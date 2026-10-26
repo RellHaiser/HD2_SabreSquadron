@@ -9,7 +9,7 @@ of the game and its data.
 
 ## Status
 
-Work in progress (2026-10-25). Of the game's 12,287 functions, 6,216 (60.7 % of the code by size)
+Work in progress (2026-10-25). Of the game's 12,287 functions, 6,274 (61.0 % of the code by size)
 are ported by hand. Generated code (tier 1, below) covers the rest. The sources are
 compile-checked file by file; there is no linked build of the game yet.
 
@@ -17,8 +17,8 @@ Ported so far, among others: the app core and module framework, the console, con
 data files (`C_chunk`), the mission script language (compiler, expressions, interpreter), the
 campaign and profiles, humans (movement, animation, combat, items, AI, squads, enemies), the
 interface and HUD, vehicles (setup, driving, damage, seats, the car actor, network and saved game),
-seat weapons, shots, collision, the rigid body, debris and items lying in the world. In progress:
-the remaining actor types.
+seat weapons, shots, collision, the rigid body, debris, items lying in the world and destructible
+scene objects. In progress: the remaining actor types.
 
 ## Approach
 

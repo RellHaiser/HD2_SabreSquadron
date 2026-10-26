@@ -392,7 +392,7 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
         case ACTOR_ANIMATION: {
             C_AnimationActor *anim = static_cast<C_AnimationActor *>(actor);
             if (state == 666)
-                anim->RequestStopAtEnd();
+                anim->HoldAnimation();
             else if (!anim->IsStopped())
                 anim->Stop(false);
             break;

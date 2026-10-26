@@ -101,7 +101,7 @@ bool IsArmoured(const C_Actor *target)
     if (!target)
         return false;
     return (target->GetType() == ACTOR_CAR && static_cast<const C_Car *>(target)->GetUnknown5E0() != 0)
-           || (target->GetType() == ACTOR_ANIMATION && static_cast<const C_AnimationActor *>(target)->GetUnknownD8() == 2);
+           || (target->GetType() == ACTOR_ANIMATION && static_cast<const C_AnimationActor *>(target)->GetArmour() == ANIMATION_ARMOUR_LIGHT);
 }
 
 bool IsActorDead(const C_Actor *actor)

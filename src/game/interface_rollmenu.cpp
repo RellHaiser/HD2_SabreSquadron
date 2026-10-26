@@ -329,7 +329,7 @@ bool C_RollMenu::HasCommandMapActions() const
         return static_cast<C_StaticWeapon *>(m_target)->GetState() == 1;
     case ACTOR_ANIMATION: {
         auto *animation = static_cast<C_AnimationActor *>(m_target);
-        return !animation->IsStopped() && !animation->GetUnknownA4();
+        return !animation->IsStopped() && !animation->ShowsNoInfo();
     }
     default:
         return false;

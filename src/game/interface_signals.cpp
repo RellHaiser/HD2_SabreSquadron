@@ -316,7 +316,7 @@ bool C_SignalsPanel::HasTargetCommands() const
     }
     case ACTOR_ANIMATION: {
         auto *animation = static_cast<C_AnimationActor *>(m_target);
-        return !animation->IsStopped() && !animation->GetUnknownA4();
+        return !animation->IsStopped() && !animation->ShowsNoInfo();
     }
     default:
         return false;

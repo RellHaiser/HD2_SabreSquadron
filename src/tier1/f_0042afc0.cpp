@@ -237,23 +237,22 @@ uint32_t C_ScriptModule__ReceiveState(C_ScriptModule *_this,void *param_1, ...)
 // 0x0042b650
 uint32_t C_ScriptModule__HandleClientMessage(int type,C_BitStream *msg, ...)
 {
-  E_ActorType EVar1;
-  C_Human *pCVar2;
-  I3D_scene *pIVar3;
-  I3D_frame *pIVar4;
-  uint32_t uVar5;
-  C_game *pCVar6;
-  int *piVar7;
+  C_Human *pCVar1;
+  I3D_scene *pIVar2;
+  I3D_frame *pIVar3;
+  uint32_t uVar4;
+  C_game *pCVar5;
+  int *piVar6;
+  uint32_t uVar7;
   uint32_t uVar8;
-  uint32_t uVar9;
-  C_Team *pCVar10;
-  C_Human *pCVar11;
-  I3D_driver *pIVar12;
-  uint8_t *puVar13;
+  C_Team *pCVar9;
+  C_Human *pCVar10;
+  I3D_driver *pIVar11;
+  uint8_t *puVar12;
   char *a;
+  int iVar13;
+  C_AnimationActor *_this;
   int iVar14;
-  C_Actor *_this;
-  int iVar15;
   uint32_t unaff_EDI;
   bool on;
   float local_210 [64];
@@ -267,289 +266,289 @@ uint32_t C_ScriptModule__HandleClientMessage(int type,C_BitStream *msg, ...)
   switch(type) {
   case 0x5f:
     C_BitStream__ReadString(msg,(char *)local_210,0xfe);
-    uVar5 = C_BitStream__ReadBits(msg,1);
-    on = uVar5 != 0;
-    pCVar6 = GetGame();
-    if (pCVar6->m_scene == 0) {
+    uVar4 = C_BitStream__ReadBits(msg,1);
+    on = uVar4 != 0;
+    pCVar5 = GetGame();
+    if (pCVar5->m_scene == 0) {
       return 0;
     }
-    pCVar6 = GetGame();
-    pIVar4 = (*pCVar6->m_scene->vtable->FindFrame)(pCVar6->m_scene,(char *)local_210,0xcffff);
-    if (pIVar4 == 0) {
-      pCVar6 = GetGame();
-      pIVar3 = pCVar6->m_scene;
-      pIVar12 = I3DGetDriver();
-      pIVar4 = (*pIVar12->vtable->FindFrame)(pIVar12,pIVar3,(char *)local_210);
-      if (pIVar4 == 0) {
+    pCVar5 = GetGame();
+    pIVar3 = (*pCVar5->m_scene->vtable->FindFrame)(pCVar5->m_scene,(char *)local_210,0xcffff);
+    if (pIVar3 == 0) {
+      pCVar5 = GetGame();
+      pIVar2 = pCVar5->m_scene;
+      pIVar11 = I3DGetDriver();
+      pIVar3 = (*pIVar11->vtable->FindFrame)(pIVar11,pIVar2,(char *)local_210);
+      if (pIVar3 == 0) {
         return 0;
       }
     }
-    uVar5 = 0x20;
-    if (pIVar4->m_type == 4) {
-      uVar5 = 0x30;
+    uVar4 = 0x20;
+    if (pIVar3->m_type == 4) {
+      uVar4 = 0x30;
     }
-    C_ScriptModule__RememberFrame((C_ScriptModule *)&g_scriptModule,(int)pIVar4,uVar5);
-    if (pIVar4->m_type == 4) {
+    C_ScriptModule__RememberFrame((C_ScriptModule *)&g_scriptModule,(int)pIVar3,uVar4);
+    if (pIVar3->m_type == 4) {
       if (on) {
-        (*pIVar4->vtable[1].LinkTo)(pIVar4,0,unaff_EDI);
+        (*pIVar3->vtable[1].LinkTo)(pIVar3,0,unaff_EDI);
       }
-      (*pIVar4->vtable[1].SetUnknown50)(pIVar4,local_210[0]);
-      (*pIVar4->vtable->Update)(pIVar4);
+      (*pIVar3->vtable[1].SetUnknown50)(pIVar3,local_210[0]);
+      (*pIVar3->vtable->Update)(pIVar3);
       return 0;
     }
-    if (pIVar4->m_type != 9) {
-      (*pIVar4->vtable->SetOn)(pIVar4,on);
+    if (pIVar3->m_type != 9) {
+      (*pIVar3->vtable->SetOn)(pIVar3,on);
       goto LAB_0042bce6;
     }
-    if (pIVar4->m_data == 0) {
+    if (pIVar3->m_data == 0) {
       _this = 0;
 LAB_0042bbdd:
       if (on) {
-        piVar7 = (int *)GetGEffects();
-        (**(code **)(*piVar7 + 0x78))(pIVar4);
+        piVar6 = (int *)GetGEffects();
+        (**(code **)(*piVar6 + 0x78))(pIVar3);
       }
       else {
-        piVar7 = (int *)GetGEffects();
-        piVar7 = (int *)(**(code **)(*piVar7 + 0x7c))(pIVar4);
-        if (piVar7 != 0) {
-          (**(code **)(*piVar7 + 0x30))(piVar7,0);
-          (**(code **)(*piVar7 + 0x24))(piVar7);
-          (**(code **)*piVar7)(piVar7);
+        piVar6 = (int *)GetGEffects();
+        piVar6 = (int *)(**(code **)(*piVar6 + 0x7c))(pIVar3);
+        if (piVar6 != 0) {
+          (**(code **)(*piVar6 + 0x30))(piVar6,0);
+          (**(code **)(*piVar6 + 0x24))(piVar6);
+          (**(code **)*piVar6)(piVar6);
         }
       }
     }
     else {
-      _this = pIVar4->m_data->actor;
-      if ((_this == 0) || (_this->m_type != ACTOR_HUMAN)) goto LAB_0042bbdd;
+      _this = (C_AnimationActor *)pIVar3->m_data->actor;
+      if ((_this == 0) || (_this->m_018 != 3)) goto LAB_0042bbdd;
       if (on) {
-        C_HumanMovement__UpdateModelNames((C_HumanMovement *)_this[1].m_netId);
-        piVar7 = *(int **)(_this[1].m_netId + 0xa9c);
-        if (piVar7 != 0) {
-          (**(code **)(*piVar7 + 0x30))(piVar7,1);
+        C_HumanMovement__UpdateModelNames(*(C_HumanMovement **)&_this->m_0a0);
+        piVar6 = *(int **)(*(int *)&_this->m_0a0 + 0xa9c);
+        if (piVar6 != 0) {
+          (**(code **)(*piVar6 + 0x30))(piVar6,1);
         }
       }
       else {
-        C_HumanVisual__RemoveShadow(&((C_HumanMovement *)_this[1].m_netId)->visual);
+        C_HumanVisual__RemoveShadow(&(*(C_HumanMovement **)&_this->m_0a0)->visual);
       }
     }
     if (_this != 0) {
-      EVar1 = _this->m_type;
-      if (EVar1 == ACTOR_ANIMATION) {
-        FUN_005b54c0(_this,on);
+      uVar4 = _this->m_018;
+      if (uVar4 == 0x19) {
+        C_AnimationActor__SetCollisionsOn(_this,on);
       }
-      else if ((EVar1 == ACTOR_JUNKERS88) || (EVar1 == ACTOR_AIR_ATTACK)) {
-        piVar7 = (int *)GetGEffects();
-        (**(code **)(*piVar7 + 0x58))(pIVar4,on,0x2088);
-        (*pIVar4->vtable->Update)(pIVar4);
+      else if ((uVar4 == 0x22) || (uVar4 == 0x24)) {
+        piVar6 = (int *)GetGEffects();
+        (**(code **)(*piVar6 + 0x58))(pIVar3,on,0x2088);
+        (*pIVar3->vtable->Update)(pIVar3);
         return 0;
       }
     }
-    (*pIVar4->vtable->SetOn)(pIVar4,on);
-    if ((((on) && (pIVar4->m_data != 0)) &&
-        (pCVar2 = (C_Human *)pIVar4->m_data->actor, pCVar2 != 0)) &&
-       (pCVar2->m_type == ACTOR_HUMAN)) {
-      pCVar10 = C_TeamManager__GetPlayerTeam(&g_teamManager);
-      pCVar11 = C_Team__GetActivePlayer(pCVar10);
-      if (pCVar11 == pCVar2) {
-        pCVar10 = C_TeamManager__GetPlayerTeam(&g_teamManager);
-        C_Team__UpdateCameraTarget(pCVar10);
-        (*pIVar4->vtable->Update)(pIVar4);
+    (*pIVar3->vtable->SetOn)(pIVar3,on);
+    if ((((on) && (pIVar3->m_data != 0)) &&
+        (pCVar1 = (C_Human *)pIVar3->m_data->actor, pCVar1 != 0)) &&
+       (pCVar1->m_type == ACTOR_HUMAN)) {
+      pCVar9 = C_TeamManager__GetPlayerTeam(&g_teamManager);
+      pCVar10 = C_Team__GetActivePlayer(pCVar9);
+      if (pCVar10 == pCVar1) {
+        pCVar9 = C_TeamManager__GetPlayerTeam(&g_teamManager);
+        C_Team__UpdateCameraTarget(pCVar9);
+        (*pIVar3->vtable->Update)(pIVar3);
         return 0;
       }
     }
 LAB_0042bce6:
-    (*pIVar4->vtable->Update)(pIVar4);
+    (*pIVar3->vtable->Update)(pIVar3);
     return 0;
   case 0x6c:
     C_BitStream__ReadString(msg,local_110,0xff);
-    uVar5 = C_BitStream__ReadBits(msg,0x20);
+    uVar4 = C_BitStream__ReadBits(msg,0x20);
+    uVar7 = C_BitStream__ReadBits(msg,8);
     uVar8 = C_BitStream__ReadBits(msg,8);
-    uVar9 = C_BitStream__ReadBits(msg,8);
-    pCVar6 = GetGame();
-    pIVar4 = (*pCVar6->m_scene->vtable->FindFrame)(pCVar6->m_scene,local_110,0xffff);
-    if (pIVar4 != 0) {
-      C_HumanMovement__PlayDubbing(uVar5,pIVar4,0,(float)uVar8,(float)uVar9);
+    pCVar5 = GetGame();
+    pIVar3 = (*pCVar5->m_scene->vtable->FindFrame)(pCVar5->m_scene,local_110,0xffff);
+    if (pIVar3 != 0) {
+      C_HumanMovement__PlayDubbing(uVar4,pIVar3,0,(float)uVar7,(float)uVar8);
       return 0;
     }
     break;
   case 0x7e:
     C_BitStream__ReadString(msg,(char *)local_210,0xfe);
-    uVar5 = C_BitStream__ReadBits(msg,8);
-    pCVar6 = GetGame();
-    if (pCVar6->m_scene != 0) {
-      pCVar6 = GetGame();
-      pIVar4 = (*pCVar6->m_scene->vtable->FindFrame)(pCVar6->m_scene,(char *)local_210,0xcffff);
-      if (pIVar4 == 0) {
-        pCVar6 = GetGame();
-        pIVar3 = pCVar6->m_scene;
-        pIVar12 = I3DGetDriver();
-        pIVar4 = (*pIVar12->vtable->FindFrame)(pIVar12,pIVar3,(char *)local_210);
-        if (pIVar4 == 0) {
+    uVar4 = C_BitStream__ReadBits(msg,8);
+    pCVar5 = GetGame();
+    if (pCVar5->m_scene != 0) {
+      pCVar5 = GetGame();
+      pIVar3 = (*pCVar5->m_scene->vtable->FindFrame)(pCVar5->m_scene,(char *)local_210,0xcffff);
+      if (pIVar3 == 0) {
+        pCVar5 = GetGame();
+        pIVar2 = pCVar5->m_scene;
+        pIVar11 = I3DGetDriver();
+        pIVar3 = (*pIVar11->vtable->FindFrame)(pIVar11,pIVar2,(char *)local_210);
+        if (pIVar3 == 0) {
           return 0;
         }
       }
-      uVar8 = (*pIVar4->vtable->GetVisualType)(pIVar4);
-      if (uVar8 == 0x50414d4c) {
-        puVar13 = GetLightMapGroups();
-        FUN_0048d270(puVar13,(int *)pIVar4,uVar5);
+      uVar7 = (*pIVar3->vtable->GetVisualType)(pIVar3);
+      if (uVar7 == 0x50414d4c) {
+        puVar12 = GetLightMapGroups();
+        FUN_0048d270(puVar12,(int *)pIVar3,uVar4);
         return 0;
       }
     }
     break;
   case 0x7f:
-    uVar5 = C_BitStream__ReadBits(msg,8);
+    uVar4 = C_BitStream__ReadBits(msg,8);
     C_BitStream__ReadString(msg,local_110,0xff);
-    pCVar6 = GetGame();
-    pIVar4 = (*pCVar6->m_scene->vtable->FindFrame)(pCVar6->m_scene,local_110,0xffff);
-    if (pIVar4 != 0) {
-      if ((pIVar4->m_frameFlags & 0x20) == 0) {
-        I3D_frame__UpdateWMatrixProc(pIVar4);
+    pCVar5 = GetGame();
+    pIVar3 = (*pCVar5->m_scene->vtable->FindFrame)(pCVar5->m_scene,local_110,0xffff);
+    if (pIVar3 != 0) {
+      if ((pIVar3->m_frameFlags & 0x20) == 0) {
+        I3D_frame__UpdateWMatrixProc(pIVar3);
       }
-      C_ParticlesModule__Create((C_ParticlesModule*)(&g_particlesModule),uVar5,&pIVar4->m_worldMatrix,pIVar4,true,false);
+      C_ParticlesModule__Create((C_ParticlesModule*)(&g_particlesModule),uVar4,&pIVar3->m_worldMatrix,pIVar3,true,false);
       return 0;
     }
     break;
   case 0x83:
     C_BitStream__ReadString(msg,(char *)local_210,0xfe);
-    uVar5 = C_BitStream__ReadBits(msg,8);
-    puVar13 = GetLightMapGroups();
-    if (puVar13 != 0) {
-      puVar13 = GetLightMapGroups();
-      if ((*(int *)(puVar13 + 0x10) != 0) &&
-         (iVar15 = *(int *)(puVar13 + 0x14) - *(int *)(puVar13 + 0x10) >> 2, iVar15 != 0)) {
+    uVar4 = C_BitStream__ReadBits(msg,8);
+    puVar12 = GetLightMapGroups();
+    if (puVar12 != 0) {
+      puVar12 = GetLightMapGroups();
+      if ((*(int *)(puVar12 + 0x10) != 0) &&
+         (iVar14 = *(int *)(puVar12 + 0x14) - *(int *)(puVar12 + 0x10) >> 2, iVar14 != 0)) {
         while( true ) {
-          iVar15--;
-          iVar14 = **(int **)(*(int *)(puVar13 + 0x10) + iVar15 * 4);
-          if (iVar14 == 0) {
+          iVar14--;
+          iVar13 = **(int **)(*(int *)(puVar12 + 0x10) + iVar14 * 4);
+          if (iVar13 == 0) {
             a = &DAT_00867a90;
           }
           else {
-            a = (char *)(iVar14 + 8);
+            a = (char *)(iVar13 + 8);
           }
-          iVar14 = _stricmp(a,(char *)local_210);
-          if (iVar14 == 0) break;
-          if (iVar15 == 0) {
+          iVar13 = _stricmp(a,(char *)local_210);
+          if (iVar13 == 0) break;
+          if (iVar14 == 0) {
             return 0;
           }
         }
-        if ((iVar15 != -1) &&
-           (iVar15 = *(int *)(*(int *)(puVar13 + 0x10) + iVar15 * 4), iVar15 != 0)) {
-          puVar13 = GetLightMapGroups();
-          FUN_0048d4e0(puVar13,iVar15,uVar5);
+        if ((iVar14 != -1) &&
+           (iVar14 = *(int *)(*(int *)(puVar12 + 0x10) + iVar14 * 4), iVar14 != 0)) {
+          puVar12 = GetLightMapGroups();
+          FUN_0048d4e0(puVar12,iVar14,uVar4);
           return 0;
         }
       }
     }
     break;
   case 0xb8:
-    uVar5 = C_BitStream__ReadBits(msg,1);
-    pCVar6 = GetGame();
-    if (pCVar6->m_scene != 0) {
-      pCVar6 = GetGame();
-      (*pCVar6->m_scene->vtable->SetWeather)(pCVar6->m_scene,0,(uint32_t)(uVar5 != 0));
+    uVar4 = C_BitStream__ReadBits(msg,1);
+    pCVar5 = GetGame();
+    if (pCVar5->m_scene != 0) {
+      pCVar5 = GetGame();
+      (*pCVar5->m_scene->vtable->SetWeather)(pCVar5->m_scene,0,(uint32_t)(uVar4 != 0));
     }
-    piVar7 = (int *)GetGEffects();
-    (**(code **)(*piVar7 + 0x40))(uVar5 != 0);
+    piVar6 = (int *)GetGEffects();
+    (**(code **)(*piVar6 + 0x40))(uVar4 != 0);
     return 0;
   case 0xb9:
-    uVar5 = C_BitStream__ReadBits(msg,0x20);
-    pCVar6 = GetGame();
-    if (pCVar6->m_scene != 0) {
-      pCVar6 = GetGame();
-      (*pCVar6->m_scene->vtable->SetWeather)(pCVar6->m_scene,10,uVar5);
+    uVar4 = C_BitStream__ReadBits(msg,0x20);
+    pCVar5 = GetGame();
+    if (pCVar5->m_scene != 0) {
+      pCVar5 = GetGame();
+      (*pCVar5->m_scene->vtable->SetWeather)(pCVar5->m_scene,10,uVar4);
       return 0;
     }
     break;
   case 0xba:
-    uVar5 = C_BitStream__ReadBits(msg,0x20);
-    pCVar6 = GetGame();
-    if (pCVar6->m_scene != 0) {
-      pCVar6 = GetGame();
-      (*pCVar6->m_scene->vtable->SetWeather)(pCVar6->m_scene,5,uVar5);
+    uVar4 = C_BitStream__ReadBits(msg,0x20);
+    pCVar5 = GetGame();
+    if (pCVar5->m_scene != 0) {
+      pCVar5 = GetGame();
+      (*pCVar5->m_scene->vtable->SetWeather)(pCVar5->m_scene,5,uVar4);
       return 0;
     }
     break;
   case 0xbc:
-    uVar5 = C_BitStream__ReadBits(msg,0x10);
-    piVar7 = (int *)GetGEffects();
-    (**(code **)(*piVar7 + 0x48))((int)(short)uVar5);
+    uVar4 = C_BitStream__ReadBits(msg,0x10);
+    piVar6 = (int *)GetGEffects();
+    (**(code **)(*piVar6 + 0x48))((int)(short)uVar4);
     break;
   case 0xbd:
-    uVar5 = C_BitStream__ReadBits(msg,0x20);
-    uVar8 = C_BitStream__ReadBits(msg,0x20);
-    pCVar6 = GetGame();
-    if (pCVar6->m_scene != 0) {
-      pCVar6 = GetGame();
-      (*pCVar6->m_scene->vtable->SetWeather)(pCVar6->m_scene,6,uVar5);
-      pCVar6 = GetGame();
-      (*pCVar6->m_scene->vtable->SetWeather)(pCVar6->m_scene,7,uVar8);
+    uVar4 = C_BitStream__ReadBits(msg,0x20);
+    uVar7 = C_BitStream__ReadBits(msg,0x20);
+    pCVar5 = GetGame();
+    if (pCVar5->m_scene != 0) {
+      pCVar5 = GetGame();
+      (*pCVar5->m_scene->vtable->SetWeather)(pCVar5->m_scene,6,uVar4);
+      pCVar5 = GetGame();
+      (*pCVar5->m_scene->vtable->SetWeather)(pCVar5->m_scene,7,uVar7);
       return 0;
     }
     break;
   case 0xbe:
-    uVar5 = C_BitStream__ReadBits(msg,0x20);
-    pCVar6 = GetGame();
-    if (pCVar6->m_scene != 0) {
-      pCVar6 = GetGame();
-      (*pCVar6->m_scene->vtable->SetWeather)(pCVar6->m_scene,3,uVar5);
+    uVar4 = C_BitStream__ReadBits(msg,0x20);
+    pCVar5 = GetGame();
+    if (pCVar5->m_scene != 0) {
+      pCVar5 = GetGame();
+      (*pCVar5->m_scene->vtable->SetWeather)(pCVar5->m_scene,3,uVar4);
       return 0;
     }
     break;
   case 0xbf:
-    uVar5 = C_BitStream__ReadBits(msg,0x20);
-    pCVar6 = GetGame();
-    if (pCVar6->m_scene != 0) {
-      pCVar6 = GetGame();
-      (*pCVar6->m_scene->vtable->SetWeather)(pCVar6->m_scene,4,uVar5);
+    uVar4 = C_BitStream__ReadBits(msg,0x20);
+    pCVar5 = GetGame();
+    if (pCVar5->m_scene != 0) {
+      pCVar5 = GetGame();
+      (*pCVar5->m_scene->vtable->SetWeather)(pCVar5->m_scene,4,uVar4);
       return 0;
     }
     break;
   case 0xc1:
-    uVar5 = C_BitStream__ReadBits(msg,1);
-    pCVar6 = GetGame();
-    if (pCVar6->m_scene != 0) {
-      pCVar6 = GetGame();
-      (*pCVar6->m_scene->vtable->SetWeather)(pCVar6->m_scene,0xe,uVar5);
+    uVar4 = C_BitStream__ReadBits(msg,1);
+    pCVar5 = GetGame();
+    if (pCVar5->m_scene != 0) {
+      pCVar5 = GetGame();
+      (*pCVar5->m_scene->vtable->SetWeather)(pCVar5->m_scene,0xe,uVar4);
     }
-    piVar7 = (int *)GetGEffects();
-    (**(code **)(*piVar7 + 0x40))(uVar5 == 0);
+    piVar6 = (int *)GetGEffects();
+    (**(code **)(*piVar6 + 0x40))(uVar4 == 0);
     return 0;
   case 0xc2:
-    uVar5 = C_BitStream__ReadBits(msg,0x20);
-    uVar8 = C_BitStream__ReadBits(msg,0x20);
-    pCVar6 = GetGame();
-    if (pCVar6->m_scene != 0) {
-      pCVar6 = GetGame();
-      (*pCVar6->m_scene->vtable->SetWeather)(pCVar6->m_scene,8,(uint32_t)(float)uVar5);
-      pCVar6 = GetGame();
-      (*pCVar6->m_scene->vtable->SetWeather)(pCVar6->m_scene,9,(uint32_t)(float)uVar8);
+    uVar4 = C_BitStream__ReadBits(msg,0x20);
+    uVar7 = C_BitStream__ReadBits(msg,0x20);
+    pCVar5 = GetGame();
+    if (pCVar5->m_scene != 0) {
+      pCVar5 = GetGame();
+      (*pCVar5->m_scene->vtable->SetWeather)(pCVar5->m_scene,8,(uint32_t)(float)uVar4);
+      pCVar5 = GetGame();
+      (*pCVar5->m_scene->vtable->SetWeather)(pCVar5->m_scene,9,(uint32_t)(float)uVar7);
       return 0;
     }
     break;
   case 0xc3:
-    uVar5 = C_BitStream__ReadBits(msg,0x20);
+    uVar4 = C_BitStream__ReadBits(msg,0x20);
+    uVar7 = C_BitStream__ReadBits(msg,0x20);
     uVar8 = C_BitStream__ReadBits(msg,0x20);
-    uVar9 = C_BitStream__ReadBits(msg,0x20);
-    pCVar6 = GetGame();
-    if (pCVar6->m_scene != 0) {
-      pCVar6 = GetGame();
-      (*pCVar6->m_scene->vtable->SetWeather)(pCVar6->m_scene,0xb,uVar5);
-      pCVar6 = GetGame();
-      (*pCVar6->m_scene->vtable->SetWeather)(pCVar6->m_scene,0xc,uVar8);
-      pCVar6 = GetGame();
-      (*pCVar6->m_scene->vtable->SetWeather)(pCVar6->m_scene,0xd,uVar9);
+    pCVar5 = GetGame();
+    if (pCVar5->m_scene != 0) {
+      pCVar5 = GetGame();
+      (*pCVar5->m_scene->vtable->SetWeather)(pCVar5->m_scene,0xb,uVar4);
+      pCVar5 = GetGame();
+      (*pCVar5->m_scene->vtable->SetWeather)(pCVar5->m_scene,0xc,uVar7);
+      pCVar5 = GetGame();
+      (*pCVar5->m_scene->vtable->SetWeather)(pCVar5->m_scene,0xd,uVar8);
       return 0;
     }
     break;
   case 0xfa:
-    uVar5 = C_BitStream__ReadBits(msg,1);
-    pCVar6 = GetGame();
-    FUN_0048ee50(pCVar6->m_quickMessages,uVar5 != 0);
+    uVar4 = C_BitStream__ReadBits(msg,1);
+    pCVar5 = GetGame();
+    FUN_0048ee50(pCVar5->m_quickMessages,uVar4 != 0);
     return 0;
   case 0xfb:
-    uVar5 = C_BitStream__ReadBits(msg,0x20);
-    pCVar6 = GetGame();
-    FUN_0048f080(pCVar6->m_quickMessages,uVar5);
+    uVar4 = C_BitStream__ReadBits(msg,0x20);
+    pCVar5 = GetGame();
+    FUN_0048f080(pCVar5->m_quickMessages,uVar4);
     return 0;
   }
   return 0;

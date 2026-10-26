@@ -1379,7 +1379,7 @@ void C_CommandPanel::PickTarget(int /*timeDelta*/)
             m_target = nullptr;
         break;
     case ACTOR_ANIMATION:
-        if (static_cast<C_AnimationActor *>(m_target)->GetUnknownA4())
+        if (static_cast<C_AnimationActor *>(m_target)->ShowsNoInfo())
             m_target = nullptr;
         break;
     default:

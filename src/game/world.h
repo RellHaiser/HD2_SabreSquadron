@@ -11,6 +11,7 @@
 #include "common/c_str.h"
 #include "game/actor.h"
 #include "game/actors_module.h"
+#include "game/animation_actor.h"
 #include "game/car.h"
 #include "game/checkpoints.h"
 #include "game/debris.h"
@@ -202,16 +203,7 @@ public:
     void Start(bool on, int count);                     // 0x005bb140
 };
 
-class C_AnimationActor : public C_Actor {               // "Animation", vtable 0x008119b8
-public:
-    void Stop(bool immediately);                        // 0x005b55e0
-    void RequestStopAtEnd();                            // byte +0xB8 = 1
-    bool IsStopped() const;                             // byte +0xA1
-    // (Byte +0xA4, not identified: the signals offer nothing on the animation while it is set.)
-    bool GetUnknownA4() const;
-    // (+0xD8, not identified: 2 makes it armoured for the squad's weapon choice.)
-    int GetUnknownD8() const;
-};
+// C_AnimationActor ("Animation", vtable 0x008119b8, 0xf0 bytes) is defined in game/animation_actor.h, included above.
 
 // Breakable fence (C_TemporaryActorsList::CreateBreakables).
 class C_WireCut : public C_Actor {

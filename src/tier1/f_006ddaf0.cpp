@@ -273,71 +273,76 @@ LAB_006ddf88:
 
 
 // 0x006de0d0
-int FUN_006de0d0(int param_1, ...)
+C_Actor * GetFrameOrModelActor(I3D_frame *frame, ...)
 {
-  int iVar1;
-  int iVar2;
-  iVar2 = 0;
-  if ((*(int **)(param_1 + 0xec) != 0) && (iVar1 = **(int **)(param_1 + 0xec), iVar1 != 0))
-  {
-    return iVar1;
+  C_Actor *pCVar1;
+  I3D_frame *pIVar2;
+  C_Actor *pCVar3;
+  pCVar3 = 0;
+  if ((frame->m_data != 0) &&
+     (pCVar1 = frame->m_data->actor, pCVar1 != 0)) {
+    return pCVar1;
   }
-  iVar1 = *(int *)(param_1 + 0x100);
-  if ((iVar1 != 0) &&
-     (((*(short *)(iVar1 + 0xf8) == 9 && (*(int **)(iVar1 + 0xec) != 0)) &&
-      (iVar1 = **(int **)(iVar1 + 0xec), iVar1 != 0)))) {
-    iVar2 = iVar1;
+  pIVar2 = frame->m_ownerModel;
+  if ((pIVar2 != 0) &&
+     (((pIVar2->m_type == 9 && (pIVar2->m_data != 0)) &&
+      (pCVar1 = pIVar2->m_data->actor, pCVar1 != 0)))) {
+    pCVar3 = pCVar1;
   }
-  return iVar2;
+  return pCVar3;
 }
 
 
-// 0x006de110
-uint32_t FUN_006de110(void *_this,int *param_1,float param_2,uint32_t param_3,uint32_t param_4,char param_5, ...)
+// 0x006de110  (tier1 fallback: translated text kept below, needs hand porting)
+uint32_t FUN_006de110(void *_this,int *param_1,float param_2,S_vector *param_3,uint32_t param_4,char param_5, ...)
+{
+  return {};
+}
+#if 0
 {
   C_VersionMaster *this_00;
-  int *piVar1;
-  uint32_t uVar2;
-  int *piVar3;
-  int iVar4;
+  int *part;
+  uint32_t uVar1;
+  int *piVar2;
+  int iVar3;
   uint32_t count;
-  int64_t lVar5;
-  piVar1 = param_1;
+  int64_t lVar4;
+  part = param_1;
   if (param_2 < 0.0 == (param_2 == 0.0)) {
-    param_1 = (int *)FUN_006de0d0((int)param_1);
-    uVar2 = param_4;
+    param_1 = (int *)GetFrameOrModelActor((I3D_frame *)param_1);
+    uVar1 = param_4;
     count = 1;
-    if (param_1 != 0) {
+    if ((C_Actor *)param_1 != 0) {
       if ((*(int *)((int)_this + 0x30) != 0) &&
-         (iVar4 = *(int *)((int)_this + 0x34) - *(int *)((int)_this + 0x30) >> 2, iVar4 != 0)) {
-        piVar3 = (int *)(*(int *)((int)_this + 0x30) + iVar4 * 4);
+         (iVar3 = *(int *)((int)_this + 0x34) - *(int *)((int)_this + 0x30) >> 2, iVar3 != 0)) {
+        piVar2 = (int *)(*(int *)((int)_this + 0x30) + iVar3 * 4);
         do {
-          piVar3--;
-          iVar4--;
-          if (param_1 == (int *)*piVar3) goto LAB_006de177;
-        } while (iVar4 != 0);
+          piVar2--;
+          iVar3--;
+          if ((C_Actor *)param_1 == (C_Actor *)*piVar2) goto LAB_006de177;
+        } while (iVar3 != 0);
       }
-      iVar4 = -1;
+      iVar3 = -1;
 LAB_006de177:
-      if (iVar4 == -1) {
-        if (param_1[6] == 4) {
+      if (iVar3 == -1) {
+        if (((C_Actor *)param_1)->m_type == ACTOR_CAR) {
           if (((uint8_t)g_gameRole & 1) != 0) {
             param_4 = 1;
-            (**(code **)(*param_1 + 0xd4))
-                      ((*(int *)((int)_this + 0x1c) == 0) * '\x02' + '\x02',param_2,param_3,uVar2,
-                       *(int *)((int)_this + 0x1c),0);
+            (*((C_Actor *)param_1)->vtable->Hit)
+                      (SUB14(*(C_Actor **)((int)_this + 0x1c) == 0,0) * 2 + 2,param_2,
+                       param_3,(S_vector *)uVar1,*(C_Actor **)((int)_this + 0x1c),0);
             count = param_4;
           }
         }
         else {
-          iVar4 = (**(code **)(*param_1 + 0xd8))(piVar1);
-          uVar2 = param_4;
-          if (((iVar4 != -1) && ((float)g_materials[iVar4].absorption < param_2)) &&
-             (param_2 = param_2 - (float)g_materials[iVar4].absorption, ((uint8_t)g_gameRole & 1) != 0)
+          iVar3 = (*((C_Actor *)param_1)->vtable->GetMaterialId)((I3D_frame *)part);
+          uVar1 = param_4;
+          if (((iVar3 != -1) && ((float)g_materials[iVar3].absorption < param_2)) &&
+             (param_2 = param_2 - (float)g_materials[iVar3].absorption, ((uint8_t)g_gameRole & 1) != 0)
              ) {
             param_4 = 1;
             (**(code **)(*param_1 + 0xd4))
-                      ((*(int *)((int)_this + 0x1c) == 0) * '\x02' + '\x02',param_2,param_3,uVar2,
+                      ((*(int *)((int)_this + 0x1c) == 0) * '\x02' + '\x02',param_2,param_3,uVar1,
                        *(int *)((int)_this + 0x1c),0);
             count = param_4;
           }
@@ -347,19 +352,20 @@ LAB_006de177:
                    (C_Actor **)&param_1);
       }
     }
-    iVar4 = piVar1[0x3b];
-    if (((iVar4 != 0) &&
-        (this_00 = *(C_VersionMaster **)(iVar4 + 0x14), this_00 != 0)) &&
+    iVar3 = part[0x3b];
+    if (((iVar3 != 0) &&
+        (this_00 = *(C_VersionMaster **)(iVar3 + 0x14), this_00 != 0)) &&
        (((uint8_t)g_gameRole & (uint8_t)count) != 0)) {
-      iVar4 = (param_5 != '\0') + 1;
-      lVar5 = tier1_ftol();
-      C_VersionMaster__DamageAll(this_00,(int)lVar5,iVar4);
+      iVar3 = (param_5 != '\0') + 1;
+      lVar4 = tier1_ftol();
+      C_VersionMaster__DamageAll(this_00,(int)lVar4,iVar3);
     }
   }
   return 0;
 }
 
 
+#endif
 // 0x006de2b0
 uint32_t FUN_006de2b0(int param_1, ...)
 {
@@ -816,11 +822,12 @@ uint32_t FUN_006deb50(void *_this,int param_1, ...)
   float fVar5;
   uint32_t in_EAX;
   uint32_t uVar6;
-  int iVar7;
+  C_Actor *pCVar7;
   I3D_sector *pIVar8;
   uint32_t uVar9;
   S_CollisionVolume *pSVar10;
   uint32_t extraout_EAX;
+  int iVar11;
   int local_48;
   float local_40;
   float local_3c;
@@ -828,21 +835,21 @@ uint32_t FUN_006deb50(void *_this,int param_1, ...)
   float local_34;
   S_vector local_30;
   S_vector local_20 [2];
-  iVar7 = *(int *)((int)_this + 0x20);
-  if (iVar7 == 0) {
+  iVar11 = *(int *)((int)_this + 0x20);
+  if (iVar11 == 0) {
     return in_EAX & 0xffffff00;
   }
   local_48 = 0;
   *(float *)((int)_this + 0x10) = (float)param_1 * 0.2 + *(float *)((int)_this + 0x10);
   do {
-    uVar3 = (uint16_t)(*(float *)(iVar7 + 0x14) < *(float *)((int)_this + 0x10));
-    uVar4 = (uint16_t)(*(float *)(iVar7 + 0x14) == *(float *)((int)_this + 0x10));
+    uVar3 = (uint16_t)(*(float *)(iVar11 + 0x14) < *(float *)((int)_this + 0x10));
+    uVar4 = (uint16_t)(*(float *)(iVar11 + 0x14) == *(float *)((int)_this + 0x10));
     uVar6 = (uint32_t)(uint16_t)(uVar3 << 8 | uVar4 << 0xe);
     if (uVar3 == 0 && uVar4 == 0) break;
-    iVar7 = FUN_006de0d0(*(int *)(iVar7 + 0x10));
+    pCVar7 = GetFrameOrModelActor(*(I3D_frame **)(iVar11 + 0x10));
     if (*(char *)((int)_this + 0x24) == '\0') {
 LAB_006debc7:
-      if ((iVar7 == 0) || (*(int *)(iVar7 + 0x18) != 3)) {
+      if ((pCVar7 == 0) || (pCVar7->m_type != ACTOR_HUMAN)) {
 LAB_006dec9f:
         pfVar1 = *(float **)((int)_this + 0x20);
         local_30.z = -pfVar1[2];
@@ -857,14 +864,14 @@ LAB_006dec9f:
         if (pSVar10 == 0) goto LAB_006debe9;
       }
       else {
-        uVar9 = FUN_006de930(iVar7);
+        uVar9 = FUN_006de930((int)pCVar7);
         if ((char)uVar9 != '\0') goto LAB_006debe9;
       }
     }
     else {
-      if (iVar7 == 0) goto LAB_006dec9f;
-      if ((*(int *)(iVar7 + 0x18) != 3) ||
-         (pIVar8 = S_HumanBody__GetSector((S_HumanBody *)(iVar7 + 0x98)),
+      if (pCVar7 == 0) goto LAB_006dec9f;
+      if ((pCVar7->m_type != ACTOR_HUMAN) ||
+         (pIVar8 = S_HumanBody__GetSector((S_HumanBody *)(pCVar7[1]._pad_0004 + 4)),
          *(I3D_sector **)((int)_this + 0x28) != pIVar8)) goto LAB_006debc7;
 LAB_006debe9:
       pfVar1 = *(float **)((int)_this + 0x20);
@@ -919,9 +926,9 @@ LAB_006debe9:
       FUN_006de330(*(void **)((int)ptr + 0x18),1);
     }
     _aligned_free(ptr);
-    iVar7 = *(int *)((int)_this + 0x20);
+    iVar11 = *(int *)((int)_this + 0x20);
     uVar6 = extraout_EAX;
-  } while (iVar7 != 0);
+  } while (iVar11 != 0);
   return CONCAT31((int3)(uVar6 >> 8),1);
 }
 
