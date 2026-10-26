@@ -7,6 +7,10 @@ build/
 *.lib
 *.exe
 *.dll
+# MinGW objects and precompiled headers (tier 1's tier1_decls.h.gch is ~56 MB)
+*.o
+*.a
+*.gch
 __pycache__/
 *.pyc
 
