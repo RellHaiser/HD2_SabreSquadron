@@ -109,6 +109,8 @@ void ChangeMap(const char *name)                    // 0x0069bcc0
     GetGameApp()->m_state->SetPendingState(GAME_STATE_NEXT_MAP);
 }
 
+}  // namespace
+
 // A human or a car within 2 m above `pos` (spawning there would collide).
 bool IsSpawnBlocked(const S_vector4 &pos)           // 0x0069d970
 {
@@ -204,6 +206,8 @@ void FaceTargetZone(S_vector4 *dir, const S_vector4 &pos, int team)   // 0x0069e
     dir->y = scale * 0.0f;
     dir->z *= scale;
 }
+
+namespace {
 
 // Shows a message in the in-game menu when it is open.
 void ShowGameMenuMessage(int textId)                // 0x0069e9b0
@@ -1132,7 +1136,7 @@ void C_game::OnPlayerJoined(int slot, S_SoldierState *state, int *stats)   // 0x
     if (!IsLocalGame()) {
         C_Actor *spawnPoint = g_actorsModule.FindSpawnPoint(1);
         if (spawnPoint)
-            SpawnAtSpawnPoint(spawnPoint, slot, state, stats);
+            static_cast<C_SpawnPoint *>(spawnPoint)->Spawn(slot, state, stats);
     }
     if (slot == g_localPlayerSlot)
         m_interface->ShowRespawnScreen(false);

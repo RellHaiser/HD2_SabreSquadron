@@ -73,6 +73,25 @@ struct S_vector {
         }
     }
     S_vector Normalized() const { S_vector v(*this); v.Normalize(); return v; }
+    // Normalized() as the game's inline copies of it compile (the mine, the spawn point, ...): the
+    // square summed (y² + z²) + x², the same rules otherwise.
+    S_vector NormalizedGame() const {
+        const float sq = (y * y + z * z) + x * x;
+        if (std::fabs(sq - 1.0f) < 1e-8f)
+            return *this;
+        if (sq >= 1e-8f) {
+            const float k = 1.0f / std::sqrt(sq);
+            return S_vector(x * k, y * k, z * k);
+        }
+        S_vector v(*this);
+        if (x != 0.0f)
+            v.x = x >= 0.0f ? 1.0f : -1.0f;
+        else if (z != 0.0f)
+            v.z = z >= 0.0f ? 1.0f : -1.0f;
+        else
+            v.y = y >= 0.0f ? 1.0f : -1.0f;
+        return v;
+    }
 
     LS3D_API float __stdcall AngleTo(const S_vector &v) const;
     LS3D_API S_vector __stdcall RotateByMatrix(const S_matrix &m) const;

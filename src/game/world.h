@@ -16,18 +16,23 @@
 #include "game/checkpoints.h"
 #include "game/clock.h"
 #include "game/debris.h"
+#include "game/document_place.h"
 #include "game/item_actor.h"
 #include "game/melee_tracker.h"
 #include "game/melee_tracker_ai.h"
+#include "game/mine.h"
 #include "game/null_actor.h"
 #include "game/photo_place.h"
+#include "game/radio.h"
 #include "game/human.h"
 #include "game/human_body.h"
 #include "game/resource_cache.h"
 #include "game/rigid_body.h"
 #include "game/sound_module.h"
+#include "game/spawn_point.h"
 #include "game/switch_actor.h"
 #include "game/team.h"
+#include "game/ts_explosion.h"
 #include "game/vehicle.h"
 #include "game/wire_cut.h"
 #include "ls3d/i3d.h"
@@ -47,21 +52,7 @@ public:
 
 // C_MeleeTrackerAI (C_MeleeTracker +0x534, the meleeTracker's AI controller) is in game/melee_tracker_ai.h.
 
-class C_SpawnPoint : public C_Actor {                   // "SpawnPoint", vtable 0x008138e0
-public:
-    C_Actor *GetSpawnedActor() const { return m_spawned; }
-    int GetTeam() const { return m_team; }
-    // Which spawns it accepts; 2 = any (C_ActorsModule::FindRandomSpawnPoint).
-    int GetKind() const { return m_kind; }
-    bool IsEnabled() const { return m_enabled; }
-private:
-    int m_team;                                         // +0x90
-    int m_kind;                                         // +0x94
-    uint8_t m_unknown98[4];
-    bool m_enabled;                                     // +0x9C
-    uint8_t m_unknown9D[0x0B];
-    C_Actor *m_spawned;                                 // +0xA8
-};
+// C_SpawnPoint ("SpawnPoint", vtable 0x008138e0, 0xb0 bytes) is defined in game/spawn_point.h, included above.
 
 // C_Car (game/car.h) with its vehicle C_Vehicle (C_Car +0x90, game/vehicle.h).
 
@@ -94,18 +85,7 @@ public:
 };
 
 // Actors with a script-visible state (SetActorState / _ACTOR_GetState).
-class C_Radio : public C_Actor {
-public:
-    void SetState(int state);                           // 0x0060b570
-    int GetState() const;                               // +0xA0
-    // The item type it needs (+0x98).
-    int GetItemId() const;
-    // `human` uses it (when the radio needs an item, it must carry it).
-    bool Use(C_Human *human);                           // 0x0060b4c0
-    // `human` may use it: it is on (state 1), he carries its item (if it needs one) and it is
-    // his side's (+0x9C; 2: either side's).
-    bool CanUse(C_Human *human) const;                  // 0x0060b460
-};
+// C_Radio ("Radio", vtable 0x00813310, 0x150 bytes) is defined in game/radio.h, included above.
 class C_SupplyBox : public C_Actor {
 public:
     void SetEnabled(bool on);                           // 0x005fa290
@@ -146,17 +126,8 @@ public:
     // Ms until the placed explosive goes off (+0xC8; the HUD's explosive timer).
     int GetTimeLeft() const;
 };
-class C_DocumentPlace : public C_Actor {
-public:
-    void SetState(int state);                           // 0x0060eac0
-    int GetState() const;                               // +0x148
-    // `human` delivers the documents it carries.
-    bool Deliver(C_Human *human);                       // 0x0060e9b0
-    // The item type of the documents (+0x98).
-    int GetItemId() const;
-    // The text of its signal (+0x9C).
-    int GetTextId() const;
-};
+// C_DocumentPlace ("Document place", vtable 0x008135e0, 0x150 bytes) is defined in game/document_place.h, included
+// above.
 class C_Submarine : public C_Actor {                    // "Submarine", vtable 0x00812650
 public:
     // The pilot's controls: forward, sideways, up (+0x100..+0x108).
@@ -179,11 +150,7 @@ public:
     // (+0x280, not identified: the squad's gunners fire at it only while nonzero.)
     float GetUnknown280() const;
 };
-class C_TSExplosion : public C_Actor {
-public:
-    void Trigger(int unused);                           // 0x0060fb10 (the script VM passes 1)
-    int GetState() const;                               // +0x90
-};
+// C_TSExplosion ("Explosion [TS]", vtable 0x008136d0, 0xd0 bytes) is defined in game/ts_explosion.h, included above.
 
 class C_Train : public C_Actor {                        // "Train", vtable 0x00811e78
 public:
@@ -229,21 +196,7 @@ public:
     // Progress bar of the zone (time left / total in ms, text id).
     bool GetProgress(int *time, int *total, int *textId) const;   // 0x005ec840
 };
-class C_Mine : public C_Actor {                         // "Mine", vtable 0x00812f08
-public:
-    int GetItemId() const { return m_itemId; }
-    // Disarms it (and tells the clients; the server removes it).
-    void Defuse();                                      // 0x005feee0 (__fastcall)
-    // Who laid it (null for mines placed in the mission).
-    C_Human *GetOwner() const { return m_owner; }
-    // A human stepped on the trigger volume, or a car's wheel met it (the culprit: the layer, else
-    // the human or the car's driver; item 0x47 ignores humans, 0x46 cars).
-    void OnSteppedOn(C_Actor *actor, int unused);       // 0x005fefb0 (the human passes -1, the car the wheel)
-private:
-    int m_itemId;                                       // +0x90 (set by SetupMine())
-    uint8_t m_unknown94[8];
-    C_Human *m_owner;                                   // +0x9C
-};
+// C_Mine ("Mine", vtable 0x00812f08, 0x120 bytes) is defined in game/mine.h, included above.
 
 // C_MeleeTracker ("MeleeTracker", vtable 0x008120e0, 0x5b0 bytes) is defined in game/melee_tracker.h, included above.
 

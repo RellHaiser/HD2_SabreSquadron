@@ -66,6 +66,16 @@ public:
     C_Actor *GetHuman(int id) const;                                // 0x00475e00
     void SetActorActive(C_Actor *actor, bool active);               // 0x00475ec0
     int FindFreePlayerSlot() const;                                 // 0x004759a0
+    // How often player slot `slot` was reused (the byte as signed; -1 outside the slots).
+    int GetPlayerSlotUse(int slot) const                            // 0x004754f0
+    {
+        return slot >= 0 && slot < PLAYER_SLOTS ? static_cast<int8_t>(m_playerSlotUse[slot]) : -1;
+    }
+    void SetPlayerSlotUse(int slot, int use)                        // 0x00475510
+    {
+        if (slot >= 0 && slot < PLAYER_SLOTS)
+            m_playerSlotUse[slot] = static_cast<uint8_t>(use);
+    }
     // An enabled spawn point of `team`; FindRandomSpawnPoint also matches `kind`
     // (spawn points of kind 2 accept any).
     C_Actor *FindSpawnPoint(int team) const;                        // 0x00475940

@@ -448,7 +448,7 @@ S_CollisionVolume *__fastcall CarOnBodyGround(void *context, S_CollisionVolume *
         data->versionMaster->DamageAll(1000, VERSION_EFFECTS_ALL);
         return nullptr;
     }
-    if (hit->type & COLLISION_TYPE_SWINGING)
+    if (hit->type & COLLISION_TYPE_LIGHT_OBJECT)
         return nullptr;
     return hit;
 }

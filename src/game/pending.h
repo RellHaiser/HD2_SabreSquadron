@@ -224,6 +224,8 @@ public:
     void SendMessages(int timeDelta);               // 0x0072d240
     // Name of the player in `slot` (+0x08 of its state), null if there is none.
     const char *GetPlayerName(int slot);            // 0x0072efa0
+    // A client: the state of `slot` (the table grown to it) gets the connection and the name.
+    void SetPlayer(int slot, int connection, const char *name);   // 0x0072ed10
     // Teams of the players (E_HumanTeam; 2 for unknown slots).
     int GetPlayerTeam(int slot, bool pending);      // 0x00730900
     void SetPlayerTeam(int slot, int team, bool pending);   // 0x00730510
@@ -593,9 +595,6 @@ bool TimedEvents_Load(C_chunk &chunk);              // 0x006dfa60
 
 // Frees the frame data blocks of all the scene's frames.
 void FreeAllFrameData(I3D_scene *scene);            // 0x006e9f20
-// Spawns a soldier with `state` (and `stats`; network `slot`) at a spawn point (a method of
-// C_SpawnPoint).
-void SpawnAtSpawnPoint(C_Actor *spawnPoint, int slot, S_SoldierState *state, int *stats);   // 0x00611c90
 // Shows / hides the frames +0x168 / +0x16C of the actors in the list at 0x008ac9c8 when the
 // game pauses (not identified).
 void PauseActorEffects(bool paused);                // 0x005e8d50
@@ -688,8 +687,6 @@ class C_Item;
 // The first-person view (C_game +0x5C): see game/first_person_view.h.
 
 // (The seat weapons: game/seat_weapon.h; C_Actor::GetSeatWeaponDef gives their item's definition.)
-// Mine actor setup (C_Mine, actor type 2).
-void SetupMine(C_Actor *mine, C_Human *owner, int itemId, int unknown);   // 0x005fe010
 // (Item actor setup: C_ItemActor::SetupItem, game/item_actor.h.)
 
 // Not identified yet: a list of periodic entries at 0x008aee64 advanced in 100 ms

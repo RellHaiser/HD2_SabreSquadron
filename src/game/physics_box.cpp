@@ -34,7 +34,7 @@ C_PhysBox::C_PhysBox(I3D_frame *frame, S_PhysicsHandle *handle) : C_PhysObject(f
     if (!m_frame)
         return;
     const I3D_bound_volume bound = HierarchyBound(frame);
-    InitBoxVolume(m_volume, m_matrix, m_invMatrix, bound, COLLISION_SHAPE_BOX, COLLISION_TYPE_SWINGING);
+    InitBoxVolume(m_volume, m_matrix, m_invMatrix, bound, COLLISION_SHAPE_BOX, COLLISION_TYPE_LIGHT_OBJECT);
     // (The original transforms the center by the inverse matrix here.)
     m_volume.center = bound.center * m_invMatrix;
     g_collisionWorld.AddVolume(&m_volume);

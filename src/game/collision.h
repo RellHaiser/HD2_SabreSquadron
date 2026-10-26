@@ -68,7 +68,7 @@ enum : uint32_t {
 // S_CollisionVolume::type bits.
 enum : uint32_t {
     COLLISION_TYPE_SWITCH = 0x1,                            // a switch's box (C_Switch)
-    COLLISION_TYPE_SWINGING = 0x2,                          // swinging physics object
+    COLLISION_TYPE_LIGHT_OBJECT = 0x2,                      // cars drive through it (physics objects, document places)
     COLLISION_TYPE_IGNORED = 0x8,                           // excluded from queries (SetIgnoredVolume)
     COLLISION_TYPE_VERSION = 0x20000,                       // destructible model
     COLLISION_TYPE_MINE = 0x40000,                          // trigger volume of a mine

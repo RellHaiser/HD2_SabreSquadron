@@ -464,7 +464,7 @@ C_PhysSwingingObject::C_PhysSwingingObject(I3D_frame *frame, S_PhysicsHandle *ha
     if (!m_frame)
         return;
     const I3D_bound_volume bound = ModelBound(m_frame);
-    AddBoxVolume(m_volume, m_matrix, m_invMatrix, bound, COLLISION_SHAPE_BOX, COLLISION_TYPE_SWINGING);
+    AddBoxVolume(m_volume, m_matrix, m_invMatrix, bound, COLLISION_SHAPE_BOX, COLLISION_TYPE_LIGHT_OBJECT);
 
     // Second volume, half a unit lower.
     m_volume2 = S_CollisionVolume();

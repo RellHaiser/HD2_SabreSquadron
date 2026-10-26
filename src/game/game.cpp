@@ -195,7 +195,7 @@ bool C_game::Start(void *arg)                       // 0x00698c80
             C_Actor *spawnPoint = g_actorsModule.FindSpawnPoint(0);
             if (!spawnPoint)
                 break;
-            SpawnAtSpawnPoint(spawnPoint, 0, squad[i], nullptr);
+            static_cast<C_SpawnPoint *>(spawnPoint)->Spawn(0, squad[i], nullptr);
         }
     }
     if (IsClient())

@@ -190,24 +190,4 @@ LAB_004754d4:
 }
 
 
-// 0x004754f0
-int FUN_004754f0(void *_this,int param_1, ...)
-{
-  if ((-1 < param_1) && (param_1 < 0x20)) {
-    return (int)*(char *)(param_1 + 0x59 + (int)_this);
-  }
-  return -1;
-}
-
-
-// 0x00475510
-uint32_t FUN_00475510(void *_this,int param_1,uint8_t param_2, ...)
-{
-  if ((-1 < param_1) && (param_1 < 0x20)) {
-    *(uint8_t *)(param_1 + 0x59 + (int)_this) = param_2;
-  }
-  return 0;
-}
-
-
 } // namespace tier1

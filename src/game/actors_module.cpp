@@ -917,7 +917,7 @@ void C_TemporaryActorsList::CreateMine(C_Human *owner, int itemId, const S_vecto
     frame->SetWorldDir(dir, 0.0f);
     frame->Update();
     C_Actor *mine = CreateActor(ACTOR_MINE, frame, -1);
-    SetupMine(mine, owner, itemId, -1);
+    static_cast<C_Mine *>(mine)->Setup(owner, itemId, -1);
     frame->Release();
     if (owner) {
         C_Item *item = owner->FindItem(itemId, nullptr);
@@ -953,7 +953,7 @@ C_Actor *C_TemporaryActorsList::ClientCreateMine(int id, int ownerId, int itemId
     frame->Update();
     auto *owner = ownerId >= 0 ? static_cast<C_Human *>(g_actorsModule.GetHuman(ownerId)) : nullptr;
     C_Actor *mine = CreateActor(ACTOR_MINE, frame, id);
-    SetupMine(mine, owner, itemId, -1);
+    static_cast<C_Mine *>(mine)->Setup(owner, itemId, -1);
     frame->Release();
     if (owner) {
         if (C_Item *item = owner->FindItem(itemId, nullptr))
@@ -968,7 +968,7 @@ C_Actor *C_TemporaryActorsList::LoadMine(int id, int itemId)
     if (!frame)
         return nullptr;
     C_Actor *mine = CreateActor(ACTOR_MINE, frame, id);
-    SetupMine(mine, nullptr, itemId, -1);
+    static_cast<C_Mine *>(mine)->Setup(nullptr, itemId, -1);
     frame->Release();
     return mine;
 }

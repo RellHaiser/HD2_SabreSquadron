@@ -235,6 +235,7 @@ public:
     // The player slot the spectator camera follows (-1: none).
     int GetSpectatedSlot() const { return m_spectatedSlot; }
     int GetRoundState() const { return m_roundState; }
+    int GetMode() const { return m_mode; }          // E_GameMode
     // Co-op with shared lives: the respawns used.
     int GetTeamLivesUsed() const { return m_teamLivesUsed; }
     // The campaign mission's number across the campaigns (-1: not a campaign mission).
@@ -334,6 +335,11 @@ public:
 };
 
 C_game *GetGame();                                  // 0x006987d0
+// A human or a car within 2 m above `pos` (spawning there would collide).
+bool IsSpawnBlocked(const S_vector4 &pos);           // 0x0069d970
+// Occupation: a respawning player faces the zone to take from `pos` (a C_game method in the
+// original).
+void FaceTargetZone(S_vector4 *dir, const S_vector4 &pos, int team);   // 0x0069e370
 // Shows text `textId` in the in-game menu when it is open.
 void ShowGameMenuMessage(int textId);                // 0x0069e9b0
 extern C_game *g_game;                              // 0x008ae8f4

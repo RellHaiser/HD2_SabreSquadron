@@ -1574,7 +1574,7 @@ LAB_0072903a:
             (FUN_0072b9a0(local_610,*(uint32_t **)((int)local_610 + 8),&local_3d8),
             pCVar6 = local_5f8, local_5f4 != (void *)0xffffffff)) &&
            (local_39c = (C_Human *)
-                        FUN_00612a60(local_5f8,(int)local_5f4,(int *)&local_5e0,gh_bitcast<S_vector*>(&local_5c0),
+                        C_SpawnPoint__CreateSoldier(local_5f8,(int)local_5f4,(S_vector4*)((int *)&local_5e0),&local_5c0,
                                      (int)&local_560,0,(int *)0xffffffff,0),
            local_39c != 0)) {
           (*local_39c->vtable->StartMission)(false);
