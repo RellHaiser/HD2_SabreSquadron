@@ -1,0 +1,787 @@
+// Declarations of game functionality that ported code calls but whose own source
+// files have not been hand-ported yet (their mechanical translation lives in
+// src/tier1). Each entry moves to its proper header when its file is ported.
+#pragma once
+
+#include <cstdint>
+#include <vector>
+
+#include "common/c_str.h"
+#include "game/campaign.h"
+#include "game/game_app.h"
+#include "game/game_state.h"
+#include "game/module.h"
+#include "game/profile.h"
+#include "game/resource_cache.h"
+#include "game/car_tables.h"                            // (the tyre and surface tables, ported)
+
+// ---- the application's states (C_GameApp, game/game_app.h) ---------------------
+// C_GameState: see game/game_state.h. The menus share one implementation (0x0066b010 ..,
+// the base of vtable 0x00815850) and differ in their GetTypeId (the screen they show);
+// their constructors are inline in C_GameApp's code, which also holds their GetTypeId and
+// destructors. The roles of the campaign screens are inferred from where the shipped
+// campaigns put them.
+
+// The video player of a campaign video node (type 7, vtable 0x00815bfc, 0x7C bytes): Start
+// takes the C_CampaignVideo.
+class C_VideoState : public C_GameState {
+public:
+    C_VideoState();                                 // 0x006c3330 (also inline)
+};
+// The logos, the intro, the game's movies and the menu's (type 10, vtable 0x00815bc8,
+// 0x84 bytes).
+class C_MovieState : public C_VideoState {
+public:
+    C_MovieState();                                 // (inline)
+    // Plays `fileName`; `sequence` says what follows it (C_GameApp: 0 back to the state it
+    // was opened over, 1 .. 3 the next logo / the intro, 4 the main menu, 5 the first logo,
+    // 6 the application ends). Returns false.
+    bool Play(const char *fileName, int sequence);  // 0x0066ede0
+    int GetSequence() const;                        // +0x7C
+    C_GameState *GetReturnState() const;            // +0x80
+    void SetReturnState(C_GameState *state);
+};
+// The main menu (type 2, vtable 0x00815e30, 0x240 bytes; also the network session's menus).
+class C_MainMenu : public C_GameState {
+public:
+    C_MainMenu();                                   // (inline)
+    // The movie the menu asks for (empty: the credits).
+    const C_str &GetMovie() const;                  // C_str +0x1E8
+};
+// The squad screen (campaign screen kinds 1 and 2; type 3, vtable 0x00815d50, 0x2B0 bytes).
+class C_SquadMenu : public C_GameState {
+public:
+    C_SquadMenu();                                  // (inline)
+};
+// The equipment screen (kinds 3 and 4; type 4, vtable 0x00815db0, 0x590 bytes).
+class C_EquipmentMenu : public C_GameState {
+public:
+    C_EquipmentMenu();                              // (inline; base 0x006c1810)
+};
+// The screen after a mission (kind 5; type 5, vtable 0x00815cf0, 0x290 bytes).
+class C_DebriefingMenu : public C_GameState {
+public:
+    C_DebriefingMenu();                             // (inline)
+};
+// The screen at the end of an operation (kind 6; type 14, vtable 0x00815c90, 0x1B0 bytes).
+class C_OperationEndMenu : public C_GameState {
+public:
+    C_OperationEndMenu();                           // (inline)
+};
+// Campaign screen kind 0 (none in the shipped campaigns; type 9, vtable 0x00815c30, 0x1B0
+// bytes).
+class C_Kind0Menu : public C_GameState {
+public:
+    C_Kind0Menu();                                  // (inline)
+};
+// Joining / hosting a network session (type 8, vtable 0x00815e98, 0x1D0 bytes).
+class C_SessionMenu : public C_GameState {
+public:
+    C_SessionMenu();                                // (inline)
+};
+// The console (type 12, vtable 0x008165a8, 0x214 bytes): the command line's "-cmd" / "-c".
+class C_ConsoleState : public C_GameState {
+public:
+    // `command` runs first (null: none; at most 0x204 chars).
+    explicit C_ConsoleState(const char *command);   // 0x007442e0
+    // "HD2 console", "Type 'help' for keywords list"; the console shows the messages.
+    void ShowBanner();                              // 0x007443a0
+    bool IsShown() const;                           // byte +0x210
+};
+// The next word of a console command line (quotes allowed); 0 when one was read, 3 at the
+// end. `*cursor` moves past it.
+int ReadConsoleToken(const char **cursor, char *out, int *unknown, char *unknown2);   // 0x007445d0
+
+// ---- 0x00486090 GEffects module ---------------------------------------------
+class I3D_frame;
+struct S_vector;
+class C_GEffectsModule {                            // "GEffects", vtable 0x008101f0
+public:
+    // (C_Module::Update; the command map calls it itself while the game is paused.)
+    void Update(int timeDelta);                     // vtable +0x10
+    void SetThunderstorm(bool on, I3D_frame *light, void *unused);   // vtable +0x44
+    // Highlight of a human's model (C_Human::SetUnknown94; meaning inferred from the camera code).
+    void SetModelHighlight(I3D_frame *model, float level);   // vtable +0x50
+    // Light level of a model (C_HumanLighting; 1: full light).
+    void SetModelLightLevel(I3D_frame *model, float level);   // vtable +0x54
+    void DetachWeapon(I3D_frame *joint, bool flag, bool hide);   // vtable +0x58
+    void HideVisual(I3D_frame *visual, bool flag);  // vtable +0x5C
+    // SetModelHighlight(model, 0); false for no model (debris and item actors going away).
+    bool ClearModelHighlight(I3D_frame *model);     // vtable +0x60 (0x00486e90)
+    // Fades the model out over `time` ms (debris).
+    void FadeOutModel(I3D_frame *model, int time, bool unknown);   // vtable +0x64 (0x00488d60)
+    // Fades every visual under `model` back in over `time` ms (0: fully opaque at once; it also
+    // cancels a fade-out in progress). `turnOn` switches the visuals on (meaning inferred).
+    void FadeInModel(I3D_frame *model, int time, bool turnOn);   // vtable +0x6C (0x00489060)
+    // The shadow of a model (a new reference; null: none).
+    I3D_frame *CreateShadow(I3D_frame *model);      // vtable +0x78
+    I3D_frame *GetShadow(I3D_frame *model);         // vtable +0x7C (adds a reference)
+    // Screen fade over `time` ms; `color` null = black.
+    // The screen's fade level (0..1).
+    // (`color` null: black; the HUD's photo flash passes black too.)
+    void SetFadeLevel(float level, const S_vector *color);   // vtable +0x88
+    void Fade(int time, int direction, const S_vector *color);   // vtable +0x8C
+    // Game speed (1.0 = normal) and its rate of change per second.
+    void SetTimeScale(float scale, float acceleration);   // vtable +0x98
+    float GetTimeScale();                           // vtable +0x9C
+    // Fades a human's model out (`in` false) or back in over `time` ms.
+    void FadeHuman(class C_Human *human, int time, bool in);   // vtable +0x74
+    // How much ground of material `material` hides a lying / crouching human (1 = none).
+    float GetGroundCover(int material);             // vtable +0x94
+    void DressUniform(class C_Human *human, int uniform);   // vtable +0xA8
+    void SwitchFaceTexture(I3D_frame *model, const char *texture);   // vtable +0xAC
+    void SetCameraAnimation(I3D_frame *camera, const char *fileName);   // vtable +0xB0
+    // A glass visual's faces as falling shards (the car's broken windows; `unknown` 0.01, meaning
+    // not identified).
+    void ShatterGlass(I3D_frame *visual, float unknown);   // vtable +0xB4 0x00485ba0
+    void SetCloudsOn(bool on);                      // vtable +0xB8
+    // The primary sector's "lensflare" frame on / off (off while the first-person view is on).
+    void SetLensFlareOn(bool on);                   // vtable +0xBC 0x00485b70
+};
+C_GEffectsModule *GetGEffects();                    // 0x00486510
+
+// ---- input/controls (0x008aeb58) ----------------------------------------------
+class C_Controls {
+public:
+    void Update(bool processAll);                   // 0x006c7bc0
+    // The frame's values per action: held (+0xCC) or pressed in this frame (+0xDC); their
+    // count, -1 when there are none.
+    int GetValues(float **values, bool pressed);    // 0x006c7600
+    // Binds `action` to a device's key (C_KeyBindings; `unknown` is always 0).
+    void Bind(int action, int16_t device, uint16_t key, int unknown, int direction);   // 0x006c7790
+    // The mouse's divisors (+0xA8 x, +0xAC y, +0xB0 the third; floats).
+    bool SetMouseScale(int x, int y, int z);        // 0x006c6fe0
+    // The byte at +0xB4 (0x008aec0c), which the player options set (inverted mouse, inferred).
+    void SetInvertMouse(bool on);
+    // Zeroes the frame's values of the bindings on key `key` (any device; null arrays: its own).
+    void ClearKey(int key, float *held, float *pressed);         // 0x006c7510
+    // Zeroes the frame's values of the bindings on the same device key as `action`'s.
+    void ClearAction(int action, float *held, float *pressed);   // 0x006c73f0
+};
+extern C_Controls g_controls;                       // 0x008aeb58
+
+// Wide text to the ANSI code page, at most `maxLength` chars (and a terminator).
+void WideToAnsi(char *out, const wchar_t *text, int maxLength);   // 0x006c90c0 (__fastcall)
+// The bytes [begin, end) are well-formed UTF-8 (the menus' unicode text code).
+bool IsLegalUtf8(const uint8_t *begin, const uint8_t *end);       // 0x0064d3d0 (__fastcall)
+
+// Objects registered for a per-frame refresh before the controls update.
+class C_FrameListener {
+public:
+    virtual void OnFrame(bool active);              // vtable +0x58
+};
+extern C_FrameListener **g_frameListenersBegin;     // 0x008aeb4c (std::vector data)
+extern C_FrameListener **g_frameListenersEnd;       // 0x008aeb50
+
+// ---- networking (0x0097d070) ---------------------------------------------------
+class C_BitStream;
+enum E_NetChannel {
+    NET_CHANNEL_SCRIPT = 4,
+};
+// Delivery modes of C_NetGame::CreateMessage (exact meaning of 3 not identified).
+enum E_NetDelivery {
+    NET_DELIVERY_RELIABLE = 0,
+    NET_DELIVERY_UNRELIABLE = 1,
+    NET_DELIVERY_3 = 3,
+};
+// Server-side state per player (0xC4 bytes; GetPlayerStates()).
+struct S_NetPlayerState {
+    int connection;                                 // +0x00 the network connection's id (0: none)
+    int unknown04;
+    char name[0x34];                                // +0x08 (size inferred) empty: a free slot
+    class C_Human *human;                           // +0x3C cleared when the human is destroyed
+    // (+0x0C the round's score, +0x14 the soldier class (SetPlayerClass), +0x20 the total.)
+    int stats[9];                                   // +0x40
+    int team;                                       // +0x64 E_HumanTeam
+    int pendingTeam;                                // +0x68 the team the player switches to
+    uint8_t unknown6C[0x36];
+    bool left;                                      // +0xA2 the player left (C_game::OnPlayerLeft);
+                                                    //       cleared when the actor is removed
+    uint8_t unknownA3[5];
+    // The server: timeGetTime() of the player's last controls or request (the player
+    // controller stamps it).
+    uint32_t activityTime;                          // +0xA8
+    uint8_t unknownAC[4];
+    int livesUsed;                                  // +0xB0 co-op respawns (-1 before the first spawn)
+    uint8_t unknownB4[0x10];
+
+    bool IsConnected() const { return name[0] != 0; }
+    // No human, or its (player / remote) controller watches.
+    bool IsSpectating() const;                      // 0x00725e90
+};
+class C_NetGame {
+public:
+    C_BitStream *CreateMessage(int channel, int delivery);      // 0x0072c280
+    C_BitStream *CreateMessageEx(int channel, int delivery);    // 0x0072c2a0 (other message kind)
+    // Player states, locked for the caller until UnlockPlayers(). (The original
+    // returns the vector that holds them.)
+    S_NetPlayerState *LockPlayers();                // 0x0072f040
+    void UnlockPlayers();                           // 0x0072f100
+    void SendMessage(C_BitStream *msg);            // 0x0072c360
+    void Init();                                    // 0x0072e570
+    void Shutdown();                                // 0x0072e830
+    void ReceiveMessages(int timeDelta, bool beforeUpdate);   // 0x0072c780
+    void SendMessages(int timeDelta);               // 0x0072d240
+    // Name of the player in `slot` (+0x08 of its state), null if there is none.
+    const char *GetPlayerName(int slot);            // 0x0072efa0
+    // Teams of the players (E_HumanTeam; 2 for unknown slots).
+    int GetPlayerTeam(int slot, bool pending);      // 0x00730900
+    void SetPlayerTeam(int slot, int team, bool pending);   // 0x00730510
+    int GetLocalTeam();                             // 0x00730880
+    // Score keeping of a kill (`killer` -1: none).
+    void OnPlayerKilled(int victim, int killer);    // 0x0072f230
+    // Number of player slots (the states LockPlayers() returns).
+    int GetPlayerCount() const;
+    C_Human *GetPlayerHuman(int slot);              // 0x0072eff0 (null: none)
+    C_Human *GetLocalHuman();                       // 0x00730830
+    // The player in `slot` watches (no human: true).
+    bool IsPlayerSpectating(int slot);              // 0x007308a0
+    // Some player of `team` has a living human that is not spectating.
+    bool IsTeamAlive(int team);                     // 0x007305e0
+    // Connected players with a human, by team.
+    void CountTeamPlayers(int *axis, int *allies);  // 0x00730230
+    // Players by team (`pending`: their next team; `inGame`: only those with a human).
+    void CountTeams(int *axis, int *allies, bool pending, bool inGame);   // 0x00730320
+    // The players' pending teams become their teams.
+    void ApplyPendingTeams();                       // 0x007304a0
+    // Moves players between the teams towards the sizes the mission asks for.
+    void BalanceTeams(int axis, int allied);        // 0x007306a0
+    // Highest round score of the players in the game.
+    int GetBestScore();                             // 0x0072f110
+    void AddScore(int slot, int points);            // 0x0072f1a0
+    // The stats of the player in `slot` (S_NetPlayerState::stats; not locked).
+    int *GetPlayerStats(int slot);                  // 0x0072f890
+    // Sets the soldier class of the player in `slot` (stats[5]) and prints its change (texts
+    // 0x22C4 / 0x22C5 about the local player, 0x22C6 / 0x22C7 about the others, by whether it
+    // went down).
+    void SetPlayerClass(int soldierClass, int slot);   // 0x0072fe90
+    // Server: the team's score (+0x44C, float per team).
+    void AddTeamScore(int team, float points);      // 0x00730a20
+    float GetTeamScore(int team) const;
+    // Rounds won per team (+0x458, three ints; 0x0097d4c8).
+    int *GetTeamWins();
+    void ResetScores();                             // 0x0072ebb0
+    void SendScores();                              // 0x007301d0
+    // Flips bit 0 of the players' +0xAC (and of the copy their connection holds) each round
+    // (meaning not identified).
+    void FlipSessionParity();                       // 0x00730e10
+    // Every player's human and statistics, the teams' scores and wins.
+    void ResetPlayerStats();                        // 0x0072ec60
+    void ResetReplication(bool all);                // 0x007319e0
+    // Sends and receives for `timeDelta` ms now (1000: everything pending).
+    void Process(int timeDelta, bool unknown);      // 0x0072c9a0
+    // Ends the session (`now` false: at the next frame).
+    void Close(bool now);                           // 0x0072e8b0
+    // Administration commands (NET_COMMAND_*; `unknown` is passed as 0).
+    bool Command(int command, const char *arg, int unknown);   // 0x0072d680
+    // State of the connection to the server (NET_CONNECTION_LOST: nothing heard for 600 ms).
+    int GetConnectionState();                       // 0x00731ac0
+    // Server: the keep-alive check of the member at +0x4D0 (message 0x17 after 15 s).
+    void UpdateWatchmeleeTracker(int timeDelta);             // 0x0072e0a0
+    // The voice chat value the player options give ((int)(option * 0.01)) to the voice
+    // object at +0x0C (meaning not identified).
+    void SetVoiceValue(int value);                  // 0x0072edf0
+    // The voice chat transmits to the local player's team ("Set Transmition team").
+    void UpdateVoiceTeam();                         // 0x00724940
+};
+// C_NetGame::Command() commands.
+enum : int {
+    NET_COMMAND_KICK_NAME = 0,
+    NET_COMMAND_KICK_SLOT = 1,
+    NET_COMMAND_SCAN_LEVEL = 3,                     // the level's bounds (g_levelMinY)
+};
+enum : int {
+    NET_CONNECTION_LOST = 9,
+};
+extern C_NetGame g_netGame;                         // 0x0097d070
+// Lowest corner of the level's frames (grown by the net game's level scan, 0x0072d9c0); bodies
+// that fall 5 m below it die.
+extern float g_levelMinY;                           // 0x0097ca34
+// Network slot of the local player.
+extern int g_localPlayerSlot;                       // 0x00982104
+// The session's server name (inferred from the info screen's "<text 0x930> %s"; written through
+// a structure not identified).
+extern char g_serverName[];                         // 0x00981e70
+
+// Multiplayer game types (S_MultiplayerSettings::gameType).
+enum E_MpGameType : int {
+    MP_GAME_DEATHMATCH = 0,                         // the only one without teams
+    MP_GAME_OCCUPATION = 1,                         // taking the zones
+    MP_GAME_OBJECTIVES = 2,                         // attackers and defenders
+    MP_GAME_COOPERATIVE = 3,
+};
+// A map of the session's list (the settings' +0x280 vector).
+// A map list entry's OBJECTIVE (0x18 bytes; parser 0x006189f0) and ITEM (0x0C bytes).
+struct S_MpMapObjective {
+    int axisText;                                   // axis_text
+    int alliedText;                                 // allied_text
+    int points;                                     // value
+    int type;                                       // type="VIP": 1, else -1
+    int team;                                       // side: AXIS 0, ALLIED (or none) 1
+    int vipUniform;                                 // vip_uniform_id
+};
+struct S_MpMapItem {
+    int itemId;
+    int count;
+    int ammo;
+};
+// A map of the multiplayer map list (GAMEDATA\mpmaplist.txt; packed: the strings at +0x01 /
+// +0x05).
+class C_MpMap {
+public:
+    const char *GetName() const;                    // C_str +0x01
+    const char *GetDirectory() const;               // C_str +0x05 (the mission's directory)
+    // The six ints at +0x0C .. +0x20: AIRCRAFTATACK axis / allied, BALANCED axis / allied,
+    // two not identified.
+    int GetValue(int index) const;
+    const std::vector<S_MpMapObjective> &GetObjectives() const;   // +0x24
+    const std::vector<S_MpMapItem> &GetItems() const;              // +0x34
+    // The allowed presets (C_str +0x44).
+    const char *GetPresets() const;
+};
+// Settings of the network game session (the object 0x008aea30 points to; the names are those
+// of the server's config file, 0x006ad200).
+struct S_MultiplayerSettings {
+    S_MultiplayerSettings();                        // (inline in C_GameProfile's constructor)
+    virtual ~S_MultiplayerSettings();               // 0x006b50a0 (0x006b50c0)
+
+    int sessionType;                                // +0x004 0 none, 1 hosting, 2 joining
+    char sessionName[0x168];                        // +0x008
+    bool dedicated;                                 // +0x170 the host plays no part: the scene is not drawn
+                                                    //        and the console takes commands
+    uint8_t unknown171[3];
+    int unknown174;                                 // +0x174
+    int unknown178;                                 // +0x178
+    uint8_t unknown17C[0x9C];
+    C_str password;                                 // +0x218
+    uint8_t unknown21C[4];
+    int port;                                       // +0x220
+    int gameType;                                   // +0x224 E_MpGameType
+    int maxClients;                                 // +0x228
+    int pointLimit;                                 // +0x22C (0: none)
+    int roundLimit;                                 // +0x230 min (0: none)
+    int roundCount;                                 // +0x234 rounds before the next map
+    int warmup;                                     // +0x238 s
+    int respawnTime;                                // +0x23C s between respawn waves
+    int allowRespawn;                               // +0x240
+    int friendlyFire;                               // +0x244 team hits also hurt the shooter
+    int autoTeamBalance;                            // +0x248
+    int thirdPersonView;                            // +0x24C
+    int spawnProtection;                            // +0x250 s
+    int inverseDamage;                              // +0x254 share of a team hit the shooter takes
+    int fallingDamage;                              // +0x258 falls hurt (C_HumanLocomotion::ApplyFallDamage)
+    uint8_t unknown25C[8];
+    int allowVehicles;                              // +0x264
+    int autoRestart;                                // +0x268
+    int coopDifficulty;                             // +0x26C
+    int coopLives;                                  // +0x270 per player (-1: unlimited)
+    int allowCrosshair;                             // +0x274
+    int spawnOnStart;                               // +0x278 co-op: everyone spawns at zone 0
+    int teamLives;                                  // +0x27C the co-op lives are shared
+
+    // The selected map (+0x290 into the vector at +0x280).
+    C_MpMap *GetCurrentMap();                       // 0x006ad830
+    // Selects map `name` (null: the next one); false when there is none of that name.
+    bool SelectMap(const char *name);               // 0x006ad780
+};
+
+// Replication of actors to the clients (the object 0x0097d084 points to).
+class C_NetTrack {                                  // value interpolated on the clients
+public:
+    virtual void SetValue(const struct S_vector4 &value);   // vtable +0x1C
+    virtual void SetTarget(const struct S_vector4 &value);  // vtable +0x20
+    virtual void SetRate(const S_vector &rate);     // vtable +0x24
+    // The value the copies replay (the player's and the remote controllers; not identified
+    // how it differs from GetValue).
+    virtual const struct S_vector4 &GetCurrent();   // vtable +0x28
+    virtual const struct S_vector4 &GetValue();     // vtable +0x2C
+    // The rate SetRate gave (the velocity the copies replay).
+    virtual const struct S_vector4 &GetRate();      // vtable +0x34
+};
+// A direction sent with a replicated position (C_NetProperty +0xC0).
+class C_NetDirTrack {
+public:
+    // The value the copies replay (the car: its rotation's axis; the controllers: the view).
+    virtual const struct S_vector4 &GetValue();     // vtable +0x28
+    // (The car's replay waits for one set; inferred: the value last received.)
+    virtual const struct S_vector4 &GetTarget();    // vtable +0x2C
+    // A value and an angle (the car: its rotation's axis and angle; the others pass 0).
+    virtual void SetValue(const struct S_vector4 &dir, float angle);   // vtable +0x50
+    virtual float GetAngle();                       // vtable +0x58 (the replayed angle)
+};
+class C_NetProperty {
+public:
+    C_NetTrack &GetTrack();                         // this + 0x30
+    C_NetDirTrack &GetDirTrack();                   // this + 0xC0
+    // Sets 6-bit field `field` of the word at +0x20 to `value` and hands the word to both tracks
+    // (their vtable +0x14; the car's StartMission sets field 2 to 0x3B; not identified).
+    void SetField(int field, int value);            // 0x0073e110
+    // The whole word (+0x20), likewise handed to both tracks.
+    uint32_t GetFlags() const;
+    void SetFlags(uint32_t flags);                  // 0x0073e0e0
+};
+// A message of a replicated object (vtable 0x00810630, 0x30 bytes), queued on the object for
+// the other machines (C_NetObject::QueueMessage; its slots are not identified).
+class C_NetObjectMessage {
+public:
+    explicit C_NetObjectMessage(int type);          // 0x0073fb40
+    virtual ~C_NetObjectMessage();                  // vtable +0x10 (scalar deleting)
+    // The message's data after its type (vtable +0x20 / +0x24; pure in the base).
+    virtual void Write(C_BitStream *stream) = 0;
+    virtual void Read(C_BitStream *stream) = 0;
+    int GetType() const { return type; }
+    int type;                                       // +0x1C
+    int sender;                                     // +0x20 C_NetObject::QueueMessage's
+    int unknown24;                                  // +0x24 the receiver deletes it below 1 (not identified)
+    bool fromClient = false;                        // +0x2C (the AI sets it on clients)
+};
+// The owner's state handlers of a net object (the controllers').
+using NetStateHandler = void (__fastcall *)(void *context, C_BitStream *stream);
+// Makes the object's message whose type `stream` holds (`write`: writes the number of types
+// instead; returns null).
+using NetMessageFactory = C_NetObjectMessage *(__fastcall *)(void *context, C_BitStream *stream, bool write);
+struct S_NetQuantization;                           // net/bitstream.h
+class C_NetObject {
+public:
+    // Two sets of three quantisations (vtable +0x00: +0x04..+0x0C; +0x04: +0x10..+0x18), each
+    // also handed to every property (their vtable +0x00 / +0x04; the car's StartMission passes
+    // null and its two quantisations, the smaller first, to both; not identified further).
+    void SetQuantizations0(S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c);   // 0x0073ecf0
+    void SetQuantizations1(S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c);   // 0x0073eca0
+    C_NetProperty *GetProperty(int index);          // 0x0073e690
+    // The replication of `seconds` (vtable +0x08).
+    void Update(float seconds);
+    // The next message received for the object (null: none; `unknown` 0).
+    C_NetObjectMessage *PopMessage(int unknown);    // 0x0073e9d0
+    // Queues `msg` for sending (reliable: the queue at +0x70, else +0x68); `sender` goes to
+    // the message's +0x20.
+    void QueueMessage(C_NetObjectMessage *msg, int sender, bool reliable);   // 0x0073e970
+    // Counts `seconds` up to a second, then clears +0x50 (not identified).
+    void Tick(float seconds);                       // 0x0073eaf0
+    // The handlers that read / write the owner's state (+0x54 / +0x58, context +0x5C) and the
+    // one at +0x64 (context +0x60).
+    void SetStateHandlers(NetStateHandler read, NetStateHandler write, void *context);
+    // The factory of the object's messages (+0x64, context +0x60).
+    void SetMessageFactory(NetMessageFactory factory, void *context);
+    // +0x38: 7 normally, 0 while frozen (inferred: what is sent).
+    void SetSendMask(int mask);
+    void SetUnknown3C(int value);                   // +0x3C
+    int GetUnknown3C() const;                       // (the car's state handler applies a state while it is set)
+    void SetUnknown40(bool value);                  // +0x40
+};
+class C_NetReplication {
+public:
+    C_NetObject *FindObject(int id, bool create);   // 0x0073f9c0
+    void RemoveObject(C_NetObject *object);         // 0x0073f900
+    int GetLocalId() const;                         // +0xDC (the sender of the messages)
+    // The server's player controller sets them at Attach (+0xC4 = 0, +0xC8 = 1; not identified).
+    void SetUnknownC4(int value);
+    void SetUnknownC8(int value);
+    // The object at +0x30, its vtable +0x08 (the local player's tick in network games).
+    void Tick30(float seconds);
+};
+extern C_NetReplication *g_netReplication;          // 0x0097d084
+
+// Soldier states in network messages (S_SoldierState, game/human.h).
+class C_NetMessage;
+struct S_SoldierState;
+void NetWriteSoldierState(C_NetMessage *msg, const S_SoldierState &state, bool unknown);   // 0x00727850
+void NetReadSoldierState(C_NetMessage *msg, S_SoldierState &state, bool unknown);          // 0x00727a30
+
+// ---- text / localisation -----------------------------------------------------------
+// The game profile (g_gameProfile): see game/profile.h.
+
+// The player's options (C_PlayerOptions, the detail switches): game/profile.h.
+
+// The game's texts (all_txt).
+class C_GameTexts {
+public:
+    // Text `id`; "__undefined index <id> in all_txt __" if there is none.
+    C_str Get(int id) const;                        // 0x006e5380
+    // Adds the texts of a text file.
+    void Load(const char *fileName);                // 0x006e50c0
+};
+extern C_GameTexts g_texts;                         // 0x008c1368
+
+// The console's commands (the table at 0x00844530, 0x18 bytes each: name, kind, value kind,
+// enabled, ..., value).
+enum : int {
+    CONSOLE_SENSITIVITY = 0,
+    CONSOLE_SAY = 1,
+    CONSOLE_SAY_TEAM = 2,
+    CONSOLE_KILL = 3,
+    CONSOLE_HAPPYAMMO = 4,
+    CHEAT_HYDROSHOCK = 5,                           // "hydroshock": enemies die from any hit
+    CHEAT_SNIPER = 6,                               // "sniper": the player's weapons lose their recoil
+    CONSOLE_HEAL = 7,
+    CONSOLE_GIVEITEM = 8,
+    CONSOLE_ANOREXY = 9,
+    CONSOLE_NO_GI = 10,                             // "no_gi": the game interface is not drawn
+};
+// Value of console command `index`, -1 if it takes none.
+int GetCheatValue(int index);                       // 0x00720f50
+// A console line ("command arguments"; the chat line without "Say"), and command `command` of the
+// table with its argument text (the chat: CONSOLE_SAY / CONSOLE_SAY_TEAM); results not
+// identified.
+int ExecuteConsoleLine(const char *line);           // 0x00720500 (__fastcall)
+int ExecuteConsoleCommand(int command, const char *args);   // 0x00720710 (__fastcall)
+
+// A pair of tables the game checks against each other (copy protection, inferred).
+extern const uint32_t g_protectionTableA[];         // 0x008ca840
+extern const uint32_t g_protectionTableB[];         // 0x008caf40
+extern uint16_t g_protectionIndexA;                 // 0x008cac84
+extern uint16_t g_protectionIndexB;                 // 0x008cb384
+inline bool CopyProtectionIntact()
+{
+    return g_protectionTableA[g_protectionIndexA] == g_protectionTableB[g_protectionIndexB];
+}
+// The pair the aqualung checks (C_HumanMovement::UpdateBreath).
+extern uint16_t g_protectionIndexBreathA;           // 0x008cac8e
+extern uint16_t g_protectionIndexBreathB;           // 0x008cb38e
+inline bool CopyProtectionIntactBreath()
+{
+    return g_protectionTableA[g_protectionIndexBreathA] == g_protectionTableB[g_protectionIndexBreathB];
+}
+
+// C_Ladder (ACTOR_LADDER, not ported): the sound group of climbing it (+0x178; -1 none).
+int GetLadderSoundGroup(const class C_Actor *ladder);
+struct S_vector4;
+// C_Ladder's ends and the way a climber faces (+0xA0 top, +0xB0 bottom, +0xD0) and the humans
+// on it (a vector at +0x164).
+const S_vector4 &GetLadderTop(const class C_Actor *ladder);
+const S_vector4 &GetLadderBottom(const class C_Actor *ladder);
+const S_vector4 &GetLadderDir(const class C_Actor *ladder);
+void AddLadderClimber(class C_Actor *ladder, class C_Human *human);       // 0x005eb8c0
+// The humans on the ladder (the vector at +0x164).
+const std::vector<class C_Human *> &GetLadderClimbers(const class C_Actor *ladder);
+void RemoveLadderClimber(class C_Actor *ladder, class C_Human *human);    // 0x005eba70
+// ... and the sound group of its steps (+0x174; -1 none).
+int GetLadderStepSoundGroup(const class C_Actor *ladder);
+// Whether a human at `pos` facing `dir` moving at `velocity` (cm/s) can get on the ladder
+// (`lookingUp`: the view is not down).
+bool CanUseLadder(class C_Actor *ladder, const S_vector4 &pos, const S_vector4 &dir, const struct S_vector &velocity,
+                  bool lookingUp);                  // 0x005eb1d0
+// The byte at +0x180: getting off at the bottom steps 1.25 m back and 0.25 m down instead of
+// 0.15 m back (meaning not identified).
+bool GetLadderFlag180(const class C_Actor *ladder);
+
+// ---- the game's collaborators (C_game, game/game.h) -------------------------------
+// The campaign tree: game/campaign.h; the profile's objects (g_campaign, g_missionSquad,
+// g_hudOption, g_mpSettings, g_gameMode): game/profile.h.
+class I3D_scene;
+
+// The loading screen's progress bar (the object at 0x008aea80).
+class C_LoaderScreen {
+public:
+    // Progress `fraction` of loading stage `stage`.
+    void SetProgress(int stage, float fraction);    // 0x006c9920
+    void Finish();                                  // 0x006c9910
+    // A player's line on the screen of a network map (`team` 1: the second list).
+    void AddPlayer(const char *text, int team);     // 0x006ca920
+};
+extern C_LoaderScreen g_loaderScreen;               // 0x008aea80
+enum : int {
+    LOADER_STAGE_MISSION = 4,                       // C_game::LoadMission
+    LOADER_STAGE_START = 5,                         // C_game::Start
+};
+
+// Effects that run for a while (the list at 0x008aee58; saved with the game).
+void TimedEvents_Update(int timeDelta, bool clear); // 0x006df760 (`clear`: all go)
+void TimedEvents_Clear();                           // 0x006df880
+bool TimedEvents_Save(C_chunk &chunk);              // 0x006df890
+bool TimedEvents_Load(C_chunk &chunk);              // 0x006dfa60
+
+// Frees the frame data blocks of all the scene's frames.
+void FreeAllFrameData(I3D_scene *scene);            // 0x006e9f20
+// Spawns a soldier with `state` (and `stats`; network `slot`) at a spawn point (a method of
+// C_SpawnPoint).
+void SpawnAtSpawnPoint(C_Actor *spawnPoint, int slot, S_SoldierState *state, int *stats);   // 0x00611c90
+// Shows / hides the frames +0x168 / +0x16C of the actors in the list at 0x008ac9c8 when the
+// game pauses (not identified).
+void PauseActorEffects(bool paused);                // 0x005e8d50
+// The scene's render callback (the fade, the interface, the debug joints; `phase` 1 / 2).
+int __stdcall GameRenderCallback(int phase, int unknown1, int unknown2);   // 0x006c95b0
+
+// The in-game menu (vtable 0x00815750, 0x5C0 bytes; wraps the game state it was opened over).
+class C_GameMenu : public C_GameState {
+public:
+    C_GameMenu();                                   // 0x0067eb40
+    void SetGame(C_GameState *game);                // +0x5B8
+    C_GameState *GetGame() const;                   // +0x5B8 the game behind the menu
+    void ShowMessage(int textId, int unknown);      // 0x00682aa0 (the game passes -1)
+    void SetUnknown1D1(bool on);                    // byte +0x1D1
+};
+// The console commands of a dedicated server (the singleton at 0x0098c0fc).
+class C_CommandProcessor {
+public:
+    bool Execute(const char *command);              // 0x00742850
+};
+C_CommandProcessor *GetCommandProcessor();          // 0x0069f520
+
+// The game's scene as the vehicles use it (0x0089c1d0; copied by the mission loader 0x006d4270).
+extern I3D_scene *g_carScene;
+// tables\hdmaterials.def and tables\effects_car.def (0xF0-byte records; freed by C_game::Stop).
+bool LoadMaterialTables();                          // 0x0071fd80
+
+// ---- misc ---------------------------------------------------------------------
+class IGraph;
+#include <windows.h>
+extern uint32_t g_graphFlags;                       // 0x00981e6c IGraph info flags after init
+extern void (*g_fatalErrorHandler)();               // 0x008bf0e4
+void OnFatalError();                                // 0x006e1ad0
+LRESULT CALLBACK GameWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+void InitControls(C_Controls &controls);            // 0x006c7340
+void BindControls(C_Controls &controls, IGraph *graph, C_FrameListener **listeners, unsigned count);  // 0x006c7010
+void RunExitSequence();                             // object 0x007426a0 at 0x0098c0fc
+// Game role flags (0x00982100): bit 0 = server side, bit 1 = client side.
+enum : uint32_t {
+    GAME_ROLE_SERVER = 0x01,
+    GAME_ROLE_CLIENT = 0x02,
+    GAME_ROLE_LOCAL = 0x07,                         // single player: everything local
+};
+extern uint32_t g_gameRole;                         // 0x00982100
+
+// Global object at 0x008ca4c8 and its item list (purpose not identified yet).
+void InitUnknown8CA4C8();                           // 0x006e8960
+void FreeUnknown8CA4C8();                           // 0x006e8970
+void FreeResourceCaches();                          // tail of 0x006dc770 (model/sound caches)
+// Shows a message box; returns the pressed button.
+int ShowMessage(const char *text, const char *title, unsigned int flags);   // 0x006ed2a0
+// Reads the CD key stored by the installer; null if missing.
+const char *GetCDKey();                             // 0x00732000
+bool ValidateCDKey(const char *key);                // 0x007350a0
+
+// ---- frames / models -------------------------------------------------------------
+class C_Actor;
+class I3D_frame;
+struct S_FrameData;
+// Attaches a copy of `data` to `frame` (allocating the frame's data block if needed).
+void SetFrameData(I3D_frame *frame, const S_FrameData &data);   // 0x006e9ea0
+
+// Frees the frame's data block (S_FrameData).
+void FreeFrameData(I3D_frame *frame);               // 0x006e9ef0
+
+// The camera module's keeper of a camera dummy's placement (0x50 bytes, 16-byte aligned; the
+// car's StartMission makes one per seat with a "camera3RD*" dummy, S_VehicleSeat::camera): the
+// dummy's local rotation and position, its parent's and its own world position (inferred: the
+// third-person camera moves the dummy).
+class alignas(16) C_CameraFrameKeeper {
+public:
+    C_CameraFrameKeeper(C_Actor *owner, I3D_frame *frame);   // 0x00465f00
+    // Restore (0x00466000, a JMP to it; its two callers, the car's StopMission and 0x005dfca0,
+    // _aligned_free the keeper after it).
+    ~C_CameraFrameKeeper();
+    // Puts the dummy back where it was made (true; false without a frame).
+    bool Restore();                                 // 0x00466010
+    // Every frame (the car's Update).
+    void Update(int time);                          // 0x00466110
+
+private:
+    uint8_t m_unknown[0x50];                        // (the camera module names the 0x50 bytes)
+};
+
+// ---- items (game/items_module.h) ----------------------------------------------------
+class C_Actor;
+class C_chunk;
+class C_Item;
+// C_HumanEquipment: see game/human_body.h.
+// The first-person view (C_game +0x5C): see game/first_person_view.h.
+
+// (The seat weapons: game/seat_weapon.h; C_Actor::GetSeatWeaponDef gives their item's definition.)
+// Mine actor setup (C_Mine, actor type 2).
+void SetupMine(C_Actor *mine, C_Human *owner, int itemId, int unknown);   // 0x005fe010
+// (Item actor setup: C_ItemActor::SetupItem, game/item_actor.h.)
+
+// Not identified yet: a list of periodic entries at 0x008aee64 advanced in 100 ms
+// steps (saved with the actors), and a per-tick human pass at 0x008aaee0 run in
+// single player / co-op.
+// Returns the link id (-1 on clients).
+int PeriodicLinks_Add(C_Actor *actor, int arg);     // 0x006e0080
+void PeriodicLinks_Remove(int id);                  // 0x006e0220
+void PeriodicLinks_SetRate(int id, int rate);       // 0x006e03a0 (rate table 0x008435c8)
+void PeriodicLinks_Tick();                          // 0x006e0b30
+void PeriodicLinks_Clear();                         // 0x006e0b90
+bool PeriodicLinks_Save(C_chunk &chunk);            // 0x006e0c60
+bool PeriodicLinks_Load(C_chunk &chunk);            // 0x006e0f40
+void HumanPass_Tick(int timeDelta, const std::vector<C_Actor *> &active);   // 0x005647c0
+
+// ---- scripts ------------------------------------------------------------------------
+// Set while the script module restarts a mission (StopMission + StartMission).
+extern bool g_scriptModuleRestarting;               // 0x008693e0
+
+// ---- sight module (0x0089b288) ------------------------------------------------------
+// Observers (humans, meleeTrackers) watch targets (humans, meleeTrackers); the module calls their owners
+// back (C_Human::OnSightEvent) when a target comes into view or leaves it.
+enum : uint32_t {
+    SIGHT_ALL = 0xF,                                // what humans register with
+};
+// C_SightModule::SetObserverState() states.
+enum : int {
+    SIGHT_OBSERVER_OFF = 0,
+    SIGHT_OBSERVER_ON = 1,
+};
+// C_SightModule::SetTargetState() states.
+enum : int {
+    SIGHT_TARGET_ALIVE = 0,
+    SIGHT_TARGET_DEAD = 2,                          // seen as a body
+    SIGHT_TARGET_HIDDEN = 3,                        // frozen / suspended
+    SIGHT_TARGET_SHOWN = 4,
+};
+// C_SightModule::GetVisibleParts() bits (which bones a shooter can aim at, inferred).
+enum : uint32_t {
+    SIGHT_PART_BODY = 0x01,
+    SIGHT_PART_HEAD = 0x02,
+    SIGHT_PART_LEFT_ARM = 0x04,
+    SIGHT_PART_RIGHT_ARM = 0x08,
+    SIGHT_PART_LEGS = 0x10,
+};
+class C_SightTarget {
+public:
+    virtual C_Actor *GetActor();                    // vtable +0x00
+    virtual int GetKind();                          // vtable +0x04 0 human, 1 meleeTracker
+    virtual void Refresh();                         // vtable +0x08 (the model changed)
+};
+class C_SightModule {
+public:
+    // Registration ids; -1 on failure.
+    int AddObserver(I3D_frame *frame, uint32_t mask);   // 0x0046f350
+    int AddTarget(I3D_frame *frame, uint32_t mask);     // 0x0046f9d0
+    bool RemoveObserver(int id);                    // 0x0046fd50
+    bool RemoveTarget(int id);                      // 0x0046fdf0
+    void SetObserverState(int id, int state);       // 0x0046f8c0
+    void SetTargetState(int id, int state);         // 0x0046f700
+    // Whether observer `observer` sees target `target` now (the observer's vtable +0x0C). The
+    // result is a count the AI compares (it fires at a target out of view when it is at least
+    // 1, defensive AI at least 3; meaning not identified); `out` may be null.
+    int CanSee(int observer, int target, int *out, bool *visible);   // 0x0046f320
+    // SIGHT_PART_* of target `target` that `observer` sees.
+    void GetVisibleParts(int observer, int target, uint32_t *parts);   // 0x0046f2a0
+    // Tests now whether `observer` sees `target` (the observer's vtable +0x08, whose answer
+    // it passes on; inferred).
+    bool TestNow(int observer, int target);         // 0x0046f280
+    // Registered target `id`, null if there is none (vector at +0x10).
+    C_SightTarget *GetTarget(int id) const;
+};
+extern C_SightModule g_sightModule;                 // 0x0089b288
+
+// Physics: see game/physics.h.
+
+// Collision world: see game/collision.h.
+
+// Uniform random number in [0, max).
+float RandomFloat(float max);                       // 0x00475190
+
+// The points of walking-network path `path` from `from` to `to` (the command map's path of an
+// order; replaces `points`).
+void BuildPathPoints(const struct S_vector4 &from, const struct S_vector4 &to, const std::vector<uint16_t> &path,
+                     struct S_Vector4Array &points);   // 0x007ce930 (__fastcall)
+
+// The squad's air targets (C_SquadController::FindAirTarget). The nearest air attack plane
+// flying in (state 1 / 2) within 150 m that `human`'s body sees (the list at 0x008ac9c8;
+// null: none).
+class C_Actor;
+class C_Human;
+class I3D_frame;
+C_Actor *FindAirAttackFor(C_Human *human);         // 0x005e8b70 (__fastcall)
+// A Junkers 88 of the setup (g_junkers88Setup; none: null) and the frame to aim at.
+C_Actor *FindJunkersTargetFor(C_Human *human, I3D_frame **frame);   // 0x005f0e40 (__fastcall)
