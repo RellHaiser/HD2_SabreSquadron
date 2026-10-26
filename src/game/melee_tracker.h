@@ -58,6 +58,7 @@ public:
     ~C_MeleeTracker() override;                                  // 0x005d4cf0 (0x005d4cc0)
 
     // --- C_Actor overrides ------------------------------------------------------------
+    // (OnMessage 0x1C 0x005d4c90 and slot 0x20 0x005d4ca0 are empty, as the base's.)
     // The base binding; the tracker's frame must be an animated model.
     bool SetFrame(I3D_frame *frame) override;           // 0x2C 0x005d4d70
     // The mission file's actor properties: a version word (1) and the stats.

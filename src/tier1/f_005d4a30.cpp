@@ -2,20 +2,6 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
-// 0x005d4c90
-uint32_t C_MeleeTracker__empty_function_5d4c90(C_MeleeTracker *_this, ...)
-{
-  return 0;
-}
-
-
-// 0x005d4ca0
-uint32_t C_MeleeTracker__empty_function_5d4ca0(C_MeleeTracker *_this, ...)
-{
-  return 0;
-}
-
-
 // 0x005d4ce0
 uint32_t C_auto_008121d0__FUN_005d4ce0(C_auto_008121d0 *_this, ...)
 {

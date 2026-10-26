@@ -14,17 +14,22 @@
 #include "game/animation_actor.h"
 #include "game/car.h"
 #include "game/checkpoints.h"
+#include "game/clock.h"
 #include "game/debris.h"
 #include "game/item_actor.h"
 #include "game/melee_tracker.h"
 #include "game/melee_tracker_ai.h"
+#include "game/null_actor.h"
+#include "game/photo_place.h"
 #include "game/human.h"
 #include "game/human_body.h"
 #include "game/resource_cache.h"
 #include "game/rigid_body.h"
 #include "game/sound_module.h"
+#include "game/switch_actor.h"
 #include "game/team.h"
 #include "game/vehicle.h"
+#include "game/wire_cut.h"
 #include "ls3d/i3d.h"
 
 class C_BitStream;
@@ -121,19 +126,8 @@ public:
     // (inline in the original: 0x005fcd80, 0x005fd760).
     void UseCharge();
 };
-class C_Switch : public C_Actor {
-public:
-    void SetState(int state);                           // 0x006136f0
-    int GetState() const;                               // +0xD4
-    // Flips it to the other state.
-    void Toggle();                                      // 0x00613640 (__fastcall)
-};
-class C_PhotoPlace : public C_Actor {
-public:
-    int GetState() const;                               // byte +0x91
-    // `human` photographs it (byte +0x91 = 1; `human` is not used).
-    void TakePhoto(C_Human *human);                     // 0x0060c130
-};
+// C_Switch ("Switch", vtable 0x008139d0, 0x150 bytes) is defined in game/switch_actor.h and C_PhotoPlace
+// ("Photo place", vtable 0x00813400, 0x140 bytes) in game/photo_place.h, included above.
 class C_StaticWeapon : public C_Actor {
 public:
     void SetState(int state);                           // 0x006059b0
@@ -205,20 +199,7 @@ public:
 
 // C_AnimationActor ("Animation", vtable 0x008119b8, 0xf0 bytes) is defined in game/animation_actor.h, included above.
 
-// Breakable fence (C_TemporaryActorsList::CreateBreakables).
-class C_WireCut : public C_Actor {
-public:
-    // Cuts the fence along `dir` (the original copies 4 floats from it); `hideBrokenPart`
-    // also hides the door's broken part (the script VM: true, the AI: false).
-    bool Cut(const S_vector &dir, bool hideBrokenPart); // 0x005e2510
-    bool IsCut() const;                                 // 0x005e24c0
-    void SetDoor(class C_PhysDoor *door) { m_door = door; }
-    // The walking points on either side of the fence (CHECKPOINT_NONE: none).
-    int GetPoint(int side) const { return m_points[side]; }
-private:
-    class C_PhysDoor *m_door;                           // +0x90
-    uint16_t m_points[2];                               // +0x94
-};
+// C_WireCut ("WireCut", vtable 0x00812750, 0xb0 bytes) is defined in game/wire_cut.h, included above.
 
 class C_AirAttack : public C_Actor {
 public:

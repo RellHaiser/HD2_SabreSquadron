@@ -37,6 +37,7 @@ enum : uint16_t {
 enum : uint8_t {
     CHECKPOINT_TYPE_NORMAL = 0,
     CHECKPOINT_TYPE_DOOR = 1,                           // a door's side (its door in the actor table)
+    CHECKPOINT_TYPE_FENCE_GAP = 7,                      // either side of a cut fence (C_WireCut, local games)
     CHECKPOINT_TYPE_SNIPER = 10,                        // a sniper's post (C_SniperController; inferred)
     CHECKPOINT_TYPE_GUN = 11,                           // a static gun's place (its actor in the table)
     CHECKPOINT_TYPE_15 = 15,                            // FindNearestType15's
