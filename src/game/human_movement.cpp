@@ -288,7 +288,7 @@ void C_HumanMovement::ResetToFrame()
     m_visual.SetNetworkPosition(pos);
     m_visual.m_sectorTime = 10000;
     m_visual.m_lighting.m_sampleDue = true;
-    GetGame()->GetScene()->Unknown144(m_owner->GetFrame());
+    GetGame()->GetScene()->MarkTrackedModel(m_owner->GetFrame());
 }
 
 // ------------------------------------------------------------------ saved games

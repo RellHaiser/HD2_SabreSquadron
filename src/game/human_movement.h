@@ -470,7 +470,7 @@ public:
     void FadeOutTrack3(int time);                       // 0x00775dd0
     // Track 0 is held at `share` (at least 0.22) of `length` ms when it gets there.
     void SetHoldTime(int length, float share);          // 0x00776570
-    // The parts of the model (I3D_model::GetUnknownD4) of one of the frames `frames[count]` are
+    // The parts of the model (I3D_model::GetTracks) of one of the frames `frames[count]` are
     // told the stage of `track`; the frames found are taken out (`frames` needs count + 1
     // entries: the original moves frames[count] into the place of a frame found).
     void NotifyFrames(int track, I3D_frame **frames, int count);   // 0x00775970

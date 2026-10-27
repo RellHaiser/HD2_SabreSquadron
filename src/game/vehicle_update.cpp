@@ -470,9 +470,9 @@ void C_Vehicle::UpdateTracks(float timeDelta)                                   
                 *pos = v;
             }
             level->UnlockVertices();
-            level->Unknown2C();
-            mesh->Unknown14();
-            static_cast<I3D_object_visual *>(strip)->UnknownAC(0);
+            level->ComputeBounds();
+            mesh->ComputeBounds();
+            static_cast<I3D_object_visual *>(strip)->RefreshLevel(0);
             strip->Update();
         }
     };
@@ -513,9 +513,9 @@ void C_Vehicle::UpdateTracks(float timeDelta)                                   
                 u = offset + u;
             }
             level->UnlockVertices();
-            level->Unknown2C();
-            mesh->Unknown14();
-            static_cast<I3D_object_visual *>(frame)->UnknownAC(0);
+            level->ComputeBounds();
+            mesh->ComputeBounds();
+            static_cast<I3D_object_visual *>(frame)->RefreshLevel(0);
             frame->Update();
         }
     };

@@ -325,7 +325,7 @@ void C_HumanWeaponPose::Attach(I3D_frame *model, C_Human *owner, bool reload)
         PoseFromRagdoll(m_rootBody, 1.0f);
         // Quirk: the scene's frames the other way round (see StartRagdoll).
         GetGame()->GetScene()->AddHumanModel(m_model, m_dummyZ, m_bones[POSE_BONE_RIGHT_FOOT].frame);
-        GetGame()->GetScene()->Unknown144(m_model);
+        GetGame()->GetScene()->MarkTrackedModel(m_model);
     }
 }
 
@@ -1118,7 +1118,7 @@ void C_HumanWeaponPose::UpdateDead(int time)
         const S_vector spine = m_bones[POSE_BONE_SPINE].frame->GetWorldPos();
         const float moved = (PoseXYZ(m_bodyPos) - spine).Square();
         if (1e-6f < moved)
-            GetGame()->GetScene()->Unknown144(m_model);
+            GetGame()->GetScene()->MarkTrackedModel(m_model);
         if (1.0f < moved) {
             m_bodyPos = PoseWorldPos4(m_bones[POSE_BONE_SPINE].frame);
             m_movement->Ragdoll(true, true);
@@ -1150,7 +1150,7 @@ void C_HumanWeaponPose::UpdateDead(int time)
         const S_vector4 before = PoseWorldPos4(m_model);
         PoseFromRagdoll(m_rootBody, 1.0f);
         if (1e-6f < (PoseXYZ(before) - m_model->GetWorldPos()).Square())
-            GetGame()->GetScene()->Unknown144(m_model);
+            GetGame()->GetScene()->MarkTrackedModel(m_model);
         // The first person camera follows the head.
         if (m_owner->IsLocalPlayer()) {
             C_CameraModule *cameras = GetGame()->GetCameraModule();

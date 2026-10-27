@@ -1208,7 +1208,7 @@ void C_HumanMovement::OnPickUpBody(C_Human *body)
         for (int i = 0; i < bodyModel->NumModelFrames(); ++i) {
             I3D_frame *frame = bodyModel->GetModelFrame(i);
             if (frame->GetType() == FRAME_VISUAL)
-                static_cast<I3D_visual *>(frame)->SetUnknown80(0);
+                static_cast<I3D_visual *>(frame)->SetModeA(0);
         }
         GetGEffects()->SetModelHighlight(body->GetFrame(), m_owner->GetUnknown94());
     }
@@ -1246,7 +1246,7 @@ void C_HumanMovement::OnDropBody(C_Human *body)
         for (int i = 0; i < bodyModel->NumModelFrames(); ++i) {
             I3D_frame *frame = bodyModel->GetModelFrame(i);
             if (frame->GetType() == FRAME_VISUAL)
-                static_cast<I3D_visual *>(frame)->SetUnknown80(2);
+                static_cast<I3D_visual *>(frame)->SetModeA(2);
         }
         // (The original refreshes the carrier's own hit volumes here, typed as a dead body's,
         // instead of the body's.)

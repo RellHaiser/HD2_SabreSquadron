@@ -159,7 +159,7 @@ void SetMarkLook(S_SurfaceMark *mark, const S_vector &scale)
     visual->SetScale(scale);
     visual->SetUnknownB4(5);
     visual->SetUnknown1E4(FOOTPRINT_UNKNOWN1E4);
-    visual->SetUnknownA4(1);
+    visual->SetOrthogonal(1);
 }
 
 void SaveMark(C_chunk &chunk, const S_SurfaceMark *mark)

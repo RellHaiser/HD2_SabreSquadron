@@ -211,7 +211,7 @@ void C_CollisionWorld::Load(const char *fileName, bool buildGrid)
             frame = nullptr;
         refs[i] = frame;
         if ((flags & FRAME_REFERENCE_VISUAL) && frame)
-            static_cast<I3D_visual *>(frame)->SetUnknown7C(1);
+            static_cast<I3D_visual *>(frame)->SetWorldSpace(1);
     }
     g_levelCollisionLoaded = true;
 

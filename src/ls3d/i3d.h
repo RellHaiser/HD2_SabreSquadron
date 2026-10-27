@@ -182,7 +182,7 @@ public:
     // Copies the contents (visual, children) of another frame of the same type.
     I3DMETHOD(void, Duplicate)(I3D_frame *source) = 0;       // 0x4C
     // Called with 1.0 on a weapon's "flash" visual when it fires (meaning not identified).
-    I3DMETHOD(void, SetUnknown50)(float value) = 0;           // 0x50
+    I3DMETHOD(void, SetHierarchyLightLevel)(float value) = 0;           // 0x50
     // Opacity of the object visuals of the hierarchy (LS3DF 0x1001ebf0; 0x50 is their light level).
     I3DMETHOD(void, SetHierarchyAlpha)(float alpha) = 0;      // 0x54
     // Recomputes the bound of the frame and its children (GetBound()).
@@ -440,9 +440,9 @@ public:
     I3D_SLOT(78);                                             // LS3DF: SetBBox
     // Called with 1 on the visuals whose geometry the level collision uses (meaning not
     // identified).
-    I3DMETHOD(void, SetUnknown7C)(int value) = 0;            // 0x7C
+    I3DMETHOD(void, SetWorldSpace)(int value) = 0;            // 0x7C
     // 0 on the visuals of a carried body, 2 when it is put down (meaning not identified).
-    I3DMETHOD(void, SetUnknown80)(int value) = 0;            // 0x80
+    I3DMETHOD(void, SetModeA)(int value) = 0;            // 0x80
     I3D_SLOT(84);                                             // LS3DF: GetModeA
     I3D_SLOT(88);                                             // LS3DF: SetModeB
     I3D_SLOT(8C);                                             // LS3DF: GetModeB
@@ -524,7 +524,7 @@ public:
     I3DMETHOD(void, SetAlpha)(float alpha) = 0;               // 0xA8
     // Called per detail level after the mesh's vertices were rewritten (the vehicle's repaired
     // parts; meaning not identified).
-    I3DMETHOD(void, UnknownAC)(int level) = 0;                // 0xAC
+    I3DMETHOD(void, RefreshLevel)(int level) = 0;                // 0xAC
 
     float GetAlpha() const { return Field<float>(0x1EC); }
 };
@@ -617,7 +617,7 @@ public:
     I3D_SLOT(28);                                             // LS3DF: AllocVertices
     // Called after the level's vertex positions were rewritten (the vehicle's repaired parts;
     // meaning not identified).
-    I3DMETHOD(void, Unknown2C)() = 0;                         // 0x2C
+    I3DMETHOD(void, ComputeBounds)() = 0;                         // 0x2C
 
     int NumVertices() const { return *reinterpret_cast<const int *>(reinterpret_cast<const uint8_t *>(this) + 0x54); }
     int NumFaceGroups() const { return *reinterpret_cast<const int *>(reinterpret_cast<const uint8_t *>(this) + 0x58); }
@@ -640,9 +640,9 @@ public:
     I3D_SLOT(10);                                             // LS3DF: GetStats
     // Called after the levels' vertices were rewritten (the vehicle's repaired parts; meaning not
     // identified).
-    I3DMETHOD(void, Unknown14)() = 0;                         // 0x14
+    I3DMETHOD(void, ComputeBounds)() = 0;                         // 0x14
     // Called on the inventory's icons once they have their own mesh (meaning not identified).
-    I3DMETHOD(void, Unknown18)() = 0;                         // 0x18
+    I3DMETHOD(void, DuplicateMaterials)() = 0;                         // 0x18
 
     // Number of detail levels (+0x44).
     uint32_t NumLevels() const { return *reinterpret_cast<const uint32_t *>(reinterpret_cast<const uint8_t *>(this) + 0x44); }
@@ -656,21 +656,21 @@ public:
     I3D_SLOT(9C);                                             // LS3DF: SetMesh
     I3D_SLOT(A0);                                             // LS3DF: DuplicateMesh
     // Called with 1.0 on the traces of client bullets only (meaning not identified).
-    I3DMETHOD(void, SetUnknownA4)(float value) = 0;           // 0xA4
+    I3DMETHOD(void, SetLightLevel)(float value) = 0;           // 0xA4
 
     I3D_mesh *GetMesh() const { return Field<I3D_mesh *>(0x1E0); }
 };
 
 // Projected texture (I3DVISUAL_PROJECTOR): bullet holes, blood and scorch marks. Slot
 // meanings inferred from the shot manager, which always calls SetMode(3), SetUnknownB4(1)
-// and SetUnknownA4(1).
+// and SetOrthogonal(1).
 class I3D_projector_visual : public I3D_visual {
 public:
     I3D_SLOT(94);                                             // LS3DF: Prepare
     I3D_SLOT(98);                                             // LS3DF: Draw
     I3DMETHOD(void, SetTexture)(class IImage *image) = 0;     // 0x9C
     I3D_SLOT(A0);                                             // LS3DF: SetMaterial
-    I3DMETHOD(void, SetUnknownA4)(int value) = 0;             // 0xA4
+    I3DMETHOD(void, SetOrthogonal)(int value) = 0;             // 0xA4
     // Opacity of the projected texture (0..1; footprints fade with it).
     I3DMETHOD(void, SetOpacity)(float opacity) = 0;           // 0xA8
     I3D_SLOT(AC);                                             // LS3DF: SetOpacity
@@ -736,7 +736,7 @@ public:
     I3DMETHOD(void, SetRenderState)(int state, uint32_t value) = 0;   // 0xA0
     I3D_SLOT(A4);                                             // LS3DF: GetParam
     // (Called once on a new car emitter after its first Update; meaning not identified.)
-    I3DMETHOD(void, UnknownA8)() = 0;                         // 0xA8
+    I3DMETHOD(void, SetDefaults)() = 0;                         // 0xA8
     // Starts / stops emitting new particles (the live ones run on).
     I3DMETHOD(void, SetEmitting)(bool on) = 0;                // 0xAC
     I3DMETHOD(void, SetSrcBlend)(int blend) = 0;              // 0xB0
@@ -880,7 +880,7 @@ public:
     }
 };
 
-// An object of a model told about a stage (I3D_model::GetUnknownD4; not identified: slot 0
+// An object of a model told about a stage (I3D_model::GetTracks; not identified: slot 0
 // takes the stage, +0xEC holds the frame C_HumanAnimMixer::NotifyFrames looks for: the
 // animation player passes joints of the skeleton).
 class I3D_model_part {
@@ -910,7 +910,7 @@ public:
     I3DMETHOD(void, StopAnimation)(int stage) = 0;            // 0x8C
     // (The first-person view calls it after SetAnimTime(stage, 0) when a shot's animation
     // starts over; meaning not identified.)
-    I3DMETHOD(void, Unknown90)(int stage) = 0;                // 0x90
+    I3DMETHOD(void, StartAnimation)(int stage) = 0;                // 0x90
     // Blend weight of a stage (C_HumanEquipment::InitHolsters saves and restores a stage
     // through 0x94..0xAC; meanings inferred from that use).
     I3DMETHOD(void, SetAnimWeight)(int stage, float weight) = 0;   // 0x94
@@ -929,13 +929,13 @@ public:
     I3D_SLOT(BC);                                             // LS3DF: SetPose
     I3D_SLOT(C0);                                             // LS3DF: SetPoseSetWeight
     // (C_HumanAnimMixer::Init passes 0.)
-    I3DMETHOD(void, SetUnknownC4)(int value) = 0;             // 0xC4
+    I3DMETHOD(void, SetPoseWeight)(int value) = 0;             // 0xC4
     I3D_SLOT(C8);                                             // LS3DF: GetPoseWeight
     I3D_SLOT(CC);                                             // LS3DF: ClearPoses
     // Objects of the model that C_HumanAnimMixer::NotifyFrames tells about a stage: their
     // number and array (not identified; I3D_model_part).
-    I3DMETHOD(int, NumUnknownD0)() = 0;                       // 0xD0
-    I3DMETHOD(class I3D_model_part **, GetUnknownD4)() = 0;   // 0xD4
+    I3DMETHOD(int, NumTracks)() = 0;                       // 0xD0
+    I3DMETHOD(class I3D_model_part **, GetTracks)() = 0;   // 0xD4
     // Copies the mesh, skeleton and animations of another model.
     I3DMETHOD(void, DuplicateModel)(I3D_model *source) = 0;   // 0xD8
 
@@ -972,7 +972,7 @@ public:
     // Inner / outer cone angles (radians) of a directional sound (meaning inferred).
     I3DMETHOD(void, SetCone)(float inner, float outer) = 0;   // 0x84
     // (C_Vehicle::LoadSound passes 0 after SetCone; meaning not identified.)
-    I3DMETHOD(void, Unknown88)(int value) = 0;                // 0x88
+    I3DMETHOD(void, SetOutVolume)(int value) = 0;                // 0x88
     I3DMETHOD(void, SetVolume)(float volume) = 0;             // 0x8C 1.0 = 100 %
     I3DMETHOD(void, SetLoop)(bool loop) = 0;                  // 0x90
     // Starts playing at `position`.
@@ -1050,17 +1050,17 @@ public:
     I3D_SLOT(70);                                             // LS3DF: Load
     I3DMETHOD(void, SetLightType)(int type) = 0;              // 0x74
     // (Not identified: the vehicle's lamps pass 0.769, 0.675, 0.541, a warm white.)
-    I3DMETHOD(void, SetUnknown78)(float a, float b, float c) = 0;   // 0x78
+    I3DMETHOD(void, SetColorRGB)(float a, float b, float c) = 0;   // 0x78
     I3DMETHOD(void, SetColor)(const S_vector &color) = 0;     // 0x7C
     I3DMETHOD(void, SetColor2)(const S_vector &color) = 0;    // 0x80 (second color, not identified)
     // (Not identified: the interface's light gets 1, 1, 1.)
-    I3DMETHOD(void, SetUnknown84)(const S_vector &value) = 0; // 0x84
+    I3DMETHOD(void, SetAmbientColor)(const S_vector &value) = 0; // 0x84
     I3DMETHOD(void, SetPower)(float power) = 0;               // 0x88
-    I3DMETHOD(void, SetUnknown8C)(float value) = 0;           // 0x8C
-    I3DMETHOD(void, SetUnknown90)(float value) = 0;           // 0x90 (the interface's light: 1)
+    I3DMETHOD(void, SetSpecularPower)(float value) = 0;           // 0x8C
+    I3DMETHOD(void, SetAmbientPower)(float value) = 0;           // 0x90 (the interface's light: 1)
     I3DMETHOD(void, SetMode)(uint32_t mode) = 0;              // 0x94
     I3DMETHOD(void, SetRange)(float range) = 0;               // 0x98
-    I3DMETHOD(void, SetUnknown9C)(float a, float b, float c) = 0;   // 0x9C
+    I3DMETHOD(void, SetAttenuation)(float a, float b, float c) = 0;   // 0x9C
     I3D_SLOT(A0);                                             // LS3DF: SetFogRange
     // Spot cone (the vehicle's lamps: 0.52 and 1.22, radians; inferred).
     I3DMETHOD(void, SetCone)(float inner, float outer) = 0;   // 0xA4
@@ -1270,7 +1270,7 @@ public:
     I3DMETHOD(void, RemoveHumanModel)(I3D_frame *model) = 0;  // 0x13C
     I3D_SLOT(140);                                            // LS3DF: ClearTrackedModels
     // Called with a frame just put into the world (meaning not identified).
-    I3DMETHOD(void, Unknown144)(I3D_frame *frame) = 0;        // 0x144
+    I3DMETHOD(void, MarkTrackedModel)(I3D_frame *frame) = 0;        // 0x144
     // Screen rectangle the scene renders into (pixels).
     I3DMETHOD(void, SetViewport)(int left, int top, int right, int bottom) = 0;   // 0x148
 

@@ -482,7 +482,7 @@ int RunGame()
         delete app;
         return -1;
     }
-    GetIGraph()->Unknown108();
+    GetIGraph()->ReadTimer();
     if (!app->Init(false))
         return -1;
 

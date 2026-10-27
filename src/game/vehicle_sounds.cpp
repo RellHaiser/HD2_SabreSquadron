@@ -268,7 +268,7 @@ void C_Vehicle::LoadSound(const char *name, I3D_sound *&slot, uint32_t flags, fl
     }
     slot->SetOn(false);
     slot->SetVolume(1.0f);
-    slot->Unknown88(0);
+    slot->SetOutVolume(0);
     if (loop)
         slot->SetLoop(true);
     if (flags & VEHICLE_SOUND_AMBIENT) {

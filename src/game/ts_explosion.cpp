@@ -301,7 +301,7 @@ void C_TSExplosion::MakeScorch()                        // 0x0060fe50
     scorch->SetDir(S_vector(0.0f, -1.0f, 0.0f), 0.0f);
     scorch->SetScale(S_vector(SCORCH_SCALE, SCORCH_SCALE, SCORCH_SCALE));
     scorch->SetUnknownB4(SCORCH_UNKNOWN_B4);
-    scorch->SetUnknownA4(1);
+    scorch->SetOrthogonal(1);
     scorch->LinkTo(scene->GetSector(pos), 0);
     scorch->Update();
     scorch->SetMode(3);

@@ -668,7 +668,7 @@ void C_BulletShot::InitClient(C_Actor *shooter, const S_vector &pos, const S_vec
     m_step.Zero();
     if (traceModel) {
         I3D_billboard_visual *trace = CreateTrace(traceModel);
-        trace->SetUnknownA4(1.0f);
+        trace->SetLightLevel(1.0f);
         m_visual = trace;
         m_visual->LinkTo(GetScene()->GetDynamicRoot(), 0);
         m_visual->SetOn(false);
@@ -1332,7 +1332,7 @@ void C_MuzzleLight::Init(I3D_frame *muzzle, I3D_frame *flash, int duration)
     m_light->SetColor(S_vector(1.0f, 1.0f, 1.0f));
     m_light->SetPower(1.5f);
     m_light->SetColor2(S_vector(1.0f, 1.0f, 1.0f));
-    m_light->SetUnknown8C(1.0f);
+    m_light->SetSpecularPower(1.0f);
     m_light->SetPosInline(S_vector(0.0f, 0.0f, 0.0f));
 
     m_sector = GetScene()->GetSector(muzzle->GetWorldPos());
@@ -1347,7 +1347,7 @@ void C_MuzzleLight::Init(I3D_frame *muzzle, I3D_frame *flash, int duration)
     }
     m_light->SetRange(4.0f);
     m_light->SetScale(S_vector(1.0f, 1.0f, 1.0f));
-    m_light->SetUnknown9C(0.99f, 0.0f, 0.01f);
+    m_light->SetAttenuation(0.99f, 0.0f, 0.01f);
     m_light->SetOn(true);
     m_light->Update();
 
@@ -1355,7 +1355,7 @@ void C_MuzzleLight::Init(I3D_frame *muzzle, I3D_frame *flash, int duration)
     if (flash) {
         flash->AddRef();
         flash->SetOn(true);
-        flash->SetUnknown50(1.0f);
+        flash->SetHierarchyLightLevel(1.0f);
         flash->Update();
     }
 }
@@ -2163,7 +2163,7 @@ void C_ShotManager::PlayNearMissSound(const S_vector &pos)
 
 // --- decals and blood -------------------------------------------------------------------
 
-S_ShotDecal *C_ShotManager::AllocDecal(bool setUnknownA4)
+S_ShotDecal *C_ShotManager::AllocDecal(bool setOrthogonal)
 {
     if (static_cast<int>(m_decals.size()) == m_maxDecals) {
         S_ShotDecal *oldest = m_decals.front();
@@ -2174,8 +2174,8 @@ S_ShotDecal *C_ShotManager::AllocDecal(bool setUnknownA4)
     decal->visual = static_cast<I3D_projector_visual *>(I3DGetDriver()->CreateVisual(I3DVISUAL_PROJECTOR));
     decal->visual->SetMode(PROJECTOR_MODE_DECAL);
     decal->visual->SetUnknownB4(1);
-    if (setUnknownA4)
-        decal->visual->SetUnknownA4(1);
+    if (setOrthogonal)
+        decal->visual->SetOrthogonal(1);
     return decal;
 }
 
@@ -2226,7 +2226,7 @@ void C_ShotManager::AddBulletDecal(int material, const S_vector &pos, const S_ve
         decal->parentName = "No Parent";
         visual->LinkTo(GetScene()->GetSector(pos), I3DLINK_KEEP_WORLD);
     }
-    visual->SetUnknownA4(1);
+    visual->SetOrthogonal(1);
     visual->Update();
     m_decals.push_back(decal);
 }

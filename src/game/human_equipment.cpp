@@ -1125,7 +1125,7 @@ void C_HumanEquipment::DetachModel(int place)
         }
         movement->RestoreCollision(false);
         m_specialModel->SetPos(pos);
-        scene->Unknown144(ownerFrame);
+        scene->MarkTrackedModel(ownerFrame);
         m_specialModel->Update();
         m_specialModel->Release();
         m_specialModel = nullptr;
@@ -1437,7 +1437,7 @@ void C_HumanEquipment::Unknown7938f0(int time)
     m_specialModel->SetPos(m_handDummy1->GetWorldPos());
     m_specialModel->SetDir(m_handDummy1->GetWorldDir(), 0.0f);
     m_specialModel->Update();
-    GetGame()->GetScene()->Unknown144(m_specialModel);
+    GetGame()->GetScene()->MarkTrackedModel(m_specialModel);
     m_specialModel->LinkTo(m_owner->GetMovement()->GetSectorFrame(), LINK_1);
     m_specialModel->SetOn(m_owner->GetFrame()->IsOn());
     if (m_unknownD0 > 0.0f && time > 0)
@@ -1857,9 +1857,9 @@ void C_HumanEquipment::SetFlashlight(bool on)
         light->SetLightType(I3DLIGHT_POINT);
         light->SetColor(S_vector(0.35f, 0.35f, 0.1f));
         light->SetPower(0.4f);
-        light->SetUnknown8C(0.0f);
-        light->SetUnknown90(0);
-        light->SetUnknown9C(0.3f, 0.0f, 0.0f);
+        light->SetSpecularPower(0.0f);
+        light->SetAmbientPower(0);
+        light->SetAttenuation(0.3f, 0.0f, 0.0f);
         light->SetRange(1.5f);
         light->LinkTo(fire, 0);
         m_flashlightTime = LIGHT_TIME;

@@ -1155,7 +1155,7 @@ bool C_HumanSpecialMoves::Die(S_HumanAnimState *next)
         I3D_frame *model = m_owner->GetFrame();
         I3D_scene *scene = GetGame()->GetScene();
         scene->UpdateFrameSector(model, model->GetWorldPos());
-        GetGame()->GetScene()->Unknown144(m_owner->GetFrame());
+        GetGame()->GetScene()->MarkTrackedModel(m_owner->GetFrame());
     }
     const S_vector4 force = {work->m_request.hitForce.x, work->m_request.hitForce.y, work->m_request.hitForce.z,
                              *reinterpret_cast<const float *>(work->m_request.unknown7C)};

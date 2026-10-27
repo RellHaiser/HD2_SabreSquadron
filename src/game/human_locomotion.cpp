@@ -912,7 +912,7 @@ bool C_HumanLocomotion::MoveOnGround(int time)
                     body->m_visual.SetNetworkPosition(body->m_owner->GetPosition4());
                     body->m_visual.m_sectorTime = 10000;
                     body->m_visual.m_lighting.m_sampleDue = true;
-                    GetGame()->GetScene()->Unknown144(body->m_owner->GetFrame());
+                    GetGame()->GetScene()->MarkTrackedModel(body->m_owner->GetFrame());
                     movement->m_stillTime = 0;
                 }
                 m_positionChanged = true;

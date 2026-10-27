@@ -496,7 +496,7 @@ void C_game::AddAnimatedModel(I3D_frame *frame)     // 0x0069a5b0
         return;
     // Fix: the original takes the reference also when the model has nothing to animate and
     // is not kept, so it is never released.
-    if (model->NumUnknownD0() != 0) {
+    if (model->NumTracks() != 0) {
         m_animatedModels.push_back(model);
         model->AddRef();
     }

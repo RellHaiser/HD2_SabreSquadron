@@ -399,8 +399,8 @@ private:
     void AddExplosionDecal(int material, const S_vector &pos, const S_vector &dir);   // 0x0044fbc0
     void PlayExplosionEffects(int material, int effect, const S_vector &pos, const S_vector &dir);   // 0x00451db0
     // A decal to (re)use: the oldest one when m_maxDecals are shown, else a new one
-    // (`setUnknownA4`: also calls SetUnknownA4(1) on a new one).
-    S_ShotDecal *AllocDecal(bool setUnknownA4);
+    // (`setOrthogonal`: also calls SetOrthogonal(1) on a new one).
+    S_ShotDecal *AllocDecal(bool setOrthogonal);
     // Recycles the bullets and deletes the other shots.
     void RemoveShots();
     // Deletes the client effects (shells go back to their pool).

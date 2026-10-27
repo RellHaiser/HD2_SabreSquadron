@@ -776,13 +776,13 @@ void C_Vehicle::RepairParts(bool healthOnly)                                    
                             CopyPositions(from, to);
                     }
                     auto *visual = static_cast<I3D_object_visual *>(part.frame);
-                    part.mesh->GetLevel(0)->Unknown2C();
+                    part.mesh->GetLevel(0)->ComputeBounds();
                     if (twoLevels)
-                        part.mesh->GetLevel(1)->Unknown2C();
-                    part.mesh->Unknown14();
-                    visual->UnknownAC(0);
+                        part.mesh->GetLevel(1)->ComputeBounds();
+                    part.mesh->ComputeBounds();
+                    visual->RefreshLevel(0);
                     if (twoLevels)
-                        visual->UnknownAC(1);
+                        visual->RefreshLevel(1);
                     part.frame->Update();
                     part.state &= ~VEHICLE_PART_DEFORMED;
                     if (--original.refs == 0) {

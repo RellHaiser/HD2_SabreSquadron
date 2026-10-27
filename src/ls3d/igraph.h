@@ -123,10 +123,10 @@ public:
     I3D_SLOT(D4);                                             // LS3DF: ReservedD4
     I3D_SLOT(D8);                                             // LS3DF: ReservedD8
     // (Meaning not identified; C_GameApp: 1 when a client starts, 0 for the console.)
-    I3DMETHOD(void, UnknownDC)(int on) = 0;                              // 0xDC
+    I3DMETHOD(void, InitMouse)(int on) = 0;                              // 0xDC
     I3D_SLOT(E0);                                             // LS3DF: IsMouseInit
     // (Not identified; C_GameApp::Close on a client.)
-    I3DMETHOD(void, UnknownE4)() = 0;                                    // 0xE4
+    I3DMETHOD(void, CloseMouse)() = 0;                                    // 0xE4
     // Called once per frame before the game update (input/timer housekeeping).
     I3DMETHOD(void, BeginFrame)() = 0;                                   // 0xE8
     // The mouse's movement in this frame, in counts (inferred from the player-driven meleeTracker's
@@ -138,7 +138,7 @@ public:
     I3D_SLOT(FC);                                             // LS3DF: GetMouseX
     I3D_SLOT(100);                                            // LS3DF: GetMouseY
     I3D_SLOT(104);                                            // LS3DF: GetMouseButtons
-    I3DMETHOD(void, Unknown108)() = 0;                                   // 0x108
+    I3DMETHOD(void, ReadTimer)() = 0;                                   // 0x108
     I3D_SLOT(10C);                                            // LS3DF: GetTimer
     // Adds a texture search directory.
     I3DMETHOD(void, AddDir)(const char *dir, uint32_t flags) = 0;        // 0x110

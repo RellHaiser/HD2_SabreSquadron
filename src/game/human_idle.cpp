@@ -405,7 +405,7 @@ void C_HumanIdle::Interact(C_Actor *target, uint32_t interaction, int arg)
                 other->ClearVehicle();
                 other->GetMovement()->SetPosition(pos);
                 // (This human's model, as in the original.)
-                GetGame()->GetScene()->Unknown144(m_owner->GetFrame());
+                GetGame()->GetScene()->MarkTrackedModel(m_owner->GetFrame());
             } else if (previousSeat >= 0) {
                 other->GetMovement()->m_idle.Interact(target, interaction, previousSeat);
             } else {
@@ -948,7 +948,7 @@ void C_HumanIdle::UpdateInteraction(int time)
             ownerMovement->m_visual.SetNetworkPosition(ownerMovement->m_owner->GetPosition4());
             ownerMovement->m_visual.m_sectorTime = 10000;
             ownerMovement->m_visual.m_lighting.m_sampleDue = true;
-            GetGame()->GetScene()->Unknown144(ownerMovement->m_owner->GetFrame());
+            GetGame()->GetScene()->MarkTrackedModel(ownerMovement->m_owner->GetFrame());
             movement->m_seatMode = 0;
             m_locomotion->Land(false);
             m_locomotion->m_waterTransition = 0;
@@ -1016,7 +1016,7 @@ void C_HumanIdle::UpdateInteraction(int time)
                 const S_vector4 to = WorldPos4(exit);
                 const S_vector4 from = WorldPos4(model);
                 movement->m_mixer.AddMove2({to.x - from.x, to.y - from.y, to.z - from.z, 0.0f}, MoveTime(700.0f));
-                GetGame()->GetScene()->Unknown144(model);
+                GetGame()->GetScene()->MarkTrackedModel(model);
                 m_owner->SetPosition(XYZ(from), from.w);
                 movement->m_stillTime = -2000;
             } else {
@@ -1026,7 +1026,7 @@ void C_HumanIdle::UpdateInteraction(int time)
                 flat.Normalize();
                 const S_vector4 from = WorldPos4(model);
                 movement->m_mixer.AddMove2({flat.x * 0.4f, flat.y * 0.4f, flat.z * 0.4f, 0.0f}, MoveTime(700.0f));
-                GetGame()->GetScene()->Unknown144(model);
+                GetGame()->GetScene()->MarkTrackedModel(model);
                 m_owner->SetPosition(XYZ(from), from.w);
             }
             equipment->PutAwayHandsItem(false);

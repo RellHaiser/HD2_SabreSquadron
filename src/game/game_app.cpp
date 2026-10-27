@@ -108,7 +108,7 @@ bool C_GameApp::Init(bool resume)                       // 0x006c0b40
     if (IsStateActive())
         return false;
     if (g_gameRole & GAME_ROLE_CLIENT)
-        GetIGraph()->UnknownDC(1);
+        GetIGraph()->InitMouse(1);
     if (!m_resume) {
         if (!g_gameProfile.Init())
             return false;
@@ -139,7 +139,7 @@ bool C_GameApp::StartFromCommandLine()                  // 0x006c0e10
     if (!script)
         return false;
     // The console alone: the window is hidden.
-    GetIGraph()->UnknownDC(0);
+    GetIGraph()->InitMouse(0);
     ShowWindow(GetIGraph()->GetHWND(), SW_HIDE);
     script += std::strlen(SCRIPT_SWITCH);
     char command[0x108];
@@ -189,7 +189,7 @@ bool C_GameApp::Close()                                 // 0x006c0c40
         m_state = nullptr;
     }
     if (g_gameRole & GAME_ROLE_CLIENT)
-        GetIGraph()->UnknownE4();
+        GetIGraph()->CloseMouse();
     return true;
 }
 
