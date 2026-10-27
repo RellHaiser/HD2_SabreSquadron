@@ -49,7 +49,7 @@ the remaining actor types.
 | `src/net` | The network bit stream and messages |
 | `src/script` | The mission script language |
 | `src/tier1` | Generated code (see above) |
-| `docs` | [Mission scripting language reference](docs/HD2_Mission_Scripting_Language.md) |
+| `docs` | [Mission scripting language reference](docs/HD2_Mission_Scripting_Language.md), [reverse-engineering findings](docs/findings/README.md) (formats, archives, binaries) |
 
 ## Building
 
@@ -62,6 +62,8 @@ cl /nologo /c /std:c++17 /EHsc /W3 /permissive- /Zc:__cplusplus /D_CRT_SECURE_NO
 
 Use an x86 developer prompt (`vcvars32.bat`). `src/tier1` is built with a 32-bit MinGW g++
 (`-std=gnu++17 -m32 -fpermissive`) instead.
+
+The language level is planned to move to C++20; until then, new code should stay valid C++17.
 
 ## Legal
 
