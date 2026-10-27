@@ -113,6 +113,9 @@ All 55 exports are bit-exact against the original under PC_24. MSVC 6's `acos` i
   them at 0.
 - Texture cache files (`*_N.565`, `.DX1` …) are written next to the image's path, as in the
   original.
+- The held key of `IGKEY_REPEAT` starts as key 0, as the original's zero-initialised variable does:
+  the first `GetKey` in repeat mode returns 0. (The port started it at -1 until `compare_input`
+  found the difference.)
 
 ### The S3TC encoder
 
@@ -126,10 +129,14 @@ index array on its first pass; the port starts from zeros (the engine never enco
 
 Kept: Release closes the file on every call; Pause of an Ogg stream is a Stop that keeps the
 decoder position; Bink's SetPosition inverts GetPosition's conversion wrongly (right only for 0);
-the whole-buffer Ogg fill ignores looping; the DirectShow graph is kept across Open calls; the
-volume is 866 · ln(v). Fixed: leaked streaming buffers, notify interfaces, thread and file handles
-on Close and failures; negative `ov_read` counts; a stale "AVI Splitter" pointer;
-`CBaseRenderer::FindPin`'s AddRef through null; empty tile lists.
+the whole-buffer Ogg fill ignores looping; only a refill that wraps past the buffer's end marks the
+end of a non-looping stream (the refill up to the play cursor writes silence without marking it,
+so the stream stops later); the DirectShow graph is kept across Open calls; the volume is
+866 · ln(v). Not copied: Close returns what freeing the Ogg decoder left in EAX (1 with the
+original's C runtime) when there was a decoder; the port returns 0. Fixed: leaked streaming
+buffers, notify interfaces, thread and file handles on Close and failures; negative `ov_read`
+counts; a stale "AVI Splitter" pointer; `CBaseRenderer::FindPin`'s AddRef through null; empty tile
+lists.
 
 The base classes are the DirectX 9 SDK's built without DEBUG. The binary differs from the
 published source in places (SendQuality's proportion in multiples of 1000, isqrt's zero check,

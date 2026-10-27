@@ -85,6 +85,59 @@ def cflags(debug):
             "/I" + SRC, "/I" + os.path.join(ROOT, "include")]
 
 
+# The device seams (docs/render_device.md, sound_device.md, input_device.md, video_device.md): only a
+# backend and the API declarations may name the API's interfaces or include them; the rest of the
+# engine draws through gfx::Device, plays sound through audio::Device, reads input through
+# input::Device and plays videos through video::Device.
+SEAMS = [
+    ("the Direct3D 8 backend", ("dx/", "gfx/d3d8/"),
+     re.compile(r'#include "dx/d3d8\.h"|#include "gfx/d3d8/|\bIDirect3D\w*8\b|\bg_pD3D\b|\bg_pDevice\b')),
+    ("the DirectSound backend", ("dx/", "audio/dsound/"),
+     re.compile(r'#include <dsound\.h>|#include "audio/dsound/|\bIDirectSound\w*|\bIKsPropertySet\b|'
+                r'\bLPDIRECTSOUND\w*|\bDirectSound(Create8|Enumerate\w*)\b')),
+    ("the DirectInput backend", ("dx/", "input/dinput/"),
+     re.compile(r'#include <dinput\.h>|#include "input/dinput/|\bIDirectInput\w*|\bLPDIRECTINPUT\w*|'
+                r'\bDirectInput8Create\b')),
+    # Bink and DirectShow (with the DirectShow base classes, src/dshow, part of the video backend).
+    ("the Windows video backend", ("dx/", "external/", "dshow/", "video/win32/"),
+     re.compile(r'#include <dshow\.h>|#include "external/bink\.h"|#include "dshow/|#include "video/win32/|'
+                r'\bBink[A-Z]\w*\s*\(|\b(IGraphBuilder|IMediaControl|IMediaSeeking|IBasicAudio|IMediaEvent|'
+                r'CTextureRenderer)\b')),
+    # The window, its messages, the cursor, time, threads, locks and events (docs/platform.md). (The
+    # DirectShow base classes keep theirs: they belong to the video backend.)
+    ("the Win32 platform", ("platform/win32/", "dshow/"),
+     re.compile(r'#include <mmsystem\.h>|\b(timeGetTime|GetTickCount|Sleep|CreateWindowExA|RegisterClassExA|'
+                r'DefWindowProcA|PeekMessageA|DispatchMessageA|TranslateMessage|IsDialogMessageA|WaitMessage|'
+                r'SetWindowTextA|SetFocus|UpdateWindow|GetWindowRect|GetSystemMetrics|ClipCursor|SetCursorPos|'
+                r'SystemParametersInfoA|PostQuitMessage|GetForegroundWindow|IsChild|LoadMenuA|LoadCursorA|'
+                r'GetStockObject|GetDesktopWindow|VkKeyScanA|MapVirtualKeyA|CreateThread|SuspendThread|'
+                r'ResumeThread|TerminateThread|SetThreadPriority|WaitForSingleObject|InitializeCriticalSection|'
+                r'DeleteCriticalSection|EnterCriticalSection|LeaveCriticalSection|CreateEventA|CloseHandle|'
+                r'MsgWaitForMultipleObjects)\s*\(')),
+]
+
+
+def check_seams():
+    """Lines outside the backends that use what only a backend may (printed); True when none."""
+    bad = []
+    for d, _, files in os.walk(SRC):
+        for f in files:
+            path = os.path.join(d, f)
+            rel = os.path.relpath(path, SRC).replace("\\", "/")
+            if not f.endswith((".cpp", ".h")):
+                continue
+            lines = list(enumerate(open(path, encoding="utf-8", errors="replace"), 1))
+            for name, allowed, pattern in SEAMS:
+                if rel.startswith(allowed):
+                    continue
+                for n, line in lines:
+                    if pattern.search(line.split("//", 1)[0]):   # (comments may name them)
+                        bad.append("%s(%d): uses %s: %s" % (rel, n, name, line.strip()))
+    for line in bad:
+        print(line)
+    return not bad
+
+
 def compile_one(src, debug):
     rel = os.path.relpath(src, SRC)
     obj = os.path.join(WORK, "obj", re.sub(r"[\\/]", "_", rel)[:-4] + ".obj")
@@ -203,6 +256,8 @@ def main():
         args.remove(only)
     targets = args or ["dll"]
     ok = True
+    if "check" in targets or "dll" in targets:
+        ok &= check_seams()
     if "check" in targets:
         ok &= compile_all(debug, only)[0]
     if "dll" in targets:

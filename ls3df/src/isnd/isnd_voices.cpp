@@ -3,10 +3,9 @@
 
 #include <cstdio>
 
-#include <mmsystem.h>
-
 #include "core/fpu.h"
 #include "i3d/i3d_links.h"
+#include "platform/platform.h"
 
 namespace ls3d::snd {
 
@@ -54,7 +53,7 @@ void UpdateVoices()
 {
     if (g_maxVoices == 0)
         return;
-    const uint32_t now = timeGetTime();
+    const uint32_t now = platform::Milliseconds();
 
     // Voices of one-shot sounds that have played to their end are released.
     for (int i = g_voices.Size(); i != 0;) {
@@ -63,7 +62,7 @@ void UpdateVoices()
         if (voice.loop == 0 && voice.pauseTime == 0) {
             const int length = voice.sound->GetSource()->GetLength();
             if (static_cast<int>(now - voice.pausedTotal - voice.startTime) >= length) {
-                voice.buffer->Stop();
+                audio::g_pAudio->Stop(voice.buffer);
                 g_voices.RemoveAtSwap(i);
             }
         }
@@ -122,8 +121,8 @@ void UpdateVoices()
         playFlags = DSBPLAY_LOOPING;
     }
     added.startTime = now - elapsed;
-    resumed.buffer->SetCurrentPosition(static_cast<DWORD>(MsToBufferOffset(source, elapsed)));
-    resumed.buffer->Play(0, 0, playFlags);
+    audio::g_pAudio->SetCurrentPosition(resumed.buffer, static_cast<DWORD>(MsToBufferOffset(source, elapsed)));
+    audio::g_pAudio->Play(resumed.buffer, 0, 0, playFlags);
     g_suspendedVoices.RemoveAtSwap(best);
 }
 
@@ -134,7 +133,7 @@ void DrawStats()
     for (int i = 0; i < g_voices.Size(); ++i) {
         const S_voice &voice = g_voices[i];
         // (The pause time is measured with GetTickCount here, timeGetTime everywhere else.)
-        const uint32_t paused = voice.pauseTime ? GetTickCount() - voice.pauseTime : 0;
+        const uint32_t paused = voice.pauseTime ? platform::TickCount() - voice.pauseTime : 0;
         ISND_sound *sound = voice.sound;
         const float frequency = sound->frequency;
         const float volume = sound->volume;

@@ -1,22 +1,27 @@
-// IGraph: DirectInput keyboard and mouse, typed characters, timing (0x1006f040 - 0x1006fbd0).
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
-
+// IGraph: the keyboard and mouse (DirectInput through the input device, input/input.h), typed
+// characters, timing (0x1006f040 - 0x1006fbd0).
 #include <cstring>
 
 #include "core/debug.h"
 #include "core/i3d_result.h"
 #include "igraph/igraph.h"
 #include "igraph/igraph_state.h"
+#include "input/input.h"
+#include "platform/platform.h"
 
 using namespace ls3d;
 using namespace ls3d::ig;
 
+namespace ls3d::ig {
+
+input::System *g_dinput = nullptr;
+
+}  // namespace ls3d::ig
+
 namespace {
 
-IDirectInput8A *g_dinput = nullptr;             // 0x100d1d0c
-IDirectInputDevice8A *g_keyboard = nullptr;     // 0x100d19c8
-IDirectInputDevice8A *g_mouse = nullptr;        // 0x100d2148
+input::Peripheral *g_keyboard = nullptr;        // 0x100d19c8
+input::Peripheral *g_mouse = nullptr;           // 0x100d2148
 bool g_keyboardInit = false;                    // 0x100d2196
 bool g_mouseInit = false;                       // 0x100d2197
 uint32_t g_keyboardFlags = 0;                   // 0x100d173c IGKEY_*
@@ -34,8 +39,10 @@ int g_messageKey = 0;                           // 0x100d1a8c
 int g_messageChar = 0;                          // 0x100d212c
 int g_lastKeyChar = 0;                          // 0x100d1a80 GetKeyChar
 
-// IGKEY_REPEAT: the held key, when it was pressed and when it last repeated.
-int g_repeatKey = -1;                           // 0x100d1d60
+// IGKEY_REPEAT: the held key (-1: none), when it was pressed and when it last repeated. (Key 0 at
+// start, as in the original, whose variable is zero-initialised: the first GetKey with IGKEY_REPEAT
+// finds key 0 up, clears it and returns 0.)
+int g_repeatKey = 0;                            // 0x100d1d60
 DWORD g_repeatStart = 0;                        // 0x100d21cc
 DWORD g_repeatLast = 0;                         // 0x100d21d0
 
@@ -95,14 +102,13 @@ void ResetInputState()
 
 HRESULT InitDirectInput(HINSTANCE instance)
 {
-    return DirectInput8Create(instance, DIRECTINPUT_VERSION, IID_IDirectInput8A, reinterpret_cast<void **>(&g_dinput),
-                              nullptr);
+    return input::g_pInput->Create(instance, &g_dinput);
 }
 
 void ReleaseDirectInput()
 {
     if (g_dinput) {
-        g_dinput->Release();
+        input::g_pInput->Release(g_dinput);
         g_dinput = nullptr;
     }
 }
@@ -133,44 +139,12 @@ void QueueChar(int ch)
     }
 }
 
-// ProcessWinMessages with IGKEY_WINDOW_MESSAGES: arrows and delete from WM_KEYDOWN, the rest
-// from WM_CHAR (DirectInput codes).
-void KeyFromMessage(const MSG &msg)
+// ProcessWinMessages with IGKEY_WINDOW_MESSAGES: the platform turns the window's key messages into
+// DirectInput codes (platform/win32).
+void KeyMessage(int key, int ch)
 {
-    if (msg.message == WM_KEYDOWN) {
-        switch (msg.wParam) {
-        case VK_LEFT: g_messageKey = DIK_LEFT; g_messageChar = 0; break;
-        case VK_UP: g_messageKey = DIK_UP; g_messageChar = 0; break;
-        case VK_RIGHT: g_messageKey = DIK_RIGHT; g_messageChar = 0; break;
-        case VK_DOWN: g_messageKey = DIK_DOWN; g_messageChar = 0; break;
-        case VK_DELETE: g_messageKey = DIK_DELETE; g_messageChar = 0; break;
-        }
-    } else if (msg.message == WM_CHAR && static_cast<LONG>(msg.lParam) >= 0) {
-        switch (msg.wParam) {
-        case 8:
-            g_messageKey = DIK_BACK;
-            g_messageChar = 8;
-            break;
-        case 9:
-            g_messageKey = DIK_TAB;
-            g_messageChar = 9;
-            break;
-        case 0x1b:
-            g_messageKey = DIK_ESCAPE;
-            g_messageChar = 0x1b;
-            break;
-        default: {
-            const SHORT vk = VkKeyScanA(static_cast<CHAR>(msg.wParam));
-            if (vk == -1) {
-                g_messageKey = 0;
-                g_messageChar = 0;
-            } else {
-                g_messageKey = static_cast<int>(MapVirtualKeyA(vk & 0xff, 0));
-                g_messageChar = static_cast<int>(msg.wParam);
-            }
-        }
-        }
-    }
+    g_messageKey = key;
+    g_messageChar = ch;
 }
 
 }  // namespace ls3d::ig
@@ -180,24 +154,24 @@ HRESULT __stdcall IGraph::InitKeyboard(uint32_t flags)
 {
     CloseKeyboard();
     g_keyboardFlags = flags;
-    HRESULT hr = g_dinput->CreateDevice(GUID_SysKeyboard, &g_keyboard, nullptr);
+    HRESULT hr = input::g_pInput->CreateDevice(g_dinput, GUID_SysKeyboard, &g_keyboard);
     if (hr < 0) {
         LogDxError(hr, 0x105a);
         return I3DERR_GENERIC;
     }
-    hr = g_keyboard->SetDataFormat(&c_dfDIKeyboard);
+    hr = input::g_pInput->SetDataFormat(g_keyboard, &c_dfDIKeyboard);
     if (hr < 0) {
         LogDxError(hr, 0x105d);
         return I3DERR_GENERIC;
     }
-    hr = g_keyboard->SetCooperativeLevel(g_mainWnd, (g_keyboardFlags & IGKEY_EXCLUSIVE)
-                                                         ? DISCL_EXCLUSIVE | DISCL_FOREGROUND
-                                                         : DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
+    const DWORD level = (g_keyboardFlags & IGKEY_EXCLUSIVE) ? DISCL_EXCLUSIVE | DISCL_FOREGROUND
+                                                            : DISCL_NONEXCLUSIVE | DISCL_FOREGROUND;
+    hr = input::g_pInput->SetCooperativeLevel(g_keyboard, g_mainWnd, level);
     if (hr < 0) {
         LogDxError(hr, 0x1067);
         return I3DERR_GENERIC;
     }
-    g_keyboard->Acquire();
+    input::g_pInput->Acquire(g_keyboard);
     g_keyboardInit = true;
     ReadKeyboard();
     std::memcpy(g_prevKeys, g_keys, sizeof g_keys);
@@ -219,8 +193,8 @@ HRESULT __stdcall IGraph::CloseKeyboard()
 {
     HRESULT result = 0;
     if (g_keyboard) {
-        g_keyboard->Unacquire();
-        result = static_cast<HRESULT>(g_keyboard->Release());
+        input::g_pInput->Unacquire(g_keyboard);
+        result = static_cast<HRESULT>(input::g_pInput->Release(g_keyboard));
         g_keyboard = nullptr;
     }
     g_keyboardInit = false;
@@ -234,10 +208,10 @@ HRESULT __stdcall IGraph::ReadKeyboard()
         return I3DERR_NOTINITIALIZED;
     std::memcpy(g_prevKeys, g_keys, sizeof g_keys);
     std::memset(g_keys, 0, sizeof g_keys);
-    if (g_keyboard->GetDeviceState(sizeof g_keys, g_keys) < 0) {
-        while (g_keyboard->Acquire() == DIERR_INPUTLOST)
+    if (input::g_pInput->GetDeviceState(g_keyboard, sizeof g_keys, g_keys) < 0) {
+        while (input::g_pInput->Acquire(g_keyboard) == DIERR_INPUTLOST)
             ProcessWinMessages();
-        if (g_keyboard->GetDeviceState(sizeof g_keys, g_keys) < 0)
+        if (input::g_pInput->GetDeviceState(g_keyboard, sizeof g_keys, g_keys) < 0)
             std::memset(g_keys, 0, sizeof g_keys);
         return 0;
     }
@@ -285,7 +259,7 @@ int __stdcall IGraph::GetKey()
             g_lastKeyChar = KeyToChar(key, GetShiftKeys(false) & (IGSHIFT_SHIFT | IGSHIFT_CTRL | IGSHIFT_ALT));
             if (g_keyboardFlags & IGKEY_REPEAT) {
                 g_repeatKey = key;
-                g_repeatStart = timeGetTime();
+                g_repeatStart = platform::Milliseconds();
                 g_repeatLast = 0;
             }
             return key;
@@ -296,7 +270,7 @@ int __stdcall IGraph::GetKey()
                 g_repeatKey = -1;
                 return 0;
             }
-            const DWORD now = timeGetTime();
+            const DWORD now = platform::Milliseconds();
             const bool due = g_repeatLast ? static_cast<int>(now - g_repeatLast) > 34
                                           : static_cast<int>(now - g_repeatStart) > 350;
             if (due) {
@@ -405,7 +379,7 @@ const wchar_t *__stdcall IGraph::GetKeyName(int key)
     g_keyName.diph.dwHeaderSize = sizeof g_keyName.diph;
     g_keyName.diph.dwObj = static_cast<DWORD>(key);
     g_keyName.diph.dwHow = DIPH_BYOFFSET;
-    return g_keyboard->GetProperty(DIPROP_KEYNAME, &g_keyName.diph) ? nullptr : g_keyName.wsz;
+    return input::g_pInput->GetProperty(g_keyboard, DIPROP_KEYNAME, &g_keyName.diph) ? nullptr : g_keyName.wsz;
 }
 
 // 0x1006f710
@@ -423,25 +397,25 @@ int __stdcall IGraph::InitMouse(int mode)
                  0x80);
     }
     CloseMouse();
-    HRESULT hr = g_dinput->CreateDevice(GUID_SysMouse, &g_mouse, nullptr);
+    HRESULT hr = input::g_pInput->CreateDevice(g_dinput, GUID_SysMouse, &g_mouse);
     if (hr < 0) {
         LogDxError(hr, 0x1399);
         return I3DERR_GENERIC;
     }
     g_mouseCaps.dwSize = sizeof g_mouseCaps;
-    g_mouse->GetCapabilities(&g_mouseCaps);
-    hr = g_mouse->SetDataFormat(&c_dfDIMouse2);
+    input::g_pInput->GetCapabilities(g_mouse, &g_mouseCaps);
+    hr = input::g_pInput->SetDataFormat(g_mouse, &c_dfDIMouse2);
     if (hr < 0) {
         LogDxError(hr, 0x13a2);
         return I3DERR_GENERIC;
     }
-    hr = g_mouse->SetCooperativeLevel(g_mainWnd, mode ? DISCL_EXCLUSIVE | DISCL_FOREGROUND
-                                                      : DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
+    hr = input::g_pInput->SetCooperativeLevel(g_mouse, g_mainWnd, mode ? DISCL_EXCLUSIVE | DISCL_FOREGROUND
+                                                                       : DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
     if (hr < 0) {
         LogDxError(hr, 0x13ac);
         return I3DERR_GENERIC;
     }
-    g_mouse->Acquire();
+    input::g_pInput->Acquire(g_mouse);
     g_mouseMode = mode;
     g_mouseInit = true;
     return 0;
@@ -457,8 +431,8 @@ bool __stdcall IGraph::IsMouseInit()
 HRESULT __stdcall IGraph::CloseMouse()
 {
     if (g_mouse) {
-        g_mouse->Unacquire();
-        g_mouse->Release();
+        input::g_pInput->Unacquire(g_mouse);
+        input::g_pInput->Release(g_mouse);
         g_mouse = nullptr;
     }
     std::memset(&g_mouseState, 0, sizeof g_mouseState);
@@ -471,9 +445,9 @@ HRESULT __stdcall IGraph::ReadMouse()
 {
     if (!g_mouse)
         return I3DERR_NOTINITIALIZED;
-    if (g_mouse->GetDeviceState(sizeof g_mouseState, &g_mouseState) < 0) {
-        g_mouse->Acquire();
-        if (g_mouse->GetDeviceState(sizeof g_mouseState, &g_mouseState) < 0) {
+    if (input::g_pInput->GetDeviceState(g_mouse, sizeof g_mouseState, &g_mouseState) < 0) {
+        input::g_pInput->Acquire(g_mouse);
+        if (input::g_pInput->GetDeviceState(g_mouse, sizeof g_mouseState, &g_mouseState) < 0) {
             std::memset(&g_mouseState, 0, sizeof g_mouseState);
             return I3DERR_GENERIC;
         }
@@ -521,22 +495,14 @@ int __stdcall IGraph::SetMousePos(int x, int y)
     if (g_mouseMode != 0)
         return g_mouseMode;
     if (!(g_init.flags & IG_FULLSCREEN)) {
-        RECT rc;
-        if (g_init.flags & IG_CHILD_WINDOW) {
-            GetWindowRect(g_childWnd, &rc);
-        } else {
-            GetWindowRect(g_mainWnd, &rc);
-            const int frameX = GetSystemMetrics(SM_CXFIXEDFRAME);
-            const int frameY = GetSystemMetrics(SM_CYFIXEDFRAME);
-            const int caption = GetSystemMetrics(SM_CYCAPTION);
-            const int menu = (g_init.flags & IG_MENU) ? GetSystemMetrics(SM_CYMENU) : 0;
-            rc.left += frameX;
-            rc.top += menu + caption + frameY;
-        }
-        x += rc.left;
-        y += rc.top;
+        // The client area's top left: the child window's own, the main window's after its frame.
+        const bool child = (g_init.flags & IG_CHILD_WINDOW) != 0;
+        const bool withMenu = (g_init.flags & IG_MENU) != 0;
+        const POINT origin = platform::ClientOrigin(child ? g_childWnd : g_mainWnd, !child, withMenu);
+        x += origin.x;
+        y += origin.y;
     }
-    return SetCursorPos(x, y);
+    return platform::SetCursorPosition(x, y);
 }
 
 // 0x1006fb10
@@ -569,7 +535,7 @@ uint32_t __stdcall IGraph::GetMouseButtons()
 // 0x1006fb70
 DWORD __stdcall IGraph::ReadTimer()
 {
-    g_lastTime = timeGetTime();
+    g_lastTime = platform::Milliseconds();
     return g_lastTime;
 }
 
@@ -580,7 +546,7 @@ DWORD __stdcall IGraph::GetTimer(DWORD minMs, DWORD maxMs)
     ReadTimer();
     const DWORD elapsed = g_lastTime - before;
     if (elapsed < minMs) {
-        Sleep(minMs - elapsed);
+        platform::Pause(minMs - elapsed);
         g_lastTime += minMs - elapsed;
         return minMs;
     }

@@ -9,10 +9,12 @@
 #include <new>
 
 #include "core/debug.h"
+#include "core/enhance.h"
 #include "core/i3d_result.h"
 #include "external/rw_data.h"
 #include "igraph/igraph.h"
 #include "igraph/igraph_state.h"
+#include "igraph/mip_filter.h"
 
 using namespace ls3d;
 using namespace ls3d::ig;
@@ -95,7 +97,8 @@ void FitTextureSize(uint16_t width, uint16_t height, uint32_t flags, uint16_t *o
 }
 
 // The name of a texture's cache file: the source path without its extension, the opacity map's
-// name (DXT3), the level count, 'L' for ITC_HALF and ".DX<kind>" / ".565" / ".555".
+// name (DXT3), the level count, 'L' for ITC_HALF, 'G' for the port's improved mip levels and
+// ".DX<kind>" / ".565" / ".555".
 void CacheFileName(const ITexture *texture, const char *fileName, const char *alphaFileName, int kind,
                    bool dxt, char *out)
 {
@@ -111,6 +114,9 @@ void CacheFileName(const ITexture *texture, const char *fileName, const char *al
     std::strcat(buf, levels);
     if (texture->flags & ITC_HALF)
         std::strcat(buf, "L");
+    // (Port enhancement: levels from tex::DownsampleMip are cached apart from the original's.)
+    if (Enhancements().mipmaps && texture->levels > 1)
+        std::strcat(buf, "G");
     std::strcat(buf, ".");
     const size_t n = std::strlen(buf);
     if (dxt) {
@@ -132,16 +138,16 @@ void ReadLevels(ITexture *texture, int file)
 {
     texture->memorySize = 0;
     for (int level = 0; level < texture->levels; ++level) {
-        IDirect3DSurface8 *surface;
-        texture->d3dTexture->GetSurfaceLevel(level, &surface);
+        gfx::Surface *surface;
+        gfx::g_pGfx->GetSurfaceLevel(texture->deviceTexture, level, &surface);
         D3DSURFACE_DESC desc;
-        surface->GetDesc(&desc);
+        gfx::g_pGfx->GetDesc(surface, &desc);
         texture->memorySize += desc.Size;
         D3DLOCKED_RECT lr;
-        surface->LockRect(&lr, nullptr, 0);
+        gfx::g_pGfx->LockRect(surface, &lr, nullptr, 0);
         dtaRead(file, lr.pBits, desc.Size);
-        surface->UnlockRect();
-        surface->Release();
+        gfx::g_pGfx->UnlockRect(surface);
+        gfx::g_pGfx->Release(surface);
     }
 }
 
@@ -217,23 +223,23 @@ void WriteCache(ITexture *texture, const char *name, const char magic[4], uint16
     if (alphaTime)
         dtaWrite(file, alphaTime, 8);
     for (int level = 0; level < texture->levels; ++level) {
-        IDirect3DSurface8 *surface;
+        gfx::Surface *surface;
         D3DSURFACE_DESC desc;
         D3DLOCKED_RECT lr;
-        if (texture->d3dTexture->GetSurfaceLevel(level, &surface) < 0) {
+        if (gfx::g_pGfx->GetSurfaceLevel(texture->deviceTexture, level, &surface) < 0) {
             dtaClose(file);
             dbgPrintf("ITexture::Create() - Can't create %s !!!", name);
             return;
         }
-        if (surface->GetDesc(&desc) < 0 || surface->LockRect(&lr, nullptr, 0) < 0) {
-            surface->Release();                 // (the original leaks the surface here)
+        if (gfx::g_pGfx->GetDesc(surface, &desc) < 0 || gfx::g_pGfx->LockRect(surface, &lr, nullptr, 0) < 0) {
+            gfx::g_pGfx->Release(surface);      // (the original leaks the surface here)
             dtaClose(file);
             dbgPrintf("ITexture::Create() - Can't create %s !!!", name);
             return;
         }
         dtaWrite(file, lr.pBits, desc.Size);
-        surface->UnlockRect();
-        surface->Release();
+        gfx::g_pGfx->UnlockRect(surface);
+        gfx::g_pGfx->Release(surface);
     }
     dtaClose(file);
 }
@@ -333,7 +339,7 @@ uint32_t KeyColor(D3DFORMAT format, uint8_t r, uint8_t g, uint8_t b, bool *known
 // 0x10073720 (The original leaves the size, format, color key, level count and stream record
 // unset until Create; the port starts them at 0.)
 ITexture::ITexture()
-    : id(0), pad06(0), d3dTexture(nullptr), lockedSurface(nullptr), loaded(false), refCount(1), fileName(nullptr),
+    : id(0), pad06(0), deviceTexture(nullptr), lockedSurface(nullptr), loaded(false), refCount(1), fileName(nullptr),
       alphaFileName(nullptr), width(0), height(0), format(D3DFMT_UNKNOWN), flags(0), requestedFlags(0), colorKey(0),
       pixels(nullptr), levels(0), pad3A(0), memorySize(0), stream(nullptr)
 {
@@ -398,15 +404,15 @@ HRESULT __stdcall ITexture::Duplicate(const ITexture *source)
     memorySize = source->memorySize;
     // (format is not copied, as in the original.)
     D3DSURFACE_DESC desc;
-    source->d3dTexture->GetLevelDesc(0, &desc);
-    g_pDevice->CreateTexture(width, height, levels, 0, desc.Format, D3DPOOL_MANAGED, &d3dTexture);
+    gfx::g_pGfx->GetLevelDesc(source->deviceTexture, 0, &desc);
+    gfx::g_pGfx->CreateTexture(width, height, levels, 0, desc.Format, D3DPOOL_MANAGED, &deviceTexture);
     for (int level = levels; level--;) {
-        IDirect3DSurface8 *from, *to;
-        source->d3dTexture->GetSurfaceLevel(level, &from);
-        d3dTexture->GetSurfaceLevel(level, &to);
-        g_pDevice->CopyRects(from, nullptr, 0, to, nullptr);
-        from->Release();
-        to->Release();
+        gfx::Surface *from, *to;
+        gfx::g_pGfx->GetSurfaceLevel(source->deviceTexture, level, &from);
+        gfx::g_pGfx->GetSurfaceLevel(deviceTexture, level, &to);
+        gfx::g_pGfx->CopyRects(from, nullptr, 0, to, nullptr);
+        gfx::g_pGfx->Release(from);
+        gfx::g_pGfx->Release(to);
     }
     AddToList(g_uncachedTextures, this);
     loaded = true;
@@ -462,7 +468,7 @@ HRESULT __stdcall ITexture::Close()
     if (flags & ITC_STREAMED) {
         tex::StreamRemove(this);
         stream = nullptr;
-        d3dTexture = nullptr;                   // (a staging texture of the thread's pools)
+        deviceTexture = nullptr;                // (a staging texture of the thread's pools)
     }
     ::operator delete(pixels);
     pixels = nullptr;
@@ -479,9 +485,9 @@ HRESULT __stdcall ITexture::Close()
     g_cachedTextures.RemoveSwap(this);
     g_uncachedTextures.RemoveSwap(this);
     HRESULT refs = 0;
-    if (d3dTexture) {
-        refs = static_cast<HRESULT>(d3dTexture->Release());
-        d3dTexture = nullptr;
+    if (deviceTexture) {
+        refs = static_cast<HRESULT>(gfx::g_pGfx->Release(deviceTexture));
+        deviceTexture = nullptr;
     }
     loaded = false;
     return refs;
@@ -492,9 +498,9 @@ void *__stdcall ITexture::Lock(const RECT *rect, int *pitch, int level)
 {
     if (lockedSurface)
         return nullptr;
-    d3dTexture->GetSurfaceLevel(level & 0xffff, &lockedSurface);
+    gfx::g_pGfx->GetSurfaceLevel(deviceTexture, level & 0xffff, &lockedSurface);
     D3DLOCKED_RECT lr;
-    lockedSurface->LockRect(&lr, rect, 0);
+    gfx::g_pGfx->LockRect(lockedSurface, &lr, rect, 0);
     *pitch = lr.Pitch;
     return lr.pBits;
 }
@@ -503,8 +509,8 @@ void *__stdcall ITexture::Lock(const RECT *rect, int *pitch, int level)
 HRESULT __stdcall ITexture::Unlock()
 {
     if (lockedSurface) {
-        lockedSurface->UnlockRect();
-        lockedSurface->Release();
+        gfx::g_pGfx->UnlockRect(lockedSurface);
+        gfx::g_pGfx->Release(lockedSurface);
         lockedSurface = nullptr;
     }
     return 0;
@@ -515,15 +521,15 @@ HRESULT __stdcall ITexture::Preload()
 {
     const bool scene = g_inScene;
     if (!scene)
-        g_pDevice->BeginScene();
+        gfx::g_pGfx->BeginScene();
     if (g_rs.vertexShader != 6) {
         g_rs.vertexShader = 6;
-        g_pDevice->SetVertexShader(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1);
+        gfx::g_pGfx->SetVertexShader(D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1);
     }
-    g_pDevice->SetTexture(0, d3dTexture);
-    g_pDevice->DrawPrimitiveUP(D3DPT_POINTLIST, 1, &g_preloadPoint, sizeof(S_tlVertex));
+    gfx::g_pGfx->SetTexture(0, deviceTexture);
+    gfx::g_pGfx->DrawPrimitiveUP(D3DPT_POINTLIST, 1, &g_preloadPoint, sizeof(S_tlVertex));
     if (!scene)
-        g_pDevice->EndScene();
+        gfx::g_pGfx->EndScene();
     return 0;
 }
 
@@ -531,7 +537,7 @@ HRESULT __stdcall ITexture::Preload()
 bool __stdcall ITexture::Fill(const RECT *rect, D3DCOLOR color, int level)
 {
     D3DSURFACE_DESC desc;
-    if (d3dTexture->GetLevelDesc(level & 0xffff, &desc) < 0)
+    if (gfx::g_pGfx->GetLevelDesc(deviceTexture, level & 0xffff, &desc) < 0)
         return false;
     int pitch;
     uint8_t *bits = static_cast<uint8_t *>(Lock(rect, &pitch, level));
@@ -603,12 +609,12 @@ bool __stdcall ITexture::DrawRect(int left, int top, int right, int bottom, D3DC
     g_rectQuad[3].y = g_rectQuad[2].y;
     g_rectQuad[3].diffuse = bottomRight;
     g_pIGraph->SetTexture(this, 0);
-    g_pDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
-    g_pDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
+    gfx::g_pGfx->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
+    gfx::g_pGfx->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
     if (g_pIGraph->DrawPrimitive(IGP_TRIANGLESTRIP, 2, g_rectQuad, IGV_TRANSFORMED) < 0)
         return false;
-    g_pDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
-    g_pDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
+    gfx::g_pGfx->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
+    gfx::g_pGfx->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
     return true;
 }
 
@@ -629,12 +635,12 @@ bool __stdcall ITexture::Draw(int x, int y)
     g_drawQuad[3].x = static_cast<float>(width) + g_drawQuad[0].x;
     g_drawQuad[3].y = static_cast<float>(height) + g_drawQuad[0].y;
     g_pIGraph->SetTexture(this, 0);
-    g_pDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
-    g_pDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
+    gfx::g_pGfx->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
+    gfx::g_pGfx->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
     if (g_pIGraph->DrawPrimitive(IGP_TRIANGLESTRIP, 2, g_drawQuad, IGV_TRANSFORMED) < 0)
         return false;
-    g_pDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
-    g_pDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
+    gfx::g_pGfx->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_WRAP);
+    gfx::g_pGfx->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_WRAP);
     return true;
 }
 
@@ -791,22 +797,22 @@ HRESULT ITexture::CreateFromDds(const char *name)
     } else {
         return unsupported();
     }
-    if (g_pDevice->CreateTexture(width, height, levels, 0, format, D3DPOOL_MANAGED, &d3dTexture) < 0) {
+    if (gfx::g_pGfx->CreateTexture(width, height, levels, 0, format, D3DPOOL_MANAGED, &deviceTexture) < 0) {
         dtaClose(file);
         return I3DERR_GENERIC;
     }
     memorySize = 0;
     for (int level = 0; level < levels; ++level) {
-        IDirect3DSurface8 *surface;
+        gfx::Surface *surface;
         D3DSURFACE_DESC desc;
         D3DLOCKED_RECT lr;
-        if (d3dTexture->GetSurfaceLevel(level, &surface) < 0) {
+        if (gfx::g_pGfx->GetSurfaceLevel(deviceTexture, level, &surface) < 0) {
             dtaClose(file);
             Close();
             return I3DERR_GENERIC;
         }
-        if (surface->GetDesc(&desc) < 0 || surface->LockRect(&lr, nullptr, 0) < 0) {
-            surface->Release();                 // (leaked by the original)
+        if (gfx::g_pGfx->GetDesc(surface, &desc) < 0 || gfx::g_pGfx->LockRect(surface, &lr, nullptr, 0) < 0) {
+            gfx::g_pGfx->Release(surface);      // (leaked by the original)
             dtaClose(file);
             Close();
             return I3DERR_GENERIC;
@@ -816,8 +822,8 @@ HRESULT ITexture::CreateFromDds(const char *name)
         if (level == 0 && (flags & ITC_KEEP_PIXELS)) {
             pixels = static_cast<uint8_t *>(::operator new(static_cast<size_t>(width) * height * 4, std::nothrow));
             if (!pixels) {
-                surface->UnlockRect();
-                surface->Release();
+                gfx::g_pGfx->UnlockRect(surface);
+                gfx::g_pGfx->Release(surface);
                 dtaClose(file);
                 Close();
                 return I3DERR_OUTOFMEM;
@@ -827,8 +833,8 @@ HRESULT ITexture::CreateFromDds(const char *name)
             if (flags & ITC_PIXEL_MASK) {
                 uint8_t *mask = MakeAlphaMask(pixels, width * height);
                 if (!mask) {
-                    surface->UnlockRect();
-                    surface->Release();
+                    gfx::g_pGfx->UnlockRect(surface);
+                    gfx::g_pGfx->Release(surface);
                     dtaClose(file);
                     Close();
                     return I3DERR_OUTOFMEM;
@@ -837,8 +843,8 @@ HRESULT ITexture::CreateFromDds(const char *name)
                 pixels = mask;
             }
         }
-        surface->UnlockRect();
-        surface->Release();
+        gfx::g_pGfx->UnlockRect(surface);
+        gfx::g_pGfx->Release(surface);
     }
     dtaClose(file);
     AddToList((flags & ITC_NOCACHE) ? g_uncachedTextures : g_cachedTextures, this);
@@ -989,6 +995,11 @@ HRESULT ITexture::CreateFromImage(const char *name, const char *alphaName, int w
         }
     }
 
+    // (Port enhancement, LS3DF.ini TrueColorTextures: a texture from an image file in A8R8G8B8.
+    // Not empty or memory textures: their owners may write pixels in the format they asked for.)
+    if (Enhancements().trueColorTextures && name && !(flags & ITC_FROM_MEMORY))
+        flags |= ITC_TRUECOLOR;
+
     // ---- the texture format; `kind`: 0 uncompressed, 1 DXT1, 2 DXT1 with 1-bit alpha, 3 DXT3
     D3DFORMAT staging = D3DFMT_UNKNOWN;         // the uncompressed format compressed from
     int kind = 0;
@@ -1029,12 +1040,13 @@ HRESULT ITexture::CreateFromImage(const char *name, const char *alphaName, int w
     format = fmt;
     const int wantLevels = static_cast<uint16_t>((flags & ITC_MIPMAP) ? levelsParam : 1);
     // (The original does not check this call.)
-    if (g_pDevice->CreateTexture(width, height, wantLevels, 0, fmt, D3DPOOL_MANAGED, &d3dTexture) < 0 || !d3dTexture) {
+    if (gfx::g_pGfx->CreateTexture(width, height, wantLevels, 0, fmt, D3DPOOL_MANAGED, &deviceTexture) < 0 ||
+        !deviceTexture) {
         Close();
         freeImages();
         return I3DERR_GENERIC;
     }
-    levels = static_cast<uint16_t>(d3dTexture->GetLevelCount());
+    levels = static_cast<uint16_t>(gfx::g_pGfx->GetLevelCount(deviceTexture));
 
     auto finishFromCache = [&]() {
         loaded = true;
@@ -1219,48 +1231,75 @@ HRESULT ITexture::CreateFromImage(const char *name, const char *alphaName, int w
         }
         std::memset(next, 0, static_cast<size_t>(width) * height * 2);
     }
-    IDirect3DTexture8 *stage = nullptr;
+    // (Port enhancement, LS3DF.ini ImprovedMipmaps: the levels from tex::DownsampleMip; those of
+    // a colour-keyed texture, drawn alpha-tested, uploaded with their alpha rescaled to level 0's
+    // coverage at IGraph's reference, from a copy: the next level is made from the unscaled one.)
+    const bool improvedMips = Enhancements().mipmaps && cur;
+    const int coverageRef = improvedMips && (flags & ITC_ALPHA_1BIT) && g_rs.alphaRef > 0
+                                ? (g_rs.alphaRef < 255 ? g_rs.alphaRef : 255)
+                                : 0;
+    const double coverage = coverageRef ? tex::AlphaCoverage(pixels, width, height, coverageRef) : 0.0;
+    uint8_t *scaled = nullptr;
+    if (coverageRef) {
+        scaled = static_cast<uint8_t *>(::operator new(static_cast<size_t>(width) * height * 2, std::nothrow));
+        if (!scaled) {
+            Close();
+            ::operator delete(cur);
+            ::operator delete(next);
+            return I3DERR_OUTOFMEM;
+        }
+    }
+    gfx::Texture *stage = nullptr;
     auto fail = [&](HRESULT hr) {
         if (stage)
-            stage->Release();
+            gfx::g_pGfx->Release(stage);
         Close();
         ::operator delete(cur);
         ::operator delete(next);
+        ::operator delete(scaled);
         return hr;
     };
     if (!(flags & ITC_EMPTY) && staging) {
-        if (g_pDevice->CreateTexture(width, height, wantLevels, 0, staging, D3DPOOL_MANAGED, &stage) < 0)
+        if (gfx::g_pGfx->CreateTexture(width, height, wantLevels, 0, staging, D3DPOOL_MANAGED, &stage) < 0)
             return fail(I3DERR_GENERIC);
     }
     for (int level = 0; level < levels; ++level) {
-        IDirect3DSurface8 *surface;
-        if (d3dTexture->GetSurfaceLevel(level, &surface) < 0)
+        gfx::Surface *surface;
+        if (gfx::g_pGfx->GetSurfaceLevel(deviceTexture, level, &surface) < 0)
             return fail(I3DERR_GENERIC);
         D3DSURFACE_DESC desc;
-        if (surface->GetDesc(&desc) < 0) {
-            surface->Release();
+        if (gfx::g_pGfx->GetDesc(surface, &desc) < 0) {
+            gfx::g_pGfx->Release(surface);
             return fail(I3DERR_GENERIC);
         }
         memorySize += desc.Size;
         if (!(flags & ITC_EMPTY)) {
             const uint8_t *image = pixels;
             if (level) {
-                Downsample(cur, levelW, levelH, rowBytes, next);
+                if (improvedMips)
+                    tex::DownsampleMip(cur, levelW, levelH, next);
+                else
+                    Downsample(cur, levelW, levelH, rowBytes, next);
                 levelW = levelW >> 1 ? levelW >> 1 : 1;
                 levelH = levelH >> 1 ? levelH >> 1 : 1;
                 rowBytes >>= 1;
                 image = next;
+                if (scaled) {
+                    std::memcpy(scaled, next, static_cast<size_t>(levelW) * levelH * 4);
+                    tex::ScaleAlphaToCoverage(scaled, levelW, levelH, coverageRef, coverage);
+                    image = scaled;
+                }
             }
             bool ok;
             if (stage) {
-                IDirect3DSurface8 *stageSurface;
-                if (stage->GetSurfaceLevel(level, &stageSurface) < 0) {
-                    surface->Release();
+                gfx::Surface *stageSurface;
+                if (gfx::g_pGfx->GetSurfaceLevel(stage, level, &stageSurface) < 0) {
+                    gfx::g_pGfx->Release(surface);
                     return fail(I3DERR_GENERIC);
                 }
                 ok = tex::WriteSurface(this, image, stageSurface, levelW, levelH, 0);
                 tex::CompressSurface(name, kind, stageSurface, surface);
-                stageSurface->Release();
+                gfx::g_pGfx->Release(stageSurface);
             } else {
                 ok = tex::WriteSurface(this, image, surface, levelW, levelH, kind);
             }
@@ -1270,11 +1309,11 @@ HRESULT ITexture::CreateFromImage(const char *name, const char *alphaName, int w
                 next = t;
             }
             if (!ok) {
-                surface->Release();
+                gfx::g_pGfx->Release(surface);
                 return fail(I3DERR_GENERIC);
             }
         }
-        surface->Release();
+        gfx::g_pGfx->Release(surface);
     }
 
     if (flags & ITC_EMPTY) {
@@ -1289,9 +1328,10 @@ HRESULT ITexture::CreateFromImage(const char *name, const char *alphaName, int w
         pixels = nullptr;
     }
     if (stage)
-        stage->Release();
+        gfx::g_pGfx->Release(stage);
     ::operator delete(cur);
     ::operator delete(next);
+    ::operator delete(scaled);
     AddToList((flags & ITC_NOCACHE) ? g_uncachedTextures : g_cachedTextures, this);
     loaded = true;
     Preload();

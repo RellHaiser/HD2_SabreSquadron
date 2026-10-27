@@ -15,6 +15,7 @@
 #include "external/rw_data.h"
 #include "igraph/igraph_state.h"
 #include "igraph/itexture.h"
+#include "platform/platform.h"
 
 using namespace ls3d;
 using namespace ls3d::ig;
@@ -34,8 +35,8 @@ namespace {
 // A pool texture (0x2c bytes).
 struct S_slot {
     ITexture *owner;
-    IDirect3DTexture8 *texture;
-    IDirect3DSurface8 *surface;                 // level 0
+    gfx::Texture *texture;
+    gfx::Surface *surface;                      // level 0
     D3DSURFACE_DESC desc;
 };
 static_assert(sizeof(S_slot) == 0x2c, "S_slot layout");
@@ -58,17 +59,17 @@ int g_queueCount = 0;
 void AddSlot(int sizeClass, D3DFORMAT format)
 {
     S_slot slot = {};
-    g_pDevice->CreateTexture(kClassSize[sizeClass], kClassSize[sizeClass], 1, 0, format, D3DPOOL_DEFAULT,
-                             &slot.texture);
-    slot.texture->GetSurfaceLevel(0, &slot.surface);
-    slot.surface->GetDesc(&slot.desc);
+    gfx::g_pGfx->CreateTexture(kClassSize[sizeClass], kClassSize[sizeClass], 1, 0, format, D3DPOOL_DEFAULT,
+                               &slot.texture);
+    gfx::g_pGfx->GetSurfaceLevel(slot.texture, 0, &slot.surface);
+    gfx::g_pGfx->GetDesc(slot.surface, &slot.desc);
     slot.owner = nullptr;
     g_pools[sizeClass].PushBack(slot);
     g_poolBytes[sizeClass] += slot.desc.Size;
 }
 
-void Lock() { EnterCriticalSection(&g_textureLock); }
-void Unlock() { LeaveCriticalSection(&g_textureLock); }
+void Lock() { platform::Lock(g_textureLock); }
+void Unlock() { platform::Unlock(g_textureLock); }
 
 }  // namespace
 
@@ -87,17 +88,17 @@ void StreamFlush()
     Unlock();
     for (int c = 0; c < kClasses; ++c) {
         if (g_staging[c].surface) {
-            g_staging[c].surface->Release();
+            gfx::g_pGfx->Release(g_staging[c].surface);
             g_staging[c].surface = nullptr;
         }
         if (g_staging[c].texture) {
-            g_staging[c].texture->Release();
+            gfx::g_pGfx->Release(g_staging[c].texture);
             g_staging[c].texture = nullptr;
         }
         C_vector<S_slot> &pool = g_pools[c];
         for (int i = pool.Size(); i--;) {
-            pool[i].surface->Release();
-            pool[i].texture->Release();
+            gfx::g_pGfx->Release(pool[i].surface);
+            gfx::g_pGfx->Release(pool[i].texture);
         }
         pool.Free();
         g_poolBytes[c] = 0;
@@ -112,9 +113,9 @@ void StreamInit(uint32_t flags)
     for (int c = 0; c < kClasses; ++c) {
         g_pools[c].SetGrowBy(0x400);
         S_slot &stage = g_staging[c];
-        g_pDevice->CreateTexture(kClassSize[c], kClassSize[c], 1, 0, format, D3DPOOL_SYSTEMMEM, &stage.texture);
-        stage.texture->GetSurfaceLevel(0, &stage.surface);
-        stage.surface->GetDesc(&stage.desc);
+        gfx::g_pGfx->CreateTexture(kClassSize[c], kClassSize[c], 1, 0, format, D3DPOOL_SYSTEMMEM, &stage.texture);
+        gfx::g_pGfx->GetSurfaceLevel(stage.texture, 0, &stage.surface);
+        gfx::g_pGfx->GetDesc(stage.surface, &stage.desc);
         stage.owner = nullptr;
         while (g_poolBytes[c] < kClassBudget[c])
             AddSlot(c, format);
@@ -149,7 +150,7 @@ DWORD WINAPI StreamThread(void *)
 {
     while (g_textureThreadRun) {
         if (!g_queueCount) {
-            Sleep(0);
+            platform::Pause(0);
             continue;
         }
         Lock();
@@ -200,7 +201,7 @@ DWORD WINAPI StreamThread(void *)
         } else {
             slot = &pool[best];
             if (ITexture *owner = slot->owner) {
-                owner->d3dTexture = nullptr;
+                owner->deviceTexture = nullptr;
                 owner->flags &= ~(ITC_RESIDENT | ITC_QUEUED);
             }
         }
@@ -208,26 +209,26 @@ DWORD WINAPI StreamThread(void *)
 
         S_slot &stage = g_staging[c];
         D3DLOCKED_RECT lr;
-        stage.surface->LockRect(&lr, nullptr, 0);
+        gfx::g_pGfx->LockRect(stage.surface, &lr, nullptr, 0);
         texture->width = static_cast<uint16_t>(slot->desc.Width);
         texture->height = static_cast<uint16_t>(slot->desc.Height);
         const int file = dtaOpen(record->fileName, false);
         dtaSeek(file, 0x80, 1);                 // past the DDS header
         dtaRead(file, lr.pBits, slot->desc.Size);
         dtaClose(file);
-        stage.surface->UnlockRect();
-        g_pDevice->UpdateTexture(stage.texture, slot->texture);
+        gfx::g_pGfx->UnlockRect(stage.surface);
+        gfx::g_pGfx->UpdateTexture(stage.texture, slot->texture);
 
         Lock();
         slot->owner = texture;
-        texture->d3dTexture = slot->texture;
+        texture->deviceTexture = slot->texture;
         texture->flags = (texture->flags & ~(ITC_RESIDENT | ITC_QUEUED)) | ITC_RESIDENT;
         texture->Release();
         if (++g_queueRead >= 0x100)
             g_queueRead = 0;
         --g_queueCount;
         Unlock();
-        Sleep(0);
+        platform::Pause(0);
     }
     return 0;
 }
@@ -247,7 +248,7 @@ bool StreamAdd(ITexture *texture, const char *fileName, uint32_t)
     }
     std::memcpy(record->fileName, fileName, len + 1);
     record->sizeClass = fileName[len - 5] - '0';
-    texture->d3dTexture = nullptr;
+    texture->deviceTexture = nullptr;
     texture->stream = record;
     g_records.PushBack(record);
     return true;

@@ -1,24 +1,30 @@
-// IGraph state shared with the rest of the engine (the I3D renderer reads the device, the formats
-// and the render-state cache directly, as the original did with IGraph.cpp's globals).
+// IGraph state shared with the rest of the engine (the I3D renderer reads the formats and the
+// render-state cache directly, as the original did with IGraph.cpp's globals; it draws through the
+// render device, gfx::g_pGfx).
 #pragma once
 
 #include <cstdint>
 
 #include <windows.h>
-#include <mmsystem.h>
 
 #include "core/c_vector.h"
 #include "core/i3d_result.h"
-#include "dx/d3d8.h"
+#include "dx/d3d8_types.h"
+#include "gfx/gfx.h"
 #include "igraph/igraph.h"
 
 class ITexture;
 class IShow;
+namespace ls3d::input {
+struct System;
+}  // namespace ls3d::input
+namespace ls3d::platform {
+struct Mutex;
+struct Thread;
+}  // namespace ls3d::platform
 
 namespace ls3d::ig {
 
-extern IDirect3D8 *g_pD3D;                      // 0x100d1a94
-extern IDirect3DDevice8 *g_pDevice;             // 0x100d216c
 extern S_IGraphInit g_init;                     // 0x100d1d18
 extern D3DPRESENT_PARAMETERS g_presentParams;   // 0x100d1740
 extern D3DVIEWPORT8 g_viewport;                 // 0x100d1cf0 the device viewport (the I3D renderer sets it too)
@@ -34,6 +40,11 @@ extern uint32_t g_caps;                         // 0x100d1dac IGCAPS_*
 extern uint32_t g_quirks;                       // 0x100d215c IGQ_* below
 extern int g_maxTextureWidth;                   // 0x100d2128
 extern int g_maxTextureHeight;                  // 0x100d1ce8
+// (Port enhancement, LS3DF.ini AnisotropicFiltering) the maximum anisotropy in use: the option
+// capped by the device, 0 when off or unsupported (Init).
+extern int g_anisotropy;
+// The minifying filter of "linear" filtering (driver state 0): anisotropic with g_anisotropy.
+inline DWORD LinearMinFilter() { return g_anisotropy ? D3DTEXF_ANISOTROPIC : D3DTEXF_LINEAR; }
 
 // Texture formats chosen in Init (D3DFMT_UNKNOWN: not available).
 extern D3DFORMAT g_fmt16Bit;                    // 0x100d1da8 R5G6B5 / X1R5G5B5 / A1R5G5B5
@@ -100,9 +111,9 @@ extern ITexture *g_bumpAnimTextures[17];        // 0x100d1df8 BumpAnim_00.dds ..
 extern uint16_t g_textureId;                    // 0x100d2192 last ITexture::id given out
 
 // The texture loading thread (IG_TEXTURE_THREAD).
-extern CRITICAL_SECTION g_textureLock;          // 0x100d1720
+extern platform::Mutex *g_textureLock;          // 0x100d1720
 extern volatile int g_frameCounter;             // 0x100a7864 Flip count, under g_textureLock
-extern HANDLE g_textureThread;                  // 0x100d21c8
+extern platform::Thread *g_textureThread;       // 0x100d21c8
 extern bool g_textureThreadRun;                 // 0x100d21c7
 
 // Debug overlays toggled by Ctrl+Alt+Shift+F12 / F11 / F10.
@@ -126,18 +137,19 @@ inline void SetZWrite(int on)
 {
     if (g_rs.zWrite != on) {
         g_rs.zWrite = on;
-        g_pDevice->SetRenderState(D3DRS_ZWRITEENABLE, on == 1);
+        gfx::g_pGfx->SetRenderState(D3DRS_ZWRITEENABLE, on == 1);
     }
 }
 inline void SetSpecular(int on)
 {
     if (g_rs.specular != on) {
         g_rs.specular = on;
-        g_pDevice->SetRenderState(D3DRS_SPECULARENABLE, on == 1);
+        gfx::g_pGfx->SetRenderState(D3DRS_SPECULARENABLE, on == 1);
     }
 }
 
-// Input (igraph_input.cpp).
+// Input (igraph_input.cpp): the input system (0x100d1d0c; InitDirectInput creates it).
+extern input::System *g_dinput;
 void ResetInputState();
 HRESULT InitDirectInput(HINSTANCE instance);
 void ReleaseDirectInput();
@@ -145,7 +157,8 @@ void SetSwapMouseButtons(bool swap);
 int MouseMode();
 bool KeyboardUsesMessages();
 void QueueChar(int ch);
-void KeyFromMessage(const MSG &msg);
+// IGKEY_WINDOW_MESSAGES: a key from the window's messages (DIK_* code, 0: none) and its character.
+void KeyMessage(int key, int ch);
 
 // IGraph::ResizeImage (resize_image.cpp).
 bool ResizeImage(int srcWidth, int srcHeight, int srcPitch, const uint8_t *src, int dstWidth, int dstHeight,
