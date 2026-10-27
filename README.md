@@ -50,6 +50,7 @@ the remaining actor types.
 | `src/script` | The mission script language |
 | `src/tier1` | Generated code (see above) |
 | `ls3df` | The LS3D engine DLL, `LS3DF.dll` ([RellHaiser/LS3DF](https://github.com/RellHaiser/LS3DF), kept in sync with `git subtree --prefix=ls3df`); built and tested with its own `build.py` |
+| `rw_data` | The virtual file system DLL, `rw_data.dll` ([RellHaiser/rw_data](https://github.com/RellHaiser/rw_data), kept in sync with `git subtree --prefix=rw_data`); `src/ls3d/rw_data.h` forwards to its header |
 | `docs` | [Mission scripting language reference](docs/HD2_Mission_Scripting_Language.md), [reverse-engineering findings](docs/findings/README.md) (formats, archives, binaries) |
 
 ## Building

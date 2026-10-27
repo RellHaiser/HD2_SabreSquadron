@@ -52,16 +52,16 @@ public:
     I3DMETHOD(HRESULT, Init)(const S_IGraphInit &init) = 0;              // 0x00
     I3DMETHOD(const S_IGraphInfo *, GetInfo)() = 0;                      // 0x04
     I3DMETHOD(void, SetFlags)(uint32_t flags) = 0;                       // 0x08
-    I3D_SLOT(0C);
+    I3D_SLOT(0C);                                             // LS3DF: IsInitialized
     I3DMETHOD(void, Close)() = 0;                                        // 0x10
     I3DMETHOD(void, ProcessWinMessages)() = 0;                           // 0x14
     I3DMETHOD(int, ScrnX)() = 0;                                         // 0x18
     I3DMETHOD(int, ScrnY)() = 0;                                         // 0x1C
-    I3D_SLOT(20);
-    I3D_SLOT(24);
-    I3D_SLOT(28);
-    I3D_SLOT(2C);
-    I3D_SLOT(30);
+    I3D_SLOT(20);                                             // LS3DF: GetBitDepth
+    I3D_SLOT(24);                                             // LS3DF: GetCaps
+    I3D_SLOT(28);                                             // LS3DF: GetBackBufferFormat
+    I3D_SLOT(2C);                                             // LS3DF: GetFormatName
+    I3D_SLOT(30);                                             // LS3DF: GetImageInfo
     // Saves the back buffer to an image file.
     I3DMETHOD(bool, SaveShot)(const char *fileName, int x, int y, int flags) = 0;   // 0x34
     // New (closed) streamed sound, used for music.
@@ -70,19 +70,19 @@ public:
     // success, `out` gets one reference).
     I3DMETHOD(HRESULT, LoadTexture)(const char *fileName, const char *alphaFileName, uint32_t mode,
                                   class IImage **out) = 0;            // 0x3C
-    I3D_SLOT(40);
+    I3D_SLOT(40);                                             // LS3DF: CreateITexture
     // (The interface passes 0, 0 before it draws its lines: no texture, inferred.)
     I3DMETHOD(void, SetTexture)(void *texture, int stage) = 0;           // 0x44
     I3DMETHOD(HWND, GetHWND)() = 0;                                      // 0x48
-    I3D_SLOT(4C);
+    I3D_SLOT(4C);                                             // LS3DF: GetChildHWND
     I3DMETHOD(void, SetAppName)(const char *name) = 0;                   // 0x50
-    I3D_SLOT(54);
-    I3D_SLOT(58);
-    I3D_SLOT(5C);
-    I3D_SLOT(60);
+    I3D_SLOT(54);                                             // LS3DF: SetAppNameF
+    I3D_SLOT(58);                                             // LS3DF: GetAppName
+    I3D_SLOT(5C);                                             // LS3DF: AddDlg
+    I3D_SLOT(60);                                             // LS3DF: DelDlg
     I3DMETHOD(void, Clear)(uint32_t color, float z, uint32_t flags) = 0; // 0x64
-    I3D_SLOT(68);
-    I3D_SLOT(6C);
+    I3D_SLOT(68);                                             // LS3DF: BeginScene
+    I3D_SLOT(6C);                                             // LS3DF: EndScene
     I3DMETHOD(bool, Flip)() = 0;                                         // 0x70
     // Render states (the interface's mission information sets state 4 to 4 while it draws).
     I3DMETHOD(void, SetRenderState)(int state, int value) = 0;          // 0x74
@@ -96,35 +96,35 @@ public:
     // `transformed` 1: pre-transformed vertices (S_TLVertex, 0x20 bytes); 0: world points with a
     // colour (0x18 bytes, the command map's lines; meaning inferred).
     I3DMETHOD(void, DrawPrimitives)(int kind, int count, const void *vertices, int transformed) = 0;   // 0x88
-    I3D_SLOT(8C);
+    I3D_SLOT(8C);                                             // LS3DF: DrawIndexedPrimitive
     I3DMETHOD(void, InitInput)() = 0;                                    // 0x90
-    I3D_SLOT(94);
-    I3D_SLOT(98);
+    I3D_SLOT(94);                                             // LS3DF: IsKeyboardInit
+    I3D_SLOT(98);                                             // LS3DF: CloseKeyboard
     I3DMETHOD(void, ReadKeyboard)() = 0;                                 // 0x9C
     // The key pressed in this frame (its DirectInput code: 200 up, 0xD0 down ...; 0: none).
     I3DMETHOD(int, GetAsciiKey)() = 0;                                   // 0xA0
-    I3D_SLOT(A4);
+    I3D_SLOT(A4);                                             // LS3DF: GetKeyChar
     // The next character typed (8 backspace, 9 tab, 13 enter; 0: none) / forgets the typed ones.
     I3DMETHOD(uint32_t, ReadChar)() = 0;                                 // 0xA8
     I3DMETHOD(void, FlushChars)() = 0;                                   // 0xAC
     // A key (DirectInput code) is held.
     I3DMETHOD(bool, IsKeyDown)(int key) = 0;                             // 0xB0
-    I3D_SLOT(B4);
-    I3D_SLOT(B8);
-    I3D_SLOT(BC);
-    I3D_SLOT(C0);
-    I3D_SLOT(C4);
-    I3D_SLOT(C8);
+    I3D_SLOT(B4);                                             // LS3DF: SetKeyMap
+    I3D_SLOT(B8);                                             // LS3DF: GetMappedKeys
+    I3D_SLOT(BC);                                             // LS3DF: IsShiftDown
+    I3D_SLOT(C0);                                             // LS3DF: IsCtrlDown
+    I3D_SLOT(C4);                                             // LS3DF: IsAltDown
+    I3D_SLOT(C8);                                             // LS3DF: GetShiftKeys
     // The character of a key (DirectInput code; the signals panel's digits; the second argument
     // 0, not identified).
     I3DMETHOD(uint32_t, KeyToChar)(int key, int unknown) = 0;           // 0xCC
     // The DirectInput name of a keyboard key.
     I3DMETHOD(const wchar_t *, GetKeyName)(int key) = 0;                // 0xD0
-    I3D_SLOT(D4);
-    I3D_SLOT(D8);
+    I3D_SLOT(D4);                                             // LS3DF: ReservedD4
+    I3D_SLOT(D8);                                             // LS3DF: ReservedD8
     // (Meaning not identified; C_GameApp: 1 when a client starts, 0 for the console.)
     I3DMETHOD(void, UnknownDC)(int on) = 0;                              // 0xDC
-    I3D_SLOT(E0);
+    I3D_SLOT(E0);                                             // LS3DF: IsMouseInit
     // (Not identified; C_GameApp::Close on a client.)
     I3DMETHOD(void, UnknownE4)() = 0;                                    // 0xE4
     // Called once per frame before the game update (input/timer housekeeping).
@@ -133,21 +133,21 @@ public:
     // mouse look, 2 pi per 1000 counts).
     I3DMETHOD(int, GetMouseDeltaX)() = 0;                                // 0xEC
     I3DMETHOD(int, GetMouseDeltaY)() = 0;                                // 0xF0
-    I3D_SLOT(F4);
-    I3D_SLOT(F8);
-    I3D_SLOT(FC);
-    I3D_SLOT(100);
-    I3D_SLOT(104);
+    I3D_SLOT(F4);                                             // LS3DF: GetMouseDZ
+    I3D_SLOT(F8);                                             // LS3DF: SetMousePos
+    I3D_SLOT(FC);                                             // LS3DF: GetMouseX
+    I3D_SLOT(100);                                            // LS3DF: GetMouseY
+    I3D_SLOT(104);                                            // LS3DF: GetMouseButtons
     I3DMETHOD(void, Unknown108)() = 0;                                   // 0x108
-    I3D_SLOT(10C);
+    I3D_SLOT(10C);                                            // LS3DF: GetTimer
     // Adds a texture search directory.
     I3DMETHOD(void, AddDir)(const char *dir, uint32_t flags) = 0;        // 0x110
-    I3D_SLOT(114);
-    I3D_SLOT(118);
-    I3D_SLOT(11C);
-    I3D_SLOT(120);
-    I3D_SLOT(124);
-    I3D_SLOT(128);
+    I3D_SLOT(114);                                            // LS3DF: DelDir
+    I3D_SLOT(118);                                            // LS3DF: DelAllDirs
+    I3D_SLOT(11C);                                            // LS3DF: GetCachedTextures
+    I3D_SLOT(120);                                            // LS3DF: NumCachedTextures
+    I3D_SLOT(124);                                            // LS3DF: GetUncachedTextures
+    I3D_SLOT(128);                                            // LS3DF: NumUncachedTextures
     // Sets the display's gamma ramp: 3 x 256 words (red, green, blue).
     I3DMETHOD(void, SetGammaRamp)(const uint16_t *ramp, uint32_t flags) = 0;   // 0x12C
 };
@@ -155,12 +155,12 @@ public:
 // LS3D sound driver (ISndGetDriver()).
 class ISND_driver {
 public:
-    I3D_SLOT(00);
+    I3D_SLOT(00);                                             // LS3DF: InitFromDesc
     I3DMETHOD(HRESULT, Init)(HWND window, int frequency, int channels, int bits, uint32_t flags) = 0;  // 0x04
     I3DMETHOD(void, Close)() = 0;                                        // 0x08
     // False when there is no sound device (sounds are not created then).
     I3DMETHOD(bool, IsInitialized)() = 0;                                // 0x0C
-    I3D_SLOT(10);
+    I3D_SLOT(10);                                             // LS3DF: SetPrimaryFormat
     I3DMETHOD(void, SetVolume)(float volume) = 0;                        // 0x14 master volume
 };
 
