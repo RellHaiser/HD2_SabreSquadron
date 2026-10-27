@@ -96,7 +96,7 @@ uint32_t C_VertexAnimModule__FUN_00473df0(C_VertexAnimModule *_this, ...)
 
 
 // 0x00473e30
-uint32_t FUN_00473e30(void *_this,int *param_1, ...)
+uint32_t C_VertexAnimModule__FindAnimation(C_VertexAnimModule *_this,int *param_1, ...)
 {
   uint8_t bVar1;
   uint8_t *pbVar2;
@@ -104,9 +104,7 @@ uint32_t FUN_00473e30(void *_this,int *param_1, ...)
   uint32_t uVar4;
   uint8_t *pbVar5;
   bool bVar6;
-  for (uVar4 = 0;
-      (*(int *)((int)_this + 0x14) != 0 &&
-      (uVar4 < (uint32_t)(*(int *)((int)_this + 0x18) - *(int *)((int)_this + 0x14) >> 2)));
+  for (uVar4 = 0; (_this->m_014 != 0 && (uVar4 < (uint32_t)((int)(_this->m_018 - _this->m_014) >> 2)));
       uVar4 = uVar4 + 1) {
     if (*param_1 == 0) {
       pbVar2 = &DAT_00867a90;
@@ -114,7 +112,7 @@ uint32_t FUN_00473e30(void *_this,int *param_1, ...)
     else {
       pbVar2 = (uint8_t *)(*param_1 + 8);
     }
-    pbVar5 = *(uint8_t **)(*(int *)((int)_this + 0x14) + uVar4 * 4);
+    pbVar5 = *(uint8_t **)(_this->m_014 + uVar4 * 4);
     do {
       bVar1 = *pbVar2;
       bVar6 = bVar1 < *pbVar5;
@@ -134,9 +132,8 @@ LAB_00473e89:
 LAB_00473e8e:
     if (iVar3 == 0) break;
   }
-  if ((*(int *)((int)_this + 0x14) != 0) &&
-     (uVar4 < (uint32_t)(*(int *)((int)_this + 0x18) - *(int *)((int)_this + 0x14) >> 2))) {
-    return *(uint32_t *)(*(int *)((int)_this + 0x14) + uVar4 * 4);
+  if ((_this->m_014 != 0) && (uVar4 < (uint32_t)((int)(_this->m_018 - _this->m_014) >> 2))) {
+    return *(uint32_t *)(_this->m_014 + uVar4 * 4);
   }
   return 0;
 }
@@ -464,7 +461,7 @@ uint32_t FUN_00474290(...)
          ((iVar6 = dtaRead(handle,local_a4 + 7,1), iVar6 < 1 ||
           (iVar6 = dtaRead(handle,acStack_8c,0x14), iVar6 < 1)))) break;
       C_fstr_Construct(&local_a0,acStack_8c);
-      pCVar8 = (C_str_rep *)FUN_00473e30(local_9c,(int *)&local_a0);
+      pCVar8 = (C_str_rep *)C_VertexAnimModule__FindAnimation(local_9c,(int *)&local_a0);
       local_a4[9].rep = pCVar8;
       if ((local_a0.rep != 0) &&
          ((local_a0.rep)->refCount = (local_a0.rep)->refCount - 1, (local_a0.rep)->refCount == 0))
@@ -476,8 +473,8 @@ uint32_t FUN_00474290(...)
         tier1_operator_delete(local_a4);
       }
       else {
-        FUN_00473790(local_a4,self,local_a4[9].rep);
-        FUN_00474cf0(_this,*(uint32_t **)((int)pvVar3 + 0x28),1,(uint32_t*)(&local_a4));
+        S_VertexAnimPlayer__Init(local_a4,self,local_a4[9].rep);
+        C_VertexAnimModule__PlayerVectorInsert(_this,*(uint32_t **)((int)pvVar3 + 0x28),1,(uint32_t*)(&local_a4));
       }
     }
 LAB_00474659:
@@ -496,31 +493,29 @@ LAB_00474659:
 
 
 // 0x004746b0
-uint32_t FUN_004746b0(void *_this,int param_1,char param_2, ...)
+uint32_t C_VertexAnimModule__RemovePlayer(C_VertexAnimModule *_this,int param_1,char param_2, ...)
 {
   void *ptr;
   int iVar1;
   uint32_t uVar2;
   uVar2 = 0;
   while( true ) {
-    if (*(int *)((int)_this + 0x24) == 0) {
+    if (_this->m_024 == 0) {
       return 0;
     }
-    if ((uint32_t)(*(int *)((int)_this + 0x28) - *(int *)((int)_this + 0x24) >> 2) <= uVar2) break;
-    if (*(int *)(*(int *)((int)_this + 0x24) + uVar2 * 4) == param_1) {
-      if ((param_2 != '\0') &&
-         (ptr = *(void **)(*(int *)((int)_this + 0x24) + uVar2 * 4), ptr != 0)) {
+    if ((uint32_t)(_this->m_028 - _this->m_024 >> 2) <= uVar2) break;
+    if (*(int *)(_this->m_024 + uVar2 * 4) == param_1) {
+      if ((param_2 != '\0') && (ptr = *(void **)(_this->m_024 + uVar2 * 4), ptr != 0)) {
         tier1_operator_delete(ptr);
       }
-      if (*(int *)((int)_this + 0x24) == 0) {
+      if (_this->m_024 == 0) {
         iVar1 = 0;
       }
       else {
-        iVar1 = *(int *)((int)_this + 0x28) - *(int *)((int)_this + 0x24) >> 2;
+        iVar1 = _this->m_028 - _this->m_024 >> 2;
       }
-      *(uint32_t *)(*(int *)((int)_this + 0x24) + uVar2 * 4) =
-           *(uint32_t *)(*(int *)((int)_this + 0x24) - 4 + iVar1 * 4);
-      *(int *)((int)_this + 0x28) = *(int *)((int)_this + 0x28) - 4;
+      *(uint32_t *)(_this->m_024 + uVar2 * 4) = *(uint32_t *)(_this->m_024 - 4 + iVar1 * 4);
+      _this->m_028 = _this->m_028 - 4;
       return 0;
     }
     uVar2++;
@@ -839,7 +834,7 @@ uint32_t empty_function_474ce0(...)
 
 
 // 0x00474cf0
-uint32_t FUN_00474cf0(void *_this,uint32_t *param_1,uint32_t param_2,uint32_t *param_3, ...)
+uint32_t C_VertexAnimModule__PlayerVectorInsert(C_VertexAnimModule *_this,uint32_t *param_1,uint32_t param_2,uint32_t *param_3, ...)
 {
   uint32_t *puVar1;
   int iVar2;
@@ -848,8 +843,8 @@ uint32_t FUN_00474cf0(void *_this,uint32_t *param_1,uint32_t param_2,uint32_t *p
   uint32_t *puVar5;
   uint32_t uVar6;
   uint32_t *puVar7;
-  puVar7 = *(uint32_t **)((int)_this + 8);
-  if (param_2 <= (uint32_t)(*(int *)((int)_this + 0xc) - (int)puVar7 >> 2)) {
+  puVar7 = *(uint32_t **)(_this->_pad_0004 + 4);
+  if (param_2 <= (uint32_t)(*(int *)(_this->_pad_0004 + 8) - (int)puVar7 >> 2)) {
     if ((uint32_t)((int)puVar7 - (int)param_1 >> 2) < param_2) {
       puVar5 = param_1 + param_2;
       if (param_1 != puVar7) {
@@ -862,18 +857,18 @@ uint32_t FUN_00474cf0(void *_this,uint32_t *param_1,uint32_t param_2,uint32_t *p
           puVar5++;
         } while (puVar4 != puVar7);
       }
-      puVar7 = *(uint32_t **)((int)_this + 8);
+      puVar7 = *(uint32_t **)(_this->_pad_0004 + 4);
       for (iVar2 = param_2 - ((int)puVar7 - (int)param_1 >> 2); iVar2 != 0; iVar2 = iVar2 - 1) {
         if (puVar7 != 0) {
           *puVar7 = *param_3;
         }
         puVar7++;
       }
-      puVar7 = *(uint32_t **)((int)_this + 8);
+      puVar7 = *(uint32_t **)(_this->_pad_0004 + 4);
       for (; param_1 != puVar7; param_1 = param_1 + 1) {
         *param_1 = *param_3;
       }
-      *(uint32_t *)((int)_this + 8) = *(int *)((int)_this + 8) + param_2 * 4;
+      *(uint32_t *)(_this->_pad_0004 + 4) = *(int *)(_this->_pad_0004 + 4) + param_2 * 4;
       return 0;
     }
     if (param_2 != 0) {
@@ -884,7 +879,7 @@ uint32_t FUN_00474cf0(void *_this,uint32_t *param_1,uint32_t param_2,uint32_t *p
         }
         puVar5++;
       }
-      puVar7 = *(uint32_t **)((int)_this + 8);
+      puVar7 = *(uint32_t **)(_this->_pad_0004 + 4);
       for (puVar5 = puVar7 + -param_2; param_1 != puVar5; puVar5 = puVar5 - 1) {
         puVar7--;
         *puVar7 = puVar5[-1];
@@ -893,11 +888,11 @@ uint32_t FUN_00474cf0(void *_this,uint32_t *param_1,uint32_t param_2,uint32_t *p
       for (; param_1 != puVar7; param_1 = param_1 + 1) {
         *param_1 = *param_3;
       }
-      *(int *)((int)_this + 8) = *(int *)((int)_this + 8) + param_2 * 4;
+      *(uint32_t *)(_this->_pad_0004 + 4) = *(int *)(_this->_pad_0004 + 4) + param_2 * 4;
     }
     return 0;
   }
-  iVar2 = *(int *)((int)_this + 4);
+  iVar2 = *(int *)_this->_pad_0004;
   if ((iVar2 == 0) || (uVar6 = (int)puVar7 - iVar2 >> 2, uVar6 <= param_2)) {
     uVar6 = param_2;
   }
@@ -914,7 +909,7 @@ uint32_t FUN_00474cf0(void *_this,uint32_t *param_1,uint32_t param_2,uint32_t *p
   }
   puVar4 = tier1_operator_new(iVar3 * 4);
   puVar5 = puVar4;
-  for (puVar7 = *(uint32_t **)((int)_this + 4); uVar6 = param_2, puVar1 = puVar5, puVar7 != param_1
+  for (puVar7 = *(uint32_t **)_this->_pad_0004; uVar6 = param_2, puVar1 = puVar5, puVar7 != param_1
       ; puVar7 = puVar7 + 1) {
     if (puVar5 != 0) {
       *puVar5 = *puVar7;
@@ -927,7 +922,7 @@ uint32_t FUN_00474cf0(void *_this,uint32_t *param_1,uint32_t param_2,uint32_t *p
     }
     puVar1++;
   }
-  puVar1 = *(uint32_t **)((int)_this + 8);
+  puVar1 = *(uint32_t **)(_this->_pad_0004 + 4);
   puVar7 = puVar5 + param_2;
   if (param_1 != puVar1) {
     puVar5 = (uint32_t *)((int)puVar7 + (param_2 * -4 - (int)puVar5) + (int)param_1);
@@ -939,16 +934,17 @@ uint32_t FUN_00474cf0(void *_this,uint32_t *param_1,uint32_t param_2,uint32_t *p
       puVar7++;
     } while (puVar5 != puVar1);
   }
-  tier1_operator_delete(*(void **)((int)_this + 4));
-  *(uint32_t **)((int)_this + 0xc) = puVar4 + iVar2;
-  iVar2 = *(int *)((int)_this + 4);
+  tier1_operator_delete(*(void **)_this->_pad_0004);
+  *(uint32_t **)(_this->_pad_0004 + 8) = puVar4 + iVar2;
+  iVar2 = *(int *)_this->_pad_0004;
   if (iVar2 == 0) {
-    *(uint32_t **)((int)_this + 4) = puVar4;
-    *(uint32_t **)((int)_this + 8) = puVar4 + param_2;
+    *(uint32_t **)_this->_pad_0004 = puVar4;
+    *(uint32_t **)(_this->_pad_0004 + 4) = puVar4 + param_2;
     return 0;
   }
-  *(uint32_t **)((int)_this + 4) = puVar4;
-  *(uint32_t **)((int)_this + 8) = puVar4 + (*(int *)((int)_this + 8) - iVar2 >> 2) + param_2;
+  *(uint32_t **)_this->_pad_0004 = puVar4;
+  *(uint32_t **)(_this->_pad_0004 + 4) =
+       puVar4 + (*(int *)(_this->_pad_0004 + 4) - iVar2 >> 2) + param_2;
   return 0;
 }
 

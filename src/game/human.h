@@ -532,6 +532,8 @@ public:
     // Takes part in the game: always in single player; a player's human in a network game
     // once it has spawned (and until DetachFromWorld()); false without a controller.
     bool IsInPlay() const;                              // 0x005a63b0
+    // The multiplayer zone whose capture the player's HUD shows.
+    void SetMpZone(int zoneId) { m_mpZone = zoneId; }
     // Multiplayer: the player's human waits (dead or between rounds).
     bool IsSpectating() const;                          // 0x005a63f0
     bool IsInWater() const;                             // 0x005a6420

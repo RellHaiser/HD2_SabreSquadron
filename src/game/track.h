@@ -44,11 +44,13 @@ private:
 class C_TrackPlayer {                             // 0x8070 bytes in the original
 public:
     C_TrackPlayer(C_Track *track, I3D_frame *frame, I3D_frame *parent);
+    // Without a track or frame (the train's, inline in its constructor 0x005bcfb0).
+    C_TrackPlayer() : m_frame(nullptr), m_parent(nullptr), m_track(nullptr) {}
 
     void Update(int timeDelta);                                          // 0x00404890
     // Movement since the start of the track and the current rotation; false if finished.
     bool GetOffsetFromStart(S_vector &offset, S_quat &rot) const;        // 0x004029f0
-    // Key-based (non-spline) movement; kept from the original, unused by the game.
+    // Key-based (non-spline) movement (the train's).
     S_vector AdvanceAlongKeys(const S_vector &from, int timeMs, bool *outDecelerating);  // 0x00402a70
     // Point on the polyline of keys at `radius` from `center`, searching back from `keyIndex`.
     S_vector FindPointAtDistance(int keyIndex, const S_vector &center, float radius,
@@ -57,6 +59,9 @@ public:
 
     I3D_frame *GetFrame() const { return m_frame; }
     C_Track *GetTrack() const { return m_track; }
+    void SetTrack(C_Track *track) { m_track = track; }
+    int GetKeyIndex() const { return m_keyIndex; }
+    void SetKeyIndex(int index) { m_keyIndex = index; }
 
 private:
     friend class C_TrackModule;

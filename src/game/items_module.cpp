@@ -57,9 +57,6 @@ enum : uint16_t {
     CHUNK_ITEM_RECORD_CONTENTS = 0x268,
 };
 
-// Scene frames that carry the actors in items.dat.
-constexpr uint32_t FRAME_MASK_USER = 1u << (FRAME_USER - 1);
-
 // Models of the idle activity props.
 const char *const ACTIVITY_PROP_FILES[3] = {"m_karty", "m_bottle", "m_cigarette"};
 I3D_frame *g_activityProps[3];                          // 0x0098b868..0x0098b870

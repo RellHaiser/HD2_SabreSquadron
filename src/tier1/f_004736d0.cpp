@@ -50,7 +50,7 @@ uint32_t FUN_00473720(int param_1, ...)
 
 
 // 0x00473790
-uint32_t FUN_00473790(void *_this,uint32_t param_1,uint32_t param_2, ...)
+uint32_t S_VertexAnimPlayer__Init(void *_this,uint32_t param_1,uint32_t param_2, ...)
 {
   *(uint32_t *)((int)_this + 0x24) = param_2;
   *(uint32_t *)((int)_this + 4) = param_1;
@@ -64,7 +64,7 @@ uint32_t FUN_00473790(void *_this,uint32_t param_1,uint32_t param_2, ...)
 
 
 // 0x004737c0
-uint32_t FUN_004737c0(int *param_1, ...)
+uint32_t S_VertexAnimPlayer__Reset(int *param_1, ...)
 {
   float fVar1;
   float fVar2;

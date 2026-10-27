@@ -2302,7 +2302,7 @@ uint32_t FUN_005f62a0(void *_this,uchar param_1, ...)
     bVar1 = *pcVar8;
     pcVar8++;
   } while (bVar1 != 0);
-  FUN_00420800(&local_3c,(uint32_t *)pcVar12,~uVar11 - 1);
+  std_string__AssignChars(&local_3c,(uint32_t *)pcVar12,~uVar11 - 1);
   GH_PIECE(local_4,0,1) = 1;
   piVar4 = (int *)FUN_00429da0(&DAT_008aed2c,&local_3c.alloc);
   piVar4 = (int *)*piVar4;

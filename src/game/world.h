@@ -24,6 +24,7 @@
 #include "game/melee_tracker.h"
 #include "game/melee_tracker_ai.h"
 #include "game/mine.h"
+#include "game/mp_zone.h"
 #include "game/null_actor.h"
 #include "game/photo_place.h"
 #include "game/pike.h"
@@ -34,6 +35,8 @@
 #include "game/rigid_body.h"
 #include "game/sound_module.h"
 #include "game/spawn_point.h"
+#include "game/submarine.h"
+#include "game/train.h"
 #include "game/switch_actor.h"
 #include "game/team.h"
 #include "game/ts_explosion.h"
@@ -121,17 +124,8 @@ public:
 // included above.
 // C_DocumentPlace ("Document place", vtable 0x008135e0, 0x150 bytes) is defined in game/document_place.h, included
 // above.
-class C_Submarine : public C_Actor {                    // "Submarine", vtable 0x00812650
-public:
-    // The pilot's controls: forward, sideways, up (+0x100..+0x108).
-    void SetControls(float forward, float side, float up);   // 0x005e0dd0
-    // (+0xF4, inferred: the speed, which the squad lets run down to 2.)
-    float GetSpeed() const;
-    void SetSpeed(float speed);
-    void SetUnknownF8(float value);                     // +0xF8
-};
-// The submarines of the mission (the list at 0x008ac9a8).
-const std::vector<C_Actor *> &GetSubmarines();          // 0x005de7b0
+// C_Submarine ("Submarine", vtable 0x00812650, 0x120 bytes) and GetSubmarines() are in game/submarine.h, included
+// above.
 // C_Pike ("Pike", vtable 0x00811c90, 0x210 bytes) is defined in game/pike.h, included above.
 class C_Junkers88 : public C_Actor {
 public:
@@ -141,12 +135,7 @@ public:
 };
 // C_TSExplosion ("Explosion [TS]", vtable 0x008136d0, 0xd0 bytes) is defined in game/ts_explosion.h, included above.
 
-class C_Train : public C_Actor {                        // "Train", vtable 0x00811e78
-public:
-    void Start();                                       // 0x005bc970
-    // Follows the named track (or stops following when `on` is false).
-    void SetTrack(bool on, const char *track);          // 0x0041d590
-};
+// C_Train ("Train", vtable 0x00811e78, 0x8250 bytes) is defined in game/train.h, included above.
 
 // C_FowlGenerator ("FowlGenerator", vtable 0x00811d80, 0xd0 bytes) is defined in game/fowl_generator.h,
 // included above.
@@ -164,25 +153,7 @@ public:
 
 // C_ItemActor ("Item", vtable 0x00811aa8, 0x6c0 bytes) is defined in game/item_actor.h, included above.
 
-// Multiplayer zone (actor type 37): a timed objective, a spawn area of a team.
-class C_MPZone : public C_Actor {                       // "MPZone", vtable 0x00812b20
-public:
-    // Its number in the occupation's order.
-    int GetNumber() const;                              // +0x90
-    // The team it belongs to (spawns there).
-    int GetTeam() const;                                // +0x98
-    // The side EnableSpawnZone() gave it (-1: none).
-    int GetSide() const;                                // +0xA4
-    void EnableForSide(int side);                       // 0x005ed900 (+0xE4)
-    // Its next spawn position (cycling through them; `cycle` false: false once all were used).
-    bool PickSpawnPosition(S_vector4 *pos, S_vector4 *dir, bool cycle);   // 0x005ed700
-    // The spawn positions start over (+0x100 = 0).
-    void ResetSpawnIndex();
-    // The zone's countdown runs.
-    bool IsRunning() const;                             // byte +0xF1
-    // Progress bar of the zone (time left / total in ms, text id).
-    bool GetProgress(int *time, int *total, int *textId) const;   // 0x005ec840
-};
+// C_MPZone ("MPZone", vtable 0x00812b20, 0x120 bytes) is defined in game/mp_zone.h, included above.
 // C_Mine ("Mine", vtable 0x00812f08, 0x120 bytes) is defined in game/mine.h, included above.
 
 // C_MeleeTracker ("MeleeTracker", vtable 0x008120e0, 0x5b0 bytes) is defined in game/melee_tracker.h, included above.

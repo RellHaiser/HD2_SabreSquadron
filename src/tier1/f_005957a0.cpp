@@ -172,9 +172,9 @@ uint32_t FUN_005957d0(void *_this,int *param_1, ...)
       }
     }
     else if (((param_1[6] == 0x14) &&
-             (uVar6 = FUN_005e0530(param_1,fStack_9c,&SStack_50.x,&SStack_40.x,'\0'),
+             (uVar6 = C_Submarine__FindExit(param_1,fStack_9c,gh_bitcast<S_vector4*>(&SStack_50.x),gh_bitcast<S_vector4*>(&SStack_40.x),'\0'),
              (char)uVar6 != '\0')) &&
-            (uVar6 = FUN_005e0530(param_1,fStack_9c,&SStack_50.x,&SStack_40.x,'\x01'),
+            (uVar6 = C_Submarine__FindExit(param_1,fStack_9c,gh_bitcast<S_vector4*>(&SStack_50.x),gh_bitcast<S_vector4*>(&SStack_40.x),'\x01'),
             (char)uVar6 != '\0')) {
       if (local_6c <= local_68) {
         local_6c += 8;
@@ -345,9 +345,9 @@ joined_r0x00595ef4:
     if (!bVar4) goto LAB_00595fac;
   }
   else if (((param_1[6] == 0x14) &&
-           (uVar6 = FUN_005e0530(param_1,gh_bitcast<float>(puStack_98),&SStack_50.x,&SStack_40.x,'\0'),
+           (uVar6 = C_Submarine__FindExit(param_1,gh_bitcast<float>(puStack_98),gh_bitcast<S_vector4*>(&SStack_50.x),gh_bitcast<S_vector4*>(&SStack_40.x),'\0'),
            (char)uVar6 != '\0')) &&
-          (uVar6 = FUN_005e0530(param_1,gh_bitcast<float>(puStack_98),&SStack_50.x,&SStack_40.x,'\x01'),
+          (uVar6 = C_Submarine__FindExit(param_1,gh_bitcast<float>(puStack_98),gh_bitcast<S_vector4*>(&SStack_50.x),gh_bitcast<S_vector4*>(&SStack_40.x),'\x01'),
           (char)uVar6 != '\0')) {
     tier1_operator_delete(local_7c);
     local_7c = 0;

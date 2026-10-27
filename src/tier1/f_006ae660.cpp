@@ -29,7 +29,7 @@ bool ForgetProfileName(char *name, ...)
   local_18 = 0;
   local_14 = 0;
   local_10 = 0;
-  FUN_00420800(local_1c,(uint32_t *)name,~uVar4 - 1);
+  std_string__AssignChars((std_string*)(local_1c),(uint32_t *)name,~uVar4 - 1);
   local_4 = 0;
   FUN_006b2580(g_profileDirectories,(int *)&local_24,(int)local_1c);
   if (local_24 != g_profileDirectories[1]) {

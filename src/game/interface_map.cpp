@@ -892,13 +892,13 @@ void C_MapScreen::CreateZones()
     if (!m_selectMarker)
         return;
     m_selectMarker->LinkTo(m_frame, 1);
-    // The map actors' zones without a side given by EnableSpawnZone.
+    // The map actors' zones that stand for no objective.
     std::vector<C_MPZone *> zones;
     zones.reserve(20);
     const std::vector<C_Actor *> &actors = g_actorsModule.GetActors();
     for (size_t i = FIRST_MAP_ACTOR; i < actors.size(); ++i) {
         C_Actor *actor = actors[i];
-        if (actor->GetType() == ACTOR_MP_ZONE && static_cast<C_MPZone *>(actor)->GetSide() == -1)
+        if (actor->GetType() == ACTOR_MP_ZONE && static_cast<C_MPZone *>(actor)->GetObjective() == -1)
             zones.push_back(static_cast<C_MPZone *>(actor));
     }
     // Quirk kept: more than 15 zones and the map shows none.

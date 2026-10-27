@@ -9,7 +9,7 @@ of the game and its data.
 
 ## Status
 
-Work in progress (2026-10-26). Of the game's 12,286 functions, 6,638 (62.6 % of the code by size)
+Work in progress (2026-10-27). Of the game's 12,286 functions, 6,792 (63.7 % of the code by size)
 are ported by hand. Generated code (tier 1, below) covers the rest. The sources are
 compile-checked file by file; there is no linked build of the game yet.
 
@@ -19,7 +19,8 @@ campaign and profiles, humans (movement, animation, combat, items, AI, squads, e
 interface and HUD, vehicles (setup, driving, damage, seats, the car actor, network and saved game),
 seat weapons, shots, collision, the rigid body, debris, items lying in the world, destructible
 scene objects, clocks, switches, photo places, breakable fences, radios, document places, mines,
-timed explosions, spawn points, explosive places, pikes, flocks of birds and ladders. In progress:
+timed explosions, spawn points, explosive places, pikes, flocks of birds, ladders, multiplayer
+zones, submarines and trains. In progress:
 the remaining actor types.
 
 ## Approach
