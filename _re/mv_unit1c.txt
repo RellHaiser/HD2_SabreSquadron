@@ -1,0 +1,515 @@
+// 0x00787080
+void __fastcall FUN_00787080(int param_1)
+{
+  uVar6 = *(uint32_t *)(*(int *)(param_1 + 600) + 0x20);
+  local_338[0] = param_1;
+  pCVar5 = GetGame();
+  (*pCVar5->m_scene->vtable->Slot13C)(pCVar5->m_scene,uVar6);
+  piVar8 = (int *)(param_1 + 0x810);
+  iVar9 = 0;
+  piVar7 = piVar8;
+  do {
+    iVar1 = *piVar7;
+    if ((*(uint32_t *)(iVar1 + 0xe0) & 8) == 0) {
+      *(uint32_t *)(iVar1 + 0xe0) = *(uint32_t *)(iVar1 + 0xe0) | 8;
+      S_quat::Make((S_quat *)(iVar1 + 0xc0),(S_matrix *)(iVar1 + 0x80));
+    }
+    *(uint32_t *)((int)local_338 + iVar9) = *(uint32_t *)(iVar1 + 0xc0);
+    *(uint32_t *)((int)local_338 + iVar9 + 4) = *(uint32_t *)(iVar1 + 0xc4);
+    *(uint32_t *)((int)local_338 + iVar9 + 8) = *(uint32_t *)(iVar1 + 200);
+    puVar2 = (uint32_t *)*piVar7;
+    *(uint32_t *)((int)local_338 + iVar9 + 0xc) = *(uint32_t *)(iVar1 + 0xcc);
+    *(uint32_t *)((int)local_338 + iVar9 + 400) = puVar2[0x2c];
+    *(uint32_t *)((int)local_338 + iVar9 + 0x194) = puVar2[0x2d];
+    *(uint32_t *)((int)local_338 + iVar9 + 0x198) = puVar2[0x2e];
+    *(uint32_t *)((int)local_338 + iVar9 + 0x19c) = puVar2[0x2f];
+    (**(code **)*puVar2)();
+    iVar9 += 0x10;
+    piVar7 += 3;
+  } while (iVar9 < 400);
+  FUN_0075d620(pvStack_340);
+  FUN_0077d870((int)pvStack_340 + 0xc00);
+  C_HumanWeaponPose::Unknown79c780(*(C_HumanWeaponPose **)((int)pvStack_340 + 0xdc0),'\x02');
+  this = *(C_HumanEquipment **)(*(int *)((int)pvStack_340 + 600) + 0xa8);
+  if (this != nullptr) {
+    C_HumanEquipment::Unknown793b40(this);
+  }
+  iVar9 = 0;
+  do {
+    iVar1 = *piVar8;
+    S_quat::Copy((S_quat *)(iVar1 + 0xc0),(uint32_t *)((int)local_338 + iVar9));
+    S_quat::Normalize((S_quat *)(iVar1 + 0xc0));
+    *(uint32_t *)(iVar1 + 0xe0) = *(uint32_t *)(iVar1 + 0xe0) & 0xfffffecb | 0x40000008;
+    iVar1 = *piVar8;
+    if (-1 < (char)*(uint32_t *)(iVar1 + 0xe0)) {
+      *(uint32_t *)(iVar1 + 0xb0) = *(uint32_t *)((int)local_338 + iVar9 + 400);
+      *(uint32_t *)(iVar1 + 0xb4) = *(uint32_t *)((int)local_338 + iVar9 + 0x194);
+      *(uint32_t *)(iVar1 + 0xb8) = *(uint32_t *)((int)local_338 + iVar9 + 0x198);
+      *(uint32_t *)(iVar1 + 0xe0) = *(uint32_t *)(iVar1 + 0xe0) & 0xfffffedf | 0x40000000;
+    }
+    iVar1 = *piVar8;
+    iVar9 += 0x10;
+    piVar8 += 3;
+    *(short *)(iVar1 + 0xe4) = *(short *)(iVar1 + 0xe4) + 1;
+  } while (iVar9 < 400);
+  piVar8 = *(int **)(*(int *)((int)pvStack_340 + 600) + 0x20);
+  if ((piVar8[0x42] == 0) || (*(short *)(piVar8[0x42] + 0xf8) == 5)) {
+    pCVar5 = GetGame();
+    pIVar3 = pCVar5->m_scene;
+    pIVar4 = pIVar3->vtable;
+    uVar6 = (**(code **)(*piVar8 + 0x48))(piVar8,&DAT_0083939c,0xffff);
+    uVar6 = (**(code **)(*piVar8 + 0x48))(piVar8,&DAT_00839398,0xffff,uVar6);
+    (*pIVar4->Slot138)(pIVar3,piVar8,uVar6);
+  }
+  iVar9 = *(int *)(*(int *)((int)pvStack_340 + 600) + 0x20);
+  *(uint32_t *)(iVar9 + 0xe0) = *(uint32_t *)(iVar9 + 0xe0) | 0x400000;
+  piVar8 = *(int **)(*(int *)((int)pvStack_340 + 600) + 0x20);
+  (**(code **)(*piVar8 + 0x24))(piVar8);
+}
+
+// 0x007872b0
+void __thiscall C_HumanMovement::Ragdoll(C_HumanMovement *this,bool a,bool b)
+{
+  if ((a) && (0 < this->unknown69C)) {
+    Unknown75bcd0(this);
+    iVar12 = 0;
+    if (0 < this->unknown69C) {
+      do {
+        iVar13 = *(int *)(this->_pad_0730 + iVar12 * 4);
+        pSVar6 = this->unknown6A0 + iVar12;
+        *(float *)(iVar13 + 0x30) = pSVar6->x;
+        *(float *)(iVar13 + 0x34) = pSVar6->y;
+        *(float *)(iVar13 + 0x38) = pSVar6->z;
+        *(float *)(iVar13 + 0x3c) = pSVar6->w;
+        if (iVar12 == 0) {
+          fVar1 = this->unknown1CC;
+        }
+        else {
+          fVar1 = this->unknown1D0;
+        }
+        *(float *)(*(int *)(this->_pad_0730 + iVar12 * 4) + 0x4c) =
+             fVar1 * this->unknown6A0[iVar12].w;
+        *(uint32_t *)(*(int *)(this->_pad_0730 + iVar12 * 4) + 8) = 0x10002;
+        C_CollisionWorld::MoveVolume
+                  (&g_collisionWorld,*(S_CollisionVolume **)(this->_pad_0730 + iVar12 * 4));
+        iVar12++;
+      } while (iVar12 < this->unknown69C);
+    }
+  }
+  if (b) {
+    if (((uint8_t)g_gameRole & 2) != 0) {
+      local_28 = 1;
+      bVar5 = C_Human::IsLocalPlayer(this->owner);
+      if (bVar5) {
+        local_28 = 0;
+        iVar12 = 300;
+      }
+      else {
+        uVar2 = ((this->owner->m_body).movement)->flags;
+        if (((uVar2 & 0x40) != 0) || (iVar12 = 300, (uVar2 & 0x100) != 0)) {
+          iVar12 = 900;
+        }
+      }
+      iVar13 = (this->visual).unknown018 + 100;
+      (this->visual).unknown018 = iVar13;
+      if (iVar12 < iVar13) {
+        pCVar9 = this->owner;
+        pIVar3 = (this->visual).sector;
+        (this->visual).unknown018 = iVar13 - iVar12;
+        pIVar4 = pCVar9->m_frame;
+        if ((pIVar4->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar4);
+        }
+        pCVar7 = GetGame();
+        pIVar8 = (*pCVar7->m_scene->vtable->GetSector)((int)pCVar7->m_scene);
+        (this->visual).sector = pIVar8;
+        if (pIVar3 != pIVar8) {
+          if (((uint8_t)g_gameRole & 2) != 0) {
+            this_02 = (C_Team *)field_address_1c_461410(0x89ae78);
+            pCVar9 = (C_Human *)C_Team::GetActivePlayer(this_02);
+            if (this->owner == pCVar9) {
+              pCVar7 = GetGame();
+              piVar10 = (int *)C_game::GetCameraModule(pCVar7);
+              (**(code **)(*piVar10 + 0x40))(0);
+            }
+          }
+          C_HumanLighting::Unknown78a420(&(this->visual).lighting,(int)(this->visual).sector);
+        }
+      }
+      RemoveCollision(this,false);
+      if ((((this->unknownA44 < 1) || (7 < this->unknownA44)) ||
+          (this_01 = (C_Car *)this->unknownA3C, this_01 == nullptr)) ||
+         ((this_01->m_018 != 4 || (uVar11 = C_Car::IsDestroyed(this_01), (char)uVar11 == '\0')))) {
+        pIVar4 = this->joints[0x10].frame;
+        if ((pIVar4->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar4);
+        }
+        this_00 = &(this->visual).lighting;
+        C_HumanLighting::Unknown78a210
+                  (this_00,(int)(this->visual).sector,(int *)this->owner->m_frame,
+                   (pIVar4->m_worldMatrix).m[3],'\0');
+        C_HumanLighting::Unknown78a130(this_00,(int)this->owner->m_frame,100,local_28);
+      }
+      RestoreCollision(this,false);
+      return;
+    }
+    return;
+  }
+}
+
+// 0x00787530
+void __thiscall C_HumanMovement::SetPlayerControlled(C_HumanMovement *this,bool on)
+{
+  (this->locomotion).unknown130 = 500;
+  C_HumanVisual::Unknown7583c0(&this->visual,on);
+  if (this->unknownA30 == 1) {
+    C_HumanEquipment::GetModel((this->owner->m_body).equipment,9);
+  }
+}
+
+// 0x00787570
+void __thiscall FUN_00787570(void *this,float *param_1,float *param_2)
+{
+  if (((uint8_t)g_gameRole & 2) != 0) {
+    if (*(int *)((int)this + 0x184) == 0) {
+      iVar1 = _rand();
+      maxSize = (float)(iVar1 % 0x96) * 0.0013 + 0.35;
+    }
+    else {
+      iVar1 = _rand();
+      maxSize = (float)(iVar1 % 0x96) * 0.0013 + 0.25;
+    }
+    if (*(int *)((int)this + 0x184) != 5) {
+      this_00 = *(I3D_frame **)((int)this + 0x188);
+      if ((this_00->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(this_00);
+      }
+      local_50.x = (this_00->m_worldMatrix).m[3][0];
+      local_50.y = (this_00->m_worldMatrix).m[3][1];
+      local_50.z = (this_00->m_worldMatrix).m[3][2];
+      local_44 = (this_00->m_worldMatrix).m[3][3];
+      C_HumanMovement::RemoveCollision(this,false);
+      local_40.x = 0.0;
+      local_40.y = -0.2;
+      local_40.z = 0.0;
+      pSVar2 = CollisionRayTest(&local_50,&local_40,&local_30,local_20,0x48002,0);
+      C_HumanMovement::RestoreCollision(this,false);
+      if (pSVar2 != nullptr) {
+        C_ShotManager::AddBloodPool(&g_shotManager,&local_30,local_20,maxSize);
+        FUN_0078b090(&local_30.x);
+        return;
+      }
+    }
+    C_ShotManager::AddBloodPool(&g_shotManager,(S_vector *)param_1,(S_vector *)param_2,maxSize);
+    FUN_0078b090(param_1);
+  }
+}
+
+// 0x007876d0
+void __thiscall C_HumanMovement::UpdateAnimation(C_HumanMovement *this,int time)
+{
+  if (this->unknownDC4 != false) {
+    return;
+  }
+  pIVar9 = this->owner->m_frame;
+  if ((pIVar9->m_frameFlags & 0x20) == 0) {
+    I3D_frame::UpdateWMatrixProc(pIVar9);
+  }
+  bVar7 = C_Human::IsLocalPlayer(this->owner);
+  this->unknown1C0 = 0;
+  this->unknown760 = '\0';
+  auStack_3c[3] = bVar7;
+  this->unknown1D4 = '\x01';
+  this->unknown224 = '\x01';
+  QueryPerformanceFrequency((LARGE_INTEGER *)(auStack_3c + 4));
+  QueryPerformanceCounter((LARGE_INTEGER *)(local_34 + 4));
+  lVar11 = __allmul((uint32_t)local_30.x,(int)local_30.y,1000000,0);
+  uVar12 = __aulldiv((uint32_t)lVar11,(uint32_t)((uint64_t)lVar11 >> 0x20),auStack_3c._4_4_,(uint32_t)local_34)
+  ;
+  local_30.y = (float)((uint64_t)uVar12 >> 0x20);
+  this->unknown1C0 = -(int)uVar12;
+  if ((this->unknown1AC == 0) && (this->unknown9C0 == 0)) {
+    QueryPerformanceFrequency((LARGE_INTEGER *)(auStack_3c + 4));
+    QueryPerformanceCounter((LARGE_INTEGER *)(local_34 + 4));
+    lVar11 = __allmul((uint32_t)local_30.x,(int)local_30.y,1000000,0);
+    uVar12 = __aulldiv((uint32_t)lVar11,(uint32_t)((uint64_t)lVar11 >> 0x20),auStack_3c._4_4_,
+                       (uint32_t)local_34);
+    local_30.y = (float)((uint64_t)uVar12 >> 0x20);
+    this->unknown1C0 = this->unknown1C0 + (int)uVar12;
+    this->unknown1D4 = '\0';
+    if ((*(uint32_t *)(this->weaponPose2->_pad_0004 + 0x6300) & 0x200) == 0) {
+      return;
+    }
+    if (*(float *)(this->weaponPose2->_pad_0004 + 0x68cc) < 1e-08) {
+      return;
+    }
+    if ((this->locomotion).unknown114 != -10000.1) {
+      return;
+    }
+    C_HumanSpecialMoves::Unknown74eee0(&this->specialMoves);
+    return;
+  }
+  if ((this->flags & 8) != 0) {
+    QueryPerformanceFrequency((LARGE_INTEGER *)(auStack_3c + 4));
+    QueryPerformanceCounter((LARGE_INTEGER *)(local_34 + 4));
+    lVar11 = __allmul((uint32_t)local_30.x,(int)local_30.y,1000000,0);
+    uVar12 = __aulldiv((uint32_t)lVar11,(uint32_t)((uint64_t)lVar11 >> 0x20),auStack_3c._4_4_,
+                       (uint32_t)local_34);
+    this->unknown1D4 = '\0';
+    this->unknown1C0 = this->unknown1C0 + (int)uVar12;
+    return;
+  }
+  if (((auStack_3c[3] == '\0') &&
+      (pCVar4 = (this->owner->m_body).work, *(int *)(pCVar4 + 0x4c) != 2)) &&
+     (*(int *)(pCVar4 + 0xb8) != 5)) {
+    this->flags = this->flags | 1;
+  }
+  else {
+    ClearFlags(this,1);
+  }
+  FUN_00770560((int)&this->locomotion);
+  *(uint32_t *)((this->owner->m_body).work + 200) = 0;
+  *(uint32_t *)((this->owner->m_body).work + 0xcc) = 0;
+  *(uint32_t *)((this->owner->m_body).work + 0xd8) = 0;
+  pCVar4 = (this->owner->m_body).work;
+  if (*(int *)(pCVar4 + 0x5c) == 1) {
+    pCVar4 += 0xcc;
+    *(uint32_t *)pCVar4 = *(uint32_t *)pCVar4 | 0x40;
+  }
+  if (*(int *)(this->_pad_01f0 + 4) == 0x4a) {
+    pCVar4 = (this->owner->m_body).work + 0xcc;
+    *(uint32_t *)pCVar4 = *(uint32_t *)pCVar4 | 0x10000;
+  }
+  if (((1 < this->unknownA24) && (*(int *)(this->_pad_01f0 + 4) == 0x4b)) &&
+     (iVar8 = this->unknownA24 - time, this->unknownA24 = iVar8, iVar8 < 1)) {
+    this->unknownA24 = 1;
+  }
+  FUN_00780140((this->owner->m_body).work,time);
+  Unknown75f690(this,time);
+  FUN_0077e290((this->owner->m_body).work,time);
+  iVar8 = this->state;
+  if (((((iVar8 < 0x29) || (0x41 < iVar8)) && ((iVar8 < 0x1e || (0x21 < iVar8)))) &&
+      ((iVar8 < 0xa2 || (0xa5 < iVar8)))) || (this->unknownA90 != '\0')) {
+    this->unknown228 = 0;
+    (this->locomotion).unknown0E8 = 3;
+  }
+  if ((this->unknown9AC != -10000) &&
+     (iVar8 = this->unknown9AC - time, this->unknown9AC = iVar8, iVar8 < 1)) {
+    this->unknown9AC = -10000;
+    this->unknown228 = -500;
+  }
+  if ((0 < this->unknownA28) &&
+     (iVar8 = this->unknownA28 - time, this->unknownA28 = iVar8, iVar8 < 0)) {
+    this->unknownA28 = 0;
+  }
+  if (this->unknown1AC == 1) {
+    C_HumanLocomotion::Unknown763c30(&this->locomotion,time);
+  }
+  C_HumanIdle::Unknown750c00(&this->idle,time);
+  C_HumanAnimPlayer::Unknown779f90(&this->animPlayer);
+  if (((uint8_t)g_gameRole & 2) != 0) {
+    if ((this->unknownA30 < 1) ||
+       (pIVar9 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,9),
+       pIVar9 == nullptr)) {
+      RemoveCollision(this,false);
+      if ((this->unknownA44 < 1) ||
+         ((((7 < this->unknownA44 || (this_01 = (C_Car *)this->unknownA3C, this_01 == nullptr))
+           || (this_01->m_018 != 4)) || (uVar10 = C_Car::IsDestroyed(this_01), (char)uVar10 == '\0')
+          ))) {
+        iVar8 = *(int *)((this->owner->m_body).work + 0xb8);
+        if (((((iVar8 == 2) || (iVar8 == 3)) || (iVar8 = this->state, iVar8 == 0x9f)) ||
+            ((iVar8 == 0x9e || (iVar8 == 0x9b)))) ||
+           ((iVar8 == 0x6f || ((iVar8 == 0x22 || (0 < this->unknownA44)))))) {
+          local_30.y = 0.8;
+        }
+        else {
+          local_30.y = 0.0;
+        }
+        pIVar9 = this->joints[0x10].frame;
+        auStack_3c._4_4_ = local_34 + 4;
+        local_30.x = 0.0;
+        local_30.z = 0.0;
+        if ((pIVar9->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar9);
+        }
+        local_20[0].z = (pIVar9->m_worldMatrix).m[3][2] + (float)*(void **)(auStack_3c._4_4_ + 8);
+        local_20[0].y = (pIVar9->m_worldMatrix).m[3][1] + (float)*(void **)(auStack_3c._4_4_ + 4);
+        local_20[0].x = (pIVar9->m_worldMatrix).m[3][0] + (float)*(void **)auStack_3c._4_4_;
+        C_HumanLighting::Unknown78a210
+                  (&(this->visual).lighting,(int)(this->visual).sector,(int *)this->owner->m_frame,
+                   &local_20[0].x,'\0');
+      }
+    }
+    else {
+      RemoveCollision(this,false);
+      pIVar9 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,9);
+      (*pIVar9->vtable->SetOn)(pIVar9,false);
+      pIVar9 = this->joints[0x10].frame;
+      if ((pIVar9->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar9);
+      }
+      C_HumanLighting::Unknown78a210
+                (&(this->visual).lighting,(int)(this->visual).sector,(int *)this->owner->m_frame,
+                 (pIVar9->m_worldMatrix).m[3],'\0');
+      pIVar9 = this->owner->m_frame;
+      self = C_HumanEquipment::GetModel((this->owner->m_body).equipment,9);
+      (*self->vtable->SetOn)(self,(bool)((uint8_t)pIVar9->m_frameFlags & 1));
+    }
+    RestoreCollision(this,false);
+  }
+  *(uint32_t *)((this->owner->m_body).work + 0x40) = 0;
+  if ((0 < this->unknown980) &&
+     (iVar8 = this->unknown980 - time, this->unknown980 = iVar8, iVar8 < 1)) {
+    iVar8 = 0;
+    if (0 < this->unknown984) {
+      auStack_3c._4_4_ = this->volumes2;
+      do {
+        C_CollisionWorld::RemoveVolume(&g_collisionWorld,*(S_CollisionVolume **)auStack_3c._4_4_);
+        iVar8++;
+        auStack_3c._4_4_ = auStack_3c._4_4_ + 4;
+      } while (iVar8 < this->unknown984);
+    }
+    this->unknown984 = 0;
+  }
+  C_HumanIdle::Unknown755960(&this->idle,time);
+  Unknown75ef00(this,'\0');
+  if (((uint8_t)g_gameRole & 1) != 0) {
+    if ((*(int *)((this->owner->m_body).work + 0xb8) == 5) && (this->unknown764 == 0x46)) {
+      iVar8 = 0x46;
+LAB_00787d09:
+      Unknown75f340(this,iVar8,time);
+    }
+    else if (this->unknown760 == '\0') {
+      iVar8 = this->unknown75C;
+      goto LAB_00787d09;
+    }
+    pCVar5 = this->owner;
+    local_30.x = (pCVar5->m_position).x;
+    local_30.y = (pCVar5->m_position).y;
+    local_30.z = (pCVar5->m_position).z;
+    fStack_24 = (pCVar5->m_position).w;
+    if (local_30.y < _DAT_0097ca34 - 5.0) {
+      local_20[0].x = 0.0;
+      local_20[0].y = 0.0;
+      local_20[0].z = 0.0;
+      local_30.x = 0.0;
+      local_30.y = 0.0;
+      local_30.z = 0.0;
+      (*pCVar5->vtable->Hit)(6,1000.0,(S_vector *)(local_34 + 4),local_20,nullptr,0);
+    }
+  }
+  iVar8 = this->state;
+  auStack_3c._4_4_ = 0;
+  if ((((iVar8 < 0x6a) || (0x6c < iVar8)) && (iVar8 != 8)) && (iVar8 != 0xe)) {
+    if ((iVar8 < 8) || (0xe < iVar8)) {
+      if ((iVar8 == 0x12) || ((iVar8 == 0x18 || (iVar8 == 0x17)))) {
+        auStack_3c._4_4_ = 0x80000;
+      }
+    }
+    else {
+      auStack_3c._4_4_ = 0x20000;
+    }
+  }
+  else {
+    auStack_3c._4_4_ = 0x100000;
+  }
+  if ((this->locomotion).unknown114 != -10000.1) {
+    local_30.x = (float)this->joints[4].frame;
+    if ((((I3D_frame *)local_30.x)->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc((I3D_frame *)local_30.x);
+    }
+    fVar6 = (((I3D_frame *)local_30.x)->m_worldMatrix).m[3][0];
+    local_30.y = (((I3D_frame *)local_30.x)->m_worldMatrix).m[3][1];
+    local_30.z = (((I3D_frame *)local_30.x)->m_worldMatrix).m[3][2];
+    fStack_24 = (((I3D_frame *)local_30.x)->m_worldMatrix).m[3][3];
+    fVar1 = (this->locomotion).unknown114;
+    local_30.x = fVar6;
+    if (local_30.y + 0.08 < fVar1 != (local_30.y + 0.08 == fVar1)) {
+      Unknown75f040(this,time,'\x01');
+      auStack_3c._4_4_ = auStack_3c._4_4_ | 0x40000;
+      goto LAB_00787e75;
+    }
+  }
+  Unknown75f040(this,time,'\0');
+LAB_00787e75:
+  C_Human::ControllerUnknownD0(this->owner);
+  if (199 < (uint32_t)this->unknownA80) {
+    this->unknownA80 = this->unknownA80 - 200;
+  }
+  if (299 < (uint32_t)this->unknownA84) {
+    this->unknownA84 = this->unknownA84 - 300;
+  }
+  if (399 < (uint32_t)this->unknownA88) {
+    this->unknownA88 = this->unknownA88 - 400;
+  }
+  if (599 < (uint32_t)this->unknownA8C) {
+    this->unknownA8C = this->unknownA8C - 600;
+  }
+  if (((((this->flags & 0x200) == 0) || (bVar7 = C_Human::IsLocalPlayer(this->owner), bVar7)) ||
+      (this->unknown1AC != 1)) || (this->unknown761 != '\0')) {
+    if ((this->unknown18C != false) &&
+       (((float)this->unknown228 <= 280.0 / _DAT_0084e920 || (this->unknown761 != '\0')))) {
+      pCVar5 = this->owner;
+      local_34 = (uint8_t  [4])(pCVar5->m_position).x;
+      local_30.x = (pCVar5->m_position).y;
+      local_30.y = (pCVar5->m_position).z;
+      local_30.z = (pCVar5->m_position).w;
+      C_HumanVisual::Unknown759e50(&this->visual,(float *)local_34);
+    }
+    QueryPerformanceFrequency((LARGE_INTEGER *)auStack_3c);
+    QueryPerformanceCounter((LARGE_INTEGER *)local_34);
+    lVar11 = __allmul((uint32_t)local_34,(int)local_30.x,1000000,0);
+    uVar12 = __aulldiv((uint32_t)lVar11,(uint32_t)((uint64_t)lVar11 >> 0x20),auStack_3c._0_4_,
+                       auStack_3c._4_4_);
+    this->unknown1C0 = this->unknown1C0 + (int)uVar12;
+  }
+  else {
+    if ((this->unknown18C != false) && ((float)this->unknown228 <= 280.0 / _DAT_0084e920)) {
+      this_00 = &this->visual;
+      C_HumanVisual::Unknown7583c0(this_00,'\x01');
+      pCVar5 = this->owner;
+      local_34 = (uint8_t  [4])(pCVar5->m_position).x;
+      local_30.x = (pCVar5->m_position).y;
+      local_30.y = (pCVar5->m_position).z;
+      local_30.z = (pCVar5->m_position).w;
+      C_HumanVisual::Unknown759e50(this_00,(float *)local_34);
+      C_HumanVisual::Unknown7583c0(this_00,'\0');
+    }
+    QueryPerformanceFrequency((LARGE_INTEGER *)auStack_3c);
+    QueryPerformanceCounter((LARGE_INTEGER *)local_34);
+    lVar11 = __allmul((uint32_t)local_34,(int)local_30.x,1000000,0);
+    uVar12 = __aulldiv((uint32_t)lVar11,(uint32_t)((uint64_t)lVar11 >> 0x20),auStack_3c._0_4_,
+                       auStack_3c._4_4_);
+    local_30.x = (float)((uint64_t)uVar12 >> 0x20);
+    this->unknown1C0 = this->unknown1C0 + (int)uVar12;
+    C_HumanVisual::Unknown7583c0(&this->visual,'\x01');
+    UpdatePhysics(this,time);
+    C_HumanVisual::Unknown7583c0(&this->visual,'\0');
+  }
+  if ((this->mixer).unknown260 <= (this->mixer).unknown240) {
+    fVar1 = (float)(this->mixer).unknown234;
+    fVar6 = (this->mixer).unknown240;
+    fVar2 = (float)(this->mixer).unknown238;
+    fVar3 = (this->mixer).unknown240;
+    (this->locomotion).unknown0B0 =
+         (int)((this->mixer).unknown240 * (float)(this->mixer).unknown230);
+    (this->locomotion).unknown0B4 = (int)(fVar1 * fVar6);
+    (this->locomotion).unknown0B8 = (int)(fVar2 * fVar3);
+    (this->locomotion).unknown0BC = (int)local_30.z;
+  }
+  else {
+    fVar1 = (this->mixer).unknown254;
+    fVar6 = (this->mixer).unknown260;
+    fVar2 = *(float *)(this->mixer)._pad_0258;
+    fVar3 = (this->mixer).unknown260;
+    (this->locomotion).unknown0B0 = (int)((this->mixer).unknown250 * (this->mixer).unknown260);
+    (this->locomotion).unknown0B4 = (int)(fVar1 * fVar6);
+    (this->locomotion).unknown0B8 = (int)(fVar2 * fVar3);
+    (this->locomotion).unknown0BC = (int)local_30.z;
+  }
+  this->unknown1D4 = '\0';
+  if (0 < this->unknownDC8) {
+    this->unknownDC8 = this->unknownDC8 - 1;
+  }
+}
+

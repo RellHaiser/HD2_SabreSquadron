@@ -1,0 +1,180 @@
+// 0x0040e080 void __thiscall FUN_0040e080(void *this,float *param_1,float *param_2) { fVar1 = *(float *)((int)this + 8); fVar2 = param_2[2]; fVar3 = *(float *)((int)this + 4); fVar4 = param_2[1]; *param_1 = *(float *)this - *param_2; param_1[1] = fVar3 - fVar4; param_1[2] = fVar1 - fVar2; }
+
+0041d000 void __thiscall FUN_0041d000(void *this,uint32_t param_1) { C_BitStream::WriteBits(this,param_1,8); }
+
+0041d010 void __thiscall FUN_0041d010(void *this,uint32_t param_1) { C_BitStream::WriteBits(this,param_1,0x20); }
+
+0041d070 void __thiscall FUN_0041d070(void *this,float *param_1) { if (*param_1 < *(float *)this) { *(float *)this = *param_1; } if (*(float *)((int)this + 0x10) < *param_1) { *(float *)((int)this + 0x10) = *param_1; } if (param_1[1] < *(float *)((int)this + 4)) { *(float *)((int)this + 4) = param_1[1]; } if (*(float *)((int)this + 0x14) < param_1[1]) { *(float *)((int)this + 0x14) = param_1[1]; } if (param_1[2] < *(float *)((int)this + 8)) { *(float *)((int)this + 8) = param_1[2]; } if (*(float *)((int)this + 0x18) < param_1[2]) { *(float *)((int)this + 0x18) = param_1[2]; } }
+
+0041d0f0 int __fastcall FUN_0041d0f0(int param_1) { *(short *)(param_1 + 0xe4) = *(short *)(param_1 + 0xe4) + 1; return (int)*(short *)(param_1 + 0xe4); }
+
+0041d110 void __thiscall FUN_0041d110(void *this,uint32_t *param_1) { if (-1 < (char)*(uint32_t *)((int)this + 0xe0)) { *(uint32_t *)((int)this + 0xb0) = *param_1; *(uint32_t *)((int)this + 0xb4) = param_1[1]; *(uint32_t *)((int)this + 0xb8) = param_1[2]; *(uint32_t *)((int)this + 0xe0) = *(uint32_t *)((int)this + 0xe0) & 0xfffffedf | 0x40000000; } }
+
+0041d160 float (*) [4] __fastcall FUN_0041d160(I3D_frame *param_1) { if ((param_1->m_frameFlags & 0x20) == 0) { I3D_frame::UpdateWMatrixProc(param_1); } return (param_1->m_worldMatrix).m + 3; }
+
+0041d180 void __thiscall FUN_0041d180(void *this,uint32_t *param_1) { ((S_quat *)((int)this + 0xc0))->s = (float)*param_1; *(uint32_t *)((int)this + 0xc4) = param_1[1]; *(uint32_t *)((int)this + 200) = param_1[2]; *(uint32_t *)((int)this + 0xcc) = param_1[3]; S_quat::Normalize((S_quat *)((int)this + 0xc0)); *(uint32_t *)((int)this + 0xe0) = *(uint32_t *)((int)this + 0xe0) & 0xfffffecb | 0x40000008; }
+
+0041d1d0 int __fastcall FUN_0041d1d0(int param_1) { if ((*(uint32_t *)(param_1 + 0xe0) & 8) == 0) { *(uint32_t *)(param_1 + 0xe0) = *(uint32_t *)(param_1 + 0xe0) | 8; S_quat::Make((S_quat *)(param_1 + 0xc0),(S_matrix *)(param_1 + 0x80)); } return param_1 + 0xc0; }
+
+0041d370 int __fastcall FUN_0041d370(int param_1) { uVar1 = *(uint32_t *)(param_1 + 0xe0); if ((uVar1 & 0x10) == 0) { *(uint32_t *)(param_1 + 0xe0) = uVar1 | 0x14; self = (S_matrix *)(param_1 + 0x80); S_matrix::SetRot3(self,(S_quat *)(param_1 + 0xc0)); self->m[0][0] = self->m[0][0] * *(float *)(param_1 + 0xd0); } else { if ((uVar1 & 4) != 0) goto LAB_0041d475; if ((uVar1 & 8) == 0) { S_quat::Make((S_quat *)(param_1 + 0xc0),(S_matrix *)(param_1 + 0x80)); } *(uint32_t *)(param_1 + 0xe0) = *(uint32_t *)(param_1 + 0xe0) | 0xc; *(float *)(param_1 + 0x80) = *(float *)(param_1 + 0x80) * *(float *)(param_1 + 0xd0); } *(float *)(param_1 + 0x84) = *(float *)(param_1 + 0x84) * *(float *)(param_1 + 0xd0
+
+0041d480 S_matrix * __fastcall FUN_0041d480(I3D_frame *param_1) { if ((param_1->m_frameFlags & 0x20) == 0) { I3D_frame::UpdateWMatrixProc(param_1); } return &param_1->m_worldMatrix; }
+
+0041d4a0 uint8_t * __fastcall FUN_0041d4a0(int param_1) { puVar1 = *(uint8_t **)(param_1 + 0xe8); if (puVar1 == nullptr) { puVar1 = &DAT_00867a90; } return puVar1; }
+
+0041d4e0 void __thiscall FUN_0041d4e0(void *this,uint32_t *param_1,uint32_t *param_2) { *param_1 = *(uint32_t *)((int)this + 0x124); *param_2 = *(uint32_t *)((int)this + 0x128); }
+
+0041d510 bool __fastcall FUN_0041d510(int param_1) { return *(int *)(param_1 + 0x19c) == 4; }
+
+0041d520 bool __fastcall FUN_0041d520(int param_1) { return *(int *)(param_1 + 0x19c) == 5; }
+
+0041d530 uint32_t __fastcall FUN_0041d530(int param_1) { return CONCAT31((int3)((uint32_t)*(int *)(param_1 + 0xec) >> 8),*(int *)(param_1 + 0xec) < 1); }
+
+0041d540 uint32_t __fastcall FUN_0041d540(int param_1) { return CONCAT31((int3)((uint32_t)*(int *)(param_1 + 0xec) >> 8),0 < *(int *)(param_1 + 0xec)); }
+
+0041d590 void __thiscall FUN_0041d590(void *this,char param_1,uint8_t *param_2) { if (param_1 != '\0') { FUN_005bd490(this,param_2); } *(char *)((int)this + 0x19c) = param_1; }
+
+0041d5e0 uint32_t __thiscall FUN_0041d5e0(void *this,uint8_t *param_1) { if (param_1 == nullptr) { return 0; } if ((*(int *)((int)this + 0x10) != 0) && (iVar2 = *(int *)((int)this + 0x14) - *(int *)((int)this + 0x10) >> 2, iVar2 != 0)) { while( true ) { iVar2--; iVar1 = **(int **)(*(int *)((int)this + 0x10) + iVar2 * 4); if (iVar1 == 0) { a = &DAT_00867a90; } else { a = (char *)(iVar1 + 8); } iVar1 = _stricmp(a,(char *)param_1); if (iVar1 == 0) break; if (iVar2 == 0) { return 0; } } if (iVar2 != -1) { return *(uint32_t *)(*(int *)((int)this + 0x10) + iVar2 * 4); } } return 0; }
+
+0041d660 uint8_t * __fastcall FUN_0041d660(int *param_1) { if (*param_1 != 0) { return (uint8_t *)(*param_1 + 8); } return &DAT_00867a90; }
+
+0041d700 void __thiscall FUN_0041d700(void *this,uint32_t *param_1) { *(uint32_t *)((int)this + 0x30) = *param_1; *(uint32_t *)((int)this + 0x34) = param_1[1]; *(uint32_t *)((int)this + 0x38) = param_1[2]; *(uint32_t *)((int)this + 0x3c) = param_1[3]; }
+
+0041d720 void __thiscall FUN_0041d720(void *this,uint32_t *param_1) { *(uint32_t *)((int)this + 0x40) = *param_1; *(uint32_t *)((int)this + 0x44) = param_1[1]; *(uint32_t *)((int)this + 0x48) = param_1[2]; *(uint32_t *)((int)this + 0x4c) = param_1[3]; }
+
+0041d780 uint32_t __fastcall FUN_0041d780(int param_1) { return CONCAT31((int3)((uint32_t)*(int *)(param_1 + 0x4a0) >> 8),0 < *(int *)(param_1 + 0x4a0)); }
+
+0041d790 void __fastcall FUN_0041d790(int param_1) { // WARNING: Could not recover jumptable at 0x0041d798. Too many branches // WARNING: Treating indirect jump as call (**(code **)(**(int **)(param_1 + 0x534) + 0x3c))(); }
+
+0041d7a0 void __thiscall FUN_0041d7a0(void *this,char param_1) { FUN_005c86c0((void *)((int)this + 0x90),param_1); }
+
+0041d7c0 void __thiscall FUN_0041d7c0(void *this,uint32_t *param_1) { uVar1 = *(uint32_t *)((int)this + 8); uVar2 = *(uint32_t *)((int)this + 4); *param_1 = *(uint32_t *)this; param_1[1] = uVar2; param_1[2] = uVar1; }
+
+0041d800 void __fastcall FUN_0041d800(int param_1) { iVar2 = *(int *)(param_1 + 600); *(uint32_t *)(param_1 + 0x228) = 0; local_20 = *(float *)(iVar2 + 0x30); local_1c = *(uint32_t *)(iVar2 + 0x34); local_18 = *(uint32_t *)(iVar2 + 0x38); local_14 = *(uint32_t *)(iVar2 + 0x3c); FUN_00759e50((void *)(param_1 + 0xcd0),&local_20); iVar2 = *(int *)(param_1 + 600); local_20 = *(float *)(iVar2 + 0x30); local_1c = *(uint32_t *)(iVar2 + 0x34); local_18 = *(uint32_t *)(iVar2 + 0x38); local_14 = *(uint32_t *)(iVar2 + 0x3c); FUN_00759e50((void *)(param_1 + 0xcd0),&local_20); *(uint32_t *)(param_1 + 0xce8) = 10000; *(uint8_t *)(param_1 + 0xdb4) = 1; uVar1 = *(uint32_t *)(*(int *)(param_1 + 600) + 0x20);
+
+0041d8b0 void __fastcall FUN_0041d8b0(uint32_t *param_1) { *param_1 = 0; param_1[1] = 0; param_1[2] = 0; param_1[4] = 0; param_1[5] = 0; param_1[6] = 0; param_1[0xe] = 0; *(uint8_t *)(param_1 + 0x10) = 0; *(uint8_t *)((int)param_1 + 0x41) = 0; }
+
+00424260 uint32_t __thiscall FUN_00424260(void *this,int *param_1) { if ((*(int *)((int)this + 0x87c) != 0) && (uVar1 = *(int *)((int)this + 0x880) - *(int *)((int)this + 0x87c) >> 2, uVar1 != 0)) { iVar2 = *(int *)((int)this + 0x87c) + uVar1 * 4; do { piVar3 = (int *)(iVar2 - 4); iVar2 -= 4; uVar1--; if ((int *)*piVar3 == param_1) { return uVar1 & 0xffffff00; } } while (uVar1 != 0); } uStack_4 = this; FUN_007764d0(param_1); piVar3 = param_1; this_00 = (void *)GetGame(); FUN_0069a5b0(this_00,piVar3); FUN_0042a140((void *)((int)this + 0x878),*(uint32_t **)((int)this + 0x880),1,&param_1); uStack_4 = (void *)CONCAT13(*(char *)((int)this + 0x824) != '\0',(undefined3)uStack_4); FUN_0042a560((void
+
+00424420 uint32_t __thiscall FUN_00424420(void *this,int param_1) { if ((*(int *)((int)this + 0x86c) != 0) && (uVar2 = *(int *)((int)this + 0x870) - *(int *)((int)this + 0x86c) >> 2, uVar2 != 0)) { iVar3 = *(int *)((int)this + 0x86c) + uVar2 * 4; do { piVar1 = (int *)(iVar3 - 4); iVar3 -= 4; uVar2--; if (*piVar1 == param_1) { return uVar2 & 0xffffff00; } } while (uVar2 != 0); } FUN_0042a140((void *)((int)this + 0x868),*(uint32_t **)((int)this + 0x870),1,&param_1); *(short *)(param_1 + 0xe4) = *(short *)(param_1 + 0xe4) + 1; return CONCAT31((int3)((uint32_t)param_1 >> 8),1); }
+
+00424540 void * __fastcall FUN_00424540(uint32_t param_1,char param_2) { this = (void *)FUN_0072c280(&g_netGame,4,(uint32_t)(param_2 == '\0')); if (this != nullptr) { C_BitStream::WriteBits(this,param_1,DAT_00838874); } return this; }
+
+00424580 void __fastcall FUN_00424580(void *param_1) { FUN_0072c360(&g_netGame,param_1); }
+
+004336c0 uint8_t * FUN_004336c0(void) { return &g_soundModule; }
+
+004374d0 uint32_t * __fastcall FUN_004374d0(uint32_t *param_1) { puVar2 = param_1; memset(puVar2, 0, 0x10 * sizeof(*puVar2)); puVar2 += 0x10; param_1[0xc] = 4; param_1[0xd] = 0x3f800000; param_1[0xe] = 0x3f800000; param_1[0xf] = 0x3f800000; return param_1; }
+
+00445800 void __thiscall FUN_00445800(void *this,int param_1) { puVar2 = (uint32_t *)FUN_00445740(this,param_1,&param_1); if (puVar2 != nullptr) { ptr = (void *)*puVar2; if (ptr != nullptr) { FUN_004406a0(ptr); _aligned_free(ptr); } puVar3 = (uint32_t *)(param_1 * 0x10 + *(int *)((int)this + 0x1014)); puVar2 = *(uint32_t **)((int)this + 0x1018); puVar1 = puVar3; while (puVar3 = puVar3 + 4, puVar3 != puVar2) { *puVar1 = *puVar3; puVar1[1] = puVar3[1]; puVar1[2] = puVar3[2]; puVar1[3] = puVar3[3]; puVar1 += 4; } *(int *)((int)this + 0x1018) = *(int *)((int)this + 0x1018) - 0x10; } }
+
+004458d0 void __thiscall FUN_004458d0(void *this,int param_1) { puVar1 = (uint32_t *)FUN_00445740(this,param_1,&param_1); if (puVar1 != nullptr) { FUN_00443210((uint32_t *)*puVar1); } }
+
+0045d100 void __thiscall FUN_0045d100(void *this,uint32_t param_1,char param_2) { if (param_2 != '\0') { (**(code **)(*(int *)this + 8))(); return; } (**(code **)(*(int *)this + 0x24))(param_1); }
+
+0045d1d0 int __fastcall FUN_0045d1d0(int param_1) { iVar1 = *(int *)(param_1 + 0x58); if (iVar1 == 0) { if (*(int *)(param_1 + 0x2c) == -1) { return 0; } iVar1 = *(int *)(*(int *)(param_1 + 8) + *(int *)(param_1 + 0x2c) * 4); } return iVar1; }
+
+0045da40 void __fastcall FUN_0045da40(int param_1) { if (*(int *)(param_1 + 0x2c) != -1) { C_Human::FUN_005a3e60 (*(C_Human **)(*(int *)(param_1 + 8) + *(int *)(param_1 + 0x2c) * 4),'\x01'); } }
+
+00461240 uint32_t __thiscall FUN_00461240(void *this,int param_1) { if ((param_1 != 0) && (in_EAX = *(uint32_t *)((int)this + 0x10), in_EAX != 0)) { iVar2 = (int)(*(int *)((int)this + 0x14) - in_EAX) >> 2; while (iVar2 != 0) { iVar2--; in_EAX = FUN_00461a20(*(void **)(*(int *)((int)this + 0x10) + iVar2 * 4),param_1); if ((char)in_EAX != '\0') { uVar1 = (**(code **)(**(int **)(*(int *)((int)this + 0x10) + iVar2 * 4) + 0xc))(param_1,0); return uVar1; } } } return in_EAX & 0xffffff00; }
+
+00461390 void __thiscall FUN_00461390(void *this,int *param_1) { if (*(int *)((int)this + 0x10) != 0) { iVar3 = *(int *)((int)this + 0x14) - *(int *)((int)this + 0x10) >> 2; while (iVar3 != 0) { iVar3--; piVar1 = *(int **)(*(int *)((int)this + 0x10) + iVar3 * 4); if (piVar1 == param_1) { if (piVar1 != nullptr) { (**(code **)(*piVar1 + 4))(1); } if (*(int *)((int)this + 0x10) == 0) { iVar2 = 0; } else { iVar2 = *(int *)((int)this + 0x14) - *(int *)((int)this + 0x10) >> 2; } *(uint32_t *)(*(int *)((int)this + 0x10) + iVar3 * 4) = *(uint32_t *)(*(int *)((int)this + 0x10) - 4 + iVar2 * 4); *(int *)((int)this + 0x14) = *(int *)((int)this + 0x14) - 4; } } } }
+
+004619f0 uint32_t __thiscall C_auto_0080fc20::FUN_004619f0(C_auto_0080fc20 *this,uint32_t param_1) { if ((this->m_008 != 0) && (param_1 < (uint32_t)(this->m_00c - this->m_008 >> 2))) { return *(uint32_t *)(this->m_008 + param_1 * 4); } return 0; }
+
+004622c0 int __fastcall FUN_004622c0(int param_1) { iVar2 = 0; for (uVar3 = 0; (*(int *)(param_1 + 8) != 0 && (uVar3 < (uint32_t)(*(int *)(param_1 + 0xc) - *(int *)(param_1 + 8) >> 2))); uVar3 = uVar3 + 1) { iVar1 = *(int *)(*(int *)(param_1 + 8) + uVar3 * 4); if ((iVar1 != 0) && (0 < *(int *)(iVar1 + 0xec))) { iVar2++; } } return iVar2; }
+
+00462300 int __fastcall FUN_00462300(int param_1) { if (*(int *)(param_1 + 8) == 0) { return 0; } return *(int *)(param_1 + 0xc) - *(int *)(param_1 + 8) >> 2; }
+
+00475dd0 uint32_t __thiscall FUN_00475dd0(void *this,int param_1) { if (*(int *)((int)this + 0x10) == 0) { iVar1 = 0; } else { iVar1 = *(int *)((int)this + 0x14) - *(int *)((int)this + 0x10) >> 2; } if ((param_1 < iVar1) && (-1 < param_1)) { return *(uint32_t *)(*(int *)((int)this + 0x10) + param_1 * 4); } return 0; }
+
+00479450 int * __thiscall FUN_00479450(void *this,int *param_1) { iVar1 = (**(code **)(*param_1 + 4))(param_1); if (iVar1 == 0) { return nullptr; } piVar2 = I3DGetDriver(); iVar1 = *piVar2; uVar3 = (**(code **)(*param_1 + 4))(param_1); piVar2 = (int *)(**(code **)(iVar1 + 0x50))(piVar2,uVar3); (**(code **)(*piVar2 + 0x4c))(piVar2,param_1); (**(code **)(*piVar2 + 8))(piVar2,unaff_EBP); (**(code **)(*piVar2 + 0xc))(piVar2,unaff_ESI,0); (**(code **)(*piVar2 + 0x24))(piVar2); *(int *)((int)this + 0x74) = *(int *)((int)this + 0x74) + 1; piVar4 = C_TemporaryActorsList::FUN_004770b0(this,0xc,(int)piVar2); (**(code **)*piVar2)(piVar2); return piVar4; }
+
+0047b010 void __thiscall FUN_0047b010(void *this,uint32_t param_1) { cVar2 = (char)param_1; if ((cVar2 != *(char *)this) && ((DAT_0089b749 != '\0' || (cVar2 == '\0')))) { if ((*(int *)((int)this + 0x28) != 0) && (iVar4 = 0, 0 < *(int *)((int)this + 8))) { do { iVar3 = 0; if (0 < *(int *)((int)this + 4)) { iVar5 = 0; do { piVar1 = *(int **)(*(int *)(*(int *)((int)this + 0x28) + iVar4 * 4) + 4 + iVar5); if (piVar1 != nullptr) { (**(code **)(*piVar1 + 0x30))(piVar1,param_1); piVar1 = *(int **)(*(int *)(*(int *)((int)this + 0x28) + iVar4 * 4) + 4 + iVar5); (**(code **)(*piVar1 + 0x24))(piVar1); } iVar3++; iVar5 += 0x14; } while (iVar3 < *(int *)((int)this + 4)); } iVar4++; } while (iVar4 < *(int
+
+0048cb00 uint8_t * FUN_0048cb00(void) { return &g_lightMapGroupsModule; }
+
+0048e2d0 uint32_t __thiscall FUN_0048e2d0(void *this,int param_1) { uVar2 = 0; if (*(int *)((int)this + 0x10) != 0) { iVar4 = *(int *)((int)this + 0x14) - *(int *)((int)this + 0x10); iVar3 = iVar4 / 0x1c; uVar2 = -(iVar4 >> 0x1f); if (iVar3 != 0) { uVar2 = *(int *)((int)this + 0x10) + 4 + iVar3 * 0x1c; do { piVar1 = (int *)(uVar2 - 0x1c); uVar2 -= 0x1c; iVar3--; if (*piVar1 == param_1) { return CONCAT31((int3)(uVar2 >> 8),1); } } while (iVar3 != 0); } } return uVar2 & 0xffffff00; }
+
+0048e780 int __thiscall FUN_0048e780(void *this,int param_1) { if (*(int *)((int)this + 0x10) != 0) { iVar3 = (*(int *)((int)this + 0x14) - *(int *)((int)this + 0x10)) / 0x1c; if (iVar3 != 0) { iVar2 = *(int *)((int)this + 0x10) + iVar3 * 0x1c; do { piVar1 = (int *)(iVar2 - 0x1c); iVar2 -= 0x1c; iVar3--; if (*piVar1 == param_1) { return *(int *)((int)this + 0x10) + iVar3 * 0x1c; } } while (iVar3 != 0); } } return 0; }
+
+004db310 void __thiscall FUN_004db310(void *this) { local_4 = *(uint32_t *)((int)this + 0xfec); local_c = &PTR_FUN_008108b8; if (((uint8_t)g_gameRole & 1) != 0) { C_Car::FUN_004db2b0(this,(int *)&local_c); return; } C_Car::FUN_004db2e0(this,(int *)&local_c); }
+
+004f2670 uint32_t __thiscall FUN_004f2670(void *this,float param_1) { fVar1 = *(float *)((int)this + 0x2220); bVar2 = param_1 < fVar1; bVar3 = param_1 == fVar1; if (!bVar2 && bVar3 == 0) { param_1 = *(float *)((int)this + 0x2220); } *(float *)((int)this + 0xf5c) = param_1; return CONCAT31((uint3)(uint8_t)(bVar2 | (uint8_t)((uint16_t)((uint16_t)bVar3 << 0xe) >> 8)),1); }
+
+0051d5a0 int __thiscall FUN_0051d5a0(void *this,uint16_t param_1) { if (*(uint16_t *)this <= param_1) { return 0; } return *(int *)((int)this + 4) + (uint32_t)param_1 * 0x24; }
+
+0051e1a0 uint16_t __thiscall FUN_0051e1a0(void *this,char *param_1) { uVar2 = 0; if (*(short *)((int)this + 0xc) != 0) { do { iVar1 = FUN_0051c800((void *)(*(int *)((int)this + 0x10) + (uint32_t)uVar2 * 0x12),param_1); if (iVar1 == 0) { return *(uint16_t *)(*(int *)((int)this + 0x10) + 0x10 + (uint32_t)uVar2 * 0x12); } uVar2++; } while (uVar2 < *(uint16_t *)((int)this + 0xc)); } return 0xffff; }
+
+0051f490 uint32_t __thiscall FUN_0051f490(void *this,char *param_1,char *param_2) { sVar1 = FUN_0051e1a0(this,param_1); sVar2 = FUN_0051e1a0(this,param_2); if ((sVar1 != -1) && (sVar2 != -1)) { uVar3 = FUN_0051f280(this,CONCAT22(extraout_var,sVar1), (uint32_t *)CONCAT22(extraout_var_00,sVar2)); return uVar3; } return CONCAT22(extraout_var_00,sVar2) & 0xffffff00; }
+
+0051f5a0 uint32_t __thiscall FUN_0051f5a0(void *this,char *param_1,char *param_2) { uVar1 = FUN_0051e1a0(this,param_1); uVar2 = FUN_0051e1a0(this,param_2); if ((uVar1 != 0xffff) && (uVar2 != 0xffff)) { uVar3 = FUN_0051f4d0(this,uVar1,uVar2); return uVar3; } return CONCAT22(extraout_var,uVar2) & 0xffffff00; }
+
+005977f0 void __thiscall FUN_005977f0(void *this,float *param_1) { pfVar1 = (float *)((int)this + 0x50); *pfVar1 = *param_1; *(float *)((int)this + 0x54) = param_1[1]; *(float *)((int)this + 0x58) = param_1[2]; *(float *)((int)this + 0x5c) = param_1[3]; S_matrix::SetDir(this,(S_vector *)((int)this + 0x40)); *(float *)this = *pfVar1 * *(float *)this; *(float *)((int)this + 4) = *pfVar1 * *(float *)((int)this + 4); *(float *)((int)this + 8) = *pfVar1 * *(float *)((int)this + 8); *(float *)((int)this + 0x10) = *(float *)((int)this + 0x10) * *(float *)((int)this + 0x54); *(float *)((int)this + 0x14) = *(float *)((int)this + 0x54) * *(float *)((int)this + 0x14); *(float *)((int)this + 0x18) = *(f
+
+005a5ff0 int64_t __fastcall FUN_005a5ff0(int param_1,uint32_t param_2) { if (*(int *)(param_1 + 0xec) == 0) { return (uint64_t)param_2 << 0x20; } fVar1 = ((float)*(int *)(param_1 + 0xec) * 100.0) / (float)*(int *)(param_1 + 0x11c); if ((fVar1 < 1.0) && (0.0 < fVar1)) { lVar2 = __ftol(); return lVar2; } lVar2 = __ftol(); return lVar2; }
+
+005a6060 void __thiscall FUN_005a6060(void *this,int param_1) { if (0 < *(int *)((int)this + 0xec)) { local_4 = 100; piVar1 = &param_1; if (99 < param_1) { piVar1 = &local_4; } local_4 = 1; piVar2 = &param_1; if (*piVar1 < 2) { piVar2 = &local_4; } param_1 = *piVar2; lVar3 = __ftol(); *(int *)((int)this + 0xec) = (int)lVar3; } }
+
+005a63b0 uint8_t __fastcall FUN_005a63b0(int param_1) { if (((uint8_t)g_gameRole & 7) == 7) { return 1; } if (*(int *)(param_1 + 0xb0) == 0) { return 0; } uVar1 = 1; if (*(int *)(param_1 + 0x19c) == 1) { uVar1 = *(uint8_t *)(param_1 + 0x20c); } return uVar1; }
+
+005a63f0 uint32_t __fastcall FUN_005a63f0(int param_1) { piVar1 = (int *)(g_gameRole & 7); if ((((char)piVar1 != '\a') && (piVar1 = *(int **)(param_1 + 0xb0), piVar1 != nullptr)) && (*(int *)(param_1 + 0x19c) == 1)) { // WARNING: Could not recover jumptable at 0x005a6413. Too many branches // WARNING: Treating indirect jump as call uVar2 = (**(code **)(*piVar1 + 100))(); return uVar2; } return (uint32_t)piVar1 & 0xffffff00; }
+
+005a7b30 void __thiscall FUN_005a7b30(void *this,int param_1) { iVar1 = FUN_005a78f0(this,param_1,nullptr); while (iVar1 != 0) { FUN_005a7b70(this,*(int *)(iVar1 + 0x10),'\x01'); iVar1 = FUN_005a78f0(this,param_1,nullptr); } *(uint8_t *)((int)this + 0x178) = 1; }
+
+005a87c0 void __thiscall C_Human::FUN_005a87c0(C_Human *this,char *param_1) { C_str::operator_assign((C_str *)&this->m_0bc,param_1); iVar1 = this->m_0bc; if (iVar1 == 0) { puVar4 = &DAT_00867a90; } else { puVar4 = (uint8_t *)(iVar1 + 8); } pvVar2 = this->m_020; piVar3 = (int *)GetGEffects(); (**(code **)(*piVar3 + 0xac))(pvVar2,puVar4); }
+
+005af150 void __thiscall FUN_005af150(void *this,uint32_t param_1,char param_2) { if (*(int *)((int)*(void **)((int)this + 0xb0) + 0x48) == 5) { FUN_0058e650(*(void **)((int)this + 0xb0),param_1,param_2); return; } }
+
+005af450 void __fastcall FUN_005af450(int param_1) { if (*(int *)(*(int *)(param_1 + 0xb0) + 0x48) == 5) { FUN_0058f680(*(int *)(param_1 + 0xb0)); return; } }
+
+005af570 void __thiscall FUN_005af570(void *this,uint32_t param_1) { if (*(int *)((int)*(void **)((int)this + 0xb0) + 0x48) == 5) { FUN_0058faa0(*(void **)((int)this + 0xb0),param_1); return; } C_Human::FUN_005a5d50(this,param_1); if ((char)param_1 != '\0') { FUN_005a7f50((int)this); return; } FUN_005a7fa0((int)this); }
+
+005af5c0 void __thiscall FUN_005af5c0(void *this,int param_1) { if (*(int *)((int)*(void **)((int)this + 0xb0) + 0x48) == 5) { FUN_0058fcc0(*(void **)((int)this + 0xb0),param_1); return; } }
+
+005b7920 void __thiscall FUN_005b7920(void *this,int param_1) { C_ItemActor::FUN_005b76a0(this,param_1); if (((uint8_t)g_gameRole & 7) != 7) { this_00 = FUN_00478780(*(uint32_t *)((int)this + 0x10),'\x01'); log2((long double)4.0); log2((long double)2.0); lVar2 = __ftol(); C_BitStream::WriteBits(this_00,3,(int)lVar2); pcVar1 = *(char **)(param_1 + 0xe8); if (pcVar1 == nullptr) { pcVar1 = &DAT_00867a90; } C_BitStream::WriteString(this_00,pcVar1); FUN_00478880(this_00); } }
+
+005b8ea0 void __thiscall C_Pike::FUN_005b8ea0(C_Pike *this,int param_1) { iVar1 = *(int *)((int)this->m_020 + 0xec); if ((iVar1 != 0) && (iVar1 = *(int *)(iVar1 + 4), iVar1 != 0)) { FUN_0041d960(iVar1); } if (param_1 == 2) { FUN_005b9e70(this,0); this->m_184 = 2; return; } if (param_1 == 3) { FUN_005b9e70(this,1); this->m_184 = 3; } }
+
+005d5870 void __thiscall FUN_005d5870(void *this,char param_1) { FUN_005c86e0((void *)((int)this + 0x90),param_1); *(char *)((int)this + 0x530) = param_1; }
+
+005e2510 uint32_t __thiscall C_WireCut::FUN_005e2510(C_WireCut *this,float *param_1) { uVar3 = (**(code **)(*(int *)this->m_090 + 0x14))(3,param_1,0); if ((char)uVar3 == '\0') { return uVar3; } if (unaff_BL != '\0') { FUN_00408750((int)this->m_090); } FUN_005e2480(this); this_00 = FUN_00478780(this->m_010,'\x01'); FUN_0073db30(this_00,param_1,-1); FUN_00478880(this_00); iVar1 = *(int *)((int)this->m_020 + 0xec); if ((iVar1 != 0) && (iVar1 = *(int *)(iVar1 + 4), iVar1 != 0)) { FUN_0041d960(iVar1); } this->m_0a0 = *param_1; this->m_0a4 = param_1[1]; fVar2 = param_1[2]; this->m_0a8 = fVar2; this->m_0ac = (uint32_t)param_1[3]; return CONCAT31((int3)((uint32_t)fVar2 >> 8),1); }
+
+005e7570 void __thiscall C_AirAttack::FUN_005e7570(C_AirAttack *this,char param_1,int param_2) { this->m_148 = 100.0; this->m_14c = 30.0; this->m_150 = 0x42c80000; if (param_1 == '\0') { if ((this->m_130 == 3) || (param_2 != 0)) { this->m_135 = '\0'; this->m_130 = 2; this->m_14c = 35.0; this->m_150 = 0x42c80000; this->m_160 = (void *)param_2; return; } this->m_148 = 100.0; this->m_14c = 30.0; this->m_150 = 0x42c80000; } this->m_135 = '\x01'; }
+
+005eddc0 void __thiscall FUN_005eddc0(void *this,uint32_t param_1,uint32_t param_2) { *(uint32_t *)((int)this + 0x284) = param_1; *(uint32_t *)((int)this + 0x288) = param_2; }
+
+005fdc50 void __thiscall FUN_005fdc50(void *this,uint32_t param_1,uint8_t param_2) { RandFloat(); lVar1 = __ftol(); *(int *)((int)this + 0x690) = (int)lVar1; this_00 = (C_auto_00810700 *)((int)this + 0x90); *(uint8_t *)((int)this + 0x695) = param_2; (*(code *)**(uint32_t **)((int)this + 0x90))(*(uint32_t *)((int)this + 0x20)); FUN_004cd6e0(this_00,unaff_retaddr); (*this_00->vtable->vf06)(); C_auto_00810700::FUN_004c8250(this_00,this); }
+
+005ff5f0 bool __thiscall FUN_005ff5f0(void *this,int param_1) { if (*(char *)((int)this + 0x234) == '\0') { return true; } if (param_1 == *(int *)((int)this + 0x230)) { *(uint8_t *)((int)this + 0x234) = 0; if (*(int *)((int)this + 0x11c) != 0) { *(uint8_t *)(*(int *)((int)this + 0x11c) + 0x234) = 0; } uVar1 = 3; } else { uVar1 = 5; } C_Door::FUN_00601f40(this,uVar1); return *(char *)((int)this + 0x234) == '\0'; }
+
+005ff650 uint8_t __thiscall FUN_005ff650(void *this,int param_1) { if (*(char *)((int)this + 0x234) != '\0') { return 1; } if (*(int *)((int)this + 0x224) != 0) { return 0; } if (param_1 == *(int *)((int)this + 0x230)) { *(uint8_t *)((int)this + 0x234) = 1; if (*(int *)((int)this + 0x11c) != 0) { *(uint8_t *)(*(int *)((int)this + 0x11c) + 0x234) = 1; } C_Door::FUN_00601f40(this,4); return *(uint8_t *)((int)this + 0x234); } C_Door::FUN_00601f40(this,5); return *(uint8_t *)((int)this + 0x234); }
+
+0060b570 void __thiscall FUN_0060b570(void *this,uint32_t param_1) { *(uint32_t *)((int)this + 0xa0) = param_1; if (((uint8_t)g_gameRole & 7) != 7) { this_00 = FUN_00475530(*(uint32_t *)((int)this + 0x10),'\x01'); log2((long double)3.0); log2((long double)2.0); lVar1 = __ftol(); C_BitStream::WriteBits(this_00,*(uint32_t *)((int)this + 0xa0),(int)lVar1); FUN_004755b0(this_00); } }
+
+0060d300 void __thiscall FUN_0060d300(void *this,int *param_1) { if (param_1 != *(int **)((int)this + 0x94)) { C_ExplosivePlace::FUN_0060d380(this,param_1); if (((uint8_t)g_gameRole & 7) != 7) { this_00 = FUN_00475530(*(uint32_t *)((int)this + 0x10),'\x01'); log2((long double)3.0); log2((long double)2.0); lVar1 = __ftol(); C_BitStream::WriteBits(this_00,3,(int)lVar1); C_BitStream::WriteBits(this_00,param_1,(int)lVar1); FUN_004755b0(this_00); } } }
+
+0060eac0 void __thiscall FUN_0060eac0(void *this,int *param_1) { if (param_1 != *(int **)((int)this + 0x148)) { FUN_0060eb60(this,param_1); if (((uint8_t)g_gameRole & 7) != 7) { this_00 = FUN_00475530(*(uint32_t *)((int)this + 0x10),'\x01'); log2((long double)2.0); log2((long double)0.0); lVar1 = __ftol(); C_BitStream::WriteBits(this_00,1,(int)lVar1); lVar1 = __ftol(); C_BitStream::WriteBits(this_00,param_1,(int)lVar1); FUN_004755b0(this_00); } } }
+
+0060fb10 void __fastcall FUN_0060fb10(int param_1) { *(uint32_t *)(param_1 + 0x90) = *(uint32_t *)(param_1 + 0x90) | 1; *(uint32_t *)(param_1 + 0xa0) = 0; pvVar1 = FUN_00475530(*(uint32_t *)(param_1 + 0x10),'\x01'); FUN_004755b0(pvVar1); FUN_0060fd90(param_1); }
+
+0069a770 void __thiscall FUN_0069a770(void *this,uint32_t param_1) { FUN_00491fd0(*(void **)((int)this + 0x5c),param_1); }
+
+0069a780 uint32_t __fastcall FUN_0069a780(int param_1) { if ((*(char *)(*(int *)(param_1 + 0x5c) + 0x58) == '\0') && (*(char *)(*(int *)(param_1 + 0x5c) + 0x59) == '\0')) { return 0; } return 1; }
+
+0069a7a0 void __thiscall FUN_0069a7a0(void *this,char param_1) { FUN_004921f0(*(void **)((int)this + 0x5c),param_1); }
+
+0069a7b0 uint32_t __fastcall FUN_0069a7b0(int param_1) { if (((uint8_t)g_gameRole & 2) == 0) { return in_EAX & 0xffffff00; } return CONCAT31((int3)((uint32_t)*(int *)(param_1 + 0x5c) >> 8), *(uint8_t *)(*(int *)(param_1 + 0x5c) + 0x59)); }
+
+0069e8b0 void __thiscall FUN_0069e8b0(void *this,char *param_1) { *(uint8_t *)((int)this + 0xb0) = 1; C_str::operator_assign((C_str *)((int)this + 0xac),param_1); }
+
+0069ec40 void __thiscall FUN_0069ec40(void *this,char param_1) { if ((g_gameRole & 2) != 0) { if (param_1 == '\0') { iVar3 = *(int *)((int)this + 200); } else { iVar3 = *(int *)((int)this + 0xcc); } if (((uint8_t)g_gameRole & 7) != 7) { iVar3 = -1; } piVar1 = (int *)FUN_004336c0(); iVar2 = (**(code **)(*piVar1 + 0x70))(); if (iVar2 != iVar3) { piVar1 = (int *)FUN_004336c0(); (**(code **)(*piVar1 + 0x6c))(iVar3,4000,0); } *(uint32_t *)((int)this + 0xd0) = 5000; } }
+
+0069f320 uint32_t FUN_0069f320(uint8_t *param_1,uint32_t param_2) { uVar3 = 0x20; iVar2 = DAT_0089b4c0; do { if ((iVar2 == 0) || (in_EAX = DAT_0089b4c4 - iVar2 >> 2, in_EAX <= uVar3)) { return in_EAX & 0xffffff00; } in_EAX = *(uint32_t *)(iVar2 + uVar3 * 4); if (((*(int *)(in_EAX + 0x18) == 0x25) && (*(int *)(in_EAX + 0xa4) == -1)) && (*(int *)(in_EAX + 0x20) != 0)) { iVar2 = *(int *)(*(int *)(in_EAX + 0x20) + 0xe8); if (iVar2 == 0) { a = &DAT_00867a90; } else { a = (char *)(*(short *)(*(int *)(in_EAX + 0x20) + 0xe6) + iVar2); } in_EAX = _stricmp(a,(char *)param_1); iVar2 = DAT_0089b4c0; if (in_EAX == 0) { uVar1 = FUN_005ed900(*(void **)(DAT_0089b4c0 + uVar3 * 4),param_2); return CONCAT31((i
+
+006ae7c0 int __fastcall FUN_006ae7c0(int param_1) { if (*(int *)(DAT_008aea10 + 0xe8) != 1) { } }
+
+006b6830 void FUN_006b6830(int param_1,int param_2) { this = (void *)GetGame(); FUN_0069bd30(this,param_1,param_2); }
+
+006b69d0 int __fastcall FUN_006b69d0(int param_1) { iVar1 = *(int *)(param_1 + 0x24); uVar2 = (uint3)((uint32_t)iVar1 >> 8); if ((*(int *)(iVar1 + 4) != 0) && (*(int *)(iVar1 + 0x224) == 3)) { return CONCAT31(uVar2,1); } return (uint32_t)uVar2 << 8; }
+

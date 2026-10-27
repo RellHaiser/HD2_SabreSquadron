@@ -1,0 +1,261 @@
+[
+ {
+  "group": ".dta archives",
+  "item": "Mount & lookup",
+  "weight": 3,
+  "state": "verified",
+  "evidence": "compare.cpp: all 11 archives (ISD0 and ISD1), 64,569 files read whole and with random seeks"
+ },
+ {
+  "group": ".dta archives",
+  "item": "Keys & cipher",
+  "weight": 2,
+  "state": "verified",
+  "evidence": "compare.cpp: the two-step key and GetKey's masked values match the original"
+ },
+ {
+  "group": ".dta archives",
+  "item": "LZSS blocks",
+  "weight": 2,
+  "state": "verified",
+  "evidence": "compare.cpp: codec against the original's code (3,000 random rounds) and every compressed file"
+ },
+ {
+  "group": ".dta archives",
+  "item": "WAV blocks",
+  "weight": 2,
+  "state": "verified",
+  "evidence": "compare.cpp: 16-bit DPCM decoder against the original's code and every compressed WAV"
+ },
+ {
+  "group": ".dta archives",
+  "item": "Writing",
+  "weight": 1,
+  "state": "verified",
+  "evidence": "compare.cpp: every dtaOpenWrite flag combination, .tmp write-through, dtaBin2Text"
+ },
+ {
+  "group": ".dta archives",
+  "item": "File logs",
+  "weight": 1,
+  "state": "verified",
+  "evidence": "compare.cpp: file logs, including the slot-reuse quirk"
+ },
+ {
+  "group": ".dta archives",
+  "item": "FQL",
+  "weight": 1,
+  "state": "verified",
+  "evidence": "compare.cpp: recordings compared byte for byte, then played back"
+ },
+ {
+  "group": "Assets",
+  "item": ".4ds models",
+  "weight": 4,
+  "state": "verified",
+  "evidence": "compare_loader: all 5,946 models, object graphs compared member by member"
+ },
+ {
+  "group": "Assets",
+  "item": "Scenes & maps",
+  "weight": 3,
+  "state": "verified",
+  "evidence": "compare_loader: 244 mission files (82 scenes, maps, loading screens)"
+ },
+ {
+  "group": "Assets",
+  "item": ".6ds shadows",
+  "weight": 1,
+  "state": "verified",
+  "evidence": "compare_loader: all 10 shadow files"
+ },
+ {
+  "group": "Assets",
+  "item": ".5ds anims",
+  "weight": 2,
+  "state": "ported",
+  "evidence": "Loader ported (OpenAnimationFile, animation sets); the game's .5ds files are not in compare_loader's list"
+ },
+ {
+  "group": "Assets",
+  "item": "BMP/TGA/DDS",
+  "weight": 2,
+  "state": "verified",
+  "evidence": "compare_texture: 6,000 random cases"
+ },
+ {
+  "group": "Assets",
+  "item": "DXT",
+  "weight": 1,
+  "state": "verified",
+  "evidence": "compare_s3tc: 23,000 images, 373,000 blocks"
+ },
+ {
+  "group": "Assets",
+  "item": "Ogg music",
+  "weight": 1,
+  "state": "verified",
+  "evidence": "compare_show: the game's music"
+ },
+ {
+  "group": "Assets",
+  "item": "Bink/AVI",
+  "weight": 1,
+  "state": "verified",
+  "evidence": "compare_show: the game's movies, 24 AVI playbacks"
+ },
+ {
+  "group": "Mission files",
+  "item": "actors.bin",
+  "weight": 3,
+  "state": "ported",
+  "evidence": "Car blocks verified (205 of 205 re-pack byte-identical); the other actor types ported, not checked against the files"
+ },
+ {
+  "group": "Mission files",
+  "item": "Scripts",
+  "weight": 3,
+  "state": "ported",
+  "evidence": "Compiler, expressions and interpreter ported; scripting reference written; not run over the shipped scripts"
+ },
+ {
+  "group": "Mission files",
+  "item": "check2.bin",
+  "weight": 2,
+  "state": "verified",
+  "evidence": "checkpoints harness: loads all 73 missions' networks"
+ },
+ {
+  "group": "Mission files",
+  "item": "scene2.bin",
+  "weight": 2,
+  "state": "pending",
+  "evidence": "Mission loader not ported"
+ },
+ {
+  "group": "Mission files",
+  "item": "items.dat",
+  "weight": 1,
+  "state": "ported",
+  "evidence": "Load and save ported"
+ },
+ {
+  "group": "Mission files",
+  "item": "effects.bin",
+  "weight": 1,
+  "state": "ported",
+  "evidence": "Static emitters ported (v1/v2)"
+ },
+ {
+  "group": "Mission files",
+  "item": "tracks.dat",
+  "weight": 1,
+  "state": "ported",
+  "evidence": "Track module ported"
+ },
+ {
+  "group": "Mission files",
+  "item": "tree.klz",
+  "weight": 1,
+  "state": "pending",
+  "evidence": "Not ported"
+ },
+ {
+  "group": "Mission files",
+  "item": "decorations",
+  "weight": 1,
+  "state": "pending",
+  "evidence": "decorations.bin and decorator_sl.bin: not ported"
+ },
+ {
+  "group": "Mission files",
+  "item": "volumetrics",
+  "weight": 1,
+  "state": "pending",
+  "evidence": "volumetrics.bin: not ported"
+ },
+ {
+  "group": "Mission files",
+  "item": "meshplayer",
+  "weight": 1,
+  "state": "pending",
+  "evidence": "meshplayer.bin: not ported"
+ },
+ {
+  "group": "Mission files",
+  "item": "Vertanim",
+  "weight": 1,
+  "state": "pending",
+  "evidence": "Vertanim.def / .bin: vertex animation module not ported"
+ },
+ {
+  "group": "Tables",
+  "item": "items.sav",
+  "weight": 2,
+  "state": "ported",
+  "evidence": "Item definitions ported (10 component classes)"
+ },
+ {
+  "group": "Tables",
+  "item": "HumanStore.def",
+  "weight": 1,
+  "state": "verified",
+  "evidence": "The shipped roster (65 soldiers) loads and writes back byte-identical"
+ },
+ {
+  "group": "Tables",
+  "item": "tyres.bin, materials",
+  "weight": 1,
+  "state": "verified",
+  "evidence": "car_tables harness on the shipped tyres.bin and hdmaterials.def"
+ },
+ {
+  "group": "Tables",
+  "item": "anim.sav",
+  "weight": 1,
+  "state": "ported",
+  "evidence": "Human movement anim tables ported"
+ },
+ {
+  "group": "Tables",
+  "item": "effects.def",
+  "weight": 1,
+  "state": "ported",
+  "evidence": "Particle definitions ported"
+ },
+ {
+  "group": "Tables",
+  "item": "gamecam.set",
+  "weight": 1,
+  "state": "pending",
+  "evidence": "Camera module not ported"
+ },
+ {
+  "group": "Tables",
+  "item": "Dialogs.bin",
+  "weight": 1,
+  "state": "pending",
+  "evidence": "Text tables not ported"
+ },
+ {
+  "group": "Saves & profiles",
+  "item": "Gamedata .gdt",
+  "weight": 1,
+  "state": "verified",
+  "evidence": "Campaign files load and re-save byte-identical"
+ },
+ {
+  "group": "Saves & profiles",
+  "item": "profile.sav, game.cfg",
+  "weight": 2,
+  "state": "verified",
+  "evidence": "profile harness: save/load round trips of profile.sav, Options.bin, game.cfg and the profile's parts"
+ },
+ {
+  "group": "Saves & profiles",
+  "item": "Saved games",
+  "weight": 3,
+  "state": "ported",
+  "evidence": "Most actors' chunks ported (vehicles' verified in the harness); some modules still write placeholders"
+ }
+]

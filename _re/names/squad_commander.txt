@@ -1,0 +1,77 @@
+# The squad's commands (src/game/squad_commander.cpp; the object 0x0089ad40, vtable 0x0080fb28;
+# types in _re/types/48_team.spec).
+
+# --- data
+0089ad40 g_squadCommander @ C_SquadCommander
+0089ad30 g_idleReports @ uint[4]
+0089ac30 g_nearPlaces @ S_vector4[6]
+0089ac90 g_unusedPlaces @ S_vector4[5]
+0089ace0 g_coverSlots @ S_vector4[5]
+
+# --- statics
+00455a10 StaticInit_SquadCommander
+00455a20 StaticConstruct_SquadCommander
+00455a30 StaticAtExit_SquadCommander
+00455a40 StaticExit_SquadCommander
+00455a50 C_SquadCommander::Destroy | void __fastcall Destroy(C_SquadCommander *this)
+00455a90 StaticInit_IdleReports
+00455aa0 StaticConstruct_IdleReports
+00455ac0 StaticAtExit_IdleReports
+00455ad0 StaticExit_IdleReports
+004595e0 StaticInit_CoverSlots_thunk
+004595f0 StaticInit_CoverSlots
+00459690 StaticInit_UnusedPlaces_thunk
+004596a0 StaticInit_UnusedPlaces
+0045b7c0 StaticInit_NearPlaces_thunk
+0045b7d0 StaticInit_NearPlaces
+004563e0 GetSquadCommander | C_SquadCommander * __cdecl GetSquadCommander(void)
+
+# --- the slots
+00456780 C_SquadCommander::C_SquadCommander | void __thiscall C_SquadCommander(C_SquadCommander *this)
+00456020 C_SquadCommander::ExecuteActionCommand | void __thiscall ExecuteActionCommand(C_SquadCommander *this, S_ActionCommand *command)
+00456850 C_SquadCommander::GetUnknown38 | int __thiscall GetUnknown38(C_SquadCommander *this)
+004568d0 C_SquadCommander::CollectGroup | void __thiscall CollectGroup(C_SquadCommander *this, void *out, int group)
+00456b80 C_SquadCommander::HasGroupMembers | bool __thiscall HasGroupMembers(C_SquadCommander *this, int group)
+00456890 C_SquadCommander::IsInGroup | bool __thiscall IsInGroup(C_SquadCommander *this, C_Human *human, int group)
+00456c20 C_SquadCommander::CollectFor | void __thiscall CollectFor(C_SquadCommander *this, void *out, int command, C_Actor *actor, int value)
+00456860 C_SquadCommander::GetSquadTarget | C_Actor * __thiscall GetSquadTarget(C_SquadCommander *this)
+00459500 C_SquadCommander::OnFriendlyFire | void __thiscall OnFriendlyFire(C_SquadCommander *this, C_Actor *attacker)
+00459490 C_SquadCommander::DelayFormationChecks | void __thiscall DelayFormationChecks(C_SquadCommander *this)
+00459360 C_SquadCommander::OnPlayerNoise | void __thiscall OnPlayerNoise(C_SquadCommander *this)
+00458e50 C_SquadCommander::ExecuteCommand | void __thiscall ExecuteCommand(C_SquadCommander *this, int command, C_Actor *actor, C_Human *member, bool quiet, int value)
+00459470 C_SquadCommander::SetWhispering | void __thiscall SetWhispering(C_SquadCommander *this, bool on)
+00459480 C_SquadCommander::IsWhispering | bool __thiscall IsWhispering(C_SquadCommander *this)
+004593e0 C_SquadCommander::ReleaseFollowers | void __thiscall ReleaseFollowers(C_SquadCommander *this, C_Human *leader)
+00455af0 C_SquadCommander::OnMemberIdle | void __thiscall OnMemberIdle(C_SquadCommander *this, C_Human *member)
+004595c0 C_SquadCommander::IsSpacingMax | bool __thiscall IsSpacingMax(C_SquadCommander *this)
+004595d0 C_SquadCommander::IsSpacingMin | bool __thiscall IsSpacingMin(C_SquadCommander *this)
+0045b750 C_SquadCommander::Unknown44 | void __thiscall Unknown44(C_SquadCommander *this, C_Human *human)
+0045b760 C_SquadCommander::Unknown48 | int __thiscall Unknown48(C_SquadCommander *this, C_Human *human)
+0045b770 C_SquadCommander::Unknown4C | bool __thiscall Unknown4C(C_SquadCommander *this, C_Human *human)
+0045b780 C_SquadCommander::Unknown50 | int __thiscall Unknown50(C_SquadCommander *this, C_Human *human)
+0045b790 C_SquadCommander::Unknown54 | bool __thiscall Unknown54(C_SquadCommander *this, C_Human *human)
+0045b7a0 C_SquadCommander::Unknown58 | void __thiscall Unknown58(C_SquadCommander *this, C_Human *human, void *out)
+0045b7b0 C_SquadCommander::Unknown5C | void __thiscall Unknown5C(C_SquadCommander *this, C_Human *human, void *out)
+004567e0 C_SquadCommander::GetFlag41 | bool __thiscall GetFlag41(C_SquadCommander *this)
+004567f0 C_SquadCommander::GetFlag42 | bool __thiscall GetFlag42(C_SquadCommander *this)
+00456800 C_SquadCommander::GetFlag3D | bool __thiscall GetFlag3D(C_SquadCommander *this)
+00456810 C_SquadCommander::GetFlag3E | bool __thiscall GetFlag3E(C_SquadCommander *this)
+00456820 C_SquadCommander::GetFlag3F | bool __thiscall GetFlag3F(C_SquadCommander *this)
+00456830 C_SquadCommander::GetFlag3C | bool __thiscall GetFlag3C(C_SquadCommander *this)
+00456840 C_SquadCommander::GetFlag40 | bool __thiscall GetFlag40(C_SquadCommander *this)
+00456440 C_SquadCommander::Reset | void __thiscall Reset(C_SquadCommander *this)
+004564a0 C_SquadCommander::Tick | void __thiscall Tick(C_SquadCommander *this, int timeDelta)
+
+# --- the rest
+00456f00 C_SquadCommander::OnOrderMoveDone | void __fastcall OnOrderMoveDone(C_SquadCommander *this)
+004563f0 C_SquadCommander::UpdateScale | void __thiscall UpdateScale(C_SquadCommander *this)
+00455d40 C_SquadCommander::ApplyOrder | void __stdcall ApplyOrder(C_Human *member, S_ActionCommand *command)
+00459740 C_SquadCommander::TakeCover | void __thiscall TakeCover(C_SquadCommander *this, S_ActionCommand *command, bool quiet)
+0045b890 C_SquadCommander::MoveNear | void __thiscall MoveNear(C_SquadCommander *this, S_ActionCommand *command, bool quiet)
+0045bb20 C_SquadCommander::FilterMembers | void __stdcall FilterMembers(void *members, int command, C_Actor *actor, int value)
+0045bd10 C_SquadCommander::PickMember | C_Human * __stdcall PickMember(void *members, int command, C_Actor *actor, int value)
+00459180 C_SquadCommander::SortByDistance | void __stdcall SortByDistance(void *members, S_vector *pos)
+004592d0 C_SquadCommander::PickNone | C_Human * __stdcall PickNone(void *members, int command, C_Actor *actor, int value)
+004592e0 C_SquadCommander::RemoveBusy | void __stdcall RemoveBusy(void *members)
+00457820 C_SquadCommander::StartManoeuvre | void __thiscall StartManoeuvre(C_SquadCommander *this, int kind, C_Actor *actor, bool quiet, void *members)
+00456ef0 C_SquadCommander::DebugManoeuvre | void __thiscall DebugManoeuvre(C_SquadCommander *this, int timeDelta)

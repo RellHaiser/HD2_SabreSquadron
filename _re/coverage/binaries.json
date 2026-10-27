@@ -1,0 +1,17 @@
+[
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "port": "C++ (HD2_SabreSquadron)",
+  "status": "Hand port, compiles file by file; not linked yet, generated tier-1 code fills the gaps"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "port": "LS3DF_Github",
+  "status": "Drop-in DLL; ran the menus, two co-op missions, music and movies"
+ },
+ {
+  "binary": "rw_data.dll",
+  "port": "RW_DATA_Github",
+  "status": "Drop-in DLL; every function of the original's own code verified"
+ }
+]

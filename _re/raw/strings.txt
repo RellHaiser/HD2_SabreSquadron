@@ -1,0 +1,3344 @@
+008174e0	string too long
+00817514	invalid string position
+00817678	ios::eofbit set
+00817688	ios::failbit set
+0081769c	ios::badbit set
+008176c4	invalid ios::iword/pword index
+00817700	bad allocation
+008177d0	Unknown exception
+00817810	LC_TIME
+00817818	LC_NUMERIC
+00817824	LC_MONETARY
+00817830	LC_CTYPE
+0081783c	LC_COLLATE
+00817848	LC_ALL
+008178fe	GAIsProcessorFeaturePresent
+0081791c	KERNEL32
+00817930	e+000
+00817996	null)
+008179a5	null)
+00817a58	floor
+00817ac8	SunMonTueWedThuFriSat
+00817ae0	JanFebMarAprMayJunJulAugSepOctNovDec
+00817b0c	__GLOBAL_HEAP_SELECTED
+00817b24	__MSVCRT_HEAP_SELECT
+00817b47	@runtime error 
+00817b58	TLOSS error\r\n
+00817b68	SING error\r\n
+00817b78	DOMAIN error\r\n
+00817b88	R6028\r\n- unable to initialize heap\r\n
+00817bb0	R6027\r\n- not enough space for lowio initialization\r\n
+00817be8	R6026\r\n- not enough space for stdio initialization\r\n
+00817c20	R6025\r\n- pure virtual function call\r\n
+00817c48	R6024\r\n- not enough space for _onexit/atexit table\r\n
+00817c80	R6019\r\n- unable to open console device\r\n
+00817cac	R6018\r\n- unexpected heap error\r\n
+00817cd0	R6017\r\n- unexpected multithread lock error\r\n
+00817d00	R6016\r\n- not enough space for thread data\r\n
+00817d2c	\r\nabnormal program termination\r\n
+00817d50	R6009\r\n- not enough space for environment\r\n
+00817d7c	R6008\r\n- not enough space for arguments\r\n
+00817da8	R6002\r\n- floating point not loaded\r\n
+00817dd0	Microsoft Visual C++ Runtime Library
+00817dfc	Runtime Error!\n\nProgram: 
+00817e18	<program name unknown>
+00817e48	Paraguay
+00817e5c	Chile
+00817e64	Ecuador
+00817e6c	Argentina
+00817e80	Colombia
+00817e8c	Venezuela
+00817e98	Dominican Republic
+00817eac	South Africa
+00817ebc	Panama
+00817ec4	Luxembourg
+00817ed0	Costa Rica
+00817edc	Switzerland
+00817ee8	Guatemala
+00817ef4	Canada
+00817efc	Spanish - Modern Sort
+00817f14	Australia
+00817f20	Austria
+00817f28	Belgium
+00817f30	Mexico
+00817f38	Basque
+00817f40	Sweden
+00817f48	Swedish
+00817f50	Iceland
+00817f58	Icelandic
+00817f64	France
+00817f6c	Finland
+00817f74	Finnish
+00817f7c	Spain
+00817f84	Spanish - Traditional Sort
+00817fa0	united-states
+00817fb0	united-kingdom
+00817fc0	trinidad & tobago
+00817fd4	south-korea
+00817fe0	south-africa
+00817ff0	south korea
+00817ffc	south africa
+00818014	puerto-rico
+00818020	pr-china
+0081802c	pr china
+0081803c	new-zealand
+00818048	hong-kong
+00818054	holland
+0081805c	great britain
+0081806c	england
+0081807c	china
+00818084	britain
+0081808c	america
+008180a0	swiss
+008180a8	swedish-finland
+008180b8	spanish-venezuela
+008180cc	spanish-uruguay
+008180dc	spanish-puerto rico
+008180f0	spanish-peru
+00818100	spanish-paraguay
+00818114	spanish-panama
+00818124	spanish-nicaragua
+00818138	spanish-modern
+00818148	spanish-mexican
+00818158	spanish-honduras
+0081816c	spanish-guatemala
+00818180	spanish-el salvador
+00818194	spanish-ecuador
+008181a4	spanish-dominican republic
+008181c0	spanish-costa rica
+008181d4	spanish-colombia
+008181e8	spanish-chile
+008181f8	spanish-bolivia
+00818208	spanish-argentina
+0081821c	portuguese-brazilian
+00818234	norwegian-nynorsk
+00818248	norwegian-bokmal
+0081825c	norwegian
+00818268	italian-swiss
+00818278	irish-english
+00818288	german-swiss
+00818298	german-luxembourg
+008182ac	german-lichtenstein
+008182c0	german-austrian
+008182d0	french-swiss
+008182e0	french-luxembourg
+008182f4	french-canadian
+00818304	french-belgian
+00818314	english-usa
+00818320	english-us
+0081832c	english-uk
+00818338	english-trinidad y tobago
+00818354	english-south africa
+0081836c	english-nz
+00818378	english-jamaica
+00818388	english-ire
+00818394	english-caribbean
+008183a8	english-can
+008183b4	english-belize
+008183c4	english-aus
+008183d0	english-american
+008183e4	dutch-belgian
+008183f4	chinese-traditional
+00818408	chinese-singapore
+0081841c	chinese-simplified
+00818430	chinese-hongkong
+00818444	chinese
+00818454	canadian
+00818460	belgian
+00818468	australian
+00818474	american-english
+00818488	american english
+0081849c	american
+008184bc	1#QNAN
+008184c4	1#INF
+008184cc	1#IND
+008184d4	1#SNAN
+008184dc	GetLastActivePopup
+008184f0	GetActiveWindow
+00818500	MessageBoxA
+0081850c	user32.dll
+00818518	H:mm:ss
+00818520	dddd, MMMM dd, yyyy
+00818534	M/d/yy
+00818544	December
+00818550	November
+0081855c	October
+00818564	September
+00818570	August
+00818588	April
+00818590	March
+00818598	February
+008185a4	January
+008185dc	Saturday
+008185e8	Friday
+008185f0	Thursday
+008185fc	Wednesday
+00818608	Tuesday
+00818610	Monday
+00818618	Sunday
+00818640	am/pm
+0082fd98	KERNEL32.DLL
+0082fda5	ADVAPI32.dll
+0082fdb2	GDI32.dll
+0082fdbc	IJoy.dll
+0082fdc5	imagehlp.dll
+0082fdd2	LS3DF.dll
+0082fddc	MPR.dll
+0082fde4	ole32.dll
+0082fdee	OLEAUT32.dll
+0082fdfb	rw_data.dll
+0082fe07	USER32.dll
+0082fe12	WINMM.dll
+0082fe1c	WSOCK32.dll
+0082fe2a	GetCurrentThreadId
+0082fe3e	CreateThread
+0082fe4c	GetStartupInfoA
+0082fe5e	CreateProcessA
+0082fe6e	RemoveDirectoryA
+0082fe80	Sleep
+0082fe88	SetFileAttributesA
+0082fe9c	MoveFileA
+0082fea8	GetFileAttributesA
+0082febc	DeleteFileA
+0082feca	CreateFileMappingA
+0082fede	MapViewOfFile
+0082feee	UnmapViewOfFile
+0082ff00	GetVolumeInformationA
+0082ff18	FindNextFileA
+0082ff28	VirtualQuery
+0082ff36	FormatMessageA
+0082ff46	GetLocalTime
+0082ff54	GetCurrentProcess
+0082ff68	GetCurrentProcessId
+0082ff7e	SetUnhandledExceptionFilter
+0082ff9c	LoadLibraryA
+0082ffaa	CompareStringW
+0082ffba	CompareStringA
+0082ffca	GetLocaleInfoW
+0082ffda	GetOEMCP
+0082ffe4	GetACP
+0082ffec	GetVersionExA
+0082fffc	GetFullPathNameA
+0083000e	MulDiv
+00830016	SetEvent
+00830020	ResetEvent
+0083002c	WaitNamedPipeA
+0083003c	DisconnectNamedPipe
+00830052	FlushFileBuffers
+00830064	ConnectNamedPipe
+00830076	TerminateThread
+00830088	CreateNamedPipeA
+0083009a	InterlockedExchange
+008300b0	InterlockedDecrement
+008300c6	InterlockedIncrement
+008300dc	RtlUnwind
+008300e8	GetDriveTypeA
+008300f8	GetTimeZoneInformation
+00830110	GetSystemTime
+00830120	SetEnvironmentVariableA
+0083013a	SetCurrentDirectoryA
+00830150	FileTimeToSystemTime
+00830166	FileTimeToLocalFileTime
+00830180	GetSystemTimeAsFileTime
+0083019a	HeapAlloc
+008301a6	GetProcAddress
+008301b6	FreeLibrary
+008301c4	SetFilePointer
+008301d4	SetEndOfFile
+008301e2	WriteFile
+008301ee	SetStdHandle
+008301fc	GetStringTypeW
+0083020c	GetStringTypeA
+0083021c	GetFileSize
+0083022a	ReadFile
+00830234	CreateFileA
+00830242	GetFileInformationByHandle
+0083025e	CreateMutexA
+0083026c	CreateEventA
+0083027a	GetCurrentThread
+0083028c	SetThreadPriority
+008302a0	GetComputerNameA
+008302b2	FindFirstFileA
+008302c2	FindClose
+008302ce	CloseHandle
+008302dc	WaitForSingleObject
+008302f2	GetModuleHandleA
+00830304	GetModuleFileNameA
+00830318	WideCharToMultiByte
+0083032e	GetCommandLineA
+00830340	CreateDirectoryA
+00830352	GetLastError
+00830360	GetCurrentDirectoryA
+00830376	MultiByteToWideChar
+0083038c	EnterCriticalSection
+008303a2	LeaveCriticalSection
+008303b8	DeleteCriticalSection
+008303d0	GetTickCount
+008303de	InitializeCriticalSection
+008303fa	lstrcpyA
+00830404	OutputDebugStringA
+00830418	QueryPerformanceFrequency
+00830434	QueryPerformanceCounter
+0083044e	GetVersion
+0083045a	ExitProcess
+00830468	RaiseException
+00830478	FatalAppExitA
+00830488	HeapSize
+00830492	TerminateProcess
+008304a4	TlsSetValue
+008304b2	TlsAlloc
+008304bc	TlsFree
+008304c6	SetLastError
+008304d4	TlsGetValue
+008304e2	HeapReAlloc
+008304f0	LCMapStringA
+008304fe	IsBadCodePtr
+0083050c	IsBadReadPtr
+0083051a	GetUserDefaultLCID
+0083052e	EnumSystemLocalesA
+00830542	GetLocaleInfoA
+00830552	IsValidCodePage
+00830564	IsValidLocale
+00830574	GetCPInfo
+00830580	GetEnvironmentStringsW
+00830598	HeapFree
+008305a2	GetExitCodeProcess
+008305b6	LCMapStringW
+008305c4	SetConsoleCtrlHandler
+008305dc	SetHandleCount
+008305ec	GetEnvironmentStrings
+00830604	FreeEnvironmentStringsW
+0083061e	FreeEnvironmentStringsA
+00830638	UnhandledExceptionFilter
+00830652	IsBadWritePtr
+00830662	VirtualAlloc
+00830670	VirtualFree
+0083067e	GetStdHandle
+0083068c	HeapCreate
+00830698	HeapDestroy
+008306a6	GetEnvironmentVariableA
+008306c0	GetFileType
+008306ce	RegCloseKey
+008306dc	RegQueryValueExA
+008306ee	RegFlushKey
+008306fc	RegSetValueExA
+0083070c	RegCreateKeyExA
+0083071e	RegOpenKeyA
+0083072c	RegOpenKeyExA
+0083073c	DeleteDC
+00830746	ExtTextOutW
+00830754	CreateCompatibleDC
+00830768	Rectangle
+00830774	CreateDIBSection
+00830786	SelectObject
+00830794	SetTextColor
+008307a2	SetBkColor
+008307ae	SetMapMode
+008307ba	GetTextExtentPoint32W
+008307d2	GetStockObject
+008307e2	SetBkMode
+008307ee	GetDeviceCaps
+008307fe	CreateFontA
+0083080c	DeleteObject
+0083081a	_CreateJoyBase@20
+0083082e	UnDecorateSymbolName
+00830844	?SetRot@S_matrix@@QAGXABUS_quat@@@Z
+0083086a	I3DGetDriver
+00830878	?RotateByMatrix@S_quat@@QBG?AU1@ABUS_matrix@@@Z
+008308aa	?Normalize@S_quat@@QAGXXZ
+008308c6	?GetUScale@S_matrix@@QBGMXZ
+008308e4	?RotateByNormMatrix@S_vector@@QBG?AU1@ABUS_matrix@@@Z
+0083091c	GetEngineVersion
+00830934	dbgPrintf2
+00830940	?SetDir@S_matrix@@QAGXABUS_vector@@M@Z
+00830968	?IntersectionLine@S_plane@@QBG_NABU1@AAUS_vector@@1@Z
+008309a0	?Inverse@S_quat@@QBGXAAUS_vector@@AAM@Z
+008309ca	?UpdateWBoundProc@I3D_visual@@AAGXXZ
+008309f0	?SetDir@S_matrix@@QAGXABUS_vector@@0@Z
+00830a18	?SetDir3@S_matrix@@QAGXABUS_vector@@0@Z
+00830a42	?GetDir@S_quat@@QBG?AUS_vector@@XZ
+00830a66	?AngleTo@S_vector@@QBGMABU1@@Z
+00830a86	?SetDir@S_quat@@QAGXABUS_vector@@M@Z
+00830aac	?SetDir@S_matrix@@QAGXABUS_vector@@@Z
+00830ad4	?RotateByMatrix@S_matrix@@QBG?AU1@ABU1@@Z
+00830b00	?SetDir3@S_matrix@@QAGXABUS_vector@@@Z
+00830b28	?Identity@S_matrix@@QAGXXZ
+00830b44	ISndGetDriver
+00830b54	??XS_matrix@@QAGAAU0@ABU0@@Z
+00830b72	GetIGraph
+00830b7e	?SetRot3@S_matrix@@QAGXABUS_quat@@@Z
+00830ba4	RandFloat
+00830bb0	?RotateByMatrix@S_vector@@QBG?AU1@ABUS_matrix@@@Z
+00830be4	?RotateZMatrix@@YG?AUS_matrix@@M@Z
+00830c08	?RotateYMatrix@@YG?AUS_matrix@@M@Z
+00830c2c	?RotateXMatrix@@YG?AUS_matrix@@M@Z
+00830c50	??DS_matrix@@QBG?AU0@ABU0@@Z
+00830c6e	?GetScale@S_matrix@@QBG?AUS_vector@@XZ
+00830c96	dbgPrintf
+00830ca2	??XS_vector@@QAGAAU0@ABUS_matrix@@@Z
+00830cc8	?Make@S_quat@@QAGXABUS_matrix@@@Z
+00830cec	?Make@S_quat@@QAGXABUS_vector@@M@Z
+00830d10	?RotationMatrix@S_quat@@QBG?AUS_matrix@@XZ
+00830d3c	?Inverse@S_matrix@@QAG_NABU1@@Z
+00830d5e	??DS_vector@@QBG?AU0@ABUS_matrix@@@Z
+00830d84	?Slerp@S_quat@@QBG?AU1@ABU1@M_N@Z
+00830da8	?UpdateWMatrixProc@I3D_frame@@AAEXXZ
+00830dce	WNetAddConnection2A
+00830de4	WNetCancelConnection2A
+00830dfc	CoInitializeEx
+00830e0c	CoCreateInstance
+00830e1e	CoInitialize
+00830e2c	CoInitializeSecurity
+00830e42	CoUninitialize
+00830e52	_dtaCreate@4
+00830e60	_dtaWrite@12
+00830e6e	_dtaSeek@12
+00830e7c	_dtaRead@12
+00830e8a	_dtaOpen@8
+00830e96	_dtaClose@4
+00830ea4	_dtaOpenWrite@8
+00830eb6	_dtaDelete@4
+00830ec4	LoadCursorA
+00830ed2	RegisterClassExA
+00830ee4	CreateWindowExA
+00830ef6	GetDC
+00830efe	DrawTextA
+00830f0a	ReleaseDC
+00830f16	BeginPaint
+00830f22	GetClientRect
+00830f32	EndPaint
+00830f3c	SetScrollRange
+00830f4c	SetScrollPos
+00830f5a	DefWindowProcA
+00830f6a	InvalidateRect
+00830f7a	wsprintfA
+00830f86	EnumChildWindows
+00830f98	EnumThreadWindows
+00830fac	PostMessageA
+00830fba	DialogBoxParamA
+00830fcc	EndDialog
+00830fd8	SetDlgItemTextA
+00830fea	MessageBeep
+00830ff8	DestroyWindow
+00831008	MessageBoxA
+00831016	LoadStringA
+00831024	wvsprintfA
+00831030	SendMessageTimeoutA
+00831046	SystemParametersInfoA
+0083105e	SetForegroundWindow
+00831074	CallWindowProcA
+00831086	RegisterWindowMessageA
+0083109e	GetWindowLongA
+008310ae	SetWindowLongA
+008310be	GetForegroundWindow
+008310d4	GetWindowRect
+008310e4	LoadIconA
+008310f0	SetClassLongA
+00831100	SetWindowPos
+0083110e	SetFocus
+00831118	IsZoomed
+00831122	SetRect
+0083112c	GetParent
+00831138	ShowWindow
+00831144	GetCapture
+00831150	IsWindow
+0083115a	GetFocus
+00831164	IsWindowVisible
+00831176	IsIconic
+00831180	timeGetTime
+0083118e	timeSetEvent
+00832c40	Track module
+00832c50	missions\\%s\\%s
+00832c60	tracks.dat
+00832c6c	VOLB0%d
+00832c84	Cache : BADFILETIME '%s' (3ds filter)
+00832cac	Cache : BADFILEVERSION '%s' (3ds filter)
+00832ce0	Physics
+00832ce8	angle
+00832cf0	plotdira
+00832d00	break
+00832d20	cross
+00832d2c	sightstop
+00832d38	phobj
+00833338	return true if player fired with signal pistol
+00833368	_SignalPistolFired
+0083337c	distance to active player [m]
+0083339c	_GetDistToActivePlayer
+008333b4	camera state : 0 - default, 1 - underwater
+008333e0	_GetCameraState
+008333f0	current sp_gamedifficulty
+0083340c	_SPGetGameDifficulty
+00833424	current sp_gametype
+00833438	_SPGetGameType
+00833448	frame variable receiving human with item
+00833474	_MP_IsItemInTeamInventory
+00833490	_MP_IsTeamMemberInRange
+008334a8	range(m)
+008334b4	team id (0/1)
+008334c4	_MP_AllTeamMembersAreInRange
+008334e4	singleplayer : true/false
+00833500	_IsTeamMemberDead
+00833514	human menuID (INTEGER)
+0083352c	frame with human actor
+00833544	_GetHumanStoreID
+00833558	number of live players (INTEGER)
+0083357c	_GetNumMembersOfClientTeam
+00833598	game value for index (INTEGER)
+008335b8	value index
+008335c4	_LoadGameValue
+008335d4	type of last alarm (INTEGER)
+008335f4	_GetAlarmType
+00833604	objective status (INTEGER)
+00833620	objective index
+00833630	mission index
+00833640	kampaign index
+00833650	game index
+0083365c	_GetObjectiveStatus
+00833670	_CameraInRange
+00833680	distance to frame [m]
+00833698	target object
+008336a8	_FrameInRange
+008336b8	_SeeFriend
+008336c4	_SeeEnemy
+008336d0	item number
+008336dc	_IsInInventory
+008336ec	state of the actor (INTEGER)
+0083370c	actor target
+0083371c	_ACTOR_GetState
+0083372c	radnom value from 0 to max (INTEGER)
+00833754	maximal value
+00833764	_RandomInt
+00833770	language name
+00833780	_IsLanguageVersion
+00833794	signal number
+008337a4	_SignalReceived
+008337b4	_GetCountOfCarnageEnemies
+008337d0	num live enemies
+008337e4	_GetNumLiveEnemies
+008337f8	_AllEnemiesDead
+00833808	_AllPlayersDead
+00833818	item ID
+00833820	_ItemInRange
+00833830	_MineInRange
+00833840	_AllPlayersInRange
+00833854	_EnemyInRange
+00833864	frame
+0083386c	_PlayerInBox
+0083387c	true/false
+00833888	distance [m]
+00833898	_PlayerInRange
+00836890	CSC_FreeBackPack
+008368a4	CSC_FreeHands
+008368b4	CSC_ReleaseHuman
+008368c8	CSC_GetPlayerNumNoNPC
+008368e0	CSC_GetPlayerNum
+008368f4	CSC_DuplicateHuman
+00836908	CSC_EndCutscene
+00836918	CSC_RunCLouder
+00836928	CSC_SetCameraAnimation
+00836940	CSC_NoTeamDamage
+00836954	CSC_FrameSetShadow
+00836968	CSC_SetCameraFOV
+0083697c	CSC_SetupFakeCutscene
+00836994	CSC_RunCutscene
+008369a4	CSC_FadeOutToColor
+008369b8	CSC_FadeInFromColor
+008369cc	CSC_FadeOut
+008369d8	CSC_FadeIn
+008369e4	CSC_SetTimer
+008369f4	SetInterfaceTimer
+00836a08	AirAttack_SetTarget
+00836a1c	FRM_SetGroupLightMap
+00836a34	FRM_FinishIndexedParticle
+00836a50	FRM_DestroyIndexedParticle
+00836a6c	FRM_CreateIndexedParticle
+00836a88	FRM_CreateParticle
+00836a9c	FRM_SetLightMap
+00836aac	FRM_SetCameraFrameSlide
+00836ac4	FRM_SetCameraFrame
+00836ad8	FRM_WatchTrackWithParent
+00836af4	FRM_WatchTrack
+00836b04	FRM_GetActiveCamera
+00836b18	FRM_SetActiveCamera
+00836b2c	FRM_GetPosition
+00836b3c	FRM_GetMyFrame
+00836b4c	FRM_Move
+00836b58	FRM_RotateZ
+00836b64	FRM_RotateY
+00836b70	FRM_RotateX
+00836b7c	FRM_SoundAdjustDoppler
+00836b94	FRM_SoundAdjustVolume
+00836bac	Car_SetFuel
+00836bb8	FRM_TimerSetOn
+00836bc8	FRM_SetOn
+00836bd4	FRM_CreatePhysicalObject
+00836bf0	FRM_TeleportNearFrameBack
+00836c0c	FRM_TeleportNearFrame
+00836c24	ITEM_Teleport
+00836c34	FRM_MorphSpeechDelayed
+00836c4c	FRM_MorphSpeech
+00836c5c	__SetupAutoLogging
+00836c70	__LogFrame
+00836c7c	__LogNumber
+00836c88	__Log
+00836c90	FRM_SetTarget
+00836ca0	FRM_TeleportNearCheckpoint
+00836cbc	FRM_FindChildFrame
+00836cd0	FRM_FindFrame
+00836ce0	FRM_SetAnimationDelayed
+00836cf8	FRM_StopAnimation
+00836d0c	FRM_ResetAnimation
+00836d20	FRM_SetAnimation
+00836d34	WEATHER_SetDir
+00836d44	WEATHER_Debug
+00836d54	WEATHER_SetColorOut
+00836d68	WEATHER_SetColorIn
+00836d7c	WEATHER_SetSize
+00836d8c	WEATHER_SetSpeed
+00836da0	WEATHER_SetCount
+00836db4	WEATHER_SetSpace
+00836dc8	WEATHER_SetMode
+00836dd8	THUNDERSTORM_MP
+00836de8	THUNDERSTORM_SetOn
+00836dfc	WEATHER_SetOn
+00836e0c	DisableWhenevers
+00836e20	DisableAlarms
+00836e30	EnableSignal
+00836e40	DisableSignals
+00836e50	SetNPCTeamStatus
+00836e64	DECORATOR_SetOn
+00836e74	DOOR_Lock
+00836e80	SetActorState
+00836e90	SetAlarmType
+00836ea0	SetPlayerInput
+00836eb0	CheckpointJoin
+00836ec0	CheckpointSeparate
+00836ed4	FRM_SetShifting
+00836eec	MakeExplosion
+00836efc	PrintfNumber
+00836f0c	Printf
+00836f14	SetWheneverTime
+00836f24	SetWhenever
+00836f30	AddDebriefingText
+00836f44	AddDiaryText
+00836f54	SetObjectiveStatus
+00836f68	SendSignal
+00836f74	Delay
+00836f7c	PlayCutsceneMusic
+00836f90	PlayMusic
+00836f9c	PlaySound
+00836fa8	ScriptStartPoint
+00836fbc	OnExit
+00836fc4	OnGlobalAlarm
+00836fd4	OnCutsceneDone
+00836fe4	OnAlarmDone
+00836ff0	OnAlarm
+00837000	OnUse
+00837008	OnDeath
+00837010	OnSignal
+0083701c	OnCutscene
+00837028	Whenever
+00837034	Block
+0083703c	Return
+00837044	Gosub
+00837060	Label
+00837068	Frame
+00837078	String
+00837090	Integer
+00837098	EndScript
+008370a4	SUBTITLES_SetText
+008370b8	SUBTITLES_SetOn
+008370c8	SetupJunkers88
+008370d8	AddHumanHealth
+008370e8	HINT_ClearAll
+008370f8	HINT_Add
+00837104	MP_EnableSpawnZone
+00837118	AddPauseSound
+00837128	HUMAN_RemoveItemsFromStore
+00837144	SetupTacticalMode
+00837158	Mission_SetUniformDisguise
+00837174	HUMAN_SETEVENTS
+00837184	HUMAN_ACTIVITY_BinocularsEnd
+008371a4	HUMAN_ACTIVITY_Point
+008371bc	HUMAN_ACTIVITY_Sleep
+008371d4	HUMAN_ACTIVITY_Sit
+008371e8	HUMAN_ACTIVITY_Piss
+008371fc	HUMAN_ACTIVITY_StandSleep
+00837218	HUMAN_ACTIVITY_Exercise
+00837230	HUMAN_ACTIVITY_Salute
+00837248	HUMAN_ACTIVITY_Turk
+0083725c	HUMAN_ACTIVITY_Eat
+00837270	HUMAN_ACTIVITY_DrinkBottle
+0083728c	HUMAN_ACTIVITY_Read
+008372a0	HUMAN_ACTIVITY_Phone
+008372b8	HUMAN_ACTIVITY_Telegraph
+008372d4	HUMAN_ACTIVITY_Trap
+008372e8	HUMAN_ACTIVITY_PlayPuppet
+00837304	HUMAN_ACTIVITY_PlayAirplane
+00837320	HUMAN_ACTIVITY_PlayCar
+00837338	HUMAN_ACTIVITY_Hot
+0083734c	HUMAN_ACTIVITY_Cold
+00837360	HUMAN_ACTIVITY_Binoculars
+0083737c	HUMAN_ACTIVITY_Hat
+00837390	HUMAN_ACTIVITY_Shoes
+008373a8	HUMAN_ACTIVITY_CheckWeapon
+008373c4	HUMAN_ACTIVITY_SpotLeft
+008373dc	HUMAN_ACTIVITY_SpotRight
+008373f8	HUMAN_ACTIVITY_SpotDown
+00837410	HUMAN_ACTIVITY_SpotUp
+00837428	HUMAN_ACTIVITY_Cubes
+00837440	HUMAN_ACTIVITY_Card
+00837454	HUMAN_ACTIVITY_Smoke
+0083746c	HUMAN_DropObject
+00837480	HUMAN_PickObject
+00837494	HUMAN_WeaponUp
+008374a4	HUMAN_WeaponOnArm
+008374b8	HUMAN_SETHEARRANGE
+008374cc	HUMAN_SETSIGHTRANGE
+008374e0	FRAME_SETAIMODE_Zombie
+008374f8	FRAME_SETAIMODE_Defensive
+00837514	FRAME_SETAIMODE_Aggressive
+00837530	HUMAN_SETAIMODE_Zombie
+00837548	HUMAN_SETAIMODE_Defensive
+00837564	HUMAN_SETAIMODE_Aggressive
+00837580	HUMAN_SETMODE_StandFast
+00837598	HUMAN_SETMODE_Stand
+008375ac	HUMAN_SETMODE_Crouch
+008375c4	HUMAN_SETMODE_DontSeekBestPos
+008375e4	HUMAN_SETMODE_Lie
+008375f8	HUMAN_SETMODE_Silence
+00837610	HUMAN_SETMODE_Guard
+00837624	HUMAN_SETMODE_Walk
+00837638	HUMAN_SETMODE_Run
+0083764c	FRM_GetNearestPlayer
+00837664	HUMAN_TurnAtNearestPlayer
+00837680	HUMAN_TurnAt
+00837690	HUMAN_MoveToAlarm
+008376a4	HUMAN_LookAround
+008376b8	HUMAN_LookAt
+008376c8	HUMAN_IllFire
+008376d8	HUMAN_SetWaitForPlayer
+008376f0	HUMAN_SetSniper
+00837700	HUMAN_SetOptimized
+00837714	HUMAN_Suspend
+00837724	HUMAN_Unlock
+00837734	HUMAN_Investigate
+00837748	HUMAN_UseBomb
+00837758	HUMAN_Climb
+00837764	HUMAN_Open
+00837770	HUMAN_Bike
+0083777c	HUMAN_SetIgnoreCircumventionFlag
+008377a0	HUMAN_DriveNearPlayer
+008377b8	HUMAN_Drive
+008377c4	HUMAN_Stop
+008377d0	HUMAN_Reload
+008377e0	HUMAN_Put
+008377ec	HUMAN_Attack
+008377fc	HUMAN_KillAllInBox
+00837810	HUMAN_KillEx
+00837820	HUMAN_Kill
+0083782c	HUMAN_MoveRandomRadius
+00837844	HUMAN_MoveFromFrame
+00837858	HUMAN_MoveToFrame
+0083786c	HUMAN_SetWorkingFrame
+00837884	HUMAN_SetAnim
+00837894	FRM_SwitchFaceTexture
+008378ac	HUMAN_DressUniform
+008378c0	HUMAN_AttackMove
+008378d4	HUMAN_Move
+008378e0	HUMAN_CreateItemInStore
+008378f8	HUMAN_SetAlarm
+00837908	HUMAN_BoardVehicle
+0083791c	ScriptAssign
+0083792c	SaveGameValue
+0083793c	DOG_SETAIMODE_Defensive
+00837954	DOG_SETAIMODE_Aggressive
+00837970	DOG_SETMODE_Lie
+00837980	DOG_SETMODE_Stand
+00837994	DOG_SETMODE_Walk
+008379a8	DOG_SETMODE_Run
+008379c4	DOG_Attack
+008379d0	DOG_Move
+008379dc	DOG_SetOwner
+008379ec	DOG_ClearAlarm
+008379fc	DOG_SetRangeHear
+00837a10	DOG_SetRangeSight
+00837a24	DOG_Suspend
+00837a30	DOG_SetOptimized
+00837a44	FORMATION_SetScale
+00837a58	FORMATION_SetTypeArrowInvert
+00837a78	FORMATION_SetTypeArrowSharp
+00837a94	FORMATION_SetTypeQuad3X2
+00837ab0	FORMATION_SetTypeQuad2X3
+00837acc	FORMATION_SetTypeLine
+00837ae4	FORMATION_SetTypeColumn
+00837afc	FORMATION_DelMember
+00837b10	FORMATION_AddMember
+00837b24	FORMATION_Destroy
+00837b38	FORMATION_Create
+00837b4c	Interceptors HP percent
+00837b64	Interceptors firepower percent
+00837b84	Health in percent to add
+00837ba0	Human frame
+00837bac	Hint ID
+00837bb4	AXIS - 0 ALLIED - 1 NEUTRAL - 2
+00837bd4	Zone name
+00837be0	SoundFrame name
+00837bf0	ItemID
+00837bf8	Human model
+00837c04	one-hand flag[true/false]
+00837c20	range [m]
+00837c2c	target human
+00837c3c	R [0..255]
+00837c48	G [0..255]
+00837c54	B [0..255]
+00837c60	A [0..255]
+00837c6c	width [mm]
+00837c78	length [mm]
+00837c84	speed [mm/s]
+00837c94	number of elements
+00837ca8	Z dir
+00837cb0	Y dir
+00837cb8	X dir
+00837cc0	height [m]
+00837ccc	mode [0-rain, 1-snow]
+00837cec	light frame
+00837cf8	lock : true/false
+00837d0c	door frame
+00837d18	state
+00837d20	actor frame
+00837d2c	set [true/false]
+00837d40	alarm types [flags]
+00837d54	status-true/false
+00837d68	NPC frame
+00837d74	checkpoint name B
+00837d88	checkpoint name A
+00837d9c	reverse [true/false]
+00837db4	avi filename
+00837dc4	range [mm]
+00837dd0	damage [zotti] 1000 = 1.0
+00837dec	variable to print
+00837e00	text to print
+00837e10	time to check[ms]
+00837e24	whenever name
+00837e34	index in sound table in chapter 'MUSIC'
+00837e5c	number of sub-sound in chapter
+00837e7c	number of sound-chapter (sound table)
+00837ea4	text ID
+00837eac	objective status
+00837ec0	objective number
+00837ed4	signal number (1..31)
+00837eec	target script
+00837f00	particle index to finish(received from function CreateIndexedParticle() )
+00837f50	particle index to destroy (received from function CreateIndexedParticle() )
+00837f9c	variable receiving particle index
+00837fc0	target frame (position)
+00837fd8	particle ID
+00837fe4	lightmap group name
+00837ff8	lightmap level [0 .. 9?]
+00838014	target lit-object
+00838028	animation filename [playing in world coords]
+00838058	camera frame
+00838068	degrees
+00838070	cutscene number
+00838080	duplicated frame from human (never actor human!)
+008380b4	frame to release
+008380c8	new frame name (must be unique!)
+008380ec	new frame keeper
+00838100	frame of player
+00838110	target frame variable
+00838128	index of player
+00838138	b [0-255]
+00838144	g [0-255]
+00838150	r [0-255]
+0083815c	time to fadeout [ms]
+00838174	time to fadein [ms]
+00838188	acceleration [zotti/s] 
+008381a0	game speed [zotti ;-) ], (1000 = normal speed)
+008381d0	time [ms]
+008381dc	target to attack
+008381f0	speed [degree]
+00838200	target to watch
+00838210	target camera variable
+00838228	target camera 
+00838238	track name
+00838244	speed [degree/s]
+00838258	angle [degree]
+00838268	doppler Z
+00838274	doppler Y
+00838280	doppler X [m/s]
+00838290	volume [%], (100 = 1.0)
+008382a8	target sound
+008382b8	fuel [1/10 lt]
+008382c8	target car frame
+008382dc	stopwatch time [ms]
+008382f0	Set stopwatch true/false
+0083830c	link flag (true/false)
+00838324	target frame 
+00838334	far [m]
+0083833c	near [m]
+00838348	Speech phrase
+00838358	target frame (human model)
+00838374	frame variable
+00838384	int variable
+00838394	outputfilename
+008383a4	log message
+008383b0	link(true), unlink(false)
+008383cc	targeting frame
+008383dc	move collision(true/false)
+008383f8	fadeout(true/false)
+0083840c	weight [kg]
+00838418	item's frame
+00838428	target dir checkpoint name
+00838444	target checkpoint name
+0083845c	moving frame
+0083846c	parent frame
+0083847c	frame name
+00838488	target variable
+00838498	stage [0..7?]
+008384a8	target 
+008384b0	number of cutscene
+008384c4	number of signal
+008384d8	target frame-variable for player
+008384fc	ref frame
+00838508	look type [0-6]
+00838518	target to fake-attack
+00838530	watch player, when waiting(true/false)
+00838558	distance to resume [m]
+00838570	distance to stop [m]
+00838588	 sniper radius [m]
+0083859c	sniper true/false
+008385b0	name of bike model
+008385c4	speed [km/h]
+008385d4	attack time [ms]
+008385e8	frame of BBOX (dummy)
+00838600	0, 1, 2
+00838608	frame of actor
+00838618	radius [m]
+00838624	target frame
+00838634	working frame
+00838644	loop [true/false]
+00838658	cancel time [ms]
+0083866c	blend time [ms]
+0083867c	animation name
+0083868c	texture name
+0083869c	human model
+008386a8	uniform index
+008386b8	store type
+008386c4	value
+008386cc	position
+008386d8	position in car
+008386e8	vehicle name
+008386f8	script name [*.scr]
+0083870c	target
+00838714	checkpoint name
+00838724	owner
+00838730	on/off
+00838738	optimized mode
+00838748	distance [cm]
+00838758	Member frame (actor HUMAN)
+00838774	Leader frame (actor HUMAN)
+00838790	Unknown chunk '%d'.
+008387a4	Broken chunk '%d'.
+008387b8	chunk error.
+008387c8	Frame not found : '%s'.
+008387f0	%s %d
+008387f8	Failed to load file: %s
+00838810	(MO) E_IT_MOVE : checkpoint '%s'not found!!!
+00838840	(MO) E_IT_ATTACKMOVE : checkpoint '%s'not found!!!
+00838878	Rotated frame '%s' not found in scene :-(
+008388a4	(MO) Unknown chunk.
+008388b8	Script on frame '%s' don't know how to load its data :-(
+008388f4	Script on frame '%s' not compiled
+00838928	Scripts\\%s\\%s
+00838938	Scripts.dta
+00838944	mpscripts.dta
+00838954	Script
+0083895c	ScriptModule : send state for %s(%s)\n
+00838984	false
+00838994	ScriptModule : send state for %d sounds \n
+008389c0	ScriptModule : receive state for %s(%s)\n
+008389ec	ScriptModule : recieve state for %d sounds \n
+00838a1c	Scripts\\include\\%s
+00838a35	       
+00838a40	#include
+00838a5c	#name error
+00838a68	Sound
+00838a78	sounds\\%s
+00838b00	Weapon Shooting Dist
+00838b18	Music
+00838b20	Action
+00838b28	Interface & Menu
+00838b3c	Speech
+00838b44	Vehicle Not Car
+00838b54	Version
+00838b5c	Explosion
+00838b68	Falling Hit
+00838b74	Bullet Hit
+00838b80	Weapon Manipulation
+00838b94	Weapon Shooting
+00838ba4	Object Manipulation
+00838bb8	Puppet Movement
+00838bc8	 @SOUND_TABLE : chapter not loaded; loading stopped
+00838bfc	 @SOUND_TABLE : bad tablefile format
+00838c24	 @SOUND_TABLE : tablefile not found
+00838c48	Tables\\IngameSounds.dat
+00838c60	Tables\\IngameSounds.def
+00838c78	 ERROR : C_sound_table::GetDabingSampleSize() : dabing id '%d' with unknown lenght
+00838ccc	sound
+00838cd4	version
+00838cdc	Version cache : BADFILETIME '%s' (3ds filter)
+00838d0c	Version cache : BADFILEVERSION '%s' (3ds filter)
+00838d40	Versions
+00838d50	###### C_VersionMaster::BuildVersionKeepersFromScene() : frame with default material ['%s']######
+00838db4	trans
+00838dbc	matid
+00838dc4	particle
+00838dd0	MR_Particle
+00838ddc	Particles
+00838de8	Could not load data from "tables\\effects.def" wrong version
+00838e24	Could not load data from "tables\\effects.def"
+00838e54	tables\\effects.def
+00838e68	Effects.bin - Error: different versions
+00838e90	Effects.bin - Error: could not open "%s"
+00838ebc	missions\\%s\\effects.bin
+00838ed4	ParticleManager ver: 1.0: %d static particles initialized.
+00838f10	Effects.bin - Error: error in chunks..
+00838f38	ParticleManager ver: 2.01: %d static particles initialized.
+00838f74	FollowBulletSound
+00838f88	e_incm%d.wav
+00838f98	flare
+00838fa0	m_w_flare
+00838fb0	Shot bullet:MatID je -1, na frame "%s".. zapiste si to a dejte grafikum,program pak nejspise spadne!!!!
+00839018	no frame
+00839030	ShotMgr
+00839038	shellFPV
+00839044	shell3rd
+00839050	trace
+00839058	WeaponOdds
+00839064	x_blood%02d.tga
+00839074	x_expl%02d.tga
+00839084	x_decal%02d.tga
+00839094	No Parent
+008390a0	blsdum
+008390a8	cardum
+008390b0	undercut him!!!
+008390c0	WeaponLight
+008390f4	humanzones
+00839108	right leg down
+00839118	right leg up
+00839128	left leg down
+00839138	left leg up
+00839144	righ hand down
+00839154	right hand up
+00839164	left hand down
+00839174	left hand up
+00839194	You are switched to %s
+008391ac	%s is dead !!!
+008391bc	%s killed an enemy soldier!!!
+008391dc	TeamMgr
+008391e4	CameraModule
+008391f4	###### (MO) Game camera not created.
+0083921c	GameCamera
+00839228	###### (MO) Load camera file '%s' failed.
+00839254	tables\\gamecam.set
+0083926f	?Debug camera speed %.2f
+00839288	Yaw %.2f, Pitch %.2f, Roll %.2f
+008392a8	cameraFPV*
+008392b4	INTERIERCLOSE
+008392c4	interierclose
+008392d4	NOINTERIER
+008392e0	nointerier
+008392ec	camera3RD*
+008392f8	spectator
+00839304	spectator%d
+00839310	SAFE : %d, MissionTime : %d, REST: %d
+008393a0	Sight
+008393a8	airsupport_speech
+008393bc	90005601.wav
+008393cc	90005603.wav
+008393dc	90005600
+008393e8	90005602
+008393f4	HeavyFireSupportModule
+0083940c	tables\\airsupport.tbl
+00839424	Vertex anim
+00839430	Tables\\Vertanim.def
+00839444	\\Vertanim.bin
+00839454	Missions\\
+00839464	Actors
+0083946c	Temp. Actors
+00839480	C_TemporaryActorsList::ClCreateItem: CREATED _TempActorIndex %d ActorIndex %d _ItemUID %d \n
+008394e0	C_TemporaryActorsList::ClCreateItem - wrong params (ITEM) for clcreateitem %d, %d
+00839538	C_TemporaryActorsList::ClCreateItem - wrong params (HUMAN) for clcreateitem %d, %d
+00839590	C_TemporaryActorsList::ClCreateItem: _TempActorIndex %d ActorIndex %d _ItemUID %d \n
+008395e4	Object01
+008395f0	Object03
+008395fc	ptacekletacek
+0083960c	decorations.bin
+0083961c	decorator_sl.bin
+00839638	volumetrics.bin
+00839648	clouder2.tga
+00839658	clouder.tga
+00839664	meshplayer.bin
+00839674	GameMovie\\%s
+00839718	lensflare
+00839724	*cam*
+00839730	GEffects
+0083973c	MP_Lightning
+0083974c	sea_amb
+00839758	a_undw_
+00839760	a_nsea_
+00839768	mirasun
+00839770	._shad.%s
+0083977c	shdpuppet
+0083978c	watercam.set
+008397ac	LMapsGrp
+008397bc	TShift
+008397c4	NOSUB
+008397cc	Dialogs_DD.bin
+008397dc	Dialogs.bin
+008397e8	Text\\%s\\
+008397f4	NO TEXT WITH THIS ID !!!
+00839810	FPV_HANDS
+00839820	C_FirstPersonView: LoadAnimTable : Could not open file "%s", readonly ?
+00839868	tables\\FpvAnims.sav
+0083987c	flash
+0083988c	FPV_hands
+00839898	w_default
+008398b0	C_FirstPersonView: PlayAnim %d (%d) : could not load unknow anim
+008398f4	C_FirstPersonView: PlayAnim %d (%d) : could not load %s anim
+00839938	C_FirstPersonView: PlayAnim %d: bad values in the ratio, could not select random anim !!!
+00839994	kul_en
+0083999c	kul_us
+008399a4	kmps_rd%02d
+008399b0	kmps_bl%02d
+008399bc	strelka
+008399c4	kmpscvr
+008399cc	kompas
+008399d8	SayTeam: %s
+008399e4	Say: %s
+0083a8cc	oklmpqrnOKLMPQRNtext
+0083a8e4	header
+0083a8ec	game_info
+0083a8f8	ingame_info
+0083a904	%s %s
+0083a90c	%d %s
+0083a914	%s %02d:%02d:%02d
+0083a928	Camera pos: 0,0,0
+0083a93c	Border
+0083a944	sound_click
+0083a950	button.wav
+0083a95c	GI_Light
+0083a968	gameinterface
+0083a978	down_panel
+0083a984	playerstate2_%02d
+0083a998	playerstate1_%02d
+0083a9ac	action%02d
+0083a9b8	camera3RD
+0083a9c4	cameraFPV
+0083a9ec	scroll16
+0083a9f8	scroll15
+0083aa04	scroll14
+0083aa10	scroll13
+0083aa1c	text_lockpick01
+0083aa2c	lpcpct00
+0083aa38	text_lockpick
+0083aa48	text_first aid01
+0083aa5c	facpct00
+0083aa68	text_first aid
+0083aa78	text_stealth01
+0083aa88	sicpct00
+0083aa94	text_stealth
+0083aaa4	text_endurance01
+0083aab8	encpct00
+0083aac4	text_endurance
+0083aad4	text_health01
+0083aae4	hecpct00
+0083aaf0	text_health
+0083aafc	text_strenght01
+0083ab0c	stcpct00
+0083ab18	text_strenght
+0083ab28	text_shooting01
+0083ab38	shcpct00
+0083ab44	text_shooting
+0083ab54	text_soldier stats
+0083ab68	skills
+0083ab70	DraggingFrame
+0083ab80	description
+0083ab8c	text_allcpct01
+0083ab9c	text_allcpct00
+0083abac	namexx01
+0083abb8	namexx00
+0083abc4	allcpct01
+0083abd0	allcpct00
+0083abdc	hlcpct03
+0083abe8	selbackpack*
+0083abf8	hlcpct01
+0083ac04	item07*
+0083ac0c	item06*
+0083ac14	item05*
+0083ac1c	item04*
+0083ac24	text_bkpckcap*
+0083ac34	bkpckcaptab*
+0083ac44	hlcpct02
+0083ac50	selholsters*
+0083ac60	hlcpct00
+0083ac6c	item03*
+0083ac74	item02*
+0083ac7c	item01*
+0083ac84	item00*
+0083ac8c	text_hlstrscap*
+0083ac9c	hlstrscaptab*
+0083acac	X_SQUARE.BMP
+0083acbc	selshoulder*
+0083accc	text_shoulder*
+0083acdc	shoulder*
+0083ace8	seluniform*
+0083acf4	text_uniform*
+0083ad04	uniform*
+0083ad10	selhand*
+0083ad1c	text_hand*
+0083ad28	hand*
+0083ad30	seldrop*
+0083ad3c	text_drop*
+0083ad48	drop*
+0083ad50	selhead*
+0083ad5c	text_head*
+0083ad68	head*
+0083ad70	selbck*
+0083ad78	text_back*
+0083ad8c	items01
+0083ad94	items00
+0083ad9c	inventory
+0083ada8	%d/%d
+0083adb0	%s: %d/%d
+0083adbc	%d/%d kg
+0083adc8	%s : %.2f x
+0083add4	%s : %.2f m/s
+0083ade4	%s : %d/%d
+0083adf0	%s : %.2f kg
+0083ae00	%5d%%
+0083ae0c	objective
+0083ae18	enemy
+0083ae20	mapcamera
+0083ae30	allied_active
+0083ae40	scale
+0083ae50	center
+0083ae58	missions\\%s\\map
+0083ae68	allied
+0083ae70	selectzone
+0083ae7c	objective%d
+0083ae88	axis*
+0083ae90	allied*
+0083ae98	zone_disabled*
+0083aea8	axis_obj*
+0083aeb4	allied_obj*
+0083aec0	text_obj*
+0083af10	k_movepos
+0083af1c	t_down
+0083af2c	t_backward
+0083af38	t_forward
+0083af44	t_right
+0083af4c	t_left
+0083af54	t_rotdown
+0083af60	t_rotup
+0083af68	t_rotright
+0083af74	t_rotleft
+0083af80	k_rotate
+0083af8c	k_move
+0083af94	kurzor
+0083af9c	lee_enfield
+0083afa8	springfield
+0083afb8	arisaka
+0083afc0	scope
+0083afc8	sniper
+0083afd0	speed03
+0083afd8	speed02
+0083afe0	speed01
+0083aff0	i_shoulder
+0083affc	i_hands
+0083b004	tabl02
+0083b00c	cross_name
+0083b018	cross_B
+0083b020	cross_T
+0083b028	cross_R
+0083b030	cross_L
+0083b038	%d. %s
+0083b040	%s %s - %d%%
+0083b050	mpallied
+0083b05c	mpaxis
+0083b064	msprint
+0083b074	mwalk
+0083b084	pkneel
+0083b08c	tabl01
+0083b094	%02d:%02d
+0083b0a0	progress_name
+0083b0b0	prgbr01
+0083b0b8	prgbrbk
+0083b0c0	infosel
+0083b0c8	info%02d
+0083b0d4	i_frehnd.bmp
+0083b0e4	select_weapon02
+0083b0f4	select_weapon01
+0083b104	drkr2
+0083b10c	tabl03
+0083b114	select_weapon00
+0083b124	drkr1
+0083b12c	selector_weapon
+0083b13c	select_weapon
+0083b14c	%.0f/%d
+0083b154	injury
+0083b15c	GameMovie\\AnimHit%d.bik
+0083b174	Htext
+0083b17c	%s     %d  :  %d     %s
+0083b194	mpneutral_obj%02d
+0083b1a8	mpaxis_obj%02d
+0083b1b8	mpallied_obj%02d
+0083b1cc	mpobjectives
+0083b1dc	inactived*
+0083b1e8	actived*
+0083b1f4	normal*
+0083b1fc	sliderbase*
+0083b208	slider*
+0083b210	barrow down*
+0083b220	barrow up*
+0083b22c	mpaxis_score
+0083b23c	mpallied_score
+0083b24c	99/99
+0083b254	00:00
+0083b264	mp_scoretable
+0083b274	%2d:%02d
+0083b280	voting
+0083b288	camera
+0083b290	timer-explosive%02d
+0083b2a4	explosivetimer
+0083b2b4	carnage_stats
+0083b2c4	rollmenu
+0083b2dc	%s - %s
+0083b2e4	mp_vip*
+0083b2ec	medic*
+0083b2f4	silence*
+0083b300	AImode*
+0083b308	visibility*
+0083b314	x_fc_death.bmp
+0083b324	x_fc_a.bmp
+0083b330	univerz
+0083b338	mind*
+0083b340	command*
+0083b34c	disguisebar*
+0083b35c	disguise0*
+0083b368	staminabar*
+0083b374	stamina0*
+0083b380	health0*
+0083b38c	healthcr*
+0083b398	healthbar*
+0083b3a4	photo*
+0083b3ac	select*
+0083b3bc	player0*
+0083b3c8	Soldier%02d
+0083b3d4	%.0fm
+0083b3dc	aggresive
+0083b3e8	defensive
+0083b3f4	passive
+0083b3fc	sprint
+0083b420	kneel
+0083b42c	l_aicomm
+0083b438	TMcamera16x
+0083b444	TMcamera8x
+0083b450	TMcamera4x
+0083b45c	TMcamera2x
+0083b468	TMcamera1x
+0083b474	~realtime
+0083b480	realtime
+0083b48c	~TMCamera
+0083b498	TMCamera
+0083b4a4	~options
+0083b4b0	options
+0083b4b8	~wait02
+0083b4c0	wait02
+0083b4c8	~wait01
+0083b4d0	wait01
+0083b4d8	~defensive
+0083b4e4	~aggresive
+0083b4f0	~passive
+0083b4fc	~slow
+0083b504	~walk
+0083b514	~sprint
+0083b524	~kneel
+0083b52c	~stay
+0083b534	~deleteall
+0083b540	deleteall
+0083b54c	~delete
+0083b554	delete
+0083b55c	~regroup
+0083b568	regroup
+0083b570	text_options
+0083b580	text_cameramotion
+0083b594	text_delete
+0083b5a0	text_mind
+0083b5ac	text_movement
+0083b5bc	text_pose
+0083b5c8	text_signals
+0083b5d8	text_regroup
+0083b5e8	selector_commands
+0083b5fc	3Dstand
+0083b604	3Dmove
+0083b60c	3Dpose
+0083b614	3Dcommand
+0083bd00	signals
+0083bd08	projectile
+0083bd14	GunShells
+0083bd20	AIM%02d*
+0083bd2c	VERT%02d*
+0083bd38	%s_f%02d_%02d
+0083bd48	CARDUM*
+0083bd50	SHDUM*
+0083bd58	right
+0083bd7c	itemid
+0083bd84	BARREL%02d_%02d*
+0083bd98	VIEW%02d
+0083bda4	HORT%02d*
+0083bdb0	SHELL
+0083bdb8	sounds
+0083bdc0	soundm
+0083bde0	send svcl car impuls
+0083bdf8	car do collision
+0083be0c	send clsv car impuls
+0083be24	Damage driver - Damage :%.2f, impuls %.2f 
+0083be50	Car_particle
+0083be60	tables\\tyres.bin
+0083be74	NO3RD
+0083be84	PSMOKE
+0083be8c	PFIRE
+0083be98	PARTID
+0083bea8	EXPL_D
+0083beb4	D_ZONE
+0083bec8	SEAT%02d
+0083bed9	ft19r+.bmp
+0083bee5	ft19r.bmp
+0083bef0	STRIPR*
+0083bef8	STRIPL*
+0083bf00	SMOKE_MOTOR
+0083bf0c	SWHEEL
+0083bf14	CENTRE
+0083bf34	SEAT*
+0083bf3c	BALLAST*
+0083bf48	WINDOW*
+0083bf50	DOOR*
+0083bf58	BODYCOL*
+0083bf6c	SPECCOLL*
+0083bf78	EXHAUST*
+0083bf8c	 %f %f %f
+0083bf98	AXIS*
+0083bfa0	LIGHT*
+0083bfa8	PROJECTOR*
+0083bfb4	LIGHTBA*
+0083bfc0	LIGHTBR*
+0083bfcc	LIGHTLI*
+0083bfd8	LIGHTBI*
+0083bfe4	LIGHTIN*
+0083bff0	BILLBOARD*
+0083bffc	LIGHTRE*
+0083c008	shlaif02.i3d
+0083c018	shlaif01.i3d
+0083c028	develop
+0083c030	BODYCOL
+0083c038	+DEFORM SPZ
+0083c044	+DEFORM ROOF
+0083c054	+DEFORM DOOR
+0083c064	+DEFORM WING
+0083c074	+DEFORM BODY
+0083c084	+DEFORM LIGHT
+0083c094	+DEFORM MIRROR
+0083c0a4	+DEFORM BUMPER
+0083c0b4	DEFORM GLASS
+0083c0c4	DEFORM STEPNEY
+0083c0d4	DEFORM ROOF
+0083c0e0	DEFORM DOOR
+0083c0ec	DEFORM WING
+0083c0f8	DEFORM MIRROR
+0083c108	DEFORM SPZ
+0083c114	DEFORM LIGHT
+0083c124	DEFORM BUMPER
+0083c134	DEFORM BODY
+0083c140	PNEU_PUNC.WAV
+0083c150	ctest.bin
+0083c1e0	%s : Checking event and turning body for 3.5 s.
+0083c210	%s : Checking event by head for 3 s.
+0083c238	%s: Switching to %s
+0083c250	%s - Set preset prior keep dir!
+0083c270	%s - Set preset prior fire!
+0083c28c	%s - Set preset prior move!
+0083c2a8	%s - Set preset none!
+0083c2c0	%s - Action finished!
+0083c2d8	(MO) C_PlayerAiBrain::ServerLoad()
+0083c2fc	(MO) _S_CURRENTACTIONDESC::ServerLoad()
+0083c324	(MO) C_PlayerAiBrain::ServerLoad_OneMapCommand()
+0083c54c	Breath again...
+0083c55c	Holding breath...
+0083c570	shdum
+0083c5f8	UNKNOWN
+0083c604	CROUCH
+0083c60c	STAND
+0083c628	E_PRESET_PRIORKEEPDIR
+0083c648	E_PRESET_PRIORFIRE
+0083c65c	E_PRESET_PRIORMOVE
+0083c670	E_PRESET_NONE
+0083c680	E_BF_LIE
+0083c68c	E_BF_CROUCH
+0083c698	E_BF_STAND
+0083c6a4	E_BF_UNKNOW
+0083c6b4	Human
+0083c6bc	%s doesnt have speechset.. using player speech set!!!\n
+0083c6f4	%s have empty speechset.. Please set it urgently..\n
+0083c728	Unknow damage zone !!!!
+0083c740	SvDropItem: failed - _TempActorIndex %d ActorIndex %d _ItemUID %d \n
+0083c784	%s: %s
+0083c78c	EVENT SOUNT WITHOUT HUMAN (%s)!!!
+0083c7b0	EVENT SOUNT WITHOUT HUMAN and FRAME!!!
+0083c7d8	%s Update strenght by %.3f to %.3f
+0083c7fc	%s Update Endurance by %.3f to %.3f
+0083c820	%s Update Morale by %.3f to %.3f
+0083c844	%s Update Shooting by %.3f to %.3f
+0083c868	%s Update Stealth by %.3f to %.3f
+0083c88c	%s Update FirstAid by %.3f to %.3f
+0083c8b0	%s Update Lockpick by %.3f to %.3f
+0083c8d4	%s Update Experience by %d to %d
+0083c93c	right
+0083c9a0	crouch
+0083c9dc	ladder
+0083c9f0	reload
+0083ca04	binoculars
+0083ca54	drvRight
+0083ca7c	drvBack
+0083ca90	handBrake
+0083caa4	nextPlayer
+0083cab8	prevPlayer
+0083cacc	action
+0083caf4	inventory
+0083cb08	tacticalMode
+0083cb30	console
+0083cb58	textTeam
+0083cb6c	zoomIn
+0083cb80	zoomOut
+0083cb94	mailWeapon
+0083cba8	secWeapon
+0083cbbc	grenade
+0083cbe4	select1
+0083cbf8	select2
+0083cc0c	select3
+0083cc20	select4
+0083cc34	select5
+0083cc48	select6
+0083cc5c	comFollow
+0083cc70	comMoveOn
+0083cc84	comStop
+0083cc98	comSuppFire
+0083ccac	comArm
+0083ccc0	comGuard
+0083ccd4	comSilence
+0083cce8	comHoldFire
+0083ccfc	comOpenFire
+0083cd10	comGetOut
+0083cd24	comAllSldrs
+0083cd4c	showDebug
+0083cd60	zoomReset
+0083cdb0	escape
+0083cdc4	\nControlsEx - 
+0083cdd4	\nControls - 
+0083d010	(Plr sig) MP - NEED PICKUP
+0083d02c	(Plr sig) MP - NEED MEDIC
+0083d048	(Plr sig) MP - NEED REINFORCEMENT
+0083d06c	(Plr sig) MP - SNIPER SPOTTED
+0083d08c	(Plr sig) MP - ARMOR SPOTTED
+0083d0ac	(Plr sig) MP - ENEMY SPOTTED
+0083d0cc	(Plr sig) MP - NEGATIVE
+0083d0e4	(Plr sig) MP - AFFIRMITAVE
+0083d100	(Plr action) HEAL_ME
+0083d118	(Plr event) YES_SIR_S
+0083d130	(Plr event) YES_SIR
+0083d144	(Plr sig) MOVE_TO_S
+0083d158	(Plr sig) MOVE_TO
+0083d16c	OTHER_SOUNDS
+0083d17c	FAKE_ALARM
+0083d188	WHAT_IS
+0083d190	SEE_ENEMY
+0083d19c	CANCEL_ALARM
+0083d1ac	ATTACK_SPEECH
+0083d1bc	ENEMY_KILLED
+0083d1cc	INJURY
+0083d1d4	LONG_DEATH
+0083d1e0	SHORT_DEATH
+0083d1ec	EVENT_I_HAVE_NO_WEAPON
+0083d204	(Plr event) FRIEND_IN_FIRE_LINE_S
+0083d228	(Plr event) FRIEND_IN_FIRE_LINE
+0083d248	(Plr event) BULLET_HIT_NEAR_S
+0083d268	(Plr event) BULLET_HIT_NEAR
+0083d284	(Plr event) INJURY_S
+0083d29c	(Plr event) INJURY
+0083d2b0	(Plr event) ENEMY_KILLED_S
+0083d2cc	(Plr event) ENEMY_KILLED
+0083d2e8	(Plr event) NEGATIVE_S
+0083d300	(Plr event) NEGATIVE
+0083d318	(Plr event) FRIENDLY_FIRE_S
+0083d334	(Plr event) FRIENDLY_FIRE
+0083d350	(Plr event) WE_ARE_UNDER_FIRE_S
+0083d370	(Plr event) WE_ARE_UNDER_FIRE
+0083d390	(Plr event) CORPSE_SPOTTED_S
+0083d3b0	(Plr event) CORPSE_SPOTTED
+0083d3cc	(Plr event) ENEMY_LOST_S
+0083d3e8	(Plr event) ENEMY_LOST
+0083d400	(Plr event) ENEMY_CONTACT_S
+0083d41c	(Plr event) ENEMY_CONTACT
+0083d438	(Plr event) SEE_ENEMY_S
+0083d450	(Plr event) SEE_ENEMY
+0083d468	(Plr action) CLOSE_S
+0083d480	(Plr action) CLOSE
+0083d494	(Plr action) OPEN_S
+0083d4a8	(Plr action) OPEN
+0083d4bc	(Plr action) KILL_HIM_S
+0083d4d4	(Plr action) KILL_HIM
+0083d4ec	(Plr action) CHANGE_UNIFORM_S
+0083d50c	(Plr action) CHANGE_UNIFORM
+0083d528	(Plr action) SEARCH_REARM_S
+0083d544	(Plr action) SEARCH_REARM
+0083d560	(Plr action) DESTROY_S
+0083d578	(Plr action) DESTROY
+0083d590	(Plr action) ENTER_CLEAR_S
+0083d5ac	(Plr action) ENTER_CLEAR
+0083d5c8	(Plr action) REGROUP_S
+0083d5e0	(Plr action) REGROUP
+0083d5f8	(Plr action) CAPTURE_S
+0083d610	(Plr action) CAPTURE
+0083d628	(Plr action) GRENADE_ROOM_S
+0083d644	(Plr action) GRENADE_ROOM
+0083d660	(Plr action) GET_AWAY_S
+0083d678	(Plr action) GET_AWAY
+0083d690	(Plr action) USE_CUTTERS_S
+0083d6ac	(Plr action) USE_CUTTERS
+0083d6c8	(Plr action) FIRST_AID_S
+0083d6e4	(Plr action) FIRST_AID
+0083d6fc	(Plr action) LOCKPICK_S
+0083d714	(Plr action) LOCKPICK
+0083d72c	(Plr action) GETIN_S
+0083d744	(Plr action) GETIN
+0083d758	(Plr action) INVENTORY_S
+0083d774	(Plr action) INVENTORY
+0083d78c	(Plr action) TAKE_S
+0083d7a0	(Plr action) TAKE
+0083d7b4	(Plr action) LEAVE_S
+0083d7cc	(Plr action) LEAVE
+0083d7e0	(Plr action) PUT_EXPLOSIVES_S
+0083d800	(Plr action) PUT_EXPLOSIVES
+0083d81c	(Plr action) USE_S
+0083d830	(Plr action) USE
+0083d844	(Plr action) DISARM_S
+0083d85c	(Plr action) DISARM
+0083d870	(Plr action) UNLOCK_S
+0083d888	(Plr action) UNLOCK
+0083d89c	(Plr action) LOCK_S
+0083d8b0	(Plr action) LOCK
+0083d8c4	(Plr tact) RETURN_S
+0083d8d8	(Plr tact) RETURN
+0083d8ec	(Plr tact) CLEAR_S
+0083d900	(Plr tact) CLEAR
+0083d914	(Plr tact) CONTINUE_S
+0083d92c	(Plr tact) CONTINUE
+0083d940	(Plr tact) HOLD_S
+0083d954	(Plr tact) HOLD
+0083d964	(Plr tact) SIGNAL_2_S
+0083d97c	(Plr tact) SIGNAL_2
+0083d990	(Plr tact) SIGNAL_1_S
+0083d9a8	(Plr tact) SIGNAL_1
+0083d9bc	(Plr sig) FORMATION_REGROUP_S
+0083d9dc	(Plr sig) FORMATION_REGROUP
+0083d9f8	(Plr sig) FORMATION_WIDE_S
+0083da14	(Plr sig) FORMATION_WIDE
+0083da30	(Plr sig) FORMATION_TIGHT_S
+0083da4c	(Plr sig) FORMATION_TIGHT
+0083da68	(Plr sig) FORMATION_V_S
+0083da80	(Plr sig) FORMATION_V
+0083da98	(Plr sig) FORMATION_COLUMN_S
+0083dab8	(Plr sig) FORMATION_COLUMN
+0083dad4	(Plr sig) FORMATION_LINE_S
+0083daf0	(Plr sig) FORMATION_LINE
+0083db0c	(Plr sig) ATTACK_USE_BAZOOKA_S
+0083db2c	(Plr sig) ATTACK_USE_BAZOOKA
+0083db4c	(Plr sig) ATTACK_THROW_GRENADE_S
+0083db70	(Plr sig) ATTACK_THROW_GRENADE
+0083db90	(Plr sig) ATTACK_COVERING_FIRE_S
+0083dbb4	(Plr sig) ATTACK_COVERING_FIRE
+0083dbd4	(Plr sig) ATTACK_FIRE_AT_WILL_S
+0083dbf4	(Plr sig) ATTACK_FIRE_AT_WILL
+0083dc14	(Plr sig) ATTACK_HOLD_FIRE_S
+0083dc34	(Plr sig) ATTACK_HOLD_FIRE
+0083dc50	(Plr sig) ATTACK_FIRE_AT_SHOT_S
+0083dc70	(Plr sig) ATTACK_FIRE_AT_SHOT
+0083dc90	(Plr sig) MOVE_FIND_COVER_S
+0083dcac	(Plr sig) MOVE_FIND_COVER
+0083dcc8	(Plr sig) MOVE_HOLD_POS_S
+0083dce4	(Plr sig) MOVE_HOLD_POS
+0083dcfc	(Plr sig) MOVE_ADVANCE_S
+0083dd18	(Plr sig) MOVE_ADVANCE
+0083dd30	(Plr sig) MOVE_STOP_S
+0083dd48	(Plr sig) MOVE_STOP
+0083dd5c	(Plr sig) MOVE_FOLLOW_S
+0083dd74	(Plr sig) MOVE_FOLLOW
+0083dd8c	Tables\\speech.set
+0083dda0	%s DONT HAVE ITEM %s (%d) in his backpack !!!!!
+0083ddd0	%s DONT HAVE ITEM %s (%d) in his back !!!!!
+0083ddfc	%s DONT HAVE ITEM %s (%d) as uniform  !!!!!
+0083de28	%s DONT HAVE ITEM %s (%d) in his hands !!!!!
+0083de58	%s DONT HAVE ITEM %s (%d) in his shoulder !!!!!
+0083de88	%s DONT HAVE ITEM %s (%d) on his holster !!!!!
+0083deb8	%s DONT HAVE ITEM %s (%d) on his head !!!!!
+0083dee4	Animation
+0083def0	BODYCOLB%02d
+0083df00	left_wing
+0083df0c	right_wing
+0083df18	#mchescape
+0083df24	%s#%s
+0083df2c	aanim
+0083df34	Collision frame name
+0083df4c	Particle ID
+0083df58	Show no info flag
+0083df6c	Actor name text ID
+0083df84	Sound ID from chapter explosion
+0083dfa4	Permanent collision refresh
+0083dfc0	Hitpoints
+0083dfcc	Anim name
+0083dfe0	Clock
+0083e030	FowlGenerator
+0083e040	_bird_%d_%d
+0083e04c	Train
+0083e054	l_sts%d%c.wav
+0083e064	l_jar.wav
+0083e070	l_brake.wav
+0083e07c	l_braklp.wav
+0083e08c	l_whisfr.wav
+0083e09c	l_whisnr.wav
+0083e0ac	l_steam.wav
+0083e0b8	l_rheels.wav
+0083e0c8	l_eheels.wav
+0083e0d8	l_hheels.wav
+0083e0e8	BODYCOLB00
+0083e0f4	STHL00
+0083e0fc	STHR00
+0083e104	DTHL%02d
+0083e110	DTHR%02d
+0083e11c	THL%02d
+0083e124	THR%02d
+0083e12c	WHL%02d
+0083e134	WHR%02d
+0083e13c	Kousnul jsem humana
+0083e15c	col dummy
+0083e168	col dummy2
+0083e174	col dummy1
+0083e184	anim2
+0083e18c	Found target %s
+0083e1a4	bcdefghijklmnopqrstuvwxy
+0083e1c4	Enemy(%s) lost !!!
+0083e1d8	Enemy(%s) spotted !!!
+0083e1f8	 - Unknown error
+0083e20c	 - I3DERR_OUTOFLIMIT
+0083e224	 - I3DERR_BADFILETIME
+0083e23c	 - I3DERR_BADFILEVERSION
+0083e258	 - I3DERR_FILESYSTEMERROR
+0083e274	 - I3DERR_USERBREAK
+0083e288	 - I3DERR_UNSUPPORTED
+0083e2a0	 - I3DERR_CANCELED
+0083e2b4	 - I3DERR_CYCLICLINK
+0083e2cc	 - I3DERR_FILECORRUPTED
+0083e2e4	 - I3DERR_GENERIC
+0083e2f8	 - I3DERR_BADTEXTURE
+0083e310	 - I3DERR_BADTEXTUREFORMAT
+0083e32c	 - I3DERR_OUTOFMEM
+0083e340	 - I3DERR_NOFILE
+0083e354	Chyba pri nahravani souboru dog_anim.sav
+0083e380	Chyba pri nahravani souboru dog_anim
+0083e3a8	I/O ERROR
+0083e3b4	Tables\\dog_anim.sav
+0083e3d0	bike_ride
+0083e3dc	bike_legs
+0083e3e8	%s_ridedupl
+0083e3f8	kliky
+0083e400	riditka
+0083e408	kolo2
+0083e410	kolo1
+0083e428	Submarine
+0083e434	sroub
+0083e43c	%1(m)
+0083e444	Max waterlevel
+0083e454	WireCut
+0083e45c	NullActor
+0083e468	AirAttack
+0083e474	sand%02d.wav
+0083e484	whizz%d.wav
+0083e490	kul_d%d.wav
+0083e49c	motor%d.wav
+0083e4a8	bluur
+0083e4b0	bilboard_r0%d
+0083e4c0	bilboard_l0%d
+0083e4d0	bilboard
+0083e4dc	carriage_r00
+0083e4ec	carriage_l00
+0083e4fc	listy
+0083e504	Ladder
+0083e50c	' nenalezen dumac 'down'
+0083e528	' nenalezen dumac 'up'
+0083e540	TS: chyba - u zebriku '
+0083e558	down*
+0083e56c	vlajka
+0083e57c	New zone owner: Axis
+0083e594	New zone owner: Alied
+0083e5ac	New zone owner: Neutral
+0083e698	elevator_right01d
+0083e6ac	elevator_left01d
+0083e6c0	flap_r01ad
+0083e6cc	flap_r00ad
+0083e6d8	flap_r01d
+0083e6e4	right_wing02d
+0083e6f4	flap_l01d
+0083e700	left_wing02d
+0083e710	listy_r00d
+0083e71c	flap_r00d
+0083e728	right_wing00d
+0083e738	listy_l00d
+0083e744	flap_l00d
+0083e750	left_wing00d
+0083e760	right_wing01d
+0083e770	left_wing01d
+0083e780	engine_r00d
+0083e78c	engine_l00d
+0083e798	Junkers88
+0083e7a4	la_Bf109Canyon
+0083e7b4	vrtule_r00
+0083e7c0	vrtule_l00
+0083e7cc	expmtr02.wav
+0083e7dc	expmtr01.wav
+0083e7ec	DMGMTR02.wav
+0083e7fc	DMGMTR01.wav
+0083e80c	ju88mtr2.wav
+0083e81c	ju88mtr1.wav
+0083e82c	#aircraftdum
+0083e83c	#aircraftA
+0083e848	bluur_r00
+0083e854	bluur_l00
+0083e860	%d.wav
+0083e898	vrtule
+0083e8a0	weapon_l01
+0083e8ac	weapons_r01
+0083e8b8	weapon_l00
+0083e8c4	weapon_r00
+0083e8d0	#bfshotdwn%d
+0083e8e0	#adamage0
+0083e8ec	#airfightdum
+0083e8fc	#airfight_0%d_A
+0083e90c	interceptor_%d
+0083e91c	#bfcanygrup
+0083e928	fire_end
+0083e934	fire_start
+0083e948	#jushotdwn%d
+0083e958	#adamage%d
+0083e964	SupplyBox
+0083e970	Ammo%d
+0083e978	Ammo0%d
+0083e980	Steny02
+0083e988	morph
+0083e990	ammobox
+0083e998	parachute
+0083e9a4	letibedna
+0083e9b0	cratedummy
+0083e9bc	#cratedrop
+0083e9c8	#crateclosed
+0083e9d8	#crateopen
+0083e9e4	#cratefly
+0083e9f0	Debris
+0083ea00	Actor_mine
+0083ea44	d2handle
+0083ea50	dhandle
+0083ea58	StaticWeapon
+0083ea68	Barrel
+0083ea78	%s_destroyed
+0083ea88	Radio
+0083ea90	Photo place
+0083ea9c	Explosive place
+0083eaac	explosive_off
+0083eabc	explosive_on
+0083eacc	Exploded, you should not see this text!!
+0083eaf8	Hidden, you should not see this text!!
+0083eb20	Document place
+0083eb30	Explosion [TS]
+0083eb40	x_expl00.tga
+0083eb54	Missing actor name!!
+0083eb6c	SpawnPoint
+0083eb78	_PLAYER_%2d
+0083eb84	Switch
+0083eb90	bload mission
+0083eba0	Load Last save
+0083ebb0	bload lastsave
+0083ebc0	text_h&dversion
+0083ebd0	text_list of profiles
+0083ebe8	Anim%02d
+0083ebf4	scroll00
+0083ec00	bexit
+0083ec08	bexit01
+0083ec10	text_screen
+0083ec1c	GB_Cinematics
+0083ec2c	bshort
+0083ec34	blong
+0083ec3c	screen_shot
+0083ec48	text00
+0083ec50	video
+0083ecd4	Czech3_obj
+0083ece0	Czech2_obj
+0083ecec	Czech1_obj
+0083ecf8	Burma2_obj
+0083ed04	Burma1_obj
+0083ed10	Arctic3_obj
+0083ed1c	Arctic1_obj
+0083ed28	Africa4_obj
+0083ed34	Africa3_obj
+0083ed40	Africa1_obj
+0083ed4c	Normandy3_mp
+0083ed5c	NORMANDY2B_MP_ZONE
+0083ed70	Normandy2_mp_zone
+0083ed84	Czech6_mp_zone
+0083ed94	Czech5_mp_zone
+0083eda4	Czech4_mp_zone
+0083edb4	Czech2_mp_zone
+0083edc4	Burma1_mp_zone
+0083edd4	Arctic4_mp_zone
+0083ede4	Alps1_mp_zone
+0083edf4	Africa5_mp_zone
+0083ee04	africa2_mp_zone
+0083ee14	Normandy_mp
+0083ee20	Czech3_mp
+0083ee2c	Burma1_mp
+0083ee38	Arctic2_mp
+0083ee44	Arctic1_mp
+0083ee50	Africa5_mp
+0083ee5c	Africa3_mp
+0083ee68	Africa1_mp
+0083ee74	ammo_num
+0083ee80	item_num
+0083ee8c	item_id
+0083ee9c	ZONEGRAPH
+0083eea8	ALLOWEDPRESETS
+0083eeb8	ALLOWEDITEMS
+0083eec8	BALANCED
+0083eed4	AIRCRAFTATACK
+0083eee4	ALLIED
+0083eefc	vip_uniform_id
+0083ef10	axis_text
+0083ef1c	allied_text
+0083ef28	OBJECTIVE
+0083ef3c	 UNKNOWN 
+0083ef48	FRONTLINE
+0083ef64	cooperative
+0083ef70	teamplay
+0083ef7c	hd2multiplayer
+0083ef8c	deathmatch
+0083efa0	GAMESTYLE
+0083efac	MAP_LIST
+0083efb8	GameData\\mpmaplist.txt
+0083efd0	mpmaplist.txt
+0083efe0	%s\\ServerList.bin
+0083eff4	PlayersProfiles
+0083f004	%s\\%s\\MPSetings.sav
+0083f018	text_profile00
+0083f028	text_date01
+0083f034	text_date00
+0083f040	text_min norm max02
+0083f054	text_min norm max
+0083f068	bback
+0083f070	bmultiplayer setup
+0083f084	bgame setup
+0083f090	bcontrols
+0083f09c	bsound setup
+0083f0ac	bvideo setup
+0083f0bc	GROptions
+0083f0c8	text_modifications
+0083f0dc	geometry detail
+0083f0ec	scrollbar03
+0083f0f8	text_gama correction
+0083f110	text_graphics setup
+0083f124	graphics setup
+0083f13c	use high models
+0083f154	light glow
+0083f168	dynamic lightning
+0083f184	morphing
+0083f198	mirrors
+0083f1a8	shadows
+0083f1b8	nextdetail
+0083f1c4	scrollbar02
+0083f1d0	scrollbar01
+0083f1dc	text_min norm max01
+0083f1f0	text_music volume
+0083f204	text_sound volume
+0083f218	text_sound setup
+0083f22c	sound setup
+0083f238	bback01
+0083f240	bdefault*
+0083f24c	GR_Tactical
+0083f258	GR_Selections
+0083f268	GR_Other
+0083f274	GR_Weapons
+0083f280	GR_Movements
+0083f290	hktext
+0083f298	hkinput
+0083f2a0	controls
+0083f2ac	text_last save01
+0083f2c0	keysscreen01
+0083f2d0	lock fire
+0083f2dc	force feedback
+0083f2ec	bcalibrate
+0083f2f8	text_joystick setup
+0083f30c	text_minimal normal maximal
+0083f328	scrollbar
+0083f334	text_mouse sensitivity
+0083f34c	invert mouse
+0083f35c	text_mouse setup
+0083f370	bcontrols01
+0083f37c	text_controls setup
+0083f390	keysscreen
+0083f39c	parental lock
+0083f3ac	subtitles
+0083f3b8	text_game options
+0083f3cc	gameoptions
+0083f3d8	text_network setup
+0083f3ec	text_min norm max020
+0083f404	scrollbar04
+0083f410	text_voice-chat volume
+0083f428	enable voice-chat
+0083f43c	text_voice-chat settings
+0083f458	connection
+0083f464	text_connection rate
+0083f47c	network settings
+0083f490	Control%2d
+0083f49c	ADD SERVER
+0083f4a8	MP Connect console
+0083f4bc	Game info
+0083f4c8	gameinfo
+0083f4d4	Server Filters
+0083f4e4	server filters
+0083f4f4	PASSWORD
+0083f500	password
+0083f50c	create server
+0083f51c	multiplayer menu
+0083f530	OPTIONS
+0083f538	SINGLE MISSION 2
+0083f54c	single mission 2
+0083f56c	byes*
+0083f574	CONFIRM
+0083f57c	confirm
+0083f584	text_HD2datadisk
+0083f598	text_HD2original
+0083f5ac	carnage01
+0083f5b8	blone wolf01
+0083f5c8	bcampaign01
+0083f5d4	bsingle mission- carnage
+0083f5f0	bsingle mission
+0083f600	carnage
+0083f608	blone wolf
+0083f614	bcampaign
+0083f640	single side
+0083f64c	SINGLEPLAYER
+0083f65c	singleplayer
+0083f66c	text_difficulty
+0083f67c	text01
+0083f684	text_date and time
+0083f698	text_current profile and save
+0083f6b8	Bdelete profile
+0083f6c8	brename profile
+0083f6d8	bcreate profile
+0083f6e8	bvery hard-*
+0083f6f8	bhard-*
+0083f700	bnormal-*
+0083f70c	beasy-*
+0083f714	LB_Profile*
+0083f720	japan
+0083f728	./\\*?|<>:"
+0083f734	bcurrent profile
+0083f748	CHANGE PROFIL
+0083f758	change_profile
+0083f768	bcredits
+0083f774	boptions
+0083f780	bcinematics
+0083f78c	bmultiplayernet
+0083f79c	bmultiplayerlan
+0083f7ac	bsingleplayer
+0083f7bc	bchange profile
+0083f7cc	bresume game
+0083f7dc	text_last save00
+0083f7f0	text_profile01
+0083f800	MAIN MENU
+0083f80c	main_menu
+0083f818	text_maplist
+0083f828	text_maplist preset
+0083f83c	maplist preset
+0083f84c	text_server type
+0083f860	text_voice chat
+0083f870	text_server options
+0083f884	text_available maps checklist
+0083f8a4	text_hostname and style
+0083f8bc	bstart
+0083f8c4	voice chat
+0083f8d0	style
+0083f8d8	bhostname
+0083f8e4	bmap_B
+0083f8ec	bmap_A
+0083f8f4	gr_mp_sel_list
+0083f904	gr_mp_coopmaps
+0083f914	gr_mp_hiddenmaps
+0083f928	gr_mp_zonegame
+0083f938	gr_mp_deathmatch
+0083f94c	MP_MAPS_PANEL
+0083f95c	MPMap%02d
+0083f968	bport
+0083f970	 \t>-"
+0083f978	bpassword
+0083f984	yn_crosshair
+0083f994	3person view
+0083f9a4	Auto Team Balence
+0083f9b8	Friendly Fire
+0083f9c8	Self Damage
+0083f9d4	Spawn Protection
+0083f9e8	Respawn Time
+0083f9f8	Allow respawn
+0083fa08	WarmUp Time
+0083fa14	Round Count
+0083fa20	Round Limit
+0083fa2c	Frag Limit
+0083fa38	Respawn Num
+0083fa44	Team Respawn
+0083fa54	player num
+0083fa60	coop difficulty
+0083fa70	scroll01
+0083fa7c	dedicated server
+0083fa90	internet server
+0083faa0	combo_tmpl
+0083faac	binput
+0083fab4	bshort00
+0083fac0	yes_no_tmpl
+0083facc	gr_setings
+0083fd48	text_
+0083fd50	text_team status
+0083fd64	breturn
+0083fd6c	bjoin game
+0083fd78	brefresh status
+0083fd88	text_01
+0083fd90	LB_Players
+0083fd9c	%d.%d.%d.%d
+0083fda8	%d / %d
+0083fdb0	Reading Data from server ...
+0083fe0c	bfavorites
+0083fe18	badd/remove
+0083fe24	text_online
+0083fe30	esrb-US
+0083fe38	gamespylogo
+0083fe44	bview game info
+0083fe54	bcreate server
+0083fe64	bserver filters
+0083fe74	benter server ip
+0083fe88	brefresh list
+0083fe98	brestore list
+0083fea8	bplayers/max
+0083feb8	bping
+0083fec0	bstyle
+0083fed0	bhost name
+0083fedc	barrows
+0083fee4	Server%d
+0083fef0	sever00
+0083fef8	GB_ServerList
+0083ff08	%d/%d ----- %d %s
+0083ff1c	11001
+0083ff24	binput02
+0083ff31	55.255.255.255
+0083ff40	binput01
+0083ff54	text_show servers
+0083ff68	text_scan style
+0083ff78	baccept
+0083ff80	current version
+0083ff90	without password
+0083ffa4	that are not full
+0083ffb8	that are not empty
+0083ffcc	dedicated only
+0083ffdc	responding only
+0083ffec	scan style
+008400ec	tables\\HumanStore.def
+00840104	GB_SingleMission
+00840118	GB_Campaign
+00840124	Mission%02d
+00840130	Campaign%02d
+00840140	SMMission%02d
+00840158	Font-pokus.tga
+00840168	MS UI Gothic
+00840178	Lucida Sans Unicode
+0084018c	Japanese
+00840198	FontConfig.hxml
+008401a8	EnglishUS
+008401b4	English
+008401bc	German
+008401c4	Spanish
+008401cc	French
+008401d4	Italian
+008401dc	SMALL
+008401e8	%s\\%s.tga
+008401f4	%s\\%s.tbl
+00840200	Text\\Fonts\\
+0084020c	SYMBOLS
+00840214	Text\\Fonts\\Ce\\Set%d\\
+0084022c	Text\\Fonts\\%s\\Set%d\\
+0084024c	Japan
+00840254	Polish
+00840260	Czech
+00840268	FONT_SMALL
+00840274	FONT_BIG
+00840280	texture_height
+008402ac	resolution
+008402bc	LANGUAGE
+008402c8	FONTCONFIG
+008402d4	640x480
+008402dc	800x600
+008402e7	4x768
+008402f0	SUBTITLES
+008402fc	SUBTITLES3
+00840308	Text\\Czech\\Fonts\\Set%d\\%s.tga
+00840328	Text\\Czech\\Fonts\\Set%d\\%s.tbl
+00840348	%sFonts\\Set%d\\%s.tga
+00840360	%sFonts\\Set%d\\%s.tbl
+00840378	hktext*
+00840380	text*
+00840388	skill_value*
+00840398	skill_text*
+008403a8	text_info*
+008403b4	ammo*
+008403bc	emptynormal*
+008403cc	emptyactived*
+008403dc	yesnormal*
+008403e8	yesactived*
+008403f4	nonormal*
+00840400	noactived*
+0084040c	text_*
+0084041c	%s : %d
+00840424	no_empty*
+00840430	no_full*
+0084043c	yes_empty*
+00840448	yes_full*
+00840454	noactived_empty*
+00840468	noactived_full*
+00840478	yesactived_full*
+0084048c	xallnormal
+00840498	xallactived
+008404a4	allnormal
+008404b0	allactived
+008404bc	normalup*
+008404c8	activedup*
+008404d4	normaldown*
+008404e0	activeddown*
+008404f0	selector*
+00840514	bTeam
+0084051c	binput*
+00840524	scroll*
+0084052c	header*
+00840534	cbdown*
+0084053c	listbox*
+00840548	ERROR : cannot find frame : %s !!
+0084056c	ERROR : cannot create item : %d !!
+00840590	game difficulty
+008405a0	text18
+008405a8	+ %.1f
+008405b0	%.1f 
+008405b8	upgrade*
+008405c4	hlcpct*
+008405cc	name_*
+008405d4	Positions is ------: %d
+008405ec	xvoice01
+008405f8	xdedicated01
+00840608	xpassword01
+00840614	xvoice
+0084061c	xdedicated
+00840628	xpassword
+00840634	GameMovie\\%s2
+00840644	description01
+00840654	new_medal
+00840660	text02
+00840670	x_kursor.tga
+00840680	CURZOR
+008406a8	ambient
+008406b0	ActivCamera
+008406bc	KEY VALUE :: %d \n
+008406d0	Menu : %2d | Item : %2d | Child : %2d | Child : %2d |Data : %2d
+00840710	kurzor_menu
+0084071c	text_backpack
+0084072c	text_holsters
+0084073c	text_shoulder
+0084074c	text_uniform
+0084075c	text_hands
+00840768	text_drop
+00840774	text_head
+00840780	text_back
+0084078c	overload
+00840798	text_cpcty
+008407a4	item07
+008407ac	item06
+008407b4	item05
+008407bc	item04
+008407c4	GR_BackPack
+008407d0	slider13
+008407dc	text_bkpckcap
+008407ec	barrow down24
+008407fc	barrow up24
+00840808	item03
+00840810	item02
+00840818	item01
+00840820	item00
+00840828	GB_Holsters
+00840834	slider12
+00840840	text_hlstrscap
+00840850	barrow down23
+00840860	barrow up23
+00840874	hands
+0084087c	shoulder
+00840890	uniform
+00840898	P_Equipment
+008408a4	%d/%d 
+008408ac	selbackpack
+008408b8	selholsters
+008408c4	seldrop
+008408cc	selhands
+008408d8	selshoulder
+008408e4	selbck
+008408ec	seluniform
+008408f8	selhead
+00840900	%2.1f%%
+00840908	%s: %3.1f / %d Kg
+00840ab0	equippanel
+00840abc	%3.0f
+00840ac4	%3.0f Kg
+00840ad0	%3.0f %%
+00840adc	text_assortment
+00840aec	bauto equip
+00840af8	baccept and continue
+00840b10	text_team
+00840b1c	text_military storages
+00840b34	text_mission essentials
+00840b4c	soldier type
+00840b5c	text_inventory
+00840b6c	bassign to all
+00840b7c	DESCRIPTION
+00840b88	SELECTION SCREEN
+00840b9c	selection screen
+00840bb0	Items selection
+00840bc0	items selection
+00840bd0	selector
+00840bdc	button00
+00840be8	button01
+00840bf4	photo06
+00840bfc	photo05
+00840c04	photo04
+00840c0c	photo03
+00840c14	text_select one soldier
+00840c2c	hlcpct06
+00840c38	Lockpick
+00840c44	hlcpct05
+00840c50	First aid
+00840c5c	hlcpct04
+00840c68	Stealth
+00840c70	Endurance
+00840c7c	hlcpct09
+00840c88	Health
+00840c90	hlcpct08
+00840c9c	Strenght
+00840ca8	hlcpct07
+00840cb4	Shooting
+00840cc0	Panel02
+00840cc8	name- capacity
+00840cd8	GB_Soldiers
+00840ce4	photo07
+00840cec	table15
+00840cf4	table14
+00840cfc	table13
+00840d04	table11
+00840d0c	vi_template
+00840d18	text_info00
+00840d24	item09
+00840d2c	item08
+00840d34	P_visualstore
+00840d44	filter
+00840d4c	itemselector01
+00840d70	selitem08
+00840d7c	GR_Dresses
+00840d88	GR_Explosives
+00840d98	GR_HeavyWeapons
+00840da8	GR_MiddleWeapons
+00840dbc	GR_SmallWeapons
+00840dcc	bscroll
+00840dd4	frame_%d
+00840de0	itemselector
+00840df0	user_presets.def
+00840e04	GameData\\presets.def
+00840e1c	User preset6
+00840e2c	User preset5
+00840e3c	User preset4
+00840e4c	User preset3
+00840e5c	User preset2
+00840e6c	User preset1
+00840e7c	Deadmatch user preset6
+00840e94	Deadmatch user preset5
+00840eac	Deadmatch user preset4
+00840ec4	Deadmatch user preset3
+00840edc	Deadmatch user preset2
+00840ef4	Deadmatch user preset1
+00840f0c	Allied user preset6
+00840f20	Allied user preset5
+00840f34	Allied user preset4
+00840f48	Allied user preset3
+00840f5c	Allied user preset2
+00840f70	Allied user preset1
+00840f84	Axis user preset6
+00840f98	Axis user preset5
+00840fac	Axis user preset4
+00840fc0	Axis user preset3
+00840fd4	Axis user preset2
+00840fe8	Axis user preset1
+00840ffc	GameData\\miss_itm.def
+00841014	player screen
+00841024	PLAYER SCREEN
+00841034	player screen 2
+00841044	MAIN_INGAME_MENU
+00841058	main ingame
+00841064	 %2d:%02d
+00841070	button05
+0084107c	button04
+00841088	button03
+00841094	button02
+008410a0	button06
+008410b0	text_weapons info
+008410c4	3Dview
+008410cc	text_player status
+008410e0	bgame info
+008410ec	text_draft
+008410f8	text_selected soldier stats
+00841114	text_chat
+00841120	text_playerarrangement
+00841138	text03
+00841140	console
+00841148	text_etimated time
+0084115c	text_warm up
+0084116c	text_equipment
+0084117c	brename preset
+0084118c	bsave preset
+0084119c	allies
+008411a4	Soldier_x%02d
+008411b4	Soldier_a%02d
+008411c4	scroll11
+008411d0	selector2
+008411dc	GB_Soldiers_x
+008411ec	GB_Soldiers_a
+008411fc	soldierspanel
+0084120c	selitem15
+00841218	selitem14
+00841224	selitem13
+00841230	selitem12
+0084123c	selitem11
+00841248	selitem10
+00841254	selitem09
+00841260	item15
+00841268	item14
+00841270	item13
+00841278	item12
+00841280	item11
+00841288	item10
+00841290	soldier type01
+008412a0	allitemspanel
+008412b4	%3d Kg
+008412bc	%3d %%
+008415a8	IntroBurma.bik
+008415b8	IntroAlps.bik
+008415c8	D_Outro
+008415d0	Outro2
+008415d8	credits
+008415e0	%s\\text\\%s\\subtitles\\%s.txt
+008415fc	SPEED
+00841648	sounds_DATADISK\\
+0084165c	Sounds\\
+00841664	Exit Game
+00841850	f_s_burgundy
+00841860	f_s_sicily
+0084186c	f_s_libye
+00841878	f_s_LaRochel
+00841888	f_s_norman
+008418a0	f_s_burma
+008418ac	f_s_norway
+008418b8	f_s_africa
+008418c4	f_s_arctic
+008418d0	f_s_tutorial
+008418e0	Campaign_debrief
+008418f4	textbar
+008418fc	title
+00841904	DIARY
+0084190c	diary
+00841914	debriefing
+00841920	bnext page
+0084192c	bprevious page
+0084193c	multi_page
+00841948	text_02
+00841950	death
+00841958	soldier_rank
+00841968	rank_major
+00841974	rank_captain
+00841984	rank_lieutenant
+00841994	rank_second_lieutenant
+008419ac	rank_StaffSergeant
+008419c0	rank_sergeant
+008419d0	rank_corporal
+008419e0	rank_private
+008419f0	medal%02d
+008419fc	BURMA_STAR_b
+00841a0c	AFRICA_STAR_b
+00841a1c	GERM_FRANCE_STAR_b
+00841a30	VICTORIA_CROSS_b
+00841a44	MILITARY_CROSS_b
+00841a58	DEFENCE_MEDAL_b
+00841a68	WAR_MEDAL_b
+00841a74	GSM_b
+00841a7c	GSM_AFRICA_b
+00841a8c	MILIT_MEDAL_b
+00841a9c	DCM_b
+00841aa4	DSO_b
+00841aac	BURMA_STAR_a
+00841abc	AFRICA_STAR_a
+00841acc	GERM_FRANCE_STAR_a
+00841ae0	VICTORIA_CROSS_a
+00841af4	MILITARY_CROSS_a
+00841b08	DEFENCE_MEDAL_a
+00841b18	WAR_MEDAL_a
+00841b24	GSM_a
+00841b2c	GSM_AFRICA_a
+00841b3c	MILIT_MEDAL_a
+00841b4c	DCM_a
+00841b54	DSO_a
+00841b5c	hlcpctcr06
+00841b68	hlcpctcr05
+00841b74	hlcpctcr04
+00841b80	hlcpctcr03
+00841b8c	hlcpctcr02
+00841b9c	hlcpctcr01
+00841ba8	hlcpctcr00
+00841bb8	text_new decoration
+00841bcc	text_decorations
+00841be0	text_new medal
+00841bf0	text_soldierstats00
+00841c04	text_name00
+00841c10	soldier00
+00841c1c	panel_soldier00
+00841c2c	bexit to main menu
+00841c40	bload
+00841c48	bretry immediately
+00841c5c	bsave and continue
+00841c70	text_objectives
+00841c80	text_status
+00841c8c	text_mission status
+00841ca0	Debug Experience :: %d
+00841e98	Medal
+00841ea0	team members selection
+00841eb8	bselected soldier info
+00841ed0	bnamexx
+00841ed8	Panel01
+00841ee0	panel01
+00841ee8	member03
+00841ef4	member02
+00841f00	member01
+00841f0c	table21
+00841f14	table20
+00841f1c	table19
+00841f24	medals_panel
+00841f34	text_05
+00841f3c	Panel03
+00841f44	P_SelectedSol
+00841f54	photo02
+00841f5c	text_team member03
+00841f70	text_name03
+00841f7c	photo01
+00841f84	text_team member02
+00841f98	text_name02
+00841fa4	photo00
+00841fac	text_team member01
+00841fc0	text_name01
+00841fcc	member00
+00841fd8	text_team member00
+00841fec	text_military service draft
+00842008	bauto assign
+00842018	bassign - detach
+00842198	HERO STATS
+008421a4	heros_screen
+008421b4	skill00
+008421bc	text_specialization
+008421d0	GRSkillSpec
+008421dc	bengineer
+008421e8	bmedic
+008421f0	bsniper
+008421f8	bheavysoldier
+00842208	bsoldier
+00842214	Pilot
+0084221c	Pick Lock
+00842228	First Aid
+00842234	Traps
+0084223c	Swimming
+00842248	Driving
+00842250	Morale
+00842258	Throwing
+00842264	Shooting Rifle
+00842274	Heavy Weapons
+00842284	Light Weapons
+00842294	Inteligence
+008422a0	Reactions
+008422ac	Might
+008422b4	GRSkills
+008422c0	skill01
+008422c8	%s%d %s%d
+008422d4	Warmup finished
+008422e4	Objective %d. failed critical
+00842304	Objective %d. failed
+0084231c	Objective %d. finished
+00842334	Objective %d. in progress
+00842350	Mission is not connected to game data..
+008423ac	Japanese test version
+008423e4	%c. %s
+008423ec	%s (%s) %s
+00842404	e_f001.bmp
+00842410	usernames.sav
+00842420	x_f_001.bmp
+00842434	First
+0084243c	NETCDKEY
+00842448	PARENTLOCK
+00842454	LASTPROFIL
+00842460	game.cfg
+0084246c	PARENTLOC
+00842478	%s\\%s
+00842480	D_Outro.bik
+0084248c	D_InBurgundy2.bik
+008424a0	D_InBurgundy1.bik
+008424b4	D_InSicily1.bik
+008424c4	D_InAfrica3.bik
+008424d4	D_InAfrica1.bik
+008424e4	D_InFrance1.bik
+008424f4	Outro2.bik
+00842500	Outro1.bik
+0084250c	IntroCzech.avi
+0084251c	IntroNormandy.bik
+00842530	IntroNorway.bik
+00842540	IntroAfrica.bik
+00842550	IntroArctic.bik
+00842560	Intro.bik
+0084273c	<Select_soldier_4>
+00842750	<Select_soldier_3>
+00842764	<Select_soldier_2>
+00842778	<Select_soldier_1>
+0084278c	<SwitchPlayer>
+0084279c	<Hand_brake>
+008427ac	<Console>
+008427b8	<Camera>
+008427c4	<Binoculars>
+008427dc	<Inventory_key>
+008427f4	<Interface_mode>
+00842808	<Tactical_map>
+00842818	<GameInfo>
+00842824	<Action_pull_down_menu>
+0084283c	<Action_button>
+0084284c	<Drop_item>
+00842858	<Next_weapon>
+00842868	<Previous_weapon>
+0084287c	<Reload>
+00842888	<Throw_grenade>
+00842898	<Secondary_action>
+008428ac	<Primary_fire>
+008428bc	<Lie_down>
+008428c8	<Crouch>
+008428dc	<Jump_key>
+008428e8	<Lean_right>
+008428f8	<Lean_left>
+00842904	<Decrease_speed>
+00842918	<Increase_speed>
+0084292c	<Strafe_right>
+0084293c	<Strafe_left>
+0084294c	<Move_back>
+00842958	<Move_forward>
+00842968	Barra espaciad.
+00842984	%s '%s' %s
+00842990	%s '%s'
+00842998	'%s' %s
+00842a1c	server\n
+00842a24	voicechat %s\n
+00842a34	teamlives %d\n
+00842a44	spawnonstart %d\n
+00842a58	allowcrosshair %d\n
+00842a6c	cooplives %d\n
+00842a7c	coopdifficulty %d\n
+00842a90	autorestart %d\n
+00842aa0	allowvehicles %d\n
+00842ab4	maxinactivity %d\n
+00842ac8	maxping %d\n
+00842ad4	maxfreq %d\n
+00842ae0	%s %d\n
+00842ae8	password "%s"\n
+00842af8	port %d\n
+00842b04	dedicated %d\n
+00842b14	domain %s\n
+00842b20	mapname %s\n
+00842b2c	style %s\n
+00842b38	sessionname "%s"\n
+00842b50	mpdesc.txt
+00842b60	Profile_%d
+00842b78	LASTSAVETEXT
+00842b88	LASTSAVE
+00842b94	LASTCARNAGE
+00842ba0	LASTLONEWOLF
+00842bb0	LASTCAMPAIGN
+00842bc0	LASTGAME
+00842bcc	GAME_DIFFICULTY
+00842bdc	profile.pr
+00842be8	%s\\%s\\profile.sav
+00842bfc	quick
+00842c04	CAR_%02d%02d.sav
+00842c20	LOW_%02d%02d.sav
+00842c3c	CAM_%02d%02d.sav
+00842c58	text\\%s\\%s
+00842c64	dialogs.txt
+00842c70	%s\\text\\%s\\*.txt
+00842c84	%s\\%s\\%s
+00842c90	Options.bin
+00842c9c	%s\\FontConfig.hxml
+00842cb0	Russian
+00842cb8	english
+00842cc0	language
+00842ccc	SOFTWARE\\Illusion Softworks\\Hidden & Dangerous 2
+00842d00	%s\\%s\\quick.sav
+00842d10	%s\\%s\\
+00842d18	SMCAM_quick.sav
+00842d28	SMCAR_quick.sav
+00842d38	CAM_quick.sav
+00842d48	LOW_quick.sav
+00842d58	CAR_quick.sav
+00842f08	Realistic
+00842f14	Tactical
+00842f24	%s\\Gamedata%02d.gdt
+00842f38	GameData
+00842f44	exec %s
+00842f51	-cmd 
+00842f58	Logo1.bik
+00842f64	Logo3.bik
+00842f70	Logo2.bik
+00842f7c	credits.bik
+00842f88	X axis
+00842f90	Y axis
+00842f98	Z axis
+00842fa0	button X2
+00842fac	button X1
+00842fb8	Middle button
+00842fc8	Right button
+00842fd8	Left button
+00843168	MP_designated
+00843178	MP_progress
+00843184	MP_map survey
+00843194	MP_team allied2
+008431a4	MP_team allied1
+008431b4	MP_text_screen
+008431c4	MP_title
+008431d0	MP_objective2
+008431e0	MP_objective1
+008431f0	MP_list2
+00843200	MP_list1
+0084320c	briefing
+00843218	mission init
+00843228	stuff.bin
+00843234	sounds.bin
+00843240	actors.bin
+0084324c	scene2.bin
+00843258	scene
+00843260	loadbar
+00843274	C_LoaderScreen
+00843284	missions\\%s\\loader
+00843298	-unnamed-
+008432a4	missions\\%s\\tree.klz
+008432bc	missions\\%s\\scene2.bin
+008432d4	# ERROR LOADER : soundfile '%s' not found
+00843301	gtlgf7
+00843308	# ERROR LOADER : modelfile '%s' not found
+00843334	missions\\%s\\Scene
+00843348	missions\\%s\\check.bin
+00843360	missions\\%s\\check2.bin
+00843378	missions\\%s\\actors.bin
+00843390	missions\\%s\\sounds.bin
+008433ac	-join
+008433b8	# ERROR DATAFILE : datafile '%s' missing
+008433e4	Maps_U.dta
+008433f0	Maps_C.dta
+008433fc	Others.dta
+00843408	Sounds.dta
+00843414	Maps.dta
+00843420	Missions.dta
+00843430	Models.dta
+0084343c	Patch.dta
+00843448	LangEnglish.dta
+00843458	SabreSquadron.dta
+0084346c	PatchX01.dta
+0084347c	PatchX02.dta
+0084348d	atchX03.dta
+0084349c	Lang%s.dta
+008434a8	Sounds
+008434b0	Models
+008434b8	Maps_U
+008434c0	Maps_C
+008434d0	window.cfg
+008434dc	setup.exe
+008434e8	LS3D_setup
+008434f4	Software\\Illusion Softworks\\Hidden & Dangerous 2
+00843528	Game.exe :
+00843538	%s[%04i].tga
+0084354c	D54BD597-ACC7-4870-9122-C1D03E7F617D
+00843574	Wrong CDKey. Please contact Illusion Softworks.
+008435a4	Security
+008435e0	\\\\Intra\\HD2_graf\\CRASH_REPORTS\\%s
+00843608	MULTIPLAYER
+00843614	RELEASE - 
+00843624	### NO crash info generated ###
+00843644	Lib:Object
+00843650	Module32Next
+00843660	Module32First
+00843670	CreateToolhelp32Snapshot
+0084368c	kernel32.dll
+008436a4	Loading all symbol files...\n
+008436c8	C_ExceptionHandler::C_ExceptionHandler() - GetProcAddress(): some required function not found.
+00843728	Using ImageHlp API version: %i.%i.%i\n
+00843750	SymEnumSymbols
+00843760	SymSetContext
+00843770	SymLoadModule
+00843780	UnDecorateSymbolName
+00843798	StackWalk
+008437a4	SymSetOptions
+008437b4	SymInitialize
+008437c4	SymGetSymFromAddr
+008437d8	SymGetOptions
+008437e8	SymGetModuleInfo
+008437fc	SymGetModuleBase
+00843810	SymGetLineFromAddr
+00843824	SymFunctionTableAccess
+0084383c	SymCleanup
+00843848	ImagehlpApiVersion
+00843860	C_ExceptionHandler::C_ExceptionHandler() - Error LoadLibrary( "owndbghelp.dll" ): GetLastError() = %lu\n
+008438c8	dbghelp.dll
+008438d8	##################################################################################################################################\n
+00843960	C_ExceptionHandler::UnhandledExceptionFilter() : exception raised\n
+008439a8	\n##################################################################################################################################\n
+00843a34	Flags:%08X\n
+00843a40	[CS:EIP=%04X:%08X] [SS:ESP=%04X:%08X] [EBP=%08X]\n[DS=%04X] [ES=%04X] [FS=%04X] [GS=%04X]\n
+00843aa0	\n[EAX=%08X] [EBX=%08X] [ECX=%08X] [EDX=%08X] [ESI=%08X] [EDI=%08X]\n
+00843ae4	Fault address:  %08X ??:???????? %s\n
+00843b0c	Fault address:  %08X %02X:%08X %s\n
+00843b30	Machine: "%s"  LS3DVer: %d  BuildID: [%s %s]  Date: %s \nException code: %08X %s\n
+00843b84	Aug 18 2004
+00843b90	16:38:15
+00843b9c	%2.2d.%2.2d.%4.4d  (%2.2d:%2.2d:%2.2d)
+00843bc4	-Unknown-
+00843bd0	NTDLL.DLL
+00843bdc	STACK_OVERFLOW
+00843bec	PRIV_INSTRUCTION
+00843c00	INT_OVERFLOW
+00843c10	INT_DIVIDE_BY_ZERO
+00843c24	FLT_UNDERFLOW
+00843c34	FLT_STACK_CHECK
+00843c44	FLT_OVERFLOW
+00843c54	FLT_INVALID_OPERATION
+00843c6c	FLT_INEXACT_RESULT
+00843c80	FLT_DIVIDE_BY_ZERO
+00843c94	FLT_DENORMAL_OPERAND
+00843cac	INVALID_HANDLE
+00843cbc	INVALID_DISPOSITION
+00843cd0	NONCONTINUABLE_EXCEPTION
+00843cec	ILLEGAL_INSTRUCTION
+00843d00	ARRAY_BOUNDS_EXCEEDED
+00843d18	IN_PAGE_ERROR
+00843d28	SINGLE_STEP
+00843d34	ACCESS_VIOLATION
+00843d48	BREAKPOINT
+00843d54	GUARD_PAGE
+00843d60	DATATYPE_MISALIGNMENT
+00843d78	C_ExceptionHandler::GetLogicalAddress() : generic error 3\n
+00843db8	C_ExceptionHandler::GetLogicalAddress() : generic error 2 ( GetLastError() = %i )\n
+00843e0c	C_ExceptionHandler::GetLogicalAddress() : generic error 1\n
+00843e48	\t[%c,%08x] %-20s = %08x\n
+00843e64	  [0x%08X] (%s)\n
+00843e78	  [0x%08X] %s()+0x%X[line:???]  (%s)\n
+00843ea0	[a-zA-Z0-9_]*
+00843eb0	  [0x%08X] %s()+0x%X[line:%i]  (%s, %s)\n
+00843edc	\nCall stack:\n
+00843eec	%s*.map
+00843ef4	plugins\\
+00843f00	Warning ...
+00843f0c	Trying add file <%s>; FAILED
+00843f2c	For your information ...
+00843f48	Trying add file <%s>; Unicode format detected, not supporting now.
+00843f8c	__undefined index <%d> in all_txt __
+00843fb4	LogFile.log
+00843fd8	Access allowed.
+00843fe8	register
+00843ff4	\\\\hd_server\\Vss
+00844004	Access denied. Please contact programmers.
+0084403c	CONNECT
+00844048	tables\\fnt_matrix.bin
+00844060	editfont.bmp
+00844074	%s=%s
+00844084	BAADBAADBAADBAAD
+0084409c	Error: Unknown report type!
+00844130	<no text>
+0084413c	<no title>
+00844148	Error:
+00844150	Failed to move file %s\nto %s
+00844178	%d. %s. %d  %02d:%02d
+00844190	%d_%s_%d--%d_%d_%d
+008441d4	debug_b
+008441dc	debug_a
+008441f0	%s\\%08d.wav
+008441fc	Nenalezen Dabing %08d.dat
+00844218	tables\\dabing\\%08d.dat
+00844238	Default
+00844338	tables\\effects_car.def
+00844350	tables\\hdmaterials.def
+00844368	Undefined text
+00844654	invalid value
+00844664	command execution failed
+00844680	a number required
+00844694	invalid parameters
+008446a8	not supported yet
+008446bc	unknown command
+008446d8	anorexy
+008446e0	giveitem
+008446f8	hydroshock
+00844704	happyammo
+00844718	sayteam
+00844724	sensitivity
+00844730	AQUALUNG
+0084473c	BACKPACKGB3
+00844748	BACKPACKGB2
+00844754	BACKPACKGB1
+00844760	BACKPACKGER
+0084476c	BACKPACKRUS
+00844778	MAGNETICMINE
+00844788	TANKMINE
+0084479c	DYNAMITE
+008447a8	EXPLOSIVESBAG
+008447b8	CLUMMYBOMB
+008447c4	GRENADEJAP
+008447d0	GRENADEGER
+008447dc	GRENADE69
+008447e8	GRENADE36
+008447f4	WIRECUTTER
+00844800	KNIFESAS
+0084480c	KNIFEGER
+00844818	CAMERA
+00844820	BINOCULARS
+0084482c	MEDIKIT
+00844834	MEDIKITBIG
+00844840	BAZOOKA
+00844848	PANZERFAUST
+00844854	DEGTYAREV
+00844860	BRENGUN
+00844878	SPAGIN
+00844888	STENGUNSIL
+00844894	STENGUN
+0084489c	THOMPSON
+008448c0	ARISAKAOPT
+008448cc	SPRINGFIELDOPT
+008448e4	SPRINGFIELD
+008448f0	ARISAKA
+008448f8	CARBINE
+00844900	GARAND
+00844908	MOSIN
+00844910	DELISLE
+00844920	TOKAREV
+00844928	TAISHO
+00844938	ENFIELD
+00844940	PARABELLUM
+00844950	%s = %i
+00844958	%s = %s
+00844960	Error: Invalid variable type
+00844980	<not a string variable>
+008449a4	%s %i\r\n
+008449ac	%s "%s"\r\n
+008449c0	hd2ds_sabresquadron.exe
+008449d8	hd2ds_sabresquadron.exe -cmd -exec %s
+00844a00	XDServer_%5d.txt
+00844a14	Enumeration of devices failed.
+00844a34	Server::Host failed
+00844a48	Creating H&D2 Server v%d.%02d
+00844a68	port
+00844a74	Can't set self address
+00844a8c	Can't create address object
+00844aa8	Can't initialize server
+00844ac0	DirectX 8 not installed. Can't create server
+00844af0	gamever
+00844afc	%d.%d
+00844b04	expansion
+00844b10	voicechat
+00844b1c	isdedicated
+00844b28	objectives
+00844b34	occupation
+00844b40	gametype
+00844b4c	(NO TYPE)
+00844b58	hostport
+00844b64	maxplayers
+00844b70	numplayers
+00844b7c	mapname
+00844b84	(NO MAP)
+00844b90	hostname
+00844b9c	(NO HOST)
+00844ba8	sK8pQ9
+00844bb2	2hostname
+00844bc8	Deathmatch
+00844bd4	Cooperative
+00844be0	Objectives
+00844bec	Occupation
+00844bf8	Client::Initialize failed
+00844c14	DirectX 8 not installed. Can't create client
+00844c44	Client::EnumHosts failed
+00844c60	Client::Create failed
+00844c78	Connect failed
+00844c88	SetClientInfo failed
+00844ca0	------------------\n
+00844cb8	Set Transmition team: %d ------------------\n
+00844cf0	HRESULT=0x%0X\n%s
+00844d60	DPN_MSGID_TERMINATE_SESSION
+00844d7c	DPN_MSGID_SERVER_INFO
+00844d94	DPN_MSGID_SEND_COMPLETE
+00844dac	DPN_MSGID_RETURN_BUFFER
+00844dc4	DPN_MSGID_REMOVE_PLAYER_FROM_GROUP
+00844de8	DPN_MSGID_RECEIVE
+00844dfc	DPN_MSGID_PEER_INFO
+00844e10	DPN_MSGID_INDICATED_CONNECT_ABORTED
+00844e34	DPN_MSGID_INDICATE_CONNECT
+00844e50	DPN_MSGID_HOST_MIGRATE
+00844e68	DPN_MSGID_GROUP_INFO
+00844e80	DPN_MSGID_ENUM_HOSTS_RESPONSE
+00844ea0	DPN_MSGID_ENUM_HOSTS_QUERY
+00844ebc	DPN_MSGID_DESTROY_PLAYER
+00844ed8	DPN_MSGID_DESTROY_GROUP
+00844ef0	DPN_MSGID_CREATE_PLAYER
+00844f08	DPN_MSGID_CREATE_GROUP
+00844f20	DPN_MSGID_CONNECT_COMPLETE
+00844f3c	DPN_MSGID_CLIENT_INFO
+00844f54	DPN_MSGID_ASYNC_OP_COMPLETE
+00844f70	DPN_MSGID_APPLICATION_DESC
+00844f8c	DPN_MSGID_ADD_PLAYER_TO_GROUP
+00844fb4	DPserver->GetClientInfo failed (2)
+00844fd8	DPserver->GetClientInfo failed (1)
+00844ffc	????????
+0084500d	TEAM> 
+00845014	ADMIN: %s
+00845020	ADMIN
+00845028	Incorrect admin password!
+00845044	Admin rights granted!
+0084505c	player
+00845064	%s %d - %s
+0084509c	%s kicked because unknow(new?) reason
+008450c4	index: %d name: %s dpnid: %x \n
+008450e4	name: %s teamid: %d\n
+008450fc	%s %s %s
+00845108	Score  Axis: %2.0f Alied: %2.0f\n
+0084512c	Kills  Axis: %2d Alied: %2d\n
+0084514c	%15s %d\n
+00845160	r:%s:
+008451a8	HD2 port %d
+008451b4	Firewall settings have been modified!
+00845214	%s%d%s
+00845224	CD Key or challenge too long
+0084524c	Keys output to keys.txt\n
+00845268	%.10I64x
+00845274	keys.txt
+00845280	How many keys would you like? 
+008452a4	%I64x
+008452c5	ndustries
+008452d5	rojectAphex
+008452e5	stats.dat
+00845308	gamestats.gamespy.com
+00845389	hallenge
+008453e8	ctime
+008453f0	dtime
+00845558	errmsg
+00845564	pauthr
+00845574	\\data\\
+0084557c	length
+00845588	getpdr
+00845590	setpdr
+00845598	%s_t%d
+008455a0	%s_%d
+00845600	Software\\GameSpy\\GameSpy 3D\\Registration
+0084562c	0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ
+0084577c	%s.master.gamespy.com
+00845794	No challenge value was received from the master server.
+008457cc	unknown
+008457d4	final\\\\queryid\\1.1
+008457e8	gamename
+008457f4	statechanged
+00845804	natneg
+0084580c	localport
+00845818	localip%d
+00845c20	score_t
+00845c28	team_t
+00845c38	deaths_
+00845c40	team_
+00845c48	ping_
+00845c50	skill_
+00845c58	score_
+00845c60	player_
+00845c68	groupid
+00845c70	roundelapsed
+00845c80	roundtime
+00845c8c	timelimit
+00845c98	timeelapsed
+00845ca4	teamfraglimit
+00845cb4	fraglimit
+00845cc0	gamemode
+00845ccc	numteams
+00845cd8	gamevariant
+00845ce4	\\status\\
+00845cf0	\\basic\\\\info\\
+00845d00	\\final\\
+00845d10	final
+00845d18	queryid
+00845d20	Function parameter error
+00845d3c	Memory allocation error
+00845d54	Data stream error
+00845d68	Connection failed
+00845d7c	DNS lookup error
+00845d90	Socket creation error
+00845db0	%s.ms%d.gamespy.com
+00845dc4	\\echo\\test
+00845de4	DX81SDK Samples Path
+00845dfc	Software\\Microsoft\\DirectX SDK
+00845e28	%s(%ld): 
+00845e5c	{%0.8X-%0.4X-%0.4X-%0.2X%0.2X-%0.2X%0.2X%0.2X%0.2X%0.2X%0.2X}
+00845e9c	Cannot create server! No map!
+00845ec0	maxinactivity:  %d
+00845ed4	maxfreq:  %d
+00845ee4	maxping:  %d
+00845ef4	You don't have admin rights!
+00845f14	Cooperative maps:
+00845f28	Objectives maps:
+00845f3c	Occupation maps:
+00845f50	Deathmatch maps:
+00845f64	Closing game. Wait please.
+00845f80	port  %d
+00845f8c	dedicated  %d
+00845f9c	password: 
+00845fa8	Not valid voice codec
+00845fc0	voicechat %s
+00845fd0	Console keywords:
+00845fe4	sessionname: %s
+00845ff4	domain: %s
+00846000	style: %s
+0084600c	Map %s doesn't exist!
+00846024	maps: 
+0084602c	Not valid voting command
+00846048	%s  %d
+00846050	%[^\n]s
+0084605c	Type 'help' for keywords list
+0084607c	HD2 console
+00846088	maxclients
+0084628c	pointlimit
+00846490	roundlimit
+00846694	roundcount
+00846a9c	respawntime
+00846ca0	allowrespawn
+00846ea4	friendlyfire
+008470a8	autoteambalance
+008472ac	3rdpersonview
+008474b0	spawnprotection
+008476b4	inversedamage
+008478b8	fallingdmg
+00847abc	floodprotect
+00847ec4	allowvehicles
+008480c8	autorestart
+008482cc	coopdifficulty
+008484d0	cooplives
+008486d4	allowcrosshair
+008488d8	spawnonstart
+00848adc	teamlives
+00848ce0	mapname
+00848ee4	removemap
+008490e8	style
+008492ec	deathmatch
+008494f0	occupation
+008496f4	objectives
+008498f8	cooperative
+00849afc	domain
+00849d00	local
+00849f04	internet
+0084a108	sessionname
+0084a714	server
+0084a918	dedicated
+0084af24	voteyes
+0084b128	listplayers
+0084b32c	kickplayer
+0084b530	nextmap
+0084b734	restart
+0084bb3c	password
+0084bf44	voicechat
+0084c148	listmaps
+0084c34c	adminpass
+0084c550	adminlogin
+0084c958	maxping
+0084cf64	maxinactivity
+0084d168	listobjectives
+0084d978	truespeech
+0084dd80	adpcm
+0084e38c	dumpentity
+0084e794	Courier
+0084e79c	Hidden & Dangerous II Console
+0084e7bc	WndConsole
+0084e7cc	\\\\.\\pipe\\autorestart
+0084e7ec	hd2ds_sabresquadron.exe -cmd -exec %DServer_%5d.txt
+0084e820	HD2AutoRestart
+0084e830	hd2ds_sabresquadron.exe -autorestart
+0084e85c	Akce!!!!!!!!!!!!!!!!!!!!!\n
+0084e8e4	kneel2
+0084e8ec	kneel1
+0084e8f4	stand3
+0084e8fc	stand2
+0084e904	stand1
+0084e90c	shot2
+0084e914	shot1
+0084e93c	klika
+0084e944	Neuspesny pokus nastavit specialni animaci:  
+0084e984	Tables\\morph.sav
+0084e99c	Tables\\othermorph.def
+0084e9b4	Tables\\childmorph.def
+0084e9cc	Tables\\womanmorph.def
+0084e9e4	Tables\\manmorph.def
+0084ea07	<KRITICKA chyba pri nahravani souboru anim.sav
+0084ea38	Tables\\anim.sav
+0084f1e0	drown02.wav
+0084f1ec	drown01.wav
+0084f1f8	o_juover.wav
+0084f208	o_over3.wav
+0084f214	o_over2.wav
+0084f220	o_over.wav
+0084f22c	o_grtake.wav
+0084f23c	o_win.wav
+0084f248	o_wout.wav
+0084f254	o_frun06.wav
+0084f294	o_frun02.wav
+0084f344	o_stay.wav
+0084f350	o_kneel.wav
+0084f3a4	uvs01.wav
+0084f3c0	p_swuw01.wav
+0084f3d0	p_swim02.wav
+0084f3e0	p_swim01.wav
+0084f3f0	' not found!
+0084f400	AESound '
+0084f41c	Africa4
+0084f424	Arctic3
+0084f42c	Arctic1
+0084f434	Co_Sicily2
+0084f440	Sicily2
+0084f44c	Co_Bu
+0084f458	Co_Sicily1
+0084f464	Sicily1
+0084f46c	Norway
+0084f474	Co_Bre
+0084f480	Co_Ar
+0084f488	Arden
+0084f490	Prole
+0084f498	Norwa
+0084f4a0	Arcti
+0084f4b0	U daneho modelu nenalezen vizual
+0084f4d4	U daneho modelu nalezen vizual, ktery neni typu object
+0084f50c	U daneho modelu nesedi pocet LODu vzhledem k ostatnim
+0084f6d0	m_SpecFrameLight
+0084f710	'. Oznamte skutecnost TS.
+0084f72c	' nenalezl holster set '
+0084f748	' nenalezen v seznamu. Oznamte skutecnost TS.
+0084f778	HolsterInit chyba - panak '
+0084f7a4	backlink
+0084f7c4	bigbag
+0084f7cc	smlbag
+0084f7d4	panzer
+0084ff14	us_vyb2
+0084ff1c	us_vyb
+0084ff24	ru_vyb
+0084ff2c	ja_vyb
+0084ff34	it_vyb01
+0084ff40	ge_vyb01
+0084ff4c	en_vyb03
+0084ff58	en_vyb02
+0084ff64	en_vyb01
+0084ff70	def_holster_set
+0084ff80	light_smoke
+0084ff8c	lensf
+0084ffa8	TS problem: ve scene nenalezen frame, ktery se ma panakovi linknout do ruky ('
+00863694	camouflage2.bmp
+008636a4	camouflageD.bmp
+008636b4	camouflageC.bmp
+008636c4	camouflageB.bmp
+008636d4	camouflage.bmp
+008636e4	camouflageA.bmp
+008636f4	hshadow.bmp
+00863700	hshadowA.bmp
+00863710	stainNull.bmp
+00863720	stainNullA.bmp
+008637f8	!bazKLIDst
+00863804	(pzbp
+0086380c	(kliddrz21
+00863818	!klidMG
+00863820	!drzgran1
+0086382c	!vpredP
+00863834	!walkFN6c4
+00863840	!static02NEW
+00863850	mp_Na01
+00863858	C_AeMenu1
+00863898	ERROR
+008638a0	BACKPACK
+008638b4	UNIFORM
+008638c4	SHOULDER
+008638d0	HOLSTERS
+00863900	Items
+00863908	m_karty
+00863910	m_bottle
+0086391c	m_cigarette
+00863928	\\items.dat
+00863938	Nahran item na pozici, na ktere uz nejaky item je - puvodni bude zrusen (frame : 
+0086398c	 ,error: 
+00863998	Chyba pri zarazeni itemu actorovi (frame : 
+008639c4	.  Item neni v tabulce nadefinovan (nastaven na false).
+008639fc	Chyba pri nacitani itemu ID = 
+00863a1c	Stara verze ulozenych itemu (items.dat)
+00863a44	KRITICKA chyba pri nahravani souboru items.sav
+00863a74	Tables\\items.sav
+00863ab8	magazine
+00863ac4	fpv_weapon
+00863ad8	.?AVexception@@
+00863af0	.?AVlogic_error@std@@
+00863b10	.?AVlength_error@std@@
+00863b30	.?AVout_of_range@std@@
+00863b58	.?AVios_base@std@@
+00863b78	.?AV?$basic_ios@DU?$char_traits@D@std@@@std@@
+00863bb0	.?AV?$basic_istream@DU?$char_traits@D@std@@@std@@
+00863bf0	.?AV?$basic_ostream@DU?$char_traits@D@std@@@std@@
+00863c30	.?AV?$basic_streambuf@DU?$char_traits@D@std@@@std@@
+00863c70	.?AV?$basic_filebuf@DU?$char_traits@D@std@@@std@@
+00863cb0	.?AV?$basic_ios@GU?$char_traits@G@std@@@std@@
+00863ce8	.?AV?$basic_istream@GU?$char_traits@G@std@@@std@@
+00863d28	.?AV?$basic_ostream@GU?$char_traits@G@std@@@std@@
+00863d68	.?AV?$basic_filebuf@GU?$char_traits@G@std@@@std@@
+00863da8	.?AV?$basic_streambuf@GU?$char_traits@G@std@@@std@@
+00863de8	.?AVruntime_error@std@@
+00863e08	.?AVfailure@ios_base@std@@
+00863e30	.?AVfacet@locale@std@@
+00863e50	.?AV_Locimp@locale@std@@
+00863e78	.?AVbad_alloc@std@@
+00864080	.?AVtype_info@@
+00864788	 \t-\r]
+00aad5d8	EV_%04d
+00aad5e0	EV_%d

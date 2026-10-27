@@ -1,0 +1,3938 @@
+[
+{
+"op": 2,
+"name": "FORMATION_Create",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"Leader frame (actor HUMAN)",
+"",
+"",
+""
+]
+},
+{
+"op": 3,
+"name": "FORMATION_Destroy",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"Leader frame (actor HUMAN)",
+"",
+"",
+""
+]
+},
+{
+"op": 4,
+"name": "FORMATION_AddMember",
+"types": [
+5,
+5,
+0,
+0
+],
+"args": [
+"Member frame (actor HUMAN)",
+"Leader frame (actor HUMAN)",
+"",
+""
+]
+},
+{
+"op": 5,
+"name": "FORMATION_DelMember",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"Member frame (actor HUMAN)",
+"",
+"",
+""
+]
+},
+{
+"op": 6,
+"name": "FORMATION_SetTypeColumn",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"Leader frame (actor HUMAN)",
+"",
+"",
+""
+]
+},
+{
+"op": 7,
+"name": "FORMATION_SetTypeLine",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"Leader frame (actor HUMAN)",
+"",
+"",
+""
+]
+},
+{
+"op": 8,
+"name": "FORMATION_SetTypeQuad2X3",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"Leader frame (actor HUMAN)",
+"",
+"",
+""
+]
+},
+{
+"op": 9,
+"name": "FORMATION_SetTypeQuad3X2",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"Leader frame (actor HUMAN)",
+"",
+"",
+""
+]
+},
+{
+"op": 10,
+"name": "FORMATION_SetTypeArrowSharp",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"Leader frame (actor HUMAN)",
+"",
+"",
+""
+]
+},
+{
+"op": 11,
+"name": "FORMATION_SetTypeArrowInvert",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"Leader frame (actor HUMAN)",
+"",
+"",
+""
+]
+},
+{
+"op": 12,
+"name": "FORMATION_SetScale",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"Leader frame (actor HUMAN)",
+"distance [cm]",
+"",
+""
+]
+},
+{
+"op": 13,
+"name": "DOG_SetOptimized",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"optimized mode",
+"",
+"",
+""
+]
+},
+{
+"op": 14,
+"name": "DOG_Suspend",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"on/off",
+"",
+"",
+""
+]
+},
+{
+"op": 15,
+"name": "DOG_SetRangeSight",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"[m]",
+"",
+"",
+""
+]
+},
+{
+"op": 16,
+"name": "DOG_SetRangeHear",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"[m]",
+"",
+"",
+""
+]
+},
+{
+"op": 17,
+"name": "DOG_ClearAlarm",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 18,
+"name": "DOG_SetOwner",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"owner",
+"",
+"",
+""
+]
+},
+{
+"op": 19,
+"name": "DOG_Move",
+"types": [
+4,
+0,
+0,
+0
+],
+"args": [
+"checkpoint name",
+"",
+"",
+""
+]
+},
+{
+"op": 20,
+"name": "DOG_Attack",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"target",
+"",
+"",
+""
+]
+},
+{
+"op": 25,
+"name": "DOG_HafHaf",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 21,
+"name": "DOG_SETMODE_Run",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 22,
+"name": "DOG_SETMODE_Walk",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 23,
+"name": "DOG_SETMODE_Stand",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 24,
+"name": "DOG_SETMODE_Lie",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 26,
+"name": "DOG_SETAIMODE_Aggressive",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 27,
+"name": "DOG_SETAIMODE_Defensive",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 1,
+"name": "ScriptAssign",
+"types": [
+5,
+4,
+0,
+0
+],
+"args": [
+"target object",
+"script name [*.scr]",
+"",
+""
+]
+},
+{
+"op": 52,
+"name": "HUMAN_BoardVehicle",
+"types": [
+4,
+2,
+2,
+0
+],
+"args": [
+"vehicle name",
+"on/off",
+"position in car",
+""
+]
+},
+{
+"op": 141,
+"name": "SaveGameValue",
+"types": [
+2,
+2,
+0,
+0
+],
+"args": [
+"position",
+"value",
+"",
+""
+]
+},
+{
+"op": 29,
+"name": "HUMAN_SetAlarm",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 28,
+"name": "HUMAN_CreateItemInStore",
+"types": [
+2,
+2,
+0,
+0
+],
+"args": [
+"item ID",
+"store type",
+"",
+""
+]
+},
+{
+"op": 31,
+"name": "HUMAN_Move",
+"types": [
+4,
+0,
+0,
+0
+],
+"args": [
+"checkpoint name",
+"",
+"",
+""
+]
+},
+{
+"op": 32,
+"name": "HUMAN_AttackMove",
+"types": [
+4,
+0,
+0,
+0
+],
+"args": [
+"checkpoint name",
+"",
+"",
+""
+]
+},
+{
+"op": 57,
+"name": "HUMAN_DressUniform",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"uniform index",
+"",
+"",
+""
+]
+},
+{
+"op": 58,
+"name": "FRM_SwitchFaceTexture",
+"types": [
+5,
+4,
+0,
+0
+],
+"args": [
+"human model",
+"texture name",
+"",
+""
+]
+},
+{
+"op": 56,
+"name": "HUMAN_SetAnim",
+"types": [
+4,
+2,
+2,
+2
+],
+"args": [
+"animation name",
+"blend time [ms]",
+"cancel time [ms]",
+"loop [true/false]"
+]
+},
+{
+"op": 59,
+"name": "HUMAN_SetWorkingFrame",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"working frame",
+"",
+"",
+""
+]
+},
+{
+"op": 51,
+"name": "HUMAN_MoveToFrame",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"target frame",
+"distance [m]",
+"",
+""
+]
+},
+{
+"op": 53,
+"name": "HUMAN_MoveFromFrame",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"target frame",
+"distance [m]",
+"",
+""
+]
+},
+{
+"op": 54,
+"name": "HUMAN_MoveRandomRadius",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"radius [m]",
+"",
+"",
+""
+]
+},
+{
+"op": 50,
+"name": "HUMAN_Kill",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"frame of actor",
+"",
+"",
+""
+]
+},
+{
+"op": 55,
+"name": "HUMAN_KillEx",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"frame of actor",
+"0, 1, 2",
+"",
+""
+]
+},
+{
+"op": 60,
+"name": "HUMAN_KillAllInBox",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"frame of BBOX (dummy)",
+"",
+"",
+""
+]
+},
+{
+"op": 33,
+"name": "HUMAN_Attack",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"frame of actor",
+"attack time [ms]",
+"",
+""
+]
+},
+{
+"op": 34,
+"name": "?",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 35,
+"name": "HUMAN_Put",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 36,
+"name": "HUMAN_Reload",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 37,
+"name": "HUMAN_Stop",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 38,
+"name": "HUMAN_Drive",
+"types": [
+4,
+2,
+0,
+0
+],
+"args": [
+"checkpoint name",
+"speed [km/h]",
+"",
+""
+]
+},
+{
+"op": 43,
+"name": "HUMAN_DriveNearPlayer",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"speed [km/h]",
+"",
+"",
+""
+]
+},
+{
+"op": 46,
+"name": "HUMAN_SetIgnoreCircumventionFlag",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"on/off",
+"",
+"",
+""
+]
+},
+{
+"op": 182,
+"name": "HUMAN_Bike",
+"types": [
+4,
+4,
+2,
+0
+],
+"args": [
+"name of bike model",
+"checkpoint name",
+"speed [km/h]",
+""
+]
+},
+{
+"op": 45,
+"name": "HUMAN_Unlock",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 47,
+"name": "HUMAN_Suspend",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 63,
+"name": "HUMAN_SetOptimized",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 68,
+"name": "HUMAN_SetSniper",
+"types": [
+2,
+2,
+0,
+0
+],
+"args": [
+"sniper true/false",
+" sniper radius [m]",
+"",
+""
+]
+},
+{
+"op": 66,
+"name": "HUMAN_SetWaitForPlayer",
+"types": [
+2,
+2,
+2,
+2
+],
+"args": [
+"on/off",
+"distance to stop [m]",
+"distance to resume [m]",
+"watch player, when waiting(true/false)"
+]
+},
+{
+"op": 48,
+"name": "HUMAN_IllFire",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"target to fake-attack",
+"attack time [ms]",
+"",
+""
+]
+},
+{
+"op": 61,
+"name": "HUMAN_LookAt",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"target",
+"",
+"",
+""
+]
+},
+{
+"op": 64,
+"name": "HUMAN_LookAround",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"look type [0-6]",
+"",
+"",
+""
+]
+},
+{
+"op": 65,
+"name": "HUMAN_MoveToAlarm",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 62,
+"name": "HUMAN_TurnAt",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"target",
+"",
+"",
+""
+]
+},
+{
+"op": 67,
+"name": "HUMAN_TurnAtNearestPlayer",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 69,
+"name": "FRM_GetNearestPlayer",
+"types": [
+5,
+5,
+0,
+0
+],
+"args": [
+"ref frame",
+"target frame-variable for player",
+"",
+""
+]
+},
+{
+"op": 261,
+"name": "?",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 262,
+"name": "?",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 77,
+"name": "GoTo",
+"types": [
+4,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 81,
+"name": "Gosub",
+"types": [
+4,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 78,
+"name": "If",
+"types": [
+7,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 80,
+"name": "Whenever",
+"types": [
+7,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 263,
+"name": "?",
+"types": [
+7,
+2,
+2,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 83,
+"name": "OnSignal",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"number of signal",
+"",
+"",
+""
+]
+},
+{
+"op": 164,
+"name": "OnCutscene",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"number of cutscene",
+"",
+"",
+""
+]
+},
+{
+"op": 85,
+"name": "OnDeath",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 86,
+"name": "OnUse",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 88,
+"name": "OnHit",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 87,
+"name": "OnAlarm",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 91,
+"name": "OnAlarmDone",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 92,
+"name": "OnCutsceneDone",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"number of cutscene",
+"",
+"",
+""
+]
+},
+{
+"op": 89,
+"name": "OnGlobalAlarm",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 90,
+"name": "OnExit",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 93,
+"name": "FRM_SetAnimation",
+"types": [
+5,
+4,
+2,
+0
+],
+"args": [
+"target ",
+"animation name",
+"stage [0..7?]",
+""
+]
+},
+{
+"op": 97,
+"name": "FRM_ResetAnimation",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"target ",
+"stage [0..7?]",
+"",
+""
+]
+},
+{
+"op": 99,
+"name": "FRM_StopAnimation",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"target ",
+"stage [0..7?]",
+"",
+""
+]
+},
+{
+"op": 96,
+"name": "FRM_SetAnimationDelayed",
+"types": [
+5,
+4,
+2,
+0
+],
+"args": [
+"target ",
+"animation name",
+"stage [0..7?]",
+""
+]
+},
+{
+"op": 94,
+"name": "FRM_FindFrame",
+"types": [
+5,
+4,
+0,
+0
+],
+"args": [
+"target variable",
+"frame name",
+"",
+""
+]
+},
+{
+"op": 102,
+"name": "FRM_FindChildFrame",
+"types": [
+5,
+4,
+5,
+0
+],
+"args": [
+"target variable",
+"frame name",
+"parent frame",
+""
+]
+},
+{
+"op": 100,
+"name": "FRM_TeleportNearCheckpoint",
+"types": [
+5,
+4,
+4,
+0
+],
+"args": [
+"moving frame",
+"target checkpoint name",
+"target dir checkpoint name",
+""
+]
+},
+{
+"op": 114,
+"name": "ITEM_Teleport",
+"types": [
+5,
+5,
+0,
+0
+],
+"args": [
+"item's frame",
+"target frame",
+"",
+""
+]
+},
+{
+"op": 107,
+"name": "FRM_CreatePhysicalObject",
+"types": [
+5,
+2,
+2,
+2
+],
+"args": [
+"frame",
+"weight [kg]",
+"fadeout(true/false)",
+"move collision(true/false)"
+]
+},
+{
+"op": 106,
+"name": "FRM_SetTarget",
+"types": [
+5,
+5,
+2,
+0
+],
+"args": [
+"targeting frame",
+"target frame",
+"link(true), unlink(false)",
+""
+]
+},
+{
+"op": 110,
+"name": "__Log",
+"types": [
+4,
+0,
+0,
+0
+],
+"args": [
+"log message",
+"",
+"",
+""
+]
+},
+{
+"op": 113,
+"name": "__SetupAutoLogging",
+"types": [
+2,
+4,
+0,
+0
+],
+"args": [
+"on/off",
+"outputfilename",
+"",
+""
+]
+},
+{
+"op": 111,
+"name": "__LogNumber",
+"types": [
+4,
+2,
+0,
+0
+],
+"args": [
+"log message",
+"int variable",
+"",
+""
+]
+},
+{
+"op": 112,
+"name": "__LogFrame",
+"types": [
+4,
+5,
+0,
+0
+],
+"args": [
+"log message",
+"frame variable",
+"",
+""
+]
+},
+{
+"op": 108,
+"name": "FRM_MorphSpeech",
+"types": [
+5,
+2,
+2,
+2
+],
+"args": [
+"target frame (human model)",
+"Speech phrase",
+"near [m]",
+"far [m]"
+]
+},
+{
+"op": 115,
+"name": "FRM_MorphSpeechDelayed",
+"types": [
+5,
+2,
+2,
+2
+],
+"args": [
+"target frame (human model)",
+"Speech phrase",
+"near [m]",
+"far [m]"
+]
+},
+{
+"op": 104,
+"name": "FRM_TeleportNearFrame",
+"types": [
+5,
+5,
+2,
+0
+],
+"args": [
+"moving frame",
+"target frame ",
+"link flag (true/false)",
+""
+]
+},
+{
+"op": 109,
+"name": "FRM_TeleportNearFrameBack",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"moving frame",
+"",
+"",
+""
+]
+},
+{
+"op": 120,
+"name": "FRM_GetMyFrame",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"target variable",
+"",
+"",
+""
+]
+},
+{
+"op": 95,
+"name": "FRM_SetOn",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"target ",
+"true/false",
+"",
+""
+]
+},
+{
+"op": 105,
+"name": "FRM_TimerSetOn",
+"types": [
+2,
+2,
+0,
+0
+],
+"args": [
+"Set stopwatch true/false",
+"stopwatch time [ms]",
+"",
+""
+]
+},
+{
+"op": 98,
+"name": "Car_SetFuel",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"target car frame",
+"fuel [1/10 lt]",
+"",
+""
+]
+},
+{
+"op": 101,
+"name": "FRM_SoundAdjustVolume",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"target sound",
+"volume [%], (100 = 1.0)",
+"",
+""
+]
+},
+{
+"op": 103,
+"name": "FRM_SoundAdjustDoppler",
+"types": [
+5,
+2,
+2,
+2
+],
+"args": [
+"target sound",
+"doppler X [m/s]",
+"doppler Y",
+"doppler Z"
+]
+},
+{
+"op": 116,
+"name": "FRM_RotateX",
+"types": [
+5,
+2,
+2,
+0
+],
+"args": [
+"target ",
+"angle [degree]",
+"speed [degree/s]",
+""
+]
+},
+{
+"op": 117,
+"name": "FRM_RotateY",
+"types": [
+5,
+2,
+2,
+0
+],
+"args": [
+"target ",
+"angle [degree]",
+"speed [degree/s]",
+""
+]
+},
+{
+"op": 118,
+"name": "FRM_RotateZ",
+"types": [
+5,
+2,
+2,
+0
+],
+"args": [
+"target ",
+"angle [degree]",
+"speed [degree/s]",
+""
+]
+},
+{
+"op": 122,
+"name": "FRM_WatchTrack",
+"types": [
+5,
+4,
+0,
+0
+],
+"args": [
+"target ",
+"track name",
+"",
+""
+]
+},
+{
+"op": 133,
+"name": "FRM_WatchTrackWithParent",
+"types": [
+5,
+4,
+5,
+0
+],
+"args": [
+"target ",
+"track name",
+"parent frame",
+""
+]
+},
+{
+"op": 123,
+"name": "FRM_SetActiveCamera",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"target camera ",
+"",
+"",
+""
+]
+},
+{
+"op": 124,
+"name": "FRM_GetActiveCamera",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"target camera variable",
+"",
+"",
+""
+]
+},
+{
+"op": 125,
+"name": "FRM_SetCameraFrame",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"target to watch",
+"",
+"",
+""
+]
+},
+{
+"op": 132,
+"name": "FRM_SetCameraFrameSlide",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"target to watch",
+"speed [degree]",
+"",
+""
+]
+},
+{
+"op": 157,
+"name": "AirAttack_SetTarget",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"target to attack",
+"true/false",
+"",
+""
+]
+},
+{
+"op": 158,
+"name": "SetInterfaceTimer",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"time [ms]",
+"",
+"",
+""
+]
+},
+{
+"op": 159,
+"name": "CSC_SetTimer",
+"types": [
+2,
+2,
+0,
+0
+],
+"args": [
+"game speed [zotti ;-) ], (1000 = normal speed)",
+"acceleration [zotti/s] ",
+"",
+""
+]
+},
+{
+"op": 160,
+"name": "CSC_FadeIn",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"time to fadein [ms]",
+"",
+"",
+""
+]
+},
+{
+"op": 161,
+"name": "CSC_FadeOut",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"time to fadeout [ms]",
+"",
+"",
+""
+]
+},
+{
+"op": 166,
+"name": "CSC_FadeOutToColor",
+"types": [
+2,
+2,
+2,
+2
+],
+"args": [
+"time to fadeout [ms]",
+"r [0-255]",
+"g [0-255]",
+"b [0-255]"
+]
+},
+{
+"op": 165,
+"name": "CSC_FadeInFromColor",
+"types": [
+2,
+2,
+2,
+2
+],
+"args": [
+"time to fadein [ms]",
+"r [0-255]",
+"g [0-255]",
+"b [0-255]"
+]
+},
+{
+"op": 170,
+"name": "CSC_GetPlayerNum",
+"types": [
+2,
+5,
+0,
+0
+],
+"args": [
+"index of player",
+"target frame variable",
+"",
+""
+]
+},
+{
+"op": 179,
+"name": "CSC_GetPlayerNumNoNPC",
+"types": [
+2,
+5,
+0,
+0
+],
+"args": [
+"index of player",
+"target frame variable",
+"",
+""
+]
+},
+{
+"op": 168,
+"name": "CSC_DuplicateHuman",
+"types": [
+5,
+5,
+4,
+0
+],
+"args": [
+"frame of player",
+"new frame keeper",
+"new frame name (must be unique!)",
+""
+]
+},
+{
+"op": 169,
+"name": "CSC_ReleaseHuman",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"frame to release",
+"",
+"",
+""
+]
+},
+{
+"op": 171,
+"name": "CSC_FreeHands",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"duplicated frame from human (never actor human!)",
+"",
+"",
+""
+]
+},
+{
+"op": 172,
+"name": "CSC_FreeBackPack",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"duplicated frame from human (never actor human!)",
+"",
+"",
+""
+]
+},
+{
+"op": 162,
+"name": "CSC_RunCutscene",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"cutscene number",
+"",
+"",
+""
+]
+},
+{
+"op": 177,
+"name": "CSC_SetupFakeCutscene",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"on/off",
+"",
+"",
+""
+]
+},
+{
+"op": 178,
+"name": "CSC_SetCameraFOV",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"degrees",
+"",
+"",
+""
+]
+},
+{
+"op": 175,
+"name": "CSC_FrameSetShadow",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"frame",
+"on/off",
+"",
+""
+]
+},
+{
+"op": 176,
+"name": "CSC_NoTeamDamage",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"on/off",
+"",
+"",
+""
+]
+},
+{
+"op": 167,
+"name": "CSC_SetCameraAnimation",
+"types": [
+5,
+4,
+0,
+0
+],
+"args": [
+"camera frame",
+"animation filename [playing in world coords]",
+"",
+""
+]
+},
+{
+"op": 173,
+"name": "CSC_RunCLouder",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"on/off",
+"",
+"",
+""
+]
+},
+{
+"op": 163,
+"name": "CSC_EndCutscene",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 126,
+"name": "FRM_SetLightMap",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"target lit-object",
+"lightmap level [0 .. 9?]",
+"",
+""
+]
+},
+{
+"op": 131,
+"name": "FRM_SetGroupLightMap",
+"types": [
+4,
+2,
+0,
+0
+],
+"args": [
+"lightmap group name",
+"lightmap level [0 .. 9?]",
+"",
+""
+]
+},
+{
+"op": 127,
+"name": "FRM_CreateParticle",
+"types": [
+2,
+5,
+0,
+0
+],
+"args": [
+"particle ID",
+"target frame (position)",
+"",
+""
+]
+},
+{
+"op": 128,
+"name": "FRM_CreateIndexedParticle",
+"types": [
+2,
+5,
+2,
+0
+],
+"args": [
+"particle ID",
+"target frame (position)",
+"variable receiving particle index",
+""
+]
+},
+{
+"op": 129,
+"name": "FRM_DestroyIndexedParticle",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"particle index to destroy (received from function CreateIndexedParticle() )",
+"",
+"",
+""
+]
+},
+{
+"op": 130,
+"name": "FRM_FinishIndexedParticle",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"particle index to finish(received from function CreateIndexedParticle() )",
+"",
+"",
+""
+]
+},
+{
+"op": 39,
+"name": "Delay",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"time [ms]",
+"",
+"",
+""
+]
+},
+{
+"op": 135,
+"name": "SendSignal",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"target script",
+"signal number (1..31)",
+"",
+""
+]
+},
+{
+"op": 136,
+"name": "SetObjectiveStatus",
+"types": [
+2,
+2,
+0,
+0
+],
+"args": [
+"objective number",
+"objective status",
+"",
+""
+]
+},
+{
+"op": 137,
+"name": "AddDiaryText",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"text ID",
+"",
+"",
+""
+]
+},
+{
+"op": 138,
+"name": "AddDebriefingText",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"text ID",
+"",
+"",
+""
+]
+},
+{
+"op": 134,
+"name": "PlaySound",
+"types": [
+2,
+2,
+0,
+0
+],
+"args": [
+"number of sound-chapter (sound table)",
+"number of sub-sound in chapter",
+"",
+""
+]
+},
+{
+"op": 143,
+"name": "PlayMusic",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"index in sound table in chapter 'MUSIC'",
+"",
+"",
+""
+]
+},
+{
+"op": 156,
+"name": "PlayCutsceneMusic",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"index in sound table in chapter 'MUSIC'",
+"",
+"",
+""
+]
+},
+{
+"op": 139,
+"name": "SetWhenever",
+"types": [
+4,
+2,
+0,
+0
+],
+"args": [
+"whenever name",
+"true/false",
+"",
+""
+]
+},
+{
+"op": 142,
+"name": "SetWheneverTime",
+"types": [
+4,
+2,
+0,
+0
+],
+"args": [
+"whenever name",
+"time to check[ms]",
+"",
+""
+]
+},
+{
+"op": 140,
+"name": "Printf",
+"types": [
+4,
+0,
+0,
+0
+],
+"args": [
+"text to print",
+"",
+"",
+""
+]
+},
+{
+"op": 183,
+"name": "PrintfNumber",
+"types": [
+4,
+2,
+0,
+0
+],
+"args": [
+"text to print",
+"variable to print",
+"",
+""
+]
+},
+{
+"op": 146,
+"name": "MakeExplosion",
+"types": [
+5,
+2,
+2,
+0
+],
+"args": [
+"target frame",
+"damage [zotti] 1000 = 1.0",
+"range [mm]",
+""
+]
+},
+{
+"op": 147,
+"name": "PlayAvi",
+"types": [
+4,
+0,
+0,
+0
+],
+"args": [
+"avi filename",
+"",
+"",
+""
+]
+},
+{
+"op": 174,
+"name": "FRM_SetShifting",
+"types": [
+5,
+2,
+2,
+0
+],
+"args": [
+"target frame",
+"true/false",
+"reverse [true/false]",
+""
+]
+},
+{
+"op": 180,
+"name": "CheckpointSeparate",
+"types": [
+4,
+4,
+0,
+0
+],
+"args": [
+"checkpoint name A",
+"checkpoint name B",
+"",
+""
+]
+},
+{
+"op": 181,
+"name": "CheckpointJoin",
+"types": [
+4,
+4,
+0,
+0
+],
+"args": [
+"checkpoint name A",
+"checkpoint name B",
+"",
+""
+]
+},
+{
+"op": 144,
+"name": "SetPlayerInput",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 145,
+"name": "SetNPCTeamStatus",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"NPC frame",
+"status-true/false",
+"",
+""
+]
+},
+{
+"op": 148,
+"name": "SetAlarmType",
+"types": [
+2,
+2,
+0,
+0
+],
+"args": [
+"alarm types [flags]",
+"set [true/false]",
+"",
+""
+]
+},
+{
+"op": 149,
+"name": "SetActorState",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"actor frame",
+"state",
+"",
+""
+]
+},
+{
+"op": 154,
+"name": "DOOR_Lock",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"door frame",
+"lock : true/false",
+"",
+""
+]
+},
+{
+"op": 155,
+"name": "DECORATOR_SetOn",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"on/off",
+"",
+"",
+""
+]
+},
+{
+"op": 150,
+"name": "DisableSignals",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 153,
+"name": "EnableSignal",
+"types": [
+2,
+2,
+0,
+0
+],
+"args": [
+"number of signal",
+"true/false",
+"",
+""
+]
+},
+{
+"op": 151,
+"name": "DisableAlarms",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 152,
+"name": "DisableWhenevers",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 184,
+"name": "WEATHER_SetOn",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 187,
+"name": "THUNDERSTORM_SetOn",
+"types": [
+2,
+5,
+0,
+0
+],
+"args": [
+"true/false",
+"light frame",
+"",
+""
+]
+},
+{
+"op": 188,
+"name": "THUNDERSTORM_MP",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"Time",
+"",
+"",
+""
+]
+},
+{
+"op": 193,
+"name": "WEATHER_SetMode",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"mode [0-rain, 1-snow]",
+"",
+"",
+""
+]
+},
+{
+"op": 194,
+"name": "WEATHER_SetSpace",
+"types": [
+2,
+2,
+0,
+0
+],
+"args": [
+"distance [m]",
+"height [m]",
+"",
+""
+]
+},
+{
+"op": 195,
+"name": "WEATHER_SetDir",
+"types": [
+2,
+2,
+2,
+0
+],
+"args": [
+"X dir",
+"Y dir",
+"Z dir",
+""
+]
+},
+{
+"op": 185,
+"name": "WEATHER_SetCount",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"number of elements",
+"",
+"",
+""
+]
+},
+{
+"op": 186,
+"name": "WEATHER_SetSpeed",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"speed [mm/s]",
+"",
+"",
+""
+]
+},
+{
+"op": 189,
+"name": "WEATHER_SetSize",
+"types": [
+2,
+2,
+0,
+0
+],
+"args": [
+"length [mm]",
+"width [mm]",
+"",
+""
+]
+},
+{
+"op": 190,
+"name": "WEATHER_SetColorIn",
+"types": [
+2,
+2,
+2,
+2
+],
+"args": [
+"A [0..255]",
+"B [0..255]",
+"G [0..255]",
+"R [0..255]"
+]
+},
+{
+"op": 191,
+"name": "WEATHER_SetColorOut",
+"types": [
+2,
+2,
+2,
+2
+],
+"args": [
+"A [0..255]",
+"B [0..255]",
+"G [0..255]",
+"R [0..255]"
+]
+},
+{
+"op": 192,
+"name": "WEATHER_Debug",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 196,
+"name": "HUMAN_SETMODE_Run",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 197,
+"name": "HUMAN_SETMODE_Walk",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 199,
+"name": "HUMAN_SETMODE_Guard",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 198,
+"name": "HUMAN_SETMODE_Silence",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 200,
+"name": "HUMAN_SETMODE_Lie",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 204,
+"name": "HUMAN_SETMODE_DontSeekBestPos",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 201,
+"name": "HUMAN_SETMODE_Crouch",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 202,
+"name": "HUMAN_SETMODE_Stand",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 203,
+"name": "HUMAN_SETMODE_StandFast",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 205,
+"name": "HUMAN_SETAIMODE_Aggressive",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 206,
+"name": "HUMAN_SETAIMODE_Defensive",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 207,
+"name": "HUMAN_SETAIMODE_Zombie",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 208,
+"name": "FRAME_SETAIMODE_Aggressive",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"target human",
+"",
+"",
+""
+]
+},
+{
+"op": 209,
+"name": "FRAME_SETAIMODE_Defensive",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"target human",
+"",
+"",
+""
+]
+},
+{
+"op": 210,
+"name": "FRAME_SETAIMODE_Zombie",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"target human",
+"",
+"",
+""
+]
+},
+{
+"op": 211,
+"name": "HUMAN_SETSIGHTRANGE",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"range [m]",
+"",
+"",
+""
+]
+},
+{
+"op": 212,
+"name": "HUMAN_SETHEARRANGE",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"range [m]",
+"",
+"",
+""
+]
+},
+{
+"op": 213,
+"name": "HUMAN_WeaponOnArm",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 215,
+"name": "HUMAN_WeaponUp",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 214,
+"name": "HUMAN_PickObject",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"target object",
+"one-hand flag[true/false]",
+"",
+""
+]
+},
+{
+"op": 216,
+"name": "HUMAN_DropObject",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 44,
+"name": "HUMAN_Investigate",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 217,
+"name": "HUMAN_ACTIVITY_Smoke",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 218,
+"name": "HUMAN_ACTIVITY_Card",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 219,
+"name": "HUMAN_ACTIVITY_Cubes",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 220,
+"name": "HUMAN_ACTIVITY_SpotUp",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 221,
+"name": "HUMAN_ACTIVITY_SpotDown",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 222,
+"name": "HUMAN_ACTIVITY_SpotRight",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 223,
+"name": "HUMAN_ACTIVITY_SpotLeft",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 224,
+"name": "HUMAN_ACTIVITY_CheckWeapon",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 225,
+"name": "HUMAN_ACTIVITY_Shoes",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 226,
+"name": "HUMAN_ACTIVITY_Hat",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 227,
+"name": "HUMAN_ACTIVITY_Binoculars",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 228,
+"name": "HUMAN_ACTIVITY_Cold",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 229,
+"name": "HUMAN_ACTIVITY_Hot",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 230,
+"name": "HUMAN_ACTIVITY_PlayCar",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 231,
+"name": "HUMAN_ACTIVITY_PlayAirplane",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 232,
+"name": "HUMAN_ACTIVITY_PlayPuppet",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 233,
+"name": "HUMAN_ACTIVITY_Trap",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 234,
+"name": "HUMAN_ACTIVITY_Telegraph",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 235,
+"name": "HUMAN_ACTIVITY_Phone",
+"types": [
+2,
+5,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 236,
+"name": "HUMAN_ACTIVITY_Read",
+"types": [
+2,
+5,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 237,
+"name": "HUMAN_ACTIVITY_DrinkBottle",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 238,
+"name": "HUMAN_ACTIVITY_Eat",
+"types": [
+2,
+5,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 239,
+"name": "HUMAN_ACTIVITY_Turk",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 240,
+"name": "HUMAN_ACTIVITY_Salute",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 241,
+"name": "HUMAN_ACTIVITY_Exercise",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 242,
+"name": "HUMAN_ACTIVITY_StandSleep",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 243,
+"name": "HUMAN_ACTIVITY_Piss",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 244,
+"name": "HUMAN_ACTIVITY_Sit",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 245,
+"name": "HUMAN_ACTIVITY_Sleep",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 246,
+"name": "HUMAN_ACTIVITY_Point",
+"types": [
+5,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 247,
+"name": "HUMAN_ACTIVITY_BinocularsEnd",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 248,
+"name": "HUMAN_SETEVENTS",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 250,
+"name": "SUBTITLES_SetOn",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 252,
+"name": "Mission_SetUniformDisguise",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"true/false",
+"",
+"",
+""
+]
+},
+{
+"op": 253,
+"name": "SetupTacticalMode",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"on/off",
+"",
+"",
+""
+]
+},
+{
+"op": 254,
+"name": "HUMAN_RemoveItemsFromStore",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"Human model",
+"ItemID",
+"",
+""
+]
+},
+{
+"op": 259,
+"name": "AddPauseSound",
+"types": [
+4,
+0,
+0,
+0
+],
+"args": [
+"SoundFrame name",
+"",
+"",
+""
+]
+},
+{
+"op": 260,
+"name": "MP_EnableSpawnZone",
+"types": [
+4,
+2,
+0,
+0
+],
+"args": [
+"Zone name",
+"AXIS - 0 ALLIED - 1 NEUTRAL - 2",
+"",
+""
+]
+},
+{
+"op": 256,
+"name": "HINT_Add",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"Hint ID",
+"",
+"",
+""
+]
+},
+{
+"op": 255,
+"name": "HINT_ClearAll",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+},
+{
+"op": 257,
+"name": "AddHumanHealth",
+"types": [
+5,
+2,
+0,
+0
+],
+"args": [
+"Human frame",
+"Health in percent to add",
+"",
+""
+]
+},
+{
+"op": 258,
+"name": "SetupJunkers88",
+"types": [
+2,
+2,
+0,
+0
+],
+"args": [
+"Interceptors firepower percent",
+"Interceptors HP percent",
+"",
+""
+]
+},
+{
+"op": 251,
+"name": "SUBTITLES_SetText",
+"types": [
+2,
+0,
+0,
+0
+],
+"args": [
+"text ID",
+"",
+"",
+""
+]
+},
+{
+"op": 249,
+"name": "EndScript",
+"types": [
+0,
+0,
+0,
+0
+],
+"args": [
+"",
+"",
+"",
+""
+]
+}
+]

@@ -260,7 +260,7 @@ uint32_t C_SupplyBox__FUN_005f9a60(C_SupplyBox *_this, ...)
   local_14 = 0xffffffff;
   C_fstr_Construct(&local_a4,"ammobox");
   local_14 = 0;
-  iVar5 = FUN_00473e30(&g_vertexAnimModule,(int *)&local_a4);
+  iVar5 = C_VertexAnimModule__FindAnimation((C_VertexAnimModule*)(&g_vertexAnimModule),(int *)&local_a4);
   local_14 = 0xffffffff;
   if ((local_a4.rep != 0) &&
      ((local_a4.rep)->refCount = (local_a4.rep)->refCount - 1, (local_a4.rep)->refCount == 0)) {
@@ -272,7 +272,7 @@ uint32_t C_SupplyBox__FUN_005f9a60(C_SupplyBox *_this, ...)
     _this->m_228 = 0;
   }
   if (_this->m_214 != 0) {
-    FUN_004746b0(&g_vertexAnimModule,_this->m_214,'\0');
+    C_VertexAnimModule__RemovePlayer((C_VertexAnimModule*)(&g_vertexAnimModule),_this->m_214,'\0');
     if ((void *)_this->m_214 != 0) {
       tier1_operator_delete((void *)_this->m_214);
     }
@@ -290,11 +290,11 @@ uint32_t C_SupplyBox__FUN_005f9a60(C_SupplyBox *_this, ...)
   _this->m_214 = iVar7;
   if (iVar5 != 0) {
     (**(code **)(*piVar6 + 0xa0))(piVar6);
-    FUN_00473790((void *)_this->m_214,piVar6,iVar5);
+    S_VertexAnimPlayer__Init((void *)_this->m_214,piVar6,iVar5);
     *(uint8_t *)(_this->m_214 + 0x1e) = 1;
-    FUN_004737c0((int *)_this->m_214);
+    S_VertexAnimPlayer__Reset((int *)_this->m_214);
     puStack_b4 = (uint32_t *)_this->m_214;
-    FUN_00474cf0(&DAT_0089b494,DAT_0089b49c,1,(uint32_t*)(&puStack_b4));
+    C_VertexAnimModule__PlayerVectorInsert((C_VertexAnimModule*)(&DAT_0089b494),DAT_0089b49c,1,(uint32_t*)(&puStack_b4));
     *(uint8_t *)(_this->m_214 + 0x1c) = 1;
     *(int *)_this->m_214 = *(int *)(iVar5 + 0x18) - 1;
     *(uint32_t *)(_this->m_214 + 0x18) = 0x82;
@@ -1202,13 +1202,13 @@ uint32_t C_SupplyBox__FUN_005fb220(C_SupplyBox *_this,int *param_1, ...)
     C_Actor__Deactivate((C_Actor *)_this,SUB41(param_1,0));
     _this->m_090 = '\0';
     *(uint8_t *)(_this->m_214 + 0x1e) = 1;
-    FUN_004737c0((int *)_this->m_214);
+    S_VertexAnimPlayer__Reset((int *)_this->m_214);
     (**(code **)(*(int *)_this->m_218 + 0x30))(_this->m_218,0);
     (**(code **)(*(int *)_this->m_228 + 0x38))(_this->m_228,0,1);
     (**(code **)(*(int *)_this->m_020 + 0x38))(_this->m_020,0,1);
     C_SupplyBox__FUN_005fc860(_this,5);
     C_SupplyBox__FUN_005fc9a0(_this,1.4013e-45);
-    FUN_004746b0(&g_vertexAnimModule,_this->m_214,'\0');
+    C_VertexAnimModule__RemovePlayer((C_VertexAnimModule*)(&g_vertexAnimModule),_this->m_214,'\0');
     if ((void *)_this->m_214 != 0) {
       tier1_operator_delete((void *)_this->m_214);
     }
@@ -2397,7 +2397,7 @@ uint32_t C_SupplyBox__FUN_005fcd80(C_SupplyBox *_this,uint32_t param_1, ...)
   case 2:
     C_SupplyBox__FUN_005fbd90(_this,4);
     *(uint8_t *)(_this->m_214 + 0x1e) = 1;
-    FUN_004737c0((int *)_this->m_214);
+    S_VertexAnimPlayer__Reset((int *)_this->m_214);
     if (0 < (int)_this->m_134) {
       _this->m_250 = param_1;
       _this->m_254 = _this->m_134 * 1000;
@@ -2569,7 +2569,7 @@ uint32_t C_SupplyBox__FUN_005fd2a0(C_SupplyBox *_this,uint32_t *param_1, ...)
   int iVar3;
   I3D_scene *pIVar4;
   *(uint8_t *)(_this->m_214 + 0x1e) = 1;
-  FUN_004737c0((int *)_this->m_214);
+  S_VertexAnimPlayer__Reset((int *)_this->m_214);
   (**(code **)(*(int *)_this->m_218 + 0x30))();
   (**(code **)(*(int *)_this->m_228 + 0x38))();
   FUN_005fd760((int)_this);

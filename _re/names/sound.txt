@@ -1,0 +1,105 @@
+# Sound module (src/game/sound_module.*) and sound table (src/game/sound_table.*)
+
+# --- C_SoundModule ---
+00433580 InitSoundModule
+00433590 ConstructSoundModule
+004335b0 RegisterSoundModuleDtor
+004336d0 C_SoundModule::C_SoundModule
+004335d0 C_SoundModule::~C_SoundModule
+00433e40 C_SoundModule::ScalarDeletingDestructor
+004337e0 C_SoundModuleBase::ScalarDeletingDestructor
+004336c0 GetSoundModule
+00436820 C_SoundModule::Tick | void __thiscall Tick(C_SoundModule *this, int timeDelta)
+00436830 C_SoundModule::UpdateThunk
+004368d0 C_SoundModule::Update
+004338d0 C_SoundModule::LoadMissionData
+004338f0 C_SoundModule::FreeMissionData
+00433840 C_SoundModule::StartMission
+004338a0 C_SoundModule::StopMission
+00433910 C_SoundModule::RestartMission | void __thiscall RestartMission(C_SoundModule *this, bool server)
+00433950 C_SoundModule::SaveGame
+00433b10 C_SoundModule::LoadGame
+00433e80 C_SoundModule::RemoveListener
+00433ed0 C_SoundModule::AddListener
+004361f0 C_SoundModule::StopAll
+00436520 C_SoundModule::PlayDubbingWithNoise
+00436470 C_SoundModule::PlayDubbing
+00433fa0 C_SoundModule::Play
+00435240 C_SoundModule::PlayTableSound
+00435752 C_SoundModule::PlayTableSound_part2
+00437340 C_SoundModule::Stop
+004370f0 C_SoundModule::SetBackgroundMusic
+00436e90 C_SoundModule::FadeBackgroundMusic
+00436f60 C_SoundModule::PlayMusic
+00436f10 C_SoundModule::CrossfadeMusic | void __thiscall CrossfadeMusic(C_SoundModule *this, int track, int fadeTime, int position)
+00433800 C_SoundModule::GetBackgroundMusic
+00433810 C_SoundModule::GetBackgroundMusicPosition
+004374a0 C_SoundModule::GetSound
+00433510 C_SoundModule::SetMusicVolume | float __thiscall SetMusicVolume(C_SoundModule *this, float volume)
+00433830 C_SoundModule::GetMusicVolume | float __thiscall GetMusicVolume(C_SoundModule *this)
+00433550 C_SoundModule::SetMasterVolume | float __thiscall SetMasterVolume(C_SoundModule *this, float volume)
+00432710 C_SoundModule::RegisterSoundFrame
+004326d0 C_SoundModule::GetGroup
+004324c0 C_SoundModule::SetChannelLimit
+004326c0 C_SoundModule::GetDubbingSampleSize
+00436840 C_SoundModule::SetDopplerWobble
+00435b00 C_SoundModule::NotifyListeners
+00435dc0 C_SoundModule::NotifyListenersForRequest
+004361b0 C_SoundModule::ReleaseSlotSound
+004323e0 C_SoundModule::IsMusicPlaying
+00432400 C_SoundModule::IsOverlayPlaying
+00436ed0 C_SoundModule::FadeOverlay
+00437210 C_SoundModule::OpenStream
+004328d0 C_SoundModule::InitSectorAcoustics
+00432860 C_SoundModule::FreeSectorAcoustics
+00432900 C_SoundModule::AddSectorAcoustics
+00432be0 Sound_PortalDistance | float __stdcall Sound_PortalDistance(float *factor, S_vector *a, S_vector *b, I3D_sector *sectorA, I3D_sector *sectorB, int unused)
+00433330 Sound_SectorDistance | float __stdcall Sound_SectorDistance(float *factor, S_vector *a, S_vector *b, I3D_sector *sectorA, I3D_sector *sectorB, int unused)
+00432420 S_SoundFrame::S_SoundFrame
+00432480 S_SoundFrame::~S_SoundFrame
+00432490 S_SoundFrame::SetSectorFactor
+004374d0 S_SoundRequest::Init
+004370d0 C_str_CopyFromField
+
+# --- older sector-distance helpers (no callers) ---
+00431120 Sound_SectorHopDistance
+004312b0 Sound_CountSectorHops
+004314e0 Sound_BuildSectorHopTable
+00431630 Sound_AddSectorHopEntry
+00431dd0 S_SectorHops::S_SectorHops
+
+# --- sound table ---
+00439040 InitSoundTable
+00439050 ConstructSoundTable
+00439060 RegisterSoundTableDtor
+004394d0 C_SoundTable::C_SoundTable
+00439770 C_SoundTable::~C_SoundTable
+00439080 C_SoundTable::Load
+004398b0 C_SoundTable::Clear
+00439a10 C_SoundTable::GetDubbingSampleSize
+004394b0 S_SoundChapter::S_SoundChapter
+004399a0 S_SoundChapter::~S_SoundChapter
+00431f80 S_SoundChapter::Clear
+00432040 S_SoundChapter::Load
+00431fd0 S_SoundGroup::~S_SoundGroup
+0043a5e0 S_SoundGroup::Clear
+0043a6f0 S_SoundGroup::Load
+0043a630 S_SoundSample::~S_SoundSample
+0043aa50 S_SoundSample::Load
+
+# --- speech slots 0x008cb8e0 (16 x 0x44: dubbing sample + lip sync; world.h, not ported) ---
+# (the mission / frame entry points are in game.txt, ResetSpeechSlots in script.txt)
+0071e2c0 FindFreeSpeechSlot
+0071e830 StopFrameSpeech
+0071e300 AttachSpeechSlotToHuman
+0071e860 AttachSpeechSlotToFrame
+0071ea20 ReleaseHumanSpeech
+0071ebc0 OpenDubbingSample | bool __fastcall OpenDubbingSample(I3D_sound * sound, int dubbing)
+0071ec30 PlaySpeechSlot | void __fastcall PlaySpeechSlot(int slot, int dubbing, float nearRange, float farRange, bool showSubtitle, bool isActivePlayer)
+0071f090 IsHumanSpeaking | bool __fastcall IsHumanSpeaking(C_Human * human)
+0071f0c0 StopSpeechSlot
+00464e90 GetCameraModule
+
+00899838 g_soundModule @
+00899948 g_soundTable @
+00899940 g_soundSectorUpdateTimer @

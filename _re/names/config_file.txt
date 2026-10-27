@@ -1,0 +1,27 @@
+# Key=value text files, the game directory (src/common/config_file.{h,cpp}) and the C runtime file
+# wrappers and the date text (src/common/os_files.{h,cpp}).
+
+008ca4d0 g_gameDirectory @ char[260]
+008ca5d8 g_configLine @ char[1024]
+006e92a0 GetGameDirectory | char * __cdecl GetGameDirectory(void)
+006e92e0 SetWorkingDirectory | bool __fastcall SetWorkingDirectory(char * a, char * b, char * c)
+006e9600 C_ConfigFile::Load | bool __thiscall Load(C_ConfigFile *this, C_str fileName)
+006e9880 C_ConfigFile::Save | bool __thiscall Save(C_ConfigFile *this, C_str fileName)
+006e9a60 C_ConfigFile::SetString | bool __fastcall SetString(C_ConfigFile * file, char * key, char * value)
+006e9c00 C_ConfigFile::SetStringThunk | bool __fastcall SetStringThunk(C_ConfigFile * file, char * key, char * value)
+006e9c10 C_ConfigFile::FindValue | char * __fastcall FindValue(C_ConfigFile * file, char * key)
+006e9cf0 C_ConfigFile::GetInt | bool __fastcall GetInt(C_ConfigFile * file, char * key, int * value)
+006e9e40 C_ConfigFile::GetString | bool __fastcall GetString(C_ConfigFile * file, char * key, char * value)
+
+008cb444 g_dateText @ C_str
+008cb44c g_dateTime @ uint[9]
+006edc30 FileExists | bool __fastcall FileExists(char * path)
+006edc60 MakeDirectory | int __fastcall MakeDirectory(char * path)
+006edc70 ChangeDirectory | int __fastcall ChangeDirectory(char * path)
+006edc90 RenameFile | bool __fastcall RenameFile(char * from, char * to)
+006edcd0 FileFindFirst | int __fastcall FileFindFirst(char * pattern, void * data)
+006edce0 FileFindNext | int __fastcall FileFindNext(int handle, void * data)
+006edcf0 FileFindClose | void __fastcall FileFindClose(int handle)
+006edd10 SameMinute | bool __fastcall SameMinute(void * a, void * b)
+006edd30 GetDateString | bool __fastcall GetDateString(char ** text, bool forFileName)
+006edee0 FreeDateText | void __cdecl FreeDateText(void)

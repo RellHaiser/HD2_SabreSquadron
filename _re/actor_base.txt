@@ -1,0 +1,1038 @@
+// 0x00610010
+void FUN_00610010(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x00610040
+void FUN_00610040(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x0061006e
+uint32_t * __thiscall C_Actor::FUN_0061006e(C_Actor *this,E_ActorType param_1)
+{
+  (this->m_name).rep = nullptr;
+  this->vtable = (C_Actor_vtbl *)&PTR_008137f0;
+  this->m_temporary = false;
+  this->m_type = param_1;
+  this->m_frame = nullptr;
+  this->m_activeIndex = -1;
+  this->m_netId = -1;
+  this->m_inventory = nullptr;
+  empty_function_611080();
+  this->m_unknown7C = 0;
+  uVar3 = strlen("Missing actor name!!") + 1;
+  pcVar7 = "Missing actor name!!" + uVar3;
+  uVar4 = uVar3 - 1;
+  pCVar2 = operator_new(uVar3 + 8);
+  if (pCVar2 == nullptr) {
+    pCVar2 = nullptr;
+  }
+  else {
+    pCVar2->refCount = 1;
+    pCVar2->length = uVar4;
+    pcVar7 = "Missing actor name!!";
+    pcVar8 = pCVar2->chars;
+    memcpy(pcVar8, pcVar7, uVar4);
+    pcVar7 += uVar4;
+    pcVar8 += uVar4;
+    uVar4 = 0;
+    pCVar2->chars[uVar3 - 1] = '\0';
+  }
+  ptr = (this->m_name).rep;
+  if ((ptr != nullptr) && (iVar6 = ptr->refCount - 1, ptr->refCount = iVar6, iVar6 == 0))
+  {
+    operator_delete(ptr);
+  }
+  (this->m_name).rep = pCVar2;
+  this->m_initialParent = nullptr;
+  return &this->vtable;
+}
+
+// 0x00610070
+C_Actor * __thiscall C_Actor::C_Actor(C_Actor *this,E_ActorType type)
+{
+  (this->m_name).rep = nullptr;
+  this->vtable = (C_Actor_vtbl *)&PTR_008137f0;
+  this->m_temporary = false;
+  this->m_type = type;
+  this->m_frame = nullptr;
+  this->m_activeIndex = -1;
+  this->m_netId = -1;
+  this->m_inventory = nullptr;
+  empty_function_611080();
+  this->m_unknown7C = 0;
+  uVar3 = strlen("Missing actor name!!") + 1;
+  pcVar7 = "Missing actor name!!" + uVar3;
+  uVar4 = uVar3 - 1;
+  pCVar2 = operator_new(uVar3 + 8);
+  if (pCVar2 == nullptr) {
+    pCVar2 = nullptr;
+  }
+  else {
+    pCVar2->refCount = 1;
+    pCVar2->length = uVar4;
+    pcVar7 = "Missing actor name!!";
+    pcVar8 = pCVar2->chars;
+    memcpy(pcVar8, pcVar7, uVar4);
+    pcVar7 += uVar4;
+    pcVar8 += uVar4;
+    uVar4 = 0;
+    pCVar2->chars[uVar3 - 1] = '\0';
+  }
+  ptr = (this->m_name).rep;
+  if ((ptr != nullptr) && (iVar6 = ptr->refCount - 1, ptr->refCount = iVar6, iVar6 == 0))
+  {
+    operator_delete(ptr);
+  }
+  (this->m_name).rep = pCVar2;
+  this->m_initialParent = nullptr;
+  return this;
+}
+
+// 0x00610150
+C_Actor * __thiscall C_Actor::ScalarDeletingDestructor(C_Actor *this,uchar flags)
+{
+  ~C_Actor(this);
+  if ((flags & 1) != 0) {
+    _aligned_free(this);
+  }
+  return this;
+}
+
+// 0x00610170
+void __thiscall C_Actor::~C_Actor(C_Actor *this)
+{
+  this->vtable = (C_Actor_vtbl *)&PTR_008137f0;
+  Done(this);
+  self = this->m_frame;
+  this->m_unknown7C = 0;
+  if (self != nullptr) {
+    (*self->vtable->Release)(self);
+  }
+  FUN_004cff70((int)this);
+  ptr = (this->m_name).rep;
+  if ((ptr != nullptr) && (iVar1 = ptr->refCount - 1, ptr->refCount = iVar1, iVar1 == 0))
+  {
+    operator_delete(ptr);
+  }
+}
+
+// 0x006101f0
+void __thiscall C_Actor::CopyFrom(C_Actor *this,C_Actor *source)
+{
+}
+
+// 0x00610200
+bool __thiscall C_Actor::SetFrame(C_Actor *this,I3D_frame *frame)
+{
+  if (frame == nullptr) {
+    return false;
+  }
+  this->m_frame = frame;
+  frame->m_refCount = frame->m_refCount + 1;
+  (*this->vtable->Init)();
+  return true;
+}
+
+// 0x00610230
+void __thiscall C_Actor::SetNetId(C_Actor *this,int id)
+{
+  this->m_netId = id;
+}
+
+// 0x00610240
+void __thiscall C_Actor::Activate(C_Actor *this,bool server)
+{
+  empty_function_611080();
+  pIVar1 = this->m_frame;
+  if ((pIVar1->m_frameFlags & 0x20) == 0) {
+    I3D_frame::UpdateWMatrixProc(pIVar1);
+  }
+  local_20 = (pIVar1->m_worldMatrix).m[2][0];
+  local_1c = (pIVar1->m_worldMatrix).m[2][1];
+  local_18 = (pIVar1->m_worldMatrix).m[2][2];
+  fVar2 = (pIVar1->m_worldMatrix).m[2][3];
+  fVar4 = local_20 * local_20 + local_1c * local_1c + local_18 * local_18;
+  if (1e-08 <= ABS(fVar4 - 1.0)) {
+    if (1e-08 <= fVar4) {
+      fVar4 = 1.0 / SQRT(fVar4);
+      local_20 *= fVar4;
+      local_1c *= fVar4;
+      local_18 *= fVar4;
+    }
+    else if (local_20 == 0.0) {
+      if (local_18 == 0.0) {
+        if (0.0 <= local_1c) {
+          local_1c = 1.0;
+        }
+        else {
+          local_1c = -1.0;
+        }
+      }
+      else if (0.0 <= local_18) {
+        local_18 = 1.0;
+      }
+      else {
+        local_18 = -1.0;
+      }
+    }
+    else if (0.0 <= local_20) {
+      local_20 = 1.0;
+    }
+    else {
+      local_20 = -1.0;
+    }
+  }
+  pIVar1 = this->m_frame;
+  (this->m_direction).x = local_20;
+  (this->m_direction).y = local_1c;
+  (this->m_direction).z = local_18;
+  (this->m_direction).w = fVar2;
+  if ((pIVar1->m_frameFlags & 0x20) == 0) {
+    I3D_frame::UpdateWMatrixProc(pIVar1);
+  }
+  (this->m_position).x = (pIVar1->m_worldMatrix).m[3][0];
+  (this->m_position).y = (pIVar1->m_worldMatrix).m[3][1];
+  (this->m_position).z = (pIVar1->m_worldMatrix).m[3][2];
+  (this->m_position).w = (pIVar1->m_worldMatrix).m[3][3];
+  if (this->m_temporary == false) {
+    if (this->m_initialParent == nullptr) {
+      pIVar1 = this->m_frame->m_parent;
+      this->m_initialParent = pIVar1;
+      if (pIVar1 != nullptr) {
+        pIVar1->m_refCount = pIVar1->m_refCount + 1;
+      }
+      pIVar1 = this->m_frame;
+      (this->m_initialPos).x = (pIVar1->m_localMatrix).m[3][0];
+      (this->m_initialPos).y = (pIVar1->m_localMatrix).m[3][1];
+      (this->m_initialPos).z = (pIVar1->m_localMatrix).m[3][2];
+      (this->m_initialPos).w = (pIVar1->m_localMatrix).m[3][3];
+      if ((pIVar1->m_frameFlags & 8) == 0) {
+        pIVar1->m_frameFlags = pIVar1->m_frameFlags | 8;
+        S_quat::Make(&pIVar1->m_rot,&pIVar1->m_localMatrix);
+      }
+      (this->m_initialRot).v.x = (pIVar1->m_rot).v.x;
+      (this->m_initialRot).v.y = (pIVar1->m_rot).v.y;
+      (this->m_initialRot).v.z = (pIVar1->m_rot).v.z;
+      (this->m_initialRot).s = (pIVar1->m_rot).s;
+    }
+    if ((server) || (((uint8_t)g_gameRole & 1) == 0)) {
+      C_ActorsModule::SetActorActive((C_ActorsModule *)&g_actorsModule,this,true);
+    }
+  }
+  else if (server) {
+    C_TemporaryActorsList::SetActorActive((C_TemporaryActorsList *)&g_temporaryActors,this,true);
+  }
+  else if (((uint8_t)g_gameRole & 1) == 0) {
+    C_TemporaryActorsList::SetActorActive((C_TemporaryActorsList *)&g_temporaryActors,this,true);
+  }
+  iVar5 = GetGame();
+  pIVar1 = this->m_frame;
+  piVar3 = *(int **)(iVar5 + 0x18);
+  if ((pIVar1->m_frameFlags & 0x20) == 0) {
+    I3D_frame::UpdateWMatrixProc(pIVar1);
+  }
+  (**(code **)(*piVar3 + 0xec))(piVar3,pIVar1,(pIVar1->m_worldMatrix).m + 3);
+}
+
+// 0x00610510
+void __thiscall C_Actor::Deactivate(C_Actor *this,bool server)
+{
+  this->m_unknown7C = 0;
+  empty_function_611080();
+  if (this->m_temporary == false) {
+    if ((server != false) || (((uint8_t)g_gameRole & 1) == 0)) {
+      C_ActorsModule::SetActorActive((C_ActorsModule *)&g_actorsModule,this,false);
+    }
+    (*this->m_frame->vtable->SetOn)(this->m_frame,true);
+    if (this->m_initialParent != nullptr) {
+      format = this->m_initialParent->m_name;
+      if (format == nullptr) {
+        format = &DAT_00867a90;
+      }
+      C_fstr_Construct((C_str *)&server,format);
+      (*this->m_frame->vtable->LinkTo)(this->m_frame,this->m_initialParent,0);
+      (*this->m_frame->vtable->Update)(this->m_frame);
+      (*this->m_initialParent->vtable->Release)(this->m_initialParent);
+      if (this->m_frame->m_parent == nullptr) {
+        puVar4 = (uint8_t *)(unaff_ESI + 8);
+        if (unaff_ESI == 0) {
+          puVar4 = &DAT_00867a90;
+        }
+        iVar2 = GetGame();
+        pIVar3 = (I3D_frame *)
+                 (**(code **)(**(int **)(iVar2 + 0x18) + 0x7c))
+                           (*(int **)(iVar2 + 0x18),puVar4,0xffff);
+        if (pIVar3 != nullptr) {
+          (*this->m_frame->vtable->LinkTo)(this->m_frame,pIVar3,0);
+          (*this->m_frame->vtable->Update)(this->m_frame);
+        }
+      }
+      pIVar3 = this->m_frame;
+      this->m_initialParent = nullptr;
+      uVar1 = pIVar3->m_frameFlags;
+      if (-1 < (char)uVar1) {
+        (pIVar3->m_localMatrix).m[3][0] = (this->m_initialPos).x;
+        (pIVar3->m_localMatrix).m[3][1] = (this->m_initialPos).y;
+        (pIVar3->m_localMatrix).m[3][2] = (this->m_initialPos).z;
+        pIVar3->m_frameFlags = uVar1 & 0xfffffedf | 0x40000000;
+      }
+      pIVar3 = this->m_frame;
+      (pIVar3->m_rot).v.x = (this->m_initialRot).v.x;
+      (pIVar3->m_rot).v.y = (this->m_initialRot).v.y;
+      (pIVar3->m_rot).v.z = (this->m_initialRot).v.z;
+      (pIVar3->m_rot).s = (this->m_initialRot).s;
+      S_quat::Normalize(&pIVar3->m_rot);
+      pIVar3->m_frameFlags = pIVar3->m_frameFlags & 0xfffffecb | 0x40000008;
+      (*this->m_frame->vtable->Update)(this->m_frame);
+      if ((_server != nullptr) &&
+         (_server->refCount = _server->refCount - 1, _server->refCount == 0)) {
+        operator_delete(_server);
+      }
+    }
+  }
+  else {
+    if (server != false) {
+      C_TemporaryActorsList::SetActorActive((C_TemporaryActorsList *)&g_temporaryActors,this,false);
+      return;
+    }
+    if (((uint8_t)g_gameRole & 1) == 0) {
+      C_TemporaryActorsList::SetActorActive((C_TemporaryActorsList *)&g_temporaryActors,this,false);
+      return;
+    }
+  }
+}
+
+// 0x00610710
+void __thiscall C_Actor::Reactivate(C_Actor *this)
+{
+  if (this->m_temporary == false) {
+    iVar1 = this->m_unknown7C;
+    if (((uint8_t)g_gameRole & 2) != 0) {
+      Deactivate(this,false);
+    }
+    if (((uint8_t)g_gameRole & 1) != 0) {
+      Deactivate(this,true);
+      if (((uint8_t)g_gameRole & 1) != 0) {
+        Activate(this,true);
+      }
+    }
+    if (((uint8_t)g_gameRole & 2) != 0) {
+      Activate(this,false);
+    }
+    this->m_unknown7C = iVar1;
+  }
+}
+
+// 0x00610780
+bool __thiscall C_Actor::SaveGame(C_Actor *this,C_chunk *chunk)
+{
+  local_30 = &DAT_00867a90;
+  if (chunk->m_open != false) {
+    local_28 = DAT_0083eb50;
+    local_2c = (I3D_frame *)this;
+    iVar3 = dtaSeek(chunk->m_handle,0,1);
+    chunk->m_stack[chunk->m_depth] = iVar3;
+    chunk->m_depth = chunk->m_depth + 1;
+    iVar3 = dtaWrite(chunk->m_handle,&local_28,6);
+    if (iVar3 == 6) {
+      FUN_007de3c0(this,&chunk->m_open);
+      pIVar2 = this->m_frame->m_parent;
+      if ((pIVar2 != nullptr) && (local_30 = pIVar2->m_name, local_30 == nullptr)) {
+        local_30 = &DAT_00867a90;
+      }
+      uVar4 = 0xffffffff;
+      pcVar5 = local_30;
+      do {
+        if (uVar4 == 0) break;
+        uVar4--;
+        cVar1 = *pcVar5;
+        pcVar5++;
+      } while (cVar1 != '\0');
+      C_chunk::Begin(chunk,0);
+      C_chunk::Write(chunk,local_30,~uVar4);
+      C_chunk::Ascend(chunk);
+      pIVar2 = local_2c;
+      fStack_20 = ((S_vector4 *)&(local_2c->m_bound).center)->x;
+      fStack_1c = ((S_vector4 *)&(local_2c->m_bound).center)->y;
+      fStack_18 = ((S_vector4 *)&(local_2c->m_bound).center)->z;
+      fStack_14 = (local_2c->m_bound).radius;
+      C_chunk::Begin(chunk,1);
+      C_chunk::Write(chunk,&fStack_20,0xc);
+      C_chunk::Ascend(chunk);
+      fStack_20 = (pIVar2->m_worldMatrix).m[0][0];
+      fStack_1c = (pIVar2->m_worldMatrix).m[0][1];
+      fStack_18 = (pIVar2->m_worldMatrix).m[0][2];
+      fStack_14 = (pIVar2->m_worldMatrix).m[0][3];
+      C_chunk::Begin(chunk,2);
+      C_chunk::Write(chunk,&fStack_20,0xc);
+      C_chunk::Ascend(chunk);
+      local_2c = (I3D_frame *)(pIVar2->m_bound).bbox.max.x;
+      if ((local_2c->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(local_2c);
+      }
+      C_chunk::Begin(chunk,3);
+      C_chunk::Write(chunk,(local_2c->m_worldMatrix).m + 3,0xc);
+      C_chunk::Ascend(chunk);
+      local_2c = (I3D_frame *)((uint8_t)((I3D_frame *)(pIVar2->m_bound).bbox.max.x)->m_frameFlags & 1);
+      C_chunk::Begin(chunk,4);
+      if ((chunk->m_open != false) && (chunk->m_writing != false)) {
+        dtaWrite(chunk->m_handle,&local_2c,4);
+      }
+      C_chunk::Ascend(chunk);
+      pIVar2 = (I3D_frame *)(pIVar2->m_bound).bbox.max.x;
+      if ((pIVar2->m_frameFlags & 8) == 0) {
+        pIVar2->m_frameFlags = pIVar2->m_frameFlags | 8;
+        S_quat::Make(&pIVar2->m_rot,&pIVar2->m_localMatrix);
+      }
+      fStack_18 = (pIVar2->m_rot).v.y;
+      fStack_20 = (pIVar2->m_rot).s;
+      fStack_1c = (pIVar2->m_rot).v.x;
+      fStack_14 = (pIVar2->m_rot).v.z;
+      if (chunk->m_open != false) {
+        local_28 = 5;
+        iVar3 = dtaSeek(chunk->m_handle,0,1);
+        chunk->m_stack[chunk->m_depth] = iVar3;
+        chunk->m_depth = chunk->m_depth + 1;
+        dtaWrite(chunk->m_handle,&local_28,6);
+      }
+      C_chunk::Write(chunk,&fStack_20,0x10);
+      C_chunk::Ascend(chunk);
+      if (chunk->m_open != false) {
+        iVar3 = chunk->m_handle;
+        if (chunk->m_writing == false) {
+          position = chunk->m_stack[chunk->m_depth - 1];
+        }
+        else {
+          position = dtaSeek(iVar3,0,1);
+          local_2c = (I3D_frame *)(position - chunk->m_stack[chunk->m_depth - 1]);
+          dtaSeek(chunk->m_handle,chunk->m_stack[chunk->m_depth - 1] + 2,0);
+          dtaWrite(chunk->m_handle,&local_2c,4);
+          iVar3 = chunk->m_handle;
+        }
+        dtaSeek(iVar3,position,0);
+        if (chunk->m_depth != 0) {
+          chunk->m_depth = chunk->m_depth - 1;
+        }
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+// 0x00610a80
+bool __thiscall C_Actor::LoadGame(C_Actor *this,C_chunk *chunk)
+{
+  local_4a0 = CONCAT31(local_4a0._1_3_,1);
+  C_fstr_Construct(&local_4a4,&DAT_00867a90);
+  if ((chunk->m_open != false) && (iVar3 = dtaRead(chunk->m_handle,&local_494,6), iVar3 == 6)) {
+    iVar3 = dtaSeek(chunk->m_handle,0,1);
+    chunk->m_stack[chunk->m_depth] = iVar3 - 6 + CONCAT22(uStack_490,uStack_492);
+    iVar3 = chunk->m_depth;
+    chunk->m_depth = iVar3 + 1;
+    uStack_48c = CONCAT22(uStack_492,local_494);
+    if (local_494 == _DAT_0083eb50) {
+      FUN_007de5a0((int)this,&chunk->m_open);
+      while ((((chunk->m_open != false && (chunk->m_depth != 0)) &&
+              (iVar3 = dtaSeek(chunk->m_handle,0,1), iVar3 != -1)) &&
+             (pIStack_49c = (I3D_frame *)(chunk->m_stack[chunk->m_depth - 1] - iVar3),
+             pIStack_49c != nullptr))) {
+        if ((chunk->m_open != false) && (iVar3 = dtaRead(chunk->m_handle,&uStack_488,6), iVar3 == 6)
+           ) {
+          iVar3 = dtaSeek(chunk->m_handle,0,1);
+          chunk->m_stack[chunk->m_depth] = iVar3 - 6 + CONCAT22(uStack_484,uStack_486);
+          uStack_48c = CONCAT22(uStack_486,uStack_488);
+          chunk->m_depth = chunk->m_depth + 1;
+        }
+        switch(uStack_48c & 0xffff) {
+        case 0:
+          iVar3 = chunk->m_stack[chunk->m_depth - 1];
+          iVar4 = dtaSeek(chunk->m_handle,0,1);
+          pIStack_49c = (I3D_frame *)(iVar3 - iVar4);
+          pIStack_498 = (I3D_frame *)0x3e7;
+          ppIVar5 = &pIStack_498;
+          if ((int)pIStack_49c < 1000) {
+            ppIVar5 = &pIStack_49c;
+          }
+          C_chunk::Read(chunk,acStack_408,(int)*ppIVar5);
+          C_str::operator_assign(&local_4a4,acStack_408);
+          C_chunk::Ascend(chunk);
+          if ((local_4a4.rep == nullptr) ||
+             (pcVar1 = (local_4a4.rep)->chars, pcVar1 == &DAT_00867a90)) {
+            (*this->m_frame->vtable->LinkTo)(this->m_frame,nullptr,0);
+          }
+          else {
+            iVar3 = GetGame();
+            pIStack_49c = this->m_frame;
+            pIStack_498 = (I3D_frame *)pIStack_49c->vtable;
+            uVar6 = (**(code **)(**(int **)(iVar3 + 0x18) + 0x7c))
+                              (*(int **)(iVar3 + 0x18),pcVar1,0xffff,0);
+            (**(code **)((int)&local_4a4.rep[6].refCount + 2))(this,uVar6);
+          }
+          break;
+        case 1:
+          C_chunk::Read(chunk,&fStack_440,0xc);
+          C_chunk::Ascend(chunk);
+          (this->m_position).x = fStack_440;
+          (this->m_position).y = fStack_43c;
+          (this->m_position).z = fStack_438;
+          (this->m_position).w = fStack_434;
+          break;
+        case 2:
+          C_chunk::Read(chunk,&fStack_420,0xc);
+          C_chunk::Ascend(chunk);
+          (this->m_direction).x = fStack_420;
+          (this->m_direction).y = fStack_41c;
+          (this->m_direction).z = fStack_418;
+          (this->m_direction).w = fStack_414;
+          break;
+        case 3:
+          C_chunk::Read(chunk,&fStack_470,0xc);
+          C_chunk::Ascend(chunk);
+          SStack_460.x = fStack_470;
+          SStack_460.z = fStack_468;
+          SStack_460.y = fStack_46c;
+          (*this->m_frame->vtable->SetPos)(this->m_frame,&SStack_460);
+          break;
+        case 4:
+          C_chunk::Read(chunk,&local_494,4);
+          C_chunk::Ascend(chunk);
+          local_4a0 = CONCAT31(local_4a0._1_3_,CONCAT22(uStack_492,local_494) != 0);
+          break;
+        case 5:
+          C_chunk::Read(chunk,&uStack_450,0x10);
+          uStack_480 = uStack_44c;
+          C_chunk::Ascend(chunk);
+          pIVar2 = this->m_frame;
+          uStack_430 = uStack_480;
+          S_quat::Copy(&pIVar2->m_rot,&uStack_430);
+          S_quat::Normalize(&pIVar2->m_rot);
+          pIVar2->m_frameFlags = pIVar2->m_frameFlags & 0xfffffecb | 0x40000008;
+          break;
+        default:
+          C_chunk::Ascend(chunk);
+        }
+      }
+      (*this->m_frame->vtable->SetOn)(this->m_frame,SUB41(local_4a0,0));
+      (*this->m_frame->vtable->Update)(this->m_frame);
+      C_chunk::Ascend(chunk);
+      if (unaff_EDI != nullptr) {
+        C_str::ReleaseRep(unaff_EDI);
+      }
+      return true;
+    }
+    if (chunk->m_open != false) {
+      if (chunk->m_writing == false) {
+        iVar4 = chunk->m_stack[iVar3];
+        iVar3 = chunk->m_handle;
+      }
+      else {
+        iVar4 = dtaSeek(chunk->m_handle,0,1);
+        local_4a0 = iVar4 - chunk->m_stack[chunk->m_depth - 1];
+        dtaSeek(chunk->m_handle,chunk->m_stack[chunk->m_depth - 1] + 2,0);
+        dtaWrite(chunk->m_handle,&local_4a0,4);
+        iVar3 = chunk->m_handle;
+      }
+      dtaSeek(iVar3,iVar4,0);
+      if (chunk->m_depth != 0) {
+        chunk->m_depth = chunk->m_depth - 1;
+      }
+    }
+  }
+  if (local_4a4.rep != nullptr) {
+    C_str::ReleaseRep((C_str *)local_4a4.rep);
+  }
+  return false;
+}
+
+// 0x00610f80
+void __thiscall C_Actor::Init(C_Actor *this)
+{
+  EVar1 = this->m_type;
+  this->m_inventory = nullptr;
+  this->m_initialized = true;
+  if ((((EVar1 == ACTOR_CAR) || (EVar1 == ACTOR_STATIC_WEAPON)) || (EVar1 == ACTOR_SUBMARINE)) ||
+     (EVar1 == ACTOR_JUNKERS88)) {
+    pvVar2 = operator_new(4);
+    this->m_inventory = pvVar2;
+    this_00 = operator_new(0x20);
+    if (this_00 == nullptr) {
+      puVar3 = nullptr;
+    }
+    else {
+      puVar3 = C_auto_008171a0::FUN_007d7470(this_00,2);
+    }
+    *(uint32_t **)this->m_inventory = puVar3;
+    (**(code **)(**(int **)this->m_inventory + 4))(0x447a0000);
+  }
+}
+
+// 0x00611020
+void __thiscall C_Actor::Done(C_Actor *this)
+{
+  if (this->m_inventory != nullptr) {
+    puVar1 = *(uint32_t **)this->m_inventory;
+    if (puVar1 != nullptr) {
+      (**(code **)*puVar1)(1);
+    }
+    operator_delete(this->m_inventory);
+    this->m_inventory = nullptr;
+  }
+}
+
+// 0x00611050
+void __thiscall C_Actor::Update(C_Actor *this,int frameTime)
+{
+}
+
+// 0x00611060
+void __thiscall C_Actor::Tick(C_Actor *this,int timeDelta)
+{
+}
+
+// 0x00611070
+bool __thiscall
+C_Actor::OnCollisionEx(C_Actor *this,C_Actor *other,int a2,int a3,int a4,int a5,int a6,int a7)
+{
+  return false;
+}
+
+// 0x00611080
+void empty_function_611080(void)
+{
+}
+
+// 0x00611090
+int __cdecl GetFrameMaterialId(I3D_frame *frame)
+{
+  if (frame != nullptr) {
+    pcVar2 = frame->m_userProps;
+    if (pcVar2 == nullptr) {
+      pcVar2 = &DAT_00867a90;
+    }
+    pcVar2 = strstr(pcVar2,"matid");
+    if (pcVar2 != nullptr) {
+      uVar4 = 0xffffffff;
+      pcVar5 = "matid";
+      do {
+        if (uVar4 == 0) break;
+        uVar4--;
+        cVar1 = *pcVar5;
+        pcVar5++;
+      } while (cVar1 != '\0');
+      iVar3 = atoi(pcVar2 + (~uVar4 - 1));
+      return iVar3;
+    }
+  }
+  return -1;
+}
+
+// 0x00611140
+int __thiscall C_Actor::GetSeatAmmoCount(C_Actor *this,int seat)
+{
+  bVar1 = (*this->vtable->HasSeatWeapon)(seat);
+  if (bVar1) {
+    piVar2 = (*this->vtable->GetSeatWeapon)(seat);
+    iVar3 = (**(code **)(*piVar2 + 0x18))();
+    iVar4 = (**(code **)(**(int **)this->m_inventory + 0x44))();
+    do {
+      if (iVar4 == 0) {
+        return 0;
+      }
+      iVar4--;
+      iVar5 = (**(code **)(**(int **)this->m_inventory + 0x3c))();
+      iVar5 = *(int *)(iVar5 + iVar4 * 4);
+      piVar2 = *(int **)(iVar5 + 4);
+    } while (((piVar2 == nullptr) || (*(int *)(iVar5 + 8) - (int)piVar2 >> 2 == 0)) ||
+            (*(int *)(*piVar2 + 0xc) != iVar3));
+    if (*(int *)(iVar5 + 4) != 0) {
+      return *(int *)(iVar5 + 8) - *(int *)(iVar5 + 4) >> 2;
+    }
+  }
+  return 0;
+}
+
+// 0x006111d0
+void empty_function_6111e0(void)
+{
+}
+
+// 0x006111e0
+void empty_function_6111e0(void)
+{
+}
+
+// 0x006111f0
+I3D_bbox * __fastcall ComputeHierarchyBox(I3D_frame *frame)
+{
+  uVar1 = (*frame->vtable->GetVisualType)(frame);
+  if ((((uVar1 == 0x5f4a424f) || (uVar1 == 0x50414d4c)) || (uVar1 == 0x4d474e53)) ||
+     (uVar1 == 0x524d4d53)) {
+    if (((uint32_t)frame[1].m_rot.v.y & 0x20000) == 0) {
+      (*frame->vtable[1].SetName)(frame,unaff_ESI);
+    }
+    pfVar3 = frame[1].m_localMatrix.m[1];
+    pfVar4 = (float *)&DAT_008aca40;
+    for (iVar2 = 8; pfVar3 = pfVar3 + 1, iVar2 != 0; iVar2 = iVar2 - 1) {
+      *pfVar4 = *pfVar3;
+      pfVar4++;
+    }
+  }
+  else {
+    _DAT_008aca48 = 0x5a0e1bca;
+    DAT_008aca44 = 0x5a0e1bca;
+    DAT_008aca40 = 0x5a0e1bca;
+    _DAT_008aca58 = 0xda0e1bca;
+    _DAT_008aca54 = 0xda0e1bca;
+    _DAT_008aca50 = 0xda0e1bca;
+  }
+  for (frame_00 = (I3D_frame *)frame[1].vtable; frame_00 != nullptr;
+      frame_00 = *(I3D_frame **)frame_00[1]._pad_0004) {
+    AddToHierarchyBox(frame_00,(S_matrix *)&DAT_008137b0);
+  }
+  return (I3D_bbox *)&DAT_008aca40;
+}
+
+// 0x006112b0
+void __fastcall AddToHierarchyBox(I3D_frame *frame,S_matrix *parentMatrix)
+{
+  FUN_004c8140((int)frame);
+  S_matrix::OperatorMul(&frame->m_localMatrix,(S_matrix *)local_50,parentMatrix);
+  uVar4 = (*frame->vtable->GetVisualType)(frame);
+  if ((((uVar4 == 0x5f4a424f) || (uVar4 == 0x50414d4c)) || (uVar4 == 0x4d474e53)) ||
+     (uVar4 == 0x524d4d53)) {
+    if (((uint32_t)frame[1].m_rot.v.y & 0x20000) == 0) {
+      (*frame->vtable[1].SetName)(frame,unaff_EDI);
+    }
+    fVar2 = frame[1].m_localMatrix.m[1][1];
+    fVar3 = frame[1].m_localMatrix.m[2][1];
+    pfVar1 = frame[1].m_localMatrix.m[1] + 1;
+    if (fVar2 < fVar3 != (fVar2 == fVar3)) {
+      SStack_6c.x = *pfVar1;
+      SStack_6c.y = frame[1].m_localMatrix.m[1][2];
+      SStack_6c.z = frame[1].m_localMatrix.m[1][3];
+      pSVar5 = S_vector::OperatorMul(&SStack_6c,&SStack_5c,(S_matrix *)(local_50 + 4));
+      if (pSVar5->x < DAT_008aca40) {
+        DAT_008aca40 = pSVar5->x;
+      }
+      if (_DAT_008aca50 < pSVar5->x) {
+        _DAT_008aca50 = pSVar5->x;
+      }
+      if (pSVar5->y < DAT_008aca44) {
+        DAT_008aca44 = pSVar5->y;
+      }
+      if (_DAT_008aca54 < pSVar5->y) {
+        _DAT_008aca54 = pSVar5->y;
+      }
+      if (pSVar5->z < _DAT_008aca48) {
+        _DAT_008aca48 = pSVar5->z;
+      }
+      if (_DAT_008aca58 < pSVar5->z) {
+        _DAT_008aca58 = pSVar5->z;
+      }
+      SStack_6c.x = frame[1].m_localMatrix.m[2][1];
+      pSVar5 = S_vector::OperatorMul(&SStack_6c,&SStack_5c,(S_matrix *)(local_50 + 4));
+      if (pSVar5->x < DAT_008aca40) {
+        DAT_008aca40 = pSVar5->x;
+      }
+      if (_DAT_008aca50 < pSVar5->x) {
+        _DAT_008aca50 = pSVar5->x;
+      }
+      if (pSVar5->y < DAT_008aca44) {
+        DAT_008aca44 = pSVar5->y;
+      }
+      if (_DAT_008aca54 < pSVar5->y) {
+        _DAT_008aca54 = pSVar5->y;
+      }
+      if (pSVar5->z < _DAT_008aca48) {
+        _DAT_008aca48 = pSVar5->z;
+      }
+      if (_DAT_008aca58 < pSVar5->z) {
+        _DAT_008aca58 = pSVar5->z;
+      }
+      SStack_6c.y = frame[1].m_localMatrix.m[2][2];
+      pSVar5 = S_vector::OperatorMul(&SStack_6c,&SStack_5c,(S_matrix *)(local_50 + 4));
+      S_bbox__Expand(&DAT_008aca40,&pSVar5->x);
+      SStack_6c.x = *pfVar1;
+      pSVar5 = S_vector::OperatorMul(&SStack_6c,&SStack_5c,(S_matrix *)(local_50 + 4));
+      S_bbox__Expand(&DAT_008aca40,&pSVar5->x);
+      SStack_6c.z = frame[1].m_localMatrix.m[2][3];
+      pSVar5 = S_vector::OperatorMul(&SStack_6c,&SStack_5c,(S_matrix *)(local_50 + 4));
+      S_bbox__Expand(&DAT_008aca40,&pSVar5->x);
+      SStack_6c.x = frame[1].m_localMatrix.m[2][1];
+      pSVar5 = S_vector::OperatorMul(&SStack_6c,&SStack_5c,(S_matrix *)(local_50 + 4));
+      S_bbox__Expand(&DAT_008aca40,&pSVar5->x);
+      SStack_6c.y = frame[1].m_localMatrix.m[1][2];
+      pSVar5 = S_vector::OperatorMul(&SStack_6c,&SStack_5c,(S_matrix *)(local_50 + 4));
+      S_bbox__Expand(&DAT_008aca40,&pSVar5->x);
+      SStack_6c.x = *pfVar1;
+      pSVar5 = S_vector::OperatorMul(&SStack_6c,&SStack_5c,(S_matrix *)(local_50 + 4));
+      S_bbox__Expand(&DAT_008aca40,&pSVar5->x);
+    }
+  }
+  for (frame_00 = (I3D_frame *)frame[1].vtable; frame_00 != nullptr;
+      frame_00 = *(I3D_frame **)frame_00[1]._pad_0004) {
+    AddToHierarchyBox(frame_00,(S_matrix *)(local_50 + 4));
+  }
+}
+
+// 0x006115b0
+void __thiscall C_Actor::GetBoxCorners(C_Actor *this,S_vector *corners)
+{
+  local_54.m[0][0] = (float)this;
+  (*this->m_frame->vtable->Update)(this->m_frame);
+  pIVar2 = ComputeHierarchyBox(this->m_frame);
+  iVar5 = 0;
+  pSVar3 = corners;
+  do {
+    iVar4 = 0;
+    do {
+      if (iVar5 == 0) {
+        fVar1 = (pIVar2->max).x;
+      }
+      else {
+        fVar1 = (pIVar2->min).x;
+      }
+      pSVar3->x = fVar1;
+      if (iVar4 == 0) {
+        fVar1 = (pIVar2->max).y;
+      }
+      else {
+        fVar1 = (pIVar2->min).y;
+      }
+      pSVar3->y = fVar1;
+      pSVar3->z = (pIVar2->min).z;
+      if (iVar5 == 0) {
+        fVar1 = (pIVar2->max).x;
+      }
+      else {
+        fVar1 = (pIVar2->min).x;
+      }
+      pSVar3[1].y = fVar1;
+      if (iVar4 == 0) {
+        fVar1 = (pIVar2->max).y;
+      }
+      else {
+        fVar1 = (pIVar2->min).y;
+      }
+      pSVar3[1].z = fVar1;
+      pSVar3[2].x = (pIVar2->max).z;
+      pSVar3 = (S_vector *)&pSVar3[2].z;
+      iVar4++;
+    } while (iVar4 < 2);
+    iVar5++;
+  } while (iVar5 < 2);
+  this_00 = *(I3D_frame **)(iStack_58 + 0x20);
+  if ((this_00->m_frameFlags & 0x20) == 0) {
+    I3D_frame::UpdateWMatrixProc(this_00);
+  }
+  pSVar6 = &this_00->m_worldMatrix;
+  pfVar7 = (float *)&local_54;
+  for (iVar5 = 0x10; iVar5 != 0; iVar5 = iVar5 - 1) {
+    *pfVar7 = pSVar6->m[0][0];
+    pSVar6 = (S_matrix *)(pSVar6->m[0] + 1);
+    pfVar7++;
+  }
+  iVar5 = 8;
+  do {
+    S_vector::OperatorMulAssign(corners,&local_54);
+    corners = (S_vector *)&corners[1].y;
+    iVar5--;
+  } while (iVar5 != 0);
+}
+
+// 0x00611680
+void FUN_00611680(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x006116b0
+void FUN_006116b0(void)
+{
+  FUN_006116c0();
+  FUN_006116d0();
+}
+
+// 0x006116c0
+void FUN_006116c0(void)
+{
+  FUN_007e25ef();
+}
+
+// 0x006116d0
+void FUN_006116d0(void)
+{
+  atexit(FUN_006116e0);
+}
+
+// 0x006116e0
+void FUN_006116e0(void)
+{
+  FUN_007e276e();
+}
+
+// 0x006116f0
+void FUN_006116f0(void)
+{
+  FUN_00611700();
+  FUN_00611710();
+}
+
+// 0x00611700
+void FUN_00611700(void)
+{
+  FUN_007e35d3();
+}
+
+// 0x00611710
+void FUN_00611710(void)
+{
+  atexit(FUN_00611720);
+}
+
+// 0x00611720
+void FUN_00611720(void)
+{
+  FUN_007e3754();
+}
+
+// 0x00611730
+void thunk_FUN_00611740(void)
+{
+  _DAT_008aca60 = &PTR_008138d0;
+  g_actorCreators[10] = (C_ActorCreator *)&DAT_008aca60;
+}
+
+// 0x00611740
+void FUN_00611740(void)
+{
+  _DAT_008aca60 = &PTR_008138d0;
+  g_actorCreators[10] = (C_ActorCreator *)&DAT_008aca60;
+}
+
+// 0x00611760
+uint32_t * __thiscall C_Actor::FUN_00611760(C_Actor *this)
+{
+  this_00 = _aligned_malloc(0xb0,0x10);
+  if (this_00 != nullptr) {
+    puVar1 = C_SpawnPoint::FUN_006118d0(this_00);
+    return puVar1;
+  }
+  return nullptr;
+}
+
+// 0x006117c0
+char * __thiscall C_Actor::FUN_006117c0(C_Actor *this)
+{
+  return "SpawnPoint";
+}
+
+// 0x006117d0
+void __thiscall C_Actor::FUN_006117d0(C_Actor *this,uint32_t *param_1)
+{
+  if (param_1 != nullptr) {
+                    // WARNING: Could not recover jumptable at 0x006117e2. Too many branches
+                    // WARNING: Treating indirect jump as call
+    (**(code **)*param_1)();
+    return;
+  }
+}
+
+// 0x006117f0
+void __thiscall C_SpawnPoint::FUN_006117f0(C_SpawnPoint *this)
+{
+  if ((this->m_09c == '\0') && (*(int *)this->_pad_00a8 != 0)) {
+    if ((this->m_020->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(this->m_020);
+    }
+    if ((this->m_020->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(this->m_020);
+    }
+    if (((this->m_020 != nullptr) && (iVar1 = *(int *)((int)this->m_020 + 0xec), iVar1 != 0)) &&
+       (this_00 = *(C_Script **)(iVar1 + 4), this_00 != nullptr)) {
+      C_Script::OnUse(this_00);
+    }
+  }
+}
+
+// 0x006118b0
+uint8_t __thiscall C_SpawnPoint::FUN_006118b0(C_SpawnPoint *this)
+{
+  return 1;
+}
+
+// 0x006118c0
+uint8_t __thiscall C_SpawnPoint::FUN_006118c0(C_SpawnPoint *this)
+{
+  return 1;
+}
+
+// 0x006118d0
+uint32_t * __thiscall C_SpawnPoint::FUN_006118d0(C_SpawnPoint *this)
+{
+  C_Actor::C_Actor((C_Actor *)this,ACTOR_SPAWN_POINT);
+  this->vtable = (C_SpawnPoint_vtbl *)&PTR_008138e0;
+  this->m_090 = 0;
+  this->m_094 = 0;
+  this->m_098 = 0;
+  this->m_0a0 = 0;
+  this->m_0a4 = 0;
+  this->_pad_00a8[0] = '\0';
+  this->_pad_00a8[1] = '\0';
+  this->_pad_00a8[2] = '\0';
+  this->_pad_00a8[3] = '\0';
+  this->m_09c = '\x01';
+  return &this->vtable;
+}
+
+// 0x00611920
+uint32_t * __thiscall C_SpawnPoint::FUN_00611920(C_SpawnPoint *this,uint8_t param_1)
+{
+  FUN_00611940(this);
+  if ((param_1 & 1) != 0) {
+    _aligned_free(this);
+  }
+  return &this->vtable;
+}
+
+// 0x00611940
+void __thiscall C_SpawnPoint::FUN_00611940(C_SpawnPoint *this)
+{
+  this->vtable = (C_SpawnPoint_vtbl *)&PTR_008138e0;
+  C_Actor::~C_Actor((C_Actor *)this);
+}
+
+// 0x00611950
+bool __thiscall C_SpawnPoint::C_Actor::SetFrame(C_SpawnPoint *this,I3D_frame *frame)
+{
+  bVar1 = C_Actor::SetFrame((C_Actor *)this,frame);
+  return bVar1;
+}
+
+// 0x00611960
+void __thiscall C_SpawnPoint::C_Actor::CopyFrom(C_SpawnPoint *this,C_Actor *source)
+{
+  C_Actor::CopyFrom((C_Actor *)this,source);
+}
+
+// 0x00611970
+void __thiscall C_SpawnPoint::FUN_00611970(C_SpawnPoint *this,char param_1)
+{
+  C_Actor::Activate((C_Actor *)this,(bool)param_1);
+  this->m_09c = '\x01';
+}
+

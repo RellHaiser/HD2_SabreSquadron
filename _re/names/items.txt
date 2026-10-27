@@ -1,0 +1,185 @@
+# Items module and the item definition table loaded from Tables\items.sav
+# (types in _re/types/30_items.spec; record layout notes there too)
+
+# --- C_ItemsModule (g_itemsModule, module id 3 "Items") ---
+007d7ad0 InitItemsModule
+007d7ae0 ConstructItemsModule
+007d7b00 RegisterItemsModuleDtor
+007d7b10 DestroyItemsModule
+007dce90 C_ItemsModule::C_ItemsModule | C_ItemsModule * __thiscall C_ItemsModule(C_ItemsModule *this, int id, char *name)
+007dcfd0 C_ItemsModule::~C_ItemsModule
+007dcfb0 C_ItemsModule::ScalarDeletingDestructor | C_ItemsModule * __thiscall ScalarDeletingDestructor(C_ItemsModule *this, unsigned char flags)
+007dd180 C_ItemsModule::Init
+007dd260 C_ItemsModule::Done
+007dd7f0 C_ItemsModule::UpdateRealTime
+007dd810 C_ItemsModule::Update
+007dd300 C_ItemsModule::LoadMissionData
+007dd410 C_ItemsModule::FreeMissionData | void __thiscall FreeMissionData(C_ItemsModule *this, bool server)
+007dd470 C_ItemsModule::StartMission
+007dd6a0 C_ItemsModule::StopMission
+007ddbb0 C_ItemsModule::RestartMission
+007ddef0 C_ItemsModule::SaveGame
+007de110 C_ItemsModule::LoadGame
+007dc940 C_ItemsModule::EnsureItemsLoaded | void __thiscall EnsureItemsLoaded(C_ItemsModule *this)
+007dc960 C_ItemsModule::LoadItemsTable | void __thiscall LoadItemsTable(C_ItemsModule *this)
+# Inventory placement checks. Return 1 = ok; -5 too heavy, -6 no space, -7 too few slots,
+# -8 wrong item kind for the slot, -2 no such slot. Slots: 0 head (headgear), 1, 2 long gun,
+# 3 hands, 4 uniform, 5 backpack, 6 backpack contents.
+007db780 C_ItemsModule::CanPutItemInSlot | int __thiscall CanPutItemInSlot(C_ItemsModule *this, C_Actor *actor, int container, int itemId)
+007db5d0 C_ItemsModule::CanAddItemToInventory | int __thiscall CanAddItemToInventory(C_ItemsModule *this, C_Actor *actor, int itemId)
+
+# Releases an I3D frame and, recursively, its children
+007dc8c0 ReleaseFrameTree | void __fastcall ReleaseFrameTree(I3D_frame *frame)
+
+# --- C_ItemDef: base of the 500 table entries ---
+# Save(ioSize, buf): *ioSize == 0 -> only report the stream size. Load(outSize, data):
+# *outSize = bytes consumed so far (derived classes read their fields after it).
+007df7e0 C_ItemDef::C_ItemDef | void __thiscall C_ItemDef(C_ItemDef *this, E_ItemRecordType recordType, int id)
+007df890 C_ItemDef::~C_ItemDef
+007df870 C_ItemDef::ScalarDeletingDestructor | C_ItemDef * __thiscall ScalarDeletingDestructor(C_ItemDef *this, unsigned char flags)
+007dff10 C_ItemDef::Save | void __thiscall Save(C_ItemDef *this, int *ioSize, void *buffer)
+007e0150 C_ItemDef::Load | void __thiscall Load(C_ItemDef *this, int *outSize, void *data)
+007df830 C_ItemDef::GetAmmoAmount | float __thiscall GetAmmoAmount(C_ItemDef *this)
+007df840 C_ItemDef::GetAmmoItemId | int __thiscall GetAmmoItemId(C_ItemDef *this)
+007df850 C_ItemDef::GetHeadgearItemId | int __thiscall GetHeadgearItemId(C_ItemDef *this)
+007df860 C_ItemDef::GetUnknown64 | int __thiscall GetUnknown64(C_ItemDef *this)
+007e5e95 _purecall | int __cdecl _purecall(void)
+
+# --- C_AmmoItemDef (record type 0) ---
+007e0850 C_AmmoItemDef::C_AmmoItemDef | C_AmmoItemDef * __thiscall C_AmmoItemDef(C_AmmoItemDef *this, int id)
+007e08c0 C_AmmoItemDef::~C_AmmoItemDef
+007e08a0 C_AmmoItemDef::ScalarDeletingDestructor | C_AmmoItemDef * __thiscall ScalarDeletingDestructor(C_AmmoItemDef *this, unsigned char flags)
+007e08d0 C_AmmoItemDef::Save | void __thiscall Save(C_AmmoItemDef *this, int *ioSize, void *buffer)
+007e0910 C_AmmoItemDef::Load | void __thiscall Load(C_AmmoItemDef *this, int *outSize, void *data)
+007e0880 C_AmmoItemDef::GetCarryMode | int __thiscall GetCarryMode(C_AmmoItemDef *this)
+007e0890 C_AmmoItemDef::GetBehaviour | int __thiscall GetBehaviour(C_AmmoItemDef *this)
+007e0870 C_AmmoItemDef::GetAmmoAmount | float __thiscall GetAmmoAmount(C_AmmoItemDef *this)
+
+# --- C_AnimatedItemDef (record type 1: weapons, mines, grenades) ---
+007e0940 C_AnimatedItemDef::C_AnimatedItemDef | C_AnimatedItemDef * __thiscall C_AnimatedItemDef(C_AnimatedItemDef *this, int id)
+007e09c0 C_AnimatedItemDef::~C_AnimatedItemDef
+007e09a0 C_AnimatedItemDef::ScalarDeletingDestructor | C_AnimatedItemDef * __thiscall ScalarDeletingDestructor(C_AnimatedItemDef *this, unsigned char flags)
+007e0a20 C_AnimatedItemDef::Save | void __thiscall Save(C_AnimatedItemDef *this, int *ioSize, void *buffer)
+007e0a80 C_AnimatedItemDef::Load | void __thiscall Load(C_AnimatedItemDef *this, int *outSize, void *data)
+007e0980 C_AnimatedItemDef::GetCarryMode | int __thiscall GetCarryMode(C_AnimatedItemDef *this)
+007e0990 C_AnimatedItemDef::GetBehaviour | int __thiscall GetBehaviour(C_AnimatedItemDef *this)
+007e0970 C_AnimatedItemDef::GetAmmoItemId | int __thiscall GetAmmoItemId(C_AnimatedItemDef *this)
+
+# --- C_StaticItemDef (record type 2: equipment) ---
+007e0ac0 C_StaticItemDef::C_StaticItemDef | C_StaticItemDef * __thiscall C_StaticItemDef(C_StaticItemDef *this, int id)
+007e0b40 C_StaticItemDef::~C_StaticItemDef
+007e0b20 C_StaticItemDef::ScalarDeletingDestructor | C_StaticItemDef * __thiscall ScalarDeletingDestructor(C_StaticItemDef *this, unsigned char flags)
+007e0b50 C_StaticItemDef::Save | void __thiscall Save(C_StaticItemDef *this, int *ioSize, void *buffer)
+007e0bb0 C_StaticItemDef::Load | void __thiscall Load(C_StaticItemDef *this, int *outSize, void *data)
+007e0ae0 C_StaticItemDef::GetCarryMode | int __thiscall GetCarryMode(C_StaticItemDef *this)
+007e0af0 C_StaticItemDef::GetBehaviour | int __thiscall GetBehaviour(C_StaticItemDef *this)
+007e0b00 C_StaticItemDef::GetHeadgearItemId | int __thiscall GetHeadgearItemId(C_StaticItemDef *this)
+007e0b10 C_StaticItemDef::GetUnknown64 | int __thiscall GetUnknown64(C_StaticItemDef *this)
+
+# --- item components (C_ItemDef::m_component / m_secondaryComponent) ---
+# Save(ioSize, buf): *ioSize == 0 -> report the stream size, else copy *ioSize bytes.
+007e06b0 C_ItemComponent::GetUnknownVf00 | int __thiscall GetUnknownVf00(C_ItemComponent *this)
+007e06c0 C_ItemComponent::GetProjectileType | int __thiscall GetProjectileType(C_ItemComponent *this)
+007e06d0 C_WeaponComp::GetAimedDispersion | float __thiscall GetAimedDispersion(C_WeaponComp *this)
+007e06e0 C_WeaponComp::GetMuzzleVelocity | float __thiscall GetMuzzleVelocity(C_WeaponComp *this)
+007e06f0 C_WeaponComp::GetShotSound | int __thiscall GetShotSound(C_WeaponComp *this)
+007e0700 C_WeaponComp::GetReloadSound | int __thiscall GetReloadSound(C_WeaponComp *this)
+007e0710 C_WeaponComp::GetReloadTimeMs | int __thiscall GetReloadTimeMs(C_WeaponComp *this)
+007e0720 C_WeaponComp::GetLastShotSound | int __thiscall GetLastShotSound(C_WeaponComp *this)
+007e0730 C_WeaponComp::GetBoltSound | int __thiscall GetBoltSound(C_WeaponComp *this)
+007e0740 C_WeaponComp::GetUnknownVf2C | float __thiscall GetUnknownVf2C(C_WeaponComp *this)
+007e0750 C_WeaponComp::CanReload | bool __thiscall CanReload(C_WeaponComp *this)
+
+007df330 C_MeleeComp::Save | void __thiscall Save(C_MeleeComp *this, unsigned int *ioSize, void *buffer)
+007df370 C_MeleeComp::Load | void __thiscall Load(C_MeleeComp *this, unsigned int size, void *data)
+
+007df3a0 C_MineComp::Save | void __thiscall Save(C_MineComp *this, unsigned int *ioSize, void *buffer)
+007df3e0 C_MineComp::Load | void __thiscall Load(C_MineComp *this, unsigned int size, void *data)
+007e0760 C_MineComp::GetUnknownVf00 | int __thiscall GetUnknownVf00(C_MineComp *this)
+
+# stream = 0x60 bytes of fields + two 20-char strings that are written empty and never read
+007df410 C_ProjectileWeaponComp::Save | void __thiscall Save(C_ProjectileWeaponComp *this, int *ioSize, void *buffer)
+007df490 C_ProjectileWeaponComp::Load | void __thiscall Load(C_ProjectileWeaponComp *this, unsigned int size, void *data)
+007e07b0 C_ProjectileWeaponComp::GetProjectileType | int __thiscall GetProjectileType(C_ProjectileWeaponComp *this)
+007e0770 C_ProjectileWeaponComp::GetAimedDispersion | float __thiscall GetAimedDispersion(C_ProjectileWeaponComp *this)
+007e0780 C_ProjectileWeaponComp::GetMuzzleVelocity | float __thiscall GetMuzzleVelocity(C_ProjectileWeaponComp *this)
+007e0790 C_ProjectileWeaponComp::GetReloadSound | int __thiscall GetReloadSound(C_ProjectileWeaponComp *this)
+007e07a0 C_ProjectileWeaponComp::GetReloadTimeMs | int __thiscall GetReloadTimeMs(C_ProjectileWeaponComp *this)
+007e07c0 C_ProjectileWeaponComp::GetUnknownVf2C | float __thiscall GetUnknownVf2C(C_ProjectileWeaponComp *this)
+
+# stream = 0x58 bytes of fields + two empty 20-char strings
+007df4b0 C_FirearmComp::Save | void __thiscall Save(C_FirearmComp *this, int *ioSize, void *buffer)
+007df540 C_FirearmComp::Load | void __thiscall Load(C_FirearmComp *this, unsigned int size, void *data)
+007e0810 C_FirearmComp::GetProjectileType | int __thiscall GetProjectileType(C_FirearmComp *this)
+007e07d0 C_FirearmComp::GetAimedDispersion | float __thiscall GetAimedDispersion(C_FirearmComp *this)
+007e07e0 C_FirearmComp::GetMuzzleVelocity | float __thiscall GetMuzzleVelocity(C_FirearmComp *this)
+007e07f0 C_FirearmComp::GetReloadSound | int __thiscall GetReloadSound(C_FirearmComp *this)
+007e0800 C_FirearmComp::GetReloadTimeMs | int __thiscall GetReloadTimeMs(C_FirearmComp *this)
+007e0820 C_FirearmComp::GetLastShotSound | int __thiscall GetLastShotSound(C_FirearmComp *this)
+007e0830 C_FirearmComp::GetBoltSound | int __thiscall GetBoltSound(C_FirearmComp *this)
+007e0840 C_FirearmComp::GetUnknownVf2C | float __thiscall GetUnknownVf2C(C_FirearmComp *this)
+
+007df560 C_ScopeComp::Save | void __thiscall Save(C_ScopeComp *this, unsigned int *ioSize, void *buffer)
+007df5a0 C_ScopeComp::Load | void __thiscall Load(C_ScopeComp *this, unsigned int size, void *data)
+007df5d0 C_UniformComp::Save | void __thiscall Save(C_UniformComp *this, unsigned int *ioSize, void *buffer)
+007df610 C_UniformComp::Load | void __thiscall Load(C_UniformComp *this, unsigned int size, void *data)
+007df640 C_MedkitComp::Save | void __thiscall Save(C_MedkitComp *this, unsigned int *ioSize, void *buffer)
+007df680 C_MedkitComp::Load | void __thiscall Load(C_MedkitComp *this, unsigned int size, void *data)
+007df6b0 C_BackpackComp::Save | void __thiscall Save(C_BackpackComp *this, unsigned int *ioSize, void *buffer)
+007df6f0 C_BackpackComp::Load | void __thiscall Load(C_BackpackComp *this, unsigned int size, void *data)
+007df720 C_HeadgearComp::Save | void __thiscall Save(C_HeadgearComp *this, unsigned int *ioSize, void *buffer)
+007df760 C_HeadgearComp::Load | void __thiscall Load(C_HeadgearComp *this, unsigned int size, void *data)
+007df790 C_SpecialItemComp::Save | void __thiscall Save(C_SpecialItemComp *this, unsigned int *ioSize, void *buffer)
+007df7a0 C_SpecialItemComp::Load | void __thiscall Load(C_SpecialItemComp *this, unsigned int size, void *data)
+
+# --- C_ItemsModule internals (pass 2) ---
+007d7b20 GetActivityProp | I3D_frame * __fastcall GetActivityProp(int index)
+007d7c70 C_ItemsModule::CreateItem | C_Item * __thiscall CreateItem(C_ItemsModule *this, int typeId, int container, C_Actor *owner, int uid)
+007d7d90 C_ItemsModule::GiveItem | C_Item * __thiscall GiveItem(C_ItemsModule *this, int typeId, int unused, C_Actor *actor, int unused2)
+007d7f30 C_ItemsModule::CreateFreeItem | C_Item * __thiscall CreateFreeItem(C_ItemsModule *this, int typeId)
+007d8040 DeleteMissionItemsFile | void __cdecl DeleteMissionItemsFile(void)
+007d81f0 SaveMissionItems | bool __cdecl SaveMissionItems(void)
+007d8600 C_ItemsModule::LoadMissionItems | bool __thiscall LoadMissionItems(C_ItemsModule *this)
+007d8ef0 C_ItemsModule::ClearActorItems | void __thiscall ClearActorItems(C_ItemsModule *this)
+007d8fa0 C_ItemsModule::MoveItem | int __thiscall MoveItem(C_ItemsModule *this, C_Item *item, C_Item **replaced, C_Actor *from, int fromContainer, C_Actor *to, int toContainer, int index, C_Actor *carrier, bool notify, bool ignoreLocks, bool keepWeights, bool testOnly)
+007d9fa0 C_ItemsModule::PutItem | int __thiscall PutItem(C_ItemsModule *this, C_Item *item, C_Actor *actor, int *container, bool notify)
+007da240 C_ItemsModule::TransferItem | int __thiscall TransferItem(C_ItemsModule *this, C_Item *item, C_Actor *from, int fromContainer, C_Actor *to, int toContainer, C_Item **replaced, int *toContainerOut, int *replacedContainer)
+007da850 C_ItemsModule::TransferItemAuto | int __thiscall TransferItemAuto(C_ItemsModule *this, C_Item *item, C_Actor *from, int fromContainer, C_Actor *to, int *toContainer)
+007daa40 IsSwapBlocked | bool __stdcall IsSwapBlocked(C_Actor *from, int fromContainer, C_Actor *to, int toContainer, C_Item *item)
+007db3e0 C_ItemsModule::CanPutItem | int __thiscall CanPutItem(C_ItemsModule *this, C_Actor *actor, C_Item *item)
+007dc1e0 C_ItemsModule::DropItem | void __thiscall DropItem(C_ItemsModule *this, C_Item *item, C_Actor *owner, int container)
+007dc700 C_ItemsModule::RemoveFromContainer | void __thiscall RemoveFromContainer(C_ItemsModule *this, C_Item *item, C_Actor *owner, int container)
+007dc800 CloneFrameTree | bool __fastcall CloneFrameTree(I3D_frame **copy, I3D_frame *source, I3D_frame *parent)
+007dcb40 C_ItemsModule::AddInstance | void __thiscall AddInstance(C_ItemsModule *this, C_Item *item)
+007dcd00 C_ItemsModule::DestroyItem | void __thiscall DestroyItem(C_ItemsModule *this, C_Item *item)
+007dd850 C_ItemsModule::DestroyItemThunk | void __thiscall DestroyItemThunk(C_ItemsModule *this, C_Item *item)
+007dd860 NewAmmoItem | C_Item * __stdcall NewAmmoItem(int typeId)
+007dd8d0 AlignedDelete | void __fastcall AlignedDelete(void *p)
+007dd8e0 NewContainerItem | C_Item * __stdcall NewContainerItem(int typeId)
+007dd950 NewMedkitItem | C_Item * __stdcall NewMedkitItem(int typeId)
+007dd9c0 NewWeaponItem | C_Item * __stdcall NewWeaponItem(int typeId)
+007dda30 C_ItemsModule::NextUid | int __thiscall NextUid(C_ItemsModule *this)
+007ddcc0 C_ItemsModule::AddRespawningItem | void __thiscall AddRespawningItem(C_ItemsModule *this, C_Item *item)
+007dde70 C_ItemsModule::RemoveRespawningItem | void __thiscall RemoveRespawningItem(C_ItemsModule *this, C_Item *item)
+007de350 ClearActorContainers | void __stdcall ClearActorContainers(C_Actor *actor)
+007de3c0 SaveActorItems | bool __thiscall SaveActorItems(C_ItemsModule *this, C_Actor *actor, C_chunk *chunk)
+007de5a0 LoadActorItems | bool __thiscall LoadActorItems(C_ItemsModule *this, C_Actor *actor, C_chunk *chunk)
+007de840 C_ItemsModule::SaveItem | bool __thiscall SaveItem(C_ItemsModule *this, C_Item *item, int container, int slot, int index, C_chunk *chunk)
+007deb60 C_ItemsModule::LoadItem | C_Item * __thiscall LoadItem(C_ItemsModule *this, int *container, int *slot, int *index, C_chunk *chunk, C_Actor *owner)
+007df190 C_ItemsModule::GetItemDef | C_ItemDef * __thiscall GetItemDef(C_ItemsModule *this, int typeId)
+007df970 C_ItemDef::GetFpvModel | I3D_frame * __fastcall GetFpvModel(C_ItemDef *def)
+007dfab0 C_ItemDef::GetImage | IImage * __fastcall GetImage(C_ItemDef *def)
+007dfbb0 C_ItemDef::GetModel | I3D_frame * __fastcall GetModel(C_ItemDef *def)
+007dfcb0 C_ItemDef::GetDivingGear | I3D_frame ** __fastcall GetDivingGear(C_ItemDef *def)
+007dfdb0 C_ItemDef::GetAllowedContainers | uint __fastcall GetAllowedContainers(C_ItemDef *def)
+007dfe70 C_ItemDef::GetInventoryGroup | int __fastcall GetInventoryGroup(C_ItemDef *def)
+0098b868 g_cardsProp @
+0098b86c g_bottleProp @
+0098b870 g_cigaretteProp @
+0098b874 g_itemsUpdateTime @
+
+# --- called by the items module (owners not ported) ---
+0078ade0 SurfaceMarks_Free
+0078b1d0 SurfaceMarks_Tick
+0078b6a0 SurfaceMarks_Save
+0078bc50 SurfaceMarks_Load

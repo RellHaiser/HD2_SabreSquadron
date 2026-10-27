@@ -1,0 +1,167 @@
+# The car actor (src/game/car.h / car*.cpp; part 2). Vtable slots by C_Actor's names.
+004d0b60 C_Car::C_Car
+004d0ea0 C_Car::DeletingDestructor
+004d0f20 C_Car::~C_Car
+004d04f0 C_CarCreator::Create
+004d0560 C_CarCreator::GetName
+004d0570 C_CarCreator::Destroy
+004d04d0 StaticInit_CarCreator
+004d04c0 StaticInit_CarCreator_thunk
+004d0490 StaticInit_Car
+004d0e20 C_Car::GetHitPoints
+004d0e30 C_Car::GetSeatCount
+004d10a0 C_Car::SetFrame
+004d16a0 C_Car::StartMission | void __thiscall StartMission(C_Car *this, bool server)
+004d25c0 C_Car::StopMission | void __thiscall StopMission(C_Car *this, bool server)
+004dd0d0 C_Car::RestartMission | void __thiscall RestartMission(C_Car *this, bool server)
+004dd350 C_Car::SaveGame | bool __thiscall SaveGame(C_Car *this, C_chunk *chunk)
+004dd750 C_Car::LoadGame | bool __thiscall LoadGame(C_Car *this, C_chunk *chunk)
+004ddf90 C_Car::WriteState | void __thiscall WriteState(C_Car *this, C_BitStream *msg)
+004de270 C_Car::ReadState | void __thiscall ReadState(C_Car *this, C_BitStream *msg)
+004d3110 C_Car::Update
+004d2790 C_Car::Tick
+004db360 C_Car::OnMessage | void __thiscall OnMessage(C_Car *this, C_BitStream *msg)
+004db760 C_Car::Unknown20 | void __thiscall Unknown20(C_Car *this, C_BitStream *msg)
+004d3ef0 C_Car::OnCollision | bool __thiscall OnCollision(C_Car *this, C_Actor *other, S_vector4 *pos, S_vector *push, S_vector *normal, int mass, int a6)
+004d93c0 C_Car::IsSeatBlocked
+004d93e0 C_Car::SetSeatBlocked
+004d9430 C_Car::SetSeatOccupant
+004d99d0 C_Car::GetSeatOccupant
+004d9a00 C_Car::FindSeat
+004d9a40 C_Car::LeaveSeat
+004d9be0 C_Car::ExitSeat
+004d9fc0 C_Car::GetSeatFlags
+004d9e10 C_Car::GetSeatCamera
+004d9ff0 C_Car::GetSeatText
+004da020 C_Car::HasSeatWeapon
+004da040 C_Car::GetSeatWeaponRounds
+004da150 C_Car::GetSeatWeaponAim
+004da110 C_Car::GetSeatWeaponOrigin
+004da190 C_Car::UnknownAC
+004da1b0 C_Car::GetSeatWeaponText
+004da1d0 C_Car::GetSeatWeaponDef
+004da1f0 C_Car::GetSeatWeaponLimits
+004da240 C_Car::CanSeatWeaponAim
+004da060 C_Car::ApplySeatControls
+004da090 C_Car::ShowSeatView
+004da270 C_Car::UnknownC8
+004da2a0 C_Car::IsSeatFirstPersonOnly
+004dba00 C_Car::UnknownD0
+004dba10 C_Car::Hit | void __thiscall Hit(C_Car *this, int type, float amount, S_vector *pos, S_vector *dir, C_Human *attacker, int flags)
+004dbee0 C_Car::GetMaterialId | int __thiscall GetMaterialId(C_Car *this, I3D_frame *part)
+004d11f0 C_Car::GetDriver
+004d11c0 C_Car::SetDriver
+004d1200 C_Car::SetDriven
+004da2f0 C_Car::PutOutside
+004e08c0 S_CarParts::S_CarParts
+004e0ee0 S_CarParts::Release | void __fastcall Release(S_CarParts *parts)
+00748dc0 GetPerfTimeMs
+0089bd34 g_cars @ void *[4]
+0089bd44 g_carCreator @ void *
+004d49f0 CarOnPartHit
+004d4a00 CarOnRepaired
+00748da0 InitPerfTime
+# The seat weapon (game/seat_weapon.h; part 3): what the car's seats call so far.
+# Part 2c: the controls and the updates (car_update.cpp, car_marks.cpp; perf_timer.cpp).
+004d9280 C_Car::SetInput
+004d38f0 C_Car::UpdateVehicle
+004d3970 C_Car::UpdateDetail
+004d2c50 C_Car::CheckWater
+004d2dc0 C_Car::GetEngineNoise
+004d5430 C_Car::IsDrivable
+004dd090 C_Car::GetEnvironmentFlags
+004db060 C_Car::MarkCheckpoints
+004dab60 C_Car::ClearMarks
+004dac80 C_Car::MarkAhead
+004dafe0 C_Car::ClearAhead
+004dab20 C_Car::IsCheckpointMarked
+004dac00 C_Car::GetFootprint | void __thiscall GetFootprint(C_Car * this, I3D_frame * * frame, float * min, float * max)
+004ddf70 C_Car::HasNoEnemyAboard | bool __thiscall HasNoEnemyAboard(C_Car * this, C_Human * human)
+004db2a0 C_Car::Restart
+004db2b0 C_Car::SendMessage
+004db2e0 C_Car::SendMessageEx
+004d3380 C_Car::UpdateNetwork | void __thiscall UpdateNetwork(C_Car *this, int time)
+004d2ec0 C_Car::ReadMessages | void __thiscall ReadMessages(C_Car *this)
+004de150 C_Car::WriteStore | void __thiscall WriteStore(C_Car *this, C_BitStream *msg)
+004dec10 C_Car::UpdateCharge | void __thiscall UpdateCharge(C_Car *this, int time)
+004e0760 C_CarRestartMessage::Read
+004e0770 C_CarRestartMessage::Write
+004e07b0 C_CarDeadlyGroundMessage::Read
+004e07c0 C_CarDeadlyGroundMessage::Write
+004e1990 S_CarParts::Tick | void __thiscall Tick(S_CarParts *this, int time)
+0073ee20 S_PerfTimer::S_PerfTimer
+0073ee40 S_PerfTimer::S_PerfTimerWithPeriod
+0073ee60 S_PerfTimer::Fire
+0073ee90 S_PerfTimer::Start
+# Part 2d-i: the vehicle's callbacks (car_callbacks.cpp; the callbacks themselves are in vehicle.txt).
+004d5140 CarThrowOff | bool __fastcall CarThrowOff(C_Car * car, I3D_frame * frame, void * params, int kind, int index)
+004e0180 C_CarHitMessage::Read | void __thiscall Read(C_CarHitMessage * this, C_BitStream * stream)
+004e0270 C_CarHitMessage::Write | void __thiscall Write(C_CarHitMessage * this, C_BitStream * stream)
+004e0540 C_CarWheelMessage::Read | void __thiscall Read(C_CarWheelMessage * this, C_BitStream * stream)
+004e05b0 C_CarWheelMessage::Write | void __thiscall Write(C_CarWheelMessage * this, C_BitStream * stream)
+00485ba0 C_GEffectsModule::ShatterGlass | void __thiscall ShatterGlass(C_GEffectsModule * this, I3D_frame * visual, float unknown)
+# Part 2d-ii: contacts, hits, the wreck and the charges (car_hits.cpp; the queries and charges named elsewhere).
+004d3d10 C_Car::TakePush | void __thiscall TakePush(C_Car *this, int id, S_vector4 *point)
+004d3b70 C_Car::IsTyreHit | int __thiscall IsTyreHit(C_Car *this, int wheel, S_vector *pos, bool axle)
+004de800 C_Car::IsSimulatedHere | bool __thiscall IsSimulatedHere(C_Car *this)
+004dbf00 C_Car::Wreck | void __thiscall Wreck(C_Car *this, bool told)
+004dc580 C_Car::BlastAround | void __thiscall BlastAround(C_Car *this)
+004e1a20 S_CarParts::Hit | void __thiscall Hit(S_CarParts *this, int type, float amount, S_vector *pos, S_vector *dir, C_Human *attacker)
+004e1530 S_CarParts::GetHitMaterial | int __thiscall GetHitMaterial(S_CarParts *this, S_vector *pos, S_vector *dir)
+004e0340 C_CarGlassMessage::Read | void __thiscall Read(C_CarGlassMessage *this, C_BitStream *stream)
+004e03a0 C_CarGlassMessage::Write | void __thiscall Write(C_CarGlassMessage *this, C_BitStream *stream)
+004e0410 C_CarPartMessage::Read | void __thiscall Read(C_CarPartMessage *this, C_BitStream *stream)
+004e04b0 C_CarPartMessage::Write | void __thiscall Write(C_CarPartMessage *this, C_BitStream *stream)
+004e0630 C_CarTyreMessage::Read | void __thiscall Read(C_CarTyreMessage *this, C_BitStream *stream)
+004e0650 C_CarTyreMessage::Write | void __thiscall Write(C_CarTyreMessage *this, C_BitStream *stream)
+004e0800 C_CarImpulseMessage::Read | void __thiscall Read(C_CarImpulseMessage *this, C_BitStream *stream)
+004e0830 C_CarImpulseMessage::Write | void __thiscall Write(C_CarImpulseMessage *this, C_BitStream *stream)
+004e0710 C_CarDestroyedMessage::Read | void __thiscall Read(void *this, C_BitStream *stream)
+004e0720 C_CarDestroyedMessage::Write | void __thiscall Write(void *this, C_BitStream *stream)
+0089b4cc g_blastActors @ void *[4]
+# Part 2e: the mission's start, stop and restart (car_mission.cpp) and what they call.
+004dce40 C_Car::RestoreModel | void __thiscall RestoreModel(C_Car *this)
+004dcd10 C_Car::ShowWreck | void __thiscall ShowWreck(C_Car *this)
+004dd040 C_Car::RefreshPartMeshes | void __fastcall RefreshPartMeshes(C_Car *car)
+004dcfe0 CopyNamesakeMesh | uint __stdcall CopyNamesakeMesh(I3D_frame *frame, void *context)
+004dcde0 CopyNamesakeMesh2 | uint __stdcall CopyNamesakeMesh2(I3D_frame *frame, void *context)
+004d0610 CarNetReadState | void __fastcall CarNetReadState(C_Car *car, C_BitStream *stream)
+004d08c0 CarNetWriteState | void __fastcall CarNetWriteState(C_Car *car, C_BitStream *stream)
+0073e110 C_NetProperty::SetField | void __thiscall SetField(void *this, int field, int value)
+0073ecf0 C_NetObject::SetQuantizations0 | void __thiscall SetQuantizations0(void *this, S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c)
+0073eca0 C_NetObject::SetQuantizations1 | void __thiscall SetQuantizations1(void *this, S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c)
+0073dbb0 S_NetQuantization::Setup | void __fastcall Setup(S_NetQuantization *q, S_vector4 *span, S_vector4 *from, S_vector4 *step, int unknown)
+# Part 2f-i: the network side (car_net.cpp) and what it calls.
+004db310 C_Car::SendFuel | void __thiscall SendFuel(C_Car *this)
+004de1f0 C_Car::ReadStore | void __thiscall ReadStore(C_Car *this, C_BitStream *msg, bool add)
+004dc780 C_Car::ShowDestroyed | void __thiscall ShowDestroyed(C_Car *this)
+004e06a0 C_CarPartEffectMessage::Read | void __thiscall Read(C_CarPartEffectMessage *this, C_BitStream *stream)
+004e06c0 C_CarPartEffectMessage::Write | void __thiscall Write(C_CarPartEffectMessage *this, C_BitStream *stream)
+004e0040 C_CarFuelMessage::Read | void __thiscall Read(C_CarFuelMessage *this, C_BitStream *stream)
+004e00f0 C_CarFuelMessage::Write | void __thiscall Write(C_CarFuelMessage *this, C_BitStream *stream)
+004e2000 S_CarParts::StartWreckEffects | void __fastcall StartWreckEffects(S_CarParts *parts)
+004e1f70 S_CarParts::StartPartEffect | void __thiscall StartPartEffect(S_CarParts *this, int part)
+004e1f40 S_CarParts::SendPartEffect | void __thiscall SendPartEffect(S_CarParts *this, int part)
+0073e0e0 C_NetProperty::SetFlags | void __thiscall SetFlags(void *this, uint flags)
+0073e9d0 C_NetObject::PopMessage | void * __thiscall PopMessage(void *this, int unknown)
+
+# Part 2f-ii: the saved game (car_save.cpp), a joining client's state (car_net.cpp) and what they call.
+004e0f70 S_CarParts::SaveGame | bool __thiscall SaveGame(S_CarParts *this, C_chunk *chunk)
+004e1230 S_CarParts::LoadGame | bool __thiscall LoadGame(S_CarParts *this, C_chunk *chunk)
+
+# Part 2g-i: the damage parts' setup, lifetime, saved game and fuse (car_parts.cpp).
+004e0930 S_CarParts::Setup | void __thiscall Setup(S_CarParts *this, C_Car *owner)
+004e09d0 S_CarParts::Gather | void __fastcall Gather(S_CarParts *parts)
+004e0dc0 S_CarParts::Clear | void __fastcall Clear(S_CarParts *parts)
+004e0ea0 S_CarParts::Reset | void __fastcall Reset(S_CarParts *parts)
+004e19c0 S_CarParts::GetFrameInt | int __stdcall GetFrameInt(I3D_frame *frame, char *key)
+004e1fe0 S_CarParts::WreckOnce | void __fastcall WreckOnce(S_CarParts *parts)
+004e2240 vector_size_e12_4e2240
+004e2270 vector_insert_n_e12_4e2270
+004e2600 copy12_4e2600
+
+# Part 2g-ii: the damage parts' hits and effects (car_parts.cpp).
+004e1dc0 S_CarParts::Place | void __fastcall Place(S_CarParts *parts)
+004e1820 S_CarParts::ExplosiveAt | int __thiscall ExplosiveAt(S_CarParts *this, S_vector *from, S_vector *dir)
+004e18c0 S_CarParts::HitSeats | void __thiscall HitSeats(S_CarParts *this, S_vector *from, S_vector *dir, float amount, C_Actor *attacker)
+004e1680 S_CarParts::HitZoneUnused | bool __thiscall HitZoneUnused(S_CarParts *this, S_vector *from, S_vector *dir, float amount)

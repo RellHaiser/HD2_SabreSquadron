@@ -1,0 +1,1106 @@
+// @00453d20 size=37 callers= vt=00832004[64]
+void FUN_00453d20(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 = DAT_0098c1c0 | 1;
+  }
+  atexit(&LAB_00405c90);
+  return;
+}
+
+// @00453d50 size=37 callers= vt=00832004[65]
+void FUN_00453d50(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 = DAT_0098c1c0 | 1;
+  }
+  atexit(&LAB_00405c90);
+  return;
+}
+
+// @00453d80 size=734 callers=C_ShotManager::FireBulletImpl
+// WARNING: Exceeded maximum restarts with more pending
+void __thiscall C_MuzzleLight__Init(void *this,I3D_frame *muzzle,I3D_frame *flash,int duration)
+{
+  // locals: I3D_frame *this_00; float fVar1; float fVar2; float fVar3; I3D_driver *self; C_game *pCVar4; I3D_sector *pIVar5; int *piVar6; int iVar7; int *piStack_54; undefined4 uStack_50; int *piStack_4c; undefined4 uStack_48; int *piStack_44; char *pcStack_40; I3D_frame *pIStack_3c
+  *(int *)((int)this + 0x10) = duration;
+  if (muzzle == (I3D_frame *)0x0) {
+    *(int *)((int)this + 0xc) = duration;
+    *(undefined4 *)this = 0;
+    return;
+  }
+  *(undefined4 *)((int)this + 0xc) = 0;
+  self = I3DGetDriver();
+  pIStack_3c = (I3D_frame *)0x453dbb;
+  pIStack_3c = (*self->vtable->CreateFrame)(self,2);
+  *(I3D_frame **)this = pIStack_3c;
+  pcStack_40 = (char *)0x453dc6;
+  (*pIStack_3c->vtable->LinkTo)();
+  piStack_44 = *(int **)this;
+  pcStack_40 = "WeaponLight";
+  uStack_48 = 0x453dd3;
+  (**(code **)(*piStack_44 + 0x34))();
+  piStack_4c = *(int **)this;
+  uStack_48 = 0x11;
+  uStack_50 = 0x453de0;
+  (**(code **)(*piStack_4c + 0x94))();
+  piStack_54 = *(int **)this;
+  uStack_50 = 1;
+  (**(code **)(*piStack_54 + 0x74))();
+  piStack_44 = (int *)0x3f800000;
+  pcStack_40 = (char *)0x3f800000;
+  pIStack_3c = (I3D_frame *)0x3f800000;
+  (**(code **)(**(int **)this + 0x7c))(*(int **)this,&piStack_44);
+  (**(code **)(**(int **)this + 0x88))(*(int **)this,0x3fc00000);
+  piStack_54 = (int *)0x3f800000;
+  uStack_50 = 0x3f800000;
+  piStack_4c = (int *)0x3f800000;
+  (**(code **)(**(int **)this + 0x80))(*(int **)this);
+  (**(code **)(**(int **)this + 0x8c))(*(int **)this,0x3f800000);
+  iVar7 = *(int *)this;
+  if (-1 < (char)*(uint *)(iVar7 + 0xe0)) {
+    *(undefined4 *)(iVar7 + 0xb0) = 0;
+    *(undefined4 *)(iVar7 + 0xb4) = 0;
+    *(undefined4 *)(iVar7 + 0xb8) = 0;
+    *(uint *)(iVar7 + 0xe0) = *(uint *)(iVar7 + 0xe0) & 0xfffffedf | 0x40000000;
+  }
+  if ((muzzle->m_frameFlags & 0x20) == 0) {
+    I3D_frame::UpdateWMatrixProc(muzzle);
+  }
+  pCVar4 = GetGame();
+  pIVar5 = (*pCVar4->m_scene->vtable->GetSector)
+                     (pCVar4->m_scene,(S_vector *)((muzzle->m_worldMatrix).m + 3));
+  *(I3D_sector **)((int)this + 4) = pIVar5;
+  (*pIVar5->vtable->Slot74)(pIVar5,*(undefined4 *)this);
+  iVar7 = 0;
+  piVar6 = *(int **)(*(int *)((int)this + 4) + 0x25c);
+  if (0 < *(int *)(*(int *)((int)this + 4) + 0x264)) {
+    do {
+      this_00 = *(I3D_frame **)(*piVar6 + 0x194);
+      if ((muzzle->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(muzzle);
+      }
+      if ((this_00->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(this_00);
+      }
+      fVar1 = (this_00->m_worldMatrix).m[3][0] - (muzzle->m_worldMatrix).m[3][0];
+      fVar3 = (this_00->m_worldMatrix).m[3][1] - (muzzle->m_worldMatrix).m[3][1];
+      fVar2 = (this_00->m_worldMatrix).m[3][2] - (muzzle->m_worldMatrix).m[3][2];
+      if (fVar1 * fVar1 + fVar3 * fVar3 + fVar2 * fVar2 <= 16.0) {
+        (*this_00->vtable[1].Slot18)(this_00,*(undefined4 *)this);
+        (*this_00->vtable->Update)(this_00);
+      }
+      piVar6 = piVar6 + 1;
+      iVar7 = iVar7 + 1;
+    } while (iVar7 < *(int *)(*(int *)((int)this + 4) + 0x264));
+  }
+  (**(code **)(**(int **)this + 0x98))(*(int **)this,0x40800000);
+  iVar7 = *(int *)this;
+  *(undefined4 *)(iVar7 + 0xd0) = 0x3f800000;
+  *(undefined4 *)(iVar7 + 0xd4) = 0x3f800000;
+  *(undefined4 *)(iVar7 + 0xd8) = 0x3f800000;
+  *(int ***)(iVar7 + 0xdc) = &piStack_54;
+  if ((*(byte *)(iVar7 + 0xe0) & 8) == 0) {
+    S_quat::Make((S_quat *)(iVar7 + 0xc0),(S_matrix *)(iVar7 + 0x80));
+  }
+  *(uint *)(iVar7 + 0xe0) = *(uint *)(iVar7 + 0xe0) & 0xfffffecb | 0x40000008;
+  (**(code **)(**(int **)this + 0x9c))(*(int **)this,0x3f7d70a4,0,0x3c23d70a);
+  (**(code **)(**(int **)this + 0x30))(*(int **)this,1);
+  (**(code **)(**(int **)this + 0x24))(*(int **)this);
+  *(I3D_frame **)((int)this + 8) = flash;
+  if (flash != (I3D_frame *)0x0) {
+    flash->m_refCount = flash->m_refCount + 1;
+    (**(code **)(**(int **)((int)this + 8) + 0x30))(*(int **)((int)this + 8),1);
+    (**(code **)(**(int **)((int)this + 8) + 0x50))(*(int **)((int)this + 8),0x3f800000);
+    (**(code **)(**(int **)((int)this + 8) + 0x24))(*(int **)((int)this + 8));
+  }
+  return;
+}
+
+// @00454060 size=186 callers=C_ShotManager::Update
+int __thiscall C_MuzzleLight__Tick(void *this,int timeDelta)
+{
+  // locals: int *piVar1; float fVar2
+  piVar1 = *(int **)((int)this + 8);
+  if ((piVar1 != (int *)0x0) && (0x32 < *(int *)((int)this + 0xc))) {
+    (**(code **)(*piVar1 + 0x30))(piVar1,0);
+    (**(code **)(**(int **)((int)this + 8) + 0x24))(*(int **)((int)this + 8));
+    (**(code **)**(undefined4 **)((int)this + 8))(*(undefined4 **)((int)this + 8));
+    *(undefined4 *)((int)this + 8) = 0;
+  }
+  piVar1 = *(int **)this;
+  if (*(int *)((int)this + 0x10) <= *(int *)((int)this + 0xc)) {
+    if (piVar1 != (int *)0x0) {
+      (**(code **)(*piVar1 + 0x30))(piVar1,0);
+      (**(code **)(**(int **)this + 0x24))(*(int **)this);
+    }
+    return 2;
+  }
+  fVar2 = 1.0 - (float)*(int *)((int)this + 0xc) / (float)*(int *)((int)this + 0x10);
+  (**(code **)(*piVar1 + 0x88))(piVar1);
+  (**(code **)(**(int **)this + 0x98))
+            (*(int **)this,
+             4.0 - (float)*(int *)((int)this + 0xc) / (float)*(int *)((int)this + 0x10));
+  (**(code **)(**(int **)this + 0x24))(*(int **)this);
+  *(int *)((int)this + 0xc) = *(int *)((int)this + 0xc) + (int)fVar2;
+  return 0;
+}
+
+// @00454120 size=104 callers=C_ShotManager::StopMission,C_ShotManager::Update,C_ShotManager::RestartMission
+void __thiscall C_MuzzleLight__Release(void *this)
+{
+  // locals: int iVar1; int *piVar2; int iVar3
+  iVar3 = *(int *)this;
+  if (iVar3 != 0) {
+    iVar1 = *(int *)(iVar3 + 0x120);
+    for (iVar3 = *(int *)(iVar3 + 0x128); iVar3 != 0; iVar3 = iVar3 + -1) {
+      piVar2 = *(int **)(iVar1 + -4 + iVar3 * 4);
+      (**(code **)(*piVar2 + 0x78))(piVar2,*(undefined4 *)this);
+    }
+    (**(code **)(**(int **)this + 0x38))(*(int **)this,0,0);
+    (**(code **)**(undefined4 **)this)(*(undefined4 **)this);
+    *(undefined4 *)this = 0;
+  }
+  piVar2 = *(int **)((int)this + 8);
+  if (piVar2 != (int *)0x0) {
+    (**(code **)(*piVar2 + 0x30))(piVar2,0);
+    (**(code **)**(undefined4 **)((int)this + 8))(*(undefined4 **)((int)this + 8));
+    *(undefined4 *)((int)this + 8) = 0;
+  }
+  return;
+}
+
+// @00454190 size=456 callers=C_ShotManager::EjectShell
+void __thiscall
+C_Shell__Init(void *this,C_Human *shooter,I3D_frame *model,S_vector4 *pos,S_vector *dir,
+             S_vector4 *velocity,int soundGroup)
+{
+  // locals: float fVar1; int iVar2; bool bVar3; I3D_driver *self; I3D_frame *pIVar4; C_game *pCVar5; undefined4 uVar6; I3D_scene *self_00; undefined4 unaff_EDI; float fStack_2c; float fStack_28; float fStack_24; float fStack_20
+  *(float *)this = pos->x;
+  *(float *)((int)this + 4) = pos->y;
+  *(float *)((int)this + 8) = pos->z;
+  *(float *)((int)this + 0xc) = pos->w;
+  *(float *)((int)this + 0x10) = velocity->x;
+  *(float *)((int)this + 0x14) = velocity->y;
+  *(float *)((int)this + 0x18) = velocity->z;
+  fVar1 = velocity->w;
+  *(C_Human **)((int)this + 0x24) = shooter;
+  *(float *)((int)this + 0x1c) = fVar1;
+  *(undefined4 *)((int)this + 0x28) = 0;
+  *(int *)((int)this + 0x30) = soundGroup;
+  if (model == (I3D_frame *)0x0) {
+    return;
+  }
+  if (*(int *)((int)this + 0x20) == 0) {
+    self = I3DGetDriver();
+    pIVar4 = (*self->vtable->CreateVisual)(self,0x5f4a424f);
+    *(I3D_frame **)((int)this + 0x20) = pIVar4;
+    (*pIVar4->vtable->Duplicate)(pIVar4,model);
+  }
+  (**(code **)(**(int **)((int)this + 0x20) + 0x38))(*(int **)((int)this + 0x20),0,0);
+  fStack_2c = dir->x;
+  fStack_28 = dir->y;
+  fStack_24 = dir->z;
+  fStack_20 = dir[1].x;
+  (**(code **)(**(int **)((int)this + 0x20) + 0x14))(*(int **)((int)this + 0x20),pos,&fStack_2c,0);
+  bVar3 = C_Human::IsLocalPlayer(shooter);
+  if (bVar3) {
+    pCVar5 = GetGame();
+    uVar6 = C_game::IsHudShown(pCVar5);
+    if ((char)uVar6 != '\0') {
+      iVar2 = *(int *)((int)this + 0x20);
+      *(undefined4 *)(iVar2 + 0xd0) = 0x3f19999a;
+      *(undefined4 *)(iVar2 + 0xd4) = 0x3f19999a;
+      *(undefined4 *)(iVar2 + 0xd8) = 0x3f19999a;
+      *(undefined4 *)(iVar2 + 0xdc) = unaff_EDI;
+      if ((*(byte *)(iVar2 + 0xe0) & 8) == 0) {
+        S_quat::Make((S_quat *)(iVar2 + 0xc0),(S_matrix *)(iVar2 + 0x80));
+      }
+      *(uint *)(iVar2 + 0xe0) = *(uint *)(iVar2 + 0xe0) & 0xfffffecb | 0x40000008;
+      pCVar5 = GetGame();
+      (**(code **)(**(int **)((int)this + 0x20) + 0x38))
+                (*(int **)((int)this + 0x20),*(undefined4 *)(pCVar5->m_scene->_pad_01fc + 8),1);
+      goto LAB_00454335;
+    }
+  }
+  pCVar5 = GetGame();
+  pIVar4 = *(I3D_frame **)((int)this + 0x20);
+  self_00 = pCVar5->m_scene;
+  if ((pIVar4->m_frameFlags & 0x20) == 0) {
+    I3D_frame::UpdateWMatrixProc(pIVar4);
+  }
+  (*self_00->vtable->UpdateFrameSector)(self_00,pIVar4,(S_vector *)((pIVar4->m_worldMatrix).m + 3));
+LAB_00454335:
+  (**(code **)(**(int **)((int)this + 0x20) + 0x30))(*(int **)((int)this + 0x20),1);
+  (**(code **)(**(int **)((int)this + 0x20) + 0x24))(*(int **)((int)this + 0x20));
+  *(undefined4 *)((int)this + 0x2c) = 0;
+  return;
+}
+
+// @00454360 size=765 callers=C_ShotManager::Update
+int __thiscall C_Shell__Tick(void *this,int timeDelta)
+{
+  // locals: float *this_00; int iVar1; int *piVar2; S_vector *unaff_EDI; float fVar3; undefined4 uStack_94; float fStack_90; float fStack_8c; float fStack_88; undefined4 uStack_84; float local_80; float local_7c; float local_78; S_vector SStack_70; float fStack_5c; float local_58; int local_54; undefined4 uStack_50; undefined4 uStack_4c; undefined4 uStack_48; undefined4 uStack_44; undefined4 uStack_40; undefined4 uStack_3c; undefined4 uStack_38; undefined4 uStack_34; undefined4 uStack_30; undefined4 uStack_20
+  if (*(int *)((int)this + 0x2c) == 3) {
+    return 2;
+  }
+  local_58 = (float)timeDelta;
+  this_00 = (float *)((int)this + 0x10);
+  *(int *)((int)this + 0x28) = *(int *)((int)this + 0x28) + timeDelta;
+  local_54 = 0;
+  local_80 = local_58 * *this_00 * 0.001;
+  local_7c = local_58 * *(float *)((int)this + 0x14) * 0.001;
+  local_78 = local_58 * *(float *)((int)this + 0x18) * 0.001;
+  FUN_005ac1c0((void *)(*(int *)((int)this + 0x24) + 0x98),'\0');
+  iVar1 = CollisionRayTest(this,&local_80,&fStack_90,&SStack_70.x,1,0);
+  FUN_005ac1b0((void *)(*(int *)((int)this + 0x24) + 0x98),'\0');
+  if (iVar1 == 0) {
+    *(float *)this = local_80 + *(float *)this;
+    *(float *)((int)this + 4) = local_7c + *(float *)((int)this + 4);
+    *(float *)((int)this + 8) = local_78 + *(float *)((int)this + 8);
+  }
+  else if (((*(float *)this == fStack_90) && (*(float *)((int)this + 4) == fStack_8c)) &&
+          (*(float *)((int)this + 8) == fStack_88)) {
+    *this_00 = 0.0;
+    *(undefined4 *)((int)this + 0x14) = 0;
+    *(undefined4 *)((int)this + 0x18) = 0;
+    *(undefined4 *)((int)this + 0x1c) = uStack_94;
+  }
+  else {
+    *(int *)((int)this + 0x2c) = *(int *)((int)this + 0x2c) + 1;
+    fStack_5c = *(float *)((int)this + 0x18) * *(float *)((int)this + 0x18) +
+                *(float *)((int)this + 0x14) * *(float *)((int)this + 0x14) + *this_00 * *this_00;
+    if (((int)fStack_5c < 0x322bcc77) ||
+       ((1e-08 <= ABS(fStack_5c - 1.0) && (SQRT(fStack_5c) < 0.1)))) {
+      *this_00 = 0.0;
+      *(undefined4 *)((int)this + 0x14) = 0;
+      *(undefined4 *)((int)this + 0x18) = 0;
+    }
+    else {
+      fVar3 = DotVector(this_00,&SStack_70,unaff_EDI);
+      fVar3 = fVar3 * 1.2;
+      *this_00 = *this_00 - SStack_70.x * fVar3;
+      *(float *)((int)this + 0x14) = *(float *)((int)this + 0x14) - SStack_70.y * fVar3;
+      *(float *)((int)this + 0x18) = *(float *)((int)this + 0x18) - SStack_70.z * fVar3;
+      fVar3 = DotVector(this_00,&SStack_70,unaff_EDI);
+      if (fVar3 < 0.0) {
+        NegateVector(this_00,unaff_EDI);
+      }
+    }
+    S_SoundRequest__Init(&uStack_50);
+    uStack_34 = 5;
+    uStack_40 = 1;
+    uStack_20 = 2;
+    uStack_50 = *(undefined4 *)this;
+    uStack_4c = *(undefined4 *)((int)this + 4);
+    uStack_48 = *(undefined4 *)((int)this + 8);
+    uStack_44 = *(undefined4 *)((int)this + 0xc);
+    uStack_30 = *(undefined4 *)((int)this + 0x30);
+    uStack_38 = 0;
+    uStack_3c = 0;
+    piVar2 = (int *)GetSoundModule();
+    (**(code **)(*piVar2 + 0x54))(&uStack_50);
+    *(float *)this = fStack_90;
+    *(float *)((int)this + 4) = fStack_8c;
+    *(float *)((int)this + 8) = fStack_88;
+    *(undefined4 *)((int)this + 0xc) = uStack_84;
+  }
+  piVar2 = *(int **)((int)this + 0x20);
+  if (piVar2 != (int *)0x0) {
+    (**(code **)(*piVar2 + 8))(piVar2,this);
+    (**(code **)(**(int **)((int)this + 0x20) + 0x24))(*(int **)((int)this + 0x20));
+  }
+  if (*(float *)((int)this + 0x18) * *(float *)((int)this + 0x18) +
+      *(float *)((int)this + 0x14) * *(float *)((int)this + 0x14) + *this_00 * *this_00 != 0.0) {
+    *(float *)((int)this + 0x14) = *(float *)((int)this + 0x14) - local_58 * 0.001 * 3.8;
+  }
+  iVar1 = 2;
+  if (*(int *)((int)this + 0x28) < 0x7d1) {
+    iVar1 = local_54;
+  }
+  return iVar1;
+}
+
+// @00454660 size=27 callers=C_Shell::Tick,00484f60,004c94b0,004cb2b0,004cc520,C_Vehicle::Simulate,00507a40,00512390...
+float __thiscall DotVector(void *this,S_vector *a,S_vector *b)
+{
+  return a->x * *(float *)this + a->y * *(float *)((int)this + 4) + a->z * *(float *)((int)this + 8)
+  ;
+}
+
+// @00454680 size=23 callers=C_Shell::Tick,006013b0
+void __thiscall NegateVector(void *this,S_vector *v)
+{
+  *(float *)this = -*(float *)this;
+  *(float *)((int)this + 4) = -*(float *)((int)this + 4);
+  *(float *)((int)this + 8) = -*(float *)((int)this + 8);
+  return;
+}
+
+// @004546a0 size=24 callers=C_ShotManager::StopMission,C_ShellPool::~C_ShellPool,C_ShellPool::Clear,C_ShellPool::ScalarDeletingDestructor
+void __thiscall C_Shell__Release(void *this)
+{
+  // locals: undefined4 *puVar1
+  puVar1 = *(undefined4 **)((int)this + 0x20);
+  if (puVar1 != (undefined4 *)0x0) {
+    (**(code **)*puVar1)(puVar1);
+  }
+  *(undefined4 *)((int)this + 0x20) = 0;
+  return;
+}
+
+// @004546c0 size=29 callers=C_ShotManager::Update,C_ShotManager::RestartMission
+void __thiscall C_Shell__Hide(void *this)
+{
+  // locals: int *piVar1
+  piVar1 = *(int **)((int)this + 0x20);
+  if (piVar1 != (int *)0x0) {
+    (**(code **)(*piVar1 + 0x30))(piVar1,0);
+    (**(code **)(**(int **)((int)this + 0x20) + 0x24))(*(int **)((int)this + 0x20));
+  }
+  return;
+}
+
+// @004546e0 size=599 callers=C_ShotManager::AddBloodPool
+// WARNING: Exceeded maximum restarts with more pending
+void __thiscall
+C_BloodPool__Init(void *this,S_vector *pos,S_vector *normal,IImage *texture,float maxSize)
+{
+  // locals: I3D_driver *self; I3D_frame *pIVar1; C_game *pCVar2; I3D_sector *pIVar3; float10 extraout_ST0; float fVar4; float10 *__return_storage_ptr__; int iVar5; char cVar6; float fStack_6c; float fStack_68; int *piStack_64; undefined4 uStack_60; undefined4 uStack_5c; int *piStack_50; float *pfStack_4c; undefined4 uStack_34; float local_28 [2]; float local_20; float local_1c; float local_18; int *piVar7
+  if (texture != (IImage *)0x0) {
+    local_28[0] = normal->z * 0.05;
+    local_20 = normal->x * 0.05 + pos->x;
+    local_1c = normal->y * 0.05 + pos->y;
+    local_18 = local_28[0] + pos->z;
+    self = I3DGetDriver();
+    pfStack_4c = (float *)0x454746;
+    pIVar1 = (*self->vtable->CreateVisual)(self,0x4a4f5250);
+    *(I3D_frame **)this = pIVar1;
+    pfStack_4c = (float *)0x454755;
+    (*pIVar1->vtable[1].GetChild)();
+    piStack_50 = *(int **)this;
+    pfStack_4c = local_28;
+    (**(code **)(*piStack_50 + 8))();
+    iVar5 = *(int *)this;
+    *(undefined4 *)(iVar5 + 0xd0) = 0x3dcccccd;
+    *(undefined4 *)(iVar5 + 0xd4) = 0x3dcccccd;
+    *(undefined4 *)(iVar5 + 0xd8) = 0x3dcccccd;
+    *(undefined4 *)(iVar5 + 0xdc) = uStack_34;
+    if ((*(byte *)(iVar5 + 0xe0) & 8) == 0) {
+      uStack_5c = 0x4547be;
+      S_quat::Make((S_quat *)(iVar5 + 0xc0),(S_matrix *)(iVar5 + 0x80));
+    }
+    *(uint *)(iVar5 + 0xe0) = *(uint *)(iVar5 + 0xe0) & 0xfffffecb | 0x40000008;
+    iVar5 = **(int **)this;
+    RandFloat();
+    uStack_5c = *(undefined4 *)this;
+    uStack_60 = 0x454824;
+    (**(code **)(iVar5 + 0xc))();
+    piStack_64 = *(int **)this;
+    uStack_60 = 1;
+    fStack_68 = 6.362547e-39;
+    (**(code **)(*piStack_64 + 0xb4))();
+    fStack_68 = 1.4013e-45;
+    fStack_6c = 0.0;
+    (**(code **)(**(int **)this + 0x38))(*(int **)this);
+    pCVar2 = GetGame();
+    pIVar3 = (*pCVar2->m_scene->vtable->GetSector)(pCVar2->m_scene,(S_vector *)&piStack_50);
+    piVar7 = *(int **)this;
+    (**(code **)(*piVar7 + 0x38))(piVar7,pIVar3,1);
+    cVar6 = (char)piVar7;
+    iVar5 = 1;
+    __return_storage_ptr__ = (float10 *)&uStack_5c;
+    pCVar2 = GetGame();
+    C_game::GetLightIntensity(pCVar2,__return_storage_ptr__,(float *)pIVar3,iVar5,cVar6);
+    fStack_6c = (float)extraout_ST0;
+    piVar7 = *(int **)this;
+    if ((float10)0.2 <= extraout_ST0) {
+      piStack_64 = (int *)(fStack_6c * (float)piVar7[0x7e]);
+      fStack_68 = fStack_6c * (float)piVar7[0x7d];
+      fStack_6c = fStack_6c * (float)piVar7[0x7c];
+    }
+    else {
+      piStack_64 = (int *)((float)piVar7[0x7e] * 0.2);
+      fStack_68 = (float)piVar7[0x7d] * 0.2;
+      fStack_6c = (float)piVar7[0x7c] * 0.2;
+    }
+    (**(code **)(*piVar7 + 0xb0))(piVar7,&fStack_6c);
+    (**(code **)(**(int **)this + 0xb8))(*(int **)this,3);
+    (**(code **)(**(int **)this + 0x24))(*(int **)this);
+    *(undefined4 *)((int)this + 0xc) = 0;
+    *(undefined4 *)((int)this + 4) = 0x3c23d70a;
+    fVar4 = RandFloat();
+    *(float *)((int)this + 8) = ((fVar4 - 0.5) + (fVar4 - 0.5)) * 0.1 + maxSize;
+    return;
+  }
+  *(undefined4 *)this = 0;
+  return;
+}
+
+// @00454940 size=518 callers=C_ShotManager::AddBloodPool
+void __thiscall C_BloodPool__Reuse(void *this,S_vector *pos,S_vector *normal,float maxSize)
+{
+  // locals: C_game *pCVar1; I3D_sector *pIVar2; float fVar3; float10 *__return_storage_ptr__; int iVar4; char cVar5; S_vector SStack_34; float local_28; float local_20; float local_1c; float local_18; int *piVar6
+  local_28 = normal->z * 0.05;
+  local_20 = normal->x * 0.05 + pos->x;
+  local_1c = normal->y * 0.05 + pos->y;
+  local_18 = local_28 + pos->z;
+  (**(code **)(**(int **)this + 8))();
+  iVar4 = *(int *)this;
+  SStack_34.x = 0.1;
+  SStack_34.y = 0.1;
+  *(undefined4 *)(iVar4 + 0xd0) = 0x3dcccccd;
+  *(undefined4 *)(iVar4 + 0xd4) = 0x3dcccccd;
+  *(undefined4 *)(iVar4 + 0xd8) = 0x3dcccccd;
+  *(float *)(iVar4 + 0xdc) = SStack_34.z;
+  if ((*(byte *)(iVar4 + 0xe0) & 8) == 0) {
+    S_quat::Make((S_quat *)(iVar4 + 0xc0),(S_matrix *)(iVar4 + 0x80));
+  }
+  *(uint *)(iVar4 + 0xe0) = *(uint *)(iVar4 + 0xe0) & 0xfffffecb | 0x40000008;
+  SStack_34.x = normal->y * -1.0;
+  SStack_34.y = normal->z * -1.0;
+  iVar4 = **(int **)this;
+  RandFloat();
+  (**(code **)(iVar4 + 0xc))(*(undefined4 *)this);
+  pCVar1 = GetGame();
+  pIVar2 = (*pCVar1->m_scene->vtable->GetSector)(pCVar1->m_scene,&SStack_34);
+  piVar6 = *(int **)this;
+  (**(code **)(*piVar6 + 0x38))(piVar6,pIVar2,1);
+  cVar5 = (char)piVar6;
+  iVar4 = 1;
+  __return_storage_ptr__ = (float10 *)&stack0xffffffc0;
+  pCVar1 = GetGame();
+  C_game::GetLightIntensity(pCVar1,__return_storage_ptr__,(float *)pIVar2,iVar4,cVar5);
+  (**(code **)(**(int **)this + 0xb0))(*(int **)this,&stack0xffffffb0);
+  (**(code **)(**(int **)this + 0xb8))(*(int **)this,3);
+  (**(code **)(**(int **)this + 0x24))(*(int **)this);
+  fVar3 = RandFloat();
+  *(undefined4 *)((int)this + 0xc) = 0;
+  *(undefined4 *)((int)this + 4) = 0x3c23d70a;
+  *(float *)((int)this + 8) = ((fVar3 - 0.5) + (fVar3 - 0.5)) * 0.1 + maxSize;
+  return;
+}
+
+// @00454b50 size=240 callers=C_ShotManager::Update
+int __thiscall C_BloodPool__Tick(void *this,int timeDelta)
+{
+  // locals: int iVar1; float fVar2; int iVar3; undefined4 local_14
+  if (*(int *)((int)this + 0xc) != -1) {
+    iVar1 = *(int *)this;
+    if (iVar1 == 0) {
+      return 2;
+    }
+    iVar3 = *(int *)((int)this + 0xc) + timeDelta;
+    *(int *)((int)this + 0xc) = iVar3;
+    if (100 < iVar3) {
+      fVar2 = *(float *)((int)this + 4) + 0.001;
+      *(float *)((int)this + 4) = fVar2;
+      *(float *)(iVar1 + 0xd0) = fVar2;
+      *(float *)(iVar1 + 0xd4) = fVar2;
+      *(undefined4 *)(iVar1 + 0xd8) = 0x3dcccccd;
+      *(undefined4 *)(iVar1 + 0xdc) = local_14;
+      if ((*(byte *)(iVar1 + 0xe0) & 8) == 0) {
+        S_quat::Make((S_quat *)(iVar1 + 0xc0),(S_matrix *)(iVar1 + 0x80));
+      }
+      *(uint *)(iVar1 + 0xe0) = *(uint *)(iVar1 + 0xe0) & 0xfffffecb | 0x40000008;
+      (**(code **)(**(int **)this + 0xb8))(*(int **)this,3);
+      (**(code **)(**(int **)this + 0x24))(*(int **)this);
+      *(int *)((int)this + 0xc) = *(int *)((int)this + 0xc) + -100;
+    }
+    if (*(float *)((int)this + 8) <= *(float *)((int)this + 4)) {
+      (**(code **)(**(int **)this + 0x24))(*(int **)this);
+      *(undefined4 *)((int)this + 0xc) = 0xffffffff;
+    }
+  }
+  return 0;
+}
+
+// @00454c40 size=22 callers=C_ShotManager::StopMission,C_ShotManager::RestartMission
+void __thiscall C_BloodPool__Release(void *this)
+{
+  // locals: undefined4 *puVar1
+  puVar1 = *(undefined4 **)this;
+  if (puVar1 != (undefined4 *)0x0) {
+    (**(code **)*puVar1)(puVar1);
+  }
+  *(undefined4 *)this = 0;
+  return;
+}
+
+// @00454c60 size=440 callers=C_ShotManager::AddBloodDrop
+void __thiscall C_BloodDrop__Init(void *this,S_vector4 *pos,S_vector4 *dir,IImage *texture)
+{
+  // locals: float *pfVar1; I3D_driver *self; I3D_frame *self_00; float fVar2
+  *(float *)this = pos->x;
+  pfVar1 = (float *)((int)this + 0x10);
+  *(float *)((int)this + 4) = pos->y;
+  *(float *)((int)this + 8) = pos->z;
+  *(float *)((int)this + 0xc) = pos->w;
+  *pfVar1 = dir->x;
+  *(float *)((int)this + 0x14) = dir->y;
+  *(float *)((int)this + 0x18) = dir->z;
+  *(float *)((int)this + 0x1c) = dir->w;
+  fVar2 = *(float *)((int)this + 0x18) * *(float *)((int)this + 0x18) +
+          *(float *)((int)this + 0x14) * *(float *)((int)this + 0x14) + *pfVar1 * *pfVar1;
+  if (ABS(fVar2 - 1.0) < 1e-08) goto LAB_00454d9c;
+  if (1e-08 <= fVar2) {
+    fVar2 = 1.0 / SQRT(fVar2);
+    *pfVar1 = fVar2 * *pfVar1;
+    *(float *)((int)this + 0x14) = fVar2 * *(float *)((int)this + 0x14);
+    fVar2 = fVar2 * *(float *)((int)this + 0x18);
+  }
+  else {
+    if (*pfVar1 != 0.0) {
+      if (0.0 <= *pfVar1) {
+        *pfVar1 = 1.0;
+      }
+      else {
+        *pfVar1 = -1.0;
+      }
+      goto LAB_00454d9c;
+    }
+    if (*(float *)((int)this + 0x18) == 0.0) {
+      if (0.0 <= *(float *)((int)this + 0x14)) {
+        *(undefined4 *)((int)this + 0x14) = 0x3f800000;
+      }
+      else {
+        *(undefined4 *)((int)this + 0x14) = 0xbf800000;
+      }
+      goto LAB_00454d9c;
+    }
+    if (0.0 <= *(float *)((int)this + 0x18)) {
+      fVar2 = 1.0;
+    }
+    else {
+      fVar2 = -1.0;
+    }
+  }
+  *(float *)((int)this + 0x18) = fVar2;
+LAB_00454d9c:
+  fVar2 = RandFloat();
+  fVar2 = (fVar2 - 0.5) + (fVar2 - 0.5) + 3.0;
+  *pfVar1 = fVar2 * *pfVar1;
+  *(float *)((int)this + 0x14) = fVar2 * *(float *)((int)this + 0x14);
+  *(float *)((int)this + 0x18) = fVar2 * *(float *)((int)this + 0x18);
+  *(undefined1 *)((int)this + 0x24) = 0;
+  *(undefined4 *)((int)this + 0x28) = 0;
+  if (texture != (IImage *)0x0) {
+    self = I3DGetDriver();
+    self_00 = (*self->vtable->CreateVisual)(self,0x4a4f5250);
+    *(I3D_frame **)((int)this + 0x20) = self_00;
+    (*self_00->vtable[1].GetChild)(self_00,(int)texture);
+    (**(code **)(**(int **)((int)this + 0x20) + 0x30))(*(int **)((int)this + 0x20),0);
+    (**(code **)(**(int **)((int)this + 0x20) + 0x24))(*(int **)((int)this + 0x20));
+    return;
+  }
+  *(undefined4 *)((int)this + 0x20) = 0;
+  return;
+}
+
+// @00454e20 size=449 callers=C_ShotManager::AddBloodDrop
+void __thiscall C_BloodDrop__Reuse(void *this,S_vector4 *pos,S_vector4 *dir,IImage *texture)
+{
+  // locals: float *pfVar1; I3D_driver *self; I3D_frame *pIVar2; float fVar3; int *piVar4
+  if (*(int *)((int)this + 0x20) == 0) {
+    if (texture == (IImage *)0x0) {
+      *(undefined1 *)((int)this + 0x24) = 1;
+      return;
+    }
+    self = I3DGetDriver();
+    pIVar2 = (*self->vtable->CreateVisual)(self,0x4a4f5250);
+    *(I3D_frame **)((int)this + 0x20) = pIVar2;
+  }
+  piVar4 = *(int **)((int)this + 0x20);
+  (**(code **)(*piVar4 + 0x9c))();
+  (**(code **)(**(int **)((int)this + 0x20) + 0x30))(*(int **)((int)this + 0x20),0);
+  (**(code **)(**(int **)((int)this + 0x20) + 0x24))(*(int **)((int)this + 0x20));
+  pfVar1 = (float *)((int)this + 0x10);
+  *(int *)this = *piVar4;
+  *(int *)((int)this + 4) = piVar4[1];
+  *(int *)((int)this + 8) = piVar4[2];
+  *(int *)((int)this + 0xc) = piVar4[3];
+  *pfVar1 = (float)texture->vtable;
+  *(IImage_vtbl **)((int)this + 0x14) = texture[1].vtable;
+  *(IImage_vtbl **)((int)this + 0x18) = texture[2].vtable;
+  *(IImage_vtbl **)((int)this + 0x1c) = texture[3].vtable;
+  fVar3 = *(float *)((int)this + 0x18) * *(float *)((int)this + 0x18) +
+          *(float *)((int)this + 0x14) * *(float *)((int)this + 0x14) + *pfVar1 * *pfVar1;
+  if (ABS(fVar3 - 1.0) < 1e-08) goto LAB_00454faa;
+  if (1e-08 <= fVar3) {
+    fVar3 = 1.0 / SQRT(fVar3);
+    *pfVar1 = fVar3 * *pfVar1;
+    *(float *)((int)this + 0x14) = fVar3 * *(float *)((int)this + 0x14);
+    fVar3 = fVar3 * *(float *)((int)this + 0x18);
+  }
+  else {
+    if (*pfVar1 != 0.0) {
+      if (0.0 <= *pfVar1) {
+        *pfVar1 = 1.0;
+      }
+      else {
+        *pfVar1 = -1.0;
+      }
+      goto LAB_00454faa;
+    }
+    if (*(float *)((int)this + 0x18) == 0.0) {
+      if (0.0 <= *(float *)((int)this + 0x14)) {
+        *(undefined4 *)((int)this + 0x14) = 0x3f800000;
+      }
+      else {
+        *(undefined4 *)((int)this + 0x14) = 0xbf800000;
+      }
+      goto LAB_00454faa;
+    }
+    if (0.0 <= *(float *)((int)this + 0x18)) {
+      fVar3 = 1.0;
+    }
+    else {
+      fVar3 = -1.0;
+    }
+  }
+  *(float *)((int)this + 0x18) = fVar3;
+LAB_00454faa:
+  fVar3 = RandFloat();
+  fVar3 = (fVar3 - 0.5) + (fVar3 - 0.5) + 3.0;
+  *pfVar1 = fVar3 * *pfVar1;
+  *(float *)((int)this + 0x14) = fVar3 * *(float *)((int)this + 0x14);
+  *(float *)((int)this + 0x18) = fVar3 * *(float *)((int)this + 0x18);
+  *(undefined1 *)((int)this + 0x24) = 0;
+  *(undefined4 *)((int)this + 0x28) = 0;
+  return;
+}
+
+// @00454ff0 size=578 callers=C_BloodDrop::Tick
+void __thiscall C_BloodDrop__Land(void *this,S_vector *pos,S_vector4 *normal)
+{
+  // locals: float fVar1; C_game *pCVar2; I3D_sector *pIVar3; float10 extraout_ST0; float fVar4; float10 *__return_storage_ptr__; int iVar5; char cVar6; int *piStack_80; int *piStack_7c; float fStack_78; int *piStack_74; undefined4 uStack_70; undefined4 uStack_6c; S_vector SStack_5c; float local_28 [2]; float local_20; float local_1c; float local_18; int *piVar7
+  local_28[0] = normal->z * 0.02;
+  fVar1 = normal->w;
+  local_20 = normal->x * 0.02 + pos->x;
+  SStack_5c.z = 0.0;
+  local_1c = normal->y * 0.02 + pos->y;
+  local_18 = local_28[0] + pos->z;
+  SStack_5c.y = *(float *)((int)this + 0x20);
+  SStack_5c.x = 6.36553e-39;
+  (**(code **)(*(int *)SStack_5c.y + 0xb8))();
+  SStack_5c.x = (float)local_28;
+  (**(code **)(**(int **)((int)this + 0x20) + 8))();
+  fVar4 = RandFloat();
+  iVar5 = *(int *)((int)this + 0x20);
+  fVar4 = (fVar4 - 0.5) * 0.1 + 0.2;
+  *(float *)(iVar5 + 0xd0) = fVar4;
+  *(float *)(iVar5 + 0xd4) = fVar4;
+  *(undefined4 *)(iVar5 + 0xd8) = 0x3d4ccccd;
+  *(float *)(iVar5 + 0xdc) = fVar1;
+  if ((*(byte *)(iVar5 + 0xe0) & 8) == 0) {
+    uStack_6c = 0x4550f8;
+    S_quat::Make((S_quat *)(iVar5 + 0xc0),(S_matrix *)(iVar5 + 0x80));
+  }
+  *(uint *)(iVar5 + 0xe0) = *(uint *)(iVar5 + 0xe0) & 0xfffffecb | 0x40000008;
+  iVar5 = **(int **)((int)this + 0x20);
+  RandFloat();
+  uStack_6c = *(undefined4 *)((int)this + 0x20);
+  uStack_70 = 0x455136;
+  (**(code **)(iVar5 + 0x1c))();
+  piStack_74 = *(int **)((int)this + 0x20);
+  uStack_70 = 1;
+  fStack_78 = 6.365802e-39;
+  (**(code **)(*piStack_74 + 0xb4))();
+  piStack_7c = *(int **)((int)this + 0x20);
+  fStack_78 = 1.4013e-45;
+  piStack_80 = (int *)0x45514f;
+  (**(code **)(*piStack_7c + 0x30))();
+  piStack_80 = *(int **)((int)this + 0x20);
+  (**(code **)(*piStack_80 + 0x24))();
+  (**(code **)(**(int **)((int)this + 0x20) + 0x38))(*(int **)((int)this + 0x20),0,1);
+  pCVar2 = GetGame();
+  pIVar3 = (*pCVar2->m_scene->vtable->GetSector)(pCVar2->m_scene,&SStack_5c);
+  piVar7 = *(int **)((int)this + 0x20);
+  (**(code **)(*piVar7 + 0x38))(piVar7,pIVar3,1);
+  cVar6 = (char)piVar7;
+  iVar5 = 1;
+  __return_storage_ptr__ = (float10 *)&uStack_70;
+  pCVar2 = GetGame();
+  C_game::GetLightIntensity(pCVar2,__return_storage_ptr__,(float *)pIVar3,iVar5,cVar6);
+  fVar1 = (float)extraout_ST0;
+  piVar7 = *(int **)((int)this + 0x20);
+  if ((float10)0.2 <= extraout_ST0) {
+    fStack_78 = fVar1 * (float)piVar7[0x7e];
+    piStack_7c = (int *)(fVar1 * (float)piVar7[0x7d]);
+    piStack_80 = (int *)(fVar1 * (float)piVar7[0x7c]);
+  }
+  else {
+    fStack_78 = (float)piVar7[0x7e] * 0.2;
+    piStack_7c = (int *)((float)piVar7[0x7d] * 0.2);
+    piStack_80 = (int *)((float)piVar7[0x7c] * 0.2);
+  }
+  (**(code **)(*piVar7 + 0xb0))(piVar7,&piStack_80);
+  (**(code **)(**(int **)((int)this + 0x20) + 0xb8))(*(int **)((int)this + 0x20),3);
+  (**(code **)(**(int **)((int)this + 0x20) + 0x24))(*(int **)((int)this + 0x20));
+  *(undefined1 *)((int)this + 0x24) = 1;
+  return;
+}
+
+// @00455240 size=270 callers=C_ShotManager::Update
+int __thiscall C_BloodDrop__Tick(void *this,int timeDelta)
+{
+  // locals: float fVar1; int iVar2; float local_40; float local_3c; float local_38; S_vector4 local_30; S_vector local_20 [2]
+  if (*(char *)((int)this + 0x24) == '\0') {
+    if (*(int *)((int)this + 0x20) == 0) {
+      return 2;
+    }
+    iVar2 = *(int *)((int)this + 0x28) + timeDelta;
+    *(int *)((int)this + 0x28) = iVar2;
+    if (1000 < iVar2) {
+      return 2;
+    }
+    fVar1 = (float)timeDelta;
+    local_30.y = fVar1 * *(float *)((int)this + 0x14);
+    local_30.z = fVar1 * *(float *)((int)this + 0x18);
+    local_40 = fVar1 * *(float *)((int)this + 0x10) * 0.001;
+    local_3c = local_30.y * 0.001;
+    local_38 = local_30.z * 0.001;
+    iVar2 = CollisionRayTest(this,&local_40,&local_20[0].x,&local_30.x,0xffffffff,0);
+    if (iVar2 != 0) {
+      C_BloodDrop__Land(this,local_20,&local_30);
+      return 0;
+    }
+    *(float *)this = local_40 + *(float *)this;
+    *(float *)((int)this + 4) = local_3c + *(float *)((int)this + 4);
+    *(float *)((int)this + 8) = local_38 + *(float *)((int)this + 8);
+    if (400 < *(int *)((int)this + 0x28)) {
+      *(float *)((int)this + 0x14) = *(float *)((int)this + 0x14) - fVar1 * 0.001 * 9.8;
+    }
+  }
+  return 0;
+}
+
+// @00455350 size=24 callers=C_ShotManager::StopMission,C_ShotManager::RestartMission
+void __thiscall C_BloodDrop__Release(void *this)
+{
+  // locals: undefined4 *puVar1
+  puVar1 = *(undefined4 **)((int)this + 0x20);
+  if (puVar1 != (undefined4 *)0x0) {
+    (**(code **)*puVar1)(puVar1);
+  }
+  *(undefined4 *)((int)this + 0x20) = 0;
+  return;
+}
+
+// @00455370 size=281 callers=ConstructHitZonesThunk,ConstructHitZones
+void __thiscall C_HitZones__C_HitZones(void *this)
+{
+  // locals: char cVar1; char *pcVar2
+  pcVar2 = &DAT_008390f0;
+  *(undefined4 *)this = 0;
+  *(undefined4 *)((int)this + 0x2c) = 1;
+  *(undefined4 *)((int)this + 0x30) = 6;
+  *(undefined4 *)((int)this + 0x34) = 0xd;
+  *(undefined4 *)((int)this + 0x38) = 0xe;
+  *(undefined4 *)((int)this + 0x3c) = 9;
+  *(undefined4 *)((int)this + 0x40) = 10;
+  *(undefined4 *)((int)this + 0x44) = 0x14;
+  *(undefined4 *)((int)this + 0x48) = 0x15;
+  *(undefined4 *)((int)this + 0x4c) = 0x10;
+  *(undefined4 *)((int)this + 0x50) = 0x11;
+  do {
+    cVar1 = *pcVar2;
+    pcVar2[(int)this + -0x83909c] = cVar1;
+    pcVar2 = pcVar2 + 1;
+  } while (cVar1 != '\0');
+  pcVar2 = &DAT_008390ec;
+  do {
+    cVar1 = *pcVar2;
+    pcVar2[(int)this + -0x839096] = cVar1;
+    pcVar2 = pcVar2 + 1;
+  } while (cVar1 != '\0');
+  pcVar2 = &DAT_008390e8;
+  do {
+    cVar1 = *pcVar2;
+    pcVar2[(int)this + -0x839090] = cVar1;
+    pcVar2 = pcVar2 + 1;
+  } while (cVar1 != '\0');
+  pcVar2 = &DAT_008390e4;
+  do {
+    cVar1 = *pcVar2;
+    pcVar2[(int)this + -0x83908a] = cVar1;
+    pcVar2 = pcVar2 + 1;
+  } while (cVar1 != '\0');
+  pcVar2 = &DAT_008390e0;
+  do {
+    cVar1 = *pcVar2;
+    pcVar2[(int)this + -0x839084] = cVar1;
+    pcVar2 = pcVar2 + 1;
+  } while (cVar1 != '\0');
+  pcVar2 = &DAT_008390dc;
+  do {
+    cVar1 = *pcVar2;
+    pcVar2[(int)this + -0x83907e] = cVar1;
+    pcVar2 = pcVar2 + 1;
+  } while (cVar1 != '\0');
+  pcVar2 = &DAT_008390d8;
+  do {
+    cVar1 = *pcVar2;
+    pcVar2[(int)this + -0x839078] = cVar1;
+    pcVar2 = pcVar2 + 1;
+  } while (cVar1 != '\0');
+  pcVar2 = &DAT_008390d4;
+  do {
+    cVar1 = *pcVar2;
+    pcVar2[(int)this + -0x839072] = cVar1;
+    pcVar2 = pcVar2 + 1;
+  } while (cVar1 != '\0');
+  pcVar2 = &DAT_008390d0;
+  do {
+    cVar1 = *pcVar2;
+    pcVar2[(int)this + -0x83906c] = cVar1;
+    pcVar2 = pcVar2 + 1;
+  } while (cVar1 != '\0');
+  pcVar2 = &DAT_008390cc;
+  do {
+    cVar1 = *pcVar2;
+    pcVar2[(int)this + -0x839066] = cVar1;
+    pcVar2 = pcVar2 + 1;
+  } while (cVar1 != '\0');
+  return;
+}
+
+// @00455490 size=140 callers=C_ShotManager::StartMission
+void __thiscall C_HitZones__Load(void *this)
+{
+  // locals: I3D_driver *self; I3D_frame *pIVar1; void *pvVar2; undefined4 uVar3; C_game *pCVar4; undefined4 *puVar5; int iVar6; int iVar7
+  self = I3DGetDriver();
+  pIVar1 = (*self->vtable->CreateFrame)(self,9);
+  *(I3D_frame **)this = pIVar1;
+  pvVar2 = C_auto_00815f90::ModelCacheBase_OpenInto
+                     ((C_auto_00815f90 *)&g_modelCache,(int *)pIVar1,(byte *)"humanzones",0
+                      ,(int *)0x0);
+  if (pvVar2 != (void *)0x0) {
+    (**(code **)**(undefined4 **)this)(*(undefined4 **)this);
+    *(undefined4 *)this = 0;
+    return;
+  }
+  iVar7 = (int)this + 0x54;
+  iVar6 = 10;
+  puVar5 = this;
+  do {
+    puVar5 = puVar5 + 1;
+    uVar3 = (**(code **)(**(int **)this + 0x48))(*(int **)this,iVar7,0xffff);
+    *puVar5 = uVar3;
+    iVar7 = iVar7 + 2;
+    iVar6 = iVar6 + -1;
+  } while (iVar6 != 0);
+  pCVar4 = GetGame();
+  (**(code **)(**(int **)this + 0x38))
+            (*(int **)this,*(undefined4 *)(pCVar4->m_scene->_pad_01fc + 4),0);
+  (**(code **)(**(int **)this + 0x30))(*(int **)this,0);
+  return;
+}
+
+// @00455520 size=22 callers=C_ShotManager::StopMission
+void __thiscall C_HitZones__Free(void *this)
+{
+  // locals: undefined4 *puVar1
+  puVar1 = *(undefined4 **)this;
+  if (puVar1 != (undefined4 *)0x0) {
+    (**(code **)*puVar1)(puVar1);
+  }
+  *(undefined4 *)this = 0;
+  return;
+}
+
+// @00455540 size=228 callers=
+void __thiscall C_HitZones__Place(void *this,I3D_frame *human)
+{
+  // locals: I3D_frame *this_00; int iVar1; I3D_frame *pIVar2; S_vector *pSVar3; int iVar4; S_matrix *pSVar5; int *piVar6; float *pfVar7; int iStack_38; S_vector aSStack_2c [3]
+  if (*(int *)this != 0) {
+    pIVar2 = (*human->vtable->FindChildFrame)(human,&DAT_00839100,1);
+    pIVar2 = pIVar2[1].m_ownerModel;
+    iStack_38 = 10;
+    do {
+      piVar6 = (int *)((int)this + 4);
+      this_00 = *(I3D_frame **)(pIVar2->_pad_0004 + *(int *)((int)this + 0x2c) * 4 + -4);
+      if ((this_00->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(this_00);
+      }
+      iVar1 = *piVar6;
+      pSVar5 = &this_00->m_worldMatrix;
+      pfVar7 = (float *)(iVar1 + 0x80);
+      for (iVar4 = 0x10; iVar4 != 0; iVar4 = iVar4 + -1) {
+        *pfVar7 = pSVar5->m[0][0];
+        pSVar5 = (S_matrix *)(pSVar5->m[0] + 1);
+        pfVar7 = pfVar7 + 1;
+      }
+      pSVar3 = S_matrix::GetScale((S_matrix *)(iVar1 + 0x80),aSStack_2c);
+      *(float *)(iVar1 + 0xd0) = pSVar3->x;
+      *(float *)(iVar1 + 0xd4) = pSVar3->y;
+      *(float *)(iVar1 + 0xd8) = pSVar3->z;
+      *(float *)(iVar1 + 0xdc) = pSVar3[1].x;
+      *(uint *)(iVar1 + 0xe0) = *(uint *)(iVar1 + 0xe0) & 0xffffffd7 | 0x40000014;
+      (**(code **)(*(int *)*piVar6 + 0x24))((int *)*piVar6);
+      iStack_38 = iStack_38 + -1;
+      this = piVar6;
+    } while (iStack_38 != 0);
+  }
+  return;
+}
+
+// @00455650 size=22 callers=C_ProjectileShot::Tick,C_BulletShot::Tick
+bool __fastcall IsCollisionHitCloser(void *a,void *b)
+{
+  if (*(float *)((int)a + 0x24) < *(float *)((int)b + 0x24)) {
+    return true;
+  }
+  return false;
+}
+
+// @00455670 size=555 callers=C_ProjectileShot::Tick,C_BulletShot::Tick,MeleeAttack,006057b0
+int __thiscall C_HitZones__GetHitZone(void *this,C_Human *human,S_vector *pos,S_vector *dir)
+{
+  // locals: I3D_scene *pIVar1; I3D_scene_vtbl *pIVar2; int iVar3; S_vector *pSVar4; C_game *pCVar5; I3D_frame *pIVar6; int iVar7; int *piVar8; void *unaff_ESI; S_matrix *pSVar9; int unaff_EDI; float *pfVar10; undefined1 *puVar11; undefined4 uVar12; undefined4 uVar13; undefined4 uVar14; undefined4 uVar15; void *pvStack_78; C_Item *pCStack_74; undefined4 uStack_60; S_vector SStack_5c; undefined1 auStack_50 [76]
+  if (*(int *)this != 0) {
+    iVar3 = (**(code **)(*(int *)human->m_020 + 0x48))(human->m_020,&DAT_00839100,1);
+    pCStack_74 = *(C_Item **)(iVar3 + 0x214);
+    if (pCStack_74 != (C_Item *)0x0) {
+      pvStack_78 = (void *)0x0;
+      do {
+        pIVar6 = *(I3D_frame **)
+                  (pCStack_74->_pad_001e +
+                  *(int *)((int)this + (int)pvStack_78 * 4 + 0x2c) * 4 + -0x1e);
+        if ((pIVar6->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar6);
+        }
+        iVar3 = *(int *)((int)unaff_ESI + (int)pvStack_78 * 4 + 4);
+        pSVar9 = &pIVar6->m_worldMatrix;
+        pfVar10 = (float *)(iVar3 + 0x80);
+        for (iVar7 = 0x10; iVar7 != 0; iVar7 = iVar7 + -1) {
+          *pfVar10 = pSVar9->m[0][0];
+          pSVar9 = (S_matrix *)(pSVar9->m[0] + 1);
+          pfVar10 = pfVar10 + 1;
+        }
+        pSVar4 = S_matrix::GetScale((S_matrix *)(iVar3 + 0x80),&SStack_5c);
+        *(float *)(iVar3 + 0xd0) = pSVar4->x;
+        *(float *)(iVar3 + 0xd4) = pSVar4->y;
+        *(float *)(iVar3 + 0xd8) = pSVar4->z;
+        *(float *)(iVar3 + 0xdc) = pSVar4[1].x;
+        *(uint *)(iVar3 + 0xe0) = *(uint *)(iVar3 + 0xe0) & 0xffffffd7 | 0x40000014;
+        iVar3 = *(int *)((int)unaff_ESI + (int)pvStack_78 * 4 + 4);
+        *(undefined4 *)(iVar3 + 0xd0) = 0x3f800000;
+        *(undefined4 *)(iVar3 + 0xd4) = 0x3f800000;
+        *(undefined4 *)(iVar3 + 0xd8) = 0x3f800000;
+        *(undefined4 *)(iVar3 + 0xdc) = uStack_60;
+        if ((*(byte *)(iVar3 + 0xe0) & 8) == 0) {
+          S_quat::Make((S_quat *)(iVar3 + 0xc0),(S_matrix *)(iVar3 + 0x80));
+        }
+        *(uint *)(iVar3 + 0xe0) = *(uint *)(iVar3 + 0xe0) & 0xfffffecb | 0x40000008;
+        piVar8 = *(int **)((int)unaff_ESI + (int)pvStack_78 * 4 + 4);
+        (**(code **)(*piVar8 + 0x24))(piVar8);
+        if (pvStack_78 == (void *)0x1) {
+          if ((undefined4 *)human->m_074 == (undefined4 *)0x0) {
+            piVar8 = (int *)0x0;
+          }
+          else {
+            piVar8 = *(int **)human->m_074;
+          }
+          pCStack_74 = (C_Item *)(**(code **)(*piVar8 + 0x40))();
+          if ((pCStack_74 != (C_Item *)0x0) &&
+             (pCStack_74->m_def->m_component[1].vtable == (C_ItemComponent_vtbl *)0x0)) {
+            pCVar5 = GetGame();
+            pIVar1 = pCVar5->m_scene;
+            uVar15 = 0;
+            uVar14 = 0;
+            pIVar2 = pIVar1->vtable;
+            uVar13 = 0;
+            puVar11 = auStack_50;
+            uVar12 = 0x4040000;
+            pIVar6 = C_Item::GetFrame(pCStack_74,0);
+            iVar3 = (*pIVar2->Slot104)(pIVar1,pos,dir,pIVar6,puVar11,uVar12,uVar13,uVar14,uVar15);
+            pvStack_78 = unaff_ESI;
+            if (iVar3 != 0) {
+              return 0xb;
+            }
+          }
+        }
+        pCVar5 = GetGame();
+        iVar3 = (*pCVar5->m_scene->vtable->Slot104)
+                          (pCVar5->m_scene,pos,dir,
+                           *(undefined4 *)(unaff_EDI + 4 + (int)pvStack_78 * 4),auStack_50,0x8040000
+                           ,0,0,0);
+        if (iVar3 != 0) {
+          return (int)pvStack_78;
+        }
+        pvStack_78 = (void *)((int)pvStack_78 + 1);
+        this = unaff_ESI;
+      } while ((int)pvStack_78 < 10);
+    }
+  }
+  return 0xff;
+}
+
+// @004558a0 size=279 callers=MeleeAttack
+void PrintHitZone(int zone)
+{
+  // locals: C_game *this; C_game *this_00; C_game *this_01; C_game *this_02; C_game *this_03; C_game *this_04; C_game *this_05; C_game *this_06; C_game *this_07; C_game *this_08; C_game *this_09
+  if (zone < 0x100) {
+    if (zone == 0xff) {
+      GetGame();
+      C_game::Print(this_09);
+    }
+    else {
+      switch(zone) {
+      case 0:
+        GetGame();
+        C_game::Print(this);
+        return;
+      case 1:
+        GetGame();
+        C_game::Print(this_00);
+        return;
+      case 2:
+        GetGame();
+        C_game::Print(this_01);
+        return;
+      case 3:
+        GetGame();
+        C_game::Print(this_02);
+        return;
+      case 4:
+        GetGame();
+        C_game::Print(this_03);
+        return;
+      case 5:
+        GetGame();
+        C_game::Print(this_04);
+        return;
+      case 6:
+        GetGame();
+        C_game::Print(this_05);
+        return;
+      case 7:
+        GetGame();
+        C_game::Print(this_06);
+        return;
+      case 8:
+        GetGame();
+        C_game::Print(this_07);
+        return;
+      case 9:
+        GetGame();
+        C_game::Print(this_08);
+        return;
+      }
+    }
+  }
+  return;
+}
+
+// @004559e0 size=37 callers= vt=00832004[66]
+void FUN_004559e0(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 = DAT_0098c1c0 | 1;
+  }
+  atexit(&LAB_00405c90);
+  return;
+}
+

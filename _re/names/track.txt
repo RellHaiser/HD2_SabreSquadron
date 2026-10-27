@@ -1,0 +1,107 @@
+# Source file 0x00401000-0x00405c5f: track module + COMDAT copies of shared inlines.
+00401000 vector_constructor_iterator
+00401030 StaticInit_TrackModule
+00401040 StaticConstruct_TrackModule
+00401060 C_TrackModule::C_TrackModule | C_TrackModule * __thiscall C_TrackModule(C_TrackModule *this, int id, char *name)
+004010b0 C_TrackModule::StartMission | void __thiscall StartMission(C_TrackModule *this, bool server)
+004010c0 C_TrackModule::ScalarDeletingDestructor
+004010e0 C_TrackModule::~C_TrackModule
+00401120 StaticRegisterDestructor_TrackModule
+00401140 C_TrackModule::RestartMission | void __thiscall RestartMission(C_TrackModule *this, bool server)
+00401160 C_TrackModule::SaveGame
+00401440 C_TrackModule::LoadGame
+00401a90 C_TrackModule::RemovePlayer
+00401b20 C_TrackModule::CreatePlayer
+00401d30 C_TrackPlayer::Delete
+00401d40 C_TrackModule::AddTrack
+00401ec0 C_Track::Delete
+00401ed0 C_TrackModule::FindTrack
+00401f40 C_TrackModule::StopMission
+00401fd0 C_TrackModule::Update
+00402020 C_TrackModule::LoadMissionData
+00402030 C_TrackModule::FreeMissionData
+00402040 C_TrackModule::FreeTracks
+004020c0 C_Track::~C_Track
+00402120 C_TrackModule::LoadTracks
+00402860 S_quat::Copy
+00402880 C_Track::AddKey
+004029f0 C_TrackPlayer::GetOffsetFromStart
+00402a70 C_TrackPlayer::AdvanceAlongKeys
+00402bd0 C_TrackPlayer::TimeToKey | float __thiscall TimeToKey(C_TrackPlayer *this, S_vector *pos, int keyIndex)
+00402ed0 C_TrackPlayer::TimeToPathPoint | float __thiscall TimeToPathPoint(C_TrackPlayer *this, S_vector *pos, int pointIndex)
+004030d0 C_TrackPlayer::AccelerateTowardsKey
+004034c0 C_TrackPlayer::AccelerateTowardsPathPoint
+004038b0 HermiteInterpolate
+00403a50 BezierInterpolate
+00403bc0 C_TrackPlayer::SubdivideBezier
+004042e0 C_TrackPlayer::BuildPath
+00404620 C_TrackPlayer::MoveAlongPath | float __thiscall MoveAlongPath(C_TrackPlayer *this, S_vector *pos, float time)
+00404740 C_TrackPlayer::Advance
+00404890 C_TrackPlayer::Update
+00404c80 C_TrackPlayer::FindPointAtDistance
+
+# shared inline helpers instantiated here
+00404260 S_vector::Set
+00404280 S_vector::operator_plus
+004042b0 S_vector::operator_mul_scalar | S_vector * __fastcall operator_mul_scalar(S_vector *result, S_vector *v, float s)
+00405040 std_string::Tidy
+00405090 EmptyFunction
+004050a0 C_str::CreateRep
+004050e0 C_str::ReleaseRep
+004050f0 OperatorDeleteThunk
+00405100 C_fstr_Construct | C_str * __cdecl C_fstr_Construct(C_str *self, char *format, ...)
+00405160 C_str::~C_str
+00405180 C_str::operator_assign
+00405200 vector_ptr_insert_n_A
+00405410 vector_ptr_insert_n_B
+00405620 C_chunk::Open | bool __thiscall Open(C_chunk *this, char *fileName, bool write)
+00405690 C_chunk::~C_chunk
+00405750 C_chunk::Close | bool __thiscall Close(C_chunk *this)
+00405820 C_chunk::Begin | bool __thiscall Begin(C_chunk *this, unsigned short id)
+00405890 C_chunk::Ascend | bool __thiscall Ascend(C_chunk *this, uint *size)
+00405940 C_chunk::Read | bool __thiscall Read(C_chunk *this, void *buffer, int size)
+004059b0 C_chunk::Write | bool __thiscall Write(C_chunk *this, void *data, int size)
+004059f0 C_chunk::WriteChunk | void __thiscall WriteChunk(C_chunk *this, unsigned short id, void *data, int size)
+00405af0 C_Module::Init | void __thiscall Init(C_Module *this)
+00405b00 C_Module::Done | void __thiscall Done(C_Module *this)
+00405b10 C_Module::Tick | void __thiscall Tick(C_Module *this, int timeDelta)
+00405b20 C_Module::OnMessage | bool __thiscall OnMessage(C_Module *this, C_BitStream *msg)
+00405b30 C_Module::Unknown28 | bool __thiscall Unknown28(C_Module *this, C_BitStream *msg)
+00405b40 std_string::max_size
+00405b50 std_string::Grow
+00405bd0 std_string::CopyTail
+
+# module.cpp (0x0048d930..)
+0048d930 C_Module::WriteState | void __thiscall WriteState(C_Module *this, C_BitStream *msg)
+0048d940 C_Module::ReadState | void __thiscall ReadState(C_Module *this, C_BitStream *msg)
+0048d950 C_Module::C_Module
+0048da10 C_Module::ScalarDeletingDestructor
+0048da30 C_Module::~C_Module
+0048da60 ModuleManager::BroadcastInit
+0048da80 ModuleManager::BroadcastDone
+0048daa0 ModuleManager::BroadcastUpdateRealTime
+0048dad0 ModuleManager::BroadcastUpdate
+0048db00 ModuleManager::BroadcastStartMission
+0048db30 ModuleManager::BroadcastWriteState
+0048db60 ModuleManager::BroadcastReadState
+0048db90 ModuleManager::BroadcastStopMission
+0048dbc0 ModuleManager::BroadcastRestartMission
+0048dbf0 ModuleManager::BroadcastLoadMissionData
+0048dc20 ModuleManager::BroadcastFreeMissionData
+0048dc50 ModuleManager::CallUnknown28
+0048dc70 ModuleManager::DispatchMessage
+0048dc90 ModuleManager::SaveGame
+0048de60 ModuleManager::LoadGame
+004115d0 C_Module::Update | void __thiscall Update(C_Module *this, int timeDelta)
+004115e0 C_Module::LoadMissionData | void __thiscall LoadMissionData(C_Module *this, bool server)
+004115f0 C_Module::FreeMissionData | void __thiscall FreeMissionData(C_Module *this, bool server)
+00411600 C_Module::StartMission | void __thiscall StartMission(C_Module *this, bool server)
+00411610 C_Module::StopMission | void __thiscall StopMission(C_Module *this, bool server)
+00411620 C_Module::RestartMission | void __thiscall RestartMission(C_Module *this, bool server)
+00411630 C_Module::SaveGame | bool __thiscall SaveGame(C_Module *this, C_chunk *chunk)
+00411640 C_Module::LoadGame | bool __thiscall LoadGame(C_Module *this, C_chunk *chunk)
+
+# globals
+00867a64 g_trackModule @
+0089bbe8 g_modules @
+008ae8f4 g_game @

@@ -1,0 +1,30 @@
+# The camera module (C_CameraModule, "CameraModule", vtable 0x0080fdd0; not ported yet, declared in
+# src/game/world.h). Only the slots other ports call are named here; m_240 is the game camera.
+
+00465a10 C_CameraModule::GetCameraPos | bool __thiscall GetCameraPos(C_CameraModule *this, int index, S_vector4 * pos)
+00465b40 C_CameraModule::GetCameraDir | bool __thiscall GetCameraDir(C_CameraModule *this, int index, S_vector4 * dir)
+0046cb20 C_CameraModule::SetSpecialMode | void __thiscall SetSpecialMode(C_CameraModule *this, int mode, bool on, I3D_frame * target)
+00465ee0 C_CameraModule::IsGameCamera | bool __thiscall IsGameCamera(C_CameraModule *this, I3D_frame * camera)
+00465e50 C_CameraModule::SetFov | bool __thiscall SetFov(C_CameraModule *this, float fov)
+00465e80 C_CameraModule::GetFov | float __thiscall GetFov(C_CameraModule *this)
+00465de0 C_CameraModule::GetViewDistance | float __thiscall GetViewDistance(C_CameraModule *this)
+00465e00 C_CameraModule::SetFov2 | bool __thiscall SetFov2(C_CameraModule *this, float fov)
+00465e30 C_CameraModule::GetFov2 | float __thiscall GetFov2(C_CameraModule *this)
+004650b0 C_CameraModule::GetCamera | I3D_frame * __thiscall GetCamera(C_CameraModule *this)
+00465ad0 C_CameraModule::SetBlendTime | void __thiscall SetBlendTime(C_CameraModule *this, int time)
+00465b20 C_CameraModule::SetTarget | void __thiscall SetTarget(C_CameraModule *this, I3D_frame * frame, int speed)
+00465070 C_CameraModule::GetState | bool __thiscall GetState(C_CameraModule *this)
+004650c0 C_CameraModule::GetListenerSector | I3D_sector * __thiscall GetListenerSector(C_CameraModule *this)
+
+# The command map's tactical camera (the object behind C_CameraModule's slot +0x88, named
+# C_CameraHumanEffects for its LookAt; see src/game/world.h).
+00462ae0 C_CameraHumanEffects::SetTactical
+00462770 C_CameraHumanEffects::IsTactical
+004632c0 C_CameraHumanEffects::SetTacticalMode
+004633a0 C_CameraHumanEffects::SetTacticalMotion
+00462750 C_CameraHumanEffects::SetTacticalZoom
+00463ba0 C_CameraHumanEffects::UpdateTactical
+# The keeper of a camera dummy's placement (pending.h; the car's seats).
+00465f00 C_CameraFrameKeeper::C_CameraFrameKeeper
+00466010 C_CameraFrameKeeper::Restore
+00466110 C_CameraFrameKeeper::Update

@@ -1,0 +1,3086 @@
+// 0x00416e10
+uint32_t __thiscall C_auto_0080f6fc::FUN_00416e10(C_auto_0080f6fc *this,int *param_1)
+{
+  local_14 = 0xffffffff;
+  if ((((g_gameRole & 1) == 0) || (param_1 == nullptr)) || (0x106 < *param_1 - 1U))
+  goto switchD_00416e6a_caseD_76;
+  piVar23 = nullptr;
+  ppvVar3 = &local_1c;
+  CVar14.rep = local_614.rep;
+  local_608 = (C_Door *)this;
+                    /* WARNING (jumptable): Sanity check requires truncation of jumptable */
+                    /* WARNING: Could not find normalized switch variable to match jumptable */
+  switch(*(uint8_t *)((int)&PTR_caseD_76_0041cdb8 + *param_1 + 3)) {
+  case 0:
+    iVar24 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    piVar23 = *(int **)(this->m_0b0 + ((int *)param_1[1])[1] * 4);
+    if (piVar23 != nullptr) {
+      *piVar23 = *piVar23 + 1;
+    }
+    local_14 = 0;
+    local_610 = piVar23;
+    if ((iVar24 != 0) ||
+       ((((this->m_100 != 0 && (piVar29 = *(int **)(this->m_100 + 0xec), piVar29 != nullptr)) &&
+         ((iVar24 = *piVar29, iVar24 != 0 &&
+          ((*(int *)(iVar24 + 0x18) == 10 && (*(int *)(iVar24 + 0xa8) != 0)))))) &&
+        (iVar24 = *(int *)(*(int *)(iVar24 + 0xa8) + 0x20), iVar24 != 0)))) {
+      piVar29 = piVar23 + 2;
+      if (piVar23 == nullptr) {
+        piVar29 = (int *)&DAT_00867a90;
+      }
+      C_ScriptModule::FUN_00427730((C_ScriptModule *)&g_scriptModule,iVar24,(char *)piVar29);
+    }
+    iVar24 = FUN_00416cf0((int)this);
+    if (piVar23 != nullptr) {
+      iVar24 = *piVar23 - 1;
+      *piVar23 = iVar24;
+      if (iVar24 == 0) {
+        operator_delete(piVar23);
+        return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
+      }
+    }
+    goto LAB_0041c8cd;
+  case 1:
+    iVar24 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    if ((((iVar24 != 0) &&
+         (piVar23 = *(int **)(iVar24 + 0xec), ExceptionList = &local_1c, piVar23 != nullptr)) &&
+        (iVar24 = *piVar23, ExceptionList = &local_1c, iVar24 != 0)) &&
+       (ExceptionList = &local_1c, *(int *)(iVar24 + 0x18) == 3)) {
+      C_TeamManager::FUN_00461290((C_TeamManager *)&g_teamManager,iVar24,(uint32_t *)0x1);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 2:
+    iVar24 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    if (((iVar24 != 0) &&
+        (piVar23 = *(int **)(iVar24 + 0xec), ExceptionList = &local_1c, piVar23 != nullptr)) &&
+       ((iVar24 = *piVar23, ExceptionList = &local_1c, iVar24 != 0 &&
+        ((ExceptionList = &local_1c, *(int *)(iVar24 + 0x18) == 3 &&
+         (ExceptionList = &local_1c,
+         piVar23 = (int *)C_TeamManager::FUN_00461290
+                                    ((C_TeamManager *)&g_teamManager,iVar24,nullptr),
+         CVar14.rep = local_614.rep, piVar23 != nullptr)))))) {
+      FUN_00461390(&g_teamManager,piVar23);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 3:
+    iVar24 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    if (((iVar24 != 0) &&
+        (piVar23 = *(int **)(iVar24 + 0xec), ExceptionList = &local_1c, piVar23 != nullptr)) &&
+       ((((local_60c.rep = (C_str_rep *)*piVar23, ExceptionList = &local_1c,
+          (C_auto_0080fc20 *)local_60c.rep != nullptr &&
+          ((ExceptionList = &local_1c, ((C_auto_0080fc20 *)local_60c.rep)->m_018 == (void *)0x3 &&
+           (iVar24 = *(int *)(this->m_090 + ((int *)param_1[1])[1] * 4), ExceptionList = &local_1c,
+           iVar24 != 0)))) &&
+         (piVar23 = *(int **)(iVar24 + 0xec), ExceptionList = &local_1c, piVar23 != nullptr)) &&
+        (((iVar24 = *piVar23, ExceptionList = &local_1c, iVar24 != 0 &&
+          (ExceptionList = &local_1c, *(int *)(iVar24 + 0x18) == 3)) &&
+         (ExceptionList = &local_1c,
+         piVar23 = (int *)C_TeamManager::FUN_00461290
+                                    ((C_TeamManager *)&g_teamManager,iVar24,nullptr),
+         CVar14.rep = local_614.rep, piVar23 != nullptr)))))) {
+      FUN_00461240(&g_teamManager,(int)local_60c.rep);
+      (**(code **)(*piVar23 + 8))(local_60c.rep);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 4:
+    iVar24 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    if ((((iVar24 != 0) &&
+         (piVar23 = *(int **)(iVar24 + 0xec), ExceptionList = &local_1c, piVar23 != nullptr)) &&
+        (iVar24 = *piVar23, ExceptionList = &local_1c, iVar24 != 0)) &&
+       (ExceptionList = &local_1c, *(int *)(iVar24 + 0x18) == 3)) {
+      FUN_00461240(&g_teamManager,iVar24);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 5:
+    iVar24 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    if (((iVar24 != 0) &&
+        (piVar23 = *(int **)(iVar24 + 0xec), ExceptionList = &local_1c, piVar23 != nullptr)) &&
+       ((iVar24 = *piVar23, ExceptionList = &local_1c, iVar24 != 0 &&
+        ((ExceptionList = &local_1c, *(int *)(iVar24 + 0x18) == 3 &&
+         (ExceptionList = &local_1c,
+         iVar24 = C_TeamManager::FUN_00461290
+                            ((C_TeamManager *)&g_teamManager,iVar24,nullptr),
+         CVar14.rep = local_614.rep, iVar24 != 0)))))) {
+      switch(*param_1) {
+      case 6:
+        FUN_00597420(*(void **)(iVar24 + 0x28),6);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      case 7:
+        FUN_00597420(*(void **)(iVar24 + 0x28),5);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      case 8:
+        FUN_00597420(*(void **)(iVar24 + 0x28),7);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      case 9:
+        FUN_00597420(*(void **)(iVar24 + 0x28),8);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      case 10:
+        FUN_00597420(*(void **)(iVar24 + 0x28),9);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      case 0xb:
+        FUN_00597420(*(void **)(iVar24 + 0x28),10);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      case 0xc:
+        local_560 = (float)*(int *)(this->m_0a0 + *(int *)(param_1[1] + 4) * 8) * 0.01;
+        local_55c = local_560;
+        local_558[0] = local_560;
+        FUN_005977f0(*(void **)(iVar24 + 0x28),&local_560);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      }
+    }
+    break;
+  case 6:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    CVar14.rep = local_614.rep;
+    if ((*piVar23 != 0) &&
+       (pCVar15 = (C_Door *)FUN_0041cf80(*piVar23), local_61c = pCVar15,
+       CVar14.rep = local_614.rep, pCVar15 != nullptr)) {
+      iVar24 = get_field_18_41d6f0((int)pCVar15);
+      if (iVar24 == 3) {
+        pCVar22 = pCVar15->vtable;
+        uVar43 = 0;
+        uVar44 = 0;
+        uVar12 = S_vector::Set(local_540,0,0,0);
+        uVar39 = S_vector::Set(&local_510,0,0,0);
+        (*pCVar22->vf35)(4,0xbf800000,uVar39,uVar12,uVar44,uVar43);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      }
+      iVar24 = get_field_18_41d6f0((int)pCVar15);
+      CVar14.rep = local_614.rep;
+      if (iVar24 == 0x19) {
+        C_AnimationActor::FUN_005b55e0((C_AnimationActor *)pCVar15,'\0');
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      }
+    }
+    break;
+  case 7:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    CVar14.rep = local_614.rep;
+    if (((*piVar23 != 0) &&
+        (pCVar15 = (C_Door *)FUN_0041cf80(*piVar23), local_61c = pCVar15,
+        CVar14.rep = local_614.rep, pCVar15 != nullptr)) &&
+       (iVar24 = get_field_18_41d6f0((int)pCVar15), CVar14.rep = local_614.rep, iVar24 == 3)) {
+      pCVar22 = pCVar15->vtable;
+      uVar43 = 0;
+      uVar44 = 0;
+      uVar12 = S_vector::Set(&local_430,0,0,0);
+      uVar39 = S_vector::Set(&local_440,0,0,0);
+      (*pCVar22->vf35)(0xe,0xbf800000,uVar39,uVar12,uVar44,uVar43);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 8:
+    iVar24 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    iVar33 = *(int *)(this->m_0b0 + ((int *)param_1[1])[1] * 4);
+    if (iVar33 == 0) {
+      local_614.rep = (C_str_rep *)&DAT_00867a90;
+    }
+    else {
+      local_614.rep = (C_str_rep *)(iVar33 + 8);
+    }
+    if (((iVar24 != 0) && (*(uint32_t **)(iVar24 + 0xec) != nullptr)) &&
+       ((this_00 = (C_Human *)**(uint32_t **)(iVar24 + 0xec),
+        this_00 != nullptr && (this_00->m_018 == 3)))) {
+      C_Human::FUN_005a87c0(this_00,(char *)local_614.rep);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    piVar23 = (int *)GetGEffects();
+    (**(code **)(*piVar23 + 0xac))(iVar24,local_614.rep);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 9:
+    pCVar15 = *(C_Door **)(this->m_090 + *(int *)param_1[1] * 4);
+    ppvVar3 = &local_1c;
+    local_61c = pCVar15;
+    if ((pCVar15 == nullptr) ||
+       (ppvVar3 = &local_1c, (short)*(uint32_t *)&pCVar15->m_0f8 != 6)) goto switchD_00416e6a_caseD_18;
+    if ((*(uint32_t *)(pCVar15->_pad_00d4 + 0xc) & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc((I3D_frame *)pCVar15);
+    }
+    pSVar30 = (S_matrix *)&pCVar15->m_040;
+    local_608 = (C_Door *)&local_61c->m_120;
+    local_600.x = *(float *)local_608;
+    local_600.y = (float)local_61c->m_124;
+    local_600.z = *(float *)&local_61c->m_128;
+    local_5f4 = *(uint32_t *)(local_61c->_pad_0129 + 3);
+    pSVar32 = S_vector::OperatorMul(&local_600,&local_5e0,pSVar30);
+    local_5c0 = pSVar32->x;
+    local_5bc = pSVar32->y;
+    local_5b8 = pSVar32->z;
+    local_5b4 = pSVar32[1].x;
+    local_5d0.x = pSVar32->x;
+    local_5d0.y = pSVar32->y;
+    local_5d0.z = pSVar32->z;
+    local_5c4 = pSVar32[1].x;
+    local_600.x = (float)local_608->m_010;
+    pSVar32 = S_vector::OperatorMul(&local_600,&local_5e0,pSVar30);
+    FUN_0041d070(&local_5d0,&pSVar32->x);
+    local_600.y = (float)local_608->m_014;
+    pSVar32 = S_vector::OperatorMul(&local_600,&local_5e0,pSVar30);
+    FUN_0041d070(&local_5d0,&pSVar32->x);
+    local_600.x = (float)local_608->vtable;
+    pSVar32 = S_vector::OperatorMul(&local_600,&local_5e0,pSVar30);
+    FUN_0041d070(&local_5d0,&pSVar32->x);
+    local_600.z = (float)local_608->m_018;
+    pSVar32 = S_vector::OperatorMul(&local_600,&local_5e0,pSVar30);
+    FUN_0041d070(&local_5d0,&pSVar32->x);
+    local_600.x = (float)local_608->m_010;
+    pSVar32 = S_vector::OperatorMul(&local_600,&local_5e0,pSVar30);
+    FUN_0041d070(&local_5d0,&pSVar32->x);
+    local_600.y = *(float *)local_608->_pad_0004;
+    pSVar32 = S_vector::OperatorMul(&local_600,&local_5e0,pSVar30);
+    FUN_0041d070(&local_5d0,&pSVar32->x);
+    local_600.x = (float)local_608->vtable;
+    pSVar32 = S_vector::OperatorMul(&local_600,&local_5e0,pSVar30);
+    FUN_0041d070(&local_5d0,&pSVar32->x);
+    CVar9.rep = (C_str_rep *)vector_size_e4_41fb80(0x89b4bc);
+    CVar14.rep = local_614.rep;
+    if (CVar9.rep != nullptr) {
+      do {
+        CVar9.rep = (C_str_rep *)CVar9.rep[-1].chars;
+        local_60c.rep = CVar9.rep;
+        local_618.rep = (C_str_rep *)FUN_00475dd0(&g_actorsModule,(int)CVar9.rep);
+        if ((((C_Door *)local_618.rep != nullptr) &&
+            (((C_Door *)local_618.rep)->m_018 == 3)) &&
+           ((cVar6 = FUN_005a63b0((int)local_618.rep), CVar9.rep = local_60c.rep, cVar6 != '\0' &&
+            (uVar28 = FUN_005a63f0((int)local_618.rep), CVar9.rep = local_60c.rep,
+            (char)uVar28 == '\0')))) {
+          pIVar1 = *(I3D_frame **)((int)&local_618.rep[0x43].length + 1);
+          if ((pIVar1->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar1);
+          }
+          CVar9.rep = local_60c.rep;
+          if (((((pIVar1->m_worldMatrix).m[3][0] < local_5c0) &&
+               ((pIVar1->m_worldMatrix).m[3][1] < local_5bc)) &&
+              ((pIVar1->m_worldMatrix).m[3][2] < local_5b8)) &&
+             (((local_5d0.x < (pIVar1->m_worldMatrix).m[3][0] &&
+               (local_5d0.y < (pIVar1->m_worldMatrix).m[3][1])) &&
+              (local_5d0.z < (pIVar1->m_worldMatrix).m[3][2])))) {
+            fVar38 = RandFloat();
+            local_61c = (C_Door *)((fVar38 - 0.5) + (fVar38 - 0.5));
+            fVar38 = RandFloat();
+            local_5e4.rep = (C_str_rep *)(fVar38 + fVar38 + 3.0);
+            fVar38 = RandFloat();
+            local_56c = (C_Door *)local_5e4.rep;
+            local_568 = (fVar38 - 0.5) + (fVar38 - 0.5);
+            local_570 = local_61c;
+            pIVar1 = *(I3D_frame **)((int)&local_618.rep[0x43].length + 1);
+            if ((pIVar1->m_frameFlags & 0x20) == 0) {
+              I3D_frame::UpdateWMatrixProc(pIVar1);
+            }
+            (*((C_auto_00812ff8_vtbl *)(local_618.rep)->refCount)->vf35)
+                      (2,0xbf800000,(pIVar1->m_worldMatrix).m + 3,&local_570,0,0);
+            CVar9.rep = local_60c.rep;
+          }
+        }
+      } while (CVar9.rep != nullptr);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 10:
+    local_618.rep = nullptr;
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_5e4.rep = (C_str_rep *)*pfVar13;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*(int *)(iVar24 + 4));
+    if (*piVar23 != 0) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,*(int *)(iVar24 + 4));
+      (*(code *)**(uint32_t **)*puVar25)((uint32_t *)*puVar25);
+      iVar24 = get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,*(int *)(iVar24 + 4));
+      *puVar25 = 0;
+    }
+    CVar14.rep = local_614.rep;
+    if ((C_Door *)local_5e4.rep != nullptr) {
+      local_61c = (C_Door *)0x7f7fffff;
+      iVar24 = FUN_006b69d0(0x8aea0c);
+      if ((char)iVar24 == '\0') {
+        CVar14.rep = (C_str_rep *)field_address_1c_461410(0x89ae78);
+      }
+      else {
+        CVar14.rep = (C_str_rep *)field_address_e8_461420(0x89ae78);
+      }
+      local_60c.rep = CVar14.rep;
+      piVar23 = (int *)FUN_00462300((int)CVar14.rep);
+      if (piVar23 != nullptr) {
+        do {
+          local_610 = (int *)((int)piVar23 - 1);
+          local_614.rep = (C_str_rep *)C_auto_0080fc20::FUN_004619f0(CVar14.rep,(uint32_t)local_610);
+          uVar12 = FUN_0041d530((int)local_614.rep);
+          if (((((char)uVar12 == '\0') && (cVar6 = FUN_005a63b0((int)local_614.rep), cVar6 != '\0'))
+              && (uVar28 = FUN_005a63f0((int)local_614.rep), CVar14.rep = local_614.rep,
+                 (char)uVar28 == '\0')) && (iVar24 = get_field_20_41d740((int)local_614.rep), iVar24 != 0))
+          {
+            pfVar18 = (float *)FUN_0041d160(local_5e4.rep);
+            pfVar13 = afStack_490;
+            uVar12 = get_field_20_41d740((int)CVar14.rep);
+            pvVar26 = (void *)FUN_0041d160(uVar12);
+            FUN_0040e080(pvVar26,pfVar13,pfVar18);
+            fVar35 = (long double)empty_function_41cfd0();
+            if (fVar35 < (long double)(float)local_61c) {
+              local_61c = (C_Door *)(float)fVar35;
+              local_618.rep = (C_str_rep *)get_field_20_41d740(CVar14.rep);
+            }
+          }
+          piVar23 = local_610;
+          CVar14.rep = local_60c.rep;
+        } while (local_610 != nullptr);
+        if ((C_Door *)local_618.rep != nullptr) {
+          iVar24 = get_field_4_41cf50((int)param_1);
+          pCVar15 = local_608;
+          pfVar13 = (float *)vector_at_e4_420310((uchar *)((int)local_608->_pad_0084 + 8),
+                                          *(int *)(iVar24 + 4));
+          *pfVar13 = (float)local_618.rep;
+          FUN_0041d0f0((int)local_618.rep);
+          uVar12 = FUN_00416cf0((int)pCVar15);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        }
+      }
+LAB_0041966e:
+      uVar12 = FUN_00416cf0((int)local_608);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0xb:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e4_420270(&this->m_06c,*piVar23);
+    piVar23 = (int *)FUN_00411650((void *)*puVar25,this);
+    if (piVar23 == nullptr) {
+      pcVar34 = &this->m_05c;
+      iVar24 = this->m_0d8 + 1;
+      this->m_0d8 = iVar24;
+      piVar23 = (int *)vector_at_e4_420260(pcVar34,iVar24);
+      piVar23 = (int *)get_field_4_41cf50(*piVar23);
+      local_610 = (int *)(this->m_0d8 + *piVar23 + 2);
+      this->m_0d8 = (int)local_610;
+      piVar23 = (int *)vector_size_e4_420240((int)pcVar34);
+      if (piVar23 <= local_610) goto LAB_0041be0e;
+      puVar25 = (uint32_t *)vector_at_e4_420260(pcVar34,(int)local_610);
+      piVar23 = (int *)get_first_field_41cf40((uint32_t *)*puVar25);
+      if (piVar23 != (int *)0x4f) goto LAB_0041be42;
+    }
+  case 0x74:
+    this->m_0d8 = this->m_0d8 + 1;
+LAB_0041be42:
+    this->m_104 = '\x01';
+    return CONCAT31((int3)((uint32_t)piVar23 >> 8),1);
+  case 0xc:
+    iVar24 = this->m_0d8 + 1;
+    this->m_0d8 = iVar24;
+    piVar23 = (int *)vector_at_e4_420260(&this->m_05c,iVar24);
+    piVar23 = (int *)get_field_4_41cf50(*piVar23);
+    iVar24 = *piVar23;
+    this->m_104 = '\x01';
+    this->m_0d8 = this->m_0d8 + iVar24 + 2;
+    pCVar15 = (C_Door *)vector_size_e4_420240((int)&this->m_05c);
+    if ((C_Door *)this->m_0d8 < pCVar15) goto LAB_0041cbc6;
+LAB_0041be0e:
+    iVar24 = vector_size_e4_420240((int)&this->m_05c);
+    piVar23 = (int *)(iVar24 - 1);
+    this->m_104 = '\0';
+    this->m_0d8 = (int)piVar23;
+    goto switchD_00416e6a_caseD_76;
+  case 0xd:
+    iVar24 = this->m_0d8 + 1;
+    this->m_0d8 = iVar24;
+    piVar23 = (int *)vector_at_e4_420260(&this->m_05c,iVar24);
+    CVar14.rep = local_614.rep;
+    if (*piVar23 != 0) {
+      piVar23 = (int *)get_field_4_41cf50(*piVar23);
+      this->m_0d8 = this->m_0d8 + *piVar23 + 2;
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0xe:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_5e4.rep = (C_str_rep *)*pfVar13;
+    local_5e8[0] = '\0';
+    if (((C_Door *)local_5e4.rep == nullptr) ||
+       (uVar8 = get_field_f8_41d100((int)local_5e4.rep), CONCAT22(extraout_var_06,uVar8) != 9))
+    goto LAB_0041c60a;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    pCVar15 = local_608;
+    puVar25 = (uint32_t *)vector_at_e4_41fc00(local_608->_pad_00a1 + 0xb,*(int *)(iVar24 + 4));
+    FUN_004145b0(&local_60c,puVar25);
+    local_14 = 6;
+    local_614.rep = nullptr;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e8_420360(&pCVar15->m_09c,*(int *)(iVar24 + 8));
+    local_618.rep = (C_str_rep *)*pfVar13;
+    pcVar34 = (char *)FUN_0041d670(&local_60c,0);
+    uVar28 = 0xffffffff;
+    do {
+      if (uVar28 == 0) break;
+      uVar28--;
+      cVar6 = *pcVar34;
+      pcVar34++;
+    } while (cVar6 != '\0');
+    if (~uVar28 - 1 < 2) {
+LAB_0041bbe8:
+      CVar14.rep = local_5e4.rep;
+      (*((C_auto_00812ff8_vtbl *)(local_5e4.rep)->refCount)->vf27)(local_5e4.rep,local_618.rep,0);
+      (*((C_auto_00812ff8_vtbl *)(CVar14.rep)->refCount)->vf23)(CVar14.rep,uStack_624);
+      (*((C_auto_00812ff8_vtbl *)(CVar14.rep)->refCount)->vf21)(CVar14.rep,0,unaff_ESI,0x3f800000,0)
+      ;
+      FUN_00424310(&g_scriptModule,&(CVar14.rep)->refCount);
+    }
+    else {
+      iVar24 = 0;
+      puVar40 = nullptr;
+      pCVar42 = &local_614;
+      pbVar11 = FUN_0041d660((int *)&local_60c);
+      iVar24 = C_auto_008160d0::FUN_0041fc10
+                         ((C_auto_008160d0 *)&DAT_008aed28,pbVar11,(int *)pCVar42,puVar40,iVar24);
+      if (iVar24 != 0) goto LAB_0041bbe8;
+      iVar24 = get_first_field_41cf40(param_1);
+      set_field_8_41d4c0(local_614.rep,2 - (uint32_t)(iVar24 != 0x5d));
+      CVar14.rep = local_5e4.rep;
+      (*((C_auto_00812ff8_vtbl *)(local_5e4.rep)->refCount)->vf21)
+                (local_5e4.rep,local_614.rep,local_618.rep,0x3f800000,0);
+      (**(code **)*puStack_628)(puStack_628);
+      (*((C_auto_00812ff8_vtbl *)(CVar14.rep)->refCount)->vf27)(CVar14.rep,unaff_EDI,0);
+      FUN_00423670(&g_scriptModule,(int)CVar14.rep,8);
+      FUN_00424260(&g_scriptModule,&(CVar14.rep)->refCount);
+      (*((C_auto_00812ff8_vtbl *)(CVar14.rep)->refCount)->vf09)(CVar14.rep);
+      local_5e8[0] = '\x01';
+    }
+    local_14 = 0xffffffff;
+    C_str::~C_str(&local_60c);
+    if ((local_5e8[0] != '\0') && (iVar24 = get_first_field_41cf40(param_1), iVar24 != 0x5d)) {
+      *(C_str_rep **)((int)local_608->_pad_0024 + 4) = CVar14.rep;
+      *(uint32_t *)local_608->_pad_0024 = *(uint32_t *)(local_608->_pad_00d4 + 4);
+      return CONCAT31((int3)((uint32_t)local_608 >> 8),1);
+    }
+LAB_0041c60a:
+    uVar12 = FUN_00416cf0((int)local_608);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0xf:
+    C_fstr_Construct(&local_618,&DAT_00867a90);
+    local_14 = 4;
+    puVar27 = (uint32_t *)get_field_4_41cf50((int)param_1);
+    local_608 = (C_Door *)*puVar27;
+    if ((-1 < (int)local_608) &&
+       (pCVar15 = (C_Door *)vector_size_e4_4202f0((int)&this->m_08c), local_608 < pCVar15)) {
+      piVar23 = (int *)vector_at_e4_420310(&this->m_08c,(int)local_608);
+      if (*piVar23 != 0) {
+        puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,(int)local_608);
+        (*(code *)**(uint32_t **)*puVar25)((uint32_t *)*puVar25);
+      }
+      puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,(int)local_608);
+      *puVar25 = 0;
+      iVar24 = get_field_4_41cf50((int)param_1);
+      uVar28 = *(uint32_t *)(iVar24 + 4);
+      if ((-1 < (int)uVar28) && (uVar17 = vector_size_e4_409600((int)&this->m_0ac), uVar28 < uVar17)) {
+        puVar25 = (uint32_t *)vector_at_e4_41fc00(&this->m_0ac,uVar28);
+        FUN_004145d0(&local_618,puVar25);
+        piVar23 = I3DGetDriver();
+        local_610 = piVar23;
+        local_61c = (C_Door *)vector_at_e4_420310(&this->m_08c,(int)local_608);
+        iVar24 = *piVar23;
+        iVar33 = FUN_0041d670(&local_618,0);
+        iVar20 = GetGame();
+        uVar12 = get_field_18_41d030(iVar20);
+        pCVar22 = (C_auto_00812ff8_vtbl *)(**(code **)(iVar24 + 0x88))(local_610,uVar12,iVar33);
+        local_61c->vtable = pCVar22;
+        piVar23 = (int *)vector_at_e4_420310(&this->m_08c,(int)local_608);
+        if (*piVar23 == 0) {
+          iVar24 = GetGame();
+          iVar24 = get_field_18_41d030(iVar24);
+          if (iVar24 != 0) {
+            iVar24 = GetGame();
+            local_61c = (C_Door *)get_field_18_41d030(iVar24);
+            local_610 = (int *)vector_at_e4_420310(&this->m_08c,(int)local_608);
+            uVar12 = 0xcffff;
+            pCVar22 = local_61c->vtable;
+            iVar24 = FUN_0041d670(&local_618,0);
+            iVar24 = (*pCVar22->vf1f)(local_61c,iVar24,uVar12);
+            *local_610 = iVar24;
+          }
+        }
+        piVar23 = (int *)vector_at_e4_420310(&this->m_08c,(int)local_608);
+        if (*piVar23 != 0) {
+          piVar23 = (int *)vector_at_e4_420310(&this->m_08c,(int)local_608);
+          FUN_0041d0f0(*piVar23);
+        }
+      }
+    }
+    FUN_00416cf0((int)this);
+    uVar12 = C_str::~C_str(&local_618);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x10:
+    pfVar13 = (float *)get_field_4_41cf50((int)param_1);
+    pCVar15 = (C_Door *)*pfVar13;
+    if (((int)pCVar15 < 0) ||
+       (local_618.rep = (C_str_rep *)pCVar15,
+       pCVar15 = (C_Door *)vector_size_e4_4202f0((int)&this->m_08c), pCVar15 <= local_618.rep))
+    goto LAB_0041cbc6;
+    pCVar15 = (C_Door *)get_field_4_41cf50((int)param_1);
+    pCVar16 = *(C_Door **)pCVar15->_pad_0004;
+    if (((int)pCVar16 < 0) ||
+       (pCVar15 = (C_Door *)vector_size_e8_420340((int)&this->m_09c), pCVar15 <= pCVar16))
+    goto LAB_0041cbc6;
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,(int)pCVar16);
+    pcVar34 = &this->m_08c;
+    local_604 = (float)CONCAT31(local_604._1_3_,*piVar23 != 0);
+    piVar23 = (int *)vector_at_e4_420310(pcVar34,(int)local_618.rep);
+    CVar14.rep = local_614.rep;
+    if (*piVar23 != 0) {
+      piVar23 = (int *)vector_at_e4_420310(pcVar34,(int)local_618.rep);
+      uVar8 = get_field_f8_41d100(*piVar23);
+      if (CONCAT22(extraout_var,uVar8) == 4) {
+        piVar23 = (int *)vector_at_e4_420310(pcVar34,(int)local_618.rep);
+        FUN_00423980(&g_scriptModule,*piVar23);
+      }
+      puVar25 = (uint32_t *)vector_at_e4_420310(pcVar34,(int)local_618.rep);
+      (**(code **)(*(int *)*puVar25 + 0x24))((int *)*puVar25);
+      pCVar15 = FUN_00424540(0x5f,'\x01');
+      CVar14.rep = local_614.rep;
+      if (pCVar15 != nullptr) {
+        piVar23 = (int *)vector_at_e4_420310(&this->m_08c,(int)local_618.rep);
+        pcVar34 = FUN_0041d4a0(*piVar23);
+        C_BitStream__WriteString(pCVar15,pcVar34);
+        FUN_0041cff0(pCVar15,(uint32_t)(local_604._0_1_ != '\0'));
+        goto LAB_00417647;
+      }
+    }
+    break;
+  case 0x11:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_61c = (C_Door *)*pfVar13;
+    CVar14.rep = local_614.rep;
+    if ((local_61c != nullptr) &&
+       (uVar8 = get_field_f8_41d100((int)local_61c), CVar14.rep = local_614.rep,
+       CONCAT22(extraout_var_05,uVar8) == 9)) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+      pCVar15 = local_61c;
+      local_60c.rep = (C_str_rep *)*puVar25;
+      (*local_61c->vtable->vf27)(local_61c,local_60c.rep,0);
+      (*pCVar15->vtable->vf08)(pCVar15,1);
+      (*pCVar15->vtable->vf23)(pCVar15,iStack_620);
+      (*pCVar15->vtable->vf21)(pCVar15,0,puStack_628,0x3f800000,0);
+      FUN_00424310(&g_scriptModule,(int *)pCVar15);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x12:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    CVar14.rep = local_614.rep;
+    if (((*piVar23 != 0) &&
+        (local_614.rep = (C_str_rep *)FUN_0041cf80(*piVar23), CVar14.rep = local_614.rep,
+        (C_Door *)local_614.rep != nullptr)) &&
+       (iVar24 = get_field_18_41d6f0((int)local_614.rep), CVar14.rep = local_614.rep, iVar24 == 4)) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+      FUN_004f2670(local_614.rep + 0x10,(float)*piVar23 * 0.1);
+      uVar12 = get_first_field_41d750(&g_gameRole);
+      CVar14.rep = local_614.rep;
+      if (((uint8_t)uVar12 & 7) != 7) {
+        FUN_004db310(local_614.rep);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      }
+    }
+    break;
+  case 0x13:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_61c = (C_Door *)*pfVar13;
+    piVar23 = nullptr;
+    if (local_61c == nullptr) goto switchD_00416e6a_caseD_76;
+    uVar8 = get_field_f8_41d100((int)local_61c);
+    CVar14.rep = local_614.rep;
+    if (CONCAT22(extraout_var_04,uVar8) == 9) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+      pCVar15 = local_61c;
+      (*local_61c->vtable->vf23)(local_61c,*puVar25);
+      FUN_00424310(&g_scriptModule,(int *)pCVar15);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x14:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_614.rep = (C_str_rep *)*pfVar13;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e4_41fc00(&this->m_0ac,*(int *)(iVar24 + 4));
+    FUN_004145b0(&local_5e4,puVar25);
+    local_14 = 2;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e4_41fc00(&this->m_0ac,*(int *)(iVar24 + 8));
+    FUN_004145b0(&local_618,puVar25);
+    local_14 = CONCAT31(local_14._1_3_,3);
+    if (local_614.rep != nullptr) {
+      pvVar26 = (void *)FUN_0041cf80((int)local_614.rep);
+      if ((pvVar26 == nullptr) || (iVar24 = get_field_18_41d6f0((int)pvVar26), iVar24 != 4)) {
+        pcVar34 = FUN_0041d660((int *)&local_5e4);
+        iVar24 = GetGame();
+        uVar12 = get_field_54_41d020(iVar24);
+        pvVar19 = (void *)identity_41d7e0(uVar12);
+        uVar7 = FUN_0051e1a0(pvVar19,pcVar34);
+        if (uVar7 != 0xffff) {
+          pSVar32 = &local_5e0;
+          iVar24 = GetGame();
+          uVar12 = get_field_54_41d020(iVar24);
+          pvVar19 = (void *)identity_41d7e0(uVar12);
+          pvVar19 = (void *)FUN_0051d5a0(pvVar19,uVar7);
+          FUN_0041d7c0(pvVar19,&pSVar32->x);
+          CVar14.rep = local_614.rep;
+          if (pvVar26 == nullptr) {
+            (**(code **)((local_614.rep)->refCount + 8))(local_614.rep,&local_5e0);
+            pcVar34 = FUN_0041d660(&iStack_620);
+            iVar24 = -1;
+            do {
+              if (iVar24 == 0) break;
+              iVar24--;
+              cVar6 = *pcVar34;
+              pcVar34++;
+            } while (cVar6 != '\0');
+            if (iVar24 != -2) {
+              pcVar34 = FUN_0041d660(&iStack_620);
+              iVar24 = GetGame();
+              uVar12 = get_field_54_41d020(iVar24);
+              pvVar26 = (void *)identity_41d7e0(uVar12);
+              uVar7 = FUN_0051e1a0(pvVar26,pcVar34);
+              if (uVar7 != 0xffff) {
+                pfVar13 = (float *)local_5e8;
+                ppCVar41 = &local_608;
+                pfVar18 = &aSStack_4cc[0].y;
+                iVar24 = GetGame();
+                uVar12 = get_field_54_41d020(iVar24);
+                pvVar26 = (void *)identity_41d7e0(uVar12);
+                pvVar26 = (void *)FUN_0051d5a0(pvVar26,uVar7);
+                pvVar26 = (void *)FUN_0041d7c0(pvVar26,pfVar18);
+                FUN_0040e080(pvVar26,(float *)ppCVar41,pfVar13);
+                local_61c = (C_Door *)
+                            ((float)local_608 * (float)local_608 +
+                            local_600.x * local_600.x + local_604 * local_604);
+                fVar35 = FUN_0041cf60((float)local_61c - 1.0);
+                if ((long double)1e-08 <= fVar35) {
+                  if (1e-08 <= (float)local_61c) {
+                    fVar35 = FUN_0041cf70((float)local_61c);
+                    fVar35 = (long double)1.0 / fVar35;
+                    local_608 = (C_Door *)(float)((long double)(float)local_608 * fVar35);
+                    local_604 = (float)((long double)local_604 * fVar35);
+                    local_600.x = (float)((long double)local_600.x * fVar35);
+                  }
+                  else if ((float)local_608 == 0.0) {
+                    if (local_600.x == 0.0) {
+                      if (0.0 <= local_604) {
+                        local_604 = 1.0;
+                      }
+                      else {
+                        local_604 = -1.0;
+                      }
+                    }
+                    else if (0.0 <= local_600.x) {
+                      local_600.x = 1.0;
+                    }
+                    else {
+                      local_600.x = -1.0;
+                    }
+                  }
+                  else if (0.0 <= (float)local_608) {
+                    local_608 = (C_Door *)0x3f800000;
+                  }
+                  else {
+                    local_608 = (C_Door *)0xbf800000;
+                  }
+                }
+                (**(code **)((CVar14.rep)->refCount + 0xc))(CVar14.rep,&local_608,0);
+              }
+            }
+            (**(code **)((CVar14.rep)->refCount + 0x24))(CVar14.rep);
+          }
+          else {
+            FUN_0041d700(pvVar26,&local_5e0.x);
+            piVar23 = (int *)get_field_20_41d740((int)pvVar26);
+            (**(code **)(*piVar23 + 8))(piVar23,&local_5e0);
+            iVar24 = get_field_18_41d6f0((int)pvVar26);
+            if (iVar24 == 3) {
+              iVar24 = get_field_a0_41d570((int)pvVar26);
+              FUN_0041d800(iVar24);
+            }
+            pcVar34 = FUN_0041d660(&iStack_620);
+            iVar24 = -1;
+            do {
+              if (iVar24 == 0) break;
+              iVar24--;
+              cVar6 = *pcVar34;
+              pcVar34++;
+            } while (cVar6 != '\0');
+            if (iVar24 != -2) {
+              pcVar34 = FUN_0041d660(&iStack_620);
+              iVar24 = GetGame();
+              uVar12 = get_field_54_41d020(iVar24);
+              pvVar19 = (void *)identity_41d7e0(uVar12);
+              uVar7 = FUN_0051e1a0(pvVar19,pcVar34);
+              if (uVar7 != 0xffff) {
+                pfVar13 = (float *)local_5e8;
+                ppCVar41 = &local_608;
+                pfVar18 = &SStack_4ec.y;
+                iVar24 = GetGame();
+                uVar12 = get_field_54_41d020(iVar24);
+                pvVar19 = (void *)identity_41d7e0(uVar12);
+                pvVar19 = (void *)FUN_0051d5a0(pvVar19,uVar7);
+                pvVar19 = (void *)FUN_0041d7c0(pvVar19,pfVar18);
+                FUN_0040e080(pvVar19,(float *)ppCVar41,pfVar13);
+                local_61c = (C_Door *)
+                            ((float)local_608 * (float)local_608 +
+                            local_600.x * local_600.x + local_604 * local_604);
+                fVar35 = FUN_0041cf60((float)local_61c - 1.0);
+                if ((long double)1e-08 <= fVar35) {
+                  if (1e-08 <= (float)local_61c) {
+                    fVar35 = FUN_0041cf70((float)local_61c);
+                    fVar35 = (long double)1.0 / fVar35;
+                    local_608 = (C_Door *)(float)((long double)(float)local_608 * fVar35);
+                    local_604 = (float)((long double)local_604 * fVar35);
+                    local_600.x = (float)((long double)local_600.x * fVar35);
+                  }
+                  else if ((float)local_608 == 0.0) {
+                    if (local_600.x == 0.0) {
+                      if (0.0 <= local_604) {
+                        local_604 = 1.0;
+                      }
+                      else {
+                        local_604 = -1.0;
+                      }
+                    }
+                    else if (0.0 <= local_600.x) {
+                      local_600.x = 1.0;
+                    }
+                    else {
+                      local_600.x = -1.0;
+                    }
+                  }
+                  else if (0.0 <= (float)local_608) {
+                    local_608 = (C_Door *)0x3f800000;
+                  }
+                  else {
+                    local_608 = (C_Door *)0xbf800000;
+                  }
+                }
+                piVar23 = (int *)get_field_20_41d740((int)pvVar26);
+                (**(code **)(*piVar23 + 0x1c))(piVar23,&local_608,0);
+                FUN_0041d720(pvVar26,&local_608);
+              }
+            }
+            piVar23 = (int *)get_field_20_41d740((int)pvVar26);
+            (**(code **)(*piVar23 + 0x24))(piVar23);
+          }
+        }
+      }
+      else {
+        pcVar34 = FUN_0041d660((int *)&local_5e4);
+        iVar24 = GetGame();
+        iVar24 = get_field_54_41d020(iVar24);
+        pvVar19 = (void *)field_address_3c_41d7f0(iVar24);
+        uVar7 = FUN_0051e1a0(pvVar19,pcVar34);
+        if (uVar7 != 0xffff) {
+          local_610 = (int *)((int)pvVar26 + 0x90);
+          FUN_004e95b0(local_610,0);
+          pSVar32 = &local_5e0;
+          iVar24 = GetGame();
+          iVar24 = get_field_54_41d020(iVar24);
+          pvVar19 = (void *)field_address_3c_41d7f0(iVar24);
+          pvVar19 = (void *)FUN_0051d5a0(pvVar19,uVar7);
+          FUN_0041d7c0(pvVar19,&pSVar32->x);
+          FUN_0041d700(pvVar26,&local_5e0.x);
+          pSVar32 = &local_5e0;
+          pvVar19 = (void *)get_field_20_41d740((int)pvVar26);
+          FUN_0041d110(pvVar19,&pSVar32->x);
+          pcVar34 = FUN_0041d660((int *)&local_618);
+          iVar24 = -1;
+          do {
+            if (iVar24 == 0) break;
+            iVar24--;
+            cVar6 = *pcVar34;
+            pcVar34++;
+          } while (cVar6 != '\0');
+          if (iVar24 != -2) {
+            pcVar34 = FUN_0041d660((int *)&local_618);
+            iVar24 = GetGame();
+            iVar24 = get_field_54_41d020(iVar24);
+            pvVar19 = (void *)field_address_3c_41d7f0(iVar24);
+            uVar7 = FUN_0051e1a0(pvVar19,pcVar34);
+            if (uVar7 != 0xffff) {
+              pSVar32 = &local_5e0;
+              pSVar31 = &local_600;
+              puVar25 = local_500;
+              iVar24 = GetGame();
+              iVar24 = get_field_54_41d020(iVar24);
+              pvVar19 = (void *)field_address_3c_41d7f0(iVar24);
+              pvVar19 = (void *)FUN_0051d5a0(pvVar19,uVar7);
+              pvVar19 = (void *)FUN_0041d7c0(pvVar19,puVar25);
+              FUN_0040e080(pvVar19,&pSVar31->x,&pSVar32->x);
+              local_614.rep =
+                   (C_str_rep *)
+                   (local_600.x * local_600.x +
+                   local_600.z * local_600.z + local_600.y * local_600.y);
+              fVar35 = FUN_0041cf60((float)local_614.rep - 1.0);
+              if ((long double)1e-08 <= fVar35) {
+                if (1e-08 <= (float)local_614.rep) {
+                  fVar35 = FUN_0041cf70((float)local_614.rep);
+                  fVar35 = (long double)1.0 / fVar35;
+                  local_600.x = (float)((long double)local_600.x * fVar35);
+                  local_600.y = (float)((long double)local_600.y * fVar35);
+                  local_600.z = (float)((long double)local_600.z * fVar35);
+                }
+                else if (local_600.x == 0.0) {
+                  if (local_600.z == 0.0) {
+                    if (0.0 <= local_600.y) {
+                      local_600.y = 1.0;
+                    }
+                    else {
+                      local_600.y = -1.0;
+                    }
+                  }
+                  else if (0.0 <= local_600.z) {
+                    local_600.z = 1.0;
+                  }
+                  else {
+                    local_600.z = -1.0;
+                  }
+                }
+                else if (0.0 <= local_600.x) {
+                  local_600.x = 1.0;
+                }
+                else {
+                  local_600.x = -1.0;
+                }
+              }
+              piVar23 = (int *)get_field_20_41d740((int)pvVar26);
+              (**(code **)(*piVar23 + 0x1c))(piVar23,&local_600,0);
+              FUN_0041d720(pvVar26,&local_600.x);
+            }
+          }
+          piVar23 = (int *)get_field_20_41d740((int)pvVar26);
+          (**(code **)(*piVar23 + 0x24))(piVar23);
+          piVar23 = local_610;
+          uVar4 = get_field_22bf_41d650((int)local_610);
+          local_610 = (int *)CONCAT31(local_610._1_3_,uVar4);
+          FUN_004e9db0(piVar23,0.0,'\x01');
+          FUN_004f2530(piVar23,(char)local_610,'\0');
+        }
+      }
+    }
+    FUN_00416cf0((int)local_608);
+    C_str::~C_str(&local_618);
+    uVar12 = C_str::~C_str(&local_5e4);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x15:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_618.rep = (C_str_rep *)*pfVar13;
+    CVar14.rep = local_614.rep;
+    if (((C_Door *)local_618.rep != nullptr) &&
+       (uVar8 = get_field_f8_41d100((int)local_618.rep), CVar14.rep = local_614.rep,
+       CONCAT22(extraout_var_00,uVar8) == 4)) {
+      FUN_00423670(&g_scriptModule,(int)local_618.rep,0x10);
+      iVar24 = get_first_field_41cf40(param_1);
+      if (iVar24 == 0x65) {
+        iVar24 = get_field_4_41cf50((int)param_1);
+        piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+        CVar14.rep = local_618.rep;
+        local_610 = (int *)((float)*piVar23 * 0.01);
+        (*((C_auto_00812ff8_vtbl *)(local_618.rep)->refCount)->vf23)(local_618.rep,local_610);
+        (*((C_auto_00812ff8_vtbl *)(CVar14.rep)->refCount)->vf09)(CVar14.rep);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      }
+      iVar24 = get_first_field_41cf40(param_1);
+      CVar14.rep = local_614.rep;
+      if (iVar24 == 0x67) {
+        iVar24 = get_field_4_41cf50((int)param_1);
+        local_610 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 0xc));
+        iVar24 = get_field_4_41cf50((int)param_1);
+        local_61c = (C_Door *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 8));
+        iVar24 = get_field_4_41cf50((int)param_1);
+        piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+        S_vector::Set(&local_5e0,(float)*piVar23,(float)(int)local_61c->vtable,(float)*local_610);
+        CVar14.rep = local_618.rep;
+        (*((C_auto_00812ff8_vtbl *)(local_618.rep)->refCount)->vf2c)(local_618.rep,&local_5e0);
+        (*((C_auto_00812ff8_vtbl *)(CVar14.rep)->refCount)->vf09)(CVar14.rep);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      }
+    }
+    break;
+  case 0x16:
+    C_fstr_Construct(&local_5e4,&DAT_00867a90);
+    local_14 = 5;
+    puVar27 = (uint32_t *)get_field_4_41cf50((int)param_1);
+    local_618.rep = (C_str_rep *)*puVar27;
+    if ((-1 < (int)local_618.rep) &&
+       (pCVar21 = (C_str_rep *)vector_size_e4_4202f0((int)&this->m_08c), local_618.rep < pCVar21)) {
+      piVar23 = (int *)vector_at_e4_420310(&this->m_08c,(int)local_618.rep);
+      if (*piVar23 != 0) {
+        puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,(int)local_618.rep);
+        (*(code *)**(uint32_t **)*puVar25)((uint32_t *)*puVar25);
+      }
+      puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,(int)local_618.rep);
+      *puVar25 = 0;
+      iVar24 = get_field_4_41cf50((int)param_1);
+      local_61c = *(C_Door **)(iVar24 + 4);
+      if ((-1 < (int)local_61c) &&
+         (pCVar15 = (C_Door *)vector_size_e4_409600((int)&this->m_0ac), local_61c < pCVar15)) {
+        puVar25 = (uint32_t *)vector_at_e4_41fc00(&this->m_0ac,(int)local_61c);
+        FUN_004145d0(&local_5e4,puVar25);
+        iVar24 = get_field_4_41cf50((int)param_1);
+        puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,*(int *)(iVar24 + 8));
+        piVar23 = (int *)*puVar25;
+        local_610 = piVar23;
+        if (piVar23 != nullptr) {
+          local_61c = (C_Door *)vector_at_e4_420310(&this->m_08c,(int)local_618.rep);
+          iVar24 = *piVar23;
+          uVar12 = 0xffff;
+          puVar10 = FUN_0041d660((int *)&local_5e4);
+          pCVar22 = (C_auto_00812ff8_vtbl *)(**(code **)(iVar24 + 0x48))(local_610,puVar10,uVar12);
+          local_61c->vtable = pCVar22;
+          piVar23 = (int *)vector_at_e4_420310(&this->m_08c,(int)local_618.rep);
+          if (*piVar23 != 0) {
+            piVar23 = (int *)vector_at_e4_420310(&this->m_08c,(int)local_618.rep);
+            FUN_0041d0f0(*piVar23);
+          }
+        }
+      }
+    }
+    FUN_00416cf0((int)this);
+    uVar12 = C_str::~C_str(&local_5e4);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x17:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_618.rep = (C_str_rep *)*puVar25;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e4_420310(&this->m_08c,*(int *)(iVar24 + 4));
+    local_608 = (C_Door *)*pfVar13;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 8));
+    CVar9.rep = local_618.rep;
+    local_604 = (float)CONCAT31(local_604._1_3_,*piVar23 != 0);
+    CVar14.rep = local_614.rep;
+    if (((C_Door *)local_618.rep != nullptr) &&
+       (local_608 != nullptr)) {
+      FUN_00423670(&g_scriptModule,(int)local_618.rep,3);
+      puVar25 = (uint32_t *)field_address_108_41d4b0((int)CVar9.rep);
+      local_61c = (C_Door *)*puVar25;
+      uVar39 = 1;
+      pCVar15 = local_608;
+      (*((C_auto_00812ff8_vtbl *)(CVar9.rep)->refCount)->vf0e)(CVar9.rep,local_608,1);
+      puVar25 = (uint32_t *)S_vector::Set(&SStack_4dc,0,0,0);
+      FUN_0041d110(CVar9.rep,puVar25);
+      local_61c = (C_Door *)(CVar9.rep)->refCount;
+      pvVar26 = nullptr;
+      uVar12 = S_vector::Set(aSStack_47c,0,0,0x3f800000);
+      (**(code **)&local_61c->m_01c)(CVar9.rep);
+      CVar14.rep = CVar9.rep;
+      (*((C_auto_00812ff8_vtbl *)(CVar9.rep)->refCount)->vf09)();
+      (*((C_auto_00812ff8_vtbl *)(CVar9.rep)->refCount)->vf0e)(CVar9.rep,pCVar15,1);
+      (*((C_auto_00812ff8_vtbl *)(CVar9.rep)->refCount)->vf09)(CVar9.rep);
+      if ((char)unaff_EDI == '\0') {
+        iVar24 = GetGame();
+        piVar23 = (int *)get_field_18_41d030(iVar24);
+        iVar24 = *piVar23;
+        pfVar18 = (float *)S_vector::Set(&SStack_4dc,0,0x3f000000,0);
+        pfVar13 = &local_55c;
+        pSVar32 = (S_vector *)FUN_0041d160(uVar12);
+        uVar12 = S_vector::operator_plus(pSVar32,pfVar13,pfVar18);
+        iVar24 = (**(code **)(iVar24 + 0xe0))(piVar23,uVar12);
+        CVar9.rep = CVar14.rep;
+        if (iVar24 == 0) {
+          iVar24 = GetGame();
+          iVar24 = get_field_18_41d030(iVar24);
+          piVar23 = (int *)field_address_1f8_41d560(iVar24);
+          iVar24 = *piVar23;
+          CVar9.rep = CVar14.rep;
+        }
+        FUN_00423670(&g_scriptModule,(int)CVar9.rep,3);
+        (*((C_Door *)CVar9.rep)->vtable->vf0e)(CVar9.rep,iVar24,1);
+      }
+      else {
+        FUN_00423670(&g_scriptModule,(int)CVar9.rep,7);
+        (*((C_auto_00812ff8_vtbl *)(CVar9.rep)->refCount)->vf0e)(CVar9.rep,uVar39,1);
+      }
+      pvVar19 = (void *)FUN_0041cf80((int)CVar9.rep);
+      if (pvVar19 != nullptr) {
+        puVar25 = (uint32_t *)FUN_0041d160(pvVar26);
+        FUN_0041d700(pvVar19,puVar25);
+        puVar25 = (uint32_t *)FUN_0041d200(pvVar26,local_558);
+        FUN_0041d720(pvVar19,puVar25);
+        iVar24 = get_field_18_41d6f0((int)pvVar19);
+        if (iVar24 == 3) {
+          iVar24 = get_field_a0_41d570((int)pvVar19);
+          FUN_0041d800(iVar24);
+        }
+      }
+      (*((C_Door *)CVar9.rep)->vtable->vf09)(CVar9.rep);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x18:
+    goto switchD_00416e6a_caseD_18;
+  case 0x19:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_614.rep = (C_str_rep *)*pfVar13;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,*(int *)(iVar24 + 4));
+    local_610 = (int *)*puVar25;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar29 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 8));
+    piVar23 = local_610;
+    local_604 = (float)CONCAT31(local_604._1_3_,*piVar29 != 0);
+    CVar14.rep = local_614.rep;
+    if ((((C_Door *)local_614.rep != nullptr) && (local_610 != nullptr))
+       && (uVar8 = get_field_f8_41d100((int)local_610), CVar14.rep = local_614.rep,
+          CONCAT22(extraout_var_02,uVar8) == 7)) {
+      if (local_604._0_1_ != '\0') {
+        (**(code **)(*piVar23 + 0x74))(piVar23,local_614.rep);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      }
+      (**(code **)(*piVar23 + 0x78))(piVar23,local_614.rep);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x1a:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_614.rep = (C_str_rep *)*pfVar13;
+    CVar14.rep = local_614.rep;
+    if ((C_Door *)local_614.rep != nullptr) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+      local_610 = (int *)(float)*piVar23;
+      uVar37 = FUN_0041d200(local_614.rep,&local_4f0);
+      FUN_0041d160(local_614.rep,(int)((uint64_t)uVar37 >> 0x20),(int)uVar37);
+      local_614.rep = (C_str_rep *)FUN_00479450(&g_temporaryActors,&(local_614.rep)->refCount);
+      iVar24 = get_field_20_41d740((int)local_614.rep);
+      if (iVar24 != 0) {
+        piVar23 = (int *)get_field_20_41d740((int)local_614.rep);
+        (**(code **)(*piVar23 + 0x30))(piVar23,1);
+        piVar23 = (int *)get_field_20_41d740((int)local_61c);
+        (**(code **)(*piVar23 + 0x24))(piVar23);
+      }
+      FUN_0041d8b0(&local_5d0.x);
+      puVar25 = (uint32_t *)S_vector::Set(&SStack_450,0,0x3f800000,0);
+      iVar24 = get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 0xc));
+      iVar24 = get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 8));
+      FUN_005fdc50(local_614.rep,&local_5d0,*piVar23 != 0);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x1b:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    local_610 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_610 = (int *)*local_610;
+    if ((local_610 != nullptr) &&
+       (local_608 = FUN_00424540(0x6c,'\x01'), local_608 != nullptr)) {
+      pcVar34 = FUN_0041d4a0((int)local_610);
+      C_BitStream__WriteString(local_608,pcVar34);
+      iVar24 = get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+      FUN_0041d010(local_608,*puVar25);
+      iVar24 = get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 8));
+      FUN_0041d000(local_608,*puVar25);
+      iVar24 = get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 0xc));
+      FUN_0041d000(local_608,*puVar25);
+      FUN_00424580(local_608);
+    }
+    iVar24 = get_first_field_41cf40(param_1);
+    if (iVar24 == 0x73) {
+      local_610 = (int *)FUN_004336c0();
+      iVar24 = get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+      uVar28 = (**(code **)(*local_610 + 0x94))(*puVar25);
+      this->m_018 = uVar28;
+      return CONCAT31((int3)(uVar28 >> 8),1);
+    }
+    goto LAB_0041cbbf;
+  case 0x1c:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    CVar14.rep = local_614.rep;
+    if (*piVar23 != 0) {
+      C_ScriptModule::FUN_00423b40((C_ScriptModule *)&g_scriptModule,*piVar23);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x1e:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_61c = (C_Door *)*pfVar13;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*(int *)(iVar24 + 4));
+    iVar24 = *piVar23;
+    CVar14.rep = local_614.rep;
+    if ((((local_61c != nullptr) && (iVar24 != 0)) &&
+        (local_610 = (int *)FUN_0041cf80((int)local_61c), CVar14.rep = local_614.rep,
+        local_610 != nullptr)) &&
+       (iVar33 = get_field_18_41d6f0((int)local_610), CVar14.rep = local_614.rep, iVar33 == 0xb)) {
+      FUN_005b7920(local_610,iVar24);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x1f:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_61c = (C_Door *)*piVar23;
+    local_614.rep = nullptr;
+    iVar24 = get_first_field_41cf40(param_1);
+    if (iVar24 == 0x75) {
+      local_614.rep = (C_str_rep *)0x1;
+    }
+    iVar24 = get_first_field_41cf40(param_1);
+    if (iVar24 == 0x76) {
+      local_614.rep = (C_str_rep *)0x2;
+    }
+    iVar24 = get_field_4_41cf50((int)param_1);
+    local_610 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    local_610 = (int *)*local_610;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 8));
+    FUN_004274a0(&g_scriptModule,(int)local_61c,local_614.rep,(int)local_610,(uint32_t *)*puVar25)
+    ;
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x20:
+    puVar27 = (uint32_t *)get_field_4_41cf50((int)param_1);
+    uVar28 = *puVar27;
+    CVar14.rep = local_614.rep;
+    if ((-1 < (int)uVar28) &&
+       (uVar17 = vector_size_e4_4202f0((int)&this->m_08c), CVar14.rep = local_614.rep, uVar28 < uVar17)) {
+      piVar23 = (int *)vector_at_e4_420310(&this->m_08c,uVar28);
+      if (*piVar23 != 0) {
+        puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,uVar28);
+        (*(code *)**(uint32_t **)*puVar25)((uint32_t *)*puVar25);
+      }
+      piVar23 = (int *)vector_at_e4_420310(&this->m_08c,uVar28);
+      *piVar23 = this->m_100;
+      piVar23 = (int *)vector_at_e4_420310(&this->m_08c,uVar28);
+      CVar14.rep = local_614.rep;
+      if (*piVar23 != 0) goto LAB_0041c2d5;
+    }
+    break;
+  case 0x21:
+    pfVar13 = (float *)get_field_4_41cf50((int)param_1);
+    pCVar15 = (C_Door *)*pfVar13;
+    if (((int)pCVar15 < 0) ||
+       (local_618.rep = (C_str_rep *)pCVar15,
+       pCVar15 = (C_Door *)vector_size_e4_4202f0((int)&this->m_08c), pCVar15 <= local_618.rep))
+    goto LAB_0041cbc6;
+    pCVar15 = (C_Door *)get_field_4_41cf50((int)param_1);
+    pCVar16 = *(C_Door **)pCVar15->_pad_0004;
+    if (((int)pCVar16 < 0) ||
+       (pCVar15 = (C_Door *)vector_size_e4_409600((int)&this->m_0ac), pCVar15 <= pCVar16))
+    goto LAB_0041cbc6;
+    piVar23 = (int *)vector_at_e4_41fc00(&this->m_0ac,(int)pCVar16);
+    local_614.rep = (C_str_rep *)FUN_0041d660(piVar23);
+    pcVar34 = &this->m_08c;
+    piVar23 = (int *)vector_at_e4_420310(pcVar34,(int)local_618.rep);
+    if (*piVar23 != 0) {
+      piVar23 = (int *)vector_at_e4_420310(pcVar34,(int)local_618.rep);
+      iVar24 = FUN_0041cf80(*piVar23);
+      if (iVar24 != 0) {
+        piVar23 = (int *)vector_at_e4_420310(pcVar34,(int)local_618.rep);
+        local_610 = (int *)FUN_0041cf80(*piVar23);
+        iVar24 = get_field_18_41d6f0((int)local_610);
+        if (iVar24 != 0xe) {
+          puVar25 = (uint32_t *)vector_at_e4_420310(pcVar34,(int)local_618.rep);
+          C_TrackModule::CreatePlayer((C_TrackModule *)&g_trackModule,local_614.rep,*puVar25,0);
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        }
+        iVar24 = -1;
+        CVar14.rep = local_614.rep;
+        do {
+          if (iVar24 == 0) break;
+          iVar24--;
+          ppCVar2 = &((C_Door *)CVar14.rep)->vtable;
+          CVar14.rep = (C_str_rep *)((int)&((C_Door *)CVar14.rep)->vtable + 1);
+        } while (*(char *)ppCVar2 != '\0');
+        FUN_0041d590(local_610,iVar24 != -2,(uint8_t *)local_614.rep);
+        goto LAB_0041966e;
+      }
+    }
+    piVar23 = (int *)vector_at_e4_420310(pcVar34,(int)local_618.rep);
+    CVar14.rep = local_614.rep;
+    if (*piVar23 != 0) {
+      puVar25 = (uint32_t *)vector_at_e4_420310(pcVar34,(int)local_618.rep);
+      C_TrackModule::CreatePlayer((C_TrackModule *)&g_trackModule,local_614.rep,*puVar25,0);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x22:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    pCVar15 = (C_Door *)*pfVar13;
+    CVar14.rep = local_614.rep;
+    local_5e4.rep = (C_str_rep *)pCVar15;
+    if (pCVar15 != nullptr) {
+      GetGame();
+      piVar23 = (int *)thunk_FUN_00464e90();
+      cVar6 = (**(code **)(*piVar23 + 0x4c))(pCVar15);
+      if (cVar6 == '\0') {
+        iVar24 = GetGame();
+        uVar12 = FUN_0069a780(iVar24);
+        if (((char)uVar12 != '\0') && (this->m_007 == '\0')) {
+          uVar12 = 0;
+          this->m_007 = '\x01';
+          pvVar26 = (void *)GetGame();
+          FUN_0069a770(pvVar26,uVar12);
+        }
+        iVar24 = GetGame();
+        uVar28 = FUN_0069a7b0(iVar24);
+        if (((char)uVar28 != '\0') && (this->m_008 == '\0')) {
+          cVar6 = '\0';
+          this->m_008 = '\x01';
+          pvVar26 = (void *)GetGame();
+          FUN_0069a7a0(pvVar26,cVar6);
+        }
+      }
+      CVar9.rep = local_5e4.rep;
+      uVar8 = get_field_f8_41d100((int)local_5e4.rep);
+      CVar14.rep = local_614.rep;
+      if (CONCAT22(extraout_var_03,uVar8) == 3) {
+        GetGame();
+        piVar23 = (int *)thunk_FUN_00464e90();
+        cVar6 = (**(code **)(*piVar23 + 0x4c))(CVar9.rep);
+        if (cVar6 != '\0') {
+          if (this->m_007 != '\0') {
+            uVar12 = 1;
+            this->m_007 = '\0';
+            pvVar26 = (void *)GetGame();
+            FUN_0069a770(pvVar26,uVar12);
+          }
+          if (this->m_008 != '\0') {
+            cVar6 = '\x01';
+            this->m_008 = '\0';
+            pvVar26 = (void *)GetGame();
+            FUN_0069a7a0(pvVar26,cVar6);
+          }
+        }
+        iVar24 = GetGame();
+        local_614.rep = (C_str_rep *)get_field_18_41d030(iVar24);
+        CVar14.rep = local_614.rep;
+        if ((C_Door *)local_614.rep != nullptr) {
+          puVar25 = (uint32_t *)field_address_15c_41d550((int)local_614.rep);
+          local_61c = (C_Door *)*puVar25;
+          if (local_61c != nullptr) {
+            FUN_0041d4e0(local_61c,&local_60c,&local_610);
+            CVar14.rep = local_5e4.rep;
+            (*((C_auto_00812ff8_vtbl *)(local_5e4.rep)->refCount)->vf1f)
+                      (local_5e4.rep,local_60c.rep);
+            puVar25 = (uint32_t *)field_address_138_41d500((int)puStack_628);
+            (*((C_auto_00812ff8_vtbl *)(CVar14.rep)->refCount)->vf23)(CVar14.rep,*puVar25);
+            puVar25 = (uint32_t *)field_address_120_41d4d0(unaff_EDI);
+            (*((C_auto_00812ff8_vtbl *)(CVar14.rep)->refCount)->vf1d)(CVar14.rep,*puVar25);
+            (*((C_auto_00812ff8_vtbl *)(CVar14.rep)->refCount)->vf09)(CVar14.rep);
+            (**(code **)(*local_610 + 0x90))(local_610,CVar14.rep);
+            uVar12 = FUN_00416cf0((int)this);
+            return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+          }
+          (*((C_auto_00812ff8_vtbl *)(local_614.rep)->refCount)->vf24)(local_614.rep,local_5e4.rep);
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        }
+      }
+    }
+    break;
+  case 0x23:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    if (*piVar23 != 0) {
+      piVar23 = (int *)get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,*piVar23);
+      (*(code *)**(uint32_t **)*puVar25)((uint32_t *)*puVar25);
+    }
+    iVar24 = GetGame();
+    iVar24 = get_field_18_41d030(iVar24);
+    if (iVar24 == 0) {
+      piVar23 = (int *)get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,*piVar23);
+      *puVar25 = 0;
+    }
+    else {
+      local_610 = (int *)field_address_15c_41d550(iVar24);
+      piVar23 = (int *)get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+      *piVar23 = *local_610;
+    }
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    CVar14.rep = local_614.rep;
+    if (*piVar23 != 0) {
+      puVar27 = (uint32_t *)get_field_4_41cf50((int)param_1);
+      uVar28 = *puVar27;
+LAB_0041c2d5:
+      piVar23 = (int *)vector_at_e4_420310((uchar *)((int)((C_Door *)this)->_pad_0084 + 8),uVar28)
+      ;
+      FUN_0041d0f0(*piVar23);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x24:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    uVar12 = *puVar25;
+    GetGame();
+    piVar23 = (int *)thunk_FUN_00464e90();
+    (**(code **)(*piVar23 + 0x74))(uVar12,0xffffffff);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x25:
+    pfVar13 = (float *)get_field_4_41cf50((int)param_1);
+    pCVar15 = (C_Door *)*pfVar13;
+    if (((int)pCVar15 < 0) ||
+       (local_618.rep = (C_str_rep *)pCVar15,
+       pCVar15 = (C_Door *)vector_size_e4_4202f0((int)&this->m_08c), pCVar15 <= local_618.rep))
+    goto LAB_0041cbc6;
+    pCVar15 = (C_Door *)get_field_4_41cf50((int)param_1);
+    pCVar16 = *(C_Door **)pCVar15->_pad_0004;
+    if (((int)pCVar16 < 0) ||
+       (pCVar15 = (C_Door *)vector_size_e8_420340((int)&this->m_09c), pCVar15 <= pCVar16))
+    goto LAB_0041cbc6;
+    local_610 = (int *)vector_at_e8_420360(&this->m_09c,(int)pCVar16);
+    local_610 = (int *)*local_610;
+    pcVar34 = &this->m_08c;
+    piVar23 = (int *)vector_at_e4_420310(pcVar34,(int)local_618.rep);
+    CVar14.rep = local_614.rep;
+    if (*piVar23 != 0) {
+      piVar23 = (int *)vector_at_e4_420310(pcVar34,(int)local_618.rep);
+      uVar8 = get_field_f8_41d100(*piVar23);
+      iVar24 = CONCAT22(extraout_var_01,uVar8);
+      if (iVar24 != 1) goto LAB_0041c8cd;
+      local_608 = FUN_00424540(0x7e,(char)uVar8);
+      CVar14.rep = local_614.rep;
+      if (local_608 != nullptr) {
+        piVar23 = (int *)vector_at_e4_420310(pcVar34,(int)local_618.rep);
+        pcVar34 = FUN_0041d4a0(*piVar23);
+        pCVar15 = local_608;
+        C_BitStream__WriteString(local_608,pcVar34);
+        FUN_0041d000(pCVar15,local_610);
+        goto LAB_00417647;
+      }
+    }
+    break;
+  case 0x26:
+    local_608 = FUN_00424540(0x7f,'\x01');
+    CVar14.rep = local_614.rep;
+    if (local_608 != nullptr) {
+      piVar23 = (int *)get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*piVar23);
+      FUN_0041d000(local_608,*puVar25);
+      iVar24 = get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*(int *)(iVar24 + 4));
+      pcVar34 = FUN_0041d4a0(*piVar23);
+      pCVar15 = local_608;
+      C_BitStream__WriteString(local_608,pcVar34);
+      goto LAB_00417647;
+    }
+    break;
+  case 0x27:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    local_61c = (C_Door *)*pfVar13;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    local_610 = (int *)vector_at_e4_420310(&this->m_08c,*(int *)(iVar24 + 4));
+    local_610 = (int *)*local_610;
+    CVar14.rep = local_614.rep;
+    if (local_610 != nullptr) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      piVar29 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 8));
+      uVar44 = 0;
+      uVar39 = 1;
+      piVar23 = local_610;
+      uVar12 = FUN_0041d480();
+      iVar24 = FUN_004451b0(&g_particlesModule,local_61c,uVar12,piVar23,uVar39,uVar44);
+      *piVar29 = iVar24;
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x28:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    CVar14.rep = local_614.rep;
+    if (*piVar23 != -1) {
+      FUN_00445800(&g_particlesModule,*piVar23);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x29:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    CVar14.rep = local_614.rep;
+    if (*piVar23 != -1) {
+      FUN_004458d0(&g_particlesModule,*piVar23);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x2a:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e4_41fc00(&this->m_0ac,*piVar23);
+    FUN_004145b0(&local_614,puVar25);
+    local_14 = 1;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    local_610 = (int *)*puVar25;
+    pbVar11 = FUN_0041d660((int *)&local_614);
+    puVar40 = FUN_0048cb00();
+    iVar24 = FUN_0041d5e0(puVar40,pbVar11);
+    if ((iVar24 != 0) && (pvVar26 = FUN_00424540(0x83,'\x01'), pvVar26 != nullptr)) {
+      pcVar34 = FUN_0041d660((int *)&local_614);
+      C_BitStream__WriteString(pvVar26,pcVar34);
+      FUN_0041d000(pvVar26,local_610);
+      FUN_00424580(pvVar26);
+    }
+    FUN_00416cf0((int)this);
+    uVar12 = C_str::~C_str(&local_614);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x2b:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_610 = (int *)*puVar25;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    uVar12 = *puVar25;
+    GetGame();
+    piVar23 = (int *)thunk_FUN_00464e90();
+    (**(code **)(*piVar23 + 0x74))(local_610,uVar12);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x2c:
+    pfVar13 = (float *)get_field_4_41cf50((int)param_1);
+    pCVar15 = (C_Door *)*pfVar13;
+    if (((int)pCVar15 < 0) ||
+       (local_614.rep = (C_str_rep *)pCVar15,
+       pCVar15 = (C_Door *)vector_size_e4_4202f0((int)&this->m_08c), pCVar15 <= local_614.rep))
+    goto LAB_0041cbc6;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    pCVar15 = *(C_Door **)(iVar24 + 4);
+    if (((int)pCVar15 < 0) ||
+       (local_61c = pCVar15, pCVar15 = (C_Door *)vector_size_e4_409600((int)&this->m_0ac),
+       pCVar15 <= local_61c)) goto LAB_0041cbc6;
+    piVar23 = (int *)vector_at_e4_41fc00(&this->m_0ac,(int)local_61c);
+    local_61c = (C_Door *)FUN_0041d660(piVar23);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,(int)local_614.rep);
+    CVar14.rep = local_614.rep;
+    if (*piVar23 != 0) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,*(int *)(iVar24 + 8));
+      local_610 = (int *)*puVar25;
+      puVar25 = (uint32_t *)vector_at_e4_420310(&this->m_08c,(int)local_614.rep);
+      C_TrackModule::CreatePlayer((C_TrackModule *)&g_trackModule,local_61c,*puVar25,local_610);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x2d:
+    FUN_004374d0(&local_5d0.x);
+    CVar14.rep = local_614.rep;
+    if (this->m_100 != 0) {
+      pfVar13 = (float *)FUN_0041d160();
+      local_5d0.x = *pfVar13;
+      local_5d0.y = pfVar13[1];
+      local_5d0.z = pfVar13[2];
+      local_5c4 = pfVar13[3];
+      piVar23 = (int *)get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*piVar23);
+      local_5b4 = (float)*puVar25;
+      iVar24 = get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+      local_5c0 = 1.4013e-45;
+      piVar23 = (int *)FUN_004336c0();
+      (**(code **)(*piVar23 + 0x54))(&local_5d0);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x2e:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    if (*piVar23 == 0) goto switchD_00416e6a_caseD_76;
+    local_610 = (int *)FUN_0041cfa0(*piVar23);
+    CVar14.rep = local_614.rep;
+    if (local_610 != nullptr) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+      FUN_00416610(local_610,*piVar23);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x2f:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    local_610 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    local_610 = (int *)*local_610;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    FUN_006b6830((int)local_610,*piVar23);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x30:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    uVar12 = *puVar25;
+    iVar24 = get_field_20_41d760(0x8aea0c);
+    CVar14.rep = local_614.rep;
+    if (iVar24 != 0) {
+      iVar24 = get_field_20_41d760(0x8aea0c);
+      pvVar26 = (void *)FUN_006ae7c0(iVar24);
+      FUN_006a7ad0(pvVar26,uVar12);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x31:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    uVar12 = *puVar25;
+    iVar24 = get_field_20_41d760(0x8aea0c);
+    CVar14.rep = local_614.rep;
+    if (iVar24 != 0) {
+      iVar24 = get_field_20_41d760(0x8aea0c);
+      pvVar26 = (void *)field_address_dc_41d770(iVar24);
+      FUN_006a6c10(pvVar26,uVar12);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x32:
+    pfVar13 = (float *)get_field_4_41cf50((int)param_1);
+    local_61c = (C_Door *)*pfVar13;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    local_610 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    local_610 = (int *)*local_610;
+    piVar23 = (int *)vector_at_e4_4202c0(&this->m_07c,(int)local_61c);
+    CVar14.rep = local_614.rep;
+    if (*piVar23 != 0) {
+      piVar23 = (int *)vector_at_e4_4202c0(&this->m_07c,(int)local_61c);
+      *(bool *)(*piVar23 + 8) = local_610 != nullptr;
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x33:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_41fc00(&this->m_0ac,*piVar23);
+    FUN_0041d660(piVar23);
+    GetGame();
+    empty_function_69c2b0();
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x34:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    local_60c.rep = (C_str_rep *)*puVar25;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    CVar14.rep = local_614.rep;
+    if ((-1 < (int)local_60c.rep) && ((int)local_60c.rep < 0x100)) {
+      *(uint32_t *)(&DAT_00868b3c + (int)local_60c.rep * 4) = *puVar25;
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x35:
+    pfVar13 = (float *)get_field_4_41cf50((int)param_1);
+    local_61c = (C_Door *)*pfVar13;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    local_610 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    local_610 = (int *)*local_610;
+    piVar23 = (int *)vector_at_e4_4202c0(&this->m_07c,(int)local_61c);
+    CVar14.rep = local_614.rep;
+    if (*piVar23 != 0) {
+      puVar25 = (uint32_t *)vector_at_e4_4202c0(&this->m_07c,(int)local_61c);
+      set_field_c_41cfc0((void *)*puVar25,local_610);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x36:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    uVar12 = *puVar25;
+    piVar23 = (int *)FUN_004336c0();
+    (**(code **)(*piVar23 + 0x68))(uVar12);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x37:
+    local_604 = (float)CONCAT31(local_604._1_3_,*(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0)
+    ;
+    iVar24 = GetGame();
+    *(char *)(iVar24 + 0x6e) = local_604._0_1_;
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x38:
+    iVar24 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    local_60c.rep._0_1_ = *(int *)(this->m_0a0 + ((int *)param_1[1])[1] * 8) != 0;
+    cVar6 = (char)local_60c.rep;
+    if (((iVar24 != 0) &&
+        (puVar25 = *(uint32_t **)(iVar24 + 0xec), ExceptionList = &local_1c,
+        puVar25 != nullptr)) &&
+       (((pvVar26 = (void *)*puVar25, ExceptionList = &local_1c, pvVar26 != nullptr &&
+         (ExceptionList = &local_1c, *(int *)((int)pvVar26 + 0x18) == 3)) &&
+        ((*(int *)((int)pvVar26 + 0x19c) == 4 ||
+         (ExceptionList = &local_1c, *(int *)((int)pvVar26 + 0x19c) == 5)))))) {
+      if (!(bool)(char)local_60c.rep) goto LAB_0041cbbf;
+      if (0 < *(int *)((int)pvVar26 + 0xec)) {
+        pvVar19 = pvVar26;
+        CVar14.rep = local_60c.rep;
+        this_01 = (void *)field_address_1c_461410(0x89ae78);
+        FUN_0045d100(this_01,pvVar19,(char)CVar14.rep);
+        FUN_005af5c0(pvVar26,0);
+        FUN_005af570(pvVar26,0);
+        FUN_005af450((int)pvVar26);
+        cVar6 = (char)local_60c.rep;
+      }
+    }
+    if (cVar6 != '\0') {
+      this->m_0d4 = '\x01';
+      iVar24 = this->m_0d8 + 1;
+      this->m_0d8 = iVar24;
+      return CONCAT31((int3)((uint32_t)iVar24 >> 8),1);
+    }
+    goto LAB_0041cbbf;
+  case 0x39:
+    local_614.rep = *(C_str_rep **)(this->m_090 + *(int *)param_1[1] * 4);
+    CVar14.rep = local_614.rep;
+    if ((C_Door *)local_614.rep != nullptr) {
+      S_vector::Set(&local_5d0,0,0,0);
+      local_5b8 = (float)((uint32_t)local_5b8 & 0xffffff00);
+      local_5b4 = 0.0;
+      local_5c0 = 10.0;
+      local_5bc = 1.0;
+      if ((*(uint32_t *)local_614.rep[0x18].chars & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc((I3D_frame *)local_614.rep);
+      }
+      local_5d0.x = (float)local_614.rep[0xc].length;
+      local_5d0.y = *(float *)local_614.rep[0xc].chars;
+      local_5d0.z = *(float *)((int)&local_614.rep[0xd].refCount + 3);
+      local_5c4 = *(float *)((int)&local_614.rep[0xd].length + 3);
+      local_5bc = (float)*(int *)(this->m_0a0 + *(int *)(param_1[1] + 4) * 8) * 0.001;
+      local_5c0 = (float)*(int *)(this->m_0a0 + *(int *)(param_1[1] + 8) * 8) * 0.001;
+      FUN_006df540(&local_5d0.x);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x3a:
+    iVar24 = *(int *)(this->m_0b0 + *(int *)param_1[1] * 4);
+    pcVar34 = (char *)(iVar24 + 8);
+    if (iVar24 == 0) {
+      pcVar34 = &DAT_00867a90;
+    }
+    pvVar26 = (void *)GetGame();
+    FUN_0069e8b0(pvVar26,pcVar34);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x3b:
+    if (((this->m_100 != 0) &&
+        (puVar25 = *(uint32_t **)(this->m_100 + 0xec), ExceptionList = &local_1c,
+        puVar25 != nullptr)) &&
+       ((pvVar26 = (void *)*puVar25, ExceptionList = &local_1c, pvVar26 != nullptr &&
+        (ExceptionList = &local_1c, *(int *)((int)pvVar26 + 0x18) == 3)))) {
+      FUN_005af150(pvVar26,*(uint32_t *)(this->m_0a0 + *(int *)param_1[1] * 8),
+                   *(int *)(this->m_0a0 + ((int *)param_1[1])[1] * 8) != 0);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x3c:
+    iVar24 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    if (iVar24 != 0) {
+      puVar25 = *(uint32_t **)(iVar24 + 0xec);
+      if (puVar25 == nullptr) {
+        local_614.rep = nullptr;
+      }
+      else {
+        local_614.rep = (C_str_rep *)*puVar25;
+      }
+      piVar23 = *(int **)(this->m_0a0 + ((int *)param_1[1])[1] * 8);
+      CVar14.rep = local_614.rep;
+      if ((C_Door *)local_614.rep != nullptr) {
+        switch(*(uint32_t *)((int)&local_614.rep[2].length + 2)) {
+        case 6:
+          C_Door::FUN_005ff4b0
+                    ((C_Door *)local_614.rep,3 - (uint32_t)(piVar23 != nullptr),1,'\0',0);
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        case 7:
+          FUN_0060b570(local_614.rep,piVar23);
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        case 9:
+          FUN_005fa290(local_614.rep,piVar23 != nullptr);
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        case 0xd:
+          C_Switch::FUN_006136f0((C_Switch *)local_614.rep,(int)piVar23);
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        case 0xe:
+          FUN_005bc970((int)local_614.rep);
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        case 0x15:
+          FUN_006059b0(local_614.rep,(int)piVar23);
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        case 0x16:
+          FUN_0060d300(local_614.rep,piVar23);
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        case 0x17:
+          FUN_0060eac0(local_614.rep,piVar23);
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        case 0x19:
+          if (piVar23 == (int *)0x29a) {
+            *(uint8_t *)&local_614.rep[0x14].length = 1;
+            uVar12 = FUN_00416cf0((int)this);
+            return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+          }
+          if (local_614.rep[0x11].chars[0] == '\0') {
+            C_AnimationActor::FUN_005b55e0((C_AnimationActor *)local_614.rep,'\0');
+            uVar12 = FUN_00416cf0((int)this);
+            return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+          }
+          break;
+        case 0x1c:
+          C_Pike::FUN_005b8ea0
+                    ((C_Pike *)local_614.rep,3 - (uint32_t)(piVar23 != nullptr));
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        case 0x1d:
+          C_FowlGenerator::FUN_005bb140((C_FowlGenerator *)local_614.rep,'\x01',0);
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        case 0x22:
+          FUN_005f0a90(local_614.rep,piVar23);
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        case 0x23:
+          local_61c = *(void **)((int)&local_614.rep[3].length + 1);
+          if ((*(uint32_t *)(local_61c->_pad_00d4 + 0xc) & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc((I3D_frame *)local_61c);
+          }
+          local_600.x = (*(float (*) [4])((int)local_61c->_pad_0050 + 0x10))[0];
+          local_600.y = *(float *)((int)local_61c->_pad_0050 + 0x14);
+          local_600.z = *(float *)((int)local_61c->_pad_0050 + 0x18);
+          local_5d4 = *(float *)((int)local_61c->_pad_0050 + 0x1c);
+          CVar14.rep = (C_str_rep *)
+                       (local_600.z * local_600.z +
+                       local_600.y * local_600.y + local_600.x * local_600.x);
+          if (1e-08 <= ABS((float)CVar14.rep - 1.0)) {
+            if (1e-08 <= (float)CVar14.rep) {
+              fVar38 = 1.0 / SQRT((float)CVar14.rep);
+              local_600.x = local_600.x * fVar38;
+              local_600.y = local_600.y * fVar38;
+              local_600.z = fVar38 * local_600.z;
+            }
+            else if (local_600.x == 0.0) {
+              if (local_600.z == 0.0) {
+                if (0.0 <= local_600.y) {
+                  local_600.y = 1.0;
+                }
+                else {
+                  local_600.y = -1.0;
+                }
+              }
+              else if (0.0 <= local_600.z) {
+                local_600.z = 1.0;
+              }
+              else {
+                local_600.z = -1.0;
+              }
+            }
+            else if (0.0 <= local_600.x) {
+              local_600.x = 1.0;
+            }
+            else {
+              local_600.x = -1.0;
+            }
+          }
+          local_5e0.x = local_600.x;
+          local_5e0.y = local_600.y;
+          local_5e0.z = local_600.z;
+          if (piVar23 != nullptr) {
+            pCVar15 = (C_Door *)local_614.rep;
+            local_614.rep = CVar14.rep;
+            C_WireCut::FUN_005e2510((C_WireCut *)pCVar15,&local_5e0.x);
+            uVar12 = FUN_00416cf0((int)this);
+            return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+          }
+          break;
+        case 0x26:
+          FUN_0060fb10((int)local_614.rep);
+          uVar12 = FUN_00416cf0((int)this);
+          return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+        }
+      }
+    }
+    break;
+  case 0x3d:
+    bVar5 = *(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0;
+    this->m_004 = bVar5;
+    if (bVar5) {
+      this->m_010 = 0;
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x3e:
+    this->m_005 = *(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0;
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x3f:
+    this->m_006 = *(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0;
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x40:
+    uVar28 = 1 << ((uint8_t)*(uint32_t *)(this->m_0a0 + *(int *)param_1[1] * 8) & 0x1f);
+    if (*(int *)(this->m_0a0 + ((int *)param_1[1])[1] * 8) != 0) {
+      this->m_014 = this->m_014 & ~uVar28;
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    this->m_014 = this->m_014 | uVar28;
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x41:
+    iVar24 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    if ((((iVar24 != 0) &&
+         (puVar25 = *(uint32_t **)(iVar24 + 0xec), ExceptionList = &local_1c,
+         puVar25 != nullptr)) &&
+        (pvVar26 = (void *)*puVar25, ExceptionList = &local_1c, pvVar26 != nullptr)) &&
+       (ExceptionList = &local_1c, *(int *)((int)pvVar26 + 0x18) == 6)) {
+      if (*(int *)(this->m_0a0 + ((int *)param_1[1])[1] * 8) != 0) {
+        FUN_005ff650(pvVar26,*(int *)((int)pvVar26 + 0x230));
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      }
+      FUN_005ff5f0(pvVar26,*(int *)((int)pvVar26 + 0x230));
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x42:
+    if (DAT_0089bbb0 != nullptr) {
+      FUN_0047b010(DAT_0089bbb0,
+                   CONCAT31((int3)((uint32_t)*(int *)param_1[1] >> 8),
+                            *(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0));
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x43:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    iVar24 = *piVar23;
+    piVar23 = (int *)FUN_004336c0();
+    (**(code **)(*piVar23 + 0x6c))(iVar24,4000,0);
+    CVar14.rep = local_614.rep;
+    if (iVar24 == -1) {
+      iVar24 = GetGame();
+      iVar24 = get_field_d4_41d060(iVar24);
+      cVar6 = iVar24 != 0;
+      pvVar26 = (void *)GetGame();
+      FUN_0069ec40(pvVar26,cVar6);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x44:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    local_610 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_610 = (int *)*local_610;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    local_604 = (float)CONCAT31(local_604._1_3_,*piVar23 != 0);
+    CVar14.rep = local_614.rep;
+    if ((this->m_100 != 0) &&
+       (iVar24 = FUN_0041cf80(this->m_100), CVar14.rep = local_614.rep, iVar24 != 0)) {
+      this_02 = (C_AirAttack *)FUN_0041cf80(this->m_100);
+      iVar24 = get_field_18_41d6f0((int)this_02);
+      CVar14.rep = local_614.rep;
+      if (iVar24 == 0x24) {
+        C_AirAttack::FUN_005e7570(this_02,local_604._0_1_ == '\0',(int)local_610);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      }
+    }
+    break;
+  case 0x45:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    vector_at_e8_420360(&this->m_09c,*piVar23);
+    lVar36 = __ftol();
+    uVar12 = (uint32_t)lVar36;
+    iVar24 = GetGame();
+    pvVar26 = (void *)get_field_58_41d040(iVar24);
+    set_field_10850_49dde0(pvVar26,uVar12);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x46:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    local_61c = (C_Door *)((float)*piVar23 * 0.001);
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    local_610 = (int *)((float)*piVar23 * 0.001);
+    piVar23 = (int *)GetGEffects();
+    (**(code **)(*piVar23 + 0x98))(local_61c,local_610);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x47:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    piVar23 = (int *)*piVar23;
+    piVar29 = (int *)GetGEffects();
+    pSVar32 = nullptr;
+    uVar12 = 0;
+    goto LAB_0041c8bc;
+  case 0x48:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    piVar23 = (int *)*piVar23;
+    piVar29 = (int *)GetGEffects();
+    pSVar32 = nullptr;
+    uVar12 = 1;
+    goto LAB_0041c8bc;
+  case 0x49:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    FUN_00423c70(&g_scriptModule,*puVar25);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x4a:
+    C_ScriptModule::FUN_00423eb0((C_ScriptModule *)&g_scriptModule);
+LAB_0041cbbf:
+    pCVar15 = (C_Door *)FUN_00416cf0((int)this);
+LAB_0041cbc6:
+    return CONCAT31((int3)((uint32_t)pCVar15 >> 8),1);
+  case 0x4b:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    local_610 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    local_610 = (int *)*local_610;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    local_618.rep = (C_str_rep *)*pfVar13;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 8));
+    local_614.rep = (C_str_rep *)*pfVar13;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 0xc));
+    local_60c.rep = (C_str_rep *)*piVar23;
+    if ((int)local_618.rep < 0) {
+      local_618.rep = nullptr;
+    }
+    else if (0xff < (int)local_618.rep) {
+      local_618.rep = (C_str_rep *)0xff;
+    }
+    if ((int)local_614.rep < 0) {
+      local_614.rep = nullptr;
+    }
+    else if (0xff < (int)local_614.rep) {
+      local_614.rep = (C_str_rep *)0xff;
+    }
+    if ((int)local_60c.rep < 0) {
+      local_60c.rep = nullptr;
+    }
+    else if (0xff < (int)local_60c.rep) {
+      local_60c.rep = (C_str_rep *)0xff;
+    }
+    S_vector::Set(&local_5e0,(float)(int)local_618.rep * 0.003921569,
+                  (float)(int)local_614.rep * 0.003921569,(float)(int)local_60c.rep * 0.003921569);
+    piVar29 = (int *)GetGEffects();
+    pSVar32 = &local_5e0;
+    uVar12 = 0;
+    piVar23 = local_610;
+    goto LAB_0041c8bc;
+  case 0x4c:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    local_610 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    local_610 = (int *)*local_610;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    local_618.rep = (C_str_rep *)*pfVar13;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 8));
+    local_614.rep = (C_str_rep *)*pfVar13;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 0xc));
+    local_60c.rep = (C_str_rep *)*piVar23;
+    if ((int)local_618.rep < 0) {
+      local_618.rep = nullptr;
+    }
+    else if (0xff < (int)local_618.rep) {
+      local_618.rep = (C_str_rep *)0xff;
+    }
+    if ((int)local_614.rep < 0) {
+      local_614.rep = nullptr;
+    }
+    else if (0xff < (int)local_614.rep) {
+      local_614.rep = (C_str_rep *)0xff;
+    }
+    if ((int)local_60c.rep < 0) {
+      local_60c.rep = nullptr;
+    }
+    else if (0xff < (int)local_60c.rep) {
+      local_60c.rep = (C_str_rep *)0xff;
+    }
+    S_vector::Set(&local_550,(float)(int)local_618.rep * 0.003921569,
+                  (float)(int)local_614.rep * 0.003921569,(float)(int)local_60c.rep * 0.003921569);
+    piVar29 = (int *)GetGEffects();
+    pSVar32 = &local_550;
+    uVar12 = 1;
+    piVar23 = local_610;
+LAB_0041c8bc:
+    (**(code **)(*piVar29 + 0x8c))(piVar23,uVar12,pSVar32);
+    CVar14.rep = local_614.rep;
+    break;
+  case 0x4d:
+    local_61c = (C_Door *)GetGEffects();
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    local_610 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_60c.rep = (C_str_rep *)local_61c->vtable;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_41fc00(&this->m_0ac,*(int *)(iVar24 + 4));
+    puVar10 = FUN_0041d660(piVar23);
+    (**(void **)((int)&local_60c.rep[0x13].length + 1))(*local_610,puVar10);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x4e:
+    cVar6 = get_field_824_41d5d0(0x868b18);
+    if (cVar6 == '\0') goto LAB_0041c60a;
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    pcVar34 = (char *)((int)local_608->_pad_0084 + 8);
+    pfVar13 = (float *)vector_at_e4_420310(pcVar34,*piVar23);
+    local_618.rep = (C_str_rep *)*pfVar13;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(pcVar34,*(int *)(iVar24 + 4));
+    if (*piVar23 != 0) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e4_420310(pcVar34,*(int *)(iVar24 + 4));
+      (*(code *)**(uint32_t **)*puVar25)((uint32_t *)*puVar25);
+    }
+    iVar24 = get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e4_420310(pcVar34,*(int *)(iVar24 + 4));
+    *puVar25 = 0;
+    if ((C_Door *)local_618.rep == nullptr) goto LAB_0041c60a;
+    piVar23 = I3DGetDriver();
+    pCVar15 = (C_Door *)(**(code **)(*piVar23 + 0x54))(piVar23,9);
+    local_614.rep = (C_str_rep *)pCVar15;
+    uVar8 = get_field_f8_41d100(iStack_620);
+    if (CONCAT22(extraout_var_08,uVar8) == 9) {
+      (*pCVar15->vtable->vf36)(pCVar15,iStack_620);
+      piVar23 = (int *)GetGEffects();
+      (**(code **)(*piVar23 + 0x50))(pCVar15,0);
+    }
+    puVar25 = (uint32_t *)field_address_108_41d4b0(iStack_620);
+    (*pCVar15->vtable->vf0e)(pCVar15,*puVar25,0);
+    puVar25 = (uint32_t *)field_address_b0_41d150((int)unaff_ESI);
+    FUN_0041d110(pCVar15,puVar25);
+    puVar25 = (uint32_t *)FUN_0041d1d0((int)unaff_ESI);
+    FUN_0041d180(pCVar15,puVar25);
+    piVar23 = I3DGetDriver();
+    iVar24 = *piVar23;
+    iVar33 = get_field_4_41cf50((int)param_1);
+    piVar29 = (int *)vector_at_e4_41fc00(local_61c->_pad_00a1 + 0xb,*(int *)(iVar33 + 8));
+    puVar10 = FUN_0041d660(piVar29);
+    iVar33 = GetGame();
+    uVar12 = get_field_18_41d030(iVar33);
+    iVar24 = (**(code **)(iVar24 + 0x88))(piVar23,uVar12,puVar10);
+    if (iVar24 == 0) {
+      iVar24 = GetGame();
+      iVar24 = get_field_18_41d030(iVar24);
+      if (iVar24 != 0) {
+        iVar24 = GetGame();
+        piVar23 = (int *)get_field_18_41d030(iVar24);
+        iVar24 = *piVar23;
+        uVar12 = 0xcffff;
+        iVar33 = get_field_4_41cf50((int)param_1);
+        piVar29 = (int *)vector_at_e4_41fc00(puStack_628 + 0x2b,*(int *)(iVar33 + 8));
+        puVar10 = FUN_0041d660(piVar29);
+        iVar24 = (**(code **)(iVar24 + 0x7c))(piVar23,puVar10,uVar12);
+        if (iVar24 != 0) goto LAB_0041c4e1;
+      }
+      iVar24 = *unaff_ESI;
+      iVar33 = get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e4_41fc00(puStack_628 + 0x2b,*(int *)(iVar33 + 8));
+      puVar10 = FUN_0041d660(piVar23);
+      (**(code **)(iVar24 + 0x34))(unaff_ESI,puVar10);
+    }
+LAB_0041c4e1:
+    (**(code **)(*unaff_ESI + 0x24))(unaff_ESI);
+    iVar24 = get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e4_420310(unaff_ESI + 0x23,*(int *)(iVar24 + 4));
+    *puVar25 = unaff_ESI;
+    piVar29 = (int *)(**(code **)(*unaff_ESI + 0x48))(unaff_ESI,&DAT_008387ec,0xffff);
+    puVar40 = &DAT_008387e0;
+    piVar23 = (int *)(**(code **)(*unaff_ESI + 0x48))(unaff_ESI,&DAT_008387e0,0xffff);
+    if (piVar29 != nullptr) {
+      iVar24 = (**(code **)(*piVar29 + 0x3c))(piVar29);
+      if ((0 < iVar24) &&
+         (this_04 = (int *)(**(code **)(*piVar29 + 0x40))(piVar29,0), piVar29 = piVar23,
+         this_04 != nullptr)) {
+        (**(code **)(*this_04 + 0x38))(this_04,piVar29,4);
+        piVar23 = (int *)field_address_108_41d4b0((int)puVar40);
+        pSVar30 = (S_matrix *)FUN_0041d370(*piVar23);
+        pSVar32 = &SStack_4ec;
+        pSVar31 = (S_vector *)field_address_b0_41d150((int)puVar40);
+        pSVar32 = S_vector::OperatorMul(pSVar31,pSVar32,pSVar30);
+        FUN_0041d110(this_04,&pSVar32->x);
+        iVar24 = *this_04;
+        uVar39 = 0;
+        uVar12 = S_vector::Set(aSStack_4cc,0x3f800000,0,0);
+        (**(code **)(iVar24 + 0x1c))(this_04,uVar12,uVar39);
+        (**(code **)(*this_04 + 0x24))(this_04);
+      }
+      puVar25 = (uint32_t *)S_vector::Set(&SStack_4a0,0x3d99999a,0xbcbc6a7f,0xbb83126f);
+      FUN_0041d110(piVar29,puVar25);
+      (**(code **)(*piVar29 + 0x24))(piVar29);
+    }
+    piVar23 = (int *)GetGEffects();
+    (**(code **)(*piVar23 + 0x54))(unaff_ESI,0x3f800000);
+    FUN_00424420(&g_scriptModule,(int)unaff_ESI);
+    goto LAB_0041c60a;
+  case 0x4f:
+    cVar6 = get_field_824_41d5d0(0x868b18);
+    if (cVar6 != '\0') {
+      piVar23 = (int *)get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)vector_at_e4_420310((char *)((int)local_608->_pad_0084 + 8),*piVar23);
+      piVar23 = (int *)*puVar25;
+      if (piVar23 != nullptr) {
+        (**(code **)*piVar23)(piVar23);
+        piVar29 = (int *)get_field_4_41cf50((int)param_1);
+        puVar25 = (uint32_t *)vector_at_e4_420310((char *)((int)local_608->_pad_0084 + 8),*piVar29);
+        *puVar25 = 0;
+        FUN_00424310(&g_scriptModule,piVar23);
+        C_ScriptModule::FUN_00423b40((C_ScriptModule *)&g_scriptModule,(int)piVar23);
+        FUN_00424490(&g_scriptModule,piVar23);
+      }
+    }
+    uVar12 = FUN_00416cf0((int)local_608);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x50:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    pfVar13 = (float *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    local_618.rep = (C_str_rep *)*pfVar13;
+    local_614.rep = nullptr;
+    iVar24 = field_address_1c_461410(0x89ae78);
+    iVar24 = FUN_004622c0(iVar24);
+    if (((int)local_618.rep < iVar24) && (-1 < (int)local_618.rep)) {
+      local_60c.rep = nullptr;
+      iVar24 = field_address_1c_461410(0x89ae78);
+      iVar24 = FUN_00462300(iVar24);
+      CVar14.rep = local_60c.rep;
+      if (0 < iVar24) {
+        do {
+          this_03 = (C_auto_0080fc20 *)field_address_1c_461410(0x89ae78);
+          local_5e4.rep = (C_str_rep *)C_auto_0080fc20::FUN_004619f0(this_03,CVar14.rep);
+          uVar12 = FUN_0041d530((int)local_5e4.rep);
+          if (((char)uVar12 == '\0') &&
+             ((iVar24 = get_first_field_41cf40(param_1), iVar24 != 0xb3 ||
+              ((bVar5 = FUN_0041d510((int)local_5e4.rep), !bVar5 &&
+               (bVar5 = FUN_0041d520((int)local_5e4.rep), !bVar5)))))) {
+            if ((C_Door *)local_618.rep == nullptr) {
+              local_614.rep = local_5e4.rep;
+              this = (C_auto_0080f6fc *)local_608;
+              break;
+            }
+            local_618.rep = (C_str_rep *)local_618.rep[-1].chars;
+          }
+          CVar14.rep = (C_str_rep *)((int)&(local_60c.rep)->refCount + 1);
+          local_60c.rep = CVar14.rep;
+          iVar24 = field_address_1c_461410(0x89ae78);
+          iVar24 = FUN_00462300(iVar24);
+          this = (C_auto_0080f6fc *)local_608;
+        } while ((int)CVar14.rep < iVar24);
+      }
+    }
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310((uchar *)((int)((C_Door *)this)->_pad_0084 + 8),
+                                  *(int *)(iVar24 + 4));
+    if (*piVar23 != 0) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      puVar25 = (uint32_t *)
+                vector_at_e4_420310((uchar *)((int)((C_Door *)this)->_pad_0084 + 8),
+                             *(int *)(iVar24 + 4));
+      (*(code *)**(uint32_t **)*puVar25)((uint32_t *)*puVar25);
+    }
+    iVar24 = get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)
+              vector_at_e4_420310((uchar *)((int)((C_Door *)this)->_pad_0084 + 8),
+                           *(int *)(iVar24 + 4));
+    *puVar25 = 0;
+    CVar14.rep = local_614.rep;
+    if ((C_Door *)local_614.rep != nullptr) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      local_610 = (int *)vector_at_e4_420310((uchar *)((int)((C_Door *)this)->_pad_0084 + 8),
+                                      *(int *)(iVar24 + 4));
+      iVar24 = get_field_20_41d740((int)local_614.rep);
+      *local_610 = iVar24;
+      iVar24 = get_field_4_41cf50((int)param_1);
+      uVar28 = *(uint32_t *)(iVar24 + 4);
+      goto LAB_0041c2d5;
+    }
+    break;
+  case 0x51:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    piVar23 = (int *)*piVar23;
+    CVar14.rep = local_614.rep;
+    if (piVar23 != nullptr) {
+      local_61c = (C_Door *)(**(code **)(*piVar23 + 0x48))(piVar23,&DAT_008387ec,0xffff);
+      if (local_61c != nullptr) {
+        piVar29 = (int *)GetGEffects();
+        (**(code **)(*piVar29 + 0x58))(local_61c,0,1);
+      }
+      iVar24 = (**(code **)(*piVar23 + 0x48))(piVar23,&DAT_008387e8,0xffff);
+      CVar14.rep = local_614.rep;
+      if (iVar24 != 0) {
+        piVar23 = (int *)GetGEffects();
+        (**(code **)(*piVar23 + 0x58))(iVar24,0,1);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      }
+    }
+    break;
+  case 0x52:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    piVar23 = (int *)*piVar23;
+    CVar14.rep = local_614.rep;
+    if (((piVar23 != nullptr) &&
+        (local_610 = (int *)(**(code **)(*piVar23 + 0x48))(piVar23,&DAT_008387e4,0xffff),
+        CVar14.rep = local_614.rep, local_610 != nullptr)) &&
+       (iVar24 = (**(code **)(*local_610 + 0x3c))(local_610), CVar14.rep = local_614.rep,
+       iVar24 != 0)) {
+      do {
+        iVar24--;
+        local_61c = (C_Door *)(**(code **)(*local_610 + 0x40))(local_610,iVar24);
+        uVar8 = get_field_f8_41d100((int)local_61c);
+        if (CONCAT22(extraout_var_07,uVar8) == 1) {
+          piVar23 = (int *)GetGEffects();
+          (**(code **)(*piVar23 + 0x5c))(local_61c,0);
+        }
+      } while (iVar24 != 0);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x53:
+    local_610 = (int *)GetGEffects();
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    (**(code **)(*local_610 + 0xb8))(*piVar23 != 0);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x54:
+    piVar23 = (int *)param_1[1];
+    local_61c = *(C_Door **)(this->m_090 + *piVar23 * 4);
+    if (local_61c != nullptr) {
+      local_5e8[0] = *(int *)(this->m_0a0 + piVar23[1] * 8) != 0;
+      local_604 = (float)CONCAT31(local_604._1_3_,*(int *)(this->m_0a0 + piVar23[2] * 8) != 0);
+      uVar28 = FUN_0048e2d0(&g_tshiftModule,(int)local_61c);
+      pCVar15 = local_61c;
+      CVar14.rep = local_614.rep;
+      if (((char)uVar28 != '\0') &&
+         (((iVar24 = (*local_61c->vtable->vf01)(local_61c), CVar14.rep = local_614.rep,
+           iVar24 == 0x50414d4c || (iVar24 == 0x5f4a424f)) && (uVar28 = pCVar15->m_1e0, uVar28 != 0)
+          ))) {
+        iVar24 = FUN_0048e780(&g_tshiftModule,uVar28);
+        *(char *)(iVar24 + 8) = local_5e8[0];
+        iVar24 = FUN_0048e780(&g_tshiftModule,uVar28);
+        *(char *)(iVar24 + 9) = local_604._0_1_;
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      }
+    }
+    break;
+  case 0x55:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e4_420310(&this->m_08c,*piVar23);
+    local_61c = (C_Door *)*piVar23;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    pCVar15 = local_61c;
+    local_604 = (float)CONCAT31(local_604._1_3_,*piVar23 != 0);
+    if ((local_61c != nullptr) &&
+       (uVar8 = get_field_f8_41d100((int)local_61c), CONCAT22(extraout_var_09,uVar8) == 9)) {
+      if (local_604._0_1_ != '\0') {
+        piVar23 = (int *)GetGEffects();
+        (**(code **)(*piVar23 + 0x78))(pCVar15);
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      }
+      piVar23 = (int *)GetGEffects();
+      piVar23 = (int *)(**(code **)(*piVar23 + 0x7c))(pCVar15);
+      if (piVar23 != nullptr) {
+        (**(code **)(*piVar23 + 0x30))(piVar23,0);
+        (**(code **)(*piVar23 + 0x24))(piVar23);
+        (**(code **)*piVar23)(piVar23);
+      }
+    }
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x56:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    local_610 = (int *)CONCAT31(local_610._1_3_,*piVar23 != 0);
+    piVar23 = local_610;
+    pvVar26 = (void *)GetGame();
+    set_field_35_41d050(pvVar26,(char)piVar23);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x57:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    set_field_825_41d5c0(&g_scriptModule,*piVar23 != 0);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x58:
+    iVar24 = GetGame();
+    iVar24 = get_field_18_41d030(iVar24);
+    puVar25 = (uint32_t *)field_address_15c_41d550(iVar24);
+    local_610 = (int *)*puVar25;
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    (**(code **)(*local_610 + 0x74))(local_610,(float)*piVar23 * 0.017453292);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x59:
+    iVar24 = GetGame();
+    CVar14.rep = local_614.rep;
+    if (*(int *)(iVar24 + 0x54) != 0) {
+      pcVar34 = &DAT_00867a90;
+      iVar24 = *(int *)(this->m_0b0 + ((int *)param_1[1])[1] * 4);
+      if (iVar24 == 0) {
+        local_60c.rep = (C_str_rep *)&DAT_00867a90;
+      }
+      else {
+        local_60c.rep = (C_str_rep *)(iVar24 + 8);
+      }
+      iVar24 = *(int *)(this->m_0b0 + *(int *)param_1[1] * 4);
+      if (iVar24 != 0) {
+        pcVar34 = (char *)(iVar24 + 8);
+      }
+      iVar24 = GetGame();
+      uVar28 = FUN_0051f5a0(*(void **)(iVar24 + 0x54),pcVar34,(char *)local_60c.rep);
+      if (((char)uVar28 != '\0') ||
+         (iVar24 = GetGame(), this = (C_auto_0080f6fc *)local_608, *(int *)(iVar24 + 0x54) == -0x3c)
+         ) goto LAB_0041966e;
+      iVar24 = *(int *)(*(int *)(local_608->_pad_00a1 + 0xf) + ((int *)param_1[1])[1] * 4);
+      if (iVar24 == 0) {
+        local_60c.rep = (C_str_rep *)&DAT_00867a90;
+      }
+      else {
+        local_60c.rep = (C_str_rep *)(iVar24 + 8);
+      }
+      iVar24 = *(int *)(*(int *)(local_608->_pad_00a1 + 0xf) + *(int *)param_1[1] * 4);
+      pcVar34 = (char *)(iVar24 + 8);
+      if (iVar24 == 0) {
+        pcVar34 = &DAT_00867a90;
+      }
+      iVar24 = GetGame();
+      uVar28 = FUN_0051f5a0((void *)(*(int *)(iVar24 + 0x54) + 0x3c),pcVar34,(char *)local_60c.rep);
+      cVar6 = (char)uVar28;
+LAB_00417fdd:
+      CVar14.rep = local_614.rep;
+      if (cVar6 == '\0') {
+        GetGame();
+        uVar12 = FUN_00416cf0((int)this);
+        return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+      }
+    }
+    break;
+  case 0x5a:
+    iVar24 = GetGame();
+    CVar14.rep = local_614.rep;
+    if (*(int *)(iVar24 + 0x54) != 0) {
+      pcVar34 = &DAT_00867a90;
+      iVar24 = *(int *)(this->m_0b0 + ((int *)param_1[1])[1] * 4);
+      if (iVar24 == 0) {
+        local_60c.rep = (C_str_rep *)&DAT_00867a90;
+      }
+      else {
+        local_60c.rep = (C_str_rep *)(iVar24 + 8);
+      }
+      iVar24 = *(int *)(this->m_0b0 + *(int *)param_1[1] * 4);
+      if (iVar24 != 0) {
+        pcVar34 = (char *)(iVar24 + 8);
+      }
+      iVar24 = GetGame();
+      uVar28 = FUN_0051f490(*(void **)(iVar24 + 0x54),pcVar34,(char *)local_60c.rep);
+      if (((char)uVar28 != '\0') ||
+         (iVar24 = GetGame(), this = (C_auto_0080f6fc *)local_608, *(int *)(iVar24 + 0x54) == -0x3c)
+         ) goto LAB_0041966e;
+      iVar24 = *(int *)(*(int *)(local_608->_pad_00a1 + 0xf) + ((int *)param_1[1])[1] * 4);
+      if (iVar24 == 0) {
+        local_60c.rep = (C_str_rep *)&DAT_00867a90;
+      }
+      else {
+        local_60c.rep = (C_str_rep *)(iVar24 + 8);
+      }
+      iVar24 = *(int *)(*(int *)(local_608->_pad_00a1 + 0xf) + *(int *)param_1[1] * 4);
+      pcVar34 = (char *)(iVar24 + 8);
+      if (iVar24 == 0) {
+        pcVar34 = &DAT_00867a90;
+      }
+      iVar24 = GetGame();
+      uVar28 = FUN_0051f490((void *)(*(int *)(iVar24 + 0x54) + 0x3c),pcVar34,(char *)local_60c.rep);
+      cVar6 = (char)uVar28;
+      goto LAB_00417fdd;
+    }
+    break;
+  case 0x5b:
+    local_610 = (int *)get_field_4_41cf50((int)param_1);
+    local_610 = (int *)*local_610;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    uVar12 = *puVar25;
+    piVar23 = (int *)vector_at_e4_41fc00(&this->m_0ac,(int)local_610);
+    puVar10 = FUN_0041d660(piVar23);
+    sprintf(local_420,"%s %d",puVar10,uVar12);
+    GetGame();
+    empty_function_69c2b0();
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x5c:
+    local_60c.rep._0_1_ = *(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0;
+    pvVar26 = FUN_00424540(0xb8,'\x01');
+    if (pvVar26 != nullptr) {
+      C_BitStream__WriteBits(pvVar26,(uint32_t)((char)local_60c.rep != '\0'),1);
+      FUN_00424580(pvVar26);
+    }
+    CVar14.rep = local_614.rep;
+    if ((g_gameRole & 2) == 0) {
+      iVar24 = GetGame();
+      (**(code **)(**(int **)(iVar24 + 0x18) + 0x11c))
+                (*(int **)(iVar24 + 0x18),0,(uint32_t)local_60c.rep & 0xff);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x5d:
+    local_60c.rep = *(C_str_rep **)(this->m_0a0 + *(int *)param_1[1] * 8);
+    pvVar26 = FUN_00424540(0xb9,'\x01');
+    if (pvVar26 != nullptr) {
+      C_BitStream__WriteBits(pvVar26,local_60c.rep,0x20);
+      FUN_00424580(pvVar26);
+    }
+    CVar14.rep = local_614.rep;
+    if ((g_gameRole & 2) == 0) {
+      iVar24 = GetGame();
+      (**(code **)(**(int **)(iVar24 + 0x18) + 0x11c))(*(int **)(iVar24 + 0x18),10,local_60c.rep);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x5e:
+    local_61c = *(C_Door **)(this->m_0a0 + *(int *)param_1[1] * 8);
+    local_618.rep = (C_str_rep *)((float)(int)local_61c * 0.001);
+    if ((200.0 < (float)local_618.rep) || (0.0 <= (float)local_618.rep)) {
+      if (200.0 < (float)local_618.rep) {
+        local_618.rep = (C_str_rep *)0x43480000;
+      }
+    }
+    else {
+      local_618.rep = nullptr;
+    }
+    pvVar26 = FUN_00424540(0xba,'\x01');
+    if (pvVar26 != nullptr) {
+      local_61c = (C_Door *)local_618.rep;
+      C_BitStream__WriteBits(pvVar26,local_618.rep,0x20);
+      FUN_00424580(pvVar26);
+    }
+    CVar14.rep = local_614.rep;
+    if ((g_gameRole & 2) == 0) {
+      local_61c = (C_Door *)local_618.rep;
+      iVar24 = GetGame();
+      (**(code **)(**(int **)(iVar24 + 0x18) + 0x11c))(*(int **)(iVar24 + 0x18),5,local_61c);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x5f:
+    iVar24 = *(int *)(this->m_090 + ((int *)param_1[1])[1] * 4);
+    local_61c = (C_Door *)
+                CONCAT31(local_61c._1_3_,*(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0);
+    if ((iVar24 != 0) && (*(short *)(iVar24 + 0xf8) != 2)) {
+      iVar24 = 0;
+    }
+    piVar23 = (int *)GetGEffects();
+    (**(code **)(*piVar23 + 0x44))(local_61c,iVar24,0);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x60:
+    local_61c = *(C_Door **)(this->m_0a0 + *(int *)param_1[1] * 8);
+    pvVar26 = FUN_00424540(0xbc,'\x01');
+    if (pvVar26 != nullptr) {
+      C_BitStream__WriteBits(pvVar26,local_61c,0x10);
+      FUN_00424580(pvVar26);
+    }
+    goto switchD_00416e6a_caseD_18;
+  case 0x61:
+    local_61c = *(C_Door **)(this->m_0a0 + *(int *)param_1[1] * 8);
+    local_60c.rep = *(C_str_rep **)(this->m_0a0 + ((int *)param_1[1])[1] * 8);
+    local_618.rep = (C_str_rep *)((float)(int)local_61c * 0.001);
+    if ((20.0 < (float)local_618.rep) || (0.0001 <= (float)local_618.rep)) {
+      if (20.0 < (float)local_618.rep) {
+        local_618.rep = (C_str_rep *)0x41a00000;
+      }
+    }
+    else {
+      local_618.rep = (C_str_rep *)0x38d1b717;
+    }
+    local_608 = (C_Door *)((float)(int)local_60c.rep * 0.001);
+    if ((500.0 < (float)local_608) || (0.0 <= (float)local_608)) {
+      if (500.0 < (float)local_608) {
+        local_608 = (C_Door *)0x43fa0000;
+      }
+    }
+    else {
+      local_608 = nullptr;
+    }
+    pvVar26 = FUN_00424540(0xbd,'\x01');
+    if (pvVar26 != nullptr) {
+      local_61c = (C_Door *)local_618.rep;
+      C_BitStream__WriteBits(pvVar26,local_618.rep,0x20);
+      local_61c = local_608;
+      C_BitStream__WriteBits(pvVar26,local_608,0x20);
+      FUN_00424580(pvVar26);
+    }
+    CVar14.rep = local_614.rep;
+    if ((g_gameRole & 2) == 0) {
+      local_61c = (C_Door *)local_618.rep;
+      iVar24 = GetGame();
+      (**(code **)(**(int **)(iVar24 + 0x18) + 0x11c))(*(int **)(iVar24 + 0x18),6,local_61c);
+      iVar24 = GetGame();
+      (**(code **)(**(int **)(iVar24 + 0x18) + 0x11c))(*(int **)(iVar24 + 0x18),7,local_614.rep);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x62:
+    piVar23 = (int *)param_1[1];
+    iVar24 = this->m_0a0;
+    local_618.rep = *(C_str_rep **)(iVar24 + *piVar23 * 8);
+    if ((int)local_618.rep < 0x100) {
+      if ((int)local_618.rep < 0) {
+        local_618.rep = nullptr;
+      }
+      else if (0xff < (int)local_618.rep) goto LAB_00418d21;
+    }
+    else {
+LAB_00418d21:
+      local_618.rep = (C_str_rep *)0xff;
+    }
+    local_614.rep = *(C_str_rep **)(iVar24 + piVar23[1] * 8);
+    if ((int)local_614.rep < 0x100) {
+      if ((int)local_614.rep < 0) {
+        local_614.rep = nullptr;
+      }
+      else if (0xff < (int)local_614.rep) goto LAB_00418d53;
+    }
+    else {
+LAB_00418d53:
+      local_614.rep = (C_str_rep *)0xff;
+    }
+    iVar33 = *(int *)(iVar24 + piVar23[2] * 8);
+    if (iVar33 < 0x100) {
+      if (iVar33 < 0) {
+        iVar33 = 0;
+      }
+      else if (0xff < iVar33) goto LAB_00418d7f;
+    }
+    else {
+LAB_00418d7f:
+      iVar33 = 0xff;
+    }
+    iVar24 = *(int *)(iVar24 + piVar23[3] * 8);
+    if (iVar24 < 0x100) {
+      if (iVar24 < 0) {
+        iVar24 = 0;
+      }
+      else {
+        if (0xff < iVar24) goto LAB_00418da6;
+        piVar23 = (int *)vector_at_e8_420360(&this->m_09c,piVar23[3]);
+        iVar24 = *piVar23;
+      }
+    }
+    else {
+LAB_00418da6:
+      iVar24 = 0xff;
+    }
+    local_60c.rep = ((iVar24 * 0x100 + iVar33) * 0x100 + (int)local_614.rep) * 0x100 + local_618.rep
+    ;
+    pvVar26 = FUN_00424540(0xbe,'\x01');
+    if (pvVar26 != nullptr) {
+      FUN_0041d010(pvVar26,local_60c.rep);
+      FUN_00424580(pvVar26);
+    }
+    uVar28 = get_first_field_41d750(&g_gameRole);
+    CVar14.rep = local_614.rep;
+    if ((uVar28 & 2) == 0) {
+      iVar24 = GetGame();
+      piVar23 = (int *)get_field_18_41d030(iVar24);
+      (**(code **)(*piVar23 + 0x11c))(piVar23,3,local_60c.rep);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 99:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    if (*piVar23 < 0x100) {
+      piVar23 = (int *)get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+      if (-1 < *piVar23) goto LAB_00418e8c;
+      local_608 = nullptr;
+    }
+    else {
+LAB_00418e8c:
+      piVar23 = (int *)get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*piVar23);
+      if (*piVar23 < 0x100) {
+        piVar23 = (int *)get_field_4_41cf50((int)param_1);
+        pfVar13 = (float *)vector_at_e8_420360(&this->m_09c,*piVar23);
+        local_608 = (C_Door *)*pfVar13;
+      }
+      else {
+        local_608 = (C_Door *)0xff;
+      }
+    }
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+    if (*piVar23 < 0x100) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+      if (-1 < *piVar23) goto LAB_00418f11;
+      local_618.rep = nullptr;
+    }
+    else {
+LAB_00418f11:
+      iVar24 = get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+      if (*piVar23 < 0x100) {
+        iVar24 = get_field_4_41cf50((int)param_1);
+        pfVar13 = (float *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 4));
+        local_618.rep = (C_str_rep *)*pfVar13;
+      }
+      else {
+        local_618.rep = (C_str_rep *)0xff;
+      }
+    }
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 8));
+    if (*piVar23 < 0x100) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 8));
+      if (-1 < *piVar23) goto LAB_00418f98;
+      local_614.rep = nullptr;
+    }
+    else {
+LAB_00418f98:
+      iVar24 = get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 8));
+      if (*piVar23 < 0x100) {
+        iVar24 = get_field_4_41cf50((int)param_1);
+        pfVar13 = (float *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 8));
+        local_614.rep = (C_str_rep *)*pfVar13;
+      }
+      else {
+        local_614.rep = (C_str_rep *)0xff;
+      }
+    }
+    iVar24 = get_field_4_41cf50((int)param_1);
+    piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 0xc));
+    if (*piVar23 < 0x100) {
+      iVar24 = get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 0xc));
+      if (-1 < *piVar23) goto LAB_00419019;
+      iVar24 = 0;
+    }
+    else {
+LAB_00419019:
+      iVar24 = get_field_4_41cf50((int)param_1);
+      piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 0xc));
+      if (*piVar23 < 0x100) {
+        iVar24 = get_field_4_41cf50((int)param_1);
+        piVar23 = (int *)vector_at_e8_420360(&this->m_09c,*(int *)(iVar24 + 0xc));
+        iVar24 = *piVar23;
+      }
+      else {
+        iVar24 = 0xff;
+      }
+    }
+    local_60c.rep =
+         (C_str_rep *)
+         (((iVar24 * 0x100 + (int)local_614.rep) * 0x100 + (int)local_618.rep) * 0x100 +
+         (int)local_608);
+    pvVar26 = FUN_00424540(0xbf,'\x01');
+    if (pvVar26 != nullptr) {
+      FUN_0041d010(pvVar26,local_60c.rep);
+      FUN_00424580(pvVar26);
+    }
+    uVar28 = get_first_field_41d750(&g_gameRole);
+    CVar14.rep = local_614.rep;
+    if ((uVar28 & 2) == 0) {
+      iVar24 = GetGame();
+      piVar23 = (int *)get_field_18_41d030(iVar24);
+      (**(code **)(*piVar23 + 0x11c))(piVar23,4,local_60c.rep);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 100:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    puVar25 = (uint32_t *)vector_at_e8_420360(&this->m_09c,*piVar23);
+    uVar12 = *puVar25;
+    iVar24 = GetGame();
+    iVar24 = get_field_18_41d030(iVar24);
+    CVar14.rep = local_614.rep;
+    if (iVar24 != 0) {
+      iVar24 = GetGame();
+      piVar23 = (int *)get_field_18_41d030(iVar24);
+      (**(code **)(*piVar23 + 0x11c))(piVar23,0xf,uVar12);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x65:
+    local_60c.rep = *(C_str_rep **)(this->m_0a0 + *(int *)param_1[1] * 8);
+    pvVar26 = FUN_00424540(0xc1,'\x01');
+    if (pvVar26 != nullptr) {
+      C_BitStream__WriteBits
+                (pvVar26,(uint32_t)((C_auto_0080fc20 *)local_60c.rep == (C_auto_0080fc20 *)0x1),1);
+      FUN_00424580(pvVar26);
+    }
+    CVar14.rep = local_614.rep;
+    if ((g_gameRole & 2) == 0) {
+      iVar24 = GetGame();
+      (**(code **)(**(int **)(iVar24 + 0x18) + 0x11c))(*(int **)(iVar24 + 0x18),0xe,local_60c.rep);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x66:
+    local_60c.rep = *(C_str_rep **)(this->m_0a0 + *(int *)param_1[1] * 8);
+    local_5e4.rep = *(C_str_rep **)(this->m_0a0 + ((int *)param_1[1])[1] * 8);
+    pvVar26 = FUN_00424540(0xc2,'\x01');
+    if (pvVar26 != nullptr) {
+      C_BitStream__WriteBits(pvVar26,local_60c.rep,0x20);
+      C_BitStream__WriteBits(pvVar26,local_5e4.rep,0x20);
+      FUN_00424580(pvVar26);
+    }
+    CVar14.rep = local_614.rep;
+    if ((g_gameRole & 2) == 0) {
+      local_61c = (C_Door *)(float)(int)local_60c.rep;
+      iVar24 = GetGame();
+      (**(code **)(**(int **)(iVar24 + 0x18) + 0x11c))(*(int **)(iVar24 + 0x18),8,local_61c);
+      iVar24 = GetGame();
+      (**(code **)(**(int **)(iVar24 + 0x18) + 0x11c))(*(int **)(iVar24 + 0x18),9,(float)iStack_5f0)
+      ;
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x67:
+    piVar23 = (int *)param_1[1];
+    iVar24 = this->m_0a0;
+    local_600.x = (float)*(int *)(iVar24 + *piVar23 * 8);
+    local_600.y = (float)*(int *)(iVar24 + piVar23[1] * 8);
+    local_600.z = (float)*(int *)(iVar24 + piVar23[2] * 8);
+    local_614.rep =
+         (C_str_rep *)
+         (local_600.x * local_600.x + local_600.y * local_600.y + local_600.z * local_600.z);
+    if (1e-08 <= ABS((float)local_614.rep - 1.0)) {
+      if (1e-08 <= (float)local_614.rep) {
+        fVar38 = 1.0 / SQRT((float)local_614.rep);
+        local_600.x = local_600.x * fVar38;
+        local_600.y = local_600.y * fVar38;
+        local_600.z = local_600.z * fVar38;
+      }
+      else if (local_600.x == 0.0) {
+        if (local_600.z == 0.0) {
+          if (0.0 <= local_600.y) {
+            local_600.y = 1.0;
+          }
+          else {
+            local_600.y = -1.0;
+          }
+        }
+        else if (0.0 <= local_600.z) {
+          local_600.z = 1.0;
+        }
+        else {
+          local_600.z = -1.0;
+        }
+      }
+      else if (0.0 <= local_600.x) {
+        local_600.x = 1.0;
+      }
+      else {
+        local_600.x = -1.0;
+      }
+    }
+    pvVar26 = FUN_00424540(0xc3,'\x01');
+    if (pvVar26 != nullptr) {
+      local_61c = (C_Door *)local_600.x;
+      C_BitStream__WriteBits(pvVar26,local_600.x,0x20);
+      local_61c = (C_Door *)local_600.y;
+      C_BitStream__WriteBits(pvVar26,local_600.y,0x20);
+      local_61c = (C_Door *)local_600.z;
+      C_BitStream__WriteBits(pvVar26,local_600.z,0x20);
+      FUN_00424580(pvVar26);
+    }
+    CVar14.rep = local_614.rep;
+    if ((g_gameRole & 2) == 0) {
+      local_61c = (C_Door *)local_600.x;
+      iVar24 = GetGame();
+      (**(code **)(**(int **)(iVar24 + 0x18) + 0x11c))(*(int **)(iVar24 + 0x18),0xb,local_61c);
+      pCVar15 = local_608;
+      iVar24 = GetGame();
+      (**(code **)(**(int **)(iVar24 + 0x18) + 0x11c))(*(int **)(iVar24 + 0x18),0xc,pCVar15);
+      iVar24 = GetGame();
+      (**(code **)(**(int **)(iVar24 + 0x18) + 0x11c))(*(int **)(iVar24 + 0x18),0xd,local_610);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x68:
+    this->m_0d4 = '\x01';
+    pCVar15 = (C_Door *)FUN_0041cf80(this->m_100);
+    if (pCVar15 != nullptr) {
+      local_61c = pCVar15;
+      iVar24 = get_field_18_41d6f0((int)pCVar15);
+      if (iVar24 == 3) {
+        uVar12 = FUN_0041d540((int)pCVar15);
+        if ((char)uVar12 != '\0') {
+          FUN_005af5c0(pCVar15,0);
+          FUN_005af570(pCVar15,0);
+          FUN_005af450((int)pCVar15);
+          iVar24 = get_field_160_41d580((int)pCVar15);
+          if (iVar24 != 0) {
+            iVar24 = get_field_160_41d580((int)pCVar15);
+            iVar24 = get_field_18_41d6f0(iVar24);
+            if (iVar24 == 0x22) {
+              iVar24 = field_address_1c_461410(0x89ae78);
+              pCVar16 = (C_Door *)FUN_0045d1d0(iVar24);
+              if (pCVar16 == pCVar15) {
+                iVar24 = field_address_1c_461410(0x89ae78);
+                FUN_0045da40(iVar24);
+                iVar24 = this->m_0d8 + 1;
+                this->m_0d8 = iVar24;
+                return CONCAT31((int3)((uint32_t)iVar24 >> 8),1);
+              }
+            }
+          }
+        }
+      }
+      else {
+        iVar24 = get_field_18_41d6f0((int)pCVar15);
+        if ((iVar24 == 0x1e) &&
+           (uVar12 = FUN_0041d780((int)pCVar15), pCVar15 = local_61c, (char)uVar12 != '\0')) {
+          FUN_0041d7a0(local_61c,'\0');
+          FUN_005d5870(pCVar15,'\0');
+          FUN_0041d790((int)pCVar15);
+        }
+      }
+    }
+    iVar24 = this->m_0d8 + 1;
+    this->m_0d8 = iVar24;
+    return CONCAT31((int3)((uint32_t)iVar24 >> 8),1);
+  case 0x69:
+    local_608 = FUN_00424540(0xfa,'\x01');
+    CVar14.rep = local_614.rep;
+    if (local_608 != nullptr) {
+      iVar24 = 1;
+      uVar28 = (uint32_t)(*(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0);
+LAB_0041763a:
+      C_BitStream__WriteBits(local_608,uVar28,iVar24);
+      pCVar15 = local_608;
+LAB_00417647:
+      FUN_00424580(pCVar15);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x6a:
+    local_608 = FUN_00424540(0xfb,'\x01');
+    CVar14.rep = local_614.rep;
+    if (local_608 != nullptr) {
+      iVar24 = 0x20;
+      uVar28 = *(uint32_t *)(this->m_0a0 + *(int *)param_1[1] * 8);
+      goto LAB_0041763a;
+    }
+    break;
+  case 0x6b:
+    local_5e8[0] = *(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0;
+    iVar24 = GetGame();
+    *(char *)(iVar24 + 0x34) = local_5e8[0];
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x6c:
+    local_5e8[0] = *(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0;
+    iVar24 = GetGame();
+    *(char *)(iVar24 + 0x36) = local_5e8[0];
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x6d:
+    iVar24 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    if (((iVar24 != 0) &&
+        (puVar25 = *(uint32_t **)(iVar24 + 0xec), ExceptionList = &local_1c,
+        puVar25 != nullptr)) &&
+       ((pvVar26 = (void *)*puVar25, ExceptionList = &local_1c, pvVar26 != nullptr &&
+        (ExceptionList = &local_1c, *(int *)((int)pvVar26 + 0x18) == 3)))) {
+      FUN_005a7b30(pvVar26,*(int *)(this->m_0a0 + ((int *)param_1[1])[1] * 8));
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x6e:
+    iVar24 = GetGame();
+    vector_clear_420390(*(int *)(iVar24 + 0x58) + 0x6b3a0);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x6f:
+    local_61c = (C_Door *)this->m_0a0;
+    piVar23 = (int *)param_1[1];
+    iVar24 = GetGame();
+    local_61c = *(C_Door **)(local_61c->_pad_0004 + *piVar23 * 8 - 4);
+    FUN_004205c0((void *)(*(int *)(iVar24 + 0x58) + 0x6b3a0),
+                 *(uint32_t **)(*(int *)(iVar24 + 0x58) + 0x6b3a8),&local_61c);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x70:
+    iVar24 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    local_61c = *(C_Door **)(this->m_0a0 + ((int *)param_1[1])[1] * 8);
+    if (((iVar24 != 0) &&
+        (puVar25 = *(uint32_t **)(iVar24 + 0xec), ExceptionList = &local_1c,
+        puVar25 != nullptr)) &&
+       ((pvVar26 = (void *)*puVar25, ExceptionList = &local_1c, pvVar26 != nullptr &&
+        (ExceptionList = &local_1c, *(int *)((int)pvVar26 + 0x18) == 3)))) {
+      lVar36 = FUN_005a5ff0((int)pvVar26,(uint32_t)local_61c);
+      FUN_005a6060(pvVar26,(int)(local_61c->_pad_0004 + (int)lVar36 - 4));
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x71:
+    if (DAT_008ac9e4 != nullptr) {
+      FUN_005eddc0(DAT_008ac9e4,(float)*(int *)(this->m_0a0 + *(int *)param_1[1] * 8) * 0.01,
+                   (float)*(int *)(this->m_0a0 + ((int *)param_1[1])[1] * 8) * 0.01);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x72:
+    iVar24 = *(int *)(this->m_0b0 + *(int *)param_1[1] * 4);
+    puVar10 = (uint8_t *)(iVar24 + 8);
+    if (iVar24 == 0) {
+      puVar10 = &DAT_00867a90;
+    }
+    FUN_00428d10(&g_scriptModule,puVar10);
+    uVar12 = FUN_00416cf0((int)this);
+    return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  case 0x73:
+    if (((uint8_t)g_gameRole & 7) != 7) {
+      iVar24 = *(int *)(this->m_0b0 + *(int *)param_1[1] * 4);
+      pbVar11 = (uint8_t *)(iVar24 + 8);
+      if (iVar24 == 0) {
+        pbVar11 = &DAT_00867a90;
+      }
+      uVar12 = *(uint32_t *)(this->m_0a0 + ((int *)param_1[1])[1] * 8);
+      GetGame();
+      FUN_0069f320(pbVar11,uVar12);
+      uVar12 = FUN_00416cf0((int)this);
+      return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+    }
+    break;
+  case 0x75:
+    piVar23 = (int *)get_field_4_41cf50((int)param_1);
+    local_61c = (C_Door *)*piVar23;
+    iVar24 = get_field_4_41cf50((int)param_1);
+    local_610 = *(int **)(iVar24 + 4);
+    iVar24 = get_field_4_41cf50((int)param_1);
+    iVar24 = *(int *)(iVar24 + 8);
+    if (local_610 == (int *)0x2) {
+      local_610 = (int *)vector_at_e4_420270(&this->m_06c,(int)local_61c);
+      puVar27 = (uint32_t *)vector_at_e8_420360(&this->m_09c,iVar24);
+      uVar28 = FUN_00411650((void *)*local_610,this);
+      *puVar27 = uVar28;
+    }
+    else if (local_610 == (int *)0x4) {
+      puVar25 = (uint32_t *)vector_at_e4_420270(&this->m_06c,(int)local_61c);
+      puVar25 = FUN_00411860((void *)*puVar25,&local_574,(int)this);
+      local_14 = 7;
+      pvVar26 = (void *)vector_at_e4_41fc00(&this->m_0ac,iVar24);
+      FUN_004145d0(pvVar26,puVar25);
+      C_str::~C_str(&local_574);
+    }
+    iVar24 = this->m_0d8 + 1;
+    this->m_0d8 = iVar24;
+    this->m_104 = '\x01';
+    return CONCAT31((int3)((uint32_t)iVar24 >> 8),1);
+  case 0x76:
+    goto switchD_00416e6a_caseD_76;
+  }
+  local_614.rep = CVar14.rep;
+  iVar24 = FUN_00416cf0((int)this);
+LAB_0041c8cd:
+  return CONCAT31((int3)((uint32_t)iVar24 >> 8),1);
+switchD_00416e6a_caseD_18:
+  piVar23 = (int *)FUN_00416cf0((int)this);
+switchD_00416e6a_caseD_76:
+  return (uint32_t)piVar23 & 0xffffff00;
+}
+

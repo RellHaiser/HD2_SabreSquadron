@@ -1,0 +1,72 @@
+# Destructible objects ("versions"), source file 0x0043ad80-0x0043f1e0 (src/game/versions.*)
+0043ad80 StaticInit_43ad80
+0043adb0 C_VersionKeeper::C_VersionKeeper | C_VersionKeeper * __thiscall C_VersionKeeper(C_VersionKeeper *this, I3D_frame *frame, C_VersionMaster *master, int index, int hitPoints, int particleEffect, int materialId, bool transparent)
+0043aef0 C_VersionKeeper::~C_VersionKeeper | void __thiscall ~C_VersionKeeper(C_VersionKeeper *this)
+0043b000 C_VersionKeeper::Damage | bool __thiscall Damage(C_VersionKeeper *this, int damage, I3D_frame **outFrame, int effectsMode)
+0043b140 C_VersionKeeper::SpawnDebris | void __thiscall SpawnDebris(C_VersionKeeper *this, I3D_frame *debris, bool physics)
+0043b9d0 C_VersionKeeper::PlaySound | void __thiscall PlaySound(C_VersionKeeper *this, int sound)
+0043ba60 C_VersionKeeper::SwapVisual | void __thiscall SwapVisual(C_VersionKeeper *this, I3D_frame *source)
+0043c000 C_VersionKeeper::SpawnParticles | void __thiscall SpawnParticles(C_VersionKeeper *this, int effect)
+0043c040 C_VersionKeeper::SetVersion | void __thiscall SetVersion(C_VersionKeeper *this, int version, bool effects)
+0043c170 StaticInit_43c170
+0043c1a0 C_VersionMaster::Clear | void __thiscall Clear(C_VersionMaster *this)
+0043c220 C_VersionMaster::C_VersionMaster | C_VersionMaster * __thiscall C_VersionMaster(C_VersionMaster *this, I3D_frame *frame, int index, bool transparent)
+0043c310 AlignedFree_43c310 | void __fastcall AlignedFree_43c310(void *p)
+0043c320 C_VersionMaster::~C_VersionMaster | void __thiscall ~C_VersionMaster(C_VersionMaster *this)
+0043c440 C_VersionMaster::AddKeeper | bool __thiscall AddKeeper(C_VersionMaster *this, I3D_frame *frame, int hitPoints, int particleEffect, int materialId, bool transparent)
+0043c660 C_VersionMaster::DamageFrame | bool __thiscall DamageFrame(C_VersionMaster *this, I3D_frame *frame, int damage)
+0043c6a0 C_VersionMaster::DamageAll | bool __thiscall DamageAll(C_VersionMaster *this, int damage, int effectsMode)
+0043c710 C_VersionMaster::OnKeeperDamaged | bool __thiscall OnKeeperDamaged(C_VersionMaster *this, C_VersionKeeper *keeper)
+0043c9f0 vector_insert_n4_43c9f0
+0043cc70 StaticInit_43cc70
+0043cca0 C_VersionMaster::LoadVersions | bool __thiscall LoadVersions(C_VersionMaster *this, C_VersionKeeper *keeper)
+0043ce10 ClassifyVersionChild | void __fastcall ClassifyVersionChild(I3D_frame *frame, I3D_frame **outDebris, I3D_frame **outVisual)
+0043ce40 C_VersionMaster::LoadVersionsModel | void __thiscall LoadVersionsModel(C_VersionMaster *this)
+0043d310 vector_insert_n4_43d310
+0043d520 StaticInit_43d520
+0043d550 C_VersionMaster::SaveGame | void __thiscall SaveGame(C_VersionMaster *this, C_chunk *chunk)
+0043d7f0 C_VersionMaster::LoadGame | void __thiscall LoadGame(C_VersionMaster *this, C_chunk *chunk)
+0043dab0 C_VersionMaster::WriteState | void __thiscall WriteState(C_VersionMaster *this, C_BitStream *msg)
+0043db40 C_VersionMaster::ReadState | void __thiscall ReadState(C_VersionMaster *this, C_BitStream *msg)
+0043dbb0 StaticInit_43dbb0
+0043dbe0 StaticInit_VersionsModule
+0043dbf0 ConstructVersionsModule
+0043dc10 C_VersionsModule::C_VersionsModule | C_VersionsModule * __thiscall C_VersionsModule(C_VersionsModule *this, int id, char *name)
+0043dc70 C_VersionsModule::Init
+0043dc80 C_VersionsModule::Done
+0043dc90 C_VersionsModule::LoadMissionData | void __thiscall LoadMissionData(C_VersionsModule *this, bool server)
+0043dca0 C_VersionsModule::FreeMissionData | void __thiscall FreeMissionData(C_VersionsModule *this, bool server)
+0043dcb0 C_VersionsModule::ScalarDeletingDestructor
+0043dcd0 C_VersionsModule::~C_VersionsModule
+0043dd20 RegisterVersionsModuleDtor
+0043dd30 DestroyVersionsModule
+0043dd40 C_VersionsModule::StartMission | void __thiscall StartMission(C_VersionsModule *this, bool server)
+0043dd90 C_VersionsModule::StopMission | void __thiscall StopMission(C_VersionsModule *this, bool server)
+0043ddb0 S_VersionCollision::S_VersionCollision | S_VersionCollision * __thiscall S_VersionCollision(S_VersionCollision *this, I3D_frame *frame, bool transparent)
+0043e1f0 S_VersionCollision::~S_VersionCollision | void __thiscall ~S_VersionCollision(S_VersionCollision *this)
+0043e210 StaticInit_43e210
+0043e240 ParseUserProp | int __fastcall ParseUserProp(char *props, char *key, int defaultValue)
+0043e2a0 AddVersionKeeper | void __fastcall AddVersionKeeper(I3D_frame *frame, int hitPoints, int particleEffect, int materialId, bool transparent)
+0043e2c0 C_VersionsModule::Clear | void __thiscall Clear(C_VersionsModule *this)
+0043e3e0 BuildVersionKeepers | void __stdcall BuildVersionKeepers(I3D_scene *scene)
+0043e400 BuildVersionKeeperProc | uint __stdcall BuildVersionKeeperProc(I3D_frame *frame, void *context)
+0043e560 C_VersionsModule::AddKeeper | void __thiscall AddKeeper(C_VersionsModule *this, I3D_frame *frame, int hitPoints, int particleEffect, int materialId, bool transparent)
+0043e7c0 C_VersionsModule::RemoveMaster | void __thiscall RemoveMaster(C_VersionsModule *this, C_VersionMaster *master)
+0043e830 C_VersionsModule::KeepCollision | void __thiscall KeepCollision(C_VersionsModule *this, S_VersionCollision *collision)
+0043eb20 StaticInit_43eb20
+0043eb50 C_VersionsModule::RestartMission | void __thiscall RestartMission(C_VersionsModule *this, bool server)
+0043eba0 C_VersionsModule::SaveGame | bool __thiscall SaveGame(C_VersionsModule *this, C_chunk *chunk)
+0043ee10 C_VersionsModule::LoadGame | bool __thiscall LoadGame(C_VersionsModule *this, C_chunk *chunk)
+0043f090 C_VersionsModule::WriteState | void __thiscall WriteState(C_VersionsModule *this, C_BitStream *msg)
+0043f120 C_VersionsModule::ReadState | void __thiscall ReadState(C_VersionsModule *this, C_BitStream *msg)
+0043f1e0 C_VersionsModule::OnMessage | bool __thiscall OnMessage(C_VersionsModule *this, C_BitStream *msg)
+00899978 g_versionsModule @ C_VersionsModule
+00899974 g_versionsLoading @ bool
+# collision world (0x006ef000.., not ported yet)
+006ef7b0 C_CollisionWorld::AddVolume | void __thiscall AddVolume(C_CollisionWorld *this, S_CollisionVolume *volume)
+006ef9b0 C_CollisionWorld::RemoveVolume | void __thiscall RemoveVolume(C_CollisionWorld *this, S_CollisionVolume *volume)
+006efbc0 C_CollisionWorld::MoveVolume | void __thiscall MoveVolume(C_CollisionWorld *this, S_CollisionVolume *volume)
+00475190 RandomFloat | float10 __stdcall RandomFloat(float max)
+004066c0 S_vector::Scaled | S_vector * __thiscall Scaled(S_vector *this, S_vector *result, float *factor)
+00408680 S_FrameData::Init | void __fastcall Init(S_FrameData *this)
+00410630 GetPhysicsModule

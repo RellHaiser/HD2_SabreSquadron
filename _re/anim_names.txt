@@ -1,0 +1,1162 @@
+# group 1 (g_humanAnimTable): id: stance 0 / 1 / 2 (flags, blend ms, file)
+  0 0x00: !dvereST02(3,100) | !dvereKL03(3,200) | -
+  1 0x01: !dvereST02(3,100) | !dvereKL03(3,200) | -
+  2 0x02: !dvereST02(3,100) | !dvereKL03(3,200) | -
+  3 0x03: !dvereST02(3,100) | !dvereKL03(3,200) | -
+  4 0x04: - | !manipul(5,200) | -
+  5 0x05: - | !manipulm(3,200) | -
+  6 0x06: !svazuje1(3,200) | - | -
+  7 0x07: !svazovanej(3,200) | - | -
+  8 0x08: !slezZEBda(3,500) | - | -
+  9 0x09: !nakroc4a(3,200) | - | -
+ 10 0x0A: !nakrocV6a(3,200) | - | -
+ 11 0x0B: !stPREKca(3,200) | - | -
+ 12 0x0C: !vPREKha(3,200) | - | -
+ 13 0x0D: !vys_prek2a(3,200) | - | -
+ 14 0x0E: !zZEBda(3,300) | - | -
+ 15 0x0F: - | - | -
+ 16 0x10: - | - | -
+ 17 0x11: !vPAD01(5,300) | - | -
+ 18 0x12: - | - | -
+ 19 0x13: - | - | -
+ 20 0x14: !doskKLa(3,300) | - | -
+ 21 0x15: - | !doskKLa(3,500) | -
+ 22 0x16: !doskSTb(3,200) | - | -
+ 23 0x17: - | !skokDRc(3,200) | -
+ 24 0x18: !jump(3,80) | - | -
+ 25 0x19: - | !medik01(3,200) | -
+ 26 0x1A: !st-dr3(3,200) | - | -
+ 27 0x1B: - | !dr-st3(3,200) | -
+ 28 0x1C: !sednuti(3,200) | - | -
+ 29 0x1D: !zeseduR(3,200) | - | -
+ 30 0x1E: - | !dr-leR(3,200) | -
+ 31 0x1F: - | - | !le-drR(3,200)
+ 32 0x20: !st-leR(3,250) | - | -
+ 33 0x21: - | - | !le-st3(3,200)
+ 34 0x22: !sedim1(5,200) | - | -
+ 35 0x23: #sedimturek(5,200) | - | -
+ 36 0x24: #sedamturek(3,200) | - | -
+ 37 0x25: #vstavamtur(3,200) | - | -
+ 38 0x26: !zeseduR(3,200) | - | -
+ 39 0x27: - | !strihaLOOP(3,200) | -
+ 40 0x28: - | - | -
+ 41 0x29: - | - | -
+ 42 0x2A: - | - | -
+ 43 0x2B: !otocP1(3,200) | !DotocP(3,700) | !LotocP(3,750)
+ 44 0x2C: !otocL1(3,200) | !DotocL(3,700) | !LotocL(3,750)
+ 45 0x2D: !static02NEW(3,300) | - | -
+ 46 0x2E: !static02NEW(3,400) | - | -
+ 47 0x2F: !stani01(3,100) | - | -
+ 48 0x30: !stani02(3,100) | - | -
+ 49 0x31: !stani01(3,100) | - | -
+ 50 0x32: !stani02(3,100) | - | -
+ 51 0x33: !stani04(3,200) | - | -
+ 52 0x34: !static02NEW(3,100) | - | -
+ 53 0x35: !static02NEW(3,100) | - | -
+ 54 0x36: !staticZB(9,150) | - | -
+ 55 0x37: - | !drep1(3,400) | -
+ 56 0x38: - | !drep1(3,200) | -
+ 57 0x39: - | !drepL(3,200) | -
+ 58 0x3A: - | !drepP(3,200) | -
+ 59 0x3B: - | !drepL(3,200) | -
+ 60 0x3C: - | !drepP(3,200) | -
+ 61 0x3D: - | !drep1(3,200) | -
+ 62 0x3E: - | !drepZB1(3,300) | -
+ 63 0x3F: - | - | #leh1b1(3,400)
+ 64 0x40: - | - | !leziN(3,200)
+ 65 0x41: - | - | !lehZB(3,300)
+ 66 0x42: - | - | -
+ 67 0x43: - | - | -
+ 68 0x44: - | - | -
+ 69 0x45: - | - | -
+ 70 0x46: - | - | -
+ 71 0x47: - | - | -
+ 72 0x48: - | - | -
+ 73 0x49: - | - | -
+ 74 0x4A: - | - | -
+ 75 0x4B: - | - | -
+ 76 0x4C: - | - | -
+ 77 0x4D: - | - | -
+ 78 0x4E: - | - | -
+ 79 0x4F: - | - | -
+ 80 0x50: - | - | -
+ 81 0x51: - | - | -
+ 82 0x52: - | - | -
+ 83 0x53: - | - | -
+ 84 0x54: - | - | -
+ 85 0x55: - | - | -
+ 86 0x56: - | - | -
+ 87 0x57: - | - | -
+ 88 0x58: - | - | -
+ 89 0x59: !potapManipul(5,300) | - | -
+ 90 0x5A: !plavani3(9,200) | !plavani3(9,200) | !plavani3(9,200)
+ 91 0x5B: !plavST(9,500) | !plavST(9,200) | !plavST(9,200)
+ 92 0x5C: !potapec(9,500) | !potapec(9,400) | !potapec(9,400)
+ 93 0x5D: !potapecM(9,200) | !potapecM(9,200) | !potapecM(9,200)
+ 94 0x5E: (uchprestoj4(3,250) | - | -
+ 95 0x5F: (upuprestoj4(3,250) | - | -
+ 96 0x60: (mrtvolak1(5,300) | - | -
+ 97 0x61: !mrtvolaP1(5,300) | - | -
+ 98 0x62: !svazanej(5,200) | - | -
+ 99 0x63: - | - | -
+100 0x64: - | - | -
+101 0x65: - | - | -
+102 0x66: - | - | -
+103 0x67: !odemceST(3,200) | !odemceKL(3,200) | -
+104 0x68: !plavani3(5,300) | !plavani3(5,400) | !plavani3(5,300)
+105 0x69: !plavani3(5,100) | !plavani3(5,400) | !plavani3(9,300)
+106 0x6A: #LEZUP2da(9,200) | - | -
+107 0x6B: #LEZDWN1da(9,200) | - | -
+108 0x6C: !rychleZEBD(5,150) | - | -
+109 0x6D: - | - | -
+110 0x6E: - | - | -
+111 0x6F: !naponorce(5,100) | - | -
+112 0x70: - | - | -
+113 0x71: !svazSMRT(3,200) | - | -
+114 0x72: !smrtMOT1(3,200) | - | -
+115 0x73: !smrtMOT2(3,200) | - | -
+116 0x74: !dthBAZs(3,200) | - | -
+117 0x75: - | !dthBAZd(3,200) | -
+118 0x76: - | - | !dthBAZl(3,200)
+119 0x77: #death13(3,200) | - | -
+120 0x78: #death121(3,200) | - | -
+121 0x79: #death3(3,200) | - | -
+122 0x7A: #death5(3,200) | - | -
+123 0x7B: #death6(3,200) | - | -
+124 0x7C: !smrtB1a(3,200) | - | -
+125 0x7D: !smrtB2a(3,200) | - | -
+126 0x7E: !smrtB3b(3,200) | - | -
+127 0x7F: !smrtB4a(3,200) | - | -
+128 0x80: !smrtM2b(3,200) | - | -
+129 0x81: !smrtL1c(3,200) | - | -
+130 0x82: !smrtP2a(3,200) | - | -
+131 0x83: - | #-death1(3,200) | -
+132 0x84: - | #-death3(3,200) | -
+133 0x85: - | #-death4(3,200) | -
+134 0x86: - | #-death2(3,200) | -
+135 0x87: - | #dthkB4(3,200) | -
+136 0x88: - | #dthkB1(3,200) | -
+137 0x89: - | #dthkB3(3,200) | -
+138 0x8A: - | #dthkZ1(3,200) | -
+139 0x8B: - | #dthkL5(3,200) | -
+140 0x8C: - | #dthkR1(3,200) | -
+141 0x8D: - | - | #deathleh1(3,200)
+142 0x8E: - | - | #deathleh2(3,200)
+143 0x8F: - | - | #deathleh5(3,200)
+144 0x90: - | - | #deathleh4(3,200)
+145 0x91: - | - | #deathleh6(3,200)
+146 0x92: !smrtsed1(3,200) | - | -
+147 0x93: !smrtsed2(3,200) | - | -
+148 0x94: !smrttur2(3,200) | - | -
+149 0x95: !smrtauto1(3,200) | - | -
+150 0x96: !smrtauto2(3,200) | - | -
+151 0x97: !smrtauto3(3,200) | - | -
+152 0x98: !smrtpodrez(3,200) | - | -
+153 0x99: - | #dthkZ1(3,200) | -
+154 0x9A: !utopenec(3,300) | !utopenec(3,300) | !utopenec(3,300)
+155 0x9B: !namotorce(5,100) | - | -
+156 0x9C: (uchprestoj4(3,250) | (uchpredrep(3,250) | -
+157 0x9D: (upuprestoj4(3,250) | (uppredrep1(3,250) | -
+158 0x9E: !ridic(5,0) | - | -
+159 0x9F: !spol(5,0) | - | -
+160 0xA0: (uchprestoj4(3,250) | (uchpredrep(3,250) | -
+161 0xA1: (upuprestoj4(3,250) | (uppredrep1(3,250) | -
+162 0xA2: !vykouk_L1b(3,300) | #kackukL2b(3,400) | !leh_vyklL1b(3,400)
+163 0xA3: !vykouk_P1b(3,300) | #kackukR2b(3,400) | !leh_vyklR1b(3,400)
+164 0xA4: !vykouk_LZB(3,300) | #kackukLzb(3,400) | !leh_vyklL1b(3,400)
+165 0xA5: !vykouk_PZB(3,300) | #kackukRzb(3,400) | !leh_vyklR1b(3,400)
+190 0xBE stance 0: !vpredP !walkFN6c4 (beh1b6 (mrzak !strazny02 !sprint01
+190 0xBE stance 1: (KACAKYS-a (kacak-Na (behprikrN2 (KACAKYS-a (kacak-Na (behprikrN2
+190 0xBE stance 2: #_opatrneF1 #_FN3 #_plizenFS01 #_opatrneF1 #_FN3 #_plizenFS
+191 0xBF stance 0: ~wolk_Bs !walkB1 !walkB1 (mrzakvzad !walkB1 !walkB1
+191 0xBF stance 1: !kacakVZp !kacVZ !kacVZ !kacakVZp !kacVZ !kacVZ
+191 0xBF stance 2: #_opatrneB #_BN1 #_BN1 #_opatrneB #_BN1 #_BN1
+192 0xC0 stance 0: !strafepomL #strafL2d !strafLr (mrzakL !strafepomL !strafLr
+192 0xC0 stance 1: !strafeDRpL !cSTRAF_LR (StrafeL1dr !strafeDRpL !cSTRAF_LR (StrafeL1dr
+192 0xC0 stance 2: (prevalenL1p (prevalenL1 (prevalenL1r (prevalenL1 (prevalenL1 (prevalenL1r
+193 0xC1 stance 0: !strafepomR #strafR2d !strafPr (mrzakR !strafepomR !strafPr
+193 0xC1 stance 1: !strafeDRpR !cSTRAF_RR (StrafeR1dr !strafeDRpR !cSTRAF_RR (StrafeR1dr
+193 0xC1 stance 2: (prevalenR1p (prevalenR1 (prevalenR1r (prevalenR1 (prevalenR1 (prevalenR1r
+194 0xC2 stance 0: !LPps !LPns !LPrs !FLmrzak !LPgs !LPsps
+194 0xC2 stance 1: !LPpd !LPnd !LPrd !LPpd !LPnd !LPrd
+194 0xC2 stance 2: !LPpl !LPnl !LPrl !LPpl !LPnl !LPrl
+195 0xC3 stance 0: !PPps !PPns !PPrs !FPmrzak !PPgs !PPsps
+195 0xC3 stance 1: !PPpd !PPnd !PPrd !PPpd !PPnd !PPrd
+195 0xC3 stance 2: !PPpl !PPnl !PPrl !PPpl !PPnl !PPrl
+196 0xC4 stance 0: !LZps !LZns !LZns !BLmrzak !LZns !LZns
+196 0xC4 stance 1: !LZpd !LZnd !LZnd !LZpd !LZnd !LZnd
+196 0xC4 stance 2: !LZpl !LZnl !LZnl !LZpl !LZnl !LZnl
+197 0xC5 stance 0: !PZps !PZns !PZns !BPmrzak !PZns !PZns
+197 0xC5 stance 1: !PZpd !PZnd !PZnd !PZpd !PZnd !PZnd
+197 0xC5 stance 2: !PZpl !PZnl !PZnl !PZpl !PZnl !PZnl
+198 0xC6 stance 0: !vpredpzb1 (chuzeZBr41 !behZB1b (mrzakZB !strazny02 !sprint01
+198 0xC6 stance 1: !-vpredPZB1 !-vpredZB1 !-vpredRZB1 !-vpredPZB1 (kacak-Na !-vpredRZB1
+198 0xC6 stance 2: #_opatrneF1 #_FN3 #_plizenFS01 #_opatrneF1 #_FN3 #_plizenFS
+199 0xC7 stance 0: !vzadPZb1 !vzadZB1 !vzadZB1 (mrzakvzad (couvani2 !vzadZB1
+199 0xC7 stance 1: !-vzadPZB1 !-vzadZB1 !-vzadZB1 !-vzadPZB1 !-vzadZB1 !-vzadZB1
+199 0xC7 stance 2: #_opatrneB #_BN1 #_BN1 #_opatrneB #_BN1 #_BN1
+200 0xC8 stance 0: !strafePOMlZ !strafeLZB1 !strafLRzb (mrzakL !strafePOMlZ !strafLrZB
+200 0xC8 stance 1: !strafeDRpLz !-strafLZB1 (StrafeL1drZ !strafeDRpLz !-strafLZB1 (StrafeL1drZ
+200 0xC8 stance 2: (prevalenL1 (prevalenL1 (prevalenL1r (prevalenL1 (prevalenL1 (prevalenL1r
+201 0xC9 stance 0: !strafepomRZ !strafeRZB1 !strafPRzb (mrzakR !strafepomRZ !strafPrZB
+201 0xC9 stance 1: !strafeDRpRz !-strafPZB1 (StrafeR1drZ !strafeDRpRz !-strafPZB1 (StrafeR1drZ
+201 0xC9 stance 2: (prevalenR1 (prevalenR1 (prevalenR1r (prevalenR1 (prevalenR1 (prevalenR1r
+202 0xCA stance 0: !LPpsZ !LPnsZ !LPrsZ !FLmrzak !LPgs !LPsps
+202 0xCA stance 1: !LPpdZ !LPndZ !LPrdZ !LPpdZ !LPndZ !LPrdZ
+202 0xCA stance 2: !LPpl !LPnl !LPrl !LPpl !LPnl !LPrl
+203 0xCB stance 0: !PPpsZ !PPnsZ !PPrsZ !FPmrzak !PPgs !PPsps
+203 0xCB stance 1: !PPpdZ !PPndZ !PPrdZ !PPpdZ !PPndZ !PPrdZ
+203 0xCB stance 2: !PPpl !PPnl !PPrl !PPpl !PPnl !PPrl
+204 0xCC stance 0: !LZpsZ !LZnsZ !LZnsZ !BLmrzak !LZnsZ !LZnsZ
+204 0xCC stance 1: !LZpdZ !LZndZ !LZndZ !LZpdZ !LZndZ !LZndZ
+204 0xCC stance 2: !LZpl !LZnl !LZnl !LZpl !LZnl !LZnl
+205 0xCD stance 0: !PZpsZ !PZnsZ !PZnsZ !BPmrzak !PZnsZ !PZnsZ
+205 0xCD stance 1: !PZpdZ !PZndZ !PZndZ !PZpdZ !PZndZ !PZndZ
+205 0xCD stance 2: !PZpl !PZnl !PZnl !PZpl !PZnl !PZnl
+# group 2 (g_humanAnimTable2): id: stance 0 / 1 / 2 (flags, blend ms, file)
+  0 0x00: !dvereST02(3,300) | !dvereKL03(3,500) | -
+  1 0x01: !dvereST02(3,300) | !dvereKL03(3,500) | -
+  2 0x02: !dvereST02(3,300) | !dvereKL03(3,500) | -
+  3 0x03: !dvereST02(3,300) | !dvereKL03(3,500) | -
+  4 0x04: - | !manipul(5,200) | -
+  5 0x05: - | !manipul(5,200) | -
+  6 0x06: !svazuje1(3,200) | - | -
+  7 0x07: !svazovanej(3,200) | - | -
+  8 0x08: !slezZEBda(3,500) | - | -
+  9 0x09: !nakroc4a(3,200) | - | -
+ 10 0x0A: !nakrocV6a(3,200) | - | -
+ 11 0x0B: !stPREKca(3,200) | - | -
+ 12 0x0C: !vPREKha(3,200) | - | -
+ 13 0x0D: !vys_prek2a(3,200) | - | -
+ 14 0x0E: !zZEBda(3,300) | - | -
+ 15 0x0F: - | - | -
+ 16 0x10: - | - | -
+ 17 0x11: !vPAD01(5,300) | - | -
+ 18 0x12: - | - | -
+ 19 0x13: - | - | -
+ 20 0x14: !doskKLa(3,300) | - | -
+ 21 0x15: - | !doskKLa(3,500) | -
+ 22 0x16: !doskSTb(3,200) | - | -
+ 23 0x17: - | !skokDRc(3,200) | -
+ 24 0x18: !jump(3,80) | - | -
+ 25 0x19: - | !medik01(3,200) | -
+ 26 0x1A: !st-dr3(3,200) | - | -
+ 27 0x1B: - | !dr-st3(3,200) | -
+ 28 0x1C: !sednuti(3,200) | - | -
+ 29 0x1D: !zeseduR(3,200) | - | -
+ 30 0x1E: - | !dr-leR(3,200) | -
+ 31 0x1F: - | - | !le-drR(3,200)
+ 32 0x20: !st-leR(3,250) | - | -
+ 33 0x21: - | - | !le-st3(3,200)
+ 34 0x22: !sedim1(5,200) | - | -
+ 35 0x23: #sedimturek(5,200) | - | -
+ 36 0x24: #sedamturek(3,200) | - | -
+ 37 0x25: #vstavamtur(3,200) | - | -
+ 38 0x26: !zeseduR(3,200) | - | -
+ 39 0x27: - | !strihaLOOP(3,200) | -
+ 40 0x28: - | - | -
+ 41 0x29: - | - | -
+ 42 0x2A: - | - | -
+ 43 0x2B: !otocP1w(3,200) | !DotocP(3,700) | !LotocP(3,750)
+ 44 0x2C: !otocL1w(3,200) | !DotocL(3,700) | !LotocL(3,750)
+ 45 0x2D: _stance3(3,300) | - | -
+ 46 0x2E: _stance3(3,400) | - | -
+ 47 0x2F: _stance3(3,100) | - | -
+ 48 0x30: _stance3(3,100) | - | -
+ 49 0x31: _stance3(3,100) | - | -
+ 50 0x32: _stance3(3,100) | - | -
+ 51 0x33: _stance3(3,200) | - | -
+ 52 0x34: _stance3(3,100) | - | -
+ 53 0x35: _stance3(3,100) | - | -
+ 54 0x36: !staticZB(9,150) | - | -
+ 55 0x37: - | !drep1(3,400) | -
+ 56 0x38: - | !drep1(3,200) | -
+ 57 0x39: - | !drepL(3,200) | -
+ 58 0x3A: - | !drepP(3,200) | -
+ 59 0x3B: - | !drepL(3,200) | -
+ 60 0x3C: - | !drepP(3,200) | -
+ 61 0x3D: - | !drep1(3,200) | -
+ 62 0x3E: - | !drepZB1(3,300) | -
+ 63 0x3F: - | - | #leh1b1(3,400)
+ 64 0x40: - | - | !leziN(3,200)
+ 65 0x41: - | - | !lehZB(3,300)
+ 66 0x42: - | - | -
+ 67 0x43: - | - | -
+ 68 0x44: - | - | -
+ 69 0x45: - | - | -
+ 70 0x46: - | - | -
+ 71 0x47: - | - | -
+ 72 0x48: - | - | -
+ 73 0x49: - | - | -
+ 74 0x4A: - | - | -
+ 75 0x4B: - | - | -
+ 76 0x4C: - | - | -
+ 77 0x4D: - | - | -
+ 78 0x4E: - | - | -
+ 79 0x4F: - | - | -
+ 80 0x50: - | - | -
+ 81 0x51: - | - | -
+ 82 0x52: - | - | -
+ 83 0x53: - | - | -
+ 84 0x54: - | - | -
+ 85 0x55: - | - | -
+ 86 0x56: - | - | -
+ 87 0x57: - | - | -
+ 88 0x58: - | - | -
+ 89 0x59: !potapManipul(5,300) | - | -
+ 90 0x5A: !plavani3(9,200) | !plavani3(9,200) | !plavani3(9,200)
+ 91 0x5B: !plavST(9,500) | !plavST(9,200) | !plavST(9,200)
+ 92 0x5C: !potapec(9,500) | !potapec(9,400) | !potapec(9,400)
+ 93 0x5D: !potapecM(9,200) | !potapecM(9,200) | !potapecM(9,200)
+ 94 0x5E: (uchprestoj4(3,250) | - | -
+ 95 0x5F: (upuprestoj4(3,250) | - | -
+ 96 0x60: (mrtvolak1(5,300) | - | -
+ 97 0x61: !mrtvolaP1(5,300) | - | -
+ 98 0x62: !svazanej(5,200) | - | -
+ 99 0x63: - | - | -
+100 0x64: - | - | -
+101 0x65: - | - | -
+102 0x66: - | - | -
+103 0x67: !odemceST(3,200) | !odemceKL(3,200) | -
+104 0x68: !plavani3(5,300) | !plavani3(5,400) | !plavani3(5,300)
+105 0x69: !plavani3(5,100) | !plavani3(5,400) | !plavani3(9,300)
+106 0x6A: #LEZUP2da(9,200) | - | -
+107 0x6B: #LEZDWN1da(9,200) | - | -
+108 0x6C: !rychleZEBD(5,150) | - | -
+109 0x6D: - | - | -
+110 0x6E: - | - | -
+111 0x6F: !naponorce(5,100) | - | -
+112 0x70: - | - | -
+113 0x71: !svazSMRT(3,200) | - | -
+114 0x72: !smrtMOT1(3,200) | - | -
+115 0x73: !smrtMOT2(3,200) | - | -
+116 0x74: !dthBAZs(3,200) | - | -
+117 0x75: - | !dthBAZd(3,200) | -
+118 0x76: - | - | !dthBAZl(3,200)
+119 0x77: #death13(3,200) | - | -
+120 0x78: #death121(3,200) | - | -
+121 0x79: #death3(3,200) | - | -
+122 0x7A: #death5(3,200) | - | -
+123 0x7B: #death6(3,200) | - | -
+124 0x7C: !smrtB1a(3,200) | - | -
+125 0x7D: !smrtB2a(3,200) | - | -
+126 0x7E: !smrtB3b(3,200) | - | -
+127 0x7F: !smrtB4a(3,200) | - | -
+128 0x80: !smrtM2b(3,200) | - | -
+129 0x81: !smrtL1c(3,200) | - | -
+130 0x82: !smrtP2a(3,200) | - | -
+131 0x83: - | #-death1(3,200) | -
+132 0x84: - | #-death3(3,200) | -
+133 0x85: - | #-death4(3,200) | -
+134 0x86: - | #-death2(3,200) | -
+135 0x87: - | #dthkB4(3,200) | -
+136 0x88: - | #dthkB1(3,200) | -
+137 0x89: - | #dthkB3(3,200) | -
+138 0x8A: - | #dthkZ1(3,200) | -
+139 0x8B: - | #dthkL5(3,200) | -
+140 0x8C: - | #dthkR1(3,200) | -
+141 0x8D: - | - | #deathleh1(3,200)
+142 0x8E: - | - | #deathleh2(3,200)
+143 0x8F: - | - | #deathleh5(3,200)
+144 0x90: - | - | #deathleh4(3,200)
+145 0x91: - | - | #deathleh6(3,200)
+146 0x92: (smrtsed5b(3,200) | - | -
+147 0x93: (smrtsed3(3,200) | - | -
+148 0x94: !smrttur2(3,200) | - | -
+149 0x95: !smrtauto1(3,200) | - | -
+150 0x96: !smrtauto2(3,200) | - | -
+151 0x97: !smrtauto3(3,200) | - | -
+152 0x98: !smrtpodrez(3,200) | - | -
+153 0x99: - | #dthkZ1(3,200) | -
+154 0x9A: !utopenec(3,300) | !utopenec(3,300) | !utopenec(3,300)
+155 0x9B: !namotorce(5,100) | - | -
+156 0x9C: (uchprestoj4(3,250) | (uchpredrep(3,250) | -
+157 0x9D: (upuprestoj4(3,250) | (uppredrep1(3,250) | -
+158 0x9E: !ridic(5,0) | - | -
+159 0x9F: !spol(5,0) | - | -
+160 0xA0: (uchprestoj4(3,250) | (uchpredrep(3,250) | -
+161 0xA1: (upuprestoj4(3,250) | (uppredrep1(3,250) | -
+162 0xA2: !vykouk_L1b(3,300) | #kackukL2b(3,400) | !leh_vyklL1b(3,400)
+163 0xA3: !vykouk_P1b(3,300) | #kackukR2b(3,400) | !leh_vyklR1b(3,400)
+164 0xA4: !vykouk_LZB(3,300) | #kackukLzb(3,400) | !leh_vyklL1b(3,400)
+165 0xA5: !vykouk_PZB(3,300) | #kackukRzb(3,400) | !leh_vyklR1b(3,400)
+190 0xBE stance 0: _opchuze2 _chuzezena1 _behzena !vpredP !vpredP !sprint01
+190 0xBE stance 1: (KACAKYS-a (kacak-Na (behprikrN2 (KACAKYS-a (kacak-Na (behprikrN2
+190 0xBE stance 2: #_opatrneF1 #_FN3 #_plizenFS01 #_opatrneF1 #_FN3 #_plizenFS
+191 0xBF stance 0: ~wolk_Bs _walkB _walkB ~wolk_Bs ~wolk_Bs _walkB
+191 0xBF stance 1: !kacakVZp !kacVZ !kacVZ !kacakVZp !kacVZ !kacVZ
+191 0xBF stance 2: #_opatrneB #_BN1 #_BN1 #_opatrneB #_BN1 #_BN1
+192 0xC0 stance 0: !strafepomL #strafL2d !strafLr !strafepomL !strafepomL !strafLr
+192 0xC0 stance 1: !strafeDRpL !cSTRAF_LR (StrafeL1dr !strafeDRpL !cSTRAF_LR (StrafeL1dr
+192 0xC0 stance 2: (prevalenL1 (prevalenL1 (prevalenL1r (prevalenL1 (prevalenL1 (prevalenL1r
+193 0xC1 stance 0: !strafepomR #strafR2d !strafPr !strafepomR !strafepomR !strafPr
+193 0xC1 stance 1: !strafeDRpR !cSTRAF_RR (StrafeR1dr !strafeDRpR !cSTRAF_RR (StrafeR1dr
+193 0xC1 stance 2: (prevalenR1 (prevalenR1 (prevalenR1r (prevalenR1 (prevalenR1 (prevalenR1r
+194 0xC2 stance 0: _LPsp _LPsn _LPsr _LPsp _LPsp _LPsr
+194 0xC2 stance 1: !LPpd !LPnd !LPrd !LPpd !LPnd !LPrd
+194 0xC2 stance 2: !LPpl !LPnl !LPrl !LPpl !LPnl !LPrl
+195 0xC3 stance 0: _PPsp _PPsn _PPsr _PPsp _PPsp _PPsr
+195 0xC3 stance 1: !PPpd !PPnd !PPrd !PPpd !PPnd !PPrd
+195 0xC3 stance 2: !PPpl !PPnl !PPrl !PPpl !PPnl !PPrl
+196 0xC4 stance 0: !LZps !LZns !LZns !LZps !LZps !LZns
+196 0xC4 stance 1: !LZpd !LZnd !LZnd !LZpd !LZnd !LZnd
+196 0xC4 stance 2: !LZpl !LZnl !LZnl !LZpl !LZnl !LZnl
+197 0xC5 stance 0: !PZps !PZns !PZns !PZps !PZps !PZns
+197 0xC5 stance 1: !PZpd !PZnd !PZnd !PZpd !PZnd !PZnd
+197 0xC5 stance 2: !PZpl !PZnl !PZnl !PZpl !PZnl !PZnl
+198 0xC6 stance 0: !vpredpzb1 (chuzeZBr41 !behZB1b (mrzakZB !strazny02 !sprint01
+198 0xC6 stance 1: !-vpredPZB1 !-vpredZB1 !-vpredRZB1 !-vpredPZB1 (kacak-Na !-vpredRZB1
+198 0xC6 stance 2: #_opatrneF1 #_FN3 #_plizenFS01 #_opatrneF1 #_FN3 #_plizenFS
+199 0xC7 stance 0: !vzadPZb1 !vzadZB1 !vzadZB1 (mrzakvzad (couvani2 !vzadZB1
+199 0xC7 stance 1: !-vzadPZB1 !-vzadZB1 !-vzadZB1 !-vzadPZB1 !-vzadZB1 !-vzadZB1
+199 0xC7 stance 2: #_opatrneB #_BN1 #_BN1 #_opatrneB #_BN1 #_BN1
+200 0xC8 stance 0: !strafePOMlZ !strafeLZB1 !strafLRzb (mrzakL #strafL2d !strafLrZB
+200 0xC8 stance 1: !strafeDRpLz !-strafLZB1 (StrafeL1drZ !strafeDRpLz !-strafLZB1 (StrafeL1drZ
+200 0xC8 stance 2: (prevalenL1 (prevalenL1 (prevalenL1r (prevalenL1 (prevalenL1 (prevalenL1r
+201 0xC9 stance 0: !strafepomRZ !strafeRZB1 !strafPRzb (mrzakR #strafR2d !strafPrZB
+201 0xC9 stance 1: !strafeDRpRz !-strafPZB1 (StrafeR1drZ !strafeDRpRz !-strafPZB1 (StrafeR1drZ
+201 0xC9 stance 2: (prevalenR1 (prevalenR1 (prevalenR1r (prevalenR1 (prevalenR1 (prevalenR1r
+202 0xCA stance 0: !LPpsZ !LPnsZ !LPrsZ !FLmrzak !LPgs !LPsps
+202 0xCA stance 1: !LPpdZ !LPndZ !LPrdZ !LPpdZ !LPndZ !LPrdZ
+202 0xCA stance 2: !LPpl !LPnl !LPrl !LPpl !LPnl !LPrl
+203 0xCB stance 0: !PPpsZ !PPnsZ !PPrsZ !FPmrzak !PPgs !PPsps
+203 0xCB stance 1: !PPpdZ !PPndZ !PPrdZ !PPpdZ !PPndZ !PPrdZ
+203 0xCB stance 2: !PPpl !PPnl !PPrl !PPpl !PPnl !PPrl
+204 0xCC stance 0: !LZpsZ !LZnsZ !LZnsZ !BLmrzak !LZnsZ !LZnsZ
+204 0xCC stance 1: !LZpdZ !LZndZ !LZndZ !LZpdZ !LZndZ !LZndZ
+204 0xCC stance 2: !LZpl !LZnl !LZnl !LZpl !LZnl !LZnl
+205 0xCD stance 0: !PZpsZ !PZnsZ !PZnsZ !BPmrzak !PZnsZ !PZnsZ
+205 0xCD stance 1: !PZpdZ !PZndZ !PZndZ !PZpdZ !PZndZ !PZndZ
+205 0xCD stance 2: !PZpl !PZnl !PZnl !PZpl !PZnl !PZnl
+# carry table 0: id: variant 0 / 1 / 2 (flags, file, weight, blend ms)
+  0 0x00: - | - | -
+  1 0x01: - | - | -
+  2 0x02: - | - | -
+  3 0x03: - | - | -
+  4 0x04: - | - | -
+  5 0x05: - | - | -
+  6 0x06: - | - | -
+  7 0x07: - | - | -
+  8 0x08: - | - | -
+  9 0x09: - | - | -
+ 10 0x0A: - | - | -
+ 11 0x0B: - | - | -
+ 12 0x0C: - | - | -
+ 13 0x0D: - | - | -
+ 14 0x0E: - | - | -
+ 15 0x0F: - | - | -
+ 16 0x10: - | - | -
+ 17 0x11: - | - | -
+ 18 0x12: - | - | -
+ 19 0x13: - | - | -
+ 20 0x14: - | - | -
+ 21 0x15: - | - | -
+ 22 0x16: - | - | -
+ 23 0x17: - | - | -
+ 24 0x18: - | - | -
+ 25 0x19: - | - | -
+ 26 0x1A: - | - | -
+ 27 0x1B: - | - | -
+ 28 0x1C: - | - | -
+ 29 0x1D: - | - | -
+ 30 0x1E: !drzgran1(3,1,300) | !drzgran1(5,1,400) | !drzgran1(5,1,400)
+ 31 0x1F: !drzgran1(5,1,300) | !drzgran1(5,1,400) | !drzgran1(5,1,400)
+ 32 0x20: !drzgran1(5,1,300) | !drzgran1(5,1,400) | !drzgran1(5,1,400)
+ 33 0x21: - | - | -
+ 34 0x22: !vytITEMs1(3,0.8,200) | !vytITEMk1(3,0.9,300) | !vytITEMl3(3,0.9,500)
+ 35 0x23: !vytITEMs1(3,0.8,200) | !vytITEMk1(3,0.9,300) | !vytITEMl3(3,0.9,500)
+ 36 0x24: !vytITEMs1(3,0.8,200) | !vytITEMk1(3,0.9,300) | !vytITEMl3(3,0.9,500)
+ 37 0x25: - | - | -
+ 38 0x26: - | - | -
+ 39 0x27: - | - | -
+ 40 0x28: - | - | -
+ 41 0x29: - | - | -
+ 42 0x2A: - | - | -
+ 43 0x2B: - | - | -
+ 44 0x2C: - | - | -
+ 45 0x2D: - | - | -
+ 46 0x2E: - | - | -
+ 47 0x2F: - | - | -
+ 48 0x30: - | - | -
+ 49 0x31: - | - | -
+ 50 0x32: - | - | -
+ 51 0x33: - | - | -
+ 52 0x34: - | - | -
+ 53 0x35: - | - | -
+ 54 0x36: - | - | -
+ 55 0x37: - | - | -
+ 56 0x38: - | - | -
+ 57 0x39: - | - | -
+ 58 0x3A: - | - | -
+ 59 0x3B: - | - | -
+ 60 0x3C: - | - | -
+ 61 0x3D: - | - | -
+ 62 0x3E: - | - | -
+ 63 0x3F: - | - | -
+ 64 0x40: - | - | -
+ 65 0x41: - | - | -
+ 66 0x42: - | - | -
+ 67 0x43: - | - | -
+ 68 0x44: - | - | -
+ 69 0x45: - | - | -
+ 70 0x46: (bodnuti(3,0.9,300) | (bodnutidrep(3,0.9,250) | -
+ 71 0x47: !podrezSTa(3,1,200) | (podrezKL02(3,1,150) | -
+ 72 0x48: - | - | -
+ 73 0x49: - | - | -
+ 74 0x4A: (vrhUPa(3,1,200) | (vrh-upB(3,1,200) | !hodLEv(3,1,400)
+ 75 0x4B: !vrhSTspA1(3,1,200) | !hodDRs1(3,0.9,300) | !hodLEv(3,1,400)
+ 76 0x4C: !vrhUPp(3,0.8,200) | !hodDRvP(3,0.9,300) | !hodLEv(3,1,400)
+ 77 0x4D: !vrhSTspB3(3,0.9,200) | !hodDRsP(3,0.8,300) | !hodLEv(3,1,400)
+ 78 0x4E: !hodHSTv(3,1,200) | !hodHDRv1(3,1,200) | !hodHLEv(3,1,400)
+ 79 0x4F: !hodHSTvP(3,1,200) | !hodHDRvP(3,1,300) | !hodHLEv(3,1,400)
+ 80 0x50: !drzgran1(5,1,0) | !drzgran1(5,1,0) | !drzgran1(5,1,500)
+ 81 0x51: !drzgran1(5,1,0) | !drzgran1(5,1,0) | !drzgran1(5,1,500)
+ 82 0x52: !nesST01(5,0.8,500) | !nesKL01(5,1,200) | -
+ 83 0x53: - | - | -
+ 84 0x54: - | - | -
+ 85 0x55: - | - | -
+ 86 0x56: - | - | -
+ 87 0x57: !nesST01(5,0.8,200) | !nesKL01(5,1,200) | -
+ 88 0x58: (nestmrtv(5,1,200) | - | -
+ 89 0x59: !hodHSTs(3,1,200) | !hodHDRs1(3,0.9,300) | !hodHLEv(3,1,400)
+ 90 0x5A: !vrhSTspHp(3,0.9,200) | !hodHDRsP(3,0.8,300) | !hodHLEv(3,1,400)
+# carry table 1: id: variant 0 / 1 / 2 (flags, file, weight, blend ms)
+  0 0x00: - | - | -
+  1 0x01: - | - | -
+  2 0x02: - | - | -
+  3 0x03: - | - | -
+  4 0x04: - | - | -
+  5 0x05: - | - | -
+  6 0x06: - | - | -
+  7 0x07: - | - | -
+  8 0x08: - | - | -
+  9 0x09: - | - | -
+ 10 0x0A: - | - | -
+ 11 0x0B: - | - | -
+ 12 0x0C: - | - | -
+ 13 0x0D: - | - | -
+ 14 0x0E: - | - | -
+ 15 0x0F: - | - | -
+ 16 0x10: - | - | -
+ 17 0x11: - | - | -
+ 18 0x12: - | - | -
+ 19 0x13: - | - | -
+ 20 0x14: - | - | -
+ 21 0x15: - | - | -
+ 22 0x16: - | - | -
+ 23 0x17: - | - | -
+ 24 0x18: - | - | -
+ 25 0x19: - | - | -
+ 26 0x1A: - | - | -
+ 27 0x1B: - | - | -
+ 28 0x1C: - | - | -
+ 29 0x1D: - | - | -
+ 30 0x1E: !klidMG(3,1,300) | (pzbks(3,1,300) | !sLE1b6(3,1,300)
+ 31 0x1F: !klidMG(3,1,300) | !drzSdr2(3,1,300) | !sLE1b6(3,1,300)
+ 32 0x20: !!zbp04a(3,1,250) | !!zbpSKL(3,1,150) | !puLE1a1(3,1,200)
+ 33 0x21: - | - | -
+ 34 0x22: !submSTs(3,1,200) | !submDRs(3,1,200) | !schSUBMleh5(3,1,200)
+ 35 0x23: !submSTvN(3,1,150) | !submDRvR(3,1,250) | !vytSUBMleh5(3,1,200)
+ 36 0x24: !submSTvR(3,1,150) | !submDRvR(3,1,250) | !vytSUBMleh5(3,1,200)
+ 37 0x25: !pazbauder(3,0.9,50) | !pazbauder(3,0.9,50) | -
+ 38 0x26: - | - | -
+ 39 0x27: !pohotMG(3,1,10) | !_pufSKL(3,1,10) | !pufLE(3,1,10)
+ 40 0x28: - | - | -
+ 41 0x29: - | - | -
+ 42 0x2A: - | - | -
+ 43 0x2B: - | - | -
+ 44 0x2C: - | - | -
+ 45 0x2D: - | - | -
+ 46 0x2E: - | - | -
+ 47 0x2F: - | - | -
+ 48 0x30: - | - | -
+ 49 0x31: - | - | -
+ 50 0x32: - | - | -
+ 51 0x33: - | - | -
+ 52 0x34: - | - | -
+ 53 0x35: - | - | -
+ 54 0x36: - | - | -
+ 55 0x37: - | - | -
+ 56 0x38: - | - | -
+ 57 0x39: - | - | -
+ 58 0x3A: - | - | -
+ 59 0x3B: - | - | -
+ 60 0x3C: - | - | -
+ 61 0x3D: - | - | -
+ 62 0x3E: - | - | -
+ 63 0x3F: - | - | -
+ 64 0x40: - | - | -
+ 65 0x41: - | - | -
+ 66 0x42: - | - | -
+ 67 0x43: - | - | -
+ 68 0x44: - | - | -
+ 69 0x45: - | - | -
+ 70 0x46: - | - | -
+ 71 0x47: - | - | -
+ 72 0x48: - | - | -
+ 73 0x49: - | - | -
+ 74 0x4A: - | - | -
+ 75 0x4B: - | - | -
+ 76 0x4C: - | - | -
+ 77 0x4D: - | - | -
+ 78 0x4E: !hodHSTv(3,1,200) | !hodHDRv1(3,1,200) | !hodHLEv(3,1,400)
+ 79 0x4F: !hodHSTvP(3,1,200) | !hodHDRvP(3,1,300) | !hodHLEv(3,1,400)
+ 80 0x50: (preSAs66(3,1,200) | (preSAd66(3,1,200) | (preSAl66(3,1,200)
+ 81 0x51: (preTSAs66(3,1,200) | (preTSAd66(3,1,200) | (preSAl66(3,1,200)
+ 82 0x52: (preTSAs66(3,1,200) | (preTSAd66(3,1,200) | (preSAl66(3,1,200)
+ 83 0x53: !_UPsL1(5,1,100) | !_UPkL1(5,1,100) | -
+ 84 0x54: !_DWsL1(5,1,100) | !_DWkL1(5,1,100) | -
+ 85 0x55: !_UPsP1(5,1,500) | !_UPkP1(5,1,500) | -
+ 86 0x56: !_DWsP1(5,1,500) | !_DWkP1(5,1,500) | -
+ 87 0x57: - | - | -
+ 88 0x58: - | - | -
+ 89 0x59: !hodHSTs(3,1,200) | !hodHDRs1(3,0.9,300) | !hodHLEv(3,1,400)
+ 90 0x5A: !vrhSTspHp(3,0.9,200) | !hodHDRsP(3,0.8,300) | !hodHLEv(3,1,400)
+# carry table 2: id: variant 0 / 1 / 2 (flags, file, weight, blend ms)
+  0 0x00: - | - | -
+  1 0x01: - | - | -
+  2 0x02: - | - | -
+  3 0x03: - | - | -
+  4 0x04: - | - | -
+  5 0x05: - | - | -
+  6 0x06: - | - | -
+  7 0x07: - | - | -
+  8 0x08: - | - | -
+  9 0x09: - | - | -
+ 10 0x0A: - | - | -
+ 11 0x0B: - | - | -
+ 12 0x0C: - | - | -
+ 13 0x0D: - | - | -
+ 14 0x0E: - | - | -
+ 15 0x0F: - | - | -
+ 16 0x10: - | - | -
+ 17 0x11: - | - | -
+ 18 0x12: - | - | -
+ 19 0x13: - | - | -
+ 20 0x14: - | - | -
+ 21 0x15: - | - | -
+ 22 0x16: - | - | -
+ 23 0x17: - | - | -
+ 24 0x18: - | - | -
+ 25 0x19: - | - | -
+ 26 0x1A: - | - | -
+ 27 0x1B: - | - | -
+ 28 0x1C: - | - | -
+ 29 0x1D: - | - | -
+ 30 0x1E: (kliddrz21(3,1,400) | (kliddrz21(3,1,300) | (kliddrz_1(3,1,300)
+ 31 0x1F: (kliddrz21(3,1,400) | (kliddrz21(3,1,300) | (kliddrz_1(3,1,300)
+ 32 0x20: !drzREVst(3,1,250) | !drzREVst(3,1,200) | (revleh16(3,1,200)
+ 33 0x21: - | - | -
+ 34 0x22: !revSST3(3,0.9,300) | (schorevkle2(3,0.9,300) | !schREVleh(3,0.9,300)
+ 35 0x23: !revVST3(3,0.9,200) | (tasrevklek5(3,0.9,200) | !vytREVleh(3,0.9,300)
+ 36 0x24: !revVST3(3,0.9,200) | (tasrevklek5(3,0.9,200) | !vytREVleh(3,0.9,300)
+ 37 0x25: !reluder(3,0.9,50) | !reluder(3,0.9,50) | -
+ 38 0x26: - | - | -
+ 39 0x27: !pufPst(3,1,10) | !pufPst(3,1,10) | -
+ 40 0x28: - | - | -
+ 41 0x29: - | - | -
+ 42 0x2A: - | - | -
+ 43 0x2B: - | - | -
+ 44 0x2C: - | - | -
+ 45 0x2D: - | - | -
+ 46 0x2E: - | - | -
+ 47 0x2F: - | - | -
+ 48 0x30: - | - | -
+ 49 0x31: - | - | -
+ 50 0x32: - | - | -
+ 51 0x33: - | - | -
+ 52 0x34: - | - | -
+ 53 0x35: - | - | -
+ 54 0x36: - | - | -
+ 55 0x37: - | - | -
+ 56 0x38: - | - | -
+ 57 0x39: - | - | -
+ 58 0x3A: - | - | -
+ 59 0x3B: - | - | -
+ 60 0x3C: - | - | -
+ 61 0x3D: - | - | -
+ 62 0x3E: - | - | -
+ 63 0x3F: - | - | -
+ 64 0x40: - | - | -
+ 65 0x41: - | - | -
+ 66 0x42: - | - | -
+ 67 0x43: - | - | -
+ 68 0x44: - | - | -
+ 69 0x45: - | - | -
+ 70 0x46: - | - | -
+ 71 0x47: - | - | -
+ 72 0x48: - | - | -
+ 73 0x49: - | - | -
+ 74 0x4A: - | - | -
+ 75 0x4B: - | - | -
+ 76 0x4C: - | - | -
+ 77 0x4D: - | - | -
+ 78 0x4E: !hodHSTv(3,1,200) | !hodHDRv1(3,1,200) | !hodHLEv(3,1,200)
+ 79 0x4F: !hodHSTvP(3,1,200) | !hodHDRvP(3,1,300) | !hodHLEv(3,1,200)
+ 80 0x50: (preREst2(3,1,300) | (preREdre5(3,1,250) | (preREle6(3,1,250)
+ 81 0x51: (preREst2(3,1,300) | (preREdre5(3,1,250) | (preREle6(3,1,250)
+ 82 0x52: (preREst2(3,1,300) | (preREdre5(3,1,250) | (preREle6(3,1,250)
+ 83 0x53: !_UPsL1p(5,1,100) | !_UPkL1r(5,1,100) | -
+ 84 0x54: !_DWsL1p(5,1,100) | !_DWkL1r(5,1,100) | -
+ 85 0x55: !_UPsP1p(5,1,500) | !_UPkP1r(5,1,500) | -
+ 86 0x56: !_DWsP1p(5,1,500) | !_DWkP1r(5,1,500) | -
+ 87 0x57: - | - | -
+ 88 0x58: - | - | -
+ 89 0x59: !hodHSTs(3,1,200) | !hodHDRs1(3,0.9,300) | !hodHLEv(3,1,200)
+ 90 0x5A: !vrhSTspHp(3,0.9,200) | !hodHDRsP(3,0.8,300) | !hodHLEv(3,1,200)
+# carry table 3: id: variant 0 / 1 / 2 (flags, file, weight, blend ms)
+  0 0x00: - | - | -
+  1 0x01: - | - | -
+  2 0x02: - | - | -
+  3 0x03: - | - | -
+  4 0x04: - | - | -
+  5 0x05: - | - | -
+  6 0x06: - | - | -
+  7 0x07: - | - | -
+  8 0x08: - | - | -
+  9 0x09: - | - | -
+ 10 0x0A: - | - | -
+ 11 0x0B: - | - | -
+ 12 0x0C: - | - | -
+ 13 0x0D: - | - | -
+ 14 0x0E: - | - | -
+ 15 0x0F: - | - | -
+ 16 0x10: - | - | -
+ 17 0x11: - | - | -
+ 18 0x12: - | - | -
+ 19 0x13: - | - | -
+ 20 0x14: - | - | -
+ 21 0x15: - | - | -
+ 22 0x16: - | - | -
+ 23 0x17: - | - | -
+ 24 0x18: - | - | -
+ 25 0x19: - | - | -
+ 26 0x1A: - | - | -
+ 27 0x1B: - | - | -
+ 28 0x1C: - | - | -
+ 29 0x1D: - | - | -
+ 30 0x1E: (pzbp(3,1,300) | (pzbkp(3,1,300) | !puLE1b5(3,1,200)
+ 31 0x1F: !!zbdS6p(3,1,300) | !drzSdr2p(3,1,300) | !puLE1b5(3,1,200)
+ 32 0x20: !!zbp04a(3,1,250) | !!zbpKL(3,1,150) | !puLE1a1(3,1,200)
+ 33 0x21: - | - | -
+ 34 0x22: !rifleSTs(3,1,100) | !rifleDRs(3,1,200) | !schoPUleh1(3,1,200)
+ 35 0x23: !rifleSTvN(3,1,150) | !rifleDRv(3,1,250) | !vytPUleh5(3,1,200)
+ 36 0x24: !rifleSTvR(3,1,150) | !rifleDRv(3,1,250) | !vytPUleh5(3,1,200)
+ 37 0x25: !pazbauder(3,0.9,50) | !pazbauder(3,0.9,50) | -
+ 38 0x26: - | - | -
+ 39 0x27: !_puf(3,1,10) | !_pufKL(3,1,10) | !pufLE(3,1,10)
+ 40 0x28: - | - | -
+ 41 0x29: - | - | -
+ 42 0x2A: - | - | -
+ 43 0x2B: - | - | -
+ 44 0x2C: - | - | -
+ 45 0x2D: - | - | -
+ 46 0x2E: - | - | -
+ 47 0x2F: - | - | -
+ 48 0x30: - | - | -
+ 49 0x31: - | - | -
+ 50 0x32: - | - | -
+ 51 0x33: - | - | -
+ 52 0x34: - | - | -
+ 53 0x35: - | - | -
+ 54 0x36: - | - | -
+ 55 0x37: - | - | -
+ 56 0x38: - | - | -
+ 57 0x39: - | - | -
+ 58 0x3A: - | - | -
+ 59 0x3B: - | - | -
+ 60 0x3C: - | - | -
+ 61 0x3D: - | - | -
+ 62 0x3E: - | - | -
+ 63 0x3F: - | - | -
+ 64 0x40: - | - | -
+ 65 0x41: - | - | -
+ 66 0x42: - | - | -
+ 67 0x43: - | - | -
+ 68 0x44: - | - | -
+ 69 0x45: - | - | -
+ 70 0x46: - | - | -
+ 71 0x47: - | - | -
+ 72 0x48: - | - | -
+ 73 0x49: - | - | -
+ 74 0x4A: - | - | -
+ 75 0x4B: - | - | -
+ 76 0x4C: - | - | -
+ 77 0x4D: - | - | -
+ 78 0x4E: !hodHSTv(3,1,200) | !hodHDRv1(3,1,200) | !hodHLEv(3,1,200)
+ 79 0x4F: !hodHSTvP(3,1,200) | !hodHDRvP(3,1,300) | !hodHLEv(3,1,200)
+ 80 0x50: (reloadpuI66(3,1,200) | (relpudre(3,1,200) | (reloadpu66(3,1,200)
+ 81 0x51: (prePUs80(3,1,200) | (prePUd80(3,1,200) | (prePUl80(3,1,200)
+ 82 0x52: (prePUs118(3,1,200) | (prePUd118(3,1,200) | (prePUl118(3,1,200)
+ 83 0x53: !_UPsL1(5,1,100) | !_UPkL1(5,1,100) | -
+ 84 0x54: !_DWsL1(5,1,100) | !_DWkL1(5,1,100) | -
+ 85 0x55: !_UPsP1(5,1,500) | !_UPkP1(5,1,500) | -
+ 86 0x56: !_DWsP1(5,1,500) | !_DWkP1(5,1,500) | -
+ 87 0x57: - | - | -
+ 88 0x58: - | - | -
+ 89 0x59: !hodHSTs(3,1,200) | !hodHDRs1(3,0.9,300) | !hodHLEv(3,1,200)
+ 90 0x5A: !vrhSTspHp(3,0.9,200) | !hodHDRsP(3,0.8,300) | !hodHLEv(3,1,200)
+# carry table 4: id: variant 0 / 1 / 2 (flags, file, weight, blend ms)
+  0 0x00: - | - | -
+  1 0x01: - | - | -
+  2 0x02: - | - | -
+  3 0x03: - | - | -
+  4 0x04: - | - | -
+  5 0x05: - | - | -
+  6 0x06: - | - | -
+  7 0x07: - | - | -
+  8 0x08: - | - | -
+  9 0x09: - | - | -
+ 10 0x0A: - | - | -
+ 11 0x0B: - | - | -
+ 12 0x0C: - | - | -
+ 13 0x0D: - | - | -
+ 14 0x0E: - | - | -
+ 15 0x0F: - | - | -
+ 16 0x10: - | - | -
+ 17 0x11: - | - | -
+ 18 0x12: - | - | -
+ 19 0x13: - | - | -
+ 20 0x14: - | - | -
+ 21 0x15: - | - | -
+ 22 0x16: - | - | -
+ 23 0x17: - | - | -
+ 24 0x18: - | - | -
+ 25 0x19: - | - | -
+ 26 0x1A: - | - | -
+ 27 0x1B: - | - | -
+ 28 0x1C: - | - | -
+ 29 0x1D: - | - | -
+ 30 0x1E: !klidMG(3,1,300) | (pzbkp(3,1,300) | !sLE1b6(3,1,300)
+ 31 0x1F: !klidMG(3,1,300) | !drzSdr2(3,1,300) | !sLE1b6(3,1,300)
+ 32 0x20: !pohotMG(3,1,250) | !!zbpKL(3,1,150) | !puLE1a1(3,1,200)
+ 33 0x21: - | - | -
+ 34 0x22: !submSTs(3,1,200) | !submDRs(3,1,200) | !schSUBMleh5(3,1,200)
+ 35 0x23: !submSTvN(3,1,100) | !submDRvR(3,1,250) | !vytSUBMleh5(3,1,200)
+ 36 0x24: !submSTvR(3,1,100) | !submDRvR(3,1,250) | !vytSUBMleh5(3,1,200)
+ 37 0x25: !pazbauder(3,0.9,50) | !pazbauder(3,0.9,50) | -
+ 38 0x26: - | - | -
+ 39 0x27: !pohotMG(3,1,10) | !_pufKL(3,1,10) | !pufLE(3,1,10)
+ 40 0x28: - | - | -
+ 41 0x29: - | - | -
+ 42 0x2A: - | - | -
+ 43 0x2B: - | - | -
+ 44 0x2C: - | - | -
+ 45 0x2D: - | - | -
+ 46 0x2E: - | - | -
+ 47 0x2F: - | - | -
+ 48 0x30: - | - | -
+ 49 0x31: - | - | -
+ 50 0x32: - | - | -
+ 51 0x33: - | - | -
+ 52 0x34: - | - | -
+ 53 0x35: - | - | -
+ 54 0x36: - | - | -
+ 55 0x37: - | - | -
+ 56 0x38: - | - | -
+ 57 0x39: - | - | -
+ 58 0x3A: - | - | -
+ 59 0x3B: - | - | -
+ 60 0x3C: - | - | -
+ 61 0x3D: - | - | -
+ 62 0x3E: - | - | -
+ 63 0x3F: - | - | -
+ 64 0x40: - | - | -
+ 65 0x41: - | - | -
+ 66 0x42: - | - | -
+ 67 0x43: - | - | -
+ 68 0x44: - | - | -
+ 69 0x45: - | - | -
+ 70 0x46: - | - | -
+ 71 0x47: - | - | -
+ 72 0x48: - | - | -
+ 73 0x49: - | - | -
+ 74 0x4A: - | - | -
+ 75 0x4B: - | - | -
+ 76 0x4C: - | - | -
+ 77 0x4D: - | - | -
+ 78 0x4E: !hodHSTv(3,1,200) | !hodHDRv1(3,1,200) | !hodHLEv(3,1,200)
+ 79 0x4F: !hodHSTvP(3,1,200) | !hodHDRvP(3,1,300) | !hodHLEv(3,1,200)
+ 80 0x50: (preSAs66(3,1,200) | (preSAd66(3,1,200) | (preSAl66(3,1,200)
+ 81 0x51: (preTSAs66(3,1,200) | (preTSAd66(3,1,200) | (preSAl66(3,1,200)
+ 82 0x52: (preTSAs66(3,1,200) | (preTSAd66(3,1,200) | (preSAl66(3,1,200)
+ 83 0x53: !_UPsL1(5,1,100) | !_UPkL1(5,1,100) | -
+ 84 0x54: !_DWsL1(5,1,100) | !_DWkL1(5,1,100) | -
+ 85 0x55: !_UPsP1(5,1,500) | !_UPkP1(5,1,500) | -
+ 86 0x56: !_DWsP1(5,1,500) | !_DWkP1(5,1,500) | -
+ 87 0x57: - | - | -
+ 88 0x58: - | - | -
+ 89 0x59: !hodHSTs(3,1,200) | !hodHDRs1(3,0.9,300) | !hodHLEv(3,1,200)
+ 90 0x5A: !vrhSTspHp(3,0.9,200) | !hodHDRsP(3,0.8,300) | !hodHLEv(3,1,200)
+# carry table 5: id: variant 0 / 1 / 2 (flags, file, weight, blend ms)
+  0 0x00: - | - | -
+  1 0x01: - | - | -
+  2 0x02: - | - | -
+  3 0x03: - | - | -
+  4 0x04: - | - | -
+  5 0x05: - | - | -
+  6 0x06: - | - | -
+  7 0x07: - | - | -
+  8 0x08: - | - | -
+  9 0x09: - | - | -
+ 10 0x0A: - | - | -
+ 11 0x0B: - | - | -
+ 12 0x0C: - | - | -
+ 13 0x0D: - | - | -
+ 14 0x0E: - | - | -
+ 15 0x0F: - | - | -
+ 16 0x10: - | - | -
+ 17 0x11: - | - | -
+ 18 0x12: - | - | -
+ 19 0x13: - | - | -
+ 20 0x14: - | - | -
+ 21 0x15: - | - | -
+ 22 0x16: - | - | -
+ 23 0x17: - | - | -
+ 24 0x18: - | - | -
+ 25 0x19: - | - | -
+ 26 0x1A: - | - | -
+ 27 0x1B: - | - | -
+ 28 0x1C: - | - | -
+ 29 0x1D: - | - | -
+ 30 0x1E: !bazKLIDst(3,1,300) | !bazKLIDdr(3,1,300) | !drzBAZle(3,1,300)
+ 31 0x1F: !bazKLIDst(3,1,300) | !bazKLIDdr(3,1,300) | !drzBAZle(3,1,300)
+ 32 0x20: !bazPOHst(3,1,200) | !bazPOHdr(3,1,300) | -
+ 33 0x21: - | - | -
+ 34 0x22: !schBAZst1(3,1,200) | !schBAZdr1(3,1,200) | !schBAZleh(3,1,10)
+ 35 0x23: !vytBAZst1(3,1,200) | !vytBAZdr1(3,1,200) | !vytBAZleh(3,1,300)
+ 36 0x24: !vytBAZst1(3,1,200) | !vytBAZdr1(3,1,200) | !vytBAZleh(3,1,300)
+ 37 0x25: - | - | -
+ 38 0x26: - | - | -
+ 39 0x27: !bazPOHst(3,1,10) | !bazPOHst(3,1,10) | -
+ 40 0x28: - | - | -
+ 41 0x29: - | - | -
+ 42 0x2A: - | - | -
+ 43 0x2B: - | - | -
+ 44 0x2C: - | - | -
+ 45 0x2D: - | - | -
+ 46 0x2E: - | - | -
+ 47 0x2F: - | - | -
+ 48 0x30: - | - | -
+ 49 0x31: - | - | -
+ 50 0x32: - | - | -
+ 51 0x33: - | - | -
+ 52 0x34: - | - | -
+ 53 0x35: - | - | -
+ 54 0x36: - | - | -
+ 55 0x37: - | - | -
+ 56 0x38: - | - | -
+ 57 0x39: - | - | -
+ 58 0x3A: - | - | -
+ 59 0x3B: - | - | -
+ 60 0x3C: - | - | -
+ 61 0x3D: - | - | -
+ 62 0x3E: - | - | -
+ 63 0x3F: - | - | -
+ 64 0x40: - | - | -
+ 65 0x41: - | - | -
+ 66 0x42: - | - | -
+ 67 0x43: - | - | -
+ 68 0x44: - | - | -
+ 69 0x45: - | - | -
+ 70 0x46: - | - | -
+ 71 0x47: - | - | -
+ 72 0x48: - | - | -
+ 73 0x49: - | - | -
+ 74 0x4A: - | - | -
+ 75 0x4B: - | - | -
+ 76 0x4C: - | - | -
+ 77 0x4D: - | - | -
+ 78 0x4E: !hodHSTv(3,1,200) | !hodHDRv1(3,1,200) | !hodHLEv(3,1,200)
+ 79 0x4F: !hodHSTvP(3,1,200) | !hodHDRvP(3,1,300) | !hodHLEv(3,1,200)
+ 80 0x50: !bazRELst(3,1,400) | !bazRELdr1(3,1,400) | !bazRELle(3,1,300)
+ 81 0x51: !bazRELst(3,1,400) | !bazRELdr1(3,1,400) | !bazRELle(3,1,300)
+ 82 0x52: !bazRELst(3,1,400) | !bazRELdr1(3,1,400) | !bazRELle(3,1,300)
+ 83 0x53: !_UPsL1(5,1,100) | !_UPkL1(5,1,100) | -
+ 84 0x54: !_DWsL1(5,1,100) | !_DWkL1(5,1,100) | -
+ 85 0x55: !_UPsP1(5,1,500) | !_UPkP1(5,1,500) | -
+ 86 0x56: !_DWsP1(5,1,500) | !_DWkP1(5,1,500) | -
+ 87 0x57: - | - | -
+ 88 0x58: - | - | -
+ 89 0x59: !hodHSTs(3,1,200) | !hodHDRs1(3,0.9,300) | !hodHLEv(3,1,200)
+ 90 0x5A: !vrhSTspHp(3,0.9,200) | !hodHDRsP(3,0.8,300) | !hodHLEv(3,1,200)
+# carry table 6: id: variant 0 / 1 / 2 (flags, file, weight, blend ms)
+  0 0x00: - | - | -
+  1 0x01: - | - | -
+  2 0x02: - | - | -
+  3 0x03: - | - | -
+  4 0x04: - | - | -
+  5 0x05: - | - | -
+  6 0x06: - | - | -
+  7 0x07: - | - | -
+  8 0x08: - | - | -
+  9 0x09: - | - | -
+ 10 0x0A: - | - | -
+ 11 0x0B: - | - | -
+ 12 0x0C: - | - | -
+ 13 0x0D: - | - | -
+ 14 0x0E: - | - | -
+ 15 0x0F: - | - | -
+ 16 0x10: - | - | -
+ 17 0x11: - | - | -
+ 18 0x12: - | - | -
+ 19 0x13: - | - | -
+ 20 0x14: - | - | -
+ 21 0x15: - | - | -
+ 22 0x16: - | - | -
+ 23 0x17: - | - | -
+ 24 0x18: - | - | -
+ 25 0x19: - | - | -
+ 26 0x1A: - | - | -
+ 27 0x1B: - | - | -
+ 28 0x1C: - | - | -
+ 29 0x1D: - | - | -
+ 30 0x1E: - | - | -
+ 31 0x1F: - | - | -
+ 32 0x20: - | - | -
+ 33 0x21: - | - | -
+ 34 0x22: - | - | -
+ 35 0x23: - | - | -
+ 36 0x24: - | - | -
+ 37 0x25: - | - | -
+ 38 0x26: - | - | -
+ 39 0x27: - | - | -
+ 40 0x28: - | - | -
+ 41 0x29: - | - | -
+ 42 0x2A: - | - | -
+ 43 0x2B: - | - | -
+ 44 0x2C: - | - | -
+ 45 0x2D: - | - | -
+ 46 0x2E: - | - | -
+ 47 0x2F: - | - | -
+ 48 0x30: - | - | -
+ 49 0x31: - | - | -
+ 50 0x32: - | - | -
+ 51 0x33: - | - | -
+ 52 0x34: - | - | -
+ 53 0x35: - | - | -
+ 54 0x36: - | - | -
+ 55 0x37: - | - | -
+ 56 0x38: - | - | -
+ 57 0x39: - | - | -
+ 58 0x3A: - | - | -
+ 59 0x3B: - | - | -
+ 60 0x3C: - | - | -
+ 61 0x3D: - | - | -
+ 62 0x3E: - | - | -
+ 63 0x3F: - | - | -
+ 64 0x40: - | - | -
+ 65 0x41: - | - | -
+ 66 0x42: - | - | -
+ 67 0x43: - | - | -
+ 68 0x44: - | - | -
+ 69 0x45: - | - | -
+ 70 0x46: - | - | -
+ 71 0x47: - | - | -
+ 72 0x48: - | - | -
+ 73 0x49: - | - | -
+ 74 0x4A: - | - | -
+ 75 0x4B: - | - | -
+ 76 0x4C: - | - | -
+ 77 0x4D: - | - | -
+ 78 0x4E: - | - | -
+ 79 0x4F: - | - | -
+ 80 0x50: - | - | -
+ 81 0x51: - | - | -
+ 82 0x52: - | - | -
+ 83 0x53: - | - | -
+ 84 0x54: - | - | -
+ 85 0x55: - | - | -
+ 86 0x56: - | - | -
+ 87 0x57: - | - | -
+ 88 0x58: - | - | -
+ 89 0x59: - | - | -
+ 90 0x5A: - | - | -
+# activity table (6456 bytes left incl. the seat table)
+  0 0x00: !signFOst(3,200) | !signFOst(3,200) | !signFOle(3,200)
+  1 0x01: !signSTst(3,200) | !signSTst(3,200) | !signSTle(3,200)
+  2 0x02: !signADst(3,200) | !signADst(3,200) | !signADle(3,200)
+  3 0x03: !signHPst(3,200) | !signHPst(3,200) | !signHPle(3,200)
+  4 0x04: !signFCst(3,200) | !signFCst(3,200) | !signFCle(3,200)
+  5 0x05: !signWFMSst(3,200) | !signWFMSst(3,200) | (signWFMSle(3,200)
+  6 0x06: !signHFst(3,200) | !signHFst(3,200) | (signHFle(3,200)
+  7 0x07: !signFAWst(3,200) | !signFAWst(3,200) | (signFAWle(3,200)
+  8 0x08: - | - | -
+  9 0x09: - | - | -
+ 10 0x0A: - | - | -
+ 11 0x0B: - | - | -
+ 12 0x0C: - | - | -
+ 13 0x0D: - | - | -
+ 14 0x0E: - | - | -
+ 15 0x0F: - | - | -
+ 16 0x10: - | - | -
+ 17 0x11: (koureniB(3,200) | - | -
+ 18 0x12: (koureni5(3,200) | - | -
+ 19 0x13: (tipnuti(3,200) | - | -
+ 20 0x14: - | - | -
+ 21 0x15: !manipul1(3,250) | - | -
+ 22 0x16: !manip01(3,300) | - | -
+ 23 0x17: !dlkhld5(3,200) | !dlkhldK(3,200) | !dlkhldL(3,200)
+ 24 0x18: - | - | -
+ 25 0x19: (drzkartu(5,200) | - | -
+ 26 0x1A: (hrejkarty(3,200) | - | -
+ 27 0x1B: - | - | -
+ 28 0x1C: (pitiFL(3,200) | - | -
+ 29 0x1D: (pitznec3(3,200) | - | -
+ 30 0x1E: )zhlava4(3,300) | )z-hlava3(3,300) | )z_hlava2(3,300)
+ 31 0x1F: )zhlava(3,300) | )z-hlava4(3,300) | )z_hlava1(3,300)
+ 32 0x20: )zramenoL(3,300) | )z-ramenoL2(3,300) | )z_rukaL(3,300)
+ 33 0x21: - | - | -
+ 34 0x22: )zramenoL-(3,300) | )z-ramenoL-(3,300) | )z_rukaL(3,300)
+ 35 0x23: - | - | -
+ 36 0x24: )zramenoP(3,300) | )z-ramenoP(3,300) | )z_rukaP(3,300)
+ 37 0x25: - | - | -
+ 38 0x26: )zramenoP-(3,300) | )z-ramenoP-(3,300) | )z_rukaP(3,300)
+ 39 0x27: - | - | -
+ 40 0x28: )znohaL1(3,300) | )z-nohaL(3,300) | )z_nohaL(3,300)
+ 41 0x29: - | - | -
+ 42 0x2A: )znohaL-2(3,300) | )z-nohaL(3,300) | )z_nohaL(3,300)
+ 43 0x2B: - | - | -
+ 44 0x2C: )znohaP1(3,300) | )z-nohaP1(3,300) | )z_nohaP1(3,300)
+ 45 0x2D: - | - | -
+ 46 0x2E: )znohaP-1(3,300) | )z-nohaP1(3,300) | )z_nohaP1(3,300)
+ 47 0x2F: - | - | -
+ 48 0x30: )zbricho1(3,300) | )z-hlava2(3,300) | )z_bolL1(3,300)
+ 49 0x31: )zzada(3,300) | )z-zada(3,300) | )z_bolP2(3,300)
+ 50 0x32: )zbokL2(3,300) | )z-ramenoL-1(3,300) | -
+ 51 0x33: )zbokP(3,300) | )z-ramenoP-1(3,300) | -
+ 52 0x34: !zajatecST(5,200) | !zajatecDR(5,200) | !zajatecLE(5,200)
+ 53 0x35: - | - | -
+ 54 0x36: (teplous(3,200) | - | -
+ 55 0x37: - | - | -
+ 56 0x38: - | - | -
+ 57 0x39: - | - | -
+ 58 0x3A: - | - | -
+ 59 0x3B: !salutovani(3,400) | - | -
+ 60 0x3C: !hailovani(3,400) | - | -
+ 61 0x3D: - | - | -
+ 62 0x3E: (ukazovani(3,200) | !ukazDR(3,200) | -
+ 63 0x3F: - | - | -
+ 64 0x40: - | - | -
+ 65 0x41: %dalekohled(3,200) | - | -
+ 66 0x42: #vpad2(5,200) | - | -
+ 67 0x43: - | - | -
+ 68 0x44: - | - | -
+ 69 0x45: - | - | -
+ 70 0x46: !ridicRUCE(5,0) | - | -
+ 71 0x47: - | - | -
+ 72 0x48: - | - | -
+ 73 0x49: !foti(3,200) | !fotiK(3,200) | !fotiL(3,200)
+# seat (idle) table: 240 bytes
+  0: (mg42_stand
+  1: (w97_stand
+  2: 
+  3: (mg42crouch
+  4: (w97_crouch
+  5: 
+  6: (mg42lie
+  7: 
+  8: 
+  9: (jeep1919
+ 10: (flaksed
+ 11: 

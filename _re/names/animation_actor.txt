@@ -1,0 +1,49 @@
+# Part 6b: the animation actor (src/game/animation_actor.cpp; vtable 0x008119b8, 0xf0 bytes; creator
+# vtable 0x008119a8). The class stays an auto class (90_auto.spec), as C_MeleeTracker and part 6a's.
+005b3100 StaticInit_AnimationActorCreatorThunk
+005b3110 StaticInit_AnimationActorCreator
+005b3130 C_AnimationActorCreator::Create | C_Actor * __thiscall Create(C_ActorCreator * this)
+005b3190 C_AnimationActorCreator::GetName | char * __thiscall GetName(C_ActorCreator * this)
+005b31a0 C_AnimationActorCreator::Destroy | void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)
+005b31c0 C_AnimationActor::RestartMission | void __thiscall RestartMission(C_AnimationActor * this, bool server)
+005b3210 C_AnimationActor::SaveGame | bool __thiscall SaveGame(C_AnimationActor * this, C_chunk * chunk)
+005b3450 C_AnimationActor::LoadGame | bool __thiscall LoadGame(C_AnimationActor * this, C_chunk * chunk)
+005b3710 C_AnimationActor::SetFrame | bool __thiscall SetFrame(C_AnimationActor * this, I3D_frame * frame)
+005b3740 C_AnimationActor::C_AnimationActor | C_AnimationActor * __thiscall C_AnimationActor(C_AnimationActor * this)
+005b3910 C_AnimationActor::ScalarDeletingDestructor | C_AnimationActor * __thiscall ScalarDeletingDestructor(C_AnimationActor * this, uchar flags)
+005b3930 C_AnimationActor::~C_AnimationActor | void __thiscall ~C_AnimationActor(C_AnimationActor * this)
+005b3a00 C_AnimationActor::CopyFrom | void __thiscall CopyFrom(C_AnimationActor * this, C_Actor * source)
+005b3ac0 C_AnimationActor::CreateCollisions | void __thiscall CreateCollisions(C_AnimationActor * this, I3D_frame * frame)
+005b3be0 C_AnimationActor::StartMission | void __thiscall StartMission(C_AnimationActor * this, bool server)
+005b45a0 AnimationActor_AlignedFreeA
+005b45b0 C_AnimationActor::ArmourProc | uint __stdcall ArmourProc(I3D_frame * frame, C_AnimationActor * context)
+005b4610 C_AnimationActor::NoteProc | int __stdcall NoteProc(I3D_frame * frame, uint message, char * note, uint unused)
+005b4790 C_AnimationActor::ReleaseModel | void __fastcall ReleaseModel(C_AnimationActor * this)
+005b4850 AnimationCollision_Construct
+005b48b0 AnimationCollision_Refresh
+005b4dc0 AnimationCollision_Destruct
+005b4de0 C_AnimationActor::AddCollision | void __thiscall AddCollision(C_AnimationActor * this, I3D_frame * frame, uint flags, uint type)
+005b4ff0 AnimationActor_AlignedFreeB
+005b5000 C_AnimationActor::StopMission | void __thiscall StopMission(C_AnimationActor * this, bool server)
+005b50c0 C_AnimationActor::Finish | void __thiscall Finish(C_AnimationActor * this)
+005b5190 C_AnimationActor::Step | void __thiscall Step(C_AnimationActor * this, int time)
+005b5490 C_AnimationActor::Update | void __thiscall Update(C_AnimationActor * this, int frameTime)
+005b54a0 C_AnimationActor::Tick | void __thiscall Tick(C_AnimationActor * this, int timeDelta)
+005b54c0 C_AnimationActor::SetCollisionsOn | void __thiscall SetCollisionsOn(C_AnimationActor * this, bool on)
+005b5550 C_AnimationActor::EnablePrimitives | void __thiscall EnablePrimitives(C_AnimationActor * this, I3D_frame * frame, bool enable)
+005b55e0 C_AnimationActor::Stop | void __thiscall Stop(C_AnimationActor * this, bool immediately)
+005b58d0 C_AnimationActor::OnMessage | void __thiscall OnMessage(C_AnimationActor * this, C_BitStream * msg)
+005b5900 StaticInit_AnimationActorPropertiesThunk
+005b5910 StaticInit_AnimationActorProperties
+005b5af0 C_AnimationActor::ReadProperties | bool __thiscall ReadProperties(C_AnimationActor * this, C_chunk * chunk)
+005b5eb0 C_AnimationActor::Hit | void __thiscall Hit(C_AnimationActor * this, int type, float amount, S_vector4 * pos, S_vector4 * dir, C_Actor * attacker, int flags)
+005b5f20 C_AnimationActor::GetMaterialId | int __thiscall GetMaterialId(C_AnimationActor * this, I3D_frame * part)
+005b5f40 AnimationWing_Construct
+005b5f60 AnimationWing_Destruct
+005b5f70 AnimationWing_Reset
+005b5fb0 AnimationWing_Sweep
+005b6130 C_AnimationActor::WriteState | void __thiscall WriteState(C_AnimationActor * this, C_BitStream * msg)
+005b6150 C_AnimationActor::ReadState | void __thiscall ReadState(C_AnimationActor * this, C_BitStream * msg)
+005b61f0 AnimationWingVector_Insert
+005b63d0 AnimationWingVector_InsertN
+006de0d0 GetFrameOrModelActor | C_Actor * __fastcall GetFrameOrModelActor(I3D_frame * frame)

@@ -82,6 +82,7 @@ constexpr uint32_t FRAME_MASK_ANY = 0xFFFF;
 // Single types in such masks (bit type-1).
 constexpr uint32_t FRAME_MASK_VISUAL = 1u << (FRAME_VISUAL - 1);
 constexpr uint32_t FRAME_MASK_DUMMY = 1u << (FRAME_DUMMY - 1);
+constexpr uint32_t FRAME_MASK_USER = 1u << (FRAME_USER - 1);
 constexpr uint32_t FRAME_MASK_LIGHT = 1u << (FRAME_LIGHT - 1);
 constexpr uint32_t FRAME_MASK_VOLUME = 1u << (FRAME_VOLUME - 1);
 // I3D_frame::EnumFrames() type mask of sectors.
@@ -992,6 +993,8 @@ public:
 
     S_vector4 GetVelocityInline() const { return Field<S_vector4>(0x1A0); }
     float GetVolumeInline() const { return Field<float>(0x16C); }
+    // The playback rate SetFrequency set (inferred: the submarine compares it with the one it sets).
+    float GetFrequencyInline() const { return Field<float>(0x174); }
     // File of the sound source (inline 0x0051c0d0), "" without a source.
     const char *GetFileName() const
     {

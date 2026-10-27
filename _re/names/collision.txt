@@ -1,0 +1,113 @@
+# Collision world (types in _re/types/35_collision.spec). AddVolume / RemoveVolume / MoveVolume
+# are in versions.txt, SetIgnoredVolume / RayTest* in physics.txt.
+
+# ---- the world, its loading and the dynamic grid (0x006ee000..0x006f2fe0) ----
+006ee000 InitCollisionWorldStatic
+006ee010 ConstructCollisionWorld
+006ee0a0 RegisterCollisionWorldDtor
+006ee0b0 DestroyCollisionWorld
+006ee0c0 C_CollisionWorld::~C_CollisionWorld
+# Debug: ray test between the scene frames "debug_a" and "debug_b" (not called).
+006ee130 DebugCollisionRay | int __thiscall DebugCollisionRay(void *this, int unused)
+# Frees the level collision (unless `keepMesh` and it lives in the external buffer) and the grid.
+006ee4f0 C_CollisionWorld::Free | void __thiscall Free(C_CollisionWorld *this, bool keepMesh)
+# Sets the projection kind (low byte 1..7) of every triangle from its normal and edges.
+006ee750 ClassifyTriangles | void __fastcall ClassifyTriangles(S_CollisionMesh *mesh)
+# Loads the level collision file ("GifC"); `buildGrid` also makes the dynamic volume grid.
+006ee940 C_CollisionWorld::Load | void __thiscall Load(C_CollisionWorld *this, char *fileName, bool buildGrid)
+# Unlinks grid cells that became empty and keeps them for reuse.
+006ef700 C_CollisionWorld::ReleaseEmptyCells | void __thiscall ReleaseEmptyCells(C_CollisionWorld *this)
+006efee0 C_CollisionWorld::SetIgnoredVolumes | void __thiscall SetIgnoredVolumes(C_CollisionWorld *this, S_CollisionVolume **volumes, uint count, int unknown)
+# Empties the dynamic grid and deletes its cells.
+006eff70 C_CollisionWorld::ClearGrid | void __thiscall ClearGrid(C_CollisionWorld *this)
+# Whether a dynamic volume overlaps the swept sphere/box of `query`.
+006f0420 C_CollisionWorld::TestVolumesOverlap | bool __thiscall TestVolumesOverlap(C_CollisionWorld *this, void *query)
+006f0690 TestPrimitiveOverlap | bool __stdcall TestPrimitiveOverlap(void *primitive, void *query)
+006f08c0 TestCellOverlap | bool __stdcall TestCellOverlap(S_CollisionMeshCell *cell, void *query)
+# Whether a box moving from one placement to another touches anything.
+006f0ac0 C_CollisionWorld::TestBoxSweep | bool __thiscall TestBoxSweep(C_CollisionWorld *this, float *box, S_matrix *from, S_matrix *to, float *unknown4, float *unknown5, float *unknown6, uint excludeTypes, uint excludeFlags)
+
+# ---- ray tests (0x006f2ff0..0x006f9b10) ----
+# Dynamic volumes in the grid cells around the ray; pre-filter by distance / by the ray's box.
+006f3020 C_CollisionWorld::RayTestVolumes | bool __thiscall RayTestVolumes(C_CollisionWorld *this, S_CollisionRay *ray)
+006f3620 C_CollisionWorld::RayTestVolumesBox | bool __thiscall RayTestVolumesBox(C_CollisionWorld *this, S_CollisionRay *ray)
+# Dead: ray tests of a list of volumes / of the grid volumes without pre-filter.
+006f3ca0 RayTestVolumeList
+006f42c0 C_CollisionWorld::RayTestVolumesUnfiltered | bool __thiscall RayTestVolumesUnfiltered(C_CollisionWorld *this, S_CollisionRay *ray)
+006f46e0 RayTestAabb | bool __stdcall RayTestAabb(float *min, float *max, S_CollisionRay *ray)
+006f4b50 RayExitAabb | bool __stdcall RayExitAabb(float *min, float *max, S_CollisionRay *ray)
+006f4d70 RayTestCapsule | bool __stdcall RayTestCapsule(float radius, float halfHeight, S_CollisionRay *ray)
+006f50d0 RayTestPrimitive | bool __stdcall RayTestPrimitive(void *primitive, S_CollisionRay *ray)
+006f57c0 RayTestCell | bool __stdcall RayTestCell(S_CollisionMeshCell *cell, S_CollisionRay *ray)
+# Every static cell around the segment.
+006f5c60 C_CollisionWorld::RayTestBrute | S_CollisionVolume * __thiscall RayTestBrute(C_CollisionWorld *this, S_vector *from, S_vector *dir, S_vector *hitPos, S_vector *hitNormal, uint excludeTypes, uint excludeFlags)
+# Lowest layer of static cells, volumes pre-filtered by box.
+006f62b0 C_CollisionWorld::RayTest2D | S_CollisionVolume * __thiscall RayTest2D(C_CollisionWorld *this, S_vector *from, S_vector *dir, S_vector *hitPos, S_vector *hitNormal, uint excludeTypes, uint excludeFlags)
+# Dead: like RayTest2D, returns the hit fraction.
+006f67d0 C_CollisionWorld::RayTestFraction2D | S_CollisionVolume * __thiscall RayTestFraction2D(C_CollisionWorld *this, S_vector *from, S_vector *dir, float *fraction, S_vector *hitNormal, uint excludeTypes)
+# Static geometry only, walking the lowest layer of cells along the ray.
+006f6c40 C_CollisionWorld::RayTestStatic | S_CollisionVolume * __thiscall RayTestStatic(C_CollisionWorld *this, S_vector *from, S_vector *dir, S_vector *hitPos, S_vector *hitNormal, uint excludeFlags)
+# Dynamic volumes only.
+006f7cc0 C_CollisionWorld::RayTestDynamic | S_CollisionVolume * __thiscall RayTestDynamic(C_CollisionWorld *this, S_vector *from, S_vector *dir, S_vector *hitPos, S_vector *hitNormal, uint excludeTypes, uint excludeFlags)
+# Walks the static grid along the ray.
+006f8060 C_CollisionWorld::RayTest | S_CollisionVolume * __thiscall RayTest(C_CollisionWorld *this, S_vector *from, S_vector *dir, S_vector *hitPos, S_vector *hitNormal, uint excludeTypes, uint excludeFlags)
+# Dead.
+006f9520 RayTestBoundingSphere
+006f97a0 RayTestVolumeListInside
+006f9b10 RayTestVolumeListEx
+00718770 CollisionRayTest | S_CollisionVolume * __stdcall CollisionRayTest(S_vector *from, S_vector *dir, S_vector *hitPos, S_vector *hitNormal, uint excludeTypes, uint excludeFlags)
+007187a0 CollisionRayTest2D | S_CollisionVolume * __stdcall CollisionRayTest2D(S_vector *from, S_vector *dir, S_vector *hitPos, S_vector *hitNormal, uint excludeTypes, uint excludeFlags)
+007187d0 CollisionRayTestFraction2D
+00718830 C_CollisionWorld::RayTestThunk
+00718840 CollisionRayTestStaticBrute
+# Convex hull ray tests (template instances).
+007e1360 RayTestConvexVolume | bool __stdcall RayTestConvexVolume(S_CollisionRay *ray, S_CollisionConvexVolume *volume)
+007e18d0 RayTestConvexPrim | bool __stdcall RayTestConvexPrim(S_CollisionRay *ray, S_CollisionConvexPrim *prim)
+
+008cb480 g_collisionWorld @ C_CollisionWorld
+
+# ---- segment queries, water, region queries (0x006f9e30..0x00702ba0) ----
+006fba30 C_CollisionWorld::GetFramePrimitives | int __thiscall GetFramePrimitives(C_CollisionWorld *this, I3D_frame *frame, void *primitives)
+006fbcf0 C_CollisionWorld::GetVolumeAt | S_CollisionVolume * __thiscall GetVolumeAt(C_CollisionWorld *this, S_vector *pos, uint excludeTypes)
+006fcf30 C_CollisionWorld::GetVolumesInRadius | int __thiscall GetVolumesInRadius(C_CollisionWorld *this, S_vector *pos, float radius, uint excludeTypes, void *volumes)
+# Ray test against the water surfaces (flag 0x10000).
+006fd170 C_CollisionWorld::RayTestWater | S_CollisionVolume * __thiscall RayTestWater(C_CollisionWorld *this, S_vector *from, S_vector *dir, S_vector *hitPos, S_vector *hitNormal, uint excludeFlags)
+006fd710 RayTestWaterCell | bool __stdcall RayTestWaterCell(S_CollisionMeshCell *cell, S_CollisionRay *ray)
+006fdbb0 RayTestWaterRect | bool __stdcall RayTestWaterRect(S_CollisionRect *rect, S_CollisionRay *ray)
+006fddd0 C_CollisionWorld::GetWaterHeightRange | void __thiscall GetWaterHeightRange(C_CollisionWorld *this, float *minY, float *maxY)
+006ff510 C_CollisionWorld::QuerySegment | int __thiscall QuerySegment(C_CollisionWorld *this, S_CollisionQuery *query)
+00700f90 CollectSegmentCell | void __stdcall CollectSegmentCell(S_CollisionMeshCell *cell, S_CollisionRay *ray, S_CollisionQuery *query)
+00701720 CollectSegmentPrimitive | bool __stdcall CollectSegmentPrimitive(void *primitive, S_CollisionRay *ray, S_CollisionQuery *query)
+00701f40 AddSegmentHit
+00702180 vector_insert_collision_hit_702180
+007023d0 vector_insert_n_collision_hit_7023d0
+
+# ---- sphere sweeps (0x00702bb0..0x007182c0) ----
+00702be0 C_CollisionWorld::SweepSphereVolumes | bool __thiscall SweepSphereVolumes(C_CollisionWorld *this, S_SphereSweep *sweep)
+007045a0 SweepSphereEdge | bool __stdcall SweepSphereEdge(S_vector *a, S_vector *b, S_SphereSweep *sweep, uint *corner, uint cornerA, uint cornerB)
+00705130 SweepSphereTriangle | bool __stdcall SweepSphereTriangle(S_CollisionTriangle *tri, S_SphereSweep *sweep, void *unknown)
+00706cd0 SweepSphereAabb | bool __stdcall SweepSphereAabb(S_vector *min, S_vector *max, S_SphereSweep *sweep)
+0070ffc0 SweepSphereCapsule | bool __stdcall SweepSphereCapsule(float capsuleRadius, float halfHeight, S_SphereSweep *sweep)
+00710580 SweepSpherePrimitive | bool __stdcall SweepSpherePrimitive(void *primitive, S_SphereSweep *sweep)
+007155a0 SweepSphereCell | bool __stdcall SweepSphereCell(S_CollisionMeshCell *cell, S_SphereSweep *sweep)
+007158e0 C_CollisionWorld::SphereTest | S_CollisionVolume * __thiscall SphereTest(C_CollisionWorld *this, S_vector *from, S_vector *dir, float radius, S_vector *hitPos, S_vector *hitNormal, uint excludeTypes, uint excludeFlags)
+00717170 C_CollisionWorld::SlideSphere | S_CollisionVolume * __thiscall SlideSphere(C_CollisionWorld *this, S_vector *from, S_vector *move, float radius, S_vector *endPos, S_vector *endNormal, uint excludeTypes, uint excludeFlags)
+# Dead (no references): a second sphere sweep family over the lowest cell layer, and 0x717660..0x7182c0.
+00703bb0 C_CollisionWorld::SweepSphereVolumes2D | bool __thiscall SweepSphereVolumes2D(C_CollisionWorld *this, S_SphereSweep *sweep)
+00704b80 SweepSphereEdge2D
+00705f10 SweepSphereTriangle2D | bool __stdcall SweepSphereTriangle2D(S_CollisionTriangle *tri, S_SphereSweep *sweep, void *unknown)
+0070b590 SweepSphereAabb2D
+00712dd0 SweepSpherePrimitive2D
+007157b0 SweepSphereCell2D
+00716740 C_CollisionWorld::SphereTest2D | S_CollisionVolume * __thiscall SphereTest2D(C_CollisionWorld *this, S_vector *from, S_vector *dir, float radius, S_vector *hitPos, S_vector *hitNormal, uint excludeTypes, uint excludeFlags)
+00718890 CollisionSphereTestDistance | S_CollisionVolume * __stdcall CollisionSphereTestDistance(S_vector *from, S_vector *dir, float radius, float *distance, S_vector *hitPos, S_vector *hitNormal, uint excludeTypes, uint excludeFlags)
+00718900 CollisionSphereTest | S_CollisionVolume * __stdcall CollisionSphereTest(S_vector *from, S_vector *dir, float radius, S_vector *hitPos, S_vector *hitNormal, uint excludeTypes, uint excludeFlags)
+00718930 CollisionSlideSphere | S_CollisionVolume * __stdcall CollisionSlideSphere(S_vector *from, S_vector *move, float radius, S_vector *endPos, S_vector *endNormal, uint excludeTypes, uint excludeFlags)
+007e15e0 SweepSphereConvexVolume | bool __stdcall SweepSphereConvexVolume(S_SphereSweep *sweep, S_CollisionConvexVolume *volume)
+007e1b50 SweepSphereConvexPrim | bool __stdcall SweepSphereConvexPrim(S_SphereSweep *sweep, S_CollisionConvexPrim *prim)
+008cb8c8 g_sphereTestDistanceSq @ float
+
+# ---- body sweeps (0x0071ba20..0x0071cba0; src/game/collision_body.cpp) ----
+0071ba20 C_CollisionWorld::MoveSpheres | S_CollisionVolume * __thiscall MoveSpheres(C_CollisionWorld *this, S_MoveContacts * contacts)
+0071bec0 C_CollisionWorld::MoveSpheresStepping | S_CollisionVolume * __thiscall MoveSpheresStepping(C_CollisionWorld *this, S_MoveContacts * contacts)
+0071cba0 C_CollisionWorld::MoveSpheresLow | S_CollisionVolume * __thiscall MoveSpheresLow(C_CollisionWorld *this, S_MoveContacts * contacts)

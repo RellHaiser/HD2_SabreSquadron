@@ -12986,10 +12986,10 @@
 "in_vtables": []
 },
 "00420800": {
-"name": "FUN_00420800",
+"name": "AssignChars",
 "size": 157,
-"lines": 47,
-"chars": 1374,
+"lines": 45,
+"chars": 1166,
 "callers": [
 "0041fc10",
 "004290a0",
@@ -42274,10 +42274,10 @@
 "in_vtables": []
 },
 "00473790": {
-"name": "FUN_00473790",
+"name": "S_VertexAnimPlayer::Init",
 "size": 38,
 "lines": 14,
-"chars": 405,
+"chars": 417,
 "callers": [
 "00474290",
 "005ec8b0",
@@ -42291,10 +42291,10 @@
 "in_vtables": []
 },
 "004737c0": {
-"name": "FUN_004737c0",
+"name": "S_VertexAnimPlayer::Reset",
 "size": 409,
 "lines": 72,
-"chars": 2019,
+"chars": 2032,
 "callers": [
 "005ec8b0",
 "005f9a60",
@@ -42681,10 +42681,10 @@
 "in_vtables": []
 },
 "00473e30": {
-"name": "FUN_00473e30",
+"name": "FindAnimation",
 "size": 140,
-"lines": 48,
-"chars": 1249,
+"lines": 45,
+"chars": 1158,
 "callers": [
 "00474290",
 "005ec8b0",
@@ -42769,10 +42769,10 @@
 "in_vtables": []
 },
 "004746b0": {
-"name": "FUN_004746b0",
+"name": "RemovePlayer",
 "size": 132,
-"lines": 38,
-"chars": 1119,
+"lines": 36,
+"chars": 951,
 "callers": [
 "005ec8b0",
 "005ed260",
@@ -43046,10 +43046,10 @@
 "in_vtables": []
 },
 "00474cf0": {
-"name": "FUN_00474cf0",
+"name": "PlayerVectorInsert",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 119,
+"chars": 3662,
 "callers": [
 "00474290",
 "005ec8b0",
@@ -136904,10 +136904,10 @@
 ]
 },
 "005bbdb0": {
-"name": "thunk_FUN_005bbdc0",
+"name": "StaticInit_TrainCreatorThunk",
 "size": 5,
 "lines": 11,
-"chars": 236,
+"chars": 265,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -136925,10 +136925,10 @@
 ]
 },
 "005bbdc0": {
-"name": "FUN_005bbdc0",
+"name": "StaticInit_TrainCreator",
 "size": 23,
 "lines": 11,
-"chars": 230,
+"chars": 260,
 "callers": [
 "005bbdb0"
 ],
@@ -136946,10 +136946,10 @@
 "in_vtables": []
 },
 "005bbde0": {
-"name": "FUN_005bbde0",
+"name": "C_TrainCreator::Create",
 "size": 92,
-"lines": 25,
-"chars": 570,
+"lines": 24,
+"chars": 553,
 "callers": [],
 "callees": [
 "005bcfb0",
@@ -136967,10 +136967,10 @@
 ]
 },
 "005bbe40": {
-"name": "FUN_005bbe40",
+"name": "C_TrainCreator::GetName",
 "size": 6,
 "lines": 7,
-"chars": 112,
+"chars": 123,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -136987,10 +136987,10 @@
 ]
 },
 "005bbe50": {
-"name": "FUN_005bbe50",
+"name": "C_TrainCreator::Destroy",
 "size": 23,
 "lines": 13,
-"chars": 358,
+"chars": 386,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -137005,10 +137005,10 @@
 ]
 },
 "005bbe70": {
-"name": "FUN_005bbe70",
+"name": "FindNextCheckpoint",
 "size": 1069,
 "lines": 167,
-"chars": 4629,
+"chars": 4738,
 "callers": [
 "005bc2a0"
 ],
@@ -137031,10 +137031,10 @@
 "in_vtables": []
 },
 "005bc2a0": {
-"name": "FUN_005bc2a0",
+"name": "BuildPath",
 "size": 760,
-"lines": 138,
-"chars": 4793,
+"lines": 141,
+"chars": 4975,
 "callers": [
 "005bd490",
 "005bf250"
@@ -137062,10 +137062,10 @@
 "in_vtables": []
 },
 "005bc5a0": {
-"name": "FUN_005bc5a0",
+"name": "UpdateCrossings",
 "size": 532,
-"lines": 92,
-"chars": 3019,
+"lines": 97,
+"chars": 3253,
 "callers": [
 "005bff10"
 ],
@@ -137081,10 +137081,10 @@
 "in_vtables": []
 },
 "005bc7c0": {
-"name": "FUN_005bc7c0",
+"name": "ClearPath",
 "size": 110,
-"lines": 25,
-"chars": 643,
+"lines": 31,
+"chars": 858,
 "callers": [
 "005bc2a0",
 "005be1b0"
@@ -137099,10 +137099,10 @@
 "in_vtables": []
 },
 "005bc830": {
-"name": "FUN_005bc830",
+"name": "Train_LoadSound",
 "size": 284,
 "lines": 51,
-"chars": 1721,
+"chars": 1724,
 "callers": [
 "005bca90"
 ],
@@ -137121,10 +137121,10 @@
 "in_vtables": []
 },
 "005bc950": {
-"name": "FUN_005bc950",
+"name": "Train_FreeSound",
 "size": 32,
 "lines": 15,
-"chars": 284,
+"chars": 287,
 "callers": [
 "005bca90"
 ],
@@ -137158,10 +137158,10 @@
 "in_vtables": []
 },
 "005bca90": {
-"name": "FUN_005bca90",
+"name": "SetSounds",
 "size": 1245,
 "lines": 123,
-"chars": 4004,
+"chars": 4035,
 "callers": [
 "005bd820",
 "005be1b0"
@@ -137190,10 +137190,10 @@
 "in_vtables": []
 },
 "005bcf70": {
-"name": "empty_function_5bcf70",
+"name": "Tick",
 "size": 3,
 "lines": 7,
-"chars": 102,
+"chars": 83,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -137208,7 +137208,7 @@
 ]
 },
 "005bcf80": {
-"name": "FUN_005bcf80",
+"name": "Update",
 "size": 42,
 "lines": 11,
 "chars": 207,
@@ -137226,12 +137226,13 @@
 ]
 },
 "005bcfb0": {
-"name": "FUN_005bcfb0",
+"name": "C_Train",
 "size": 285,
 "lines": 106,
-"chars": 3066,
+"chars": 3070,
 "callers": [
-"005bbde0"
+"005bbde0",
+"005bd0d0"
 ],
 "callees": [
 "00610070"
@@ -137245,12 +137246,13 @@
 "in_vtables": []
 },
 "005bd0d0": {
-"name": "FUN_005bd0d0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 195,
+"chars": 188,
 "callers": [],
 "callees": [
+"005bcfb0",
 "005bd0f0",
 "007e559c"
 ],
@@ -137266,10 +137268,10 @@
 ]
 },
 "005bd0f0": {
-"name": "FUN_005bd0f0",
+"name": "~C_Train",
 "size": 176,
 "lines": 47,
-"chars": 1281,
+"chars": 1292,
 "callers": [
 "005bd0d0"
 ],
@@ -137287,10 +137289,10 @@
 "in_vtables": []
 },
 "005bd1a0": {
-"name": "FUN_005bd1a0",
+"name": "SetFrame",
 "size": 708,
-"lines": 179,
-"chars": 5989,
+"lines": 173,
+"chars": 5701,
 "callers": [],
 "callees": [
 "00405040",
@@ -137321,10 +137323,10 @@
 ]
 },
 "005bd470": {
-"name": "FUN_005bd470",
+"name": "Train_AlignedFree",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 107,
 "callers": [
 "007ffa60",
 "007ffacb"
@@ -137339,10 +137341,10 @@
 "in_vtables": []
 },
 "005bd480": {
-"name": "thunk_FUN_006101f0",
+"name": "CopyFrom",
 "size": 5,
 "lines": 8,
-"chars": 145,
+"chars": 135,
 "callers": [],
 "callees": [
 "006101f0"
@@ -137386,10 +137388,10 @@
 "in_vtables": []
 },
 "005bd820": {
-"name": "FUN_005bd820",
+"name": "StartMission",
 "size": 2424,
-"lines": 412,
-"chars": 17437,
+"lines": 413,
+"chars": 17463,
 "callers": [],
 "callees": [
 "00404260",
@@ -137444,10 +137446,10 @@
 ]
 },
 "005be1a0": {
-"name": "FUN_005be1a0",
+"name": "Train_AlignedFree2",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 108,
 "callers": [
 "007ffaa1"
 ],
@@ -137461,10 +137463,10 @@
 "in_vtables": []
 },
 "005be1b0": {
-"name": "FUN_005be1b0",
+"name": "StopMission",
 "size": 426,
 "lines": 68,
-"chars": 2416,
+"chars": 2394,
 "callers": [],
 "callees": [
 "005bc7c0",
@@ -137489,10 +137491,10 @@
 ]
 },
 "005be360": {
-"name": "FUN_005be360",
+"name": "ReadProperties",
 "size": 1004,
-"lines": 194,
-"chars": 7668,
+"lines": 180,
+"chars": 6890,
 "callers": [],
 "callees": [
 "004050e0",
@@ -137523,10 +137525,10 @@
 ]
 },
 "005be780": {
-"name": "FUN_005be780",
+"name": "ClearWagons",
 "size": 117,
 "lines": 25,
-"chars": 645,
+"chars": 547,
 "callers": [
 "005bd0f0",
 "005be360"
@@ -137542,10 +137544,10 @@
 "in_vtables": []
 },
 "005be800": {
-"name": "FUN_005be800",
+"name": "Train_StringTidy",
 "size": 61,
 "lines": 23,
-"chars": 478,
+"chars": 482,
 "callers": [
 "005be780"
 ],
@@ -137559,10 +137561,10 @@
 "in_vtables": []
 },
 "005be840": {
-"name": "FUN_005be840",
+"name": "Train_StringConstruct",
 "size": 24,
 "lines": 11,
-"chars": 239,
+"chars": 248,
 "callers": [
 "005be360"
 ],
@@ -137673,10 +137675,10 @@
 "in_vtables": []
 },
 "005be910": {
-"name": "FUN_005be910",
+"name": "Train_WagonVectorInsert",
 "size": 406,
 "lines": 74,
-"chars": 2333,
+"chars": 2344,
 "callers": [
 "005be360"
 ],
@@ -137712,10 +137714,10 @@
 "in_vtables": []
 },
 "005beac0": {
-"name": "FUN_005beac0",
+"name": "Train_PathVectorInsert",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3531,
 "callers": [
 "005bc2a0"
 ],
@@ -137730,10 +137732,10 @@
 "in_vtables": []
 },
 "005becd0": {
-"name": "FUN_005becd0",
+"name": "Train_WheelVectorInsert",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3532,
 "callers": [
 "005bd820"
 ],
@@ -137825,10 +137827,10 @@
 "in_vtables": []
 },
 "005befb0": {
-"name": "FUN_005befb0",
+"name": "StaticInit_5befb0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -137847,10 +137849,10 @@
 ]
 },
 "005befe0": {
-"name": "FUN_005befe0",
+"name": "RestartMission",
 "size": 23,
 "lines": 9,
-"chars": 156,
+"chars": 170,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -137865,10 +137867,10 @@
 ]
 },
 "005bf000": {
-"name": "FUN_005bf000",
+"name": "SaveGame",
 "size": 580,
-"lines": 109,
-"chars": 3483,
+"lines": 98,
+"chars": 2962,
 "callers": [],
 "callees": [
 "004059b0",
@@ -137891,10 +137893,10 @@
 ]
 },
 "005bf250": {
-"name": "FUN_005bf250",
+"name": "LoadGame",
 "size": 656,
-"lines": 117,
-"chars": 4091,
+"lines": 111,
+"chars": 3604,
 "callers": [],
 "callees": [
 "00401ed0",
@@ -137919,10 +137921,10 @@
 ]
 },
 "005bf4e0": {
-"name": "FUN_005bf4e0",
+"name": "PlayChuff",
 "size": 149,
-"lines": 27,
-"chars": 853,
+"lines": 32,
+"chars": 969,
 "callers": [
 "005bf580"
 ],
@@ -137934,10 +137936,10 @@
 "in_vtables": []
 },
 "005bf580": {
-"name": "FUN_005bf580",
+"name": "UpdateWheels",
 "size": 2186,
-"lines": 292,
-"chars": 10518,
+"lines": 288,
+"chars": 10428,
 "callers": [
 "005bff10"
 ],
@@ -137968,10 +137970,10 @@
 "in_vtables": []
 },
 "005bfe10": {
-"name": "FUN_005bfe10",
+"name": "Train_PlaceWagon",
 "size": 240,
 "lines": 37,
-"chars": 1302,
+"chars": 1310,
 "callers": [
 "005bd490",
 "005bff10"
@@ -137989,10 +137991,10 @@
 "in_vtables": []
 },
 "005bff10": {
-"name": "FUN_005bff10",
+"name": "Move",
 "size": 2615,
-"lines": 346,
-"chars": 12338,
+"lines": 348,
+"chars": 12364,
 "callers": [],
 "callees": [
 "00402a70",
@@ -138030,10 +138032,10 @@
 ]
 },
 "005c0950": {
-"name": "FUN_005c0950",
+"name": "Train_HitHuman",
 "size": 216,
 "lines": 33,
-"chars": 1083,
+"chars": 1085,
 "callers": [
 "005c0a30"
 ],
@@ -138049,10 +138051,10 @@
 "in_vtables": []
 },
 "005c0a30": {
-"name": "FUN_005c0a30",
+"name": "Train_UpdateWagonVolume",
 "size": 681,
 "lines": 100,
-"chars": 3481,
+"chars": 3504,
 "callers": [
 "005bff10"
 ],
@@ -146640,10 +146642,10 @@
 "in_vtables": []
 },
 "005de660": {
-"name": "FUN_005de660",
+"name": "StaticInit_5de660",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -146662,10 +146664,10 @@
 ]
 },
 "005de690": {
-"name": "thunk_FUN_005de6a0",
+"name": "StaticInit_SubmarineCreatorThunk",
 "size": 5,
 "lines": 11,
-"chars": 237,
+"chars": 274,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -146683,10 +146685,10 @@
 ]
 },
 "005de6a0": {
-"name": "FUN_005de6a0",
+"name": "StaticInit_SubmarineCreator",
 "size": 23,
 "lines": 11,
-"chars": 231,
+"chars": 269,
 "callers": [
 "005de690"
 ],
@@ -146705,10 +146707,10 @@
 "in_vtables": []
 },
 "005de6c0": {
-"name": "FUN_005de6c0",
+"name": "C_SubmarineCreator::Create",
 "size": 92,
-"lines": 24,
-"chars": 466,
+"lines": 25,
+"chars": 543,
 "callers": [],
 "callees": [
 "005df000",
@@ -146726,10 +146728,10 @@
 ]
 },
 "005de720": {
-"name": "FUN_005de720",
+"name": "C_SubmarineCreator::GetName",
 "size": 6,
 "lines": 7,
-"chars": 71,
+"chars": 103,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -146746,10 +146748,10 @@
 ]
 },
 "005de730": {
-"name": "FUN_005de730",
+"name": "C_SubmarineCreator::Destroy",
 "size": 23,
 "lines": 13,
-"chars": 308,
+"chars": 362,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -146764,10 +146766,10 @@
 ]
 },
 "005de750": {
-"name": "FUN_005de750",
+"name": "StaticInit_Submarines",
 "size": 10,
 "lines": 9,
-"chars": 118,
+"chars": 149,
 "callers": [],
 "callees": [
 "005de760",
@@ -146785,10 +146787,10 @@
 ]
 },
 "005de760": {
-"name": "FUN_005de760",
+"name": "Submarines_Construct",
 "size": 29,
 "lines": 14,
-"chars": 240,
+"chars": 248,
 "callers": [
 "005de750"
 ],
@@ -146805,10 +146807,10 @@
 "in_vtables": []
 },
 "005de780": {
-"name": "FUN_005de780",
+"name": "Submarines_RegisterDestroy",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 93,
 "callers": [
 "005de750"
 ],
@@ -146822,10 +146824,10 @@
 "in_vtables": []
 },
 "005de790": {
-"name": "FUN_005de790",
+"name": "Submarines_Destroy",
 "size": 32,
 "lines": 11,
-"chars": 155,
+"chars": 161,
 "callers": [
 "005de780"
 ],
@@ -146861,10 +146863,10 @@
 "in_vtables": []
 },
 "005de7c0": {
-"name": "FUN_005de7c0",
+"name": "C_Submarine::RestartMission",
 "size": 110,
 "lines": 24,
-"chars": 520,
+"chars": 701,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -146881,10 +146883,10 @@
 ]
 },
 "005de830": {
-"name": "FUN_005de830",
+"name": "C_Submarine::SaveGame",
 "size": 506,
-"lines": 77,
-"chars": 2726,
+"lines": 72,
+"chars": 2320,
 "callers": [],
 "callees": [
 "00405890",
@@ -146904,10 +146906,10 @@
 ]
 },
 "005dea30": {
-"name": "FUN_005dea30",
+"name": "C_Submarine::LoadGame",
 "size": 973,
-"lines": 159,
-"chars": 5316,
+"lines": 157,
+"chars": 4986,
 "callers": [],
 "callees": [
 "00405890",
@@ -146934,10 +146936,10 @@
 ]
 },
 "005dee00": {
-"name": "FUN_005dee00",
+"name": "C_Submarine::SetFrame",
 "size": 498,
-"lines": 103,
-"chars": 2937,
+"lines": 97,
+"chars": 2948,
 "callers": [],
 "callees": [
 "00405100",
@@ -146967,10 +146969,10 @@
 ]
 },
 "005df000": {
-"name": "FUN_005df000",
+"name": "C_Submarine::C_Submarine",
 "size": 696,
-"lines": 106,
-"chars": 3224,
+"lines": 107,
+"chars": 3477,
 "callers": [
 "005de6c0"
 ],
@@ -146999,10 +147001,10 @@
 "in_vtables": []
 },
 "005df2c0": {
-"name": "FUN_005df2c0",
+"name": "C_Submarine::ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 167,
+"chars": 203,
 "callers": [],
 "callees": [
 "005df2e0",
@@ -147020,10 +147022,10 @@
 ]
 },
 "005df2e0": {
-"name": "FUN_005df2e0",
+"name": "C_Submarine::~C_Submarine",
 "size": 217,
 "lines": 41,
-"chars": 1092,
+"chars": 1198,
 "callers": [
 "005df2c0"
 ],
@@ -147043,10 +147045,10 @@
 "in_vtables": []
 },
 "005df3c0": {
-"name": "CopyFrom",
+"name": "C_Submarine::CopyFrom",
 "size": 5,
 "lines": 8,
-"chars": 115,
+"chars": 128,
 "callers": [],
 "callees": [
 "006101f0"
@@ -147063,10 +147065,10 @@
 ]
 },
 "005df3d0": {
-"name": "FUN_005df3d0",
+"name": "C_Submarine::StartMission",
 "size": 553,
 "lines": 96,
-"chars": 3075,
+"chars": 3141,
 "callers": [],
 "callees": [
 "004336c0",
@@ -147092,10 +147094,10 @@
 ]
 },
 "005df600": {
-"name": "FUN_005df600",
+"name": "Submarine_SetSoundActive",
 "size": 74,
 "lines": 21,
-"chars": 471,
+"chars": 483,
 "callers": [
 "005df3d0",
 "005e15e0"
@@ -147110,10 +147112,10 @@
 "in_vtables": []
 },
 "005df650": {
-"name": "FUN_005df650",
+"name": "C_Submarine::Reset",
 "size": 191,
 "lines": 37,
-"chars": 852,
+"chars": 867,
 "callers": [
 "005df000",
 "005df2e0",
@@ -147130,10 +147132,10 @@
 "in_vtables": []
 },
 "005df710": {
-"name": "FUN_005df710",
+"name": "S_FrameVolume::Init",
 "size": 858,
 "lines": 169,
-"chars": 5687,
+"chars": 5694,
 "callers": [
 "005dfa80"
 ],
@@ -147162,10 +147164,10 @@
 "in_vtables": []
 },
 "005dfa70": {
-"name": "FUN_005dfa70",
+"name": "S_FrameVolume::Remove",
 "size": 15,
 "lines": 8,
-"chars": 158,
+"chars": 167,
 "callers": [
 "005df650"
 ],
@@ -147181,10 +147183,10 @@
 "in_vtables": []
 },
 "005dfa80": {
-"name": "FUN_005dfa80",
+"name": "C_Submarine::AddVolume",
 "size": 524,
 "lines": 91,
-"chars": 2937,
+"chars": 2954,
 "callers": [
 "005df3d0"
 ],
@@ -147205,10 +147207,10 @@
 "in_vtables": []
 },
 "005dfc90": {
-"name": "FUN_005dfc90",
+"name": "Submarine_AlignedFree",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 111,
 "callers": [
 "007fff20"
 ],
@@ -147222,10 +147224,10 @@
 "in_vtables": []
 },
 "005dfca0": {
-"name": "FUN_005dfca0",
+"name": "C_Submarine::StopMission",
 "size": 317,
 "lines": 51,
-"chars": 1764,
+"chars": 1752,
 "callers": [],
 "callees": [
 "004336c0",
@@ -147248,10 +147250,10 @@
 ]
 },
 "005dfde0": {
-"name": "thunk_FUN_005dfdf0",
+"name": "StaticInit_SubmarinePropertyThunk",
 "size": 5,
 "lines": 18,
-"chars": 418,
+"chars": 433,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -147276,10 +147278,10 @@
 ]
 },
 "005dfdf0": {
-"name": "FUN_005dfdf0",
+"name": "StaticInit_SubmarineProperty",
 "size": 83,
 "lines": 18,
-"chars": 412,
+"chars": 428,
 "callers": [
 "005dfde0"
 ],
@@ -147304,10 +147306,10 @@
 "in_vtables": []
 },
 "005dfe50": {
-"name": "FUN_005dfe50",
+"name": "C_Submarine::ReadProperties",
 "size": 691,
-"lines": 121,
-"chars": 4310,
+"lines": 113,
+"chars": 3848,
 "callers": [],
 "callees": [
 "00405890",
@@ -147465,10 +147467,10 @@
 "in_vtables": []
 },
 "005e0240": {
-"name": "FUN_005e0240",
+"name": "StaticInit_5e0240",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -147487,10 +147489,10 @@
 ]
 },
 "005e0270": {
-"name": "FUN_005e0270",
+"name": "C_Submarine::IsSeatBlocked",
 "size": 31,
 "lines": 10,
-"chars": 258,
+"chars": 202,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -147505,10 +147507,10 @@
 ]
 },
 "005e0290": {
-"name": "FUN_005e0290",
+"name": "C_Submarine::SetSeatBlocked",
 "size": 37,
 "lines": 11,
-"chars": 295,
+"chars": 225,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -147523,10 +147525,10 @@
 ]
 },
 "005e02c0": {
-"name": "FUN_005e02c0",
+"name": "C_Submarine::GetSeatText",
 "size": 91,
 "lines": 24,
-"chars": 544,
+"chars": 536,
 "callers": [],
 "callees": [
 "007e5ea0",
@@ -147547,10 +147549,10 @@
 ]
 },
 "005e0320": {
-"name": "FUN_005e0320",
+"name": "C_Submarine::SetSeatOccupant",
 "size": 239,
-"lines": 39,
-"chars": 1423,
+"lines": 44,
+"chars": 1544,
 "callers": [],
 "callees": [
 "00466010"
@@ -147567,10 +147569,10 @@
 ]
 },
 "005e0410": {
-"name": "FUN_005e0410",
+"name": "C_Submarine::GetSeatOccupant",
 "size": 31,
 "lines": 10,
-"chars": 196,
+"chars": 210,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -147585,10 +147587,10 @@
 ]
 },
 "005e0430": {
-"name": "FUN_005e0430",
+"name": "C_Submarine::FindSeat",
 "size": 38,
 "lines": 21,
-"chars": 353,
+"chars": 380,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -147603,10 +147605,10 @@
 ]
 },
 "005e0460": {
-"name": "FUN_005e0460",
+"name": "C_Submarine::LeaveSeat",
 "size": 139,
 "lines": 31,
-"chars": 877,
+"chars": 896,
 "callers": [],
 "callees": [
 "00466010",
@@ -147625,10 +147627,10 @@
 ]
 },
 "005e04f0": {
-"name": "FUN_005e04f0",
+"name": "C_Submarine::ExitSeat",
 "size": 64,
-"lines": 22,
-"chars": 512,
+"lines": 20,
+"chars": 431,
 "callers": [],
 "callees": [
 "005e0b30"
@@ -147645,10 +147647,10 @@
 ]
 },
 "005e0530": {
-"name": "FUN_005e0530",
+"name": "C_Submarine::FindExit",
 "size": 1530,
-"lines": 230,
-"chars": 7812,
+"lines": 210,
+"chars": 6482,
 "callers": [
 "005957d0",
 "005e0b30"
@@ -147674,10 +147676,10 @@
 "in_vtables": []
 },
 "005e0b30": {
-"name": "FUN_005e0b30",
+"name": "C_Submarine::PutOutside",
 "size": 344,
-"lines": 58,
-"chars": 2138,
+"lines": 54,
+"chars": 2108,
 "callers": [
 "005e04f0"
 ],
@@ -147692,10 +147694,10 @@
 "in_vtables": []
 },
 "005e0c90": {
-"name": "FUN_005e0c90",
+"name": "C_Submarine::GetSeatCount",
 "size": 6,
 "lines": 7,
-"chars": 56,
+"chars": 79,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -147710,10 +147712,10 @@
 ]
 },
 "005e0ca0": {
-"name": "FUN_005e0ca0",
+"name": "C_Submarine::GetSeatFlags",
 "size": 31,
 "lines": 10,
-"chars": 196,
+"chars": 185,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -147728,10 +147730,10 @@
 ]
 },
 "005e0cc0": {
-"name": "FUN_005e0cc0",
+"name": "C_Submarine::GetSeatCamera",
 "size": 218,
-"lines": 54,
-"chars": 1492,
+"lines": 55,
+"chars": 1596,
 "callers": [],
 "callees": [
 "006987d0",
@@ -147752,10 +147754,10 @@
 ]
 },
 "005e0da0": {
-"name": "FUN_005e0da0",
+"name": "StaticInit_5e0da0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -147793,10 +147795,10 @@
 "in_vtables": []
 },
 "005e0e00": {
-"name": "FUN_005e0e00",
+"name": "C_Submarine::Tick",
 "size": 21,
 "lines": 13,
-"chars": 355,
+"chars": 376,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -147813,10 +147815,10 @@
 ]
 },
 "005e0e20": {
-"name": "FUN_005e0e20",
+"name": "C_Submarine::Update",
 "size": 61,
 "lines": 16,
-"chars": 335,
+"chars": 370,
 "callers": [],
 "callees": [
 "00466110",
@@ -147837,10 +147839,10 @@
 ]
 },
 "005e0e60": {
-"name": "FUN_005e0e60",
+"name": "C_Submarine::UpdateVolumes",
 "size": 422,
 "lines": 98,
-"chars": 3292,
+"chars": 3306,
 "callers": [
 "005dea30",
 "005e15e0"
@@ -147861,10 +147863,10 @@
 "in_vtables": []
 },
 "005e1010": {
-"name": "FUN_005e1010",
+"name": "C_Submarine::SetVolumesActive",
 "size": 124,
 "lines": 37,
-"chars": 1023,
+"chars": 1040,
 "callers": [
 "005e1090"
 ],
@@ -147882,10 +147884,10 @@
 "in_vtables": []
 },
 "005e1090": {
-"name": "FUN_005e1090",
+"name": "C_Submarine::CheckCollision",
 "size": 1076,
 "lines": 168,
-"chars": 5656,
+"chars": 5722,
 "callers": [
 "005e15e0"
 ],
@@ -147910,10 +147912,10 @@
 "in_vtables": []
 },
 "005e14d0": {
-"name": "FUN_005e14d0",
+"name": "C_Submarine::Bob",
 "size": 265,
 "lines": 38,
-"chars": 1384,
+"chars": 1388,
 "callers": [
 "005e0e20"
 ],
@@ -147931,10 +147933,10 @@
 "in_vtables": []
 },
 "005e15e0": {
-"name": "FUN_005e15e0",
+"name": "C_Submarine::Move",
 "size": 1958,
 "lines": 231,
-"chars": 9020,
+"chars": 9225,
 "callers": [
 "005e0e20"
 ],
@@ -147976,10 +147978,10 @@
 "in_vtables": []
 },
 "005e1d90": {
-"name": "FUN_005e1d90",
+"name": "C_Submarine::ApplyControls",
 "size": 687,
 "lines": 101,
-"chars": 2901,
+"chars": 2915,
 "callers": [
 "005e0e20"
 ],
@@ -148001,10 +148003,10 @@
 "in_vtables": []
 },
 "005e2040": {
-"name": "FUN_005e2040",
+"name": "StaticInit_5e2040",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -151055,10 +151057,10 @@
 ]
 },
 "005ebde0": {
-"name": "FUN_005ebde0",
+"name": "StaticInit_5ebde0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -151077,10 +151079,10 @@
 ]
 },
 "005ebe10": {
-"name": "thunk_FUN_005ebe20",
+"name": "StaticInit_MPZoneCreatorThunk",
 "size": 5,
 "lines": 11,
-"chars": 237,
+"chars": 268,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -151098,10 +151100,10 @@
 ]
 },
 "005ebe20": {
-"name": "FUN_005ebe20",
+"name": "StaticInit_MPZoneCreator",
 "size": 26,
 "lines": 11,
-"chars": 231,
+"chars": 263,
 "callers": [
 "005ebe10"
 ],
@@ -151120,10 +151122,10 @@
 "in_vtables": []
 },
 "005ebe40": {
-"name": "FUN_005ebe40",
+"name": "C_MPZoneCreator::Create",
 "size": 92,
-"lines": 25,
-"chars": 515,
+"lines": 24,
+"chars": 529,
 "callers": [],
 "callees": [
 "005ebed0",
@@ -151141,10 +151143,10 @@
 ]
 },
 "005ebea0": {
-"name": "FUN_005ebea0",
+"name": "C_MPZoneCreator::GetName",
 "size": 6,
 "lines": 7,
-"chars": 68,
+"chars": 97,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -151161,10 +151163,10 @@
 ]
 },
 "005ebeb0": {
-"name": "FUN_005ebeb0",
+"name": "C_MPZoneCreator::Destroy",
 "size": 23,
 "lines": 13,
-"chars": 308,
+"chars": 359,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -151179,12 +151181,13 @@
 ]
 },
 "005ebed0": {
-"name": "FUN_005ebed0",
+"name": "C_MPZone",
 "size": 175,
 "lines": 45,
-"chars": 1114,
+"chars": 1120,
 "callers": [
-"005ebe40"
+"005ebe40",
+"005ebfa0"
 ],
 "callees": [
 "00610070"
@@ -151198,10 +151201,10 @@
 "in_vtables": []
 },
 "005ebf80": {
-"name": "FUN_005ebf80",
+"name": "SaveGame",
 "size": 5,
 "lines": 7,
-"chars": 87,
+"chars": 96,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -151216,10 +151219,10 @@
 ]
 },
 "005ebf90": {
-"name": "FUN_005ebf90",
+"name": "LoadGame",
 "size": 5,
 "lines": 7,
-"chars": 87,
+"chars": 96,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -151234,12 +151237,13 @@
 ]
 },
 "005ebfa0": {
-"name": "FUN_005ebfa0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 197,
+"chars": 192,
 "callers": [],
 "callees": [
+"005ebed0",
 "005ebfc0",
 "007e559c"
 ],
@@ -151255,10 +151259,10 @@
 ]
 },
 "005ebfc0": {
-"name": "FUN_005ebfc0",
+"name": "~C_MPZone",
 "size": 11,
 "lines": 9,
-"chars": 172,
+"chars": 190,
 "callers": [
 "005ebfa0"
 ],
@@ -151274,10 +151278,10 @@
 "in_vtables": []
 },
 "005ebfd0": {
-"name": "FUN_005ebfd0",
+"name": "SetFrame",
 "size": 22,
-"lines": 14,
-"chars": 284,
+"lines": 13,
+"chars": 230,
 "callers": [],
 "callees": [
 "00610200"
@@ -151294,10 +151298,10 @@
 ]
 },
 "005ebff0": {
-"name": "FUN_005ebff0",
+"name": "CopyFrom",
 "size": 104,
 "lines": 26,
-"chars": 731,
+"chars": 709,
 "callers": [],
 "callees": [
 "006101f0"
@@ -151314,10 +151318,10 @@
 ]
 },
 "005ec060": {
-"name": "FUN_005ec060",
+"name": "Tick",
 "size": 680,
 "lines": 94,
-"chars": 2424,
+"chars": 2372,
 "callers": [],
 "callees": [
 "005ec310",
@@ -151346,10 +151350,10 @@
 ]
 },
 "005ec310": {
-"name": "FUN_005ec310",
+"name": "AwardPlayers",
 "size": 545,
 "lines": 107,
-"chars": 3191,
+"chars": 3187,
 "callers": [
 "005ec060"
 ],
@@ -151375,10 +151379,10 @@
 "in_vtables": []
 },
 "005ec540": {
-"name": "FUN_005ec540",
+"name": "Update",
 "size": 758,
 "lines": 123,
-"chars": 4124,
+"chars": 4117,
 "callers": [],
 "callees": [
 "005ec8b0",
@@ -151410,10 +151414,10 @@
 ]
 },
 "005ec840": {
-"name": "FUN_005ec840",
+"name": "GetProgress",
 "size": 107,
-"lines": 26,
-"chars": 620,
+"lines": 23,
+"chars": 415,
 "callers": [
 "005a9830"
 ],
@@ -151425,10 +151429,10 @@
 "in_vtables": []
 },
 "005ec8b0": {
-"name": "FUN_005ec8b0",
+"name": "ApplyTeam",
 "size": 534,
-"lines": 76,
-"chars": 2846,
+"lines": 79,
+"chars": 3079,
 "callers": [
 "005ec060",
 "005ec540",
@@ -151466,10 +151470,10 @@
 "in_vtables": []
 },
 "005ecad0": {
-"name": "FUN_005ecad0",
+"name": "Contains",
 "size": 268,
 "lines": 53,
-"chars": 1417,
+"chars": 1413,
 "callers": [
 "005ec310",
 "005ec540",
@@ -151487,10 +151491,10 @@
 "in_vtables": []
 },
 "005ecbe0": {
-"name": "FUN_005ecbe0",
+"name": "CountPresence",
 "size": 831,
 "lines": 114,
-"chars": 3881,
+"chars": 3874,
 "callers": [
 "005ec060",
 "005ecf20"
@@ -151521,10 +151525,10 @@
 "in_vtables": []
 },
 "005ecf20": {
-"name": "FUN_005ecf20",
+"name": "CheckCapture",
 "size": 484,
 "lines": 87,
-"chars": 2319,
+"chars": 2275,
 "callers": [
 "005ec060"
 ],
@@ -151545,10 +151549,10 @@
 "in_vtables": []
 },
 "005ed110": {
-"name": "FUN_005ed110",
+"name": "StartMission",
 "size": 271,
 "lines": 74,
-"chars": 1919,
+"chars": 1914,
 "callers": [],
 "callees": [
 "005ec8b0",
@@ -151574,10 +151578,10 @@
 ]
 },
 "005ed220": {
-"name": "FUN_005ed220",
+"name": "S_VertexAnimPlayer::Create",
 "size": 64,
 "lines": 25,
-"chars": 534,
+"chars": 548,
 "callers": [
 "005ed110"
 ],
@@ -151591,10 +151595,10 @@
 "in_vtables": []
 },
 "005ed260": {
-"name": "FUN_005ed260",
+"name": "StopMission",
 "size": 106,
-"lines": 31,
-"chars": 696,
+"lines": 32,
+"chars": 765,
 "callers": [],
 "callees": [
 "004746b0"
@@ -151613,10 +151617,10 @@
 ]
 },
 "005ed2d0": {
-"name": "FUN_005ed2d0",
+"name": "WriteState",
 "size": 21,
 "lines": 8,
-"chars": 143,
+"chars": 140,
 "callers": [],
 "callees": [
 "0073d320"
@@ -151633,10 +151637,10 @@
 ]
 },
 "005ed2f0": {
-"name": "FUN_005ed2f0",
+"name": "ReadState",
 "size": 41,
 "lines": 13,
-"chars": 225,
+"chars": 218,
 "callers": [],
 "callees": [
 "005ec8b0",
@@ -151654,10 +151658,10 @@
 ]
 },
 "005ed320": {
-"name": "FUN_005ed320",
+"name": "SendState",
 "size": 106,
 "lines": 18,
-"chars": 400,
+"chars": 389,
 "callers": [
 "005ec060",
 "005ecf20",
@@ -151681,10 +151685,10 @@
 "in_vtables": []
 },
 "005ed390": {
-"name": "FUN_005ed390",
+"name": "OnMessage",
 "size": 443,
 "lines": 58,
-"chars": 1333,
+"chars": 1322,
 "callers": [],
 "callees": [
 "005ec8b0",
@@ -151714,10 +151718,10 @@
 ]
 },
 "005ed550": {
-"name": "FUN_005ed550",
+"name": "GetSpawnPoint",
 "size": 430,
-"lines": 66,
-"chars": 1819,
+"lines": 65,
+"chars": 1777,
 "callers": [
 "005ed700"
 ],
@@ -151758,10 +151762,10 @@
 "in_vtables": []
 },
 "005ed7e0": {
-"name": "FUN_005ed7e0",
+"name": "CanTake",
 "size": 198,
-"lines": 52,
-"chars": 1524,
+"lines": 53,
+"chars": 1411,
 "callers": [
 "005ec060",
 "005ecf20"
@@ -151779,10 +151783,10 @@
 "in_vtables": []
 },
 "005ed8b0": {
-"name": "FUN_005ed8b0",
+"name": "RestartMission",
 "size": 67,
 "lines": 18,
-"chars": 361,
+"chars": 372,
 "callers": [],
 "callees": [
 "005ec8b0"
@@ -151817,10 +151821,10 @@
 "in_vtables": []
 },
 "005ed920": {
-"name": "FUN_005ed920",
+"name": "WriteProperties",
 "size": 314,
-"lines": 67,
-"chars": 2426,
+"lines": 53,
+"chars": 1651,
 "callers": [],
 "callees": [
 "007e5392"
@@ -151837,10 +151841,10 @@
 ]
 },
 "005eda60": {
-"name": "FUN_005eda60",
+"name": "ReadProperties",
 "size": 606,
-"lines": 123,
-"chars": 3692,
+"lines": 120,
+"chars": 3480,
 "callers": [],
 "callees": [
 "00405940",
@@ -151859,10 +151863,10 @@
 ]
 },
 "005edcc0": {
-"name": "FUN_005edcc0",
+"name": "StaticInit_5edcc0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"

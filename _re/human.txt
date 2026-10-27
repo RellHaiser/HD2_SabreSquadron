@@ -1,0 +1,902 @@
+// 0x00421c00
+uint32_t __thiscall C_HumanScript::FUN_00421c00(C_HumanScript *this,int *param_1)
+{
+  local_14 = 0xffffffff;
+  CVar9.rep = (C_str_rep *)C_Script::C_Script::ExecuteCommand((C_Script *)this,param_1);
+  if ((char)CVar9.rep != '\0') goto LAB_0042335b;
+  local_98.rep = (C_str_rep *)this->m_10c;
+  if ((I3D_frame *)local_98.rep == nullptr) goto switchD_00421c68_caseD_1e;
+  local_94 = (C_Bike *)*param_1;
+  switch(local_94) {
+  case (C_Bike *)0x1c:
+    FUN_005af760(local_98.rep,*(int *)(this->m_0a0 + *(int *)param_1[1] * 8),
+                 *(int *)(this->m_0a0 + ((int *)param_1[1])[1] * 8));
+    break;
+  case (C_Bike *)0x1d:
+    FUN_005af190(local_98.rep,*(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0);
+    break;
+  case (C_Bike *)0x1f:
+    piVar17 = *(int **)(this->m_0b0 + *(int *)param_1[1] * 4);
+    if (piVar17 != nullptr) {
+      *piVar17 = *piVar17 + 1;
+    }
+    local_14 = 3;
+    piVar10 = piVar17 + 2;
+    if (piVar17 == nullptr) {
+      piVar10 = (int *)&DAT_00867a90;
+    }
+    local_84 = (I3D_frame *)piVar17;
+    sVar8 = FUN_005af210((void *)this->m_10c,(char *)piVar10);
+    if (sVar8 == -1) {
+      piVar10 = piVar17 + 2;
+      if (piVar17 == nullptr) {
+        piVar10 = (int *)&DAT_00867a90;
+      }
+      C_fstr_Construct(&local_88,"(MO) E_IT_MOVE : checkpoint '%s'not found!!!",piVar10);
+      local_14 = CONCAT31(local_14._1_3_,4);
+      C_Script::Advance((int)this);
+      CVar9.rep = local_88.rep;
+      if (((I3D_frame *)local_88.rep != nullptr) &&
+         ((local_88.rep)->refCount = (int)((I3D_frame_vtbl *)(local_88.rep)->refCount - 1),
+         (I3D_frame_vtbl *)(local_88.rep)->refCount == nullptr)) {
+        operator_delete(local_88.rep);
+        CVar9.rep = (C_str_rep *)extraout_EAX_02;
+      }
+    }
+    else {
+      CVar9.rep = (C_str_rep *)FUN_005af1d0((void *)this->m_10c,sVar8,this->m_0d8);
+    }
+    if (piVar17 != nullptr) {
+      CVar9.rep = (C_str_rep *)(*piVar17 - 1);
+      *piVar17 = (int)CVar9.rep;
+      if ((I3D_frame *)CVar9.rep == nullptr) {
+        operator_delete(piVar17);
+        CVar9.rep = (C_str_rep *)extraout_EAX_03;
+      }
+    }
+    goto LAB_0042335b;
+  case (C_Bike *)0x20:
+    piVar17 = *(int **)(this->m_0b0 + *(int *)param_1[1] * 4);
+    if (piVar17 != nullptr) {
+      *piVar17 = *piVar17 + 1;
+    }
+    local_14 = 1;
+    piVar10 = piVar17 + 2;
+    if (piVar17 == nullptr) {
+      piVar10 = (int *)&DAT_00867a90;
+    }
+    local_84 = (I3D_frame *)piVar17;
+    sVar8 = FUN_005af210((void *)this->m_10c,(char *)piVar10);
+    if (sVar8 == -1) {
+      piVar10 = piVar17 + 2;
+      if (piVar17 == nullptr) {
+        piVar10 = (int *)&DAT_00867a90;
+      }
+      C_fstr_Construct(&local_88,"(MO) E_IT_ATTACKMOVE : checkpoint '%s'not found!!!",piVar10);
+      local_14 = CONCAT31(local_14._1_3_,2);
+      C_Script::Advance((int)this);
+      CVar9.rep = local_88.rep;
+      if (((I3D_frame *)local_88.rep != nullptr) &&
+         ((local_88.rep)->refCount = (int)((I3D_frame_vtbl *)(local_88.rep)->refCount - 1),
+         (I3D_frame_vtbl *)(local_88.rep)->refCount == nullptr)) {
+        operator_delete(local_88.rep);
+        CVar9.rep = (C_str_rep *)extraout_EAX_00;
+      }
+    }
+    else {
+      CVar9.rep = (C_str_rep *)FUN_005af1b0((void *)this->m_10c,sVar8,this->m_0d8);
+    }
+    if (piVar17 != nullptr) {
+      CVar9.rep = (C_str_rep *)(*piVar17 - 1);
+      *piVar17 = (int)CVar9.rep;
+      if ((I3D_frame *)CVar9.rep == nullptr) {
+        operator_delete(piVar17);
+        CVar9.rep = (C_str_rep *)extraout_EAX_01;
+      }
+    }
+    goto LAB_0042335b;
+  case (C_Bike *)0x21:
+  case (C_Bike *)0x30:
+    bVar22 = local_94 == (C_Bike *)0x30;
+    uVar15 = (uint32_t)local_94 >> 8;
+    local_94 = (C_Bike *)CONCAT31((int3)uVar15,bVar22);
+    iVar16 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    uVar11 = *(uint32_t *)(this->m_0a0 + ((int *)param_1[1])[1] * 8);
+    if (((iVar16 == 0) || (*(int **)(iVar16 + 0xec) == nullptr)) ||
+       (iVar18 = **(int **)(iVar16 + 0xec), iVar18 == 0)) {
+      CVar9.rep = (C_str_rep *)FUN_005af250(local_98.rep,iVar16,uVar11,bVar22,this->m_0d8);
+    }
+    else {
+      CVar9.rep = (C_str_rep *)FUN_005af230(local_98.rep,iVar18,uVar11,bVar22,this->m_0d8);
+    }
+    goto LAB_0042335b;
+  case (C_Bike *)0x24:
+    FUN_005af4f0((int)local_98.rep);
+    break;
+  case (C_Bike *)0x25:
+    FUN_005af430((int)local_98.rep);
+    break;
+  case (C_Bike *)0x26:
+    fVar3 = (((I3D_frame *)((int)local_98.rep + 0xf4))->m_worldMatrix).m[2][3];
+    if ((fVar3 != 0.0) && (*(int *)((int)fVar3 + 0x18) == 4)) {
+      local_8c = *(I3D_frame **)(this->m_0b0 + *(int *)param_1[1] * 4);
+      if (local_8c != nullptr) {
+        local_8c->vtable = local_8c->vtable + 1;
+      }
+      local_14 = 9;
+      if (local_8c == nullptr) {
+        local_88.rep = (C_str_rep *)&DAT_00867a90;
+      }
+      else {
+        local_88.rep = (C_str_rep *)(local_8c->_pad_0004 + 4);
+      }
+      iVar16 = GetGame();
+      sVar8 = C_Checkpoints::Find((void *)(*(int *)(iVar16 + 0x54) + 0x3c),(char *)local_88.rep);
+      local_84 = (I3D_frame *)CONCAT22(extraout_var,sVar8);
+      local_88.rep = *(C_str_rep **)(this->m_0a0 + *(int *)(param_1[1] + 4) * 8);
+      if (sVar8 == -1) {
+        FUN_00577a60(*(void **)(this->m_10c + 0xb0),0xffff,(float)(int)local_88.rep * 0.28,
+                     0xffffffff);
+        C_Script::Advance((int)this);
+      }
+      else {
+        iVar16 = C_Human::GetControllerType(this->m_10c);
+        if (iVar16 == 5) {
+          FUN_00577a60(*(void **)(this->m_10c + 0xb0),(uint16_t)local_84,
+                       (float)(int)local_88.rep * 0.28,this->m_0d8);
+        }
+      }
+      CVar9.rep = (C_str_rep *)local_8c;
+      if ((local_8c != nullptr) &&
+         (pIVar2 = local_8c->vtable, local_8c->vtable = pIVar2 - 1,
+         pIVar2 - 1 == nullptr)) {
+        operator_delete(local_8c);
+        CVar9.rep = (C_str_rep *)extraout_EAX_08;
+      }
+      goto LAB_0042335b;
+    }
+    break;
+  case (C_Bike *)0x2b:
+    fVar3 = (((I3D_frame *)((int)local_98.rep + 0xf4))->m_worldMatrix).m[2][3];
+    local_99 = '\0';
+    if (((fVar3 != 0.0) && (*(int *)((int)fVar3 + 0x18) == 4)) &&
+       ((((I3D_frame *)((int)local_98.rep + 0xf4))->m_worldMatrix).m[3][0] == 0.0)) {
+      local_90 = nullptr;
+      local_8c = (I3D_frame *)0x7f7fffff;
+      iVar16 = C_GameProfile::IsCooperativeGame(0x8aea0c);
+      if ((char)iVar16 == '\0') {
+        CVar9.rep = (C_str_rep *)field_address_1c_461410(0x89ae78);
+      }
+      else {
+        CVar9.rep = (C_str_rep *)field_address_e8_461420(0x89ae78);
+      }
+      local_88.rep = CVar9.rep;
+      pIVar14 = (I3D_frame *)C_Team::GetMemberCount((int)CVar9.rep);
+      if (pIVar14 != nullptr) {
+        do {
+          local_84 = (I3D_frame *)((int)pIVar14 - 1);
+          local_94 = (C_Bike *)
+                     C_Team::C_Team::GetMember((C_Team *)CVar9.rep,(uint32_t)local_84);
+          if (((0 < *(int *)(local_94->_pad_00d1 + 0x1b)) &&
+              (uVar15 = C_Human::IsInVehicle((int)local_94), (char)uVar15 == '\0')) &&
+             ((cVar7 = C_Human::IsActive((int)local_94), pCVar13 = local_94, cVar7 != '\0' &&
+              ((local_94->m_020 != nullptr &&
+               (local_98.rep = (C_str_rep *)this->m_100,
+               (I3D_frame *)local_98.rep != nullptr)))))) {
+            if ((((I3D_frame *)local_98.rep)->m_frameFlags & 0x20) == 0) {
+              I3D_frame::UpdateWMatrixProc((I3D_frame *)local_98.rep);
+            }
+            pIVar14 = pCVar13->m_020;
+            if ((pIVar14->m_frameFlags & 0x20) == 0) {
+              I3D_frame::UpdateWMatrixProc(pIVar14);
+            }
+            fVar3 = (pIVar14->m_worldMatrix).m[3][2] -
+                    *(float *)((int)&local_98.rep[0xd].refCount + 3);
+            fVar5 = (pIVar14->m_worldMatrix).m[3][1] - *(float *)local_98.rep[0xc].chars;
+            fVar4 = (pIVar14->m_worldMatrix).m[3][0] - (float)local_98.rep[0xc].length;
+            fVar3 = fVar3 * fVar3 + fVar5 * fVar5 + fVar4 * fVar4;
+            if (fVar3 < (float)local_8c) {
+              local_90 = local_94;
+              local_8c = (I3D_frame *)fVar3;
+            }
+          }
+          pIVar14 = local_84;
+          CVar9.rep = local_88.rep;
+        } while (local_84 != nullptr);
+        if (local_90 != nullptr) {
+          fVar3 = (float)local_90->m_030;
+          local_5c = (float)local_90->m_034;
+          local_58 = (float)local_90->m_038;
+          iVar16 = GetGame();
+          uVar15 = FUN_0051d780((void *)(*(int *)(iVar16 + 0x54) + 0x3c),fVar3,local_5c,local_58,
+                                20.0,-1.0);
+          local_80[0] = 0;
+          local_7c = nullptr;
+          local_78 = 0.0;
+          local_14 = 8;
+          iVar16 = GetGame();
+          local_84 = (I3D_frame *)(*(int *)(iVar16 + 0x54) + 0x3c);
+          if (((local_84 != nullptr) && ((uint16_t)uVar15 != 0xffff)) &&
+             (uVar11 = FUN_00520830(local_84,(uint16_t)uVar15,20.0,local_80), (char)uVar11 != '\0')) {
+            if (local_7c != nullptr) {
+              CVar9.rep = (C_str_rep *)((int)local_78 - (int)local_7c >> 1);
+              while ((I3D_frame *)CVar9.rep != nullptr) {
+                iVar16 = (int)CVar9.rep * 2;
+                CVar9.rep = (C_str_rep *)
+                            ((int)&(((I3D_frame *)((int)CVar9.rep - 0xf4))->m_name).capacity + 3);
+                local_88.rep = CVar9.rep;
+                iVar16 = C_Checkpoints::Get(local_84,*(uint16_t *)((int)local_7c + iVar16 - 2));
+                if ((iVar16 != 0) && ((*(uint8_t *)(iVar16 + 0x15) & 1) != 0)) {
+                  if (local_7c == nullptr) {
+                    iVar16 = 0;
+                  }
+                  else {
+                    iVar16 = (int)local_78 - (int)local_7c >> 1;
+                  }
+                  *(uint16_t *)((int)local_7c + (int)CVar9.rep * 2) =
+                       *(uint16_t *)((int)local_7c + iVar16 * 2 - 2);
+                  local_78 = (float)((int)local_78 - 2);
+                  CVar9.rep = local_88.rep;
+                }
+              }
+            }
+            uVar19 = 0xffff;
+            if ((local_7c != nullptr) &&
+               (local_84 = (I3D_frame *)((int)local_78 - (int)local_7c >> 1),
+               local_84 != nullptr)) {
+              uVar15 = _rand();
+              uVar19 = *(uint16_t *)((int)local_7c + (uVar15 % (uint32_t)local_84) * 2);
+            }
+            local_88.rep = *(C_str_rep **)(this->m_0a0 + *(int *)param_1[1] * 8);
+            if (uVar19 == 0xffff) {
+              FUN_00577a60(*(void **)(this->m_10c + 0xb0),0xffff,(float)(int)local_88.rep * 0.28,
+                           0xffffffff);
+            }
+            else {
+              iVar16 = C_Human::GetControllerType(this->m_10c);
+              if (iVar16 == 5) {
+                FUN_00577a60(*(void **)(this->m_10c + 0xb0),uVar19,(float)(int)local_88.rep * 0.28,
+                             this->m_0d8);
+              }
+              local_99 = '\x01';
+            }
+          }
+          local_14 = 0xffffffff;
+          operator_delete(local_7c);
+          CVar9.rep = (C_str_rep *)CONCAT31((int3)((uint32_t)extraout_EAX_07 >> 8),local_99);
+          if (local_99 != '\0') goto LAB_0042335b;
+        }
+      }
+    }
+    break;
+  case (C_Bike *)0x2c:
+    CVar9.rep = (C_str_rep *)
+                FUN_005af530(local_98.rep,0x15,*(uint32_t *)(this->m_090 + *(int *)param_1[1] * 4)
+                            );
+    this->m_018 = (uint32_t)CVar9.rep;
+    goto LAB_0042335b;
+  case (C_Bike *)0x2e:
+    iVar16 = C_Human::GetControllerType((int)local_98.rep);
+    if (iVar16 == 5) {
+      *(bool *)(*(int *)(this->m_10c + 0xb0) + 0x11c) =
+           *(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0;
+    }
+    break;
+  case (C_Bike *)0x2f:
+    bVar22 = *(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0;
+    local_88.rep._0_1_ = bVar22;
+    if ((bVar22) && (this->m_108 == '\0')) {
+      this->m_018 = 2000;
+      iVar16 = this->m_0d8 - 1;
+      this->m_0d8 = iVar16;
+      this->m_104 = '\x01';
+      this->m_108 = '\x01';
+      return CONCAT31((int3)((uint32_t)iVar16 >> 8),1);
+    }
+    C_Human::Suspend(local_98.rep,local_88.rep);
+    CVar9.rep = (C_str_rep *)C_Script::Advance((int)this);
+    this->m_108 = '\0';
+    goto LAB_0042335b;
+  case (C_Bike *)0x33:
+    pIVar14 = *(I3D_frame **)(this->m_090 + *(int *)param_1[1] * 4);
+    local_98.rep = (C_str_rep *)(float)*(int *)(this->m_0a0 + ((int *)param_1[1])[1] * 8);
+    if (pIVar14 != nullptr) {
+      if ((pIVar14->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar14);
+      }
+      local_70 = (pIVar14->m_worldMatrix).m[3][0];
+      local_6c = (void *)(pIVar14->m_worldMatrix).m[3][1];
+      local_68 = (pIVar14->m_worldMatrix).m[3][2];
+      local_64 = (pIVar14->m_worldMatrix).m[3][3];
+      pIVar14 = *(I3D_frame **)(this->m_10c + 0x20);
+      if ((pIVar14->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar14);
+      }
+      fVar3 = (pIVar14->m_worldMatrix).m[3][0] - local_70;
+      local_7c = (void *)((pIVar14->m_worldMatrix).m[3][1] - (float)local_6c);
+      local_78 = (pIVar14->m_worldMatrix).m[3][2] - local_68;
+      local_94 = (C_Bike *)
+                 ((float)local_7c * (float)local_7c + fVar3 * fVar3 + local_78 * local_78);
+      if (1e-08 <= ABS((float)local_94 - 1.0)) {
+        if (1e-08 <= (float)local_94) {
+          fVar4 = 1.0 / SQRT((float)local_94);
+          fVar3 *= fVar4;
+          local_7c = (void *)((float)local_7c * fVar4);
+          local_78 = fVar4 * local_78;
+        }
+        else if (fVar3 == 0.0) {
+          if (local_78 == 0.0) {
+            if (0.0 <= (float)local_7c) {
+              local_7c = (void *)0x3f800000;
+            }
+            else {
+              local_7c = (void *)0xbf800000;
+            }
+          }
+          else if (0.0 <= local_78) {
+            local_78 = 1.0;
+          }
+          else {
+            local_78 = -1.0;
+          }
+        }
+        else if (0.0 <= fVar3) {
+          fVar3 = 1.0;
+        }
+        else {
+          fVar3 = -1.0;
+        }
+      }
+      local_78 = local_78 * (float)local_98.rep;
+      local_60 = fVar3 * (float)local_98.rep + local_70;
+      local_5c = (float)local_7c * (float)local_98.rep + (float)local_6c;
+      local_58 = local_78 + local_68;
+LAB_00422312:
+      iVar16 = GetGame();
+      uVar15 = FUN_0051d780(*(void **)(iVar16 + 0x54),local_60,local_5c,local_58,5.0,-1.0);
+      if ((short)uVar15 != -1) {
+        CVar9.rep = (C_str_rep *)FUN_005af1d0((void *)this->m_10c,(short)uVar15,this->m_0d8);
+        goto LAB_0042335b;
+      }
+    }
+    break;
+  case (C_Bike *)0x34:
+    C_fstr_Construct(&local_98,&DAT_00867a90);
+    local_14 = 0;
+    if ((this->m_0b0 != 0) &&
+       (uVar15 = *(uint32_t *)param_1[1], uVar15 < (uint32_t)((int)(this->m_0b4 - this->m_0b0) >> 2))) {
+      piVar17 = *(int **)(this->m_0b0 + uVar15 * 4);
+      local_88.rep = (C_str_rep *)(this->m_0b0 + uVar15 * 4);
+      if (piVar17 != nullptr) {
+        *piVar17 = *piVar17 + 1;
+      }
+      if (((I3D_frame *)local_98.rep != nullptr) &&
+         ((local_98.rep)->refCount = (int)((I3D_frame_vtbl *)(local_98.rep)->refCount - 1),
+         (I3D_frame_vtbl *)(local_98.rep)->refCount == nullptr)) {
+        operator_delete(local_98.rep);
+      }
+      local_98.rep = (C_str_rep *)(local_88.rep)->refCount;
+      local_88.rep = (C_str_rep *)param_1[1];
+      local_8c = *(I3D_frame **)
+                  (this->m_0a0 + *(int *)(((I3D_frame *)local_88.rep)->_pad_0004 + 4) * 8);
+      puVar20 = ((I3D_frame *)local_98.rep)->_pad_0004 + 4;
+      if ((I3D_frame *)local_98.rep == nullptr) {
+        puVar20 = &DAT_00867a90;
+      }
+      iVar16 = -1;
+      do {
+        if (iVar16 == 0) break;
+        iVar16--;
+        uVar1 = *puVar20;
+        puVar20++;
+      } while (uVar1 != '\0');
+      if ((iVar16 == -2) ||
+         (*(int *)(this->m_0a0 + *(int *)((I3D_frame *)local_88.rep)->_pad_0004 * 8) == 0)) {
+        local_34 = &PTR_FUN_0080f720;
+      }
+      else {
+        puVar20 = ((I3D_frame *)local_98.rep)->_pad_0004 + 4;
+        if ((I3D_frame *)local_98.rep == nullptr) {
+          puVar20 = &DAT_00867a90;
+        }
+        iVar16 = GetGame();
+        iVar16 = (**(code **)(**(int **)(iVar16 + 0x18) + 0x7c))
+                           (*(int **)(iVar16 + 0x18),puVar20,0xffff);
+        if ((((iVar16 == 0) || (*(int **)(iVar16 + 0xec) == nullptr)) ||
+            (iVar16 = **(int **)(iVar16 + 0xec), iVar16 == 0)) ||
+           (((iVar18 = *(int *)(iVar16 + 0x18), iVar18 != 4 && (iVar18 != 0x15)) && (iVar18 != 0x22)
+            ))) goto LAB_00421e36;
+        uStack_3c = *(uint32_t *)(iVar16 + 0x10);
+        ppuStack_48 = &PTR_FUN_0080f720;
+        fStack_38 = (float)local_8c;
+      }
+      FUN_005a45b0(this->m_10c);
+    }
+LAB_00421e36:
+    C_Script::Advance((int)this);
+    CVar9.rep = local_98.rep;
+    if (((I3D_frame *)local_98.rep != nullptr) &&
+       ((local_98.rep)->refCount = (int)((I3D_frame_vtbl *)(local_98.rep)->refCount - 1),
+       (I3D_frame_vtbl *)(local_98.rep)->refCount == nullptr)) {
+      operator_delete(local_98.rep);
+      CVar9.rep = (C_str_rep *)extraout_EAX;
+    }
+    goto LAB_0042335b;
+  case (C_Bike *)0x35:
+    pIVar14 = *(I3D_frame **)(this->m_090 + *(int *)param_1[1] * 4);
+    local_94 = (C_Bike *)(float)*(int *)(this->m_0a0 + ((int *)param_1[1])[1] * 8);
+    if (pIVar14 != nullptr) {
+      if ((pIVar14->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar14);
+      }
+      local_88.rep = *(C_str_rep **)(this->m_10c + 0x20);
+      if ((((I3D_frame *)local_88.rep)->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc((I3D_frame *)local_88.rep);
+      }
+      fVar3 = (float)local_88.rep[0xc].length - (pIVar14->m_worldMatrix).m[3][0];
+      local_7c = (void *)(*(float *)local_88.rep[0xc].chars - (pIVar14->m_worldMatrix).m[3][1]);
+      local_78 = *(float *)((int)&local_88.rep[0xd].refCount + 3) - (pIVar14->m_worldMatrix).m[3][2]
+      ;
+      local_98.rep = (C_str_rep *)
+                     ((float)local_7c * (float)local_7c + local_78 * local_78 + fVar3 * fVar3);
+      if (1e-08 <= ABS((float)local_98.rep - 1.0)) {
+        if (1e-08 <= (float)local_98.rep) {
+          fVar4 = 1.0 / SQRT((float)local_98.rep);
+          fVar3 *= fVar4;
+          local_7c = (void *)((float)local_7c * fVar4);
+          local_78 = fVar4 * local_78;
+        }
+        else if (fVar3 == 0.0) {
+          if (local_78 == 0.0) {
+            if (0.0 <= (float)local_7c) {
+              local_7c = (void *)0x3f800000;
+            }
+            else {
+              local_7c = (void *)0xbf800000;
+            }
+          }
+          else if (0.0 <= local_78) {
+            local_78 = 1.0;
+          }
+          else {
+            local_78 = -1.0;
+          }
+        }
+        else if (0.0 <= fVar3) {
+          fVar3 = 1.0;
+        }
+        else {
+          fVar3 = -1.0;
+        }
+      }
+      iVar16 = this->m_10c;
+      local_78 = local_78 * (float)local_94;
+      local_70 = *(float *)(iVar16 + 0x30);
+      local_6c = *(void **)(iVar16 + 0x34);
+      local_60 = local_70 + fVar3 * (float)local_94;
+      local_68 = *(float *)(iVar16 + 0x38);
+      local_5c = (float)local_6c + (float)local_7c * (float)local_94;
+      local_64 = *(float *)(iVar16 + 0x3c);
+      local_58 = local_68 + local_78;
+      goto LAB_00422312;
+    }
+    break;
+  case (C_Bike *)0x36:
+    local_88.rep = (C_str_rep *)(float)*(int *)(this->m_0a0 + *(int *)param_1[1] * 8);
+    local_70 = (float)CONCAT31(local_70._1_3_,local_99);
+    local_6c = nullptr;
+    local_68 = 0.0;
+    local_64 = 0.0;
+    local_14 = 5;
+    uVar15 = *(uint32_t *)(*(int *)(((I3D_frame *)local_98.rep)->_pad_0080 + 0x30) + 0xa4);
+    iVar16 = GetGame();
+    uVar11 = FUN_00520860(*(void **)(iVar16 + 0x54),uVar15,(float)local_88.rep,&local_70);
+    if ((((char)uVar11 == '\0') || (local_6c == nullptr)) ||
+       (uVar15 = (int)local_68 - (int)local_6c >> 1, uVar15 == 0)) {
+      C_Script::Advance((int)this);
+      operator_delete(local_6c);
+      CVar9.rep = (C_str_rep *)extraout_EAX_05;
+    }
+    else {
+      uVar12 = _rand();
+      FUN_005af1d0((void *)this->m_10c,*(short *)((int)local_6c + (uVar12 % uVar15) * 2),this->m_0d8
+                  );
+      operator_delete(local_6c);
+      CVar9.rep = (C_str_rep *)extraout_EAX_04;
+    }
+    goto LAB_0042335b;
+  case (C_Bike *)0x38:
+    piVar10 = (int *)param_1[1];
+    iVar16 = *(int *)(this->m_0b0 + *piVar10 * 4);
+    piVar17 = (int *)(iVar16 + 8);
+    if (iVar16 == 0) {
+      piVar17 = (int *)&DAT_00867a90;
+    }
+    iVar16 = this->m_0a0;
+    FUN_005af780(local_98.rep,piVar17,*(uint32_t **)(iVar16 + piVar10[1] * 8),
+                 *(int *)(iVar16 + piVar10[2] * 8),
+                 (uint32_t *)
+                 CONCAT31((int3)((uint32_t)piVar10[3] >> 8),*(int *)(iVar16 + piVar10[3] * 8) != 0));
+    break;
+  case (C_Bike *)0x39:
+    local_88.rep = (C_str_rep *)this->m_0a0;
+    piVar17 = (int *)param_1[1];
+    piVar10 = (int *)GetGEffects();
+    (**(code **)(*piVar10 + 0xa8))
+              (this->m_10c,*(uint32_t *)((local_88.rep)->chars + *piVar17 * 8 - 8));
+    break;
+  case (C_Bike *)0x3b:
+    FUN_0077fb70(*(void **)(((I3D_frame *)local_98.rep)->_pad_0080 + 0x24),
+                 *(int *)(this->m_090 + *(int *)param_1[1] * 4),'\x01');
+    break;
+  case (C_Bike *)0x3e:
+    FUN_005af660(local_98.rep,*(uint32_t *)(this->m_090 + *(int *)param_1[1] * 4));
+    break;
+  case (C_Bike *)0x3f:
+    C_Human::SetAIOptimized(local_98.rep,*(int *)(this->m_0a0 + *(int *)param_1[1] * 8));
+    break;
+  case (C_Bike *)0x40:
+    uVar15 = *(uint32_t *)(this->m_0a0 + *(int *)param_1[1] * 8);
+    uVar15 = uVar15 & ((int)uVar15 < 0) - 1;
+    if (6 < (int)uVar15) {
+      uVar15 = 6;
+    }
+    FUN_005af6a0(local_98.rep,uVar15);
+    break;
+  case (C_Bike *)0x41:
+    CVar9.rep = (C_str_rep *)FUN_005af6e0(local_98.rep,this->m_0d8);
+    goto LAB_0042335b;
+  case (C_Bike *)0x42:
+    piVar17 = (int *)param_1[1];
+    iVar16 = this->m_0a0;
+    fVar4 = (float)*(int *)(iVar16 + piVar17[1] * 8);
+    fVar3 = (float)*(int *)(iVar16 + piVar17[2] * 8);
+    FUN_005af5e0(local_98.rep,*(int *)(iVar16 + *piVar17 * 8) != 0,fVar4 * fVar4,fVar3 * fVar3,
+                 *(int *)(iVar16 + piVar17[3] * 8) != 0);
+    break;
+  case (C_Bike *)0x43:
+    local_88.rep = nullptr;
+    local_8c = (I3D_frame *)0x7f7fffff;
+    iVar16 = C_GameProfile::IsCooperativeGame(0x8aea0c);
+    if ((char)iVar16 == '\0') {
+      pCVar13 = (C_Bike *)field_address_1c_461410(0x89ae78);
+    }
+    else {
+      pCVar13 = (C_Bike *)field_address_e8_461420(0x89ae78);
+    }
+    local_90 = pCVar13;
+    pIVar14 = (I3D_frame *)C_Team::GetMemberCount((int)pCVar13);
+    while (pIVar14 != nullptr) {
+      local_84 = (I3D_frame *)((int)pIVar14 - 1);
+      local_94 = (C_Bike *)
+                 C_Team::C_Team::GetMember((C_Team *)pCVar13,(uint32_t)local_84);
+      pIVar14 = local_84;
+      pCVar13 = local_90;
+      if ((((0 < *(int *)(local_94->_pad_00d1 + 0x1b)) &&
+           (uVar15 = C_Human::IsInVehicle((int)local_94), pIVar14 = local_84, pCVar13 = local_90,
+           (char)uVar15 == '\0')) &&
+          (cVar7 = C_Human::IsActive((int)local_94), pCVar6 = local_94, pIVar14 = local_84,
+          pCVar13 = local_90, cVar7 != '\0')) &&
+         ((local_94->m_020 != nullptr &&
+          (local_98.rep = (C_str_rep *)this->m_100, (I3D_frame *)local_98.rep != nullptr)))
+         ) {
+        if ((((I3D_frame *)local_98.rep)->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc((I3D_frame *)local_98.rep);
+        }
+        pIVar14 = pCVar6->m_020;
+        if ((pIVar14->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar14);
+        }
+        fVar3 = (pIVar14->m_worldMatrix).m[3][0] - (float)local_98.rep[0xc].length;
+        fVar5 = (pIVar14->m_worldMatrix).m[3][1] - *(float *)local_98.rep[0xc].chars;
+        fVar4 = (pIVar14->m_worldMatrix).m[3][2] - *(float *)((int)&local_98.rep[0xd].refCount + 3);
+        fVar3 = fVar3 * fVar3 + fVar5 * fVar5 + fVar4 * fVar4;
+        pIVar14 = local_84;
+        pCVar13 = local_90;
+        if (fVar3 < (float)local_8c) {
+          local_88.rep = local_94->m_020;
+          local_8c = (I3D_frame *)fVar3;
+        }
+      }
+    }
+    if ((this->m_10c != 0) && ((I3D_frame *)local_88.rep != nullptr)) {
+      FUN_005af660(this->m_10c,local_88.rep);
+    }
+    break;
+  case (C_Bike *)0x44:
+    FUN_005af700(local_98.rep,*(int *)(this->m_0a0 + *(int *)param_1[1] * 8) != 0,
+                 (float)*(int *)(this->m_0a0 + ((int *)param_1[1])[1] * 8));
+    break;
+  case (C_Bike *)0xb6:
+    local_84 = *(I3D_frame **)(this->m_0b0 + *(int *)param_1[1] * 4);
+    if (local_84 != nullptr) {
+      local_84->vtable = local_84->vtable + 1;
+    }
+    local_98.rep = *(C_str_rep **)(this->m_0b0 + *(int *)(param_1[1] + 4) * 4);
+    if (local_98.rep != nullptr) {
+      (local_98.rep)->refCount = (local_98.rep)->refCount + 1;
+    }
+    local_14 = 7;
+    puVar20 = local_84->_pad_0004 + 4;
+    local_88.rep = *(C_str_rep **)(this->m_0a0 + *(int *)(param_1[1] + 8) * 8);
+    if (local_84 == nullptr) {
+      puVar20 = &DAT_00867a90;
+    }
+    iVar16 = GetGame();
+    iVar16 = (**(code **)(**(int **)(iVar16 + 0x18) + 0x7c))
+                       (*(int **)(iVar16 + 0x18),puVar20,0xffff);
+    if (((iVar16 != 0) && (*(uint32_t **)(iVar16 + 0xec) != nullptr)) &&
+       ((local_94 = (C_Bike *)**(uint32_t **)(iVar16 + 0xec),
+        local_94 != nullptr && (local_94->m_018 == 0x1f)))) {
+      pcVar21 = (local_98.rep)->chars;
+      if (local_98.rep == nullptr) {
+        pcVar21 = &DAT_00867a90;
+      }
+      iVar16 = -1;
+      do {
+        if (iVar16 == 0) break;
+        iVar16--;
+        cVar7 = *pcVar21;
+        pcVar21++;
+      } while (cVar7 != '\0');
+      if (iVar16 == -2) {
+        C_Bike::FUN_005d8f60
+                  (local_94,0xffff,(float)(int)local_88.rep,*(uint32_t *)(this->m_10c + 0x20));
+        C_Script::Advance((int)this);
+      }
+      else {
+        pcVar21 = (local_98.rep)->chars;
+        if (local_98.rep == nullptr) {
+          pcVar21 = &DAT_00867a90;
+        }
+        iVar16 = GetGame();
+        sVar8 = C_Checkpoints::Find((void *)(*(int *)(iVar16 + 0x54) + 0x3c),pcVar21);
+        if (sVar8 != -1) {
+          C_Bike::FUN_005d8f60
+                    (local_94,sVar8,(float)(int)local_88.rep,*(uint32_t *)(this->m_10c + 0x20));
+        }
+      }
+    }
+    if ((local_98.rep != nullptr) &&
+       (iVar16 = (local_98.rep)->refCount - 1, (local_98.rep)->refCount = iVar16, iVar16 == 0)) {
+      operator_delete(local_98.rep);
+    }
+    CVar9.rep = (C_str_rep *)local_84;
+    if ((local_84 != nullptr) &&
+       (pIVar2 = local_84->vtable, local_84->vtable = pIVar2 - 1,
+       pIVar2 - 1 == nullptr)) {
+      operator_delete(local_84);
+      CVar9.rep = (C_str_rep *)extraout_EAX_06;
+    }
+    goto LAB_0042335b;
+  case (C_Bike *)0xc4:
+    FUN_005af270((int)local_98.rep);
+    break;
+  case (C_Bike *)0xc5:
+    FUN_005af290((int)local_98.rep);
+    break;
+  case (C_Bike *)0xc6:
+    FUN_005af2b0((int)local_98.rep);
+    break;
+  case (C_Bike *)0xc7:
+    FUN_005af2d0((int)local_98.rep);
+    break;
+  case (C_Bike *)0xc8:
+    FUN_005af2f0((int)local_98.rep);
+    break;
+  case (C_Bike *)0xc9:
+    FUN_005af310((int)local_98.rep);
+    break;
+  case (C_Bike *)0xca:
+    FUN_005af330((int)local_98.rep);
+    break;
+  case (C_Bike *)0xcb:
+    FUN_005af350((int)local_98.rep);
+    break;
+  case (C_Bike *)0xcd:
+    FUN_005af3f0(local_98.rep,0x100);
+    break;
+  case (C_Bike *)0xce:
+    FUN_005af3f0(local_98.rep,0x200);
+    break;
+  case (C_Bike *)0xcf:
+    FUN_005af3f0(local_98.rep,0x400);
+    break;
+  case (C_Bike *)0xd0:
+  case (C_Bike *)0xd1:
+  case (C_Bike *)0xd2:
+    iVar16 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    if ((((iVar16 != 0) && (piVar17 = *(int **)(iVar16 + 0xec), piVar17 != nullptr)) &&
+        (iVar16 = *piVar17, iVar16 != 0)) && (*(int *)(iVar16 + 0x18) == 3)) {
+      if (local_94 == (C_Bike *)0xd0) {
+        FUN_005a5ca0(iVar16);
+      }
+      else if (local_94 == (C_Bike *)0xd1) {
+        FUN_005a5ca0(iVar16);
+      }
+      else if (local_94 == (C_Bike *)0xd2) {
+        FUN_005a5ca0(iVar16);
+      }
+    }
+    break;
+  case (C_Bike *)0xd3:
+    lVar23 = __ftol();
+    *(int *)((int)&local_98.rep[0x1e].refCount + 2) = (int)lVar23;
+    break;
+  case (C_Bike *)0xd4:
+    lVar23 = __ftol();
+    *(int *)((int)&local_98.rep[0x1f].refCount + 1) = (int)lVar23;
+    break;
+  case (C_Bike *)0xd5:
+    if (*(int *)(this->m_0a0 + *(int *)param_1[1] * 8) == 0) {
+      FUN_005af4d0((int)local_98.rep);
+    }
+    else {
+      FUN_005af4b0((int)local_98.rep);
+    }
+    break;
+  case (C_Bike *)0xd6:
+    FUN_005af470(local_98.rep,*(uint32_t *)(this->m_090 + *(int *)param_1[1] * 4),
+                 *(int *)(this->m_0a0 + ((int *)param_1[1])[1] * 8) == 1);
+    break;
+  case (C_Bike *)0xd7:
+    if (*(int *)(this->m_0a0 + *(int *)param_1[1] * 8) == 0) {
+      FUN_005af750((int)local_98.rep);
+    }
+    else {
+      FUN_005af740((int)local_98.rep);
+    }
+    break;
+  case (C_Bike *)0xd8:
+    FUN_005af490((int)local_98.rep);
+    break;
+  case (C_Bike *)0xda:
+    iVar16 = *(int *)(this->m_0a0 + *(int *)param_1[1] * 8);
+    iVar18 = 0x1a;
+    if (iVar16 == 1) {
+      CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x19);
+      this->m_018 = (uint32_t)CVar9.rep;
+    }
+    else {
+      if (iVar16 == 0) {
+        iVar18 = 0x4c;
+      }
+      CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,iVar18);
+      this->m_018 = (uint32_t)CVar9.rep;
+    }
+    goto LAB_0042335b;
+  case (C_Bike *)0xdb:
+    CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x1b);
+    this->m_018 = (uint32_t)CVar9.rep;
+    goto LAB_0042335b;
+  case (C_Bike *)0xe0:
+    CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x37);
+    this->m_018 = (uint32_t)CVar9.rep;
+    goto LAB_0042335b;
+  case (C_Bike *)0xe1:
+    CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x39);
+    this->m_018 = (uint32_t)CVar9.rep;
+    goto LAB_0042335b;
+  case (C_Bike *)0xe2:
+    CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x38);
+    this->m_018 = (uint32_t)CVar9.rep;
+    goto LAB_0042335b;
+  case (C_Bike *)0xe3:
+    this->m_018 = 0;
+    FUN_005af510(local_98.rep,0x41);
+    break;
+  case (C_Bike *)0xe4:
+    CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x35);
+    this->m_018 = (uint32_t)CVar9.rep;
+    goto LAB_0042335b;
+  case (C_Bike *)0xe5:
+    CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x36);
+    this->m_018 = (uint32_t)CVar9.rep;
+    goto LAB_0042335b;
+  case (C_Bike *)0xea:
+    if (*(int *)(this->m_0a0 + *(int *)param_1[1] * 8) == 0) {
+      CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x4c);
+      this->m_018 = (uint32_t)CVar9.rep;
+    }
+    else {
+      CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x44);
+      this->m_018 = (uint32_t)CVar9.rep;
+    }
+    goto LAB_0042335b;
+  case (C_Bike *)0xeb:
+    if (*(int *)(this->m_0a0 + *(int *)param_1[1] * 8) == 0) {
+      CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x4c);
+      this->m_018 = (uint32_t)CVar9.rep;
+    }
+    else {
+      CVar9.rep = (C_str_rep *)
+                  FUN_005af530(local_98.rep,0x43,
+                               *(uint32_t *)(this->m_090 + ((int *)param_1[1])[1] * 4));
+      this->m_018 = (uint32_t)CVar9.rep;
+    }
+    goto LAB_0042335b;
+  case (C_Bike *)0xec:
+    if (*(int *)(this->m_0a0 + *(int *)param_1[1] * 8) == 0) {
+      CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x4c);
+      this->m_018 = (uint32_t)CVar9.rep;
+    }
+    else {
+      CVar9.rep = (C_str_rep *)
+                  FUN_005af530(local_98.rep,0x45,
+                               *(uint32_t *)(this->m_090 + ((int *)param_1[1])[1] * 4));
+      this->m_018 = (uint32_t)CVar9.rep;
+    }
+    goto LAB_0042335b;
+  case (C_Bike *)0xed:
+    iVar16 = *(int *)(this->m_090 + *(int *)param_1[1] * 4);
+    if (iVar16 == 0) {
+      CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x1c);
+      this->m_018 = (uint32_t)CVar9.rep;
+    }
+    else {
+      CVar9.rep = (C_str_rep *)FUN_005af530(local_98.rep,0x1d,iVar16);
+      this->m_018 = (uint32_t)CVar9.rep;
+    }
+    goto LAB_0042335b;
+  case (C_Bike *)0xee:
+    if (*(int *)(this->m_0a0 + *(int *)param_1[1] * 8) == 0) {
+      CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x4c);
+      this->m_018 = (uint32_t)CVar9.rep;
+    }
+    else {
+      iVar16 = *(int *)(this->m_090 + ((int *)param_1[1])[1] * 4);
+      if (iVar16 == 0) {
+        CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x42);
+        this->m_018 = (uint32_t)CVar9.rep;
+      }
+      else {
+        CVar9.rep = (C_str_rep *)FUN_005af530(local_98.rep,0x42,iVar16);
+        this->m_018 = (uint32_t)CVar9.rep;
+      }
+    }
+    goto LAB_0042335b;
+  case (C_Bike *)0xef:
+    FUN_005af390((int)local_98.rep);
+    break;
+  case (C_Bike *)0xf0:
+    iVar18 = 0x3a;
+    iVar16 = *(int *)(this->m_0a0 + *(int *)param_1[1] * 8);
+    if (iVar16 == 1) {
+      CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,0x3b);
+      this->m_018 = (uint32_t)CVar9.rep;
+    }
+    else {
+      if (iVar16 == 2) {
+        iVar18 = 0x3c;
+      }
+      CVar9.rep = (C_str_rep *)FUN_005af510(local_98.rep,iVar18);
+      this->m_018 = (uint32_t)CVar9.rep;
+    }
+    goto LAB_0042335b;
+  case (C_Bike *)0xf4:
+    FUN_005af370(local_98.rep,*(uint32_t *)(this->m_090 + *(int *)param_1[1] * 4));
+    break;
+  case (C_Bike *)0xf6:
+    CVar9.rep = (C_str_rep *)
+                FUN_005af530(local_98.rep,0x3e,*(uint32_t *)(this->m_090 + *(int *)param_1[1] * 4)
+                            );
+    this->m_018 = (uint32_t)CVar9.rep;
+    goto LAB_0042335b;
+  case (C_Bike *)0xf7:
+    this->m_018 = 0;
+    FUN_005af510(local_98.rep,0x3d);
+    break;
+  case (C_Bike *)0xf8:
+    if (*(int *)(this->m_0a0 + *(int *)param_1[1] * 8) == 0) {
+      FUN_005af3b0((int)local_98.rep);
+    }
+    else {
+      FUN_005af3d0((int)local_98.rep);
+    }
+  }
+switchD_00421c68_caseD_1e:
+  CVar9.rep = (C_str_rep *)C_Script::Advance((int)this);
+LAB_0042335b:
+  return CONCAT31((int3)((uint32_t)CVar9.rep >> 8),1);
+}
+

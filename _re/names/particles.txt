@@ -1,0 +1,118 @@
+# Particle effects (src/game/particles.*): particles 0x0043f2a0.., emitters 0x00440440.., module 0x00443ce0..
+0043f2a0 StaticInit_43f2a0
+0043f2d0 RandomizeDirection | void __fastcall RandomizeDirection(S_vector *dir, S_vector *variance)
+0043f500 S_Particle::S_Particle | S_Particle * __thiscall S_Particle(S_Particle *this)
+0043f520 S_Particle::Init | bool __thiscall Init(S_Particle *this, S_matrix *emitterMatrix, S_ParticleDef *def, int time, int defIndex)
+0043f730 S_Particle::StartPhase | bool __thiscall StartPhase(S_Particle *this, S_matrix *emitterMatrix)
+0043fb40 S_Particle::Tick | void __thiscall Tick(S_Particle *this, int time)
+0043fdf0 S_Particle::Save | void __thiscall Save(S_Particle *this, C_chunk *chunk)
+00440080 S_Particle::Load | void __thiscall Load(S_Particle *this, C_chunk *chunk)
+004403b0 StaticInit_4403b0
+004403e0 StaticInit_ParticleSortKeys
+004403f0 InitParticleSortKeys
+00440410 RegisterParticleSortKeysDtor
+00440420 FreeParticleSortKeys
+00440440 StaticInit_ParticlePool
+00440450 ConstructParticlePool
+00440490 RegisterParticlePoolDtor
+004404a0 DestroyParticlePool
+00440530 C_ParticleEmitter::C_ParticleEmitter | C_ParticleEmitter * __thiscall C_ParticleEmitter(C_ParticleEmitter *this)
+004405e0 C_ParticleEmitter::C_ParticleEmitter | C_ParticleEmitter * __thiscall C_ParticleEmitter(C_ParticleEmitter *this, S_EffectDef *def, I3D_scene *scene)
+004406a0 C_ParticleEmitter::~C_ParticleEmitter | void __thiscall ~C_ParticleEmitter(C_ParticleEmitter *this)
+00440800 C_ParticleEmitter::Init | void __thiscall Init(C_ParticleEmitter *this, I3D_scene *scene, I3D_frame *parent, S_matrix *matrix, S_EffectDef *def, bool faceCamera)
+00440b20 C_ParticleEmitter::Restart | void __thiscall Restart(C_ParticleEmitter *this, I3D_scene *scene, I3D_frame *parent, S_matrix *matrix, bool faceCamera)
+00440d80 C_ParticleEmitter::Stop | void __thiscall Stop(C_ParticleEmitter *this)
+00440dc0 C_ParticleEmitter::Emit | void __thiscall Emit(C_ParticleEmitter *this, S_ParticleDef *def, S_matrix *matrix, int time, int defIndex)
+00440fe0 C_ParticleEmitter::EmitBursts | void __thiscall EmitBursts(C_ParticleEmitter *this)
+004410b0 C_ParticleEmitter::EmitContinuous | void __thiscall EmitContinuous(C_ParticleEmitter *this, int time)
+004412d0 C_ParticleEmitter::RemoveDead | void __thiscall RemoveDead(C_ParticleEmitter *this)
+00441390 C_ParticleEmitter::TickParticles | void __thiscall TickParticles(C_ParticleEmitter *this, int time)
+00441460 C_ParticleEmitter::Sort | void __thiscall Sort(C_ParticleEmitter *this, bool collect)
+00441a00 C_ParticleEmitter::BuildQuads | void __thiscall BuildQuads(C_ParticleEmitter *this)
+00442100 C_ParticleEmitter::BuildQuadsCameraAligned | void __thiscall BuildQuadsCameraAligned(C_ParticleEmitter *this)
+004427a0 C_ParticleEmitter::Tick | bool __thiscall Tick(C_ParticleEmitter *this, int time)
+00442860 C_ParticleEmitter::Draw | void __thiscall Draw(C_ParticleEmitter *this, int unused)
+004428e0 C_ParticleEmitter::Save | void __thiscall Save(C_ParticleEmitter *this, C_chunk *chunk)
+00442c80 C_ParticleEmitter::Load | void __thiscall Load(C_ParticleEmitter *this, C_chunk *chunk)
+00443210 C_ParticleEmitter::Finish | void __thiscall Finish(C_ParticleEmitter *this)
+00443320 C_ParticlePool::ScalarDeletingDestructor | C_ParticlePool * __thiscall ScalarDeletingDestructor(C_ParticlePool *this, uchar flags)
+004433b0 vector_insert1_e4_4433b0
+00443560 vector_insert1_e24_443560
+00443760 vector_size_e24_443760
+004437a0 C_ParticlePool::FreeNode | void __thiscall FreeNode(C_ParticlePool *this, S_ParticlePoolNode *node)
+004437c0 C_ParticlePool::Grow | void __thiscall Grow(C_ParticlePool *this)
+00443870 AlignedFree_443870
+00443880 vector_insert_n_e24_443880
+00443b80 C_ParticlePool::AllocNode | S_ParticlePoolNode * __thiscall AllocNode(C_ParticlePool *this)
+00443c10 uninitialized_copy24_443c10
+00443c50 uninitialized_fill_n24_443c50
+00443c90 construct_copy24_443c90
+00443cb0 StaticInit_443cb0
+00443ce0 StaticInit_ParticlesModule
+00443cf0 ConstructParticlesModule
+00443d10 RegisterParticlesModuleDtor
+00443d20 DestroyParticlesModule
+00443d30 C_ParticlesModule::C_ParticlesModule | C_ParticlesModule * __thiscall C_ParticlesModule(C_ParticlesModule *this, int id, char *name)
+00443e00 C_ParticlesModule::ScalarDeletingDestructor | C_ParticlesModule * __thiscall ScalarDeletingDestructor(C_ParticlesModule *this, uchar flags)
+00443e20 vector_init_443e20
+00443e40 C_ParticlesModule::~C_ParticlesModule | void __thiscall ~C_ParticlesModule(C_ParticlesModule *this)
+00443f10 DestroyFreeEmitterLists
+00443f30 C_ParticlesModule::StartMission | void __thiscall StartMission(C_ParticlesModule *this, bool server)
+00443fe0 C_ParticlesModule::StopMission | void __thiscall StopMission(C_ParticlesModule *this, bool server)
+00444110 C_ParticlesModule::LoadMissionData | void __thiscall LoadMissionData(C_ParticlesModule *this, bool server)
+00444130 C_ParticlesModule::FreeMissionData | void __thiscall FreeMissionData(C_ParticlesModule *this, bool server)
+00444140 C_ParticlesModule::LoadEffects | void __thiscall LoadEffects(C_ParticlesModule *this)
+00444490 S_EffectDef::Load | void __thiscall Load(S_EffectDef *this, C_chunk *chunk)
+00444840 S_EffectItem::~S_EffectItem | void __thiscall ~S_EffectItem(S_EffectItem *this)
+00444850 AlignedFree_444850
+00444860 S_EffectItem::ScalarDeletingDestructor | S_EffectItem * __thiscall ScalarDeletingDestructor(S_EffectItem *this, uchar flags)
+00444880 ParticleFrames_Init_444880
+004448a0 S_ParticleDef::Load | void __thiscall Load(S_ParticleDef *this, C_chunk *chunk)
+00444e40 S_ParticlePhase::ScalarDeletingDestructor | S_ParticlePhase * __thiscall ScalarDeletingDestructor(S_ParticlePhase *this, uchar flags)
+00444e60 S_ParticlePhase::~S_ParticlePhase | void __thiscall ~S_ParticlePhase(S_ParticlePhase *this)
+00444e90 S_ParticleDef::ScalarDeletingDestructor | S_ParticleDef * __thiscall ScalarDeletingDestructor(S_ParticleDef *this, uchar flags)
+00444eb0 S_ParticleDef::~S_ParticleDef | void __thiscall ~S_ParticleDef(S_ParticleDef *this)
+00445050 S_EffectDef::ScalarDeletingDestructor | S_EffectDef * __thiscall ScalarDeletingDestructor(S_EffectDef *this, uchar flags)
+00445070 S_EffectDef::~S_EffectDef | void __thiscall ~S_EffectDef(S_EffectDef *this)
+00445150 C_ParticlesModule::CreateAt | int __thiscall CreateAt(C_ParticlesModule *this, int effect, S_vector *pos, S_vector *dir, I3D_frame *parent, bool faceCamera, bool transient)
+004451b0 C_ParticlesModule::Create | int __thiscall Create(C_ParticlesModule *this, int effect, S_matrix *matrix, I3D_frame *parent, bool faceCamera, bool transient)
+004454e0 AlignedFree_4454e0
+004454f0 S_EffectDef::IsUsable | bool __stdcall IsUsable(S_EffectDef *def)
+004455a0 C_ParticlesModule::Tick | void __thiscall Tick(C_ParticlesModule *this, int time)
+004455b0 C_ParticlesModule::Update | void __thiscall Update(C_ParticlesModule *this, int time)
+00445740 C_ParticlesModule::FindActive | S_ActiveEmitter * __thiscall FindActive(C_ParticlesModule *this, int handle, int *outIndex)
+00445800 C_ParticlesModule::Destroy | void __thiscall Destroy(C_ParticlesModule *this, int handle)
+004458b0 C_ParticlesModule::ToggleEmission | void __thiscall ToggleEmission(C_ParticlesModule *this, int handle, int unused)
+004458d0 C_ParticlesModule::Finish | void __thiscall Finish(C_ParticlesModule *this, int handle)
+004458f0 C_ParticlesModule::DestroyAll | void __thiscall DestroyAll(C_ParticlesModule *this)
+00445980 C_ParticlesModule::FreeEffects | void __thiscall FreeEffects(C_ParticlesModule *this)
+00445af0 C_ParticlesModule::AddStaticEmitter | void __thiscall AddStaticEmitter(C_ParticlesModule *this, int effect, S_matrix *matrix, I3D_frame *parent)
+00445d90 C_ParticlesModule::LoadStaticEmitters | void __thiscall LoadStaticEmitters(C_ParticlesModule *this)
+00446070 C_ParticlesModule::LoadStaticEmittersV1 | void __thiscall LoadStaticEmittersV1(C_ParticlesModule *this, C_chunk *chunk)
+004464a0 C_ParticlesModule::LoadStaticEmittersV2 | void __thiscall LoadStaticEmittersV2(C_ParticlesModule *this, C_chunk *chunk)
+00446880 vector_init_446880
+00446960 vector_insert1_e16_446960
+00446b60 vector_erase_e16_446b60
+00446bc0 vector_insert1_e4_446bc0
+00446d80 vector_erase_e4_446d80
+00446dc0 vector_insert1_e4_446dc0
+00446f80 vector_erase_e4_446f80
+00446fe0 vector_insert1_e4_446fe0
+004471b0 vector_insert_n_e4_4471b0
+00447510 uninitialized_copy16_447510
+00447560 uninitialized_fill_n16_447560
+00447660 construct_copy16_447660
+00447690 StaticInit_447690
+004476c0 C_chunk::RemainingSizeInline | int __fastcall RemainingSizeInline(C_chunk *this)
+00447700 StaticInit_447700
+00447730 C_ParticlesModule::RestartMission | void __thiscall RestartMission(C_ParticlesModule *this, bool server)
+004478f0 C_ParticlesModule::SaveGame | bool __thiscall SaveGame(C_ParticlesModule *this, C_chunk *chunk)
+00447c20 C_ParticlesModule::LoadGame | bool __thiscall LoadGame(C_ParticlesModule *this, C_chunk *chunk)
+00447f60 vector_insert_n_e16_447f60
+008999d4 g_particlePool @ C_ParticlePool
+008999ec g_particleSortKeys @
+008999f0 g_particleSortCapacity @ int
+008999f4 g_particleSortCount @ int
+006e4ce0 RadixSortPairs | void __fastcall RadixSortPairs(uchar *pairs, uint32_t count)
+006e9fe0 RgbToHsv | void __fastcall RgbToHsv(float *rgb, float *hsv)
+006ea100 HsvToRgb | void __fastcall HsvToRgb(float *hsv, float *rgb)

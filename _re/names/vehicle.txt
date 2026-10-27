@@ -1,0 +1,223 @@
+# The vehicles (0x004c1200..0x0051c180; map and plan in PROGRESS.md "Vehicles"). Part 1a: the car's
+# parameter block (src/game/vehicle_params.h/.cpp; S_VehicleParams in types/54_vehicle.spec) and the
+# C_Vehicle functions identified so far. C_Vehicle = C_Car +0x90 (vtable 0x008108f8, 0x2298 bytes).
+004d0110 PackVehicleBlob | bool __fastcall PackVehicleBlob(uchar * data, uint size, uchar ** out, uint * outSize, bool unpack)
+004d6c50 WriteVehicleParams | void __stdcall WriteVehicleParams(uchar * blob, S_VehicleParams * params, bool tyreIndices)
+004d7d80 ReadVehicleParams | void __stdcall ReadVehicleParams(uchar * blob, S_VehicleParams * params, bool tyreIndices)
+004d1220 C_Car::CopyFrom | void __thiscall CopyFrom(C_Car * this, C_Actor * source)
+004d1280 C_Car::WriteProperties | bool __thiscall WriteProperties(C_Car * this, C_chunk * chunk)
+004d55c0 C_Car::ReadProperties | bool __thiscall ReadProperties(C_Car * this, C_chunk * chunk)
+004e2900 C_Vehicle::C_Vehicle | C_Vehicle * __thiscall C_Vehicle(C_Vehicle * this)
+004e7f10 C_Vehicle::~C_Vehicle | void __thiscall ~C_Vehicle(C_Vehicle * this)
+004e81a0 C_Vehicle::Release | void __thiscall Release(C_Vehicle * this)
+004e2e30 C_Vehicle::Setup | bool __thiscall Setup(C_Vehicle * this, I3D_frame * model)
+004ed270 C_Vehicle::ApplyParams | bool __thiscall ApplyParams(C_Vehicle * this, S_VehicleParams * params, uchar flags)
+004f2000 C_Vehicle::GetParams | bool __thiscall GetParams(C_Vehicle * this, S_VehicleParams * params)
+004f2030 C_Vehicle::SetGear | bool __thiscall SetGear(C_Vehicle * this, int gear)
+004f2100 C_Vehicle::SetThrottle | bool __thiscall SetThrottle(C_Vehicle * this, float value, bool first)
+004f2270 C_Vehicle::SetBrake | bool __thiscall SetBrake(C_Vehicle * this, float value)
+004f2420 C_Vehicle::SetSteering | bool __thiscall SetSteering(C_Vehicle * this, float value)
+004f26a0 C_Vehicle::SetHandbrake | bool __thiscall SetHandbrake(C_Vehicle * this, bool on, bool unknown)
+004f2790 C_Vehicle::ApplyImpulse | void __thiscall ApplyImpulse(C_Vehicle * this, S_vector * impulse, S_vector * point, uchar flags, S_vector * factors)
+004f9be0 AddVehicleWheel | int __stdcall AddVehicleWheel(I3D_frame * frame, S_VehicleWheel ** list)
+004f9cb0 StoreFoundFrame | int __stdcall StoreFoundFrame(I3D_frame * frame, I3D_frame ** found)
+00517370 C_Vehicle::LoadSounds | bool __thiscall LoadSounds(C_Vehicle * this, S_VehicleParams * params)
+0051bd50 C_Vehicle::OpenSound | int __thiscall OpenSound(C_Vehicle * this, I3D_sound * sound, char * fileName, uint flags)
+0051bd80 C_Vehicle::LoadSound | void __thiscall LoadSound(C_Vehicle * this, char * name, I3D_sound ** slot, uint flags, float nearRange, float farRange, float range2, float range3, bool loop, bool atEngine)
+# Part 1b-i (src/game/vehicle_setup.cpp): Setup's steps and frame callbacks.
+004e6de0 C_Vehicle::SetupStruts | void __thiscall SetupStruts(C_Vehicle * this)
+00500fd0 C_Vehicle::UpdateStruts | void __thiscall UpdateStruts(C_Vehicle * this)
+004fe6b0 C_Vehicle::SetupParts | bool __thiscall SetupParts(C_Vehicle * this)
+004e7450 C_Vehicle::SetupLights | void __thiscall SetupLights(C_Vehicle * this)
+004fa2e0 C_Vehicle::PlaceBodyCollision | void __thiscall PlaceBodyCollision(C_Vehicle * this, S_BodyCollisionBox * list)
+004fa520 AddVehiclePart | int __stdcall AddVehiclePart(I3D_frame * frame, void * parts)
+004f9cc0 CollectFrame | int __stdcall CollectFrame(I3D_frame * frame, void * list)
+004f9e70 AddBodyCollisionBox | int __stdcall AddBodyCollisionBox(I3D_frame * frame, void * context)
+004fa0e0 InsertBodyCollisionBox | bool __fastcall InsertBodyCollisionBox(S_BodyCollisionBox * list, S_BodyCollisionBox * box)
+004fa140 CollectBodyCollisionPoints | void __fastcall CollectBodyCollisionPoints(void * context)
+004fa190 AddBodyCollisionPoint | int __stdcall AddBodyCollisionPoint(I3D_frame * frame, void * context)
+004e8770 FreeBodyCollision | void __stdcall FreeBodyCollision(S_BodyCollisionBox * list)
+004e8740 S_VehicleWheel::~S_VehicleWheel | void __thiscall ~S_VehicleWheel(S_VehicleWheel * this)
+004fb820 S_VehicleDoor::Assign | S_VehicleDoor * __thiscall Assign(S_VehicleDoor * this, S_VehicleDoor * other)
+# Part 1b-ii (src/game/vehicle_parts.cpp): the damage parts and the lamps.
+004faea0 AddToPartGroup | int __fastcall AddToPartGroup(I3D_frame * frame, void * parts, S_VehiclePart * part, char * props, uint start, int type, bool * fresh)
+004e87c0 CreateLamp | I3D_projector_visual * __stdcall CreateLamp(I3D_frame * frame, I3D_light ** light)
+004e8d80 C_Vehicle::CreateProjector | I3D_projector_visual * __thiscall CreateProjector(C_Vehicle * this, I3D_frame * frame, I3D_light ** light)
+# Part 1c-i (src/game/vehicle_drive.cpp): the controls, the engine switch, impulses, Reset, the
+# collision volumes, the struts; the engine-sound and effect helpers they call (parts 1d).
+004f23b0 C_Vehicle::SetUnknown4f23b0 | bool __thiscall SetUnknown4f23b0(C_Vehicle * this, float value)
+004f2630 C_Vehicle::SetUnknown4f2630 | bool __thiscall SetUnknown4f2630(C_Vehicle * this, float value)
+004f2710 C_Vehicle::EnableSounds | void __thiscall EnableSounds(C_Vehicle * this, bool on)
+004f4c80 C_Vehicle::GetSize | S_vector4 * __thiscall GetSize(C_Vehicle * this, bool unscaled)
+004f5840 C_Vehicle::SetVolumesInWorld | void __thiscall SetVolumesInWorld(C_Vehicle * this, bool main, bool second)
+004f5620 C_Vehicle::SetSpecialVolumes | bool __thiscall SetSpecialVolumes(C_Vehicle * this, bool on)
+004fe610 C_Vehicle::EndSkidMark | void __thiscall EndSkidMark(C_Vehicle * this, int wheel)
+004ecfc0 C_Vehicle::StopEffect | bool __thiscall StopEffect(C_Vehicle * this, int slot)
+00518710 C_Vehicle::SwitchEngine | void __thiscall SwitchEngine(C_Vehicle * this, bool on)
+0051a620 C_Vehicle::PlayEngineFail | void __thiscall PlayEngineFail(C_Vehicle * this)
+0051b8f0 C_Vehicle::StopSounds | void __thiscall StopSounds(C_Vehicle * this)
+# Part 1c-ii (src/game/vehicle_start.cpp): Start / Stop and their steps; the sound and per-tick
+# functions they call (later parts).
+004ea780 C_Vehicle::Start | void __thiscall Start(C_Vehicle * this)
+004ec5c0 C_Vehicle::Stop | void __thiscall Stop(C_Vehicle * this)
+004f3950 C_Vehicle::SetSeatLoad | void __thiscall SetSeatLoad(C_Vehicle * this, int seat, float mass)
+004fe910 C_Vehicle::RepairParts | void __thiscall RepairParts(C_Vehicle * this, bool healthOnly)
+004feea0 C_Vehicle::ResetCondition | void __thiscall ResetCondition(C_Vehicle * this)
+004fe850 C_Vehicle::LoadGlassTextures | bool __thiscall LoadGlassTextures(C_Vehicle * this, char * name, char * alphaName)
+004f6080 C_Vehicle::AddLightsToSectors | void __thiscall AddLightsToSectors(C_Vehicle * this)
+004f61e0 C_Vehicle::RemoveLights | void __thiscall RemoveLights(C_Vehicle * this)
+00517cf0 C_Vehicle::AddSoundsToSectors | void __thiscall AddSoundsToSectors(C_Vehicle * this)
+005181c0 C_Vehicle::RemoveSoundsFromSectors | void __thiscall RemoveSoundsFromSectors(C_Vehicle * this)
+0051c180 C_Vehicle::ReleaseSounds | void __thiscall ReleaseSounds(C_Vehicle * this)
+0089c1d0 g_carScene @ I3D_scene *
+# Part 1c-iii-a (src/game/vehicle_drivetrain.cpp): the physics step's drivetrain; the solver and the
+# gear sound it calls (later parts).
+00509aa0 C_Vehicle::Step | void __thiscall Step(C_Vehicle * this, uint ms)
+004f67b0 C_Vehicle::Settle | bool __thiscall Settle(C_Vehicle * this, uint maxMs, float speed, int minSteps)
+00507400 C_Vehicle::UpdateSteering | void __thiscall UpdateSteering(C_Vehicle * this, float timeDelta)
+0050d5c0 C_Vehicle::EngineTorque | float __thiscall EngineTorque(C_Vehicle * this, float revs, float throttle)
+004f3840 C_Vehicle::GetEngineTorque | bool __thiscall GetEngineTorque(C_Vehicle * this, float rpm, float * torque, int gear, bool engineBraking)
+0050d2c0 C_Vehicle::DriveTorque | float __thiscall DriveTorque(C_Vehicle * this, float timeDelta, float throttle)
+0050d760 C_Vehicle::UpdateEngineRevs | void __thiscall UpdateEngineRevs(C_Vehicle * this, float timeDelta, float torque, float brakeTorque)
+0050db90 C_Vehicle::Integrate | void __thiscall Integrate(C_Vehicle * this, float timeDelta, float torqueLeft, float torqueRight)
+0051a480 C_Vehicle::PlayGearSound | void __thiscall PlayGearSound(C_Vehicle * this)
+004ea760 S_quat::S_quat | S_quat * __thiscall S_quat(S_quat * this, float s, S_vector * v)
+# Part 1c-iii-b (src/game/vehicle_solve.cpp): the solver; the wheel contacts and the body's collision
+# it calls (later parts), its two vector inlines.
+0050de60 C_Vehicle::Solve | bool __thiscall Solve(C_Vehicle * this, float timeDelta, float drag, float frontDownforce, float rearDownforce, float torqueLeft, float torqueRight)
+00512390 C_Vehicle::UpdateWheelContacts | void __thiscall UpdateWheelContacts(C_Vehicle * this, S_vector4 * headingSum, float timeDelta, S_vector4 * down, bool bumps)
+00514d70 C_Vehicle::CollideBody | bool __thiscall CollideBody(C_Vehicle * this, S_BodyCollisionBox * boxes, S_vector * push, S_vector * push2, float * maxImpulse, S_vector * maxImpulseVector, S_vector4 * up, int ms)
+004ccc60 S_vector::Cross | S_vector * __thiscall Cross(S_vector * this, S_vector * result, S_vector * v)
+004ccca0 S_vector::Assign | void __thiscall Assign(S_vector * this, S_vector * v)
+0089c174 g_tyreTypes @ S_TyreTypeList
+# Part 1c-iii-c (src/game/vehicle_wheels.cpp): the wheels' contacts; the deformation and the bump
+# sound they call (later parts); the car's handlers of the two callback slots they use.
+00500eb0 C_Vehicle::ImpactDamage | void __thiscall ImpactDamage(C_Vehicle * this, float impulse)
+004ff8b0 C_Vehicle::Deform | void __thiscall Deform(C_Vehicle * this, S_vector4 * point, S_vector4 * direction, float radius, float strength, uchar flags, S_vector * push)
+0051b560 C_Vehicle::PlayBumpSound | void __thiscall PlayBumpSound(C_Vehicle * this, float volume)
+004d4740 CarOnVehicleImpact | void __fastcall CarOnVehicleImpact(C_Car * car, S_vector * impulse, S_vector * largest, S_vector4 * point, float radius, S_vector * velocity, C_Actor * actor, S_CollisionVolume * volume, int unknown)
+004d4b50 CarOnWheelGround | S_CollisionVolume * __fastcall CarOnWheelGround(C_Car * car, S_CollisionVolume * ground, int wheel)
+# Part 1c-iii-d (src/game/vehicle_collide.cpp): the body against the world; its work lists (insert
+# helper, atexit frees, the statics), the impact sound it calls (part 1d), the car's handlers of
+# the callback slots it uses, the car surface table.
+005172d0 BodyWorkListAppend | S_BodyWorkEntry * __fastcall BodyWorkListAppend(S_BodyWorkList * list)
+00517290 FreeBodyPointList | void __cdecl FreeBodyPointList(void)
+005172b0 FreeBodyBoxList | void __cdecl FreeBodyBoxList(void)
+0051a950 C_Vehicle::PlayImpactSound | void __thiscall PlayImpactSound(C_Vehicle * this, float impulse, bool unknown)
+004d4130 CarOnBodyActorResponse | bool __fastcall CarOnBodyActorResponse(C_Vehicle * vehicle, S_CollisionVolume * hit, S_vector4 * point, S_vector * normal, S_vector4 * arm, S_vector4 * velocity, float * mass, S_vector4 * turn, float * scale, bool * push)
+004d4230 CarOnBodyActorImpulse | void __fastcall CarOnBodyActorImpulse(C_Car * car, S_CollisionVolume * hit, S_vector4 * point, S_vector4 * impulse, S_vector * normal, float mass)
+004d4450 CarOnBodyActorTouch | void __fastcall CarOnBodyActorTouch(C_Car * car, S_CollisionVolume * hit, S_vector4 * point, S_vector4 * velocity, S_vector * normal)
+004d4620 CarIsActorFirm | bool __fastcall CarIsActorFirm(C_Car * car, S_CollisionVolume * hit, bool * deform)
+004d4a70 CarOnBodyGround | S_CollisionVolume * __fastcall CarOnBodyGround(C_Car * car, S_CollisionVolume * hit, S_vector * hitPos, S_vector * normal)
+004ecd60 FillCarSurfaces | bool __fastcall FillCarSurfaces(S_CarSurfaceList * surfaces)
+0089c190 s_bodyHitNormal @ S_vector
+0089c1a0 s_bodyHitActor @ C_Actor *
+0089c210 s_bodyPointList @ S_BodyWorkList
+0089c220 s_bodyBoxList @ S_BodyWorkList
+0089c230 s_bodyListsMade @ uchar
+0089bd60 g_carSurfaceOfMaterial @ int[256]
+0089c160 g_carSurfaces @ S_CarSurfaceList
+# Part 1c-iii-e (src/game/vehicle_lamps.cpp): the lamps (the former "Tick") and its vector at()s.
+00501cb0 C_Vehicle::UpdateLamps | void __thiscall UpdateLamps(C_Vehicle * this, float timeDelta)
+00509a40 LampVectorAt | S_VehicleLamp * __thiscall LampVectorAt(vector_S_VehicleLamp * this, int index)
+00509a50 ProjectorVectorAt | S_VehicleProjector * __thiscall ProjectorVectorAt(vector_S_VehicleProjector * this, int index)
+# Part 1c-iii-f (src/game/vehicle_update.cpp): the per-step update, its doors, windows, wheel spin
+# and track strips; the effects, skid marks and sounds it calls (parts 1c-iii-g and 1d).
+0050b180 C_Vehicle::Update | int __thiscall Update(C_Vehicle * this, uint ms)
+00501750 C_Vehicle::UpdateDoors | void __thiscall UpdateDoors(C_Vehicle * this, float timeDelta)
+00501ab0 C_Vehicle::UpdateWindows | void __thiscall UpdateWindows(C_Vehicle * this, float timeDelta)
+00507a40 C_Vehicle::UpdateWheelSpin | void __thiscall UpdateWheelSpin(C_Vehicle * this, float timeDelta)
+00506700 C_Vehicle::UpdateTracks | void __thiscall UpdateTracks(C_Vehicle * this, float timeDelta)
+00506f00 C_Vehicle::UpdateEngineSmoke | bool __thiscall UpdateEngineSmoke(C_Vehicle * this)
+00508350 C_Vehicle::UpdateWheelEffects | void __thiscall UpdateWheelEffects(C_Vehicle * this)
+00508ee0 C_Vehicle::UpdateExhausts | void __thiscall UpdateExhausts(C_Vehicle * this)
+00509540 C_Vehicle::UpdateContactEffects | void __thiscall UpdateContactEffects(C_Vehicle * this)
+004fcbd0 C_Vehicle::LaySkidMark | void __thiscall LaySkidMark(C_Vehicle * this, int wheel)
+00518ab0 C_Vehicle::UpdateEngineSound | void __thiscall UpdateEngineSound(C_Vehicle * this, float timeDelta)
+0051b7c0 C_Vehicle::StopEngineLoops | void __thiscall StopEngineLoops(C_Vehicle * this)
+0051a580 C_Vehicle::PlayHandbrakeSound | void __thiscall PlayHandbrakeSound(C_Vehicle * this)
+0051a6c0 C_Vehicle::SwitchLoopSoundA | void __thiscall SwitchLoopSoundA(C_Vehicle * this, bool on)
+0051a7a0 C_Vehicle::SwitchLoopSoundB | void __thiscall SwitchLoopSoundB(C_Vehicle * this, bool on)
+0051a130 C_Vehicle::UpdateTyreSqueal | void __thiscall UpdateTyreSqueal(C_Vehicle * this, float timeDelta)
+00519a60 C_Vehicle::UpdateRollingSound | void __thiscall UpdateRollingSound(C_Vehicle * this)
+00519dc0 C_Vehicle::UpdateRimSound | void __thiscall UpdateRimSound(C_Vehicle * this, bool on)
+0051a880 C_Vehicle::PlayWheelBurst | void __thiscall PlayWheelBurst(C_Vehicle * this, int wheel)
+0051b660 C_Vehicle::PlayDoorSound | void __thiscall PlayDoorSound(C_Vehicle * this, int seat, bool opening)
+# Part 1c-iii-g (src/game/vehicle_effects.cpp, src/game/car_effects.cpp): the particle effects;
+# the car effects' pool and definitions (InitCarEffects, the pool's update and free in game.txt),
+# the car's two emitter callbacks, the pool's static init and atexit free.
+004ece20 C_Vehicle::StartEffect | int __thiscall StartEffect(C_Vehicle * this, int effect, int slot)
+004d5b10 SetupCarEmitter | bool __fastcall SetupCarEmitter(S_CarEmitter * emitter, uint effect)
+004d62c0 ReuseCarEmitter | int __fastcall ReuseCarEmitter(int slot, uint effect)
+004ecff0 AddCarEmitter | bool __fastcall AddCarEmitter(S_CarEmitter * emitter)
+004e2790 InitCarEmitterArray | void __cdecl InitCarEmitterArray(void)
+004e27c0 FreeCarEmitterArray | void __cdecl FreeCarEmitterArray(void)
+0089bd50 g_carEmitters @ S_CarEmitterArray
+0097b9ac g_carEffects @ S_CarEffectDef *
+0097b9b0 g_carEffectCount @ uint
+# Part 1c-iii-i (src/game/vehicle_start.cpp): the restart after the car was moved (the script's
+# teleport, the car's placing and respawn; named Simulate before).
+004e9db0 C_Vehicle::Restart | void __thiscall Restart(C_Vehicle * this, float speed, bool repair)
+# Part 1c-iv-a (src/game/vehicle_damage.cpp): the damage's steps (Deform is above), the mesh originals'
+# vector insert, the car's damage callbacks.
+004fefd0 C_Vehicle::ShowPartDamage | void __thiscall ShowPartDamage(C_Vehicle * this, uint part, S_vector * push, bool detach)
+00500da0 C_Vehicle::CrackGlass | void __thiscall CrackGlass(C_Vehicle * this, uint part, S_vector * velocity)
+00500cb0 C_Vehicle::BreakProjectorSide | bool __thiscall BreakProjectorSide(C_Vehicle * this, I3D_projector_visual * projector, ushort keep)
+004fc320 InsertMeshOriginals | void __thiscall InsertMeshOriginals(void * this, S_VehicleMeshOriginal * at, uint count, S_VehicleMeshOriginal * value)
+004d4ca0 CarOnPartOff | bool __fastcall CarOnPartOff(C_Car * car, int part, S_vector * velocity, S_vector * push)
+004d4eb0 CarOnWheelOff | bool __fastcall CarOnWheelOff(C_Car * car, int wheel, S_vector * velocity, S_vector * push)
+004d4a10 CarOnGlassBroken | void __fastcall CarOnGlassBroken(C_Car * car, int part, S_vector * velocity, char * sound)
+# Part 1c-iv-b (src/game/vehicle_state.cpp): the state saved with the game (C_Car's chunk 10000) and
+# its steps: the packed positions, the parts' name keys, the place read again after the load.
+004f7300 C_Vehicle::StateSize | uint __thiscall StateSize(C_Vehicle * this)
+004f7650 C_Vehicle::SaveState | bool __thiscall SaveState(C_Vehicle * this, void * buffer)
+004f8510 C_Vehicle::LoadState | bool __thiscall LoadState(C_Vehicle * this, void * buffer)
+004f4040 C_Vehicle::PackPosition | uint __thiscall PackPosition(C_Vehicle * this, int bits, S_vector * pos)
+004f4110 C_Vehicle::UnpackPosition | S_vector * __thiscall UnpackPosition(C_Vehicle * this, S_vector * result, int bits, uint packed)
+004f41f0 C_Vehicle::PartKey | uint __thiscall PartKey(C_Vehicle * this, uint part)
+004f42f0 C_Vehicle::FindPartByKey | int __thiscall FindPartByKey(C_Vehicle * this, uint key)
+004e98c0 C_Vehicle::Replace | void __thiscall Replace(C_Vehicle * this)
+# Part 1c-iv-b (src/game/vehicle_drive.cpp): the car's collision with a human (the torque) or a car.
+004f2a30 C_Vehicle::AddForce | void __thiscall AddForce(C_Vehicle * this, S_vector * force, S_vector * point, uchar flags, S_vector * factors)
+004f2b60 C_Vehicle::ApplyCarHit | void __thiscall ApplyCarHit(C_Vehicle * this, C_Actor * other, float scale, S_vector4 * point, S_vector * impulse, S_vector * normal, int unused)
+# Part 1d-a (src/game/vehicle_sounds.cpp): the sounds' loading, the sector lists (MSVC6 std::vector
+# <I3D_sector *>: +4 begin, +8 end, +0xC capacity) and their add / remove functions, which nothing in
+# this exe references (created as functions 2026-10-21), the sound file's static initialiser.
+004f6350 C_Vehicle::AddLightSector | void __fastcall AddLightSector(I3D_sector * sector)
+004f6550 C_Vehicle::RemoveLightSector | void __fastcall RemoveLightSector(I3D_sector * sector)
+004f65b0 C_Vehicle::AddSoundSector | void __fastcall AddSoundSector(I3D_sector * sector)
+0089c1b0 g_vehicleLightSectors @ void *[4]
+0089c1c0 g_vehicleSoundSectors @ void *[4]
+0083bed4 g_vehicleSoundVolume @ float
+00517340 StaticInit_VehicleSounds
+004f32a0 C_Vehicle::GetContactResponse | void __thiscall GetContactResponse(C_Vehicle * this, S_vector4 * point, S_vector * normal, S_vector4 * arm, S_vector4 * velocity, float * mass, S_vector4 * turn)
+004f3630 C_Vehicle::GetCameraOffset | void __thiscall GetCameraOffset(C_Vehicle * this, S_vector * offset)
+004f4e40 C_Vehicle::SetBeamScale | void __thiscall SetBeamScale(C_Vehicle * this, uint beams, S_vector * scale)
+004f5d10 C_Vehicle::ReadModelState | void __thiscall ReadModelState(C_Vehicle * this)
+004fcba0 StaticInit_VehicleSkidMarks
+00509a70 StaticInit_VehicleStep
+004fb090 C_Vehicle::SetActorImpulseCallback | void __thiscall SetActorImpulseCallback(C_Vehicle * this, void * callback)
+004fb0a0 C_Vehicle::SetActorTouchCallback | void __thiscall SetActorTouchCallback(C_Vehicle * this, void * callback)
+004fb080 C_Vehicle::SetActorResponseCallback | void __thiscall SetActorResponseCallback(C_Vehicle * this, void * callback)
+004fb0b0 C_Vehicle::SetActorFirmCallback | void __thiscall SetActorFirmCallback(C_Vehicle * this, void * callback)
+004fb0c0 C_Vehicle::SetImpactCallback | void __thiscall SetImpactCallback(C_Vehicle * this, void * callback)
+004fb0d0 C_Vehicle::SetPartOffCallback | void __thiscall SetPartOffCallback(C_Vehicle * this, void * callback)
+004fb0e0 C_Vehicle::SetWheelOffCallback | void __thiscall SetWheelOffCallback(C_Vehicle * this, void * callback)
+004fb0f0 C_Vehicle::SetGlassBrokenCallback | void __thiscall SetGlassBrokenCallback(C_Vehicle * this, void * callback)
+004fb100 C_Vehicle::SetSeatCallback | void __thiscall SetSeatCallback(C_Vehicle * this, void * callback)
+004fb110 C_Vehicle::SetImpulseCallback | void __thiscall SetImpulseCallback(C_Vehicle * this, void * callback)
+004fb120 C_Vehicle::SetBodyGroundCallback | void __thiscall SetBodyGroundCallback(C_Vehicle * this, void * callback)
+004fb130 C_Vehicle::SetWheelGroundCallback | void __thiscall SetWheelGroundCallback(C_Vehicle * this, void * callback)
+004fb140 C_Vehicle::SetPartHitCallback | void __thiscall SetPartHitCallback(C_Vehicle * this, void * callback)
+004fb150 C_Vehicle::SetRepairedCallback | void __thiscall SetRepairedCallback(C_Vehicle * this, void * callback)
+004fb160 C_Vehicle::SetCollisionCallback | void __thiscall SetCollisionCallback(C_Vehicle * this, void * callback)
+004fb170 C_Vehicle::SetSetupEmitterCallback | void __thiscall SetSetupEmitterCallback(C_Vehicle * this, void * callback)
+004fb180 C_Vehicle::SetReuseEmitterCallback | void __thiscall SetReuseEmitterCallback(C_Vehicle * this, void * callback)
+004d6bf0 DecodeTyreSurface | void __fastcall DecodeTyreSurface(float * values, S_TyreSurface * surface)
+004ec980 SetTyreTypes | bool __fastcall SetTyreTypes(S_TyreTypeList * types)
+004df230 CarSurfaceList_Insert
+004df520 TyreTypeList_Insert
+004dfc40 TyreSurfaceList_Insert
+004fb7f0 TyreSurfaceList_Size
+004fca40 TyreSurfaces_Copy
+004fca80 TyreSurfaces_Fill

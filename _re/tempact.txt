@@ -1,0 +1,1489 @@
+// 0x00476ec0
+C_TemporaryActorsList * __thiscall
+C_TemporaryActorsList::C_TemporaryActorsList(C_TemporaryActorsList *this,int id,char *name)
+{
+  C_Module::C_Module((C_Module *)this,id,name);
+  (this->m_actors).alloc = (uchar)name;
+  (this->m_actors).first = (C_Actor **)0x0;
+  (this->m_actors).last = (C_Actor **)0x0;
+  (this->m_actors).end = (C_Actor **)0x0;
+  (this->m_active).first = (C_Actor **)0x0;
+  (this->m_active).alloc = (uchar)name;
+  (this->m_active).last = (C_Actor **)0x0;
+  (this->m_active).end = (C_Actor **)0x0;
+  (this->m_pending).first = (C_Actor **)0x0;
+  (this->m_pending).alloc = (uchar)name;
+  (this->m_pending).last = (C_Actor **)0x0;
+  (this->m_pending).end = (C_Actor **)0x0;
+  (this->m_toDestroy).first = (C_Actor **)0x0;
+  (this->m_toDestroy).alloc = (uchar)name;
+  (this->m_toDestroy).last = (C_Actor **)0x0;
+  (this->m_toDestroy).end = (C_Actor **)0x0;
+  this->m_breakables = nullptr;
+  this->m_breakableCapacity = 0;
+  this->m_breakableCount = 0;
+  this->m_breakableGrowBy = 10;
+  this->m_respawnItems = nullptr;
+  this->m_respawnItemCapacity = 0;
+  this->m_respawnItemCount = 0;
+  this->m_respawnItemGrowBy = 2;
+  this->vtable = (C_TemporaryActorsList_vtbl *)&PTR_008100e8;
+  Clear(this);
+  return this;
+}
+
+// 0x00476f80
+void __thiscall C_TemporaryActorsList::Init(C_TemporaryActorsList *this)
+{
+}
+
+// 0x00476f90
+void __thiscall C_TemporaryActorsList::Done(C_TemporaryActorsList *this)
+{
+}
+
+// 0x00476fa0
+void __thiscall C_TemporaryActorsList::LoadMissionData(C_TemporaryActorsList *this,bool server)
+{
+}
+
+// 0x00476fb0
+void __thiscall C_TemporaryActorsList::FreeMissionData(C_TemporaryActorsList *this,bool server)
+{
+  Clear(this);
+}
+
+// 0x00476fc0
+C_TemporaryActorsList * __thiscall
+C_TemporaryActorsList::ScalarDeletingDestructor(C_TemporaryActorsList *this,uchar flags)
+{
+  ~C_TemporaryActorsList(this);
+  if ((flags & 1) != 0) {
+    _aligned_free(this);
+  }
+  return this;
+}
+
+// 0x00476fe0
+void __thiscall C_TemporaryActorsList::~C_TemporaryActorsList(C_TemporaryActorsList *this)
+{
+  this->vtable = (C_TemporaryActorsList_vtbl *)&PTR_008100e8;
+  Clear(this);
+  _aligned_free(this->m_respawnItems);
+  this->m_respawnItems = nullptr;
+  this->m_respawnItemCount = 0;
+  this->m_respawnItemCapacity = 0;
+  _aligned_free(this->m_breakables);
+  this->m_breakables = nullptr;
+  this->m_breakableCount = 0;
+  this->m_breakableCapacity = 0;
+  operator_delete((this->m_toDestroy).first);
+  (this->m_toDestroy).first = (C_Actor **)0x0;
+  (this->m_toDestroy).last = (C_Actor **)0x0;
+  (this->m_toDestroy).end = (C_Actor **)0x0;
+  operator_delete((this->m_pending).first);
+  (this->m_pending).first = (C_Actor **)0x0;
+  (this->m_pending).last = (C_Actor **)0x0;
+  (this->m_pending).end = (C_Actor **)0x0;
+  operator_delete((this->m_active).first);
+  (this->m_active).first = (C_Actor **)0x0;
+  (this->m_active).last = (C_Actor **)0x0;
+  (this->m_active).end = (C_Actor **)0x0;
+  operator_delete((this->m_actors).first);
+  (this->m_actors).first = (C_Actor **)0x0;
+  (this->m_actors).last = (C_Actor **)0x0;
+  (this->m_actors).end = (C_Actor **)0x0;
+  C_Module::~C_Module((C_Module *)this);
+}
+
+// 0x004770b0
+C_Actor * __thiscall
+C_TemporaryActorsList::CreateActor
+          (C_TemporaryActorsList *this,E_ActorType type,I3D_frame *frame,int id)
+{
+  local_24 = nullptr;
+  local_24 = (*g_actorCreators[type]->vtable->Create)();
+  if (local_24 != nullptr) {
+    (*local_24->vtable->SetFrame)(frame);
+    local_24->m_temporary = true;
+    pSVar1 = local_24->m_frame->m_data;
+    if (pSVar1 == nullptr) {
+      pCStack_20 = local_24;
+      pSStack_10 = g_noPhysicsObject;
+      SetFrameData((int)local_24->m_frame,&pCStack_20);
+    }
+    else {
+      pSVar1->actor = local_24;
+    }
+    if (id < 0) {
+      id = this->m_nextId;
+      this->m_nextId = id + 1;
+    }
+    C_Actor::SetNetId(local_24,id);
+    ActorPtrVector_Insert(&this->m_actors,(this->m_actors).last,1,&local_24);
+    if ((g_gameRole & 1) != 0) {
+      (*local_24->vtable->StartMission)(1);
+    }
+    if ((g_gameRole & 2) != 0) {
+      (*local_24->vtable->StartMission)(0);
+    }
+  }
+  return local_24;
+}
+
+// 0x00477190
+void __thiscall C_TemporaryActorsList::DestroyActor(C_TemporaryActorsList *this,C_Actor *actor)
+{
+  if (this->m_iterating != false) {
+    ActorPtrVector_Insert(&this->m_toDestroy,(this->m_toDestroy).last,1,&actor);
+    return;
+  }
+  if (-1 < actor->m_activeIndex) {
+    SetActorActive(this,actor,false);
+  }
+  frame = actor->m_frame;
+  if ((frame != nullptr) && (frame->m_data != nullptr)) {
+    frame->m_data->actor = nullptr;
+    pSVar1 = frame->m_data;
+    if ((pSVar1->actor == nullptr) &&
+       ((((pSVar1->script == nullptr && (pSVar1->unknown08 == 0)) &&
+         (pSVar1->physicsObject == g_noPhysicsObject)) &&
+        ((pSVar1->versionMaster == nullptr &&
+         (pSVar1->versionKeeper == nullptr)))))) {
+      FreeFrameData(frame);
+    }
+  }
+  if ((g_gameRole & 2) != 0) {
+    (*actor->vtable->StopMission)(0);
+  }
+  if ((g_gameRole & 1) != 0) {
+    (*actor->vtable->StopMission)(1);
+  }
+  for (uVar4 = 0;
+      (ppCVar2 = (this->m_actors).first, ppCVar2 != (C_Actor **)0x0 &&
+      (uVar4 < (uint32_t)((int)(this->m_actors).last - (int)ppCVar2 >> 2))); uVar4 = uVar4 + 1) {
+    if (ppCVar2[uVar4] == actor) {
+      if (ppCVar2 == (C_Actor **)0x0) {
+        iVar3 = 0;
+      }
+      else {
+        iVar3 = (int)(this->m_actors).last - (int)ppCVar2 >> 2;
+      }
+      ppCVar2[uVar4] = ppCVar2[iVar3 - 1];
+      (this->m_actors).last = (this->m_actors).last - 1;
+    }
+  }
+  if ((g_gameRole & 2) != 0) {
+    iVar3 = GetGame();
+    C_Interface__OnActorEvent(*(void **)(iVar3 + 0x58),1,actor);
+  }
+  (*g_actorCreators[actor->m_type]->vtable->Destroy)(actor);
+}
+
+// 0x004772f0
+C_Actor * __thiscall C_TemporaryActorsList::FindActor(C_TemporaryActorsList *this,int id)
+{
+  ppCVar2 = (this->m_actors).first;
+  if ((ppCVar2 != (C_Actor **)0x0) &&
+     (iVar3 = (int)(this->m_actors).last - (int)ppCVar2 >> 2, iVar3 != 0)) {
+    ppCVar4 = ppCVar2 + iVar3;
+    do {
+      ppCVar1 = ppCVar4 - 1;
+      ppCVar4--;
+      iVar3--;
+      if ((*ppCVar1)->m_netId == id) {
+        return ppCVar2[iVar3];
+      }
+    } while (iVar3 != 0);
+  }
+  return nullptr;
+}
+
+// 0x00477330
+void __thiscall
+C_TemporaryActorsList::SetActorActive(C_TemporaryActorsList *this,C_Actor *actor,bool active)
+{
+  if (active) {
+    if (actor->m_activeIndex < 0) {
+      if (this->m_iterating != false) {
+        ActorPtrVector_Insert(&this->m_pending,(this->m_pending).last,1,&actor);
+        return;
+      }
+      ppCVar1 = (this->m_active).first;
+      if (ppCVar1 != (C_Actor **)0x0) {
+        actor->m_activeIndex = (int)(this->m_active).last - (int)ppCVar1 >> 2;
+        ActorPtrVector_Insert(&this->m_active,(this->m_active).last,1,&actor);
+        return;
+      }
+      actor->m_activeIndex = 0;
+      ActorPtrVector_Insert(&this->m_active,(this->m_active).last,1,&actor);
+      return;
+    }
+  }
+  else if (-1 < actor->m_activeIndex) {
+    if (this->m_iterating != false) {
+      ActorPtrVector_Insert(&this->m_pending,(this->m_pending).last,1,&actor);
+      return;
+    }
+    ppCVar1 = (this->m_active).first;
+    if ((ppCVar1 != (C_Actor **)0x0) && (1 < (uint32_t)((int)(this->m_active).last - (int)ppCVar1 >> 2))
+       ) {
+      pCVar2 = (this->m_active).last[-1];
+      (this->m_active).first[actor->m_activeIndex] = pCVar2;
+      pCVar2->m_activeIndex = actor->m_activeIndex;
+    }
+    (this->m_active).last = (this->m_active).last - 1;
+    actor->m_activeIndex = -1;
+  }
+}
+
+// 0x00477430
+void __thiscall C_TemporaryActorsList::Clear(C_TemporaryActorsList *this)
+{
+  ppCVar1 = (this->m_actors).first;
+  if (ppCVar1 != (C_Actor **)0x0) {
+    iVar2 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+    while (0 < iVar2) {
+      iVar2--;
+      DestroyActor(this,(this->m_actors).first[iVar2]);
+    }
+  }
+  (this->m_actors).last = (this->m_actors).first;
+  (this->m_active).last = (this->m_active).first;
+  (this->m_pending).last = (this->m_pending).first;
+}
+
+// 0x004774c0
+void __thiscall C_TemporaryActorsList::Tick(C_TemporaryActorsList *this,int timeDelta)
+{
+  this->m_iterating = true;
+  ppCVar1 = (this->m_active).first;
+  if (ppCVar1 != (C_Actor **)0x0) {
+    iVar2 = (int)(this->m_active).last - (int)ppCVar1 >> 2;
+    while (0 < iVar2) {
+      iVar2--;
+      (*(this->m_active).first[iVar2]->vtable->Tick)(timeDelta);
+    }
+  }
+  this->m_iterating = false;
+  ppCVar1 = (this->m_pending).first;
+  if (ppCVar1 != (C_Actor **)0x0) {
+    iVar2 = (int)(this->m_pending).last - (int)ppCVar1 >> 2;
+    while (iVar2 != 0) {
+      iVar2--;
+      actor = (this->m_pending).first[iVar2];
+      SetActorActive(this,actor,actor->m_activeIndex == -1);
+    }
+  }
+  (this->m_pending).last = (this->m_pending).first;
+  ppCVar1 = (this->m_toDestroy).first;
+  if (ppCVar1 != (C_Actor **)0x0) {
+    iVar2 = (int)(this->m_toDestroy).last - (int)ppCVar1 >> 2;
+    while (iVar2 != 0) {
+      iVar2--;
+      DestroyActor(this,(this->m_toDestroy).first[iVar2]);
+    }
+  }
+  (this->m_toDestroy).last = (this->m_toDestroy).first;
+}
+
+// 0x00477590
+void __thiscall C_TemporaryActorsList::Update(C_TemporaryActorsList *this,int frameTime)
+{
+  this->m_iterating = true;
+  ppCVar1 = (this->m_active).first;
+  if (ppCVar1 != (C_Actor **)0x0) {
+    iVar2 = (int)(this->m_active).last - (int)ppCVar1 >> 2;
+    while (0 < iVar2) {
+      iVar2--;
+      (*(this->m_active).first[iVar2]->vtable->Update)(frameTime);
+    }
+  }
+  this->m_iterating = false;
+  ppCVar1 = (this->m_pending).first;
+  if (ppCVar1 != (C_Actor **)0x0) {
+    iVar2 = (int)(this->m_pending).last - (int)ppCVar1 >> 2;
+    while (iVar2 != 0) {
+      iVar2--;
+      actor = (this->m_pending).first[iVar2];
+      SetActorActive(this,actor,actor->m_activeIndex == -1);
+    }
+  }
+  (this->m_pending).last = (this->m_pending).first;
+  ppCVar1 = (this->m_toDestroy).first;
+  if (ppCVar1 != (C_Actor **)0x0) {
+    iVar2 = (int)(this->m_toDestroy).last - (int)ppCVar1 >> 2;
+    while (iVar2 != 0) {
+      iVar2--;
+      DestroyActor(this,(this->m_toDestroy).first[iVar2]);
+    }
+  }
+  (this->m_toDestroy).last = (this->m_toDestroy).first;
+}
+
+// 0x00477660
+void __thiscall C_TemporaryActorsList::StartMission(C_TemporaryActorsList *this,bool server)
+{
+  if ((server) || ((_g_gameRole & 1) == 0)) {
+    this->m_nextId = 0;
+  }
+  this->m_debrisCount = 0;
+  if (server) {
+    CreateBreakables(this);
+  }
+  else {
+    CreateBreakablesOnClient(this);
+  }
+  if (((_g_gameRole & 1) != 0) && (server)) {
+    local_ac = 0;
+    if (0 < g_modelPoolCount) {
+      local_b4 = 0;
+      do {
+        if ((*(char *)(*(int *)(local_b4 + (int)g_modelPool) + 0x1d) == '\0') ||
+           (iVar13 = (**(code **)(**(int **)(*(int *)(local_b4 + (int)g_modelPool) + 4) + 0x10))(),
+           iVar13 != 10)) {
+          frame = (I3D_frame *)
+                  C_LoadedModel::GetFrame(*(C_LoadedModel **)(local_b4 + (int)g_modelPool),0);
+          uVar2 = frame->m_frameFlags;
+          pfVar16 = (float *)(local_b4 + 0x10 + (int)g_modelPool);
+          if (-1 < (char)uVar2) {
+            (frame->m_localMatrix).m[3][0] = *pfVar16;
+            (frame->m_localMatrix).m[3][1] = pfVar16[1];
+            (frame->m_localMatrix).m[3][2] = pfVar16[2];
+            frame->m_frameFlags = uVar2 & 0xfffffedf | 0x40000000;
+          }
+          pvVar12 = g_modelPool;
+          (frame->m_rot).v.x = *(float *)(local_b4 + 0x20 + (int)g_modelPool);
+          (frame->m_rot).v.y = *(float *)((int)pvVar12 + local_b4 + 0x24);
+          (frame->m_rot).v.z = *(float *)((int)pvVar12 + local_b4 + 0x28);
+          (frame->m_rot).s = *(float *)((int)pvVar12 + local_b4 + 0x2c);
+          S_quat::Normalize(&frame->m_rot);
+          frame->m_frameFlags = frame->m_frameFlags & 0xfffffecb | 0x40000008;
+          this_00 = CreateActor((C_TemporaryActorsList *)&g_temporaryActors,ACTOR_ITEM,frame,-1);
+          uStack_60 = 0;
+          FUN_005b69b0(this_00,*(int **)(local_b4 + (int)g_modelPool),&uStack_60);
+          if ((((uint8_t)_g_gameRole & 7) != 7) &&
+             (iVar13 = (**(code **)(**(int **)(*(int *)(local_b4 + (int)g_modelPool) + 4) + 0x10))()
+             , iVar13 == 0x14)) {
+            pCVar3 = *(C_LoadedModel **)(local_b4 + (int)g_modelPool);
+            pfVar16 = (float *)(local_b4 + 0x10 + (int)g_modelPool);
+            pfVar1 = (float *)(local_b4 + 0x20 + (int)g_modelPool);
+            fVar4 = *pfVar16;
+            fVar5 = pfVar16[1];
+            fVar6 = pfVar16[2];
+            fVar7 = *pfVar1;
+            fVar8 = pfVar16[3];
+            fVar9 = pfVar1[1];
+            fVar10 = pfVar1[2];
+            fVar11 = pfVar1[3];
+            if (this->m_respawnItemCapacity <= this->m_respawnItemCount) {
+              iVar13 = this->m_respawnItemCapacity + this->m_respawnItemGrowBy;
+              this->m_respawnItemCapacity = iVar13;
+              pSVar14 = _aligned_malloc(iVar13 * 0x30,0x10);
+              iStack_b0 = 0;
+              if (0 < this->m_respawnItemCount) {
+                pfVar16 = &(pSVar14->rot).v.z;
+                do {
+                  puVar15 = (uint32_t *)
+                            ((-0x28 - (int)pSVar14) + (int)pfVar16 + (int)this->m_respawnItems);
+                  pfVar16[-10] = (float)*puVar15;
+                  pfVar16[-6] = (float)puVar15[4];
+                  pfVar16[-5] = (float)puVar15[5];
+                  pfVar16[-4] = (float)puVar15[6];
+                  pfVar16[-3] = (float)puVar15[7];
+                  ((S_vector *)(pfVar16 - 2))->x = (float)puVar15[8];
+                  pfVar16[-1] = (float)puVar15[9];
+                  *pfVar16 = (float)puVar15[10];
+                  pfVar16[1] = (float)puVar15[0xb];
+                  iStack_b0++;
+                  pfVar16 += 0xc;
+                } while (iStack_b0 < this->m_respawnItemCount);
+              }
+              _aligned_free(this->m_respawnItems);
+              this->m_respawnItems = pSVar14;
+            }
+            pSVar14 = this->m_respawnItems + this->m_respawnItemCount;
+            this->m_respawnItemCount = this->m_respawnItemCount + 1;
+            pSVar14->model = pCVar3;
+            (pSVar14->pos).x = fVar4;
+            (pSVar14->pos).y = fVar5;
+            (pSVar14->pos).z = fVar6;
+            (pSVar14->pos).w = fVar8;
+            (pSVar14->rot).v.x = fVar7;
+            (pSVar14->rot).v.y = fVar9;
+            (pSVar14->rot).v.z = fVar10;
+            (pSVar14->rot).s = fVar11;
+          }
+        }
+        else {
+          afStack_70[0] = 0.0;
+          afStack_70[1] = -2.0;
+          afStack_70[2] = 0.0;
+          uStack_48 = *(uint32_t *)(local_b4 + 0x18 + (int)g_modelPool);
+          fStack_4c = *(float *)(local_b4 + 0x14 + (int)g_modelPool) + 0.5;
+          fStack_50 = *(float *)(local_b4 + 0x10 + (int)g_modelPool);
+          iVar13 = C_CollisionWorld::RayTestThunk
+                             (&g_collisionWorld,&fStack_50,afStack_70,&aSStack_20[0].x,&SStack_30.x,
+                              0,0);
+          if (iVar13 == 0) {
+            SStack_40.x = 0.0;
+            SStack_40.y = 1.0;
+            SStack_40.z = 0.0;
+            pos = (S_vector *)(local_b4 + 0x10 + (int)g_modelPool);
+            dir = &SStack_40;
+            iVar13 = *(int *)(*(int *)(local_b4 + (int)g_modelPool) + 0xc);
+          }
+          else {
+            dir = &SStack_30;
+            pos = aSStack_20;
+            iVar13 = *(int *)(*(int *)(local_b4 + (int)g_modelPool) + 0xc);
+          }
+          CreateMine(this,nullptr,iVar13,pos,dir,false);
+          thunk_FUN_007dcd00(&g_itemsModule,*(uint32_t **)(local_b4 + (int)g_modelPool));
+        }
+        local_ac++;
+        local_b4 += 0x30;
+      } while (local_ac < g_modelPoolCount);
+    }
+    _aligned_free(g_modelPool);
+    g_modelPool = nullptr;
+    g_modelPoolCount = 0;
+    _DAT_0098b80c = 0;
+  }
+}
+
+// 0x00477a90
+void __thiscall C_TemporaryActorsList::StopMission(C_TemporaryActorsList *this,bool server)
+{
+  if ((server) || ((g_gameRole & 1) == 0)) {
+    ppCVar1 = (this->m_actors).first;
+    if (ppCVar1 != (C_Actor **)0x0) {
+      iVar2 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+      while (iVar2 != 0) {
+        iVar2--;
+        DestroyActor(this,(this->m_actors).first[iVar2]);
+      }
+    }
+    _aligned_free(this->m_breakables);
+    this->m_breakables = nullptr;
+    this->m_breakableCount = 0;
+    this->m_breakableCapacity = 0;
+    _aligned_free(this->m_respawnItems);
+    this->m_respawnItems = nullptr;
+    this->m_respawnItemCount = 0;
+    this->m_respawnItemCapacity = 0;
+  }
+}
+
+// 0x00477b00
+void __thiscall C_TemporaryActorsList::RestartMission(C_TemporaryActorsList *this,bool server)
+{
+  ppCVar1 = (this->m_actors).first;
+  if (ppCVar1 != (C_Actor **)0x0) {
+    iVar2 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+    while (iVar2 != 0) {
+      iVar2--;
+      DestroyActor(this,(this->m_actors).first[iVar2]);
+    }
+  }
+  this->m_nextId = 0;
+  this->m_debrisCount = 0;
+  if (server) {
+    if ((g_gameRole & 1) != 0) {
+      (*this->vtable->StartMission)(true);
+    }
+    if ((g_gameRole & 2) != 0) {
+      (*this->vtable->StartMission)(false);
+      return;
+    }
+  }
+  else {
+    if ((g_gameRole & 1) != 0) {
+      CreateBreakables(this);
+    }
+    if ((g_gameRole & 2) != 0) {
+      CreateBreakablesOnClient(this);
+    }
+  }
+}
+
+// 0x00477b90
+bool __thiscall C_TemporaryActorsList::SaveGame(C_TemporaryActorsList *this,C_chunk *chunk)
+{
+  this_00 = chunk;
+  if (chunk->m_open != false) {
+    local_20 = 0x456;
+    local_1e = 0;
+    iVar3 = dtaSeek(chunk->m_handle,0,1);
+    this_00->m_stack[this_00->m_depth] = iVar3;
+    this_00->m_depth = this_00->m_depth + 1;
+    dtaWrite(this_00->m_handle,&local_20,6);
+  }
+  chunk = (C_chunk *)this->m_nextId;
+  C_chunk::Write(this_00,&chunk,4);
+  if (this_00->m_open != false) {
+    iVar3 = this_00->m_handle;
+    if (this_00->m_writing == false) {
+      iVar4 = this_00->m_stack[this_00->m_depth - 1];
+    }
+    else {
+      iVar4 = dtaSeek(iVar3,0,1);
+      chunk = (C_chunk *)(iVar4 - this_00->m_stack[this_00->m_depth - 1]);
+      dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+      dtaWrite(this_00->m_handle,&chunk,4);
+      iVar3 = this_00->m_handle;
+    }
+    dtaSeek(iVar3,iVar4,0);
+    if (this_00->m_depth != 0) {
+      this_00->m_depth = this_00->m_depth - 1;
+    }
+  }
+  uVar6 = 0;
+LAB_00477c74:
+  ppCVar1 = (this->m_actors).first;
+  if ((ppCVar1 == (C_Actor **)0x0) ||
+     ((uint32_t)((int)(this->m_actors).last - (int)ppCVar1 >> 2) <= uVar6)) {
+    return true;
+  }
+  bVar2 = (*ppCVar1[uVar6]->vtable->IsActive)();
+  chunk = (C_chunk *)CONCAT31(chunk._1_3_,bVar2);
+  switch((this->m_actors).first[uVar6]->m_type) {
+  case ACTOR_MINE:
+    if (this_00->m_open != false) {
+      uStack_10 = 0x458;
+      iVar3 = dtaSeek(this_00->m_handle,0,1);
+      this_00->m_stack[this_00->m_depth] = iVar3;
+      this_00->m_depth = this_00->m_depth + 1;
+      dtaWrite(this_00->m_handle,&uStack_10,6);
+      if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+        dtaWrite(this_00->m_handle,&chunk,1);
+      }
+    }
+    iVar3 = (this->m_actors).first[uVar6]->m_netId;
+    local_20 = (uint16_t)iVar3;
+    local_1e = (uint16_t)((uint32_t)iVar3 >> 0x10);
+    C_chunk::Write(this_00,&local_20,4);
+    pCVar5 = (this->m_actors).first[uVar6][1].vtable;
+    break;
+  default:
+    goto switchD_00477cb8_caseD_3;
+  case ACTOR_ITEM:
+    if (this_00->m_open != false) {
+      uStack_18 = 0x457;
+      iVar3 = dtaSeek(this_00->m_handle,0,1);
+      this_00->m_stack[this_00->m_depth] = iVar3;
+      this_00->m_depth = this_00->m_depth + 1;
+      dtaWrite(this_00->m_handle,&uStack_18,6);
+      if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+        dtaWrite(this_00->m_handle,&chunk,1);
+      }
+    }
+    FUN_007de840();
+    (*(this->m_actors).first[uVar6]->vtable->SaveGame)(this_00);
+    if (this_00->m_open == false) goto switchD_00477cb8_caseD_3;
+    iVar3 = this_00->m_handle;
+    if (this_00->m_writing == false) {
+      iVar4 = this_00->m_stack[this_00->m_depth - 1];
+    }
+    else {
+      iVar4 = dtaSeek(iVar3,0,1);
+      iStack_24 = iVar4 - this_00->m_stack[this_00->m_depth - 1];
+      dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+      dtaWrite(this_00->m_handle,&iStack_24,4);
+      iVar3 = this_00->m_handle;
+    }
+    dtaSeek(iVar3,iVar4,0);
+    if (this_00->m_depth == 0) goto switchD_00477cb8_caseD_3;
+    uVar6++;
+    this_00->m_depth = this_00->m_depth - 1;
+    goto LAB_00477c74;
+  case ACTOR_DEBRIS:
+    C_chunk::Begin(this_00,0x45a);
+    C_chunk::Ascend(this_00);
+    goto switchD_00477cb8_caseD_3;
+  case ACTOR_WIRE_CUT:
+    if (this_00->m_open != false) {
+      uStack_8 = 0x459;
+      iVar3 = dtaSeek(this_00->m_handle,0,1);
+      this_00->m_stack[this_00->m_depth] = iVar3;
+      this_00->m_depth = this_00->m_depth + 1;
+      dtaWrite(this_00->m_handle,&uStack_8,6);
+    }
+    C_chunk::Write(this_00,&chunk,1);
+    pCVar5 = (C_Actor_vtbl *)(this->m_actors).first[uVar6]->m_netId;
+  }
+  local_20 = SUB42(pCVar5,0);
+  local_1e = (uint16_t)((uint32_t)pCVar5 >> 0x10);
+  C_chunk::Write(this_00,&local_20,4);
+  (*(this->m_actors).first[uVar6]->vtable->SaveGame)(this_00);
+  C_chunk::Ascend(this_00);
+  uVar6++;
+  goto LAB_00477c74;
+switchD_00477cb8_caseD_3:
+  uVar6++;
+  goto LAB_00477c74;
+}
+
+// 0x00477f50
+bool __thiscall C_TemporaryActorsList::LoadGame(C_TemporaryActorsList *this,C_chunk *chunk)
+{
+  this_00 = chunk;
+  actor = nullptr;
+  uVar1 = 0xffff;
+  do {
+    if ((((this_00->m_open == false) || (this_00->m_depth == 0)) ||
+        (aiStack_24[0] = dtaSeek(this_00->m_handle,0,1), aiStack_24[0] == -1)) ||
+       (aiStack_24[0] = this_00->m_stack[this_00->m_depth - 1] - aiStack_24[0], aiStack_24[0] == 0)
+       ) {
+      return true;
+    }
+    chunk = (C_chunk *)CONCAT31(chunk._1_3_,1);
+    if ((this_00->m_open != false) && (iVar2 = dtaRead(this_00->m_handle,&uStack_8,6), iVar2 == 6))
+    {
+      iVar2 = dtaSeek(this_00->m_handle,0,1);
+      this_00->m_stack[this_00->m_depth] = iVar2 - 6 + CONCAT22(uStack_4,uStack_6);
+      this_00->m_depth = this_00->m_depth + 1;
+      uVar1 = uStack_8;
+    }
+    switch(uVar1) {
+    case 0x456:
+      C_chunk::Read(this_00,&this->m_nextId,4);
+      if (this_00->m_open != false) {
+        iVar2 = this_00->m_handle;
+        if (this_00->m_writing == false) goto LAB_00478155;
+        iVar2 = dtaSeek(iVar2,0,1);
+        iStack_2c = iVar2 - this_00->m_stack[this_00->m_depth - 1];
+        dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+        piVar3 = &iStack_2c;
+LAB_00478071:
+        dtaWrite(this_00->m_handle,piVar3,4);
+        dtaSeek(this_00->m_handle,iVar2,0);
+LAB_00478167:
+        if (this_00->m_depth != 0) {
+          this_00->m_depth = this_00->m_depth - 1;
+        }
+      }
+      break;
+    case 0x457:
+      if ((this_00->m_open != false) && (this_00->m_writing == false)) {
+        if (this_00->m_depth != 0) {
+          iVar2 = this_00->m_stack[this_00->m_depth - 1];
+          aiStack_24[0] = dtaSeek(this_00->m_handle,0,1);
+          aiStack_24[0] = iVar2 - aiStack_24[0];
+          iStack_28 = 0;
+          piVar3 = &iStack_28;
+          if (-1 < aiStack_24[0]) {
+            piVar3 = aiStack_24;
+          }
+          if (*piVar3 < 1) goto LAB_004780dd;
+        }
+        dtaRead(this_00->m_handle,&chunk,1);
+      }
+LAB_004780dd:
+      model = (C_LoadedModel *)FUN_007deb60(&g_itemsModule);
+      actor = CreateTempItemActor(iStack_1c,model);
+      (*actor->vtable->LoadGame)(this_00);
+      if (this_00->m_open != false) {
+        iVar2 = this_00->m_handle;
+        if (this_00->m_writing != false) {
+          iVar2 = dtaSeek(iVar2,0,1);
+          iStack_18 = iVar2 - this_00->m_stack[this_00->m_depth - 1];
+          dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+          piVar3 = &iStack_18;
+          goto LAB_00478071;
+        }
+LAB_00478155:
+        dtaSeek(iVar2,this_00->m_stack[this_00->m_depth - 1],0);
+        goto LAB_00478167;
+      }
+      break;
+    case 0x458:
+      if ((this_00->m_open != false) && (this_00->m_writing == false)) {
+        if (this_00->m_depth != 0) {
+          iVar2 = this_00->m_stack[this_00->m_depth - 1];
+          iStack_28 = dtaSeek(this_00->m_handle,0,1);
+          iStack_28 = iVar2 - iStack_28;
+          aiStack_24[0] = 0;
+          piVar3 = aiStack_24;
+          if (-1 < iStack_28) {
+            piVar3 = &iStack_28;
+          }
+          if (*piVar3 < 1) goto LAB_004781cd;
+        }
+        dtaRead(this_00->m_handle,&chunk,1);
+      }
+LAB_004781cd:
+      C_chunk::Read(this_00,&iStack_10,4);
+      C_chunk::Read(this_00,&iStack_14,4);
+      actor = LoadMine(this,iStack_10,iStack_14);
+LAB_0047826a:
+      (*actor->vtable->LoadGame)(this_00);
+    case 0x45a:
+switchD_00478018_caseD_45a:
+      C_chunk::Ascend(this_00);
+      break;
+    case 0x459:
+      if ((this_00->m_open != false) && (this_00->m_writing == false)) {
+        if (this_00->m_depth != 0) {
+          iVar2 = this_00->m_stack[this_00->m_depth - 1];
+          iStack_28 = dtaSeek(this_00->m_handle,0,1);
+          iStack_28 = iVar2 - iStack_28;
+          aiStack_24[0] = 0;
+          piVar3 = aiStack_24;
+          if (-1 < iStack_28) {
+            piVar3 = &iStack_28;
+          }
+          if (*piVar3 < 1) goto LAB_0047824a;
+        }
+        dtaRead(this_00->m_handle,&chunk,1);
+      }
+LAB_0047824a:
+      C_chunk::Read(this_00,&iStack_c,4);
+      actor = FindActor(this,iStack_c);
+      if (actor != nullptr) goto LAB_0047826a;
+      goto switchD_00478018_caseD_45a;
+    }
+    if (actor != nullptr) {
+      SetActorActive(this,actor,SUB41(chunk,0));
+    }
+  } while( true );
+}
+
+// 0x004782c0
+void __thiscall C_TemporaryActorsList::WriteState(C_TemporaryActorsList *this,C_BitStream *msg)
+{
+  C_BitStream::WriteBits(msg,this->m_nextId,0x10);
+  local_54 = 0;
+LAB_004782e5:
+  do {
+    ppCVar1 = (this->m_actors).first;
+    if ((ppCVar1 == (C_Actor **)0x0) ||
+       ((uint32_t)((int)(this->m_actors).last - (int)ppCVar1 >> 2) <= local_54)) {
+      log2((long double)39.0);
+      log2((long double)2.0);
+      lVar5 = __ftol();
+      C_BitStream::WriteBits(msg,0,(int)lVar5);
+      return;
+    }
+    log2((long double)39.0);
+    log2((long double)2.0);
+    lVar5 = __ftol();
+    C_BitStream::WriteBits(msg,(this->m_actors).first[local_54]->m_type,(int)lVar5);
+    C_BitStream::WriteBits(msg,(this->m_actors).first[local_54]->m_netId,0x10);
+    pCVar2 = (this->m_actors).first[local_54];
+    EVar3 = pCVar2->m_type;
+    if (EVar3 == ACTOR_MINE) {
+      C_BitStream::WriteBits(msg,*(uint32_t *)(*(int *)(pCVar2[1]._pad_0004 + 8) + 0x10),0x10);
+      C_BitStream::WriteBits(msg,(this->m_actors).first[local_54][1].vtable,0x10);
+      uVar6 = '\a';
+      pCVar2 = (this->m_actors).first[local_54];
+      local_30 = (pCVar2->m_position).x;
+      local_2c = (pCVar2->m_position).y;
+      local_28 = (pCVar2->m_position).z;
+      local_24 = (pCVar2->m_position).w;
+      pvVar4 = (void *)C_NetMessage::GetSender((C_NetMessage *)msg,-1);
+      C_NetMessage::WriteQuantized((C_NetMessage *)msg,&local_30,pvVar4,uVar6);
+      pCVar2 = (this->m_actors).first[local_54];
+      local_20.x = (pCVar2->m_direction).x;
+      local_20.y = (pCVar2->m_direction).y;
+      local_20.z = (pCVar2->m_direction).z;
+      local_14 = (pCVar2->m_direction).w;
+      dir = &local_20;
+LAB_004784bf:
+      C_NetMessage::WriteDirection3D((C_NetMessage *)msg,dir,-1);
+      (*(this->m_actors).first[local_54]->vtable->WriteState)(msg);
+    }
+    else {
+      if (EVar3 == ACTOR_ITEM) {
+        C_BitStream::WriteBits(msg,(pCVar2[1].vtable)->Done,0x10);
+        C_BitStream::WriteBits(msg,((this->m_actors).first[local_54][1].vtable)->GetHitPoints,0x10);
+        uVar6 = '\a';
+        pCVar2 = (this->m_actors).first[local_54];
+        local_50 = (pCVar2->m_position).x;
+        local_4c = (pCVar2->m_position).y;
+        local_48 = (pCVar2->m_position).z;
+        local_44 = (pCVar2->m_position).w;
+        pvVar4 = (void *)C_NetMessage::GetSender((C_NetMessage *)msg,-1);
+        C_NetMessage::WriteQuantized((C_NetMessage *)msg,&local_50,pvVar4,uVar6);
+        pCVar2 = (this->m_actors).first[local_54];
+        local_40.x = (pCVar2->m_direction).x;
+        local_40.y = (pCVar2->m_direction).y;
+        local_40.z = (pCVar2->m_direction).z;
+        local_34 = (pCVar2->m_direction).w;
+        dir = &local_40;
+        goto LAB_004784bf;
+      }
+      if (EVar3 == ACTOR_WIRE_CUT) {
+        (*pCVar2->vtable->WriteState)(msg);
+        local_54++;
+        goto LAB_004782e5;
+      }
+    }
+    local_54++;
+  } while( true );
+}
+
+// 0x00478520
+void __thiscall C_TemporaryActorsList::ReadState(C_TemporaryActorsList *this,C_BitStream *msg)
+{
+  uVar1 = C_BitStream::ReadBits(msg,0x10);
+  this->m_nextId = (int)(short)uVar1;
+  log2((long double)39.0);
+  log2((long double)2.0);
+  lVar5 = __ftol();
+  uVar1 = C_BitStream::ReadBits(msg,(int)lVar5);
+  do {
+    if (uVar1 == 0) {
+      return;
+    }
+    uVar2 = C_BitStream::ReadBits(msg,0x10);
+    id = (int)(short)uVar2;
+    if (uVar1 == 2) {
+      uVar1 = C_BitStream::ReadBits(msg,0x10);
+      uVar2 = C_BitStream::ReadBits(msg,0x10);
+      uVar6 = 7;
+      pvVar4 = (void *)C_NetMessage::GetSender((C_NetMessage *)msg,-1);
+      C_NetMessage::ReadQuantized((C_NetMessage *)msg,&local_90,pvVar4,uVar6);
+      local_40.y = local_8c;
+      local_40.x = local_90;
+      local_40.z = local_88;
+      C_NetMessage::ReadDirection3D((C_NetMessage *)msg,&local_80,-1);
+      local_60.x = local_80.x;
+      local_60.y = local_80.y;
+      local_60.z = local_80.z;
+      pCVar3 = ClientCreateMine(this,id,(int)(short)uVar1,(int)(short)uVar2,&local_40,&local_60);
+LAB_0047874b:
+      (*pCVar3->vtable->ReadState)(msg);
+    }
+    else {
+      if (uVar1 == 0xb) {
+        uVar1 = C_BitStream::ReadBits(msg,0x10);
+        uVar2 = C_BitStream::ReadBits(msg,0x10);
+        uVar6 = 7;
+        pvVar4 = (void *)C_NetMessage::GetSender((C_NetMessage *)msg,-1);
+        C_NetMessage::ReadQuantized((C_NetMessage *)msg,&local_70,pvVar4,uVar6);
+        local_30.y = local_6c;
+        local_30.x = local_70;
+        local_30.z = local_68;
+        C_NetMessage::ReadDirection3D((C_NetMessage *)msg,&local_50,-1);
+        local_a0.v.x = local_50.x;
+        local_a0.v.y = local_50.y;
+        local_a0.v.z = local_50.z;
+        local_a0.s = local_44;
+        local_20[0].x = 0.0;
+        local_20[0].y = -0.1;
+        local_20[0].z = 0.0;
+        pCVar3 = ClientCreateItem(this,id,-1,(int)(short)uVar1,(int)(short)uVar2,&local_30,local_20,
+                                  &local_a0);
+        goto LAB_0047874b;
+      }
+      if (uVar1 == 0x23) {
+        pCVar3 = FindActor(this,id);
+        goto LAB_0047874b;
+      }
+    }
+    uVar1 = C_BitStream::ReadBits(msg,(int)lVar5);
+  } while( true );
+}
+
+// 0x00478780
+C_BitStream * __cdecl CreateTempActorMessage(int id,bool reliable)
+{
+  this = (C_BitStream *)C_NetGame__CreateMessage(&g_netGame,0xc,(-(uint32_t)reliable & 0xfffffffd) + 3);
+  log2((long double)2.0);
+  lVar1 = __ftol();
+  C_BitStream::WriteBits(this,0,(int)lVar1);
+  C_BitStream::WriteBits(this,id,10);
+  return this;
+}
+
+// 0x004787e0
+C_BitStream * __cdecl CreateTempActorCommand(int command,bool reliable)
+{
+  this = (C_BitStream *)C_NetGame__CreateMessage(&g_netGame,0xc,(-(uint32_t)reliable & 0xfffffffd) + 3);
+  log2((long double)2.0);
+  lVar1 = __ftol();
+  C_BitStream::WriteBits(this,1,(int)lVar1);
+  C_BitStream::WriteBits(this,command,(int)lVar1);
+  return this;
+}
+
+// 0x00478840
+C_BitStream * __cdecl CreateTempActorMessage2(int id,bool reliable)
+{
+  this = (C_BitStream *)
+         C_NetGame__CreateMessageEx(&g_netGame,0xc,(-(uint32_t)reliable & 0xfffffffd) + 3);
+  C_BitStream::WriteBits(this,id,10);
+  return this;
+}
+
+// 0x00478880
+void __cdecl SendTempActorMessage(C_BitStream *msg)
+{
+  C_NetGame__SendMessage(&g_netGame,msg);
+}
+
+// 0x004788a0
+bool __thiscall C_TemporaryActorsList::Unknown28(C_TemporaryActorsList *this,C_BitStream *msg)
+{
+  id = C_BitStream::ReadBits(msg,10);
+  pCVar1 = FindActor(this,id);
+  if (pCVar1 == nullptr) {
+    return false;
+  }
+  (*pCVar1->vtable->Unknown20)(msg);
+  return true;
+}
+
+// 0x004788e0
+bool __thiscall C_TemporaryActorsList::OnMessage(C_TemporaryActorsList *this,C_BitStream *msg)
+{
+  log2((long double)2.0);
+  lVar5 = __ftol();
+  uVar1 = C_BitStream::ReadBits(msg,(int)lVar5);
+  if (uVar1 == 0) {
+    uVar1 = C_BitStream::ReadBits(msg,10);
+    pCVar2 = FindActor(this,uVar1);
+    if (pCVar2 != nullptr) {
+      (*pCVar2->vtable->OnMessage)(msg);
+      return true;
+    }
+  }
+  else if (uVar1 == 1) {
+    uVar1 = C_BitStream::ReadBits(msg,(int)lVar5);
+    if (uVar1 == 0) {
+      uVar1 = C_BitStream::ReadBits(msg,0x10);
+      uVar3 = C_BitStream::ReadBits(msg,0x10);
+      uVar4 = C_BitStream::ReadBits(msg,0x10);
+      mask = 7;
+      quantization = (void *)C_NetMessage::GetSender((C_NetMessage *)msg,-1);
+      C_NetMessage::ReadQuantized((C_NetMessage *)msg,&local_40.x,quantization,mask);
+      local_20.y = local_40.y;
+      local_20.x = local_40.x;
+      local_20.z = local_40.z;
+      C_NetMessage::ReadDirection3D((C_NetMessage *)msg,&local_40,-1);
+      local_30.x = local_40.x;
+      local_30.y = local_40.y;
+      local_30.z = local_40.z;
+      ClientCreateMine(this,(int)(short)uVar1,(int)(short)uVar3,(int)(short)uVar4,&local_20,
+                       &local_30);
+    }
+  }
+  return true;
+}
+
+// 0x00478a20
+uint32_t __thiscall
+C_TemporaryActorsList::IsItemInRange
+          (C_TemporaryActorsList *this,int param_1,float *param_2,int param_3)
+{
+  pCVar5 = (C_Actor *)(this->m_actors).first;
+  fVar1 = (float)(param_3 * param_3);
+  if (pCVar5 != nullptr) {
+    iVar6 = (int)(this->m_actors).last - (int)pCVar5 >> 2;
+    while (iVar6 != 0) {
+      iVar6--;
+      pCVar5 = (this->m_actors).first[iVar6];
+      if (((pCVar5->m_type == ACTOR_ITEM) && (pCVar5[1].vtable != nullptr)) &&
+         ((pCVar5[1].vtable)->Done == (_func_233 *)param_1)) {
+        this_00 = pCVar5->m_frame;
+        if ((this_00->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(this_00);
+        }
+        fVar2 = *param_2 - (this_00->m_worldMatrix).m[3][0];
+        fVar3 = param_2[1] - (this_00->m_worldMatrix).m[3][1];
+        fVar4 = param_2[2] - (this_00->m_worldMatrix).m[3][2];
+        fVar2 = fVar3 * fVar3 + fVar2 * fVar2 + fVar4 * fVar4;
+        pCVar5 = (C_Actor *)
+                 CONCAT22((short)((uint32_t)param_2 >> 0x10),
+                          (uint16_t)(fVar2 < fVar1) << 8 | (uint16_t)(NAN(fVar2) || NAN(fVar1)) << 10 |
+                          (uint16_t)(fVar2 == fVar1) << 0xe);
+        if (fVar2 < fVar1) {
+          return CONCAT31((int3)((uint32_t)pCVar5 >> 8),1);
+        }
+      }
+    }
+  }
+  return (uint32_t)pCVar5 & 0xffffff00;
+}
+
+// 0x00478ae0
+bool __thiscall
+C_TemporaryActorsList::IsMineInRange(C_TemporaryActorsList *this,S_vector *pos,int range)
+{
+  ppCVar1 = (this->m_actors).first;
+  if (ppCVar1 != (C_Actor **)0x0) {
+    iVar6 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+    while (iVar6 != 0) {
+      iVar6--;
+      pCVar2 = (this->m_actors).first[iVar6];
+      if (pCVar2->m_type == ACTOR_MINE) {
+        this_00 = pCVar2->m_frame;
+        if ((this_00->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(this_00);
+        }
+        fVar3 = pos->x - (this_00->m_worldMatrix).m[3][0];
+        fVar4 = pos->y - (this_00->m_worldMatrix).m[3][1];
+        fVar5 = pos->z - (this_00->m_worldMatrix).m[3][2];
+        if (fVar4 * fVar4 + fVar3 * fVar3 + fVar5 * fVar5 < (float)(range * range)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+// 0x00478b90
+void __thiscall
+C_TemporaryActorsList::CreateMine
+          (C_TemporaryActorsList *this,C_Actor *owner,int itemId,S_vector *pos,S_vector *dir,
+          bool send)
+{
+  self = I3DGetDriver();
+  self_00 = (*self->vtable->CreateFrame)(self,9);
+  if ((itemId < 0) || (499 < itemId)) {
+    iVar3 = 0;
+  }
+  else {
+    iVar3 = (&DAT_0098b030)[itemId];
+  }
+  pvVar2 = C_auto_00815f90::ModelCacheBase_OpenInto
+                     ((C_auto_00815f90 *)&g_modelCache,(int *)self_00,*(uint8_t **)(iVar3 + 0x34),0,
+                      nullptr);
+  if (pvVar2 == nullptr) {
+    uVar1 = self_00->m_frameFlags;
+    if (-1 < (char)uVar1) {
+      (self_00->m_localMatrix).m[3][0] = pos->x;
+      (self_00->m_localMatrix).m[3][1] = pos->y;
+      (self_00->m_localMatrix).m[3][2] = pos->z;
+      self_00->m_frameFlags = uVar1 & 0xfffffedf | 0x40000000;
+    }
+    (*self_00->vtable->SetWorldDir)(self_00,dir,0.0);
+    (*self_00->vtable->Update)(self_00);
+    this_00 = CreateActor((C_TemporaryActorsList *)&g_temporaryActors,ACTOR_MINE,self_00,-1);
+    FUN_005fe010(this_00,owner,itemId,0xffffffff);
+    (*self_00->vtable->Release)(self_00);
+    if (owner != nullptr) {
+      iVar3 = C_Human::FindItem((C_Human *)owner,itemId,nullptr);
+      if (iVar3 == 0) {
+        return;
+      }
+      FUN_005a7b70(owner,*(int *)(iVar3 + 0x10),'\x01');
+    }
+    if ((((uint8_t)_g_gameRole & 7) != 7) && (send)) {
+      SendCreateMine(this,this_00->m_netId,owner->m_netId,itemId,pos,dir);
+    }
+    return;
+  }
+  (*self_00->vtable->Release)(self_00);
+}
+
+// 0x00478cc0
+void __thiscall
+C_TemporaryActorsList::SendCreateMine
+          (C_TemporaryActorsList *this,int id,int ownerId,int itemId,S_vector *pos,S_vector *dir)
+{
+  this_00 = (C_NetMessage *)CreateTempActorCommand(0,true);
+  C_BitStream::WriteBits((C_BitStream *)this_00,id,0x10);
+  C_BitStream::WriteBits((C_BitStream *)this_00,ownerId,0x10);
+  C_BitStream::WriteBits((C_BitStream *)this_00,itemId,0x10);
+  mask = '\a';
+  quantization = (void *)C_NetMessage::GetSender(this_00,-1);
+  C_NetMessage::WriteQuantized(this_00,&pos->x,quantization,mask);
+  C_NetMessage::WriteDirection3D(this_00,dir,-1);
+  SendTempActorMessage((C_BitStream *)this_00);
+}
+
+// 0x00478d30
+C_Actor * __thiscall
+C_TemporaryActorsList::ClientCreateMine
+          (C_TemporaryActorsList *this,int id,int ownerId,int itemId,S_vector *pos,S_vector *dir)
+{
+  if ((g_gameRole & 1) != 0) {
+    pCVar2 = FindActor(this,id);
+    return pCVar2;
+  }
+  self = I3DGetDriver();
+  self_00 = (*self->vtable->CreateFrame)(self,9);
+  if ((id < 0) || (499 < id)) {
+    iVar4 = 0;
+  }
+  else {
+    iVar4 = (&DAT_0098b030)[id];
+  }
+  pvVar3 = C_auto_00815f90::ModelCacheBase_OpenInto
+                     ((C_auto_00815f90 *)&g_modelCache,(int *)self_00,*(uint8_t **)(iVar4 + 0x34),0,
+                      nullptr);
+  if (pvVar3 != nullptr) {
+    (*self_00->vtable->Release)(self_00);
+    return nullptr;
+  }
+  uVar1 = self_00->m_frameFlags;
+  if (-1 < (char)uVar1) {
+    (self_00->m_localMatrix).m[3][0] = *(float *)ownerId;
+    (self_00->m_localMatrix).m[3][1] = *(float *)(ownerId + 4);
+    (self_00->m_localMatrix).m[3][2] = *(float *)(ownerId + 8);
+    self_00->m_frameFlags = uVar1 & 0xfffffedf | 0x40000000;
+  }
+  (*self_00->vtable->SetWorldDir)(self_00,(S_vector *)itemId,0.0);
+  (*self_00->vtable->Update)(self_00);
+  this_00 = nullptr;
+  if (-1 < (int)self) {
+    this_00 = (C_Human *)C_ActorsModule::GetHuman((C_ActorsModule *)&g_actorsModule,(int)self);
+  }
+  pCVar2 = CreateActor((C_TemporaryActorsList *)&g_temporaryActors,ACTOR_MINE,self_00,unaff_EBX);
+  FUN_005fe010(pCVar2,this_00,id,0xffffffff);
+  (*self_00->vtable->Release)(self_00);
+  if (this_00 != nullptr) {
+    iVar4 = C_Human::FindItem(this_00,id,nullptr);
+    if (iVar4 != 0) {
+      FUN_005a7b70(this_00,*(int *)(iVar4 + 0x10),'\x01');
+    }
+  }
+  return pCVar2;
+}
+
+// 0x00478e50
+C_Actor * __thiscall C_TemporaryActorsList::LoadMine(C_TemporaryActorsList *this,int id,int itemId)
+{
+  self = I3DGetDriver();
+  frame = (*self->vtable->CreateFrame)(self,9);
+  if ((unaff_retaddr < 0) || (499 < unaff_retaddr)) {
+    iVar1 = 0;
+  }
+  else {
+    iVar1 = (&DAT_0098b030)[unaff_retaddr];
+  }
+  pvVar2 = C_auto_00815f90::ModelCacheBase_OpenInto
+                     ((C_auto_00815f90 *)&g_modelCache,(int *)frame,*(uint8_t **)(iVar1 + 0x34),0,
+                      nullptr);
+  if (pvVar2 != nullptr) {
+    (*frame->vtable->Release)(frame);
+    return nullptr;
+  }
+  this_00 = CreateActor((C_TemporaryActorsList *)&g_temporaryActors,ACTOR_MINE,frame,unaff_EBX);
+  FUN_005fe010(this_00,0,unaff_retaddr,0xffffffff);
+  (*frame->vtable->Release)(frame);
+  return this_00;
+}
+
+// 0x00478ee0
+int __thiscall
+C_TemporaryActorsList::DropItem
+          (C_TemporaryActorsList *this,C_Actor *human,int itemUid,S_vector *pos,S_vector *dir,
+          bool unknown)
+{
+  this_00 = (C_LoadedModel *)C_Human::FUN_005a6ff0((C_Human *)human,itemUid);
+  if (this_00 == nullptr) {
+    return -1;
+  }
+  self = (I3D_frame *)C_LoadedModel::GetFrame(this_00,0);
+  FUN_005a7b70(human,itemUid,'\0');
+  local_20 = dir->x;
+  local_1c = dir->y;
+  local_18 = dir->z;
+  fVar1 = local_20 * local_20 + local_18 * local_18 + local_1c * local_1c;
+  if (1e-08 <= ABS(fVar1 - 1.0)) {
+    if (1e-08 <= fVar1) {
+      fVar1 = 1.0 / SQRT(fVar1);
+      local_20 *= fVar1;
+      local_1c *= fVar1;
+      local_18 *= fVar1;
+    }
+    else if (local_20 == 0.0) {
+      if (local_18 == 0.0) {
+        if (0.0 <= local_1c) {
+          local_1c = 1.0;
+        }
+        else {
+          local_1c = -1.0;
+        }
+      }
+      else if (0.0 <= local_18) {
+        local_18 = 1.0;
+      }
+      else {
+        local_18 = -1.0;
+      }
+    }
+    else if (0.0 <= local_20) {
+      local_20 = 1.0;
+    }
+    else {
+      local_20 = -1.0;
+    }
+  }
+  (*self->vtable->Slot14)(self,pos,&local_20,0);
+  (*self->vtable->Update)(self);
+  this_01 = CreateActor((C_TemporaryActorsList *)&g_temporaryActors,ACTOR_ITEM,self,-1);
+  FUN_005b69b0(this_01,(int *)this_00,&dir->x);
+  if (((uint8_t)_g_gameRole & 7) != 7) {
+    iVar2 = (**(code **)(*(int *)this_00->m_004 + 0x10))();
+    if (iVar2 == 0x14) {
+      this_01[0xb].m_unknown7C = 15000;
+    }
+  }
+  return this_01->m_netId;
+}
+
+// 0x004790c0
+C_Actor * __thiscall
+C_TemporaryActorsList::ClientCreateItem
+          (C_TemporaryActorsList *this,int id,int ownerId,int itemType,int itemUid,S_vector *pos,
+          S_vector *dir,S_quat *rot)
+{
+  if ((g_gameRole & 1) != 0) {
+    pCVar2 = FindActor(this,id);
+    return pCVar2;
+  }
+  pCVar3 = C_fstr_Construct(&local_28,"C_TemporaryActorsList::ClCreateItem: _TempActorIndex %d ActorIndex %d _ItemUID %d \n",id,ownerId,itemUid
+                           );
+  if (pCVar3->rep == nullptr) {
+    pcVar4 = &DAT_00867a90;
+  }
+  else {
+    pcVar4 = pCVar3->rep->chars;
+  }
+  OutputDebugStringA(pcVar4);
+  if ((local_28.rep != nullptr) &&
+     ((local_28.rep)->refCount = (local_28.rep)->refCount - 1, (local_28.rep)->refCount == 0)) {
+    operator_delete(local_28.rep);
+  }
+  if (ownerId == -1) {
+    local_28.rep = (C_str_rep *)FUN_007d7c70(&g_itemsModule,itemType,0,nullptr,itemUid);
+    ((C_LoadedModel *)local_28.rep)->m_01c = '\x01';
+LAB_004791f2:
+    self = (I3D_frame *)C_LoadedModel::GetFrame((C_LoadedModel *)local_28.rep,0);
+    if (self == nullptr) {
+      return nullptr;
+    }
+    if (rot == nullptr) {
+      local_20 = dir->x;
+      local_1c = dir->y;
+      local_18 = dir->z;
+      local_2c = local_20 * local_20 + local_18 * local_18 + local_1c * local_1c;
+      if (1e-08 <= ABS(local_2c - 1.0)) {
+        if (1e-08 <= local_2c) {
+          fVar1 = 1.0 / SQRT(local_2c);
+          local_20 *= fVar1;
+          local_1c *= fVar1;
+          local_18 *= fVar1;
+        }
+        else if (local_20 == 0.0) {
+          if (local_18 == 0.0) {
+            if (0.0 <= local_1c) {
+              local_1c = 1.0;
+            }
+            else {
+              local_1c = -1.0;
+            }
+          }
+          else if (0.0 <= local_18) {
+            local_18 = 1.0;
+          }
+          else {
+            local_18 = -1.0;
+          }
+        }
+        else if (0.0 <= local_20) {
+          local_20 = 1.0;
+        }
+        else {
+          local_20 = -1.0;
+        }
+      }
+      (*self->vtable->Slot14)(self,pos,&local_20,0);
+    }
+    else {
+      (*self->vtable->Slot14)(self,pos,rot,0);
+    }
+    (*self->vtable->Update)(self);
+    pCVar2 = CreateActor((C_TemporaryActorsList *)aCStack_38[0].rep,ACTOR_ITEM,self,id);
+    FUN_005b69b0(pCVar2,unaff_ESI,&dir->x);
+    pCVar3 = C_fstr_Construct(aCStack_38,"C_TemporaryActorsList::ClCreateItem: CREATED _TempActorIndex %d ActorIndex %d _ItemUID %d \n",id,ownerId,
+                              itemUid);
+    if (pCVar3->rep == nullptr) {
+      pcVar4 = &DAT_00867a90;
+    }
+    else {
+      pcVar4 = pCVar3->rep->chars;
+    }
+    OutputDebugStringA(pcVar4);
+    if (((C_TemporaryActorsList *)aCStack_38[0].rep != nullptr) &&
+       ((aCStack_38[0].rep)->refCount =
+             (int)((int)&((C_TemporaryActorsList_vtbl *)(aCStack_38[0].rep)->refCount)[-1].ReadState
+                  + 3),
+       (C_TemporaryActorsList_vtbl *)(aCStack_38[0].rep)->refCount ==
+       nullptr)) {
+      operator_delete(aCStack_38[0].rep);
+    }
+    return pCVar2;
+  }
+  this_00 = (C_Human *)C_ActorsModule::GetHuman((C_ActorsModule *)&g_actorsModule,ownerId);
+  if (this_00 == nullptr) {
+    pcVar4 = "C_TemporaryActorsList::ClCreateItem - wrong params (HUMAN) for clcreateitem %d, %d";
+  }
+  else {
+    local_28.rep = (C_str_rep *)C_Human::FUN_005a6ff0(this_00,itemUid);
+    if ((C_LoadedModel *)local_28.rep != nullptr) {
+      FUN_005a7b70(this_00,itemUid,'\0');
+      goto LAB_004791f2;
+    }
+    pcVar4 = "C_TemporaryActorsList::ClCreateItem - wrong params (ITEM) for clcreateitem %d, %d";
+    local_28.rep = nullptr;
+  }
+  pCVar3 = C_fstr_Construct(&local_28,pcVar4,ownerId,itemUid);
+  if (pCVar3->rep == nullptr) {
+    pcVar4 = &DAT_00867a90;
+  }
+  else {
+    pcVar4 = pCVar3->rep->chars;
+  }
+  OutputDebugStringA(pcVar4);
+  if ((local_28.rep != nullptr) &&
+     ((local_28.rep)->refCount = (local_28.rep)->refCount - 1, (local_28.rep)->refCount == 0)) {
+    operator_delete(local_28.rep);
+  }
+  return nullptr;
+}
+
+// 0x004793f0
+C_Actor * C_TemporaryActorsList::CreateTempItemActor(int id,C_LoadedModel *model)
+{
+  frame = (I3D_frame *)C_LoadedModel::GetFrame(model,0);
+  this = CreateActor((C_TemporaryActorsList *)&g_temporaryActors,ACTOR_ITEM,frame,id);
+  local_20 = 0;
+  FUN_005b69b0(this,(int *)model,&local_20);
+  return this;
+}
+
+// 0x00479450
+int * __thiscall C_TemporaryActorsList::CreateDebris(C_TemporaryActorsList *this,int *param_1)
+{
+  iVar2 = (**(code **)(*param_1 + 4))(param_1);
+  if (iVar2 == 0) {
+    return nullptr;
+  }
+  self = I3DGetDriver();
+  pIVar1 = self->vtable;
+  visualType = (**(code **)(*param_1 + 4))(param_1);
+  self_00 = (*pIVar1->CreateVisual)(self,visualType);
+  (*self_00->vtable->Duplicate)(self_00,(I3D_frame *)param_1);
+  (*self_00->vtable->SetPos)(self_00,unaff_EBP);
+  (*self_00->vtable->SetDir)(self_00,unaff_ESI,0.0);
+  (*self_00->vtable->Update)(self_00);
+  iVar2 = this->m_debrisCount;
+  this->m_debrisCount = iVar2 + 1;
+  pCVar3 = CreateActor(this,ACTOR_DEBRIS,self_00,iVar2 + 1000000);
+  (*self_00->vtable->Release)(self_00);
+  return (int *)pCVar3;
+}
+
+// 0x004794d0
+void __thiscall C_TemporaryActorsList::CreateBreakables(C_TemporaryActorsList *this)
+{
+  iVar2 = 0;
+  if (0 < this->m_breakableCount) {
+    iVar3 = 0;
+    do {
+      pCVar1 = CreateActor(this,ACTOR_WIRE_CUT,
+                           *(I3D_frame **)((int)&this->m_breakables->frame + iVar3),-1);
+      pCVar1[1].vtable = *(C_Actor_vtbl **)((int)&this->m_breakables->door + iVar3);
+      *(C_Actor **)(*(int *)((int)&this->m_breakables->volume + iVar3) + 0x48) = pCVar1;
+      C_CollisionWorld::MoveVolume
+                (&g_collisionWorld,*(S_CollisionVolume **)((int)&this->m_breakables->volume + iVar3)
+                );
+      iVar2++;
+      iVar3 += 0xc;
+    } while (iVar2 < this->m_breakableCount);
+  }
+}
+
+// 0x00479530
+void __thiscall C_TemporaryActorsList::CreateBreakablesOnClient(C_TemporaryActorsList *this)
+{
+  if ((g_gameRole & 1) == 0) {
+    CreateBreakables(this);
+    return;
+  }
+}
+
+// 0x00479540
+void __thiscall
+C_TemporaryActorsList::AddBreakable(C_TemporaryActorsList *this,S_BreakableObject *object)
+{
+  if (this->m_breakableCapacity <= this->m_breakableCount) {
+    iVar2 = this->m_breakableCapacity + this->m_breakableGrowBy;
+    this->m_breakableCapacity = iVar2;
+    pSVar3 = _aligned_malloc(iVar2 * 0xc,0x10);
+    iVar2 = 0;
+    if (0 < this->m_breakableCount) {
+      iVar4 = 0;
+      do {
+        puVar1 = (uint32_t *)((int)&pSVar3->frame + iVar4);
+        puVar5 = (uint32_t *)((int)&this->m_breakables->frame + iVar4);
+        iVar2++;
+        iVar4 += 0xc;
+        *puVar1 = *puVar5;
+        puVar1[1] = puVar5[1];
+        puVar1[2] = puVar5[2];
+      } while (iVar2 < this->m_breakableCount);
+    }
+    _aligned_free(this->m_breakables);
+    this->m_breakables = pSVar3;
+  }
+  pSVar3 = this->m_breakables + this->m_breakableCount;
+  pSVar3->frame = object->frame;
+  pSVar3->door = object->door;
+  pSVar3->volume = object->volume;
+  this->m_breakableCount = this->m_breakableCount + 1;
+}
+
+// 0x004795e0
+void __thiscall C_TemporaryActorsList::ClearBreakables(C_TemporaryActorsList *this)
+{
+  _aligned_free(this->m_breakables);
+  this->m_breakables = nullptr;
+  this->m_breakableCount = 0;
+  this->m_breakableCapacity = 0;
+}
+
+// 0x00479600
+C_Actor * __thiscall
+C_TemporaryActorsList::FindItemNear(C_TemporaryActorsList *this,S_vector *pos,float range)
+{
+  ppCVar1 = (this->m_actors).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    local_20 = 0;
+  }
+  else {
+    local_20 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+  }
+  local_1c = 0;
+  if (local_20 < 1) {
+    return nullptr;
+  }
+  do {
+    pCVar2 = (this->m_actors).first[local_1c];
+    if ((pCVar2->m_type == ACTOR_ITEM) &&
+       ((((iVar6 = (**(code **)(*(int *)(pCVar2[1].vtable)->GetName + 0x10))(), iVar6 == 3 ||
+          (iVar6 == 4)) || (iVar6 == 5)) || ((iVar6 == 6 || (iVar6 == 0xc)))))) {
+      this_00 = pCVar2->m_frame;
+      if ((this_00->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(this_00);
+      }
+      fVar3 = pos->x - (this_00->m_worldMatrix).m[3][0];
+      fVar4 = pos->y - (this_00->m_worldMatrix).m[3][1];
+      fVar5 = pos->z - (this_00->m_worldMatrix).m[3][2];
+      if (fVar4 * fVar4 + fVar3 * fVar3 + fVar5 * fVar5 <= range * range) {
+        return pCVar2;
+      }
+    }
+    local_1c++;
+    if (local_20 <= local_1c) {
+      return nullptr;
+    }
+  } while( true );
+}
+

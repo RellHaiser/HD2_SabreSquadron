@@ -1,0 +1,84 @@
+# The application's state machine (src/game/game_app.{h,cpp}; C_GameApp in types/10_core.spec) and
+# the states it creates (declared in src/game/pending.h; their inline GetTypeId and destructors
+# were emitted in C_GameApp's code).
+
+008aee24 g_gameApp @ C_GameApp *
+006dcd10 GetGameApp | C_GameApp * __stdcall GetGameApp(void)
+
+# C_GameApp
+006c0a70 C_GameApp::C_GameApp | C_GameApp * __thiscall C_GameApp(C_GameApp *this)
+006c0ab0 C_GameApp::~C_GameApp | void __thiscall ~C_GameApp(C_GameApp *this)
+006c0b40 C_GameApp::Init | bool __thiscall Init(C_GameApp *this, bool resume)
+006c0bf0 C_GameApp::Shutdown | void __thiscall Shutdown(C_GameApp *this)
+006c0c30 C_GameApp::CloseThunk | bool __thiscall CloseThunk(C_GameApp *this)
+006c0c40 C_GameApp::Close | bool __thiscall Close(C_GameApp *this)
+006c0e10 C_GameApp::StartFromCommandLine | bool __thiscall StartFromCommandLine(C_GameApp *this)
+006c0fc0 C_GameApp::StartIntro | bool __thiscall StartIntro(C_GameApp *this)
+006c1210 C_GameApp::StartStep | bool __thiscall StartStep(C_GameApp *this, C_CampaignNode * step, int unused)
+006c23e0 C_GameApp::EndClientUpdate | bool __thiscall EndClientUpdate(C_GameApp *this, bool result)
+006c2410 C_GameApp::UpdateClient | bool __thiscall UpdateClient(C_GameApp *this, int timeDelta)
+006c33e0 C_GameApp::EndServerUpdate | bool __thiscall EndServerUpdate(C_GameApp *this, bool result)
+006c3420 C_GameApp::UpdateServer | bool __thiscall UpdateServer(C_GameApp *this, int timeDelta)
+006c34b0 C_GameApp::RenderState | void __thiscall RenderState(C_GameApp *this)
+006c34f0 C_GameApp::HandleInput | void __thiscall HandleInput(C_GameApp *this)
+006c3550 C_GameApp::LoadCommand | bool __thiscall LoadCommand(C_GameApp *this)
+006c3660 C_GameApp::LoadGame | bool __thiscall LoadGame(C_GameApp *this, C_str * fileName, bool inGame)
+006c3c20 C_GameApp::SaveCommand | bool __thiscall SaveCommand(C_GameApp *this)
+006c3d20 C_GameApp::SaveGame | bool __thiscall SaveGame(C_GameApp *this, C_str * fileName, bool inGame)
+006c4200 C_GameApp::RestartMission | void __thiscall RestartMission(C_GameApp *this)
+006c42b0 C_GameApp::RequestLoad | void __thiscall RequestLoad(C_GameApp *this, C_str * fileName)
+006c43a0 C_GameApp::LoadFromMenu | bool __thiscall LoadFromMenu(C_GameApp *this)
+006c4b00 C_GameApp::GetQuickSaveMission | bool __thiscall GetQuickSaveMission(C_GameApp *this, C_str * fileName, int * mission)
+006c4e80 C_GameApp::PrintMessage | void __thiscall PrintMessage(C_GameApp *this, char * text)
+006c4f10 C_GameApp::HasQuickSave | bool __thiscall HasQuickSave(C_GameApp *this)
+0072a480 C_GameApp::SendGameMessage | void __thiscall SendGameMessage(C_GameApp *this, int type, int to, int a, int b, bool reliable)
+0072b590 C_GameApp::PostCommand | void __thiscall PostCommand(C_GameApp *this, int command, int a, int b, bool flush)
+
+# The states (not ported)
+006c3330 C_VideoState::C_VideoState | C_VideoState * __thiscall C_VideoState(C_VideoState *this)
+00688330 C_VideoState::Start | bool __thiscall Start(C_VideoState *this, void * arg)
+00688750 C_VideoState::Stop | bool __thiscall Stop(C_VideoState *this)
+00688ea0 C_VideoState::HandleInput | bool __thiscall HandleInput(C_VideoState *this, float * held, float * pressed)
+00688f00 C_VideoState::Update | void __thiscall Update(C_VideoState *this, int timeDelta)
+00689240 C_VideoState::Render | void __thiscall Render(C_VideoState *this)
+0066f030 C_MovieState::Stop | bool __thiscall Stop(C_MovieState *this)
+0066f050 C_MovieState::HandleInput | bool __thiscall HandleInput(C_MovieState *this, float * held, float * pressed)
+0066f080 C_MovieState::Update | void __thiscall Update(C_MovieState *this, int timeDelta)
+0066f0a0 C_MovieState::RenderThunk | void __thiscall RenderThunk(C_MovieState *this)
+006c1170 C_VideoState::GetTypeId | int __thiscall GetTypeId(C_VideoState *this)
+006c1180 C_VideoState::DeletingDestructor | C_VideoState * __thiscall DeletingDestructor(C_VideoState *this, uint flags)
+006c11a0 C_VideoState::~C_VideoState | void __thiscall ~C_VideoState(C_VideoState *this)
+0066ede0 C_MovieState::Play | bool __thiscall Play(C_MovieState *this, char * fileName, int sequence)
+006c10d0 C_MovieState::GetTypeId | int __thiscall GetTypeId(C_MovieState *this)
+006c10e0 C_MovieState::DeletingDestructor | C_MovieState * __thiscall DeletingDestructor(C_MovieState *this, uint flags)
+006c1100 C_MovieState::~C_MovieState | void __thiscall ~C_MovieState(C_MovieState *this)
+006c1970 C_MainMenu::GetTypeId | int __thiscall GetTypeId(C_MainMenu *this)
+006c1980 C_MainMenu::DeletingDestructor | C_MainMenu * __thiscall DeletingDestructor(C_MainMenu *this, uint flags)
+006c19a0 C_MainMenu::~C_MainMenu | void __thiscall ~C_MainMenu(C_MainMenu *this)
+006c1e20 C_EquipmentMenu::GetTypeId | int __thiscall GetTypeId(C_EquipmentMenu *this)
+006c1e30 C_EquipmentMenu::DeletingDestructor | C_EquipmentMenu * __thiscall DeletingDestructor(C_EquipmentMenu *this, uint flags)
+006c1e50 C_EquipmentMenu::~C_EquipmentMenu | void __thiscall ~C_EquipmentMenu(C_EquipmentMenu *this)
+006c1810 C_EquipmentMenuBase::C_EquipmentMenuBase | C_EquipmentMenuBase * __thiscall C_EquipmentMenuBase(C_EquipmentMenuBase *this)
+006c1ba0 C_SquadMenu::GetTypeId
+006c1bb0 C_SquadMenu::DeletingDestructor
+006c1bd0 C_SquadMenu::~C_SquadMenu
+006c2020 C_DebriefingMenu::GetTypeId
+006c2030 C_DebriefingMenu::DeletingDestructor
+006c2050 C_DebriefingMenu::~C_DebriefingMenu
+006c2160 C_OperationEndMenu::GetTypeId
+006c2170 C_OperationEndMenu::DeletingDestructor
+006c2190 C_OperationEndMenu::~C_OperationEndMenu
+006c22a0 C_Kind0Menu::GetTypeId
+006c22b0 C_Kind0Menu::DeletingDestructor
+006c22d0 C_Kind0Menu::~C_Kind0Menu
+006c31f0 C_SessionMenu::GetTypeId
+006c3200 C_SessionMenu::DeletingDestructor
+006c3220 C_SessionMenu::~C_SessionMenu
+007442e0 C_ConsoleState::C_ConsoleState | C_ConsoleState * __thiscall C_ConsoleState(C_ConsoleState *this, char * command)
+007443a0 C_ConsoleState::ShowBanner | void __thiscall ShowBanner(C_ConsoleState *this)
+007445d0 ReadConsoleToken | int __fastcall ReadConsoleToken(char * * cursor, char * out, int * unknown, char * unknown2)
+
+# Callees declared with the port
+006c7600 C_Controls::GetValues
+006ca920 C_LoaderScreen::AddPlayer | void __thiscall AddPlayer(C_LoaderScreen *this, char * text, int team)
+0072ec60 C_NetGame::ResetPlayerStats | void __thiscall ResetPlayerStats(C_NetGame *this)

@@ -1,0 +1,2471 @@
+// @006ee000 size=10 callers= vt=00832004[557]
+void InitCollisionWorldStatic(void)
+{
+  ConstructCollisionWorld();
+  RegisterCollisionWorldDtor();
+  return;
+}
+
+// @006ee010 size=123 callers=InitCollisionWorldStatic
+void ConstructCollisionWorld(void)
+{
+  g_collisionWorld.m_mesh = (S_CollisionMesh *)0x0;
+  g_collisionWorld.m_grid = (S_CollisionGrid *)0x0;
+  g_collisionWorld.m_freeCells.alloc = '\0';
+  g_collisionWorld.m_freeCells.first = (S_CollisionGridCell **)0x0;
+  g_collisionWorld.m_freeCells.last = (S_CollisionGridCell **)0x0;
+  g_collisionWorld.m_freeCells.end = (S_CollisionGridCell **)0x0;
+  g_collisionWorld.m_emptyCells.alloc = '\0';
+  g_collisionWorld.m_emptyCells.first = (S_CollisionGridCell **)0x0;
+  g_collisionWorld.m_emptyCells.last = (S_CollisionGridCell **)0x0;
+  g_collisionWorld.m_emptyCells.end = (S_CollisionGridCell **)0x0;
+  g_collisionWorld.m_ignoredUnknown = 0;
+  g_collisionWorld.m_ignoredSingle = (S_CollisionVolume *)0x0;
+  g_collisionWorld.m_ignored = (S_CollisionVolume **)0x0;
+  g_collisionWorld.m_ignoredCount = 0;
+  g_collisionWorld.m_unknown424 = 0;
+  g_collisionWorld.m_unknown00 = 0;
+  g_collisionWorld.m_unknown04 = 0;
+  g_collisionWorld.m_ownBuffer = false;
+  return;
+}
+
+// @006ee0a0 size=12 callers=InitCollisionWorldStatic
+void RegisterCollisionWorldDtor(void)
+{
+  atexit(DestroyCollisionWorld);
+  return;
+}
+
+// @006ee0b0 size=10 callers=RegisterCollisionWorldDtor
+void DestroyCollisionWorld(void)
+{
+  C_CollisionWorld::~C_CollisionWorld();
+  return;
+}
+
+// @006ee0c0 size=72 callers=DestroyCollisionWorld
+void __fastcall C_CollisionWorld::~C_CollisionWorld(void)
+{
+  // locals: int in_ECX
+  operator_delete(*(void **)(in_ECX + 0x404));
+  *(undefined4 *)(in_ECX + 0x404) = 0;
+  *(undefined4 *)(in_ECX + 0x408) = 0;
+  *(undefined4 *)(in_ECX + 0x40c) = 0;
+  operator_delete(*(void **)(in_ECX + 0x3f4));
+  *(undefined4 *)(in_ECX + 0x3f4) = 0;
+  *(undefined4 *)(in_ECX + 0x3f8) = 0;
+  *(undefined4 *)(in_ECX + 0x3fc) = 0;
+  return;
+}
+
+// @006ee130 size=355 callers=
+int __cdecl DebugCollisionRay(void)
+{
+  // locals: C_game *pCVar1; I3D_frame *pIVar2; int iVar3; float unaff_EBX; undefined4 unaff_ESI; float *pfVar4; float fStack_84; float fStack_80; float fStack_78; float fStack_74; float local_70 [7]; void *pvStack_54; void *pvStack_34; void *pvStack_1c; undefined1 *puStack_18; undefined4 local_14
+  puStack_18 = &LAB_0080ca78;
+  pvStack_1c = ExceptionList;
+  local_14 = 0;
+  pfVar4 = local_70;
+  for (iVar3 = 0x14; iVar3 != 0; iVar3 = iVar3 + -1) {
+    *pfVar4 = 0.0;
+    pfVar4 = pfVar4 + 1;
+  }
+  ExceptionList = &pvStack_1c;
+  pCVar1 = GetGame();
+  pIVar2 = (*pCVar1->m_scene->vtable->FindFrame)(pCVar1->m_scene,"debug_a",0xffff);
+  if (pIVar2 == (I3D_frame *)0x0) {
+    unaff_ESI = 0;
+    unaff_EBX = 0.0;
+    fStack_84 = 0.0;
+    fStack_78 = 0.0;
+    fStack_74 = 0.0;
+    local_70[0] = fStack_80;
+  }
+  else {
+    if ((pIVar2->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar2);
+    }
+    fStack_78 = (pIVar2->m_worldMatrix).m[3][1];
+    fStack_74 = (pIVar2->m_worldMatrix).m[3][2];
+    local_70[0] = (pIVar2->m_worldMatrix).m[3][3];
+  }
+  pCVar1 = GetGame();
+  pIVar2 = (*pCVar1->m_scene->vtable->FindFrame)(pCVar1->m_scene,"debug_b",0xffff);
+  if (pIVar2 != (I3D_frame *)0x0) {
+    if ((pIVar2->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar2);
+    }
+    fStack_78 = (pIVar2->m_worldMatrix).m[3][0] - unaff_EBX;
+    fStack_74 = (pIVar2->m_worldMatrix).m[3][1] - fStack_84;
+    local_70[0] = (pIVar2->m_worldMatrix).m[3][2] - fStack_80;
+    local_70[1] = (float)unaff_ESI;
+    FUN_00718870((float *)&stack0xffffff78,&fStack_78,0);
+  }
+  _aligned_free(pvStack_54);
+  ExceptionList = pvStack_34;
+  return 0;
+}
+
+// @006ee4f0 size=198 callers=C_CollisionWorld::Load,00718750
+// WARNING: Removing unreachable block (ram,0x006ee576)
+// WARNING: Removing unreachable block (ram,0x006ee59c)
+void __thiscall C_CollisionWorld::Free(C_CollisionWorld *this,bool keepMesh)
+{
+  S_CollisionMeshCell **ptr;
+  if ((!keepMesh) || (this->m_buffer == (void *)0x0)) {
+    if (this->m_mesh != (S_CollisionMesh *)0x0) {
+      ptr = this->m_mesh->cells;
+      if (ptr != (S_CollisionMeshCell **)0x0) {
+        operator_delete(ptr);
+      }
+      _aligned_free(this->m_mesh);
+      this->m_mesh = (S_CollisionMesh *)0x0;
+    }
+    this->m_buffer = (void *)0x0;
+    this->m_unknown10 = 0;
+    this->m_ownBuffer = false;
+  }
+  if (this->m_grid != (S_CollisionGrid *)0x0) {
+    operator_delete(this->m_grid->cells);
+    operator_delete(this->m_grid);
+    this->m_grid = (S_CollisionGrid *)0x0;
+    (this->m_freeCells).last = (this->m_freeCells).first;
+    (this->m_emptyCells).last = (this->m_emptyCells).first;
+  }
+  return;
+}
+
+// @006ee750 size=494 callers=C_CollisionWorld::Load
+void __fastcall ClassifyTriangles(S_CollisionMesh *mesh)
+{
+  // locals: S_CollisionMeshCell *pSVar1; uint *puVar2; float fVar3; int iVar4; uint uVar5; uint uVar6; uint local_10; int local_c; int local_8
+  local_8 = 0;
+  if (0 < mesh->cellsZ) {
+    do {
+      iVar4 = mesh->cellsX;
+      local_c = 0;
+      if (0 < iVar4) {
+        do {
+          pSVar1 = mesh->cells[iVar4 * local_8 + local_c];
+          local_10 = 0;
+          if (pSVar1->count != 0) {
+            do {
+              puVar2 = pSVar1->entries[local_10];
+              uVar6 = *puVar2;
+              if ((uVar6 & 0xa0) == 0) {
+                if (ABS((float)puVar2[4]) <= ABS((float)puVar2[5])) {
+                  uVar5 = 10;
+                  if (ABS((float)puVar2[6]) <= ABS((float)puVar2[5])) {
+                    uVar5 = 9;
+                  }
+                }
+                else if (ABS((float)puVar2[6]) <= ABS((float)puVar2[4])) {
+                  uVar5 = 8;
+                }
+                else {
+                  uVar5 = 10;
+                }
+                if (uVar5 == 8) {
+                  fVar3 = ABS(*(float *)(puVar2[2] + 4) - *(float *)(puVar2[1] + 4));
+                  if ((fVar3 <= -0.0001) || (0.0001 <= fVar3)) {
+                    uVar5 = 2;
+                  }
+                  else {
+                    uVar5 = 1;
+                  }
+                }
+                else if (uVar5 == 9) {
+                  if (0.0001 <= ABS(*(float *)puVar2[2] - *(float *)puVar2[1])) {
+                    fVar3 = ABS(((float *)puVar2[2])[2] - ((float *)puVar2[1])[2]);
+                    if ((fVar3 <= -0.0001) || (0.0001 <= fVar3)) {
+                      uVar5 = 5;
+                    }
+                    else {
+                      uVar5 = 4;
+                    }
+                  }
+                  else {
+                    uVar5 = 3;
+                  }
+                }
+                else if (uVar5 == 10) {
+                  if (0.0001 <= ABS(*(float *)puVar2[2] - *(float *)puVar2[1])) {
+                    uVar5 = 7;
+                  }
+                  else {
+                    uVar5 = 6;
+                  }
+                }
+                *(undefined1 *)puVar2 = 0;
+                *puVar2 = *puVar2 | uVar5;
+                uVar5 = *(uint *)pSVar1->entries[local_10];
+                if ((char)uVar5 != (char)uVar6) {
+                  uVar6 = uVar6 ^ (uVar5 ^ uVar6) & 0xff;
+                }
+                *(uint *)pSVar1->entries[local_10] = uVar6;
+              }
+              local_10 = local_10 + 1;
+            } while (local_10 < (uint)pSVar1->count);
+          }
+          iVar4 = mesh->cellsX;
+          local_c = local_c + 1;
+        } while (local_c < iVar4);
+      }
+      local_8 = local_8 + 1;
+    } while (local_8 < mesh->cellsZ);
+  }
+  return;
+}
+
+// @006ee940 size=3341 callers=006caad0,00718730
+// WARNING: Removing unreachable block (ram,0x006ef600)
+// WARNING: Removing unreachable block (ram,0x006ef626)
+void __thiscall C_CollisionWorld::Load(C_CollisionWorld *this,char *fileName,bool buildGrid)
+{
+  void **ppvVar1;
+  float fVar2;
+  I3D_scene *scene;
+  S_CollisionMesh *pSVar3;
+  S_vector4 *pSVar4;
+  S_vector4 *pSVar5;
+  S_CollisionTriangle *pSVar6;
+  float fVar7;
+  float fVar8;
+  int iVar9;
+  int iVar10;
+  void *buffer;
+  void *buffer_00;
+  int iVar11;
+  S_CollisionMesh *pSVar12;
+  C_game *pCVar13;
+  I3D_driver *self;
+  I3D_frame *pIVar14;
+  int *piVar15;
+  undefined4 uVar16;
+  S_CollisionMeshCell **ppSVar17;
+  S_CollisionGrid *pSVar18;
+  S_CollisionGridCell **ppSVar19;
+  uint uVar20;
+  S_vector4 **ppSVar21;
+  uchar *puVar22;
+  S_CollisionTriangle *pSVar23;
+  float *pfVar24;
+  S_CollisionMeshCell *pSVar25;
+  S_CollisionMeshCell *pSVar26;
+  longlong lVar27;
+  float fStack_80;
+  uint uStack_78;
+  int iStack_74;
+  int iStack_6c;
+  float fStack_60;
+  float fStack_5c;
+  float fStack_58;
+  float fStack_50;
+  float fStack_4c;
+  float fStack_48;
+  int aiStack_28 [2];
+  int iStack_20;
+  int iStack_1c;
+  this->m_unknown428 = 1e+06;
+  this->m_unknown424 = 0;
+  Free(this,this->m_ownBuffer);
+  iVar9 = dtaOpen(fileName,0);
+  if (-1 < iVar9) {
+    iVar10 = dtaSeek(iVar9,0,2);
+    dtaSeek(iVar9,0,0);
+    dtaRead(iVar9,aiStack_28,0x18);
+    if (aiStack_28[0] == 0x43666947) {
+      buffer = operator_new(iStack_1c * 4);
+      dtaRead(iVar9,buffer,iStack_1c * 4);
+      buffer_00 = operator_new((iStack_20 + iStack_1c * -4) - 0x18);
+      dtaRead(iVar9,buffer_00,iStack_20 + iStack_1c * -4 + -0x18);
+      iVar11 = dtaSeek(iVar9,0,1);
+      uVar20 = iVar10 - iVar11;
+      if (this->m_ownBuffer == false) {
+        pSVar12 = _aligned_malloc(uVar20,0x10);
+      }
+      else {
+        pSVar12 = this->m_buffer;
+      }
+      this->m_meshSize = uVar20;
+      dtaRead(iVar9,pSVar12,uVar20);
+      dtaClose(iVar9);
+      iVar9 = iStack_1c;
+      while (iVar10 = iStack_1c, iVar9 != 0) {
+        iVar10 = iVar9 * 4;
+        iVar9 = iVar9 + -1;
+        *(int *)((int)buffer + iVar9 * 4) =
+             (int)buffer_00 + *(int *)((int)buffer + iVar10 + -4) + iStack_1c * -4 + -0x18;
+      }
+      while (iVar10 != 0) {
+        iVar10 = iVar10 + -1;
+        uVar20 = **(uint **)((int)buffer + iVar10 * 4);
+        pCVar13 = GetGame();
+        scene = pCVar13->m_scene;
+        self = I3DGetDriver();
+        pIVar14 = (*self->vtable->FindFrame)
+                            (self,scene,(char *)(*(int *)((int)buffer + iVar10 * 4) + 4));
+        **(undefined4 **)((int)buffer + iVar10 * 4) = pIVar14;
+        uVar20 = uVar20 & 1;
+        if (uVar20 != 0) {
+          piVar15 = *(int **)((int)buffer + iVar10 * 4);
+          iVar9 = *piVar15;
+          if ((iVar9 != 0) && (*(short *)(iVar9 + 0xf8) != 1)) {
+            *piVar15 = 0;
+          }
+        }
+        if ((uVar20 != 0) &&
+           (piVar15 = (int *)**(int **)((int)buffer + iVar10 * 4), piVar15 != (int *)0x0)) {
+          (**(code **)(*piVar15 + 0x7c))(piVar15,1);
+        }
+      }
+      DAT_008cb8c0 = 1;
+      this->m_mesh = pSVar12;
+      pSVar12->gridLinesX = &pSVar12[1].minX;
+      pSVar12 = this->m_mesh;
+      pSVar12->gridLinesY = pSVar12->gridLinesX + pSVar12->cellsX + 1;
+      pSVar12 = this->m_mesh;
+      pSVar12->gridLinesZ = pSVar12->gridLinesY + pSVar12->cellsY + 1;
+      pSVar12 = this->m_mesh;
+      pSVar6 = (S_CollisionTriangle *)(pSVar12->gridLinesZ + pSVar12->cellsZ + 5);
+      pSVar12->triangles = pSVar6;
+      pSVar12 = this->m_mesh;
+      pSVar23 = pSVar6 + pSVar12->numTriangles;
+      pSVar12->aabbs = (S_CollisionAabb *)(-(uint)(pSVar12->numAabbs != 0) & (uint)pSVar23);
+      pSVar12 = this->m_mesh;
+      pSVar23 = pSVar23 + pSVar12->numAabbs;
+      pSVar12->boxes = (S_CollisionBox *)(-(uint)(pSVar12->numBoxes != 0) & (uint)pSVar23);
+      pSVar12 = this->m_mesh;
+      pSVar23 = pSVar23 + pSVar12->numBoxes * 6;
+      pSVar12->poles = (S_CollisionPole *)(-(uint)(pSVar12->numPoles != 0) & (uint)pSVar23);
+      pSVar12 = this->m_mesh;
+      pSVar23 = pSVar23 + pSVar12->numPoles;
+      pSVar12->rects = (S_CollisionRect *)(-(uint)(pSVar12->numRects != 0) & (uint)pSVar23);
+      pSVar12 = this->m_mesh;
+      pSVar23 = pSVar23 + pSVar12->numRects * 5;
+      pSVar12->spheres = (S_CollisionSphere *)(-(uint)(pSVar12->numSpheres != 0) & (uint)pSVar23);
+      pSVar12 = this->m_mesh;
+      pSVar23 = pSVar23 + pSVar12->numSpheres;
+      pSVar12->prims85 = (void *)(-(uint)(pSVar12->numPrims85 != 0) & (uint)pSVar23);
+      pSVar12 = this->m_mesh;
+      pSVar23 = pSVar23 + pSVar12->numPrims85 * 0x11;
+      pSVar12->prims86 = (void *)(-(uint)(pSVar12->numPrims86 != 0) & (uint)pSVar23);
+      pSVar12 = this->m_mesh;
+      pSVar12->capsules =
+           (S_CollisionCapsule *)
+           (-(uint)(pSVar12->numCapsules != 0) & (uint)(pSVar23 + pSVar12->numPrims86 * 5));
+      pSVar3 = this->m_mesh;
+      pfVar24 = (float *)((int)(pSVar23 + pSVar12->numPrims86 * 5) + pSVar3->numCapsules * 0x90);
+      pSVar3->vertices = (S_vector4 *)(-(uint)(pSVar3->numVertices != 0) & (uint)pfVar24);
+      pSVar12 = this->m_mesh;
+      fStack_80 = 0.0;
+      pSVar26 = (S_CollisionMeshCell *)(pfVar24 + (pSVar12->numVertices + 1) * 4);
+      if (pSVar12->numAabbs != 0) {
+        uStack_78 = 0;
+        do {
+          piVar15 = (int *)((int)&pSVar12->aabbs->frame + uStack_78);
+          *piVar15 = **(int **)((int)buffer + *piVar15 * 4);
+          uStack_78 = uStack_78 + 0x20;
+          pSVar12 = this->m_mesh;
+          fStack_80 = (float)((int)fStack_80 + 1);
+        } while ((uint)fStack_80 < (uint)pSVar12->numAabbs);
+      }
+      pSVar12 = this->m_mesh;
+      fStack_80 = 0.0;
+      if (pSVar12->numBoxes != 0) {
+        uStack_78 = 0;
+        do {
+          piVar15 = (int *)((int)((pSVar12->boxes->matrix).m + -4) + 4 + uStack_78);
+          *piVar15 = **(int **)((int)buffer + *piVar15 * 4);
+          uStack_78 = uStack_78 + 0xc0;
+          pSVar12 = this->m_mesh;
+          fStack_80 = (float)((int)fStack_80 + 1);
+        } while ((uint)fStack_80 < (uint)pSVar12->numBoxes);
+      }
+      pSVar12 = this->m_mesh;
+      fStack_80 = 0.0;
+      if (pSVar12->numPoles != 0) {
+        uStack_78 = 0;
+        do {
+          puVar22 = pSVar12->poles->_pad_0014 + uStack_78 + -0x10;
+          *(int *)puVar22 = **(int **)((int)buffer + *(int *)puVar22 * 4);
+          uStack_78 = uStack_78 + 0x20;
+          pSVar12 = this->m_mesh;
+          fStack_80 = (float)((int)fStack_80 + 1);
+        } while ((uint)fStack_80 < (uint)pSVar12->numPoles);
+      }
+      pSVar12 = this->m_mesh;
+      fStack_80 = 0.0;
+      if (pSVar12->numRects != 0) {
+        uStack_78 = 0;
+        do {
+          piVar15 = (int *)((int)((pSVar12->rects->matrix).m + -2) + 4 + uStack_78);
+          *piVar15 = **(int **)((int)buffer + *piVar15 * 4);
+          uStack_78 = uStack_78 + 0xa0;
+          pSVar12 = this->m_mesh;
+          fStack_80 = (float)((int)fStack_80 + 1);
+        } while ((uint)fStack_80 < (uint)pSVar12->numRects);
+      }
+      pSVar12 = this->m_mesh;
+      fStack_80 = 0.0;
+      if (pSVar12->numSpheres != 0) {
+        uStack_78 = 0;
+        do {
+          puVar22 = pSVar12->spheres->_pad_000c + uStack_78 + -8;
+          *(int *)puVar22 = **(int **)((int)buffer + *(int *)puVar22 * 4);
+          uStack_78 = uStack_78 + 0x20;
+          pSVar12 = this->m_mesh;
+          fStack_80 = (float)((int)fStack_80 + 1);
+        } while ((uint)fStack_80 < (uint)pSVar12->numSpheres);
+      }
+      pSVar12 = this->m_mesh;
+      fStack_80 = 0.0;
+      if (pSVar12->numPrims85 != 0) {
+        uStack_78 = 0;
+        do {
+          piVar15 = (int *)((int)pSVar12->prims85 + uStack_78 + 4);
+          *piVar15 = **(int **)((int)buffer + *piVar15 * 4);
+          uStack_78 = uStack_78 + 0x220;
+          pSVar12 = this->m_mesh;
+          fStack_80 = (float)((int)fStack_80 + 1);
+        } while ((uint)fStack_80 < (uint)pSVar12->numPrims85);
+      }
+      pSVar12 = this->m_mesh;
+      fStack_80 = 0.0;
+      if (pSVar12->numPrims86 != 0) {
+        uStack_78 = 0;
+        do {
+          piVar15 = (int *)((int)pSVar12->prims86 + uStack_78 + 4);
+          *piVar15 = **(int **)((int)buffer + *piVar15 * 4);
+          uStack_78 = uStack_78 + 0xa0;
+          pSVar12 = this->m_mesh;
+          fStack_80 = (float)((int)fStack_80 + 1);
+        } while ((uint)fStack_80 < (uint)pSVar12->numPrims86);
+      }
+      pSVar12 = this->m_mesh;
+      fStack_80 = 0.0;
+      iVar9 = iStack_1c;
+      if (pSVar12->numCapsules != 0) {
+        uStack_78 = 0;
+        do {
+          piVar15 = (int *)((int)((pSVar12->capsules->matrix).m + -1) + 4 + uStack_78);
+          *piVar15 = **(int **)((int)buffer + *piVar15 * 4);
+          uStack_78 = uStack_78 + 0x90;
+          pSVar12 = this->m_mesh;
+          fStack_80 = (float)((int)fStack_80 + 1);
+        } while ((uint)fStack_80 < (uint)pSVar12->numCapsules);
+      }
+      while (iVar9 != 0) {
+        iVar9 = iVar9 + -1;
+        piVar15 = (int *)**(int **)((int)buffer + iVar9 * 4);
+        if ((((piVar15 == (int *)0x0) || ((short)piVar15[0x3e] != 1)) ||
+            (iVar10 = (**(code **)(*piVar15 + 4))(piVar15), iVar10 == 0x5252494d)) ||
+           (piVar15 = (int *)piVar15[0x78], piVar15 == (int *)0x0)) {
+          **(undefined4 **)((int)buffer + iVar9 * 4) = 0;
+        }
+        else {
+          piVar15 = (int *)(**(code **)(*piVar15 + 4))(piVar15,0);
+          uVar16 = (**(code **)(*piVar15 + 4))(piVar15,1);
+          **(undefined4 **)((int)buffer + iVar9 * 4) = uVar16;
+        }
+      }
+      pSVar12 = this->m_mesh;
+      fStack_80 = 0.0;
+      if (pSVar12->numTriangles != 0) {
+        ppSVar21 = &pSVar6->v1;
+        do {
+          if (*(ushort *)((int)ppSVar21 + -2) == 0x7fff) {
+            ppSVar21[-1] = pSVar12->vertices + ((uint)ppSVar21[-1] & 0xffff);
+            *ppSVar21 = this->m_mesh->vertices + ((uint)*ppSVar21 & 0xffff);
+            ppSVar21[1] = this->m_mesh->vertices + ((uint)ppSVar21[1] & 0xffff);
+          }
+          else {
+            iVar9 = **(int **)((int)buffer + (uint)*(ushort *)((int)ppSVar21 + -2) * 4);
+            if (iVar9 != 0) {
+              ppSVar21[-1] = (S_vector4 *)(((uint)ppSVar21[-1] & 0xffff) * 0x20 + iVar9);
+              *ppSVar21 = (S_vector4 *)(((uint)*ppSVar21 & 0xffff) * 0x20 + iVar9);
+              ppSVar21[1] = (S_vector4 *)(((uint)ppSVar21[1] & 0xffff) * 0x20 + iVar9);
+              pSVar4 = ppSVar21[-1];
+              fStack_60 = pSVar4->x;
+              fStack_5c = pSVar4->y;
+              fStack_58 = pSVar4->z;
+              pSVar4 = ppSVar21[-1];
+              pSVar5 = *ppSVar21;
+              fVar2 = pSVar5->x;
+              fStack_50 = pSVar4->x;
+              if (fVar2 < pSVar4->x) {
+                fStack_50 = fVar2;
+              }
+              if (fStack_60 < fVar2) {
+                fStack_60 = fVar2;
+              }
+              fVar2 = pSVar5->y;
+              fStack_4c = pSVar4->y;
+              if (fVar2 < pSVar4->y) {
+                fStack_4c = fVar2;
+              }
+              if (fStack_5c < fVar2) {
+                fStack_5c = fVar2;
+              }
+              fVar2 = pSVar5->z;
+              fStack_48 = pSVar4->z;
+              if (fVar2 < pSVar4->z) {
+                fStack_48 = fVar2;
+              }
+              if (fStack_58 < fVar2) {
+                fStack_58 = fVar2;
+              }
+              fVar2 = ppSVar21[1]->x;
+              if (fVar2 < fStack_50) {
+                fStack_50 = fVar2;
+              }
+              if (fStack_60 < fVar2) {
+                fStack_60 = fVar2;
+              }
+              fVar2 = ppSVar21[1]->y;
+              if (fVar2 < fStack_4c) {
+                fStack_4c = fVar2;
+              }
+              if (fStack_5c < fVar2) {
+                fStack_5c = fVar2;
+              }
+              fVar2 = ppSVar21[1]->z;
+              if (fVar2 < fStack_48) {
+                fStack_48 = fVar2;
+              }
+              if (fStack_58 < fVar2) {
+                fStack_58 = fVar2;
+              }
+              pSVar4 = ppSVar21[-1];
+              uStack_78 = 0;
+              fVar2 = pSVar4->x - pSVar5->x;
+              fVar8 = pSVar4->y - pSVar5->y;
+              fVar7 = pSVar4->z - pSVar5->z;
+              if (fVar2 * fVar2 + fVar8 * fVar8 + fVar7 * fVar7 < 1e-08) {
+                uStack_78 = 2;
+              }
+              pSVar4 = ppSVar21[1];
+              fVar2 = pSVar5->x - pSVar4->x;
+              fVar8 = pSVar5->y - pSVar4->y;
+              fVar7 = pSVar5->z - pSVar4->z;
+              if (fVar2 * fVar2 + fVar8 * fVar8 + fVar7 * fVar7 < 1e-08) {
+                uStack_78 = uStack_78 + 2;
+              }
+              pSVar4 = ppSVar21[1];
+              pSVar5 = ppSVar21[-1];
+              fVar2 = pSVar4->x - pSVar5->x;
+              fVar7 = pSVar4->y - pSVar5->y;
+              fVar8 = pSVar4->z - pSVar5->z;
+              if (fVar7 * fVar7 + fVar8 * fVar8 + fVar2 * fVar2 < 1e-08) {
+                uStack_78 = uStack_78 + 2;
+              }
+              if (ABS(fStack_60 - fStack_50) < 1e-08) {
+                uStack_78 = uStack_78 + 1;
+              }
+              if (ABS(fStack_5c - fStack_4c) < 1e-08) {
+                uStack_78 = uStack_78 + 1;
+              }
+              if (ABS(fStack_58 - fStack_48) < 1e-08) {
+                uStack_78 = uStack_78 + 1;
+              }
+              if (uStack_78 < 2) goto LAB_006ef2ca;
+            }
+            ((S_CollisionTriangle *)(ppSVar21 + -2))->flags = 0x20;
+          }
+LAB_006ef2ca:
+          pSVar12 = this->m_mesh;
+          fStack_80 = (float)((int)fStack_80 + 1);
+          ppSVar21 = ppSVar21 + 8;
+        } while ((uint)fStack_80 < (uint)pSVar12->numTriangles);
+      }
+      pSVar12 = this->m_mesh;
+      ppSVar17 = operator_new(pSVar12->cellsY * pSVar12->cellsZ * pSVar12->cellsX * 4);
+      iStack_74 = 0;
+      this->m_mesh->cells = ppSVar17;
+      pSVar12 = this->m_mesh;
+      pSVar6 = pSVar12->triangles;
+      if (0 < pSVar12->cellsZ) {
+        do {
+          uStack_78 = 0;
+          if (0 < pSVar12->cellsY) {
+            do {
+              iStack_6c = 0;
+              pSVar25 = pSVar26;
+              if (0 < pSVar12->cellsX) {
+                do {
+                  pSVar25->entries = (void **)(pSVar25 + 1);
+                  pSVar12 = this->m_mesh;
+                  pSVar26 = (S_CollisionMeshCell *)(&pSVar25[1].count + pSVar25->count);
+                  pSVar12->cells
+                  [(pSVar12->cellsZ * uStack_78 + iStack_74) * pSVar12->cellsX + iStack_6c] =
+                       pSVar25;
+                  fStack_80 = 0.0;
+                  if ((float)pSVar25->count != 0.0) {
+                    do {
+                      ppvVar1 = pSVar25->entries + (int)fStack_80;
+                      switch(*(undefined1 *)((int)ppvVar1 + 3)) {
+                      case 0:
+                        *ppvVar1 = (void *)((int)*ppvVar1 + (int)pSVar6);
+                      default:
+                        goto switchD_006ef3b1_caseD_1;
+                      case 0x80:
+                        puVar22 = (uchar *)((int)&((S_CollisionBox *)
+                                                  (&this->m_mesh->boxes->matrix + -1))->flags +
+                                           ((uint)*ppvVar1 & 0xffffff));
+                        break;
+                      case 0x81:
+                        puVar22 = (uchar *)((int)&this->m_mesh->aabbs->flags +
+                                           ((uint)*ppvVar1 & 0xffffff));
+                        break;
+                      case 0x82:
+                        puVar22 = this->m_mesh->spheres->_pad_000c +
+                                  (((uint)*ppvVar1 & 0xffffff) - 0xc);
+                        break;
+                      case 0x83:
+                        puVar22 = (uchar *)((int)((this->m_mesh->rects->matrix).m + -2) +
+                                           ((uint)*ppvVar1 & 0xffffff));
+                        break;
+                      case 0x84:
+                        puVar22 = this->m_mesh->poles->_pad_0014 +
+                                  (((uint)*ppvVar1 & 0xffffff) - 0x14);
+                        break;
+                      case 0x85:
+                        puVar22 = (uchar *)(((uint)*ppvVar1 & 0xffffff) + (int)this->m_mesh->prims85
+                                           );
+                        break;
+                      case 0x87:
+                        puVar22 = (uchar *)((int)((this->m_mesh->capsules->matrix).m + -1) +
+                                           ((uint)*ppvVar1 & 0xffffff));
+                      }
+                      *ppvVar1 = puVar22;
+switchD_006ef3b1_caseD_1:
+                      fStack_80 = (float)((int)fStack_80 + 1);
+                    } while ((uint)fStack_80 < (uint)pSVar25->count);
+                  }
+                  iStack_6c = iStack_6c + 1;
+                  pSVar25 = pSVar26;
+                } while (iStack_6c < this->m_mesh->cellsX);
+              }
+              pSVar12 = this->m_mesh;
+              uStack_78 = uStack_78 + 1;
+            } while ((int)uStack_78 < pSVar12->cellsY);
+          }
+          pSVar12 = this->m_mesh;
+          iStack_74 = iStack_74 + 1;
+        } while (iStack_74 < pSVar12->cellsZ);
+      }
+      operator_delete(buffer);
+      operator_delete(buffer_00);
+      if (buildGrid) {
+        if (this->m_grid == (S_CollisionGrid *)0x0) {
+          pSVar18 = operator_new(0x1c);
+          this->m_grid = pSVar18;
+        }
+        else {
+          operator_delete(this->m_grid->cells);
+        }
+        lVar27 = __ftol();
+        this->m_grid->cellsX = (int)lVar27;
+        lVar27 = __ftol();
+        this->m_grid->cellsZ = (int)lVar27;
+        if (this->m_grid->cellsX < 1) {
+          this->m_grid->cellsX = 1;
+        }
+        if (this->m_grid->cellsZ < 1) {
+          this->m_grid->cellsZ = 1;
+        }
+        this->m_grid->cellSizeX =
+             (this->m_mesh->maxX - this->m_mesh->minX) / (float)this->m_grid->cellsX;
+        this->m_grid->cellSizeZ =
+             (this->m_mesh->maxZ - this->m_mesh->minZ) / (float)this->m_grid->cellsZ;
+        this->m_grid->minX = this->m_mesh->minX;
+        this->m_grid->minZ = this->m_mesh->minZ;
+        ppSVar19 = operator_new(this->m_grid->cellsZ * this->m_grid->cellsX * 4);
+        this->m_grid->cells = ppSVar19;
+        pSVar18 = this->m_grid;
+        ppSVar19 = pSVar18->cells;
+        for (uVar20 = pSVar18->cellsZ * pSVar18->cellsX & 0x3fffffff; uVar20 != 0;
+            uVar20 = uVar20 - 1) {
+          *ppSVar19 = (S_CollisionGridCell *)0x0;
+          ppSVar19 = ppSVar19 + 1;
+        }
+        for (iVar9 = 0; iVar9 != 0; iVar9 = iVar9 + -1) {
+          *(undefined1 *)ppSVar19 = 0;
+          ppSVar19 = (S_CollisionGridCell **)((int)ppSVar19 + 1);
+        }
+        (this->m_freeCells).last = (this->m_freeCells).first;
+        (this->m_emptyCells).last = (this->m_emptyCells).first;
+      }
+      ClassifyTriangles(this->m_mesh);
+    }
+  }
+  return;
+}
+
+// @006ef700 size=169 callers=0069b500
+// WARNING: Removing unreachable block (ram,0x006ef789)
+// WARNING: Removing unreachable block (ram,0x006ef78b)
+void __fastcall C_CollisionWorld::ReleaseEmptyCells(void)
+{
+  // locals: int in_ECX; int *local_8; int local_4
+  while ((*(int *)(in_ECX + 0x404) != 0 &&
+         (local_4 = *(int *)(in_ECX + 0x408) - *(int *)(in_ECX + 0x404) >> 2, local_4 != 0))) {
+    local_8 = *(int **)(*(int *)(in_ECX + 0x408) + -4);
+    if ((local_8[3] == 0) || (local_4 = local_8[4] - local_8[3] >> 2, local_4 == 0)) {
+      *(undefined4 *)
+       (*(int *)(*(int *)(in_ECX + 0x3ec) + 0x18) +
+       (*(int *)(*(int *)(in_ECX + 0x3ec) + 0x10) * local_8[1] + *local_8) * 4) = 0;
+      FUN_006f2d10((void *)(in_ECX + 0x3f0),*(undefined4 **)(in_ECX + 0x3f8),1,&local_8);
+    }
+    *(int *)(in_ECX + 0x408) = *(int *)(in_ECX + 0x408) + -4;
+  }
+  return;
+}
+
+// @006ef7b0 size=505 callers=C_PhysSwingingObject::Tick,C_PhysSwingingObject::C_PhysSwingingObject,C_PhysDoor::AddBreakVolumes,C_PhysDoor::C_PhysDoor,C_PhysObject::SetVolumeActive,C_PhysBox::C_PhysBox,C_PhysCan::C_PhysCan,C_PhysSphere::C_PhysSphere...
+// WARNING: Removing unreachable block (ram,0x006ef889)
+// WARNING: Removing unreachable block (ram,0x006ef88b)
+void __thiscall C_CollisionWorld::AddVolume(C_CollisionWorld *this,S_CollisionVolume *volume)
+{
+  S_CollisionGridCell ***pppSVar1;
+  S_CollisionGrid *pSVar2;
+  S_CollisionGridCell **ppSVar3;
+  S_CollisionVolume **ppSVar4;
+  S_CollisionVolume *pSVar5;
+  S_CollisionGridCell *pSVar6;
+  S_CollisionVolume **ppSVar7;
+  int iVar8;
+  S_CollisionVolume **ppSVar9;
+  S_CollisionVolume **ppSVar10;
+  longlong lVar11;
+  int local_10;
+  int local_c;
+  pSVar5 = volume;
+  pSVar2 = this->m_grid;
+  if ((pSVar2 != (S_CollisionGrid *)0x0) && (volume->m_cell == (S_CollisionGridCell *)0x0)) {
+    lVar11 = __ftol();
+    local_c = (int)lVar11;
+    lVar11 = __ftol();
+    local_10 = (int)lVar11;
+    if (local_c < 0) {
+      local_c = 0;
+    }
+    if (local_10 < 0) {
+      local_10 = 0;
+    }
+    iVar8 = pSVar2->cellsX;
+    if (iVar8 <= local_c) {
+      local_c = iVar8 + -1;
+    }
+    if (pSVar2->cellsZ <= local_10) {
+      local_10 = pSVar2->cellsZ + -1;
+    }
+    pSVar5->m_cell = pSVar2->cells[iVar8 * local_10 + local_c];
+    if (volume->m_cell == (S_CollisionGridCell *)0x0) {
+      ppSVar3 = (this->m_freeCells).first;
+      if ((ppSVar3 == (S_CollisionGridCell **)0x0) ||
+         ((int)(this->m_freeCells).last - (int)ppSVar3 >> 2 == 0)) {
+        pSVar6 = operator_new(0x18);
+        if (pSVar6 == (S_CollisionGridCell *)0x0) {
+          pSVar6 = (S_CollisionGridCell *)0x0;
+        }
+        else {
+          (pSVar6->volumes).first = (S_CollisionVolume **)0x0;
+          (pSVar6->volumes).alloc = (uchar)volume;
+          (pSVar6->volumes).last = (S_CollisionVolume **)0x0;
+          (pSVar6->volumes).end = (S_CollisionVolume **)0x0;
+        }
+        volume->m_cell = pSVar6;
+        pSVar6 = volume->m_cell;
+        ppSVar4 = (pSVar6->volumes).first;
+        if ((ppSVar4 == (S_CollisionVolume **)0x0) ||
+           ((uint)((int)(pSVar6->volumes).end - (int)ppSVar4 >> 2) < 8)) {
+          ppSVar7 = operator_new(0x20);
+          ppSVar4 = (pSVar6->volumes).last;
+          ppSVar9 = ppSVar7;
+          for (ppSVar10 = (pSVar6->volumes).first; ppSVar10 != ppSVar4; ppSVar10 = ppSVar10 + 1) {
+            construct_copy4_6f2fd0(ppSVar9,ppSVar10);
+            ppSVar9 = ppSVar9 + 1;
+          }
+          operator_delete((pSVar6->volumes).first);
+          (pSVar6->volumes).end = ppSVar7 + 8;
+          ppSVar4 = (pSVar6->volumes).first;
+          if (ppSVar4 == (S_CollisionVolume **)0x0) {
+            iVar8 = 0;
+          }
+          else {
+            iVar8 = (int)(pSVar6->volumes).last - (int)ppSVar4 >> 2;
+          }
+          (pSVar6->volumes).last = ppSVar7 + iVar8;
+          (pSVar6->volumes).first = ppSVar7;
+        }
+      }
+      else {
+        volume->m_cell = (this->m_freeCells).last[-1];
+        pppSVar1 = &(this->m_freeCells).last;
+        *pppSVar1 = *pppSVar1 + -1;
+      }
+      this->m_grid->cells[this->m_grid->cellsX * local_10 + local_c] = volume->m_cell;
+      volume->m_cell->x = local_c;
+      volume->m_cell->z = local_10;
+    }
+    FUN_004fbb70(&volume->m_cell->volumes,(volume->m_cell->volumes).last,1,&volume);
+  }
+  return;
+}
+
+// @006ef9b0 size=513 callers=C_PhysSwingingObject::~C_PhysSwingingObject,C_PhysSwingingObject::Hit,C_PhysDoor::~C_PhysDoor,C_PhysObject::SetVolumeActive,S_VersionCollision::~S_VersionCollision,004c8ea0,004f5620,004f5840...
+// WARNING: Removing unreachable block (ram,0x006efb65)
+// WARNING: Removing unreachable block (ram,0x006efb7a)
+// WARNING: Removing unreachable block (ram,0x006efb89)
+// WARNING: Removing unreachable block (ram,0x006efb92)
+void __thiscall C_CollisionWorld::RemoveVolume(C_CollisionWorld *this,S_CollisionVolume *volume)
+{
+  S_CollisionGridCell **ppSVar1;
+  S_CollisionGridCell ***pppSVar2;
+  S_CollisionGridCell *pSVar3;
+  S_CollisionVolume **ppSVar4;
+  S_CollisionVolume **ppSVar5;
+  int iVar6;
+  S_CollisionGridCell **ppSVar7;
+  undefined4 *puVar8;
+  S_CollisionGridCell **ppSVar9;
+  uint uVar10;
+  S_CollisionVolume **ppSVar11;
+  int iVar12;
+  if (this->m_grid != (S_CollisionGrid *)0x0) {
+    pSVar3 = volume->m_cell;
+    ppSVar1 = &volume->m_cell;
+    if (pSVar3 != (S_CollisionGridCell *)0x0) {
+      ppSVar11 = (pSVar3->volumes).first;
+      ppSVar5 = (pSVar3->volumes).last;
+      if (ppSVar11 < ppSVar5) {
+        while (*ppSVar11 != volume) {
+          ppSVar11 = ppSVar11 + 1;
+          if (ppSVar5 <= ppSVar11) {
+            *ppSVar1 = (S_CollisionGridCell *)0x0;
+            return;
+          }
+        }
+        ppSVar4 = (pSVar3->volumes).last;
+        ppSVar5 = ppSVar11 + 1;
+        if (ppSVar5 != ppSVar4) {
+          iVar12 = (int)ppSVar11 - (int)ppSVar5;
+          do {
+            *(S_CollisionVolume **)(iVar12 + (int)ppSVar5) = *ppSVar5;
+            ppSVar5 = ppSVar5 + 1;
+          } while (ppSVar5 != ppSVar4);
+        }
+        (pSVar3->volumes).last = (pSVar3->volumes).last + -1;
+        ppSVar11 = ((*ppSVar1)->volumes).first;
+        if ((ppSVar11 == (S_CollisionVolume **)0x0) ||
+           ((int)((*ppSVar1)->volumes).last - (int)ppSVar11 >> 2 == 0)) {
+          ppSVar9 = (this->m_emptyCells).last;
+          if ((int)(this->m_emptyCells).end - (int)ppSVar9 >> 2 == 0) {
+            ppSVar7 = (this->m_emptyCells).first;
+            if ((ppSVar7 == (S_CollisionGridCell **)0x0) ||
+               (uVar10 = (int)ppSVar9 - (int)ppSVar7 >> 2, uVar10 < 2)) {
+              uVar10 = 1;
+            }
+            if (ppSVar7 == (S_CollisionGridCell **)0x0) {
+              iVar12 = 0;
+            }
+            else {
+              iVar12 = (int)ppSVar9 - (int)ppSVar7 >> 2;
+            }
+            iVar12 = iVar12 + uVar10;
+            iVar6 = iVar12;
+            if (iVar12 < 0) {
+              iVar6 = 0;
+            }
+            ppSVar7 = operator_new(iVar6 * 4);
+            puVar8 = (undefined4 *)
+                     uninitialized_copy4_6f2f50((this->m_emptyCells).first,ppSVar9,ppSVar7);
+            uninitialized_fill_n4_6f2f80(puVar8,1,ppSVar1);
+            uninitialized_copy4_6f2f50(ppSVar9,(this->m_emptyCells).last,puVar8 + 1);
+            empty_function_6f2d00();
+            operator_delete((this->m_emptyCells).first);
+            (this->m_emptyCells).end = ppSVar7 + iVar12;
+            iVar12 = vector_size_e4_6f2ae0((int)&this->m_emptyCells);
+            (this->m_emptyCells).last = ppSVar7 + iVar12 + 1;
+            (this->m_emptyCells).first = ppSVar7;
+            *ppSVar1 = (S_CollisionGridCell *)0x0;
+            return;
+          }
+          uninitialized_copy4_6f2f50(ppSVar9,ppSVar9,ppSVar9 + 1);
+          ppSVar7 = (this->m_emptyCells).last;
+          uninitialized_fill_n4_6f2f80(ppSVar7,1 - ((int)ppSVar7 - (int)ppSVar9 >> 2),ppSVar1);
+          ppSVar7 = (this->m_emptyCells).last;
+          for (; ppSVar9 != ppSVar7; ppSVar9 = ppSVar9 + 1) {
+            *ppSVar9 = *ppSVar1;
+          }
+          pppSVar2 = &(this->m_emptyCells).last;
+          *pppSVar2 = *pppSVar2 + 1;
+        }
+      }
+      *ppSVar1 = (S_CollisionGridCell *)0x0;
+    }
+  }
+  return;
+}
+
+// @006efbc0 size=600 callers=C_PhysSwingingObject::Tick,C_PhysSwingingObject::C_PhysSwingingObject,C_PhysDoor::AddBreakVolumes,C_PhysDoor::C_PhysDoor,C_PhysObject::SyncFrame,C_PhysObject::SetVolumeActive,C_PhysBox::C_PhysBox,C_PhysCan::C_PhysCan...
+// WARNING: Removing unreachable block (ram,0x006efd02)
+// WARNING: Removing unreachable block (ram,0x006efd04)
+void __thiscall C_CollisionWorld::MoveVolume(C_CollisionWorld *this,S_CollisionVolume *volume)
+{
+  S_CollisionGridCell ***pppSVar1;
+  S_CollisionGrid *pSVar2;
+  S_CollisionGridCell *pSVar3;
+  S_CollisionGridCell **ppSVar4;
+  S_CollisionVolume *pSVar5;
+  S_CollisionVolume **ppSVar6;
+  S_CollisionVolume **ppSVar7;
+  int iVar8;
+  S_CollisionVolume **ppSVar9;
+  S_CollisionVolume **ppSVar10;
+  longlong lVar11;
+  int local_14;
+  int local_10;
+  S_CollisionGridCell *local_c;
+  pSVar5 = volume;
+  pSVar2 = this->m_grid;
+  if (pSVar2 != (S_CollisionGrid *)0x0) {
+    lVar11 = __ftol();
+    local_10 = (int)lVar11;
+    lVar11 = __ftol();
+    local_14 = (int)lVar11;
+    if (local_10 < 0) {
+      local_10 = 0;
+    }
+    if (local_14 < 0) {
+      local_14 = 0;
+    }
+    iVar8 = pSVar2->cellsX;
+    if (iVar8 <= local_10) {
+      local_10 = iVar8 + -1;
+    }
+    if (pSVar2->cellsZ <= local_14) {
+      local_14 = pSVar2->cellsZ + -1;
+    }
+    pSVar3 = pSVar5->m_cell;
+    local_c = pSVar2->cells[iVar8 * local_14 + local_10];
+    if (local_c != pSVar3) {
+      if (pSVar3 != (S_CollisionGridCell *)0x0) {
+        ppSVar9 = (pSVar3->volumes).first;
+        ppSVar6 = (pSVar3->volumes).last;
+        if (ppSVar9 < ppSVar6) {
+LAB_006efc5e:
+          if (*ppSVar9 != pSVar5) goto code_r0x006efc62;
+          ppSVar10 = (pSVar3->volumes).last;
+          ppSVar6 = ppSVar9 + 1;
+          if (ppSVar6 != ppSVar10) {
+            iVar8 = (int)ppSVar9 - (int)ppSVar6;
+            do {
+              *(S_CollisionVolume **)(iVar8 + (int)ppSVar6) = *ppSVar6;
+              ppSVar6 = ppSVar6 + 1;
+            } while (ppSVar6 != ppSVar10);
+          }
+          (pSVar3->volumes).last = (pSVar3->volumes).last + -1;
+          ppSVar9 = (volume->m_cell->volumes).first;
+          if ((ppSVar9 == (S_CollisionVolume **)0x0) ||
+             ((int)(volume->m_cell->volumes).last - (int)ppSVar9 >> 2 == 0)) {
+            FUN_006f2d10(&this->m_emptyCells,(this->m_emptyCells).last,1,&volume->m_cell);
+          }
+        }
+      }
+LAB_006efcc0:
+      if (local_c == (S_CollisionGridCell *)0x0) {
+        ppSVar4 = (this->m_freeCells).first;
+        if ((ppSVar4 == (S_CollisionGridCell **)0x0) ||
+           ((int)(this->m_freeCells).last - (int)ppSVar4 >> 2 == 0)) {
+          local_c = operator_new(0x18);
+          if (local_c == (S_CollisionGridCell *)0x0) {
+            local_c = (S_CollisionGridCell *)0x0;
+          }
+          else {
+            (local_c->volumes).first = (S_CollisionVolume **)0x0;
+            (local_c->volumes).alloc = (uchar)volume;
+            (local_c->volumes).last = (S_CollisionVolume **)0x0;
+            (local_c->volumes).end = (S_CollisionVolume **)0x0;
+          }
+          ppSVar9 = (local_c->volumes).first;
+          if ((ppSVar9 == (S_CollisionVolume **)0x0) ||
+             ((uint)((int)(local_c->volumes).end - (int)ppSVar9 >> 2) < 8)) {
+            ppSVar7 = operator_new(0x20);
+            ppSVar9 = (local_c->volumes).last;
+            ppSVar10 = ppSVar7;
+            for (ppSVar6 = (local_c->volumes).first; ppSVar6 != ppSVar9; ppSVar6 = ppSVar6 + 1) {
+              construct_copy4_6f2fd0(ppSVar10,ppSVar6);
+              ppSVar10 = ppSVar10 + 1;
+            }
+            empty_function_4fb8a0();
+            operator_delete((local_c->volumes).first);
+            (local_c->volumes).end = ppSVar7 + 8;
+            ppSVar9 = (local_c->volumes).first;
+            if (ppSVar9 == (S_CollisionVolume **)0x0) {
+              iVar8 = 0;
+            }
+            else {
+              iVar8 = (int)(local_c->volumes).last - (int)ppSVar9 >> 2;
+            }
+            (local_c->volumes).last = ppSVar7 + iVar8;
+            (local_c->volumes).first = ppSVar7;
+          }
+        }
+        else {
+          local_c = (this->m_freeCells).last[-1];
+          pppSVar1 = &(this->m_freeCells).last;
+          *pppSVar1 = *pppSVar1 + -1;
+        }
+        this->m_grid->cells[this->m_grid->cellsX * local_14 + local_10] = local_c;
+        local_c->x = local_10;
+        local_c->z = local_14;
+      }
+      FUN_004fbb70(&local_c->volumes,(local_c->volumes).last,1,&volume);
+      volume->m_cell = local_c;
+    }
+  }
+  return;
+code_r0x006efc62:
+  ppSVar9 = ppSVar9 + 1;
+  if (ppSVar6 <= ppSVar9) goto LAB_006efcc0;
+  goto LAB_006efc5e;
+}
+
+// @006efe40 size=155 callers=C_PhysDoor::MoveLeaf,C_PhysBox::TickFlying,C_PhysBox::TickTipping,C_PhysBox::TickRolling,0046df80,004c94b0,004cb2b0,004da420...
+void __thiscall C_CollisionWorld::SetIgnoredVolume(C_CollisionWorld *this,int param_1,int param_2)
+{
+  S_CollisionVolume **ppSVar1;
+  uint uVar2;
+  uVar2 = 0;
+  if (this->m_ignoredCount != 0) {
+    do {
+      ppSVar1 = this->m_ignored + uVar2;
+      uVar2 = uVar2 + 1;
+      (*ppSVar1)->m_type = (*ppSVar1)->m_type & 0xfffffff7;
+    } while (uVar2 < (uint)this->m_ignoredCount);
+  }
+  if (param_1 == 0) {
+    this->m_ignoredCount = 0;
+  }
+  else {
+    this->m_ignoredCount = 1;
+    this->m_ignored = &this->m_ignoredSingle;
+    this->m_ignoredSingle = (S_CollisionVolume *)param_1;
+  }
+  uVar2 = 0;
+  if (this->m_ignoredCount != 0) {
+    do {
+      ppSVar1 = this->m_ignored + uVar2;
+      uVar2 = uVar2 + 1;
+      (*ppSVar1)->m_type = (*ppSVar1)->m_type | 8;
+    } while (uVar2 < (uint)this->m_ignoredCount);
+    this->m_ignoredUnknown = param_2;
+    return;
+  }
+  this->m_ignoredUnknown = param_2;
+  return;
+}
+
+// @006efee0 size=123 callers=0046df80,004da420,00514d70,005c1ec0,005c2260,005c26d0,005c3420,0075cdc0
+void __thiscall
+C_CollisionWorld::SetIgnoredVolumes
+          (C_CollisionWorld *this,S_CollisionVolume **volumes,uint count,int unknown)
+{
+  S_CollisionVolume **ppSVar1;
+  uint uVar2;
+  uVar2 = 0;
+  if (this->m_ignoredCount != 0) {
+    do {
+      ppSVar1 = this->m_ignored + uVar2;
+      uVar2 = uVar2 + 1;
+      (*ppSVar1)->m_type = (*ppSVar1)->m_type & 0xfffffff7;
+    } while (uVar2 < (uint)this->m_ignoredCount);
+  }
+  this->m_ignored = volumes;
+  this->m_ignoredCount = -(uint)(volumes != (S_CollisionVolume **)0x0) & count;
+  this->m_ignoredUnknown = unknown;
+  uVar2 = 0;
+  if (this->m_ignoredCount != 0) {
+    do {
+      ppSVar1 = this->m_ignored + uVar2;
+      uVar2 = uVar2 + 1;
+      (*ppSVar1)->m_type = (*ppSVar1)->m_type | 8;
+    } while (uVar2 < (uint)this->m_ignoredCount);
+  }
+  return;
+}
+
+// @006eff70 size=657 callers=00718750
+// WARNING: Removing unreachable block (ram,0x006f0166)
+// WARNING: Removing unreachable block (ram,0x006f01a0)
+void __fastcall C_CollisionWorld::ClearGrid(void)
+{
+  // locals: undefined4 *puVar1; void *ptr
+  void **ppvVar2;
+  uint uVar3;
+  int iVar4;
+  undefined4 uVar5;
+  int *piVar6;
+  int in_ECX;
+  int iVar7;
+  int *piVar8;
+  int iVar9;
+  int *piVar10;
+  int iVar11;
+  int *piVar12;
+  undefined1 local_1c [4];
+  int *local_18;
+  int *local_14;
+  undefined4 local_10;
+  void *local_c;
+  undefined1 *puStack_8;
+  undefined4 local_4;
+  local_4 = 0xffffffff;
+  puStack_8 = &LAB_0080ca98;
+  local_c = ExceptionList;
+  uVar3 = 0;
+  ExceptionList = &local_c;
+  ppvVar2 = &local_c;
+  if (*(int *)(in_ECX + 0x41c) != 0) {
+    do {
+      ExceptionList = ppvVar2;
+      iVar7 = *(int *)(*(int *)(in_ECX + 0x418) + uVar3 * 4);
+      uVar3 = uVar3 + 1;
+      *(uint *)(iVar7 + 8) = *(uint *)(iVar7 + 8) & 0xfffffff7;
+      ppvVar2 = ExceptionList;
+    } while (uVar3 < *(uint *)(in_ECX + 0x41c));
+  }
+  iVar7 = *(int *)(in_ECX + 0x3ec);
+  if (iVar7 != 0) {
+    iVar9 = 0;
+    if (0 < *(int *)(iVar7 + 0x14)) {
+      do {
+        iVar4 = *(int *)(iVar7 + 0x10);
+        iVar11 = 0;
+        if (0 < iVar4) {
+          do {
+            iVar7 = *(int *)(*(int *)(iVar7 + 0x18) + (iVar4 * iVar9 + iVar11) * 4);
+            if (iVar7 != 0) {
+              puVar1 = *(undefined4 **)(iVar7 + 0xc);
+              if ((puVar1 != (undefined4 *)0x0) &&
+                 ((int)*(undefined4 **)(iVar7 + 0x10) - (int)puVar1 >> 2 != 0)) {
+                FUN_006f2b00((void *)(iVar7 + 8),puVar1,*(undefined4 **)(iVar7 + 0x10));
+                FUN_006f2b60((void *)(in_ECX + 0x400),*(undefined4 **)(in_ECX + 0x408),
+                             (undefined4 *)
+                             (*(int *)(*(int *)(in_ECX + 0x3ec) + 0x18) +
+                             (*(int *)(*(int *)(in_ECX + 0x3ec) + 0x10) * iVar9 + iVar11) * 4));
+                *(undefined4 *)
+                 (*(int *)(*(int *)(in_ECX + 0x3ec) + 0x18) +
+                 (*(int *)(*(int *)(in_ECX + 0x3ec) + 0x10) * iVar9 + iVar11) * 4) = 0;
+              }
+            }
+            iVar7 = *(int *)(in_ECX + 0x3ec);
+            iVar11 = iVar11 + 1;
+            iVar4 = *(int *)(iVar7 + 0x10);
+          } while (iVar11 < iVar4);
+        }
+        iVar7 = *(int *)(in_ECX + 0x3ec);
+        iVar9 = iVar9 + 1;
+      } while (iVar9 < *(int *)(iVar7 + 0x14));
+    }
+    piVar10 = (int *)0x0;
+    piVar8 = (int *)0x0;
+    local_18 = (int *)0x0;
+    local_14 = (int *)0x0;
+    local_10 = 0;
+    piVar12 = *(int **)(in_ECX + 0x3f4);
+    local_4 = 0;
+    if (piVar12 < *(int **)(in_ECX + 0x3f8)) {
+      do {
+        if (piVar10 < piVar8) {
+          piVar6 = piVar10;
+          do {
+            if (*piVar12 == *piVar6) {
+              if (piVar6 < piVar8) goto LAB_006f00c8;
+              break;
+            }
+            piVar6 = piVar6 + 1;
+          } while (piVar6 < piVar8);
+        }
+        FUN_006f2d10(local_1c,piVar8,1,piVar12);
+        piVar8 = local_14;
+        piVar10 = local_18;
+LAB_006f00c8:
+        piVar12 = piVar12 + 1;
+      } while (piVar12 < *(int **)(in_ECX + 0x3f8));
+    }
+    uVar5 = copy4_6f2fb0(*(undefined4 **)(in_ECX + 0x3f8),*(undefined4 **)(in_ECX + 0x3f8),
+                         *(undefined4 **)(in_ECX + 0x3f4));
+    empty_function_6f2d00();
+    *(undefined4 *)(in_ECX + 0x3f8) = uVar5;
+    piVar12 = *(int **)(in_ECX + 0x404);
+    piVar8 = local_14;
+    piVar10 = local_18;
+    if (piVar12 < *(int **)(in_ECX + 0x408)) {
+      do {
+        if (piVar10 < piVar8) {
+          piVar6 = piVar10;
+          do {
+            if (*piVar12 == *piVar6) {
+              if (piVar6 < piVar8) goto LAB_006f0144;
+              break;
+            }
+            piVar6 = piVar6 + 1;
+          } while (piVar6 < piVar8);
+        }
+        FUN_006f2d10(local_1c,piVar8,1,piVar12);
+        piVar8 = local_14;
+        piVar10 = local_18;
+LAB_006f0144:
+        piVar12 = piVar12 + 1;
+      } while (piVar12 < *(int **)(in_ECX + 0x408));
+    }
+    uVar5 = *(undefined4 *)(in_ECX + 0x404);
+    empty_function_6f2d00();
+    *(undefined4 *)(in_ECX + 0x408) = uVar5;
+    piVar12 = local_18;
+    if (local_18 < local_14) {
+      do {
+        *(undefined4 *)(*piVar12 + 0x10) = *(undefined4 *)(*piVar12 + 0xc);
+        ptr = (void *)*piVar12;
+        if (ptr != (void *)0x0) {
+          operator_delete(*(void **)((int)ptr + 0xc));
+          *(undefined4 *)((int)ptr + 0xc) = 0;
+          *(undefined4 *)((int)ptr + 0x10) = 0;
+          *(undefined4 *)((int)ptr + 0x14) = 0;
+          operator_delete(ptr);
+        }
+        piVar12 = piVar12 + 1;
+      } while (piVar12 < local_14);
+    }
+    local_14 = local_18;
+    operator_delete(local_18);
+  }
+  ExceptionList = local_c;
+  return;
+}
+
+// @006f0420 size=595 callers=C_CollisionWorld::TestBoxSweep,007189b0
+bool __thiscall C_CollisionWorld::TestVolumesOverlap(C_CollisionWorld *this,void *query)
+{
+  // locals: S_CollisionGrid *pSVar1; int iVar2; int iVar3; uint *puVar4; float fVar5; float fVar6; float fVar7; float fVar8; int iVar9; int *piVar10; int *piVar11; byte bVar12; longlong lVar13; longlong lVar14; int local_38; int local_34; int local_2c; int local_28; int local_20
+  pSVar1 = this->m_grid;
+  if (pSVar1 != (S_CollisionGrid *)0x0) {
+    lVar13 = __ftol();
+    local_34 = (int)lVar13;
+    lVar13 = __ftol();
+    lVar14 = __ftol();
+    local_20 = (int)lVar14;
+    lVar14 = __ftol();
+    if (local_34 < 0) {
+      local_34 = 0;
+    }
+    if (local_20 < 0) {
+      local_20 = 0;
+    }
+    iVar2 = pSVar1->cellsX;
+    local_38 = (int)lVar13;
+    if (iVar2 < (int)lVar13) {
+      local_38 = iVar2;
+    }
+    local_2c = (int)lVar14;
+    if (pSVar1->cellsZ < (int)lVar14) {
+      local_2c = pSVar1->cellsZ;
+    }
+    if (local_20 < local_2c) {
+      iVar9 = (iVar2 * local_20 + local_34) * 4;
+      do {
+        local_28 = local_34;
+        if (local_34 < local_38) {
+          piVar10 = (int *)((int)pSVar1->cells + iVar9);
+          do {
+            iVar3 = *piVar10;
+            if (iVar3 != 0) {
+              for (piVar11 = *(int **)(iVar3 + 0xc); piVar11 < *(int **)(iVar3 + 0x10);
+                  piVar11 = piVar11 + 1) {
+                puVar4 = (uint *)*piVar11;
+                if ((puVar4[2] & *(uint *)((int)query + 0x88)) == 0) {
+                  switch(*puVar4 & 0xff) {
+                  case 0x40:
+                  case 0x42:
+                  case 0x44:
+                    fVar5 = *(float *)((int)query + 0x30) - (float)puVar4[0xc];
+                    fVar8 = *(float *)((int)query + 0x34) - (float)puVar4[0xd];
+                    fVar7 = *(float *)((int)query + 0x38) - (float)puVar4[0xe];
+                    fVar6 = (float)puVar4[0x13] + *(float *)((int)query + 0x68);
+                    fVar5 = fVar5 * fVar5 + fVar8 * fVar8 + fVar7 * fVar7;
+                    fVar6 = fVar6 * fVar6;
+                    bVar12 = fVar6 < fVar5 |
+                             (byte)((ushort)((ushort)(NAN(fVar6) || NAN(fVar5)) << 10) >> 8);
+LAB_006f0602:
+                    if ((POPCOUNT(bVar12) & 1U) == 0) {
+switchD_006f0576_caseD_49:
+                      return true;
+                    }
+                    break;
+                  case 0x41:
+                    if (((((float)puVar4[4] <= *(float *)((int)query + 0x5c)) &&
+                         ((float)puVar4[5] <= *(float *)((int)query + 0x60))) &&
+                        ((float)puVar4[6] <= *(float *)((int)query + 100))) &&
+                       ((*(float *)((int)query + 0x50) <= (float)puVar4[8] &&
+                        (*(float *)((int)query + 0x54) <= (float)puVar4[9])))) {
+                      bVar12 = (float)puVar4[10] < *(float *)((int)query + 0x58) |
+                               (byte)((ushort)((ushort)(NAN((float)puVar4[10]) ||
+                                                       NAN(*(float *)((int)query + 0x58))) << 10) >>
+                                     8);
+                      goto LAB_006f0602;
+                    }
+                    break;
+                  case 0x49:
+                    goto switchD_006f0576_caseD_49;
+                  }
+                }
+              }
+            }
+            local_28 = local_28 + 1;
+            piVar10 = piVar10 + 1;
+          } while (local_28 < local_38);
+        }
+        iVar9 = iVar9 + iVar2 * 4;
+        local_20 = local_20 + 1;
+      } while (local_20 < local_2c);
+    }
+  }
+  return false;
+}
+
+// @006f0690 size=532 callers=TestCellOverlap
+bool __cdecl TestPrimitiveOverlap(void *primitive,void *query)
+{
+  // locals: float fVar1; float fVar2; float fVar3; float fVar4; ushort uVar5; S_vector local_30 [3]
+  switch(*(uint *)primitive & 0xff) {
+  case 0x80:
+  case 0x81:
+    if (((*(float *)((int)primitive + 8) < *(float *)((int)query + 0x5c)) &&
+        (*(float *)((int)query + 0x50) < *(float *)((int)primitive + 0x14))) &&
+       ((*(float *)((int)primitive + 0x10) < *(float *)((int)query + 100) &&
+        (((*(float *)((int)query + 0x58) < *(float *)((int)primitive + 0x1c) &&
+          (*(float *)((int)primitive + 0xc) < *(float *)((int)query + 0x60))) &&
+         (*(float *)((int)query + 0x54) < *(float *)((int)primitive + 0x18))))))) {
+      return true;
+    }
+    break;
+  case 0x82:
+    fVar1 = *(float *)((int)primitive + 0x10) - *(float *)((int)query + 0x30);
+    fVar4 = *(float *)((int)primitive + 0x14) - *(float *)((int)query + 0x34);
+    fVar3 = *(float *)((int)primitive + 0x18) - *(float *)((int)query + 0x38);
+    fVar2 = *(float *)((int)query + 0x68) + *(float *)((int)primitive + 8);
+    fVar1 = fVar1 * fVar1 + fVar4 * fVar4 + fVar3 * fVar3;
+    fVar2 = fVar2 * fVar2;
+    uVar5 = (ushort)(fVar2 < fVar1) << 8 | (ushort)(fVar2 == fVar1) << 0xe;
+    goto LAB_006f082a;
+  case 0x83:
+    S_vector::OperatorMul
+              ((S_vector *)((int)query + 0x30),local_30,(S_matrix *)((int)primitive + 0x60));
+    fVar1 = *(float *)((int)query + 0x68);
+    if ((((*(float *)((int)primitive + 8) < local_30[0].x + fVar1) &&
+         (local_30[0].x - fVar1 < *(float *)((int)primitive + 0x14))) &&
+        (*(float *)((int)primitive + 0x10) < local_30[0].z + fVar1)) &&
+       (((local_30[0].z - fVar1 < *(float *)((int)primitive + 0x1c) && (0.0 < local_30[0].y + fVar1)
+         ) && (local_30[0].y - fVar1 < 0.0)))) {
+      return true;
+    }
+    break;
+  case 0x84:
+    fVar1 = *(float *)((int)primitive + 8) - *(float *)((int)query + 0x30);
+    fVar2 = *(float *)((int)query + 0x34) - *(float *)((int)query + 0x34);
+    fVar4 = *(float *)((int)primitive + 0xc) - *(float *)((int)query + 0x38);
+    fVar3 = *(float *)((int)query + 0x68) + *(float *)((int)primitive + 0x10);
+    fVar1 = fVar1 * fVar1 + fVar2 * fVar2 + fVar4 * fVar4;
+    fVar3 = fVar3 * fVar3;
+    uVar5 = (ushort)(fVar3 < fVar1) << 8 | (ushort)(fVar3 == fVar1) << 0xe;
+LAB_006f082a:
+    if (uVar5 == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// @006f08c0 size=505 callers=C_CollisionWorld::TestBoxSweep,007189b0
+bool __cdecl TestCellOverlap(S_CollisionMeshCell *cell,void *query)
+{
+  // locals: uint *primitive; float *pfVar1; float *pfVar2; float fVar3; float fVar4; float fVar5; bool bVar6; float local_1c; uint local_18
+  local_18 = 0;
+  if (cell->count != 0) {
+    do {
+      primitive = cell->entries[local_18];
+      if ((*primitive & *(uint *)((int)query + 0x8c)) == 0) {
+        if ((*primitive & 0xa0) == 0) {
+          pfVar1 = (float *)primitive[3];
+          if (*(float *)((int)query + 0x50) <= *pfVar1) {
+            pfVar2 = (float *)primitive[1];
+            if (*(float *)((int)query + 0x5c) < *pfVar2) {
+              return false;
+            }
+            local_1c = pfVar2[1];
+            fVar3 = pfVar1[1];
+            fVar4 = fVar3;
+            if ((local_1c <= fVar3) && (fVar4 = local_1c, local_1c < fVar3)) {
+              local_1c = fVar3;
+            }
+            fVar3 = *(float *)(primitive[2] + 4);
+            fVar5 = fVar3;
+            if ((fVar4 <= fVar3) && (fVar5 = fVar4, local_1c < fVar3)) {
+              local_1c = fVar3;
+            }
+            if ((fVar5 <= *(float *)((int)query + 0x60)) &&
+               (*(float *)((int)query + 0x54) <= local_1c)) {
+              local_1c = pfVar2[2];
+              fVar3 = pfVar1[2];
+              fVar4 = fVar3;
+              if ((local_1c <= fVar3) && (fVar4 = local_1c, local_1c < fVar3)) {
+                local_1c = fVar3;
+              }
+              fVar3 = *(float *)(primitive[2] + 8);
+              fVar5 = fVar3;
+              if ((fVar4 <= fVar3) && (fVar5 = fVar4, local_1c < fVar3)) {
+                local_1c = fVar3;
+              }
+              if ((fVar5 <= *(float *)((int)query + 100)) &&
+                 (*(float *)((int)query + 0x58) <= local_1c)) {
+                fVar3 = ABS((*(float *)((int)query + 0x40) - *pfVar2) * (float)primitive[4] +
+                            (*(float *)((int)query + 0x44) - pfVar2[1]) * (float)primitive[5] +
+                            (*(float *)((int)query + 0x48) - pfVar2[2]) * (float)primitive[6]);
+                bVar6 = *(float *)((int)query + 0x6c) < fVar3 * fVar3;
+                goto LAB_006f0a8d;
+              }
+            }
+          }
+        }
+        else {
+          bVar6 = TestPrimitiveOverlap(primitive,query);
+          bVar6 = !bVar6;
+LAB_006f0a8d:
+          if (!bVar6) {
+            return true;
+          }
+        }
+      }
+      local_18 = local_18 + 1;
+    } while (local_18 < (uint)cell->count);
+  }
+  return false;
+}
+
+// @006f0ac0 size=2013 callers=007189b0
+bool __thiscall
+C_CollisionWorld::TestBoxSweep
+          (C_CollisionWorld *this,float *box,S_matrix *from,S_matrix *to,float *unknown4,
+          float *unknown5,float *unknown6,uint excludeTypes,uint excludeFlags)
+{
+  // locals: float fVar1; float fVar2; float fVar3; S_CollisionMesh *pSVar4; float fVar5; bool bVar6; S_vector *pSVar7; int iVar8; int iVar9; int iVar10; S_vector *unaff_EDI; C_CollisionWorld *pCVar11; bool bVar12; longlong lVar13; longlong lVar14; byte local_18a; int local_184; int local_164; S_vector local_160; int local_14c; int local_148; int local_144; S_vector local_140 [2]; int local_128; C_CollisionWorld *local_124; undefined1 local_120 [48]; float local_f0; float local_ec; float local_e8; float local_e4; float local_e0; float local_dc; float local_d8; float local_d4; float local_d0; float local_cc; float local_c8; float local_c4; float local_c0; float local_bc; float local_b8; float local_b4; uint local_98; uint local_94; S_vector local_90; S_vector local_80 [8]; float local_20; float local_1c; float local_18
+  if (this->m_mesh == (S_CollisionMesh *)0x0) {
+    return false;
+  }
+  bVar12 = excludeFlags == 0xffffffff;
+  if (bVar12) {
+    excludeFlags = 0;
+  }
+  local_98 = excludeTypes | 8;
+  local_94 = excludeFlags | 0x20;
+  fVar2 = unknown4[3];
+  local_160.z = unknown5[2] + unknown6[2];
+  fVar1 = (*unknown5 + *unknown6) * 0.5;
+  fVar3 = (unknown5[1] + unknown6[1]) * 0.5;
+  local_160.x = local_160.z * 0.5 * unknown4[1] - fVar3 * unknown4[2];
+  fVar5 = fVar1 * unknown4[2] - local_160.z * 0.5 * *unknown4;
+  fVar1 = fVar3 * *unknown4 - fVar1 * unknown4[1];
+  local_140[0].x = unknown4[2] * fVar5 - unknown4[1] * fVar1;
+  local_140[0].y = *unknown4 * fVar1 - unknown4[2] * local_160.x;
+  local_140[0].z = unknown4[1] * local_160.x - fVar5 * *unknown4;
+  pSVar7 = &local_90;
+  iVar9 = 0;
+  do {
+    iVar8 = 0;
+    do {
+      if (iVar9 == 0) {
+        fVar1 = box[4];
+      }
+      else {
+        fVar1 = *box;
+      }
+      pSVar7->x = fVar1;
+      if (iVar8 == 0) {
+        fVar1 = box[5];
+      }
+      else {
+        fVar1 = box[1];
+      }
+      fVar3 = box[2];
+      pSVar7->y = fVar1;
+      pSVar7->z = fVar3;
+      if (iVar9 == 0) {
+        fVar1 = box[4];
+      }
+      else {
+        fVar1 = *box;
+      }
+      pSVar7[1].y = fVar1;
+      if (iVar8 == 0) {
+        fVar1 = box[5];
+      }
+      else {
+        fVar1 = box[1];
+      }
+      fVar3 = box[6];
+      pSVar7[1].z = fVar1;
+      pSVar7[2].x = fVar3;
+      pSVar7 = (S_vector *)&pSVar7[2].z;
+      iVar8 = iVar8 + 1;
+    } while (iVar8 < 2);
+    iVar9 = iVar9 + 1;
+  } while (iVar9 < 2);
+  local_124 = this;
+  S_vector::OperatorMulAssign(&local_90,from);
+  local_c4 = local_90.x;
+  local_d0 = local_90.x;
+  local_c0 = local_90.y;
+  local_cc = local_90.y;
+  local_bc = local_90.z;
+  local_c8 = local_90.z;
+  pSVar7 = local_80;
+  local_184 = 7;
+  do {
+    S_vector::OperatorMulAssign(pSVar7,from);
+    fVar1 = pSVar7->x;
+    if (fVar1 < local_d0) {
+      local_d0 = fVar1;
+    }
+    if (local_c4 < fVar1) {
+      local_c4 = fVar1;
+    }
+    fVar1 = pSVar7->z;
+    if (fVar1 < local_c8) {
+      local_c8 = fVar1;
+    }
+    if (local_bc < fVar1) {
+      local_bc = fVar1;
+    }
+    fVar1 = pSVar7->y;
+    if (fVar1 < local_cc) {
+      local_cc = fVar1;
+    }
+    if (local_c0 < fVar1) {
+      local_c0 = fVar1;
+    }
+    pSVar7 = (S_vector *)&pSVar7[1].y;
+    local_184 = local_184 + -1;
+  } while (local_184 != 0);
+  pSVar7 = &local_90;
+  iVar9 = 0;
+  do {
+    iVar8 = 0;
+    do {
+      if (iVar9 == 0) {
+        fVar1 = box[4];
+      }
+      else {
+        fVar1 = *box;
+      }
+      pSVar7->x = fVar1;
+      if (iVar8 == 0) {
+        fVar1 = box[5];
+      }
+      else {
+        fVar1 = box[1];
+      }
+      fVar3 = box[2];
+      pSVar7->y = fVar1;
+      pSVar7->z = fVar3;
+      if (iVar9 == 0) {
+        fVar1 = box[4];
+      }
+      else {
+        fVar1 = *box;
+      }
+      pSVar7[1].y = fVar1;
+      if (iVar8 == 0) {
+        fVar1 = box[5];
+      }
+      else {
+        fVar1 = box[1];
+      }
+      fVar3 = box[6];
+      pSVar7[1].z = fVar1;
+      pSVar7[2].x = fVar3;
+      pSVar7 = (S_vector *)&pSVar7[2].z;
+      iVar8 = iVar8 + 1;
+    } while (iVar8 < 2);
+    iVar9 = iVar9 + 1;
+  } while (iVar9 < 2);
+  pSVar7 = &local_90;
+  local_184 = 8;
+  do {
+    S_vector::OperatorMulAssign(pSVar7,to);
+    fVar1 = pSVar7->x;
+    if (fVar1 < local_d0) {
+      local_d0 = fVar1;
+    }
+    if (local_c4 < fVar1) {
+      local_c4 = fVar1;
+    }
+    fVar1 = pSVar7->z;
+    if (fVar1 < local_c8) {
+      local_c8 = fVar1;
+    }
+    if (local_bc < fVar1) {
+      local_bc = fVar1;
+    }
+    fVar1 = pSVar7->y;
+    if (fVar1 < local_cc) {
+      local_cc = fVar1;
+    }
+    if (local_c0 < fVar1) {
+      local_c0 = fVar1;
+    }
+    pSVar7 = (S_vector *)&pSVar7[1].y;
+    local_184 = local_184 + -1;
+  } while (local_184 != 0);
+  local_140[0].z = box[6] + box[2];
+  local_160.x = (box[4] + *box) * 0.5;
+  local_160.y = (box[5] + box[1]) * 0.5;
+  local_160.z = local_140[0].z * 0.5;
+  pSVar7 = S_vector::OperatorMul(&local_160,local_140,to);
+  local_f0 = pSVar7->x;
+  local_ec = pSVar7->y;
+  local_140[0].x = local_f0 - local_20;
+  local_e8 = pSVar7->z;
+  local_e4 = pSVar7[1].x;
+  local_b8 = local_140[0].x * local_140[0].x +
+             (local_ec - local_1c) * (local_ec - local_1c) +
+             (local_e8 - local_18) * (local_e8 - local_18);
+  local_e0 = *unknown6 * 20.0 + local_f0;
+  local_dc = local_ec + unknown6[1] * 20.0;
+  local_d8 = local_e8 + unknown6[2] * 20.0;
+  local_160.x = local_e0 - local_20;
+  local_160.y = local_dc - local_1c;
+  local_160.z = local_d8 - local_18;
+  local_d4 = fVar2;
+  S_vector::Set(local_140,local_160.x,local_160.y,local_160.z);
+  local_b4 = DotVector(local_140,&local_160,unaff_EDI);
+  pCVar11 = local_124;
+  local_18a = 0;
+  if ((excludeTypes != 0xffffffff) && (bVar6 = TestVolumesOverlap(local_124,local_120), bVar6)) {
+    return true;
+  }
+  if (bVar12) {
+    return false;
+  }
+  pSVar4 = pCVar11->m_mesh;
+  lVar13 = __ftol();
+  local_128 = (int)lVar13;
+  lVar13 = __ftol();
+  local_14c = (int)lVar13;
+  lVar13 = __ftol();
+  local_164 = (int)lVar13;
+  lVar13 = __ftol();
+  lVar14 = __ftol();
+  local_148 = (int)lVar14;
+  lVar14 = __ftol();
+  local_144 = (int)lVar14;
+  if (local_128 < 0) {
+    local_128 = 0;
+  }
+  if (local_164 < 0) {
+    local_164 = 0;
+  }
+  if (pSVar4->cellsX < local_14c) {
+    local_14c = pSVar4->cellsX;
+  }
+  iVar9 = (int)lVar13;
+  if (pSVar4->cellsZ < (int)lVar13) {
+    iVar9 = pSVar4->cellsZ;
+  }
+  if (local_144 < 0) {
+    local_144 = 0;
+  }
+  if (pSVar4->cellsY < local_148) {
+    local_148 = pSVar4->cellsY;
+  }
+  if (local_164 < iVar9) {
+    do {
+      iVar8 = local_144;
+      if (local_144 < local_148) {
+        do {
+          iVar10 = local_128;
+          if (local_128 < local_14c) {
+            do {
+              pSVar4 = pCVar11->m_mesh;
+              if (local_cc <
+                  pSVar4->cells[(pSVar4->cellsZ * iVar8 + local_164) * pSVar4->cellsX + iVar10]->
+                  maxY) {
+                bVar12 = TestCellOverlap(pSVar4->cells
+                                         [(pSVar4->cellsZ * iVar8 + local_164) * pSVar4->cellsX +
+                                          iVar10],local_120);
+                local_18a = local_18a | bVar12;
+                pCVar11 = local_124;
+              }
+              iVar10 = iVar10 + 1;
+            } while (iVar10 < local_14c);
+          }
+          iVar8 = iVar8 + 1;
+        } while (iVar8 < local_148);
+      }
+      local_164 = local_164 + 1;
+    } while (local_164 < iVar9);
+    if (local_18a != 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// @006f12a0 size=5832 callers=
+uint __thiscall FUN_006f12a0(void *this,float *param_1)
+{
+  // locals: S_vector *this_00; I3D_driver_vtbl *pIVar1; float fVar2; float fVar3; I3D_driver *pIVar4; I3D_driver *pIVar5; S_vector *pSVar6; undefined4 *puVar7; float *pfVar8; S_vector *pSVar9; undefined4 *puVar10; undefined4 uVar11; undefined4 uVar12; undefined1 *puVar13; undefined1 *puVar14; I3D_driver *unaff_ESI; float *pfVar15; undefined4 uVar16; float *pfVar17; float *pfVar18; undefined4 uVar19; I3D_driver *pIStack_25c; undefined1 *puStack_258; undefined1 *puStack_254; float *pfStack_250; I3D_driver *pIStack_24c; undefined1 *puStack_248; undefined1 *puVar20; uint uVar21; float fVar22; undefined1 *puStack_208; undefined1 *puStack_204; float *local_200; undefined1 local_1fc [8]; float local_1f4; S_vector local_1f0; S_vector local_1e4; float fStack_1d8; float local_1d4; S_vector local_1d0; undefined1 *local_1c4; float *pfStack_1c0; S_vector SStack_1bc; S_vector local_1b0; float local_1a4; S_vector local_1a0; float local_194; float *local_190; undefined1 local_18c [8]; undefined1 *local_184; S_vector local_180; undefined1 local_174 [8]; S_vector local_16c; S_vector local_160; float fStack_154; undefined1 local_150 [8]; float local_148; I3D_driver *pIStack_144; S_vector *pSStack_140; float afStack_13c [2]; S_vector *local_134; S_vector local_130; float local_124; float local_120; float local_11c; float local_118; float local_114; undefined1 local_110 [12]; undefined4 local_104; float local_100; float local_fc; float local_f8; undefined1 local_f4 [8]; float local_ec [3]; S_vector local_e0; undefined1 auStack_cc [8]; S_vector *local_c4; float local_c0; float local_bc; float local_b8; float local_b4; S_vector local_b0; S_vector local_a0; float local_90 [35]
+  uVar21 = 0;
+  if (*(int *)((int)this + 0x3e4) != 0) {
+    this_00 = (S_vector *)(param_1 + 4);
+    S_vector::Set(&local_180,this_00->x - *param_1,param_1[5] - param_1[1],param_1[6] - param_1[2]);
+    local_190 = (float *)local_180.x;
+    local_18c._0_4_ = local_180.y;
+    local_184 = (undefined1 *)local_174._0_4_;
+    local_18c._4_4_ = local_180.z;
+    local_1d4 = local_180.z * local_180.z + local_180.y * local_180.y + local_180.x * local_180.x;
+    if (1e-08 <= ABS(local_1d4 - 1.0)) {
+      if (1e-08 <= local_1d4) {
+        local_18c._4_4_ = 1.0 / SQRT(local_1d4);
+        local_190 = (float *)(local_180.x * (float)local_18c._4_4_);
+        local_18c._0_4_ = local_180.y * (float)local_18c._4_4_;
+        local_18c._4_4_ = local_180.z * (float)local_18c._4_4_;
+      }
+      else if (local_180.x == 0.0) {
+        if (local_180.z == 0.0) {
+          if (0.0 <= local_180.y) {
+            local_18c._0_4_ = 1.0;
+          }
+          else {
+            local_18c._0_4_ = -1.0;
+          }
+        }
+        else if (0.0 <= local_180.z) {
+          local_18c._4_4_ = 1.0;
+        }
+        else {
+          local_18c._4_4_ = -1.0;
+        }
+      }
+      else if (0.0 <= local_180.x) {
+        local_190 = (float *)0x3f800000;
+      }
+      else {
+        local_190 = (float *)0xbf800000;
+      }
+    }
+    S_vector::Set(&local_1a0,(float)local_18c._0_4_ * 0.0 - (float)local_18c._4_4_,
+                  (float)local_18c._4_4_ * 0.0 - (float)local_190 * 0.0,
+                  (float)local_190 - (float)local_18c._0_4_ * 0.0);
+    local_c0 = local_1a0.x;
+    local_b4 = local_194;
+    local_bc = local_1a0.y;
+    local_b8 = local_1a0.z;
+    S_vector::Set(&local_180,
+                  local_1a0.z * (float)local_18c._0_4_ - local_1a0.y * (float)local_18c._4_4_,
+                  local_1a0.x * (float)local_18c._4_4_ - local_1a0.z * (float)local_190,
+                  local_1a0.y * (float)local_190 - local_1a0.x * (float)local_18c._0_4_);
+    S_vector::Set(&local_1b0,param_1[0x18] * param_1[0x20],param_1[0x19] * param_1[0x20],
+                  param_1[0x1a] * param_1[0x20]);
+    local_130.x = local_1b0.x;
+    local_130.z = local_1b0.z;
+    local_130.y = local_1b0.y;
+    local_124 = local_1a4;
+    S_vector::Set(&local_1f0,param_1[0x21] * param_1[8],param_1[9] * param_1[0x21],
+                  param_1[10] * param_1[0x21]);
+    local_f4._4_4_ = local_1f0.x;
+    local_ec[0] = local_1f0.y;
+    local_ec[1] = local_1f0.z;
+    local_ec[2] = local_1e4.x;
+    S_vector::Set(&local_1d0,param_1[0x22] * param_1[0x10],param_1[0x11] * param_1[0x22],
+                  param_1[0x12] * param_1[0x22]);
+    local_110._8_4_ = local_1d0.z;
+    local_110._0_4_ = local_1d0.x;
+    local_110._4_4_ = local_1d0.y;
+    local_104 = local_1c4;
+    if (0.0 <= local_1b0.z * (float)local_18c._4_4_ +
+               local_1b0.y * (float)local_18c._0_4_ + local_1b0.x * (float)local_190) {
+      local_200 = (float *)local_1b0.x;
+      local_1fc._0_4_ = local_1b0.y;
+      local_1fc._4_4_ = local_1b0.z;
+      local_1f4 = local_1a4;
+    }
+    else {
+      S_vector::Set((S_vector *)(local_174 + 4),-local_1b0.x,-local_1b0.y,-local_1b0.z);
+      local_200 = (float *)local_174._4_4_;
+      local_1fc._0_4_ = local_16c.x;
+      local_1fc._4_4_ = local_16c.y;
+      local_1f4 = local_16c.z;
+    }
+    if (0.0 <= local_1f0.z * (float)local_18c._4_4_ +
+               local_1f0.y * (float)local_18c._0_4_ + local_1f0.x * (float)local_190) {
+      fVar22 = local_1f0.x + (float)local_200;
+      local_1fc._0_4_ = local_1f0.y + (float)local_1fc._0_4_;
+      local_1fc._4_4_ = local_1f0.z + (float)local_1fc._4_4_;
+    }
+    else {
+      fVar22 = (float)local_200 - local_1f0.x;
+      local_1fc._0_4_ = (float)local_1fc._0_4_ - local_1f0.y;
+      local_1fc._4_4_ = (float)local_1fc._4_4_ - local_1f0.z;
+    }
+    if (0.0 <= local_1d0.z * (float)local_18c._4_4_ +
+               local_1d0.y * (float)local_18c._0_4_ + local_1d0.x * (float)local_190) {
+      local_200 = (float *)(local_1d0.x + fVar22);
+      local_1fc._0_4_ = local_1d0.y + (float)local_1fc._0_4_;
+      local_1fc._4_4_ = local_1d0.z + (float)local_1fc._4_4_;
+    }
+    else {
+      local_200 = (float *)(fVar22 - local_1d0.x);
+      local_1fc._0_4_ = (float)local_1fc._0_4_ - local_1d0.y;
+      local_1fc._4_4_ = (float)local_1fc._4_4_ - local_1d0.z;
+    }
+    S_vector::Set(&local_160,(float)local_200 + *param_1,(float)local_1fc._0_4_ + param_1[1],
+                  (float)local_1fc._4_4_ + param_1[2]);
+    S_vector::Set(&local_160,*param_1 - (float)local_200,param_1[1] - (float)local_1fc._0_4_,
+                  param_1[2] - (float)local_1fc._4_4_);
+    local_118 = (float)local_1fc._4_4_;
+    local_120 = (float)local_200;
+    local_11c = (float)local_1fc._0_4_;
+    local_114 = local_1f4;
+    if (0.0 <= local_180.z * local_1b0.z + local_180.y * local_1b0.y + local_180.x * local_1b0.x) {
+      local_200 = (float *)local_1b0.x;
+      local_1fc._0_4_ = local_1b0.y;
+      local_1fc._4_4_ = local_1b0.z;
+      local_1f4 = local_1a4;
+    }
+    else {
+      S_vector::Set((S_vector *)(local_174 + 4),-local_1b0.x,-local_1b0.y,-local_1b0.z);
+      local_200 = (float *)local_174._4_4_;
+      local_1fc._0_4_ = local_16c.x;
+      local_1fc._4_4_ = local_16c.y;
+      local_1f4 = local_16c.z;
+    }
+    if (0.0 <= local_180.z * local_1f0.z + local_180.y * local_1f0.y + local_180.x * local_1f0.x) {
+      fVar22 = local_1f0.x + (float)local_200;
+      local_1fc._0_4_ = local_1f0.y + (float)local_1fc._0_4_;
+      local_1fc._4_4_ = local_1f0.z + (float)local_1fc._4_4_;
+    }
+    else {
+      fVar22 = (float)local_200 - local_1f0.x;
+      local_1fc._0_4_ = (float)local_1fc._0_4_ - local_1f0.y;
+      local_1fc._4_4_ = (float)local_1fc._4_4_ - local_1f0.z;
+    }
+    if (0.0 <= local_180.z * local_1d0.z + local_180.y * local_1d0.y + local_180.x * local_1d0.x) {
+      local_200 = (float *)(local_1d0.x + fVar22);
+      local_1fc._0_4_ = local_1d0.y + (float)local_1fc._0_4_;
+      local_1fc._4_4_ = local_1d0.z + (float)local_1fc._4_4_;
+    }
+    else {
+      local_200 = (float *)(fVar22 - local_1d0.x);
+      local_1fc._0_4_ = (float)local_1fc._0_4_ - local_1d0.y;
+      local_1fc._4_4_ = (float)local_1fc._4_4_ - local_1d0.z;
+    }
+    S_vector::Set(&local_160,(float)local_200 + *param_1,(float)local_1fc._0_4_ + param_1[1],
+                  (float)local_1fc._4_4_ + param_1[2]);
+    S_vector::Set(&local_160,*param_1 - (float)local_200,param_1[1] - (float)local_1fc._0_4_,
+                  param_1[2] - (float)local_1fc._4_4_);
+    local_f8 = (float)local_1fc._4_4_;
+    local_100 = (float)local_200;
+    local_fc = (float)local_1fc._0_4_;
+    local_f4._0_4_ = local_1f4;
+    if (0.0 <= local_1b0.y * local_1a0.y + local_1b0.x * local_1a0.x + local_1b0.z * local_1a0.z) {
+      local_200 = (float *)local_1b0.x;
+      local_1fc._0_4_ = local_1b0.y;
+      local_1fc._4_4_ = local_1b0.z;
+      local_1f4 = local_1a4;
+    }
+    else {
+      S_vector::Set((S_vector *)(local_174 + 4),-local_1b0.x,-local_1b0.y,-local_1b0.z);
+      local_200 = (float *)local_174._4_4_;
+      local_1fc._0_4_ = local_16c.x;
+      local_1fc._4_4_ = local_16c.y;
+      local_1f4 = local_16c.z;
+    }
+    if (0.0 <= local_1f0.y * local_1a0.y + local_1f0.x * local_1a0.x + local_1f0.z * local_1a0.z) {
+      fVar22 = local_1f0.x + (float)local_200;
+      local_1fc._0_4_ = local_1f0.y + (float)local_1fc._0_4_;
+      local_1fc._4_4_ = local_1f0.z + (float)local_1fc._4_4_;
+    }
+    else {
+      fVar22 = (float)local_200 - local_1f0.x;
+      local_1fc._0_4_ = (float)local_1fc._0_4_ - local_1f0.y;
+      local_1fc._4_4_ = (float)local_1fc._4_4_ - local_1f0.z;
+    }
+    if (0.0 <= local_1d0.y * local_1a0.y + local_1d0.x * local_1a0.x + local_1d0.z * local_1a0.z) {
+      local_200 = (float *)(local_1d0.x + fVar22);
+      local_1fc._0_4_ = local_1d0.y + (float)local_1fc._0_4_;
+      local_1fc._4_4_ = local_1d0.z + (float)local_1fc._4_4_;
+    }
+    else {
+      local_200 = (float *)(fVar22 - local_1d0.x);
+      local_1fc._0_4_ = (float)local_1fc._0_4_ - local_1d0.y;
+      local_1fc._4_4_ = (float)local_1fc._4_4_ - local_1d0.z;
+    }
+    S_vector::Set(&local_160,(float)local_200 + *param_1,(float)local_1fc._0_4_ + param_1[1],
+                  (float)local_1fc._4_4_ + param_1[2]);
+    S_vector::Set(&local_160,*param_1 - (float)local_200,param_1[1] - (float)local_1fc._0_4_,
+                  param_1[2] - (float)local_1fc._4_4_);
+    local_174._4_4_ = local_200;
+    local_16c.x = (float)local_1fc._0_4_;
+    local_16c.y = (float)local_1fc._4_4_;
+    local_16c.z = local_1f4;
+    local_1d4 = 0.0;
+    SStack_1bc.z = (float)local_90;
+    do {
+      if (((uint)local_1d4 & 4) == 0) {
+        S_vector::Set(&local_a0,-local_1d0.x,-local_1d0.y,-local_1d0.z);
+        local_134 = &local_a0;
+      }
+      else {
+        local_134 = (S_vector *)local_110;
+      }
+      if (((uint)local_1d4 & 2) == 0) {
+        S_vector::Set(&local_e0,-local_1f0.x,-local_1f0.y,-local_1f0.z);
+        local_c4 = &local_e0;
+      }
+      else {
+        local_c4 = (S_vector *)(local_f4 + 4);
+      }
+      if (((uint)local_1d4 & 1) == 0) {
+        S_vector::Set(&local_160,-local_1b0.x,-local_1b0.y,-local_1b0.z);
+        pSVar6 = &local_160;
+      }
+      else {
+        pSVar6 = &local_130;
+      }
+      S_vector::Set(&local_b0,pSVar6->x + *param_1,pSVar6->y + param_1[1],pSVar6->z + param_1[2]);
+      S_vector::Set((S_vector *)local_150,local_b0.x + local_c4->x,local_b0.y + local_c4->y,
+                    local_b0.z + local_c4->z);
+      S_vector::Set(&local_1a0,(float)local_150._0_4_ + local_134->x,
+                    (float)local_150._4_4_ + local_134->y,local_148 + local_134->z);
+      pfVar8 = (float *)((int)SStack_1bc.z + 0x10);
+      *(float *)SStack_1bc.z = local_1a0.x;
+      *(float *)((int)SStack_1bc.z + 4) = local_1a0.y;
+      *(float *)((int)SStack_1bc.z + 8) = local_1a0.z;
+      *(float *)((int)SStack_1bc.z + 0xc) = local_194;
+      local_1d4 = (float)((int)local_1d4 + 1);
+      SStack_1bc.z = (float)pfVar8;
+    } while ((int)local_1d4 < 8);
+    local_150._0_4_ = 1.0;
+    local_150._4_4_ = 0.0;
+    local_148 = 0.0;
+    S_vector::Set(&local_160,local_120 + *param_1,local_11c + param_1[1],local_118 + param_1[2]);
+    S_vector::Set(&local_e0,*param_1 - local_120,param_1[1] - local_11c,param_1[2] - local_118);
+    pIVar4 = I3DGetDriver();
+    (*pIVar4->vtable->Slot2C)();
+    local_16c.z = 0.0;
+    local_160.x = 1.0;
+    local_160.y = 0.0;
+    S_vector::Set((S_vector *)local_174,local_114 + *param_1,(float)local_110._0_4_ + param_1[1],
+                  (float)local_110._4_4_ + param_1[2]);
+    S_vector::Set((S_vector *)local_f4,*param_1 - local_114,param_1[1] - (float)local_110._0_4_,
+                  param_1[2] - (float)local_110._4_4_);
+    pIVar5 = I3DGetDriver();
+    pfVar8 = &local_16c.z;
+    fVar22 = 0.0;
+    (*pIVar5->vtable->Slot2C)();
+    local_180.z = 0.0;
+    local_174._0_4_ = 0.0;
+    local_174._4_4_ = 1.0;
+    puStack_248 = (undefined1 *)0x6f204e;
+    S_vector::Set((S_vector *)(local_18c + 4),local_1a0.z + *param_1,local_194 + param_1[1],
+                  (float)local_190 + param_1[2]);
+    puStack_248 = (undefined1 *)0x6f2085;
+    S_vector::Set((S_vector *)(local_110 + 8),*param_1 - local_1a0.z,param_1[1] - local_194,
+                  param_1[2] - (float)local_190);
+    pIStack_24c = I3DGetDriver();
+    pfVar15 = &local_180.z;
+    puVar14 = local_18c + 4;
+    puStack_248 = local_110 + 8;
+    pfStack_250 = (float *)0x6f20aa;
+    (*pIStack_24c->vtable->Slot2C)();
+    local_18c._0_4_ = 1.0;
+    local_18c._4_4_ = 1.0;
+    local_184 = (undefined1 *)0x3f800000;
+    pfStack_250 = (float *)0x6f20d0;
+    pSVar6 = (S_vector *)I3DGetDriver();
+    pfStack_250 = (float *)0x0;
+    puStack_258 = local_18c;
+    puStack_254 = (undefined1 *)0x10;
+    pIStack_25c = (I3D_driver *)0x18;
+    (*((I3D_driver_vtbl *)pSVar6->x)->Slot30)(pSVar6,auStack_cc,8,&DAT_008441a4);
+    S_vector::Set((S_vector *)&pIStack_24c,param_1[0x20] * param_1[0x1c],
+                  param_1[0x1d] * param_1[0x20],param_1[0x1e] * param_1[0x20]);
+    local_18c._0_4_ = pIStack_24c;
+    local_18c._4_4_ = puStack_248;
+    local_184 = puVar14;
+    local_180.x = (float)pfVar15;
+    S_vector::Set((S_vector *)&stack0xfffffdd4,param_1[0xc] * param_1[0x21],
+                  param_1[0xd] * param_1[0x21],param_1[0xe] * param_1[0x21]);
+    local_150._4_4_ = pfVar8;
+    local_148 = fVar22;
+    pIStack_144 = pIVar4;
+    pSStack_140 = &local_e0;
+    S_vector::Set((S_vector *)local_1fc,param_1[0x22] * param_1[0x14],param_1[0x15] * param_1[0x22],
+                  param_1[0x16] * param_1[0x22]);
+    local_16c.y = (float)local_1fc._4_4_;
+    local_16c.x = (float)local_1fc._0_4_;
+    local_16c.z = local_1f4;
+    local_160.x = local_1f0.x;
+    pIVar5 = pIStack_24c;
+    puVar13 = puStack_248;
+    puVar20 = puVar14;
+    pfVar17 = pfVar15;
+    if ((float)puVar14 * local_1e4.x +
+        (float)puStack_248 * local_1f0.z + (float)pIStack_24c * local_1f0.y < 0.0) {
+      S_vector::Set((S_vector *)&stack0xfffffdf4,-(float)pIStack_24c,-(float)puStack_248,
+                    -(float)puVar14);
+      pIVar5 = unaff_ESI;
+      puVar13 = puStack_208;
+      puVar14 = puStack_204;
+      pfVar15 = local_200;
+    }
+    if (0.0 <= local_1e4.x * (float)pIVar4 + local_1f0.z * fVar22 + local_1f0.y * (float)pfVar8) {
+      fVar2 = (float)pIVar5 + (float)pfVar8;
+      puStack_258 = (undefined1 *)((float)puVar13 + fVar22);
+      fVar3 = (float)puVar14 + (float)pIVar4;
+    }
+    else {
+      fVar2 = (float)pIVar5 - (float)pfVar8;
+      puStack_258 = (undefined1 *)((float)puVar13 - fVar22);
+      fVar3 = (float)puVar14 - (float)pIVar4;
+    }
+    if (0.0 <= local_1e4.x * local_1f4 +
+               local_1f0.z * (float)local_1fc._4_4_ + local_1f0.y * (float)local_1fc._0_4_) {
+      pIStack_25c = (I3D_driver *)(fVar2 + (float)local_1fc._0_4_);
+      puStack_258 = (undefined1 *)((float)puStack_258 + (float)local_1fc._4_4_);
+      puStack_254 = (undefined1 *)(fVar3 + local_1f4);
+    }
+    else {
+      pIStack_25c = (I3D_driver *)(fVar2 - (float)local_1fc._0_4_);
+      puStack_258 = (undefined1 *)((float)puStack_258 - (float)local_1fc._4_4_);
+      puStack_254 = (undefined1 *)(fVar3 - local_1f4);
+    }
+    S_vector::Set(&SStack_1bc,(float)pIStack_25c + this_00->x,(float)puStack_258 + param_1[5],
+                  (float)puStack_254 + param_1[6]);
+    S_vector::Set(&SStack_1bc,this_00->x - (float)pIStack_25c,param_1[5] - (float)puStack_258,
+                  param_1[6] - (float)puStack_254);
+    local_180.y = (float)pIStack_25c;
+    local_180.z = (float)puStack_258;
+    local_174._0_4_ = puStack_254;
+    local_174._4_4_ = pfVar15;
+    if ((float)puVar20 * local_1d4 +
+        (float)puStack_248 * fStack_1d8 + (float)pIStack_24c * local_1e4.z < 0.0) {
+      S_vector::Set((S_vector *)&pIStack_24c,-(float)pIStack_24c,-(float)puStack_248,-(float)puVar20
+                   );
+    }
+    pfStack_250 = pfVar17;
+    if (0.0 <= local_1d4 * (float)pIVar4 + fStack_1d8 * fVar22 + local_1e4.z * (float)pfVar8) {
+      pIStack_25c = (I3D_driver *)((float)pIStack_24c + (float)pfVar8);
+      puStack_258 = (undefined1 *)((float)puStack_248 + fVar22);
+      puStack_254 = (undefined1 *)((float)puVar20 + (float)pIVar4);
+    }
+    else {
+      pIStack_25c = (I3D_driver *)((float)pIStack_24c - (float)pfVar8);
+      puStack_258 = (undefined1 *)((float)puStack_248 - fVar22);
+      puStack_254 = (undefined1 *)((float)puVar20 - (float)pIVar4);
+    }
+    if (0.0 <= local_1d4 * local_1f4 +
+               fStack_1d8 * (float)local_1fc._4_4_ + local_1e4.z * (float)local_1fc._0_4_) {
+      FUN_004cd520(&pIStack_25c,&local_16c.x);
+    }
+    else {
+      FUN_004ce5c0(&pIStack_25c,&local_16c.x);
+    }
+    S_vector::operator_plus(this_00,&SStack_1bc.x,(float *)&pIStack_25c);
+    S_vector::Subtract(this_00,&SStack_1bc.x,(float *)&pIStack_25c);
+    local_160.z = (float)puStack_258;
+    local_160.y = (float)pIStack_25c;
+    fStack_154 = (float)puStack_254;
+    local_150._0_4_ = pfStack_250;
+    fVar22 = DotVector(&local_11c,(S_vector *)local_18c,pSVar6);
+    if (0.0 <= fVar22) {
+      pIStack_25c = (I3D_driver *)local_18c._0_4_;
+      puStack_258 = (undefined1 *)local_18c._4_4_;
+      puStack_254 = local_184;
+      pfStack_250 = (float *)local_180.x;
+    }
+    else {
+      puVar7 = (undefined4 *)FUN_006f2970(local_18c,&SStack_1bc.x);
+      pIStack_25c = (I3D_driver *)*puVar7;
+      puStack_258 = (undefined1 *)puVar7[1];
+      puStack_254 = (undefined1 *)puVar7[2];
+      pfStack_250 = (float *)puVar7[3];
+    }
+    fVar22 = DotVector(&local_11c,(S_vector *)(local_150 + 4),pSVar6);
+    if (0.0 <= fVar22) {
+      FUN_004cd520(&pIStack_25c,(float *)(local_150 + 4));
+    }
+    else {
+      FUN_004ce5c0(&pIStack_25c,(float *)(local_150 + 4));
+    }
+    fVar22 = DotVector(&local_11c,&local_16c,pSVar6);
+    if (0.0 <= fVar22) {
+      FUN_004cd520(&pIStack_25c,&local_16c.x);
+    }
+    else {
+      FUN_004ce5c0(&pIStack_25c,&local_16c.x);
+    }
+    S_vector::operator_plus(this_00,&SStack_1bc.x,(float *)&pIStack_25c);
+    S_vector::Subtract(this_00,&SStack_1bc.x,(float *)&pIStack_25c);
+    local_1d0.y = (float)pIStack_25c;
+    local_1d0.z = (float)puStack_258;
+    local_1c4 = puStack_254;
+    pfStack_1c0 = pfStack_250;
+    uVar21 = 0;
+    puVar7 = (undefined4 *)(local_f4 + 8);
+    do {
+      if ((uVar21 & 4) == 0) {
+        pSVar6 = (S_vector *)FUN_006f2970(&local_16c,&SStack_1bc.x);
+      }
+      else {
+        pSVar6 = &local_16c;
+      }
+      if ((uVar21 & 2) == 0) {
+        local_190 = (float *)FUN_006f2970(local_150 + 4,afStack_13c);
+      }
+      else {
+        local_190 = (float *)(local_150 + 4);
+      }
+      if ((uVar21 & 1) == 0) {
+        pfVar8 = (float *)FUN_006f2970(local_18c,&local_fc);
+      }
+      else {
+        pfVar8 = (float *)local_18c;
+      }
+      pfVar15 = &local_1b0.y;
+      pfVar17 = (float *)(local_110 + 4);
+      pfVar18 = local_190;
+      pSVar9 = (S_vector *)S_vector::operator_plus(this_00,&local_11c,pfVar8);
+      pSVar9 = (S_vector *)S_vector::operator_plus(pSVar9,pfVar17,pfVar18);
+      puVar10 = (undefined4 *)S_vector::operator_plus(pSVar9,pfVar15,&pSVar6->x);
+      *puVar7 = *puVar10;
+      puVar7[1] = puVar10[1];
+      puVar7[2] = puVar10[2];
+      puVar7[3] = puVar10[3];
+      uVar21 = uVar21 + 1;
+      puVar7 = puVar7 + 4;
+    } while ((int)uVar21 < 8);
+    local_1b0.y = 1.0;
+    local_1b0.z = 0.0;
+    local_1a4 = 0.0;
+    pIVar5 = I3DGetDriver();
+    pIVar1 = pIVar5->vtable;
+    pfVar8 = &local_1b0.y;
+    uVar19 = 0;
+    uVar11 = S_vector::operator_plus(this_00,&SStack_1bc.x,&local_180.y);
+    uVar12 = S_vector::Subtract(this_00,afStack_13c,&local_180.y);
+    (*pIVar1->Slot2C)(pIVar5,uVar12,uVar11,pfVar8,uVar19);
+    pIVar5 = I3DGetDriver();
+    pIVar1 = pIVar5->vtable;
+    uVar16 = 0;
+    uVar11 = S_vector::Set(&local_1d0,0,0x3f800000,0);
+    uVar12 = S_vector::operator_plus(this_00,(float *)local_150,(float *)(local_174 + 4));
+    uVar19 = S_vector::Subtract(this_00,(float *)local_110,(float *)(local_174 + 4));
+    (*pIVar1->Slot2C)(pIVar5,uVar19,uVar12,uVar11,uVar16);
+    pIVar5 = I3DGetDriver();
+    pIVar1 = pIVar5->vtable;
+    uVar16 = 0;
+    uVar11 = S_vector::Set(&local_1e4,0,0,0x3f800000);
+    uVar12 = S_vector::operator_plus(this_00,&local_16c.z,&local_1f4);
+    uVar19 = S_vector::Subtract(this_00,&local_124,&local_1f4);
+    (*pIVar1->Slot2C)(pIVar5,uVar19,uVar12,uVar11,uVar16);
+    pIVar5 = I3DGetDriver();
+    uVar19 = 0;
+    uVar12 = 0x10;
+    pIVar1 = pIVar5->vtable;
+    uVar11 = S_vector::Set((S_vector *)(local_1fc + 4),0x3f800000,0x3f800000,0x3f800000);
+    uVar21 = (*pIVar1->Slot30)(pIVar5,&local_130.z,8,&DAT_008441a4,0x18,uVar11,uVar12,uVar19);
+  }
+  return uVar21 & 0xffffff00;
+}
+
+// @006f2970 size=29 callers=006f12a0
+void __thiscall FUN_006f2970(void *this,float *param_1)
+{
+  // locals: float fVar1; float fVar2
+  fVar1 = *(float *)((int)this + 8);
+  fVar2 = *(float *)((int)this + 4);
+  *param_1 = -*(float *)this;
+  param_1[1] = -fVar2;
+  param_1[2] = -fVar1;
+  return;
+}
+
+// @006f2ac0 size=28 callers=0080ca90
+void __fastcall vector_tidy_6f2ac0(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(undefined4 *)(param_1 + 4) = 0;
+  *(undefined4 *)(param_1 + 8) = 0;
+  *(undefined4 *)(param_1 + 0xc) = 0;
+  return;
+}
+
+// @006f2ae0 size=19 callers=C_CollisionWorld::RemoveVolume,006f2b60
+int __fastcall vector_size_e4_6f2ae0(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 2;
+}
+
+// @006f2b00 size=43 callers=C_CollisionWorld::ClearGrid
+void __thiscall FUN_006f2b00(void *this,undefined4 *param_1,undefined4 *param_2)
+{
+  // locals: undefined4 *puVar1
+  puVar1 = *(undefined4 **)((int)this + 8);
+  for (; param_2 != puVar1; param_2 = param_2 + 1) {
+    *param_1 = *param_2;
+    param_1 = param_1 + 1;
+  }
+  *(undefined4 **)((int)this + 8) = param_1;
+  return;
+}
+
+// @006f2b60 size=406 callers=C_CollisionWorld::ClearGrid
+undefined4 * __thiscall FUN_006f2b60(void *this,undefined4 *param_1,undefined4 *param_2)
+{
+  // locals: int iVar1; int iVar2; undefined4 *puVar3; uint uVar4; undefined4 *puVar5; int iVar6; undefined4 *puVar7
+  puVar5 = *(undefined4 **)((int)this + 8);
+  iVar1 = *(int *)((int)this + 4);
+  iVar6 = (int)param_1 - iVar1 >> 2;
+  if (*(int *)((int)this + 0xc) - (int)puVar5 >> 2 != 0) {
+    if ((int)puVar5 - (int)param_1 >> 2 == 0) {
+      uninitialized_copy4_6f2f50(param_1,puVar5,param_1 + 1);
+      uninitialized_fill_n4_6f2f80
+                (*(undefined4 **)((int)this + 8),
+                 1 - ((int)*(undefined4 **)((int)this + 8) - (int)param_1 >> 2),param_2);
+      puVar5 = *(undefined4 **)((int)this + 8);
+      for (; param_1 != puVar5; param_1 = param_1 + 1) {
+        *param_1 = *param_2;
+      }
+    }
+    else {
+      uninitialized_copy4_6f2f50(puVar5 + -1,puVar5,puVar5);
+      puVar5 = *(undefined4 **)((int)this + 8);
+      puVar7 = puVar5;
+      while (param_1 != puVar7 + -1) {
+        puVar5 = puVar5 + -1;
+        *puVar5 = puVar7[-2];
+        puVar7 = puVar7 + -1;
+      }
+      puVar5 = param_1 + 1;
+      for (; param_1 != puVar5; param_1 = param_1 + 1) {
+        *param_1 = *param_2;
+      }
+    }
+    *(int *)((int)this + 8) = *(int *)((int)this + 8) + 4;
+    return (undefined4 *)(*(int *)((int)this + 4) + iVar6 * 4);
+  }
+  if ((iVar1 == 0) || (uVar4 = (int)puVar5 - iVar1 >> 2, uVar4 < 2)) {
+    uVar4 = 1;
+  }
+  if (iVar1 == 0) {
+    iVar1 = 0;
+  }
+  else {
+    iVar1 = (int)puVar5 - iVar1 >> 2;
+  }
+  iVar1 = iVar1 + uVar4;
+  iVar2 = iVar1;
+  if (iVar1 < 0) {
+    iVar2 = 0;
+  }
+  puVar3 = operator_new(iVar2 * 4);
+  puVar7 = puVar3;
+  for (puVar5 = *(undefined4 **)((int)this + 4); puVar5 != param_1; puVar5 = puVar5 + 1) {
+    construct_copy4_6f2fe0(puVar7,puVar5);
+    puVar7 = puVar7 + 1;
+  }
+  construct_copy4_6f2fe0(puVar7,param_2);
+  uninitialized_copy4_6f2f50(param_1,*(undefined4 **)((int)this + 8),puVar7 + 1);
+  empty_function_6f2d00();
+  operator_delete(*(void **)((int)this + 4));
+  *(undefined4 **)((int)this + 0xc) = puVar3 + iVar1;
+  iVar1 = vector_size_e4_6f2ae0((int)this);
+  *(undefined4 **)((int)this + 8) = puVar3 + iVar1 + 1;
+  *(undefined4 **)((int)this + 4) = puVar3;
+  return puVar3 + iVar6;
+}
+
+// @006f2d00 size=3 callers=C_CollisionWorld::RemoveVolume,C_CollisionWorld::ClearGrid,006f2b60
+void empty_function_6f2d00(void)
+{
+  return;
+}
+
+// @006f2d10 size=517 callers=C_CollisionWorld::ReleaseEmptyCells,C_CollisionWorld::MoveVolume,C_CollisionWorld::ClearGrid
+void __thiscall FUN_006f2d10(void *this,undefined4 *param_1,uint param_2,undefined4 *param_3)
+{
+  // locals: undefined4 *puVar1; int iVar2; int iVar3; undefined4 *puVar4; undefined4 *puVar5; uint uVar6; undefined4 *puVar7
+  puVar7 = *(undefined4 **)((int)this + 8);
+  if (param_2 <= (uint)(*(int *)((int)this + 0xc) - (int)puVar7 >> 2)) {
+    if ((uint)((int)puVar7 - (int)param_1 >> 2) < param_2) {
+      puVar5 = param_1 + param_2;
+      if (param_1 != puVar7) {
+        puVar4 = puVar5 + -param_2;
+        do {
+          if (puVar5 != (undefined4 *)0x0) {
+            *puVar5 = *puVar4;
+          }
+          puVar4 = puVar4 + 1;
+          puVar5 = puVar5 + 1;
+        } while (puVar4 != puVar7);
+      }
+      puVar7 = *(undefined4 **)((int)this + 8);
+      for (iVar2 = param_2 - ((int)puVar7 - (int)param_1 >> 2); iVar2 != 0; iVar2 = iVar2 + -1) {
+        if (puVar7 != (undefined4 *)0x0) {
+          *puVar7 = *param_3;
+        }
+        puVar7 = puVar7 + 1;
+      }
+      puVar7 = *(undefined4 **)((int)this + 8);
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(uint *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+      return;
+    }
+    if (param_2 != 0) {
+      puVar5 = puVar7;
+      for (puVar4 = puVar7 + -param_2; puVar4 != puVar7; puVar4 = puVar4 + 1) {
+        if (puVar5 != (undefined4 *)0x0) {
+          *puVar5 = *puVar4;
+        }
+        puVar5 = puVar5 + 1;
+      }
+      puVar7 = *(undefined4 **)((int)this + 8);
+      for (puVar5 = puVar7 + -param_2; param_1 != puVar5; puVar5 = puVar5 + -1) {
+        puVar7 = puVar7 + -1;
+        *puVar7 = puVar5[-1];
+      }
+      puVar7 = param_1 + param_2;
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(int *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+    }
+    return;
+  }
+  iVar2 = *(int *)((int)this + 4);
+  if ((iVar2 == 0) || (uVar6 = (int)puVar7 - iVar2 >> 2, uVar6 <= param_2)) {
+    uVar6 = param_2;
+  }
+  if (iVar2 == 0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)puVar7 - iVar2 >> 2;
+  }
+  iVar2 = iVar2 + uVar6;
+  iVar3 = iVar2;
+  if (iVar2 < 0) {
+    iVar3 = 0;
+  }
+  puVar4 = operator_new(iVar3 * 4);
+  puVar5 = puVar4;
+  for (puVar7 = *(undefined4 **)((int)this + 4); uVar6 = param_2, puVar1 = puVar5, puVar7 != param_1
+      ; puVar7 = puVar7 + 1) {
+    if (puVar5 != (undefined4 *)0x0) {
+      *puVar5 = *puVar7;
+    }
+    puVar5 = puVar5 + 1;
+  }
+  for (; uVar6 != 0; uVar6 = uVar6 - 1) {
+    if (puVar1 != (undefined4 *)0x0) {
+      *puVar1 = *param_3;
+    }
+    puVar1 = puVar1 + 1;
+  }
+  puVar1 = *(undefined4 **)((int)this + 8);
+  puVar7 = puVar5 + param_2;
+  if (param_1 != puVar1) {
+    puVar5 = (undefined4 *)((int)puVar7 + (param_2 * -4 - (int)puVar5) + (int)param_1);
+    do {
+      if (puVar7 != (undefined4 *)0x0) {
+        *puVar7 = *puVar5;
+      }
+      puVar5 = puVar5 + 1;
+      puVar7 = puVar7 + 1;
+    } while (puVar5 != puVar1);
+  }
+  operator_delete(*(void **)((int)this + 4));
+  *(undefined4 **)((int)this + 0xc) = puVar4 + iVar2;
+  iVar2 = *(int *)((int)this + 4);
+  if (iVar2 == 0) {
+    *(undefined4 **)((int)this + 4) = puVar4;
+    *(undefined4 **)((int)this + 8) = puVar4 + param_2;
+    return;
+  }
+  *(undefined4 **)((int)this + 4) = puVar4;
+  *(undefined4 **)((int)this + 8) = puVar4 + (*(int *)((int)this + 8) - iVar2 >> 2) + param_2;
+  return;
+}
+
+// @006f2f50 size=39 callers=C_CollisionWorld::RemoveVolume,006f2b60
+void uninitialized_copy4_6f2f50(undefined4 *param_1,undefined4 *param_2,undefined4 *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != (undefined4 *)0x0) {
+      *param_3 = *param_1;
+    }
+    param_3 = param_3 + 1;
+  }
+  return;
+}
+
+// @006f2f80 size=37 callers=C_CollisionWorld::RemoveVolume,006f2b60
+void uninitialized_fill_n4_6f2f80(undefined4 *param_1,int param_2,undefined4 *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 + -1) {
+    if (param_1 != (undefined4 *)0x0) {
+      *param_1 = *param_3;
+    }
+    param_1 = param_1 + 1;
+  }
+  return;
+}
+
+// @006f2fb0 size=27 callers=C_CollisionWorld::ClearGrid
+void __fastcall copy4_6f2fb0(undefined4 *param_1,undefined4 *param_2,undefined4 *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    *param_3 = *param_1;
+    param_3 = param_3 + 1;
+  }
+  return;
+}
+
+// @006f2fd0 size=9 callers=C_CollisionWorld::AddVolume,C_CollisionWorld::MoveVolume
+void __fastcall construct_copy4_6f2fd0(undefined4 *param_1,undefined4 *param_2)
+{
+  if (param_1 != (undefined4 *)0x0) {
+    *param_1 = *param_2;
+  }
+  return;
+}
+
+// @006f2fe0 size=9 callers=006f2b60
+void __fastcall construct_copy4_6f2fe0(undefined4 *param_1,undefined4 *param_2)
+{
+  if (param_1 != (undefined4 *)0x0) {
+    *param_1 = *param_2;
+  }
+  return;
+}
+

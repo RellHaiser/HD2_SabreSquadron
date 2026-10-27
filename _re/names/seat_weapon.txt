@@ -1,0 +1,52 @@
+# The seat weapon (src/game/seat_weapon.h / seat_weapon.cpp; part 3): a vehicle seat's weapon (the
+# car's, the static weapon's, the Junkers 88's). Its type: types/56_seat_weapon.spec.
+004c19d0 C_SeatWeapon::C_SeatWeapon | C_SeatWeapon * __thiscall C_SeatWeapon(C_SeatWeapon *this)
+004c1aa0 C_SeatWeapon::~C_SeatWeapon | void __thiscall ~C_SeatWeapon(C_SeatWeapon *this)
+004c1ad0 C_SeatWeapon::Init | bool __thiscall Init(C_SeatWeapon *this, C_Car *car, I3D_frame *frame, I3D_frame *seatFrame, int seat)
+004c2380 C_SeatWeapon::Stop | void __thiscall Stop(C_SeatWeapon *this)
+004c6620 C_SeatWeapon::Restart | void __thiscall Restart(C_SeatWeapon *this)
+004c6dd0 C_SeatWeapon::SetGunner | void __thiscall SetGunner(C_SeatWeapon *this, C_Human *gunner)
+004c6d90 C_SeatWeapon::ShowView | void __thiscall ShowView(C_SeatWeapon *this, bool on)
+004c6570 C_SeatWeapon::GetFrameInt | int __stdcall GetFrameInt(I3D_frame *frame, char *key)
+004c6e50 C_SeatWeapon::LoadSounds | void __fastcall LoadSounds(C_SeatWeapon *weapon)
+004c7630 C_SeatWeapon::ReleaseSounds | void __fastcall ReleaseSounds(C_SeatWeapon *weapon)
+004c1990 C_SeatWeapon::OnBarrelNote | int __stdcall OnBarrelNote(I3D_frame *frame, uint message, char *note, uint time)
+004c5080 C_SeatWeapon::EjectShell | void __thiscall EjectShell(C_SeatWeapon *this, I3D_frame *barrel)
+004c56a0 C_SeatWeapon::Update | void __thiscall Update(C_SeatWeapon *this, int time)
+004c55e0 C_SeatWeapon::Tick | void __thiscall Tick(C_SeatWeapon *this, int time)
+004c2580 C_SeatWeapon::TurnToView | void __thiscall TurnToView(C_SeatWeapon *this, int time)
+004c3120 C_SeatWeapon::TurnByControls | void __thiscall TurnByControls(C_SeatWeapon *this, int time)
+004c3b60 C_SeatWeapon::ApplyControls | void __thiscall ApplyControls(C_SeatWeapon *this, float *axes, float *buttons)
+004c3100 C_SeatWeapon::IsEmpty | bool __fastcall IsEmpty(C_SeatWeapon *weapon)
+004c4780 C_SeatWeapon::Fire | void __fastcall Fire(C_SeatWeapon *weapon)
+004c4440 SpreadDirection | void __thiscall SpreadDirection(S_vector *this, float spread)
+004c3dc0 C_SeatWeapon::FireShot | bool __thiscall FireShot(C_SeatWeapon *this, S_vector4 *pos, S_vector4 *dir, int barrel, int unused)
+004c4010 C_SeatWeapon::PlayShot | void __thiscall PlayShot(C_SeatWeapon *this, int barrel)
+004c6400 C_SeatWeapon::StartReload | void __thiscall StartReload(C_SeatWeapon *this, C_ItemContainer *store)
+004c6270 C_SeatWeapon::Reload | void __thiscall Reload(C_SeatWeapon *this, C_ItemContainer *store)
+004c62e0 C_SeatWeapon::ShowReload | void __thiscall ShowReload(C_SeatWeapon *this, C_ItemContainer *store)
+004c6550 C_SeatWeapon::GetRounds | int __fastcall GetRounds(C_SeatWeapon *weapon)
+004c6560 C_SeatWeapon::SetRounds | void __thiscall SetRounds(C_SeatWeapon *this, int rounds)
+004c57b0 C_SeatWeapon::GetItemDef | C_ItemDef * __fastcall GetItemDef(C_SeatWeapon *weapon)
+004c57d0 C_SeatWeapon::GetItemText | int __fastcall GetItemText(C_SeatWeapon *weapon)
+004c57f0 C_SeatWeapon::UnknownAC | float __thiscall UnknownAC(C_SeatWeapon *this)
+004c5800 C_SeatWeapon::GetOrigin | void __thiscall GetOrigin(C_SeatWeapon *this, S_vector4 *out)
+004c5870 C_SeatWeapon::GetAim | void __thiscall GetAim(C_SeatWeapon *this, S_vector4 *out)
+004c5a30 C_SeatWeapon::CanTurnTo | bool __thiscall CanTurnTo(C_SeatWeapon *this, S_vector *pos)
+004c5f60 C_SeatWeapon::CanTiltTo | bool __thiscall CanTiltTo(C_SeatWeapon *this, S_vector *pos)
+004c6230 C_SeatWeapon::CanAim | bool __thiscall CanAim(C_SeatWeapon *this, S_vector *pos)
+004c7670 C_SeatWeapon::UnknownC8 | bool __thiscall UnknownC8(C_SeatWeapon *this, int *left, int *total, int *text)
+004c6660 C_SeatWeapon::SaveGame | bool __thiscall SaveGame(C_SeatWeapon *this, C_chunk *chunk)
+004c68b0 C_SeatWeapon::LoadGame | bool __thiscall LoadGame(C_SeatWeapon *this, C_chunk *chunk)
+004c6cb0 QuatMultiply | void __thiscall QuatMultiply(S_quat *this, S_quat *out, S_quat *other)
+# The messages of the seat weapons on the car's net object.
+004c1230 SeatWeaponSendMessage | bool __fastcall SeatWeaponSendMessage(int kind, S_vector4 *pos, S_vector4 *dir, int barrel, int seat, C_Car *car)
+004c14b0 MakeSeatWeaponMessage | void * __fastcall MakeSeatWeaponMessage(C_Car *car, C_BitStream *stream, bool write)
+004c1760 C_SeatWeaponShotMessage::Write
+004c1810 C_SeatWeaponShotMessage::Read
+004c1920 C_SeatWeaponReloadMessage::Write
+004c1970 C_SeatWeaponReloadMessage::Read
+004c1890 C_SeatWeaponRoundsMessage::Write
+004c18f0 C_SeatWeaponRoundsMessage::Read
+004c16d0 C_SeatWeaponAmmoMessage::Write
+004c1730 C_SeatWeaponAmmoMessage::Read

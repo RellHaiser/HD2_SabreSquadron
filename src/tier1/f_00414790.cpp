@@ -556,47 +556,45 @@ uint32_t FUN_004207c0(int param_1, ...)
 
 
 // 0x00420800
-void * FUN_00420800(void *_this,uint32_t *param_1,uint32_t param_2, ...)
+void * std_string__AssignChars(std_string *_this,uint32_t *param_1,uint32_t param_2, ...)
 {
   char cVar1;
-  int iVar2;
-  uint32_t uVar3;
-  uint32_t *puVar4;
+  uint32_t uVar2;
+  char *pcVar3;
   if (0xfffffffd < param_2) {
     std_Xlen();
   }
-  iVar2 = *(int *)((int)_this + 4);
-  if (((iVar2 == 0) || (cVar1 = *(char *)(iVar2 - 1), cVar1 == '\0')) || (cVar1 == -1)) {
+  pcVar3 = _this->ptr;
+  if (((pcVar3 == 0) || (cVar1 = pcVar3[-1], cVar1 == '\0')) || (cVar1 == -1)) {
     if (param_2 == 0) {
       std_string__Tidy(_this,'\x01');
       return _this;
     }
-    if ((*(uint32_t *)((int)_this + 0xc) < 0x20) && (param_2 <= *(uint32_t *)((int)_this + 0xc)))
-    goto LAB_00420871;
+    if ((_this->capacity < 0x20) && (param_2 <= _this->capacity)) goto LAB_00420871;
     std_string__Tidy(_this,'\x01');
   }
   else if (param_2 == 0) {
-    *(char *)(iVar2 - 1) = cVar1 - 1;
-    *(uint32_t *)((int)_this + 4) = 0;
-    *(uint32_t *)((int)_this + 8) = 0;
-    *(uint32_t *)((int)_this + 0xc) = 0;
+    pcVar3[-1] = cVar1 - 1;
+    _this->ptr = 0;
+    _this->length = 0;
+    _this->capacity = 0;
     return _this;
   }
   std_string__Grow(_this,param_2);
 LAB_00420871:
-  puVar4 = *(uint32_t **)((int)_this + 4);
-  for (uVar3 = param_2 >> 2; uVar3 != 0; uVar3 = uVar3 - 1) {
-    *puVar4 = *param_1;
-    param_1++;
-    puVar4++;
+  pcVar3 = _this->ptr;
+  for (uVar2 = param_2 >> 2; uVar2 != 0; uVar2 = uVar2 - 1) {
+    *(uint32_t *)pcVar3 = *param_1;
+    param_1 = (uint32_t *)((int)param_1 + 4);
+    pcVar3 += 4;
   }
-  for (uVar3 = param_2 & 3; uVar3 != 0; uVar3 = uVar3 - 1) {
-    *(uint8_t *)puVar4 = *(uint8_t *)param_1;
+  for (uVar2 = param_2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {
+    *pcVar3 = *(char *)param_1;
     param_1 = (uint32_t *)((int)param_1 + 1);
-    puVar4 = (uint32_t *)((int)puVar4 + 1);
+    pcVar3++;
   }
-  *(uint32_t *)((int)_this + 8) = param_2;
-  *(uint8_t *)(param_2 + *(int *)((int)_this + 4)) = 0;
+  _this->length = param_2;
+  _this->ptr[param_2] = '\0';
   return _this;
   return 0;
 }

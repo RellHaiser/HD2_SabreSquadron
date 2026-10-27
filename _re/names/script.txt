@@ -1,0 +1,265 @@
+# Mission script system. Hand-ported: src/script/ (script.cpp, script_vm.cpp,
+# script_expression.cpp, script_functions.cpp, script_tables*.cpp).
+
+# --- expressions (0x00411650-0x00412d70)
+00411650 C_ScriptExpression::Evaluate
+00411860 C_ScriptExpression::ToString
+00411c30 C_ScriptExpression::Clear
+00411d00 C_ScriptExpression::AddToken
+00412480 C_ScriptExpression::AddOperand
+00412540 ScriptExpr_IsBinaryOperator
+00412560 C_ScriptExpression::GroupRange
+00412760 C_ScriptExpression::Build
+00412d70 C_ScriptExpression::HasUniformPrecedence
+
+# --- commands / chunk helpers
+00414610 S_ScriptCommand::SetArgs
+00414660 S_ScriptCommand::FreeArgs
+00414680 GetScriptArgCount
+004146d0 GetScriptArgType
+00414550 C_str::CreateConcatRep
+004145b0 C_str::CopyConstruct
+004145d0 C_str::Assign
+00414dd0 C_chunk::WriteSizedString
+00415c90 C_chunk::DescendInline | bool __thiscall DescendInline(C_chunk *this, ushort *id)
+00415d00 C_chunk::ReadRemainingString | void __thiscall ReadRemainingString(C_chunk *this, C_str *out)
+00415e30 C_chunk::ReadSizedString
+
+# --- C_Script (vtable 0x0080f6fc)
+004147d0 C_Script::SaveGame
+00414e30 C_Script::LoadGame
+00415fe0 C_Script::AddSignalHandler
+004161f0 C_Script::AddCutsceneHandler
+00416400 C_Script::AddCutsceneDoneHandler
+00416610 C_Script::SendSignal
+00416700 C_Script::AddCommand | int __thiscall AddCommand(C_Script *this, void *command)
+00416750 C_Script::AddExpression
+004167b0 C_Script::Tick
+00416cf0 C_Script::Advance
+00416d50 C_Script::OnActionDone
+00416d70 C_Script::OnActionDone2
+00416d90 C_Script::OnActionDone3
+00416db0 C_Script::Stop
+00416e10 C_Script::ExecuteCommand
+0041d8d0 C_Script::Restart
+0041d920 C_Script::OnDeath
+0041d960 C_Script::OnUse | void __thiscall OnUse(C_Script *this, int unused)
+0041d9b0 C_Script::OnCutscene
+0041da20 C_Script::OnAlarm
+0041da80 C_Script::OnAlarmDone
+0041dae0 C_Script::OnCutsceneDone
+0041db50 C_Script::OnGlobalAlarm
+0041db80 C_Script::OnExit
+0041dbb0 C_Script::OnHit
+0041dc00 C_Script::ExecuteBlock
+0041dcb0 C_Script::C_Script
+0041df10 C_Script::GetKind
+0041df20 C_Script::~C_Script
+0041e140 C_Script::Clear
+0041e3f0 C_Script::CallFunction
+
+# --- SDK / engine inlines instantiated in this file
+0041cf80 GetFrameActor
+0041cfa0 GetFrameScript
+0041d070 S_bbox::Expand
+0041d0f0 I3D_frame::AddRef
+0041d100 I3D_frame::GetType
+0041d110 I3D_frame::SetPosInline
+0041d160 I3D_frame::GetWorldPos
+0041d180 I3D_frame::SetRot
+0041d1d0 I3D_frame::GetRot
+0041d200 I3D_frame::GetWorldDir
+0041d370 I3D_frame::GetLocalMatrix
+0041d480 I3D_frame::GetMatrix
+0041d4a0 I3D_frame::GetName
+0041d4b0 I3D_frame::GetParentAddress
+0041d4c0 I3D_animation_set::SetPlayMode
+0041d4e0 I3D_camera::GetRange
+0041d510 C_Human::IsNPCTeamRole4
+0041d520 C_Human::IsNPCTeamRole5
+0041d590 C_Train::SetTrack
+0041d5c0 C_ScriptModule::SetFakeCutscene
+0041d5d0 C_ScriptModule::IsCutsceneRunning
+0041d5e0 C_LightMapGroupsModule::FindGroup
+0041d660 C_str::GetCString
+0041d670 C_str::GetBufferAt
+0041d700 C_Actor::SetPosition
+0041d720 C_Actor::SetDirection
+0041d7c0 S_Checkpoint::GetPos
+0041d800 C_HumanMovement::ResetToFrame
+0041d8b0 S_DebrisParams::Init
+00420310 ScriptFrameVector_At
+00420360 ScriptNumberVector_At
+
+# --- callees named after the script commands that use them
+0040e080 S_vector::Subtract
+00405100 C_fstr_Construct
+00423670 C_ScriptModule::RememberFrame
+00423980 C_ScriptModule::RegisterSoundFrame
+00423b40 C_ScriptModule::RestoreFrame
+00423c70 C_ScriptModule::RunCutscene
+00423eb0 C_ScriptModule::EndCutscene
+00424260 C_ScriptModule::RegisterAnimatedModel
+00424310 C_ScriptModule::UnregisterAnimatedModel
+00424420 C_ScriptModule::RegisterDuplicate
+00424490 C_ScriptModule::UnregisterDuplicate
+00424540 BeginScriptNetMessage
+00424580 SendScriptNetMessage
+00424900 C_ScriptModule::RestartMission | void __thiscall RestartMission(C_ScriptModule *this, bool server)
+004274a0 C_ScriptModule::RotateFrame
+00427730 C_ScriptModule::AssignScript
+00428d10 C_ScriptModule::AddPauseSound
+004336c0 GetSoundModule
+004374d0 S_SoundRequest::Init
+00478a20 C_TemporaryActorsList::IsItemInRange
+00479450 C_TemporaryActorsList::CreateDebris | C_Debris * __thiscall CreateDebris(C_TemporaryActorsList *this, I3D_frame *frame, S_vector *pos, S_vector *dir)
+0047b010 C_Decorators::SetOn
+0048cb00 GetLightMapGroups
+0048e2d0 C_TShiftModule::HasFrame
+0048e780 C_TShiftModule::GetEntry
+004ddcf0 C_Car::IsDestroyed | bool __thiscall IsDestroyed(C_Car *this)
+004e95b0 C_Vehicle::Reset | void __thiscall Reset(C_Vehicle * this, uchar flags)
+004f2530 C_Vehicle::SetEngine | bool __thiscall SetEngine(C_Vehicle * this, bool on, bool instant)
+004f2670 C_Vehicle::SetFuel | bool __thiscall SetFuel(C_Vehicle * this, float litres)
+00597420 C_FormationShape::SetType
+005977f0 C_FormationShape::SetScale
+005bc970 C_Train::Start
+005bd490 C_Train::FollowTrack
+005e7570 C_AirAttack::SetTarget
+005eddc0 C_Junkers88Setup::SetInterceptors
+005f0a90 C_Junkers88::SetState
+005fa290 C_SupplyBox::SetEnabled
+005ff4b0 C_Door::SetState
+005ff5f0 C_Door::Unlock
+005ff650 C_Door::Lock
+006029f0 C_Door::GetState
+006059b0 C_StaticWeapon::SetState
+006df540 S_Explosion::Execute
+006e9ea0 SetFrameData
+00730970 IsNetPlayerConnected
+
+# --- data
+008693e0 g_scriptModuleRestarting @
+00868b3c g_saveGameValues @
+008338a8 g_scriptCommandDefs @
+00832d60 g_scriptFunctionDefs @
+00835b68 g_scriptKeywords @
+008993e8 g_scriptKeywordCount @
+008993f0 g_scriptCompiler @
+0089bbb0 g_decorators @
+008ac9e4 g_junkers88Setup @
+0098b808 g_modelPool @
+0098b810 g_modelPoolCount @
+0098b818 g_respawningItems @
+
+# --- C_HumanScript (vtable 0x0080f714), C_MeleeTrackerScript (vtable 0x0080f70c)
+00421930 C_MeleeTrackerScript::C_MeleeTrackerScript
+00421960 C_MeleeTrackerScript::GetKind
+00421970 C_MeleeTrackerScript::ExecuteCommand
+00421bc0 C_HumanScript::C_HumanScript
+00421bf0 C_HumanScript::GetKind
+00421c00 C_HumanScript::ExecuteCommand
+0077fb70 C_HumanWork::SetWorkingFrame
+005d8f60 C_Bike::Drive
+
+# --- C_ScriptModule (vtable 0x0080f750) - src/script/script_module.cpp
+00423bf0 S_RememberedFrame::Restore
+004245c0 C_ScriptModule::C_ScriptModule
+00424750 C_ScriptModule::ScalarDeletingDestructor
+00424770 C_ScriptModule::~C_ScriptModule
+00424590 C_ScriptModule::ReceiveNetMessage
+00424970 C_ScriptModule::SaveGame
+004256a0 C_chunk::WriteStringChunkSized
+004257b0 C_ScriptModule::LoadGame | bool __thiscall LoadGame(C_ScriptModule *this, C_chunk *chunk)
+00427010 C_ScriptModule::WriteSaveGameValues
+00427050 C_ScriptModule::ReadSaveGameValues
+004270d0 C_ScriptModule::StartMission
+00427200 S_FrameRotation::Update
+00427b80 C_ScriptModule::StopMission
+004281a0 StartPendingSound
+004281d0 CollectForeignChildren
+00428490 C_ScriptModule::Tick
+004285d0 C_ScriptModule::FreeMissionData
+00428600 C_ScriptModule::LoadScriptList | void __thiscall LoadScriptList(C_ScriptModule *this, bool multiplayer)
+00428a70 C_ScriptModule::ClearScriptList
+00428b00 C_ScriptModule::BroadcastGlobalAlarm
+00428b30 C_ScriptModule::Update
+00428c80 C_ScriptModule::BackupSaveGameValues
+00428ca0 C_ScriptModule::RestoreSaveGameValues
+00428cc0 S_FrameRotation::S_FrameRotation
+00428d00 S_FrameRotation::~S_FrameRotation
+00428f00 C_ScriptModule::SetPauseSoundsPaused
+00428f60 StaticConstruct_ScriptModule
+0042aff0 C_ScriptModule::SendState
+0042b330 C_ScriptModule::ReceiveState
+0042b650 C_ScriptModule::HandleClientMessage | void __fastcall HandleClientMessage(int type, C_BitStream *msg)
+0042c850 C_ScriptCompiler::Compile | bool __thiscall Compile(void *this, char *path, C_Script *script)
+0071e680 ResetSpeechSlots
+007764d0 AttachModelUpdateHook
+00776520 DetachModelUpdateHook
+0072c280 C_NetGame::CreateMessage
+0072c360 C_NetGame::SendMessage
+00867b18 g_scriptPath @
+008693d0 g_pendingSounds @
+00867b08 g_relinks @
+00838874 g_scriptMessageTypeBits @
+
+# --- script compiler (src/script/script_compiler.cpp) ---
+0042bf60 InitScriptCompiler
+0042bf70 ConstructScriptCompiler
+0042bf80 RegisterScriptCompilerDtor
+0042bfa0 C_ScriptCompiler::~C_ScriptCompiler
+0042c0b0 C_ScriptCompiler::ParseStatement
+0042c4b0 C_ScriptCompiler::InsertInclude | void __stdcall InsertInclude(char *fileName, char *at)
+0042c580 C_ScriptCompiler::Preprocess | void __thiscall Preprocess(void *this, char *source)
+0042cb80 C_ScriptCompiler::C_ScriptCompiler
+0042cc00 C_ScriptCompiler::NextToken
+0042cdd0 C_ScriptCompiler::SkipWhitespace
+0042ce30 C_ScriptCompiler::GetVariable
+0042ceb0 C_ScriptCompiler::FindVariable
+0042cf60 C_ScriptCompiler::Expect
+0042cf90 C_ScriptCompiler::Reset
+0042d080 ScriptVariableVector_Destroy
+0042d0c0 ScriptLabelVector_Destroy
+0042d100 S_ScriptVariable::~S_ScriptVariable
+0042d120 S_ScriptLabel::~S_ScriptLabel
+0042d170 C_ScriptCompiler::ParseExpression
+0042d740 C_ScriptCompiler::ParseBlock
+0042d890 C_ScriptCompiler::FindTypedVariable
+0042d920 C_ScriptCompiler::ParseLiteral
+0042dd40 C_ScriptCompiler::ParseArguments
+0042de10 ScriptTokenVector_Erase
+0042de80 FindScriptKeyword
+0042ded0 IsScriptNameChar
+0042df10 IsScriptNumberChar
+0042e080 GetScriptFunctionArgCount
+0042e0e0 FindScriptFunction
+0042e160 C_ScriptCompiler::ParseAssignment
+0042e2a0 C_ScriptCompiler::ParseIf
+0042e340 C_ScriptCompiler::ParseBlockKeyword
+0042e380 C_ScriptCompiler::ParseReturn
+0042e3d0 C_ScriptCompiler::ParseElse
+0042e410 C_ScriptCompiler::ParseStartPoint
+0042e460 C_ScriptCompiler::ParseOnSignal
+0042e550 C_ScriptCompiler::ParseOnCutscene
+0042e640 C_ScriptCompiler::ParseOnCutsceneDone
+0042e730 C_ScriptCompiler::ParseHandler
+0042e7c0 C_ScriptCompiler::ParseWhenever
+0042ec20 C_ScriptCompiler::ParseCommand
+0042ecd0 C_ScriptCompiler::ParseDeclaration
+0042f0a0 C_ScriptCompiler::ParseLabel
+0042f2e0 C_ScriptCompiler::ParseGoTo
+0042f530 C_ScriptCompiler::ParseSetWhenever
+0042f920 C_ScriptCompiler::ParseSetWheneverTime
+0042fd10 C_ScriptCompiler::ParseGosub
+0042ff60 ScriptWheneverVector_Insert
+004300f6 ScriptVariableVector_InsertUnwind
+00430100 PtrVector_Insert
+004302a0 ScriptNumberVector_Insert
+00430450 CStrVector_Insert
+004305d0 ScriptVariableVector_Insert
+004307e0 ScriptVariableVector_InsertN
+00430ae0 ScriptLabelVector_InsertN
+008693e8 g_scriptSource @
+008793e8 g_scriptIncludeBuffer @
+008893e8 g_scriptIncludeTail @

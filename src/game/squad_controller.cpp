@@ -1127,7 +1127,7 @@ void C_SquadController::FollowSubmarine(C_Actor *other)
         throttle = 0.0f;
         turn = 0.0f;
     }
-    submarine->SetUnknownF8(0.0f);
+    submarine->SetTurn(0.0f);
     submarine->SetControls(throttle, turn, dive);
 }
 

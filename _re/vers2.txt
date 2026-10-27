@@ -1,0 +1,2838 @@
+// 0x0043ad80
+void StaticInit_43ad80(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x0043adb0
+C_VersionKeeper * __thiscall
+C_VersionKeeper::C_VersionKeeper
+          (C_VersionKeeper *this,I3D_frame *frame,C_VersionMaster *master,int index,int hitPoints,
+          int particleEffect,int materialId,bool transparent)
+{
+  (this->m_versionHitPoints).alloc = transparent;
+  (this->m_versionHitPoints).first = nullptr;
+  (this->m_versionHitPoints).last = nullptr;
+  (this->m_versionHitPoints).end = nullptr;
+  (this->m_versionFrames).alloc = transparent;
+  (this->m_versionFrames).first = (I3D_frame **)0x0;
+  (this->m_versionFrames).last = (I3D_frame **)0x0;
+  (this->m_versionFrames).end = (I3D_frame **)0x0;
+  (this->m_debrisFrames).first = (I3D_frame **)0x0;
+  (this->m_debrisFrames).alloc = transparent;
+  (this->m_debrisFrames).last = (I3D_frame **)0x0;
+  (this->m_debrisFrames).end = (I3D_frame **)0x0;
+  (this->m_versionSounds).first = nullptr;
+  (this->m_versionSounds).alloc = transparent;
+  (this->m_versionSounds).last = nullptr;
+  (this->m_versionSounds).end = nullptr;
+  if (frame != nullptr) {
+    frame->m_refCount = frame->m_refCount + 1;
+  }
+  if (frame->m_data == nullptr) {
+    local_2c = 0;
+    SetFrameData((int)frame,&local_2c);
+  }
+  else {
+    frame->m_data->versionMaster = master;
+  }
+  if (frame->m_data == nullptr) {
+    local_2c = 0;
+    SetFrameData((int)frame,&local_2c);
+  }
+  else {
+    frame->m_data->versionKeeper = this;
+  }
+  this->m_hitPoints = hitPoints;
+  this->m_materialId = materialId;
+  this->m_frame = frame;
+  this->m_index = index;
+  this->m_version = 0;
+  this->m_numVersions = 0;
+  this->m_versionsLoaded = false;
+  this->m_particleEffect = particleEffect;
+  this->m_master = master;
+  this->m_transparent = transparent;
+  return this;
+}
+
+// 0x0043aef0
+void __thiscall C_VersionKeeper::~C_VersionKeeper(C_VersionKeeper *this)
+{
+  pSVar1 = this->m_frame->m_data;
+  if (pSVar1 == nullptr) {
+    local_2c = 0;
+    SetFrameData((int)this->m_frame,&local_2c);
+  }
+  else {
+    pSVar1->versionMaster = nullptr;
+  }
+  pSVar1 = this->m_frame->m_data;
+  if (pSVar1 == nullptr) {
+    local_2c = 0;
+    SetFrameData((int)this->m_frame,&local_2c);
+  }
+  else {
+    pSVar1->versionKeeper = nullptr;
+  }
+  (*this->m_frame->vtable->Release)(this->m_frame);
+  operator_delete((this->m_versionSounds).first);
+  (this->m_versionSounds).first = nullptr;
+  (this->m_versionSounds).last = nullptr;
+  (this->m_versionSounds).end = nullptr;
+  operator_delete((this->m_debrisFrames).first);
+  (this->m_debrisFrames).first = (I3D_frame **)0x0;
+  (this->m_debrisFrames).last = (I3D_frame **)0x0;
+  (this->m_debrisFrames).end = (I3D_frame **)0x0;
+  operator_delete((this->m_versionFrames).first);
+  (this->m_versionFrames).first = (I3D_frame **)0x0;
+  (this->m_versionFrames).last = (I3D_frame **)0x0;
+  (this->m_versionFrames).end = (I3D_frame **)0x0;
+  operator_delete((this->m_versionHitPoints).first);
+  (this->m_versionHitPoints).first = nullptr;
+  (this->m_versionHitPoints).last = nullptr;
+  (this->m_versionHitPoints).end = nullptr;
+}
+
+// 0x0043b000
+bool __thiscall
+C_VersionKeeper::Damage(C_VersionKeeper *this,int damage,I3D_frame **outFrame,int effectsMode)
+{
+  if (outFrame != (I3D_frame **)0x0) {
+    *outFrame = this->m_frame;
+  }
+  if (damage < this->m_hitPoints) {
+    this->m_hitPoints = this->m_hitPoints - damage;
+    return true;
+  }
+  if ((this->m_versionsLoaded == false) &&
+     (bVar2 = C_VersionMaster::LoadVersions(this->m_master,this), !bVar2)) {
+    this->m_numVersions = 0;
+    this->m_version = 0;
+    C_VersionMaster::OnKeeperDamaged(this->m_master,this);
+    return false;
+  }
+  version = this->m_version;
+  if (this->m_numVersions <= this->m_version) {
+    return false;
+  }
+  do {
+    iVar3 = version;
+    damage = damage - this->m_hitPoints;
+    version = iVar3 + 1;
+    if (version == this->m_numVersions) goto LAB_0043b087;
+    iVar1 = (this->m_versionHitPoints).first[version];
+    this->m_hitPoints = iVar1;
+  } while (iVar1 <= damage);
+  this->m_hitPoints = iVar1 - damage;
+LAB_0043b087:
+  SwapVisual(this,(this->m_versionFrames).first[iVar3]);
+  if (outFrame != (I3D_frame **)0x0) {
+    *outFrame = this->m_frame;
+  }
+  this_00 = (void *)C_NetGame__CreateMessage(&g_netGame,7,0);
+  if (this_00 != nullptr) {
+    C_BitStream__WriteBits(this_00,this->m_master->m_index,0x10);
+    C_BitStream__WriteBits(this_00,this->m_index,8);
+    C_BitStream__WriteBits(this_00,version,8);
+    C_NetGame__SendMessage(&g_netGame,this_00);
+  }
+  if (((uint8_t)g_gameRole & 2) != 0) {
+    if (effectsMode == 0) {
+      bVar2 = true;
+    }
+    else if (effectsMode == 2) {
+      bVar2 = false;
+    }
+    else {
+      bVar2 = this->m_master->m_index % 3 == 0;
+    }
+    SetVersion(this,version,bVar2);
+  }
+  this->m_version = version;
+  bVar2 = C_VersionMaster::OnKeeperDamaged(this->m_master,this);
+  return bVar2;
+}
+
+// 0x0043b140
+void __thiscall C_VersionKeeper::SpawnDebris(C_VersionKeeper *this,I3D_frame *debris,bool physics)
+{
+  if (debris != nullptr) {
+    local_dc._0_4_ = this;
+    if (debris->m_parent != nullptr) {
+      pIVar5 = this->m_frame;
+      if ((pIVar5->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar5);
+      }
+      (*debris->m_parent->vtable->SetPos)
+                (debris->m_parent,(S_vector *)((pIVar5->m_worldMatrix).m + 3));
+      pIVar5 = (I3D_frame *)*puStack_e4;
+      if ((pIVar5->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar5);
+      }
+      fStack_118 = (pIVar5->m_worldMatrix).m[2][0];
+      fStack_114 = (pIVar5->m_worldMatrix).m[2][1];
+      fStack_110 = (pIVar5->m_worldMatrix).m[2][2];
+      fStack_cc = (pIVar5->m_worldMatrix).m[2][3];
+      SStack_104.y = fStack_118 * fStack_118 + fStack_110 * fStack_110 + fStack_114 * fStack_114;
+      if (1e-08 <= ABS(SStack_104.y - 1.0)) {
+        if (1e-08 <= SStack_104.y) {
+          fVar2 = 1.0 / SQRT(SStack_104.y);
+          fStack_118 *= fVar2;
+          fStack_114 *= fVar2;
+          fStack_110 *= fVar2;
+        }
+        else if (fStack_118 == 0.0) {
+          if (fStack_110 == 0.0) {
+            if (0.0 <= fStack_114) {
+              fStack_114 = 1.0;
+            }
+            else {
+              fStack_114 = -1.0;
+            }
+          }
+          else if (0.0 <= fStack_110) {
+            fStack_110 = 1.0;
+          }
+          else {
+            fStack_110 = -1.0;
+          }
+        }
+        else if (0.0 <= fStack_118) {
+          fStack_118 = 1.0;
+        }
+        else {
+          fStack_118 = -1.0;
+        }
+      }
+      local_dc._4_4_ = fStack_118;
+      fStack_d0 = fStack_110;
+      fStack_d4 = fStack_114;
+      (*debris->m_parent->vtable->SetDir)
+                (debris->m_parent,(S_vector *)&((S_vector *)local_dc)->y,0.0);
+      pIVar5 = (I3D_frame *)*puStack_f0;
+      if (pIVar5->m_parent == nullptr) {
+        SStack_104.x = (pIVar5->m_scale).x;
+        SStack_104.y = (pIVar5->m_scale).y;
+        SStack_104.z = (pIVar5->m_scale).z;
+        pIStack_f8 = *(I3D_driver **)pIVar5->_pad_00dc;
+      }
+      else {
+        if ((pIVar5->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar5);
+        }
+        S_matrix::GetScale(&pIVar5->m_worldMatrix,&SStack_104);
+      }
+      pIVar5 = debris->m_parent;
+      (pIVar5->m_scale).x = SStack_104.x;
+      (pIVar5->m_scale).y = SStack_104.y;
+      (pIVar5->m_scale).z = SStack_104.z;
+      *(I3D_driver **)pIVar5->_pad_00dc = pIStack_f8;
+      if ((pIVar5->m_frameFlags & 8) == 0) {
+        S_quat::Make(&pIVar5->m_rot,&pIVar5->m_localMatrix);
+      }
+      pIVar5->m_frameFlags = pIVar5->m_frameFlags & 0xfffffecb | 0x40000008;
+      (*debris->m_parent->vtable->Update)(debris->m_parent);
+    }
+    if (physics) {
+      iStack_b4 = (*debris->vtable->NumChildren)(debris);
+      while (iStack_b4 != 0) {
+        iStack_b4--;
+        pIVar5 = (*debris->vtable->GetChild)(debris,iStack_b4);
+        if ((pIVar5 != nullptr) && (pIVar5->m_type == 1)) {
+          pIStack_f4 = I3DGetDriver();
+          pIVar1 = pIStack_f4->vtable;
+          visualType = (*pIVar5->vtable->GetVisualType)(pIVar5);
+          self = (*pIVar1->CreateVisual)(pIStack_f8,visualType);
+          if (self == nullptr) {
+            return;
+          }
+          (*self->vtable->Duplicate)(self,pIVar5);
+          self[1].m_rot.v.x = (float)((uint32_t)self[1].m_rot.v.x & 0xffffdfff);
+          if ((pIVar5->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar5);
+          }
+          fStack_58 = (pIVar5->m_worldMatrix).m[3][0];
+          fStack_54 = (pIVar5->m_worldMatrix).m[3][1];
+          fStack_50 = (pIVar5->m_worldMatrix).m[3][2];
+          ppIStack_4c = (I3D_frame **)(pIVar5->m_worldMatrix).m[3][3];
+          iVar6 = GetGame();
+          if (*(int *)(iVar6 + 0x18) != 0) {
+            iVar6 = GetGame();
+            (*self->vtable->LinkTo)(self,*(I3D_frame **)(*(int *)(iVar6 + 0x18) + 0x1f8),0);
+            (*self->vtable->Update)(self);
+            (*self->vtable->SetPos)(self,&SStack_68);
+            if ((pIVar5->m_frameFlags & 0x20) == 0) {
+              I3D_frame::UpdateWMatrixProc(pIVar5);
+            }
+            auStack_80._0_4_ = (pIVar5->m_worldMatrix).m[2][0];
+            auStack_80._4_4_ = (pIVar5->m_worldMatrix).m[2][1];
+            fStack_78 = (pIVar5->m_worldMatrix).m[2][2];
+            CStack_74.rep = (C_str_rep *)(pIVar5->m_worldMatrix).m[2][3];
+            fVar2 = (float)auStack_80._0_4_ * (float)auStack_80._0_4_ +
+                    fStack_78 * fStack_78 + (float)auStack_80._4_4_ * (float)auStack_80._4_4_;
+            if (1e-08 <= ABS(fVar2 - 1.0)) {
+              if (1e-08 <= fVar2) {
+                fVar2 = 1.0 / SQRT(fVar2);
+                auStack_80._0_4_ = (float)auStack_80._0_4_ * fVar2;
+                auStack_80._4_4_ = (float)auStack_80._4_4_ * fVar2;
+                fStack_78 *= fVar2;
+              }
+              else if ((float)auStack_80._0_4_ == 0.0) {
+                if (fStack_78 == 0.0) {
+                  if (0.0 <= (float)auStack_80._4_4_) {
+                    auStack_80._4_4_ = 1.0;
+                  }
+                  else {
+                    auStack_80._4_4_ = -1.0;
+                  }
+                }
+                else if (0.0 <= fStack_78) {
+                  fStack_78 = 1.0;
+                }
+                else {
+                  fStack_78 = -1.0;
+                }
+              }
+              else if (0.0 <= (float)auStack_80._0_4_) {
+                auStack_80._0_4_ = 1.0;
+              }
+              else {
+                auStack_80._0_4_ = -1.0;
+              }
+            }
+            (*self->vtable->SetDir)(self,(S_vector *)auStack_80,0.0);
+            if (pIVar5->m_parent == nullptr) {
+              local_dc._0_4_ = (pIVar5->m_scale).x;
+              local_dc._4_4_ = (pIVar5->m_scale).y;
+              fStack_d4 = (pIVar5->m_scale).z;
+              fStack_d0 = *(float *)pIVar5->_pad_00dc;
+            }
+            else {
+              if ((pIVar5->m_frameFlags & 0x20) == 0) {
+                I3D_frame::UpdateWMatrixProc(pIVar5);
+              }
+              S_matrix::GetScale(&pIVar5->m_worldMatrix,(S_vector *)local_dc);
+            }
+            (self->m_scale).x = (float)local_dc._0_4_;
+            (self->m_scale).y = (float)local_dc._4_4_;
+            (self->m_scale).z = fStack_d4;
+            *(float *)self->_pad_00dc = fStack_d0;
+            if ((self->m_frameFlags & 8) == 0) {
+              S_quat::Make(&self->m_rot,&self->m_localMatrix);
+            }
+            self->m_frameFlags = self->m_frameFlags & 0xfffffecb | 0x40000008;
+            (*self->vtable->Update)(self);
+            iVar6 = GetGame();
+            piVar7 = *(int **)(iVar6 + 0x18);
+            if ((self->m_frameFlags & 0x20) == 0) {
+              I3D_frame::UpdateWMatrixProc(self);
+            }
+            (**(code **)(*piVar7 + 0xec))(piVar7,self,(self->m_worldMatrix).m + 3);
+            (*self->vtable->Update)(self);
+          }
+          local_dc._0_4_ = auStack_80 + 4;
+          pIStack_98 = nullptr;
+          auStack_80._4_4_ = auStack_80._4_4_ & 0xff000000;
+          fStack_78 = 1.5707964;
+          CStack_74.rep = nullptr;
+          local_1c = nullptr;
+          C_str::operator_assign(&CStack_74,&DAT_00867a90);
+          puVar3 = puStack_e4;
+          fStack_70 = -1.0;
+          auStack_80._0_4_ = 0.0;
+          local_1c = (void *)0x1;
+          pIStack_98 = self;
+          piVar7 = (int *)GetPhysicsModule();
+          max = &pIStack_98;
+          puStack_e0 = (uint8_t *)(**(code **)(*piVar7 + 0x40))();
+          RandomFloat((long double *)0x3fc00000,(float)max);
+          SStack_104.x = (float)(extraout_ST0 - (long double)0.75);
+          RandomFloat((long double *)0x3fc00000,(float)max);
+          fStack_c4 = (float)(extraout_ST0_00 - (long double)0.75);
+          RandomFloat((long double *)0x3fc00000,(float)max);
+          SStack_104.y = (float)(extraout_ST0_01 - (long double)0.75);
+          if ((self->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(self);
+          }
+          SStack_104.z = (self->m_worldMatrix).m[3][0];
+          pIStack_f8 = (I3D_driver *)(self->m_worldMatrix).m[3][1];
+          pIStack_f4 = (I3D_driver *)(self->m_worldMatrix).m[3][2];
+          puStack_f0 = (uint32_t *)(self->m_worldMatrix).m[3][3];
+          pIVar5 = *(I3D_frame **)(puVar3[1] + 8);
+          if (pIVar5 != nullptr) {
+            if ((pIVar5->m_frameFlags & 0x20) == 0) {
+              I3D_frame::UpdateWMatrixProc(pIVar5);
+            }
+            puVar4 = puStack_e0;
+            local_dc._0_4_ = (pIVar5->m_worldMatrix).m[3][0];
+            local_dc._4_4_ = (pIVar5->m_worldMatrix).m[3][1];
+            fStack_d4 = (pIVar5->m_worldMatrix).m[3][2];
+            fStack_d0 = (pIVar5->m_worldMatrix).m[3][3];
+            fStack_70 = ((float)pIStack_f4 - fStack_d4) * 3.0;
+            fStack_a0 = ((float)pIStack_f8 - (float)local_dc._4_4_) * 3.0;
+            puStack_e4 = (uint32_t *)((SStack_104.z - (float)local_dc._0_4_) * 3.0);
+            ppIStack_4c = (I3D_frame **)((float)puStack_e4 + SStack_104.y);
+            if (puStack_e0 != PTR_DAT_00832cdc) {
+              fStack_34 = (float)pIStack_f4 + SStack_104.x;
+              fStack_38 = (float)pIStack_f8 + fStack_c4;
+              ppIStack_3c = (I3D_frame **)(SStack_104.z + SStack_104.y);
+              piVar7 = (int *)GetPhysicsModule();
+              (**(code **)(*piVar7 + 0x48))(puVar4,&ppIStack_4c,&ppIStack_3c,0x3f800000);
+            }
+          }
+          (*self->vtable->Release)(self);
+          if ((piStack_6c != nullptr) && (*piStack_6c = *piStack_6c - 1, *piStack_6c == 0)) {
+            operator_delete(piStack_6c);
+          }
+        }
+      }
+    }
+  }
+}
+
+// 0x0043b9d0
+void __thiscall C_VersionKeeper::PlaySound(C_VersionKeeper *this,int sound)
+{
+  if (sound != -1) {
+    S_SoundRequest__Init(&local_50);
+    this_00 = this->m_frame;
+    if (this_00 != nullptr) {
+      if ((this_00->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(this_00);
+      }
+      local_50 = (this_00->m_worldMatrix).m[3][0];
+      local_4c = (this_00->m_worldMatrix).m[3][1];
+      local_48 = (this_00->m_worldMatrix).m[3][2];
+      local_44 = (this_00->m_worldMatrix).m[3][3];
+      piVar1 = (int *)GetSoundModule();
+      (**(code **)(*piVar1 + 0x54))(&local_50);
+    }
+  }
+}
+
+// 0x0043ba60
+void __thiscall C_VersionKeeper::SwapVisual(C_VersionKeeper *this,I3D_frame *source)
+{
+  if (this->m_frame != nullptr) {
+    local_44 = this;
+    self = I3DGetDriver();
+    pIVar1 = self->vtable;
+    uVar4 = (*this->m_frame->vtable->GetVisualType)(this->m_frame);
+    pIVar5 = (*pIVar1->CreateVisual)(self,uVar4);
+    if (pIVar5 != nullptr) {
+      (*pIVar5->vtable->Duplicate)(pIVar5,source);
+      (*pIVar5->vtable->LinkTo)(pIVar5,this->m_frame->m_parent,0);
+      pIVar7 = this->m_frame;
+      uVar4 = pIVar5->m_frameFlags;
+      if (-1 < (char)uVar4) {
+        (pIVar5->m_localMatrix).m[3][0] = (pIVar7->m_localMatrix).m[3][0];
+        (pIVar5->m_localMatrix).m[3][1] = (pIVar7->m_localMatrix).m[3][1];
+        (pIVar5->m_localMatrix).m[3][2] = (pIVar7->m_localMatrix).m[3][2];
+        pIVar5->m_frameFlags = uVar4 & 0xfffffedf | 0x40000000;
+      }
+      pIStack_4c = this->m_frame;
+      if ((pIStack_4c->m_frameFlags & 0x10) == 0) {
+        pIStack_4c->m_frameFlags = pIStack_4c->m_frameFlags | 0x10;
+        S_quat::Normalize((S_quat *)(&pIStack_4c->m_worldMatrix + 2));
+        S_matrix::SetRot3(&pIStack_4c->m_worldMatrix + 1,(S_quat *)(&pIStack_4c->m_worldMatrix + 2))
+        ;
+        SStack_30.actor = (C_Actor *)(&pIStack_4c->m_worldMatrix)[1].m[2][0];
+        SStack_30.script = (C_Script *)(&pIStack_4c->m_worldMatrix)[1].m[2][1];
+        SStack_30.unknown08 = (uint32_t)(&pIStack_4c->m_worldMatrix)[1].m[2][2];
+        SStack_30.unknown0C = (uint32_t)(&pIStack_4c->m_worldMatrix)[1].m[2][3];
+      }
+      else {
+        pCStack_40 = (C_Actor *)(&pIStack_4c->m_worldMatrix)[1].m[2][0];
+        pCStack_3c = (C_Script *)(&pIStack_4c->m_worldMatrix)[1].m[2][1];
+        fStack_38 = (&pIStack_4c->m_worldMatrix)[1].m[2][2];
+        SStack_30.unknown0C = (uint32_t)(&pIStack_4c->m_worldMatrix)[1].m[2][3];
+        pIStack_4c = (I3D_frame *)
+                     ((float)pCStack_40 * (float)pCStack_40 +
+                     fStack_38 * fStack_38 + (float)pCStack_3c * (float)pCStack_3c);
+        if (1e-08 <= ABS((float)pIStack_4c - 1.0)) {
+          if (1e-08 <= (float)pIStack_4c) {
+            fVar3 = 1.0 / SQRT((float)pIStack_4c);
+            pCStack_40 = (C_Actor *)((float)pCStack_40 * fVar3);
+            pCStack_3c = (C_Script *)((float)pCStack_3c * fVar3);
+            fStack_38 *= fVar3;
+          }
+          else if ((float)pCStack_40 == 0.0) {
+            if (fStack_38 == 0.0) {
+              if (0.0 <= (float)pCStack_3c) {
+                pCStack_3c = (C_Script *)0x3f800000;
+              }
+              else {
+                pCStack_3c = (C_Script *)0xbf800000;
+              }
+            }
+            else if (0.0 <= fStack_38) {
+              fStack_38 = 1.0;
+            }
+            else {
+              fStack_38 = -1.0;
+            }
+          }
+          else if (0.0 <= (float)pCStack_40) {
+            pCStack_40 = (C_Actor *)0x3f800000;
+          }
+          else {
+            pCStack_40 = (C_Actor *)0xbf800000;
+          }
+        }
+        SStack_30.actor = pCStack_40;
+        SStack_30.script = pCStack_3c;
+        SStack_30.unknown08 = (uint32_t)fStack_38;
+      }
+      (*pIVar5->vtable->SetWorldDir)(pIVar5,(S_vector *)&SStack_30,0.0);
+      pIVar7 = this->m_frame;
+      (pIVar5->m_scale).x = (pIVar7->m_scale).x;
+      (pIVar5->m_scale).y = (pIVar7->m_scale).y;
+      (pIVar5->m_scale).z = (pIVar7->m_scale).z;
+      *(uint32_t *)pIVar5->_pad_00dc = *(uint32_t *)pIVar7->_pad_00dc;
+      if ((pIVar5->m_frameFlags & 8) == 0) {
+        S_quat::Make(&pIVar5->m_rot,&pIVar5->m_localMatrix);
+      }
+      pIVar5->m_frameFlags = pIVar5->m_frameFlags & 0xfffffecb | 0x40000008;
+      (*pIVar5->vtable->Update)(pIVar5);
+      if (pIVar5->m_data == nullptr) {
+        SStack_30.actor = nullptr;
+        SStack_30.script = nullptr;
+        SStack_30.unknown08 = 0;
+        SStack_30.unknown0C = 0;
+        SStack_30.versionKeeper = nullptr;
+        SStack_30.unknown10 = PTR_DAT_00832cdc;
+        SStack_30.versionMaster = this->m_master;
+        SetFrameData((int)pIVar5,&SStack_30.actor);
+      }
+      else {
+        pIVar5->m_data->versionMaster = this->m_master;
+      }
+      if (pIVar5->m_data == nullptr) {
+        SStack_30.actor = nullptr;
+        SStack_30.script = nullptr;
+        SStack_30.unknown08 = 0;
+        SStack_30.unknown0C = 0;
+        SStack_30.unknown10 = PTR_DAT_00832cdc;
+        SStack_30.versionMaster = nullptr;
+        SStack_30.versionKeeper = this;
+        SetFrameData((int)pIVar5,&SStack_30.actor);
+      }
+      else {
+        pIVar5->m_data->versionKeeper = this;
+      }
+      pIVar7 = this->m_frame;
+      pSVar2 = pIVar7->m_data;
+      if (pSVar2 == nullptr) {
+        S_FrameData__Init(&SStack_30);
+        SStack_30.versionMaster = nullptr;
+        SetFrameData((int)pIVar7,&SStack_30.actor);
+      }
+      else {
+        pSVar2->versionMaster = nullptr;
+      }
+      pIVar7 = this->m_frame;
+      pSVar2 = pIVar7->m_data;
+      if (pSVar2 == nullptr) {
+        S_FrameData__Init(&SStack_30);
+        SStack_30.versionKeeper = nullptr;
+        SetFrameData((int)pIVar7,&SStack_30.actor);
+      }
+      else {
+        pSVar2->versionKeeper = nullptr;
+      }
+      pIVar7 = this->m_frame->m_ownerModel;
+      if (pIVar7 != nullptr) {
+        (*pIVar7->vtable[1].Slot2C)(pIVar7,pIVar5);
+        (*pIStack_50->vtable[1].SetOn)(pIStack_50,SUB41(this->m_frame,0));
+        (*this->m_frame->vtable->SetOn)(this->m_frame,false);
+        (*this->m_frame->vtable->Update)(this->m_frame);
+        iVar6 = (*this->m_frame->vtable->NumChildren)(this->m_frame);
+        while (iVar6 != 0) {
+          iVar6--;
+          pIVar7 = (*this->m_frame->vtable->GetChild)(this->m_frame,iVar6);
+          if ((pIVar7 != nullptr) &&
+             (uVar4 = (*pIVar7->vtable->GetVisualType)(pIVar7), uVar4 == 0x4a4f5250)) {
+            (*pIVar7->vtable->LinkTo)(pIVar7,pIVar5,1);
+            (*pIVar7->vtable->Update)(pIVar7);
+          }
+        }
+        uVar4 = (*this->m_frame->vtable->GetVisualType)(this->m_frame);
+        if ((uVar4 == 0x50414d4c) &&
+           (uVar4 = (*pIVar5->vtable->GetVisualType)(pIVar5), uVar4 == 0x50414d4c)) {
+          pIVar7 = this->m_frame;
+          uVar8 = *(uint32_t *)(pIVar7[2]._pad_0004 + *(int *)pIVar7[1]._pad_0104 * 0x38 - 4);
+          (*pIVar5->vtable[2].Update)(pIVar5);
+          *(uint32_t *)(pIVar5[2]._pad_0004 + *(int *)pIVar5[1]._pad_0104 * 0x38) =
+               *(uint32_t *)(pIVar7[2]._pad_0004 + *(int *)pIVar7[1]._pad_0104 * 0x38);
+          *(uint32_t *)(pIVar5[2]._pad_0004 + *(int *)pIVar5[1]._pad_0104 * 0x38 + 4) =
+               *(uint32_t *)(pIVar7[2]._pad_0004 + *(int *)pIVar7[1]._pad_0104 * 0x38 + 4);
+          (*pIVar5->vtable[2].Slot28)(pIVar5,*(uint32_t *)pIVar7[1]._pad_0104,uVar8);
+          local_44 = nullptr;
+          pCStack_40 = (C_Actor *)0x3f800000;
+          pCStack_3c = nullptr;
+          iVar6 = GetGame();
+          (*pIVar5->vtable[2].Slot14)
+                    (pIVar5,*(uint32_t *)(iVar6 + 0x18),&local_44,
+                     *(uint32_t *)(pIVar7[2]._pad_0004 + *(int *)pIVar7[1]._pad_0104 * 0x38),4,0,0
+                    );
+          (*pIVar5->vtable->Update)(pIVar5);
+          this = (C_VersionKeeper *)pIStack_4c;
+        }
+        (*((I3D_frame *)((I3D_frame *)this)->vtable)->vtable->Release)
+                  ((I3D_frame *)((I3D_frame *)this)->vtable);
+        ((I3D_frame *)this)->vtable = (I3D_frame_vtbl *)pIVar5;
+        iVar6 = (*pIVar5->vtable->NumChildren)(pIVar5);
+        while (iVar6 != 0) {
+          iVar6--;
+          pIVar5 = (*((I3D_frame *)((I3D_frame *)this)->vtable)->vtable->GetChild)
+                             ((I3D_frame *)((I3D_frame *)this)->vtable,iVar6);
+          if ((pIVar5 != nullptr) &&
+             (uVar4 = (*pIVar5->vtable->GetVisualType)(pIVar5), uVar4 == 0x4a4f5250)) {
+            (*pIVar5->vtable[2].SetWorldDir)(pIVar5,nullptr,0.0);
+            (*pIVar5->vtable->Update)(pIVar5);
+          }
+        }
+      }
+    }
+  }
+}
+
+// 0x0043c000
+void __thiscall C_VersionKeeper::SpawnParticles(C_VersionKeeper *this,int effect)
+{
+  this_00 = this->m_frame;
+  if (this_00 != nullptr) {
+    if ((this_00->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(this_00);
+    }
+    C_ParticlesModule__Create(&g_particlesModule,effect,&this_00->m_worldMatrix,0,1,0);
+  }
+}
+
+// 0x0043c040
+void __thiscall C_VersionKeeper::SetVersion(C_VersionKeeper *this,int version,bool effects)
+{
+  if (((this->m_versionsLoaded == false) && (this->m_master != nullptr)) &&
+     (bVar3 = C_VersionMaster::LoadVersions(this->m_master,this), !bVar3)) {
+    this->m_numVersions = 0;
+    this->m_version = 0;
+    C_VersionMaster::OnKeeperDamaged(this->m_master,this);
+    return;
+  }
+  if (version < 0) {
+    ppIVar1 = (this->m_versionFrames).first;
+    if (ppIVar1 == (I3D_frame **)0x0) {
+      version = 0;
+    }
+    else {
+      version = (int)(this->m_versionFrames).last - (int)ppIVar1 >> 2;
+    }
+  }
+  if (version <= this->m_version) {
+    return;
+  }
+  if ((g_gameRole & 1) == 0) {
+LAB_0043c0af:
+    ppIVar1 = (this->m_versionFrames).first;
+    if (ppIVar1 == (I3D_frame **)0x0) {
+      uVar4 = 0;
+    }
+    else {
+      uVar4 = (int)(this->m_versionFrames).last - (int)ppIVar1 >> 2;
+    }
+    if ((uint32_t)version <= uVar4) {
+      SwapVisual(this,(this->m_versionFrames).first[version - 1]);
+    }
+LAB_0043c0d5:
+    if (!effects) goto LAB_0043c0e8;
+  }
+  else {
+    if (((uint8_t)g_gameRole & 7) != 7) goto LAB_0043c0d5;
+    if (!effects) goto LAB_0043c0af;
+  }
+  if (-1 < this->m_particleEffect) {
+    SpawnParticles(this,this->m_particleEffect);
+  }
+LAB_0043c0e8:
+  ppIVar1 = (this->m_debrisFrames).first;
+  if (ppIVar1 == (I3D_frame **)0x0) {
+    uVar4 = 0;
+  }
+  else {
+    uVar4 = (int)(this->m_debrisFrames).last - (int)ppIVar1 >> 2;
+  }
+  if ((uint32_t)version <= uVar4) {
+    SpawnDebris(this,(this->m_debrisFrames).first[version - 1],effects);
+  }
+  piVar2 = (this->m_versionSounds).first;
+  if (piVar2 == nullptr) {
+    uVar4 = 0;
+  }
+  else {
+    uVar4 = (int)(this->m_versionSounds).last - (int)piVar2 >> 2;
+  }
+  if (((uint32_t)version <= uVar4) && (effects)) {
+    PlaySound(this,(this->m_versionSounds).first[version - 1]);
+  }
+  this->m_version = version;
+}
+
+// 0x0043c150
+void __fastcall vector_tidy_43c150(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(uint32_t *)(param_1 + 4) = 0;
+  *(uint32_t *)(param_1 + 8) = 0;
+  *(uint32_t *)(param_1 + 0xc) = 0;
+}
+
+// 0x0043c170
+void StaticInit_43c170(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x0043c1a0
+void __thiscall C_VersionMaster::Clear(C_VersionMaster *this)
+{
+  ppCVar1 = (this->m_keepers).first;
+  if (ppCVar1 != (C_VersionKeeper **)0x0) {
+    iVar2 = (int)(this->m_keepers).last - (int)ppCVar1 >> 2;
+    while (iVar2 != 0) {
+      iVar2--;
+      this_00 = (this->m_keepers).first[iVar2];
+      if (this_00 != nullptr) {
+        C_VersionKeeper::~C_VersionKeeper(this_00);
+        operator_delete(this_00);
+      }
+    }
+  }
+  (this->m_keepers).last = (this->m_keepers).first;
+  self = this->m_versionsModel;
+  if (self != nullptr) {
+    (*self->vtable->Release)((I3D_frame *)self);
+    this->m_versionsModel = nullptr;
+  }
+  self_00 = this->m_frame;
+  if (self_00 != nullptr) {
+    (*self_00->vtable->Release)(self_00);
+    this->m_frame = nullptr;
+  }
+}
+
+// 0x0043c220
+C_VersionMaster * __thiscall
+C_VersionMaster::C_VersionMaster(C_VersionMaster *this,I3D_frame *frame,int index,bool transparent)
+{
+  (this->m_keepers).alloc = (uchar)frame;
+  (this->m_keepers).first = (C_VersionKeeper **)0x0;
+  (this->m_keepers).last = (C_VersionKeeper **)0x0;
+  (this->m_keepers).end = (C_VersionKeeper **)0x0;
+  local_4 = 0;
+  this->m_removed = false;
+  this->m_refCount = 1;
+  if (frame != nullptr) {
+    frame->m_refCount = frame->m_refCount + 1;
+  }
+  if (frame->m_data == nullptr) {
+    local_2c = 0;
+    SetFrameData((int)frame,&local_2c);
+  }
+  else {
+    frame->m_data->versionMaster = this;
+  }
+  this->m_frame = frame;
+  this->m_versionsModel = nullptr;
+  this->m_damaged = false;
+  pSVar1 = _aligned_malloc(0xe0,0x10);
+  local_4 = CONCAT31(local_4._1_3_,1);
+  if (pSVar1 == nullptr) {
+    pSVar1 = nullptr;
+  }
+  else {
+    pSVar1 = S_VersionCollision::S_VersionCollision(pSVar1,this->m_frame,transparent);
+  }
+  this->m_collision = pSVar1;
+  this->m_index = index;
+  return this;
+}
+
+// 0x0043c310
+void __fastcall AlignedFree_43c310(void *p)
+{
+  _aligned_free(p);
+}
+
+// 0x0043c320
+void __thiscall C_VersionMaster::~C_VersionMaster(C_VersionMaster *this)
+{
+  self = (this->m_collision->m_volume).m_frame;
+  local_44[0] = (I3D_frame *)this;
+  if ((self->m_frameFlags & 0x100) == 0) {
+    (*self->vtable[1].SetPos)(self,unaff_EDI);
+  }
+  if (*(float *)(self->_pad_0004 + 0x38) <= 0.1) {
+    this_00 = this->m_collision;
+    if (this_00 != nullptr) {
+      S_VersionCollision::~S_VersionCollision(this_00);
+      _aligned_free(this_00);
+    }
+  }
+  else {
+    C_VersionsModule::KeepCollision(&g_versionsModule,this->m_collision);
+  }
+  pSVar1 = this->m_frame->m_data;
+  if (pSVar1 == nullptr) {
+    uStack_3c = 0;
+    SetFrameData((int)this->m_frame,&uStack_3c);
+  }
+  else {
+    pSVar1->versionMaster = nullptr;
+  }
+  if ((this->m_damaged != false) && (this->m_frame != nullptr)) {
+    local_44[0] = this->m_frame;
+    vector_insert_n4_43c9f0(&DAT_008999a4,DAT_008999ac,1,local_44);
+  }
+  Clear(this);
+  operator_delete((this->m_keepers).first);
+  (this->m_keepers).first = (C_VersionKeeper **)0x0;
+  (this->m_keepers).last = (C_VersionKeeper **)0x0;
+  (this->m_keepers).end = (C_VersionKeeper **)0x0;
+}
+
+// 0x0043c440
+bool __thiscall
+C_VersionMaster::AddKeeper
+          (C_VersionMaster *this,I3D_frame *frame,int hitPoints,int particleEffect,int materialId,
+          bool transparent)
+{
+  frame_00 = frame;
+  if ((frame->m_data != nullptr) &&
+     (frame->m_data->versionMaster != nullptr)) {
+    return false;
+  }
+  this_00 = operator_new(0x68);
+  if (this_00 == nullptr) {
+    frame = nullptr;
+  }
+  else {
+    ppCVar6 = (this->m_keepers).first;
+    if (ppCVar6 == (C_VersionKeeper **)0x0) {
+      iVar4 = 0;
+    }
+    else {
+      iVar4 = (int)(this->m_keepers).last - (int)ppCVar6 >> 2;
+    }
+    frame = (I3D_frame *)
+            C_VersionKeeper::C_VersionKeeper
+                      (this_00,frame_00,this,iVar4,hitPoints,particleEffect,materialId,
+                       SUB41(_transparent,0));
+  }
+  if (frame != nullptr) {
+    ppCVar6 = (this->m_keepers).last;
+    if ((int)(this->m_keepers).end - (int)ppCVar6 >> 2 == 0) {
+      ppCVar5 = (this->m_keepers).first;
+      if ((ppCVar5 == (C_VersionKeeper **)0x0) ||
+         (uVar3 = (int)ppCVar6 - (int)ppCVar5 >> 2, uVar3 < 2)) {
+        uVar3 = 1;
+      }
+      if (ppCVar5 == (C_VersionKeeper **)0x0) {
+        iVar4 = 0;
+      }
+      else {
+        iVar4 = (int)ppCVar6 - (int)ppCVar5 >> 2;
+      }
+      materialId = iVar4 + uVar3;
+      iVar4 = materialId;
+      if (materialId < 0) {
+        iVar4 = 0;
+      }
+      ppCVar2 = operator_new(iVar4 << 2);
+      _transparent = ppCVar2;
+      for (ppCVar5 = (this->m_keepers).first; ppCVar5 != ppCVar6; ppCVar5 = ppCVar5 + 1) {
+        construct_copy4_43cc60(ppCVar2,ppCVar5);
+        ppCVar2++;
+      }
+      uninitialized_fill_n4_43cc30(ppCVar2,1,&frame);
+      uninitialized_copy4_43cc00(ppCVar6,(this->m_keepers).last,ppCVar2 + 1);
+      empty_function_43c9e0();
+      operator_delete((this->m_keepers).first);
+      ppCVar6 = _transparent;
+      (this->m_keepers).end = _transparent + materialId;
+      iVar4 = vector_size_e4_43c9c0((int)&this->m_keepers);
+      (this->m_keepers).first = ppCVar6;
+      (this->m_keepers).last = ppCVar6 + iVar4 + 1;
+    }
+    else {
+      uninitialized_copy4_43cc00(ppCVar6,ppCVar6,ppCVar6 + 1);
+      ppCVar5 = (this->m_keepers).last;
+      uninitialized_fill_n4_43cc30(ppCVar5,1 - ((int)ppCVar5 - (int)ppCVar6 >> 2),&frame);
+      ppCVar5 = (this->m_keepers).last;
+      for (; ppCVar6 != ppCVar5; ppCVar6 = ppCVar6 + 1) {
+        *ppCVar6 = (C_VersionKeeper *)frame;
+      }
+      pppCVar1 = &(this->m_keepers).last;
+      *pppCVar1 = *pppCVar1 + 1;
+    }
+  }
+  return true;
+}
+
+// 0x0043c660
+bool __thiscall C_VersionMaster::DamageFrame(C_VersionMaster *this,I3D_frame *frame,int damage)
+{
+  if ((((frame != nullptr) && (pSVar1 = frame->m_data, pSVar1 != nullptr)) &&
+      (pSVar1->versionMaster != nullptr)) &&
+     ((pSVar1->versionMaster == this && (pSVar1->versionKeeper != nullptr)))) {
+    bVar2 = C_VersionKeeper::Damage(pSVar1->versionKeeper,damage,&frame,0);
+    return bVar2;
+  }
+  return false;
+}
+
+// 0x0043c6a0
+bool __thiscall C_VersionMaster::DamageAll(C_VersionMaster *this,int damage,int effectsMode)
+{
+  ppCVar1 = (this->m_keepers).first;
+  if (ppCVar1 != (C_VersionKeeper **)0x0) {
+    iVar4 = (int)(this->m_keepers).last - (int)ppCVar1 >> 2;
+    while (iVar4 != 0) {
+      ppCVar1 = (this->m_keepers).first;
+      iVar4--;
+      if (ppCVar1[iVar4] != nullptr) {
+        this_00 = ppCVar1[iVar4];
+        iVar2 = this->m_index;
+        bVar3 = C_VersionKeeper::Damage(this_00,damage,&this_00->m_frame,effectsMode);
+        if (!bVar3) {
+        }
+        if (*(int *)(DAT_00899988 + iVar2 * 4) == 0) {
+          return false;
+        }
+      }
+    }
+  }
+}
+
+// 0x0043c710
+bool __thiscall C_VersionMaster::OnKeeperDamaged(C_VersionMaster *this,C_VersionKeeper *keeper)
+{
+  if (keeper == nullptr) {
+    return false;
+  }
+  this->m_damaged = true;
+  pSVar2 = this->m_frame->m_data;
+  if ((pSVar2 != nullptr) && (pCVar3 = pSVar2->script, pCVar3 != nullptr)) {
+    C_Script__OnHit((int)pCVar3);
+  }
+  if (((keeper->m_version == keeper->m_numVersions) &&
+      (ppCVar8 = (this->m_keepers).first, ppCVar8 != (C_VersionKeeper **)0x0)) &&
+     (iVar9 = (int)(this->m_keepers).last - (int)ppCVar8 >> 2, iVar9 != 0)) {
+    ppCVar7 = ppCVar8 + iVar9;
+    do {
+      ppCVar1 = ppCVar7 - 1;
+      ppCVar7--;
+      iVar9--;
+      if ((*ppCVar1 != nullptr) && (keeper == *ppCVar1)) {
+        local_94 = ppCVar8[iVar9];
+        if (local_94 != nullptr) {
+          C_VersionKeeper::~C_VersionKeeper(local_94);
+          operator_delete(local_94);
+        }
+        (this->m_keepers).first[iVar9] = nullptr;
+        break;
+      }
+    } while (iVar9 != 0);
+  }
+  if ((this->m_collision != nullptr) &&
+     ((this->m_collision->m_volume).m_frame != nullptr)) {
+    self = I3DGetDriver();
+    pIVar4 = (*self->vtable->GetHierarchyBBox)
+                       (self,(I3D_bbox *)&local_50,(this->m_collision->m_volume).m_frame);
+    pSVar6 = &SStack_80;
+    for (iVar9 = 8; iVar9 != 0; iVar9 = iVar9 - 1) {
+      pSVar6->x = (pIVar4->min).x;
+      pIVar4 = (I3D_bbox *)&(pIVar4->min).y;
+      pSVar6 = (S_vector *)&pSVar6->y;
+    }
+    if (SStack_80.x < fStack_70 == (SStack_80.x == fStack_70)) {
+      fStack_54 = 0.0;
+    }
+    else {
+      local_94 = (C_VersionKeeper *)0x3f000000;
+      S_vector::Set((S_vector *)&local_50,fStack_70 - SStack_80.x,fStack_6c - SStack_80.y,
+                    fStack_68 - SStack_80.z);
+      S_vector::Scaled((S_vector *)&local_50,&SStack_90,(float *)&local_94);
+      pfVar5 = (float *)S_vector::operator_plus(&SStack_80,(float *)&local_50,&SStack_90.x);
+      SStack_60.x = *pfVar5;
+      SStack_60.y = pfVar5[1];
+      SStack_60.z = pfVar5[2];
+      fStack_54 = SQRT(SStack_90.x * SStack_90.x +
+                       SStack_90.y * SStack_90.y + SStack_90.z * SStack_90.z);
+    }
+    (this->m_collision->m_volume).m_radius = fStack_54;
+    pSVar6 = &SStack_80;
+    pIVar4 = &(this->m_collision->m_volume).m_bbox;
+    for (iVar9 = 8; iVar9 != 0; iVar9 = iVar9 - 1) {
+      (pIVar4->min).x = pSVar6->x;
+      pSVar6 = (S_vector *)&pSVar6->y;
+      pIVar4 = (I3D_bbox *)&(pIVar4->min).y;
+    }
+    this_00 = (this->m_collision->m_volume).m_frame;
+    if ((this_00->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(this_00);
+    }
+    pSVar10 = &this_00->m_worldMatrix;
+    pSVar12 = this->m_collision;
+    for (iVar9 = 0x10; iVar9 != 0; iVar9 = iVar9 - 1) {
+      (pSVar12->m_invMatrix).m[0][0] = pSVar10->m[0][0];
+      pSVar10 = (S_matrix *)(pSVar10->m[0] + 1);
+      pSVar12 = (S_VersionCollision *)((pSVar12->m_invMatrix).m[0] + 1);
+    }
+    pSVar6 = S_vector::OperatorMul(&SStack_60,(S_vector *)&local_50,&this->m_collision->m_invMatrix)
+    ;
+    pSVar12 = this->m_collision;
+    (pSVar12->m_volume).m_center.x = pSVar6->x;
+    (pSVar12->m_volume).m_center.y = pSVar6->y;
+    (pSVar12->m_volume).m_center.z = pSVar6->z;
+    (pSVar12->m_volume).m_centerW = pSVar6[1].x;
+    pSVar12 = this->m_collision;
+    pSVar11 = pSVar12;
+    pfVar5 = (float *)&local_50;
+    for (iVar9 = 0x10; iVar9 != 0; iVar9 = iVar9 - 1) {
+      *pfVar5 = (pSVar11->m_invMatrix).m[0][0];
+      pSVar11 = (S_VersionCollision *)((pSVar11->m_invMatrix).m[0] + 1);
+      pfVar5++;
+    }
+    S_matrix::Inverse(&pSVar12->m_invMatrix,&local_50);
+    C_CollisionWorld::MoveVolume(&g_collisionWorld,&this->m_collision->m_volume);
+  }
+  ppCVar8 = (this->m_keepers).first;
+  if ((ppCVar8 != (C_VersionKeeper **)0x0) &&
+     (iVar9 = (int)(this->m_keepers).last - (int)ppCVar8 >> 2, iVar9 != 0)) {
+    ppCVar8 += iVar9;
+    do {
+      ppCVar7 = ppCVar8 - 1;
+      ppCVar8--;
+      iVar9--;
+      if (*ppCVar7 != nullptr) {
+      }
+    } while (iVar9 != 0);
+    C_VersionsModule::RemoveMaster(&g_versionsModule,this);
+  }
+}
+
+// 0x0043c9a0
+void __fastcall vector_tidy_43c9a0(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(uint32_t *)(param_1 + 4) = 0;
+  *(uint32_t *)(param_1 + 8) = 0;
+  *(uint32_t *)(param_1 + 0xc) = 0;
+}
+
+// 0x0043c9c0
+int __fastcall vector_size_e4_43c9c0(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 2;
+}
+
+// 0x0043c9e0
+void empty_function_43c9e0(void)
+{
+}
+
+// 0x0043c9f0
+void __thiscall
+vector_insert_n4_43c9f0(void *this,uint32_t *param_1,uint32_t param_2,uint32_t *param_3)
+{
+  puVar7 = *(uint32_t **)((int)this + 8);
+  if (param_2 <= (uint32_t)(*(int *)((int)this + 0xc) - (int)puVar7 >> 2)) {
+    if ((uint32_t)((int)puVar7 - (int)param_1 >> 2) < param_2) {
+      puVar5 = param_1 + param_2;
+      if (param_1 != puVar7) {
+        puVar4 = puVar5 + -param_2;
+        do {
+          if (puVar5 != nullptr) {
+            *puVar5 = *puVar4;
+          }
+          puVar4++;
+          puVar5++;
+        } while (puVar4 != puVar7);
+      }
+      puVar7 = *(uint32_t **)((int)this + 8);
+      for (iVar2 = param_2 - ((int)puVar7 - (int)param_1 >> 2); iVar2 != 0; iVar2 = iVar2 - 1) {
+        if (puVar7 != nullptr) {
+          *puVar7 = *param_3;
+        }
+        puVar7++;
+      }
+      puVar7 = *(uint32_t **)((int)this + 8);
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(uint32_t *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+      return;
+    }
+    if (param_2 != 0) {
+      puVar5 = puVar7;
+      for (puVar4 = puVar7 + -param_2; puVar4 != puVar7; puVar4 = puVar4 + 1) {
+        if (puVar5 != nullptr) {
+          *puVar5 = *puVar4;
+        }
+        puVar5++;
+      }
+      puVar7 = *(uint32_t **)((int)this + 8);
+      for (puVar5 = puVar7 + -param_2; param_1 != puVar5; puVar5 = puVar5 - 1) {
+        puVar7--;
+        *puVar7 = puVar5[-1];
+      }
+      puVar7 = param_1 + param_2;
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(int *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+    }
+    return;
+  }
+  iVar2 = *(int *)((int)this + 4);
+  if ((iVar2 == 0) || (uVar6 = (int)puVar7 - iVar2 >> 2, uVar6 <= param_2)) {
+    uVar6 = param_2;
+  }
+  if (iVar2 == 0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)puVar7 - iVar2 >> 2;
+  }
+  iVar2 += uVar6;
+  iVar3 = iVar2;
+  if (iVar2 < 0) {
+    iVar3 = 0;
+  }
+  puVar4 = operator_new(iVar3 * 4);
+  puVar5 = puVar4;
+  for (puVar7 = *(uint32_t **)((int)this + 4); uVar6 = param_2, puVar1 = puVar5, puVar7 != param_1
+      ; puVar7 = puVar7 + 1) {
+    if (puVar5 != nullptr) {
+      *puVar5 = *puVar7;
+    }
+    puVar5++;
+  }
+  for (; uVar6 != 0; uVar6 = uVar6 - 1) {
+    if (puVar1 != nullptr) {
+      *puVar1 = *param_3;
+    }
+    puVar1++;
+  }
+  puVar1 = *(uint32_t **)((int)this + 8);
+  puVar7 = puVar5 + param_2;
+  if (param_1 != puVar1) {
+    puVar5 = (uint32_t *)((int)puVar7 + (param_2 * -4 - (int)puVar5) + (int)param_1);
+    do {
+      if (puVar7 != nullptr) {
+        *puVar7 = *puVar5;
+      }
+      puVar5++;
+      puVar7++;
+    } while (puVar5 != puVar1);
+  }
+  operator_delete(*(void **)((int)this + 4));
+  *(uint32_t **)((int)this + 0xc) = puVar4 + iVar2;
+  iVar2 = *(int *)((int)this + 4);
+  if (iVar2 == 0) {
+    *(uint32_t **)((int)this + 4) = puVar4;
+    *(uint32_t **)((int)this + 8) = puVar4 + param_2;
+    return;
+  }
+  *(uint32_t **)((int)this + 4) = puVar4;
+  *(uint32_t **)((int)this + 8) = puVar4 + (*(int *)((int)this + 8) - iVar2 >> 2) + param_2;
+}
+
+// 0x0043cc00
+void uninitialized_copy4_43cc00(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != nullptr) {
+      *param_3 = *param_1;
+    }
+    param_3++;
+  }
+}
+
+// 0x0043cc30
+void uninitialized_fill_n4_43cc30(uint32_t *param_1,int param_2,uint32_t *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 - 1) {
+    if (param_1 != nullptr) {
+      *param_1 = *param_3;
+    }
+    param_1++;
+  }
+}
+
+// 0x0043cc60
+void __fastcall construct_copy4_43cc60(uint32_t *param_1,uint32_t *param_2)
+{
+  if (param_1 != nullptr) {
+    *param_1 = *param_2;
+  }
+}
+
+// 0x0043cc70
+void StaticInit_43cc70(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x0043cca0
+bool __thiscall C_VersionMaster::LoadVersions(C_VersionMaster *this,C_VersionKeeper *keeper)
+{
+  if (this->m_versionsModel == nullptr) {
+    LoadVersionsModel(this);
+  }
+  self = this->m_versionsModel;
+  if (self == nullptr) {
+    return false;
+  }
+  pcVar2 = keeper->m_frame->m_name;
+  if (pcVar2 == nullptr) {
+    pcVar2 = &DAT_00867a90;
+  }
+  else {
+    pcVar2 = pcVar2 + keeper->m_frame->m_nameOffset;
+  }
+  pIStack_14 = (*self->vtable->FindChildFrame)((I3D_frame *)self,pcVar2,0xffff);
+  if (pIStack_14 != nullptr) {
+    do {
+      pcVar2 = pIStack_14->m_userProps;
+      if (pcVar2 == nullptr) {
+        pcVar2 = &DAT_00867a90;
+      }
+      iStack_8 = ParseUserProp(pcVar2,"version",100);
+      pcVar2 = pIStack_14->m_userProps;
+      if (pcVar2 == nullptr) {
+        pcVar2 = &DAT_00867a90;
+      }
+      iStack_4 = ParseUserProp(pcVar2,"sound",-1);
+      pIStack_10 = nullptr;
+      pIStack_c = nullptr;
+      iVar3 = (*pIStack_14->vtable->NumChildren)(pIStack_14);
+      while (iVar3 != 0) {
+        outVisual = &pIStack_c;
+        iVar3--;
+        frame = (*pIStack_14->vtable->GetChild)(pIStack_14,iVar3);
+        ClassifyVersionChild(frame,&pIStack_10,outVisual);
+      }
+      vector_insert_n4_43d310(&keeper->m_debrisFrames,(keeper->m_debrisFrames).last,1,&pIStack_10);
+      FUN_0042a140(&keeper->m_versionFrames,(keeper->m_versionFrames).last,1,&pIStack_14);
+      FUN_00420ec0(&keeper->m_versionHitPoints,(keeper->m_versionHitPoints).last,1,&iStack_8);
+      FUN_00420ec0(&keeper->m_versionSounds,(keeper->m_versionSounds).last,1,&iStack_4);
+      pIStack_14 = pIStack_c;
+    } while (pIStack_c != nullptr);
+    piVar1 = (keeper->m_versionHitPoints).first;
+    iVar3 = 0;
+    if (piVar1 != nullptr) {
+      iVar3 = (int)(keeper->m_versionHitPoints).last - (int)piVar1 >> 2;
+    }
+    keeper->m_numVersions = iVar3;
+    keeper->m_versionsLoaded = true;
+    return true;
+  }
+  return false;
+}
+
+// 0x0043ce10
+void __fastcall ClassifyVersionChild(I3D_frame *frame,I3D_frame **outDebris,I3D_frame **outVisual)
+{
+  if (((frame != nullptr) && (outDebris != (I3D_frame **)0x0)) &&
+     (outVisual != (I3D_frame **)0x0)) {
+    if (frame->m_type == 6) {
+      *outDebris = frame;
+      return;
+    }
+    if (frame->m_type == 1) {
+      *outVisual = frame;
+    }
+  }
+}
+
+// 0x0043ce40
+void __thiscall C_VersionMaster::LoadVersionsModel(C_VersionMaster *this)
+{
+  local_4 = 0xffffffff;
+  if (this->m_versionsModel != nullptr) {
+    return;
+  }
+  if (this->m_frame == nullptr) {
+    return;
+  }
+  pcVar12 = *(char **)(this->m_frame[1]._pad_0004 + 0x24);
+  if (pcVar12 == nullptr) {
+    pcVar12 = &DAT_00867a90;
+  }
+  pcVar14 = local_8c;
+  do {
+    cVar2 = *pcVar12;
+    pcVar12++;
+    *pcVar14 = cVar2;
+    pcVar14++;
+  } while (cVar2 != '\0');
+  local_d8 = this;
+  pcVar12 = _strrchr(local_8c,0x2e);
+  if (pcVar12 != nullptr) {
+    pcVar14 = &DAT_00867a90;
+    do {
+      cVar2 = *pcVar14;
+      (pcVar12 - 0x867a90)[(int)pcVar14] = cVar2;
+      pcVar14++;
+    } while (cVar2 != '\0');
+  }
+  pcVar12 = _strrchr(local_8c,0x5c);
+  if (pcVar12 == nullptr) {
+    pcVar12 = local_8c;
+  }
+  else {
+    pcVar12++;
+  }
+  C_fstr_Construct(&local_e0,&DAT_00832cd8,pcVar12);
+  local_4 = 0;
+  pcVar12 = (local_e0.rep)->chars;
+  if (local_e0.rep == nullptr) {
+    pcVar12 = &DAT_00867a90;
+  }
+  FUN_004094e0(&local_9c,pcVar12,&local_e1);
+  local_4._0_1_ = 1;
+  piVar5 = (int *)FUN_00409660(&DAT_008aecb4,&local_9c.alloc);
+  pIVar9 = (I3D_model *)*piVar5;
+  local_4._0_1_ = 0;
+  std_string::Tidy(&local_9c,'\x01');
+  if (pIVar9 != nullptr) goto LAB_0043d0e4;
+  if (DAT_008aece8 == nullptr) {
+    DAT_008aece8 = (int *)(**(code **)(g_versionModelCache + 0xc))();
+  }
+  uVar15 = 0;
+  iVar6 = vector_size_e4_409600(0x8aecd4);
+  if (iVar6 != 0) {
+    do {
+      piVar5 = FUN_00409f20((void *)(DAT_008aecd8 + uVar15 * 4),&pCStack_d4,(uint8_t *)pcVar12);
+      local_4._0_1_ = 2;
+      puVar13 = (uint8_t *)(*piVar5 + 8);
+      if (*piVar5 == 0) {
+        puVar13 = &DAT_00867a90;
+      }
+      iVar6 = (**(code **)(*DAT_008aece8 + 0x74))(DAT_008aece8,puVar13,0x10,0,0);
+      local_4._0_1_ = 0;
+      if (pCStack_d4 != nullptr) {
+        C_str::ReleaseRep(pCStack_d4);
+      }
+      switch(iVar6) {
+      case -0x7fffffff:
+        goto switchD_0043cfdc_caseD_80000001;
+      case -0x7ffffffe:
+      case -0x7ffffff6:
+        goto switchD_0043cfdc_caseD_80000002;
+      default:
+        goto switchD_0043cfdc_caseD_80000003;
+      case -0x7fffffed:
+        piVar5 = FUN_00409f20((void *)(DAT_008aecd8 + uVar15 * 4),&pCStack_cc,(uint8_t *)pcVar12);
+        local_4 = CONCAT31(local_4._1_3_,3);
+        if (*piVar5 == 0) {
+          puVar13 = &DAT_00867a90;
+        }
+        else {
+          puVar13 = (uint8_t *)(*piVar5 + 8);
+        }
+        pCVar7 = C_fstr_Construct(&CStack_c8,"Version cache : BADFILEVERSION '%s' (3ds filter)",puVar13);
+        if (pCVar7->rep == nullptr) {
+          pcVar14 = &DAT_00867a90;
+        }
+        else {
+          pcVar14 = pCVar7->rep->chars;
+        }
+        dbgPrintf(pcVar14,0);
+        pCVar7 = pCStack_cc;
+        if (CStack_c8.rep != nullptr) {
+          C_str::ReleaseRep((C_str *)CStack_c8.rep);
+          pCVar7 = pCStack_cc;
+        }
+        break;
+      case -0x7fffffec:
+        piVar5 = FUN_00409f20((void *)(DAT_008aecd8 + uVar15 * 4),&pCStack_d0,(uint8_t *)pcVar12);
+        local_4 = CONCAT31(local_4._1_3_,4);
+        if (*piVar5 == 0) {
+          puVar13 = &DAT_00867a90;
+        }
+        else {
+          puVar13 = (uint8_t *)(*piVar5 + 8);
+        }
+        pCVar7 = C_fstr_Construct(&CStack_dc,"Version cache : BADFILETIME '%s' (3ds filter)",puVar13);
+        if (pCVar7->rep == nullptr) {
+          pcVar14 = &DAT_00867a90;
+        }
+        else {
+          pcVar14 = pCVar7->rep->chars;
+        }
+        dbgPrintf(pcVar14,0);
+        pCVar7 = pCStack_d0;
+        if (CStack_dc.rep != nullptr) {
+          C_str::ReleaseRep((C_str *)CStack_dc.rep);
+          pCVar7 = pCStack_d0;
+        }
+      }
+      local_4._0_1_ = 0;
+      if (pCVar7 != nullptr) {
+        C_str::ReleaseRep(pCVar7);
+      }
+switchD_0043cfdc_caseD_80000003:
+      if (-1 < iVar6) {
+        uVar15 = vector_size_e8_409730(0x8aecc4);
+        if (uVar15 < DAT_008aece4) goto LAB_0043d211;
+        uVar15 = 0;
+        iVar6 = vector_size_e8_409730(0x8aecc4);
+        if (iVar6 == 0) goto LAB_0043d211;
+        goto LAB_0043d179;
+      }
+switchD_0043cfdc_caseD_80000001:
+      uVar15++;
+      uVar8 = vector_size_e4_409600(0x8aecd4);
+    } while (uVar15 < uVar8);
+  }
+  goto switchD_0043cfdc_caseD_80000002;
+  while( true ) {
+    uVar15++;
+    uVar8 = vector_size_e8_409730(0x8aecc4);
+    if (uVar8 <= uVar15) break;
+LAB_0043d179:
+    psVar1 = (short *)(*(int *)(DAT_008aecc8 + uVar15 * 8) + 0xe4);
+    *psVar1 = *psVar1 + 1;
+    puVar11 = *(uint32_t **)(DAT_008aecc8 + uVar15 * 8);
+    iVar6 = (**(code **)*puVar11)(puVar11);
+    if (iVar6 == 1) {
+      iVar6 = *(int *)(uVar15 * 8 + 4 + DAT_008aecc8);
+      if (iVar6 == 0) {
+        pcVar14 = &DAT_00867a90;
+      }
+      else {
+        pcVar14 = (char *)(iVar6 + 8);
+      }
+      FUN_004094e0(&sStack_bc,pcVar14,&uStack_e3);
+      local_4._0_1_ = 5;
+      puVar11 = (uint32_t *)FUN_00409660(&DAT_008aecb4,&sStack_bc.alloc);
+      *puVar11 = 0;
+      local_4._0_1_ = 0;
+      std_string::Tidy(&sStack_bc,'\x01');
+      FUN_00409750(&DAT_008aecc4,uVar15 * 8 + DAT_008aecc8);
+      break;
+    }
+  }
+LAB_0043d211:
+  piVar5 = (int *)(**(code **)(g_versionModelCache + 0xc))();
+  if (piVar5 != nullptr) {
+    piVar10 = (int *)FUN_00409620(aiStack_c4);
+    local_4._0_1_ = 6;
+    FUN_00409a20(&DAT_008aecc4,DAT_008aeccc,piVar10);
+    local_4._0_1_ = 0;
+    FUN_004086a0(aiStack_c4);
+    C_str::operator_assign((C_str *)(DAT_008aeccc - 1),pcVar12);
+    FUN_00409630(DAT_008aeccc - 2,(int)DAT_008aece8);
+    FUN_004094e0(&sStack_ac,pcVar12,&uStack_e2);
+    local_4._0_1_ = 7;
+    puVar11 = (uint32_t *)FUN_00409660(&DAT_008aecb4,&sStack_ac.alloc);
+    *puVar11 = DAT_008aece8;
+    local_4._0_1_ = 0;
+    std_string::Tidy(&sStack_ac,'\x01');
+    (**(code **)*DAT_008aece8)(DAT_008aece8);
+    pIVar9 = (I3D_model *)DAT_008aeccc[-2];
+    DAT_008aece8 = piVar5;
+    goto LAB_0043d0e4;
+  }
+switchD_0043cfdc_caseD_80000002:
+  pIVar9 = nullptr;
+LAB_0043d0e4:
+  local_d8->m_versionsModel = pIVar9;
+  if ((((pIVar9 != nullptr) &&
+       (pIVar9->m_refCount = pIVar9->m_refCount + 1, g_versionsLoading == false)) &&
+      (pSVar3 = local_d8->m_frame->m_data, pSVar3 != nullptr)) &&
+     (pCVar4 = pSVar3->script, pCVar4 != nullptr)) {
+    C_Script__OnDeath((int)pCVar4);
+  }
+  if ((local_e0.rep != nullptr) &&
+     ((local_e0.rep)->refCount = (local_e0.rep)->refCount - 1, (local_e0.rep)->refCount == 0)) {
+    operator_delete(local_e0.rep);
+  }
+}
+
+// 0x0043d310
+void __thiscall
+vector_insert_n4_43d310(void *this,uint32_t *param_1,uint32_t param_2,uint32_t *param_3)
+{
+  puVar7 = *(uint32_t **)((int)this + 8);
+  if (param_2 <= (uint32_t)(*(int *)((int)this + 0xc) - (int)puVar7 >> 2)) {
+    if ((uint32_t)((int)puVar7 - (int)param_1 >> 2) < param_2) {
+      puVar5 = param_1 + param_2;
+      if (param_1 != puVar7) {
+        puVar4 = puVar5 + -param_2;
+        do {
+          if (puVar5 != nullptr) {
+            *puVar5 = *puVar4;
+          }
+          puVar4++;
+          puVar5++;
+        } while (puVar4 != puVar7);
+      }
+      puVar7 = *(uint32_t **)((int)this + 8);
+      for (iVar2 = param_2 - ((int)puVar7 - (int)param_1 >> 2); iVar2 != 0; iVar2 = iVar2 - 1) {
+        if (puVar7 != nullptr) {
+          *puVar7 = *param_3;
+        }
+        puVar7++;
+      }
+      puVar7 = *(uint32_t **)((int)this + 8);
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(uint32_t *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+      return;
+    }
+    if (param_2 != 0) {
+      puVar5 = puVar7;
+      for (puVar4 = puVar7 + -param_2; puVar4 != puVar7; puVar4 = puVar4 + 1) {
+        if (puVar5 != nullptr) {
+          *puVar5 = *puVar4;
+        }
+        puVar5++;
+      }
+      puVar7 = *(uint32_t **)((int)this + 8);
+      for (puVar5 = puVar7 + -param_2; param_1 != puVar5; puVar5 = puVar5 - 1) {
+        puVar7--;
+        *puVar7 = puVar5[-1];
+      }
+      puVar7 = param_1 + param_2;
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(int *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+    }
+    return;
+  }
+  iVar2 = *(int *)((int)this + 4);
+  if ((iVar2 == 0) || (uVar6 = (int)puVar7 - iVar2 >> 2, uVar6 <= param_2)) {
+    uVar6 = param_2;
+  }
+  if (iVar2 == 0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)puVar7 - iVar2 >> 2;
+  }
+  iVar2 += uVar6;
+  iVar3 = iVar2;
+  if (iVar2 < 0) {
+    iVar3 = 0;
+  }
+  puVar4 = operator_new(iVar3 * 4);
+  puVar5 = puVar4;
+  for (puVar7 = *(uint32_t **)((int)this + 4); uVar6 = param_2, puVar1 = puVar5, puVar7 != param_1
+      ; puVar7 = puVar7 + 1) {
+    if (puVar5 != nullptr) {
+      *puVar5 = *puVar7;
+    }
+    puVar5++;
+  }
+  for (; uVar6 != 0; uVar6 = uVar6 - 1) {
+    if (puVar1 != nullptr) {
+      *puVar1 = *param_3;
+    }
+    puVar1++;
+  }
+  puVar1 = *(uint32_t **)((int)this + 8);
+  puVar7 = puVar5 + param_2;
+  if (param_1 != puVar1) {
+    puVar5 = (uint32_t *)((int)puVar7 + (param_2 * -4 - (int)puVar5) + (int)param_1);
+    do {
+      if (puVar7 != nullptr) {
+        *puVar7 = *puVar5;
+      }
+      puVar5++;
+      puVar7++;
+    } while (puVar5 != puVar1);
+  }
+  operator_delete(*(void **)((int)this + 4));
+  *(uint32_t **)((int)this + 0xc) = puVar4 + iVar2;
+  iVar2 = *(int *)((int)this + 4);
+  if (iVar2 == 0) {
+    *(uint32_t **)((int)this + 4) = puVar4;
+    *(uint32_t **)((int)this + 8) = puVar4 + param_2;
+    return;
+  }
+  *(uint32_t **)((int)this + 4) = puVar4;
+  *(uint32_t **)((int)this + 8) = puVar4 + (*(int *)((int)this + 8) - iVar2 >> 2) + param_2;
+}
+
+// 0x0043d520
+void StaticInit_43d520(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x0043d550
+void __thiscall C_VersionMaster::SaveGame(C_VersionMaster *this,C_chunk *chunk)
+{
+  this_00 = chunk;
+  uVar3 = 0;
+LAB_0043d561:
+  ppCVar1 = (this->m_keepers).first;
+  if ((ppCVar1 == (C_VersionKeeper **)0x0) ||
+     ((uint32_t)((int)(this->m_keepers).last - (int)ppCVar1 >> 2) <= uVar3)) {
+    return;
+  }
+  if (ppCVar1[uVar3] == nullptr) {
+    if (this_00->m_open != false) {
+      uStack_8 = 1000;
+      iVar2 = dtaSeek(this_00->m_handle,0,1);
+      this_00->m_stack[this_00->m_depth] = iVar2;
+      this_00->m_depth = this_00->m_depth + 1;
+      dtaWrite(this_00->m_handle,&uStack_8,6);
+    }
+    C_chunk::Ascend(this_00);
+  }
+  else {
+    if (ppCVar1[uVar3]->m_version == 0) {
+      if (this_00->m_open == false) goto LAB_0043d7d2;
+      uStack_10 = 3000;
+      iVar2 = dtaSeek(this_00->m_handle,0,1);
+      this_00->m_stack[this_00->m_depth] = iVar2;
+      this_00->m_depth = this_00->m_depth + 1;
+      dtaWrite(this_00->m_handle,&uStack_10,6);
+      if (this_00->m_open == false) goto LAB_0043d7d2;
+      if (this_00->m_writing == false) {
+        dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1],0);
+      }
+      else {
+        iVar2 = dtaSeek(this_00->m_handle,0,1);
+        iStack_1c = iVar2 - this_00->m_stack[this_00->m_depth - 1];
+        dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+        dtaWrite(this_00->m_handle,&iStack_1c,4);
+        dtaSeek(this_00->m_handle,iVar2,0);
+      }
+      if (this_00->m_depth == 0) goto LAB_0043d7d2;
+      uVar3++;
+      this_00->m_depth = this_00->m_depth - 1;
+      goto LAB_0043d561;
+    }
+    if (this_00->m_open != false) {
+      local_18 = 2000;
+      iVar2 = dtaSeek(this_00->m_handle,0,1);
+      this_00->m_stack[this_00->m_depth] = iVar2;
+      this_00->m_depth = this_00->m_depth + 1;
+      dtaWrite(this_00->m_handle,&local_18,6);
+    }
+    chunk = (C_chunk *)(this->m_keepers).first[uVar3]->m_version;
+    if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+      dtaWrite(this_00->m_handle,&chunk,4);
+    }
+    chunk = (C_chunk *)(this->m_keepers).first[uVar3]->m_hitPoints;
+    if (this_00->m_open != false) {
+      if (this_00->m_writing != false) {
+        dtaWrite(this_00->m_handle,&chunk,4);
+      }
+      if (this_00->m_open != false) {
+        if (this_00->m_writing == false) {
+          dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1],0);
+        }
+        else {
+          iVar2 = dtaSeek(this_00->m_handle,0,1);
+          iStack_20 = iVar2 - this_00->m_stack[this_00->m_depth - 1];
+          dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+          dtaWrite(this_00->m_handle,&iStack_20,4);
+          dtaSeek(this_00->m_handle,iVar2,0);
+        }
+        if (this_00->m_depth == 0) goto LAB_0043d7d2;
+        uVar3++;
+        this_00->m_depth = this_00->m_depth - 1;
+        goto LAB_0043d561;
+      }
+    }
+  }
+LAB_0043d7d2:
+  uVar3++;
+  goto LAB_0043d561;
+}
+
+// 0x0043d7f0
+void __thiscall C_VersionMaster::LoadGame(C_VersionMaster *this,C_chunk *chunk)
+{
+  this_00 = chunk;
+  g_versionsLoading = true;
+  uVar4 = 0;
+  do {
+    ppCVar1 = (this->m_keepers).first;
+    if ((ppCVar1 == (C_VersionKeeper **)0x0) ||
+       ((uint32_t)((int)(this->m_keepers).last - (int)ppCVar1 >> 2) <= uVar4)) {
+      g_versionsLoading = false;
+      return;
+    }
+    if ((this_00->m_open != false) && (iVar2 = dtaRead(this_00->m_handle,&local_8,6), iVar2 == 6)) {
+      iVar2 = dtaSeek(this_00->m_handle,0,1);
+      this_00->m_stack[this_00->m_depth] = iVar2 - 6 + CONCAT22(uStack_4,uStack_6);
+      this_00->m_depth = this_00->m_depth + 1;
+      chunk = (C_chunk *)CONCAT22(uStack_6,local_8);
+    }
+    uVar3 = (uint32_t)chunk & 0xffff;
+    if (uVar3 == 1000) {
+      C_VersionKeeper::SetVersion((this->m_keepers).first[uVar4],-1,false);
+      if (this_00->m_open != false) {
+        if (this_00->m_writing == false) {
+LAB_0043da62:
+          iVar2 = this_00->m_stack[this_00->m_depth - 1];
+        }
+        else {
+          iVar2 = dtaSeek(this_00->m_handle,0,1);
+          iStack_c = iVar2 - this_00->m_stack[this_00->m_depth - 1];
+          dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+          dtaWrite(this_00->m_handle,&iStack_c,4);
+        }
+LAB_0043da6f:
+        handle = this_00->m_handle;
+LAB_0043da73:
+        dtaSeek(handle,iVar2,0);
+        if (this_00->m_depth != 0) {
+          this_00->m_depth = this_00->m_depth - 1;
+        }
+      }
+    }
+    else if (uVar3 == 2000) {
+      C_chunk::Read(this_00,&iStack_14,4);
+      C_chunk::Read(this_00,&iStack_18,4);
+      (this->m_keepers).first[uVar4]->m_hitPoints = iStack_18;
+      C_VersionKeeper::SetVersion((this->m_keepers).first[uVar4],iStack_14,false);
+      if (this_00->m_open != false) {
+        handle = this_00->m_handle;
+        if (this_00->m_writing != false) {
+          iVar2 = dtaSeek(handle,0,1);
+          iStack_10 = iVar2 - this_00->m_stack[this_00->m_depth - 1];
+          dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+          dtaWrite(this_00->m_handle,&iStack_10,4);
+          goto LAB_0043da6f;
+        }
+        iVar2 = this_00->m_stack[this_00->m_depth - 1];
+        goto LAB_0043da73;
+      }
+    }
+    else if (uVar3 == 3000) {
+      if (this_00->m_open != false) {
+        handle = this_00->m_handle;
+        if (this_00->m_writing == false) {
+          iVar2 = this_00->m_stack[this_00->m_depth - 1];
+        }
+        else {
+          iVar2 = dtaSeek(handle,0,1);
+          iStack_1c = iVar2 - this_00->m_stack[this_00->m_depth - 1];
+          dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+          dtaWrite(this_00->m_handle,&iStack_1c,4);
+          handle = this_00->m_handle;
+        }
+        goto LAB_0043da73;
+      }
+    }
+    else if (this_00->m_open != false) {
+      if (this_00->m_writing == false) goto LAB_0043da62;
+      iVar2 = dtaSeek(this_00->m_handle,0,1);
+      iStack_20 = iVar2 - this_00->m_stack[this_00->m_depth - 1];
+      dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+      dtaWrite(this_00->m_handle,&iStack_20,4);
+      goto LAB_0043da6f;
+    }
+    uVar4++;
+  } while( true );
+}
+
+// 0x0043dab0
+void __thiscall C_VersionMaster::WriteState(C_VersionMaster *this,C_BitStream *msg)
+{
+  if ((((uint8_t)g_gameRole & 1) == 0) || (msg == nullptr)) {
+    return;
+  }
+  uVar2 = 0;
+  do {
+    while( true ) {
+      ppCVar1 = (this->m_keepers).first;
+      if ((ppCVar1 == (C_VersionKeeper **)0x0) ||
+         ((uint32_t)((int)(this->m_keepers).last - (int)ppCVar1 >> 2) <= uVar2)) {
+        C_BitStream__WriteBits(msg,0xffffffff,0x10);
+        return;
+      }
+      if (ppCVar1[uVar2] != nullptr) break;
+      C_BitStream__WriteBits(msg,uVar2,0x10);
+      C_BitStream__WriteBits(msg,0xffffffff,8);
+LAB_0043db20:
+      uVar2++;
+    }
+    if (ppCVar1[uVar2]->m_version == 0) goto LAB_0043db20;
+    C_BitStream__WriteBits(msg,uVar2,0x10);
+    C_BitStream__WriteBits(msg,(this->m_keepers).first[uVar2]->m_version,8);
+    uVar2++;
+  } while( true );
+}
+
+// 0x0043db40
+void __thiscall C_VersionMaster::ReadState(C_VersionMaster *this,C_BitStream *msg)
+{
+  if ((((uint8_t)g_gameRole & 2) != 0) && (msg != nullptr)) {
+    uVar2 = C_BitStream__ReadBits(msg,0x10);
+    sVar1 = (short)uVar2;
+    while (sVar1 != -1) {
+      uVar2 = C_BitStream__ReadBits(msg,8);
+      if (((uint8_t)g_gameRole & 1) == 0) {
+        C_VersionKeeper::SetVersion((this->m_keepers).first[sVar1],(int)(char)uVar2,false);
+      }
+      uVar2 = C_BitStream__ReadBits(msg,0x10);
+      sVar1 = (short)uVar2;
+    }
+  }
+}
+
+// 0x0043dbb0
+void StaticInit_43dbb0(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x0043dbe0
+void StaticInit_VersionsModule(void)
+{
+  ConstructVersionsModule();
+  RegisterVersionsModuleDtor();
+}
+
+// 0x0043dbf0
+void ConstructVersionsModule(void)
+{
+  C_VersionsModule::C_VersionsModule(&g_versionsModule,7,"Versions");
+}
+
+// 0x0043dc10
+C_VersionsModule * __thiscall
+C_VersionsModule::C_VersionsModule(C_VersionsModule *this,int id,char *name)
+{
+  C_Module::C_Module((C_Module *)this,id,name);
+  *(uint8_t *)&this[3].vtable = name._0_1_;
+  this[4].vtable = nullptr;
+  this[5].vtable = nullptr;
+  this[6].vtable = nullptr;
+  *(uint8_t *)&this[7].vtable = name._0_1_;
+  this[8].vtable = nullptr;
+  this[9].vtable = nullptr;
+  this[10].vtable = nullptr;
+  *(uint8_t *)&this[0xb].vtable = name._0_1_;
+  this[0xc].vtable = nullptr;
+  this[0xd].vtable = nullptr;
+  this[0xe].vtable = nullptr;
+  this->vtable = (C_VersionsModule_vtbl *)&PTR_ScalarDeletingDestructor_0080f908;
+  return this;
+}
+
+// 0x0043dc70
+void __thiscall C_VersionsModule::empty_function_43dc70(C_VersionsModule *this)
+{
+}
+
+// 0x0043dc80
+void __thiscall C_VersionsModule::empty_function_43dc80(C_VersionsModule *this)
+{
+}
+
+// 0x0043dc90
+void __thiscall C_VersionsModule::empty_function_43dc90(C_VersionsModule *this)
+{
+}
+
+// 0x0043dca0
+void __thiscall C_VersionsModule::empty_function_43dca0(C_VersionsModule *this)
+{
+}
+
+// 0x0043dcb0
+uint32_t * __thiscall
+C_VersionsModule::ScalarDeletingDestructor(C_VersionsModule *this,uint8_t param_1)
+{
+  ~C_VersionsModule(this);
+  if ((param_1 & 1) != 0) {
+    _aligned_free(this);
+  }
+  return this;
+}
+
+// 0x0043dcd0
+void __thiscall C_VersionsModule::~C_VersionsModule(C_VersionsModule *this)
+{
+  this->vtable = (C_VersionsModule_vtbl *)&PTR_ScalarDeletingDestructor_0080f908;
+  operator_delete(this[0xc].vtable);
+  this[0xc].vtable = nullptr;
+  this[0xd].vtable = nullptr;
+  this[0xe].vtable = nullptr;
+  operator_delete(this[8].vtable);
+  this[8].vtable = nullptr;
+  this[9].vtable = nullptr;
+  this[10].vtable = nullptr;
+  operator_delete(this[4].vtable);
+  this[4].vtable = nullptr;
+  this[5].vtable = nullptr;
+  this[6].vtable = nullptr;
+  C_Module::~C_Module((C_Module *)this);
+}
+
+// 0x0043dd20
+void RegisterVersionsModuleDtor(void)
+{
+  atexit(DestroyVersionsModule);
+}
+
+// 0x0043dd30
+void DestroyVersionsModule(void)
+{
+  C_VersionsModule::~C_VersionsModule(&g_versionsModule);
+}
+
+// 0x0043dd40
+void __thiscall C_VersionsModule::StartMission(C_VersionsModule *this,bool server)
+{
+  if (server) {
+    Clear(this);
+    iVar1 = GetGame();
+    BuildVersionKeepers(*(I3D_scene **)(iVar1 + 0x18));
+    return;
+  }
+  if (((uint8_t)g_gameRole & 1) == 0) {
+    Clear(this);
+    iVar1 = GetGame();
+    BuildVersionKeepers(*(I3D_scene **)(iVar1 + 0x18));
+  }
+}
+
+// 0x0043dd90
+void __thiscall C_VersionsModule::StopMission(C_VersionsModule *this,bool server)
+{
+  if ((server) || (((uint8_t)g_gameRole & 1) == 0)) {
+    Clear(this);
+  }
+}
+
+// 0x0043ddb0
+S_VersionCollision * __thiscall
+S_VersionCollision::S_VersionCollision(S_VersionCollision *this,I3D_frame *frame,bool transparent)
+{
+  local_54 = &this->m_volume;
+  pSVar12 = local_54;
+  for (iVar8 = 0x18; iVar8 != 0; iVar8 = iVar8 - 1) {
+    pSVar12->m_flags = 0;
+    pSVar12 = (S_CollisionVolume *)&pSVar12->m_frame;
+  }
+  if (frame != nullptr) {
+    pSVar12 = local_54;
+    for (iVar8 = 0x18; iVar8 != 0; iVar8 = iVar8 - 1) {
+      pSVar12->m_flags = 0;
+      pSVar12 = (S_CollisionVolume *)&pSVar12->m_frame;
+    }
+    (this->m_volume).m_frame = frame;
+    local_54->m_flags = 0x40;
+    (this->m_volume).m_type = 0x20000;
+    if (transparent) {
+      local_54->m_flags = 0x100040;
+    }
+    local_b4 = this;
+    if (frame->m_type == 6) {
+      puVar9 = frame[1]._pad_0004 + 0x10;
+      pSVar7 = &local_90;
+      for (iVar8 = 8; iVar8 != 0; iVar8 = iVar8 - 1) {
+        pSVar7->x = *(float *)puVar9;
+        puVar9 += 4;
+        pSVar7 = (S_vector *)&pSVar7->y;
+      }
+      SStack_b0.y = local_90.y + local_80.y;
+      local_70.x = (local_90.x + local_80.x) * 0.5;
+      local_70.y = SStack_b0.y * 0.5;
+      SStack_b0.z = (local_90.z + local_80.z) * 0.5;
+      local_64 = (local_80.y - local_90.y) * 0.5;
+      local_70.z = SStack_b0.z;
+    }
+    else {
+      self = I3DGetDriver();
+      pIVar4 = (*self->vtable->GetHierarchyBBox)
+                         (self,(I3D_bbox *)&local_50,(this->m_volume).m_frame);
+      pSVar7 = &local_90;
+      for (iVar8 = 8; iVar8 != 0; iVar8 = iVar8 - 1) {
+        pSVar7->x = (pIVar4->min).x;
+        pIVar4 = (I3D_bbox *)&(pIVar4->min).y;
+        pSVar7 = (S_vector *)&pSVar7->y;
+      }
+      if (local_90.x < local_80.x == (local_90.x == local_80.x)) {
+        local_64 = 0.0;
+      }
+      else {
+        factor = &pSStack_94;
+        pSVar7 = &local_d0;
+        pSStack_94 = (S_vector *)0x3f000000;
+        pSVar5 = (S_vector *)S_vector::Subtract(&local_80,(float *)&local_50,&local_90.x);
+        S_vector::Scaled(pSVar5,pSVar7,(float *)factor);
+        pfVar6 = (float *)S_vector::operator_plus(&local_90,(float *)&local_50,&local_d0.x);
+        local_70.x = *pfVar6;
+        local_70.y = pfVar6[1];
+        local_70.z = pfVar6[2];
+        local_64 = SQRT(local_d0.x * local_d0.x + local_d0.y * local_d0.y + local_d0.z * local_d0.z)
+        ;
+      }
+    }
+    pSVar14 = local_b4;
+    pIVar1 = (local_b4->m_volume).m_frame;
+    local_d0.x = (pIVar1->m_scale).x;
+    local_d0.y = (pIVar1->m_scale).y;
+    local_80.x = local_80.x * local_d0.x;
+    local_d0.z = (pIVar1->m_scale).z;
+    local_c4 = *(uint32_t *)pIVar1->_pad_00dc;
+    local_80.y = local_d0.y * local_80.y;
+    local_80.z = local_80.z * local_d0.z;
+    local_90.x = local_90.x * local_d0.x;
+    local_90.y = local_d0.y * local_90.y;
+    local_90.z = local_90.z * local_d0.z;
+    if ((pIVar1->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar1);
+    }
+    pSVar7 = S_vector::OperatorMul(&local_70,(S_vector *)&local_50,&pIVar1->m_worldMatrix);
+    pSVar3 = local_b4;
+    pSStack_94 = &(pSVar14->m_volume).m_center;
+    pSStack_94->x = pSVar7->x;
+    (pSVar14->m_volume).m_center.y = pSVar7->y;
+    (pSVar14->m_volume).m_center.z = pSVar7->z;
+    (pSVar14->m_volume).m_centerW = pSVar7[1].x;
+    (pSVar14->m_volume).m_radius = local_64;
+    pSVar7 = &local_90;
+    pIVar4 = &(pSVar14->m_volume).m_bbox;
+    for (iVar8 = 8; iVar8 != 0; iVar8 = iVar8 - 1) {
+      (pIVar4->min).x = pSVar7->x;
+      pSVar7 = (S_vector *)&pSVar7->y;
+      pIVar4 = (I3D_bbox *)&(pIVar4->min).y;
+    }
+    pIVar1 = (local_b4->m_volume).m_frame;
+    if ((pIVar1->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar1);
+    }
+    fVar2 = 1.0 / local_d0.x;
+    pSVar11 = &pSVar3->m_matrix;
+    pSVar10 = &pIVar1->m_worldMatrix;
+    pSVar13 = pSVar11;
+    for (iVar8 = 0x10; iVar8 != 0; iVar8 = iVar8 - 1) {
+      pSVar13->m[0][0] = pSVar10->m[0][0];
+      pSVar10 = (S_matrix *)(pSVar10->m[0] + 1);
+      pSVar13 = (S_matrix *)(pSVar13->m[0] + 1);
+    }
+    pSVar11->m[0][0] = fVar2 * pSVar11->m[0][0];
+    (pSVar3->m_matrix).m[0][1] = fVar2 * (pSVar3->m_matrix).m[0][1];
+    (pSVar3->m_matrix).m[0][2] = fVar2 * (pSVar3->m_matrix).m[0][2];
+    fVar2 = 1.0 / local_d0.y;
+    (local_b4->m_matrix).m[1][0] = fVar2 * (local_b4->m_matrix).m[1][0];
+    (local_b4->m_matrix).m[1][1] = fVar2 * (local_b4->m_matrix).m[1][1];
+    (local_b4->m_matrix).m[1][2] = fVar2 * (local_b4->m_matrix).m[1][2];
+    fVar2 = 1.0 / local_d0.z;
+    (local_b4->m_matrix).m[2][0] = fVar2 * (local_b4->m_matrix).m[2][0];
+    (local_b4->m_matrix).m[2][1] = fVar2 * (local_b4->m_matrix).m[2][1];
+    (local_b4->m_matrix).m[2][2] = fVar2 * (local_b4->m_matrix).m[2][2];
+    pSVar10 = pSVar11;
+    pSVar14 = local_b4;
+    for (iVar8 = 0x10; iVar8 != 0; iVar8 = iVar8 - 1) {
+      (pSVar14->m_invMatrix).m[0][0] = pSVar10->m[0][0];
+      pSVar10 = (S_matrix *)(pSVar10->m[0] + 1);
+      pSVar14 = (S_VersionCollision *)((pSVar14->m_invMatrix).m[0] + 1);
+    }
+    (local_b4->m_volume).m_matrix = pSVar11;
+    pfVar6 = (float *)&local_50;
+    for (iVar8 = 0x10; iVar8 != 0; iVar8 = iVar8 - 1) {
+      *pfVar6 = pSVar11->m[0][0];
+      pSVar11 = (S_matrix *)(pSVar11->m[0] + 1);
+      pfVar6++;
+    }
+    S_matrix::Inverse(&local_b4->m_invMatrix,&local_50);
+    this = local_b4;
+    pIVar1 = (local_b4->m_volume).m_frame;
+    (local_b4->m_volume).m_invMatrix = &local_b4->m_invMatrix;
+    if (pIVar1->m_parent == nullptr) {
+      SStack_b0.x = (pIVar1->m_scale).x;
+      SStack_b0.y = (pIVar1->m_scale).y;
+      SStack_b0.z = (pIVar1->m_scale).z;
+      uStack_a4 = *(uint32_t *)pIVar1->_pad_00dc;
+    }
+    else {
+      if ((pIVar1->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar1);
+      }
+      S_matrix::GetScale(&pIVar1->m_worldMatrix,&SStack_b0);
+    }
+    pSVar7 = (S_vector *)&SStack_b0.y;
+    if (SStack_b0.y <= SStack_b0.z) {
+      pSVar7 = (S_vector *)&SStack_b0.z;
+    }
+    pSVar5 = &SStack_b0;
+    if (SStack_b0.x <= pSVar7->x) {
+      pSVar5 = pSVar7;
+    }
+    pIVar1 = (this->m_volume).m_frame;
+    (this->m_volume).m_radius = pSVar5->x * local_64;
+    if ((pIVar1->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar1);
+    }
+    pSVar7 = S_vector::OperatorMul(&local_70,(S_vector *)&local_50,&pIVar1->m_worldMatrix);
+    pSVar12 = local_54;
+    pSStack_94->x = pSVar7->x;
+    pSStack_94->y = pSVar7->y;
+    pSStack_94->z = pSVar7->z;
+    pSStack_94[1].x = pSVar7[1].x;
+    C_CollisionWorld::AddVolume(&g_collisionWorld,local_54);
+    C_CollisionWorld::MoveVolume(&g_collisionWorld,pSVar12);
+  }
+  return this;
+}
+
+// 0x0043e1f0
+void __thiscall S_VersionCollision::~S_VersionCollision(S_VersionCollision *this)
+{
+  C_CollisionWorld::RemoveVolume(&g_collisionWorld,&this->m_volume);
+}
+
+// 0x0043e210
+void StaticInit_43e210(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x0043e240
+int __fastcall ParseUserProp(char *props,char *key,int defaultValue)
+{
+  if (((key != nullptr) && (props != nullptr)) &&
+     (local_4 = props, pcVar2 = strstr(props,key), pcVar2 != nullptr)) {
+    uVar4 = 0xffffffff;
+    do {
+      if (uVar4 == 0) break;
+      uVar4--;
+      cVar1 = *key;
+      key++;
+    } while (cVar1 != '\0');
+    local_4 = (char *)0xffffffff;
+    iVar3 = sscanf(pcVar2 + (~uVar4 - 1),&DAT_00832d40,&local_4);
+    if ((iVar3 != -1) && (0 < iVar3)) {
+      return (int)local_4;
+    }
+  }
+  return defaultValue;
+}
+
+// 0x0043e2a0
+void __fastcall
+AddVersionKeeper(I3D_frame *frame,int hitPoints,int particleEffect,int materialId,bool transparent)
+{
+  C_VersionsModule::AddKeeper
+            (&g_versionsModule,frame,hitPoints,particleEffect,materialId,transparent);
+}
+
+// 0x0043e2c0
+void __thiscall C_VersionsModule::Clear(C_VersionsModule *this)
+{
+  if (this[4].vtable != nullptr) {
+    iVar4 = (int)this[5].vtable - (int)this[4].vtable >> 2;
+    while (iVar4 != 0) {
+      iVar4--;
+      this_00 = *(C_VersionMaster **)((int)this[4].vtable + iVar4 * 4);
+      if (this_00 != nullptr) {
+        C_VersionMaster::~C_VersionMaster(this_00);
+        operator_delete(this_00);
+      }
+    }
+  }
+  pCVar2 = (C_VersionsModule_vtbl *)
+           copy4_43eae0(&(this[5].vtable)->ScalarDeletingDestructor,
+                        &(this[5].vtable)->ScalarDeletingDestructor,
+                        &(this[4].vtable)->ScalarDeletingDestructor);
+  empty_function_43ea00();
+  this[5].vtable = pCVar2;
+  if (this[8].vtable != nullptr) {
+    iVar4 = (int)this[9].vtable - (int)this[8].vtable >> 2;
+    while (iVar4 != 0) {
+      iVar4--;
+      this_01 = *(S_VersionCollision **)((int)this[8].vtable + iVar4 * 4);
+      if (this_01 != nullptr) {
+        S_VersionCollision::~S_VersionCollision(this_01);
+        _aligned_free(this_01);
+      }
+    }
+  }
+  pCVar2 = this[8].vtable;
+  empty_function_43ea10();
+  this[9].vtable = pCVar2;
+  if (this[0xc].vtable != nullptr) {
+    iVar4 = (int)this[0xd].vtable - (int)this[0xc].vtable >> 2;
+    while (iVar4 != 0) {
+      iVar4--;
+      piVar1 = *(int **)((int)this[0xc].vtable + iVar4 * 4);
+      if (piVar1 != nullptr) {
+        pbVar3 = (uint8_t *)piVar1[0x4d];
+        if (pbVar3 == nullptr) {
+          pbVar3 = &DAT_00867a90;
+        }
+        C_auto_00815f90::ModelCacheBase_OpenInto
+                  ((C_auto_00815f90 *)&g_modelCache,piVar1,pbVar3,0,nullptr);
+      }
+    }
+  }
+  this[0xd].vtable = this[0xc].vtable;
+}
+
+// 0x0043e3e0
+void __cdecl BuildVersionKeepers(I3D_scene *scene)
+{
+  (*scene->vtable->Slot44)(scene,BuildVersionKeeperProc,0,0xffff,0);
+}
+
+// 0x0043e400
+uint32_t BuildVersionKeeperProc(I3D_frame *frame,void *context)
+{
+  pcVar4 = frame->m_userProps;
+  pcVar5 = pcVar4;
+  if (pcVar4 == nullptr) {
+    pcVar5 = &DAT_00867a90;
+  }
+  iVar3 = -1;
+  do {
+    if (iVar3 == 0) break;
+    iVar3--;
+    cVar1 = *pcVar5;
+    pcVar5++;
+  } while (cVar1 != '\0');
+  if (iVar3 != -2) {
+    if (pcVar4 == nullptr) {
+      pcVar4 = &DAT_00867a90;
+    }
+    pcVar5 = local_400;
+    do {
+      cVar1 = *pcVar4;
+      pcVar4++;
+      *pcVar5 = cVar1;
+      pcVar5++;
+    } while (cVar1 != '\0');
+    _strlwr(local_400);
+    pcVar4 = strstr(local_400,"version");
+    if ((pcVar4 != nullptr) && (frame->m_type != 9)) {
+      iVar3 = ParseUserProp(local_400,"version",100);
+      particleEffect = ParseUserProp(local_400,"particle",-1);
+      materialId = ParseUserProp(local_400,"matid",0);
+      pcVar4 = strstr(local_400,"trans");
+      if (materialId == 0) {
+        pcVar5 = frame->m_name;
+        if (pcVar5 == nullptr) {
+          pcVar5 = &DAT_00867a90;
+        }
+        pCVar2 = C_fstr_Construct(&local_404,"###### C_VersionMaster::BuildVersionKeepersFromScene() : frame with default material ['%s']######");
+        if (pCVar2->rep == nullptr) {
+          format = &DAT_00867a90;
+        }
+        else {
+          format = pCVar2->rep->chars;
+        }
+        dbgPrintf(format,pcVar5);
+        if ((local_404.rep != nullptr) &&
+           ((local_404.rep)->refCount = (local_404.rep)->refCount - 1,
+           (local_404.rep)->refCount == 0)) {
+          operator_delete(local_404.rep);
+        }
+      }
+      AddVersionKeeper(frame,iVar3,particleEffect,materialId,pcVar4 != nullptr);
+    }
+  }
+  return 0;
+}
+
+// 0x0043e560
+void __thiscall
+C_VersionsModule::AddKeeper
+          (C_VersionsModule *this,I3D_frame *frame,int hitPoints,int particleEffect,int materialId,
+          bool transparent)
+{
+  if (frame == nullptr) {
+    return;
+  }
+  frame_00 = frame->m_ownerModel;
+  if (frame_00 == nullptr) {
+    return;
+  }
+  if (frame_00->m_type != 9) {
+    return;
+  }
+  if (frame_00->m_data == nullptr) {
+    local_18 = nullptr;
+  }
+  else {
+    local_18 = frame_00->m_data->versionMaster;
+    if (local_18 != nullptr) goto LAB_0043e782;
+  }
+  local_10 = operator_new(0x2c);
+  if (local_10 == nullptr) {
+    local_18 = nullptr;
+  }
+  else if (this[4].vtable == nullptr) {
+    local_18 = C_VersionMaster::C_VersionMaster(local_10,frame_00,0,transparent);
+  }
+  else {
+    local_18 = C_VersionMaster::C_VersionMaster
+                         (local_10,frame_00,(int)this[5].vtable - (int)this[4].vtable >> 2,
+                          transparent);
+  }
+  if (local_18 == nullptr) {
+    return;
+  }
+  pCVar6 = this[5].vtable;
+  if ((int)this[6].vtable - (int)pCVar6 >> 2 == 0) {
+    pCVar5 = this[4].vtable;
+    if ((pCVar5 == nullptr) ||
+       (uVar4 = (int)pCVar6 - (int)pCVar5 >> 2, uVar4 < 2)) {
+      uVar4 = 1;
+    }
+    if (pCVar5 == nullptr) {
+      iVar1 = 0;
+    }
+    else {
+      iVar1 = (int)pCVar6 - (int)pCVar5 >> 2;
+    }
+    local_10 = (C_VersionMaster *)(iVar1 + uVar4);
+    pCVar2 = local_10;
+    if ((int)local_10 < 0) {
+      pCVar2 = nullptr;
+    }
+    pCVar3 = operator_new((int)pCVar2 << 2);
+    local_14 = pCVar3;
+    for (pCVar5 = this[4].vtable; pCVar5 != pCVar6;
+        pCVar5 = (C_VersionsModule_vtbl *)&pCVar5->empty_function_43dc70) {
+      construct_copy4_43eb00(&pCVar3->ScalarDeletingDestructor,&pCVar5->ScalarDeletingDestructor);
+      pCVar3 = (C_VersionsModule_vtbl *)&pCVar3->empty_function_43dc70;
+    }
+    uninitialized_fill_n4_43ea50(&pCVar3->ScalarDeletingDestructor,1,&local_18);
+    uninitialized_copy4_43ea20
+              (&pCVar6->ScalarDeletingDestructor,&(this[5].vtable)->ScalarDeletingDestructor,
+               &pCVar3->empty_function_43dc70);
+    empty_function_43ea00();
+    operator_delete(this[4].vtable);
+    pCVar6 = local_14;
+    this[6].vtable = (C_VersionsModule_vtbl *)(&local_14->ScalarDeletingDestructor + (int)local_10);
+    iVar1 = vector_size_e4_43e9e0((int)(this + 3));
+    this[4].vtable = pCVar6;
+    this[5].vtable = (C_VersionsModule_vtbl *)(&pCVar6->empty_function_43dc70 + iVar1);
+  }
+  else {
+    uninitialized_copy4_43ea20
+              (&pCVar6->ScalarDeletingDestructor,&pCVar6->ScalarDeletingDestructor,
+               &pCVar6->empty_function_43dc70);
+    uninitialized_fill_n4_43ea50
+              (&(this[5].vtable)->ScalarDeletingDestructor,
+               1 - ((int)this[5].vtable - (int)pCVar6 >> 2),&local_18);
+    pCVar5 = this[5].vtable;
+    for (; pCVar6 != pCVar5; pCVar6 = (C_VersionsModule_vtbl *)&pCVar6->empty_function_43dc70) {
+      pCVar6->ScalarDeletingDestructor = local_18;
+    }
+    this[5].vtable = (C_VersionsModule_vtbl *)&(this[5].vtable)->empty_function_43dc70;
+  }
+LAB_0043e782:
+  C_VersionMaster::AddKeeper(local_18,frame,hitPoints,particleEffect,materialId,transparent);
+}
+
+// 0x0043e7c0
+void __thiscall C_VersionsModule::RemoveMaster(C_VersionsModule *this,C_VersionMaster *master)
+{
+  if ((master != nullptr) && (this[4].vtable != nullptr)) {
+    iVar3 = (int)this[5].vtable - (int)this[4].vtable >> 2;
+    while (iVar3 != 0) {
+      iVar3--;
+      pCVar1 = *(C_VersionMaster **)((int)this[4].vtable + iVar3 * 4);
+      if ((pCVar1 != nullptr) && (pCVar1 == master)) {
+        pCVar1->m_removed = true;
+        pCVar1 = *(C_VersionMaster **)((int)this[4].vtable + iVar3 * 4);
+        iVar2 = pCVar1->m_refCount - 1;
+        pCVar1->m_refCount = iVar2;
+        if (iVar2 == 0) {
+          C_VersionMaster::~C_VersionMaster(pCVar1);
+          operator_delete(pCVar1);
+        }
+        *(uint32_t *)((int)this[4].vtable + iVar3 * 4) = 0;
+      }
+    }
+  }
+}
+
+// 0x0043e830
+void __thiscall
+C_VersionsModule::KeepCollision(C_VersionsModule *this,S_VersionCollision *collision)
+{
+  pCVar7 = this[9].vtable;
+  if ((int)this[10].vtable - (int)pCVar7 >> 2 != 0) {
+    uninitialized_copy4_43ea80
+              (&pCVar7->ScalarDeletingDestructor,&pCVar7->ScalarDeletingDestructor,
+               &pCVar7->empty_function_43dc70);
+    uninitialized_fill_n4_43eab0
+              (&(this[9].vtable)->ScalarDeletingDestructor,
+               1 - ((int)this[9].vtable - (int)pCVar7 >> 2),&collision);
+    pCVar6 = this[9].vtable;
+    if (pCVar7 != pCVar6) {
+      do {
+        pCVar7->ScalarDeletingDestructor = collision;
+        pCVar7 = (C_VersionsModule_vtbl *)&pCVar7->empty_function_43dc70;
+      } while (pCVar7 != pCVar6);
+      this[9].vtable = (C_VersionsModule_vtbl *)&(this[9].vtable)->empty_function_43dc70;
+      return;
+    }
+    this[9].vtable = (C_VersionsModule_vtbl *)&(this[9].vtable)->empty_function_43dc70;
+    return;
+  }
+  pCVar6 = this[8].vtable;
+  if ((pCVar6 == nullptr) ||
+     (uVar4 = (int)pCVar7 - (int)pCVar6 >> 2, uVar4 < 2)) {
+    uVar4 = 1;
+  }
+  if (pCVar6 == nullptr) {
+    iVar1 = 0;
+  }
+  else {
+    iVar1 = (int)pCVar7 - (int)pCVar6 >> 2;
+  }
+  iVar1 += uVar4;
+  iVar2 = iVar1;
+  if (iVar1 < 0) {
+    iVar2 = 0;
+  }
+  pCVar3 = operator_new(iVar2 * 4);
+  pCVar5 = pCVar3;
+  for (pCVar6 = this[8].vtable; pCVar6 != pCVar7;
+      pCVar6 = (C_VersionsModule_vtbl *)&pCVar6->empty_function_43dc70) {
+    construct_copy4_43eb10(&pCVar5->ScalarDeletingDestructor,&pCVar6->ScalarDeletingDestructor);
+    pCVar5 = (C_VersionsModule_vtbl *)&pCVar5->empty_function_43dc70;
+  }
+  uninitialized_fill_n4_43eab0(&pCVar5->ScalarDeletingDestructor,1,&collision);
+  uninitialized_copy4_43ea80
+            (&pCVar7->ScalarDeletingDestructor,&(this[9].vtable)->ScalarDeletingDestructor,
+             &pCVar5->empty_function_43dc70);
+  empty_function_43ea10();
+  operator_delete(this[8].vtable);
+  pCVar7 = this[8].vtable;
+  this[10].vtable = (C_VersionsModule_vtbl *)(&pCVar3->ScalarDeletingDestructor + iVar1);
+  if (pCVar7 == nullptr) {
+    this[8].vtable = pCVar3;
+    this[9].vtable = (C_VersionsModule_vtbl *)&pCVar3->empty_function_43dc70;
+    return;
+  }
+  this[8].vtable = pCVar3;
+  this[9].vtable =
+       (C_VersionsModule_vtbl *)
+       (&pCVar3->empty_function_43dc70 + ((int)this[9].vtable - (int)pCVar7 >> 2));
+}
+
+// 0x0043e9e0
+int __fastcall vector_size_e4_43e9e0(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 2;
+}
+
+// 0x0043ea00
+void empty_function_43ea00(void)
+{
+}
+
+// 0x0043ea10
+void empty_function_43ea10(void)
+{
+}
+
+// 0x0043ea20
+void uninitialized_copy4_43ea20(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != nullptr) {
+      *param_3 = *param_1;
+    }
+    param_3++;
+  }
+}
+
+// 0x0043ea50
+void uninitialized_fill_n4_43ea50(uint32_t *param_1,int param_2,uint32_t *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 - 1) {
+    if (param_1 != nullptr) {
+      *param_1 = *param_3;
+    }
+    param_1++;
+  }
+}
+
+// 0x0043ea80
+void uninitialized_copy4_43ea80(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != nullptr) {
+      *param_3 = *param_1;
+    }
+    param_3++;
+  }
+}
+
+// 0x0043eab0
+void uninitialized_fill_n4_43eab0(uint32_t *param_1,int param_2,uint32_t *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 - 1) {
+    if (param_1 != nullptr) {
+      *param_1 = *param_3;
+    }
+    param_1++;
+  }
+}
+
+// 0x0043eae0
+void __fastcall copy4_43eae0(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    *param_3 = *param_1;
+    param_3++;
+  }
+}
+
+// 0x0043eb00
+void __fastcall construct_copy4_43eb00(uint32_t *param_1,uint32_t *param_2)
+{
+  if (param_1 != nullptr) {
+    *param_1 = *param_2;
+  }
+}
+
+// 0x0043eb10
+void __fastcall construct_copy4_43eb10(uint32_t *param_1,uint32_t *param_2)
+{
+  if (param_1 != nullptr) {
+    *param_1 = *param_2;
+  }
+}
+
+// 0x0043eb20
+void StaticInit_43eb20(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x0043eb50
+void __thiscall C_VersionsModule::RestartMission(C_VersionsModule *this,bool server)
+{
+  if (((uint8_t)g_gameRole & 1) != 0) {
+    (*this->vtable->StopMission)(1);
+  }
+  if (((uint8_t)g_gameRole & 2) != 0) {
+    (*this->vtable->StopMission)(0);
+  }
+  if (((uint8_t)g_gameRole & 1) != 0) {
+    (*this->vtable->StartMission)(1);
+  }
+  if (((uint8_t)g_gameRole & 2) != 0) {
+    (*this->vtable->StartMission)(0);
+  }
+}
+
+// 0x0043eba0
+bool __thiscall C_VersionsModule::SaveGame(C_VersionsModule *this,C_chunk *chunk)
+{
+  chunk_00 = chunk;
+  uVar3 = 0;
+  do {
+    pCVar1 = this[4].vtable;
+    if ((pCVar1 == nullptr) ||
+       ((uint32_t)((int)this[5].vtable - (int)pCVar1 >> 2) <= uVar3)) {
+      return true;
+    }
+    if ((&pCVar1->ScalarDeletingDestructor)[uVar3] == nullptr) {
+      if (chunk_00->m_open != false) {
+        uStack_8 = 1000;
+        iVar2 = dtaSeek(chunk_00->m_handle,0,1);
+        chunk_00->m_stack[chunk_00->m_depth] = iVar2;
+        chunk_00->m_depth = chunk_00->m_depth + 1;
+        dtaWrite(chunk_00->m_handle,&uStack_8,6);
+        if (chunk_00->m_open != false) {
+          if (chunk_00->m_writing == false) {
+            iVar2 = chunk_00->m_handle;
+            goto LAB_0043edcb;
+          }
+          position = dtaSeek(chunk_00->m_handle,0,1);
+          iStack_1c = position - chunk_00->m_stack[chunk_00->m_depth - 1];
+          dtaSeek(chunk_00->m_handle,chunk_00->m_stack[chunk_00->m_depth - 1] + 2,0);
+          dtaWrite(chunk_00->m_handle,&iStack_1c,4);
+          iVar2 = chunk_00->m_handle;
+          goto LAB_0043edd7;
+        }
+      }
+    }
+    else if (*(char *)((int)(&pCVar1->ScalarDeletingDestructor)[uVar3] + 0x28) == '\0') {
+      if (chunk_00->m_open != false) {
+        local_18 = 3000;
+        iVar2 = dtaSeek(chunk_00->m_handle,0,1);
+        chunk_00->m_stack[chunk_00->m_depth] = iVar2;
+        chunk_00->m_depth = chunk_00->m_depth + 1;
+        dtaWrite(chunk_00->m_handle,&local_18,6);
+        if (chunk_00->m_open != false) {
+          iVar2 = chunk_00->m_handle;
+          if (chunk_00->m_writing == false) goto LAB_0043edcb;
+          position = dtaSeek(iVar2,0,1);
+          chunk = (C_chunk *)(position - chunk_00->m_stack[chunk_00->m_depth - 1]);
+          dtaSeek(chunk_00->m_handle,chunk_00->m_stack[chunk_00->m_depth - 1] + 2,0);
+          dtaWrite(chunk_00->m_handle,&chunk,4);
+          iVar2 = chunk_00->m_handle;
+          goto LAB_0043edd7;
+        }
+      }
+    }
+    else {
+      if (chunk_00->m_open != false) {
+        uStack_10 = 2000;
+        iVar2 = dtaSeek(chunk_00->m_handle,0,1);
+        chunk_00->m_stack[chunk_00->m_depth] = iVar2;
+        chunk_00->m_depth = chunk_00->m_depth + 1;
+        dtaWrite(chunk_00->m_handle,&uStack_10,6);
+      }
+      C_VersionMaster::SaveGame((&(this[4].vtable)->ScalarDeletingDestructor)[uVar3],chunk_00);
+      if (chunk_00->m_open != false) {
+        iVar2 = chunk_00->m_handle;
+        if (chunk_00->m_writing == false) {
+LAB_0043edcb:
+          position = chunk_00->m_stack[chunk_00->m_depth - 1];
+        }
+        else {
+          position = dtaSeek(iVar2,0,1);
+          iStack_20 = position - chunk_00->m_stack[chunk_00->m_depth - 1];
+          dtaSeek(chunk_00->m_handle,chunk_00->m_stack[chunk_00->m_depth - 1] + 2,0);
+          dtaWrite(chunk_00->m_handle,&iStack_20,4);
+          iVar2 = chunk_00->m_handle;
+        }
+LAB_0043edd7:
+        dtaSeek(iVar2,position,0);
+        if (chunk_00->m_depth != 0) {
+          chunk_00->m_depth = chunk_00->m_depth - 1;
+        }
+      }
+    }
+    uVar3++;
+  } while( true );
+}
+
+// 0x0043ee10
+bool __thiscall C_VersionsModule::LoadGame(C_VersionsModule *this,C_chunk *chunk)
+{
+  chunk_00 = chunk;
+  uVar3 = 0;
+  do {
+    if ((this[4].vtable == nullptr) ||
+       ((uint32_t)((int)this[5].vtable - (int)this[4].vtable >> 2) <= uVar3)) {
+      return true;
+    }
+    if (chunk_00->m_open != false) {
+      iVar1 = dtaRead(chunk_00->m_handle,&local_8,6);
+      if (iVar1 == 6) {
+        iVar1 = dtaSeek(chunk_00->m_handle,0,1);
+        chunk_00->m_stack[chunk_00->m_depth] = iVar1 - 6 + CONCAT22(uStack_4,uStack_6);
+        chunk_00->m_depth = chunk_00->m_depth + 1;
+        chunk = (C_chunk *)CONCAT22(uStack_6,local_8);
+      }
+    }
+    uVar2 = (uint32_t)chunk & 0xffff;
+    if (uVar2 == 1000) {
+      C_VersionMaster::DamageAll((&(this[4].vtable)->ScalarDeletingDestructor)[uVar3],1000000,2);
+      if (chunk_00->m_open != false) {
+        if (chunk_00->m_writing == false) {
+LAB_0043f04b:
+          iVar1 = chunk_00->m_stack[chunk_00->m_depth - 1];
+        }
+        else {
+          iVar1 = dtaSeek(chunk_00->m_handle,0,1);
+          iStack_c = iVar1 - chunk_00->m_stack[chunk_00->m_depth - 1];
+          dtaSeek(chunk_00->m_handle,chunk_00->m_stack[chunk_00->m_depth - 1] + 2,0);
+          dtaWrite(chunk_00->m_handle,&iStack_c,4);
+        }
+LAB_0043f058:
+        handle = chunk_00->m_handle;
+LAB_0043f05c:
+        dtaSeek(handle,iVar1,0);
+        if (chunk_00->m_depth != 0) {
+          chunk_00->m_depth = chunk_00->m_depth - 1;
+        }
+      }
+    }
+    else if (uVar2 == 2000) {
+      *(uint8_t *)((int)(&(this[4].vtable)->ScalarDeletingDestructor)[uVar3] + 0x28) = 1;
+      C_VersionMaster::LoadGame((&(this[4].vtable)->ScalarDeletingDestructor)[uVar3],chunk_00);
+      if (chunk_00->m_open != false) {
+        if (chunk_00->m_writing == false) goto LAB_0043f04b;
+        iVar1 = dtaSeek(chunk_00->m_handle,0,1);
+        iStack_10 = iVar1 - chunk_00->m_stack[chunk_00->m_depth - 1];
+        dtaSeek(chunk_00->m_handle,chunk_00->m_stack[chunk_00->m_depth - 1] + 2,0);
+        dtaWrite(chunk_00->m_handle,&iStack_10,4);
+        goto LAB_0043f058;
+      }
+    }
+    else if (uVar2 == 3000) {
+      if (chunk_00->m_open != false) {
+        handle = chunk_00->m_handle;
+        if (chunk_00->m_writing == false) {
+          iVar1 = chunk_00->m_stack[chunk_00->m_depth - 1];
+        }
+        else {
+          iVar1 = dtaSeek(handle,0,1);
+          iStack_14 = iVar1 - chunk_00->m_stack[chunk_00->m_depth - 1];
+          dtaSeek(chunk_00->m_handle,chunk_00->m_stack[chunk_00->m_depth - 1] + 2,0);
+          dtaWrite(chunk_00->m_handle,&iStack_14,4);
+          handle = chunk_00->m_handle;
+        }
+        goto LAB_0043f05c;
+      }
+    }
+    else if (chunk_00->m_open != false) {
+      if (chunk_00->m_writing == false) goto LAB_0043f04b;
+      iVar1 = dtaSeek(chunk_00->m_handle,0,1);
+      iStack_18 = iVar1 - chunk_00->m_stack[chunk_00->m_depth - 1];
+      dtaSeek(chunk_00->m_handle,chunk_00->m_stack[chunk_00->m_depth - 1] + 2,0);
+      dtaWrite(chunk_00->m_handle,&iStack_18,4);
+      goto LAB_0043f058;
+    }
+    uVar3++;
+  } while( true );
+}
+
+// 0x0043f090
+void __thiscall C_VersionsModule::WriteState(C_VersionsModule *this,C_BitStream *msg)
+{
+  if ((((uint8_t)g_gameRole & 1) == 0) || (msg == nullptr)) {
+    return;
+  }
+  uVar2 = 0;
+  do {
+    while( true ) {
+      pCVar1 = this[4].vtable;
+      if ((pCVar1 == nullptr) ||
+         ((uint32_t)((int)this[5].vtable - (int)pCVar1 >> 2) <= uVar2)) {
+        if (this[4].vtable == nullptr) {
+          iVar3 = 0;
+        }
+        else {
+          iVar3 = (int)this[5].vtable - (int)this[4].vtable >> 2;
+        }
+        C_BitStream__WriteBits(msg,-0x20 - iVar3,0x10);
+        return;
+      }
+      if ((&pCVar1->ScalarDeletingDestructor)[uVar2] != nullptr) break;
+      C_BitStream__WriteBits(msg,-1 - uVar2,0x10);
+LAB_0043f0f3:
+      uVar2++;
+    }
+    if (*(char *)((int)(&pCVar1->ScalarDeletingDestructor)[uVar2] + 0x28) == '\0')
+    goto LAB_0043f0f3;
+    C_BitStream__WriteBits(msg,uVar2,0x10);
+    C_VersionMaster::WriteState((&(this[4].vtable)->ScalarDeletingDestructor)[uVar2],msg);
+    uVar2++;
+  } while( true );
+}
+
+// 0x0043f120
+void __thiscall C_VersionsModule::ReadState(C_VersionsModule *this,C_BitStream *msg)
+{
+  if ((((uint8_t)g_gameRole & 2) != 0) && (msg != nullptr)) {
+    while( true ) {
+      uVar1 = C_BitStream__ReadBits(msg,0x10);
+      iVar3 = (int)(short)uVar1;
+      if (this[4].vtable == nullptr) {
+        iVar2 = 0;
+      }
+      else {
+        iVar2 = (int)this[5].vtable - (int)this[4].vtable >> 2;
+      }
+      if (iVar3 < -0x10 - iVar2) break;
+      if (iVar3 < 0) {
+        if (((uint8_t)g_gameRole & 1) == 0) {
+          iVar3 = iVar3 * 4 + 4;
+          iVar2 = *(int *)((int)this[4].vtable - iVar3);
+          if ((iVar2 != 0) && (*(int *)(iVar2 + 0x14) != 0)) {
+            iVar2 = *(int *)(iVar2 + 0x18) - *(int *)(iVar2 + 0x14) >> 2;
+            while (iVar2 != 0) {
+              iVar2--;
+              this_00 = *(C_VersionKeeper **)
+                         (*(int *)(*(int *)((int)this[4].vtable - iVar3) + 0x14) + iVar2 * 4);
+              if (this_00 != nullptr) {
+                C_VersionKeeper::SetVersion(this_00,-1,false);
+              }
+            }
+          }
+        }
+      }
+      else {
+        this_01 = (&(this[4].vtable)->ScalarDeletingDestructor)[iVar3];
+        if (this_01 != nullptr) {
+          C_VersionMaster::ReadState(this_01,msg);
+        }
+      }
+    }
+  }
+}
+
+// 0x0043f1e0
+bool __thiscall C_VersionsModule::OnMessage(C_VersionsModule *this,C_BitStream *msg)
+{
+  if (((uint8_t)g_gameRole & 2) == 0) {
+    return false;
+  }
+  if (msg == nullptr) {
+    return false;
+  }
+  uVar4 = C_BitStream__ReadBits(msg,0x10);
+  uVar6 = (uint32_t)(short)uVar4;
+  uVar4 = C_BitStream__ReadBits(msg,8);
+  uVar5 = (uint32_t)(char)uVar4;
+  uVar4 = C_BitStream__ReadBits(msg,8);
+  if ((((((uint8_t)g_gameRole & 1) == 0) &&
+       (pCVar1 = this[4].vtable, pCVar1 != nullptr)) &&
+      (uVar6 < (uint32_t)((int)this[5].vtable - (int)pCVar1 >> 2))) &&
+     (((pvVar2 = (&pCVar1->ScalarDeletingDestructor)[uVar6], pvVar2 != nullptr &&
+       (iVar3 = *(int *)((int)pvVar2 + 0x14), iVar3 != 0)) &&
+      ((uVar5 < (uint32_t)(*(int *)((int)pvVar2 + 0x18) - iVar3 >> 2) &&
+       (this_00 = *(C_VersionKeeper **)(iVar3 + uVar5 * 4), this_00 != nullptr))))))
+  {
+    C_VersionKeeper::SetVersion(this_00,(int)(char)uVar4,true);
+    this_01 = (&(this[4].vtable)->ScalarDeletingDestructor)[uVar6];
+    C_VersionMaster::OnKeeperDamaged(this_01,(this_01->m_keepers).first[uVar5]);
+  }
+  return true;
+}
+

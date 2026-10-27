@@ -1,0 +1,41 @@
+# The rigid body (src/game/rigid_body.h / rigid_body.cpp; part 5): loose objects' physics (thrown
+# items, a car's parts and wheels, debris). Its type: types/57_rigid_body.spec.
+004c84a0 C_RigidBody::C_RigidBody | C_RigidBody * __thiscall C_RigidBody(C_RigidBody *this)
+004c8770 C_RigidBody::~C_RigidBody | void __thiscall ~C_RigidBody(C_RigidBody *this)
+004c8820 C_RigidBody::SetFrame | bool __thiscall SetFrame(C_RigidBody *this, I3D_frame *frame)
+004cdfe0 C_RigidBody::ApplyImpulse | bool __thiscall ApplyImpulse(C_RigidBody *this, int unused, S_vector4 *point, S_vector *impulse, int unused4, int unused5, int unused6)
+004ce5f0 C_RigidBody::Wake | bool __thiscall Wake(C_RigidBody *this, int unused1, int unused2, int unused3, int unused4, int unused5, int unused6, int unused7, int unused8)
+004cec60 C_RigidBody::SaveGame | bool __thiscall SaveGame(C_RigidBody *this, void *stream)
+004cef00 C_RigidBody::LoadGame | bool __thiscall LoadGame(C_RigidBody *this, void *stream)
+004c9480 C_RigidBody::Nudge | void __thiscall Nudge(C_RigidBody *this)
+004c8980 C_RigidBody::Start | void __thiscall Start(C_RigidBody *this)
+004c8ea0 C_RigidBody::Stop | void __thiscall Stop(C_RigidBody *this)
+004c8ee0 C_RigidBody::Step | void __thiscall Step(C_RigidBody *this, uint time)
+004c9000 C_RigidBody::Tick | void __thiscall Tick(C_RigidBody *this, uint time)
+004c8250 C_RigidBody::SetOwner | void __thiscall SetOwner(C_RigidBody *this, C_Actor *owner)
+004c8270 C_RigidBody::SetState | void __thiscall SetState(C_RigidBody *this, int state)
+004cd6e0 C_RigidBody::Setup | void __thiscall Setup(C_RigidBody *this, S_RigidBodyParams *params)
+004cd550 C_RigidBody::SetupWheel | void __thiscall SetupWheel(C_RigidBody *this, S_WheelDebrisParams *params)
+004ce7a0 C_RigidBody::AddImpulse | void __thiscall AddImpulse(C_RigidBody *this, S_vector *impulse, S_vector4 *point)
+004ce8f0 C_RigidBody::ForgetActor | void __thiscall ForgetActor(C_RigidBody *this, C_Actor *actor)
+004ceaa0 C_RigidBody::RefreshMatrices | void __thiscall RefreshMatrices(C_RigidBody *this)
+004cf440 C_RigidBody::Topple | bool __thiscall Topple(C_RigidBody *this)
+004c94b0 C_RigidBody::StepWheel | void __thiscall StepWheel(C_RigidBody *this, float dt)
+004cb2b0 C_RigidBody::StepBox | void __thiscall StepBox(C_RigidBody *this, float dt)
+004cc520 C_RigidBody::Integrate | void __thiscall Integrate(C_RigidBody *this, float dt, S_vector *move)
+004cccc0 C_RigidBody::Collide | void __thiscall Collide(C_RigidBody *this, S_vector *velocity, S_vector *spin, S_vector *normal, S_vector4 *point, float unusedDt, short pointIndex, int unused7)
+004ce990 C_RigidBody::FilterContact | S_CollisionVolume * __thiscall FilterContact(C_RigidBody *this, S_CollisionVolume *volume, S_vector4 *pos, S_vector4 *normal, bool *onActor)
+# the hierarchy's box (a static I3D_bbox: the frame's and its descendants' visual boxes in its space)
+004c7db0 GetHierarchyBox | I3D_bbox * __fastcall GetHierarchyBox(I3D_frame *frame)
+004c7e50 AddHierarchyBox | void __fastcall AddHierarchyBox(I3D_frame *frame, S_matrix *parent)
+# small SDK inlines (in place)
+004cd4f0 S_vector::MulAssign | void __thiscall MulAssign(S_vector *this, S_vector *v)
+004cd520 S_vector::AddAssign | void __thiscall AddAssign(S_vector *this, S_vector *v)
+004ce5c0 S_vector::SubAssign | void __thiscall SubAssign(S_vector *this, S_vector *v)
+# never called (no references in code or data): left to tier 1
+004c8e00 C_RigidBody::Unknown8E00 | void __thiscall Unknown8E00(C_RigidBody *this)
+004cde80 RigidBodyContactResponse
+004ce220 C_RigidBody::UnknownE220 | void __thiscall UnknownE220(C_RigidBody *this, S_vector4 *point, S_vector *normal, S_vector *velocity)
+004ce620 C_RigidBody::UnknownE620
+0089bcd4 g_rigidBodies @
+0089bcf0 g_hierarchyBox @ I3D_bbox

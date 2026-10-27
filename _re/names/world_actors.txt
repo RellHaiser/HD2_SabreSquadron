@@ -1,0 +1,121 @@
+# Part 7c: the pike, the fowl generator, the ladder and the explosive place (src/game/pike.*,
+# fowl_generator.*, ladder.*, explosive_place.*), and the bird's methods they call (declared in
+# pending.h; the bird is not ported). The classes stay auto classes. StaticInit_<addr>: each file's
+# guarded header static (atexit).
+005b88c0 StaticInit_PikeCreatorThunk
+005b88d0 StaticInit_PikeCreator
+005b88f0 C_PikeCreator::Create | C_Actor * __thiscall Create(C_ActorCreator * this)
+005b8950 C_PikeCreator::GetName | char * __thiscall GetName(C_ActorCreator * this)
+005b8960 C_PikeCreator::Destroy | void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)
+005b8980 C_Pike::Hit
+005b8990 C_Pike::RestartMission | void __thiscall RestartMission(C_Pike * this, bool server)
+005b89b0 C_Pike::SaveGame | bool __thiscall SaveGame(C_Pike * this, C_chunk * chunk)
+005b8b00 C_Pike::LoadGame | bool __thiscall LoadGame(C_Pike * this, C_chunk * chunk)
+005b8d00 C_Pike::C_Pike | C_Pike * __thiscall C_Pike(C_Pike * this)
+005b8dc0 C_Pike::Unknown20 | void __thiscall Unknown20(C_Pike * this, C_BitStream * msg)
+005b8dd0 C_Pike::ScalarDeletingDestructor | C_Pike * __thiscall ScalarDeletingDestructor(C_Pike * this, uchar flags)
+005b8df0 C_Pike::~C_Pike | void __thiscall ~C_Pike(C_Pike * this)
+005b8e00 C_Pike::SetFrame | bool __thiscall SetFrame(C_Pike * this, I3D_frame * frame)
+005b8e20 C_Pike::CopyFrom | void __thiscall CopyFrom(C_Pike * this, C_Actor * source)
+005b8ea0 C_Pike::SetState | void __thiscall SetState(C_Pike * this, int state)
+005b8f00 C_Pike::Turn | bool __thiscall Turn(C_Pike * this, int time)
+005b9340 C_Pike::Tick | void __thiscall Tick(C_Pike * this, int timeDelta)
+005b9470 C_Pike::Update | void __thiscall Update(C_Pike * this, int frameTime)
+005b9670 C_Pike::StartMission | void __thiscall StartMission(C_Pike * this, bool server)
+005b97b0 C_Pike::UpdateVolume | void __thiscall UpdateVolume(C_Pike * this, bool add)
+005b9bc0 C_Pike::StopMission | void __thiscall StopMission(C_Pike * this, bool server)
+005b9c80 C_Pike::ReadProperties | bool __thiscall ReadProperties(C_Pike * this, C_chunk * chunk)
+005b9e70 C_Pike::SendState | void __thiscall SendState(C_Pike * this, uint kind)
+005b9ec0 C_Pike::OnMessage | void __thiscall OnMessage(C_Pike * this, C_BitStream * msg)
+005ba000 C_Pike::WriteState | void __thiscall WriteState(C_Pike * this, C_BitStream * msg)
+005ba070 C_Pike::ReadState | void __thiscall ReadState(C_Pike * this, C_BitStream * msg)
+005ba0d0 StaticInit_5ba0d0
+005ba100 StaticInit_FowlGeneratorCreatorThunk
+005ba110 StaticInit_FowlGeneratorCreator
+005ba130 C_FowlGeneratorCreator::Create | C_Actor * __thiscall Create(C_ActorCreator * this)
+005ba190 C_FowlGeneratorCreator::GetName | char * __thiscall GetName(C_ActorCreator * this)
+005ba1a0 C_FowlGeneratorCreator::Destroy | void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)
+005ba1c0 C_FowlGenerator::RestartMission | void __thiscall RestartMission(C_FowlGenerator * this, bool server)
+005ba1e0 C_FowlGenerator::SaveGame | bool __thiscall SaveGame(C_FowlGenerator * this, C_chunk * chunk)
+005ba300 C_FowlGenerator::LoadGame | bool __thiscall LoadGame(C_FowlGenerator * this, C_chunk * chunk)
+005ba4b0 C_FowlGenerator::SetFrame | bool __thiscall SetFrame(C_FowlGenerator * this, I3D_frame * frame)
+005ba4d0 C_FowlGenerator::C_FowlGenerator | C_FowlGenerator * __thiscall C_FowlGenerator(C_FowlGenerator * this)
+005ba5e0 C_FowlGenerator::ScalarDeletingDestructor | C_FowlGenerator * __thiscall ScalarDeletingDestructor(C_FowlGenerator * this, uchar flags)
+005ba600 C_FowlGenerator::~C_FowlGenerator | void __thiscall ~C_FowlGenerator(C_FowlGenerator * this)
+005ba660 C_FowlGenerator::CopyFrom | void __thiscall CopyFrom(C_FowlGenerator * this, C_Actor * source)
+005ba670 C_FowlGenerator::StartMission | void __thiscall StartMission(C_FowlGenerator * this, bool server)
+005ba860 C_FowlGenerator::OnSoundHeard | void __stdcall OnSoundHeard(S_HeardSound * sound)
+005ba8b0 C_FowlGenerator::CreateBirds | void __thiscall CreateBirds(C_FowlGenerator * this)
+005bb140 C_FowlGenerator::Start | void __thiscall Start(C_FowlGenerator * this, bool send, int time)
+005bb280 C_FowlGenerator::OnMessage | void __thiscall OnMessage(C_FowlGenerator * this, C_BitStream * msg)
+005bb290 C_FowlGenerator::StopMission | void __thiscall StopMission(C_FowlGenerator * this, bool server)
+005bb3c0 C_FowlGenerator::Update | void __thiscall Update(C_FowlGenerator * this, int frameTime)
+005bb4d0 C_FowlGenerator::Tick | void __thiscall Tick(C_FowlGenerator * this, int timeDelta)
+005bb7e0 C_FowlGenerator::ReadProperties | bool __thiscall ReadProperties(C_FowlGenerator * this, C_chunk * chunk)
+005bbb70 C_FowlGenerator::InsertBirds
+005bbd80 StaticInit_5bbd80
+005ea300 StaticInit_LadderCreatorThunk
+005ea310 StaticInit_LadderCreator
+005ea330 C_LadderCreator::Create | C_Actor * __thiscall Create(C_ActorCreator * this)
+005ea390 C_LadderCreator::FreeOnThrow
+005ea3a0 C_LadderCreator::GetName | char * __thiscall GetName(C_ActorCreator * this)
+005ea3b0 C_LadderCreator::Destroy | void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)
+005ea3d0 C_Ladder::C_Ladder | C_Ladder * __thiscall C_Ladder(C_Ladder * this)
+005ea4c0 C_Ladder::CopyFrom | void __thiscall CopyFrom(C_Ladder * this, C_Actor * source)
+005ea4d0 C_Ladder::RestartMission | void __thiscall RestartMission(C_Ladder * this, bool server)
+005ea500 C_Ladder::SaveGame | bool __thiscall SaveGame(C_Ladder * this, C_chunk * chunk)
+005ea510 C_Ladder::LoadGame | bool __thiscall LoadGame(C_Ladder * this, C_chunk * chunk)
+005ea520 C_Ladder::Update | void __thiscall Update(C_Ladder * this, int frameTime)
+005ea530 C_Ladder::Tick | void __thiscall Tick(C_Ladder * this, int timeDelta)
+005ea540 C_Ladder::OnMessage | void __thiscall OnMessage(C_Ladder * this, C_BitStream * msg)
+005ea550 C_Ladder::Unknown20 | void __thiscall Unknown20(C_Ladder * this, C_BitStream * msg)
+005ea560 C_Ladder::GetMaterialId | int __thiscall GetMaterialId(C_Ladder * this, I3D_frame * part)
+005ea570 C_Ladder::ScalarDeletingDestructor | C_Ladder * __thiscall ScalarDeletingDestructor(C_Ladder * this, uchar flags)
+005ea590 C_Ladder::~C_Ladder | void __thiscall ~C_Ladder(C_Ladder * this)
+005ea5d0 C_Ladder::SetFrame | bool __thiscall SetFrame(C_Ladder * this, I3D_frame * frame)
+005ead20 C_Ladder::StartMission | void __thiscall StartMission(C_Ladder * this, bool server)
+005eb120 C_Ladder::StopMission | void __thiscall StopMission(C_Ladder * this, bool server)
+005eb1d0 C_Ladder::CanUse | bool __thiscall CanUse(C_Ladder * this, S_vector4 * pos, S_vector4 * dir, S_vector * velocity, int lookingUp)
+005eb8c0 C_Ladder::AddClimber | void __thiscall AddClimber(C_Ladder * this, C_Human * human)
+005eba70 C_Ladder::RemoveClimber | void __thiscall RemoveClimber(C_Ladder * this, C_Human * human)
+005ebaf0 C_Ladder::WriteProperties | bool __thiscall WriteProperties(C_Ladder * this, C_chunk * chunk)
+005ebbd0 C_Ladder::ReadProperties | bool __thiscall ReadProperties(C_Ladder * this, C_chunk * chunk)
+0060c170 StaticInit_ExplosivePlaceCreatorThunk
+0060c180 StaticInit_ExplosivePlaceCreator
+0060c1a0 C_ExplosivePlaceCreator::Create | C_Actor * __thiscall Create(C_ActorCreator * this)
+0060c200 C_ExplosivePlaceCreator::GetName | char * __thiscall GetName(C_ActorCreator * this)
+0060c210 C_ExplosivePlaceCreator::Destroy | void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)
+0060c230 C_ExplosivePlace::C_ExplosivePlace | C_ExplosivePlace * __thiscall C_ExplosivePlace(C_ExplosivePlace * this)
+0060c2c0 C_ExplosivePlace::ScalarDeletingDestructor | C_ExplosivePlace * __thiscall ScalarDeletingDestructor(C_ExplosivePlace * this, uchar flags)
+0060c2e0 C_ExplosivePlace::~C_ExplosivePlace | void __thiscall ~C_ExplosivePlace(C_ExplosivePlace * this)
+0060c2f0 C_ExplosivePlace::SetFrame | bool __thiscall SetFrame(C_ExplosivePlace * this, I3D_frame * frame)
+0060c300 C_ExplosivePlace::CopyFrom | void __thiscall CopyFrom(C_ExplosivePlace * this, C_Actor * source)
+0060c330 C_ExplosivePlace::Tick | void __thiscall Tick(C_ExplosivePlace * this, int timeDelta)
+0060c370 C_ExplosivePlace::Update | void __thiscall Update(C_ExplosivePlace * this, int frameTime)
+0060c3b0 C_ExplosivePlace::StartMission | void __thiscall StartMission(C_ExplosivePlace * this, bool server)
+0060c6b0 C_ExplosivePlace::StopMission | void __thiscall StopMission(C_ExplosivePlace * this, bool server)
+0060c6e0 C_ExplosivePlace::WriteProperties | bool __thiscall WriteProperties(C_ExplosivePlace * this, C_chunk * chunk)
+0060ca30 C_ExplosivePlace::ReadProperties | bool __thiscall ReadProperties(C_ExplosivePlace * this, C_chunk * chunk)
+0060cda0 C_ExplosivePlace::OnMessage | void __thiscall OnMessage(C_ExplosivePlace * this, C_BitStream * msg)
+0060ce50 C_ExplosivePlace::Unknown20 | void __thiscall Unknown20(C_ExplosivePlace * this, C_BitStream * msg)
+0060ce60 C_ExplosivePlace::WriteState | void __thiscall WriteState(C_ExplosivePlace * this, C_BitStream * msg)
+0060cea0 C_ExplosivePlace::ReadState | void __thiscall ReadState(C_ExplosivePlace * this, C_BitStream * msg)
+0060cee0 C_ExplosivePlace::GetMaterialId | int __thiscall GetMaterialId(C_ExplosivePlace * this, I3D_frame * part)
+0060cf20 C_ExplosivePlace::RestartMission | void __thiscall RestartMission(C_ExplosivePlace * this, bool server)
+0060cf70 C_ExplosivePlace::SaveGame | bool __thiscall SaveGame(C_ExplosivePlace * this, C_chunk * chunk)
+0060d0c0 C_ExplosivePlace::LoadGame | bool __thiscall LoadGame(C_ExplosivePlace * this, C_chunk * chunk)
+0060d300 C_ExplosivePlace::SetState | void __thiscall SetState(C_ExplosivePlace * this, int state)
+0060d380 C_ExplosivePlace::ApplyState | void __thiscall ApplyState(C_ExplosivePlace * this, int state)
+0060d6f0 C_ExplosivePlace::Place | bool __thiscall Place(C_ExplosivePlace * this, C_Human * human)
+0060d7b0 C_ExplosivePlace::OnPlaced | void __thiscall OnPlaced(C_ExplosivePlace * this, int humanId, int uid)
+0060d810 C_ExplosivePlace::ExplodeHarmless | void __thiscall ExplodeHarmless(C_ExplosivePlace * this)
+0060d870 C_ExplosivePlace::Explode | void __thiscall Explode(C_ExplosivePlace * this, int planterId)
+0060d980 C_ExplosivePlace::OnExploded | void __thiscall OnExploded(C_ExplosivePlace * this)
+0060d9f0 C_ExplosivePlace::Disarm | bool __thiscall Disarm(C_ExplosivePlace * this, C_Human * human)
+0060da50 C_ExplosivePlace::OnDisarmed | void __thiscall OnDisarmed(C_ExplosivePlace * this)
+0060da70 C_ExplosivePlace::Hit
+# The bird (0x00479790..0x0047a640; not ported).
+004797c0 C_Bird::C_Bird
+004799e0 C_Bird::~C_Bird
+0047a2e0 C_Bird::Update
+0047a2f0 C_Bird::FlyAway

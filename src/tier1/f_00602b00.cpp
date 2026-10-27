@@ -832,7 +832,7 @@ uint32_t C_StaticWeapon__FUN_006036d0(C_StaticWeapon *_this,char param_1, ...)
       cVar2 = *pcVar26;
       pcVar26++;
     } while (cVar2 != '\0');
-    FUN_00420800(&sStack_158,(uint32_t *)pcVar18,~uVar23 - 1);
+    std_string__AssignChars(&sStack_158,(uint32_t *)pcVar18,~uVar23 - 1);
     iStack_14 = 0;
     uStack_1c8 = 0;
     piVar16 = (int *)FUN_00429c20(&sStack_f4,&sStack_158.alloc,&uStack_1c8);

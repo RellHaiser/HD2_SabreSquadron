@@ -1,0 +1,563 @@
+[
+ {
+  "name": "_PlayerInRange",
+  "id": 0,
+  "types": [
+   2,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "distance [m]",
+   "",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_PlayerInBox",
+  "id": 31,
+  "types": [
+   5,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "frame",
+   "",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_EnemyInRange",
+  "id": 1,
+  "types": [
+   5,
+   2,
+   0,
+   0
+  ],
+  "args": [
+   "frame",
+   "distance [m]",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_AllPlayersInRange",
+  "id": 2,
+  "types": [
+   2,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "distance [m]",
+   "",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_MineInRange",
+  "id": 3,
+  "types": [
+   2,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "distance [m]",
+   "",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_ItemInRange",
+  "id": 4,
+  "types": [
+   2,
+   2,
+   0,
+   0
+  ],
+  "args": [
+   "item ID",
+   "distance [m]",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_AllPlayersDead",
+  "id": 5,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_AllEnemiesDead",
+  "id": 6,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_GetNumLiveEnemies",
+  "id": 7,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "num live enemies"
+ },
+ {
+  "name": "_GetCountOfCarnageEnemies",
+  "id": 8,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "num live enemies"
+ },
+ {
+  "name": "_SignalReceived",
+  "id": 9,
+  "types": [
+   2,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "signal number",
+   "",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_IsLanguageVersion",
+  "id": 10,
+  "types": [
+   4,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "language name",
+   "",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_RandomInt",
+  "id": 11,
+  "types": [
+   2,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "maximal value",
+   "",
+   "",
+   ""
+  ],
+  "desc": "radnom value from 0 to max (INTEGER)"
+ },
+ {
+  "name": "_ACTOR_GetState",
+  "id": 16,
+  "types": [
+   5,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "actor target",
+   "",
+   "",
+   ""
+  ],
+  "desc": "state of the actor (INTEGER)"
+ },
+ {
+  "name": "_IsInInventory",
+  "id": 19,
+  "types": [
+   2,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "item number",
+   "",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_SeeEnemy",
+  "id": 13,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_SeeFriend",
+  "id": 14,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_FrameInRange",
+  "id": 15,
+  "types": [
+   5,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "target object",
+   "",
+   "",
+   ""
+  ],
+  "desc": "distance to frame [m]"
+ },
+ {
+  "name": "_CameraInRange",
+  "id": 30,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "distance to frame [m]"
+ },
+ {
+  "name": "_GetObjectiveStatus",
+  "id": 17,
+  "types": [
+   2,
+   2,
+   2,
+   2
+  ],
+  "args": [
+   "game index",
+   "kampaign index",
+   "mission index",
+   "objective index"
+  ],
+  "desc": "objective status (INTEGER)"
+ },
+ {
+  "name": "_GetAlarmType",
+  "id": 18,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "type of last alarm (INTEGER)"
+ },
+ {
+  "name": "_LoadGameValue",
+  "id": 12,
+  "types": [
+   2,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "value index",
+   "",
+   "",
+   ""
+  ],
+  "desc": "game value for index (INTEGER)"
+ },
+ {
+  "name": "_GetNumMembersOfClientTeam",
+  "id": 20,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "number of live players (INTEGER)"
+ },
+ {
+  "name": "_GetHumanStoreID",
+  "id": 21,
+  "types": [
+   5,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "frame with human actor",
+   "",
+   "",
+   ""
+  ],
+  "desc": "human menuID (INTEGER)"
+ },
+ {
+  "name": "_IsTeamMemberDead",
+  "id": 22,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "singleplayer : true/false"
+ },
+ {
+  "name": "_MP_AllTeamMembersAreInRange",
+  "id": 23,
+  "types": [
+   2,
+   2,
+   0,
+   0
+  ],
+  "args": [
+   "team id (0/1)",
+   "range(m)",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_MP_IsTeamMemberInRange",
+  "id": 24,
+  "types": [
+   2,
+   2,
+   0,
+   0
+  ],
+  "args": [
+   "team id (0/1)",
+   "range(m)",
+   "",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_MP_IsItemInTeamInventory",
+  "id": 25,
+  "types": [
+   2,
+   2,
+   5,
+   0
+  ],
+  "args": [
+   "team id (0/1)",
+   "item ID",
+   "frame variable receiving human with item",
+   ""
+  ],
+  "desc": "true/false"
+ },
+ {
+  "name": "_SPGetGameType",
+  "id": 26,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "current sp_gametype"
+ },
+ {
+  "name": "_SPGetGameDifficulty",
+  "id": 27,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "current sp_gamedifficulty"
+ },
+ {
+  "name": "_GetCameraState",
+  "id": 28,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "camera state : 0 - default, 1 - underwater"
+ },
+ {
+  "name": "_GetDistToActivePlayer",
+  "id": 29,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "distance to active player [m]"
+ },
+ {
+  "name": "_SignalPistolFired",
+  "id": 32,
+  "types": [
+   0,
+   0,
+   0,
+   0
+  ],
+  "args": [
+   "",
+   "",
+   "",
+   ""
+  ],
+  "desc": "return true if player fired with signal pistol"
+ }
+]

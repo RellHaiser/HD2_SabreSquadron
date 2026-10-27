@@ -1,0 +1,272 @@
+// 0x005b80d0
+void __thiscall C_Clock::FUN_005b80d0(C_Clock *this)
+{
+  (*this->vtable->vf10)(0);
+  (*this->vtable->vf0f)(0);
+}
+
+// 0x005b80f0
+uint32_t __thiscall C_Clock::FUN_005b80f0(C_Clock *this,char *param_1)
+{
+  pcVar1 = param_1;
+  local_4 = this->m_0c0;
+  if ((*param_1 != '\0') && (param_1[8] != '\0')) {
+    dtaWrite(*(int *)(param_1 + 4),&local_4,4);
+  }
+  param_1 = (char *)this->m_0c4;
+  uVar3 = (undefined3)((uint32_t)param_1 >> 8);
+  iVar2 = CONCAT31(uVar3,*pcVar1);
+  if ((*pcVar1 != '\0') && (iVar2 = CONCAT31(uVar3,pcVar1[8]), pcVar1[8] != '\0')) {
+    iVar2 = dtaWrite(*(int *)(pcVar1 + 4),&param_1,4);
+  }
+  return CONCAT31((int3)((uint32_t)iVar2 >> 8),1);
+}
+
+// 0x005b8150
+uint32_t __thiscall C_Clock::FUN_005b8150(C_Clock *this,char *param_1)
+{
+  pcVar3 = param_1;
+  this->m_0c0 = 0;
+  this->m_0c4 = 0.0;
+  if (*param_1 == '\0') goto LAB_005b8207;
+  if (param_1[8] == '\0') {
+    if (*(int *)(param_1 + 0x410) != 0) {
+      iVar1 = *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc);
+      iVar4 = dtaSeek(*(int *)(param_1 + 4),0,1);
+      param_1 = nullptr;
+      pcStack_c = (char *)(iVar1 - iVar4);
+      ppcVar5 = &param_1;
+      if (-1 < iVar1 - iVar4) {
+        ppcVar5 = &pcStack_c;
+      }
+      if ((int)*ppcVar5 < 4) goto LAB_005b81bb;
+    }
+    dtaRead(*(int *)(pcVar3 + 4),&local_8,4);
+  }
+LAB_005b81bb:
+  if ((*pcVar3 != '\0') && (pcVar3[8] == '\0')) {
+    if (*(int *)(pcVar3 + 0x410) != 0) {
+      iVar1 = *(int *)(pcVar3 + *(int *)(pcVar3 + 0x410) * 4 + 0xc);
+      iVar4 = dtaSeek(*(int *)(pcVar3 + 4),0,1);
+      param_1 = nullptr;
+      pcStack_c = (char *)(iVar1 - iVar4);
+      ppcVar5 = &param_1;
+      if (-1 < iVar1 - iVar4) {
+        ppcVar5 = &pcStack_c;
+      }
+      if ((int)*ppcVar5 < 4) goto LAB_005b8207;
+    }
+    dtaRead(*(int *)(pcVar3 + 4),auStack_4,4);
+  }
+LAB_005b8207:
+  pCVar2 = this->vtable;
+  lVar6 = __ftol();
+  (*pCVar2->vf05)((int)lVar6);
+  this->m_0c4 = local_8;
+  return CONCAT31((int3)((uint32_t)local_8 >> 8),1);
+}
+
+// 0x005b8240
+bool __thiscall FUN_005b8240(void *this,int param_1)
+{
+  *(uint32_t *)((int)this + 0xd0) = 0;
+  *(uint32_t *)((int)this + 0xcc) = 0;
+  *(uint32_t *)((int)this + 200) = 0;
+  uVar1 = C_Actor::FUN_00610200(this,param_1);
+  return (char)uVar1 != '\0';
+}
+
+// 0x005b8270
+uint32_t * __fastcall FUN_005b8270(uint32_t *param_1)
+{
+  C_Actor::FUN_00610070((C_Actor *)param_1,0x1b);
+  *param_1 = &PTR_00811b98;
+  return param_1;
+}
+
+// 0x005b8290
+uint32_t * __thiscall C_Clock::FUN_005b8290(C_Clock *this,uint8_t param_1)
+{
+  FUN_005b82b0(this);
+  if ((param_1 & 1) != 0) {
+    _aligned_free(this);
+  }
+  return &this->vtable;
+}
+
+// 0x005b82b0
+void __thiscall C_Clock::FUN_005b82b0(C_Clock *this)
+{
+  this->vtable = (C_auto_00811b98_vtbl *)&PTR_00811b98;
+  FUN_00610170(&this->vtable);
+}
+
+// 0x005b82c0
+void __thiscall C_Clock::empty_function_6101f0(C_Clock *this)
+{
+  empty_function_6101f0(this);
+}
+
+// 0x005b82d0
+void __thiscall C_Clock::FUN_005b82d0(C_Clock *this,char param_1)
+{
+  if (param_1 == '\0') {
+    (**(code **)(*(int *)this->m_020 + 0x44))(this->m_020,FUN_005b8430,this,0xffff,0);
+    iVar1 = this->m_0d0;
+    this->m_0c0 = 0;
+    this->m_0c4 = 0.0;
+    if (iVar1 != 0) {
+      if ((*(uint32_t *)(iVar1 + 0xe0) & 8) == 0) {
+        *(uint32_t *)(iVar1 + 0xe0) = *(uint32_t *)(iVar1 + 0xe0) | 8;
+        S_quat::Make((S_quat *)(iVar1 + 0xc0),(S_matrix *)(iVar1 + 0x80));
+      }
+      (this->m_0b0).s = *(float *)(iVar1 + 0xc0);
+      (this->m_0b0).v.x = *(float *)(iVar1 + 0xc4);
+      (this->m_0b0).v.y = *(float *)(iVar1 + 200);
+      (this->m_0b0).v.z = *(float *)(iVar1 + 0xcc);
+    }
+    iVar1 = this->m_0cc;
+    if (iVar1 != 0) {
+      if ((*(uint32_t *)(iVar1 + 0xe0) & 8) == 0) {
+        *(uint32_t *)(iVar1 + 0xe0) = *(uint32_t *)(iVar1 + 0xe0) | 8;
+        S_quat::Make((S_quat *)(iVar1 + 0xc0),(S_matrix *)(iVar1 + 0x80));
+      }
+      (this->m_0a0).s = *(float *)(iVar1 + 0xc0);
+      (this->m_0a0).v.x = *(float *)(iVar1 + 0xc4);
+      (this->m_0a0).v.y = *(float *)(iVar1 + 200);
+      (this->m_0a0).v.z = *(float *)(iVar1 + 0xcc);
+    }
+    iVar1 = this->m_0c8;
+    if (iVar1 != 0) {
+      if ((*(uint32_t *)(iVar1 + 0xe0) & 8) == 0) {
+        *(uint32_t *)(iVar1 + 0xe0) = *(uint32_t *)(iVar1 + 0xe0) | 8;
+        S_quat::Make((S_quat *)(iVar1 + 0xc0),(S_matrix *)(iVar1 + 0x80));
+      }
+      (this->m_090).s = *(float *)(iVar1 + 0xc0);
+      (this->m_090).v.x = *(float *)(iVar1 + 0xc4);
+      (this->m_090).v.y = *(float *)(iVar1 + 200);
+      (this->m_090).v.z = *(float *)(iVar1 + 0xcc);
+    }
+  }
+}
+
+// 0x005b8430
+uint32_t FUN_005b8430(int param_1,int param_2)
+{
+  if (*(int *)(param_1 + 0xe8) == 0) {
+    pcVar1 = &DAT_00867a90;
+  }
+  else {
+    pcVar1 = (char *)((int)*(short *)(param_1 + 0xe6) + *(int *)(param_1 + 0xe8));
+  }
+  iVar2 = _stricmp(pcVar1,&DAT_0083dff0);
+  if (iVar2 == 0) {
+    *(int *)(param_2 + 200) = param_1;
+  }
+  if (*(int *)(param_1 + 0xe8) == 0) {
+    pcVar1 = &DAT_00867a90;
+  }
+  else {
+    pcVar1 = (char *)((int)*(short *)(param_1 + 0xe6) + *(int *)(param_1 + 0xe8));
+  }
+  iVar2 = _stricmp(pcVar1,&DAT_0083dfec);
+  if (iVar2 == 0) {
+    *(int *)(param_2 + 0xcc) = param_1;
+  }
+  if (*(int *)(param_1 + 0xe8) == 0) {
+    pcVar1 = &DAT_00867a90;
+  }
+  else {
+    pcVar1 = (char *)((int)*(short *)(param_1 + 0xe6) + *(int *)(param_1 + 0xe8));
+  }
+  iVar2 = _stricmp(pcVar1,&DAT_0083dfe8);
+  if (iVar2 == 0) {
+    *(int *)(param_2 + 0xd0) = param_1;
+  }
+  return 0;
+}
+
+// 0x005b84e0
+void __thiscall C_Clock::FUN_005b84e0(C_Clock *this,char param_1)
+{
+  if (param_1 == '\0') {
+    iVar1 = this->m_0d0;
+    if (iVar1 != 0) {
+      ((S_quat *)(iVar1 + 0xc0))->s = (this->m_0b0).s;
+      *(float *)(iVar1 + 0xc4) = (this->m_0b0).v.x;
+      *(float *)(iVar1 + 200) = (this->m_0b0).v.y;
+      *(float *)(iVar1 + 0xcc) = (this->m_0b0).v.z;
+      S_quat::Normalize((S_quat *)(iVar1 + 0xc0));
+      *(uint32_t *)(iVar1 + 0xe0) = *(uint32_t *)(iVar1 + 0xe0) & 0xfffffecb | 0x40000008;
+      (**(code **)(*(int *)this->m_0d0 + 0x24))((int *)this->m_0d0);
+    }
+    iVar1 = this->m_0cc;
+    if (iVar1 != 0) {
+      ((S_quat *)(iVar1 + 0xc0))->s = (this->m_0a0).s;
+      *(float *)(iVar1 + 0xc4) = (this->m_0a0).v.x;
+      *(float *)(iVar1 + 200) = (this->m_0a0).v.y;
+      *(float *)(iVar1 + 0xcc) = (this->m_0a0).v.z;
+      S_quat::Normalize((S_quat *)(iVar1 + 0xc0));
+      *(uint32_t *)(iVar1 + 0xe0) = *(uint32_t *)(iVar1 + 0xe0) & 0xfffffecb | 0x40000008;
+      (**(code **)(*(int *)this->m_0cc + 0x24))((int *)this->m_0cc);
+    }
+    iVar1 = this->m_0c8;
+    if (iVar1 != 0) {
+      ((S_quat *)(iVar1 + 0xc0))->s = (this->m_090).s;
+      *(float *)(iVar1 + 0xc4) = (this->m_090).v.x;
+      *(float *)(iVar1 + 200) = (this->m_090).v.y;
+      *(float *)(iVar1 + 0xcc) = (this->m_090).v.z;
+      S_quat::Normalize((S_quat *)(iVar1 + 0xc0));
+      *(uint32_t *)(iVar1 + 0xe0) = *(uint32_t *)(iVar1 + 0xe0) & 0xfffffecb | 0x40000008;
+      (**(code **)(*(int *)this->m_0c8 + 0x24))((int *)this->m_0c8);
+    }
+  }
+}
+
+// 0x005b8610
+void __thiscall C_Clock::FUN_005b8610(C_Clock *this,uint32_t param_1)
+{
+  auStack_64._4_4_ = (float)param_1 * 0.001 + (float)this->m_0c0;
+  fVar2 = (float)param_1 * 0.001 + this->m_0c4;
+  this->m_0c0 = auStack_64._4_4_;
+  this->m_0c4 = fVar2;
+  if ((this->m_0d0 != 0) && (1.0 < fVar2)) {
+    pSVar3 = RotateZMatrix((S_matrix *)(auStack_54 + 4),(float)auStack_64._4_4_ * -0.10471976);
+    pSVar4 = S_quat::RotateByMatrix(&this->m_0b0,(S_quat *)(auStack_64 + 4),pSVar3);
+    iVar1 = this->m_0d0;
+    *(float *)(iVar1 + 0xc0) = pSVar4->s;
+    *(float *)(iVar1 + 0xc4) = (pSVar4->v).x;
+    *(float *)(iVar1 + 200) = (pSVar4->v).y;
+    *(float *)(iVar1 + 0xcc) = (pSVar4->v).z;
+    S_quat::Normalize((S_quat *)(iVar1 + 0xc0));
+    *(uint32_t *)(iVar1 + 0xe0) = *(uint32_t *)(iVar1 + 0xe0) & 0xfffffecb | 0x40000008;
+    (**(code **)(*(int *)this->m_0d0 + 0x24))((int *)this->m_0d0);
+    if (this->m_0cc != 0) {
+      pSVar3 = RotateZMatrix((S_matrix *)auStack_54,(float)this->m_0c0 * -0.0017453294);
+      pSVar4 = S_quat::RotateByMatrix(&this->m_0a0,(S_quat *)auStack_64,pSVar3);
+      iVar1 = this->m_0cc;
+      *(float *)(iVar1 + 0xc0) = pSVar4->s;
+      *(float *)(iVar1 + 0xc4) = (pSVar4->v).x;
+      *(float *)(iVar1 + 200) = (pSVar4->v).y;
+      *(float *)(iVar1 + 0xcc) = (pSVar4->v).z;
+      S_quat::Normalize((S_quat *)(iVar1 + 0xc0));
+      *(uint32_t *)(iVar1 + 0xe0) = *(uint32_t *)(iVar1 + 0xe0) & 0xfffffecb | 0x40000008;
+      (**(code **)(*(int *)this->m_0cc + 0x24))((int *)this->m_0cc);
+    }
+    if (this->m_0c8 != 0) {
+      pSVar3 = RotateZMatrix((S_matrix *)auStack_54,(float)this->m_0c0 * -0.00014544411);
+      pSVar4 = S_quat::RotateByMatrix(&this->m_090,(S_quat *)auStack_64,pSVar3);
+      iVar1 = this->m_0c8;
+      *(float *)(iVar1 + 0xc0) = pSVar4->s;
+      *(float *)(iVar1 + 0xc4) = (pSVar4->v).x;
+      *(float *)(iVar1 + 200) = (pSVar4->v).y;
+      *(float *)(iVar1 + 0xcc) = (pSVar4->v).z;
+      S_quat::Normalize((S_quat *)(iVar1 + 0xc0));
+      *(uint32_t *)(iVar1 + 0xe0) = *(uint32_t *)(iVar1 + 0xe0) & 0xfffffecb | 0x40000008;
+      (**(code **)(*(int *)this->m_0c8 + 0x24))((int *)this->m_0c8);
+    }
+    lVar5 = __ftol();
+    this->m_0c4 = (float)(extraout_ST0 - (long double)(int)lVar5);
+  }
+}
+

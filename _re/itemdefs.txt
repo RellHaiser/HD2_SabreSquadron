@@ -1,0 +1,1589 @@
+// 0x007df330
+void __thiscall C_MeleeComp::Save(C_MeleeComp *this,uint32_t *ioSize,void *buffer)
+{
+  uVar2 = *ioSize;
+  if (uVar2 == 0) {
+    *ioSize = 0x24;
+    return;
+  }
+  for (uVar1 = uVar2 >> 2; this = (C_MeleeComp *)&this->m_unknown04, uVar1 != 0; uVar1 = uVar1 - 1)
+  {
+    *(int *)buffer = *(int *)this;
+    buffer = (int *)((int)buffer + 4);
+  }
+  for (uVar2 = uVar2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {
+    *(char *)buffer = (char)*(int *)this;
+    this = (C_MeleeComp *)((int)this + 1);
+    buffer = (int *)((int)buffer + 1);
+  }
+}
+
+// 0x007df370
+void __thiscall C_MeleeComp::Load(C_MeleeComp *this,uint32_t size,void *data)
+{
+  for (uVar1 = size >> 2; this = (C_MeleeComp *)&this->m_unknown04, uVar1 != 0; uVar1 = uVar1 - 1) {
+    *(int *)this = *(int *)data;
+    data = (int *)((int)data + 4);
+  }
+  for (uVar1 = size & 3; uVar1 != 0; uVar1 = uVar1 - 1) {
+    *(char *)this = (char)*(int *)data;
+    data = (int *)((int)data + 1);
+    this = (C_MeleeComp *)((int)this + 1);
+  }
+}
+
+// 0x007df3a0
+void __thiscall C_MineComp::Save(C_MineComp *this,uint32_t *ioSize,void *buffer)
+{
+  uVar2 = *ioSize;
+  if (uVar2 == 0) {
+    *ioSize = 0x28;
+    return;
+  }
+  for (uVar1 = uVar2 >> 2; this = (C_MineComp *)&this->m_unknown04, uVar1 != 0; uVar1 = uVar1 - 1) {
+    *(int *)buffer = *(int *)this;
+    buffer = (int *)((int)buffer + 4);
+  }
+  for (uVar2 = uVar2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {
+    *(char *)buffer = (char)*(int *)this;
+    this = (C_MineComp *)((int)this + 1);
+    buffer = (int *)((int)buffer + 1);
+  }
+}
+
+// 0x007df3e0
+void __thiscall C_MineComp::Load(C_MineComp *this,uint32_t size,void *data)
+{
+  for (uVar1 = size >> 2; this = (C_MineComp *)&this->m_unknown04, uVar1 != 0; uVar1 = uVar1 - 1) {
+    *(int *)this = *(int *)data;
+    data = (int *)((int)data + 4);
+  }
+  for (uVar1 = size & 3; uVar1 != 0; uVar1 = uVar1 - 1) {
+    *(char *)this = (char)*(int *)data;
+    data = (int *)((int)data + 1);
+    this = (C_MineComp *)((int)this + 1);
+  }
+}
+
+// 0x007df410
+void __thiscall C_ProjectileWeaponComp::Save(C_ProjectileWeaponComp *this,int *ioSize,void *buffer)
+{
+  if (*ioSize == 0) {
+    *ioSize = 0x88;
+    return;
+  }
+  *ioSize = 0x60;
+  local_100[0]._0_1_ = 0;
+  piVar4 = buffer;
+  for (iVar2 = 0x18; this = (C_ProjectileWeaponComp *)&this->m_unknown04, iVar2 != 0;
+      iVar2 = iVar2 - 1) {
+    *piVar4 = *(int *)this;
+    piVar4++;
+  }
+  puVar1 = (uint32_t *)((int)buffer + *ioSize);
+  *ioSize = *ioSize + 0x28;
+  puVar3 = local_100;
+  puVar5 = puVar1;
+  for (iVar2 = 5; iVar2 != 0; iVar2 = iVar2 - 1) {
+    *puVar5 = *puVar3;
+    puVar3++;
+    puVar5++;
+  }
+  local_100[0]._0_1_ = 0;
+  puVar3 = local_100;
+  puVar5 = puVar1 + 5;
+  for (iVar2 = 5; iVar2 != 0; iVar2 = iVar2 - 1) {
+    *puVar5 = *puVar3;
+    puVar3++;
+    puVar5++;
+  }
+}
+
+// 0x007df490
+void __thiscall C_ProjectileWeaponComp::Load(C_ProjectileWeaponComp *this,uint32_t size,void *data)
+{
+  for (iVar1 = 0x18; this = (C_ProjectileWeaponComp *)&this->m_unknown04, iVar1 != 0;
+      iVar1 = iVar1 - 1) {
+    *(int *)this = *(int *)data;
+    data = (int *)((int)data + 4);
+  }
+}
+
+// 0x007df4b0
+void __thiscall C_FirearmComp::Save(C_FirearmComp *this,int *ioSize,void *buffer)
+{
+  if (*ioSize == 0) {
+    *ioSize = 0x80;
+    return;
+  }
+  *ioSize = 0x58;
+  piVar5 = buffer;
+  pCVar3 = this;
+  for (iVar1 = 0x16; pCVar3 = (C_FirearmComp *)&pCVar3->m_unknown04, iVar1 != 0; iVar1 = iVar1 - 1)
+  {
+    *piVar5 = *(int *)pCVar3;
+    piVar5++;
+  }
+  puVar2 = (uint32_t *)((int)buffer + *ioSize);
+  *ioSize = *ioSize + 0x28;
+  if (this->m_unknown24 == 0) {
+    local_100[0]._0_1_ = 0;
+    puVar4 = local_100;
+    puVar6 = puVar2;
+    for (iVar1 = 5; iVar1 != 0; iVar1 = iVar1 - 1) {
+      *puVar6 = *puVar4;
+      puVar4++;
+      puVar6++;
+    }
+    local_100[0]._0_1_ = 0;
+    puVar4 = local_100;
+    puVar2 += 5;
+    for (iVar1 = 5; iVar1 != 0; iVar1 = iVar1 - 1) {
+      *puVar2 = *puVar4;
+      puVar4++;
+      puVar2++;
+    }
+  }
+}
+
+// 0x007df540
+void __thiscall C_FirearmComp::Load(C_FirearmComp *this,uint32_t size,void *data)
+{
+  for (iVar1 = 0x16; this = (C_FirearmComp *)&this->m_unknown04, iVar1 != 0; iVar1 = iVar1 - 1) {
+    *(int *)this = *(int *)data;
+    data = (int *)((int)data + 4);
+  }
+}
+
+// 0x007df560
+void __thiscall C_ScopeComp::Save(C_ScopeComp *this,uint32_t *ioSize,void *buffer)
+{
+  uVar2 = *ioSize;
+  if (uVar2 == 0) {
+    *ioSize = 0x10;
+    return;
+  }
+  for (uVar1 = uVar2 >> 2; this = (C_ScopeComp *)&this->m_unknown04, uVar1 != 0; uVar1 = uVar1 - 1)
+  {
+    *(int *)buffer = *(int *)this;
+    buffer = (int *)((int)buffer + 4);
+  }
+  for (uVar2 = uVar2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {
+    *(char *)buffer = (char)*(int *)this;
+    this = (C_ScopeComp *)((int)this + 1);
+    buffer = (int *)((int)buffer + 1);
+  }
+}
+
+// 0x007df5a0
+void __thiscall C_ScopeComp::Load(C_ScopeComp *this,uint32_t size,void *data)
+{
+  for (uVar1 = size >> 2; this = (C_ScopeComp *)&this->m_unknown04, uVar1 != 0; uVar1 = uVar1 - 1) {
+    *(int *)this = *(int *)data;
+    data = (int *)((int)data + 4);
+  }
+  for (uVar1 = size & 3; uVar1 != 0; uVar1 = uVar1 - 1) {
+    *(char *)this = (char)*(int *)data;
+    data = (int *)((int)data + 1);
+    this = (C_ScopeComp *)((int)this + 1);
+  }
+}
+
+// 0x007df5d0
+void __thiscall C_UniformComp::Save(C_UniformComp *this,uint32_t *ioSize,void *buffer)
+{
+  uVar2 = *ioSize;
+  if (uVar2 == 0) {
+    *ioSize = 0xc;
+    return;
+  }
+  for (uVar1 = uVar2 >> 2; this = (C_UniformComp *)&this->m_unknown04, uVar1 != 0; uVar1 = uVar1 - 1
+      ) {
+    *(int *)buffer = *(int *)this;
+    buffer = (int *)((int)buffer + 4);
+  }
+  for (uVar2 = uVar2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {
+    *(char *)buffer = (char)*(int *)this;
+    this = (C_UniformComp *)((int)this + 1);
+    buffer = (int *)((int)buffer + 1);
+  }
+}
+
+// 0x007df610
+void __thiscall C_UniformComp::Load(C_UniformComp *this,uint32_t size,void *data)
+{
+  for (uVar1 = size >> 2; this = (C_UniformComp *)&this->m_unknown04, uVar1 != 0; uVar1 = uVar1 - 1)
+  {
+    *(int *)this = *(int *)data;
+    data = (int *)((int)data + 4);
+  }
+  for (uVar1 = size & 3; uVar1 != 0; uVar1 = uVar1 - 1) {
+    *(char *)this = (char)*(int *)data;
+    data = (int *)((int)data + 1);
+    this = (C_UniformComp *)((int)this + 1);
+  }
+}
+
+// 0x007df640
+void __thiscall C_MedkitComp::Save(C_MedkitComp *this,uint32_t *ioSize,void *buffer)
+{
+  uVar2 = *ioSize;
+  if (uVar2 == 0) {
+    *ioSize = 0xc;
+    return;
+  }
+  for (uVar1 = uVar2 >> 2; this = (C_MedkitComp *)&this->m_unknown04, uVar1 != 0; uVar1 = uVar1 - 1)
+  {
+    *(int *)buffer = *(int *)this;
+    buffer = (int *)((int)buffer + 4);
+  }
+  for (uVar2 = uVar2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {
+    *(char *)buffer = (char)*(int *)this;
+    this = (C_MedkitComp *)((int)this + 1);
+    buffer = (int *)((int)buffer + 1);
+  }
+}
+
+// 0x007df680
+void __thiscall C_MedkitComp::Load(C_MedkitComp *this,uint32_t size,void *data)
+{
+  for (uVar1 = size >> 2; this = (C_MedkitComp *)&this->m_unknown04, uVar1 != 0; uVar1 = uVar1 - 1)
+  {
+    *(int *)this = *(int *)data;
+    data = (int *)((int)data + 4);
+  }
+  for (uVar1 = size & 3; uVar1 != 0; uVar1 = uVar1 - 1) {
+    *(char *)this = (char)*(int *)data;
+    data = (int *)((int)data + 1);
+    this = (C_MedkitComp *)((int)this + 1);
+  }
+}
+
+// 0x007df6b0
+void __thiscall C_BackpackComp::Save(C_BackpackComp *this,uint32_t *ioSize,void *buffer)
+{
+  uVar2 = *ioSize;
+  if (uVar2 == 0) {
+    *ioSize = 0x1c;
+    return;
+  }
+  for (uVar1 = uVar2 >> 2; this = (C_BackpackComp *)&this->m_unknown04, uVar1 != 0;
+      uVar1 = uVar1 - 1) {
+    *(int *)buffer = *(int *)this;
+    buffer = (int *)((int)buffer + 4);
+  }
+  for (uVar2 = uVar2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {
+    *(char *)buffer = (char)*(int *)this;
+    this = (C_BackpackComp *)((int)this + 1);
+    buffer = (int *)((int)buffer + 1);
+  }
+}
+
+// 0x007df6f0
+void __thiscall C_BackpackComp::Load(C_BackpackComp *this,uint32_t size,void *data)
+{
+  for (uVar1 = size >> 2; this = (C_BackpackComp *)&this->m_unknown04, uVar1 != 0; uVar1 = uVar1 - 1
+      ) {
+    *(int *)this = *(int *)data;
+    data = (int *)((int)data + 4);
+  }
+  for (uVar1 = size & 3; uVar1 != 0; uVar1 = uVar1 - 1) {
+    *(char *)this = (char)*(int *)data;
+    data = (int *)((int)data + 1);
+    this = (C_BackpackComp *)((int)this + 1);
+  }
+}
+
+// 0x007df720
+void __thiscall C_HeadgearComp::Save(C_HeadgearComp *this,uint32_t *ioSize,void *buffer)
+{
+  uVar2 = *ioSize;
+  if (uVar2 == 0) {
+    *ioSize = 0x10;
+    return;
+  }
+  for (uVar1 = uVar2 >> 2; this = (C_HeadgearComp *)&this->m_unknown04, uVar1 != 0;
+      uVar1 = uVar1 - 1) {
+    *(int *)buffer = *(int *)this;
+    buffer = (int *)((int)buffer + 4);
+  }
+  for (uVar2 = uVar2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {
+    *(char *)buffer = (char)*(int *)this;
+    this = (C_HeadgearComp *)((int)this + 1);
+    buffer = (int *)((int)buffer + 1);
+  }
+}
+
+// 0x007df760
+void __thiscall C_HeadgearComp::Load(C_HeadgearComp *this,uint32_t size,void *data)
+{
+  for (uVar1 = size >> 2; this = (C_HeadgearComp *)&this->m_unknown04, uVar1 != 0; uVar1 = uVar1 - 1
+      ) {
+    *(int *)this = *(int *)data;
+    data = (int *)((int)data + 4);
+  }
+  for (uVar1 = size & 3; uVar1 != 0; uVar1 = uVar1 - 1) {
+    *(char *)this = (char)*(int *)data;
+    data = (int *)((int)data + 1);
+    this = (C_HeadgearComp *)((int)this + 1);
+  }
+}
+
+// 0x007df790
+void __thiscall C_SpecialItemComp::Save(C_SpecialItemComp *this,uint32_t *ioSize,void *buffer)
+{
+  *ioSize = 0;
+}
+
+// 0x007df7a0
+void __thiscall C_SpecialItemComp::Load(C_SpecialItemComp *this,uint32_t size,void *data)
+{
+}
+
+// 0x007df7b0
+void FUN_007df7b0(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x007df7e0
+void __thiscall C_ItemDef::C_ItemDef(C_ItemDef *this,E_ItemRecordType recordType,int id)
+{
+  this->m_recordType = recordType;
+  this->vtable = (C_ItemDef_vtbl *)&PTR_00817290;
+  this->m_id = id;
+  this->m_fpvFrame = nullptr;
+  this->m_fpvModelName = nullptr;
+  this->m_image = nullptr;
+  this->m_imageName = nullptr;
+  this->m_modelFrame = nullptr;
+  this->m_modelName = nullptr;
+  this->m_unknown0c = 0;
+  this->m_displayName = nullptr;
+  this->m_textId = 0;
+  this->m_category = 0;
+  this->m_unknown3c = 0;
+  this->m_armedSound = 0;
+  this->m_component = nullptr;
+  this->m_secondaryComponent = nullptr;
+  this->m_divingGear = (I3D_frame **)0x0;
+  this->m_team = 0;
+}
+
+// 0x007df830
+float __thiscall C_ItemDef::GetAmmoAmount(C_ItemDef *this)
+{
+  return -1.0;
+}
+
+// 0x007df840
+int __thiscall C_ItemDef::GetAmmoItemId(C_ItemDef *this)
+{
+  return -1;
+}
+
+// 0x007df850
+int __thiscall C_ItemDef::GetHeadgearItemId(C_ItemDef *this)
+{
+  return -1;
+}
+
+// 0x007df860
+int __thiscall C_ItemDef::GetUnknown64(C_ItemDef *this)
+{
+  return -1;
+}
+
+// 0x007df870
+C_ItemDef * __thiscall C_ItemDef::ScalarDeletingDestructor(C_ItemDef *this,uchar flags)
+{
+  ~C_ItemDef(this);
+  if ((flags & 1) != 0) {
+    operator_delete(this);
+  }
+  return this;
+}
+
+// 0x007df890
+void __thiscall C_ItemDef::~C_ItemDef(C_ItemDef *this)
+{
+  this->vtable = (C_ItemDef_vtbl *)&PTR_00817290;
+  if (this->m_fpvFrame != nullptr) {
+    ReleaseFrameTree(this->m_fpvFrame);
+    this->m_fpvFrame = nullptr;
+  }
+  if (this->m_component != nullptr) {
+    operator_delete(this->m_component);
+    this->m_component = nullptr;
+  }
+  if (this->m_secondaryComponent != nullptr) {
+    operator_delete(this->m_secondaryComponent);
+    this->m_secondaryComponent = nullptr;
+  }
+  operator_delete(this->m_fpvModelName);
+  obj = this->m_image;
+  this->m_fpvModelName = nullptr;
+  if (obj != nullptr) {
+    (**(code **)*obj)(obj);
+    this->m_image = nullptr;
+  }
+  operator_delete(this->m_imageName);
+  this->m_imageName = nullptr;
+  if (this->m_modelFrame != nullptr) {
+    ReleaseFrameTree(this->m_modelFrame);
+    this->m_modelFrame = nullptr;
+  }
+  operator_delete(this->m_modelName);
+  this->m_modelName = nullptr;
+  if (this->m_divingGear != (I3D_frame **)0x0) {
+    offset = 0;
+    do {
+      obj = *(uint32_t **)(offset + (int)this->m_divingGear);
+      if (obj != nullptr) {
+        (**(code **)*obj)(obj);
+      }
+      offset += 4;
+    } while (offset < 0x10);
+    operator_delete(this->m_divingGear);
+    this->m_divingGear = (I3D_frame **)0x0;
+  }
+  if (this->m_displayName != nullptr) {
+    operator_delete(this->m_displayName);
+    this->m_displayName = nullptr;
+  }
+}
+
+// 0x007df970
+I3D_frame * __fastcall C_ItemDef::GetFpvModel(C_ItemDef *def)
+{
+  local_88[0] = &def->m_fpvFrame;
+  if ((def->m_fpvFrame != nullptr) || (def->m_fpvModelName == nullptr)) {
+    return *local_88[0];
+  }
+  self = I3DGetDriver();
+  self_00 = (*self->vtable->CreateFrame)(self,9);
+  pcVar3 = def->m_fpvModelName;
+  iVar7 = (int)local_88 - (int)pcVar3;
+  do {
+    cVar1 = *pcVar3;
+    pcVar3[iVar7] = cVar1;
+    pcVar3++;
+  } while (cVar1 != '\0');
+  uVar6 = 0xffffffff;
+  pcVar3 = PTR_0084e9f8;
+  do {
+    pcVar11 = pcVar3;
+    if (uVar6 == 0) break;
+    uVar6--;
+    pcVar11 = pcVar3 + 1;
+    cVar1 = *pcVar3;
+    pcVar3 = pcVar11;
+  } while (cVar1 != '\0');
+  uVar6 = ~uVar6;
+  iVar7 = -1;
+  pppIVar9 = local_88;
+  do {
+    pppIVar10 = pppIVar9;
+    if (iVar7 == 0) break;
+    iVar7--;
+    pppIVar10 = (I3D_frame ***)((int)pppIVar9 + 1);
+    cVar1 = *(char *)pppIVar9;
+    pppIVar9 = pppIVar10;
+  } while (cVar1 != '\0');
+  pcVar3 = pcVar11 + -uVar6;
+  pcVar11 = (char *)((int)pppIVar10 - 1);
+  memcpy(pcVar11, pcVar3, uVar6);
+  pcVar3 += uVar6;
+  pcVar11 += uVar6;
+  uVar6 = 0;
+  pvVar4 = C_auto_00815f90::ModelCacheBase_OpenInto
+                     ((C_auto_00815f90 *)&g_modelCache,(int *)self_00,(uint8_t *)local_88,0,nullptr)
+  ;
+  if (pvVar4 != nullptr) {
+    (*self_00->vtable->Release)(self_00);
+    return (I3D_frame *)*unaff_ESI;
+  }
+  source = (*self_00->vtable->FindChildFrame)(self_00,"fpv_weapon",1);
+  if (def->m_recordType == ITEM_ANIMATED) {
+    pIVar5 = (*self_00->vtable->FindChildFrame)(self_00,"magazine",0x21);
+    if (pIVar5 != nullptr) {
+      pIVar5->m_refCount = pIVar5->m_refCount + 1;
+      def[1].m_displayName = (char *)pIVar5;
+    }
+  }
+  if (source == nullptr) {
+    self->vtable = nullptr;
+  }
+  else {
+    bVar2 = CloneFrameTree((I3D_frame **)self,source,nullptr);
+    if (!bVar2) {
+      self->vtable = nullptr;
+      (*self_00->vtable->Release)(self_00);
+      return (I3D_frame *)self->vtable;
+    }
+  }
+  (*self_00->vtable->Release)(self_00);
+  return (I3D_frame *)self->vtable;
+}
+
+// 0x007dfab0
+IImage * __fastcall C_ItemDef::GetImage(C_ItemDef *def)
+{
+  out = &def->m_image;
+  if ((def->m_image == nullptr) && (def->m_imageName != nullptr)) {
+    pIVar2 = I3DGetDriver();
+    (*pIVar2->vtable->Slot1C)(pIVar2);
+    pIVar2 = I3DGetDriver();
+    iVar3 = (*pIVar2->vtable->Slot1C)(pIVar2,0x19);
+    uVar7 = (uint32_t)(iVar3 != 0);
+    pIVar2 = I3DGetDriver();
+    (*pIVar2->vtable->SetState)(pIVar2,0x15,0);
+    pIVar2 = I3DGetDriver();
+    (*pIVar2->vtable->SetState)(pIVar2,0x19,0);
+    pcVar4 = def->m_imageName;
+    iVar3 = -(int)pcVar4;
+    do {
+      cVar1 = *pcVar4;
+      pcVar4[(int)(&stack0xffffff70 + iVar3)] = cVar1;
+      pcVar4++;
+    } while (cVar1 != '\0');
+    iVar3 = -1;
+    pcVar4 = &stack0xffffff70;
+    do {
+      pcVar6 = pcVar4;
+      if (iVar3 == 0) break;
+      iVar3--;
+      pcVar6 = pcVar4 + 1;
+      cVar1 = *pcVar4;
+      pcVar4 = pcVar6;
+    } while (cVar1 != '\0');
+    *(uint32_t *)(pcVar6 - 1) = DAT_00839630;
+    pcVar6[3] = DAT_00839634;
+    self = GetIGraph();
+    lVar5 = (*self->vtable->LoadTexture)(self,&stack0xffffff70,0,0,out);
+    if (lVar5 != 0) {
+      *out = nullptr;
+    }
+    pIVar2 = I3DGetDriver();
+    (*pIVar2->vtable->SetState)(pIVar2,0x15,0x15);
+    pIVar2 = I3DGetDriver();
+    (*pIVar2->vtable->SetState)(pIVar2,0x19,uVar7 & 0xff);
+  }
+  return *out;
+}
+
+// 0x007dfbb0
+I3D_frame * __fastcall C_ItemDef::GetModel(C_ItemDef *def)
+{
+  local_88[0] = &def->m_modelFrame;
+  if ((def->m_modelFrame != nullptr) || (def->m_modelName == nullptr)) {
+    return *local_88[0];
+  }
+  self = I3DGetDriver();
+  self_00 = (*self->vtable->CreateFrame)(self,9);
+  pcVar3 = def->m_modelName;
+  iVar6 = (int)local_88 - (int)pcVar3;
+  do {
+    cVar1 = *pcVar3;
+    pcVar3[iVar6] = cVar1;
+    pcVar3++;
+  } while (cVar1 != '\0');
+  uVar5 = 0xffffffff;
+  pcVar3 = PTR_0084e9f8;
+  do {
+    pcVar10 = pcVar3;
+    if (uVar5 == 0) break;
+    uVar5--;
+    pcVar10 = pcVar3 + 1;
+    cVar1 = *pcVar3;
+    pcVar3 = pcVar10;
+  } while (cVar1 != '\0');
+  uVar5 = ~uVar5;
+  iVar6 = -1;
+  pppIVar8 = local_88;
+  do {
+    pppIVar9 = pppIVar8;
+    if (iVar6 == 0) break;
+    iVar6--;
+    pppIVar9 = (I3D_frame ***)((int)pppIVar8 + 1);
+    cVar1 = *(char *)pppIVar8;
+    pppIVar8 = pppIVar9;
+  } while (cVar1 != '\0');
+  pcVar3 = pcVar10 + -uVar5;
+  pcVar10 = (char *)((int)pppIVar9 - 1);
+  memcpy(pcVar10, pcVar3, uVar5);
+  pcVar3 += uVar5;
+  pcVar10 += uVar5;
+  uVar5 = 0;
+  pvVar4 = C_auto_00815f90::ModelCacheBase_OpenInto
+                     ((C_auto_00815f90 *)&g_modelCache,(int *)self_00,(uint8_t *)local_88,0,nullptr)
+  ;
+  if (pvVar4 != nullptr) {
+    (*self_00->vtable->Release)(self_00);
+    return (I3D_frame *)*unaff_ESI;
+  }
+  source = (*self_00->vtable->FindChildFrame)(self_00,def->m_modelName,1);
+  if (source != nullptr) {
+    bVar2 = CloneFrameTree((I3D_frame **)self,source,nullptr);
+    if (bVar2) goto LAB_007dfc85;
+  }
+  self->vtable = nullptr;
+LAB_007dfc85:
+  (*self_00->vtable->Release)(self_00);
+  return (I3D_frame *)self->vtable;
+}
+
+// 0x007dfcb0
+I3D_frame ** __fastcall C_ItemDef::GetDivingGear(C_ItemDef *def)
+{
+  ppIVar4 = def->m_divingGear;
+  if (ppIVar4 == (I3D_frame **)0x0) {
+    if ((def->m_id == 0xe7) && (def->m_modelName != nullptr)) {
+      self = I3DGetDriver();
+      self_00 = (*self->vtable->CreateFrame)(self,9);
+      pcVar2 = def->m_modelName;
+      iVar6 = -(int)pcVar2;
+      do {
+        cVar1 = *pcVar2;
+        pcVar2[(int)(&stack0xffffff78 + iVar6)] = cVar1;
+        pcVar2++;
+      } while (cVar1 != '\0');
+      uVar5 = 0xffffffff;
+      pcVar2 = PTR_0084e9f8;
+      do {
+        pcVar9 = pcVar2;
+        if (uVar5 == 0) break;
+        uVar5--;
+        pcVar9 = pcVar2 + 1;
+        cVar1 = *pcVar2;
+        pcVar2 = pcVar9;
+      } while (cVar1 != '\0');
+      uVar5 = ~uVar5;
+      iVar6 = -1;
+      pcVar2 = &stack0xffffff78;
+      do {
+        pcVar8 = pcVar2;
+        if (iVar6 == 0) break;
+        iVar6--;
+        pcVar8 = pcVar2 + 1;
+        cVar1 = *pcVar2;
+        pcVar2 = pcVar8;
+      } while (cVar1 != '\0');
+      pcVar2 = pcVar9 + -uVar5;
+      pcVar9 = pcVar8 - 1;
+      memcpy(pcVar9, pcVar2, uVar5);
+      pcVar2 += uVar5;
+      pcVar9 += uVar5;
+      uVar5 = 0;
+      pvVar3 = C_auto_00815f90::ModelCacheBase_OpenInto
+                         ((C_auto_00815f90 *)&g_modelCache,(int *)self_00,&stack0xffffff78,0,
+                          nullptr);
+      if (pvVar3 == nullptr) {
+        ppIVar4 = operator_new(0x10);
+        def->m_divingGear = ppIVar4;
+        iVar6 = 0;
+        do {
+          source = (*self_00->vtable->FindChildFrame)
+                             (self_00,*(char **)((int)&PTR_00863a88 + iVar6),1);
+          *(uint32_t *)(iVar6 + (int)def->m_divingGear) = 0;
+          if (source != nullptr) {
+            CloneFrameTree((I3D_frame **)((int)def->m_divingGear + iVar6),source,nullptr);
+          }
+          iVar6 += 4;
+        } while (iVar6 < 0x10);
+        (*self_00->vtable->Release)(self_00);
+        return def->m_divingGear;
+      }
+      (*self_00->vtable->Release)(self_00);
+    }
+    ppIVar4 = (I3D_frame **)0x0;
+  }
+  return ppIVar4;
+}
+
+// 0x007dfdb0
+uint32_t __fastcall C_ItemDef::GetAllowedContainers(C_ItemDef *def)
+{
+  uVar3 = 0;
+  bVar4 = def->m_recordType == ITEM_AMMO;
+  iVar2 = (*def->vtable->GetBehaviour)();
+  if (iVar2 == 0x10) {
+    return 1;
+  }
+  if (iVar2 != 0xf) {
+    iVar1 = def->m_inventorySize;
+    if (iVar1 != 5) {
+      if ((((iVar1 == 2) || (iVar1 == 3)) && (!bVar4)) &&
+         (((iVar2 == 3 || (iVar2 == 4)) || ((iVar2 == 5 || ((iVar2 == 6 || (iVar2 == 0xc)))))))) {
+        uVar3 = 0x10;
+      }
+      if (((iVar1 != 4) && (!bVar4)) && ((iVar2 < 10 || (iVar2 == 0xc)))) {
+        uVar3 |= 4;
+      }
+      if ((iVar1 == 0) || (iVar1 == 1)) {
+        uVar3 |= 0x60;
+      }
+      if (iVar1 == 2) {
+        if (((bVar4) || (iVar2 == 0xb)) || (iVar2 == 10)) {
+          uVar3 |= 0x40;
+        }
+        if (iVar2 == 0xd) {
+          uVar3 |= 0x60;
+        }
+      }
+      return uVar3;
+    }
+    return 8;
+  }
+  return 2;
+}
+
+// 0x007dfe70
+int __fastcall C_ItemDef::GetInventoryGroup(C_ItemDef *def)
+{
+  iVar1 = (*def->vtable->GetBehaviour)();
+  if (iVar1 == 8) {
+    return 0;
+  }
+  if (def->m_recordType == ITEM_AMMO) {
+    return 4;
+  }
+  if ((iVar1 == 0x10) || (iVar1 == 0xf)) {
+    return 6;
+  }
+  if (((iVar1 != 0) && (iVar1 != 1)) && (iVar1 != 2)) {
+    if ((iVar1 == 3) || (iVar1 == 4)) {
+      return 2;
+    }
+    if (((iVar1 != 0xc) && (iVar1 != 5)) && ((iVar1 != 6 && (iVar1 != 7)))) {
+      if ((((iVar1 != 9) && (iVar1 != 10)) && (iVar1 != 0xb)) && (iVar1 != 0x15)) {
+        return 7;
+      }
+      return 5;
+    }
+    return 3;
+  }
+  return 1;
+}
+
+// 0x007dff10
+// *ioSize == 0: only report the stream size (0xa8 + component sizes).
+// Otherwise write the stream described at C_ItemDef::Load.
+void __thiscall C_ItemDef::Save(C_ItemDef *this,int *ioSize,void *buffer)
+{
+  iVar4 = *ioSize;
+  *ioSize = 0xa8;
+  compSizeAndBlank[1] = 0;
+  compSizeAndBlank[2] = 0;
+  compSizeAndBlank[3] = 0;
+  compSizeAndBlank[0] = 0;
+  compSizeAndBlank[4] = 0;
+  compSizeAndBlank[5] = 0;
+  if (this->m_component != nullptr) {
+    (*this->m_component->vtable->Save)(compSizeAndBlank,buffer);
+  }
+  total = *ioSize + compSizeAndBlank[0];
+  compSizeAndBlank[0] = 0;
+  *ioSize = total;
+  if (this->m_secondaryComponent != nullptr) {
+    (*this->m_secondaryComponent->vtable->Save)(compSizeAndBlank,buffer);
+  }
+  *ioSize = *ioSize + compSizeAndBlank[0];
+  if (iVar4 != 0) {
+    pcVar6 = this->m_fpvModelName;
+    if (pcVar6 == nullptr) {
+      puVar7 = compSizeAndBlank;
+      puVar9 = buffer;
+      for (iVar4 = 5; puVar7 = puVar7 + 1, iVar4 != 0; iVar4 = iVar4 - 1) {
+        *puVar9 = *puVar7;
+        puVar9++;
+      }
+    }
+    else {
+      uVar2 = 0xffffffff;
+      pcVar8 = pcVar6;
+      do {
+        if (uVar2 == 0) break;
+        uVar2--;
+        cVar1 = *pcVar8;
+        pcVar8++;
+      } while (cVar1 != '\0');
+      pcVar8 = buffer;
+      for (uVar3 = ~uVar2 >> 2; uVar3 != 0; uVar3 = uVar3 - 1) {
+        *(uint32_t *)pcVar8 = *(uint32_t *)pcVar6;
+        pcVar6 += 4;
+        pcVar8 += 4;
+      }
+      for (uVar2 = ~uVar2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {
+        *pcVar8 = *pcVar6;
+        pcVar6++;
+        pcVar8++;
+      }
+    }
+    puVar7 = (uint32_t *)this->m_imageName;
+    if (puVar7 == nullptr) {
+      puVar7 = compSizeAndBlank;
+      puVar9 = (uint32_t *)((int)buffer + 0x14);
+      for (iVar4 = 5; puVar7 = puVar7 + 1, iVar4 != 0; iVar4 = iVar4 - 1) {
+        *puVar9 = *puVar7;
+        puVar9++;
+      }
+    }
+    else {
+      uVar2 = 0xffffffff;
+      puVar9 = puVar7;
+      do {
+        if (uVar2 == 0) break;
+        uVar2--;
+        uVar3 = *puVar9;
+        puVar9 = (uint32_t *)((int)puVar9 + 1);
+      } while ((char)uVar3 != '\0');
+      puVar9 = (uint32_t *)((int)buffer + 0x14);
+      for (uVar3 = ~uVar2 >> 2; uVar3 != 0; uVar3 = uVar3 - 1) {
+        *puVar9 = *puVar7;
+        puVar7++;
+        puVar9++;
+      }
+      for (uVar2 = ~uVar2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {
+        *(char *)puVar9 = (char)*puVar7;
+        puVar7 = (uint32_t *)((int)puVar7 + 1);
+        puVar9 = (uint32_t *)((int)puVar9 + 1);
+      }
+    }
+    puVar7 = (uint32_t *)this->m_modelName;
+    if (puVar7 == nullptr) {
+      puVar7 = compSizeAndBlank;
+      puVar9 = (uint32_t *)((int)buffer + 0x28);
+      for (iVar4 = 5; puVar7 = puVar7 + 1, iVar4 != 0; iVar4 = iVar4 - 1) {
+        *puVar9 = *puVar7;
+        puVar9++;
+      }
+    }
+    else {
+      uVar2 = 0xffffffff;
+      puVar9 = puVar7;
+      do {
+        if (uVar2 == 0) break;
+        uVar2--;
+        uVar3 = *puVar9;
+        puVar9 = (uint32_t *)((int)puVar9 + 1);
+      } while ((char)uVar3 != '\0');
+      puVar9 = (uint32_t *)((int)buffer + 0x28);
+      for (uVar3 = ~uVar2 >> 2; uVar3 != 0; uVar3 = uVar3 - 1) {
+        *puVar9 = *puVar7;
+        puVar7++;
+        puVar9++;
+      }
+      for (uVar2 = ~uVar2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {
+        *(char *)puVar9 = (char)*puVar7;
+        puVar7 = (uint32_t *)((int)puVar7 + 1);
+        puVar9 = (uint32_t *)((int)puVar9 + 1);
+      }
+    }
+    *(int *)((int)buffer + 0x3c) = this->m_unknown0c;
+    puVar7 = (uint32_t *)this->m_displayName;
+    if (puVar7 == nullptr) {
+      puVar7 = compSizeAndBlank;
+      puVar9 = (uint32_t *)((int)buffer + 0x50);
+      for (iVar4 = 5; puVar7 = puVar7 + 1, iVar4 != 0; iVar4 = iVar4 - 1) {
+        *puVar9 = *puVar7;
+        puVar9++;
+      }
+    }
+    else {
+      uVar2 = 0xffffffff;
+      puVar9 = puVar7;
+      do {
+        if (uVar2 == 0) break;
+        uVar2--;
+        uVar3 = *puVar9;
+        puVar9 = (uint32_t *)((int)puVar9 + 1);
+      } while ((char)uVar3 != '\0');
+      puVar9 = (uint32_t *)((int)buffer + 0x50);
+      for (uVar3 = ~uVar2 >> 2; uVar3 != 0; uVar3 = uVar3 - 1) {
+        *puVar9 = *puVar7;
+        puVar7++;
+        puVar9++;
+      }
+      for (uVar2 = ~uVar2 & 3; uVar2 != 0; uVar2 = uVar2 - 1) {
+        *(char *)puVar9 = (char)*puVar7;
+        puVar7 = (uint32_t *)((int)puVar7 + 1);
+        puVar9 = (uint32_t *)((int)puVar9 + 1);
+      }
+    }
+    *(int *)((int)buffer + 100) = this->m_textId;
+    *(float *)((int)buffer + 0x68) = this->m_weight;
+    *(int *)((int)buffer + 0x6c) = this->m_inventorySize;
+    *(int *)((int)buffer + 0x70) = this->m_category;
+    *(int *)((int)buffer + 0x74) = this->m_unknown3c;
+    *(int *)((int)buffer + 0x78) = this->m_armedSound;
+    *(int *)((int)buffer + 0x7c) = this->m_team;
+    if (this->m_component == nullptr) {
+      *(uint32_t *)((int)buffer + 0x80) = 0;
+      piVar5 = (int *)((int)buffer + 0x84);
+    }
+    else {
+      requestedSize = (void *)((int)buffer + 0x84);
+      compSizeAndBlank[0] = 0;
+      *(E_ItemComponentKind *)((int)buffer + 0x80) = this->m_component->m_kind + ICK_MINE;
+      (*this->m_component->vtable->Save)(compSizeAndBlank,requestedSize);
+      (*this->m_component->vtable->Save)((uint32_t *)&stack0xffffffe0,requestedSize);
+      piVar5 = (int *)((int)requestedSize + compSizeAndBlank[0]);
+    }
+    if (this->m_secondaryComponent != nullptr) {
+      *piVar5 = this->m_secondaryComponent->m_kind + ICK_MINE;
+      compSizeAndBlank[0] = 0;
+      (*this->m_secondaryComponent->vtable->Save)(compSizeAndBlank,piVar5 + 1);
+      (*this->m_secondaryComponent->vtable->Save)((uint32_t *)&stack0xffffffe0,piVar5 + 1);
+      return;
+    }
+    *piVar5 = 0;
+  }
+}
+
+// 0x007e0150
+// Stream layout (offsets from data):
+//   0x00 char fpvModel[20]   0x14 char image[20]   0x28 char model[20]
+//   0x3c int unknown0c       0x40 16 unused bytes  0x50 char displayName[20] (ignored)
+//   0x64 textId  0x68 weight  0x6c inventorySize  0x70 category  0x74 unknown3c
+//   0x78 armedSound  0x7c team
+//   0x80 int component kind+1 (0 = none), component data (its Save size),
+//        int secondary component kind+1, its data, 0x20 reserved bytes.
+// *outSize = bytes consumed; derived classes read their fields at data + *outSize.
+void __thiscall C_ItemDef::Load(C_ItemDef *this,int *outSize,void *data)
+{
+  compSize = 0;
+  *outSize = 0;
+  Save(this,outSize,data);
+  str = operator_new(0x14);
+  this->m_fpvModelName = str;
+  str = operator_new(0x14);
+  this->m_imageName = str;
+  str = operator_new(0x14);
+  this->m_displayName = nullptr;
+  this->m_modelName = str;
+  src = data;
+  str = this->m_fpvModelName;
+  for (n = 5; n != 0; n = n - 1) {
+    *(uint32_t *)str = *src;
+    src++;
+    str += 4;
+  }
+  if (*this->m_fpvModelName == '\0') {
+    operator_delete(this->m_fpvModelName);
+    this->m_fpvModelName = nullptr;
+  }
+  src = (uint32_t *)((int)data + 0x14);
+  str = this->m_imageName;
+  for (n = 5; n != 0; n = n - 1) {
+    *(uint32_t *)str = *src;
+    src++;
+    str += 4;
+  }
+  if (*this->m_imageName == '\0') {
+    operator_delete(this->m_imageName);
+    this->m_imageName = nullptr;
+  }
+  src = (uint32_t *)((int)data + 0x28);
+  str = this->m_modelName;
+  for (n = 5; n != 0; n = n - 1) {
+    *(uint32_t *)str = *src;
+    src++;
+    str += 4;
+  }
+  if (*this->m_modelName == '\0') {
+    operator_delete(this->m_modelName);
+    this->m_modelName = nullptr;
+  }
+  this->m_unknown0c = *(int *)((int)data + 0x3c);
+  this->m_textId = *(int *)((int)data + 100);
+  this->m_weight = *(float *)((int)data + 0x68);
+  this->m_inventorySize = *(int *)((int)data + 0x6c);
+  this->m_category = *(int *)((int)data + 0x70);
+  this->m_unknown3c = *(int *)((int)data + 0x74);
+  this->m_armedSound = *(int *)((int)data + 0x78);
+  this->m_team = *(int *)((int)data + 0x7c);
+  cursor = (int *)((int)data + 0x84);
+  if (*(int *)((int)data + 0x80) != 0) {
+    switch(*(int *)((int)data + 0x80)) {
+    case 1:
+      comp = operator_new(0x28);
+      if (comp == nullptr) {
+LAB_007e0416:
+        comp = nullptr;
+      }
+      else {
+        comp->m_kind = ICK_MELEE;
+        comp->m_unknown04 = 0;
+        *(uint8_t *)&comp[2].m_kind = ICK_MINE;
+        comp->vtable = (C_ItemComponent_vtbl *)&PTR_008173b0;
+        comp[1].m_kind = ICK_MELEE;
+      }
+      break;
+    case 2:
+      comp = operator_new(0x2c);
+      if (comp == nullptr) goto LAB_007e0416;
+      comp->m_kind = ICK_MINE;
+      comp->m_unknown04 = 0;
+      *(uint8_t *)&comp[2].m_kind = ICK_MINE;
+      comp->vtable = (C_ItemComponent_vtbl *)&PTR_0081737c;
+      comp[1].m_kind = ICK_MELEE;
+      break;
+    case 3:
+      comp = operator_new(100);
+      if (comp == nullptr) goto LAB_007e0416;
+      comp->m_kind = ICK_PROJECTILE_WEAPON;
+      comp->m_unknown04 = 0;
+      *(uint8_t *)&comp[2].m_kind = ICK_MINE;
+      comp->vtable = (C_ItemComponent_vtbl *)&PTR_00817348;
+      comp[4].vtable = nullptr;
+      comp[1].m_kind = ICK_MELEE;
+      break;
+    case 4:
+      comp = operator_new(0x5c);
+      if (comp == nullptr) goto LAB_007e0416;
+      comp->m_kind = ICK_FIREARM;
+      comp->m_unknown04 = 0;
+      *(uint8_t *)&comp[2].m_kind = ICK_MINE;
+      comp->vtable = (C_ItemComponent_vtbl *)&PTR_00817314;
+      break;
+    case 5:
+      comp = operator_new(0x14);
+      if (comp == nullptr) goto LAB_007e0416;
+      comp->m_kind = ICK_SCOPE;
+      comp->m_unknown04 = 0;
+      comp->vtable = (C_ItemComponent_vtbl *)&PTR_00817304;
+      comp[1].vtable = (C_ItemComponent_vtbl *)0x6;
+      break;
+    case 6:
+      comp = operator_new(0x10);
+      if (comp == nullptr) goto LAB_007e0416;
+      comp->m_kind = ICK_UNIFORM;
+      comp->m_unknown04 = 0;
+      comp->vtable = (C_ItemComponent_vtbl *)&PTR_008172f4;
+      break;
+    case 7:
+      comp = operator_new(0x10);
+      if (comp == nullptr) goto LAB_007e0416;
+      comp->m_kind = ICK_MEDKIT;
+      comp->m_unknown04 = 0;
+      comp->vtable = (C_ItemComponent_vtbl *)&PTR_008172e4;
+      break;
+    case 8:
+      comp = operator_new(0x20);
+      if (comp == nullptr) goto LAB_007e0416;
+      comp->m_kind = ICK_BACKPACK;
+      comp->m_unknown04 = 0;
+      comp->vtable = (C_ItemComponent_vtbl *)&PTR_008172d4;
+      break;
+    case 9:
+      comp = operator_new(0x14);
+      if (comp == nullptr) goto LAB_007e0416;
+      comp->m_kind = ICK_HEADGEAR;
+      comp->m_unknown04 = 0;
+      comp->vtable = (C_ItemComponent_vtbl *)&PTR_008172c4;
+      break;
+    case 10:
+      comp = operator_new(0xc);
+      if (comp == nullptr) goto LAB_007e0416;
+      comp->m_kind = ICK_SPECIAL;
+      comp->m_unknown04 = 0;
+      comp->vtable = (C_ItemComponent_vtbl *)&PTR_008172b4;
+      break;
+    default:
+      goto switchD_007e026c_default;
+    }
+    this->m_component = comp;
+switchD_007e026c_default:
+    compSize = 0;
+    (*this->m_component->vtable->Save)(&compSize,cursor);
+    (*this->m_component->vtable->Load)(unaff_EBP,cursor);
+    cursor = (int *)((int)cursor + compSize);
+    *outSize = *outSize + compSize;
+  }
+  if (*cursor == 0) {
+    return;
+  }
+  switch(*cursor) {
+  case 1:
+    comp = operator_new(0x28);
+    if (comp == nullptr) {
+LAB_007e0617:
+      comp = nullptr;
+    }
+    else {
+      comp->m_kind = ICK_MELEE;
+      comp->m_unknown04 = 0;
+      *(uint8_t *)&comp[2].m_kind = ICK_MINE;
+      comp->vtable = (C_ItemComponent_vtbl *)&PTR_008173b0;
+      comp[1].m_kind = ICK_MELEE;
+    }
+    break;
+  case 2:
+    comp = operator_new(0x2c);
+    if (comp == nullptr) goto LAB_007e0617;
+    comp->m_kind = ICK_MINE;
+    comp->m_unknown04 = 0;
+    *(uint8_t *)&comp[2].m_kind = ICK_MINE;
+    comp->vtable = (C_ItemComponent_vtbl *)&PTR_0081737c;
+    comp[1].m_kind = ICK_MELEE;
+    break;
+  case 3:
+    comp = operator_new(100);
+    if (comp == nullptr) goto LAB_007e0617;
+    comp->m_kind = ICK_PROJECTILE_WEAPON;
+    comp->m_unknown04 = 0;
+    *(uint8_t *)&comp[2].m_kind = ICK_MINE;
+    comp->vtable = (C_ItemComponent_vtbl *)&PTR_00817348;
+    comp[4].vtable = nullptr;
+    comp[1].m_kind = ICK_MELEE;
+    break;
+  case 4:
+    comp = operator_new(0x5c);
+    if (comp == nullptr) goto LAB_007e0617;
+    comp->m_kind = ICK_FIREARM;
+    comp->m_unknown04 = 0;
+    *(uint8_t *)&comp[2].m_kind = ICK_MINE;
+    comp->vtable = (C_ItemComponent_vtbl *)&PTR_00817314;
+    break;
+  case 5:
+    comp = operator_new(0x14);
+    if (comp == nullptr) goto LAB_007e0617;
+    comp->m_kind = ICK_SCOPE;
+    comp->m_unknown04 = 0;
+    comp->vtable = (C_ItemComponent_vtbl *)&PTR_00817304;
+    comp[1].vtable = (C_ItemComponent_vtbl *)0x6;
+    break;
+  case 6:
+    comp = operator_new(0x10);
+    if (comp == nullptr) goto LAB_007e0617;
+    comp->m_kind = ICK_UNIFORM;
+    comp->m_unknown04 = 0;
+    comp->vtable = (C_ItemComponent_vtbl *)&PTR_008172f4;
+    break;
+  case 7:
+    comp = operator_new(0x10);
+    if (comp == nullptr) goto LAB_007e0617;
+    comp->m_kind = ICK_MEDKIT;
+    comp->m_unknown04 = 0;
+    comp->vtable = (C_ItemComponent_vtbl *)&PTR_008172e4;
+    break;
+  case 8:
+    comp = operator_new(0x20);
+    if (comp == nullptr) goto LAB_007e0617;
+    comp->m_kind = ICK_BACKPACK;
+    comp->m_unknown04 = 0;
+    comp->vtable = (C_ItemComponent_vtbl *)&PTR_008172d4;
+    break;
+  case 9:
+    comp = operator_new(0x14);
+    if (comp == nullptr) goto LAB_007e0617;
+    comp->m_kind = ICK_HEADGEAR;
+    comp->m_unknown04 = 0;
+    comp->vtable = (C_ItemComponent_vtbl *)&PTR_008172c4;
+    break;
+  case 10:
+    comp = operator_new(0xc);
+    if (comp == nullptr) goto LAB_007e0617;
+    comp->m_kind = ICK_SPECIAL;
+    comp->m_unknown04 = 0;
+    comp->vtable = (C_ItemComponent_vtbl *)&PTR_008172b4;
+    break;
+  default:
+    goto switchD_007e046d_default;
+  }
+  this->m_secondaryComponent = comp;
+switchD_007e046d_default:
+  compSize = 0;
+  (*this->m_secondaryComponent->vtable->Save)(&compSize,cursor + 1);
+  (*this->m_secondaryComponent->vtable->Load)(unaff_EBP,cursor + 1);
+  *outSize = *outSize + unaff_EDI;
+}
+
+// 0x007e06b0
+int __thiscall C_ItemComponent::GetUnknownVf00(C_ItemComponent *this)
+{
+  return 0x7fffffff;
+}
+
+// 0x007e06c0
+int __thiscall C_ItemComponent::GetProjectileType(C_ItemComponent *this)
+{
+  return 3;
+}
+
+// 0x007e06d0
+float __thiscall C_WeaponComp::GetAimedDispersion(C_WeaponComp *this)
+{
+  return 0.0;
+}
+
+// 0x007e06e0
+float __thiscall C_WeaponComp::GetMuzzleVelocity(C_WeaponComp *this)
+{
+  return 0.0;
+}
+
+// 0x007e06f0
+int __thiscall C_WeaponComp::GetShotSound(C_WeaponComp *this)
+{
+  return this->m_shotSound;
+}
+
+// 0x007e0700
+int __thiscall C_WeaponComp::GetReloadSound(C_WeaponComp *this)
+{
+  return -1;
+}
+
+// 0x007e0710
+int __thiscall C_WeaponComp::GetReloadTimeMs(C_WeaponComp *this)
+{
+  return 0;
+}
+
+// 0x007e0720
+int __thiscall C_WeaponComp::GetLastShotSound(C_WeaponComp *this)
+{
+  return -1;
+}
+
+// 0x007e0730
+int __thiscall C_WeaponComp::GetBoltSound(C_WeaponComp *this)
+{
+  return -1;
+}
+
+// 0x007e0740
+float __thiscall C_WeaponComp::GetUnknownVf2C(C_WeaponComp *this)
+{
+  return 0.0;
+}
+
+// 0x007e0750
+bool __thiscall C_WeaponComp::CanReload(C_WeaponComp *this)
+{
+  return this->m_canReload;
+}
+
+// 0x007e0760
+int __thiscall C_MineComp::GetUnknownVf00(C_MineComp *this)
+{
+  return this->m_unknown24;
+}
+
+// 0x007e0770
+float __thiscall C_ProjectileWeaponComp::GetAimedDispersion(C_ProjectileWeaponComp *this)
+{
+  return this->m_aimedDispersion;
+}
+
+// 0x007e0780
+float __thiscall C_ProjectileWeaponComp::GetMuzzleVelocity(C_ProjectileWeaponComp *this)
+{
+  return this->m_muzzleVelocity;
+}
+
+// 0x007e0790
+int __thiscall C_ProjectileWeaponComp::GetReloadSound(C_ProjectileWeaponComp *this)
+{
+  return this->m_reloadSound;
+}
+
+// 0x007e07a0
+int __thiscall C_ProjectileWeaponComp::GetReloadTimeMs(C_ProjectileWeaponComp *this)
+{
+  lVar1 = __ftol();
+  return (int)lVar1;
+}
+
+// 0x007e07b0
+int __thiscall C_ProjectileWeaponComp::GetProjectileType(C_ProjectileWeaponComp *this)
+{
+  return this->m_projectileType;
+}
+
+// 0x007e07c0
+float __thiscall C_ProjectileWeaponComp::GetUnknownVf2C(C_ProjectileWeaponComp *this)
+{
+  return this->m_unknown48;
+}
+
+// 0x007e07d0
+float __thiscall C_FirearmComp::GetAimedDispersion(C_FirearmComp *this)
+{
+  return this->m_aimedDispersion;
+}
+
+// 0x007e07e0
+float __thiscall C_FirearmComp::GetMuzzleVelocity(C_FirearmComp *this)
+{
+  return this->m_muzzleVelocity;
+}
+
+// 0x007e07f0
+int __thiscall C_FirearmComp::GetReloadSound(C_FirearmComp *this)
+{
+  return this->m_reloadSound;
+}
+
+// 0x007e0800
+int __thiscall C_FirearmComp::GetReloadTimeMs(C_FirearmComp *this)
+{
+  lVar1 = __ftol();
+  return (int)lVar1;
+}
+
+// 0x007e0810
+int __thiscall C_FirearmComp::GetProjectileType(C_FirearmComp *this)
+{
+  return this->m_projectileType;
+}
+
+// 0x007e0820
+int __thiscall C_FirearmComp::GetLastShotSound(C_FirearmComp *this)
+{
+  return this->m_lastShotSound;
+}
+
+// 0x007e0830
+int __thiscall C_FirearmComp::GetBoltSound(C_FirearmComp *this)
+{
+  return this->m_boltSound;
+}
+
+// 0x007e0840
+float __thiscall C_FirearmComp::GetUnknownVf2C(C_FirearmComp *this)
+{
+  return this->m_unknown44;
+}
+
+// 0x007e0850
+C_AmmoItemDef * __thiscall C_AmmoItemDef::C_AmmoItemDef(C_AmmoItemDef *this,int id)
+{
+  C_ItemDef::C_ItemDef((C_ItemDef *)this,ITEM_AMMO,id);
+  this->vtable = (C_AmmoItemDef_vtbl *)&PTR_008173e4;
+  return this;
+}
+
+// 0x007e0870
+float __thiscall C_AmmoItemDef::GetAmmoAmount(C_AmmoItemDef *this)
+{
+  return this->m_ammoAmount;
+}
+
+// 0x007e0880
+int __thiscall C_AmmoItemDef::GetCarryMode(C_AmmoItemDef *this)
+{
+  return 100;
+}
+
+// 0x007e0890
+int __thiscall C_AmmoItemDef::GetBehaviour(C_AmmoItemDef *this)
+{
+  return 0x17;
+}
+
+// 0x007e08a0
+C_AmmoItemDef * __thiscall C_AmmoItemDef::ScalarDeletingDestructor(C_AmmoItemDef *this,uchar flags)
+{
+  ~C_AmmoItemDef(this);
+  if ((flags & 1) != 0) {
+    operator_delete(this);
+  }
+  return this;
+}
+
+// 0x007e08c0
+void __thiscall C_AmmoItemDef::~C_AmmoItemDef(C_AmmoItemDef *this)
+{
+  this->vtable = (C_AmmoItemDef_vtbl *)&PTR_008173e4;
+  C_ItemDef::~C_ItemDef((C_ItemDef *)this);
+}
+
+// 0x007e08d0
+void __thiscall C_AmmoItemDef::Save(C_AmmoItemDef *this,int *ioSize,void *buffer)
+{
+  iVar1 = *ioSize;
+  C_ItemDef::Save((C_ItemDef *)this,ioSize,buffer);
+  if (iVar1 == 0) {
+    *ioSize = *ioSize + 4;
+    return;
+  }
+  *(float *)((int)buffer + *ioSize) = this->m_ammoAmount;
+}
+
+// 0x007e0910
+void __thiscall C_AmmoItemDef::Load(C_AmmoItemDef *this,int *outSize,void *data)
+{
+  C_ItemDef::Load((C_ItemDef *)this,outSize,data);
+  this->m_ammoAmount = *(float *)((int)data + *outSize);
+}
+
+// 0x007e0940
+C_AnimatedItemDef * __thiscall C_AnimatedItemDef::C_AnimatedItemDef(C_AnimatedItemDef *this,int id)
+{
+  C_ItemDef::C_ItemDef((C_ItemDef *)this,ITEM_ANIMATED,id);
+  this->vtable = (C_AnimatedItemDef_vtbl *)&PTR_00817408;
+  this->m_fpvMagazine = nullptr;
+  return this;
+}
+
+// 0x007e0970
+int __thiscall C_AnimatedItemDef::GetAmmoItemId(C_AnimatedItemDef *this)
+{
+  return this->m_ammoItemId;
+}
+
+// 0x007e0980
+int __thiscall C_AnimatedItemDef::GetCarryMode(C_AnimatedItemDef *this)
+{
+  return this->m_carryMode;
+}
+
+// 0x007e0990
+int __thiscall C_AnimatedItemDef::GetBehaviour(C_AnimatedItemDef *this)
+{
+  return this->m_behaviour;
+}
+
+// 0x007e09a0
+C_AnimatedItemDef * __thiscall
+C_AnimatedItemDef::ScalarDeletingDestructor(C_AnimatedItemDef *this,uchar flags)
+{
+  ~C_AnimatedItemDef(this);
+  if ((flags & 1) != 0) {
+    operator_delete(this);
+  }
+  return this;
+}
+
+// 0x007e09c0
+void __thiscall C_AnimatedItemDef::~C_AnimatedItemDef(C_AnimatedItemDef *this)
+{
+  this->vtable = (C_AnimatedItemDef_vtbl *)&PTR_00817408;
+  self = this->m_fpvMagazine;
+  if (self != nullptr) {
+    (*self->vtable->Release)(self);
+  }
+  C_ItemDef::~C_ItemDef((C_ItemDef *)this);
+}
+
+// 0x007e0a20
+void __thiscall C_AnimatedItemDef::Save(C_AnimatedItemDef *this,int *ioSize,void *buffer)
+{
+  iVar1 = *ioSize;
+  C_ItemDef::Save((C_ItemDef *)this,ioSize,buffer);
+  piVar2 = (int *)((int)buffer + *ioSize);
+  if (iVar1 == 0) {
+    *ioSize = *ioSize + 0x10;
+    return;
+  }
+  *piVar2 = this->m_carryMode;
+  piVar2[1] = this->m_behaviour;
+  piVar2[2] = this->m_attachment;
+  piVar2[3] = this->m_ammoItemId;
+}
+
+// 0x007e0a80
+void __thiscall C_AnimatedItemDef::Load(C_AnimatedItemDef *this,int *outSize,void *data)
+{
+  C_ItemDef::Load((C_ItemDef *)this,outSize,data);
+  piVar1 = (int *)((int)data + *outSize);
+  this->m_carryMode = *piVar1;
+  this->m_behaviour = piVar1[1];
+  this->m_attachment = piVar1[2];
+  this->m_ammoItemId = piVar1[3];
+}
+
+// 0x007e0ac0
+C_StaticItemDef * __thiscall C_StaticItemDef::C_StaticItemDef(C_StaticItemDef *this,int id)
+{
+  C_ItemDef::C_ItemDef((C_ItemDef *)this,ITEM_STATIC,id);
+  this->vtable = (C_StaticItemDef_vtbl *)&PTR_0081742c;
+  return this;
+}
+
+// 0x007e0ae0
+int __thiscall C_StaticItemDef::GetCarryMode(C_StaticItemDef *this)
+{
+  return this->m_carryMode;
+}
+
+// 0x007e0af0
+int __thiscall C_StaticItemDef::GetBehaviour(C_StaticItemDef *this)
+{
+  return this->m_behaviour;
+}
+
+// 0x007e0b00
+int __thiscall C_StaticItemDef::GetHeadgearItemId(C_StaticItemDef *this)
+{
+  return this->m_headgearItemId;
+}
+
+// 0x007e0b10
+int __thiscall C_StaticItemDef::GetUnknown64(C_StaticItemDef *this)
+{
+  return this->m_unknown64;
+}
+
+// 0x007e0b20
+C_StaticItemDef * __thiscall
+C_StaticItemDef::ScalarDeletingDestructor(C_StaticItemDef *this,uchar flags)
+{
+  ~C_StaticItemDef(this);
+  if ((flags & 1) != 0) {
+    operator_delete(this);
+  }
+  return this;
+}
+
+// 0x007e0b40
+void __thiscall C_StaticItemDef::~C_StaticItemDef(C_StaticItemDef *this)
+{
+  this->vtable = (C_StaticItemDef_vtbl *)&PTR_0081742c;
+  C_ItemDef::~C_ItemDef((C_ItemDef *)this);
+}
+
+// 0x007e0b50
+void __thiscall C_StaticItemDef::Save(C_StaticItemDef *this,int *ioSize,void *buffer)
+{
+  iVar1 = *ioSize;
+  C_ItemDef::Save((C_ItemDef *)this,ioSize,buffer);
+  piVar2 = (int *)((int)buffer + *ioSize);
+  if (iVar1 == 0) {
+    *ioSize = *ioSize + 0x14;
+    return;
+  }
+  *piVar2 = this->m_carryMode;
+  piVar2[1] = this->m_behaviour;
+  piVar2[2] = this->m_unknown5c;
+  piVar2[3] = this->m_headgearItemId;
+  piVar2[4] = this->m_unknown64;
+}
+
+// 0x007e0bb0
+void __thiscall C_StaticItemDef::Load(C_StaticItemDef *this,int *outSize,void *data)
+{
+  C_ItemDef::Load((C_ItemDef *)this,outSize,data);
+  piVar1 = (int *)((int)data + *outSize);
+  this->m_carryMode = *piVar1;
+  this->m_behaviour = piVar1[1];
+  this->m_unknown5c = piVar1[2];
+  this->m_headgearItemId = piVar1[3];
+  this->m_unknown64 = piVar1[4];
+}
+
+// 0x007e0bf0
+void FUN_007e0bf0(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+

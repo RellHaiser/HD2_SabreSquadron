@@ -4883,6 +4883,68 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     controller.txt and script.txt), 120 decompiles exported. Stats: 6,638 of 12,286 functions by
     hand (62.6 % by size).
 
+  PART 7d DONE (2026-10-27): the multiplayer zone, the submarine and the train (src/game/mp_zone.*,
+  submarine.*, train.*, frame_volume.h, new).
+  - C_MPZone ("MPZone", type 37, 0x120 bytes): a dummy frame's box (shape 0, strictly inside) or the
+    sphere around it (shape 1); three flags (user frames by name, held; the shown one's "vlajka"
+    visual gets the vertex animation player: 210 ms frames from the last), the spawn area
+    "<name>spawn" (Fix: no fixed 28-byte name buffer). Properties version 0x8001 (older ones start
+    with the number, no both-ways byte; a failed first read counts as versioned, quirk kept). The
+    server checks once a second who is in it (one per team counts), starts and stops the capture,
+    turns a held plain zone neutral at half time (2 points each), takes it at the capture time (5
+    points; an objective's zone sets the objective's status), team points while held; pure clients
+    check the local player and show the progress. Messages 2 bits (start, stop, team); ordered
+    zones (mission +0x60) need the neighbour zone. Fix: StopMission lets the animation player go
+    even when it was never shown; CanTake passes over empty actor slots.
+  - C_Submarine ("Submarine", type 20, 0x120 bytes): two seats ("SEAT00" pilot, "SEAT01"; flags from
+    "SEAT<digits>", texts from "name<n>"), its body bobbing and rolling, the "sroub" propeller, five
+    looping sounds (chapter 8) paused at the start; controls to speed (±6 m/s), turn (±0.5) and
+    climb (±1, to "Max waterlevel"); the hull's boxes (BODYCOLB00's children, S_FrameVolume) swept
+    from the second on: a hit turns it away and puts it back (turning: tried once more by the
+    speed's size). Exits: a 0.25 m sphere 1.35 m to either side of a seat, then the other seat,
+    the ground below. LeaveSeat returns null (quirk kept). Fix: no pilot seat: no camera dummy.
+  - S_FrameVolume (frame_volume.h): the box and inverse matrix block the submarine (0x005df710) and
+    the train (inline) share; Fix: an empty box's centre 0.
+  - C_Train ("Train", type 14, 0x8250 bytes): wagons from the "Wagon" properties (user frames in the
+    scene; the train's own model too when set first), their BODY, wheels (WHR / WHL, then their TH,
+    DTH and STH rods), boxes (BODYCOLB00, else a BODY dummy, else the frame); the embedded track
+    player (a default constructor and accessors added to C_TrackPlayer) moves the first wagon's
+    body along the keys, the others follow on the polyline at their lengths and gaps, the bodies
+    sway (sin of the time), the wheels turn by distance / radius, the connecting rods aim at the
+    crosshead slide (-0.3), a crosshead turning back plays a chuff of the set for the speed (0 / 12
+    / 24 / 36 km/h; the last place and direction shared by all trains, quirk kept). Brakes while
+    the keys slow down (loop, squeals 1.5..3.5 s, jars 6..10 s), the loop fading out after; wheel
+    volume by speed. The path: the checkpoints from the first within 2 m of a key, then the
+    straightest link (> 60° off: none; without a previous point link 0 is taken, quirk kept); the
+    points 5 s ahead get CHECKPOINT_FLAG_UNDER_CAR, those a train's length behind lose it; the boxes'
+    centre lines run humans over (hit 5, -1). FollowTrack: the first key past the train's length
+    (a shorter track: not placed or moved, quirk kept). Saved game chunk 1000 (track name, key,
+    places) / 2000; LoadGame skips a name past 127 bytes with reads of n-1 .. 0 bytes (quirk kept).
+    Fixes: a null track, wagon list, body or a single-key track (the original reads through null or
+    past the keys); a connecting rod without its crosshead is left; LoadGame's name skip into a
+    buffer and places past the wagons dropped; SaveGame without a track or a wagon frame.
+    HitHuman drops the original's unused train argument (ret_audit +1, expected).
+  - world.h's partials replaced by the headers; squad_controller / game / interface_map renamed
+    calls (SetTurn, GetObjective).
+  - Harness (build_item.bat links mp_zone.cpp, submarine.cpp, train.cpp and track.cpp;
+    moving_actors_test.inc with moving_train.inc, moving_submarine.inc, moving_zone.inc after
+    WorldActorsTest; check_item.py reads "moving:", 22 checks): the 7b spawn test's fake
+    C_MPZone::PickSpawnPosition is kept through ld's --wrap (mutfast now passes the .bat's -Wl,
+    options), the real one is called as ___real_; fakes for LS3DF's RotateX/YMatrix, GetDir, Slerp,
+    RotateByMatrix, the sound driver, sound frames, checkpoint links, the vertex animation module,
+    the net game's scores; harness.cpp: Play's slot step, the sphere hook's hit and normal. The
+    zone is checked by a model (from the asm) over 600 random steps per model; the train's moves
+    and wheels, the submarine's updates and exits by oracles. The test puts back the globals the
+    earlier tests read and unlinks its frames from the sector (several models per process).
+    Baselines: 0 of 37 in both orders; sw, route, rigid, rigid step 0 of 37; the car build could
+    not run (the game data on H: was not mounted).
+  - Mutations (mutations/mutate_7d.py, 831 after dropping 27 equivalent): the first run caught 742
+    of 858; 89 survivors needed new cases (see the file's docstring). All 831 caught.
+  - Build: 182 files clean (MSVC). Tier 1: 619 errors in 109 files, 248 stubs. ret_audit --src: 45.
+  - Ghidra: 133 names (names/moving_actors.txt; the submarine's prototypes take void *this, no
+    struct), 133 decompiles exported; 154 functions in ported.txt. Stats: 6,792 of 12,286
+    functions by hand (63.7 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

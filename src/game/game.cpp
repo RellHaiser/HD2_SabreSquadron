@@ -709,7 +709,7 @@ bool EnableSpawnZone(const char *zoneName, int side)   // 0x0069f320
         if (actor->GetType() != ACTOR_MP_ZONE)
             continue;
         C_MPZone *zone = static_cast<C_MPZone *>(actor);
-        if (zone->GetSide() != -1 || !zone->GetFrame())
+        if (zone->GetObjective() != -1 || !zone->GetFrame())
             continue;
         if (_stricmp(zone->GetFrame()->GetShortName(), zoneName) == 0) {
             zone->EnableForSide(side);

@@ -373,9 +373,6 @@ struct action { uint8_t _unknown[1]; };
 struct u_long { uint8_t _unknown[1]; };
 struct u_short { uint8_t _unknown[1]; };
 struct va_list { uint8_t _unknown[1]; };
-struct x { uint8_t _unknown[1]; };
-struct y { uint8_t _unknown[1]; };
-struct z { uint8_t _unknown[1]; };
 
 #pragma pack(push, 1)
 struct C_str_rep { int refCount; unsigned int length; char chars[1]; };
