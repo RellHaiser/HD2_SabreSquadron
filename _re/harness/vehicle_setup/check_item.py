@@ -5,8 +5,8 @@
 Per model: an items line with every check of ItemTest met (part 6a), an animation line with every
 check of AnimationTest met (part 6b), a simple line with every check of SimpleActorsTest met
 (part 7a) and an objective line with every check of ObjectiveActorsTest met (part 7b) a world line with every
-check of WorldActorsTest met (part 7c) and a moving line with every check of MovingActorsTest met
-(part 7d). Prints
+check of WorldActorsTest met (part 7c), a moving line with every check of MovingActorsTest met
+(part 7d) and a seat line with every check of SeatActorsTest met (part 7e). Prints
 "N models, M with differences" (mutfast.py reads it).
 """
 import glob
@@ -28,6 +28,8 @@ LINES = {
     "moving": ("train trainProps trainStart trainPath trainMove trainWheels trainSounds trainSave sub subProps "
                "subStart subSeats subExit subMove subSounds subSave zone zoneProps zoneStart zoneCapture zoneState "
                "zoneSpawn").split(),
+    "seat": ("fish fishProps fishStart fishTick fishUpdate fishSave fishStop bike bikeProps bikeStart bikeDrive "
+             "bikeUpdate bikeSave bikeStop sw swStart swState swNet swSeats swExit swHit swTick swSave swBox").split(),
 }
 
 

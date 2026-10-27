@@ -222,10 +222,6 @@ f_005ac500.cpp:111:55: request for member '_8_4_' in '"\012ControlsEx - "', whic
     *(uint32_t *)(pcVar9 + 7) = "\nControlsEx - "._8_4_;
 f_005ac500.cpp:112:57: request for member '_12_2_' in '"\012ControlsEx - "', which is of non-class type 'const char [15]'
     *(uint16_t *)(pcVar9 + 0xb) = "\nControlsEx - "._12_2_;
-f_005d87c0.cpp:495:35: too few arguments to function
-    (*pIVar2->vtable->Duplicate)();
-f_005db7b0.cpp:1329:37: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    fStack_d8 = (float)(**(code **)(*DAT_008aedd8 + 0x74))(DAT_008aedd8,puVar4,0,0,0);
 f_005e3a20.cpp:110:22: call of overloaded 'S_matrix__SetDir3(tier1::S_matrix*, tier1::S_vector*)' is ambiguous
     S_matrix__SetDir3(&local_50,&local_60);
 f_005e3a20.cpp:519:32: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
@@ -296,10 +292,6 @@ f_005f9700.cpp:314:45: invalid operands of types 'tier1::C_str_rep*' and 'float'
     local_a4.rep = (C_str_rep *)(local_a4.rep * fStack_94);
 f_005ff150.cpp:1418:57: expected primary-expression before ')' token
     pfStack_b0 = gh_bitcast<float*>(ABS((fVar2 * fVar2 +)
-f_00602b00.cpp:638:19: base operand of '->' is not a pointer
-    DAT_0097d084->m_0c4 = 0;
-f_00602b00.cpp:639:19: base operand of '->' is not a pointer
-    DAT_0097d084->m_0c8 = 1;
 f_00606280.cpp:1020:63: base operand of '->' is not a pointer
     (&g_particlesModule,*(int *)(*(int *)(local_e4->m_1f4 + iVar20 * 4) + 4));
 f_00606280.cpp:1036:11: base operand of '->' is not a pointer

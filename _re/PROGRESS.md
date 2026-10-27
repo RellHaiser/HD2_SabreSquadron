@@ -4945,6 +4945,75 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     struct), 133 decompiles exported; 154 functions in ported.txt. Stats: 6,792 of 12,286
     functions by hand (63.7 % by size).
 
+  PART 7e DONE (2026-10-27): the static weapon, the bike and the fish (src/game/static_weapon.*,
+  bike.*, fish.*, new).
+  - C_StaticWeapon ("StaticWeapon", type 21, 0x300 bytes, 0x00602a10..0x00606250): the seats
+    "SEAT00".. (to the first missing; flags from "SEAT<digits>", texts from "name<n>", "NO3RD"), one
+    seat weapon (the C_SeatWeapon at +0x160, Init on the frame for seat 0; the seats' weapon calls
+    all go to it whatever the seat), its text the actor's name. States 0 hidden, 1 usable (the box in
+    the world), 2 destroyed (every visual takes the mesh and turn of the same name in the model
+    "C<model file>"; the occupants out meanwhile, then killed by SetState: an explosion's hit at the
+    weapon), 3 off (the meshes from the model file again; quirk kept: that model is never released).
+    The box (COLLISION_TYPE_PLACE, flags 0x40) from the weapon's own hierarchy box (0x00602b20 /
+    0x00602bc0: object visuals not flagged VISFLAGS_1000, through every frame's local matrix);
+    StartMission scales its radius by the frame's largest scale, UpdateVolume does not (quirk kept);
+    Fix: an empty box's centre 0. The way out: the walking point at the weapon, else half a metre
+    behind; ExitSeat goes there (no way out: a metre behind), facing along the weapon. Hits go to
+    the gunner (seat 0): a bullet or melee hit missing his zones alarms him along the weapon's
+    direction. Network games: messages 2 bits (0 the store, 1 the state, 2 bits); the server refills
+    the store's ammunition every 30 s (a launcher's 15 s) while it holds no more than at the start
+    (not in co-op; the clients run it too, as the car's), sends the rounds to a new gunner; the seat
+    weapon's shot / reload / rounds / ammo messages handled as the car's. Saved game (no base
+    chunk): 1000 the state, 0x3EA the store, 0x3E9 the seat weapon. Fixes: a weapon without seats
+    (Update reads through null), without its item (StartMission's count, Tick's refill), a seat out
+    of range (ApplySeatControls), a seat dummy without a parent (GetSeatCamera). 0x006056d0 (the
+    way out as ExitSeat computes it) is not referenced: left to tier 1.
+  - C_Bike ("Bike", type 31, 0x1D0 bytes, 0x005d8760..0x005db780): Drive (HUMAN_Bike) from the road
+    point nearest the bike (5 m) along the path found to the target (quirk kept: the script's speed
+    is not used); the rider (its frame) mounts once: a copy of its model ("<name>_ridedupl") on the
+    frame "ram" with "bike_legs" (stage 0) and "bike_ride" (stage 1), its human suspended;
+    CHECKPOINT_NONE gets it off where the bike is. Update: the next point reached (its radius, at
+    least 3 m) is dropped, the last one advances the rider's script, else the speed rises 1 m/s a
+    second to the top speed (km/h x 0.28); the bike turns towards the point (not within the angle
+    its radius makes), "ram" lags and follows the handlebars ("riditka"), the rider steers (±25°,
+    frames 0..50); it moves along the handlebars (level), its front wheel ("kolo1") 0.35 m over the
+    ground below (falling 2 m/s without), the wheels (3.33 rad a m), cranks (half) and the rider's
+    pedalling turn. The box (COLLISION_TYPE_PIKE) moves along: quirk kept, its centre the frame's
+    bound's in the frame's space. ReadProperties: quirk kept, the top speed read is put back (7
+    km/h). Saved game: chunk 2000 (5000 the rider's name, 6000 the path, 3000 the speed, 4000 the
+    pedals) or an empty 1000. Fix: ridden without a rider, SaveGame writes an empty name.
+    StopMission asks for the shadow twice and releases it once (quirk kept).
+  - C_Fish ("Fish", type 32, 0xE0 bytes, 0x005db780..0x005de650): a school of copies of the "ryba"
+    model's "ryba" frame around the actor's frame, only while the camera is within the radius + 15
+    m (the frame hidden otherwise). Tick: speeding up (0.007 m/s a ms) to the top speed (the
+    places spread out), slowing to a tenth, a pause of 3..5 s, a new direction (±135° about y, ±27°
+    up / down; the places draw in, a fifth swap sides); the direction levels out; a slide along what
+    the radius' sphere meets turns it; the velocity for Update. Update: the frame moves, turns
+    towards the move; each fish's place towards its target (0.15 m/s), it faces the move and sways
+    (sin / cos of the time), fades within a metre of the camera. Saved game: chunk 9999 (1000..6000);
+    quirk kept: a speed chunk too short leaves the first four bytes of the outer header. Fix: a
+    model without "ryba" makes no fish.
+  - Shared: C_SeatWeapon's message sender takes the owner as C_Actor * (the static weapon's too);
+    world.h's partials replaced by the headers; C_Script befriends C_Bike (Advance).
+  - Harness (build_item.bat links static_weapon.cpp, bike.cpp and fish.cpp; seat_actors_test.inc
+    with seat_fish.inc, seat_bike.inc, seat_static_weapon.inc after MovingActorsTest; check_item.py
+    reads "seat:", 24 checks): fakes for the model cache's Get ("ryba"), the animation cache, the
+    shadows, the hit zones, NotifyFrameHit, C_Script::Advance, the actor's items saved, FindPath,
+    FindActorPoint, the sliding sphere, AngleBetween2D, the model slots 0x84 / 0x9C / 0xB0, a
+    visual's local bound (slot 0x90); stub human: Suspend, NotifyShotAt; stub pending.h:
+    CreateShadow / GetShadow; stub items_module.h: SaveActorItems / LoadActorItems. The fish's and
+    the bike's movement against oracles from the asm over random runs per model; the static
+    weapon's seats, exits, states, messages, refills, saves and box corners.
+    Baselines: 0 of 37 in both orders; the other five builds 0 of 37 each.
+  - Mutations (mutations/mutate_7e.py, 844 after dropping 112 equivalent and
+    10 that did not compile): the first run caught 797 of 966; 47 survivors
+    needed new cases, a full rerun one more (see the file's docstring). All 844
+    caught.
+  - Build: 185 files clean (MSVC). Tier 1: 615 errors in 106 files, 245 stubs. ret_audit --src: 45.
+  - Ghidra: 108 names (names/static_weapon_bike_fish.txt), 110 decompiles exported; 116 functions
+    in ported.txt (7 STL helpers absorbed). Stats: 6,908 of 12,286 functions by hand (64.6 % by
+    size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

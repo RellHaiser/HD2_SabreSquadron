@@ -107,11 +107,11 @@ public:
     void SetRefillTime(uint32_t time);
     int GetRefillBelow() const;
     void SetRefillBelow(int rounds);
-    // Network games: what sends the weapon's messages (the car's: SeatWeaponSendMessage) and its
-    // context (the car).
+    // Network games: what sends the weapon's messages (SeatWeaponSendMessage) and its context
+    // (the car, the static weapon).
     using T_MessageSender = bool(__fastcall *)(int kind, const S_vector4 *pos, const S_vector4 *dir, int barrel,
-                                               int seat, C_Car *car);
-    void SetMessageSender(T_MessageSender sender, C_Car *context);
+                                               int seat, C_Actor *owner);
+    void SetMessageSender(T_MessageSender sender, C_Actor *context);
 
 private:
     // The value of `key` in the frame's user properties ("<key><number>", the key matched in any
@@ -200,7 +200,7 @@ private:
     float m_tiltRate = 0.3926991f;                      // +0x164 "vs"
     bool m_launcher = false;                            // +0x168 the item fires projectiles (ICK_PROJECTILE_WEAPON)
     T_MessageSender m_sender = nullptr;                 // +0x16C network games
-    C_Car *m_senderContext = nullptr;                   // +0x170
+    C_Actor *m_senderContext = nullptr;                 // +0x170
     uint32_t m_refillTime = 0;                          // +0x174 network games: the mission time of the last ammo the server added
     int m_refillBelow = 0;                              // +0x178 how few rounds in the store let it add more
 };
@@ -209,7 +209,7 @@ private:
 // RET 0x10): kind 0 a shot (C_SeatWeaponShotMessage: `pos`, `dir`, `barrel`, `seat`), kind 1 a
 // reload (C_SeatWeaponReloadMessage: `seat`); other kinds send nothing. Always true.
 bool __fastcall SeatWeaponSendMessage(int kind, const S_vector4 *pos, const S_vector4 *dir, int barrel, int seat,
-                                      C_Car *car);      // 0x004c1230
+                                      C_Actor *car);    // 0x004c1230
 // The factory of the messages of the car's net object (NetMessageFactory, the context the car):
 // the seat weapons' kinds 0..3 (`write`: writes their number, 4, in 3 bits and makes none).
 C_NetObjectMessage *__fastcall MakeSeatWeaponMessage(void *car, C_BitStream *stream, bool write);   // 0x004c14b0

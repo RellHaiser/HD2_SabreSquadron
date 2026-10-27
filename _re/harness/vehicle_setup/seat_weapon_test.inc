@@ -244,10 +244,10 @@ struct S_SwSent {
     bool hasPos, hasDir;
     S_vector4 pos, dir;
     int barrel, seat;
-    C_Car *car;
+    C_Actor *car;
 };
 std::vector<S_SwSent> g_swSent;
-bool __fastcall SwSender(int kind, const S_vector4 *pos, const S_vector4 *dir, int barrel, int seat, C_Car *car)
+bool __fastcall SwSender(int kind, const S_vector4 *pos, const S_vector4 *dir, int barrel, int seat, C_Actor *car)
 {
     S_SwSent sent = {kind, pos != nullptr, dir != nullptr, {}, {}, barrel, seat, car};
     if (pos)

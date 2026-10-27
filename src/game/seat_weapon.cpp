@@ -1148,7 +1148,7 @@ void C_SeatWeapon::SetRefillBelow(int rounds)
     m_refillBelow = rounds;
 }
 
-void C_SeatWeapon::SetMessageSender(T_MessageSender sender, C_Car *context)
+void C_SeatWeapon::SetMessageSender(T_MessageSender sender, C_Actor *context)
 {
     m_sender = sender;
     m_senderContext = context;
@@ -1217,7 +1217,7 @@ bool C_SeatWeapon::LoadGame(C_chunk &chunk)             // 0x004c68b0
 // --- the network messages ---------------------------------------------------------------------------
 
 bool __fastcall SeatWeaponSendMessage(int kind, const S_vector4 *pos, const S_vector4 *dir, int barrel, int seat,
-                                      C_Car *car)       // 0x004c1230
+                                      C_Actor *car)     // 0x004c1230
 {
     C_NetObjectMessage *message;
     if (kind == SEAT_WEAPON_MSG_SHOT) {

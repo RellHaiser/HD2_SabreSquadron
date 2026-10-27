@@ -7008,7 +7008,7 @@ struct S_FakeWeapon {
     I3D_frame *frame = nullptr, *seatFrame = nullptr;
     int seat = -1, inits = 0, stops = 0, restarts = 0;
     C_SeatWeapon::T_MessageSender sender = nullptr;
-    C_Car *senderContext = nullptr;
+    C_Actor *senderContext = nullptr;
     // (Part 2f-i: the network messages.)
     struct S_Shot {
         S_vector4 pos, dir;
@@ -7173,12 +7173,12 @@ void C_SeatWeapon::SetRefillBelow(int rounds)
 {
     Fake(this).refillBelow = rounds;
 }
-void C_SeatWeapon::SetMessageSender(T_MessageSender sender, C_Car *context)
+void C_SeatWeapon::SetMessageSender(T_MessageSender sender, C_Actor *context)
 {
     Fake(this).sender = sender;
     Fake(this).senderContext = context;
 }
-bool __fastcall SeatWeaponSendMessage(int, const S_vector4 *, const S_vector4 *, int, int, C_Car *)
+bool __fastcall SeatWeaponSendMessage(int, const S_vector4 *, const S_vector4 *, int, int, C_Actor *)
 {
     return true;
 }
@@ -14790,6 +14790,7 @@ void PartsHitTest(const char *path)
 #include "objective_actors_test.inc"
 #include "world_actors_test.inc"
 #include "moving_actors_test.inc"
+#include "seat_actors_test.inc"
 #endif
 
 int main(int argc, char **argv)
@@ -14819,6 +14820,7 @@ int main(int argc, char **argv)
         ObjectiveActorsTest();
         WorldActorsTest();
         MovingActorsTest();
+        SeatActorsTest();
     }
     return 0;
 #endif

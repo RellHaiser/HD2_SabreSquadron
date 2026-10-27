@@ -12,12 +12,14 @@
 #include "game/actor.h"
 #include "game/actors_module.h"
 #include "game/animation_actor.h"
+#include "game/bike.h"
 #include "game/car.h"
 #include "game/checkpoints.h"
 #include "game/clock.h"
 #include "game/debris.h"
 #include "game/document_place.h"
 #include "game/explosive_place.h"
+#include "game/fish.h"
 #include "game/fowl_generator.h"
 #include "game/item_actor.h"
 #include "game/ladder.h"
@@ -35,6 +37,7 @@
 #include "game/rigid_body.h"
 #include "game/sound_module.h"
 #include "game/spawn_point.h"
+#include "game/static_weapon.h"
 #include "game/submarine.h"
 #include "game/train.h"
 #include "game/switch_actor.h"
@@ -52,10 +55,8 @@ class C_Item;
 
 // Humans: see game/human.h (controllers: game/human_controller.h, body: game/human_body.h).
 
-class C_Bike : public C_Actor {                         // "Bike", vtable 0x00812440
-public:
-    void Drive(int roadCheckpoint, float speed, I3D_frame *rider);   // 0x005d8f60
-};
+// C_Bike ("Bike", vtable 0x00812440, 0x1d0 bytes) is defined in game/bike.h and C_Fish ("Fish", vtable
+// 0x00812538, 0xe0 bytes) in game/fish.h, included above.
 
 // C_MeleeTrackerAI (C_MeleeTracker +0x534, the meleeTracker's AI controller) is in game/melee_tracker_ai.h.
 
@@ -115,11 +116,8 @@ public:
 };
 // C_Switch ("Switch", vtable 0x008139d0, 0x150 bytes) is defined in game/switch_actor.h and C_PhotoPlace
 // ("Photo place", vtable 0x00813400, 0x140 bytes) in game/photo_place.h, included above.
-class C_StaticWeapon : public C_Actor {
-public:
-    void SetState(int state);                           // 0x006059b0
-    int GetState() const;                               // +0x2F0
-};
+// C_StaticWeapon ("StaticWeapon", vtable 0x00813130, 0x300 bytes) is defined in game/static_weapon.h, included
+// above.
 // C_ExplosivePlace ("Explosive place", vtable 0x008134f0, 0x180 bytes) is defined in game/explosive_place.h,
 // included above.
 // C_DocumentPlace ("Document place", vtable 0x008135e0, 0x150 bytes) is defined in game/document_place.h, included
