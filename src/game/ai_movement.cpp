@@ -17,6 +17,7 @@
 #include "game/controller_messages.h"
 #include "game/human.h"
 #include "game/human_internal.h"
+#include "game/ladder.h"
 #include "game/pending.h"
 #include "game/world.h"
 #include "ls3d/i3d.h"

@@ -26,6 +26,7 @@
 #include "game/item_defs.h"
 #include "game/items.h"
 #include "game/items_module.h"
+#include "game/ladder.h"
 #include "game/pending.h"
 #include "game/resource_cache.h"
 #include "game/sound_module.h"

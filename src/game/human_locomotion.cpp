@@ -31,6 +31,7 @@
 #include "game/human_body.h"
 #include "game/human_equipment.h"
 #include "game/human_internal.h"
+#include "game/ladder.h"
 #include "game/pending.h"
 #include "game/physics.h"
 #include "game/world.h"
@@ -1026,7 +1027,7 @@ void C_HumanLocomotion::SweepBody(S_MoveContacts &contacts, S_CollisionVolume **
             contacts.move = m_move;
             contacts.excludeTypes = TEST_TYPES;
             if ((std::fabs(m_move.x) <= 1e-8f && std::fabs(m_move.z) <= 1e-8f) || !localPlayer)
-                contacts.excludeTypes |= 0x4000;
+                contacts.excludeTypes |= COLLISION_TYPE_LADDER;
             if (!localPlayer)
                 contacts.excludeTypes |= 0x100;
             contacts.excludeFlags = m_owner->GetRole() != HUMAN_ROLE_PLAYER ? TEST_FLAGS_OTHERS : TEST_FLAGS;

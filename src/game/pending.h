@@ -545,27 +545,7 @@ inline bool CopyProtectionIntactBreath()
     return g_protectionTableA[g_protectionIndexBreathA] == g_protectionTableB[g_protectionIndexBreathB];
 }
 
-// C_Ladder (ACTOR_LADDER, not ported): the sound group of climbing it (+0x178; -1 none).
-int GetLadderSoundGroup(const class C_Actor *ladder);
-struct S_vector4;
-// C_Ladder's ends and the way a climber faces (+0xA0 top, +0xB0 bottom, +0xD0) and the humans
-// on it (a vector at +0x164).
-const S_vector4 &GetLadderTop(const class C_Actor *ladder);
-const S_vector4 &GetLadderBottom(const class C_Actor *ladder);
-const S_vector4 &GetLadderDir(const class C_Actor *ladder);
-void AddLadderClimber(class C_Actor *ladder, class C_Human *human);       // 0x005eb8c0
-// The humans on the ladder (the vector at +0x164).
-const std::vector<class C_Human *> &GetLadderClimbers(const class C_Actor *ladder);
-void RemoveLadderClimber(class C_Actor *ladder, class C_Human *human);    // 0x005eba70
-// ... and the sound group of its steps (+0x174; -1 none).
-int GetLadderStepSoundGroup(const class C_Actor *ladder);
-// Whether a human at `pos` facing `dir` moving at `velocity` (cm/s) can get on the ladder
-// (`lookingUp`: the view is not down).
-bool CanUseLadder(class C_Actor *ladder, const S_vector4 &pos, const S_vector4 &dir, const struct S_vector &velocity,
-                  bool lookingUp);                  // 0x005eb1d0
-// The byte at +0x180: getting off at the bottom steps 1.25 m back and 0.25 m down instead of
-// 0.15 m back (meaning not identified).
-bool GetLadderFlag180(const class C_Actor *ladder);
+// (C_Ladder and the accessors the human movement code uses on it: game/ladder.h.)
 
 // ---- the game's collaborators (C_game, game/game.h) -------------------------------
 // The campaign tree: game/campaign.h; the profile's objects (g_campaign, g_missionSquad,

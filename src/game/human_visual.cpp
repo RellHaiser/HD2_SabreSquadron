@@ -15,6 +15,7 @@
 #include "game/human_body.h"
 #include "game/human_equipment.h"
 #include "game/human_internal.h"
+#include "game/ladder.h"
 #include "game/particles.h"
 #include "game/pending.h"
 #include "game/sound_module.h"

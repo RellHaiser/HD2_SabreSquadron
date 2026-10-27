@@ -13,9 +13,10 @@ class C_Actor;
 
 // `volume` made a box (COLLISION_SHAPE_BOX of `type`) around `frame`'s hierarchy: the box in the
 // frame's space under its world matrix (scale included), whose inverse is kept in `invMatrix`; the
-// bounding sphere's radius scaled by the largest world scale. It is not added to the world.
+// bounding sphere's radius scaled by the largest world scale (`boxRadius`: the unscaled one). It is
+// not added to the world.
 inline void MakeFrameBoxVolume(S_CollisionVolume &volume, S_matrix &invMatrix, I3D_frame *frame, uint32_t type,
-                               C_Actor *actor)
+                               C_Actor *actor, float *boxRadius = nullptr)
 {
     I3D_bbox hierarchy;
     const I3D_bbox box = *I3DGetDriver()->GetHierarchyBBox(hierarchy, frame);
@@ -42,4 +43,6 @@ inline void MakeFrameBoxVolume(S_CollisionVolume &volume, S_matrix &invMatrix, I
     volume.center = center * frame->GetMatrix();
     volume.centerW = frame->GetMatrix().m[0][3];        // (a stale local in the original: this)
     volume.actor = actor;
+    if (boxRadius)
+        *boxRadius = radius;
 }

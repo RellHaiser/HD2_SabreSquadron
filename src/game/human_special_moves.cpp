@@ -22,6 +22,7 @@
 #include "game/human_body.h"
 #include "game/human_equipment.h"
 #include "game/human_internal.h"
+#include "game/ladder.h"
 #include "game/pending.h"
 #include "game/world.h"
 #include "ls3d/i3d.h"
