@@ -662,7 +662,7 @@ public:
 };
 
 // Projected texture (I3DVISUAL_PROJECTOR): bullet holes, blood and scorch marks. Slot
-// meanings inferred from the shot manager, which always calls SetMode(3), SetUnknownB4(1)
+// meanings inferred from the shot manager, which always calls SetBuffered(3), SetMode(1)
 // and SetOrthogonal(1).
 class I3D_projector_visual : public I3D_visual {
 public:
@@ -671,18 +671,18 @@ public:
     I3DMETHOD(void, SetTexture)(class IImage *image) = 0;     // 0x9C
     I3D_SLOT(A0);                                             // LS3DF: SetMaterial
     I3DMETHOD(void, SetOrthogonal)(int value) = 0;             // 0xA4
-    // Opacity of the projected texture (0..1; footprints fade with it).
-    I3DMETHOD(void, SetOpacity)(float opacity) = 0;           // 0xA8
+    // Intensity of the projected texture (at least 0; footprints fade with it).
+    I3DMETHOD(void, SetIntensity)(float opacity) = 0;           // 0xA8
     I3D_SLOT(AC);                                             // LS3DF: SetOpacity
     I3DMETHOD(void, SetColor)(const S_vector &color) = 0;     // 0xB0
-    I3DMETHOD(void, SetUnknownB4)(int value) = 0;             // 0xB4
-    I3DMETHOD(void, SetMode)(int mode) = 0;                   // 0xB8
+    I3DMETHOD(void, SetMode)(int value) = 0;             // 0xB4
+    I3DMETHOD(void, SetBuffered)(int mode) = 0;                   // 0xB8
     // Projects the texture onto the geometry under it again (footprints call it with 0, 0).
     I3DMETHOD(void, Reproject)(int unknown1, int unknown2) = 0;   // 0xBC
 
     // Set to 22 on footprints (meaning not identified).
-    void SetUnknown1E4(float value) { Field<float>(0x1E4) = value; }
-    float GetOpacity() const { return Field<float>(0x1E8); }
+    void SetRange(float value) { Field<float>(0x1E4) = value; }
+    float GetIntensity() const { return Field<float>(0x1E8); }
     // Full-light color of the decal (the shot manager scales it by the light at the decal).
     const S_vector &GetBaseColor() const { return Field<S_vector>(0x1F0); }
 };

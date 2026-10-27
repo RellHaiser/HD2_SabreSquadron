@@ -67,8 +67,8 @@ enum : uint16_t {
 };
 
 // Projector visual mode of decals (3) and of a flying blood drop (0); not identified.
-constexpr int PROJECTOR_MODE_DECAL = 3;
-constexpr int PROJECTOR_MODE_DROP = 0;
+constexpr int PROJECTOR_BUFFERED_DECAL = 3;
+constexpr int PROJECTOR_BUFFERED_DROP = 0;
 
 // Materials whose hit sound and effect a projectile plays when it passes through.
 bool HasProjectileHitEffect(int material)
@@ -1433,12 +1433,12 @@ void C_BloodPool::Init(const S_vector &pos, const S_vector &normal, IImage *text
     m_visual->SetPos(at);
     m_visual->SetScale(S_vector(0.1f, 0.1f, 0.1f));
     m_visual->SetDir(-normal, (RandFloat() - 0.5f) * TWO_PI);
-    m_visual->SetUnknownB4(1);
+    m_visual->SetMode(1);
     m_visual->LinkTo(nullptr, I3DLINK_KEEP_WORLD);
     I3D_sector *sector = GetScene()->GetSector(at);
     m_visual->LinkTo(sector, I3DLINK_KEEP_WORLD);
     m_visual->SetColor(BloodColor(m_visual, at, sector));
-    m_visual->SetMode(PROJECTOR_MODE_DECAL);
+    m_visual->SetBuffered(PROJECTOR_BUFFERED_DECAL);
     m_visual->Update();
     m_time = 0;
     m_size = 0.01f;
@@ -1458,7 +1458,7 @@ void C_BloodPool::Reuse(const S_vector &pos, const S_vector &normal, float maxSi
     I3D_sector *sector = GetScene()->GetSector(at);
     m_visual->LinkTo(sector, I3DLINK_KEEP_WORLD);
     m_visual->SetColor(BloodColor(m_visual, at, sector));
-    m_visual->SetMode(PROJECTOR_MODE_DECAL);
+    m_visual->SetBuffered(PROJECTOR_BUFFERED_DECAL);
     m_visual->Update();
     const float r = RandFloat() - 0.5f;
     m_time = 0;
@@ -1475,7 +1475,7 @@ void C_BloodPool::Tick(int timeDelta)
     if (m_time > 100) {
         m_size += 0.001f;
         m_visual->SetScale(S_vector(m_size, m_size, 0.1f));
-        m_visual->SetMode(PROJECTOR_MODE_DECAL);
+        m_visual->SetBuffered(PROJECTOR_BUFFERED_DECAL);
         m_visual->Update();
         m_time -= 100;
     }
@@ -1577,19 +1577,19 @@ void C_BloodDrop::Tick(int timeDelta)
 void C_BloodDrop::Land(const S_vector &pos, const S_vector &normal)
 {
     const S_vector at = normal * 0.02f + pos;
-    m_visual->SetMode(PROJECTOR_MODE_DROP);
+    m_visual->SetBuffered(PROJECTOR_BUFFERED_DROP);
     m_visual->SetPos(at);
     const float size = (RandFloat() - 0.5f) * 0.1f + 0.2f;
     m_visual->SetScale(S_vector(size, size, 0.05f));
     m_visual->SetWorldDir(-normal, (RandFloat() - 0.5f) * TWO_PI);
-    m_visual->SetUnknownB4(1);
+    m_visual->SetMode(1);
     m_visual->SetOn(true);
     m_visual->Update();
     m_visual->LinkTo(nullptr, I3DLINK_KEEP_WORLD);
     I3D_sector *sector = GetScene()->GetSector(at);
     m_visual->LinkTo(sector, I3DLINK_KEEP_WORLD);
     m_visual->SetColor(BloodColor(m_visual, at, sector));
-    m_visual->SetMode(PROJECTOR_MODE_DECAL);
+    m_visual->SetBuffered(PROJECTOR_BUFFERED_DECAL);
     m_visual->Update();
     m_landed = true;
 }
@@ -2172,8 +2172,8 @@ S_ShotDecal *C_ShotManager::AllocDecal(bool setOrthogonal)
     }
     auto *decal = new S_ShotDecal;
     decal->visual = static_cast<I3D_projector_visual *>(I3DGetDriver()->CreateVisual(I3DVISUAL_PROJECTOR));
-    decal->visual->SetMode(PROJECTOR_MODE_DECAL);
-    decal->visual->SetUnknownB4(1);
+    decal->visual->SetBuffered(PROJECTOR_BUFFERED_DECAL);
+    decal->visual->SetMode(1);
     if (setOrthogonal)
         decal->visual->SetOrthogonal(1);
     return decal;
