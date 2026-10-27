@@ -17,12 +17,16 @@
 #include "game/clock.h"
 #include "game/debris.h"
 #include "game/document_place.h"
+#include "game/explosive_place.h"
+#include "game/fowl_generator.h"
 #include "game/item_actor.h"
+#include "game/ladder.h"
 #include "game/melee_tracker.h"
 #include "game/melee_tracker_ai.h"
 #include "game/mine.h"
 #include "game/null_actor.h"
 #include "game/photo_place.h"
+#include "game/pike.h"
 #include "game/radio.h"
 #include "game/human.h"
 #include "game/human_body.h"
@@ -113,19 +117,8 @@ public:
     void SetState(int state);                           // 0x006059b0
     int GetState() const;                               // +0x2F0
 };
-class C_ExplosivePlace : public C_Actor {
-public:
-    void SetState(int state);                           // 0x0060d300
-    // 0: empty, 1: the explosive is placed (inferred from the interactions).
-    int GetState() const;                               // +0x94
-    // `human` places the explosive it carries.
-    bool Place(C_Human *human);                         // 0x0060d6f0
-    // The item type of the explosive (+0xA0).
-    int GetItemId() const;
-    bool Disarm(C_Human *human);                        // 0x0060d9f0
-    // Ms until the placed explosive goes off (+0xC8; the HUD's explosive timer).
-    int GetTimeLeft() const;
-};
+// C_ExplosivePlace ("Explosive place", vtable 0x008134f0, 0x180 bytes) is defined in game/explosive_place.h,
+// included above.
 // C_DocumentPlace ("Document place", vtable 0x008135e0, 0x150 bytes) is defined in game/document_place.h, included
 // above.
 class C_Submarine : public C_Actor {                    // "Submarine", vtable 0x00812650
@@ -139,11 +132,7 @@ public:
 };
 // The submarines of the mission (the list at 0x008ac9a8).
 const std::vector<C_Actor *> &GetSubmarines();          // 0x005de7b0
-class C_Pike : public C_Actor {
-public:
-    void SetState(int state);                           // 0x005b8ea0 (2 = up, 3 = down)
-    int GetState() const;                               // +0x184
-};
+// C_Pike ("Pike", vtable 0x00811c90, 0x210 bytes) is defined in game/pike.h, included above.
 class C_Junkers88 : public C_Actor {
 public:
     void SetState(int state);                           // 0x005f0a90
@@ -159,10 +148,8 @@ public:
     void SetTrack(bool on, const char *track);          // 0x0041d590
 };
 
-class C_FowlGenerator : public C_Actor {
-public:
-    void Start(bool on, int count);                     // 0x005bb140
-};
+// C_FowlGenerator ("FowlGenerator", vtable 0x00811d80, 0xd0 bytes) is defined in game/fowl_generator.h,
+// included above.
 
 // C_AnimationActor ("Animation", vtable 0x008119b8, 0xf0 bytes) is defined in game/animation_actor.h, included above.
 

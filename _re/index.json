@@ -45775,10 +45775,10 @@
 ]
 },
 "004797c0": {
-"name": "FUN_004797c0",
+"name": "C_Bird::C_Bird",
 "size": 530,
 "lines": 83,
-"chars": 3311,
+"chars": 3313,
 "callers": [
 "0047a7b0",
 "005ba8b0"
@@ -45798,13 +45798,12 @@
 "in_vtables": []
 },
 "004799e0": {
-"name": "FUN_004799e0",
+"name": "C_Bird::~C_Bird",
 "size": 650,
 "lines": 90,
-"chars": 3313,
+"chars": 3316,
 "callers": [
 "0047a700",
-"0047aa00",
 "0047aa10",
 "005bb290",
 "005bb3c0"
@@ -45874,10 +45873,10 @@
 "in_vtables": []
 },
 "0047a2e0": {
-"name": "FUN_0047a2e0",
+"name": "C_Bird::Update",
 "size": 16,
 "lines": 8,
-"chars": 115,
+"chars": 117,
 "callers": [
 "0047a700",
 "005bb3c0"
@@ -45892,10 +45891,10 @@
 "in_vtables": []
 },
 "0047a2f0": {
-"name": "FUN_0047a2f0",
+"name": "C_Bird::FlyAway",
 "size": 846,
 "lines": 118,
-"chars": 3274,
+"chars": 3277,
 "callers": [
 "005bb140"
 ],
@@ -46011,7 +46010,7 @@
 "name": "FUN_0047a700",
 "size": 138,
 "lines": 39,
-"chars": 1078,
+"chars": 1083,
 "callers": [
 "00487240"
 ],
@@ -46048,7 +46047,7 @@
 "name": "FUN_0047a7b0",
 "size": 572,
 "lines": 107,
-"chars": 3248,
+"chars": 3250,
 "callers": [
 "0047a790"
 ],
@@ -46097,13 +46096,12 @@
 "name": "thunk_FUN_0047aa10",
 "size": 5,
 "lines": 37,
-"chars": 1101,
+"chars": 1104,
 "callers": [
 "004863f0",
 "004888c0"
 ],
 "callees": [
-"004799e0",
 "007e559c"
 ],
 "imports": [],
@@ -46116,7 +46114,7 @@
 "name": "FUN_0047aa10",
 "size": 163,
 "lines": 37,
-"chars": 1095,
+"chars": 1098,
 "callers": [
 "0047aa00"
 ],
@@ -135675,10 +135673,10 @@
 ]
 },
 "005b88c0": {
-"name": "thunk_FUN_005b88d0",
+"name": "StaticInit_PikeCreatorThunk",
 "size": 5,
 "lines": 11,
-"chars": 237,
+"chars": 264,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -135696,10 +135694,10 @@
 ]
 },
 "005b88d0": {
-"name": "FUN_005b88d0",
+"name": "StaticInit_PikeCreator",
 "size": 23,
 "lines": 11,
-"chars": 231,
+"chars": 259,
 "callers": [
 "005b88c0"
 ],
@@ -135718,10 +135716,10 @@
 "in_vtables": []
 },
 "005b88f0": {
-"name": "FUN_005b88f0",
+"name": "C_PikeCreator::Create",
 "size": 92,
-"lines": 25,
-"chars": 509,
+"lines": 24,
+"chars": 519,
 "callers": [],
 "callees": [
 "005b8d00",
@@ -135739,10 +135737,10 @@
 ]
 },
 "005b8950": {
-"name": "FUN_005b8950",
+"name": "C_PikeCreator::GetName",
 "size": 6,
 "lines": 7,
-"chars": 69,
+"chars": 91,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -135759,10 +135757,10 @@
 ]
 },
 "005b8960": {
-"name": "FUN_005b8960",
+"name": "C_PikeCreator::Destroy",
 "size": 23,
 "lines": 13,
-"chars": 308,
+"chars": 357,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -135777,10 +135775,10 @@
 ]
 },
 "005b8980": {
-"name": "empty_function_5b8980",
+"name": "Hit",
 "size": 3,
 "lines": 7,
-"chars": 57,
+"chars": 66,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -135795,10 +135793,10 @@
 ]
 },
 "005b8990": {
-"name": "FUN_005b8990",
+"name": "RestartMission",
 "size": 23,
 "lines": 9,
-"chars": 154,
+"chars": 168,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -135813,10 +135811,10 @@
 ]
 },
 "005b89b0": {
-"name": "FUN_005b89b0",
+"name": "SaveGame",
 "size": 324,
-"lines": 62,
-"chars": 2022,
+"lines": 52,
+"chars": 1532,
 "callers": [],
 "callees": [
 "007e5392",
@@ -135834,10 +135832,10 @@
 ]
 },
 "005b8b00": {
-"name": "FUN_005b8b00",
+"name": "LoadGame",
 "size": 502,
-"lines": 92,
-"chars": 2991,
+"lines": 90,
+"chars": 2758,
 "callers": [],
 "callees": [
 "007e5392",
@@ -135856,12 +135854,13 @@
 ]
 },
 "005b8d00": {
-"name": "FUN_005b8d00",
+"name": "C_Pike",
 "size": 188,
 "lines": 38,
-"chars": 899,
+"chars": 901,
 "callers": [
-"005b88f0"
+"005b88f0",
+"005b8dd0"
 ],
 "callees": [
 "004374d0",
@@ -135876,10 +135875,10 @@
 "in_vtables": []
 },
 "005b8dc0": {
-"name": "empty_function_5b8dc0",
+"name": "Unknown20",
 "size": 3,
 "lines": 7,
-"chars": 102,
+"chars": 89,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -135894,12 +135893,13 @@
 ]
 },
 "005b8dd0": {
-"name": "FUN_005b8dd0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 193,
+"chars": 184,
 "callers": [],
 "callees": [
+"005b8d00",
 "005b8df0",
 "007e559c"
 ],
@@ -135915,10 +135915,10 @@
 ]
 },
 "005b8df0": {
-"name": "FUN_005b8df0",
+"name": "~C_Pike",
 "size": 11,
 "lines": 9,
-"chars": 166,
+"chars": 182,
 "callers": [
 "005b8dd0"
 ],
@@ -135934,10 +135934,10 @@
 "in_vtables": []
 },
 "005b8e00": {
-"name": "FUN_005b8e00",
+"name": "SetFrame",
 "size": 22,
-"lines": 14,
-"chars": 280,
+"lines": 13,
+"chars": 226,
 "callers": [],
 "callees": [
 "00610200"
@@ -135954,10 +135954,10 @@
 ]
 },
 "005b8e20": {
-"name": "FUN_005b8e20",
+"name": "CopyFrom",
 "size": 113,
 "lines": 25,
-"chars": 676,
+"chars": 696,
 "callers": [],
 "callees": [
 "006101f0"
@@ -135977,7 +135977,7 @@
 "name": "SetState",
 "size": 86,
 "lines": 23,
-"chars": 544,
+"chars": 458,
 "callers": [
 "00416e10",
 "005b9670"
@@ -135993,10 +135993,10 @@
 "in_vtables": []
 },
 "005b8f00": {
-"name": "FUN_005b8f00",
+"name": "Turn",
 "size": 1078,
-"lines": 177,
-"chars": 6287,
+"lines": 178,
+"chars": 6331,
 "callers": [
 "005b9340",
 "005b9470"
@@ -136033,10 +136033,10 @@
 "in_vtables": []
 },
 "005b9340": {
-"name": "FUN_005b9340",
+"name": "Tick",
 "size": 289,
 "lines": 45,
-"chars": 1099,
+"chars": 1100,
 "callers": [],
 "callees": [
 "005b8f00",
@@ -136058,10 +136058,10 @@
 ]
 },
 "005b9470": {
-"name": "FUN_005b9470",
+"name": "Update",
 "size": 508,
 "lines": 109,
-"chars": 2708,
+"chars": 2711,
 "callers": [],
 "callees": [
 "004336c0",
@@ -136085,10 +136085,10 @@
 ]
 },
 "005b9670": {
-"name": "FUN_005b9670",
+"name": "StartMission",
 "size": 310,
 "lines": 54,
-"chars": 1649,
+"chars": 1639,
 "callers": [],
 "callees": [
 "005b8ea0",
@@ -136111,10 +136111,10 @@
 ]
 },
 "005b97b0": {
-"name": "FUN_005b97b0",
+"name": "UpdateVolume",
 "size": 1033,
 "lines": 187,
-"chars": 6809,
+"chars": 6793,
 "callers": [
 "005b9340",
 "005b9470",
@@ -136145,10 +136145,10 @@
 "in_vtables": []
 },
 "005b9bc0": {
-"name": "FUN_005b9bc0",
+"name": "StopMission",
 "size": 181,
 "lines": 28,
-"chars": 941,
+"chars": 929,
 "callers": [],
 "callees": [
 "004336c0",
@@ -136170,10 +136170,10 @@
 ]
 },
 "005b9c80": {
-"name": "FUN_005b9c80",
+"name": "ReadProperties",
 "size": 488,
-"lines": 109,
-"chars": 3320,
+"lines": 108,
+"chars": 3123,
 "callers": [],
 "callees": [
 "007e5398",
@@ -136191,10 +136191,10 @@
 ]
 },
 "005b9e70": {
-"name": "FUN_005b9e70",
+"name": "SendState",
 "size": 74,
 "lines": 15,
-"chars": 349,
+"chars": 299,
 "callers": [
 "005b8ea0"
 ],
@@ -136215,10 +136215,10 @@
 "in_vtables": []
 },
 "005b9ec0": {
-"name": "FUN_005b9ec0",
+"name": "OnMessage",
 "size": 308,
 "lines": 54,
-"chars": 1385,
+"chars": 1381,
 "callers": [],
 "callees": [
 "004336c0",
@@ -136240,10 +136240,10 @@
 ]
 },
 "005ba000": {
-"name": "FUN_005ba000",
+"name": "WriteState",
 "size": 99,
 "lines": 18,
-"chars": 373,
+"chars": 366,
 "callers": [],
 "callees": [
 "0073d320",
@@ -136264,10 +136264,10 @@
 ]
 },
 "005ba070": {
-"name": "FUN_005ba070",
+"name": "ReadState",
 "size": 95,
 "lines": 22,
-"chars": 401,
+"chars": 397,
 "callers": [],
 "callees": [
 "0073d3d0",
@@ -136288,10 +136288,10 @@
 ]
 },
 "005ba0d0": {
-"name": "FUN_005ba0d0",
+"name": "StaticInit_5ba0d0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -136310,10 +136310,10 @@
 ]
 },
 "005ba100": {
-"name": "thunk_FUN_005ba110",
+"name": "StaticInit_FowlGeneratorCreatorThunk",
 "size": 5,
 "lines": 11,
-"chars": 237,
+"chars": 282,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -136331,10 +136331,10 @@
 ]
 },
 "005ba110": {
-"name": "FUN_005ba110",
+"name": "StaticInit_FowlGeneratorCreator",
 "size": 23,
 "lines": 11,
-"chars": 231,
+"chars": 277,
 "callers": [
 "005ba100"
 ],
@@ -136352,10 +136352,10 @@
 "in_vtables": []
 },
 "005ba130": {
-"name": "FUN_005ba130",
+"name": "C_FowlGeneratorCreator::Create",
 "size": 92,
-"lines": 25,
-"chars": 574,
+"lines": 24,
+"chars": 573,
 "callers": [],
 "callees": [
 "005ba4d0",
@@ -136373,10 +136373,10 @@
 ]
 },
 "005ba190": {
-"name": "FUN_005ba190",
+"name": "C_FowlGeneratorCreator::GetName",
 "size": 6,
 "lines": 7,
-"chars": 102,
+"chars": 121,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -136393,10 +136393,10 @@
 ]
 },
 "005ba1a0": {
-"name": "FUN_005ba1a0",
+"name": "C_FowlGeneratorCreator::Destroy",
 "size": 23,
 "lines": 13,
-"chars": 340,
+"chars": 376,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -136411,10 +136411,10 @@
 ]
 },
 "005ba1c0": {
-"name": "FUN_005ba1c0",
+"name": "RestartMission",
 "size": 23,
 "lines": 9,
-"chars": 172,
+"chars": 186,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -136429,10 +136429,10 @@
 ]
 },
 "005ba1e0": {
-"name": "FUN_005ba1e0",
+"name": "SaveGame",
 "size": 287,
-"lines": 54,
-"chars": 1729,
+"lines": 47,
+"chars": 1318,
 "callers": [],
 "callees": [
 "007e5392",
@@ -136450,10 +136450,10 @@
 ]
 },
 "005ba300": {
-"name": "FUN_005ba300",
+"name": "LoadGame",
 "size": 427,
-"lines": 96,
-"chars": 3125,
+"lines": 86,
+"chars": 2550,
 "callers": [],
 "callees": [
 "005bb140",
@@ -136473,10 +136473,10 @@
 ]
 },
 "005ba4b0": {
-"name": "FUN_005ba4b0",
+"name": "SetFrame",
 "size": 18,
 "lines": 10,
-"chars": 198,
+"chars": 184,
 "callers": [],
 "callees": [
 "00610200"
@@ -136493,12 +136493,13 @@
 ]
 },
 "005ba4d0": {
-"name": "FUN_005ba4d0",
+"name": "C_FowlGenerator",
 "size": 267,
 "lines": 81,
-"chars": 2133,
+"chars": 2153,
 "callers": [
-"005ba130"
+"005ba130",
+"005ba5e0"
 ],
 "callees": [
 "00610070",
@@ -136520,12 +136521,13 @@
 "in_vtables": []
 },
 "005ba5e0": {
-"name": "FUN_005ba5e0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 211,
+"lines": 12,
+"chars": 221,
 "callers": [],
 "callees": [
+"005ba4d0",
 "005ba600",
 "007e559c"
 ],
@@ -136541,10 +136543,10 @@
 ]
 },
 "005ba600": {
-"name": "FUN_005ba600",
+"name": "~C_FowlGenerator",
 "size": 88,
 "lines": 23,
-"chars": 576,
+"chars": 601,
 "callers": [
 "005ba5e0"
 ],
@@ -136561,10 +136563,10 @@
 "in_vtables": []
 },
 "005ba660": {
-"name": "thunk_FUN_006101f0",
+"name": "CopyFrom",
 "size": 5,
 "lines": 8,
-"chars": 161,
+"chars": 151,
 "callers": [],
 "callees": [
 "006101f0"
@@ -136581,10 +136583,10 @@
 ]
 },
 "005ba670": {
-"name": "FUN_005ba670",
+"name": "StartMission",
 "size": 489,
 "lines": 78,
-"chars": 2390,
+"chars": 2382,
 "callers": [],
 "callees": [
 "004336c0",
@@ -136614,10 +136616,10 @@
 ]
 },
 "005ba860": {
-"name": "FUN_005ba860",
+"name": "OnSoundHeard",
 "size": 70,
-"lines": 17,
-"chars": 524,
+"lines": 16,
+"chars": 464,
 "callers": [
 "005ba670"
 ],
@@ -136633,10 +136635,10 @@
 "in_vtables": []
 },
 "005ba8b0": {
-"name": "FUN_005ba8b0",
+"name": "CreateBirds",
 "size": 2152,
-"lines": 387,
-"chars": 13294,
+"lines": 386,
+"chars": 13207,
 "callers": [
 "005ba670",
 "005bb140"
@@ -136696,7 +136698,7 @@
 "name": "Start",
 "size": 311,
 "lines": 62,
-"chars": 1667,
+"chars": 1642,
 "callers": [
 "00416e10",
 "005ba300",
@@ -136723,10 +136725,10 @@
 "in_vtables": []
 },
 "005bb280": {
-"name": "FUN_005bb280",
+"name": "OnMessage",
 "size": 12,
 "lines": 8,
-"chars": 116,
+"chars": 131,
 "callers": [],
 "callees": [
 "005bb140"
@@ -136743,10 +136745,10 @@
 ]
 },
 "005bb290": {
-"name": "FUN_005bb290",
+"name": "StopMission",
 "size": 298,
 "lines": 66,
-"chars": 1996,
+"chars": 1988,
 "callers": [],
 "callees": [
 "004336c0",
@@ -136768,10 +136770,10 @@
 ]
 },
 "005bb3c0": {
-"name": "FUN_005bb3c0",
+"name": "Update",
 "size": 272,
 "lines": 47,
-"chars": 1323,
+"chars": 1328,
 "callers": [],
 "callees": [
 "004799e0",
@@ -136790,10 +136792,10 @@
 ]
 },
 "005bb4d0": {
-"name": "FUN_005bb4d0",
+"name": "Tick",
 "size": 781,
 "lines": 115,
-"chars": 3852,
+"chars": 3842,
 "callers": [],
 "callees": [
 "00404260",
@@ -136819,10 +136821,10 @@
 ]
 },
 "005bb7e0": {
-"name": "FUN_005bb7e0",
+"name": "ReadProperties",
 "size": 845,
-"lines": 140,
-"chars": 5017,
+"lines": 137,
+"chars": 4070,
 "callers": [],
 "callees": [
 "00405180",
@@ -136861,10 +136863,10 @@
 "in_vtables": []
 },
 "005bbb70": {
-"name": "FUN_005bbb70",
+"name": "InsertBirds",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 119,
+"chars": 3649,
 "callers": [
 "005ba670",
 "005ba8b0"
@@ -136880,10 +136882,10 @@
 "in_vtables": []
 },
 "005bbd80": {
-"name": "FUN_005bbd80",
+"name": "StaticInit_5bbd80",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -150490,10 +150492,10 @@
 ]
 },
 "005ea300": {
-"name": "thunk_FUN_005ea310",
+"name": "StaticInit_LadderCreatorThunk",
 "size": 5,
 "lines": 11,
-"chars": 234,
+"chars": 265,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -150511,10 +150513,10 @@
 ]
 },
 "005ea310": {
-"name": "FUN_005ea310",
+"name": "StaticInit_LadderCreator",
 "size": 23,
 "lines": 11,
-"chars": 228,
+"chars": 260,
 "callers": [
 "005ea300"
 ],
@@ -150533,10 +150535,10 @@
 "in_vtables": []
 },
 "005ea330": {
-"name": "FUN_005ea330",
+"name": "C_LadderCreator::Create",
 "size": 92,
-"lines": 25,
-"chars": 513,
+"lines": 24,
+"chars": 527,
 "callers": [],
 "callees": [
 "005ea3d0",
@@ -150554,10 +150556,10 @@
 ]
 },
 "005ea390": {
-"name": "FUN_005ea390",
+"name": "C_LadderCreator::FreeOnThrow",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 118,
 "callers": [
 "008002c0"
 ],
@@ -150571,10 +150573,10 @@
 "in_vtables": []
 },
 "005ea3a0": {
-"name": "FUN_005ea3a0",
+"name": "C_LadderCreator::GetName",
 "size": 6,
 "lines": 7,
-"chars": 68,
+"chars": 97,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -150591,10 +150593,10 @@
 ]
 },
 "005ea3b0": {
-"name": "FUN_005ea3b0",
+"name": "C_LadderCreator::Destroy",
 "size": 23,
 "lines": 13,
-"chars": 308,
+"chars": 359,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -150609,12 +150611,13 @@
 ]
 },
 "005ea3d0": {
-"name": "FUN_005ea3d0",
+"name": "C_Ladder",
 "size": 240,
 "lines": 66,
-"chars": 1874,
+"chars": 1880,
 "callers": [
-"005ea330"
+"005ea330",
+"005ea570"
 ],
 "callees": [
 "00610070",
@@ -150631,10 +150634,10 @@
 "in_vtables": []
 },
 "005ea4c0": {
-"name": "thunk_FUN_006101f0",
+"name": "CopyFrom",
 "size": 5,
 "lines": 8,
-"chars": 147,
+"chars": 137,
 "callers": [],
 "callees": [
 "006101f0"
@@ -150651,10 +150654,10 @@
 ]
 },
 "005ea4d0": {
-"name": "FUN_005ea4d0",
+"name": "RestartMission",
 "size": 45,
 "lines": 12,
-"chars": 282,
+"chars": 296,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -150669,10 +150672,10 @@
 ]
 },
 "005ea500": {
-"name": "FUN_005ea500",
+"name": "SaveGame",
 "size": 5,
 "lines": 7,
-"chars": 87,
+"chars": 95,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -150687,10 +150690,10 @@
 ]
 },
 "005ea510": {
-"name": "FUN_005ea510",
+"name": "LoadGame",
 "size": 5,
 "lines": 7,
-"chars": 87,
+"chars": 95,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -150705,10 +150708,10 @@
 ]
 },
 "005ea520": {
-"name": "empty_function_5ea520",
+"name": "Update",
 "size": 3,
 "lines": 7,
-"chars": 102,
+"chars": 87,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -150723,10 +150726,10 @@
 ]
 },
 "005ea530": {
-"name": "empty_function_5ea530",
+"name": "Tick",
 "size": 3,
 "lines": 7,
-"chars": 74,
+"chars": 85,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -150741,10 +150744,10 @@
 ]
 },
 "005ea540": {
-"name": "empty_function_5ea540",
+"name": "OnMessage",
 "size": 3,
 "lines": 7,
-"chars": 57,
+"chars": 93,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -150759,10 +150762,10 @@
 ]
 },
 "005ea550": {
-"name": "empty_function_5ea550",
+"name": "Unknown20",
 "size": 3,
 "lines": 7,
-"chars": 102,
+"chars": 93,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -150777,10 +150780,10 @@
 ]
 },
 "005ea560": {
-"name": "FUN_005ea560",
+"name": "GetMaterialId",
 "size": 9,
 "lines": 7,
-"chars": 125,
+"chars": 128,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -150795,12 +150798,13 @@
 ]
 },
 "005ea570": {
-"name": "FUN_005ea570",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 197,
+"chars": 192,
 "callers": [],
 "callees": [
+"005ea3d0",
 "005ea590",
 "007e559c"
 ],
@@ -150816,10 +150820,10 @@
 ]
 },
 "005ea590": {
-"name": "FUN_005ea590",
+"name": "~C_Ladder",
 "size": 52,
 "lines": 16,
-"chars": 373,
+"chars": 391,
 "callers": [
 "005ea570"
 ],
@@ -150836,10 +150840,10 @@
 "in_vtables": []
 },
 "005ea5d0": {
-"name": "FUN_005ea5d0",
+"name": "SetFrame",
 "size": 1859,
-"lines": 362,
-"chars": 12977,
+"lines": 373,
+"chars": 12768,
 "callers": [],
 "callees": [
 "004050e0",
@@ -150885,10 +150889,10 @@
 ]
 },
 "005ead20": {
-"name": "FUN_005ead20",
+"name": "StartMission",
 "size": 1013,
 "lines": 182,
-"chars": 6870,
+"chars": 6862,
 "callers": [],
 "callees": [
 "00610240",
@@ -150919,10 +150923,10 @@
 ]
 },
 "005eb120": {
-"name": "FUN_005eb120",
+"name": "StopMission",
 "size": 173,
 "lines": 26,
-"chars": 891,
+"chars": 879,
 "callers": [],
 "callees": [
 "00610510",
@@ -150943,10 +150947,10 @@
 ]
 },
 "005eb1d0": {
-"name": "FUN_005eb1d0",
+"name": "CanUse",
 "size": 1773,
-"lines": 223,
-"chars": 7382,
+"lines": 205,
+"chars": 6003,
 "callers": [
 "00788ca0"
 ],
@@ -150972,10 +150976,10 @@
 "in_vtables": []
 },
 "005eb8c0": {
-"name": "FUN_005eb8c0",
+"name": "AddClimber",
 "size": 430,
 "lines": 72,
-"chars": 2313,
+"chars": 2062,
 "callers": [
 "0074b950"
 ],
@@ -150994,10 +150998,10 @@
 "in_vtables": []
 },
 "005eba70": {
-"name": "FUN_005eba70",
+"name": "RemoveClimber",
 "size": 127,
-"lines": 33,
-"chars": 939,
+"lines": 32,
+"chars": 786,
 "callers": [
 "0074d970",
 "00768690"
@@ -151010,10 +151014,10 @@
 "in_vtables": []
 },
 "005ebaf0": {
-"name": "FUN_005ebaf0",
+"name": "WriteProperties",
 "size": 209,
-"lines": 48,
-"chars": 1626,
+"lines": 37,
+"chars": 1076,
 "callers": [],
 "callees": [
 "007e5392"
@@ -151030,10 +151034,10 @@
 ]
 },
 "005ebbd0": {
-"name": "FUN_005ebbd0",
+"name": "ReadProperties",
 "size": 521,
-"lines": 113,
-"chars": 3749,
+"lines": 111,
+"chars": 3408,
 "callers": [],
 "callees": [
 "007e5398",
@@ -162607,10 +162611,10 @@
 ]
 },
 "0060c170": {
-"name": "thunk_FUN_0060c180",
+"name": "StaticInit_ExplosivePlaceCreatorThunk",
 "size": 5,
 "lines": 11,
-"chars": 237,
+"chars": 284,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -162628,10 +162632,10 @@
 ]
 },
 "0060c180": {
-"name": "FUN_0060c180",
+"name": "StaticInit_ExplosivePlaceCreator",
 "size": 23,
 "lines": 11,
-"chars": 231,
+"chars": 279,
 "callers": [
 "0060c170"
 ],
@@ -162649,10 +162653,10 @@
 "in_vtables": []
 },
 "0060c1a0": {
-"name": "FUN_0060c1a0",
+"name": "C_ExplosivePlaceCreator::Create",
 "size": 92,
-"lines": 25,
-"chars": 590,
+"lines": 24,
+"chars": 591,
 "callers": [],
 "callees": [
 "0060c230",
@@ -162670,10 +162674,10 @@
 ]
 },
 "0060c200": {
-"name": "FUN_0060c200",
+"name": "C_ExplosivePlaceCreator::GetName",
 "size": 6,
 "lines": 7,
-"chars": 116,
+"chars": 136,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -162690,10 +162694,10 @@
 ]
 },
 "0060c210": {
-"name": "FUN_0060c210",
+"name": "C_ExplosivePlaceCreator::Destroy",
 "size": 23,
 "lines": 13,
-"chars": 352,
+"chars": 389,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -162708,12 +162712,13 @@
 ]
 },
 "0060c230": {
-"name": "FUN_0060c230",
+"name": "C_ExplosivePlace",
 "size": 143,
 "lines": 32,
-"chars": 831,
+"chars": 853,
 "callers": [
-"0060c1a0"
+"0060c1a0",
+"0060c2c0"
 ],
 "callees": [
 "00610070"
@@ -162727,12 +162732,13 @@
 "in_vtables": []
 },
 "0060c2c0": {
-"name": "FUN_0060c2c0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 213,
+"lines": 12,
+"chars": 225,
 "callers": [],
 "callees": [
+"0060c230",
 "0060c2e0",
 "007e559c"
 ],
@@ -162748,10 +162754,10 @@
 ]
 },
 "0060c2e0": {
-"name": "FUN_0060c2e0",
+"name": "~C_ExplosivePlace",
 "size": 11,
 "lines": 9,
-"chars": 196,
+"chars": 222,
 "callers": [
 "0060c2c0"
 ],
@@ -162767,10 +162773,10 @@
 "in_vtables": []
 },
 "0060c2f0": {
-"name": "thunk_FUN_00610200",
+"name": "SetFrame",
 "size": 5,
 "lines": 10,
-"chars": 196,
+"chars": 186,
 "callers": [],
 "callees": [
 "00610200"
@@ -162787,10 +162793,10 @@
 ]
 },
 "0060c300": {
-"name": "FUN_0060c300",
+"name": "CopyFrom",
 "size": 43,
 "lines": 10,
-"chars": 253,
+"chars": 247,
 "callers": [],
 "callees": [
 "006101f0"
@@ -162807,10 +162813,10 @@
 ]
 },
 "0060c330": {
-"name": "FUN_0060c330",
+"name": "Tick",
 "size": 52,
 "lines": 14,
-"chars": 319,
+"chars": 310,
 "callers": [],
 "callees": [
 "0060d870"
@@ -162827,10 +162833,10 @@
 ]
 },
 "0060c370": {
-"name": "FUN_0060c370",
+"name": "Update",
 "size": 56,
 "lines": 13,
-"chars": 326,
+"chars": 324,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -162847,10 +162853,10 @@
 ]
 },
 "0060c3b0": {
-"name": "FUN_0060c3b0",
+"name": "StartMission",
 "size": 762,
 "lines": 153,
-"chars": 4966,
+"chars": 4936,
 "callers": [],
 "callees": [
 "00404280",
@@ -162881,10 +162887,10 @@
 ]
 },
 "0060c6b0": {
-"name": "FUN_0060c6b0",
+"name": "StopMission",
 "size": 43,
 "lines": 12,
-"chars": 262,
+"chars": 239,
 "callers": [],
 "callees": [
 "0060d380",
@@ -162902,10 +162908,10 @@
 ]
 },
 "0060c6e0": {
-"name": "FUN_0060c6e0",
+"name": "WriteProperties",
 "size": 834,
-"lines": 117,
-"chars": 4638,
+"lines": 113,
+"chars": 4066,
 "callers": [],
 "callees": [
 "00405820",
@@ -162926,10 +162932,10 @@
 ]
 },
 "0060ca30": {
-"name": "FUN_0060ca30",
+"name": "ReadProperties",
 "size": 849,
-"lines": 157,
-"chars": 5636,
+"lines": 162,
+"chars": 4794,
 "callers": [],
 "callees": [
 "00405890",
@@ -162950,10 +162956,10 @@
 ]
 },
 "0060cda0": {
-"name": "FUN_0060cda0",
+"name": "OnMessage",
 "size": 150,
-"lines": 32,
-"chars": 699,
+"lines": 31,
+"chars": 648,
 "callers": [],
 "callees": [
 "0060d380",
@@ -162979,10 +162985,10 @@
 ]
 },
 "0060ce50": {
-"name": "empty_function_60ce50",
+"name": "Unknown20",
 "size": 3,
 "lines": 7,
-"chars": 102,
+"chars": 109,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -162997,10 +163003,10 @@
 ]
 },
 "0060ce60": {
-"name": "FUN_0060ce60",
+"name": "WriteState",
 "size": 57,
 "lines": 13,
-"chars": 258,
+"chars": 255,
 "callers": [],
 "callees": [
 "0073d320",
@@ -163022,10 +163028,10 @@
 ]
 },
 "0060cea0": {
-"name": "FUN_0060cea0",
+"name": "ReadState",
 "size": 58,
 "lines": 15,
-"chars": 307,
+"chars": 291,
 "callers": [],
 "callees": [
 "0060d380",
@@ -163048,10 +163054,10 @@
 ]
 },
 "0060cee0": {
-"name": "FUN_0060cee0",
+"name": "GetMaterialId",
 "size": 49,
-"lines": 17,
-"chars": 372,
+"lines": 16,
+"chars": 337,
 "callers": [],
 "callees": [
 "00611090"
@@ -163068,10 +163074,10 @@
 ]
 },
 "0060cf20": {
-"name": "FUN_0060cf20",
+"name": "RestartMission",
 "size": 77,
 "lines": 19,
-"chars": 441,
+"chars": 455,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -163088,10 +163094,10 @@
 ]
 },
 "0060cf70": {
-"name": "FUN_0060cf70",
+"name": "SaveGame",
 "size": 334,
-"lines": 61,
-"chars": 2050,
+"lines": 50,
+"chars": 1480,
 "callers": [],
 "callees": [
 "007e5392",
@@ -163109,10 +163115,10 @@
 ]
 },
 "0060d0c0": {
-"name": "FUN_0060d0c0",
+"name": "LoadGame",
 "size": 563,
-"lines": 111,
-"chars": 3855,
+"lines": 116,
+"chars": 3414,
 "callers": [],
 "callees": [
 "0060d380",
@@ -163135,7 +163141,7 @@
 "name": "SetState",
 "size": 124,
 "lines": 22,
-"chars": 542,
+"chars": 539,
 "callers": [
 "00416e10"
 ],
@@ -163159,10 +163165,10 @@
 "in_vtables": []
 },
 "0060d380": {
-"name": "FUN_0060d380",
+"name": "ApplyState",
 "size": 857,
 "lines": 154,
-"chars": 5134,
+"chars": 5088,
 "callers": [
 "0060c3b0",
 "0060c6b0",
@@ -163202,7 +163208,7 @@
 "name": "Place",
 "size": 190,
 "lines": 31,
-"chars": 783,
+"chars": 772,
 "callers": [
 "00584e30"
 ],
@@ -163227,10 +163233,10 @@
 "in_vtables": []
 },
 "0060d7b0": {
-"name": "FUN_0060d7b0",
+"name": "OnPlaced",
 "size": 82,
 "lines": 21,
-"chars": 570,
+"chars": 543,
 "callers": [
 "0060cda0"
 ],
@@ -163250,10 +163256,10 @@
 "in_vtables": []
 },
 "0060d810": {
-"name": "FUN_0060d810",
+"name": "ExplodeHarmless",
 "size": 84,
 "lines": 17,
-"chars": 366,
+"chars": 358,
 "callers": [
 "0060d870"
 ],
@@ -163276,10 +163282,10 @@
 "in_vtables": []
 },
 "0060d870": {
-"name": "FUN_0060d870",
+"name": "Explode",
 "size": 272,
 "lines": 41,
-"chars": 1222,
+"chars": 1218,
 "callers": [
 "0060c330"
 ],
@@ -163313,10 +163319,10 @@
 "in_vtables": []
 },
 "0060d980": {
-"name": "FUN_0060d980",
+"name": "OnExploded",
 "size": 104,
 "lines": 21,
-"chars": 540,
+"chars": 527,
 "callers": [
 "0060cda0"
 ],
@@ -163337,7 +163343,7 @@
 "name": "Disarm",
 "size": 88,
 "lines": 17,
-"chars": 380,
+"chars": 369,
 "callers": [
 "00584e30"
 ],
@@ -163360,10 +163366,10 @@
 "in_vtables": []
 },
 "0060da50": {
-"name": "FUN_0060da50",
+"name": "OnDisarmed",
 "size": 17,
 "lines": 10,
-"chars": 174,
+"chars": 161,
 "callers": [
 "0060cda0"
 ],
@@ -163379,10 +163385,10 @@
 "in_vtables": []
 },
 "0060da70": {
-"name": "empty_function_60da70",
+"name": "Hit",
 "size": 3,
 "lines": 7,
-"chars": 57,
+"chars": 86,
 "callers": [],
 "callees": [],
 "imports": [],

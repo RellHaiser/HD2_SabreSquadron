@@ -547,6 +547,33 @@ inline bool CopyProtectionIntactBreath()
 
 // (C_Ladder and the accessors the human movement code uses on it: game/ladder.h.)
 
+// ---- the birds (0x00479790..0x0047ab90, not ported) --------------------------------------------
+// A bird: a bird model (its wings the frames "Object01" and "Object03") sitting at its place until it
+// flies away. The birds module scatters them over the mission; C_FowlGenerator takes them over or
+// makes its own.
+class C_Bird {                                          // 0x70 bytes
+public:
+    // On `model`, whose frame data then points at the bird; `ownModel`: the model is the bird's,
+    // else it goes back to g_spareBirdModels (hidden) when the bird is deleted.
+    C_Bird(class I3D_frame *model, bool ownModel);     // 0x004797c0
+    ~C_Bird();                                          // 0x004799e0
+    // Flying on; false once it has flown off.
+    bool Update(int time);                              // 0x0047a2e0
+    void FlyAway();                                     // 0x0047a2f0
+    class I3D_frame *GetModel() const { return m_model; }   // +0x50
+    bool OwnsModel() const { return m_ownModel; }       // +0x60
+
+private:
+    uint8_t m_unknown00[0x50];
+    class I3D_frame *m_model;                           // +0x50
+    uint8_t m_unknown54[0x0C];
+    bool m_ownModel;                                    // +0x60
+    uint8_t m_unknown61[0x0F];
+};
+// The birds sitting in the mission (the birds module's) and the models of the birds deleted.
+extern std::vector<C_Bird *> g_birds;                  // 0x0089bb90
+extern std::vector<class I3D_frame *> g_spareBirdModels;   // 0x0089bba0
+
 // ---- the game's collaborators (C_game, game/game.h) -------------------------------
 // The campaign tree: game/campaign.h; the profile's objects (g_campaign, g_missionSquad,
 // g_hudOption, g_mpSettings, g_gameMode): game/profile.h.

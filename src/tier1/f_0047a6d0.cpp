@@ -26,11 +26,11 @@ uint32_t FUN_0047a700(void *_this,int param_1, ...)
     iVar4 = *(int *)((int)_this + 8) - *(int *)((int)_this + 4) >> 2;
     while (iVar4 != 0) {
       iVar4--;
-      cVar2 = FUN_0047a2e0(*(void **)(*(int *)((int)_this + 4) + iVar4 * 4),param_1);
+      cVar2 = C_Bird__Update(*(void **)(*(int *)((int)_this + 4) + iVar4 * 4),param_1);
       if (cVar2 == '\0') {
         ptr = *(void **)(*(int *)((int)_this + 4) + iVar4 * 4);
         if (ptr != 0) {
-          FUN_004799e0((int)ptr);
+          C_Bird___C_Bird((int)ptr);
           _aligned_free(ptr);
         }
         iVar1 = *(int *)((int)_this + 4);
@@ -96,7 +96,7 @@ uint32_t FUN_0047a7b0(int *param_1,int param_2, ...)
       local_118 = 0;
     }
     else {
-      local_118 = FUN_004797c0(local_114,param_1,0);
+      local_118 = C_Bird__C_Bird(local_114,param_1,0);
     }
     local_4 = 0xffffffff;
     puVar8 = *(uint32_t **)(param_2 + 8);
@@ -174,7 +174,7 @@ uint32_t thunk_FUN_0047aa10(int param_1, ...)
       iVar2--;
       ptr = *(void **)(*(int *)(param_1 + 4) + iVar2 * 4);
       if (ptr != 0) {
-        FUN_004799e0((int)ptr);
+        C_Bird___C_Bird((int)ptr);
         _aligned_free(ptr);
       }
     }
@@ -207,7 +207,7 @@ uint32_t FUN_0047aa10(int param_1, ...)
       iVar2--;
       ptr = *(void **)(*(int *)(param_1 + 4) + iVar2 * 4);
       if (ptr != 0) {
-        FUN_004799e0((int)ptr);
+        C_Bird___C_Bird((int)ptr);
         _aligned_free(ptr);
       }
     }

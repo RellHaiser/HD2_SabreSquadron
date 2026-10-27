@@ -4819,6 +4819,70 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     controller.txt, game.txt, hud.txt and script.txt), 136 decompiles exported. Stats: 6,525 of
     12,286 functions by hand (61.9 % by size).
 
+  PART 7c DONE (2026-10-27): four world actors (src/game/explosive_place.*, ladder.*, pike.*,
+  fowl_generator.*, new).
+  - C_ExplosivePlace ("Explosive place", type 22, 0x180 bytes): states 0 empty, 1 placed, 2 exploded,
+    3 hidden, 4 between missions; ApplyState shows the "explosive_on" / "explosive_off" children
+    (any type, no case), names it (the text 0x1BF9 while empty, the item's name when placed) and
+    keeps a box volume (COLLISION_TYPE_LIGHT_OBJECT) in the world while empty or placed; without
+    both frames only the state is stored. StartMission: the volume's centre w is the box's own
+    radius (a stale local; MakeFrameBoxVolume got an optional out-parameter for it). Place (only
+    while empty; who placed it noted even when the item is missing), Disarm, the countdown (Tick on
+    the server, Update on clients) and Explode (the area damage from who placed it; without them
+    no damage, quirk kept; copy protection dropped). Messages: kind 2 bits (0 exploded, 1 disarmed,
+    2 placed: 10-bit human id, 16-bit signed uid, 3 a state; state 4 does not fit 2 bits, quirk
+    kept). Properties chunks 100..105 (another id entered and not left, quirk kept); saved game
+    chunk 3000. Fix: no item definition: text -1.
+  - C_Ladder ("Ladder", type 8, 0x190 bytes): SetFrame takes its ends from the "up*" / "down*"
+    dummies (false without either), the way to face it from the frame's z axis made level, the
+    material from "matid" in the first visual's user properties (25 by default; Fix: no fixed
+    1028-byte copy). StartMission relinks it (world kept) and makes two box volumes
+    (COLLISION_TYPE_LADDER 0x4000, new in collision.h; human_locomotion's contacts exclude it): its
+    box raised to 0.3 m above the top and a 0.0075 m slab at the top, set back. CanUse from the asm
+    (NaN-faithful compares; the byte at +0x180 loosens the bottom's limits). The human movement
+    code's ladder accessors moved from pending.h to inline wrappers in ladder.h. Fix: the volumes
+    are let go in the destructor.
+  - C_Pike ("Pike", type 28, 0x210 bytes): the script raises (2) and lowers (3) it; its frame turns
+    about the axis from the activation's rotation at a speed up to the largest angle; Turn (from the
+    asm) casts 12 edge rays and 2 diagonals 0.01 m inside its box (cars' light objects excluded)
+    and undoes a blocked turn, which then waits 0.2 s. Tick on a server without a client side,
+    Update on clients (the end sounds, the loop stopped). UpdateVolume (from the asm): a dummy's own
+    box (radius half its height, quirk kept) or the hierarchy box, centre w m_matrix.m[0][3] (a
+    stale local); COLLISION_TYPE_PIKE 0x800 (new). Messages 2 bits; properties raw (a short chunk
+    leaves the axis 0 and its bytes to the first sound); saved game chunk 1234 (LoadGame: a chunk
+    too short gives id | size << 16 as the state, quirk kept). Fix: an empty box's centre 0.
+  - C_FowlGenerator ("FowlGenerator", type 29, 0xD0 bytes): mode 0 takes over the mission's birds
+    within its radius, 2 makes a square of birds (√count rows, jittered ±0.4 spacing) on the ground
+    at StartMission, 1 when they fly up; named "_bird_%d_%d" with a float passed to %d (the low word
+    of its double, quirk kept). A server listens for footsteps / shots louder than 0.8; Tick looks
+    once a second for players near (Fix: bounded by the actor list), the player's other humans (from
+    the back down to a gap) and the camera. Start: they fly away, a client hears them within 1 s
+    (group 1 for more than 3), the clients told. Properties: chunk 0 the version (1) first (Fix: the
+    model name terminated); saved game chunk 0x10E1. The birds module stays unported: C_Bird,
+    g_birds and g_spareBirdModels are declared in pending.h.
+  - world.h's partial classes replaced by the headers; ladder.h included by the human movement files.
+  - Harness (build_item.bat links the four sources; world_actors_test.inc with
+    world_explosive_ladder.inc and world_pike_fowl.inc after ObjectiveActorsTest on each model;
+    check_item.py reads the "world:" line, 16 checks): RandomFloat, the dynamic rays, sound
+    loops and listeners, the actor list, a fake C_Bird, model copies, frame bounds and the ground
+    ray are logged; CreateFrame can fail after N frames (g_obFramesLeft). Oracles from the asm for
+    the ladder's volumes and CanUse (random samples plus exact limits and NaNs), the pike's turn,
+    rays and volume, the birds' square. The stub pending.h got C_Bird and RandomFloat. Baselines:
+    0 of 37 in both model orders; the other five builds 0 of 37 each.
+  - Mutations (mutations/mutate_world.py, 717 after dropping 32 equivalent or not compiling): the
+    first run caught 647 of 749; 70 survivors needed new cases (exact limits and NaNs in CanUse,
+    tiny vectors in its normalisation, blocked waits ending at 1 and below 0, arrival exactly at an
+    end, slot 0 loops, untouched state on Hit / slot 0x20, Place in every state and of another item
+    type, frame failures mid-square, the flock of exactly 3, slot 32 and gaps in the actor list,
+    countdowns ending at 0). The full rerun caught all but one (a Start without a client side; new
+    case) and one mutant that did not compile (fixed); those two: caught. All 717 caught (16 by a
+    crash).
+  - Build: 179 files clean (MSVC). Tier 1: 623 errors in 113 files, 252 stubs (1 error, 1 file and
+    1 stub fewer). ret_audit --src: 44.
+  - Ghidra: 116 names (names/world_actors.txt, 113 ported plus C_Bird's; stale entries removed from
+    controller.txt and script.txt), 120 decompiles exported. Stats: 6,638 of 12,286 functions by
+    hand (62.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

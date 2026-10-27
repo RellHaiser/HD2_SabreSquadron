@@ -15,7 +15,7 @@ uint32_t FUN_00479790(...)
 
 
 // 0x004797c0
-uint32_t * FUN_004797c0(void *_this,int *param_1,uint8_t param_2, ...)
+uint32_t * C_Bird__C_Bird(void *_this,int *param_1,uint8_t param_2, ...)
 {
   int iVar1;
   int iVar2;
@@ -97,7 +97,7 @@ uint32_t * FUN_004797c0(void *_this,int *param_1,uint8_t param_2, ...)
 
 
 // 0x004799e0
-uint32_t FUN_004799e0(int param_1, ...)
+uint32_t C_Bird___C_Bird(int param_1, ...)
 {
   int *piVar1;
   int *piVar2;
@@ -427,7 +427,7 @@ LAB_0047a2a5:
 
 
 // 0x0047a2e0
-uint32_t FUN_0047a2e0(void *_this,int param_1, ...)
+uint32_t C_Bird__Update(void *_this,int param_1, ...)
 {
   FUN_00479c70(_this,(float)param_1);
   return 0;
@@ -435,7 +435,7 @@ uint32_t FUN_0047a2e0(void *_this,int param_1, ...)
 
 
 // 0x0047a2f0
-uint32_t FUN_0047a2f0(float *param_1, ...)
+uint32_t C_Bird__FlyAway(float *param_1, ...)
 {
   I3D_frame *_this;
   float fVar1;
