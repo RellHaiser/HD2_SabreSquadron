@@ -551,18 +551,17 @@ public:
 
 constexpr uint32_t I3DMATERIAL_TEXTURE_PENDING_BIT = 0x04000000;
 
-// Material of a mesh face group. Slot meanings inferred (the bullet trace sets them to
-// a white unlit look); +0x08 holds flags, of which the traces set 0x08000000.
+// Material of a mesh face group. Slots 0x04 - 0x18 set the D3DMATERIAL8 the DLL keeps at +0x14
+// (LS3DF 0x1002b140 - 0x1002b1d0); +0x08 holds flags, of which the traces set 0x08000000.
 class I3D_material {
 public:
     I3DMETHOD(uint32_t, Release)() = 0;                       // 0x00
-    // (The member panels pass their photo's colour: (1, 1, 1) or the human's +0x1E0; not
-    // identified.)
-    I3DMETHOD(void, SetUnknown04)(const S_vector &value) = 0;   // 0x04
-    I3DMETHOD(void, SetAmbient)(const S_vector &color) = 0;   // 0x08
-    I3DMETHOD(void, SetDiffuse)(const S_vector &color) = 0;   // 0x0C
-    I3DMETHOD(void, SetEmissive)(const S_vector &color) = 0;  // 0x10
-    I3DMETHOD(void, SetAlpha)(float alpha) = 0;               // 0x14
+    // (The member panels pass their photo's colour: (1, 1, 1) or the human's +0x1E0.)
+    I3DMETHOD(void, SetAmbient)(const S_vector &color) = 0;   // 0x04
+    I3DMETHOD(void, SetDiffuse)(const S_vector &color) = 0;   // 0x08
+    I3DMETHOD(void, SetEmissive)(const S_vector &color) = 0;  // 0x0C
+    I3DMETHOD(void, SetSpecular)(const S_vector &color) = 0;  // 0x10
+    I3DMETHOD(void, SetPower)(float power) = 0;               // 0x14
     I3D_SLOT(18);                                             // LS3DF: SetOpacity
     // (The first-person view gives the hands the uniform's sleeve texture.)
     I3DMETHOD(void, SetTexture)(I3D_texture *texture) = 0;    // 0x1C
@@ -809,7 +808,8 @@ public:
     I3D_SLOT(A0);
     I3D_SLOT(A4);
     // Called with 0 on the pelvis of every posed human while the skeleton debug switch
-    // (0x0098af98) is on (not identified).
+    // (0x0098af98) is on (not identified). Quirk kept: LS3DF.DLL's joint vtable (0x1009b9d8) ends
+    // at slot 0x70, so this reads the next vtable's slot 0x30 (0x1001cfe0, I3D_frame::SetOn).
     I3DMETHOD(void, UnknownA8)(int value) = 0;                // 0xA8
 };
 
@@ -1033,7 +1033,7 @@ private:
 class I3D_morph {
 public:
     I3DMETHOD(int, NumTargets)() = 0;                         // 0x00
-    I3D_SLOT(04);
+    I3D_SLOT(04);                                             // LS3DF: NumMorphChannels
     I3DMETHOD(void, SetWeight)(int channel, int target, float weight) = 0;   // 0x08
 };
 inline I3D_morph *I3D_GetMorph(I3D_frame *visual)

@@ -234,10 +234,10 @@ I3D_billboard_visual *CreateTrace(I3D_frame *traceModel)
     trace->Duplicate(traceModel);
     I3D_material *material = trace->GetMesh()->GetLevel(0)->GetFaceGroup(0)->material;
     material->Flags() |= I3DMATERIAL_TRACE_FLAG;
-    material->SetDiffuse(S_vector(1.0f, 1.0f, 1.0f));
-    material->SetEmissive(S_vector(0.0f, 0.0f, 0.0f));
-    material->SetAmbient(S_vector(0.0f, 0.0f, 0.0f));
-    material->SetAlpha(0.0f);
+    material->SetEmissive(S_vector(1.0f, 1.0f, 1.0f));
+    material->SetSpecular(S_vector(0.0f, 0.0f, 0.0f));
+    material->SetDiffuse(S_vector(0.0f, 0.0f, 0.0f));
+    material->SetPower(0.0f);
     return trace;
 }
 

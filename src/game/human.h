@@ -968,7 +968,7 @@ private:
     S_vector4 m_prevVelocity = {};                      // +0x1C0
     S_vector4 m_lastPos = {};                           // +0x1D0
     S_vector4 m_scale = {};                             // +0x1E0 (1, 1, 1) from StartMission; the member panel's
-                                                        // photo takes it (I3D_material::SetUnknown04)
+                                                        // photo takes it (I3D_material::SetAmbient)
     int m_unknown200 = 0;                               // +0x200
     int m_deadTime = 0;                                 // +0x204 ms since death (multiplayer respawn)
     int m_aliveTime = 0;                                // +0x208 ms since spawn (spawn protection)
