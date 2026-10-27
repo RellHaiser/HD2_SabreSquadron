@@ -4936,8 +4936,8 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     zone is checked by a model (from the asm) over 600 random steps per model; the train's moves
     and wheels, the submarine's updates and exits by oracles. The test puts back the globals the
     earlier tests read and unlinks its frames from the sector (several models per process).
-    Baselines: 0 of 37 in both orders; sw, route, rigid, rigid step 0 of 37; the car build could
-    not run (the game data on H: was not mounted).
+    Baselines: 0 of 37 in both orders; the other five builds 0 of 37 each (the car build once the
+    game data on H: was mounted again).
   - Mutations (mutations/mutate_7d.py, 831 after dropping 27 equivalent): the first run caught 742
     of 858; 89 survivors needed new cases (see the file's docstring). All 831 caught.
   - Build: 182 files clean (MSVC). Tier 1: 619 errors in 109 files, 248 stubs. ret_audit --src: 45.
