@@ -49,6 +49,7 @@ the remaining actor types.
 | `src/net` | The network bit stream and messages |
 | `src/script` | The mission script language |
 | `src/tier1` | Generated code (see above) |
+| `ls3df` | The LS3D engine DLL, `LS3DF.dll` ([RellHaiser/LS3DF](https://github.com/RellHaiser/LS3DF), kept in sync with `git subtree --prefix=ls3df`); built and tested with its own `build.py` |
 | `docs` | [Mission scripting language reference](docs/HD2_Mission_Scripting_Language.md), [reverse-engineering findings](docs/findings/README.md) (formats, archives, binaries) |
 
 ## Building
