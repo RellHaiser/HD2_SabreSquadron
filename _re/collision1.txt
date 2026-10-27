@@ -1,0 +1,3027 @@
+// @006f2ff0 size=37 callers= vt=00832004[558]
+void FUN_006f2ff0(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 = DAT_0098c1c0 | 1;
+  }
+  atexit(&LAB_00405c90);
+  return;
+}
+
+// @006f3020 size=1499 callers=C_CollisionWorld::RayTestBrute,006f67d0,C_CollisionWorld::RayTest,006fad50,C_CollisionWorld::RayTestThunk
+bool __thiscall C_CollisionWorld::RayTestVolumes(C_CollisionWorld *this,S_CollisionRay *ray)
+{
+  // locals: S_vector4 *self; float fVar1; float fVar2; float fVar3; float fVar4; float fVar5; float fVar6; S_CollisionGrid *pSVar7; int iVar8; S_CollisionGridCell *pSVar9; S_CollisionVolume *pSVar10; bool bVar11
+  S_CollisionVolume **ppSVar12;
+  uint uVar13;
+  S_vector *pSVar14;
+  int iVar15;
+  S_CollisionRay *pSVar16;
+  float10 *unaff_EDI;
+  float *pfVar17;
+  float10 fVar18;
+  float10 extraout_ST0;
+  longlong lVar19;
+  longlong lVar20;
+  bool local_1fd;
+  int local_1f8;
+  int local_1ec;
+  int local_1e8;
+  int local_1e0;
+  float local_1c4;
+  S_vector local_1c0;
+  S_vector local_1b0;
+  float local_1a0;
+  float local_188;
+  S_vector local_180;
+  S_vector local_170;
+  S_vector local_160;
+  S_vector local_150;
+  undefined1 local_140 [144];
+  S_vector local_b0;
+  undefined1 local_a0 [156];
+  pSVar7 = this->m_grid;
+  local_1fd = false;
+  lVar19 = __ftol();
+  local_1e0 = (int)lVar19;
+  lVar19 = __ftol();
+  lVar20 = __ftol();
+  local_1f8 = (int)lVar20;
+  lVar20 = __ftol();
+  if (local_1e0 < 0) {
+    local_1e0 = 0;
+  }
+  if (local_1f8 < 0) {
+    local_1f8 = 0;
+  }
+  iVar8 = pSVar7->cellsX;
+  local_1e8 = (int)lVar19;
+  if (iVar8 < (int)lVar19) {
+    local_1e8 = iVar8;
+  }
+  iVar8 = pSVar7->cellsZ;
+  local_1ec = (int)lVar20;
+  if (iVar8 < (int)lVar20) {
+    local_1ec = iVar8;
+  }
+  do {
+    iVar8 = local_1e0;
+    if (local_1ec <= local_1f8) {
+      return local_1fd;
+    }
+    for (; iVar8 < local_1e8; iVar8 = iVar8 + 1) {
+      pSVar9 = this->m_grid->cells[this->m_grid->cellsX * local_1f8 + iVar8];
+      if ((pSVar9 != (S_CollisionGridCell *)0x0) &&
+         (ppSVar12 = (pSVar9->volumes).first, ppSVar12 < (pSVar9->volumes).last)) {
+        do {
+          pSVar10 = *ppSVar12;
+          if (((ray->excludeTypes & pSVar10->m_type) == 0) &&
+             ((pSVar10->m_flags & ray->excludeFlags) == 0)) {
+            fVar1 = (ray->dir).z;
+            fVar2 = (ray->dir).y;
+            fVar3 = (ray->dir).x;
+            self = &ray->dir;
+            fVar1 = fVar1 * fVar1 + fVar2 * fVar2 + fVar3 * fVar3;
+            if (1e-08 <= fVar1) {
+              S_vector::Set(&local_1c0,(ray->from).x - (pSVar10->m_center).x,
+                            (ray->from).y - (pSVar10->m_center).y,
+                            (ray->from).z - (pSVar10->m_center).z);
+              fVar1 = (local_1c0.x * self->x +
+                      local_1c0.y * (ray->dir).y + local_1c0.z * (ray->dir).z) / fVar1;
+              S_vector::Set(&local_1b0,fVar1 * self->x,fVar1 * (ray->dir).y,fVar1 * (ray->dir).z);
+              S_vector::Set(&local_180,local_1c0.x - local_1b0.x,local_1c0.y - local_1b0.y,
+                            local_1c0.z - local_1b0.z);
+              S_vector::MagnitudeInline(&local_180,unaff_EDI);
+              fVar18 = extraout_ST0;
+            }
+            else {
+              fVar18 = (float10)-1e+16;
+            }
+            pSVar10 = *ppSVar12;
+            if (fVar18 <= (float10)pSVar10->m_radius) {
+              fVar1 = (pSVar10->m_center).x - (ray->from).x;
+              fVar3 = (pSVar10->m_center).y - (ray->from).y;
+              fVar4 = (pSVar10->m_center).z - (ray->from).z;
+              fVar2 = fVar1 * fVar1 + fVar3 * fVar3 + fVar4 * fVar4;
+              fVar1 = fVar1 * self->x + fVar3 * (ray->dir).y + fVar4 * (ray->dir).z;
+              if (fVar1 <= 0.0) {
+                fVar3 = pSVar10->m_radius;
+              }
+              else {
+                fVar3 = ray->dirLength + pSVar10->m_radius;
+              }
+              if (fVar2 <= fVar3 * fVar3) {
+                switch(pSVar10->m_flags & 0xff) {
+                case 0x40:
+                  pSVar16 = ray;
+                  pfVar17 = (float *)local_140;
+                  for (iVar15 = 0x24; iVar15 != 0; iVar15 = iVar15 + -1) {
+                    *pfVar17 = (pSVar16->from).x;
+                    pSVar16 = (S_CollisionRay *)&(pSVar16->from).y;
+                    pfVar17 = pfVar17 + 1;
+                  }
+                  S_vector::OperatorMulAssign((S_vector *)local_140,pSVar10->m_invMatrix);
+                  pSVar14 = S_vector::RotateByMatrix
+                                      ((S_vector *)self,&local_150,(*ppSVar12)->m_invMatrix);
+                  local_140._16_4_ = pSVar14->x;
+                  local_140._20_4_ = pSVar14->y;
+                  local_140._24_4_ = pSVar14->z;
+                  local_140._28_4_ = pSVar14[1].x;
+                  bVar11 = RayTestAabb((float *)&(*ppSVar12)->m_bbox,&((*ppSVar12)->m_bbox).max.x,
+                                       (S_CollisionRay *)local_140);
+                  if (bVar11) {
+                    ray->hitT = (float)local_140._88_4_;
+                    pSVar14 = S_vector::RotateByMatrix
+                                        ((S_vector *)(local_140 + 0x70),&local_170,
+                                         (*ppSVar12)->m_matrix);
+                    (ray->hitNormal).x = pSVar14->x;
+                    (ray->hitNormal).y = pSVar14->y;
+                    (ray->hitNormal).z = pSVar14->z;
+                    (ray->hitNormal).w = pSVar14[1].x;
+LAB_006f3597:
+                    local_1fd = true;
+                    ray->hit = *ppSVar12;
+                  }
+                  break;
+                case 0x41:
+                  bVar11 = RayTestAabb((float *)&pSVar10->m_bbox,&(pSVar10->m_bbox).max.x,ray);
+                  if (bVar11) {
+LAB_006f33b1:
+                    local_1fd = true;
+                    ray->hit = *ppSVar12;
+                  }
+                  break;
+                case 0x42:
+                case 0x44:
+                  fVar2 = fVar1 * fVar1 -
+                          (fVar2 - pSVar10->m_radius * pSVar10->m_radius) * ray->dirSquare;
+                  if (((0.0 <= fVar2) &&
+                      (fVar1 = (fVar1 - SQRT(fVar2)) / ray->dirSquare, 0.0 <= fVar1)) &&
+                     (fVar1 < ray->hitT)) {
+                    fVar2 = (ray->dir).y;
+                    local_188 = fVar1 * (ray->dir).z;
+                    local_1a0 = fVar1 * self->x + (ray->from).x;
+                    fVar3 = (ray->from).y;
+                    fVar4 = (ray->from).z;
+                    fVar5 = (pSVar10->m_center).y;
+                    fVar6 = (pSVar10->m_center).z;
+                    (ray->hitNormal).x = (pSVar10->m_center).x - local_1a0;
+                    (ray->hitNormal).y = fVar5 - (fVar1 * fVar2 + fVar3);
+                    (ray->hitNormal).z = fVar6 - (local_188 + fVar4);
+                    ray->hitT = fVar1;
+                    (ray->hitNormal).w = local_1c4;
+                    goto LAB_006f33b1;
+                  }
+                  break;
+                case 0x49:
+                  uVar13 = FUN_007e1360(ray,pSVar10);
+                  if ((char)uVar13 != '\0') {
+                    local_1fd = true;
+                  }
+                  break;
+                case 0x4a:
+                  pSVar16 = ray;
+                  pfVar17 = (float *)local_a0;
+                  for (iVar15 = 0x24; iVar15 != 0; iVar15 = iVar15 + -1) {
+                    *pfVar17 = (pSVar16->from).x;
+                    pSVar16 = (S_CollisionRay *)&(pSVar16->from).y;
+                    pfVar17 = pfVar17 + 1;
+                  }
+                  S_vector::OperatorMulAssign((S_vector *)local_a0,pSVar10->m_invMatrix);
+                  pSVar14 = S_vector::RotateByMatrix
+                                      ((S_vector *)self,&local_b0,(*ppSVar12)->m_invMatrix);
+                  local_a0._16_4_ = pSVar14->x;
+                  local_a0._20_4_ = pSVar14->y;
+                  local_a0._24_4_ = pSVar14->z;
+                  local_a0._28_4_ = pSVar14[1].x;
+                  bVar11 = RayTestCapsule((*ppSVar12)->m_capsuleRadius,(*ppSVar12)->m_radius,
+                                          (S_CollisionRay *)local_a0);
+                  if (bVar11) {
+                    ray->hitT = (float)local_a0._88_4_;
+                    pSVar14 = S_vector::RotateByMatrix
+                                        ((S_vector *)(local_a0 + 0x70),&local_160,
+                                         (*ppSVar12)->m_matrix);
+                    (ray->hitNormal).x = pSVar14->x;
+                    (ray->hitNormal).y = pSVar14->y;
+                    (ray->hitNormal).z = pSVar14->z;
+                    (ray->hitNormal).w = pSVar14[1].x;
+                    goto LAB_006f3597;
+                  }
+                }
+              }
+            }
+          }
+          ppSVar12 = ppSVar12 + 1;
+        } while (ppSVar12 < (pSVar9->volumes).last);
+      }
+    }
+    local_1f8 = local_1f8 + 1;
+  } while( true );
+}
+
+// @006f3620 size=1613 callers=006f62b0,006f7cc0
+bool __thiscall C_CollisionWorld::RayTestVolumes2(C_CollisionWorld *this,S_CollisionRay *ray)
+{
+  // locals: S_vector4 *self; float fVar1; float fVar2; float fVar3; float fVar4; float fVar5; float fVar6; S_CollisionGrid *pSVar7; int iVar8; S_CollisionGridCell *pSVar9; S_CollisionVolume *pSVar10; bool bVar11
+  S_CollisionVolume **ppSVar12;
+  S_vector *pSVar13;
+  uint uVar14;
+  int iVar15;
+  int iVar16;
+  S_CollisionRay *pSVar17;
+  float10 *unaff_EDI;
+  float *pfVar18;
+  float10 fVar19;
+  float10 extraout_ST0;
+  longlong lVar20;
+  longlong lVar21;
+  bool local_209;
+  int local_1fc;
+  int local_1f8;
+  int local_1f4;
+  float local_1d4;
+  float local_1c4;
+  S_vector local_1c0;
+  S_vector local_1b0 [2];
+  float local_198;
+  float local_190;
+  float local_180 [4];
+  S_vector local_170;
+  S_vector local_160;
+  S_vector local_150;
+  undefined1 local_140 [144];
+  S_vector local_b0;
+  undefined1 local_a0 [156];
+  pSVar7 = this->m_grid;
+  local_209 = false;
+  lVar20 = __ftol();
+  local_1f4 = (int)lVar20;
+  lVar20 = __ftol();
+  lVar21 = __ftol();
+  iVar15 = (int)lVar21;
+  lVar21 = __ftol();
+  if (local_1f4 < 0) {
+    local_1f4 = 0;
+  }
+  if (iVar15 < 0) {
+    iVar15 = 0;
+  }
+  iVar8 = pSVar7->cellsX;
+  local_1f8 = (int)lVar20;
+  if (iVar8 < (int)lVar20) {
+    local_1f8 = iVar8;
+  }
+  iVar8 = pSVar7->cellsZ;
+  local_1fc = (int)lVar21;
+  if (iVar8 < (int)lVar21) {
+    local_1fc = iVar8;
+  }
+  do {
+    iVar8 = local_1f4;
+    if (local_1fc <= iVar15) {
+      return local_209;
+    }
+    for (; iVar8 < local_1f8; iVar8 = iVar8 + 1) {
+      pSVar9 = this->m_grid->cells[this->m_grid->cellsX * iVar15 + iVar8];
+      if ((pSVar9 != (S_CollisionGridCell *)0x0) &&
+         (ppSVar12 = (pSVar9->volumes).first, ppSVar12 < (pSVar9->volumes).last)) {
+        do {
+          pSVar10 = *ppSVar12;
+          if (((ray->excludeTypes & pSVar10->m_type) == 0) &&
+             ((pSVar10->m_flags & ray->excludeFlags) == 0)) {
+            fVar1 = (ray->dir).z;
+            fVar2 = (ray->dir).y;
+            fVar3 = (ray->dir).x;
+            self = &ray->dir;
+            fVar1 = fVar1 * fVar1 + fVar2 * fVar2 + fVar3 * fVar3;
+            if (1e-08 <= fVar1) {
+              S_vector::Set(&local_1c0,(ray->from).x - (pSVar10->m_center).x,
+                            (ray->from).y - (pSVar10->m_center).y,
+                            (ray->from).z - (pSVar10->m_center).z);
+              fVar1 = (local_1c0.y * (ray->dir).y +
+                      local_1c0.z * (ray->dir).z + local_1c0.x * self->x) / fVar1;
+              S_vector::Set(local_1b0,fVar1 * self->x,fVar1 * (ray->dir).y,fVar1 * (ray->dir).z);
+              pSVar13 = (S_vector *)S_vector::Subtract(&local_1c0,local_180,&local_1b0[0].x);
+              S_vector::MagnitudeInline(pSVar13,unaff_EDI);
+              fVar19 = extraout_ST0;
+            }
+            else {
+              fVar19 = (float10)-1e+16;
+            }
+            pSVar10 = *ppSVar12;
+            if ((((fVar19 <= (float10)pSVar10->m_radius) &&
+                 ((ray->boxMin).x <= pSVar10->m_radius + (pSVar10->m_center).x)) &&
+                ((pSVar10->m_center).x - pSVar10->m_radius <= (ray->boxMax).x)) &&
+               (((ray->boxMin).z <= pSVar10->m_radius + (pSVar10->m_center).z &&
+                ((pSVar10->m_center).z - pSVar10->m_radius <= (ray->boxMax).z)))) {
+              switch(pSVar10->m_flags & 0xff) {
+              case 0x40:
+                pSVar17 = ray;
+                pfVar18 = (float *)local_140;
+                for (iVar16 = 0x24; iVar16 != 0; iVar16 = iVar16 + -1) {
+                  *pfVar18 = (pSVar17->from).x;
+                  pSVar17 = (S_CollisionRay *)&(pSVar17->from).y;
+                  pfVar18 = pfVar18 + 1;
+                }
+                S_vector::OperatorMulAssign((S_vector *)local_140,pSVar10->m_invMatrix);
+                pSVar13 = S_vector::RotateByMatrix
+                                    ((S_vector *)self,&local_b0,(*ppSVar12)->m_invMatrix);
+                local_140._16_4_ = pSVar13->x;
+                local_140._20_4_ = pSVar13->y;
+                local_140._24_4_ = pSVar13->z;
+                local_140._28_4_ = pSVar13[1].x;
+                bVar11 = RayTestAabb((float *)&(*ppSVar12)->m_bbox,&((*ppSVar12)->m_bbox).max.x,
+                                     (S_CollisionRay *)local_140);
+                if (bVar11) {
+                  ray->hitT = (float)local_140._88_4_;
+                  pSVar13 = S_vector::RotateByMatrix
+                                      ((S_vector *)(local_140 + 0x70),&local_150,
+                                       (*ppSVar12)->m_matrix);
+                  (ray->hitNormal).x = pSVar13->x;
+                  (ray->hitNormal).y = pSVar13->y;
+                  (ray->hitNormal).z = pSVar13->z;
+                  (ray->hitNormal).w = pSVar13[1].x;
+LAB_006f3c07:
+                  local_209 = true;
+                  ray->hit = *ppSVar12;
+                }
+                break;
+              case 0x41:
+                bVar11 = RayTestAabb((float *)&pSVar10->m_bbox,&(pSVar10->m_bbox).max.x,ray);
+                if (bVar11) {
+LAB_006f3a21:
+                  local_209 = true;
+                  ray->hit = *ppSVar12;
+                }
+                break;
+              case 0x42:
+              case 0x44:
+                fVar1 = (pSVar10->m_center).x - (ray->from).x;
+                fVar3 = (pSVar10->m_center).y - (ray->from).y;
+                fVar4 = (pSVar10->m_center).z - (ray->from).z;
+                fVar5 = pSVar10->m_radius * pSVar10->m_radius;
+                fVar2 = fVar1 * fVar1 + fVar3 * fVar3 + fVar4 * fVar4;
+                if (fVar5 <= fVar2) {
+                  fVar1 = fVar1 * self->x + fVar3 * (ray->dir).y + fVar4 * (ray->dir).z;
+                  fVar2 = fVar1 * fVar1 - (fVar2 - fVar5) * ray->dirSquare;
+                  if (((0.0 <= fVar2) &&
+                      (fVar1 = (fVar1 - SQRT(fVar2)) / ray->dirSquare, 0.0 <= fVar1)) &&
+                     (fVar1 < ray->hitT)) {
+                    fVar2 = (ray->dir).y;
+                    local_198 = fVar1 * (ray->dir).z;
+                    local_190 = fVar1 * self->x + (ray->from).x;
+                    fVar3 = (ray->from).y;
+                    fVar4 = (ray->from).z;
+                    fVar5 = (pSVar10->m_center).y;
+                    fVar6 = (pSVar10->m_center).z;
+                    (ray->hitNormal).x = (pSVar10->m_center).x - local_190;
+                    (ray->hitNormal).y = fVar5 - (fVar1 * fVar2 + fVar3);
+                    (ray->hitNormal).z = fVar6 - (local_198 + fVar4);
+                    ray->hitT = fVar1;
+                    (ray->hitNormal).w = local_1c4;
+                    goto LAB_006f3a21;
+                  }
+                }
+                else {
+                  fVar1 = (pSVar10->m_center).x;
+                  fVar2 = (ray->from).x;
+                  local_209 = true;
+                  fVar3 = (pSVar10->m_center).y;
+                  fVar4 = (ray->from).y;
+                  fVar5 = (pSVar10->m_center).z;
+                  fVar6 = (ray->from).z;
+                  ray->hitT = 0.0;
+                  (ray->hitNormal).x = fVar1 - fVar2;
+                  (ray->hitNormal).y = fVar3 - fVar4;
+                  (ray->hitNormal).z = fVar5 - fVar6;
+                  (ray->hitNormal).w = local_1d4;
+                  ray->hit = *ppSVar12;
+                }
+                break;
+              case 0x49:
+                uVar14 = FUN_007e1360(ray,pSVar10);
+                if ((char)uVar14 != '\0') {
+                  local_209 = true;
+                }
+                break;
+              case 0x4a:
+                pSVar17 = ray;
+                pfVar18 = (float *)local_a0;
+                for (iVar16 = 0x24; iVar16 != 0; iVar16 = iVar16 + -1) {
+                  *pfVar18 = (pSVar17->from).x;
+                  pSVar17 = (S_CollisionRay *)&(pSVar17->from).y;
+                  pfVar18 = pfVar18 + 1;
+                }
+                S_vector::OperatorMulAssign((S_vector *)local_a0,pSVar10->m_invMatrix);
+                pSVar13 = S_vector::RotateByMatrix
+                                    ((S_vector *)self,&local_170,(*ppSVar12)->m_invMatrix);
+                local_a0._16_4_ = pSVar13->x;
+                local_a0._20_4_ = pSVar13->y;
+                local_a0._24_4_ = pSVar13->z;
+                local_a0._28_4_ = pSVar13[1].x;
+                bVar11 = RayTestCapsule((*ppSVar12)->m_capsuleRadius,(*ppSVar12)->m_radius,
+                                        (S_CollisionRay *)local_a0);
+                if (bVar11) {
+                  ray->hitT = (float)local_a0._88_4_;
+                  pSVar13 = S_vector::RotateByMatrix
+                                      ((S_vector *)(local_a0 + 0x70),&local_160,
+                                       (*ppSVar12)->m_matrix);
+                  (ray->hitNormal).x = pSVar13->x;
+                  (ray->hitNormal).y = pSVar13->y;
+                  (ray->hitNormal).z = pSVar13->z;
+                  (ray->hitNormal).w = pSVar13[1].x;
+                  goto LAB_006f3c07;
+                }
+              }
+            }
+          }
+          ppSVar12 = ppSVar12 + 1;
+        } while (ppSVar12 < (pSVar9->volumes).last);
+      }
+    }
+    iVar15 = iVar15 + 1;
+  } while( true );
+}
+
+// @006f3ca0 size=1543 callers=
+int FUN_006f3ca0(int param_1,float *param_2,float *param_3,float *param_4,float *param_5)
+{
+  // locals: float *pfVar1; float fVar2; float fVar3; float fVar4; float fVar5; uint *puVar6; bool bVar7; float *pfVar8; S_vector *pSVar9; int iVar10; undefined4 *puVar11; int *piVar12; undefined4 *puVar13; float local_184; undefined1 local_170 [20]; float local_15c; float local_158; float local_154; float local_150; float local_148; float local_144; float local_13c; float local_130; float local_12c; float local_128 [4]; float local_118; float local_114; float local_110; float local_100; float local_fc; float local_f8; float local_f4; void *local_f0; float local_e0; float local_c8; S_vector local_c0; S_vector local_b0; undefined1 local_a0 [156]
+  local_170._0_4_ = *param_2;
+  local_f0 = (void *)0x0;
+  local_118 = 1.0;
+  local_170._4_4_ = param_2[1];
+  local_170._8_4_ = param_2[2];
+  local_130 = *param_2 + *param_3;
+  local_170._12_4_ = param_2[3];
+  local_170._16_4_ = *param_3;
+  local_15c = param_3[1];
+  local_158 = param_3[2];
+  pfVar1 = param_2 + 2;
+  local_128[0] = *pfVar1 + param_3[2];
+  local_154 = param_3[3];
+  local_12c = param_2[1] + param_3[1];
+  pfVar8 = param_2;
+  if (local_130 <= *param_2) {
+    pfVar8 = &local_130;
+  }
+  local_150 = *pfVar8;
+  pfVar8 = pfVar1;
+  if (local_128[0] <= *pfVar1) {
+    pfVar8 = local_128;
+  }
+  local_148 = *pfVar8;
+  pfVar8 = param_2;
+  if (*param_2 <= local_130) {
+    pfVar8 = &local_130;
+  }
+  local_144 = *pfVar8;
+  pfVar8 = pfVar1;
+  if (*pfVar1 <= local_128[0]) {
+    pfVar8 = local_128;
+  }
+  local_13c = *pfVar8;
+  piVar12 = *(int **)(param_1 + 4);
+  local_114 = *param_3 * *param_3 + param_3[1] * param_3[1] + param_3[2] * param_3[2];
+  local_110 = SQRT(local_114);
+  if (piVar12 < *(int **)(param_1 + 8)) {
+    do {
+      puVar6 = (uint *)*piVar12;
+      if ((puVar6[2] & 8) == 0) {
+        switch(*puVar6 & 0xff) {
+        case 0x40:
+          puVar11 = (undefined4 *)local_170;
+          puVar13 = (undefined4 *)local_a0;
+          for (iVar10 = 0x24; iVar10 != 0; iVar10 = iVar10 + -1) {
+            *puVar13 = *puVar11;
+            puVar11 = puVar11 + 1;
+            puVar13 = puVar13 + 1;
+          }
+          S_vector::OperatorMulAssign((S_vector *)local_a0,(S_matrix *)puVar6[0x11]);
+          pSVar9 = S_vector::RotateByMatrix
+                             ((S_vector *)(local_170 + 0x10),&local_c0,
+                              *(S_matrix **)(*piVar12 + 0x44));
+          local_a0._16_4_ = pSVar9->x;
+          local_a0._20_4_ = pSVar9->y;
+          local_a0._24_4_ = pSVar9->z;
+          local_a0._28_4_ = pSVar9[1].x;
+          bVar7 = RayTestAabb((float *)(*piVar12 + 0x10),(float *)(*piVar12 + 0x20),
+                              (S_CollisionRay *)local_a0);
+          if (bVar7) {
+            local_118 = (float)local_a0._88_4_;
+            pSVar9 = S_vector::RotateByMatrix
+                               ((S_vector *)(local_a0 + 0x70),&local_b0,
+                                *(S_matrix **)(*piVar12 + 0x40));
+            local_100 = pSVar9->x;
+            local_fc = pSVar9->y;
+            local_f8 = pSVar9->z;
+            local_f4 = pSVar9[1].x;
+            local_f0 = (void *)*piVar12;
+          }
+          break;
+        case 0x41:
+          bVar7 = RayTestAabb((float *)(puVar6 + 4),(float *)(puVar6 + 8),
+                              (S_CollisionRay *)local_170);
+          if (bVar7) {
+            local_f0 = (void *)*piVar12;
+          }
+          break;
+        case 0x42:
+        case 0x44:
+          fVar2 = (float)puVar6[0xc] - (float)local_170._0_4_;
+          fVar4 = (float)puVar6[0xd] - (float)local_170._4_4_;
+          fVar5 = (float)puVar6[0xe] - (float)local_170._8_4_;
+          fVar3 = fVar2 * (float)local_170._16_4_ + local_15c * fVar4 + local_158 * fVar5;
+          fVar2 = fVar3 * fVar3 -
+                  ((fVar2 * fVar2 + fVar4 * fVar4 + fVar5 * fVar5) -
+                  (float)puVar6[0x13] * (float)puVar6[0x13]) * local_114;
+          if (((0.0 <= fVar2) && (fVar2 = (fVar3 - SQRT(fVar2)) / local_114, 0.0 <= fVar2)) &&
+             (fVar2 < local_118)) {
+            local_c8 = local_158 * fVar2;
+            local_e0 = (float)local_170._16_4_ * fVar2 + (float)local_170._0_4_;
+            local_100 = (float)puVar6[0xc] - local_e0;
+            local_fc = (float)puVar6[0xd] - (local_15c * fVar2 + (float)local_170._4_4_);
+            local_f4 = local_184;
+            local_118 = fVar2;
+            local_f8 = (float)puVar6[0xe] - (local_158 * fVar2 + (float)local_170._8_4_);
+            local_f0 = (void *)*piVar12;
+          }
+        }
+      }
+      piVar12 = piVar12 + 1;
+    } while (piVar12 < *(int **)(param_1 + 8));
+  }
+  if (param_4 != (float *)0x0) {
+    fVar2 = param_3[1];
+    fVar3 = param_3[2];
+    fVar4 = param_2[1];
+    fVar5 = *pfVar1;
+    *param_4 = local_118 * *param_3 + *param_2;
+    param_4[1] = local_118 * fVar2 + fVar4;
+    param_4[2] = local_118 * fVar3 + fVar5;
+    param_4[3] = local_184;
+  }
+  if (param_5 != (float *)0x0) {
+    *param_5 = -local_100;
+    param_5[1] = -local_fc;
+    param_5[2] = -local_f8;
+    param_5[3] = local_184;
+    fVar2 = param_5[2] * param_5[2] + param_5[1] * param_5[1] + *param_5 * *param_5;
+    if (1e-08 <= ABS(fVar2 - 1.0)) {
+      if (fVar2 < 1e-08) {
+        if (*param_5 != 0.0) {
+          if (*param_5 < 0.0) {
+            *param_5 = -1.0;
+            return (int)local_f0;
+          }
+          *param_5 = 1.0;
+          return (int)local_f0;
+        }
+        if (param_5[2] == 0.0) {
+          if (param_5[1] < 0.0) {
+            param_5[1] = -1.0;
+            return (int)local_f0;
+          }
+          param_5[1] = 1.0;
+          return (int)local_f0;
+        }
+        if (param_5[2] < 0.0) {
+          param_5[2] = -1.0;
+          return (int)local_f0;
+        }
+        param_5[2] = 1.0;
+        return (int)local_f0;
+      }
+      fVar2 = 1.0 / SQRT(fVar2);
+      *param_5 = fVar2 * *param_5;
+      param_5[1] = fVar2 * param_5[1];
+      param_5[2] = fVar2 * param_5[2];
+    }
+  }
+  return (int)local_f0;
+}
+
+// @006f42c0 size=1019 callers=
+uint __thiscall FUN_006f42c0(void *this,S_CollisionRay *param_2)
+{
+  // locals: float fVar1; float fVar2; float fVar3; float fVar4; float fVar5; float fVar6; int iVar7; uint *puVar8; float fVar9; bool bVar10; undefined4 in_EAX; int iVar11; S_vector *pSVar12; uint uVar13; int iVar14; int *piVar15; int iVar16; int iVar17; S_CollisionRay *pSVar18; float *pfVar19; longlong lVar20; longlong lVar21; undefined1 local_115; int local_108; int local_100; float local_e4; S_vector local_c0; S_vector local_b0; undefined1 local_a0 [156]
+  fVar9 = ABS(param_2->dirSquare);
+  if (fVar9 >= 1e-08) {
+    iVar7 = *(int *)((int)this + 0x3ec);
+    local_115 = 0;
+    lVar20 = __ftol();
+    local_100 = (int)lVar20;
+    lVar20 = __ftol();
+    lVar21 = __ftol();
+    iVar14 = (int)lVar21;
+    lVar21 = __ftol();
+    iVar11 = (int)lVar21;
+    if (local_100 < 0) {
+      local_100 = 0;
+    }
+    if (iVar14 < 0) {
+      iVar14 = 0;
+    }
+    iVar16 = *(int *)(iVar7 + 0x10);
+    iVar17 = (int)lVar20;
+    if (iVar16 < (int)lVar20) {
+      iVar17 = iVar16;
+    }
+    iVar7 = *(int *)(iVar7 + 0x14);
+    local_108 = iVar11;
+    if (iVar7 < iVar11) {
+      iVar11 = iVar7;
+      local_108 = iVar7;
+    }
+    while (iVar7 = local_100, iVar14 < local_108) {
+      for (; iVar7 < iVar17; iVar7 = iVar7 + 1) {
+        iVar11 = *(int *)(*(int *)(*(int *)((int)this + 0x3ec) + 0x18) +
+                         (*(int *)(*(int *)((int)this + 0x3ec) + 0x10) * iVar14 + iVar7) * 4);
+        if ((iVar11 != 0) && (piVar15 = *(int **)(iVar11 + 0xc), piVar15 < *(int **)(iVar11 + 0x10))
+           ) {
+          do {
+            puVar8 = (uint *)*piVar15;
+            if (((param_2->excludeTypes & puVar8[2]) == 0) &&
+               ((*puVar8 & param_2->excludeFlags) == 0)) {
+              switch(*puVar8 & 0xff) {
+              case 0x40:
+                pSVar18 = param_2;
+                pfVar19 = (float *)local_a0;
+                for (iVar16 = 0x24; iVar16 != 0; iVar16 = iVar16 + -1) {
+                  *pfVar19 = (pSVar18->from).x;
+                  pSVar18 = (S_CollisionRay *)&(pSVar18->from).y;
+                  pfVar19 = pfVar19 + 1;
+                }
+                S_vector::OperatorMulAssign((S_vector *)local_a0,(S_matrix *)puVar8[0x11]);
+                pSVar12 = S_vector::RotateByMatrix
+                                    ((S_vector *)&param_2->dir,&local_c0,
+                                     *(S_matrix **)(*piVar15 + 0x44));
+                local_a0._16_4_ = pSVar12->x;
+                local_a0._20_4_ = pSVar12->y;
+                local_a0._24_4_ = pSVar12->z;
+                local_a0._28_4_ = pSVar12[1].x;
+                bVar10 = RayTestAabb((float *)(*piVar15 + 0x10),(float *)(*piVar15 + 0x20),
+                                     (S_CollisionRay *)local_a0);
+                if (bVar10) {
+                  param_2->hitT = (float)local_a0._88_4_;
+                  pSVar12 = S_vector::RotateByMatrix
+                                      ((S_vector *)(local_a0 + 0x70),&local_b0,
+                                       *(S_matrix **)(*piVar15 + 0x40));
+                  local_115 = 1;
+                  (param_2->hitNormal).x = pSVar12->x;
+                  (param_2->hitNormal).y = pSVar12->y;
+                  (param_2->hitNormal).z = pSVar12->z;
+                  (param_2->hitNormal).w = pSVar12[1].x;
+                  param_2->hit = (void *)*piVar15;
+                }
+                break;
+              case 0x41:
+                bVar10 = RayTestAabb((float *)(puVar8 + 4),(float *)(puVar8 + 8),param_2);
+                if (bVar10) {
+                  local_115 = 1;
+                  param_2->hit = (void *)*piVar15;
+                }
+                break;
+              case 0x42:
+              case 0x44:
+                fVar9 = (float)puVar8[0xc] - (param_2->from).x;
+                fVar3 = (float)puVar8[0xd] - (param_2->from).y;
+                fVar2 = (float)puVar8[0xe] - (param_2->from).z;
+                fVar1 = fVar9 * (param_2->dir).x +
+                        fVar3 * (param_2->dir).y + fVar2 * (param_2->dir).z;
+                fVar9 = fVar1 * fVar1 -
+                        ((fVar3 * fVar3 + fVar9 * fVar9 + fVar2 * fVar2) -
+                        (float)puVar8[0x13] * (float)puVar8[0x13]) * param_2->dirSquare;
+                if (((0.0 <= fVar9) &&
+                    (fVar9 = (fVar1 - SQRT(fVar9)) / param_2->dirSquare, 0.0 <= fVar9)) &&
+                   (fVar9 < param_2->hitT)) {
+                  fVar1 = (param_2->dir).y;
+                  fVar2 = (param_2->dir).z;
+                  local_115 = 1;
+                  fVar3 = (param_2->from).y;
+                  fVar4 = (param_2->from).z;
+                  fVar5 = (float)puVar8[0xd];
+                  fVar6 = (float)puVar8[0xe];
+                  (param_2->hitNormal).x =
+                       (float)puVar8[0xc] - (fVar9 * (param_2->dir).x + (param_2->from).x);
+                  (param_2->hitNormal).y = fVar5 - (fVar9 * fVar1 + fVar3);
+                  (param_2->hitNormal).z = fVar6 - (fVar9 * fVar2 + fVar4);
+                  param_2->hitT = fVar9;
+                  (param_2->hitNormal).w = local_e4;
+                  param_2->hit = (void *)*piVar15;
+                }
+                break;
+              case 0x49:
+                uVar13 = FUN_007e1360(param_2,puVar8);
+                if ((char)uVar13 != '\0') {
+                  local_115 = 1;
+                }
+              }
+            }
+            piVar15 = piVar15 + 1;
+          } while (piVar15 < *(int **)(iVar11 + 0x10));
+        }
+      }
+      iVar14 = iVar14 + 1;
+      iVar11 = iVar14;
+    }
+    return CONCAT31((int3)((uint)iVar11 >> 8),local_115);
+  }
+  return CONCAT22((short)((uint)in_EAX >> 0x10),
+                  (ushort)(fVar9 < 1e-08) << 8 | (ushort)NAN(fVar9) << 10 |
+                  (ushort)(fVar9 == 1e-08) << 0xe);
+}
+
+// @006f46e0 size=1130 callers=C_CollisionWorld::RayTestVolumes,C_CollisionWorld::RayTestVolumes2,006f3ca0,006f42c0,RayTestPrimitive,006f97a0,006fe750,006febd0...
+bool __cdecl RayTestAabb(float *min,float *max,S_CollisionRay *ray)
+{
+  // locals: float fVar1; float local_38; float local_34; float local_30; float local_2c; float local_28; float local_20; float local_1c; float local_18; float local_14
+  if ((ray->dir).x <= 1e-08) {
+    if (-1e-08 <= (ray->dir).x) {
+      if ((ray->from).x < *min) {
+        return false;
+      }
+      if (*max < (ray->from).x) {
+        return false;
+      }
+      local_34 = 0.0;
+      local_2c = 3.4028235e+38;
+    }
+    else {
+      local_2c = 1.0 / (ray->dir).x;
+      local_34 = (*max - (ray->from).x) * local_2c;
+      if (ray->hitT < local_34) {
+        return false;
+      }
+      local_2c = (*min - (ray->from).x) * local_2c;
+    }
+  }
+  else {
+    local_2c = 1.0 / (ray->dir).x;
+    local_34 = (*min - (ray->from).x) * local_2c;
+    if (ray->hitT < local_34) {
+      return false;
+    }
+    local_2c = (*max - (ray->from).x) * local_2c;
+  }
+  if ((ray->dir).z <= 1e-08) {
+    if (-1e-08 <= (ray->dir).z) {
+      if ((ray->from).z < min[2]) {
+        return false;
+      }
+      if (max[2] < (ray->from).z) {
+        return false;
+      }
+      local_30 = 0.0;
+      local_28 = 3.4028235e+38;
+    }
+    else {
+      local_28 = 1.0 / (ray->dir).z;
+      local_30 = (max[2] - (ray->from).z) * local_28;
+      if (ray->hitT < local_30) {
+        return false;
+      }
+      local_28 = (min[2] - (ray->from).z) * local_28;
+    }
+  }
+  else {
+    local_28 = 1.0 / (ray->dir).z;
+    local_30 = (min[2] - (ray->from).z) * local_28;
+    if (ray->hitT < local_30) {
+      return false;
+    }
+    local_28 = (max[2] - (ray->from).z) * local_28;
+  }
+  if ((local_30 <= local_2c) && (local_34 <= local_28)) {
+    if (ABS((ray->dir).y) <= 1e-08) {
+      if ((ray->from).y < min[1]) {
+        return false;
+      }
+      if (max[1] < (ray->from).y) {
+        return false;
+      }
+      fVar1 = 3.4028235e+38;
+      local_38 = 0.0;
+    }
+    else {
+      fVar1 = 1.0 / (ray->dir).y;
+      if ((ray->dir).y <= 0.0) {
+        local_38 = (max[1] - (ray->from).y) * fVar1;
+        if (ray->hitT < local_38) {
+          return false;
+        }
+        fVar1 = (min[1] - (ray->from).y) * fVar1;
+      }
+      else {
+        local_38 = (min[1] - (ray->from).y) * fVar1;
+        if (ray->hitT < local_38) {
+          return false;
+        }
+        fVar1 = (max[1] - (ray->from).y) * fVar1;
+      }
+    }
+    if (local_34 <= local_30) {
+      if (local_38 < local_30) {
+        if (fVar1 < local_30) {
+          return false;
+        }
+        if (local_30 < 0.0) {
+          return false;
+        }
+        fVar1 = (ray->dir).z;
+        local_18 = 1.0;
+        (ray->hitNormal).x = 0.0;
+        (ray->hitNormal).y = 0.0;
+        if (fVar1 <= 0.0) {
+          local_18 = -1.0;
+        }
+        (ray->hitNormal).z = local_18;
+        (ray->hitNormal).w = local_14;
+        ray->hitT = local_30;
+        return true;
+      }
+    }
+    else if (local_38 < local_34) {
+      if (fVar1 < local_34) {
+        return false;
+      }
+      if (local_34 < 0.0) {
+        return false;
+      }
+      local_20 = 1.0;
+      if ((ray->dir).x <= 0.0) {
+        local_20 = -1.0;
+      }
+      (ray->hitNormal).x = local_20;
+      (ray->hitNormal).y = 0.0;
+      (ray->hitNormal).z = 0.0;
+      (ray->hitNormal).w = local_14;
+      ray->hitT = local_34;
+      return true;
+    }
+    if (((local_38 <= local_2c) && (local_38 <= local_28)) && (0.0 <= local_38)) {
+      fVar1 = (ray->dir).y;
+      local_1c = 1.0;
+      (ray->hitNormal).x = 0.0;
+      if (fVar1 <= 0.0) {
+        local_1c = -1.0;
+      }
+      (ray->hitNormal).y = local_1c;
+      (ray->hitNormal).z = 0.0;
+      (ray->hitNormal).w = local_14;
+      ray->hitT = local_38;
+      return true;
+    }
+  }
+  return false;
+}
+
+// @006f4b50 size=535 callers=006f97a0
+bool __cdecl RayExitAabb(float *min,float *max,S_CollisionRay *ray)
+{
+  // locals: float fVar1; float fVar2; float local_20; float local_1c; float local_18; float local_14
+  fVar2 = (ray->dir).y;
+  if (1e-08 < ABS(fVar2)) {
+    if (0.0 <= fVar2) {
+      fVar1 = max[1];
+    }
+    else {
+      fVar1 = min[1];
+    }
+    fVar1 = (fVar1 - (ray->from).y) / fVar2;
+    if ((fVar1 < ray->hitT) && (0.0 < fVar1)) {
+      local_18 = 0.0;
+      local_1c = 1.0;
+      (ray->hitNormal).x = 0.0;
+      if (fVar2 <= 0.0) {
+        local_1c = -1.0;
+      }
+      (ray->hitNormal).y = local_1c;
+      goto LAB_006f4d42;
+    }
+  }
+  fVar2 = (ray->dir).x;
+  if (1e-08 < ABS(fVar2)) {
+    if (0.0 <= fVar2) {
+      fVar1 = *max;
+    }
+    else {
+      fVar1 = *min;
+    }
+    fVar1 = (fVar1 - (ray->from).x) / fVar2;
+    if ((fVar1 < ray->hitT) && (0.0 < fVar1)) {
+      local_18 = 0.0;
+      local_20 = 1.0;
+      if (fVar2 <= 0.0) {
+        local_20 = -1.0;
+      }
+      (ray->hitNormal).x = local_20;
+      (ray->hitNormal).y = 0.0;
+      goto LAB_006f4d42;
+    }
+  }
+  fVar2 = (ray->dir).z;
+  if (1e-08 < ABS(fVar2)) {
+    if (0.0 <= fVar2) {
+      fVar1 = max[2];
+    }
+    else {
+      fVar1 = min[2];
+    }
+    fVar1 = (fVar1 - (ray->from).z) / fVar2;
+    if ((fVar1 < ray->hitT) && (0.0 < fVar1)) {
+      local_18 = 1.0;
+      (ray->hitNormal).x = 0.0;
+      (ray->hitNormal).y = 0.0;
+      if (fVar2 <= 0.0) {
+        local_18 = -1.0;
+      }
+LAB_006f4d42:
+      ray->hitT = fVar1;
+      (ray->hitNormal).z = local_18;
+      (ray->hitNormal).w = local_14;
+      return true;
+    }
+  }
+  return false;
+}
+
+// @006f4d70 size=853 callers=C_CollisionWorld::RayTestVolumes,C_CollisionWorld::RayTestVolumes2,RayTestPrimitive,006febd0
+bool __cdecl RayTestCapsule(float radius,float halfHeight,S_CollisionRay *ray)
+{
+  // locals: float fVar1; float fVar2; float fVar3; float fVar4; float fVar5; float fVar6; float fVar7; float local_3c
+  fVar1 = (ray->dir).x;
+  fVar2 = (ray->dir).z;
+  local_3c = fVar1 * fVar1 + fVar2 * fVar2;
+  if (local_3c <= 1e-08) {
+    if (0.0 <= (ray->dir).y) {
+      fVar1 = -3.4028235e+38;
+    }
+    else {
+      fVar1 = 3.4028235e+38;
+    }
+  }
+  else {
+    fVar3 = (ray->from).x;
+    fVar4 = (ray->from).z;
+    fVar1 = -(fVar3 * fVar1 + fVar2 * fVar4);
+    fVar2 = fVar1 * fVar1 - ((fVar3 * fVar3 + fVar4 * fVar4) - radius * radius) * local_3c;
+    if (fVar2 < 0.0) {
+      return false;
+    }
+    local_3c = (fVar1 - SQRT(fVar2)) / local_3c;
+    if (ray->hitT < local_3c) {
+      return false;
+    }
+    if (local_3c < 0.0) {
+      return false;
+    }
+    fVar1 = local_3c * (ray->dir).y + (ray->from).y;
+  }
+  fVar2 = halfHeight - radius;
+  if (fVar1 <= fVar2) {
+    if (radius - halfHeight <= fVar1) {
+      fVar1 = (ray->dir).x;
+      (ray->hitNormal).y = 0.0;
+      ray->hitT = local_3c;
+      (ray->hitNormal).x = local_3c * fVar1 + (ray->from).x;
+      (ray->hitNormal).z = local_3c * (ray->dir).z + (ray->from).z;
+      return true;
+    }
+    fVar1 = (ray->from).x;
+    fVar3 = (ray->from).z;
+    fVar5 = fVar2 + (ray->from).y;
+    fVar4 = (ray->from).w;
+    fVar6 = -(fVar1 * (ray->dir).x + fVar5 * (ray->dir).y + fVar3 * (ray->dir).z);
+    fVar1 = fVar6 * fVar6 -
+            ((fVar5 * fVar5 + fVar1 * fVar1 + fVar3 * fVar3) - radius * radius) * ray->dirSquare;
+    if (0.0 <= fVar1) {
+      fVar1 = (fVar6 - SQRT(fVar1)) / ray->dirSquare;
+      if (ray->hitT < fVar1) {
+        return false;
+      }
+      ray->hitT = fVar1;
+      fVar3 = (ray->dir).y;
+      fVar5 = (ray->dir).z;
+      fVar6 = (ray->from).y;
+      (ray->hitNormal).x = fVar1 * (ray->dir).x + (ray->from).x;
+      fVar7 = (ray->from).z;
+      (ray->hitNormal).y = fVar1 * fVar3 + fVar6;
+      (ray->hitNormal).z = fVar1 * fVar5 + fVar7;
+      (ray->hitNormal).w = fVar4;
+      (ray->hitNormal).y = fVar2 + (ray->hitNormal).y;
+      return true;
+    }
+    return false;
+  }
+  fVar1 = (ray->from).x;
+  fVar3 = (ray->from).z;
+  fVar5 = (ray->from).y - fVar2;
+  fVar4 = (ray->from).w;
+  fVar6 = -(fVar1 * (ray->dir).x + fVar5 * (ray->dir).y + fVar3 * (ray->dir).z);
+  fVar1 = fVar6 * fVar6 -
+          ((fVar5 * fVar5 + fVar1 * fVar1 + fVar3 * fVar3) - radius * radius) * ray->dirSquare;
+  if (fVar1 < 0.0) {
+    return false;
+  }
+  fVar1 = (fVar6 - SQRT(fVar1)) / ray->dirSquare;
+  if (ray->hitT < fVar1) {
+    return false;
+  }
+  ray->hitT = fVar1;
+  fVar3 = (ray->dir).y;
+  fVar5 = (ray->dir).z;
+  fVar6 = (ray->from).y;
+  (ray->hitNormal).x = fVar1 * (ray->dir).x + (ray->from).x;
+  fVar7 = (ray->from).z;
+  (ray->hitNormal).y = fVar1 * fVar3 + fVar6;
+  (ray->hitNormal).z = fVar1 * fVar5 + fVar7;
+  (ray->hitNormal).w = fVar4;
+  (ray->hitNormal).y = (ray->hitNormal).y - fVar2;
+  return true;
+}
+
+// @006f50d0 size=1736 callers=RayTestCell
+bool __cdecl RayTestPrimitive(void *primitive,S_CollisionRay *ray)
+{
+  // locals: float fVar1; float fVar2; float fVar3; float fVar4; float fVar5; float fVar6; float fVar7; float fVar8; float fVar9; bool bVar10; uint uVar11; S_vector *pSVar12; int iVar13; S_CollisionRay *pSVar14; float *pfVar15; S_vector *result; S_matrix *m; float local_1f4; S_vector local_1e0; S_vector local_1d0; float local_1c0; undefined4 local_1bc; float local_1b8; S_vector local_1a0; S_vector local_190; S_vector local_180; S_vector local_170; S_vector local_160; S_vector local_150; S_vector local_140; undefined1 local_130 [144]; undefined1 local_a0 [156]
+  switch(*(uint *)primitive & 0xff) {
+  case 0x80:
+    pSVar14 = ray;
+    pfVar15 = (float *)local_130;
+    for (iVar13 = 0x24; iVar13 != 0; iVar13 = iVar13 + -1) {
+      *pfVar15 = (pSVar14->from).x;
+      pSVar14 = (S_CollisionRay *)&(pSVar14->from).y;
+      pfVar15 = pfVar15 + 1;
+    }
+    S_vector::OperatorMulAssign((S_vector *)local_130,(S_matrix *)((int)primitive + 0x80));
+    pSVar12 = S_vector::RotateByMatrix
+                        ((S_vector *)&ray->dir,&local_140,(S_matrix *)((int)primitive + 0x80));
+    local_130._16_4_ = pSVar12->x;
+    local_130._20_4_ = pSVar12->y;
+    local_130._24_4_ = pSVar12->z;
+    local_130._28_4_ = pSVar12[1].x;
+    bVar10 = RayTestAabb((float *)((int)primitive + 0x20),(float *)((int)primitive + 0x30),
+                         (S_CollisionRay *)local_130);
+    if (bVar10) {
+      m = (S_matrix *)((int)primitive + 0x40);
+      result = &local_150;
+      ray->hitT = (float)local_130._88_4_;
+      pSVar12 = (S_vector *)(local_130 + 0x70);
+LAB_006f5769:
+      pSVar12 = S_vector::RotateByMatrix(pSVar12,result,m);
+      (ray->hitNormal).x = pSVar12->x;
+      (ray->hitNormal).y = pSVar12->y;
+      (ray->hitNormal).z = pSVar12->z;
+      fVar9 = pSVar12[1].x;
+      ray->hit = primitive;
+      (ray->hitNormal).w = fVar9;
+      return true;
+    }
+    break;
+  case 0x81:
+    local_1c0 = *(float *)((int)primitive + 0x14);
+    local_1bc = *(undefined4 *)((int)primitive + 0x18);
+    local_1b8 = *(float *)((int)primitive + 0x1c);
+    local_1e0.x = *(float *)((int)primitive + 8);
+    local_1e0.y = *(float *)((int)primitive + 0xc);
+    local_1e0.z = *(float *)((int)primitive + 0x10);
+    bVar10 = RayTestAabb(&local_1e0.x,&local_1c0,ray);
+    if (bVar10) {
+      ray->hit = primitive;
+      return true;
+    }
+    break;
+  case 0x82:
+    if (ray->dirSquare != 0.0) {
+      fVar9 = *(float *)((int)primitive + 0x10) - (ray->from).x;
+      fVar2 = *(float *)((int)primitive + 0x14) - (ray->from).y;
+      fVar8 = *(float *)((int)primitive + 0x18) - (ray->from).z;
+      fVar1 = fVar9 * (ray->dir).x + fVar2 * (ray->dir).y + fVar8 * (ray->dir).z;
+      fVar9 = fVar1 * fVar1 -
+              ((fVar9 * fVar9 + fVar2 * fVar2 + fVar8 * fVar8) -
+              *(float *)((int)primitive + 8) * *(float *)((int)primitive + 8)) * ray->dirSquare;
+      if (((0.0 <= fVar9) && (fVar9 = (fVar1 - SQRT(fVar9)) / ray->dirSquare, 0.0 <= fVar9)) &&
+         (fVar9 < ray->hitT)) {
+        fVar8 = (ray->dir).y;
+        fVar1 = (ray->dir).z;
+        fVar2 = (ray->from).y;
+        fVar7 = (ray->from).z;
+        fVar3 = *(float *)((int)primitive + 0x14);
+        fVar4 = *(float *)((int)primitive + 0x18);
+        (ray->hitNormal).x =
+             *(float *)((int)primitive + 0x10) - (fVar9 * (ray->dir).x + (ray->from).x);
+        ray->hit = primitive;
+        (ray->hitNormal).y = fVar3 - (fVar9 * fVar8 + fVar2);
+        (ray->hitNormal).z = fVar4 - (fVar9 * fVar1 + fVar7);
+        ray->hitT = fVar9;
+        (ray->hitNormal).w = local_1f4;
+        return true;
+      }
+    }
+    break;
+  case 0x83:
+    pSVar14 = ray;
+    pfVar15 = (float *)local_130;
+    for (iVar13 = 0x24; iVar13 != 0; iVar13 = iVar13 + -1) {
+      *pfVar15 = (pSVar14->from).x;
+      pSVar14 = (S_CollisionRay *)&(pSVar14->from).y;
+      pfVar15 = pfVar15 + 1;
+    }
+    S_vector::OperatorMulAssign((S_vector *)local_130,(S_matrix *)((int)primitive + 0x60));
+    pSVar12 = S_vector::RotateByMatrix
+                        ((S_vector *)&ray->dir,&local_180,(S_matrix *)((int)primitive + 0x60));
+    local_130._16_4_ = pSVar12->x;
+    local_130._20_4_ = pSVar12->y;
+    local_130._24_4_ = pSVar12->z;
+    local_130._28_4_ = pSVar12[1].x;
+    local_1c0 = *(float *)((int)primitive + 0x14);
+    local_1b8 = *(float *)((int)primitive + 0x1c);
+    if (((1e-08 < ABS((float)local_130._20_4_)) &&
+        (fVar9 = -((float)local_130._4_4_ / (float)local_130._20_4_), fVar9 < ray->hitT)) &&
+       (0.0 < fVar9)) {
+      fVar8 = (float)local_130._16_4_ * fVar9 + (float)local_130._0_4_;
+      fVar1 = (float)local_130._8_4_ + (float)local_130._24_4_ * fVar9;
+      if (((*(float *)((int)primitive + 8) <= fVar8) && (fVar8 < local_1c0 != (fVar8 == local_1c0)))
+         && ((*(float *)((int)primitive + 0x10) <= fVar1 &&
+             (fVar1 < local_1b8 != (fVar1 == local_1b8))))) {
+        ray->hitT = fVar9;
+        if (0.0 < (float)local_130._20_4_) {
+          m = (S_matrix *)((int)primitive + 0x20);
+          result = &local_170;
+          pSVar12 = &local_190;
+          local_190.x = 0.0;
+          local_190.y = 1.0;
+          local_190.z = 0.0;
+        }
+        else {
+          local_1e0.x = 0.0;
+          local_1e0.y = -1.0;
+          local_1e0.z = 0.0;
+          m = (S_matrix *)((int)primitive + 0x20);
+          result = &local_160;
+          pSVar12 = &local_1e0;
+        }
+        goto LAB_006f5769;
+      }
+    }
+    break;
+  case 0x84:
+    fVar1 = *(float *)((int)primitive + 8) - (ray->from).x;
+    fVar9 = (ray->dir).x;
+    fVar2 = *(float *)((int)primitive + 0xc) - (ray->from).z;
+    fVar8 = (ray->dir).z;
+    fVar7 = fVar9 * fVar9 + fVar8 * fVar8;
+    if ((int)fVar7 < 0x322bcc77) {
+      fVar7 = 0.0;
+    }
+    else if (1e-08 <= ABS(fVar7 - 1.0)) {
+      fVar7 = SQRT(fVar7);
+    }
+    else {
+      fVar7 = 1.0;
+    }
+    if (1e-08 <= ABS(fVar7)) {
+      fVar7 = 1.0 / fVar7;
+      fVar8 = fVar7 * 0.0 * 0.0 + fVar9 * fVar7 * fVar1 + fVar2 * fVar8 * fVar7;
+      fVar9 = *(float *)((int)primitive + 0x10) * *(float *)((int)primitive + 0x10) -
+              ((fVar1 * fVar1 + fVar2 * fVar2) - fVar8 * fVar8);
+      if (((0.0 <= fVar9) && (fVar7 = (fVar8 - SQRT(fVar9)) * fVar7, 0.0 <= fVar7)) &&
+         (fVar7 < ray->hitT)) {
+        fVar9 = (ray->dir).x;
+        fVar8 = (ray->dir).y;
+        fVar1 = (ray->dir).z;
+        fVar2 = (ray->from).x;
+        fVar3 = (ray->from).y;
+        fVar4 = (ray->from).z;
+        fVar5 = *(float *)((int)primitive + 8);
+        fVar6 = *(float *)((int)primitive + 0xc);
+        ray->hit = primitive;
+        (ray->hitNormal).x = fVar5 - (fVar7 * fVar9 + fVar2);
+        (ray->hitNormal).y = -(fVar7 * fVar8 + fVar3);
+        ray->hitT = fVar7;
+        (ray->hitNormal).z = fVar6 - (fVar7 * fVar1 + fVar4);
+        (ray->hitNormal).w = local_1f4;
+        (ray->hitNormal).y = 0.0;
+        return true;
+      }
+    }
+    break;
+  case 0x85:
+    uVar11 = FUN_007e18d0(ray,primitive);
+    if ((char)uVar11 != '\0') {
+      return true;
+    }
+    break;
+  case 0x87:
+    pSVar14 = ray;
+    pfVar15 = (float *)local_a0;
+    for (iVar13 = 0x24; iVar13 != 0; iVar13 = iVar13 + -1) {
+      *pfVar15 = (pSVar14->from).x;
+      pSVar14 = (S_CollisionRay *)&(pSVar14->from).y;
+      pfVar15 = pfVar15 + 1;
+    }
+    S_vector::OperatorMulAssign((S_vector *)local_a0,(S_matrix *)((int)primitive + 0x50));
+    pSVar12 = S_vector::RotateByMatrix
+                        ((S_vector *)&ray->dir,&local_1a0,(S_matrix *)((int)primitive + 0x50));
+    local_a0._16_4_ = pSVar12->x;
+    local_a0._20_4_ = pSVar12->y;
+    local_a0._24_4_ = pSVar12->z;
+    local_a0._28_4_ = pSVar12[1].x;
+    bVar10 = RayTestCapsule(*(float *)((int)primitive + 0xc),*(float *)((int)primitive + 8),
+                            (S_CollisionRay *)local_a0);
+    if (bVar10) {
+      m = (S_matrix *)((int)primitive + 0x10);
+      result = &local_1d0;
+      ray->hitT = (float)local_a0._88_4_;
+      pSVar12 = (S_vector *)(local_a0 + 0x70);
+      goto LAB_006f5769;
+    }
+  }
+  return false;
+}
+
+// @006f57c0 size=1146 callers=C_CollisionWorld::RayTestBrute,006f62b0,006f67d0,006f6c40,C_CollisionWorld::RayTest,C_CollisionWorld::RayTestThunk
+bool __cdecl RayTestCell(S_CollisionMeshCell *cell,S_CollisionRay *ray)
+{
+  // locals: uint *primitive; float *pfVar1; float *pfVar2; float fVar3; float fVar4; float fVar5; float *pfVar6; float fVar7; float fVar8; float fVar9; float fVar10; float fVar11; float fVar12; float fVar13; bool bVar14
+  void **ppvVar15;
+  int iVar16;
+  byte bVar17;
+  bool local_75;
+  float local_74;
+  float local_48;
+  iVar16 = cell->count;
+  ppvVar15 = cell->entries;
+  local_75 = false;
+  do {
+    if (iVar16 < 1) {
+      return local_75;
+    }
+    primitive = *ppvVar15;
+    ppvVar15 = ppvVar15 + 1;
+    if ((ray->excludeFlags & *primitive) != 0) goto switchD_006f5a07_default;
+    if ((*primitive & 0xa0) != 0) {
+      bVar14 = RayTestPrimitive(primitive,ray);
+      local_75 = (bool)(local_75 | bVar14);
+      goto switchD_006f5a07_default;
+    }
+    pfVar1 = (float *)primitive[3];
+    if (*pfVar1 < (ray->boxMin).x) goto switchD_006f5a07_default;
+    pfVar2 = (float *)primitive[1];
+    if ((ray->boxMax).x < *pfVar2) {
+      return local_75;
+    }
+    local_48 = pfVar2[2];
+    fVar3 = pfVar1[2];
+    fVar4 = fVar3;
+    if ((local_48 <= fVar3) && (fVar4 = local_48, local_48 < fVar3)) {
+      local_48 = fVar3;
+    }
+    fVar3 = *(float *)(primitive[2] + 8);
+    fVar5 = fVar3;
+    if ((fVar4 <= fVar3) && (fVar5 = fVar4, local_48 < fVar3)) {
+      local_48 = fVar3;
+    }
+    fVar3 = (ray->boxMax).z;
+    if ((fVar5 < fVar3 == (fVar5 == fVar3)) || (local_48 < (ray->boxMin).z))
+    goto switchD_006f5a07_default;
+    fVar3 = (ray->dir).x * (float)primitive[4] +
+            (ray->dir).y * (float)primitive[5] + (ray->dir).z * (float)primitive[6];
+    if ((*primitive & 0x40000) == 0) {
+      bVar17 = fVar3 < 1e-08 | (byte)((ushort)((ushort)NAN(fVar3) << 10) >> 8);
+    }
+    else {
+      bVar17 = ABS(fVar3) < 1e-08 | (byte)((ushort)((ushort)NAN(ABS(fVar3)) << 10) >> 8);
+    }
+    if ((((POPCOUNT(bVar17) & 1U) != 0) ||
+        (fVar3 = -(((float)primitive[4] * (ray->from).x +
+                    (float)primitive[5] * (ray->from).y + (float)primitive[6] * (ray->from).z +
+                   (float)primitive[7]) / fVar3), fVar3 < 0.0)) ||
+       (ray->hitT < fVar3 != (ray->hitT == fVar3))) goto switchD_006f5a07_default;
+    fVar4 = *pfVar2;
+    fVar5 = pfVar2[2];
+    pfVar6 = (float *)primitive[2];
+    fVar9 = (fVar3 * (ray->dir).x + (ray->from).x) - fVar4;
+    fVar8 = (fVar3 * (ray->dir).z + (ray->from).z) - fVar5;
+    fVar7 = (fVar3 * (ray->dir).y + (ray->from).y) - pfVar2[1];
+    fVar10 = *pfVar6 - fVar4;
+    fVar4 = *pfVar1 - fVar4;
+    fVar11 = pfVar6[2] - fVar5;
+    fVar5 = pfVar1[2] - fVar5;
+    fVar12 = pfVar6[1] - pfVar2[1];
+    fVar13 = pfVar1[1] - pfVar2[1];
+    switch((char)*primitive) {
+    case '\x01':
+      local_74 = fVar7 / fVar13;
+      break;
+    case '\x02':
+      local_74 = (fVar12 * fVar8 - fVar11 * fVar7) / (fVar12 * fVar5 - fVar13 * fVar11);
+      goto LAB_006f5b02;
+    case '\x03':
+      local_74 = fVar9 / fVar4;
+      break;
+    case '\x04':
+      local_74 = fVar8 / fVar5;
+      goto LAB_006f5a94;
+    case '\x05':
+      local_74 = (fVar10 * fVar8 - fVar11 * fVar9) / (fVar5 * fVar10 - fVar11 * fVar4);
+LAB_006f5a94:
+      if ((0.0 <= local_74) && (local_74 <= 1.0)) {
+        fVar11 = (fVar9 - fVar4 * local_74) / fVar10;
+        goto LAB_006f5b3e;
+      }
+      goto switchD_006f5a07_default;
+    case '\x06':
+      local_74 = fVar9 / fVar4;
+LAB_006f5b02:
+      if ((0.0 <= local_74) && (local_74 <= 1.0)) {
+        fVar11 = (fVar7 - fVar13 * local_74) / fVar12;
+        goto LAB_006f5b3e;
+      }
+      goto switchD_006f5a07_default;
+    case '\a':
+      fVar5 = (fVar10 * fVar7 - fVar12 * fVar9) / (fVar13 * fVar10 - fVar12 * fVar4);
+      if (((fVar5 < 0.0) || (1.0 < fVar5)) ||
+         ((fVar10 = (fVar9 - fVar4 * fVar5) / fVar10, fVar10 < 0.0 || (1.0 < fVar5 + fVar10))))
+      goto switchD_006f5a07_default;
+      goto LAB_006f5bed;
+    default:
+      goto switchD_006f5a07_default;
+    }
+    if ((0.0 <= local_74) && (local_74 <= 1.0)) {
+      fVar11 = (fVar8 - fVar5 * local_74) / fVar11;
+LAB_006f5b3e:
+      if ((0.0 <= fVar11) && (local_74 + fVar11 <= 1.0)) {
+LAB_006f5bed:
+        ray->hitT = fVar3;
+        (ray->hitNormal).x = (float)primitive[4];
+        local_75 = true;
+        (ray->hitNormal).y = (float)primitive[5];
+        (ray->hitNormal).z = (float)primitive[6];
+        fVar3 = (float)primitive[7];
+        ray->hit = primitive;
+        (ray->hitNormal).w = fVar3;
+      }
+    }
+switchD_006f5a07_default:
+    iVar16 = iVar16 + -1;
+  } while( true );
+}
+
+// @006f5c60 size=1606 callers=006f6c40,C_CollisionWorld::RayTest,CollisionRayTest,C_CollisionWorld::RayTestThunk,00718840
+int __thiscall
+C_CollisionWorld::RayTestBrute
+          (C_CollisionWorld *this,float *param_1,float *param_2,float *param_3,float *param_4,
+          uint param_5,uint param_6)
+{
+  // locals: float *pfVar1; float *pfVar2; float fVar3; float fVar4; float fVar5; float fVar6; S_CollisionMesh *pSVar7; S_CollisionMeshCell *cell; int iVar8; int iVar9; S_vector4 *pSVar10; float *pfVar11; int iVar12; bool bVar13; longlong lVar14; longlong lVar15; longlong lVar16; float local_e4; int local_d0; int local_cc; int local_c4; int local_c0; int local_bc; S_CollisionRay local_b0
+  if (this->m_mesh == (S_CollisionMesh *)0x0) {
+    return 0;
+  }
+  bVar13 = param_6 == 0xffffffff;
+  if (bVar13) {
+    param_6 = 0;
+  }
+  local_b0.hit = (void *)0x0;
+  local_b0.from.x = *param_1;
+  local_b0.excludeFlags = param_6 | 0x20;
+  local_b0.from.y = param_1[1];
+  local_b0.hitT = 1.0;
+  local_b0.from.z = param_1[2];
+  local_b0.from.w = param_1[3];
+  local_b0.to.x = *param_1 + *param_2;
+  local_b0.dir.x = *param_2;
+  local_b0.dir.y = param_2[1];
+  local_b0.dir.z = param_2[2];
+  pfVar1 = param_1 + 1;
+  local_b0.dir.w = param_2[3];
+  local_b0.to.y = *pfVar1 + param_2[1];
+  pfVar2 = param_1 + 2;
+  local_b0.to.z = *pfVar2 + param_2[2];
+  local_b0.excludeTypes = param_5 | 8;
+  pSVar10 = (S_vector4 *)param_1;
+  if (local_b0.to.x <= *param_1) {
+    pSVar10 = &local_b0.to;
+  }
+  local_b0.boxMin.x = pSVar10->x;
+  pSVar10 = (S_vector4 *)param_1;
+  if (*param_1 <= local_b0.to.x) {
+    pSVar10 = &local_b0.to;
+  }
+  local_b0.boxMax.x = pSVar10->x;
+  pfVar11 = pfVar1;
+  if (local_b0.to.y <= *pfVar1) {
+    pfVar11 = &local_b0.to.y;
+  }
+  local_b0.boxMin.y = *pfVar11;
+  pfVar11 = pfVar1;
+  if (*pfVar1 <= local_b0.to.y) {
+    pfVar11 = &local_b0.to.y;
+  }
+  local_b0.boxMax.y = *pfVar11;
+  pfVar11 = pfVar2;
+  if (local_b0.to.z <= *pfVar2) {
+    pfVar11 = &local_b0.to.z;
+  }
+  local_b0.boxMin.z = *pfVar11;
+  pfVar11 = pfVar2;
+  if (*pfVar2 <= local_b0.to.z) {
+    pfVar11 = &local_b0.to.z;
+  }
+  local_b0.boxMax.z = *pfVar11;
+  pfVar11 = pfVar1;
+  if (local_b0.to.y <= *pfVar1) {
+    pfVar11 = &local_b0.to.y;
+  }
+  fVar5 = *pfVar11;
+  pfVar11 = pfVar1;
+  if (*pfVar1 <= local_b0.to.y) {
+    pfVar11 = &local_b0.to.y;
+  }
+  fVar6 = *pfVar11;
+  local_b0.dirSquare = *param_2 * *param_2 + param_2[1] * param_2[1] + param_2[2] * param_2[2];
+  local_b0.dirLength = SQRT(local_b0.dirSquare);
+  if ((param_5 != 0xffffffff) && (this->m_grid != (S_CollisionGrid *)0x0)) {
+    RayTestVolumes(this,&local_b0);
+  }
+  if (!bVar13) {
+    pSVar7 = this->m_mesh;
+    lVar14 = __ftol();
+    local_bc = (int)lVar14;
+    lVar14 = __ftol();
+    lVar15 = __ftol();
+    local_d0 = (int)lVar15;
+    lVar15 = __ftol();
+    lVar16 = __ftol();
+    iVar12 = (int)lVar16;
+    lVar16 = __ftol();
+    if (local_bc < 0) {
+      local_bc = 0;
+    }
+    if (local_d0 < 0) {
+      local_d0 = 0;
+    }
+    if (iVar12 < 0) {
+      iVar12 = 0;
+    }
+    local_c4 = (int)lVar14;
+    if (pSVar7->cellsX < (int)lVar14) {
+      local_c4 = pSVar7->cellsX;
+    }
+    local_c0 = (int)lVar15;
+    if (pSVar7->cellsY < (int)lVar15) {
+      local_c0 = pSVar7->cellsY;
+    }
+    local_cc = (int)lVar16;
+    if (pSVar7->cellsZ < (int)lVar16) {
+      local_cc = pSVar7->cellsZ;
+    }
+    local_b0.visited = 0;
+    for (; iVar8 = local_d0, iVar12 < local_cc; iVar12 = iVar12 + 1) {
+      for (; iVar9 = local_bc, iVar8 < local_c0; iVar8 = iVar8 + 1) {
+        for (; iVar9 < local_c4; iVar9 = iVar9 + 1) {
+          pSVar7 = this->m_mesh;
+          cell = pSVar7->cells[(pSVar7->cellsZ * iVar8 + iVar12) * pSVar7->cellsX + iVar9];
+          if ((fVar5 <= cell->maxY) && (cell->minY < fVar6 != (cell->minY == fVar6))) {
+            RayTestCell(cell,&local_b0);
+          }
+          local_b0.visited = local_b0.visited | 2;
+        }
+      }
+      local_b0.visited = local_b0.visited | 1;
+    }
+  }
+  if (local_b0.hit == (void *)0x0) {
+    return 0;
+  }
+  if (param_3 != (float *)0x0) {
+    fVar5 = param_2[1];
+    fVar6 = param_2[2];
+    fVar3 = *pfVar1;
+    fVar4 = *pfVar2;
+    *param_3 = local_b0.hitT * *param_2 + *param_1;
+    param_3[1] = local_b0.hitT * fVar5 + fVar3;
+    param_3[2] = local_b0.hitT * fVar6 + fVar4;
+    param_3[3] = local_e4;
+  }
+  if (param_4 != (float *)0x0) {
+    *param_4 = -local_b0.hitNormal.x;
+    param_4[1] = -local_b0.hitNormal.y;
+    param_4[2] = -local_b0.hitNormal.z;
+    param_4[3] = local_e4;
+    fVar5 = param_4[2] * param_4[2] + param_4[1] * param_4[1] + *param_4 * *param_4;
+    if (1e-08 <= ABS(fVar5 - 1.0)) {
+      if (fVar5 < 1e-08) {
+        if (*param_4 != 0.0) {
+          if (*param_4 < 0.0) {
+            *param_4 = -1.0;
+            return (int)local_b0.hit;
+          }
+          *param_4 = 1.0;
+          return (int)local_b0.hit;
+        }
+        if (param_4[2] == 0.0) {
+          if (param_4[1] < 0.0) {
+            param_4[1] = -1.0;
+            return (int)local_b0.hit;
+          }
+          param_4[1] = 1.0;
+          return (int)local_b0.hit;
+        }
+        if (param_4[2] < 0.0) {
+          param_4[2] = -1.0;
+          return (int)local_b0.hit;
+        }
+        param_4[2] = 1.0;
+        return (int)local_b0.hit;
+      }
+      fVar5 = 1.0 / SQRT(fVar5);
+      *param_4 = fVar5 * *param_4;
+      param_4[1] = fVar5 * param_4[1];
+      param_4[2] = fVar5 * param_4[2];
+    }
+  }
+  return (int)local_b0.hit;
+}
+
+// @006f62b0 size=1311 callers=007187a0
+int __thiscall
+FUN_006f62b0(void *this,float *param_1,float *param_2,float *param_3,float *param_4,uint param_5,
+            uint param_6)
+{
+  // locals: float *pfVar1; float *pfVar2; float fVar3; float fVar4; float fVar5; float fVar6; int iVar7; S_CollisionMeshCell *cell; S_vector4 *pSVar8; float *pfVar9; int iVar10; int iVar11; bool bVar12; longlong lVar13; longlong lVar14; float local_d4; int local_c8; int local_bc; S_CollisionRay local_b0
+  if (*(int *)((int)this + 0x3e4) == 0) {
+    return 0;
+  }
+  bVar12 = param_6 == 0xffffffff;
+  if (bVar12) {
+    param_6 = 0;
+  }
+  local_b0.hit = (void *)0x0;
+  local_b0.from.x = *param_1;
+  local_b0.excludeFlags = param_6 | 0x20;
+  local_b0.from.y = param_1[1];
+  local_b0.hitT = 1.0;
+  local_b0.from.z = param_1[2];
+  local_b0.from.w = param_1[3];
+  local_b0.to.x = *param_1 + *param_2;
+  local_b0.dir.x = *param_2;
+  local_b0.dir.y = param_2[1];
+  local_b0.dir.z = param_2[2];
+  pfVar1 = param_1 + 1;
+  local_b0.dir.w = param_2[3];
+  pfVar2 = param_1 + 2;
+  local_b0.to.z = *pfVar2 + param_2[2];
+  local_b0.to.y = *pfVar1 + param_2[1];
+  local_b0.excludeTypes = param_5 | 8;
+  pSVar8 = (S_vector4 *)param_1;
+  if (local_b0.to.x <= *param_1) {
+    pSVar8 = &local_b0.to;
+  }
+  local_b0.boxMin.x = pSVar8->x;
+  pfVar9 = pfVar2;
+  if (local_b0.to.z <= *pfVar2) {
+    pfVar9 = &local_b0.to.z;
+  }
+  local_b0.boxMin.z = *pfVar9;
+  pSVar8 = (S_vector4 *)param_1;
+  if (*param_1 <= local_b0.to.x) {
+    pSVar8 = &local_b0.to;
+  }
+  local_b0.boxMax.x = pSVar8->x;
+  pfVar9 = pfVar2;
+  if (*pfVar2 <= local_b0.to.z) {
+    pfVar9 = &local_b0.to.z;
+  }
+  local_b0.boxMax.z = *pfVar9;
+  pfVar9 = pfVar1;
+  if (*pfVar1 + param_2[1] <= *pfVar1) {
+    pfVar9 = &local_b0.to.y;
+  }
+  fVar6 = *pfVar9;
+  local_b0.dirSquare = *param_2 * *param_2 + param_2[1] * param_2[1] + param_2[2] * param_2[2];
+  local_b0.dirLength = SQRT(local_b0.dirSquare);
+  if ((param_5 != 0xffffffff) && (*(int *)((int)this + 0x3ec) != 0)) {
+    C_CollisionWorld::RayTestVolumes2(this,&local_b0);
+  }
+  if (!bVar12) {
+    iVar7 = *(int *)((int)this + 0x3e4);
+    lVar13 = __ftol();
+    local_bc = (int)lVar13;
+    lVar13 = __ftol();
+    lVar14 = __ftol();
+    iVar11 = (int)lVar14;
+    lVar14 = __ftol();
+    if (local_bc < 0) {
+      local_bc = 0;
+    }
+    if (iVar11 < 0) {
+      iVar11 = 0;
+    }
+    iVar10 = *(int *)(iVar7 + 0x18);
+    local_c8 = (int)lVar13;
+    if (iVar10 < (int)lVar13) {
+      local_c8 = iVar10;
+    }
+    iVar7 = *(int *)(iVar7 + 0x1c);
+    iVar10 = (int)lVar14;
+    if (iVar7 < (int)lVar14) {
+      iVar10 = iVar7;
+    }
+    local_b0.visited = 0;
+    for (; iVar7 = local_bc, iVar11 < iVar10; iVar11 = iVar11 + 1) {
+      for (; iVar7 < local_c8; iVar7 = iVar7 + 1) {
+        cell = *(S_CollisionMeshCell **)
+                (*(int *)(*(int *)((int)this + 0x3e4) + 0x44) +
+                (*(int *)(*(int *)((int)this + 0x3e4) + 0x18) * iVar11 + iVar7) * 4);
+        if (fVar6 <= cell->maxY) {
+          RayTestCell(cell,&local_b0);
+        }
+        local_b0.visited = local_b0.visited | 2;
+      }
+      local_b0.visited = local_b0.visited | 1;
+    }
+  }
+  if (local_b0.hit == (void *)0x0) {
+    return 0;
+  }
+  if (param_3 != (float *)0x0) {
+    fVar6 = param_2[1];
+    fVar3 = param_2[2];
+    fVar4 = *pfVar1;
+    fVar5 = *pfVar2;
+    *param_3 = local_b0.hitT * *param_2 + *param_1;
+    param_3[1] = local_b0.hitT * fVar6 + fVar4;
+    param_3[2] = local_b0.hitT * fVar3 + fVar5;
+    param_3[3] = local_d4;
+  }
+  if (param_4 != (float *)0x0) {
+    *param_4 = -local_b0.hitNormal.x;
+    param_4[1] = -local_b0.hitNormal.y;
+    param_4[2] = -local_b0.hitNormal.z;
+    param_4[3] = local_d4;
+    fVar6 = param_4[2] * param_4[2] + param_4[1] * param_4[1] + *param_4 * *param_4;
+    if (1e-08 <= ABS(fVar6 - 1.0)) {
+      if (fVar6 < 1e-08) {
+        if (*param_4 != 0.0) {
+          if (*param_4 < 0.0) {
+            *param_4 = -1.0;
+            return (int)local_b0.hit;
+          }
+          *param_4 = 1.0;
+          return (int)local_b0.hit;
+        }
+        if (param_4[2] == 0.0) {
+          if (param_4[1] < 0.0) {
+            param_4[1] = -1.0;
+            return (int)local_b0.hit;
+          }
+          param_4[1] = 1.0;
+          return (int)local_b0.hit;
+        }
+        if (param_4[2] < 0.0) {
+          param_4[2] = -1.0;
+          return (int)local_b0.hit;
+        }
+        param_4[2] = 1.0;
+        return (int)local_b0.hit;
+      }
+      fVar6 = 1.0 / SQRT(fVar6);
+      *param_4 = fVar6 * *param_4;
+      param_4[1] = fVar6 * param_4[1];
+      param_4[2] = fVar6 * param_4[2];
+    }
+  }
+  return (int)local_b0.hit;
+}
+
+// @006f67d0 size=1128 callers=007187d0
+int __thiscall
+FUN_006f67d0(void *this,float *param_1,float *param_2,undefined4 *param_3,float *param_4,
+            uint param_5)
+{
+  // locals: float fVar1; int iVar2; S_CollisionMeshCell *cell; S_vector4 *pSVar3; float *pfVar4; int iVar5; float *pfVar6; float *pfVar7; int iVar8; longlong lVar9; longlong lVar10; int local_c4; float local_b4; int local_ac; S_CollisionRay local_a0
+  if (*(int *)((int)this + 0x3e4) == 0) {
+    return 0;
+  }
+  local_a0.hit = (void *)0x0;
+  local_a0.hitT = 1.0;
+  local_a0.from.x = *param_1;
+  pfVar7 = param_1 + 1;
+  local_a0.excludeFlags = 0x20;
+  local_a0.from.y = param_1[1];
+  local_a0.from.z = param_1[2];
+  local_a0.from.w = param_1[3];
+  local_a0.to.x = *param_1 + *param_2;
+  local_a0.dir.x = *param_2;
+  local_a0.dir.y = param_2[1];
+  local_a0.dir.z = param_2[2];
+  pfVar6 = param_1 + 2;
+  local_a0.dir.w = param_2[3];
+  local_a0.to.z = *pfVar6 + param_2[2];
+  local_a0.to.y = *pfVar7 + param_2[1];
+  local_a0.excludeTypes = param_5 | 8;
+  pSVar3 = (S_vector4 *)param_1;
+  if (local_a0.to.x <= *param_1) {
+    pSVar3 = &local_a0.to;
+  }
+  local_a0.boxMin.x = pSVar3->x;
+  pfVar4 = pfVar6;
+  if (local_a0.to.z <= *pfVar6) {
+    pfVar4 = &local_a0.to.z;
+  }
+  local_a0.boxMin.z = *pfVar4;
+  if (*param_1 <= local_a0.to.x) {
+    param_1 = &local_a0.to.x;
+  }
+  local_a0.boxMax.x = ((S_vector4 *)param_1)->x;
+  if (*pfVar6 <= local_a0.to.z) {
+    pfVar6 = &local_a0.to.z;
+  }
+  local_a0.boxMax.z = *pfVar6;
+  if (*pfVar7 + param_2[1] <= *pfVar7) {
+    pfVar7 = &local_a0.to.y;
+  }
+  fVar1 = *pfVar7;
+  local_a0.dirSquare = *param_2 * *param_2 + param_2[1] * param_2[1] + param_2[2] * param_2[2];
+  local_a0.dirLength = SQRT(local_a0.dirSquare);
+  if ((param_5 != 0xffffffff) && (*(int *)((int)this + 0x3ec) != 0)) {
+    C_CollisionWorld::RayTestVolumes(this,&local_a0);
+  }
+  iVar2 = *(int *)((int)this + 0x3e4);
+  lVar9 = __ftol();
+  local_ac = (int)lVar9;
+  lVar9 = __ftol();
+  lVar10 = __ftol();
+  iVar8 = (int)lVar10;
+  lVar10 = __ftol();
+  if (local_ac < 0) {
+    local_ac = 0;
+  }
+  if (iVar8 < 0) {
+    iVar8 = 0;
+  }
+  iVar5 = *(int *)(iVar2 + 0x18);
+  local_c4 = (int)lVar9;
+  if (iVar5 < (int)lVar9) {
+    local_c4 = iVar5;
+  }
+  iVar2 = *(int *)(iVar2 + 0x1c);
+  iVar5 = (int)lVar10;
+  if (iVar2 < (int)lVar10) {
+    iVar5 = iVar2;
+  }
+  local_a0.visited = 0;
+  for (; iVar2 = local_ac, iVar8 < iVar5; iVar8 = iVar8 + 1) {
+    for (; iVar2 < local_c4; iVar2 = iVar2 + 1) {
+      cell = *(S_CollisionMeshCell **)
+              (*(int *)(*(int *)((int)this + 0x3e4) + 0x44) +
+              (*(int *)(*(int *)((int)this + 0x3e4) + 0x18) * iVar8 + iVar2) * 4);
+      if (fVar1 <= cell->maxY) {
+        RayTestCell(cell,&local_a0);
+      }
+      local_a0.visited = local_a0.visited | 2;
+    }
+    local_a0.visited = local_a0.visited | 1;
+  }
+  if (local_a0.hit == (void *)0x0) {
+    return 0;
+  }
+  *param_3 = local_a0.hitT;
+  *param_4 = -local_a0.hitNormal.x;
+  param_4[1] = -local_a0.hitNormal.y;
+  param_4[2] = -local_a0.hitNormal.z;
+  param_4[3] = local_b4;
+  fVar1 = param_4[2] * param_4[2] + param_4[1] * param_4[1] + *param_4 * *param_4;
+  if (1e-08 <= ABS(fVar1 - 1.0)) {
+    if (fVar1 < 1e-08) {
+      if (*param_4 != 0.0) {
+        if (*param_4 < 0.0) {
+          *param_4 = -1.0;
+          return (int)local_a0.hit;
+        }
+        *param_4 = 1.0;
+        return (int)local_a0.hit;
+      }
+      if (param_4[2] == 0.0) {
+        if (param_4[1] < 0.0) {
+          param_4[1] = -1.0;
+          return (int)local_a0.hit;
+        }
+        param_4[1] = 1.0;
+        return (int)local_a0.hit;
+      }
+      if (param_4[2] < 0.0) {
+        param_4[2] = -1.0;
+        return (int)local_a0.hit;
+      }
+      param_4[2] = 1.0;
+      return (int)local_a0.hit;
+    }
+    fVar1 = 1.0 / SQRT(fVar1);
+    *param_4 = fVar1 * *param_4;
+    param_4[1] = fVar1 * param_4[1];
+    param_4[2] = fVar1 * param_4[2];
+  }
+  return (int)local_a0.hit;
+}
+
+// @006f6c40 size=4163 callers=00584e30,005f8c50
+int __thiscall
+FUN_006f6c40(void *this,float *param_1,float *param_2,float *param_3,float *param_4,uint param_5)
+{
+  // locals: float *pfVar1; float fVar2; float fVar3; float fVar4; float fVar5; int iVar6; S_CollisionMeshCell *pSVar7; int iVar8; uint uVar9; S_vector4 *pSVar10; float *pfVar11; float *pfVar12; longlong lVar13; longlong lVar14; int local_f8; int local_f4; int local_ec; int local_e0; int local_dc; int local_d4; float local_c4; S_CollisionRay local_c0; float *local_24
+  if (ABS(param_2[2]) + ABS(*param_2) < 1e-08) {
+    iVar8 = C_CollisionWorld::RayTestBrute(this,param_1,param_2,param_3,param_4,0xffffffff,param_5);
+    return iVar8;
+  }
+  if (*(int *)((int)this + 0x3e4) == 0) {
+    return 0;
+  }
+  local_c0.hit = (void *)0x0;
+  local_c0.visited = 0;
+  local_c0.excludeFlags = param_5 | 0x20;
+  if (((param_5 & 0x200000) != 0) && (uVar9 = _rand(), (uVar9 & 8) != 0)) {
+    local_c0.excludeFlags = local_c0.excludeFlags ^ 0x200000;
+  }
+  local_c0.hitT = 1.0;
+  local_c0.from.x = *param_1;
+  pfVar12 = param_1 + 1;
+  local_c0.to.x = *param_1 + *param_2;
+  local_c0.from.y = param_1[1];
+  local_24 = pfVar12;
+  local_c0.from.z = param_1[2];
+  local_c0.from.w = param_1[3];
+  local_c0.dir.x = *param_2;
+  local_c0.dir.y = param_2[1];
+  local_c0.dir.z = param_2[2];
+  pfVar1 = param_1 + 2;
+  local_c0.dir.w = param_2[3];
+  local_c0.to.z = *pfVar1 + param_2[2];
+  local_c0.to.y = *pfVar12 + param_2[1];
+  pSVar10 = (S_vector4 *)param_1;
+  if (local_c0.to.x <= *param_1) {
+    pSVar10 = &local_c0.to;
+  }
+  local_c0.boxMin.x = pSVar10->x;
+  pfVar11 = pfVar1;
+  if (local_c0.to.z <= *pfVar1) {
+    pfVar11 = &local_c0.to.z;
+  }
+  local_c0.boxMin.z = *pfVar11;
+  pSVar10 = (S_vector4 *)param_1;
+  if (*param_1 <= local_c0.to.x) {
+    pSVar10 = &local_c0.to;
+  }
+  local_c0.boxMax.x = pSVar10->x;
+  pfVar11 = pfVar1;
+  if (*pfVar1 <= local_c0.to.z) {
+    pfVar11 = &local_c0.to.z;
+  }
+  local_c0.boxMax.z = *pfVar11;
+  if (*pfVar12 + param_2[1] <= *pfVar12) {
+    pfVar12 = &local_c0.to.y;
+  }
+  fVar5 = *pfVar12;
+  iVar8 = *(int *)((int)this + 0x3e4);
+  local_c0.dirSquare = param_2[2] * param_2[2] + *param_2 * *param_2 + param_2[1] * param_2[1];
+  local_c0.dirLength = SQRT(local_c0.dirSquare);
+  lVar13 = __ftol();
+  local_e0 = (int)lVar13;
+  lVar13 = __ftol();
+  lVar14 = __ftol();
+  local_dc = (int)lVar14;
+  lVar14 = __ftol();
+  uVar9 = 0;
+  if (local_e0 < 0) {
+    local_e0 = 0;
+  }
+  if (local_dc < 0) {
+    local_dc = 0;
+  }
+  iVar6 = *(int *)(iVar8 + 0x18);
+  local_d4 = (int)lVar13;
+  if (iVar6 < (int)lVar13) {
+    local_d4 = iVar6;
+  }
+  iVar8 = *(int *)(iVar8 + 0x1c);
+  local_ec = (int)lVar14;
+  if (iVar8 < (int)lVar14) {
+    local_ec = iVar8;
+  }
+  if (ABS(*param_2) < ABS(param_2[2])) {
+    uVar9 = 8;
+  }
+  if (*param_2 < 0.0) {
+    uVar9 = uVar9 | 1;
+  }
+  if (param_2[2] < 0.0) {
+    uVar9 = uVar9 | 2;
+  }
+  switch(uVar9) {
+  case 0:
+    for (; local_e0 < local_d4; local_e0 = local_e0 + 1) {
+      lVar13 = __ftol();
+      lVar14 = __ftol();
+      local_f4 = (int)lVar14;
+      iVar8 = local_dc;
+      if (local_dc < (int)lVar13) {
+        iVar8 = (int)lVar13;
+      }
+      if (local_ec <= local_f4) {
+        local_f4 = local_ec;
+      }
+      local_c0.visited = local_c0.visited & 0xfe;
+      for (; iVar8 < local_f4; iVar8 = iVar8 + 1) {
+        pSVar7 = *(S_CollisionMeshCell **)
+                  (*(int *)(*(int *)((int)this + 0x3e4) + 0x44) +
+                  (*(int *)(*(int *)((int)this + 0x3e4) + 0x18) * iVar8 + local_e0) * 4);
+        if (fVar5 <= pSVar7->maxY) {
+          RayTestCell(pSVar7,&local_c0);
+        }
+        local_c0.visited = local_c0.visited | 1;
+      }
+      fVar3 = local_c0.hitT * *param_2 + *param_1;
+      fVar2 = *(float *)(*(int *)(*(int *)((int)this + 0x3e4) + 0x3c) + 4 + local_e0 * 4);
+      if (fVar3 < fVar2 != (fVar3 == fVar2)) break;
+      local_c0.visited = local_c0.visited | 2;
+    }
+    break;
+  case 1:
+    while (local_d4 = local_d4 + -1, local_e0 <= local_d4) {
+      lVar13 = __ftol();
+      lVar14 = __ftol();
+      local_f4 = (int)lVar14;
+      iVar8 = local_dc;
+      if (local_dc < (int)lVar13) {
+        iVar8 = (int)lVar13;
+      }
+      if (local_ec <= local_f4) {
+        local_f4 = local_ec;
+      }
+      local_c0.visited = local_c0.visited & 0xfe;
+      for (; iVar8 < local_f4; iVar8 = iVar8 + 1) {
+        pSVar7 = *(S_CollisionMeshCell **)
+                  (*(int *)(*(int *)((int)this + 0x3e4) + 0x44) +
+                  (*(int *)(*(int *)((int)this + 0x3e4) + 0x18) * iVar8 + local_d4) * 4);
+        if (fVar5 <= pSVar7->maxY) {
+          RayTestCell(pSVar7,&local_c0);
+        }
+        local_c0.visited = local_c0.visited | 1;
+      }
+      if (*(float *)(*(int *)(*(int *)((int)this + 0x3e4) + 0x3c) + local_d4 * 4) <=
+          local_c0.hitT * *param_2 + *param_1) break;
+      local_c0.visited = local_c0.visited | 8;
+    }
+    break;
+  case 2:
+    for (; local_e0 < local_d4; local_e0 = local_e0 + 1) {
+      lVar13 = __ftol();
+      lVar14 = __ftol();
+      local_f4 = (int)lVar14;
+      iVar8 = local_dc;
+      if (local_dc < (int)lVar13) {
+        iVar8 = (int)lVar13;
+      }
+      if (local_ec <= local_f4) {
+        local_f4 = local_ec;
+      }
+      local_c0.visited = local_c0.visited & 0xfe;
+      for (; iVar8 < local_f4; iVar8 = iVar8 + 1) {
+        pSVar7 = *(S_CollisionMeshCell **)
+                  (*(int *)(*(int *)((int)this + 0x3e4) + 0x44) +
+                  (*(int *)(*(int *)((int)this + 0x3e4) + 0x18) * iVar8 + local_e0) * 4);
+        if (fVar5 <= pSVar7->maxY) {
+          RayTestCell(pSVar7,&local_c0);
+        }
+        local_c0.visited = local_c0.visited | 1;
+      }
+      fVar3 = local_c0.hitT * *param_2 + *param_1;
+      fVar2 = *(float *)(*(int *)(*(int *)((int)this + 0x3e4) + 0x3c) + 4 + local_e0 * 4);
+      if (fVar3 < fVar2 != (fVar3 == fVar2)) break;
+      local_c0.visited = local_c0.visited | 2;
+    }
+    break;
+  case 3:
+    while (local_d4 = local_d4 + -1, local_e0 <= local_d4) {
+      lVar13 = __ftol();
+      lVar14 = __ftol();
+      local_f4 = (int)lVar14;
+      iVar8 = local_dc;
+      if (local_dc < (int)lVar13) {
+        iVar8 = (int)lVar13;
+      }
+      if (local_ec <= local_f4) {
+        local_f4 = local_ec;
+      }
+      local_c0.visited = local_c0.visited & 0xfe;
+      for (; iVar8 < local_f4; iVar8 = iVar8 + 1) {
+        pSVar7 = *(S_CollisionMeshCell **)
+                  (*(int *)(*(int *)((int)this + 0x3e4) + 0x44) +
+                  (*(int *)(*(int *)((int)this + 0x3e4) + 0x18) * iVar8 + local_d4) * 4);
+        if (fVar5 <= pSVar7->maxY) {
+          RayTestCell(pSVar7,&local_c0);
+        }
+        local_c0.visited = local_c0.visited | 1;
+      }
+      if (*(float *)(*(int *)(*(int *)((int)this + 0x3e4) + 0x3c) + local_d4 * 4) <=
+          local_c0.hitT * *param_2 + *param_1) break;
+      local_c0.visited = local_c0.visited | 8;
+    }
+    break;
+  case 8:
+    for (; local_dc < local_ec; local_dc = local_dc + 1) {
+      lVar13 = __ftol();
+      lVar14 = __ftol();
+      local_f4 = (int)lVar14;
+      iVar8 = local_e0;
+      if (local_e0 < (int)lVar13) {
+        iVar8 = (int)lVar13;
+      }
+      if (local_d4 <= local_f4) {
+        local_f4 = local_d4;
+      }
+      local_c0.visited = local_c0.visited & 0xfd;
+      for (; iVar8 < local_f4; iVar8 = iVar8 + 1) {
+        pSVar7 = *(S_CollisionMeshCell **)
+                  (*(int *)(*(int *)((int)this + 0x3e4) + 0x44) +
+                  (*(int *)(*(int *)((int)this + 0x3e4) + 0x18) * local_dc + iVar8) * 4);
+        if (fVar5 <= pSVar7->maxY) {
+          RayTestCell(pSVar7,&local_c0);
+        }
+        local_c0.visited = local_c0.visited | 2;
+      }
+      fVar3 = local_c0.hitT * param_2[2] + *pfVar1;
+      fVar2 = *(float *)(*(int *)(*(int *)((int)this + 0x3e4) + 0x40) + 4 + local_dc * 4);
+      if (fVar3 < fVar2 != (fVar3 == fVar2)) break;
+      local_c0.visited = local_c0.visited | 1;
+    }
+    break;
+  case 9:
+    for (; local_dc < local_ec; local_dc = local_dc + 1) {
+      lVar13 = __ftol();
+      lVar14 = __ftol();
+      local_f4 = (int)lVar14;
+      iVar8 = local_e0;
+      if (local_e0 < (int)lVar13) {
+        iVar8 = (int)lVar13;
+      }
+      if (local_d4 <= local_f4) {
+        local_f4 = local_d4;
+      }
+      local_c0.visited = local_c0.visited & 0xfd;
+      for (; iVar8 < local_f4; iVar8 = iVar8 + 1) {
+        pSVar7 = *(S_CollisionMeshCell **)
+                  (*(int *)(*(int *)((int)this + 0x3e4) + 0x44) +
+                  (*(int *)(*(int *)((int)this + 0x3e4) + 0x18) * local_dc + iVar8) * 4);
+        if (fVar5 <= pSVar7->maxY) {
+          RayTestCell(pSVar7,&local_c0);
+        }
+        local_c0.visited = local_c0.visited | 2;
+      }
+      fVar3 = local_c0.hitT * param_2[2] + *pfVar1;
+      fVar2 = *(float *)(*(int *)(*(int *)((int)this + 0x3e4) + 0x40) + 4 + local_dc * 4);
+      if (fVar3 < fVar2 != (fVar3 == fVar2)) break;
+      local_c0.visited = local_c0.visited | 1;
+    }
+    break;
+  case 10:
+    local_f8 = local_ec + -1;
+    if (local_dc <= local_f8) {
+      local_ec = local_f8 * 4 + 4;
+      do {
+        lVar13 = __ftol();
+        lVar14 = __ftol();
+        local_f4 = (int)lVar14;
+        iVar8 = local_e0;
+        if (local_e0 < (int)lVar13) {
+          iVar8 = (int)lVar13;
+        }
+        if (local_d4 <= local_f4) {
+          local_f4 = local_d4;
+        }
+        local_c0.visited = local_c0.visited & 0xfd;
+        for (; iVar8 < local_f4; iVar8 = iVar8 + 1) {
+          pSVar7 = *(S_CollisionMeshCell **)
+                    (*(int *)(*(int *)((int)this + 0x3e4) + 0x44) +
+                    (*(int *)(*(int *)((int)this + 0x3e4) + 0x18) * local_f8 + iVar8) * 4);
+          if (fVar5 <= pSVar7->maxY) {
+            RayTestCell(pSVar7,&local_c0);
+          }
+          local_c0.visited = local_c0.visited | 2;
+        }
+        if (*(float *)(local_ec + *(int *)(*(int *)((int)this + 0x3e4) + 0x40)) <=
+            local_c0.hitT * param_2[2] + *pfVar1) break;
+        local_c0.visited = local_c0.visited | 4;
+        local_ec = local_ec + -4;
+        local_f8 = local_f8 + -1;
+      } while (local_dc <= local_f8);
+    }
+    break;
+  case 0xb:
+    local_f8 = local_ec + -1;
+    if (local_dc <= local_f8) {
+      local_ec = local_f8 * 4 + 4;
+      do {
+        lVar13 = __ftol();
+        lVar14 = __ftol();
+        local_f4 = (int)lVar14;
+        iVar8 = local_e0;
+        if (local_e0 < (int)lVar13) {
+          iVar8 = (int)lVar13;
+        }
+        if (local_d4 <= local_f4) {
+          local_f4 = local_d4;
+        }
+        local_c0.visited = local_c0.visited & 0xfd;
+        for (; iVar8 < local_f4; iVar8 = iVar8 + 1) {
+          pSVar7 = *(S_CollisionMeshCell **)
+                    (*(int *)(*(int *)((int)this + 0x3e4) + 0x44) +
+                    (*(int *)(*(int *)((int)this + 0x3e4) + 0x18) * local_f8 + iVar8) * 4);
+          if (fVar5 <= pSVar7->maxY) {
+            RayTestCell(pSVar7,&local_c0);
+          }
+          local_c0.visited = local_c0.visited | 2;
+        }
+        if (*(float *)(local_ec + *(int *)(*(int *)((int)this + 0x3e4) + 0x40)) <=
+            local_c0.hitT * param_2[2] + *pfVar1) break;
+        local_c0.visited = local_c0.visited | 4;
+        local_ec = local_ec + -4;
+        local_f8 = local_f8 + -1;
+      } while (local_dc <= local_f8);
+    }
+  }
+  if (local_c0.hit == (void *)0x0) {
+    return 0;
+  }
+  if (param_3 != (float *)0x0) {
+    fVar5 = param_2[1];
+    fVar2 = param_2[2];
+    fVar3 = *local_24;
+    fVar4 = *pfVar1;
+    *param_3 = local_c0.hitT * *param_2 + *param_1;
+    param_3[1] = local_c0.hitT * fVar5 + fVar3;
+    param_3[2] = local_c0.hitT * fVar2 + fVar4;
+    param_3[3] = local_c4;
+  }
+  if (param_4 != (float *)0x0) {
+    *param_4 = -local_c0.hitNormal.x;
+    param_4[1] = -local_c0.hitNormal.y;
+    param_4[2] = -local_c0.hitNormal.z;
+    param_4[3] = local_c4;
+    fVar5 = param_4[2] * param_4[2] + param_4[1] * param_4[1] + *param_4 * *param_4;
+    if (1e-08 <= ABS(fVar5 - 1.0)) {
+      if (fVar5 < 1e-08) {
+        if (*param_4 != 0.0) {
+          if (0.0 <= *param_4) {
+            *param_4 = 1.0;
+            return (int)local_c0.hit;
+          }
+          *param_4 = -1.0;
+          return (int)local_c0.hit;
+        }
+        if (param_4[2] != 0.0) {
+          if (0.0 <= param_4[2]) {
+            param_4[2] = 1.0;
+            return (int)local_c0.hit;
+          }
+          param_4[2] = -1.0;
+          return (int)local_c0.hit;
+        }
+        if (0.0 <= param_4[1]) {
+          param_4[1] = 1.0;
+          return (int)local_c0.hit;
+        }
+        param_4[1] = -1.0;
+        return (int)local_c0.hit;
+      }
+      fVar5 = 1.0 / SQRT(fVar5);
+      *param_4 = fVar5 * *param_4;
+      param_4[1] = fVar5 * param_4[1];
+      param_4[2] = fVar5 * param_4[2];
+    }
+  }
+  return (int)local_c0.hit;
+}
+
+// @006f7cc0 size=920 callers=MeleeAttack,00542b80,0054f910,005b8f00,005e3a80,005ff700,005ffbd0
+void * __thiscall
+FUN_006f7cc0(void *this,float *param_1,float *param_2,float *param_3,float *param_4,uint param_5,
+            uint param_6)
+{
+  // locals: float *pfVar1; float fVar2; float fVar3; float fVar4; float fVar5; bool bVar6; S_vector4 *pSVar7; float *pfVar8; float local_c4; S_CollisionRay local_b0
+  local_b0.from.x = *param_1;
+  local_b0.hit = (void *)0x0;
+  local_b0.hitT = 1.0;
+  local_b0.from.y = param_1[1];
+  local_b0.from.z = param_1[2];
+  local_b0.from.w = param_1[3];
+  local_b0.to.x = *param_1 + *param_2;
+  local_b0.dir.x = *param_2;
+  local_b0.dir.y = param_2[1];
+  local_b0.dir.z = param_2[2];
+  pfVar1 = param_1 + 2;
+  local_b0.dir.w = param_2[3];
+  local_b0.to.z = *pfVar1 + param_2[2];
+  local_b0.to.y = param_1[1] + param_2[1];
+  local_b0.excludeTypes = param_5 | 8;
+  local_b0.excludeFlags = param_6 | 0x20;
+  pSVar7 = (S_vector4 *)param_1;
+  if (local_b0.to.x <= *param_1) {
+    pSVar7 = &local_b0.to;
+  }
+  local_b0.boxMin.x = pSVar7->x;
+  pfVar8 = pfVar1;
+  if (local_b0.to.z <= *pfVar1) {
+    pfVar8 = &local_b0.to.z;
+  }
+  local_b0.boxMin.z = *pfVar8;
+  pSVar7 = (S_vector4 *)param_1;
+  if (*param_1 <= local_b0.to.x) {
+    pSVar7 = &local_b0.to;
+  }
+  local_b0.boxMax.x = pSVar7->x;
+  pfVar8 = pfVar1;
+  if (*pfVar1 <= local_b0.to.z) {
+    pfVar8 = &local_b0.to.z;
+  }
+  local_b0.boxMax.z = *pfVar8;
+  local_b0.dirSquare = param_2[2] * param_2[2] + *param_2 * *param_2 + param_2[1] * param_2[1];
+  local_b0.dirLength = SQRT(local_b0.dirSquare);
+  if (*(int *)((int)this + 0x3ec) != 0) {
+    bVar6 = C_CollisionWorld::RayTestVolumes2(this,&local_b0);
+    if (bVar6) {
+      if (param_3 != (float *)0x0) {
+        fVar2 = param_2[1];
+        fVar3 = param_2[2];
+        fVar4 = param_1[1];
+        fVar5 = *pfVar1;
+        *param_3 = local_b0.hitT * *param_2 + *param_1;
+        param_3[1] = local_b0.hitT * fVar2 + fVar4;
+        param_3[2] = local_b0.hitT * fVar3 + fVar5;
+        param_3[3] = local_c4;
+      }
+      if (param_4 != (float *)0x0) {
+        *param_4 = -local_b0.hitNormal.x;
+        param_4[1] = -local_b0.hitNormal.y;
+        param_4[2] = -local_b0.hitNormal.z;
+        param_4[3] = local_c4;
+        fVar2 = param_4[2] * param_4[2] + param_4[1] * param_4[1] + *param_4 * *param_4;
+        if (1e-08 <= ABS(fVar2 - 1.0)) {
+          if (fVar2 < 1e-08) {
+            if (*param_4 != 0.0) {
+              if (*param_4 < 0.0) {
+                *param_4 = -1.0;
+                return local_b0.hit;
+              }
+              *param_4 = 1.0;
+              return local_b0.hit;
+            }
+            if (param_4[2] == 0.0) {
+              if (param_4[1] < 0.0) {
+                param_4[1] = -1.0;
+                return local_b0.hit;
+              }
+              param_4[1] = 1.0;
+              return local_b0.hit;
+            }
+            if (param_4[2] < 0.0) {
+              param_4[2] = -1.0;
+              return local_b0.hit;
+            }
+            param_4[2] = 1.0;
+            return local_b0.hit;
+          }
+          fVar2 = 1.0 / SQRT(fVar2);
+          *param_4 = fVar2 * *param_4;
+          param_4[1] = fVar2 * param_4[1];
+          param_4[2] = fVar2 * param_4[2];
+        }
+      }
+      return local_b0.hit;
+    }
+  }
+  return (void *)0;
+}
+
+// @006f8060 size=5259 callers=C_CollisionWorld::RayTestThunk
+int __thiscall
+C_CollisionWorld::RayTest
+          (C_CollisionWorld *this,float *param_1,float *param_2,float *param_3,float *param_4,
+          uint param_5,uint param_6)
+{
+  // locals: float *pfVar1; float fVar2; float fVar3; float fVar4; float fVar5; S_CollisionMesh *pSVar6; S_CollisionMeshCell *pSVar7; int iVar8; bool bVar9; int iVar10; float *pfVar11; S_vector4 *pSVar12; float *pfVar13; uint uVar14; bool bVar15; longlong lVar16; longlong lVar17; longlong lVar18; int local_114; int local_10c; int local_104; int local_100; int local_fc; int local_f8; int local_f4; int local_f0; int local_ec; float local_d4; S_CollisionRay local_c0; float *local_24; float local_18
+  if (ABS(param_2[2]) + ABS(*param_2) < 1e-08) {
+    iVar10 = RayTestBrute(this,param_1,param_2,param_3,param_4,param_5,param_6);
+    return iVar10;
+  }
+  if (this->m_mesh == (S_CollisionMesh *)0x0) {
+    return 0;
+  }
+  bVar15 = param_6 == 0xffffffff;
+  if (bVar15) {
+    param_6 = 0;
+  }
+  local_c0.excludeFlags = param_6 | 0x20;
+  local_c0.excludeTypes = param_5 | 8;
+  local_c0.hit = (void *)0x0;
+  local_c0.from.x = *param_1;
+  local_c0.visited = 0;
+  local_c0.hitT = 1.0;
+  local_c0.from.y = param_1[1];
+  local_c0.from.z = param_1[2];
+  local_c0.to.x = *param_1 + *param_2;
+  local_c0.from.w = param_1[3];
+  local_c0.dir.x = *param_2;
+  local_c0.dir.y = param_2[1];
+  local_c0.dir.z = param_2[2];
+  local_c0.to.y = param_1[1] + param_2[1];
+  local_c0.dir.w = param_2[3];
+  pfVar13 = param_1 + 1;
+  local_c0.to.z = param_1[2] + param_2[2];
+  pfVar1 = param_1 + 2;
+  local_24 = pfVar13;
+  pSVar12 = (S_vector4 *)param_1;
+  if (local_c0.to.x <= *param_1) {
+    pSVar12 = &local_c0.to;
+  }
+  local_c0.boxMin.x = pSVar12->x;
+  pfVar11 = pfVar1;
+  if (local_c0.to.z <= *pfVar1) {
+    pfVar11 = &local_c0.to.z;
+  }
+  local_c0.boxMin.z = *pfVar11;
+  pSVar12 = (S_vector4 *)param_1;
+  if (*param_1 <= local_c0.to.x) {
+    pSVar12 = &local_c0.to;
+  }
+  local_c0.boxMax.x = pSVar12->x;
+  pfVar11 = pfVar1;
+  if (*pfVar1 <= local_c0.to.z) {
+    pfVar11 = &local_c0.to.z;
+  }
+  local_c0.boxMax.z = *pfVar11;
+  pfVar11 = pfVar13;
+  if (local_c0.to.y <= *pfVar13) {
+    pfVar11 = &local_c0.to.y;
+  }
+  local_c0.boxMin.y = *pfVar11;
+  pfVar11 = pfVar13;
+  if (*pfVar13 <= local_c0.to.y) {
+    pfVar11 = &local_c0.to.y;
+  }
+  local_c0.boxMax.y = *pfVar11;
+  pfVar11 = pfVar13;
+  if (local_c0.to.y <= *pfVar13) {
+    pfVar11 = &local_c0.to.y;
+  }
+  fVar4 = *pfVar11;
+  if (*pfVar13 <= local_c0.to.y) {
+    pfVar13 = &local_c0.to.y;
+  }
+  fVar5 = *pfVar13;
+  local_c0.dirSquare = param_2[2] * param_2[2] + *param_2 * *param_2 + param_2[1] * param_2[1];
+  local_c0.dirLength = SQRT(local_c0.dirSquare);
+  if (((param_5 != 0xffffffff) && (this->m_grid != (S_CollisionGrid *)0x0)) &&
+     (bVar9 = RayTestVolumes(this,&local_c0), bVar9)) {
+    local_18 = local_c0.hitT * param_2[2];
+    local_c0.to.x = local_c0.hitT * *param_2 + *param_1;
+    local_c0.to.y = local_c0.hitT * param_2[1] + *local_24;
+    local_c0.to.z = local_c0.hitT * param_2[2] + *pfVar1;
+    pSVar12 = (S_vector4 *)param_1;
+    if (local_c0.to.x <= *param_1) {
+      pSVar12 = &local_c0.to;
+    }
+    local_c0.boxMin.x = pSVar12->x;
+    pfVar13 = pfVar1;
+    if (local_c0.to.z <= *pfVar1) {
+      pfVar13 = &local_c0.to.z;
+    }
+    local_c0.boxMin.z = *pfVar13;
+    pSVar12 = (S_vector4 *)param_1;
+    if (*param_1 <= local_c0.to.x) {
+      pSVar12 = &local_c0.to;
+    }
+    local_c0.boxMax.x = pSVar12->x;
+    pfVar13 = pfVar1;
+    if (*pfVar1 <= local_c0.to.z) {
+      pfVar13 = &local_c0.to.z;
+    }
+    local_c0.boxMax.z = *pfVar13;
+    pfVar13 = local_24;
+    if (local_c0.to.y <= *local_24) {
+      pfVar13 = &local_c0.to.y;
+    }
+    local_c0.boxMin.y = *pfVar13;
+    pfVar13 = local_24;
+    if (*local_24 <= local_c0.to.y) {
+      pfVar13 = &local_c0.to.y;
+    }
+    local_c0.boxMax.y = *pfVar13;
+  }
+  if (!bVar15) {
+    pSVar6 = this->m_mesh;
+    lVar16 = __ftol();
+    local_f4 = (int)lVar16;
+    lVar16 = __ftol();
+    lVar17 = __ftol();
+    local_f0 = (int)lVar17;
+    lVar17 = __ftol();
+    lVar18 = __ftol();
+    local_104 = (int)lVar18;
+    lVar18 = __ftol();
+    uVar14 = 0;
+    if (local_f4 < 0) {
+      local_f4 = 0;
+    }
+    if (local_f0 < 0) {
+      local_f0 = 0;
+    }
+    local_ec = (int)lVar16;
+    if (pSVar6->cellsX < (int)lVar16) {
+      local_ec = pSVar6->cellsX;
+    }
+    local_100 = (int)lVar17;
+    if (pSVar6->cellsZ < (int)lVar17) {
+      local_100 = pSVar6->cellsZ;
+    }
+    if (local_104 < 0) {
+      local_104 = 0;
+    }
+    local_fc = (int)lVar18;
+    if (pSVar6->cellsY < (int)lVar18) {
+      local_fc = pSVar6->cellsY;
+    }
+    if (ABS(*param_2) < ABS(param_2[2])) {
+      uVar14 = 8;
+    }
+    if (*param_2 < 0.0) {
+      uVar14 = uVar14 | 1;
+    }
+    if (param_2[2] < 0.0) {
+      uVar14 = uVar14 | 2;
+    }
+    switch(uVar14) {
+    case 0:
+      for (; local_f4 < local_ec; local_f4 = local_f4 + 1) {
+        lVar16 = __ftol();
+        lVar17 = __ftol();
+        local_10c = (int)lVar17;
+        iVar10 = local_f0;
+        if (local_f0 < (int)lVar16) {
+          iVar10 = (int)lVar16;
+        }
+        if (local_100 <= local_10c) {
+          local_10c = local_100;
+        }
+        local_c0.visited = local_c0.visited & 0xfe;
+        for (; iVar8 = local_104, iVar10 < local_10c; iVar10 = iVar10 + 1) {
+          for (; iVar8 < local_fc; iVar8 = iVar8 + 1) {
+            pSVar6 = this->m_mesh;
+            pSVar7 = pSVar6->cells[(pSVar6->cellsZ * iVar8 + iVar10) * pSVar6->cellsX + local_f4];
+            if ((fVar4 <= pSVar7->maxY) && (pSVar7->minY < fVar5 != (pSVar7->minY == fVar5))) {
+              RayTestCell(pSVar7,&local_c0);
+            }
+          }
+          local_c0.visited = local_c0.visited | 1;
+        }
+        fVar3 = local_c0.hitT * *param_2 + *param_1;
+        fVar2 = this->m_mesh->gridLinesX[local_f4 + 1];
+        if (fVar3 < fVar2 != (fVar3 == fVar2)) break;
+        local_c0.visited = local_c0.visited | 2;
+      }
+      break;
+    case 1:
+      while (local_ec = local_ec + -1, local_f4 <= local_ec) {
+        lVar16 = __ftol();
+        lVar17 = __ftol();
+        local_10c = (int)lVar17;
+        iVar10 = local_f0;
+        if (local_f0 < (int)lVar16) {
+          iVar10 = (int)lVar16;
+        }
+        if (local_100 <= local_10c) {
+          local_10c = local_100;
+        }
+        local_c0.visited = local_c0.visited & 0xfe;
+        for (; iVar8 = local_104, iVar10 < local_10c; iVar10 = iVar10 + 1) {
+          for (; iVar8 < local_fc; iVar8 = iVar8 + 1) {
+            pSVar6 = this->m_mesh;
+            pSVar7 = pSVar6->cells[(pSVar6->cellsZ * iVar8 + iVar10) * pSVar6->cellsX + local_ec];
+            if ((fVar4 <= pSVar7->maxY) && (pSVar7->minY < fVar5 != (pSVar7->minY == fVar5))) {
+              RayTestCell(pSVar7,&local_c0);
+            }
+          }
+          local_c0.visited = local_c0.visited | 1;
+        }
+        if (this->m_mesh->gridLinesX[local_ec] <= local_c0.hitT * *param_2 + *param_1) break;
+        local_c0.visited = local_c0.visited | 8;
+      }
+      break;
+    case 2:
+      for (; local_f4 < local_ec; local_f4 = local_f4 + 1) {
+        lVar16 = __ftol();
+        lVar17 = __ftol();
+        local_10c = (int)lVar17;
+        iVar10 = local_f0;
+        if (local_f0 < (int)lVar16) {
+          iVar10 = (int)lVar16;
+        }
+        if (local_100 <= local_10c) {
+          local_10c = local_100;
+        }
+        local_c0.visited = local_c0.visited & 0xfe;
+        for (; iVar8 = local_104, iVar10 < local_10c; iVar10 = iVar10 + 1) {
+          for (; iVar8 < local_fc; iVar8 = iVar8 + 1) {
+            pSVar6 = this->m_mesh;
+            pSVar7 = pSVar6->cells[(pSVar6->cellsZ * iVar8 + iVar10) * pSVar6->cellsX + local_f4];
+            if ((fVar4 <= pSVar7->maxY) && (pSVar7->minY < fVar5 != (pSVar7->minY == fVar5))) {
+              RayTestCell(pSVar7,&local_c0);
+            }
+          }
+          local_c0.visited = local_c0.visited | 1;
+        }
+        fVar3 = local_c0.hitT * *param_2 + *param_1;
+        fVar2 = this->m_mesh->gridLinesX[local_f4 + 1];
+        if (fVar3 < fVar2 != (fVar3 == fVar2)) break;
+        local_c0.visited = local_c0.visited | 2;
+      }
+      break;
+    case 3:
+      while (local_ec = local_ec + -1, local_f4 <= local_ec) {
+        lVar16 = __ftol();
+        lVar17 = __ftol();
+        local_10c = (int)lVar17;
+        iVar10 = local_f0;
+        if (local_f0 < (int)lVar16) {
+          iVar10 = (int)lVar16;
+        }
+        if (local_100 <= local_10c) {
+          local_10c = local_100;
+        }
+        local_c0.visited = local_c0.visited & 0xfe;
+        for (; iVar8 = local_104, iVar10 < local_10c; iVar10 = iVar10 + 1) {
+          for (; iVar8 < local_fc; iVar8 = iVar8 + 1) {
+            pSVar6 = this->m_mesh;
+            pSVar7 = pSVar6->cells[(pSVar6->cellsZ * iVar8 + iVar10) * pSVar6->cellsX + local_ec];
+            if ((fVar4 <= pSVar7->maxY) && (pSVar7->minY < fVar5 != (pSVar7->minY == fVar5))) {
+              RayTestCell(pSVar7,&local_c0);
+            }
+          }
+          local_c0.visited = local_c0.visited | 1;
+        }
+        if (this->m_mesh->gridLinesX[local_ec] <= local_c0.hitT * *param_2 + *param_1) break;
+        local_c0.visited = local_c0.visited | 8;
+      }
+      break;
+    case 8:
+      for (; local_f0 < local_100; local_f0 = local_f0 + 1) {
+        lVar16 = __ftol();
+        lVar17 = __ftol();
+        local_f8 = (int)lVar17;
+        iVar10 = local_f4;
+        if (local_f4 < (int)lVar16) {
+          iVar10 = (int)lVar16;
+        }
+        if (local_ec <= local_f8) {
+          local_f8 = local_ec;
+        }
+        local_c0.visited = local_c0.visited & 0xfd;
+        for (; iVar8 = local_104, iVar10 < local_f8; iVar10 = iVar10 + 1) {
+          for (; iVar8 < local_fc; iVar8 = iVar8 + 1) {
+            pSVar6 = this->m_mesh;
+            pSVar7 = pSVar6->cells[(pSVar6->cellsZ * iVar8 + local_f0) * pSVar6->cellsX + iVar10];
+            if ((fVar4 <= pSVar7->maxY) && (pSVar7->minY < fVar5 != (pSVar7->minY == fVar5))) {
+              RayTestCell(pSVar7,&local_c0);
+            }
+          }
+          local_c0.visited = local_c0.visited | 2;
+        }
+        fVar3 = local_c0.hitT * param_2[2] + *pfVar1;
+        fVar2 = this->m_mesh->gridLinesZ[local_f0 + 1];
+        if (fVar3 < fVar2 != (fVar3 == fVar2)) break;
+        local_c0.visited = local_c0.visited | 1;
+      }
+      break;
+    case 9:
+      for (; local_f0 < local_100; local_f0 = local_f0 + 1) {
+        lVar16 = __ftol();
+        lVar17 = __ftol();
+        local_f8 = (int)lVar17;
+        iVar10 = local_f4;
+        if (local_f4 < (int)lVar16) {
+          iVar10 = (int)lVar16;
+        }
+        if (local_ec <= local_f8) {
+          local_f8 = local_ec;
+        }
+        local_c0.visited = local_c0.visited & 0xfd;
+        for (; iVar8 = local_104, iVar10 < local_f8; iVar10 = iVar10 + 1) {
+          for (; iVar8 < local_fc; iVar8 = iVar8 + 1) {
+            pSVar6 = this->m_mesh;
+            pSVar7 = pSVar6->cells[(pSVar6->cellsZ * iVar8 + local_f0) * pSVar6->cellsX + iVar10];
+            if ((fVar4 <= pSVar7->maxY) && (pSVar7->minY < fVar5 != (pSVar7->minY == fVar5))) {
+              RayTestCell(pSVar7,&local_c0);
+            }
+          }
+          local_c0.visited = local_c0.visited | 2;
+        }
+        fVar3 = local_c0.hitT * param_2[2] + *pfVar1;
+        fVar2 = this->m_mesh->gridLinesZ[local_f0 + 1];
+        if (fVar3 < fVar2 != (fVar3 == fVar2)) break;
+        local_c0.visited = local_c0.visited | 1;
+      }
+      break;
+    case 10:
+      local_114 = local_100 + -1;
+      if (local_f0 <= local_114) {
+        local_100 = local_114 * 4 + 4;
+        do {
+          lVar16 = __ftol();
+          lVar17 = __ftol();
+          local_f8 = (int)lVar17;
+          iVar10 = local_f4;
+          if (local_f4 < (int)lVar16) {
+            iVar10 = (int)lVar16;
+          }
+          if (local_ec <= local_f8) {
+            local_f8 = local_ec;
+          }
+          local_c0.visited = local_c0.visited & 0xfd;
+          for (; iVar8 = local_104, iVar10 < local_f8; iVar10 = iVar10 + 1) {
+            for (; iVar8 < local_fc; iVar8 = iVar8 + 1) {
+              pSVar6 = this->m_mesh;
+              pSVar7 = pSVar6->cells[(pSVar6->cellsZ * iVar8 + local_114) * pSVar6->cellsX + iVar10]
+              ;
+              if ((fVar4 <= pSVar7->maxY) && (pSVar7->minY < fVar5 != (pSVar7->minY == fVar5))) {
+                RayTestCell(pSVar7,&local_c0);
+              }
+            }
+            local_c0.visited = local_c0.visited | 2;
+          }
+          if (*(float *)(local_100 + (int)this->m_mesh->gridLinesZ) <=
+              local_c0.hitT * param_2[2] + *pfVar1) break;
+          local_c0.visited = local_c0.visited | 4;
+          local_100 = local_100 + -4;
+          local_114 = local_114 + -1;
+        } while (local_f0 <= local_114);
+      }
+      break;
+    case 0xb:
+      local_114 = local_100 + -1;
+      if (local_f0 <= local_114) {
+        local_f8 = local_114 * 4 + 4;
+        do {
+          lVar16 = __ftol();
+          local_10c = (int)lVar16;
+          lVar16 = __ftol();
+          if (local_10c <= local_f4) {
+            local_10c = local_f4;
+          }
+          iVar10 = (int)lVar16;
+          if (local_ec <= (int)lVar16) {
+            iVar10 = local_ec;
+          }
+          local_c0.visited = local_c0.visited & 0xf7;
+          while (iVar10 = iVar10 + -1, iVar8 = local_104, local_10c <= iVar10) {
+            for (; iVar8 < local_fc; iVar8 = iVar8 + 1) {
+              pSVar6 = this->m_mesh;
+              pSVar7 = pSVar6->cells[(pSVar6->cellsZ * iVar8 + local_114) * pSVar6->cellsX + iVar10]
+              ;
+              if ((fVar4 <= pSVar7->maxY) && (pSVar7->minY < fVar5 != (pSVar7->minY == fVar5))) {
+                RayTestCell(pSVar7,&local_c0);
+              }
+            }
+            local_c0.visited = local_c0.visited | 8;
+          }
+          if (*(float *)(local_f8 + (int)this->m_mesh->gridLinesZ) <=
+              local_c0.hitT * param_2[2] + *pfVar1) break;
+          local_c0.visited = local_c0.visited | 4;
+          local_f8 = local_f8 + -4;
+          local_114 = local_114 + -1;
+        } while (local_f0 <= local_114);
+      }
+    }
+  }
+  if (local_c0.hit == (void *)0x0) {
+    return 0;
+  }
+  if (param_3 != (float *)0x0) {
+    fVar4 = param_2[1];
+    fVar5 = param_2[2];
+    fVar2 = *local_24;
+    fVar3 = *pfVar1;
+    *param_3 = local_c0.hitT * *param_2 + *param_1;
+    param_3[1] = local_c0.hitT * fVar4 + fVar2;
+    param_3[2] = local_c0.hitT * fVar5 + fVar3;
+    param_3[3] = local_d4;
+  }
+  if (param_4 != (float *)0x0) {
+    *param_4 = -local_c0.hitNormal.x;
+    param_4[1] = -local_c0.hitNormal.y;
+    param_4[2] = -local_c0.hitNormal.z;
+    param_4[3] = local_d4;
+    fVar4 = param_4[2] * param_4[2] + param_4[1] * param_4[1] + *param_4 * *param_4;
+    if (1e-08 <= ABS(fVar4 - 1.0)) {
+      if (fVar4 < 1e-08) {
+        if (*param_4 != 0.0) {
+          if (0.0 <= *param_4) {
+            *param_4 = 1.0;
+            return (int)local_c0.hit;
+          }
+          *param_4 = -1.0;
+          return (int)local_c0.hit;
+        }
+        if (param_4[2] != 0.0) {
+          if (0.0 <= param_4[2]) {
+            param_4[2] = 1.0;
+            return (int)local_c0.hit;
+          }
+          param_4[2] = -1.0;
+          return (int)local_c0.hit;
+        }
+        if (0.0 <= param_4[1]) {
+          param_4[1] = 1.0;
+          return (int)local_c0.hit;
+        }
+        param_4[1] = -1.0;
+        return (int)local_c0.hit;
+      }
+      fVar4 = 1.0 / SQRT(fVar4);
+      *param_4 = fVar4 * *param_4;
+      param_4[1] = fVar4 * param_4[1];
+      param_4[2] = fVar4 * param_4[2];
+    }
+  }
+  return (int)local_c0.hit;
+}
+
+// @006f9520 size=635 callers=
+uint FUN_006f9520(int param_1,float *param_2,float *param_3,float *param_4,float *param_5)
+{
+  // locals: float fVar1; float fVar2; float fVar3; float fVar4; float fVar5; undefined4 in_EAX; undefined2 uVar7; undefined3 uVar6; ushort uVar8; float local_24
+  fVar1 = *(float *)(param_1 + 0x30) - *param_2;
+  fVar3 = *(float *)(param_1 + 0x34) - param_2[1];
+  fVar4 = *(float *)(param_1 + 0x38) - param_2[2];
+  fVar5 = param_3[2] * param_3[2] + param_3[1] * param_3[1] + *param_3 * *param_3;
+  fVar2 = -(fVar1 * *param_3 + fVar3 * param_3[1] + fVar4 * param_3[2]);
+  fVar1 = fVar2 * fVar2 -
+          ((fVar1 * fVar1 + fVar3 * fVar3 + fVar4 * fVar4) -
+          *(float *)(param_1 + 0x4c) * *(float *)(param_1 + 0x4c)) * fVar5;
+  if (fVar1 < 0.0) {
+    return CONCAT22((short)((uint)in_EAX >> 0x10),
+                    (ushort)(fVar1 < 0.0) << 8 | (ushort)NAN(fVar1) << 10 |
+                    (ushort)(fVar1 == 0.0) << 0xe);
+  }
+  fVar5 = (fVar2 - SQRT(fVar1)) / fVar5;
+  fVar1 = param_3[1];
+  fVar2 = param_3[2];
+  fVar3 = param_2[1];
+  fVar4 = param_2[2];
+  *param_4 = *param_2 - fVar5 * *param_3;
+  param_4[1] = fVar3 - fVar5 * fVar1;
+  param_4[2] = fVar4 - fVar5 * fVar2;
+  param_4[3] = local_24;
+  fVar1 = param_4[1];
+  fVar5 = *(float *)(param_1 + 0x34);
+  fVar2 = param_4[2];
+  fVar3 = *(float *)(param_1 + 0x38);
+  *param_5 = *param_4 - *(float *)(param_1 + 0x30);
+  param_5[1] = fVar1 - fVar5;
+  param_5[2] = fVar2 - fVar3;
+  param_5[3] = local_24;
+  fVar1 = param_5[2] * param_5[2] + param_5[1] * param_5[1] + *param_5 * *param_5;
+  fVar5 = ABS(fVar1 - 1.0);
+  uVar8 = (ushort)(fVar5 < 1e-08) << 8 | (ushort)NAN(fVar5) << 10 | (ushort)(fVar5 == 1e-08) << 0xe;
+  uVar7 = (undefined2)((uint)local_24 >> 0x10);
+  if (fVar5 >= 1e-08) {
+    uVar8 = (ushort)(fVar1 < 1e-08) << 8 | (ushort)NAN(fVar1) << 10 |
+            (ushort)(fVar1 == 1e-08) << 0xe;
+    if (fVar1 < 1e-08) {
+      if (*param_5 != 0.0) {
+        fVar1 = *param_5;
+        uVar6 = (undefined3)
+                (CONCAT22(uVar7,(ushort)(fVar1 < 0.0) << 8 | (ushort)NAN(fVar1) << 10 |
+                                (ushort)(fVar1 == 0.0) << 0xe) >> 8);
+        if (fVar1 < 0.0) {
+          *param_5 = -1.0;
+          return CONCAT31(uVar6,1);
+        }
+        *param_5 = 1.0;
+        return CONCAT31(uVar6,1);
+      }
+      if (param_5[2] == 0.0) {
+        fVar1 = param_5[1];
+        uVar6 = (undefined3)
+                (CONCAT22(uVar7,(ushort)(fVar1 < 0.0) << 8 | (ushort)NAN(fVar1) << 10 |
+                                (ushort)(fVar1 == 0.0) << 0xe) >> 8);
+        if (fVar1 < 0.0) {
+          param_5[1] = -1.0;
+          return CONCAT31(uVar6,1);
+        }
+        param_5[1] = 1.0;
+        return CONCAT31(uVar6,1);
+      }
+      fVar1 = param_5[2];
+      uVar6 = (undefined3)
+              (CONCAT22(uVar7,(ushort)(fVar1 < 0.0) << 8 | (ushort)NAN(fVar1) << 10 |
+                              (ushort)(fVar1 == 0.0) << 0xe) >> 8);
+      if (fVar1 < 0.0) {
+        param_5[2] = -1.0;
+        return CONCAT31(uVar6,1);
+      }
+      param_5[2] = 1.0;
+      return CONCAT31(uVar6,1);
+    }
+    fVar1 = 1.0 / SQRT(fVar1);
+    *param_5 = fVar1 * *param_5;
+    param_5[1] = fVar1 * param_5[1];
+    param_5[2] = fVar1 * param_5[2];
+  }
+  return CONCAT31((int3)(CONCAT22(uVar7,uVar8) >> 8),1);
+}
+
+// @006f97a0 size=852 callers=006f9b10
+undefined1 FUN_006f97a0(int param_1,float *param_2)
+{
+  // locals: float fVar1; float fVar2; uint *puVar3; float fVar4; float fVar5; bool bVar6; S_vector *pSVar7; int iVar8; uint uVar9; float *pfVar10; S_CollisionRay *pSVar11; undefined1 local_1ad; float local_194; S_vector local_170; S_vector local_160; S_vector local_150; S_CollisionRay local_140; S_vector local_b0; S_CollisionRay local_a0
+  if (ABS(param_2[0x17]) < 1e-08) {
+    return 0;
+  }
+  local_1ad = 0;
+  uVar9 = 0;
+LAB_006f97d8:
+  iVar8 = *(int *)(param_1 + 4);
+  if ((iVar8 == 0) || ((uint)(*(int *)(param_1 + 8) - iVar8 >> 2) <= uVar9)) {
+    return local_1ad;
+  }
+  puVar3 = *(uint **)(iVar8 + uVar9 * 4);
+  if ((puVar3[2] & (uint)param_2[0x15]) != 0) goto switchD_006f9821_caseD_43;
+  switch(*puVar3 & 0xff) {
+  case 0x40:
+    pfVar10 = param_2;
+    pSVar11 = &local_140;
+    for (iVar8 = 0x24; iVar8 != 0; iVar8 = iVar8 + -1) {
+      (pSVar11->from).x = *pfVar10;
+      pfVar10 = pfVar10 + 1;
+      pSVar11 = (S_CollisionRay *)&(pSVar11->from).y;
+    }
+    S_vector::OperatorMulAssign((S_vector *)&local_140,(S_matrix *)puVar3[0x11]);
+    pSVar7 = S_vector::RotateByMatrix((S_vector *)(param_2 + 4),&local_b0,(S_matrix *)puVar3[0x11]);
+    local_140.dir.x = pSVar7->x;
+    local_140.dir.y = pSVar7->y;
+    local_140.dir.z = pSVar7->z;
+    local_140.dir.w = pSVar7[1].x;
+    bVar6 = RayTestAabb((float *)(puVar3 + 4),(float *)(puVar3 + 8),&local_140);
+    if (bVar6) {
+      pSVar7 = &local_150;
+      param_2[0x16] = local_140.hitT;
+      pSVar11 = &local_140;
+LAB_006f9aa0:
+      pSVar7 = S_vector::RotateByMatrix
+                         ((S_vector *)&pSVar11->hitNormal,pSVar7,(S_matrix *)puVar3[0x10]);
+      local_1ad = 1;
+      param_2[0x1c] = pSVar7->x;
+      param_2[0x1d] = pSVar7->y;
+      param_2[0x1e] = pSVar7->z;
+      fVar4 = pSVar7[1].x;
+      param_2[0x20] = (float)puVar3;
+      param_2[0x1f] = fVar4;
+    }
+    break;
+  case 0x41:
+    bVar6 = RayTestAabb((float *)(puVar3 + 4),(float *)(puVar3 + 8),(S_CollisionRay *)param_2);
+    if (!bVar6) goto switchD_006f9821_caseD_43;
+    param_2[0x20] = (float)puVar3;
+    local_1ad = 1;
+    uVar9 = uVar9 + 1;
+    goto LAB_006f97d8;
+  case 0x42:
+  case 0x44:
+    fVar4 = (float)puVar3[0xc] - *param_2;
+    fVar5 = (float)puVar3[0xd] - param_2[1];
+    fVar2 = (float)puVar3[0xe] - param_2[2];
+    fVar1 = fVar4 * param_2[4] + fVar5 * param_2[5] + fVar2 * param_2[6];
+    fVar4 = fVar1 * fVar1 -
+            ((fVar5 * fVar5 + fVar4 * fVar4 + fVar2 * fVar2) -
+            (float)puVar3[0x13] * (float)puVar3[0x13]) * param_2[0x17];
+    if (((fVar4 < 0.0) || (fVar4 = (fVar1 - SQRT(fVar4)) / param_2[0x17], fVar4 < 0.0)) ||
+       (param_2[0x16] <= fVar4)) goto switchD_006f9821_caseD_43;
+    local_1ad = 1;
+    fVar1 = (float)puVar3[0xd];
+    fVar2 = (float)puVar3[0xe];
+    param_2[0x1c] = (float)puVar3[0xc] - (fVar4 * param_2[4] + *param_2);
+    param_2[0x20] = (float)puVar3;
+    param_2[0x1d] = fVar1 - (fVar4 * param_2[5] + param_2[1]);
+    param_2[0x1e] = fVar2 - (fVar4 * param_2[6] + param_2[2]);
+    param_2[0x16] = fVar4;
+    param_2[0x1f] = local_194;
+    uVar9 = uVar9 + 1;
+    goto LAB_006f97d8;
+  default:
+switchD_006f9821_caseD_43:
+    uVar9 = uVar9 + 1;
+    goto LAB_006f97d8;
+  case 0x45:
+    pfVar10 = param_2;
+    pSVar11 = &local_a0;
+    for (iVar8 = 0x24; iVar8 != 0; iVar8 = iVar8 + -1) {
+      (pSVar11->from).x = *pfVar10;
+      pfVar10 = pfVar10 + 1;
+      pSVar11 = (S_CollisionRay *)&(pSVar11->from).y;
+    }
+    S_vector::OperatorMulAssign((S_vector *)&local_a0,(S_matrix *)puVar3[0x11]);
+    pSVar7 = S_vector::RotateByMatrix((S_vector *)(param_2 + 4),&local_170,(S_matrix *)puVar3[0x11])
+    ;
+    local_a0.dir.x = pSVar7->x;
+    local_a0.dir.y = pSVar7->y;
+    local_a0.dir.z = pSVar7->z;
+    local_a0.dir.w = pSVar7[1].x;
+    bVar6 = RayExitAabb((float *)(puVar3 + 4),(float *)(puVar3 + 8),&local_a0);
+    if (bVar6) {
+      pSVar7 = &local_160;
+      param_2[0x16] = local_a0.hitT;
+      pSVar11 = &local_a0;
+      goto LAB_006f9aa0;
+    }
+  }
+  uVar9 = uVar9 + 1;
+  goto LAB_006f97d8;
+}
+
+// @006f9b10 size=792 callers=
+undefined4
+FUN_006f9b10(int param_1,float *param_2,float *param_3,float *param_4,float *param_5,uint param_6)
+{
+  // locals: float fVar1; float fVar2; float fVar3; float fVar4; char cVar5; float local_c4; float local_b0; float local_ac; float local_a8; float local_a4; float local_a0; float local_9c; float local_98; float local_94; float local_70; float local_6c; float local_68; uint local_5c; float local_58; float local_54; float local_50; float local_40; float local_3c; float local_38; undefined4 local_30
+  local_5c = param_6 | 8;
+  local_30 = 0;
+  local_b0 = *param_2;
+  local_58 = 1.0;
+  local_ac = param_2[1];
+  local_a8 = param_2[2];
+  local_a4 = param_2[3];
+  local_70 = *param_2 + *param_3;
+  local_6c = param_2[1] + param_3[1];
+  local_a0 = *param_3;
+  local_68 = param_2[2] + param_3[2];
+  local_9c = param_3[1];
+  local_98 = param_3[2];
+  local_94 = param_3[3];
+  local_54 = param_3[2] * param_3[2] + *param_3 * *param_3 + param_3[1] * param_3[1];
+  local_50 = SQRT(local_54);
+  cVar5 = FUN_006f97a0(param_1,&local_b0);
+  if (cVar5 == '\0') {
+    return 0;
+  }
+  if (param_4 != (float *)0x0) {
+    fVar1 = param_3[1];
+    fVar2 = param_3[2];
+    fVar3 = param_2[1];
+    fVar4 = param_2[2];
+    *param_4 = local_58 * *param_3 + *param_2;
+    param_4[1] = local_58 * fVar1 + fVar3;
+    param_4[2] = local_58 * fVar2 + fVar4;
+    param_4[3] = local_c4;
+  }
+  if (param_5 != (float *)0x0) {
+    *param_5 = -local_40;
+    param_5[1] = -local_3c;
+    param_5[2] = -local_38;
+    param_5[3] = local_c4;
+    fVar1 = param_5[2] * param_5[2] + param_5[1] * param_5[1] + *param_5 * *param_5;
+    if (1e-08 <= ABS(fVar1 - 1.0)) {
+      if (fVar1 < 1e-08) {
+        if (*param_5 != 0.0) {
+          if (*param_5 < 0.0) {
+            *param_5 = -1.0;
+            return local_30;
+          }
+          *param_5 = 1.0;
+          return local_30;
+        }
+        if (param_5[2] == 0.0) {
+          if (param_5[1] < 0.0) {
+            param_5[1] = -1.0;
+            return local_30;
+          }
+          param_5[1] = 1.0;
+          return local_30;
+        }
+        if (param_5[2] < 0.0) {
+          param_5[2] = -1.0;
+          return local_30;
+        }
+        param_5[2] = 1.0;
+        return local_30;
+      }
+      fVar1 = 1.0 / SQRT(fVar1);
+      *param_5 = fVar1 * *param_5;
+      param_5[1] = fVar1 * param_5[1];
+      param_5[2] = fVar1 * param_5[2];
+    }
+  }
+  return local_30;
+}
+

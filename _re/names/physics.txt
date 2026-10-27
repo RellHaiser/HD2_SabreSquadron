@@ -1,0 +1,124 @@
+# Physics objects (src/game/physics.*): 0x00405c60..0x00411590
+00405c60 StaticInit_405c60
+00405ca0 C_PhysSwingingObject::Tick | bool __thiscall Tick(C_PhysSwingingObject *this, float dt)
+00405ea0 C_PhysSwingingObject::C_PhysSwingingObject | C_PhysSwingingObject * __thiscall C_PhysSwingingObject(C_PhysSwingingObject *this, I3D_frame *frame, S_PhysicsHandle *handle, I3D_frame *parent)
+004062e0 C_PhysSwingingObject::ScalarDeletingDestructor | C_PhysSwingingObject * __thiscall ScalarDeletingDestructor(C_PhysSwingingObject *this, uchar flags)
+00406300 C_PhysSwingingObject::~C_PhysSwingingObject | void __thiscall ~C_PhysSwingingObject(C_PhysSwingingObject *this)
+00406390 C_PhysSwingingObject::Hit | bool __thiscall Hit(C_PhysSwingingObject *this, int kind, S_vector *dir, void *extra)
+004066a0 C_PhysSwingingObject::ApplyImpulse | void __thiscall ApplyImpulse(C_PhysSwingingObject *this, S_vector *impulse, S_vector *point, float factor)
+004066f0 StaticInit_4066f0
+00406720 S_vector::Assign | void __thiscall Assign(S_vector *this, S_vector *src)
+00406740 C_PhysDoor::AddBreakVolumes | void __thiscall AddBreakVolumes(C_PhysDoor *this, I3D_frame *model)
+00406c10 AlignedFree_406c10
+00406c30 S_vector::DivAssign | void __thiscall DivAssign(S_vector *this, float divisor)
+00406c70 ComputeBoundSphere | void __fastcall ComputeBoundSphere(I3D_bound_volume *bound)
+00406d10 C_PhysDoor::MoveLeaf | bool __thiscall MoveLeaf(C_PhysDoor *this)
+004070c0 C_PhysDoor::Tick | bool __thiscall Tick(C_PhysDoor *this, float dt)
+00407390 C_PhysDoor::C_PhysDoor | C_PhysDoor * __thiscall C_PhysDoor(C_PhysDoor *this, S_PhysicsObjectDesc *desc, S_PhysicsHandle *handle)
+004079d0 C_PhysDoor::ScalarDeletingDestructor | C_PhysDoor * __thiscall ScalarDeletingDestructor(C_PhysDoor *this, uchar flags)
+004079f0 C_PhysDoor::~C_PhysDoor | void __thiscall ~C_PhysDoor(C_PhysDoor *this)
+00407bd0 C_PhysDoor::Break | void __thiscall Break(C_PhysDoor *this, S_vector *dir)
+004085c0 S_DoorParams::S_DoorParams | S_DoorParams * __thiscall S_DoorParams(S_DoorParams *this)
+004086a0 S_CacheEntry_Model::~S_CacheEntry_Model
+004086d0 I3D_frame::GetWorldScaleInline | S_vector * __thiscall GetWorldScaleInline(I3D_frame *this, S_vector *out)
+00408730 S_PhysicsObjectDesc::~S_PhysicsObjectDesc | void __thiscall ~S_PhysicsObjectDesc(S_PhysicsObjectDesc *this)
+00408750 C_PhysDoor::HideBrokenPart | void __thiscall HideBrokenPart(C_PhysDoor *this)
+00408780 C_PhysDoor::Hit | bool __thiscall Hit(C_PhysDoor *this, int kind, S_vector *dir, void *extra)
+004094d0 C_PhysDoor::ApplyImpulse | void __thiscall ApplyImpulse(C_PhysDoor *this, S_vector *impulse, S_vector *point, float factor)
+0040ab50 StaticInit_40ab50
+0040ab80 C_PhysObject::SyncFrame | void __thiscall SyncFrame(C_PhysObject *this)
+0040ad40 C_PhysObject::ApplyGravity | void __thiscall ApplyGravity(C_PhysObject *this, float dt)
+0040ad60 C_PhysObject::SetFreezeVolume | void __thiscall SetFreezeVolume(C_PhysObject *this, bool on)
+0040ad80 C_PhysObject::SetVolumeActive | void __thiscall SetVolumeActive(C_PhysObject *this, bool on)
+0040ade0 C_PhysObject::Rotate | void __thiscall Rotate(C_PhysObject *this, float dt)
+0040b030 C_PhysObject::ApplyImpulse | void __thiscall ApplyImpulse(C_PhysObject *this, S_vector *impulse, S_vector *point, float factor)
+0040b360 C_PhysObject::Bounce | void __thiscall Bounce(C_PhysObject *this, S_vector *velocity, S_vector *normal)
+0040b5e0 C_PhysObject::C_PhysObject | C_PhysObject * __thiscall C_PhysObject(C_PhysObject *this, I3D_frame *frame, S_PhysicsHandle *handle)
+0040b770 S_CollisionVolume::S_CollisionVolume | S_CollisionVolume * __thiscall S_CollisionVolume(S_CollisionVolume *this)
+0040b790 C_PhysObject::Hit | bool __thiscall Hit(C_PhysObject *this, int kind, S_vector *dir, void *extra)
+0040b7a0 S_quat::InitZW_40b7a0
+0040b7c0 C_PhysObject::ScalarDeletingDestructor | C_PhysObject * __thiscall ScalarDeletingDestructor(C_PhysObject *this, uchar flags)
+0040b7e0 C_PhysObject::~C_PhysObject | void __thiscall ~C_PhysObject(C_PhysObject *this)
+0040b890 C_PhysObject::Tick | bool __thiscall Tick(C_PhysObject *this, float dt)
+0040b8a0 C_PhysObject::SetCallback | void __thiscall SetCallback(C_PhysObject *this, void *callback)
+0040b8b0 C_PhysObject::SetMaterialId | void __thiscall SetMaterialId(C_PhysObject *this, int id)
+0040b8c0 C_PhysObject::SetFlags | void __thiscall SetFlags(C_PhysObject *this, bool unknown144, bool collideWithBoxes)
+0040b8e0 StaticInit_40b8e0
+0040b910 C_PhysFallingObject::Tick | bool __thiscall Tick(C_PhysFallingObject *this, float dt)
+0040bd70 C_PhysFallingObject::C_PhysFallingObject | C_PhysFallingObject * __thiscall C_PhysFallingObject(C_PhysFallingObject *this, I3D_frame *frame, S_PhysicsHandle *handle)
+0040be40 C_PhysFallingObject::ScalarDeletingDestructor | C_PhysFallingObject * __thiscall ScalarDeletingDestructor(C_PhysFallingObject *this, uchar flags)
+0040be60 C_PhysFallingObject::~C_PhysFallingObject | void __thiscall ~C_PhysFallingObject(C_PhysFallingObject *this)
+0040be70 StaticInit_40be70
+0040bea0 C_PhysBox::ApplyGravity | void __thiscall ApplyGravity(C_PhysBox *this, float dt)
+0040bec0 C_PhysBox::Rotate | void __thiscall Rotate(C_PhysBox *this, float dt)
+0040bee0 C_PhysBox::Tick | bool __thiscall Tick(C_PhysBox *this, float dt)
+0040bf20 C_PhysBox::TickFlying | bool __thiscall TickFlying(C_PhysBox *this, float dt)
+0040c670 C_PhysBox::Tip | void __thiscall Tip(C_PhysBox *this, float dt)
+0040ce00 C_PhysBox::TickTipping | bool __thiscall TickTipping(C_PhysBox *this, float dt)
+0040d510 C_PhysBox::Roll | void __thiscall Roll(C_PhysBox *this, float dt)
+0040d6a0 C_PhysBox::TickRolling | bool __thiscall TickRolling(C_PhysBox *this, float dt)
+0040daa0 C_PhysBox::C_PhysBox | C_PhysBox * __thiscall C_PhysBox(C_PhysBox *this, I3D_frame *frame, S_PhysicsHandle *handle)
+0040e050 C_PhysBox::ScalarDeletingDestructor | C_PhysBox * __thiscall ScalarDeletingDestructor(C_PhysBox *this, uchar flags)
+0040e070 C_PhysBox::~C_PhysBox | void __thiscall ~C_PhysBox(C_PhysBox *this)
+0040e0b0 S_vector::MagnitudeInline | float10 __thiscall MagnitudeInline(S_vector *this)
+0040e130 StaticInit_40e130
+0040e160 C_PhysSimpleObject::Tick | bool __thiscall Tick(C_PhysSimpleObject *this, float dt)
+0040e320 C_PhysSimpleObject::C_PhysSimpleObject | C_PhysSimpleObject * __thiscall C_PhysSimpleObject(C_PhysSimpleObject *this, I3D_frame *frame, S_PhysicsHandle *handle)
+0040e350 C_PhysSimpleObject::ScalarDeletingDestructor | C_PhysSimpleObject * __thiscall ScalarDeletingDestructor(C_PhysSimpleObject *this, uchar flags)
+0040e370 C_PhysSimpleObject::~C_PhysSimpleObject | void __thiscall ~C_PhysSimpleObject(C_PhysSimpleObject *this)
+0040e380 StaticInit_40e380
+0040e3b0 C_PhysCan::Tick | bool __thiscall Tick(C_PhysCan *this, float dt)
+0040e810 C_PhysCan::C_PhysCan | C_PhysCan * __thiscall C_PhysCan(C_PhysCan *this, I3D_frame *frame, float radius, S_PhysicsHandle *handle)
+0040ead0 C_PhysCan::ScalarDeletingDestructor | C_PhysCan * __thiscall ScalarDeletingDestructor(C_PhysCan *this, uchar flags)
+0040eaf0 C_PhysCan::~C_PhysCan | void __thiscall ~C_PhysCan(C_PhysCan *this)
+0040eb00 C_PhysCan::Hit | bool __thiscall Hit(C_PhysCan *this, int kind, S_vector *dir, void *extra)
+0040eb10 C_PhysCan::ApplyImpulse | void __thiscall ApplyImpulse(C_PhysCan *this, S_vector *impulse, S_vector *point, float factor)
+0040eda0 StaticInit_40eda0
+0040edd0 C_PhysSphere::Tick | bool __thiscall Tick(C_PhysSphere *this, float dt)
+0040f6a0 C_PhysSphere::C_PhysSphere | C_PhysSphere * __thiscall C_PhysSphere(C_PhysSphere *this, I3D_frame *frame, float radius, S_PhysicsHandle *handle)
+0040fa10 C_PhysSphere::Unknown18 | bool __thiscall Unknown18(C_PhysSphere *this)
+0040fa20 C_PhysSphere::ScalarDeletingDestructor | C_PhysSphere * __thiscall ScalarDeletingDestructor(C_PhysSphere *this, uchar flags)
+0040fa40 C_PhysSphere::~C_PhysSphere | void __thiscall ~C_PhysSphere(C_PhysSphere *this)
+0040fa50 StaticInit_40fa50
+0040fa80 StaticInit_PhysicsModule
+0040fa90 ConstructPhysicsModule
+0040fab0 RegisterPhysicsModuleDtor
+0040fac0 DestroyPhysicsModule
+0040fae0 InitNoPhysicsObject
+0040fb00 C_PhysicsModule::CreateObject | S_PhysicsHandle * __thiscall CreateObject(C_PhysicsModule *this, S_PhysicsObjectDesc *desc)
+004100f0 AlignedFree_4100f0
+00410100 C_PhysicsModule::Tick | void __thiscall Tick(C_PhysicsModule *this, int timeDelta)
+004101a0 C_PhysicsModule::Update | void __thiscall Update(C_PhysicsModule *this, int timeDelta)
+00410230 C_PhysicsModule::DestroyObject | bool __thiscall DestroyObject(C_PhysicsModule *this, S_PhysicsHandle **handle)
+00410420 C_PhysicsModule::ApplyImpulse | void __thiscall ApplyImpulse(C_PhysicsModule *this, S_PhysicsHandle *handle, S_vector *impulse, S_vector *point, float factor)
+00410530 C_PhysicsModule::Hit | bool __thiscall Hit(C_PhysicsModule *this, S_PhysicsHandle *handle, int kind, S_vector *dir, void *extra)
+00410630 GetPhysicsModule | C_PhysicsModule * __cdecl GetPhysicsModule(void)
+00410640 C_PhysicsModule::C_PhysicsModule | C_PhysicsModule * __thiscall C_PhysicsModule(C_PhysicsModule *this, int id, char *name)
+004106c0 C_PhysicsModule::Init | void __thiscall Init(C_PhysicsModule *this)
+004106d0 C_PhysicsModule::Done | void __thiscall Done(C_PhysicsModule *this)
+004106e0 C_PhysicsModule::LoadMissionData | void __thiscall LoadMissionData(C_PhysicsModule *this, bool server)
+004106f0 C_PhysicsModule::FreeMissionData | void __thiscall FreeMissionData(C_PhysicsModule *this, bool server)
+00410700 C_PhysicsModule::SaveGame | bool __thiscall SaveGame(C_PhysicsModule *this, C_chunk *chunk)
+00410710 C_PhysicsModule::LoadGame | bool __thiscall LoadGame(C_PhysicsModule *this, C_chunk *chunk)
+00410720 C_PhysicsModule::ScalarDeletingDestructor | C_PhysicsModule * __thiscall ScalarDeletingDestructor(C_PhysicsModule *this, uchar flags)
+00410740 C_PhysicsModule::~C_PhysicsModule | void __thiscall ~C_PhysicsModule(C_PhysicsModule *this)
+00410800 C_PhysicsModuleBase::~C_PhysicsModuleBase
+00410810 C_PhysicsModuleBase::ScalarDeletingDestructor
+00410830 C_PhysicsModule::DeleteAll | void __thiscall DeleteAll(C_PhysicsModule *this)
+00410940 C_PhysicsModule::Deactivate | void __thiscall Deactivate(C_PhysicsModule *this, int index, bool destroy)
+00410a40 C_PhysicsModule::StartMission | void __thiscall StartMission(C_PhysicsModule *this, bool server)
+00410a70 C_PhysicsModule::StopMission | void __thiscall StopMission(C_PhysicsModule *this, bool server)
+00410a90 C_PhysicsModule::RestartMission | void __thiscall RestartMission(C_PhysicsModule *this, bool server)
+00410af0 StrStr_410af0
+00410b00 C_PhysicsModule::CreateSceneObjects | void __thiscall CreateSceneObjects(C_PhysicsModule *this)
+00410b40 CreatePhysicsObjectProc | uint __stdcall CreatePhysicsObjectProc(I3D_frame *frame, void *context)
+00410ef0 C_PhysicsModule::WriteState | void __thiscall WriteState(C_PhysicsModule *this, C_BitStream *msg)
+00410f70 C_PhysicsModule::ReadState | void __thiscall ReadState(C_PhysicsModule *this, C_BitStream *msg)
+00867a98 g_noPhysicsHandle @ S_PhysicsHandle
+00832cdc g_noPhysicsObject @ S_PhysicsHandle *
+00479540 C_TemporaryActorsList::AddBreakable | void __thiscall AddBreakable(C_TemporaryActorsList *this, S_BreakableObject *object)
+004795e0 C_TemporaryActorsList::ClearBreakables | void __thiscall ClearBreakables(C_TemporaryActorsList *this)
+0073db30 C_NetMessage::WriteDirection
+0073db70 C_NetMessage::ReadDirection
+006efe40 C_CollisionWorld::SetIgnoredVolume
+00488d60 C_GEffectsModule::FadeOutModel

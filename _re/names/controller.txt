@@ -1,0 +1,14 @@
+# What C_HumanController (src/game/human_controller.cpp) calls in other modules that had no names:
+# world objects (src/game/world.h), the HUD (pending.h) and the network replication.
+# The controller's own names are in human.txt.
+
+004dde20 C_Car::HasEnemyAboard | bool __thiscall HasEnemyAboard(C_Car *this, C_Human *human)
+004dec60 C_Car::RayTest | bool __thiscall RayTest(C_Car *this, S_vector4 *from, S_vector *dir, S_vector4 *pos, S_vector4 *normal)
+004dead0 C_Car::PlaceCharge | bool __thiscall PlaceCharge(C_Car *this, C_Item *item, C_Human *human, S_vector4 *pos, S_vector4 *normal)
+004deb50 C_Car::AttachCharge | bool __thiscall AttachCharge(C_Car *this, C_Item *item, C_Human *human, S_vector4 *pos, S_vector4 *normal)
+004d9050 C_Car::ApplyControls | void __thiscall ApplyControls(void *this, float *axes, float *buttons)
+005ff6c0 C_Door::PickLock | void __thiscall PickLock(void *this)
+005e0dd0 C_Submarine::SetControls | void __thiscall SetControls(void *this, float forward, float side, float up)
+0073f900 C_NetReplication::RemoveObject | void __thiscall RemoveObject(void *this, void *object)
+0073f9c0 C_NetReplication::FindObject | void * __thiscall FindObject(void *this, int id, bool create)
+0073e690 C_NetObject::GetProperty | void * __thiscall GetProperty(void *this, int index)

@@ -1,0 +1,640 @@
+// 0x0041e3f0
+uint32_t __thiscall FUN_0041e3f0(void *this,uint32_t param_1,uint32_t param_2,int *param_3)
+{
+  if ((g_gameRole & 1) == 0) {
+    return 0;
+  }
+  switch(param_1) {
+  case 0:
+    local_88 = 0;
+    iVar20 = *(int *)(*(int *)((int)this + 0xa0) + *param_3 * 8);
+    iVar20 *= iVar20;
+    iVar14 = FUN_006b69d0(0x8aea0c);
+    if ((char)iVar14 == '\0') {
+      pCVar19 = (C_auto_0080fc20 *)field_address_1c_461410(0x89ae78);
+      uVar18 = FUN_00462300((int)pCVar19);
+      while (uVar18 != 0) {
+        uVar18--;
+        iVar14 = C_auto_0080fc20::FUN_004619f0(pCVar19,uVar18);
+        if ((((iVar14 != 0) && (0 < *(int *)(iVar14 + 0xec))) && (*(int *)(iVar14 + 0x20) != 0)) &&
+           (pIVar4 = *(I3D_frame **)((int)this + 0x100), pIVar4 != nullptr)) {
+          if ((pIVar4->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar4);
+          }
+          pIVar3 = *(I3D_frame **)(iVar14 + 0x20);
+          if ((pIVar3->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar3);
+          }
+          fVar5 = (pIVar3->m_worldMatrix).m[3][0] - (pIVar4->m_worldMatrix).m[3][0];
+          fVar7 = (pIVar3->m_worldMatrix).m[3][1] - (pIVar4->m_worldMatrix).m[3][1];
+          fVar6 = (pIVar3->m_worldMatrix).m[3][2] - (pIVar4->m_worldMatrix).m[3][2];
+          if (fVar5 * fVar5 + fVar7 * fVar7 + fVar6 * fVar6 < (float)iVar20) {
+            local_88++;
+          }
+        }
+      }
+    }
+    else {
+      pCVar19 = (C_auto_0080fc20 *)field_address_e8_461420(0x89ae78);
+      uVar18 = FUN_00462300((int)pCVar19);
+      if (uVar18 != 0) {
+        do {
+          uVar18--;
+          iVar14 = C_auto_0080fc20::FUN_004619f0(pCVar19,uVar18);
+          if (((iVar14 != 0) && (0 < *(int *)(iVar14 + 0xec))) &&
+             (((cVar10 = FUN_005a63b0(iVar14), cVar10 != '\0' &&
+               ((uVar16 = FUN_005a63f0(iVar14), (char)uVar16 == '\0' &&
+                (*(int *)(iVar14 + 0x20) != 0)))) &&
+              (pIVar4 = *(I3D_frame **)((int)this + 0x100), pIVar4 != nullptr)))) {
+            if ((pIVar4->m_frameFlags & 0x20) == 0) {
+              I3D_frame::UpdateWMatrixProc(pIVar4);
+            }
+            pIVar3 = *(I3D_frame **)(iVar14 + 0x20);
+            if ((pIVar3->m_frameFlags & 0x20) == 0) {
+              I3D_frame::UpdateWMatrixProc(pIVar3);
+            }
+            fVar5 = (pIVar3->m_worldMatrix).m[3][0] - (pIVar4->m_worldMatrix).m[3][0];
+            fVar7 = (pIVar3->m_worldMatrix).m[3][1] - (pIVar4->m_worldMatrix).m[3][1];
+            fVar6 = (pIVar3->m_worldMatrix).m[3][2] - (pIVar4->m_worldMatrix).m[3][2];
+            if (fVar5 * fVar5 + fVar7 * fVar7 + fVar6 * fVar6 < (float)iVar20) {
+              local_88++;
+            }
+          }
+        } while (uVar18 != 0);
+        return local_88;
+      }
+    }
+    return local_88;
+  case 1:
+    pIVar4 = *(I3D_frame **)(*(int *)((int)this + 0x90) + *param_3 * 4);
+    if (pIVar4 != nullptr) {
+      iVar20 = *(int *)(*(int *)((int)this + 0xa0) + param_3[1] * 8);
+      if ((pIVar4->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar4);
+      }
+      local_70.x = (pIVar4->m_worldMatrix).m[3][0];
+      local_70.y = (pIVar4->m_worldMatrix).m[3][1];
+      local_70.z = (pIVar4->m_worldMatrix).m[3][2];
+      local_64 = (uint32_t *)(pIVar4->m_worldMatrix).m[3][3];
+      iVar14 = 0x20;
+      while( true ) {
+        if (DAT_0089b4c0 == 0) {
+          iVar21 = 0;
+        }
+        else {
+          iVar21 = DAT_0089b4c4 - DAT_0089b4c0 >> 2;
+        }
+        if (iVar21 <= iVar14) break;
+        iVar21 = FUN_00475d50(&g_actorsModule,iVar14);
+        if (((iVar21 != 0) && (*(int *)(iVar21 + 0x18) == 3)) &&
+           ((0 < *(int *)(iVar21 + 0xec) &&
+            ((uVar18 = FUN_005a6380(iVar21), (char)uVar18 == '\0' && (*(int *)(iVar21 + 0x19c) == 2)
+             ))))) {
+          pIVar4 = *(I3D_frame **)(iVar21 + 0x20);
+          if ((pIVar4->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar4);
+          }
+          fVar5 = (pIVar4->m_worldMatrix).m[3][0] - local_70.x;
+          fVar6 = (pIVar4->m_worldMatrix).m[3][1] - local_70.y;
+          fVar7 = (pIVar4->m_worldMatrix).m[3][2] - local_70.z;
+          if (fVar6 * fVar6 + fVar7 * fVar7 + fVar5 * fVar5 < (float)(iVar20 * iVar20)) {
+            return 1;
+          }
+        }
+        iVar14++;
+      }
+    }
+    break;
+  case 2:
+    pCVar19 = (C_auto_0080fc20 *)field_address_1c_461410(0x89ae78);
+    bVar8 = false;
+    uVar18 = FUN_00462300((int)pCVar19);
+    if (uVar18 != 0) {
+      do {
+        uVar18--;
+        iVar20 = C_auto_0080fc20::FUN_004619f0(pCVar19,uVar18);
+        if (((0 < *(int *)(iVar20 + 0xec)) && (bVar8 = true, *(int *)(iVar20 + 0x20) != 0)) &&
+           (pIVar4 = *(I3D_frame **)((int)this + 0x100), pIVar4 != nullptr)) {
+          if ((pIVar4->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar4);
+          }
+          pIVar3 = *(I3D_frame **)(iVar20 + 0x20);
+          if ((pIVar3->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar3);
+          }
+          fVar5 = (pIVar3->m_worldMatrix).m[3][0] - (pIVar4->m_worldMatrix).m[3][0];
+          fVar7 = (pIVar3->m_worldMatrix).m[3][1] - (pIVar4->m_worldMatrix).m[3][1];
+          fVar6 = (pIVar3->m_worldMatrix).m[3][2] - (pIVar4->m_worldMatrix).m[3][2];
+          fVar5 = fVar5 * fVar5 + fVar7 * fVar7 + fVar6 * fVar6;
+          if ((int)fVar5 < 0x322bcc77) {
+            fVar5 = 0.0;
+          }
+          else if (1e-08 <= ABS(fVar5 - 1.0)) {
+            fVar5 = SQRT(fVar5);
+          }
+          else {
+            fVar5 = 1.0;
+          }
+          if ((float)*(int *)(*(int *)((int)this + 0xa0) + *param_3 * 8) < fVar5) {
+            return 0;
+          }
+        }
+      } while (uVar18 != 0);
+      if (bVar8) {
+        return 1;
+      }
+    }
+    break;
+  case 3:
+    local_70.x = (float)CONCAT31(local_70.x._1_3_,DAT_0089b5dc);
+    if (DAT_0089b5e0 == 0) {
+      iVar20 = 0;
+    }
+    else {
+      iVar20 = DAT_0089b5e4 - DAT_0089b5e0 >> 2;
+    }
+    if (iVar20 < 0) {
+      iVar20 = 0;
+    }
+    local_70.y = (float)operator_new(iVar20 * 4);
+    iVar20 = DAT_0089b5e4;
+    local_70.z = local_70.y;
+    if (DAT_0089b5e0 != DAT_0089b5e4) {
+      iVar14 = DAT_0089b5e0 - (int)local_70.y;
+      do {
+        if ((uint32_t *)local_70.z != nullptr) {
+          *(uint32_t *)local_70.z = *(uint32_t *)(iVar14 + (int)local_70.z);
+        }
+        local_70.z = (float)((int)local_70.z + 4);
+      } while (iVar14 + (int)local_70.z != iVar20);
+    }
+    local_64 = (uint32_t *)local_70.z;
+    if ((uint32_t *)local_70.y != nullptr) {
+      iVar20 = (int)local_70.z - (int)local_70.y >> 2;
+      while (iVar20 != 0) {
+        iVar20--;
+        if ((*(int *)(*(int *)((int)local_70.y + iVar20 * 4) + 0x18) == 2) &&
+           (pIVar4 = *(I3D_frame **)((int)this + 0x100), pIVar4 != nullptr)) {
+          if ((pIVar4->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar4);
+          }
+          iVar14 = *(int *)((int)local_70.y + iVar20 * 4);
+          local_60 = *(float *)(iVar14 + 0x30);
+          local_5c = *(float *)(iVar14 + 0x34);
+          fVar5 = local_60 - (pIVar4->m_worldMatrix).m[3][0];
+          local_58 = *(float *)(iVar14 + 0x38);
+          fVar7 = local_5c - (pIVar4->m_worldMatrix).m[3][1];
+          local_54 = *(float *)(iVar14 + 0x3c);
+          fVar6 = local_58 - (pIVar4->m_worldMatrix).m[3][2];
+          fVar5 = fVar5 * fVar5 + fVar7 * fVar7 + fVar6 * fVar6;
+          if ((int)fVar5 < 0x322bcc77) {
+            fVar5 = 0.0;
+          }
+          else if (1e-08 <= ABS(fVar5 - 1.0)) {
+            fVar5 = SQRT(fVar5);
+          }
+          else {
+            fVar5 = 1.0;
+          }
+          if (fVar5 < (float)*(int *)(*(int *)((int)this + 0xa0) + *param_3 * 8)) {
+            operator_delete((void *)local_70.y);
+            return 1;
+          }
+        }
+      }
+    }
+    operator_delete((void *)local_70.y);
+    break;
+  case 4:
+    pIVar4 = *(I3D_frame **)((int)this + 0x100);
+    if ((pIVar4->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar4);
+    }
+    local_60 = (pIVar4->m_worldMatrix).m[3][0];
+    local_5c = (pIVar4->m_worldMatrix).m[3][1];
+    local_58 = (pIVar4->m_worldMatrix).m[3][2];
+    local_54 = (pIVar4->m_worldMatrix).m[3][3];
+    uVar18 = FUN_00478a20(&g_temporaryActors,*(int *)(*(int *)((int)this + 0xa0) + *param_3 * 8),
+                          &local_60,*(int *)(*(int *)((int)this + 0xa0) + param_3[1] * 8));
+    return uVar18 & 0xff;
+  case 5:
+    iVar20 = field_address_1c_461410(0x89ae78);
+    iVar20 = FUN_004622c0(iVar20);
+    return (uint32_t)(iVar20 == 0);
+  case 6:
+    return (uint32_t)(DAT_0089b4fc == 0);
+  case 7:
+    return DAT_0089b4fc;
+  case 8:
+    return DAT_0089b500;
+  case 9:
+    uVar18 = 1 << ((uint8_t)*(uint32_t *)(*(int *)((int)this + 0xa0) + *param_3 * 8) & 0x1f);
+    if ((uVar18 & *(uint32_t *)((int)this + 0x10)) != 0) {
+      *(uint32_t *)((int)this + 0x10) = ~uVar18 & *(uint32_t *)((int)this + 0x10);
+      return 1;
+    }
+    break;
+  case 10:
+    bVar8 = C_auto_00815a08::FUN_006b6a70((C_auto_00815a08 *)&g_textManager);
+    return (uint32_t)bVar8;
+  case 0xb:
+    iVar20 = *(int *)(*(int *)((int)this + 0xa0) + *param_3 * 8);
+    if (iVar20 != 0) {
+      iVar14 = _rand();
+      return iVar14 % iVar20;
+    }
+    break;
+  case 0xc:
+    iVar20 = *(int *)(*(int *)((int)this + 0xa0) + *param_3 * 8);
+    if ((iVar20 < 0x100) && (-1 < iVar20)) {
+      return *(uint32_t *)(&DAT_00868b3c + iVar20 * 4);
+    }
+    break;
+  case 0xd:
+    if (((*(int *)((int)this + 0x100) != 0) &&
+        (piVar11 = *(int **)(*(int *)((int)this + 0x100) + 0xec), piVar11 != nullptr)) &&
+       ((iVar20 = *piVar11, iVar20 != 0 && (*(int *)(iVar20 + 0x18) == 3)))) {
+      uVar18 = FUN_005af620(iVar20);
+      return (uint32_t)((char)uVar18 != '\0');
+    }
+    break;
+  case 0xe:
+    if ((((*(int *)((int)this + 0x100) != 0) &&
+         (piVar11 = *(int **)(*(int *)((int)this + 0x100) + 0xec), piVar11 != nullptr)) &&
+        (iVar20 = *piVar11, iVar20 != 0)) && (*(int *)(iVar20 + 0x18) == 3)) {
+      cVar10 = FUN_005af640(iVar20);
+      return (uint32_t)(cVar10 != '\0');
+    }
+    break;
+  case 0xf:
+    pIVar4 = *(I3D_frame **)(*(int *)((int)this + 0x90) + *param_3 * 4);
+    if ((((((uint8_t)g_gameRole & 7) != 7) && (ExceptionList = &local_1c, pIVar4 != nullptr)
+         ) && ((piVar11 = (int *)(pIVar4->m_name).length, ExceptionList = &local_1c,
+               piVar11 != nullptr &&
+               ((iVar20 = *piVar11, ExceptionList = &local_1c, iVar20 != 0 &&
+                (ExceptionList = &local_1c, *(int *)(iVar20 + 0x18) == 3)))))) &&
+       ((*(int *)(iVar20 + 0xec) < 1 ||
+        ((ExceptionList = &local_1c, cVar10 = FUN_005a63b0(iVar20), cVar10 == '\0' ||
+         (uVar18 = FUN_005a63f0(iVar20), (char)uVar18 != '\0')))))) {
+      return 1000;
+    }
+    if (pIVar4 == nullptr) goto LAB_0041ee4a;
+    pIVar3 = *(I3D_frame **)((int)this + 0x100);
+    if ((pIVar3->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar3);
+    }
+    if ((pIVar4->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar4);
+    }
+    fVar5 = (pIVar4->m_worldMatrix).m[3][0] - (pIVar3->m_worldMatrix).m[3][0];
+    fVar7 = (pIVar4->m_worldMatrix).m[3][1] - (pIVar3->m_worldMatrix).m[3][1];
+    fVar6 = (pIVar4->m_worldMatrix).m[3][2] - (pIVar3->m_worldMatrix).m[3][2];
+    local_80 = fVar5 * fVar5 + fVar7 * fVar7 + fVar6 * fVar6;
+    goto LAB_0041ecf7;
+  case 0x10:
+    iVar20 = *(int *)(*(int *)((int)this + 0x90) + *param_3 * 4);
+    if (((iVar20 != 0) && (piVar11 = *(int **)(iVar20 + 0xec), piVar11 != nullptr)) &&
+       (iVar20 = *piVar11, iVar20 != 0)) {
+      switch(*(uint32_t *)(iVar20 + 0x18)) {
+      case 3:
+        if (0 < *(int *)(iVar20 + 0xec)) {
+          uVar18 = FUN_005a6380(iVar20);
+          return (uint32_t)((char)uVar18 == '\0');
+        }
+        break;
+      case 4:
+        uVar15 = FUN_004ddcf0(iVar20);
+        return (uint32_t)((char)uVar15 == '\0');
+      case 6:
+        uVar18 = FUN_006029f0(iVar20);
+        return uVar18;
+      case 7:
+        return *(uint32_t *)(iVar20 + 0xa0);
+      case 0xd:
+        return *(uint32_t *)(iVar20 + 0xd4);
+      case 0xf:
+        return (uint32_t)*(uint8_t *)(iVar20 + 0x91);
+      case 0x15:
+        return *(uint32_t *)(iVar20 + 0x2f0);
+      case 0x16:
+        return *(uint32_t *)(iVar20 + 0x94);
+      case 0x17:
+        return *(uint32_t *)(iVar20 + 0x148);
+      case 0x19:
+        return (uint32_t)(*(char *)(iVar20 + 0xa1) == '\0');
+      case 0x1c:
+        return *(uint32_t *)(iVar20 + 0x184);
+      case 0x23:
+        uVar18 = FUN_005e24c0(iVar20);
+        return uVar18 & 0xff;
+      case 0x26:
+        return *(uint32_t *)(iVar20 + 0x90);
+      }
+    }
+    break;
+  case 0x11:
+    iVar20 = *(int *)((int)this + 0xa0);
+    uVar18 = FUN_006b6820(&g_textManager,*(uint32_t *)(iVar20 + *param_3 * 8),
+                          *(int *)(iVar20 + param_3[1] * 8),*(int *)(iVar20 + param_3[2] * 8),
+                          *(uint32_t *)(iVar20 + param_3[3] * 8));
+    return uVar18;
+  case 0x12:
+    iVar20 = *(int *)((int)this + 0x100);
+    if (((iVar20 != 0) && (piVar11 = *(int **)(iVar20 + 0xec), piVar11 != nullptr)) &&
+       (*piVar11 != 0)) {
+      if ((iVar20 == 0) || (piVar11 == nullptr)) {
+        iVar14 = 0;
+      }
+      else {
+        iVar14 = *piVar11;
+      }
+      if (*(int *)(iVar14 + 0x18) == 3) {
+        if ((iVar20 != 0) && (*(int **)(iVar20 + 0xec) != nullptr)) {
+          uVar18 = FUN_005af170(**(int **)(iVar20 + 0xec));
+          return uVar18;
+        }
+        uVar18 = FUN_005af170(0);
+        return uVar18;
+      }
+      if (*(int *)(iVar14 + 0x18) == 0x1e) {
+        if ((iVar20 != 0) && (*(int **)(iVar20 + 0xec) != nullptr)) {
+          uVar18 = get_field_1c_5ce6f0(*(int *)(**(int **)(iVar20 + 0xec) + 0x534));
+          return uVar18;
+        }
+        uVar18 = get_field_1c_5ce6f0(iRam00000534);
+        return uVar18;
+      }
+    }
+    break;
+  case 0x13:
+    iVar20 = *(int *)(*(int *)((int)this + 0xa0) + *param_3 * 8);
+    this_00 = (void *)field_address_1c_461410(0x89ae78);
+    uVar18 = FUN_0045e9a0(this_00,iVar20);
+    return uVar18 & 0xff;
+  case 0x14:
+    iVar20 = field_address_1c_461410(0x89ae78);
+    uVar18 = FUN_004622c0(iVar20);
+    return uVar18;
+  case 0x15:
+    iVar20 = *(int *)(*(int *)((int)this + 0x90) + *param_3 * 4);
+    if (((iVar20 != 0) && (piVar11 = *(int **)(iVar20 + 0xec), piVar11 != nullptr)) &&
+       ((iVar20 = *piVar11, iVar20 != 0 && (*(int *)(iVar20 + 0x18) == 3)))) {
+      return *(uint32_t *)(iVar20 + 0x170);
+    }
+    return 0xffffffff;
+  case 0x16:
+    iVar20 = field_address_1c_461410(0x89ae78);
+    iVar20 = FUN_00462300(iVar20);
+    iVar14 = field_address_1c_461410(0x89ae78);
+    iVar14 = FUN_004622c0(iVar14);
+    return (uint32_t)(iVar14 != iVar20);
+  case 0x17:
+    pIVar4 = *(I3D_frame **)((int)this + 0x100);
+    iVar20 = *(int *)(*(int *)((int)this + 0xa0) + *param_3 * 8);
+    iVar14 = *(int *)(*(int *)((int)this + 0xa0) + param_3[1] * 8);
+    if ((pIVar4->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar4);
+    }
+    bVar8 = true;
+    iVar21 = 0x20;
+    local_70.x = (pIVar4->m_worldMatrix).m[3][0];
+    local_70.y = (pIVar4->m_worldMatrix).m[3][1];
+    local_70.z = (pIVar4->m_worldMatrix).m[3][2];
+    local_64 = (uint32_t *)(pIVar4->m_worldMatrix).m[3][3];
+    do {
+      iVar21--;
+      pCVar12 = (C_Human *)FUN_00475dd0(&g_actorsModule,iVar21);
+      if (pCVar12 != nullptr) {
+        if ((pCVar12->m_0ec < 1) && (bVar9 = FUN_00730970(pCVar12->m_010), bVar9)) {
+          return 0;
+        }
+        cVar10 = FUN_005a63b0((int)pCVar12);
+        if ((((cVar10 != '\0') &&
+             (uVar18 = C_Human::FUN_005a8820(pCVar12,'\0'), uVar18 == (iVar20 != 0))) &&
+            (0 < pCVar12->m_0ec)) && (uVar18 = FUN_005a63f0((int)pCVar12), (char)uVar18 == '\0')) {
+          pIVar4 = pCVar12->m_020;
+          if ((pIVar4->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar4);
+          }
+          fVar5 = (pIVar4->m_worldMatrix).m[3][0] - local_70.x;
+          fVar7 = (pIVar4->m_worldMatrix).m[3][1] - local_70.y;
+          fVar6 = (pIVar4->m_worldMatrix).m[3][2] - local_70.z;
+          bVar8 = false;
+          if ((float)(iVar14 * iVar14) < fVar5 * fVar5 + fVar7 * fVar7 + fVar6 * fVar6) {
+            return 0;
+          }
+        }
+      }
+      if (iVar21 == 0) {
+        return (uint32_t)!bVar8;
+      }
+    } while( true );
+  case 0x18:
+    pIVar4 = *(I3D_frame **)((int)this + 0x100);
+    iVar20 = *(int *)(*(int *)((int)this + 0xa0) + *param_3 * 8);
+    iVar14 = *(int *)(*(int *)((int)this + 0xa0) + param_3[1] * 8);
+    if ((pIVar4->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar4);
+    }
+    iVar21 = 0x20;
+    local_70.x = (pIVar4->m_worldMatrix).m[3][0];
+    local_70.y = (pIVar4->m_worldMatrix).m[3][1];
+    local_70.z = (pIVar4->m_worldMatrix).m[3][2];
+    local_64 = (uint32_t *)(pIVar4->m_worldMatrix).m[3][3];
+    do {
+      iVar21--;
+      pCVar12 = (C_Human *)FUN_00475dd0(&g_actorsModule,iVar21);
+      if (pCVar12 != nullptr) {
+        if (pCVar12->m_0ec < 1) {
+          bVar8 = FUN_00730970(pCVar12->m_010);
+          if (bVar8) {
+            return 0;
+          }
+          if (pCVar12->m_0ec < 1) goto LAB_0041e6e2;
+        }
+        uVar18 = FUN_005a63f0((int)pCVar12);
+        if ((((char)uVar18 == '\0') &&
+            (uVar18 = C_Human::FUN_005a8820(pCVar12,'\0'), uVar18 == (iVar20 != 0))) &&
+           (cVar10 = FUN_005a63b0((int)pCVar12), cVar10 != '\0')) {
+          pIVar4 = pCVar12->m_020;
+          if ((pIVar4->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar4);
+          }
+          fVar5 = (pIVar4->m_worldMatrix).m[3][0] - local_70.x;
+          fVar7 = (pIVar4->m_worldMatrix).m[3][1] - local_70.y;
+          fVar6 = (pIVar4->m_worldMatrix).m[3][2] - local_70.z;
+          if (fVar5 * fVar5 + fVar7 * fVar7 + fVar6 * fVar6 < (float)(iVar14 * iVar14)) {
+            return 1;
+          }
+        }
+      }
+LAB_0041e6e2:
+    } while (iVar21 != 0);
+    break;
+  case 0x19:
+    puVar2 = *(uint32_t **)(*(int *)((int)this + 0x90) + param_3[2] * 4);
+    if (puVar2 != nullptr) {
+      (**(code **)*puVar2)(puVar2);
+      *(uint32_t *)(*(int *)((int)this + 0x90) + param_3[2] * 4) = 0;
+    }
+    iVar20 = *(int *)(*(int *)((int)this + 0xa0) + *param_3 * 8);
+    iVar21 = 0x20;
+    iVar14 = *(int *)(*(int *)((int)this + 0xa0) + param_3[1] * 8);
+    do {
+      iVar21--;
+      pCVar12 = (C_Human *)FUN_00475dd0(&g_actorsModule,iVar21);
+      if (((((pCVar12 != nullptr) && (0 < pCVar12->m_0ec)) &&
+           (uVar18 = FUN_005a63f0((int)pCVar12), (char)uVar18 == '\0')) &&
+          ((cVar10 = FUN_005a63b0((int)pCVar12), cVar10 != '\0' &&
+           (uVar18 = C_Human::FUN_005a8820(pCVar12,'\0'), uVar18 == (iVar20 != 0))))) &&
+         (iVar13 = FUN_005a78f0(pCVar12,iVar14,nullptr), iVar13 != 0)) {
+        *(void **)(*(int *)((int)this + 0x90) + param_3[2] * 4) = pCVar12->m_020;
+        psVar1 = (short *)(*(int *)(*(int *)((int)this + 0x90) + param_3[2] * 4) + 0xe4);
+        *psVar1 = *psVar1 + 1;
+        return 1;
+      }
+    } while (iVar21 != 0);
+    break;
+  case 0x1a:
+    uVar18 = *(int *)(DAT_008aea34 + 8) + *(int *)(DAT_008aea34 + 4) * 4;
+    if ((int)uVar18 < 0) {
+      return 0xffffffff;
+    }
+    if (10 < (int)uVar18) {
+      return 0xffffffff;
+    }
+    return uVar18;
+  case 0x1b:
+    uVar18 = FUN_006b6a20(0x8aea0c);
+    return uVar18;
+  case 0x1c:
+    GetGame();
+    piVar11 = (int *)thunk_FUN_00464e90();
+    cVar10 = (**(code **)(*piVar11 + 0x7c))();
+    return (uint32_t)(cVar10 != '\0');
+  case 0x1d:
+    iVar20 = field_address_1c_461410(0x89ae78);
+    iVar20 = FUN_0045d1d0(iVar20);
+    if (iVar20 == 0) {
+      lVar23 = __ftol();
+      return (uint32_t)lVar23;
+    }
+    pIVar4 = *(I3D_frame **)(iVar20 + 0x20);
+    if ((pIVar4->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar4);
+    }
+    pIVar3 = *(I3D_frame **)((int)this + 0x100);
+    if ((pIVar3->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar3);
+    }
+    fVar5 = (pIVar3->m_worldMatrix).m[3][0] - (pIVar4->m_worldMatrix).m[3][0];
+    fVar7 = (pIVar3->m_worldMatrix).m[3][1] - (pIVar4->m_worldMatrix).m[3][1];
+    fVar6 = (pIVar3->m_worldMatrix).m[3][2] - (pIVar4->m_worldMatrix).m[3][2];
+    fVar5 = fVar5 * fVar5 + fVar7 * fVar7 + fVar6 * fVar6;
+    if ((int)fVar5 < 0x322bcc77) {
+      lVar23 = __ftol();
+      return (uint32_t)lVar23;
+    }
+    if (ABS(fVar5 - 1.0) < 1e-08) {
+      lVar23 = __ftol();
+      return (uint32_t)lVar23;
+    }
+    lVar23 = __ftol();
+    return (uint32_t)lVar23;
+  case 0x1e:
+    iVar20 = GetGame();
+    pIVar4 = *(I3D_frame **)(*(int *)(iVar20 + 0x18) + 0x15c);
+    if (pIVar4 == nullptr) goto LAB_0041ee4a;
+    pIVar3 = *(I3D_frame **)((int)this + 0x100);
+    if ((pIVar3->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar3);
+    }
+    if ((pIVar4->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar4);
+    }
+    fVar5 = (pIVar4->m_worldMatrix).m[3][0] - (pIVar3->m_worldMatrix).m[3][0];
+    fVar7 = (pIVar4->m_worldMatrix).m[3][1] - (pIVar3->m_worldMatrix).m[3][1];
+    fVar6 = (pIVar4->m_worldMatrix).m[3][2] - (pIVar3->m_worldMatrix).m[3][2];
+    local_80 = fVar5 * fVar5 + fVar7 * fVar7 + fVar6 * fVar6;
+LAB_0041ecf7:
+    if ((int)local_80 < 0x322bcc77) {
+      lVar23 = __ftol();
+      return (uint32_t)lVar23;
+    }
+    if (ABS(local_80 - 1.0) < 1e-08) {
+      lVar23 = __ftol();
+      return (uint32_t)lVar23;
+    }
+LAB_0041ee4a:
+    lVar23 = __ftol();
+    return (uint32_t)lVar23;
+  case 0x1f:
+    pIVar4 = *(I3D_frame **)(*(int *)((int)this + 0x90) + *param_3 * 4);
+    if (*(short *)pIVar4[1]._pad_0004 == 6) {
+      if ((pIVar4->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar4);
+      }
+      m = &pIVar4->m_worldMatrix;
+      puVar22 = pIVar4[1]._pad_0004 + 0x28;
+      local_70.x = *(float *)puVar22;
+      local_70.y = *(float *)(pIVar4[1]._pad_0004 + 0x2c);
+      local_70.z = *(float *)(pIVar4[1]._pad_0004 + 0x30);
+      local_64 = *(uint32_t **)(pIVar4[1]._pad_0004 + 0x34);
+      pSVar17 = S_vector::OperatorMul(&local_70,&local_50,m);
+      local_30 = pSVar17->x;
+      local_2c = pSVar17->y;
+      local_28 = pSVar17->z;
+      local_40 = pSVar17->x;
+      local_38 = pSVar17->z;
+      local_3c = pSVar17->y;
+      local_70.x = *(float *)(pIVar4[1]._pad_0004 + 0x38);
+      pSVar17 = S_vector::OperatorMul(&local_70,&local_50,m);
+      FUN_0041d070(&local_40,&pSVar17->x);
+      local_70.y = pIVar4[1].m_worldMatrix.m[0][0];
+      pSVar17 = S_vector::OperatorMul(&local_70,&local_50,m);
+      FUN_0041d070(&local_40,&pSVar17->x);
+      local_70.x = *(float *)puVar22;
+      pSVar17 = S_vector::OperatorMul(&local_70,&local_50,m);
+      FUN_0041d070(&local_40,&pSVar17->x);
+      local_70.z = pIVar4[1].m_worldMatrix.m[0][1];
+      pSVar17 = S_vector::OperatorMul(&local_70,&local_50,m);
+      FUN_0041d070(&local_40,&pSVar17->x);
+      local_70.x = *(float *)(pIVar4[1]._pad_0004 + 0x38);
+      pSVar17 = S_vector::OperatorMul(&local_70,&local_50,m);
+      FUN_0041d070(&local_40,&pSVar17->x);
+      local_70.y = *(float *)(pIVar4[1]._pad_0004 + 0x2c);
+      pSVar17 = S_vector::OperatorMul(&local_70,&local_50,m);
+      FUN_0041d070(&local_40,&pSVar17->x);
+      local_70.x = *(float *)puVar22;
+      pSVar17 = S_vector::OperatorMul(&local_70,&local_50,m);
+      FUN_0041d070(&local_40,&pSVar17->x);
+      local_78 = 0;
+      do {
+        iVar20 = FUN_00475dd0(&g_actorsModule,local_78);
+        if ((((iVar20 != 0) && (cVar10 = FUN_005a63b0(iVar20), cVar10 != '\0')) &&
+            (uVar18 = FUN_005a63f0(iVar20), (char)uVar18 == '\0')) && (0 < *(int *)(iVar20 + 0xec)))
+        {
+          pIVar4 = *(I3D_frame **)(iVar20 + 0x20);
+          if ((pIVar4->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar4);
+          }
+          if (((((pIVar4->m_worldMatrix).m[3][0] < local_30) &&
+               ((pIVar4->m_worldMatrix).m[3][1] < local_2c)) &&
+              (((pIVar4->m_worldMatrix).m[3][2] < local_28 &&
+               ((local_40 < (pIVar4->m_worldMatrix).m[3][0] &&
+                (local_3c < (pIVar4->m_worldMatrix).m[3][1])))))) &&
+             (local_38 < (pIVar4->m_worldMatrix).m[3][2])) {
+            return 1;
+          }
+        }
+        local_78++;
+      } while (local_78 < 0x20);
+    }
+    break;
+  case 0x20:
+    iVar20 = GetGame();
+    return (uint32_t)*(uint8_t *)(iVar20 + 0x40);
+  }
+  return 0;
+}
+

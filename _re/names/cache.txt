@@ -1,0 +1,125 @@
+# Resource caches (src/game/resource_cache.*): template C_ResourceCache<T>,
+# four instantiations + five global instances.
+
+# --- C_ResourceCache<I3D_model> (vtable 0x00815f90) ---
+006d77d0 ModelCacheBase_SetMaxEntries
+004290a0 ModelCacheBase_OpenInto | int __thiscall ModelCacheBase_OpenInto(C_auto_00815f90 *this, I3D_model *object, char *fileName, uint flags, void *callback, void *context, int unused)
+004c76c0 ModelCacheBase_Get
+006d81c0 ModelCacheBase_Create
+006d77e0 ModelCacheBase_Clear
+006da560 ModelCacheBase_ScalarDtor
+006da580 ModelCacheBase_Destroy
+006d78e0 ModelCacheBase_AddDir
+006d7ac0 ModelCacheBase_RemoveDir
+006d7d00 ModelCacheBase_ClearDirs
+006d7d70 ModelCacheBase_NumDirs
+006d7d90 ModelCacheBase_GetDir
+006d7db0 ModelCacheBase_MakeRelative
+006d81a0 ModelCacheBase_NumEntries
+006d81d0 ModelCacheBase_ResetVtable
+
+# --- C_ResourceCache<I3D_sound> (vtable 0x00816030) ---
+006d81e0 SoundCacheBase_SetMaxEntries
+0044a1c0 SoundCacheBase_OpenInto | int __thiscall SoundCacheBase_OpenInto(C_auto_00816030 *this, I3D_sound *object, char *fileName, uint flags, void *callback, void *context, int unused)
+006d81f0 SoundCacheBase_Get
+006d9180 SoundCacheBase_Create
+006d87a0 SoundCacheBase_Clear
+006da830 SoundCacheBase_ScalarDtor
+006da850 SoundCacheBase_Destroy
+006d88a0 SoundCacheBase_AddDir
+006d8a80 SoundCacheBase_RemoveDir
+006d8cc0 SoundCacheBase_ClearDirs
+006d8d30 SoundCacheBase_NumDirs
+006d8d50 SoundCacheBase_GetDir
+006d8d70 SoundCacheBase_MakeRelative
+006d9160 SoundCacheBase_NumEntries
+006d9190 SoundCacheBase_ResetVtable
+
+# --- C_ResourceCache<I3D_animation_set> (vtable 0x008160d0) ---
+006d91a0 AnimationCacheBase_SetMaxEntries
+006d91b0 AnimationCacheBase_OpenInto | int __thiscall AnimationCacheBase_OpenInto(C_AnimationCache *this, I3D_animation_set *object, char *fileName, uint flags, void *callback, void *context, int unused)
+0041fc10 AnimationCacheBase_Get
+006da270 AnimationCacheBase_Create
+006d9890 AnimationCacheBase_Clear
+006dab00 AnimationCacheBase_ScalarDtor
+006dab20 AnimationCacheBase_Destroy
+006d9990 AnimationCacheBase_AddDir
+006d9b70 AnimationCacheBase_RemoveDir
+006d9db0 AnimationCacheBase_ClearDirs
+006d9e20 AnimationCacheBase_NumDirs
+006d9e40 AnimationCacheBase_GetDir
+006d9e60 AnimationCacheBase_MakeRelative
+006da250 AnimationCacheBase_NumEntries
+006da280 AnimationCacheBase_ResetVtable
+
+# --- C_ResourceCache<I3D_shadow> (vtable 0x00816170) ---
+006d6130 ShadowCacheBase_SetMaxEntries
+006d6140 ShadowCacheBase_OpenInto | int __thiscall ShadowCacheBase_OpenInto(C_auto_00816170 *this, I3D_shadow *object, char *fileName, uint flags, void *callback, void *context, int unused)
+006d6820 ShadowCacheBase_Get
+006d77b0 ShadowCacheBase_Create
+006d6dd0 ShadowCacheBase_Clear
+006da290 ShadowCacheBase_ScalarDtor
+006da2b0 ShadowCacheBase_Destroy
+006d6ed0 ShadowCacheBase_AddDir
+006d70b0 ShadowCacheBase_RemoveDir
+006d72f0 ShadowCacheBase_ClearDirs
+006d7360 ShadowCacheBase_NumDirs
+006d7380 ShadowCacheBase_GetDir
+006d73a0 ShadowCacheBase_MakeRelative
+006d7790 ShadowCacheBase_NumEntries
+006d77c0 ShadowCacheBase_ResetVtable
+
+# --- derived caches and their static instances ---
+006d5020 InitModelCache
+006d5030 ConstructModelCache
+006d5040 RegisterModelCacheDtor
+006d51e0 C_ModelCache::C_ModelCache
+006d5060 C_ModelCache::~C_ModelCache
+006d52e0 C_ModelCache::Duplicate
+006d5330 C_ModelCache::Create
+006d5340 C_ModelCache::ScalarDeletingDestructor
+006d5360 InitSoundCache
+006d5370 ConstructSoundCache
+006d5380 RegisterSoundCacheDtor
+006d5520 C_SoundCache::C_SoundCache
+006d53a0 C_SoundCache::~C_SoundCache
+006d5620 C_SoundCache::Duplicate
+006d5660 C_SoundCache::Create
+006d5670 C_SoundCache::ScalarDeletingDestructor
+006d5690 InitAnimationCache
+006d56a0 ConstructAnimationCache
+006d56b0 RegisterAnimationCacheDtor
+006d5850 C_AnimationCache::C_AnimationCache
+006d56d0 C_AnimationCache::~C_AnimationCache
+006d5950 C_AnimationCache::OpenInto | int __thiscall OpenInto(C_AnimationCache *this, I3D_animation_set *object, char *fileName, uint flags, void *callback, void *context, int unused)
+006d5960 C_AnimationCache::Duplicate | void __thiscall Duplicate(C_AnimationCache *this, I3D_animation_set *dest, I3D_animation_set *source)
+006d5970 C_AnimationCache::Create
+006d5990 C_AnimationCache::ScalarDeletingDestructor
+006d59b0 InitShadowCache
+006d59c0 ConstructShadowCache
+006d59d0 RegisterShadowCacheDtor
+006d5b70 C_ShadowCache::C_ShadowCache
+006d59f0 C_ShadowCache::~C_ShadowCache
+006d5c70 C_ShadowCache::Duplicate | void __thiscall Duplicate(void *this, I3D_shadow *dest, I3D_shadow *source)
+006d5d20 C_ShadowCache::Create
+006d5d30 C_ShadowCache::ScalarDeletingDestructor
+006d5d50 InitVersionModelCache
+006d5d60 ConstructVersionModelCache
+006d5d70 RegisterVersionModelCacheDtor
+006d5f10 C_VersionModelCache::C_VersionModelCache
+006d5d90 C_VersionModelCache::~C_VersionModelCache
+006d6010 C_VersionModelCache::Duplicate
+006d6060 C_VersionModelCache::Create
+006d6070 C_VersionModelCache::ScalarDeletingDestructor
+
+# --- search directories ---
+006ed940 AddDirectoryEntry
+006eda80 AddSubdirectories
+0051c0d0 I3D_sound_GetFileName
+
+008aecb0 g_versionModelCache @
+008aecec g_shadowCache @
+008aed28 g_animationCache @
+008aed64 g_soundCache @
+008aeda0 g_modelCache @
+008aedec g_animationSetsCreated @

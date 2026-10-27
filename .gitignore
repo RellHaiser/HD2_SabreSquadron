@@ -18,6 +18,6 @@ __pycache__/
 # reverse-engineering exports of the original binary.
 *.dta
 *.DTA
-_re/
 
 mods/
+_re/tools/__pycache__

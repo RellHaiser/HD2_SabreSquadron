@@ -1,0 +1,69 @@
+# Application core 0x006db2c0-0x006ddb00 (hand-ported: src/game/app.cpp)
+006db380 StaticInit_DefaultSetup
+006db440 InitGraphics
+006db650 SetWindowTitle
+006db700 InitSound
+006db810 InitRenderer
+006db830 ApplyRenderSettings
+006db970 InitInputAndTexts
+006dba30 MountDataArchives
+006dc230 RegisterDataDirectories
+006dc330 SetCurrentDirectoryToExe
+006dc380 InitModules
+006dc390 InitGame
+006dc770 ShutdownGame
+006dcd20 LimitFrameTime
+006dcea0 SetKeyboardPolling
+006dceb0 RunGame
+006dd850 StartupChunkHolder_InitList
+006dd8a0 StaticInit_RegisterActivateMessage
+006dd8b0 RegisterActivateMessage
+006dd920 WinMain | int __stdcall WinMain(void *instance, void *prevInstance, char *cmdLine, int showCmd)
+
+# referenced, not yet ported
+00486510 GetGEffects
+006c7bc0 C_Controls::Update
+006c7340 InitControls
+006c7010 BindControls
+0072e570 C_NetGame::Init
+0072e830 C_NetGame::Shutdown
+0072c780 C_NetGame::ReceiveMessages
+0072d240 C_NetGame::SendMessages
+006edb30 AddDataDirectory
+006e8960 InitUnknown8CA4C8
+006e8970 FreeUnknown8CA4C8
+00783420 InitMusic
+00783680 DoneMusic
+006ed2a0 ShowMessage
+00732000 GetCDKey
+007350a0 ValidateCDKey
+006ea270 InitProtectionTables
+006ed840 LoadStringResource
+006edd00 GetModuleFileNameWrapper
+007e767a time | long __cdecl time(long *timer)
+
+# globals
+008aedf8 g_setup @
+008aedf4 g_instance @
+00982100 g_gameRole @
+008aeb58 g_controls @
+0097d070 g_netGame @
+008aeb08 g_archives @
+00981e6c g_graphFlags @
+00843534 g_pollKeyboard @
+0089b880 g_geffectsModule @
+00867aa0 g_physicsModule @ C_PhysicsModule
+0098b020 g_itemsModule @
+00868b18 g_scriptModule @
+0089b288 g_sightModule @
+00899838 g_soundModule @
+00899978 g_versionsModule @
+0089bbbc g_lightMapGroupsModule @
+0089b474 g_vertexAnimModule @
+0089bc34 g_tshiftModule @
+0089b5d0 g_temporaryActors @
+0089b4b0 g_actorsModule @
+0089aac0 g_shotManager @
+0089afb0 g_cameraModule @
+008999f8 g_particlesModule @ C_ParticlesModule
+008cb480 g_collisionWorld @ C_CollisionWorld

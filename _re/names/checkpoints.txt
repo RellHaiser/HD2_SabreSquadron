@@ -1,0 +1,142 @@
+# Checkpoints: the networks (src/game/checkpoint_network.cpp, checkpoint_search.cpp), the point
+# (checkpoint.cpp) and the pair around them (checkpoints.cpp); types in _re/types/10_core.spec.
+
+# S_Checkpoint (0x24 bytes) and its tables' entries
+0051e110 S_Checkpoint::S_Checkpoint | S_Checkpoint * __thiscall S_Checkpoint(S_Checkpoint *this)
+00524610 S_Checkpoint::DestructorThunk | void __thiscall DestructorThunk(S_Checkpoint *this)
+00524840 S_Checkpoint::~S_Checkpoint | void __thiscall ~S_Checkpoint(S_Checkpoint *this)
+005245e0 S_Checkpoint::ClearLinks | void __thiscall ClearLinks(S_Checkpoint *this)
+00524620 S_Checkpoint::Read | uchar * __thiscall Read(S_Checkpoint *this, uchar * data, S_CheckpointLink ** storage)
+00524750 S_Checkpoint::GetCell | int __stdcall GetCell(float x)
+00524780 S_Checkpoint::GetLink | S_CheckpointLink * __thiscall GetLink(S_Checkpoint *this, int index)
+005247a0 S_Checkpoint::FindLink | uchar __thiscall FindLink(S_Checkpoint *this, short target)
+005247e0 S_Checkpoint::GetLinkCost | float __thiscall GetLinkCost(S_Checkpoint *this, S_Checkpoint * to)
+00524870 S_Checkpoint::ResetState | void __thiscall ResetState(S_Checkpoint *this)
+005248c0 S_Checkpoint::AddJoinedLink | bool __thiscall AddJoinedLink(S_Checkpoint *this, short index, S_Checkpoint * target)
+005249a0 S_Checkpoint::RemoveJoinedLink | bool __thiscall RemoveJoinedLink(S_Checkpoint *this, short index)
+00524a30 S_Checkpoint::GetDirectionBit | uchar __fastcall GetDirectionBit(S_vector * dir)
+00524b10 S_Checkpoint::GetCoverMask | uchar __thiscall GetCoverMask(S_Checkpoint *this, int stances)
+00524b50 S_Checkpoint::GetValuePair | bool __thiscall GetValuePair(S_Checkpoint *this, int set, float * first, float * second)
+0045acf0 S_Checkpoint::GetCoverStances | uchar __thiscall GetCoverStances(S_Checkpoint *this, uchar direction, uchar stances)
+005245c0 S_Checkpoint::GetDirectionVector | S_vector4 * __fastcall GetDirectionVector(uchar bits)
+005244b0 StaticInit_CheckpointDirections
+005244c0 InitCheckpointDirections
+008aad10 g_checkpointDirections @
+0051c790 S_CheckpointName::S_CheckpointName | S_CheckpointName * __thiscall S_CheckpointName(S_CheckpointName *this)
+0051c7b0 S_CheckpointName::Read | uchar * __thiscall Read(S_CheckpointName *this, uchar * data)
+0051c800 S_CheckpointName::Compare | int __thiscall Compare(S_CheckpointName *this, char * name)
+0051c840 S_CheckpointName::StartsWith | bool __thiscall StartsWith(S_CheckpointName *this, char * prefix)
+0051c870 S_CheckpointFrame::Read | uchar * __thiscall Read(S_CheckpointFrame *this, uchar * data)
+0051c910 S_CheckpointActor::Read | uchar * __thiscall Read(S_CheckpointActor *this, uchar * data)
+
+# C_CheckpointNetwork (0x3C bytes): data, tables, joins, state
+0051dd60 C_CheckpointNetwork::Clear | void __thiscall Clear(C_CheckpointNetwork *this)
+0051de80 C_CheckpointNetwork::Load | uchar * __thiscall Load(C_CheckpointNetwork *this, uchar * data)
+0051d5a0 C_CheckpointNetwork::Get | S_Checkpoint * __thiscall Get(C_CheckpointNetwork *this, int index)
+0051e1a0 C_CheckpointNetwork::Find | ushort __thiscall Find(C_CheckpointNetwork *this, char * name)
+0051c9c0 C_CheckpointNetwork::FindByPrefix | void __thiscall FindByPrefix(C_CheckpointNetwork *this, char * prefix, void * out)
+0051e520 C_CheckpointNetwork::GetActor | C_Actor * __thiscall GetActor(C_CheckpointNetwork *this, ushort index)
+0051e690 C_CheckpointNetwork::FindActorPoint | ushort __thiscall FindActorPoint(C_CheckpointNetwork *this, C_Actor * actor)
+0051e6d0 C_CheckpointNetwork::GetActorPoints | void __thiscall GetActorPoints(C_CheckpointNetwork *this, C_Actor * actor, void * out)
+0051e150 C_CheckpointNetwork::FindNameEntry | ushort __thiscall FindNameEntry(C_CheckpointNetwork *this, char * name)
+0051e2c0 C_CheckpointNetwork::FindNameEntryOfPoint | ushort __thiscall FindNameEntryOfPoint(C_CheckpointNetwork *this, ushort index)
+0051e450 C_CheckpointNetwork::FindFrameEntryOfPoint | ushort __thiscall FindFrameEntryOfPoint(C_CheckpointNetwork *this, ushort index)
+0051e5e0 C_CheckpointNetwork::FindActorEntryOfPoint | ushort __thiscall FindActorEntryOfPoint(C_CheckpointNetwork *this, ushort index)
+0051f280 C_CheckpointNetwork::JoinPoints | bool __thiscall JoinPoints(C_CheckpointNetwork *this, int a, int b)
+0051f490 C_CheckpointNetwork::Join | bool __thiscall Join(C_CheckpointNetwork *this, char * a, char * b)
+0051f4d0 C_CheckpointNetwork::SeparatePoints | bool __thiscall SeparatePoints(C_CheckpointNetwork *this, int a, int b)
+0051f5a0 C_CheckpointNetwork::Separate | bool __thiscall Separate(C_CheckpointNetwork *this, char * a, char * b)
+0051f230 C_CheckpointNetwork::ResetState | void __thiscall ResetState(C_CheckpointNetwork *this)
+00522a30 C_CheckpointNetwork::SaveState | bool __thiscall SaveState(C_CheckpointNetwork *this, C_chunk * chunk)
+00522b60 C_CheckpointNetwork::LoadState | bool __thiscall LoadState(C_CheckpointNetwork *this, C_chunk * chunk)
+00523bb0 C_CheckpointNetwork::~C_CheckpointNetwork | void __thiscall ~C_CheckpointNetwork(C_CheckpointNetwork *this)
+
+# C_CheckpointNetwork: spatial lookups
+0051cba0 C_CheckpointNetwork::FindFirst | ushort __thiscall FindFirst(C_CheckpointNetwork *this, int cell, float z, ushort lo, ushort hi)
+0051ccd0 C_CheckpointNetwork::ScanNearestPoint | void __thiscall ScanNearestPoint(C_CheckpointNetwork *this, int * cell, float * x, float * y, float * z, ushort * best, float * bestSq, float minSq)
+0051ce70 C_CheckpointNetwork::ScanNearestType15 | void __thiscall ScanNearestType15(C_CheckpointNetwork *this, int * cell, float * x, float * y, float * z, ushort * best, float * bestSq, float minSq)
+0051d160 C_CheckpointNetwork::ScanNearest | void __thiscall ScanNearest(C_CheckpointNetwork *this, int * cell, float * x, float * y, float * z, ushort * best, float * bestSq, float minSq)
+0051d460 C_CheckpointNetwork::ScanWithin | void __thiscall ScanWithin(C_CheckpointNetwork *this, uchar * marks, int * cell, float * x, float * y, float * z, float radiusSq)
+0051d5c0 C_CheckpointNetwork::FindNearestPoint | ushort __thiscall FindNearestPoint(C_CheckpointNetwork *this, S_vector pos, float maxDist, float minDist)
+0051d780 C_CheckpointNetwork::FindNearest | ushort __thiscall FindNearest(C_CheckpointNetwork *this, S_vector pos, float maxDist, float minDist)
+0051d970 C_CheckpointNetwork::FindNearestType15 | ushort __thiscall FindNearestType15(C_CheckpointNetwork *this, S_vector pos, float maxDist, float minDist)
+0051dbd0 C_CheckpointNetwork::MarkWithin | void __thiscall MarkWithin(C_CheckpointNetwork *this, uchar * marks, S_vector pos, float radius)
+0051f830 C_CheckpointNetwork::FindCoverWithin | bool __thiscall FindCoverWithin(C_CheckpointNetwork *this, S_vector * pos, float radius, void * out)
+
+# C_CheckpointNetwork: reachable points, cover
+00520530 C_CheckpointNetwork::FloodFill | void __thiscall FloodFill(C_CheckpointNetwork *this, S_Checkpoint * from, float radius, void * out)
+00520830 C_CheckpointNetwork::GetNeighbours | bool __thiscall GetNeighbours(C_CheckpointNetwork *this, int from, float radius, void * out)
+00520860 C_CheckpointNetwork::GetReachable | bool __thiscall GetReachable(C_CheckpointNetwork *this, S_Checkpoint * from, float radius, void * out)
+005208a0 C_CheckpointNetwork::GetReachableCopy | bool __thiscall GetReachableCopy(C_CheckpointNetwork *this, S_Checkpoint * from, float radius, void * out)
+005208e0 C_CheckpointNetwork::GetNeighbourCover | bool __thiscall GetNeighbourCover(C_CheckpointNetwork *this, int from, float radius, void * out)
+00520910 C_CheckpointNetwork::GetReachableCover | bool __thiscall GetReachableCover(C_CheckpointNetwork *this, S_Checkpoint * from, float radius, void * out)
+0051f5e0 C_CheckpointNetwork::GetReachableDepthFirst | bool __thiscall GetReachableDepthFirst(C_CheckpointNetwork *this, S_Checkpoint * from, float radius, void * out)
+0051fcb0 C_CheckpointNetwork::CollectDepthFirst | void __thiscall CollectDepthFirst(C_CheckpointNetwork *this, S_Checkpoint * point, float budget, void * list)
+0051f700 C_CheckpointNetwork::GetReachableType12 | bool __thiscall GetReachableType12(C_CheckpointNetwork *this, S_vector * pos, float radius, void * out)
+0051ff20 C_CheckpointNetwork::CollectReachableWithCosts | void __thiscall CollectReachableWithCosts(C_CheckpointNetwork *this, S_Checkpoint * from, float radius, void * out)
+00520110 C_CheckpointNetwork::CollectReachableWithCosts2 | void __thiscall CollectReachableWithCosts2(C_CheckpointNetwork *this, S_Checkpoint * from, float radius, void * out)
+0051e8a0 C_CheckpointNetwork::FindNearestFree | ushort __thiscall FindNearestFree(C_CheckpointNetwork *this, S_Checkpoint * from)
+00520a30 C_CheckpointNetwork::PickCoverPoint | ushort __thiscall PickCoverPoint(C_CheckpointNetwork *this, S_vector * self, S_vector * enemy, void * candidates, uint flags)
+00520ed0 CheckpointList_EraseUnordered | void __fastcall CheckpointList_EraseUnordered(void * list, int index)
+005230d0 C_CheckpointNetwork::GetPathLength | float __thiscall GetPathLength(C_CheckpointNetwork *this, void * path)
+
+# C_CheckpointNetwork: path searches
+005223b0 C_CheckpointNetwork::FindPath | bool __thiscall FindPath(C_CheckpointNetwork *this, int from, int to, void * path, uint excludeFlags)
+00521b60 C_CheckpointNetwork::FindPathImpl | bool __thiscall FindPathImpl(C_CheckpointNetwork *this, int from, int to, void * path, uint excludeFlags)
+00522470 C_CheckpointNetwork::FindMeleeTrackerPath | bool __thiscall FindMeleeTrackerPath(C_CheckpointNetwork *this, int from, int to, void * path)
+005223d0 C_CheckpointNetwork::IsMeleeTrackerPassable | bool __thiscall IsMeleeTrackerPassable(C_CheckpointNetwork *this, S_Checkpoint * from, S_Checkpoint * to)
+00521460 C_CheckpointNetwork::FindEscapePath | bool __thiscall FindEscapePath(C_CheckpointNetwork *this, int from, S_Vector4Array * threats, float minDist, float safeDist, void * path, uint excludeFlags)
+00521480 C_CheckpointNetwork::FindEscapePathImpl | bool __thiscall FindEscapePathImpl(C_CheckpointNetwork *this, int from, S_Vector4Array * threats, float minDist, float safeDist, void * path, uint excludeFlags)
+00521120 PathSearch_InsertOpen | void __fastcall PathSearch_InsertOpen(void * node)
+00521160 PathSearch_RepositionOpen | void __fastcall PathSearch_RepositionOpen(void * node)
+0089c250 g_searchNodes @
+008a5e90 g_searchPrev @
+008aace8 g_searchOpen @
+008aacec g_searchClosed @
+008aacf0 g_searchInserts @
+008aacf4 g_searchRepositions @
+# The Dijkstra search only a debug comparison calls (not ported)
+0051ec70 C_CheckpointNetwork::FindPathDijkstra | bool __thiscall FindPathDijkstra(C_CheckpointNetwork *this, int from, int to, void * path, uint excludeFlags)
+0051eb80 C_CheckpointNetwork::DijkstraPush | void __thiscall DijkstraPush(C_CheckpointNetwork *this, ushort from, ushort point, uint cost)
+005211c0 C_CheckpointNetwork::DebugCompareSearches | bool __thiscall DebugCompareSearches(C_CheckpointNetwork *this, int unknown1, int unknown2, int unknown3, uint excludeFlags)
+008aace0 g_dijkstraOpen @
+008aace4 g_dijkstraInserts @
+
+# The search node pools (vtables 0x008109b8 Dijkstra, 0x008109bc flood, 0x008109c0 path searches)
+0051ea60 StaticInit_DijkstraNodePool
+0051ea70 DijkstraNodePool_Construct
+0051eaf0 DijkstraNodePool_RegisterExit
+0051eb00 StaticExit_DijkstraNodePool
+00523200 DijkstraNodePool_DeletingDestructor
+00523400 DijkstraNodePool_ReleaseCell
+00523420 DijkstraNodePool_Add
+00523700 DijkstraNodePool_GetCell
+008aacc8 g_dijkstraNodePool @
+00520410 StaticInit_FloodNodePool
+00520420 FloodNodePool_Construct
+005204a0 FloodNodePool_RegisterExit
+005204b0 StaticExit_FloodNodePool
+00523280 FloodNodePool_DeletingDestructor
+00523660 FloodNodePool_ReleaseCell
+00523680 FloodNodePool_Add
+00523970 FloodNodePool_GetCell
+008aacb0 g_floodNodePool @
+00520f20 StaticInit_SearchNodePool
+00520f30 SearchNodePool_Construct
+00520fb0 SearchNodePool_RegisterExit
+00520fc0 StaticExit_SearchNodePool
+00523300 SearchNodePool_DeletingDestructor
+005236b0 SearchNodePool_ReleaseCell
+005236d0 SearchNodePool_Add
+005239a0 SearchNodePool_GetCell
+0089c238 g_searchNodePool @
+
+# C_Checkpoints (C_game +0x54)
+00523ab0 C_Checkpoints::C_Checkpoints | C_Checkpoints * __thiscall C_Checkpoints(C_Checkpoints *this)
+00523b20 C_Checkpoints::~C_Checkpoints | void __thiscall ~C_Checkpoints(C_Checkpoints *this)
+00523c00 LoadCheckpointNetwork | int __stdcall LoadCheckpointNetwork(C_chunk * chunk, C_CheckpointNetwork * network)
+00523e10 C_Checkpoints::Clear | void __thiscall Clear(C_Checkpoints *this)
+00523e30 C_Checkpoints::ResetState | void __thiscall ResetState(C_Checkpoints *this)
+00523e40 LoadCheckpointTestFile | void __cdecl LoadCheckpointTestFile(void)
+00523f30 C_Checkpoints::SaveGame | bool __thiscall SaveGame(C_Checkpoints *this, C_chunk * chunk)
+005241a0 C_Checkpoints::LoadGame | bool __thiscall LoadGame(C_Checkpoints *this, C_chunk * chunk)

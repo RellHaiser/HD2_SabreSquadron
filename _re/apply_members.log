@@ -1,0 +1,4 @@
+2962 assigned, 317 failed
+  007e5398 dtaSeek: ['Failed to set function prototype: Command failed: Invalid signature']
+symbols: 207 ok, 1 with errors
+12711 functions, 179 vtables, 22.1 MB decompiled text

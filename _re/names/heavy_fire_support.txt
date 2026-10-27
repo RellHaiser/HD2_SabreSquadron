@@ -1,0 +1,45 @@
+# The heavy fire support (src/game/heavy_fire_support.cpp; the object 0x0089b2c0, module 16,
+# vtables 0x00810050 / 0x00810010 (the C_Module part at +4) / 0x00810058; types in
+# _re/types/50_fire_support.spec).
+
+# --- data and statics
+0089b2c0 g_heavyFireSupport @ C_HeavyFireSupport
+00471f60 StaticInit_HeavyFireSupport
+00471f70 StaticConstruct_HeavyFireSupport
+00471f90 StaticAtExit_HeavyFireSupport
+00471fa0 StaticExit_HeavyFireSupport
+00471fb0 GetHeavyFireSupport | C_HeavyFireSupport * __cdecl GetHeavyFireSupport(void)
+
+# --- the module
+00471fc0 C_HeavyFireSupport::C_HeavyFireSupport | void __thiscall C_HeavyFireSupport(C_HeavyFireSupport *this, int id, char *name)
+00472190 I_HeavyFireSupport::I_HeavyFireSupport | void __thiscall I_HeavyFireSupport(I_HeavyFireSupport *this)
+004721a0 I_HeavyFireSupport::Destroy | void __thiscall Destroy(I_HeavyFireSupport *this)
+00472080 C_HeavyFireSupport_Module::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(C_HeavyFireSupport_Module *this, uchar flags)
+004720d0 C_HeavyFireSupport_Module::Destroy | void __thiscall Destroy(C_HeavyFireSupport_Module *this)
+00472c60 C_HeavyFireSupport_Module::Tick | void __thiscall Tick(C_HeavyFireSupport_Module *this, int timeDelta)
+00472510 C_HeavyFireSupport_Module::Update | void __thiscall Update(C_HeavyFireSupport_Module *this, int timeDelta)
+00472250 C_HeavyFireSupport_Module::StartMission | void __thiscall StartMission(C_HeavyFireSupport_Module *this, bool server)
+00472270 C_HeavyFireSupport_Module::StopMission | void __thiscall StopMission(C_HeavyFireSupport_Module *this, bool server)
+00472590 C_HeavyFireSupport_Module::OnMessage | bool __thiscall OnMessage(C_HeavyFireSupport_Module *this, C_BitStream *msg)
+00472e50 C_HeavyFireSupport::RequestAirAttack | int __thiscall RequestAirAttack(C_HeavyFireSupport *this, S_AirAttackRequest *request)
+00472ce0 C_HeavyFireSupport::RequestArtillery | int __thiscall RequestArtillery(C_HeavyFireSupport *this, S_ArtilleryRequest *request)
+00472350 C_HeavyFireSupport::RemoveAirStrike | void __thiscall RemoveAirStrike(C_HeavyFireSupport *this, int index)
+004723f0 C_HeavyFireSupport::RemoveArtillery | void __thiscall RemoveArtillery(C_HeavyFireSupport *this, int index)
+004732b0 C_HeavyFireSupport::LoadTable | bool __fastcall LoadTable(C_HeavyFireSupport *this)
+004721c0 S_AirSupportKind::Construct | S_AirSupportKind * __fastcall Construct(S_AirSupportKind *this)
+004720b0 S_AirSupportKind::Destroy | void __fastcall Destroy(S_AirSupportKind *this)
+00472210 S_AirSupportKind::SetDefaults | void __fastcall SetDefaults(S_AirSupportKind *this)
+
+# --- the strikes
+00470530 C_AirStrike::C_AirStrike | void __thiscall C_AirStrike(C_AirStrike *this, S_vector4 *target, S_vector4 *dir, S_AirSupportKind *kind, int planes, int team, C_Human *caller)
+00471090 C_AirStrike::Destroy | void __fastcall Destroy(C_AirStrike *this)
+00471140 C_AirStrike::Update_thunk | bool __thiscall Update_thunk(C_AirStrike *this, int timeDelta)
+00471150 C_AirStrike::TickServer | bool __thiscall TickServer(C_AirStrike *this, int timeDelta)
+00471170 C_AirStrike::Update | bool __thiscall Update(C_AirStrike *this, int timeDelta)
+00471730 S_AirStrikePlane::Construct | S_AirStrikePlane * __fastcall Construct(S_AirStrikePlane *this)
+00471750 S_AirStrikePlane::Destroy | void __fastcall Destroy(S_AirStrikePlane *this)
+004719f0 C_ArtilleryStrike::C_ArtilleryStrike | void __thiscall C_ArtilleryStrike(C_ArtilleryStrike *this, S_vector4 *target, int team, C_Human *caller)
+00471b10 C_ArtilleryStrike::Destroy | void __fastcall Destroy(C_ArtilleryStrike *this)
+00471b20 C_ArtilleryStrike::Update_thunk | bool __thiscall Update_thunk(C_ArtilleryStrike *this, int timeDelta)
+00471b30 C_ArtilleryStrike::TickServer | bool __thiscall TickServer(C_ArtilleryStrike *this, int timeDelta)
+00471b50 C_ArtilleryStrike::Update | bool __thiscall Update(C_ArtilleryStrike *this, int timeDelta)

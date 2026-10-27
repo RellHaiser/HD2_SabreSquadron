@@ -1,0 +1,4208 @@
+// @0044dc00 size=5 callers= vt=0080fa18[10]
+bool __thiscall C_ShotManager::Unknown28(C_ShotManager *this,C_BitStream *stream)
+{
+  return false;
+}
+
+// @0044dc10 size=30 callers= vt=0080fa18[0]
+C_ShotManager * __thiscall C_ShotManager::ScalarDeletingDestructor(C_ShotManager *this,uchar flags)
+{
+  ~C_ShotManager(this);
+  if ((flags & 1) != 0) {
+    _aligned_free(this);
+  }
+  return this;
+}
+
+// @0044dc30 size=362 callers=C_ShotManager::ScalarDeletingDestructor,DestroyShotManager
+void __thiscall C_ShotManager::~C_ShotManager(C_ShotManager *this)
+{
+  // locals: void *local_c; undefined1 *puStack_8; int local_4
+  puStack_8 = &LAB_007fb6f9;
+  local_c = ExceptionList;
+  ExceptionList = &local_c;
+  this->vtable = (C_ShotManager_vtbl *)&PTR_ScalarDeletingDestructor_0080fa18;
+  local_4 = 3;
+  operator_delete((this->m_shells).first);
+  (this->m_shells).first = (void **)0x0;
+  (this->m_shells).last = (void **)0x0;
+  (this->m_shells).end = (void **)0x0;
+  operator_delete((this->m_clientBullets).first);
+  (this->m_clientBullets).first = (C_BulletShot **)0x0;
+  (this->m_clientBullets).last = (C_BulletShot **)0x0;
+  (this->m_clientBullets).end = (C_BulletShot **)0x0;
+  operator_delete((this->m_shots).first);
+  (this->m_shots).first = (C_Shot **)0x0;
+  (this->m_shots).last = (C_Shot **)0x0;
+  (this->m_shots).end = (C_Shot **)0x0;
+  operator_delete((this->m_muzzleLights).first);
+  (this->m_muzzleLights).first = (void **)0x0;
+  (this->m_muzzleLights).last = (void **)0x0;
+  (this->m_muzzleLights).end = (void **)0x0;
+  operator_delete((this->m_bloodPools).first);
+  (this->m_bloodPools).first = (void **)0x0;
+  (this->m_bloodPools).last = (void **)0x0;
+  (this->m_bloodPools).end = (void **)0x0;
+  empty_function_453310();
+  operator_delete((this->m_bloodDrops).first);
+  (this->m_bloodDrops).first = (void **)0x0;
+  (this->m_bloodDrops).last = (void **)0x0;
+  (this->m_bloodDrops).end = (void **)0x0;
+  local_4._0_1_ = 2;
+  empty_function_4532d0();
+  operator_delete((this->m_decals).first);
+  (this->m_decals).first = (S_ShotDecal **)0x0;
+  (this->m_decals).last = (S_ShotDecal **)0x0;
+  (this->m_decals).end = (S_ShotDecal **)0x0;
+  local_4._0_1_ = 1;
+  (this->m_shellPool).vtable = (C_ShellPool_vtbl *)&PTR_ScalarDeletingDestructor_0080fa58;
+  C_ShellPool::Clear(&this->m_shellPool);
+  local_4 = (uint)local_4._1_3_ << 8;
+  (this->m_bulletPool).vtable = (C_BulletShotPool_vtbl *)&PTR_ScalarDeletingDestructor_0080fa5c;
+  C_BulletShotPool::Clear(&this->m_bulletPool);
+  local_4 = 0xffffffff;
+  C_Module::~C_Module((C_Module *)this);
+  ExceptionList = local_c;
+  return;
+}
+
+// @0044dda0 size=12 callers=0044d8f0
+void RegisterShotManagerDtor(void)
+{
+  atexit(DestroyShotManager);
+  return;
+}
+
+// @0044ddb0 size=10 callers=RegisterShotManagerDtor
+void DestroyShotManager(void)
+{
+  C_ShotManager::~C_ShotManager(&g_shotManager);
+  return;
+}
+
+// @0044ddc0 size=5 callers= vt=00832004[63]
+void ConstructHitZonesThunk(void)
+{
+  C_HitZones__C_HitZones(&DAT_0089aa50);
+  return;
+}
+
+// @0044ddd0 size=10 callers=ConstructHitZonesThunk
+void ConstructHitZones(void)
+{
+  C_HitZones__C_HitZones(&DAT_0089aa50);
+  return;
+}
+
+// @0044dde0 size=804 callers= vt=0080fa18[7]
+// WARNING: Globals starting with '_' overlap smaller symbols at the same address
+void __thiscall C_ShotManager::StartMission(C_ShotManager *this,bool server)
+{
+  // locals: I3D_driver *self; I3D_frame *pIVar1; void *pvVar2; uint uVar3
+  S_ShotDecal **ppSVar4;
+  int iVar5;
+  S_ShotDecal **ppSVar6;
+  uint uVar7;
+  void **ppvVar8;
+  S_ShotDecal **ppSVar9;
+  void **ppvVar10;
+  LARGE_INTEGER local_10;
+  LARGE_INTEGER local_8;
+  QueryPerformanceFrequency(&local_8);
+  QueryPerformanceCounter(&local_10);
+  if (!server) {
+    this->m_maxBloodDrops = 100;
+    if (((byte)_g_gameRole & 7) == 7) {
+      this->m_maxBloodPools = 0x32;
+    }
+    else {
+      this->m_maxBloodPools = 0x14;
+    }
+    this->m_maxDecals = 100;
+    this->m_weaponOdds = (I3D_frame *)0x0;
+    this->m_traceModel = (I3D_frame *)0x0;
+    this->m_shell3rd = (I3D_frame *)0x0;
+    this->m_shellFpv = (I3D_frame *)0x0;
+    self = I3DGetDriver();
+    pIVar1 = (*self->vtable->CreateFrame)(self,9);
+    this->m_weaponOdds = pIVar1;
+    pvVar2 = C_auto_00815f90::ModelCacheBase_OpenInto
+                       ((C_auto_00815f90 *)&g_modelCache,(int *)pIVar1,(byte *)"WeaponOdds"
+                        ,0,(int *)0x0);
+    if (-1 < (int)pvVar2) {
+      pIVar1 = (*this->m_weaponOdds->vtable->FindChildFrame)(this->m_weaponOdds,"trace",1);
+      this->m_traceModel = pIVar1;
+      pIVar1 = (*this->m_weaponOdds->vtable->FindChildFrame)
+                         (this->m_weaponOdds,"shell3rd",1);
+      this->m_shell3rd = pIVar1;
+      pIVar1 = (*this->m_weaponOdds->vtable->FindChildFrame)
+                         (this->m_weaponOdds,"shellFPV",1);
+      this->m_shellFpv = pIVar1;
+    }
+    ppSVar6 = (this->m_decals).first;
+    uVar7 = this->m_maxDecals;
+    if (ppSVar6 == (S_ShotDecal **)0x0) {
+      uVar3 = 0;
+    }
+    else {
+      uVar3 = (int)(this->m_decals).end - (int)ppSVar6 >> 2;
+    }
+    if (uVar3 < uVar7) {
+      uVar3 = uVar7;
+      if ((int)uVar7 < 0) {
+        uVar3 = 0;
+      }
+      ppSVar4 = operator_new(uVar3 << 2);
+      ppSVar6 = (this->m_decals).last;
+      local_8.s.HighPart = (LONG)ppSVar4;
+      for (ppSVar9 = (this->m_decals).first; ppSVar9 != ppSVar6; ppSVar9 = ppSVar9 + 1) {
+        construct_copy4_453cf0(ppSVar4,ppSVar9);
+        ppSVar4 = ppSVar4 + 1;
+      }
+      operator_delete((this->m_decals).first);
+      (this->m_decals).end = (S_ShotDecal **)(local_8.s.HighPart + uVar7 * 4);
+      ppSVar6 = (this->m_decals).first;
+      if (ppSVar6 == (S_ShotDecal **)0x0) {
+        iVar5 = 0;
+      }
+      else {
+        iVar5 = (int)(this->m_decals).last - (int)ppSVar6 >> 2;
+      }
+      (this->m_decals).first = (S_ShotDecal **)local_8.s.HighPart;
+      (this->m_decals).last = (S_ShotDecal **)(local_8.s.HighPart + iVar5 * 4);
+    }
+    ppvVar10 = (this->m_bloodDrops).first;
+    uVar7 = this->m_maxBloodDrops;
+    if (ppvVar10 == (void **)0x0) {
+      uVar3 = 0;
+    }
+    else {
+      uVar3 = (int)(this->m_bloodDrops).end - (int)ppvVar10 >> 2;
+    }
+    if (uVar3 < uVar7) {
+      uVar3 = uVar7;
+      if ((int)uVar7 < 0) {
+        uVar3 = 0;
+      }
+      ppSVar6 = operator_new(uVar3 * 4);
+      ppvVar10 = (this->m_bloodDrops).last;
+      local_8.s.HighPart = (LONG)ppSVar6;
+      for (ppvVar8 = (this->m_bloodDrops).first; ppvVar8 != ppvVar10; ppvVar8 = ppvVar8 + 1) {
+        construct_copy4_453d00(ppSVar6,ppvVar8);
+        ppSVar6 = ppSVar6 + 1;
+      }
+      operator_delete((this->m_bloodDrops).first);
+      (this->m_bloodDrops).end = (S_ShotDecal **)(local_8.s.HighPart + uVar7 * 4);
+      ppvVar10 = (this->m_bloodDrops).first;
+      if (ppvVar10 == (void **)0x0) {
+        iVar5 = 0;
+      }
+      else {
+        iVar5 = (int)(this->m_bloodDrops).last - (int)ppvVar10 >> 2;
+      }
+      (this->m_bloodDrops).first = (void **)local_8.s.HighPart;
+      (this->m_bloodDrops).last = (S_ShotDecal **)(local_8.s.HighPart + iVar5 * 4);
+    }
+    ppvVar10 = (this->m_bloodPools).first;
+    local_10.s.LowPart = this->m_maxBloodPools;
+    if (ppvVar10 == (void **)0x0) {
+      uVar7 = 0;
+    }
+    else {
+      uVar7 = (int)(this->m_bloodPools).end - (int)ppvVar10 >> 2;
+    }
+    if (uVar7 < local_10.s.LowPart) {
+      uVar7 = local_10.s.LowPart;
+      if ((int)local_10.s.LowPart < 0) {
+        uVar7 = 0;
+      }
+      ppvVar8 = operator_new(uVar7 * 4);
+      ppSVar6 = (this->m_bloodPools).first;
+      local_8.s.HighPart = (LONG)(this->m_bloodPools).last;
+      ppvVar10 = ppvVar8;
+      if (ppSVar6 != (S_ShotDecal **)local_8.s.HighPart) {
+        do {
+          construct_copy4_453d10(ppvVar8,ppSVar6);
+          ppSVar6 = ppSVar6 + 1;
+          ppvVar8 = ppvVar8 + 1;
+        } while (ppSVar6 != (S_ShotDecal **)local_8.s.HighPart);
+      }
+      empty_function_453380();
+      operator_delete((this->m_bloodPools).first);
+      (this->m_bloodPools).end = ppvVar10 + local_10.s.LowPart;
+      iVar5 = vector_size_e4_452f80((int)&this->m_bloodPools);
+      (this->m_bloodPools).first = ppvVar10;
+      (this->m_bloodPools).last = ppvVar10 + iVar5;
+    }
+    LoadTextures(this);
+    this->m_clientTickTime = 0;
+    return;
+  }
+  C_HitZones__Load(&DAT_0089aa50);
+  return;
+}
+
+// @0044e110 size=941 callers= vt=0080fa18[8]
+// WARNING: Removing unreachable block (ram,0x0044e498)
+void __thiscall C_ShotManager::StopMission(C_ShotManager *this,bool server)
+{
+  // locals: S_ShotDecal *this_00; void *pvVar1; IImage *pIVar2; I3D_frame *self
+  C_Shot **ppCVar3;
+  C_Shot *pCVar4;
+  int iVar5;
+  undefined4 *puVar6;
+  S_PoolNode *pSVar7;
+  S_ShotDecal **ppSVar8;
+  void **ppvVar9;
+  S_PoolNode *pSVar10;
+  int iVar11;
+  S_ShotDecal *unaff_EDI;
+  IImage **ppIVar12;
+  if (server) {
+    C_HitZones__Free(&DAT_0089aa50);
+  }
+  else {
+    ppvVar9 = (this->m_shells).first;
+    if ((ppvVar9 != (void **)0x0) &&
+       (iVar11 = (int)(this->m_shells).last - (int)ppvVar9 >> 2, iVar11 != 0)) {
+      do {
+        iVar11 = iVar11 + -1;
+        C_ShellPool::Put(&this->m_shellPool,(this->m_shells).first[iVar11]);
+      } while (iVar11 != 0);
+    }
+    ppSVar8 = (this->m_decals).first;
+    if (ppSVar8 != (S_ShotDecal **)0x0) {
+      iVar11 = (int)(this->m_decals).last - (int)ppSVar8 >> 2;
+      while (iVar11 != 0) {
+        iVar11 = iVar11 + -1;
+        this_00 = (this->m_decals).first[iVar11];
+        if (this_00 != (S_ShotDecal *)0x0) {
+          FreeShotDecal(this_00,unaff_EDI);
+          operator_delete(this_00);
+        }
+      }
+    }
+    ppvVar9 = (this->m_bloodDrops).first;
+    if (ppvVar9 != (void **)0x0) {
+      iVar11 = (int)(this->m_bloodDrops).last - (int)ppvVar9 >> 2;
+      while (iVar11 != 0) {
+        iVar11 = iVar11 + -1;
+        pvVar1 = (this->m_bloodDrops).first[iVar11];
+        if (pvVar1 != (void *)0x0) {
+          C_BloodDrop__Release(pvVar1);
+          _aligned_free(pvVar1);
+        }
+      }
+    }
+    ppvVar9 = (this->m_bloodPools).first;
+    if (ppvVar9 != (void **)0x0) {
+      iVar11 = (int)(this->m_bloodPools).last - (int)ppvVar9 >> 2;
+      while (iVar11 != 0) {
+        iVar11 = iVar11 + -1;
+        pvVar1 = (this->m_bloodPools).first[iVar11];
+        if (pvVar1 != (void *)0x0) {
+          C_BloodPool__Release(pvVar1);
+          operator_delete(pvVar1);
+        }
+      }
+    }
+    ppvVar9 = (this->m_muzzleLights).first;
+    if (ppvVar9 != (void **)0x0) {
+      iVar11 = (int)(this->m_muzzleLights).last - (int)ppvVar9 >> 2;
+      while (iVar11 != 0) {
+        iVar11 = iVar11 + -1;
+        pvVar1 = (this->m_muzzleLights).first[iVar11];
+        if (pvVar1 != (void *)0x0) {
+          C_MuzzleLight__Release(pvVar1);
+          operator_delete(pvVar1);
+        }
+      }
+    }
+    ppSVar8 = (this->m_decals).last;
+    ppSVar8 = (S_ShotDecal **)copy4_453c70(ppSVar8,ppSVar8,(this->m_decals).first);
+    empty_function_4532d0();
+    (this->m_decals).last = ppSVar8;
+    ppvVar9 = (this->m_bloodDrops).last;
+    ppvVar9 = (void **)copy4_453c90(ppvVar9,ppvVar9,(this->m_bloodDrops).first);
+    empty_function_453310();
+    (this->m_bloodDrops).last = ppvVar9;
+    ppvVar9 = (this->m_bloodPools).last;
+    ppvVar9 = (void **)copy4_453cb0(ppvVar9,ppvVar9,(this->m_bloodPools).first);
+    empty_function_453380();
+    (this->m_bloodPools).last = ppvVar9;
+    ppvVar9 = (this->m_muzzleLights).last;
+    ppvVar9 = (void **)copy4_453cd0(ppvVar9,ppvVar9,(this->m_muzzleLights).first);
+    empty_function_4533f0();
+    (this->m_muzzleLights).last = ppvVar9;
+    pSVar10 = (this->m_shellPool).m_free;
+    while (pSVar10 != (S_PoolNode *)0x0) {
+      pvVar1 = ((this->m_shellPool).m_free)->m_object;
+      if (pvVar1 != (void *)0x0) {
+        C_Shell__Release(pvVar1);
+        _aligned_free(pvVar1);
+      }
+      pSVar7 = (this->m_shellPool).m_free;
+      pSVar10 = pSVar7->m_next;
+      operator_delete(pSVar7);
+      (this->m_shellPool).m_free = pSVar10;
+    }
+    pSVar10 = (this->m_shellPool).m_spareNodes;
+    while (pSVar10 != (S_PoolNode *)0x0) {
+      pSVar7 = (this->m_shellPool).m_spareNodes;
+      pSVar10 = pSVar7->m_next;
+      operator_delete(pSVar7);
+      (this->m_shellPool).m_spareNodes = pSVar10;
+    }
+    (this->m_shellPool).m_free = (S_PoolNode *)0x0;
+    (this->m_shellPool).m_spareNodes = (S_PoolNode *)0x0;
+    (this->m_shellPool).m_freeCount = 0;
+    FUN_00453420(&this->m_shells,(this->m_shells).first,(this->m_shells).last);
+    ppIVar12 = this->m_decalTextures;
+    iVar11 = 9;
+    do {
+      pIVar2 = *ppIVar12;
+      if (pIVar2 != (IImage *)0x0) {
+        (*pIVar2->vtable->Release)(pIVar2);
+      }
+      *ppIVar12 = (IImage *)0x0;
+      ppIVar12 = ppIVar12 + 1;
+      iVar11 = iVar11 + -1;
+    } while (iVar11 != 0);
+    pIVar2 = this->m_explosionDecal;
+    if (pIVar2 != (IImage *)0x0) {
+      (*pIVar2->vtable->Release)(pIVar2);
+    }
+    this->m_explosionDecal = (IImage *)0x0;
+    ppIVar12 = this->m_bloodTextures;
+    iVar11 = 6;
+    do {
+      pIVar2 = *ppIVar12;
+      if (pIVar2 != (IImage *)0x0) {
+        (*pIVar2->vtable->Release)(pIVar2);
+      }
+      *ppIVar12 = (IImage *)0x0;
+      ppIVar12 = ppIVar12 + 1;
+      iVar11 = iVar11 + -1;
+    } while (iVar11 != 0);
+    self = this->m_weaponOdds;
+    if (self != (I3D_frame *)0x0) {
+      (*self->vtable->Release)(self);
+    }
+    this->m_weaponOdds = (I3D_frame *)0x0;
+    this->m_traceModel = (I3D_frame *)0x0;
+  }
+  ppCVar3 = (this->m_shots).first;
+  if (ppCVar3 != (C_Shot **)0x0) {
+    iVar11 = (int)(this->m_shots).last - (int)ppCVar3 >> 2;
+    while (iVar11 != 0) {
+      iVar11 = iVar11 + -1;
+      pCVar4 = (this->m_shots).first[iVar11];
+      iVar5 = pCVar4->m_type;
+      if (iVar5 == 1) {
+        (*pCVar4->vtable->Recycle)();
+        pSVar10 = C_BulletShotPool::NewNode(&this->m_bulletPool);
+        pSVar10->m_object = pCVar4;
+        pSVar10->m_next = (this->m_bulletPool).m_free;
+        (this->m_bulletPool).m_free = pSVar10;
+        (this->m_bulletPool).m_freeCount = (this->m_bulletPool).m_freeCount + 1;
+      }
+      else if ((2 < iVar5) && (iVar5 < 5)) {
+        (*pCVar4->vtable->ScalarDeletingDestructor)('\x01');
+      }
+    }
+  }
+  pSVar10 = (this->m_bulletPool).m_free;
+  while (pSVar10 != (S_PoolNode *)0x0) {
+    puVar6 = ((this->m_bulletPool).m_free)->m_object;
+    if (puVar6 != (undefined4 *)0x0) {
+      (**(code **)*puVar6)(1);
+    }
+    pSVar7 = (this->m_bulletPool).m_free;
+    pSVar10 = pSVar7->m_next;
+    operator_delete(pSVar7);
+    (this->m_bulletPool).m_free = pSVar10;
+  }
+  pSVar10 = (this->m_bulletPool).m_spareNodes;
+  while (pSVar10 != (S_PoolNode *)0x0) {
+    pSVar7 = (this->m_bulletPool).m_spareNodes;
+    pSVar10 = pSVar7->m_next;
+    operator_delete(pSVar7);
+    (this->m_bulletPool).m_spareNodes = pSVar10;
+  }
+  (this->m_bulletPool).m_free = (S_PoolNode *)0x0;
+  (this->m_bulletPool).m_spareNodes = (S_PoolNode *)0x0;
+  (this->m_bulletPool).m_freeCount = 0;
+  ppCVar3 = (this->m_shots).first;
+  empty_function_453400();
+  (this->m_shots).last = ppCVar3;
+  return;
+}
+
+// @0044e4c0 size=87 callers=C_ShotManager::StopMission,C_ShotManager::RestartMission
+void __thiscall FreeShotDecal(void *this,S_ShotDecal *decal)
+{
+  // locals: undefined4 *puVar1; int *ptr; int iVar2; void *pvStack_c; undefined1 *puStack_8; undefined4 local_4
+  puStack_8 = &LAB_007fb71b;
+  pvStack_c = ExceptionList;
+  puVar1 = *(undefined4 **)this;
+  local_4 = 0;
+  ExceptionList = &pvStack_c;
+  if (puVar1 != (undefined4 *)0x0) {
+    ExceptionList = &pvStack_c;
+    (**(code **)*puVar1)(puVar1);
+  }
+  ptr = *(int **)((int)this + 4);
+  if ((ptr != (int *)0x0) && (iVar2 = *ptr, *ptr = iVar2 + -1, iVar2 + -1 == 0)) {
+    operator_delete(ptr);
+  }
+  ExceptionList = pvStack_c;
+  return;
+}
+
+// @0044e520 size=173 callers=C_ShotManager::StartMission
+void __thiscall C_ShotManager::LoadTextures(C_ShotManager *this)
+{
+  // locals: IGraph *pIVar1; int iVar2
+  IImage **ppIVar3;
+  char local_80 [44];
+  char acStack_54 [84];
+  iVar2 = 0;
+  ppIVar3 = this->m_decalTextures;
+  do {
+    sprintf(local_80,"x_decal%02d.tga",iVar2);
+    pIVar1 = GetIGraph();
+    (*pIVar1->vtable->LoadTexture)(pIVar1,local_80,0,2,ppIVar3);
+    iVar2 = iVar2 + 1;
+    ppIVar3 = ppIVar3 + 1;
+  } while (iVar2 < 9);
+  sprintf(local_80,"x_expl%02d.tga",0);
+  pIVar1 = GetIGraph();
+  (*pIVar1->vtable->LoadTexture)(pIVar1,local_80,0,2,&this->m_explosionDecal);
+  iVar2 = 0;
+  ppIVar3 = this->m_bloodTextures;
+  do {
+    sprintf(acStack_54,"x_blood%02d.tga",iVar2);
+    pIVar1 = GetIGraph();
+    (*pIVar1->vtable->LoadTexture)(pIVar1,acStack_54,0,2,ppIVar3);
+    iVar2 = iVar2 + 1;
+    ppIVar3 = ppIVar3 + 1;
+  } while (iVar2 < 6);
+  return;
+}
+
+// @0044e5d0 size=1527 callers=C_ShotManager::FireBulletImpl
+// WARNING: Removing unreachable block (ram,0x0044eb83)
+// WARNING: Removing unreachable block (ram,0x0044eb98)
+// WARNING: Removing unreachable block (ram,0x0044eba7)
+// WARNING: Removing unreachable block (ram,0x0044ebae)
+void __thiscall
+C_ShotManager::EjectShell(C_ShotManager *this,C_Human *shooter,I3D_frame *ejectDummy,int soundGroup)
+{
+  void ***pppvVar1;
+  vector_voidPtr *pvVar2;
+  S_PoolNode *pSVar3;
+  void **ppvVar4;
+  C_ShotManager *pCVar5;
+  C_ShotManager *pCVar6;
+  C_Team *this_00;
+  C_Human *pCVar7;
+  C_game *pCVar8;
+  int iVar9;
+  I3D_frame *model;
+  void **ppvVar10;
+  float fVar11;
+  void *local_50;
+  C_ShotManager *local_4c;
+  undefined4 *local_48;
+  int local_44;
+  float local_40;
+  float local_3c;
+  float local_38;
+  S_vector4 local_30;
+  S_vector local_20;
+  float local_14;
+  if (((this->m_shell3rd != (I3D_frame *)0x0) && (ejectDummy != (I3D_frame *)0x0)) &&
+     (this->m_shellFpv != (I3D_frame *)0x0)) {
+    local_4c = this;
+    this_00 = (C_Team *)field_address_1c_461410(0x89ae78);
+    pCVar7 = (C_Human *)C_Team::GetActivePlayer(this_00);
+    if (shooter == pCVar7) {
+      if ((ejectDummy->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(ejectDummy);
+      }
+      local_30.x = (ejectDummy->m_worldMatrix).m[1][0];
+      local_30.y = (ejectDummy->m_worldMatrix).m[1][1];
+      local_30.z = (ejectDummy->m_worldMatrix).m[1][2];
+      local_30.w = (ejectDummy->m_worldMatrix).m[1][3];
+      fVar11 = RandFloat();
+      local_30.x = ((fVar11 - 0.5) * 0.5 + 1.5) * local_30.x;
+      fVar11 = RandFloat();
+      local_30.y = ((fVar11 - 0.5) + 1.5) * local_30.y;
+      fVar11 = RandFloat();
+      pCVar5 = local_4c;
+      local_30.x = local_30.x + (float)shooter->m_1b0;
+      local_30.y = local_30.y + shooter->m_1b4;
+      local_30.z = ((fVar11 - 0.5) * 0.5 + 1.5) * local_30.z + shooter->m_1b8;
+      if ((local_4c->m_shellPool).m_free == (S_PoolNode *)0x0) {
+        C_ShellPool::Grow(&local_4c->m_shellPool);
+      }
+      pSVar3 = (pCVar5->m_shellPool).m_free;
+      (pCVar5->m_shellPool).m_free = pSVar3->m_next;
+      local_50 = pSVar3->m_object;
+      pSVar3->m_next = (pCVar5->m_shellPool).m_spareNodes;
+      pSVar3->m_object = (void *)0x0;
+      (pCVar5->m_shellPool).m_spareNodes = pSVar3;
+      (pCVar5->m_shellPool).m_freeCount = (pCVar5->m_shellPool).m_freeCount + -1;
+      pCVar8 = GetGame();
+      if ((*(char *)(*(int *)(pCVar8->_pad_001c + 0x40) + 0x58) == '\0') &&
+         (*(char *)(*(int *)(pCVar8->_pad_001c + 0x40) + 0x59) == '\0')) {
+        if ((ejectDummy->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(ejectDummy);
+        }
+        local_40 = (ejectDummy->m_worldMatrix).m[2][0];
+        local_3c = (ejectDummy->m_worldMatrix).m[2][1];
+        local_38 = (ejectDummy->m_worldMatrix).m[2][2];
+        local_14 = (ejectDummy->m_worldMatrix).m[2][3];
+        local_48 = (undefined4 *)(local_40 * local_40 + local_38 * local_38 + local_3c * local_3c);
+        if (1e-08 <= ABS((float)local_48 - 1.0)) {
+          if (1e-08 <= (float)local_48) {
+            fVar11 = 1.0 / SQRT((float)local_48);
+            local_40 = local_40 * fVar11;
+            local_3c = local_3c * fVar11;
+            local_38 = local_38 * fVar11;
+          }
+          else if (local_40 == 0.0) {
+            if (local_38 == 0.0) {
+              if (0.0 <= local_3c) {
+                local_3c = 1.0;
+              }
+              else {
+                local_3c = -1.0;
+              }
+            }
+            else if (0.0 <= local_38) {
+              local_38 = 1.0;
+            }
+            else {
+              local_38 = -1.0;
+            }
+          }
+          else if (0.0 <= local_40) {
+            local_40 = 1.0;
+          }
+          else {
+            local_40 = -1.0;
+          }
+        }
+        local_20.y = local_3c;
+        local_20.x = local_40;
+        local_20.z = local_38;
+        if ((ejectDummy->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(ejectDummy);
+        }
+        model = local_4c->m_shell3rd;
+      }
+      else {
+        if ((ejectDummy->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(ejectDummy);
+        }
+        local_40 = (ejectDummy->m_worldMatrix).m[2][0];
+        local_3c = (ejectDummy->m_worldMatrix).m[2][1];
+        local_38 = (ejectDummy->m_worldMatrix).m[2][2];
+        local_14 = (ejectDummy->m_worldMatrix).m[2][3];
+        local_48 = (undefined4 *)(local_40 * local_40 + local_38 * local_38 + local_3c * local_3c);
+        if (1e-08 <= ABS((float)local_48 - 1.0)) {
+          if (1e-08 <= (float)local_48) {
+            fVar11 = 1.0 / SQRT((float)local_48);
+            local_40 = local_40 * fVar11;
+            local_3c = local_3c * fVar11;
+            local_38 = local_38 * fVar11;
+          }
+          else if (local_40 == 0.0) {
+            if (local_38 == 0.0) {
+              if (0.0 <= local_3c) {
+                local_3c = 1.0;
+              }
+              else {
+                local_3c = -1.0;
+              }
+            }
+            else if (0.0 <= local_38) {
+              local_38 = 1.0;
+            }
+            else {
+              local_38 = -1.0;
+            }
+          }
+          else if (0.0 <= local_40) {
+            local_40 = 1.0;
+          }
+          else {
+            local_40 = -1.0;
+          }
+        }
+        local_20.y = local_3c;
+        local_20.x = local_40;
+        local_20.z = local_38;
+        if ((ejectDummy->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(ejectDummy);
+        }
+        model = local_4c->m_shellFpv;
+      }
+      C_Shell__Init(local_50,shooter,model,(S_vector4 *)((ejectDummy->m_worldMatrix).m + 3),
+                    &local_20,&local_30,soundGroup);
+      pCVar5 = local_4c;
+      pvVar2 = &local_4c->m_shells;
+      ppvVar10 = (local_4c->m_shells).last;
+      if ((int)(local_4c->m_shells).end - (int)ppvVar10 >> 2 == 0) {
+        ppvVar4 = (local_4c->m_shells).first;
+        if ((ppvVar4 == (void **)0x0) || ((uint)((int)ppvVar10 - (int)ppvVar4 >> 2) < 2)) {
+          local_48 = (undefined4 *)0x1;
+        }
+        else {
+          local_48 = (undefined4 *)vector_size_e4_453000((int)pvVar2);
+        }
+        local_44 = vector_size_e4_453000((int)pvVar2);
+        local_44 = local_44 + (int)local_48;
+        iVar9 = local_44;
+        if (local_44 < 0) {
+          iVar9 = 0;
+        }
+        local_4c = operator_new(iVar9 * 4);
+        local_48 = (undefined4 *)
+                   uninitialized_copy4_453c10((pCVar5->m_shells).first,ppvVar10,&local_4c->vtable);
+        uninitialized_fill_n4_453c40(local_48,1,&local_50);
+        uninitialized_copy4_453c10(ppvVar10,(pCVar5->m_shells).last,local_48 + 1);
+        empty_function_453450();
+        operator_delete((pCVar5->m_shells).first);
+        pCVar6 = local_4c;
+        (pCVar5->m_shells).end = (void **)((int)local_4c + local_44 * 4);
+        iVar9 = vector_size_e4_453000((int)pvVar2);
+        (pCVar5->m_shells).first = &pCVar6->vtable;
+        (pCVar5->m_shells).last = (void **)((int)pCVar6 + (iVar9 + 1) * 4);
+        return;
+      }
+      uninitialized_copy4_453c10(ppvVar10,ppvVar10,ppvVar10 + 1);
+      ppvVar4 = (pCVar5->m_shells).last;
+      uninitialized_fill_n4_453c40(ppvVar4,1 - ((int)ppvVar4 - (int)ppvVar10 >> 2),&local_50);
+      ppvVar4 = (pCVar5->m_shells).last;
+      if (ppvVar10 != ppvVar4) {
+        do {
+          *ppvVar10 = local_50;
+          ppvVar10 = ppvVar10 + 1;
+        } while (ppvVar10 != ppvVar4);
+        pppvVar1 = &(pCVar5->m_shells).last;
+        *pppvVar1 = *pppvVar1 + 1;
+        return;
+      }
+      pppvVar1 = &(pCVar5->m_shells).last;
+      *pppvVar1 = *pppvVar1 + 1;
+    }
+  }
+  return;
+}
+
+// @0044ebd0 size=1752 callers=C_ShotManager::OnBulletHit
+// WARNING: Exceeded maximum restarts with more pending
+void __thiscall
+C_ShotManager::AddBulletDecal
+          (C_ShotManager *this,int material,S_vector *pos,S_vector *normal,I3D_frame *frame)
+{
+  S_ShotDecal ***pppSVar1;
+  I3D_frame *pIVar2;
+  S_ShotDecal **ppSVar3;
+  S_ShotDecal **ppSVar4;
+  I3D_visual_vtbl *pIVar5;
+  C_ShotManager *pCVar6;
+  char cVar7;
+  void *this_00;
+  uint uVar8;
+  int iVar9;
+  S_ShotDecal **ppSVar10;
+  S_ShotDecal *pSVar11;
+  I3D_driver *self;
+  I3D_visual *pIVar12;
+  C_game *pCVar13;
+  undefined4 *puVar14;
+  I3D_sector *pIVar15;
+  uint uVar16;
+  uint uVar17;
+  undefined4 *unaff_ESI;
+  char *pcVar18;
+  undefined4 *unaff_EDI;
+  S_ShotDecal *pSVar19;
+  char *pcVar20;
+  undefined4 **ppuVar21;
+  float10 fVar22;
+  float fVar23;
+  undefined4 *puVar24;
+  undefined4 **ppuStack_98;
+  undefined4 *puVar25;
+  int *piVar26;
+  undefined4 *puVar27;
+  undefined4 *puStack_68;
+  undefined4 *puStack_64;
+  S_ShotDecal *pSStack_60;
+  S_ShotDecal *local_5c;
+  C_ShotManager *local_58;
+  vector_S_ShotDecalPtr *local_54;
+  float fStack_50;
+  float fStack_4c;
+  float fStack_48;
+  float fStack_44;
+  S_vector SStack_40;
+  float fStack_34;
+  float fStack_28;
+  void *local_1c;
+  undefined1 *puStack_18;
+  undefined4 uStack_14;
+  uStack_14 = 0xffffffff;
+  puStack_18 = &LAB_007fb746;
+  local_1c = ExceptionList;
+  puVar27 = (undefined4 *)0x2;
+  ExceptionList = &local_1c;
+  local_58 = this;
+  this_00 = (void *)FUN_006b6a60(0x8aea0c);
+  cVar7 = FUN_006b3700(this_00,(int)puVar27);
+  if (cVar7 != '\0') {
+    pSVar19 = (S_ShotDecal *)(material * 0x100);
+    if (((-1 < g_materials[material].m_decal) && ((uint)material < g_materialCount)) &&
+       (g_materials[material].m_decal < 9)) {
+      local_5c = pSVar19;
+      if (frame != (I3D_frame *)0x0) {
+        uVar8 = (*frame->vtable->GetVisualType)(frame);
+        if (((uVar8 != 0x5f4a424f) && (uVar8 != 0x50414d4c)) && (uVar8 != 0x5252494d)) {
+          ExceptionList = local_1c;
+          return;
+        }
+        if (((uint)frame[1].m_localMatrix.m[3][3] & 0x3000) != 0) {
+          ExceptionList = local_1c;
+          return;
+        }
+        for (pIVar2 = frame->m_parent; pIVar2 != (I3D_frame *)0x0; pIVar2 = pIVar2->m_parent) {
+          uVar8 = (*pIVar2->vtable->GetVisualType)(pIVar2);
+          if (uVar8 == 0x4d474e53) {
+            ExceptionList = local_1c;
+            return;
+          }
+          if (uVar8 == 0x444853) {
+            ExceptionList = local_1c;
+            return;
+          }
+          if (uVar8 == 0x524d4d53) {
+            ExceptionList = local_1c;
+            return;
+          }
+        }
+      }
+      pCVar6 = local_58;
+      if (local_58->m_decalTextures[g_materials[material].m_decal] != (IImage *)0x0) {
+        ppSVar10 = (local_58->m_decals).first;
+        local_54 = &local_58->m_decals;
+        if (ppSVar10 == (S_ShotDecal **)0x0) {
+          iVar9 = 0;
+        }
+        else {
+          iVar9 = (int)(local_58->m_decals).last - (int)ppSVar10 >> 2;
+        }
+        if (iVar9 == local_58->m_maxDecals) {
+          ppSVar3 = (local_58->m_decals).first;
+          pSStack_60 = *ppSVar3;
+          ppSVar10 = ppSVar3 + 1;
+          ppSVar4 = (local_58->m_decals).last;
+          if (ppSVar10 != ppSVar4) {
+            iVar9 = (int)ppSVar3 - (int)ppSVar10;
+            do {
+              *(S_ShotDecal **)(iVar9 + (int)ppSVar10) = *ppSVar10;
+              ppSVar10 = ppSVar10 + 1;
+              pSVar19 = local_5c;
+            } while (ppSVar10 != ppSVar4);
+          }
+          empty_function_4532d0();
+          pppSVar1 = &(pCVar6->m_decals).last;
+          *pppSVar1 = *pppSVar1 + -1;
+        }
+        else {
+          pSVar11 = operator_new(8);
+          pSStack_60 = (S_ShotDecal *)0x0;
+          local_5c = pSVar11;
+          if (pSVar11 != (S_ShotDecal *)0x0) {
+            (pSVar11->m_parentName).rep = (C_str_rep *)0x0;
+            uStack_14 = 1;
+            self = I3DGetDriver();
+            pIVar12 = (I3D_visual *)(*self->vtable->CreateVisual)(self,0x4a4f5250);
+            pSVar11->m_visual = pIVar12;
+            pSStack_60 = pSVar11;
+          }
+          uStack_14 = 0xffffffff;
+          (*pSStack_60->m_visual->vtable[1].Update)((I3D_frame *)pSStack_60->m_visual);
+          (**(code **)(*(int *)*puStack_64 + 0xb4))((int *)*puStack_64,1);
+          (**(code **)(*(int *)*unaff_ESI + 0xa4))((int *)*unaff_ESI,1);
+        }
+        fStack_50 = normal->x;
+        fStack_4c = normal->y;
+        fStack_48 = normal->z;
+        fStack_44 = normal[1].x;
+        local_5c = (S_ShotDecal *)
+                   (fStack_50 * fStack_50 + fStack_4c * fStack_4c + fStack_48 * fStack_48);
+        if (1e-08 <= ABS((float)local_5c - 1.0)) {
+          if (1e-08 <= (float)local_5c) {
+            fVar23 = 1.0 / SQRT((float)local_5c);
+            fStack_50 = fStack_50 * fVar23;
+            fStack_4c = fStack_4c * fVar23;
+            fStack_48 = fStack_48 * fVar23;
+          }
+          else if (fStack_50 == 0.0) {
+            if (fStack_48 == 0.0) {
+              if (0.0 <= fStack_4c) {
+                fStack_4c = 1.0;
+              }
+              else {
+                fStack_4c = -1.0;
+              }
+            }
+            else if (0.0 <= fStack_48) {
+              fStack_48 = 1.0;
+            }
+            else {
+              fStack_48 = -1.0;
+            }
+          }
+          else if (0.0 <= fStack_50) {
+            fStack_50 = 1.0;
+          }
+          else {
+            fStack_50 = -1.0;
+          }
+        }
+        SStack_40.x = fStack_50 * -1.0;
+        SStack_40.y = fStack_4c * -1.0;
+        SStack_40.z = fStack_48 * -1.0;
+        pIVar5 = pSStack_60->m_visual->vtable;
+        fVar23 = RandFloat();
+        (*pIVar5->SetDir)((I3D_frame *)pSStack_60->m_visual,&SStack_40,(fVar23 - 0.5) * 3.1415927);
+        fVar23 = RandFloat();
+        SStack_40.z = 0.03;
+        SStack_40.x = fVar23 * 0.01 + 0.015;
+        pIVar12 = pSStack_60->m_visual;
+        (pIVar12->m_scale).x = SStack_40.x;
+        (pIVar12->m_scale).y = SStack_40.x;
+        (pIVar12->m_scale).z = 0.03;
+        pIVar12->m_scaleW = fStack_34;
+        if ((pIVar12->m_frameFlags & 8) == 0) {
+          SStack_40.y = SStack_40.x;
+          S_quat::Make(&pIVar12->m_rot,&pIVar12->m_localMatrix);
+        }
+        fStack_28 = fStack_48 * 0.01;
+        pIVar12->m_frameFlags = pIVar12->m_frameFlags & 0xfffffecb | 0x40000008;
+        SStack_40.x = fStack_50 * 0.01 + pos->x;
+        SStack_40.y = fStack_4c * 0.01 + pos->y;
+        SStack_40.z = fStack_28 + pos->z;
+        (*pSStack_60->m_visual->vtable->SetPos)(pSStack_60->m_visual);
+        (**(code **)(*(int *)*puStack_68 + 0x9c))
+                  ((int *)*puStack_68,
+                   (&pSStack_60[4].m_parentName)
+                   [*(int *)(g_materials->_pad_0058 + (int)pSVar19 + -8)].rep);
+        pIVar2 = (I3D_frame *)*unaff_EDI;
+        if ((pIVar2->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar2);
+        }
+        pCVar13 = GetGame();
+        piVar26 = (int *)0x0;
+        puVar27 = (undefined4 *)0x0;
+        fVar22 = (float10)(*pCVar13->m_scene->vtable->Slot8C)
+                                    (pCVar13->m_scene,(pIVar2->m_worldMatrix).m + 3,0,1);
+        fVar23 = (float)fVar22;
+        if ((float10)0.4 <= fVar22) {
+          if (1.0 <= fVar23) {
+            ppuStack_98 = (undefined4 **)&stack0xffffff8c;
+            (**(code **)(*(int *)*piVar26 + 0xb0))((int *)*piVar26);
+          }
+          else {
+            iVar9 = *piVar26;
+            local_5c = (S_ShotDecal *)(fVar23 * *(float *)(iVar9 + 0x1f8));
+            pSStack_60 = (S_ShotDecal *)(fVar23 * *(float *)(iVar9 + 500));
+            puStack_64 = (undefined4 *)(fVar23 * *(float *)(iVar9 + 0x1f0));
+            ppuStack_98 = &puStack_64;
+            (**(code **)(*(int *)*piVar26 + 0xb0))((int *)*piVar26);
+          }
+        }
+        else {
+          iVar9 = *piVar26;
+          local_5c = (S_ShotDecal *)(*(float *)(iVar9 + 0x1f8) * 0.4);
+          pSStack_60 = (S_ShotDecal *)(*(float *)(iVar9 + 500) * 0.4);
+          puStack_64 = (undefined4 *)(*(float *)(iVar9 + 0x1f0) * 0.4);
+          ppuStack_98 = &puStack_64;
+          (**(code **)(*(int *)*piVar26 + 0xb0))((int *)*piVar26);
+        }
+        if (frame == (I3D_frame *)0x0) {
+          uVar8 = 0xffffffff;
+          pcVar18 = "No Parent";
+          do {
+            if (uVar8 == 0) break;
+            uVar8 = uVar8 - 1;
+            cVar7 = *pcVar18;
+            pcVar18 = pcVar18 + 1;
+          } while (cVar7 != '\0');
+          uVar8 = ~uVar8;
+          uVar16 = uVar8 - 1;
+          puVar24 = puVar27 + 1;
+          puVar25 = puVar24;
+          puVar14 = operator_new(uVar8 + 8);
+          if (puVar14 == (undefined4 *)0x0) {
+            puVar14 = (undefined4 *)0x0;
+          }
+          else {
+            puVar14[1] = uVar16;
+            *puVar14 = 1;
+            pcVar18 = "No Parent";
+            pcVar20 = (char *)(puVar14 + 2);
+            for (uVar17 = uVar16 >> 2; uVar17 != 0; uVar17 = uVar17 - 1) {
+              *(undefined4 *)pcVar20 = *(undefined4 *)pcVar18;
+              pcVar18 = pcVar18 + 4;
+              pcVar20 = pcVar20 + 4;
+            }
+            for (uVar16 = uVar16 & 3; uVar16 != 0; uVar16 = uVar16 - 1) {
+              *pcVar20 = *pcVar18;
+              pcVar18 = pcVar18 + 1;
+              pcVar20 = pcVar20 + 1;
+            }
+            *(undefined1 *)((int)puVar14 + uVar8 + 7) = 0;
+            puVar24 = puVar25;
+          }
+          piVar26 = (int *)*puVar24;
+          if ((piVar26 != (int *)0x0) && (iVar9 = *piVar26, *piVar26 = iVar9 + -1, iVar9 + -1 == 0))
+          {
+            operator_delete(piVar26);
+          }
+          *puVar24 = puVar14;
+          pCVar13 = GetGame();
+          puVar24 = (undefined4 *)((int)&piRam00000000 + 1);
+          iVar9 = *(int *)*puVar27;
+          pIVar15 = (*pCVar13->m_scene->vtable->GetSector)(pCVar13->m_scene,pos);
+          (**(code **)(iVar9 + 0x38))(*puVar27,pIVar15);
+        }
+        else {
+          puVar24 = (undefined4 *)((int)&piRam00000000 + 1);
+          (**(code **)(*(int *)*puVar27 + 0x38))((int *)*puVar27,frame);
+          pcVar18 = frame->m_name;
+          if (pcVar18 == (char *)0x0) {
+            pcVar18 = &DAT_00867a90;
+          }
+          ppuVar21 = ppuStack_98 + 1;
+          puVar27 = (undefined4 *)0x0;
+          if (pcVar18 != (char *)0x0) {
+            uVar8 = 0xffffffff;
+            pcVar20 = pcVar18;
+            do {
+              if (uVar8 == 0) break;
+              uVar8 = uVar8 - 1;
+              cVar7 = *pcVar20;
+              pcVar20 = pcVar20 + 1;
+            } while (cVar7 != '\0');
+            uVar8 = ~uVar8;
+            uVar16 = uVar8 - 1;
+            puVar27 = operator_new(uVar8 + 8);
+            if (puVar27 == (undefined4 *)0x0) {
+              puVar27 = (undefined4 *)0x0;
+            }
+            else {
+              puVar27[1] = uVar16;
+              *puVar27 = 1;
+              pcVar20 = (char *)(puVar27 + 2);
+              for (uVar17 = uVar16 >> 2; uVar17 != 0; uVar17 = uVar17 - 1) {
+                *(undefined4 *)pcVar20 = *(undefined4 *)pcVar18;
+                pcVar18 = pcVar18 + 4;
+                pcVar20 = pcVar20 + 4;
+              }
+              for (uVar16 = uVar16 & 3; uVar16 != 0; uVar16 = uVar16 - 1) {
+                *pcVar20 = *pcVar18;
+                pcVar18 = pcVar18 + 1;
+                pcVar20 = pcVar20 + 1;
+              }
+              *(undefined1 *)((int)puVar27 + uVar8 + 7) = 0;
+            }
+          }
+          piVar26 = *ppuVar21;
+          if ((piVar26 != (int *)0x0) && (iVar9 = *piVar26, *piVar26 = iVar9 + -1, iVar9 + -1 == 0))
+          {
+            operator_delete(piVar26);
+          }
+          *ppuVar21 = puVar27;
+        }
+        (**(code **)(**ppuStack_98 + 0xa4))(*ppuStack_98,1);
+        (**(code **)(*(int *)*puVar24 + 0x24))((int *)*puVar24);
+        FUN_004534c0(local_54,local_54->last,1,&pSStack_60);
+      }
+    }
+  }
+  ExceptionList = local_1c;
+  return;
+}
+
+// @0044f2b0 size=540 callers=00787570
+// WARNING: Removing unreachable block (ram,0x0044f48c)
+// WARNING: Removing unreachable block (ram,0x0044f4a1)
+// WARNING: Removing unreachable block (ram,0x0044f4ad)
+// WARNING: Removing unreachable block (ram,0x0044f4b6)
+void __thiscall
+C_ShotManager::AddBloodPool(C_ShotManager *this,S_vector *pos,S_vector *normal,float maxSize)
+{
+  void ***pppvVar1;
+  void **ppvVar2;
+  char cVar3;
+  void *this_00;
+  uint uVar4;
+  int iVar5;
+  void **ppvVar6;
+  undefined4 *puVar7;
+  void **ppvVar8;
+  int iVar9;
+  C_ShotManager *local_4;
+  iVar9 = 2;
+  local_4 = this;
+  this_00 = (void *)FUN_006b6a60(0x8aea0c);
+  cVar3 = FUN_006b3700(this_00,iVar9);
+  if (cVar3 != '\0') {
+    ppvVar8 = (this->m_bloodPools).first;
+    if (ppvVar8 == (void **)0x0) {
+      uVar4 = 0;
+    }
+    else {
+      uVar4 = (int)(this->m_bloodPools).last - (int)ppvVar8 >> 2;
+    }
+    if (uVar4 < (uint)this->m_maxBloodPools) {
+      local_4 = operator_new(0x10);
+      C_BloodPool__Init(local_4,pos,normal,this->m_bloodTextures[5],maxSize);
+    }
+    else {
+      ppvVar6 = (this->m_bloodPools).first;
+      ppvVar2 = (this->m_bloodPools).last;
+      local_4 = *ppvVar6;
+      ppvVar8 = ppvVar6 + 1;
+      if (ppvVar8 != ppvVar2) {
+        iVar9 = (int)ppvVar6 - (int)ppvVar8;
+        do {
+          *(void **)(iVar9 + (int)ppvVar8) = *ppvVar8;
+          ppvVar8 = ppvVar8 + 1;
+        } while (ppvVar8 != ppvVar2);
+      }
+      (this->m_bloodPools).last = (this->m_bloodPools).last + -1;
+      C_BloodPool__Reuse(local_4,pos,normal,maxSize);
+    }
+    ppvVar8 = (this->m_bloodPools).last;
+    if ((int)(this->m_bloodPools).end - (int)ppvVar8 >> 2 == 0) {
+      ppvVar6 = (this->m_bloodPools).first;
+      if ((ppvVar6 == (void **)0x0) || (uVar4 = (int)ppvVar8 - (int)ppvVar6 >> 2, uVar4 < 2)) {
+        uVar4 = 1;
+      }
+      if (ppvVar6 == (void **)0x0) {
+        iVar9 = 0;
+      }
+      else {
+        iVar9 = (int)ppvVar8 - (int)ppvVar6 >> 2;
+      }
+      iVar9 = iVar9 + uVar4;
+      iVar5 = iVar9;
+      if (iVar9 < 0) {
+        iVar5 = 0;
+      }
+      ppvVar6 = operator_new(iVar5 * 4);
+      puVar7 = (undefined4 *)uninitialized_copy4_453390((this->m_bloodPools).first,ppvVar8,ppvVar6);
+      uninitialized_fill_n4_453b20(puVar7,1,&local_4);
+      uninitialized_copy4_453390(ppvVar8,(this->m_bloodPools).last,puVar7 + 1);
+      empty_function_453380();
+      operator_delete((this->m_bloodPools).first);
+      (this->m_bloodPools).end = ppvVar6 + iVar9;
+      iVar9 = vector_size_e4_452f80((int)&this->m_bloodPools);
+      (this->m_bloodPools).last = ppvVar6 + iVar9 + 1;
+      (this->m_bloodPools).first = ppvVar6;
+      return;
+    }
+    uninitialized_copy4_453390(ppvVar8,ppvVar8,ppvVar8 + 1);
+    ppvVar6 = (this->m_bloodPools).last;
+    uninitialized_fill_n4_453b20(ppvVar6,1 - ((int)ppvVar6 - (int)ppvVar8 >> 2),&local_4);
+    ppvVar6 = (this->m_bloodPools).last;
+    if (ppvVar8 != ppvVar6) {
+      do {
+        *ppvVar8 = local_4;
+        ppvVar8 = ppvVar8 + 1;
+      } while (ppvVar8 != ppvVar6);
+      (this->m_bloodPools).last = (this->m_bloodPools).last + 1;
+      return;
+    }
+    pppvVar1 = &(this->m_bloodPools).last;
+    *pppvVar1 = *pppvVar1 + 1;
+  }
+  return;
+}
+
+// @0044f4d0 size=22 callers=005a15d0,005a1c90
+void __thiscall C_ShotManager::SprayBlood(C_ShotManager *this,S_vector4 *pos,S_vector *dir)
+{
+  AddBloodDrop(this,pos,dir,this->m_bloodTextures[0]);
+  return;
+}
+
+// @0044f4f0 size=42 callers=005a0480
+void __thiscall C_ShotManager::SprayBloodRandom(C_ShotManager *this,S_vector4 *pos,S_vector *dir)
+{
+  // locals: int iVar1
+  iVar1 = _rand();
+  AddBloodDrop(this,pos,dir,this->m_bloodTextures[iVar1 % 3 + 1]);
+  return;
+}
+
+// @0044f520 size=534 callers=C_ShotManager::SprayBlood,C_ShotManager::SprayBloodRandom
+// WARNING: Removing unreachable block (ram,0x0044f6f6)
+// WARNING: Removing unreachable block (ram,0x0044f70b)
+// WARNING: Removing unreachable block (ram,0x0044f717)
+// WARNING: Removing unreachable block (ram,0x0044f720)
+void __thiscall
+C_ShotManager::AddBloodDrop(C_ShotManager *this,S_vector4 *pos,S_vector *dir,IImage *texture)
+{
+  void ***pppvVar1;
+  void **ppvVar2;
+  IImage *texture_00;
+  char cVar3;
+  void *this_00;
+  uint uVar4;
+  int iVar5;
+  void **ppvVar6;
+  undefined4 *puVar7;
+  void **ppvVar8;
+  int iVar9;
+  iVar9 = 2;
+  this_00 = (void *)FUN_006b6a60(0x8aea0c);
+  cVar3 = FUN_006b3700(this_00,iVar9);
+  texture_00 = texture;
+  if ((cVar3 != '\0') && (texture != (IImage *)0x0)) {
+    ppvVar8 = (this->m_bloodDrops).first;
+    if (ppvVar8 == (void **)0x0) {
+      uVar4 = 0;
+    }
+    else {
+      uVar4 = (int)(this->m_bloodDrops).last - (int)ppvVar8 >> 2;
+    }
+    if (uVar4 < (uint)this->m_maxBloodDrops) {
+      texture = _aligned_malloc(0x30,0x10);
+      C_BloodDrop__Init(texture,pos,(S_vector4 *)dir,texture_00);
+    }
+    else {
+      ppvVar6 = (this->m_bloodDrops).first;
+      ppvVar2 = (this->m_bloodDrops).last;
+      texture = *ppvVar6;
+      ppvVar8 = ppvVar6 + 1;
+      if (ppvVar8 != ppvVar2) {
+        iVar9 = (int)ppvVar6 - (int)ppvVar8;
+        do {
+          *(void **)(iVar9 + (int)ppvVar8) = *ppvVar8;
+          ppvVar8 = ppvVar8 + 1;
+        } while (ppvVar8 != ppvVar2);
+      }
+      (this->m_bloodDrops).last = (this->m_bloodDrops).last + -1;
+      C_BloodDrop__Reuse(texture,pos,(S_vector4 *)dir,texture_00);
+    }
+    ppvVar8 = (this->m_bloodDrops).last;
+    if ((int)(this->m_bloodDrops).end - (int)ppvVar8 >> 2 == 0) {
+      ppvVar6 = (this->m_bloodDrops).first;
+      if ((ppvVar6 == (void **)0x0) || (uVar4 = (int)ppvVar8 - (int)ppvVar6 >> 2, uVar4 < 2)) {
+        uVar4 = 1;
+      }
+      iVar5 = vector_size_e4_452f40((int)&this->m_bloodDrops);
+      iVar5 = iVar5 + uVar4;
+      iVar9 = iVar5;
+      if (iVar5 < 0) {
+        iVar9 = 0;
+      }
+      ppvVar6 = operator_new(iVar9 * 4);
+      puVar7 = (undefined4 *)uninitialized_copy4_453320((this->m_bloodDrops).first,ppvVar8,ppvVar6);
+      uninitialized_fill_n4_453af0(puVar7,1,&texture);
+      uninitialized_copy4_453320(ppvVar8,(this->m_bloodDrops).last,puVar7 + 1);
+      empty_function_453310();
+      operator_delete((this->m_bloodDrops).first);
+      (this->m_bloodDrops).end = ppvVar6 + iVar5;
+      iVar9 = vector_size_e4_452f40((int)&this->m_bloodDrops);
+      (this->m_bloodDrops).first = ppvVar6;
+      (this->m_bloodDrops).last = ppvVar6 + iVar9 + 1;
+      return;
+    }
+    uninitialized_copy4_453320(ppvVar8,ppvVar8,ppvVar8 + 1);
+    ppvVar6 = (this->m_bloodDrops).last;
+    uninitialized_fill_n4_453af0(ppvVar6,1 - ((int)ppvVar6 - (int)ppvVar8 >> 2),&texture);
+    ppvVar6 = (this->m_bloodDrops).last;
+    if (ppvVar8 != ppvVar6) {
+      do {
+        *ppvVar8 = texture;
+        ppvVar8 = ppvVar8 + 1;
+      } while (ppvVar8 != ppvVar6);
+      (this->m_bloodDrops).last = (this->m_bloodDrops).last + 1;
+      return;
+    }
+    pppvVar1 = &(this->m_bloodDrops).last;
+    *pppvVar1 = *pppvVar1 + 1;
+  }
+  return;
+}
+
+// @0044f740 size=1144 callers=
+void __thiscall C_ShotManager::AddBloodSplat(C_ShotManager *this,S_vector *pos,S_vector *dir)
+{
+  S_ShotDecal ***pppSVar1;
+  S_ShotDecal **ppSVar2;
+  S_ShotDecal **ppSVar3;
+  I3D_visual_vtbl *pIVar4;
+  I3D_frame *this_00;
+  char cVar5;
+  void *this_01;
+  S_ShotDecal **ppSVar6;
+  S_ShotDecal *pSVar7;
+  I3D_driver *self;
+  I3D_visual *pIVar8;
+  C_game *pCVar9;
+  I3D_sector *pIVar10;
+  undefined4 *unaff_EDI;
+  float10 fVar11;
+  float fVar12;
+  int *piVar13;
+  float (*pafVar14) [4];
+  undefined4 *puVar15;
+  S_vector *dir_00;
+  int iVar16;
+  int *piStack_98;
+  undefined4 *puStack_94;
+  S_ShotDecal *local_8c;
+  S_vector local_88;
+  float local_7c;
+  float local_78;
+  float local_74;
+  S_vector local_70;
+  float fStack_64;
+  float local_60;
+  float local_5c;
+  float local_58;
+  float fStack_54;
+  float local_50 [7];
+  float fStack_34;
+  void *local_1c;
+  undefined1 *puStack_18;
+  undefined4 local_14;
+  local_14 = 0xffffffff;
+  puStack_18 = &LAB_007fb766;
+  local_1c = ExceptionList;
+  iVar16 = 2;
+  ExceptionList = &local_1c;
+  local_88.y = (float)this;
+  this_01 = (void *)FUN_006b6a60(0x8aea0c);
+  cVar5 = FUN_006b3700(this_01,iVar16);
+  if ((cVar5 != '\0') && (this->m_bloodTextures[4] != (IImage *)0x0)) {
+    local_88.z = dir->x;
+    local_78 = dir->z;
+    local_7c = 0.0;
+    local_74 = dir[1].x;
+    local_8c = (S_ShotDecal *)(local_88.z * local_88.z + local_78 * local_78);
+    if (1e-08 <= ABS((float)local_8c - 1.0)) {
+      if (1e-08 <= (float)local_8c) {
+        fVar12 = 1.0 / SQRT((float)local_8c);
+        local_88.z = local_88.z * fVar12;
+        local_7c = fVar12 * 0.0;
+        local_78 = local_78 * fVar12;
+      }
+      else if (local_88.z == 0.0) {
+        if (local_78 == 0.0) {
+          local_7c = 1.0;
+        }
+        else if (0.0 <= local_78) {
+          local_78 = 1.0;
+        }
+        else {
+          local_78 = -1.0;
+        }
+      }
+      else if (0.0 <= local_88.z) {
+        local_88.z = 1.0;
+      }
+      else {
+        local_88.z = -1.0;
+      }
+    }
+    local_88.z = local_88.z * 3.0;
+    local_7c = local_7c * 3.0;
+    local_78 = local_78 * 3.0;
+    iVar16 = CollisionRayTest(&pos->x,&local_88.z,local_50,&local_60,0xffffffff,0);
+    if (iVar16 != 0) {
+      ppSVar6 = (this->m_decals).first;
+      if (ppSVar6 == (S_ShotDecal **)0x0) {
+        iVar16 = 0;
+      }
+      else {
+        iVar16 = (int)(this->m_decals).last - (int)ppSVar6 >> 2;
+      }
+      if (iVar16 == this->m_maxDecals) {
+        ppSVar2 = (this->m_decals).first;
+        local_8c = *ppSVar2;
+        ppSVar6 = ppSVar2 + 1;
+        ppSVar3 = (this->m_decals).last;
+        if (ppSVar6 != ppSVar3) {
+          iVar16 = (int)ppSVar2 - (int)ppSVar6;
+          do {
+            *(S_ShotDecal **)(iVar16 + (int)ppSVar6) = *ppSVar6;
+            ppSVar6 = ppSVar6 + 1;
+          } while (ppSVar6 != ppSVar3);
+        }
+        empty_function_4532d0();
+        pppSVar1 = &(this->m_decals).last;
+        *pppSVar1 = *pppSVar1 + -1;
+      }
+      else {
+        pSVar7 = operator_new(8);
+        local_88.x = (float)pSVar7;
+        if (pSVar7 == (S_ShotDecal *)0x0) {
+          local_8c = (S_ShotDecal *)0x0;
+        }
+        else {
+          (pSVar7->m_parentName).rep = (C_str_rep *)0x0;
+          local_14 = 1;
+          self = I3DGetDriver();
+          pIVar8 = (I3D_visual *)(*self->vtable->CreateVisual)(self,0x4a4f5250);
+          pSVar7->m_visual = pIVar8;
+          local_8c = pSVar7;
+        }
+        local_14 = 0xffffffff;
+        (*local_8c->m_visual->vtable[1].Update)((I3D_frame *)local_8c->m_visual);
+        (**(code **)(*(int *)*puStack_94 + 0xb4))((int *)*puStack_94,1);
+      }
+      fVar12 = RandFloat();
+      local_88.x = fVar12 * 0.6 + 0.3;
+      local_70.x = local_60 * -1.0;
+      local_70.y = local_5c * -1.0;
+      local_70.z = local_58 * -1.0;
+      pIVar4 = local_8c->m_visual->vtable;
+      fVar12 = RandFloat();
+      dir_00 = &local_70;
+      (*pIVar4->SetDir)((I3D_frame *)local_8c->m_visual,dir_00,(fVar12 - 0.5) * 6.2831855);
+      iVar16 = *piStack_98;
+      local_74 = 0.2;
+      *(undefined4 **)(iVar16 + 0xd0) = puStack_94;
+      *(undefined4 **)(iVar16 + 0xd4) = puStack_94;
+      *(undefined4 *)(iVar16 + 0xd8) = 0x3e4ccccd;
+      *(float *)(iVar16 + 0xdc) = local_70.x;
+      if ((*(byte *)(iVar16 + 0xe0) & 8) == 0) {
+        S_quat::Make((S_quat *)(iVar16 + 0xc0),(S_matrix *)(iVar16 + 0x80));
+      }
+      *(uint *)(iVar16 + 0xe0) = *(uint *)(iVar16 + 0xe0) & 0xfffffecb | 0x40000008;
+      fStack_34 = fStack_64 * 0.01;
+      local_7c = local_70.y * 0.01 + local_5c;
+      local_78 = local_58 + local_70.z * 0.01;
+      local_74 = fStack_54 + fStack_34;
+      (**(code **)(*(int *)*piStack_98 + 8))((int *)*piStack_98,&local_7c);
+      piVar13 = (int *)*unaff_EDI;
+      (**(code **)(*piVar13 + 0x9c))(piVar13,piStack_98[0x17]);
+      this_00 = (I3D_frame *)dir_00->x;
+      if ((this_00->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(this_00);
+      }
+      pCVar9 = GetGame();
+      puVar15 = (undefined4 *)0x0;
+      pafVar14 = (this_00->m_worldMatrix).m + 3;
+      fVar11 = (float10)(*pCVar9->m_scene->vtable->Slot8C)(pCVar9->m_scene,pafVar14,0,0,0);
+      local_70.x = (float)fVar11;
+      iVar16 = *piVar13;
+      local_70.z = local_70.x * *(float *)(iVar16 + 0x1f8);
+      local_70.y = local_70.x * *(float *)(iVar16 + 500);
+      local_70.x = local_70.x * *(float *)(iVar16 + 0x1f0);
+      piVar13 = (int *)*piVar13;
+      (**(code **)(*piVar13 + 0xb0))(piVar13,&local_70);
+      pCVar9 = GetGame();
+      iVar16 = *(int *)*puVar15;
+      pIVar10 = (*pCVar9->m_scene->vtable->GetSector)(pCVar9->m_scene,&local_88);
+      (**(code **)(iVar16 + 0x38))((*pafVar14)[0],pIVar10);
+      (**(code **)(*(int *)*piVar13 + 0x24))((int *)*piVar13);
+      FUN_004534c0(&this->m_decals,(this->m_decals).last,1,&local_8c);
+    }
+  }
+  ExceptionList = local_1c;
+  return;
+}
+
+// @0044fbc0 size=1032 callers=C_ShotManager::PlayExplosionEffects
+// WARNING: Heritage AFTER dead removal. Example location: s0xffffff9c : 0x0044ff98
+// WARNING: Restarted to delay deadcode elimination for space: stack
+// WARNING: Exceeded maximum restarts with more pending
+void __thiscall
+C_ShotManager::AddBloodDecal(C_ShotManager *this,int material,S_vector *pos,S_vector *dir)
+{
+  S_ShotDecal ***pppSVar1;
+  S_ShotDecal **ppSVar2;
+  S_ShotDecal **ppSVar3;
+  I3D_visual_vtbl *pIVar4;
+  I3D_frame *this_00;
+  char cVar5;
+  void *this_01;
+  S_ShotDecal **ppSVar6;
+  I3D_driver *self;
+  I3D_visual *pIVar7;
+  C_game *pCVar8;
+  I3D_sector *pIVar9;
+  undefined4 *unaff_ESI;
+  undefined4 *unaff_EDI;
+  float10 fVar10;
+  float fVar11;
+  undefined4 uVar12;
+  undefined4 *puVar13;
+  int *piVar14;
+  int iVar15;
+  undefined4 *puStack_98;
+  undefined4 *puStack_94;
+  S_ShotDecal *local_90;
+  S_ShotDecal *local_8c;
+  float local_88;
+  C_ShotManager *local_84;
+  S_vector local_80;
+  undefined4 local_74;
+  float local_70;
+  float local_6c;
+  float local_68;
+  int *local_64;
+  float local_60;
+  float local_5c;
+  float local_58;
+  float fStack_54;
+  S_vector local_50 [2];
+  float local_30 [5];
+  void *local_1c;
+  undefined1 *puStack_18;
+  undefined4 local_14;
+  local_14 = 0xffffffff;
+  puStack_18 = &LAB_007fb786;
+  local_1c = ExceptionList;
+  iVar15 = 2;
+  ExceptionList = &local_1c;
+  local_84 = this;
+  this_01 = (void *)FUN_006b6a60(0x8aea0c);
+  cVar5 = FUN_006b3700(this_01,iVar15);
+  if (cVar5 != '\0') {
+    local_58 = dir->z * 0.5;
+    local_5c = dir->y * 0.5;
+    local_60 = dir->x * 0.5;
+    local_8c = (S_ShotDecal *)(dir->y * 0.3);
+    local_88 = dir->x * 0.3;
+    local_50[0].z = pos->z - dir->z * 0.3;
+    local_50[0].y = pos->y - (float)local_8c;
+    local_50[0].x = pos->x - local_88;
+    iVar15 = CollisionRayTest(&local_50[0].x,&local_60,local_30,&local_70,0xffffffff,0xb90000);
+    if ((iVar15 != 0) &&
+       (local_88 = (float)(material * 0x100),
+       this->m_bloodTextures[g_materials[material].m_bloodDecal + -1] != (IImage *)0x0)) {
+      ppSVar6 = (this->m_decals).first;
+      if (ppSVar6 == (S_ShotDecal **)0x0) {
+        iVar15 = 0;
+      }
+      else {
+        iVar15 = (int)(this->m_decals).last - (int)ppSVar6 >> 2;
+      }
+      if (iVar15 == this->m_maxDecals) {
+        ppSVar2 = (this->m_decals).first;
+        ppSVar3 = (this->m_decals).last;
+        local_90 = *ppSVar2;
+        ppSVar6 = ppSVar2 + 1;
+        if (ppSVar6 != ppSVar3) {
+          iVar15 = (int)ppSVar2 - (int)ppSVar6;
+          do {
+            *(S_ShotDecal **)(iVar15 + (int)ppSVar6) = *ppSVar6;
+            ppSVar6 = ppSVar6 + 1;
+          } while (ppSVar6 != ppSVar3);
+        }
+        empty_function_4532d0();
+        pppSVar1 = &(this->m_decals).last;
+        *pppSVar1 = *pppSVar1 + -1;
+      }
+      else {
+        local_90 = operator_new(8);
+        local_8c = local_90;
+        if (local_90 == (S_ShotDecal *)0x0) {
+          local_90 = (S_ShotDecal *)0x0;
+        }
+        else {
+          (local_90->m_parentName).rep = (C_str_rep *)0x0;
+          local_14 = 1;
+          self = I3DGetDriver();
+          pIVar7 = (I3D_visual *)(*self->vtable->CreateVisual)(self,0x4a4f5250);
+          local_90->m_visual = pIVar7;
+        }
+        uVar12 = 3;
+        local_14 = 0xffffffff;
+        (*local_90->m_visual->vtable[1].Update)((I3D_frame *)local_90->m_visual);
+        (**(code **)(*(int *)*puStack_94 + 0xb4))((int *)*puStack_94,1,uVar12);
+        (**(code **)(*(int *)*unaff_ESI + 0xa4))((int *)*unaff_ESI,1);
+      }
+      fVar11 = RandFloat();
+      local_8c = (S_ShotDecal *)((fVar11 + 1.0) * 0.5);
+      local_74 = local_64;
+      local_80.x = -local_70;
+      local_80.y = -local_6c;
+      local_80.z = -local_68;
+      pIVar4 = local_90->m_visual->vtable;
+      fVar11 = RandFloat();
+      (*pIVar4->SetDir)((I3D_frame *)local_90->m_visual,&local_80,(fVar11 - 0.5) * 6.2831855);
+      local_60 = (float)local_8c;
+      pIVar7 = local_90->m_visual;
+      local_5c = (float)local_8c;
+      local_58 = 0.1;
+      (pIVar7->m_scale).x = (float)local_8c;
+      (pIVar7->m_scale).y = (float)local_8c;
+      (pIVar7->m_scale).z = 0.1;
+      pIVar7->m_scaleW = fStack_54;
+      if ((pIVar7->m_frameFlags & 8) == 0) {
+        S_quat::Make(&pIVar7->m_rot,&pIVar7->m_localMatrix);
+      }
+      pIVar7->m_frameFlags = pIVar7->m_frameFlags & 0xfffffecb | 0x40000008;
+      S_vector::Set(local_50,local_70 * 0.05 + pos->x,local_6c * 0.05 + pos->y,
+                    local_68 * 0.05 + pos->z);
+      (*local_90->m_visual->vtable->SetPos)((I3D_frame *)local_90->m_visual,local_50);
+      (**(code **)(*(int *)*puStack_98 + 0x9c))
+                ((int *)*puStack_98,
+                 *(undefined4 *)
+                  ((int)local_8c + 0x48 +
+                  *(int *)(g_materials->_pad_0000 + (int)&local_90[10].m_parentName.rep) * 4));
+      this_00 = (I3D_frame *)*unaff_EDI;
+      if ((this_00->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(this_00);
+      }
+      pCVar8 = GetGame();
+      piVar14 = (int *)0x0;
+      puVar13 = (undefined4 *)0x0;
+      fVar10 = (float10)(*pCVar8->m_scene->vtable->Slot8C)
+                                  (pCVar8->m_scene,(this_00->m_worldMatrix).m + 3,0,0);
+      fVar11 = (float)fVar10;
+      iVar15 = *piVar14;
+      local_5c = fVar11 * *(float *)(iVar15 + 0x1f8);
+      local_60 = fVar11 * *(float *)(iVar15 + 500);
+      local_64 = (int *)(fVar11 * *(float *)(iVar15 + 0x1f0));
+      (**(code **)(*(int *)*piVar14 + 0xb0))((int *)*piVar14);
+      pCVar8 = GetGame();
+      uVar12 = 1;
+      iVar15 = *(int *)*puVar13;
+      pIVar9 = (*pCVar8->m_scene->vtable->GetSector)(pCVar8->m_scene,pos);
+      (**(code **)(iVar15 + 0x38))(*puVar13,pIVar9,uVar12);
+      (**(code **)(*local_64 + 0x24))(local_64);
+      FUN_004534c0(&this->m_decals,(this->m_decals).last,1,&local_90);
+    }
+  }
+  ExceptionList = local_1c;
+  return;
+}
+
+// @0044ffd0 size=1062 callers=
+void MakeOrthoBasis(S_vector4 *dir,S_vector4 *right,S_vector4 *up)
+{
+  // locals: float fVar1; float fVar2; float fVar3; float fVar4; float fVar5; float fVar6; float fVar7; float fVar8; float local_14
+  fVar4 = dir->y * 0.0;
+  fVar1 = dir->z;
+  fVar2 = dir->x;
+  fVar3 = dir->x;
+  right->x = fVar4 - dir->z;
+  right->y = fVar1 * 0.0 - fVar2 * 0.0;
+  right->z = fVar3 - fVar4;
+  right->w = local_14;
+  fVar1 = right->z * right->z + right->y * right->y + right->x * right->x;
+  if (1e-08 <= ABS(fVar1 - 1.0)) {
+    if (1e-08 <= fVar1) {
+      fVar1 = 1.0 / SQRT(fVar1);
+      right->x = fVar1 * right->x;
+      right->y = fVar1 * right->y;
+      fVar1 = fVar1 * right->z;
+LAB_0045012c:
+      right->z = fVar1;
+    }
+    else if (right->x == 0.0) {
+      if (right->z != 0.0) {
+        if (0.0 <= right->z) {
+          fVar1 = 1.0;
+        }
+        else {
+          fVar1 = -1.0;
+        }
+        goto LAB_0045012c;
+      }
+      if (0.0 <= right->y) {
+        right->y = 1.0;
+      }
+      else {
+        right->y = -1.0;
+      }
+    }
+    else if (0.0 <= right->x) {
+      right->x = 1.0;
+    }
+    else {
+      right->x = -1.0;
+    }
+  }
+  fVar1 = dir->x;
+  fVar2 = right->x;
+  fVar3 = dir->z;
+  fVar4 = right->x;
+  fVar5 = dir->y;
+  fVar6 = right->y;
+  fVar7 = dir->x;
+  right->x = right->y * dir->z - right->z * dir->y;
+  right->y = right->z * fVar1 - fVar2 * fVar3;
+  right->z = fVar4 * fVar5 - fVar6 * fVar7;
+  right->w = local_14;
+  fVar1 = right->z * right->z + right->y * right->y + right->x * right->x;
+  if (ABS(fVar1 - 1.0) < 1e-08) goto LAB_0045027d;
+  if (1e-08 <= fVar1) {
+    fVar1 = 1.0 / SQRT(fVar1);
+    right->x = fVar1 * right->x;
+    right->y = fVar1 * right->y;
+    fVar1 = fVar1 * right->z;
+  }
+  else {
+    if (right->x != 0.0) {
+      if (0.0 <= right->x) {
+        right->x = 1.0;
+      }
+      else {
+        right->x = -1.0;
+      }
+      goto LAB_0045027d;
+    }
+    if (right->z == 0.0) {
+      if (0.0 <= right->y) {
+        right->y = 1.0;
+      }
+      else {
+        right->y = -1.0;
+      }
+      goto LAB_0045027d;
+    }
+    if (0.0 <= right->z) {
+      fVar1 = 1.0;
+    }
+    else {
+      fVar1 = -1.0;
+    }
+  }
+  right->z = fVar1;
+LAB_0045027d:
+  fVar1 = right->z;
+  fVar2 = dir->x;
+  fVar3 = right->x;
+  fVar4 = dir->z;
+  fVar5 = right->x;
+  fVar6 = dir->y;
+  fVar7 = right->y;
+  fVar8 = dir->x;
+  up->x = right->y * dir->z - right->z * dir->y;
+  up->y = fVar1 * fVar2 - fVar3 * fVar4;
+  up->z = fVar5 * fVar6 - fVar7 * fVar8;
+  up->w = local_14;
+  fVar1 = up->z * up->z + up->y * up->y + up->x * up->x;
+  if (1e-08 <= ABS(fVar1 - 1.0)) {
+    if (fVar1 < 1e-08) {
+      if (up->x != 0.0) {
+        if (up->x < 0.0) {
+          up->x = -1.0;
+          return;
+        }
+        up->x = 1.0;
+        return;
+      }
+      if (up->z == 0.0) {
+        if (up->y < 0.0) {
+          up->y = -1.0;
+          return;
+        }
+        up->y = 1.0;
+        return;
+      }
+      if (up->z < 0.0) {
+        up->z = -1.0;
+        return;
+      }
+      up->z = 1.0;
+      return;
+    }
+    fVar1 = 1.0 / SQRT(fVar1);
+    up->x = fVar1 * up->x;
+    up->y = fVar1 * up->y;
+    up->z = fVar1 * up->z;
+  }
+  return;
+}
+
+// @00450400 size=317 callers=C_WeaponItem::Fire,C_WeaponItem::FireSecondary
+// WARNING: Globals starting with '_' overlap smaller symbols at the same address
+void __thiscall
+C_ShotManager::ThrowItem
+          (C_ShotManager *this,C_Actor *thrower,C_Item *item,S_vector *pos,S_vector *dir,bool quiet)
+{
+  // locals: C_ThrownShot *pCVar1; void *this_00; C_Actor *pCVar2; C_ThrownShot *local_34; undefined4 local_30; undefined4 local_2c; undefined4 local_28; undefined4 local_24; void *local_1c; undefined1 *puStack_18; undefined4 local_14
+  local_14 = 0xffffffff;
+  puStack_18 = &LAB_007fb7a0;
+  local_1c = ExceptionList;
+  ExceptionList = &local_1c;
+  pCVar1 = _aligned_malloc(0x6a0,0x10);
+  local_34 = pCVar1;
+  if (pCVar1 == (C_ThrownShot *)0x0) {
+    pCVar1 = (C_ThrownShot *)0x0;
+  }
+  else {
+    pCVar1->m_weapon = (C_WeaponComp *)0x0;
+    pCVar1->vtable = (C_ThrownShot_vtbl *)&PTR_ScalarDeletingDestructor_0080fa7c;
+    pCVar1->m_type = 0;
+    pCVar1->m_visual = (I3D_frame *)0x0;
+    pCVar1->m_flag6c = false;
+    local_14 = 1;
+    FUN_004c84a0((undefined4 *)(pCVar1->_pad_006f + 1));
+    local_30 = 0;
+    local_2c = 0x3f800000;
+    local_28 = 0;
+    pCVar1->m_unknown680 = 0.0;
+    pCVar1->vtable = (C_ThrownShot_vtbl *)&PTR_ScalarDeletingDestructor_0080faa8;
+    pCVar1->m_type = 3;
+    pCVar1->_pad_0684[0] = '\0';
+    pCVar1->_pad_0684[1] = '\0';
+    pCVar1->_pad_0684[2] = 0x80;
+    pCVar1->_pad_0684[3] = '?';
+    pCVar1->m_unknown690 = -1;
+    pCVar1->_pad_0684[4] = '\0';
+    pCVar1->_pad_0684[5] = '\0';
+    pCVar1->_pad_0684[6] = '\0';
+    pCVar1->_pad_0684[7] = '\0';
+    *(undefined4 *)(pCVar1->_pad_0684 + 8) = local_24;
+  }
+  local_14 = 0xffffffff;
+  C_ThrownShot::Init(pCVar1,thrower,(S_vector4 *)pos,(S_vector4 *)dir,item,quiet);
+  local_34 = pCVar1;
+  FUN_004536d0(&this->m_shots,(this->m_shots).last,1,&local_34);
+  if (((byte)_g_gameRole & 7) == 7) {
+    pCVar2 = thrower;
+    this_00 = (void *)field_address_1c_461410(0x89ae78);
+    FUN_0045eab0(this_00,&pos->x,&dir->x,(int)pCVar2);
+  }
+  FUN_005a7b70(thrower,item->m_uid,'\x01');
+  ExceptionList = local_1c;
+  return;
+}
+
+// @00450540 size=11 callers=007fb798,007fb7b0,007fb7d0
+void __thiscall C_Shot::DestroyBase_450540(C_Shot *this)
+{
+  this->vtable = (C_Shot_vtbl *)&PTR_ScalarDeletingDestructor_0080fa7c;
+  Release(this);
+  return;
+}
+
+// @00450550 size=8 callers= vt=0080faa8[7]
+bool __thiscall C_ThrownShot::Unknown1C(C_ThrownShot *this,int unknown)
+{
+  return true;
+}
+
+// @00450560 size=1 callers= vt=0080faa8[4]
+void __thiscall C_ThrownShot::Recycle(C_ThrownShot *this)
+{
+  return;
+}
+
+// @00450570 size=3 callers= vt=0080faa8[5]
+void __thiscall C_ThrownShot::SaveGame(C_ThrownShot *this,C_chunk *chunk)
+{
+  return;
+}
+
+// @00450580 size=3 callers= vt=0080faa8[6]
+void __thiscall C_ThrownShot::LoadGame(C_ThrownShot *this,C_chunk *chunk)
+{
+  return;
+}
+
+// @00450590 size=30 callers= vt=0080faa8[0]
+C_ThrownShot * __thiscall C_ThrownShot::ScalarDeletingDestructor(C_ThrownShot *this,uchar flags)
+{
+  ~C_ThrownShot(this);
+  if ((flags & 1) != 0) {
+    _aligned_free(this);
+  }
+  return this;
+}
+
+// @004505b0 size=98 callers=C_ThrownShot::ScalarDeletingDestructor
+void __thiscall C_ThrownShot::~C_ThrownShot(C_ThrownShot *this)
+{
+  // locals: void *local_c; undefined1 *puStack_8; uint local_4
+  puStack_8 = &LAB_007fb7c3;
+  local_c = ExceptionList;
+  ExceptionList = &local_c;
+  this->vtable = (C_ThrownShot_vtbl *)&PTR_ScalarDeletingDestructor_0080faa8;
+  local_4 = 1;
+  Release(this);
+  local_4 = local_4 & 0xffffff00;
+  FUN_004c8770((undefined4 *)(this->_pad_006f + 1));
+  local_4 = 0xffffffff;
+  this->vtable = (C_ThrownShot_vtbl *)&PTR_ScalarDeletingDestructor_0080fa7c;
+  C_Shot::Release((C_Shot *)this);
+  ExceptionList = local_c;
+  return;
+}
+
+// @00450620 size=1797 callers=C_ShotManager::FireBulletImpl
+bool __fastcall IsSegmentInView(S_vector *pos,S_vector *dir)
+{
+  // locals: float fVar1; float fVar2; float fVar3; float fVar4; I3D_camera *this; float fVar5; float fVar6; float fVar7; float fVar8; float fVar9; uint uVar10; C_game *pCVar11; int iVar12; S_matrix *pSVar13; float *pfVar14; float10 fVar15; float local_d0; float local_cc; float local_c8; float local_b0; float local_ac; float local_a8; float local_50 [4]; float local_40; float local_3c; float local_38; float local_30; float local_2c; float local_28
+  pCVar11 = GetGame();
+  this = pCVar11->m_scene->m_activeCamera;
+  if (this == (I3D_camera *)0x0) {
+    return false;
+  }
+  fVar15 = (float10)fptan((float10)this->m_fOV * (float10)0.5);
+  fVar1 = (float)fVar15;
+  fVar2 = (float)(fVar15 / (float10)this->m_aspectRatio);
+  fVar5 = -fVar1;
+  fVar6 = -fVar2;
+  fVar3 = this->m_124;
+  fVar4 = this->m_128;
+  if ((this->m_frameFlags & 0x20) == 0) {
+    I3D_frame::UpdateWMatrixProc((I3D_frame *)this);
+  }
+  uVar10 = this->m_frameFlags;
+  pSVar13 = &this->m_worldMatrix;
+  pfVar14 = local_50;
+  for (iVar12 = 0x10; iVar12 != 0; iVar12 = iVar12 + -1) {
+    *pfVar14 = pSVar13->m[0][0];
+    pSVar13 = (S_matrix *)(pSVar13->m[0] + 1);
+    pfVar14 = pfVar14 + 1;
+  }
+  if ((uVar10 & 0x20) == 0) {
+    I3D_frame::UpdateWMatrixProc((I3D_frame *)this);
+  }
+  fVar7 = pos->x - (this->m_worldMatrix).m[3][0];
+  fVar8 = pos->y - (this->m_worldMatrix).m[3][1];
+  fVar9 = pos->z - (this->m_worldMatrix).m[3][2];
+  local_d0 = local_50[0] * fVar7 + local_50[1] * fVar8 + local_50[2] * fVar9;
+  local_cc = local_40 * fVar7 + local_3c * fVar8 + local_38 * fVar9;
+  local_c8 = local_2c * fVar8 + local_28 * fVar9 + local_30 * fVar7;
+  fVar7 = fVar7 + dir->x;
+  fVar8 = fVar8 + dir->y;
+  fVar9 = fVar9 + dir->z;
+  local_b0 = local_50[0] * fVar7 + local_50[1] * fVar8 + local_50[2] * fVar9;
+  local_ac = local_40 * fVar7 + local_3c * fVar8 + local_38 * fVar9;
+  local_a8 = local_2c * fVar8 + local_28 * fVar9 + local_30 * fVar7;
+  fVar7 = local_a8 - local_c8;
+  if (1e-08 < ABS(fVar7)) {
+    if (fVar3 <= local_c8) {
+      if (fVar4 < local_c8) {
+        if (fVar4 < local_a8) {
+          return false;
+        }
+        fVar8 = (fVar4 - local_c8) / fVar7;
+        local_d0 = (local_b0 - local_d0) * fVar8 + local_d0;
+        local_cc = (local_ac - local_cc) * fVar8 + local_cc;
+        local_c8 = fVar7 * fVar8 + local_c8;
+      }
+    }
+    else {
+      if (local_a8 < fVar3) {
+        return false;
+      }
+      fVar8 = (fVar3 - local_c8) / fVar7;
+      local_d0 = (local_b0 - local_d0) * fVar8 + local_d0;
+      local_cc = (local_ac - local_cc) * fVar8 + local_cc;
+      local_c8 = fVar7 * fVar8 + local_c8;
+    }
+    if (fVar3 <= local_a8) {
+      if (fVar4 < local_a8) {
+        fVar3 = -((fVar4 - local_a8) / fVar7);
+        local_b0 = (local_d0 - local_b0) * fVar3 + local_b0;
+        local_ac = (local_cc - local_ac) * fVar3 + local_ac;
+        local_a8 = (local_c8 - local_a8) * fVar3 + local_a8;
+      }
+    }
+    else {
+      fVar3 = -((fVar3 - local_a8) / fVar7);
+      local_b0 = (local_d0 - local_b0) * fVar3 + local_b0;
+      local_ac = (local_cc - local_ac) * fVar3 + local_ac;
+      local_a8 = (local_c8 - local_a8) * fVar3 + local_a8;
+    }
+  }
+  if (1e-08 < ABS(local_c8)) {
+    local_d0 = local_d0 * ABS(1.0 / local_c8);
+    local_cc = ABS(1.0 / local_c8) * local_cc;
+  }
+  if (1e-08 < ABS(local_a8)) {
+    local_b0 = local_b0 * ABS(1.0 / local_a8);
+    local_ac = ABS(1.0 / local_a8) * local_ac;
+  }
+  fVar3 = local_b0 - local_d0;
+  if (1e-08 < ABS(fVar3)) {
+    if ((((int)((uint)(local_b0 - fVar5) ^ (uint)(local_d0 - fVar5)) < 0) &&
+        (fVar4 = (local_ac - local_cc) * ((fVar5 - local_d0) / fVar3) + local_cc, fVar6 <= fVar4))
+       && (fVar4 < fVar2 != (fVar4 == fVar2))) {
+      return true;
+    }
+    if ((((int)((uint)(local_b0 - fVar1) ^ (uint)(local_d0 - fVar1)) < 0) &&
+        (fVar4 = (local_ac - local_cc) * ((fVar1 - local_d0) / fVar3) + local_cc, fVar6 <= fVar4))
+       && (fVar4 < fVar2 != (fVar4 == fVar2))) {
+      return true;
+    }
+  }
+  fVar4 = local_ac - local_cc;
+  if (1e-08 < ABS(fVar4)) {
+    if ((((int)((uint)(local_ac - fVar6) ^ (uint)(local_cc - fVar6)) < 0) &&
+        (fVar7 = ((fVar6 - local_cc) / fVar4) * fVar3 + local_d0, fVar5 <= fVar7)) &&
+       (fVar7 < fVar1 != (fVar7 == fVar1))) {
+      return true;
+    }
+    if ((((int)((uint)(local_ac - fVar2) ^ (uint)(local_cc - fVar2)) < 0) &&
+        (fVar3 = ((fVar2 - local_cc) / fVar4) * fVar3 + local_d0, fVar5 <= fVar3)) &&
+       (fVar3 < fVar1 != (fVar3 == fVar1))) {
+      return true;
+    }
+  }
+  if (((fVar5 <= local_d0) && (local_d0 < fVar1)) && ((fVar6 <= local_cc && (local_cc < fVar2)))) {
+    return true;
+  }
+  return false;
+}
+
+// @00450d30 size=964 callers=C_ShotManager::FireBullet,004c3dc0,004c4010,004c4780
+// WARNING: Removing unreachable block (ram,0x004510aa)
+// WARNING: Removing unreachable block (ram,0x004510c1)
+// WARNING: Removing unreachable block (ram,0x004510d0)
+// WARNING: Removing unreachable block (ram,0x004510d9)
+// WARNING: Globals starting with '_' overlap smaller symbols at the same address
+void __thiscall
+C_ShotManager::FireBulletImpl
+          (C_ShotManager *this,C_Human *shooter,C_WeaponItem *weapon,S_vector *pos,S_vector *dir,
+          I3D_frame *muzzle,I3D_frame *ejectDummy,bool tracer,uint flags,int shellSound)
+{
+  void ***pppvVar1;
+  C_FirearmComp *weapon_00;
+  void *pvVar2;
+  S_PoolNode *pSVar3;
+  C_BulletShot *this_00;
+  C_Human *human;
+  S_vector *dir_00;
+  bool bVar4;
+  C_game *pCVar5;
+  I3D_frame *pIVar6;
+  uint uVar7;
+  int iVar8;
+  int iVar9;
+  void **ppvVar10;
+  vector_voidPtr *pvVar11;
+  void **ppvVar12;
+  bool bVar13;
+  undefined3 in_stack_0000001d;
+  human = shooter;
+  bVar13 = weapon->m_typeId == 0x105;
+  weapon_00 = (C_FirearmComp *)weapon->m_def->m_component;
+  if ((((((byte)_g_gameRole & 7) == 7) || ((_g_gameRole & 1) != 0)) ||
+      (bVar4 = C_Human::IsLocalPlayer(shooter), bVar4)) || (bVar13)) {
+    if ((this->m_bulletPool).m_free == (S_PoolNode *)0x0) {
+      C_BulletShotPool::Grow(&this->m_bulletPool);
+    }
+    pSVar3 = (this->m_bulletPool).m_free;
+    (this->m_bulletPool).m_free = pSVar3->m_next;
+    this_00 = pSVar3->m_object;
+    pSVar3->m_next = (this->m_bulletPool).m_spareNodes;
+    pSVar3->m_object = (void *)0x0;
+    (this->m_bulletPool).m_spareNodes = pSVar3;
+    (this->m_bulletPool).m_freeCount = (this->m_bulletPool).m_freeCount + -1;
+    if (tracer == false) {
+      pIVar6 = (I3D_frame *)0x0;
+    }
+    else {
+      pIVar6 = this->m_traceModel;
+    }
+    C_BulletShot::Init(this_00,(C_Actor *)human,(S_vector4 *)pos,(S_vector4 *)dir,weapon_00,pIVar6,
+                       SUB41(flags,0),bVar13);
+    if ((human->m_160 != 0) ||
+       ((((byte)_g_gameRole & 7) != 7 && (bVar13 = C_Human::IsLocalPlayer(human), bVar13)))) {
+      (*this_00->vtable->Tick)(100);
+    }
+    _tracer = this_00;
+    FUN_004536d0(&this->m_shots,(this->m_shots).last,1,(undefined4 *)&tracer);
+  }
+  else {
+    pvVar2 = human->m_020;
+    pCVar5 = GetGame();
+    dir_00 = dir;
+    if ((*(int *)((int)pvVar2 + 0x11c) != pCVar5->m_scene->m_renderStamp) &&
+       (bVar13 = IsSegmentInView(pos,dir), !bVar13)) {
+      return;
+    }
+    if ((this->m_bulletPool).m_free == (S_PoolNode *)0x0) {
+      C_BulletShotPool::Grow(&this->m_bulletPool);
+    }
+    pSVar3 = (this->m_bulletPool).m_free;
+    (this->m_bulletPool).m_free = pSVar3->m_next;
+    shooter = pSVar3->m_object;
+    pSVar3->m_next = (this->m_bulletPool).m_spareNodes;
+    pSVar3->m_object = (void *)0x0;
+    (this->m_bulletPool).m_spareNodes = pSVar3;
+    (this->m_bulletPool).m_freeCount = (this->m_bulletPool).m_freeCount + -1;
+    if (tracer == false) {
+      pIVar6 = (I3D_frame *)0x0;
+    }
+    else {
+      pIVar6 = this->m_traceModel;
+    }
+    C_BulletShot::InitClient
+              ((C_BulletShot *)shooter,(C_Actor *)human,pos,dir_00,weapon_00,pIVar6,SUB41(flags,0));
+    FUN_004538e0(&this->m_clientBullets,(this->m_clientBullets).last,1,&shooter);
+  }
+  if ((_g_gameRole & 2) != 0) {
+    if (ejectDummy != (I3D_frame *)0x0) {
+      EjectShell(this,human,ejectDummy,shellSound);
+    }
+    pIVar6 = muzzle;
+    if (muzzle != (I3D_frame *)0x0) {
+      pvVar2 = human->m_020;
+      pCVar5 = GetGame();
+      if (*(int *)((int)pvVar2 + 0x11c) == pCVar5->m_scene->m_renderStamp) {
+        if ((pIVar6->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar6);
+        }
+        C_ParticlesModule::Create
+                  (&g_particlesModule,weapon_00->m_effect,&pIVar6->m_worldMatrix,pIVar6,true,false);
+      }
+      _tracer = operator_new(0x14);
+      C_MuzzleLight__Init(_tracer,pIVar6,weapon->m_flash,100);
+      ppvVar12 = (this->m_muzzleLights).last;
+      pvVar11 = &this->m_muzzleLights;
+      if ((int)(this->m_muzzleLights).end - (int)ppvVar12 >> 2 == 0) {
+        uVar7 = vector_size_e4_452fc0((int)pvVar11);
+        if (uVar7 < 2) {
+          iVar8 = 1;
+        }
+        else {
+          iVar8 = vector_size_e4_452fc0((int)pvVar11);
+        }
+        iVar9 = vector_size_e4_452fc0((int)pvVar11);
+        iVar9 = iVar9 + iVar8;
+        iVar8 = iVar9;
+        if (iVar9 < 0) {
+          iVar8 = 0;
+        }
+        ppvVar10 = operator_new(iVar8 * 4);
+        pos = (S_vector *)uninitialized_copy4_453b50((this->m_muzzleLights).first,ppvVar12,ppvVar10)
+        ;
+        uninitialized_fill_n4_453b80((undefined4 *)pos,1,(undefined4 *)&tracer);
+        uninitialized_copy4_453b50(ppvVar12,(this->m_muzzleLights).last,&pos->y);
+        empty_function_4533f0();
+        operator_delete((this->m_muzzleLights).first);
+        (this->m_muzzleLights).end = ppvVar10 + iVar9;
+        iVar8 = vector_size_e4_452fc0((int)pvVar11);
+        (this->m_muzzleLights).first = ppvVar10;
+        (this->m_muzzleLights).last = ppvVar10 + iVar8 + 1;
+        return;
+      }
+      uninitialized_copy4_453b50(ppvVar12,ppvVar12,ppvVar12 + 1);
+      ppvVar10 = (this->m_muzzleLights).last;
+      uninitialized_fill_n4_453b80
+                (ppvVar10,1 - ((int)ppvVar10 - (int)ppvVar12 >> 2),(undefined4 *)&tracer);
+      ppvVar10 = (this->m_muzzleLights).last;
+      if (ppvVar12 != ppvVar10) {
+        do {
+          *ppvVar12 = _tracer;
+          ppvVar12 = ppvVar12 + 1;
+        } while (ppvVar12 != ppvVar10);
+        (this->m_muzzleLights).last = (this->m_muzzleLights).last + 1;
+        return;
+      }
+      pppvVar1 = &(this->m_muzzleLights).last;
+      *pppvVar1 = *pppvVar1 + 1;
+    }
+  }
+  return;
+}
+
+// @00451100 size=209 callers=C_WeaponItem::Fire
+void __thiscall
+C_ShotManager::FireBullet
+          (C_ShotManager *this,C_Actor *shooter,C_Item *weapon,S_vector *pos,S_vector *dir,
+          bool tracer,uint flags,int shellSound)
+{
+  // locals: bool bVar1; I3D_frame *pIVar2; C_game *pCVar3; undefined4 uVar4; I3D_frame *pIVar5
+  pIVar5 = (I3D_frame *)0x0;
+  pIVar2 = (I3D_frame *)0x0;
+  if ((g_gameRole & 2) != 0) {
+    bVar1 = C_Human::IsLocalPlayer((C_Human *)shooter);
+    if (bVar1) {
+      pCVar3 = GetGame();
+      uVar4 = C_game::IsHudShown(pCVar3);
+      if ((char)uVar4 != '\0') {
+        pCVar3 = GetGame();
+        pIVar5 = (I3D_frame *)FUN_004928d0(*(int *)(pCVar3->_pad_001c + 0x40));
+        pCVar3 = GetGame();
+        pIVar2 = (I3D_frame *)FUN_00492900(*(int *)(pCVar3->_pad_001c + 0x40));
+        goto LAB_004511a6;
+      }
+    }
+    pIVar5 = (I3D_frame *)weapon[3].m_container;
+    if (pIVar5 == (I3D_frame *)0x0) {
+      pIVar5 = C_Item::GetFrame(weapon,0);
+      pIVar5 = (*pIVar5->vtable->FindChildFrame)(pIVar5,"cardum",0x20);
+      weapon[3].m_container = (int)pIVar5;
+    }
+    pIVar2 = (I3D_frame *)weapon[4].vtable;
+    if (pIVar2 == (I3D_frame *)0x0) {
+      pIVar2 = C_Item::GetFrame(weapon,0);
+      pIVar2 = (*pIVar2->vtable->FindChildFrame)(pIVar2,"blsdum",0x20);
+      weapon[4].vtable = (C_Item_vtbl *)pIVar2;
+    }
+  }
+LAB_004511a6:
+  FireBulletImpl(this,(C_Human *)shooter,(C_WeaponItem *)weapon,pos,dir,pIVar2,pIVar5,tracer,flags,
+                 shellSound);
+  return;
+}
+
+// @004511e0 size=78 callers=C_ProjectileShot::Tick,C_BulletShot::Tick,C_ThrownShot::Unknown44d570,006094f0
+int __fastcall GetFrameMaterial(I3D_frame *frame)
+{
+  // locals: char cVar1; char *pcVar2; int iVar3; uint uVar4; char *pcVar5
+  if (frame != (I3D_frame *)0x0) {
+    pcVar2 = frame->m_userProps;
+    if (pcVar2 == (char *)0x0) {
+      pcVar2 = &DAT_00867a90;
+    }
+    pcVar2 = _strlwr(pcVar2);
+    pcVar2 = strstr(pcVar2,"matid");
+    if (pcVar2 != (char *)0x0) {
+      uVar4 = 0xffffffff;
+      pcVar5 = "matid";
+      do {
+        if (uVar4 == 0) break;
+        uVar4 = uVar4 - 1;
+        cVar1 = *pcVar5;
+        pcVar5 = pcVar5 + 1;
+      } while (cVar1 != '\0');
+      iVar3 = atoi(pcVar2 + (~uVar4 - 1));
+      return iVar3;
+    }
+  }
+  return -1;
+}
+
+// @00451230 size=1080 callers=C_WeaponItem::Fire
+void MeleeAttack(C_Actor *attacker,C_Item *weapon,bool unknown,S_vector *pos,S_vector *dir)
+{
+  // locals: int *piVar1; void *pvVar2; int iVar3; float *pfVar4; uint *puVar5; float fVar6; C_Human *human; uint uVar7; C_game *pCVar8; I3D_frame *part; C_game *this; float unaff_ESI; undefined1 auStack_84 [8]; float local_7c; float local_78; float local_74; S_vector local_70; undefined1 local_64 [20]; S_vector SStack_50; undefined1 auStack_40 [60]
+  if (unknown) {
+    auStack_84._4_4_ = dir->x;
+    local_78 = dir->z;
+    local_7c = 0.0;
+    local_74 = dir[1].x;
+    fVar6 = (float)auStack_84._4_4_ * (float)auStack_84._4_4_ + local_78 * local_78;
+    if (1e-08 <= ABS(fVar6 - 1.0)) {
+      if (1e-08 <= fVar6) {
+        fVar6 = 1.0 / SQRT(fVar6);
+        auStack_84._4_4_ = (float)auStack_84._4_4_ * fVar6;
+        local_7c = fVar6 * 0.0;
+        local_78 = local_78 * fVar6;
+      }
+      else if ((float)auStack_84._4_4_ == 0.0) {
+        if (local_78 == 0.0) {
+          local_7c = 1.0;
+        }
+        else if (0.0 <= local_78) {
+          local_78 = 1.0;
+        }
+        else {
+          local_78 = -1.0;
+        }
+      }
+      else if (0.0 <= (float)auStack_84._4_4_) {
+        auStack_84._4_4_ = 1.0;
+      }
+      else {
+        auStack_84._4_4_ = -1.0;
+      }
+    }
+    auStack_84._4_4_ = (float)auStack_84._4_4_ * 0.5;
+    local_7c = local_7c * 0.5;
+    local_78 = local_78 * 0.5;
+    FUN_005ac1c0(attacker[1]._pad_0004 + 4,'\0');
+    iVar3 = FUN_006f7cc0(&g_collisionWorld,&pos->x,(float *)(auStack_84 + 4),(float *)(local_64 + 4)
+                         ,&SStack_50.x,0,0);
+    FUN_005ac1b0(attacker[1]._pad_0004 + 4,'\0');
+    if (iVar3 == 0) {
+      return;
+    }
+    piVar1 = *(int **)(iVar3 + 0x48);
+    if (piVar1 == (int *)0x0) {
+      return;
+    }
+    if (piVar1[6] != 3) {
+      return;
+    }
+    pfVar4 = (float *)FUN_005a80d0((int)piVar1);
+    if (*pfVar4 * dir->x + pfVar4[1] * dir->y + pfVar4[2] * dir->z <= 0.8) {
+      return;
+    }
+    GetGame();
+    C_game::Print(this);
+    (**(code **)(*piVar1 + 0xd4))(0xb,0xbf800000,local_64 + 4,auStack_84 + 4,attacker,0);
+    return;
+  }
+  iVar3 = weapon->m_def->m_component[1].m_unknown04;
+  local_70.x = pos->x;
+  local_70.y = pos->y;
+  local_70.z = pos->z;
+  local_64._0_4_ = pos[1].x;
+  auStack_84._4_4_ = dir->x * 1.2;
+  local_7c = dir->y * 1.2;
+  local_78 = dir->z * 1.2;
+  FUN_005ac1c0(attacker[1]._pad_0004 + 4,'\0');
+  puVar5 = (uint *)C_CollisionWorld::RayTestThunk
+                             (&g_collisionWorld,&local_70.x,(float *)(auStack_84 + 4),
+                              (float *)(local_64 + 4),&SStack_50.x,1,0);
+  FUN_005ac1b0(attacker[1]._pad_0004 + 4,'\0');
+  if (puVar5 == (uint *)0x0) {
+    return;
+  }
+  if ((((*puVar5 & 0x40) == 0) || ((*puVar5 & 0xc0) == 0)) || (puVar5[1] == 0)) {
+    uVar7 = (uint)*(byte *)((int)puVar5 + 3);
+    goto LAB_0045162f;
+  }
+  human = (C_Human *)puVar5[0x12];
+  if (human == (C_Human *)0x0) {
+    return;
+  }
+  uVar7 = human->m_018;
+  if (uVar7 == 3) {
+    fVar6 = (float)C_HitZones__GetHitZone
+                             (&DAT_0089aa50,human,&local_70,(S_vector *)(auStack_84 + 4));
+    auStack_84._0_4_ = fVar6;
+    PrintHitZone((int)fVar6);
+  }
+  else {
+    if (uVar7 == 0x1e) {
+      uVar7 = (*human->vtable->GetMaterialId)((I3D_frame *)0x0);
+      (*human->vtable->Hit)(3,unaff_ESI,(S_vector *)local_64,(S_vector *)auStack_84,attacker,0);
+      goto LAB_0045162f;
+    }
+    if (uVar7 != 0x15) {
+      pvVar2 = human->m_020;
+      pCVar8 = GetGame();
+      part = (I3D_frame *)
+             (*pCVar8->m_scene->vtable->Slot104)
+                       (pCVar8->m_scene,&local_70,auStack_84 + 4,pvVar2,auStack_40,0,0,0,0);
+      if (part == (I3D_frame *)0x0) {
+        return;
+      }
+      uVar7 = (*human->vtable->GetMaterialId)(part);
+      goto LAB_0045162f;
+    }
+    human = (C_Human *)(*human->vtable->GetSeatOccupant)(0);
+    if (human == (C_Human *)0x0) {
+      return;
+    }
+    fVar6 = (float)C_HitZones__GetHitZone
+                             (&DAT_0089aa50,human,&local_70,(S_vector *)(auStack_84 + 4));
+    auStack_84._0_4_ = fVar6;
+  }
+  if (fVar6 == 3.57331e-43) {
+    FUN_005a5960(human,attacker,auStack_84 + 4);
+    return;
+  }
+  uVar7 = (*human->vtable->GetMaterialId)((I3D_frame *)0x0);
+  (*human->vtable->Hit)(3,unaff_ESI,(S_vector *)local_64,(S_vector *)auStack_84,attacker,iVar3);
+LAB_0045162f:
+  if ((uVar7 != 0xffffffff) && (g_materials[uVar7].m_hitEffect != 0)) {
+    C_ParticlesModule::CreateAt
+              (&g_particlesModule,g_materials[uVar7].m_hitEffect,(S_vector *)(local_64 + 4),
+               &SStack_50,(I3D_frame *)0x0,true,false);
+  }
+  return;
+}
+
+// @00451670 size=483 callers=004c3dc0,004c4010,004c4780,C_WeaponItem::Fire
+// WARNING: Removing unreachable block (ram,0x0045180e)
+// WARNING: Removing unreachable block (ram,0x00451823)
+// WARNING: Removing unreachable block (ram,0x0045182f)
+// WARNING: Removing unreachable block (ram,0x00451838)
+void __thiscall
+C_ShotManager::FireProjectile
+          (C_ShotManager *this,C_Actor *shooter,C_Item *weapon,S_vector *pos,S_vector *dir,
+          I3D_frame *projectile,int trailEffect,bool flySound,bool allowCameraFollow,uint flags)
+{
+  // locals: C_ProjectileShot *this_00; int iVar1; int iVar2
+  C_Shot **ppCVar3;
+  undefined4 *puVar4;
+  C_Shot **ppCVar5;
+  uint uVar6;
+  this_00 = _aligned_malloc(0xa0,0x10);
+  if (this_00 == (C_ProjectileShot *)0x0) {
+    this_00 = (C_ProjectileShot *)0x0;
+  }
+  else {
+    this_00->m_weapon = (C_WeaponComp *)0x0;
+    this_00->m_visual = (I3D_frame *)0x0;
+    this_00->m_flag6c = false;
+    this_00->vtable = (C_ProjectileShot_vtbl *)&PTR_ScalarDeletingDestructor_0080fad8;
+    this_00->m_type = 4;
+  }
+  C_ProjectileShot::Init
+            (this_00,shooter,(S_vector4 *)pos,(S_vector4 *)dir,
+             (C_ProjectileWeaponComp *)weapon->m_def->m_component,projectile,trailEffect,flySound,
+             allowCameraFollow,SUB41(flags,0));
+  ppCVar5 = (this->m_shots).last;
+  flags = (uint)this_00;
+  if ((int)(this->m_shots).end - (int)ppCVar5 >> 2 != 0) {
+    uninitialized_copy4_453bb0(ppCVar5,ppCVar5,ppCVar5 + 1);
+    ppCVar3 = (this->m_shots).last;
+    uninitialized_fill_n4_453be0(ppCVar3,1 - ((int)ppCVar3 - (int)ppCVar5 >> 2),&flags);
+    ppCVar3 = (this->m_shots).last;
+    if (ppCVar5 == ppCVar3) {
+      (this->m_shots).last = (this->m_shots).last + 1;
+      return;
+    }
+    do {
+      *ppCVar5 = (C_Shot *)flags;
+      ppCVar5 = ppCVar5 + 1;
+    } while (ppCVar5 != ppCVar3);
+    (this->m_shots).last = (this->m_shots).last + 1;
+    return;
+  }
+  ppCVar3 = (this->m_shots).first;
+  if ((ppCVar3 == (C_Shot **)0x0) || (uVar6 = (int)ppCVar5 - (int)ppCVar3 >> 2, uVar6 < 2)) {
+    uVar6 = 1;
+  }
+  if (ppCVar3 == (C_Shot **)0x0) {
+    iVar1 = 0;
+  }
+  else {
+    iVar1 = (int)ppCVar5 - (int)ppCVar3 >> 2;
+  }
+  iVar1 = iVar1 + uVar6;
+  iVar2 = iVar1;
+  if (iVar1 < 0) {
+    iVar2 = 0;
+  }
+  ppCVar3 = operator_new(iVar2 << 2);
+  puVar4 = (undefined4 *)uninitialized_copy4_453bb0((this->m_shots).first,ppCVar5,ppCVar3);
+  uninitialized_fill_n4_453be0(puVar4,1,&flags);
+  uninitialized_copy4_453bb0(ppCVar5,(this->m_shots).last,puVar4 + 1);
+  empty_function_453400();
+  operator_delete((this->m_shots).first);
+  (this->m_shots).end = ppCVar3 + iVar1;
+  iVar1 = vector_size_e4_452fe0((int)&this->m_shots);
+  (this->m_shots).first = ppCVar3;
+  (this->m_shots).last = ppCVar3 + iVar1 + 1;
+  return;
+}
+
+// @00451860 size=8 callers= vt=0080fad8[7]
+bool __thiscall C_ProjectileShot::Unknown1C(C_ProjectileShot *this,int unknown)
+{
+  return true;
+}
+
+// @00451870 size=1 callers= vt=0080fad8[4]
+void __thiscall C_ProjectileShot::Recycle(C_ProjectileShot *this)
+{
+  return;
+}
+
+// @00451880 size=30 callers= vt=0080fad8[0]
+C_ProjectileShot * __thiscall
+C_ProjectileShot::ScalarDeletingDestructor(C_ProjectileShot *this,uchar flags)
+{
+  ~C_ProjectileShot(this);
+  if ((flags & 1) != 0) {
+    _aligned_free(this);
+  }
+  return this;
+}
+
+// @004518a0 size=85 callers=C_ProjectileShot::ScalarDeletingDestructor
+void __thiscall C_ProjectileShot::~C_ProjectileShot(C_ProjectileShot *this)
+{
+  // locals: void *local_c; undefined1 *puStack_8; undefined4 local_4
+  puStack_8 = &LAB_007fb7d8;
+  local_c = ExceptionList;
+  ExceptionList = &local_c;
+  this->vtable = (C_ProjectileShot_vtbl *)&PTR_ScalarDeletingDestructor_0080fad8;
+  local_4 = 0;
+  Release(this);
+  local_4 = 0xffffffff;
+  this->vtable = (C_ProjectileShot_vtbl *)&PTR_ScalarDeletingDestructor_0080fa7c;
+  C_Shot::Release((C_Shot *)this);
+  ExceptionList = local_c;
+  return;
+}
+
+// @00451900 size=143 callers=0075f340
+void SendExplosionMessage(S_vector4 *pos,int unknown)
+{
+  // locals: C_NetMessage *this; void *quantization; uchar mask; float local_30; float local_2c; float local_28; float local_24; undefined4 local_20; undefined4 local_1c; undefined1 local_18; undefined4 local_14
+  local_18 = 0;
+  local_14 = 0;
+  local_1c = 0x447a0000;
+  local_30 = pos->x;
+  local_20 = 0x40a00000;
+  local_2c = pos->y;
+  local_28 = pos->z;
+  local_24 = pos->w;
+  S_Explosion__Execute(&local_30);
+  this = CreateShotMessage(0,true);
+  mask = '\a';
+  quantization = (void *)C_NetMessage::GetSender(this,-1);
+  C_NetMessage::WriteQuantized(this,&pos->x,quantization,mask);
+  C_BitStream::WriteBits((C_BitStream *)this,unknown,8);
+  SendShotMessage(this);
+  return;
+}
+
+// @00451990 size=233 callers=C_ProjectileShot::Tick,C_ThrownShot::Simulate,004d4b50,005fefb0,0060d870
+// WARNING: Globals starting with '_' overlap smaller symbols at the same address
+void __thiscall
+C_ShotManager::Explode
+          (C_ShotManager *this,C_Actor *source,S_vector4 *pos,float damage,float radius,
+          int soundGroup)
+{
+  // locals: float fVar1; int *piVar2; float local_30; float local_2c; float local_28; float local_24; float local_20; float local_1c; undefined1 local_18; C_Actor *local_14
+  if ((0.0 < radius) && (0.0 < damage)) {
+    local_14 = source;
+    local_1c = radius;
+    local_20 = damage;
+    local_18 = 0;
+    local_30 = pos->x;
+    local_2c = pos->y;
+    local_28 = pos->z;
+    local_24 = pos->w;
+    S_Explosion__Execute(&local_30);
+  }
+  if (((byte)_g_gameRole & 7) == 7) {
+    (this->m_sound).chapter = 6;
+    (this->m_sound).pos.x = pos->x;
+    (this->m_sound).pos.y = pos->y;
+    (this->m_sound).pos.z = pos->z;
+    fVar1 = pos->w;
+    (this->m_sound).attachTo = (I3D_frame *)0x0;
+    (this->m_sound).posW = fVar1;
+    (this->m_sound).group = soundGroup;
+    (this->m_sound).source = source;
+    (this->m_sound).flags = 0x22;
+    piVar2 = (int *)GetSoundModule();
+    (**(code **)(*piVar2 + 0x54))(&this->m_sound);
+  }
+  return;
+}
+
+// @00451a80 size=127 callers=C_ProjectileShot::Tick,C_ThrownShot::Simulate,C_ShotManager::OnMessage,004d4b50,005fef50,0060d980
+void __thiscall
+C_ShotManager::PlayExplosion
+          (C_ShotManager *this,S_vector4 *pos,S_vector *dir,int effect,int material,int soundGroup)
+{
+  // locals: float fVar1; int *piVar2
+  (this->m_sound).chapter = 6;
+  (this->m_sound).pos.x = pos->x;
+  (this->m_sound).pos.y = pos->y;
+  (this->m_sound).pos.z = pos->z;
+  fVar1 = pos->w;
+  (this->m_sound).flags = 1;
+  (this->m_sound).posW = fVar1;
+  (this->m_sound).group = soundGroup;
+  (this->m_sound).source = (C_Actor *)0x0;
+  (this->m_sound).attachTo = (I3D_frame *)0x0;
+  piVar2 = (int *)GetSoundModule();
+  (**(code **)(*piVar2 + 0x54))(&this->m_sound);
+  PlayExplosionEffects(this,effect,(int)dir,(S_vector *)pos,(S_vector *)pos);
+  return;
+}
+
+// @00451b00 size=189 callers=C_ProjectileShot::Tick,C_BulletShot::Tick,C_BulletShot::TickClient,005a15d0,005a1c90
+void __thiscall
+C_ShotManager::PlayHitSound
+          (C_ShotManager *this,C_Actor *source,int material,S_vector4 *pos,bool nearListener,
+          bool unknown)
+{
+  // locals: int iVar1; int *piVar2
+  if ((((g_gameRole & 2) != 0) && (material != -1)) && ((uint)material < g_materialCount)) {
+    (this->m_sound).chapter = 4;
+    (this->m_sound).pos.x = pos->x;
+    (this->m_sound).pos.y = pos->y;
+    (this->m_sound).pos.z = pos->z;
+    (this->m_sound).posW = pos->w;
+    if (nearListener) {
+      iVar1 = g_materials[material].m_hitSoundNear;
+    }
+    else {
+      iVar1 = g_materials[material].m_hitSound;
+    }
+    (this->m_sound).group = iVar1;
+    if (iVar1 != -1) {
+      (this->m_sound).source = source;
+      (this->m_sound).flags = (uint)unknown;
+      (this->m_sound).attachTo = (I3D_frame *)0x0;
+      (this->m_sound).channel = 1;
+      piVar2 = (int *)GetSoundModule();
+      (**(code **)(*piVar2 + 0x54))(&this->m_sound);
+    }
+  }
+  return;
+}
+
+// @00451bc0 size=53 callers=C_BulletShot::Tick,C_BulletShot::TickClient
+void __thiscall
+C_ShotManager::OnBulletHit
+          (C_ShotManager *this,C_Actor *shooter,I3D_frame *frame,int material,S_vector *pos,
+          S_vector *normal)
+{
+  if (material != -1) {
+    AddBulletDecal(this,material,pos,normal,frame);
+    PlayHitEffect(this,material,pos,normal);
+  }
+  return;
+}
+
+// @00451c00 size=425 callers=C_ProjectileShot::Tick,C_ShotManager::OnBulletHit,005a15d0,005a1c90
+void __thiscall
+C_ShotManager::PlayHitEffect(C_ShotManager *this,int material,S_vector *pos,S_vector *normal)
+{
+  // locals: float fVar1; float fVar2; float fVar3; C_game *pCVar4; int *piVar5; float fStack_48; float fStack_40; float fStack_3c; float afStack_38 [2]; float fStack_30; float fStack_2c; float fStack_28; undefined1 local_20 [28]
+  pCVar4 = GetGame();
+  piVar5 = (int *)C_game::GetCameraModule(pCVar4);
+  (**(code **)(*piVar5 + 0x68))(0,local_20);
+  pCVar4 = GetGame();
+  piVar5 = (int *)C_game::GetCameraModule(pCVar4);
+  (**(code **)(*piVar5 + 100))(0,afStack_38);
+  fVar1 = pos->x - fStack_40;
+  fVar2 = pos->y - fStack_3c;
+  fStack_48 = pos->z - afStack_38[0];
+  fVar3 = fVar1 * fVar1 + fVar2 * fVar2 + fStack_48 * fStack_48;
+  if (1e-08 <= ABS(fVar3 - 1.0)) {
+    if (1e-08 <= fVar3) {
+      fVar3 = 1.0 / SQRT(fVar3);
+      fVar1 = fVar1 * fVar3;
+      fVar2 = fVar2 * fVar3;
+      fStack_48 = fStack_48 * fVar3;
+    }
+    else if (fVar1 == 0.0) {
+      if (fStack_48 == 0.0) {
+        if (0.0 <= fVar2) {
+          fVar2 = 1.0;
+        }
+        else {
+          fVar2 = -1.0;
+        }
+      }
+      else if (0.0 <= fStack_48) {
+        fStack_48 = 1.0;
+      }
+      else {
+        fStack_48 = -1.0;
+      }
+    }
+    else if (0.0 <= fVar1) {
+      fVar1 = 1.0;
+    }
+    else {
+      fVar1 = -1.0;
+    }
+  }
+  if (-0.05 < fVar1 * fStack_30 + fStack_2c * fVar2 + fStack_28 * fStack_48) {
+    C_ParticlesModule::CreateAt
+              (&g_particlesModule,g_materials[material].m_hitEffect,pos,normal,(I3D_frame *)0x0,true
+               ,false);
+  }
+  return;
+}
+
+// @00451db0 size=133 callers=C_ShotManager::PlayExplosion
+void __thiscall
+C_ShotManager::PlayExplosionEffects
+          (C_ShotManager *this,int material,int effect,S_vector *pos,S_vector *dir)
+{
+  // locals: S_vector local_20 [2]
+  if (-1 < material) {
+    local_20[0].x = -dir->x;
+    local_20[0].y = -dir->y;
+    local_20[0].z = -dir->z;
+    AddBloodDecal(this,material,pos,local_20);
+  }
+  C_ParticlesModule::CreateAt(&g_particlesModule,effect,pos,dir,(I3D_frame *)0x0,true,false);
+  if (-1 < material) {
+    C_ParticlesModule::CreateAt
+              (&g_particlesModule,g_materials[material].m_exitEffect,pos,dir,(I3D_frame *)0x0,true,
+               false);
+  }
+  return;
+}
+
+// @00451e40 size=113 callers=C_BulletShot::CheckNearMiss
+void __thiscall C_ShotManager::PlayNearMissSound(C_ShotManager *this,S_vector4 *pos)
+{
+  // locals: float fVar1; int *piVar2
+  if ((g_gameRole & 2) != 0) {
+    (this->m_sound).chapter = 4;
+    (this->m_sound).pos.x = pos->x;
+    (this->m_sound).pos.y = pos->y;
+    (this->m_sound).pos.z = pos->z;
+    fVar1 = pos->w;
+    (this->m_sound).group = 0xb;
+    (this->m_sound).flags = 1;
+    (this->m_sound).posW = fVar1;
+    (this->m_sound).source = (C_Actor *)0x0;
+    (this->m_sound).attachTo = (I3D_frame *)0x0;
+    (this->m_sound).channel = 0;
+    piVar2 = (int *)GetSoundModule();
+    (**(code **)(*piVar2 + 0x54))(&this->m_sound);
+  }
+  return;
+}
+
+// @00451ec0 size=205 callers= vt=0080fa18[3]
+void __thiscall C_ShotManager::Tick(C_ShotManager *this,int timeDelta)
+{
+  // locals: C_Shot *pCVar1
+  C_Shot **ppCVar2;
+  C_Shot **ppCVar3;
+  int iVar4;
+  bool bVar5;
+  undefined3 extraout_var;
+  S_PoolNode *pSVar6;
+  C_Shot **ppCVar7;
+  uint uVar8;
+  for (uVar8 = 0;
+      (ppCVar7 = (this->m_shots).first, ppCVar7 != (C_Shot **)0x0 &&
+      (uVar8 < (uint)((int)(this->m_shots).last - (int)ppCVar7 >> 2))); uVar8 = uVar8 + 1) {
+    pCVar1 = ppCVar7[uVar8];
+    bVar5 = (*pCVar1->vtable->Tick)(timeDelta);
+    if (CONCAT31(extraout_var,bVar5) == 1) {
+      switch(pCVar1->m_type) {
+      case 1:
+        (*pCVar1->vtable->Recycle)();
+        pSVar6 = C_BulletShotPool::NewNode(&this->m_bulletPool);
+        pSVar6->m_object = pCVar1;
+        pSVar6->m_next = (this->m_bulletPool).m_free;
+        (this->m_bulletPool).m_free = pSVar6;
+        (this->m_bulletPool).m_freeCount = (this->m_bulletPool).m_freeCount + 1;
+        break;
+      case 3:
+      case 4:
+      case 6:
+        (*pCVar1->vtable->ScalarDeletingDestructor)('\x01');
+      }
+      ppCVar2 = (this->m_shots).first;
+      ppCVar3 = (this->m_shots).last;
+      ppCVar7 = ppCVar2 + uVar8 + 1;
+      if (ppCVar7 != ppCVar3) {
+        iVar4 = uVar8 * 4 - (int)ppCVar7;
+        do {
+          *(C_Shot **)((int)ppCVar2 + iVar4 + (int)ppCVar7) = *ppCVar7;
+          ppCVar7 = ppCVar7 + 1;
+        } while (ppCVar7 != ppCVar3);
+      }
+      uVar8 = uVar8 - 1;
+      (this->m_shots).last = (this->m_shots).last + -1;
+    }
+  }
+  return;
+}
+
+// @00451fb0 size=712 callers= vt=0080fa18[4]
+void __thiscall C_ShotManager::Update(C_ShotManager *this,int timeDelta)
+{
+  // locals: int *piVar1
+  void ***pppvVar2;
+  C_BulletShot *this_00;
+  C_BulletShot **ppCVar3;
+  C_BulletShot **ppCVar4;
+  C_Shot **ppCVar5;
+  void *pvVar6;
+  void **ppvVar7;
+  void **ppvVar8;
+  bool bVar9;
+  undefined3 extraout_var;
+  C_BulletShot **ppCVar10;
+  S_PoolNode *pSVar11;
+  void **ppvVar12;
+  int iVar13;
+  uint uVar14;
+  uint uVar15;
+  uint local_8;
+  if ((g_gameRole & 1) == 0) {
+    iVar13 = this->m_clientTickTime + timeDelta;
+    this->m_clientTickTime = iVar13;
+    if (100 < iVar13) {
+      this->m_clientTickTime = iVar13 + -100;
+      (*this->vtable->Tick)(100);
+    }
+    for (local_8 = 0;
+        (ppCVar10 = (this->m_clientBullets).first, ppCVar10 != (C_BulletShot **)0x0 &&
+        (local_8 < (uint)((int)(this->m_clientBullets).last - (int)ppCVar10 >> 2)));
+        local_8 = local_8 + 1) {
+      this_00 = (this->m_clientBullets).first[local_8];
+      bVar9 = C_BulletShot::TickClient(this_00,timeDelta);
+      if (CONCAT31(extraout_var,bVar9) == 1) {
+        (*this_00->vtable->Recycle)();
+        C_BulletShotPool::Put(&this->m_bulletPool,this_00);
+        ppCVar3 = (this->m_clientBullets).first;
+        ppCVar4 = (this->m_clientBullets).last;
+        ppCVar10 = ppCVar3 + local_8 + 1;
+        if (ppCVar10 != ppCVar4) {
+          iVar13 = local_8 * 4 - (int)ppCVar10;
+          do {
+            *(C_BulletShot **)((int)ppCVar3 + iVar13 + (int)ppCVar10) = *ppCVar10;
+            ppCVar10 = ppCVar10 + 1;
+          } while (ppCVar10 != ppCVar4);
+        }
+        empty_function_453410();
+        local_8 = local_8 - 1;
+        (this->m_clientBullets).last = (this->m_clientBullets).last + -1;
+      }
+    }
+  }
+  for (uVar15 = 0;
+      (ppCVar5 = (this->m_shots).first, ppCVar5 != (C_Shot **)0x0 &&
+      (uVar15 < (uint)((int)(this->m_shots).last - (int)ppCVar5 >> 2))); uVar15 = uVar15 + 1) {
+    (*ppCVar5[uVar15]->vtable->Update)(timeDelta);
+  }
+  uVar15 = 0;
+  while( true ) {
+    ppvVar12 = (this->m_shells).first;
+    if ((ppvVar12 == (void **)0x0) ||
+       ((uint)((int)(this->m_shells).last - (int)ppvVar12 >> 2) <= uVar15)) break;
+    iVar13 = C_Shell__Tick((this->m_shells).first[uVar15],timeDelta);
+    uVar14 = uVar15;
+    if (iVar13 == 2) {
+      C_Shell__Hide((this->m_shells).first[uVar15]);
+      pvVar6 = (this->m_shells).first[uVar15];
+      if (pvVar6 != (void *)0x0) {
+        pSVar11 = C_ShellPool::NewNode(&this->m_shellPool);
+        pSVar11->m_object = pvVar6;
+        pSVar11->m_next = (this->m_shellPool).m_free;
+        (this->m_shellPool).m_free = pSVar11;
+        piVar1 = &(this->m_shellPool).m_freeCount;
+        *piVar1 = *piVar1 + 1;
+      }
+      ppvVar7 = (this->m_shells).first;
+      ppvVar8 = (this->m_shells).last;
+      uVar14 = uVar15 - 1;
+      ppvVar12 = ppvVar7 + uVar15 + 1;
+      if (ppvVar12 != ppvVar8) {
+        iVar13 = uVar15 * 4 - (int)ppvVar12;
+        do {
+          *(void **)((int)ppvVar7 + iVar13 + (int)ppvVar12) = *ppvVar12;
+          ppvVar12 = ppvVar12 + 1;
+        } while (ppvVar12 != ppvVar8);
+      }
+      empty_function_453450();
+      (this->m_shells).last = (this->m_shells).last + -1;
+    }
+    uVar15 = uVar14 + 1;
+  }
+  uVar15 = 0;
+  while ((ppvVar12 = (this->m_muzzleLights).first, ppvVar12 != (void **)0x0 &&
+         (uVar15 < (uint)((int)(this->m_muzzleLights).last - (int)ppvVar12 >> 2)))) {
+    iVar13 = C_MuzzleLight__Tick(ppvVar12[uVar15],timeDelta);
+    uVar14 = uVar15;
+    if (iVar13 == 2) {
+      pvVar6 = (this->m_muzzleLights).first[uVar15];
+      if (pvVar6 != (void *)0x0) {
+        C_MuzzleLight__Release(pvVar6);
+        operator_delete(pvVar6);
+      }
+      ppvVar7 = (this->m_muzzleLights).first;
+      ppvVar8 = (this->m_muzzleLights).last;
+      uVar14 = uVar15 - 1;
+      ppvVar12 = ppvVar7 + uVar15 + 1;
+      if (ppvVar12 != ppvVar8) {
+        iVar13 = uVar15 * 4 - (int)ppvVar12;
+        do {
+          *(void **)((int)ppvVar7 + iVar13 + (int)ppvVar12) = *ppvVar12;
+          ppvVar12 = ppvVar12 + 1;
+        } while (ppvVar12 != ppvVar8);
+      }
+      pppvVar2 = &(this->m_muzzleLights).last;
+      *pppvVar2 = *pppvVar2 + -1;
+    }
+    uVar15 = uVar14 + 1;
+  }
+  for (uVar15 = 0;
+      (ppvVar12 = (this->m_bloodPools).first, ppvVar12 != (void **)0x0 &&
+      (uVar15 < (uint)((int)(this->m_bloodPools).last - (int)ppvVar12 >> 2))); uVar15 = uVar15 + 1)
+  {
+    C_BloodPool__Tick(ppvVar12[uVar15],timeDelta);
+  }
+  for (uVar15 = 0;
+      (ppvVar12 = (this->m_bloodDrops).first, ppvVar12 != (void **)0x0 &&
+      (uVar15 < (uint)((int)(this->m_bloodDrops).last - (int)ppvVar12 >> 2))); uVar15 = uVar15 + 1)
+  {
+    C_BloodDrop__Tick(ppvVar12[uVar15],timeDelta);
+  }
+  return;
+}
+
+// @00452280 size=568 callers= vt=0080fa18[11]
+// WARNING: Removing unreachable block (ram,0x0045249c)
+void __thiscall C_ShotManager::RestartMission(C_ShotManager *this)
+{
+  // locals: int *piVar1
+  void **ppvVar2;
+  S_ShotDecal **ppSVar3;
+  S_ShotDecal *this_00;
+  void *pvVar4;
+  C_Shot **ppCVar5;
+  C_Shot *pCVar6;
+  int iVar7;
+  S_PoolNode *pSVar8;
+  S_ShotDecal *unaff_EDI;
+  int iVar9;
+  ppvVar2 = (this->m_shells).first;
+  if ((ppvVar2 != (void **)0x0) &&
+     (iVar9 = (int)(this->m_shells).last - (int)ppvVar2 >> 2, iVar9 != 0)) {
+    do {
+      iVar9 = iVar9 + -1;
+      C_Shell__Hide((this->m_shells).first[iVar9]);
+      C_ShellPool::Put(&this->m_shellPool,(this->m_shells).first[iVar9]);
+    } while (iVar9 != 0);
+  }
+  ppSVar3 = (this->m_decals).first;
+  if (ppSVar3 != (S_ShotDecal **)0x0) {
+    iVar9 = (int)(this->m_decals).last - (int)ppSVar3 >> 2;
+    while (iVar9 != 0) {
+      iVar9 = iVar9 + -1;
+      this_00 = (this->m_decals).first[iVar9];
+      if (this_00 != (S_ShotDecal *)0x0) {
+        FreeShotDecal(this_00,unaff_EDI);
+        operator_delete(this_00);
+      }
+    }
+  }
+  ppvVar2 = (this->m_bloodDrops).first;
+  if (ppvVar2 != (void **)0x0) {
+    iVar9 = (int)(this->m_bloodDrops).last - (int)ppvVar2 >> 2;
+    while (iVar9 != 0) {
+      iVar9 = iVar9 + -1;
+      pvVar4 = (this->m_bloodDrops).first[iVar9];
+      if (pvVar4 != (void *)0x0) {
+        C_BloodDrop__Release(pvVar4);
+        _aligned_free(pvVar4);
+      }
+    }
+  }
+  ppvVar2 = (this->m_bloodPools).first;
+  if (ppvVar2 != (void **)0x0) {
+    iVar9 = (int)(this->m_bloodPools).last - (int)ppvVar2 >> 2;
+    while (iVar9 != 0) {
+      iVar9 = iVar9 + -1;
+      pvVar4 = (this->m_bloodPools).first[iVar9];
+      if (pvVar4 != (void *)0x0) {
+        C_BloodPool__Release(pvVar4);
+        operator_delete(pvVar4);
+      }
+    }
+  }
+  ppvVar2 = (this->m_muzzleLights).first;
+  if (ppvVar2 != (void **)0x0) {
+    iVar9 = (int)(this->m_muzzleLights).last - (int)ppvVar2 >> 2;
+    while (iVar9 != 0) {
+      iVar9 = iVar9 + -1;
+      pvVar4 = (this->m_muzzleLights).first[iVar9];
+      if (pvVar4 != (void *)0x0) {
+        C_MuzzleLight__Release(pvVar4);
+        operator_delete(pvVar4);
+      }
+    }
+  }
+  FUN_004532a0(&this->m_decals,(this->m_decals).first,(this->m_decals).last);
+  FUN_004532e0(&this->m_bloodDrops,(this->m_bloodDrops).first,(this->m_bloodDrops).last);
+  FUN_00453350(&this->m_bloodPools,(this->m_bloodPools).first,(this->m_bloodPools).last);
+  FUN_004533c0(&this->m_muzzleLights,(this->m_muzzleLights).first,(this->m_muzzleLights).last);
+  FUN_00453420(&this->m_shells,(this->m_shells).first,(this->m_shells).last);
+  FUN_004532a0(&this->m_decals,(this->m_decals).first,(this->m_decals).last);
+  ppCVar5 = (this->m_shots).first;
+  if (ppCVar5 != (C_Shot **)0x0) {
+    iVar9 = (int)(this->m_shots).last - (int)ppCVar5 >> 2;
+    while (iVar9 != 0) {
+      iVar9 = iVar9 + -1;
+      pCVar6 = (this->m_shots).first[iVar9];
+      iVar7 = pCVar6->m_type;
+      if (iVar7 == 1) {
+        (*pCVar6->vtable->Recycle)();
+        pSVar8 = C_BulletShotPool::NewNode(&this->m_bulletPool);
+        pSVar8->m_object = pCVar6;
+        pSVar8->m_next = (this->m_bulletPool).m_free;
+        (this->m_bulletPool).m_free = pSVar8;
+        piVar1 = &(this->m_bulletPool).m_freeCount;
+        *piVar1 = *piVar1 + 1;
+      }
+      else if ((2 < iVar7) && (iVar7 < 5)) {
+        (*pCVar6->vtable->ScalarDeletingDestructor)('\x01');
+      }
+    }
+  }
+  (this->m_shots).last = (this->m_shots).first;
+  return;
+}
+
+// @004524c0 size=794 callers= vt=0080fa18[12]
+bool __thiscall C_ShotManager::SaveGame(C_ShotManager *this,C_chunk *chunk)
+{
+  S_ShotDecal **ppSVar1;
+  void **ppvVar2;
+  int iVar3;
+  int iVar4;
+  int iStack_10;
+  C_ShotManager *local_c;
+  undefined2 local_8;
+  undefined4 local_6;
+  ppSVar1 = (this->m_decals).first;
+  local_c = this;
+  if (ppSVar1 != (S_ShotDecal **)0x0) {
+    for (iVar4 = (int)(this->m_decals).last - (int)ppSVar1 >> 2; iVar4 != 0; iVar4 = iVar4 + -1) {
+      if (chunk->m_open != false) {
+        local_8 = 0x1a0a;
+        local_6 = 0;
+        iVar3 = dtaSeek(chunk->m_handle,0,1);
+        chunk->m_stack[chunk->m_depth] = iVar3;
+        chunk->m_depth = chunk->m_depth + 1;
+        dtaWrite(chunk->m_handle,&local_8,6);
+        if (chunk->m_open != false) {
+          if (chunk->m_writing == false) {
+            iVar3 = chunk->m_stack[chunk->m_depth + -1];
+          }
+          else {
+            iVar3 = dtaSeek(chunk->m_handle,0,1);
+            iStack_10 = iVar3 - chunk->m_stack[chunk->m_depth + -1];
+            dtaSeek(chunk->m_handle,chunk->m_stack[chunk->m_depth + -1] + 2,0);
+            dtaWrite(chunk->m_handle,&iStack_10,4);
+          }
+          dtaSeek(chunk->m_handle,iVar3,0);
+          if (chunk->m_depth != 0) {
+            chunk->m_depth = chunk->m_depth + -1;
+          }
+        }
+      }
+    }
+  }
+  ppvVar2 = (this->m_bloodDrops).first;
+  if (ppvVar2 != (void **)0x0) {
+    for (iVar4 = (int)(this->m_bloodDrops).last - (int)ppvVar2 >> 2; iVar4 != 0; iVar4 = iVar4 + -1)
+    {
+      if (chunk->m_open != false) {
+        local_8 = 0x1a0b;
+        local_6 = 0;
+        iVar3 = dtaSeek(chunk->m_handle,0,1);
+        chunk->m_stack[chunk->m_depth] = iVar3;
+        chunk->m_depth = chunk->m_depth + 1;
+        dtaWrite(chunk->m_handle,&local_8,6);
+        if (chunk->m_open != false) {
+          if (chunk->m_writing == false) {
+            iVar3 = chunk->m_stack[chunk->m_depth + -1];
+          }
+          else {
+            iVar3 = dtaSeek(chunk->m_handle,0,1);
+            iStack_10 = iVar3 - chunk->m_stack[chunk->m_depth + -1];
+            dtaSeek(chunk->m_handle,chunk->m_stack[chunk->m_depth + -1] + 2,0);
+            dtaWrite(chunk->m_handle,&iStack_10,4);
+          }
+          dtaSeek(chunk->m_handle,iVar3,0);
+          if (chunk->m_depth != 0) {
+            chunk->m_depth = chunk->m_depth + -1;
+          }
+        }
+      }
+    }
+  }
+  ppvVar2 = (this->m_bloodPools).first;
+  if (ppvVar2 != (void **)0x0) {
+    for (iVar4 = (int)(this->m_bloodPools).last - (int)ppvVar2 >> 2; iVar4 != 0; iVar4 = iVar4 + -1)
+    {
+      if (chunk->m_open != false) {
+        local_8 = 0x1a0c;
+        local_6 = 0;
+        iVar3 = dtaSeek(chunk->m_handle,0,1);
+        chunk->m_stack[chunk->m_depth] = iVar3;
+        chunk->m_depth = chunk->m_depth + 1;
+        dtaWrite(chunk->m_handle,&local_8,6);
+        if (chunk->m_open != false) {
+          if (chunk->m_writing == false) {
+            iVar3 = chunk->m_stack[chunk->m_depth + -1];
+          }
+          else {
+            iVar3 = dtaSeek(chunk->m_handle,0,1);
+            iStack_10 = iVar3 - chunk->m_stack[chunk->m_depth + -1];
+            dtaSeek(chunk->m_handle,chunk->m_stack[chunk->m_depth + -1] + 2,0);
+            dtaWrite(chunk->m_handle,&iStack_10,4);
+          }
+          dtaSeek(chunk->m_handle,iVar3,0);
+          if (chunk->m_depth != 0) {
+            chunk->m_depth = chunk->m_depth + -1;
+          }
+        }
+      }
+      this = local_c;
+    }
+  }
+  iVar4 = vector_size_e4_452fe0((int)&this->m_shots);
+  while (iVar4 != 0) {
+    iVar4 = iVar4 + -1;
+    C_chunk::Begin(chunk,0x1a0d);
+    (*(this->m_shots).first[iVar4]->vtable->SaveGame)(chunk);
+    C_chunk::Ascend(chunk);
+  }
+  return true;
+}
+
+// @004527e0 size=638 callers= vt=0080fa18[13]
+bool __thiscall C_ShotManager::LoadGame(C_ShotManager *this,C_chunk *chunk)
+{
+  // locals: C_chunk *pCVar1; int iVar2; ushort uVar3; int iStack_18; int iStack_14; int iStack_10; int iStack_c; ushort uStack_8; undefined2 uStack_6; undefined2 uStack_4
+  pCVar1 = chunk;
+  uVar3 = 0;
+switchD_0045288e_default:
+  if (pCVar1->m_open == false) {
+    return true;
+  }
+  if (pCVar1->m_depth == 0) {
+    return true;
+  }
+  iStack_c = dtaSeek(pCVar1->m_handle,0,1);
+  if (iStack_c == -1) {
+    return true;
+  }
+  iStack_c = pCVar1->m_stack[pCVar1->m_depth + -1] - iStack_c;
+  if (iStack_c == 0) {
+    return true;
+  }
+  if ((pCVar1->m_open != false) && (iVar2 = dtaRead(pCVar1->m_handle,&uStack_8,6), iVar2 == 6)) {
+    iVar2 = dtaSeek(pCVar1->m_handle,0,1);
+    pCVar1->m_stack[pCVar1->m_depth] = iVar2 + -6 + CONCAT22(uStack_4,uStack_6);
+    pCVar1->m_depth = pCVar1->m_depth + 1;
+    uVar3 = uStack_8;
+  }
+  switch(uVar3) {
+  case 0x1a0a:
+    if (pCVar1->m_open == false) {
+      return true;
+    }
+    if (pCVar1->m_writing == false) {
+LAB_004528ea:
+      iVar2 = pCVar1->m_stack[pCVar1->m_depth + -1];
+    }
+    else {
+      iVar2 = dtaSeek(pCVar1->m_handle,0,1);
+      chunk = (C_chunk *)(iVar2 - pCVar1->m_stack[pCVar1->m_depth + -1]);
+      dtaSeek(pCVar1->m_handle,pCVar1->m_stack[pCVar1->m_depth + -1] + 2,0);
+      dtaWrite(pCVar1->m_handle,&chunk,4);
+    }
+    break;
+  case 0x1a0b:
+    if (pCVar1->m_open == false) {
+      return true;
+    }
+    if (pCVar1->m_writing == false) {
+LAB_0045296f:
+      iVar2 = pCVar1->m_stack[pCVar1->m_depth + -1];
+    }
+    else {
+      iVar2 = dtaSeek(pCVar1->m_handle,0,1);
+      iStack_18 = iVar2 - pCVar1->m_stack[pCVar1->m_depth + -1];
+      dtaSeek(pCVar1->m_handle,pCVar1->m_stack[pCVar1->m_depth + -1] + 2,0);
+      dtaWrite(pCVar1->m_handle,&iStack_18,4);
+    }
+    goto LAB_0045297c;
+  case 0x1a0c:
+    if (pCVar1->m_open == false) {
+      return true;
+    }
+    if (pCVar1->m_writing == false) goto LAB_004528ea;
+    iVar2 = dtaSeek(pCVar1->m_handle,0,1);
+    iStack_14 = iVar2 - pCVar1->m_stack[pCVar1->m_depth + -1];
+    dtaSeek(pCVar1->m_handle,pCVar1->m_stack[pCVar1->m_depth + -1] + 2,0);
+    dtaWrite(pCVar1->m_handle,&iStack_14,4);
+    break;
+  case 0x1a0d:
+    if (pCVar1->m_open == false) {
+      return true;
+    }
+    if (pCVar1->m_writing == false) goto LAB_0045296f;
+    iVar2 = dtaSeek(pCVar1->m_handle,0,1);
+    iStack_10 = iVar2 - pCVar1->m_stack[pCVar1->m_depth + -1];
+    dtaSeek(pCVar1->m_handle,pCVar1->m_stack[pCVar1->m_depth + -1] + 2,0);
+    dtaWrite(pCVar1->m_handle,&iStack_10,4);
+LAB_0045297c:
+    dtaSeek(pCVar1->m_handle,iVar2,0);
+    if (pCVar1->m_depth != 0) {
+      pCVar1->m_depth = pCVar1->m_depth + -1;
+    }
+  default:
+    goto switchD_0045288e_default;
+  }
+  dtaSeek(pCVar1->m_handle,iVar2,0);
+  if (pCVar1->m_depth != 0) {
+    pCVar1->m_depth = pCVar1->m_depth + -1;
+  }
+  goto switchD_0045288e_default;
+}
+
+// @00452bd0 size=205 callers= vt=0080fa18[9]
+bool __thiscall C_ShotManager::OnMessage(C_ShotManager *this,C_BitStream *stream)
+{
+  // locals: uint uVar1; void *quantization; int iVar2; longlong lVar3; int soundGroup; float local_40; float local_3c; float local_38; float local_34; S_vector4 local_30; S_vector local_20 [2]
+  log2((float10)1.0);
+  log2((float10)2.0);
+  lVar3 = __ftol();
+  uVar1 = C_BitStream::ReadBits(stream,(int)lVar3);
+  if (uVar1 == 0) {
+    uVar1 = 7;
+    quantization = (void *)C_NetMessage::GetSender((C_NetMessage *)stream,-1);
+    C_NetMessage::ReadQuantized((C_NetMessage *)stream,&local_40,quantization,uVar1);
+    local_30.x = local_40;
+    local_30.w = local_34;
+    local_30.y = local_3c;
+    local_30.z = local_38;
+    uVar1 = C_BitStream::ReadBits(stream,8);
+    soundGroup = 0x1e;
+    local_20[0].x = 0.0;
+    local_20[0].y = 1.0;
+    local_20[0].z = 0.0;
+    iVar2 = _rand();
+    PlayExplosion(this,&local_30,local_20,*(int *)(&DAT_00839024 + (iVar2 % 3) * 4),uVar1,soundGroup
+                 );
+  }
+  return true;
+}
+
+// @00452ca0 size=83 callers=SendExplosionMessage
+C_NetMessage * CreateShotMessage(int type,bool reliable)
+{
+  // locals: C_NetMessage *this; longlong lVar1
+  this = (C_NetMessage *)C_NetGame__CreateMessage(&g_netGame,0xe,(-(uint)reliable & 0xfffffffd) + 3)
+  ;
+  log2((float10)1.0);
+  log2((float10)2.0);
+  lVar1 = __ftol();
+  C_BitStream::WriteBits((C_BitStream *)this,type,(int)lVar1);
+  return this;
+}
+
+// @00452d00 size=21 callers=SendExplosionMessage
+void SendShotMessage(C_NetMessage *message)
+{
+  C_NetGame__SendMessage(&g_netGame,message);
+  return;
+}
+
+// @00452d20 size=111 callers=007fb670,007fb6d8
+void __thiscall C_BulletShotPool::~C_BulletShotPool(C_BulletShotPool *this)
+{
+  // locals: S_PoolNode *pSVar1; undefined4 *puVar2
+  pSVar1 = this->m_free;
+  this->vtable = (C_BulletShotPool_vtbl *)&PTR_ScalarDeletingDestructor_0080fa5c;
+  while (pSVar1 != (S_PoolNode *)0x0) {
+    puVar2 = this->m_free->m_object;
+    if (puVar2 != (undefined4 *)0x0) {
+      (**(code **)*puVar2)(1);
+    }
+    pSVar1 = this->m_free->m_next;
+    operator_delete(this->m_free);
+    this->m_free = pSVar1;
+  }
+  pSVar1 = this->m_spareNodes;
+  while (pSVar1 != (S_PoolNode *)0x0) {
+    pSVar1 = this->m_spareNodes->m_next;
+    operator_delete(this->m_spareNodes);
+    this->m_spareNodes = pSVar1;
+  }
+  this->m_free = (S_PoolNode *)0x0;
+  this->m_spareNodes = (S_PoolNode *)0x0;
+  this->m_freeCount = 0;
+  return;
+}
+
+// @00452d90 size=105 callers=C_ShotManager::~C_ShotManager
+void __thiscall C_BulletShotPool::Clear(C_BulletShotPool *this)
+{
+  // locals: S_PoolNode *pSVar1; undefined4 *puVar2
+  pSVar1 = this->m_free;
+  while (pSVar1 != (S_PoolNode *)0x0) {
+    puVar2 = this->m_free->m_object;
+    if (puVar2 != (undefined4 *)0x0) {
+      (**(code **)*puVar2)(1);
+    }
+    pSVar1 = this->m_free->m_next;
+    operator_delete(this->m_free);
+    this->m_free = pSVar1;
+  }
+  pSVar1 = this->m_spareNodes;
+  while (pSVar1 != (S_PoolNode *)0x0) {
+    pSVar1 = this->m_spareNodes->m_next;
+    operator_delete(this->m_spareNodes);
+    this->m_spareNodes = pSVar1;
+  }
+  this->m_free = (S_PoolNode *)0x0;
+  this->m_spareNodes = (S_PoolNode *)0x0;
+  this->m_freeCount = 0;
+  return;
+}
+
+// @00452e00 size=121 callers=007fb683,007fb6e3
+void __thiscall C_ShellPool::~C_ShellPool(C_ShellPool *this)
+{
+  // locals: S_PoolNode *pSVar1; void *this_00
+  pSVar1 = this->m_free;
+  this->vtable = (C_ShellPool_vtbl *)&PTR_ScalarDeletingDestructor_0080fa58;
+  while (pSVar1 != (S_PoolNode *)0x0) {
+    this_00 = this->m_free->m_object;
+    if (this_00 != (void *)0x0) {
+      C_Shell__Release(this_00);
+      _aligned_free(this_00);
+    }
+    pSVar1 = this->m_free->m_next;
+    operator_delete(this->m_free);
+    this->m_free = pSVar1;
+  }
+  pSVar1 = this->m_spareNodes;
+  while (pSVar1 != (S_PoolNode *)0x0) {
+    pSVar1 = this->m_spareNodes->m_next;
+    operator_delete(this->m_spareNodes);
+    this->m_spareNodes = pSVar1;
+  }
+  this->m_free = (S_PoolNode *)0x0;
+  this->m_spareNodes = (S_PoolNode *)0x0;
+  this->m_freeCount = 0;
+  return;
+}
+
+// @00452e80 size=115 callers=C_ShotManager::~C_ShotManager
+void __thiscall C_ShellPool::Clear(C_ShellPool *this)
+{
+  // locals: S_PoolNode *pSVar1; void *this_00
+  pSVar1 = this->m_free;
+  while (pSVar1 != (S_PoolNode *)0x0) {
+    this_00 = this->m_free->m_object;
+    if (this_00 != (void *)0x0) {
+      C_Shell__Release(this_00);
+      _aligned_free(this_00);
+    }
+    pSVar1 = this->m_free->m_next;
+    operator_delete(this->m_free);
+    this->m_free = pSVar1;
+  }
+  pSVar1 = this->m_spareNodes;
+  while (pSVar1 != (S_PoolNode *)0x0) {
+    pSVar1 = this->m_spareNodes->m_next;
+    operator_delete(this->m_spareNodes);
+    this->m_spareNodes = pSVar1;
+  }
+  this->m_free = (S_PoolNode *)0x0;
+  this->m_spareNodes = (S_PoolNode *)0x0;
+  this->m_freeCount = 0;
+  return;
+}
+
+// @00452f00 size=28 callers=007fb68e,007fb6ee
+void __fastcall vector_tidy_452f00(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(undefined4 *)(param_1 + 4) = 0;
+  *(undefined4 *)(param_1 + 8) = 0;
+  *(undefined4 *)(param_1 + 0xc) = 0;
+  return;
+}
+
+// @00452f20 size=28 callers=007fb699
+void __fastcall vector_tidy_452f20(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(undefined4 *)(param_1 + 4) = 0;
+  *(undefined4 *)(param_1 + 8) = 0;
+  *(undefined4 *)(param_1 + 0xc) = 0;
+  return;
+}
+
+// @00452f40 size=19 callers=C_ShotManager::AddBloodDrop
+int __fastcall vector_size_e4_452f40(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 2;
+}
+
+// @00452f60 size=28 callers=007fb6a7
+void __fastcall vector_tidy_452f60(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(undefined4 *)(param_1 + 4) = 0;
+  *(undefined4 *)(param_1 + 8) = 0;
+  *(undefined4 *)(param_1 + 0xc) = 0;
+  return;
+}
+
+// @00452f80 size=19 callers=C_ShotManager::StartMission,C_ShotManager::AddBloodPool
+int __fastcall vector_size_e4_452f80(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 2;
+}
+
+// @00452fa0 size=28 callers=007fb6b5
+void __fastcall vector_tidy_452fa0(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(undefined4 *)(param_1 + 4) = 0;
+  *(undefined4 *)(param_1 + 8) = 0;
+  *(undefined4 *)(param_1 + 0xc) = 0;
+  return;
+}
+
+// @00452fc0 size=19 callers=C_ShotManager::FireBulletImpl
+int __fastcall vector_size_e4_452fc0(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 2;
+}
+
+// @00452fe0 size=19 callers=C_ShotManager::FireProjectile,C_ShotManager::SaveGame
+int __fastcall vector_size_e4_452fe0(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 2;
+}
+
+// @00453000 size=19 callers=C_ShotManager::EjectShell
+int __fastcall vector_size_e4_453000(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 2;
+}
+
+// @00453020 size=132 callers= vt=0080fa18[17]
+C_BulletShotPool * __thiscall
+C_BulletShotPool::ScalarDeletingDestructor(C_BulletShotPool *this,uchar flags)
+{
+  // locals: S_PoolNode *pSVar1; undefined4 *puVar2
+  pSVar1 = this->m_free;
+  this->vtable = (C_BulletShotPool_vtbl *)&PTR_ScalarDeletingDestructor_0080fa5c;
+  while (pSVar1 != (S_PoolNode *)0x0) {
+    puVar2 = this->m_free->m_object;
+    if (puVar2 != (undefined4 *)0x0) {
+      (**(code **)*puVar2)(1);
+    }
+    pSVar1 = this->m_free->m_next;
+    operator_delete(this->m_free);
+    this->m_free = pSVar1;
+  }
+  pSVar1 = this->m_spareNodes;
+  while (pSVar1 != (S_PoolNode *)0x0) {
+    pSVar1 = this->m_spareNodes->m_next;
+    operator_delete(this->m_spareNodes);
+    this->m_spareNodes = pSVar1;
+  }
+  this->m_free = (S_PoolNode *)0x0;
+  this->m_spareNodes = (S_PoolNode *)0x0;
+  this->m_freeCount = 0;
+  if ((flags & 1) != 0) {
+    operator_delete(this);
+  }
+  return this;
+}
+
+// @004530b0 size=142 callers= vt=0080fa18[16]
+C_ShellPool * __thiscall C_ShellPool::ScalarDeletingDestructor(C_ShellPool *this,uchar flags)
+{
+  // locals: S_PoolNode *pSVar1; void *this_00
+  pSVar1 = this->m_free;
+  this->vtable = (C_ShellPool_vtbl *)&PTR_ScalarDeletingDestructor_0080fa58;
+  while (pSVar1 != (S_PoolNode *)0x0) {
+    this_00 = this->m_free->m_object;
+    if (this_00 != (void *)0x0) {
+      C_Shell__Release(this_00);
+      _aligned_free(this_00);
+    }
+    pSVar1 = this->m_free->m_next;
+    operator_delete(this->m_free);
+    this->m_free = pSVar1;
+  }
+  pSVar1 = this->m_spareNodes;
+  while (pSVar1 != (S_PoolNode *)0x0) {
+    pSVar1 = this->m_spareNodes->m_next;
+    operator_delete(this->m_spareNodes);
+    this->m_spareNodes = pSVar1;
+  }
+  this->m_free = (S_PoolNode *)0x0;
+  this->m_spareNodes = (S_PoolNode *)0x0;
+  this->m_freeCount = 0;
+  if ((flags & 1) != 0) {
+    operator_delete(this);
+  }
+  return this;
+}
+
+// @00453140 size=133 callers=C_ShotManager::FireBulletImpl
+void __thiscall C_BulletShotPool::Grow(C_BulletShotPool *this)
+{
+  // locals: undefined4 *puVar1; S_PoolNode *pSVar2; int local_4
+  local_4 = 0;
+  if (0 < this->m_growBy) {
+    do {
+      puVar1 = _aligned_malloc(0xc0,0x10);
+      if (puVar1 != (undefined4 *)0x0) {
+        puVar1[0x19] = 0;
+        puVar1[0x1a] = 0;
+        *(undefined1 *)(puVar1 + 0x1b) = 0;
+        *puVar1 = &PTR_ScalarDeletingDestructor_0080fa60;
+        puVar1[0x17] = 1;
+        pSVar2 = this->m_spareNodes;
+        if (pSVar2 == (S_PoolNode *)0x0) {
+          pSVar2 = operator_new(8);
+          if (pSVar2 == (S_PoolNode *)0x0) {
+            pSVar2 = (S_PoolNode *)0x0;
+          }
+          else {
+            pSVar2->m_object = (void *)0x0;
+            pSVar2->m_next = (S_PoolNode *)0x0;
+          }
+        }
+        else {
+          this->m_spareNodes = pSVar2->m_next;
+        }
+        pSVar2->m_object = puVar1;
+        pSVar2->m_next = this->m_free;
+        this->m_free = pSVar2;
+        this->m_freeCount = this->m_freeCount + 1;
+      }
+      local_4 = local_4 + 1;
+    } while (local_4 < this->m_growBy);
+  }
+  return;
+}
+
+// @004531d0 size=36 callers=C_ShotManager::C_ShotManager,C_ShotManager::Update
+void __thiscall C_BulletShotPool::Put(C_BulletShotPool *this,C_BulletShot *shot)
+{
+  // locals: S_PoolNode *pSVar1
+  if (shot != (C_BulletShot *)0x0) {
+    pSVar1 = NewNode(this);
+    pSVar1->m_object = shot;
+    pSVar1->m_next = this->m_free;
+    this->m_free = pSVar1;
+    this->m_freeCount = this->m_freeCount + 1;
+  }
+  return;
+}
+
+// @00453200 size=107 callers=C_ShotManager::EjectShell
+void __thiscall C_ShellPool::Grow(C_ShellPool *this)
+{
+  // locals: void *pvVar1; S_PoolNode *pSVar2; int iVar3
+  iVar3 = 0;
+  if (0 < this->m_growBy) {
+    do {
+      pvVar1 = _aligned_malloc(0x40,0x10);
+      if (pvVar1 != (void *)0x0) {
+        *(undefined4 *)((int)pvVar1 + 0x20) = 0;
+        *(undefined4 *)((int)pvVar1 + 0x24) = 0;
+        *(undefined4 *)((int)pvVar1 + 0x28) = 0;
+        pSVar2 = this->m_spareNodes;
+        if (pSVar2 == (S_PoolNode *)0x0) {
+          pSVar2 = operator_new(8);
+          if (pSVar2 == (S_PoolNode *)0x0) {
+            pSVar2 = (S_PoolNode *)0x0;
+          }
+          else {
+            pSVar2->m_object = (void *)0x0;
+            pSVar2->m_next = (S_PoolNode *)0x0;
+          }
+        }
+        else {
+          this->m_spareNodes = pSVar2->m_next;
+        }
+        pSVar2->m_object = pvVar1;
+        pSVar2->m_next = this->m_free;
+        this->m_free = pSVar2;
+        this->m_freeCount = this->m_freeCount + 1;
+      }
+      iVar3 = iVar3 + 1;
+    } while (iVar3 < this->m_growBy);
+  }
+  return;
+}
+
+// @00453270 size=36 callers=C_ShotManager::C_ShotManager,C_ShotManager::StopMission,C_ShotManager::RestartMission
+void __thiscall C_ShellPool::Put(C_ShellPool *this,void *shell)
+{
+  // locals: S_PoolNode *pSVar1
+  if (shell != (void *)0x0) {
+    pSVar1 = NewNode(this);
+    pSVar1->m_object = shell;
+    pSVar1->m_next = this->m_free;
+    this->m_free = pSVar1;
+    this->m_freeCount = this->m_freeCount + 1;
+  }
+  return;
+}
+
+// @004532a0 size=43 callers=C_ShotManager::RestartMission
+void __thiscall FUN_004532a0(void *this,undefined4 *param_1,undefined4 *param_2)
+{
+  // locals: undefined4 *puVar1
+  puVar1 = *(undefined4 **)((int)this + 8);
+  for (; param_2 != puVar1; param_2 = param_2 + 1) {
+    *param_1 = *param_2;
+    param_1 = param_1 + 1;
+  }
+  *(undefined4 **)((int)this + 8) = param_1;
+  return;
+}
+
+// @004532d0 size=3 callers=C_ShotManager::~C_ShotManager,C_ShotManager::StopMission,C_ShotManager::AddBulletDecal,C_ShotManager::AddBloodSplat,C_ShotManager::AddBloodDecal
+void empty_function_4532d0(void)
+{
+  return;
+}
+
+// @004532e0 size=43 callers=C_ShotManager::RestartMission
+void __thiscall FUN_004532e0(void *this,undefined4 *param_1,undefined4 *param_2)
+{
+  // locals: undefined4 *puVar1
+  puVar1 = *(undefined4 **)((int)this + 8);
+  for (; param_2 != puVar1; param_2 = param_2 + 1) {
+    *param_1 = *param_2;
+    param_1 = param_1 + 1;
+  }
+  *(undefined4 **)((int)this + 8) = param_1;
+  return;
+}
+
+// @00453310 size=3 callers=C_ShotManager::~C_ShotManager,C_ShotManager::StopMission,C_ShotManager::AddBloodDrop
+void empty_function_453310(void)
+{
+  return;
+}
+
+// @00453320 size=39 callers=C_ShotManager::AddBloodDrop
+void uninitialized_copy4_453320(undefined4 *param_1,undefined4 *param_2,undefined4 *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != (undefined4 *)0x0) {
+      *param_3 = *param_1;
+    }
+    param_3 = param_3 + 1;
+  }
+  return;
+}
+
+// @00453350 size=43 callers=C_ShotManager::RestartMission
+void __thiscall FUN_00453350(void *this,undefined4 *param_1,undefined4 *param_2)
+{
+  // locals: undefined4 *puVar1
+  puVar1 = *(undefined4 **)((int)this + 8);
+  for (; param_2 != puVar1; param_2 = param_2 + 1) {
+    *param_1 = *param_2;
+    param_1 = param_1 + 1;
+  }
+  *(undefined4 **)((int)this + 8) = param_1;
+  return;
+}
+
+// @00453380 size=3 callers=C_ShotManager::StartMission,C_ShotManager::StopMission,C_ShotManager::AddBloodPool
+void empty_function_453380(void)
+{
+  return;
+}
+
+// @00453390 size=39 callers=C_ShotManager::AddBloodPool
+void uninitialized_copy4_453390(undefined4 *param_1,undefined4 *param_2,undefined4 *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != (undefined4 *)0x0) {
+      *param_3 = *param_1;
+    }
+    param_3 = param_3 + 1;
+  }
+  return;
+}
+
+// @004533c0 size=43 callers=C_ShotManager::RestartMission
+void __thiscall FUN_004533c0(void *this,undefined4 *param_1,undefined4 *param_2)
+{
+  // locals: undefined4 *puVar1
+  puVar1 = *(undefined4 **)((int)this + 8);
+  for (; param_2 != puVar1; param_2 = param_2 + 1) {
+    *param_1 = *param_2;
+    param_1 = param_1 + 1;
+  }
+  *(undefined4 **)((int)this + 8) = param_1;
+  return;
+}
+
+// @004533f0 size=3 callers=C_ShotManager::StopMission,C_ShotManager::FireBulletImpl
+void empty_function_4533f0(void)
+{
+  return;
+}
+
+// @00453400 size=3 callers=C_ShotManager::StopMission,C_ShotManager::FireProjectile
+void empty_function_453400(void)
+{
+  return;
+}
+
+// @00453410 size=3 callers=C_ShotManager::Update
+void empty_function_453410(void)
+{
+  return;
+}
+
+// @00453420 size=43 callers=C_ShotManager::StopMission,C_ShotManager::RestartMission
+void __thiscall FUN_00453420(void *this,undefined4 *param_1,undefined4 *param_2)
+{
+  // locals: undefined4 *puVar1
+  puVar1 = *(undefined4 **)((int)this + 8);
+  for (; param_2 != puVar1; param_2 = param_2 + 1) {
+    *param_1 = *param_2;
+    param_1 = param_1 + 1;
+  }
+  *(undefined4 **)((int)this + 8) = param_1;
+  return;
+}
+
+// @00453450 size=3 callers=C_ShotManager::EjectShell,C_ShotManager::Update
+void empty_function_453450(void)
+{
+  return;
+}
+
+// @00453460 size=45 callers=C_ShotManager::StopMission,C_ShotManager::Tick,C_ShotManager::RestartMission,C_BulletShotPool::Put
+S_PoolNode * __thiscall C_BulletShotPool::NewNode(C_BulletShotPool *this)
+{
+  // locals: S_PoolNode *pSVar1
+  pSVar1 = this->m_spareNodes;
+  if (pSVar1 != (S_PoolNode *)0x0) {
+    this->m_spareNodes = pSVar1->m_next;
+    return pSVar1;
+  }
+  pSVar1 = operator_new(8);
+  if (pSVar1 != (S_PoolNode *)0x0) {
+    pSVar1->m_object = (void *)0x0;
+    pSVar1->m_next = (S_PoolNode *)0x0;
+    return pSVar1;
+  }
+  return (S_PoolNode *)0x0;
+}
+
+// @00453490 size=45 callers=C_ShotManager::Update,C_ShellPool::Put
+S_PoolNode * __thiscall C_ShellPool::NewNode(C_ShellPool *this)
+{
+  // locals: S_PoolNode *pSVar1
+  pSVar1 = this->m_spareNodes;
+  if (pSVar1 != (S_PoolNode *)0x0) {
+    this->m_spareNodes = pSVar1->m_next;
+    return pSVar1;
+  }
+  pSVar1 = operator_new(8);
+  if (pSVar1 != (S_PoolNode *)0x0) {
+    pSVar1->m_object = (void *)0x0;
+    pSVar1->m_next = (S_PoolNode *)0x0;
+    return pSVar1;
+  }
+  return (S_PoolNode *)0x0;
+}
+
+// @004534c0 size=517 callers=C_ShotManager::AddBulletDecal,C_ShotManager::AddBloodSplat,C_ShotManager::AddBloodDecal
+void __thiscall FUN_004534c0(void *this,undefined4 *param_1,uint param_2,undefined4 *param_3)
+{
+  // locals: undefined4 *puVar1; int iVar2; int iVar3; undefined4 *puVar4; undefined4 *puVar5; uint uVar6; undefined4 *puVar7
+  puVar7 = *(undefined4 **)((int)this + 8);
+  if (param_2 <= (uint)(*(int *)((int)this + 0xc) - (int)puVar7 >> 2)) {
+    if ((uint)((int)puVar7 - (int)param_1 >> 2) < param_2) {
+      puVar5 = param_1 + param_2;
+      if (param_1 != puVar7) {
+        puVar4 = puVar5 + -param_2;
+        do {
+          if (puVar5 != (undefined4 *)0x0) {
+            *puVar5 = *puVar4;
+          }
+          puVar4 = puVar4 + 1;
+          puVar5 = puVar5 + 1;
+        } while (puVar4 != puVar7);
+      }
+      puVar7 = *(undefined4 **)((int)this + 8);
+      for (iVar2 = param_2 - ((int)puVar7 - (int)param_1 >> 2); iVar2 != 0; iVar2 = iVar2 + -1) {
+        if (puVar7 != (undefined4 *)0x0) {
+          *puVar7 = *param_3;
+        }
+        puVar7 = puVar7 + 1;
+      }
+      puVar7 = *(undefined4 **)((int)this + 8);
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(uint *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+      return;
+    }
+    if (param_2 != 0) {
+      puVar5 = puVar7;
+      for (puVar4 = puVar7 + -param_2; puVar4 != puVar7; puVar4 = puVar4 + 1) {
+        if (puVar5 != (undefined4 *)0x0) {
+          *puVar5 = *puVar4;
+        }
+        puVar5 = puVar5 + 1;
+      }
+      puVar7 = *(undefined4 **)((int)this + 8);
+      for (puVar5 = puVar7 + -param_2; param_1 != puVar5; puVar5 = puVar5 + -1) {
+        puVar7 = puVar7 + -1;
+        *puVar7 = puVar5[-1];
+      }
+      puVar7 = param_1 + param_2;
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(int *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+    }
+    return;
+  }
+  iVar2 = *(int *)((int)this + 4);
+  if ((iVar2 == 0) || (uVar6 = (int)puVar7 - iVar2 >> 2, uVar6 <= param_2)) {
+    uVar6 = param_2;
+  }
+  if (iVar2 == 0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)puVar7 - iVar2 >> 2;
+  }
+  iVar2 = iVar2 + uVar6;
+  iVar3 = iVar2;
+  if (iVar2 < 0) {
+    iVar3 = 0;
+  }
+  puVar4 = operator_new(iVar3 * 4);
+  puVar5 = puVar4;
+  for (puVar7 = *(undefined4 **)((int)this + 4); uVar6 = param_2, puVar1 = puVar5, puVar7 != param_1
+      ; puVar7 = puVar7 + 1) {
+    if (puVar5 != (undefined4 *)0x0) {
+      *puVar5 = *puVar7;
+    }
+    puVar5 = puVar5 + 1;
+  }
+  for (; uVar6 != 0; uVar6 = uVar6 - 1) {
+    if (puVar1 != (undefined4 *)0x0) {
+      *puVar1 = *param_3;
+    }
+    puVar1 = puVar1 + 1;
+  }
+  puVar1 = *(undefined4 **)((int)this + 8);
+  puVar7 = puVar5 + param_2;
+  if (param_1 != puVar1) {
+    puVar5 = (undefined4 *)((int)puVar7 + (param_2 * -4 - (int)puVar5) + (int)param_1);
+    do {
+      if (puVar7 != (undefined4 *)0x0) {
+        *puVar7 = *puVar5;
+      }
+      puVar5 = puVar5 + 1;
+      puVar7 = puVar7 + 1;
+    } while (puVar5 != puVar1);
+  }
+  operator_delete(*(void **)((int)this + 4));
+  *(undefined4 **)((int)this + 0xc) = puVar4 + iVar2;
+  iVar2 = *(int *)((int)this + 4);
+  if (iVar2 == 0) {
+    *(undefined4 **)((int)this + 4) = puVar4;
+    *(undefined4 **)((int)this + 8) = puVar4 + param_2;
+    return;
+  }
+  *(undefined4 **)((int)this + 4) = puVar4;
+  *(undefined4 **)((int)this + 8) = puVar4 + (*(int *)((int)this + 8) - iVar2 >> 2) + param_2;
+  return;
+}
+
+// @004536d0 size=517 callers=C_ShotManager::ThrowItem,C_ShotManager::FireBulletImpl
+void __thiscall FUN_004536d0(void *this,undefined4 *param_1,uint param_2,undefined4 *param_3)
+{
+  // locals: undefined4 *puVar1; int iVar2; int iVar3; undefined4 *puVar4; undefined4 *puVar5; uint uVar6; undefined4 *puVar7
+  puVar7 = *(undefined4 **)((int)this + 8);
+  if (param_2 <= (uint)(*(int *)((int)this + 0xc) - (int)puVar7 >> 2)) {
+    if ((uint)((int)puVar7 - (int)param_1 >> 2) < param_2) {
+      puVar5 = param_1 + param_2;
+      if (param_1 != puVar7) {
+        puVar4 = puVar5 + -param_2;
+        do {
+          if (puVar5 != (undefined4 *)0x0) {
+            *puVar5 = *puVar4;
+          }
+          puVar4 = puVar4 + 1;
+          puVar5 = puVar5 + 1;
+        } while (puVar4 != puVar7);
+      }
+      puVar7 = *(undefined4 **)((int)this + 8);
+      for (iVar2 = param_2 - ((int)puVar7 - (int)param_1 >> 2); iVar2 != 0; iVar2 = iVar2 + -1) {
+        if (puVar7 != (undefined4 *)0x0) {
+          *puVar7 = *param_3;
+        }
+        puVar7 = puVar7 + 1;
+      }
+      puVar7 = *(undefined4 **)((int)this + 8);
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(uint *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+      return;
+    }
+    if (param_2 != 0) {
+      puVar5 = puVar7;
+      for (puVar4 = puVar7 + -param_2; puVar4 != puVar7; puVar4 = puVar4 + 1) {
+        if (puVar5 != (undefined4 *)0x0) {
+          *puVar5 = *puVar4;
+        }
+        puVar5 = puVar5 + 1;
+      }
+      puVar7 = *(undefined4 **)((int)this + 8);
+      for (puVar5 = puVar7 + -param_2; param_1 != puVar5; puVar5 = puVar5 + -1) {
+        puVar7 = puVar7 + -1;
+        *puVar7 = puVar5[-1];
+      }
+      puVar7 = param_1 + param_2;
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(int *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+    }
+    return;
+  }
+  iVar2 = *(int *)((int)this + 4);
+  if ((iVar2 == 0) || (uVar6 = (int)puVar7 - iVar2 >> 2, uVar6 <= param_2)) {
+    uVar6 = param_2;
+  }
+  if (iVar2 == 0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)puVar7 - iVar2 >> 2;
+  }
+  iVar2 = iVar2 + uVar6;
+  iVar3 = iVar2;
+  if (iVar2 < 0) {
+    iVar3 = 0;
+  }
+  puVar4 = operator_new(iVar3 * 4);
+  puVar5 = puVar4;
+  for (puVar7 = *(undefined4 **)((int)this + 4); uVar6 = param_2, puVar1 = puVar5, puVar7 != param_1
+      ; puVar7 = puVar7 + 1) {
+    if (puVar5 != (undefined4 *)0x0) {
+      *puVar5 = *puVar7;
+    }
+    puVar5 = puVar5 + 1;
+  }
+  for (; uVar6 != 0; uVar6 = uVar6 - 1) {
+    if (puVar1 != (undefined4 *)0x0) {
+      *puVar1 = *param_3;
+    }
+    puVar1 = puVar1 + 1;
+  }
+  puVar1 = *(undefined4 **)((int)this + 8);
+  puVar7 = puVar5 + param_2;
+  if (param_1 != puVar1) {
+    puVar5 = (undefined4 *)((int)puVar7 + (param_2 * -4 - (int)puVar5) + (int)param_1);
+    do {
+      if (puVar7 != (undefined4 *)0x0) {
+        *puVar7 = *puVar5;
+      }
+      puVar5 = puVar5 + 1;
+      puVar7 = puVar7 + 1;
+    } while (puVar5 != puVar1);
+  }
+  operator_delete(*(void **)((int)this + 4));
+  *(undefined4 **)((int)this + 0xc) = puVar4 + iVar2;
+  iVar2 = *(int *)((int)this + 4);
+  if (iVar2 == 0) {
+    *(undefined4 **)((int)this + 4) = puVar4;
+    *(undefined4 **)((int)this + 8) = puVar4 + param_2;
+    return;
+  }
+  *(undefined4 **)((int)this + 4) = puVar4;
+  *(undefined4 **)((int)this + 8) = puVar4 + (*(int *)((int)this + 8) - iVar2 >> 2) + param_2;
+  return;
+}
+
+// @004538e0 size=517 callers=C_ShotManager::FireBulletImpl
+void __thiscall FUN_004538e0(void *this,undefined4 *param_1,uint param_2,undefined4 *param_3)
+{
+  // locals: undefined4 *puVar1; int iVar2; int iVar3; undefined4 *puVar4; undefined4 *puVar5; uint uVar6; undefined4 *puVar7
+  puVar7 = *(undefined4 **)((int)this + 8);
+  if (param_2 <= (uint)(*(int *)((int)this + 0xc) - (int)puVar7 >> 2)) {
+    if ((uint)((int)puVar7 - (int)param_1 >> 2) < param_2) {
+      puVar5 = param_1 + param_2;
+      if (param_1 != puVar7) {
+        puVar4 = puVar5 + -param_2;
+        do {
+          if (puVar5 != (undefined4 *)0x0) {
+            *puVar5 = *puVar4;
+          }
+          puVar4 = puVar4 + 1;
+          puVar5 = puVar5 + 1;
+        } while (puVar4 != puVar7);
+      }
+      puVar7 = *(undefined4 **)((int)this + 8);
+      for (iVar2 = param_2 - ((int)puVar7 - (int)param_1 >> 2); iVar2 != 0; iVar2 = iVar2 + -1) {
+        if (puVar7 != (undefined4 *)0x0) {
+          *puVar7 = *param_3;
+        }
+        puVar7 = puVar7 + 1;
+      }
+      puVar7 = *(undefined4 **)((int)this + 8);
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(uint *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+      return;
+    }
+    if (param_2 != 0) {
+      puVar5 = puVar7;
+      for (puVar4 = puVar7 + -param_2; puVar4 != puVar7; puVar4 = puVar4 + 1) {
+        if (puVar5 != (undefined4 *)0x0) {
+          *puVar5 = *puVar4;
+        }
+        puVar5 = puVar5 + 1;
+      }
+      puVar7 = *(undefined4 **)((int)this + 8);
+      for (puVar5 = puVar7 + -param_2; param_1 != puVar5; puVar5 = puVar5 + -1) {
+        puVar7 = puVar7 + -1;
+        *puVar7 = puVar5[-1];
+      }
+      puVar7 = param_1 + param_2;
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(int *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+    }
+    return;
+  }
+  iVar2 = *(int *)((int)this + 4);
+  if ((iVar2 == 0) || (uVar6 = (int)puVar7 - iVar2 >> 2, uVar6 <= param_2)) {
+    uVar6 = param_2;
+  }
+  if (iVar2 == 0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)puVar7 - iVar2 >> 2;
+  }
+  iVar2 = iVar2 + uVar6;
+  iVar3 = iVar2;
+  if (iVar2 < 0) {
+    iVar3 = 0;
+  }
+  puVar4 = operator_new(iVar3 * 4);
+  puVar5 = puVar4;
+  for (puVar7 = *(undefined4 **)((int)this + 4); uVar6 = param_2, puVar1 = puVar5, puVar7 != param_1
+      ; puVar7 = puVar7 + 1) {
+    if (puVar5 != (undefined4 *)0x0) {
+      *puVar5 = *puVar7;
+    }
+    puVar5 = puVar5 + 1;
+  }
+  for (; uVar6 != 0; uVar6 = uVar6 - 1) {
+    if (puVar1 != (undefined4 *)0x0) {
+      *puVar1 = *param_3;
+    }
+    puVar1 = puVar1 + 1;
+  }
+  puVar1 = *(undefined4 **)((int)this + 8);
+  puVar7 = puVar5 + param_2;
+  if (param_1 != puVar1) {
+    puVar5 = (undefined4 *)((int)puVar7 + (param_2 * -4 - (int)puVar5) + (int)param_1);
+    do {
+      if (puVar7 != (undefined4 *)0x0) {
+        *puVar7 = *puVar5;
+      }
+      puVar5 = puVar5 + 1;
+      puVar7 = puVar7 + 1;
+    } while (puVar5 != puVar1);
+  }
+  operator_delete(*(void **)((int)this + 4));
+  *(undefined4 **)((int)this + 0xc) = puVar4 + iVar2;
+  iVar2 = *(int *)((int)this + 4);
+  if (iVar2 == 0) {
+    *(undefined4 **)((int)this + 4) = puVar4;
+    *(undefined4 **)((int)this + 8) = puVar4 + param_2;
+    return;
+  }
+  *(undefined4 **)((int)this + 4) = puVar4;
+  *(undefined4 **)((int)this + 8) = puVar4 + (*(int *)((int)this + 8) - iVar2 >> 2) + param_2;
+  return;
+}
+
+// @00453af0 size=37 callers=C_ShotManager::AddBloodDrop
+void uninitialized_fill_n4_453af0(undefined4 *param_1,int param_2,undefined4 *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 + -1) {
+    if (param_1 != (undefined4 *)0x0) {
+      *param_1 = *param_3;
+    }
+    param_1 = param_1 + 1;
+  }
+  return;
+}
+
+// @00453b20 size=37 callers=C_ShotManager::AddBloodPool
+void uninitialized_fill_n4_453b20(undefined4 *param_1,int param_2,undefined4 *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 + -1) {
+    if (param_1 != (undefined4 *)0x0) {
+      *param_1 = *param_3;
+    }
+    param_1 = param_1 + 1;
+  }
+  return;
+}
+
+// @00453b50 size=39 callers=C_ShotManager::FireBulletImpl
+void uninitialized_copy4_453b50(undefined4 *param_1,undefined4 *param_2,undefined4 *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != (undefined4 *)0x0) {
+      *param_3 = *param_1;
+    }
+    param_3 = param_3 + 1;
+  }
+  return;
+}
+
+// @00453b80 size=37 callers=C_ShotManager::FireBulletImpl
+void uninitialized_fill_n4_453b80(undefined4 *param_1,int param_2,undefined4 *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 + -1) {
+    if (param_1 != (undefined4 *)0x0) {
+      *param_1 = *param_3;
+    }
+    param_1 = param_1 + 1;
+  }
+  return;
+}
+
+// @00453bb0 size=39 callers=C_ShotManager::FireProjectile
+void uninitialized_copy4_453bb0(undefined4 *param_1,undefined4 *param_2,undefined4 *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != (undefined4 *)0x0) {
+      *param_3 = *param_1;
+    }
+    param_3 = param_3 + 1;
+  }
+  return;
+}
+
+// @00453be0 size=37 callers=C_ShotManager::FireProjectile
+void uninitialized_fill_n4_453be0(undefined4 *param_1,int param_2,undefined4 *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 + -1) {
+    if (param_1 != (undefined4 *)0x0) {
+      *param_1 = *param_3;
+    }
+    param_1 = param_1 + 1;
+  }
+  return;
+}
+
+// @00453c10 size=39 callers=C_ShotManager::EjectShell
+void uninitialized_copy4_453c10(undefined4 *param_1,undefined4 *param_2,undefined4 *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != (undefined4 *)0x0) {
+      *param_3 = *param_1;
+    }
+    param_3 = param_3 + 1;
+  }
+  return;
+}
+
+// @00453c40 size=37 callers=C_ShotManager::EjectShell
+void uninitialized_fill_n4_453c40(undefined4 *param_1,int param_2,undefined4 *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 + -1) {
+    if (param_1 != (undefined4 *)0x0) {
+      *param_1 = *param_3;
+    }
+    param_1 = param_1 + 1;
+  }
+  return;
+}
+
+// @00453c70 size=27 callers=C_ShotManager::StopMission
+void __fastcall copy4_453c70(undefined4 *param_1,undefined4 *param_2,undefined4 *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    *param_3 = *param_1;
+    param_3 = param_3 + 1;
+  }
+  return;
+}
+
+// @00453c90 size=27 callers=C_ShotManager::StopMission
+void __fastcall copy4_453c90(undefined4 *param_1,undefined4 *param_2,undefined4 *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    *param_3 = *param_1;
+    param_3 = param_3 + 1;
+  }
+  return;
+}
+
+// @00453cb0 size=27 callers=C_ShotManager::StopMission
+void __fastcall copy4_453cb0(undefined4 *param_1,undefined4 *param_2,undefined4 *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    *param_3 = *param_1;
+    param_3 = param_3 + 1;
+  }
+  return;
+}
+
+// @00453cd0 size=27 callers=C_ShotManager::StopMission
+void __fastcall copy4_453cd0(undefined4 *param_1,undefined4 *param_2,undefined4 *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    *param_3 = *param_1;
+    param_3 = param_3 + 1;
+  }
+  return;
+}
+
+// @00453cf0 size=9 callers=C_ShotManager::StartMission
+void __fastcall construct_copy4_453cf0(undefined4 *param_1,undefined4 *param_2)
+{
+  if (param_1 != (undefined4 *)0x0) {
+    *param_1 = *param_2;
+  }
+  return;
+}
+
+// @00453d00 size=9 callers=C_ShotManager::StartMission
+void __fastcall construct_copy4_453d00(undefined4 *param_1,undefined4 *param_2)
+{
+  if (param_1 != (undefined4 *)0x0) {
+    *param_1 = *param_2;
+  }
+  return;
+}
+
+// @00453d10 size=9 callers=C_ShotManager::StartMission
+void __fastcall construct_copy4_453d10(undefined4 *param_1,undefined4 *param_2)
+{
+  if (param_1 != (undefined4 *)0x0) {
+    *param_1 = *param_2;
+  }
+  return;
+}
+

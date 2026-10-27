@@ -1,0 +1,1198 @@
+// 0x0078e3c0
+void __thiscall C_HumanEquipment::AttachModel(C_HumanEquipment *this,int place)
+{
+  switch(place) {
+  case 0:
+    pIVar13 = this->m_headModel;
+    if (pIVar13 == nullptr) {
+      return;
+    }
+    (*pIVar13->vtable->LinkTo)(pIVar13,this->m_jointF,2);
+    SStack_5f0.x = 0.0;
+    SStack_5f0.y = 0.0;
+    SStack_5f0.z = 1.0;
+    (*this->m_headModel->vtable->SetWorldDir)(this->m_headModel,&SStack_5f0,0.0);
+    (*this->m_headModel->vtable->SetOn)(this->m_headModel,true);
+    pIVar13 = this->m_headModel;
+    uVar19 = pIVar13->m_frameFlags;
+    if (-1 < (char)uVar19) {
+      (pIVar13->m_localMatrix).m[3][0] = g_headModelOffset.x;
+      (pIVar13->m_localMatrix).m[3][1] = g_headModelOffset.y;
+      (pIVar13->m_localMatrix).m[3][2] = g_headModelOffset.z;
+      pIVar13->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+    }
+    (*this->m_headModel->vtable->Update)(this->m_headModel);
+    if ((this->m_headUid < 0) ||
+       (pCVar10 = C_Human::FindItemByUid(this->m_owner,this->m_headUid), pCVar10 == nullptr))
+    {
+      pvVar22 = *(void **)((this->m_owner->m_body).movement + 0xdc0);
+    }
+    else {
+      if (pCVar10->m_def->m_weight <= 0.1) goto LAB_0078e4d6;
+      pvVar22 = *(void **)((this->m_owner->m_body).movement + 0xdc0);
+    }
+    FUN_007b8a00(pvVar22,'\x01');
+LAB_0078e4d6:
+    uVar19 = (*this->m_headModel->vtable->GetVisualType)(this->m_headModel);
+    if (uVar19 == 0x5f4a424f) {
+      pIVar7 = this->m_headModel->vtable;
+      C_HumanMovement__UpdateVisibilityFactor((this->m_owner->m_body).movement + 0xda4);
+      (*pIVar7[1].FindChildFrame)(this->m_headModel,(char *)(float)extraout_ST0,unaff_EDI);
+    }
+    UpdateModelNames(this);
+    return;
+  case 1:
+    if (this->m_backpackModel != nullptr) {
+      iVar14 = this->m_backpackTypeId;
+      if (iVar14 != -1) {
+        if ((iVar14 < 0) || (499 < iVar14)) {
+          def = nullptr;
+        }
+        else {
+          def = (C_ItemDef *)(&DAT_0098b030)[iVar14];
+        }
+        ppIVar11 = C_ItemDef::GetDivingGear(def);
+        if (ppIVar11 != (I3D_frame **)0x0) {
+          ppIVar25 = this->m_divingGear;
+          local_774 = 0;
+          local_778 = ppIVar25;
+          do {
+            if ((*local_778 == nullptr) && (ppIVar11[local_774] != nullptr)) {
+              CloneFrameTree(local_778,ppIVar11[local_774],nullptr);
+            }
+            local_774++;
+            local_778++;
+          } while (local_774 < 4);
+          (*(*ppIVar25)->vtable->LinkTo)(*ppIVar25,this->m_jointF,2);
+          auStack_590._0_4_ = 0.0;
+          auStack_590._4_4_ = 0.0;
+          auStack_590._8_4_ = 1.0;
+          (*(*ppIVar25)->vtable->SetWorldDir)(*ppIVar25,(S_vector *)auStack_590,0.0);
+          (*(*ppIVar25)->vtable->SetOn)(*ppIVar25,true);
+          pIVar13 = *ppIVar25;
+          uVar19 = pIVar13->m_frameFlags;
+          if (-1 < (char)uVar19) {
+            (pIVar13->m_localMatrix).m[3][0] = g_headModelOffset.x;
+            (pIVar13->m_localMatrix).m[3][1] = g_headModelOffset.y;
+            (pIVar13->m_localMatrix).m[3][2] = g_headModelOffset.z;
+            pIVar13->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+          }
+          (*(*ppIVar25)->vtable->Update)(*ppIVar25);
+          (*this->m_divingGear[1]->vtable->LinkTo)(this->m_divingGear[1],this->m_jointU,2);
+          SStack_680.x = 0.0;
+          SStack_680.y = 0.0;
+          SStack_680.z = 1.0;
+          (*this->m_divingGear[1]->vtable->SetWorldDir)(this->m_divingGear[1],&SStack_680,0.0);
+          pIVar13 = this->m_divingGear[1];
+          uVar19 = pIVar13->m_frameFlags;
+          if (-1 < (char)uVar19) {
+            (pIVar13->m_localMatrix).m[3][0] = 0.0;
+            (pIVar13->m_localMatrix).m[3][1] = 0.0;
+            (pIVar13->m_localMatrix).m[3][2] = 0.0;
+            pIVar13->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+          }
+          (*this->m_divingGear[1]->vtable->SetOn)(this->m_divingGear[1],true);
+          (*this->m_divingGear[1]->vtable->Update)(this->m_divingGear[1]);
+          (*this->m_divingGear[2]->vtable->LinkTo)(this->m_divingGear[2],this->m_jointQ,2);
+          SStack_600.x = 0.0;
+          SStack_600.y = 0.0;
+          SStack_600.z = 1.0;
+          (*this->m_divingGear[2]->vtable->SetWorldDir)(this->m_divingGear[2],&SStack_600,0.0);
+          pIVar13 = this->m_divingGear[2];
+          uVar19 = pIVar13->m_frameFlags;
+          if (-1 < (char)uVar19) {
+            (pIVar13->m_localMatrix).m[3][0] = 0.0;
+            (pIVar13->m_localMatrix).m[3][1] = 0.0;
+            (pIVar13->m_localMatrix).m[3][2] = 0.0;
+            pIVar13->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+          }
+          (*this->m_divingGear[2]->vtable->SetOn)(this->m_divingGear[2],true);
+          (*this->m_divingGear[2]->vtable->Update)(this->m_divingGear[2]);
+          this->m_backpackModel = this->m_divingGear[3];
+          local_778 = (I3D_frame **)0x4;
+          do {
+            uVar19 = (*(*ppIVar25)->vtable->GetVisualType)(*ppIVar25);
+            if (uVar19 == 0x5f4a424f) {
+              pIVar7 = (*ppIVar25)->vtable;
+              C_HumanMovement__UpdateVisibilityFactor((this->m_owner->m_body).movement + 0xda4);
+              (*pIVar7[1].FindChildFrame)(*ppIVar25,(char *)(float)extraout_ST0_00,unaff_EDI);
+            }
+            ppIVar25++;
+            local_778 = (I3D_frame **)((int)local_778 - 1);
+          } while (local_778 != (I3D_frame **)0x0);
+        }
+      }
+      (*this->m_backpackModel->vtable->LinkTo)(this->m_backpackModel,this->m_backpackJoint,2);
+      SStack_660.x = 0.0;
+      SStack_660.y = 0.0;
+      SStack_660.z = 1.0;
+      (*this->m_backpackModel->vtable->SetWorldDir)(this->m_backpackModel,&SStack_660,0.0);
+      if (*(int *)((this->m_owner->m_body).movement + 0xa44) < 1) {
+        (*this->m_backpackModel->vtable->SetOn)(this->m_backpackModel,true);
+      }
+      pIVar13 = this->m_backpackModel;
+      uVar19 = pIVar13->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar13->m_localMatrix).m[3][0] = g_backpackModelOffset.x;
+        (pIVar13->m_localMatrix).m[3][1] = g_backpackModelOffset.y;
+        (pIVar13->m_localMatrix).m[3][2] = g_backpackModelOffset.z;
+        pIVar13->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+      }
+      (*this->m_backpackModel->vtable->Update)(this->m_backpackModel);
+      uVar19 = (*this->m_backpackModel->vtable->GetVisualType)(this->m_backpackModel);
+      if (uVar19 == 0x5f4a424f) {
+        pIVar7 = this->m_backpackModel->vtable;
+        C_HumanMovement__UpdateVisibilityFactor((this->m_owner->m_body).movement + 0xda4);
+        (*pIVar7[1].FindChildFrame)(this->m_backpackModel,(char *)(float)extraout_ST0_01,unaff_EDI);
+      }
+      UpdateModelNames(this);
+      return;
+    }
+    break;
+  case 2:
+    pIVar13 = this->m_longGunModel;
+    if (pIVar13 == nullptr) {
+      return;
+    }
+    pIVar13 = (*pIVar13->vtable->FindChildFrame)(pIVar13,"backlink",0x20);
+    pIVar12 = (*this->m_longGunModel->vtable->FindChildFrame)
+                        (this->m_longGunModel,&DAT_0084f79c,0xffff);
+    if (pIVar13 == nullptr) {
+      return;
+    }
+    this->m_unknownBC = 0;
+    this->m_unknownC0 = 0;
+    (*this->m_longGunModel->vtable->LinkTo)(this->m_longGunModel,this->m_jointD,2);
+    SStack_5c0.x = 0.0;
+    SStack_5c0.y = 1.0;
+    SStack_5c0.z = 0.0;
+    (*this->m_longGunModel->vtable->SetWorldDir)(this->m_longGunModel,&SStack_5c0,0.0);
+    if (*(int *)((this->m_owner->m_body).movement + 0xa44) < 1) {
+      (*this->m_longGunModel->vtable->SetOn)(this->m_longGunModel,true);
+    }
+    pIVar5 = this->m_longGunModel;
+    uVar19 = pIVar5->m_frameFlags;
+    if (-1 < (char)uVar19) {
+      (pIVar5->m_localMatrix).m[3][0] = g_longGunModelOffset.x;
+      (pIVar5->m_localMatrix).m[3][1] = g_longGunModelOffset.y;
+      (pIVar5->m_localMatrix).m[3][2] = g_longGunModelOffset.z;
+      pIVar5->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+    }
+    (*this->m_longGunModel->vtable->Update)(this->m_longGunModel);
+    pIVar5 = pIVar13->m_parent;
+    I3D_frame__GetLocalMatrixInline_4c8140(pIVar5);
+    SStack_640.z = -(pIVar13->m_localMatrix).m[3][2];
+    SStack_640.y = -(pIVar13->m_localMatrix).m[3][1];
+    SStack_640.x = -(pIVar13->m_localMatrix).m[3][0];
+    pSVar16 = S_vector::OperatorMul(&SStack_640,&SStack_540,&pIVar5->m_localMatrix);
+    local_750.v.y = pSVar16->y;
+    pIVar13 = this->m_longGunModel;
+    local_750.v.z = pSVar16->z + 0.09;
+    uVar19 = pIVar13->m_frameFlags;
+    if (-1 < (char)uVar19) {
+      (pIVar13->m_localMatrix).m[3][0] = pSVar16->x + 0.0275;
+      (pIVar13->m_localMatrix).m[3][1] = local_750.v.y;
+      (pIVar13->m_localMatrix).m[3][2] = local_750.v.z;
+      pIVar13->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+    }
+    (*this->m_longGunModel->vtable->Update)(this->m_longGunModel);
+    if (pIVar12 == nullptr) {
+LAB_0078ed99:
+      this->m_unknownC4 = 0.4;
+      this->m_unknownC8 = 0.068;
+      pIVar13 = this->m_longGunModel;
+      fVar24 = (pIVar13->m_localMatrix).m[3][0];
+      fVar3 = (pIVar13->m_localMatrix).m[3][1];
+      fVar4 = (pIVar13->m_localMatrix).m[3][2];
+      auStack_764._0_4_ = (pIVar13->m_localMatrix).m[3][3];
+      I3D_frame__GetLocalMatrixInline_4c8140(pIVar13);
+      pSVar17 = &pIVar13->m_localMatrix;
+      pfVar18 = (float *)auStack_710;
+      for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+        *pfVar18 = pSVar17->m[0][0];
+        pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+        pfVar18++;
+      }
+      SStack_620.x = SStack_700.y * (float)auStack_710._8_4_ -
+                     SStack_700.z * (float)auStack_710._4_4_;
+      SStack_620.y = SStack_700.z * (float)auStack_710._0_4_ -
+                     SStack_700.x * (float)auStack_710._8_4_;
+      SStack_620.z = SStack_700.x * (float)auStack_710._4_4_ -
+                     SStack_700.y * (float)auStack_710._0_4_;
+      S_quat::Make((S_quat *)(auStack_764 + 4),&SStack_620,-0.25);
+      pSVar17 = S_quat::RotationMatrix((S_quat *)(auStack_764 + 4),&SStack_210);
+      pfVar18 = (float *)S_matrix::OperatorMul((S_matrix *)auStack_710,&SStack_390,pSVar17);
+      local_77c = this->m_longGunModel;
+      pSVar17 = &local_77c->m_localMatrix;
+      for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+        pSVar17->m[0][0] = *pfVar18;
+        pfVar18++;
+        pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+      }
+      pSVar16 = S_matrix::GetScale(&local_77c->m_localMatrix,(S_vector *)(auStack_754 + 4));
+      (local_77c->m_scale).x = pSVar16->x;
+      (local_77c->m_scale).y = pSVar16->y;
+      (local_77c->m_scale).z = pSVar16->z;
+      local_77c->m_scaleW = pSVar16[1].x;
+      local_77c->m_frameFlags = local_77c->m_frameFlags & 0xffffffd7 | 0x40000014;
+      pIVar13 = this->m_longGunModel;
+      uVar19 = pIVar13->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar13->m_localMatrix).m[3][0] = fVar24;
+        (pIVar13->m_localMatrix).m[3][1] = fVar3;
+        (pIVar13->m_localMatrix).m[3][2] = fVar4;
+        pIVar13->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+      }
+      (*this->m_longGunModel->vtable->Update)(this->m_longGunModel);
+      pIVar13 = this->m_longGunModel;
+      fVar24 = (pIVar13->m_localMatrix).m[3][0];
+      fVar3 = (pIVar13->m_localMatrix).m[3][1];
+      fVar4 = (pIVar13->m_localMatrix).m[3][2];
+      I3D_frame__GetLocalMatrixInline_4c8140(pIVar13);
+      pSVar17 = &pIVar13->m_localMatrix;
+      pfVar18 = (float *)auStack_714;
+      for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+        *pfVar18 = pSVar17->m[0][0];
+        pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+        pfVar18++;
+      }
+      S_quat::Make(&SStack_6b4,(S_vector *)(auStack_710 + 0xc),0.1);
+      auStack_764._4_4_ = SStack_6b4.v.y;
+      auStack_75c._0_4_ = SStack_6b4.v.z;
+      auStack_764._0_4_ = SStack_6b4.v.x;
+      auStack_75c._4_4_ = SStack_6b4.s;
+      pSVar17 = S_quat::RotationMatrix((S_quat *)auStack_764,(S_matrix *)(auStack_150 + 0x3c));
+      pfVar18 = (float *)S_matrix::OperatorMul
+                                   ((S_matrix *)auStack_714,(S_matrix *)(auStack_350 + 0x3c),pSVar17
+                                   );
+      pIVar13 = (I3D_frame *)(local_77c->m_bound).bbox.max.x;
+      pSVar17 = &pIVar13->m_localMatrix;
+      for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+        pSVar17->m[0][0] = *pfVar18;
+        pfVar18++;
+        pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+      }
+      pSVar16 = S_matrix::GetScale(&pIVar13->m_localMatrix,(S_vector *)auStack_754);
+      (pIVar13->m_scale).x = pSVar16->x;
+      (pIVar13->m_scale).y = pSVar16->y;
+      (pIVar13->m_scale).z = pSVar16->z;
+      pIVar13->m_scaleW = pSVar16[1].x;
+      pIVar13->m_frameFlags = pIVar13->m_frameFlags & 0xffffffd7 | 0x40000014;
+      fVar2 = (local_77c->m_bound).bbox.max.x;
+      if (-1 < (char)*(uint32_t *)((int)fVar2 + 0xe0)) {
+        *(float *)((int)fVar2 + 0xb0) = fVar24;
+        *(float *)((int)fVar2 + 0xb4) = fVar3;
+        *(float *)((int)fVar2 + 0xb8) = fVar4;
+        *(uint32_t *)((int)fVar2 + 0xe0) = *(uint32_t *)((int)fVar2 + 0xe0) & 0xfffffedf | 0x40000000;
+      }
+      piVar15 = (int *)(local_77c->m_bound).bbox.max.x;
+      (**(code **)(*piVar15 + 0x24))(piVar15);
+      pIStack_780 = pIVar13;
+    }
+    else {
+      iVar14 = this->m_longGunTypeId;
+      if ((iVar14 < 0) || (499 < iVar14)) {
+        piVar15 = nullptr;
+      }
+      else {
+        piVar15 = (int *)(&DAT_0098b030)[iVar14];
+      }
+      iVar14 = (**(code **)(*piVar15 + 0x10))();
+      if (iVar14 == 4) goto LAB_0078ed99;
+      this->m_unknownC4 = 0.29;
+      this->m_unknownC8 = 0.038;
+      pIVar13 = this->m_longGunModel;
+      fVar24 = (pIVar13->m_localMatrix).m[3][0];
+      fVar3 = (pIVar13->m_localMatrix).m[3][1];
+      fVar4 = (pIVar13->m_localMatrix).m[3][2];
+      I3D_frame__GetLocalMatrixInline_4c8140(pIVar13);
+      pSVar17 = &pIVar13->m_localMatrix;
+      pfVar18 = (float *)auStack_710;
+      for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+        *pfVar18 = pSVar17->m[0][0];
+        pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+        pfVar18++;
+      }
+      SStack_5e0.x = SStack_700.y * (float)auStack_710._8_4_ -
+                     SStack_700.z * (float)auStack_710._4_4_;
+      SStack_5e0.y = SStack_700.z * (float)auStack_710._0_4_ -
+                     SStack_700.x * (float)auStack_710._8_4_;
+      SStack_5e0.z = SStack_700.x * (float)auStack_710._4_4_ -
+                     SStack_700.y * (float)auStack_710._0_4_;
+      S_quat::Make((S_quat *)(auStack_764 + 4),&SStack_5e0,-1.9634955);
+      pSVar17 = S_quat::RotationMatrix((S_quat *)(auStack_764 + 4),&SStack_190);
+      pfVar18 = (float *)S_matrix::OperatorMul
+                                   ((S_matrix *)auStack_710,(S_matrix *)auStack_490,pSVar17);
+      pIVar13 = this->m_longGunModel;
+      pSVar17 = &pIVar13->m_localMatrix;
+      for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+        pSVar17->m[0][0] = *pfVar18;
+        pfVar18++;
+        pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+      }
+      pSVar16 = S_matrix::GetScale(&pIVar13->m_localMatrix,(S_vector *)(auStack_754 + 4));
+      (pIVar13->m_scale).x = pSVar16->x;
+      (pIVar13->m_scale).y = pSVar16->y;
+      (pIVar13->m_scale).z = pSVar16->z;
+      pIVar13->m_scaleW = pSVar16[1].x;
+      pIVar13->m_frameFlags = pIVar13->m_frameFlags & 0xffffffd7 | 0x40000014;
+      pIVar12 = this->m_longGunModel;
+      uVar19 = pIVar12->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar12->m_localMatrix).m[3][0] = fVar24 - 0.01;
+        (pIVar12->m_localMatrix).m[3][1] = fVar3;
+        (pIVar12->m_localMatrix).m[3][2] = fVar4 - 0.08;
+        pIVar12->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+      }
+      (*this->m_longGunModel->vtable->Update)(this->m_longGunModel);
+      pIVar12 = this->m_longGunModel;
+      fVar24 = (pIVar12->m_localMatrix).m[3][0];
+      fVar3 = (pIVar12->m_localMatrix).m[3][1];
+      fVar4 = (pIVar12->m_localMatrix).m[3][2];
+      I3D_frame__GetLocalMatrixInline_4c8140(pIVar12);
+      pSVar17 = &pIVar12->m_localMatrix;
+      pfVar18 = (float *)auStack_714;
+      for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+        *pfVar18 = pSVar17->m[0][0];
+        pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+        pfVar18++;
+      }
+      S_quat::Make((S_quat *)(auStack_6d0 + 0xc),(S_vector *)auStack_714,-0.35);
+      auStack_764._4_4_ = fStack_6c0;
+      auStack_75c._0_4_ = fStack_6bc;
+      auStack_764._0_4_ = auStack_6d0._12_4_;
+      auStack_75c._4_4_ = fStack_6b8;
+      pSVar17 = S_quat::RotationMatrix((S_quat *)auStack_764,(S_matrix *)(auStack_d0 + 0x3c));
+      pfVar18 = (float *)S_matrix::OperatorMul((S_matrix *)auStack_714,&SStack_414,pSVar17);
+      pIStack_780 = (I3D_frame *)(pIVar13->m_bound).bbox.max.x;
+      pSVar17 = &pIStack_780->m_localMatrix;
+      for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+        pSVar17->m[0][0] = *pfVar18;
+        pfVar18++;
+        pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+      }
+      pSVar16 = S_matrix::GetScale(&pIStack_780->m_localMatrix,(S_vector *)auStack_754);
+      (pIStack_780->m_scale).x = pSVar16->x;
+      (pIStack_780->m_scale).y = pSVar16->y;
+      (pIStack_780->m_scale).z = pSVar16->z;
+      pIStack_780->m_scaleW = pSVar16[1].x;
+      pIStack_780->m_frameFlags = pIStack_780->m_frameFlags & 0xffffffd7 | 0x40000014;
+      fVar2 = (pIVar13->m_bound).bbox.max.x;
+      if (-1 < (char)*(uint32_t *)((int)fVar2 + 0xe0)) {
+        *(float *)((int)fVar2 + 0xb0) = fVar24;
+        *(float *)((int)fVar2 + 0xb4) = fVar3;
+        *(float *)((int)fVar2 + 0xb8) = fVar4;
+        *(uint32_t *)((int)fVar2 + 0xe0) = *(uint32_t *)((int)fVar2 + 0xe0) & 0xfffffedf | 0x40000000;
+      }
+      piVar15 = (int *)(pIVar13->m_bound).bbox.max.x;
+      (**(code **)(*piVar15 + 0x24))(piVar15);
+      local_77c = pIVar13;
+    }
+    pvVar22 = (void *)(pIVar13->m_bound).bbox.max.x;
+    I3D_frame__GetLocalMatrixInline_4c8140(pvVar22);
+    bVar9 = local_77c == nullptr;
+    puVar23 = (uint32_t *)((int)pvVar22 + 0x80);
+    puVar26 = (uint32_t *)(auStack_590 + 8);
+    for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+      *puVar26 = *puVar23;
+      puVar23++;
+      puVar26++;
+    }
+    local_77c = (I3D_frame *)0x3e19999a;
+    if (bVar9) {
+      local_77c = (I3D_frame *)0x3e800000;
+    }
+    auStack_5b0._8_4_ = 1.0;
+    S_quat::Make((S_quat *)auStack_728,(S_vector *)(auStack_5b0 + 8),(float)local_77c);
+    pSVar17 = S_quat::RotationMatrix((S_quat *)auStack_728,(S_matrix *)(auStack_520 + 8));
+    pfVar18 = (float *)S_matrix::OperatorMul
+                                 ((S_matrix *)(auStack_590 + 8),(S_matrix *)(auStack_2d0 + 0x38),
+                                  pSVar17);
+    pIVar13 = (I3D_frame *)(pIStack_780->m_bound).bbox.max.x;
+    pSVar17 = &pIVar13->m_localMatrix;
+    for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+      pSVar17->m[0][0] = *pfVar18;
+      pfVar18++;
+      pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+    }
+    pSVar16 = S_matrix::GetScale(&pIVar13->m_localMatrix,(S_vector *)(auStack_75c + 4));
+    (pIVar13->m_scale).x = pSVar16->x;
+    (pIVar13->m_scale).y = pSVar16->y;
+    (pIVar13->m_scale).z = pSVar16->z;
+    pIVar13->m_scaleW = pSVar16[1].x;
+    pIVar13->m_frameFlags = pIVar13->m_frameFlags & 0xffffffd7 | 0x40000014;
+    piVar15 = (int *)(pIStack_780->m_bound).bbox.max.x;
+    (**(code **)(*piVar15 + 0x24))(piVar15);
+    if ((pIStack_780->m_rot).s == 0.0) {
+      (pIStack_780->m_localMatrix).m[3][3] = 0.0;
+      (pIStack_780->m_rot).v.x = 0.0;
+      pIVar13 = pIStack_780;
+    }
+    else {
+      fVar24 = (pIStack_780->m_rot).v.y;
+      fStack_698 = 0.0;
+      (pIStack_780->m_localMatrix).m[3][3] = fVar24;
+      auStack_6a0._4_4_ = 1.0;
+      S_quat::Make((S_quat *)auStack_73c,(S_vector *)(auStack_6a0 + 4),-fVar24);
+      pvVar22 = (void *)(pIStack_780->m_bound).bbox.max.x;
+      I3D_frame__GetLocalMatrixInline_4c8140(pvVar22);
+      pSVar17 = S_quat::RotationMatrix((S_quat *)auStack_73c,&SStack_4dc);
+      pfVar18 = (float *)S_matrix::OperatorMul
+                                   ((S_matrix *)((int)pvVar22 + 0x80),
+                                    (S_matrix *)(auStack_490 + 0x34),pSVar17);
+      fVar24 = (pIStack_780->m_bound).bbox.max.x;
+      pfVar27 = (float *)((int)fVar24 + 0x80);
+      for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+        *pfVar27 = *pfVar18;
+        pfVar18++;
+        pfVar27++;
+      }
+      pSVar16 = S_matrix::GetScale((S_matrix *)((int)fVar24 + 0x80),(S_vector *)auStack_75c);
+      *(float *)((int)fVar24 + 0xd0) = pSVar16->x;
+      *(float *)((int)fVar24 + 0xd4) = pSVar16->y;
+      *(float *)((int)fVar24 + 0xd8) = pSVar16->z;
+      *(float *)((int)fVar24 + 0xdc) = pSVar16[1].x;
+      *(uint32_t *)((int)fVar24 + 0xe0) = *(uint32_t *)((int)fVar24 + 0xe0) & 0xffffffd7 | 0x40000014;
+      fVar24 = (pIVar13->m_rot).v.z;
+      (pIVar13->m_rot).v.x = fVar24;
+      fVar3 = (pIVar13->m_bound).bbox.max.x;
+      auStack_75c._0_4_ = *(float *)((int)fVar3 + 0xb0);
+      auStack_75c._4_4_ = *(float *)((int)fVar3 + 0xb4);
+      if (-1 < (char)*(uint32_t *)((int)fVar3 + 0xe0)) {
+        *(float *)((int)fVar3 + 0xb8) = -fVar24 + *(float *)((int)fVar3 + 0xb8);
+        *(uint32_t *)((int)fVar3 + 0xb0) = auStack_75c._0_4_;
+        *(uint32_t *)((int)fVar3 + 0xb4) = auStack_75c._4_4_;
+        *(uint32_t *)((int)fVar3 + 0xe0) = *(uint32_t *)((int)fVar3 + 0xe0) & 0xfffffedf | 0x40000000;
+      }
+    }
+    piVar15 = (int *)(pIVar13->m_bound).bbox.max.x;
+    iVar14 = (**(code **)(*piVar15 + 4))(piVar15);
+    if (iVar14 == 0x5f4a424f) {
+      iVar14 = *(int *)(pIVar13->m_bound).bbox.max.x;
+      C_HumanMovement__UpdateVisibilityFactor(pIVar13->vtable[1].EnumFrames + 0xda4);
+      (**(code **)(iVar14 + 0xa4))((pIVar13->m_bound).bbox.max.x,(float)extraout_ST0_02);
+      return;
+    }
+    break;
+  case 3:
+    pIVar13 = this->m_handsModel;
+    if ((pIVar13 == nullptr) || (this->m_handDummy1 == nullptr))
+    goto LAB_0078f62b;
+    this->m_handsTime = -10000;
+    if ((this->m_flags & 1) != 0) {
+      AttachModel(this,10);
+      return;
+    }
+    (*pIVar13->vtable->SetOn)(pIVar13,true);
+    (*this->m_handsModel->vtable->LinkTo)(this->m_handsModel,this->m_handDummy1,6);
+    pIVar13 = this->m_handsModel;
+    uVar19 = pIVar13->m_frameFlags;
+    if (-1 < (char)uVar19) {
+      (pIVar13->m_localMatrix).m[3][0] = 0.0;
+      (pIVar13->m_localMatrix).m[3][1] = 0.0;
+      (pIVar13->m_localMatrix).m[3][2] = 0.0;
+      pIVar13->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+    }
+    SStack_670.x = 1.0;
+    SStack_670.y = 0.0;
+    SStack_670.z = 0.0;
+    (*this->m_handsModel->vtable->SetWorldDir)(this->m_handsModel,&SStack_670,0.0);
+    (*this->m_handsModel->vtable->SetOn)(this->m_handsModel,true);
+    (*this->m_handsModel->vtable->Update)(this->m_handsModel);
+    iVar14 = this->m_handsTypeId;
+    if (((iVar14 < 0) || (499 < iVar14)) || (iVar20 = (&DAT_0098b030)[iVar14], iVar20 == 0)) {
+      set_field_78_781760((this->m_owner->m_body).movement + 0x610,2);
+      pIVar13 = this->m_handsModel;
+      pvVar22 = *(void **)((this->m_owner->m_body).movement + 0xdc0);
+    }
+    else {
+      if ((iVar14 < 0) || (499 < iVar14)) {
+        iVar20 = 0;
+      }
+      if ((*(int *)(iVar20 + 0x48) == 0) || (*(int *)(*(int *)(iVar20 + 0x48) + 8) != 0)) {
+        if ((iVar14 < 0) || (499 < iVar14)) {
+          piVar15 = nullptr;
+        }
+        else {
+          piVar15 = (int *)(&DAT_0098b030)[iVar14];
+        }
+        iVar14 = (**(code **)(*piVar15 + 0x10))();
+        if (iVar14 == 9) {
+          uVar28 = 1;
+          pCVar21 = (this->m_owner->m_body).movement;
+        }
+        else {
+          uVar28 = 2;
+          pCVar21 = (this->m_owner->m_body).movement;
+        }
+      }
+      else {
+        uVar28 = 1;
+        pCVar21 = (this->m_owner->m_body).movement;
+      }
+      set_field_78_781760(pCVar21 + 0x610,uVar28);
+      iVar14 = this->m_handsTypeId;
+      if ((iVar14 < 0) || (499 < iVar14)) {
+        piVar15 = nullptr;
+      }
+      else {
+        piVar15 = (int *)(&DAT_0098b030)[iVar14];
+      }
+      pvVar22 = *(void **)((this->m_owner->m_body).movement + 0xdc0);
+      (**(code **)(*piVar15 + 0x10))();
+      pIVar13 = this->m_handsModel;
+    }
+    FUN_007b9510(pvVar22,(int *)pIVar13);
+    set_field_64_781750((this->m_owner->m_body).movement + 0x610,2);
+    if (this->m_handsTypeId != -1) {
+      bVar9 = C_Human::IsLocalPlayer(this->m_owner);
+      if (bVar9) {
+        this_00 = GetGame();
+        uVar28 = C_game::IsHudShown(this_00);
+        if ((char)uVar28 != '\0') goto LAB_0078f5f5;
+      }
+      S_SoundRequest__Init((uint32_t *)auStack_710);
+      auStack_764._4_4_ = 0.0;
+      auStack_710._0_4_ = 0.0;
+      auStack_710._12_4_ = auStack_754;
+      iVar14 = this->m_handsTypeId;
+      auStack_75c._0_4_ = 0.0;
+      auStack_75c._4_4_ = 0.0;
+      auStack_710._4_4_ = 0.0;
+      auStack_710._8_4_ = 0.0;
+      if ((iVar14 < 0) || (499 < iVar14)) {
+        iVar14 = 0;
+      }
+      else {
+        iVar14 = (&DAT_0098b030)[iVar14];
+      }
+      fStack_6f0 = *(float *)(iVar14 + 0x40);
+      SStack_700.z = (float)this->m_owner;
+      SStack_700.y = (float)C_Human::GetHandsItemFrame((C_Human *)SStack_700.z);
+      SStack_700.x = 0.0;
+      piVar15 = (int *)GetSoundModule();
+      (**(code **)(*piVar15 + 0x54))(auStack_710);
+    }
+LAB_0078f5f5:
+    uVar19 = (*this->m_handsModel->vtable->GetVisualType)(this->m_handsModel);
+    if (uVar19 == 0x5f4a424f) {
+      pIVar7 = this->m_handsModel->vtable;
+      C_HumanMovement__UpdateVisibilityFactor((this->m_owner->m_body).movement + 0xda4);
+      (*pIVar7[1].FindChildFrame)(this->m_handsModel,(char *)(float)extraout_ST0_03,unaff_EDI);
+    }
+LAB_0078f62b:
+    UpdateModelNames(this);
+    return;
+  case 4:
+    if (this->m_specialModel != nullptr) {
+      this->m_specialPlace = 4;
+      psVar1 = &this->m_specialModel->m_refCount;
+      *psVar1 = *psVar1 + 1;
+      pIVar13 = this->m_specialModel;
+      if ((pIVar13->m_frameFlags & 0x100) == 0) {
+        (*pIVar13->vtable->UpdateBound)(pIVar13);
+      }
+      fVar24 = (pIVar13->m_bound).bbox.min.x;
+      fVar3 = (pIVar13->m_bound).bbox.max.x;
+      if (fVar24 < fVar3 != (fVar24 == fVar3)) {
+        pIVar12 = this->m_specialModel;
+        if ((pIVar12->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar12);
+        }
+        S_quat::Make((S_quat *)(auStack_728 + 8),&pIVar12->m_worldMatrix);
+        (this->m_specialRot).v.x = (float)auStack_728._8_4_;
+        (this->m_specialRot).v.y = fStack_71c;
+        (this->m_specialRot).v.z = fStack_718;
+        (this->m_specialRot).s = (float)auStack_714;
+        pIVar12 = this->m_specialModel;
+        if ((pIVar12->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar12);
+        }
+        (this->m_specialPos).x = (pIVar12->m_worldMatrix).m[3][0];
+        (this->m_specialPos).y = (pIVar12->m_worldMatrix).m[3][1];
+        (this->m_specialPos).z = (pIVar12->m_worldMatrix).m[3][2];
+        *(float *)this->_pad_00ac = (pIVar12->m_worldMatrix).m[3][3];
+        auStack_73c._12_4_ = ((pIVar13->m_bound).bbox.max.x - (pIVar13->m_bound).bbox.min.x) * 0.5;
+        auStack_728._8_4_ = (float)auStack_73c._12_4_ + (pIVar13->m_bound).bbox.min.x;
+        fStack_71c = ((pIVar13->m_bound).bbox.max.y - (pIVar13->m_bound).bbox.min.y) * 0.5 +
+                     (pIVar13->m_bound).bbox.min.y;
+        fStack_718 = ((pIVar13->m_bound).bbox.max.z - (pIVar13->m_bound).bbox.min.z) * 0.5 +
+                     (pIVar13->m_bound).bbox.min.z;
+        pIVar13 = this->m_handDummy1;
+        if ((pIVar13->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar13);
+        }
+        pIVar12 = this->m_handDummy2;
+        if ((pIVar12->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar12);
+        }
+        fVar24 = (pIVar12->m_worldMatrix).m[3][0];
+        fVar3 = (pIVar13->m_worldMatrix).m[3][0];
+        fVar4 = (pIVar12->m_worldMatrix).m[3][1];
+        fVar2 = (pIVar13->m_worldMatrix).m[3][1];
+        auStack_728._0_4_ = (pIVar12->m_worldMatrix).m[3][2] - (pIVar13->m_worldMatrix).m[3][2];
+        pIVar13 = this->m_handDummy1;
+        fVar8 = (float)auStack_728._0_4_ * 0.5;
+        if ((pIVar13->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar13);
+        }
+        auStack_764._4_4_ = (fVar24 - fVar3) * 0.5 + (pIVar13->m_worldMatrix).m[3][0];
+        pCVar6 = this->m_owner;
+        auStack_75c._0_4_ = (fVar4 - fVar2) * 0.5 + (pIVar13->m_worldMatrix).m[3][1];
+        auStack_73c._12_4_ = (pCVar6->m_direction).x;
+        fStack_72c = (pCVar6->m_direction).y;
+        auStack_75c._4_4_ = fVar8 + (pIVar13->m_worldMatrix).m[3][2];
+        auStack_728._0_4_ = (pCVar6->m_direction).z;
+        pIVar13 = this->m_specialModel;
+        auStack_728._4_4_ = (pCVar6->m_direction).w;
+        if ((pIVar13->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar13);
+        }
+        fStack_770 = (pIVar13->m_worldMatrix).m[2][0];
+        fStack_76c = (pIVar13->m_worldMatrix).m[2][1];
+        fStack_768 = (pIVar13->m_worldMatrix).m[2][2];
+        local_750.s = (pIVar13->m_worldMatrix).m[2][3];
+        fVar24 = fStack_770 * fStack_770 + fStack_768 * fStack_768 + fStack_76c * fStack_76c;
+        if (1e-08 <= ABS(fVar24 - 1.0)) {
+          if (1e-08 <= fVar24) {
+            fVar24 = 1.0 / SQRT(fVar24);
+            fStack_770 *= fVar24;
+            fStack_76c *= fVar24;
+            fStack_768 *= fVar24;
+          }
+          else if (fStack_770 == 0.0) {
+            if (fStack_768 == 0.0) {
+              if (0.0 <= fStack_76c) {
+                fStack_76c = 1.0;
+              }
+              else {
+                fStack_76c = -1.0;
+              }
+            }
+            else if (0.0 <= fStack_768) {
+              fStack_768 = 1.0;
+            }
+            else {
+              fStack_768 = -1.0;
+            }
+          }
+          else if (0.0 <= fStack_770) {
+            fStack_770 = 1.0;
+          }
+          else {
+            fStack_770 = -1.0;
+          }
+        }
+        auStack_764._4_4_ = (float)auStack_73c._12_4_ * 0.1 + (float)auStack_764._4_4_;
+        local_750.v.y = fStack_76c;
+        pIVar13 = this->m_specialModel;
+        local_750.v.x = fStack_770;
+        auStack_73c._12_4_ = (float)auStack_764._4_4_ - (float)auStack_728._8_4_;
+        local_750.v.z = fStack_768;
+        fStack_72c = (float)auStack_75c._0_4_ - fStack_71c;
+        auStack_728._0_4_ = ((float)auStack_728._0_4_ * 0.1 + (float)auStack_75c._4_4_) - fStack_718
+        ;
+        if ((pIVar13->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar13);
+        }
+        SStack_650.z = (float)auStack_728._0_4_ + (pIVar13->m_worldMatrix).m[3][2];
+        SStack_650.y = fStack_72c + (pIVar13->m_worldMatrix).m[3][1];
+        SStack_650.x = (float)auStack_73c._12_4_ + (pIVar13->m_worldMatrix).m[3][0];
+        (*this->m_specialModel->vtable->SetPos)(this->m_specialModel,&SStack_650);
+        (*this->m_specialModel->vtable->LinkTo)(this->m_specialModel,this->m_handDummy1,3);
+        (*this->m_specialModel->vtable->SetDir)
+                  (this->m_specialModel,(S_vector *)(auStack_754 + 4),0.0);
+        (*this->m_specialModel->vtable->SetOn)
+                  (this->m_specialModel,this->m_owner->m_fadedOut == false);
+        (*this->m_specialModel->vtable->Update)(this->m_specialModel);
+        set_field_64_781750((this->m_owner->m_body).movement + 0x610,2);
+        set_field_78_781760((this->m_owner->m_body).movement + 0x610,2);
+        uVar19 = (*this->m_specialModel->vtable->GetVisualType)(this->m_specialModel);
+        if (uVar19 == 0x5f4a424f) {
+          pIVar7 = this->m_specialModel->vtable;
+          C_HumanMovement__UpdateVisibilityFactor((this->m_owner->m_body).movement + 0xda4);
+          (*pIVar7[1].FindChildFrame)(this->m_specialModel,(char *)(float)extraout_ST0_04,unaff_EDI)
+          ;
+          return;
+        }
+      }
+    }
+    break;
+  case 5:
+    if (this->m_specialModel != nullptr) {
+      this->m_specialPlace = 5;
+      psVar1 = &this->m_specialModel->m_refCount;
+      *psVar1 = *psVar1 + 1;
+      pIVar13 = this->m_specialModel;
+      if ((pIVar13->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar13);
+      }
+      S_quat::Make((S_quat *)(auStack_754 + 4),&pIVar13->m_worldMatrix);
+      (this->m_specialRot).v.x = local_750.v.x;
+      (this->m_specialRot).v.y = local_750.v.y;
+      (this->m_specialRot).v.z = local_750.v.z;
+      (this->m_specialRot).s = local_750.s;
+      pIVar13 = this->m_specialModel;
+      if ((pIVar13->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar13);
+      }
+      (this->m_specialPos).x = (pIVar13->m_worldMatrix).m[3][0];
+      (this->m_specialPos).y = (pIVar13->m_worldMatrix).m[3][1];
+      (this->m_specialPos).z = (pIVar13->m_worldMatrix).m[3][2];
+      *(float *)this->_pad_00ac = (pIVar13->m_worldMatrix).m[3][3];
+      (*this->m_specialModel->vtable->LinkTo)(this->m_specialModel,nullptr,0);
+      if (this->m_unknown2c == false) {
+        pIVar13 = this->m_handDummy2;
+      }
+      else {
+        pIVar13 = this->m_handDummy1;
+      }
+      (*this->m_specialModel->vtable->LinkTo)(this->m_specialModel,pIVar13,2);
+      (*this->m_specialModel->vtable->SetOn)
+                (this->m_specialModel,this->m_owner->m_fadedOut == false);
+      pIVar13 = this->m_specialModel;
+      uVar19 = pIVar13->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar13->m_localMatrix).m[3][0] = 0.0;
+        (pIVar13->m_localMatrix).m[3][1] = 0.0;
+        (pIVar13->m_localMatrix).m[3][2] = 0.0;
+        pIVar13->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+      }
+      (*this->m_specialModel->vtable->Update)(this->m_specialModel);
+      uVar19 = (*this->m_specialModel->vtable->GetVisualType)(this->m_specialModel);
+      if (uVar19 == 0x5f4a424f) {
+        pIVar7 = this->m_specialModel->vtable;
+        C_HumanMovement__UpdateVisibilityFactor((this->m_owner->m_body).movement + 0xda4);
+        (*pIVar7[1].FindChildFrame)(this->m_specialModel,(char *)(float)extraout_ST0_05,unaff_EDI);
+        return;
+      }
+    }
+    break;
+  case 6:
+  case 7:
+    if (this->m_specialModel != nullptr) {
+      this->m_specialPlace = place;
+      psVar1 = &this->m_specialModel->m_refCount;
+      *psVar1 = *psVar1 + 1;
+      pIVar13 = this->m_specialModel;
+      if ((pIVar13->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar13);
+      }
+      S_quat::Make((S_quat *)(auStack_754 + 4),&pIVar13->m_worldMatrix);
+      (this->m_specialRot).v.x = local_750.v.x;
+      (this->m_specialRot).v.y = local_750.v.y;
+      (this->m_specialRot).v.z = local_750.v.z;
+      (this->m_specialRot).s = local_750.s;
+      (*this->m_specialModel->vtable->LinkTo)(this->m_specialModel,nullptr,0);
+      if (this->m_unknown2c == false) {
+        pIVar13 = this->m_handDummy2;
+      }
+      else {
+        pIVar13 = this->m_handDummy1;
+      }
+      (*this->m_specialModel->vtable->LinkTo)(this->m_specialModel,pIVar13,2);
+      (*this->m_specialModel->vtable->SetOn)
+                (this->m_specialModel,this->m_owner->m_fadedOut == false);
+      pIVar13 = this->m_specialModel;
+      uVar19 = pIVar13->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar13->m_localMatrix).m[3][0] = 0.0;
+        (pIVar13->m_localMatrix).m[3][1] = 0.0;
+        (pIVar13->m_localMatrix).m[3][2] = 0.0;
+        pIVar13->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+      }
+      (*this->m_specialModel->vtable->Update)(this->m_specialModel);
+      uVar19 = (*this->m_specialModel->vtable->GetVisualType)(this->m_specialModel);
+      if (uVar19 == 0x5f4a424f) {
+        pIVar7 = this->m_specialModel->vtable;
+        C_HumanMovement__UpdateVisibilityFactor((this->m_owner->m_body).movement + 0xda4);
+        (*pIVar7[1].FindChildFrame)(this->m_specialModel,(char *)(float)extraout_ST0_06,unaff_EDI);
+        return;
+      }
+    }
+    break;
+  case 8:
+    if (this->m_specialModel != nullptr) {
+      this->m_specialPlace = 8;
+      psVar1 = &this->m_specialModel->m_refCount;
+      *psVar1 = *psVar1 + 1;
+      pIVar13 = this->m_specialModel;
+      if ((pIVar13->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar13);
+      }
+      S_quat::Make((S_quat *)(auStack_754 + 4),&pIVar13->m_worldMatrix);
+      (this->m_specialRot).v.x = local_750.v.x;
+      (this->m_specialRot).v.y = local_750.v.y;
+      (this->m_specialRot).v.z = local_750.v.z;
+      (this->m_specialRot).s = local_750.s;
+      pIVar13 = this->m_specialModel;
+      if ((pIVar13->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar13);
+      }
+      (this->m_specialPos).x = (pIVar13->m_worldMatrix).m[3][0];
+      (this->m_specialPos).y = (pIVar13->m_worldMatrix).m[3][1];
+      (this->m_specialPos).z = (pIVar13->m_worldMatrix).m[3][2];
+      *(float *)this->_pad_00ac = (pIVar13->m_worldMatrix).m[3][3];
+      (*this->m_specialModel->vtable->LinkTo)(this->m_specialModel,nullptr,0);
+      (*this->m_specialModel->vtable->LinkTo)(this->m_specialModel,this->m_handDummy1,2);
+      (*this->m_specialModel->vtable->SetOn)
+                (this->m_specialModel,this->m_owner->m_fadedOut == false);
+      pIVar13 = this->m_specialModel;
+      uVar19 = pIVar13->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar13->m_localMatrix).m[3][0] = 0.0;
+        (pIVar13->m_localMatrix).m[3][1] = 0.0;
+        (pIVar13->m_localMatrix).m[3][2] = 0.0;
+        pIVar13->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+      }
+      (*this->m_specialModel->vtable->Update)(this->m_specialModel);
+      uVar19 = (*this->m_specialModel->vtable->GetVisualType)(this->m_specialModel);
+      if (uVar19 == 0x5f4a424f) {
+        pIVar7 = this->m_specialModel->vtable;
+        C_HumanMovement__UpdateVisibilityFactor((this->m_owner->m_body).movement + 0xda4);
+        (*pIVar7[1].FindChildFrame)(this->m_specialModel,(char *)(float)extraout_ST0_07,unaff_EDI);
+        return;
+      }
+    }
+    break;
+  case 9:
+    if (this->m_specialModel != nullptr) {
+      psVar1 = &this->m_specialModel->m_refCount;
+      *psVar1 = *psVar1 + 1;
+      this->m_specialPlace = 9;
+      (*this->m_specialModel->vtable[1].Slot28)
+                (this->m_specialModel,*(uint32_t *)(DAT_0098a474 + 0xd88),6,0x3f800000,2);
+      pIVar13 = this->m_specialModel;
+      iVar14 = (*pIVar13->vtable[1].Slot2C)(pIVar13,6);
+      *(uint32_t *)(iVar14 + 8) = 2;
+      (*this->m_specialModel->vtable->Tick)(this->m_specialModel,1000);
+      Unknown7938f0(this,100);
+      uVar19 = (*this->m_specialModel->vtable->GetVisualType)(this->m_specialModel);
+      if (uVar19 == 0x5f4a424f) {
+        pIVar7 = this->m_specialModel->vtable;
+        C_HumanMovement__UpdateVisibilityFactor((this->m_owner->m_body).movement + 0xda4);
+        (*pIVar7[1].FindChildFrame)
+                  (this->m_specialModel,(char *)(float)extraout_ST0_08,(uint32_t)pIVar13);
+        return;
+      }
+    }
+    break;
+  case 10:
+    if ((this->m_handsTime != -10000) && (0 < this->m_owner->m_stats[0])) {
+      auStack_73c[0xb] = (uint8_t)this->m_flags & 1;
+      if (auStack_73c[0xb] != 0) {
+        this->m_flags = this->m_flags & 0xfffffffe;
+      }
+      AttachModel(this,3);
+      if (auStack_73c[0xb] != 0) {
+        this->m_flags = this->m_flags | 1;
+      }
+    }
+    this->m_handsTime = -10000;
+    pIVar13 = (*this->m_handsModel->vtable->FindChildFrame)
+                        (this->m_handsModel,"backlink",0x20);
+    iVar14 = this->m_handsTypeId;
+    if ((iVar14 < 0) || (499 < iVar14)) {
+      piVar15 = nullptr;
+    }
+    else {
+      piVar15 = (int *)(&DAT_0098b030)[iVar14];
+    }
+    iVar14 = (**(code **)(*piVar15 + 0x10))();
+    if (iVar14 < 3) {
+LAB_00790940:
+      (*this->m_handsModel->vtable->SetOn)(this->m_handsModel,false);
+      return;
+    }
+    iVar14 = this->m_handsTypeId;
+    if ((iVar14 < 0) || (499 < iVar14)) {
+      piVar15 = nullptr;
+    }
+    else {
+      piVar15 = (int *)(&DAT_0098b030)[iVar14];
+    }
+    iVar14 = (**(code **)(*piVar15 + 0x10))();
+    if (7 < iVar14) {
+      iVar14 = this->m_handsTypeId;
+      if ((iVar14 < 0) || (499 < iVar14)) {
+        piVar15 = nullptr;
+      }
+      else {
+        piVar15 = (int *)(&DAT_0098b030)[iVar14];
+      }
+      iVar14 = (**(code **)(*piVar15 + 0x10))();
+      if (iVar14 != 0xc) goto LAB_00790940;
+    }
+    if (pIVar13 == nullptr) {
+      return;
+    }
+    (*this->m_handsModel->vtable->LinkTo)(this->m_handsModel,this->m_jointD,2);
+    SStack_630.x = 0.0;
+    SStack_630.y = 1.0;
+    SStack_630.z = 0.0;
+    (*this->m_handsModel->vtable->SetWorldDir)(this->m_handsModel,&SStack_630,0.0);
+    if (*(int *)((this->m_owner->m_body).movement + 0xa44) < 1) {
+      (*this->m_handsModel->vtable->SetOn)(this->m_handsModel,true);
+    }
+    fVar4 = g_longGunModelOffset.z;
+    fVar3 = g_longGunModelOffset.y;
+    auStack_764._0_4_ = DAT_0098adac;
+    fVar24 = g_longGunModelOffset.x;
+    if (this->m_longGunModel != nullptr) {
+      fVar24 = -g_longGunModelOffset.x;
+    }
+    pIVar12 = this->m_handsModel;
+    uVar19 = pIVar12->m_frameFlags;
+    if (-1 < (char)uVar19) {
+      (pIVar12->m_localMatrix).m[3][0] = fVar24;
+      (pIVar12->m_localMatrix).m[3][1] = fVar3;
+      (pIVar12->m_localMatrix).m[3][2] = fVar4;
+      pIVar12->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+    }
+    (*this->m_handsModel->vtable->Update)(this->m_handsModel);
+    if (this->m_longGunModel == nullptr) {
+      pIVar12 = pIVar13->m_parent;
+      I3D_frame__GetLocalMatrixInline_4c8140(pIVar12);
+      fStack_698 = -(pIVar13->m_localMatrix).m[3][2];
+      auStack_6a0._4_4_ = -(pIVar13->m_localMatrix).m[3][1];
+      auStack_6a0._0_4_ = -(pIVar13->m_localMatrix).m[3][0];
+      pSVar16 = S_vector::OperatorMul((S_vector *)auStack_6a0,&SStack_530,&pIVar12->m_localMatrix);
+      auStack_764._4_4_ = pSVar16->x + 0.0275;
+      auStack_75c._0_4_ = pSVar16->y;
+      auStack_75c._4_4_ = pSVar16->z + 0.09;
+    }
+    else {
+      local_77c = (I3D_frame *)0x3c23d70a;
+      if (this->m_backpackModel == nullptr) {
+        local_77c = (I3D_frame *)0x3ccccccd;
+      }
+      pIVar12 = pIVar13->m_parent;
+      I3D_frame__GetLocalMatrixInline_4c8140(pIVar12);
+      SStack_610.z = -(pIVar13->m_localMatrix).m[3][2];
+      SStack_610.y = -(pIVar13->m_localMatrix).m[3][1];
+      SStack_610.x = -(pIVar13->m_localMatrix).m[3][0];
+      pSVar16 = S_vector::OperatorMul(&SStack_610,(S_vector *)auStack_520,&pIVar12->m_localMatrix);
+      auStack_764._4_4_ = (float)local_77c + pSVar16->x;
+      auStack_75c._0_4_ = pSVar16->y;
+      auStack_75c._4_4_ = pSVar16->z + 0.06;
+    }
+    pIVar13 = this->m_handsModel;
+    uVar19 = pIVar13->m_frameFlags;
+    if (-1 < (char)uVar19) {
+      (pIVar13->m_localMatrix).m[3][0] = (float)auStack_764._4_4_;
+      (pIVar13->m_localMatrix).m[3][1] = (float)auStack_75c._0_4_;
+      (pIVar13->m_localMatrix).m[3][2] = (float)auStack_75c._4_4_;
+      pIVar13->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+    }
+    auStack_764._0_4_ = auStack_754;
+    (*this->m_handsModel->vtable->Update)(this->m_handsModel);
+    pIVar13 = (*this->m_handsModel->vtable->FindChildFrame)(this->m_handsModel,&DAT_0084f79c,0xffff)
+    ;
+    if (pIVar13 == nullptr) {
+      if (this->m_longGunModel == nullptr) {
+        pIVar12 = this->m_handsModel;
+        auStack_764._4_4_ = (pIVar12->m_localMatrix).m[3][0];
+        auStack_75c._0_4_ = (pIVar12->m_localMatrix).m[3][1];
+        auStack_75c._4_4_ = (pIVar12->m_localMatrix).m[3][2];
+        auStack_754 = (uint8_t  [4])(pIVar12->m_localMatrix).m[3][3];
+        I3D_frame__GetLocalMatrixInline_4c8140(pIVar12);
+        pSVar17 = &pIVar12->m_localMatrix;
+        pfVar18 = (float *)auStack_710;
+        for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+          *pfVar18 = pSVar17->m[0][0];
+          pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+          pfVar18++;
+        }
+        S_quat::Make((S_quat *)(auStack_754 + 4),&SStack_700,0.1);
+        pSVar17 = S_quat::RotationMatrix((S_quat *)(auStack_754 + 4),&SStack_1d0);
+        pfVar18 = (float *)S_matrix::OperatorMul
+                                     ((S_matrix *)auStack_710,(S_matrix *)auStack_150,pSVar17);
+        pIVar12 = this->m_handsModel;
+        pSVar17 = &pIVar12->m_localMatrix;
+        for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+          pSVar17->m[0][0] = *pfVar18;
+          pfVar18++;
+          pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+        }
+        pSVar16 = S_matrix::GetScale(&pIVar12->m_localMatrix,(S_vector *)(auStack_73c + 0xc));
+        (pIVar12->m_scale).x = pSVar16->x;
+        (pIVar12->m_scale).y = pSVar16->y;
+        (pIVar12->m_scale).z = pSVar16->z;
+        pIVar12->m_scaleW = pSVar16[1].x;
+        pIVar12->m_frameFlags = pIVar12->m_frameFlags & 0xffffffd7 | 0x40000014;
+        pIVar12 = this->m_handsModel;
+        uVar19 = pIVar12->m_frameFlags;
+        if (-1 < (char)uVar19) {
+          (pIVar12->m_localMatrix).m[3][0] = (float)auStack_764._4_4_;
+          (pIVar12->m_localMatrix).m[3][1] = (float)auStack_75c._0_4_;
+          fVar24 = (float)auStack_75c._4_4_;
+          goto LAB_007906d6;
+        }
+        goto LAB_007906ee;
+      }
+    }
+    else {
+      pIVar12 = this->m_handsModel;
+      fVar24 = (pIVar12->m_localMatrix).m[3][0];
+      fVar3 = (pIVar12->m_localMatrix).m[3][1];
+      fVar4 = (pIVar12->m_localMatrix).m[3][2];
+      I3D_frame__GetLocalMatrixInline_4c8140(pIVar12);
+      local_77c = (I3D_frame *)0xbfb6c898;
+      pSVar17 = &pIVar12->m_localMatrix;
+      pfVar18 = (float *)auStack_710;
+      for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+        *pfVar18 = pSVar17->m[0][0];
+        pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+        pfVar18++;
+      }
+      if (this->m_longGunModel == nullptr) {
+        local_77c = (I3D_frame *)0xbffb53d2;
+      }
+      SStack_5d0.x = (float)auStack_710._8_4_ * SStack_700.y -
+                     (float)auStack_710._4_4_ * SStack_700.z;
+      SStack_5d0.y = (float)auStack_710._0_4_ * SStack_700.z -
+                     (float)auStack_710._8_4_ * SStack_700.x;
+      SStack_5d0.z = (float)auStack_710._4_4_ * SStack_700.x -
+                     (float)auStack_710._0_4_ * SStack_700.y;
+      S_quat::Make((S_quat *)(auStack_764 + 4),&SStack_5d0,(float)local_77c);
+      pSVar17 = S_quat::RotationMatrix((S_quat *)(auStack_764 + 4),&SStack_3d0);
+      pfVar18 = (float *)S_matrix::OperatorMul
+                                   ((S_matrix *)auStack_710,(S_matrix *)auStack_350,pSVar17);
+      pIVar12 = this->m_handsModel;
+      pSVar17 = &pIVar12->m_localMatrix;
+      for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+        pSVar17->m[0][0] = *pfVar18;
+        pfVar18++;
+        pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+      }
+      pSVar16 = S_matrix::GetScale(&pIVar12->m_localMatrix,(S_vector *)(auStack_754 + 4));
+      (pIVar12->m_scale).x = pSVar16->x;
+      (pIVar12->m_scale).y = pSVar16->y;
+      (pIVar12->m_scale).z = pSVar16->z;
+      pIVar12->m_scaleW = pSVar16[1].x;
+      pIVar12->m_frameFlags = pIVar12->m_frameFlags & 0xffffffd7 | 0x40000014;
+      pIVar12 = this->m_handsModel;
+      uVar19 = pIVar12->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar12->m_localMatrix).m[3][0] = fVar24 - 0.01;
+        (pIVar12->m_localMatrix).m[3][1] = fVar3;
+        (pIVar12->m_localMatrix).m[3][2] = fVar4 - 0.08;
+        pIVar12->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+      }
+      (*this->m_handsModel->vtable->Update)(this->m_handsModel);
+      if (this->m_longGunModel == nullptr) {
+        pIVar12 = this->m_handsModel;
+        fVar3 = (pIVar12->m_localMatrix).m[3][0];
+        fVar4 = (pIVar12->m_localMatrix).m[3][1];
+        fVar24 = (pIVar12->m_localMatrix).m[3][2];
+        auStack_764._0_4_ = (pIVar12->m_localMatrix).m[3][3];
+        I3D_frame__GetLocalMatrixInline_4c8140(pIVar12);
+        pSVar17 = &pIVar12->m_localMatrix;
+        pfVar18 = (float *)auStack_710;
+        for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+          *pfVar18 = pSVar17->m[0][0];
+          pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+          pfVar18++;
+        }
+        S_quat::Make((S_quat *)auStack_6d0,(S_vector *)auStack_710,-0.35);
+        auStack_75c._0_4_ = auStack_6d0._4_4_;
+        auStack_75c._4_4_ = auStack_6d0._8_4_;
+        auStack_764._4_4_ = auStack_6d0._0_4_;
+        auStack_754 = (uint8_t  [4])auStack_6d0._12_4_;
+        pSVar17 = S_quat::RotationMatrix((S_quat *)(auStack_764 + 4),(S_matrix *)auStack_2d0);
+        pfVar18 = (float *)S_matrix::OperatorMul((S_matrix *)auStack_710,&SStack_250,pSVar17);
+        pIVar12 = this->m_handsModel;
+        pSVar17 = &pIVar12->m_localMatrix;
+        for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+          pSVar17->m[0][0] = *pfVar18;
+          pfVar18++;
+          pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+        }
+        pSVar16 = S_matrix::GetScale(&pIVar12->m_localMatrix,(S_vector *)(auStack_754 + 4));
+        (pIVar12->m_scale).x = pSVar16->x;
+        (pIVar12->m_scale).y = pSVar16->y;
+        (pIVar12->m_scale).z = pSVar16->z;
+        pIVar12->m_scaleW = pSVar16[1].x;
+        pIVar12->m_frameFlags = pIVar12->m_frameFlags & 0xffffffd7 | 0x40000014;
+        pIVar12 = this->m_handsModel;
+        uVar19 = pIVar12->m_frameFlags;
+        if (-1 < (char)uVar19) {
+          (pIVar12->m_localMatrix).m[3][0] = fVar3;
+          (pIVar12->m_localMatrix).m[3][1] = fVar4;
+LAB_007906d6:
+          pIVar12->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+          (pIVar12->m_localMatrix).m[3][2] = fVar24;
+        }
+LAB_007906ee:
+        (*this->m_handsModel->vtable->Update)(this->m_handsModel);
+      }
+    }
+    pIVar12 = this->m_handsModel;
+    uVar19 = pIVar12->m_frameFlags;
+    if ((uVar19 & 0x10) == 0) {
+      pSVar17 = &pIVar12->m_localMatrix;
+      pIVar12->m_frameFlags = uVar19 | 0x14;
+      S_matrix::SetRot3(pSVar17,&pIVar12->m_rot);
+      pSVar17->m[0][0] = (pIVar12->m_scale).x * pSVar17->m[0][0];
+LAB_0079076e:
+      (pIVar12->m_localMatrix).m[0][1] = (pIVar12->m_scale).x * (pIVar12->m_localMatrix).m[0][1];
+      (pIVar12->m_localMatrix).m[0][2] = (pIVar12->m_scale).x * (pIVar12->m_localMatrix).m[0][2];
+      (pIVar12->m_localMatrix).m[1][0] = (pIVar12->m_localMatrix).m[1][0] * (pIVar12->m_scale).y;
+      (pIVar12->m_localMatrix).m[1][1] = (pIVar12->m_scale).y * (pIVar12->m_localMatrix).m[1][1];
+      (pIVar12->m_localMatrix).m[1][2] = (pIVar12->m_scale).y * (pIVar12->m_localMatrix).m[1][2];
+      (pIVar12->m_localMatrix).m[2][0] = (pIVar12->m_localMatrix).m[2][0] * (pIVar12->m_scale).z;
+      (pIVar12->m_localMatrix).m[2][1] = (pIVar12->m_localMatrix).m[2][1] * (pIVar12->m_scale).z;
+      (pIVar12->m_localMatrix).m[2][2] = (pIVar12->m_localMatrix).m[2][2] * (pIVar12->m_scale).z;
+    }
+    else if ((uVar19 & 4) == 0) {
+      if ((uVar19 & 8) == 0) {
+        S_quat::Make(&pIVar12->m_rot,&pIVar12->m_localMatrix);
+      }
+      fVar24 = (pIVar12->m_scale).x;
+      fVar3 = (pIVar12->m_localMatrix).m[0][0];
+      pIVar12->m_frameFlags = pIVar12->m_frameFlags | 0xc;
+      (pIVar12->m_localMatrix).m[0][0] = fVar24 * fVar3;
+      goto LAB_0079076e;
+    }
+    pSVar17 = &pIVar12->m_localMatrix;
+    pfVar18 = (float *)&SStack_580;
+    for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+      *pfVar18 = pSVar17->m[0][0];
+      pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+      pfVar18++;
+    }
+    if ((pIVar13 != nullptr) ||
+       (local_77c = (I3D_frame *)0x3e800000, this->m_longGunModel != nullptr)) {
+      local_77c = (I3D_frame *)0x3e19999a;
+    }
+    auStack_5b0._0_4_ = 1.0;
+    auStack_5b0._4_4_ = 0.0;
+    auStack_5b0._8_4_ = 0.0;
+    S_quat::Make((S_quat *)(auStack_728 + 8),(S_vector *)auStack_5b0,(float)local_77c);
+    pSVar17 = S_quat::RotationMatrix((S_quat *)(auStack_728 + 8),(S_matrix *)auStack_d0);
+    pfVar18 = (float *)S_matrix::OperatorMul(&SStack_580,&SStack_50,pSVar17);
+    pIVar13 = this->m_handsModel;
+    pSVar17 = &pIVar13->m_localMatrix;
+    for (iVar14 = 0x10; iVar14 != 0; iVar14 = iVar14 - 1) {
+      pSVar17->m[0][0] = *pfVar18;
+      pfVar18++;
+      pSVar17 = (S_matrix *)(pSVar17->m[0] + 1);
+    }
+    pSVar16 = S_matrix::GetScale(&pIVar13->m_localMatrix,(S_vector *)(auStack_754 + 4));
+    (pIVar13->m_scale).x = pSVar16->x;
+    (pIVar13->m_scale).y = pSVar16->y;
+    (pIVar13->m_scale).z = pSVar16->z;
+    pIVar13->m_scaleW = pSVar16[1].x;
+    pIVar13->m_frameFlags = pIVar13->m_frameFlags & 0xffffffd7 | 0x40000014;
+    (*this->m_handsModel->vtable->Update)(this->m_handsModel);
+    uVar19 = (*this->m_handsModel->vtable->GetVisualType)(this->m_handsModel);
+    if (uVar19 == 0x5f4a424f) {
+      pIVar7 = this->m_handsModel->vtable;
+      C_HumanMovement__UpdateVisibilityFactor((this->m_owner->m_body).movement + 0xda4);
+      (*pIVar7[1].FindChildFrame)(this->m_handsModel,(char *)(float)extraout_ST0_09,unaff_EDI);
+      return;
+    }
+  }
+}
+
+// 0x00790980

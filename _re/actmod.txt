@@ -1,0 +1,1186 @@
+// 0x004755d0
+bool __thiscall C_ActorsModule::Unknown28(C_ActorsModule *this,C_BitStream *msg)
+{
+  uVar2 = C_BitStream::ReadBits(msg,10);
+  if (0x1f < (int)uVar2) {
+    (*(this->m_actors).first[uVar2]->vtable->Unknown20)(msg);
+    return true;
+  }
+  pCVar1 = (this->m_actors).first[uVar2];
+  if (pCVar1 == nullptr) {
+    FUN_005a5f80(nullptr,msg);
+    return true;
+  }
+  FUN_005a5f80((int *)pCVar1,msg);
+  return true;
+}
+
+// 0x00475630
+bool __thiscall C_ActorsModule::OnMessage(C_ActorsModule *this,C_BitStream *msg)
+{
+  uVar2 = C_BitStream::ReadBits(msg,10);
+  if (0x1f < (int)uVar2) {
+    (*(this->m_actors).first[uVar2]->vtable->OnMessage)(msg);
+    return true;
+  }
+  pCVar1 = (this->m_actors).first[uVar2];
+  if (pCVar1 == nullptr) {
+    FUN_005a5fb0(nullptr,msg);
+    return true;
+  }
+  FUN_005a5fb0((int *)pCVar1,msg);
+  return true;
+}
+
+// 0x00475690
+C_ActorsModule * __thiscall C_ActorsModule::C_ActorsModule(C_ActorsModule *this,int id,char *name)
+{
+  C_Module::C_Module((C_Module *)this,id,name);
+  (this->m_actors).alloc = (uchar)name;
+  (this->m_actors).first = (C_Actor **)0x0;
+  (this->m_actors).last = (C_Actor **)0x0;
+  (this->m_actors).end = (C_Actor **)0x0;
+  (this->m_active).first = (C_Actor **)0x0;
+  (this->m_active).alloc = (uchar)name;
+  (this->m_active).last = (C_Actor **)0x0;
+  (this->m_active).end = (C_Actor **)0x0;
+  (this->m_pending).first = (C_Actor **)0x0;
+  (this->m_pending).alloc = (uchar)name;
+  (this->m_pending).last = (C_Actor **)0x0;
+  (this->m_pending).end = (C_Actor **)0x0;
+  (this->m_removed).first = nullptr;
+  (this->m_removed).alloc = (uchar)name;
+  (this->m_removed).last = nullptr;
+  (this->m_removed).end = nullptr;
+  this->vtable = (C_ActorsModule_vtbl *)&PTR_008100a8;
+  Clear(this);
+  return this;
+}
+
+// 0x00475730
+void __thiscall C_ActorsModule::Init(C_ActorsModule *this)
+{
+}
+
+// 0x00475740
+void __thiscall C_ActorsModule::Done(C_ActorsModule *this)
+{
+}
+
+// 0x00475750
+void __thiscall C_ActorsModule::LoadMissionData(C_ActorsModule *this,bool server)
+{
+}
+
+// 0x00475760
+void __thiscall C_ActorsModule::FreeMissionData(C_ActorsModule *this,bool server)
+{
+  Clear(this);
+}
+
+// 0x00475770
+C_ActorsModule * __thiscall
+C_ActorsModule::ScalarDeletingDestructor(C_ActorsModule *this,uchar flags)
+{
+  ~C_ActorsModule(this);
+  if ((flags & 1) != 0) {
+    _aligned_free(this);
+  }
+  return this;
+}
+
+// 0x00475790
+void __thiscall C_ActorsModule::~C_ActorsModule(C_ActorsModule *this)
+{
+  this->vtable = (C_ActorsModule_vtbl *)&PTR_008100a8;
+  this->m_iterating = false;
+  Clear(this);
+  operator_delete((this->m_removed).first);
+  (this->m_removed).first = nullptr;
+  (this->m_removed).last = nullptr;
+  (this->m_removed).end = nullptr;
+  operator_delete((this->m_pending).first);
+  (this->m_pending).first = (C_Actor **)0x0;
+  (this->m_pending).last = (C_Actor **)0x0;
+  (this->m_pending).end = (C_Actor **)0x0;
+  operator_delete((this->m_active).first);
+  (this->m_active).first = (C_Actor **)0x0;
+  (this->m_active).last = (C_Actor **)0x0;
+  (this->m_active).end = (C_Actor **)0x0;
+  operator_delete((this->m_actors).first);
+  (this->m_actors).first = (C_Actor **)0x0;
+  (this->m_actors).last = (C_Actor **)0x0;
+  (this->m_actors).end = (C_Actor **)0x0;
+  C_Module::~C_Module((C_Module *)this);
+}
+
+// 0x00475840
+C_Actor * __thiscall C_ActorsModule::FindRandomSpawnPoint(C_ActorsModule *this,int team,int kind)
+{
+  ppCVar1 = (this->m_actors).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    iVar6 = 0;
+  }
+  else {
+    iVar6 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+  }
+  iVar3 = iVar6;
+  if (0 < iVar6) {
+    do {
+      iVar3--;
+    } while (iVar3 != 0);
+  }
+  _rand();
+  lVar7 = __ftol();
+  iVar4 = 0;
+  iVar3 = 0;
+  if (0 < iVar6) {
+    ppCVar1 = (this->m_actors).first;
+    ppCVar5 = ppCVar1;
+    do {
+      pCVar2 = *ppCVar5;
+      if ((((pCVar2 != nullptr) && (pCVar2->m_type == ACTOR_SPAWN_POINT)) &&
+          (pCVar2[1].vtable == (C_Actor_vtbl *)team)) &&
+         ((pCVar2[1]._pad_0004[8] != '\0' &&
+          ((*(int *)pCVar2[1]._pad_0004 == kind || (*(int *)pCVar2[1]._pad_0004 == 2)))))) {
+        if (iVar4 == (int)lVar7) {
+          return ppCVar1[iVar3];
+        }
+        iVar4++;
+      }
+      iVar3++;
+      ppCVar5++;
+    } while (iVar3 < iVar6);
+  }
+  return nullptr;
+}
+
+// 0x00475940
+C_Actor * __thiscall C_ActorsModule::FindSpawnPoint(C_ActorsModule *this,int team)
+{
+  ppCVar1 = (this->m_actors).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    iVar4 = 0;
+  }
+  else {
+    iVar4 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+  }
+  iVar5 = 0;
+  if (0 < iVar4) {
+    ppCVar1 = (this->m_actors).first;
+    ppCVar3 = ppCVar1;
+    do {
+      pCVar2 = *ppCVar3;
+      if ((((pCVar2 != nullptr) && (pCVar2->m_type == ACTOR_SPAWN_POINT)) &&
+          (pCVar2[1].vtable == (C_Actor_vtbl *)team)) && (pCVar2[1]._pad_0004[8] != '\0')) {
+        return ppCVar1[iVar5];
+      }
+      iVar5++;
+      ppCVar3++;
+    } while (iVar5 < iVar4);
+  }
+  return nullptr;
+}
+
+// 0x004759a0
+int __thiscall C_ActorsModule::FindFreePlayerSlot(C_ActorsModule *this)
+{
+  ppCVar2 = (this->m_actors).first;
+  iVar1 = 0;
+  do {
+    if (*ppCVar2 == nullptr) {
+      return iVar1;
+    }
+    iVar1++;
+    ppCVar2++;
+  } while (iVar1 < 0x20);
+  return -1;
+}
+
+// 0x004759c0
+C_Actor * __thiscall
+C_ActorsModule::CreateActor
+          (C_ActorsModule *this,E_ActorType type,I3D_frame *frame,bool active,int slot)
+{
+  pCVar2 = nullptr;
+  local_24 = nullptr;
+  if (((-1 < (int)type) && ((int)type < 0x27)) && (g_actorCreators[type] != nullptr))
+  {
+    local_24 = (*g_actorCreators[type]->vtable->Create)();
+    if ((slot != -1) && (pCVar2 = (this->m_actors).first[slot], pCVar2 != nullptr)) {
+      DestroyActor(this,pCVar2,true);
+    }
+    pCVar2 = local_24;
+    if (local_24 != nullptr) {
+      if (frame != nullptr) {
+        if (frame->m_data == nullptr) {
+          pSStack_10 = g_noPhysicsObject;
+          pCStack_20 = local_24;
+          SetFrameData((int)frame,&pCStack_20);
+        }
+        else {
+          frame->m_data->actor = local_24;
+        }
+      }
+      iVar3 = slot;
+      if (slot == -1) {
+        ppCVar8 = (this->m_actors).first;
+        if (ppCVar8 == (C_Actor **)0x0) {
+          iVar3 = 0;
+        }
+        else {
+          iVar3 = (int)(this->m_actors).last - (int)ppCVar8 >> 2;
+        }
+      }
+      C_Actor::SetNetId(local_24,iVar3);
+      if (slot == -1) {
+        ActorPtrVector_Insert(&this->m_actors,(this->m_actors).last,1,&local_24);
+      }
+      else {
+        (this->m_actors).first[slot] = local_24;
+        this->m_playerSlotUse[slot] = this->m_playerSlotUse[slot] + '\x01';
+      }
+      pCVar2 = local_24;
+      if (active) {
+        ppCVar8 = (this->m_active).first;
+        if (ppCVar8 == (C_Actor **)0x0) {
+          iVar3 = 0;
+        }
+        else {
+          iVar3 = (int)(this->m_active).last - (int)ppCVar8 >> 2;
+        }
+        local_24->m_activeIndex = iVar3;
+        ppCVar8 = (this->m_active).last;
+        if ((int)(this->m_active).end - (int)ppCVar8 >> 2 == 0) {
+          ppCVar6 = (this->m_active).first;
+          if ((ppCVar6 == (C_Actor **)0x0) || (uVar4 = (int)ppCVar8 - (int)ppCVar6 >> 2, uVar4 < 2))
+          {
+            uVar4 = 1;
+          }
+          iVar5 = vector_size_e4_41fb80((int)&this->m_active);
+          iVar5 += uVar4;
+          iVar3 = iVar5;
+          if (iVar5 < 0) {
+            iVar3 = 0;
+          }
+          ppCVar6 = operator_new(iVar3 * 4);
+          puVar7 = (uint32_t *)uninitialized_copy4_476d70((this->m_active).first,ppCVar8,ppCVar6);
+          uninitialized_fill_n4_476da0(puVar7,1,&local_24);
+          uninitialized_copy4_476d70(ppCVar8,(this->m_active).last,puVar7 + 1);
+          empty_function_476b40();
+          operator_delete((this->m_active).first);
+          (this->m_active).end = ppCVar6 + iVar5;
+          iVar3 = vector_size_e4_41fb80((int)&this->m_active);
+          (this->m_active).last = ppCVar6 + iVar3 + 1;
+          (this->m_active).first = ppCVar6;
+          return local_24;
+        }
+        uninitialized_copy4_476d70(ppCVar8,ppCVar8,ppCVar8 + 1);
+        ppCVar6 = (this->m_active).last;
+        uninitialized_fill_n4_476da0(ppCVar6,1 - ((int)ppCVar6 - (int)ppCVar8 >> 2),&local_24);
+        ppCVar6 = (this->m_active).last;
+        for (; ppCVar8 != ppCVar6; ppCVar8 = ppCVar8 + 1) {
+          *ppCVar8 = local_24;
+        }
+        pppCVar1 = &(this->m_active).last;
+        *pppCVar1 = *pppCVar1 + 1;
+        pCVar2 = local_24;
+      }
+    }
+  }
+  return pCVar2;
+}
+
+// 0x00475c50
+void __thiscall C_ActorsModule::DestroyActor(C_ActorsModule *this,C_Actor *actor,bool immediately)
+{
+  if (actor != nullptr) {
+    if (-1 < actor->m_activeIndex) {
+      SetActorActive(this,actor,false);
+    }
+    iVar2 = actor->m_netId;
+    ppCVar3 = (this->m_actors).first;
+    if (iVar2 < 0x20) {
+      ppCVar3[iVar2] = nullptr;
+    }
+    else {
+      if (ppCVar3 == (C_Actor **)0x0) {
+        iVar6 = 0;
+      }
+      else {
+        iVar6 = (int)(this->m_actors).last - (int)ppCVar3 >> 2;
+      }
+      ppCVar3 = (this->m_actors).first;
+      ppCVar3[iVar2] = ppCVar3[iVar6 - 1];
+      C_Actor::SetNetId((this->m_actors).first[actor->m_netId],actor->m_netId);
+      pppCVar1 = &(this->m_actors).last;
+      *pppCVar1 = *pppCVar1 - 1;
+    }
+    if (!immediately) {
+      ScheduleRemoval(this,actor,20000);
+      return;
+    }
+    pIVar4 = actor->m_frame;
+    if ((pIVar4 != nullptr) && (pIVar4->m_data != nullptr)) {
+      pIVar4->m_data->actor = nullptr;
+      pSVar5 = pIVar4->m_data;
+      if (((pSVar5->actor == nullptr) &&
+          (((pSVar5->script == nullptr && (pSVar5->unknown08 == 0)) &&
+           (pSVar5->physicsObject == g_noPhysicsObject)))) &&
+         ((pSVar5->versionMaster == nullptr &&
+          (pSVar5->versionKeeper == nullptr)))) {
+        FUN_006e9ef0((int)pIVar4);
+      }
+    }
+    (*g_actorCreators[actor->m_type]->vtable->Destroy)(actor);
+  }
+}
+
+// 0x00475d50
+C_Actor * __thiscall C_ActorsModule::GetActorById(C_ActorsModule *this,int id)
+{
+  if (-1 < id) {
+    ppCVar2 = (this->m_actors).first;
+    if (ppCVar2 == (C_Actor **)0x0) {
+      iVar4 = 0;
+    }
+    else {
+      iVar4 = (int)(this->m_actors).last - (int)ppCVar2 >> 2;
+    }
+    if (id < iVar4) {
+      if ((((id < 0x20) && ((this->m_actors).first[id] == nullptr)) &&
+          (pSVar3 = (this->m_removed).first, pSVar3 != nullptr)) &&
+         (iVar4 = (int)(this->m_removed).last - (int)pSVar3 >> 3, iVar4 != 0)) {
+        pSVar5 = pSVar3 + iVar4;
+        do {
+          pSVar1 = pSVar5 - 1;
+          pSVar5--;
+          iVar4--;
+          if (pSVar1->actor->m_netId == id) {
+            return pSVar3[iVar4].actor;
+          }
+        } while (iVar4 != 0);
+      }
+      return (this->m_actors).first[id];
+    }
+  }
+  return nullptr;
+}
+
+// 0x00475dd0
+C_Actor * __thiscall C_ActorsModule::GetActor(C_ActorsModule *this,int index)
+{
+  ppCVar1 = (this->m_actors).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+  }
+  if ((index < iVar2) && (-1 < index)) {
+    return (this->m_actors).first[index];
+  }
+  return nullptr;
+}
+
+// 0x00475e00
+C_Actor * __thiscall C_ActorsModule::GetHuman(C_ActorsModule *this,int id)
+{
+  ppCVar2 = (this->m_actors).first;
+  if (ppCVar2 == (C_Actor **)0x0) {
+    iVar5 = 0;
+  }
+  else {
+    iVar5 = (int)(this->m_actors).last - (int)ppCVar2 >> 2;
+  }
+  if ((id < iVar5) && (-1 < id)) {
+    pCVar3 = (this->m_actors).first[id];
+    if ((pCVar3 != nullptr) && (pCVar3->m_type == ACTOR_HUMAN)) {
+      return pCVar3;
+    }
+    pSVar4 = (this->m_removed).first;
+    if ((pSVar4 != nullptr) &&
+       (iVar5 = (int)(this->m_removed).last - (int)pSVar4 >> 3, iVar5 != 0)) {
+      pSVar6 = pSVar4 + iVar5;
+      do {
+        pSVar1 = pSVar6 - 1;
+        pSVar6--;
+        iVar5--;
+        if (pSVar1->actor->m_netId == id) {
+          return pSVar4[iVar5].actor;
+        }
+      } while (iVar5 != 0);
+    }
+  }
+  return nullptr;
+}
+
+// 0x00475ec0
+void __thiscall C_ActorsModule::SetActorActive(C_ActorsModule *this,C_Actor *actor,bool active)
+{
+  if (active) {
+    if (actor->m_activeIndex < 0) {
+      if (this->m_iterating != false) {
+        ActorPtrVector_Insert(&this->m_pending,(this->m_pending).last,1,&actor);
+        return;
+      }
+      ppCVar1 = (this->m_active).first;
+      if (ppCVar1 != (C_Actor **)0x0) {
+        actor->m_activeIndex = (int)(this->m_active).last - (int)ppCVar1 >> 2;
+        ActorPtrVector_Insert(&this->m_active,(this->m_active).last,1,&actor);
+        return;
+      }
+      actor->m_activeIndex = 0;
+      ActorPtrVector_Insert(&this->m_active,(this->m_active).last,1,&actor);
+      return;
+    }
+  }
+  else if (-1 < actor->m_activeIndex) {
+    if (this->m_iterating != false) {
+      ActorPtrVector_Insert(&this->m_pending,(this->m_pending).last,1,&actor);
+      return;
+    }
+    pCVar2 = (this->m_active).last[-1];
+    (this->m_active).first[actor->m_activeIndex] = pCVar2;
+    pCVar2->m_activeIndex = actor->m_activeIndex;
+    (this->m_active).last = (this->m_active).last - 1;
+    actor->m_activeIndex = -1;
+  }
+}
+
+// 0x00475fb0
+void __thiscall C_ActorsModule::Clear(C_ActorsModule *this)
+{
+  ppCVar1 = (this->m_actors).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+  }
+  iVar3 = 0;
+  local_4 = (C_Actor *)this;
+  if (0 < iVar2) {
+    do {
+      actor = (this->m_actors).first[iVar3];
+      if (actor != nullptr) {
+        DestroyActor(this,actor,true);
+      }
+      iVar3++;
+    } while (iVar3 < iVar2);
+  }
+  (this->m_actors).last = (this->m_actors).first;
+  (this->m_active).last = (this->m_active).first;
+  iVar2 = 0;
+  (this->m_pending).last = (this->m_pending).first;
+  do {
+    local_4 = nullptr;
+    ActorPtrVector_Insert(&this->m_actors,(this->m_actors).last,1,&local_4);
+    this->m_playerSlotUse[iVar2] = 0xff;
+    iVar2++;
+  } while (iVar2 < 0x20);
+}
+
+// 0x00476080
+void __thiscall C_ActorsModule::Tick(C_ActorsModule *this,int timeDelta)
+{
+  if (((uint8_t)g_gameRole & 2) == 0) {
+    TickRemovals(this,timeDelta);
+  }
+  FUN_006e0b30(&DAT_008aee64);
+  FUN_005647c0(&DAT_008aaee0,timeDelta,(int)&this->m_active);
+  this->m_iterating = true;
+  ppCVar1 = (this->m_active).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    local_8 = 0;
+  }
+  else {
+    local_8 = (int)(this->m_active).last - (int)ppCVar1 >> 2;
+  }
+  iVar2 = 0;
+  if (0 < local_8) {
+    do {
+      (*(this->m_active).first[iVar2]->vtable->Tick)(timeDelta);
+      iVar2++;
+    } while (iVar2 < local_8);
+  }
+  this->m_iterating = false;
+  ppCVar1 = (this->m_pending).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    local_8 = 0;
+  }
+  else {
+    local_8 = (int)(this->m_pending).last - (int)ppCVar1 >> 2;
+  }
+  iVar2 = 0;
+  if (0 < local_8) {
+    do {
+      actor = (this->m_pending).first[iVar2];
+      SetActorActive(this,actor,actor->m_activeIndex == -1);
+      iVar2++;
+    } while (iVar2 < local_8);
+  }
+  (this->m_pending).last = (this->m_pending).first;
+}
+
+// 0x00476160
+void __thiscall C_ActorsModule::Update(C_ActorsModule *this,int frameTime)
+{
+  if (((uint8_t)g_gameRole & 7) != 7) {
+    TickRemovals(this,frameTime);
+  }
+  this->m_iterating = true;
+  ppCVar1 = (this->m_active).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)(this->m_active).last - (int)ppCVar1 >> 2;
+  }
+  iVar3 = 0;
+  if (0 < iVar2) {
+    do {
+      (*(this->m_active).first[iVar3]->vtable->Update)(frameTime);
+      iVar3++;
+    } while (iVar3 < iVar2);
+  }
+  this->m_iterating = false;
+  ppCVar1 = (this->m_pending).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)(this->m_pending).last - (int)ppCVar1 >> 2;
+  }
+  iVar3 = 0;
+  if (0 < iVar2) {
+    do {
+      actor = (this->m_pending).first[iVar3];
+      SetActorActive(this,actor,actor->m_activeIndex == -1);
+      iVar3++;
+    } while (iVar3 < iVar2);
+  }
+  (this->m_pending).last = (this->m_pending).first;
+  CountEnemies(this);
+}
+
+// 0x00476210
+void __thiscall C_ActorsModule::StartMission(C_ActorsModule *this,bool server)
+{
+  iVar4 = 0;
+  this->m_liveEnemies = 0;
+  this->m_carnageEnemies = 0;
+  ppCVar1 = (this->m_actors).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    iVar3 = 0;
+  }
+  else {
+    iVar3 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+  }
+  if (0 < iVar3) {
+    do {
+      if (iVar4 < 0x20) {
+        this->m_playerSlotUse[iVar4] = 0xff;
+      }
+      pCVar2 = (this->m_actors).first[iVar4];
+      if (pCVar2 != nullptr) {
+        (*pCVar2->vtable->StartMission)(_server);
+      }
+      iVar4++;
+    } while (iVar4 < iVar3);
+  }
+}
+
+// 0x00476260
+void __thiscall C_ActorsModule::StopMission(C_ActorsModule *this,bool server)
+{
+  if (((uint8_t)g_gameRole & 7) != 7) {
+    TickRemovals(this,100000);
+  }
+  ppCVar1 = (this->m_actors).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+  }
+  iVar3 = 0;
+  if (0 < iVar2) {
+    do {
+      pCVar4 = (this->m_actors).first[iVar3];
+      if ((pCVar4 != nullptr) && ((*pCVar4->vtable->StopMission)(_server), iVar3 < 0x20)) {
+        if (server) {
+          pCVar4 = (this->m_actors).first[iVar3];
+        }
+        else {
+          if ((g_gameRole & 1) != 0) goto LAB_004762d6;
+          pCVar4 = (this->m_actors).first[iVar3];
+        }
+        DestroyActor(this,pCVar4,true);
+      }
+LAB_004762d6:
+      iVar3++;
+    } while (iVar3 < iVar2);
+  }
+}
+
+// 0x004762f0
+void __thiscall C_ActorsModule::RestartMission(C_ActorsModule *this,bool server)
+{
+  iVar3 = 0;
+  this->m_liveEnemies = 0;
+  this->m_carnageEnemies = 0;
+  FUN_006e0b90(0x8aee64);
+  ppCVar1 = (this->m_actors).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+  }
+  if (0 < iVar2) {
+    do {
+      if ((0x1f < iVar3) || ((this->m_actors).first[iVar3] != nullptr)) {
+        (*(this->m_actors).first[iVar3]->vtable->RestartMission)(_server);
+        SetActorActive(this,(this->m_actors).first[iVar3],true);
+      }
+      iVar3++;
+    } while (iVar3 < iVar2);
+  }
+  if (server) {
+    CountEnemies(this);
+  }
+}
+
+// 0x00476370
+bool __thiscall C_ActorsModule::SaveGame(C_ActorsModule *this,C_chunk *chunk)
+{
+  chunk_00 = chunk;
+  FUN_006e0c60(&DAT_008aee64,&chunk->m_open);
+  ppCVar1 = (this->m_actors).first;
+  iVar4 = 0;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    local_10 = 0;
+  }
+  else {
+    local_10 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+  }
+  if (0 < local_10) {
+    do {
+      if ((0x1f < iVar4) || ((this->m_actors).first[iVar4] != nullptr)) {
+        if (chunk_00->m_open != false) {
+          local_8 = 0x29a;
+          iVar3 = dtaSeek(chunk_00->m_handle,0,1);
+          chunk_00->m_stack[chunk_00->m_depth] = iVar3;
+          chunk_00->m_depth = chunk_00->m_depth + 1;
+          dtaWrite(chunk_00->m_handle,&local_8,6);
+        }
+        bVar2 = (*(this->m_actors).first[iVar4]->vtable->IsActive)();
+        chunk = (C_chunk *)CONCAT31(chunk._1_3_,bVar2);
+        if ((chunk_00->m_open != false) && (chunk_00->m_writing != false)) {
+          dtaWrite(chunk_00->m_handle,&chunk,1);
+        }
+        (*(this->m_actors).first[iVar4]->vtable->SaveGame)(chunk_00);
+        if (chunk_00->m_open != false) {
+          iVar3 = chunk_00->m_handle;
+          if (chunk_00->m_writing == false) {
+            position = chunk_00->m_stack[chunk_00->m_depth - 1];
+          }
+          else {
+            position = dtaSeek(iVar3,0,1);
+            iStack_c = position - chunk_00->m_stack[chunk_00->m_depth - 1];
+            dtaSeek(chunk_00->m_handle,chunk_00->m_stack[chunk_00->m_depth - 1] + 2,0);
+            dtaWrite(chunk_00->m_handle,&iStack_c,4);
+            iVar3 = chunk_00->m_handle;
+          }
+          dtaSeek(iVar3,position,0);
+          if (chunk_00->m_depth != 0) {
+            chunk_00->m_depth = chunk_00->m_depth - 1;
+          }
+        }
+      }
+      iVar4++;
+    } while (iVar4 < local_10);
+  }
+  return true;
+}
+
+// 0x004764d0
+bool __thiscall C_ActorsModule::LoadGame(C_ActorsModule *this,C_chunk *chunk)
+{
+  chunk_00 = chunk;
+  FUN_006e0f40(&DAT_008aee64,&chunk->m_open);
+  ppCVar1 = (this->m_actors).first;
+  iVar4 = 0;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    chunk = nullptr;
+  }
+  else {
+    chunk = (C_chunk *)((int)(this->m_actors).last - (int)ppCVar1 >> 2);
+  }
+  if (0 < (int)chunk) {
+    do {
+      if ((0x1f < iVar4) || ((this->m_actors).first[iVar4] != nullptr)) {
+        if ((chunk_00->m_open != false) &&
+           (iVar2 = dtaRead(chunk_00->m_handle,local_8,6), iVar2 == 6)) {
+          iVar2 = dtaSeek(chunk_00->m_handle,0,1);
+          chunk_00->m_stack[chunk_00->m_depth] = iVar2 - 6 + iStack_6;
+          chunk_00->m_depth = chunk_00->m_depth + 1;
+        }
+        auStack_18[0] = 1;
+        if ((chunk_00->m_open != false) && (chunk_00->m_writing == false)) {
+          if (chunk_00->m_depth != 0) {
+            iVar2 = chunk_00->m_stack[chunk_00->m_depth - 1];
+            iStack_10 = dtaSeek(chunk_00->m_handle,0,1);
+            iStack_10 = iVar2 - iStack_10;
+            iStack_14 = 0;
+            piVar3 = &iStack_14;
+            if (-1 < iStack_10) {
+              piVar3 = &iStack_10;
+            }
+            if (*piVar3 < 1) goto LAB_004765c4;
+          }
+          dtaRead(chunk_00->m_handle,auStack_18,1);
+        }
+LAB_004765c4:
+        (*(this->m_actors).first[iVar4]->vtable->LoadGame)(chunk_00);
+        SetActorActive(this,(this->m_actors).first[iVar4],auStack_18[0]);
+        if (chunk_00->m_open != false) {
+          iVar2 = chunk_00->m_handle;
+          if (chunk_00->m_writing == false) {
+            position = chunk_00->m_stack[chunk_00->m_depth - 1];
+          }
+          else {
+            position = dtaSeek(iVar2,0,1);
+            iStack_c = position - chunk_00->m_stack[chunk_00->m_depth - 1];
+            dtaSeek(chunk_00->m_handle,chunk_00->m_stack[chunk_00->m_depth - 1] + 2,0);
+            dtaWrite(chunk_00->m_handle,&iStack_c,4);
+            iVar2 = chunk_00->m_handle;
+          }
+          dtaSeek(iVar2,position,0);
+          if (chunk_00->m_depth != 0) {
+            chunk_00->m_depth = chunk_00->m_depth - 1;
+          }
+        }
+      }
+      iVar4++;
+    } while (iVar4 < (int)chunk);
+  }
+  CountEnemies(this);
+  return true;
+}
+
+// 0x00476680
+void __thiscall C_ActorsModule::ScheduleRemoval(C_ActorsModule *this,C_Actor *actor,int delay)
+{
+  local_8 = actor;
+  pSVar7 = (this->m_removed).last;
+  local_4 = delay;
+  if ((int)(this->m_removed).end - (int)pSVar7 >> 3 != 0) {
+    FUN_00476dd0(&pSVar7->actor,&pSVar7->actor,&pSVar7[1].actor);
+    pSVar6 = (this->m_removed).last;
+    FUN_00476e00(&pSVar6->actor,1 - ((int)pSVar6 - (int)pSVar7 >> 3),&local_8);
+    pSVar6 = (this->m_removed).last;
+    for (; pSVar7 != pSVar6; pSVar7 = pSVar7 + 1) {
+      pSVar7->actor = local_8;
+      pSVar7->timeLeft = local_4;
+    }
+    (this->m_removed).last = (this->m_removed).last + 1;
+    FUN_005a7fe0((int)actor);
+    return;
+  }
+  pSVar6 = (this->m_removed).first;
+  if ((pSVar6 == nullptr) || (uVar4 = (int)pSVar7 - (int)pSVar6 >> 3, uVar4 < 2)) {
+    uVar4 = 1;
+  }
+  if (pSVar6 == nullptr) {
+    iVar1 = 0;
+  }
+  else {
+    iVar1 = (int)pSVar7 - (int)pSVar6 >> 3;
+  }
+  iVar1 += uVar4;
+  iVar2 = iVar1;
+  if (iVar1 < 0) {
+    iVar2 = 0;
+  }
+  pSVar3 = operator_new(iVar2 * 8);
+  pSVar5 = pSVar3;
+  for (pSVar6 = (this->m_removed).first; pSVar6 != pSVar7; pSVar6 = pSVar6 + 1) {
+    FUN_00476e30(&pSVar5->actor,&pSVar6->actor);
+    pSVar5++;
+  }
+  FUN_00476e00(&pSVar5->actor,1,&local_8);
+  FUN_00476dd0(&pSVar7->actor,&((this->m_removed).last)->actor,&pSVar5[1].actor);
+  empty_function_476b50();
+  operator_delete((this->m_removed).first);
+  pSVar7 = (this->m_removed).first;
+  (this->m_removed).end = pSVar3 + iVar1;
+  if (pSVar7 == nullptr) {
+    (this->m_removed).first = pSVar3;
+    (this->m_removed).last = pSVar3 + 1;
+    FUN_005a7fe0((int)actor);
+    return;
+  }
+  (this->m_removed).first = pSVar3;
+  (this->m_removed).last = pSVar3 + ((int)(this->m_removed).last - (int)pSVar7 >> 3) + 1;
+  FUN_005a7fe0((int)actor);
+}
+
+// 0x00476860
+void __thiscall C_ActorsModule::TickRemovals(C_ActorsModule *this,int timeDelta)
+{
+  uVar4 = 0;
+  while ((pSVar2 = (this->m_removed).first, pSVar2 != nullptr &&
+         (uVar4 < (uint32_t)((int)(this->m_removed).last - (int)pSVar2 >> 3)))) {
+    pSVar2[uVar4].timeLeft = pSVar2[uVar4].timeLeft - timeDelta;
+    uVar5 = uVar4;
+    if ((this->m_removed).first[uVar4].timeLeft < 0) {
+      if (((uint8_t)g_gameRole & 1) != 0) {
+        iVar3 = FUN_0072f040(0x97d070);
+        *(uint8_t *)
+         (*(int *)(iVar3 + 4) + 0xa2 + ((this->m_removed).first[uVar4].actor)->m_netId * 0xc4) = 0;
+        FUN_0072f100(0x97d070);
+      }
+      if (((uint8_t)g_gameRole & 2) != 0) {
+        (*((this->m_removed).first[uVar4].actor)->vtable->StopMission)(0);
+      }
+      if (((uint8_t)g_gameRole & 1) != 0) {
+        (*((this->m_removed).first[uVar4].actor)->vtable->StopMission)(1);
+      }
+      if (((uint8_t)g_gameRole & 2) != 0) {
+        pSVar2 = (this->m_removed).first;
+        iVar3 = GetGame();
+        FUN_0049ef70(*(void **)(iVar3 + 0x58),1,(int)pSVar2[uVar4].actor);
+      }
+      actor = (this->m_removed).first[uVar4].actor;
+      (*g_actorCreators[actor->m_type]->vtable->Destroy)(actor);
+      pSVar2 = (this->m_removed).first;
+      if ((pSVar2 != nullptr) &&
+         (1 < (uint32_t)((int)(this->m_removed).last - (int)pSVar2 >> 3))) {
+        if (pSVar2 == nullptr) {
+          iVar3 = 0;
+        }
+        else {
+          iVar3 = (int)(this->m_removed).last - (int)pSVar2 >> 3;
+        }
+        pSVar2 = (this->m_removed).first;
+        pSVar2[uVar4].actor = pSVar2[iVar3 - 1].actor;
+        pSVar2 = (this->m_removed).first;
+        if (pSVar2 == nullptr) {
+          iVar3 = 0;
+        }
+        else {
+          iVar3 = (int)(this->m_removed).last - (int)pSVar2 >> 3;
+        }
+        pSVar2 = (this->m_removed).first;
+        uVar5 = uVar4 - 1;
+        pSVar2[uVar4].timeLeft = pSVar2[iVar3 - 1].timeLeft;
+      }
+      ppSVar1 = &(this->m_removed).last;
+      *ppSVar1 = *ppSVar1 - 1;
+    }
+    uVar4 = uVar5 + 1;
+  }
+}
+
+// 0x004769d0
+void __thiscall C_ActorsModule::WriteState(C_ActorsModule *this,C_BitStream *msg)
+{
+  ppCVar1 = (this->m_actors).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    iVar4 = 0;
+  }
+  else {
+    iVar4 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+  }
+  iVar3 = 0;
+  if (0 < iVar4) {
+    do {
+      pCVar2 = (this->m_actors).first[iVar3];
+      if (pCVar2 != nullptr) {
+        (*pCVar2->vtable->WriteState)(msg);
+      }
+      iVar3++;
+    } while (iVar3 < iVar4);
+  }
+}
+
+// 0x00476a10
+void __thiscall C_ActorsModule::ReadState(C_ActorsModule *this,C_BitStream *msg)
+{
+  ppCVar1 = (this->m_actors).first;
+  if (ppCVar1 == (C_Actor **)0x0) {
+    iVar4 = 0;
+  }
+  else {
+    iVar4 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+  }
+  iVar3 = 0;
+  if (0 < iVar4) {
+    do {
+      pCVar2 = (this->m_actors).first[iVar3];
+      if (pCVar2 != nullptr) {
+        (*pCVar2->vtable->ReadState)(msg);
+      }
+      iVar3++;
+    } while (iVar3 < iVar4);
+  }
+}
+
+// 0x00476a50
+void __thiscall C_ActorsModule::CountEnemies(C_ActorsModule *this)
+{
+  if ((((uint8_t)g_gameRole & 7) == 7) ||
+     (iVar2 = C_GameProfile::IsCooperativeGame((C_GameProfile *)&g_gameProfile), (char)iVar2 != '\0'
+     )) {
+    iVar2 = 0;
+    this->m_liveEnemies = 0;
+    this->m_carnageEnemies = 0;
+    this->m_carnageEnemy = nullptr;
+    ppCVar1 = (this->m_actors).first;
+    if (ppCVar1 == (C_Actor **)0x0) {
+      iVar5 = 0;
+    }
+    else {
+      iVar5 = (int)(this->m_actors).last - (int)ppCVar1 >> 2;
+    }
+    if (0 < iVar5) {
+      do {
+        this_00 = (C_Human *)(this->m_actors).first[iVar2];
+        if ((((this_00 != nullptr) && (this_00->m_018 == 3)) && (this_00->m_19c == 2)) &&
+           (((0 < this_00->m_0ec && (this_00->m_0b0 != nullptr)) &&
+            (uVar3 = C_Human::IsUnconscious(this_00), (char)uVar3 == '\0')))) {
+          iVar4 = C_Human::IsAISuspended(this_00);
+          if ((char)iVar4 == '\0') {
+            this->m_liveEnemies = this->m_liveEnemies + 1;
+          }
+          if (this_00->m_1a4 != '\0') {
+            this->m_carnageEnemy = (C_Actor *)this_00;
+            this->m_carnageEnemies = this->m_carnageEnemies + 1;
+          }
+        }
+        iVar2++;
+      } while (iVar2 < iVar5);
+    }
+    if (this->m_carnageEnemies != 1) {
+      this->m_carnageEnemy = nullptr;
+    }
+  }
+}
+
+// 0x00476b20
+void __fastcall vector_tidy_476b20(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(uint32_t *)(param_1 + 4) = 0;
+  *(uint32_t *)(param_1 + 8) = 0;
+  *(uint32_t *)(param_1 + 0xc) = 0;
+}
+
+// 0x00476b40
+void empty_function_476b40(void)
+{
+}
+
+// 0x00476b50
+void empty_function_476b50(void)
+{
+}
+
+// 0x00476b60
+void __thiscall ActorPtrVector_Insert(void *this,C_Actor **pos,uint32_t count,C_Actor **value)
+{
+  ppCVar4 = *(C_Actor ***)((int)this + 8);
+  if (count <= (uint32_t)(*(int *)((int)this + 0xc) - (int)ppCVar4 >> 2)) {
+    if ((uint32_t)((int)ppCVar4 - (int)pos >> 2) < count) {
+      ppCVar5 = pos + count;
+      if (pos != ppCVar4) {
+        ppCVar8 = ppCVar5 + -count;
+        do {
+          if (ppCVar5 != (C_Actor **)0x0) {
+            *ppCVar5 = *ppCVar8;
+          }
+          ppCVar8++;
+          ppCVar5++;
+        } while (ppCVar8 != ppCVar4);
+      }
+      puVar7 = *(uint32_t **)((int)this + 8);
+      for (iVar1 = count - ((int)puVar7 - (int)pos >> 2); iVar1 != 0; iVar1 = iVar1 - 1) {
+        if (puVar7 != nullptr) {
+          *puVar7 = *value;
+        }
+        puVar7++;
+      }
+      ppCVar4 = *(C_Actor ***)((int)this + 8);
+      for (; pos != ppCVar4; pos = pos + 1) {
+        *pos = *value;
+      }
+      *(uint32_t *)((int)this + 8) = *(int *)((int)this + 8) + count * 4;
+      return;
+    }
+    if (count != 0) {
+      ppCVar5 = ppCVar4;
+      for (ppCVar8 = ppCVar4 + -count; ppCVar8 != ppCVar4; ppCVar8 = ppCVar8 + 1) {
+        if (ppCVar5 != (C_Actor **)0x0) {
+          *ppCVar5 = *ppCVar8;
+        }
+        ppCVar5++;
+      }
+      puVar7 = *(uint32_t **)((int)this + 8);
+      for (ppCVar4 = (C_Actor **)(puVar7 + -count); pos != ppCVar4; ppCVar4 = ppCVar4 - 1) {
+        puVar7--;
+        *puVar7 = ppCVar4[-1];
+      }
+      ppCVar4 = pos + count;
+      for (; pos != ppCVar4; pos = pos + 1) {
+        *pos = *value;
+      }
+      *(int *)((int)this + 8) = *(int *)((int)this + 8) + count * 4;
+    }
+    return;
+  }
+  iVar1 = *(int *)((int)this + 4);
+  if ((iVar1 == 0) || (uVar6 = (int)ppCVar4 - iVar1 >> 2, uVar6 <= count)) {
+    uVar6 = count;
+  }
+  if (iVar1 == 0) {
+    iVar1 = 0;
+  }
+  else {
+    iVar1 = (int)ppCVar4 - iVar1 >> 2;
+  }
+  iVar1 += uVar6;
+  iVar2 = iVar1;
+  if (iVar1 < 0) {
+    iVar2 = 0;
+  }
+  puVar3 = operator_new(iVar2 * 4);
+  puVar7 = puVar3;
+  for (ppCVar4 = *(C_Actor ***)((int)this + 4); uVar6 = count, puVar9 = puVar7, ppCVar4 != pos;
+      ppCVar4 = ppCVar4 + 1) {
+    if (puVar7 != nullptr) {
+      *puVar7 = *ppCVar4;
+    }
+    puVar7++;
+  }
+  for (; uVar6 != 0; uVar6 = uVar6 - 1) {
+    if (puVar9 != nullptr) {
+      *puVar9 = *value;
+    }
+    puVar9++;
+  }
+  ppCVar4 = *(C_Actor ***)((int)this + 8);
+  puVar9 = puVar7 + count;
+  if (pos != ppCVar4) {
+    ppCVar5 = (C_Actor **)((int)puVar9 + (count * -4 - (int)puVar7) + (int)pos);
+    do {
+      if (puVar9 != nullptr) {
+        *puVar9 = *ppCVar5;
+      }
+      ppCVar5++;
+      puVar9++;
+    } while (ppCVar5 != ppCVar4);
+  }
+  operator_delete(*(void **)((int)this + 4));
+  *(uint32_t **)((int)this + 0xc) = puVar3 + iVar1;
+  iVar1 = *(int *)((int)this + 4);
+  if (iVar1 == 0) {
+    *(uint32_t **)((int)this + 4) = puVar3;
+    *(uint32_t **)((int)this + 8) = puVar3 + count;
+    return;
+  }
+  *(uint32_t **)((int)this + 4) = puVar3;
+  *(uint32_t **)((int)this + 8) = puVar3 + (*(int *)((int)this + 8) - iVar1 >> 2) + count;
+}
+
+// 0x00476d70
+void uninitialized_copy4_476d70(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != nullptr) {
+      *param_3 = *param_1;
+    }
+    param_3++;
+  }
+}
+
+// 0x00476da0
+void uninitialized_fill_n4_476da0(uint32_t *param_1,int param_2,uint32_t *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 - 1) {
+    if (param_1 != nullptr) {
+      *param_1 = *param_3;
+    }
+    param_1++;
+  }
+}
+
+// 0x00476dd0
+void FUN_00476dd0(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 2) {
+    if (param_3 != nullptr) {
+      *param_3 = *param_1;
+      param_3[1] = param_1[1];
+    }
+    param_3 += 2;
+  }
+}
+
+// 0x00476e00
+void FUN_00476e00(uint32_t *param_1,int param_2,uint32_t *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 - 1) {
+    if (param_1 != nullptr) {
+      *param_1 = *param_3;
+      param_1[1] = param_3[1];
+    }
+    param_1 += 2;
+  }
+}
+
+// 0x00476e30
+void __fastcall FUN_00476e30(uint32_t *param_1,uint32_t *param_2)
+{
+  if (param_1 != nullptr) {
+    *param_1 = *param_2;
+    param_1[1] = param_2[1];
+  }
+}
+
+// 0x00476e40
+void FUN_00476e40(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x00476e70
+void FUN_00476e70(void)
+{
+  StaticInit_TemporaryActors();
+  FUN_00476ea0();
+}
+
+// 0x00476e80
+void StaticInit_TemporaryActors(void)
+{
+  C_TemporaryActorsList::C_TemporaryActorsList
+            ((C_TemporaryActorsList *)&g_temporaryActors,0xc,"Temp. Actors");
+}
+
+// 0x00476ea0
+void FUN_00476ea0(void)
+{
+  atexit(StaticExit_TemporaryActors);
+}
+
+// 0x00476eb0
+void StaticExit_TemporaryActors(void)
+{
+  C_TemporaryActorsList::~C_TemporaryActorsList((C_TemporaryActorsList *)&g_temporaryActors);
+}
+

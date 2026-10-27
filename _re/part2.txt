@@ -1,0 +1,5450 @@
+// 0x0043f2a0
+void StaticInit_43f2a0(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x0043f2d0
+void __fastcall RandomizeDirection(S_vector *dir,S_vector *variance)
+{
+  if (variance->z * variance->z + variance->y * variance->y + variance->x * variance->x != 0.0) {
+    fVar1 = dir->y;
+    fVar2 = variance->z;
+    fVar3 = dir->z;
+    fVar4 = variance->y;
+    fVar5 = dir->z;
+    fVar6 = variance->x;
+    fVar7 = dir->x;
+    fVar8 = variance->z;
+    fVar9 = dir->x;
+    fVar10 = variance->y;
+    fVar11 = dir->y;
+    fVar12 = variance->x;
+    fVar16 = RandFloat();
+    fVar15 = (fVar16 - 0.5) + (fVar16 - 0.5);
+    fVar16 = variance->x;
+    fVar13 = variance->y;
+    fVar14 = variance->z;
+    fVar17 = RandFloat();
+    fVar17 = (fVar17 - 0.5) + (fVar17 - 0.5);
+    fVar1 = (fVar1 * fVar2 - fVar3 * fVar4) * fVar17 + fVar15 * fVar16 + dir->x;
+    dir->x = fVar1;
+    fVar2 = (fVar5 * fVar6 - fVar7 * fVar8) * fVar17 + fVar15 * fVar13 + dir->y;
+    fVar3 = (fVar9 * fVar10 - fVar11 * fVar12) * fVar17 + fVar15 * fVar14 + dir->z;
+    dir->y = fVar2;
+    dir->z = fVar3;
+    fVar4 = fVar1 * fVar1 + fVar2 * fVar2 + fVar3 * fVar3;
+    if (1e-08 <= ABS(fVar4 - 1.0)) {
+      if (fVar4 < 1e-08) {
+        if (fVar1 != 0.0) {
+          if (fVar1 < 0.0) {
+            dir->x = -1.0;
+            return;
+          }
+          dir->x = 1.0;
+          return;
+        }
+        if (fVar3 == 0.0) {
+          if (fVar2 < 0.0) {
+            dir->y = -1.0;
+            return;
+          }
+          dir->y = 1.0;
+          return;
+        }
+        if (fVar3 < 0.0) {
+          dir->z = -1.0;
+          return;
+        }
+        dir->z = 1.0;
+        return;
+      }
+      fVar4 = 1.0 / SQRT(fVar4);
+      dir->x = fVar1 * fVar4;
+      dir->y = fVar2 * fVar4;
+      dir->z = fVar3 * fVar4;
+    }
+  }
+}
+
+// 0x0043f500
+S_Particle * __thiscall S_Particle::S_Particle(S_Particle *this)
+{
+  this->m_def = nullptr;
+  return this;
+}
+
+// 0x0043f510
+void empty_function_43f510(void)
+{
+}
+
+// 0x0043f520
+bool __thiscall
+S_Particle::Init(S_Particle *this,S_matrix *emitterMatrix,S_ParticleDef *def,int time,int defIndex)
+{
+  this->m_defIndex = defIndex;
+  this->m_def = def;
+  S_matrix::Identity(&this->m_matrix);
+  pSVar3 = (this->m_def->m_frames).first;
+  if (pSVar3 == nullptr) {
+    iVar5 = 0;
+  }
+  else {
+    iVar5 = (int)(this->m_def->m_frames).last - (int)pSVar3 >> 4;
+  }
+  this->m_numFrames = iVar5;
+  fVar9 = (def->m_pos).z;
+  fVar1 = (def->m_pos).y;
+  fVar2 = (def->m_pos).x;
+  if ((1e-16 <= fVar9 * fVar9 + fVar1 * fVar1 + fVar2 * fVar2) ||
+     (fVar9 = (def->m_posVariance).z, fVar1 = (def->m_posVariance).y, fVar2 = (def->m_posVariance).x
+     , 1e-16 <= fVar9 * fVar9 + fVar1 * fVar1 + fVar2 * fVar2)) {
+    fVar9 = (def->m_pos).x;
+    fVar1 = (def->m_pos).y;
+    fVar2 = (def->m_pos).z;
+    fVar6 = RandFloat();
+    fVar6 = (fVar6 - 0.5) * (def->m_posVariance).x;
+    fVar7 = RandFloat();
+    fVar7 = (fVar7 - 0.5) * (def->m_posVariance).y;
+    fVar8 = RandFloat();
+    fVar8 = (fVar8 - 0.5) * (def->m_posVariance).z;
+    (this->m_matrix).m[3][0] = fVar6 + fVar6 + fVar9;
+    (this->m_matrix).m[3][1] = fVar7 + fVar7 + fVar1;
+    (this->m_matrix).m[3][2] = fVar8 + fVar8 + fVar2;
+  }
+  if ((def->m_flags & 1) == 0) {
+    this->m_flags = 0;
+  }
+  else {
+    this->m_flags = 1;
+    fVar9 = (this->m_matrix).m[3][1];
+    fVar1 = emitterMatrix->m[3][1];
+    fVar2 = (this->m_matrix).m[3][2];
+    fVar6 = emitterMatrix->m[3][2];
+    (this->m_matrix).m[3][0] = (this->m_matrix).m[3][0] + emitterMatrix->m[3][0];
+    (this->m_matrix).m[3][2] = fVar2 + fVar6;
+    (this->m_matrix).m[3][1] = fVar9 + fVar1;
+  }
+  this->m_phase = 0;
+  this->m_frame = 0;
+  if (this->m_numFrames < 2) {
+    this->m_frameTimer = -1;
+  }
+  else {
+    this->m_frameTimer = this->m_def->m_frameTime;
+  }
+  fVar9 = RandFloat();
+  fVar9 = (fVar9 - 0.5) * def->m_rotationVariance;
+  this->m_rotation = fVar9 + fVar9 + def->m_rotation;
+  fVar9 = RandFloat();
+  fVar9 = (fVar9 - 0.5) * def->m_sizeVariance;
+  this->m_size = fVar9 + fVar9 + def->m_size;
+  fVar9 = RandFloat();
+  fVar9 = (fVar9 - 0.5) * def->m_alphaVariance;
+  this->m_alpha = fVar9 + fVar9 + def->m_alpha;
+  bVar4 = StartPhase(this,emitterMatrix);
+  if (!bVar4) {
+    return false;
+  }
+  fVar9 = RandFloat();
+  fVar9 = (fVar9 - 0.5) * def->m_speedVariance;
+  this->m_speed = fVar9 + fVar9 + def->m_speed;
+  if (time != 0) {
+    Tick(this,time);
+  }
+  return true;
+}
+
+// 0x0043f730
+bool __thiscall S_Particle::StartPhase(S_Particle *this,S_matrix *emitterMatrix)
+{
+  pSVar2 = this->m_def;
+  ppSVar3 = (pSVar2->m_phases).first;
+  if (ppSVar3 == (S_ParticlePhase **)0x0) {
+    uVar5 = 0;
+  }
+  else {
+    uVar5 = (int)(pSVar2->m_phases).last - (int)ppSVar3 >> 2;
+  }
+  if ((uint32_t)this->m_phase < uVar5) {
+    pSVar4 = (pSVar2->m_phases).first[this->m_phase];
+    local_30.x = (pSVar4->m_dir).x;
+    local_30.y = (pSVar4->m_dir).y;
+    local_30.z = (pSVar4->m_dir).z;
+    if (local_30.x * local_30.x + local_30.y * local_30.y + local_30.z * local_30.z < 1e-16) {
+      local_20.x = 0.0;
+      local_20.y = 0.0;
+      local_20.z = 1.0;
+      local_30.x = 0.0;
+      local_30.y = 0.0;
+      local_30.z = 1.0;
+    }
+    fVar8 = (pSVar4->m_dirVariance).z;
+    fVar1 = (pSVar4->m_dirVariance).y;
+    fVar9 = (pSVar4->m_dirVariance).x;
+    if (1e-16 <= fVar8 * fVar8 + fVar1 * fVar1 + fVar9 * fVar9) {
+      fVar8 = RandFloat();
+      fVar8 = (fVar8 - 0.5) * (pSVar4->m_dirVariance).x;
+      local_30.x = fVar8 + fVar8 + local_30.x;
+      fVar8 = RandFloat();
+      fVar8 = (fVar8 - 0.5) * (pSVar4->m_dirVariance).y;
+      local_30.y = fVar8 + fVar8 + local_30.y;
+      fVar8 = RandFloat();
+      fVar8 = (fVar8 - 0.5) * (pSVar4->m_dirVariance).z;
+      local_30.z = fVar8 + fVar8 + local_30.z;
+      fVar8 = local_30.x * local_30.x + local_30.y * local_30.y + local_30.z * local_30.z;
+      if (1e-08 <= ABS(fVar8 - 1.0)) {
+        if (1e-08 <= fVar8) {
+          fVar8 = 1.0 / SQRT(fVar8);
+          local_30.x = local_30.x * fVar8;
+          local_30.y = local_30.y * fVar8;
+          local_30.z = fVar8 * local_30.z;
+        }
+        else if (local_30.x == 0.0) {
+          if (local_30.z == 0.0) {
+            if (0.0 <= local_30.y) {
+              local_30.y = 1.0;
+            }
+            else {
+              local_30.y = -1.0;
+            }
+          }
+          else if (0.0 <= local_30.z) {
+            local_30.z = 1.0;
+          }
+          else {
+            local_30.z = -1.0;
+          }
+        }
+        else if (0.0 <= local_30.x) {
+          local_30.x = 1.0;
+        }
+        else {
+          local_30.x = -1.0;
+        }
+      }
+    }
+    if ((this->m_flags & 1) == 0) {
+      pSVar6 = S_vector::RotateByMatrix(&local_30,&local_20,emitterMatrix);
+      local_30.x = pSVar6->x;
+      local_30.y = pSVar6->y;
+      local_30.z = pSVar6->z;
+    }
+    S_matrix::SetDir3(&this->m_matrix,&local_30);
+    this->m_gravity = pSVar4->m_gravity * 0.001;
+    RandFloat();
+    lVar7 = __ftol();
+    this->m_lifetime = (int)lVar7;
+    if ((int)lVar7 < 1) {
+      this->m_lifetime = 1;
+    }
+    fVar8 = RandFloat();
+    fVar8 = (fVar8 - 0.5) * pSVar4->m_endSizeVariance;
+    this->m_sizeSpeed =
+         (((fVar8 + fVar8 + pSVar4->m_endSize) - this->m_size) / ((float)this->m_lifetime * 0.001))
+         * 0.001;
+    fVar8 = RandFloat();
+    fVar8 = (fVar8 - 0.5) * pSVar4->m_endAlphaVariance;
+    fVar8 = fVar8 + fVar8 + pSVar4->m_endAlpha;
+    if (fVar8 <= 1.0) {
+      if (fVar8 < 0.0) {
+        fVar8 = 0.0;
+      }
+    }
+    else {
+      fVar8 = 1.0;
+    }
+    this->m_alphaSpeed = ((fVar8 - this->m_alpha) / ((float)this->m_lifetime * 0.001)) * 0.001;
+    fVar8 = RandFloat();
+    fVar8 = (fVar8 - 0.5) * pSVar4->m_accelVariance;
+    this->m_accel = (fVar8 + fVar8 + pSVar4->m_accel) * 0.001;
+    fVar8 = RandFloat();
+    pSVar6 = &this->m_color;
+    fVar8 = (fVar8 - 0.5) * pSVar4->m_rotSpeedVariance;
+    this->m_rotSpeed = (fVar8 + fVar8 + pSVar4->m_rotSpeed) * 0.001;
+    pSVar6->x = (pSVar4->m_color).x;
+    (this->m_color).y = (pSVar4->m_color).y;
+    (this->m_color).z = (pSVar4->m_color).z;
+    this->m_colorW = pSVar4->m_colorW;
+    fVar8 = (pSVar4->m_colorVariance).z;
+    fVar1 = (pSVar4->m_colorVariance).y;
+    fVar9 = (pSVar4->m_colorVariance).x;
+    if (1e-16 <= fVar8 * fVar8 + fVar1 * fVar1 + fVar9 * fVar9) {
+      fVar9 = RandFloat();
+      fVar8 = (pSVar4->m_colorVariance).y;
+      fVar1 = (pSVar4->m_colorVariance).z;
+      pSVar6->x = fVar9 * (pSVar4->m_colorVariance).x + pSVar6->x;
+      (this->m_color).y = fVar9 * fVar8 + (this->m_color).y;
+      (this->m_color).z = fVar9 * fVar1 + (this->m_color).z;
+    }
+    return true;
+  }
+  return false;
+}
+
+// 0x0043fb40
+void __thiscall S_Particle::Tick(S_Particle *this,int time)
+{
+  float (*pafVar1) [4];
+  iVar5 = this->m_lifetime - time;
+  this->m_lifetime = iVar5;
+  if (iVar5 < 0) {
+    this->m_lifetime = 0;
+    time += iVar5;
+  }
+  if ((DAT_008999d0 & 1) == 0) {
+    DAT_008999d0 |= 1;
+    atexit(&DAT_0043fde0);
+  }
+  pafVar1 = (this->m_matrix).m + 3;
+  local_50.x = (this->m_matrix).m[2][0];
+  local_50.y = (this->m_matrix).m[2][1];
+  local_50.z = (this->m_matrix).m[2][2];
+  local_44 = (this->m_matrix).m[2][3];
+  local_30 = (*pafVar1)[0];
+  local_2c = (this->m_matrix).m[3][1];
+  local_28 = (this->m_matrix).m[3][2];
+  local_24 = (this->m_matrix).m[3][3];
+  if (this->m_gravity != 0.0) {
+    local_50.y = local_50.y - (float)time * this->m_gravity;
+    S_matrix::SetDir3(&this->m_matrix,&local_50);
+  }
+  if (this->m_accel != 0.0) {
+    this->m_speed = (float)time * this->m_accel + this->m_speed;
+  }
+  fVar4 = (float)time;
+  _DAT_008999c0 = local_50.x * this->m_speed * fVar4 * 0.001;
+  _DAT_008999c4 = local_50.y * this->m_speed * fVar4 * 0.001;
+  _DAT_008999cc = local_34;
+  _DAT_008999c8 = local_50.z * this->m_speed * fVar4 * 0.001;
+  local_2c += _DAT_008999c4;
+  local_28 += _DAT_008999c8;
+  (*pafVar1)[0] = _DAT_008999c0 + local_30;
+  (this->m_matrix).m[3][1] = local_2c;
+  fVar2 = this->m_rotSpeed;
+  (this->m_matrix).m[3][2] = local_28;
+  if (fVar2 != 0.0) {
+    fVar2 = fVar4 * this->m_rotSpeed + this->m_rotation;
+    this->m_rotation = fVar2;
+    if (0.0 <= fVar2) {
+      if (6.2831855 < fVar2) {
+        this->m_rotation = fVar2 - 6.2831855;
+      }
+    }
+    else {
+      this->m_rotation = fVar2 + 6.2831855;
+    }
+  }
+  if (this->m_sizeSpeed != 0.0) {
+    this->m_size = fVar4 * this->m_sizeSpeed + this->m_size;
+  }
+  if (this->m_alphaSpeed != 0.0) {
+    fVar2 = fVar4 * this->m_alphaSpeed + this->m_alpha;
+    this->m_alpha = fVar2;
+    if (fVar2 <= 1.0) {
+      if (fVar2 < 0.0) {
+        this->m_alpha = 0.0;
+      }
+    }
+    else {
+      this->m_alpha = 1.0;
+    }
+  }
+  if (-1 < this->m_frameTimer) {
+    iVar5 = this->m_frameTimer + time;
+    pSVar3 = this->m_def;
+    this->m_frameTimer = iVar5;
+    if (pSVar3->m_frameTime < iVar5) {
+      iVar5 = this->m_frame + 1;
+      this->m_frameTimer = 0;
+      this->m_frame = iVar5;
+      if (iVar5 == this->m_numFrames) {
+        this->m_frame = pSVar3->m_loopFrame;
+      }
+      pSVar6 = (pSVar3->m_frames).first + this->m_frame;
+      (this->m_uv).u0 = pSVar6->u0;
+      (this->m_uv).v0 = pSVar6->v0;
+      (this->m_uv).u1 = pSVar6->u1;
+      (this->m_uv).v1 = pSVar6->v1;
+    }
+  }
+}
+
+// 0x0043fdf0
+void __thiscall S_Particle::Save(S_Particle *this,C_chunk *chunk)
+{
+  this_00 = chunk;
+  if (chunk->m_open != false) {
+    local_8 = 0x2b66;
+    iVar1 = dtaSeek(chunk->m_handle,0,1);
+    this_00->m_stack[this_00->m_depth] = iVar1;
+    this_00->m_depth = this_00->m_depth + 1;
+    dtaWrite(this_00->m_handle,&local_8,6);
+    if (this_00->m_open != false) {
+      if (this_00->m_writing != false) {
+        dtaWrite(this_00->m_handle,this,0x40);
+      }
+      if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+        dtaWrite(this_00->m_handle,&this->m_uv,0x10);
+      }
+    }
+  }
+  C_chunk::Write(this_00,&this->m_color,0xc);
+  chunk = (C_chunk *)this->m_frame;
+  C_chunk::Write(this_00,&chunk,4);
+  chunk = (C_chunk *)this->m_numFrames;
+  C_chunk::Write(this_00,&chunk,4);
+  chunk = (C_chunk *)this->m_frameTimer;
+  C_chunk::Write(this_00,&chunk,4);
+  chunk = (C_chunk *)this->m_lifetime;
+  C_chunk::Write(this_00,&chunk,4);
+  chunk = (C_chunk *)this->m_phase;
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  chunk = (C_chunk *)this->m_flags;
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  chunk = (C_chunk *)this->m_alpha;
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  chunk = (C_chunk *)this->m_alphaSpeed;
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  chunk = (C_chunk *)this->m_speed;
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  chunk = (C_chunk *)this->m_accel;
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  chunk = (C_chunk *)this->m_gravity;
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  chunk = (C_chunk *)this->m_size;
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  chunk = (C_chunk *)this->m_sizeSpeed;
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  chunk = (C_chunk *)this->m_rotation;
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  chunk = (C_chunk *)this->m_rotSpeed;
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  C_chunk::Ascend(this_00);
+}
+
+// 0x00440080
+void __thiscall S_Particle::Load(S_Particle *this,C_chunk *chunk)
+{
+  this_00 = chunk;
+  sVar1 = 0;
+  do {
+    do {
+      if (this_00->m_open == false) {
+        return;
+      }
+      if (this_00->m_depth == 0) {
+        return;
+      }
+      iVar2 = dtaSeek(this_00->m_handle,0,1);
+      if (iVar2 == -1) {
+        return;
+      }
+      chunk = (C_chunk *)(this_00->m_stack[this_00->m_depth - 1] - iVar2);
+      if (chunk == nullptr) {
+        return;
+      }
+      if ((this_00->m_open != false) && (iVar2 = dtaRead(this_00->m_handle,&sStack_8,6), iVar2 == 6)
+         ) {
+        iVar2 = dtaSeek(this_00->m_handle,0,1);
+        this_00->m_stack[this_00->m_depth] = iVar2 - 6 + CONCAT22(uStack_4,uStack_6);
+        this_00->m_depth = this_00->m_depth + 1;
+        sVar1 = sStack_8;
+      }
+    } while (sVar1 != 0x2b66);
+    if (this_00->m_open != false) {
+      if (this_00->m_writing == false) {
+        if (this_00->m_depth != 0) {
+          iVar2 = this_00->m_stack[this_00->m_depth - 1];
+          iVar3 = dtaSeek(this_00->m_handle,0,1);
+          pCStack_10 = (C_chunk *)(iVar2 - iVar3);
+          chunk = nullptr;
+          ppCVar4 = &chunk;
+          if (-1 < (int)pCStack_10) {
+            ppCVar4 = &pCStack_10;
+          }
+          if ((int)*ppCVar4 < 0x40) goto LAB_00440177;
+        }
+        dtaRead(this_00->m_handle,this,0x40);
+      }
+LAB_00440177:
+      if ((this_00->m_open != false) && (this_00->m_writing == false)) {
+        if (this_00->m_depth != 0) {
+          iVar2 = this_00->m_stack[this_00->m_depth - 1];
+          iVar3 = dtaSeek(this_00->m_handle,0,1);
+          pCStack_10 = (C_chunk *)(iVar2 - iVar3);
+          chunk = nullptr;
+          ppCVar4 = &chunk;
+          if (-1 < (int)pCStack_10) {
+            ppCVar4 = &pCStack_10;
+          }
+          if ((int)*ppCVar4 < 0x10) goto LAB_004401c5;
+        }
+        dtaRead(this_00->m_handle,&this->m_uv,0x10);
+      }
+    }
+LAB_004401c5:
+    C_chunk::Read(this_00,&this->m_color,0xc);
+    C_chunk::Read(this_00,&this->m_frame,4);
+    C_chunk::Read(this_00,&this->m_numFrames,4);
+    C_chunk::Read(this_00,&this->m_frameTimer,4);
+    C_chunk::Read(this_00,&this->m_lifetime,4);
+    C_chunk::Read(this_00,&this->m_phase,4);
+    C_chunk::Read(this_00,&this->m_flags,4);
+    C_chunk::Read(this_00,&this->m_alpha,4);
+    C_chunk::Read(this_00,&this->m_alphaSpeed,4);
+    C_chunk::Read(this_00,&this->m_speed,4);
+    C_chunk::Read(this_00,&this->m_accel,4);
+    C_chunk::Read(this_00,&this->m_gravity,4);
+    C_chunk::Read(this_00,&this->m_size,4);
+    C_chunk::Read(this_00,&this->m_sizeSpeed,4);
+    if (this_00->m_open == false) {
+      return;
+    }
+    if (this_00->m_writing == false) {
+      if (this_00->m_depth != 0) {
+        iVar2 = this_00->m_stack[this_00->m_depth - 1];
+        iVar3 = dtaSeek(this_00->m_handle,0,1);
+        pCStack_10 = (C_chunk *)(iVar2 - iVar3);
+        chunk = nullptr;
+        ppCVar4 = &chunk;
+        if (-1 < (int)pCStack_10) {
+          ppCVar4 = &pCStack_10;
+        }
+        if ((int)*ppCVar4 < 4) goto LAB_004402d3;
+      }
+      dtaRead(this_00->m_handle,&this->m_rotation,4);
+    }
+LAB_004402d3:
+    if (this_00->m_open == false) {
+      return;
+    }
+    if (this_00->m_writing == false) {
+      if (this_00->m_depth != 0) {
+        iVar2 = this_00->m_stack[this_00->m_depth - 1];
+        iVar3 = dtaSeek(this_00->m_handle,0,1);
+        pCStack_10 = (C_chunk *)(iVar2 - iVar3);
+        chunk = nullptr;
+        ppCVar4 = &chunk;
+        if (-1 < (int)pCStack_10) {
+          ppCVar4 = &pCStack_10;
+        }
+        if ((int)*ppCVar4 < 4) goto LAB_00440322;
+      }
+      dtaRead(this_00->m_handle,&this->m_rotSpeed,4);
+    }
+LAB_00440322:
+    if (this_00->m_open == false) {
+      return;
+    }
+    iVar2 = this_00->m_handle;
+    if (this_00->m_writing == false) {
+      iVar3 = this_00->m_stack[this_00->m_depth - 1];
+    }
+    else {
+      iVar3 = dtaSeek(iVar2,0,1);
+      iStack_c = iVar3 - this_00->m_stack[this_00->m_depth - 1];
+      dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+      dtaWrite(this_00->m_handle,&iStack_c,4);
+      iVar2 = this_00->m_handle;
+    }
+    dtaSeek(iVar2,iVar3,0);
+    if (this_00->m_depth != 0) {
+      this_00->m_depth = this_00->m_depth - 1;
+    }
+  } while( true );
+}
+
+// 0x004403b0
+void StaticInit_4403b0(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x004403e0
+void StaticInit_ParticleSortKeys(void)
+{
+  InitParticleSortKeys();
+  RegisterParticleSortKeysDtor();
+}
+
+// 0x004403f0
+void InitParticleSortKeys(void)
+{
+  g_particleSortKeys = 0;
+  g_particleSortCapacity = 0;
+  g_particleSortCount = 0;
+}
+
+// 0x00440410
+void RegisterParticleSortKeysDtor(void)
+{
+  atexit(FreeParticleSortKeys);
+}
+
+// 0x00440420
+void FreeParticleSortKeys(void)
+{
+  operator_delete(g_particleSortKeys);
+  g_particleSortKeys = nullptr;
+  g_particleSortCapacity = 0;
+  g_particleSortCount = 0;
+}
+
+// 0x00440440
+void StaticInit_ParticlePool(void)
+{
+  ConstructParticlePool();
+  RegisterParticlePoolDtor();
+}
+
+// 0x00440450
+void ConstructParticlePool(void)
+{
+  g_particlePool.m_growBy = 0x400;
+  g_particlePool.m_free = nullptr;
+  g_particlePool.m_spareNodes = nullptr;
+  g_particlePool.m_count = 0;
+  _DAT_008999e8 = 0;
+  g_particlePool.vtable = (C_ParticlePool_vtbl *)&PTR_ScalarDeletingDestructor_0080f990;
+  C_ParticlePool::Grow(&g_particlePool);
+}
+
+// 0x00440490
+void RegisterParticlePoolDtor(void)
+{
+  atexit(DestroyParticlePool);
+}
+
+// 0x004404a0
+void DestroyParticlePool(void)
+{
+  g_particlePool.vtable = (C_ParticlePool_vtbl *)&PTR_ScalarDeletingDestructor_0080f990;
+  while (g_particlePool.m_free != nullptr) {
+    ptr = (g_particlePool.m_free)->particle;
+    if (ptr != nullptr) {
+      empty_function_43f510();
+      _aligned_free(ptr);
+    }
+    pSVar1 = (g_particlePool.m_free)->next;
+    operator_delete(g_particlePool.m_free);
+    g_particlePool.m_free = pSVar1;
+  }
+  g_particlePool.m_free = nullptr;
+  while (g_particlePool.m_spareNodes != nullptr) {
+    pSVar1 = (g_particlePool.m_spareNodes)->next;
+    operator_delete(g_particlePool.m_spareNodes);
+    g_particlePool.m_spareNodes = pSVar1;
+  }
+  g_particlePool.m_free = nullptr;
+  g_particlePool.m_spareNodes = nullptr;
+  g_particlePool.m_count = 0;
+}
+
+// 0x00440530
+C_ParticleEmitter * __thiscall C_ParticleEmitter::C_ParticleEmitter(C_ParticleEmitter *this)
+{
+  (this->m_particles).alloc = local_11;
+  (this->m_particles).first = (S_Particle **)0x0;
+  (this->m_particles).last = (S_Particle **)0x0;
+  (this->m_particles).end = (S_Particle **)0x0;
+  (this->m_states).alloc = local_11;
+  (this->m_states).first = nullptr;
+  (this->m_states).last = nullptr;
+  (this->m_states).end = nullptr;
+  self = I3DGetDriver();
+  pIVar1 = (I3D_particle_visual *)(*self->vtable->CreateVisual)(self,0x52544d45);
+  this->m_visual = pIVar1;
+  *(uint8_t *)((int)&pIVar1[1].m_rot.s + 1) = 1;
+  (*this->m_visual->vtable->SetName)((I3D_frame *)this->m_visual,"MR_Particle");
+  this->m_parent = nullptr;
+  this->m_def = nullptr;
+  this->m_scene = nullptr;
+  return this;
+}
+
+// 0x004405e0
+C_ParticleEmitter * __thiscall
+C_ParticleEmitter::C_ParticleEmitter(C_ParticleEmitter *this,S_EffectDef *def)
+{
+  (this->m_particles).alloc = (uchar)def;
+  (this->m_particles).first = (S_Particle **)0x0;
+  (this->m_particles).last = (S_Particle **)0x0;
+  (this->m_particles).end = (S_Particle **)0x0;
+  (this->m_states).alloc = (uchar)def;
+  (this->m_states).first = nullptr;
+  (this->m_states).last = nullptr;
+  (this->m_states).end = nullptr;
+  self = I3DGetDriver();
+  pIVar1 = (I3D_particle_visual *)(*self->vtable->CreateVisual)(self,0x52544d45);
+  this->m_visual = pIVar1;
+  *(uint8_t *)((int)&pIVar1[1].m_rot.s + 1) = 1;
+  (*this->m_visual->vtable->SetName)((I3D_frame *)this->m_visual,"MR_Particle");
+  this->m_parent = nullptr;
+  this->m_scene = in_stack_00000008;
+  this->m_def = def;
+  this->m_unknownD0 = true;
+  return this;
+}
+
+// 0x004406a0
+void __thiscall C_ParticleEmitter::~C_ParticleEmitter(C_ParticleEmitter *this)
+{
+  Stop(this);
+  ppSVar1 = (this->m_particles).first;
+  if (ppSVar1 != (S_Particle **)0x0) {
+    pSVar4 = g_particlePool.m_spareNodes;
+    for (iVar3 = (int)(this->m_particles).last - (int)ppSVar1 >> 2;
+        g_particlePool.m_spareNodes = pSVar4, iVar3 != 0; iVar3 = iVar3 - 1) {
+      pSVar2 = (this->m_particles).last[-1];
+      if (pSVar2 != nullptr) {
+        if (pSVar4 == nullptr) {
+          pSVar4 = operator_new(8);
+          if (pSVar4 == nullptr) {
+            pSVar4 = nullptr;
+          }
+          else {
+            pSVar4->particle = nullptr;
+            pSVar4->next = nullptr;
+          }
+        }
+        else {
+          g_particlePool.m_spareNodes = pSVar4->next;
+        }
+        pSVar4->particle = pSVar2;
+        pSVar4->next = g_particlePool.m_free;
+        g_particlePool.m_count = g_particlePool.m_count + 1;
+        g_particlePool.m_free = pSVar4;
+      }
+      (this->m_particles).last = (this->m_particles).last - 1;
+      pSVar4 = g_particlePool.m_spareNodes;
+    }
+  }
+  (this->m_states).last = (this->m_states).first;
+  (*this->m_visual->vtable->Release)((I3D_frame *)this->m_visual);
+  operator_delete((this->m_states).first);
+  (this->m_states).first = nullptr;
+  (this->m_states).last = nullptr;
+  (this->m_states).end = nullptr;
+  operator_delete((this->m_particles).first);
+  (this->m_particles).first = (S_Particle **)0x0;
+  (this->m_particles).last = (S_Particle **)0x0;
+  (this->m_particles).end = (S_Particle **)0x0;
+}
+
+// 0x00440800
+void __thiscall
+C_ParticleEmitter::Init
+          (C_ParticleEmitter *this,I3D_scene *scene,I3D_frame *parent,S_matrix *matrix,
+          S_EffectDef *def,bool unknownD0)
+{
+  float (*pafVar13) [4];
+  this->m_scene = scene;
+  this->m_parent = parent;
+  pfVar8 = (float *)matrix;
+  pSVar11 = &this->m_matrix;
+  for (iVar10 = 0x10; iVar10 != 0; iVar10 = iVar10 - 1) {
+    pSVar11->m[0][0] = *pfVar8;
+    pfVar8++;
+    pSVar11 = (S_matrix *)(pSVar11->m[0] + 1);
+  }
+  fVar2 = def->m_range;
+  this->m_unknown94 = 100;
+  this->m_flags = 1;
+  this->m_rangeSq = fVar2 * fVar2;
+  if (parent == nullptr) {
+    S_matrix::Identity(&this->m_localMatrix);
+  }
+  else {
+    if ((parent->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(parent);
+    }
+    S_matrix::Inverse(&local_90,&parent->m_worldMatrix);
+    pfVar8 = (float *)S_matrix::OperatorMul(&this->m_matrix,&local_50,&local_90);
+    pIVar3 = this->m_parent;
+    pSVar11 = &this->m_localMatrix;
+    for (iVar10 = 0x10; iVar10 != 0; iVar10 = iVar10 - 1) {
+      pSVar11->m[0][0] = *pfVar8;
+      pfVar8++;
+      pSVar11 = (S_matrix *)(pSVar11->m[0] + 1);
+    }
+    psVar1 = &pIVar3->m_refCount;
+    *psVar1 = *psVar1 + 1;
+  }
+  this->m_def = def;
+  if (def->m_distanceFade == false) {
+    this->m_lodFactor = 1.0;
+  }
+  else {
+    cVar16 = '\x01';
+    pafVar13 = matrix->m + 3;
+    iVar15 = 0;
+    iVar10 = GetGame();
+    fVar12 = FUN_0069eca0(iVar10,*pafVar13,iVar15,cVar16);
+    this->m_lodFactor = (float)fVar12;
+  }
+  pCVar4 = (this->m_def->m_texture).rep;
+  fileName = pCVar4->chars;
+  if (pCVar4 == nullptr) {
+    fileName = &DAT_00867a90;
+  }
+  self = GetIGraph();
+  pfVar8 = (float *)0x2;
+  pCVar14 = nullptr;
+  lVar9 = (*self->vtable->LoadTexture)(self,fileName,0,2,&local_ac);
+  this_00 = pCVar14;
+  if (lVar9 == 0) {
+    (*pCVar14->m_visual->vtable->SetTexture)(pCVar14->m_visual,unaff_EDI);
+    (**(code **)*pfVar8)(pfVar8);
+  }
+  ppSVar5 = (pCVar14->m_def->m_particles).first;
+  if (ppSVar5 == (S_ParticleDef **)0x0) {
+    iVar10 = 0;
+  }
+  else {
+    iVar10 = (int)(pCVar14->m_def->m_particles).last - (int)ppSVar5 >> 2;
+  }
+  iVar15 = 0;
+  if (0 < iVar10) {
+    do {
+      pSVar6 = pCVar14->m_def;
+      local_ac = (IImage *)(float)(pSVar6->m_particles).first[iVar15]->m_rate;
+      pCVar14 = this_00;
+      if ((float)local_ac != 0.0) {
+        __ftol();
+        pCVar14 = this_00;
+      }
+      iStack_a8 = (pSVar6->m_particles).first[iVar15]->m_repeat;
+      vector_insert_n_e24_443880
+                (&pCVar14->m_states,&((pCVar14->m_states).last)->m_delay,1,
+                 (uint32_t *)&stack0xffffff44);
+      iVar15++;
+      this_00 = pCVar14;
+    } while (iVar15 < iVar10);
+  }
+  pCVar14->m_visual->m_11c = -1;
+  pIVar7 = pCVar14->m_visual;
+  pSVar11 = &pIVar7->m_worldMatrix;
+  for (iVar10 = 0x10; iVar10 != 0; iVar10 = iVar10 - 1) {
+    pSVar11->m[0][0] = *pfVar8;
+    pfVar8++;
+    pSVar11 = (S_matrix *)(pSVar11->m[0] + 1);
+  }
+  pIVar7->m_frameFlags = pIVar7->m_frameFlags | 0x20;
+  pIVar7 = this_00->m_visual;
+  iVar10 = this_00->m_def->m_blendMode;
+  if (iVar10 == 3) {
+    (*pIVar7->vtable->SetRenderState)(pIVar7,0x13,0x80);
+    (*this_00->m_visual->vtable->SetSrcBlend)(this_00->m_visual,this_00->m_def->m_srcBlend);
+    (*this_00->m_visual->vtable->SetDstBlend)(this_00->m_visual,this_00->m_def->m_dstBlend);
+  }
+  else {
+    (*pIVar7->vtable->SetRenderState)(pIVar7,0x13,1 << ((uint8_t)iVar10 & 0x1f));
+  }
+  pIVar7 = this_00->m_visual;
+  if (this_00->m_parent == nullptr) {
+    (*pIVar7->vtable->LinkTo)((I3D_frame *)pIVar7,nullptr,0);
+    pIVar7 = this_00->m_visual;
+    self_00 = this_00->m_scene;
+    if ((pIVar7->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc((I3D_frame *)pIVar7);
+    }
+    (*self_00->vtable->UpdateFrameSector)
+              (self_00,(I3D_frame *)pIVar7,(S_vector *)((pIVar7->m_worldMatrix).m + 3));
+  }
+  else {
+    (*pIVar7->vtable->LinkTo)((I3D_frame *)pIVar7,this_00->m_parent,1);
+  }
+  (*this_00->m_visual->vtable->Update)((I3D_frame *)this_00->m_visual);
+  EmitBursts(this_00);
+  empty_function_4432b0();
+  (*this_00->m_visual->vtable->SetOn)((I3D_frame *)this_00->m_visual,true);
+  this_00->m_unknownD0 = unknownD0;
+}
+
+// 0x00440b20
+void __thiscall
+C_ParticleEmitter::Restart
+          (C_ParticleEmitter *this,I3D_scene *scene,I3D_frame *parent,S_matrix *matrix,
+          bool unknownD0)
+{
+  float (*pafVar12) [4];
+  this->m_scene = scene;
+  self_00 = &this->m_matrix;
+  this->m_parent = parent;
+  pfVar6 = (float *)matrix;
+  pSVar9 = self_00;
+  for (iVar7 = 0x10; iVar7 != 0; iVar7 = iVar7 - 1) {
+    pSVar9->m[0][0] = *pfVar6;
+    pfVar6++;
+    pSVar9 = (S_matrix *)(pSVar9->m[0] + 1);
+  }
+  this->m_unknown94 = 100;
+  this->m_flags = 1;
+  if (parent == nullptr) {
+    S_matrix::Identity(&this->m_localMatrix);
+  }
+  else {
+    if ((parent->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(parent);
+    }
+    S_matrix::Inverse(&local_90,&parent->m_worldMatrix);
+    pfVar6 = (float *)S_matrix::OperatorMul(self_00,&local_50,&local_90);
+    pIVar2 = this->m_parent;
+    pSVar9 = &this->m_localMatrix;
+    for (iVar7 = 0x10; iVar7 != 0; iVar7 = iVar7 - 1) {
+      pSVar9->m[0][0] = *pfVar6;
+      pfVar6++;
+      pSVar9 = (S_matrix *)(pSVar9->m[0] + 1);
+    }
+    psVar1 = &pIVar2->m_refCount;
+    *psVar1 = *psVar1 + 1;
+  }
+  if (this->m_def->m_distanceFade == false) {
+    this->m_lodFactor = 1.0;
+  }
+  else {
+    cVar14 = '\x01';
+    pafVar12 = matrix->m + 3;
+    iVar13 = 0;
+    iVar7 = GetGame();
+    fVar10 = FUN_0069eca0(iVar7,*pafVar12,iVar13,cVar14);
+    this->m_lodFactor = (float)fVar10;
+  }
+  iVar7 = 0;
+  ppSVar3 = (this->m_def->m_particles).first;
+  if (ppSVar3 == (S_ParticleDef **)0x0) {
+    local_9c = 0;
+  }
+  else {
+    local_9c = (int)(this->m_def->m_particles).last - (int)ppSVar3 >> 2;
+  }
+  if (0 < local_9c) {
+    local_a0 = 0;
+    do {
+      puVar8 = (uint32_t *)((int)&((this->m_states).first)->m_delay + local_a0);
+      pSVar4 = (this->m_def->m_particles).first[iVar7];
+      iVar13 = pSVar4->m_rate;
+      puVar8[1] = 0;
+      puVar8[4] = (float)iVar13;
+      if ((float)puVar8[4] == 0.0) {
+        puVar8[3] = 0;
+      }
+      else {
+        lVar11 = __ftol();
+        puVar8[3] = (int)lVar11;
+      }
+      puVar8[2] = 0;
+      *puVar8 = 0;
+      puVar8[5] = pSVar4->m_repeat;
+      iVar7++;
+      local_a0 += 0x18;
+    } while (iVar7 < local_9c);
+  }
+  this->m_visual->m_11c = -1;
+  pIVar5 = this->m_visual;
+  pSVar9 = &pIVar5->m_worldMatrix;
+  for (iVar7 = 0x10; iVar7 != 0; iVar7 = iVar7 - 1) {
+    pSVar9->m[0][0] = self_00->m[0][0];
+    self_00 = (S_matrix *)(self_00->m[0] + 1);
+    pSVar9 = (S_matrix *)(pSVar9->m[0] + 1);
+  }
+  pIVar5->m_frameFlags = pIVar5->m_frameFlags | 0x20;
+  pIVar5 = this->m_visual;
+  if (this->m_parent == nullptr) {
+    (*pIVar5->vtable->LinkTo)((I3D_frame *)pIVar5,nullptr,0);
+    pIVar5 = unaff_EDI->m_visual;
+    self = unaff_EDI->m_scene;
+    if ((pIVar5->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc((I3D_frame *)pIVar5);
+    }
+    (*self->vtable->UpdateFrameSector)
+              (self,(I3D_frame *)pIVar5,(S_vector *)((pIVar5->m_worldMatrix).m + 3));
+  }
+  else {
+    (*pIVar5->vtable->LinkTo)((I3D_frame *)pIVar5,this->m_parent,1);
+  }
+  (*unaff_EDI->m_visual->vtable->Update)((I3D_frame *)unaff_EDI->m_visual);
+  EmitBursts(unaff_EDI);
+  empty_function_4432b0();
+  (*unaff_EDI->m_visual->vtable->SetOn)((I3D_frame *)unaff_EDI->m_visual,true);
+  unaff_EDI->m_unknownD0 = unknownD0;
+}
+
+// 0x00440d80
+void __thiscall C_ParticleEmitter::Stop(C_ParticleEmitter *this)
+{
+  (*this->m_visual->vtable->LinkTo)((I3D_frame *)this->m_visual,nullptr,0);
+  self = this->m_parent;
+  if (self != nullptr) {
+    (*self->vtable->Release)(self);
+  }
+  this->m_parent = nullptr;
+  (*this->m_visual->vtable->SetOn)((I3D_frame *)this->m_visual,false);
+}
+
+// 0x00440dc0
+void __thiscall
+C_ParticleEmitter::Emit
+          (C_ParticleEmitter *this,S_ParticleDef *def,S_matrix *matrix,int time,int defIndex)
+{
+  pSVar4 = g_particlePool.m_free;
+  if (g_particlePool.m_free == nullptr) {
+    local_4 = this;
+    C_ParticlePool::Grow(&g_particlePool);
+    pSVar4 = g_particlePool.m_free;
+  }
+  g_particlePool.m_free = pSVar4->next;
+  local_4 = (C_ParticleEmitter *)pSVar4->particle;
+  pSVar4->particle = nullptr;
+  pSVar4->next = g_particlePool.m_spareNodes;
+  g_particlePool.m_count = g_particlePool.m_count - 1;
+  g_particlePool.m_spareNodes = pSVar4;
+  bVar3 = S_Particle::Init((S_Particle *)local_4,matrix,def,time,defIndex);
+  pCVar2 = local_4;
+  if (bVar3) {
+    ppSVar9 = (this->m_particles).last;
+    if ((int)(this->m_particles).end - (int)ppSVar9 >> 2 == 0) {
+      ppSVar7 = (this->m_particles).first;
+      if ((ppSVar7 == (S_Particle **)0x0) || (uVar10 = (int)ppSVar9 - (int)ppSVar7 >> 2, uVar10 < 2)
+         ) {
+        uVar10 = 1;
+      }
+      if (ppSVar7 == (S_Particle **)0x0) {
+        iVar5 = 0;
+      }
+      else {
+        iVar5 = (int)ppSVar9 - (int)ppSVar7 >> 2;
+      }
+      iVar5 += uVar10;
+      iVar6 = iVar5;
+      if (iVar5 < 0) {
+        iVar6 = 0;
+      }
+      ppSVar7 = operator_new(iVar6 << 2);
+      puVar8 = (uint32_t *)uninitialized_copy4_443bb0((this->m_particles).first,ppSVar9,ppSVar7);
+      uninitialized_fill_n4_443be0(puVar8,1,&local_4);
+      uninitialized_copy4_443bb0(ppSVar9,(this->m_particles).last,puVar8 + 1);
+      empty_function_443550();
+      operator_delete((this->m_particles).first);
+      (this->m_particles).end = ppSVar7 + iVar5;
+      iVar5 = vector_size_e4_4432e0((int)&this->m_particles);
+      (this->m_particles).first = ppSVar7;
+      (this->m_particles).last = ppSVar7 + iVar5 + 1;
+      return;
+    }
+    uninitialized_copy4_443bb0(ppSVar9,ppSVar9,ppSVar9 + 1);
+    ppSVar7 = (this->m_particles).last;
+    uninitialized_fill_n4_443be0(ppSVar7,1 - ((int)ppSVar7 - (int)ppSVar9 >> 2),&local_4);
+    ppSVar7 = (this->m_particles).last;
+    if (ppSVar9 != ppSVar7) {
+      do {
+        *ppSVar9 = (S_Particle *)local_4;
+        ppSVar9++;
+      } while (ppSVar9 != ppSVar7);
+      (this->m_particles).last = (this->m_particles).last + 1;
+      return;
+    }
+    pppSVar1 = &(this->m_particles).last;
+    *pppSVar1 = *pppSVar1 + 1;
+  }
+  else if (local_4 != nullptr) {
+    pSVar4 = C_ParticlePool::AllocNode(&g_particlePool);
+    pSVar4->particle = (S_Particle *)pCVar2;
+    pSVar4->next = g_particlePool.m_free;
+    g_particlePool.m_free = pSVar4;
+    g_particlePool.m_count = g_particlePool.m_count + 1;
+    return;
+  }
+}
+
+// 0x00440fe0
+void __thiscall C_ParticleEmitter::EmitBursts(C_ParticleEmitter *this)
+{
+  defIndex = 0;
+  while( true ) {
+    ppSVar1 = (this->m_def->m_particles).first;
+    if ((ppSVar1 == (S_ParticleDef **)0x0) ||
+       ((uint32_t)((int)(this->m_def->m_particles).last - (int)ppSVar1 >> 2) <= defIndex)) break;
+    def = ppSVar1[defIndex];
+    if ((def->m_burstMin != 0) || (def->m_burstMax != 0)) {
+      RandFloat();
+      lVar6 = __ftol();
+      for (iVar3 = (int)lVar6; iVar3 != 0; iVar3 = iVar3 - 1) {
+        this_00 = this->m_parent;
+        if (this_00 != nullptr) {
+          if ((this_00->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(this_00);
+          }
+          pfVar2 = (float *)S_matrix::OperatorMul
+                                      (&this->m_localMatrix,&local_50,&this_00->m_worldMatrix);
+          pSVar5 = &this->m_matrix;
+          for (iVar4 = 0x10; iVar4 != 0; iVar4 = iVar4 - 1) {
+            pSVar5->m[0][0] = *pfVar2;
+            pfVar2++;
+            pSVar5 = (S_matrix *)(pSVar5->m[0] + 1);
+          }
+        }
+        Emit(this,def,&this->m_matrix,0,defIndex);
+      }
+    }
+    defIndex++;
+  }
+}
+
+// 0x004410b0
+void __thiscall C_ParticleEmitter::EmitContinuous(C_ParticleEmitter *this,int time)
+{
+  defIndex = 0;
+  ppSVar1 = (this->m_particles).first;
+  if ((ppSVar1 == (S_Particle **)0x0) ||
+     ((uint32_t)((int)(this->m_particles).last - (int)ppSVar1 >> 2) < 500)) {
+    local_6c = 0;
+    while( true ) {
+      ppSVar2 = (this->m_def->m_particles).first;
+      if ((ppSVar2 == (S_ParticleDef **)0x0) ||
+         ((uint32_t)((int)(this->m_def->m_particles).last - (int)ppSVar2 >> 2) <= defIndex)) break;
+      piVar6 = (int *)((int)&((this->m_states).first)->m_delay + local_6c);
+      if (((*piVar6 < 1) || (iVar4 = *piVar6 - time, *piVar6 = iVar4, iVar4 < 1)) && (0 < piVar6[3])
+         ) {
+        iVar4 = piVar6[2];
+        piVar6[2] = iVar4 + time;
+        def = (this->m_def->m_particles).first[defIndex];
+        if ((def->m_fadeRate != 0) && (def->m_fadeStart < iVar4 + time)) {
+          fVar3 = (float)piVar6[4] - (float)(def->m_fadeRate * time) * 0.001;
+          piVar6[4] = (int)fVar3;
+          if (fVar3 == 0.0) {
+            piVar6[3] = 0;
+          }
+          else {
+            lVar8 = __ftol();
+            piVar6[3] = (int)lVar8;
+          }
+        }
+        if (piVar6[3] < 1) {
+          iVar4 = piVar6[5];
+          if (iVar4 < 2) {
+            if (iVar4 != -1) goto LAB_004412ae;
+          }
+          else {
+            piVar6[5] = iVar4 - 1;
+          }
+          *piVar6 = def->m_delay;
+          iVar4 = def->m_rate;
+          piVar6[4] = (int)(float)iVar4;
+          if ((float)iVar4 == 0.0) {
+            piVar6[3] = 0;
+          }
+          else {
+            lVar8 = __ftol();
+            piVar6[3] = (int)lVar8;
+          }
+          piVar6[2] = 0;
+          piVar6[1] = 0;
+        }
+        else {
+          iVar4 = piVar6[1];
+          piVar6[1] = iVar4 + time;
+          local_60 = (iVar4 + time) / piVar6[3];
+          if (0 < local_60) {
+            do {
+              this_00 = this->m_parent;
+              if (this_00 != nullptr) {
+                if ((this_00->m_frameFlags & 0x20) == 0) {
+                  I3D_frame::UpdateWMatrixProc(this_00);
+                }
+                pfVar5 = (float *)S_matrix::OperatorMul
+                                            (&this->m_localMatrix,&local_50,&this_00->m_worldMatrix)
+                ;
+                pSVar7 = &this->m_matrix;
+                for (iVar4 = 0x10; iVar4 != 0; iVar4 = iVar4 - 1) {
+                  pSVar7->m[0][0] = *pfVar5;
+                  pfVar5++;
+                  pSVar7 = (S_matrix *)(pSVar7->m[0] + 1);
+                }
+              }
+              Emit(this,def,&this->m_matrix,piVar6[1],defIndex);
+              local_60--;
+              piVar6[1] = piVar6[1] - piVar6[3];
+            } while (local_60 != 0);
+          }
+        }
+        this->m_empty = false;
+      }
+LAB_004412ae:
+      defIndex++;
+      local_6c += 0x18;
+    }
+  }
+}
+
+// 0x004412d0
+void __thiscall C_ParticleEmitter::RemoveDead(C_ParticleEmitter *this)
+{
+  iVar7 = 0;
+  ppSVar6 = (this->m_particles).first;
+  if (ppSVar6 == (S_Particle **)0x0) {
+    local_4 = 0;
+  }
+  else {
+    local_4 = (int)(this->m_particles).last - (int)ppSVar6 >> 2;
+  }
+  if (0 < local_4) {
+    do {
+      pSVar1 = (this->m_particles).first[iVar7];
+      if (pSVar1->m_lifetime == 0) {
+        pSVar5 = C_ParticlePool::AllocNode(&g_particlePool);
+        pSVar5->particle = pSVar1;
+        pSVar5->next = g_particlePool.m_free;
+        g_particlePool.m_count = g_particlePool.m_count + 1;
+        ppSVar2 = (this->m_particles).first;
+        ppSVar3 = (this->m_particles).last;
+        ppSVar6 = ppSVar2 + iVar7 + 1;
+        g_particlePool.m_free = pSVar5;
+        if (ppSVar6 != ppSVar3) {
+          iVar4 = iVar7 * 4 - (int)ppSVar6;
+          do {
+            *(S_Particle **)((int)ppSVar2 + iVar4 + (int)ppSVar6) = *ppSVar6;
+            ppSVar6++;
+          } while (ppSVar6 != ppSVar3);
+        }
+        iVar7--;
+        local_4--;
+        (this->m_particles).last = (this->m_particles).last - 1;
+      }
+      iVar7++;
+    } while (iVar7 < local_4);
+  }
+}
+
+// 0x00441390
+void __thiscall C_ParticleEmitter::TickParticles(C_ParticleEmitter *this,int time)
+{
+  ppSVar1 = (this->m_particles).first;
+  if (ppSVar1 == (S_Particle **)0x0) {
+    local_54 = 0;
+  }
+  else {
+    local_54 = (int)(this->m_particles).last - (int)ppSVar1 >> 2;
+  }
+  this_00 = this->m_parent;
+  if (this_00 != nullptr) {
+    if ((this_00->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(this_00);
+    }
+    pfVar2 = (float *)S_matrix::OperatorMul(&this->m_localMatrix,&local_50,&this_00->m_worldMatrix);
+    pSVar4 = &this->m_matrix;
+    for (iVar3 = 0x10; iVar3 != 0; iVar3 = iVar3 - 1) {
+      pSVar4->m[0][0] = *pfVar2;
+      pfVar2++;
+      pSVar4 = (S_matrix *)(pSVar4->m[0] + 1);
+    }
+  }
+  local_58 = 0;
+  if (0 < local_54) {
+    do {
+      this_01 = (this->m_particles).first[local_58];
+      S_Particle::Tick(this_01,time);
+      if (this_01->m_lifetime == 0) {
+        this_01->m_phase = this_01->m_phase + 1;
+        S_Particle::StartPhase(this_01,&this->m_matrix);
+      }
+      local_58++;
+    } while (local_58 < local_54);
+  }
+}
+
+// 0x00441460
+void __thiscall C_ParticleEmitter::Sort(C_ParticleEmitter *this,bool collect)
+{
+  g_particleSortCount = 0;
+  ppSVar1 = (this->m_particles).first;
+  if (ppSVar1 == (S_Particle **)0x0) {
+    local_f8 = 0;
+  }
+  else {
+    local_f8 = (int)(this->m_particles).last - (int)ppSVar1 >> 2;
+  }
+  if (this->m_empty != false) {
+    if (local_f8 == 0) {
+      g_particleSortCount = 0;
+      return;
+    }
+    this->m_empty = false;
+  }
+  if (local_f8 != 0) {
+    local_a8 = this;
+    if ((collect) && ((uint32_t)g_particleSortCapacity < local_f8)) {
+      if (g_particleSortKeys != nullptr) {
+        operator_delete(g_particleSortKeys);
+      }
+      g_particleSortKeys = operator_new(local_f8 * 8);
+      if (g_particleSortKeys != nullptr) {
+        g_particleSortCapacity = local_f8;
+      }
+    }
+    this_00 = this->m_parent;
+    local_c4 = this->m_scene->m_activeCamera;
+    this->m_depth = 0.0;
+    if (this_00 != nullptr) {
+      if ((this_00->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(this_00);
+      }
+      pfVar3 = (float *)S_matrix::OperatorMul
+                                  (&this->m_localMatrix,&local_50,&this_00->m_worldMatrix);
+      pSVar6 = &this->m_matrix;
+      for (iVar4 = 0x10; this = local_a8, iVar4 != 0; iVar4 = iVar4 - 1) {
+        pSVar6->m[0][0] = *pfVar3;
+        pfVar3++;
+        pSVar6 = (S_matrix *)(pSVar6->m[0] + 1);
+      }
+    }
+    this_01 = this->m_visual;
+    local_98 = 1e+16;
+    local_9c = 1e+16;
+    local_a0 = 1e+16;
+    local_88 = -1e+16;
+    local_8c = -1e+16;
+    local_90 = -1e+16;
+    fVar2 = this_01[1].m_localMatrix.m[3][0];
+    if (((uint32_t)fVar2 & 0x40) == 0) {
+      if (((uint32_t)fVar2 & 0x100000) == 0) {
+        this_01[1].m_localMatrix.m[3][0] = (float)((uint32_t)fVar2 | 0x100000);
+        if ((this_01->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc((I3D_frame *)this_01);
+        }
+        S_matrix::Inverse((S_matrix *)(this_01[1]._pad_0004 + 0xc),&this_01->m_worldMatrix);
+      }
+      local_a4 = this_01[1]._pad_0004 + 0xc;
+    }
+    else {
+      local_a4 = "";
+    }
+    local_f4 = 0;
+    if (0 < (int)local_f8) {
+      do {
+        pSVar8 = (this->m_particles).first[local_f4];
+        if ((pSVar8->m_flags & 1) == 0) {
+          local_f0.x = (this->m_matrix).m[3][0] + (pSVar8->m_matrix).m[3][0];
+          local_f0.y = (pSVar8->m_matrix).m[3][1] + (this->m_matrix).m[3][1];
+          local_f0.z = (pSVar8->m_matrix).m[3][2] + (this->m_matrix).m[3][2];
+          local_e4 = local_d4;
+          local_e0.x = local_f0.x;
+          local_e0.y = local_f0.y;
+          local_e0.z = local_f0.z;
+        }
+        else {
+          local_f0.x = (pSVar8->m_matrix).m[3][0];
+          local_f0.y = (pSVar8->m_matrix).m[3][1];
+          local_f0.z = (pSVar8->m_matrix).m[3][2];
+          local_e4 = (pSVar8->m_matrix).m[3][3];
+        }
+        this->m_depth =
+             local_f0.y * *(float *)(local_c4[1]._pad_0004 + 0x28) +
+             local_f0.z * local_c4[1].m_boundRadius +
+             local_f0.x * *(float *)(local_c4[1]._pad_0004 + 0x18) +
+             local_c4[1].m_worldMatrix.m[0][3] + this->m_depth;
+        local_64 = pSVar8;
+        if (collect) {
+          if (g_particleSortCount == g_particleSortCapacity) {
+            local_68 = g_particleSortCapacity * 2;
+            local_6c = operator_new(g_particleSortCapacity << 4);
+            if (local_6c == nullptr) goto LAB_00441778;
+            pbVar5 = g_particleSortKeys;
+            pbVar7 = local_6c;
+            for (iVar4 = g_particleSortCount * 2; iVar4 != 0; iVar4 = iVar4 - 1) {
+              *(uint32_t *)pbVar7 = *(uint32_t *)pbVar5;
+              pbVar5 += 4;
+              pbVar7 += 4;
+            }
+            g_particleSortCapacity = local_68;
+            operator_delete(g_particleSortKeys);
+            g_particleSortKeys = local_6c;
+            this = local_a8;
+          }
+          pSVar8 = local_64;
+          lVar9 = __ftol();
+          *(int *)(g_particleSortKeys + g_particleSortCount * 8) = (int)lVar9;
+          *(int *)(g_particleSortKeys + g_particleSortCount * 8 + 4) = local_f4;
+          g_particleSortCount++;
+        }
+LAB_00441778:
+        S_vector::OperatorMulAssign(&local_f0,(S_matrix *)local_a4);
+        fVar2 = pSVar8->m_size * 0.5 * 0.8660255;
+        local_5c = local_f0.y - fVar2;
+        local_58 = local_f0.z - fVar2;
+        if (local_f0.x - fVar2 < local_a0) {
+          local_a0 = local_f0.x - fVar2;
+        }
+        if (local_5c < local_9c) {
+          local_9c = local_5c;
+        }
+        if (local_58 < local_98) {
+          local_98 = local_58;
+        }
+        local_c0[0].y = local_f0.y + fVar2;
+        local_c0[0].z = local_f0.z + fVar2;
+        if (local_90 < local_f0.x + fVar2) {
+          local_90 = local_f0.x + fVar2;
+        }
+        if (local_8c < local_c0[0].y) {
+          local_8c = local_c0[0].y;
+        }
+        if (local_88 < local_c0[0].z) {
+          local_88 = local_c0[0].z;
+        }
+        local_f4++;
+      } while (local_f4 < (int)local_f8);
+    }
+    if (collect) {
+      FUN_006e4ce0(g_particleSortKeys,g_particleSortCount);
+    }
+    this->m_depth = this->m_depth / (float)(int)local_f8;
+    if (local_a0 < local_90 == (local_a0 == local_90)) {
+      local_74 = 0.0;
+    }
+    else {
+      S_vector::Set(local_c0,local_90 - local_a0,local_8c - local_9c,local_88 - local_98);
+      S_vector::Set(&local_e0,local_c0[0].x * 0.5,local_c0[0].y * 0.5,local_c0[0].z * 0.5);
+      S_vector::Set(local_c0,local_e0.x + local_a0,local_e0.y + local_9c,local_e0.z + local_98);
+      local_74 = SQRT(local_e0.x * local_e0.x + local_e0.y * local_e0.y + local_e0.z * local_e0.z);
+    }
+    (*this->m_visual->vtable->Slot74)(this->m_visual,&local_a0);
+    (*this->m_visual->vtable->Update)((I3D_frame *)this->m_visual);
+  }
+}
+
+// 0x00441a00
+void __thiscall C_ParticleEmitter::BuildQuads(C_ParticleEmitter *this)
+{
+  local_244 = g_particleSortCount;
+  local_220 = this;
+  if (g_particleSortCount != 0) {
+    if (500 < g_particleSortCount) {
+      local_244 = 500;
+    }
+    this_00 = this->m_scene->m_activeCamera;
+    if ((this_00->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc((I3D_frame *)this_00);
+    }
+    bVar1 = this->m_unknownD0;
+    pSVar8 = &this_00->m_worldMatrix;
+    pfVar4 = (float *)(auStack_15c + 0xc);
+    for (iVar7 = 0x10; iVar7 != 0; iVar7 = iVar7 - 1) {
+      *pfVar4 = pSVar8->m[0][0];
+      pSVar8 = (S_matrix *)(pSVar8->m[0] + 1);
+      pfVar4++;
+    }
+    if (bVar1 == false) {
+      local_1a0.x = -(this->m_matrix).m[2][0];
+      local_1a0.y = -(this->m_matrix).m[2][1];
+      local_1a0.z = -(this->m_matrix).m[2][2];
+      S_matrix::SetDir((S_matrix *)(auStack_15c + 0xc),&local_1a0);
+    }
+    pfVar4 = (*this->m_visual->vtable->LockQuads)(this->m_visual,local_244,this->m_depth);
+    if (pfVar4 != nullptr) {
+      this_01 = *(I3D_frame **)(iStack_22c + 0x90);
+      iStack_1b0 = unaff_EDI;
+      if (this_01 != nullptr) {
+        if ((this_01->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(this_01);
+        }
+        pfVar5 = (float *)S_matrix::OperatorMul
+                                    ((S_matrix *)(iStack_22c + 0x50),&SStack_dc,
+                                     &this_01->m_worldMatrix);
+        pfVar10 = (float *)(iStack_22c + 0x10);
+        for (iVar7 = 0x10; iVar7 != 0; iVar7 = iVar7 - 1) {
+          *pfVar10 = *pfVar5;
+          pfVar5++;
+          pfVar10++;
+        }
+      }
+      while (iStack_1b0 != 0) {
+        iStack_1b0--;
+        iVar7 = *(int *)(*(int *)(iStack_22c + 0xb4) +
+                        *(int *)(g_particleSortKeys + 4 + iStack_1b0 * 8) * 4);
+        iStack_190 = iVar7;
+        FUN_006e9fe0((float *)(iVar7 + 0x80),afStack_228);
+        local_220 = (C_ParticleEmitter *)((float)local_220 * *(float *)(iStack_22c + 0xa0));
+        FUN_006ea100(afStack_228,&fStack_20c);
+        iStack_210 = (int)ROUND(*(float *)(iVar7 + 0x60) * 255.0);
+        uStack_218 = (uint32_t)ROUND(fStack_20c * 255.0);
+        uStack_214 = (uint32_t)ROUND(fStack_208 * 255.0);
+        fVar2 = *(float *)(iVar7 + 0x4c);
+        fVar9 = (float)(((iStack_210 << 8 | uStack_218) << 8 | uStack_214) << 8 |
+                       (int)ROUND(fStack_204 * 255.0));
+        fStack_21c = *(float *)(iVar7 + 0x54);
+        if ((int)ABS(fStack_21c) < 0x322bcc77) {
+          SStack_1fc.m[0][0] = (float)auStack_15c._0_4_ * fVar2;
+          SStack_1fc.m[0][1] = (float)auStack_15c._4_4_ * fVar2;
+          SStack_1fc.m[0][2] = (float)auStack_15c._8_4_ * fVar2;
+          SStack_1fc.m[0][3] = fStack_170;
+          SStack_1fc.m[1][0] = fStack_14c * fVar2;
+          SStack_1fc.m[1][1] = fStack_148 * fVar2;
+          SStack_1fc.m[1][2] = fStack_144 * fVar2;
+          SStack_1fc.m[1][3] = fStack_180;
+          SStack_1fc.m[2][0] = fStack_13c * fVar2;
+          SStack_1fc.m[2][1] = fStack_138 * fVar2;
+          SStack_1fc.m[2][2] = fStack_134 * fVar2;
+          SStack_1fc.m[2][3] = fStack_160;
+        }
+        else {
+          fVar11 = (long double)fcos((long double)fStack_21c);
+          pfVar5 = (float *)&DAT_0080f950;
+          pfVar10 = (float *)&SStack_dc;
+          for (iVar7 = 0x10; iVar7 != 0; iVar7 = iVar7 - 1) {
+            *pfVar10 = *pfVar5;
+            pfVar5++;
+            pfVar10++;
+          }
+          fVar12 = (long double)fsin((long double)fStack_21c);
+          SStack_dc.m[0][0] = (float)fVar11;
+          SStack_dc.m[0][1] = (float)fVar12;
+          SStack_dc.m[1][0] = (float)-fVar12;
+          SStack_dc.m[1][1] = (float)fVar11;
+          pfVar5 = (float *)S_matrix::RotateByMatrix(&SStack_dc,&SStack_5c,(S_matrix *)auStack_15c);
+          pfVar10 = (float *)&SStack_1fc;
+          for (iVar7 = 0x10; iVar7 != 0; iVar7 = iVar7 - 1) {
+            *pfVar10 = *pfVar5;
+            pfVar5++;
+            pfVar10++;
+          }
+          SStack_1fc.m[0][0] = SStack_1fc.m[0][0] * fVar2;
+          SStack_1fc.m[0][1] = SStack_1fc.m[0][1] * fVar2;
+          SStack_1fc.m[0][2] = SStack_1fc.m[0][2] * fVar2;
+          SStack_1fc.m[1][0] = SStack_1fc.m[1][0] * fVar2;
+          SStack_1fc.m[1][1] = SStack_1fc.m[1][1] * fVar2;
+          SStack_1fc.m[1][2] = SStack_1fc.m[1][2] * fVar2;
+          SStack_1fc.m[2][0] = SStack_1fc.m[2][0] * fVar2;
+          SStack_1fc.m[2][1] = SStack_1fc.m[2][1] * fVar2;
+          SStack_1fc.m[2][2] = SStack_1fc.m[2][2] * fVar2;
+          iVar7 = iStack_190;
+        }
+        if ((*(uint8_t *)(iVar7 + 0xa8) & 1) == 0) {
+          SStack_1fc.m[3][0] = *(float *)(iStack_22c + 0x40) + *(float *)(iVar7 + 0x30);
+          SStack_1fc.m[3][1] = *(float *)(iVar7 + 0x34) + *(float *)(iStack_22c + 0x44);
+          SStack_1fc.m[3][2] = *(float *)(iVar7 + 0x38) + *(float *)(iStack_22c + 0x48);
+          SStack_1fc.m[3][3] = local_1a0.x;
+        }
+        else {
+          SStack_1fc.m[3][0] = *(float *)(iVar7 + 0x30);
+          SStack_1fc.m[3][1] = *(float *)(iVar7 + 0x34);
+          SStack_1fc.m[3][2] = *(float *)(iVar7 + 0x38);
+          SStack_1fc.m[3][3] = *(float *)(iVar7 + 0x3c);
+        }
+        pfVar5 = (float *)(*(int *)(iVar7 + 0x40) * 0x10 + *(int *)(*(int *)(iVar7 + 0x90) + 0x10));
+        SStack_10c.x = -0.5;
+        SStack_10c.y = 0.5;
+        SStack_10c.z = 0.0;
+        pSVar6 = S_vector::OperatorMul(&SStack_10c,&SStack_6c,&SStack_1fc);
+        fVar2 = pSVar6->y;
+        fVar3 = pSVar6->z;
+        *pfVar4 = pSVar6->x;
+        pfVar4[1] = fVar2;
+        pfVar4[2] = fVar3;
+        pfVar4[3] = fVar9;
+        pfVar4[4] = *pfVar5;
+        pfVar4[5] = pfVar5[1];
+        SStack_fc.x = 0.5;
+        SStack_fc.y = 0.5;
+        SStack_fc.z = 0.0;
+        pSVar6 = S_vector::OperatorMul(&SStack_fc,&SStack_9c,&SStack_1fc);
+        fVar2 = pSVar6->y;
+        fVar3 = pSVar6->z;
+        pfVar4[6] = pSVar6->x;
+        pfVar4[7] = fVar2;
+        pfVar4[8] = fVar3;
+        pfVar4[9] = fVar9;
+        pfVar4[10] = *pfVar5;
+        pfVar4[0xb] = pfVar5[3];
+        SStack_11c.x = -0.5;
+        SStack_11c.y = -0.5;
+        SStack_11c.z = 0.0;
+        pSVar6 = S_vector::OperatorMul(&SStack_11c,&SStack_8c,&SStack_1fc);
+        fVar2 = pSVar6->y;
+        fVar3 = pSVar6->z;
+        pfVar4[0xc] = pSVar6->x;
+        pfVar4[0xd] = fVar2;
+        pfVar4[0xe] = fVar3;
+        pfVar4[0xf] = fVar9;
+        pfVar4[0x10] = pfVar5[2];
+        pfVar4[0x11] = pfVar5[1];
+        SStack_ec.x = 0.5;
+        SStack_ec.y = -0.5;
+        SStack_ec.z = 0.0;
+        pSVar6 = S_vector::OperatorMul(&SStack_ec,&SStack_7c,&SStack_1fc);
+        fVar2 = pSVar6->y;
+        fVar3 = pSVar6->z;
+        pfVar4[0x12] = pSVar6->x;
+        pfVar4[0x13] = fVar2;
+        pfVar4[0x14] = fVar3;
+        pfVar4[0x15] = fVar9;
+        pfVar4[0x16] = pfVar5[2];
+        pfVar4[0x17] = pfVar5[3];
+        pfVar4 += 0x18;
+      }
+    }
+    return;
+  }
+  (*this->m_visual->vtable->LockQuads)(this->m_visual,0,0.0);
+}
+
+// 0x00442100
+void __thiscall C_ParticleEmitter::BuildQuadsCameraAligned(C_ParticleEmitter *this)
+{
+  local_1f4 = g_particleSortCount;
+  local_1c4 = this;
+  if (g_particleSortCount != 0) {
+    if (500 < g_particleSortCount) {
+      local_1f4 = 500;
+    }
+    this_00 = this->m_scene->m_activeCamera;
+    if ((this_00->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc((I3D_frame *)this_00);
+    }
+    local_158 = &this_00->m_worldMatrix;
+    pfVar4 = (*this->m_visual->vtable->LockQuads)(this->m_visual,local_1f4,this->m_depth);
+    if (pfVar4 != nullptr) {
+      this_01 = this->m_parent;
+      pCVar3 = this;
+      iStack_168 = unaff_EDI;
+      if (this_01 != nullptr) {
+        if ((this_01->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(this_01);
+        }
+        pfVar5 = (float *)S_matrix::OperatorMul
+                                    (&this->m_localMatrix,&SStack_dc,&this_01->m_worldMatrix);
+        pSVar10 = &this->m_matrix;
+        for (iVar7 = 0x10; pCVar3 = pCStack_1d0, iVar7 != 0; iVar7 = iVar7 - 1) {
+          pSVar10->m[0][0] = *pfVar5;
+          pfVar5++;
+          pSVar10 = (S_matrix *)(pSVar10->m[0] + 1);
+        }
+      }
+      while (iStack_168 != 0) {
+        iStack_168--;
+        pSVar8 = (pCVar3->m_particles).first[*(int *)(g_particleSortKeys + 4 + iStack_168 * 8)];
+        pSStack_160 = pSVar8;
+        FUN_006e9fe0(&(pSVar8->m_color).x,afStack_1dc);
+        FUN_006ea100(afStack_1dc,&fStack_1bc);
+        iStack_1cc = (int)ROUND(pSVar8->m_alpha * 255.0);
+        local_1c4 = (C_ParticleEmitter *)(int)ROUND(fStack_1bc * 255.0);
+        uStack_1c0 = (uint32_t)ROUND(fStack_1b8 * 255.0);
+        fVar1 = pSVar8->m_size;
+        fVar11 = (float)(((iStack_1cc << 8 | (uint32_t)local_1c4) << 8 | uStack_1c0) << 8 |
+                        (int)ROUND(fStack_1b4 * 255.0));
+        fStack_1c8 = pSVar8->m_rotation;
+        if ((int)ABS(fStack_1c8) < 0x322bcc77) {
+          SStack_1ac.m[0][0] = fVar1 * pSStack_164->m[0][0];
+          SStack_1ac.m[0][1] = fVar1 * pSStack_164->m[0][1];
+          SStack_1ac.m[0][2] = fVar1 * pSStack_164->m[0][2];
+          SStack_1ac.m[0][3] = fStack_150;
+          SStack_1ac.m[1][0] = fVar1 * pSStack_164->m[1][0];
+          SStack_1ac.m[1][1] = fVar1 * pSStack_164->m[1][1];
+          SStack_1ac.m[1][2] = fVar1 * pSStack_164->m[1][2];
+          SStack_1ac.m[1][3] = fStack_130;
+          SStack_1ac.m[2][0] = fVar1 * pSStack_164->m[2][0];
+          SStack_1ac.m[2][1] = fVar1 * pSStack_164->m[2][1];
+          SStack_1ac.m[2][2] = fVar1 * pSStack_164->m[2][2];
+          SStack_1ac.m[2][3] = fStack_120;
+          local_158 = (S_matrix *)SStack_1ac.m[0][1];
+        }
+        else {
+          fVar13 = (long double)fcos((long double)fStack_1c8);
+          pfVar5 = (float *)&DAT_0080f950;
+          pfVar12 = (float *)&SStack_dc;
+          for (iVar7 = 0x10; iVar7 != 0; iVar7 = iVar7 - 1) {
+            *pfVar12 = *pfVar5;
+            pfVar5++;
+            pfVar12++;
+          }
+          fVar14 = (long double)fsin((long double)fStack_1c8);
+          SStack_dc.m[0][0] = (float)fVar13;
+          SStack_dc.m[0][1] = (float)fVar14;
+          SStack_dc.m[1][0] = (float)-fVar14;
+          SStack_dc.m[1][1] = (float)fVar13;
+          pfVar5 = (float *)S_matrix::RotateByMatrix(&SStack_dc,&SStack_5c,pSStack_164);
+          pfVar12 = (float *)&SStack_1ac;
+          for (iVar7 = 0x10; iVar7 != 0; iVar7 = iVar7 - 1) {
+            *pfVar12 = *pfVar5;
+            pfVar5++;
+            pfVar12++;
+          }
+          SStack_1ac.m[0][0] = SStack_1ac.m[0][0] * fVar1;
+          SStack_1ac.m[0][1] = SStack_1ac.m[0][1] * fVar1;
+          SStack_1ac.m[0][2] = SStack_1ac.m[0][2] * fVar1;
+          SStack_1ac.m[1][0] = SStack_1ac.m[1][0] * fVar1;
+          SStack_1ac.m[1][1] = SStack_1ac.m[1][1] * fVar1;
+          SStack_1ac.m[1][2] = SStack_1ac.m[1][2] * fVar1;
+          SStack_1ac.m[2][0] = SStack_1ac.m[2][0] * fVar1;
+          SStack_1ac.m[2][1] = SStack_1ac.m[2][1] * fVar1;
+          SStack_1ac.m[2][2] = SStack_1ac.m[2][2] * fVar1;
+          pSVar8 = pSStack_160;
+        }
+        if ((pSVar8->m_flags & 1) == 0) {
+          SStack_1ac.m[3][0] = (pCStack_1d0->m_matrix).m[3][0] + (pSVar8->m_matrix).m[3][0];
+          SStack_1ac.m[3][1] = (pSVar8->m_matrix).m[3][1] + (pCStack_1d0->m_matrix).m[3][1];
+          SStack_1ac.m[3][2] = (pSVar8->m_matrix).m[3][2] + (pCStack_1d0->m_matrix).m[3][2];
+          SStack_1ac.m[3][3] = fStack_140;
+        }
+        else {
+          SStack_1ac.m[3][0] = (pSVar8->m_matrix).m[3][0];
+          SStack_1ac.m[3][1] = (pSVar8->m_matrix).m[3][1];
+          SStack_1ac.m[3][2] = (pSVar8->m_matrix).m[3][2];
+          SStack_1ac.m[3][3] = (pSVar8->m_matrix).m[3][3];
+        }
+        pSVar9 = (pSVar8->m_def->m_frames).first + pSVar8->m_frame;
+        SStack_fc.x = -0.5;
+        SStack_fc.y = 0.5;
+        SStack_fc.z = 0.0;
+        pSVar6 = S_vector::OperatorMul(&SStack_fc,&SStack_9c,&SStack_1ac);
+        fVar1 = pSVar6->y;
+        fVar2 = pSVar6->z;
+        *pfVar4 = pSVar6->x;
+        pfVar4[1] = fVar1;
+        pfVar4[2] = fVar2;
+        pfVar4[3] = fVar11;
+        pfVar4[4] = pSVar9->u0;
+        pfVar4[5] = pSVar9->v0;
+        SStack_11c.x = 0.5;
+        SStack_11c.y = 0.5;
+        SStack_11c.z = 0.0;
+        pSVar6 = S_vector::OperatorMul(&SStack_11c,&SStack_8c,&SStack_1ac);
+        fVar1 = pSVar6->y;
+        fVar2 = pSVar6->z;
+        pfVar4[6] = pSVar6->x;
+        pfVar4[7] = fVar1;
+        pfVar4[8] = fVar2;
+        pfVar4[9] = fVar11;
+        pfVar4[10] = pSVar9->u0;
+        pfVar4[0xb] = pSVar9->v1;
+        SStack_ec.x = -0.5;
+        SStack_ec.y = -0.5;
+        SStack_ec.z = 0.0;
+        pSVar6 = S_vector::OperatorMul(&SStack_ec,&SStack_7c,&SStack_1ac);
+        fVar1 = pSVar6->y;
+        fVar2 = pSVar6->z;
+        pfVar4[0xc] = pSVar6->x;
+        pfVar4[0xd] = fVar1;
+        pfVar4[0xe] = fVar2;
+        pfVar4[0xf] = fVar11;
+        pfVar4[0x10] = pSVar9->u1;
+        pfVar4[0x11] = pSVar9->v0;
+        SStack_10c.x = 0.5;
+        SStack_10c.y = -0.5;
+        SStack_10c.z = 0.0;
+        pSVar6 = S_vector::OperatorMul(&SStack_10c,&SStack_6c,&SStack_1ac);
+        fVar1 = pSVar6->y;
+        fVar2 = pSVar6->z;
+        pfVar4[0x12] = pSVar6->x;
+        pfVar4[0x13] = fVar1;
+        pfVar4[0x14] = fVar2;
+        pfVar4[0x15] = fVar11;
+        pfVar4[0x16] = pSVar9->u1;
+        pfVar4[0x17] = pSVar9->v1;
+        pfVar4 += 0x18;
+        pCVar3 = pCStack_1d0;
+      }
+    }
+    return;
+  }
+  (*this->m_visual->vtable->LockQuads)(this->m_visual,0,0.0);
+}
+
+// 0x004427a0
+bool __thiscall C_ParticleEmitter::Tick(C_ParticleEmitter *this,int time)
+{
+  this->m_empty = true;
+  if ((this->m_flags & 4) != 0) {
+    (*this->m_visual->vtable->LockQuads)(this->m_visual,0,0.0);
+    return true;
+  }
+  iVar1 = this->m_visual->m_11c;
+  if (iVar1 == -1) {
+    this->m_visual->m_11c = 0;
+    collect = true;
+  }
+  else {
+    collect = iVar1 == *(int *)(this->m_scene->_pad_0004 + 0x118);
+  }
+  TickParticles(this,time);
+  if ((this->m_flags & 1) != 0) {
+    EmitContinuous(this,time);
+  }
+  Sort(this,collect);
+  if (collect == false) {
+    (*this->m_visual->vtable->LockQuads)(this->m_visual,0,0.0);
+  }
+  else {
+    BuildQuads(this);
+  }
+  RemoveDead(this);
+  return this->m_empty == false;
+}
+
+// 0x00442860
+void __thiscall C_ParticleEmitter::Draw(C_ParticleEmitter *this)
+{
+  if ((this->m_flags & 4) != 0) {
+    (*this->m_visual->vtable->LockQuads)(this->m_visual,0,0.0);
+    return;
+  }
+  iVar1 = this->m_visual->m_11c;
+  if (iVar1 == -1) {
+    this->m_visual->m_11c = 0;
+    collect = true;
+  }
+  else {
+    collect = iVar1 == *(int *)(this->m_scene->_pad_0004 + 0x118);
+  }
+  Sort(this,collect);
+  if (collect != false) {
+    BuildQuads(this);
+    return;
+  }
+  (*this->m_visual->vtable->LockQuads)(this->m_visual,0,0.0);
+}
+
+// 0x004428e0
+void __thiscall C_ParticleEmitter::Save(C_ParticleEmitter *this,C_chunk *chunk)
+{
+  this_00 = chunk;
+  if (chunk->m_open != false) {
+    local_8 = 11000;
+    iVar3 = dtaSeek(chunk->m_handle,0,1);
+    this_00->m_stack[this_00->m_depth] = iVar3;
+    this_00->m_depth = this_00->m_depth + 1;
+    dtaWrite(this_00->m_handle,&local_8,6);
+    if (this_00->m_open != false) {
+      if (this_00->m_writing != false) {
+        dtaWrite(this_00->m_handle,&this->m_matrix,0x40);
+      }
+      if (this_00->m_open != false) {
+        if (this_00->m_writing != false) {
+          dtaWrite(this_00->m_handle,&this->m_localMatrix,0x40);
+        }
+        if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+          dtaWrite(this_00->m_handle,&this->m_unknownD0,1);
+        }
+      }
+    }
+  }
+  chunk = (C_chunk *)this->m_flags;
+  C_chunk::Write(this_00,&chunk,4);
+  chunk = (C_chunk *)this->m_lodFactor;
+  C_chunk::Write(this_00,&chunk,4);
+  chunk = (C_chunk *)(uint32_t)this->m_empty;
+  C_chunk::Write(this_00,&chunk,4);
+  chunk = (C_chunk *)this->m_depth;
+  C_chunk::Write(this_00,&chunk,4);
+  if (this_00->m_open != false) {
+    iVar3 = this_00->m_handle;
+    if (this_00->m_writing == false) {
+      iVar4 = this_00->m_stack[this_00->m_depth - 1];
+    }
+    else {
+      iVar4 = dtaSeek(iVar3,0,1);
+      chunk = (C_chunk *)(iVar4 - this_00->m_stack[this_00->m_depth - 1]);
+      dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+      dtaWrite(this_00->m_handle,&chunk,4);
+      iVar3 = this_00->m_handle;
+    }
+    dtaSeek(iVar3,iVar4,0);
+    if (this_00->m_depth != 0) {
+      this_00->m_depth = this_00->m_depth - 1;
+    }
+  }
+  if (this->m_parent != nullptr) {
+    if (this_00->m_open != false) {
+      local_8 = 0x2af9;
+      iVar3 = dtaSeek(this_00->m_handle,0,1);
+      this_00->m_stack[this_00->m_depth] = iVar3;
+      this_00->m_depth = this_00->m_depth + 1;
+      dtaWrite(this_00->m_handle,&local_8,6);
+    }
+    data = this->m_parent->m_name;
+    if (data == nullptr) {
+      data = &DAT_00867a90;
+    }
+    uVar6 = 0xffffffff;
+    pcVar7 = data;
+    do {
+      if (uVar6 == 0) break;
+      uVar6--;
+      cVar1 = *pcVar7;
+      pcVar7++;
+    } while (cVar1 != '\0');
+    chunk = (C_chunk *)~uVar6;
+    C_chunk::Write(this_00,&chunk,2);
+    if (chunk != nullptr) {
+      C_chunk::Write(this_00,data,(int)chunk);
+    }
+    if (this_00->m_open != false) {
+      iVar3 = this_00->m_handle;
+      if (this_00->m_writing == false) {
+        iVar4 = this_00->m_stack[this_00->m_depth - 1];
+      }
+      else {
+        iVar4 = dtaSeek(iVar3,0,1);
+        chunk = (C_chunk *)(iVar4 - this_00->m_stack[this_00->m_depth - 1]);
+        dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+        dtaWrite(this_00->m_handle,&chunk,4);
+        iVar3 = this_00->m_handle;
+      }
+      dtaSeek(iVar3,iVar4,0);
+      if (this_00->m_depth != 0) {
+        this_00->m_depth = this_00->m_depth - 1;
+      }
+    }
+  }
+  pSVar2 = (this->m_states).first;
+  if (pSVar2 == nullptr) {
+    iVar3 = 0;
+  }
+  else {
+    iVar3 = ((int)(this->m_states).last - (int)pSVar2) / 0x18;
+  }
+  if (0 < iVar3) {
+    iVar4 = 0;
+    do {
+      if (this_00->m_open != false) {
+        local_8 = 0x2afa;
+        iVar5 = dtaSeek(this_00->m_handle,0,1);
+        this_00->m_stack[this_00->m_depth] = iVar5;
+        this_00->m_depth = this_00->m_depth + 1;
+        dtaWrite(this_00->m_handle,&local_8,6);
+      }
+      C_chunk::Write(this_00,(void *)((int)&((this->m_states).first)->m_delay + iVar4),0x18);
+      C_chunk::Ascend(this_00);
+      iVar4 += 0x18;
+      iVar3--;
+    } while (iVar3 != 0);
+  }
+  iVar3 = vector_size_e4_4432e0((int)&this->m_particles);
+  iVar4 = 0;
+  if (0 < iVar3) {
+    do {
+      C_chunk::Begin(this_00,0x2afb);
+      chunk = (C_chunk *)(this->m_particles).first[iVar4]->m_defIndex;
+      C_chunk::Write(this_00,&chunk,4);
+      S_Particle::Save((this->m_particles).first[iVar4],this_00);
+      C_chunk::Ascend(this_00);
+      iVar4++;
+    } while (iVar4 < iVar3);
+  }
+}
+
+// 0x00442c80
+void __thiscall C_ParticleEmitter::Load(C_ParticleEmitter *this,C_chunk *chunk)
+{
+  local_42c = 0;
+  do {
+    if ((((chunk->m_open == false) || (chunk->m_depth == 0)) ||
+        (iVar4 = dtaSeek(chunk->m_handle,0,1), iVar4 == -1)) ||
+       (pIStack_440 = (IImage *)(chunk->m_stack[chunk->m_depth - 1] - iVar4),
+       pIStack_440 == nullptr)) goto LAB_00443112;
+    if ((chunk->m_open != false) && (iVar4 = dtaRead(chunk->m_handle,&uStack_424,6), iVar4 == 6)) {
+      iVar4 = dtaSeek(chunk->m_handle,0,1);
+      chunk->m_stack[chunk->m_depth] = iVar4 - 6 + CONCAT22(uStack_420,uStack_422);
+      chunk->m_depth = chunk->m_depth + 1;
+      local_42c = CONCAT22(uStack_422,uStack_424);
+    }
+    switch(local_42c & 0xffff) {
+    case 11000:
+      if (chunk->m_open != false) {
+        if (chunk->m_writing == false) {
+          if (chunk->m_depth != 0) {
+            iVar4 = chunk->m_stack[chunk->m_depth - 1];
+            iVar7 = dtaSeek(chunk->m_handle,0,1);
+            pIStack_440 = (IImage *)(iVar4 - iVar7);
+            pIStack_444 = nullptr;
+            ppIVar5 = &pIStack_444;
+            if (-1 < (int)pIStack_440) {
+              ppIVar5 = &pIStack_440;
+            }
+            if ((int)*ppIVar5 < 0x40) goto LAB_00442d93;
+          }
+          dtaRead(chunk->m_handle,&this->m_matrix,0x40);
+        }
+LAB_00442d93:
+        if (chunk->m_open != false) {
+          if (chunk->m_writing == false) {
+            if (chunk->m_depth != 0) {
+              iVar4 = chunk->m_stack[chunk->m_depth - 1];
+              iVar7 = dtaSeek(chunk->m_handle,0,1);
+              pIStack_444 = (IImage *)(iVar4 - iVar7);
+              pIStack_440 = nullptr;
+              ppIVar5 = &pIStack_440;
+              if (-1 < (int)pIStack_444) {
+                ppIVar5 = &pIStack_444;
+              }
+              if ((int)*ppIVar5 < 0x40) goto LAB_00442de2;
+            }
+            dtaRead(chunk->m_handle,&this->m_localMatrix,0x40);
+          }
+LAB_00442de2:
+          if ((chunk->m_open != false) && (chunk->m_writing == false)) {
+            if (chunk->m_depth != 0) {
+              iVar4 = chunk->m_stack[chunk->m_depth - 1];
+              iVar7 = dtaSeek(chunk->m_handle,0,1);
+              pIStack_444 = (IImage *)(iVar4 - iVar7);
+              pIStack_440 = nullptr;
+              ppIVar5 = &pIStack_440;
+              if (-1 < (int)pIStack_444) {
+                ppIVar5 = &pIStack_444;
+              }
+              if ((int)*ppIVar5 < 1) goto LAB_00442e30;
+            }
+            dtaRead(chunk->m_handle,&this->m_unknownD0,1);
+          }
+        }
+      }
+LAB_00442e30:
+      C_chunk::Read(chunk,&this->m_flags,4);
+      C_chunk::Read(chunk,&this->m_lodFactor,4);
+      C_chunk::Read(chunk,&uStack_43c,4);
+      this->m_empty = uStack_43c == 1;
+      C_chunk::Read(chunk,&this->m_depth,4);
+      if (chunk->m_open == false) {
+LAB_00443112:
+        pCVar2 = (this->m_def->m_texture).rep;
+        fileName = pCVar2->chars;
+        if (pCVar2 == nullptr) {
+          fileName = &DAT_00867a90;
+        }
+        self_00 = GetIGraph();
+        lVar8 = (*self_00->vtable->LoadTexture)(self_00,fileName,0,2,&pIStack_430);
+        if (lVar8 == 0) {
+          (*this->m_visual->vtable->SetTexture)(this->m_visual,pIStack_444);
+          (**(code **)*unaff_EBP)(unaff_EBP);
+        }
+        self = this->m_visual;
+        iVar4 = this->m_def->m_blendMode;
+        if (iVar4 == 3) {
+          (*self->vtable->SetRenderState)(self,0x13,0x80);
+          (*this->m_visual->vtable->SetSrcBlend)(this->m_visual,this->m_def->m_srcBlend);
+          (*this->m_visual->vtable->SetDstBlend)(this->m_visual,this->m_def->m_dstBlend);
+        }
+        else {
+          (*self->vtable->SetRenderState)(self,0x13,1 << ((uint8_t)iVar4 & 0x1f));
+        }
+        (*this->m_scene->vtable->UpdateFrameSector)
+                  (this->m_scene,(I3D_frame *)this->m_visual,(S_vector *)((this->m_matrix).m + 3));
+        (*this->m_visual->vtable->Update)((I3D_frame *)this->m_visual);
+        (*this->m_visual->vtable->SetOn)((I3D_frame *)this->m_visual,true);
+        return;
+      }
+      if (chunk->m_writing == false) {
+        iVar4 = chunk->m_stack[chunk->m_depth - 1];
+      }
+      else {
+        iVar4 = dtaSeek(chunk->m_handle,0,1);
+        iStack_41c = iVar4 - chunk->m_stack[chunk->m_depth - 1];
+        dtaSeek(chunk->m_handle,chunk->m_stack[chunk->m_depth - 1] + 2,0);
+        dtaWrite(chunk->m_handle,&iStack_41c,4);
+      }
+      dtaSeek(chunk->m_handle,iVar4,0);
+      if (chunk->m_depth != 0) {
+        chunk->m_depth = chunk->m_depth - 1;
+      }
+      break;
+    case 0x2af9:
+      pIStack_444 = nullptr;
+      C_chunk::Read(chunk,&pIStack_444,2);
+      if (pIStack_444 == nullptr) {
+        acStack_400[0] = '\0';
+      }
+      else if ((int)pIStack_444 < 0x401) {
+        C_chunk::Read(chunk,acStack_400,(int)pIStack_444);
+      }
+      else {
+        C_chunk::Read(chunk,acStack_400,0x400);
+        pIVar3 = pIStack_444 - 0x400;
+        while (pIVar3 != nullptr) {
+          pIStack_444 = pIVar3 - 1;
+          C_chunk::Read(chunk,&uStack_431,(int)pIStack_444);
+          pIVar3 = pIStack_444;
+        }
+      }
+      pIVar6 = (*this->m_scene->vtable->FindFrame)(this->m_scene,acStack_400,0xffff);
+      this->m_parent = pIVar6;
+      if (pIVar6 != nullptr) {
+        pIVar6->m_refCount = pIVar6->m_refCount + 1;
+      }
+      if (chunk->m_open == false) goto LAB_00443112;
+      iVar4 = chunk->m_handle;
+      if (chunk->m_writing == false) {
+        iVar7 = chunk->m_stack[chunk->m_depth - 1];
+      }
+      else {
+        iVar7 = dtaSeek(iVar4,0,1);
+        iStack_428 = iVar7 - chunk->m_stack[chunk->m_depth - 1];
+        dtaSeek(chunk->m_handle,chunk->m_stack[chunk->m_depth - 1] + 2,0);
+        dtaWrite(chunk->m_handle,&iStack_428,4);
+        iVar4 = chunk->m_handle;
+      }
+      dtaSeek(iVar4,iVar7,0);
+      if (chunk->m_depth != 0) {
+        chunk->m_depth = chunk->m_depth - 1;
+      }
+      break;
+    case 0x2afa:
+      C_chunk::Read(chunk,auStack_418,0x18);
+      vector_insert1_e24_443560(&this->m_states,&((this->m_states).last)->m_delay,auStack_418);
+      C_chunk::Ascend(chunk);
+      break;
+    case 0x2afb:
+      C_chunk::Read(chunk,&uStack_43c,4);
+      if (-1 < (int)uStack_43c) {
+        ppSVar1 = (this->m_def->m_particles).first;
+        if ((ppSVar1 != (S_ParticleDef **)0x0) &&
+           (uStack_43c < (uint32_t)((int)(this->m_def->m_particles).last - (int)ppSVar1 >> 2))) {
+          if (g_particlePool.m_free == nullptr) {
+            C_ParticlePool::Grow(&g_particlePool);
+          }
+          this_00 = (g_particlePool.m_free)->particle;
+          node = g_particlePool.m_free;
+          g_particlePool.m_free = (g_particlePool.m_free)->next;
+          C_ParticlePool::FreeNode(&g_particlePool,node);
+          g_particlePool.m_count = g_particlePool.m_count - 1;
+          this_00->m_def = (this->m_def->m_particles).first[uStack_43c];
+          this_00->m_defIndex = uStack_43c;
+          pSStack_438 = this_00;
+          S_Particle::Load(this_00,chunk);
+          vector_insert1_e4_4433b0(&this->m_particles,(this->m_particles).last,&pSStack_438);
+        }
+      }
+      C_chunk::Ascend(chunk);
+    }
+  } while( true );
+}
+
+// 0x00443210
+void __thiscall C_ParticleEmitter::Finish(C_ParticleEmitter *this)
+{
+  pIVar1 = this->m_parent;
+  this->m_flags = this->m_flags & 0xfffffffe | 2;
+  if (pIVar1 != nullptr) {
+    if ((pIVar1->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar1);
+    }
+    pfVar3 = (float *)S_matrix::OperatorMul(&this->m_localMatrix,&local_50,&pIVar1->m_worldMatrix);
+    pIVar1 = this->m_parent;
+    pSVar5 = &this->m_matrix;
+    for (iVar4 = 0x10; iVar4 != 0; iVar4 = iVar4 - 1) {
+      pSVar5->m[0][0] = *pfVar3;
+      pfVar3++;
+      pSVar5 = (S_matrix *)(pSVar5->m[0] + 1);
+    }
+    (*pIVar1->vtable->Release)(pIVar1);
+    this->m_parent = nullptr;
+    flags = 0;
+    pIVar2 = this->m_visual->vtable;
+    parent = (*this->m_scene->vtable->GetSector)(this->m_scene,(S_vector *)((this->m_matrix).m + 3))
+    ;
+    (*pIVar2->LinkTo)((I3D_frame *)this->m_visual,(I3D_frame *)parent,flags);
+    (*this->m_visual->vtable->Update)((I3D_frame *)this->m_visual);
+  }
+}
+
+// 0x004432b0
+void empty_function_4432b0(void)
+{
+}
+
+// 0x004432c0
+void __fastcall vector_tidy_4432c0(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(uint32_t *)(param_1 + 4) = 0;
+  *(uint32_t *)(param_1 + 8) = 0;
+  *(uint32_t *)(param_1 + 0xc) = 0;
+}
+
+// 0x004432e0
+int __fastcall vector_size_e4_4432e0(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 2;
+}
+
+// 0x00443300
+void __fastcall vector_tidy_443300(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(uint32_t *)(param_1 + 4) = 0;
+  *(uint32_t *)(param_1 + 8) = 0;
+  *(uint32_t *)(param_1 + 0xc) = 0;
+}
+
+// 0x00443320
+C_ParticlePool * __thiscall
+C_ParticlePool::ScalarDeletingDestructor(C_ParticlePool *this,uchar flags)
+{
+  pSVar1 = this->m_free;
+  this->vtable = (C_ParticlePool_vtbl *)&PTR_ScalarDeletingDestructor_0080f990;
+  while (pSVar1 != nullptr) {
+    ptr = this->m_free->particle;
+    if (ptr != nullptr) {
+      empty_function_43f510();
+      _aligned_free(ptr);
+    }
+    pSVar1 = this->m_free->next;
+    operator_delete(this->m_free);
+    this->m_free = pSVar1;
+  }
+  pSVar1 = this->m_spareNodes;
+  while (pSVar1 != nullptr) {
+    pSVar1 = this->m_spareNodes->next;
+    operator_delete(this->m_spareNodes);
+    this->m_spareNodes = pSVar1;
+  }
+  this->m_free = nullptr;
+  this->m_spareNodes = nullptr;
+  this->m_count = 0;
+  if ((flags & 1) != 0) {
+    operator_delete(this);
+  }
+  return this;
+}
+
+// 0x004433b0
+uint32_t * __thiscall vector_insert1_e4_4433b0(void *this,uint32_t *param_1,uint32_t *param_2)
+{
+  puVar5 = *(uint32_t **)((int)this + 8);
+  iVar1 = *(int *)((int)this + 4);
+  iVar6 = (int)param_1 - iVar1 >> 2;
+  if (*(int *)((int)this + 0xc) - (int)puVar5 >> 2 != 0) {
+    if ((int)puVar5 - (int)param_1 >> 2 == 0) {
+      uninitialized_copy4_443bb0(param_1,puVar5,param_1 + 1);
+      uninitialized_fill_n4_443be0
+                (*(uint32_t **)((int)this + 8),
+                 1 - ((int)*(uint32_t **)((int)this + 8) - (int)param_1 >> 2),param_2);
+      puVar5 = *(uint32_t **)((int)this + 8);
+      for (; param_1 != puVar5; param_1 = param_1 + 1) {
+        *param_1 = *param_2;
+      }
+    }
+    else {
+      uninitialized_copy4_443bb0(puVar5 - 1,puVar5,puVar5);
+      puVar5 = *(uint32_t **)((int)this + 8);
+      puVar7 = puVar5;
+      while (param_1 != puVar7 - 1) {
+        puVar5--;
+        *puVar5 = puVar7[-2];
+        puVar7--;
+      }
+      puVar5 = param_1 + 1;
+      for (; param_1 != puVar5; param_1 = param_1 + 1) {
+        *param_1 = *param_2;
+      }
+    }
+    *(int *)((int)this + 8) = *(int *)((int)this + 8) + 4;
+    return (uint32_t *)(*(int *)((int)this + 4) + iVar6 * 4);
+  }
+  if ((iVar1 == 0) || (uVar4 = (int)puVar5 - iVar1 >> 2, uVar4 < 2)) {
+    uVar4 = 1;
+  }
+  if (iVar1 == 0) {
+    iVar1 = 0;
+  }
+  else {
+    iVar1 = (int)puVar5 - iVar1 >> 2;
+  }
+  iVar1 += uVar4;
+  iVar2 = iVar1;
+  if (iVar1 < 0) {
+    iVar2 = 0;
+  }
+  puVar3 = operator_new(iVar2 * 4);
+  puVar7 = puVar3;
+  for (puVar5 = *(uint32_t **)((int)this + 4); puVar5 != param_1; puVar5 = puVar5 + 1) {
+    construct_copy4_443c80(puVar7,puVar5);
+    puVar7++;
+  }
+  construct_copy4_443c80(puVar7,param_2);
+  uninitialized_copy4_443bb0(param_1,*(uint32_t **)((int)this + 8),puVar7 + 1);
+  empty_function_443550();
+  operator_delete(*(void **)((int)this + 4));
+  *(uint32_t **)((int)this + 0xc) = puVar3 + iVar1;
+  iVar1 = vector_size_e4_4432e0((int)this);
+  *(uint32_t **)((int)this + 8) = puVar3 + iVar1 + 1;
+  *(uint32_t **)((int)this + 4) = puVar3;
+  return puVar3 + iVar6;
+}
+
+// 0x00443550
+void empty_function_443550(void)
+{
+}
+
+// 0x00443560
+int __thiscall vector_insert1_e24_443560(void *this,uint32_t *param_1,uint32_t *param_2)
+{
+  iVar1 = *(int *)((int)this + 4);
+  puVar6 = *(uint32_t **)((int)this + 8);
+  iVar3 = *(int *)((int)this + 0xc) - (int)puVar6;
+  iVar4 = iVar3 >> 0x1f;
+  if (iVar3 / 0x18 + iVar4 == iVar4) {
+    if ((iVar1 == 0) || (uVar8 = ((int)puVar6 - iVar1) / 0x18, uVar8 < 2)) {
+      uVar8 = 1;
+    }
+    if (iVar1 == 0) {
+      iVar4 = 0;
+    }
+    else {
+      iVar4 = ((int)puVar6 - iVar1) / 0x18;
+    }
+    iVar4 += uVar8;
+    iVar3 = iVar4;
+    if (iVar4 < 0) {
+      iVar3 = 0;
+    }
+    puVar2 = operator_new(iVar3 * 0x18);
+    puVar7 = puVar2;
+    for (puVar6 = *(uint32_t **)((int)this + 4); puVar6 != param_1; puVar6 = puVar6 + 6) {
+      construct_copy24_443c90(puVar7,puVar6);
+      puVar7 += 6;
+    }
+    construct_copy24_443c90(puVar7,param_2);
+    uninitialized_copy24_443c10(param_1,*(uint32_t **)((int)this + 8),puVar7 + 6);
+    empty_function_443790();
+    operator_delete(*(void **)((int)this + 4));
+    *(uint32_t **)((int)this + 0xc) = puVar2 + iVar4 * 6;
+    iVar4 = vector_size_e24_443760((int)this);
+    *(uint32_t **)((int)this + 4) = puVar2;
+    *(uint32_t **)((int)this + 8) = puVar2 + (iVar4 + 1) * 6;
+  }
+  else {
+    iVar4 = (int)puVar6 - (int)param_1 >> 0x1f;
+    if (((int)puVar6 - (int)param_1) / 0x18 + iVar4 == iVar4) {
+      uninitialized_copy24_443c10(param_1,puVar6,param_1 + 6);
+      uninitialized_fill_n24_443c50
+                (*(uint32_t **)((int)this + 8),
+                 1 - ((int)*(uint32_t **)((int)this + 8) - (int)param_1) / 0x18,param_2);
+      puVar6 = *(uint32_t **)((int)this + 8);
+      puVar7 = param_1;
+      while (puVar7 != puVar6) {
+        puVar5 = puVar7 + 6;
+        puVar2 = param_2;
+        puVar9 = puVar7;
+        for (iVar4 = 6; puVar7 = puVar5, iVar4 != 0; iVar4 = iVar4 - 1) {
+          *puVar9 = *puVar2;
+          puVar2++;
+          puVar9++;
+        }
+      }
+    }
+    else {
+      uninitialized_copy24_443c10(puVar6 - 6,puVar6,puVar6);
+      puVar7 = *(uint32_t **)((int)this + 8);
+      puVar6 = puVar7 - 6;
+      while (param_1 != puVar6) {
+        puVar6 -= 6;
+        puVar7 -= 6;
+        puVar2 = puVar6;
+        puVar9 = puVar7;
+        for (iVar4 = 6; iVar4 != 0; iVar4 = iVar4 - 1) {
+          *puVar9 = *puVar2;
+          puVar2++;
+          puVar9++;
+        }
+      }
+      puVar6 = param_1;
+      while (puVar6 != param_1 + 6) {
+        puVar9 = puVar6 + 6;
+        puVar7 = param_2;
+        puVar2 = puVar6;
+        for (iVar4 = 6; puVar6 = puVar9, iVar4 != 0; iVar4 = iVar4 - 1) {
+          *puVar2 = *puVar7;
+          puVar7++;
+          puVar2++;
+        }
+      }
+    }
+    *(int *)((int)this + 8) = *(int *)((int)this + 8) + 0x18;
+  }
+  return *(int *)((int)this + 4) + (((int)param_1 - iVar1) / 0x18) * 0x18;
+}
+
+// 0x00443760
+int __fastcall vector_size_e24_443760(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return (*(int *)(param_1 + 8) - *(int *)(param_1 + 4)) / 0x18;
+}
+
+// 0x00443790
+void empty_function_443790(void)
+{
+}
+
+// 0x004437a0
+void __thiscall C_ParticlePool::FreeNode(C_ParticlePool *this,S_ParticlePoolNode *node)
+{
+  node->next = this->m_spareNodes;
+  node->particle = nullptr;
+  this->m_spareNodes = node;
+}
+
+// 0x004437c0
+void __thiscall C_ParticlePool::Grow(C_ParticlePool *this)
+{
+  iVar3 = 0;
+  if (0 < this->m_growBy) {
+    do {
+      pSVar1 = _aligned_malloc(0xb0,0x10);
+      if (pSVar1 == nullptr) {
+        pSVar1 = nullptr;
+      }
+      else {
+        pSVar1 = S_Particle::S_Particle(pSVar1);
+      }
+      if (pSVar1 != nullptr) {
+        pSVar2 = this->m_spareNodes;
+        if (pSVar2 == nullptr) {
+          pSVar2 = operator_new(8);
+          if (pSVar2 == nullptr) {
+            pSVar2 = nullptr;
+          }
+          else {
+            pSVar2->particle = nullptr;
+            pSVar2->next = nullptr;
+          }
+        }
+        else {
+          this->m_spareNodes = pSVar2->next;
+        }
+        pSVar2->particle = pSVar1;
+        pSVar2->next = this->m_free;
+        this->m_free = pSVar2;
+        this->m_count = this->m_count + 1;
+      }
+      iVar3++;
+    } while (iVar3 < this->m_growBy);
+  }
+}
+
+// 0x00443870
+void __fastcall AlignedFree_443870(uint32_t param_1)
+{
+  _aligned_free((void *)param_1);
+}
+
+// 0x00443880
+void __thiscall
+vector_insert_n_e24_443880(void *this,uint32_t *param_1,uint32_t param_2,uint32_t *param_3)
+{
+  puVar6 = *(uint32_t **)((int)this + 8);
+  if (param_2 <= (uint32_t)((*(int *)((int)this + 0xc) - (int)puVar6) / 0x18)) {
+    if ((uint32_t)(((int)puVar6 - (int)param_1) / 0x18) < param_2) {
+      puVar3 = param_1 + param_2 * 6;
+      if (param_1 != puVar6) {
+        puVar2 = puVar3 + param_2 * -6;
+        do {
+          if (puVar3 != nullptr) {
+            puVar7 = puVar2;
+            puVar8 = puVar3;
+            for (iVar5 = 6; iVar5 != 0; iVar5 = iVar5 - 1) {
+              *puVar8 = *puVar7;
+              puVar7++;
+              puVar8++;
+            }
+          }
+          puVar2 += 6;
+          puVar3 += 6;
+        } while (puVar2 != puVar6);
+      }
+      puVar6 = *(uint32_t **)((int)this + 8);
+      for (iVar5 = param_2 - ((int)puVar6 - (int)param_1) / 0x18; iVar5 != 0; iVar5 = iVar5 - 1) {
+        if (puVar6 != nullptr) {
+          puVar3 = param_3;
+          puVar2 = puVar6;
+          for (iVar1 = 6; iVar1 != 0; iVar1 = iVar1 - 1) {
+            *puVar2 = *puVar3;
+            puVar3++;
+            puVar2++;
+          }
+        }
+        puVar6 += 6;
+      }
+      puVar6 = *(uint32_t **)((int)this + 8);
+      while (param_1 != puVar6) {
+        puVar7 = param_1 + 6;
+        puVar3 = param_3;
+        puVar2 = param_1;
+        for (iVar5 = 6; param_1 = puVar7, iVar5 != 0; iVar5 = iVar5 - 1) {
+          *puVar2 = *puVar3;
+          puVar3++;
+          puVar2++;
+        }
+      }
+      *(uint32_t *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 0x18;
+      return;
+    }
+    if (param_2 != 0) {
+      puVar3 = puVar6;
+      for (puVar2 = puVar6 + param_2 * -6; puVar2 != puVar6; puVar2 = puVar2 + 6) {
+        if (puVar3 != nullptr) {
+          puVar7 = puVar2;
+          puVar8 = puVar3;
+          for (iVar5 = 6; iVar5 != 0; iVar5 = iVar5 - 1) {
+            *puVar8 = *puVar7;
+            puVar7++;
+            puVar8++;
+          }
+        }
+        puVar3 += 6;
+      }
+      puVar6 = *(uint32_t **)((int)this + 8);
+      puVar3 = puVar6 + param_2 * -6;
+      while (param_1 != puVar3) {
+        puVar3 -= 6;
+        puVar6 -= 6;
+        puVar2 = puVar3;
+        puVar7 = puVar6;
+        for (iVar5 = 6; iVar5 != 0; iVar5 = iVar5 - 1) {
+          *puVar7 = *puVar2;
+          puVar2++;
+          puVar7++;
+        }
+      }
+      puVar6 = param_1;
+      while (puVar6 != param_1 + param_2 * 6) {
+        puVar7 = puVar6 + 6;
+        puVar3 = param_3;
+        puVar2 = puVar6;
+        for (iVar5 = 6; puVar6 = puVar7, iVar5 != 0; iVar5 = iVar5 - 1) {
+          *puVar2 = *puVar3;
+          puVar3++;
+          puVar2++;
+        }
+      }
+      *(int *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 0x18;
+    }
+    return;
+  }
+  iVar5 = *(int *)((int)this + 4);
+  if ((iVar5 == 0) || (uVar4 = ((int)puVar6 - iVar5) / 0x18, uVar4 <= param_2)) {
+    uVar4 = param_2;
+  }
+  if (iVar5 == 0) {
+    iVar5 = 0;
+  }
+  else {
+    iVar5 = ((int)puVar6 - iVar5) / 0x18;
+  }
+  iVar5 += uVar4;
+  iVar1 = iVar5;
+  if (iVar5 < 0) {
+    iVar1 = 0;
+  }
+  puVar2 = operator_new(iVar1 * 0x18);
+  puVar3 = puVar2;
+  for (puVar6 = *(uint32_t **)((int)this + 4); uVar4 = param_2, puVar7 = puVar3, puVar6 != param_1
+      ; puVar6 = puVar6 + 6) {
+    if (puVar3 != nullptr) {
+      puVar7 = puVar6;
+      puVar8 = puVar3;
+      for (iVar1 = 6; iVar1 != 0; iVar1 = iVar1 - 1) {
+        *puVar8 = *puVar7;
+        puVar7++;
+        puVar8++;
+      }
+    }
+    puVar3 += 6;
+  }
+  for (; uVar4 != 0; uVar4 = uVar4 - 1) {
+    if (puVar7 != nullptr) {
+      puVar6 = param_3;
+      puVar8 = puVar7;
+      for (iVar1 = 6; iVar1 != 0; iVar1 = iVar1 - 1) {
+        *puVar8 = *puVar6;
+        puVar6++;
+        puVar8++;
+      }
+    }
+    puVar7 += 6;
+  }
+  puVar7 = *(uint32_t **)((int)this + 8);
+  puVar6 = puVar3 + param_2 * 6;
+  if (param_1 != puVar7) {
+    puVar3 = (uint32_t *)((int)puVar6 + (param_2 * -0x18 - (int)puVar3) + (int)param_1);
+    do {
+      if (puVar6 != nullptr) {
+        puVar8 = puVar3;
+        puVar9 = puVar6;
+        for (iVar1 = 6; iVar1 != 0; iVar1 = iVar1 - 1) {
+          *puVar9 = *puVar8;
+          puVar8++;
+          puVar9++;
+        }
+      }
+      puVar3 += 6;
+      puVar6 += 6;
+    } while (puVar3 != puVar7);
+  }
+  operator_delete(*(void **)((int)this + 4));
+  iVar1 = *(int *)((int)this + 4);
+  *(uint32_t **)((int)this + 0xc) = puVar2 + iVar5 * 6;
+  if (iVar1 == 0) {
+    *(uint32_t **)((int)this + 4) = puVar2;
+    *(uint32_t **)((int)this + 8) = puVar2 + param_2 * 6;
+    return;
+  }
+  *(uint32_t **)((int)this + 4) = puVar2;
+  *(uint32_t **)((int)this + 8) =
+       puVar2 + (param_2 + (*(int *)((int)this + 8) - iVar1) / 0x18) * 6;
+}
+
+// 0x00443b80
+S_ParticlePoolNode * __thiscall C_ParticlePool::AllocNode(C_ParticlePool *this)
+{
+  pSVar1 = this->m_spareNodes;
+  if (pSVar1 != nullptr) {
+    this->m_spareNodes = pSVar1->next;
+    return pSVar1;
+  }
+  pSVar1 = operator_new(8);
+  if (pSVar1 != nullptr) {
+    pSVar1->particle = nullptr;
+    pSVar1->next = nullptr;
+    return pSVar1;
+  }
+  return nullptr;
+}
+
+// 0x00443bb0
+void uninitialized_copy4_443bb0(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != nullptr) {
+      *param_3 = *param_1;
+    }
+    param_3++;
+  }
+}
+
+// 0x00443be0
+void uninitialized_fill_n4_443be0(uint32_t *param_1,int param_2,uint32_t *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 - 1) {
+    if (param_1 != nullptr) {
+      *param_1 = *param_3;
+    }
+    param_1++;
+  }
+}
+
+// 0x00443c10
+void uninitialized_copy24_443c10(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 6) {
+    if (param_3 != nullptr) {
+      puVar2 = param_1;
+      puVar3 = param_3;
+      for (iVar1 = 6; iVar1 != 0; iVar1 = iVar1 - 1) {
+        *puVar3 = *puVar2;
+        puVar2++;
+        puVar3++;
+      }
+    }
+    param_3 += 6;
+  }
+}
+
+// 0x00443c50
+void uninitialized_fill_n24_443c50(uint32_t *param_1,int param_2,uint32_t *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 - 1) {
+    if (param_1 != nullptr) {
+      puVar2 = param_3;
+      puVar3 = param_1;
+      for (iVar1 = 6; iVar1 != 0; iVar1 = iVar1 - 1) {
+        *puVar3 = *puVar2;
+        puVar2++;
+        puVar3++;
+      }
+    }
+    param_1 += 6;
+  }
+}
+
+// 0x00443c80
+void __fastcall construct_copy4_443c80(uint32_t *param_1,uint32_t *param_2)
+{
+  if (param_1 != nullptr) {
+    *param_1 = *param_2;
+  }
+}
+
+// 0x00443c90
+void __fastcall construct_copy24_443c90(uint32_t *param_1,uint32_t *param_2)
+{
+  if (param_1 != nullptr) {
+    for (iVar1 = 6; iVar1 != 0; iVar1 = iVar1 - 1) {
+      *param_1 = *param_2;
+      param_2++;
+      param_1++;
+    }
+  }
+}
+
+// 0x00443cb0
+void StaticInit_443cb0(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x00443ce0
+void StaticInit_ParticlesModule(void)
+{
+  ConstructParticlesModule();
+  RegisterParticlesModuleDtor();
+}
+
+// 0x00443cf0
+void ConstructParticlesModule(void)
+{
+  C_ParticlesModule::C_ParticlesModule
+            ((C_ParticlesModule *)&g_particlesModule,0x11,"Particles");
+}
+
+// 0x00443d10
+void RegisterParticlesModuleDtor(void)
+{
+  atexit(DestroyParticlesModule);
+}
+
+// 0x00443d20
+void DestroyParticlesModule(void)
+{
+  C_ParticlesModule::~C_ParticlesModule((C_ParticlesModule *)&g_particlesModule);
+}
+
+// 0x00443d30
+C_ParticlesModule * __thiscall
+C_ParticlesModule::C_ParticlesModule(C_ParticlesModule *this,int id,char *name)
+{
+  C_Module::C_Module((C_Module *)this,id,name);
+  eh_vector_constructor_iterator
+            (this->m_freeEmitters,0x10,0x100,vector_init_443e20,vector_tidy_4468e0);
+  (this->m_active).alloc = (uchar)name;
+  (this->m_active).first = nullptr;
+  (this->m_active).last = nullptr;
+  (this->m_active).end = nullptr;
+  (this->m_effects).alloc = (uchar)name;
+  (this->m_effects).first = (S_EffectDef **)0x0;
+  (this->m_effects).last = (S_EffectDef **)0x0;
+  (this->m_effects).end = (S_EffectDef **)0x0;
+  (this->m_static).alloc = (uchar)name;
+  (this->m_static).first = nullptr;
+  (this->m_static).last = nullptr;
+  (this->m_static).end = nullptr;
+  this->m_scene = nullptr;
+  this->vtable = (C_ParticlesModule_vtbl *)&PTR_ScalarDeletingDestructor_0080f9a0;
+  this->m_lastHandle = -1;
+  return this;
+}
+
+// 0x00443e00
+C_ParticlesModule * __thiscall
+C_ParticlesModule::ScalarDeletingDestructor(C_ParticlesModule *this,uchar flags)
+{
+  ~C_ParticlesModule(this);
+  if ((flags & 1) != 0) {
+    _aligned_free(this);
+  }
+  return this;
+}
+
+// 0x00443e20
+void __fastcall vector_init_443e20(uint8_t *param_1)
+{
+  local_1 = (uint8_t)((uint32_t)param_1 >> 0x18);
+  *param_1 = local_1;
+  *(uint32_t *)(param_1 + 4) = 0;
+  *(uint32_t *)(param_1 + 8) = 0;
+  *(uint32_t *)(param_1 + 0xc) = 0;
+}
+
+// 0x00443e40
+void __thiscall C_ParticlesModule::~C_ParticlesModule(C_ParticlesModule *this)
+{
+  this->vtable = (C_ParticlesModule_vtbl *)&PTR_ScalarDeletingDestructor_0080f9a0;
+  local_4 = 4;
+  FreeEffects(this);
+  operator_delete((this->m_static).first);
+  (this->m_static).first = nullptr;
+  (this->m_static).last = nullptr;
+  (this->m_static).end = nullptr;
+  operator_delete((this->m_effects).first);
+  (this->m_effects).first = (S_EffectDef **)0x0;
+  (this->m_effects).last = (S_EffectDef **)0x0;
+  (this->m_effects).end = (S_EffectDef **)0x0;
+  operator_delete((this->m_active).first);
+  (this->m_active).first = nullptr;
+  (this->m_active).last = nullptr;
+  (this->m_active).end = nullptr;
+  local_4 &= 0xffffff00;
+  eh_vector_destructor_iterator(this->m_freeEmitters,0x10,0x100,vector_tidy_4468e0);
+  local_4 = 0xffffffff;
+  C_Module::~C_Module((C_Module *)this);
+}
+
+// 0x00443f10
+void __fastcall DestroyFreeEmitterLists(void *param_1)
+{
+  eh_vector_destructor_iterator(param_1,0x10,0x100,vector_tidy_4468e0);
+}
+
+// 0x00443f30
+void __thiscall C_ParticlesModule::StartMission(C_ParticlesModule *this,bool server)
+{
+  if (this->m_started == false) {
+    this->m_lastHandle = -1;
+    LoadEffects(this);
+    local_8 = 0x100;
+    pvVar1 = (vector_C_ParticleEmitterPtr *)&this->m_scene;
+    do {
+      while ((pvVar1[-1].first != (C_ParticleEmitter **)0x0 &&
+             ((int)pvVar1[-1].last - (int)pvVar1[-1].first >> 2 != 0))) {
+        this_00 = pvVar1[-1].last[-1];
+        if (this_00 != nullptr) {
+          C_ParticleEmitter::~C_ParticleEmitter(this_00);
+          _aligned_free(this_00);
+        }
+        pvVar1[-1].last = pvVar1[-1].last - 1;
+      }
+      local_8--;
+      pvVar1--;
+    } while (local_8 != 0);
+    this->m_started = true;
+  }
+}
+
+// 0x00443fe0
+void __thiscall C_ParticlesModule::StopMission(C_ParticlesModule *this,bool server)
+{
+  if (this->m_started != false) {
+    DestroyAll(this);
+    local_8 = 0x100;
+    pvVar5 = (vector_C_ParticleEmitterPtr *)&this->m_scene;
+    do {
+      while ((pvVar5[-1].first != (C_ParticleEmitter **)0x0 &&
+             ((int)pvVar5[-1].last - (int)pvVar5[-1].first >> 2 != 0))) {
+        pCVar1 = pvVar5[-1].last[-1];
+        if (pCVar1 != nullptr) {
+          C_ParticleEmitter::~C_ParticleEmitter(pCVar1);
+          _aligned_free(pCVar1);
+        }
+        ppCVar2 = pvVar5[-1].last;
+        copy4_447600(ppCVar2,ppCVar2,ppCVar2 - 1);
+        empty_function_446fc0();
+        pvVar5[-1].last = pvVar5[-1].last - 1;
+      }
+      local_8--;
+      pvVar5--;
+    } while (local_8 != 0);
+    FreeEffects(this);
+    this->m_lastHandle = -1;
+    iVar4 = 0;
+    for (uVar6 = 0;
+        (pSVar3 = (this->m_static).first, pSVar3 != nullptr &&
+        (uVar6 < (uint32_t)((int)(this->m_static).last - (int)pSVar3 >> 4))); uVar6 = uVar6 + 1) {
+      pCVar1 = *(C_ParticleEmitter **)(pSVar3->_pad_000d + iVar4 - 0xd);
+      if (pCVar1 != nullptr) {
+        C_ParticleEmitter::~C_ParticleEmitter(pCVar1);
+        _aligned_free(pCVar1);
+      }
+      iVar4 += 0x10;
+    }
+    (this->m_static).last = (this->m_static).first;
+    this->m_started = false;
+  }
+}
+
+// 0x00444110
+void __thiscall C_ParticlesModule::LoadMissionData(C_ParticlesModule *this,bool server)
+{
+  iVar1 = GetGame();
+  this->m_scene = *(I3D_scene **)(iVar1 + 0x18);
+}
+
+// 0x00444130
+void __thiscall C_ParticlesModule::FreeMissionData(C_ParticlesModule *this,bool server)
+{
+}
+
+// 0x00444140
+void __thiscall C_ParticlesModule::LoadEffects(C_ParticlesModule *this)
+{
+  ppSVar1 = (this->m_effects).first;
+  this_00 = &this->m_effects;
+  if ((ppSVar1 != (S_EffectDef **)0x0) &&
+     (local_43c = (S_EffectDef *)((int)(this->m_effects).last - (int)ppSVar1 >> 2),
+     local_43c != nullptr)) {
+    return;
+  }
+  local_420.m_open = false;
+  local_420.m_handle = -1;
+  local_420.m_writing = false;
+  local_420.m_depth = 0;
+  local_430 = this_00;
+  bVar2 = C_chunk::Open(&local_420,"tables\\effects.def",false);
+  if (bVar2) {
+    if ((local_420.m_open != false) &&
+       (iVar3 = dtaRead(local_420.m_handle,&local_438,6), iVar3 == 6)) {
+      iVar3 = dtaSeek(local_420.m_handle,0,1);
+      local_420.m_stack[local_420.m_depth] = iVar3 - 6 + CONCAT22(uStack_434,local_438._2_2_);
+      local_420.m_depth = local_420.m_depth + 1;
+      sVar4 = (short)local_438;
+      if ((short)local_438 == 1000) {
+        while (local_420.m_open != false) {
+          if (local_420.m_depth == 0) {
+LAB_00444424:
+            if (local_420.m_open != false) {
+              if (local_420.m_writing != false) {
+                while (local_420.m_depth != 0) {
+                  C_chunk::Ascend(&local_420);
+                }
+              }
+              dtaClose(local_420.m_handle);
+              local_420.m_handle = -1;
+              local_420.m_open = false;
+            }
+            break;
+          }
+          iVar3 = dtaSeek(local_420.m_handle,0,1);
+          if ((iVar3 == -1) ||
+             (local_438 = local_420.m_stack[local_420.m_depth - 1] - iVar3, local_438 == 0))
+          goto LAB_00444424;
+          if (local_420.m_open != false) {
+            iVar3 = dtaRead(local_420.m_handle,&sStack_42c,6);
+            if (iVar3 == 6) {
+              iVar3 = dtaSeek(local_420.m_handle,0,1);
+              local_420.m_stack[local_420.m_depth] = iVar3 - 6 + CONCAT22(uStack_428,uStack_42a);
+              local_420.m_depth = local_420.m_depth + 1;
+              sVar4 = sStack_42c;
+            }
+          }
+          if (sVar4 == 0x3f2) {
+            local_43c = _aligned_malloc(0x38,0x10);
+            if (local_43c == nullptr) {
+              local_43c = nullptr;
+            }
+            else {
+              (local_43c->m_name).rep = nullptr;
+              (local_43c->m_texture).rep = nullptr;
+              (local_43c->m_particles).alloc = uStack_43d;
+              (local_43c->m_particles).first = (S_ParticleDef **)0x0;
+              (local_43c->m_particles).last = (S_ParticleDef **)0x0;
+              (local_43c->m_particles).end = (S_ParticleDef **)0x0;
+              local_43c->vtable = (S_EffectDef_vtbl *)&PTR_ScalarDeletingDestructor_0080f9e0;
+              local_43c->m_type = 1;
+              local_43c->m_distanceFade = false;
+              local_43c->m_blendMode = 1;
+              local_43c->m_range = 20.0;
+              local_43c->m_unknown1C = 50.0;
+              local_43c->m_srcBlend = 5;
+              local_43c->m_dstBlend = 6;
+            }
+            S_EffectDef::Load(local_43c,&local_420);
+            if (local_420.m_open != false) {
+              if (local_420.m_writing == false) {
+                dtaSeek(local_420.m_handle,local_420.m_stack[local_420.m_depth - 1],0);
+              }
+              else {
+                iVar3 = dtaSeek(local_420.m_handle,0,1);
+                iStack_424 = iVar3 - local_420.m_stack[local_420.m_depth - 1];
+                dtaSeek(local_420.m_handle,local_420.m_stack[local_420.m_depth - 1] + 2,0);
+                dtaWrite(local_420.m_handle,&iStack_424,4);
+                dtaSeek(local_420.m_handle,iVar3,0);
+                this_00 = local_430;
+              }
+              if (local_420.m_depth != 0) {
+                local_420.m_depth = local_420.m_depth - 1;
+              }
+            }
+            vector_insert1_e4_446fe0(this_00,this_00->last,&local_43c);
+          }
+        }
+        goto LAB_0044446d;
+      }
+    }
+    dbgPrintf("Could not load data from \"tables\\effects.def\" wrong version");
+    if (local_420.m_open != false) {
+      if (local_420.m_writing != false) {
+        while (local_420.m_depth != 0) {
+          C_chunk::Ascend(&local_420);
+        }
+      }
+      dtaClose(local_420.m_handle);
+      local_420.m_handle = -1;
+      local_420.m_open = false;
+    }
+  }
+  else {
+    dbgPrintf("Could not load data from \"tables\\effects.def\"");
+  }
+LAB_0044446d:
+  C_chunk::Close(&local_420);
+}
+
+// 0x00444490
+void __thiscall S_EffectDef::Load(S_EffectDef *this,C_chunk *chunk)
+{
+  uStack_4 = 0xffffffff;
+  vector_erase_e4_446f80(&this->m_particles,(this->m_particles).first,(this->m_particles).last);
+  while( true ) {
+    if (chunk->m_open == false) {
+      return;
+    }
+    if (chunk->m_depth == 0) {
+      return;
+    }
+    iVar1 = dtaSeek(chunk->m_handle,0,1);
+    if (iVar1 == -1) {
+      return;
+    }
+    pSStack_7f8 = (S_ParticleDef *)(chunk->m_stack[chunk->m_depth - 1] - iVar1);
+    if (pSStack_7f8 == nullptr) break;
+    if (chunk->m_open == false) {
+      return;
+    }
+    iVar1 = dtaRead(chunk->m_handle,&uStack_7e8,6);
+    if (iVar1 == 6) {
+      iVar1 = dtaSeek(chunk->m_handle,0,1);
+      chunk->m_stack[chunk->m_depth] = iVar1 - 6 + CONCAT22(uStack_7e4,uStack_7e6);
+      iVar1 = chunk->m_depth;
+      chunk->m_depth = iVar1 + 1;
+      switch(uStack_7e8) {
+      case 100:
+        C_chunk::Read(chunk,&this->m_distanceFade,1);
+        C_chunk::Read(chunk,&this->m_blendMode,4);
+        C_chunk::Ascend(chunk);
+        break;
+      case 0x65:
+        iVar1 = chunk->m_stack[iVar1];
+        iVar3 = dtaSeek(chunk->m_handle,0,1);
+        pSStack_7f8 = (S_ParticleDef *)(iVar1 - iVar3);
+        pSStack_7f4 = (S_ParticleDef *)0x3e7;
+        ppSVar4 = &pSStack_7f4;
+        if ((int)pSStack_7f8 < 1000) {
+          ppSVar4 = &pSStack_7f8;
+        }
+        C_chunk::Read(chunk,acStack_7dc,(int)*ppSVar4);
+        C_str::operator_assign(&this->m_name,acStack_7dc);
+        C_chunk::Ascend(chunk);
+        break;
+      case 0x66:
+        iVar1 = chunk->m_stack[iVar1];
+        iVar3 = dtaSeek(chunk->m_handle,0,1);
+        pSStack_7f4 = (S_ParticleDef *)(iVar1 - iVar3);
+        pSStack_7f8 = (S_ParticleDef *)0x3e7;
+        ppSVar4 = &pSStack_7f8;
+        if ((int)pSStack_7f4 < 1000) {
+          ppSVar4 = &pSStack_7f4;
+        }
+        C_chunk::Read(chunk,acStack_3f4,(int)*ppSVar4);
+        C_str::operator_assign(&this->m_texture,acStack_3f4);
+        C_chunk::Ascend(chunk);
+        break;
+      case 0x67:
+        pSVar2 = _aligned_malloc(0xa0,0x10);
+        pSStack_7f8 = pSVar2;
+        if (pSVar2 == nullptr) {
+          pSStack_7ec = nullptr;
+        }
+        else {
+          pSVar2->vtable = (S_ParticleDef_vtbl *)&PTR_ScalarDeletingDestructor_0080f9e8;
+          pSVar2->m_type = 0;
+          (pSVar2->m_name).rep = nullptr;
+          uStack_4._0_1_ = 2;
+          uStack_4._1_3_ = 0;
+          ParticleFrames_Init_444880(&(pSVar2->m_frames).alloc);
+          uStack_4 = CONCAT31(uStack_4._1_3_,3);
+          vector_init_446880(&pSVar2->m_phases,&uStack_7ed);
+          pSVar2->vtable = (S_ParticleDef_vtbl *)&PTR_ScalarDeletingDestructor_0080f9e4;
+          pSVar2->m_type = 2;
+          (pSVar2->m_pos).x = 0.0;
+          (pSVar2->m_pos).y = 0.0;
+          (pSVar2->m_pos).z = 0.0;
+          (pSVar2->m_posVariance).x = 0.0;
+          (pSVar2->m_posVariance).y = 0.0;
+          (pSVar2->m_posVariance).z = 0.0;
+          pSVar2->m_speed = 1.0;
+          pSVar2->m_speedVariance = 0.0;
+          pSVar2->m_size = 1.0;
+          pSVar2->m_sizeVariance = 0.0;
+          pSVar2->m_alpha = 1.0;
+          pSVar2->m_alphaVariance = 0.0;
+          pSVar2->m_burstMin = 0;
+          pSVar2->m_burstMax = 0;
+          pSVar2->m_fadeRate = 0;
+          pSVar2->m_fadeStart = 0;
+          pSVar2->m_repeat = 0;
+          pSVar2->m_delay = 0;
+          pSVar2->m_rate = 0;
+          pSVar2->m_unknown30 = 0;
+          pSVar2->m_rotation = 0.0;
+          pSVar2->m_rotationVariance = 0.0;
+          pSVar2->m_flags = 0;
+          pSStack_7ec = pSVar2;
+        }
+        uStack_4 = 0xffffffff;
+        S_ParticleDef::Load(pSStack_7ec,chunk);
+        vector_insert1_e4_446dc0(&this->m_particles,(this->m_particles).last,&pSStack_7ec);
+        if (chunk->m_open == false) {
+          return;
+        }
+        iVar1 = chunk->m_handle;
+        if (chunk->m_writing == false) {
+          iVar3 = chunk->m_stack[chunk->m_depth - 1];
+        }
+        else {
+          iVar3 = dtaSeek(iVar1,0,1);
+          iStack_7e0 = iVar3 - chunk->m_stack[chunk->m_depth - 1];
+          dtaSeek(chunk->m_handle,chunk->m_stack[chunk->m_depth - 1] + 2,0);
+          dtaWrite(chunk->m_handle,&iStack_7e0,4);
+          iVar1 = chunk->m_handle;
+        }
+        dtaSeek(iVar1,iVar3,0);
+        if (chunk->m_depth != 0) {
+          chunk->m_depth = chunk->m_depth - 1;
+        }
+        break;
+      case 0x68:
+        C_chunk::Read(chunk,&this->m_range,4);
+        C_chunk::Read(chunk,&this->m_unknown1C,4);
+        C_chunk::Ascend(chunk);
+        break;
+      case 0x69:
+        C_chunk::Read(chunk,&this->m_srcBlend,4);
+        C_chunk::Read(chunk,&this->m_dstBlend,4);
+        C_chunk::Ascend(chunk);
+      }
+    }
+  }
+}
+
+// 0x00444840
+void __thiscall S_EffectItem::~S_EffectItem(S_EffectItem *this)
+{
+  this->vtable = (S_EffectItem_vtbl *)&PTR_ScalarDeletingDestructor_0080f9e8;
+}
+
+// 0x00444850
+void __fastcall AlignedFree_444850(uint32_t param_1)
+{
+  _aligned_free((void *)param_1);
+}
+
+// 0x00444860
+S_EffectItem * __thiscall S_EffectItem::ScalarDeletingDestructor(S_EffectItem *this,uchar flags)
+{
+  this->vtable = (S_EffectItem_vtbl *)&PTR_ScalarDeletingDestructor_0080f9e8;
+  if ((flags & 1) != 0) {
+    _aligned_free(this);
+  }
+  return this;
+}
+
+// 0x00444880
+void __fastcall ParticleFrames_Init_444880(uint8_t *param_1)
+{
+  local_1 = (uint8_t)((uint32_t)param_1 >> 0x18);
+  *param_1 = local_1;
+  *(uint32_t *)(param_1 + 4) = 0;
+  *(uint32_t *)(param_1 + 8) = 0;
+  *(uint32_t *)(param_1 + 0xc) = 0;
+  *(uint32_t *)(param_1 + 0x10) = 0;
+  *(uint32_t *)(param_1 + 0x14) = 100;
+}
+
+// 0x004448a0
+void __thiscall S_ParticleDef::Load(S_ParticleDef *this,C_chunk *chunk)
+{
+  vector_erase_e4_446d80(&this->m_phases,(this->m_phases).first,(this->m_phases).last);
+  vector_erase_e16_446b60
+            (&this->m_frames,&((this->m_frames).first)->u0,&((this->m_frames).last)->u0);
+switchD_0044499e_default:
+  do {
+    if ((((chunk->m_open == false) || (chunk->m_depth == 0)) ||
+        (iVar1 = dtaSeek(chunk->m_handle,0,1), iVar1 == -1)) ||
+       ((chunk->m_stack[chunk->m_depth - 1] == iVar1 || (chunk->m_open == false)))) {
+      return;
+    }
+    iVar1 = dtaRead(chunk->m_handle,&uStack_58,6);
+  } while (iVar1 != 6);
+  iVar1 = dtaSeek(chunk->m_handle,0,1);
+  chunk->m_stack[chunk->m_depth] = iVar1 - 6 + CONCAT22(uStack_54,uStack_56);
+  chunk->m_depth = chunk->m_depth + 1;
+  switch(uStack_58) {
+  case 200:
+    C_chunk::Read(chunk,&this->m_burstMin,4);
+    C_chunk::Read(chunk,&this->m_burstMax,4);
+    C_chunk::Read(chunk,&this->m_rate,4);
+    C_chunk::Read(chunk,&this->m_unknown30,4);
+    C_chunk::Read(chunk,&this->m_fadeStart,4);
+    C_chunk::Read(chunk,&this->m_fadeRate,4);
+    C_chunk::Read(chunk,&this->m_repeat,4);
+    C_chunk::Read(chunk,&this->m_delay,4);
+    C_chunk::Read(chunk,&this->m_pos,0xc);
+    C_chunk::Read(chunk,&this->m_posVariance,0xc);
+    C_chunk::Read(chunk,&this->m_size,4);
+    C_chunk::Read(chunk,&this->m_sizeVariance,4);
+    C_chunk::Read(chunk,&this->m_speed,4);
+    C_chunk::Read(chunk,&this->m_speedVariance,4);
+    C_chunk::Read(chunk,&this->m_alpha,4);
+    C_chunk::Read(chunk,&this->m_alphaVariance,4);
+    C_chunk::Read(chunk,&this->m_rotation,4);
+    buffer = &this->m_rotationVariance;
+    break;
+  case 0xc9:
+    C_chunk::ReadRemainingString(chunk);
+    goto switchD_0044499e_default;
+  case 0xca:
+    C_chunk::Read(chunk,&this->m_loopFrame,4);
+    C_chunk::Read(chunk,&this->m_frameTime,4);
+    C_chunk::Read(chunk,&iStack_68,4);
+    iStack_70 = 0;
+    if (0 < iStack_68) {
+      do {
+        C_chunk::Read(chunk,auStack_50,0x10);
+        vector_insert1_e16_446960(&this->m_frames,&((this->m_frames).last)->u0,auStack_50);
+        iStack_70++;
+      } while (iStack_70 < iStack_68);
+    }
+    C_chunk::Ascend(chunk);
+    goto switchD_0044499e_default;
+  case 0xcb:
+    puVar2 = _aligned_malloc(0x90,0x10);
+    if (puVar2 == nullptr) {
+      puVar2 = nullptr;
+    }
+    else {
+      puVar2[2] = 0;
+      *puVar2 = &PTR_ScalarDeletingDestructor_0080f9ec;
+      puVar2[1] = 3;
+      puVar2[0xd] = 0;
+      puVar2[0xc] = 1000;
+      puVar3 = (uint32_t *)S_vector::Set(&SStack_40,0,0,0);
+      puVar2[4] = *puVar3;
+      puVar2[5] = puVar3[1];
+      puVar2[6] = puVar3[2];
+      puVar2[7] = puVar3[3];
+      puVar2[8] = 0;
+      puVar2[9] = 0;
+      puVar2[10] = 0;
+      puVar2[0xf] = 0;
+      puVar2[0x10] = 0;
+      puVar2[0x11] = 0x3f800000;
+      puVar2[0x12] = 0;
+      puVar2[0x1e] = 0;
+      puVar2[0x1f] = 0;
+      puVar2[0x20] = 0;
+      puVar2[0x21] = 0;
+      puVar2[0xe] = 0;
+      puVar3 = (uint32_t *)S_vector::Set(&SStack_30,0x3f000000,0x3f000000,0x3f000000);
+      puVar2[0x14] = *puVar3;
+      puVar2[0x15] = puVar3[1];
+      puVar2[0x16] = puVar3[2];
+      puVar2[0x17] = puVar3[3];
+      puVar2[0x18] = 0;
+      puVar2[0x19] = 0;
+      puVar2[0x1a] = 0;
+      puVar2[0x1c] = 0x3f800000;
+      puVar2[0x1d] = 0;
+    }
+    puStack_60 = puVar2;
+    iVar1 = C_chunk::RemainingSizeInline();
+    while (iVar1 != 0) {
+      uVar4 = C_chunk::DescendInline(chunk);
+      if ((char)uVar4 != '\0') {
+        uVar5 = uStack_64 & 0xffff;
+        if (uVar5 == 300) {
+          C_chunk::Read(chunk,puVar2 + 4,0xc);
+          C_chunk::Read(chunk,puVar2 + 8,0xc);
+          C_chunk::Read(chunk,puVar2 + 0xc,4);
+          C_chunk::Read(chunk,puVar2 + 0xd,4);
+          C_chunk::Read(chunk,puVar2 + 0xe,4);
+          C_chunk::Read(chunk,puVar2 + 0xf,4);
+          C_chunk::Read(chunk,puVar2 + 0x10,4);
+          C_chunk::Read(chunk,puVar2 + 0x11,4);
+          C_chunk::Read(chunk,puVar2 + 0x12,4);
+          C_chunk::Read(chunk,puVar2 + 0x14,0xc);
+          C_chunk::Read(chunk,puVar2 + 0x18,0xc);
+          C_chunk::Read(chunk,puVar2 + 0x1e,4);
+          C_chunk::Read(chunk,puVar2 + 0x1f,4);
+          C_chunk::Read(chunk,puVar2 + 0x20,4);
+          puVar3 = puVar2 + 0x21;
+LAB_00444bc4:
+          C_chunk::Read(chunk,puVar3,4);
+          C_chunk::Ascend(chunk);
+        }
+        else if (uVar5 == 0x12d) {
+          C_chunk::ReadRemainingString(chunk);
+        }
+        else if (uVar5 == 0x12e) {
+          C_chunk::Read(chunk,puVar2 + 0x1c,4);
+          puVar3 = puVar2 + 0x1d;
+          goto LAB_00444bc4;
+        }
+      }
+      iVar1 = C_chunk::RemainingSizeInline();
+    }
+    vector_insert1_e4_446bc0(&this->m_phases,(this->m_phases).last,&puStack_60);
+    if (chunk->m_open != false) {
+      iVar1 = chunk->m_handle;
+      if (chunk->m_writing == false) {
+        position = chunk->m_stack[chunk->m_depth - 1];
+      }
+      else {
+        position = dtaSeek(iVar1,0,1);
+        iStack_5c = position - chunk->m_stack[chunk->m_depth - 1];
+        dtaSeek(chunk->m_handle,chunk->m_stack[chunk->m_depth - 1] + 2,0);
+        dtaWrite(chunk->m_handle,&iStack_5c,4);
+        iVar1 = chunk->m_handle;
+      }
+      dtaSeek(iVar1,position,0);
+      if (chunk->m_depth != 0) {
+        chunk->m_depth = chunk->m_depth - 1;
+      }
+    }
+    goto switchD_0044499e_default;
+  case 0xcc:
+    buffer = (float *)&this->m_flags;
+    break;
+  default:
+    goto switchD_0044499e_default;
+  }
+  C_chunk::Read(chunk,buffer,4);
+  C_chunk::Ascend(chunk);
+  goto switchD_0044499e_default;
+}
+
+// 0x00444e40
+S_ParticlePhase * __thiscall
+S_ParticlePhase::ScalarDeletingDestructor(S_ParticlePhase *this,uchar flags)
+{
+  ~S_ParticlePhase(this);
+  if ((flags & 1) != 0) {
+    _aligned_free(this);
+  }
+  return this;
+}
+
+// 0x00444e60
+void __thiscall S_ParticlePhase::~S_ParticlePhase(S_ParticlePhase *this)
+{
+  ptr = (int *)this->m_unknown08;
+  if ((ptr != nullptr) && (iVar1 = *ptr, *ptr = iVar1 - 1, iVar1 - 1 == 0)) {
+    operator_delete(ptr);
+  }
+  this->vtable = (S_ParticlePhase_vtbl *)&PTR_ScalarDeletingDestructor_0080f9e8;
+}
+
+// 0x00444e90
+S_ParticleDef * __thiscall S_ParticleDef::ScalarDeletingDestructor(S_ParticleDef *this,uchar flags)
+{
+  ~S_ParticleDef(this);
+  if ((flags & 1) != 0) {
+    _aligned_free(this);
+  }
+  return this;
+}
+
+// 0x00444eb0
+void __thiscall S_ParticleDef::~S_ParticleDef(S_ParticleDef *this)
+{
+  this->vtable = (S_ParticleDef_vtbl *)&PTR_ScalarDeletingDestructor_0080f9e4;
+  local_4 = 3;
+  while ((ppSVar2 = (this->m_phases).first, ppSVar2 != (S_ParticlePhase **)0x0 &&
+         ((int)(this->m_phases).last - (int)ppSVar2 >> 2 != 0))) {
+    pSVar3 = (this->m_phases).last[-1];
+    if (pSVar3 != nullptr) {
+      (*pSVar3->vtable->ScalarDeletingDestructor)(1);
+    }
+    empty_function_446db0();
+    pppSVar1 = &(this->m_phases).last;
+    *pppSVar1 = *pppSVar1 - 1;
+  }
+  ppSVar2 = (this->m_phases).first;
+  empty_function_446db0();
+  (this->m_phases).last = ppSVar2;
+  pSVar4 = (this->m_frames).first;
+  empty_function_446bb0();
+  (this->m_frames).last = pSVar4;
+  operator_delete((this->m_phases).first);
+  (this->m_phases).first = (S_ParticlePhase **)0x0;
+  (this->m_phases).last = (S_ParticlePhase **)0x0;
+  (this->m_phases).end = (S_ParticlePhase **)0x0;
+  local_4 = CONCAT31(local_4._1_3_,1);
+  empty_function_446bb0();
+  operator_delete((this->m_frames).first);
+  (this->m_frames).first = nullptr;
+  (this->m_frames).last = nullptr;
+  (this->m_frames).end = nullptr;
+  ptr = (this->m_name).rep;
+  if ((ptr != nullptr) && (iVar5 = ptr->refCount - 1, ptr->refCount = iVar5, iVar5 == 0))
+  {
+    operator_delete(ptr);
+  }
+  this->vtable = (S_ParticleDef_vtbl *)&PTR_ScalarDeletingDestructor_0080f9e8;
+}
+
+// 0x00445030
+void __fastcall vector_tidy_445030(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(uint32_t *)(param_1 + 4) = 0;
+  *(uint32_t *)(param_1 + 8) = 0;
+  *(uint32_t *)(param_1 + 0xc) = 0;
+}
+
+// 0x00445050
+S_EffectDef * __thiscall S_EffectDef::ScalarDeletingDestructor(S_EffectDef *this,uchar flags)
+{
+  ~S_EffectDef(this);
+  if ((flags & 1) != 0) {
+    _aligned_free(this);
+  }
+  return this;
+}
+
+// 0x00445070
+void __thiscall S_EffectDef::~S_EffectDef(S_EffectDef *this)
+{
+  this->vtable = (S_EffectDef_vtbl *)&PTR_ScalarDeletingDestructor_0080f9e0;
+  while ((ppSVar2 = (this->m_particles).first, ppSVar2 != (S_ParticleDef **)0x0 &&
+         ((int)(this->m_particles).last - (int)ppSVar2 >> 2 != 0))) {
+    pSVar3 = (this->m_particles).last[-1];
+    if (pSVar3 != nullptr) {
+      (*pSVar3->vtable->ScalarDeletingDestructor)(1);
+    }
+    pppSVar1 = &(this->m_particles).last;
+    *pppSVar1 = *pppSVar1 - 1;
+  }
+  operator_delete((this->m_particles).first);
+  (this->m_particles).first = (S_ParticleDef **)0x0;
+  (this->m_particles).last = (S_ParticleDef **)0x0;
+  (this->m_particles).end = (S_ParticleDef **)0x0;
+  pCVar4 = (this->m_texture).rep;
+  if ((pCVar4 != nullptr) &&
+     (iVar5 = pCVar4->refCount - 1, pCVar4->refCount = iVar5, iVar5 == 0)) {
+    operator_delete(pCVar4);
+  }
+  pCVar4 = (this->m_name).rep;
+  if ((pCVar4 != nullptr) &&
+     (iVar5 = pCVar4->refCount - 1, pCVar4->refCount = iVar5, iVar5 == 0)) {
+    operator_delete(pCVar4);
+  }
+  this->vtable = (S_EffectDef_vtbl *)&PTR_ScalarDeletingDestructor_0080f9e8;
+}
+
+// 0x00445150
+int __thiscall
+C_ParticlesModule::CreateAt
+          (C_ParticlesModule *this,int effect,S_vector *pos,S_vector *dir,I3D_frame *parent,
+          bool unknownD0,bool persistent)
+{
+  S_matrix::Identity(&local_50);
+  S_matrix::SetDir3(&local_50,dir);
+  local_50.m[3][0] = pos->x;
+  local_50.m[3][1] = pos->y;
+  local_50.m[3][2] = pos->z;
+  iVar1 = C_ParticlesModule__Create(this,effect,&local_50,parent,_unknownD0,_persistent);
+  return iVar1;
+}
+
+// 0x004451b0
+int __thiscall
+C_ParticlesModule__Create
+          (void *this,uint32_t param_1,S_matrix *param_2,I3D_frame *param_4,bool param_5,
+          uint8_t param_6)
+{
+  if ((*(int *)((int)this + 0x1024) == 0) ||
+     ((uint32_t)(*(int *)((int)this + 0x1028) - *(int *)((int)this + 0x1024) >> 2) <= param_1)) {
+    return -1;
+  }
+  bVar1 = S_EffectDef::IsUsable(*(S_EffectDef **)(*(int *)((int)this + 0x1024) + param_1 * 4));
+  if (!bVar1) {
+    return -1;
+  }
+  iVar6 = param_1 * 0x10;
+  iVar7 = *(int *)(iVar6 + 0x10 + (int)this);
+  if ((iVar7 != 0) && (*(int *)((int)this + iVar6 + 0x14) - iVar7 >> 2 != 0)) {
+    pCVar2 = *(C_ParticleEmitter **)(*(int *)((int)this + iVar6 + 0x14) - 4);
+    *(int *)((int)this + iVar6 + 0x14) = *(int *)((int)this + iVar6 + 0x14) - 4;
+    if (pCVar2 != nullptr) {
+      C_ParticleEmitter::Restart(pCVar2,*(I3D_scene **)((int)this + 0x100c),param_4,param_2,param_5)
+      ;
+      goto LAB_004452f6;
+    }
+  }
+  pCVar2 = _aligned_malloc(0xe0,0x10);
+  if (pCVar2 == nullptr) {
+    pCVar2 = nullptr;
+  }
+  else {
+    pCVar2 = C_ParticleEmitter::C_ParticleEmitter(pCVar2);
+  }
+  C_ParticleEmitter::Init
+            (pCVar2,*(I3D_scene **)((int)this + 0x100c),param_4,param_2,
+             *(S_EffectDef **)(*(int *)((int)this + 0x1024) + param_1 * 4),param_5);
+LAB_004452f6:
+  local_18 = *(int *)((int)this + 0x1040) + 1;
+  *(int *)((int)this + 0x1040) = local_18;
+  iVar7 = (int)this + 0x1010;
+  local_14 = param_1;
+  local_10 = CONCAT31(local_10._1_3_,param_6);
+  puVar8 = *(uint32_t **)((int)this + 0x1018);
+  local_1c = pCVar2;
+  if (*(int *)((int)this + 0x101c) - (int)puVar8 >> 4 == 0) {
+    if ((*(int *)((int)this + 0x1014) == 0) ||
+       ((uint32_t)((int)puVar8 - *(int *)((int)this + 0x1014) >> 4) < 2)) {
+      iVar6 = 1;
+    }
+    else {
+      iVar6 = vector_size_e16_446920(iVar7);
+    }
+    iVar3 = vector_size_e16_446920(iVar7);
+    iVar3 += iVar6;
+    iVar6 = iVar3;
+    if (iVar3 < 0) {
+      iVar6 = 0;
+    }
+    puVar4 = operator_new(iVar6 << 4);
+    puVar5 = (uint32_t *)
+             uninitialized_copy16_447510(*(uint32_t **)((int)this + 0x1014),puVar8,puVar4);
+    uninitialized_fill_n16_447560(puVar5,1,&local_1c);
+    uninitialized_copy16_447510(puVar8,*(uint32_t **)((int)this + 0x1018),puVar5 + 4);
+    empty_function_446fd0();
+    operator_delete(*(void **)((int)this + 0x1014));
+    *(uint32_t **)((int)this + 0x101c) = puVar4 + iVar3 * 4;
+    iVar7 = vector_size_e16_446920(iVar7);
+    *(uint32_t **)((int)this + 0x1014) = puVar4;
+    puVar4 = puVar4 + (iVar7 + 1) * 4;
+  }
+  else {
+    uninitialized_copy16_447510(puVar8,puVar8,puVar8 + 4);
+    uninitialized_fill_n16_447560
+              (*(uint32_t **)((int)this + 0x1018),
+               1 - ((int)*(uint32_t **)((int)this + 0x1018) - (int)puVar8 >> 4),&local_1c);
+    puVar4 = *(uint32_t **)((int)this + 0x1018);
+    for (; puVar8 != puVar4; puVar8 = puVar8 + 4) {
+      *puVar8 = local_1c;
+      puVar8[1] = local_18;
+      puVar8[2] = local_14;
+      puVar8[3] = local_10;
+    }
+    puVar4 = (uint32_t *)(*(int *)((int)this + 0x1018) + 0x10);
+  }
+  *(uint32_t **)((int)this + 0x1018) = puVar4;
+  return local_18;
+}
+
+// 0x004454e0
+void __fastcall AlignedFree_4454e0(uint32_t param_1)
+{
+  _aligned_free((void *)param_1);
+}
+
+// 0x004454f0
+bool __cdecl S_EffectDef::IsUsable(S_EffectDef *def)
+{
+  pCVar1 = (def->m_texture).rep;
+  if ((pCVar1 == nullptr) || (pCVar1->length == 0)) {
+    return false;
+  }
+  ppSVar7 = (def->m_particles).first;
+  if ((ppSVar7 != (S_ParticleDef **)0x0) && ((int)(def->m_particles).last - (int)ppSVar7 >> 2 != 0))
+  {
+    ppSVar7 = (def->m_particles).first;
+    bVar5 = false;
+    if ((ppSVar7 != (S_ParticleDef **)0x0) &&
+       (iVar6 = (int)(def->m_particles).last - (int)ppSVar7 >> 2, iVar6 != 0)) {
+      ppSVar7 += iVar6;
+      do {
+        pSVar2 = ppSVar7[-1];
+        ppSVar7--;
+        iVar6--;
+        pSVar3 = (pSVar2->m_frames).first;
+        if (pSVar3 == nullptr) {
+          return false;
+        }
+        if ((int)(pSVar2->m_frames).last - (int)pSVar3 >> 4 == 0) {
+          return false;
+        }
+        ppSVar4 = (pSVar2->m_phases).first;
+        if ((ppSVar4 != (S_ParticlePhase **)0x0) &&
+           ((int)(pSVar2->m_phases).last - (int)ppSVar4 >> 2 != 0)) {
+          bVar5 = true;
+        }
+      } while (iVar6 != 0);
+      if (bVar5) {
+        return true;
+      }
+    }
+    return false;
+  }
+  return false;
+}
+
+// 0x004455a0
+void __thiscall C_ParticlesModule::Tick(C_ParticlesModule *this,int time)
+{
+}
+
+// 0x004455b0
+void __thiscall C_ParticlesModule::Update(C_ParticlesModule *this,int time)
+{
+  if (this->m_scene != nullptr) {
+    uVar6 = 0;
+    iVar7 = 0;
+    while ((pSVar2 = (this->m_static).first, pSVar2 != nullptr &&
+           (uVar6 < (uint32_t)((int)(this->m_static).last - (int)pSVar2 >> 4)))) {
+      iVar4 = GetGame();
+      if (*(char *)(iVar4 + 100) == '\0') {
+        C_ParticleEmitter::Tick
+                  (*(C_ParticleEmitter **)(((this->m_static).first)->_pad_000d + iVar7 - 0xd),time)
+        ;
+        uVar6++;
+        iVar7 += 0x10;
+      }
+      else {
+        C_ParticleEmitter::Draw
+                  (*(C_ParticleEmitter **)(((this->m_static).first)->_pad_000d + iVar7 - 0xd));
+        uVar6++;
+        iVar7 += 0x10;
+      }
+    }
+    if (this->m_lastHandle != -1) {
+      local_8 = 0;
+      iVar7 = 0;
+      while ((pSVar2 = (this->m_active).first, pSVar2 != nullptr &&
+             (local_8 < (uint32_t)((int)(this->m_active).last - (int)pSVar2 >> 4)))) {
+        puVar8 = ((this->m_active).first)->_pad_000d + iVar7 - 0xd;
+        iVar4 = GetGame();
+        if ((*(char *)(iVar4 + 100) == '\0') ||
+           ((*(int *)(puVar8 + 8) == 0x2c || (*(int *)(puVar8 + 8) == 0x2d)))) {
+          bVar3 = C_ParticleEmitter::Tick(*(C_ParticleEmitter **)puVar8,time);
+          if (!bVar3) {
+            C_ParticleEmitter::Stop(*(C_ParticleEmitter **)puVar8);
+            local_4 = *(int *)puVar8;
+            vector_insert_n_e4_4471b0
+                      (this->m_freeEmitters + *(int *)(puVar8 + 8),
+                       this->m_freeEmitters[*(int *)(puVar8 + 8)].last,1,&local_4);
+            pSVar2 = (this->m_active).last;
+            puVar8 = ((this->m_active).first)->_pad_000d + iVar7 - 0xd;
+            local_8--;
+            iVar7 -= 0x10;
+            pSVar5 = (S_ActiveEmitter *)(puVar8 + 0x10);
+            for (; pSVar5 != pSVar2; pSVar5 = pSVar5 + 1) {
+              *(C_ParticleEmitter **)puVar8 = pSVar5->emitter;
+              *(int *)(puVar8 + 4) = pSVar5->handle;
+              *(int *)(puVar8 + 8) = pSVar5->effect;
+              *(uint32_t *)(puVar8 + 0xc) = *(uint32_t *)&pSVar5->persistent;
+              puVar8 += 0x10;
+            }
+            ppSVar1 = &(this->m_active).last;
+            *ppSVar1 = *ppSVar1 - 1;
+            local_4 = iVar7;
+          }
+          local_8++;
+          iVar7 += 0x10;
+        }
+        else {
+          C_ParticleEmitter::Draw(*(C_ParticleEmitter **)puVar8);
+          local_8++;
+          iVar7 += 0x10;
+        }
+      }
+    }
+  }
+}
+
+// 0x00445740
+S_ActiveEmitter * __thiscall
+C_ParticlesModule::FindActive(C_ParticlesModule *this,int handle,int *outIndex)
+{
+  pSVar5 = (this->m_active).first;
+  iVar6 = 0;
+  if (pSVar5 == nullptr) {
+    uVar3 = 0;
+  }
+  else {
+    uVar3 = (int)(this->m_active).last - (int)pSVar5 >> 4;
+  }
+  local_4 = uVar3 - 1;
+  if (-1 < local_4) {
+    do {
+      uVar7 = (int)uVar3 / 2;
+      if (uVar7 == 0) {
+        if (uVar3 == 0) {
+          return nullptr;
+        }
+        pSVar5 = (this->m_active).first + iVar6;
+        if (pSVar5->handle != handle) {
+          return nullptr;
+        }
+        *outIndex = iVar6;
+        return pSVar5;
+      }
+      uVar4 = uVar7;
+      if ((uVar3 & 1) == 0) {
+        uVar4 = uVar7 - 1;
+      }
+      iVar1 = uVar4 + iVar6;
+      pSVar5 = (this->m_active).first + iVar1;
+      iVar2 = pSVar5->handle;
+      if (iVar2 == handle) {
+        *outIndex = iVar1;
+        return pSVar5;
+      }
+      if (handle < iVar2) {
+        local_4 = iVar1 - 1;
+        if ((uVar3 & 1) == 0) {
+          uVar7--;
+        }
+      }
+      else {
+        iVar6 = iVar1 + 1;
+      }
+      uVar3 = uVar7;
+    } while (iVar6 <= local_4);
+  }
+  return nullptr;
+}
+
+// 0x00445800
+void __thiscall C_ParticlesModule__Destroy(void *this,int param_1)
+{
+  pSVar3 = C_ParticlesModule::FindActive(this,param_1,&param_1);
+  if (pSVar3 != nullptr) {
+    this_00 = pSVar3->emitter;
+    if (this_00 != nullptr) {
+      C_ParticleEmitter::~C_ParticleEmitter(this_00);
+      _aligned_free(this_00);
+    }
+    puVar4 = (uint32_t *)(param_1 * 0x10 + *(int *)((int)this + 0x1014));
+    puVar1 = *(uint32_t **)((int)this + 0x1018);
+    puVar2 = puVar4;
+    while (puVar4 = puVar4 + 4, puVar4 != puVar1) {
+      *puVar2 = *puVar4;
+      puVar2[1] = puVar4[1];
+      puVar2[2] = puVar4[2];
+      puVar2[3] = puVar4[3];
+      puVar2 += 4;
+    }
+    *(int *)((int)this + 0x1018) = *(int *)((int)this + 0x1018) - 0x10;
+  }
+}
+
+// 0x004458b0
+void __thiscall C_ParticlesModule::ToggleEmission(C_ParticlesModule *this,int handle)
+{
+  pSVar2 = FindActive(this,handle,&handle);
+  if (pSVar2 != nullptr) {
+    puVar1 = &pSVar2->emitter->m_flags;
+    *puVar1 = *puVar1 ^ 1;
+  }
+}
+
+// 0x004458d0
+void __thiscall C_ParticlesModule__Finish(void *this,int param_1)
+{
+  pSVar1 = C_ParticlesModule::FindActive(this,param_1,&param_1);
+  if (pSVar1 != nullptr) {
+    C_ParticleEmitter::Finish(pSVar1->emitter);
+  }
+}
+
+// 0x004458f0
+void __thiscall C_ParticlesModule::DestroyAll(C_ParticlesModule *this)
+{
+  iVar3 = 0;
+  for (uVar2 = 0;
+      (pSVar1 = (this->m_active).first, pSVar1 != nullptr &&
+      (uVar2 < (uint32_t)((int)(this->m_active).last - (int)pSVar1 >> 4))); uVar2 = uVar2 + 1) {
+    this_00 = *(C_ParticleEmitter **)(pSVar1->_pad_000d + iVar3 - 0xd);
+    if (this_00 != nullptr) {
+      C_ParticleEmitter::~C_ParticleEmitter(this_00);
+      _aligned_free(this_00);
+    }
+    iVar3 += 0x10;
+  }
+  (this->m_active).last = (this->m_active).first;
+}
+
+// 0x00445980
+void __thiscall C_ParticlesModule::FreeEffects(C_ParticlesModule *this)
+{
+  for (uVar2 = 0;
+      (ppSVar1 = (this->m_effects).first, ppSVar1 != (S_EffectDef **)0x0 &&
+      (uVar2 < (uint32_t)((int)(this->m_effects).last - (int)ppSVar1 >> 2))); uVar2 = uVar2 + 1) {
+    if (ppSVar1[uVar2] != nullptr) {
+      (*ppSVar1[uVar2]->vtable->ScalarDeletingDestructor)(1);
+    }
+  }
+  (this->m_effects).last = (this->m_effects).first;
+}
+
+// 0x00445af0
+void __thiscall
+C_ParticlesModule::AddStaticEmitter
+          (C_ParticlesModule *this,int effect,S_matrix *matrix,I3D_frame *parent)
+{
+  this_01 = nullptr;
+  ppSVar1 = (this->m_effects).first;
+  if ((((ppSVar1 != (S_EffectDef **)0x0) &&
+       ((uint32_t)effect < (uint32_t)((int)(this->m_effects).last - (int)ppSVar1 >> 2))) &&
+      (ExceptionList = &local_c, bVar2 = S_EffectDef::IsUsable(ppSVar1[effect]), bVar2)) &&
+     ((ppSVar1 = (this->m_effects).first, ppSVar1 != (S_EffectDef **)0x0 &&
+      ((uint32_t)effect < (uint32_t)((int)(this->m_effects).last - (int)ppSVar1 >> 2))))) {
+    this_00 = _aligned_malloc(0xe0,0x10);
+    if (this_00 != nullptr) {
+      this_01 = C_ParticleEmitter::C_ParticleEmitter(this_00);
+    }
+    C_ParticleEmitter::Init
+              (this_01,this->m_scene,parent,matrix,(this->m_effects).first[effect],true);
+    pSVar9 = (this->m_static).last;
+    local_14 = effect;
+    local_18 = -1;
+    local_1c = this_01;
+    if ((int)(this->m_static).end - (int)pSVar9 >> 4 == 0) {
+      pSVar5 = (this->m_static).first;
+      if ((pSVar5 == nullptr) || (uVar6 = (int)pSVar9 - (int)pSVar5 >> 4, uVar6 < 2))
+      {
+        uVar6 = 1;
+      }
+      if (pSVar5 == nullptr) {
+        iVar3 = 0;
+      }
+      else {
+        iVar3 = (int)pSVar9 - (int)pSVar5 >> 4;
+      }
+      iVar3 += uVar6;
+      iVar4 = iVar3;
+      if (iVar3 < 0) {
+        iVar4 = 0;
+      }
+      pSVar5 = operator_new(iVar4 << 4);
+      pSVar8 = pSVar5;
+      for (pSVar7 = (this->m_static).first; pSVar7 != pSVar9; pSVar7 = pSVar7 + 1) {
+        construct_copy16_447660(&pSVar8->emitter,&pSVar7->emitter);
+        pSVar8++;
+      }
+      uninitialized_fill_n16_447560(&pSVar8->emitter,1,&local_1c);
+      uninitialized_copy16_447510
+                (&pSVar9->emitter,&((this->m_static).last)->emitter,&pSVar8[1].emitter);
+      empty_function_446fd0();
+      operator_delete((this->m_static).first);
+      (this->m_static).end = pSVar5 + iVar3;
+      iVar3 = vector_size_e16_446920((int)&this->m_static);
+      (this->m_static).first = pSVar5;
+      pSVar5 = pSVar5 + iVar3 + 1;
+    }
+    else {
+      uninitialized_copy16_447510(&pSVar9->emitter,&pSVar9->emitter,&pSVar9[1].emitter);
+      pSVar5 = (this->m_static).last;
+      uninitialized_fill_n16_447560(&pSVar5->emitter,1 - ((int)pSVar5 - (int)pSVar9 >> 4),&local_1c)
+      ;
+      pSVar5 = (this->m_static).last;
+      for (; pSVar9 != pSVar5; pSVar9 = pSVar9 + 1) {
+        pSVar9->emitter = local_1c;
+        pSVar9->handle = local_18;
+        pSVar9->effect = local_14;
+        pSVar9->persistent = (bool)(uint8_t)local_10;
+        pSVar9->_pad_000d[0] = local_10._1_1_;
+        pSVar9->_pad_000d[1] = local_10._2_1_;
+        pSVar9->_pad_000d[2] = local_10._3_1_;
+      }
+      pSVar5 = (this->m_static).last + 1;
+    }
+    (this->m_static).last = pSVar5;
+  }
+}
+
+// 0x00445d90
+void __thiscall C_ParticlesModule::LoadStaticEmitters(C_ParticlesModule *this)
+{
+  local_4 = 0xffffffff;
+  ppSVar1 = (this->m_effects).first;
+  if (ppSVar1 == (S_EffectDef **)0x0) {
+LAB_00445dce:
+    LoadEffects(this);
+  }
+  else {
+    iVar6 = (int)(this->m_effects).last - (int)ppSVar1;
+    iVar7 = iVar6 >> 2;
+    local_428._0_2_ = (short)iVar7;
+    local_428._2_2_ = (short)(iVar6 >> 0x12);
+    if (iVar7 == 0) goto LAB_00445dce;
+  }
+  iVar6 = GetGame();
+  C_fstr_Construct(&local_42c,"missions\\%s\\effects.bin",*(int *)(iVar6 + 0x6a) + 8);
+  local_420.m_open = false;
+  local_420.m_handle = -1;
+  local_420.m_writing = false;
+  local_420.m_depth = 0;
+  local_4 = 1;
+  if (local_42c.rep == nullptr) {
+    pcVar4 = &DAT_00867a90;
+  }
+  else {
+    pcVar4 = (local_42c.rep)->chars;
+  }
+  bVar3 = C_chunk::Open(&local_420,pcVar4,false);
+  if (!bVar3) {
+    if ((C_str_rep *)(local_42c.rep)->refCount != (C_str_rep *)0x1) {
+      pCVar5 = operator_new((local_42c.rep)->length + 9);
+      if (pCVar5 == nullptr) {
+        pCVar5 = nullptr;
+      }
+      else {
+        uVar2 = (local_42c.rep)->length;
+        pCVar5->refCount = 1;
+        pCVar5->length = uVar2;
+        pcVar4 = (local_42c.rep)->chars;
+        pcVar10 = pCVar5->chars;
+        memcpy(pcVar10, pcVar4, uVar2);
+        pcVar4 += uVar2;
+        pcVar10 += uVar2;
+        pCVar5->chars[uVar2] = '\0';
+      }
+      C_str::ReleaseRep((C_str *)local_42c.rep);
+      local_42c.rep = pCVar5;
+    }
+    dbgPrintf("Effects.bin - Error: could not open \"%s\"",(local_42c.rep)->chars);
+    goto LAB_00446029;
+  }
+  sVar9 = 0;
+  if ((local_420.m_open != false) && (iVar6 = dtaRead(local_420.m_handle,&local_428,6), iVar6 == 6))
+  {
+    iVar6 = dtaSeek(local_420.m_handle,0,1);
+    local_420.m_stack[local_420.m_depth] = iVar6 - 6 + CONCAT22(uStack_424,local_428._2_2_);
+    local_420.m_depth = local_420.m_depth + 1;
+    sVar9 = (short)local_428;
+  }
+  if (sVar9 == 0x65) {
+    LoadStaticEmittersV1(this,&local_420);
+LAB_00445f6f:
+    if (local_420.m_open == false) goto LAB_00446029;
+    if (local_420.m_writing == false) {
+      iVar6 = local_420.m_stack[local_420.m_depth - 1];
+    }
+    else {
+      iVar6 = dtaSeek(local_420.m_handle,0,1);
+      local_428 = iVar6 - local_420.m_stack[local_420.m_depth - 1];
+      dtaSeek(local_420.m_handle,local_420.m_stack[local_420.m_depth - 1] + 2,0);
+      dtaWrite(local_420.m_handle,&local_428,4);
+    }
+    dtaSeek(local_420.m_handle,iVar6,0);
+    if (local_420.m_depth != 0) {
+      local_420.m_depth = local_420.m_depth - 1;
+    }
+    if (local_420.m_open == false) goto LAB_00446029;
+    iVar6 = local_428;
+    if (local_420.m_writing != false) {
+      while (local_420.m_depth != 0) {
+        local_428 = iVar6;
+        C_chunk::Ascend(&local_420);
+        iVar6 = local_428;
+      }
+    }
+  }
+  else {
+    if (sVar9 == 0xc9) {
+      LoadStaticEmittersV2(this,&local_420);
+      goto LAB_00445f6f;
+    }
+    dbgPrintf("Effects.bin - Error: different versions");
+    if (local_420.m_open == false) goto LAB_00446029;
+    iVar6 = local_428;
+    if (local_420.m_writing != false) {
+      while (local_420.m_depth != 0) {
+        C_chunk::Ascend(&local_420);
+        iVar6 = CONCAT22(local_428._2_2_,(short)local_428);
+      }
+    }
+  }
+  local_428 = iVar6;
+  dtaClose(local_420.m_handle);
+  local_420.m_open = false;
+  local_420.m_handle = -1;
+LAB_00446029:
+  local_4 &= 0xffffff00;
+  C_chunk::Close(&local_420);
+  if ((local_42c.rep != nullptr) &&
+     ((local_42c.rep)->refCount = (int)((C_str_rep *)(local_42c.rep)->refCount)[-1].chars,
+     (C_str_rep *)(local_42c.rep)->refCount == nullptr)) {
+    operator_delete(local_42c.rep);
+  }
+}
+
+// 0x00446070
+void __thiscall C_ParticlesModule::LoadStaticEmittersV1(C_ParticlesModule *this,C_chunk *chunk)
+{
+  local_4a8 = 0xffff;
+  local_4a4 = -1;
+  local_4b4.rep = nullptr;
+  local_14 = 0;
+  local_4ac = 0;
+  local_4b0.rep = (C_str_rep *)this;
+  S_matrix::Identity(&local_490);
+  do {
+    if ((((chunk->m_open == false) || (chunk->m_depth == 0)) ||
+        (iVar1 = dtaSeek(chunk->m_handle,0,1), iVar1 == -1)) ||
+       (pIStack_4b8 = (I3D_frame *)(chunk->m_stack[chunk->m_depth - 1] - iVar1),
+       pIStack_4b8 == nullptr)) {
+      pCVar6 = C_fstr_Construct(&local_4b0,"ParticleManager ver: 1.0: %d static particles initialized.",local_4ac);
+      if (pCVar6->rep == nullptr) {
+        format = &DAT_00867a90;
+      }
+      else {
+        format = pCVar6->rep->chars;
+      }
+      dbgPrintf(format);
+      if ((C_ParticlesModule *)local_4b0.rep != nullptr) {
+        C_str::ReleaseRep((C_str *)local_4b0.rep);
+      }
+      local_14 = 0xffffffff;
+      if (local_4b4.rep != nullptr) {
+        C_str::ReleaseRep((C_str *)local_4b4.rep);
+      }
+      return;
+    }
+    if ((chunk->m_open != false) && (iVar1 = dtaRead(chunk->m_handle,&uStack_4a0,6), iVar1 == 6)) {
+      iVar1 = dtaSeek(chunk->m_handle,0,1);
+      chunk->m_stack[chunk->m_depth] = iVar1 - 6 + CONCAT22(uStack_49c,uStack_49e);
+      chunk->m_depth = chunk->m_depth + 1;
+      local_4a8 = CONCAT22(uStack_49e,uStack_4a0);
+    }
+    if ((short)local_4a8 != 1000) {
+      dbgPrintf("Effects.bin - Error: error in chunks..");
+      if (local_4b4.rep == nullptr) {
+        return;
+      }
+      (local_4b4.rep)->refCount = (int)((C_str_rep *)(local_4b4.rep)->refCount)[-1].chars;
+      if ((C_str_rep *)(local_4b4.rep)->refCount != nullptr) {
+        return;
+      }
+      operator_delete(local_4b4.rep);
+      return;
+    }
+    if (chunk->m_open == false) {
+LAB_00446382:
+      pIStack_4bc = nullptr;
+    }
+    else {
+      if (chunk->m_writing == false) {
+        if (chunk->m_depth != 0) {
+          iVar1 = chunk->m_stack[chunk->m_depth - 1];
+          iVar2 = dtaSeek(chunk->m_handle,0,1);
+          pIStack_4b8 = (I3D_frame *)(iVar1 - iVar2);
+          pIStack_4bc = nullptr;
+          ppIVar3 = &pIStack_4bc;
+          if (-1 < (int)pIStack_4b8) {
+            ppIVar3 = &pIStack_4b8;
+          }
+          if ((int)*ppIVar3 < 0x40) goto LAB_004461bb;
+        }
+        dtaRead(chunk->m_handle,&local_490,0x40);
+      }
+LAB_004461bb:
+      if (chunk->m_open == false) goto LAB_00446382;
+      if (chunk->m_writing == false) {
+        if (chunk->m_depth != 0) {
+          iVar1 = chunk->m_stack[chunk->m_depth - 1];
+          iVar2 = dtaSeek(chunk->m_handle,0,1);
+          pIStack_4bc = (I3D_frame *)(iVar1 - iVar2);
+          pIStack_4b8 = nullptr;
+          ppIVar3 = &pIStack_4b8;
+          if (-1 < (int)pIStack_4bc) {
+            ppIVar3 = &pIStack_4bc;
+          }
+          if ((int)*ppIVar3 < 4) goto LAB_00446213;
+        }
+        dtaRead(chunk->m_handle,&local_4a4,4);
+      }
+LAB_00446213:
+      if (((chunk->m_open == false) || (chunk->m_depth == 0)) ||
+         ((iVar1 = dtaSeek(chunk->m_handle,0,1), iVar1 == -1 ||
+          (pIStack_4b8 = (I3D_frame *)(chunk->m_stack[chunk->m_depth - 1] - iVar1),
+          pIStack_4b8 == nullptr)))) goto LAB_00446382;
+      if ((chunk->m_open != false) && (iVar1 = dtaRead(chunk->m_handle,&uStack_498,6), iVar1 == 6))
+      {
+        iVar1 = dtaSeek(chunk->m_handle,0,1);
+        chunk->m_stack[chunk->m_depth] = iVar1 - 6 + CONCAT22(uStack_494,uStack_496);
+        chunk->m_depth = chunk->m_depth + 1;
+        local_4a8 = CONCAT22(uStack_496,uStack_498);
+      }
+      iVar1 = chunk->m_stack[chunk->m_depth - 1];
+      iVar2 = dtaSeek(chunk->m_handle,0,1);
+      pIStack_4bc = (I3D_frame *)(iVar1 - iVar2);
+      pIStack_4b8 = (I3D_frame *)0x3e7;
+      ppIVar3 = &pIStack_4b8;
+      if ((int)pIStack_4bc < 1000) {
+        ppIVar3 = &pIStack_4bc;
+      }
+      C_chunk::Read(chunk,acStack_408,(int)*ppIVar3);
+      C_str::operator_assign(&local_4b4,acStack_408);
+      C_chunk::Ascend(chunk);
+      if ((C_str_rep *)(local_4b4.rep)->refCount != (C_str_rep *)0x1) {
+        pIStack_4b8 = (I3D_frame *)(local_4b4.rep)->length;
+        pIStack_4bc = operator_new((uint32_t)(pIStack_4b8->_pad_0004 + 5));
+        local_14._0_1_ = 1;
+        if (pIStack_4bc == nullptr) {
+          pCVar4 = nullptr;
+        }
+        else {
+          pCVar4 = (C_str_rep *)
+                   C_str::CreateRep((C_str *)pIStack_4bc,(uint32_t *)(local_4b4.rep)->chars,
+                                    (local_4b4.rep)->length);
+        }
+        local_14 = (uint32_t)local_14._1_3_ << 8;
+        C_str::ReleaseRep((C_str *)local_4b4.rep);
+        local_4b4.rep = pCVar4;
+      }
+      iVar1 = GetGame();
+      pIStack_4bc = (I3D_frame *)
+                    (**(code **)(**(int **)(iVar1 + 0x18) + 0x7c))
+                              (*(int **)(iVar1 + 0x18),(local_4b4.rep)->chars,0xffff);
+    }
+    this_00 = pIStack_4bc;
+    C_chunk::Ascend(chunk);
+    if (this_00 != nullptr) {
+      if ((this_00->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(this_00);
+      }
+      pfVar5 = (float *)S_matrix::OperatorMul(&local_490,&SStack_450,&this_00->m_worldMatrix);
+      pfVar7 = (float *)&local_490;
+      for (iVar1 = 0x10; this_00 = pIStack_4bc, iVar1 != 0; iVar1 = iVar1 - 1) {
+        *pfVar7 = *pfVar5;
+        pfVar5++;
+        pfVar7++;
+      }
+    }
+    AddStaticEmitter((C_ParticlesModule *)local_4b0.rep,local_4a4,&local_490,this_00);
+    local_4ac++;
+  } while( true );
+}
+
+// 0x004464a0
+void __thiscall C_ParticlesModule::LoadStaticEmittersV2(C_ParticlesModule *this,C_chunk *chunk)
+{
+  local_464 = -1;
+  local_478.rep = nullptr;
+  local_14 = 0;
+  local_468 = 0;
+  local_46c = 0;
+  local_470.rep = (C_str_rep *)this;
+  S_matrix::Identity(&local_450);
+  do {
+    if ((((chunk->m_open == false) || (chunk->m_depth == 0)) ||
+        (iVar1 = dtaSeek(chunk->m_handle,0,1), iVar1 == -1)) ||
+       (pCStack_47c = (C_str_rep *)(chunk->m_stack[chunk->m_depth - 1] - iVar1),
+       pCStack_47c == nullptr)) {
+      pCVar5 = C_fstr_Construct(&local_470,"ParticleManager ver: 2.01: %d static particles initialized.",local_468);
+      if (pCVar5->rep == nullptr) {
+        format = &DAT_00867a90;
+      }
+      else {
+        format = pCVar5->rep->chars;
+      }
+      dbgPrintf(format);
+      if ((C_ParticlesModule *)local_470.rep != nullptr) {
+        C_str::ReleaseRep((C_str *)local_470.rep);
+      }
+      local_14 = 0xffffffff;
+      if (local_478.rep != nullptr) {
+        C_str::ReleaseRep((C_str *)local_478.rep);
+      }
+      return;
+    }
+    if ((chunk->m_open != false) && (iVar1 = dtaRead(chunk->m_handle,&uStack_460,6), iVar1 == 6)) {
+      iVar1 = dtaSeek(chunk->m_handle,0,1);
+      chunk->m_stack[chunk->m_depth] = iVar1 - 6 + CONCAT22(uStack_45c,uStack_45e);
+      chunk->m_depth = chunk->m_depth + 1;
+      local_46c = CONCAT22(uStack_45e,uStack_460);
+    }
+    if ((short)local_46c != 1000) {
+      dbgPrintf("Effects.bin - Error: error in chunks..");
+      if (local_478.rep == nullptr) {
+        return;
+      }
+      (local_478.rep)->refCount = (int)((C_str_rep *)(local_478.rep)->refCount)[-1].chars;
+      if ((C_str_rep *)(local_478.rep)->refCount != nullptr) {
+        return;
+      }
+      operator_delete(local_478.rep);
+      return;
+    }
+    if (chunk->m_open == false) {
+LAB_004467aa:
+      parent = nullptr;
+    }
+    else {
+      if (chunk->m_writing == false) {
+        if (chunk->m_depth != 0) {
+          iVar1 = chunk->m_stack[chunk->m_depth - 1];
+          iVar2 = dtaSeek(chunk->m_handle,0,1);
+          pCStack_47c = (C_str_rep *)(iVar1 - iVar2);
+          pCStack_474 = nullptr;
+          ppCVar3 = &pCStack_474;
+          if (-1 < (int)pCStack_47c) {
+            ppCVar3 = &pCStack_47c;
+          }
+          if ((int)*ppCVar3 < 0x40) goto LAB_004465e7;
+        }
+        dtaRead(chunk->m_handle,&local_450,0x40);
+      }
+LAB_004465e7:
+      if (chunk->m_open == false) goto LAB_004467aa;
+      if (chunk->m_writing == false) {
+        if (chunk->m_depth != 0) {
+          iVar1 = chunk->m_stack[chunk->m_depth - 1];
+          iVar2 = dtaSeek(chunk->m_handle,0,1);
+          pCStack_474 = (C_str_rep *)(iVar1 - iVar2);
+          pCStack_47c = nullptr;
+          ppCVar3 = &pCStack_47c;
+          if (-1 < (int)pCStack_474) {
+            ppCVar3 = &pCStack_474;
+          }
+          if ((int)*ppCVar3 < 4) goto LAB_0044663f;
+        }
+        dtaRead(chunk->m_handle,&local_464,4);
+      }
+LAB_0044663f:
+      if (((chunk->m_open == false) || (chunk->m_depth == 0)) ||
+         ((iVar1 = dtaSeek(chunk->m_handle,0,1), iVar1 == -1 ||
+          (pCStack_47c = (C_str_rep *)(chunk->m_stack[chunk->m_depth - 1] - iVar1),
+          pCStack_47c == nullptr)))) goto LAB_004467aa;
+      if ((chunk->m_open != false) && (iVar1 = dtaRead(chunk->m_handle,&uStack_458,6), iVar1 == 6))
+      {
+        iVar1 = dtaSeek(chunk->m_handle,0,1);
+        chunk->m_stack[chunk->m_depth] = iVar1 - 6 + CONCAT22(uStack_454,uStack_456);
+        chunk->m_depth = chunk->m_depth + 1;
+        local_46c = CONCAT22(uStack_456,uStack_458);
+      }
+      iVar1 = chunk->m_stack[chunk->m_depth - 1];
+      iVar2 = dtaSeek(chunk->m_handle,0,1);
+      pCStack_474 = (C_str_rep *)(iVar1 - iVar2);
+      pCStack_47c = (C_str_rep *)0x3e7;
+      ppCVar3 = &pCStack_47c;
+      if ((int)pCStack_474 < 1000) {
+        ppCVar3 = &pCStack_474;
+      }
+      C_chunk::Read(chunk,acStack_408,(int)*ppCVar3);
+      C_str::operator_assign(&local_478,acStack_408);
+      C_chunk::Ascend(chunk);
+      if ((C_str_rep *)(local_478.rep)->refCount != (C_str_rep *)0x1) {
+        pCStack_47c = (C_str_rep *)(local_478.rep)->length;
+        pCStack_474 = operator_new((uint32_t)(pCStack_47c + 1));
+        local_14._0_1_ = 1;
+        if (pCStack_474 == nullptr) {
+          pCVar4 = nullptr;
+        }
+        else {
+          pCVar4 = (C_str_rep *)
+                   C_str::CreateRep((C_str *)pCStack_474,(uint32_t *)(local_478.rep)->chars,
+                                    (local_478.rep)->length);
+        }
+        local_14 = (uint32_t)local_14._1_3_ << 8;
+        C_str::ReleaseRep((C_str *)local_478.rep);
+        local_478.rep = pCVar4;
+      }
+      iVar1 = GetGame();
+      parent = (I3D_frame *)
+               (**(code **)(**(int **)(iVar1 + 0x18) + 0x7c))
+                         (*(int **)(iVar1 + 0x18),(local_478.rep)->chars,0xffff);
+    }
+    C_chunk::Ascend(chunk);
+    AddStaticEmitter((C_ParticlesModule *)local_470.rep,local_464,&local_450,parent);
+    local_468++;
+  } while( true );
+}
+
+// 0x00446880
+void __thiscall vector_init_446880(void *this,uint8_t *param_1)
+{
+  *(uint8_t *)this = *param_1;
+  *(uint32_t *)((int)this + 4) = 0;
+  *(uint32_t *)((int)this + 8) = 0;
+  *(uint32_t *)((int)this + 0xc) = 0;
+}
+
+// 0x004468a0
+void __fastcall vector_tidy_4468a0(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(uint32_t *)(param_1 + 4) = 0;
+  *(uint32_t *)(param_1 + 8) = 0;
+  *(uint32_t *)(param_1 + 0xc) = 0;
+}
+
+// 0x004468c0
+void __fastcall vector_tidy_4468c0(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(uint32_t *)(param_1 + 4) = 0;
+  *(uint32_t *)(param_1 + 8) = 0;
+  *(uint32_t *)(param_1 + 0xc) = 0;
+}
+
+// 0x004468e0
+void __fastcall vector_tidy_4468e0(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(uint32_t *)(param_1 + 4) = 0;
+  *(uint32_t *)(param_1 + 8) = 0;
+  *(uint32_t *)(param_1 + 0xc) = 0;
+}
+
+// 0x00446900
+void __fastcall vector_tidy_446900(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(uint32_t *)(param_1 + 4) = 0;
+  *(uint32_t *)(param_1 + 8) = 0;
+  *(uint32_t *)(param_1 + 0xc) = 0;
+}
+
+// 0x00446920
+int __fastcall vector_size_e16_446920(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 4;
+}
+
+// 0x00446940
+void __fastcall vector_tidy_446940(int param_1)
+{
+  operator_delete(*(void **)(param_1 + 4));
+  *(uint32_t *)(param_1 + 4) = 0;
+  *(uint32_t *)(param_1 + 8) = 0;
+  *(uint32_t *)(param_1 + 0xc) = 0;
+}
+
+// 0x00446960
+int __thiscall vector_insert1_e16_446960(void *this,uint32_t *param_1,uint32_t *param_2)
+{
+  puVar4 = *(uint32_t **)((int)this + 8);
+  iVar1 = *(int *)((int)this + 4);
+  iVar6 = (int)param_1 - iVar1;
+  if (*(int *)((int)this + 0xc) - (int)puVar4 >> 4 == 0) {
+    if ((iVar1 == 0) || (uVar5 = (int)puVar4 - iVar1 >> 4, uVar5 < 2)) {
+      uVar5 = 1;
+    }
+    if (iVar1 == 0) {
+      iVar1 = 0;
+    }
+    else {
+      iVar1 = (int)puVar4 - iVar1 >> 4;
+    }
+    iVar1 += uVar5;
+    iVar2 = iVar1;
+    if (iVar1 < 0) {
+      iVar2 = 0;
+    }
+    puVar3 = operator_new(iVar2 << 4);
+    puVar7 = puVar3;
+    for (puVar4 = *(uint32_t **)((int)this + 4); puVar4 != param_1; puVar4 = puVar4 + 4) {
+      FUN_00447620(puVar7,puVar4);
+      puVar7 += 4;
+    }
+    FUN_00447620(puVar7,param_2);
+    FUN_004473c0(param_1,*(uint32_t **)((int)this + 8),puVar7 + 4);
+    empty_function_446bb0();
+    operator_delete(*(void **)((int)this + 4));
+    *(uint32_t **)((int)this + 0xc) = puVar3 + iVar1 * 4;
+    iVar1 = vector_size_e16_446b40((int)this);
+    puVar4 = puVar3 + (iVar1 + 1) * 4;
+    *(uint32_t **)((int)this + 4) = puVar3;
+  }
+  else {
+    if ((int)puVar4 - (int)param_1 >> 4 == 0) {
+      FUN_004473c0(param_1,puVar4,param_1 + 4);
+      FUN_00447410(*(uint32_t **)((int)this + 8),
+                   1 - ((int)*(uint32_t **)((int)this + 8) - (int)param_1 >> 4),param_2);
+      puVar4 = *(uint32_t **)((int)this + 8);
+      for (; param_1 != puVar4; param_1 = param_1 + 4) {
+        *param_1 = *param_2;
+        param_1[1] = param_2[1];
+        param_1[2] = param_2[2];
+        param_1[3] = param_2[3];
+      }
+    }
+    else {
+      FUN_004473c0(puVar4 - 4,puVar4,puVar4);
+      puVar4 = *(uint32_t **)((int)this + 8);
+      puVar7 = *(uint32_t **)((int)this + 8) - 4;
+      while (param_1 != puVar7) {
+        puVar4[-4] = puVar7[-4];
+        puVar4[-3] = puVar7[-3];
+        puVar4[-2] = puVar7[-2];
+        puVar4[-1] = puVar7[-1];
+        puVar4 -= 4;
+        puVar7 -= 4;
+      }
+      puVar4 = param_1 + 4;
+      for (; param_1 != puVar4; param_1 = param_1 + 4) {
+        *param_1 = *param_2;
+        param_1[1] = param_2[1];
+        param_1[2] = param_2[2];
+        param_1[3] = param_2[3];
+      }
+    }
+    puVar4 = (uint32_t *)(*(int *)((int)this + 8) + 0x10);
+  }
+  *(uint32_t **)((int)this + 8) = puVar4;
+  return (iVar6 >> 4) * 0x10 + *(int *)((int)this + 4);
+}
+
+// 0x00446b40
+int __fastcall vector_size_e16_446b40(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 4;
+}
+
+// 0x00446b60
+uint32_t * __thiscall vector_erase_e16_446b60(void *this,uint32_t *param_1,uint32_t *param_2)
+{
+  puVar1 = *(uint32_t **)((int)this + 8);
+  puVar2 = param_1;
+  for (; param_2 != puVar1; param_2 = param_2 + 4) {
+    *puVar2 = *param_2;
+    puVar2[1] = param_2[1];
+    puVar2[2] = param_2[2];
+    puVar2[3] = param_2[3];
+    puVar2 += 4;
+  }
+  *(uint32_t **)((int)this + 8) = puVar2;
+  return param_1;
+}
+
+// 0x00446bb0
+void empty_function_446bb0(void)
+{
+}
+
+// 0x00446bc0
+uint32_t * __thiscall vector_insert1_e4_446bc0(void *this,uint32_t *param_1,uint32_t *param_2)
+{
+  puVar5 = *(uint32_t **)((int)this + 8);
+  iVar1 = *(int *)((int)this + 4);
+  iVar6 = (int)param_1 - iVar1 >> 2;
+  if (*(int *)((int)this + 0xc) - (int)puVar5 >> 2 != 0) {
+    if ((int)puVar5 - (int)param_1 >> 2 == 0) {
+      uninitialized_copy4_447450(param_1,puVar5,param_1 + 1);
+      uninitialized_fill_n4_447480
+                (*(uint32_t **)((int)this + 8),
+                 1 - ((int)*(uint32_t **)((int)this + 8) - (int)param_1 >> 2),param_2);
+      puVar5 = *(uint32_t **)((int)this + 8);
+      for (; param_1 != puVar5; param_1 = param_1 + 1) {
+        *param_1 = *param_2;
+      }
+    }
+    else {
+      uninitialized_copy4_447450(puVar5 - 1,puVar5,puVar5);
+      puVar5 = *(uint32_t **)((int)this + 8);
+      puVar7 = puVar5;
+      while (param_1 != puVar7 - 1) {
+        puVar5--;
+        *puVar5 = puVar7[-2];
+        puVar7--;
+      }
+      puVar5 = param_1 + 1;
+      for (; param_1 != puVar5; param_1 = param_1 + 1) {
+        *param_1 = *param_2;
+      }
+    }
+    *(int *)((int)this + 8) = *(int *)((int)this + 8) + 4;
+    return (uint32_t *)(*(int *)((int)this + 4) + iVar6 * 4);
+  }
+  if ((iVar1 == 0) || (uVar4 = (int)puVar5 - iVar1 >> 2, uVar4 < 2)) {
+    uVar4 = 1;
+  }
+  if (iVar1 == 0) {
+    iVar1 = 0;
+  }
+  else {
+    iVar1 = (int)puVar5 - iVar1 >> 2;
+  }
+  iVar1 += uVar4;
+  iVar2 = iVar1;
+  if (iVar1 < 0) {
+    iVar2 = 0;
+  }
+  puVar3 = operator_new(iVar2 * 4);
+  puVar7 = puVar3;
+  for (puVar5 = *(uint32_t **)((int)this + 4); puVar5 != param_1; puVar5 = puVar5 + 1) {
+    construct_copy4_447640(puVar7,puVar5);
+    puVar7++;
+  }
+  construct_copy4_447640(puVar7,param_2);
+  uninitialized_copy4_447450(param_1,*(uint32_t **)((int)this + 8),puVar7 + 1);
+  empty_function_446db0();
+  operator_delete(*(void **)((int)this + 4));
+  *(uint32_t **)((int)this + 0xc) = puVar3 + iVar1;
+  iVar1 = vector_size_e4_446d60((int)this);
+  *(uint32_t **)((int)this + 8) = puVar3 + iVar1 + 1;
+  *(uint32_t **)((int)this + 4) = puVar3;
+  return puVar3 + iVar6;
+}
+
+// 0x00446d60
+int __fastcall vector_size_e4_446d60(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 2;
+}
+
+// 0x00446d80
+void __thiscall vector_erase_e4_446d80(void *this,uint32_t *param_1,uint32_t *param_2)
+{
+  puVar1 = *(uint32_t **)((int)this + 8);
+  for (; param_2 != puVar1; param_2 = param_2 + 1) {
+    *param_1 = *param_2;
+    param_1++;
+  }
+  *(uint32_t **)((int)this + 8) = param_1;
+}
+
+// 0x00446db0
+void empty_function_446db0(void)
+{
+}
+
+// 0x00446dc0
+uint32_t * __thiscall vector_insert1_e4_446dc0(void *this,uint32_t *param_1,uint32_t *param_2)
+{
+  puVar5 = *(uint32_t **)((int)this + 8);
+  iVar1 = *(int *)((int)this + 4);
+  iVar6 = (int)param_1 - iVar1 >> 2;
+  if (*(int *)((int)this + 0xc) - (int)puVar5 >> 2 != 0) {
+    if ((int)puVar5 - (int)param_1 >> 2 == 0) {
+      uninitialized_copy4_4474b0(param_1,puVar5,param_1 + 1);
+      uninitialized_fill_n4_4474e0
+                (*(uint32_t **)((int)this + 8),
+                 1 - ((int)*(uint32_t **)((int)this + 8) - (int)param_1 >> 2),param_2);
+      puVar5 = *(uint32_t **)((int)this + 8);
+      for (; param_1 != puVar5; param_1 = param_1 + 1) {
+        *param_1 = *param_2;
+      }
+    }
+    else {
+      uninitialized_copy4_4474b0(puVar5 - 1,puVar5,puVar5);
+      puVar5 = *(uint32_t **)((int)this + 8);
+      puVar7 = puVar5;
+      while (param_1 != puVar7 - 1) {
+        puVar5--;
+        *puVar5 = puVar7[-2];
+        puVar7--;
+      }
+      puVar5 = param_1 + 1;
+      for (; param_1 != puVar5; param_1 = param_1 + 1) {
+        *param_1 = *param_2;
+      }
+    }
+    *(int *)((int)this + 8) = *(int *)((int)this + 8) + 4;
+    return (uint32_t *)(*(int *)((int)this + 4) + iVar6 * 4);
+  }
+  if ((iVar1 == 0) || (uVar4 = (int)puVar5 - iVar1 >> 2, uVar4 < 2)) {
+    uVar4 = 1;
+  }
+  if (iVar1 == 0) {
+    iVar1 = 0;
+  }
+  else {
+    iVar1 = (int)puVar5 - iVar1 >> 2;
+  }
+  iVar1 += uVar4;
+  iVar2 = iVar1;
+  if (iVar1 < 0) {
+    iVar2 = 0;
+  }
+  puVar3 = operator_new(iVar2 * 4);
+  puVar7 = puVar3;
+  for (puVar5 = *(uint32_t **)((int)this + 4); puVar5 != param_1; puVar5 = puVar5 + 1) {
+    construct_copy4_447650(puVar7,puVar5);
+    puVar7++;
+  }
+  construct_copy4_447650(puVar7,param_2);
+  uninitialized_copy4_4474b0(param_1,*(uint32_t **)((int)this + 8),puVar7 + 1);
+  empty_function_446fb0();
+  operator_delete(*(void **)((int)this + 4));
+  *(uint32_t **)((int)this + 0xc) = puVar3 + iVar1;
+  iVar1 = vector_size_e4_446f60((int)this);
+  *(uint32_t **)((int)this + 8) = puVar3 + iVar1 + 1;
+  *(uint32_t **)((int)this + 4) = puVar3;
+  return puVar3 + iVar6;
+}
+
+// 0x00446f60
+int __fastcall vector_size_e4_446f60(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 2;
+}
+
+// 0x00446f80
+void __thiscall vector_erase_e4_446f80(void *this,uint32_t *param_1,uint32_t *param_2)
+{
+  puVar1 = *(uint32_t **)((int)this + 8);
+  for (; param_2 != puVar1; param_2 = param_2 + 1) {
+    *param_1 = *param_2;
+    param_1++;
+  }
+  *(uint32_t **)((int)this + 8) = param_1;
+}
+
+// 0x00446fb0
+void empty_function_446fb0(void)
+{
+}
+
+// 0x00446fc0
+void empty_function_446fc0(void)
+{
+}
+
+// 0x00446fd0
+void empty_function_446fd0(void)
+{
+}
+
+// 0x00446fe0
+uint32_t * __thiscall vector_insert1_e4_446fe0(void *this,uint32_t *param_1,uint32_t *param_2)
+{
+  puVar5 = *(uint32_t **)((int)this + 8);
+  iVar1 = *(int *)((int)this + 4);
+  iVar6 = (int)param_1 - iVar1 >> 2;
+  if (*(int *)((int)this + 0xc) - (int)puVar5 >> 2 != 0) {
+    if ((int)puVar5 - (int)param_1 >> 2 == 0) {
+      uninitialized_copy4_4475a0(param_1,puVar5,param_1 + 1);
+      uninitialized_fill_n4_4475d0
+                (*(uint32_t **)((int)this + 8),
+                 1 - ((int)*(uint32_t **)((int)this + 8) - (int)param_1 >> 2),param_2);
+      puVar5 = *(uint32_t **)((int)this + 8);
+      for (; param_1 != puVar5; param_1 = param_1 + 1) {
+        *param_1 = *param_2;
+      }
+    }
+    else {
+      uninitialized_copy4_4475a0(puVar5 - 1,puVar5,puVar5);
+      puVar5 = *(uint32_t **)((int)this + 8);
+      puVar7 = puVar5;
+      while (param_1 != puVar7 - 1) {
+        puVar5--;
+        *puVar5 = puVar7[-2];
+        puVar7--;
+      }
+      puVar5 = param_1 + 1;
+      for (; param_1 != puVar5; param_1 = param_1 + 1) {
+        *param_1 = *param_2;
+      }
+    }
+    *(int *)((int)this + 8) = *(int *)((int)this + 8) + 4;
+    return (uint32_t *)(*(int *)((int)this + 4) + iVar6 * 4);
+  }
+  if ((iVar1 == 0) || (uVar4 = (int)puVar5 - iVar1 >> 2, uVar4 < 2)) {
+    uVar4 = 1;
+  }
+  if (iVar1 == 0) {
+    iVar1 = 0;
+  }
+  else {
+    iVar1 = (int)puVar5 - iVar1 >> 2;
+  }
+  iVar1 += uVar4;
+  iVar2 = iVar1;
+  if (iVar1 < 0) {
+    iVar2 = 0;
+  }
+  puVar3 = operator_new(iVar2 * 4);
+  puVar7 = puVar3;
+  for (puVar5 = *(uint32_t **)((int)this + 4); puVar5 != param_1; puVar5 = puVar5 + 1) {
+    construct_copy4_447680(puVar7,puVar5);
+    puVar7++;
+  }
+  construct_copy4_447680(puVar7,param_2);
+  uninitialized_copy4_4475a0(param_1,*(uint32_t **)((int)this + 8),puVar7 + 1);
+  empty_function_4471a0();
+  operator_delete(*(void **)((int)this + 4));
+  *(uint32_t **)((int)this + 0xc) = puVar3 + iVar1;
+  iVar1 = vector_size_e4_447180((int)this);
+  *(uint32_t **)((int)this + 8) = puVar3 + iVar1 + 1;
+  *(uint32_t **)((int)this + 4) = puVar3;
+  return puVar3 + iVar6;
+}
+
+// 0x00447180
+int __fastcall vector_size_e4_447180(int param_1)
+{
+  if (*(int *)(param_1 + 4) == 0) {
+    return 0;
+  }
+  return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 2;
+}
+
+// 0x004471a0
+void empty_function_4471a0(void)
+{
+}
+
+// 0x004471b0
+void __thiscall
+vector_insert_n_e4_4471b0(void *this,uint32_t *param_1,uint32_t param_2,uint32_t *param_3)
+{
+  puVar7 = *(uint32_t **)((int)this + 8);
+  if (param_2 <= (uint32_t)(*(int *)((int)this + 0xc) - (int)puVar7 >> 2)) {
+    if ((uint32_t)((int)puVar7 - (int)param_1 >> 2) < param_2) {
+      puVar5 = param_1 + param_2;
+      if (param_1 != puVar7) {
+        puVar4 = puVar5 + -param_2;
+        do {
+          if (puVar5 != nullptr) {
+            *puVar5 = *puVar4;
+          }
+          puVar4++;
+          puVar5++;
+        } while (puVar4 != puVar7);
+      }
+      puVar7 = *(uint32_t **)((int)this + 8);
+      for (iVar2 = param_2 - ((int)puVar7 - (int)param_1 >> 2); iVar2 != 0; iVar2 = iVar2 - 1) {
+        if (puVar7 != nullptr) {
+          *puVar7 = *param_3;
+        }
+        puVar7++;
+      }
+      puVar7 = *(uint32_t **)((int)this + 8);
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(uint32_t *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+      return;
+    }
+    if (param_2 != 0) {
+      puVar5 = puVar7;
+      for (puVar4 = puVar7 + -param_2; puVar4 != puVar7; puVar4 = puVar4 + 1) {
+        if (puVar5 != nullptr) {
+          *puVar5 = *puVar4;
+        }
+        puVar5++;
+      }
+      puVar7 = *(uint32_t **)((int)this + 8);
+      for (puVar5 = puVar7 + -param_2; param_1 != puVar5; puVar5 = puVar5 - 1) {
+        puVar7--;
+        *puVar7 = puVar5[-1];
+      }
+      puVar7 = param_1 + param_2;
+      for (; param_1 != puVar7; param_1 = param_1 + 1) {
+        *param_1 = *param_3;
+      }
+      *(int *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 4;
+    }
+    return;
+  }
+  iVar2 = *(int *)((int)this + 4);
+  if ((iVar2 == 0) || (uVar6 = (int)puVar7 - iVar2 >> 2, uVar6 <= param_2)) {
+    uVar6 = param_2;
+  }
+  if (iVar2 == 0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)puVar7 - iVar2 >> 2;
+  }
+  iVar2 += uVar6;
+  iVar3 = iVar2;
+  if (iVar2 < 0) {
+    iVar3 = 0;
+  }
+  puVar4 = operator_new(iVar3 * 4);
+  puVar5 = puVar4;
+  for (puVar7 = *(uint32_t **)((int)this + 4); uVar6 = param_2, puVar1 = puVar5, puVar7 != param_1
+      ; puVar7 = puVar7 + 1) {
+    if (puVar5 != nullptr) {
+      *puVar5 = *puVar7;
+    }
+    puVar5++;
+  }
+  for (; uVar6 != 0; uVar6 = uVar6 - 1) {
+    if (puVar1 != nullptr) {
+      *puVar1 = *param_3;
+    }
+    puVar1++;
+  }
+  puVar1 = *(uint32_t **)((int)this + 8);
+  puVar7 = puVar5 + param_2;
+  if (param_1 != puVar1) {
+    puVar5 = (uint32_t *)((int)puVar7 + (param_2 * -4 - (int)puVar5) + (int)param_1);
+    do {
+      if (puVar7 != nullptr) {
+        *puVar7 = *puVar5;
+      }
+      puVar5++;
+      puVar7++;
+    } while (puVar5 != puVar1);
+  }
+  operator_delete(*(void **)((int)this + 4));
+  *(uint32_t **)((int)this + 0xc) = puVar4 + iVar2;
+  iVar2 = *(int *)((int)this + 4);
+  if (iVar2 == 0) {
+    *(uint32_t **)((int)this + 4) = puVar4;
+    *(uint32_t **)((int)this + 8) = puVar4 + param_2;
+    return;
+  }
+  *(uint32_t **)((int)this + 4) = puVar4;
+  *(uint32_t **)((int)this + 8) = puVar4 + (*(int *)((int)this + 8) - iVar2 >> 2) + param_2;
+}
+
+// 0x004473c0
+void FUN_004473c0(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 4) {
+    if (param_3 != nullptr) {
+      *param_3 = *param_1;
+      param_3[1] = param_1[1];
+      param_3[2] = param_1[2];
+      param_3[3] = param_1[3];
+    }
+    param_3 += 4;
+  }
+}
+
+// 0x00447410
+void FUN_00447410(uint32_t *param_1,int param_2,uint32_t *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 - 1) {
+    if (param_1 != nullptr) {
+      *param_1 = *param_3;
+      param_1[1] = param_3[1];
+      param_1[2] = param_3[2];
+      param_1[3] = param_3[3];
+    }
+    param_1 += 4;
+  }
+}
+
+// 0x00447450
+void uninitialized_copy4_447450(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != nullptr) {
+      *param_3 = *param_1;
+    }
+    param_3++;
+  }
+}
+
+// 0x00447480
+void uninitialized_fill_n4_447480(uint32_t *param_1,int param_2,uint32_t *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 - 1) {
+    if (param_1 != nullptr) {
+      *param_1 = *param_3;
+    }
+    param_1++;
+  }
+}
+
+// 0x004474b0
+void uninitialized_copy4_4474b0(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != nullptr) {
+      *param_3 = *param_1;
+    }
+    param_3++;
+  }
+}
+
+// 0x004474e0
+void uninitialized_fill_n4_4474e0(uint32_t *param_1,int param_2,uint32_t *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 - 1) {
+    if (param_1 != nullptr) {
+      *param_1 = *param_3;
+    }
+    param_1++;
+  }
+}
+
+// 0x00447510
+void uninitialized_copy16_447510(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 4) {
+    if (param_3 != nullptr) {
+      *param_3 = *param_1;
+      param_3[1] = param_1[1];
+      param_3[2] = param_1[2];
+      param_3[3] = param_1[3];
+    }
+    param_3 += 4;
+  }
+}
+
+// 0x00447560
+void uninitialized_fill_n16_447560(uint32_t *param_1,int param_2,uint32_t *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 - 1) {
+    if (param_1 != nullptr) {
+      *param_1 = *param_3;
+      param_1[1] = param_3[1];
+      param_1[2] = param_3[2];
+      param_1[3] = param_3[3];
+    }
+    param_1 += 4;
+  }
+}
+
+// 0x004475a0
+void uninitialized_copy4_4475a0(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    if (param_3 != nullptr) {
+      *param_3 = *param_1;
+    }
+    param_3++;
+  }
+}
+
+// 0x004475d0
+void uninitialized_fill_n4_4475d0(uint32_t *param_1,int param_2,uint32_t *param_3)
+{
+  for (; param_2 != 0; param_2 = param_2 - 1) {
+    if (param_1 != nullptr) {
+      *param_1 = *param_3;
+    }
+    param_1++;
+  }
+}
+
+// 0x00447600
+void __fastcall copy4_447600(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3)
+{
+  for (; param_1 != param_2; param_1 = param_1 + 1) {
+    *param_3 = *param_1;
+    param_3++;
+  }
+}
+
+// 0x00447620
+void __fastcall FUN_00447620(uint32_t *param_1,uint32_t *param_2)
+{
+  if (param_1 != nullptr) {
+    *param_1 = *param_2;
+    param_1[1] = param_2[1];
+    param_1[2] = param_2[2];
+    param_1[3] = param_2[3];
+  }
+}
+
+// 0x00447640
+void __fastcall construct_copy4_447640(uint32_t *param_1,uint32_t *param_2)
+{
+  if (param_1 != nullptr) {
+    *param_1 = *param_2;
+  }
+}
+
+// 0x00447650
+void __fastcall construct_copy4_447650(uint32_t *param_1,uint32_t *param_2)
+{
+  if (param_1 != nullptr) {
+    *param_1 = *param_2;
+  }
+}
+
+// 0x00447660
+void __fastcall construct_copy16_447660(uint32_t *param_1,uint32_t *param_2)
+{
+  if (param_1 != nullptr) {
+    *param_1 = *param_2;
+    param_1[1] = param_2[1];
+    param_1[2] = param_2[2];
+    param_1[3] = param_2[3];
+  }
+}
+
+// 0x00447680
+void __fastcall construct_copy4_447680(uint32_t *param_1,uint32_t *param_2)
+{
+  if (param_1 != nullptr) {
+    *param_1 = *param_2;
+  }
+}
+
+// 0x00447690
+void StaticInit_447690(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x004476c0
+int __fastcall C_chunk::RemainingSizeInline(void)
+{
+  if (*in_ECX == '\0') {
+    return 0;
+  }
+  if (*(int *)(in_ECX + 0x410) == 0) {
+    return 0;
+  }
+  iVar1 = dtaSeek(*(int *)(in_ECX + 4),0,1);
+  if (iVar1 == -1) {
+    return 0;
+  }
+  return *(int *)(in_ECX + *(int *)(in_ECX + 0x410) * 4 + 0xc) - iVar1;
+}
+
+// 0x00447700
+void StaticInit_447700(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x00447730
+void __thiscall C_ParticlesModule::RestartMission(C_ParticlesModule *this,bool server)
+{
+  pSVar1 = (this->m_active).first;
+  if ((pSVar1 != nullptr) &&
+     (iVar3 = (int)(this->m_active).last - (int)pSVar1 >> 4, iVar3 != 0)) {
+    iVar4 = iVar3 << 4;
+    do {
+      pCVar2 = *(C_ParticleEmitter **)((this->m_active).first[-1]._pad_000d + iVar4 - 0xd);
+      if (pCVar2 != nullptr) {
+        C_ParticleEmitter::~C_ParticleEmitter(pCVar2);
+        _aligned_free(pCVar2);
+      }
+      iVar3--;
+      iVar4 -= 0x10;
+    } while (iVar3 != 0);
+  }
+  pSVar1 = (this->m_active).first;
+  empty_function_446fd0();
+  (this->m_active).last = pSVar1;
+  pSVar1 = (this->m_static).first;
+  if ((pSVar1 != nullptr) &&
+     (iVar3 = (int)(this->m_static).last - (int)pSVar1 >> 4, iVar3 != 0)) {
+    iVar4 = iVar3 << 4;
+    do {
+      pCVar2 = *(C_ParticleEmitter **)((this->m_static).first[-1]._pad_000d + iVar4 - 0xd);
+      if (pCVar2 != nullptr) {
+        C_ParticleEmitter::~C_ParticleEmitter(pCVar2);
+        _aligned_free(pCVar2);
+      }
+      iVar3--;
+      iVar4 -= 0x10;
+    } while (iVar3 != 0);
+  }
+  (this->m_static).last = (this->m_static).first;
+  if (server) {
+    LoadStaticEmitters(this);
+    this->m_lastHandle = -1;
+    iVar3 = 0x100;
+    pvVar5 = (vector_C_ParticleEmitterPtr *)&this->m_scene;
+    do {
+      while ((pvVar5[-1].first != (C_ParticleEmitter **)0x0 &&
+             ((int)pvVar5[-1].last - (int)pvVar5[-1].first >> 2 != 0))) {
+        pCVar2 = pvVar5[-1].last[-1];
+        if (pCVar2 != nullptr) {
+          C_ParticleEmitter::~C_ParticleEmitter(pCVar2);
+          _aligned_free(pCVar2);
+        }
+        pvVar5[-1].last = pvVar5[-1].last - 1;
+      }
+      iVar3--;
+      pvVar5--;
+    } while (iVar3 != 0);
+    this->m_started = true;
+  }
+}
+
+// 0x004478f0
+bool __thiscall C_ParticlesModule::SaveGame(C_ParticlesModule *this,C_chunk *chunk)
+{
+  this_00 = chunk;
+  if (chunk->m_open != false) {
+    local_10 = 0x2712;
+    local_e = 0;
+    iVar3 = dtaSeek(chunk->m_handle,0,1);
+    this_00->m_stack[this_00->m_depth] = iVar3;
+    this_00->m_depth = this_00->m_depth + 1;
+    dtaWrite(this_00->m_handle,&local_10,6);
+  }
+  chunk = (C_chunk *)this->m_lastHandle;
+  C_chunk::Write(this_00,&chunk,4);
+  if (this_00->m_open != false) {
+    if (this_00->m_writing == false) {
+      dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1],0);
+    }
+    else {
+      iVar3 = dtaSeek(this_00->m_handle,0,1);
+      chunk = (C_chunk *)(iVar3 - this_00->m_stack[this_00->m_depth - 1]);
+      dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+      dtaWrite(this_00->m_handle,&chunk,4);
+      dtaSeek(this_00->m_handle,iVar3,0);
+    }
+    if (this_00->m_depth != 0) {
+      this_00->m_depth = this_00->m_depth - 1;
+    }
+  }
+  pSVar1 = (this->m_active).first;
+  if ((pSVar1 != nullptr) &&
+     (iStack_14 = (int)(this->m_active).last - (int)pSVar1 >> 4, iStack_14 != 0)) {
+    iVar3 = iStack_14 << 4;
+    do {
+      if ((this->m_active).first[-1]._pad_000d[iVar3 - 1] == '\0') {
+        if (this_00->m_open != false) {
+          uStack_8 = 10000;
+          iVar4 = dtaSeek(this_00->m_handle,0,1);
+          this_00->m_stack[this_00->m_depth] = iVar4;
+          this_00->m_depth = this_00->m_depth + 1;
+          dtaWrite(this_00->m_handle,&uStack_8,6);
+        }
+        uVar2 = *(uint32_t *)((this->m_active).first[-1]._pad_000d + iVar3 - 9);
+        local_10 = (uint16_t)uVar2;
+        local_e = (uint16_t)((uint32_t)uVar2 >> 0x10);
+        C_chunk::Write(this_00,&local_10,4);
+        uVar2 = *(uint32_t *)((this->m_active).first[-1]._pad_000d + iVar3 - 5);
+        local_10 = (uint16_t)uVar2;
+        local_e = (uint16_t)((uint32_t)uVar2 >> 0x10);
+        C_chunk::Write(this_00,&local_10,4);
+        C_ParticleEmitter::Save
+                  (*(C_ParticleEmitter **)((this->m_active).first[-1]._pad_000d + iVar3 - 0xd),
+                   this_00);
+        if (this_00->m_open != false) {
+          if (this_00->m_writing == false) {
+            dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1],0);
+          }
+          else {
+            iVar4 = dtaSeek(this_00->m_handle,0,1);
+            chunk = (C_chunk *)(iVar4 - this_00->m_stack[this_00->m_depth - 1]);
+            dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+            dtaWrite(this_00->m_handle,&chunk,4);
+            dtaSeek(this_00->m_handle,iVar4,0);
+          }
+          if (this_00->m_depth != 0) {
+            this_00->m_depth = this_00->m_depth - 1;
+          }
+        }
+      }
+      iStack_14--;
+      iVar3 -= 0x10;
+    } while (iStack_14 != 0);
+  }
+  pSVar1 = (this->m_static).first;
+  if ((pSVar1 != nullptr) &&
+     (iVar3 = (int)(this->m_static).last - (int)pSVar1 >> 4, iVar3 != 0)) {
+    iVar4 = iVar3 << 4;
+    do {
+      if (this_00->m_open != false) {
+        uStack_8 = 0x2711;
+        iVar5 = dtaSeek(this_00->m_handle,0,1);
+        this_00->m_stack[this_00->m_depth] = iVar5;
+        this_00->m_depth = this_00->m_depth + 1;
+        dtaWrite(this_00->m_handle,&uStack_8,6);
+      }
+      chunk = *(C_chunk **)((this->m_static).first[-1]._pad_000d + iVar4 - 5);
+      if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+        dtaWrite(this_00->m_handle,&chunk,4);
+      }
+      C_ParticleEmitter::Save
+                (*(C_ParticleEmitter **)((this->m_static).first[-1]._pad_000d + iVar4 - 0xd),
+                 this_00);
+      C_chunk::Ascend(this_00);
+      iVar3--;
+      iVar4 -= 0x10;
+    } while (iVar3 != 0);
+  }
+  return true;
+}
+
+// 0x00447c20
+bool __thiscall C_ParticlesModule::LoadGame(C_ParticlesModule *this,C_chunk *chunk)
+{
+  this_00 = chunk;
+  sVar1 = 0;
+LAB_00447c49:
+  if ((((this_00->m_open != false) && (this_00->m_depth != 0)) &&
+      (iVar2 = dtaSeek(this_00->m_handle,0,1), iVar2 != -1)) &&
+     (pCStack_28 = (C_ParticleEmitter *)(this_00->m_stack[this_00->m_depth - 1] - iVar2),
+     pCStack_28 != nullptr)) {
+    if ((this_00->m_open != false) && (iVar2 = dtaRead(this_00->m_handle,&sStack_24,6), iVar2 == 6))
+    {
+      iVar2 = dtaSeek(this_00->m_handle,0,1);
+      this_00->m_stack[this_00->m_depth] = iVar2 - 6 + CONCAT22(uStack_20,uStack_22);
+      this_00->m_depth = this_00->m_depth + 1;
+      sVar1 = sStack_24;
+    }
+    if (sVar1 == 10000) {
+      C_chunk::Read(this_00,&uStack_18,4);
+      C_chunk::Read(this_00,aiStack_14,4);
+      pCStack_28 = _aligned_malloc(0xe0,0x10);
+      if (pCStack_28 == nullptr) {
+        pCStack_1c = nullptr;
+      }
+      else {
+        pCStack_1c = C_ParticleEmitter::C_ParticleEmitter
+                               (pCStack_28,(this->m_effects).first[aiStack_14[0]]);
+      }
+      C_ParticleEmitter::Load(pCStack_1c,this_00);
+      vector_insert_n_e16_447f60(&this->m_active,&((this->m_active).last)->emitter,1,&pCStack_1c);
+      if (this_00->m_open != false) {
+        if (this_00->m_writing != false) {
+          iVar2 = dtaSeek(this_00->m_handle,0,1);
+          iStack_2c = iVar2 - this_00->m_stack[this_00->m_depth - 1];
+          dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+          dtaWrite(this_00->m_handle,&iStack_2c,4);
+          goto LAB_00447d70;
+        }
+        goto LAB_00447d63;
+      }
+    }
+    else {
+      if (sVar1 != 0x2711) goto code_r0x00447cf7;
+      uStack_18 = 0xffffffff;
+      C_chunk::Read(this_00,aiStack_14,4);
+      pCStack_28 = _aligned_malloc(0xe0,0x10);
+      if (pCStack_28 == nullptr) {
+        pCStack_1c = nullptr;
+      }
+      else {
+        pCStack_1c = C_ParticleEmitter::C_ParticleEmitter
+                               (pCStack_28,(this->m_effects).first[aiStack_14[0]]);
+      }
+      C_ParticleEmitter::Load(pCStack_1c,this_00);
+      vector_insert_n_e16_447f60(&this->m_static,&((this->m_static).last)->emitter,1,&pCStack_1c);
+      if (this_00->m_open != false) {
+        if (this_00->m_writing == false) goto LAB_00447d63;
+        iVar2 = dtaSeek(this_00->m_handle,0,1);
+        iStack_30 = iVar2 - this_00->m_stack[this_00->m_depth - 1];
+        dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+        dtaWrite(this_00->m_handle,&iStack_30,4);
+        goto LAB_00447d70;
+      }
+    }
+  }
+  return true;
+code_r0x00447cf7:
+  if (sVar1 == 0x2712) {
+    C_chunk::Read(this_00,&this->m_lastHandle,4);
+    if (this_00->m_open == false) {
+      return true;
+    }
+    if (this_00->m_writing == false) {
+LAB_00447d63:
+      iVar2 = this_00->m_stack[this_00->m_depth - 1];
+    }
+    else {
+      iVar2 = dtaSeek(this_00->m_handle,0,1);
+      chunk = (C_chunk *)(iVar2 - this_00->m_stack[this_00->m_depth - 1]);
+      dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+      dtaWrite(this_00->m_handle,&chunk,4);
+    }
+LAB_00447d70:
+    dtaSeek(this_00->m_handle,iVar2,0);
+    if (this_00->m_depth != 0) {
+      this_00->m_depth = this_00->m_depth - 1;
+    }
+  }
+  goto LAB_00447c49;
+}
+
+// 0x00447f60
+void __thiscall
+vector_insert_n_e16_447f60(void *this,uint32_t *param_1,uint32_t param_2,uint32_t *param_3)
+{
+  puVar6 = param_1;
+  puVar5 = *(uint32_t **)((int)this + 8);
+  if (param_2 <= (uint32_t)(*(int *)((int)this + 0xc) - (int)puVar5 >> 4)) {
+    if (param_2 <= (uint32_t)((int)puVar5 - (int)param_1 >> 4)) {
+      if (param_2 != 0) {
+        puVar6 = puVar5;
+        for (puVar8 = puVar5 + param_2 * -4; puVar8 != puVar5; puVar8 = puVar8 + 4) {
+          if (puVar6 != nullptr) {
+            *puVar6 = *puVar8;
+            puVar6[1] = puVar8[1];
+            puVar6[2] = puVar8[2];
+            puVar6[3] = puVar8[3];
+          }
+          puVar6 += 4;
+        }
+        puVar5 = *(uint32_t **)((int)this + 8);
+        puVar6 = *(uint32_t **)((int)this + 8) + param_2 * -4;
+        while (param_1 != puVar6) {
+          puVar5[-4] = puVar6[-4];
+          puVar5[-3] = puVar6[-3];
+          puVar5[-2] = puVar6[-2];
+          puVar5[-1] = puVar6[-1];
+          puVar5 -= 4;
+          puVar6 -= 4;
+        }
+        puVar5 = param_1 + param_2 * 4;
+        for (; param_1 != puVar5; param_1 = param_1 + 4) {
+          *param_1 = *param_3;
+          param_1[1] = param_3[1];
+          param_1[2] = param_3[2];
+          param_1[3] = param_3[3];
+        }
+        *(int *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 0x10;
+      }
+      return;
+    }
+    puVar6 = param_1 + param_2 * 4;
+    if (param_1 != puVar5) {
+      puVar8 = puVar6 + param_2 * -4;
+      do {
+        if (puVar6 != nullptr) {
+          *puVar6 = *puVar8;
+          puVar6[1] = puVar8[1];
+          puVar6[2] = puVar8[2];
+          puVar6[3] = puVar8[3];
+        }
+        puVar8 += 4;
+        puVar6 += 4;
+      } while (puVar8 != puVar5);
+    }
+    puVar5 = *(uint32_t **)((int)this + 8);
+    for (iVar2 = param_2 - ((int)puVar5 - (int)param_1 >> 4); iVar2 != 0; iVar2 = iVar2 - 1) {
+      if (puVar5 != nullptr) {
+        *puVar5 = *param_3;
+        puVar5[1] = param_3[1];
+        puVar5[2] = param_3[2];
+        puVar5[3] = param_3[3];
+      }
+      puVar5 += 4;
+    }
+    puVar5 = *(uint32_t **)((int)this + 8);
+    for (; param_1 != puVar5; param_1 = param_1 + 4) {
+      *param_1 = *param_3;
+      param_1[1] = param_3[1];
+      param_1[2] = param_3[2];
+      param_1[3] = param_3[3];
+    }
+    *(uint32_t *)((int)this + 8) = *(int *)((int)this + 8) + param_2 * 0x10;
+    return;
+  }
+  iVar2 = *(int *)((int)this + 4);
+  if ((iVar2 == 0) || (uVar7 = (int)puVar5 - iVar2 >> 4, uVar7 <= param_2)) {
+    uVar7 = param_2;
+  }
+  if (iVar2 == 0) {
+    iVar2 = 0;
+  }
+  else {
+    iVar2 = (int)puVar5 - iVar2 >> 4;
+  }
+  iVar2 += uVar7;
+  iVar3 = iVar2;
+  if (iVar2 < 0) {
+    iVar3 = 0;
+  }
+  puVar4 = operator_new(iVar3 << 4);
+  puVar8 = puVar4;
+  for (puVar5 = *(uint32_t **)((int)this + 4); puVar5 != param_1; puVar5 = puVar5 + 4) {
+    if (puVar8 != nullptr) {
+      *puVar8 = *puVar5;
+      puVar8[1] = puVar5[1];
+      puVar8[2] = puVar5[2];
+      puVar8[3] = puVar5[3];
+    }
+    puVar8 += 4;
+  }
+  if (param_2 != 0) {
+    param_1 = (uint32_t *)param_2;
+    puVar5 = puVar8;
+    do {
+      if (puVar5 != nullptr) {
+        *puVar5 = *param_3;
+        puVar5[1] = param_3[1];
+        puVar5[2] = param_3[2];
+        puVar5[3] = param_3[3];
+      }
+      puVar5 += 4;
+      param_1 = (uint32_t *)((int)param_1 - 1);
+    } while (param_1 != nullptr);
+  }
+  puVar1 = *(uint32_t **)((int)this + 8);
+  puVar5 = puVar8 + param_2 * 4;
+  if (puVar6 != puVar1) {
+    puVar6 = (uint32_t *)((int)puVar5 + (param_2 * -0x10 - (int)puVar8) + (int)puVar6);
+    do {
+      if (puVar5 != nullptr) {
+        *puVar5 = *puVar6;
+        puVar5[1] = puVar6[1];
+        puVar5[2] = puVar6[2];
+        puVar5[3] = puVar6[3];
+      }
+      puVar6 += 4;
+      puVar5 += 4;
+    } while (puVar6 != puVar1);
+  }
+  operator_delete(*(void **)((int)this + 4));
+  iVar3 = *(int *)((int)this + 4);
+  *(uint32_t **)((int)this + 0xc) = puVar4 + iVar2 * 4;
+  if (iVar3 != 0) {
+    *(uint32_t **)((int)this + 4) = puVar4;
+    *(uint32_t **)((int)this + 8) =
+         puVar4 + ((*(int *)((int)this + 8) - iVar3 >> 4) + param_2) * 4;
+    return;
+  }
+  *(uint32_t **)((int)this + 4) = puVar4;
+  *(uint32_t **)((int)this + 8) = puVar4 + param_2 * 4;
+}
+

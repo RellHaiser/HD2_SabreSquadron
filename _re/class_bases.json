@@ -1,0 +1,106 @@
+{
+ "C_Car": {
+  "base": "C_Actor"
+ },
+ "C_Human": {
+  "base": "C_Actor"
+ },
+ "C_AnimationActor": {
+  "base": "C_Actor",
+  "vtable_slots": 56
+ },
+ "C_ItemActor": {
+  "base": "C_Actor"
+ },
+ "C_Clock": {
+  "base": "C_Actor"
+ },
+ "C_Pike": {
+  "base": "C_Actor",
+  "vtable_slots": 56
+ },
+ "C_FowlGenerator": {
+  "base": "C_Actor",
+  "vtable_slots": 56
+ },
+ "C_Train": {
+  "base": "C_Actor"
+ },
+ "C_MeleeTracker": {
+  "base": "C_Actor"
+ },
+ "C_Bike": {
+  "base": "C_Actor"
+ },
+ "C_Fish": {
+  "base": "C_Actor"
+ },
+ "C_WireCut": {
+  "base": "C_Actor",
+  "vtable_slots": 56
+ },
+ "C_NullActor": {
+  "base": "C_Actor",
+  "vtable_slots": 56
+ },
+ "C_AirAttack": {
+  "base": "C_Actor"
+ },
+ "C_Ladder": {
+  "base": "C_Actor"
+ },
+ "C_MPZone": {
+  "base": "C_Actor"
+ },
+ "C_Junkers88": {
+  "base": "C_Actor"
+ },
+ "C_SupplyBox": {
+  "base": "C_Actor"
+ },
+ "C_Debris": {
+  "base": "C_Actor",
+  "vtable_slots": 56
+ },
+ "C_Mine": {
+  "base": "C_Actor",
+  "vtable_slots": 56
+ },
+ "C_Door": {
+  "base": "C_Actor"
+ },
+ "C_Barrel": {
+  "base": "C_Actor"
+ },
+ "C_Radio": {
+  "base": "C_Actor",
+  "vtable_slots": 56
+ },
+ "C_PhotoPlace": {
+  "base": "C_Actor",
+  "vtable_slots": 56
+ },
+ "C_ExplosivePlace": {
+  "base": "C_Actor",
+  "vtable_slots": 56
+ },
+ "C_TSExplosion": {
+  "base": "C_Actor"
+ },
+ "C_SpawnPoint": {
+  "base": "C_Actor",
+  "vtable_slots": 56
+ },
+ "C_Switch": {
+  "base": "C_Actor"
+ },
+ "C_StaticWeapon": {
+  "vtable_slots": 56
+ },
+ "C_DocumentPlace": {
+  "vtable_slots": 56
+ },
+ "C_Actor": {
+  "vtable_slots": 56
+ }
+}

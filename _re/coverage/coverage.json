@@ -1,0 +1,474 @@
+[
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "AI & controllers",
+  "state": "verified",
+  "functions": 103,
+  "bytes": 24426,
+  "evidence": "checkpoints harness: every mission's check2.bin (73)"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "AI & controllers",
+  "state": "ported",
+  "functions": 1202,
+  "bytes": 411884,
+  "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "AI & controllers",
+  "state": "pending",
+  "functions": 294,
+  "bytes": 90859,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Actors & objects",
+  "state": "verified",
+  "functions": 380,
+  "bytes": 61529,
+  "evidence": "vehicle_setup harness builds for debris, item, animation, simple and objective actors; mutation-tested"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Actors & objects",
+  "state": "ported",
+  "functions": 626,
+  "bytes": 142702,
+  "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Actors & objects",
+  "state": "pending",
+  "functions": 550,
+  "bytes": 194598,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "App & core",
+  "state": "verified",
+  "functions": 20,
+  "bytes": 3054,
+  "evidence": "profile harness (config files, file wrappers)"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "App & core",
+  "state": "ported",
+  "functions": 429,
+  "bytes": 105316,
+  "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "App & core",
+  "state": "pending",
+  "functions": 700,
+  "bytes": 170501,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "C runtime & library",
+  "state": "excluded",
+  "functions": 798,
+  "bytes": 86816,
+  "evidence": "MSVC runtime and libraries outside the game's code range, and exception-unwind funclets"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Humans",
+  "state": "ported",
+  "functions": 1129,
+  "bytes": 581307,
+  "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Humans",
+  "state": "pending",
+  "functions": 136,
+  "bytes": 30843,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Interface & HUD",
+  "state": "ported",
+  "functions": 573,
+  "bytes": 183130,
+  "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Interface & HUD",
+  "state": "pending",
+  "functions": 77,
+  "bytes": 15430,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Menus & front end",
+  "state": "pending",
+  "functions": 1566,
+  "bytes": 494527,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Mission & world modules",
+  "state": "pending",
+  "functions": 327,
+  "bytes": 131077,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Network",
+  "state": "ported",
+  "functions": 24,
+  "bytes": 2096,
+  "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Network",
+  "state": "pending",
+  "functions": 785,
+  "bytes": 113242,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Physics & collision",
+  "state": "verified",
+  "functions": 29,
+  "bytes": 30741,
+  "evidence": "rigid body builds of the vehicle harness; mutation-tested"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Physics & collision",
+  "state": "ported",
+  "functions": 266,
+  "bytes": 155425,
+  "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Physics & collision",
+  "state": "pending",
+  "functions": 237,
+  "bytes": 134762,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Profile & campaign",
+  "state": "verified",
+  "functions": 405,
+  "bytes": 115756,
+  "evidence": "profile harness round trips (HumanStore.def, profile.sav, Options.bin, game.cfg, key bindings); Gamedata .gdt re-saved byte-identical"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Profile & campaign",
+  "state": "pending",
+  "functions": 80,
+  "bytes": 7209,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "STL & compiler idioms",
+  "state": "excluded",
+  "functions": 623,
+  "bytes": 12002,
+  "evidence": "MSVC 6 STL instantiations and empty functions (stl_idioms.py); the port uses the standard library"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Scripting",
+  "state": "ported",
+  "functions": 218,
+  "bytes": 91385,
+  "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Scripting",
+  "state": "pending",
+  "functions": 85,
+  "bytes": 19863,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Sound & effects",
+  "state": "ported",
+  "functions": 260,
+  "bytes": 63273,
+  "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Sound & effects",
+  "state": "pending",
+  "functions": 58,
+  "bytes": 9096,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Vehicles",
+  "state": "verified",
+  "functions": 442,
+  "bytes": 326508,
+  "evidence": "vehicle_params harness (205 shipped car blocks re-pack byte-identical), vehicle_setup harness on the 37 shipped car models, car_tables harness; mutation-tested"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Vehicles",
+  "state": "pending",
+  "functions": 88,
+  "bytes": 8934,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Weapons & items",
+  "state": "ported",
+  "functions": 532,
+  "bytes": 115043,
+  "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
+ },
+ {
+  "binary": "HD2_SabreSquadron.exe",
+  "group": "Weapons & items",
+  "state": "pending",
+  "functions": 42,
+  "bytes": 10435,
+  "evidence": "Not hand-ported; the generated tier-1 translation stands in"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "C runtime",
+  "state": "excluded",
+  "functions": 340,
+  "bytes": 42230,
+  "evidence": "MSVC 6 C runtime and import thunks; the port links the current CRT"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Collision",
+  "state": "verified",
+  "functions": 20,
+  "bytes": 35258,
+  "evidence": "Differential test against the original DLL: compare_collision"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Compiler-generated (EH)",
+  "state": "excluded",
+  "functions": 326,
+  "bytes": 3289,
+  "evidence": "Exception-unwind funclets"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "DXGetErrorString8",
+  "state": "verified",
+  "functions": 1,
+  "bytes": 8938,
+  "evidence": "Differential test against the original DLL: compare_dxerr8"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "DXT encoder",
+  "state": "verified",
+  "functions": 21,
+  "bytes": 22358,
+  "evidence": "Differential test against the original DLL: compare_s3tc"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "DirectShow base",
+  "state": "verified",
+  "functions": 255,
+  "bytes": 26615,
+  "evidence": "Differential test against the original DLL: compare_show"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Engine core",
+  "state": "ported",
+  "functions": 37,
+  "bytes": 6051,
+  "evidence": "Ported; part of the drop-in DLL that ran the game; not compared with the original"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "IGraph device & window",
+  "state": "ported",
+  "functions": 68,
+  "bytes": 23657,
+  "evidence": "Ported; part of the drop-in DLL that ran the game; not compared with the original"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "IGraph input",
+  "state": "verified",
+  "functions": 29,
+  "bytes": 2467,
+  "evidence": "Differential test against the original DLL: compare_input"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Lightmaps",
+  "state": "verified",
+  "functions": 12,
+  "bytes": 24670,
+  "evidence": "Differential test against the original DLL: compare_lightmap"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Lightmaps",
+  "state": "ported",
+  "functions": 35,
+  "bytes": 14312,
+  "evidence": "Ported; part of the drop-in DLL that ran the game; not compared with the original"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Loaders",
+  "state": "verified",
+  "functions": 10,
+  "bytes": 4949,
+  "evidence": "Differential test against the original DLL: compare_loader"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Materials",
+  "state": "verified",
+  "functions": 32,
+  "bytes": 4841,
+  "evidence": "Differential test against the original DLL: compare_material"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Math",
+  "state": "verified",
+  "functions": 63,
+  "bytes": 17759,
+  "evidence": "Differential test against the original DLL: compare_math"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Meshes & buffers",
+  "state": "verified",
+  "functions": 88,
+  "bytes": 21399,
+  "evidence": "Differential test against the original DLL: compare_buffers, compare_mesh"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Renderer",
+  "state": "ported",
+  "functions": 118,
+  "bytes": 74891,
+  "evidence": "Ported; part of the drop-in DLL that ran the game; not compared with the original"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Scene",
+  "state": "ported",
+  "functions": 83,
+  "bytes": 18096,
+  "evidence": "Ported; part of the drop-in DLL that ran the game; not compared with the original"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Scene graph",
+  "state": "verified",
+  "functions": 307,
+  "bytes": 77747,
+  "evidence": "Differential test against the original DLL: compare_frame"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Sound (ISND)",
+  "state": "verified",
+  "functions": 85,
+  "bytes": 11831,
+  "evidence": "Differential test against the original DLL: compare_isnd"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Textures & images",
+  "state": "verified",
+  "functions": 30,
+  "bytes": 28896,
+  "evidence": "Differential test against the original DLL: compare_resize, compare_texture"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Unreferenced",
+  "state": "excluded",
+  "functions": 126,
+  "bytes": 5250,
+  "evidence": "No callers and no virtual-table slot"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Video (IShow)",
+  "state": "verified",
+  "functions": 56,
+  "bytes": 9382,
+  "evidence": "Differential test against the original DLL: compare_show"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Visuals",
+  "state": "ported",
+  "functions": 277,
+  "bytes": 106802,
+  "evidence": "Ported; part of the drop-in DLL that ran the game; not compared with the original"
+ },
+ {
+  "binary": "LS3DF.dll",
+  "group": "Weather",
+  "state": "verified",
+  "functions": 3,
+  "bytes": 6830,
+  "evidence": "Differential test against the original DLL: compare_weather"
+ },
+ {
+  "binary": "rw_data.dll",
+  "group": "Archive API & codecs",
+  "state": "verified",
+  "functions": 72,
+  "bytes": null,
+  "evidence": "compare.cpp against the original: all 11 archives, 64,569 files, 6.4 GB, about 3.35 million checks, 0 failures"
+ },
+ {
+  "binary": "rw_data.dll",
+  "group": "Static initialisers",
+  "state": "verified",
+  "functions": 32,
+  "bytes": null,
+  "evidence": "compare.cpp against the original: all 11 archives, 64,569 files, 6.4 GB, about 3.35 million checks, 0 failures"
+ },
+ {
+  "binary": "rw_data.dll",
+  "group": "std::vector instantiations",
+  "state": "excluded",
+  "functions": 213,
+  "bytes": null,
+  "evidence": "Replaced by the standard library"
+ }
+]

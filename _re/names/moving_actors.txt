@@ -1,0 +1,154 @@
+# Part 7d: the multiplayer zone, the submarine and the train (src/game/mp_zone.*, submarine.*,
+# train.*, frame_volume.h), and the vertex animation module's functions the zone calls (declared in
+# pending.h; the module is not ported). The classes stay auto classes. StaticInit_<addr>: each
+# file's guarded header static (atexit). (C_MPZone::PickSpawnPosition / EnableForSide, GetSubmarines,
+# C_Submarine::SetControls and C_Train::SetTrack / Start / FollowTrack are named elsewhere.)
+
+# --- the train, actor file (0x005bbdb0..0x005befb0)
+005bbdb0 StaticInit_TrainCreatorThunk
+005bbdc0 StaticInit_TrainCreator
+005bbde0 C_TrainCreator::Create | C_Actor * __thiscall Create(C_ActorCreator * this)
+005bbe40 C_TrainCreator::GetName | char * __thiscall GetName(C_ActorCreator * this)
+005bbe50 C_TrainCreator::Destroy | void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)
+005bbe70 C_Train::FindNextCheckpoint
+005bc2a0 C_Train::BuildPath
+005bc5a0 C_Train::UpdateCrossings
+005bc7c0 C_Train::ClearPath
+005bc830 Train_LoadSound
+005bc950 Train_FreeSound
+005bca90 C_Train::SetSounds | void __thiscall SetSounds(C_Train * this, bool load)
+005bcf70 C_Train::Tick | void __thiscall Tick(C_Train * this, int timeDelta)
+005bcf80 C_Train::Update | void __thiscall Update(C_Train * this, int frameTime)
+005bcfb0 C_Train::C_Train | C_Train * __thiscall C_Train(C_Train * this)
+005bd0d0 C_Train::ScalarDeletingDestructor | C_Train * __thiscall ScalarDeletingDestructor(C_Train * this, uchar flags)
+005bd0f0 C_Train::~C_Train | void __thiscall ~C_Train(C_Train * this)
+005bd1a0 C_Train::SetFrame | bool __thiscall SetFrame(C_Train * this, I3D_frame * frame)
+005bd470 Train_AlignedFree
+005bd480 C_Train::CopyFrom | void __thiscall CopyFrom(C_Train * this, C_Actor * source)
+005bd820 C_Train::StartMission | void __thiscall StartMission(C_Train * this, bool server)
+005be1a0 Train_AlignedFree2
+005be1b0 C_Train::StopMission | void __thiscall StopMission(C_Train * this, bool server)
+005be360 C_Train::ReadProperties | bool __thiscall ReadProperties(C_Train * this, C_chunk * chunk)
+005be780 C_Train::ClearWagons
+005be800 Train_StringTidy
+005be840 Train_StringConstruct
+005be910 Train_WagonVectorInsert
+005beac0 Train_PathVectorInsert
+005becd0 Train_WheelVectorInsert
+
+# --- the train, saved game and movement file (0x005befb0..0x005c0ce0)
+005befb0 StaticInit_5befb0
+005befe0 C_Train::RestartMission | void __thiscall RestartMission(C_Train * this, bool server)
+005bf000 C_Train::SaveGame | bool __thiscall SaveGame(C_Train * this, C_chunk * chunk)
+005bf250 C_Train::LoadGame | bool __thiscall LoadGame(C_Train * this, C_chunk * chunk)
+005bf4e0 C_Train::PlayChuff
+005bf580 C_Train::UpdateWheels | void __thiscall UpdateWheels(C_Train * this, uint time, float distance, int unused)
+005bfe10 Train_PlaceWagon
+005bff10 C_Train::Move | void __thiscall Move(C_Train * this, uint time, bool force)
+005c0950 Train_HitHuman
+005c0a30 Train_UpdateWagonVolume
+
+# --- the submarine, actor file (0x005de660..0x005dfde0)
+005de660 StaticInit_5de660
+005de690 StaticInit_SubmarineCreatorThunk
+005de6a0 StaticInit_SubmarineCreator
+005de6c0 C_SubmarineCreator::Create | C_Actor * __thiscall Create(C_ActorCreator * this)
+005de720 C_SubmarineCreator::GetName | char * __thiscall GetName(C_ActorCreator * this)
+005de730 C_SubmarineCreator::Destroy | void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)
+005de750 StaticInit_Submarines
+005de760 Submarines_Construct
+005de780 Submarines_RegisterDestroy
+005de790 Submarines_Destroy
+005de7c0 C_Submarine::RestartMission | void __thiscall RestartMission(void * this, bool server)
+005de830 C_Submarine::SaveGame | bool __thiscall SaveGame(void * this, C_chunk * chunk)
+005dea30 C_Submarine::LoadGame | bool __thiscall LoadGame(void * this, C_chunk * chunk)
+005dee00 C_Submarine::SetFrame | bool __thiscall SetFrame(void * this, I3D_frame * frame)
+005df000 C_Submarine::C_Submarine | void * __thiscall C_Submarine(void * this)
+005df2c0 C_Submarine::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(void * this, uchar flags)
+005df2e0 C_Submarine::~C_Submarine | void __thiscall ~C_Submarine(void * this)
+005df3c0 C_Submarine::CopyFrom | void __thiscall CopyFrom(void * this, C_Actor * source)
+005df3d0 C_Submarine::StartMission | void __thiscall StartMission(void * this, bool server)
+005df600 Submarine_SetSoundActive
+005df650 C_Submarine::Reset
+005df710 S_FrameVolume::Init
+005dfa70 S_FrameVolume::Remove
+005dfa80 C_Submarine::AddVolume
+005dfc90 Submarine_AlignedFree
+005dfca0 C_Submarine::StopMission | void __thiscall StopMission(void * this, bool server)
+
+# --- the submarine, properties file (0x005dfde0..0x005e0240)
+005dfde0 StaticInit_SubmarinePropertyThunk
+005dfdf0 StaticInit_SubmarineProperty
+005dfe50 C_Submarine::ReadProperties | bool __thiscall ReadProperties(void * this, C_chunk * chunk)
+
+# --- the submarine, seats file (0x005e0240..0x005e0da0)
+005e0240 StaticInit_5e0240
+005e0270 C_Submarine::IsSeatBlocked | bool __thiscall IsSeatBlocked(void * this, int seat)
+005e0290 C_Submarine::SetSeatBlocked | bool __thiscall SetSeatBlocked(void * this, int seat, bool blocked)
+005e02c0 C_Submarine::GetSeatText | int __thiscall GetSeatText(void * this, int seat)
+005e0320 C_Submarine::SetSeatOccupant | void __thiscall SetSeatOccupant(void * this, int seat, C_Actor * occupant)
+005e0410 C_Submarine::GetSeatOccupant | C_Actor * __thiscall GetSeatOccupant(void * this, int seat)
+005e0430 C_Submarine::FindSeat | int __thiscall FindSeat(void * this, C_Actor * occupant)
+005e0460 C_Submarine::LeaveSeat | C_Actor * __thiscall LeaveSeat(void * this, int seat)
+005e04f0 C_Submarine::ExitSeat | bool __thiscall ExitSeat(void * this, int seat)
+005e0530 C_Submarine::FindExit | bool __thiscall FindExit(void * this, int seat, S_vector4 * pos, S_vector4 * dir, bool otherSide)
+005e0b30 C_Submarine::PutOutside | bool __thiscall PutOutside(void * this, C_Actor * actor)
+005e0c90 C_Submarine::GetSeatCount | int __thiscall GetSeatCount(void * this)
+005e0ca0 C_Submarine::GetSeatFlags | uint __thiscall GetSeatFlags(void * this, int seat)
+005e0cc0 C_Submarine::GetSeatCamera | I3D_frame * __thiscall GetSeatCamera(void * this, int seat)
+
+# --- the submarine, movement file (0x005e0da0..0x005e2070)
+005e0da0 StaticInit_5e0da0
+005e0e00 C_Submarine::Tick | void __thiscall Tick(void * this, int timeDelta)
+005e0e20 C_Submarine::Update | void __thiscall Update(void * this, int frameTime)
+005e0e60 C_Submarine::UpdateVolumes
+005e1010 C_Submarine::SetVolumesActive
+005e1090 C_Submarine::CheckCollision
+005e14d0 C_Submarine::Bob
+005e15e0 C_Submarine::Move
+005e1d90 C_Submarine::ApplyControls
+005e2040 StaticInit_5e2040
+
+# --- the multiplayer zone (0x005ebde0..0x005edcf0)
+005ebde0 StaticInit_5ebde0
+005ebe10 StaticInit_MPZoneCreatorThunk
+005ebe20 StaticInit_MPZoneCreator
+005ebe40 C_MPZoneCreator::Create | C_Actor * __thiscall Create(C_ActorCreator * this)
+005ebea0 C_MPZoneCreator::GetName | char * __thiscall GetName(C_ActorCreator * this)
+005ebeb0 C_MPZoneCreator::Destroy | void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)
+005ebed0 C_MPZone::C_MPZone | C_MPZone * __thiscall C_MPZone(C_MPZone * this)
+005ebf80 C_MPZone::SaveGame | bool __thiscall SaveGame(C_MPZone * this, C_chunk * chunk)
+005ebf90 C_MPZone::LoadGame | bool __thiscall LoadGame(C_MPZone * this, C_chunk * chunk)
+005ebfa0 C_MPZone::ScalarDeletingDestructor | C_MPZone * __thiscall ScalarDeletingDestructor(C_MPZone * this, uchar flags)
+005ebfc0 C_MPZone::~C_MPZone | void __thiscall ~C_MPZone(C_MPZone * this)
+005ebfd0 C_MPZone::SetFrame | bool __thiscall SetFrame(C_MPZone * this, I3D_frame * frame)
+005ebff0 C_MPZone::CopyFrom | void __thiscall CopyFrom(C_MPZone * this, C_Actor * source)
+005ec060 C_MPZone::Tick | void __thiscall Tick(C_MPZone * this, int timeDelta)
+005ec310 C_MPZone::AwardPlayers
+005ec540 C_MPZone::Update | void __thiscall Update(C_MPZone * this, int frameTime)
+005ec840 C_MPZone::GetProgress | bool __thiscall GetProgress(C_MPZone * this, int * time, int * total, int * textId)
+005ec8b0 C_MPZone::ApplyTeam
+005ecad0 C_MPZone::Contains
+005ecbe0 C_MPZone::CountPresence
+005ecf20 C_MPZone::CheckCapture
+005ed110 C_MPZone::StartMission | void __thiscall StartMission(C_MPZone * this, bool server)
+005ed220 S_VertexAnimPlayer::Create
+005ed260 C_MPZone::StopMission | void __thiscall StopMission(C_MPZone * this, bool server)
+005ed2d0 C_MPZone::WriteState | void __thiscall WriteState(C_MPZone * this, C_BitStream * msg)
+005ed2f0 C_MPZone::ReadState | void __thiscall ReadState(C_MPZone * this, C_BitStream * msg)
+005ed320 C_MPZone::SendState | void __thiscall SendState(C_MPZone * this, uint kind)
+005ed390 C_MPZone::OnMessage | void __thiscall OnMessage(C_MPZone * this, C_BitStream * msg)
+005ed550 C_MPZone::GetSpawnPoint
+005ed7e0 C_MPZone::CanTake | bool __thiscall CanTake(C_MPZone * this, int team)
+005ed8b0 C_MPZone::RestartMission | void __thiscall RestartMission(C_MPZone * this, bool server)
+005ed920 C_MPZone::WriteProperties | bool __thiscall WriteProperties(C_MPZone * this, C_chunk * chunk)
+005eda60 C_MPZone::ReadProperties | bool __thiscall ReadProperties(C_MPZone * this, C_chunk * chunk)
+005edcc0 StaticInit_5edcc0
+
+# --- the vertex animation module (not ported; the zone's flag)
+00473790 S_VertexAnimPlayer::Init
+004737c0 S_VertexAnimPlayer::Reset
+00473e30 C_VertexAnimModule::FindAnimation
+004746b0 C_VertexAnimModule::RemovePlayer
+00474cf0 C_VertexAnimModule::PlayerVectorInsert
+00420800 std_string::AssignChars

@@ -1,0 +1,3373 @@
+// 0x00777d10
+void FUN_00777d10(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x00777d40
+void thunk_FUN_00777d50(void)
+{
+  g_apOldAnim.anim = 0xce;
+  g_apOldAnim.valid = false;
+  g_apOldAnim.stance = 0;
+  g_apOldAnim.sub = 1;
+}
+
+// 0x00777d50
+void FUN_00777d50(void)
+{
+  g_apOldAnim.anim = 0xce;
+  g_apOldAnim.valid = false;
+  g_apOldAnim.stance = 0;
+  g_apOldAnim.sub = 1;
+}
+
+// 0x00777d80
+void thunk_FUN_00777d90(void)
+{
+  g_apOldCarry[0] = 0x5b;
+  g_apOldCarry[1] = 0;
+}
+
+// 0x00777d90
+void FUN_00777d90(void)
+{
+  g_apOldCarry[0] = 0x5b;
+  g_apOldCarry[1] = 0;
+}
+
+// 0x00777db0
+void thunk_FUN_00777dc0(void)
+{
+  g_apOldActivity[0] = 0x4b;
+  g_apOldActivity[1] = 0;
+}
+
+// 0x00777dc0
+void FUN_00777dc0(void)
+{
+  g_apOldActivity[0] = 0x4b;
+  g_apOldActivity[1] = 0;
+}
+
+// 0x00777de0
+void thunk_FUN_00777df0(void)
+{
+  g_apCurAnim.valid = false;
+}
+
+// 0x00777df0
+void FUN_00777df0(void)
+{
+  g_apCurAnim.valid = false;
+}
+
+// 0x00777e00
+void empty_function_777e10(void)
+{
+}
+
+// 0x00777e10
+void empty_function_777e10(void)
+{
+}
+
+// 0x00777e20
+void empty_function_777e30(void)
+{
+}
+
+// 0x00777e30
+void empty_function_777e30(void)
+{
+}
+
+// 0x00777e40
+void thunk_FUN_00777e50(void)
+{
+  g_apNextAnim.valid = false;
+}
+
+// 0x00777e50
+void FUN_00777e50(void)
+{
+  g_apNextAnim.valid = false;
+}
+
+// 0x00777e60
+void empty_function_777e70(void)
+{
+}
+
+// 0x00777e70
+void empty_function_777e70(void)
+{
+}
+
+// 0x00777e80
+void empty_function_777e90(void)
+{
+}
+
+// 0x00777e90
+void empty_function_777e90(void)
+{
+}
+
+// 0x00777ea0
+void __thiscall C_HumanAnimPlayer::Reset(C_HumanAnimPlayer *this)
+{
+  this->animDelayState = 0;
+  this->carryDelayState = 0;
+  this->activityDelayState = 0;
+  this->animDelay = -10000;
+  this->carryDelay = -10000;
+  this->activityDelay = -10000;
+  this->animBlocked = 0x20000;
+  this->carryBlocked = 0x20000;
+  this->activityBlocked = 0x20000;
+  this->unknown58 = -10000;
+  this->unknownA0 = -10000.1;
+}
+
+// 0x00777ee0
+void __thiscall
+C_HumanAnimPlayer::Init
+          (C_HumanAnimPlayer *this,C_HumanMovement *param_1,C_HumanSpecialMoves *param_2,
+          C_HumanLocomotion *param_3,int param_4)
+{
+  this->specialMoves = param_2;
+  this->movement = param_1;
+  this->owner = (C_Human *)param_4;
+  this->locomotion = param_3;
+  Reset(this);
+  pIVar1 = (I3D_frame *)
+           (**(code **)(**(int **)(param_4 + 0x20) + 0x48))
+                     (*(int **)(param_4 + 0x20),&DAT_0084e938,0x20);
+  this->headDummy = pIVar1;
+}
+
+// 0x00777f30
+void __thiscall C_HumanAnimPlayer::UpdateAnimTrack(C_HumanAnimPlayer *this)
+{
+  local_44.x = (float)((uint32_t)local_44.x & 0xffffff00);
+  SStack_54.stance = 0xce;
+  SStack_54.sub = 0;
+  SStack_54.valid = true;
+  SStack_54._pad_000d[0] = '\0';
+  SStack_54._pad_000d[1] = '\0';
+  SStack_54._pad_000d[2] = '\0';
+  iVar7 = this->movement->useState;
+  if (iVar7 != -10000) {
+    if (((g_apNextAnim.anim == 0xce) && (0x69 < g_apCurAnim.anim)) && (g_apCurAnim.anim < 0x6d)) {
+      iVar7 = C_HumanAnimMixer::GetTrackTime(&this->movement->mixer,0);
+      if (iVar7 != -10000) {
+        C_HumanAnimMixer::HoldTrack(&this->movement->mixer,0,iVar7);
+      }
+      iVar7 = C_HumanAnimMixer::GetTrackTime(&this->movement->mixer,1);
+      if (iVar7 != -10000) {
+        C_HumanAnimMixer::HoldTrack(&this->movement->mixer,1,iVar7);
+      }
+      iVar7 = C_HumanAnimMixer::GetTrackTime(&this->movement->mixer,2);
+      if (iVar7 != -10000) {
+        C_HumanAnimMixer::HoldTrack(&this->movement->mixer,2,iVar7);
+      }
+      C_Human::ControllerUnknownD0(this->owner);
+      C_HumanMovement::StopUseSound(this->movement);
+    }
+    else if (iVar7 != -10000) {
+      if (((g_apCurAnim.anim < 0x6a) || (0x6c < g_apCurAnim.anim)) &&
+         ((g_apCurAnim.anim != 8 && ((g_apNextAnim.anim != 0xce && (g_apNextAnim.anim != 8)))))) {
+        C_Human::ControllerUnknownD0(this->owner);
+        C_HumanWork::Play((this->owner->m_body).work,0x2d,true);
+        iVar7 = C_HumanAnimMixer::GetTrackTime(&this->movement->mixer,0);
+        if (iVar7 != -10000) {
+          C_HumanAnimMixer::HoldTrack(&this->movement->mixer,0,iVar7);
+        }
+        iVar7 = C_HumanAnimMixer::GetTrackTime(&this->movement->mixer,1);
+        if (iVar7 != -10000) {
+          C_HumanAnimMixer::HoldTrack(&this->movement->mixer,1,iVar7);
+        }
+        iVar7 = C_HumanAnimMixer::GetTrackTime(&this->movement->mixer,2);
+        if (iVar7 != -10000) {
+          C_HumanAnimMixer::HoldTrack(&this->movement->mixer,2,iVar7);
+        }
+        C_HumanMovement::StopUseSound(this->movement);
+      }
+      else {
+        if ((g_apCurAnim.anim == 0x6a) || ((g_apCurAnim.anim == 0x6b || (g_apCurAnim.anim == 0x6c)))
+           ) {
+          C_Human::ControllerUnknownD0(this->owner);
+          C_HumanAnimMixer::ClearQueue(&this->movement->mixer,0);
+          if (g_apCurAnim.anim == 0x6c) {
+            C_HumanMovement::StartUseSound(this->movement);
+          }
+        }
+        if (0 < (this->movement->mixer).tracks[0].hold) {
+          C_HumanAnimMixer::ReleaseTrack(&this->movement->mixer,0);
+        }
+        if (0 < (this->movement->mixer).tracks[1].hold) {
+          C_HumanAnimMixer::ReleaseTrack(&this->movement->mixer,1);
+        }
+        if (0 < (this->movement->mixer).tracks[2].hold) {
+          C_HumanAnimMixer::ReleaseTrack(&this->movement->mixer,2);
+        }
+      }
+    }
+  }
+  S_HumanAnimRef::Set(&SStack_54,g_apNextAnim.anim,g_apNextAnim.stance,g_apNextAnim.sub);
+  singleStage = IsSingleStageAnim(g_apNextAnim.anim);
+  if ((0 < this->animDelayState) || (singleStage)) {
+    C_HumanAnimMixer::ClearQueue(&this->movement->mixer,0);
+  }
+  if ((g_apNextAnim.anim < 0x71) || (0x9a < g_apNextAnim.anim)) {
+    if (this->animDelay != -10000) {
+      pCVar3 = this->movement;
+      iVar7 = (pCVar3->animState).anim.anim;
+      if ((((iVar7 < 0x29) || (0x41 < iVar7)) ||
+          (iVar7 = (pCVar3->nextAnimState).anim.anim, iVar7 == 0xce)) ||
+         (((((0x28 < iVar7 && (iVar7 < 0x42)) &&
+            ((iVar7 != 0x2c && ((iVar7 != 0x2b && (iVar7 != 0x36)))))) && (iVar7 != 0x3e)) &&
+          (iVar7 != 0x41)))) {
+        bVar6 = C_HumanAnimMixer::HasTrackPlayed(&pCVar3->mixer,0,this->animDelay);
+        if (!bVar6) {
+          if ((((((g_apNextAnim.anim != g_apCurAnim.anim) ||
+                 (g_apNextAnim.stance != g_apCurAnim.stance)) ||
+                (g_apNextAnim.sub != g_apCurAnim.sub)) &&
+               ((this->animDelayState != -1 || (0 < (this->movement->mixer).tracks[0].hold)))) &&
+              (0xa1 < g_apCurAnim.anim)) && (g_apCurAnim.anim < 0xa6)) {
+            C_HumanAnimMixer::ReleaseTrack(&this->movement->mixer,0);
+            this->animDelayState = -1;
+            C_HumanAnimMixer::MirrorTrackTime(&this->movement->mixer,0);
+            (this->movement->mixer).holdTime = -10000;
+            pCVar4 = (this->owner->m_body).work;
+            pCVar4->blocked = pCVar4->blocked & ~this->animBlocked;
+          }
+          if ((((0x69 < g_apCurAnim.anim) && (g_apCurAnim.anim < 0x6d)) ||
+              ((g_apCurAnim.anim != 8 && (g_apCurAnim.anim != 0xe)))) &&
+             ((((0x69 < g_apNextAnim.anim && (g_apNextAnim.anim < 0x6d)) &&
+               (((uint8_t)g_gameRole & 7) != 7)) &&
+              ((bVar6 = C_Human::IsLocalPlayer(this->owner), !bVar6 &&
+               (bVar6 = C_Human::IsServerSimulated(this->owner), !bVar6)))))) {
+            this->animDelay = -10000;
+          }
+          g_apNextAnim.anim = 0xce;
+          goto LAB_00778540;
+        }
+        if (this->animDelayState == 1) {
+          fStack_18 = *(float *)&(this->pendingAnim).valid;
+          if (((g_apNextAnim.anim == (this->pendingAnim).anim) &&
+              (g_apNextAnim.stance == (this->pendingAnim).stance)) &&
+             (g_apNextAnim.sub == (this->pendingAnim).sub)) {
+            pCVar3 = this->movement;
+            (pCVar3->mixer).tracks[0].time = 0;
+            (pCVar3->mixer).tracks[0].hold = 0;
+            goto LAB_0077854a;
+          }
+        }
+        if (this->animDelayState == 0) {
+          if (((((((this->animBlocked & 0x40000) == 0) && (g_apCurAnim.anim != 0x20)) &&
+                (g_apCurAnim.anim != 0x21)) &&
+               ((g_apCurAnim.anim != 0x1f && (g_apCurAnim.anim != 0x1e)))) ||
+              (g_apNextAnim.anim == 0xce)) &&
+             ((S_HumanAnimRef::Set(&g_apNextAnim,(this->pendingAnim).anim,(this->pendingAnim).stance
+                                   ,(this->pendingAnim).sub), 7 < g_apCurAnim.anim &&
+              (g_apCurAnim.anim < 0xf)))) {
+            g_apNextAnim.stance = (((this->owner->m_body).work)->request).stance;
+            S_HumanAnimRef::Normalize(&g_apNextAnim);
+          }
+        }
+        else {
+          lVar11 = __ftol();
+          C_HumanAnimMixer::FadeOutTrack(&this->movement->mixer,0,(int)lVar11);
+          g_apAnimBlendTime = 350.0 / g_moveTimeScale;
+          g_apCurAnim.anim = 0xce;
+          S_HumanAnimRef::Normalize(&g_apCurAnim);
+          iVar7 = (this->pendingAnim).anim;
+          if ((iVar7 == 0x21) || (iVar7 == 0x1f)) {
+            S_HumanAnimRef::Set(&g_apNextAnim,(this->pendingAnim).anim,(this->pendingAnim).stance,
+                                (this->pendingAnim).sub);
+          }
+        }
+        this->animDelay = -10000;
+        if ((this->movement->useState == -10000) && (this->animBlocked != 0x20000)) {
+          puVar1 = &((this->owner->m_body).work)->blocked;
+          *puVar1 = *puVar1 & ~this->animBlocked;
+        }
+        goto LAB_0077854a;
+      }
+    }
+    g_apAnimSpeed = C_HumanAnimMixer::QueueAnim(&this->movement->mixer,&g_apNextAnim);
+    if ((singleStage) && (g_apNextAnim.anim == 0xce)) {
+      C_HumanAnimMixer::LockQueue(&this->movement->mixer,0);
+    }
+    this->animDelay = -10000;
+  }
+  else {
+    g_apNextAnim.stance = this->movement->unknown9E0;
+LAB_00778540:
+    S_HumanAnimRef::Normalize(&g_apNextAnim);
+  }
+LAB_0077854a:
+  if (g_apNextAnim.anim != 0xce) {
+    AdjustAnimRequest(this,&g_apCurAnim,&g_apNextAnim);
+  }
+  if (((SStack_54.anim != g_apNextAnim.anim) || (SStack_54.stance != g_apNextAnim.stance)) ||
+     (SStack_54.sub != g_apNextAnim.sub)) {
+    S_HumanAnimRef::Set(&SStack_54,g_apNextAnim.anim,g_apNextAnim.stance,g_apNextAnim.sub);
+    singleStage = IsSingleStageAnim(g_apNextAnim.anim);
+  }
+  if (singleStage != false) {
+    C_HumanAnimMixer::LockQueue(&this->movement->mixer,0);
+  }
+  if ((g_apNextAnim.anim == 0xce) ||
+     (((g_apNextAnim.anim == g_apCurAnim.anim && (g_apNextAnim.stance == g_apCurAnim.stance)) &&
+      (g_apNextAnim.sub == g_apCurAnim.sub)))) goto LAB_00778ba3;
+  if (((g_apCurAnim.anim == 0x2b) || (g_apCurAnim.anim == 0x2c)) &&
+     ((g_apNextAnim.anim != 0x2b && (g_apNextAnim.anim != 0x2c)))) {
+    this->locomotion->unknown020 = -10000.1;
+  }
+  if ((7 < g_apCurAnim.anim) && (g_apCurAnim.anim < 0xf)) {
+    if ((this->movement->unknown96C == false) && (g_apCurAnim.anim != 0xe)) {
+      pCVar8 = this->owner;
+      local_44.x = (pCVar8->m_direction).x * 0.08;
+      fStack_30 = (pCVar8->m_direction).y * 0.08;
+      local_44.z = (pCVar8->m_direction).z * 0.08;
+      local_44.w = fStack_28;
+      fStack_34 = local_44.x;
+      fStack_2c = local_44.z;
+    }
+    else {
+      pCVar8 = this->owner;
+      fStack_34 = (pCVar8->m_direction).x;
+      local_44.x = fStack_34 * 0.25;
+      fStack_30 = (pCVar8->m_direction).y;
+      fStack_2c = (pCVar8->m_direction).z;
+      fStack_28 = (pCVar8->m_direction).w;
+      local_44.z = fStack_2c * 0.25;
+      local_44.w = fStack_18;
+    }
+    local_44.y = 0.0;
+    C_HumanAnimMixer::AddMove(&this->movement->mixer,&local_44,200);
+  }
+  S_HumanAnimRef::Set(&g_apCurAnim,g_apNextAnim.anim,g_apNextAnim.stance,g_apNextAnim.sub);
+  if ((7 < g_apCurAnim.anim) && (g_apCurAnim.anim < 0xf)) {
+    g_apCurAnim.stance = 0;
+    S_HumanAnimRef::Normalize(&g_apCurAnim);
+  }
+  if (0xcd < g_apCurAnim.anim) goto LAB_00778ba3;
+  if (((this->movement->owner->m_body).work)->group == 1) {
+    g_apAnimTable = g_humanAnimTable;
+  }
+  else if (((this->owner->m_body).work)->group == 2) {
+    g_apAnimTable = g_humanAnimTable2;
+  }
+  this_00 = &this->movement->mixer;
+  if (g_apCurAnim.anim < 0xbe) {
+    C_HumanAnimMixer::SetTrackRate(this_00,0,1.0);
+    iVar7 = g_apCurAnim.stance + g_apCurAnim.anim * 3;
+    g_apAnimSet = g_apAnimTable[iVar7].anim;
+    if (g_apAnimBlendTime < 0.0 == (g_apAnimBlendTime == 0.0)) {
+      g_apAnims[0].blendTime = g_apAnimBlendTime;
+    }
+    else {
+      g_apAnims[0].blendTime = (g_apAnimTable[iVar7].time / g_moveTimeScale) * g_apAnimSpeed;
+    }
+    g_apAnims[0].mode = g_apAnimTable[iVar7].flags & 0xe;
+    cVar12 = '\0';
+  }
+  else {
+    iVar7 = g_apCurAnim.anim - 0xbe;
+    C_HumanAnimMixer::SetTrackRate(this_00,0,1.0);
+    iVar7 = g_apCurAnim.stance + iVar7 * 3;
+    iVar2 = g_apCurAnim.sub + iVar7 * 6;
+    g_apAnimSet = g_apAnimTable[iVar2 + 0x1f2].anim;
+    if (g_apAnimBlendTime < 0.0 == (g_apAnimBlendTime == 0.0)) {
+      g_apAnims[0].blendTime = g_apAnimBlendTime;
+    }
+    else {
+      g_apAnims[0].blendTime = g_apAnimTable[iVar2 + 0x1f2].time / g_moveTimeScale;
+    }
+    g_apAnims[0].mode = g_apAnimTable[g_apCurAnim.sub + (iVar7 * 3 + 0xf9) * 2].flags & 0xe;
+    if ((g_apCurAnim.sub == 2) || (g_apCurAnim.sub == 5)) {
+      cVar12 = '\x01';
+    }
+    else {
+      cVar12 = '\0';
+    }
+  }
+  g_apAnims[0].weight = 1.0;
+  g_apAnims[0].anim = g_apAnimSet;
+  C_HumanMorph::SetExhausted(&this->movement->morph,cVar12,'\0');
+  if (g_apAnimSet == nullptr) {
+    S_HumanAnimRef::Set(&g_apCurAnim,g_apOldAnim.anim,g_apOldAnim.stance,g_apOldAnim.sub);
+  }
+  if (this->animDelayState == -1) {
+    this->animDelayState = 0;
+    g_apAnims[0].blendTime = 200.0;
+    goto LAB_00778b20;
+  }
+  if ((((g_apCurAnim.anim < 0x59) || (0x5d < g_apCurAnim.anim)) ||
+      ((0x58 < g_apOldAnim.anim && (g_apOldAnim.anim < 0x5e)))) ||
+     ((g_apOldAnim.anim == 0x68 || (g_apOldAnim.anim == 0x69)))) {
+    if ((0x58 < g_apOldAnim.anim) &&
+       ((((g_apOldAnim.anim < 0x5e && (g_apOldAnim.anim != 0x68)) && (g_apOldAnim.anim != 0x69)) &&
+        (((g_apCurAnim.anim == 0x2e || (g_apCurAnim.anim == 0x38)) ||
+         ((g_apCurAnim.anim == 0x40 || ((g_apCurAnim.anim == 0xbe || (g_apCurAnim.anim == 0xc6))))))
+        )))) {
+      fVar5 = 600.0;
+      goto LAB_00778b14;
+    }
+    if (((g_apCurAnim.stance != g_apOldAnim.stance) && (g_apCurCarry[0] == 0x20)) &&
+       (((g_apCurAnim.anim < 0x29 || (0x41 < g_apCurAnim.anim)) &&
+        ((((g_apCurAnim.anim != 0x1a && (g_apCurAnim.anim != 0x1b)) && (g_apCurAnim.stance < 2)) &&
+         (g_apOldAnim.stance < 2)))))) {
+      g_apAnims[0].blendTime = 650.0 / g_moveTimeScale;
+      this->movement->unknown9AC = 2000;
+      this->movement->unknown9B0 = g_apOldAnim.stance;
+      goto LAB_00778b20;
+    }
+    if ((g_apOldAnim.anim == 0x2c) || (g_apOldAnim.anim == 0x2b)) {
+      fVar5 = 300.0;
+      goto LAB_00778b14;
+    }
+    if ((7 < g_apOldAnim.anim) && (g_apOldAnim.anim < 0xf)) {
+      fVar5 = 200.0;
+      goto LAB_00778b14;
+    }
+    if ((((g_apCurAnim.anim < 0xa2) || (0xa5 < g_apCurAnim.anim)) || (g_apOldAnim.anim < 0xa2)) ||
+       (0xa5 < g_apOldAnim.anim)) {
+      if (g_apOldAnim.anim == 6) {
+        fVar5 = 800.0;
+        goto LAB_00778b14;
+      }
+    }
+    else {
+      g_apAnims[0].mode = 8;
+    }
+  }
+  else {
+    fVar5 = 1100.0;
+LAB_00778b14:
+    g_apAnims[0].blendTime = fVar5 / g_moveTimeScale;
+  }
+LAB_00778b20:
+  if (g_apCurAnim.anim == 0x9e) {
+    C_HumanMorph::SetUnknown78(&this->movement->morph,1);
+    uVar13 = 1;
+LAB_00778b53:
+    C_HumanMorph::SetUnknown64(&this->movement->morph,uVar13);
+  }
+  else if (g_apOldAnim.anim == 0x9e) {
+    C_HumanMorph::SetUnknown78(&this->movement->morph,0);
+    uVar13 = 0;
+    goto LAB_00778b53;
+  }
+  if ((((g_apCurAnim.anim == 0x12) || (g_apCurAnim.anim == 0x18)) || (g_apCurAnim.anim == 0x17)) &&
+     ((g_apOldAnim.anim == 0xbf || (g_apOldAnim.anim == 199)))) {
+    this->locomotion->unknown104 = '\x01';
+  }
+  else {
+    this->locomotion->unknown104 = '\0';
+  }
+LAB_00778ba3:
+  if (g_apAnimSet == nullptr) {
+    g_apNextAnim.anim = 0xce;
+    S_HumanAnimRef::Normalize(&g_apNextAnim);
+    return;
+  }
+  S_HumanAnimRef::Set(&(this->movement->animState).anim,g_apCurAnim.anim,g_apCurAnim.stance,
+                      g_apCurAnim.sub);
+  if (((SStack_54.anim != g_apCurAnim.anim) || (SStack_54.stance != g_apCurAnim.stance)) ||
+     (SStack_54.sub != g_apCurAnim.sub)) {
+    S_HumanAnimRef::Set(&SStack_54,g_apCurAnim.anim,g_apCurAnim.stance,g_apCurAnim.sub);
+    singleStage = IsSingleStageAnim(g_apCurAnim.anim);
+  }
+  g_apAnimMode = 2 - (uint32_t)(singleStage != false);
+  g_apAnimSet->m_playMode = g_apAnimMode;
+  if (((g_apCurAnim.anim < 0x71) || (0x9a < g_apCurAnim.anim)) || (6 < this->movement->unknown1AC))
+  {
+    C_HumanAnimMixer::Play
+              (&this->movement->mixer,g_apAnims,&g_apNextAnim,g_apNextCarry,g_apNextActivity,
+               g_apAnimMode == 1);
+  }
+  pSVar9 = g_apAnims;
+  pSVar10 = g_apStartAnims;
+  for (iVar7 = 5; iVar7 != 0; iVar7 = iVar7 - 1) {
+    pSVar10->anim = pSVar9->anim;
+    pSVar9 = (S_MixerAnim *)&pSVar9->weight;
+    pSVar10 = (S_MixerAnim *)&pSVar10->weight;
+  }
+  g_apAnims[0].anim = nullptr;
+  OnAnimStarted(this,&g_apCurAnim,&g_apOldAnim,singleStage);
+  C_HumanLocomotion::Unknown76bad0(this->locomotion,'\0');
+  C_Human::ControllerUnknownD0(this->owner);
+  if ((g_apCurAnim.anim == 0xbe) || (g_apCurAnim.anim == 0xc6)) {
+    C_Human::ControllerUnknownD0(this->owner);
+    g_apChanged = true;
+    return;
+  }
+  if ((g_apCurAnim.anim == 0xbf) || (g_apCurAnim.anim == 199)) {
+    C_Human::ControllerUnknownD0(this->owner);
+    g_apChanged = true;
+    return;
+  }
+  if ((g_apCurAnim.anim == 0xc0) || (g_apCurAnim.anim == 200)) {
+    C_Human::ControllerUnknownD0(this->owner);
+    g_apChanged = true;
+    return;
+  }
+  if ((g_apCurAnim.anim == 0xc1) || (g_apCurAnim.anim == 0xc9)) {
+    C_Human::ControllerUnknownD0(this->owner);
+    g_apChanged = true;
+    return;
+  }
+  if ((0x28 < g_apCurAnim.anim) && (g_apCurAnim.anim < 0x42)) {
+    C_Human::ControllerUnknownD0(this->owner);
+    g_apChanged = true;
+    return;
+  }
+  if ((g_apCurAnim.anim == 0xc4) || (g_apCurAnim.anim == 0xcc)) {
+    C_Human::ControllerUnknownD0(this->owner);
+    g_apChanged = true;
+    return;
+  }
+  if ((g_apCurAnim.anim == 0xc2) || (g_apCurAnim.anim == 0xca)) {
+    C_Human::ControllerUnknownD0(this->owner);
+    g_apChanged = true;
+    return;
+  }
+  if ((g_apCurAnim.anim != 0xc5) && (g_apCurAnim.anim != 0xcd)) {
+    if ((g_apCurAnim.anim == 0xc3) || (g_apCurAnim.anim == 0xcb)) {
+      C_Human::ControllerUnknownD0(this->owner);
+      g_apChanged = true;
+      return;
+    }
+    if (g_apCurAnim.anim == 0x6a) {
+      pCVar8 = this->owner;
+      if ((this->movement->mixer).tracks[0].hold < 1) {
+        C_Human::ControllerUnknownD0(pCVar8);
+        g_apChanged = true;
+        return;
+      }
+    }
+    else {
+      if ((g_apCurAnim.anim != 0x6b) && (g_apCurAnim.anim != 0x6c)) {
+        if ((g_apCurAnim.anim != 0xa2) && (g_apCurAnim.anim != 0xa4)) {
+          if ((g_apCurAnim.anim != 0xa3) && (g_apCurAnim.anim != 0xa5)) {
+            g_apChanged = true;
+            return;
+          }
+          C_Human::ControllerUnknownD0(this->owner);
+          g_apChanged = true;
+          return;
+        }
+        C_Human::ControllerUnknownD0(this->owner);
+        g_apChanged = true;
+        return;
+      }
+      pCVar8 = this->owner;
+      if ((this->movement->mixer).tracks[0].hold < 1) {
+        C_Human::ControllerUnknownD0(pCVar8);
+        g_apChanged = true;
+        return;
+      }
+    }
+    C_Human::ControllerUnknownD0(pCVar8);
+    g_apChanged = true;
+    return;
+  }
+  C_Human::ControllerUnknownD0(this->owner);
+  g_apChanged = true;
+}
+
+// 0x00778f80
+void __thiscall C_HumanAnimPlayer::UpdateCarryTrack(C_HumanAnimPlayer *this)
+{
+  AdjustCarryRequest(this,&g_apCurAnim,g_apCurActivity);
+  g_apNextCarry[0] = (this->movement->nextAnimState).carryAnim;
+  g_apNextCarry[1] = (this->movement->nextAnimState).carryVariant;
+  if (this->carryDelay == -10000) {
+    if ((g_apNextCarry[0] < 0x50) || (0x52 < g_apNextCarry[0])) {
+      g_apCarrySpeed = C_HumanAnimMixer::QueueCarry(&this->movement->mixer,g_apNextCarry);
+    }
+  }
+  else {
+    bVar5 = C_HumanAnimMixer::HasTrackPlayed(&this->movement->mixer,1,this->carryDelay);
+    if (!bVar5) {
+      if (g_apNextCarry[0] != 0x5b) {
+        C_HumanAnimMixer::PushCarry(&this->movement->mixer,g_apNextCarry);
+      }
+      iVar8 = g_apNextCarry[1];
+      if ((g_apNextCarry[0] != 0x23) && (g_apNextCarry[0] != 0x24)) {
+        g_apNextCarry[0] = 0x5b;
+        return;
+      }
+      this->pendingCarry[0] = g_apNextCarry[0];
+      this->pendingCarry[1] = iVar8;
+      g_apNextCarry[0] = 0x5b;
+      return;
+    }
+    piVar1 = this->pendingCarry;
+    if (this->pendingCarry[0] == 0x5c) {
+      g_apNextCarry[0] = 0x5c;
+      this->carryDelay = -10000;
+      puVar2 = &((this->owner->m_body).work)->blocked;
+      *puVar2 = *puVar2 & ~this->carryBlocked;
+    }
+    else if (((this->carryDelayState == 1) && (g_apNextCarry[0] == *piVar1)) &&
+            (g_apNextCarry[1] == this->pendingCarry[1])) {
+      pCVar3 = this->movement;
+      (pCVar3->mixer).tracks[1].time = 0;
+      (pCVar3->mixer).tracks[1].hold = 0;
+    }
+    else {
+      if (this->carryDelayState == 0) {
+        if (((*piVar1 < 0x21) && (0x1d < *piVar1)) &&
+           ((iVar8 = (((this->owner->m_body).work)->request).carryMode, iVar8 == 0 || (iVar8 == 6)))
+           ) {
+          g_apNextCarry[0] = 0x5c;
+        }
+        else {
+          g_apNextCarry[0] = *piVar1;
+          g_apNextCarry[1] = this->pendingCarry[1];
+        }
+      }
+      else {
+        C_HumanAnimMixer::SetTrackRate(&this->movement->mixer,1,0.0);
+      }
+      this->carryDelayState = 0;
+      this->carryDelay = -10000;
+      puVar2 = &((this->owner->m_body).work)->blocked;
+      *puVar2 = *puVar2 & ~this->carryBlocked;
+    }
+  }
+  iVar8 = g_apCurCarry[1];
+  if ((g_apNextCarry[0] != 0x5b) &&
+     ((bVar5 = IsSameStandGroup(g_apNextCarry,g_apCurCarry[0]), !bVar5 ||
+      (g_apNextCarry[1] != iVar8)))) {
+    if (g_apNextCarry[0] == 0x20) {
+      if ((g_apCurCarry[0] < 0x50) || (0x52 < g_apCurCarry[0])) {
+        iVar8 = 300;
+        pCVar7 = this->movement->weaponPose2;
+      }
+      else {
+        iVar8 = 0;
+        pCVar7 = this->movement->weaponPose2;
+      }
+      C_HumanWeaponPose__Unknown7b9160(pCVar7,iVar8);
+LAB_007791a5:
+      if (g_apNextCarry[0] == 0x5c) {
+        g_apCurCarry[0] = g_apNextCarry[0];
+        g_apCurCarry[1] = g_apNextCarry[1];
+        pCVar3 = this->movement;
+        iVar8 = pCVar3->handsCarryState;
+        if ((iVar8 == 3) || (iVar8 == 4)) {
+          if (g_apNextCarry[1] == 2) {
+            lVar11 = __ftol();
+            C_HumanAnimMixer::FadeOutTrack(&pCVar3->mixer,1,(int)lVar11);
+            pCVar7 = this->movement->weaponPose2;
+            lVar11 = __ftol();
+            *(int *)(pCVar7->_pad_0004 + 0x6308) = (int)lVar11;
+            lVar11 = __ftol();
+            *(int *)(pCVar7->_pad_0004 + 0x6304) = (int)lVar11;
+            g_apChanged = true;
+          }
+          else {
+            if ((g_apCurAnim.anim < 8) || (0xe < g_apCurAnim.anim)) {
+              if (iVar8 == 4) {
+                lVar11 = __ftol();
+                C_HumanAnimMixer::FadeOutTrack(&pCVar3->mixer,1,(int)lVar11);
+                pCVar7 = this->movement->weaponPose2;
+                lVar11 = __ftol();
+                uVar6 = (uint32_t)lVar11;
+              }
+              else {
+                lVar11 = __ftol();
+                C_HumanAnimMixer::FadeOutTrack(&pCVar3->mixer,1,(int)lVar11);
+                pCVar7 = this->movement->weaponPose2;
+                lVar11 = __ftol();
+                uVar6 = (uint32_t)lVar11;
+              }
+            }
+            else {
+              lVar11 = __ftol();
+              C_HumanAnimMixer::FadeOutTrack(&pCVar3->mixer,1,(int)lVar11);
+              pCVar7 = this->movement->weaponPose2;
+              lVar11 = __ftol();
+              uVar6 = (uint32_t)lVar11;
+            }
+            *(uint32_t *)(pCVar7->_pad_0004 + 0x6308) = uVar6;
+            lVar11 = __ftol();
+            *(int *)(pCVar7->_pad_0004 + 0x6304) = (int)lVar11;
+          }
+          iVar8 = this->movement->handsCarryState;
+          if ((((iVar8 != 4) && (iVar8 != 3)) ||
+              (iVar8 = (((this->owner->m_body).work)->request).carryMode, iVar8 == 0)) ||
+             (iVar8 == 100)) {
+            this->movement->handsCarryState = 0;
+          }
+        }
+        else {
+          lVar11 = __ftol();
+          C_HumanAnimMixer::FadeOutTrack(&pCVar3->mixer,1,(int)lVar11);
+          iVar8 = (((this->owner->m_body).work)->request).carryMode;
+          if ((iVar8 != 6) && ((iVar8 == 0 || (iVar8 == 100)))) {
+            this->movement->handsCarryState = 0;
+          }
+        }
+        goto LAB_00779228;
+      }
+    }
+    else if (g_apNextCarry[0] != 0x27) {
+      if ((g_apNextCarry[0] < 0x50) || (0x52 < g_apNextCarry[0])) {
+        FUN_007b91c0(this->movement->weaponPose2,300);
+      }
+      else {
+        FUN_007b91c0(this->movement->weaponPose2,0);
+      }
+      goto LAB_007791a5;
+    }
+    g_apCurCarry[1] = g_apNextCarry[1];
+    g_apCurCarry[0] = g_apNextCarry[0];
+    if (g_apNextCarry[0] < 0x5b) {
+      if ((g_apNextCarry[0] == 0x20) && (g_apOldCarry[0] != 0x20)) {
+        lVar11 = __ftol();
+        this->movement->unknownA28 = (int)lVar11;
+      }
+      pCVar4 = (this->owner->m_body).work;
+      iVar8 = (pCVar4->request).carryMode;
+      if (g_apCurCarry[0] == 0x22) {
+        pCVar4->forced = true;
+        C_HumanWork::SetCarryMode((this->owner->m_body).work,this->movement->unknown220,false);
+        ((this->owner->m_body).work)->forced = false;
+      }
+      switch((((this->owner->m_body).work)->request).carryMode) {
+      case 0:
+      case 6:
+        g_apCarryTable = g_carryAnimTables[0];
+        break;
+      case 1:
+        g_apCarryTable = g_carryAnimTables[1];
+        break;
+      case 2:
+        g_apCarryTable = g_carryAnimTables[2];
+        break;
+      case 3:
+        g_apCarryTable = g_carryAnimTables[3];
+        break;
+      case 4:
+        g_apCarryTable = g_carryAnimTables[4];
+        break;
+      case 5:
+        g_apCarryTable = g_carryAnimTables[5];
+        break;
+      default:
+        g_apCarryTable = nullptr;
+      }
+      ((this->owner->m_body).work)->forced = true;
+      C_HumanWork::SetCarryMode((this->owner->m_body).work,iVar8,false);
+      ((this->owner->m_body).work)->forced = false;
+      if ((g_apCurCarry[1] < 0) || (4 < g_apCurCarry[1])) {
+        g_apCurCarry[1] = (((this->owner->m_body).work)->request).stance;
+      }
+      if (g_apCarryTable != nullptr) {
+        C_HumanAnimMixer::SetTrackRate(&this->movement->mixer,1,1.0);
+        iVar8 = g_apCurCarry[1] + g_apCurCarry[0] * 3;
+        g_apCarrySet = g_apCarryTable[iVar8].anim;
+        g_apAnims[1].blendTime =
+             (g_apCarryTable[iVar8].unknown0C / g_moveTimeScale) * g_apCarrySpeed;
+        pCVar7 = this->movement->weaponPose2;
+        lVar11 = __ftol();
+        *(int *)(pCVar7->_pad_0004 + 0x6308) = (int)lVar11;
+        lVar11 = __ftol();
+        *(int *)(pCVar7->_pad_0004 + 0x6304) = (int)lVar11;
+        g_apAnims[1].anim = g_apCarrySet;
+        g_apAnims[1].weight = (float)g_apCarryTable[g_apCurCarry[1] + g_apCurCarry[0] * 3].unknown08
+        ;
+        g_apAnims[1].mode = g_apCarryTable[g_apCurCarry[1] + g_apCurCarry[0] * 3].flags & 0xe;
+      }
+      if (g_apCarrySet == nullptr) {
+        g_apCurCarry[0] = g_apOldCarry[0];
+        g_apCurCarry[1] = g_apOldCarry[1];
+        goto LAB_00779624;
+      }
+      if (g_apCurCarry[0] == 0x20) {
+        if (g_apOldCarry[0] == 0x20) {
+joined_r0x00779691:
+          if (g_apCurCarry[1] != g_apOldCarry[1]) {
+            g_apAnims[1].blendTime = (550.0 / g_moveTimeScale) * g_apCarrySpeed;
+          }
+        }
+      }
+      else if (((g_apCurCarry[0] == 0x1f) || (g_apCurCarry[0] == 0x1e)) &&
+              (g_apOldCarry[0] == g_apCurCarry[0])) goto joined_r0x00779691;
+    }
+  }
+LAB_00779228:
+  iVar8 = g_apCurCarry[0];
+  if (g_apCarrySet != nullptr) {
+    if (g_apCurCarry[0] == 0x27) {
+      FUN_007ae7f0((int)this->movement->weaponPose2);
+      return;
+    }
+    pCVar3 = this->movement;
+    (pCVar3->animState).carryVariant = g_apCurCarry[1];
+    (pCVar3->animState).carryAnim = iVar8;
+    bVar5 = IsSingleStageCarryAnim(g_apCurCarry[0]);
+    g_apCarryMode = 2 - (uint32_t)bVar5;
+    g_apCarrySet->m_playMode = g_apCarryMode;
+    C_HumanAnimMixer::Play
+              (&this->movement->mixer,g_apAnims,&g_apNextAnim,g_apNextCarry,g_apNextActivity,
+               g_apCarryMode == 1);
+    pSVar9 = g_apAnims + 1;
+    pSVar10 = g_apStartAnims + 1;
+    for (iVar8 = 5; iVar8 != 0; iVar8 = iVar8 - 1) {
+      pSVar10->anim = pSVar9->anim;
+      pSVar9 = (S_MixerAnim *)&pSVar9->weight;
+      pSVar10 = (S_MixerAnim *)&pSVar10->weight;
+    }
+    g_apAnims[1].anim = nullptr;
+    OnCarryStarted(this,g_apCurCarry,g_apOldCarry);
+    g_apChanged = true;
+    return;
+  }
+LAB_00779624:
+  if (g_apCurCarry[0] != 0x5c) {
+    g_apNextCarry[0] = 0x5b;
+    return;
+  }
+  (this->movement->animState).carryAnim = 0x5b;
+  g_apNextCarry[0] = 0x5b;
+}
+
+// 0x007797f0
+bool __thiscall IsSameStandGroup(void *this,int other)
+{
+  iVar1 = *(int *)this;
+  if (((iVar1 != other) &&
+      ((((iVar1 < 0x2d || (0x36 < iVar1)) || (other < 0x2d)) || (0x36 < other)))) &&
+     (((((iVar1 < 0x37 || (0x3e < iVar1)) || (other < 0x37)) || (0x3e < other)) &&
+      (((iVar1 < 0x3f || (0x41 < iVar1)) || ((other < 0x3f || (0x41 < other)))))))) {
+    return false;
+  }
+  return true;
+}
+
+// 0x00779850
+void __thiscall C_HumanAnimPlayer::UpdateActivityTrack(C_HumanAnimPlayer *this)
+{
+  AdjustActivityRequest(this,&g_apCurAnim,g_apCurCarry,g_apNextActivity);
+  iVar5 = C_HumanAnimMixer::GetTrackTag(&this->movement->mixer,2);
+  if (((-1 < iVar5) || (iVar5 = this->movement->handsCarryState, iVar5 == 2)) || (iVar5 == 1)) {
+    pCVar6 = (this->owner->m_body).work;
+    pCVar6->bodyFlags = pCVar6->bodyFlags | 0x200;
+  }
+  C_HumanAnimMixer::CheckTrackFinished(&this->movement->mixer,2,0x51);
+  bVar4 = C_HumanAnimMixer::CheckTrackFinished(&this->movement->mixer,2,0x52);
+  if (bVar4) {
+    C_HumanEquipment::OnAnimationEvent((this->owner->m_body).equipment,6);
+  }
+  else {
+    bVar4 = C_HumanAnimMixer::CheckTrackFinished(&this->movement->mixer,2,0x53);
+    if (bVar4) {
+      if ((g_apCurActivity[0] == 0x41) && (g_apNextActivity[0] == 0x4b)) {
+        iVar5 = 0x53;
+LAB_00779992:
+        C_HumanAnimMixer::SetTrackTag(&this->movement->mixer,2,iVar5);
+      }
+      else {
+        C_HumanEquipment::SetHolster4Visible((this->owner->m_body).equipment,true);
+        C_HumanEquipment::OnAnimationEvent((this->owner->m_body).equipment,8);
+        pCVar6 = (this->owner->m_body).work;
+        pCVar6->blocked = pCVar6->blocked & 0xfffffffe;
+        puVar1 = &((this->owner->m_body).work)->blocked;
+        *puVar1 = *puVar1 & 0xfffffff7;
+      }
+    }
+    else {
+      bVar4 = C_HumanAnimMixer::CheckTrackFinished(&this->movement->mixer,2,0x55);
+      if (bVar4) {
+        if ((g_apCurActivity[0] == 0x41) && (g_apNextActivity[0] == 0x4b)) {
+          iVar5 = 0x55;
+          goto LAB_00779992;
+        }
+        C_HumanEquipment::SetHolster4Visible((this->owner->m_body).equipment,true);
+        pCVar3 = this->movement;
+        (pCVar3->mixer).tracks[1].events[(pCVar3->mixer).tracks[1].eventCount] = 0xc;
+        (pCVar3->mixer).tracks[1].eventCount = (pCVar3->mixer).tracks[1].eventCount + 1;
+        C_HumanEquipment::OnAnimationEvent((this->owner->m_body).equipment,8);
+        pCVar6 = (this->owner->m_body).work;
+        pCVar6->blocked = pCVar6->blocked & 0xfffffffe;
+        puVar1 = &((this->owner->m_body).work)->blocked;
+        *puVar1 = *puVar1 & 0xfffffff7;
+      }
+      else {
+        bVar4 = C_HumanAnimMixer::CheckTrackFinished(&this->movement->mixer,2,0x50);
+        if ((bVar4) && (g_apCurActivity[0] != 0x1a)) {
+          C_HumanEquipment::SetFlashlight((this->owner->m_body).equipment,false);
+          C_HumanEquipment::OnAnimationEvent((this->owner->m_body).equipment,10);
+        }
+        else {
+          bVar4 = C_HumanAnimMixer::CheckTrackFinished(&this->movement->mixer,2,0x54);
+          if (bVar4) {
+            iVar5 = _rand();
+            this->unknown58 = iVar5 % 10000 + 10000;
+          }
+        }
+      }
+    }
+  }
+  pCVar3 = this->movement;
+  if (this->activityDelay == -10000) {
+    if ((((pCVar3->nextAnimState).activity == 0x4b) && (this->unknown58 != -10000)) &&
+       (this->unknown58 < 1)) {
+      this->unknown58 = -10000;
+      (pCVar3->nextAnimState).activity = 0x12;
+      g_apNextActivity[0] = 0x12;
+    }
+    g_apActivitySpeed =
+         C_HumanAnimMixer::QueueActivity
+                   (&this->movement->mixer,&(this->movement->nextAnimState).activity);
+LAB_00779c38:
+    if ((g_apNextActivity[0] != 0x4b) &&
+       ((g_apNextActivity[0] != g_apCurActivity[0] || (g_apNextActivity[1] != g_apCurActivity[1]))))
+    {
+      if (g_apNextActivity[0] == 0x4c) {
+        lVar10 = __ftol();
+        C_HumanAnimMixer::FadeOutTrack(&this->movement->mixer,2,(int)lVar10);
+        g_apCurActivity[0] = g_apNextActivity[0];
+        g_apCurActivity[1] = g_apNextActivity[1];
+        ((this->owner->m_body).work)->forced = true;
+        C_HumanWork::PlayWorkAnimation((this->owner->m_body).work,0x4b,false);
+        ((this->owner->m_body).work)->forced = false;
+      }
+      else {
+        g_apCurActivity[0] = g_apNextActivity[0];
+        g_apCurActivity[1] = g_apNextActivity[1];
+        g_apActivityTable = g_activityAnimTable;
+        if (g_activityAnimTable != nullptr) {
+          C_HumanAnimMixer::SetTrackRate(&this->movement->mixer,1,1.0);
+          pSVar2 = g_apActivityTable + g_apCurActivity[1] + g_apCurActivity[0] * 3;
+          g_apAnims[2].anim = pSVar2->anim;
+          g_apAnims[2].weight = 1.0;
+          g_apAnims[2].blendTime = (pSVar2->time / g_moveTimeScale) * g_apActivitySpeed;
+          g_apAnims[2].mode = pSVar2->flags & 0xe;
+          g_apActivitySet = g_apAnims[2].anim;
+        }
+        if (g_apActivitySet == nullptr) {
+          g_apCurActivity[0] = g_apOldActivity[0];
+          g_apCurActivity[1] = g_apOldActivity[1];
+          goto LAB_00779d8d;
+        }
+        iVar5 = (this->movement->animState).anim.anim;
+        if ((iVar5 < 0xbe) || (0xce < iVar5)) {
+LAB_00779e68:
+          if ((g_apCurActivity[0] < 0x1e) || (0x33 < g_apCurActivity[0])) {
+LAB_00779e81:
+            if ((g_apCurActivity[0] < 0) || (2 < g_apCurActivity[0])) {
+              if (g_apCurActivity[0] == 0x42) {
+                g_apAnims[2].weight = 0.65;
+              }
+            }
+            else if ((0xbd < iVar5) && (iVar5 < 0xcf)) {
+              g_apAnims[2].weight = 0.75;
+            }
+            goto LAB_00779eb3;
+          }
+          g_apAnims[2].weight = 0.6;
+        }
+        else {
+          if (g_apCurActivity[0] < 0x1e) goto LAB_00779e81;
+          if (0x33 < g_apCurActivity[0]) goto LAB_00779e68;
+          g_apAnims[2].weight = 0.5;
+        }
+        g_apJointFrames[0] = this->movement->joints[8].frame;
+        g_apJointFrames[1] = this->movement->joints[9].frame;
+        g_apJointFrames[2] = this->movement->joints[10].frame;
+        g_apJointFrames[3] = this->movement->joints[0xb].frame;
+        g_apJointFrames[4] = this->movement->joints[0xc].frame;
+        g_apJointFrames[5] = this->movement->joints[0xd].frame;
+        g_apJointFrames[6] = this->movement->joints[0xe].frame;
+        g_apJointFrames[7] = this->movement->joints[0xf].frame;
+        g_apJointCount = 7;
+      }
+    }
+  }
+  else {
+    bVar4 = C_HumanAnimMixer::HasTrackPlayed(&pCVar3->mixer,2,this->activityDelay);
+    if ((bVar4) ||
+       ((this->pendingActivity[0] == 0x41 && (0 < (this->movement->mixer).tracks[2].hold)))) {
+      iVar5 = (((this->owner->m_body).work)->request).activity;
+      if (iVar5 != 0x4b) {
+        this->pendingActivity[0] = iVar5;
+        C_HumanWork::PlayWorkAnimation((this->owner->m_body).work,0x4b,true);
+      }
+      if (this->pendingActivity[0] == 0x4c) {
+        g_apNextActivity[0] = 0x4c;
+        this->activityDelay = -10000;
+        pCVar6 = (this->owner->m_body).work;
+      }
+      else {
+        if (((this->activityDelayState == 1) && (g_apNextActivity[0] == this->pendingActivity[0]))
+           && (g_apNextActivity[1] == this->pendingActivity[1])) {
+          pCVar3 = this->movement;
+          (pCVar3->mixer).tracks[2].time = 0;
+          (pCVar3->mixer).tracks[2].hold = 0;
+          goto LAB_00779c38;
+        }
+        if (this->activityDelayState == 0) {
+          g_apNextActivity[0] = this->pendingActivity[0];
+          g_apNextActivity[1] = this->pendingActivity[1];
+        }
+        else {
+          C_HumanAnimMixer::SetTrackRate(&this->movement->mixer,2,0.0);
+        }
+        this->activityDelayState = 0;
+        this->activityDelay = -10000;
+        pCVar6 = (this->owner->m_body).work;
+      }
+      pCVar6->blocked = pCVar6->blocked & ~this->activityBlocked;
+      goto LAB_00779c38;
+    }
+    if (((g_apNextActivity[0] != g_apCurActivity[0]) && (0 < (this->movement->mixer).tracks[2].hold)
+        ) && (g_apNextActivity[0] != 0x4b)) {
+      C_HumanAnimMixer::ReleaseTrack(&this->movement->mixer,2);
+      this->pendingActivity[0] = 0x4c;
+      this->activityDelay = 200;
+      ((this->owner->m_body).work)->forced = true;
+      C_HumanWork::PlayWorkAnimation((this->owner->m_body).work,0x4b,true);
+      ((this->owner->m_body).work)->forced = false;
+    }
+    g_apNextActivity[0] = 0x4b;
+  }
+LAB_00779eb3:
+  iVar5 = g_apCurActivity[1];
+  if (g_apActivitySet != nullptr) {
+    if (g_apCurActivity[0] < 8) {
+      FUN_007ae780(this->movement->weaponPose2,(int)g_apActivitySet);
+    }
+    else {
+      pCVar3 = this->movement;
+      (pCVar3->animState).activity = g_apCurActivity[0];
+      (pCVar3->animState).activityVariant = iVar5;
+      bVar4 = IsSingleStageActivity(g_apCurActivity[0]);
+      g_apActivityMode = 2 - (uint32_t)bVar4;
+      g_apActivitySet->m_playMode = g_apActivityMode;
+      C_HumanAnimMixer::Play
+                (&this->movement->mixer,g_apAnims,&g_apNextAnim,g_apNextCarry,g_apNextActivity,
+                 g_apActivityMode == 1);
+      iVar5 = g_apCurActivity[0];
+      pSVar8 = g_apAnims + 2;
+      pSVar9 = g_apStartAnims + 2;
+      for (iVar7 = 5; iVar7 != 0; iVar7 = iVar7 - 1) {
+        pSVar9->anim = pSVar8->anim;
+        pSVar8 = (S_MixerAnim *)&pSVar8->weight;
+        pSVar9 = (S_MixerAnim *)&pSVar9->weight;
+      }
+      g_apAnims[2].anim = nullptr;
+      if (iVar5 == 0x41) {
+        g_apAnims[2].crossfade = false;
+      }
+    }
+    OnActivityStarted(this,g_apCurActivity,g_apOldActivity);
+    g_apChanged = true;
+    return;
+  }
+LAB_00779d8d:
+  if (g_apCurActivity[0] == 0x4c) {
+    (this->movement->animState).activity = 0x4b;
+  }
+  g_apNextActivity[0] = 0x4b;
+}
+
+// 0x00779f90
+void __thiscall C_HumanAnimPlayer::Update(C_HumanAnimPlayer *this)
+{
+  g_apChanged = false;
+  g_apAnimSet = nullptr;
+  g_apCarrySet = nullptr;
+  g_apActivitySet = nullptr;
+  g_apAnimSpeed = 1.0;
+  g_apAnimBlendTime = -1.0;
+  g_apCarrySpeed = 1.0;
+  g_apActivitySpeed = 1.0;
+  S_HumanAnimRef::Set(&g_apOldAnim,0xce,0,1);
+  g_apOldCarry[0] = 0x5b;
+  g_apOldCarry[1] = 0;
+  g_apOldActivity[0] = 0x4b;
+  g_apOldActivity[1] = 0;
+  g_apJointCount = -1;
+  pCVar1 = this->movement;
+  S_HumanAnimRef::Set(&g_apCurAnim,(pCVar1->animState).anim.anim,(pCVar1->animState).anim.stance,
+                      (pCVar1->animState).anim.sub);
+  g_apCurCarry[0] = (this->movement->animState).carryAnim;
+  g_apCurCarry[1] = (this->movement->animState).carryVariant;
+  g_apCurActivity[0] = (this->movement->animState).activity;
+  g_apCurActivity[1] = (this->movement->animState).activityVariant;
+  pCVar1 = this->movement;
+  S_HumanAnimRef::Set(&g_apNextAnim,(pCVar1->nextAnimState).anim.anim,
+                      (pCVar1->nextAnimState).anim.stance,(pCVar1->nextAnimState).anim.sub);
+  g_apNextCarry[0] = (this->movement->nextAnimState).carryAnim;
+  g_apNextCarry[1] = (this->movement->nextAnimState).carryVariant;
+  g_apNextActivity[0] = (this->movement->nextAnimState).activity;
+  g_apNextActivity[1] = (this->movement->nextAnimState).activityVariant;
+  g_apAnims[0].anim = nullptr;
+  g_apAnims[1].anim = nullptr;
+  g_apAnims[2].anim = nullptr;
+  g_apAnims[3].anim = nullptr;
+  g_apAnims[0].crossfade = true;
+  g_apAnims[1].crossfade = true;
+  g_apAnims[2].crossfade = true;
+  g_apStartAnims[0].anim = nullptr;
+  g_apStartAnims[1].anim = nullptr;
+  g_apStartAnims[2].anim = nullptr;
+  g_apStartAnims[3].anim = nullptr;
+  pCVar1 = this->movement;
+  S_HumanAnimRef::Set(&g_apOldAnim,(pCVar1->animState).anim.anim,(pCVar1->animState).anim.stance,
+                      (pCVar1->animState).anim.sub);
+  g_apOldCarry[0] = (this->movement->animState).carryAnim;
+  g_apOldCarry[1] = (this->movement->animState).carryVariant;
+  g_apOldActivity[0] = (this->movement->animState).activity;
+  g_apOldActivity[1] = (this->movement->animState).activityVariant;
+  if ((g_apCurAnim.anim < 0x71) || (0x9a < g_apCurAnim.anim)) {
+    UpdateAnimTrack(this);
+    UpdateActivityTrack(this);
+    UpdateCarryTrack(this);
+    if (g_apChanged != false) {
+      if (-1 < g_apJointCount) {
+        C_HumanAnimMixer::NotifyFrames
+                  (&this->movement->mixer,2,(int *)g_apJointFrames,g_apJointCount);
+      }
+      C_HumanAnimMixer::UpdateStages(&this->movement->mixer,0,1,true,g_apStartAnims);
+    }
+    g_apNextAnim.anim = 0xce;
+    S_HumanAnimRef::Normalize(&g_apNextAnim);
+    g_apNextCarry[0] = 0x5b;
+    g_apNextActivity[0] = 0x4b;
+    S_HumanAnimRef::Set(&(this->movement->nextAnimState).anim,g_apNextAnim.anim,g_apNextAnim.stance,
+                        g_apNextAnim.sub);
+    iVar2 = g_apNextCarry[1];
+    pCVar1 = this->movement;
+    (pCVar1->nextAnimState).carryAnim = g_apNextCarry[0];
+    (pCVar1->nextAnimState).carryVariant = iVar2;
+    iVar2 = g_apNextActivity[1];
+    pCVar1 = this->movement;
+    (pCVar1->nextAnimState).activity = g_apNextActivity[0];
+    (pCVar1->nextAnimState).activityVariant = iVar2;
+  }
+}
+
+// 0x0077a2c0
+void __thiscall
+C_HumanAnimPlayer::OnAnimStarted
+          (C_HumanAnimPlayer *this,S_HumanAnimRef *anim,S_HumanAnimRef *old,bool singleStage)
+{
+  bVar7 = false;
+  bVar9 = false;
+  bVar6 = false;
+  if (!singleStage) {
+    if (((0x69 < anim->anim) && (anim->anim < 0x6d)) &&
+       ((((uint8_t)g_gameRole & 7) == 7 ||
+        ((bVar9 = C_Human::IsLocalPlayer(this->owner), bVar9 ||
+         (bVar9 = C_Human::IsServerSimulated(this->owner), bVar9)))))) {
+      C_HumanLocomotion::Unknown770e20(this->locomotion,&local_20.x);
+      pCVar5 = this->owner;
+      (pCVar5->m_position).x = local_20.x;
+      (pCVar5->m_position).y = local_20.y;
+      (pCVar5->m_position).z = local_20.z;
+      (pCVar5->m_position).w = local_20.w;
+      local_30.x = 0.0;
+      local_30.y = 0.0;
+      local_30.z = 0.0;
+      C_HumanAnimMixer::SetVelocity(&this->movement->mixer,&local_30,0.0,0.0,&local_20);
+      local_40.x = 0.0;
+      local_40.y = 0.0;
+      local_40.z = 0.0;
+      C_HumanAnimMixer::SetVelocity(&this->movement->mixer,&local_40,0.0,0.0,&local_20);
+    }
+    goto LAB_0077bb2e;
+  }
+  if (this->animDelay != -10000) goto LAB_0077bb2e;
+  this->animDelayState = 0;
+  this->animBlocked = 0x20000;
+  this_00 = &this->pendingAnim;
+  S_HumanAnimRef::Set(this_00,old->anim,old->stance,old->sub);
+  (this->pendingAnim).stance = (((this->owner->m_body).work)->request).stance;
+  S_HumanAnimRef::Normalize(this_00);
+  pCVar13 = nullptr;
+  (this->pendingAnim).sub = (((this->owner->m_body).work)->request).gait;
+  this->movement->unknown968 = 0.0;
+  this->locomotion->unknown0E4 = '\0';
+  this->unknown5C = 0;
+  this->unknown60 = -10000;
+  switch(anim->anim) {
+  case 0:
+  case 1:
+  case 2:
+  case 3:
+    pIVar10 = this->movement->vehicle->m_frame;
+    pIVar10 = (*pIVar10->vtable->FindChildFrame)(pIVar10,"klika",0x20);
+    if (pIVar10 != nullptr) {
+      pCVar5 = this->owner;
+      fVar15 = (pCVar5->m_position).x;
+      fVar2 = (pCVar5->m_position).y;
+      fVar3 = (pCVar5->m_position).z;
+      if ((pIVar10->m_frameFlags & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc(pIVar10);
+      }
+      local_20.x = (pIVar10->m_worldMatrix).m[3][0] - fVar15;
+      local_20.y = (pIVar10->m_worldMatrix).m[3][1] - fVar2;
+      local_20.z = (pIVar10->m_worldMatrix).m[3][2] - fVar3;
+      lVar17 = C_HumanLocomotion::Unknown76d290(this->locomotion,&local_20.x);
+      this->movement->unknown998 = (int)lVar17;
+      C_HumanWork::SetFacingDir((this->owner->m_body).work,(S_vector *)&local_20,true);
+      this->animBlocked = 0x40000;
+      break;
+    }
+    goto LAB_0077ac39;
+  case 7:
+    this_00->anim = 0x62;
+    S_HumanAnimRef::Normalize(this_00);
+    this->animBlocked = 0x40000;
+    break;
+  case 8:
+    C_HumanMovement::PlaySound(this->movement,0xf);
+    C_HumanLocomotion::Unknown770ff0(this->locomotion,'\0');
+    this->movement->unknown95C = -0x402f7cee;
+    this->movement->unknown960 = (int)(0.0 / g_moveTimeScale);
+    this->movement->unknown964 = (int)(0.0 / g_moveTimeScale);
+    if ((((this->owner->m_body).work)->request).gait == 2) {
+      this_00->anim = 0x6c;
+    }
+    else {
+      this_00->anim = 0x6b;
+    }
+    S_HumanAnimRef::Normalize(this_00);
+    (this->pendingAnim).stance = 0;
+    S_HumanAnimRef::Normalize(this_00);
+    this->animBlocked = 0x20000;
+    ((this->movement->owner->m_body).work)->forced = true;
+    C_HumanWork::Play((this->movement->owner->m_body).work,this_00->anim,true);
+    ((this->movement->owner->m_body).work)->forced = false;
+    (this->unknown70).x = 0.0;
+    (this->unknown70).y = 0.0;
+    (this->unknown70).z = 0.0;
+    (this->unknown70).w = local_74;
+    pCVar14 = (this->owner->m_body).work;
+    pCVar14->blocked = pCVar14->blocked & 0xfffffffe;
+    ((this->owner->m_body).work)->forced = true;
+    C_HumanWork::Play((this->owner->m_body).work,this_00->anim,true);
+    ((this->owner->m_body).work)->forced = false;
+    pIVar10 = this->headDummy;
+    if (pIVar10 != nullptr) {
+      uVar19 = pIVar10->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar10->m_localMatrix).m[3][0] = (this->unknown70).x;
+        (pIVar10->m_localMatrix).m[3][1] = (this->unknown70).y;
+        fVar15 = (this->unknown70).z;
+LAB_0077b323:
+        (pIVar10->m_localMatrix).m[3][2] = fVar15;
+        pIVar10->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+      }
+LAB_0077b33b:
+      (*this->headDummy->vtable->Update)(this->headDummy);
+    }
+    break;
+  case 9:
+    this->movement->unknown95C = 0x3e79db23;
+    this->movement->unknown960 = (int)(0.0 / g_moveTimeScale);
+    this->movement->unknown964 = (int)(554.0 / g_moveTimeScale);
+    if (this->movement->unknown954 == 1) {
+      this_00->anim = 0x38;
+      S_HumanAnimRef::Normalize(this_00);
+      (this->pendingAnim).stance = 1;
+LAB_0077acac:
+      S_HumanAnimRef::Normalize(this_00);
+    }
+    else if ((this_00->anim == 0x2b) || (this_00->anim == 0x2c)) {
+      this_00->anim = 0x2d;
+      goto LAB_0077acac;
+    }
+    ((this->movement->owner->m_body).work)->forced = true;
+    C_HumanWork::Play((this->movement->owner->m_body).work,this_00->anim,true);
+    ((this->movement->owner->m_body).work)->forced = false;
+    C_HumanLocomotion::Unknown770ff0(this->locomotion,'\0');
+    (this->unknown70).x = 0.0;
+    (this->unknown70).y = 0.0;
+    (this->unknown70).z = 0.0;
+    (this->unknown70).w = local_74;
+    pIVar10 = this->headDummy;
+    if (pIVar10 != nullptr) {
+      uVar19 = pIVar10->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar10->m_localMatrix).m[3][0] = (this->unknown70).x;
+        (pIVar10->m_localMatrix).m[3][1] = (this->unknown70).y;
+        (pIVar10->m_localMatrix).m[3][2] = (this->unknown70).z;
+        pIVar10->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+      }
+      (*this->headDummy->vtable->Update)(this->headDummy);
+    }
+    break;
+  case 10:
+    this->movement->unknown95C = 0x3f0f9db2;
+    this->movement->unknown960 = (int)(0.0 / g_moveTimeScale);
+    this->movement->unknown964 = (int)(754.0 / g_moveTimeScale);
+    if (this->movement->unknown954 == 1) {
+      this_00->anim = 0x38;
+      S_HumanAnimRef::Normalize(this_00);
+      (this->pendingAnim).stance = 1;
+LAB_0077adf3:
+      S_HumanAnimRef::Normalize(this_00);
+    }
+    else if ((this_00->anim == 0x2b) || (this_00->anim == 0x2c)) {
+      this_00->anim = 0x2d;
+      goto LAB_0077adf3;
+    }
+    ((this->movement->owner->m_body).work)->forced = true;
+    C_HumanWork::Play((this->movement->owner->m_body).work,this_00->anim,true);
+    ((this->movement->owner->m_body).work)->forced = false;
+    C_HumanLocomotion::Unknown770ff0(this->locomotion,'\0');
+    (this->unknown70).x = 0.0;
+    (this->unknown70).y = 0.0;
+    (this->unknown70).z = 0.0;
+    (this->unknown70).w = local_74;
+    pIVar10 = this->headDummy;
+    if (pIVar10 != nullptr) {
+      uVar19 = pIVar10->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar10->m_localMatrix).m[3][0] = (this->unknown70).x;
+        (pIVar10->m_localMatrix).m[3][1] = (this->unknown70).y;
+        (pIVar10->m_localMatrix).m[3][2] = (this->unknown70).z;
+        pIVar10->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+      }
+      (*this->headDummy->vtable->Update)(this->headDummy);
+    }
+    break;
+  case 0xb:
+    C_HumanMovement::PlaySound(this->movement,0xd);
+    this->movement->unknown95C = 0x3f31eb85;
+    this->movement->unknown960 = (int)(0.0 / g_moveTimeScale);
+    this->movement->unknown964 = (int)(400.0 / g_moveTimeScale);
+    if (this->movement->unknown954 == 1) {
+      this_00->anim = 0x38;
+      S_HumanAnimRef::Normalize(this_00);
+      (this->pendingAnim).stance = 1;
+LAB_0077af43:
+      S_HumanAnimRef::Normalize(this_00);
+    }
+    else if ((this_00->anim == 0x2b) || (this_00->anim == 0x2c)) {
+      this_00->anim = 0x2d;
+      goto LAB_0077af43;
+    }
+    ((this->movement->owner->m_body).work)->forced = true;
+    C_HumanWork::Play((this->movement->owner->m_body).work,this_00->anim,true);
+    ((this->movement->owner->m_body).work)->forced = false;
+    C_HumanLocomotion::Unknown770ff0(this->locomotion,'\0');
+    (this->unknown70).x = 0.0;
+    (this->unknown70).y = 0.0;
+    (this->unknown70).z = 0.0;
+    (this->unknown70).w = local_74;
+    pIVar10 = this->headDummy;
+    if (pIVar10 != nullptr) {
+      uVar19 = pIVar10->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar10->m_localMatrix).m[3][0] = (this->unknown70).x;
+        (pIVar10->m_localMatrix).m[3][1] = (this->unknown70).y;
+        (pIVar10->m_localMatrix).m[3][2] = (this->unknown70).z;
+        pIVar10->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+      }
+      (*this->headDummy->vtable->Update)(this->headDummy);
+    }
+    break;
+  case 0xc:
+    C_HumanMovement::PlaySound(this->movement,0xe);
+    this->movement->unknown95C = 0x3f7851ec;
+    this->movement->unknown960 = (int)(550.0 / g_moveTimeScale);
+    this->movement->unknown964 = (int)(750.0 / g_moveTimeScale);
+    if (this->movement->unknown954 == 1) {
+      this_00->anim = 0x38;
+      S_HumanAnimRef::Normalize(this_00);
+      (this->pendingAnim).stance = 1;
+LAB_0077b093:
+      S_HumanAnimRef::Normalize(this_00);
+    }
+    else if ((this_00->anim == 0x2b) || (this_00->anim == 0x2c)) {
+      this_00->anim = 0x2d;
+      goto LAB_0077b093;
+    }
+    ((this->movement->owner->m_body).work)->forced = true;
+    C_HumanWork::Play((this->movement->owner->m_body).work,this_00->anim,true);
+    ((this->movement->owner->m_body).work)->forced = false;
+    C_HumanLocomotion::Unknown770ff0(this->locomotion,'\0');
+    (this->unknown70).x = 0.0;
+    (this->unknown70).y = 0.0;
+    (this->unknown70).z = 0.0;
+    (this->unknown70).w = local_74;
+    pIVar10 = this->headDummy;
+    if (pIVar10 != nullptr) {
+      uVar19 = pIVar10->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar10->m_localMatrix).m[3][0] = (this->unknown70).x;
+        (pIVar10->m_localMatrix).m[3][1] = (this->unknown70).y;
+        (pIVar10->m_localMatrix).m[3][2] = (this->unknown70).z;
+        pIVar10->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+      }
+      (*this->headDummy->vtable->Update)(this->headDummy);
+    }
+    break;
+  case 0xd:
+    C_HumanMovement::PlaySound(this->movement,0xf);
+    pCVar5 = this->owner;
+    fVar15 = (pCVar5->m_direction).w;
+    local_20.x = -(pCVar5->m_direction).x * 0.1;
+    local_20.y = -(pCVar5->m_direction).y * 0.1;
+    local_20.z = -(pCVar5->m_direction).z * 0.1;
+    this->movement->unknown95C = 0x3fd22d0e;
+    this->movement->unknown960 = (int)(0.0 / g_moveTimeScale);
+    this->movement->unknown964 = (int)(426.0 / g_moveTimeScale);
+    if (this->movement->unknown954 == 1) {
+      this_00->anim = 0x38;
+      S_HumanAnimRef::Normalize(this_00);
+      (this->pendingAnim).stance = 1;
+LAB_0077b247:
+      S_HumanAnimRef::Normalize(this_00);
+    }
+    else if ((this_00->anim == 0x2b) || (this_00->anim == 0x2c)) {
+      this_00->anim = 0x2d;
+      goto LAB_0077b247;
+    }
+    ((this->movement->owner->m_body).work)->forced = true;
+    C_HumanWork::Play((this->movement->owner->m_body).work,this_00->anim,true);
+    ((this->movement->owner->m_body).work)->forced = false;
+    C_HumanLocomotion::Unknown770ff0(this->locomotion,'\0');
+    local_20.y = 0.0;
+    C_HumanAnimMixer::AddMove(&this->movement->mixer,&local_20,0xfa);
+    (this->unknown70).x = 0.0;
+    (this->unknown70).y = 0.0;
+    (this->unknown70).z = 0.0;
+    (this->unknown70).w = fVar15;
+    pIVar10 = this->headDummy;
+    if (pIVar10 != nullptr) {
+      uVar19 = pIVar10->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar10->m_localMatrix).m[3][0] = (this->unknown70).x;
+        (pIVar10->m_localMatrix).m[3][1] = (this->unknown70).y;
+        fVar15 = (this->unknown70).z;
+        goto LAB_0077b323;
+      }
+      goto LAB_0077b33b;
+    }
+    break;
+  case 0xe:
+    C_HumanMovement::PlaySound(this->movement,0xf);
+    this->movement->unknown95C = 0x3fad9168;
+    this->movement->unknown960 = (int)(0.0 / g_moveTimeScale);
+    this->movement->unknown964 = (int)(400.0 / g_moveTimeScale);
+    if (this->movement->unknown954 == 1) {
+      this_00->anim = 0x38;
+      S_HumanAnimRef::Normalize(this_00);
+      (this->pendingAnim).stance = 1;
+    }
+    else {
+      this_00->anim = 0x2d;
+    }
+    S_HumanAnimRef::Normalize(this_00);
+    ((this->movement->owner->m_body).work)->forced = true;
+    C_HumanWork::Play((this->movement->owner->m_body).work,this_00->anim,true);
+    ((this->movement->owner->m_body).work)->forced = false;
+    C_HumanLocomotion::Unknown770ff0(this->locomotion,'\0');
+    (this->unknown70).x = 0.0;
+    (this->unknown70).y = 0.0;
+    (this->unknown70).z = 0.0;
+    (this->unknown70).w = local_74;
+    pIVar10 = this->headDummy;
+    if (pIVar10 != nullptr) {
+      uVar19 = pIVar10->m_frameFlags;
+      if (-1 < (char)uVar19) {
+        (pIVar10->m_localMatrix).m[3][0] = (this->unknown70).x;
+        (pIVar10->m_localMatrix).m[3][1] = (this->unknown70).y;
+        (pIVar10->m_localMatrix).m[3][2] = (this->unknown70).z;
+        pIVar10->m_frameFlags = uVar19 & 0xfffffedf | 0x40000000;
+      }
+      (*this->headDummy->vtable->Update)(this->headDummy);
+    }
+    pCVar13 = this->movement->useObject;
+    if (pCVar13 != nullptr) {
+      fVar15 = (float)pCVar13[1].m_frame - (float)pCVar13[1].m_netId;
+      fVar2 = *(float *)(pCVar13[1]._pad_0024 + 4) - (float)pCVar13[1].m_type;
+      fVar15 = fVar2 * fVar2 + fVar15 * fVar15;
+      if ((int)fVar15 < 0x322bcc77) {
+        fVar15 = 0.0;
+      }
+      else if (1e-08 <= ABS(fVar15 - 1.0)) {
+        fVar15 = SQRT(fVar15);
+      }
+      else {
+        fVar15 = 1.0;
+      }
+      pCVar13 = this->movement->useObject;
+      local_20.x = fVar15 * pCVar13[1].m_direction.x * 0.5;
+      local_20.y = fVar15 * pCVar13[1].m_direction.y * 0.5;
+      local_20.z = fVar15 * pCVar13[1].m_direction.z * 0.5;
+      fVar15 = local_20.z * local_20.z + local_20.x * local_20.x;
+      if ((0x322bcc76 < (int)fVar15) && ((ABS(fVar15 - 1.0) < 1e-08 || (0.05 <= SQRT(fVar15))))) {
+        this->unknown60 = 0x32;
+        (this->unknown90).x = local_20.x;
+        (this->unknown90).y = 0.0;
+        (this->unknown90).z = local_20.z;
+        (this->unknown90).w = local_20.w;
+      }
+    }
+    break;
+  case 0x12:
+    iVar11 = 0x960;
+    this->locomotion->unknown100 = 0;
+    pCVar14 = (this->owner->m_body).work;
+    pCVar14->bodyFlags = pCVar14->bodyFlags | 0x80;
+    local_70.x = 0.0;
+    local_70.y = 8.0;
+    local_70.z = 0.0;
+    offset = &local_70;
+    goto LAB_0077ac2c;
+  case 0x14:
+    this_00->anim = 0x2d;
+    S_HumanAnimRef::Normalize(this_00);
+    (this->pendingAnim).stance = 0;
+    S_HumanAnimRef::Normalize(this_00);
+    this->animBlocked = 8;
+  case 0x16:
+    this_00->anim = 0x2d;
+    S_HumanAnimRef::Normalize(this_00);
+    (this->pendingAnim).stance = 0;
+    S_HumanAnimRef::Normalize(this_00);
+    this->animBlocked = 8;
+    break;
+  case 0x15:
+    this_00->anim = 0x37;
+    S_HumanAnimRef::Normalize(this_00);
+    (this->pendingAnim).stance = 1;
+    S_HumanAnimRef::Normalize(this_00);
+    this->animBlocked = 8;
+    C_HumanWork::Play((this->owner->m_body).work,0x2d,false);
+    break;
+  case 0x17:
+    this->locomotion->unknown100 = 0;
+    pCVar14 = (this->owner->m_body).work;
+    pCVar14->bodyFlags = pCVar14->bodyFlags | 0x80;
+    if ((((this->owner->m_body).work)->request).gait == 2) {
+      offset = &local_40;
+      iVar11 = 3000;
+      local_40.x = 0.0;
+      local_40.y = 9.5;
+      local_40.z = 0.0;
+    }
+    else {
+      local_30.x = 0.0;
+      local_30.y = 9.0;
+      local_30.z = 0.0;
+      iVar11 = 0x9c4;
+      offset = &local_30;
+    }
+    goto LAB_0077ac2c;
+  case 0x18:
+    this->locomotion->unknown100 = 0;
+    pCVar14 = (this->owner->m_body).work;
+    pCVar14->bodyFlags = pCVar14->bodyFlags | 0x80;
+    if ((((this->owner->m_body).work)->request).gait == 2) {
+      offset = &local_60;
+      iVar11 = 0x9c4;
+      local_60.x = 0.0;
+      local_60.y = 9.85;
+      local_60.z = 0.0;
+    }
+    else {
+      local_50.x = 0.0;
+      local_50.y = 9.85;
+      local_50.z = 0.0;
+      iVar11 = 0x834;
+      offset = &local_50;
+    }
+LAB_0077ac2c:
+    C_HumanAnimMixer::Slide(&this->movement->mixer,offset,iVar11);
+LAB_0077ac39:
+    this->animBlocked = 0x40000;
+    break;
+  case 0x1a:
+    C_HumanMovement::PlaySound(this->movement,5);
+    this_00->anim = 0x37;
+    S_HumanAnimRef::Normalize(this_00);
+    (this->pendingAnim).stance = 1;
+    S_HumanAnimRef::Normalize(this_00);
+    this->animBlocked = 8;
+    bVar7 = true;
+    this->locomotion->unknown0DC = 0;
+    this->locomotion->unknown0E0 = 0;
+    this->movement->unknown9AC = 0;
+    this->movement->unknown9B0 = 0;
+    break;
+  case 0x1b:
+    C_HumanMovement::PlaySound(this->movement,6);
+    this_00->anim = 0x2e;
+    S_HumanAnimRef::Normalize(this_00);
+    (this->pendingAnim).stance = 0;
+    goto LAB_0077a575;
+  case 0x1c:
+    this_00->anim = 0x22;
+    S_HumanAnimRef::Normalize(this_00);
+    C_HumanMovement::SetSeatMode(this->movement,1,'\x01');
+    break;
+  case 0x1d:
+  case 0x25:
+  case 0x26:
+    this_00->anim = 0x2d;
+    S_HumanAnimRef::Normalize(this_00);
+    C_HumanMovement::SetSeatMode(this->movement,1,'\0');
+    C_HumanMovement::SetSeatMode(this->movement,2,'\0');
+    break;
+  case 0x1e:
+    C_HumanMovement::PlaySound(this->movement,4);
+    this_00->anim = 0x40;
+    S_HumanAnimRef::Normalize(this_00);
+    (this->pendingAnim).stance = 2;
+LAB_0077a575:
+    S_HumanAnimRef::Normalize(this_00);
+    this->animBlocked = 8;
+    this->locomotion->unknown0DC = 0;
+    this->locomotion->unknown0E0 = 0;
+    this->movement->unknown9AC = 0;
+    this->movement->unknown9B0 = 1;
+    bVar7 = true;
+    break;
+  case 0x1f:
+    C_HumanMovement::PlaySound(this->movement,5);
+    this_00->anim = 0x38;
+    S_HumanAnimRef::Normalize(this_00);
+    (this->pendingAnim).stance = 1;
+    goto LAB_0077a518;
+  case 0x20:
+    C_HumanMovement::PlaySound(this->movement,4);
+    (this->pendingAnim).stance = 2;
+    S_HumanAnimRef::Normalize(this_00);
+    this->animBlocked = 8;
+    bVar7 = true;
+    this->locomotion->unknown0DC = 0;
+    this->locomotion->unknown0E0 = 0;
+    this->movement->unknown9AC = 0;
+    this->movement->unknown9B0 = 0;
+    if (old->anim < 0xbe) {
+      this_00->anim = 0x40;
+      S_HumanAnimRef::Normalize(this_00);
+    }
+    else {
+      S_HumanAnimRef::Set(this_00,old->anim,old->stance,old->sub);
+      (this->pendingAnim).stance = 2;
+      S_HumanAnimRef::Normalize(this_00);
+      bVar6 = true;
+    }
+    break;
+  case 0x21:
+    C_HumanMovement::PlaySound(this->movement,6);
+    this_00->anim = 0x2e;
+    S_HumanAnimRef::Normalize(this_00);
+    (this->pendingAnim).stance = 0;
+LAB_0077a518:
+    S_HumanAnimRef::Normalize(this_00);
+    this->animBlocked = 8;
+    bVar7 = true;
+    this->locomotion->unknown0DC = 0;
+    this->locomotion->unknown0E0 = 0;
+    this->movement->unknown9AC = 0;
+    this->movement->unknown9B0 = 2;
+    break;
+  case 0x24:
+    this_00->anim = 0x23;
+    S_HumanAnimRef::Normalize(this_00);
+    C_HumanMovement::SetSeatMode(this->movement,2,'\x01');
+    break;
+  case 0x2b:
+  case 0x2c:
+    bVar8 = IsSingleStageAnim(this_00->anim);
+    if (bVar8) {
+      (this->pendingAnim).anim = 0x2d;
+      S_HumanAnimRef::Normalize(&this->pendingAnim);
+    }
+    pCVar14 = (this->owner->m_body).work;
+    if ((pCVar14->request).anim == anim->anim) {
+      C_HumanWork::Play(pCVar14,(this->pendingAnim).anim,true);
+    }
+    break;
+  case 0x2f:
+  case 0x30:
+  case 0x31:
+  case 0x32:
+  case 0x33:
+  case 0x34:
+  case 0x35:
+  case 0x36:
+    this_00->anim = 0x2d;
+    S_HumanAnimRef::Normalize(this_00);
+    break;
+  case 0x39:
+  case 0x3a:
+  case 0x3b:
+  case 0x3c:
+  case 0x3d:
+  case 0x3e:
+    this_00->anim = 0x37;
+    S_HumanAnimRef::Normalize(this_00);
+    break;
+  case 0x41:
+    this_00->anim = 0x3f;
+    S_HumanAnimRef::Normalize(this_00);
+    break;
+  case 0x5e:
+    if ((((this->owner->m_body).work)->request).workingFrame != nullptr) {
+      this->movement->unknownA30 = 0;
+      pIVar10 = (((this->owner->m_body).work)->request).workingFrame;
+      if (pIVar10 != nullptr) {
+        if (pIVar10->m_data == nullptr) {
+          pCVar13 = nullptr;
+        }
+        else {
+          pCVar13 = pIVar10->m_data->actor;
+        }
+      }
+      C_HumanEquipment::SetModel((this->owner->m_body).equipment,pIVar10,9,-1,pCVar13->m_netId,-1);
+    }
+    break;
+  case 0x5f:
+    this->movement->unknownA30 = 2;
+    ((this->owner->m_body).work)->forced = true;
+    C_HumanWork::SetCarryMode((this->owner->m_body).work,100,false);
+    ((this->owner->m_body).work)->forced = false;
+    break;
+  case 0x67:
+    C_HumanWork::Play((this->owner->m_body).work,this_00->anim,true);
+    break;
+  case 0x9c:
+    this->movement->unknownA2C = 0;
+    C_HumanEquipment::SetModel
+              ((this->owner->m_body).equipment,(((this->owner->m_body).work)->request).workingFrame,
+               4,-1,-4,-1);
+    break;
+  case 0x9d:
+    this->movement->unknownA2C = 2;
+    ((this->owner->m_body).work)->forced = true;
+    C_HumanWork::SetCarryMode((this->owner->m_body).work,100,false);
+    ((this->owner->m_body).work)->forced = false;
+    break;
+  case 0xa0:
+    this->movement->unknownA2C = 8;
+    C_HumanEquipment::SetModel
+              ((this->owner->m_body).equipment,(((this->owner->m_body).work)->request).workingFrame,
+               4,-1,-4,-1);
+    break;
+  case 0xa1:
+    this->movement->unknownA2C = 10;
+    break;
+  case 0xa2:
+  case 0xa3:
+  case 0xa4:
+  case 0xa5:
+    bVar9 = true;
+    this->animDelayState = 0;
+    break;
+  case 0xc0:
+  case 0xc1:
+  case 0xc2:
+  case 0xc3:
+  case 0xc4:
+  case 0xc5:
+  case 200:
+  case 0xc9:
+  case 0xca:
+  case 0xcb:
+  case 0xcc:
+  case 0xcd:
+    S_HumanAnimRef::Set(this_00,anim->anim,anim->stance,anim->sub);
+    this->animDelayState = 0;
+    this->locomotion->unknown0DC = 0;
+    this->locomotion->unknown0E0 = 0;
+    this->animBlocked = 0x40000;
+  }
+  if ((0x70 < anim->anim) && (anim->anim < 0x9b)) {
+    (this->pendingAnim).anim = 0x71;
+    S_HumanAnimRef::Normalize(&this->pendingAnim);
+    local_20.x = 0.0;
+    local_20.y = 0.0;
+    local_20.z = 0.0;
+    (this->unknown70).x = 0.0;
+    (this->unknown70).y = 0.0;
+    (this->unknown70).z = 0.0;
+    (this->unknown70).w = local_20.w;
+  }
+  if (anim->anim < 0xce) {
+    iVar11 = ((this->owner->m_body).work)->group;
+    pSVar16 = g_humanAnimTable;
+    if ((iVar11 != 1) && (pSVar16 = g_humanAnimTable2, iVar11 != 2)) {
+      pSVar16 = nullptr;
+    }
+    if (anim->anim < 0xbe) {
+      pIVar4 = pSVar16[anim->anim * 3 + anim->stance].anim;
+      lVar17 = __ftol();
+      if (pIVar4 != nullptr) {
+        if (bVar9) {
+          if (this->unknownA0 != -10000.1) {
+            fVar15 = this->unknownA0;
+            iVar11 = (*pIVar4->vtable->GetEndTime)(pIVar4);
+            C_HumanAnimMixer::SetHoldTime(&this->movement->mixer,iVar11,fVar15);
+          }
+          iVar11 = (*pIVar4->vtable->GetEndTime)(pIVar4);
+          iVar11 -= 200;
+        }
+        else {
+          iVar11 = (*pIVar4->vtable->GetEndTime)(pIVar4);
+          iVar11 = iVar11 - (int)lVar17;
+        }
+        this->animDelay = iVar11;
+        lVar17 = __ftol();
+        this->animDelay = (int)lVar17;
+        if (bVar6) {
+          lVar17 = __ftol();
+          this->animDelay = (int)lVar17;
+        }
+        if (this->movement->unknown9AC == 0) {
+          this->movement->unknown9AC = this->animDelay;
+        }
+        goto LAB_0077b799;
+      }
+LAB_0077b89a:
+      this->animDelay = 0;
+    }
+    else {
+      lVar17 = __ftol();
+      pIVar4 = pSVar16[anim->sub + (anim->anim * 3 - 0x23a + anim->stance) * 6 + 0x1f2].anim;
+      if (pIVar4 == nullptr) goto LAB_0077b89a;
+      iVar11 = (*pIVar4->vtable->GetEndTime)(pIVar4);
+      this->animDelay = iVar11 - (int)lVar17;
+      lVar17 = __ftol();
+      this->animDelay = (int)lVar17;
+      if (this->movement->unknown9AC == 0) {
+        this->movement->unknown9AC = (int)lVar17;
+      }
+LAB_0077b799:
+      iVar11 = anim->anim;
+      if ((iVar11 < 0x71) || (0x9a < iVar11)) {
+        if ((iVar11 < 0xb) || (0xe < iVar11)) {
+          if (bVar7) {
+            uVar19 = 8;
+            pCVar14 = (this->owner->m_body).work;
+            iVar11 = (pCVar14->request).stance;
+            lVar17 = __ftol();
+            iVar18 = (int)lVar17;
+            goto LAB_0077b99f;
+          }
+        }
+        else if (this->movement->unknown954 == 1) {
+          C_HumanWork::SetStance((this->owner->m_body).work,1,false);
+          uVar19 = 9;
+          iVar11 = this->movement->unknown954;
+          lVar17 = __ftol();
+          iVar18 = (int)lVar17;
+          pCVar14 = (this->owner->m_body).work;
+LAB_0077b99f:
+          C_HumanWork::SetStanceTimer(pCVar14,iVar18,iVar11,uVar19);
+        }
+        iVar11 = anim->anim;
+        if (((10 < iVar11) && (iVar11 < 0xf)) || (iVar11 == 8)) {
+          iVar11 = 0;
+          this->movement->trailTime = this->animDelay;
+          pCVar12 = this->movement;
+          if (0 < pCVar12->trailCount) {
+            local_8c = 0x970;
+            do {
+              C_CollisionWorld::AddVolume
+                        (&g_collisionWorld,
+                         *(S_CollisionVolume **)((int)pCVar12->shotDummies + local_8c));
+              pCVar12 = this->movement;
+              iVar11++;
+              local_8c += 4;
+            } while (iVar11 < pCVar12->trailCount);
+          }
+        }
+      }
+      else {
+        if (this->movement->unknown1AC == 4) {
+          if ((iVar11 == 0x92) || (iVar11 == 0x94)) {
+            uVar19 = 9;
+            iVar18 = 0;
+            lVar17 = __ftol();
+            iVar11 = (int)lVar17;
+            pCVar14 = (this->owner->m_body).work;
+          }
+          else {
+            uVar19 = 9;
+            iVar18 = 2;
+            lVar17 = __ftol();
+            iVar11 = (int)lVar17;
+            pCVar14 = (this->owner->m_body).work;
+          }
+          C_HumanWork::SetStanceTimer(pCVar14,iVar11,iVar18,uVar19);
+        }
+        lVar17 = __ftol();
+        this->movement->unknown9BC = (int)lVar17;
+        lVar17 = __ftol();
+        this->movement->unknown9B8 = (int)lVar17;
+        lVar17 = __ftol();
+        this->movement->unknown9C0 = (int)lVar17;
+        iVar11 = this->movement->unknown9B8;
+        this->movement->unknown9C4 = (int)(iVar11 + (iVar11 >> 0x1f & 3U)) >> 2;
+      }
+    }
+    puVar1 = &((this->owner->m_body).work)->blocked;
+    *puVar1 = *puVar1 | this->animBlocked;
+  }
+  else {
+    this->animDelay = -10000;
+  }
+  if (this->movement->unknown9AC == 0) {
+    this->movement->unknown9AC = -10000;
+  }
+LAB_0077bb2e:
+  this->unknownA0 = -10000.1;
+  if (anim->anim == 0x6c) {
+    C_HumanMovement::StartUseSound(this->movement);
+    return;
+  }
+  C_HumanMovement::StopUseSound(this->movement);
+}
+
+// 0x0077bcd0
+void __thiscall C_HumanAnimPlayer::OnCarryStarted(C_HumanAnimPlayer *this,int *carry,int *old)
+{
+  this_00 = (this->owner->m_body).work;
+  bVar5 = false;
+  bVar7 = false;
+  bVar8 = false;
+  local_64 = '\0';
+  bVar6 = false;
+  bVar9 = IsSingleStageCarryAnim(*carry);
+  if (!bVar9) {
+    return;
+  }
+  if (this->carryDelay != -10000) {
+    return;
+  }
+  iVar1 = old[1];
+  this->pendingCarry[0] = *old;
+  this->pendingCarry[1] = iVar1;
+  this->pendingCarry[1] = (this_00->request).stance;
+  this->pendingCarry[2] = (this_00->request).gait;
+  iVar1 = (this_00->request).carryMode;
+  switch(*carry) {
+  case 0x22:
+    if (((uint8_t)g_gameRole & 2) != 0) {
+      pCVar17 = (C_Team *)field_address_1c_461410(0x89ae78);
+      pCVar18 = (C_Human *)C_Team::GetActivePlayer(pCVar17);
+      if (this->owner == pCVar18) {
+        C_HumanMovement::PlaySound(this->movement,0xb);
+      }
+    }
+    this->pendingCarry[0] = 0x5c;
+    this->carryBlocked = 0x100;
+    this_00->forced = true;
+    C_HumanWork::SetCarryMode(this_00,this->movement->unknown220,false);
+    this_00->forced = false;
+    this->movement->handsCarryState = 1;
+    break;
+  case 0x23:
+    piVar16 = &this->movement->unknown190;
+    *piVar16 = *piVar16 & 0xfffffffe;
+  case 0x24:
+    if (((uint8_t)g_gameRole & 2) != 0) {
+      pCVar18 = this->owner;
+      pCVar17 = (C_Team *)field_address_1c_461410(0x89ae78);
+      pCVar10 = (C_Human *)C_Team::GetActivePlayer(pCVar17);
+      if (pCVar18 == pCVar10) {
+        pCVar12 = C_Human::GetHandsItem(pCVar18);
+        if (pCVar12 == nullptr) {
+LAB_0077be37:
+          uVar23 = 10;
+        }
+        else {
+          pCVar12 = C_Human::GetHandsItem(this->owner);
+          iVar15 = (*pCVar12->m_def->vtable->GetBehaviour)();
+          if (iVar15 != 9) goto LAB_0077be37;
+          uVar23 = 0xc;
+        }
+        C_HumanMovement::PlaySound(this->movement,uVar23);
+      }
+    }
+    this->movement->handsCarryState = 2;
+    bVar8 = true;
+    this->movement->unknownA24 = 0;
+    this->carryBlocked = 0x100;
+    iVar15 = (this_00->request).unknown5C;
+    if (iVar15 == 0) {
+      if (((this_00->request).carryMode == 6) ||
+         (((this_00->request).stance == 2 &&
+          ((iVar15 = (this->movement->animState).anim.anim, iVar15 < 0x29 || (0x41 < iVar15)))))) {
+switchD_0077bd77_caseD_25:
+        this->pendingCarry[0] = 0x5c;
+      }
+      else {
+        this->pendingCarry[0] = (this->owner->m_role != 1) + 0x1e;
+      }
+    }
+    else if (iVar15 == 1) {
+      iVar15 = (this_00->request).carryMode;
+      if ((((iVar15 == 6) || ((((this->owner->m_body).equipment)->m_flags & 1) != 0)) ||
+          (iVar15 == 100)) ||
+         (((this_00->request).stance == 2 &&
+          ((iVar15 = (this->movement->animState).anim.anim, iVar15 < 0x29 || (0x41 < iVar15))))))
+      goto switchD_0077bd77_caseD_25;
+      this->pendingCarry[0] = 0x20;
+    }
+    break;
+  case 0x25:
+    goto switchD_0077bd77_caseD_25;
+  case 0x46:
+  case 0x47:
+    goto switchD_0077bd77_caseD_46;
+  case 0x4c:
+  case 0x4d:
+    bVar6 = true;
+    pCVar13 = GetGame();
+    uVar14 = C_game::IsHudShown(pCVar13);
+    if (((char)uVar14 == '\0') &&
+       (pCVar11 = C_Human::GetHandsWeapon(this->movement->owner), pCVar11 != nullptr)) {
+      pCVar11 = C_Human::GetHandsWeapon(this->movement->owner);
+      iVar15 = pCVar11->m_typeId;
+      if ((-1 < iVar15) && ((iVar15 < 500 && ((&DAT_0098b030)[iVar15] != 0)))) {
+        S_SoundRequest__Init(local_50);
+        pCVar11 = C_Human::GetHandsWeapon(this->movement->owner);
+        iVar15 = pCVar11->m_typeId;
+        if ((iVar15 < 0) || (499 < iVar15)) {
+          iVar15 = 0;
+        }
+        else {
+          iVar15 = (&DAT_0098b030)[iVar15];
+        }
+        uStack_30 = (**(code **)(**(int **)(iVar15 + 0x48) + 0x18))();
+        pCVar13 = GetGame();
+        piVar16 = (int *)C_game::GetCameraModule(pCVar13);
+        (**(code **)(*piVar16 + 100))(0,local_50);
+        piVar16 = (int *)GetSoundModule();
+        (**(code **)(*piVar16 + 0x54))(auStack_58);
+      }
+    }
+switchD_0077bd77_caseD_46:
+    if (((uint8_t)g_gameRole & 2) != 0) {
+      pCVar17 = (C_Team *)field_address_1c_461410(0x89ae78);
+      pCVar18 = (C_Human *)C_Team::GetActivePlayer(pCVar17);
+      if (pCVar18 == this->owner) {
+        pCVar13 = GetGame();
+        C_HudPanel__OnInventoryEvent(*(void **)(pCVar13->_pad_001c + 0x40),2,0);
+      }
+    }
+    goto switchD_0077bd77_caseD_25;
+  case 0x4f:
+  case 0x5a:
+    bVar6 = true;
+    pCVar12 = C_Human::FindBeltItem(this->movement->owner,9);
+    pCVar13 = GetGame();
+    uVar14 = C_game::IsHudShown(pCVar13);
+    if (((((char)uVar14 == '\0') && (pCVar12 != nullptr)) &&
+        (iVar15 = pCVar12->m_typeId, -1 < iVar15)) &&
+       ((iVar15 < 500 && ((&DAT_0098b030)[iVar15] != 0)))) {
+      S_SoundRequest__Init(local_50);
+      iVar15 = pCVar12->m_typeId;
+      if ((iVar15 < 0) || (499 < iVar15)) {
+        iVar15 = 0;
+      }
+      else {
+        iVar15 = (&DAT_0098b030)[iVar15];
+      }
+      uStack_30 = (**(code **)(**(int **)(iVar15 + 0x48) + 0x18))();
+      pCVar13 = GetGame();
+      piVar16 = (int *)C_game::GetCameraModule(pCVar13);
+      (**(code **)(*piVar16 + 100))(0,local_50);
+      piVar16 = (int *)GetSoundModule();
+      (**(code **)(*piVar16 + 0x54))(auStack_58);
+    }
+    C_HumanEquipment::SetModel
+              ((this->owner->m_body).equipment,(((this->owner->m_body).work)->request).workingFrame,
+               7,-1,-6,-1);
+    if (this->pendingCarry[0] == 0x5b) {
+      this->pendingCarry[0] = 0x5c;
+    }
+    local_64 = '\x01';
+    break;
+  case 0x50:
+  case 0x51:
+  case 0x52:
+    if (((uint8_t)g_gameRole & 2) != 0) {
+      pCVar17 = (C_Team *)field_address_1c_461410(0x89ae78);
+      pCVar18 = (C_Human *)C_Team::GetActivePlayer(pCVar17);
+      if (pCVar18 == this->owner) {
+        pCVar13 = GetGame();
+        C_HudPanel__OnInventoryEvent(*(void **)(pCVar13->_pad_001c + 0x40),6,0);
+      }
+    }
+    bVar7 = true;
+    bVar5 = true;
+  }
+  if ((0x5a < this->pendingCarry[0]) && (this->pendingCarry[0] != 0x5c)) {
+    this->carryDelay = -10000;
+    goto LAB_0077c4da;
+  }
+  switch((this_00->request).carryMode) {
+  case 0:
+  case 6:
+    pSVar20 = g_carryAnimTables[0];
+    break;
+  case 1:
+    pSVar20 = g_carryAnimTables[1];
+    break;
+  case 2:
+    pSVar20 = g_carryAnimTables[2];
+    break;
+  case 3:
+    pSVar20 = g_carryAnimTables[3];
+    break;
+  case 4:
+    pSVar20 = g_carryAnimTables[4];
+    break;
+  case 5:
+    pSVar20 = g_carryAnimTables[5];
+    break;
+  default:
+    goto switchD_0077c1a2_default;
+  }
+  if ((pSVar20 == nullptr) ||
+     (self = pSVar20[*carry * 3 + carry[1]].anim, self == nullptr)) {
+switchD_0077c1a2_default:
+    this->carryDelay = -10000;
+    goto LAB_0077c4da;
+  }
+  iVar15 = (*self->vtable->GetEndTime)(self);
+  this->carryDelay = iVar15;
+  if (bVar5) {
+    FUN_007b9270(((this->owner->m_body).movement)->weaponPose,iVar15,local_64);
+  }
+  if (local_64 != '\0') {
+    lVar22 = __ftol();
+    this->movement->unknownA24 = (int)lVar22;
+  }
+  if (bVar6) {
+    lVar22 = __ftol();
+    FUN_007b9220(this->movement->weaponPose2,(int)lVar22);
+    if ((((this->owner->m_body).work)->request).stance == 2) {
+      lVar22 = __ftol();
+      pCVar2 = this->movement;
+      pSVar21 = &pCVar2->remoteActions;
+      if ((pCVar2->remoteActions).size == 0) {
+LAB_0077c2ce:
+        FUN_00750940((int)pSVar21);
+        puVar19 = (pCVar2->remoteActions).last.next;
+        (pCVar2->remoteActions).last.next = puVar19 + 3;
+      }
+      else {
+        puVar19 = (pCVar2->remoteActions).last.next;
+        puVar3 = (pCVar2->remoteActions).last.blockLast;
+        if (puVar19 == puVar3) goto LAB_0077c2ce;
+        (pCVar2->remoteActions).last.next = puVar19 + 3;
+        if (puVar19 + 3 == puVar3) {
+          if (puVar19 != nullptr) {
+            *puVar19 = (int)lVar22;
+            uVar14 = 0xe;
+            goto LAB_0077c35f;
+          }
+          goto LAB_0077c36a;
+        }
+      }
+      if (puVar19 != nullptr) {
+        uVar14 = 0xe;
+        *puVar19 = (int)lVar22;
+LAB_0077c425:
+        puVar19[1] = uVar14;
+        puVar19[2] = 1;
+      }
+      goto LAB_0077c430;
+    }
+  }
+  else {
+    if ((bVar7) &&
+       ((pCVar4 = (this->owner->m_body).work, (pCVar4->request).stance == 2 ||
+        ((pCVar4->request).carryMode == 5)))) {
+      lVar22 = __ftol();
+      pCVar2 = this->movement;
+      pSVar21 = &pCVar2->remoteActions;
+      if ((pCVar2->remoteActions).size == 0) {
+LAB_0077c376:
+        FUN_00750940((int)pSVar21);
+        puVar19 = (pCVar2->remoteActions).last.next;
+        (pCVar2->remoteActions).last.next = puVar19 + 3;
+      }
+      else {
+        puVar19 = (pCVar2->remoteActions).last.next;
+        puVar3 = (pCVar2->remoteActions).last.blockLast;
+        if (puVar19 == puVar3) goto LAB_0077c376;
+        (pCVar2->remoteActions).last.next = puVar19 + 3;
+        if (puVar19 + 3 == puVar3) {
+          if (puVar19 != nullptr) {
+            *puVar19 = (int)lVar22;
+            uVar14 = 0xd;
+LAB_0077c35f:
+            puVar19[1] = uVar14;
+            puVar19[2] = 1;
+          }
+LAB_0077c36a:
+          FUN_00750940((int)pSVar21);
+          goto LAB_0077c430;
+        }
+      }
+      if (puVar19 != nullptr) {
+        uVar14 = 0xd;
+        *puVar19 = (int)lVar22;
+        goto LAB_0077c425;
+      }
+    }
+    else {
+      if ((!bVar8) || ((((this->owner->m_body).work)->request).stance != 2)) goto LAB_0077c433;
+      lVar22 = __ftol();
+      pCVar2 = this->movement;
+      pSVar21 = &pCVar2->remoteActions;
+      if ((pCVar2->remoteActions).size == 0) {
+LAB_0077c406:
+        FUN_00750940((int)pSVar21);
+        puVar19 = (pCVar2->remoteActions).last.next;
+        (pCVar2->remoteActions).last.next = puVar19 + 3;
+      }
+      else {
+        puVar19 = (pCVar2->remoteActions).last.next;
+        puVar3 = (pCVar2->remoteActions).last.blockLast;
+        if (puVar19 == puVar3) goto LAB_0077c406;
+        (pCVar2->remoteActions).last.next = puVar19 + 3;
+        if (puVar19 + 3 == puVar3) {
+          if (puVar19 != nullptr) {
+            uVar14 = 0xf;
+            *puVar19 = (int)lVar22;
+            goto LAB_0077c35f;
+          }
+          goto LAB_0077c36a;
+        }
+      }
+      if (puVar19 != nullptr) {
+        *puVar19 = (int)lVar22;
+        uVar14 = 0xf;
+        goto LAB_0077c425;
+      }
+    }
+LAB_0077c430:
+    pSVar21->size = pSVar21->size + 1;
+  }
+LAB_0077c433:
+  if (this->pendingCarry[0] == 0x5c) {
+    lVar22 = __ftol();
+    iVar15 = (int)lVar22;
+  }
+  else {
+    lVar22 = __ftol();
+    this->carryDelay = (int)lVar22;
+    lVar22 = __ftol();
+    iVar15 = (int)lVar22;
+  }
+  this->carryDelay = iVar15;
+  iVar15 = *carry;
+  if (((iVar15 == 0x22) || (iVar15 == 0x23)) || (iVar15 == 0x24)) {
+    lVar22 = __ftol();
+    this->movement->unknownA1C = (int)lVar22;
+  }
+LAB_0077c4da:
+  this_00->forced = true;
+  C_HumanWork::SetCarryMode(this_00,iVar1,false);
+  this_00->forced = false;
+  if (this->carryDelay != -10000) {
+    this_00->blocked = this_00->blocked | this->carryBlocked;
+  }
+}
+
+// 0x0077c5a0
+void __thiscall C_HumanAnimPlayer::OnActivityStarted(C_HumanAnimPlayer *this,int *activity,int *old)
+{
+  local_4 = (I3D_frame_vtbl *)g_activityAnimTable;
+  pCVar3 = (this->owner->m_body).work;
+  if (this->activityDelay != -10000) {
+    return;
+  }
+  if ((*old == 0x4b) || (bVar5 = IsSingleStageActivity(*old), bVar5)) {
+    this->pendingActivity[0] = 0x4c;
+    C_HumanWork::PlayWorkAnimation((this->owner->m_body).work,0x4b,true);
+  }
+  else {
+    iVar10 = old[1];
+    this->pendingActivity[0] = *old;
+    this->pendingActivity[1] = iVar10;
+  }
+  this->pendingActivity[1] = (pCVar3->request).stance;
+  this->unknown58 = -10000;
+  iVar10 = *activity;
+  switch(iVar10) {
+  case 0x11:
+    pIVar6 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,7);
+    if ((pIVar6 == nullptr) && (pIVar6 = GetActivityProp(2), pIVar6 != nullptr)) {
+      pIVar6 = (I3D_frame *)I3DGetDriver();
+      pIVar6 = (*pIVar6->vtable->Slot54)(pIVar6,9);
+      pIVar4 = pIVar6->vtable;
+      pIVar7 = GetActivityProp(2);
+      (*pIVar4->Duplicate)(pIVar6,pIVar7);
+      ((this->owner->m_body).equipment)->m_unknown2c = false;
+      C_HumanEquipment::SetModel((this->owner->m_body).equipment,pIVar6,7,-1,-3,-1);
+      C_HumanEquipment::OnAnimationEvent((this->owner->m_body).equipment,0xb);
+      ((this->owner->m_body).equipment)->m_unknown2c = true;
+    }
+    this->pendingActivity[0] = 0x12;
+    break;
+  case 0x12:
+    C_HumanAnimMixer::SetTrackTag(&this->movement->mixer,2,0x54);
+    pCVar3 = (this->owner->m_body).work;
+    if ((pCVar3->request).activity == 0x11) {
+      pCVar3->forced = true;
+      C_HumanWork::PlayWorkAnimation((this->owner->m_body).work,0x4b,true);
+      ((this->owner->m_body).work)->forced = false;
+    }
+    break;
+  default:
+    if ((iVar10 < 0x1e) || (0x33 < iVar10)) goto LAB_0077c9dd;
+    break;
+  case 0x16:
+    pCVar3 = (this->owner->m_body).work;
+    pCVar3->blocked = pCVar3->blocked | 1;
+    puVar1 = &((this->owner->m_body).work)->blocked;
+    *puVar1 = *puVar1 | 8;
+  case 0x17:
+    C_HumanEquipment::SetModel
+              ((this->owner->m_body).equipment,(((this->owner->m_body).work)->request).workingFrame,
+               6,-1,-7,-1);
+    C_HumanEquipment::OnAnimationEvent((this->owner->m_body).equipment,9);
+    C_HumanEquipment::SetHolster4Visible((this->owner->m_body).equipment,false);
+    pCVar3 = (this->owner->m_body).work;
+    pCVar3->bodyFlags = pCVar3->bodyFlags | 0x200;
+    if ((((this->owner->m_body).work)->request).activity != 0x41) {
+      iVar10 = 0x55;
+      goto LAB_0077c9df;
+    }
+    this->pendingActivity[0] = 0x41;
+    C_HumanAnimMixer::SetTrackTag(&this->movement->mixer,2,0x53);
+    ((this->owner->m_body).work)->forced = true;
+    C_HumanWork::PlayWorkAnimation((this->owner->m_body).work,0x4b,true);
+    ((this->owner->m_body).work)->forced = false;
+    break;
+  case 0x19:
+    pIVar6 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,7);
+    if ((pIVar6 == nullptr) && (pIVar6 = GetActivityProp(0), pIVar6 != nullptr)) {
+      pIVar6 = (I3D_frame *)I3DGetDriver();
+      pIVar6 = (*pIVar6->vtable->Slot54)(pIVar6,9);
+      pIVar4 = pIVar6->vtable;
+      pIVar7 = GetActivityProp(0);
+      (*pIVar4->Duplicate)(pIVar6,pIVar7);
+      C_HumanEquipment::SetModel((this->owner->m_body).equipment,pIVar6,7,-1,-2,-1);
+      C_HumanEquipment::OnAnimationEvent((this->owner->m_body).equipment,0xb);
+    }
+    C_HumanAnimMixer::SetTrackTag(&this->movement->mixer,2,0x50);
+    C_HumanWork::PlayWorkAnimation((this->owner->m_body).work,0x4b,true);
+    return;
+  case 0x1a:
+    this->pendingActivity[0] = 0x19;
+LAB_0077c9dd:
+    iVar10 = 0x51;
+    goto LAB_0077c9df;
+  case 0x1c:
+    pIVar6 = GetActivityProp(1);
+    if (pIVar6 != nullptr) {
+      pIVar6 = (I3D_frame *)I3DGetDriver();
+      pIVar6 = (*pIVar6->vtable->Slot54)(pIVar6,9);
+      local_4 = pIVar6->vtable;
+      pIVar7 = GetActivityProp(1);
+      (*local_4->Duplicate)(pIVar6,pIVar7);
+      C_HumanEquipment::SetModel((this->owner->m_body).equipment,pIVar6,7,-1,-1,-1);
+    }
+    iVar10 = 0x50;
+    goto LAB_0077c9df;
+  case 0x1d:
+    C_HumanEquipment::SetModel
+              ((this->owner->m_body).equipment,(((this->owner->m_body).work)->request).workingFrame,
+               7,-1,-4,-1);
+    iVar10 = 0x52;
+LAB_0077c9df:
+    C_HumanAnimMixer::SetTrackTag(&this->movement->mixer,2,iVar10);
+    break;
+  case 0x34:
+  case 0x41:
+  case 0x42:
+  case 0x47:
+  case 0x48:
+  case 0x4a:
+    goto switchD_0077c62f_caseD_34;
+  case 0x46:
+    C_HumanAnimMixer::HoldTrackAt(&this->movement->mixer,2,0.5);
+    return;
+  case 0x49:
+    psVar2 = &((((this->owner->m_body).work)->request).workingFrame)->m_refCount;
+    *psVar2 = *psVar2 + 1;
+    C_HumanEquipment::SetModel
+              ((this->owner->m_body).equipment,(((this->owner->m_body).work)->request).workingFrame,
+               7,-1,-8,-1);
+    C_HumanEquipment::OnAnimationEvent((this->owner->m_body).equipment,0xb);
+    C_HumanWork::PlayWorkAnimation((this->owner->m_body).work,0x4b,true);
+    C_HumanAnimMixer::SetTrackTag(&this->movement->mixer,2,0x53);
+    cVar9 = '\0';
+    this_00 = ((this->owner->m_body).movement)->weaponPose;
+    GetActivityAnimLength(0x49,(pCVar3->request).stance);
+    lVar8 = __ftol();
+    FUN_007b9270(this_00,(int)lVar8,cVar9);
+  }
+  if ((((this->pendingActivity[0] < 0x4b) || (this->pendingActivity[0] == 0x4c)) &&
+      (local_4 != nullptr)) &&
+     (self = (I3D_animation_set *)(&local_4->SetPos)[(*activity * 3 + activity[1]) * 3],
+     self != nullptr)) {
+    iVar10 = (*self->vtable->GetEndTime)(self);
+    this->activityDelay = iVar10;
+    if ((this->pendingActivity[0] != 0x41) && (*activity != 0x49)) {
+      lVar8 = __ftol();
+      this->activityDelay = (int)lVar8;
+      return;
+    }
+    lVar8 = __ftol();
+    this->activityDelay = (int)lVar8;
+    return;
+  }
+  this->activityDelay = -10000;
+switchD_0077c62f_caseD_34:
+}
+
+// 0x0077caf0
+void __thiscall
+C_HumanAnimPlayer::AdjustAnimRequest
+          (C_HumanAnimPlayer *this,S_HumanAnimRef *current,S_HumanAnimRef *next)
+{
+  pCVar1 = this->movement;
+  pCVar2 = (this->owner->m_body).work;
+  if ((pCVar1->handsCarryState == 2) || (pCVar1->handsCarryState == 3)) {
+    bVar5 = true;
+  }
+  else {
+    bVar5 = false;
+  }
+  iVar3 = (pCVar1->animState).carryAnim;
+  if (((iVar3 < 0x46) || (0x4f < iVar3)) && ((iVar3 < 0x50 || (0x52 < iVar3)))) {
+    bVar6 = false;
+  }
+  else {
+    bVar6 = true;
+  }
+  iVar3 = next->anim;
+  if ((((0x69 < iVar3) && (iVar3 < 0x6d)) || (iVar3 == 8)) || (iVar3 == 0xe)) {
+    if (iVar3 != 0x6b) {
+      return;
+    }
+    if ((next->sub != 2) && ((pCVar2->request).gait != 5)) {
+      return;
+    }
+    next->anim = 0x6c;
+    S_HumanAnimRef::Normalize(next);
+    return;
+  }
+  if (pCVar1->useState != -10000) {
+    return;
+  }
+  if ((iVar3 < 0x29) || (0x41 < iVar3)) {
+LAB_0077cc82:
+    if (bVar6) goto LAB_0077ccaf;
+  }
+  else {
+    if (((((pCVar2->request).unknown5C != 0) && ((pCVar2->request).carryMode != 6)) &&
+        ((bVar5 || (current->anim == 0x21)))) || (bVar6)) {
+      iVar4 = next->stance;
+      pSVar7 = next;
+      if (iVar4 == 0) {
+        if (((iVar3 != 0x36) && (iVar3 != 0x2c)) && (iVar3 != 0x2b)) {
+          next->anim = 0x36;
+          goto LAB_0077cc7d;
+        }
+      }
+      else if (iVar4 == 1) {
+        if (iVar3 != 0x3e) {
+          next->anim = 0x3e;
+          goto LAB_0077cc7d;
+        }
+      }
+      else if ((iVar4 == 2) && (g_apNextAnim.anim != 0x41)) {
+        g_apNextAnim.anim = 0x41;
+        pSVar7 = &g_apNextAnim;
+LAB_0077cc7d:
+        S_HumanAnimRef::Normalize(pSVar7);
+      }
+      goto LAB_0077cc82;
+    }
+    iVar4 = current->stance;
+    if (iVar4 == 0) {
+      if (iVar3 == 0x36) {
+        next->anim = 0x2d;
+        S_HumanAnimRef::Normalize(next);
+      }
+    }
+    else if (iVar4 == 1) {
+      if (iVar3 == 0x3e) {
+        next->anim = 0x37;
+        S_HumanAnimRef::Normalize(next);
+      }
+    }
+    else if ((iVar4 == 2) && (g_apNextAnim.anim == 0x41)) {
+      g_apNextAnim.anim = 0x3f;
+      S_HumanAnimRef::Normalize(&g_apNextAnim);
+    }
+  }
+  if ((pCVar2->request).unknown5C == 0) {
+    return;
+  }
+  if ((pCVar2->request).carryMode == 6) {
+    return;
+  }
+  if (this->movement->unknown1AC != 1) {
+    return;
+  }
+LAB_0077ccaf:
+  iVar3 = next->anim;
+  if ((iVar3 < 0xbe) || (0xcd < iVar3)) {
+    iVar4 = current->anim;
+    if ((0xbd < iVar4) && ((iVar4 < 0xce && (iVar3 == 0xce)))) {
+      if (iVar4 < 0xc6) {
+        if (bVar6) {
+          next->anim = iVar4 + 8;
+          S_HumanAnimRef::Normalize(next);
+        }
+      }
+      else if (!bVar6) {
+        next->anim = iVar4 - 8;
+        S_HumanAnimRef::Normalize(next);
+        return;
+      }
+    }
+  }
+  else if (bVar6) {
+    next->anim = iVar3 + 8;
+    S_HumanAnimRef::Normalize(next);
+    return;
+  }
+}
+
+// 0x0077cd30
+void __thiscall
+C_HumanAnimPlayer::AdjustCarryRequest(C_HumanAnimPlayer *this,S_HumanAnimRef *current,int *activity)
+{
+  pCVar1 = this->movement;
+  iVar2 = (pCVar1->nextAnimState).carryAnim;
+  this_00 = (this->owner->m_body).work;
+  if ((iVar2 != 0x5c) && (pCVar1->unknown1AC == 1)) {
+    iVar3 = current->anim;
+    if ((((iVar3 < 0) || (((0x28 < iVar3 || (iVar3 == 9)) || (iVar3 == 10)))) &&
+        ((iVar3 != 0x38 && (iVar3 != 0x67)))) ||
+       ((pCVar1->handsCarryState < 2 || (((iVar2 == 0x22 || (iVar3 == 0x1a)) || (iVar3 == 0x1b))))))
+    {
+      if (((iVar3 < 0x6a) || (0x6c < iVar3)) &&
+         ((iVar3 < 0x59 || (((0x5d < iVar3 || (iVar2 == 0x22)) || (iVar2 == 0x23)))))) {
+        iVar4 = pCVar1->handsCarryState;
+        if ((iVar4 == 3) || (iVar4 == 4)) {
+          if (((this_00->request).stance == 2) &&
+             (((((iVar3 != 0x21 && (iVar3 != 0x1f)) &&
+                ((iVar2 != 0x22 && ((iVar2 != 0x23 && (iVar2 != 0x24)))))) &&
+               ((iVar4 = (pCVar1->animState).anim.anim, iVar4 < 0x29 || (0x41 < iVar4)))) &&
+              ((iVar3 < 0xa2 || (0xa5 < iVar3)))))) {
+            (pCVar1->nextAnimState).carryAnim = 0x5c;
+            C_HumanEquipment::OnAnimationEvent((this->owner->m_body).equipment,1);
+            this->movement->handsCarryState = 4;
+          }
+          else if ((iVar3 != 0xce) && (iVar2 != 0x22)) {
+            if (((this_00->request).action == 0) || ((this_00->request).carryMode == 6)) {
+              iVar2 = *activity;
+              if ((((iVar2 < 8) || (0x1d < iVar2)) && ((iVar2 < 0x34 || (0x4a < iVar2)))) ||
+                 (iVar2 == 0x4a)) {
+                if (pCVar1->unknownA24 == 1) {
+                  pCVar1->unknownA24 = 0;
+                }
+                else if (pCVar1->unknownA24 == 0) {
+                  uVar5 = this_00->bodyFlags;
+                  this_00->bodyFlags = uVar5 | 8;
+                  if ((((this->movement->animState).carryAnim == 0x20) ||
+                      ((this_00->request).carryMode == 6)) && (this->movement->unknownA28 == 0)) {
+                    this_00->bodyFlags = uVar5 | 0x108;
+                  }
+                  if (((((this->movement->nextAnimState).carryAnim < 0x21) &&
+                       (iVar2 = (this_00->request).carryMode, iVar2 != 6)) && (iVar2 != 2)) &&
+                     ((iVar2 = (this->movement->animState).carryAnim, iVar2 < 0x50 || (0x52 < iVar2)
+                      ))) {
+                    C_HumanEquipment::OnAnimationEvent((this->owner->m_body).equipment,0);
+                  }
+                }
+              }
+              else if (pCVar1->unknownA24 == 0) {
+                if ((this_00->request).carryMode != 6) {
+                  C_HumanEquipment::OnAnimationEvent((this->owner->m_body).equipment,1);
+                }
+                lVar7 = __ftol();
+                this->movement->unknownA24 = (int)lVar7;
+              }
+              iVar2 = (this_00->request).carryMode;
+              if (((iVar2 == 6) ||
+                  (pCVar6 = this->owner, (((pCVar6->m_body).equipment)->m_flags & 1) != 0)) ||
+                 (iVar2 == 100)) {
+                iVar2 = (this->movement->animState).anim.anim;
+                if ((0x28 < iVar2) && (iVar2 < 0x42)) {
+                  ReturnToStand(this);
+                }
+              }
+              else if (iVar2 != 0) {
+                iVar3 = (this_00->request).unknown5C;
+                if (iVar3 == 0) {
+                  if (pCVar6->m_role == 1) {
+                    (this->movement->nextAnimState).carryAnim = 0x1e;
+                  }
+                  else {
+                    (this->movement->nextAnimState).carryAnim = 0x1f;
+                  }
+                  this->movement->handsCarryState = 3;
+                  iVar2 = (this->movement->animState).anim.anim;
+                  if ((0x28 < iVar2) && (iVar2 < 0x42)) {
+                    ReturnToStand(this);
+                  }
+                }
+                else if (iVar3 == 1) {
+                  if ((iVar2 == 5) && ((this_00->request).stance == 2)) {
+                    if (pCVar6->m_role == 1) {
+                      (this->movement->nextAnimState).carryAnim = 0x1e;
+                      this->movement->handsCarryState = 3;
+                    }
+                    else {
+                      (this->movement->nextAnimState).carryAnim = 0x1f;
+                      this->movement->handsCarryState = 3;
+                    }
+                  }
+                  else {
+                    (this->movement->nextAnimState).carryAnim = 0x20;
+                    this->movement->handsCarryState = 3;
+                    iVar2 = (this->movement->animState).anim.anim;
+                    if ((0x28 < iVar2) && (((iVar2 < 0x42 && (iVar2 != 0x2c)) && (iVar2 != 0x2b))))
+                    {
+                      iVar3 = (this->movement->animState).anim.stance;
+                      if (iVar3 == 0) {
+                        if (iVar2 != 0x36) {
+                          C_HumanWork::Play(this_00,0x36,true);
+                        }
+                      }
+                      else if (iVar3 == 1) {
+                        if (iVar2 != 0x3e) {
+                          C_HumanWork::Play(this_00,0x3e,true);
+                        }
+                      }
+                      else if ((iVar3 == 2) && (iVar2 != 0x41)) {
+                        C_HumanWork::Play(this_00,0x41,true);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            else if ((iVar2 != 0x22) && ((this_00->request).action < 3)) {
+              uVar5 = this_00->bodyFlags;
+              this_00->bodyFlags = uVar5 | 8;
+              if ((((this->movement->animState).carryAnim == 0x20) ||
+                  ((this_00->request).carryMode == 6)) && (this->movement->unknownA28 == 0)) {
+                this_00->bodyFlags = uVar5 | 0x108;
+              }
+            }
+          }
+        }
+        else if ((iVar4 == 0) && ((pCVar1->animState).carryAnim == 0x5b)) {
+          ReturnToStand(this);
+        }
+      }
+    }
+    else {
+      (pCVar1->nextAnimState).carryAnim = 0x5c;
+      this->movement->handsCarryState = 4;
+      C_HumanEquipment::OnAnimationEvent((this->owner->m_body).equipment,1);
+    }
+  }
+  pCVar1 = this->movement;
+  if (((pCVar1->nextAnimState).carryAnim == 0x23) && ((pCVar1->unknown190 & 1) == 0)) {
+    (pCVar1->nextAnimState).carryAnim = 0x24;
+  }
+}
+
+// 0x0077d190
+void __thiscall
+C_HumanAnimPlayer::AdjustActivityRequest
+          (C_HumanAnimPlayer *this,S_HumanAnimRef *current,int *carry,int *next)
+{
+  iVar1 = *next;
+  if (iVar1 == 0x13) {
+    *next = 0x4c;
+    C_HumanEquipment::SetFlashlight((this->owner->m_body).equipment,false);
+    C_HumanEquipment::OnAnimationEvent((this->owner->m_body).equipment,10);
+    C_HumanAnimMixer::SetTrackTag(&this->movement->mixer,2,-1);
+    this->unknown58 = -10000;
+    this->activityDelay = -10000;
+  }
+  else {
+    if (iVar1 == 0x3d) {
+      *next = 0x4c;
+      ((this->owner->m_body).work)->forced = true;
+      C_HumanWork::PlayWorkAnimation((this->owner->m_body).work,0x4b,true);
+      ((this->owner->m_body).work)->forced = false;
+      return;
+    }
+    if (iVar1 == 0x41) {
+      this_01 = C_Human::FindBeltItem(this->owner,0xe);
+      if (this_01 != nullptr) {
+        cVar3 = '\x01';
+        this_00 = (this->owner->m_body).work;
+        pIVar2 = C_Item::GetFrame(this_01,0);
+        C_HumanWork::SetWorkingFrame(this_00,(int)pIVar2,cVar3);
+      }
+      *next = 0x17;
+      return;
+    }
+  }
+}
+
+// 0x0077d270
+void __thiscall
+C_HumanAnimPlayer::PlayAnimation(C_HumanAnimPlayer *this,char *name,int a,int b,int c)
+{
+  pcVar6 = name;
+  local_20 = nullptr;
+  local_24.rep = nullptr;
+  local_28.rep = nullptr;
+  uStack_3 = 0;
+  uVar4 = uStack_3;
+  uStack_3 = 0;
+  local_1c = this;
+  if (this->movement->unknown1AC != 1) {
+    C_HumanAnimMixer::FadeOutTrack3(&this->movement->mixer,a);
+    if ((local_28.rep != nullptr) &&
+       ((local_28.rep)->refCount = (int)((C_str_rep *)(local_28.rep)->refCount)[-1].chars,
+       (C_str_rep *)(local_28.rep)->refCount == nullptr)) {
+      operator_delete(local_28.rep);
+    }
+    goto LAB_0077d779;
+  }
+  if ((name == nullptr) || (ExceptionList = &local_c, uVar4 = uStack_3, *name == '\0')) {
+LAB_0077d6f5:
+    uStack_3 = uVar4;
+    C_HumanAnimMixer::FadeOutTrack3(&local_1c->movement->mixer,a);
+  }
+  else {
+    uVar8 = 0xffffffff;
+    do {
+      if (uVar8 == 0) break;
+      uVar8--;
+      cVar1 = *name;
+      name++;
+    } while (cVar1 != '\0');
+    pcVar9 = (char *)(~uVar8 - 1);
+    name = pcVar9;
+    local_18 = operator_new(~uVar8 + 8);
+    if (local_18 == nullptr) {
+      pCVar5 = nullptr;
+    }
+    else {
+      pCVar5 = (C_str_rep *)C_str::CreateRep(local_18,(uint32_t *)pcVar6,(uint32_t)pcVar9);
+    }
+    if (local_24.rep != nullptr) {
+      C_str::ReleaseRep((C_str *)local_24.rep);
+    }
+    puVar2 = PTR_0084e9f8;
+    local_24.rep = pCVar5;
+    if (pCVar5 == nullptr) {
+      C_str::operator_assign(&local_24,PTR_0084e9f8);
+    }
+    else {
+      uVar8 = 0xffffffff;
+      pcVar6 = (char *)pCVar5->length;
+      pcVar9 = PTR_0084e9f8;
+      do {
+        if (uVar8 == 0) break;
+        uVar8--;
+        cVar1 = *pcVar9;
+        pcVar9++;
+      } while (cVar1 != '\0');
+      pCVar11 = (C_str *)(~uVar8 - 1);
+      name = pcVar6;
+      local_18 = pCVar11;
+      local_14 = operator_new((uint32_t)((int)&pCVar11->rep + (int)(pcVar6 + 9)));
+      if (local_14 == nullptr) {
+        pCVar5 = nullptr;
+      }
+      else {
+        pCVar5 = (C_str_rep *)
+                 C_str::CreateConcatRep
+                           (local_14,(uint32_t *)(local_24.rep)->chars,(uint32_t *)puVar2,
+                            (uint32_t)pcVar6,(uint32_t)pCVar11);
+      }
+      C_str::ReleaseRep((C_str *)local_24.rep);
+      local_24.rep = pCVar5;
+    }
+    pcVar6 = (local_24.rep)->chars;
+    if (local_24.rep == nullptr) {
+      pcVar6 = &DAT_00867a90;
+    }
+    iVar7 = C_AnimationCache::AnimationCacheBase_Get
+                      ((C_AnimationCache *)&g_animationCache,(uint8_t *)pcVar6,(int *)&local_20,
+                       nullptr,0);
+    uVar8 = 0xffffffff;
+    pcVar6 = "Neuspesny pokus nastavit specialni animaci:  ";
+    do {
+      if (uVar8 == 0) break;
+      uVar8--;
+      cVar1 = *pcVar6;
+      pcVar6++;
+    } while (cVar1 != '\0');
+    pcVar6 = (char *)(~uVar8 - 1);
+    name = pcVar6;
+    local_14 = operator_new(~uVar8 + 8);
+    if (local_14 == nullptr) {
+      pCVar5 = nullptr;
+    }
+    else {
+      pCVar5 = (C_str_rep *)
+               C_str::CreateRep(local_14,(uint32_t *)"Neuspesny pokus nastavit specialni animaci:  ",
+                                (uint32_t)pcVar6);
+    }
+    if (local_28.rep != nullptr) {
+      C_str::ReleaseRep((C_str *)local_28.rep);
+    }
+    local_28.rep = pCVar5;
+    if (pCVar5 == nullptr) {
+      C_str::Assign(&local_28,&local_24);
+    }
+    else {
+      pcVar6 = (char *)pCVar5->length;
+      if (local_24.rep == nullptr) {
+        pCVar11 = nullptr;
+      }
+      else {
+        pCVar11 = (C_str *)(local_24.rep)->length;
+      }
+      name = pcVar6;
+      local_14 = pCVar11;
+      local_18 = operator_new((uint32_t)(pcVar6 + (int)((int)&pCVar11[2].rep + 1)));
+      if (local_18 == nullptr) {
+        pCVar5 = nullptr;
+      }
+      else {
+        pCVar5 = (C_str_rep *)
+                 C_str::CreateConcatRep
+                           (local_18,(uint32_t *)(local_28.rep)->chars,
+                            (uint32_t *)(local_24.rep)->chars,(uint32_t)pcVar6,(uint32_t)pCVar11);
+      }
+      C_str::ReleaseRep((C_str *)local_28.rep);
+      local_28.rep = pCVar5;
+    }
+    switch(iVar7) {
+    case -0x7fffffff:
+      if (local_28.rep == nullptr) {
+        C_str::operator_assign(&local_28," - I3DERR_NOFILE");
+      }
+      else {
+        pCVar11 = (C_str *)(local_28.rep)->length;
+        uVar8 = 0xffffffff;
+        pcVar6 = " - I3DERR_NOFILE";
+        do {
+          if (uVar8 == 0) break;
+          uVar8--;
+          cVar1 = *pcVar6;
+          pcVar6++;
+        } while (cVar1 != '\0');
+        pCVar10 = (C_str *)(~uVar8 - 1);
+        local_18 = pCVar10;
+        local_14 = pCVar11;
+        this_00 = operator_new((uint32_t)((int)&pCVar10->rep + (int)((int)&pCVar11[2].rep + 1)));
+        _local_4 = CONCAT31(uStack_3,6);
+        if (this_00 != nullptr) {
+          pcVar6 = " - I3DERR_NOFILE";
+          goto LAB_0077d52b;
+        }
+LAB_0077d5f0:
+        pCVar5 = nullptr;
+LAB_0077d5f2:
+        C_str::ReleaseRep((C_str *)local_28.rep);
+        local_28.rep = pCVar5;
+      }
+      break;
+    case -0x7ffffffe:
+      if (local_28.rep != nullptr) {
+        pCVar11 = (C_str *)(local_28.rep)->length;
+        uVar8 = 0xffffffff;
+        pcVar6 = " - I3DERR_OUTOFMEM";
+        do {
+          if (uVar8 == 0) break;
+          uVar8--;
+          cVar1 = *pcVar6;
+          pcVar6++;
+        } while (cVar1 != '\0');
+        pCVar10 = (C_str *)(~uVar8 - 1);
+        local_14 = pCVar10;
+        this_00 = operator_new((uint32_t)((int)&pCVar10->rep + (int)((int)&pCVar11[2].rep + 1)));
+        _local_4 = CONCAT31(uStack_3,7);
+        local_18 = this_00;
+        if (this_00 == nullptr) goto LAB_0077d5f0;
+        pcVar6 = " - I3DERR_OUTOFMEM";
+LAB_0077d52b:
+        pCVar5 = (C_str_rep *)
+                 C_str::CreateConcatRep
+                           (this_00,(uint32_t *)(local_28.rep)->chars,(uint32_t *)pcVar6,
+                            (uint32_t)pCVar11,(uint32_t)pCVar10);
+        goto LAB_0077d5f2;
+      }
+      C_str::operator_assign(&local_28," - I3DERR_OUTOFMEM");
+      break;
+    case -0x7ffffffd:
+      if (local_28.rep != nullptr) {
+        pCVar11 = (C_str *)(local_28.rep)->length;
+        uVar8 = 0xffffffff;
+        pcVar6 = " - I3DERR_BADTEXTUREFORMAT";
+        do {
+          if (uVar8 == 0) break;
+          uVar8--;
+          cVar1 = *pcVar6;
+          pcVar6++;
+        } while (cVar1 != '\0');
+        pCVar10 = (C_str *)(~uVar8 - 1);
+        local_14 = pCVar10;
+        this_00 = operator_new((uint32_t)((int)&pCVar10->rep + (int)((int)&pCVar11[2].rep + 1)));
+        _local_4 = CONCAT31(uStack_3,8);
+        local_18 = this_00;
+        if (this_00 == nullptr) goto LAB_0077d5f0;
+        pcVar6 = " - I3DERR_BADTEXTUREFORMAT";
+        goto LAB_0077d52b;
+      }
+      C_str::operator_assign(&local_28," - I3DERR_BADTEXTUREFORMAT");
+      break;
+    case -0x7ffffffc:
+      FUN_005d7070(&local_28," - I3DERR_BADTEXTURE");
+      break;
+    case -0x7ffffffb:
+      FUN_005d7070(&local_28," - I3DERR_GENERIC");
+      break;
+    default:
+      FUN_00409f20(&local_28,&name,(uint8_t *)" - Unknown error");
+      if (name != nullptr) {
+        C_str::ReleaseRep((C_str *)name);
+      }
+      break;
+    case -0x7ffffff6:
+      FUN_005d7070(&local_28," - I3DERR_FILECORRUPTED");
+      break;
+    case -0x7ffffff4:
+      FUN_005d7070(&local_28," - I3DERR_CYCLICLINK");
+      break;
+    case -0x7ffffff3:
+      FUN_005d7070(&local_28," - I3DERR_CANCELED");
+      break;
+    case -0x7ffffff2:
+      FUN_005d7070(&local_28," - I3DERR_UNSUPPORTED");
+      break;
+    case -0x7fffffef:
+      FUN_005d7070(&local_28," - I3DERR_USERBREAK");
+      break;
+    case -0x7fffffee:
+      FUN_005d7070(&local_28," - I3DERR_FILESYSTEMERROR");
+      break;
+    case -0x7fffffed:
+      FUN_005d7070(&local_28," - I3DERR_BADFILEVERSION");
+      break;
+    case -0x7fffffec:
+      FUN_005d7070(&local_28," - I3DERR_BADFILETIME");
+      break;
+    case -0x7fffffeb:
+      FUN_005d7070(&local_28," - I3DERR_OUTOFLIMIT");
+    }
+    pCVar3 = local_1c;
+    uVar4 = uStack_3;
+    if (local_20 == nullptr) goto LAB_0077d6f5;
+    C_HumanAnimMixer::PlayTrack3(&local_1c->movement->mixer,local_20,a,b,SUB41(c,0));
+    g_apStartAnims[0].anim = nullptr;
+    g_apStartAnims[1].anim = nullptr;
+    g_apStartAnims[2].anim = nullptr;
+    g_apStartAnims[3].anim = local_20;
+    C_HumanAnimMixer::UpdateStages(&pCVar3->movement->mixer,0,1,true,g_apStartAnims);
+    (*local_20->vtable->Release)(local_20);
+  }
+  if (local_28.rep != nullptr) {
+    C_str::ReleaseRep((C_str *)local_28.rep);
+  }
+LAB_0077d779:
+  if ((local_24.rep != nullptr) &&
+     ((local_24.rep)->refCount = (int)((C_str_rep *)(local_24.rep)->refCount)[-1].chars,
+     (C_str_rep *)(local_24.rep)->refCount == nullptr)) {
+    operator_delete(local_24.rep);
+  }
+}
+
+// 0x0077d800
+void __thiscall C_HumanAnimPlayer::ReturnToStand(C_HumanAnimPlayer *this)
+{
+  pCVar1 = this->movement;
+  iVar2 = (pCVar1->animState).anim.stance;
+  if (iVar2 == 0) {
+    if ((pCVar1->animState).anim.anim == 0x36) {
+      C_HumanWork::Play((this->owner->m_body).work,0x2d,true);
+    }
+  }
+  else if (iVar2 == 1) {
+    if ((pCVar1->animState).anim.anim == 0x3e) {
+      C_HumanWork::Play((this->owner->m_body).work,0x37,true);
+      return;
+    }
+  }
+  else if ((iVar2 == 2) && ((pCVar1->animState).anim.anim == 0x41)) {
+    C_HumanWork::Play((this->owner->m_body).work,0x3f,true);
+    return;
+  }
+}
+
+// 0x0077d870
+void __thiscall C_HumanAnimPlayer::FindHeadDummy(C_HumanAnimPlayer *this)
+{
+  pIVar1 = this->owner->m_frame;
+  pIVar1 = (*pIVar1->vtable->FindChildFrame)(pIVar1,&DAT_0084e938,0x20);
+  this->headDummy = pIVar1;
+}
+
+// 0x0077d890
+void FUN_0077d890(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x0077d8c0
+bool __thiscall C_HumanAnimPlayer::SaveGame(C_HumanAnimPlayer *this,C_chunk *chunk)
+{
+  this_00 = chunk;
+  if (chunk->m_open != false) {
+    local_8 = 0x1bc;
+    iVar1 = dtaSeek(chunk->m_handle,0,1);
+    this_00->m_stack[this_00->m_depth] = iVar1;
+    this_00->m_depth = this_00->m_depth + 1;
+    iVar1 = dtaWrite(this_00->m_handle,&local_8,6);
+    if (iVar1 == 6) {
+      if (this_00->m_open != false) {
+        local_8 = 0;
+        iVar1 = dtaSeek(this_00->m_handle,0,1);
+        this_00->m_stack[this_00->m_depth] = iVar1;
+        this_00->m_depth = this_00->m_depth + 1;
+        dtaWrite(this_00->m_handle,&local_8,6);
+        if (this_00->m_open != false) {
+          if (this_00->m_writing != false) {
+            dtaWrite(this_00->m_handle,&this->pendingAnim,0x10);
+          }
+          if (this_00->m_open != false) {
+            if (this_00->m_writing == false) {
+              iVar1 = this_00->m_stack[this_00->m_depth - 1];
+            }
+            else {
+              iVar1 = dtaSeek(this_00->m_handle,0,1);
+              chunk = (C_chunk *)(iVar1 - this_00->m_stack[this_00->m_depth - 1]);
+              dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+              dtaWrite(this_00->m_handle,&chunk,4);
+            }
+            dtaSeek(this_00->m_handle,iVar1,0);
+            if (this_00->m_depth != 0) {
+              this_00->m_depth = this_00->m_depth - 1;
+            }
+          }
+        }
+      }
+      chunk = (C_chunk *)this->animDelay;
+      C_chunk::WriteChunk(this_00,1,&chunk,4);
+      chunk = (C_chunk *)this->animDelayState;
+      C_chunk::WriteChunk(this_00,2,&chunk,4);
+      chunk = (C_chunk *)this->animBlocked;
+      C_chunk::WriteChunk(this_00,3,&chunk,4);
+      if (this_00->m_open != false) {
+        local_8 = 4;
+        iVar1 = dtaSeek(this_00->m_handle,0,1);
+        this_00->m_stack[this_00->m_depth] = iVar1;
+        this_00->m_depth = this_00->m_depth + 1;
+        dtaWrite(this_00->m_handle,&local_8,6);
+        if (this_00->m_open != false) {
+          if (this_00->m_writing != false) {
+            dtaWrite(this_00->m_handle,this->pendingCarry,0xc);
+          }
+          if (this_00->m_open != false) {
+            iVar1 = this_00->m_handle;
+            if (this_00->m_writing == false) {
+              position = this_00->m_stack[this_00->m_depth - 1];
+            }
+            else {
+              position = dtaSeek(iVar1,0,1);
+              chunk = (C_chunk *)(position - this_00->m_stack[this_00->m_depth - 1]);
+              dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+              dtaWrite(this_00->m_handle,&chunk,4);
+              iVar1 = this_00->m_handle;
+            }
+            dtaSeek(iVar1,position,0);
+            if (this_00->m_depth != 0) {
+              this_00->m_depth = this_00->m_depth - 1;
+            }
+          }
+        }
+      }
+      chunk = (C_chunk *)this->carryDelay;
+      C_chunk::WriteChunk(this_00,5,&chunk,4);
+      chunk = (C_chunk *)this->carryDelayState;
+      C_chunk::WriteChunk(this_00,6,&chunk,4);
+      chunk = (C_chunk *)this->carryBlocked;
+      C_chunk::WriteChunk(this_00,7,&chunk,4);
+      if (this_00->m_open != false) {
+        local_8 = 8;
+        iVar1 = dtaSeek(this_00->m_handle,0,1);
+        this_00->m_stack[this_00->m_depth] = iVar1;
+        this_00->m_depth = this_00->m_depth + 1;
+        dtaWrite(this_00->m_handle,&local_8,6);
+        if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+          dtaWrite(this_00->m_handle,this->pendingActivity,8);
+        }
+      }
+      C_chunk::Ascend(this_00);
+      chunk = (C_chunk *)this->activityDelay;
+      C_chunk::WriteChunk(this_00,9,&chunk,4);
+      chunk = (C_chunk *)this->activityDelayState;
+      C_chunk::WriteChunk(this_00,10,&chunk,4);
+      chunk = (C_chunk *)this->activityBlocked;
+      C_chunk::WriteChunk(this_00,0xb,&chunk,4);
+      chunk = (C_chunk *)this->unknown5C;
+      C_chunk::WriteChunk(this_00,0xc,&chunk,4);
+      chunk = (C_chunk *)this->unknown60;
+      C_chunk::WriteChunk(this_00,0xd,&chunk,4);
+      C_chunk::WriteChunk(this_00,0xe,&this->unknown70,0xc);
+      chunk = (C_chunk *)this->unknown58;
+      C_chunk::WriteChunk(this_00,0xf,&chunk,4);
+      C_chunk::WriteChunk(this_00,0x10,&this->unknown90,0xc);
+      chunk = (C_chunk *)this->unknownA0;
+      C_chunk::WriteChunk(this_00,0x11,&chunk,4);
+      C_chunk::Ascend(this_00);
+      return true;
+    }
+  }
+  return false;
+}
+
+// 0x0077dc90
+bool __thiscall C_HumanAnimPlayer::LoadGame(C_HumanAnimPlayer *this,C_chunk *chunk)
+{
+  C_fstr_Construct(&local_78,&DAT_00867a90);
+  if ((chunk->m_open != false) && (iVar1 = dtaRead(chunk->m_handle,&local_50,6), iVar1 == 6)) {
+    iVar1 = dtaSeek(chunk->m_handle,0,1);
+    chunk->m_stack[chunk->m_depth] = iVar1 - 6 + CONCAT22(uStack_4c,uStack_4e);
+    iVar1 = chunk->m_depth;
+    uStack_74 = CONCAT22(uStack_4e,local_50);
+    chunk->m_depth = iVar1 + 1;
+    if (local_50 == 0x1bc) {
+LAB_0077ddd0:
+      if ((((chunk->m_open == false) || (chunk->m_depth == 0)) ||
+          (iVar1 = dtaSeek(chunk->m_handle,0,1), iVar1 == -1)) ||
+         (iStack_6c = chunk->m_stack[chunk->m_depth - 1] - iVar1, iStack_6c == 0))
+      goto LAB_0077e101;
+      if ((chunk->m_open != false) && (iVar1 = dtaRead(chunk->m_handle,&uStack_48,6), iVar1 == 6)) {
+        iVar1 = dtaSeek(chunk->m_handle,0,1);
+        chunk->m_stack[chunk->m_depth] = iVar1 - 6 + CONCAT22(uStack_44,uStack_46);
+        uStack_74 = CONCAT22(uStack_46,uStack_48);
+        chunk->m_depth = chunk->m_depth + 1;
+      }
+      switch(uStack_74 & 0xffff) {
+      case 0:
+        if (chunk->m_open == false) {
+LAB_0077e101:
+          C_chunk::Ascend(chunk);
+          if (local_78.rep != nullptr) {
+            C_str::ReleaseRep((C_str *)local_78.rep);
+          }
+          return true;
+        }
+        if (chunk->m_writing == false) {
+          if (chunk->m_depth != 0) {
+            iStack_70 = chunk->m_stack[chunk->m_depth - 1];
+            iVar2 = dtaSeek(chunk->m_handle,0,1);
+            iVar1 = iStack_70;
+            iStack_70 = 0;
+            piVar3 = &iStack_70;
+            iStack_6c = iVar1 - iVar2;
+            if (-1 < iVar1 - iVar2) {
+              piVar3 = &iStack_6c;
+            }
+            if (*piVar3 < 0x10) goto LAB_0077ded9;
+          }
+          dtaRead(chunk->m_handle,&this->pendingAnim,0x10);
+        }
+LAB_0077ded9:
+        if (chunk->m_open == false) goto LAB_0077e101;
+        iVar1 = chunk->m_handle;
+        if (chunk->m_writing == false) {
+          iVar2 = chunk->m_stack[chunk->m_depth - 1];
+        }
+        else {
+          iStack_6c = dtaSeek(iVar1,0,1);
+          iStack_68 = iStack_6c - chunk->m_stack[chunk->m_depth - 1];
+          dtaSeek(chunk->m_handle,chunk->m_stack[chunk->m_depth - 1] + 2,0);
+          dtaWrite(chunk->m_handle,&iStack_68,4);
+          iVar1 = chunk->m_handle;
+          iVar2 = iStack_6c;
+        }
+        dtaSeek(iVar1,iVar2,0);
+        if (chunk->m_depth != 0) {
+          chunk->m_depth = chunk->m_depth - 1;
+        }
+        goto LAB_0077ddd0;
+      case 1:
+        C_chunk::Read(chunk,&iStack_64,4);
+        C_chunk::Ascend(chunk);
+        this->animDelay = iStack_64;
+        goto LAB_0077ddd0;
+      case 2:
+        C_chunk::Read(chunk,&iStack_60,4);
+        C_chunk::Ascend(chunk);
+        this->animDelayState = iStack_60;
+        goto LAB_0077ddd0;
+      case 3:
+        C_chunk::Read(chunk,&uStack_5c,4);
+        C_chunk::Ascend(chunk);
+        this->animBlocked = uStack_5c;
+        goto LAB_0077ddd0;
+      case 4:
+        piVar3 = this->pendingCarry;
+        iVar1 = 0xc;
+        break;
+      case 5:
+        C_chunk::Read(chunk,&iStack_58,4);
+        C_chunk::Ascend(chunk);
+        this->carryDelay = iStack_58;
+        goto LAB_0077ddd0;
+      case 6:
+        C_chunk::Read(chunk,&iStack_54,4);
+        C_chunk::Ascend(chunk);
+        this->carryDelayState = iStack_54;
+        goto LAB_0077ddd0;
+      case 7:
+        C_chunk::Read(chunk,&local_50,4);
+        C_chunk::Ascend(chunk);
+        this->carryBlocked = CONCAT22(uStack_4e,local_50);
+        goto LAB_0077ddd0;
+      case 8:
+        piVar3 = this->pendingActivity;
+        iVar1 = 8;
+        break;
+      case 9:
+        iVar1 = FUN_0053b1d0(&chunk->m_open);
+        this->activityDelay = iVar1;
+        goto LAB_0077ddd0;
+      case 10:
+        iVar1 = FUN_0053b1d0(&chunk->m_open);
+        this->activityDelayState = iVar1;
+        goto LAB_0077ddd0;
+      case 0xb:
+        uVar4 = FUN_0053b1d0(&chunk->m_open);
+        this->activityBlocked = uVar4;
+        goto LAB_0077ddd0;
+      case 0xc:
+        iVar1 = FUN_0053b1d0(&chunk->m_open);
+        this->unknown5C = iVar1;
+        goto LAB_0077ddd0;
+      case 0xd:
+        iVar1 = FUN_0053b1d0(&chunk->m_open);
+        this->unknown60 = iVar1;
+        goto LAB_0077ddd0;
+      case 0xe:
+        pfVar5 = (float *)FUN_0055fe60(chunk,auStack_40);
+        pSVar6 = &this->unknown70;
+        goto LAB_0077e0b1;
+      case 0xf:
+        iVar1 = FUN_0053b1d0(&chunk->m_open);
+        this->unknown58 = iVar1;
+        goto LAB_0077ddd0;
+      case 0x10:
+        pfVar5 = (float *)FUN_0055fe60(chunk,auStack_30);
+        pSVar6 = &this->unknown90;
+LAB_0077e0b1:
+        pSVar6->x = *pfVar5;
+        pSVar6->y = pfVar5[1];
+        pSVar6->z = pfVar5[2];
+        pSVar6->w = pfVar5[3];
+        goto LAB_0077ddd0;
+      case 0x11:
+        goto switchD_0077de73_caseD_11;
+      default:
+        goto switchD_0077de73_default;
+      }
+      C_chunk::Read(chunk,piVar3,iVar1);
+switchD_0077de73_default:
+      C_chunk::Ascend(chunk);
+      goto LAB_0077ddd0;
+    }
+    if (chunk->m_open != false) {
+      if (chunk->m_writing == false) {
+        iVar2 = chunk->m_stack[iVar1];
+        iVar1 = chunk->m_handle;
+      }
+      else {
+        iVar2 = dtaSeek(chunk->m_handle,0,1);
+        uStack_74 = iVar2 - chunk->m_stack[chunk->m_depth - 1];
+        dtaSeek(chunk->m_handle,chunk->m_stack[chunk->m_depth - 1] + 2,0);
+        dtaWrite(chunk->m_handle,&uStack_74,4);
+        iVar1 = chunk->m_handle;
+      }
+      dtaSeek(iVar1,iVar2,0);
+      if (chunk->m_depth != 0) {
+        chunk->m_depth = chunk->m_depth - 1;
+      }
+    }
+  }
+  if (local_78.rep != nullptr) {
+    C_str::ReleaseRep((C_str *)local_78.rep);
+  }
+  return false;
+switchD_0077de73_caseD_11:
+  fVar7 = FUN_00482170(&chunk->m_open);
+  this->unknownA0 = (float)fVar7;
+  goto LAB_0077ddd0;
+}
+
+// 0x0077e180
+void __thiscall C_HumanAnimPlayer::Reset(C_HumanAnimPlayer *this)
+{
+  this->animDelayState = 0;
+  this->carryDelayState = 0;
+  this->activityDelayState = 0;
+  this->animDelay = -10000;
+  this->carryDelay = -10000;
+  this->activityDelay = -10000;
+  this->animBlocked = 0x20000;
+  this->carryBlocked = 0x20000;
+  this->activityBlocked = 0x20000;
+  this->unknown58 = -10000;
+  this->unknownA0 = -10000.1;
+}
+
+// 0x0077e190
+void FUN_0077e190(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+

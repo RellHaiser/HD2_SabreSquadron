@@ -1,0 +1,188 @@
+// 0x0078a0e0
+void __thiscall C_HumanLighting::GetLevel(C_HumanLighting *this)
+{
+}
+
+// 0x0078a100
+int __thiscall C_HumanLighting::Init(C_HumanLighting *this)
+{
+  this->level = 1.0;
+  this->unknown08 = 1.0;
+  iVar1 = _rand();
+  this->unknown0C = (float)(iVar1 % 1000 + 0xfa);
+  return iVar1 / 1000;
+}
+
+// 0x0078a130
+int __thiscall
+C_HumanLighting::Unknown78a130(C_HumanLighting *this,int param_1,int param_2,int param_3)
+{
+  switch(param_3) {
+  case 0:
+    puVar4 = (uint8_t *)0xfa;
+    break;
+  case 1:
+    puVar4 = (uint8_t *)0x1f4;
+    break;
+  default:
+    puVar4 = (uint8_t *)0x3e8;
+    break;
+  case 3:
+    puVar4 = &DAT_00989680;
+    break;
+  case 5:
+    puVar4 = (uint8_t *)0x578;
+  }
+  GetLevel(this);
+  if (extraout_ST0 != (long double)this->unknown08) {
+    Unknown78a3c0(this_00,param_2);
+    piVar2 = (int *)GetGEffects();
+    (**(code **)(*piVar2 + 0x54))(param_1,this->unknown08);
+  }
+  fVar1 = this->unknown0C;
+  if ((int)fVar1 < (int)puVar4) {
+    this->unknown0C = (float)((int)fVar1 + param_2);
+    return (int)fVar1 + param_2;
+  }
+  this->unknown0C = (float)((int)fVar1 + param_2);
+  pCVar3 = GetGame();
+  if (((*(int *)(param_1 + 0x11c) != pCVar3->m_scene->m_renderStamp) && (param_2 < 1000)) &&
+     (param_3 != 0)) {
+    this->unknown0C = (float)puVar4;
+    return param_3;
+  }
+  fVar1 = this->unknown0C;
+  this->unknown10 = true;
+  this->unknown0C = (float)((int)fVar1 % (int)puVar4);
+  return (int)fVar1 / (int)puVar4;
+}
+
+// 0x0078a210
+void __thiscall
+C_HumanLighting::Unknown78a210
+          (C_HumanLighting *this,int param_1,int *param_2,uint32_t *param_3,char param_4)
+{
+  if (this->unknown10 == false) {
+    return;
+  }
+  this->unknown10 = false;
+  auStack_28[4] = *(uint8_t *)(param_2 + 0x38) & 1;
+  piVar4 = param_2;
+  (**(code **)(*param_2 + 0x30))(param_2,0);
+  cVar8 = (char)piVar4;
+  if (param_4 == '\0') {
+    if ((uint32_t *)param_2[0x3b] == nullptr) {
+      this_00 = nullptr;
+    }
+    else {
+      this_00 = *(C_Human **)param_2[0x3b];
+    }
+    bVar2 = C_Human::ControllerUnknown5C(this_00);
+    if (!bVar2) {
+      iVar7 = 0;
+      pfVar5 = (long double *)auStack_28;
+      pfVar6 = (float *)param_1;
+      pCVar3 = GetGame();
+      C_game::GetLightIntensity(pCVar3,pfVar5,pfVar6,iVar7,cVar8);
+      fStack_34 = (float)extraout_ST0_01;
+      iVar7 = 1;
+      pfVar5 = (long double *)auStack_28;
+      pCVar3 = GetGame();
+      C_game::GetLightIntensity(pCVar3,pfVar5,(float *)param_1,iVar7,cVar8);
+      this->unknown00 = (float)extraout_ST0_02;
+    }
+    if (fStack_34 != 0.0) {
+      this->level = this->unknown00 / fStack_34;
+      goto LAB_0078a2c3;
+    }
+  }
+  else {
+    iVar7 = 0;
+    pfVar5 = (long double *)auStack_28;
+    pfVar6 = (float *)param_1;
+    pCVar3 = GetGame();
+    C_game::GetLightIntensity(pCVar3,pfVar5,pfVar6,iVar7,cVar8);
+    iVar7 = 1;
+    pfVar5 = (long double *)auStack_28;
+    pCVar3 = GetGame();
+    C_game::GetLightIntensity(pCVar3,pfVar5,(float *)param_1,iVar7,cVar8);
+    this->unknown00 = (float)extraout_ST0_00;
+    if ((float)extraout_ST0 != 0.0) {
+      this->level = (float)(extraout_ST0_00 / (long double)(float)extraout_ST0);
+      goto LAB_0078a2c3;
+    }
+  }
+  this->level = 1.0;
+LAB_0078a2c3:
+  fVar1 = (1.0 - this->level) * this->climate + this->level;
+  this->level = fVar1;
+  if (fVar1 <= 1.0) {
+    if (fVar1 < 0.1) {
+      this->level = 0.1;
+    }
+  }
+  else {
+    this->level = 1.0;
+  }
+  Unknown78a3c0(this,(int)this->unknown0C);
+  piVar4 = (int *)GetGEffects();
+  (**(code **)(*piVar4 + 0x54))(param_2,this->unknown08);
+  (**(code **)(*param_2 + 0x30))(param_2,fStack_34);
+  (**(code **)(*param_2 + 0x24))(param_2);
+}
+
+// 0x0078a3c0
+void __thiscall C_HumanLighting::Unknown78a3c0(C_HumanLighting *this,int param_1)
+{
+  fVar1 = (float)param_1 * 0.001 + (float)param_1 * 0.001;
+  GetLevel(this);
+  if (extraout_ST0 <= (long double)*(float *)(extraout_ECX + 8)) {
+    fVar2 = (long double)*(float *)(extraout_ECX + 8) - (long double)fVar1;
+    *(float *)(extraout_ECX + 8) = (float)fVar2;
+    if (fVar2 < extraout_ST0 != (fVar2 == extraout_ST0)) {
+      *(float *)(extraout_ECX + 8) = (float)extraout_ST0;
+      return;
+    }
+  }
+  else {
+    fVar2 = (long double)fVar1 + (long double)*(float *)(extraout_ECX + 8);
+    *(float *)(extraout_ECX + 8) = (float)fVar2;
+    if (extraout_ST0 <= fVar2) {
+      *(float *)(extraout_ECX + 8) = (float)extraout_ST0;
+      return;
+    }
+  }
+}
+
+// 0x0078a420
+void __thiscall C_HumanLighting::Unknown78a420(C_HumanLighting *this,int param_1)
+{
+  iVar5 = 0;
+  if (0 < *(int *)(param_1 + 0x1ac)) {
+    do {
+      iVar1 = *(int *)(*(int *)(param_1 + 0x1a4) + iVar5 * 4);
+      if (((*(uint8_t *)(iVar1 + 0xe0) & 1) != 0) && (*(int *)(iVar1 + 0x164) == 4)) {
+        iVar5 = *(int *)(*(int *)(param_1 + 0x1a4) + iVar5 * 4);
+        if (iVar5 != 0) {
+          fVar2 = *(float *)(iVar5 + 0x130);
+          fVar3 = *(float *)(iVar5 + 0x134);
+          fVar4 = *(float *)(iVar5 + 0x138);
+          if ((fVar3 < fVar2) && (fVar4 < fVar2)) {
+            this->unknown14 = fVar2 * *(float *)(iVar5 + 0x168);
+            return;
+          }
+          if ((fVar2 < fVar3) && (fVar4 < fVar3)) {
+            this->unknown14 = fVar3 * *(float *)(iVar5 + 0x168);
+            return;
+          }
+          this->unknown14 = fVar4 * *(float *)(iVar5 + 0x168);
+          return;
+        }
+        break;
+      }
+      iVar5++;
+    } while (iVar5 < *(int *)(param_1 + 0x1ac));
+  }
+  this->unknown14 = 1.0;
+}
+

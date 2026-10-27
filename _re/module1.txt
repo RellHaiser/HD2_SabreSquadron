@@ -1,0 +1,2346 @@
+// 0x00423610
+void __fastcall FUN_00423610(uint32_t param_1)
+{
+  FUN_00423620(param_1);
+  FUN_00423640();
+}
+
+// 0x00423620
+void __fastcall FUN_00423620(uint32_t param_1)
+{
+  local_1 = (uint8_t)((uint32_t)param_1 >> 0x18);
+  DAT_008693d0 = local_1;
+  DAT_008693d4 = 0;
+  DAT_008693d8 = 0;
+  _DAT_008693dc = 0;
+}
+
+// 0x00423640
+void FUN_00423640(void)
+{
+  atexit(&LAB_00423650);
+}
+
+// 0x00423670
+void __thiscall C_ScriptModule::RememberFrame(void *this,int param_1,uint32_t param_2)
+{
+  iVar7 = (int)this + 0x898;
+  if ((*(int *)((int)this + 0x89c) != 0) &&
+     (iVar5 = *(int *)((int)this + 0x8a0) - *(int *)((int)this + 0x89c) >> 2, iVar5 != 0)) {
+    do {
+      iVar3 = iVar5 * 4;
+      iVar5--;
+      if (*(int *)(*(int *)(*(int *)((int)this + 0x89c) - 4 + iVar3) + 0x34) == param_1) {
+        puVar1 = (uint32_t *)(*(int *)(*(int *)((int)this + 0x89c) + iVar5 * 4) + 0x3c);
+        *puVar1 = *puVar1 | param_2;
+        return;
+      }
+    } while (iVar5 != 0);
+  }
+  local_30 = _aligned_malloc(0x50,0x10);
+  local_24 = local_30;
+  if (local_30 == nullptr) {
+    local_30 = nullptr;
+  }
+  else {
+    local_30[0xd] = param_1;
+    *(short *)(param_1 + 0xe4) = *(short *)(param_1 + 0xe4) + 1;
+    local_2c = (uint32_t *)local_30[0xd];
+    local_30[0xe] = *(uint32_t *)((int)local_2c + 0x108);
+    if ((*(uint32_t *)((int)local_2c + 0xe0) & 8) == 0) {
+      *(uint32_t *)((int)local_2c + 0xe0) = *(uint32_t *)((int)local_2c + 0xe0) | 8;
+      S_quat::Make((S_quat *)((int)local_2c + 0xc0),(S_matrix *)((int)local_2c + 0x80));
+    }
+    local_30[8] = *(uint32_t *)((int)local_2c + 0xc0);
+    local_30[9] = *(uint32_t *)((int)local_2c + 0xc4);
+    local_30[10] = *(uint32_t *)((int)local_2c + 200);
+    local_30[0xb] = *(uint32_t *)((int)local_2c + 0xcc);
+    *(uint8_t *)(local_30 + 0x10) = *(uint8_t *)(local_30[0xd] + 0xe0) & 1;
+    if (local_30[0xe] != 0) {
+      psVar2 = (short *)(local_30[0xe] + 0xe4);
+      *psVar2 = *psVar2 + 1;
+    }
+    iVar5 = local_30[0xd];
+    local_30[4] = *(uint32_t *)(iVar5 + 0xb0);
+    local_30[5] = *(uint32_t *)(iVar5 + 0xb4);
+    local_30[6] = *(uint32_t *)(iVar5 + 0xb8);
+    local_30[7] = *(uint32_t *)(iVar5 + 0xbc);
+    iVar5 = local_30[0xd];
+    if (*(short *)(iVar5 + 0xf8) == 4) {
+      *local_30 = *(uint32_t *)(iVar5 + 0x1a0);
+      local_30[1] = *(uint32_t *)(iVar5 + 0x1a4);
+      local_30[2] = *(uint32_t *)(iVar5 + 0x1a8);
+      local_30[3] = *(uint32_t *)(iVar5 + 0x1ac);
+      local_30[0xc] = *(uint32_t *)(local_30[0xd] + 0x16c);
+    }
+  }
+  local_30[0xf] = param_2;
+  puVar8 = *(uint32_t **)((int)this + 0x8a0);
+  if (*(int *)((int)this + 0x8a4) - (int)puVar8 >> 2 == 0) {
+    uVar6 = vector_size_e4_429080(iVar7);
+    if (uVar6 < 2) {
+      local_2c = (uint32_t *)0x1;
+    }
+    else {
+      local_2c = (uint32_t *)vector_size_e4_429080(iVar7);
+    }
+    iVar5 = vector_size_e4_429080(iVar7);
+    local_24 = (uint32_t *)(iVar5 + (int)local_2c);
+    iVar5 = (int)local_24;
+    if ((int)local_24 < 0) {
+      iVar5 = 0;
+    }
+    local_28 = operator_new(iVar5 * 4);
+    local_2c = (uint32_t *)uninitialized_copy4_42a8c0(*(uint32_t **)((int)this + 0x89c),puVar8,local_28);
+    uninitialized_fill_n4_42a8f0(local_2c,1,&local_30);
+    uninitialized_copy4_42a8c0(puVar8,*(uint32_t **)((int)this + 0x8a0),local_2c + 1);
+    empty_function_429b10();
+    operator_delete(*(void **)((int)this + 0x89c));
+    puVar4 = local_28;
+    *(uint32_t **)((int)this + 0x8a4) = local_28 + (int)local_24;
+    iVar7 = vector_size_e4_429080(iVar7);
+    puVar8 = puVar4 + iVar7 + 1;
+    *(uint32_t **)((int)this + 0x89c) = puVar4;
+  }
+  else {
+    uninitialized_copy4_42a8c0(puVar8,puVar8,puVar8 + 1);
+    uninitialized_fill_n4_42a8f0(*(uint32_t **)((int)this + 0x8a0),
+                 1 - ((int)*(uint32_t **)((int)this + 0x8a0) - (int)puVar8 >> 2),&local_30);
+    puVar4 = *(uint32_t **)((int)this + 0x8a0);
+    for (; puVar8 != puVar4; puVar8 = puVar8 + 1) {
+      *puVar8 = local_30;
+    }
+    puVar8 = (uint32_t *)(*(int *)((int)this + 0x8a0) + 4);
+  }
+  *(uint32_t **)((int)this + 0x8a0) = puVar8;
+}
+
+// 0x00423970
+void __fastcall FUN_00423970(uint32_t param_1)
+{
+  _aligned_free((void *)param_1);
+}
+
+// 0x00423980
+void __thiscall C_ScriptModule::RegisterSoundFrame(void *this,int param_1)
+{
+  if ((*(int *)((int)this + 0x8ac) != 0) &&
+     (iVar1 = *(int *)((int)this + 0x8b0) - *(int *)((int)this + 0x8ac) >> 2, iVar1 != 0)) {
+    iVar3 = *(int *)((int)this + 0x8ac) + iVar1 * 4;
+    do {
+      piVar7 = (int *)(iVar3 - 4);
+      iVar3 -= 4;
+      iVar1--;
+      if (*piVar7 == param_1) {
+        return;
+      }
+    } while (iVar1 != 0);
+  }
+  piVar7 = *(int **)((int)this + 0x8b0);
+  if (*(int *)((int)this + 0x8b4) - (int)piVar7 >> 2 != 0) {
+    uninitialized_copy4_42a730(piVar7,piVar7,piVar7 + 1);
+    uninitialized_fill_n4_42a760(*(uint32_t **)((int)this + 0x8b0),
+                 1 - ((int)*(uint32_t **)((int)this + 0x8b0) - (int)piVar7 >> 2),&param_1);
+    piVar5 = *(int **)((int)this + 0x8b0);
+    if (piVar7 == piVar5) {
+      *(int *)((int)this + 0x8b0) = *(int *)((int)this + 0x8b0) + 4;
+      return;
+    }
+    do {
+      *piVar7 = param_1;
+      piVar7++;
+    } while (piVar7 != piVar5);
+    *(int *)((int)this + 0x8b0) = *(int *)((int)this + 0x8b0) + 4;
+    return;
+  }
+  iVar1 = *(int *)((int)this + 0x8ac);
+  if ((iVar1 == 0) || (uVar4 = (int)piVar7 - iVar1 >> 2, uVar4 < 2)) {
+    uVar4 = 1;
+  }
+  if (iVar1 == 0) {
+    iVar1 = 0;
+  }
+  else {
+    iVar1 = (int)piVar7 - iVar1 >> 2;
+  }
+  iVar1 += uVar4;
+  iVar3 = iVar1;
+  if (iVar1 < 0) {
+    iVar3 = 0;
+  }
+  puVar2 = operator_new(iVar3 << 2);
+  puVar6 = puVar2;
+  for (piVar5 = *(int **)((int)this + 0x8ac); piVar5 != piVar7; piVar5 = piVar5 + 1) {
+    construct_copy4_42af60(puVar6,piVar5);
+    puVar6++;
+  }
+  uninitialized_fill_n4_42a760(puVar6,1,&param_1);
+  uninitialized_copy4_42a730(piVar7,*(uint32_t **)((int)this + 0x8b0),puVar6 + 1);
+  empty_function_420560();
+  operator_delete(*(void **)((int)this + 0x8ac));
+  *(uint32_t **)((int)this + 0x8b4) = puVar2 + iVar1;
+  iVar1 = vector_size_e4_4202f0((int)this + 0x8a8);
+  *(uint32_t **)((int)this + 0x8ac) = puVar2;
+  *(uint32_t **)((int)this + 0x8b0) = puVar2 + iVar1 + 1;
+}
+
+// 0x00423b40
+void __thiscall C_ScriptModule::C_ScriptModule::RestoreFrame(C_ScriptModule *this,int param_1)
+{
+  iVar3 = this->m_89c;
+  if ((iVar3 != 0) && (iVar4 = this->m_8a0 - iVar3 >> 2, iVar4 != 0)) {
+    iVar2 = iVar3 + iVar4 * 4;
+    while( true ) {
+      piVar1 = (int *)(iVar2 - 4);
+      iVar2 -= 4;
+      iVar4--;
+      if (*(int *)(*piVar1 + 0x34) == param_1) break;
+      if (iVar4 == 0) {
+        return;
+      }
+    }
+    ptr = *(void **)(iVar3 + iVar4 * 4);
+    if (ptr != nullptr) {
+      FUN_00423bf0((int)ptr);
+      _aligned_free(ptr);
+    }
+    if (this->m_89c == 0) {
+      iVar3 = 0;
+    }
+    else {
+      iVar3 = this->m_8a0 - this->m_89c >> 2;
+    }
+    *(uint32_t *)(this->m_89c + iVar4 * 4) = *(uint32_t *)(this->m_89c - 4 + iVar3 * 4);
+    this->m_8a0 = this->m_8a0 - 4;
+  }
+}
+
+// 0x00423bf0
+void __fastcall FUN_00423bf0(int param_1)
+{
+  piVar1 = *(int **)(param_1 + 0x34);
+  if (piVar1 != nullptr) {
+    (**(code **)(*piVar1 + 0x30))(piVar1,*(uint8_t *)(param_1 + 0x40));
+    if (*(int *)(param_1 + 0x38) != 0) {
+      (**(code **)(**(int **)(param_1 + 0x34) + 0x38))
+                (*(int **)(param_1 + 0x34),*(int *)(param_1 + 0x38),0);
+      (**(code **)**(uint32_t **)(param_1 + 0x38))(*(uint32_t **)(param_1 + 0x38));
+    }
+    (**(code **)(**(int **)(param_1 + 0x34) + 0x24))(*(int **)(param_1 + 0x34));
+    piVar1 = *(int **)(param_1 + 0x34);
+    if ((short)piVar1[0x3e] == 4) {
+      (**(code **)(*piVar1 + 0xb0))(piVar1,param_1);
+      (**(code **)(*piVar1 + 0x8c))(piVar1,*(uint32_t *)(param_1 + 0x30));
+    }
+    (**(code **)(**(int **)(param_1 + 0x34) + 0x24))(*(int **)(param_1 + 0x34));
+    (**(code **)**(uint32_t **)(param_1 + 0x34))(*(uint32_t **)(param_1 + 0x34));
+  }
+}
+
+// 0x00423c70
+void __thiscall C_ScriptModule::RunCutscene(void *this,uint32_t param_1)
+{
+  *(uint8_t *)((int)this + 0x824) = 1;
+  iVar2 = GetGame();
+  uVar3 = FUN_004b6180((int *)(*(int *)(iVar2 + 0x58) + 0x10b20));
+  *(char *)((int)this + 0x11) = (char)uVar3;
+  iVar2 = GetGame();
+  FUN_0049f410(*(void **)(iVar2 + 0x58),'\0');
+  iVar2 = GetGame();
+  iVar2 = *(int *)(*(int *)(iVar2 + 0x18) + 0x15c);
+  *(int *)((int)this + 0x828) = iVar2;
+  if (iVar2 != 0) {
+    *(short *)(iVar2 + 0xe4) = *(short *)(iVar2 + 0xe4) + 1;
+  }
+  *(uint32_t *)((int)this + 0x834) = param_1;
+  if (*(int *)((int)this + 0x18) != 0) {
+    iVar2 = *(int *)((int)this + 0x1c) - *(int *)((int)this + 0x18) >> 2;
+    while (iVar2 != 0) {
+      iVar2--;
+      this_00 = *(void **)(*(int *)((int)this + 0x18) + iVar2 * 4);
+      if ((((this_00 != nullptr) &&
+           (uVar3 = C_Script::OnCutscene(this_00,*(int *)((int)this + 0x834)), (char)uVar3 == '\0')) &&
+          (iVar1 = *(int *)(*(int *)(*(int *)((int)this + 0x18) + iVar2 * 4) + 0x100), iVar1 != 0))
+         && (((piVar4 = *(int **)(iVar1 + 0xec), piVar4 != nullptr &&
+              (iVar1 = *piVar4, iVar1 != 0)) &&
+             ((*(int *)(iVar1 + 0x18) == 3 && (*(int *)(iVar1 + 0x19c) != 1)))))) {
+        C_ActorsModule::C_ActorsModule::SetActorActive((C_ActorsModule *)&g_actorsModule,iVar1,'\0');
+      }
+    }
+  }
+  uVar3 = (uint32_t)DAT_008cb372;
+  uVar5 = (&DAT_008ca840)[DAT_008cac72];
+  uVar9 = 0x923a1;
+  uVar8 = 0x437e723;
+  uVar6 = uVar5;
+  piVar4 = GetIGraph();
+  uVar5 = (**(code **)(*piVar4 + 0x48))(piVar4,uVar8,uVar9,uVar5,uVar6);
+  *(uint32_t *)(&DAT_008cad40 + uVar3 * 4) = uVar5;
+  uVar5 = (*(code *)PTR_FUN_00a59000)(uVar5);
+  (&DAT_008caf40)[uVar3] = uVar5;
+  iVar2 = GetGame();
+  *(uint8_t *)(iVar2 + 0x6e) = 0;
+  iVar2 = GetGame();
+  uVar5 = *(uint32_t *)(*(int *)(iVar2 + 0x18) + 0x24c);
+  iVar2 = GetGame();
+  piVar4 = *(int **)(iVar2 + 0x18);
+  iVar2 = *piVar4;
+  lVar7 = __ftol();
+  uVar6 = (uint32_t)lVar7;
+  lVar7 = __ftol();
+  (**(code **)(iVar2 + 0x148))(piVar4,0,(int)lVar7,uVar5,uVar6);
+  iVar2 = GetGame();
+  *(uint32_t *)((int)this + 0x82c) =
+       *(uint32_t *)(*(int *)(*(int *)(iVar2 + 0x18) + 0x15c) + 0x138);
+  iVar2 = GetGame();
+  *(uint32_t *)((int)this + 0x830) =
+       *(uint32_t *)(*(int *)(*(int *)(iVar2 + 0x18) + 0x15c) + 0x120);
+  iVar2 = GetGame();
+  piVar4 = *(int **)(*(int *)(iVar2 + 0x18) + 0x15c);
+  (**(code **)(*piVar4 + 0x8c))(piVar4,0x3fe38e39);
+  iVar2 = GetGame();
+  uVar5 = *(uint32_t *)(iVar2 + 0xbc);
+  iVar2 = GetGame();
+  piVar4 = *(int **)(*(int *)(iVar2 + 0x18) + 0x15c);
+  (**(code **)(*piVar4 + 0x74))(piVar4,uVar5);
+  thunk_FUN_0071e680();
+}
+
+// 0x00423eb0
+void __thiscall C_ScriptModule::C_ScriptModule::EndCutscene(C_ScriptModule *this)
+{
+  if (this->m_824 != '\0') {
+    this->m_824 = '\0';
+    (**(code **)(*(int *)this->m_828 + 0x8c))(this->m_828,this->m_82c);
+    (**(code **)(*(int *)this->m_828 + 0x74))(this->m_828,this->m_830);
+    iVar1 = GetGame();
+    if (iVar1 != 0) {
+      iVar1 = GetGame();
+      (**(code **)(**(int **)(iVar1 + 0x18) + 0x90))(*(int **)(iVar1 + 0x18),this->m_828);
+    }
+    (*(code *)**(uint32_t **)this->m_828)(this->m_828);
+    this->m_828 = nullptr;
+    uVar11 = 0;
+    if ((this->m_018 != 0) && (iVar1 = this->m_01c - this->m_018 >> 2, iVar1 != 0)) {
+      do {
+        iVar1--;
+        pvVar4 = *(void **)(this->m_018 + iVar1 * 4);
+        if (pvVar4 != nullptr) {
+          uVar2 = C_Script::OnCutsceneDone(pvVar4,this->m_834);
+          if (((((char)uVar2 == '\0') &&
+               (iVar7 = *(int *)(*(int *)(this->m_018 + iVar1 * 4) + 0x100), iVar7 != 0)) &&
+              (piVar5 = *(int **)(iVar7 + 0xec), piVar5 != nullptr)) &&
+             (((iVar7 = *piVar5, iVar7 != 0 && (*(int *)(iVar7 + 0x18) == 3)) &&
+              ((*(int *)(iVar7 + 0x19c) != 1 && (iVar3 = FUN_005a5d30(iVar7), (char)iVar3 == '\0')))
+              ))) {
+            C_ActorsModule::C_ActorsModule::SetActorActive((C_ActorsModule *)&g_actorsModule,iVar7,'\x01');
+          }
+          iVar7 = *(int *)(this->m_018 + iVar1 * 4);
+          if (*(char *)(iVar7 + 7) != '\0') {
+            *(uint8_t *)(iVar7 + 7) = 0;
+            uVar11 = CONCAT13((char)((uint32_t)uVar11 >> 0x18),0x10000);
+          }
+          iVar7 = *(int *)(this->m_018 + iVar1 * 4);
+          if (*(char *)(iVar7 + 8) != '\0') {
+            *(uint8_t *)(iVar7 + 8) = 0;
+            uVar11 = CONCAT13(1,(int3)uVar11);
+          }
+        }
+      } while (iVar1 != 0);
+      if ((char)((uint32_t)uVar11 >> 0x10) != '\0') {
+        uVar10 = 1;
+        pvVar4 = (void *)GetGame();
+        C_game::ShowHud(pvVar4,uVar10);
+      }
+      if ((char)((uint32_t)uVar11 >> 0x18) != '\0') {
+        cVar9 = '\x01';
+        pvVar4 = (void *)GetGame();
+        C_game::ShowHudPanel(pvVar4,cVar9);
+      }
+    }
+    iVar1 = GetGame();
+    if (iVar1 != 0) {
+      GetGame();
+      empty_function_49b7c0();
+      this->m_00c = 500;
+      piVar5 = GetIGraph();
+      piVar6 = GetIGraph();
+      iVar1 = GetGame();
+      uVar11 = *(uint32_t *)(iVar1 + 0x18);
+      uVar10 = (**(code **)(*piVar5 + 0x1c))(piVar5);
+      uVar10 = (**(code **)(*piVar6 + 0x18))(piVar6,uVar10);
+      (**(code **)(unaff_EBX + 0x148))(uVar11,0,0,uVar10);
+      iVar1 = GetGame();
+      piVar5 = *(int **)(*(int *)(iVar1 + 0x18) + 0x15c);
+      (**(code **)(*piVar5 + 0x8c))(piVar5,0x3faaaaab);
+    }
+    piVar5 = (int *)GetGEffects();
+    (**(code **)(*piVar5 + 0x8c))(0,1,0);
+    if (this->m_86c != 0) {
+      iVar1 = (int)(this->m_870 - this->m_86c) >> 2;
+      while (iVar1 != 0) {
+        iVar1--;
+        puVar8 = *(uint32_t **)(this->m_86c + iVar1 * 4);
+        pvVar4 = (void *)GetGame();
+        FUN_0069a630(pvVar4,puVar8);
+        C_ScriptModule::RestoreFrame(this,*(int *)(this->m_86c + iVar1 * 4));
+        puVar8 = *(uint32_t **)(this->m_86c + iVar1 * 4);
+        (**(code **)*puVar8)(puVar8);
+      }
+    }
+    uVar2 = copy4_42adb0((uint32_t *)this->m_870,(uint32_t *)this->m_870,
+                         (uint32_t *)this->m_86c);
+    empty_function_420560();
+    this->m_870 = uVar2;
+    if (this->m_87c != 0) {
+      iVar1 = this->m_880 - this->m_87c >> 2;
+      while (iVar1 != 0) {
+        iVar1--;
+        if (*(char *)(iVar1 + this->m_88c) != '\0') {
+          FUN_00776520(*(int **)(this->m_87c + iVar1 * 4));
+          puVar8 = *(uint32_t **)(this->m_87c + iVar1 * 4);
+          pvVar4 = (void *)GetGame();
+          FUN_0069a630(pvVar4,puVar8);
+          C_ScriptModule::RestoreFrame((C_ScriptModule *)&g_scriptModule,*(int *)(this->m_87c + iVar1 * 4));
+          puVar8 = *(uint32_t **)(this->m_87c + iVar1 * 4);
+          (**(code **)*puVar8)(puVar8);
+          if (this->m_87c == 0) {
+            iVar7 = 0;
+          }
+          else {
+            iVar7 = this->m_880 - this->m_87c >> 2;
+          }
+          *(uint32_t *)(this->m_87c + iVar1 * 4) = *(uint32_t *)(this->m_87c - 4 + iVar7 * 4);
+          this->m_880 = this->m_880 - 4;
+          if (this->m_88c == 0) {
+            iVar7 = 0;
+          }
+          else {
+            iVar7 = this->m_890 - this->m_88c;
+          }
+          *(uint8_t *)(this->m_88c + iVar1) = *(uint8_t *)(this->m_88c - 1 + iVar7);
+          this->m_890 = this->m_890 - 1;
+        }
+      }
+    }
+    thunk_FUN_0071e680();
+    iVar1 = GetGame();
+    FUN_0049f410(*(void **)(iVar1 + 0x58),this->m_011);
+    this->m_011 = '\0';
+  }
+}
+
+// 0x00424260
+uint32_t __thiscall C_ScriptModule::RegisterAnimatedModel(void *this,int *param_1)
+{
+  if ((*(int *)((int)this + 0x87c) != 0) &&
+     (uVar1 = *(int *)((int)this + 0x880) - *(int *)((int)this + 0x87c) >> 2, uVar1 != 0)) {
+    iVar2 = *(int *)((int)this + 0x87c) + uVar1 * 4;
+    do {
+      piVar3 = (int *)(iVar2 - 4);
+      iVar2 -= 4;
+      uVar1--;
+      if ((int *)*piVar3 == param_1) {
+        return uVar1 & 0xffffff00;
+      }
+    } while (uVar1 != 0);
+  }
+  uStack_4 = this;
+  FUN_007764d0(param_1);
+  piVar3 = param_1;
+  this_00 = (void *)GetGame();
+  FUN_0069a5b0(this_00,piVar3);
+  FUN_0042a140((void *)((int)this + 0x878),*(uint32_t **)((int)this + 0x880),1,&param_1);
+  uStack_4 = (void *)CONCAT13(*(char *)((int)this + 0x824) != '\0',(undefined3)uStack_4);
+  FUN_0042a560((void *)((int)this + 0x888),*(uint8_t **)((int)this + 0x890),1,
+               (uint8_t *)((int)&uStack_4 + 3));
+  *(short *)(param_1 + 0x39) = (short)param_1[0x39] + 1;
+  return CONCAT31((int3)((uint32_t)param_1 >> 8),1);
+}
+
+// 0x00424310
+uint32_t __thiscall C_ScriptModule::UnregisterAnimatedModel(void *this,int *param_1)
+{
+  uVar3 = *(uint32_t *)((int)this + 0x87c);
+  if ((uVar3 != 0) && (iVar5 = (int)(*(int *)((int)this + 0x880) - uVar3) >> 2, iVar5 != 0)) {
+    uVar3 = uVar3 + iVar5 * 4;
+    do {
+      piVar1 = (int *)(uVar3 - 4);
+      uVar3 -= 4;
+      iVar5--;
+      if ((int *)*piVar1 == param_1) {
+        FUN_00776520(param_1);
+        this_00 = (void *)GetGame();
+        FUN_0069a630(this_00,param_1);
+        puVar2 = *(uint32_t **)(*(int *)((int)this + 0x87c) + iVar5 * 4);
+        (**(code **)*puVar2)(puVar2);
+        if (*(int *)((int)this + 0x87c) == 0) {
+          iVar4 = 0;
+        }
+        else {
+          iVar4 = *(int *)((int)this + 0x880) - *(int *)((int)this + 0x87c) >> 2;
+        }
+        *(uint32_t *)(*(int *)((int)this + 0x87c) + iVar5 * 4) =
+             *(uint32_t *)(*(int *)((int)this + 0x87c) - 4 + iVar4 * 4);
+        *(int *)((int)this + 0x880) = *(int *)((int)this + 0x880) - 4;
+        if (*(int *)((int)this + 0x88c) == 0) {
+          iVar4 = 0;
+        }
+        else {
+          iVar4 = *(int *)((int)this + 0x890) - *(int *)((int)this + 0x88c);
+        }
+        *(uint8_t *)(*(int *)((int)this + 0x88c) + iVar5) =
+             *(uint8_t *)(*(int *)((int)this + 0x88c) - 1 + iVar4);
+        iVar5 = *(int *)((int)this + 0x890) - 1;
+        *(int *)((int)this + 0x890) = iVar5;
+        return CONCAT31((int3)((uint32_t)iVar5 >> 8),1);
+      }
+    } while (iVar5 != 0);
+  }
+  return uVar3 & 0xffffff00;
+}
+
+// 0x00424420
+uint32_t __thiscall C_ScriptModule::RegisterDuplicate(void *this,int param_1)
+{
+  if ((*(int *)((int)this + 0x86c) != 0) &&
+     (uVar2 = *(int *)((int)this + 0x870) - *(int *)((int)this + 0x86c) >> 2, uVar2 != 0)) {
+    iVar3 = *(int *)((int)this + 0x86c) + uVar2 * 4;
+    do {
+      piVar1 = (int *)(iVar3 - 4);
+      iVar3 -= 4;
+      uVar2--;
+      if (*piVar1 == param_1) {
+        return uVar2 & 0xffffff00;
+      }
+    } while (uVar2 != 0);
+  }
+  FUN_0042a140((void *)((int)this + 0x868),*(uint32_t **)((int)this + 0x870),1,&param_1);
+  *(short *)(param_1 + 0xe4) = *(short *)(param_1 + 0xe4) + 1;
+  return CONCAT31((int3)((uint32_t)param_1 >> 8),1);
+}
+
+// 0x00424490
+uint32_t __thiscall C_ScriptModule::UnregisterDuplicate(void *this,uint32_t *param_1)
+{
+  uVar3 = *(uint32_t *)((int)this + 0x86c);
+  if ((uVar3 != 0) && (iVar5 = (int)(*(int *)((int)this + 0x870) - uVar3) >> 2, iVar5 != 0)) {
+    uVar3 = uVar3 + iVar5 * 4;
+    do {
+      piVar1 = (int *)(uVar3 - 4);
+      uVar3 -= 4;
+      iVar5--;
+      if ((uint32_t *)*piVar1 == param_1) {
+        this_00 = (void *)GetGame();
+        FUN_0069a630(this_00,param_1);
+        puVar2 = *(uint32_t **)(*(int *)((int)this + 0x86c) + iVar5 * 4);
+        (**(code **)*puVar2)(puVar2);
+        if (*(int *)((int)this + 0x86c) == 0) {
+          iVar4 = 0;
+        }
+        else {
+          iVar4 = *(int *)((int)this + 0x870) - *(int *)((int)this + 0x86c) >> 2;
+        }
+        *(uint32_t *)(*(int *)((int)this + 0x86c) + iVar5 * 4) =
+             *(uint32_t *)(*(int *)((int)this + 0x86c) - 4 + iVar4 * 4);
+        iVar5 = *(int *)((int)this + 0x870) - 4;
+        *(int *)((int)this + 0x870) = iVar5;
+        return CONCAT31((int3)((uint32_t)iVar5 >> 8),1);
+      }
+    } while (iVar5 != 0);
+  }
+  return uVar3 & 0xffffff00;
+}
+
+// 0x00424540
+void * __fastcall BeginScriptNetMessage(uint32_t param_1,char param_2)
+{
+  this = (void *)FUN_0072c280(&g_netGame,4,(uint32_t)(param_2 == '\0'));
+  if (this != nullptr) {
+    C_BitStream::WriteBits(this,param_1,DAT_00838874);
+  }
+  return this;
+}
+
+// 0x00424580
+void __fastcall SendScriptNetMessage(void *param_1)
+{
+  FUN_0072c360(&g_netGame,param_1);
+}
+
+// 0x00424590
+uint32_t __thiscall C_ScriptModule::FUN_00424590(C_ScriptModule *this,void *param_1)
+{
+  if (param_1 != nullptr) {
+    uVar1 = C_BitStream::ReadBits(param_1,DAT_00838874);
+    uVar2 = FUN_0042b650(uVar1,param_1);
+    return CONCAT31((int3)((uint32_t)uVar2 >> 8),1);
+  }
+  return in_EAX & 0xffffff00;
+}
+
+// 0x004245c0
+uint32_t * __thiscall
+C_ScriptModule::FUN_004245c0(C_ScriptModule *this,int param_1,char *param_2)
+{
+  C_Module::C_Module((C_Module *)this,param_1,param_2);
+  this->m_010 = '\0';
+  this->m_014 = (uchar)param_2;
+  log2((long double)275.0);
+  this->m_018 = 0;
+  this->m_01c = 0;
+  this->m_020 = 0;
+  this->m_824 = '\0';
+  this->m_825 = '\0';
+  this->_pad_0826[0] = '\0';
+  this->_pad_0826[1] = '\0';
+  this->m_828 = nullptr;
+  this->m_82c = 0;
+  this->m_830 = 0;
+  this->m_834 = 0;
+  this->m_838 = (uchar)param_2;
+  this->m_83c = 0;
+  this->m_840 = 0;
+  this->m_844 = 0;
+  this->m_848 = (uchar)param_2;
+  this->m_84c = 0;
+  this->m_850 = 0;
+  this->m_854 = 0;
+  this->m_858 = (uchar)param_2;
+  this->m_85c = 0;
+  this->m_860 = 0;
+  this->m_864 = 0;
+  this->m_868 = (uchar)param_2;
+  this->m_86c = 0;
+  this->m_870 = 0;
+  this->m_874 = 0;
+  this->m_878 = (uchar)param_2;
+  this->m_87c = 0;
+  this->m_880 = 0;
+  this->m_884 = 0;
+  this->m_888 = (uchar)param_2;
+  this->m_88c = 0;
+  this->m_890 = 0;
+  this->m_894 = 0;
+  this->m_898 = (uchar)param_2;
+  this->m_89c = 0;
+  this->m_8a0 = 0;
+  this->m_8a4 = 0;
+  this->m_8a8 = (uchar)param_2;
+  this->m_8ac = 0;
+  this->m_8b0 = 0;
+  this->m_8b4 = 0;
+  this->vtable = (C_auto_0080f750_vtbl *)&PTR_FUN_0080f750;
+  log2((long double)2.0);
+  lVar3 = __ftol();
+  DAT_00838874 = (int)lVar3 + (uint32_t)((long double)(int)lVar3 < extraout_ST0);
+  puVar1 = this->_pad_0024 + 0x400;
+  iVar2 = 0x100;
+  do {
+    puVar1 -= 4;
+    iVar2--;
+    puVar1[0] = '\0';
+    puVar1[1] = '\0';
+    puVar1[2] = '\0';
+    puVar1[3] = '\0';
+  } while (iVar2 != 0);
+  return &this->vtable;
+}
+
+// 0x00424750
+uint32_t * __thiscall C_ScriptModule::FUN_00424750(C_ScriptModule *this,uint8_t param_1)
+{
+  FUN_00424770(this);
+  if ((param_1 & 1) != 0) {
+    _aligned_free(this);
+  }
+  return &this->vtable;
+}
+
+// 0x00424770
+void __thiscall C_ScriptModule::FUN_00424770(C_ScriptModule *this)
+{
+  local_4 = 3;
+  operator_delete((void *)this->m_8ac);
+  this->m_8ac = 0;
+  this->m_8b0 = 0;
+  this->m_8b4 = 0;
+  operator_delete((void *)this->m_89c);
+  this->m_89c = 0;
+  this->m_8a0 = 0;
+  this->m_8a4 = 0;
+  operator_delete((void *)this->m_88c);
+  this->m_88c = 0;
+  this->m_890 = 0;
+  this->m_894 = 0;
+  operator_delete((void *)this->m_87c);
+  this->m_87c = 0;
+  this->m_880 = 0;
+  this->m_884 = 0;
+  operator_delete((void *)this->m_86c);
+  this->m_86c = 0;
+  this->m_870 = 0;
+  this->m_874 = 0;
+  empty_function_429aa0();
+  operator_delete((void *)this->m_85c);
+  this->m_85c = 0;
+  this->m_860 = 0;
+  this->m_864 = 0;
+  local_4._0_1_ = 2;
+  empty_function_429a60();
+  operator_delete((void *)this->m_84c);
+  this->m_84c = 0;
+  this->m_850 = 0;
+  this->m_854 = 0;
+  local_4._0_1_ = 1;
+  FUN_00429a30((uint32_t *)this->m_83c,(uint32_t *)this->m_840);
+  operator_delete((void *)this->m_83c);
+  this->m_83c = 0;
+  this->m_840 = 0;
+  this->m_844 = 0;
+  local_4 = (uint32_t)local_4._1_3_ << 8;
+  vector_tidy_428fa0((int)&this->m_014);
+  local_4 = 0xffffffff;
+  C_Module::~C_Module((C_Module *)this);
+}
+
+// 0x00424900
+void __thiscall C_ScriptModule::C_ScriptModule::RestartMission(C_ScriptModule *this)
+{
+  g_scriptModuleRestarting = 1;
+  if (((uint8_t)g_gameRole & 2) != 0) {
+    (*this->vtable->vf08)(0);
+  }
+  if (((uint8_t)g_gameRole & 1) != 0) {
+    (*this->vtable->vf08)(1);
+    FUN_00428ca0((int)this);
+    if (((uint8_t)g_gameRole & 1) != 0) {
+      (*this->vtable->vf07)(1);
+    }
+  }
+  if (((uint8_t)g_gameRole & 2) != 0) {
+    (*this->vtable->vf07)(0);
+  }
+  g_scriptModuleRestarting = 0;
+}
+
+// 0x00424970
+uint32_t __thiscall C_ScriptModule::FUN_00424970(C_ScriptModule *this,char *param_1)
+{
+  local_48c = this;
+  if (*param_1 != '\0') {
+    local_480 = 0x1004;
+    piStack_4b0 = (int *)0x4249a9;
+    iVar3 = dtaSeek(*(int *)(param_1 + 4),0,1);
+    *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0x10) = iVar3;
+    *(int *)(param_1 + 0x410) = *(int *)(param_1 + 0x410) + 1;
+    piStack_4b0 = (int *)0x4249d0;
+    dtaWrite(*(int *)(param_1 + 4),&local_480,6);
+  }
+  FUN_00427010(this,param_1);
+  if (*param_1 != '\0') {
+    if (param_1[8] == '\0') {
+      piStack_4b0 = (int *)0x424a50;
+      dtaSeek(*(int *)(param_1 + 4),*(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc),0);
+    }
+    else {
+      piStack_4b0 = (int *)0x4249f5;
+      iVar3 = dtaSeek(*(int *)(param_1 + 4),0,1);
+      iStack_484 = iVar3 - *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc);
+      piStack_4b0 = (int *)0x424a18;
+      dtaSeek(*(int *)(param_1 + 4),*(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc) + 2,0);
+      piStack_4b0 = (int *)0x424a28;
+      dtaWrite(*(int *)(param_1 + 4),&iStack_484,4);
+      piStack_4b0 = (int *)0x424a34;
+      dtaSeek(*(int *)(param_1 + 4),iVar3,0);
+      this = local_48c;
+    }
+    if (*(int *)(param_1 + 0x410) != 0) {
+      *(int *)(param_1 + 0x410) = *(int *)(param_1 + 0x410) - 1;
+    }
+  }
+  if (this->m_85c != 0) {
+    iVar3 = (int)(local_48c->m_860 - this->m_85c) >> 2;
+    while (iVar3 != 0) {
+      iVar3--;
+      if (*param_1 != '\0') {
+        local_480 = 0x1036;
+        piStack_4b0 = (int *)0x424ab3;
+        iVar4 = dtaSeek(*(int *)(param_1 + 4),0,1);
+        *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0x10) = iVar4;
+        *(int *)(param_1 + 0x410) = *(int *)(param_1 + 0x410) + 1;
+        piStack_4b0 = (int *)0x424ada;
+        dtaWrite(*(int *)(param_1 + 4),&local_480,6);
+      }
+      pcStack_494 = *(char **)(*(int *)(local_48c->m_85c + iVar3 * 4) + 0xe8);
+      if (pcStack_494 == nullptr) {
+        pcStack_494 = &DAT_00867a90;
+      }
+      uStack_490 = strlen(pcStack_494) + 1;
+      pcVar8 = pcStack_494 + uStack_490;
+      C_chunk::Write((C_chunk *)param_1,&uStack_490,2);
+      if (uStack_490 != 0) {
+        C_chunk::Write((C_chunk *)param_1,pcStack_494,uStack_490);
+      }
+      if (*param_1 != '\0') {
+        iVar4 = *(int *)(param_1 + 4);
+        if (param_1[8] == '\0') {
+          iVar5 = *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc);
+        }
+        else {
+          piStack_4b0 = (int *)0x424b4e;
+          iVar5 = dtaSeek(iVar4,0,1);
+          iStack_484 = iVar5 - *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc);
+          piStack_4b0 = (int *)0x424b71;
+          dtaSeek(*(int *)(param_1 + 4),*(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc) + 2,
+                  0);
+          piStack_4b0 = (int *)0x424b81;
+          dtaWrite(*(int *)(param_1 + 4),&iStack_484,4);
+          iVar4 = *(int *)(param_1 + 4);
+        }
+        piStack_4b0 = (int *)0x424b9c;
+        dtaSeek(iVar4,iVar5,0);
+        if (*(int *)(param_1 + 0x410) != 0) {
+          *(int *)(param_1 + 0x410) = *(int *)(param_1 + 0x410) - 1;
+        }
+      }
+    }
+  }
+  if (local_48c->m_84c != 0) {
+    iVar3 = local_48c->m_850 - local_48c->m_84c >> 2;
+    while (iVar3 != 0) {
+      iVar3--;
+      if (*param_1 != '\0') {
+        local_480 = 0x13ec;
+        piStack_4b0 = (int *)0x424c0d;
+        iVar4 = dtaSeek(*(int *)(param_1 + 4),0,1);
+        *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0x10) = iVar4;
+        *(int *)(param_1 + 0x410) = *(int *)(param_1 + 0x410) + 1;
+        piStack_4b0 = (int *)0x424c34;
+        dtaWrite(*(int *)(param_1 + 4),&local_480,6);
+      }
+      uStack_490 = *(uint32_t *)(local_48c->m_84c + iVar3 * 4);
+      pcVar8 = *(char **)(*(int *)(uStack_490 + 0x10) + 0xe8);
+      if (pcVar8 == nullptr) {
+        pcVar8 = &DAT_00867a90;
+      }
+      uVar7 = 0xffffffff;
+      pcVar10 = pcVar8;
+      do {
+        if (uVar7 == 0) break;
+        uVar7--;
+        cVar1 = *pcVar10;
+        pcVar10++;
+      } while (cVar1 != '\0');
+      piStack_4b0 = (int *)0x424c74;
+      C_chunk::WriteChunk((C_chunk *)param_1,0x1450,pcVar8,~uVar7);
+      iVar4 = *(int *)(uStack_490 + 0x10);
+      if ((*(uint32_t *)(iVar4 + 0xe0) & 8) == 0) {
+        *(uint32_t *)(iVar4 + 0xe0) = *(uint32_t *)(iVar4 + 0xe0) | 8;
+        S_quat::Make((S_quat *)(iVar4 + 0xc0),(S_matrix *)(iVar4 + 0x80));
+      }
+      uStack_470 = *(uint32_t *)(iVar4 + 0xcc);
+      uStack_46c = *(uint32_t *)(iVar4 + 0xc0);
+      uStack_468 = *(uint32_t *)(iVar4 + 0xc4);
+      uStack_464 = *(uint32_t *)(iVar4 + 200);
+      piStack_4b0 = (int *)0x424cdb;
+      C_chunk::WriteChunk((C_chunk *)param_1,0x14b4,&uStack_470,0x10);
+      uVar7 = uStack_490;
+      iStack_484 = *(int *)(uStack_490 + 0x14);
+      piStack_4b0 = (int *)0x424cf9;
+      C_chunk::WriteChunk((C_chunk *)param_1,0x1518,&iStack_484,4);
+      pcStack_494 = *(char **)(uVar7 + 0x18);
+      piStack_4b0 = (int *)0x424d13;
+      C_chunk::WriteChunk((C_chunk *)param_1,0x157c,&pcStack_494,4);
+      uStack_488 = *(uint32_t *)(uVar7 + 0x1c);
+      piStack_4b0 = (int *)0x424d2d;
+      C_chunk::WriteChunk((C_chunk *)param_1,0x15e0,&uStack_488,4);
+      if (*param_1 != '\0') {
+        iVar4 = *(int *)(param_1 + 4);
+        if (param_1[8] == '\0') {
+          iVar5 = *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc);
+        }
+        else {
+          piStack_4b0 = (int *)0x424d46;
+          iVar5 = dtaSeek(iVar4,0,1);
+          aiStack_478[0] = iVar5 - *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc);
+          piStack_4b0 = (int *)0x424d69;
+          dtaSeek(*(int *)(param_1 + 4),*(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc) + 2,
+                  0);
+          piStack_4b0 = (int *)0x424d79;
+          dtaWrite(*(int *)(param_1 + 4),aiStack_478,4);
+          iVar4 = *(int *)(param_1 + 4);
+        }
+        piStack_4b0 = (int *)0x424d94;
+        dtaSeek(iVar4,iVar5,0);
+        if (*(int *)(param_1 + 0x410) != 0) {
+          *(int *)(param_1 + 0x410) = *(int *)(param_1 + 0x410) - 1;
+        }
+      }
+    }
+  }
+  if (*param_1 != '\0') {
+    local_480 = 0x16a8;
+    piStack_4b0 = (int *)0x424dd2;
+    iVar3 = dtaSeek(*(int *)(param_1 + 4),0,1);
+    *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0x10) = iVar3;
+    *(int *)(param_1 + 0x410) = *(int *)(param_1 + 0x410) + 1;
+    piStack_4b0 = (int *)0x424df9;
+    dtaWrite(*(int *)(param_1 + 4),&local_480,6);
+  }
+  iVar3 = GetGame();
+  piVar11 = *(int **)(iVar3 + 0x18);
+  uStack_440 = (**(code **)(*piVar11 + 0x120))();
+  uStack_4b4 = 0x424e1b;
+  piStack_4b0 = piVar11;
+  uStack_444 = (**(code **)(*piVar11 + 0x120))();
+  uStack_4b4 = 5;
+  uStack_4bc = 0x424e2a;
+  piStack_4b8 = piVar11;
+  uStack_448 = (**(code **)(*piVar11 + 0x120))();
+  uStack_4bc = 6;
+  uStack_4c4 = 0x424e39;
+  piStack_4c0 = piVar11;
+  uStack_44c = (**(code **)(*piVar11 + 0x120))();
+  uStack_4c4 = 3;
+  piStack_4c8 = piVar11;
+  uStack_450 = (**(code **)(*piVar11 + 0x120))();
+  uStack_4d0._0_2_ = SUB42(piVar11,0);
+  uStack_4d0._2_2_ = (uint16_t)((uint32_t)piVar11 >> 0x10);
+  iStack_4d4 = 0x424e57;
+  uStack_454 = (**(code **)(*piVar11 + 0x120))();
+  iStack_4d4 = 0xb;
+  uStack_4dc = 0x424e66;
+  piStack_4d8 = piVar11;
+  uStack_458 = (**(code **)(*piVar11 + 0x120))();
+  uStack_4dc = 0xc;
+  piStack_4e0 = piVar11;
+  uStack_45c = (**(code **)(*piVar11 + 0x120))();
+  uStack_460 = (**(code **)(*piVar11 + 0x120))(piVar11,0xd);
+  uStack_464 = (**(code **)(*piVar11 + 0x120))(piVar11);
+  if (*param_1 != '\0') {
+    if (param_1[8] != '\0') {
+      dtaWrite(*(int *)(param_1 + 4),&uStack_488,0x28);
+    }
+    if (*param_1 != '\0') {
+      iVar3 = *(int *)(param_1 + 4);
+      if (param_1[8] == '\0') {
+        iVar4 = *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc);
+      }
+      else {
+        iVar4 = dtaSeek(iVar3,0,1);
+        iStack_4d4 = iVar4 - *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc);
+        dtaSeek(*(int *)(param_1 + 4),*(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc) + 2,0)
+        ;
+        dtaWrite(*(int *)(param_1 + 4),&iStack_4d4,4);
+        iVar3 = *(int *)(param_1 + 4);
+      }
+      dtaSeek(iVar3,iVar4,0);
+      if (*(int *)(param_1 + 0x410) != 0) {
+        *(int *)(param_1 + 0x410) = *(int *)(param_1 + 0x410) - 1;
+      }
+      if (*param_1 != '\0') {
+        uStack_4d0._0_2_ = 0x170c;
+        uStack_4d0._2_2_ = 0;
+        iVar3 = dtaSeek(*(int *)(param_1 + 4),0,1);
+        *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0x10) = iVar3;
+        *(int *)(param_1 + 0x410) = *(int *)(param_1 + 0x410) + 1;
+        dtaWrite(*(int *)(param_1 + 4),&uStack_4d0,6);
+      }
+    }
+  }
+  uVar7 = uStack_4dc;
+  this_00 = (void *)(uStack_4dc + 0x898);
+  if (*(int *)(uStack_4dc + 0x89c) != 0) {
+    iVar3 = *(int *)(uStack_4dc + 0x8a0) - *(int *)(uStack_4dc + 0x89c) >> 2;
+joined_r0x00424fac:
+    if (iVar3 != 0) {
+      iVar3--;
+      ptr = *(void **)(*(int *)(uStack_4dc + 0x89c) + iVar3 * 4);
+      if (*(short *)(*(int *)((int)ptr + 0x34) + 0xe4) != 1) goto code_r0x00424fd5;
+      goto LAB_00425007;
+    }
+  }
+  if (*(int *)(uVar7 + 0x89c) == 0) {
+    piStack_4e0 = nullptr;
+  }
+  else {
+    piStack_4e0 = (int *)(*(int *)(uVar7 + 0x8a0) - *(int *)(uVar7 + 0x89c) >> 2);
+  }
+  C_chunk::Write((C_chunk *)param_1,&piStack_4e0,4);
+  if (*(int *)(uVar7 + 0x89c) != 0) {
+    pcVar8 = (char *)(*(int *)(uVar7 + 0x8a0) - *(int *)(uVar7 + 0x89c) >> 2);
+    while (pcVar8 != nullptr) {
+      pcVar8--;
+      piStack_4d8 = *(int **)(*(int *)(uStack_4dc + 0x89c) + (int)pcVar8 * 4);
+      pcVar10 = *(char **)(piStack_4d8[0xd] + 0xe8);
+      if (pcVar10 == nullptr) {
+        pcVar10 = &DAT_00867a90;
+      }
+      uVar7 = 0xffffffff;
+      pcVar9 = pcVar10;
+      do {
+        if (uVar7 == 0) break;
+        uVar7--;
+        cVar1 = *pcVar9;
+        pcVar9++;
+      } while (cVar1 != '\0');
+      piStack_4e0 = (int *)~uVar7;
+      C_chunk::Write((C_chunk *)param_1,&piStack_4e0,2);
+      if (piStack_4e0 != nullptr) {
+        C_chunk::Write((C_chunk *)param_1,pcVar10,(int)piStack_4e0);
+      }
+      piVar11 = piStack_4d8;
+      if ((*param_1 != '\0') && (param_1[8] != '\0')) {
+        dtaWrite(*(int *)(param_1 + 4),piStack_4d8 + 0xf,4);
+      }
+      uStack_4c4 = CONCAT22(uStack_4c4._2_2_,
+                            CONCAT11(*(uint8_t *)(piVar11[0xd] + 0xe0),(uint8_t)uStack_4c4)) &
+      if ((*param_1 != '\0') && (param_1[8] != '\0')) {
+        dtaWrite(*(int *)(param_1 + 4),(void *)((int)&uStack_4c4 + 1),1);
+      }
+      if ((*(uint8_t *)(piVar11 + 0xf) & 0x20) != 0) {
+        uStack_4c4 = CONCAT13(uStack_4c4._3_1_,
+                              CONCAT12(*(uint8_t *)(piVar11[0xd] + 0xe0),(uint16_t)uStack_4c4))
+                     & 0xff01ffff;
+        if ((*param_1 != '\0') && (param_1[8] != '\0')) {
+          dtaWrite(*(int *)(param_1 + 4),(void *)((int)&uStack_4c4 + 2),1);
+        }
+      }
+      if ((*(uint8_t *)(piVar11 + 0xf) & 0x10) != 0) {
+        iVar3 = piVar11[0xd];
+        piStack_4c0 = *(int **)(iVar3 + 0x1a0);
+        uStack_4bc = *(uint32_t *)(iVar3 + 0x1a4);
+        piStack_4b8 = *(int **)(iVar3 + 0x1a8);
+        uStack_4b4 = *(uint32_t *)(iVar3 + 0x1ac);
+        C_chunk::Write((C_chunk *)param_1,&piStack_4c0,0xc);
+        C_chunk::Write((C_chunk *)param_1,&stack0xfffffb5c,4);
+        uVar6 = (**(code **)(*(int *)piVar11[0xd] + 0xa4))((int *)piVar11[0xd]);
+        uStack_4d0._0_2_ = (uint16_t)uVar6;
+        uStack_4d0._2_2_ = (uint16_t)((uint32_t)uVar6 >> 0x10);
+        if ((*param_1 != '\0') && (param_1[8] != '\0')) {
+          dtaWrite(*(int *)(param_1 + 4),&uStack_4d0,4);
+        }
+      }
+      if ((*(uint8_t *)(piVar11 + 0xf) & 1) != 0) {
+        C_chunk::Write((C_chunk *)param_1,(void *)(piVar11[0xd] + 0xb0),0xc);
+      }
+      if ((*(uint8_t *)(piVar11 + 0xf) & 2) != 0) {
+        iStack_4d4 = piVar11[0xd];
+        if ((*(uint32_t *)(iStack_4d4 + 0xe0) & 8) == 0) {
+          *(uint32_t *)(iStack_4d4 + 0xe0) = *(uint32_t *)(iStack_4d4 + 0xe0) | 8;
+          S_quat::Make((S_quat *)(iStack_4d4 + 0xc0),(S_matrix *)(iStack_4d4 + 0x80));
+        }
+        pcStack_494 = *(char **)(iStack_4d4 + 0xcc);
+        if ((*param_1 != '\0') && (param_1[8] != '\0')) {
+          dtaWrite(*(int *)(param_1 + 4),&stack0xfffffb60,0x10);
+        }
+      }
+      if ((*(uint8_t *)(piVar11 + 0xf) & 4) != 0) {
+        pcVar10 = *(char **)(*(int *)(piStack_4d8[0xd] + 0x108) + 0xe8);
+        if (pcVar10 == nullptr) {
+          pcVar10 = &DAT_00867a90;
+        }
+        uVar7 = 0xffffffff;
+        pcVar9 = pcVar10;
+        do {
+          if (uVar7 == 0) break;
+          uVar7--;
+          cVar1 = *pcVar9;
+          pcVar9++;
+        } while (cVar1 != '\0');
+        piStack_4e0 = (int *)~uVar7;
+        C_chunk::Write((C_chunk *)param_1,&piStack_4e0,2);
+        if (piStack_4e0 != nullptr) {
+          C_chunk::Write((C_chunk *)param_1,pcVar10,(int)piStack_4e0);
+        }
+      }
+      if (((*(uint8_t *)(piStack_4d8 + 0xf) & 8) != 0) &&
+         (piVar11 = (int *)piStack_4d8[0xd], (short)piVar11[0x3e] == 9)) {
+        iVar3 = 0;
+        piStack_4c8 = nullptr;
+        do {
+          iVar4 = (**(code **)(*piVar11 + 0x88))(piVar11,iVar3);
+          if (iVar4 != 0) {
+            piStack_4c8 = (int *)((int)piStack_4c8 + 1);
+          }
+          iVar3++;
+        } while (iVar3 < 7);
+        if ((*param_1 != '\0') && (param_1[8] != '\0')) {
+          dtaWrite(*(int *)(param_1 + 4),&piStack_4c8,4);
+        }
+        piStack_4d8 = nullptr;
+        do {
+          iVar3 = (**(code **)(*piVar11 + 0x88))(piVar11,piStack_4d8);
+          if (iVar3 != 0) {
+            piStack_4c8 = piStack_4d8;
+            if ((*param_1 != '\0') && (param_1[8] != '\0')) {
+              dtaWrite(*(int *)(param_1 + 4),&piStack_4c8,4);
+            }
+            uStack_4dc = (**(code **)(*piVar11 + 0xa0))(piVar11,piStack_4c8);
+            C_chunk::Write((C_chunk *)param_1,&uStack_4dc,4);
+            pcVar8 = *(char **)(iVar3 + 0xc);
+            if (pcVar8 == nullptr) {
+              pcVar8 = &DAT_00867a90;
+            }
+            pcVar10 = (char *)&uStack_468;
+            do {
+              cVar1 = *pcVar8;
+              pcVar8++;
+              *pcVar10 = cVar1;
+              pcVar10++;
+            } while (cVar1 != '\0');
+            _strrchr((char *)&uStack_468,0x5c);
+            pcVar8 = _strrchr((char *)&uStack_468,0x5c);
+            if (pcVar8 == nullptr) {
+              pcVar8 = (char *)&uStack_468;
+            }
+            else {
+              pcVar8 = _strrchr((char *)&uStack_468,0x5c);
+              pcVar8++;
+            }
+            uStack_4dc = strlen(pcVar8) + 1;
+            pcVar10 = pcVar8 + uStack_4dc;
+            C_chunk::Write((C_chunk *)param_1,&uStack_4dc,2);
+            if (uStack_4dc != 0) {
+              C_chunk::Write((C_chunk *)param_1,pcVar8,uStack_4dc);
+            }
+            iVar3 = (**(code **)(iRam0000000e + 0x88))(0xe,piStack_4e0);
+            iStack_4d4 = CONCAT31(iStack_4d4._1_3_,*(int *)(iVar3 + 8) == 2);
+            if ((*param_1 != '\0') && (param_1[8] != '\0')) {
+              dtaWrite(*(int *)(param_1 + 4),&iStack_4d4,1);
+            }
+            uVar2 = (**(code **)(iRam0000000e + 0xac))(0xe,pcVar8);
+            uStack_4c4 = CONCAT13(uVar2,(undefined3)uStack_4c4);
+            if ((*param_1 != '\0') && (param_1[8] != '\0')) {
+              dtaWrite(*(int *)(param_1 + 4),(void *)((int)&uStack_4c4 + 3),1);
+            }
+          }
+          piStack_4d8 = (int *)((int)piStack_4d8 + 1);
+        } while ((int)piStack_4d8 < 7);
+      }
+    }
+  }
+  if (*param_1 != '\0') {
+    iVar3 = *(int *)(param_1 + 4);
+    if (param_1[8] == '\0') {
+      iVar4 = *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc);
+    }
+    else {
+      iVar4 = dtaSeek(iVar3,0,1);
+      uStack_4d0 = iVar4 - *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc);
+      dtaSeek(*(int *)(param_1 + 4),*(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc) + 2,0);
+      dtaWrite(*(int *)(param_1 + 4),&uStack_4d0,4);
+      iVar3 = *(int *)(param_1 + 4);
+    }
+    dtaSeek(iVar3,iVar4,0);
+    if (*(int *)(param_1 + 0x410) != 0) {
+      *(int *)(param_1 + 0x410) = *(int *)(param_1 + 0x410) - 1;
+    }
+  }
+  uVar7 = uStack_4dc;
+  if (*(int *)(uStack_4dc + 0x18) != 0) {
+    iVar3 = *(int *)(uStack_4dc + 0x1c) - *(int *)(uStack_4dc + 0x18) >> 2;
+    while (iVar3 != 0) {
+      iVar4 = iVar3 - 1;
+      iVar3 = iVar4;
+      if (*(int *)(*(int *)(uVar7 + 0x18) + iVar4 * 4) != 0) {
+        if (*param_1 != '\0') {
+          uStack_4d0._0_2_ = 0x44c;
+          uStack_4d0._2_2_ = 0;
+          iVar5 = dtaSeek(*(int *)(param_1 + 4),0,1);
+          *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0x10) = iVar5;
+          *(int *)(param_1 + 0x410) = *(int *)(param_1 + 0x410) + 1;
+          dtaWrite(*(int *)(param_1 + 4),&uStack_4d0,6);
+          uVar7 = uStack_4dc;
+        }
+        pcVar8 = *(char **)(*(int *)(*(int *)(*(int *)(uVar7 + 0x18) + iVar4 * 4) + 0x100) + 0xe8);
+        if (pcVar8 == nullptr) {
+          pcVar8 = &DAT_00867a90;
+        }
+        uVar7 = 0xffffffff;
+        pcVar10 = pcVar8;
+        do {
+          if (uVar7 == 0) break;
+          uVar7--;
+          cVar1 = *pcVar10;
+          pcVar10++;
+        } while (cVar1 != '\0');
+        C_chunk::WriteChunk((C_chunk *)param_1,0x834,pcVar8,~uVar7);
+        iVar4 = *(int *)(*(int *)(*(int *)(uStack_4dc + 0x18) + iVar3 * 4) + 0xcc);
+        if (iVar4 == 0) {
+          pcVar8 = &DAT_00867a90;
+        }
+        else {
+          pcVar8 = (char *)(iVar4 + 8);
+        }
+        FUN_004256a0(param_1,0xc1c,pcVar8);
+        C_chunk::Begin((C_chunk *)param_1,0x1644);
+        C_Script::SaveGame(*(void **)(*(int *)(uStack_4dc + 0x18) + iVar3 * 4),param_1);
+        C_chunk::Ascend((C_chunk *)param_1);
+        C_chunk::Ascend((C_chunk *)param_1);
+        uVar7 = uStack_4dc;
+      }
+    }
+  }
+  C_chunk::WriteChunk((C_chunk *)param_1,0x47e,(void *)(uVar7 + 0x825),1);
+  return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
+code_r0x00424fd5:
+  piStack_4e0 = *(int **)(*(int *)((int)ptr + 0x34) + 0xe8);
+  if (piStack_4e0 == nullptr) {
+    piStack_4e0 = (int *)&DAT_00867a90;
+  }
+  iVar4 = GetGame();
+  iVar4 = (**(code **)(**(int **)(iVar4 + 0x18) + 0x7c))
+                    (*(int **)(iVar4 + 0x18),piStack_4e0,0xcffff);
+  if (iVar4 == 0) {
+LAB_00425007:
+    FUN_00423bf0((int)ptr);
+    _aligned_free(ptr);
+    if (*(int *)(uVar7 + 0x89c) == 0) {
+      iVar4 = 0;
+    }
+    else {
+      iVar4 = *(int *)(uVar7 + 0x8a0) - *(int *)(uVar7 + 0x89c) >> 2;
+    }
+    *(uint32_t *)(*(int *)(uStack_4dc + 0x89c) + iVar3 * 4) =
+         *(uint32_t *)(*(int *)(uStack_4dc + 0x89c) - 4 + iVar4 * 4);
+    FUN_00429ab0(this_00,*(int *)(uVar7 + 0x8a0) - 4);
+  }
+  goto joined_r0x00424fac;
+}
+
+// 0x004256a0
+void __thiscall FUN_004256a0(void *this,int param_1,char *param_2)
+{
+  buffer = param_2;
+  uVar3 = 0xffffffff;
+  pcVar4 = param_2;
+  do {
+    if (uVar3 == 0) break;
+    uVar3--;
+    cVar1 = *pcVar4;
+    pcVar4++;
+  } while (cVar1 != '\0');
+  if (*(char *)this != '\0') {
+    local_8 = (uint16_t)param_1;
+    iVar2 = dtaSeek(*(int *)((int)this + 4),0,1);
+    *(int *)((int)this + *(int *)((int)this + 0x410) * 4 + 0x10) = iVar2;
+    *(int *)((int)this + 0x410) = *(int *)((int)this + 0x410) + 1;
+    dtaWrite(*(int *)((int)this + 4),&local_8,6);
+    if (*(char *)this != '\0') {
+      if (*(char *)((int)this + 8) != '\0') {
+        dtaWrite(*(int *)((int)this + 4),buffer,~uVar3);
+      }
+      if (*(char *)this != '\0') {
+        iVar2 = *(int *)((int)this + 4);
+        if (*(char *)((int)this + 8) == '\0') {
+          position = *(int *)((int)this + *(int *)((int)this + 0x410) * 4 + 0xc);
+        }
+        else {
+          position = dtaSeek(iVar2,0,1);
+          iVar2 = *(int *)((int)this + *(int *)((int)this + 0x410) * 4 + 0xc);
+          param_1 = position - iVar2;
+          dtaSeek(*(int *)((int)this + 4),iVar2 + 2,0);
+          dtaWrite(*(int *)((int)this + 4),&param_1,4);
+          iVar2 = *(int *)((int)this + 4);
+        }
+        dtaSeek(iVar2,position,0);
+        if (*(int *)((int)this + 0x410) != 0) {
+          *(int *)((int)this + 0x410) = *(int *)((int)this + 0x410) - 1;
+        }
+      }
+    }
+  }
+}
+
+// 0x004257b0
+uint32_t FUN_004257b0(char *param_1,uint32_t param_2,int *param_3,uint32_t param_4,int *param_5,
+                 uint32_t param_6,int *param_7,uint32_t param_8,uint32_t param_9,uint32_t param_10
+                 ,uint32_t param_11,uint32_t param_12,uint32_t param_13,uint32_t param_14,
+                 int param_15,uint32_t param_16,int *param_17,uint32_t param_18,
+                 uint16_t param_19,char *param_20,uint16_t param_21,uint32_t param_22,
+                 int *param_23,int *param_24,int *param_25,char *param_26,uint16_t param_27,
+                 int *param_28,C_str_rep *param_29,uint16_t param_30,uint32_t param_31,
+                 uint32_t *param_32,int *param_33,int *param_34,int *param_35,int *param_36,
+                 int *param_37,uint32_t param_38,uint32_t param_39,uint32_t param_40,
+                 uint32_t param_41,uint32_t param_42,uint32_t param_43,int param_44)
+{
+  this_00 = param_1;
+  CStack_14.rep = (C_str_rep *)0xffffffff;
+  CStack_18.rep = (C_str_rep *)&LAB_007fa7f5;
+  _chkstk();
+  if (this_01->m_018 != 0) {
+    iVar13 = this_01->m_01c - this_01->m_018 >> 2;
+    while (iVar13 != 0) {
+      iVar13--;
+      puVar8 = *(uint32_t **)(this_01->m_018 + iVar13 * 4);
+      if (puVar8 != nullptr) {
+        C_Script::OnExit(puVar8);
+        this = *(C_Script **)(this_01->m_018 + iVar13 * 4);
+        if (this != nullptr) {
+          C_Script::C_Script::~C_Script(this);
+          operator_delete(this);
+        }
+        FUN_004297b0(&this_01->m_014,this_01->m_01c - 4);
+      }
+    }
+  }
+  FUN_004297e0(&this_01->m_014,(uint32_t *)this_01->m_018,(uint32_t *)this_01->m_01c);
+  if (this_01->m_89c != 0) {
+    iVar13 = this_01->m_8a0 - this_01->m_89c >> 2;
+    uVar3 = param_8;
+    while (param_8 = uVar3, iVar13 != 0) {
+      iVar13--;
+      param_8 = *(uint32_t *)(this_01->m_89c + iVar13 * 4);
+      if ((param_8 != 0) && (uVar3 = param_8, param_8 != 0)) {
+        FUN_00423bf0(param_8);
+        _aligned_free((void *)param_8);
+        uVar3 = param_8;
+      }
+    }
+  }
+  FUN_00429ae0(&this_01->m_898,(uint32_t *)this_01->m_89c,(uint32_t *)this_01->m_8a0);
+  pCVar2 = C_fstr_Construct((C_str *)&param_3,&DAT_00867a90);
+  param_1 = &DAT_0000ffff;
+LAB_004258c7:
+  do {
+    if ((*this_00 == '\0') || (pCVar2 = nullptr, *(int *)(this_00 + 0x410) == 0)) {
+LAB_00426fb2:
+      if (param_3 != nullptr) {
+        pCVar2 = (C_str *)C_str::ReleaseRep((C_str *)param_3);
+      }
+      return CONCAT31((int3)((uint32_t)pCVar2 >> 8),1);
+    }
+    pCVar2 = (C_str *)dtaSeek(*(int *)(this_00 + 4),0,1);
+    if ((pCVar2 == (C_str *)0xffffffff) ||
+       (CStack_8.rep = (C_str_rep *)
+                       (*(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc) - (int)pCVar2),
+       CStack_8.rep == nullptr)) goto LAB_00426fb2;
+    if (*this_00 != '\0') {
+      iVar13 = dtaRead(*(int *)(this_00 + 4),&param_26,6);
+      if (iVar13 == 6) {
+        iVar13 = dtaSeek(*(int *)(this_00 + 4),0,1);
+        *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) =
+             iVar13 - 6 + CONCAT22(param_27,param_26._2_2_);
+        *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+        param_1 = param_26;
+      }
+    }
+    uVar3 = (uint32_t)param_1 & 0xffff;
+    if (uVar3 < 0x1037) {
+      if (uVar3 == 0x1036) {
+        piStack_c = nullptr;
+        C_chunk::Read((C_chunk *)this_00,&piStack_c,2);
+        if (piStack_c == nullptr) {
+          C_ScriptModule::AddPauseSound(this_01,&stack0x00000568);
+          C_chunk::Ascend((C_chunk *)this_00);
+          pCVar2 = (C_str *)((uint32_t)extraout_var_01 << 8);
+          goto LAB_004258c7;
+        }
+        if ((int)piStack_c < 0x401) {
+          C_chunk::Read((C_chunk *)this_00,&stack0x00000568,(int)piStack_c);
+        }
+        else {
+          C_chunk::Read((C_chunk *)this_00,&stack0x00000568,0x400);
+          piVar6 = piStack_c - 0x100;
+          if (piStack_c - 0x100 != nullptr) {
+            do {
+              piStack_c = (int *)((int)piVar6 - 1);
+              C_chunk::Read((C_chunk *)this_00,&param_12,(int)piStack_c);
+              piVar6 = piStack_c;
+            } while (piStack_c != nullptr);
+            C_ScriptModule::AddPauseSound(this_01,&stack0x00000568);
+            C_chunk::Ascend((C_chunk *)this_00);
+            pCVar2 = (C_str *)((uint32_t)extraout_var_02 << 8);
+            goto LAB_004258c7;
+          }
+        }
+        C_ScriptModule::AddPauseSound(this_01,&stack0x00000568);
+        C_chunk::Ascend((C_chunk *)this_00);
+        pCVar2 = (C_str *)((uint32_t)extraout_var_03 << 8);
+        goto LAB_004258c7;
+      }
+      if (uVar3 == 0x44c) {
+        pCVar11 = nullptr;
+        if (*this_00 != '\0') {
+          pCVar11 = (C_str_rep *)dtaRead(*(int *)(this_00 + 4),&param_29,6);
+          if (pCVar11 == (C_str_rep *)0x6) {
+            iVar13 = dtaSeek(*(int *)(this_00 + 4),0,1);
+            *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) =
+                 iVar13 - 6 + CONCAT22(param_30,param_29._2_2_);
+            *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+            param_1 = (char *)param_29;
+            pCVar11 = param_29;
+          }
+        }
+        if ((short)param_1 != 0x834) goto LAB_00426f82;
+        C_fstr_Construct((C_str *)&stack0x00000000,&DAT_00867a90);
+        iVar13 = *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+        iVar4 = dtaSeek(*(int *)(this_00 + 4),0,1);
+        CStack_8.rep = (C_str_rep *)0x3e7;
+        CStack_14.rep = (C_str_rep *)(iVar13 - iVar4);
+        pCVar2 = &CStack_8;
+        if (iVar13 - iVar4 < 1000) {
+          pCVar2 = &CStack_14;
+        }
+        C_chunk::Read((C_chunk *)this_00,&stack0x00000d50,(int)pCVar2->rep);
+        C_str::operator_assign((C_str *)&stack0x00000000,&stack0x00000d50);
+        C_chunk::Ascend((C_chunk *)this_00);
+        iVar13 = GetGame();
+        pCVar5 = (C_str_rep *)(**(code **)(**(int **)(iVar13 + 0x18) + 0x7c))();
+        if (pCVar5 == nullptr) {
+          if (unaff_retaddr.rep == nullptr) {
+            CStack_10.rep = (C_str_rep *)&DAT_00867a90;
+          }
+          else {
+            CStack_10.rep = (C_str_rep *)(unaff_retaddr.rep)->chars;
+          }
+          GetGame();
+          piVar6 = I3DGetDriver();
+          pCVar5 = (C_str_rep *)(**(code **)(*piVar6 + 0x88))();
+          CVar12.rep = unaff_retaddr.rep;
+          if (pCVar5 == nullptr) goto LAB_00426de0;
+        }
+        pCVar11 = pCVar5;
+        if (*this_00 != '\0') {
+          pCVar11 = (C_str_rep *)dtaRead(*(int *)(this_00 + 4),&param_18,6);
+          if (pCVar11 == (C_str_rep *)0x6) {
+            iVar13 = dtaSeek(*(int *)(this_00 + 4),0,1);
+            *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) =
+                 iVar13 - 6 + CONCAT22(param_19,param_18._2_2_);
+            pCVar11 = (C_str_rep *)(*(int *)(this_00 + 0x410) + 1);
+            *(C_str_rep **)(this_00 + 0x410) = pCVar11;
+            param_1._0_2_ = (short)param_18;
+          }
+        }
+        if ((short)param_1 == 0xc1c) {
+          param_7 = nullptr;
+          C_chunk::ReadRemainingString(this_00);
+          if (param_7 == nullptr) {
+            piVar6 = (int *)&DAT_00867a90;
+          }
+          else {
+            piVar6 = param_7 + 2;
+          }
+          C_ScriptModule::C_ScriptModule::AssignScript(this_01,(int)pCVar5,(char *)piVar6);
+          iVar13 = *(int *)((int)&pCVar5[0x1a].refCount + 2);
+          if ((iVar13 == 0) || (*(int *)(iVar13 + 4) == 0)) {
+            pCVar2 = C_fstr_Construct((C_str *)&param_37,"Script on frame '%s' not compiled"
+                                     );
+            pCVar11 = pCVar2->rep;
+            if (pCVar11 != nullptr) {
+              pCVar11->refCount = pCVar11->refCount + 1;
+            }
+            if (param_3 != nullptr) {
+              C_str::ReleaseRep((C_str *)param_3);
+            }
+            pCVar11 = pCVar2->rep;
+            param_3 = &pCVar11->refCount;
+            if (param_37 != nullptr) {
+              pCVar11 = (C_str_rep *)C_str::ReleaseRep((C_str *)param_37);
+            }
+          }
+          else {
+            pCVar11 = (C_str_rep *)C_chunk::DescendInline(this_00);
+          }
+          if (param_7 != nullptr) {
+            pCVar11 = (C_str_rep *)C_str::ReleaseRep((C_str *)param_7);
+          }
+        }
+      }
+      else {
+        if (uVar3 == 0x47e) {
+          if ((*this_00 == '\0') || (this_00[8] != '\0')) goto LAB_00426df1;
+          if (*(int *)(this_00 + 0x410) != 0) {
+            iVar13 = *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+            iVar4 = dtaSeek(*(int *)(this_00 + 4),0,1);
+            CStack_8.rep = nullptr;
+            CStack_14.rep = (C_str_rep *)(iVar13 - iVar4);
+            pCVar2 = &CStack_8;
+            if (-1 < iVar13 - iVar4) {
+              pCVar2 = &CStack_14;
+            }
+            if ((int)pCVar2->rep < 1) goto LAB_00426df1;
+          }
+          dtaRead(*(int *)(this_00 + 4),&this_01->m_825,1);
+          C_chunk::Ascend((C_chunk *)this_00);
+          pCVar2 = (C_str *)((uint32_t)extraout_var_00 << 8);
+          goto LAB_004258c7;
+        }
+        if (uVar3 == 0x1004) {
+          FUN_00427050(this_01,this_00);
+          C_chunk::Ascend((C_chunk *)this_00);
+          pCVar2 = (C_str *)((uint32_t)extraout_var << 8);
+          goto LAB_004258c7;
+        }
+LAB_00426ec5:
+        pCVar2 = C_fstr_Construct((C_str *)&param_23,"(MO) Unknown chunk.");
+        pCVar11 = pCVar2->rep;
+        if (pCVar11 != nullptr) {
+          pCVar11->refCount = pCVar11->refCount + 1;
+        }
+        if (param_3 != nullptr) {
+          C_str::ReleaseRep((C_str *)param_3);
+        }
+        pCVar11 = pCVar2->rep;
+        unaff_retaddr.rep = (C_str_rep *)param_23;
+        param_3 = &pCVar11->refCount;
+      }
+LAB_00426f71:
+      if (unaff_retaddr.rep != nullptr) {
+        pCVar11 = (C_str_rep *)C_str::ReleaseRep(unaff_retaddr.rep);
+      }
+LAB_00426f82:
+      if (param_3 != nullptr) {
+        pCVar11 = (C_str_rep *)C_str::ReleaseRep((C_str *)param_3);
+      }
+      return (uint32_t)pCVar11 & 0xffffff00;
+    }
+    if (uVar3 == 0x13ec) {
+      CStack_18.rep = nullptr;
+      CStack_8.rep = nullptr;
+      param_8 = 0;
+      param_14 = 0;
+      while ((*this_00 != '\0' && (*(int *)(this_00 + 0x410) != 0))) {
+        iVar13 = dtaSeek(*(int *)(this_00 + 4),0,1);
+        if ((iVar13 == -1) ||
+           (CStack_14.rep =
+                 (C_str_rep *)(*(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc) - iVar13),
+           CStack_14.rep == nullptr)) break;
+        if (*this_00 != '\0') {
+          iVar13 = dtaRead(*(int *)(this_00 + 4),&param_20,6);
+          if (iVar13 == 6) {
+            iVar13 = dtaSeek(*(int *)(this_00 + 4),0,1);
+            *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) =
+                 iVar13 - 6 + CONCAT22(param_21,param_20._2_2_);
+            *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+            param_1 = param_20;
+          }
+        }
+        uVar3 = (uint32_t)param_1 & 0xffff;
+        if (uVar3 < 0x1519) {
+          if (uVar3 == 0x1518) {
+            C_chunk::Read((C_chunk *)this_00,&param_28,4);
+            C_chunk::Ascend((C_chunk *)this_00);
+            CStack_8.rep = (C_str_rep *)param_28;
+          }
+          else if (uVar3 == 0x1450) {
+            iVar13 = *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+            iVar4 = dtaSeek(*(int *)(this_00 + 4),0,1);
+            CStack_14.rep = (C_str_rep *)0x3e7;
+            CStack_10.rep = (C_str_rep *)(iVar13 - iVar4);
+            pCVar2 = &CStack_14;
+            if (iVar13 - iVar4 < 1000) {
+              pCVar2 = &CStack_10;
+            }
+            C_chunk::Read((C_chunk *)this_00,&stack0x00000968,(int)pCVar2->rep);
+            C_str::operator_assign(&CStack_18,&stack0x00000968);
+            C_chunk::Ascend((C_chunk *)this_00);
+          }
+          else if (uVar3 == 0x14b4) {
+            C_chunk::Read((C_chunk *)this_00,&stack0x000000d8,0x10);
+            param_38 = in_stack_000000dc;
+            param_39 = in_stack_000000e0;
+            param_40 = in_stack_000000e4;
+            param_41 = in_stack_000000d8;
+            C_chunk::Ascend((C_chunk *)this_00);
+            in_stack_000000e8 = param_38;
+            in_stack_000000ec = param_39;
+            in_stack_000000f0 = param_40;
+            in_stack_000000f4 = param_41;
+          }
+        }
+        else if (uVar3 == 0x157c) {
+          C_chunk::Read((C_chunk *)this_00,&param_31,4);
+          C_chunk::Ascend((C_chunk *)this_00);
+          param_8 = param_31;
+        }
+        else if (uVar3 == 0x15e0) {
+          C_chunk::Read((C_chunk *)this_00,&param_43,4);
+          C_chunk::Ascend((C_chunk *)this_00);
+          param_14 = param_43;
+        }
+      }
+      iVar13 = GetGame();
+      iVar13 = (**(code **)(**(int **)(iVar13 + 0x18) + 0x7c))();
+      if (iVar13 == 0) {
+        pCVar2 = C_fstr_Construct((C_str *)&param_24,"Rotated frame '%s' not found in scene :-(");
+        pCVar11 = pCVar2->rep;
+        if (pCVar11 != nullptr) {
+          pCVar11->refCount = pCVar11->refCount + 1;
+        }
+        if (param_3 != nullptr) {
+          pCVar11 = (C_str_rep *)C_str::ReleaseRep((C_str *)param_3);
+        }
+        param_3 = &pCVar2->rep->refCount;
+        unaff_retaddr.rep = CStack_18.rep;
+        if (param_24 != nullptr) {
+          pCVar11 = (C_str_rep *)C_str::ReleaseRep((C_str *)param_24);
+          unaff_retaddr.rep = CStack_18.rep;
+        }
+        goto LAB_00426f71;
+      }
+      S_quat::Copy((S_quat *)(iVar13 + 0xc0),&stack0x000000e8);
+      S_quat::Normalize((S_quat *)(iVar13 + 0xc0));
+      *(uint32_t *)(iVar13 + 0xe0) = *(uint32_t *)(iVar13 + 0xe0) & 0xfffffecb | 0x40000008;
+      lVar16 = __ftol();
+      puVar8 = (uint32_t *)lVar16;
+      lVar16 = __ftol();
+      C_ScriptModule::RotateFrame(this_01,iVar13,CStack_8.rep,(int)lVar16,puVar8);
+      CVar12.rep = CStack_18.rep;
+LAB_00426de0:
+      if (CVar12.rep != nullptr) {
+        C_str::ReleaseRep((C_str *)CVar12.rep);
+      }
+LAB_00426df1:
+      C_chunk::Ascend((C_chunk *)this_00);
+      pCVar2 = (C_str *)((uint32_t)extraout_var_06 << 8);
+    }
+    else if (uVar3 == 0x16a8) {
+      if ((*this_00 != '\0') && (this_00[8] == '\0')) {
+        if (*(int *)(this_00 + 0x410) != 0) {
+          iVar13 = *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+          iVar4 = dtaSeek(*(int *)(this_00 + 4),0,1);
+          CStack_8.rep = nullptr;
+          CStack_14.rep = (C_str_rep *)(iVar13 - iVar4);
+          pCVar2 = &CStack_8;
+          if (-1 < iVar13 - iVar4) {
+            pCVar2 = &CStack_14;
+          }
+          if ((int)pCVar2->rep < 0x28) goto LAB_004269ea;
+        }
+        dtaRead(*(int *)(this_00 + 4),&param_44,0x28);
+      }
+LAB_004269ea:
+      iVar13 = GetGame();
+      piVar6 = *(int **)(iVar13 + 0x18);
+      (**(code **)(*piVar6 + 0x11c))();
+      (**(code **)(*piVar6 + 0x11c))();
+      (**(code **)(*piVar6 + 0x11c))();
+      (**(code **)(*piVar6 + 0x11c))();
+      (**(code **)(*piVar6 + 0x11c))();
+      (**(code **)(*piVar6 + 0x11c))();
+      (**(code **)(*piVar6 + 0x11c))();
+      (**(code **)(*piVar6 + 0x11c))();
+      (**(code **)(*piVar6 + 0x11c))();
+      (**(code **)(*piVar6 + 0x11c))();
+      if ((param_44 == 0) || (in_stack_000000d4 != 0)) goto LAB_00426df1;
+      piVar6 = (int *)GetGEffects();
+      (**(code **)(*piVar6 + 0x40))();
+      C_chunk::Ascend((C_chunk *)this_00);
+      pCVar2 = (C_str *)((uint32_t)extraout_var_05 << 8);
+    }
+    else {
+      if (uVar3 != 0x170c) goto LAB_00426ec5;
+      C_chunk::Read((C_chunk *)this_00,&param_15,4);
+      param_4 = 0;
+      CStack_8.rep = nullptr;
+      if (param_15 < 1) goto LAB_00426df1;
+      do {
+        piStack_c = nullptr;
+        C_chunk::Read((C_chunk *)this_00,&piStack_c,2);
+        if (piStack_c == nullptr) {
+          in_stack_00000168 = 0;
+        }
+        else if ((int)piStack_c < 0x401) {
+          C_chunk::Read((C_chunk *)this_00,&stack0x00000168,(int)piStack_c);
+        }
+        else {
+          C_chunk::Read((C_chunk *)this_00,&stack0x00000168,0x400);
+          piVar6 = piStack_c - 0x100;
+          while (piVar6 != nullptr) {
+            piStack_c = (int *)((int)piVar6 - 1);
+            C_chunk::Read((C_chunk *)this_00,(void *)((int)&param_11 + 3),(int)piStack_c);
+            piVar6 = piStack_c;
+          }
+        }
+        if ((*this_00 != '\0') && (this_00[8] == '\0')) {
+          if (*(int *)(this_00 + 0x410) != 0) {
+            iVar13 = *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+            iVar4 = dtaSeek(*(int *)(this_00 + 4),0,1);
+            CStack_14.rep = nullptr;
+            CStack_10.rep = (C_str_rep *)(iVar13 - iVar4);
+            pCVar2 = &CStack_14;
+            if (-1 < iVar13 - iVar4) {
+              pCVar2 = &CStack_10;
+            }
+            if ((int)pCVar2->rep < 4) goto LAB_00425e5d;
+          }
+          dtaRead(*(int *)(this_00 + 4),&param_4,4);
+        }
+LAB_00425e5d:
+        param_16 = CONCAT31(param_16._1_3_,1);
+        if ((*this_00 != '\0') && (this_00[8] == '\0')) {
+          if (*(int *)(this_00 + 0x410) != 0) {
+            iVar13 = *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+            iVar4 = dtaSeek(*(int *)(this_00 + 4),0,1);
+            CStack_14.rep = nullptr;
+            CStack_10.rep = (C_str_rep *)(iVar13 - iVar4);
+            pCVar2 = &CStack_14;
+            if (-1 < iVar13 - iVar4) {
+              pCVar2 = &CStack_10;
+            }
+            if ((int)pCVar2->rep < 1) goto LAB_00425eb7;
+          }
+          dtaRead(*(int *)(this_00 + 4),&param_16,1);
+        }
+LAB_00425eb7:
+        iVar13 = GetGame();
+        piVar6 = (int *)(**(code **)(**(int **)(iVar13 + 0x18) + 0x7c))();
+        piStack_c = piVar6;
+        if (piVar6 == nullptr) goto LAB_00426df1;
+        C_ScriptModule::RememberFrame(this_01,(int)piVar6,param_4);
+        (**(code **)(*piVar6 + 0x30))();
+        if ((param_4 & 0x20) != 0) {
+          param_13 = CONCAT31(param_13._1_3_,1);
+          if ((*this_00 != '\0') && (this_00[8] == '\0')) {
+            if (*(int *)(this_00 + 0x410) != 0) {
+              CStack_14.rep = *(C_str_rep **)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+              iVar13 = dtaSeek(*(int *)(this_00 + 4),0,1);
+              CVar12.rep = CStack_14.rep;
+              CStack_14.rep = nullptr;
+              pCVar2 = &CStack_14;
+              CStack_10.rep = CVar12.rep - iVar13;
+              if (-1 < (int)(CVar12.rep - iVar13)) {
+                pCVar2 = &CStack_10;
+              }
+              if ((int)pCVar2->rep < 1) goto LAB_00425f63;
+            }
+            dtaRead(*(int *)(this_00 + 4),&param_13,1);
+          }
+LAB_00425f63:
+          (**(code **)(*piVar6 + 0x30))();
+          (**(code **)(*piVar6 + 0x24))();
+        }
+        if ((param_4 & 0x10) != 0) {
+          CStack_18.rep = nullptr;
+          C_chunk::Read((C_chunk *)this_00,&stack0x00000158,0xc);
+          C_chunk::Read((C_chunk *)this_00,&param_22,4);
+          if ((*this_00 != '\0') && (this_00[8] == '\0')) {
+            if (*(int *)(this_00 + 0x410) != 0) {
+              CStack_14.rep = *(C_str_rep **)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+              iVar13 = dtaSeek(*(int *)(this_00 + 4),0,1);
+              CVar12.rep = CStack_14.rep;
+              CStack_14.rep = nullptr;
+              pCVar2 = &CStack_14;
+              CStack_10.rep = CVar12.rep - iVar13;
+              if (-1 < (int)(CVar12.rep - iVar13)) {
+                pCVar2 = &CStack_10;
+              }
+              if ((int)pCVar2->rep < 4) goto LAB_00426005;
+            }
+            dtaRead(*(int *)(this_00 + 4),&CStack_18,4);
+          }
+LAB_00426005:
+          (**(code **)(*piVar6 + 0xb0))();
+          (**(code **)(*piVar6 + 0x8c))();
+          (**(code **)(*piVar6 + 0x94))();
+          if ((*(uint8_t *)(piVar6 + 0x38) & 1) != 0) {
+            (**(code **)(*piVar6 + 0x30))();
+            param_32 = operator_new(8);
+            if (param_32 == nullptr) {
+              param_32 = nullptr;
+            }
+            else {
+              param_32[1] = piVar6;
+              *param_32 = CStack_18.rep;
+              *(short *)(piVar6 + 0x39) = (short)piVar6[0x39] + 1;
+            }
+            FUN_00429f00(&DAT_008693d0,DAT_008693d8,&param_32);
+          }
+        }
+        if ((param_4 & 1) != 0) {
+          C_chunk::Read((C_chunk *)this_00,&stack0x00000108,0xc);
+          if (-1 < (char)piVar6[0x38]) {
+            piVar6[0x2c] = in_stack_00000108;
+            piVar6[0x2d] = in_stack_0000010c;
+            piVar6[0x2e] = in_stack_00000110;
+            piVar6[0x38] = piVar6[0x38] & 0xfffffedfU | 0x40000000;
+          }
+          (**(code **)(*piVar6 + 0x24))();
+        }
+        if ((param_4 & 2) != 0) {
+          if ((*this_00 != '\0') && (this_00[8] == '\0')) {
+            if (*(int *)(this_00 + 0x410) != 0) {
+              CStack_14.rep = *(C_str_rep **)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+              iVar13 = dtaSeek(*(int *)(this_00 + 4),0,1);
+              CVar12.rep = CStack_14.rep;
+              CStack_14.rep = nullptr;
+              pCVar2 = &CStack_14;
+              CStack_10.rep = CVar12.rep - iVar13;
+              if (-1 < (int)(CVar12.rep - iVar13)) {
+                pCVar2 = &CStack_10;
+              }
+              if ((int)pCVar2->rep < 0x10) goto LAB_00426150;
+            }
+            dtaRead(*(int *)(this_00 + 4),&stack0x00000148,0x10);
+          }
+LAB_00426150:
+          S_quat::Copy((S_quat *)(piVar6 + 0x30),(uint32_t *)&stack0x00000148);
+          S_quat::Normalize((S_quat *)(piVar6 + 0x30));
+          piVar6[0x38] = piVar6[0x38] & 0xfffffecbU | 0x40000008;
+          (**(code **)(*piVar6 + 0x24))();
+        }
+        if ((param_4 & 4) != 0) {
+          CStack_18.rep = nullptr;
+          C_chunk::Read((C_chunk *)this_00,&CStack_18,2);
+          if (CStack_18.rep == nullptr) {
+            in_stack_00000168 = 0;
+          }
+          else if ((int)CStack_18.rep < 0x401) {
+            C_chunk::Read((C_chunk *)this_00,&stack0x00000168,(int)CStack_18.rep);
+          }
+          else {
+            C_chunk::Read((C_chunk *)this_00,&stack0x00000168,0x400);
+            CVar12.rep = (C_str_rep *)((int)&CStack_18.rep[-0x72].refCount + 2);
+            while (CVar12.rep != nullptr) {
+              CStack_18.rep = (C_str_rep *)CVar12.rep[-1].chars;
+              C_chunk::Read((C_chunk *)this_00,(void *)((int)&param_12 + 3),(int)CStack_18.rep);
+              CVar12.rep = CStack_18.rep;
+            }
+          }
+          iVar13 = GetGame();
+          iVar13 = (**(code **)(**(int **)(iVar13 + 0x18) + 0x7c))();
+          if (iVar13 != 0) {
+            (**(code **)(*piVar6 + 0x38))();
+          }
+          (**(code **)(*piVar6 + 0x24))();
+        }
+        if ((param_4 & 8) != 0) {
+          iVar13 = 0;
+          do {
+            (**(code **)(*piStack_c + 0x84))();
+            iVar13++;
+          } while (iVar13 < 7);
+          param_5 = nullptr;
+          if ((*this_00 != '\0') && (this_00[8] == '\0')) {
+            if (*(int *)(this_00 + 0x410) != 0) {
+              iVar13 = *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+              iVar4 = dtaSeek(*(int *)(this_00 + 4),0,1);
+              CStack_14.rep = nullptr;
+              CStack_10.rep = (C_str_rep *)(iVar13 - iVar4);
+              pCVar2 = &CStack_14;
+              if (-1 < iVar13 - iVar4) {
+                pCVar2 = &CStack_10;
+              }
+              if ((int)pCVar2->rep < 4) goto LAB_004262ca;
+            }
+            dtaRead(*(int *)(this_00 + 4),&param_5,4);
+          }
+LAB_004262ca:
+          if (param_5 != nullptr) {
+            CStack_14.rep = (C_str_rep *)param_5;
+LAB_004262da:
+            if ((*this_00 != '\0') && (this_00[8] == '\0')) {
+              if (*(int *)(this_00 + 0x410) != 0) {
+                iVar13 = *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+                iVar4 = dtaSeek(*(int *)(this_00 + 4),0,1);
+                CStack_10.rep = nullptr;
+                CStack_18.rep = (C_str_rep *)(iVar13 - iVar4);
+                pCVar2 = &CStack_10;
+                if (-1 < iVar13 - iVar4) {
+                  pCVar2 = &CStack_18;
+                }
+                if ((int)pCVar2->rep < 4) goto LAB_0042632e;
+              }
+              dtaRead(*(int *)(this_00 + 4),&param_5,4);
+            }
+LAB_0042632e:
+            param_10 = 0;
+            C_chunk::Read((C_chunk *)this_00,&param_10,4);
+            CStack_18.rep = nullptr;
+            C_chunk::Read((C_chunk *)this_00,&CStack_18,2);
+            if (CStack_18.rep == nullptr) {
+              in_stack_00000168 = 0;
+            }
+            else if ((int)CStack_18.rep < 0x401) {
+              C_chunk::Read((C_chunk *)this_00,&stack0x00000168,(int)CStack_18.rep);
+            }
+            else {
+              C_chunk::Read((C_chunk *)this_00,&stack0x00000168,0x400);
+              CVar12.rep = (C_str_rep *)((int)&CStack_18.rep[-0x72].refCount + 2);
+              while (CVar12.rep != nullptr) {
+                CStack_18.rep = (C_str_rep *)CVar12.rep[-1].chars;
+                C_chunk::Read((C_chunk *)this_00,(void *)((int)&param_11 + 2),(int)CStack_18.rep);
+                CVar12.rep = CStack_18.rep;
+              }
+            }
+            if ((*this_00 != '\0') && (this_00[8] == '\0')) {
+              if (*(int *)(this_00 + 0x410) != 0) {
+                iVar13 = *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+                iVar4 = dtaSeek(*(int *)(this_00 + 4),0,1);
+                CStack_10.rep = nullptr;
+                CStack_18.rep = (C_str_rep *)(iVar13 - iVar4);
+                pCVar2 = &CStack_10;
+                if (-1 < iVar13 - iVar4) {
+                  pCVar2 = &CStack_18;
+                }
+                if ((int)pCVar2->rep < 1) goto LAB_0042641f;
+              }
+              dtaRead(*(int *)(this_00 + 4),&stack0xfffffffe,1);
+            }
+LAB_0042641f:
+            if ((*this_00 != '\0') && (this_00[8] == '\0')) {
+              if (*(int *)(this_00 + 0x410) != 0) {
+                iVar13 = *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+                iVar4 = dtaSeek(*(int *)(this_00 + 4),0,1);
+                CStack_10.rep = nullptr;
+                CStack_18.rep = (C_str_rep *)(iVar13 - iVar4);
+                pCVar2 = &CStack_10;
+                if (-1 < iVar13 - iVar4) {
+                  pCVar2 = &CStack_18;
+                }
+                if ((int)pCVar2->rep < 1) goto LAB_00426479;
+              }
+              dtaRead(*(int *)(this_00 + 4),&stack0xffffffff,1);
+            }
+LAB_00426479:
+            piVar6 = piStack_c;
+            if ((short)piStack_c[0x3e] == 9) {
+              pbVar7 = (uint8_t *)piStack_c[0x4d];
+              if (pbVar7 == nullptr) {
+                pbVar7 = &DAT_00867a90;
+              }
+              pbVar14 = &stack0x00000168;
+              do {
+                bVar1 = *pbVar14;
+                bVar15 = bVar1 < *pbVar7;
+                if (bVar1 != *pbVar7) {
+LAB_004264c7:
+                  iVar13 = (1 - (uint32_t)bVar15) - (uint32_t)(bVar15 != 0);
+                  goto LAB_004264cc;
+                }
+                if (bVar1 == 0) break;
+                bVar1 = pbVar14[1];
+                bVar15 = bVar1 < pbVar7[1];
+                if (bVar1 != pbVar7[1]) goto LAB_004264c7;
+                pbVar14 += 2;
+                pbVar7 += 2;
+              } while (bVar1 != 0);
+              iVar13 = 0;
+LAB_004264cc:
+              if (iVar13 == 0) {
+                (**(code **)(*piStack_c + 0x9c))();
+                (**(code **)(*piVar6 + 0x20))();
+                goto LAB_00426961;
+              }
+              CStack_18.rep = nullptr;
+              FUN_004094e0(&stack0x00000138,(char *)&stack0x00000168,
+                           (uint8_t *)((int)&param_12 + 2));
+              puVar8 = (uint32_t *)FUN_00429da0(&DAT_008aed2c,&stack0x00000138);
+              pCVar11 = (C_str_rep *)*puVar8;
+              std_string::Tidy((std_string *)&stack0x00000138,'\x01');
+              if (pCVar11 == nullptr) {
+                if (DAT_008aed60 == nullptr) {
+                  DAT_008aed60 = (C_str_rep *)(**(code **)(g_animationCache + 0xc))();
+                }
+                uVar3 = 0;
+                iVar13 = vector_size_e4_409600(0x8aed4c);
+                if (iVar13 == 0) goto LAB_00426961;
+                do {
+                  FUN_00409f20((void *)(DAT_008aed50 + uVar3 * 4),&param_17,&stack0x00000168);
+                  CStack_10.rep =
+                       (C_str_rep *)(*(code *)((C_str_rep *)DAT_008aed60->refCount)->length)();
+                  if (param_17 != nullptr) {
+                    C_str::ReleaseRep((C_str *)param_17);
+                  }
+                  switch(CStack_10.rep) {
+                  case (C_str_rep *)0x80000001:
+                    goto switchD_004265ff_caseD_80000001;
+                  case (C_str_rep *)0x80000002:
+                  case (C_str_rep *)0x8000000a:
+                    goto switchD_004265ff_caseD_80000002;
+                  default:
+                    goto switchD_004265ff_caseD_80000003;
+                  case (C_str_rep *)0x80000013:
+                    FUN_00409f20((void *)(DAT_008aed50 + uVar3 * 4),&param_36,&stack0x00000168);
+                    pCVar2 = C_fstr_Construct((C_str *)&param_34,
+                                              "Cache : BADFILEVERSION '%s' (3ds filter)");
+                    if (pCVar2->rep == nullptr) {
+                      pcVar10 = &DAT_00867a90;
+                    }
+                    else {
+                      pcVar10 = pCVar2->rep->chars;
+                    }
+                    dbgPrintf(pcVar10);
+                    pCVar2 = (C_str *)param_36;
+                    if (param_34 != nullptr) {
+                      C_str::ReleaseRep((C_str *)param_34);
+                      pCVar2 = (C_str *)param_36;
+                    }
+                    break;
+                  case (C_str_rep *)0x80000014:
+                    FUN_00409f20((void *)(DAT_008aed50 + uVar3 * 4),&param_35,&stack0x00000168);
+                    pCVar2 = C_fstr_Construct((C_str *)&param_25,
+                                              "Cache : BADFILETIME '%s' (3ds filter)");
+                    if (pCVar2->rep == nullptr) {
+                      pcVar10 = &DAT_00867a90;
+                    }
+                    else {
+                      pcVar10 = pCVar2->rep->chars;
+                    }
+                    dbgPrintf(pcVar10);
+                    pCVar2 = (C_str *)param_35;
+                    if (param_25 != nullptr) {
+                      C_str::ReleaseRep((C_str *)param_25);
+                      pCVar2 = (C_str *)param_35;
+                    }
+                  }
+                  if (pCVar2 != nullptr) {
+                    C_str::ReleaseRep(pCVar2);
+                  }
+switchD_004265ff_caseD_80000003:
+                  if (-1 < (int)CStack_10.rep) {
+                    uVar3 = vector_size_e8_420c60(0x8aed3c);
+                    if (uVar3 < DAT_008aed5c) goto LAB_00426803;
+                    uVar3 = 0;
+                    iVar13 = vector_size_e8_420c60(0x8aed3c);
+                    if (iVar13 != 0) goto LAB_0042675d;
+                    goto LAB_00426803;
+                  }
+switchD_004265ff_caseD_80000001:
+                  uVar3++;
+                  uVar9 = vector_size_e4_409600(0x8aed4c);
+                } while (uVar3 < uVar9);
+                goto switchD_004265ff_caseD_80000002;
+              }
+              pCVar11->length = pCVar11->length + 1;
+              CStack_18.rep = pCVar11;
+              goto LAB_004268e6;
+            }
+            goto LAB_00426961;
+          }
+        }
+LAB_00426970:
+        CStack_8.rep = (C_str_rep *)((int)&(CStack_8.rep)->refCount + 1);
+      } while ((int)CStack_8.rep < param_15);
+      C_chunk::Ascend((C_chunk *)this_00);
+      pCVar2 = (C_str *)((uint32_t)extraout_var_04 << 8);
+    }
+  } while( true );
+  while( true ) {
+    uVar3++;
+    uVar9 = vector_size_e8_420c60(0x8aed3c);
+    if (uVar9 <= uVar3) break;
+LAB_0042675d:
+    iVar13 = *(int *)(DAT_008aed40 + uVar3 * 8);
+    *(int *)(iVar13 + 4) = *(int *)(iVar13 + 4) + 1;
+    iVar13 = (**(code **)**(uint32_t **)(DAT_008aed40 + uVar3 * 8))();
+    if (iVar13 == 1) {
+      iVar13 = *(int *)(DAT_008aed40 + 4 + uVar3 * 8);
+      if (iVar13 == 0) {
+        pcVar10 = &DAT_00867a90;
+      }
+      else {
+        pcVar10 = (char *)(iVar13 + 8);
+      }
+      FUN_004094e0(&stack0x00000118,pcVar10,(uint8_t *)((int)&param_9 + 3));
+      puVar8 = (uint32_t *)FUN_00429da0(&DAT_008aed2c,&stack0x00000118);
+      *puVar8 = 0;
+      std_string::Tidy((std_string *)&stack0x00000118,'\x01');
+      FUN_00429e70(&DAT_008aed3c,DAT_008aed40 + uVar3 * 8);
+      break;
+    }
+  }
+LAB_00426803:
+  pCVar11 = (C_str_rep *)(**(code **)(g_animationCache + 0xc))();
+  if (pCVar11 != nullptr) {
+    piVar6 = (int *)FUN_00429d60((uint32_t *)&stack0x00000100);
+    FUN_00420ae0(&DAT_008aed3c,DAT_008aed44,piVar6);
+    FUN_004203e0((int *)&stack0x00000100);
+    FUN_00429d70(DAT_008aed44 - 2,(int)DAT_008aed60);
+    C_str::operator_assign((C_str *)(DAT_008aed44 - 1),(char *)&stack0x00000168);
+    CStack_18.rep = DAT_008aed60;
+    FUN_004094e0(&stack0x00000128,(char *)&stack0x00000168,(uint8_t *)((int)&param_12 + 1));
+    puVar8 = (uint32_t *)FUN_00429da0(&DAT_008aed2c,&stack0x00000128);
+    *puVar8 = DAT_008aed60;
+    std_string::Tidy((std_string *)&stack0x00000128,'\x01');
+    DAT_008aed60 = pCVar11;
+switchD_004265ff_caseD_80000002:
+    if (CStack_10.rep == nullptr) {
+LAB_004268e6:
+      piVar6 = piStack_c;
+      puVar8 = nullptr;
+      *(uint32_t *)(CStack_18.rep)->chars = 1;
+      (**(code **)(*piStack_c + 0x84))();
+      (**(code **)*puVar8)();
+      (**(code **)(*piVar6 + 0x9c))();
+      (**(code **)(*piVar6 + 0x20))();
+      C_ScriptModule::RegisterAnimatedModel(unaff_ESI,piVar6);
+      (**(code **)(*piVar6 + 0x24))();
+    }
+  }
+LAB_00426961:
+  CStack_14.rep = (C_str_rep *)CStack_14.rep[-1].chars;
+  if (CStack_14.rep == nullptr) goto LAB_00426970;
+  goto LAB_004262da;
+}
+
+// 0x00427010
+bool __thiscall C_ScriptModule::FUN_00427010(C_ScriptModule *this,char *param_1)
+{
+  if ((*param_1 != '\0') && (param_1[8] != '\0')) {
+    iVar1 = dtaWrite(*(int *)(param_1 + 4),this->_pad_0024,0x400);
+    return iVar1 == 0x400;
+  }
+  return false;
+}
+
+// 0x00427050
+bool __thiscall FUN_00427050(void *this,char *param_1)
+{
+  pcVar1 = param_1;
+  if ((*param_1 == '\0') || (param_1[8] != '\0')) {
+    return false;
+  }
+  pcStack_4 = this;
+  if (*(int *)(param_1 + 0x410) != 0) {
+    iVar4 = *(int *)(param_1 + *(int *)(param_1 + 0x410) * 4 + 0xc);
+    iVar2 = dtaSeek(*(int *)(param_1 + 4),0,1);
+    param_1 = nullptr;
+    pcStack_4 = (char *)(iVar4 - iVar2);
+    ppcVar3 = &param_1;
+    if (-1 < iVar4 - iVar2) {
+      ppcVar3 = &pcStack_4;
+    }
+    if ((int)*ppcVar3 < 0x400) {
+      return false;
+    }
+  }
+  iVar4 = dtaRead(*(int *)(pcVar1 + 4),(void *)((int)this + 0x24),0x400);
+  return 0x3ff < iVar4;
+}
+
+// 0x004270d0
+void __thiscall C_ScriptModule::FUN_004270d0(C_ScriptModule *this,char param_1)
+{
+  if ((param_1 != '\0') && (this->m_010 == '\0')) {
+    this->m_825 = '\0';
+    FUN_00428600((int)this);
+    if (this->m_83c != 0) {
+      iVar7 = (int)(this->m_840 - this->m_83c) >> 3;
+      while (iVar7 != 0) {
+        iVar4 = this->m_83c;
+        iVar7--;
+        iVar2 = GetGame();
+        uVar1 = *(uint32_t *)(iVar2 + 0x18);
+        piVar3 = I3DGetDriver();
+        iVar2 = *piVar3;
+        iVar4 = C_str::GetBufferAt((void *)(iVar4 + iVar7 * 8),0);
+        iVar4 = (**(code **)(iVar2 + 0x88))(piVar3,uVar1,iVar4);
+        if (iVar4 != 0) {
+          iVar2 = *(int *)(this->m_83c + 4 + iVar7 * 8);
+          if (iVar2 == 0) {
+            pcVar6 = &DAT_00867a90;
+          }
+          else {
+            pcVar6 = (char *)(iVar2 + 8);
+          }
+          C_ScriptModule::AssignScript(this,iVar4,pcVar6);
+        }
+      }
+    }
+    FUN_00428a70((int)this);
+    this->m_010 = '\x01';
+    this->m_00c = 0;
+    this->m_824 = '\0';
+    this->m_825 = '\0';
+    this->_pad_0826[0] = '\0';
+    this->_pad_0826[1] = '\0';
+    this->m_828 = nullptr;
+    this->m_82c = 0;
+    this->m_830 = 0;
+    this->m_834 = 0;
+    if (*(int *)(g_campaignState + 4) == 1) {
+      puVar5 = this->_pad_0024 + 0x400;
+      iVar7 = 0x100;
+      do {
+        puVar5 -= 4;
+        iVar7--;
+        puVar5[0] = '\0';
+        puVar5[1] = '\0';
+        puVar5[2] = '\0';
+        puVar5[3] = '\0';
+      } while (iVar7 != 0);
+      this->m_011 = '\0';
+      return;
+    }
+    FUN_00428c80((int)this);
+    this->m_011 = '\0';
+  }
+}
+
+// 0x00427200
+uint8_t __thiscall FUN_00427200(void *this,int param_1)
+{
+  iVar7 = *(int *)((int)this + 0x10);
+  if ((*(uint32_t *)(iVar7 + 0xe0) & 8) == 0) {
+    *(uint32_t *)(iVar7 + 0xe0) = *(uint32_t *)(iVar7 + 0xe0) | 8;
+    S_quat::Make((S_quat *)(iVar7 + 0xc0),(S_matrix *)(iVar7 + 0x80));
+  }
+  fVar3 = (float)param_1 * 0.001 * ABS(*(float *)((int)this + 0x1c));
+  bVar2 = *(float *)((int)this + 0x18) < 0.0;
+  fVar4 = fVar3;
+  if (bVar2) {
+    fVar4 = -fVar3;
+  }
+  fVar4 = *(float *)((int)this + 0x18) - fVar4;
+  *(float *)((int)this + 0x18) = fVar4;
+  if (bVar2) {
+    if (0.0 < fVar4) goto LAB_004272c6;
+  }
+  else if (fVar4 < 0.0) {
+LAB_004272c6:
+    if (bVar2) {
+      fVar4 = -fVar4;
+    }
+    fVar3 = fVar4 + fVar3;
+  }
+  fVar3 = (float)(int)((uint32_t)!bVar2 * 2 - 1) * fVar3;
+  if (*(int *)((int)this + 0x14) == 1) {
+    pfVar5 = (float *)RotateYMatrix(&local_50,fVar3);
+  }
+  else if (*(int *)((int)this + 0x14) == 2) {
+    pfVar5 = (float *)RotateZMatrix(&local_d0,fVar3);
+  }
+  else {
+    pfVar5 = (float *)RotateXMatrix(&local_90,fVar3);
+  }
+  pfVar9 = (float *)&local_120;
+  for (iVar7 = 0x10; iVar7 != 0; iVar7 = iVar7 - 1) {
+    *pfVar9 = *pfVar5;
+    pfVar5++;
+    pfVar9++;
+  }
+  iVar7 = *(int *)((int)this + 0x10);
+  uVar1 = *(uint32_t *)(iVar7 + 0xe0);
+  if ((uVar1 & 0x10) == 0) {
+    self = (S_matrix *)(iVar7 + 0x80);
+    *(uint32_t *)(iVar7 + 0xe0) = uVar1 | 0x14;
+    S_matrix::SetRot3(self,(S_quat *)(iVar7 + 0xc0));
+    self->m[0][0] = *(float *)(iVar7 + 0xd0) * self->m[0][0];
+  }
+  else {
+    if ((uVar1 & 4) != 0) goto LAB_0042740c;
+    if ((uVar1 & 8) == 0) {
+      S_quat::Make((S_quat *)(iVar7 + 0xc0),(S_matrix *)(iVar7 + 0x80));
+    }
+    *(uint32_t *)(iVar7 + 0xe0) = *(uint32_t *)(iVar7 + 0xe0) | 0xc;
+    *(float *)(iVar7 + 0x80) = *(float *)(iVar7 + 0xd0) * *(float *)(iVar7 + 0x80);
+  }
+  *(float *)(iVar7 + 0x84) = *(float *)(iVar7 + 0x84) * *(float *)(iVar7 + 0xd0);
+  *(float *)(iVar7 + 0x88) = *(float *)(iVar7 + 0x88) * *(float *)(iVar7 + 0xd0);
+  *(float *)(iVar7 + 0x90) = *(float *)(iVar7 + 0xd4) * *(float *)(iVar7 + 0x90);
+  *(float *)(iVar7 + 0x94) = *(float *)(iVar7 + 0xd4) * *(float *)(iVar7 + 0x94);
+  *(float *)(iVar7 + 0x98) = *(float *)(iVar7 + 0xd4) * *(float *)(iVar7 + 0x98);
+  *(float *)(iVar7 + 0xa0) = *(float *)(iVar7 + 0xa0) * *(float *)(iVar7 + 0xd8);
+  *(float *)(iVar7 + 0xa4) = *(float *)(iVar7 + 0xd8) * *(float *)(iVar7 + 0xa4);
+  *(float *)(iVar7 + 0xa8) = *(float *)(iVar7 + 0xd8) * *(float *)(iVar7 + 0xa8);
+LAB_0042740c:
+  S_matrix::OperatorMulAssign(&local_120,(S_matrix *)(iVar7 + 0x80));
+  iVar7 = *(int *)((int)this + 0x10);
+  pfVar5 = (float *)&local_120;
+  pfVar9 = (float *)(iVar7 + 0x80);
+  for (iVar8 = 0x10; iVar8 != 0; iVar8 = iVar8 - 1) {
+    *pfVar9 = *pfVar5;
+    pfVar5++;
+    pfVar9++;
+  }
+  pSVar6 = S_matrix::GetScale((S_matrix *)(iVar7 + 0x80),&local_e0);
+  *(float *)(iVar7 + 0xd0) = pSVar6->x;
+  *(float *)(iVar7 + 0xd4) = pSVar6->y;
+  *(float *)(iVar7 + 0xd8) = pSVar6->z;
+  *(float *)(iVar7 + 0xdc) = pSVar6[1].x;
+  *(uint32_t *)(iVar7 + 0xe0) = *(uint32_t *)(iVar7 + 0xe0) & 0xffffffd7 | 0x40000014;
+  (**(code **)(**(int **)((int)this + 0x10) + 0x24))(*(int **)((int)this + 0x10));
+}
+
+// 0x004274a0
+void __thiscall
+C_ScriptModule::RotateFrame(void *this,int param_1,uint32_t param_2,int param_3,uint32_t *param_4)
+{
+  iVar3 = param_1;
+  if ((*(int *)((int)this + 0x84c) != 0) &&
+     (iVar2 = *(int *)((int)this + 0x850) - *(int *)((int)this + 0x84c) >> 2, iVar2 != 0)) {
+    do {
+      iVar1 = iVar2 * 4;
+      iVar2--;
+      if (*(int *)(*(int *)(*(int *)((int)this + 0x84c) - 4 + iVar1) + 0x10) == param_1) {
+        *(uint32_t *)(*(int *)(*(int *)((int)this + 0x84c) + iVar2 * 4) + 0x14) = param_2;
+        *(float *)(*(int *)(*(int *)((int)this + 0x84c) + iVar2 * 4) + 0x18) =
+             (float)param_3 * 0.017453292;
+        *(float *)(*(int *)(*(int *)((int)this + 0x84c) + iVar2 * 4) + 0x1c) =
+             (float)(int)param_4 * 0.017453292;
+        return;
+      }
+    } while (iVar2 != 0);
+  }
+  this_00 = _aligned_malloc(0x20,0x10);
+  if (this_00 == nullptr) {
+    param_1 = 0;
+  }
+  else {
+    param_1 = FUN_00428cc0(this_00,iVar3,param_2,param_3,(int)param_4);
+  }
+  C_ScriptModule::RememberFrame(this,iVar3,2);
+  piVar7 = *(int **)((int)this + 0x850);
+  if (*(int *)((int)this + 0x854) - (int)piVar7 >> 2 == 0) {
+    iVar3 = *(int *)((int)this + 0x84c);
+    if ((iVar3 == 0) || (uVar5 = (int)piVar7 - iVar3 >> 2, uVar5 < 2)) {
+      uVar5 = 1;
+    }
+    if (iVar3 == 0) {
+      iVar3 = 0;
+    }
+    else {
+      iVar3 = (int)piVar7 - iVar3 >> 2;
+    }
+    param_3 = iVar3 + uVar5;
+    iVar3 = param_3;
+    if (param_3 < 0) {
+      iVar3 = 0;
+    }
+    puVar4 = operator_new(iVar3 << 2);
+    param_4 = puVar4;
+    for (piVar6 = *(int **)((int)this + 0x84c); piVar6 != piVar7; piVar6 = piVar6 + 1) {
+      construct_copy4_42af90(puVar4,piVar6);
+      puVar4++;
+    }
+    uninitialized_fill_n4_42a830(puVar4,1,&param_1);
+    uninitialized_copy4_42a800(piVar7,*(uint32_t **)((int)this + 0x850),puVar4 + 1);
+    empty_function_429a60();
+    operator_delete(*(void **)((int)this + 0x84c));
+    puVar4 = param_4;
+    *(uint32_t **)((int)this + 0x854) = param_4 + param_3;
+    iVar3 = vector_size_e4_429040((int)this + 0x848);
+    *(uint32_t **)((int)this + 0x84c) = puVar4;
+    *(uint32_t **)((int)this + 0x850) = puVar4 + iVar3 + 1;
+  }
+  else {
+    uninitialized_copy4_42a800(piVar7,piVar7,piVar7 + 1);
+    uninitialized_fill_n4_42a830(*(uint32_t **)((int)this + 0x850),
+                 1 - ((int)*(uint32_t **)((int)this + 0x850) - (int)piVar7 >> 2),&param_1);
+    piVar6 = *(int **)((int)this + 0x850);
+    for (; piVar7 != piVar6; piVar7 = piVar7 + 1) {
+      *piVar7 = param_1;
+    }
+    *(int *)((int)this + 0x850) = *(int *)((int)this + 0x850) + 4;
+  }
+}
+
+// 0x004276f0
+void __fastcall FUN_004276f0(uint32_t param_1)
+{
+  _aligned_free((void *)param_1);
+}
+
+// 0x00427700
+void FUN_00427700(int param_1)
+{
+  if (((param_1 != 0) && (*(int *)(param_1 + 0xec) != 0)) &&
+     (iVar1 = *(int *)(*(int *)(param_1 + 0xec) + 4), iVar1 != 0)) {
+    C_Script::OnHit(iVar1);
+  }
+}
+

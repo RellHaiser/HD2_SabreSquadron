@@ -1,0 +1,763 @@
+00401000-00401000 n=1    bytes=42     ported=1   cls= :: 
+00401030-00405bd0 n=69   bytes=18723  ported=68  cls=@80f4d0 :: Track module | missions\%s\%s | tracks.dat
+00405c60-004066c0 n=8    bytes=2588   ported=8   cls=C_PhysSwingingObject :: 
+004066f0-0040aae0 n=57   bytes=16948  ported=57  cls=C_PhysDoor :: VOLB0%d | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s' 
+0040ab50-0040b8c0 n=18   bytes=3293   ported=18  cls=C_PhysDoor,C_PhysObject,C_PhysSwingingObject :: 
+0040b8e0-0040be60 n=5    bytes=1400   ported=5   cls=C_PhysFallingObject :: 
+0040be70-0040e0b0 n=14   bytes=8809   ported=14  cls=@80f5d8 :: 
+0040e130-0040e370 n=5    bytes=561    ported=5   cls=@80f5f0 :: 
+0040e380-0040eb10 n=7    bytes=2541   ported=7   cls=@80f608 :: 
+0040eda0-0040fa40 n=6    bytes=3207   ported=6   cls=@80f624 :: 
+0040fa50-0040fa50 n=1    bytes=37     ported=1   cls= :: 
+0040fa80-0040fac0 n=4    bytes=50     ported=4   cls= :: Physics
+0040fad0-00411590 n=44   bytes=6451   ported=44  cls=C_PhysicsModule,@80f690 :: angle | plotdira | break | cross | sightstop
+004115a0-00414510 n=57   bytes=11504  ported=49  cls=@80f690 :: _EnemyInRange | _PlayerInBox | _PlayerInRange
+00414520-004146d0 n=8    bytes=437    ported=7   cls= :: 
+00414750-00414780 n=4    bytes=42     ported=0   cls= :: 
+00414790-004218d0 n=172  bytes=50838  ported=113 cls=C_AnimationCache,C_Script :: Unknown chunk '%d'. | Broken chunk '%d'. | chunk error. | Frame not found : '%s'. | %s %d
+00421900-00421970 n=4    bytes=564    ported=3   cls=C_MeleeTrackerScript :: 
+00421b90-004235c0 n=11   bytes=6136   ported=3   cls=C_HumanScript,S_HumanCommand :: (MO) E_IT_MOVE : checkpoint  | (MO) E_IT_ATTACKMOVE : check
+004235e0-004235e0 n=1    bytes=37     ported=0   cls= :: 
+00423610-00427730 n=33   bytes=17328  ported=23  cls=C_ScriptModule :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | Rotated frame '%s' not found | (MO) Unknown chunk. | Script on frame '%s' don't k
+00427b20-00428f00 n=22   bytes=5013   ported=16  cls=C_ScriptModule :: missions\%s\%s | Scripts.dta | mpscripts.dta
+00428f50-0042afb0 n=74   bytes=7634   ported=31  cls=@815f90 :: Script | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s' 
+0042afc0-0042b650 n=4    bytes=3690   ported=0   cls=C_ScriptModule :: ScriptModule : send state fo | false | ScriptModule : send state fo | ScriptModule : receive state | ScriptModule : recieve state
+0042bf30-0042bf30 n=1    bytes=37     ported=0   cls= :: 
+0042bf60-0042d120 n=20   bytes=4042   ported=19  cls= :: Scripts\%s\%s | Scripts\include\%s |         | #include | FORMATION_Destroy
+0042d140-0042de10 n=7    bytes=3303   ported=6   cls= :: false
+0042de50-0042df10 n=4    bytes=189    ported=3   cls= :: FORMATION_Create
+0042e050-004310ee n=54   bytes=12136  ported=36  cls= :: _EnemyInRange | _PlayerInBox | _PlayerInRange
+004310f0-00431d90 n=17   bytes=2994   ported=0   cls= :: 
+00431da0-00431f40 n=4    bytes=217    ported=0   cls= :: 
+00431f50-00432390 n=5    bytes=1079   ported=3   cls= :: #name error
+004323b0-00433550 n=17   bytes=4417   ported=16  cls=C_SoundModule :: 
+00433580-00439000 n=100  bytes=22049  ported=64  cls=C_SoundModule,@80f858,@8103d8 :: Sound | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | sounds\%s
+00439010-00439010 n=1    bytes=37     ported=0   cls= :: 
+00439040-0043a5a0 n=27   bytes=5247   ported=19  cls= ::  @SOUND_TABLE : chapter not  |  @SOUND_TABLE : bad tablefil |  @SOUND_TABLE : tablefile no | Tables\IngameSounds.dat | Tables\IngameSounds.def
+0043a5b0-0043aa00 n=5    bytes=1104   ported=3   cls= :: 
+0043aa20-0043aa50 n=2    bytes=749    ported=1   cls= :: 
+0043ad80-0043c150 n=10   bytes=5033   ported=10  cls= :: 
+0043c170-0043cc60 n=16   bytes=2689   ported=16  cls= :: 
+0043cc70-0043d310 n=5    bytes=2149   ported=5   cls= :: sound | version | Version cache : BADFILETIME  | Version cache : BADFILEVERSI
+0043d520-0043db40 n=5    bytes=1615   ported=5   cls= :: 
+0043dbb0-0043dbb0 n=1    bytes=37     ported=1   cls= :: 
+0043dbe0-0043e1f0 n=15   bytes=1444   ported=15  cls=C_VersionsModule :: Versions
+0043e210-0043eb10 n=19   bytes=2153   ported=19  cls= :: version | ###### C_VersionMaster::Buil | trans | matid | particle
+0043eb20-0043f1e0 n=7    bytes=1861   ported=7   cls=C_VersionsModule :: 
+0043f2a0-00440080 n=9    bytes=4291   ported=9   cls= :: 
+004403b0-004403b0 n=1    bytes=37     ported=1   cls= :: 
+004403e0-00440420 n=4    bytes=72     ported=4   cls= :: 
+00440440-00443c90 n=44   bytes=14077  ported=44  cls=@80f990 :: MR_Particle
+00443cb0-00443cb0 n=1    bytes=37     ported=1   cls= :: 
+00443ce0-00447680 n=84   bytes=13773  ported=84  cls=C_ParticlesModule,@80f9e0,@80f9e4,@80f9e8 :: Particles | Could not load data from "ta | Could not load data from "ta | tables\effects.def | Effects.bin - Error: differe
+00447690-004476c0 n=2    bytes=101    ported=2   cls= :: 
+00447700-00447f60 n=5    bytes=2873   ported=5   cls=C_ParticlesModule :: 
+00448270-004486b0 n=6    bytes=2383   ported=5   cls=@80fa7c :: 
+00448c30-00448c30 n=1    bytes=37     ported=0   cls= :: 
+00448c60-00448c90 n=4    bytes=42     ported=0   cls= :: 
+00448ca0-0044a910 n=12   bytes=8398   ported=8   cls=@80fad8,@816030 :: FollowBulletSound | e_incm%d.wav | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s' 
+0044add0-0044ccb0 n=10   bytes=8600   ported=9   cls=@80fa60 :: flare | m_w_flare | Shot bullet:MatID je -1, na  | no frame
+0044cfc0-0044d570 n=8    bytes=2117   ported=7   cls=@80faa8 :: 
+0044d840-0044d840 n=1    bytes=37     ported=0   cls= :: 
+0044d870-0044d8a0 n=4    bytes=42     ported=0   cls= :: 
+0044d8b0-0044d8e0 n=4    bytes=42     ported=0   cls= :: 
+0044d8f0-0044ddb0 n=19   bytes=1086   ported=19  cls=C_ShotManager,@80fa60,@80fa7c :: ShotMgr
+0044ddc0-00453d10 n=102  bytes=23160  ported=96  cls=C_ShotManager,@80fa58,@80fa5c,@80fa7c :: shellFPV | shell3rd | trace | WeaponOdds | x_blood%02d.tga
+00453d20-00453d20 n=1    bytes=37     ported=0   cls= :: 
+00453d50-004558a0 n=26   bytes=7052   ported=23  cls= :: WeaponLight | humanzones | right leg down | right leg up | left leg down
+004559e0-004559e0 n=1    bytes=37     ported=1   cls= :: 
+00455a10-00455a50 n=5    bytes=100    ported=5   cls= :: 
+00455a90-004595d0 n=41   bytes=14415  ported=41  cls=C_SquadCommander,@80fbb0 :: 
+004595e0-004595f0 n=2    bytes=156    ported=2   cls= :: 
+00459690-0045b7b0 n=14   bytes=8279   ported=11  cls=C_SquadCommander :: 
+0045b7c0-0045d040 n=34   bytes=5858   ported=13  cls=C_SquadCommander :: 
+0045d050-0045d050 n=1    bytes=37     ported=0   cls= :: 
+0045d080-0045d0b0 n=4    bytes=42     ported=0   cls= :: 
+0045d0c0-0045fb50 n=73   bytes=10060  ported=66  cls=C_Team :: You are switched to %s | %s is dead !!! | %s killed an enemy soldier!!
+0045fb60-0045ff50 n=14   bytes=850    ported=10  cls=C_CoopTeam :: 
+00460390-00460a10 n=11   bytes=1594   ported=10  cls=C_Formation :: 
+00460a20-00460a20 n=1    bytes=37     ported=0   cls= :: 
+00460a50-004615b0 n=21   bytes=3261   ported=21  cls=C_TeamManager :: TeamMgr
+004617c0-00462300 n=17   bytes=2747   ported=16  cls=C_CoopTeam,C_Formation,C_Team,C_TeamBase :: 
+00462320-00463930 n=19   bytes=5992   ported=0   cls= :: 
+00463b70-00464b80 n=6    bytes=4522   ported=0   cls= :: 
+00464d90-00464d90 n=1    bytes=37     ported=0   cls= :: 
+00464dc0-00466110 n=41   bytes=6586   ported=0   cls=C_CameraModule,@80fd40 :: CameraModule | ###### (MO) Game camera not  | GameCamera | ###### (MO) Load camera file | tables\gamecam.set
+004668c0-004668c0 n=1    bytes=37     ported=0   cls= :: 
+004668f0-00466920 n=4    bytes=42     ported=0   cls= :: 
+00466930-0046beb0 n=10   bytes=22661  ported=0   cls=C_CameraModule :: Yaw %.2f, Pitch %.2f, Roll %
+0046c310-0046c310 n=1    bytes=37     ported=0   cls= :: 
+0046c340-0046cb20 n=3    bytes=4687   ported=0   cls=C_CameraModule :: cameraFPV* | INTERIERCLOSE | interierclose | NOINTERIER | nointerier
+0046d5d0-0046e790 n=19   bytes=5151   ported=0   cls=@80ff68,@80ff7c,@80ff90 :: SAFE : %d, MissionTime : %d,
+0046ea90-0046ede0 n=13   bytes=805    ported=0   cls=@80ffa4,@80ffb0,@80ffbc :: 
+0046ee30-0046ee30 n=1    bytes=37     ported=0   cls= :: 
+0046ee60-004702f0 n=31   bytes=5328   ported=0   cls=C_SightModule :: Sight
+00470500-004717b0 n=11   bytes=5166   ported=11  cls= :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | airsupport_speech | 90005601.wav | 90005603.wav
+004719c0-00471b50 n=6    bytes=1334   ported=6   cls= :: 90005600 | 90005602
+00471f30-00471f30 n=1    bytes=37     ported=1   cls= :: 
+00471f60-004724d0 n=20   bytes=1216   ported=20  cls=C_HeavyFireSupport,C_HeavyFireSupport_Module,I_HeavyFireSupport :: HeavyFireSupportModule
+004724e0-00472c00 n=9    bytes=1795   ported=9   cls=C_HeavyFireSupport_Module :: 
+00472c30-00473070 n=5    bytes=1585   ported=5   cls=C_HeavyFireSupport,C_HeavyFireSupport_Module :: 
+00473280-004732b0 n=2    bytes=1090   ported=2   cls= :: tables\airsupport.tbl
+004736d0-00473960 n=6    bytes=1367   ported=0   cls= :: 
+00473c60-00473c60 n=1    bytes=37     ported=0   cls= :: 
+00473c90-00473cc0 n=4    bytes=42     ported=0   cls= :: 
+00473cd0-00473d00 n=4    bytes=42     ported=0   cls= :: 
+00473d10-00474f80 n=30   bytes=4480   ported=0   cls=C_VertexAnimModule :: Vertex anim | Tables\Vertanim.def | \Vertanim.bin | Missions\
+00474f90-00474f90 n=1    bytes=37     ported=0   cls= :: 
+00474fc0-00474fc0 n=1    bytes=37     ported=0   cls= :: 
+00474ff0-00474ff0 n=1    bytes=37     ported=0   cls= :: 
+00475020-00475020 n=1    bytes=37     ported=0   cls= :: 
+00475050-00475050 n=1    bytes=37     ported=0   cls= :: 
+00475080-00475080 n=1    bytes=37     ported=0   cls= :: 
+004750b0-004750b0 n=1    bytes=37     ported=0   cls= :: 
+004750e0-004750e0 n=1    bytes=37     ported=0   cls= :: 
+00475110-00475110 n=1    bytes=37     ported=0   cls= :: 
+00475140-00476e30 n=54   bytes=6917   ported=43  cls=C_ActorsModule :: Actors
+00476e40-00476e40 n=1    bytes=37     ported=1   cls= :: 
+00476e70-00479770 n=49   bytes=10042  ported=47  cls=C_TemporaryActorsList :: Temp. Actors | C_TemporaryActorsList::ClCre | C_TemporaryActorsList::ClCre | C_TemporaryActorsList::ClCre | C_TemporaryActorsList::ClCre
+00479790-0047a6a0 n=10   bytes=3799   ported=0   cls= :: Object01 | Object03
+0047a6d0-0047ab80 n=12   bytes=1116   ported=0   cls= :: ptacekletacek
+0047ab90-0047ab90 n=1    bytes=37     ported=0   cls= :: 
+0047abc0-0047abf0 n=4    bytes=42     ported=0   cls= :: 
+0047ac00-0047e0b0 n=52   bytes=11004  ported=0   cls= :: missions\%s\%s | decorations.bin | decorator_sl.bin
+0047e0c0-00480150 n=20   bytes=8566   ported=0   cls= :: 
+00480360-00482130 n=23   bytes=7145   ported=0   cls= :: 
+00482140-00482d70 n=6    bytes=3206   ported=0   cls= :: missions\%s\%s | volumetrics.bin
+00482df0-00483ec0 n=10   bytes=4741   ported=0   cls= :: clouder2.tga | clouder.tga
+004840d0-00484e70 n=19   bytes=3359   ported=0   cls= :: missions\%s\%s | meshplayer.bin | GameMovie\%s
+00484e90-00484e90 n=1    bytes=37     ported=0   cls= :: 
+00484ec0-00485fd0 n=14   bytes=4458   ported=0   cls=C_GEffectsModule :: lensflare | *cam*
+00486080-0048c700 n=106  bytes=25261  ported=0   cls=C_GEffectsModule,@8102b8 :: GEffects | MP_Lightning | sea_amb | a_undw_ | a_nsea_
+0048c710-0048c710 n=1    bytes=37     ported=0   cls= :: 
+0048c740-0048d8f0 n=34   bytes=4242   ported=0   cls=C_LightMapGroupsModule :: LMapsGrp
+0048d900-0048de60 n=21   bytes=1838   ported=20  cls=@80f4d0,@8103d8 :: 
+0048e100-0048e100 n=1    bytes=37     ported=0   cls= :: 
+0048e130-0048eaa0 n=18   bytes=575    ported=0   cls=C_TShiftModule :: TShift
+0048eac0-0048eac0 n=1    bytes=37     ported=0   cls= :: 
+0048eaf0-0048eb20 n=4    bytes=42     ported=0   cls= :: 
+0048eb30-00490700 n=42   bytes=6755   ported=1   cls=C_GameProfile,C_TextBox :: NOSUB | Dialogs_DD.bin | Dialogs.bin | Text\%s\ | NO TEXT WITH THIS ID !!!
+00490710-004935d0 n=43   bytes=11682  ported=43  cls= :: FPV_HANDS | C_FirstPersonView: LoadAnimT | tables\FpvAnims.sav | flash | FPV_hands
+00493610-00493610 n=1    bytes=37     ported=1   cls= :: 
+00493640-00493670 n=4    bytes=42     ported=4   cls= :: 
+00493680-00494940 n=26   bytes=4552   ported=26  cls= :: kul_en | kul_us | kmps_rd%02d | kmps_bl%02d | strelka
+00494950-00496330 n=26   bytes=6455   ported=26  cls= :: SayTeam: %s | Say: %s
+00496360-00496360 n=1    bytes=37     ported=1   cls= :: 
+00496390-004963c0 n=4    bytes=42     ported=4   cls= :: 
+004963d0-00499f40 n=48   bytes=15433  ported=43  cls=C_TextBox :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | oklmpqrnOKLMPQRNtext | header | game_info
+0049a200-0049fea0 n=87   bytes=22962  ported=74  cls= :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | Camera pos: 0,0,0 | Border | sound_click
+0049fec0-004a4aa0 n=55   bytes=18397  ported=46  cls=C_TextBox,@8104e8,@8104ec,@8104f0 :: scroll16 | scroll15 | scroll14 | scroll13 | text_lockpick01
+004a4ab0-004a89a0 n=54   bytes=15653  ported=51  cls= :: objective | enemy | mapcamera | allied_active | scale
+004a89b0-004b0710 n=152  bytes=30492  ported=146 cls= :: lee_enfield | springfield | arisaka | scope | sniper
+004b0720-004b3060 n=24   bytes=9708   ported=23  cls= :: kurzor | rollmenu | %s - %s
+004b30b0-004b4860 n=11   bytes=6021   ported=10  cls= :: mp_vip* | medic* | silence* | AImode* | visibility*
+004b48d0-004b48d0 n=1    bytes=37     ported=0   cls= :: 
+004b4900-004b4930 n=4    bytes=42     ported=0   cls= :: 
+004b4940-004bf280 n=65   bytes=42623  ported=55  cls= :: Border | info%02d | aggresive | defensive | passive
+004bf2b0-004c11c0 n=21   bytes=7542   ported=20  cls= :: signals
+004c1200-004c7d10 n=73   bytes=26431  ported=1   cls=@810630,@815f90 :: projectile | GunShells | AIM%02d* | VERT%02d* | %s_f%02d_%02d
+004c7d30-004c7d30 n=1    bytes=37     ported=0   cls= :: 
+004c7d60-004c7d60 n=1    bytes=37     ported=0   cls= :: 
+004c7d90-004cff70 n=40   bytes=32966  ported=0   cls=@810700 :: 
+004cffb0-004d00b0 n=9    bytes=229    ported=0   cls= :: 
+004d00e0-004d0440 n=4    bytes=838    ported=0   cls= :: 
+004d0490-004d0490 n=1    bytes=37     ported=0   cls= :: 
+004d04c0-004d0570 n=6    bytes=157    ported=0   cls= :: 
+004d0590-004e0000 n=153  bytes=60159  ported=6   cls=C_Car :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | camera3RD* | send svcl car impuls | car do collision
+004e0010-004e0800 n=17   bytes=1571   ported=0   cls= :: 
+004e0890-004e2600 n=28   bytes=7375   ported=0   cls= :: matid | particle | PSMOKE | PFIRE | PARTID
+004e2630-004e2630 n=1    bytes=37     ported=0   cls= :: 
+004e2660-004e2670 n=2    bytes=6      ported=0   cls= :: 
+004e2680-004e26c0 n=4    bytes=105    ported=0   cls= :: 
+004e2700-004e2740 n=4    bytes=105    ported=0   cls= :: 
+004e2780-004e27c0 n=4    bytes=104    ported=0   cls= :: 
+004e2800-004e2840 n=4    bytes=105    ported=0   cls= :: 
+004e2880-004fcb80 n=153  bytes=99739  ported=0   cls=@8108f8 :: ft19r+.bmp | ft19r.bmp | STRIPR* | STRIPL* | SMOKE_MOTOR
+004fcba0-00509a50 n=25   bytes=52557  ported=0   cls= :: 
+00509a70-005172d0 n=13   bytes=55381  ported=0   cls= :: 
+00517340-0051c180 n=23   bytes=21276  ported=1   cls= :: PNEU_PUNC.WAV
+0051c760-0051e8a0 n=30   bytes=7901   ported=26  cls= :: 
+0051ea60-00520110 n=17   bytes=5863   ported=9   cls= :: 
+00520410-00520ed0 n=12   bytes=2757   ported=12  cls= :: 
+00520f20-00523a70 n=43   bytes=9762   ported=27  cls=@8109b8,@8109bc,@8109c0 :: 
+00523a80-00524430 n=11   bytes=2436   ported=10  cls= :: ctest.bin
+00524450-00524450 n=1    bytes=37     ported=1   cls= :: 
+00524480-00524480 n=1    bytes=37     ported=1   cls= :: 
+005244b0-00524b50 n=17   bytes=1768   ported=16  cls= :: 
+00524c30-00525130 n=20   bytes=698    ported=18  cls=C_AIController,C_SquadController :: 
+00525150-005342d0 n=107  bytes=59919  ported=94  cls=C_SquadController :: %s : Checking event and turn | %s : Checking event by head  | %s: Switching to %s | %s - Set preset prior keep d | %s - Set preset prior fire!
+00534310-00535c00 n=35   bytes=6567   ported=34  cls=C_SquadController :: %s - Action finished!
+00535e40-00536120 n=3    bytes=2905   ported=3   cls=C_SquadController :: 
+00536a00-00538c60 n=39   bytes=7898   ported=36  cls=C_SquadController :: 
+00538c80-0053b1d0 n=9    bytes=9132   ported=8   cls=C_SquadController :: (MO) C_PlayerAiBrain::Server | (MO) _S_CURRENTACTIONDESC::S | (MO) C_PlayerAiBrain::Server
+0053b2c0-0053b2c0 n=1    bytes=37     ported=1   cls= :: 
+0053b2f0-0053b320 n=4    bytes=42     ported=0   cls= :: 
+0053b330-00547880 n=88   bytes=48831  ported=67  cls=C_PlayerController,@810630,@810cfc :: Breath again... | Holding breath... | shdum
+00547890-0054cad0 n=43   bytes=20612  ported=42  cls=C_EnemyController :: 
+0054cb40-0054fa00 n=26   bytes=12222  ported=24  cls=C_EnemyController :: 
+0054fc10-00551690 n=15   bytes=7207   ported=14  cls=@8110e4 :: 
+005518c0-005599f0 n=80   bytes=32068  ported=74  cls=C_EnemyController :: 
+00559a20-0055d130 n=34   bytes=12616  ported=32  cls=C_SniperController :: 
+0055d1b0-0055dbc0 n=17   bytes=3349   ported=16  cls= :: 
+0055df60-00560710 n=38   bytes=9462   ported=26  cls= :: 
+00560720-00560ac0 n=13   bytes=1621   ported=12  cls= :: 
+00560dd0-00561280 n=10   bytes=2046   ported=9   cls= :: 
+00561710-005639b0 n=21   bytes=8713   ported=0   cls= :: 
+005639c0-00563c70 n=10   bytes=1272   ported=9   cls= :: 
+00563f20-00563f20 n=1    bytes=37     ported=0   cls= :: 
+00563f50-0056a6d0 n=28   bytes=26714  ported=0   cls= :: 
+0056a8a0-0056a8b0 n=2    bytes=6      ported=0   cls= :: 
+0056a8c0-0056edc0 n=24   bytes=17502  ported=0   cls= :: 
+0056ede0-0056ede0 n=1    bytes=37     ported=0   cls= :: 
+0056ee10-0056ee40 n=4    bytes=42     ported=0   cls= :: 
+0056ee50-00578710 n=90   bytes=38101  ported=78  cls=C_AIController,C_HumanController :: shdum | %s %s | E_BF_LIE | E_BF_CROUCH | E_BF_STAND
+00578740-00579d50 n=6    bytes=7119   ported=6   cls= :: 
+0057a340-00580550 n=50   bytes=25211  ported=45  cls=C_AIController :: 
+00580760-00581f20 n=12   bytes=6117   ported=8   cls= :: 
+00581fc0-00581fc0 n=1    bytes=37     ported=1   cls= :: 
+00581ff0-0058b660 n=202  bytes=36188  ported=155 cls=C_EnemyController,C_HumanController,C_RemoteController,C_SquadController :: 
+0058b690-0058c4d0 n=9    bytes=3609   ported=8   cls=C_HumanController,C_RemoteController :: shdum
+0058c510-0058d720 n=10   bytes=4695   ported=9   cls=S_HumanCommand :: 
+0058d7e0-00591f00 n=77   bytes=17909  ported=76  cls=C_ScriptedController :: 
+00592110-005941b0 n=14   bytes=7984   ported=13  cls=C_RemoteController :: 
+005941d0-00595710 n=13   bytes=5422   ported=0   cls= :: 
+005957a0-005957d0 n=2    bytes=2376   ported=0   cls= :: 
+00596120-00596120 n=1    bytes=37     ported=0   cls= :: 
+00596150-00596160 n=2    bytes=366    ported=0   cls= :: 
+005962d0-005962e0 n=2    bytes=366    ported=0   cls= :: 
+00596450-00596460 n=2    bytes=366    ported=0   cls= :: 
+005965d0-005965e0 n=2    bytes=366    ported=0   cls= :: 
+00596750-00596760 n=2    bytes=366    ported=0   cls= :: 
+005968d0-005968e0 n=2    bytes=366    ported=0   cls= :: 
+00596a50-00596a60 n=2    bytes=366    ported=0   cls= :: 
+00596bd0-00596be0 n=2    bytes=366    ported=0   cls= :: 
+00596d50-00596d60 n=2    bytes=366    ported=0   cls= :: 
+00596ed0-00596ee0 n=2    bytes=366    ported=0   cls= :: 
+00597050-00597060 n=2    bytes=366    ported=0   cls= :: 
+005971d0-00597b50 n=12   bytes=2371   ported=0   cls= :: 
+00597c20-00598460 n=9    bytes=2106   ported=0   cls= :: 
+00598520-0059aef0 n=8    bytes=10673  ported=0   cls= :: 
+0059af00-0059bb60 n=5    bytes=3342   ported=0   cls= :: 
+0059bd80-0059bd80 n=1    bytes=37     ported=0   cls= :: 
+0059bdb0-0059bde0 n=4    bytes=42     ported=0   cls= :: 
+0059bdf0-0059be20 n=4    bytes=42     ported=0   cls= :: 
+0059be30-005ab2e0 n=339  bytes=58438  ported=321 cls=C_EnemyController,C_Human,C_HumanController,C_NeutralController :: Human | %s doesnt have speechset.. u | %s have empty speechset.. Pl | Unknow damage zone !!!! | SvDropItem: failed - _TempAc
+005ab300-005ac4c0 n=59   bytes=3891   ported=59  cls= :: 
+005ac4d0-005ac4d0 n=1    bytes=37     ported=1   cls= :: 
+005ac500-005ac770 n=8    bytes=958    ported=6   cls= :: 
+ControlsEx -  | 
+Controls -  | (Plr sig) MOVE_HOLD_POS
+005ac920-005ac920 n=1    bytes=37     ported=1   cls= :: 
+005ac950-005af110 n=31   bytes=9388   ported=30  cls=C_HumanEventPool :: 
+005af120-005af780 n=49   bytes=1144   ported=49  cls= :: 
+005af7a0-005b0e10 n=38   bytes=5011   ported=33  cls= :: Tables\speech.set
+005b0e20-005b3080 n=56   bytes=8332   ported=56  cls=@810cfc :: %s DONT HAVE ITEM %s (%d) in | %s DONT HAVE ITEM %s (%d) in | %s DONT HAVE ITEM %s (%d) as | %s DONT HAVE ITEM %s (%d) in | %s DONT HAVE ITEM %s (%d) in
+005b30d0-005b30d0 n=1    bytes=37     ported=1   cls= :: 
+005b3100-005b58d0 n=33   bytes=9923   ported=0   cls=C_AnimationActor :: Animation | BODYCOLB%02d | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | particle
+005b5900-005b66d0 n=28   bytes=3258   ported=3   cls=C_AnimationActor :: Collision frame name | Particle ID | Show no info flag | Actor name text ID | Sound ID from chapter explos
+005b66e0-005b66e0 n=1    bytes=37     ported=0   cls= :: 
+005b6710-005b7ec0 n=37   bytes=5882   ported=0   cls=C_AnimationActor,C_ItemActor :: 
+005b7fe0-005b7fe0 n=1    bytes=37     ported=0   cls= :: 
+005b8010-005b8610 n=17   bytes=1947   ported=0   cls=C_Clock :: Clock
+005b8830-005b88b0 n=7    bytes=62     ported=6   cls=C_Clock :: 
+005b88c0-005ba070 n=27   bytes=5917   ported=0   cls=C_Pike :: 
+005ba0d0-005ba0d0 n=1    bytes=37     ported=0   cls= :: 
+005ba100-005bbb70 n=24   bytes=7069   ported=0   cls=C_FowlGenerator,C_Pike :: FowlGenerator | ptacekletacek | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | _bird_%d_%d
+005bbd80-005bbd80 n=1    bytes=37     ported=0   cls= :: 
+005bbdb0-005befa0 n=44   bytes=12420  ported=0   cls=C_FowlGenerator,C_Train :: Train | l_sts%d%c.wav | l_jar.wav | l_brake.wav | l_braklp.wav
+005befb0-005c0a30 n=10   bytes=7383   ported=0   cls=C_Train :: 
+005c0ce0-005c18c0 n=7    bytes=3636   ported=6   cls=C_MeleeTracker :: 
+005c1b50-005c4b50 n=13   bytes=12214  ported=9   cls= :: Kousnul jsem humana
+005c4b60-005c5bf0 n=8    bytes=5722   ported=7   cls= :: 
+005c6220-005c6c70 n=8    bytes=2650   ported=5   cls= :: 
+005c6ce0-005c7b00 n=16   bytes=3124   ported=14  cls=@8121d0 :: 
+005c7d00-005c8b30 n=17   bytes=4799   ported=16  cls=C_MeleeTracker :: col dummy | col dummy2 | col dummy1 | anim2
+005c9050-005cb090 n=18   bytes=8132   ported=1   cls= :: 
+005cb0a0-005ce250 n=61   bytes=12226  ported=56  cls=C_MeleeTrackerAI,C_MeleeTrackerController :: Found target %s
+005ce280-005ce280 n=1    bytes=37     ported=0   cls= :: 
+005ce2b0-005cf000 n=21   bytes=3384   ported=9   cls=C_MeleeTrackerAI,C_MeleeTrackerController,@8120c0,@8120c4 :: 
+005cf070-005cf0f0 n=7    bytes=73     ported=6   cls= :: 
+005cf100-005cf660 n=10   bytes=1356   ported=7   cls= :: 
+005cf690-005cfbb0 n=24   bytes=1171   ported=23  cls= :: 
+005cfbe0-005cfc70 n=5    bytes=230    ported=4   cls= :: 
+005cfcf0-005d0950 n=4    bytes=3125   ported=3   cls=@8121d0 :: 
+005d0980-005d1f50 n=4    bytes=5478   ported=3   cls=C_MeleeTracker :: 
+005d1fd0-005d32b0 n=20   bytes=4574   ported=16  cls=C_MeleeTrackerAI,C_MeleeTrackerController :: 
+005d32e0-005d49f0 n=11   bytes=5735   ported=4   cls=C_MeleeTracker :: 
+005d4a00-005d4a00 n=1    bytes=37     ported=0   cls= :: 
+005d4a30-005d79c0 n=61   bytes=11523  ported=43  cls=C_MeleeTracker,C_MeleeTrackerAI,C_MeleeTrackerController,@8121d0 :: bcdefghijklmnopqrstuvwxy | Enemy(%s) lost !!! | Enemy(%s) spotted !!! | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s' 
+005d79e0-005d82b0 n=4    bytes=3224   ported=3   cls=C_MeleeTracker :: 
+005d86c0-005d86f0 n=2    bytes=145    ported=1   cls= :: 
+005d8760-005d8760 n=1    bytes=37     ported=0   cls= :: 
+005d8790-005d8790 n=1    bytes=37     ported=0   cls= :: 
+005d87c0-005db770 n=22   bytes=11954  ported=0   cls=C_Bike :: bike_ride | bike_legs | %s_ridedupl | kliky | riditka
+005db780-005db780 n=1    bytes=37     ported=0   cls= :: 
+005db7b0-005de650 n=28   bytes=11687  ported=0   cls=C_Fish :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s' 
+005de660-005de660 n=1    bytes=37     ported=0   cls= :: 
+005de690-005de730 n=5    bytes=149    ported=0   cls= :: Submarine
+005de750-005dfca0 n=21   bytes=5664   ported=0   cls= :: SEAT%02d | sroub | camera3RD* | BODYCOLB00
+005dfde0-005e0230 n=12   bytes=993    ported=0   cls= :: %1(m) | Max waterlevel
+005e0240-005e0cc0 n=14   bytes=2836   ported=0   cls= :: cameraFPV* | camera3RD*
+005e0da0-005e1d90 n=10   bytes=4684   ported=0   cls= :: 
+005e2040-005e2040 n=1    bytes=37     ported=0   cls= :: 
+005e2070-005e29a0 n=25   bytes=2220   ported=0   cls=C_WireCut :: WireCut
+005e29e0-005e29e0 n=1    bytes=37     ported=0   cls= :: 
+005e2a10-005e2bc0 n=17   bytes=327    ported=0   cls=C_NullActor,C_WireCut :: NullActor
+005e2bd0-005e2bd0 n=1    bytes=37     ported=0   cls= :: 
+005e2c00-005e3a10 n=11   bytes=3515   ported=0   cls=C_AirAttack,C_NullActor :: AirAttack
+005e3a20-005ea2c0 n=57   bytes=26198  ported=0   cls=C_AirAttack :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | sand%02d.wav | whizz%d.wav | kul_d%d.wav
+005ea2d0-005ea2d0 n=1    bytes=37     ported=0   cls= :: 
+005ea300-005ebbd0 n=26   bytes=6665   ported=0   cls=C_Ladder :: Ladder | matid | ' nenalezen dumac 'down' | ' nenalezen dumac 'up' | TS: chyba - u zebriku '
+005ebde0-005ebde0 n=1    bytes=37     ported=0   cls= :: 
+005ebe10-005eda60 n=34   bytes=7631   ported=0   cls=C_MPZone :: vlajka | New zone owner: Axis | New zone owner: Alied | New zone owner: Neutral
+005edcc0-005edcc0 n=1    bytes=37     ported=0   cls= :: 
+005edcf0-005f29b0 n=78   bytes=19060  ported=0   cls=C_Junkers88 :: Junkers88 | la_Bf109Canyon | trace | WeaponOdds | vrtule_r00
+005f29c0-005f29f0 n=2    bytes=707    ported=0   cls=C_Junkers88 :: 
+005f2c90-005f3110 n=13   bytes=1239   ported=0   cls=C_Junkers88 :: SEAT%02d | weapon_r00 | cameraFPV*
+005f31c0-005f6ed0 n=45   bytes=15201  ported=0   cls=C_Junkers88 :: left_wing | right_wing | #bfshotdwn%d | #adamage0 | #airfightdum
+005f6f50-005f8130 n=12   bytes=4487   ported=0   cls=C_Junkers88 :: #jushotdwn%d | #adamage%d
+005f8150-005f94c0 n=24   bytes=5264   ported=0   cls=C_Junkers88 :: 
+005f96d0-005f96d0 n=1    bytes=37     ported=0   cls= :: 
+005f9700-005fd970 n=43   bytes=16618  ported=0   cls=C_SupplyBox :: SupplyBox | Ammo%d | Ammo0%d | Steny02 | morph
+005fd990-005fd990 n=1    bytes=37     ported=0   cls= :: 
+005fd9c0-005fd9c0 n=1    bytes=37     ported=0   cls= :: 
+005fd9f0-005fddc0 n=24   bytes=783    ported=0   cls=C_Debris :: Debris
+005fddd0-005fddd0 n=1    bytes=37     ported=0   cls= :: 
+005fde00-005fefb0 n=30   bytes=4613   ported=0   cls=C_Debris,C_Mine :: Actor_mine
+005ff120-005ff120 n=1    bytes=37     ported=0   cls= :: 
+005ff150-006029f0 n=39   bytes=14116  ported=0   cls=C_Door,C_Mine :: d2handle | dhandle
+00602a10-00602a10 n=1    bytes=37     ported=0   cls= :: 
+00602a40-00602ae0 n=5    bytes=149    ported=0   cls= :: StaticWeapon
+00602b00-00605f20 n=61   bytes=13585  ported=0   cls=C_StaticWeapon :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | SEAT%02d | cameraFPV* | camera3RD*
+00606250-00606250 n=1    bytes=37     ported=0   cls= :: 
+00606280-0060a220 n=41   bytes=15927  ported=0   cls=C_Barrel,C_StaticWeapon :: Barrel | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | %s_destroyed
+0060a250-0060a280 n=2    bytes=1119   ported=0   cls=C_Barrel :: 
+0060a6c0-0060a6c0 n=1    bytes=37     ported=0   cls= :: 
+0060a6f0-0060b570 n=25   bytes=3612   ported=0   cls=C_Radio :: Radio
+0060b5e0-0060b5e0 n=1    bytes=37     ported=0   cls= :: 
+0060b610-0060c130 n=23   bytes=2662   ported=0   cls=C_PhotoPlace,C_Radio :: Photo place
+0060c140-0060c140 n=1    bytes=37     ported=0   cls= :: 
+0060c170-0060da70 n=34   bytes=6089   ported=0   cls=C_ExplosivePlace,C_PhotoPlace :: Explosive place | explosive_off | explosive_on | Exploded, you should not see | Hidden, you should not see t
+0060da80-0060da80 n=1    bytes=37     ported=0   cls= :: 
+0060dab0-0060eb60 n=29   bytes=4535   ported=0   cls=C_DocumentPlace,C_ExplosivePlace :: Document place
+0060ed60-0060ed60 n=1    bytes=37     ported=0   cls= :: 
+0060ed90-0060fe50 n=27   bytes=4521   ported=0   cls=C_DocumentPlace,C_TSExplosion :: Explosion [TS] | x_expl00.tga
+00610010-00610010 n=1    bytes=37     ported=1   cls= :: 
+00610040-00610040 n=1    bytes=37     ported=1   cls= :: 
+0061006e-00611140 n=20   bytes=4162   ported=20  cls=C_Actor,C_Car,C_Clock,C_WireCut :: Missing actor name!! | matid
+006111d0-006115b0 n=5    bytes=1151   ported=5   cls=C_Car :: 
+00611680-00611680 n=1    bytes=37     ported=1   cls= :: 
+006116b0-006116e0 n=4    bytes=42     ported=4   cls= :: 
+006116f0-00611720 n=4    bytes=42     ported=4   cls= :: 
+00611730-00612a60 n=20   bytes=6543   ported=1   cls=C_Actor,C_SpawnPoint :: SpawnPoint | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | _PLAYER_%2d
+006131a0-006131a0 n=1    bytes=37     ported=0   cls= :: 
+006131d0-00613e10 n=25   bytes=3587   ported=0   cls=C_SpawnPoint,C_Switch :: Switch
+00614090-00614090 n=1    bytes=37     ported=0   cls= :: 
+006140c0-006140f0 n=4    bytes=42     ported=0   cls= :: 
+00614100-00616b80 n=50   bytes=10526  ported=0   cls=@813ab0 :: bload mission | Load Last save | bload lastsave | text_h&dversion | text_list of profiles
+00616ba0-00616ba0 n=1    bytes=37     ported=0   cls= :: 
+00616bd0-00616c00 n=4    bytes=42     ported=0   cls= :: 
+00616c10-0061be20 n=70   bytes=20242  ported=0   cls= :: ammo_num | item_num | item_id | value | version
+0061be50-0061be50 n=1    bytes=37     ported=0   cls= :: 
+0061be80-0061beb0 n=4    bytes=42     ported=0   cls= :: 
+0061bec0-00620e90 n=30   bytes=19910  ported=0   cls= :: text_h&dversion | text_screen | text_profile00 | text_date01 | text_date00
+00620f00-00620f00 n=1    bytes=37     ported=0   cls= :: 
+00620f30-00620f60 n=4    bytes=42     ported=0   cls= :: 
+00620f70-00623b40 n=14   bytes=11041  ported=0   cls=C_MainMenu :: 
+00623d80-00623d80 n=1    bytes=37     ported=0   cls= :: 
+00623db0-00623de0 n=4    bytes=42     ported=0   cls= :: 
+00623df0-00628550 n=44   bytes=17732  ported=0   cls=C_MainMenu,@813ab8,@813abc,@813ac0 :: options | text_h&dversion | text_list of profiles | bexit | text_screen
+00628560-00628560 n=1    bytes=37     ported=0   cls= :: 
+00628590-006285c0 n=4    bytes=42     ported=0   cls= :: 
+006285d0-0062f3d0 n=34   bytes=27963  ported=0   cls=C_MainMenu :: text_h&dversion | text_screen | bback | text_maplist | text_maplist preset
+0062f400-0062f400 n=1    bytes=37     ported=0   cls= :: 
+0062f430-0062f460 n=4    bytes=42     ported=0   cls= :: 
+0062f470-00632060 n=15   bytes=10563  ported=0   cls=C_MainMenu :: allied | text_h&dversion | text_screen | text_ | text_team status
+006320a0-006320a0 n=1    bytes=37     ported=0   cls= :: 
+006320d0-00632100 n=4    bytes=42     ported=0   cls= :: 
+00632110-00633370 n=12   bytes=4200   ported=0   cls=C_MainMenu :: byes*
+006333e0-006333e0 n=1    bytes=37     ported=0   cls= :: 
+00633410-00633440 n=4    bytes=42     ported=0   cls= :: 
+00633450-00636e00 n=25   bytes=14828  ported=0   cls=C_MainMenu :: text_h&dversion | text_screen | bback | bjoin game | bfavorites
+00637010-00637010 n=1    bytes=37     ported=0   cls= :: 
+00637040-00637070 n=4    bytes=42     ported=0   cls= :: 
+00637080-00637fd0 n=11   bytes=5331   ported=0   cls=C_MainMenu :: byes* | binput | 11001 | binput02 | binput01
+006385b0-006385b0 n=1    bytes=37     ported=0   cls= :: 
+006385e0-00638610 n=4    bytes=42     ported=0   cls= :: 
+00638620-00638aa0 n=7    bytes=1795   ported=0   cls=C_MainMenu :: text_h&dversion | text_screen | bback | bshort00 | text_show servers
+00638d50-00638d50 n=1    bytes=37     ported=0   cls= :: 
+00638d80-00638db0 n=4    bytes=42     ported=0   cls= :: 
+00638dc0-0063c2a0 n=17   bytes=12266  ported=0   cls=C_MainMenu :: bload mission | bload lastsave | text_h&dversion | text_list of profiles | scroll00
+0063c2c0-0063ddb0 n=30   bytes=5556   ported=0   cls=@813b10 :: 
+0063de10-0063de10 n=1    bytes=37     ported=0   cls= :: 
+0063de40-00640500 n=40   bytes=9536   ported=0   cls=@813b0c,@813b10,@813b2c,@813b48 :: MS UI Gothic | Lucida Sans Unicode | Japanese | FontConfig.hxml | EnglishUS
+00640510-00641f90 n=26   bytes=6590   ported=0   cls=@813b48,@813b68 :: 
+00641fb0-00643ab0 n=5    bytes=6988   ported=0   cls= :: 
+00643b20-0064d060 n=138  bytes=36389  ported=0   cls=C_TextBox,@8154a4,@8158f8 :: 
+0064d080-0064da80 n=7    bytes=697    ported=0   cls= :: 
+0064daa0-0064dad0 n=4    bytes=42     ported=0   cls= :: 
+0064dae0-00653ea0 n=133  bytes=23131  ported=0   cls=@813dd0,@813e58,@813ee0,@813f68 :: hktext* | text* | barrow down* | barrow up* | skill_value*
+00653ec0-00653ec0 n=1    bytes=37     ported=0   cls= :: 
+00653ef0-00653f20 n=4    bytes=42     ported=0   cls= :: 
+00653f30-00655660 n=51   bytes=5547   ported=0   cls=@813dd0,@814cb0 :: no_empty* | no_full* | yes_empty* | yes_full* | noactived_empty*
+00655690-0065a5c0 n=86   bytes=18777  ported=0   cls=@813dd0,@813ee0,@814188,@814298 :: selector* | text* | bTeam | binput* | scroll*
+0065a5f0-0065ae70 n=11   bytes=2122   ported=0   cls=@8147e8 :: header*
+0065ae90-0065ca30 n=32   bytes=6783   ported=0   cls=@814188,@814298,@814d38 :: actived* | normal* | select*
+0065ca50-00663dd0 n=132  bytes=28363  ported=0   cls=@813dd0,@813e58,@813ee0,@814430 :: ERROR : cannot find frame :  | ERROR : cannot create item : | text* | game difficulty | text18
+00663df0-00665ce0 n=41   bytes=7682   ported=0   cls=@813f68,@815288 :: inactived* | actived* | normal* | sliderbase* | slider*
+00665d40-00667b30 n=15   bytes=7232   ported=0   cls=@813dd0,@813e58,@814980 :: xvoice01 | xdedicated01 | xpassword01 | xvoice | xdedicated
+00667df0-006683c0 n=9    bytes=1458   ported=0   cls=@814540 :: GameMovie\%s2
+006683f0-0066a2a0 n=30   bytes=7665   ported=0   cls=@813dd0,@815540,@8156b8,@815918 :: byes* | description | description01 | text01 | new_medal
+0066a2c0-0066ab70 n=22   bytes=2404   ported=0   cls=@8155d0 :: x_kursor.tga | CURZOR
+0066ad50-0066ad50 n=1    bytes=37     ported=0   cls= :: 
+0066ad80-0066adb0 n=4    bytes=42     ported=0   cls= :: 
+0066adc0-0066adf0 n=4    bytes=42     ported=0   cls= :: 
+0066ae00-0066ae60 n=5    bytes=230    ported=0   cls= :: 
+0066af00-0066ed80 n=48   bytes=15437  ported=0   cls=C_EquipmentMenu,C_GameMenu,C_MainMenu,@815540 :: sound_click | button.wav | ambient | ActivCamera | KEY VALUE :: %d 
+
+0066edb0-0066f0a0 n=19   bytes=608    ported=13  cls=C_CampaignNode,C_MovieState :: 
+0066f0b0-0066f0b0 n=1    bytes=37     ported=0   cls= :: 
+0066f0e0-0066f110 n=4    bytes=42     ported=0   cls= :: 
+0066f120-00672a30 n=35   bytes=15709  ported=0   cls=@8157cc :: scroll14 | scroll13 | description | hlcpct01 | hlcpct02
+00672f80-00672ff0 n=6    bytes=62     ported=0   cls= :: 
+00673000-00673030 n=4    bytes=42     ported=0   cls= :: 
+00673040-00677630 n=38   bytes=17780  ported=1   cls=C_EquipmentMenu,@8156b8 :: tables\HumanStore.def | scroll14 | scroll13 | hlcpct01 | hlcpct00
+00677840-00677890 n=4    bytes=52     ported=0   cls= :: 
+006778a0-006778d0 n=4    bytes=42     ported=0   cls= :: 
+006778e0-0067a9b0 n=23   bytes=12313  ported=0   cls=C_EquipmentMenu :: 
+0067a9c0-0067a9c0 n=1    bytes=37     ported=0   cls= :: 
+0067a9f0-0067aa20 n=4    bytes=42     ported=0   cls= :: 
+0067aa30-0067cb60 n=20   bytes=10582  ported=0   cls=@8157c4,@815e8c :: GR_Other | P_visualstore | filter | selitem08 | GR_Dresses
+0067d420-0067e3b0 n=13   bytes=3904   ported=0   cls= :: user_presets.def | GameData\presets.def | User preset6 | User preset5 | User preset4
+0067e3e0-0067e850 n=9    bytes=1634   ported=0   cls= :: GameData\miss_itm.def
+0067ea90-0067ea90 n=1    bytes=37     ported=0   cls= :: 
+0067eac0-0067eaf0 n=4    bytes=42     ported=0   cls= :: 
+0067eb00-00682bb0 n=74   bytes=15642  ported=0   cls=C_EquipmentMenuBase,C_GameMenu,C_GameState,C_MenuState :: options | OPTIONS | player screen | PLAYER SCREEN | player screen 2
+00682bd0-00682bd0 n=1    bytes=37     ported=0   cls= :: 
+00682c00-00682c30 n=4    bytes=42     ported=0   cls= :: 
+00682c40-00686bd0 n=28   bytes=16086  ported=0   cls=C_GameMenu,@8156b8 :: description | text_h&dversion | bback | baccept | soldier type
+00686bf0-00686bf0 n=1    bytes=37     ported=0   cls= :: 
+00686c20-00686c50 n=4    bytes=42     ported=0   cls= :: 
+00686c60-00688130 n=13   bytes=5297   ported=0   cls=C_GameMenu :: 
+00688250-00688250 n=1    bytes=37     ported=0   cls= :: 
+00688280-00688280 n=1    bytes=37     ported=0   cls= :: 
+006882b0-006882e0 n=4    bytes=42     ported=0   cls= :: 
+006882f0-0068a5c0 n=32   bytes=8662   ported=0   cls=C_VideoState,@8158f8 :: D_Outro | Outro2 | credits | IntroAlps.bik | GameMovie\%s
+0068a5d0-0068a5d0 n=1    bytes=37     ported=0   cls= :: 
+0068a600-0068a630 n=4    bytes=42     ported=0   cls= :: 
+0068a640-0068bce0 n=15   bytes=6245   ported=0   cls= :: MP Connect console | PASSWORD | password | confirm | byes*
+0068bf50-0068bf50 n=1    bytes=37     ported=0   cls= :: 
+0068bf80-0068bfb0 n=4    bytes=42     ported=0   cls= :: 
+0068bfc0-0068c4f0 n=13   bytes=1274   ported=0   cls= :: f_s_tutorial | Campaign_debrief | text01 | textbar | title
+0068c520-0068c520 n=1    bytes=37     ported=0   cls= :: 
+0068c550-0068c580 n=4    bytes=42     ported=0   cls= :: 
+0068c590-006907b0 n=27   bytes=16839  ported=0   cls= :: DIARY | diary | debriefing | text_h&dversion | bexit
+00690900-00690900 n=1    bytes=37     ported=0   cls= :: 
+00690930-00690960 n=4    bytes=42     ported=0   cls= :: 
+00690970-00696ef0 n=47   bytes=25204  ported=0   cls=@815918 :: tables\HumanStore.def | Medal | description | DESCRIPTION | SELECTION SCREEN
+00696f00-00696f00 n=1    bytes=37     ported=0   cls= :: 
+00696f30-00696f60 n=4    bytes=42     ported=0   cls= :: 
+00696f70-00698230 n=12   bytes=5470   ported=0   cls=C_VideoState :: tables\HumanStore.def | CONFIRM | confirm | HERO STATS | heros_screen
+00698720-00698720 n=1    bytes=37     ported=1   cls= :: 
+00698750-00698780 n=4    bytes=42     ported=4   cls= :: 
+00698790-0069f5e0 n=101  bytes=27355  ported=100 cls=C_game :: %s%d %s%d | Warmup finished | Objective %d. failed critica | Objective %d. failed | Objective %d. finished
+0069f5f0-0069f900 n=5    bytes=842    ported=1   cls= :: Japanese test version
+0069f970-0069f970 n=1    bytes=37     ported=0   cls= :: 
+0069f9a0-0069fab0 n=6    bytes=278    ported=6   cls= :: 
+0069faf0-006a5a20 n=59   bytes=22939  ported=56  cls= :: %s %s | %c. %s | %s (%s) %s | e_f001.bmp | x_fc_a.bmp
+006a5a50-006a6010 n=12   bytes=1671   ported=10  cls= :: 
+006a6220-006a69c0 n=12   bytes=2303   ported=11  cls= :: NETCDKEY | PARENTLOCK | LASTPROFIL | game.cfg | PARENTLOC
+006a6b80-006a7a50 n=20   bytes=3629   ported=19  cls= :: IntroBurma.bik | IntroAlps.bik | D_Outro.bik | D_InBurgundy2.bik | D_InBurgundy1.bik
+006a7a60-006a8390 n=7    bytes=2204   ported=6   cls= :: 
+006a83c0-006a83c0 n=1    bytes=37     ported=0   cls= :: 
+006a83f0-006a8420 n=4    bytes=42     ported=0   cls= :: 
+006a8430-006acaf0 n=38   bytes=17582  ported=33  cls= :: German | Spanish | Czech | Barra espaciad. | <Move_forward>
+006acb10-006ae590 n=32   bytes=6336   ported=0   cls= :: server
+ | voicechat %s
+ | teamlives %d
+ | spawnonstart %d
+ | allowcrosshair %d
+
+006ae5b0-006ae5b0 n=1    bytes=37     ported=0   cls= :: 
+006ae5e0-006ae610 n=4    bytes=42     ported=0   cls= :: 
+006ae620-006ae650 n=4    bytes=42     ported=0   cls= :: 
+006ae660-006b2ba0 n=49   bytes=16853  ported=42  cls= :: PlayersProfiles | Profile_%d | LASTSAVETEXT | LASTSAVE | LASTCARNAGE
+006b2bc0-006b2bc0 n=1    bytes=37     ported=0   cls= :: 
+006b2bf0-006b2c20 n=4    bytes=42     ported=0   cls= :: 
+006b2c30-006b3a70 n=20   bytes=4219   ported=16  cls= :: PlayersProfiles | %s\%s\%s | Options.bin
+006b3d30-006b3d30 n=1    bytes=37     ported=0   cls= :: 
+006b3d60-006b3d90 n=4    bytes=42     ported=0   cls= :: 
+006b3da0-006b4950 n=11   bytes=2947   ported=7   cls= :: quick
+006b4960-006b4ad0 n=5    bytes=789    ported=4   cls=S_PlayMode :: 
+006b4c90-006b4c90 n=1    bytes=37     ported=0   cls= :: 
+006b4cc0-006b4cf0 n=4    bytes=42     ported=0   cls= :: 
+006b4d00-006b4d30 n=4    bytes=42     ported=0   cls= :: 
+006b4d40-006b84b0 n=92   bytes=13515  ported=82  cls=C_Campaign,C_CampaignContainer,C_CampaignNode,C_GameProfile :: tables\HumanStore.def | Japan | %s\FontConfig.hxml | Russian | english
+006b84c0-006b84c0 n=1    bytes=37     ported=0   cls= :: 
+006b84f0-006b8520 n=4    bytes=42     ported=0   cls= :: 
+006b8530-006b8560 n=4    bytes=42     ported=0   cls= :: 
+006b8570-006ba810 n=56   bytes=7880   ported=55  cls=C_Campaign,C_CampaignNode,C_CampaignScreen,C_MissionDef :: 
+006ba820-006c07b0 n=47   bytes=24414  ported=45  cls=C_Campaign,C_CampaignContainer,C_CampaignOperation,C_CampaignScreen :: %s\Gamedata%02d.gdt | GameData
+006c09c0-006c09c0 n=1    bytes=37     ported=0   cls= :: 
+006c09f0-006c0a20 n=4    bytes=42     ported=0   cls= :: 
+006c0a30-006c6cf0 n=100  bytes=24258  ported=32  cls=C_EquipmentMenu,C_EquipmentMenuBase,C_GameState,C_MainMenu :: exec %s | -cmd  | Logo1.bik | %s %s | Intro.bik
+006c6d40-006c9560 n=24   bytes=8852   ported=0   cls= :: 
+006c9580-006c95b0 n=2    bytes=385    ported=0   cls= :: 
+006c9710-006c9710 n=1    bytes=37     ported=0   cls= :: 
+006c9740-006c9750 n=2    bytes=36     ported=0   cls= :: 
+006c9770-006c9780 n=2    bytes=46     ported=0   cls= :: 
+006c97b0-006ca9c0 n=15   bytes=4679   ported=0   cls= :: text_h&dversion | briefing | loadbar | C_LoaderScreen | missions\%s\loader
+006caaa0-006cc220 n=26   bytes=5824   ported=0   cls=C_game :: missions\%s\tree.klz
+006cc250-006d4220 n=22   bytes=30902  ported=0   cls= :: missions\%s\scene2.bin | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | # ERROR LOADER : soundfile ' | gtlgf7
+006d4240-006d4eb0 n=9    bytes=3196   ported=0   cls= :: missions\%s\Scene | missions\%s\check.bin | missions\%s\check2.bin | missions\%s\actors.bin | missions\%s\sounds.bin
+006d4f20-006d4fc0 n=3    bytes=173    ported=0   cls= :: 
+006d4ff0-006d4ff0 n=1    bytes=37     ported=0   cls= :: 
+006d5020-006d5340 n=10   bytes=763    ported=8   cls=@815f90,@815fc8 :: 
+006d5360-006d5670 n=9    bytes=750    ported=8   cls=@816000,@816030,@816068 :: 
+006d5690-006d5990 n=10   bytes=713    ported=9   cls=C_AnimationCache,@8160a0,@816108 :: 
+006d59b0-006d5d30 n=10   bytes=849    ported=8   cls=@816140,@816170,@8161a8 :: 
+006d5d50-006d6070 n=10   bytes=763    ported=8   cls=@815f60,@815f90,@8161e0 :: 
+006d6090-006d60c0 n=4    bytes=42     ported=0   cls= :: 
+006d60d0-006db290 n=86   bytes=19117  ported=65  cls=C_AnimationCache,@815f60,@815f90,@816000 :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | Failed to load file: %s
+006db2c0-006db2c0 n=1    bytes=37     ported=0   cls= :: 
+006db2f0-006db320 n=4    bytes=42     ported=0   cls= :: 
+006db330-006db360 n=4    bytes=42     ported=0   cls= :: 
+006db370-006dc770 n=14   bytes=5434   ported=13  cls= :: -join | Scripts.dta | # ERROR DATAFILE : datafile  | Maps_U.dta | Maps_C.dta
+006dcce0-006dd850 n=6    bytes=2898   ported=5   cls= :: %s[%04i].tga
+006dd870-006dd870 n=1    bytes=37     ported=0   cls= :: 
+006dd8a0-006dd920 n=3    bytes=433    ported=3   cls= :: D54BD597-ACC7-4870-9122-C1D0 | %s %s | Wrong CDKey. Please contact  | Security
+006ddac0-006ddac0 n=1    bytes=37     ported=0   cls= :: 
+006ddaf0-006dffb0 n=31   bytes=9194   ported=0   cls= :: 
+006dffc0-006dffc0 n=1    bytes=37     ported=0   cls= :: 
+006dfff0-006dfff0 n=1    bytes=37     ported=0   cls= :: 
+006e0020-006e0020 n=1    bytes=37     ported=0   cls= :: 
+006e0050-006e0f40 n=11   bytes=4656   ported=0   cls= :: 
+006e12e0-006e1a90 n=24   bytes=1766   ported=0   cls= :: 
+006e1aa0-006e1aa0 n=1    bytes=37     ported=0   cls= :: 
+006e1cb0-006e2d00 n=13   bytes=3686   ported=0   cls= :: Lib:Object
+006e2d10-006e2d10 n=1    bytes=37     ported=0   cls= :: 
+006e2d40-006e2d50 n=2    bytes=36     ported=0   cls= :: 
+006e2d70-006e2d80 n=2    bytes=46     ported=0   cls= :: 
+006e2db0-006e4560 n=22   bytes=5583   ported=0   cls= :: Module32Next | Module32First | CreateToolhelp32Snapshot | kernel32.dll | Loading all symbol files...
+
+006e4580-006e4580 n=1    bytes=37     ported=0   cls= :: 
+006e45b0-006e4a80 n=9    bytes=830    ported=0   cls= :: %s*.map
+006e4a90-006e4a90 n=1    bytes=37     ported=0   cls= :: 
+006e4ac0-006e4ac0 n=1    bytes=37     ported=0   cls= :: 
+006e4af0-006e4b00 n=2    bytes=36     ported=0   cls= :: 
+006e4b20-006e4ce0 n=7    bytes=948    ported=1   cls= :: 
+006e4f10-006e4f10 n=1    bytes=37     ported=0   cls= :: 
+006e4f40-006e5ad0 n=19   bytes=2807   ported=0   cls= :: Warning ... | Trying add file <%s>; FAILED | For your information ... | Trying add file <%s>; Unicod | __undefined index <%d> in al
+006e5af0-006e5b20 n=2    bytes=142    ported=0   cls= :: LogFile.log
+006e5d90-006e5d90 n=1    bytes=37     ported=0   cls= :: 
+006e5dc0-006e6fc0 n=26   bytes=4355   ported=0   cls= :: 
+006e6fe0-006e6fe0 n=1    bytes=37     ported=0   cls= :: 
+006e7280-006e7880 n=5    bytes=546    ported=0   cls= :: 
+006e7b10-006e7b10 n=1    bytes=37     ported=0   cls= :: 
+006e7b40-006e7ec0 n=6    bytes=279    ported=0   cls= :: 
+006e8030-006e8970 n=12   bytes=1798   ported=0   cls= :: tables\fnt_matrix.bin | editfont.bmp
+006e89e0-006e8e10 n=8    bytes=1143   ported=0   cls= :: 
+006e9140-006e9e40 n=10   bytes=2490   ported=9   cls= :: %s=%s
+006e9e70-006e9f40 n=5    bytes=185    ported=0   cls= :: 
+006e9f50-006e9f50 n=1    bytes=37     ported=0   cls= :: 
+006e9f80-006e9f80 n=1    bytes=37     ported=0   cls= :: 
+006e9fb0-006ea100 n=3    bytes=607    ported=2   cls= :: 
+006ea240-006ea630 n=7    bytes=3105   ported=0   cls= :: BAADBAADBAADBAAD
+006eaea0-006edf00 n=27   bytes=2461   ported=14  cls=@8162f4 :: <no text> | <no title> | Error: | Failed to move file %s
+to %s | %d. %s. %d  %02d:%02d
+006edf80-006edf80 n=1    bytes=37     ported=0   cls= :: 
+006edfd0-006edfd0 n=1    bytes=37     ported=0   cls= :: 
+006ee000-006f2fe0 n=33   bytes=17980  ported=29  cls= :: debug_b | debug_a
+006f2ff0-006f9b10 n=19   bytes=27777  ported=11  cls= :: 
+006f9e30-00702ba0 n=42   bytes=35203  ported=19  cls= :: 
+00702bb0-007182c0 n=21   bytes=88186  ported=9   cls= :: 
+00718700-0071e120 n=23   bytes=22915  ported=12  cls= :: 
+0071e150-0071e150 n=1    bytes=37     ported=0   cls= :: 
+0071e180-0071fa10 n=20   bytes=6157   ported=0   cls= :: sounds | %s\%08d.wav | Nenalezen Dabing %08d.dat | tables\dabing\%08d.dat
+0071faa0-0071fad0 n=2    bytes=207    ported=0   cls= :: 
+0071fd50-0071fd80 n=2    bytes=233    ported=0   cls= :: tables\effects_car.def | tables\hdmaterials.def
+0071fe50-0071fe50 n=1    bytes=37     ported=0   cls= :: 
+0071fe80-0071ff90 n=7    bytes=110    ported=0   cls= :: Undefined text
+00720000-00720000 n=1    bytes=37     ported=0   cls= :: 
+00720030-00720060 n=4    bytes=42     ported=0   cls= :: 
+00720070-007200a0 n=4    bytes=42     ported=0   cls= :: 
+007200b0-007200f0 n=4    bytes=298    ported=0   cls= :: 
+00720200-00721ee0 n=32   bytes=7021   ported=0   cls= :: invalid parameters | sensitivity | command execution failed | ENFIELD | PARABELLUM
+00721f00-00721f00 n=1    bytes=37     ported=0   cls= :: 
+00721f30-00722250 n=7    bytes=1079   ported=0   cls= :: 
+00722460-00722460 n=1    bytes=37     ported=0   cls= :: 
+00722490-007224c0 n=4    bytes=42     ported=0   cls= :: 
+007224d0-00722550 n=7    bytes=1185   ported=0   cls= :: 
+007229d0-007229d0 n=1    bytes=37     ported=0   cls= :: 
+00722a00-00722a30 n=4    bytes=42     ported=0   cls= :: 
+00722a40-00724940 n=37   bytes=7738   ported=0   cls= :: hd2ds_sabresquadron.exe | hd2ds_sabresquadron.exe -cmd | XDServer_%5d.txt | Enumeration of devices faile | Server::Host failed
+00724aa0-00725190 n=10   bytes=1342   ported=0   cls= :: %d.%d.%d.%d
+00725240-007263c0 n=20   bytes=2866   ported=0   cls= :: 
+00726400-00727630 n=9    bytes=4797   ported=0   cls= :: DPserver->GetClientInfo fail | DPserver->GetClientInfo fail
+00727740-00727740 n=1    bytes=37     ported=0   cls= :: 
+00727770-007277a0 n=4    bytes=42     ported=0   cls= :: 
+007277b0-0072c120 n=30   bytes=18332  ported=0   cls= :: %s %s | %s: %s | ???????? | TEAM>  | ADMIN: %s
+0072c140-0072c360 n=8    bytes=642    ported=0   cls= :: 
+0072c450-0072d5f0 n=14   bytes=4203   ported=0   cls=C_NetMessage :: 
+0072d630-0072d630 n=1    bytes=37     ported=0   cls= :: 
+0072d660-0072dcd0 n=5    bytes=1064   ported=0   cls= :: 
+0072dd00-0072e0a0 n=10   bytes=902    ported=0   cls= :: %s %d - %s | maxclients | %s %d
+0072e0e0-0072e0e0 n=1    bytes=37     ported=0   cls= :: 
+0072e110-0072e140 n=4    bytes=42     ported=0   cls= :: 
+0072e150-0072e180 n=4    bytes=42     ported=0   cls= :: 
+0072e190-00732d50 n=88   bytes=18391  ported=0   cls= :: %s kicked because unknow(new | %s %s | %s %s %s | Score  Axis: %2.0f Alied: %2 | Kills  Axis: %2d Alied: %2d
+
+00732d70-00732d70 n=1    bytes=37     ported=0   cls= :: 
+00732da0-00732de0 n=5    bytes=52     ported=0   cls= :: 
+00732e00-00732e30 n=2    bytes=48     ported=0   cls= :: 
+00732e40-00733470 n=26   bytes=1346   ported=0   cls= :: 
+007334e0-00733690 n=5    bytes=492    ported=0   cls= :: 
+00733700-0073cf20 n=223  bytes=26726  ported=0   cls= :: %s%d%s | CD Key or challenge too long | %I64x | dtime | errmsg
+0073cf60-0073d0c0 n=10   bytes=698    ported=0   cls=@816380 :: 
+0073d260-0073dda0 n=27   bytes=2309   ported=21  cls=C_BitStream,C_GrowingBitStream,C_NetMessage :: 
+0073ddf0-0073e110 n=13   bytes=789    ported=0   cls=@81641c,@816438 :: 
+0073e160-0073efe0 n=35   bytes=3466   ported=0   cls=@816438,@816448 :: 
+0073eff0-0073fb00 n=24   bytes=2673   ported=0   cls=@816438,@81646c :: 
+0073fb10-0073fb90 n=4    bytes=126    ported=0   cls=@810630 :: 
+0073fbb0-007407b0 n=25   bytes=2871   ported=0   cls=@816490,@8164e0 :: 
+007407c0-007414c0 n=17   bytes=3199   ported=0   cls=@816530 :: 
+007414e0-00741560 n=5    bytes=500    ported=0   cls=@816594 :: 
+00741700-00741f60 n=3    bytes=167    ported=0   cls= :: 
+00742160-00742640 n=12   bytes=1148   ported=0   cls=@816598 :: 
+00742670-00744220 n=8    bytes=6477   ported=0   cls=C_CommandProcessor :: %d. %s | %s - %s | ADMIN: %s | Cannot create server! No map | maxinactivity:  %d
+00744230-00744230 n=1    bytes=37     ported=0   cls= :: 
+00744260-00744290 n=4    bytes=42     ported=0   cls= :: 
+007442a0-00744540 n=14   bytes=635    ported=0   cls=C_ConsoleState,C_GameState :: Type 'help' for keywords lis | HD2 console
+00744570-00744570 n=1    bytes=37     ported=0   cls= :: 
+007445a0-00744750 n=3    bytes=446    ported=0   cls= :: 
+00744770-007452f0 n=22   bytes=2771   ported=21  cls=C_Console,C_ConsoleBase :: Courier | Hidden & Dangerous II Consol | WndConsole
+00745300-00745740 n=15   bytes=1037   ported=0   cls=@8165f0 :: 
+00745780-00745cc0 n=12   bytes=1311   ported=0   cls=@816614 :: 
+00745d00-00745d80 n=5    bytes=190    ported=0   cls=@816638 :: 
+00745de0-00746050 n=13   bytes=692    ported=0   cls=@81665c,@816678 :: 
+00746100-00746100 n=1    bytes=37     ported=0   cls= :: 
+00746130-00746ac0 n=21   bytes=2347   ported=0   cls=C_BitStream,@816684 :: 
+00746b00-007473f0 n=22   bytes=2036   ported=0   cls= :: 
+00747400-00747500 n=9    bytes=280    ported=0   cls=@816688,@81669c :: 
+00747570-00747900 n=15   bytes=820    ported=0   cls=@81669c,@8166b0,@8166c4 :: 
+00747910-00748990 n=32   bytes=3992   ported=0   cls= :: 
+007489b0-00748dc0 n=6    bytes=1072   ported=0   cls= :: 
+00748e10-00748e10 n=1    bytes=37     ported=0   cls= :: 
+00748e40-00748e80 n=4    bytes=83     ported=0   cls= :: 
+007497c0-007497c0 n=1    bytes=37     ported=0   cls= :: 
+007497f0-00749e70 n=16   bytes=1611   ported=0   cls=@8166d8,@8166dc :: 
+00749ea0-00749fa0 n=4    bytes=255    ported=0   cls= :: 
+00749fc0-00749fc0 n=1    bytes=37     ported=0   cls= :: 
+0074a020-0074a020 n=1    bytes=37     ported=1   cls= :: 
+0074a050-0074a080 n=4    bytes=42     ported=4   cls= :: 
+0074a090-0074a0c0 n=4    bytes=42     ported=4   cls= :: 
+0074a0d0-0074a0d0 n=1    bytes=37     ported=1   cls= :: 
+0074a100-0074a110 n=2    bytes=36     ported=2   cls= :: 
+0074a130-0074a140 n=2    bytes=36     ported=2   cls= :: 
+0074a160-0074a170 n=2    bytes=36     ported=2   cls= :: 
+0074a190-00750a90 n=18   bytes=26684  ported=18  cls= :: 
+00750ab0-00750b00 n=4    bytes=48     ported=4   cls= :: 
+00750b10-00750b90 n=5    bytes=89     ported=5   cls= :: 
+00750ba0-00750ba0 n=1    bytes=37     ported=1   cls= :: 
+00750bd0-00750c00 n=2    bytes=1986   ported=2   cls= :: 
+007513c0-007518a0 n=4    bytes=1240   ported=4   cls= :: 
+007518b0-00758020 n=31   bytes=26110  ported=31  cls= :: Akce!!!!!!!!!!!!!!!!!!!!!
+
+00758050-007590c0 n=15   bytes=4033   ported=15  cls= :: 
+00759150-0075a520 n=6    bytes=5580   ported=6   cls= :: 
+0075a810-0075b0c0 n=4    bytes=2469   ported=4   cls= :: 
+0075b230-007608c0 n=44   bytes=21614  ported=44  cls= :: shot2 | shot1 | stand2 | stand1
+007608d0-007608d0 n=1    bytes=37     ported=1   cls= :: 
+00760900-00763650 n=5    bytes=11761  ported=5   cls= :: 
+007638d0-007638d0 n=1    bytes=37     ported=0   cls= :: 
+00763900-00763910 n=2    bytes=22     ported=0   cls= :: 
+00763930-00771090 n=40   bytes=55684  ported=36  cls= :: 
+00771540-007724d0 n=4    bytes=3780   ported=3   cls= :: 
+007724f0-00776570 n=48   bytes=15480  ported=47  cls= :: 
+007765b0-007765b0 n=1    bytes=37     ported=1   cls= :: 
+007765e0-00776f90 n=3    bytes=5750   ported=3   cls= :: 
+00777d10-00777d10 n=1    bytes=37     ported=1   cls= :: 
+00777d40-00777d50 n=2    bytes=38     ported=2   cls= :: 
+00777d80-00777d90 n=2    bytes=26     ported=2   cls= :: 
+00777db0-00777dc0 n=2    bytes=26     ported=2   cls= :: 
+00777de0-00777df0 n=2    bytes=13     ported=2   cls= :: 
+00777e00-00777e10 n=2    bytes=6      ported=2   cls= :: 
+00777e20-00777e30 n=2    bytes=6      ported=2   cls= :: 
+00777e40-00777e50 n=2    bytes=13     ported=2   cls= :: 
+00777e60-00777e70 n=2    bytes=6      ported=2   cls= :: 
+00777e80-0077d870 n=18   bytes=22200  ported=18  cls= :: klika |  - Unknown error |  - I3DERR_OUTOFLIMIT |  - I3DERR_BADFILETIME |  - I3DERR_BADFILEVERSION
+0077d890-0077e180 n=4    bytes=2206   ported=4   cls= :: 
+0077e190-007801a0 n=26   bytes=7997   ported=26  cls= :: 
+00780250-00780a90 n=5    bytes=2500   ported=5   cls= :: 
+00780c70-00780c70 n=1    bytes=37     ported=1   cls= :: 
+00780ca0-00780cb0 n=2    bytes=28     ported=2   cls= :: 
+00780cd0-00780ce0 n=2    bytes=28     ported=2   cls= :: 
+00780d00-00780d10 n=2    bytes=28     ported=2   cls= :: 
+00780d30-00780d40 n=2    bytes=28     ported=2   cls= :: 
+00780d60-00780d70 n=2    bytes=28     ported=2   cls= :: 
+00780d90-00780da0 n=2    bytes=28     ported=2   cls= :: 
+00780dc0-00782000 n=19   bytes=5145   ported=19  cls= :: Tables\morph.sav
+007822e0-00782cd0 n=4    bytes=2422   ported=4   cls= :: 
+00782cf0-00782f20 n=2    bytes=63     ported=1   cls= :: 
+00783070-00783070 n=1    bytes=37     ported=1   cls= :: 
+007830a0-007830a0 n=1    bytes=37     ported=1   cls= :: 
+007830d0-007837b0 n=7    bytes=1701   ported=6   cls= :: 
+007837f0-00784020 n=18   bytes=2854   ported=18  cls= :: I/O ERROR | Tables\anim.sav
+007843d0-007843d0 n=1    bytes=37     ported=1   cls= :: 
+00784400-00784db0 n=5    bytes=2809   ported=5   cls= :: 
+00784f20-00784f20 n=1    bytes=37     ported=1   cls= :: 
+00784f50-00785950 n=14   bytes=2505   ported=14  cls= :: uvs01.wav | p_swuw01.wav | p_swim02.wav | p_swim01.wav | ' not found!
+00785980-00785980 n=1    bytes=37     ported=1   cls= :: 
+007859b0-00788890 n=34   bytes=11783  ported=30  cls= :: Africa4 | Arctic3 | Arctic1 | Co_Sicily2 | Sicily2
+007888c0-0078a020 n=13   bytes=5861   ported=8   cls= :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | U daneho modelu nenalezen vi | U daneho modelu nalezen vizu | U daneho modelu nesedi pocet
+0078a0b0-0078a420 n=7    bytes=1056   ported=7   cls= :: 
+0078a520-0078a520 n=1    bytes=37     ported=1   cls= :: 
+0078a550-0078a580 n=4    bytes=42     ported=4   cls= :: 
+0078a590-0078a5c0 n=4    bytes=42     ported=4   cls= :: 
+0078a5d0-0078a690 n=6    bytes=284    ported=6   cls=@816ca4 :: 
+0078a710-0078a760 n=4    bytes=172    ported=4   cls= :: 
+0078a7d0-0078a820 n=4    bytes=172    ported=4   cls= :: 
+0078a890-0078ccf0 n=22   bytes=9137   ported=22  cls=@816ca4 :: 
+0078cd20-0078cd20 n=1    bytes=37     ported=1   cls= :: 
+0078cd50-0078cd60 n=2    bytes=36     ported=2   cls= :: 
+0078cd80-0078cd90 n=2    bytes=36     ported=2   cls= :: 
+0078cdb0-00792510 n=26   bytes=22746  ported=26  cls= :: m_SpecFrameLight | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | '. Oznamte skutecnost TS. | ' nenalezl holster set '
+00792900-00792900 n=1    bytes=37     ported=1   cls= :: 
+00792930-00792930 n=1    bytes=37     ported=1   cls= :: 
+00792960-00792970 n=2    bytes=36     ported=2   cls= :: 
+00792990-007929a0 n=2    bytes=36     ported=2   cls= :: 
+007929c0-00794890 n=13   bytes=15171  ported=13  cls= :: light_smoke | lensf | TS problem: ve scene nenalez
+007966c0-007966c0 n=1    bytes=37     ported=0   cls= :: 
+007966f0-00796720 n=4    bytes=42     ported=0   cls= :: 
+00796730-00796760 n=4    bytes=42     ported=0   cls= :: 
+00796770-0079afe0 n=55   bytes=17257  ported=0   cls= :: camouflage2.bmp | camouflageD.bmp | camouflageC.bmp | camouflageB.bmp | camouflage.bmp
+0079aff0-0079aff0 n=1    bytes=37     ported=0   cls= :: 
+0079b020-0079b050 n=4    bytes=42     ported=0   cls= :: 
+0079b060-007cfa10 n=151  bytes=215417 ported=144 cls= :: camera3RD | cameraFPV | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s' 
+007d0200-007d0200 n=1    bytes=37     ported=0   cls= :: 
+007d0230-007d0240 n=2    bytes=36     ported=0   cls= :: 
+007d0260-007d0270 n=2    bytes=36     ported=0   cls= :: 
+007d0290-007d35d0 n=20   bytes=12816  ported=0   cls= :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  |  - Unknown error |  - I3DERR_OUTOFLIMIT |  - I3DERR_BADFILETIME
+007d3650-007d3a20 n=22   bytes=1299   ported=22  cls=@816ed8,@816f78 :: 
+007d3c30-007d3da0 n=9    bytes=383    ported=9   cls=@816f28,@816f78 :: 
+007d3df0-007d41f0 n=11   bytes=1726   ported=11  cls=@816f78 :: 
+007d4580-007d47b0 n=11   bytes=1011   ported=11  cls=@816fc8 :: 
+007d49d0-007d49d0 n=1    bytes=37     ported=1   cls= :: 
+007d4a00-007d6a70 n=25   bytes=7902   ported=25  cls=C_LoadedModel :: flash | shdum | blsdum | projectile | Cache : BADFILETIME '%s' (3d
+007d6ac0-007d6c10 n=17   bytes=177    ported=17  cls=@817068 :: 
+007d6c20-007d6e60 n=20   bytes=437    ported=20  cls=@8170d0 :: 
+007d6e90-007d7430 n=20   bytes=1244   ported=20  cls=@817138 :: 
+007d7440-007d7a90 n=17   bytes=1484   ported=17  cls=@8171a0 :: 
+007d7aa0-007d7aa0 n=1    bytes=37     ported=1   cls= :: 
+007d7ad0-007dcda0 n=29   bytes=20901  ported=29  cls=C_ItemsModule :: Items | lensf | m_karty | m_bottle | m_cigarette
+007dce60-007df260 n=34   bytes=8995   ported=34  cls=C_ItemsModule :: 
+007df290-007df290 n=1    bytes=37     ported=1   cls= :: 
+007df2c0-007df2d0 n=2    bytes=36     ported=2   cls= :: 
+007df2f0-007df7a0 n=22   bytes=934    ported=22  cls=C_ItemDef :: 
+007df7b0-007e0bb0 n=67   bytes=4445   ported=67  cls=C_AmmoItemDef,C_AnimatedItemDef,C_ItemDef,C_StaticItemDef :: magazine | fpv_weapon
+007e0bf0-007e0bf0 n=1    bytes=37     ported=1   cls= :: 
+007e0c20-007e1b50 n=6    bytes=4643   ported=4   cls= :: 
+007e1e70-007e1e70 n=1    bytes=37     ported=0   cls= :: 
+007e1ea0-007e1eb0 n=2    bytes=36     ported=0   cls= :: 
+007e1ed0-007e1ed0 n=1    bytes=37     ported=0   cls= :: 
+007e1f00-007e1f10 n=2    bytes=46     ported=0   cls= :: 

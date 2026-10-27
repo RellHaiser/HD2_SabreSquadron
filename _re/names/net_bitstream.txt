@@ -1,0 +1,18 @@
+# 0x0073d260 bit stream (hand-ported: src/net/bitstream.cpp)
+0073d290 C_BitStream::C_BitStream
+0073d2c0 C_BitStream::Reserve | bool __thiscall Reserve(C_BitStream *this, uint bits)
+0073d2e0 C_BitStream::ScalarDeletingDestructor
+0073d300 C_BitStream::Reset
+0073d320 C_BitStream::WriteBits
+0073d3d0 C_BitStream::ReadBits
+0073d440 C_BitStream::WriteString
+0073d470 C_BitStream::ReadString
+0073d650 C_GrowingBitStream::C_GrowingBitStream
+0073d670 C_GrowingBitStream::ScalarDeletingDestructor
+0073d690 C_GrowingBitStream::~C_GrowingBitStream
+0073d6c0 C_GrowingBitStream::Reserve
+0073d740 C_NetMessage::C_NetMessage
+0073d770 C_NetMessage::GetSender
+0073d7c0 C_NetMessage::GetRecipient
+00982dec g_netPlayerTable @
+00982df0 g_netPlayerCount @

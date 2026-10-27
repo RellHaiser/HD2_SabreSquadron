@@ -1,0 +1,858 @@
+=== slot 38 (+0x0e0)  base 00611760 FUN_00611760 size 92  strings []
+      undefined4 * __thiscall C_auto_008137f0::FUN_00611760(C_auto_008137f0 *this)
+      {
+        C_auto_008138e0 *this_00;
+        undefined4 *puVar1;
+        void *local_c;
+        undefined1 *puStack_8;
+        undefined4 local_4;
+        local_4 = 0xffffffff;
+        puStack_8 = &LAB_00800e78;
+        local_c = ExceptionList;
+        ExceptionList = &local_c;
+        this_00 = _aligned_malloc(0xb0,0x10);
+   c47a0000 c47a0000                           size     0 C_Human  []
+   bccccccd bccccccd                           size     0 C_Car  []
+   3f490fdb 3f490fdb                           size     0 C_Door  []
+   005d5560 FUN_005d5560                       size   178 C_MeleeTracker  []
+   46ea6000 46ea6000                           size     0 C_ItemActor  []
+   006062b0 FUN_006062b0                       size    92 C_StaticWeapon  []
+   3b80adfd 3b80adfd                           size     0 C_Barrel  []
+   005bff10 FUN_005bff10                       size  2615 C_Train  []
+   3e22f983 3e22f983                           size     0 C_Junkers88  []
+   40000000 40000000                           size     0 C_SupplyBox  []
+   005ff180 FUN_005ff180                       size    92 C_Mine  []
+   3c00adfd 3c00adfd                           size     0 C_Bike  []
+   3bf5c28f 3bf5c28f                           size     0 C_Ladder  []
+   006151b0 FUN_006151b0                       size    30 C_Switch  []
+   0060b640 FUN_0060b640                       size    92 C_Radio  []
+   005b6740 FUN_005b6740                       size    92 C_AnimationActor  []
+   b918825b b918825b                           size     0 C_Clock  []
+   005ba130 FUN_005ba130                       size    92 C_Pike  []
+   005bbde0 FUN_005bbde0                       size    92 C_FowlGenerator  []
+   3f8e38e4 3f8e38e4                           size     0 C_Fish  []
+   005e2a40 FUN_005e2a40                       size    92 C_WireCut  []
+   005e2c30 FUN_005e2c30                       size    92 C_NullActor  []
+   45c80000 45c80000                           size     0 C_AirAttack  []
+   3751b717 3751b717                           size     0 C_MPZone  []
+   005fde30 FUN_005fde30                       size    92 C_Debris  []
+   0060c1a0 FUN_0060c1a0                       size    92 C_PhotoPlace  []
+   0060dae0 FUN_0060dae0                       size    92 C_ExplosivePlace  []
+   0060edc0 FUN_0060edc0                       size    92 C_DocumentPlace  []
+   3f800000 3f800000                           size     0 C_TSExplosion  []
+   00613200 FUN_00613200                       size    92 C_SpawnPoint  []
+=== slot 39 (+0x0e4)  base 006117c0 FUN_006117c0 size 6  strings ['SpawnPoint']
+      char * __thiscall C_auto_008137f0::FUN_006117c0(C_auto_008137f0 *this)
+      {
+        return s_SpawnPoint_0083eb6c;
+      }
+   00000000 00000000                           size     0 C_Door,C_Train,C_TSExplosion  []
+   476a6000 476a6000                           size     0 C_Human  []
+   3f34fdf4 3f34fdf4                           size     0 C_Car  []
+   005d1f50 FUN_005d1f50                       size   125 C_MeleeTracker  []
+   005b8040 FUN_005b8040                       size    92 C_ItemActor  []
+   00606310 FUN_00606310                       size     6 C_StaticWeapon  ['Barrel']
+   0060a720 FUN_0060a720                       size    92 C_Barrel  []
+   3915cbec 3915cbec                           size     0 C_Junkers88  []
+   3ff33333 3ff33333                           size     0 C_SupplyBox  []
+   005ff1e0 FUN_005ff1e0                       size     6 C_Mine  []
+   42fea5dd 42fea5dd                           size     0 C_Bike  []
+   005ebe40 FUN_005ebe40                       size    92 C_Ladder  []
+   bd1374bc bd1374bc                           size     0 C_Switch  []
+   0060b6a0 FUN_0060b6a0                       size     6 C_Radio  ['Photo_place']
+   005b67a0 FUN_005b67a0                       size     6 C_AnimationActor  []
+   bae4c389 bae4c389                           size     0 C_Clock  []
+   005ba190 FUN_005ba190                       size     6 C_Pike  ['FowlGenerator']
+   005bbe40 FUN_005bbe40                       size     6 C_FowlGenerator  ['Train']
+   3ef1463b 3ef1463b                           size     0 C_Fish  []
+   005e2aa0 FUN_005e2aa0                       size     6 C_WireCut  ['NullActor']
+   005e2c90 FUN_005e2c90                       size     6 C_NullActor  ['AirAttack']
+   481c4000 481c4000                           size     0 C_AirAttack  []
+   005edd20 FUN_005edd20                       size    92 C_MPZone  []
+   005fde90 FUN_005fde90                       size     6 C_Debris  []
+   0060c200 FUN_0060c200                       size     6 C_PhotoPlace  ['Explosive_place']
+   0060db40 FUN_0060db40                       size     6 C_ExplosivePlace  ['Document_place']
+   0060ee20 FUN_0060ee20                       size     6 C_DocumentPlace  ['Explosion__TS_']
+   00613260 FUN_00613260                       size     6 C_SpawnPoint  ['Switch']
+=== slot 3a (+0x0e8)  base 006117d0 FUN_006117d0 size 23  strings []
+      void __thiscall C_auto_008137f0::FUN_006117d0(C_auto_008137f0 *this,undefined4 *param_1)
+      {
+        if (param_1 != (undefined4 *)0x0) {
+                          // WARNING: Could not recover jumptable at 0x006117e2. Too many branches
+                          // WARNING: Treating indirect jump as call
+          (**(code **)*param_1)();
+          return;
+        }
+        return;
+      }
+   00000000 00000000                           size     0 C_Car,C_Train,C_TSExplosion  []
+   51eb851f 51eb851f                           size     0 C_Human  []
+   3f800000 3f800000                           size     0 C_Door  []
+   005d09b0 FUN_005d09b0                       size  2022 C_MeleeTracker  []
+   005b80a0 FUN_005b80a0                       size     6 C_ItemActor  ['Clock']
+   00606320 FUN_00606320                       size    23 C_StaticWeapon  []
+   0060a780 FUN_0060a780                       size     6 C_Barrel  ['Radio']
+   3ad1b717 3ad1b717                           size     0 C_Junkers88  []
+   42aa0000 42aa0000                           size     0 C_SupplyBox  []
+   005ff1f0 FUN_005ff1f0                       size    23 C_Mine  []
+   3d567750 3d567750                           size     0 C_Bike  []
+   005ebea0 FUN_005ebea0                       size     6 C_Ladder  ['MPZone']
+   00626400 FUN_00626400                       size    30 C_Switch  []
+   0060b6b0 FUN_0060b6b0                       size    23 C_Radio  []
+   005b67b0 FUN_005b67b0                       size    23 C_AnimationActor  []
+   bdd67750 bdd67750                           size     0 C_Clock  []
+   005ba1a0 FUN_005ba1a0                       size    23 C_Pike  []
+   005bbe50 FUN_005bbe50                       size    23 C_FowlGenerator  []
+   4016cbe4 4016cbe4                           size     0 C_Fish  []
+   005e2ab0 FUN_005e2ab0                       size    23 C_WireCut  []
+   005e2ca0 FUN_005e2ca0                       size    23 C_NullActor  []
+   45610000 45610000                           size     0 C_AirAttack  []
+   005edd90 FUN_005edd90                       size     6 C_MPZone  ['Junkers88']
+   005fdea0 FUN_005fdea0                       size    23 C_Debris  []
+   0060c210 FUN_0060c210                       size    23 C_PhotoPlace  []
+   0060db50 FUN_0060db50                       size    23 C_ExplosivePlace  []
+   0060ee30 FUN_0060ee30                       size    23 C_DocumentPlace  []
+   00613270 FUN_00613270                       size    23 C_SpawnPoint  []
+=== slot 3b (+0x0ec)  base 00000000 00000000 size 0  strings []
+
+   3fd51eb8 3fd51eb8                           size     0 C_Human  []
+   40280000 40280000                           size     0 C_Car  []
+   005d11a0 FUN_005d11a0                       size  3294 C_MeleeTracker  []
+   005b80b0 FUN_005b80b0                       size    23 C_ItemActor  []
+   0060a790 FUN_0060a790                       size    23 C_Barrel  []
+   3fd00000 3fd00000                           size     0 C_Train  []
+   3c83126f 3c83126f                           size     0 C_Junkers88  []
+   3ba3d70b 3ba3d70b                           size     0 C_SupplyBox  []
+   005db7e0 FUN_005db7e0                       size    92 C_Bike  []
+   005ebeb0 FUN_005ebeb0                       size    23 C_Ladder  []
+   00626170 FUN_00626170                       size    30 C_Switch  []
+   005b88f0 FUN_005b88f0                       size    92 C_Clock  []
+   3fb1c71d 3fb1c71d                           size     0 C_FowlGenerator  []
+   42fa0000 42fa0000                           size     0 C_AirAttack  []
+   005edda0 FUN_005edda0                       size    23 C_MPZone  []
+=== slot 3c (+0x0f0)  base 00611920 FUN_00611920 size 30  strings []
+      undefined4 * __thiscall C_auto_008138e0::FUN_00611920(C_auto_008138e0 *this,byte param_1)
+      {
+        FUN_00611940(this);
+        if ((param_1 & 1) != 0) {
+          _aligned_free(this);
+        }
+        return &this->vtable;
+      }
+   00000000 00000000                           size     0 C_Door,C_TSExplosion  []
+   9999999a 9999999a                           size     0 C_Human  []
+   004e0760 004e0760                           size     0 C_Car  []
+   005d0950 FUN_005d0950                       size    44 C_MeleeTracker  []
+   005b8290 FUN_005b8290                       size    30 C_ItemActor  []
+   00606430 FUN_00606430                       size    30 C_StaticWeapon  []
+   0060a890 FUN_0060a890                       size    30 C_Barrel  []
+   e0000000 e0000000                           size     0 C_Train  []
+   005f9730 FUN_005f9730                       size    92 C_Junkers88  []
+   41500000 41500000                           size     0 C_SupplyBox  []
+   005ff380 FUN_005ff380                       size    30 C_Mine  []
+   005db840 FUN_005db840                       size     6 C_Bike  []
+   005ebfa0 FUN_005ebfa0                       size    30 C_Ladder  []
+   00626990 FUN_00626990                       size    30 C_Switch  []
+   0060b7a0 FUN_0060b7a0                       size    30 C_Radio  []
+   005b6860 FUN_005b6860                       size    30 C_AnimationActor  []
+   005b8950 FUN_005b8950                       size     6 C_Clock  []
+   005ba5e0 FUN_005ba5e0                       size    30 C_Pike  []
+   42400000 42400000                           size     0 C_FowlGenerator  []
+   c0000000 c0000000                           size     0 C_Fish  []
+   005e2b30 FUN_005e2b30                       size    30 C_WireCut  []
+   005e3ef0 FUN_005e3ef0                       size    30 C_NullActor  []
+   42140000 42140000                           size     0 C_AirAttack  []
+   005ef430 FUN_005ef430                       size    30 C_MPZone  []
+   005fdf40 FUN_005fdf40                       size    30 C_Debris  []
+   0060c2c0 FUN_0060c2c0                       size    30 C_PhotoPlace  []
+   0060dbd0 FUN_0060dbd0                       size    30 C_ExplosivePlace  []
+   0060ee70 FUN_0060ee70                       size    30 C_DocumentPlace  []
+   00613520 FUN_00613520                       size    30 C_SpawnPoint  []
+=== slot 3d (+0x0f4)  base 004d0e40 FUN_004d0e40 size 7  strings []
+      int __thiscall C_auto_008137f0::FUN_004d0e40(C_auto_008137f0 *this)
+      {
+        return (int)&this->m_080;
+      }
+   00000000 00000000                           size     0 C_Door,C_Switch,C_FowlGenerator  []
+   3fc99999 3fc99999                           size     0 C_Human  []
+   004e0770 004e0770                           size     0 C_Car  []
+   005cfd20 FUN_005cfd20                       size  1106 C_MeleeTracker  []
+   3f50624d 3f50624d                           size     0 C_Train  []
+   005f97a0 FUN_005f97a0                       size     6 C_Junkers88  ['SupplyBox']
+   41600000 41600000                           size     0 C_SupplyBox  []
+   005db850 FUN_005db850                       size    23 C_Bike  []
+   005b8960 FUN_005b8960                       size    23 C_Clock  []
+   3fdccccc 3fdccccc                           size     0 C_Fish  []
+   005ea330 FUN_005ea330                       size    92 C_AirAttack  []
+   3f800000 3f800000                           size     0 C_TSExplosion  []
+=== slot 3e (+0x0f8)  base 00610f80 FUN_00610f80 size 152  strings []
+      void __thiscall C_auto_008137f0::FUN_00610f80(C_auto_008137f0 *this)
+      {
+        uint uVar1;
+        void *pvVar2;
+        C_auto_008171a0 *this_00;
+        undefined4 *puVar3;
+        void *local_c;
+        undefined1 *puStack_8;
+        undefined4 local_4;
+        local_4 = 0xffffffff;
+        puStack_8 = &LAB_00800e5b;
+        local_c = ExceptionList;
+   00000000 00000000                           size     0 C_Door,C_TSExplosion  []
+   00583bc0 FUN_00583bc0                       size   110 C_Human  []
+   ff7fffff ff7fffff                           size     0 C_Car  []
+   005d0180 FUN_005d0180                       size  1938 C_MeleeTracker  []
+   c61c4066 c61c4066                           size     0 C_Train  []
+   005f97b0 FUN_005f97b0                       size    23 C_Junkers88  []
+   005fda20 FUN_005fda20                       size    92 C_SupplyBox  []
+   005dbe00 FUN_005dbe00                       size    30 C_Bike  []
+   5c28f5c3 5c28f5c3                           size     0 C_Switch  []
+   005b8dd0 FUN_005b8dd0                       size    30 C_Clock  []
+   005bd0d0 FUN_005bd0d0                       size    30 C_FowlGenerator  []
+   38fba882 38fba882                           size     0 C_Fish  []
+   005ea3a0 FUN_005ea3a0                       size     6 C_AirAttack  ['Ladder']
+=== slot 3f (+0x0fc)  base 00611020 FUN_00611020 size 45  strings []
+      void __fastcall FUN_00611020(int param_1)
+      {
+        undefined4 *puVar1;
+        if (*(int **)(param_1 + 0x74) != (int *)0x0) {
+          puVar1 = (undefined4 *)**(int **)(param_1 + 0x74);
+          if (puVar1 != (undefined4 *)0x0) {
+            (**(code **)*puVar1)(1);
+          }
+          operator_delete(*(void **)(param_1 + 0x74));
+          *(undefined4 *)(param_1 + 0x74) = 0;
+        }
+        return;
+   00000000 00000000                           size     0 C_Junkers88,C_Fish,C_TSExplosion  []
+   004d0e40 FUN_004d0e40                       size     7 C_Bike,C_Clock,C_FowlGenerator  []
+   00583090 FUN_00583090                       size     5 C_Human  []
+   004e07b0 004e07b0                           size     0 C_Car  []
+   3f800000 3f800000                           size     0 C_Door  []
+   c3fa0000 c3fa0000                           size     0 C_MeleeTracker  []
+   411cf5c3 411cf5c3                           size     0 C_Train  []
+   005fda80 FUN_005fda80                       size     6 C_SupplyBox  ['Debris']
+   bfe5c28f bfe5c28f                           size     0 C_Switch  []
+   005ea3b0 FUN_005ea3b0                       size    23 C_AirAttack  []
+=== slot 40 (+0x100)  base 005b61c0 FUN_005b61c0 size 6  strings []
+      undefined4 __thiscall C_auto_008137f0::FUN_005b61c0(C_auto_008137f0 *this)
+      {
+        return 100;
+      }
+   00610f80 FUN_00610f80                       size   152 C_Bike,C_Clock,C_FowlGenerator  []
+   00000000 00000000                           size     0 C_Door,C_TSExplosion  []
+   005830a0 empty_function_5830a0              size     3 C_Human  []
+   004e07c0 004e07c0                           size     0 C_Car  []
+   005cfc10 FUN_005cfc10                       size    15 C_MeleeTracker  []
+   e0000000 e0000000                           size     0 C_Train  []
+   005f9860 FUN_005f9860                       size    30 C_Junkers88  []
+   005fda90 FUN_005fda90                       size    23 C_SupplyBox  []
+   33333333 33333333                           size     0 C_Switch  []
+   60000000 60000000                           size     0 C_Fish  []
+   005ea570 FUN_005ea570                       size    30 C_AirAttack  []
+=== slot 41 (+0x104)  base 00611050 empty_function_611050 size 3  strings []
+      void __thiscall C_auto_008137f0::empty_function_611050(C_auto_008137f0 *this)
+      {
+        return;
+      }
+   00000000 00000000                           size     0 C_Door,C_SupplyBox,C_TSExplosion  []
+   00611020 FUN_00611020                       size    45 C_Bike,C_Clock,C_FowlGenerator  []
+   004d0e40 FUN_004d0e40                       size     7 C_Junkers88,C_AirAttack  []
+   00584e30 FUN_00584e30                       size  3026 C_Human  []
+   46afc800 46afc800                           size     0 C_Car  []
+   005d5c20 thunk_FUN_005ce5d0                 size     5 C_MeleeTracker  []
+   005b8610 FUN_005b8610                       size   534 C_ItemActor  []
+   006071b0 thunk_FUN_00606da0                 size     5 C_StaticWeapon  []
+   0060a920 empty_function_60a920              size     3 C_Barrel  []
+   3f1a36e2 3f1a36e2                           size     0 C_Train  []
+   00600940 thunk_FUN_005fffe0                 size     5 C_Mine  []
+   005ec540 FUN_005ec540                       size   758 C_Ladder  []
+   bfd33333 bfd33333                           size     0 C_Switch  []
+   0060b810 empty_function_60b810              size     3 C_Radio  []
+   005b7480 FUN_005b7480                       size    59 C_AnimationActor  []
+   005bb3c0 FUN_005bb3c0                       size   272 C_Pike  []
+   3fd66666 3fd66666                           size     0 C_Fish  []
+   005e5960 FUN_005e5960                       size  6249 C_NullActor  []
+   005f7710 FUN_005f7710                       size  1172 C_MPZone  []
+   005fee90 FUN_005fee90                       size    17 C_Debris  []
+   0060c370 FUN_0060c370                       size    56 C_PhotoPlace  []
+   0060dc60 empty_function_60dc60              size     3 C_ExplosivePlace  []
+   0060fae0 FUN_0060fae0                       size    35 C_DocumentPlace  []
+=== slot 42 (+0x108)  base 00611060 empty_function_611060 size 3  strings []
+      void empty_function_611060(void)
+      {
+        return;
+      }
+   005b61c0 FUN_005b61c0                       size     6 C_Bike,C_Clock,C_FowlGenerator  []
+   00610f80 FUN_00610f80                       size   152 C_Junkers88,C_AirAttack  []
+   00588870 FUN_00588870                       size   557 C_Human  []
+   004e0800 FUN_004e0800                       size    48 C_Car  []
+   00000000 00000000                           size     0 C_Door  []
+   005d5c40 FUN_005d5c40                       size    30 C_MeleeTracker  []
+   006071c0 FUN_006071c0                       size    17 C_StaticWeapon  []
+   0060a910 empty_function_60a910              size     3 C_Barrel  []
+   3ee66666 3ee66666                           size     0 C_Train  []
+   005fdb30 FUN_005fdb30                       size    30 C_SupplyBox  []
+   00600920 FUN_00600920                       size    17 C_Mine  []
+   005ec060 FUN_005ec060                       size   680 C_Ladder  []
+   d70a3d71 d70a3d71                           size     0 C_Switch  []
+   0060b800 empty_function_60b800              size     3 C_Radio  []
+   005b7320 FUN_005b7320                       size   343 C_AnimationActor  []
+   005bb4d0 FUN_005bb4d0                       size   781 C_Pike  []
+   391d4952 391d4952                           size     0 C_Fish  []
+   005e71e0 FUN_005e71e0                       size   345 C_NullActor  []
+   005f76a0 FUN_005f76a0                       size   100 C_MPZone  []
+   005fee70 FUN_005fee70                       size    17 C_Debris  []
+   0060c330 FUN_0060c330                       size    52 C_PhotoPlace  []
+   0060dc50 empty_function_60dc50              size     3 C_ExplosivePlace  []
+   0060fab0 FUN_0060fab0                       size    35 C_DocumentPlace  []
+   3f800000 3f800000                           size     0 C_TSExplosion  []
+=== slot 43 (+0x10c)  base 006125a0 FUN_006125a0 size 1215  strings []
+      void __thiscall C_auto_008138e0::FUN_006125a0(C_auto_008138e0 *this,void *param_1)
+      {
+        byte bVar1;
+        uint uVar2;
+        float *pfVar3;
+        undefined4 uVar4;
+        int iVar5;
+        undefined4 *puVar6;
+        undefined1 local_24a;
+        undefined1 local_249;
+        uint local_248;
+        uint local_244;
+   005b8860 empty_function_5b8860              size     3 C_ItemActor,C_WireCut,C_NullActor,C_MPZone,C_SpawnPoint  []
+   00000000 00000000                           size     0 C_Door,C_Train,C_TSExplosion  []
+   00611020 FUN_00611020                       size    45 C_Junkers88,C_AirAttack  []
+   00588aa0 FUN_00588aa0                       size   371 C_Human  []
+   004e0830 004e0830                           size     0 C_Car  []
+   005d5c30 FUN_005d5c30                       size    10 C_MeleeTracker  []
+   00609220 FUN_00609220                       size   690 C_StaticWeapon  []
+   0060b090 FUN_0060b090                       size   195 C_Barrel  []
+   004d0e40 FUN_004d0e40                       size     7 C_SupplyBox  []
+   00601f90 FUN_00601f90                       size   540 C_Mine  []
+   005dcb10 FUN_005dcb10                       size  3554 C_Bike  []
+   005ed390 FUN_005ed390                       size   443 C_Ladder  []
+   3fdd70a3 3fdd70a3                           size     0 C_Switch  []
+   0060be20 empty_function_60be20              size     3 C_Radio  []
+   005b7110 FUN_005b7110                       size   470 C_AnimationActor  []
+   005b9470 FUN_005b9470                       size   508 C_Clock  []
+   005bb280 FUN_005bb280                       size    12 C_Pike  []
+   005bcf80 FUN_005bcf80                       size    42 C_FowlGenerator  []
+   005de6c0 FUN_005de6c0                       size    92 C_Fish  []
+   005feb50 FUN_005feb50                       size    70 C_Debris  []
+   0060cda0 FUN_0060cda0                       size   150 C_PhotoPlace  []
+   0060e420 FUN_0060e420                       size   151 C_ExplosivePlace  []
+   0060f970 FUN_0060f970                       size    32 C_DocumentPlace  []
+=== slot 44 (+0x110)  base 005b61d0 empty_function_5b61d0 size 3  strings []
+      void __thiscall C_auto_008137f0::empty_function_5b61d0(C_auto_008137f0 *this)
+      {
+        return;
+      }
+   00000000 00000000                           size     0 C_Train,C_TSExplosion  []
+   005b61c0 FUN_005b61c0                       size     6 C_Junkers88,C_AirAttack  []
+   005a4430 FUN_005a4430                       size    30 C_Human  []
+   3fb33333 3fb33333                           size     0 C_Car  []
+   3f800000 3f800000                           size     0 C_Door  []
+   005ce650 FUN_005ce650                       size   129 C_MeleeTracker  []
+   0060b160 empty_function_60b160              size     3 C_Barrel  []
+   00610f80 FUN_00610f80                       size   152 C_SupplyBox  []
+   006021d0 empty_function_6021d0              size     3 C_Mine  []
+   005dbec0 FUN_005dbec0                       size  2972 C_Bike  []
+   1eb851ec 1eb851ec                           size     0 C_Switch  []
+   0060be30 empty_function_60be30              size     3 C_Radio  []
+   005b7300 empty_function_5b7300              size     3 C_AnimationActor  []
+   005b9340 FUN_005b9340                       size   289 C_Clock  []
+   005bcf70 empty_function_5bcf70              size     3 C_FowlGenerator  []
+   005de720 FUN_005de720                       size     6 C_Fish  ['Submarine']
+   005feba0 empty_function_5feba0              size     3 C_Debris  []
+   0060ce50 empty_function_60ce50              size     3 C_PhotoPlace  []
+   0060e4c0 empty_function_60e4c0              size     3 C_ExplosivePlace  []
+   0060f990 empty_function_60f990              size     3 C_DocumentPlace  []
+=== slot 45 (+0x114)  base 004d0e50 FUN_004d0e50 size 5  strings []
+      undefined1 __thiscall C_auto_008137f0::FUN_004d0e50(C_auto_008137f0 *this)
+      {
+        return 1;
+      }
+   00000000 00000000                           size     0 C_Door,C_TSExplosion  []
+   00592140 FUN_00592140                       size   189 C_Human  []
+   004e0180 FUN_004e0180                       size   234 C_Car  []
+   005cfc20 FUN_005cfc20                       size    49 C_MeleeTracker  []
+   40120000 40120000                           size     0 C_Train  []
+   005fb380 FUN_005fb380                       size  2462 C_Junkers88  []
+   00611020 FUN_00611020                       size    45 C_SupplyBox  []
+   005dbde0 empty_function_5dbde0              size     3 C_Bike  []
+   3fd1eb85 3fd1eb85                           size     0 C_Switch  []
+   005b9ec0 FUN_005b9ec0                       size   308 C_Clock  []
+   005b8860 empty_function_5b8860              size     3 C_FowlGenerator  []
+   005de730 FUN_005de730                       size    23 C_Fish  []
+   005ea520 empty_function_5ea520              size     3 C_AirAttack  []
+   006133a0 FUN_006133a0                       size    39 C_SpawnPoint  []
+=== slot 46 (+0x118)  base 004d0e60 FUN_004d0e60 size 5  strings []
+      undefined1 __thiscall C_auto_008137f0::FUN_004d0e60(C_auto_008137f0 *this)
+      {
+        return 1;
+      }
+   00000000 00000000                           size     0 C_Door,C_TSExplosion  []
+   00592200 FUN_00592200                       size    19 C_Human  []
+   004e0270 004e0270                           size     0 C_Car  []
+   005cfc60 empty_function_5cfc60              size     3 C_MeleeTracker  []
+   3fd33333 3fd33333                           size     0 C_Train  []
+   005fbd20 FUN_005fbd20                       size    17 C_Junkers88  []
+   005b61c0 FUN_005b61c0                       size     6 C_SupplyBox  []
+   005dbdf0 empty_function_5dbdf0              size     3 C_Bike  []
+   0a3d70a4 0a3d70a4                           size     0 C_Switch  []
+   005b8dc0 empty_function_5b8dc0              size     3 C_Clock  []
+   005b61d0 empty_function_5b61d0              size     3 C_FowlGenerator  []
+   005df2c0 FUN_005df2c0                       size    30 C_Fish  []
+   005ea530 empty_function_5ea530              size     3 C_AirAttack  []
+   006133d0 FUN_006133d0                       size   119 C_SpawnPoint  []
+=== slot 47 (+0x11c)  base 00611950 thunk_FUN_00610200 size 5  strings []
+      undefined4 __thiscall C_auto_008138e0::thunk_FUN_00610200(C_auto_008138e0 *this,int param_1)
+      {
+        undefined4 uVar1;
+        uVar1 = C_auto_008137f0::FUN_00610200((C_auto_008137f0 *)this,param_1);
+        return uVar1;
+      }
+   004d0e50 FUN_004d0e50                       size     5 C_Bike,C_Clock,C_FowlGenerator  []
+   00000000 00000000                           size     0 C_Car,C_Door  []
+   00592a60 FUN_00592a60                       size   886 C_Human  []
+   005ce740 FUN_005ce740                       size  1302 C_MeleeTracker  []
+   005b8240 FUN_005b8240                       size    38 C_ItemActor  []
+   00606360 FUN_00606360                       size    18 C_StaticWeapon  []
+   0060a8c0 thunk_FUN_00610200                 size     5 C_Barrel  []
+   3e2e147b 3e2e147b                           size     0 C_Train  []
+   005fa3f0 FUN_005fa3f0                       size   313 C_Junkers88  []
+   005fdd10 FUN_005fdd10                       size   166 C_SupplyBox  []
+   005ff3d0 thunk_FUN_00610200                 size     5 C_Mine  []
+   005ebfd0 FUN_005ebfd0                       size    22 C_Ladder  []
+   3fd0a3d7 3fd0a3d7                           size     0 C_Switch  []
+   0060b7d0 thunk_FUN_00610200                 size     5 C_Radio  []
+   005b68d0 FUN_005b68d0                       size    42 C_AnimationActor  []
+   005ba4b0 FUN_005ba4b0                       size    18 C_Pike  []
+   004d0e40 FUN_004d0e40                       size     7 C_Fish  []
+   005e2b60 thunk_FUN_00610200                 size     5 C_WireCut  []
+   005e4070 FUN_005e4070                       size    25 C_NullActor  []
+   005ea540 empty_function_5ea540              size     3 C_AirAttack  []
+   005ef6b0 thunk_FUN_00610200                 size     5 C_MPZone  []
+   005fdf90 FUN_005fdf90                       size    32 C_Debris  ['Actor_mine']
+   0060c2f0 thunk_FUN_00610200                 size     5 C_PhotoPlace  []
+   0060dc00 thunk_FUN_00610200                 size     5 C_ExplosivePlace  []
+   0060eea0 FUN_0060eea0                       size    76 C_DocumentPlace  []
+   3f800000 3f800000                           size     0 C_TSExplosion  []
+   00613550 FUN_00613550                       size    23 C_SpawnPoint  []
+=== slot 48 (+0x120)  base 005b61e0 FUN_005b61e0 size 5  strings []
+      undefined1 __thiscall C_auto_008137f0::FUN_005b61e0(C_auto_008137f0 *this)
+      {
+        return 1;
+      }
+   004d0e60 FUN_004d0e60                       size     5 C_Bike,C_Clock,C_FowlGenerator  []
+   60000000 60000000                           size     0 C_Car,C_Train  []
+   00592e30 empty_function_592e30              size     3 C_Human  []
+   00000000 00000000                           size     0 C_Door  []
+   005cb260 empty_function_5cb260              size     3 C_MeleeTracker  []
+   0060ac30 FUN_0060ac30                       size   521 C_Barrel  []
+   005f9840 empty_function_5f9840              size     3 C_Junkers88  []
+   005fdd00 empty_function_5fdd00              size     3 C_SupplyBox  []
+   006013b0 FUN_006013b0                       size  1775 C_Mine  []
+   005ed920 FUN_005ed920                       size   314 C_Ladder  []
+   47ae147b 47ae147b                           size     0 C_Switch  []
+   0060bb80 FUN_0060bb80                       size   251 C_Radio  []
+   005b6830 FUN_005b6830                       size     5 C_AnimationActor  []
+   00610f80 FUN_00610f80                       size   152 C_Fish  []
+   005e2bb0 FUN_005e2bb0                       size     5 C_WireCut  []
+   005e8e10 FUN_005e8e10                       size   509 C_NullActor  []
+   005ea550 empty_function_5ea550              size     3 C_AirAttack  []
+   005fdf10 FUN_005fdf10                       size     5 C_Debris  []
+   0060c6e0 FUN_0060c6e0                       size   834 C_PhotoPlace  []
+   0060df50 FUN_0060df50                       size   521 C_ExplosivePlace  []
+   0060efd0 FUN_0060efd0                       size   311 C_DocumentPlace  []
+   00610150 FUN_00610150                       size    30 C_TSExplosion  []
+   00613c10 FUN_00613c10                       size   509 C_SpawnPoint  []
+=== slot 49 (+0x124)  base 006119b0 FUN_006119b0 size 711  strings []
+      uint __thiscall C_auto_008138e0::FUN_006119b0(C_auto_008138e0 *this,char *param_1)
+      {
+        char *this_00;
+        char *in_EAX;
+        int iVar1;
+        uint3 extraout_var;
+        uint uVar2;
+        uint3 extraout_var_00;
+        uint3 extraout_var_01;
+        int iVar3;
+        int *piVar4;
+        char *pcVar5;
+   004d0e50 FUN_004d0e50                       size     5 C_Junkers88,C_AirAttack  []
+   00587550 FUN_00587550                       size   730 C_Human  []
+   3fe66666 3fe66666                           size     0 C_Car  []
+   3f800000 3f800000                           size     0 C_Door  []
+   005cb270 FUN_005cb270                       size     3 C_MeleeTracker  []
+   005b8870 FUN_005b8870                       size     5 C_ItemActor  []
+   0060a280 FUN_0060a280                       size  1082 C_StaticWeapon  []
+   0060ae40 FUN_0060ae40                       size   580 C_Barrel  []
+   3fc5c28f 3fc5c28f                           size     0 C_Train  []
+   005fdce0 empty_function_5fdce0              size     3 C_SupplyBox  []
+   00601ac0 FUN_00601ac0                       size  1101 C_Mine  []
+   005dbe60 FUN_005dbe60                       size    22 C_Bike  []
+   005eda60 FUN_005eda60                       size   606 C_Ladder  []
+   3fb47ae1 3fb47ae1                           size     0 C_Switch  []
+   0060bc80 FUN_0060bc80                       size   401 C_Radio  []
+   005b6840 FUN_005b6840                       size     5 C_AnimationActor  []
+   005b8e00 FUN_005b8e00                       size    22 C_Clock  []
+   005bb7e0 FUN_005bb7e0                       size   845 C_Pike  []
+   005bd1a0 FUN_005bd1a0                       size   708 C_FowlGenerator  []
+   00611020 FUN_00611020                       size    45 C_Fish  []
+   005e2bc0 FUN_005e2bc0                       size     5 C_WireCut  []
+   005e9010 FUN_005e9010                       size   672 C_NullActor  []
+   005f29f0 FUN_005f29f0                       size   670 C_MPZone  []
+   005fdf20 FUN_005fdf20                       size     5 C_Debris  []
+   0060ca30 FUN_0060ca30                       size   849 C_PhotoPlace  []
+   0060e160 FUN_0060e160                       size   697 C_ExplosivePlace  []
+   0060f110 FUN_0060f110                       size   568 C_DocumentPlace  []
+   004d0e40 FUN_004d0e40                       size     7 C_TSExplosion  []
+   00613e10 FUN_00613e10                       size   638 C_SpawnPoint  []
+=== slot 4a (+0x128)  base 00611960 thunk_FUN_006101f0 size 5  strings []
+      void __thiscall C_auto_008138e0::thunk_FUN_006101f0(C_auto_008138e0 *this)
+      {
+        empty_function_6101f0(this);
+        return;
+      }
+   005b61e0 FUN_005b61e0                       size     5 C_Bike,C_Clock,C_FowlGenerator  []
+   004d0e60 FUN_004d0e60                       size     5 C_Junkers88,C_AirAttack  []
+   00587830 FUN_00587830                       size   871 C_Human  []
+   402ccccd 402ccccd                           size     0 C_Car  []
+   00602a70 FUN_00602a70                       size    92 C_Door  []
+   005cb280 FUN_005cb280                       size     7 C_MeleeTracker  []
+   005b82c0 thunk_FUN_006101f0                 size     5 C_ItemActor  []
+   00606520 FUN_00606520                       size   289 C_StaticWeapon  []
+   0060a8d0 FUN_0060a8d0                       size    55 C_Barrel  []
+   40066666 40066666                           size     0 C_Train  []
+   005fdcf0 empty_function_5fdcf0              size     3 C_SupplyBox  []
+   005ff3e0 FUN_005ff3e0                       size   204 C_Mine  []
+   005ebff0 FUN_005ebff0                       size   104 C_Ladder  []
+   42820000 42820000                           size     0 C_Switch  []
+   0060b7e0 FUN_0060b7e0                       size    31 C_Radio  []
+   005b6850 empty_function_5b6850              size     3 C_AnimationActor  []
+   005ba660 thunk_FUN_006101f0                 size     5 C_Pike  []
+   005b61c0 FUN_005b61c0                       size     6 C_Fish  []
+   005e2b70 FUN_005e2b70                       size    20 C_WireCut  []
+   005e3ee0 thunk_FUN_006101f0                 size     5 C_NullActor  []
+   005ef6c0 thunk_FUN_006101f0                 size     5 C_MPZone  []
+   005fdf30 empty_function_5fdf30              size     3 C_Debris  []
+   0060c300 FUN_0060c300                       size    43 C_PhotoPlace  []
+   0060dc10 FUN_0060dc10                       size    55 C_ExplosivePlace  []
+   0060f350 FUN_0060f350                       size   109 C_DocumentPlace  []
+   00610f80 FUN_00610f80                       size   152 C_TSExplosion  []
+   006136c0 FUN_006136c0                       size    47 C_SpawnPoint  []
+=== slot 4b (+0x12c)  base 00611970 FUN_00611970 size 24  strings []
+      void __thiscall C_auto_008138e0::FUN_00611970(C_auto_008138e0 *this,char param_1)
+      {
+        FUN_00610240(this,param_1);
+        this->m_09c = '\x01';
+        return;
+      }
+   005830c0 empty_function_5830c0              size     3 C_Human  []
+   00000000 00000000                           size     0 C_Car  []
+   00602ad0 FUN_00602ad0                       size     6 C_Door  ['StaticWeapon']
+   005cb290 FUN_005cb290                       size     3 C_MeleeTracker  []
+   005b82d0 FUN_005b82d0                       size   348 C_ItemActor  []
+   00606650 FUN_00606650                       size  1214 C_StaticWeapon  []
+   0060a930 FUN_0060a930                       size   714 C_Barrel  []
+   42aa0000 42aa0000                           size     0 C_Train  []
+   005fa6a0 FUN_005fa6a0                       size  1492 C_Junkers88  []
+   004d0e50 FUN_004d0e50                       size     5 C_SupplyBox  []
+   00600cc0 FUN_00600cc0                       size  1669 C_Mine  ['d2handle', 'dhandle']
+   005de300 FUN_005de300                       size   285 C_Bike  []
+   005ed110 FUN_005ed110                       size   271 C_Ladder  []
+   42640000 42640000                           size     0 C_Switch  []
+   0060b820 FUN_0060b820                       size   805 C_Radio  []
+   005b6900 FUN_005b6900                       size    24 C_AnimationActor  []
+   005b9c80 FUN_005b9c80                       size   488 C_Clock  []
+   005ba670 FUN_005ba670                       size   489 C_Pike  []
+   005be360 FUN_005be360                       size  1004 C_FowlGenerator  []
+   005e0e20 FUN_005e0e20                       size    61 C_Fish  []
+   005e2b90 FUN_005e2b90                       size    13 C_WireCut  []
+   005e4090 FUN_005e4090                       size  5607 C_NullActor  ['Cache___BADFILETIME___s___3ds_fi', 'Cache___BADFILEVERSION___s___3ds', 'bilboard', 'bilboard_l0_d', 'bilboard_r0_d']
+   005ea5d0 FUN_005ea5d0                       size  1859 C_AirAttack  ['TS__chyba___u_zebriku__', '__nenalezen_dumac__down_', '__nenalezen_dumac__up_', 'down_', 'matid']
+   005ef6d0 FUN_005ef6d0                       size   357 C_MPZone  ['WeaponOdds', 'trace', 'vrtule_l00', 'vrtule_r00']
+   005fdfb0 FUN_005fdfb0                       size    20 C_Debris  []
+   0060c3b0 FUN_0060c3b0                       size   762 C_PhotoPlace  ['explosive_off', 'explosive_on']
+   0060dc70 FUN_0060dc70                       size   676 C_ExplosivePlace  []
+   0060eef0 FUN_0060eef0                       size    99 C_DocumentPlace  ['x_expl00_tga']
+   00611020 FUN_00611020                       size    45 C_TSExplosion  []
+   00613920 FUN_00613920                       size   679 C_SpawnPoint  []
+=== slot 4c (+0x130)  base 00611990 FUN_00611990 size 24  strings []
+      void __thiscall C_auto_008138e0::FUN_00611990(C_auto_008138e0 *this,int *param_1)
+      {
+        FUN_00610510(this,param_1);
+        this->m_09c = '\x01';
+        return;
+      }
+   005830b0 empty_function_5830b0              size     3 C_Human  []
+   00000000 00000000                           size     0 C_Car  []
+   00602ae0 FUN_00602ae0                       size    23 C_Door  []
+   005cb2a0 FUN_005cb2a0                       size    30 C_MeleeTracker  []
+   005b84e0 FUN_005b84e0                       size   298 C_ItemActor  []
+   00606bb0 FUN_00606bb0                       size   487 C_StaticWeapon  []
+   0060ac00 FUN_0060ac00                       size    46 C_Barrel  []
+   411cf5c3 411cf5c3                           size     0 C_Train  []
+   005fc050 FUN_005fc050                       size   428 C_Junkers88  []
+   004d0e60 FUN_004d0e60                       size     5 C_SupplyBox  []
+   00601350 FUN_00601350                       size    82 C_Mine  []
+   005dbe80 FUN_005dbe80                       size    59 C_Bike  []
+   005ed260 FUN_005ed260                       size   106 C_Ladder  []
+   41d00000 41d00000                           size     0 C_Switch  []
+   0060bb50 FUN_0060bb50                       size    46 C_Radio  []
+   005b6920 FUN_005b6920                       size    84 C_AnimationActor  []
+   005b8e20 FUN_005b8e20                       size   113 C_Clock  []
+   005bb290 FUN_005bb290                       size   298 C_Pike  []
+   005bd480 thunk_FUN_006101f0                 size     5 C_FowlGenerator  []
+   005e0e00 FUN_005e0e00                       size    21 C_Fish  []
+   005e2ba0 FUN_005e2ba0                       size    13 C_WireCut  []
+   005e56d0 FUN_005e56d0                       size   656 C_NullActor  []
+   005ebaf0 FUN_005ebaf0                       size   209 C_AirAttack  []
+   005efc10 FUN_005efc10                       size   442 C_MPZone  []
+   005fdfd0 FUN_005fdfd0                       size    56 C_Debris  []
+   0060c6b0 FUN_0060c6b0                       size    43 C_PhotoPlace  []
+   0060df20 FUN_0060df20                       size    43 C_ExplosivePlace  []
+   0060ef60 FUN_0060ef60                       size    98 C_DocumentPlace  []
+   005b61c0 FUN_005b61c0                       size     6 C_TSExplosion  []
+   00613bd0 FUN_00613bd0                       size    64 C_SpawnPoint  []
+=== slot 4d (+0x134)  base 006117f0 FUN_006117f0 size 186  strings []
+      void __thiscall C_auto_008138e0::FUN_006117f0(C_auto_008138e0 *this)
+      {
+        int iVar1;
+        C_Script *this_00;
+        if ((this->m_09c == '\0') && (*(int *)this->_pad_00a8 != 0)) {
+          if ((this->m_020->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(this->m_020);
+          }
+          if ((this->m_020->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(this->m_020);
+          }
+          if (((this->m_020 != (void *)0x0) && (iVar1 = *(int *)((int)this->m_020 + 0xec), iVar1 != 0)) &&
+   00000000 00000000                           size     0 C_Door,C_Train  []
+   005830d0 empty_function_5830d0              size     3 C_Human  []
+   40080000 40080000                           size     0 C_Car  []
+   005cb2c0 FUN_005cb2c0                       size     4 C_MeleeTracker  []
+   005b80d0 FUN_005b80d0                       size    23 C_ItemActor  []
+   00606340 FUN_00606340                       size    23 C_StaticWeapon  []
+   0060b1b0 FUN_0060b1b0                       size    13 C_Barrel  []
+   005fc200 FUN_005fc200                       size   636 C_Junkers88  []
+   005fdba0 thunk_FUN_00610200                 size     5 C_SupplyBox  []
+   00602400 FUN_00602400                       size   248 C_Mine  []
+   005dd900 FUN_005dd900                       size  2258 C_Bike  ['Cache___BADFILETIME___s___3ds_fi', 'Cache___BADFILEVERSION___s___3ds']
+   005ed8b0 FUN_005ed8b0                       size    67 C_Ladder  []
+   459bf000 459bf000                           size     0 C_Switch  []
+   0060be80 FUN_0060be80                       size    10 C_Radio  []
+   005b6b70 empty_function_5b6b70              size     3 C_AnimationActor  []
+   005b9670 FUN_005b9670                       size   310 C_Clock  []
+   005ba1c0 FUN_005ba1c0                       size    23 C_Pike  []
+   005bd820 FUN_005bd820                       size  2424 C_FowlGenerator  ['BODYCOLB00', 'DTHL_02d', 'DTHR_02d', 'STHL00', 'STHR00']
+   005b8860 empty_function_5b8860              size     3 C_Fish  []
+   005e2ad0 FUN_005e2ad0                       size    23 C_WireCut  []
+   005e3090 FUN_005e3090                       size    23 C_NullActor  []
+   005ebbd0 FUN_005ebbd0                       size   521 C_AirAttack  []
+   005edde0 FUN_005edde0                       size    77 C_MPZone  []
+   005fe430 empty_function_5fe430              size     3 C_Debris  []
+   0060cf20 FUN_0060cf20                       size    77 C_PhotoPlace  []
+   0060e560 FUN_0060e560                       size    77 C_ExplosivePlace  []
+   0060f3c0 FUN_0060f3c0                       size    89 C_DocumentPlace  []
+   00611050 empty_function_611050              size     3 C_TSExplosion  []
+   00613290 FUN_00613290                       size    30 C_SpawnPoint  []
+=== slot 4e (+0x138)  base 006118b0 FUN_006118b0 size 5  strings []
+      undefined1 __thiscall C_auto_008138e0::FUN_006118b0(C_auto_008138e0 *this)
+      {
+        return 1;
+      }
+   005830e0 empty_function_5830e0              size     3 C_Human  []
+   004e0540 FUN_004e0540                       size   106 C_Car  []
+   00602fa0 FUN_00602fa0                       size    30 C_Door  []
+   005ce700 FUN_005ce700                       size    55 C_MeleeTracker  []
+   005b80f0 FUN_005b80f0                       size    95 C_ItemActor  []
+   00609a30 FUN_00609a30                       size   572 C_StaticWeapon  []
+   0060b1c0 FUN_0060b1c0                       size   251 C_Barrel  []
+   33333333 33333333                           size     0 C_Train  []
+   005fbec0 FUN_005fbec0                       size   395 C_Junkers88  []
+   005fdb00 FUN_005fdb00                       size     5 C_SupplyBox  []
+   00602500 FUN_00602500                       size   507 C_Mine  []
+   005de260 FUN_005de260                       size   149 C_Bike  []
+   005ebf80 FUN_005ebf80                       size     5 C_Ladder  []
+   42f00000 42f00000                           size     0 C_Switch  []
+   0060be90 FUN_0060be90                       size   251 C_Radio  []
+   005b6b80 FUN_005b6b80                       size   663 C_AnimationActor  []
+   005b9bc0 FUN_005b9bc0                       size   181 C_Clock  []
+   005ba1e0 FUN_005ba1e0                       size   287 C_Pike  []
+   005be1b0 FUN_005be1b0                       size   426 C_FowlGenerator  []
+   005b61d0 empty_function_5b61d0              size     3 C_Fish  []
+   005e2af0 FUN_005e2af0                       size    15 C_WireCut  []
+   005e30b0 FUN_005e30b0                       size   874 C_NullActor  []
+   005ea4c0 thunk_FUN_006101f0                 size     5 C_AirAttack  []
+   005ee1e0 FUN_005ee1e0                       size  1614 C_MPZone  []
+   005fe440 FUN_005fe440                       size   960 C_Debris  []
+   0060cf70 FUN_0060cf70                       size   334 C_PhotoPlace  []
+   0060e5b0 FUN_0060e5b0                       size   251 C_ExplosivePlace  []
+   0060f420 FUN_0060f420                       size   540 C_DocumentPlace  []
+   00611060 empty_function_611060              size     3 C_TSExplosion  []
+   006132b0 FUN_006132b0                       size    60 C_SpawnPoint  []
+=== slot 4f (+0x13c)  base 006118c0 FUN_006118c0 size 5  strings []
+      undefined1 __thiscall C_auto_008138e0::FUN_006118c0(C_auto_008138e0 *this)
+      {
+        return 1;
+      }
+   00588c20 FUN_00588c20                       size    54 C_Human  []
+   004e05b0 FUN_004e05b0                       size   114 C_Car  []
+   004d0e40 FUN_004d0e40                       size     7 C_Door  []
+   005cb2d0 empty_function_5cb2d0              size     1 C_MeleeTracker  []
+   005b8150 FUN_005b8150                       size   229 C_ItemActor  []
+   00609c70 FUN_00609c70                       size   778 C_StaticWeapon  []
+   0060b2c0 FUN_0060b2c0                       size   402 C_Barrel  []
+   3fd33333 3fd33333                           size     0 C_Train  []
+   005fac80 FUN_005fac80                       size  1387 C_Junkers88  ['Cache___BADFILETIME___s___3ds_fi', 'Cache___BADFILEVERSION___s___3ds', '_crateclosed', '_cratedrop', '_cratefly']
+   005fdb10 FUN_005fdb10                       size     5 C_SupplyBox  []
+   00602700 FUN_00602700                       size   748 C_Mine  []
+   005db870 FUN_005db870                       size    23 C_Bike  []
+   005ebf90 FUN_005ebf90                       size     5 C_Ladder  []
+   0063deb0 FUN_0063deb0                       size    30 C_Switch  []
+   0060bf90 FUN_0060bf90                       size   402 C_Radio  []
+   005b6e20 FUN_005b6e20                       size   708 C_AnimationActor  []
+   005b8990 FUN_005b8990                       size    23 C_Clock  []
+   005ba300 FUN_005ba300                       size   427 C_Pike  []
+   005befe0 FUN_005befe0                       size    23 C_FowlGenerator  []
+   004d0e50 FUN_004d0e50                       size     5 C_Fish  []
+   005e2b00 FUN_005e2b00                       size    15 C_WireCut  []
+   005e3420 FUN_005e3420                       size  1494 C_NullActor  []
+   005ead20 FUN_005ead20                       size  1013 C_AirAttack  []
+   005ee830 FUN_005ee830                       size  2351 C_MPZone  ['la_Bf109Canyon']
+   005fe800 FUN_005fe800                       size   842 C_Debris  []
+   0060d0c0 FUN_0060d0c0                       size   563 C_PhotoPlace  []
+   0060e6b0 FUN_0060e6b0                       size   418 C_ExplosivePlace  []
+   0060f640 FUN_0060f640                       size   805 C_DocumentPlace  []
+   005b8860 empty_function_5b8860              size     3 C_TSExplosion  []
+   006132f0 FUN_006132f0                       size   148 C_SpawnPoint  []
+=== slot 50 (+0x140)  base 005b8880 empty_function_5b8880 size 3  strings []
+      void __thiscall empty_function_5b8880(void *this)
+      {
+        return;
+      }
+   005830f0 FUN_005830f0                       size     4 C_Human  []
+   004e0040 FUN_004e0040                       size   164 C_Car  []
+   00610f80 FUN_00610f80                       size   152 C_Door  []
+   005cb2e0 empty_function_5cb2e0              size     3 C_MeleeTracker  []
+   42a00000 42a00000                           size     0 C_Train  []
+   005fb220 FUN_005fb220                       size   341 C_Junkers88  []
+   005fdb20 empty_function_5fdb20              size     3 C_SupplyBox  []
+   006021e0 FUN_006021e0                       size   145 C_Mine  []
+   005db890 FUN_005db890                       size   446 C_Bike  []
+   005ed2d0 FUN_005ed2d0                       size    21 C_Ladder  []
+   0063eff0 empty_function_63eff0              size     1 C_Switch  []
+   005b70f0 empty_function_5b70f0              size     3 C_AnimationActor  []
+   005b89b0 FUN_005b89b0                       size   324 C_Clock  []
+   005bf000 FUN_005bf000                       size   580 C_FowlGenerator  []
+   004d0e60 FUN_004d0e60                       size     5 C_Fish  []
+   005eb120 FUN_005eb120                       size   173 C_AirAttack  []
+   0060ce60 FUN_0060ce60                       size    57 C_PhotoPlace  []
+   0060e4d0 FUN_0060e4d0                       size    51 C_ExplosivePlace  []
+   0060f9a0 FUN_0060f9a0                       size    28 C_DocumentPlace  []
+   005b61d0 empty_function_5b61d0              size     3 C_TSExplosion  []
+   00613680 FUN_00613680                       size    21 C_SpawnPoint  []
+=== slot 51 (+0x144)  base 005b8890 empty_function_5b8890 size 3  strings []
+      void __thiscall C_auto_008137f0::empty_function_5b8890(C_auto_008137f0 *this)
+      {
+        return;
+      }
+   00584b50 FUN_00584b50                       size     4 C_Human  []
+   004e00f0 FUN_004e00f0                       size   141 C_Car  []
+   00611020 FUN_00611020                       size    45 C_Door  []
+   005cb2f0 empty_function_5cb2f0              size     1 C_MeleeTracker  []
+   c61c4066 c61c4066                           size     0 C_Train  []
+   005fc480 FUN_005fc480                       size   174 C_Junkers88  []
+   005fdbb0 FUN_005fdbb0                       size    24 C_SupplyBox  []
+   00602290 FUN_00602290                       size   130 C_Mine  []
+   005dba50 FUN_005dba50                       size   810 C_Bike  []
+   005ed2f0 FUN_005ed2f0                       size    41 C_Ladder  []
+   0063f000 empty_function_63f000              size     1 C_Switch  []
+   005b7100 empty_function_5b7100              size     3 C_AnimationActor  []
+   005b8b00 FUN_005b8b00                       size   502 C_Clock  []
+   005bf250 FUN_005bf250                       size   656 C_FowlGenerator  []
+   005dee00 FUN_005dee00                       size   498 C_Fish  ['SEAT_02d', 'sroub']
+   005ea4d0 FUN_005ea4d0                       size    45 C_AirAttack  []
+   0060cea0 FUN_0060cea0                       size    58 C_PhotoPlace  []
+   0060e510 FUN_0060e510                       size    54 C_ExplosivePlace  []
+   0060f9c0 FUN_0060f9c0                       size   234 C_DocumentPlace  []
+   004d0e50 FUN_004d0e50                       size     5 C_TSExplosion  []
+   006136a0 FUN_006136a0                       size    26 C_SpawnPoint  []
+=== slot 52 (+0x148)  base 0059c2d0 FUN_0059c2d0 size 40  strings []
+      void __thiscall
+      C_auto_008137f0::FUN_0059c2d0
+                (C_auto_008137f0 *this,undefined4 param_1,undefined4 param_2,undefined4 param_3,
+                undefined4 param_4,undefined4 param_5,undefined4 param_6)
+      {
+        (*this->vtable->vf17)(param_1,param_2,param_3,param_4,param_5,param_6,0);
+        return;
+      }
+   005b8880 empty_function_5b8880              size     3 C_Bike,C_FowlGenerator  []
+   00583100 FUN_00583100                       size    32 C_Human  []
+   004e0710 empty_function_4e0710              size     3 C_Car  []
+   00602f60 FUN_00602f60                       size     6 C_Door  []
+   005cb300 empty_function_5cb300              size     3 C_MeleeTracker  []
+   3e6147ae 3e6147ae                           size     0 C_Train  []
+   005fc530 FUN_005fc530                       size   272 C_Junkers88  []
+   005fdbd0 FUN_005fdbd0                       size    34 C_SupplyBox  []
+   0063f010 empty_function_63f010              size     1 C_Switch  []
+   005ba000 FUN_005ba000                       size    99 C_Clock  []
+   005b61e0 FUN_005b61e0                       size     5 C_Fish  []
+   005ea500 FUN_005ea500                       size     5 C_AirAttack  []
+   004d0e60 FUN_004d0e60                       size     5 C_TSExplosion  []
+=== slot 53 (+0x14c)  base 00611070 FUN_00611070 size 5  strings []
+      undefined1 __thiscall C_auto_008137f0::FUN_00611070(C_auto_008137f0 *this)
+      {
+        return 0;
+      }
+   005b8890 empty_function_5b8890              size     3 C_Bike,C_FowlGenerator  []
+   00583120 FUN_00583120                       size    32 C_Human  []
+   004e0720 FUN_004e0720                       size    54 C_Car  []
+   006034d0 FUN_006034d0                       size    70 C_Door  []
+   005cb310 empty_function_5cb310              size     3 C_MeleeTracker  []
+   00609510 FUN_00609510                       size  1297 C_StaticWeapon  []
+   3e99999a 3e99999a                           size     0 C_Train  []
+   005fc640 FUN_005fc640                       size   531 C_Junkers88  []
+   005fdcb0 empty_function_5fdcb0              size     3 C_SupplyBox  []
+   0063f030 FUN_0063f030                       size    30 C_Switch  []
+   005ba070 FUN_005ba070                       size    95 C_Clock  []
+   005dfe50 FUN_005dfe50                       size   691 C_Fish  []
+   005ea510 FUN_005ea510                       size     5 C_AirAttack  []
+   00610200 FUN_00610200                       size    33 C_TSExplosion  []
+=== slot 54 (+0x150)  base 004d0e70 empty_function_4d0e70 size 3  strings []
+      void __thiscall C_auto_008137f0::empty_function_4d0e70(C_auto_008137f0 *this)
+      {
+        return;
+      }
+   0059c2d0 FUN_0059c2d0                       size    40 C_Bike,C_Clock,C_FowlGenerator  []
+   00583140 FUN_00583140                       size     5 C_Human  []
+   004e06a0 FUN_004e06a0                       size    21 C_Car  []
+   00603070 FUN_00603070                       size   537 C_Door  []
+   005cb320 empty_function_5cb320              size     3 C_MeleeTracker  []
+   40600000 40600000                           size     0 C_Train  []
+   005fd560 FUN_005fd560                       size   224 C_Junkers88  []
+   005fdcc0 FUN_005fdcc0                       size     5 C_SupplyBox  []
+   0063c9d0 FUN_0063c9d0                       size    36 C_Switch  []
+   005df3c0 empty_function_6101f0              size     5 C_Fish  []
+   005b8880 empty_function_5b8880              size     3 C_AirAttack  []
+   005b61e0 FUN_005b61e0                       size     5 C_TSExplosion  []
+=== slot 55 (+0x154)  base 004d0e80 FUN_004d0e80 size 9  strings []
+      undefined4 __thiscall C_auto_008137f0::FUN_004d0e80(C_auto_008137f0 *this)
+      {
+        return CONCAT31((int3)(this->m_014 >> 8),-1 < (int)this->m_014);
+      }
+   00611070 FUN_00611070                       size     5 C_Bike,C_Clock,C_FowlGenerator  []
+   00583150 FUN_00583150                       size     5 C_Human  []
+   004e06c0 FUN_004e06c0                       size    71 C_Car  []
+   00605030 FUN_00605030                       size   100 C_Door  []
+   005cb330 empty_function_5cb330              size     3 C_MeleeTracker  []
+   3e99999a 3e99999a                           size     0 C_Train  []
+   005fd640 FUN_005fd640                       size   283 C_Junkers88  []
+   005fdcd0 FUN_005fdcd0                       size     5 C_SupplyBox  []
+   0063ced0 FUN_0063ced0                       size   484 C_Switch  []
+   005df3d0 FUN_005df3d0                       size   553 C_Fish  ['BODYCOLB00', 'camera3RD_']
+   005b8890 empty_function_5b8890              size     3 C_AirAttack  []
+   005b8870 FUN_005b8870                       size     5 C_TSExplosion  []

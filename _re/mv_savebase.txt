@@ -1,0 +1,587 @@
+// 0x00760920
+uint32_t __thiscall C_HumanMovement::SaveBase(C_HumanMovement *this,char *param_1)
+{
+  this_00 = param_1;
+  uVar6 = CONCAT31((int3)((uint32_t)in_EAX >> 8),*param_1);
+  local_c = (S_DequeIterator *)&DAT_00867a90;
+  if (*param_1 != '\0') {
+    local_14[0] = 0x14d;
+    local_14[1] = 0;
+    local_14[2] = 0;
+    local_8 = this;
+    iVar5 = dtaSeek(*(int *)(param_1 + 4),0,1);
+    *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) = iVar5;
+    *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+    uVar6 = dtaWrite(*(int *)(this_00 + 4),local_14,6);
+    if (uVar6 == 6) {
+      param_1 = (char *)this->unknown180;
+      C_chunk::WriteChunk((C_chunk *)this_00,0,&param_1,4);
+      param_1 = (char *)this->unknown184;
+      C_chunk::WriteChunk((C_chunk *)this_00,2,&param_1,4);
+      if ((this->unknown188 != 0) &&
+         (local_c = *(S_DequeIterator **)(this->unknown188 + 0xe8),
+         local_c == nullptr)) {
+        local_c = (S_DequeIterator *)&DAT_00867a90;
+      }
+      uVar6 = 0xffffffff;
+      pSVar7 = local_c;
+      do {
+        if (uVar6 == 0) break;
+        uVar6--;
+        ppvVar8 = &pSVar7->blockFirst;
+        pSVar7 = (S_DequeIterator *)((int)&pSVar7->blockFirst + 1);
+      } while (*(char *)ppvVar8 != '\0');
+      C_chunk::WriteChunk((C_chunk *)this_00,3,local_c,~uVar6);
+      pCVar4 = local_8;
+      param_1 = (char *)local_8->unknown1C8;
+      C_chunk::WriteChunk((C_chunk *)this_00,4,&param_1,4);
+      param_1 = (char *)(uint32_t)pCVar4->unknown1D4;
+      C_chunk::WriteChunk((C_chunk *)this_00,5,&param_1,4);
+      pCVar11 = local_8;
+      if (*this_00 != '\0') {
+        local_14[0] = 6;
+        local_14[1] = 0;
+        local_14[2] = 0;
+        iVar5 = dtaSeek(*(int *)(this_00 + 4),0,1);
+        *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) = iVar5;
+        *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+        dtaWrite(*(int *)(this_00 + 4),local_14,6);
+        pCVar11 = local_8;
+        if (*this_00 != '\0') {
+          if (this_00[8] != '\0') {
+            dtaWrite(*(int *)(this_00 + 4),&pCVar4->state,0x10);
+          }
+          pCVar11 = pCVar4;
+          if (*this_00 != '\0') {
+            iVar5 = *(int *)(this_00 + 4);
+            if (this_00[8] == '\0') {
+              pSVar7 = *(S_DequeIterator **)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+            }
+            else {
+              local_c = (S_DequeIterator *)dtaSeek(iVar5,0,1);
+              param_1 = (char *)((int)local_c -
+                                *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc));
+              dtaSeek(*(int *)(this_00 + 4),
+                      *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc) + 2,0);
+              dtaWrite(*(int *)(this_00 + 4),&param_1,4);
+              iVar5 = *(int *)(this_00 + 4);
+              pSVar7 = local_c;
+            }
+            dtaSeek(iVar5,(int)pSVar7,0);
+            if (*(int *)(this_00 + 0x410) != 0) {
+              *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) - 1;
+            }
+            if (*this_00 != '\0') {
+              local_14[0] = 7;
+              local_14[1] = 0;
+              local_14[2] = 0;
+              iVar5 = dtaSeek(*(int *)(this_00 + 4),0,1);
+              *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) = iVar5;
+              *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+              dtaWrite(*(int *)(this_00 + 4),local_14,6);
+              if (*this_00 != '\0') {
+                if (this_00[8] != '\0') {
+                  dtaWrite(*(int *)(this_00 + 4),&pCVar4->unknown1E8,0xc);
+                }
+                if (*this_00 != '\0') {
+                  iVar5 = *(int *)(this_00 + 4);
+                  if (this_00[8] == '\0') {
+                    pSVar7 = *(S_DequeIterator **)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+                  }
+                  else {
+                    local_c = (S_DequeIterator *)dtaSeek(iVar5,0,1);
+                    param_1 = (char *)((int)local_c -
+                                      *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc));
+                    dtaSeek(*(int *)(this_00 + 4),
+                            *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc) + 2,0);
+                    dtaWrite(*(int *)(this_00 + 4),&param_1,4);
+                    iVar5 = *(int *)(this_00 + 4);
+                    pSVar7 = local_c;
+                  }
+                  dtaSeek(iVar5,(int)pSVar7,0);
+                  if (*(int *)(this_00 + 0x410) != 0) {
+                    *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) - 1;
+                  }
+                  if (*this_00 != '\0') {
+                    local_14[0] = 8;
+                    local_14[1] = 0;
+                    local_14[2] = 0;
+                    iVar5 = dtaSeek(*(int *)(this_00 + 4),0,1);
+                    *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) = iVar5;
+                    *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+                    dtaWrite(*(int *)(this_00 + 4),local_14,6);
+                    if (*this_00 != '\0') {
+                      if (this_00[8] != '\0') {
+                        dtaWrite(*(int *)(this_00 + 4),pCVar4->_pad_01f0 + 4,8);
+                      }
+                      if (*this_00 != '\0') {
+                        iVar5 = *(int *)(this_00 + 4);
+                        if (this_00[8] == '\0') {
+                          pSVar7 = *(S_DequeIterator **)
+                                    (this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+                        }
+                        else {
+                          local_c = (S_DequeIterator *)dtaSeek(iVar5,0,1);
+                          param_1 = (char *)((int)local_c -
+                                            *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc))
+                          ;
+                          dtaSeek(*(int *)(this_00 + 4),
+                                  *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc) + 2,0);
+                          dtaWrite(*(int *)(this_00 + 4),&param_1,4);
+                          iVar5 = *(int *)(this_00 + 4);
+                          pSVar7 = local_c;
+                        }
+                        dtaSeek(iVar5,(int)pSVar7,0);
+                        if (*(int *)(this_00 + 0x410) != 0) {
+                          *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) - 1;
+                        }
+                        if (*this_00 != '\0') {
+                          local_14[0] = 9;
+                          local_14[1] = 0;
+                          local_14[2] = 0;
+                          iVar5 = dtaSeek(*(int *)(this_00 + 4),0,1);
+                          *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) = iVar5;
+                          *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+                          dtaWrite(*(int *)(this_00 + 4),local_14,6);
+                          if (*this_00 != '\0') {
+                            if (this_00[8] != '\0') {
+                              dtaWrite(*(int *)(this_00 + 4),&pCVar4->unknown1FC,0x10);
+                            }
+                            if (*this_00 != '\0') {
+                              iVar5 = *(int *)(this_00 + 4);
+                              if (this_00[8] == '\0') {
+                                pSVar7 = *(S_DequeIterator **)
+                                          (this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+                              }
+                              else {
+                                local_c = (S_DequeIterator *)dtaSeek(iVar5,0,1);
+                                param_1 = (char *)((int)local_c -
+                                                  *(int *)(this_00 +
+                                                          *(int *)(this_00 + 0x410) * 4 + 0xc));
+                                dtaSeek(*(int *)(this_00 + 4),
+                                        *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc) + 2,
+                                        0);
+                                dtaWrite(*(int *)(this_00 + 4),&param_1,4);
+                                iVar5 = *(int *)(this_00 + 4);
+                                pSVar7 = local_c;
+                              }
+                              dtaSeek(iVar5,(int)pSVar7,0);
+                              if (*(int *)(this_00 + 0x410) != 0) {
+                                *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) - 1;
+                              }
+                              if (*this_00 != '\0') {
+                                local_14[0] = 10;
+                                local_14[1] = 0;
+                                local_14[2] = 0;
+                                iVar5 = dtaSeek(*(int *)(this_00 + 4),0,1);
+                                *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) = iVar5;
+                                *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+                                dtaWrite(*(int *)(this_00 + 4),local_14,6);
+                                if (*this_00 != '\0') {
+                                  if (this_00[8] != '\0') {
+                                    dtaWrite(*(int *)(this_00 + 4),&pCVar4->unknown20C,0xc);
+                                  }
+                                  if (*this_00 != '\0') {
+                                    iVar5 = *(int *)(this_00 + 4);
+                                    if (this_00[8] == '\0') {
+                                      pSVar7 = *(S_DequeIterator **)
+                                                (this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+                                    }
+                                    else {
+                                      local_c = (S_DequeIterator *)dtaSeek(iVar5,0,1);
+                                      param_1 = (char *)((int)local_c -
+                                                        *(int *)(this_00 +
+                                                                *(int *)(this_00 + 0x410) * 4 + 0xc)
+                                                        );
+                                      dtaSeek(*(int *)(this_00 + 4),
+                                              *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc
+                                                      ) + 2,0);
+                                      dtaWrite(*(int *)(this_00 + 4),&param_1,4);
+                                      iVar5 = *(int *)(this_00 + 4);
+                                      pSVar7 = local_c;
+                                    }
+                                    dtaSeek(iVar5,(int)pSVar7,0);
+                                    if (*(int *)(this_00 + 0x410) != 0) {
+                                      *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) - 1;
+                                    }
+                                    if (*this_00 != '\0') {
+                                      local_14[0] = 0xb;
+                                      local_14[1] = 0;
+                                      local_14[2] = 0;
+                                      iVar5 = dtaSeek(*(int *)(this_00 + 4),0,1);
+                                      *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) =
+                                      *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+                                      dtaWrite(*(int *)(this_00 + 4),local_14,6);
+                                      if (*this_00 != '\0') {
+                                        if (this_00[8] != '\0') {
+                                          dtaWrite(*(int *)(this_00 + 4),&pCVar4->unknown218,8);
+                                        }
+                                        if (*this_00 != '\0') {
+                                          iVar5 = *(int *)(this_00 + 4);
+                                          if (this_00[8] == '\0') {
+                                            pSVar7 = *(S_DequeIterator **)
+                                                      (this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc
+                                                      );
+                                          }
+                                          else {
+                                            local_c = (S_DequeIterator *)dtaSeek(iVar5,0,1);
+                                            param_1 = (char *)((int)local_c -
+                                                              *(int *)(this_00 +
+                                                                      *(int *)(this_00 + 0x410) * 4
+                                                                      + 0xc));
+                                            dtaSeek(*(int *)(this_00 + 4),
+                                                    *(int *)(this_00 +
+                                                            *(int *)(this_00 + 0x410) * 4 + 0xc) + 2
+                                                    ,0);
+                                            dtaWrite(*(int *)(this_00 + 4),&param_1,4);
+                                            iVar5 = *(int *)(this_00 + 4);
+                                            pSVar7 = local_c;
+                                          }
+                                          dtaSeek(iVar5,(int)pSVar7,0);
+                                          if (*(int *)(this_00 + 0x410) != 0) {
+                                            *(int *)(this_00 + 0x410) =
+                                                 *(int *)(this_00 + 0x410) - 1;
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      param_1 = (char *)pCVar11->unknown220;
+      C_chunk::WriteChunk((C_chunk *)this_00,0xc,&param_1,4);
+      param_1 = (char *)pCVar11->unknown228;
+      C_chunk::WriteChunk((C_chunk *)this_00,0xd,&param_1,4);
+      param_1 = (char *)pCVar11->flags;
+      C_chunk::WriteChunk((C_chunk *)this_00,0xe,&param_1,4);
+      param_1 = (char *)(uint32_t)pCVar11->unknown98C;
+      C_chunk::WriteChunk((C_chunk *)this_00,0xf,&param_1,4);
+      param_1 = (char *)pCVar11->unknown69C;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x10,&param_1,4);
+      param_1 = (char *)pCVar11->unknown750;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x11,&param_1,4);
+      param_1 = (char *)pCVar11->unknown764;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x12,&param_1,4);
+      if (*this_00 != '\0') {
+        local_14[0] = 0x13;
+        local_14[1] = 0;
+        local_14[2] = 0;
+        iVar5 = dtaSeek(*(int *)(this_00 + 4),0,1);
+        *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) = iVar5;
+        *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+        dtaWrite(*(int *)(this_00 + 4),local_14,6);
+      }
+      FUN_00780990(&pCVar11->unknown770,this_00);
+      if (*this_00 != '\0') {
+        if (this_00[8] == '\0') {
+          pSVar7 = *(S_DequeIterator **)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+        }
+        else {
+          local_c = (S_DequeIterator *)dtaSeek(*(int *)(this_00 + 4),0,1);
+          param_1 = (char *)((int)local_c - *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc))
+          ;
+          dtaSeek(*(int *)(this_00 + 4),*(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc) + 2,
+                  0);
+          dtaWrite(*(int *)(this_00 + 4),&param_1,4);
+          pSVar7 = local_c;
+        }
+        dtaSeek(*(int *)(this_00 + 4),(int)pSVar7,0);
+        if (*(int *)(this_00 + 0x410) != 0) {
+          *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) - 1;
+        }
+      }
+      C_chunk::WriteChunk((C_chunk *)this_00,0x14,&pCVar11->unknown940,0xc);
+      param_1 = (char *)pCVar11->unknown1A4;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x15,&param_1,4);
+      param_1 = (char *)pCVar11->unknown1CC;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x16,&param_1,4);
+      param_1 = (char *)pCVar11->unknown1D0;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x17,&param_1,4);
+      param_1 = (char *)(uint32_t)pCVar11->unknown762;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x18,&param_1,4);
+      param_1 = (char *)(uint32_t)pCVar11->unknown761;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x19,&param_1,4);
+      param_1 = (char *)pCVar11->unknown698;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x1a,&param_1,4);
+      param_1 = (char *)pCVar11->unknown75C;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x1c,&param_1,4);
+      param_1 = (char *)(uint32_t)pCVar11->unknown760;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x1d,&param_1,4);
+      param_1 = (char *)pCVar11->unknown234;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x20,&param_1,4);
+      param_1 = (char *)pCVar11->unknown954;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x21,&param_1,4);
+      param_1 = (char *)pCVar11->unknown958;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x22,&param_1,4);
+      param_1 = (char *)pCVar11->unknown95C;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x23,&param_1,4);
+      param_1 = (char *)pCVar11->unknown960;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x24,&param_1,4);
+      param_1 = (char *)pCVar11->unknown964;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x25,&param_1,4);
+      lVar12 = __ftol();
+      param_1 = (char *)lVar12;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x26,&param_1,4);
+      param_1 = (char *)pCVar11->unknown988;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x27,&param_1,4);
+      param_1 = (char *)(uint32_t)pCVar11->unknown96C;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x28,&param_1,4);
+      param_1 = (char *)(uint32_t)pCVar11->unknownA90;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x29,&param_1,4);
+      param_1 = (char *)pCVar11->unknown998;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x2a,&param_1,4);
+      param_1 = (char *)pCVar11->unknownA48;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x2b,&param_1,4);
+      param_1 = (char *)pCVar11->unknown99C;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x2c,&param_1,4);
+      param_1 = (char *)pCVar11->unknown9A0;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x2d,&param_1,4);
+      param_1 = (char *)pCVar11->unknown9A4;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x2e,&param_1,4);
+      param_1 = (char *)pCVar11->unknown9A8;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x2f,&param_1,4);
+      param_1 = (char *)pCVar11->unknown9AC;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x30,&param_1,4);
+      param_1 = (char *)pCVar11->unknown9B0;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x31,&param_1,4);
+      param_1 = (char *)pCVar11->unknown9B8;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x32,&param_1,4);
+      param_1 = (char *)pCVar11->unknown9BC;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x33,&param_1,4);
+      param_1 = (char *)pCVar11->unknown9C0;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x34,&param_1,4);
+      param_1 = (char *)pCVar11->unknown9C4;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x35,&param_1,4);
+      param_1 = (char *)pCVar11->unknown9CC;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x36,&param_1,4);
+      param_1 = (char *)pCVar11->unknown1AC;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x37,&param_1,4);
+      C_chunk::WriteChunk((C_chunk *)this_00,0x38,&pCVar11->unknown9D0,0xc);
+      param_1 = (char *)pCVar11->unknown9E0;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x39,&param_1,4);
+      C_chunk::WriteChunk((C_chunk *)this_00,0x3a,&pCVar11->unknown9F0,0xc);
+      C_chunk::WriteChunk((C_chunk *)this_00,0x3b,&pCVar11->unknownA00,0xc);
+      param_1 = (char *)pCVar11->unknownA10;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x3c,&param_1,4);
+      param_1 = (char *)pCVar11->unknownA1C;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x3d,&param_1,4);
+      param_1 = (char *)pCVar11->unknownA20;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x3e,&param_1,4);
+      param_1 = (char *)pCVar11->unknownA24;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x3f,&param_1,4);
+      param_1 = (char *)pCVar11->unknownA28;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x40,&param_1,4);
+      param_1 = (char *)pCVar11->unknownA2C;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x41,&param_1,4);
+      param_1 = (char *)pCVar11->unknownA30;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x42,&param_1,4);
+      param_1 = (char *)pCVar11->unknownA34;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x43,&param_1,4);
+      param_1 = (char *)pCVar11->unknownA38;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x44,&param_1,4);
+      iVar5 = pCVar11->unknownA3C;
+      if (iVar5 == 0) {
+        param_1 = (char *)0xffffffff;
+      }
+      else if (*(char *)(iVar5 + 0x1c) == '\0') {
+        param_1 = *(char **)(iVar5 + 0x10);
+      }
+      else {
+        param_1 = (char *)(*(int *)(iVar5 + 0x10) + 100000);
+      }
+      C_chunk::WriteChunk((C_chunk *)this_00,0x45,&param_1,4);
+      uVar6 = pCVar11->unknownA34 & 0x3ff;
+      if ((uVar6 == 8) || (uVar6 == 9)) {
+        data = *(char **)(pCVar11->unknownA40 + 0xe8);
+        if (data == nullptr) {
+          data = &DAT_00867a90;
+        }
+        uVar6 = 0xffffffff;
+        pcVar10 = data;
+        do {
+          if (uVar6 == 0) break;
+          uVar6--;
+          cVar1 = *pcVar10;
+          pcVar10++;
+        } while (cVar1 != '\0');
+        C_chunk::WriteChunk((C_chunk *)this_00,0x47,data,~uVar6);
+        pCVar11 = local_8;
+      }
+      else {
+        param_1 = (char *)pCVar11->unknownA40;
+        C_chunk::WriteChunk((C_chunk *)this_00,0x46,&param_1,4);
+      }
+      param_1 = (char *)pCVar11->unknownA44;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x51,&param_1,4);
+      param_1 = (char *)pCVar11->unknown1CC;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x53,&param_1,4);
+      if (pCVar11->unknown990 == 0) {
+        param_1 = (char *)0xffffffff;
+      }
+      else {
+        param_1 = *(char **)(pCVar11->unknown990 + 0x10);
+      }
+      C_chunk::WriteChunk((C_chunk *)this_00,0x54,&param_1,4);
+      param_1 = (char *)pCVar11->unknown980;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x55,&param_1,4);
+      param_1 = (char *)pCVar11->unknown984;
+      C_chunk::Begin((C_chunk *)this_00,0x56);
+      C_chunk::Write((C_chunk *)this_00,&param_1,4);
+      C_chunk::Ascend((C_chunk *)this_00);
+      param_1 = nullptr;
+      if (0 < pCVar11->unknown984) {
+        local_8 = (C_HumanMovement *)&DAT_009832d0;
+        ppvVar8 = pCVar11->volumes2;
+        do {
+          pvVar2 = *ppvVar8;
+          local_8[-1].weaponPose = *(C_HumanWeaponPose **)((int)pvVar2 + 0x30);
+          uVar3 = *(uint32_t *)((int)pvVar2 + 0x34);
+          local_8[-0xffffffff00000001].unknownDC4 = (bool)(char)uVar3;
+          local_8[-0xffffffff00000001]._pad_0dc5[0] = (char)((uint32_t)uVar3 >> 8);
+          local_8[-0xffffffff00000001]._pad_0dc5[1] = (char)((uint32_t)uVar3 >> 0x10);
+          local_8[-0xffffffff00000001]._pad_0dc5[2] = (char)((uint32_t)uVar3 >> 0x18);
+          local_8[-1].unknownDC8 = *(int *)((int)pvVar2 + 0x38);
+          local_c = (S_DequeIterator *)(ppvVar8 + 1);
+          *(uint32_t *)local_8[-1]._pad_0dcc = *(uint32_t *)((int)pvVar2 + 0x3c);
+          *(uint32_t *)local_8->_pad_0000 = *(uint32_t *)((int)*ppvVar8 + 0x4c);
+          param_1++;
+          local_8 = (C_HumanMovement *)(local_8->dummies + 6);
+          ppvVar8 = (void **)local_c;
+        } while ((int)param_1 < pCVar11->unknown984);
+      }
+      if (*this_00 != '\0') {
+        local_14[0] = 0x57;
+        local_14[1] = 0;
+        local_14[2] = 0;
+        iVar5 = dtaSeek(*(int *)(this_00 + 4),0,1);
+        *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) = iVar5;
+        *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+        dtaWrite(*(int *)(this_00 + 4),local_14,6);
+        if (*this_00 != '\0') {
+          if (this_00[8] != '\0') {
+            dtaWrite(*(int *)(this_00 + 4),&DAT_009832c0,0x80);
+          }
+          if (*this_00 != '\0') {
+            if (this_00[8] == '\0') {
+              pSVar7 = *(S_DequeIterator **)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+            }
+            else {
+              local_c = (S_DequeIterator *)dtaSeek(*(int *)(this_00 + 4),0,1);
+              param_1 = (char *)((int)local_c -
+                                *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc));
+              dtaSeek(*(int *)(this_00 + 4),
+                      *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc) + 2,0);
+              dtaWrite(*(int *)(this_00 + 4),&param_1,4);
+              pSVar7 = local_c;
+            }
+            dtaSeek(*(int *)(this_00 + 4),(int)pSVar7,0);
+            if (*(int *)(this_00 + 0x410) != 0) {
+              *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) - 1;
+            }
+          }
+        }
+      }
+      param_1 = (char *)(uint32_t)pCVar11->unknown9C8;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x58,&param_1,4);
+      param_1 = (char *)pCVar11->unknownA14;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x59,&param_1,4);
+      param_1 = (char *)pCVar11->unknownA18;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x5a,&param_1,4);
+      param_1 = (char *)pCVar11->unknown950;
+      C_chunk::WriteChunk((C_chunk *)this_00,0x5c,&param_1,4);
+      param_1 = (char *)pCVar11->unknown250;
+      C_chunk::Begin((C_chunk *)this_00,0x5d);
+      C_chunk::Write((C_chunk *)this_00,&param_1,4);
+      C_chunk::Ascend((C_chunk *)this_00);
+      param_1 = (char *)pCVar11->unknown9B4;
+      C_chunk::Begin((C_chunk *)this_00,0x5e);
+      C_chunk::Write((C_chunk *)this_00,&param_1,4);
+      C_chunk::Ascend((C_chunk *)this_00);
+      param_1 = (char *)pCVar11->unknown230;
+      C_chunk::Begin((C_chunk *)this_00,0x60);
+      C_chunk::Write((C_chunk *)this_00,&param_1,4);
+      C_chunk::Ascend((C_chunk *)this_00);
+      param_1 = *(char **)(pCVar11->_pad_018d + 3);
+      C_chunk::Begin((C_chunk *)this_00,0x61);
+      C_chunk::Write((C_chunk *)this_00,&param_1,4);
+      C_chunk::Ascend((C_chunk *)this_00);
+      param_1 = (char *)pCVar11->unknownA7C;
+      C_chunk::Begin((C_chunk *)this_00,0x62);
+      C_chunk::Write((C_chunk *)this_00,&param_1,4);
+      C_chunk::Ascend((C_chunk *)this_00);
+      param_1 = (char *)pCVar11->unknownA94;
+      C_chunk::Begin((C_chunk *)this_00,99);
+      C_chunk::Write((C_chunk *)this_00,&param_1,4);
+      C_chunk::Ascend((C_chunk *)this_00);
+      param_1 = (char *)pCVar11->unknown1B0;
+      C_chunk::Begin((C_chunk *)this_00,100);
+      C_chunk::Write((C_chunk *)this_00,&param_1,4);
+      C_chunk::Ascend((C_chunk *)this_00);
+      param_1 = (char *)(uint32_t)pCVar11->unknown1B4;
+      C_chunk::Begin((C_chunk *)this_00,0x65);
+      C_chunk::Write((C_chunk *)this_00,&param_1,4);
+      C_chunk::Ascend((C_chunk *)this_00);
+      param_1 = (char *)pCVar11->unknownA98;
+      C_chunk::Begin((C_chunk *)this_00,0x66);
+      C_chunk::Write((C_chunk *)this_00,&param_1,4);
+      C_chunk::Ascend((C_chunk *)this_00);
+      param_1 = (char *)(uint32_t)pCVar11->unknown9C9;
+      C_chunk::Begin((C_chunk *)this_00,0x67);
+      C_chunk::Write((C_chunk *)this_00,&param_1,4);
+      C_chunk::Ascend((C_chunk *)this_00);
+      lVar12 = __ftol();
+      param_1 = (char *)lVar12;
+      C_chunk::Begin((C_chunk *)this_00,0x68);
+      C_chunk::Write((C_chunk *)this_00,&param_1,4);
+      C_chunk::Ascend((C_chunk *)this_00);
+      local_8 = (C_HumanMovement *)(pCVar11->unknownA4C).size;
+      if (0x13 < (int)local_8) {
+        local_8 = (C_HumanMovement *)0x13;
+      }
+      param_1 = (char *)local_8;
+      C_chunk::Begin((C_chunk *)this_00,0x69);
+      C_chunk::Write((C_chunk *)this_00,&param_1,4);
+      C_chunk::Ascend((C_chunk *)this_00);
+      param_1 = nullptr;
+      if (0 < (int)local_8) {
+        local_c = &(pCVar11->unknownA4C).first;
+        iVar5 = 0;
+        do {
+          if (*this_00 != '\0') {
+            local_14[0] = (short)iVar5 + 0x6a;
+            local_14[1] = 0;
+            local_14[2] = 0;
+            iVar9 = dtaSeek(*(int *)(this_00 + 4),0,1);
+            *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) = iVar9;
+            *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+            dtaWrite(*(int *)(this_00 + 4),local_14,6);
+          }
+          local_24 = local_c->blockFirst;
+          local_1c = local_c->next;
+          FUN_00757f50(&local_24,iVar5);
+          if ((*this_00 != '\0') && (this_00[8] != '\0')) {
+            dtaWrite(*(int *)(this_00 + 4),local_1c,0xc);
+          }
+          C_chunk::Ascend((C_chunk *)this_00);
+          iVar5++;
+        } while (iVar5 < (int)local_8);
+      }
+      C_chunk::Ascend((C_chunk *)this_00);
+      return CONCAT31(extraout_var,1);
+    }
+  }
+  return uVar6 & 0xffffff00;
+}
+

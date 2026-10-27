@@ -1,0 +1,238 @@
+// 0x0041d800
+void __fastcall FUN_0041d800(int param_1)
+{
+  iVar2 = *(int *)(param_1 + 600);
+  *(uint32_t *)(param_1 + 0x228) = 0;
+  local_20 = *(float *)(iVar2 + 0x30);
+  local_1c = *(uint32_t *)(iVar2 + 0x34);
+  local_18 = *(uint32_t *)(iVar2 + 0x38);
+  local_14 = *(uint32_t *)(iVar2 + 0x3c);
+  FUN_00759e50((void *)(param_1 + 0xcd0),&local_20);
+  iVar2 = *(int *)(param_1 + 600);
+  local_20 = *(float *)(iVar2 + 0x30);
+  local_1c = *(uint32_t *)(iVar2 + 0x34);
+  local_18 = *(uint32_t *)(iVar2 + 0x38);
+  local_14 = *(uint32_t *)(iVar2 + 0x3c);
+  FUN_00759e50((void *)(param_1 + 0xcd0),&local_20);
+  *(uint32_t *)(param_1 + 0xce8) = 10000;
+  *(uint8_t *)(param_1 + 0xdb4) = 1;
+  uVar1 = *(uint32_t *)(*(int *)(param_1 + 600) + 0x20);
+  iVar2 = GetGame();
+  (**(code **)(**(int **)(iVar2 + 0x18) + 0x144))(*(int **)(iVar2 + 0x18),uVar1);
+}
+
+// 0x0041d8b0
+void __fastcall FUN_0041d8b0(uint32_t *param_1)
+{
+  *param_1 = 0;
+  param_1[1] = 0;
+  param_1[2] = 0;
+  param_1[4] = 0;
+  param_1[5] = 0;
+  param_1[6] = 0;
+  param_1[0xe] = 0;
+  *(uint8_t *)(param_1 + 0x10) = 0;
+  *(uint8_t *)((int)param_1 + 0x41) = 0;
+}
+
+// 0x0041d8d0
+void __fastcall FUN_0041d8d0(int param_1)
+{
+  if (((uint8_t)g_gameRole & 1) != 0) {
+    *(uint32_t *)(param_1 + 0x24) = 0xffffffff;
+    *(uint32_t *)(param_1 + 0x28) = 0;
+    *(uint32_t *)(param_1 + 0xd8) = 0;
+    if (*(int *)(param_1 + 0x1c) != -1) {
+      *(int *)(param_1 + 0xd8) = *(int *)(param_1 + 0x1c);
+    }
+    *(uint8_t *)(param_1 + 0x104) = 1;
+    *(uint8_t *)(param_1 + 6) = 0;
+    *(uint8_t *)(param_1 + 5) = 0;
+    *(uint8_t *)(param_1 + 4) = 0;
+    *(uint8_t *)(param_1 + 8) = 0;
+    *(uint8_t *)(param_1 + 7) = 0;
+    *(uint8_t *)(param_1 + 9) = 0;
+  }
+}
+
+// 0x0041d920
+void __fastcall FUN_0041d920(int param_1)
+{
+  if (((uint8_t)g_gameRole & 1) != 0) {
+    if (*(int *)(param_1 + 0xdc) == -1) {
+      FUN_00416db0(param_1);
+      return;
+    }
+    *(int *)(param_1 + 0xd8) = *(int *)(param_1 + 0xdc);
+    *(uint32_t *)(param_1 + 0x18) = 0;
+    *(uint8_t *)(param_1 + 0x104) = 1;
+    *(uint8_t *)(param_1 + 0xd4) = 0;
+  }
+}
+
+// 0x0041d960
+void __fastcall FUN_0041d960(int param_1)
+{
+  if ((((uint8_t)g_gameRole & 1) != 0) &&
+     (((*(char *)(param_1 + 0x104) == '\0' ||
+       ((*(int *)(param_1 + 0xd8) != *(int *)(param_1 + 0xdc) &&
+        (*(int *)(param_1 + 0xd8) != *(int *)(param_1 + 0xe8))))) &&
+      (*(int *)(param_1 + 0xe0) != -1)))) {
+    *(int *)(param_1 + 0xd8) = *(int *)(param_1 + 0xe0);
+    *(uint8_t *)(param_1 + 0x104) = 1;
+  }
+}
+
+// 0x0041d9b0
+uint32_t __thiscall FUN_0041d9b0(void *this,int param_1)
+{
+  uVar4 = CONCAT31((int3)((uint32_t)in_EAX >> 8),(uint8_t)g_gameRole);
+  if (((uint8_t)g_gameRole & 1) != 0) {
+    iVar2 = *(int *)((int)this + 0x40);
+    uVar4 = 0;
+    if ((iVar2 != 0) && (iVar5 = *(int *)((int)this + 0x44) - iVar2 >> 2, iVar5 != 0)) {
+      iVar6 = iVar2 + iVar5 * 4;
+      do {
+        piVar1 = (int *)(iVar6 - 4);
+        iVar6 -= 4;
+        iVar5--;
+        if (((int *)*piVar1 != nullptr) && (*(int *)*piVar1 == param_1)) {
+          *(uint8_t *)((int)this + 0x104) = 1;
+          *(uint32_t *)((int)this + 0x18) = 0;
+          uVar3 = *(uint32_t *)(*(int *)(iVar2 + iVar5 * 4) + 4);
+          *(uint8_t *)((int)this + 0xd4) = 0;
+          *(uint32_t *)((int)this + 0xd8) = uVar3;
+          *(uint8_t *)((int)this + 9) = 1;
+          return 1;
+        }
+      } while (iVar5 != 0);
+    }
+  }
+  return uVar4 & 0xffffff00;
+}
+
+// 0x0041da20
+void __fastcall FUN_0041da20(int param_1)
+{
+  if (((((uint8_t)g_gameRole & 1) != 0) &&
+      (((*(char *)(param_1 + 0xd4) != '\0' || (*(char *)(param_1 + 0x104) == '\0')) ||
+       (*(int *)(param_1 + 0xd8) != *(int *)(param_1 + 0xdc))))) &&
+     ((*(char *)(param_1 + 5) == '\0' && (*(int *)(param_1 + 0xe8) != -1)))) {
+    *(int *)(param_1 + 0xd8) = *(int *)(param_1 + 0xe8);
+    *(uint32_t *)(param_1 + 0x18) = 0;
+    *(uint8_t *)(param_1 + 0x104) = 1;
+  }
+}
+
+// 0x0041da80
+uint8_t __fastcall FUN_0041da80(int param_1)
+{
+  if ((((uint8_t)g_gameRole & 1) != 0) &&
+     (((*(char *)(param_1 + 0x104) == '\0' || (*(int *)(param_1 + 0xd8) != *(int *)(param_1 + 0xdc))
+       ) && (*(int *)(param_1 + 0xec) != -1)))) {
+    *(int *)(param_1 + 0xd8) = *(int *)(param_1 + 0xec);
+    *(uint32_t *)(param_1 + 0x18) = 0;
+    *(uint8_t *)(param_1 + 0x104) = 1;
+    *(uint8_t *)(param_1 + 0xd4) = 0;
+    return 1;
+  }
+  return 0;
+}
+
+// 0x0041dae0
+uint32_t __thiscall FUN_0041dae0(void *this,int param_1)
+{
+  uVar4 = CONCAT31((int3)((uint32_t)in_EAX >> 8),(uint8_t)g_gameRole);
+  if (((uint8_t)g_gameRole & 1) != 0) {
+    iVar2 = *(int *)((int)this + 0x50);
+    uVar4 = 0;
+    if ((iVar2 != 0) && (iVar5 = *(int *)((int)this + 0x54) - iVar2 >> 2, iVar5 != 0)) {
+      iVar6 = iVar2 + iVar5 * 4;
+      do {
+        piVar1 = (int *)(iVar6 - 4);
+        iVar6 -= 4;
+        iVar5--;
+        if (((int *)*piVar1 != nullptr) && (*(int *)*piVar1 == param_1)) {
+          *(uint8_t *)((int)this + 0x104) = 1;
+          *(uint32_t *)((int)this + 0x18) = 0;
+          uVar3 = *(uint32_t *)(*(int *)(iVar2 + iVar5 * 4) + 4);
+          *(uint8_t *)((int)this + 9) = 0;
+          *(uint8_t *)((int)this + 0xd4) = 0;
+          *(uint32_t *)((int)this + 0xd8) = uVar3;
+          return 1;
+        }
+      } while (iVar5 != 0);
+    }
+  }
+  return uVar4 & 0xffffff00;
+}
+
+// 0x0041db50
+void __fastcall FUN_0041db50(int param_1)
+{
+  if ((((uint8_t)g_gameRole & 1) != 0) && (*(int *)(param_1 + 0xf4) != -1)) {
+    *(int *)(param_1 + 0xd8) = *(int *)(param_1 + 0xf4);
+    *(uint8_t *)(param_1 + 0x104) = 1;
+  }
+}
+
+// 0x0041db80
+void __fastcall FUN_0041db80(uint32_t *param_1)
+{
+  iVar1 = param_1[0x3e];
+  *(uint8_t *)(param_1 + 0x41) = 1;
+  param_1[0x36] = iVar1;
+  if (iVar1 != -1) {
+    param_1[0x36] = iVar1 - 1;
+    FUN_0041dc00(param_1);
+    return;
+  }
+}
+
+// 0x0041dbb0
+void __fastcall FUN_0041dbb0(int param_1)
+{
+  if ((((uint8_t)g_gameRole & 1) != 0) &&
+     (((*(char *)(param_1 + 0x104) == '\0' ||
+       ((*(int *)(param_1 + 0xd8) != *(int *)(param_1 + 0xdc) &&
+        (*(int *)(param_1 + 0xd8) != *(int *)(param_1 + 0xe8))))) &&
+      (*(int *)(param_1 + 0xe4) != -1)))) {
+    *(int *)(param_1 + 0xd8) = *(int *)(param_1 + 0xe4);
+    *(uint8_t *)(param_1 + 0x104) = 1;
+  }
+}
+
+// 0x0041dc00
+void __fastcall FUN_0041dc00(uint32_t *param_1)
+{
+  if (((uint8_t)g_gameRole & 1) != 0) {
+    iVar6 = param_1[0x36] + 1;
+    param_1[0x36] = iVar6;
+    piVar1 = *(int **)(param_1[0x18] + iVar6 * 4);
+    if (((piVar1 != nullptr) && (*piVar1 == 0x105)) && ((int *)piVar1[1] != nullptr)) {
+      iVar2 = *(int *)piVar1[1];
+LAB_0041dc41:
+      if ((param_1[0x18] != 0) &&
+         (uVar3 = param_1[0x36], uVar3 < (uint32_t)((int)(param_1[0x19] - param_1[0x18]) >> 2))) {
+        piVar1 = *(int **)(param_1[0x18] + uVar3 * 4);
+        if (((int)uVar3 < iVar2 + 2 + iVar6) && (iVar6 <= (int)uVar3)) {
+          iVar4 = *piVar1;
+          uVar5 = uVar3;
+          if ((iVar4 != 0x105) && (iVar4 != 0x106)) goto code_r0x0041dc7c;
+          goto LAB_0041dc8d;
+        }
+        *(uint8_t *)(param_1 + 0x41) = 1;
+      }
+    }
+  }
+  return;
+code_r0x0041dc7c:
+  (**(code **)*param_1)(piVar1);
+  uVar5 = param_1[0x36];
+  if (uVar3 == uVar5) {
+LAB_0041dc8d:
+    param_1[0x36] = uVar5 + 1;
+  }
+  goto LAB_0041dc41;
+}
+

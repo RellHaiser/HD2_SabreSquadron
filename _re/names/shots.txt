@@ -1,0 +1,174 @@
+# Shots and the shot manager (0x00448270..0x004559c0; types in _re/types/45_shots.spec;
+# ported in src/game/shots.*)
+
+# ---- C_Shot (base, vtable 0x0080fa7c) ----
+004482a0 C_Shot::Init | void __thiscall Init(C_Shot *this, C_Actor *shooter, S_vector4 *pos, S_vector4 *velocity, C_WeaponComp *weapon, I3D_frame *model, bool fake)
+00448340 C_Shot::Recycle | void __thiscall Recycle(C_Shot *this)
+00448360 C_Shot::Release | void __thiscall Release(C_Shot *this)
+0044dba0 C_Shot::~C_Shot
+00450540 C_Shot::DestroyBase_450540 | void __thiscall DestroyBase_450540(C_Shot *this)
+0044dbd0 C_Shot::ScalarDeletingDestructor | C_Shot * __thiscall ScalarDeletingDestructor(C_Shot *this, uchar flags)
+0044dbb0 C_Shot::SaveGame | void __thiscall SaveGame(C_Shot *this, C_chunk *chunk)
+0044dbc0 C_Shot::LoadGame | void __thiscall LoadGame(C_Shot *this, C_chunk *chunk)
+# Reflects `dir` off a surface: dir - factor * dot(dir, normal) * normal, renormalized to its
+# length (factor 2 = mirror; ricochets use 1.1..1.2).
+00448380 DeflectVector | void __stdcall DeflectVector(S_vector *dir, S_vector *normal, float factor)
+
+# ---- C_BulletShot (vtable 0x0080fa60, 0xC0 bytes, pooled) ----
+0044db40 C_BulletShot::C_BulletShot | C_BulletShot * __thiscall C_BulletShot(C_BulletShot *this)
+0044db80 C_BulletShot::ScalarDeletingDestructor | C_BulletShot * __thiscall ScalarDeletingDestructor(C_BulletShot *this, uchar flags)
+0044b030 C_BulletShot::Init | void __thiscall Init(C_BulletShot *this, C_Actor *shooter, S_vector4 *pos, S_vector4 *dir, C_FirearmComp *weapon, I3D_frame *traceModel, bool fake, bool flare)
+0044b350 C_BulletShot::Recycle | void __thiscall Recycle(C_BulletShot *this)
+0044b380 C_BulletShot::Release | void __thiscall Release(C_BulletShot *this)
+# Power left after `distance` m: full up to the ideal range, then minus the falloff per metre.
+0044b3b0 C_BulletShot::GetDamageAt | float __thiscall GetDamageAt(C_BulletShot *this, float distance, float damage)
+0044b400 C_BulletShot::Update | void __thiscall Update(C_BulletShot *this, int timeDelta)
+0044b910 C_BulletShot::Tick | bool __thiscall Tick(C_BulletShot *this, int timeDelta)
+0044db60 C_BulletShot::SaveGame | void __thiscall SaveGame(C_BulletShot *this, C_chunk *chunk)
+0044db70 C_BulletShot::LoadGame | void __thiscall LoadGame(C_BulletShot *this, C_chunk *chunk)
+# Plays the bullet whiz at the local player when the segment passes within 3 m of them.
+004486b0 C_BulletShot::CheckNearMiss | void __thiscall CheckNearMiss(C_BulletShot *this, S_vector4 *from, S_vector4 *to)
+# Client-side copy of a remote player's bullet: a 500 m ray decides where it ends.
+0044ca70 C_BulletShot::InitClient | void __thiscall InitClient(C_BulletShot *this, C_Actor *shooter, S_vector *pos, S_vector *dir, C_FirearmComp *weapon, I3D_frame *traceModel, bool fake, bool flare)
+0044ccb0 C_BulletShot::TickClient | bool __thiscall TickClient(C_BulletShot *this, int timeDelta)
+
+# ---- C_ProjectileShot (vtable 0x0080fad8, 0xA0 bytes) ----
+00448ce0 C_ProjectileShot::Init | void __thiscall Init(C_ProjectileShot *this, C_Actor *shooter, S_vector4 *pos, S_vector4 *dir, C_ProjectileWeaponComp *weapon, I3D_frame *model, int trailEffect, bool flySound, bool cameraFollow, bool fake)
+00448fc0 C_ProjectileShot::Release | void __thiscall Release(C_ProjectileShot *this)
+00449030 C_ProjectileShot::Update | void __thiscall Update(C_ProjectileShot *this, int timeDelta)
+00449290 C_ProjectileShot::Tick | bool __thiscall Tick(C_ProjectileShot *this, int timeDelta)
+00451860 C_ProjectileShot::Unknown1C | bool __thiscall Unknown1C(C_ProjectileShot *this, int unknown)
+00451870 C_ProjectileShot::Recycle | void __thiscall Recycle(C_ProjectileShot *this)
+00451880 C_ProjectileShot::ScalarDeletingDestructor | C_ProjectileShot * __thiscall ScalarDeletingDestructor(C_ProjectileShot *this, uchar flags)
+004518a0 C_ProjectileShot::~C_ProjectileShot
+
+# ---- C_ThrownShot (vtable 0x0080faa8, 0x6A0 bytes: a grenade under rigid body physics) ----
+0044cff0 C_ThrownShot::Init | void __thiscall Init(C_ThrownShot *this, C_Actor *thrower, S_vector4 *pos, S_vector4 *dir, C_Item *item, bool fake)
+0044d210 C_ThrownShot::Release | void __thiscall Release(C_ThrownShot *this)
+0044d240 C_ThrownShot::Update | void __thiscall Update(C_ThrownShot *this, int timeDelta)
+0044d260 C_ThrownShot::Tick | bool __thiscall Tick(C_ThrownShot *this, int timeDelta)
+0044d290 C_ThrownShot::Simulate | void __thiscall Simulate(C_ThrownShot *this, int timeDelta)
+0044d4c0 C_ThrownShot::PlayBounceSound | void __thiscall PlayBounceSound(C_ThrownShot *this)
+# Rigid body contact callback (event 1 = contact; `context` = the shot; ECX event, EDX unused).
+0044d570 C_ThrownShot::OnContact | int __fastcall OnContact(int event, int unused, C_ThrownShot *context, S_RigidBodyContact *contact)
+00450550 C_ThrownShot::Unknown1C | bool __thiscall Unknown1C(C_ThrownShot *this, int unknown)
+00450560 C_ThrownShot::Recycle | void __thiscall Recycle(C_ThrownShot *this)
+00450570 C_ThrownShot::SaveGame | void __thiscall SaveGame(C_ThrownShot *this, C_chunk *chunk)
+00450580 C_ThrownShot::LoadGame | void __thiscall LoadGame(C_ThrownShot *this, C_chunk *chunk)
+00450590 C_ThrownShot::ScalarDeletingDestructor | C_ThrownShot * __thiscall ScalarDeletingDestructor(C_ThrownShot *this, uchar flags)
+004505b0 C_ThrownShot::~C_ThrownShot
+
+# ---- collision hits along a shot's path: std::sort by distance (S_CollisionHit, 0x30 bytes) ----
+0044a910 SortCollisionHits | void __fastcall SortCollisionHits(void *first, void *last, void *less, int ideal)
+0044ae00 InsertionSortCollisionHits | void __fastcall InsertionSortCollisionHits(void *first, void *last, void *less, int unused)
+00455650 IsCollisionHitCloser | bool __fastcall IsCollisionHitCloser(void *a, void *b)
+
+# ---- pools ----
+00452d20 C_BulletShotPool::~C_BulletShotPool
+00452d90 C_BulletShotPool::Clear | void __thiscall Clear(C_BulletShotPool *this)
+00453020 C_BulletShotPool::ScalarDeletingDestructor | C_BulletShotPool * __thiscall ScalarDeletingDestructor(C_BulletShotPool *this, uchar flags)
+00453140 C_BulletShotPool::Grow | void __thiscall Grow(C_BulletShotPool *this)
+004531d0 C_BulletShotPool::Put | void __thiscall Put(C_BulletShotPool *this, C_BulletShot *shot)
+00453460 C_BulletShotPool::NewNode | S_PoolNode * __thiscall NewNode(C_BulletShotPool *this)
+00452e00 C_ShellPool::~C_ShellPool
+00452e80 C_ShellPool::Clear | void __thiscall Clear(C_ShellPool *this)
+004530b0 C_ShellPool::ScalarDeletingDestructor | C_ShellPool * __thiscall ScalarDeletingDestructor(C_ShellPool *this, uchar flags)
+00453200 C_ShellPool::Grow | void __thiscall Grow(C_ShellPool *this)
+00453270 C_ShellPool::Put | void __thiscall Put(C_ShellPool *this, C_Shell *shell)
+00453490 C_ShellPool::NewNode | S_PoolNode * __thiscall NewNode(C_ShellPool *this)
+
+# ---- C_ShotManager (module 14 "ShotMgr", vtable 0x0080fa18) ----
+0044d900 ConstructShotManager
+0044d920 C_ShotManager::C_ShotManager | C_ShotManager * __thiscall C_ShotManager(C_ShotManager *this, int id, char *name)
+0044dc10 C_ShotManager::ScalarDeletingDestructor | C_ShotManager * __thiscall ScalarDeletingDestructor(C_ShotManager *this, uchar flags)
+0044dc30 C_ShotManager::~C_ShotManager
+0044dda0 RegisterShotManagerDtor
+0044ddb0 DestroyShotManager
+0044dc00 C_ShotManager::Unknown28 | bool __thiscall Unknown28(C_ShotManager *this, C_BitStream *stream)
+0044dde0 C_ShotManager::StartMission | void __thiscall StartMission(C_ShotManager *this, bool server)
+0044e110 C_ShotManager::StopMission | void __thiscall StopMission(C_ShotManager *this, bool server)
+00451ec0 C_ShotManager::Tick | void __thiscall Tick(C_ShotManager *this, int timeDelta)
+00451fb0 C_ShotManager::Update | void __thiscall Update(C_ShotManager *this, int timeDelta)
+00452280 C_ShotManager::RestartMission | void __thiscall RestartMission(C_ShotManager *this, bool server)
+004524c0 C_ShotManager::SaveGame | bool __thiscall SaveGame(C_ShotManager *this, C_chunk *chunk)
+004527e0 C_ShotManager::LoadGame | bool __thiscall LoadGame(C_ShotManager *this, C_chunk *chunk)
+00452bd0 C_ShotManager::OnMessage | bool __thiscall OnMessage(C_ShotManager *this, C_BitStream *stream)
+0044e520 C_ShotManager::LoadTextures | void __thiscall LoadTextures(C_ShotManager *this)
+0044e4c0 S_ShotDecal::~S_ShotDecal | void __thiscall ~S_ShotDecal(S_ShotDecal *this)
+0044e5d0 C_ShotManager::EjectShell | void __thiscall EjectShell(C_ShotManager *this, C_Human *shooter, I3D_frame *ejectDummy, int soundGroup)
+0044ebd0 C_ShotManager::AddBulletDecal | void __thiscall AddBulletDecal(C_ShotManager *this, int material, S_vector *pos, S_vector *normal, I3D_frame *frame)
+0044f2b0 C_ShotManager::AddBloodPool | void __thiscall AddBloodPool(C_ShotManager *this, S_vector *pos, S_vector *normal, float maxSize)
+0044f4d0 C_ShotManager::SprayBlood | void __thiscall SprayBlood(C_ShotManager *this, S_vector4 *pos, S_vector *dir)
+0044f4f0 C_ShotManager::SprayBloodRandom | void __thiscall SprayBloodRandom(C_ShotManager *this, S_vector4 *pos, S_vector *dir)
+0044f520 C_ShotManager::AddBloodDrop | void __thiscall AddBloodDrop(C_ShotManager *this, S_vector4 *pos, S_vector *dir, IImage *texture)
+# A blood stain on the wall 3 m away along the horizontal part of `dir` (not called).
+0044f740 C_ShotManager::AddBloodSplat | void __thiscall AddBloodSplat(C_ShotManager *this, S_vector *pos, S_vector *dir)
+# Scorch mark of an explosion: texture S_MaterialDef::explosionDecal of {x_expl00, x_blood00..05}.
+0044fbc0 C_ShotManager::AddExplosionDecal | void __thiscall AddExplosionDecal(C_ShotManager *this, int material, S_vector *pos, S_vector *dir)
+0044ffd0 MakeOrthoBasis | void __stdcall MakeOrthoBasis(S_vector4 *dir, S_vector4 *right, S_vector4 *up)
+00450400 C_ShotManager::ThrowItem | void __thiscall ThrowItem(C_ShotManager *this, C_Actor *thrower, C_Item *item, S_vector *pos, S_vector *dir, bool fake)
+00450d30 C_ShotManager::FireBulletFrom | void __thiscall FireBulletFrom(C_ShotManager *this, C_Human *shooter, C_WeaponItem *weapon, S_vector *pos, S_vector *dir, I3D_frame *muzzle, I3D_frame *ejectDummy, bool tracer, uint flags, int shellSound)
+00451100 C_ShotManager::FireBullet | void __thiscall FireBullet(C_ShotManager *this, C_Actor *shooter, C_Item *weapon, S_vector *pos, S_vector *dir, bool tracer, uint flags, int shellSound)
+00451670 C_ShotManager::FireProjectile | void __thiscall FireProjectile(C_ShotManager *this, C_Actor *shooter, C_Item *weapon, S_vector *pos, S_vector *dir, I3D_frame *projectile, int trailEffect, bool flySound, bool cameraFollow, uint flags)
+# True when a segment from `pos` along `dir` crosses the view frustum of the active camera.
+00450620 IsSegmentInView | bool __fastcall IsSegmentInView(S_vector *pos, S_vector *dir)
+# Surface material of a frame: number after "matid" in its user properties (any case), -1 if none.
+004511e0 GetFrameMaterial | int __fastcall GetFrameMaterial(I3D_frame *frame)
+00451230 MeleeAttack | void __stdcall MeleeAttack(C_Actor *attacker, C_Item *weapon, bool backstab, S_vector *pos, S_vector *dir)
+00451900 SendExplosionMessage | void __stdcall SendExplosionMessage(S_vector4 *pos, int material)
+00451990 C_ShotManager::Explode | void __thiscall Explode(C_ShotManager *this, C_Actor *source, S_vector4 *pos, float range, float damage, int soundGroup)
+00451a80 C_ShotManager::PlayExplosion | void __thiscall PlayExplosion(C_ShotManager *this, S_vector4 *pos, S_vector *dir, int effect, int material, int soundGroup)
+00451b00 C_ShotManager::PlayHitSound | void __thiscall PlayHitSound(C_ShotManager *this, C_Actor *source, int material, S_vector4 *pos, bool alternate, bool silentToAI)
+00451bc0 C_ShotManager::OnBulletHit | void __thiscall OnBulletHit(C_ShotManager *this, C_Actor *shooter, I3D_frame *frame, int material, S_vector *pos, S_vector *normal)
+00451c00 C_ShotManager::PlayHitEffect | void __thiscall PlayHitEffect(C_ShotManager *this, int material, S_vector *pos, S_vector *normal)
+00451db0 C_ShotManager::PlayExplosionEffects | void __thiscall PlayExplosionEffects(C_ShotManager *this, int material, int effect, S_vector *pos, S_vector *dir)
+00451e40 C_ShotManager::PlayNearMissSound | void __thiscall PlayNearMissSound(C_ShotManager *this, S_vector4 *pos)
+00452ca0 CreateShotMessage | C_NetMessage * __stdcall CreateShotMessage(int type, bool reliable)
+00452d00 SendShotMessage | void __stdcall SendShotMessage(C_NetMessage *message)
+
+# ---- muzzle lights (0x14 bytes: "WeaponLight" light + the weapon's flash visual) ----
+00453d80 C_MuzzleLight::Init | void __thiscall Init(C_MuzzleLight *this, I3D_frame *muzzle, I3D_frame *flash, int duration)
+00454060 C_MuzzleLight::Tick | int __thiscall Tick(C_MuzzleLight *this, int timeDelta)
+00454120 C_MuzzleLight::Release | void __thiscall Release(C_MuzzleLight *this)
+
+# ---- ejected shells (0x40 bytes) ----
+0044db10 C_Shell::C_Shell | C_Shell * __fastcall C_Shell(C_Shell *this)
+00454190 C_Shell::Init | void __thiscall Init(C_Shell *this, C_Human *owner, I3D_frame *model, S_vector4 *pos, S_vector *dir, S_vector4 *velocity, int soundGroup)
+00454360 C_Shell::Tick | int __thiscall Tick(C_Shell *this, int timeDelta)
+004546a0 C_Shell::Release | void __thiscall Release(C_Shell *this)
+004546c0 C_Shell::Hide | void __thiscall Hide(C_Shell *this)
+00454660 DotVector | float __thiscall DotVector(S_vector *a, S_vector *b)
+00454680 NegateVector | void __thiscall NegateVector(S_vector *v)
+
+# ---- blood pools (0x10 bytes, grow under a body) ----
+004546e0 C_BloodPool::Init | void __thiscall Init(C_BloodPool *this, S_vector *pos, S_vector *normal, IImage *texture, float maxSize)
+00454940 C_BloodPool::Reuse | void __thiscall Reuse(C_BloodPool *this, S_vector *pos, S_vector *normal, float maxSize)
+00454b50 C_BloodPool::Tick | int __thiscall Tick(C_BloodPool *this, int timeDelta)
+00454c40 C_BloodPool::Release | void __thiscall Release(C_BloodPool *this)
+
+# ---- blood drops (0x30 bytes, fly and leave a stain where they land) ----
+00454c60 C_BloodDrop::Init | void __thiscall Init(C_BloodDrop *this, S_vector4 *pos, S_vector4 *dir, IImage *texture)
+00454e20 C_BloodDrop::Reuse | void __thiscall Reuse(C_BloodDrop *this, S_vector4 *pos, S_vector4 *dir, IImage *texture)
+00454ff0 C_BloodDrop::Land | void __thiscall Land(C_BloodDrop *this, S_vector *pos, S_vector4 *normal)
+00455240 C_BloodDrop::Tick | int __thiscall Tick(C_BloodDrop *this, int timeDelta)
+00455350 C_BloodDrop::Release | void __thiscall Release(C_BloodDrop *this)
+
+# ---- hit zones of humans ("humanzones" model; g_hitZones 0x0089aa50) ----
+00455370 C_HitZones::C_HitZones | void __thiscall C_HitZones(C_HitZones *this)
+0044ddd0 ConstructHitZones
+0044ddc0 ConstructHitZonesThunk
+00455490 C_HitZones::Load | void __thiscall Load(C_HitZones *this)
+00455520 C_HitZones::Free | void __thiscall Free(C_HitZones *this)
+00455540 C_HitZones::Place | void __thiscall Place(C_HitZones *this, I3D_frame *human)
+# Zone of `human` the ray hits: 0..9, 0xB when a helmet stops it, 0xFF none.
+00455670 C_HitZones::GetHitZone | int __thiscall GetHitZone(C_HitZones *this, C_Human *human, S_vector *pos, S_vector *dir)
+004558a0 C_HitZones::Print | void __thiscall Print(C_HitZones *this, int zone)
+
+0089aac0 g_shotManager @ C_ShotManager
+0089aa50 g_hitZones @ C_HitZones
+0097b9b4 g_materials @ S_MaterialDef *
+0097b9b8 g_materialCount @ uint
+
+# ---- helpers of other subsystems that the shots call ----
+00427700 NotifyFrameHit | void __stdcall NotifyFrameHit(I3D_frame *frame)
+004dbed0 C_Car::GetHitMaterial | int __thiscall GetHitMaterial(C_Car *this, S_vector *pos, S_vector *dir)

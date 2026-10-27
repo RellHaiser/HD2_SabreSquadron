@@ -1,0 +1,1198 @@
+// 0x007d4a00
+void thunk_FUN_007d4a10(void)
+{
+  S_SoundRequest__Init((uint32_t *)&DAT_0098afe0);
+}
+
+// 0x007d4a10
+void FUN_007d4a10(void)
+{
+  S_SoundRequest__Init((uint32_t *)&DAT_0098afe0);
+}
+
+// 0x007d4a20
+C_WeaponItem * __thiscall C_WeaponItem::C_WeaponItem(C_WeaponItem *this)
+{
+  C_Item::C_Item((C_Item *)this,0);
+  this->m_capacity = -1.0;
+  this->m_rounds = -1.0;
+  this->vtable = (C_WeaponItem_vtbl *)&PTR_00817018;
+  this->m_unknown58 = 0;
+  this->m_flags = 1;
+  this->m_readyTime = 0;
+  this->m_projectile = nullptr;
+  this->m_projectileCopy = nullptr;
+  this->m_projectileKind = 1;
+  this->m_flash = nullptr;
+  this->m_shotInterval = 0;
+  this->m_lastShotTime = 0;
+  this->m_unknown90 = false;
+  iVar2 = 2;
+  piVar1 = &this->m_ejectFrameCount;
+  do {
+    piVar1--;
+    iVar2--;
+    *piVar1 = 0;
+  } while (iVar2 != 0);
+  this->m_shotCount = 0;
+  this->m_unknown9C = 0;
+  this->m_blastDummy = nullptr;
+  this->m_shotDummy = nullptr;
+  this->m_soundId = -1;
+  this->m_unknown98 = 1.0;
+  this->m_ejectFrameCount = 1;
+  return this;
+}
+
+// 0x007d4ab0
+void __thiscall C_WeaponItem::Use(C_WeaponItem *this,float amount)
+{
+  fVar1 = this->m_rounds - amount;
+  this->m_rounds = fVar1;
+  if (fVar1 < 0.0) {
+    this->m_rounds = 0.0;
+  }
+}
+
+// 0x007d4ae0
+float __thiscall C_WeaponItem::GetAmount(C_WeaponItem *this)
+{
+  iVar1 = GetGame();
+  if (*(uint32_t *)(iVar1 + 0x28) < this->m_readyTime) {
+    return 0.0;
+  }
+  return this->m_rounds;
+}
+
+// 0x007d4b00
+float __thiscall C_WeaponItem::GetMaxAmount(C_WeaponItem *this)
+{
+  return this->m_capacity;
+}
+
+// 0x007d4b10
+I3D_frame * __thiscall C_WeaponItem::GetProjectileFrame(C_WeaponItem *this)
+{
+  if (this->m_projectileKind == 1) {
+    FindProjectile(this);
+  }
+  return this->m_projectile;
+}
+
+// 0x007d4b30
+int __thiscall C_WeaponItem::GetProjectileKind(C_WeaponItem *this)
+{
+  if (this->m_projectileKind == 1) {
+    FindProjectile(this);
+  }
+  return this->m_projectileKind;
+}
+
+// 0x007d4b50
+C_WeaponItem * __thiscall C_WeaponItem::ScalarDeletingDestructor(C_WeaponItem *this,uchar flags)
+{
+  ~C_WeaponItem(this);
+  if ((flags & 1) != 0) {
+    _aligned_free(this);
+  }
+  return this;
+}
+
+// 0x007d4b70
+void __thiscall C_WeaponItem::~C_WeaponItem(C_WeaponItem *this)
+{
+  this->vtable = (C_WeaponItem_vtbl *)&PTR_00817018;
+  ReleaseShellSoundFrames(this);
+  if (this->m_projectileCopy != nullptr) {
+    ReleaseFrameTree(this->m_projectileCopy);
+  }
+  this->m_projectileCopy = nullptr;
+  C_Item::~C_Item((C_Item *)this);
+}
+
+// 0x007d4be0
+void __thiscall C_WeaponItem::Init(C_WeaponItem *this,int typeId)
+{
+  C_Item::Init((C_Item *)this,typeId);
+  this->m_unknown58 = 0;
+  this->m_flags = 1;
+  this->m_capacity = -1.0;
+  iVar2 = (*this->m_def->vtable->GetAmmoItemId)();
+  pCVar1 = this->m_def->vtable;
+  if (iVar2 < 0) {
+    iVar2 = (*pCVar1->GetBehaviour)();
+    if (iVar2 == 6) {
+      this->m_capacity = 1.0;
+    }
+  }
+  else {
+    iVar2 = (*pCVar1->GetAmmoItemId)();
+    if ((iVar2 < 0) || (499 < iVar2)) {
+      fVar4 = (long double)(**(code **)(iRam00000000 + 0x14))();
+      this->m_capacity = (float)fVar4;
+    }
+    else {
+      fVar4 = (long double)(**(code **)(*(int *)(&DAT_0098b030)[iVar2] + 0x14))();
+      this->m_capacity = (float)fVar4;
+    }
+  }
+  this->m_rounds = this->m_capacity;
+  this->m_readyTime = 0;
+  piVar3 = (int *)C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+  if (piVar3 == nullptr) {
+    this->m_flash = nullptr;
+  }
+  else {
+    self = (I3D_frame *)(**(code **)(*piVar3 + 0x48))(piVar3,"flash",1);
+    this->m_flash = self;
+    if (self != nullptr) {
+      (*self->vtable->SetOn)(self,false);
+    }
+  }
+  this->m_unknown9C = 0;
+  this->m_blastDummy = nullptr;
+  this->m_shotDummy = nullptr;
+  this->m_unknown8C = 0;
+  this->m_soundId = -1;
+}
+
+// 0x007d4cb0
+bool __thiscall
+C_WeaponItem::Reload(C_WeaponItem *this,C_Actor *owner,int container,int *ammoUid,bool unknown)
+{
+  local_30 = nullptr;
+  local_2c = nullptr;
+  local_39 = '\0';
+  local_28 = 0;
+  *ammoUid = -1;
+  if (((uint8_t)g_gameRole & 7) == 7) {
+    local_39 = DAT_0098b02c;
+  }
+  iVar4 = (*this->m_def->m_component->vtable[3].GetUnknownVf00)();
+  if (((char)iVar4 == '\0') && (this->m_rounds != 0.0)) {
+    if ((this->m_flags >> 1 & 1) == 0) {
+      return false;
+    }
+    iVar4 = GetGame();
+    iVar4 = *(int *)(iVar4 + 0x28);
+    iVar5 = (*this->m_def->m_component->vtable[2].GetUnknownVf00)();
+    uVar6 = iVar5 + iVar4;
+    goto LAB_007d5195;
+  }
+  if ((((owner == nullptr) ||
+       (iVar4 = GetGame(), *(uint32_t *)(iVar4 + 0x28) < this->m_readyTime)) ||
+      ((owner->m_singleItemStore != false && (container != 0)))) || (6 < container)) {
+    return false;
+  }
+  iVar4 = (*this->m_def->vtable->GetBehaviour)();
+  if ((((iVar4 == 6) && (container == 1)) && (owner->m_singleItemStore == false)) &&
+     ((owner->m_itemStores != (void **)0x0 && (owner->m_itemStores[6] != nullptr)))) {
+    container = 6;
+  }
+  if (owner->m_itemStores == (void **)0x0) {
+    return false;
+  }
+  piVar9 = owner->m_itemStores[container];
+  if (piVar9 == nullptr) {
+    return false;
+  }
+  fVar11 = (long double)(**(code **)(*piVar9 + 0x10))();
+  if (fVar11 < (long double)0.0 != (fVar11 == (long double)0.0)) {
+    return false;
+  }
+  iVar4 = (**(code **)(*piVar9 + 0x3c))();
+  iStack_38 = 0;
+  iVar5 = (**(code **)(*piVar9 + 0x44))();
+  if (0 < iVar5) {
+LAB_007d4dee:
+    iVar5 = *(int *)(iVar4 + iStack_38 * 4);
+    piVar2 = *(int **)(iVar5 + 4);
+    if (((piVar2 == nullptr) || (*(int *)(iVar5 + 8) - (int)piVar2 >> 2 == 0)) ||
+       ((*(int *)(*piVar2 + 8) != 2 ||
+        ((iVar5 = *(int *)(*piVar2 + 0xc), iVar7 = (*this->m_def->vtable->GetAmmoItemId)(),
+         iVar5 != iVar7 || (iVar5 = (*this->m_def->vtable->GetAmmoItemId)(), iVar5 < 1))))))
+    goto LAB_007d4e39;
+    local_30 = nullptr;
+    piVar9 = (int *)**(uint32_t **)(*(int *)(iVar4 + iStack_38 * 4) + 4);
+    local_2c = piVar9;
+    while( true ) {
+      iVar5 = *(int *)(iVar4 + iStack_38 * 4);
+      if ((*(int *)(iVar5 + 4) == 0) ||
+         ((uint32_t)(*(int *)(iVar5 + 8) - *(int *)(iVar5 + 4) >> 2) <= local_30)) break;
+      local_28++;
+      fVar11 = (long double)(**(code **)(**(int **)(*(int *)(iVar5 + 4) + (int)local_30 * 4) + 0xc))();
+      fVar12 = (long double)(**(code **)(*piVar9 + 0xc))();
+      if ((long double)(float)fVar11 <= fVar12) {
+        fVar11 = (long double)(**(code **)(**(int **)(*(int *)(*(int *)(iVar4 + iStack_38 * 4) + 4) +
+                                                 (int)local_30 * 4) + 0xc))();
+        fVar12 = (long double)(**(code **)(*local_2c + 0xc))();
+        if ((long double)(float)fVar11 < fVar12) {
+          local_2c = *(int **)(*(int *)(*(int *)(iVar4 + iStack_38 * 4) + 4) + (int)local_30 * 4);
+        }
+        local_30 = (int *)((int)local_30 + 1);
+      }
+      else {
+        piVar9 = *(int **)(*(int *)(*(int *)(iVar4 + iStack_38 * 4) + 4) + (int)local_30 * 4);
+        local_30 = (int *)((int)local_30 + 1);
+      }
+    }
+    local_30 = piVar9;
+    if (piVar9 == nullptr) goto LAB_007d4e53;
+    goto LAB_007d4f6b;
+  }
+LAB_007d4e53:
+  piVar9 = local_30;
+  if (local_39 == '\0') {
+    if ((this->m_flags >> 1 & 1) == 0) {
+      return false;
+    }
+    this->m_flags = this->m_flags & 0xfffffffd;
+    return true;
+  }
+LAB_007d4f6b:
+  (*this->vtable->GetAmount)();
+  if ((local_39 != '\0') || ((local_28 == 1 && (unknown)))) {
+    (*this->vtable->GetMaxAmount)();
+    this->m_rounds = (float)extraout_ST0_02;
+  }
+  else {
+    fVar11 = (long double)(**(code **)(*piVar9 + 0xc))();
+    this->m_rounds = (float)(fVar11 + (long double)this->m_rounds);
+    (*this->vtable->GetMaxAmount)();
+    if ((long double)this->m_rounds <= extraout_ST0) {
+LAB_007d4fd9:
+      *ammoUid = piVar9[4];
+    }
+    else {
+      (*this->vtable->GetMaxAmount)();
+      fVar1 = (float)((long double)this->m_rounds - extraout_ST0_00);
+      (*this->vtable->GetMaxAmount)();
+      this->m_rounds = (float)extraout_ST0_01;
+      if (fVar1 == 0.0) goto LAB_007d4fd9;
+      fVar11 = (long double)(**(code **)(*local_2c + 0xc))();
+      fVar12 = (long double)(**(code **)(*local_2c + 0x10))();
+      if ((fVar12 < (long double)(float)(fVar11 + (long double)fVar1)) || (local_2c == piVar9)) {
+        piVar9[0xb] = (int)fVar1;
+        goto LAB_007d505f;
+      }
+      local_2c[0xb] = (int)(fVar1 + (float)local_2c[0xb]);
+      *ammoUid = piVar9[4];
+    }
+    FUN_007dc1e0(&g_itemsModule,piVar9,(uint32_t)owner,container);
+    thunk_FUN_007dcd00(&g_itemsModule,piVar9);
+  }
+LAB_007d505f:
+  pCVar3 = this->m_def->m_component;
+  if ((owner->m_type == ACTOR_HUMAN) && ((g_gameRole & 2) != 0)) {
+    uVar6 = FUN_005a0890((int)owner);
+    if ((char)uVar6 == '\0') {
+LAB_007d50a6:
+      _DAT_0098aff0 = 0;
+    }
+    else {
+      this_00 = (C_game *)GetGame();
+      uVar8 = C_game::IsHudShown(this_00);
+      _DAT_0098aff0 = 0x40;
+      if ((char)uVar8 == '\0') goto LAB_007d50a6;
+    }
+    pIVar10 = this->m_shotDummy;
+    if (pIVar10 == nullptr) {
+      piVar9 = (int *)C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+      pIVar10 = (I3D_frame *)(**(code **)(*piVar9 + 0x48))(piVar9,"shdum",0x20);
+      this->m_shotDummy = pIVar10;
+    }
+    _DAT_0098affc = 3;
+    _DAT_0098aff4 = pIVar10;
+    _DAT_0098b000 = (*pCVar3->vtable[1].GetProjectileType)();
+    _DAT_0098aff8 = owner;
+    _DAT_0098afe0 = 0;
+    _DAT_0098afe4 = 0;
+    _DAT_0098afe8 = 0;
+    _DAT_0098afec = uStack_14;
+    piVar9 = (int *)GetSoundModule();
+    iVar4 = (**(code **)(*piVar9 + 0x54))(&DAT_0098afe0);
+    this->m_soundId = iVar4;
+    piVar9 = (int *)GetSoundModule();
+    iVar4 = (**(code **)(*piVar9 + 0x78))(this->m_soundId);
+    if (iVar4 == 0) {
+      this->m_soundId = -1;
+    }
+    *(uint8_t *)&owner[2].m_initialPos.z = 1;
+  }
+  iVar4 = GetGame();
+  iVar4 = *(int *)(iVar4 + 0x28);
+  iVar5 = (*pCVar3->vtable[2].GetUnknownVf00)();
+  uVar6 = iVar5 + iVar4;
+LAB_007d5195:
+  if ((int)this->m_time < (int)uVar6) {
+    this->m_time = uVar6;
+  }
+  if ((int)this->m_readyTime < (int)uVar6) {
+    this->m_readyTime = uVar6;
+  }
+  this->m_flags = this->m_flags & 0xfffffffd;
+  return true;
+LAB_007d4e39:
+  iStack_38++;
+  iVar5 = (**(code **)(*piVar9 + 0x44))();
+  if (iVar5 <= iStack_38) goto LAB_007d4e53;
+  goto LAB_007d4dee;
+}
+
+// 0x007d51d0
+void __thiscall C_WeaponItem::SetRounds(C_WeaponItem *this,C_Actor *owner,int ammoUid,int rounds)
+{
+  if (-1 < ammoUid) {
+    FUN_005a7b70(owner,ammoUid,'\x01');
+  }
+  this->m_rounds = (float)rounds;
+  this->m_flags = this->m_flags & 0xfffffffd;
+  if ((g_gameRole & 2) != 0) {
+    pCVar1 = this->m_def->m_component;
+    _DAT_0098aff0 = 0;
+    pIVar3 = this->m_shotDummy;
+    if (pIVar3 == nullptr) {
+      piVar2 = (int *)C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+      pIVar3 = (I3D_frame *)(**(code **)(*piVar2 + 0x48))(piVar2,"shdum",0x20);
+      this->m_shotDummy = pIVar3;
+    }
+    _DAT_0098affc = 3;
+    _DAT_0098aff4 = pIVar3;
+    _DAT_0098b000 = (*pCVar1->vtable[1].GetProjectileType)();
+    _DAT_0098aff8 = owner;
+    _DAT_0098afe0 = 0;
+    _DAT_0098afe4 = 0;
+    _DAT_0098afe8 = 0;
+    _DAT_0098afec = uStack_14;
+    piVar2 = (int *)GetSoundModule();
+    iVar4 = (**(code **)(*piVar2 + 0x54))(&DAT_0098afe0);
+    this->m_soundId = iVar4;
+    piVar2 = (int *)GetSoundModule();
+    iVar4 = (**(code **)(*piVar2 + 0x78))(this->m_soundId);
+    if (iVar4 == 0) {
+      this->m_soundId = -1;
+    }
+  }
+}
+
+// 0x007d52f0
+void __thiscall C_WeaponItem::PlayEmptySound(C_WeaponItem *this,C_Actor *owner)
+{
+  if ((g_gameRole & 2) == 0) {
+    return;
+  }
+  _DAT_0098afe0 = 0;
+  _DAT_0098afe4 = 0;
+  _DAT_0098affc = 3;
+  _DAT_0098b000 = 4;
+  _DAT_0098aff8 = owner;
+  _DAT_0098afe8 = 0x3f8ccccd;
+  _DAT_0098afec = local_14;
+  _DAT_0098aff4 = C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+  uVar1 = FUN_005a0890((int)owner);
+  if ((char)uVar1 != '\0') {
+    this_00 = (C_game *)GetGame();
+    uVar2 = C_game::IsHudShown(this_00);
+    _DAT_0098aff0 = 0x40;
+    if ((char)uVar2 != '\0') goto LAB_007d539d;
+  }
+  _DAT_0098aff0 = 0;
+LAB_007d539d:
+  piVar3 = (int *)GetSoundModule();
+  (**(code **)(*piVar3 + 0x54))(&DAT_0098afe0);
+}
+
+// 0x007d5430
+int __thiscall
+C_WeaponItem::Fire(C_WeaponItem *this,C_Actor *shooter,S_vector *pos,S_vector *dir,uint32_t flags)
+{
+  this->m_shotCount = this->m_shotCount + 1;
+  pCVar1 = this->m_def->m_component;
+  if (pCVar1 == nullptr) {
+    EVar5 = ICK_NONE;
+  }
+  else {
+    EVar5 = pCVar1->m_kind;
+  }
+  iVar2 = (*this->m_def->vtable->GetBehaviour)();
+  unknown = SUB41(flags,0);
+  if (iVar2 == 9) {
+    FUN_00450400(&g_shotManager,shooter,this,&pos->x,&dir->x,unknown);
+    return 0;
+  }
+  if (EVar5 == ICK_FIREARM) {
+    iVar2 = (*this->m_def->vtable->GetCarryMode)();
+    if (((iVar2 == 1) || (iVar2 = (*this->m_def->vtable->GetCarryMode)(), iVar2 == 4)) &&
+       (this->m_shotCount % 3 == 0)) {
+      iVar2 = this->m_def->m_unknown3c;
+      piVar8 = (int *)0x1;
+    }
+    else {
+      iVar2 = this->m_def->m_unknown3c;
+      piVar8 = nullptr;
+    }
+    FUN_00451100(&g_shotManager,shooter,this,&pos->x,&dir->x,piVar8,flags,iVar2);
+    pIVar3 = this->m_shotDummy;
+    if (pIVar3 == nullptr) {
+      piVar8 = (int *)C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+      pIVar3 = (I3D_frame *)(**(code **)(*piVar8 + 0x48))(piVar8,"shdum",0x20);
+      this->m_shotDummy = pIVar3;
+    }
+    PlayShellSound(this,shooter,pIVar3,unknown);
+    ShowFlash(this,shooter);
+    (*this->vtable->Use)(1.0);
+    iVar2 = GetGame();
+    this->m_shotInterval = *(int *)(iVar2 + 0x28) - this->m_lastShotTime;
+    iVar2 = GetGame();
+    this->m_lastShotTime = *(uint32_t *)(iVar2 + 0x28);
+    return 0;
+  }
+  if (EVar5 != ICK_PROJECTILE_WEAPON) {
+    if ((EVar5 == ICK_MELEE) && ((g_gameRole & 1) != 0)) {
+      FUN_00451230((int)shooter,(int)this,'\0',&pos->x,&dir->x);
+    }
+    return 0;
+  }
+  pIVar3 = this->m_blastDummy;
+  if (pIVar3 == nullptr) {
+    piVar8 = (int *)C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+    pIVar3 = (I3D_frame *)(**(code **)(*piVar8 + 0x48))(piVar8,"blsdum",0x20);
+    this->m_blastDummy = pIVar3;
+    if (pIVar3 == nullptr) goto LAB_007d55b6;
+  }
+  if ((pIVar3->m_frameFlags & 0x20) == 0) {
+    I3D_frame::UpdateWMatrixProc(pIVar3);
+  }
+  C_ParticlesModule::Create
+            (&g_particlesModule,this->m_def->m_component[2].m_unknown04,&pIVar3->m_worldMatrix,
+             pIVar3,true,false);
+LAB_007d55b6:
+  uVar9 = 0;
+  cVar7 = '\0';
+  uVar6 = 0x5b;
+  pIVar4 = (*this->vtable->GetProjectileFrame)();
+  FUN_00451670(&g_shotManager,shooter,(int)this,&pos->x,&dir->x,(int)pIVar4,uVar6,cVar7,uVar9,
+               (uint32_t *)flags);
+  pIVar4 = (*this->vtable->GetProjectileFrame)();
+  if (pIVar4 != nullptr) {
+    (*pIVar4->vtable->SetOn)(pIVar4,false);
+  }
+  if (pIVar3 == nullptr) {
+    pIVar3 = (I3D_frame *)C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+  }
+  PlayShellSound(this,shooter,pIVar3,unknown);
+  iVar2 = GetGame();
+  this->m_shotInterval = *(int *)(iVar2 + 0x28) - this->m_lastShotTime;
+  iVar2 = GetGame();
+  this->m_lastShotTime = *(uint32_t *)(iVar2 + 0x28);
+  (*this->vtable->Use)(1.0);
+  return 0;
+}
+
+// 0x007d5670
+int __thiscall
+C_WeaponItem::FireSecondary
+          (C_WeaponItem *this,C_Actor *shooter,S_vector *pos,S_vector *dir,uchar flags)
+{
+  iVar1 = (*this->m_def->vtable->GetBehaviour)();
+  if (iVar1 == 9) {
+    FUN_00450400(&g_shotManager,shooter,this,&pos->x,&dir->x,flags);
+  }
+  return 0;
+}
+
+// 0x007d56b0
+void __thiscall C_WeaponItem::FindProjectile(C_WeaponItem *this)
+{
+  piVar1 = (int *)C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+  this->m_projectile = nullptr;
+  this->m_projectileCopy = nullptr;
+  this->m_projectileKind = 0;
+  if (piVar1 != nullptr) {
+    pIVar2 = (I3D_frame *)(**(code **)(*piVar1 + 0x48))(piVar1,"projectile",0xffff);
+    this->m_projectile = pIVar2;
+    if (pIVar2 == nullptr) {
+      pIVar2 = (I3D_frame *)(**(code **)(*piVar1 + 0x48))(piVar1,&DAT_0084f79c,0xffff);
+      this->m_projectile = pIVar2;
+    }
+    if (this->m_projectile == nullptr) {
+      pIVar2 = (I3D_frame *)(**(code **)(*piVar1 + 0x48))(piVar1,&DAT_008638f8,0xffff);
+      this->m_projectile = pIVar2;
+      if (pIVar2 == nullptr) {
+        pIVar2 = (I3D_frame *)(**(code **)(*piVar1 + 0x48))(piVar1,&DAT_008638f0,0xffff);
+        this->m_projectile = pIVar2;
+        if (pIVar2 != nullptr) {
+          this->m_projectileKind = 4;
+        }
+      }
+      else {
+        this->m_projectileKind = 3;
+      }
+    }
+    else {
+      this->m_projectileKind = 2;
+    }
+    if (this->m_projectile != nullptr) {
+      FUN_007dc800(&this->m_projectileCopy,(int *)this->m_projectile);
+      pIVar2 = this->m_projectile;
+      (this->m_projectilePos).x = (pIVar2->m_localMatrix).m[3][0];
+      (this->m_projectilePos).y = (pIVar2->m_localMatrix).m[3][1];
+      (this->m_projectilePos).z = (pIVar2->m_localMatrix).m[3][2];
+      (this->m_projectilePos).w = (pIVar2->m_localMatrix).m[3][3];
+      if ((pIVar2->m_frameFlags & 8) == 0) {
+        pIVar2->m_frameFlags = pIVar2->m_frameFlags | 8;
+        S_quat::Make(&pIVar2->m_rot,&pIVar2->m_localMatrix);
+      }
+      (this->m_projectileRot).v.x = (pIVar2->m_rot).v.x;
+      (this->m_projectileRot).v.y = (pIVar2->m_rot).v.y;
+      (this->m_projectileRot).v.z = (pIVar2->m_rot).v.z;
+      (this->m_projectileRot).s = (pIVar2->m_rot).s;
+    }
+  }
+}
+
+// 0x007d57e0
+void __thiscall C_WeaponItem::AttachProjectile(C_WeaponItem *this,I3D_frame *hand)
+{
+  if (this->m_projectileKind == 1) {
+    FindProjectile(this);
+  }
+  pIVar2 = this->m_projectileCopy;
+  if ((pIVar2 != nullptr) && (this->m_projectile != nullptr)) {
+    uVar3 = 0;
+    if (hand == nullptr) {
+      pIVar1 = pIVar2->vtable;
+      pIVar2 = (I3D_frame *)C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+      (*pIVar1->LinkTo)(this->m_projectileCopy,pIVar2,uVar3);
+      pIVar2 = this->m_projectileCopy;
+      uVar3 = pIVar2->m_frameFlags;
+      if (-1 < (char)uVar3) {
+        (pIVar2->m_localMatrix).m[3][0] = (this->m_projectilePos).x;
+        (pIVar2->m_localMatrix).m[3][1] = (this->m_projectilePos).y;
+        (pIVar2->m_localMatrix).m[3][2] = (this->m_projectilePos).z;
+        pIVar2->m_frameFlags = uVar3 & 0xfffffedf | 0x40000000;
+      }
+      pIVar2 = this->m_projectileCopy;
+      (pIVar2->m_rot).v.x = (this->m_projectileRot).v.x;
+      (pIVar2->m_rot).v.y = (this->m_projectileRot).v.y;
+      (pIVar2->m_rot).v.z = (this->m_projectileRot).v.z;
+      (pIVar2->m_rot).s = (this->m_projectileRot).s;
+      S_quat::Normalize(&pIVar2->m_rot);
+      pIVar2->m_frameFlags = pIVar2->m_frameFlags & 0xfffffecb | 0x40000008;
+      (*this->m_projectileCopy->vtable->SetOn)(this->m_projectileCopy,false);
+      on = true;
+    }
+    else {
+      (*pIVar2->vtable->LinkTo)(pIVar2,hand,0);
+      pIVar2 = this->m_projectileCopy;
+      uVar3 = pIVar2->m_frameFlags;
+      if (-1 < (char)uVar3) {
+        (pIVar2->m_localMatrix).m[3][0] = 0.0;
+        (pIVar2->m_localMatrix).m[3][1] = 0.0;
+        (pIVar2->m_localMatrix).m[3][2] = 0.0;
+        pIVar2->m_frameFlags = uVar3 & 0xfffffedf | 0x40000000;
+      }
+      aSStack_20[0].x = 0.0;
+      aSStack_20[0].y = 0.0;
+      aSStack_20[0].z = 1.0;
+      (*this->m_projectileCopy->vtable->SetWorldDir)(this->m_projectileCopy,aSStack_20,0.0);
+      (*this->m_projectileCopy->vtable->SetOn)(this->m_projectileCopy,true);
+      on = false;
+    }
+    (*this->m_projectile->vtable->SetOn)(this->m_projectile,on);
+    (*this->m_projectileCopy->vtable->Update)(this->m_projectileCopy);
+    (*this->m_projectile->vtable->Update)(this->m_projectile);
+  }
+}
+
+// 0x007d5950
+bool __thiscall C_WeaponItem::SaveGame(C_WeaponItem *this,C_chunk *chunk)
+{
+  this_00 = chunk;
+  C_Item::SaveGame((C_Item *)this,chunk);
+  chunk = (C_chunk *)this->m_rounds;
+  C_chunk::Begin(this_00,200);
+  C_chunk::Write(this_00,&chunk,4);
+  C_chunk::Ascend(this_00);
+  chunk = (C_chunk *)this->m_capacity;
+  C_chunk::Begin(this_00,0xc9);
+  C_chunk::Write(this_00,&chunk,4);
+  C_chunk::Ascend(this_00);
+  chunk = (C_chunk *)this->m_unknown58;
+  C_chunk::Begin(this_00,0xca);
+  C_chunk::Write(this_00,&chunk,4);
+  C_chunk::Ascend(this_00);
+  chunk = (C_chunk *)this->m_readyTime;
+  C_chunk::Begin(this_00,0xcb);
+  C_chunk::Write(this_00,&chunk,4);
+  C_chunk::Ascend(this_00);
+  chunk = (C_chunk *)this->m_flags;
+  C_chunk::Begin(this_00,0xcc);
+  C_chunk::Write(this_00,&chunk,4);
+  C_chunk::Ascend(this_00);
+  chunk = (C_chunk *)this->m_lastShotTime;
+  C_chunk::Begin(this_00,0xcd);
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  C_chunk::Ascend(this_00);
+  chunk = (C_chunk *)this->m_shotInterval;
+  C_chunk::Begin(this_00,0xce);
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  C_chunk::Ascend(this_00);
+  chunk = (C_chunk *)this->m_shotCount;
+  C_chunk::Begin(this_00,0xcf);
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  C_chunk::Ascend(this_00);
+  chunk = (C_chunk *)this->m_projectileKind;
+  C_chunk::Begin(this_00,0xd0);
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  C_chunk::Ascend(this_00);
+  chunk = (C_chunk *)(uint32_t)this->m_unknown90;
+  C_chunk::Begin(this_00,0xd1);
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  C_chunk::Ascend(this_00);
+  chunk = (C_chunk *)this->m_unknown94;
+  C_chunk::Begin(this_00,0xd2);
+  if ((this_00->m_open != false) && (this_00->m_writing != false)) {
+    dtaWrite(this_00->m_handle,&chunk,4);
+  }
+  C_chunk::Ascend(this_00);
+  return true;
+}
+
+// 0x007d5b90
+bool __thiscall C_WeaponItem::LoadGame(C_WeaponItem *this,C_chunk *chunk)
+{
+  this_00 = chunk;
+  C_Item::LoadGame((C_Item *)this,chunk);
+  pCVar3 = chunk;
+  while ((((this_00->m_open != false && (this_00->m_depth != 0)) &&
+          (iVar1 = dtaSeek(this_00->m_handle,0,1), iVar1 != -1)) &&
+         (iStack_c = this_00->m_stack[this_00->m_depth - 1] - iVar1, iStack_c != 0))) {
+    if ((this_00->m_open != false) && (iVar1 = dtaRead(this_00->m_handle,&uStack_8,6), iVar1 == 6))
+    {
+      iVar1 = dtaSeek(this_00->m_handle,0,1);
+      this_00->m_stack[this_00->m_depth] = iVar1 - 6 + CONCAT22(uStack_4,uStack_6);
+      pCVar3 = (C_chunk *)CONCAT22(uStack_6,uStack_8);
+      this_00->m_depth = this_00->m_depth + 1;
+    }
+    switch((uint32_t)pCVar3 & 0xffff) {
+    case 200:
+      C_chunk::Read(this_00,&chunk,4);
+      C_chunk::Ascend(this_00);
+      this->m_rounds = (float)chunk;
+      break;
+    case 0xc9:
+      C_chunk::Read(this_00,&fStack_38,4);
+      C_chunk::Ascend(this_00);
+      this->m_capacity = fStack_38;
+      break;
+    case 0xca:
+      C_chunk::Read(this_00,&iStack_34,4);
+      C_chunk::Ascend(this_00);
+      this->m_unknown58 = iStack_34;
+      break;
+    case 0xcb:
+      C_chunk::Read(this_00,&uStack_30,4);
+      C_chunk::Ascend(this_00);
+      this->m_readyTime = uStack_30;
+      break;
+    case 0xcc:
+      C_chunk::Read(this_00,&uStack_2c,4);
+      C_chunk::Ascend(this_00);
+      this->m_flags = uStack_2c;
+      break;
+    case 0xcd:
+      C_chunk::Read(this_00,&uStack_28,4);
+      C_chunk::Ascend(this_00);
+      this->m_lastShotTime = uStack_28;
+      break;
+    case 0xce:
+      C_chunk::Read(this_00,&iStack_24,4);
+      C_chunk::Ascend(this_00);
+      this->m_shotInterval = iStack_24;
+      break;
+    case 0xcf:
+      C_chunk::Read(this_00,&iStack_20,4);
+      C_chunk::Ascend(this_00);
+      this->m_shotCount = iStack_20;
+      break;
+    case 0xd0:
+      C_chunk::Read(this_00,&iStack_1c,4);
+      C_chunk::Ascend(this_00);
+      this->m_projectileKind = iStack_1c;
+      break;
+    case 0xd1:
+      C_chunk::Read(this_00,&iStack_18,4);
+      C_chunk::Ascend(this_00);
+      this->m_unknown90 = iStack_18 != 0;
+      break;
+    case 0xd2:
+      C_chunk::Read(this_00,&iStack_14,4);
+      C_chunk::Ascend(this_00);
+      this->m_unknown94 = iStack_14;
+      break;
+    default:
+      if (this_00->m_open == false) goto LAB_007d5e5d;
+      iVar1 = this_00->m_handle;
+      if (this_00->m_writing == false) {
+        position = this_00->m_stack[this_00->m_depth - 1];
+      }
+      else {
+        position = dtaSeek(iVar1,0,1);
+        iStack_10 = position - this_00->m_stack[this_00->m_depth - 1];
+        dtaSeek(this_00->m_handle,this_00->m_stack[this_00->m_depth - 1] + 2,0);
+        dtaWrite(this_00->m_handle,&iStack_10,4);
+        iVar1 = this_00->m_handle;
+      }
+      dtaSeek(iVar1,position,0);
+      if (this_00->m_depth != 0) {
+        this_00->m_depth = this_00->m_depth - 1;
+      }
+    }
+  }
+LAB_007d5e5d:
+  iVar1 = (*this->m_def->vtable->GetBehaviour)();
+  if ((iVar1 == 6) && (this->m_rounds == 0.0)) {
+    piVar2 = (int *)C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+    piVar2 = (int *)(**(code **)(*piVar2 + 0x48))(piVar2,&DAT_0084f79c,0xffff);
+    if (piVar2 != nullptr) {
+      (**(code **)(*piVar2 + 0x30))(piVar2,0);
+    }
+  }
+  return true;
+}
+
+// 0x007d5ee0
+void __thiscall
+C_WeaponItem::PlayShellSound(C_WeaponItem *this,C_Actor *shooter,I3D_frame *where,bool unknown)
+{
+  if (this->m_ejectFrameCount == 0) {
+    return;
+  }
+  if ((g_gameRole & 2) == 0) goto LAB_007d5fc5;
+  iVar1 = _rand();
+  self = GetShellSoundFrame(this,iVar1 % this->m_ejectFrameCount);
+  if (self == nullptr) goto LAB_007d5fc5;
+  (*self->vtable->LinkTo)(self,where,0);
+  (*self->vtable[1].LinkTo)(self,nullptr,unaff_EDI);
+  uVar2 = FUN_005a0890((int)shooter);
+  if ((char)uVar2 == '\0') {
+LAB_007d5f79:
+    (*self->vtable[1].Tick)(self,1);
+    uVar2 = self->m_frameFlags;
+    if (-1 < (char)uVar2) {
+      (self->m_localMatrix).m[3][2] = 0.7;
+LAB_007d5f97:
+      (self->m_localMatrix).m[3][0] = 0.0;
+      (self->m_localMatrix).m[3][1] = 0.0;
+      self->m_frameFlags = uVar2 & 0xfffffedf | 0x40000000;
+    }
+  }
+  else {
+    this_00 = (C_game *)GetGame();
+    uVar3 = C_game::IsHudShown(this_00);
+    if ((char)uVar3 == '\0') goto LAB_007d5f79;
+    (*self->vtable[1].Tick)(self,3);
+    uVar2 = self->m_frameFlags;
+    if (-1 < (char)uVar2) {
+      (self->m_localMatrix).m[3][2] = 0.0;
+      goto LAB_007d5f97;
+    }
+  }
+  (*self->vtable->Update)(self);
+  (*self->vtable->SetOn)(self,true);
+  this = pCStack_20;
+LAB_007d5fc5:
+  if ((((g_gameRole & 1) != 0) && (!unknown)) &&
+     (iVar1 = GetGame(), 1000 < (uint32_t)(*(int *)(iVar1 + 0x28) - this->m_unknown8C))) {
+    iVar1 = GetGame();
+    this->m_unknown8C = *(int *)(iVar1 + 0x28);
+    _DAT_0098affc = 2;
+    _DAT_0098b000 = (*this->m_def->m_component->vtable[1].Load)(unaff_ESI,in_stack_ffffffd8);
+    _DAT_0098aff8 = shooter;
+    _DAT_0098afe0 = 0;
+    _DAT_0098afe4 = 0;
+    _DAT_0098afe8 = 0;
+    _DAT_0098afec = uStack_8;
+    _DAT_0098aff4 = where;
+    _DAT_0098aff0 = 0x22;
+    iVar1 = this->m_def->m_id;
+    if (((iVar1 == 0x16) || (iVar1 == 7)) || (iVar1 == 0x104)) {
+      _DAT_0098b018 = 0x3e99999a;
+    }
+    else {
+      _DAT_0098b018 = 0x3f800000;
+    }
+    piVar4 = (int *)GetSoundModule();
+    (**(code **)(*piVar4 + 0x54))(&DAT_0098afe0);
+  }
+}
+
+// 0x007d60d0
+I3D_frame * __thiscall C_WeaponItem::GetShellSoundFrame(C_WeaponItem *this,int index)
+{
+  iStack_14 = 0xffffffff;
+  pIVar5 = *(I3D_frame **)(this->_pad_0091 + index * 4 - 0x11);
+  if (pIVar5 == nullptr) {
+    pCVar2 = this->m_def->m_component;
+    local_a4 = this;
+    local_ac = GetSoundModule();
+    uVar4 = (*pCVar2->vtable[1].Load)(unaff_EDI,unaff_ESI);
+    iStack_9c = (**(code **)((int)uStack_b0 + 0x8c))(2,uVar4);
+    if (iStack_9c == 0) {
+      return nullptr;
+    }
+    iVar7 = *(int *)(iStack_9c + 0xc);
+    this->m_ejectFrameCount = iVar7;
+    if (2 < iVar7) {
+      this->m_ejectFrameCount = 2;
+    }
+    local_ac = nullptr;
+    if (0 < this->m_ejectFrameCount) {
+      uStack_b0 = &this->m_unknown80;
+      iStack_84 = -0x80 - (int)this;
+LAB_007d61a3:
+      this_00 = *(void **)(*(int *)(iStack_9c + 4) + iStack_84 + (int)uStack_b0);
+      self = I3DGetDriver();
+      pIVar5 = (*self->vtable->CreateFrame)(self,4);
+      piVar6 = (int *)C_str_CopyFromField(this_00,&pCStack_98);
+      iStack_14 = 0;
+      if (*piVar6 == 0) {
+        pbStack_c0 = &DAT_00867a90;
+      }
+      else {
+        pbStack_c0 = (uint8_t *)(*piVar6 + 8);
+      }
+      iVar7 = vector_size_e8_437880(0x8aed78);
+      do {
+        if (iVar7 == 0) goto LAB_007d627d;
+        iVar8 = iVar7 * 8;
+        iVar7--;
+      } while (*(I3D_frame **)(DAT_008aed7c - 8 + iVar8) != pIVar5);
+      iVar8 = *(int *)(iVar7 * 8 + 4 + DAT_008aed7c);
+      if (iVar8 == 0) {
+        pcVar13 = &DAT_00867a90;
+      }
+      else {
+        pcVar13 = (char *)(iVar8 + 8);
+      }
+      FUN_004094e0(auStack_60,pcVar13,&uStack_9e);
+      iStack_14._0_1_ = 1;
+      puVar11 = (uint32_t *)FUN_004377b0(&DAT_008aed68,auStack_60);
+      *puVar11 = 0;
+      iStack_14 = (uint32_t)iStack_14._1_3_ << 8;
+      std_string::Tidy((std_string *)auStack_60,'\x01');
+      FUN_004378a0(&DAT_008aed78,iVar7 * 8 + DAT_008aed7c);
+LAB_007d627d:
+      FUN_004094e0(&sStack_40,(char *)pbStack_c0,&uStack_9d);
+      iStack_14._0_1_ = 2;
+      piVar6 = (int *)FUN_004377b0(&DAT_008aed68,&sStack_40.alloc);
+      iVar7 = *piVar6;
+      iStack_14._0_1_ = 0;
+      std_string::Tidy(&sStack_40,'\x01');
+      if (iVar7 == 0) {
+        iVar8 = -0x7fffffff;
+        uStack_b4 = 0;
+        iVar7 = vector_size_e4_409600(0x8aed88);
+        if (iVar7 != 0) {
+          do {
+            piVar6 = FUN_00409f20((void *)(DAT_008aed8c + uStack_b4 * 4),&pCStack_90,pbStack_c0);
+            iStack_14._0_1_ = 3;
+            if (*piVar6 == 0) {
+              puVar9 = &DAT_00867a90;
+            }
+            else {
+              puVar9 = (uint8_t *)(*piVar6 + 8);
+            }
+            iVar8 = (*pIVar5->vtable[1].Slot18)(pIVar5,puVar9,0x10);
+            iStack_14._0_1_ = 0;
+            if (pCStack_90 != nullptr) {
+              C_str::ReleaseRep(pCStack_90);
+            }
+            switch(iVar8) {
+            case -0x7fffffff:
+              goto switchD_007d636e_caseD_80000001;
+            case -0x7ffffffe:
+            case -0x7ffffff6:
+              goto LAB_007d6491;
+            default:
+              goto switchD_007d636e_caseD_80000003;
+            case -0x7fffffed:
+              piVar6 = FUN_00409f20((void *)(DAT_008aed8c + uStack_b4 * 4),&pCStack_88,pbStack_c0);
+              iStack_14 = CONCAT31(iStack_14._1_3_,4);
+              if (*piVar6 == 0) {
+                puVar9 = &DAT_00867a90;
+              }
+              else {
+                puVar9 = (uint8_t *)(*piVar6 + 8);
+              }
+              pCVar10 = C_fstr_Construct(&CStack_7c,"Cache : BADFILEVERSION '%s' (3ds filter)",
+                                         puVar9);
+              if (pCVar10->rep == nullptr) {
+                pcVar13 = &DAT_00867a90;
+              }
+              else {
+                pcVar13 = pCVar10->rep->chars;
+              }
+              dbgPrintf(pcVar13,0);
+              pCVar10 = pCStack_88;
+              if (CStack_7c.rep != nullptr) {
+                C_str::ReleaseRep((C_str *)CStack_7c.rep);
+                pCVar10 = pCStack_88;
+              }
+              break;
+            case -0x7fffffec:
+              piVar6 = FUN_00409f20((void *)(DAT_008aed8c + uStack_b4 * 4),&pCStack_8c,pbStack_c0);
+              iStack_14 = CONCAT31(iStack_14._1_3_,5);
+              if (*piVar6 == 0) {
+                puVar9 = &DAT_00867a90;
+              }
+              else {
+                puVar9 = (uint8_t *)(*piVar6 + 8);
+              }
+              pCVar10 = C_fstr_Construct(&CStack_80,"Cache : BADFILETIME '%s' (3ds filter)",
+                                         puVar9);
+              if (pCVar10->rep == nullptr) {
+                pcVar13 = &DAT_00867a90;
+              }
+              else {
+                pcVar13 = pCVar10->rep->chars;
+              }
+              dbgPrintf(pcVar13,0);
+              pCVar10 = pCStack_8c;
+              if (CStack_80.rep != nullptr) {
+                C_str::ReleaseRep((C_str *)CStack_80.rep);
+                pCVar10 = pCStack_8c;
+              }
+            }
+            iStack_14._0_1_ = 0;
+            if (pCVar10 != nullptr) {
+              C_str::ReleaseRep(pCVar10);
+            }
+switchD_007d636e_caseD_80000003:
+            if (-1 < iVar8) {
+              uVar15 = vector_size_e8_437880(0x8aed78);
+              if (uVar15 < DAT_008aed98) goto LAB_007d661c;
+              uVar15 = 0;
+              iVar7 = vector_size_e8_437880(0x8aed78);
+              if (iVar7 == 0) goto LAB_007d661c;
+              goto LAB_007d657b;
+            }
+switchD_007d636e_caseD_80000001:
+            uStack_b4++;
+            uVar15 = vector_size_e4_409600(0x8aed88);
+          } while (uStack_b4 < uVar15);
+        }
+      }
+      else {
+        (**(code **)(g_soundCache + 0x30))(pIVar5,iVar7);
+        iVar8 = 0;
+      }
+      goto LAB_007d6491;
+    }
+LAB_007d6718:
+    pIVar5 = (I3D_frame *)this->m_unknown80;
+  }
+  return pIVar5;
+  while( true ) {
+    uVar15++;
+    uVar12 = vector_size_e8_437880(0x8aed78);
+    if (uVar12 <= uVar15) break;
+LAB_007d657b:
+    psVar1 = (short *)(*(int *)(DAT_008aed7c + uVar15 * 8) + 0xe4);
+    *psVar1 = *psVar1 + 1;
+    puVar11 = *(uint32_t **)(DAT_008aed7c + uVar15 * 8);
+    iVar7 = (**(code **)*puVar11)(puVar11);
+    if (iVar7 == 1) {
+      iVar7 = *(int *)(uVar15 * 8 + 4 + DAT_008aed7c);
+      if (iVar7 == 0) {
+        pcVar13 = &DAT_00867a90;
+      }
+      else {
+        pcVar13 = (char *)(iVar7 + 8);
+      }
+      FUN_004094e0(&sStack_70,pcVar13,&uStack_a5);
+      iStack_14._0_1_ = 6;
+      puVar11 = (uint32_t *)FUN_004377b0(&DAT_008aed68,&sStack_70.alloc);
+      *puVar11 = 0;
+      iStack_14._0_1_ = 0;
+      std_string::Tidy(&sStack_70,'\x01');
+      FUN_004378a0(&DAT_008aed78,uVar15 * 8 + DAT_008aed7c);
+      break;
+    }
+  }
+LAB_007d661c:
+  piVar6 = (int *)FUN_00437770(aiStack_78);
+  iStack_14._0_1_ = 7;
+  FUN_00437f40(&DAT_008aed78,DAT_008aed80,piVar6);
+  iStack_14 = (uint32_t)iStack_14._1_3_ << 8;
+  FUN_00437740(aiStack_78);
+  C_str::operator_assign((C_str *)(DAT_008aed80 - 1),(char *)pbStack_c0);
+  puVar11 = (uint32_t *)(**(code **)(g_soundCache + 0xc))();
+  (**(code **)(g_soundCache + 0x30))(puVar11,pIVar5);
+  FUN_00437780(DAT_008aed80 - 2,(int)puVar11);
+  FUN_004094e0(auStack_60 + 8,in_stack_ffffff38,(uint8_t *)((int)&uStack_b0 + 2));
+  local_1c._0_1_ = 8;
+  puVar14 = (uint32_t *)FUN_004377b0(&DAT_008aed68,auStack_60 + 8);
+  *puVar14 = puVar11;
+  local_1c = (void *)((uint32_t)local_1c._1_3_ << 8);
+  std_string::Tidy((std_string *)(auStack_60 + 8),'\x01');
+  (**(code **)*puVar11)(puVar11);
+LAB_007d6491:
+  iStack_14 = 0xffffffff;
+  if (pCStack_98 != nullptr) {
+    C_str::ReleaseRep(pCStack_98);
+  }
+  if (iVar8 == 0) {
+    (*pIVar5->vtable[1].Tick)(pIVar5,1);
+    (*pIVar5->vtable[1].Slot28)(pIVar5,0x3fc90fdb,0x3fc90fdb);
+    (*pIVar5->vtable[1].SetOn)(pIVar5,SUB41(*(uint32_t *)(iStack_84 + 0x14),0));
+    in_stack_ffffff38 = (char *)0x3ecccccd;
+    (*pIVar5->vtable[1].Update)(pIVar5);
+    pIVar3 = pIVar5->vtable;
+    uVar15 = 0;
+    parent = (I3D_frame *)C_LoadedModel::GetFrame((C_LoadedModel *)local_a4,0);
+    (*pIVar3->LinkTo)(pIVar5,parent,uVar15);
+    puVar11 = (uint32_t *)S_vector::Set(&SStack_30,0,0,0x3f8ccccd);
+    I3D_frame::I3D_frame__SetPosInline(pIVar5,puVar11);
+    *uStack_b0 = (int)pIVar5;
+  }
+  else {
+    (*pIVar5->vtable->Release)(pIVar5);
+    *uStack_b0 = 0;
+  }
+  local_ac = (uint8_t *)((int)local_ac + 1);
+  uStack_b0++;
+  this = local_a4;
+  if (local_a4->m_ejectFrameCount <= (int)local_ac) goto LAB_007d6718;
+  goto LAB_007d61a3;
+}
+
+// 0x007d6760
+void __fastcall C_WeaponItem::ReleaseShellSoundFrames(C_WeaponItem *item)
+{
+  piVar2 = &item->m_ejectFrameCount;
+  iVar3 = 2;
+  do {
+    puVar1 = (uint32_t *)piVar2[-1];
+    piVar2--;
+    if (puVar1 != nullptr) {
+      (**(code **)*puVar1)(puVar1);
+      *piVar2 = 0;
+    }
+    iVar3--;
+  } while (iVar3 != 0);
+}
+
+// 0x007d6790
+void __thiscall C_WeaponItem::ShowFlash(C_WeaponItem *this,C_Actor *shooter)
+{
+  if ((g_gameRole & 2) == 0) {
+    return;
+  }
+  (*this->vtable->GetAmount)();
+  if ((extraout_ST0 == (long double)1.0) &&
+     (iVar1 = (*this->m_def->m_component->vtable[2].Save)((uint32_t *)unaff_ESI,in_stack_ffffffd4),
+     -1 < iVar1)) {
+    uVar2 = FUN_005a0890((int)shooter);
+    if ((char)uVar2 == '\0') {
+LAB_007d685d:
+      _DAT_0098afe0 = 0;
+      _DAT_0098afe8 = 0x3f333333;
+      _DAT_0098afe4 = 0;
+      _DAT_0098afec = uStack_c;
+      unaff_ESI = (char *)0x7d68a5;
+      pIVar6 = (I3D_frame *)C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+      _DAT_0098aff0 = 1;
+    }
+    else {
+      pCVar3 = (C_game *)GetGame();
+      uVar4 = C_game::IsHudShown(pCVar3);
+      if ((char)uVar4 == '\0') goto LAB_007d685d;
+      _DAT_0098afe0 = 0;
+      _DAT_0098afe4 = 0;
+      _DAT_0098afe8 = 0;
+      _DAT_0098afec = uStack_c;
+      pIVar6 = this->m_shotDummy;
+      if (pIVar6 == nullptr) {
+        piVar5 = (int *)C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+        unaff_ESI = "shdum";
+        pIVar6 = (I3D_frame *)(**(code **)(*piVar5 + 0x48))(piVar5,"shdum",0x20);
+        this->m_shotDummy = pIVar6;
+      }
+      _DAT_0098aff0 = 0x41;
+    }
+    _DAT_0098affc = 2;
+    in_stack_ffffffd4 = (void *)0x7d68c9;
+    _DAT_0098aff4 = pIVar6;
+    _DAT_0098b000 = (*this->m_def->m_component->vtable[2].Save)(in_stack_ffffffd8,in_stack_ffffffdc)
+    ;
+    _DAT_0098aff8 = 0;
+    piVar5 = (int *)GetSoundModule();
+    in_stack_ffffffdc = &DAT_0098afe0;
+    in_stack_ffffffd8 = (uint32_t *)0x7d68e9;
+    (**(code **)(*piVar5 + 0x54))();
+  }
+  iVar1 = (*this->m_def->m_component->vtable[2].Load)((uint32_t)unaff_ESI,in_stack_ffffffd4);
+  if (iVar1 < 0) {
+    return;
+  }
+  uVar2 = FUN_005a0890((int)shooter);
+  if ((char)uVar2 != '\0') {
+    pCVar3 = (C_game *)GetGame();
+    uVar4 = C_game::IsHudShown(pCVar3);
+    if ((char)uVar4 != '\0') {
+      _DAT_0098afe0 = 0;
+      _DAT_0098afe4 = 0;
+      _DAT_0098afe8 = 0;
+      _DAT_0098afec = uStack_c;
+      pIVar6 = this->m_shotDummy;
+      if (pIVar6 == nullptr) {
+        piVar5 = (int *)C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+        pIVar6 = (I3D_frame *)(**(code **)(*piVar5 + 0x48))(piVar5,"shdum",0x20);
+        this->m_shotDummy = pIVar6;
+      }
+      _DAT_0098aff0 = 0x41;
+      goto LAB_007d69d9;
+    }
+  }
+  _DAT_0098afe0 = 0;
+  _DAT_0098afe8 = 0x3f333333;
+  _DAT_0098afe4 = 0;
+  _DAT_0098afec = uStack_c;
+  pIVar6 = (I3D_frame *)C_LoadedModel::GetFrame((C_LoadedModel *)this,0);
+  _DAT_0098aff0 = 1;
+LAB_007d69d9:
+  _DAT_0098affc = 3;
+  _DAT_0098aff4 = pIVar6;
+  _DAT_0098b000 =
+       (*this->m_def->m_component->vtable[2].Load)((uint32_t)in_stack_ffffffd8,in_stack_ffffffdc);
+  _DAT_0098aff8 = 0;
+  piVar5 = (int *)GetSoundModule();
+  (**(code **)(*piVar5 + 0x54))(&DAT_0098afe0);
+}
+
+// 0x007d6a70
+void __fastcall FUN_007d6a70(int param_1)
+{
+  if (*(int *)(param_1 + 0x5c) != 0) {
+    iVar1 = GetGame();
+    if ((200 < *(int *)(param_1 + 0x5c) - *(int *)(iVar1 + 0x28)) &&
+       (*(int *)(param_1 + 0xa8) != -1)) {
+      piVar2 = (int *)GetSoundModule();
+      (**(code **)(*piVar2 + 0x5c))(param_1 + 0xa8);
+    }
+  }
+  *(uint32_t *)(param_1 + 0xa8) = 0xffffffff;
+}
+

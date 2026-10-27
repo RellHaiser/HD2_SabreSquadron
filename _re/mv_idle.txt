@@ -1,0 +1,4847 @@
+// 0x00750940
+void __fastcall FUN_00750940(int param_1)
+{
+  pvVar2 = operator_new(0xffc);
+  if (*(int *)(param_1 + 0x2c) == 0) {
+    *(uint32_t *)(param_1 + 0x28) = 2;
+    pvVar3 = operator_new(8);
+    *(void **)(param_1 + 0x24) = pvVar3;
+    *(void **)((int)pvVar3 + 4) = pvVar2;
+    piVar4 = (int *)(*(int *)(param_1 + 0x24) + 4);
+    iVar5 = *piVar4;
+    *(int *)(param_1 + 0x14) = iVar5;
+    *(int *)(param_1 + 4) = iVar5;
+    *(int *)(param_1 + 0x18) = iVar5 + 0xffc;
+    *(int *)(param_1 + 8) = iVar5 + 0xffc;
+    *(int *)(param_1 + 0x1c) = (int)pvVar2 + 0x7f8;
+    *(int *)(param_1 + 0xc) = (int)pvVar2 + 0x7f8;
+    *(int **)(param_1 + 0x20) = piVar4;
+    *(int **)(param_1 + 0x10) = piVar4;
+    return;
+  }
+  uVar6 = *(uint32_t *)(param_1 + 0x20);
+  if (uVar6 < (uint32_t)(*(int *)(param_1 + 0x24) - 4 + *(int *)(param_1 + 0x28) * 4)) {
+    *(uint32_t **)(param_1 + 0x20) = (uint32_t *)(uVar6 + 4);
+    *(uint32_t *)(uVar6 + 4) = pvVar2;
+    piVar7 = *(int **)(param_1 + 0x20);
+  }
+  else {
+    iVar5 = ((int)(uVar6 - *(int *)(param_1 + 0x10)) >> 2) + 1;
+    uVar6 = iVar5 * 8;
+    if ((int)uVar6 < 0) {
+      uVar6 = 0;
+    }
+    pvVar3 = operator_new(uVar6);
+    piVar4 = (int *)((int)pvVar3 + (iVar5 * 2 & 0xfffffffcU));
+    iVar1 = *(int *)(param_1 + 0x20);
+    piVar8 = piVar4;
+    for (piVar7 = *(int **)(param_1 + 0x10); piVar7 != (int *)(iVar1 + 4); piVar7 = piVar7 + 1) {
+      *piVar8 = *piVar7;
+      piVar8++;
+    }
+    operator_delete(*(void **)(param_1 + 0x24));
+    *(void **)(param_1 + 0x24) = pvVar3;
+    *(int *)(param_1 + 0x28) = iVar5 * 2;
+    piVar7 = piVar4 + iVar5;
+    *piVar7 = (int)pvVar2;
+    iVar5 = *piVar4;
+    *(int *)(param_1 + 4) = iVar5;
+    *(int *)(param_1 + 8) = iVar5 + 0xffc;
+    *(uint32_t *)(param_1 + 0xc) = *(uint32_t *)(param_1 + 0xc);
+    *(int **)(param_1 + 0x10) = piVar4;
+  }
+  iVar5 = *piVar7;
+  *(int *)(param_1 + 0x14) = iVar5;
+  *(int *)(param_1 + 0x18) = iVar5 + 0xffc;
+  *(void **)(param_1 + 0x1c) = pvVar2;
+  *(int **)(param_1 + 0x20) = piVar7;
+}
+
+// 0x00750a90
+void __fastcall FUN_00750a90(uint32_t *param_1,uint32_t *param_2)
+{
+  if (param_1 != nullptr) {
+    *param_1 = *param_2;
+    param_1[1] = param_2[1];
+    param_1[2] = param_2[2];
+  }
+}
+
+// 0x00750ab0
+void FUN_00750ab0(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x00750ae0
+uint8_t FUN_00750ae0(void)
+{
+  return 1;
+}
+
+// 0x00750af0
+uint8_t FUN_00750af0(void)
+{
+  return 1;
+}
+
+// 0x00750b00
+void empty_function_750b00(void)
+{
+}
+
+// 0x00750b10
+void FUN_00750b10(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x00750b40
+int __thiscall C_HumanIdle::Reset(C_HumanIdle *this)
+{
+  this->unknown010 = 0;
+  this->unknown14 = -10000;
+  iVar1 = _rand();
+  this->idleTime = iVar1 % 8000 + 5000;
+  return iVar1 / 8000;
+}
+
+// 0x00750b70
+int __thiscall C_HumanIdle::Reset(C_HumanIdle *this)
+{
+  this->unknown010 = 0;
+  this->unknown14 = -10000;
+  iVar1 = _rand();
+  this->idleTime = iVar1 % 8000 + 5000;
+  return iVar1 / 8000;
+}
+
+// 0x00750b80
+void empty_function_750b80(void)
+{
+}
+
+// 0x00750b90
+void __thiscall C_HumanIdle::Unknown755960(C_HumanIdle *this,int param_1)
+{
+  uStack_88 = (I3D_scene_vtbl *)CONCAT13(1,(undefined3)uStack_88);
+  pCVar2 = this->movement;
+  if (pCVar2->unknownA34 == 0) {
+    return;
+  }
+  if (pCVar2->unknownA38 == -10000) {
+    return;
+  }
+  uVar18 = pCVar2->unknownA34;
+  switch(uVar18 & 0x3ff) {
+  case 1:
+    if ((0 < pCVar2->unknownA38) && (pCVar2->unknownA38 != -10000)) break;
+    pCVar2->unknownA38 = -10000;
+    this->movement->unknownA34 = 0;
+    goto LAB_007567f6;
+  case 2:
+  case 4:
+  case 6:
+  case 0xb:
+  case 0xd:
+    if (((pCVar2->unknownA38 < -999) || (0 < pCVar2->unknownA38)) || ((uVar18 & 0x400) == 0)) break;
+    pIVar15 = pCVar2->owner->m_frame;
+    pCVar9 = GetGame();
+    (*pCVar9->m_scene->vtable->RemoveHumanModel)((S_vector4 *)pCVar9->m_scene);
+    pCVar10 = (*this->movement->vehicle->vtable->GetSeatOccupant)(this->movement->seat);
+    if (pCVar10 != nullptr) {
+      pCVar17 = this->owner;
+      pCVar11 = (C_Human *)(*this->movement->vehicle->vtable->GetSeatOccupant)(this->movement->seat)
+      ;
+      if (pCVar11 != pCVar17) {
+        pCVar14 = (pCVar17->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xfffffffe;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xfffffffd;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xfffffff7;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xffffffbf;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xffffbfff;
+        this->movement->unknownA44 = 0;
+        this->movement->unknownA38 = -10000;
+        this->movement->unknownA34 = 0;
+        this->movement->vehicle = nullptr;
+        this->movement->unknown228 = 0;
+        return;
+      }
+    }
+    (*this->movement->vehicle->vtable->Unknown74)(this->movement->seat,this->owner,pIVar15);
+    this->owner->m_vehicle = this->movement->vehicle;
+    this->owner->m_seat = this->movement->seat;
+    pCVar2 = this->movement;
+    uVar18 = pCVar2->unknownA44;
+    if ((uVar18 & 4) == 0) {
+      if ((uVar18 & 8) == 0) {
+        if ((uVar18 & 0x40) == 0) {
+          if ((char)uVar18 < '\0') {
+            if ((pCVar2->unknownA34 & 0x3ffU) == 4) {
+              (pCVar2->nextAnimState).anim.anim = 0x6f;
+            }
+            else {
+              (pCVar2->nextAnimState).anim.anim = 0x9b;
+            }
+          }
+          else if ((uVar18 & 1) == 0) {
+            (pCVar2->nextAnimState).anim.anim = 0x9f;
+          }
+          else {
+            (pCVar2->nextAnimState).anim.anim = 0x9e;
+          }
+          goto LAB_00755c30;
+        }
+        (pCVar2->nextAnimState).anim.anim = 0x37;
+        S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+        pCVar2 = this->movement;
+        (pCVar2->nextAnimState).anim.stance = 2;
+        S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+        iVar19 = 2;
+      }
+      else {
+        (pCVar2->nextAnimState).anim.anim = 0x37;
+        S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+        pCVar2 = this->movement;
+        (pCVar2->nextAnimState).anim.stance = 1;
+        S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+        iVar19 = 1;
+      }
+    }
+    else {
+      (pCVar2->nextAnimState).anim.anim = 0x2d;
+LAB_00755c30:
+      S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+      pCVar2 = this->movement;
+      (pCVar2->nextAnimState).anim.stance = 0;
+      S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+      iVar19 = 0;
+    }
+    ((this->owner->m_body).work)->forced = true;
+    C_HumanWork::Play((this->owner->m_body).work,(this->movement->nextAnimState).anim.anim,false);
+    (this->movement->request).stance = (this->movement->nextAnimState).anim.stance;
+    C_HumanWork::SetStance
+              ((this->owner->m_body).work,(this->movement->nextAnimState).anim.stance,false);
+    pCVar3 = this->movement->weaponPose2;
+    iVar13 = (this->movement->nextAnimState).anim.stance;
+    *(int *)(pCVar3->_pad_0004 + 0x62cc) = iVar13;
+    if (iVar13 == 2) {
+      pCVar3->_pad_0004[0x65ec] = '\x01';
+      pCVar3->_pad_0004[0x65f0] = 0xf4;
+      pCVar3->_pad_0004[0x65f1] = '\x01';
+      pCVar3->_pad_0004[0x65f2] = '\0';
+      pCVar3->_pad_0004[0x65f3] = '\0';
+    }
+    if ((this->movement->nextAnimState).anim.stance != 2) {
+      this->movement->weaponPose2->_pad_0004[0x65ec] = '\0';
+    }
+    ((this->owner->m_body).work)->forced = false;
+    pCVar2 = this->movement;
+    FUN_007ae190(pCVar2->weaponPose2,pCVar2->unknownA44,(int *)pCVar2->vehicle,pCVar2->seat);
+    pCVar2 = this->movement;
+    if ((pCVar2->unknownA44 & 0x10) == 0) {
+      pCVar2->hitVolumeScale[0] = 0.0;
+      this->movement->hitVolumeScale[1] = 0.0;
+    }
+    else {
+      pCVar2->hitVolumeScale[0] = 0.0;
+      this->movement->hitVolumeScale[1] = 0.0;
+    }
+    pCVar2 = this->movement;
+    if (((pCVar2->unknownA44 & 1) == 0) ||
+       (bVar8 = (*pCVar2->vehicle->vtable->HasSeatWeapon)(pCVar2->seat), bVar8)) {
+      pCVar2 = this->movement;
+      uVar18 = pCVar2->unknownA44;
+      if ((uVar18 & 0x100) == 0) {
+        if (((uVar18 & 0x1d) == 0) && ((uVar18 & 0x20) != 0)) {
+          C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,false);
+          (this->movement->nextAnimState).activity = 0x4c;
+          ((this->owner->m_body).work)->forced = true;
+          C_HumanWork::PlayWorkAnimation
+                    ((this->owner->m_body).work,(this->movement->nextAnimState).activity,false);
+          ((this->owner->m_body).work)->forced = false;
+          this->movement->unknownA44 = 2;
+        }
+        else {
+          if (((uVar18 & 0xc) == 0) || ((uVar18 & 0x20) == 0)) {
+            (pCVar2->nextAnimState).activity = 0x4c;
+            this->movement->unknownA44 = 5;
+            this_00 = (this->owner->m_body).equipment;
+            goto LAB_00755fc0;
+          }
+          (pCVar2->nextAnimState).activity = 0x4c;
+          C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,false);
+          this->movement->unknownA44 = 4;
+        }
+      }
+      else {
+        pvVar12 = (*pCVar2->vehicle->vtable->GetSeatWeapon)(pCVar2->seat);
+        if (pvVar12 == nullptr) {
+          this->movement->unknownA44 = 9;
+        }
+        else {
+          iVar13 = (**(code **)(**(int **)((int)pvVar12 + 0x48) + 0xc))();
+          this->movement->unknownA44 = iVar13 + 6;
+        }
+        pCVar2 = this->movement;
+        iVar13 = pCVar2->unknownA44;
+        if (iVar13 < 9) {
+          (pCVar2->nextAnimState).activity = 0x4c;
+          if (((this->movement->nextAnimState).anim.anim == 0x9f) ||
+             (piVar21 = *(int **)((int)g_idleAnimTable + (iVar13 - 6 + iVar19 * 3) * 4),
+             piVar21 == nullptr)) {
+            piVar21 = nullptr;
+          }
+          else {
+            uStack_94 = (float)((uint32_t)uStack_94 & 0xffffff);
+          }
+          FUN_007b9070(this->movement->weaponPose2,piVar21);
+        }
+        else {
+          (pCVar2->nextAnimState).activity = 0x47;
+          (this->movement->nextAnimState).activityVariant = 0;
+          this->movement->unknownA44 = 3;
+        }
+        ((this->owner->m_body).work)->forced = true;
+        C_HumanWork::PlayWorkAnimation
+                  ((this->owner->m_body).work,(this->movement->nextAnimState).activity,false);
+        ((this->owner->m_body).work)->forced = false;
+        this_00 = (this->owner->m_body).equipment;
+LAB_00755fc0:
+        C_HumanEquipment::PutAwayHandsItem(this_00,true);
+      }
+    }
+    else {
+      (this->movement->nextAnimState).activity = 0x46;
+      (this->movement->nextAnimState).activityVariant = 0;
+      ((this->owner->m_body).work)->forced = true;
+      C_HumanWork::PlayWorkAnimation
+                ((this->owner->m_body).work,(this->movement->nextAnimState).activity,false);
+      ((this->owner->m_body).work)->forced = false;
+      C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,true);
+      this->movement->unknownA44 = 1;
+    }
+    this->movement->unknownA38 = -2000;
+    this->movement->stanceVolumeScale = 0.0;
+    C_HumanAnimPlayer::Update(this->animPlayer);
+    C_HumanAnimMixer::UpdateStages(&this->movement->mixer,2000,2000,false,nullptr);
+    iVar19 = this->movement->unknownA44;
+    if ((iVar19 == 2) || (iVar19 == 4)) {
+      pCVar14 = (this->owner->m_body).work;
+      uVar18 = pCVar14->blocked2 & 0xfffffbff;
+    }
+    else {
+      pCVar14 = (this->owner->m_body).work;
+      uVar18 = pCVar14->blocked2 | 0x400;
+    }
+    pCVar14->blocked2 = uVar18;
+    pCVar14 = (this->owner->m_body).work;
+    pCVar14->blocked2 = pCVar14->blocked2 | 0x800;
+    pCVar14 = (this->owner->m_body).work;
+    pCVar14->blocked2 = pCVar14->blocked2 | 8;
+    iVar19 = this->movement->unknownA44;
+    if ((iVar19 == 2) || (iVar19 == 4)) {
+      pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,3);
+      if (pIVar15 != nullptr) {
+        pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,3);
+        bVar8 = true;
+        goto LAB_007560d7;
+      }
+    }
+    else {
+      pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,3);
+      if (pIVar15 != nullptr) {
+        pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,3);
+        bVar8 = false;
+LAB_007560d7:
+        (*pIVar15->vtable->SetOn)(pIVar15,bVar8);
+      }
+    }
+    pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,1);
+    if (pIVar15 != nullptr) {
+      pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,1);
+      (*pIVar15->vtable->SetOn)(pIVar15,false);
+    }
+    pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,2);
+    if (pIVar15 != nullptr) {
+      pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,2);
+      (*pIVar15->vtable->SetOn)(pIVar15,false);
+    }
+    if ((this->movement->shadow != nullptr) && (uStack_94._3_1_ != '\0')) {
+      C_HumanVisual::RemoveShadow(&((this->owner->m_body).movement)->visual);
+    }
+    if (((uint8_t)g_gameRole & 2) != 0) {
+      pCVar16 = (C_Team *)field_address_1c_461410(0x89ae78);
+      pCVar17 = (C_Human *)C_Team::GetActivePlayer(pCVar16);
+      if (this->owner == pCVar17) {
+        iVar19 = field_address_1c_461410(0x89ae78);
+        FUN_0045dac0(iVar19);
+      }
+    }
+    this->movement->unknownA38 = -10000;
+    pCVar14 = (this->owner->m_body).work;
+    pCVar14->blocked2 = pCVar14->blocked2 & 0xffffbfff;
+    iVar19 = this->movement->unknownA44;
+    if ((2 < iVar19) && (iVar19 < 5)) {
+      pCVar14 = (this->owner->m_body).work;
+      pCVar14->blocked2 = pCVar14->blocked2 & 0xfffff7ff;
+    }
+    uVar18 = (*this->movement->vehicle->vtable->GetSeatFlags)(this->movement->seat);
+    if ((uVar18 & 0x10) != 0) {
+      pIVar15 = this->owner->m_frame;
+      (*pIVar15->vtable->SetOn)(pIVar15,false);
+    }
+    break;
+  case 3:
+  case 5:
+  case 7:
+  case 0xc:
+    if (pCVar2->vehicle == nullptr) {
+      pCVar2->unknownA38 = -10000;
+    }
+    else if (pCVar2->unknownA38 < 1) {
+      pCVar2->unknownA38 = 20000;
+    }
+    else if (10000 < pCVar2->unknownA38) {
+      if ((uVar18 & 0x400) != 0) {
+        bVar8 = (*pCVar2->vehicle->vtable->Unknown84)(pCVar2->seat);
+        if (!bVar8) {
+          pCVar14 = (this->owner->m_body).work;
+          pCVar14->blocked2 = pCVar14->blocked2 & 0xffffbfff;
+          this->movement->unknownA38 = -10000;
+          this->movement->unknownA34 = 0x402;
+          this->movement->unknown228 = 0;
+          return;
+        }
+        pIVar15 = this->movement->owner->m_frame;
+        pCVar9 = GetGame();
+        pIStack_68 = pCVar9->m_scene;
+        uStack_88 = pIStack_68->vtable;
+        (*pIVar15->vtable->FindChildFrame)(pIVar15,&DAT_0083939c,0xffff);
+        (*pIVar15->vtable->FindChildFrame)(pIVar15,&DAT_00839398,0xffff);
+        (*uStack_88->AddHumanModel)((S_vector4 *)pIStack_68);
+        pCVar2 = this->movement;
+        FUN_007ae190(pCVar2->weaponPose2,pCVar2->unknownA44,nullptr,pCVar2->seat);
+        this->movement->owner->m_vehicle = nullptr;
+        this->movement->owner->m_seat = -1;
+        this->locomotion->unknown0D8 = 0;
+        uVar18 = (*this->movement->vehicle->vtable->GetSeatFlags)(this->movement->seat);
+        if ((uVar18 & 0x10) != 0) {
+          pIVar15 = this->owner->m_frame;
+          (*pIVar15->vtable->SetOn)(pIVar15,true);
+        }
+        pCVar2 = this->movement;
+        (pCVar2->nextAnimState).anim.anim = 0x2d;
+        S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+        pCVar2 = this->movement;
+        (pCVar2->nextAnimState).anim.stance = (((this->owner->m_body).work)->request).stance;
+        S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+        (this->movement->nextAnimState).activity = 0x4c;
+        ((this->owner->m_body).work)->forced = true;
+        C_HumanWork::Play((this->owner->m_body).work,0x2d,false);
+        C_HumanWork::PlayWorkAnimation((this->owner->m_body).work,0x4c,false);
+        ((this->owner->m_body).work)->forced = false;
+        C_HumanAnimPlayer::Update(this->animPlayer);
+        pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,3);
+        if (pIVar15 != nullptr) {
+          pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,3);
+          (*pIVar15->vtable->SetOn)(pIVar15,true);
+        }
+        pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,1);
+        if (pIVar15 != nullptr) {
+          pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,1);
+          (*pIVar15->vtable->SetOn)(pIVar15,true);
+        }
+        pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,2);
+        if (pIVar15 != nullptr) {
+          pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,2);
+          (*pIVar15->vtable->SetOn)(pIVar15,true);
+        }
+        if ((this->movement->unknownA34 & 0x3ffU) != 5) {
+          C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,false);
+        }
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xfffffffe;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xfffffffd;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xffffffbf;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xfffff7ff;
+        C_HumanAnimMixer::ClearQueue(&this->movement->mixer,0);
+        pCVar4 = this->animPlayer;
+        pCVar4->animDelay = -10000;
+        pCVar4->animDelayState = 0;
+        pCVar4 = this->animPlayer;
+        pCVar4->carryDelay = -10000;
+        pCVar4->carryDelayState = 0;
+        pCVar4 = this->animPlayer;
+        pCVar4->activityDelay = -10000;
+        pCVar4->activityDelayState = 0;
+        this->movement->stanceVolumeScale = 0.8;
+        this->movement->hitVolumeScale[0] = 1.0;
+        this->movement->hitVolumeScale[1] = 1.0;
+        iVar19 = this->movement->unknownA44;
+        if ((iVar19 != 2) && (iVar19 != 4)) {
+          pCVar14 = (this->owner->m_body).work;
+          pCVar14->blocked2 = pCVar14->blocked2 & 0xfffffbff;
+        }
+        auStack_64._0_4_ = 0.0;
+        auStack_64._4_4_ = 0.0;
+        auStack_64._8_4_ = 0.0;
+        auStack_44._0_4_ = 0.0;
+        auStack_44._4_4_ = 0.0;
+        auStack_44._8_4_ = 0.0;
+        C_HumanWork::ApplyHit
+                  ((this->owner->m_body).work,0,(S_vector *)auStack_44,(S_vector *)auStack_64);
+        C_HumanAnimMixer::UpdateStages(&this->movement->mixer,2000,2000,false,nullptr);
+        pIVar15 = this->owner->m_frame;
+        if ((pIVar15->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar15);
+        }
+        pCVar17 = this->owner;
+        (pCVar17->m_position).x = (pIVar15->m_worldMatrix).m[3][0];
+        (pCVar17->m_position).y = (pIVar15->m_worldMatrix).m[3][1];
+        (pCVar17->m_position).z = (pIVar15->m_worldMatrix).m[3][2];
+        (pCVar17->m_position).w = (pIVar15->m_worldMatrix).m[3][3];
+        pCVar2 = (this->owner->m_body).movement;
+        pCVar17 = pCVar2->owner;
+        pCVar2->unknown228 = 0;
+        pIStack_b4 = (I3D_frame *)(pCVar17->m_position).x;
+        fStack_b0 = (pCVar17->m_position).y;
+        fStack_ac = (pCVar17->m_position).z;
+        fStack_a8 = (pCVar17->m_position).w;
+        C_HumanVisual::SetNetworkPosition(&pCVar2->visual,(float *)&pIStack_b4);
+        pCVar17 = pCVar2->owner;
+        pIStack_b4 = (I3D_frame *)(pCVar17->m_position).x;
+        fStack_b0 = (pCVar17->m_position).y;
+        fStack_ac = (pCVar17->m_position).z;
+        fStack_a8 = (pCVar17->m_position).w;
+        C_HumanVisual::SetNetworkPosition(&pCVar2->visual,(float *)&pIStack_b4);
+        pCVar17 = pCVar2->owner;
+        (pCVar2->visual).sectorTime = 10000;
+        (pCVar2->visual).lighting.sampleDue = true;
+        pIVar15 = pCVar17->m_frame;
+        pCVar9 = GetGame();
+        (*pCVar9->m_scene->vtable->Unknown144)(pCVar9->m_scene,pIVar15);
+        this->movement->unknownA44 = 0;
+        C_HumanLocomotion::Unknown770ff0(this->locomotion,'\0');
+        pCVar5 = this->locomotion;
+        pCVar5->unknown110 = 0;
+        pCVar5->unknown094 = 1000;
+        pCVar5->unknown098 = '\x01';
+        C_HumanMovement::UpdateModelNames((this->owner->m_body).movement);
+        C_HumanMovement::UpdateDummies(this->movement);
+        C_HumanMovement::UpdateHitSpheres(this->movement);
+        this->locomotion->unknown0FC = 100000.0;
+        pIVar15 = this->movement->shadow;
+        if (pIVar15 != nullptr) {
+          (*pIVar15->vtable->Update)(pIVar15);
+        }
+      }
+      if (((uint8_t)g_gameRole & 2) != 0) {
+        pCVar16 = (C_Team *)field_address_1c_461410(0x89ae78);
+        pCVar17 = (C_Human *)C_Team::GetActivePlayer(pCVar16);
+        if (this->owner == pCVar17) {
+          iVar19 = field_address_1c_461410(0x89ae78);
+          FUN_0045dac0(iVar19);
+        }
+      }
+      this->movement->unknownA38 = -10000;
+      this->movement->unknownA34 = 0;
+      this->movement->vehicle = nullptr;
+      this->movement->unknown228 = 0;
+      pCVar14 = (this->owner->m_body).work;
+      pCVar14->blocked2 = pCVar14->blocked2 & 0xffffbfff;
+      puVar1 = &((this->owner->m_body).work)->blocked2;
+      *puVar1 = *puVar1 & 0xfffffff7;
+    }
+    break;
+  case 8:
+    if (0 < pCVar2->unknownA38) {
+      pCVar2 = this->movement;
+      SStack_84.x = (float)pCVar2;
+      iVar19 = C_HumanMovement::GetAnimLength(pCVar2,0x1c,0,1);
+      if (((pCVar2->unknownA38 == iVar19) &&
+          (pIVar15 = (I3D_frame *)pCVar2->seat, pIVar15 != nullptr)) &&
+         ((*(int *)((int)SStack_84.x + 0xa34) & 0x400U) != 0)) {
+        SStack_84.x = (float)(*(C_Human **)((int)SStack_84.x + 600))->m_frame;
+        pCVar9 = GetGame();
+        (*pCVar9->m_scene->vtable->RemoveHumanModel)((S_vector4 *)pCVar9->m_scene);
+        if ((pIVar15->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar15);
+        }
+        pIStack_b4 = (I3D_frame *)(pIVar15->m_worldMatrix).m[2][0];
+        fStack_b0 = (pIVar15->m_worldMatrix).m[2][1];
+        fStack_ac = (pIVar15->m_worldMatrix).m[2][2];
+        fStack_58 = (pIVar15->m_worldMatrix).m[2][3];
+        fVar22 = fStack_ac * fStack_ac +
+                 fStack_b0 * fStack_b0 + (float)pIStack_b4 * (float)pIStack_b4;
+        if (1e-08 <= ABS(fVar22 - 1.0)) {
+          if (1e-08 <= fVar22) {
+            fVar22 = 1.0 / SQRT(fVar22);
+            pIStack_b4 = (I3D_frame *)((float)pIStack_b4 * fVar22);
+            fStack_b0 *= fVar22;
+            fStack_ac = fVar22 * fStack_ac;
+          }
+          else if ((float)pIStack_b4 == 0.0) {
+            if (fStack_ac == 0.0) {
+              if (0.0 <= fStack_b0) {
+                fStack_b0 = 1.0;
+              }
+              else {
+                fStack_b0 = -1.0;
+              }
+            }
+            else if (0.0 <= fStack_ac) {
+              fStack_ac = 1.0;
+            }
+            else {
+              fStack_ac = -1.0;
+            }
+          }
+          else if (0.0 <= (float)pIStack_b4) {
+            pIStack_b4 = (I3D_frame *)0x3f800000;
+          }
+          else {
+            pIStack_b4 = (I3D_frame *)0xbf800000;
+          }
+        }
+        auStack_64._0_4_ = pIStack_b4;
+        auStack_64._4_4_ = fStack_b0;
+        auStack_64._8_4_ = fStack_ac;
+        if ((pIVar15->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar15);
+        }
+        SStack_84.x = (pIVar15->m_worldMatrix).m[3][0];
+        SStack_84.z = (pIVar15->m_worldMatrix).m[3][2];
+        SStack_84.y = (pIVar15->m_worldMatrix).m[3][1] - 0.5;
+        piStack_78 = (int *)(pIVar15->m_worldMatrix).m[3][3];
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 | 0x800;
+        pCVar17 = this->owner;
+        (pCVar17->m_position).x = SStack_84.x;
+        (pCVar17->m_position).y = SStack_84.y;
+        (pCVar17->m_position).z = SStack_84.z;
+        (pCVar17->m_position).w = (float)piStack_78;
+        pCVar17 = this->owner;
+        (pCVar17->m_direction).x = (float)auStack_64._0_4_;
+        (pCVar17->m_direction).y = (float)auStack_64._4_4_;
+        (pCVar17->m_direction).z = (float)auStack_64._8_4_;
+        (pCVar17->m_direction).w = fStack_58;
+        pIVar6 = this->owner->m_frame;
+        (*pIVar6->vtable->SetPos)(pIVar6,&SStack_84);
+        pIVar6 = this->owner->m_frame;
+        (*pIVar6->vtable->SetDir)(pIVar6,(S_vector *)auStack_64,0.0);
+        pIVar6 = this->owner->m_frame;
+        (*pIVar6->vtable->LinkTo)(pIVar6,pIVar15,1);
+        pIVar15 = this->owner->m_frame;
+        (*pIVar15->vtable->Update)(pIVar15);
+        C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,true);
+      }
+      break;
+    }
+    pCVar2->unknownA38 = -10000;
+LAB_007567f6:
+    pCVar14 = (this->owner->m_body).work;
+    pCVar14->blocked2 = pCVar14->blocked2 & 0xffffbfff;
+    break;
+  case 9:
+  case 10:
+    if (pCVar2->unknownA38 < 1) {
+      pCVar14 = (this->owner->m_body).work;
+      pCVar14->blocked2 = pCVar14->blocked2 & 0xffffbfff;
+      pIStack_68 = (I3D_scene *)this->movement->seat;
+      pIVar15 = this->movement->owner->m_frame;
+      pIStack_b4 = pIVar15;
+      pCVar9 = GetGame();
+      SStack_84.x = (float)pCVar9->m_scene;
+      auStack_64._0_4_ = ((I3D_scene *)SStack_84.x)->vtable;
+      (*pIVar15->vtable->FindChildFrame)(pIVar15,&DAT_0083939c,0xffff);
+      (*pIVar15->vtable->FindChildFrame)(pIVar15,&DAT_00839398,0xffff);
+      (**(_func_77 **)(auStack_64._0_4_ + 0x138))((S_vector4 *)SStack_84.x);
+      if ((piStack_78 != nullptr) && ((this->movement->unknownA34 & 0x400U) != 0)) {
+        pIVar15 = (I3D_frame *)(**(code **)(*piStack_78 + 0x48))(piStack_78,&DAT_0084e878,0x10020);
+        if (pIVar15 == nullptr) {
+          pIVar15 = this->owner->m_frame;
+          if ((pIVar15->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar15);
+          }
+          fVar22 = (pIVar15->m_worldMatrix).m[2][0];
+          fVar7 = (pIVar15->m_worldMatrix).m[2][1];
+          pIStack_b4 = (I3D_frame *)(pIVar15->m_worldMatrix).m[2][2];
+          fStack_b0 = (pIVar15->m_worldMatrix).m[2][3];
+          fVar7 = fVar22 * fVar22 + (float)pIStack_b4 * (float)pIStack_b4 + fVar7 * fVar7;
+          if (1e-08 <= ABS(fVar7 - 1.0)) {
+            if (1e-08 <= fVar7) {
+              fVar22 = fVar22 * (1.0 / SQRT(fVar7));
+              pIStack_b4 = (I3D_frame *)((float)pIStack_b4 * (1.0 / SQRT(fVar7)));
+            }
+            else if (fVar22 == 0.0) {
+              if ((float)pIStack_b4 != 0.0) {
+                if (0.0 <= (float)pIStack_b4) {
+                  pIStack_b4 = (I3D_frame *)0x3f800000;
+                }
+                else {
+                  pIStack_b4 = (I3D_frame *)0xbf800000;
+                }
+              }
+            }
+            else if (0.0 <= fVar22) {
+              fVar22 = 1.0;
+            }
+            else {
+              fVar22 = -1.0;
+            }
+          }
+          fVar7 = (float)pIStack_b4 * (float)pIStack_b4 + fVar22 * fVar22;
+          if (1e-08 <= ABS(fVar7 - 1.0)) {
+            if (1e-08 <= fVar7) {
+              fVar7 = 1.0 / SQRT(fVar7);
+              fVar22 *= fVar7;
+              pIStack_b4 = (I3D_frame *)((float)pIStack_b4 * fVar7);
+            }
+            else if (fVar22 == 0.0) {
+              if ((float)pIStack_b4 == 0.0) {
+              }
+              else if (0.0 <= (float)pIStack_b4) {
+                pIStack_b4 = (I3D_frame *)0x3f800000;
+              }
+              else {
+                pIStack_b4 = (I3D_frame *)0xbf800000;
+              }
+            }
+            else if (0.0 <= fVar22) {
+              fVar22 = 1.0;
+            }
+            else {
+              fVar22 = -1.0;
+            }
+          }
+          pIVar15 = this->owner->m_frame;
+          if ((pIVar15->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar15);
+          }
+          auStack_44._8_4_ = fVar22 * 0.4;
+          fStack_9c = (pIVar15->m_worldMatrix).m[3][0];
+          fStack_98 = (pIVar15->m_worldMatrix).m[3][1];
+          uStack_94 = (pIVar15->m_worldMatrix).m[3][2];
+          fStack_90 = (pIVar15->m_worldMatrix).m[3][3];
+          fStack_34 = (float)pIStack_b4 * 0.4;
+          lVar20 = __ftol();
+          C_HumanAnimMixer::AddMove2
+                    (&this->movement->mixer,(S_vector4 *)(auStack_44 + 8),(int)lVar20);
+          pIVar15 = this->owner->m_frame;
+          pCVar9 = GetGame();
+          (*pCVar9->m_scene->vtable->Unknown144)(pCVar9->m_scene,pIVar15);
+          pCVar17 = this->owner;
+          (pCVar17->m_position).x = fStack_a4;
+          (pCVar17->m_position).y = fStack_a0;
+          (pCVar17->m_position).z = fStack_9c;
+          (pCVar17->m_position).w = fStack_98;
+        }
+        else {
+          if ((pIVar15->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar15);
+          }
+          fStack_9c = (pIVar15->m_worldMatrix).m[3][0];
+          fStack_98 = (pIVar15->m_worldMatrix).m[3][1];
+          uStack_94 = (pIVar15->m_worldMatrix).m[3][2];
+          fStack_90 = (pIVar15->m_worldMatrix).m[3][3];
+          if ((pIVar15->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar15);
+          }
+          SStack_84.z = (pIVar15->m_worldMatrix).m[2][0];
+          piStack_78 = (int *)(pIVar15->m_worldMatrix).m[2][1];
+          fStack_74 = (pIVar15->m_worldMatrix).m[2][2];
+          fStack_70 = (pIVar15->m_worldMatrix).m[2][3];
+          fVar22 = fStack_74 * fStack_74 +
+                   SStack_84.z * SStack_84.z + (float)piStack_78 * (float)piStack_78;
+          if (1e-08 <= ABS(fVar22 - 1.0)) {
+            if (1e-08 <= fVar22) {
+              fVar22 = 1.0 / SQRT(fVar22);
+              SStack_84.z = SStack_84.z * fVar22;
+              piStack_78 = (int *)((float)piStack_78 * fVar22);
+              fStack_74 = fVar22 * fStack_74;
+            }
+            else if (SStack_84.z == 0.0) {
+              if (fStack_74 == 0.0) {
+                if (0.0 <= (float)piStack_78) {
+                  piStack_78 = (int *)0x3f800000;
+                }
+                else {
+                  piStack_78 = (int *)0xbf800000;
+                }
+              }
+              else if (0.0 <= fStack_74) {
+                fStack_74 = 1.0;
+              }
+              else {
+                fStack_74 = -1.0;
+              }
+            }
+            else if (0.0 <= SStack_84.z) {
+              SStack_84.z = 1.0;
+            }
+            else {
+              SStack_84.z = -1.0;
+            }
+          }
+          pIVar15 = this->owner->m_frame;
+          if ((pIVar15->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar15);
+          }
+          fVar22 = (pIVar15->m_worldMatrix).m[2][0];
+          fVar7 = (pIVar15->m_worldMatrix).m[2][1];
+          pIStack_b4 = (I3D_frame *)(pIVar15->m_worldMatrix).m[2][2];
+          fStack_b0 = (pIVar15->m_worldMatrix).m[2][3];
+          pIVar15 = this->owner->m_frame;
+          SStack_84.x = ABS((fVar22 * fVar22 + (float)pIStack_b4 * (float)pIStack_b4 + fVar7 * fVar7
+                            ) - 1.0);
+          if ((pIVar15->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar15);
+          }
+          fVar22 = (pIVar15->m_worldMatrix).m[3][0];
+          fVar7 = (pIVar15->m_worldMatrix).m[3][1];
+          auStack_64._8_4_ = fStack_9c - fVar22;
+          pIStack_b4 = (I3D_frame *)(pIVar15->m_worldMatrix).m[3][2];
+          fStack_b0 = (pIVar15->m_worldMatrix).m[3][3];
+          fStack_58 = fStack_98 - fVar7;
+          fStack_54 = uStack_94 - (float)pIStack_b4;
+          lVar20 = __ftol();
+          C_HumanAnimMixer::AddMove2
+                    (&this->movement->mixer,(S_vector4 *)(auStack_64 + 8),(int)lVar20);
+          SStack_84.x = (float)this->owner->m_frame;
+          pCVar9 = GetGame();
+          (*pCVar9->m_scene->vtable->Unknown144)(pCVar9->m_scene,SStack_84.x);
+          pCVar17 = this->owner;
+          (pCVar17->m_position).x = fVar22;
+          (pCVar17->m_position).y = unaff_EDI;
+          (pCVar17->m_position).z = fVar22;
+          (pCVar17->m_position).w = fVar7;
+          this->movement->unknown228 = -2000;
+        }
+        C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,false);
+        this->movement->unknownA44 = 0;
+        C_HumanMovement::UpdateModelNames((this->owner->m_body).movement);
+        this->locomotion->unknown0FC = 100000.0;
+        C_HumanMovement::UpdateDummies(this->movement);
+        C_HumanMovement::UpdateHitSpheres(this->movement);
+        pIVar15 = this->movement->shadow;
+        if (pIVar15 != nullptr) {
+          (*pIVar15->vtable->Update)(pIVar15);
+        }
+      }
+      pCVar14 = (this->owner->m_body).work;
+      pCVar14->blocked2 = pCVar14->blocked2 & 0xfffff7ff;
+      this->movement->unknownA38 = -10000;
+      this->movement->unknownA34 = 0;
+      this->movement->vehicle = nullptr;
+      this->movement->unknown228 = 0;
+    }
+  }
+  iVar19 = this->movement->unknownA38;
+  if (iVar19 != -10000) {
+    this->movement->unknownA38 = iVar19 - param_1;
+  }
+}
+
+// 0x00750ba0
+void FUN_00750ba0(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x00750bd0
+void FUN_00750bd0(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x00750c00
+uint32_t __thiscall C_HumanIdle::Unknown750c00(C_HumanIdle *this,int param_1)
+{
+  pCVar3 = this->movement;
+  iVar7 = (pCVar3->animState).anim.anim;
+  if ((((iVar7 < 0x29) || (0x41 < iVar7)) || (this->owner->m_role != 1)) ||
+     (((iVar7 = (pCVar3->nextAnimState).anim.anim, iVar7 < 0x29 || (0x41 < iVar7)) &&
+      (iVar7 != 0xce)))) {
+    this->unknown14 = -10000;
+    this->unknown010 = 0;
+    pCVar12 = (pCVar3->owner->m_body).work;
+    if (((pCVar12->mode == 5) &&
+        ((pCVar12 = (C_HumanWork *)(pCVar3->animState).anim.anim, pCVar12 == (C_HumanWork *)0x5b ||
+         (pCVar12 == (C_HumanWork *)0x5d)))) &&
+       ((pCVar12 = (C_HumanWork *)(pCVar3->nextAnimState).anim.anim, pCVar12 == (C_HumanWork *)0x5b
+        || (pCVar12 == (C_HumanWork *)0x5d)))) {
+      if (0.2 <= this->locomotion->unknown10C) {
+        pCVar3->unknown234 = (int)((float)param_1 * 0.00083333335 + (float)pCVar3->unknown234);
+      }
+      else {
+        if ((float)pCVar3->unknown234 == 0.0) {
+          pCVar3->unknown234 = 0x40490fdb;
+        }
+        this->movement->unknown234 =
+             (int)((float)param_1 * 0.00125 + (float)this->movement->unknown234);
+      }
+      pCVar3 = this->movement;
+      uVar5 = (uint16_t)((float)pCVar3->unknown234 < 6.2831855);
+      uVar6 = (uint16_t)((float)pCVar3->unknown234 == 6.2831855);
+      pCVar12 = (C_HumanWork *)(uint32_t)(uint16_t)(uVar5 << 8 | uVar6 << 0xe);
+      if (uVar5 == 0 && uVar6 == 0) {
+        pCVar3->unknown234 = (int)((float)pCVar3->unknown234 - 6.2831855);
+      }
+    }
+    else {
+      pCVar3->unknown234 = 0;
+    }
+  }
+  else {
+    if (this->unknown010 == 0) {
+      iVar7 = _rand();
+      this->unknown14 = iVar7 % 25000 + 0x3c8c;
+    }
+    iVar7 = this->unknown010 + param_1;
+    this->unknown010 = iVar7;
+    if (100000000 < iVar7) {
+      this->unknown010 = 1;
+    }
+    pCVar12 = (C_HumanWork *)(this->unknown14 - param_1);
+    this->unknown14 = (int)pCVar12;
+    if (((int)pCVar12 < 1) &&
+       ((pCVar12 = (this->owner->m_body).work, (pCVar12->request).unknown5C == 0 ||
+        ((pCVar12->request).carryMode == 0)))) {
+      iVar7 = _rand();
+      this->unknown14 = iVar7 % 10000 + 0x3c8c;
+      iVar7 = (this->movement->animState).anim.stance;
+      if (iVar7 == 0) {
+        iVar7 = _rand();
+        iVar7 = iVar7 % 7 + 0x2f;
+      }
+      else {
+        if (iVar7 != 1) {
+          pCVar12 = (C_HumanWork *)(iVar7 - 2);
+          if (pCVar12 == nullptr) {
+            this_01 = &this->movement->nextAnimState;
+            (this_01->anim).anim = 0x41;
+            S_HumanAnimRef::Normalize(&this_01->anim);
+            pCVar12 = extraout_EAX;
+          }
+          goto LAB_00750e18;
+        }
+        iVar7 = _rand();
+        iVar7 = iVar7 % 5 + 0x39;
+      }
+      pCVar3 = this->movement;
+      (pCVar3->nextAnimState).anim.anim = iVar7;
+      S_HumanAnimRef::Normalize(&(pCVar3->nextAnimState).anim);
+      pCVar12 = extraout_EAX_00;
+    }
+  }
+LAB_00750e18:
+  pIVar13 = (I3D_scene *)CONCAT31((int3)((uint32_t)pCVar12 >> 8),g_coldMission);
+  if (g_coldMission != false) {
+    fVar1 = this->locomotion->waterSurface;
+    pIVar13 = (I3D_scene *)
+              CONCAT22((short)((uint32_t)this->locomotion >> 0x10),
+                       (uint16_t)(fVar1 < -10000.1) << 8 | (uint16_t)NAN(fVar1) << 10 |
+                       (uint16_t)(fVar1 == -10000.1) << 0xe);
+    if (((fVar1 == -10000.1) && ((this->movement->flags & 0x20) != 0)) &&
+       (bVar2 = this->owner->m_fadedOut,
+       pIVar13 = (I3D_scene *)CONCAT31((int3)((uint32_t)pIVar13 >> 8),bVar2), bVar2 == false)) {
+      pCVar8 = GetGame();
+      uVar9 = C_game::IsHudShown(pCVar8);
+      if ((char)uVar9 != '\0') {
+        this_00 = (C_Team *)field_address_1c_461410(0x89ae78);
+        pCVar10 = (C_Human *)C_Team::GetActivePlayer(this_00);
+        if (pCVar10 == this->owner) {
+          return (uint32_t)pCVar10;
+        }
+      }
+      pIVar13 = (I3D_scene *)(this->idleTime - param_1);
+      this->idleTime = (int)pIVar13;
+      if ((int)pIVar13 < 1) {
+        if ((this->movement->animState).anim.anim < 0xbe) {
+          iVar7 = _rand();
+          this->idleTime = iVar7 % 0x5dc + 0xdac;
+          pIVar4 = this->owner->m_frame;
+          pCVar8 = GetGame();
+          pIVar13 = pCVar8->m_scene;
+          if ((I3D_sector *)pIVar4->m_parent == pIVar13->m_primarySector) {
+            pIVar4 = this->movement->joints[4].frame;
+            if ((pIVar4->m_frameFlags & 0x20) == 0) {
+              I3D_frame::UpdateWMatrixProc(pIVar4);
+            }
+            local_30.x = (pIVar4->m_worldMatrix).m[3][0];
+            local_30.y = (pIVar4->m_worldMatrix).m[3][1];
+            local_30.z = (pIVar4->m_worldMatrix).m[3][2];
+            local_24 = (pIVar4->m_worldMatrix).m[3][3];
+            pIVar4 = this->movement->joints[4].frame;
+            if ((pIVar4->m_frameFlags & 0x20) == 0) {
+              I3D_frame::UpdateWMatrixProc(pIVar4);
+            }
+            local_40 = (pIVar4->m_worldMatrix).m[2][0];
+            local_3c = (pIVar4->m_worldMatrix).m[2][1];
+            local_38 = (pIVar4->m_worldMatrix).m[2][2];
+            local_14 = (pIVar4->m_worldMatrix).m[2][3];
+            fVar1 = local_40 * local_40 + local_38 * local_38 + local_3c * local_3c;
+            if (1e-08 <= ABS(fVar1 - 1.0)) {
+              if (1e-08 <= fVar1) {
+                fVar1 = 1.0 / SQRT(fVar1);
+                local_40 *= fVar1;
+                local_3c *= fVar1;
+                local_38 *= fVar1;
+              }
+              else if (local_40 == 0.0) {
+                if (local_38 == 0.0) {
+                  if (0.0 <= local_3c) {
+                    local_3c = 1.0;
+                  }
+                  else {
+                    local_3c = -1.0;
+                  }
+                }
+                else if (0.0 <= local_38) {
+                  local_38 = 1.0;
+                }
+                else {
+                  local_38 = -1.0;
+                }
+              }
+              else if (0.0 <= local_40) {
+                local_40 = 1.0;
+              }
+              else {
+                local_40 = -1.0;
+              }
+            }
+            local_20.x = local_40;
+            local_30.x = local_40 * 0.15 + local_30.x;
+            local_20.y = local_3c;
+            local_30.y = local_30.y + local_3c * 0.15;
+            local_20.z = local_38;
+            local_30.z = local_30.z + local_38 * 0.15;
+            pIVar13 = (I3D_scene *)
+                      C_ParticlesModule::CreateAt
+                                (&g_particlesModule,0x11,&local_30,&local_20,nullptr,true,
+                                 true);
+          }
+        }
+        else {
+          switch((((this->owner->m_body).work)->request).gait) {
+          case 0:
+            iVar7 = _rand();
+            iVar7 = iVar7 % 0x2ee + 0xdac;
+            break;
+          case 1:
+          case 2:
+            iVar7 = _rand();
+            this->idleTime = iVar7 % 0xfa + 0x640;
+            return iVar7 / 0xfa;
+          default:
+            iVar7 = _rand();
+            iVar7 = iVar7 % 0x2ee + 0xc80;
+            break;
+          case 5:
+            iVar7 = _rand();
+            this->idleTime = iVar7 % 0xfa + 0x514;
+            return iVar7 / 0xfa;
+          }
+          this->idleTime = iVar7;
+          pIVar4 = this->owner->m_frame;
+          pCVar8 = GetGame();
+          pIVar13 = pCVar8->m_scene;
+          if ((I3D_sector *)pIVar4->m_parent == pIVar13->m_primarySector) {
+            pIVar4 = this->movement->joints[4].frame;
+            if ((pIVar4->m_frameFlags & 0x20) == 0) {
+              I3D_frame::UpdateWMatrixProc(pIVar4);
+            }
+            local_30.x = (pIVar4->m_worldMatrix).m[3][0];
+            local_30.y = (pIVar4->m_worldMatrix).m[3][1];
+            local_30.z = (pIVar4->m_worldMatrix).m[3][2];
+            local_24 = (pIVar4->m_worldMatrix).m[3][3];
+            pIVar4 = this->movement->joints[4].frame;
+            if ((pIVar4->m_frameFlags & 0x20) == 0) {
+              I3D_frame::UpdateWMatrixProc(pIVar4);
+            }
+            local_40 = (pIVar4->m_worldMatrix).m[2][0];
+            local_3c = (pIVar4->m_worldMatrix).m[2][1];
+            local_38 = (pIVar4->m_worldMatrix).m[2][2];
+            local_14 = (pIVar4->m_worldMatrix).m[2][3];
+            fVar1 = local_40 * local_40 + local_38 * local_38 + local_3c * local_3c;
+            if (1e-08 <= ABS(fVar1 - 1.0)) {
+              if (1e-08 <= fVar1) {
+                fVar1 = 1.0 / SQRT(fVar1);
+                local_40 *= fVar1;
+                local_3c *= fVar1;
+                local_38 *= fVar1;
+              }
+              else if (local_40 == 0.0) {
+                if (local_38 == 0.0) {
+                  if (0.0 <= local_3c) {
+                    local_3c = 1.0;
+                  }
+                  else {
+                    local_3c = -1.0;
+                  }
+                }
+                else if (0.0 <= local_38) {
+                  local_38 = 1.0;
+                }
+                else {
+                  local_38 = -1.0;
+                }
+              }
+              else if (0.0 <= local_40) {
+                local_40 = 1.0;
+              }
+              else {
+                local_40 = -1.0;
+              }
+            }
+            local_20.x = local_40;
+            local_30.x = local_40 * 0.15 + local_30.x;
+            local_20.y = local_3c;
+            local_20.z = local_38;
+            local_30.y = local_30.y + local_3c * 0.15;
+            local_30.z = local_30.z + local_38 * 0.15;
+            uVar11 = C_ParticlesModule::CreateAt
+                               (&g_particlesModule,0x4c,&local_30,&local_20,
+                                this->movement->joints[4].frame,true,true);
+            return uVar11;
+          }
+        }
+      }
+    }
+  }
+  return (uint32_t)pIVar13;
+}
+
+// 0x007513c0
+void FUN_007513c0(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x007513f0
+uint32_t __thiscall C_HumanIdle::SaveGame(C_HumanIdle *this,char *param_1)
+{
+  this_00 = param_1;
+  if (*param_1 != '\0') {
+    local_8 = 0x6f;
+    iVar1 = dtaSeek(*(int *)(param_1 + 4),0,1);
+    *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) = iVar1;
+    *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+    in_EAX = dtaWrite(*(int *)(this_00 + 4),&local_8,6);
+    if (in_EAX == 6) {
+      param_1 = (char *)this->unknown010;
+      if (*this_00 != '\0') {
+        local_8 = 7;
+        iVar1 = dtaSeek(*(int *)(this_00 + 4),0,1);
+        *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) = iVar1;
+        *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+        dtaWrite(*(int *)(this_00 + 4),&local_8,6);
+        if ((*this_00 != '\0') && (this_00[8] != '\0')) {
+          dtaWrite(*(int *)(this_00 + 4),&param_1,4);
+        }
+      }
+      C_chunk::Ascend((C_chunk *)this_00);
+      param_1 = (char *)this->unknown14;
+      if (*this_00 != '\0') {
+        local_8 = 8;
+        iVar1 = dtaSeek(*(int *)(this_00 + 4),0,1);
+        *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) = iVar1;
+        *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+        dtaWrite(*(int *)(this_00 + 4),&local_8,6);
+        if ((*this_00 != '\0') && (this_00[8] != '\0')) {
+          dtaWrite(*(int *)(this_00 + 4),&param_1,4);
+        }
+      }
+      C_chunk::Ascend((C_chunk *)this_00);
+      iVar1 = (uint32_t)extraout_var << 8;
+      if (*this_00 != '\0') {
+        if (this_00[8] == '\0') {
+          iVar1 = *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+        }
+        else {
+          iVar1 = dtaSeek(*(int *)(this_00 + 4),0,1);
+          param_1 = (char *)(iVar1 - *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc));
+          dtaSeek(*(int *)(this_00 + 4),*(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc) + 2,
+                  0);
+          dtaWrite(*(int *)(this_00 + 4),&param_1,4);
+        }
+        dtaSeek(*(int *)(this_00 + 4),iVar1,0);
+        iVar1 = *(int *)(this_00 + 0x410);
+        if (iVar1 != 0) {
+          iVar1--;
+          *(int *)(this_00 + 0x410) = iVar1;
+        }
+      }
+      return CONCAT31((int3)((uint32_t)iVar1 >> 8),1);
+    }
+  }
+  return in_EAX & 0xffffff00;
+}
+
+// 0x007515c0
+uint32_t __thiscall C_HumanIdle::Unknown7515c0(C_HumanIdle *this,char *param_1)
+{
+  C_fstr_Construct(&local_28,&DAT_00867a90);
+  this_00 = param_1;
+  if ((*param_1 != '\0') && (iVar1 = dtaRead(*(int *)(param_1 + 4),&local_1c,6), iVar1 == 6)) {
+    iVar1 = dtaSeek(*(int *)(this_00 + 4),0,1);
+    *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) =
+         iVar1 - 6 + CONCAT22(uStack_18,local_1c._2_2_);
+    iVar1 = *(int *)(this_00 + 0x410);
+    *(int *)(this_00 + 0x410) = iVar1 + 1;
+    sVar3 = (short)local_1c;
+    if ((short)local_1c == 0x6f) {
+      while ((*this_00 != '\0' && (*(int *)(this_00 + 0x410) != 0))) {
+        iVar1 = dtaSeek(*(int *)(this_00 + 4),0,1);
+        if ((iVar1 == -1) ||
+           (local_1c = *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc) - iVar1,
+           local_1c == 0)) break;
+        if (*this_00 != '\0') {
+          iVar1 = dtaRead(*(int *)(this_00 + 4),&sStack_14,6);
+          if (iVar1 == 6) {
+            iVar1 = dtaSeek(*(int *)(this_00 + 4),0,1);
+            *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0x10) =
+                 iVar1 - 6 + CONCAT22(uStack_10,uStack_12);
+            *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) + 1;
+            sVar3 = sStack_14;
+          }
+        }
+        if (sVar3 == 7) {
+          C_chunk::Read((C_chunk *)this_00,&iStack_20,4);
+          C_chunk::Ascend((C_chunk *)this_00);
+          this->unknown010 = iStack_20;
+        }
+        else if (sVar3 == 8) {
+          C_chunk::Read((C_chunk *)this_00,&iStack_24,4);
+          C_chunk::Ascend((C_chunk *)this_00);
+          this->unknown14 = iStack_24;
+        }
+        else {
+          if (*this_00 == '\0') break;
+          iVar1 = *(int *)(this_00 + 4);
+          if (this_00[8] == '\0') {
+            iVar2 = *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc);
+          }
+          else {
+            iVar2 = dtaSeek(iVar1,0,1);
+            param_1 = (char *)(iVar2 - *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc));
+            dtaSeek(*(int *)(this_00 + 4),
+                    *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc) + 2,0);
+            dtaWrite(*(int *)(this_00 + 4),&param_1,4);
+            iVar1 = *(int *)(this_00 + 4);
+          }
+          dtaSeek(iVar1,iVar2,0);
+          if (*(int *)(this_00 + 0x410) != 0) {
+            *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) - 1;
+          }
+        }
+      }
+      C_chunk::Ascend((C_chunk *)this_00);
+      if ((local_28.rep != nullptr) &&
+         ((local_28.rep)->refCount = (local_28.rep)->refCount - 1, (local_28.rep)->refCount == 0))
+      {
+        operator_delete(local_28.rep);
+        local_28.rep = extraout_EAX_00;
+      }
+      return CONCAT31((int3)((uint32_t)local_28.rep >> 8),1);
+    }
+    if (*this_00 != '\0') {
+      if (this_00[8] == '\0') {
+        iVar2 = *(int *)(this_00 + (iVar1 + 1) * 4 + 0xc);
+        iVar1 = *(int *)(this_00 + 4);
+      }
+      else {
+        iVar2 = dtaSeek(*(int *)(this_00 + 4),0,1);
+        param_1 = (char *)(iVar2 - *(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc));
+        dtaSeek(*(int *)(this_00 + 4),*(int *)(this_00 + *(int *)(this_00 + 0x410) * 4 + 0xc) + 2,0)
+        ;
+        dtaWrite(*(int *)(this_00 + 4),&param_1,4);
+        iVar1 = *(int *)(this_00 + 4);
+      }
+      dtaSeek(iVar1,iVar2,0);
+      if (*(int *)(this_00 + 0x410) != 0) {
+        *(int *)(this_00 + 0x410) = *(int *)(this_00 + 0x410) - 1;
+      }
+    }
+  }
+  if ((local_28.rep != nullptr) &&
+     ((local_28.rep)->refCount = (local_28.rep)->refCount - 1, (local_28.rep)->refCount == 0)) {
+    operator_delete(local_28.rep);
+    local_28.rep = extraout_EAX;
+  }
+  return (uint32_t)local_28.rep & 0xffffff00;
+}
+
+// 0x007518a0
+int __thiscall C_HumanIdle::Reset(C_HumanIdle *this)
+{
+  this->unknown010 = 0;
+  this->unknown14 = -10000;
+  iVar1 = _rand();
+  this->idleTime = iVar1 % 8000 + 5000;
+  return iVar1 / 8000;
+}
+
+// 0x007518b0
+void FUN_007518b0(void)
+{
+  if ((DAT_0098c1c0 & 1) == 0) {
+    DAT_0098c1c0 |= 1;
+  }
+  atexit(&LAB_00405c90);
+}
+
+// 0x007518e0
+void __thiscall C_HumanIdle::PlayGesture(C_HumanIdle *this,int *gesture,uint32_t flags,int arg)
+{
+  local_3f4 = -NAN;
+  OutputDebugStringA("Akce!!!!!!!!!!!!!!!!!!!!!\n");
+  local_3dc = (I3D_scene_vtbl *)(flags & 0x3ff);
+  switch(local_3dc) {
+  case (I3D_scene_vtbl *)0x1:
+    this->movement->unknownA44 = 0;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x4000;
+    this->movement->seat = arg;
+    this->movement->unknownA38 = -10000;
+    this->movement->unknownA34 = flags;
+    this->movement->vehicle = (C_Actor *)gesture;
+    this->movement->unknownA38 = 0;
+    pCVar3 = this->owner;
+    local_270 = (pCVar3->m_position).x;
+    local_26c = (pCVar3->m_position).y;
+    local_268 = (pCVar3->m_position).z;
+    local_264 = (pCVar3->m_position).w;
+    iVar23 = FUN_00602320(gesture,&local_270);
+    if ((iVar23 == 2) || (pCVar11 = this->movement, pCVar11->useState != -10000)) {
+      if ((g_gameRole & 1) != 0) {
+        iVar23 = this->owner->m_role;
+        this_00 = (C_Door *)this->movement->vehicle;
+        uVar24 = (undefined3)((uint32_t)iVar23 >> 8);
+        if (this->movement->seat == 0) {
+          C_Door::SetState(this_00,3,1,'\0',CONCAT31(uVar24,iVar23 != 1));
+          return;
+        }
+        C_Door::SetState(this_00,2,1,'\0',CONCAT31(uVar24,iVar23 != 1));
+        return;
+      }
+    }
+    else if (arg == 0) {
+      if (iVar23 == 0) {
+        (pCVar11->nextAnimState).anim.anim = 2;
+        S_HumanAnimRef::Normalize(&(pCVar11->nextAnimState).anim);
+        iVar23 = 2;
+        goto LAB_00751a34;
+      }
+      if (iVar23 == 1) {
+        (pCVar11->nextAnimState).anim.anim = 3;
+        S_HumanAnimRef::Normalize(&(pCVar11->nextAnimState).anim);
+        iVar23 = 3;
+        goto LAB_00751a6f;
+      }
+    }
+    else {
+      if (iVar23 == 0) {
+        (pCVar11->nextAnimState).anim.anim = 0;
+        S_HumanAnimRef::Normalize(&(pCVar11->nextAnimState).anim);
+        iVar23 = 0;
+LAB_00751a34:
+        iVar23 = C_HumanMovement::GetAnimLength(this->movement,iVar23,0,1);
+        this->movement->unknownA38 = iVar23;
+        return;
+      }
+      if (iVar23 == 1) {
+        (pCVar11->nextAnimState).anim.anim = 1;
+        S_HumanAnimRef::Normalize(&(pCVar11->nextAnimState).anim);
+        iVar23 = 1;
+LAB_00751a6f:
+        iVar23 = C_HumanMovement::GetAnimLength(this->movement,iVar23,0,1);
+        this->movement->unknownA38 = iVar23;
+        return;
+      }
+    }
+    break;
+  case (I3D_scene_vtbl *)0x2:
+  case (I3D_scene_vtbl *)0x4:
+  case (I3D_scene_vtbl *)0x6:
+  case (I3D_scene_vtbl *)0xb:
+  case (I3D_scene_vtbl *)0xd:
+    if (((this->movement->owner->m_body).work)->mode == 5) {
+      C_HumanLocomotion::Unknown76b2d0(this->locomotion,'\0');
+    }
+    uVar16 = C_Human::GetMoveMode(this->owner);
+    uVar16 &= 0xffffff07;
+    C_Human::ControllerUnknownD0(this->owner);
+    uVar6 = this->movement->unknownA34 & 0x3ff;
+    if (((uVar6 == 2) || (uVar6 == 4)) || ((uVar6 == 0xb || (uVar6 == 0xd)))) {
+      (**(code **)(*gesture + 0x80))(this->movement->seat,uVar16);
+      pIVar13 = this->movement->owner->m_frame;
+      pIStack_3fc = pIVar13;
+      pCVar8 = GetGame();
+      local_3e4 = pCVar8->m_scene;
+      pIStack_3e0 = local_3e4->vtable;
+      (*pIVar13->vtable->FindChildFrame)(pIVar13,&DAT_0083939c,0xffff);
+      (*pIVar13->vtable->FindChildFrame)(pIVar13,&DAT_00839398,0xffff);
+      (*pIStack_3e0->AddHumanModel)((I3D_frame *)local_3e4);
+      fStack_3f8 = (float)this->movement->seat;
+      this->movement->unknownA38 = -1;
+    }
+    else {
+      bVar5 = C_Human::IsLocalPlayer(this->owner);
+      if ((bVar5) && (((uint8_t)g_gameRole & 7) == 7)) {
+        this->movement->unknownA38 = 500;
+      }
+      else {
+        this->movement->unknownA38 = 5;
+      }
+    }
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x4000;
+    this->movement->seat = arg;
+    iVar23 = (**(code **)(*gesture + 0x8c))(this->movement->seat);
+    this->movement->unknownA44 = iVar23;
+    this->movement->unknownA34 = flags;
+    this->movement->vehicle = (C_Actor *)gesture;
+    this->movement->unknownA48 = (((this->owner->m_body).work)->request).stance;
+    C_HumanAnimMixer::ClearQueue(&this->movement->mixer,0);
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 1;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 2;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 8;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x40;
+    pCVar2 = this->animPlayer;
+    pCVar2->animDelay = -10000;
+    pCVar2->animDelayState = 0;
+    pCVar2 = this->animPlayer;
+    pCVar2->carryDelay = -10000;
+    pCVar2->carryDelayState = 0;
+    pCVar2 = this->animPlayer;
+    pCVar2->activityDelay = -10000;
+    pCVar2->activityDelayState = 0;
+    pCVar7 = (*this->movement->vehicle->vtable->GetSeatOccupant)(this->movement->seat);
+    if ((pCVar7 != nullptr) &&
+       (pCVar7 = (*this->movement->vehicle->vtable->GetSeatOccupant)(this->movement->seat),
+       pCVar7->m_type == ACTOR_HUMAN)) {
+      pIStack_3e0 = (I3D_scene_vtbl *)
+                    (*this->movement->vehicle->vtable->GetSeatOccupant)(this->movement->seat);
+      local_3e4 = (I3D_scene *)pIStack_3e0->Tick;
+      if ((*(uint32_t *)(local_3e4->_pad_0004 + 0xdc) & 0x20) == 0) {
+        I3D_frame::UpdateWMatrixProc((I3D_frame *)local_3e4);
+      }
+      fStack_3f8 = (*(float *)(local_3e4->_pad_0004 + 0x6c))[0];
+      local_3f4 = *(float *)(local_3e4->_pad_0004 + 0x70);
+      local_3f0.x = *(float *)(local_3e4->_pad_0004 + 0x74);
+      local_3f0.y = *(float *)(local_3e4->_pad_0004 + 0x78);
+      if ((int)pIStack_3e0->UpdateFrameSector < 1) {
+        (*this->movement->vehicle->vtable->LeaveSeat)(this->movement->seat);
+        pIVar13 = (I3D_frame *)pIStack_3e0->Tick;
+        local_3e4 = (I3D_scene *)this->movement->owner->m_frame;
+        pIStack_3fc = pIVar13;
+        pCVar8 = GetGame();
+        local_314 = pCVar8->m_scene;
+        local_3dc = local_314->vtable;
+        pIVar9 = (*pIVar13->vtable->FindChildFrame)(pIVar13,&DAT_0083939c,0xffff);
+        uVar28 = (**(code **)(*(int *)local_3f0.x + 0x48))(local_3f0.x,&DAT_00839398,0xffff,pIVar9);
+        (**(code **)((int)local_3f4 + 0x138))(local_32c,pIVar13,uVar28);
+        *(uint32_t *)((int)local_410.z + 0x160) = 0;
+        *(uint32_t *)((int)local_410.z + 0x164) = 0xffffffff;
+        C_HumanMovement::SetPosition
+                  (*(C_HumanMovement **)((int)local_410.z + 0xa0),(uint32_t *)&stack0xfffffbe0);
+        pIVar13 = this->owner->m_frame;
+        pCVar8 = GetGame();
+        (*pCVar8->m_scene->vtable->Unknown144)(pCVar8->m_scene,pIVar13);
+      }
+      else {
+        pIVar13 = pIStack_3fc;
+        if ((int)pIStack_3fc < 0) {
+          flags = CONCAT31((uint3)(flags >> 8) & 0xfffffc,3);
+          pIVar13 = (I3D_frame *)this->movement->seat;
+        }
+        PlayGesture((C_HumanIdle *)((int)pIStack_3e0->SlotA0 + 0xcb0),gesture,flags,(int)pIVar13);
+      }
+    }
+    bVar5 = C_Human::IsLocalPlayer(this->owner);
+    if ((!bVar5) || (((uint8_t)g_gameRole & 7) != 7)) {
+      this->movement->unknownA38 = 0;
+      Unknown755960(this,100);
+      return;
+    }
+    break;
+  case (I3D_scene_vtbl *)0x3:
+  case (I3D_scene_vtbl *)0x5:
+  case (I3D_scene_vtbl *)0x7:
+  case (I3D_scene_vtbl *)0xc:
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x4000;
+    pIVar13 = this->owner->m_frame;
+    if ((pIVar13->m_frameFlags & 0x20) == 0) {
+      I3D_frame::UpdateWMatrixProc(pIVar13);
+    }
+    pCVar3 = this->owner;
+    (pCVar3->m_position).x = (pIVar13->m_worldMatrix).m[3][0];
+    (pCVar3->m_position).y = (pIVar13->m_worldMatrix).m[3][1];
+    (pCVar3->m_position).z = (pIVar13->m_worldMatrix).m[3][2];
+    (pCVar3->m_position).w = (pIVar13->m_worldMatrix).m[3][3];
+    this->movement->seat = arg;
+    this->movement->unknownA34 = flags;
+    this->locomotion->unknown0FC = 100000.0;
+    bVar5 = C_Human::IsLocalPlayer(this->owner);
+    if ((bVar5) && (((uint8_t)g_gameRole & 7) == 7)) {
+      this->movement->unknownA38 = 500;
+      return;
+    }
+    if (((uint8_t)g_gameRole & 7) == 7) {
+      this->movement->unknownA38 = 0x2711;
+      Unknown755960(this,100);
+      return;
+    }
+    this->movement->unknownA38 = 0x2711;
+    Unknown755960(this,100);
+    return;
+  case (I3D_scene_vtbl *)0x8:
+    this->movement->unknownA44 = 5;
+    iVar23 = ((this->movement->owner->m_body).work)->mode;
+    if (((iVar23 != 2) && (iVar23 != 3)) &&
+       ((((iVar23 = (this->movement->animState).anim.anim, iVar23 != 0x9f &&
+          ((iVar23 != 0x9e && (iVar23 != 0x9b)))) && (iVar23 != 0x6f)) &&
+        (((iVar23 != 0x22 && (iVar23 != 0x1d)) && (iVar23 != 0x26)))))) {
+      pCVar17 = (this->owner->m_body).work;
+      pCVar17->blocked2 = pCVar17->blocked2 | 0x4000;
+      this->movement->seat = arg;
+      if ((flags & 0x400) != 0) {
+        pCVar11 = this->movement;
+        (pCVar11->nextAnimState).anim.anim = 0x1c;
+        S_HumanAnimRef::Normalize(&(pCVar11->nextAnimState).anim);
+        C_HumanWork::Play((this->owner->m_body).work,0x1c,false);
+        pCVar11 = this->movement;
+        (pCVar11->nextAnimState).anim.stance = 0;
+        S_HumanAnimRef::Normalize(&(pCVar11->nextAnimState).anim);
+        C_HumanWork::SetStance((this->owner->m_body).work,0,false);
+      }
+      C_HumanAnimMixer::ClearQueue(&this->movement->mixer,0);
+      this->movement->unknownA34 = flags;
+      iVar23 = C_HumanMovement::GetAnimLength(this->movement,0x1c,0,1);
+      this->movement->unknownA38 = iVar23;
+      this->movement->vehicle = (C_Actor *)gesture;
+      return;
+    }
+    break;
+  case (I3D_scene_vtbl *)0x9:
+  case (I3D_scene_vtbl *)0xa:
+    pCVar11 = this->movement;
+    iVar23 = ((pCVar11->owner->m_body).work)->mode;
+    if (((iVar23 != 2) && (iVar23 != 3)) &&
+       ((iVar23 = (pCVar11->animState).anim.anim, iVar23 != 0x9f &&
+        ((((iVar23 != 0x9e && (iVar23 != 0x9b)) && (iVar23 != 0x6f)) && (iVar23 != 0x22)))))) {
+      return;
+    }
+    iVar23 = (pCVar11->animState).anim.anim;
+    if (iVar23 == 0x1d) {
+      return;
+    }
+    if (iVar23 == 0x26) {
+      return;
+    }
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x4000;
+    if ((flags & 0x400) != 0) {
+      this_02 = &this->movement->nextAnimState;
+      if (local_3dc == (I3D_scene_vtbl *)0xa) {
+        (this_02->anim).anim = 0x26;
+        S_HumanAnimRef::Normalize(&this_02->anim);
+        iVar23 = 0x26;
+        pCVar17 = (this->owner->m_body).work;
+      }
+      else {
+        (this_02->anim).anim = 0x1d;
+        S_HumanAnimRef::Normalize(&this_02->anim);
+        iVar23 = 0x1d;
+        pCVar17 = (this->owner->m_body).work;
+      }
+      C_HumanWork::Play(pCVar17,iVar23,false);
+    }
+    C_HumanAnimMixer::ClearQueue(&this->movement->mixer,0);
+    this->movement->unknownA34 = flags;
+    lVar26 = __ftol();
+    this->movement->unknownA38 = (int)lVar26;
+    goto LAB_00754f62;
+  case (I3D_scene_vtbl *)0xe:
+  case (I3D_scene_vtbl *)0x10:
+    if (0xb < (uint32_t)(this->movement->remoteActions).size) {
+      return;
+    }
+    if ((((g_gameRole & 1) == 0) && (bVar5 = C_Human::IsLocalPlayer(this->owner), !bVar5)) &&
+       (pCVar11 = this->movement, pCVar11->clock == 0)) {
+      FUN_00757970(&pCVar11->remoteActions,(int *)local_3d0,
+                   (int)(pCVar11->remoteActions).first.blockFirst,
+                   (pCVar11->remoteActions).first.blockLast,(pCVar11->remoteActions).first.next,
+                   (pCVar11->remoteActions).first.mapEntry,
+                   (int)(pCVar11->remoteActions).last.blockFirst,
+                   (pCVar11->remoteActions).last.blockLast,(pCVar11->remoteActions).last.next,
+                   (pCVar11->remoteActions).last.mapEntry);
+    }
+    pIVar4 = local_3dc;
+    C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,true);
+    local_220.x = 0.0;
+    local_220.y = 0.0;
+    local_220.z = 0.0;
+    C_HumanAnimMixer::SetVelocity
+              (&this->movement->mixer,&local_220,0.0,0.0,&this->locomotion->velocity);
+    pCVar11 = this->movement;
+    (pCVar11->mixer).move.x = 0.0;
+    (pCVar11->mixer).move.y = 0.0;
+    (pCVar11->mixer).move.z = 0.0;
+    pCVar3 = this->owner;
+    local_410.x = (pCVar3->m_position).x;
+    local_410.y = (pCVar3->m_position).y;
+    local_410.z = (pCVar3->m_position).z;
+    local_404 = (pCVar3->m_position).w;
+    local_3f0.x = (float)gesture[0xc];
+    local_3f0.y = (float)gesture[0xd];
+    local_3f0.z = (float)gesture[0xe];
+    local_3e4 = (I3D_scene *)gesture[0xf];
+    S_vector::Set(&local_410,local_3f0.x - local_410.x,local_3f0.y - local_410.y,
+                  local_3f0.z - local_410.z);
+    local_3f4 = local_410.x * local_410.x + local_410.z * local_410.z + local_410.y * local_410.y;
+    bVar5 = 1e-08 <= ABS(local_3f4 - 1.0);
+    if (pIVar4 == (I3D_scene_vtbl *)0x10) {
+      if (bVar5) {
+        if (1e-08 <= local_3f4) {
+          fVar27 = 1.0 / SQRT(local_3f4);
+          local_410.x = local_410.x * fVar27;
+          local_410.y = local_410.y * fVar27;
+          local_410.z = fVar27 * local_410.z;
+        }
+        else if (local_410.x == 0.0) {
+          if (local_410.z == 0.0) {
+            if (0.0 <= local_410.y) {
+              local_410.y = 1.0;
+            }
+            else {
+              local_410.y = -1.0;
+            }
+          }
+          else if (0.0 <= local_410.z) {
+            local_410.z = 1.0;
+          }
+          else {
+            local_410.z = -1.0;
+          }
+        }
+        else if (0.0 <= local_410.x) {
+          local_410.x = 1.0;
+        }
+        else {
+          local_410.x = -1.0;
+        }
+      }
+      C_HumanWork::SetFacingDir((this->owner->m_body).work,&local_410,true);
+      pCVar11 = this->movement;
+      pSVar20 = &pCVar11->remoteActions;
+      if ((((this->owner->m_body).work)->request).stance == 1) {
+        local_2ac = 10;
+        if ((pCVar11->remoteActions).size == 0) {
+LAB_00752663:
+          FUN_00750940((int)pSVar20);
+          puVar19 = (pCVar11->remoteActions).last.next;
+          (pCVar11->remoteActions).last.next = puVar19 + 3;
+          puVar22 = &local_2ac;
+LAB_0075267a:
+          FUN_00750a90(puVar19,puVar22);
+        }
+        else {
+          puVar19 = (pCVar11->remoteActions).last.next;
+          puVar22 = (pCVar11->remoteActions).last.blockLast;
+          if (puVar19 == puVar22) goto LAB_00752663;
+          puVar10 = puVar19 + 3;
+          bVar5 = puVar10 == puVar22;
+          puVar22 = &local_2ac;
+LAB_007525fb:
+          (pSVar20->last).next = puVar10;
+          if (!bVar5) goto LAB_0075267a;
+          FUN_00750a90(puVar19,puVar22);
+          FUN_00750940((int)pSVar20);
+        }
+        pSVar20->size = pSVar20->size + 1;
+      }
+      else {
+        local_2d0 = 10;
+        if ((pCVar11->remoteActions).size == 0) {
+LAB_00752500:
+          FUN_00750940((int)pSVar20);
+          puVar19 = (pCVar11->remoteActions).last.next;
+          (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_00752517:
+          FUN_00750a90(puVar19,&local_2d0);
+        }
+        else {
+          puVar19 = (pCVar11->remoteActions).last.next;
+          puVar22 = (pCVar11->remoteActions).last.blockLast;
+          if (puVar19 == puVar22) goto LAB_00752500;
+          (pCVar11->remoteActions).last.next = puVar19 + 3;
+          if (puVar19 + 3 != puVar22) goto LAB_00752517;
+          FUN_00750a90(puVar19,&local_2d0);
+          FUN_00750940((int)pSVar20);
+        }
+        (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+        iVar23 = (((this->owner->m_body).work)->request).stance;
+        if (iVar23 == 0) {
+          lVar26 = __ftol();
+          local_39c = (uint32_t)lVar26;
+          pCVar11 = this->movement;
+          pSVar20 = &pCVar11->remoteActions;
+          if ((pCVar11->remoteActions).size != 0) {
+            puVar19 = (pCVar11->remoteActions).last.next;
+            puVar22 = (pCVar11->remoteActions).last.blockLast;
+            if (puVar19 != puVar22) {
+              puVar10 = puVar19 + 3;
+              bVar5 = puVar10 == puVar22;
+              puVar22 = &local_39c;
+              goto LAB_007525fb;
+            }
+          }
+          FUN_00750940((int)pSVar20);
+          puVar19 = (pCVar11->remoteActions).last.next;
+          puVar22 = &local_39c;
+          (pCVar11->remoteActions).last.next = puVar19 + 3;
+          goto LAB_0075267a;
+        }
+        if (iVar23 == 2) {
+          lVar26 = __ftol();
+          local_2ec = (uint32_t)lVar26;
+          pCVar11 = this->movement;
+          pSVar20 = &pCVar11->remoteActions;
+          if ((pCVar11->remoteActions).size != 0) {
+            puVar19 = (pCVar11->remoteActions).last.next;
+            puVar22 = (pCVar11->remoteActions).last.blockLast;
+            if (puVar19 != puVar22) {
+              puVar10 = puVar19 + 3;
+              bVar5 = puVar10 == puVar22;
+              puVar22 = &local_2ec;
+              goto LAB_007525fb;
+            }
+          }
+          FUN_00750940((int)pSVar20);
+          puVar19 = (pCVar11->remoteActions).last.next;
+          (pCVar11->remoteActions).last.next = puVar19 + 3;
+          puVar22 = &local_2ec;
+          goto LAB_0075267a;
+        }
+      }
+      pCVar11 = (this->owner->m_body).movement;
+      if ((0 < pCVar11->unknownA30) || ((pCVar11->animState).anim.anim == 0x5f)) goto LAB_00752c52;
+      lVar26 = __ftol();
+      local_384 = (uint32_t)lVar26;
+      pCVar11 = this->movement;
+      pSVar20 = &pCVar11->remoteActions;
+      if ((pCVar11->remoteActions).size != 0) {
+        puVar19 = (pCVar11->remoteActions).last.next;
+        puVar22 = (pCVar11->remoteActions).last.blockLast;
+        if (puVar19 != puVar22) {
+          puVar10 = puVar19 + 3;
+          bVar5 = puVar10 == puVar22;
+          puVar22 = &local_384;
+          goto LAB_00752b30;
+        }
+      }
+      FUN_00750940((int)pSVar20);
+      puVar19 = (pCVar11->remoteActions).last.next;
+      (pCVar11->remoteActions).last.next = puVar19 + 3;
+      puVar22 = &local_384;
+LAB_00752c4a:
+      FUN_00750a90(puVar19,puVar22);
+    }
+    else {
+      if (bVar5) {
+        if (1e-08 <= local_3f4) {
+          fVar27 = 1.0 / SQRT(local_3f4);
+          local_410.x = local_410.x * fVar27;
+          local_410.y = local_410.y * fVar27;
+          local_410.z = fVar27 * local_410.z;
+        }
+        else if (local_410.x == 0.0) {
+          if (local_410.z == 0.0) {
+            if (0.0 <= local_410.y) {
+              local_410.y = 1.0;
+            }
+            else {
+              local_410.y = -1.0;
+            }
+          }
+          else if (0.0 <= local_410.z) {
+            local_410.z = 1.0;
+          }
+          else {
+            local_410.z = -1.0;
+          }
+        }
+        else if (0.0 <= local_410.x) {
+          local_410.x = 1.0;
+        }
+        else {
+          local_410.x = -1.0;
+        }
+      }
+      C_HumanWork::SetFacingDir((this->owner->m_body).work,&local_410,true);
+      S_vector::Set(&local_240,local_410.x * 0.6,local_410.y * 0.6,local_410.z * 0.6);
+      S_vector::Set((S_vector *)&local_210,local_3f0.x - local_240.x,local_3f0.y - local_240.y,
+                    local_3f0.z - local_240.z);
+      C_HumanAnimMixer::MoveTo(&this->movement->mixer,&local_210,2.0,2000);
+      if ((((this->owner->m_body).work)->request).stance == 1) {
+        pCVar11 = this->movement;
+        local_33c = 10;
+        if ((pCVar11->remoteActions).size == 0) {
+LAB_00752bb7:
+          FUN_00750940((int)&pCVar11->remoteActions);
+          puVar19 = (pCVar11->remoteActions).last.next;
+          (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_00752bce:
+          FUN_00750a90(puVar19,&local_33c);
+        }
+        else {
+          puVar19 = (pCVar11->remoteActions).last.next;
+          puVar22 = (pCVar11->remoteActions).last.blockLast;
+          if (puVar19 == puVar22) goto LAB_00752bb7;
+          (pCVar11->remoteActions).last.next = puVar19 + 3;
+          if (puVar19 + 3 != puVar22) goto LAB_00752bce;
+          FUN_00750a90(puVar19,&local_33c);
+          FUN_00750940((int)&pCVar11->remoteActions);
+        }
+        (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+        lVar26 = __ftol();
+        local_27c = (uint32_t)lVar26;
+        pCVar11 = this->movement;
+        pSVar20 = &pCVar11->remoteActions;
+        if ((pCVar11->remoteActions).size != 0) {
+          puVar19 = (pCVar11->remoteActions).last.next;
+          puVar22 = (pCVar11->remoteActions).last.blockLast;
+          if (puVar19 != puVar22) {
+            puVar10 = puVar19 + 3;
+            bVar5 = puVar10 == puVar22;
+            puVar22 = &local_27c;
+            goto LAB_00752b30;
+          }
+        }
+        FUN_00750940((int)pSVar20);
+        puVar22 = &local_27c;
+LAB_00752c41:
+        puVar19 = (pSVar20->last).next;
+        (pSVar20->last).next = puVar19 + 3;
+        goto LAB_00752c4a;
+      }
+      lVar26 = __ftol();
+      local_2dc = (uint32_t)lVar26;
+      pCVar11 = this->movement;
+      if ((pCVar11->remoteActions).size == 0) {
+LAB_0075291a:
+        FUN_00750940((int)&pCVar11->remoteActions);
+        puVar19 = (pCVar11->remoteActions).last.next;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_00752931:
+        FUN_00750a90(puVar19,&local_2dc);
+      }
+      else {
+        puVar19 = (pCVar11->remoteActions).last.next;
+        puVar22 = (pCVar11->remoteActions).last.blockLast;
+        if (puVar19 == puVar22) goto LAB_0075291a;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+        if (puVar19 + 3 != puVar22) goto LAB_00752931;
+        FUN_00750a90(puVar19,&local_2dc);
+        FUN_00750940((int)&pCVar11->remoteActions);
+      }
+      (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+      lVar26 = __ftol();
+      local_36c = (uint32_t)lVar26;
+      pCVar11 = this->movement;
+      if ((pCVar11->remoteActions).size == 0) {
+LAB_007529a4:
+        FUN_00750940((int)&pCVar11->remoteActions);
+        puVar19 = (pCVar11->remoteActions).last.next;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_007529bb:
+        FUN_00750a90(puVar19,&local_36c);
+      }
+      else {
+        puVar19 = (pCVar11->remoteActions).last.next;
+        puVar22 = (pCVar11->remoteActions).last.blockLast;
+        if (puVar19 == puVar22) goto LAB_007529a4;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+        if (puVar19 + 3 != puVar22) goto LAB_007529bb;
+        FUN_00750a90(puVar19,&local_36c);
+        FUN_00750940((int)&pCVar11->remoteActions);
+      }
+      (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+      iVar23 = (((this->owner->m_body).work)->request).stance;
+      if (iVar23 == 0) {
+        lVar26 = __ftol();
+        local_354 = (uint32_t)lVar26;
+        pCVar11 = this->movement;
+        pSVar20 = &pCVar11->remoteActions;
+        if ((pCVar11->remoteActions).size == 0) {
+LAB_00752abd:
+          FUN_00750940((int)pSVar20);
+          puVar19 = (pCVar11->remoteActions).last.next;
+          (pCVar11->remoteActions).last.next = puVar19 + 3;
+          puVar22 = &local_354;
+          goto LAB_00752ad4;
+        }
+        puVar19 = (pCVar11->remoteActions).last.next;
+        puVar22 = (pCVar11->remoteActions).last.blockLast;
+        if (puVar19 == puVar22) goto LAB_00752abd;
+        puVar10 = puVar19 + 3;
+        bVar5 = puVar10 == puVar22;
+        puVar22 = &local_354;
+LAB_00752a39:
+        (pSVar20->last).next = puVar10;
+        if (!bVar5) goto LAB_00752ad4;
+        FUN_00750a90(puVar19,puVar22);
+        FUN_00750940((int)pSVar20);
+LAB_00752ad9:
+        pSVar20->size = pSVar20->size + 1;
+      }
+      else if (iVar23 == 2) {
+        lVar26 = __ftol();
+        local_294 = (uint32_t)lVar26;
+        pCVar11 = this->movement;
+        pSVar20 = &pCVar11->remoteActions;
+        if ((pCVar11->remoteActions).size != 0) {
+          puVar19 = (pCVar11->remoteActions).last.next;
+          puVar22 = (pCVar11->remoteActions).last.blockLast;
+          if (puVar19 != puVar22) {
+            puVar10 = puVar19 + 3;
+            bVar5 = puVar10 == puVar22;
+            puVar22 = &local_294;
+            goto LAB_00752a39;
+          }
+        }
+        FUN_00750940((int)pSVar20);
+        puVar19 = (pCVar11->remoteActions).last.next;
+        puVar22 = &local_294;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_00752ad4:
+        FUN_00750a90(puVar19,puVar22);
+        goto LAB_00752ad9;
+      }
+      lVar26 = __ftol();
+      local_2c4 = (uint32_t)lVar26;
+      pCVar11 = this->movement;
+      pSVar20 = &pCVar11->remoteActions;
+      if ((pCVar11->remoteActions).size == 0) {
+LAB_00752b4a:
+        FUN_00750940((int)pSVar20);
+        puVar22 = &local_2c4;
+        goto LAB_00752c41;
+      }
+      puVar19 = (pCVar11->remoteActions).last.next;
+      puVar22 = (pCVar11->remoteActions).last.blockLast;
+      if (puVar19 == puVar22) goto LAB_00752b4a;
+      puVar10 = puVar19 + 3;
+      bVar5 = puVar10 == puVar22;
+      puVar22 = &local_2c4;
+LAB_00752b30:
+      (pSVar20->last).next = puVar10;
+      if (!bVar5) goto LAB_00752c4a;
+      FUN_00750a90(puVar19,puVar22);
+      FUN_00750940((int)pSVar20);
+    }
+    pSVar20->size = pSVar20->size + 1;
+LAB_00752c52:
+    C_HumanWork::Play((this->owner->m_body).work,0x2d,true);
+    local_260.x = 0.0;
+    local_260.y = 0.0;
+    local_260.z = 0.0;
+    C_HumanWork::SetLookAt((this->owner->m_body).work,&local_260,true);
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 1;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 2;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 8;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x40;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x100;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x200;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x800;
+    return;
+  case (I3D_scene_vtbl *)0xf:
+  case (I3D_scene_vtbl *)0x11:
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffffe;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffffd;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffff7;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xffffffbf;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffeff;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffdff;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffff7ff;
+    if (local_3dc == (I3D_scene_vtbl *)0x11) {
+      pCVar11 = this->movement;
+      if ((pCVar11->remoteActions).size == 0) {
+LAB_00752f19:
+        if ((pCVar11->remoteActions).size == 0) goto LAB_00754f62;
+        pSVar1 = &(pCVar11->remoteActions).first;
+        local_3f0.x = (float)pSVar1->blockFirst;
+        local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+        local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+        if (*(int *)((int)(pCVar11->remoteActions).first.next + 4) != 1) goto LAB_00754f62;
+        local_3f0.x = (float)pSVar1->blockFirst;
+        local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+        local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+        iVar23 = *(int *)((int)(pCVar11->remoteActions).first.next + 8) - 3;
+LAB_00752ee0:
+        if (iVar23 != 0) goto LAB_00754f62;
+      }
+      else {
+        pSVar1 = &(pCVar11->remoteActions).first;
+        local_3f0.x = (float)pSVar1->blockFirst;
+        local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+        local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+        if (*(int *)((int)(pCVar11->remoteActions).first.next + 4) != 1) goto LAB_00752f19;
+        local_3f0.x = (float)pSVar1->blockFirst;
+        local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+        local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+        if (*(int *)((int)(pCVar11->remoteActions).first.next + 8) != 2) goto LAB_00752f19;
+        pvVar12 = (void *)((int)(pCVar11->remoteActions).first.next + 0xc);
+        iVar23 = (pCVar11->remoteActions).size - 1;
+        (pCVar11->remoteActions).first.next = pvVar12;
+        (pCVar11->remoteActions).size = iVar23;
+        if ((iVar23 == 0) || (pvVar12 == (pCVar11->remoteActions).first.blockLast)) {
+          FUN_00757da0((int)&pCVar11->remoteActions);
+        }
+        pCVar11 = this->movement;
+        if ((pCVar11->remoteActions).size == 0) goto LAB_00754f62;
+        pSVar1 = &(pCVar11->remoteActions).first;
+        local_3f0.x = (float)pSVar1->blockFirst;
+        local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+        local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+        if (*(int *)((int)(pCVar11->remoteActions).first.next + 4) != 2) {
+          local_3f0.x = (float)pSVar1->blockFirst;
+          local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+          local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+          iVar23 = *(int *)((int)(pCVar11->remoteActions).first.next + 4);
+          goto LAB_00752ee0;
+        }
+      }
+      pvVar12 = (void *)((int)(pCVar11->remoteActions).first.next + 0xc);
+      iVar23 = (pCVar11->remoteActions).size - 1;
+      (pCVar11->remoteActions).first.next = pvVar12;
+      (pCVar11->remoteActions).size = iVar23;
+      if ((iVar23 == 0) || (pvVar12 == (pCVar11->remoteActions).first.blockLast)) {
+        FUN_00757da0((int)&pCVar11->remoteActions);
+      }
+      goto LAB_00754f62;
+    }
+    pCVar11 = this->movement;
+    iVar23 = (pCVar11->remoteActions).size;
+    if (iVar23 != 0) {
+      local_3f0.x = (float)(pCVar11->remoteActions).first.blockFirst;
+      local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+      local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+      if (*(int *)((int)(pCVar11->remoteActions).first.next + 4) == 1) {
+        pvVar12 = (void *)((int)(pCVar11->remoteActions).first.next + 0xc);
+        iVar23 = (pCVar11->remoteActions).size - 1;
+        (pCVar11->remoteActions).first.next = pvVar12;
+        (pCVar11->remoteActions).size = iVar23;
+        if ((iVar23 == 0) || (pvVar12 == (pCVar11->remoteActions).first.blockLast)) {
+          FUN_00757da0((int)&pCVar11->remoteActions);
+        }
+        pCVar11 = this->movement;
+        if ((pCVar11->remoteActions).size != 0) {
+          local_3f0.x = (float)(pCVar11->remoteActions).first.blockFirst;
+          local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+          local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+          if (*(int *)((int)(pCVar11->remoteActions).first.next + 4) == 5) {
+            pvVar12 = (void *)((int)(pCVar11->remoteActions).first.next + 0xc);
+            iVar23 = (pCVar11->remoteActions).size - 1;
+            (pCVar11->remoteActions).first.next = pvVar12;
+            (pCVar11->remoteActions).size = iVar23;
+            if ((iVar23 == 0) || (pvVar12 == (pCVar11->remoteActions).first.blockLast)) {
+              FUN_00757da0((int)&pCVar11->remoteActions);
+            }
+          }
+        }
+        pCVar11 = this->movement;
+        if ((pCVar11->remoteActions).size != 0) {
+          pSVar1 = &(pCVar11->remoteActions).first;
+          local_3f0.x = (float)pSVar1->blockFirst;
+          local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+          local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+          if (*(int *)((int)(pCVar11->remoteActions).first.next + 4) != 2) {
+            local_3f0.x = (float)pSVar1->blockFirst;
+            local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+            local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+            if (*(int *)((int)(pCVar11->remoteActions).first.next + 4) != 0) goto LAB_007530e1;
+          }
+LAB_007530c3:
+          pvVar12 = (void *)((int)(pCVar11->remoteActions).first.next + 0xc);
+          iVar23 = (pCVar11->remoteActions).size - 1;
+          (pCVar11->remoteActions).first.next = pvVar12;
+          (pCVar11->remoteActions).size = iVar23;
+          if ((iVar23 == 0) || (pvVar12 == (pCVar11->remoteActions).first.blockLast)) {
+            FUN_00757da0((int)&pCVar11->remoteActions);
+          }
+        }
+      }
+      else if (iVar23 != 0) {
+        local_3f0.x = (float)(pCVar11->remoteActions).first.blockFirst;
+        local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+        local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+        bVar5 = *(int *)((int)(pCVar11->remoteActions).first.next + 4) == 5;
+        goto LAB_007530bb;
+      }
+    }
+    goto LAB_007530e1;
+  case (I3D_scene_vtbl *)0x12:
+    if (0x19 < (uint32_t)(this->movement->remoteActions).size) {
+      return;
+    }
+    if ((((g_gameRole & 1) == 0) && (bVar5 = C_Human::IsLocalPlayer(this->owner), !bVar5)) &&
+       (pCVar11 = this->movement, pCVar11->clock == 0)) {
+      FUN_00757970(&pCVar11->remoteActions,(int *)local_3d0,
+                   (int)(pCVar11->remoteActions).first.blockFirst,
+                   (pCVar11->remoteActions).first.blockLast,(pCVar11->remoteActions).first.next,
+                   (pCVar11->remoteActions).first.mapEntry,
+                   (int)(pCVar11->remoteActions).last.blockFirst,
+                   (pCVar11->remoteActions).last.blockLast,(pCVar11->remoteActions).last.next,
+                   (pCVar11->remoteActions).last.mapEntry);
+    }
+    C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,true);
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 1;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 2;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 8;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x40;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x100;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x200;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x800;
+    if ((((this->owner->m_body).work)->request).stance == 1) {
+      pCVar11 = this->movement;
+      local_330 = 10;
+      local_32c = 6;
+      if ((pCVar11->remoteActions).size == 0) {
+LAB_00753da1:
+        FUN_00750940((int)&pCVar11->remoteActions);
+        puVar19 = (pCVar11->remoteActions).last.next;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_00753db8:
+        FUN_00750a90(puVar19,&local_330);
+      }
+      else {
+        puVar19 = (pCVar11->remoteActions).last.next;
+        puVar22 = (pCVar11->remoteActions).last.blockLast;
+        if (puVar19 == puVar22) goto LAB_00753da1;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+        if (puVar19 + 3 != puVar22) goto LAB_00753db8;
+        FUN_00750a90(puVar19,&local_330);
+        FUN_00750940((int)&pCVar11->remoteActions);
+      }
+      (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+      lVar26 = __ftol();
+      local_318 = (uint32_t)lVar26;
+      pCVar11 = this->movement;
+      local_314 = (I3D_scene *)0xc;
+      if ((pCVar11->remoteActions).size != 0) {
+        puVar19 = (pCVar11->remoteActions).last.next;
+        puVar22 = (pCVar11->remoteActions).last.blockLast;
+        if (puVar19 != puVar22) {
+          (pCVar11->remoteActions).last.next = puVar19 + 3;
+          if (puVar19 + 3 == puVar22) {
+            FUN_00750a90(puVar19,&local_318);
+            FUN_00750940((int)&pCVar11->remoteActions);
+            (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+            return;
+          }
+          goto LAB_00753e51;
+        }
+      }
+      FUN_00750940((int)&pCVar11->remoteActions);
+      puVar19 = (pCVar11->remoteActions).last.next;
+      (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_00753e51:
+      FUN_00750a90(puVar19,&local_318);
+      (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+      return;
+    }
+    lVar26 = __ftol();
+    local_3a8 = (uint32_t)lVar26;
+    pCVar11 = this->movement;
+    if ((pCVar11->remoteActions).size == 0) {
+LAB_00753ae9:
+      FUN_00750940((int)&pCVar11->remoteActions);
+      puVar19 = (pCVar11->remoteActions).last.next;
+      (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_00753afd:
+      FUN_00750a90(puVar19,&local_3a8);
+    }
+    else {
+      puVar19 = (pCVar11->remoteActions).last.next;
+      puVar22 = (pCVar11->remoteActions).last.blockLast;
+      if (puVar19 == puVar22) goto LAB_00753ae9;
+      (pCVar11->remoteActions).last.next = puVar19 + 3;
+      if (puVar19 + 3 != puVar22) goto LAB_00753afd;
+      FUN_00750a90(puVar19,&local_3a8);
+      FUN_00750940((int)&pCVar11->remoteActions);
+    }
+    (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+    lVar26 = __ftol();
+    local_390 = (uint32_t)lVar26;
+    pCVar11 = this->movement;
+    if ((pCVar11->remoteActions).size == 0) {
+LAB_00753b70:
+      FUN_00750940((int)&pCVar11->remoteActions);
+      puVar19 = (pCVar11->remoteActions).last.next;
+      (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_00753b87:
+      FUN_00750a90(puVar19,&local_390);
+    }
+    else {
+      puVar19 = (pCVar11->remoteActions).last.next;
+      puVar22 = (pCVar11->remoteActions).last.blockLast;
+      if (puVar19 == puVar22) goto LAB_00753b70;
+      (pCVar11->remoteActions).last.next = puVar19 + 3;
+      if (puVar19 + 3 != puVar22) goto LAB_00753b87;
+      FUN_00750a90(puVar19,&local_390);
+      FUN_00750940((int)&pCVar11->remoteActions);
+    }
+    (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+    iVar23 = (((this->owner->m_body).work)->request).stance;
+    if (iVar23 == 0) {
+      lVar26 = __ftol();
+      local_360 = (uint32_t)lVar26;
+      pCVar11 = this->movement;
+      pSVar20 = &pCVar11->remoteActions;
+      if ((pCVar11->remoteActions).size == 0) {
+LAB_00753c89:
+        FUN_00750940((int)pSVar20);
+        puVar19 = (pCVar11->remoteActions).last.next;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+        puVar22 = &local_360;
+        goto LAB_00753ca0;
+      }
+      puVar19 = (pCVar11->remoteActions).last.next;
+      puVar22 = (pCVar11->remoteActions).last.blockLast;
+      if (puVar19 == puVar22) goto LAB_00753c89;
+      puVar10 = puVar19 + 3;
+      bVar5 = puVar10 == puVar22;
+      puVar22 = &local_360;
+LAB_00753c05:
+      (pSVar20->last).next = puVar10;
+      if (!bVar5) goto LAB_00753ca0;
+      FUN_00750a90(puVar19,puVar22);
+      FUN_00750940((int)pSVar20);
+LAB_00753ca5:
+      pSVar20->size = pSVar20->size + 1;
+    }
+    else if (iVar23 == 2) {
+      lVar26 = __ftol();
+      local_378 = (uint32_t)lVar26;
+      pCVar11 = this->movement;
+      pSVar20 = &pCVar11->remoteActions;
+      if ((pCVar11->remoteActions).size != 0) {
+        puVar19 = (pCVar11->remoteActions).last.next;
+        puVar22 = (pCVar11->remoteActions).last.blockLast;
+        if (puVar19 != puVar22) {
+          puVar10 = puVar19 + 3;
+          bVar5 = puVar10 == puVar22;
+          puVar22 = &local_378;
+          goto LAB_00753c05;
+        }
+      }
+      FUN_00750940((int)pSVar20);
+      puVar19 = (pCVar11->remoteActions).last.next;
+      puVar22 = &local_378;
+      (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_00753ca0:
+      FUN_00750a90(puVar19,puVar22);
+      goto LAB_00753ca5;
+    }
+    lVar26 = __ftol();
+    local_348 = (uint32_t)lVar26;
+    pCVar11 = this->movement;
+    if ((pCVar11->remoteActions).size != 0) {
+      puVar19 = (pCVar11->remoteActions).last.next;
+      puVar22 = (pCVar11->remoteActions).last.blockLast;
+      if (puVar19 != puVar22) {
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+        if (puVar19 + 3 == puVar22) {
+          FUN_00750a90(puVar19,&local_348);
+          FUN_00750940((int)&pCVar11->remoteActions);
+          (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+          return;
+        }
+        goto LAB_00753d35;
+      }
+    }
+    FUN_00750940((int)&pCVar11->remoteActions);
+    puVar19 = (pCVar11->remoteActions).last.next;
+    (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_00753d35:
+    FUN_00750a90(puVar19,&local_348);
+    (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+    return;
+  case (I3D_scene_vtbl *)0x13:
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffffe;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffffd;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffff7;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xffffffbf;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffeff;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffdff;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffff7ff;
+    pCVar11 = this->movement;
+    if ((pCVar11->remoteActions).size != 0) {
+      local_3f0.x = (float)(pCVar11->remoteActions).first.blockFirst;
+      local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+      local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+      bVar5 = *(int *)((int)(pCVar11->remoteActions).first.next + 4) == 6;
+LAB_007530bb:
+      if (bVar5) goto LAB_007530c3;
+    }
+LAB_007530e1:
+    ((this->owner->m_body).work)->forced = true;
+    C_HumanWork::Play((this->owner->m_body).work,0x2d,true);
+    ((this->owner->m_body).work)->forced = false;
+LAB_00754f62:
+    lVar26 = __ftol();
+    this->locomotion->unknown130 = (int)lVar26;
+    return;
+  case (I3D_scene_vtbl *)0x14:
+  case (I3D_scene_vtbl *)0x16:
+    if (0xf < (uint32_t)(this->movement->remoteActions).size) {
+      return;
+    }
+    if ((((g_gameRole & 1) == 0) && (bVar5 = C_Human::IsLocalPlayer(this->owner), !bVar5)) &&
+       (pCVar11 = this->movement, pCVar11->clock == 0)) {
+      FUN_00757970(&pCVar11->remoteActions,(int *)local_3d0,
+                   (int)(pCVar11->remoteActions).first.blockFirst,
+                   (pCVar11->remoteActions).first.blockLast,(pCVar11->remoteActions).first.next,
+                   (pCVar11->remoteActions).first.mapEntry,
+                   (int)(pCVar11->remoteActions).last.blockFirst,
+                   (pCVar11->remoteActions).last.blockLast,(pCVar11->remoteActions).last.next,
+                   (pCVar11->remoteActions).last.mapEntry);
+    }
+    if (((this->movement->owner->m_body).work)->mode != 5) {
+      C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,true);
+    }
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 1;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 2;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 8;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x40;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x100;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x200;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x800;
+    pCVar11 = this->movement;
+    if (((pCVar11->owner->m_body).work)->mode == 5) {
+      puVar19 = (uint32_t *)FUN_00755820(local_108,10,8,2);
+      FUN_00757320(&this->movement->remoteActions,puVar19);
+      return;
+    }
+    if ((((this->owner->m_body).work)->request).stance == 1) {
+      puVar19 = (uint32_t *)FUN_00755820(local_138,10,8,2);
+      FUN_00757320(&this->movement->remoteActions,puVar19);
+      uVar30 = 1;
+      uVar28 = 0xc;
+      lVar26 = __ftol();
+      puVar19 = (uint32_t *)FUN_00755820(local_120,(int)lVar26,uVar28,uVar30);
+      FUN_00757320(&this->movement->remoteActions,puVar19);
+      return;
+    }
+    lVar26 = __ftol();
+    local_308 = (uint32_t)lVar26;
+    if ((pCVar11->remoteActions).size == 0) {
+LAB_0075413a:
+      FUN_00750940((int)&pCVar11->remoteActions);
+      puVar19 = (pCVar11->remoteActions).last.next;
+      (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_00754151:
+      FUN_00750a90(puVar19,&local_308);
+    }
+    else {
+      puVar19 = (pCVar11->remoteActions).last.next;
+      puVar22 = (pCVar11->remoteActions).last.blockLast;
+      if (puVar19 == puVar22) goto LAB_0075413a;
+      (pCVar11->remoteActions).last.next = puVar19 + 3;
+      if (puVar19 + 3 != puVar22) goto LAB_00754151;
+      FUN_00750a90(puVar19,&local_308);
+      FUN_00750940((int)&pCVar11->remoteActions);
+    }
+    uVar30 = 2;
+    uVar28 = 8;
+    (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(local_f0,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    iVar23 = get_field_4c_755840(iVar23);
+    if (iVar23 == 0) {
+      uVar29 = 0;
+      uVar30 = 0;
+      lVar26 = __ftol();
+      uVar28 = (uint32_t)lVar26;
+      puVar21 = local_168;
+    }
+    else {
+      if (iVar23 != 2) goto LAB_007541f6;
+      uVar29 = 0;
+      uVar30 = 2;
+      lVar26 = __ftol();
+      uVar28 = (uint32_t)lVar26;
+      puVar21 = local_180;
+    }
+    puVar19 = (uint32_t *)FUN_00755820(puVar21,uVar28,uVar30,uVar29);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+LAB_007541f6:
+    uVar30 = 0;
+    uVar28 = 0xc;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(local_150,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    return;
+  case (I3D_scene_vtbl *)0x15:
+  case (I3D_scene_vtbl *)0x17:
+    bVar5 = FUN_007558d0((int)this->movement);
+    if (!bVar5) {
+      bVar5 = false;
+      pCVar15 = (C_HumanEquipment *)get_field_a8_7558b0((int)this->owner);
+      C_HumanEquipment::PutAwayHandsItem(pCVar15,bVar5);
+    }
+    uVar16 = 1;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 2;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 8;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x40;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x100;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x200;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x800;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    bVar5 = FUN_00757250((int)&this->movement->remoteActions);
+    if (!bVar5) {
+      iVar23 = get_field_c_757260((int)&this->movement->remoteActions);
+      bVar5 = *(int *)(iVar23 + 4) == 8;
+LAB_00755422:
+      if (bVar5) {
+        FUN_00757290((int)&this->movement->remoteActions);
+      }
+    }
+    goto LAB_00755432;
+  case (I3D_scene_vtbl *)0x18:
+    uVar16 = get_field_2c_757240((int)&this->movement->remoteActions);
+    if (0xf < uVar16) {
+      return;
+    }
+    uVar16 = get_first_field_41d750(&g_gameRole);
+    if ((((uVar16 & 1) == 0) && (bVar5 = C_Human::IsLocalPlayer(this->owner), !bVar5)) &&
+       (this->movement->clock == 0)) {
+      FUN_00757610((int)&this->movement->remoteActions);
+    }
+    FUN_00755900(this->owner,local_3d0);
+    FUN_00755900(gesture,&local_3f0.x);
+    S_vector::Subtract(&local_3f0,&local_410.x,local_3d0);
+    local_3f4 = local_410.x * local_410.x + local_410.z * local_410.z + local_410.y * local_410.y;
+    fVar25 = FUN_0041cf60(local_3f4 - 1.0);
+    if ((long double)1e-08 <= fVar25) {
+      if (1e-08 <= local_3f4) {
+        fVar25 = FUN_0041cf70(local_3f4);
+        fVar25 = (long double)1.0 / fVar25;
+        local_410.x = (float)((long double)local_410.x * fVar25);
+        local_410.y = (float)((long double)local_410.y * fVar25);
+        fVar25 = fVar25 * (long double)local_410.z;
+LAB_0075450c:
+        local_410.z = (float)fVar25;
+      }
+      else if (local_410.x == 0.0) {
+        if (local_410.z != 0.0) {
+          if (0.0 <= local_410.z) {
+            fVar25 = (long double)1.0;
+          }
+          else {
+            fVar25 = (long double)-1.0;
+          }
+          goto LAB_0075450c;
+        }
+        if (0.0 <= local_410.y) {
+          local_410.y = 1.0;
+        }
+        else {
+          local_410.y = -1.0;
+        }
+      }
+      else if (0.0 <= local_410.x) {
+        local_410.x = 1.0;
+      }
+      else {
+        local_410.x = -1.0;
+      }
+    }
+    iVar23 = 2000;
+    fVar27 = 2.0;
+    local_2f0 = 0.9;
+    pSVar18 = S_vector::Scaled(&local_410,&local_60,&local_2f0);
+    pSVar14 = (S_vector4 *)S_vector::Subtract(&local_3f0,local_30,&pSVar18->x);
+    C_HumanAnimMixer::MoveTo(&this->movement->mixer,pSVar14,fVar27,iVar23);
+    pSVar18 = &local_410;
+    bVar5 = true;
+    pCVar17 = (C_HumanWork *)get_field_a4_7558c0((int)this->owner);
+    C_HumanWork::SetFacingDir(pCVar17,pSVar18,bVar5);
+    bVar5 = true;
+    pCVar15 = (C_HumanEquipment *)get_field_a8_7558b0((int)this->owner);
+    C_HumanEquipment::PutAwayHandsItem(pCVar15,bVar5);
+    uVar16 = 1;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 2;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 8;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x40;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x100;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x200;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x800;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    iVar23 = get_field_4c_755840(iVar23);
+    if (iVar23 == 0) {
+      puVar19 = (uint32_t *)FUN_00755820(local_1d4,10,9,2);
+      FUN_00757320(&this->movement->remoteActions,puVar19);
+      uVar30 = 1;
+      uVar28 = 0xc;
+      lVar26 = __ftol();
+      puVar19 = (uint32_t *)FUN_00755820(local_fc,(int)lVar26,uVar28,uVar30);
+      FUN_00757320(&this->movement->remoteActions,puVar19);
+      return;
+    }
+    uVar30 = 0;
+    uVar28 = 0;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(local_1f8,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    uVar30 = 2;
+    uVar28 = 9;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(local_d8,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    iVar23 = get_field_4c_755840(iVar23);
+    if (iVar23 == 1) {
+      uVar29 = 0;
+      uVar30 = 1;
+      lVar26 = __ftol();
+      uVar28 = (uint32_t)lVar26;
+      puVar21 = local_a8;
+    }
+    else {
+      if (iVar23 != 2) goto LAB_007546e3;
+      uVar29 = 0;
+      uVar30 = 2;
+      lVar26 = __ftol();
+      uVar28 = (uint32_t)lVar26;
+      puVar21 = local_c0;
+    }
+    puVar19 = (uint32_t *)FUN_00755820(puVar21,uVar28,uVar30,uVar29);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+LAB_007546e3:
+    uVar30 = 0;
+    uVar28 = 0xc;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(local_9c,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    return;
+  case (I3D_scene_vtbl *)0x19:
+    uVar16 = 1;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 2;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 8;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x40;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x100;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x200;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x800;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    bVar5 = FUN_00757250((int)&this->movement->remoteActions);
+    if (!bVar5) {
+      iVar23 = get_field_c_757260((int)&this->movement->remoteActions);
+      bVar5 = *(int *)(iVar23 + 4) == 9;
+LAB_00754f21:
+      if (bVar5) {
+        FUN_00757290((int)&this->movement->remoteActions);
+      }
+    }
+    goto LAB_00754f31;
+  case (I3D_scene_vtbl *)0x1a:
+    uVar16 = get_field_2c_757240((int)&this->movement->remoteActions);
+    if (0x19 < uVar16) {
+      return;
+    }
+    uVar16 = get_first_field_41d750(&g_gameRole);
+    if ((((uVar16 & 1) == 0) && (bVar5 = C_Human::IsLocalPlayer(this->owner), !bVar5)) &&
+       (this->movement->clock == 0)) {
+      FUN_00757610((int)&this->movement->remoteActions);
+    }
+    FUN_00755900(this->owner,&local_3f0.x);
+    FUN_00755900(gesture,local_3d0);
+    S_vector::Subtract(&local_3f0,&local_410.x,local_3d0);
+    local_3f4 = local_410.y * local_410.y + local_410.x * local_410.x + local_410.z * local_410.z;
+    fVar25 = FUN_0041cf60(local_3f4 - 1.0);
+    if (fVar25 < (long double)1e-08) goto LAB_007549b5;
+    if (1e-08 <= local_3f4) {
+      fVar25 = FUN_0041cf70(local_3f4);
+      fVar25 = (long double)1.0 / fVar25;
+      local_410.x = (float)((long double)local_410.x * fVar25);
+      local_410.y = (float)((long double)local_410.y * fVar25);
+      fVar25 = fVar25 * (long double)local_410.z;
+    }
+    else {
+      if (local_410.x != 0.0) {
+        if (0.0 <= local_410.x) {
+          local_410.x = 1.0;
+        }
+        else {
+          local_410.x = -1.0;
+        }
+        goto LAB_007549b5;
+      }
+      if (local_410.z == 0.0) {
+        if (0.0 <= local_410.y) {
+          local_410.y = 1.0;
+        }
+        else {
+          local_410.y = -1.0;
+        }
+        goto LAB_007549b5;
+      }
+      if (0.0 <= local_410.z) {
+        fVar25 = (long double)1.0;
+      }
+      else {
+        fVar25 = (long double)-1.0;
+      }
+    }
+    local_410.z = (float)fVar25;
+LAB_007549b5:
+    pSVar18 = &local_410;
+    bVar5 = true;
+    pCVar17 = (C_HumanWork *)get_field_a4_7558c0((int)this->owner);
+    C_HumanWork::SetFacingDir(pCVar17,pSVar18,bVar5);
+    this->movement->stanceVolumeScale = 0.45;
+    uVar16 = get_first_field_41d750(&g_gameRole);
+    if ((uVar16 & 1) == 0) {
+      iVar23 = get_field_a4_7558c0((int)this->owner);
+      FUN_00755890(iVar23);
+      pSVar18 = &local_410;
+      bVar5 = true;
+      pCVar17 = (C_HumanWork *)get_field_a4_7558c0((int)this->owner);
+      C_HumanWork::SetFacingDir(pCVar17,pSVar18,bVar5);
+      iVar23 = get_field_a4_7558c0((int)this->owner);
+      FUN_007558a0(iVar23);
+      this->movement->unknownA34 = flags;
+      set_field_18c_7558f0(this->movement,1);
+    }
+    bVar5 = true;
+    pCVar15 = (C_HumanEquipment *)get_field_a8_7558b0((int)this->owner);
+    C_HumanEquipment::PutAwayHandsItem(pCVar15,bVar5);
+    FUN_00755800(&(this->movement->nextAnimState).carryAnim,0x5c);
+    FUN_00755810(&(this->movement->nextAnimState).activity,0x4c);
+    bVar5 = true;
+    iVar23 = 0x4c;
+    pCVar17 = (C_HumanWork *)get_field_a4_7558c0((int)this->owner);
+    C_HumanWork::PlayWorkAnimation(pCVar17,iVar23,bVar5);
+    uVar16 = 1;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 2;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 8;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x40;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x100;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x200;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x800;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    iVar23 = get_field_4c_755840(iVar23);
+    if (iVar23 == 0) {
+      puVar19 = (uint32_t *)FUN_00755820(local_1a4,10,10,2);
+      FUN_00757320(&this->movement->remoteActions,puVar19);
+      return;
+    }
+    uVar30 = 0;
+    uVar28 = 0;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(local_1bc,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    uVar30 = 2;
+    uVar28 = 10;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(local_6c,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    return;
+  case (I3D_scene_vtbl *)0x1b:
+    bVar5 = FUN_00757250((int)&this->movement->remoteActions);
+    if ((!bVar5) &&
+       (iVar23 = get_field_c_757260((int)&this->movement->remoteActions), *(int *)(iVar23 + 4) == 10
+       )) {
+      FUN_00757290((int)&this->movement->remoteActions);
+    }
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    FUN_00755890(iVar23);
+    iVar23 = 0x62;
+    goto LAB_00755445;
+  case (I3D_scene_vtbl *)0x1c:
+    uVar16 = get_field_2c_757240((int)&this->movement->remoteActions);
+    if (0x19 < uVar16) {
+      return;
+    }
+    uVar16 = get_first_field_41d750(&g_gameRole);
+    if ((((uVar16 & 1) == 0) && (bVar5 = C_Human::IsLocalPlayer(this->owner), !bVar5)) &&
+       (this->movement->clock == 0)) {
+      FUN_00757610((int)&this->movement->remoteActions);
+    }
+    bVar5 = true;
+    pCVar15 = (C_HumanEquipment *)get_field_a8_7558b0((int)this->owner);
+    C_HumanEquipment::PutAwayHandsItem(pCVar15,bVar5);
+    this_01 = C_Human::FindBeltItem(this->owner,0x13);
+    if (this_01 != nullptr) {
+      typeId = -1;
+      time = -5;
+      uid = -1;
+      iVar23 = 6;
+      pIVar13 = C_Item::GetFrame(this_01,0);
+      pCVar15 = (C_HumanEquipment *)get_field_a8_7558b0((int)this->owner);
+      C_HumanEquipment::SetModel(pCVar15,pIVar13,iVar23,uid,time,typeId);
+    }
+    uVar16 = 1;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 2;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 8;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x40;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x100;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x200;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x800;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    iVar23 = get_field_4c_755840(iVar23);
+    if (iVar23 == 1) {
+      puVar19 = (uint32_t *)FUN_00755820(local_15c,10,0xb,2);
+      FUN_00757320(&this->movement->remoteActions,puVar19);
+      uVar30 = 1;
+      uVar28 = 0xc;
+      lVar26 = __ftol();
+      puVar19 = (uint32_t *)FUN_00755820(local_90,(int)lVar26,uVar28,uVar30);
+      FUN_00757320(&this->movement->remoteActions,puVar19);
+      return;
+    }
+    uVar30 = 0;
+    uVar28 = 1;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(local_e4,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    uVar30 = 2;
+    uVar28 = 0xb;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(local_18c,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    iVar23 = get_field_4c_755840(iVar23);
+    if (iVar23 == 0) {
+      uVar29 = 0;
+      uVar30 = 0;
+      lVar26 = __ftol();
+      uVar28 = (uint32_t)lVar26;
+      puVar21 = local_174;
+    }
+    else {
+      if (iVar23 != 2) goto LAB_00754dd5;
+      uVar29 = 0;
+      uVar30 = 2;
+      lVar26 = __ftol();
+      uVar28 = (uint32_t)lVar26;
+      puVar21 = local_78;
+    }
+    puVar19 = (uint32_t *)FUN_00755820(puVar21,uVar28,uVar30,uVar29);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+LAB_00754dd5:
+    uVar30 = 0;
+    uVar28 = 0xc;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(local_cc,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    return;
+  case (I3D_scene_vtbl *)0x1d:
+    uVar16 = 1;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 2;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 8;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x40;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x100;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x200;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x800;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    iVar23 = 8;
+    pCVar15 = (C_HumanEquipment *)get_field_a8_7558b0((int)this->owner);
+    C_HumanEquipment::OnAnimationEvent(pCVar15,iVar23);
+    bVar5 = FUN_00757250((int)&this->movement->remoteActions);
+    if (!bVar5) {
+      iVar23 = get_field_c_757260((int)&this->movement->remoteActions);
+      bVar5 = *(int *)(iVar23 + 4) == 0xb;
+      goto LAB_00754f21;
+    }
+LAB_00754f31:
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    FUN_00755890(iVar23);
+    bVar5 = true;
+    iVar23 = 0x2d;
+    pCVar17 = (C_HumanWork *)get_field_a4_7558c0((int)this->owner);
+    C_HumanWork::Play(pCVar17,iVar23,bVar5);
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    FUN_007558a0(iVar23);
+    goto LAB_00754f62;
+  case (I3D_scene_vtbl *)0x1e:
+    uVar16 = get_field_2c_757240((int)&this->movement->remoteActions);
+    if (0x19 < uVar16) {
+      return;
+    }
+    uVar16 = get_first_field_41d750(&g_gameRole);
+    if ((((uVar16 & 1) == 0) && (bVar5 = C_Human::IsLocalPlayer(this->owner), !bVar5)) &&
+       (this->movement->clock == 0)) {
+      FUN_00757610((int)&this->movement->remoteActions);
+    }
+    FUN_00755900(this->owner,local_3d0);
+    FUN_00755900(gesture,&local_3f0.x);
+    S_vector::Subtract(&local_3f0,&local_410.x,local_3d0);
+    local_3f4 = local_410.z * local_410.z + local_410.y * local_410.y + local_410.x * local_410.x;
+    fVar25 = FUN_0041cf60(local_3f4 - 1.0);
+    if ((long double)1e-08 <= fVar25) {
+      if (1e-08 <= local_3f4) {
+        fVar25 = FUN_0041cf70(local_3f4);
+        fVar25 = (long double)1.0 / fVar25;
+        local_410.x = (float)((long double)local_410.x * fVar25);
+        local_410.y = (float)((long double)local_410.y * fVar25);
+        fVar25 = fVar25 * (long double)local_410.z;
+LAB_00755110:
+        local_410.z = (float)fVar25;
+      }
+      else if (local_410.x == 0.0) {
+        if (local_410.z != 0.0) {
+          if (0.0 <= local_410.z) {
+            fVar25 = (long double)1.0;
+          }
+          else {
+            fVar25 = (long double)-1.0;
+          }
+          goto LAB_00755110;
+        }
+        if (0.0 <= local_410.y) {
+          local_410.y = 1.0;
+        }
+        else {
+          local_410.y = -1.0;
+        }
+      }
+      else if (0.0 <= local_410.x) {
+        local_410.x = 1.0;
+      }
+      else {
+        local_410.x = -1.0;
+      }
+    }
+    iVar23 = 2000;
+    fVar27 = 2.0;
+    local_2e0 = 0.5;
+    pSVar18 = S_vector::Scaled(&local_410,&local_50,&local_2e0);
+    pSVar14 = (S_vector4 *)S_vector::Subtract(&local_3f0,local_40,&pSVar18->x);
+    C_HumanAnimMixer::MoveTo(&this->movement->mixer,pSVar14,fVar27,iVar23);
+    pSVar18 = &local_410;
+    bVar5 = true;
+    pCVar17 = (C_HumanWork *)get_field_a4_7558c0((int)this->owner);
+    C_HumanWork::SetFacingDir(pCVar17,pSVar18,bVar5);
+    bVar5 = true;
+    pCVar15 = (C_HumanEquipment *)get_field_a8_7558b0((int)this->owner);
+    C_HumanEquipment::PutAwayHandsItem(pCVar15,bVar5);
+    uVar16 = 1;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 2;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 8;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x40;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x100;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x200;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    uVar16 = 0x800;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755870(pvVar12,uVar16);
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    iVar23 = get_field_4c_755840(iVar23);
+    if (iVar23 == 0) {
+      puVar19 = (uint32_t *)FUN_00755820(local_1ec,10,0x10,2);
+      FUN_00757320(&this->movement->remoteActions,puVar19);
+      uVar30 = 1;
+      uVar28 = 0xc;
+      lVar26 = __ftol();
+      puVar19 = (uint32_t *)FUN_00755820(local_1e0,(int)lVar26,uVar28,uVar30);
+      FUN_00757320(&this->movement->remoteActions,puVar19);
+      return;
+    }
+    uVar30 = 0;
+    uVar28 = 0;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(local_144,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    uVar30 = 2;
+    uVar28 = 0x10;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(local_b4,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    iVar23 = get_field_4c_755840(iVar23);
+    if (iVar23 == 1) {
+      uVar29 = 0;
+      uVar30 = 1;
+      lVar26 = __ftol();
+      uVar28 = (uint32_t)lVar26;
+      puVar21 = local_84;
+    }
+    else {
+      if (iVar23 != 2) goto LAB_007552e7;
+      uVar29 = 0;
+      uVar30 = 2;
+      lVar26 = __ftol();
+      uVar28 = (uint32_t)lVar26;
+      puVar21 = local_12c;
+    }
+    puVar19 = (uint32_t *)FUN_00755820(puVar21,uVar28,uVar30,uVar29);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+LAB_007552e7:
+    uVar30 = 0;
+    uVar28 = 0xc;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(local_114,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    return;
+  case (I3D_scene_vtbl *)0x1f:
+    uVar16 = 1;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 2;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 8;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x40;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x100;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x200;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    uVar16 = 0x800;
+    pvVar12 = (void *)get_field_a4_7558c0((int)this->owner);
+    FUN_00755850(pvVar12,uVar16);
+    bVar5 = FUN_00757250((int)&this->movement->remoteActions);
+    if (!bVar5) {
+      iVar23 = get_field_c_757260((int)&this->movement->remoteActions);
+      bVar5 = *(int *)(iVar23 + 4) == 0x10;
+      goto LAB_00755422;
+    }
+LAB_00755432:
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    FUN_00755890(iVar23);
+    iVar23 = 0x2d;
+LAB_00755445:
+    bVar5 = true;
+    pCVar17 = (C_HumanWork *)get_field_a4_7558c0((int)this->owner);
+    C_HumanWork::Play(pCVar17,iVar23,bVar5);
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    FUN_007558a0(iVar23);
+    lVar26 = __ftol();
+    this->locomotion->unknown130 = (int)lVar26;
+    return;
+  case (I3D_scene_vtbl *)0x20:
+    uVar16 = get_field_2c_757240((int)&this->movement->remoteActions);
+    if (0xf < uVar16) {
+      return;
+    }
+    uVar16 = get_first_field_41d750(&g_gameRole);
+    if ((((uVar16 & 1) == 0) && (bVar5 = C_Human::IsLocalPlayer(this->owner), !bVar5)) &&
+       (this->movement->clock == 0)) {
+      FUN_00757610((int)&this->movement->remoteActions);
+    }
+    FUN_00755900(this->owner,&local_3f0.x);
+    FUN_00755900(gesture,local_3d0);
+    S_vector::Subtract(&local_3f0,&local_410.x,local_3d0);
+    local_3f4 = local_410.z * local_410.z + local_410.y * local_410.y + local_410.x * local_410.x;
+    fVar25 = FUN_0041cf60(local_3f4 - 1.0);
+    if (fVar25 < (long double)1e-08) goto LAB_00755617;
+    if (1e-08 <= local_3f4) {
+      fVar25 = FUN_0041cf70(local_3f4);
+      fVar25 = (long double)1.0 / fVar25;
+      local_410.x = (float)((long double)local_410.x * fVar25);
+      local_410.y = (float)((long double)local_410.y * fVar25);
+      fVar25 = fVar25 * (long double)local_410.z;
+    }
+    else {
+      if (local_410.x != 0.0) {
+        if (0.0 <= local_410.x) {
+          local_410.x = 1.0;
+        }
+        else {
+          local_410.x = -1.0;
+        }
+        goto LAB_00755617;
+      }
+      if (local_410.z == 0.0) {
+        if (0.0 <= local_410.y) {
+          local_410.y = 1.0;
+        }
+        else {
+          local_410.y = -1.0;
+        }
+        goto LAB_00755617;
+      }
+      if (0.0 <= local_410.z) {
+        fVar25 = (long double)1.0;
+      }
+      else {
+        fVar25 = (long double)-1.0;
+      }
+    }
+    local_410.z = (float)fVar25;
+LAB_00755617:
+    pSVar18 = &local_410;
+    bVar5 = true;
+    pCVar17 = (C_HumanWork *)get_field_a4_7558c0((int)this->owner);
+    C_HumanWork::SetFacingDir(pCVar17,pSVar18,bVar5);
+    this->movement->stanceVolumeScale = 0.45;
+    uVar16 = get_first_field_41d750(&g_gameRole);
+    if ((uVar16 & 1) != 0) {
+      iVar23 = 0;
+      local_3d4 = this->owner->vtable;
+      pSVar18 = (S_vector *)FUN_00755930(this->owner,local_20);
+      pos = (S_vector *)I3D_frame::I3D_frame__GetWorldPos(this->movement->joints[4].frame);
+      (*local_3d4->Hit)(0xb,1000.0,pos,pSVar18,(C_Actor *)gesture,iVar23);
+    }
+    iVar23 = get_field_a4_7558c0((int)this->owner);
+    iVar23 = get_field_4c_755840(iVar23);
+    if (iVar23 == 0) {
+      puVar19 = (uint32_t *)FUN_00755820(auStack_198,10,0x11,2);
+      FUN_00757320(&this->movement->remoteActions,puVar19);
+      return;
+    }
+    uVar30 = 0;
+    uVar28 = 0;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(auStack_1c8,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    uVar30 = 2;
+    uVar28 = 0x11;
+    lVar26 = __ftol();
+    puVar19 = (uint32_t *)FUN_00755820(auStack_1b0,(int)lVar26,uVar28,uVar30);
+    FUN_00757320(&this->movement->remoteActions,puVar19);
+    return;
+  case (I3D_scene_vtbl *)0x21:
+    bVar5 = FUN_00757250((int)&this->movement->remoteActions);
+    if ((!bVar5) &&
+       (iVar23 = get_field_c_757260((int)&this->movement->remoteActions),
+       *(int *)(iVar23 + 4) == 0x11)) {
+      FUN_00757290((int)&this->movement->remoteActions);
+    }
+    break;
+  case (I3D_scene_vtbl *)0x24:
+    if (0xb < (uint32_t)(this->movement->remoteActions).size) {
+      return;
+    }
+    if ((((g_gameRole & 1) == 0) && (bVar5 = C_Human::IsLocalPlayer(this->owner), !bVar5)) &&
+       (pCVar11 = this->movement, pCVar11->clock == 0)) {
+      FUN_00757970(&pCVar11->remoteActions,(int *)local_3d0,
+                   (int)(pCVar11->remoteActions).first.blockFirst,
+                   (pCVar11->remoteActions).first.blockLast,(pCVar11->remoteActions).first.next,
+                   (pCVar11->remoteActions).first.mapEntry,
+                   (int)(pCVar11->remoteActions).last.blockFirst,
+                   (pCVar11->remoteActions).last.blockLast,(pCVar11->remoteActions).last.next,
+                   (pCVar11->remoteActions).last.mapEntry);
+    }
+    C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,true);
+    local_250.x = 0.0;
+    local_250.y = 0.0;
+    local_250.z = 0.0;
+    C_HumanAnimMixer::SetVelocity
+              (&this->movement->mixer,&local_250,0.0,0.0,&this->locomotion->velocity);
+    pCVar11 = this->movement;
+    (pCVar11->mixer).move.x = 0.0;
+    (pCVar11->mixer).move.y = 0.0;
+    (pCVar11->mixer).move.z = 0.0;
+    pCVar11 = this->movement;
+    if ((pCVar11->unknownA34 != 0) && (pCVar11->unknownA34 != 1)) goto LAB_007535a6;
+    if ((((this->owner->m_body).work)->request).stance == 1) {
+      local_2b8 = 10;
+      if ((pCVar11->remoteActions).size == 0) {
+LAB_0075351a:
+        FUN_00750940((int)&pCVar11->remoteActions);
+        puVar19 = (pCVar11->remoteActions).last.next;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_00753531:
+        FUN_00750a90(puVar19,&local_2b8);
+      }
+      else {
+        puVar19 = (pCVar11->remoteActions).last.next;
+        puVar22 = (pCVar11->remoteActions).last.blockLast;
+        if (puVar19 == puVar22) goto LAB_0075351a;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+        if (puVar19 + 3 != puVar22) goto LAB_00753531;
+        FUN_00750a90(puVar19,&local_2b8);
+        FUN_00750940((int)&pCVar11->remoteActions);
+      }
+      (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+      lVar26 = __ftol();
+      local_3b4 = (uint32_t)lVar26;
+      pCVar11 = this->movement;
+      pSVar20 = &pCVar11->remoteActions;
+      if ((pCVar11->remoteActions).size == 0) {
+LAB_0075358a:
+        FUN_00750940((int)pSVar20);
+        puVar19 = (pCVar11->remoteActions).last.next;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+        puVar22 = &local_3b4;
+        goto LAB_0075359e;
+      }
+      puVar19 = (pCVar11->remoteActions).last.next;
+      puVar22 = (pCVar11->remoteActions).last.blockLast;
+      if (puVar19 == puVar22) goto LAB_0075358a;
+      puVar10 = puVar19 + 3;
+      bVar5 = puVar10 == puVar22;
+      puVar22 = &local_3b4;
+LAB_0075348f:
+      (pSVar20->last).next = puVar10;
+      if (!bVar5) goto LAB_0075359e;
+      FUN_00750a90(puVar19,puVar22);
+      FUN_00750940((int)pSVar20);
+    }
+    else {
+      lVar26 = __ftol();
+      local_324 = (uint32_t)lVar26;
+      if ((pCVar11->remoteActions).size == 0) {
+LAB_0075328b:
+        FUN_00750940((int)&pCVar11->remoteActions);
+        puVar19 = (pCVar11->remoteActions).last.next;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_007532a2:
+        FUN_00750a90(puVar19,&local_324);
+      }
+      else {
+        puVar19 = (pCVar11->remoteActions).last.next;
+        puVar22 = (pCVar11->remoteActions).last.blockLast;
+        if (puVar19 == puVar22) goto LAB_0075328b;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+        if (puVar19 + 3 != puVar22) goto LAB_007532a2;
+        FUN_00750a90(puVar19,&local_324);
+        FUN_00750940((int)&pCVar11->remoteActions);
+      }
+      (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+      lVar26 = __ftol();
+      local_288 = (uint32_t)lVar26;
+      pCVar11 = this->movement;
+      if ((pCVar11->remoteActions).size == 0) {
+LAB_00753315:
+        FUN_00750940((int)&pCVar11->remoteActions);
+        puVar19 = (pCVar11->remoteActions).last.next;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+LAB_0075332c:
+        FUN_00750a90(puVar19,&local_288);
+      }
+      else {
+        puVar19 = (pCVar11->remoteActions).last.next;
+        puVar22 = (pCVar11->remoteActions).last.blockLast;
+        if (puVar19 == puVar22) goto LAB_00753315;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+        if (puVar19 + 3 != puVar22) goto LAB_0075332c;
+        FUN_00750a90(puVar19,&local_288);
+        FUN_00750940((int)&pCVar11->remoteActions);
+      }
+      (pCVar11->remoteActions).size = (pCVar11->remoteActions).size + 1;
+      iVar23 = (((this->owner->m_body).work)->request).stance;
+      if (iVar23 == 0) {
+        lVar26 = __ftol();
+        local_2a0 = (uint32_t)lVar26;
+        pCVar11 = this->movement;
+        pSVar20 = &pCVar11->remoteActions;
+        if ((pCVar11->remoteActions).size == 0) {
+LAB_0075341c:
+          FUN_00750940((int)pSVar20);
+          puVar19 = (pCVar11->remoteActions).last.next;
+          puVar22 = &local_2a0;
+          (pCVar11->remoteActions).last.next = puVar19 + 3;
+          goto LAB_00753433;
+        }
+        puVar19 = (pCVar11->remoteActions).last.next;
+        puVar22 = (pCVar11->remoteActions).last.blockLast;
+        if (puVar19 == puVar22) goto LAB_0075341c;
+        puVar10 = puVar19 + 3;
+        bVar5 = puVar10 == puVar22;
+        puVar22 = &local_2a0;
+LAB_0075339e:
+        (pSVar20->last).next = puVar10;
+        if (!bVar5) goto LAB_00753433;
+        FUN_00750a90(puVar19,puVar22);
+        FUN_00750940((int)pSVar20);
+LAB_00753438:
+        pSVar20->size = pSVar20->size + 1;
+      }
+      else if (iVar23 == 2) {
+        lVar26 = __ftol();
+        local_3c0 = (uint32_t)lVar26;
+        pCVar11 = this->movement;
+        pSVar20 = &pCVar11->remoteActions;
+        if ((pCVar11->remoteActions).size != 0) {
+          puVar19 = (pCVar11->remoteActions).last.next;
+          puVar22 = (pCVar11->remoteActions).last.blockLast;
+          if (puVar19 != puVar22) {
+            puVar10 = puVar19 + 3;
+            bVar5 = puVar10 == puVar22;
+            puVar22 = &local_3c0;
+            goto LAB_0075339e;
+          }
+        }
+        FUN_00750940((int)pSVar20);
+        puVar19 = (pCVar11->remoteActions).last.next;
+        (pCVar11->remoteActions).last.next = puVar19 + 3;
+        puVar22 = &local_3c0;
+LAB_00753433:
+        FUN_00750a90(puVar19,puVar22);
+        goto LAB_00753438;
+      }
+      lVar26 = __ftol();
+      local_2fc = (uint32_t)lVar26;
+      pCVar11 = this->movement;
+      pSVar20 = &pCVar11->remoteActions;
+      if ((pCVar11->remoteActions).size != 0) {
+        puVar19 = (pCVar11->remoteActions).last.next;
+        puVar22 = (pCVar11->remoteActions).last.blockLast;
+        if (puVar19 != puVar22) {
+          puVar10 = puVar19 + 3;
+          bVar5 = puVar10 == puVar22;
+          puVar22 = &local_2fc;
+          goto LAB_0075348f;
+        }
+      }
+      FUN_00750940((int)pSVar20);
+      puVar19 = (pCVar11->remoteActions).last.next;
+      (pCVar11->remoteActions).last.next = puVar19 + 3;
+      puVar22 = &local_2fc;
+LAB_0075359e:
+      FUN_00750a90(puVar19,puVar22);
+    }
+    pSVar20->size = pSVar20->size + 1;
+LAB_007535a6:
+    C_HumanWork::Play((this->owner->m_body).work,0x2d,true);
+    local_230.x = 0.0;
+    local_230.y = 0.0;
+    local_230.z = 0.0;
+    C_HumanWork::SetLookAt((this->owner->m_body).work,&local_230,true);
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 1;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 2;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 8;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x40;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x100;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x200;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 | 0x800;
+    return;
+  case (I3D_scene_vtbl *)0x25:
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffffe;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffffd;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffff7;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xffffffbf;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffeff;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffffdff;
+    pCVar17 = (this->owner->m_body).work;
+    pCVar17->blocked2 = pCVar17->blocked2 & 0xfffff7ff;
+    pCVar11 = this->movement;
+    iVar23 = (pCVar11->remoteActions).size;
+    if (iVar23 != 0) {
+      local_3f0.x = (float)(pCVar11->remoteActions).first.blockFirst;
+      local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+      local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+      if (*(int *)((int)(pCVar11->remoteActions).first.next + 4) == 1) {
+        pvVar12 = (void *)((int)(pCVar11->remoteActions).first.next + 0xc);
+        iVar23 = (pCVar11->remoteActions).size - 1;
+        (pCVar11->remoteActions).first.next = pvVar12;
+        (pCVar11->remoteActions).size = iVar23;
+        if ((iVar23 == 0) || (pvVar12 == (pCVar11->remoteActions).first.blockLast)) {
+          FUN_00757da0((int)&pCVar11->remoteActions);
+        }
+        pCVar11 = this->movement;
+        if ((pCVar11->remoteActions).size != 0) {
+          local_3f0.x = (float)(pCVar11->remoteActions).first.blockFirst;
+          local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+          local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+          if (*(int *)((int)(pCVar11->remoteActions).first.next + 4) == 0x12) {
+            pvVar12 = (void *)((int)(pCVar11->remoteActions).first.next + 0xc);
+            iVar23 = (pCVar11->remoteActions).size - 1;
+            (pCVar11->remoteActions).first.next = pvVar12;
+            (pCVar11->remoteActions).size = iVar23;
+            if ((iVar23 == 0) || (pvVar12 == (pCVar11->remoteActions).first.blockLast)) {
+              FUN_00757da0((int)&pCVar11->remoteActions);
+            }
+          }
+        }
+        pCVar11 = this->movement;
+        if ((pCVar11->remoteActions).size != 0) {
+          pSVar1 = &(pCVar11->remoteActions).first;
+          local_3f0.x = (float)pSVar1->blockFirst;
+          local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+          local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+          if (*(int *)((int)(pCVar11->remoteActions).first.next + 4) != 2) {
+            local_3f0.x = (float)pSVar1->blockFirst;
+            local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+            local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+            if (*(int *)((int)(pCVar11->remoteActions).first.next + 4) != 0) goto LAB_007538e4;
+          }
+          pSVar20 = &pCVar11->remoteActions;
+          pvVar12 = (void *)((int)(pCVar11->remoteActions).first.next + 0xc);
+          iVar23 = (pCVar11->remoteActions).size - 1;
+          (pCVar11->remoteActions).first.next = pvVar12;
+          (pCVar11->remoteActions).size = iVar23;
+          if ((iVar23 == 0) || (pvVar12 == (pCVar11->remoteActions).first.blockLast)) {
+LAB_007538df:
+            FUN_00757da0((int)pSVar20);
+          }
+        }
+      }
+      else if (iVar23 != 0) {
+        local_3f0.x = (float)(pCVar11->remoteActions).first.blockFirst;
+        local_3f0.y = (float)(pCVar11->remoteActions).first.blockLast;
+        local_3e4 = (pCVar11->remoteActions).first.mapEntry;
+        if (*(int *)((int)(pCVar11->remoteActions).first.next + 4) == 0x12) {
+          pSVar20 = &pCVar11->remoteActions;
+          pvVar12 = (void *)((int)(pCVar11->remoteActions).first.next + 0xc);
+          iVar23 = (pCVar11->remoteActions).size - 1;
+          (pCVar11->remoteActions).first.next = pvVar12;
+          (pCVar11->remoteActions).size = iVar23;
+          if ((iVar23 == 0) || (pvVar12 == (pCVar11->remoteActions).first.blockLast))
+          goto LAB_007538df;
+        }
+      }
+    }
+LAB_007538e4:
+    iVar23 = this->movement->unknownA34;
+    if ((iVar23 == 0) || (iVar23 == 1)) {
+      ((this->owner->m_body).work)->forced = true;
+      C_HumanWork::Play((this->owner->m_body).work,0x2d,true);
+      ((this->owner->m_body).work)->forced = false;
+    }
+    goto LAB_00754f62;
+  }
+}
+
+// 0x00755800
+void __thiscall FUN_00755800(void *this,uint32_t param_1)
+{
+  *(uint32_t *)this = param_1;
+}
+
+// 0x00755810
+void __thiscall FUN_00755810(void *this,uint32_t param_1)
+{
+  *(uint32_t *)this = param_1;
+}
+
+// 0x00755820
+void __thiscall FUN_00755820(void *this,uint32_t param_1,uint32_t param_2,uint32_t param_3)
+{
+  *(uint32_t *)this = param_1;
+  *(uint32_t *)((int)this + 4) = param_2;
+  *(uint32_t *)((int)this + 8) = param_3;
+}
+
+// 0x00755840
+uint32_t __fastcall get_field_4c_755840(int param_1)
+{
+  return *(uint32_t *)(param_1 + 0x4c);
+}
+
+// 0x00755850
+void __thiscall FUN_00755850(void *this,uint32_t param_1)
+{
+  *(uint32_t *)((int)this + 0xd4) = *(uint32_t *)((int)this + 0xd4) & ~param_1;
+}
+
+// 0x00755870
+void __thiscall FUN_00755870(void *this,uint32_t param_1)
+{
+  *(uint32_t *)((int)this + 0xd4) = *(uint32_t *)((int)this + 0xd4) | param_1;
+}
+
+// 0x00755890
+void __fastcall FUN_00755890(int param_1)
+{
+  *(uint8_t *)(param_1 + 0xb0) = 1;
+}
+
+// 0x007558a0
+void __fastcall FUN_007558a0(int param_1)
+{
+  *(uint8_t *)(param_1 + 0xb0) = 0;
+}
+
+// 0x007558b0
+uint32_t __fastcall get_field_a8_7558b0(int param_1)
+{
+  return *(uint32_t *)(param_1 + 0xa8);
+}
+
+// 0x007558c0
+uint32_t __fastcall get_field_a4_7558c0(int param_1)
+{
+  return *(uint32_t *)(param_1 + 0xa4);
+}
+
+// 0x007558d0
+bool __fastcall FUN_007558d0(int param_1)
+{
+  return *(int *)(*(int *)(*(int *)(param_1 + 600) + 0xa4) + 0xb8) == 5;
+}
+
+// 0x007558f0
+void __thiscall set_field_18c_7558f0(void *this,uint8_t param_1)
+{
+  *(uint8_t *)((int)this + 0x18c) = param_1;
+}
+
+// 0x00755900
+void __thiscall FUN_00755900(void *this,uint32_t *param_1)
+{
+  *param_1 = *(uint32_t *)((int)this + 0x30);
+  param_1[1] = *(uint32_t *)((int)this + 0x34);
+  param_1[2] = *(uint32_t *)((int)this + 0x38);
+  param_1[3] = *(uint32_t *)((int)this + 0x3c);
+}
+
+// 0x00755930
+void __thiscall FUN_00755930(void *this,uint32_t *param_1)
+{
+  *param_1 = *(uint32_t *)((int)this + 0x40);
+  param_1[1] = *(uint32_t *)((int)this + 0x44);
+  param_1[2] = *(uint32_t *)((int)this + 0x48);
+  param_1[3] = *(uint32_t *)((int)this + 0x4c);
+}
+
+// 0x00755960
+void __thiscall C_HumanIdle::Unknown755960(C_HumanIdle *this,int param_1)
+{
+  uStack_88 = (I3D_scene_vtbl *)CONCAT13(1,(undefined3)uStack_88);
+  pCVar2 = this->movement;
+  if (pCVar2->unknownA34 == 0) {
+    return;
+  }
+  if (pCVar2->unknownA38 == -10000) {
+    return;
+  }
+  uVar18 = pCVar2->unknownA34;
+  switch(uVar18 & 0x3ff) {
+  case 1:
+    if ((0 < pCVar2->unknownA38) && (pCVar2->unknownA38 != -10000)) break;
+    pCVar2->unknownA38 = -10000;
+    this->movement->unknownA34 = 0;
+    goto LAB_007567f6;
+  case 2:
+  case 4:
+  case 6:
+  case 0xb:
+  case 0xd:
+    if (((pCVar2->unknownA38 < -999) || (0 < pCVar2->unknownA38)) || ((uVar18 & 0x400) == 0)) break;
+    pIVar15 = pCVar2->owner->m_frame;
+    pCVar9 = GetGame();
+    (*pCVar9->m_scene->vtable->RemoveHumanModel)((S_vector4 *)pCVar9->m_scene);
+    pCVar10 = (*this->movement->vehicle->vtable->GetSeatOccupant)(this->movement->seat);
+    if (pCVar10 != nullptr) {
+      pCVar17 = this->owner;
+      pCVar11 = (C_Human *)(*this->movement->vehicle->vtable->GetSeatOccupant)(this->movement->seat)
+      ;
+      if (pCVar11 != pCVar17) {
+        pCVar14 = (pCVar17->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xfffffffe;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xfffffffd;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xfffffff7;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xffffffbf;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xffffbfff;
+        this->movement->unknownA44 = 0;
+        this->movement->unknownA38 = -10000;
+        this->movement->unknownA34 = 0;
+        this->movement->vehicle = nullptr;
+        this->movement->unknown228 = 0;
+        return;
+      }
+    }
+    (*this->movement->vehicle->vtable->Unknown74)(this->movement->seat,this->owner,pIVar15);
+    this->owner->m_vehicle = this->movement->vehicle;
+    this->owner->m_seat = this->movement->seat;
+    pCVar2 = this->movement;
+    uVar18 = pCVar2->unknownA44;
+    if ((uVar18 & 4) == 0) {
+      if ((uVar18 & 8) == 0) {
+        if ((uVar18 & 0x40) == 0) {
+          if ((char)uVar18 < '\0') {
+            if ((pCVar2->unknownA34 & 0x3ffU) == 4) {
+              (pCVar2->nextAnimState).anim.anim = 0x6f;
+            }
+            else {
+              (pCVar2->nextAnimState).anim.anim = 0x9b;
+            }
+          }
+          else if ((uVar18 & 1) == 0) {
+            (pCVar2->nextAnimState).anim.anim = 0x9f;
+          }
+          else {
+            (pCVar2->nextAnimState).anim.anim = 0x9e;
+          }
+          goto LAB_00755c30;
+        }
+        (pCVar2->nextAnimState).anim.anim = 0x37;
+        S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+        pCVar2 = this->movement;
+        (pCVar2->nextAnimState).anim.stance = 2;
+        S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+        iVar19 = 2;
+      }
+      else {
+        (pCVar2->nextAnimState).anim.anim = 0x37;
+        S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+        pCVar2 = this->movement;
+        (pCVar2->nextAnimState).anim.stance = 1;
+        S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+        iVar19 = 1;
+      }
+    }
+    else {
+      (pCVar2->nextAnimState).anim.anim = 0x2d;
+LAB_00755c30:
+      S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+      pCVar2 = this->movement;
+      (pCVar2->nextAnimState).anim.stance = 0;
+      S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+      iVar19 = 0;
+    }
+    ((this->owner->m_body).work)->forced = true;
+    C_HumanWork::Play((this->owner->m_body).work,(this->movement->nextAnimState).anim.anim,false);
+    (this->movement->request).stance = (this->movement->nextAnimState).anim.stance;
+    C_HumanWork::SetStance
+              ((this->owner->m_body).work,(this->movement->nextAnimState).anim.stance,false);
+    pCVar3 = this->movement->weaponPose2;
+    iVar13 = (this->movement->nextAnimState).anim.stance;
+    *(int *)(pCVar3->_pad_0004 + 0x62cc) = iVar13;
+    if (iVar13 == 2) {
+      pCVar3->_pad_0004[0x65ec] = '\x01';
+      pCVar3->_pad_0004[0x65f0] = 0xf4;
+      pCVar3->_pad_0004[0x65f1] = '\x01';
+      pCVar3->_pad_0004[0x65f2] = '\0';
+      pCVar3->_pad_0004[0x65f3] = '\0';
+    }
+    if ((this->movement->nextAnimState).anim.stance != 2) {
+      this->movement->weaponPose2->_pad_0004[0x65ec] = '\0';
+    }
+    ((this->owner->m_body).work)->forced = false;
+    pCVar2 = this->movement;
+    FUN_007ae190(pCVar2->weaponPose2,pCVar2->unknownA44,(int *)pCVar2->vehicle,pCVar2->seat);
+    pCVar2 = this->movement;
+    if ((pCVar2->unknownA44 & 0x10) == 0) {
+      pCVar2->hitVolumeScale[0] = 0.0;
+      this->movement->hitVolumeScale[1] = 0.0;
+    }
+    else {
+      pCVar2->hitVolumeScale[0] = 0.0;
+      this->movement->hitVolumeScale[1] = 0.0;
+    }
+    pCVar2 = this->movement;
+    if (((pCVar2->unknownA44 & 1) == 0) ||
+       (bVar8 = (*pCVar2->vehicle->vtable->HasSeatWeapon)(pCVar2->seat), bVar8)) {
+      pCVar2 = this->movement;
+      uVar18 = pCVar2->unknownA44;
+      if ((uVar18 & 0x100) == 0) {
+        if (((uVar18 & 0x1d) == 0) && ((uVar18 & 0x20) != 0)) {
+          C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,false);
+          (this->movement->nextAnimState).activity = 0x4c;
+          ((this->owner->m_body).work)->forced = true;
+          C_HumanWork::PlayWorkAnimation
+                    ((this->owner->m_body).work,(this->movement->nextAnimState).activity,false);
+          ((this->owner->m_body).work)->forced = false;
+          this->movement->unknownA44 = 2;
+        }
+        else {
+          if (((uVar18 & 0xc) == 0) || ((uVar18 & 0x20) == 0)) {
+            (pCVar2->nextAnimState).activity = 0x4c;
+            this->movement->unknownA44 = 5;
+            this_00 = (this->owner->m_body).equipment;
+            goto LAB_00755fc0;
+          }
+          (pCVar2->nextAnimState).activity = 0x4c;
+          C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,false);
+          this->movement->unknownA44 = 4;
+        }
+      }
+      else {
+        pvVar12 = (*pCVar2->vehicle->vtable->GetSeatWeapon)(pCVar2->seat);
+        if (pvVar12 == nullptr) {
+          this->movement->unknownA44 = 9;
+        }
+        else {
+          iVar13 = (**(code **)(**(int **)((int)pvVar12 + 0x48) + 0xc))();
+          this->movement->unknownA44 = iVar13 + 6;
+        }
+        pCVar2 = this->movement;
+        iVar13 = pCVar2->unknownA44;
+        if (iVar13 < 9) {
+          (pCVar2->nextAnimState).activity = 0x4c;
+          if (((this->movement->nextAnimState).anim.anim == 0x9f) ||
+             (piVar21 = *(int **)((int)g_idleAnimTable + (iVar13 - 6 + iVar19 * 3) * 4),
+             piVar21 == nullptr)) {
+            piVar21 = nullptr;
+          }
+          else {
+            uStack_94 = (float)((uint32_t)uStack_94 & 0xffffff);
+          }
+          FUN_007b9070(this->movement->weaponPose2,piVar21);
+        }
+        else {
+          (pCVar2->nextAnimState).activity = 0x47;
+          (this->movement->nextAnimState).activityVariant = 0;
+          this->movement->unknownA44 = 3;
+        }
+        ((this->owner->m_body).work)->forced = true;
+        C_HumanWork::PlayWorkAnimation
+                  ((this->owner->m_body).work,(this->movement->nextAnimState).activity,false);
+        ((this->owner->m_body).work)->forced = false;
+        this_00 = (this->owner->m_body).equipment;
+LAB_00755fc0:
+        C_HumanEquipment::PutAwayHandsItem(this_00,true);
+      }
+    }
+    else {
+      (this->movement->nextAnimState).activity = 0x46;
+      (this->movement->nextAnimState).activityVariant = 0;
+      ((this->owner->m_body).work)->forced = true;
+      C_HumanWork::PlayWorkAnimation
+                ((this->owner->m_body).work,(this->movement->nextAnimState).activity,false);
+      ((this->owner->m_body).work)->forced = false;
+      C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,true);
+      this->movement->unknownA44 = 1;
+    }
+    this->movement->unknownA38 = -2000;
+    this->movement->stanceVolumeScale = 0.0;
+    C_HumanAnimPlayer::Update(this->animPlayer);
+    C_HumanAnimMixer::UpdateStages(&this->movement->mixer,2000,2000,false,nullptr);
+    iVar19 = this->movement->unknownA44;
+    if ((iVar19 == 2) || (iVar19 == 4)) {
+      pCVar14 = (this->owner->m_body).work;
+      uVar18 = pCVar14->blocked2 & 0xfffffbff;
+    }
+    else {
+      pCVar14 = (this->owner->m_body).work;
+      uVar18 = pCVar14->blocked2 | 0x400;
+    }
+    pCVar14->blocked2 = uVar18;
+    pCVar14 = (this->owner->m_body).work;
+    pCVar14->blocked2 = pCVar14->blocked2 | 0x800;
+    pCVar14 = (this->owner->m_body).work;
+    pCVar14->blocked2 = pCVar14->blocked2 | 8;
+    iVar19 = this->movement->unknownA44;
+    if ((iVar19 == 2) || (iVar19 == 4)) {
+      pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,3);
+      if (pIVar15 != nullptr) {
+        pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,3);
+        bVar8 = true;
+        goto LAB_007560d7;
+      }
+    }
+    else {
+      pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,3);
+      if (pIVar15 != nullptr) {
+        pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,3);
+        bVar8 = false;
+LAB_007560d7:
+        (*pIVar15->vtable->SetOn)(pIVar15,bVar8);
+      }
+    }
+    pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,1);
+    if (pIVar15 != nullptr) {
+      pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,1);
+      (*pIVar15->vtable->SetOn)(pIVar15,false);
+    }
+    pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,2);
+    if (pIVar15 != nullptr) {
+      pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,2);
+      (*pIVar15->vtable->SetOn)(pIVar15,false);
+    }
+    if ((this->movement->shadow != nullptr) && (uStack_94._3_1_ != '\0')) {
+      C_HumanVisual::RemoveShadow(&((this->owner->m_body).movement)->visual);
+    }
+    if (((uint8_t)g_gameRole & 2) != 0) {
+      pCVar16 = (C_Team *)field_address_1c_461410(0x89ae78);
+      pCVar17 = (C_Human *)C_Team::GetActivePlayer(pCVar16);
+      if (this->owner == pCVar17) {
+        iVar19 = field_address_1c_461410(0x89ae78);
+        FUN_0045dac0(iVar19);
+      }
+    }
+    this->movement->unknownA38 = -10000;
+    pCVar14 = (this->owner->m_body).work;
+    pCVar14->blocked2 = pCVar14->blocked2 & 0xffffbfff;
+    iVar19 = this->movement->unknownA44;
+    if ((2 < iVar19) && (iVar19 < 5)) {
+      pCVar14 = (this->owner->m_body).work;
+      pCVar14->blocked2 = pCVar14->blocked2 & 0xfffff7ff;
+    }
+    uVar18 = (*this->movement->vehicle->vtable->GetSeatFlags)(this->movement->seat);
+    if ((uVar18 & 0x10) != 0) {
+      pIVar15 = this->owner->m_frame;
+      (*pIVar15->vtable->SetOn)(pIVar15,false);
+    }
+    break;
+  case 3:
+  case 5:
+  case 7:
+  case 0xc:
+    if (pCVar2->vehicle == nullptr) {
+      pCVar2->unknownA38 = -10000;
+    }
+    else if (pCVar2->unknownA38 < 1) {
+      pCVar2->unknownA38 = 20000;
+    }
+    else if (10000 < pCVar2->unknownA38) {
+      if ((uVar18 & 0x400) != 0) {
+        bVar8 = (*pCVar2->vehicle->vtable->Unknown84)(pCVar2->seat);
+        if (!bVar8) {
+          pCVar14 = (this->owner->m_body).work;
+          pCVar14->blocked2 = pCVar14->blocked2 & 0xffffbfff;
+          this->movement->unknownA38 = -10000;
+          this->movement->unknownA34 = 0x402;
+          this->movement->unknown228 = 0;
+          return;
+        }
+        pIVar15 = this->movement->owner->m_frame;
+        pCVar9 = GetGame();
+        local_68 = pCVar9->m_scene;
+        uStack_88 = local_68->vtable;
+        (*pIVar15->vtable->FindChildFrame)(pIVar15,&DAT_0083939c,0xffff);
+        (*pIVar15->vtable->FindChildFrame)(pIVar15,&DAT_00839398,0xffff);
+        (*uStack_88->AddHumanModel)((S_vector4 *)local_68);
+        pCVar2 = this->movement;
+        FUN_007ae190(pCVar2->weaponPose2,pCVar2->unknownA44,nullptr,pCVar2->seat);
+        this->movement->owner->m_vehicle = nullptr;
+        this->movement->owner->m_seat = -1;
+        this->locomotion->unknown0D8 = 0;
+        uVar18 = (*this->movement->vehicle->vtable->GetSeatFlags)(this->movement->seat);
+        if ((uVar18 & 0x10) != 0) {
+          pIVar15 = this->owner->m_frame;
+          (*pIVar15->vtable->SetOn)(pIVar15,true);
+        }
+        pCVar2 = this->movement;
+        (pCVar2->nextAnimState).anim.anim = 0x2d;
+        S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+        pCVar2 = this->movement;
+        (pCVar2->nextAnimState).anim.stance = (((this->owner->m_body).work)->request).stance;
+        S_HumanAnimRef::Normalize(&(pCVar2->nextAnimState).anim);
+        (this->movement->nextAnimState).activity = 0x4c;
+        ((this->owner->m_body).work)->forced = true;
+        C_HumanWork::Play((this->owner->m_body).work,0x2d,false);
+        C_HumanWork::PlayWorkAnimation((this->owner->m_body).work,0x4c,false);
+        ((this->owner->m_body).work)->forced = false;
+        C_HumanAnimPlayer::Update(this->animPlayer);
+        pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,3);
+        if (pIVar15 != nullptr) {
+          pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,3);
+          (*pIVar15->vtable->SetOn)(pIVar15,true);
+        }
+        pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,1);
+        if (pIVar15 != nullptr) {
+          pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,1);
+          (*pIVar15->vtable->SetOn)(pIVar15,true);
+        }
+        pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,2);
+        if (pIVar15 != nullptr) {
+          pIVar15 = C_HumanEquipment::GetModel((this->owner->m_body).equipment,2);
+          (*pIVar15->vtable->SetOn)(pIVar15,true);
+        }
+        if ((this->movement->unknownA34 & 0x3ffU) != 5) {
+          C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,false);
+        }
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xfffffffe;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xfffffffd;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xffffffbf;
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 & 0xfffff7ff;
+        C_HumanAnimMixer::ClearQueue(&this->movement->mixer,0);
+        pCVar4 = this->animPlayer;
+        pCVar4->animDelay = -10000;
+        pCVar4->animDelayState = 0;
+        pCVar4 = this->animPlayer;
+        pCVar4->carryDelay = -10000;
+        pCVar4->carryDelayState = 0;
+        pCVar4 = this->animPlayer;
+        pCVar4->activityDelay = -10000;
+        pCVar4->activityDelayState = 0;
+        this->movement->stanceVolumeScale = 0.8;
+        this->movement->hitVolumeScale[0] = 1.0;
+        this->movement->hitVolumeScale[1] = 1.0;
+        iVar19 = this->movement->unknownA44;
+        if ((iVar19 != 2) && (iVar19 != 4)) {
+          pCVar14 = (this->owner->m_body).work;
+          pCVar14->blocked2 = pCVar14->blocked2 & 0xfffffbff;
+        }
+        local_64._0_4_ = 0.0;
+        local_64._4_4_ = 0.0;
+        local_64._8_4_ = 0.0;
+        auStack_44._0_4_ = 0.0;
+        auStack_44._4_4_ = 0.0;
+        auStack_44._8_4_ = 0.0;
+        C_HumanWork::ApplyHit
+                  ((this->owner->m_body).work,0,(S_vector *)auStack_44,(S_vector *)local_64);
+        C_HumanAnimMixer::UpdateStages(&this->movement->mixer,2000,2000,false,nullptr);
+        pIVar15 = this->owner->m_frame;
+        if ((pIVar15->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar15);
+        }
+        pCVar17 = this->owner;
+        (pCVar17->m_position).x = (pIVar15->m_worldMatrix).m[3][0];
+        (pCVar17->m_position).y = (pIVar15->m_worldMatrix).m[3][1];
+        (pCVar17->m_position).z = (pIVar15->m_worldMatrix).m[3][2];
+        (pCVar17->m_position).w = (pIVar15->m_worldMatrix).m[3][3];
+        pCVar2 = (this->owner->m_body).movement;
+        pCVar17 = pCVar2->owner;
+        pCVar2->unknown228 = 0;
+        local_b4 = (I3D_frame *)(pCVar17->m_position).x;
+        fStack_b0 = (pCVar17->m_position).y;
+        fStack_ac = (pCVar17->m_position).z;
+        fStack_a8 = (pCVar17->m_position).w;
+        C_HumanVisual::SetNetworkPosition(&pCVar2->visual,(float *)&local_b4);
+        pCVar17 = pCVar2->owner;
+        local_b4 = (I3D_frame *)(pCVar17->m_position).x;
+        fStack_b0 = (pCVar17->m_position).y;
+        fStack_ac = (pCVar17->m_position).z;
+        fStack_a8 = (pCVar17->m_position).w;
+        C_HumanVisual::SetNetworkPosition(&pCVar2->visual,(float *)&local_b4);
+        pCVar17 = pCVar2->owner;
+        (pCVar2->visual).sectorTime = 10000;
+        (pCVar2->visual).lighting.sampleDue = true;
+        pIVar15 = pCVar17->m_frame;
+        pCVar9 = GetGame();
+        (*pCVar9->m_scene->vtable->Unknown144)(pCVar9->m_scene,pIVar15);
+        this->movement->unknownA44 = 0;
+        C_HumanLocomotion::Unknown770ff0(this->locomotion,'\0');
+        pCVar5 = this->locomotion;
+        pCVar5->unknown110 = 0;
+        pCVar5->unknown094 = 1000;
+        pCVar5->unknown098 = '\x01';
+        C_HumanMovement::UpdateModelNames((this->owner->m_body).movement);
+        C_HumanMovement::UpdateDummies(this->movement);
+        C_HumanMovement::UpdateHitSpheres(this->movement);
+        this->locomotion->unknown0FC = 100000.0;
+        pIVar15 = this->movement->shadow;
+        if (pIVar15 != nullptr) {
+          (*pIVar15->vtable->Update)(pIVar15);
+        }
+      }
+      if (((uint8_t)g_gameRole & 2) != 0) {
+        pCVar16 = (C_Team *)field_address_1c_461410(0x89ae78);
+        pCVar17 = (C_Human *)C_Team::GetActivePlayer(pCVar16);
+        if (this->owner == pCVar17) {
+          iVar19 = field_address_1c_461410(0x89ae78);
+          FUN_0045dac0(iVar19);
+        }
+      }
+      this->movement->unknownA38 = -10000;
+      this->movement->unknownA34 = 0;
+      this->movement->vehicle = nullptr;
+      this->movement->unknown228 = 0;
+      pCVar14 = (this->owner->m_body).work;
+      pCVar14->blocked2 = pCVar14->blocked2 & 0xffffbfff;
+      puVar1 = &((this->owner->m_body).work)->blocked2;
+      *puVar1 = *puVar1 & 0xfffffff7;
+    }
+    break;
+  case 8:
+    if (0 < pCVar2->unknownA38) {
+      pCVar2 = this->movement;
+      local_84.x = (float)pCVar2;
+      iVar19 = C_HumanMovement::GetAnimLength(pCVar2,0x1c,0,1);
+      if (((pCVar2->unknownA38 == iVar19) &&
+          (pIVar15 = (I3D_frame *)pCVar2->seat, pIVar15 != nullptr)) &&
+         ((*(int *)((int)local_84.x + 0xa34) & 0x400U) != 0)) {
+        local_84.x = (float)(*(C_Human **)((int)local_84.x + 600))->m_frame;
+        pCVar9 = GetGame();
+        (*pCVar9->m_scene->vtable->RemoveHumanModel)((S_vector4 *)pCVar9->m_scene);
+        if ((pIVar15->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar15);
+        }
+        local_b4 = (I3D_frame *)(pIVar15->m_worldMatrix).m[2][0];
+        fStack_b0 = (pIVar15->m_worldMatrix).m[2][1];
+        fStack_ac = (pIVar15->m_worldMatrix).m[2][2];
+        fStack_58 = (pIVar15->m_worldMatrix).m[2][3];
+        fVar22 = fStack_ac * fStack_ac + fStack_b0 * fStack_b0 + (float)local_b4 * (float)local_b4;
+        if (1e-08 <= ABS(fVar22 - 1.0)) {
+          if (1e-08 <= fVar22) {
+            fVar22 = 1.0 / SQRT(fVar22);
+            local_b4 = (I3D_frame *)((float)local_b4 * fVar22);
+            fStack_b0 *= fVar22;
+            fStack_ac = fVar22 * fStack_ac;
+          }
+          else if ((float)local_b4 == 0.0) {
+            if (fStack_ac == 0.0) {
+              if (0.0 <= fStack_b0) {
+                fStack_b0 = 1.0;
+              }
+              else {
+                fStack_b0 = -1.0;
+              }
+            }
+            else if (0.0 <= fStack_ac) {
+              fStack_ac = 1.0;
+            }
+            else {
+              fStack_ac = -1.0;
+            }
+          }
+          else if (0.0 <= (float)local_b4) {
+            local_b4 = (I3D_frame *)0x3f800000;
+          }
+          else {
+            local_b4 = (I3D_frame *)0xbf800000;
+          }
+        }
+        local_64._0_4_ = local_b4;
+        local_64._4_4_ = fStack_b0;
+        local_64._8_4_ = fStack_ac;
+        if ((pIVar15->m_frameFlags & 0x20) == 0) {
+          I3D_frame::UpdateWMatrixProc(pIVar15);
+        }
+        local_84.x = (pIVar15->m_worldMatrix).m[3][0];
+        local_84.z = (pIVar15->m_worldMatrix).m[3][2];
+        local_84.y = (pIVar15->m_worldMatrix).m[3][1] - 0.5;
+        piStack_78 = (int *)(pIVar15->m_worldMatrix).m[3][3];
+        pCVar14 = (this->owner->m_body).work;
+        pCVar14->blocked2 = pCVar14->blocked2 | 0x800;
+        pCVar17 = this->owner;
+        (pCVar17->m_position).x = local_84.x;
+        (pCVar17->m_position).y = local_84.y;
+        (pCVar17->m_position).z = local_84.z;
+        (pCVar17->m_position).w = (float)piStack_78;
+        pCVar17 = this->owner;
+        (pCVar17->m_direction).x = (float)local_64._0_4_;
+        (pCVar17->m_direction).y = (float)local_64._4_4_;
+        (pCVar17->m_direction).z = (float)local_64._8_4_;
+        (pCVar17->m_direction).w = fStack_58;
+        pIVar6 = this->owner->m_frame;
+        (*pIVar6->vtable->SetPos)(pIVar6,&local_84);
+        pIVar6 = this->owner->m_frame;
+        (*pIVar6->vtable->SetDir)(pIVar6,(S_vector *)local_64,0.0);
+        pIVar6 = this->owner->m_frame;
+        (*pIVar6->vtable->LinkTo)(pIVar6,pIVar15,1);
+        pIVar15 = this->owner->m_frame;
+        (*pIVar15->vtable->Update)(pIVar15);
+        C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,true);
+      }
+      break;
+    }
+    pCVar2->unknownA38 = -10000;
+LAB_007567f6:
+    pCVar14 = (this->owner->m_body).work;
+    pCVar14->blocked2 = pCVar14->blocked2 & 0xffffbfff;
+    break;
+  case 9:
+  case 10:
+    if (pCVar2->unknownA38 < 1) {
+      pCVar14 = (this->owner->m_body).work;
+      pCVar14->blocked2 = pCVar14->blocked2 & 0xffffbfff;
+      local_68 = (I3D_scene *)this->movement->seat;
+      pIVar15 = this->movement->owner->m_frame;
+      local_b4 = pIVar15;
+      pCVar9 = GetGame();
+      local_84.x = (float)pCVar9->m_scene;
+      local_64._0_4_ = ((I3D_scene *)local_84.x)->vtable;
+      (*pIVar15->vtable->FindChildFrame)(pIVar15,&DAT_0083939c,0xffff);
+      (*pIVar15->vtable->FindChildFrame)(pIVar15,&DAT_00839398,0xffff);
+      (**(_func_77 **)(local_64._0_4_ + 0x138))((S_vector4 *)local_84.x);
+      if ((piStack_78 != nullptr) && ((this->movement->unknownA34 & 0x400U) != 0)) {
+        pIVar15 = (I3D_frame *)(**(code **)(*piStack_78 + 0x48))(piStack_78,&DAT_0084e878,0x10020);
+        if (pIVar15 == nullptr) {
+          pIVar15 = this->owner->m_frame;
+          if ((pIVar15->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar15);
+          }
+          fVar22 = (pIVar15->m_worldMatrix).m[2][0];
+          fVar7 = (pIVar15->m_worldMatrix).m[2][1];
+          local_b4 = (I3D_frame *)(pIVar15->m_worldMatrix).m[2][2];
+          fStack_b0 = (pIVar15->m_worldMatrix).m[2][3];
+          fVar7 = fVar22 * fVar22 + (float)local_b4 * (float)local_b4 + fVar7 * fVar7;
+          if (1e-08 <= ABS(fVar7 - 1.0)) {
+            if (1e-08 <= fVar7) {
+              fVar22 = fVar22 * (1.0 / SQRT(fVar7));
+              local_b4 = (I3D_frame *)((float)local_b4 * (1.0 / SQRT(fVar7)));
+            }
+            else if (fVar22 == 0.0) {
+              if ((float)local_b4 != 0.0) {
+                if (0.0 <= (float)local_b4) {
+                  local_b4 = (I3D_frame *)0x3f800000;
+                }
+                else {
+                  local_b4 = (I3D_frame *)0xbf800000;
+                }
+              }
+            }
+            else if (0.0 <= fVar22) {
+              fVar22 = 1.0;
+            }
+            else {
+              fVar22 = -1.0;
+            }
+          }
+          fVar7 = (float)local_b4 * (float)local_b4 + fVar22 * fVar22;
+          if (1e-08 <= ABS(fVar7 - 1.0)) {
+            if (1e-08 <= fVar7) {
+              fVar7 = 1.0 / SQRT(fVar7);
+              fVar22 *= fVar7;
+              local_b4 = (I3D_frame *)((float)local_b4 * fVar7);
+            }
+            else if (fVar22 == 0.0) {
+              if ((float)local_b4 == 0.0) {
+              }
+              else if (0.0 <= (float)local_b4) {
+                local_b4 = (I3D_frame *)0x3f800000;
+              }
+              else {
+                local_b4 = (I3D_frame *)0xbf800000;
+              }
+            }
+            else if (0.0 <= fVar22) {
+              fVar22 = 1.0;
+            }
+            else {
+              fVar22 = -1.0;
+            }
+          }
+          pIVar15 = this->owner->m_frame;
+          if ((pIVar15->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar15);
+          }
+          auStack_44._8_4_ = fVar22 * 0.4;
+          fStack_9c = (pIVar15->m_worldMatrix).m[3][0];
+          fStack_98 = (pIVar15->m_worldMatrix).m[3][1];
+          uStack_94 = (pIVar15->m_worldMatrix).m[3][2];
+          fStack_90 = (pIVar15->m_worldMatrix).m[3][3];
+          fStack_34 = (float)local_b4 * 0.4;
+          lVar20 = __ftol();
+          C_HumanAnimMixer::AddMove2
+                    (&this->movement->mixer,(S_vector4 *)(auStack_44 + 8),(int)lVar20);
+          pIVar15 = this->owner->m_frame;
+          pCVar9 = GetGame();
+          (*pCVar9->m_scene->vtable->Unknown144)(pCVar9->m_scene,pIVar15);
+          pCVar17 = this->owner;
+          (pCVar17->m_position).x = fStack_a4;
+          (pCVar17->m_position).y = fStack_a0;
+          (pCVar17->m_position).z = fStack_9c;
+          (pCVar17->m_position).w = fStack_98;
+        }
+        else {
+          if ((pIVar15->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar15);
+          }
+          fStack_9c = (pIVar15->m_worldMatrix).m[3][0];
+          fStack_98 = (pIVar15->m_worldMatrix).m[3][1];
+          uStack_94 = (pIVar15->m_worldMatrix).m[3][2];
+          fStack_90 = (pIVar15->m_worldMatrix).m[3][3];
+          if ((pIVar15->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar15);
+          }
+          local_84.z = (pIVar15->m_worldMatrix).m[2][0];
+          piStack_78 = (int *)(pIVar15->m_worldMatrix).m[2][1];
+          fStack_74 = (pIVar15->m_worldMatrix).m[2][2];
+          fStack_70 = (pIVar15->m_worldMatrix).m[2][3];
+          fVar22 = fStack_74 * fStack_74 +
+                   local_84.z * local_84.z + (float)piStack_78 * (float)piStack_78;
+          if (1e-08 <= ABS(fVar22 - 1.0)) {
+            if (1e-08 <= fVar22) {
+              fVar22 = 1.0 / SQRT(fVar22);
+              local_84.z = local_84.z * fVar22;
+              piStack_78 = (int *)((float)piStack_78 * fVar22);
+              fStack_74 = fVar22 * fStack_74;
+            }
+            else if (local_84.z == 0.0) {
+              if (fStack_74 == 0.0) {
+                if (0.0 <= (float)piStack_78) {
+                  piStack_78 = (int *)0x3f800000;
+                }
+                else {
+                  piStack_78 = (int *)0xbf800000;
+                }
+              }
+              else if (0.0 <= fStack_74) {
+                fStack_74 = 1.0;
+              }
+              else {
+                fStack_74 = -1.0;
+              }
+            }
+            else if (0.0 <= local_84.z) {
+              local_84.z = 1.0;
+            }
+            else {
+              local_84.z = -1.0;
+            }
+          }
+          pIVar15 = this->owner->m_frame;
+          if ((pIVar15->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar15);
+          }
+          fVar22 = (pIVar15->m_worldMatrix).m[2][0];
+          fVar7 = (pIVar15->m_worldMatrix).m[2][1];
+          local_b4 = (I3D_frame *)(pIVar15->m_worldMatrix).m[2][2];
+          fStack_b0 = (pIVar15->m_worldMatrix).m[2][3];
+          pIVar15 = this->owner->m_frame;
+          local_84.x = ABS((fVar22 * fVar22 + (float)local_b4 * (float)local_b4 + fVar7 * fVar7) -
+                           1.0);
+          if ((pIVar15->m_frameFlags & 0x20) == 0) {
+            I3D_frame::UpdateWMatrixProc(pIVar15);
+          }
+          fVar22 = (pIVar15->m_worldMatrix).m[3][0];
+          fVar7 = (pIVar15->m_worldMatrix).m[3][1];
+          local_64._8_4_ = fStack_9c - fVar22;
+          local_b4 = (I3D_frame *)(pIVar15->m_worldMatrix).m[3][2];
+          fStack_b0 = (pIVar15->m_worldMatrix).m[3][3];
+          fStack_58 = fStack_98 - fVar7;
+          fStack_54 = uStack_94 - (float)local_b4;
+          lVar20 = __ftol();
+          C_HumanAnimMixer::AddMove2(&this->movement->mixer,(S_vector4 *)(local_64 + 8),(int)lVar20)
+          ;
+          local_84.x = (float)this->owner->m_frame;
+          pCVar9 = GetGame();
+          (*pCVar9->m_scene->vtable->Unknown144)(pCVar9->m_scene,local_84.x);
+          pCVar17 = this->owner;
+          (pCVar17->m_position).x = fVar22;
+          (pCVar17->m_position).y = unaff_EDI;
+          (pCVar17->m_position).z = fVar22;
+          (pCVar17->m_position).w = fVar7;
+          this->movement->unknown228 = -2000;
+        }
+        C_HumanEquipment::PutAwayHandsItem((this->owner->m_body).equipment,false);
+        this->movement->unknownA44 = 0;
+        C_HumanMovement::UpdateModelNames((this->owner->m_body).movement);
+        this->locomotion->unknown0FC = 100000.0;
+        C_HumanMovement::UpdateDummies(this->movement);
+        C_HumanMovement::UpdateHitSpheres(this->movement);
+        pIVar15 = this->movement->shadow;
+        if (pIVar15 != nullptr) {
+          (*pIVar15->vtable->Update)(pIVar15);
+        }
+      }
+      pCVar14 = (this->owner->m_body).work;
+      pCVar14->blocked2 = pCVar14->blocked2 & 0xfffff7ff;
+      this->movement->unknownA38 = -10000;
+      this->movement->unknownA34 = 0;
+      this->movement->vehicle = nullptr;
+      this->movement->unknown228 = 0;
+    }
+  }
+  iVar19 = this->movement->unknownA38;
+  if (iVar19 != -10000) {
+    this->movement->unknownA38 = iVar19 - param_1;
+  }
+}
+
+// 0x00757240
+uint32_t __fastcall get_field_2c_757240(int param_1)
+{
+  return *(uint32_t *)(param_1 + 0x2c);
+}
+
+// 0x00757250
+bool __fastcall FUN_00757250(int param_1)
+{
+  return *(int *)(param_1 + 0x2c) == 0;
+}
+
+// 0x00757260
+uint32_t __fastcall get_field_c_757260(int param_1)
+{
+  return *(uint32_t *)(param_1 + 0xc);
+}
+
+// 0x00757290
+void __fastcall FUN_00757290(int param_1)
+{
+  iVar3 = *(int *)(param_1 + 0xc) + 0xc;
+  iVar2 = *(int *)(param_1 + 0x2c) - 1;
+  *(int *)(param_1 + 0xc) = iVar3;
+  *(int *)(param_1 + 0x2c) = iVar2;
+  if ((iVar2 == 0) || (iVar3 == *(int *)(param_1 + 8))) {
+    puVar1 = *(uint32_t **)(param_1 + 0x10);
+    *(uint32_t **)(param_1 + 0x10) = puVar1 + 1;
+    operator_delete((void *)*puVar1);
+    if (*(int *)(param_1 + 0x2c) == 0) {
+      *(uint32_t *)(param_1 + 4) = 0;
+      *(uint32_t *)(param_1 + 8) = 0;
+      *(uint32_t *)(param_1 + 0xc) = 0;
+      *(uint32_t *)(param_1 + 0x10) = 0;
+      *(uint32_t *)(param_1 + 0x14) = 0;
+      *(uint32_t *)(param_1 + 0x18) = 0;
+      *(uint32_t *)(param_1 + 0x1c) = 0;
+      *(uint32_t *)(param_1 + 0x20) = 0;
+      operator_delete(*(void **)(param_1 + 0x24));
+      return;
+    }
+    iVar2 = **(int **)(param_1 + 0x10);
+    *(int *)(param_1 + 4) = iVar2;
+    *(int *)(param_1 + 8) = iVar2 + 0xffc;
+    *(int *)(param_1 + 0xc) = iVar2;
+    *(int **)(param_1 + 0x10) = *(int **)(param_1 + 0x10);
+  }
+}
+
+// 0x00757320
+void __thiscall FUN_00757320(void *this,uint32_t *param_1)
+{
+  if (*(int *)((int)this + 0x2c) != 0) {
+    puVar7 = *(uint32_t **)((int)this + 0x1c);
+    if (puVar7 != *(uint32_t **)((int)this + 0x18)) {
+      *(uint32_t **)((int)this + 0x1c) = puVar7 + 3;
+      if (puVar7 + 3 == *(uint32_t **)((int)this + 0x18)) {
+        if (puVar7 != nullptr) {
+          *puVar7 = *param_1;
+          puVar7[1] = param_1[1];
+          puVar7[2] = param_1[2];
+        }
+        pvVar2 = operator_new(0xffc);
+        if (*(int *)((int)this + 0x2c) == 0) {
+          *(uint32_t *)((int)this + 0x28) = 2;
+          pvVar3 = operator_new(8);
+          *(void **)((int)this + 0x24) = pvVar3;
+          *(void **)((int)pvVar3 + 4) = pvVar2;
+          FUN_00757f20(&local_10,(int)pvVar2 + 0x7f8,(int *)(*(int *)((int)this + 0x24) + 4));
+          *(uint32_t *)((int)this + 4) = local_10;
+          *(uint32_t *)((int)this + 8) = local_c;
+          *(uint32_t *)((int)this + 0xc) = local_8;
+          *(uint32_t *)((int)this + 0x10) = local_4;
+          *(uint32_t *)((int)this + 0x14) = local_10;
+          *(uint32_t *)((int)this + 0x18) = local_c;
+          *(int *)((int)this + 0x2c) = *(int *)((int)this + 0x2c) + 1;
+          *(uint32_t *)((int)this + 0x1c) = local_8;
+          *(uint32_t *)((int)this + 0x20) = local_4;
+          return;
+        }
+        uVar1 = *(uint32_t *)((int)this + 0x20);
+        if (uVar1 < (uint32_t)(*(int *)((int)this + 0x24) - 4 + *(int *)((int)this + 0x28) * 4)) {
+          *(uint32_t **)((int)this + 0x20) = (uint32_t *)(uVar1 + 4);
+          *(uint32_t *)(uVar1 + 4) = pvVar2;
+          FUN_00757f20(&local_10,(int)pvVar2,*(int **)((int)this + 0x20));
+          *(uint32_t *)((int)this + 0x14) = local_10;
+          *(uint32_t *)((int)this + 0x18) = local_c;
+          *(uint32_t *)((int)this + 0x1c) = local_8;
+          *(uint32_t *)((int)this + 0x20) = local_4;
+          *(int *)((int)this + 0x2c) = *(int *)((int)this + 0x2c) + 1;
+          return;
+        }
+        iVar4 = ((int)(uVar1 - *(int *)((int)this + 0x10)) >> 2) + 1;
+        piVar5 = FUN_00757e20(this,iVar4 * 2);
+        piVar5[iVar4] = (int)pvVar2;
+        FUN_00757f20(&local_10,*(int *)((int)this + 0xc),piVar5);
+        *(uint32_t *)((int)this + 4) = local_10;
+        *(uint32_t *)((int)this + 8) = local_c;
+        *(uint32_t *)((int)this + 0xc) = local_8;
+        *(uint32_t *)((int)this + 0x10) = local_4;
+        FUN_00757f20(&local_10,(int)pvVar2,piVar5 + iVar4);
+        *(uint32_t *)((int)this + 0x14) = local_10;
+        *(uint32_t *)((int)this + 0x18) = local_c;
+        *(uint32_t *)((int)this + 0x1c) = local_8;
+        *(int *)((int)this + 0x2c) = *(int *)((int)this + 0x2c) + 1;
+        *(uint32_t *)((int)this + 0x20) = local_4;
+        return;
+      }
+      goto LAB_007575e4;
+    }
+  }
+  pvVar2 = operator_new(0xffc);
+  if (*(int *)((int)this + 0x2c) == 0) {
+    *(uint32_t *)((int)this + 0x28) = 2;
+    pvVar3 = operator_new(8);
+    *(void **)((int)this + 0x24) = pvVar3;
+    *(void **)((int)pvVar3 + 4) = pvVar2;
+    FUN_00757f20(&local_10,(int)pvVar2 + 0x7f8,(int *)(*(int *)((int)this + 0x24) + 4));
+    *(uint32_t *)((int)this + 4) = local_10;
+    *(uint32_t *)((int)this + 8) = local_c;
+    *(uint32_t *)((int)this + 0xc) = local_8;
+    *(uint32_t *)((int)this + 0x10) = local_4;
+    *(uint32_t *)((int)this + 0x14) = local_10;
+    *(uint32_t *)((int)this + 0x18) = local_c;
+    *(uint32_t *)((int)this + 0x1c) = local_8;
+    *(uint32_t *)((int)this + 0x20) = local_4;
+  }
+  else {
+    uVar1 = *(uint32_t *)((int)this + 0x20);
+    if (uVar1 < (uint32_t)(*(int *)((int)this + 0x24) - 4 + *(int *)((int)this + 0x28) * 4)) {
+      *(uint32_t **)((int)this + 0x20) = (uint32_t *)(uVar1 + 4);
+      *(uint32_t *)(uVar1 + 4) = pvVar2;
+      FUN_00757f20(&local_10,(int)pvVar2,*(int **)((int)this + 0x20));
+      *(uint32_t *)((int)this + 0x14) = local_10;
+      *(uint32_t *)((int)this + 0x18) = local_c;
+      *(uint32_t *)((int)this + 0x1c) = local_8;
+      *(uint32_t *)((int)this + 0x20) = local_4;
+    }
+    else {
+      iVar4 = ((int)(uVar1 - *(int *)((int)this + 0x10)) >> 2) + 1;
+      piVar6 = FUN_00757e20(this,iVar4 * 2);
+      piVar5 = piVar6 + iVar4;
+      *piVar5 = (int)pvVar2;
+      FUN_00757f20(&local_10,*(int *)((int)this + 0xc),piVar6);
+      *(uint32_t *)((int)this + 4) = local_10;
+      *(uint32_t *)((int)this + 8) = local_c;
+      *(uint32_t *)((int)this + 0xc) = local_8;
+      *(uint32_t *)((int)this + 0x10) = local_4;
+      iVar4 = *piVar5;
+      *(int *)((int)this + 0x14) = iVar4;
+      *(int *)((int)this + 0x18) = iVar4 + 0xffc;
+      *(void **)((int)this + 0x1c) = pvVar2;
+      *(int **)((int)this + 0x20) = piVar5;
+    }
+  }
+  puVar7 = *(uint32_t **)((int)this + 0x1c);
+  *(uint32_t **)((int)this + 0x1c) = puVar7 + 3;
+LAB_007575e4:
+  if (puVar7 != nullptr) {
+    *puVar7 = *param_1;
+    puVar7[1] = param_1[1];
+    puVar7[2] = param_1[2];
+  }
+  *(int *)((int)this + 0x2c) = *(int *)((int)this + 0x2c) + 1;
+}
+
+// 0x00757610
+void __fastcall FUN_00757610(int param_1)
+{
+  piVar1 = (int *)(param_1 + 4);
+  iVar8 = *(int *)(param_1 + 0x1c);
+  iVar10 = *(int *)(param_1 + 0x20);
+  iVar3 = *(int *)(param_1 + 0xc);
+  iVar4 = *(int *)(param_1 + 0x10);
+  if (iVar10 == iVar4) {
+    iVar11 = (iVar8 - iVar3) / 0xc;
+  }
+  else {
+    iVar11 = (iVar8 - *(int *)(param_1 + 0x14)) / 0xc +
+             (*(int *)(param_1 + 8) - iVar3) / 0xc + (iVar10 - iVar4 >> 2) * 0x155 - 0x155;
+  }
+  if (iVar4 == *(int *)(param_1 + 0x10)) {
+    local_38 = (iVar3 - *(int *)(param_1 + 0xc)) / 0xc;
+  }
+  else {
+    local_38 = ((iVar3 - *piVar1) / 0xc +
+               (*(int *)(param_1 + 8) - *(int *)(param_1 + 0xc)) / 0xc +
+               (iVar4 - *(int *)(param_1 + 0x10) >> 2) * 0x155) - 0x155;
+  }
+  piVar2 = (int *)(param_1 + 0x14);
+  if (*(int *)(param_1 + 0x20) == iVar10) {
+    uVar9 = (*(int *)(param_1 + 0x1c) - iVar8) / 0xc;
+  }
+  else {
+    uVar9 = ((*(int *)(param_1 + 0x1c) - *piVar2) / 0xc +
+            (*(int *)(param_1 + 0x18) - iVar8) / 0xc +
+            (*(int *)(param_1 + 0x20) - iVar10 >> 2) * 0x155) - 0x155;
+  }
+  if (local_38 < uVar9) {
+    local_20 = *piVar2;
+    local_18 = *(uint32_t **)(param_1 + 0x1c);
+    local_1c = *(uint32_t *)(param_1 + 0x18);
+    local_14 = *(uint32_t *)(param_1 + 0x20);
+    local_30 = *piVar1;
+    local_2c = *(uint32_t *)(param_1 + 8);
+    local_28 = *(uint32_t **)(param_1 + 0xc);
+    local_24 = *(uint32_t *)(param_1 + 0x10);
+    local_c = *(uint32_t *)(param_1 + 8);
+    puVar5 = *(uint32_t **)(param_1 + 0xc);
+    local_4 = *(uint32_t *)(param_1 + 0x10);
+    while (puVar5 != local_28) {
+      iVar8 = FUN_00758020(&local_30);
+      puVar6 = *(uint32_t **)(iVar8 + 8);
+      iVar8 = FUN_00758020(&local_20);
+      puVar7 = *(uint32_t **)(iVar8 + 8);
+      *puVar7 = *puVar6;
+      puVar7[1] = puVar6[1];
+      puVar7[2] = puVar6[2];
+    }
+    for (; iVar11 != 0; iVar11 = iVar11 - 1) {
+      iVar10 = *(int *)(param_1 + 0xc) + 0xc;
+      iVar8 = *(int *)(param_1 + 0x2c) - 1;
+      *(int *)(param_1 + 0xc) = iVar10;
+      *(int *)(param_1 + 0x2c) = iVar8;
+      if ((iVar8 == 0) || (iVar10 == *(int *)(param_1 + 8))) {
+        FUN_00757da0(param_1);
+      }
+    }
+  }
+  else {
+    local_30 = *piVar1;
+    local_2c = *(uint32_t *)(param_1 + 8);
+    local_28 = *(uint32_t **)(param_1 + 0xc);
+    local_24 = *(uint32_t *)(param_1 + 0x10);
+    local_c = *(uint32_t *)(param_1 + 0x18);
+    local_20 = *piVar2;
+    puVar5 = *(uint32_t **)(param_1 + 0x1c);
+    local_4 = *(uint32_t *)(param_1 + 0x20);
+    local_1c = *(uint32_t *)(param_1 + 0x18);
+    local_18 = *(uint32_t **)(param_1 + 0x1c);
+    local_14 = *(uint32_t *)(param_1 + 0x20);
+    while (local_18 != puVar5) {
+      *local_28 = *local_18;
+      local_28[1] = local_18[1];
+      local_28[2] = local_18[2];
+      FUN_00757ff0(&local_30);
+      FUN_00757ff0(&local_20);
+    }
+    for (; iVar11 != 0; iVar11 = iVar11 - 1) {
+      if (*(int *)(param_1 + 0x1c) == *(int *)(param_1 + 0x14)) {
+        FUN_00757e90(param_1);
+      }
+      if (*(int *)(param_1 + 0x2c) != 0) {
+        *(int *)(param_1 + 0x1c) = *(int *)(param_1 + 0x1c) - 0xc;
+      }
+      iVar8 = *(int *)(param_1 + 0x2c) - 1;
+      *(int *)(param_1 + 0x2c) = iVar8;
+      if (iVar8 == 0) {
+        FUN_00757e90(param_1);
+      }
+    }
+  }
+  if (local_38 != 0) {
+    local_20 = *piVar1;
+    local_1c = *(uint32_t *)(param_1 + 8);
+    local_18 = *(uint32_t **)(param_1 + 0xc);
+    local_14 = *(uint32_t *)(param_1 + 0x10);
+    FUN_00757f50(&local_20,local_38);
+  }
+}
+
+// 0x00757970
+void __thiscall
+FUN_00757970(void *this,int *param_1,int param_2,uint32_t *param_3,uint32_t *param_4,
+            uint32_t *param_5,int param_6,uint32_t *param_7,uint32_t *param_8,
+            uint32_t *param_9)
+{
+  local_14 = param_5;
+  puVar7 = param_4;
+  local_1c = param_3;
+  local_20 = param_2;
+  if (param_9 == param_5) {
+    local_34 = ((int)param_8 - (int)param_4) / 0xc;
+  }
+  else {
+    local_34 = ((int)param_8 - param_6) / 0xc +
+               ((int)param_3 - (int)param_4) / 0xc + ((int)param_9 - (int)param_5 >> 2) * 0x155 +
+               -0x155;
+  }
+  piVar1 = (int *)((int)this + 4);
+  local_8 = *(uint32_t **)((int)this + 0xc);
+  if (param_5 == *(uint32_t **)((int)this + 0x10)) {
+    local_2c = ((int)param_4 - (int)local_8) / 0xc;
+  }
+  else {
+    local_2c = (((int)param_4 - param_2) / 0xc +
+               (*(int *)((int)this + 8) - (int)local_8) / 0xc +
+               ((int)param_5 - (int)*(uint32_t **)((int)this + 0x10) >> 2) * 0x155) - 0x155;
+  }
+  local_10 = *(int *)((int)this + 0x14);
+  local_c = *(uint32_t *)((int)this + 0x18);
+  if (*(uint32_t **)((int)this + 0x20) == param_9) {
+    uVar5 = (*(int *)((int)this + 0x1c) - (int)param_8) / 0xc;
+  }
+  else {
+    uVar5 = ((*(int *)((int)this + 0x1c) - local_10) / 0xc +
+            ((int)param_7 - (int)param_8) / 0xc +
+            ((int)*(uint32_t **)((int)this + 0x20) - (int)param_9 >> 2) * 0x155) - 0x155;
+  }
+  if (local_2c < uVar5) {
+    puVar7 = *(uint32_t **)((int)this + 0xc);
+    iVar3 = *piVar1;
+    puVar8 = *(uint32_t **)((int)this + 8);
+    puVar2 = *(uint32_t **)((int)this + 0x10);
+    local_14 = param_9;
+    local_20 = param_6;
+    param_6 = param_2;
+    local_1c = param_7;
+    param_7 = param_3;
+    param_9 = param_5;
+    param_8 = param_4;
+    while (param_5 = puVar2, param_3 = puVar8, param_2 = iVar3, puVar7 != param_8) {
+      iVar3 = FUN_00758020(&param_6);
+      puVar8 = *(uint32_t **)(iVar3 + 8);
+      iVar3 = FUN_00758020(&local_20);
+      puVar2 = *(uint32_t **)(iVar3 + 8);
+      *puVar2 = *puVar8;
+      puVar2[1] = puVar8[1];
+      puVar2[2] = puVar8[2];
+      iVar3 = param_2;
+      puVar8 = param_3;
+      puVar2 = param_5;
+    }
+    for (; local_34 != 0; local_34 = local_34 - 1) {
+      iVar6 = *(int *)((int)this + 0xc) + 0xc;
+      iVar3 = *(int *)((int)this + 0x2c) - 1;
+      *(int *)((int)this + 0xc) = iVar6;
+      *(int *)((int)this + 0x2c) = iVar3;
+      if ((iVar3 == 0) || (iVar6 == *(int *)((int)this + 8))) {
+        FUN_00757da0((int)this);
+      }
+    }
+  }
+  else {
+    param_4 = param_8;
+    local_10 = *(uint32_t *)((int)this + 0x14);
+    param_5 = param_9;
+    local_c = *(uint32_t *)((int)this + 0x18);
+    param_2 = param_6;
+    local_8 = *(uint32_t **)((int)this + 0x1c);
+    local_4 = *(uint32_t *)((int)this + 0x20);
+    param_3 = param_7;
+    if (param_8 != local_8) {
+      do {
+        puVar8 = puVar7 + 3;
+        *puVar7 = *param_4;
+        puVar7[1] = param_4[1];
+        puVar7[2] = param_4[2];
+        if (puVar8 == local_1c) {
+          local_14++;
+          puVar8 = (uint32_t *)*local_14;
+          local_1c = puVar8 + 0x3ff;
+        }
+        FUN_00757ff0(&param_2);
+        puVar7 = puVar8;
+      } while (param_4 != local_8);
+    }
+    for (; local_34 != 0; local_34 = local_34 - 1) {
+      if (*(int *)((int)this + 0x1c) == *(int *)((int)this + 0x14)) {
+        FUN_00757e90((int)this);
+      }
+      if (*(int *)((int)this + 0x2c) != 0) {
+        *(int *)((int)this + 0x1c) = *(int *)((int)this + 0x1c) - 0xc;
+      }
+      iVar3 = *(int *)((int)this + 0x2c) - 1;
+      *(int *)((int)this + 0x2c) = iVar3;
+      if (iVar3 == 0) {
+        FUN_00757e90((int)this);
+      }
+    }
+  }
+  if (local_2c == 0) {
+    param_2 = *piVar1;
+    param_3 = *(uint32_t **)((int)this + 8);
+    param_4 = *(uint32_t **)((int)this + 0xc);
+    param_5 = *(uint32_t **)((int)this + 0x10);
+  }
+  else {
+    param_2 = *piVar1;
+    param_3 = *(uint32_t **)((int)this + 8);
+    param_5 = *(uint32_t **)((int)this + 0x10);
+    param_4 = (uint32_t *)(*(int *)((int)this + 0xc) + local_2c * 0xc);
+    uVar5 = ((int)param_4 - param_2) / 0xc;
+    if ((int)uVar5 < 0) {
+      uVar4 = -((0x154 - uVar5) / 0x155);
+    }
+    else {
+      uVar4 = uVar5 / 0x155;
+    }
+    if (uVar4 != 0) {
+      param_2 = param_5[uVar4];
+      param_5 += uVar4;
+      param_3 = (uint32_t *)(param_2 + 0xffc);
+      param_4 = (uint32_t *)(param_2 + (uVar5 + uVar4 * -0x155) * 0xc);
+    }
+  }
+  *param_1 = param_2;
+  param_1[1] = (int)param_3;
+  param_1[2] = (int)param_4;
+  param_1[3] = (int)param_5;
+}
+
+// 0x00757da0
+void __fastcall FUN_00757da0(int param_1)
+{
+  puVar1 = *(uint32_t **)(param_1 + 0x10);
+  *(uint32_t **)(param_1 + 0x10) = puVar1 + 1;
+  operator_delete((void *)*puVar1);
+  if (*(int *)(param_1 + 0x2c) == 0) {
+    *(uint32_t *)(param_1 + 4) = 0;
+    *(uint32_t *)(param_1 + 8) = 0;
+    *(uint32_t *)(param_1 + 0xc) = 0;
+    *(uint32_t *)(param_1 + 0x10) = 0;
+    *(uint32_t *)(param_1 + 0x14) = 0;
+    *(uint32_t *)(param_1 + 0x18) = 0;
+    *(uint32_t *)(param_1 + 0x1c) = 0;
+    *(uint32_t *)(param_1 + 0x20) = 0;
+    operator_delete(*(void **)(param_1 + 0x24));
+    return;
+  }
+  iVar2 = **(int **)(param_1 + 0x10);
+  *(int *)(param_1 + 4) = iVar2;
+  *(int *)(param_1 + 8) = iVar2 + 0xffc;
+  *(int *)(param_1 + 0xc) = iVar2;
+  *(int **)(param_1 + 0x10) = *(int **)(param_1 + 0x10);
+}
+
+// 0x00757e20
+uint32_t * __thiscall FUN_00757e20(void *this,uint32_t param_1)
+{
+  uVar3 = param_1 * 4;
+  if ((int)uVar3 < 0) {
+    uVar3 = 0;
+  }
+  pvVar4 = operator_new(uVar3);
+  puVar1 = (uint32_t *)((int)pvVar4 + (param_1 & 0xfffffffc));
+  iVar2 = *(int *)((int)this + 0x20);
+  puVar6 = puVar1;
+  for (puVar5 = *(uint32_t **)((int)this + 0x10); puVar5 != (uint32_t *)(iVar2 + 4);
+      puVar5 = puVar5 + 1) {
+    *puVar6 = *puVar5;
+    puVar6++;
+  }
+  operator_delete(*(void **)((int)this + 0x24));
+  *(void **)((int)this + 0x24) = pvVar4;
+  *(uint32_t *)((int)this + 0x28) = param_1;
+  return puVar1;
+}
+
+// 0x00757e90
+void __fastcall FUN_00757e90(int param_1)
+{
+  puVar1 = *(uint32_t **)(param_1 + 0x20);
+  *(uint32_t **)(param_1 + 0x20) = puVar1 - 1;
+  operator_delete((void *)*puVar1);
+  if (*(int *)(param_1 + 0x2c) == 0) {
+    if (*(uint32_t **)(param_1 + 0x10) == *(uint32_t **)(param_1 + 0x20)) {
+      operator_delete((void *)**(uint32_t **)(param_1 + 0x10));
+    }
+    *(uint32_t *)(param_1 + 4) = 0;
+    *(uint32_t *)(param_1 + 8) = 0;
+    *(uint32_t *)(param_1 + 0xc) = 0;
+    *(uint32_t *)(param_1 + 0x10) = 0;
+    *(uint32_t *)(param_1 + 0x14) = 0;
+    *(uint32_t *)(param_1 + 0x18) = 0;
+    *(uint32_t *)(param_1 + 0x1c) = 0;
+    *(uint32_t *)(param_1 + 0x20) = 0;
+    operator_delete(*(void **)(param_1 + 0x24));
+    return;
+  }
+  iVar2 = **(int **)(param_1 + 0x20);
+  *(int *)(param_1 + 0x14) = iVar2;
+  *(int *)(param_1 + 0x18) = iVar2 + 0xffc;
+  *(int *)(param_1 + 0x1c) = iVar2 + 0xffc;
+  *(int **)(param_1 + 0x20) = *(int **)(param_1 + 0x20);
+}
+
+// 0x00757f20
+void __thiscall FUN_00757f20(void *this,int param_1,int *param_2)
+{
+  *(int *)this = *param_2;
+  iVar1 = *param_2;
+  *(int **)((int)this + 0xc) = param_2;
+  *(int *)((int)this + 4) = iVar1 + 0xffc;
+  *(int *)((int)this + 8) = param_1;
+}
+
+// 0x00757f50
+void __thiscall FUN_00757f50(void *this,int param_1)
+{
+  iVar1 = *(int *)((int)this + 8) + param_1 * 0xc;
+  uVar2 = (iVar1 - *(int *)this) / 0xc;
+  if ((int)uVar2 < 0) {
+    uVar3 = -((0x154 - uVar2) / 0x155);
+  }
+  else {
+    uVar3 = uVar2 / 0x155;
+  }
+  if (uVar3 == 0) {
+    *(int *)((int)this + 8) = iVar1;
+    return;
+  }
+  piVar4 = (int *)(*(int *)((int)this + 0xc) + uVar3 * 4);
+  *(int **)((int)this + 0xc) = piVar4;
+  iVar1 = *piVar4;
+  *(int *)this = iVar1;
+  *(int *)((int)this + 4) = iVar1 + 0xffc;
+  *(uint32_t *)((int)this + 8) = *(int *)this + (uVar2 + uVar3 * -0x155) * 0xc;
+}
+
+// 0x00757ff0
+void __fastcall FUN_00757ff0(int *param_1)
+{
+  iVar1 = param_1[2];
+  param_1[2] = iVar1 + 0xc;
+  if (iVar1 + 0xc == param_1[1]) {
+    iVar1 = param_1[3];
+    param_1[3] = iVar1 + 4;
+    iVar1 = *(int *)(iVar1 + 4);
+    *param_1 = iVar1;
+    param_1[1] = iVar1 + 0xffc;
+    param_1[2] = *param_1;
+  }
+}
+
+// 0x00758020
+void __fastcall FUN_00758020(int *param_1)
+{
+  if (param_1[2] == *param_1) {
+    iVar1 = param_1[3];
+    param_1[3] = iVar1 - 4;
+    iVar1 = *(int *)(iVar1 - 4);
+    *param_1 = iVar1;
+    iVar1 += 0xffc;
+    param_1[1] = iVar1;
+    param_1[2] = iVar1;
+  }
+  param_1[2] = param_1[2] - 0xc;
+}
+
