@@ -610,7 +610,7 @@ void C_SignalsPanel::BuildTargetPage()
         return;
     case ACTOR_WIRE_CUT:
         // (Without a member: whoever has the cutters.)
-        if (m_member && !m_member->FindBeltItem19())
+        if (m_member && !m_member->FindWireCutter())
             SetEntry(0, 0x1B7B, SIGNAL_DISABLED_COMMAND);
         else
             SetEntry(0, 0x1B7B, HUMAN_COMMAND_CUT_WIRE);

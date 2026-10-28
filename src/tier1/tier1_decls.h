@@ -3811,7 +3811,7 @@ uint32_t C_Human__EnableEvents(C_Human *_this = {}, ...);
 uint32_t C_Human__ExecuteBodyCommand(C_Human *_this = {}, S_BodyCommand *command = {}, ...);
 uint32_t C_Human__FadeIn(C_Human *_this = {}, int time = {}, ...);
 uint32_t C_Human__FadeOut(C_Human *_this = {}, int time = {}, ...);
-C_Item * C_Human__FindBeltItem19(C_Human *_this = {}, ...);
+C_Item * C_Human__FindWireCutter(C_Human *_this = {}, ...);
 C_Item * C_Human__FindBeltItem(C_Human *_this = {}, int behaviour = {}, ...);
 int C_Human__FindCheckpoint(C_Human *_this = {}, char *name = {}, ...);
 C_Item * C_Human__FindContainerOfBehaviour(C_Human *_this = {}, int behaviour = {}, int *container = {}, ...);

@@ -17720,8 +17720,8 @@
  },
  "005a7ed0": {
   "module": "human",
-  "name": "C_Human::FindBeltItem19",
-  "proto": "C_Item *__thiscall FindBeltItem19(C_Human *this)"
+  "name": "C_Human::FindWireCutter",
+  "proto": "C_Item *__thiscall FindWireCutter(C_Human *this)"
  },
  "005a7f50": {
   "module": "human",

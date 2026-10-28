@@ -349,7 +349,7 @@ C_Item *C_Human::GetMedkit() const
     return FindBeltItem(ITEM_BEHAVIOUR_MEDKIT);
 }
 
-C_Item *C_Human::FindBeltItem19() const
+C_Item *C_Human::FindWireCutter() const
 {
     return FindBeltItem(ITEM_BEHAVIOUR_WIRE_CUTTER);
 }

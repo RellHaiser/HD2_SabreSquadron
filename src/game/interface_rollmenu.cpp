@@ -591,7 +591,7 @@ void C_RollMenu::BuildActions()
             break;
         }
         case ACTOR_WIRE_CUT:
-            SetEntry(0, 0x1B7B, selected->FindBeltItem19() ? HUMAN_COMMAND_CUT_WIRE : ROLL_DISABLED);
+            SetEntry(0, 0x1B7B, selected->FindWireCutter() ? HUMAN_COMMAND_CUT_WIRE : ROLL_DISABLED);
             break;
         default:
             break;
@@ -804,7 +804,7 @@ void C_RollMenu::BuildCommandMapActions()
         SetEntry(1, 0x1B86, 0x1A);
         break;
     case ACTOR_WIRE_CUT:
-        SetEntry(0, 0x1B7B, commanded->FindBeltItem19() ? HUMAN_COMMAND_CUT_WIRE : ROLL_DISABLED);
+        SetEntry(0, 0x1B7B, commanded->FindWireCutter() ? HUMAN_COMMAND_CUT_WIRE : ROLL_DISABLED);
         break;
     default:
         break;

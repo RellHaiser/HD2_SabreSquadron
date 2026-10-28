@@ -1086,7 +1086,7 @@ bool C_HumanController::ExecuteCommand(const S_HumanCommand &command)
         }
         return false;
     case HUMAN_COMMAND_CUT_WIRE: {
-        C_Item *cutter = m_human->FindBeltItem19();
+        C_Item *cutter = m_human->FindWireCutter();
         if (!cutter)
             return false;
         m_interactionTarget = g_temporaryActors.FindActor(command.param1);

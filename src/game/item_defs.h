@@ -32,7 +32,7 @@ enum E_ItemComponentKind {
     ICK_NONE = 10,                  // what code that finds no component assumes
 };
 
-// C_ItemDef::GetBehaviour() values identified so far (examples from items.sav).
+// C_ItemDef::GetBehaviour() values identified so far (examples from Sabre Squadron's items.sav).
 enum : int {
     ITEM_BEHAVIOUR_MELEE = 0,       // the knife (the player's stab and its second attack); empty hands
     ITEM_BEHAVIOUR_SIDEARM = 2,     // pistols: drawn from the belt
@@ -52,12 +52,12 @@ enum : int {
     ITEM_BEHAVIOUR_UNIFORM = 15,
     ITEM_BEHAVIOUR_HEADGEAR = 16,
     ITEM_BEHAVIOUR_BACKPACK = 17,
-    ITEM_BEHAVIOUR_COMPASS_CAMERA = 18, // the compass and the camera (the shipped keys too)
+    ITEM_BEHAVIOUR_COMPASS_CAMERA = 18, // the compass and the camera
     ITEM_BEHAVIOUR_WIRE_CUTTER = 19,    // on the belt: the wire-cut command
     ITEM_BEHAVIOUR_RESPAWNING = 20, // multiplayer pick-ups (also the documents to take)
     ITEM_BEHAVIOUR_MISSION_EXPLOSIVE = 21,  // explosives for objectives (explosives bag, dynamite);
                                     // dropped on death in multiplayer like the pick-ups
-    ITEM_BEHAVIOUR_KEY = 22,        // keys for doors (none in the shipped items.sav: its keys are 18)
+    ITEM_BEHAVIOUR_KEY = 22,        // keys for doors (the base game's items.sav has them as 18)
     ITEM_BEHAVIOUR_AMMO = 23,       // every C_AmmoItemDef
 };
 

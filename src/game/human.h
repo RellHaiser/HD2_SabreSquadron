@@ -746,7 +746,7 @@ public:
     // Belt item of behaviour `behaviour` that is not busy.
     C_Item *FindBeltItem(int behaviour) const;          // 0x005a6730
     C_Item *GetMedkit() const;                          // 0x005a7e00
-    C_Item *FindBeltItem19() const;                     // 0x005a7ed0
+    C_Item *FindWireCutter() const;                     // 0x005a7ed0
     // The first item of behaviour `behaviour` (null: none) and in `*container` its container
     // (C_HumanController::UseMedkit uses the item).
     C_Item *FindContainerOfBehaviour(int behaviour, int *container) const;   // 0x005a7810
