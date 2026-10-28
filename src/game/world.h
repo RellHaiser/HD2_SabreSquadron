@@ -12,12 +12,14 @@
 #include "game/actor.h"
 #include "game/actors_module.h"
 #include "game/animation_actor.h"
+#include "game/barrel.h"
 #include "game/bike.h"
 #include "game/car.h"
 #include "game/checkpoints.h"
 #include "game/clock.h"
 #include "game/debris.h"
 #include "game/document_place.h"
+#include "game/door.h"
 #include "game/explosive_place.h"
 #include "game/fish.h"
 #include "game/fowl_generator.h"
@@ -38,6 +40,7 @@
 #include "game/sound_module.h"
 #include "game/spawn_point.h"
 #include "game/static_weapon.h"
+#include "game/supply_box.h"
 #include "game/submarine.h"
 #include "game/train.h"
 #include "game/switch_actor.h"
@@ -64,56 +67,11 @@ class C_Item;
 
 // C_Car (game/car.h) with its vehicle C_Vehicle (C_Car +0x90, game/vehicle.h).
 
-class C_Door : public C_Actor {                         // "Door", vtable 0x00812ff8
-public:
-    // action 2 = open, 3 = close (4 = lock, 5 = locked rattle)
-    void SetState(int action, bool animate, bool silent, int unused);   // 0x005ff4b0
-    bool Lock(int key);                                 // 0x005ff650
-    bool Unlock(int key);                               // 0x005ff5f0
-    int GetLockKey() const;                             // +0x230
-    int GetState() const;                               // 0x006029f0
-    // (+0x224, the door's motion: 0 closed, 1 open, 2 and 3 moving (inferred: the AI waits
-    // at 2 and opens it at 0 and 3; GetState() gives it unless the door is locked).)
-    int GetUnknown224() const;
-    bool IsLocked() const;                              // byte +0x234 (GetState() 4)
-    // (Byte +0x235, not identified: a locked door with it opens without the key.)
-    bool GetUnknown235() const;
-    // (Byte +0x118, not identified: the interface does not pick a door with it from farther
-    // than 0.65 m.)
-    bool GetUnknown118() const;
-    // (+0xFC / +0x100, not identified: without +0x118, either set lets the signals offer the
-    // door's command 0x12.)
-    int GetUnknownFC() const;
-    int GetUnknown100() const;
-    // The side of the door `pos` is on (0 / 1; 2: a door without sides, +0x220 == 1).
-    int GetSide(const S_vector4 &pos) const;            // 0x00602320
-    // A completed lockpicking: a closed, locked door that can be picked opens its lock
-    // (and its other half's).
-    void PickLock();                                    // 0x005ff6c0 (__fastcall)
-};
+// C_Door ("Door", vtable 0x00812ff8, 0x270 bytes) is defined in game/door.h, included above.
 
 // Actors with a script-visible state (SetActorState / _ACTOR_GetState).
 // C_Radio ("Radio", vtable 0x00813310, 0x150 bytes) is defined in game/radio.h, included above.
-class C_SupplyBox : public C_Actor {
-public:
-    void SetEnabled(bool on);                           // 0x005fa290
-    // Items left to take (when limited).
-    int GetCharges() const;                             // +0x130
-    bool IsLocked() const;                              // +0x250 != 0
-    bool IsLimited() const;                             // flag 1 of +0x124
-    // The box hands out the items of its lists; without lists, ammunition for the weapon
-    // in the taker's hands.
-    bool HasItemLists() const;                          // +0x11C
-    // Item types for the axis / allied side (vectors at +0xFC / +0x10C).
-    const int *GetItemList(bool allies) const;
-    int GetItemCount(bool allies) const;
-    // (+0x128: the signals offer an item to a member who can take no more of it only while he
-    // carries fewer than this many.)
-    int GetMaxCarried() const;
-    // One item was taken: one charge less (empty boxes switch off) and the clients are told
-    // (inline in the original: 0x005fcd80, 0x005fd760).
-    void UseCharge();
-};
+// C_SupplyBox ("SupplyBox", vtable 0x00812d10, 0x260 bytes) is defined in game/supply_box.h, included above.
 // C_Switch ("Switch", vtable 0x008139d0, 0x150 bytes) is defined in game/switch_actor.h and C_PhotoPlace
 // ("Photo place", vtable 0x00813400, 0x140 bytes) in game/photo_place.h, included above.
 // C_StaticWeapon ("StaticWeapon", vtable 0x00813130, 0x300 bytes) is defined in game/static_weapon.h, included

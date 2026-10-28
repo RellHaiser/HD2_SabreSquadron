@@ -6,7 +6,8 @@ Per model: an items line with every check of ItemTest met (part 6a), an animatio
 check of AnimationTest met (part 6b), a simple line with every check of SimpleActorsTest met
 (part 7a) and an objective line with every check of ObjectiveActorsTest met (part 7b) a world line with every
 check of WorldActorsTest met (part 7c), a moving line with every check of MovingActorsTest met
-(part 7d) and a seat line with every check of SeatActorsTest met (part 7e). Prints
+(part 7d), a seat line with every check of SeatActorsTest met (part 7e) and a prop line with every check
+of PropActorsTest met (part 7f). Prints
 "N models, M with differences" (mutfast.py reads it).
 """
 import glob
@@ -30,6 +31,9 @@ LINES = {
                "zoneSpawn").split(),
     "seat": ("fish fishProps fishStart fishTick fishUpdate fishSave fishStop bike bikeProps bikeStart bikeDrive "
              "bikeUpdate bikeSave bikeStop sw swStart swState swNet swSeats swExit swHit swTick swSave swBox").split(),
+    "prop": ("door doorProps doorStart doorState doorMove doorSlide doorNet doorSave doorPortals doorStop box boxProps "
+             "boxStart boxFeet boxStates boxFall boxNet boxSave boxStop barrel barrelProps barrelStart barrelHit "
+             "barrelLeak barrelSlosh barrelDestroy barrelNet barrelSave barrelStop").split(),
 }
 
 

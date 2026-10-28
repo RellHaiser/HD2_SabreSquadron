@@ -5014,6 +5014,82 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     in ported.txt (7 STL helpers absorbed). Stats: 6,908 of 12,286 functions by hand (64.6 % by
     size).
 
+  PART 7f DONE (2026-10-28): the door, the supply box and the barrel (src/game/door.*,
+  supply_box.*, barrel.*, new).
+  - C_Door ("Door", type 6, 0x270 bytes, 0x005ff150..0x00602a10): a hinged door turns about its axis
+    (default 0,-1,0) from its start rotation, a sliding one moves along its rotation turned three
+    quarters about the axis from its start position, at the speed a second to the open angle (both
+    pi/2 by default) after the opening delay. Closing, the hierarchy box (shrunk 0.01 m; sliding
+    0.001 in x / z, 0.01 in y) is tested along its 12 edges and the diagonals 1-6 and 2-5
+    (RayTestDynamic, types 2); a touch puts the position back, pauses the moving sound and waits 0.2
+    s (a hinged door turns back; quirk kept: a sliding one stays where it slid). Doors turning about
+    ±x are never tested. The handles ("dhandle", "d2handle": the last child's subtree first) turn to
+    45 degrees and back as it opens. The other half (by name) does what this one does; a lock with a
+    key item (a wrong key rattles), picking (closed, locked, pickable). Closing by itself 15 s after
+    the delay, not while the single player is within 10 m or the door was seen in the last 10 frames
+    (2 s more). Messages (3 bits): 0 open, 1 close, 2 locked tried, 3 unlocked, 4 locked (this half
+    only), 5 wrong key; the sounds are played on them. The box (COLLISION_TYPE_ACTOR_DOOR, new 0x1000;
+    | 2 while a hinged door not about ±x opens; quirk kept: its centre the frame's bound's, in the
+    frame's space). Portal doors: the nearest of the sector's own portals (none: its incoming ones)
+    within 10 m and its radius, and its opposite, shut while closed. Properties: the fields, then
+    chunks 0x65..0x6D (quirk kept: an unknown chunk is entered, not left; zeros for the two skipped
+    fields, the original's stack leftovers); WriteProperties sets the facing from the frame's z
+    (quirk kept: the quarter turn never moves the bound's local centre, and the start rotation
+    becomes the frame's). Saved game: chunk 3000 (SaveGame reports false, quirk kept); Fix: without
+    the chunk the frame stays where it is (the original places it at stack leftovers). Copy
+    protection in SetState dropped. Fix: FindHandle's names as std::string (32 / 36 byte buffers).
+    Accessors renamed (GetMotion, CanPickLock, GetPortal / GetOtherPortal) and their callers.
+  - C_SupplyBox ("SupplyBox", type 9, 0x260 bytes, 0x005f9700..0x005fd9f0): a crate handing out items
+    (its two lists, else ammunition) up to its capacity, "Ammo00".."Ammo13" showing how full (the last
+    stays while anything is left). Empty: closing (its animation), hidden (the respawn time), the
+    plane heard 5 s before 150 m behind and 20 m over the drop point (flying on 0.03 m a ms), falling
+    85 m (a network game: 0.1 m under the scene's top when lower) in "cratedummy" ("letibedna" swinging
+    on "cratefly" 1.5 times as fast) under "parachute" (its morph, the "ammobox" vertex animation),
+    5 m a second: the box swept down, on a touch six rays from the feet (four of the "Steny02" walls'
+    vertices under half the box's height, ordered round the box) and their middles and a sphere from
+    the middle; 0.01 m over what they meet it stops, static ground lands it, humans and vehicles
+    under it are hit (HIT_FALL, -1, on the server). Landed: the drop animation, put back in the
+    world, 2 s; the parachute fades (1 s); opening (1 s at least); ready. The box (COLLISION_TYPE_PIKE,
+    its own allocation; the radius from x and z times 1.2 as a double). Blends between the model's
+    two stages in whole steps of 350 ms (integer division, quirk kept). Messages (1 bit): 1
+    destroyed, 0 the state (the whole S_State, also the joining client's; the parts updated before
+    the charges, quirk kept). Saved game: the base's chunk, 0x202 the state (0x60 bytes). Quirk
+    kept: StartMission forces the text 0x1BFA. Fixes: InitBox keeps the parachute without a morph;
+    without walls (SetFrame false) nothing falls. Accessors renamed (IsBusy, IsPlaced) and callers.
+  - C_Barrel ("Barrel", type 5, 0x210 bytes, 0x00606250..0x0060a6f0): the surface "dekl" at the
+    level, the "body". Bullets through the body: a hole below the level (a leak particle, sorted by
+    height) and with exit holes one where the line leaves the cylinder of the box's radius; into the
+    surface: the slosh, then holes where it leaves. Holes within 0.09 m under the level stop; each
+    other lowers it at the leak rate a second, to the empty level. Shots slosh the surface between
+    two extremes 1 degree either way of level (dying down, turning about y with the id's parity);
+    bumps (OnCollisionEx) also tip the body 5 degrees and back over 400 ms each way. The hit points
+    used up over the explosion level: destroyed ("<file>" of the destroyed model, named
+    "<name>_destroyed", in its place; the frame hidden; the box out on the server when the property
+    says; the script told on the server; the explosion on the client). Messages (3 bits): 0 hit body,
+    1 bump, 2 destroyed, 3 hit surface; clients send their hits to the server. Properties: chunks
+    2000..13000 inside a first chunk of any id (quirk kept: an unknown one entered). Saved game: chunk
+    1 holding the base's, 1000 empty, 2000 the level (while it leaks the lowest hole's), 3000 the hit
+    points (none: destroyed without the explosion). COLLISION_TYPE_BARREL 0x400.
+  - Shared: I3D_portal SetOn / GetCenter / GetOpposite; GEffects FadeOutHierarchy, g_netSceneTop
+    (0x0097ca44), DrawDebugLine (0x0071fad0) in pending.h; world.h's partials replaced by the headers.
+  - Harness (build_item.bat links door.cpp, supply_box.cpp, barrel.cpp; prop_actors_test.inc with
+    prop_door.inc, prop_supply.inc, prop_barrel.inc after SeatActorsTest; check_item.py reads
+    "prop:", 29 checks): fakes for the fades, debug lines, particles finished, frame materials, the
+    active player, S_quat::SetDir (its directions and rolls recorded), the model slots 0x8C / 0x94 /
+    0xA0 / 0xAC, DuplicateMesh, meshes and their levels, portals; the ray, sphere and box-sweep fakes
+    record their arguments while g_recordTests is set, SetIgnoredVolume its second argument, Slerp
+    its flag, CreateActorMessage whether reliable. The door's swing and slide against the asm's box
+    tests; the supply box's calls as whole logs checked against the code; the barrel's holes, sway
+    and tip against oracles from the asm. Baselines: 0 of 37 in both orders; the other five builds 0
+    of 37 each.
+  - Mutations (mutations/mutate_7f.py, 1,514 after dropping 82 equivalent and 24 that did not
+    compile): the first run caught 1,096 of 1,620; three rounds of new cases (see the file's
+    docstring). All 1,514 caught.
+  - Build: 188 files clean (MSVC). Tier 1: 601 errors in 103 files, 241 stubs. ret_audit --src: 47
+    (door TurnTo / SlideTo: the binary passes Animate's time, unused).
+  - Ghidra: 124 names (names/door_supply_box_barrel.txt), 124 decompiles exported; 129 functions in
+    ported.txt (5 helpers absorbed). Stats: 7,037 of 12,286 functions by hand (65.9 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

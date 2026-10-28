@@ -380,5 +380,4 @@
 0098a47c g_carryAnimTables @ S_CarryAnimSlot *[7]
 0098a498 g_activityAnimTable @ S_HumanAnimSlot *
 0098a49c g_seatWeaponAnimTable @ void *
-00602320 C_Door::GetSide | int __thiscall GetSide(C_Door *this, S_vector4 * pos)
 0098a4a4 g_humanAnimTablesLoaded @ bool

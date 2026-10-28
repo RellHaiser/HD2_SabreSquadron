@@ -71,7 +71,9 @@ enum : uint32_t {
     COLLISION_TYPE_LIGHT_OBJECT = 0x2,                      // cars drive through it (physics objects, document and
                                                             // explosive places)
     COLLISION_TYPE_IGNORED = 0x8,                           // excluded from queries (SetIgnoredVolume)
-    COLLISION_TYPE_PIKE = 0x800,                            // a pike's box (C_Pike)
+    COLLISION_TYPE_BARREL = 0x400,                          // a barrel's box (C_Barrel)
+    COLLISION_TYPE_PIKE = 0x800,                            // a pike's box (C_Pike; the supply box's too)
+    COLLISION_TYPE_ACTOR_DOOR = 0x1000,                     // a door's box (C_Door; with 0x2 while it turns open)
     COLLISION_TYPE_LADDER = 0x4000,                         // a ladder's boxes (C_Ladder)
     COLLISION_TYPE_VERSION = 0x20000,                       // destructible model
     COLLISION_TYPE_MINE = 0x40000,                          // trigger volume of a mine

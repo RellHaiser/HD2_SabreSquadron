@@ -91,11 +91,14 @@ struct S_RbSplash {
     bool faceCamera, transient;
 };
 std::vector<S_RbSplash> g_rbSplashes;
+int g_rbSplashHandle = 1, g_rbSplashStep;
 int C_ParticlesModule::CreateAt(int effect, const S_vector &pos, const S_vector &dir, I3D_frame *parent, bool faceCamera,
                                 bool transient)
 {
     g_rbSplashes.push_back({effect, pos, dir, parent, faceCamera, transient});
-    return 1;
+    const int handle = g_rbSplashHandle;
+    g_rbSplashHandle += g_rbSplashStep;               // (part 7f: the barrel's holes tell them apart)
+    return handle;
 }
 
 // --- the callback --------------------------------------------------------------------------------------

@@ -329,7 +329,7 @@ int ProcessMoveContacts(C_HumanMovement *movement, S_MoveContacts *contacts, boo
         }
         case ACTOR_DOOR:
             // A closed door opens (when asked to).
-            if (IsServer() && openDoors && static_cast<C_Door *>(actor)->GetUnknown224() == 0)
+            if (IsServer() && openDoors && static_cast<C_Door *>(actor)->GetMotion() == 0)
                 static_cast<C_Door *>(actor)->SetState(2, false, false, owner->GetRole() != HUMAN_ROLE_PLAYER);
             break;
         case ACTOR_TRAIN:

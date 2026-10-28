@@ -1091,7 +1091,7 @@ int C_AIController::PassDoor(int /*timeDelta*/)
     if (m_move->unknown34 != 0)
         return 3;
     C_Door *door = static_cast<C_Door *>(m_move->door);
-    const int state = door->GetUnknown224();
+    const int state = door->GetMotion();
     if (state == 3 || state == 0) {
         // Closed: face the waypoint behind it (0.3 s), lower the weapon (0.5 s), open it.
         if (m_type == HUMAN_CONTROLLER_SQUAD && door->IsLocked()) {
@@ -1264,7 +1264,7 @@ void C_AIController::FollowRoute(int /*timeDelta*/)
                 C_Actor *actor = m_checkpoints->GetActor(point->checkpoint & 0xFFFF);
                 // (Fix: the original takes the point's actor for a door unchecked.)
                 if (actor && actor->GetType() == ACTOR_DOOR) {
-                    const int state = static_cast<C_Door *>(actor)->GetUnknown224();
+                    const int state = static_cast<C_Door *>(actor)->GetMotion();
                     if (state == 3 || state == 0) {
                         m_move->flags |= S_AIMoveOrder::FLAG_DOOR;
                         m_move->door = actor;

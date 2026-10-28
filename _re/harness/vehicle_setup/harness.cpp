@@ -1480,9 +1480,21 @@ S_CollisionVolume g_groundVolume;
 // A test's own world (the rigid body's step test): every ray test goes to it while set.
 S_CollisionVolume *(*g_rayTestHook)(const S_vector &from, const S_vector &dir, S_vector *hitPos, S_vector *hitNormal,
                                     uint32_t excludeTypes, uint32_t excludeFlags);
+// (Part 7f: the ray, sphere and box sweep tests' arguments, recorded while g_recordTests is set.)
+struct S_TestRecord {
+    char kind;                                          // 'r' ray, 's' sphere, 'b' box sweep
+    S_vector from, dir;                                 // (a sweep: its move and velocity)
+    float radius;                                       // (a sweep: the move's w)
+    S_vector extra;                                     // (a sweep: its second vector)
+    uint32_t types, flags;
+};
+bool g_recordTests;
+std::vector<S_TestRecord> g_testRecords;
 S_CollisionVolume *CollisionRayTest(const S_vector &from, const S_vector &dir, S_vector *hitPos, S_vector *hitNormal,
                                     uint32_t excludeTypes, uint32_t excludeFlags)
 {
+    if (g_recordTests)
+        g_testRecords.push_back({'r', from, dir, 0.0f, S_vector(0, 0, 0), excludeTypes, excludeFlags});
     if (g_rayTestHook)
         return g_rayTestHook(from, dir, hitPos, hitNormal, excludeTypes, excludeFlags);
     ++g_rayTests;
@@ -1536,6 +1548,8 @@ S_CollisionVolume *(*g_sphereTestHook)(const S_vector &from, const S_vector &dir
 S_CollisionVolume *CollisionSphereTest(const S_vector &from, const S_vector &dir, float radius, S_vector *hitPos,
                                        S_vector *hitNormal, uint32_t excludeTypes, uint32_t excludeFlags)
 {
+    if (g_recordTests)
+        g_testRecords.push_back({'s', from, dir, radius, S_vector(0, 0, 0), excludeTypes, excludeFlags});
     if (g_sphereTestHook) {
         S_CollisionVolume *met = g_sphereTestHook(from, dir, radius, excludeTypes, excludeFlags);
         if (met && hitPos && g_sphereHookSetsHit)       // (part 7d: where it met and its normal, when set)
@@ -1586,9 +1600,11 @@ S_CollisionVolume *CollisionSphereTest(const S_vector &from, const S_vector &dir
 }
 
 bool C_CollisionWorld::TestBoxSweep(const I3D_bbox &localBox, const S_matrix &from, const S_matrix &to,
-                                    const S_vector4 &, const S_vector &, const S_vector &velocity, uint32_t,
-                                    uint32_t) const
+                                    const S_vector4 &move, const S_vector &second, const S_vector &velocity,
+                                    uint32_t types, uint32_t flags) const
 {
+    if (g_recordTests)
+        g_testRecords.push_back({'b', S_vector(move.x, move.y, move.z), velocity, move.w, second, types, flags});
     ++g_boxTests;
     S_vector corners[8];
     int n = 0;
@@ -1625,8 +1641,10 @@ bool C_CollisionWorld::TestBoxSweep(const I3D_bbox &localBox, const S_matrix &fr
     }
     return false;
 }
-void C_CollisionWorld::SetIgnoredVolume(S_CollisionVolume *volume, int)
+int g_ignoreArg = -1, g_ignoreClearArg = -1;           // (part 7f: the last calls' second arguments)
+void C_CollisionWorld::SetIgnoredVolume(S_CollisionVolume *volume, int arg)
 {
+    (volume ? g_ignoreArg : g_ignoreClearArg) = arg;
     ++(volume ? g_ignores : g_ignoreClears);
 }
 int g_ignoreLists;
@@ -8079,12 +8097,14 @@ struct S_FakeStream {
     bool ex;
     std::vector<std::pair<uint32_t, int>> bits;
     bool sent = false;
+    bool reliable = false;                              // (CreateActorMessage's)
 };
 std::vector<S_FakeStream *> g_streams;
 bool g_reliableActorStreams;                            // (part 6b: reliable messages get a stream too)
 C_BitStream *CreateActorMessage(int id, bool reliable)
 {
     g_streams.push_back(new S_FakeStream{id, false, {}, false});
+    g_streams.back()->reliable = reliable;
     return reliable && !g_reliableActorStreams ? nullptr : reinterpret_cast<C_BitStream *>(g_streams.back());
 }
 C_BitStream *CreateActorMessageEx(int id, bool reliable)
@@ -14791,6 +14811,7 @@ void PartsHitTest(const char *path)
 #include "world_actors_test.inc"
 #include "moving_actors_test.inc"
 #include "seat_actors_test.inc"
+#include "prop_actors_test.inc"
 #endif
 
 int main(int argc, char **argv)
@@ -14821,6 +14842,7 @@ int main(int argc, char **argv)
         WorldActorsTest();
         MovingActorsTest();
         SeatActorsTest();
+        PropActorsTest();
     }
     return 0;
 #endif

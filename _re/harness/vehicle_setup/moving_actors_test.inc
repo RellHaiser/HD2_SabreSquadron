@@ -60,8 +60,10 @@ double MaAcosD(float x)
     const float t = std::sqrt((1.0f + x) * (1.0f - x));
     return std::atan2(static_cast<double>(t), static_cast<double>(x));
 }
-S_quat __stdcall S_quat::Slerp(const S_quat &q, float t, bool) const
+bool g_lastSlerpFlag;                                   // (part 7f: the last call's flag)
+S_quat __stdcall S_quat::Slerp(const S_quat &q, float t, bool flag) const
 {
+    g_lastSlerpFlag = flag;
     float cosom = ((q.v.z * v.z + q.v.y * v.y) + q.v.x * v.x) + s * q.s;
     S_quat to = q;
     if (cosom < 0.0f) {

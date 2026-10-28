@@ -721,7 +721,7 @@ bool C_Human::TakeFromSupplyBox(int boxId, int index, int *container, int *uid)
     C_SupplyBox *box = static_cast<C_SupplyBox *>(g_actorsModule.GetActorById(boxId));
     if (!box || box->GetCharges() == 0)
         return false;
-    if (box->IsLocked() || !box->IsLimited())
+    if (box->IsBusy() || !box->IsPlaced())
         return false;
     int typeId;
     if (!box->HasItemLists()) {
@@ -738,7 +738,7 @@ bool C_Human::TakeFromSupplyBox(int boxId, int index, int *container, int *uid)
         g_itemsModule.DestroyItem(item);
         return false;
     }
-    if (!box->IsLocked() && box->IsLimited())
+    if (!box->IsBusy() && box->IsPlaced())
         box->UseCharge();
     *uid = item->GetUid();
     m_inventoryChanged = true;
@@ -762,7 +762,7 @@ void C_Human::ClientTakeFromSupplyBox(int boxId, int index, int container, int u
         typeId = box->GetItemList(GetTeam(false) != TEAM_AXIS)[index];
     }
     g_itemsModule.CreateItem(typeId, container, this, uid);
-    if (!box->IsLocked() && box->IsLimited())
+    if (!box->IsBusy() && box->IsPlaced())
         box->UseCharge();
     m_inventoryChanged = true;
 }

@@ -113,6 +113,8 @@ public:
     // Fades every visual under `model` back in over `time` ms (0: fully opaque at once; it also
     // cancels a fade-out in progress). `turnOn` switches the visuals on (meaning inferred).
     void FadeInModel(I3D_frame *model, int time, bool turnOn);   // vtable +0x6C (0x00489060)
+    // Fades every visual under `model` out over `time` ms (FadeOutModel on each; the supply box).
+    void FadeOutHierarchy(I3D_frame *model, int time, bool unknown);   // vtable +0x70 (0x004890f0)
     // The shadow of a model (a new reference; null: none).
     I3D_frame *CreateShadow(I3D_frame *model);      // vtable +0x78
     I3D_frame *GetShadow(I3D_frame *model);         // vtable +0x7C (adds a reference)
@@ -139,6 +141,12 @@ public:
     void SetLensFlareOn(bool on);                   // vtable +0xBC 0x00485b70
 };
 C_GEffectsModule *GetGEffects();                    // 0x00486510
+
+// The highest y of the scene's frames' bounds (the top of the box C_NetGame::Command gathers at
+// 0x0072d9c0 for the network game; the supply box's drop height stays under it).
+extern float g_netSceneTop;                         // 0x0097ca44
+// Adds a line to the debug line buffer (at most 15000; `color2` 0: one colour).
+void DrawDebugLine(const float *from, const float *to, uint32_t color, uint32_t color2);   // 0x0071fad0
 
 // ---- input/controls (0x008aeb58) ----------------------------------------------
 class C_Controls {

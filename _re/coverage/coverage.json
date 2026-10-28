@@ -27,48 +27,48 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Actors & objects",
   "state": "verified",
-  "functions": 379,
-  "bytes": 61524,
-  "evidence": "vehicle_setup harness builds for debris, item, animation, simple and objective actors; mutation-tested"
+  "functions": 900,
+  "bytes": 213726,
+  "evidence": "vehicle_setup harness builds for debris, item, animation, simple, objective, world, moving, seat and prop actors; mutation-tested"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Actors & objects",
   "state": "ported",
-  "functions": 779,
-  "bytes": 184514,
+  "functions": 515,
+  "bytes": 117783,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Actors & objects",
   "state": "pending",
-  "functions": 476,
-  "bytes": 167762,
+  "functions": 310,
+  "bytes": 100875,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "App & core",
   "state": "verified",
-  "functions": 20,
-  "bytes": 3054,
+  "functions": 60,
+  "bytes": 18875,
   "evidence": "profile harness (config files, file wrappers)"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "App & core",
   "state": "ported",
-  "functions": 431,
-  "bytes": 105417,
+  "functions": 390,
+  "bytes": 89559,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "App & core",
   "state": "pending",
-  "functions": 674,
-  "bytes": 164592,
+  "functions": 659,
+  "bytes": 158608,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -83,8 +83,8 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Humans",
   "state": "ported",
-  "functions": 1131,
-  "bytes": 581321,
+  "functions": 1129,
+  "bytes": 581307,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
@@ -123,8 +123,8 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Mission & world modules",
   "state": "pending",
-  "functions": 327,
-  "bytes": 131077,
+  "functions": 325,
+  "bytes": 130702,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -155,16 +155,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Physics & collision",
   "state": "ported",
-  "functions": 263,
-  "bytes": 155378,
+  "functions": 258,
+  "bytes": 155152,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Physics & collision",
   "state": "pending",
-  "functions": 205,
-  "bytes": 126105,
+  "functions": 167,
+  "bytes": 115049,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -187,16 +187,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "STL & compiler idioms",
   "state": "excluded",
-  "functions": 601,
-  "bytes": 11496,
+  "functions": 582,
+  "bytes": 11237,
   "evidence": "MSVC 6 STL instantiations and empty functions (stl_idioms.py); the port uses the standard library"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Scripting",
   "state": "ported",
-  "functions": 219,
-  "bytes": 91418,
+  "functions": 218,
+  "bytes": 91385,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
@@ -227,16 +227,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Vehicles",
   "state": "verified",
-  "functions": 442,
-  "bytes": 326508,
+  "functions": 439,
+  "bytes": 326476,
   "evidence": "vehicle_params harness (205 shipped car blocks re-pack byte-identical), vehicle_setup harness on the 37 shipped car models, car_tables harness; mutation-tested"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Vehicles",
   "state": "pending",
-  "functions": 88,
-  "bytes": 8934,
+  "functions": 83,
+  "bytes": 8366,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
