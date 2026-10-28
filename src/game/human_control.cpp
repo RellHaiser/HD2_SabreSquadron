@@ -143,7 +143,7 @@ float C_Human::GetAccuracy() const
     if (!weapon)
         return 0.0f;
     C_ItemDef *def = weapon->GetDef();
-    if (def->GetCarryMode() == 6)
+    if (def->GetCarryMode() == ITEM_CARRY_EQUIPMENT)
         return 0.0f;
     const float dispersion = static_cast<C_WeaponComp *>(def->GetComponent())->GetAimedDispersion();
     return m_controller->GetAimBonus() + dispersion * 0.01f;

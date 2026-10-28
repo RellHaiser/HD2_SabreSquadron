@@ -521,7 +521,7 @@ void C_WeaponSelector::UpdateAmounts()
         }
         case ITEM_BEHAVIOUR_THROWN:
         case ITEM_BEHAVIOUR_MINE:
-        case ITEM_BEHAVIOUR_11:
+        case ITEM_BEHAVIOUR_STICKY_CHARGE:
             entry->text.SetText(C_fstr("%d", human->CountItems(item->GetTypeId())), STYLE_WEAPON_AMOUNT, 0);
             break;
         case ITEM_BEHAVIOUR_MEDKIT: {

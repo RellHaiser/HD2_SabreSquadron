@@ -518,9 +518,9 @@ int C_WeaponItem::Fire(C_Actor *shooter, const S_vector &pos, const S_vector &di
     }
 
     if (kind == ICK_FIREARM) {
-        // Machine guns fire a tracer every third round.
+        // Submachine and machine guns fire a tracer every third round.
         const int carryMode = m_def->GetCarryMode();
-        const bool tracer = (carryMode == 1 || carryMode == 4) && m_shotCount % 3 == 0;
+        const bool tracer = (carryMode == ITEM_CARRY_SMG || carryMode == ITEM_CARRY_LMG) && m_shotCount % 3 == 0;
         g_shotManager.FireBullet(shooter, this, pos, dir, tracer, flags, m_def->GetShellSound());
         PlayShotSound(shooter, GetShotDummy(), quiet);
         PlayActionSounds(shooter);

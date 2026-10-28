@@ -66,7 +66,7 @@ S_vector4 Point4(const S_vector &v) { return {v.x, v.y, v.z, 0.0f}; }
 bool IsPickUp(const C_Item *item)
 {
     const int behaviour = item->GetDef()->GetBehaviour();
-    return behaviour == ITEM_BEHAVIOUR_RESPAWNING || behaviour == ITEM_BEHAVIOUR_21;
+    return behaviour == ITEM_BEHAVIOUR_RESPAWNING || behaviour == ITEM_BEHAVIOUR_MISSION_EXPLOSIVE;
 }
 
 // S_vector::Normalized with the original's sum ((y² + z²) + x²); a NaN square scales.

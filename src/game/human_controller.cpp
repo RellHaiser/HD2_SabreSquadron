@@ -1127,7 +1127,7 @@ bool C_HumanController::ExecuteCommand(const S_HumanCommand &command)
     case HUMAN_COMMAND_PLACE_CAR_CHARGE: {
         UpdateHandsItem();
         C_Car *car = static_cast<C_Car *>(g_actorsModule.GetActorById(command.param1));
-        if (!car || !m_handsItem || BehaviourOf(m_handsItem) != ITEM_BEHAVIOUR_11)
+        if (!car || !m_handsItem || BehaviourOf(m_handsItem) != ITEM_BEHAVIOUR_STICKY_CHARGE)
             return false;
         const S_matrix &body = m_human->GetBodyFrame()->GetMatrix();
         const S_vector4 &from = reinterpret_cast<const S_vector4 &>(body.m[3]);

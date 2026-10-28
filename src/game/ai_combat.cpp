@@ -118,10 +118,10 @@ float C_AIController::GetAimSpread()
     if (m_quietTime < 2500)
         spread = RandFloat() * 0.6f + spread + 0.4f;
     switch (m_handsItem->GetDef()->GetCarryMode()) {
-    case 1:
-    case 4:
+    case ITEM_CARRY_SMG:
+    case ITEM_CARRY_LMG:
         return RandFloat() * 0.2f + spread + 0.3f;
-    case 2:
+    case ITEM_CARRY_SIDEARM:
         return RandFloat() * 0.4f + spread + 1.0f;
     default:
         return spread;

@@ -635,7 +635,7 @@ void C_AIController::OnHit(int type, int zone, int health, C_Actor *attacker, co
             UpdateHandsItem();
             if (m_handsItem) {
                 const int carryMode = m_handsItem->GetDef()->GetCarryMode();
-                if (carryMode == 1 || (carryMode > 2 && carryMode < 5)) {
+                if (carryMode == ITEM_CARRY_SMG || carryMode == ITEM_CARRY_RIFLE || carryMode == ITEM_CARRY_LMG) {
                     knockAway(m_handsItem->GetUid());
                     m_handsItem = nullptr;
                 }

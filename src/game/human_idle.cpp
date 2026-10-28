@@ -703,8 +703,8 @@ void C_HumanIdle::Interact(C_Actor *target, uint32_t interaction, int arg)
             return;
         restart();
         equipment->PutAwayHandsItem(true);
-        // The wire cutters (belt item 0x13) in the hand.
-        if (C_Item *cutters = m_owner->FindBeltItem(0x13))
+        // The wire cutters (from the belt) in the hand.
+        if (C_Item *cutters = m_owner->FindBeltItem(ITEM_BEHAVIOUR_WIRE_CUTTER))
             equipment->SetModel(cutters->GetFrame(0), 6, -1, -5, -1);
         work->m_blocked2 |= BLOCK_BUSY;
         queueSteps(REMOTE_CUT, HUMAN_STANCE_CROUCH);

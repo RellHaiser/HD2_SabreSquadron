@@ -32,15 +32,6 @@ namespace {
 
 // The members turn toward the action until within this cosine (about 18 degrees).
 constexpr float TURNED_COS = 0.95f;
-// A body is searched for these behaviours of items besides the weapons and their ammo.
-constexpr int BEHAVIOUR_SEARCHED_9 = 9;                 // grenades
-constexpr int BEHAVIOUR_SEARCHED_D = 0xD;               // medkits
-// The items of the action 0x21 (behaviours).
-constexpr int BEHAVIOUR_21_A = 0x14;
-constexpr int BEHAVIOUR_21_B = 0x16;
-constexpr int BEHAVIOUR_21_C = 0x15;
-// A carry mode of launchers (C_ItemDef::GetCarryMode).
-constexpr int CARRY_MODE_LAUNCHER = 5;
 
 // Where the actor is (its frame).
 S_vector4 ActorPos4(const C_Actor *actor)
@@ -63,7 +54,7 @@ bool IsFirearm(const C_Item *item)
 // A weapon carried like a rifle or a pistol (carry modes 1, 3, 4).
 bool IsCarriedGun(int carryMode)
 {
-    return carryMode == 1 || (carryMode > 2 && carryMode < 5);
+    return carryMode == ITEM_CARRY_SMG || carryMode == ITEM_CARRY_RIFLE || carryMode == ITEM_CARRY_LMG;
 }
 
 }  // namespace
@@ -456,9 +447,9 @@ bool C_SquadController::ExecuteAction(int timeDelta)
         return true;
     }
     case SQUAD_ACTION_21: {
-        const bool a = TakeItems(m_action.target, BEHAVIOUR_21_A);
-        const bool b = TakeItems(m_action.target, BEHAVIOUR_21_B);
-        const bool c = TakeItems(m_action.target, BEHAVIOUR_21_C);
+        const bool a = TakeItems(m_action.target, ITEM_BEHAVIOUR_RESPAWNING);
+        const bool b = TakeItems(m_action.target, ITEM_BEHAVIOUR_KEY);
+        const bool c = TakeItems(m_action.target, ITEM_BEHAVIOUR_MISSION_EXPLOSIVE);
         if (a || b || c)
             return true;
         SayReply(SENTENCE_CANNOT, true, 300, false);
@@ -1571,9 +1562,9 @@ void C_SquadController::FireLauncherAt(const S_vector4 &pos)
     C_ItemContainer *longGun = m_human->GetContainer(ITEM_CONTAINER_LONG_GUN);
     C_Item *back = longGun ? longGun->GetItem() : nullptr;
     C_Item *launcher = nullptr;
-    if (hands && hands->GetDef()->GetCarryMode() == CARRY_MODE_LAUNCHER)
+    if (hands && hands->GetDef()->GetCarryMode() == ITEM_CARRY_LAUNCHER)
         launcher = hands;
-    else if (back && back->GetDef()->GetCarryMode() == CARRY_MODE_LAUNCHER)
+    else if (back && back->GetDef()->GetCarryMode() == ITEM_CARRY_LAUNCHER)
         launcher = back;
     if (!launcher)
         return;
@@ -1780,8 +1771,8 @@ bool C_SquadController::SearchBodyItems(C_Human *body)
         return false;
     const bool ammo = LootAmmo(body);
     const bool weapon = LootWeapon(body);
-    const bool grenades = TakeItems(body, BEHAVIOUR_SEARCHED_9);
-    const bool medkits = TakeItems(body, BEHAVIOUR_SEARCHED_D);
+    const bool grenades = TakeItems(body, ITEM_BEHAVIOUR_THROWN);
+    const bool medkits = TakeItems(body, ITEM_BEHAVIOUR_MEDKIT);
     return medkits || ammo || weapon || grenades;
 }
 

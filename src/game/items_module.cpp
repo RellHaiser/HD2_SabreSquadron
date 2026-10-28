@@ -760,7 +760,7 @@ int C_ItemsModule::MoveItem(C_Item *item, C_Item **replaced, C_Actor *from, int 
             return ITEM_RESULT_NO_SPACE;
         // Ammo, mines and behaviour 11 items fit whatever their size.
         const int behaviour = def->GetBehaviour();
-        if (def->GetRecordType() != ITEM_AMMO && behaviour != ITEM_BEHAVIOUR_11 && behaviour != ITEM_BEHAVIOUR_MINE &&
+        if (def->GetRecordType() != ITEM_AMMO && behaviour != ITEM_BEHAVIOUR_STICKY_CHARGE && behaviour != ITEM_BEHAVIOUR_MINE &&
             behaviour != ITEM_BEHAVIOUR_MEDKIT && dest->GetMaxItemSize() < item->GetSize())
             return ITEM_RESULT_TOO_BIG;
         break;
@@ -1210,7 +1210,7 @@ int C_ItemsModule::CanPutItemInSlot(C_Actor *actor, int container, int itemId)
         if (dest->GetMaxSpace() < dest->GetTotalSpace() + space)
             return ITEM_RESULT_NO_SPACE;
         const int behaviour = def->GetBehaviour();
-        if (def->GetRecordType() == ITEM_AMMO || behaviour == ITEM_BEHAVIOUR_11 || behaviour == ITEM_BEHAVIOUR_MINE ||
+        if (def->GetRecordType() == ITEM_AMMO || behaviour == ITEM_BEHAVIOUR_STICKY_CHARGE || behaviour == ITEM_BEHAVIOUR_MINE ||
             behaviour == ITEM_BEHAVIOUR_MEDKIT)
             return ITEM_RESULT_OK;
         break;
@@ -1267,7 +1267,7 @@ bool IsSwapBlocked(C_Actor *from, int fromContainer, C_Actor *to, int toContaine
     if ((fits & ITEM_FITS_BACKPACK_CONTENTS) &&
         fitsIn(ITEM_CONTAINER_BACKPACK_CONTENTS, true,
                occupantBehaviour != ITEM_BEHAVIOUR_MEDKIT && occupantBehaviour != ITEM_BEHAVIOUR_MINE &&
-                   occupantBehaviour != ITEM_BEHAVIOUR_11 && occupant->GetDef()->GetRecordType() != ITEM_AMMO))
+                   occupantBehaviour != ITEM_BEHAVIOUR_STICKY_CHARGE && occupant->GetDef()->GetRecordType() != ITEM_AMMO))
         return false;
     if ((fits & ITEM_FITS_LONG_GUN) && fitsIn(ITEM_CONTAINER_LONG_GUN, false, true))
         return false;

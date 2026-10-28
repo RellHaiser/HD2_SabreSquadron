@@ -215,7 +215,7 @@ void C_PlayerController::WeaponControls(int timeDelta)
             IssueCommand(command);
         }
         return;
-    case ITEM_BEHAVIOUR_11: {
+    case ITEM_BEHAVIOUR_STICKY_CHARGE: {
         // A charge on the car looked at.
         if (m_buttons[BUTTON_FIRE] == 0.0f || m_interaction != -1)
             return;

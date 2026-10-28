@@ -1155,8 +1155,8 @@ int C_HumanEquipment::GetHolsterSlot(int typeId)
             return 7;
         return typeId == 0x3F ? 8 : 6;
     case ITEM_BEHAVIOUR_MINE:
-    case ITEM_BEHAVIOUR_11:
-    case ITEM_BEHAVIOUR_21:
+    case ITEM_BEHAVIOUR_STICKY_CHARGE:
+    case ITEM_BEHAVIOUR_MISSION_EXPLOSIVE:
         if (typeId == 0x42 || typeId == 0xFB)
             return 10;
         return typeId == 0x43 ? 11 : 9;

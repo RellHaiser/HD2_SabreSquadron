@@ -605,7 +605,7 @@ uint32_t C_ItemDef::GetAllowedContainers()
     if (size == 0 || size == 1)
         fits |= ITEM_FITS_BELT | ITEM_FITS_BACKPACK_CONTENTS;
     if (size == 2) {
-        if (ammo || behaviour == ITEM_BEHAVIOUR_11 || behaviour == ITEM_BEHAVIOUR_MINE)
+        if (ammo || behaviour == ITEM_BEHAVIOUR_STICKY_CHARGE || behaviour == ITEM_BEHAVIOUR_MINE)
             fits |= ITEM_FITS_BACKPACK_CONTENTS;
         if (behaviour == ITEM_BEHAVIOUR_MEDKIT)
             fits |= ITEM_FITS_BELT | ITEM_FITS_BACKPACK_CONTENTS;
@@ -624,22 +624,22 @@ int C_ItemDef::GetInventoryGroup()
     case ITEM_BEHAVIOUR_HEADGEAR:
     case ITEM_BEHAVIOUR_UNIFORM:
         return 6;
-    case 0:
+    case ITEM_BEHAVIOUR_MELEE:
     case 1:
-    case 2:
+    case ITEM_BEHAVIOUR_SIDEARM:
         return 1;
-    case 3:
-    case 4:
+    case ITEM_BEHAVIOUR_SMG:
+    case ITEM_BEHAVIOUR_RIFLE:
         return 2;
-    case 5:
+    case ITEM_BEHAVIOUR_LMG:
     case ITEM_BEHAVIOUR_LAUNCHER:
     case 7:
-    case 12:
+    case ITEM_BEHAVIOUR_ASSAULT:
         return 3;
     case ITEM_BEHAVIOUR_THROWN:
     case ITEM_BEHAVIOUR_MINE:
-    case ITEM_BEHAVIOUR_11:
-    case 21:
+    case ITEM_BEHAVIOUR_STICKY_CHARGE:
+    case ITEM_BEHAVIOUR_MISSION_EXPLOSIVE:
         return 5;
     default:
         return 7;
