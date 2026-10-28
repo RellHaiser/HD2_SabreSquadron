@@ -429,13 +429,13 @@ void C_EnemyController::GetWeaponRange(float *nearest, float *farthest)
     }
     switch (BehaviourOf(m_handsItem)) {
     case ITEM_BEHAVIOUR_SIDEARM: *nearest = 5.0f; *farthest = 20.0f; return;
-    case 3: *nearest = 6.0f; *farthest = 30.0f; return;
-    case 4: *nearest = 10.0f; *farthest = 60.0f; return;
-    case 5: *nearest = 15.0f; *farthest = 70.0f; return;
+    case ITEM_BEHAVIOUR_SMG: *nearest = 6.0f; *farthest = 30.0f; return;
+    case ITEM_BEHAVIOUR_RIFLE: *nearest = 10.0f; *farthest = 60.0f; return;
+    case ITEM_BEHAVIOUR_LMG: *nearest = 15.0f; *farthest = 70.0f; return;
     case ITEM_BEHAVIOUR_LAUNCHER: *nearest = 8.0f; *farthest = 35.0f; return;
     case 7: *nearest = 5.0f; *farthest = 15.0f; return;
     case ITEM_BEHAVIOUR_THROWN: *nearest = 12.0f; *farthest = 45.0f; return;
-    case 0xC: *nearest = 10.0f; *farthest = 70.0f; return;
+    case ITEM_BEHAVIOUR_ASSAULT: *nearest = 10.0f; *farthest = 70.0f; return;
     default: *nearest = 0.0f; *farthest = 2.0f; return;
     }
 }
@@ -449,7 +449,7 @@ float C_EnemyController::GetMinDistance()
     case ITEM_BEHAVIOUR_LAUNCHER: return 4.0f;
     case 7: return 3.0f;
     case ITEM_BEHAVIOUR_THROWN: return 12.0f;
-    case 0xC: return 5.0f;
+    case ITEM_BEHAVIOUR_ASSAULT: return 5.0f;
     default: return 0.0f;
     }
 }
@@ -459,12 +459,12 @@ float C_EnemyController::GetMaxDistance()
     // How far the weapon reaches.
     if (m_handsItem) {
         switch (BehaviourOf(m_handsItem)) {
-        case 0: return 2.0f;
+        case ITEM_BEHAVIOUR_MELEE: return 2.0f;
         case ITEM_BEHAVIOUR_SIDEARM: return 30.0f;
-        case 3: return 70.0f;
-        case 4: return 250.0f;
-        case 5:
-        case 0xC: return 300.0f;
+        case ITEM_BEHAVIOUR_SMG: return 70.0f;
+        case ITEM_BEHAVIOUR_RIFLE: return 250.0f;
+        case ITEM_BEHAVIOUR_LMG:
+        case ITEM_BEHAVIOUR_ASSAULT: return 300.0f;
         case ITEM_BEHAVIOUR_LAUNCHER: return 50.0f;
         case 7: return 25.0f;
         case ITEM_BEHAVIOUR_THROWN: return 45.0f;
@@ -490,9 +490,9 @@ bool C_EnemyController::CanFireMoving()
     if (!m_handsItem)
         return false;
     switch (BehaviourOf(m_handsItem)) {
-    case 0:
+    case ITEM_BEHAVIOUR_MELEE:
     case ITEM_BEHAVIOUR_SIDEARM:
-    case 3:
+    case ITEM_BEHAVIOUR_SMG:
     case 7:
     case ITEM_BEHAVIOUR_THROWN:
         return true;
@@ -528,7 +528,7 @@ bool C_EnemyController::CanFireLying()
     if (!m_handsItem)
         return false;
     switch (BehaviourOf(m_handsItem)) {
-    case 0:
+    case ITEM_BEHAVIOUR_MELEE:
     case ITEM_BEHAVIOUR_SIDEARM:
     case ITEM_BEHAVIOUR_LAUNCHER:
     case 7:

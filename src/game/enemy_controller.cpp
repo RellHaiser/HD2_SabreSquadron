@@ -950,10 +950,10 @@ void C_EnemyController::SetBurstTimes(C_Actor *target)
         const S_BurstTable *table = nullptr;
         switch (BehaviourOf(m_handsItem)) {
         case ITEM_BEHAVIOUR_SIDEARM: table = &BURST_SIDEARM; break;
-        case 3: table = &BURST_RIFLE; break;
-        case 4: table = &BURST_4; break;
-        case 5:
-        case 0xC: table = &BURST_5; break;
+        case ITEM_BEHAVIOUR_SMG: table = &BURST_RIFLE; break;
+        case ITEM_BEHAVIOUR_RIFLE: table = &BURST_4; break;
+        case ITEM_BEHAVIOUR_LMG:
+        case ITEM_BEHAVIOUR_ASSAULT: table = &BURST_5; break;
         default: break;
         }
         if (table && table->burstFar != -1) {

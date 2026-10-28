@@ -1586,15 +1586,15 @@ void C_HumanController::ApplyWeaponControls(int timeDelta, uint32_t fireFlags)
         }
         return;
     case ITEM_BEHAVIOUR_SIDEARM:
-    case 4:
+    case ITEM_BEHAVIOUR_RIFLE:
     case ITEM_BEHAVIOUR_LAUNCHER:
         // No automatic fire.
         m_axes[AXIS_FIRE] = 0.0f;
         break;
-    case 3:
-    case 5:
+    case ITEM_BEHAVIOUR_SMG:
+    case ITEM_BEHAVIOUR_LMG:
     case 7:
-    case 12:
+    case ITEM_BEHAVIOUR_ASSAULT:
         break;
     default:
         return;

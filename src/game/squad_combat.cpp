@@ -48,14 +48,14 @@ constexpr S_BurstTable BURST_TABLES[4] = {
 // The weapon preferences (BuildWeaponPrefs / PickWeapon bits).
 enum : uint32_t {
     PREF_SIDEARM = 0x001,                               // behaviour 2
-    PREF_3 = 0x002,                                     // behaviour 3
-    PREF_4 = 0x004,                                     // behaviour 12, then 4
-    PREF_5 = 0x008,                                     // behaviour 5
+    PREF_SMG = 0x002,                                     // behaviour 3
+    PREF_RIFLE = 0x004,                                     // behaviour 12, then 4
+    PREF_LMG = 0x008,                                     // behaviour 5
     PREF_LAUNCHER = 0x010,                              // behaviour 6
     PREF_GRENADE = 0x020,                               // behaviour 9
-    PREF_4_SCOPED = 0x040,
-    PREF_4_SILENCED = 0x080,
-    PREF_3_SILENCED = 0x100,
+    PREF_RIFLE_SCOPED = 0x040,
+    PREF_RIFLE_SILENCED = 0x080,
+    PREF_SMG_SILENCED = 0x100,
     PREF_SIDEARM_SILENCED = 0x200,
     PREF_ALL = 0xFFF,
 };
@@ -627,7 +627,7 @@ void C_SquadController::UpdateCombat(int timeDelta, bool ordersDone)
     if (m_handsItem && !m_human->m_vehicle) {
         const int behaviour = BehaviourOf(m_handsItem);
         const bool onRoute = (m_move->flags & S_AIMoveOrder::FLAG_ROUTE) != 0;
-        bool sniperCheck = behaviour == 5;
+        bool proneOnly = behaviour == ITEM_BEHAVIOUR_LMG;   // (fires only lying)
         if (m_fireOrder->target || FireDirSquare(m_fireOrder->fireDir) >= 1e-16f) {
             if (onRoute && !m_move->unknown58) {
                 // Walking: now and then the member stops to fire.
@@ -681,10 +681,10 @@ void C_SquadController::UpdateCombat(int timeDelta, bool ordersDone)
                 && (m_action.finished || m_action.type != HUMAN_COMMAND_PICK_UP_BODY || !m_action.target
                     || m_action.target->GetType() != ACTOR_HUMAN))
                 SetStance(static_cast<int>(m_orderStance));
-            sniperCheck = false;
+            proneOnly = false;
         }
-        if (sniperCheck && (m_fireOrder->target || FireDirSquare(m_fireOrder->fireDir) >= 1e-16f)) {
-            // Behaviour 5 (a sniper rifle, inferred): lying down to fire, stopped.
+        if (proneOnly && (m_fireOrder->target || FireDirSquare(m_fireOrder->fireDir) >= 1e-16f)) {
+            // A light machine gun: lying down to fire, stopped.
             const bool canFire = m_lyingToFire || CanFireAt();
             if ((!onRoute || m_move->unknown58) && canFire) {
                 if ((m_moveFlags & MOVE_STANCE_MASK) != MOVE_LYING) {
@@ -792,20 +792,20 @@ void C_SquadController::GetBurstDefaults(int *stopMin, int *stopSpread, int *fir
     // How long the member stops to fire and walks on (by the weapon's behaviour).
     if (m_handsItem) {
         switch (BehaviourOf(m_handsItem)) {
-        case 3:
-        case 0xC:
+        case ITEM_BEHAVIOUR_SMG:
+        case ITEM_BEHAVIOUR_ASSAULT:
             *stopMin = 1000;
             *stopSpread = 1000;
             *fireMin = 1000;
             *fireSpread = 1500;
             return;
-        case 4:
+        case ITEM_BEHAVIOUR_RIFLE:
             *stopMin = 2500;
             *stopSpread = 500;
             *fireMin = 1500;
             *fireSpread = 500;
             return;
-        case 5:
+        case ITEM_BEHAVIOUR_LMG:
             *stopMin = 4500;
             *stopSpread = 2000;
             *fireMin = 2000;
@@ -837,8 +837,8 @@ bool C_SquadController::CanFireAt()
     if (std::fabs(d.y / length) > LEVEL_FIRE_SIN)
         return false;
     switch (BehaviourOf(m_handsItem)) {
-    case 0:
-    case 2:
+    case ITEM_BEHAVIOUR_MELEE:
+    case ITEM_BEHAVIOUR_SIDEARM:
     case ITEM_BEHAVIOUR_LAUNCHER:
     case 7:
     case ITEM_BEHAVIOUR_THROWN:
@@ -870,7 +870,7 @@ bool C_SquadController::HasClearLine()
     if (std::fabs(d.y / length) > LEVEL_FIRE_SIN)
         return false;
     switch (BehaviourOf(m_handsItem)) {
-    case 0:
+    case ITEM_BEHAVIOUR_MELEE:
     case ITEM_BEHAVIOUR_LAUNCHER:
     case 7:
     case ITEM_BEHAVIOUR_THROWN:
@@ -1045,15 +1045,15 @@ C_Human *C_SquadController::PickCombatTarget(const S_vector *dir)
         const float distance2 = dx * dx + dy * dy + dz * dz;
         float range2;
         switch (BehaviourOf(m_handsItem)) {
-        case 0:
+        case ITEM_BEHAVIOUR_MELEE:
         case 1: range2 = 1.44f; break;
-        case 2: range2 = 225.0f; break;
-        case 3: range2 = 1600.0f; break;
-        case 4:
-        case 0xC: range2 = 22500.0f; break;
-        case 5: range2 = 4900.0f; break;
-        case 6: range2 = 2500.0f; break;
-        case 9: range2 = 400.0f; break;
+        case ITEM_BEHAVIOUR_SIDEARM: range2 = 225.0f; break;
+        case ITEM_BEHAVIOUR_SMG: range2 = 1600.0f; break;
+        case ITEM_BEHAVIOUR_RIFLE:
+        case ITEM_BEHAVIOUR_ASSAULT: range2 = 22500.0f; break;
+        case ITEM_BEHAVIOUR_LMG: range2 = 4900.0f; break;
+        case ITEM_BEHAVIOUR_LAUNCHER: range2 = 2500.0f; break;
+        case ITEM_BEHAVIOUR_THROWN: range2 = 400.0f; break;
         default: range2 = 625.0f; break;
         }
         const bool inRange = !(distance2 >= range2);
@@ -1175,15 +1175,15 @@ void C_SquadController::BuildWeaponPrefs(C_Actor *target, std::vector<uint32_t> 
         mask = PREF_ALL & ~PREF_LAUNCHER;
     }
     if (m_silentMode)
-        addAll({PREF_3_SILENCED, PREF_4_SILENCED, PREF_SIDEARM_SILENCED});
+        addAll({PREF_SMG_SILENCED, PREF_RIFLE_SILENCED, PREF_SIDEARM_SILENCED});
     if (m_human->m_body.GetSector() != GetGame()->GetScene()->GetPrimarySector()) {
         // Indoors.
-        addAll({PREF_3_SILENCED, PREF_SIDEARM_SILENCED, PREF_4_SILENCED, PREF_3, PREF_4, PREF_SIDEARM, PREF_4_SCOPED, PREF_5,
+        addAll({PREF_SMG_SILENCED, PREF_SIDEARM_SILENCED, PREF_RIFLE_SILENCED, PREF_SMG, PREF_RIFLE, PREF_SIDEARM, PREF_RIFLE_SCOPED, PREF_LMG,
                 PREF_LAUNCHER, PREF_GRENADE});
         return;
     }
     if (!target) {
-        addAll({PREF_4_SCOPED, PREF_5, PREF_4_SILENCED, PREF_3_SILENCED, PREF_SIDEARM_SILENCED, PREF_4, PREF_3, PREF_SIDEARM,
+        addAll({PREF_RIFLE_SCOPED, PREF_LMG, PREF_RIFLE_SILENCED, PREF_SMG_SILENCED, PREF_SIDEARM_SILENCED, PREF_RIFLE, PREF_SMG, PREF_SIDEARM,
                 PREF_LAUNCHER, PREF_GRENADE});
         return;
     }
@@ -1192,24 +1192,24 @@ void C_SquadController::BuildWeaponPrefs(C_Actor *target, std::vector<uint32_t> 
     const bool human = target->GetType() == ACTOR_HUMAN;
     if (1600.0f < distance2) {
         if (!human)
-            addAll({PREF_5, PREF_4, PREF_LAUNCHER, PREF_4_SCOPED, PREF_4_SILENCED, PREF_3, PREF_3_SILENCED, PREF_SIDEARM_SILENCED,
+            addAll({PREF_LMG, PREF_RIFLE, PREF_LAUNCHER, PREF_RIFLE_SCOPED, PREF_RIFLE_SILENCED, PREF_SMG, PREF_SMG_SILENCED, PREF_SIDEARM_SILENCED,
                     PREF_SIDEARM, PREF_GRENADE});
         else
-            addAll({PREF_4_SCOPED, PREF_5, PREF_4, PREF_4_SILENCED, PREF_3_SILENCED, PREF_3, PREF_LAUNCHER, PREF_SIDEARM_SILENCED,
+            addAll({PREF_RIFLE_SCOPED, PREF_LMG, PREF_RIFLE, PREF_RIFLE_SILENCED, PREF_SMG_SILENCED, PREF_SMG, PREF_LAUNCHER, PREF_SIDEARM_SILENCED,
                     PREF_SIDEARM, PREF_GRENADE});
     } else if (distance2 <= 400.0f) {
         if (human)
-            addAll({PREF_SIDEARM_SILENCED, PREF_3_SILENCED, PREF_4_SILENCED, PREF_3, PREF_SIDEARM, PREF_4, PREF_4_SCOPED, PREF_5,
+            addAll({PREF_SIDEARM_SILENCED, PREF_SMG_SILENCED, PREF_RIFLE_SILENCED, PREF_SMG, PREF_SIDEARM, PREF_RIFLE, PREF_RIFLE_SCOPED, PREF_LMG,
                     PREF_LAUNCHER, PREF_GRENADE});
         else
-            addAll({PREF_3, PREF_4, PREF_5, PREF_3_SILENCED, PREF_4_SILENCED, PREF_4_SCOPED, PREF_SIDEARM_SILENCED, PREF_SIDEARM,
+            addAll({PREF_SMG, PREF_RIFLE, PREF_LMG, PREF_SMG_SILENCED, PREF_RIFLE_SILENCED, PREF_RIFLE_SCOPED, PREF_SIDEARM_SILENCED, PREF_SIDEARM,
                     PREF_LAUNCHER, PREF_GRENADE});
     } else {
         if (!human)
-            addAll({PREF_5, PREF_3, PREF_3_SILENCED, PREF_4, PREF_4_SILENCED, PREF_4_SCOPED, PREF_LAUNCHER, PREF_GRENADE,
+            addAll({PREF_LMG, PREF_SMG, PREF_SMG_SILENCED, PREF_RIFLE, PREF_RIFLE_SILENCED, PREF_RIFLE_SCOPED, PREF_LAUNCHER, PREF_GRENADE,
                     PREF_SIDEARM_SILENCED, PREF_SIDEARM});
         else
-            addAll({PREF_3_SILENCED, PREF_SIDEARM_SILENCED, PREF_4_SILENCED, PREF_3, PREF_4, PREF_4_SCOPED, PREF_5, PREF_LAUNCHER,
+            addAll({PREF_SMG_SILENCED, PREF_SIDEARM_SILENCED, PREF_RIFLE_SILENCED, PREF_SMG, PREF_RIFLE, PREF_RIFLE_SCOPED, PREF_LMG, PREF_LAUNCHER,
                     PREF_SIDEARM, PREF_GRENADE});
     }
 }
@@ -1245,7 +1245,7 @@ C_Item *C_SquadController::FindWeapon(int behaviour, bool scoped, bool silenced,
         *container = ITEM_CONTAINER_LONG_GUN;
         return longGun->GetItem();
     }
-    if (behaviour == 3 || behaviour == 4 || behaviour == 5 || behaviour == ITEM_BEHAVIOUR_LAUNCHER || behaviour == 0xC)
+    if (behaviour == ITEM_BEHAVIOUR_SMG || behaviour == ITEM_BEHAVIOUR_RIFLE || behaviour == ITEM_BEHAVIOUR_LMG || behaviour == ITEM_BEHAVIOUR_LAUNCHER || behaviour == ITEM_BEHAVIOUR_ASSAULT)
         return nullptr;
     C_ItemContainer *belt = m_human->GetContainer(ITEM_CONTAINER_BELT);
     for (int i = 0; i < belt->GetUsedSlotCount(); ++i) {
@@ -1280,17 +1280,17 @@ C_Item *C_SquadController::PickWeapon(const std::vector<uint32_t> &prefs, int *c
         switch (pref) {
         case PREF_GRENADE: behaviour = ITEM_BEHAVIOUR_THROWN; break;
         case PREF_SIDEARM: behaviour = ITEM_BEHAVIOUR_SIDEARM; break;
-        case PREF_3: behaviour = 3; break;
-        case PREF_4:
-            if (C_Item *item = FindWeapon(0xC, false, false, container))
+        case PREF_SMG: behaviour = ITEM_BEHAVIOUR_SMG; break;
+        case PREF_RIFLE:
+            if (C_Item *item = FindWeapon(ITEM_BEHAVIOUR_ASSAULT, false, false, container))
                 return item;
-            behaviour = 4;
+            behaviour = ITEM_BEHAVIOUR_RIFLE;
             break;
-        case PREF_5: behaviour = 5; break;
+        case PREF_LMG: behaviour = ITEM_BEHAVIOUR_LMG; break;
         case PREF_LAUNCHER: behaviour = ITEM_BEHAVIOUR_LAUNCHER; break;
-        case PREF_3_SILENCED: behaviour = 3; silenced = true; break;
-        case PREF_4_SCOPED: behaviour = 4; scoped = true; break;
-        case PREF_4_SILENCED: behaviour = 4; silenced = true; break;
+        case PREF_SMG_SILENCED: behaviour = ITEM_BEHAVIOUR_SMG; silenced = true; break;
+        case PREF_RIFLE_SCOPED: behaviour = ITEM_BEHAVIOUR_RIFLE; scoped = true; break;
+        case PREF_RIFLE_SILENCED: behaviour = ITEM_BEHAVIOUR_RIFLE; silenced = true; break;
         case PREF_SIDEARM_SILENCED: behaviour = ITEM_BEHAVIOUR_SIDEARM; silenced = true; break;
         default: continue;
         }
