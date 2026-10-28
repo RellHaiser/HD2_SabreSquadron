@@ -24,7 +24,8 @@ const char *const GRIP_LEFT_SEAT = "LWS";
 const char *const GRIP_RIGHT_SEAT = "RWS";
 
 // The velocity of the vehicle (C_Car +0x4A0: its C_Vehicle's). The original reads +0x4A0 of any seat
-// actor; the other kinds (static weapons ...) are not ported yet: none for them.
+// actor. Fix: none for the other kinds (the submarine and the static weapon are smaller: the original
+// reads past them).
 const S_vector4 &VehicleVelocity(C_Actor *vehicle)
 {
     static const S_vector4 still = {0.0f, 0.0f, 0.0f, 0.0f};

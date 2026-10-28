@@ -282,7 +282,7 @@ bool C_RollMenu::HasActions(C_Actor *actor, float distance)
     }
     case ACTOR_SUPPLY_BOX: {
         auto *box = static_cast<C_SupplyBox *>(actor);
-        return !box->IsLocked() && box->IsLimited();
+        return !box->IsBusy() && box->IsPlaced();
     }
     case ACTOR_STATIC_WEAPON:
         return static_cast<C_StaticWeapon *>(actor)->GetState() == 1;
@@ -486,10 +486,10 @@ void C_RollMenu::BuildActions()
             auto *door = static_cast<C_Door *>(target);
             if (!door->IsLocked()) {
                 // Open (not when open), close (not when closed), lock (closed, with the key).
-                SetEntry(0, 0x1B6F, door->GetUnknown224() == 1 ? ROLL_DISABLED : HUMAN_COMMAND_OPEN_DOOR);
-                SetEntry(1, 0x1B81, door->GetUnknown224() == 0 ? ROLL_DISABLED : HUMAN_COMMAND_CLOSE_DOOR);
+                SetEntry(0, 0x1B6F, door->GetMotion() == 1 ? ROLL_DISABLED : HUMAN_COMMAND_OPEN_DOOR);
+                SetEntry(1, 0x1B81, door->GetMotion() == 0 ? ROLL_DISABLED : HUMAN_COMMAND_CLOSE_DOOR);
                 SetEntry(2, 0x1B6B,
-                         door->GetUnknown224() == 0 && selected->FindItem(door->GetLockKey()) ? HUMAN_COMMAND_LOCK_DOOR
+                         door->GetMotion() == 0 && selected->FindItem(door->GetLockKey()) ? HUMAN_COMMAND_LOCK_DOOR
                                                                                               : ROLL_DISABLED);
                 break;
             }
@@ -497,7 +497,7 @@ void C_RollMenu::BuildActions()
             SetEntry(1, 0x1B81, ROLL_DISABLED);
             C_Human *member = PlayerTeam()->GetSelectedMember();
             SetEntry(2, 0x1B6C, member->FindItem(door->GetLockKey()) ? HUMAN_COMMAND_UNLOCK_DOOR : ROLL_DISABLED);
-            SetEntry(3, 0x1B79, door->GetUnknown235() ? HUMAN_COMMAND_PICK_LOCK : ROLL_DISABLED);
+            SetEntry(3, 0x1B79, door->CanPickLock() ? HUMAN_COMMAND_PICK_LOCK : ROLL_DISABLED);
             break;
         }
         case ACTOR_RADIO:
@@ -696,13 +696,13 @@ void C_RollMenu::BuildCommandMapActions()
         SetEntry(1, 0x1B81, HUMAN_COMMAND_CLOSE_DOOR);
         SetEntry(2, 0x1B80, 0x15);
         SetEntry(3, 0x1B7D,
-                 !door->GetUnknown118() && (door->GetUnknownFC() != 0 || door->GetUnknown100() != 0) ? 0x12
+                 !door->GetUnknown118() && (door->GetPortal() != nullptr || door->GetOtherPortal() != nullptr) ? 0x12
                                                                                                     : ROLL_DISABLED);
         if (!door->IsLocked()) {
             SetEntry(4, 0x1B6B, commanded->FindItem(door->GetLockKey()) ? HUMAN_COMMAND_LOCK_DOOR : ROLL_DISABLED);
             break;
         }
-        SetEntry(4, 0x1B79, door->GetUnknown235() ? HUMAN_COMMAND_PICK_LOCK : ROLL_DISABLED);
+        SetEntry(4, 0x1B79, door->CanPickLock() ? HUMAN_COMMAND_PICK_LOCK : ROLL_DISABLED);
         SetEntry(5, 0x1B6C, commanded->FindItem(door->GetLockKey()) ? HUMAN_COMMAND_UNLOCK_DOOR : ROLL_DISABLED);
         break;
     }

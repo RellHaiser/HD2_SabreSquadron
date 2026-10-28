@@ -397,7 +397,7 @@ bool C_CheckpointNetwork::IsMeleeTrackerPassable(const S_Checkpoint &from, const
             index = CHECKPOINT_NONE;
         const C_Actor *actor = GetActor(index);
         if (actor && actor->GetType() == ACTOR_DOOR) {
-            const int state = static_cast<const C_Door *>(actor)->GetUnknown224();
+            const int state = static_cast<const C_Door *>(actor)->GetMotion();
             if (state == 0 || state == 3)               // closed, or 3
                 return false;
         }

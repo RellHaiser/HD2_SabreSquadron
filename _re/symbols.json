@@ -21258,29 +21258,227 @@
   "name": "MeleeTrackerAnimClass",
   "proto": "uint __fastcall MeleeTrackerAnimClass(int group)"
  },
+ "005d8760": {
+  "module": "static_weapon_bike_fish",
+  "name": "StaticInit_5d8760"
+ },
+ "005d8790": {
+  "module": "static_weapon_bike_fish",
+  "name": "StaticInit_5d8790"
+ },
+ "005d87c0": {
+  "module": "static_weapon_bike_fish",
+  "name": "StaticInit_BikeCreatorThunk"
+ },
+ "005d87d0": {
+  "module": "static_weapon_bike_fish",
+  "name": "StaticInit_BikeCreator"
+ },
+ "005d87f0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_BikeCreator::Create",
+  "proto": "C_Actor * __thiscall Create(C_ActorCreator * this)"
+ },
+ "005d8850": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_BikeCreator::GetName",
+  "proto": "char * __thiscall GetName(C_ActorCreator * this)"
+ },
+ "005d8860": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_BikeCreator::Destroy",
+  "proto": "void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)"
+ },
+ "005d8880": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::RestartMission",
+  "proto": "void __thiscall RestartMission(C_Bike * this, bool server)"
+ },
+ "005d88b0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::SaveGame",
+  "proto": "bool __thiscall SaveGame(C_Bike * this, C_chunk * chunk)"
+ },
+ "005d8b90": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::LoadGame",
+  "proto": "bool __thiscall LoadGame(C_Bike * this, C_chunk * chunk)"
+ },
  "005d8f60": {
   "module": "script",
   "name": "C_Bike::Drive"
  },
+ "005d9230": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::MountRider",
+  "proto": "void __thiscall MountRider(C_Bike * this, I3D_frame * rider)"
+ },
+ "005d9460": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::C_Bike",
+  "proto": "C_Bike * __thiscall C_Bike(C_Bike * this)"
+ },
  "005d9500": {
-  "module": "zz_idioms",
-  "name": "empty_function_5d9500"
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::Unknown20",
+  "proto": "void __thiscall Unknown20(C_Bike * this, C_BitStream * msg)"
+ },
+ "005d9510": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::ScalarDeletingDestructor",
+  "proto": "C_Bike * __thiscall ScalarDeletingDestructor(C_Bike * this, uchar flags)"
+ },
+ "005d9530": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::~C_Bike",
+  "proto": "void __thiscall ~C_Bike(C_Bike * this)"
+ },
+ "005d9570": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::SetFrame",
+  "proto": "bool __thiscall SetFrame(C_Bike * this, I3D_frame * frame)"
+ },
+ "005d9590": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::CopyFrom",
+  "proto": "void __thiscall CopyFrom(C_Bike * this, C_Actor * source)"
+ },
+ "005d95c0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::Update",
+  "proto": "void __thiscall Update(C_Bike * this, int frameTime)"
  },
  "005db0d0": {
-  "module": "zz_idioms",
-  "name": "empty_function_5db0d0"
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::Tick",
+  "proto": "void __thiscall Tick(C_Bike * this, int timeDelta)"
+ },
+ "005db0e0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::StartMission",
+  "proto": "void __thiscall StartMission(C_Bike * this, bool server)"
+ },
+ "005db4c0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::StopMission",
+  "proto": "void __thiscall StopMission(C_Bike * this, bool server)"
+ },
+ "005db640": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::ReadProperties",
+  "proto": "bool __thiscall ReadProperties(C_Bike * this, C_chunk * chunk)"
  },
  "005db770": {
-  "module": "zz_idioms",
-  "name": "empty_function_5db770"
+  "module": "static_weapon_bike_fish",
+  "name": "C_Bike::OnMessage",
+  "proto": "void __thiscall OnMessage(C_Bike * this, C_BitStream * msg)"
+ },
+ "005db780": {
+  "module": "static_weapon_bike_fish",
+  "name": "StaticInit_5db780"
+ },
+ "005db7b0": {
+  "module": "static_weapon_bike_fish",
+  "name": "StaticInit_FishCreatorThunk"
+ },
+ "005db7c0": {
+  "module": "static_weapon_bike_fish",
+  "name": "StaticInit_FishCreator"
+ },
+ "005db7e0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_FishCreator::Create",
+  "proto": "C_Actor * __thiscall Create(C_ActorCreator * this)"
+ },
+ "005db840": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_FishCreator::GetName",
+  "proto": "char * __thiscall GetName(C_ActorCreator * this)"
+ },
+ "005db850": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_FishCreator::Destroy",
+  "proto": "void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)"
+ },
+ "005db870": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::RestartMission",
+  "proto": "void __thiscall RestartMission(C_Fish * this, bool server)"
+ },
+ "005db890": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::SaveGame",
+  "proto": "bool __thiscall SaveGame(C_Fish * this, C_chunk * chunk)"
+ },
+ "005dba50": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::LoadGame",
+  "proto": "bool __thiscall LoadGame(C_Fish * this, C_chunk * chunk)"
+ },
+ "005dbd80": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::C_Fish",
+  "proto": "C_Fish * __thiscall C_Fish(C_Fish * this)"
  },
  "005dbde0": {
-  "module": "zz_idioms",
-  "name": "empty_function_5dbde0"
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::OnMessage",
+  "proto": "void __thiscall OnMessage(C_Fish * this, C_BitStream * msg)"
  },
  "005dbdf0": {
-  "module": "zz_idioms",
-  "name": "empty_function_5dbdf0"
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::Unknown20",
+  "proto": "void __thiscall Unknown20(C_Fish * this, C_BitStream * msg)"
+ },
+ "005dbe00": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::ScalarDeletingDestructor",
+  "proto": "C_Fish * __thiscall ScalarDeletingDestructor(C_Fish * this, uchar flags)"
+ },
+ "005dbe20": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::~C_Fish",
+  "proto": "void __thiscall ~C_Fish(C_Fish * this)"
+ },
+ "005dbe60": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::SetFrame",
+  "proto": "bool __thiscall SetFrame(C_Fish * this, I3D_frame * frame)"
+ },
+ "005dbe80": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::CopyFrom",
+  "proto": "void __thiscall CopyFrom(C_Fish * this, C_Actor * source)"
+ },
+ "005dbec0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::Tick",
+  "proto": "void __thiscall Tick(C_Fish * this, int timeDelta)"
+ },
+ "005dca60": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::UpdateVisibility",
+  "proto": "bool __fastcall UpdateVisibility(C_Fish * this)"
+ },
+ "005dcb10": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::Update",
+  "proto": "void __thiscall Update(C_Fish * this, int frameTime)"
+ },
+ "005dd900": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::StartMission",
+  "proto": "void __thiscall StartMission(C_Fish * this, bool server)"
+ },
+ "005de260": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::StopMission",
+  "proto": "void __thiscall StopMission(C_Fish * this, bool server)"
+ },
+ "005de300": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_Fish::ReadProperties",
+  "proto": "bool __thiscall ReadProperties(C_Fish * this, C_chunk * chunk)"
  },
  "005de5c0": {
   "module": "zz_idioms",
@@ -22330,21 +22528,225 @@
   "module": "zz_idioms",
   "name": "copy4_5f8130"
  },
+ "005f9700": {
+  "module": "door_supply_box_barrel",
+  "name": "StaticInit_SupplyBoxCreatorThunk"
+ },
+ "005f9710": {
+  "module": "door_supply_box_barrel",
+  "name": "StaticInit_SupplyBoxCreator"
+ },
+ "005f9730": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBoxCreator::Create",
+  "proto": "C_Actor * __thiscall Create(C_ActorCreator * this)"
+ },
+ "005f9790": {
+  "module": "door_supply_box_barrel",
+  "name": "SupplyBox_AlignedFree",
+  "proto": "void __fastcall SupplyBox_AlignedFree(void * block)"
+ },
+ "005f97a0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBoxCreator::GetName",
+  "proto": "char * __thiscall GetName(C_ActorCreator * this)"
+ },
+ "005f97b0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBoxCreator::Destroy",
+  "proto": "void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)"
+ },
+ "005f97d0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::C_SupplyBox",
+  "proto": "C_SupplyBox * __thiscall C_SupplyBox(C_SupplyBox * this)"
+ },
  "005f9840": {
-  "module": "zz_idioms",
-  "name": "empty_function_5f9840"
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::Unknown20",
+  "proto": "void __thiscall Unknown20(C_SupplyBox * this, C_BitStream * msg)"
+ },
+ "005f9850": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::GetMaterialId",
+  "proto": "int __thiscall GetMaterialId(C_SupplyBox * this, I3D_frame * part)"
+ },
+ "005f9860": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::ScalarDeletingDestructor",
+  "proto": "C_SupplyBox * __thiscall ScalarDeletingDestructor(C_SupplyBox * this, uchar flags)"
+ },
+ "005f9880": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::~C_SupplyBox",
+  "proto": "void __thiscall ~C_SupplyBox(C_SupplyBox * this)"
+ },
+ "005f98e0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::Reset",
+  "proto": "void __fastcall Reset(C_SupplyBox * this)"
+ },
+ "005f9a60": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::InitBox",
+  "proto": "void __thiscall InitBox(C_SupplyBox * this)"
+ },
+ "005f9ec0": {
+  "module": "door_supply_box_barrel",
+  "name": "VertexAnimPlayerCtor_5f9ec0",
+  "proto": "void * __fastcall VertexAnimPlayerCtor_5f9ec0(void * player)"
+ },
+ "005f9f00": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::StartDrop",
+  "proto": "void __thiscall StartDrop(C_SupplyBox * this)"
  },
  "005fa290": {
-  "module": "script",
-  "name": "C_SupplyBox::SetEnabled"
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::SetEnabled",
+  "proto": "void __thiscall SetEnabled(C_SupplyBox * this, bool on)"
+ },
+ "005fa3f0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::OnMessage",
+  "proto": "void __thiscall OnMessage(C_SupplyBox * this, C_BitStream * msg)"
+ },
+ "005fa530": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::UpdateBoxVolume",
+  "proto": "void __fastcall UpdateBoxVolume(C_SupplyBox * this)"
+ },
+ "005fa6a0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::SetFrame",
+  "proto": "bool __thiscall SetFrame(C_SupplyBox * this, I3D_frame * frame)"
+ },
+ "005fac80": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::StartMission",
+  "proto": "void __thiscall StartMission(C_SupplyBox * this, bool server)"
+ },
+ "005fb220": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::StopMission",
+  "proto": "void __thiscall StopMission(C_SupplyBox * this, bool server)"
+ },
+ "005fb380": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::Update",
+  "proto": "void __thiscall Update(C_SupplyBox * this, int frameTime)"
+ },
+ "005fbd20": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::Tick",
+  "proto": "void __thiscall Tick(C_SupplyBox * this, int timeDelta)"
+ },
+ "005fbd40": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::Damage",
+  "proto": "void __thiscall Damage(C_SupplyBox * this, int amount)"
  },
  "005fbd80": {
-  "module": "zz_idioms",
-  "name": "empty_function_5fbd80"
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::Hit",
+  "proto": "void __thiscall Hit(C_SupplyBox * this, int type, float amount, S_vector * pos, S_vector * dir, C_Actor * attacker, int part)"
+ },
+ "005fbd90": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::SetVisibility",
+  "proto": "void __thiscall SetVisibility(C_SupplyBox * this, uint flags)"
+ },
+ "005fbec0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::CopyFrom",
+  "proto": "void __thiscall CopyFrom(C_SupplyBox * this, C_Actor * source)"
+ },
+ "005fc050": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::WriteProperties",
+  "proto": "bool __thiscall WriteProperties(C_SupplyBox * this, C_chunk * chunk)"
+ },
+ "005fc200": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::ReadProperties",
+  "proto": "bool __thiscall ReadProperties(C_SupplyBox * this, C_chunk * chunk)"
+ },
+ "005fc480": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::RestartMission",
+  "proto": "void __thiscall RestartMission(C_SupplyBox * this, bool server)"
+ },
+ "005fc530": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::SaveGame",
+  "proto": "bool __thiscall SaveGame(C_SupplyBox * this, C_chunk * chunk)"
+ },
+ "005fc640": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::LoadGame",
+  "proto": "bool __thiscall LoadGame(C_SupplyBox * this, C_chunk * chunk)"
+ },
+ "005fc860": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::SetAnimation",
+  "proto": "void __thiscall SetAnimation(C_SupplyBox * this, int anim)"
+ },
+ "005fc9a0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::TickAnimation",
+  "proto": "void __thiscall TickAnimation(C_SupplyBox * this, int time)"
+ },
+ "005fca60": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::TickState",
+  "proto": "void __thiscall TickState(C_SupplyBox * this, int time)"
+ },
+ "005fcd80": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::SetState",
+  "proto": "void __thiscall SetState(C_SupplyBox * this, int state)"
+ },
+ "005fd180": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::GetState",
+  "proto": "void __thiscall GetState(C_SupplyBox * this, void * state)"
+ },
+ "005fd2a0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::ApplyState",
+  "proto": "void __thiscall ApplyState(C_SupplyBox * this, void * state)"
+ },
+ "005fd560": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::WriteState",
+  "proto": "void __thiscall WriteState(C_SupplyBox * this, C_BitStream * msg)"
+ },
+ "005fd640": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::ReadState",
+  "proto": "void __thiscall ReadState(C_SupplyBox * this, C_BitStream * msg)"
+ },
+ "005fd760": {
+  "module": "door_supply_box_barrel",
+  "name": "C_SupplyBox::UpdateAmmoParts",
+  "proto": "void __fastcall UpdateAmmoParts(C_SupplyBox * this)"
+ },
+ "005fd7f0": {
+  "module": "door_supply_box_barrel",
+  "name": "vector_assign4_5fd7f0",
+  "proto": "void * __thiscall vector_assign4_5fd7f0(void * this, void * other)"
  },
  "005fd970": {
   "module": "zz_idioms",
   "name": "copy4_5fd970"
+ },
+ "005fd990": {
+  "module": "door_supply_box_barrel",
+  "name": "StaticInit_5fd990"
+ },
+ "005fd9c0": {
+  "module": "door_supply_box_barrel",
+  "name": "StaticInit_5fd9c0"
  },
  "005fd9f0": {
   "module": "item_actor",
@@ -22616,51 +23018,709 @@
   "module": "objective_actors",
   "name": "StaticInit_5ff120"
  },
+ "005ff150": {
+  "module": "door_supply_box_barrel",
+  "name": "StaticInit_DoorCreatorThunk"
+ },
+ "005ff160": {
+  "module": "door_supply_box_barrel",
+  "name": "StaticInit_DoorCreator"
+ },
+ "005ff180": {
+  "module": "door_supply_box_barrel",
+  "name": "C_DoorCreator::Create",
+  "proto": "C_Actor * __thiscall Create(C_ActorCreator * this)"
+ },
+ "005ff1e0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_DoorCreator::GetName",
+  "proto": "char * __thiscall GetName(C_ActorCreator * this)"
+ },
+ "005ff1f0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_DoorCreator::Destroy",
+  "proto": "void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)"
+ },
+ "005ff210": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::C_Door",
+  "proto": "C_Door * __thiscall C_Door(C_Door * this)"
+ },
+ "005ff380": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::ScalarDeletingDestructor",
+  "proto": "C_Door * __thiscall ScalarDeletingDestructor(C_Door * this, uchar flags)"
+ },
+ "005ff3a0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::~C_Door",
+  "proto": "void __thiscall ~C_Door(C_Door * this)"
+ },
+ "005ff3d0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::SetFrame",
+  "proto": "bool __thiscall SetFrame(C_Door * this, I3D_frame * frame)"
+ },
+ "005ff3e0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::CopyFrom",
+  "proto": "void __thiscall CopyFrom(C_Door * this, C_Actor * source)"
+ },
  "005ff4b0": {
-  "module": "script",
-  "name": "C_Door::SetState"
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::SetState",
+  "proto": "void __thiscall SetState(C_Door * this, int action, bool autoClose, bool linked, int force)"
  },
  "005ff5f0": {
-  "module": "script",
-  "name": "C_Door::Unlock"
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::Unlock",
+  "proto": "bool __thiscall Unlock(C_Door * this, int key)"
  },
  "005ff650": {
-  "module": "script",
-  "name": "C_Door::Lock"
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::Lock",
+  "proto": "bool __thiscall Lock(C_Door * this, int key)"
  },
  "005ff6c0": {
-  "module": "controller",
+  "module": "door_supply_box_barrel",
   "name": "C_Door::PickLock",
-  "proto": "void __thiscall PickLock(void *this)"
+  "proto": "void __thiscall PickLock(C_Door * this)"
+ },
+ "005ff700": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::TurnTo",
+  "proto": "bool __thiscall TurnTo(C_Door * this, int time)"
+ },
+ "005ffbd0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::SlideTo",
+  "proto": "bool __thiscall SlideTo(C_Door * this, int time)"
+ },
+ "005fffe0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::Animate",
+  "proto": "void __thiscall Animate(C_Door * this, int time)"
+ },
+ "006007b0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::SetPortalsClosed",
+  "proto": "void __thiscall SetPortalsClosed(C_Door * this, bool closed)"
+ },
+ "006007f0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::UpdateVolume",
+  "proto": "void __fastcall UpdateVolume(C_Door * this)"
+ },
+ "00600920": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::Tick",
+  "proto": "void __thiscall Tick(C_Door * this, int timeDelta)"
+ },
+ "00600940": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::Update",
+  "proto": "void __thiscall Update(C_Door * this, int frameTime)"
+ },
+ "00600950": {
+  "module": "door_supply_box_barrel",
+  "name": "Door_FindHandle",
+  "proto": "I3D_frame * __fastcall Door_FindHandle(I3D_frame * frame, char * name)"
+ },
+ "00600a50": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::FindPortals",
+  "proto": "void __fastcall FindPortals(C_Door * this)"
+ },
+ "00600cc0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::StartMission",
+  "proto": "void __thiscall StartMission(C_Door * this, bool server)"
+ },
+ "00601350": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::StopMission",
+  "proto": "void __thiscall StopMission(C_Door * this, bool server)"
+ },
+ "006013b0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::WriteProperties",
+  "proto": "bool __thiscall WriteProperties(C_Door * this, C_chunk * chunk)"
+ },
+ "00601aa0": {
+  "module": "door_supply_box_barrel",
+  "name": "Door_FrameBound",
+  "proto": "void * __fastcall Door_FrameBound(I3D_frame * frame)"
+ },
+ "00601ac0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::ReadProperties",
+  "proto": "bool __thiscall ReadProperties(C_Door * this, C_chunk * chunk)"
+ },
+ "00601f40": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::SendMessage",
+  "proto": "void __thiscall SendMessage(C_Door * this, uint kind)"
+ },
+ "00601f90": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::OnMessage",
+  "proto": "void __thiscall OnMessage(C_Door * this, C_BitStream * msg)"
  },
  "006021d0": {
-  "module": "zz_idioms",
-  "name": "empty_function_6021d0"
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::Unknown20",
+  "proto": "void __thiscall Unknown20(C_Door * this, C_BitStream * msg)"
+ },
+ "006021e0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::WriteState",
+  "proto": "void __thiscall WriteState(C_Door * this, C_BitStream * msg)"
+ },
+ "00602290": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::ReadState",
+  "proto": "void __thiscall ReadState(C_Door * this, C_BitStream * msg)"
  },
  "00602320": {
-  "module": "movement",
+  "module": "door_supply_box_barrel",
   "name": "C_Door::GetSide",
-  "proto": "int __thiscall GetSide(C_Door *this, S_vector4 * pos)"
+  "proto": "int __thiscall GetSide(C_Door * this, S_vector4 * pos)"
+ },
+ "006023b0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::GetMaterialId",
+  "proto": "int __thiscall GetMaterialId(C_Door * this, I3D_frame * part)"
+ },
+ "00602400": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::RestartMission",
+  "proto": "void __thiscall RestartMission(C_Door * this, bool server)"
+ },
+ "00602500": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::SaveGame",
+  "proto": "bool __thiscall SaveGame(C_Door * this, C_chunk * chunk)"
+ },
+ "00602700": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::LoadGame",
+  "proto": "bool __thiscall LoadGame(C_Door * this, C_chunk * chunk)"
  },
  "006029f0": {
-  "module": "script",
-  "name": "C_Door::GetState"
+  "module": "door_supply_box_barrel",
+  "name": "C_Door::GetState",
+  "proto": "int __thiscall GetState(C_Door * this)"
+ },
+ "00602a10": {
+  "module": "static_weapon_bike_fish",
+  "name": "StaticInit_602a10"
+ },
+ "00602a40": {
+  "module": "static_weapon_bike_fish",
+  "name": "StaticInit_StaticWeaponCreatorThunk"
+ },
+ "00602a50": {
+  "module": "static_weapon_bike_fish",
+  "name": "StaticInit_StaticWeaponCreator"
+ },
+ "00602a70": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeaponCreator::Create",
+  "proto": "C_Actor * __thiscall Create(C_ActorCreator * this)"
+ },
+ "00602ad0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeaponCreator::GetName",
+  "proto": "char * __thiscall GetName(C_ActorCreator * this)"
+ },
+ "00602ae0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeaponCreator::Destroy",
+  "proto": "void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)"
  },
  "00602b10": {
   "module": "zz_idioms",
   "name": "empty_function_602b10"
  },
+ "00602b20": {
+  "module": "static_weapon_bike_fish",
+  "name": "StaticWeapon_GetWeaponBox",
+  "proto": "I3D_bbox * __fastcall StaticWeapon_GetWeaponBox(I3D_frame * frame)"
+ },
+ "00602bc0": {
+  "module": "static_weapon_bike_fish",
+  "name": "StaticWeapon_AddWeaponBox",
+  "proto": "void __fastcall StaticWeapon_AddWeaponBox(I3D_frame * frame, S_matrix * parent)"
+ },
+ "00602ec0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::C_StaticWeapon",
+  "proto": "C_StaticWeapon * __thiscall C_StaticWeapon(C_StaticWeapon * this)"
+ },
+ "00602f60": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetHitPoints",
+  "proto": "int __thiscall GetHitPoints(C_StaticWeapon * this)"
+ },
+ "00602f70": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetSeatCount",
+  "proto": "int __thiscall GetSeatCount(C_StaticWeapon * this)"
+ },
+ "00602fa0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::ScalarDeletingDestructor",
+  "proto": "C_StaticWeapon * __thiscall ScalarDeletingDestructor(C_StaticWeapon * this, uchar flags)"
+ },
+ "00602fc0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::~C_StaticWeapon",
+  "proto": "void __thiscall ~C_StaticWeapon(C_StaticWeapon * this)"
+ },
+ "00603040": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::SetFrame",
+  "proto": "bool __thiscall SetFrame(C_StaticWeapon * this, I3D_frame * frame)"
+ },
+ "00603060": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::CopyFrom",
+  "proto": "void __thiscall CopyFrom(C_StaticWeapon * this, C_Actor * source)"
+ },
+ "00603070": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::Tick",
+  "proto": "void __thiscall Tick(C_StaticWeapon * this, int timeDelta)"
+ },
+ "00603290": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::ReadMessages",
+  "proto": "void __thiscall ReadMessages(C_StaticWeapon * this)"
+ },
+ "006034d0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::Update",
+  "proto": "void __thiscall Update(C_StaticWeapon * this, int frameTime)"
+ },
+ "00603520": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::WriteState",
+  "proto": "void __thiscall WriteState(C_StaticWeapon * this, C_BitStream * msg)"
+ },
+ "00603560": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::ReadState",
+  "proto": "void __thiscall ReadState(C_StaticWeapon * this, C_BitStream * msg)"
+ },
+ "006035b0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::WriteStore",
+  "proto": "void __thiscall WriteStore(C_StaticWeapon * this, C_BitStream * msg)"
+ },
+ "00603650": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::ReadStore",
+  "proto": "void __thiscall ReadStore(C_StaticWeapon * this, C_BitStream * msg, bool add)"
+ },
+ "006036d0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::StartMission",
+  "proto": "void __thiscall StartMission(C_StaticWeapon * this, bool server)"
+ },
+ "00604120": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::StopMission",
+  "proto": "void __thiscall StopMission(C_StaticWeapon * this, bool server)"
+ },
+ "006041a0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::SetSeatOccupant",
+  "proto": "void __thiscall SetSeatOccupant(C_StaticWeapon * this, int seat, C_Actor * occupant)"
+ },
+ "00604590": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetSeatOccupant",
+  "proto": "C_Actor * __thiscall GetSeatOccupant(C_StaticWeapon * this, int seat)"
+ },
+ "006045e0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::FindSeat",
+  "proto": "int __thiscall FindSeat(C_StaticWeapon * this, C_Actor * occupant)"
+ },
+ "00604630": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::LeaveSeat",
+  "proto": "C_Actor * __thiscall LeaveSeat(C_StaticWeapon * this, int seat)"
+ },
+ "006046d0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::ExitSeat",
+  "proto": "bool __thiscall ExitSeat(C_StaticWeapon * this, int seat)"
+ },
+ "00604a10": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetSeatFlags",
+  "proto": "uint __thiscall GetSeatFlags(C_StaticWeapon * this, int seat)"
+ },
+ "00604a90": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::IsSeatBlocked",
+  "proto": "bool __thiscall IsSeatBlocked(C_StaticWeapon * this, int seat)"
+ },
+ "00604ad0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::SetSeatBlocked",
+  "proto": "bool __thiscall SetSeatBlocked(C_StaticWeapon * this, int seat, bool blocked)"
+ },
+ "00604b10": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetSeatText",
+  "proto": "int __thiscall GetSeatText(C_StaticWeapon * this, int seat)"
+ },
+ "00604b70": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetSeatCamera",
+  "proto": "I3D_frame * __thiscall GetSeatCamera(C_StaticWeapon * this, int seat)"
+ },
+ "00604cd0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::WriteProperties",
+  "proto": "bool __thiscall WriteProperties(C_StaticWeapon * this, C_chunk * chunk)"
+ },
+ "00604ce0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::ReadProperties",
+  "proto": "bool __thiscall ReadProperties(C_StaticWeapon * this, C_chunk * chunk)"
+ },
+ "00604cf0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::ApplySeatControls",
+  "proto": "void __thiscall ApplySeatControls(C_StaticWeapon * this, int seat, float * axes, float * buttons)"
+ },
+ "00604d20": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::HasSeatWeapon",
+  "proto": "bool __thiscall HasSeatWeapon(C_StaticWeapon * this, int seat)"
+ },
+ "00604d30": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetSeatWeaponRounds",
+  "proto": "int __thiscall GetSeatWeaponRounds(C_StaticWeapon * this, int seat)"
+ },
+ "00604d40": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetSeatWeaponOrigin",
+  "proto": "S_vector * __thiscall GetSeatWeaponOrigin(C_StaticWeapon * this, S_vector * out, int seat)"
+ },
+ "00604d60": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::UnknownAC",
+  "proto": "float __thiscall UnknownAC(C_StaticWeapon * this, int seat)"
+ },
+ "00604d70": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetSeatWeaponAim",
+  "proto": "S_vector * __thiscall GetSeatWeaponAim(C_StaticWeapon * this, S_vector * out, int seat)"
+ },
+ "00604d90": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetSeatWeaponText",
+  "proto": "int __thiscall GetSeatWeaponText(C_StaticWeapon * this, int seat)"
+ },
+ "00604da0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetSeatWeaponDef",
+  "proto": "C_ItemDef * __thiscall GetSeatWeaponDef(C_StaticWeapon * this, int seat)"
+ },
+ "00604db0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::ShowSeatView",
+  "proto": "void __thiscall ShowSeatView(C_StaticWeapon * this, int seat, bool on)"
+ },
+ "00604dd0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetSeatWeaponLimits",
+  "proto": "void __thiscall GetSeatWeaponLimits(C_StaticWeapon * this, int seat, float * up, float * down, float * left, float * right)"
+ },
+ "00604e10": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::UnknownC8",
+  "proto": "bool __thiscall UnknownC8(C_StaticWeapon * this, int seat, int * a, int * b, int * c)"
+ },
+ "00604e30": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::IsSeatFirstPersonOnly",
+  "proto": "bool __thiscall IsSeatFirstPersonOnly(C_StaticWeapon * this, int seat)"
+ },
+ "00604e90": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::UpdateVolume",
+  "proto": "void __fastcall UpdateVolume(C_StaticWeapon * this)"
+ },
+ "00605030": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::OnMessage",
+  "proto": "void __thiscall OnMessage(C_StaticWeapon * this, C_BitStream * msg)"
+ },
  "006050a0": {
-  "module": "zz_idioms",
-  "name": "empty_function_6050a0"
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::Unknown20",
+  "proto": "void __thiscall Unknown20(C_StaticWeapon * this, C_BitStream * msg)"
+ },
+ "006050b0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::RestartMission",
+  "proto": "void __thiscall RestartMission(C_StaticWeapon * this, bool server)"
+ },
+ "00605120": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::SaveGame",
+  "proto": "bool __thiscall SaveGame(C_StaticWeapon * this, C_chunk * chunk)"
+ },
+ "006053c0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::LoadGame",
+  "proto": "bool __thiscall LoadGame(C_StaticWeapon * this, C_chunk * chunk)"
+ },
+ "006055a0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::CanSeatWeaponAim",
+  "proto": "bool __thiscall CanSeatWeaponAim(C_StaticWeapon * this, int seat, float * pos)"
+ },
+ "006055c0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::FindExit",
+  "proto": "void __fastcall FindExit(C_StaticWeapon * this)"
+ },
+ "006056d0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetExitPosUnused",
+  "proto": "void __thiscall GetExitPosUnused(C_StaticWeapon * this, S_vector * out)"
+ },
+ "006057b0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::Hit",
+  "proto": "void __thiscall Hit(C_StaticWeapon * this, int type, float amount, S_vector * pos, S_vector * dir, C_Actor * attacker, int flags)"
  },
  "006059b0": {
   "module": "script",
   "name": "C_StaticWeapon::SetState"
  },
+ "00605ae0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::ApplyState",
+  "proto": "void __thiscall ApplyState(C_StaticWeapon * this, int state)"
+ },
+ "00605bb0": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::ShowDestroyed",
+  "proto": "void __thiscall ShowDestroyed(C_StaticWeapon * this)"
+ },
+ "00605c80": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::ShowIntact",
+  "proto": "void __thiscall ShowIntact(C_StaticWeapon * this)"
+ },
+ "00605d80": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::CopyPart",
+  "proto": "uint __stdcall CopyPart(I3D_frame * frame, void * model)"
+ },
+ "00605e50": {
+  "module": "static_weapon_bike_fish",
+  "name": "C_StaticWeapon::GetBoxCorners",
+  "proto": "void __thiscall GetBoxCorners(C_StaticWeapon * this, S_vector4 * corners)"
+ },
+ "00606250": {
+  "module": "door_supply_box_barrel",
+  "name": "StaticInit_606250"
+ },
+ "00606280": {
+  "module": "door_supply_box_barrel",
+  "name": "StaticInit_BarrelCreatorThunk"
+ },
+ "00606290": {
+  "module": "door_supply_box_barrel",
+  "name": "StaticInit_BarrelCreator"
+ },
+ "006062b0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_BarrelCreator::Create",
+  "proto": "C_Actor * __thiscall Create(C_ActorCreator * this)"
+ },
+ "00606310": {
+  "module": "door_supply_box_barrel",
+  "name": "C_BarrelCreator::GetName",
+  "proto": "char * __thiscall GetName(C_ActorCreator * this)"
+ },
+ "00606320": {
+  "module": "door_supply_box_barrel",
+  "name": "C_BarrelCreator::Destroy",
+  "proto": "void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)"
+ },
+ "00606340": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::RestartMission",
+  "proto": "void __thiscall RestartMission(C_Barrel * this, bool server)"
+ },
+ "00606360": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::SetFrame",
+  "proto": "bool __thiscall SetFrame(C_Barrel * this, I3D_frame * frame)"
+ },
+ "00606380": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::C_Barrel",
+  "proto": "C_Barrel * __thiscall C_Barrel(C_Barrel * this)"
+ },
+ "00606430": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::ScalarDeletingDestructor",
+  "proto": "C_Barrel * __thiscall ScalarDeletingDestructor(C_Barrel * this, uchar flags)"
+ },
+ "00606450": {
+  "module": "door_supply_box_barrel",
+  "name": "Barrel_SurfacePartDtor",
+  "proto": "void __fastcall Barrel_SurfacePartDtor(void * part)"
+ },
+ "00606470": {
+  "module": "door_supply_box_barrel",
+  "name": "Barrel_BodyPartDtor",
+  "proto": "void __fastcall Barrel_BodyPartDtor(void * part)"
+ },
+ "00606490": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::~C_Barrel",
+  "proto": "void __thiscall ~C_Barrel(C_Barrel * this)"
+ },
+ "00606520": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::CopyFrom",
+  "proto": "void __thiscall CopyFrom(C_Barrel * this, C_Actor * source)"
+ },
+ "00606650": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::StartMission",
+  "proto": "void __thiscall StartMission(C_Barrel * this, bool server)"
+ },
+ "00606b10": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::SetSurfaceLevel",
+  "proto": "void __fastcall SetSurfaceLevel(C_Barrel * this)"
+ },
+ "00606bb0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::StopMission",
+  "proto": "void __thiscall StopMission(C_Barrel * this, bool server)"
+ },
+ "00606da0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::Animate",
+  "proto": "void __thiscall Animate(C_Barrel * this, int time)"
+ },
+ "006071b0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::Update",
+  "proto": "void __thiscall Update(C_Barrel * this, int frameTime)"
+ },
+ "006071c0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::Tick",
+  "proto": "void __thiscall Tick(C_Barrel * this, int timeDelta)"
+ },
+ "006071e0": {
+  "module": "door_supply_box_barrel",
+  "name": "Barrel_SurfacePartCtor",
+  "proto": "void * __fastcall Barrel_SurfacePartCtor(void * part)"
+ },
+ "006072a0": {
+  "module": "door_supply_box_barrel",
+  "name": "Barrel_BodyPartCtor",
+  "proto": "void * __fastcall Barrel_BodyPartCtor(void * part)"
+ },
+ "00607350": {
+  "module": "door_supply_box_barrel",
+  "name": "Barrel_DestroyPartCtor",
+  "proto": "void * __fastcall Barrel_DestroyPartCtor(void * part)"
+ },
+ "00607410": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::Slosh",
+  "proto": "void __thiscall Slosh(C_Barrel * this, S_vector * pos, S_vector * dir, bool tipBody)"
+ },
+ "00607930": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::Destroy",
+  "proto": "void __thiscall Destroy(C_Barrel * this, bool loading)"
+ },
+ "00608150": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::AddHole",
+  "proto": "void __thiscall AddHole(C_Barrel * this, S_vector * pos, float height)"
+ },
+ "006083c0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::IsLeakHeight",
+  "proto": "bool __thiscall IsLeakHeight(C_Barrel * this, float * height)"
+ },
+ "006083f0": {
+  "module": "door_supply_box_barrel",
+  "name": "Barrel_CylinderHits",
+  "proto": "void __fastcall Barrel_CylinderHits(S_vector * origin, S_vector * dir, float radius, S_vector * a, S_vector * b)"
+ },
+ "00608590": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::HitBody",
+  "proto": "void __thiscall HitBody(C_Barrel * this, S_vector * pos, S_vector * dir)"
+ },
+ "00608a30": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::HitSurface",
+  "proto": "void __thiscall HitSurface(C_Barrel * this, S_vector * pos, S_vector * dir)"
+ },
+ "00608e40": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::Hit",
+  "proto": "void __thiscall Hit(C_Barrel * this, int type, float amount, S_vector * pos, S_vector * dir, C_Actor * attacker, int part)"
+ },
+ "00609220": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::OnMessage",
+  "proto": "void __thiscall OnMessage(C_Barrel * this, C_BitStream * msg)"
+ },
+ "006094f0": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::GetMaterialId",
+  "proto": "int __thiscall GetMaterialId(C_Barrel * this, I3D_frame * part)"
+ },
+ "00609510": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::OnCollisionEx",
+  "proto": "bool __thiscall OnCollisionEx(C_Barrel * this, C_Actor * other)"
+ },
+ "00609a30": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::SaveGame",
+  "proto": "bool __thiscall SaveGame(C_Barrel * this, C_chunk * chunk)"
+ },
+ "00609c70": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::LoadGame",
+  "proto": "bool __thiscall LoadGame(C_Barrel * this, C_chunk * chunk)"
+ },
  "00609f80": {
   "module": "zz_idioms",
   "name": "vector_size_e4_609f80"
+ },
+ "00609fa0": {
+  "module": "door_supply_box_barrel",
+  "name": "vector_insert4_609fa0",
+  "proto": "void __thiscall vector_insert4_609fa0(void * this, void * where, uint count, void * value)"
+ },
+ "0060a1b0": {
+  "module": "door_supply_box_barrel",
+  "name": "vector_erase4_60a1b0",
+  "proto": "void __thiscall vector_erase4_60a1b0(void * this, void * first, void * last)"
  },
  "0060a1e0": {
   "module": "zz_idioms",
@@ -22673,6 +23733,19 @@
  "0060a220": {
   "module": "zz_idioms",
   "name": "uninitialized_fill_n4_60a220"
+ },
+ "0060a250": {
+  "module": "door_supply_box_barrel",
+  "name": "StaticInit_60a250"
+ },
+ "0060a280": {
+  "module": "door_supply_box_barrel",
+  "name": "C_Barrel::ReadProperties",
+  "proto": "bool __thiscall ReadProperties(C_Barrel * this, C_chunk * chunk)"
+ },
+ "0060a6c0": {
+  "module": "door_supply_box_barrel",
+  "name": "StaticInit_60a6c0"
  },
  "0060a6f0": {
   "module": "objective_actors",

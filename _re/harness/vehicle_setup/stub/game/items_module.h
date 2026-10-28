@@ -22,3 +22,7 @@ public:
     void DestroyItem(C_Item *item);
 };
 extern C_ItemsModule g_itemsModule;
+// (Part 7e: the static weapon's store in the saved game.)
+class C_chunk;
+bool SaveActorItems(C_Actor *actor, C_chunk &chunk);
+bool LoadActorItems(C_Actor *actor, C_chunk &chunk);

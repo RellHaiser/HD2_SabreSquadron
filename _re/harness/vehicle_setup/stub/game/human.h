@@ -126,6 +126,11 @@ public:
         ++disguises;
     }
     void MakeNoise() { ++noises; }
+    // (Part 7e: the bike suspends its rider; the static weapon alarms a gunner a shot missed.)
+    void Suspend(bool suspend) { suspends.push_back(suspend); }
+    void NotifyShotAt(C_Actor *shooter, const S_vector &velocity) { shotsAt.push_back({shooter, velocity}); }
+    std::vector<bool> suspends;
+    std::vector<std::pair<C_Actor *, S_vector>> shotsAt;
     S_vector lookDir = S_vector(0.0f, 0.0f, 1.0f);
     float disguise = 0.0f;
     int disguises = 0, noises = 0;

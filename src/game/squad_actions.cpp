@@ -1265,7 +1265,7 @@ void C_SquadController::OpenDoor(C_Actor *actor)
     if (actor->GetType() == ACTOR_DOOR) {
         // A locked door needs its key.
         C_Door *door = static_cast<C_Door *>(actor);
-        if (!door->IsLocked() || door->GetUnknown235() || m_human->FindItem(door->GetLockKey())) {
+        if (!door->IsLocked() || door->CanPickLock() || m_human->FindItem(door->GetLockKey())) {
             ActOn(HUMAN_COMMAND_OPEN_DOOR, actor, false, 1.5f, true);
             return;
         }

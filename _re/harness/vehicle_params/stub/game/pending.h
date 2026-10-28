@@ -133,8 +133,17 @@ public:
     // (The debris and item actors, game/debris.cpp and game/item_actor.cpp.)
     bool ClearModelHighlight(I3D_frame *model);
     void FadeOutModel(I3D_frame *model, int time, bool unknown);
+    // (The bike, part 7e.)
+    I3D_frame *CreateShadow(I3D_frame *model);
+    I3D_frame *GetShadow(I3D_frame *model);
+    // (The supply box, part 7f.)
+    void FadeInModel(I3D_frame *model, int time, bool turnOn);
+    void FadeOutHierarchy(I3D_frame *model, int time, bool unknown);
 };
 C_GEffectsModule *GetGEffects();
+// (The supply box, part 7f: the scene's top, the debug lines.)
+extern float g_netSceneTop;
+void DrawDebugLine(const float *from, const float *to, uint32_t color, uint32_t color2);
 // (The item actor's ReleaseItem.)
 void FreeFrameData(I3D_frame *frame);
 

@@ -486,7 +486,7 @@ void C_SignalsPanel::BuildTargetPage()
             SetEntry(1, 0x1B81, SIGNAL_DISABLED_COMMAND);
             SetEntry(2, 0x1B80, SIGNAL_DISABLED_COMMAND);
             SetEntry(3, 0x1B7D, SIGNAL_DISABLED_COMMAND);
-            SetEntry(4, 0x1B79, door->GetUnknown235() ? HUMAN_COMMAND_PICK_LOCK : SIGNAL_DISABLED_COMMAND);
+            SetEntry(4, 0x1B79, door->CanPickLock() ? HUMAN_COMMAND_PICK_LOCK : SIGNAL_DISABLED_COMMAND);
             SetEntry(5, 0x1B6C, HasItem(m_member, door->GetLockKey()) ? HUMAN_COMMAND_UNLOCK_DOOR
                                                                       : SIGNAL_DISABLED_COMMAND);
             return;
@@ -495,11 +495,11 @@ void C_SignalsPanel::BuildTargetPage()
         SetEntry(1, 0x1B81, HUMAN_COMMAND_CLOSE_DOOR);
         SetEntry(2, 0x1B80, 0x15);
         SetEntry(3, 0x1B7D,
-                 !door->GetUnknown118() && (door->GetUnknownFC() != 0 || door->GetUnknown100() != 0)
+                 !door->GetUnknown118() && (door->GetPortal() != nullptr || door->GetOtherPortal() != nullptr)
                      ? 0x12
                      : SIGNAL_DISABLED_COMMAND);
         // Locking: a closed door, the selected soldier has the key.
-        if (door->GetUnknown224() == 0 && selected->FindItem(door->GetLockKey()))
+        if (door->GetMotion() == 0 && selected->FindItem(door->GetLockKey()))
             SetEntry(4, 0x1B6B, HUMAN_COMMAND_LOCK_DOOR);
         else
             SetEntry(4, 0x1B6B, SIGNAL_DISABLED_COMMAND);

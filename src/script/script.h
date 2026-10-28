@@ -201,6 +201,7 @@ protected:
     friend class C_ScriptCompiler;
     friend class C_ScriptedController;                 // AdvanceScript
     friend class C_MeleeTrackerAI;                              // MoveTo advances the script when no path
+    friend class C_Bike;                                // Update advances the rider's at the ride's end
 };
 
 // Runs the OnHit block of the script on `frame`, if it has one (shots hitting scene frames).

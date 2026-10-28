@@ -222,10 +222,6 @@ f_005ac500.cpp:111:55: request for member '_8_4_' in '"\012ControlsEx - "', whic
     *(uint32_t *)(pcVar9 + 7) = "\nControlsEx - "._8_4_;
 f_005ac500.cpp:112:57: request for member '_12_2_' in '"\012ControlsEx - "', which is of non-class type 'const char [15]'
     *(uint16_t *)(pcVar9 + 0xb) = "\nControlsEx - "._12_2_;
-f_005d87c0.cpp:495:35: too few arguments to function
-    (*pIVar2->vtable->Duplicate)();
-f_005db7b0.cpp:1329:37: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    fStack_d8 = (float)(**(code **)(*DAT_008aedd8 + 0x74))(DAT_008aedd8,puVar4,0,0,0);
 f_005e3a20.cpp:110:22: call of overloaded 'S_matrix__SetDir3(tier1::S_matrix*, tier1::S_vector*)' is ambiguous
     S_matrix__SetDir3(&local_50,&local_60);
 f_005e3a20.cpp:519:32: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
@@ -292,38 +288,6 @@ f_005f31c0.cpp:1369:20: cannot convert 'float*' to 'uint32_t*' {aka 'unsigned in
     puVar8 = param_1 + 0x10;
 f_005f31c0.cpp:2316:29: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     iVar13 = (**(code **)(*DAT_008aed60 + 4))(DAT_008aed60,puVar3,0);
-f_005f9700.cpp:314:45: invalid operands of types 'tier1::C_str_rep*' and 'float' to binary 'operator*'
-    local_a4.rep = (C_str_rep *)(local_a4.rep * fStack_94);
-f_005ff150.cpp:1418:57: expected primary-expression before ')' token
-    pfStack_b0 = gh_bitcast<float*>(ABS((fVar2 * fVar2 +)
-f_00602b00.cpp:638:19: base operand of '->' is not a pointer
-    DAT_0097d084->m_0c4 = 0;
-f_00602b00.cpp:639:19: base operand of '->' is not a pointer
-    DAT_0097d084->m_0c8 = 1;
-f_00606280.cpp:1020:63: base operand of '->' is not a pointer
-    (&g_particlesModule,*(int *)(*(int *)(local_e4->m_1f4 + iVar20 * 4) + 4));
-f_00606280.cpp:1036:11: base operand of '->' is not a pointer
-    local_e4->m_128 = '\0';
-f_00606280.cpp:1037:15: base operand of '->' is not a pointer
-    if (local_e4->m_130 == 0) {
-f_00606280.cpp:1041:40: base operand of '->' is not a pointer
-    pbVar17 = (uint8_t *)((int)local_e4->m_130 + 8);
-f_00606280.cpp:1070:11: base operand of '->' is not a pointer
-    local_e4->m_148 = pIVar9;
-f_00606280.cpp:1230:38: base operand of '->' is not a pointer
-    (*(code *)**(uint32_t **)local_e4->m_148)();
-f_00606280.cpp:1236:21: base operand of '->' is not a pointer
-    pCVar13 = local_e4->m_148;
-f_00606280.cpp:1237:34: base operand of '->' is not a pointer
-    iVar20 = *(int *)((int)local_e4->m_020 + 0x108);
-f_00606280.cpp:1275:32: base operand of '->' is not a pointer
-    (**(code **)(*(int *)local_e4->m_020 + 0x30))(local_e4->m_020);
-f_00606280.cpp:1275:57: base operand of '->' is not a pointer
-    (**(code **)(*(int *)local_e4->m_020 + 0x30))(local_e4->m_020);
-f_00606280.cpp:1541:35: no matching function for call to 'gh_bitcast<tier1::C_Barrel*>()'
-    local_d4 = gh_bitcast<C_Barrel*>()
-f_00606280.cpp:1586:37: no matching function for call to 'gh_bitcast<tier1::C_Barrel*>()'
-    local_d4 = gh_bitcast<C_Barrel*>()
 f_00614100.cpp:834:46: 'struct tier1::C_PlayerProfile' has no member named '_pad_00dc'
     C_MovieList__Get((g_gameProfile.m_player)->_pad_00dc + 0x24,*(uint32_t *)(param_2 + 0x5c),&param_2,
 f_0061bec0.cpp:2076:65: expected primary-expression before '*' token
@@ -466,7 +430,7 @@ f_00638620.cpp:217:47: no matching function for call to 'tier1::C_str::C_str(int
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
 f_00638620.cpp:227:47: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00638dc0.cpp:71:16: 'UNK_00804150' was not declared in this scope; did you mean 'FUN_00608150'?
+f_00638dc0.cpp:71:16: 'UNK_00804150' was not declared in this scope; did you mean 'FUN_00480150'?
     puStack_8 = &UNK_00804150;
 f_00638dc0.cpp:1003:47: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {

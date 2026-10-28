@@ -1016,13 +1016,18 @@ enum E_I3D_SOUND_TYPE {
 // Opening between two sectors (doors, windows ...).
 class I3D_portal {
 public:
-    I3D_SLOT(00);
+    // Opens / shuts the portal (C_Door).
+    I3DMETHOD(void, SetOn)(bool on) = 0;                      // 0x00
     // Open (a closed portal, e.g. a shut door, dampens sound).
     I3DMETHOD(bool, IsOn)() = 0;                              // 0x04
 
+    // Centre (world; C_Door picks the nearest one).
+    const S_vector &GetCenter() const { return Field<S_vector>(0x180); }
     float GetRadius() const { return Field<float>(0x190); }
     I3D_sector *GetOwner() const { return Field<I3D_sector *>(0x194); }
     I3D_sector *GetConnected() const { return Field<I3D_sector *>(0x198); }
+    // The portal the other way round (C_Door shuts both).
+    I3D_portal *GetOpposite() const { return Field<I3D_portal *>(0x19C); }
 
 private:
     template <class T> const T &Field(size_t offset) const
