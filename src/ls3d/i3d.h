@@ -422,6 +422,7 @@ enum : uint32_t {
 // Visual flag bits (I3D_visual::VisualFlags(), +0x1D0); others are not identified (the
 // debris code clears 0x2000).
 enum : uint32_t {
+    VISFLAGS_TEXTURE_LOD = 0x00000010,     // objects: the levels are texture LODs of level 0's geometry
     VISFLAGS_WORLD_SPACE = 0x00000040,     // geometry is in world space (no inverse transform)
     VISFLAGS_1000 = 0x00001000,            // set on the parts of the HUD's member panels (not identified)
     VISFLAGS_BOUND_VALID = 0x00020000,     // GetLocalBound() is up to date
@@ -465,8 +466,6 @@ public:
             UpdateWBoundProc();
         return Field<I3D_bbox>(0x170);
     }
-    // Id of the texture-shift entry (C_TShiftModule) of this visual, 0 if none.
-    uint32_t GetShiftId() const { return Field<uint32_t>(0x1E0); }
     uint32_t &VisualFlags() { return Field<uint32_t>(0x1D0); }
     // Geometry of mesh-based visuals (object, lightmap, billboard visuals; +0x1E0).
     class I3D_mesh *GetVisualMesh() const { return Field<class I3D_mesh *>(0x1E0); }
@@ -524,9 +523,14 @@ public:
     // inferred).
     I3DMETHOD(void, SetAlpha)(float alpha) = 0;               // 0xA8
     // Called per detail level after the mesh's vertices were rewritten (the vehicle's repaired
-    // parts; meaning not identified).
+    // parts; LS3DF.dll's RefreshLevel: the level's render vertices refilled when next drawn).
     I3DMETHOD(void, UnknownAC)(int level) = 0;                // 0xAC
+    // Every level's render vertices refilled when next drawn (the vertex animations).
+    I3DMETHOD(void, RefreshLevels)() = 0;                     // 0xB0
 
+    // The level drawn of a texture-LOD object (+0x1E4; the vertex animations read it when the
+    // visual is not one: VISFLAGS_TEXTURE_LOD clear).
+    int GetTextureLevel() const { return Field<int>(0x1E4); }
     float GetAlpha() const { return Field<float>(0x1EC); }
 };
 

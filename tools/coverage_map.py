@@ -39,6 +39,7 @@ EXE_SUBSYSTEMS = [
     ("AI & controllers", r"game/(ai_|squad_|enemy_|sniper_|scripted_controller|checkpoint|controller_|player_(controller|weapons|net|internal)|remote_controller|team)"),
     ("Actors & objects", r"game/(actor|actors_module|animation_actor|item_actor|debris|clock|null_actor|wire_cut|photo_place|switch_actor|mine|radio|document_place|ts_explosion|spawn_point|versions|melee_tracker|frame_box_volume|"
                          r"explosive_place|ladder|pike|fowl_generator|mp_zone|submarine|train|static_weapon|bike|fish|door|supply_box|barrel|air_attack|junkers88)"),
+    ("Mission & world modules", r"game/(vertex_anim|lightmap_groups|tshift)"),
     ("Weapons & items", r"game/(shots|items|item_|heavy_fire_support)"),
     ("Physics & collision", r"game/(physics|collision|rigid_body|world)"),
     ("Interface & HUD", r"game/(interface|first_person_view|text_box)"),
@@ -52,7 +53,7 @@ EXE_SUBSYSTEMS = [
 EXE_TESTED = re.compile(r"game/(vehicle|car|seat_weapon|melee_tracker_route|rigid_body|debris|item_actor|animation_actor|"
                         r"clock|null_actor|wire_cut|photo_place|switch_actor|mine|radio|document_place|ts_explosion|spawn_point|"
                         r"explosive_place|ladder|pike|fowl_generator|mp_zone|submarine|train|track|static_weapon|bike|fish|"
-                        r"door|supply_box|barrel|air_attack|junkers88|"
+                        r"door|supply_box|barrel|air_attack|junkers88|vertex_anim|lightmap_groups|tshift|"
                         r"checkpoint|profile|player_profile|key_bindings|campaign|soldier)|common/(config_file|os_files)")
 EXE_TEST_NOTES = {
     "Vehicles": "vehicle_params harness (205 shipped car blocks re-pack byte-identical), vehicle_setup harness on the 37 shipped car models, car_tables harness; mutation-tested",
@@ -61,6 +62,7 @@ EXE_TEST_NOTES = {
     "AI & controllers": "checkpoints harness: every mission's check2.bin (73)",
     "Physics & collision": "rigid body builds of the vehicle harness; mutation-tested",
     "App & core": "profile harness (config files, file wrappers)",
+    "Mission & world modules": "vehicle_setup harness's world build on 22 missions (Tables/Vertanim.def and their Vertanim.bin); mutation-tested",
 }
 # Unported code: subsystem from its file_map.txt range's classes and strings, then address bands.
 EXE_RANGE_RULES = [
@@ -324,7 +326,7 @@ FORMATS = [
     ("Mission files", "decorations", 1, N, "decorations.bin and decorator_sl.bin: not ported"),
     ("Mission files", "volumetrics", 1, N, "volumetrics.bin: not ported"),
     ("Mission files", "meshplayer", 1, N, "meshplayer.bin: not ported"),
-    ("Mission files", "Vertanim", 1, N, "Vertanim.def / .bin: vertex animation module not ported"),
+    ("Mission files", "Vertanim", 1, V, "world harness: Tables/Vertanim.def's 5 animations and 21 missions' Vertanim.bin load as the files have them"),
     ("Tables", "items.sav", 2, P, "Item definitions ported (10 component classes)"),
     ("Tables", "HumanStore.def", 1, V, "The shipped roster (65 soldiers) loads and writes back byte-identical"),
     ("Tables", "tyres.bin, materials", 1, V, "car_tables harness on the shipped tyres.bin and hdmaterials.def"),

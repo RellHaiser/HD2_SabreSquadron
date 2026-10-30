@@ -12,9 +12,11 @@
 #include "game/actor.h"
 #include "game/game.h"
 #include "game/interface.h"
+#include "game/lightmap_groups.h"
 #include "game/particles.h"
 #include "game/pending.h"
 #include "game/track.h"
+#include "game/tshift.h"
 #include "game/world.h"
 #include "ls3d/i3d.h"
 #include "net/bitstream.h"
@@ -805,8 +807,9 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
         const uint32_t visual = frame->GetVisualType();
         if (visual != I3DVISUAL_LMAP && visual != I3DVISUAL_OBJECT)
             break;
-        if (const uint32_t id = static_cast<I3D_visual *>(frame)->GetShiftId()) {
-            S_TShiftEntry *entry = g_tshiftModule.GetEntry(id);
+        if (I3D_mesh *mesh = static_cast<I3D_visual *>(frame)->GetVisualMesh()) {
+            // (Not checked for null: the frame has an entry, and the mesh is its.)
+            S_TShiftEntry *entry = g_tshiftModule.GetEntry(mesh);
             entry->on = on;
             entry->reverse = reverse;
         }

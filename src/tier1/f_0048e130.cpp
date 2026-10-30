@@ -2,39 +2,6 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
-// 0x0048e130
-uint32_t FUN_0048e130(...)
-{
-  FUN_0048e140();
-  FUN_0048e160();
-  return 0;
-}
-
-
-// 0x0048e140
-uint32_t FUN_0048e140(...)
-{
-  C_TShiftModule__FUN_0048e1f0((C_TShiftModule *)&g_tshiftModule,10,"TShift");
-  return 0;
-}
-
-
-// 0x0048e160
-uint32_t FUN_0048e160(...)
-{
-  atexit(FUN_0048e170);
-  return 0;
-}
-
-
-// 0x0048e170
-uint32_t FUN_0048e170(...)
-{
-  C_TShiftModule__FUN_0048e250((C_TShiftModule *)&g_tshiftModule);
-  return 0;
-}
-
-
 // 0x0048e180
 uint32_t C_TShiftModule__empty_function_48e180(C_TShiftModule *_this, ...)
 {
@@ -42,108 +9,9 @@ uint32_t C_TShiftModule__empty_function_48e180(C_TShiftModule *_this, ...)
 }
 
 
-// 0x0048e190
-uint32_t C_TShiftModule__FUN_0048e190(C_TShiftModule *_this,char param_1, ...)
-{
-  if (param_1 == '\0') {
-    _this->m_014 = _this->m_010;
-  }
-  return 0;
-}
-
-
 // 0x0048e1d0
 uint32_t C_TShiftModule__empty_function_48e1d0(C_TShiftModule *_this, ...)
 {
-  return 0;
-}
-
-
-// 0x0048e1f0
-uint32_t * C_TShiftModule__FUN_0048e1f0(C_TShiftModule *_this,int param_1,char *param_2, ...)
-{
-  C_Module__C_Module((C_Module *)_this,param_1,param_2);
-  _this->m_00c = (uchar)param_2;
-  _this->m_010 = 0;
-  _this->m_014 = 0;
-  _this->m_018 = 0;
-  _this->vtable = (C_TShiftModule_vtbl *)&PTR_00810418;
-  return (uint32_t*)(&_this->vtable);
-}
-
-
-// 0x0048e230
-uint32_t * C_TShiftModule__FUN_0048e230(C_TShiftModule *_this,uint8_t param_1, ...)
-{
-  C_TShiftModule__FUN_0048e250(_this);
-  if ((param_1 & 1) != 0) {
-    _aligned_free(_this);
-  }
-  return (uint32_t*)(&_this->vtable);
-}
-
-
-// 0x0048e250
-uint32_t C_TShiftModule__FUN_0048e250(C_TShiftModule *_this, ...)
-{
-  _this->vtable = (C_TShiftModule_vtbl *)&PTR_00810418;
-  tier1_operator_delete((void *)_this->m_010);
-  _this->m_010 = 0;
-  _this->m_014 = 0;
-  _this->m_018 = 0;
-  C_Module__dtor_C_Module((C_Module *)_this);
-  return 0;
-}
-
-
-// 0x0048e2d0
-uint32_t C_TShiftModule__HasFrame(C_TShiftModule *_this,int param_1, ...)
-{
-  int *piVar1;
-  uint32_t uVar2;
-  int iVar3;
-  int iVar4;
-  uVar2 = 0;
-  if (_this->m_010 != 0) {
-    iVar4 = _this->m_014 - _this->m_010;
-    iVar3 = iVar4 / 0x1c;
-    uVar2 = -(iVar4 >> 0x1f);
-    if (iVar3 != 0) {
-      uVar2 = _this->m_010 + 4 + iVar3 * 0x1c;
-      do {
-        piVar1 = (int *)(uVar2 - 0x1c);
-        uVar2 -= 0x1c;
-        iVar3--;
-        if (*piVar1 == param_1) {
-          return CONCAT31((int3)(uVar2 >> 8),1);
-        }
-      } while (iVar3 != 0);
-    }
-  }
-  return uVar2 & 0xffffff00;
-}
-
-
-// 0x0048e780
-int C_TShiftModule__GetEntry(C_TShiftModule *_this,int param_1, ...)
-{
-  int *piVar1;
-  int iVar2;
-  int iVar3;
-  if (_this->m_010 != 0) {
-    iVar3 = (int)(_this->m_014 - _this->m_010) / 0x1c;
-    if (iVar3 != 0) {
-      iVar2 = _this->m_010 + iVar3 * 0x1c;
-      do {
-        piVar1 = (int *)(iVar2 - 0x1c);
-        iVar2 -= 0x1c;
-        iVar3--;
-        if (*piVar1 == param_1) {
-          return _this->m_010 + iVar3 * 0x1c;
-        }
-      } while (iVar3 != 0);
-    }
-  }
   return 0;
 }
 
@@ -156,7 +24,7 @@ uint32_t C_TShiftModule__empty_function_48e7e0(C_TShiftModule *_this, ...)
 
 
 // 0x0048e9f0
-int FUN_0048e9f0(int param_1, ...)
+int TShiftEntryVector_Size(int param_1, ...)
 {
   if (*(int *)(param_1 + 4) == 0) {
     return 0;
@@ -173,7 +41,7 @@ uint32_t empty_function_48ea20(...)
 
 
 // 0x0048ea30
-uint32_t FUN_0048ea30(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3, ...)
+uint32_t TShiftEntry_UninitializedCopy(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3, ...)
 {
   int iVar1;
   uint32_t *puVar2;
@@ -195,7 +63,7 @@ uint32_t FUN_0048ea30(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3, ...
 
 
 // 0x0048ea70
-uint32_t FUN_0048ea70(uint32_t *param_1,int param_2,uint32_t *param_3, ...)
+uint32_t TShiftEntry_UninitializedFill(uint32_t *param_1,int param_2,uint32_t *param_3, ...)
 {
   int iVar1;
   uint32_t *puVar2;
@@ -217,7 +85,7 @@ uint32_t FUN_0048ea70(uint32_t *param_1,int param_2,uint32_t *param_3, ...)
 
 
 // 0x0048eaa0
-uint32_t FUN_0048eaa0(uint32_t *param_1,uint32_t *param_2, ...)
+uint32_t TShiftEntry_Construct(uint32_t *param_1,uint32_t *param_2, ...)
 {
   int iVar1;
   if (param_1 != 0) {

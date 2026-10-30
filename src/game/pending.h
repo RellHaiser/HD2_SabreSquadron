@@ -585,44 +585,7 @@ private:
 extern std::vector<C_Bird *> g_birds;                  // 0x0089bb90
 extern std::vector<class I3D_frame *> g_spareBirdModels;   // 0x0089bba0
 
-// ---- the vertex animation module (C_VertexAnimModule, MODULE_VERTEX_ANIM; not ported) -------
-// A loaded vertex animation (the module's list at +0x10).
-struct S_VertexAnimation {
-    uint8_t unknown00[0x18];
-    int frameCount;                                     // +0x18
-};
-// A player of a vertex animation on an object visual (0x2C bytes; the multiplayer zone's flag
-// makes one with new: 0x005ed220).
-struct S_VertexAnimPlayer {
-    int frame = 0;                                      // +0x00
-    class I3D_frame *visual = nullptr;                  // +0x04
-    int unknown08 = 0;
-    int unknown0C = 0;
-    int unknown10 = 1;
-    int unknown14 = 0;
-    int frameTime = 250;                                // +0x18 ms
-    bool unknown1C = false;
-    bool unknown1D = false;
-    bool unknown1E = false;
-    bool unknown1F = true;
-    int unknown20 = 0;                                  // (not set by the constructor)
-    S_VertexAnimation *animation = nullptr;             // +0x24 (not set by the constructor)
-    int unknown28 = 1;
-
-    // The visual's mesh back to the animation's first frame.
-    void Reset();                                       // 0x004737c0
-    void Init(class I3D_frame *visual, S_VertexAnimation *animation);   // 0x00473790
-};
-class C_VertexAnimModule {
-public:
-    // The loaded animation of that name, or null.
-    S_VertexAnimation *FindAnimation(const C_str &name);   // 0x00473e30
-    // The player out of the playing ones (the last one fills its place), deleted with `destroy`.
-    void RemovePlayer(S_VertexAnimPlayer *player, bool destroy);   // 0x004746b0
-    // Plays it (appended to the vector at +0x20: vector::insert 0x00474cf0).
-    void AddPlayer(S_VertexAnimPlayer *player);
-};
-extern C_VertexAnimModule g_vertexAnimModule;          // 0x0089b474
+// The vertex animation module: see game/vertex_anim.h.
 
 // ---- the game's collaborators (C_game, game/game.h) -------------------------------
 // The campaign tree: game/campaign.h; the profile's objects (g_campaign, g_missionSquad,

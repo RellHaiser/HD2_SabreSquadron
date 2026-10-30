@@ -66,10 +66,6 @@ f_0046c340.cpp:480:9: '_on' was not declared in this scope; did you mean 'on'?
     if (_on != 0) {
 f_0046c340.cpp:487:20: '_on' was not declared in this scope; did you mean 'on'?
     _this->m_270 = _on != 0;
-f_00473d10.cpp:794:15: 'C_auto_00810060_vtbl' was not declared in this scope; did you mean 'C_auto_008160a0_vtbl'?
-    pCVar1 = (C_auto_00810060_vtbl*)(_this->vtable);
-f_00473d10.cpp:794:36: expected primary-expression before ')' token
-    pCVar1 = (C_auto_00810060_vtbl*)(_this->vtable);
 f_0047ac00.cpp:617:32: too few arguments to function
     (*pIVar5->vtable[2].Tick)();
 f_0047ac00.cpp:619:32: too few arguments to function

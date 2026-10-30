@@ -51,6 +51,12 @@
 #include "game/car_effects.h"
 #include "ls3d/i3d.h"
 #include "game/pending.h"
+#include "game/vertex_anim.h"
+#ifdef WORLD_TEST
+#include <malloc.h>
+#include "game/lightmap_groups.h"
+#include "game/tshift.h"
+#endif
 #include "game/resource_cache.h"
 #include "game/game.h"
 #include "game/physics.h"
@@ -14815,11 +14821,19 @@ void PartsHitTest(const char *path)
 #include "air_actors_test.inc"
 #include "junkers_actors_test.inc"
 #endif
+#ifdef WORLD_TEST
+#include "world_modules_test.inc"
+#endif
 
 int main(int argc, char **argv)
 {
     InitVtables();
     g_carScene = MakeScene();
+#ifdef WORLD_TEST
+    for (int i = 1; i < argc; ++i)
+        WorldModulesTest(argv[i]);
+    return 0;
+#endif
 #ifdef REAL_SEAT_WEAPON
     for (int i = 1; i < argc; ++i)
         SeatWeaponTest(argv[i]);

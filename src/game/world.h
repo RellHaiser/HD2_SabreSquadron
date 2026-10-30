@@ -218,25 +218,7 @@ enum : int {
     CAMERA_MODE_PROJECTILE = 9,                         // rides along with a fired projectile
 };
 
-struct S_TShiftEntry {                                  // 0x1C bytes
-    int id;
-    int unknown04;
-    bool on;                                            // +0x08
-    bool reverse;                                       // +0x09
-};
-
-class C_TShiftModule {                                  // "TShift", vtable 0x00810418
-public:
-    bool HasFrame(I3D_frame *frame) const;              // 0x0048e2d0
-    S_TShiftEntry *GetEntry(uint32_t id);               // 0x0048e780
-};
-extern C_TShiftModule g_tshiftModule;                   // 0x0089bc34
-
-class C_LightMapGroupsModule {                          // "LMapsGrp", vtable 0x00810398
-public:
-    void *FindGroup(const char *name) const;            // 0x0041d5e0
-};
-C_LightMapGroupsModule *GetLightMapGroups();            // 0x0048cb00
+// The texture shifting module: see game/tshift.h; the lightmap groups: game/lightmap_groups.h.
 
 class C_Decorators {
 public:

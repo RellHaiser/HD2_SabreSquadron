@@ -6,10 +6,16 @@
 #include "game/pending.h"                               // S_MultiplayerSettings
 #include "game/soldier.h"
 
-// The detail settings (the spawn point asks for the voice chat).
+// The detail settings (the spawn point asks for the voice chat; part 8's vertex animations for
+// their switch).
 struct S_DetailSettings {
     bool IsVoiceChatEnabled() const { return voiceChat; }
+    bool IsEnabled(int option) const { return option >= 0 && option < 8 && switches[option]; }
     bool voiceChat = false;
+    bool switches[8] = {};
+};
+enum : int {
+    DETAIL_VERTEX_ANIMATION = 1,
 };
 
 // (The Junkers 88, part 7h: the HUD option and the play mode, as the real header has them.)

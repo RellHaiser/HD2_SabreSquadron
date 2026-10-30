@@ -5827,21 +5827,168 @@
   "name": "C_HeavyFireSupport::LoadTable",
   "proto": "bool __fastcall LoadTable(C_HeavyFireSupport *this)"
  },
+ "004736d0": {
+  "module": "world_modules",
+  "name": "StaticInit_4736d0"
+ },
+ "00473700": {
+  "module": "world_modules",
+  "name": "S_VertexAnimation::S_VertexAnimation"
+ },
+ "00473720": {
+  "module": "world_modules",
+  "name": "S_VertexAnimation::~S_VertexAnimation"
+ },
  "00473790": {
-  "module": "moving_actors",
-  "name": "S_VertexAnimPlayer::Init"
+  "module": "world_modules",
+  "name": "S_VertexAnimPlayer::Init",
+  "proto": "void __thiscall Init(void * this, I3D_frame * visual, void * animation)"
  },
  "004737c0": {
-  "module": "moving_actors",
-  "name": "S_VertexAnimPlayer::Reset"
+  "module": "world_modules",
+  "name": "S_VertexAnimPlayer::Reset",
+  "proto": "void __thiscall Reset(void * this)"
+ },
+ "00473960": {
+  "module": "world_modules",
+  "name": "S_VertexAnimPlayer::Update",
+  "proto": "void __thiscall Update(void * this, int timeDelta)"
+ },
+ "00473c60": {
+  "module": "world_modules",
+  "name": "StaticInit_473c60"
+ },
+ "00473c90": {
+  "module": "world_modules",
+  "name": "StaticInit_473c90"
+ },
+ "00473ca0": {
+  "module": "world_modules",
+  "name": "StaticInit_473ca0"
+ },
+ "00473cb0": {
+  "module": "world_modules",
+  "name": "StaticInit_473cb0"
+ },
+ "00473cc0": {
+  "module": "world_modules",
+  "name": "StaticInit_473cc0"
+ },
+ "00473cd0": {
+  "module": "world_modules",
+  "name": "StaticInit_473cd0"
+ },
+ "00473ce0": {
+  "module": "world_modules",
+  "name": "StaticInit_473ce0"
+ },
+ "00473cf0": {
+  "module": "world_modules",
+  "name": "StaticInit_473cf0"
+ },
+ "00473d00": {
+  "module": "world_modules",
+  "name": "StaticInit_473d00"
+ },
+ "00473d10": {
+  "module": "world_modules",
+  "name": "StaticInit_VertexAnimModule"
+ },
+ "00473d20": {
+  "module": "world_modules",
+  "name": "VertexAnimModule_Construct"
+ },
+ "00473d40": {
+  "module": "world_modules",
+  "name": "VertexAnimModule_RegisterAtExit"
+ },
+ "00473d50": {
+  "module": "world_modules",
+  "name": "VertexAnimModule_Destroy"
+ },
+ "00473d60": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::C_VertexAnimModule",
+  "proto": "C_VertexAnimModule * __thiscall C_VertexAnimModule(C_VertexAnimModule * this, int id, char * name)"
+ },
+ "00473db0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::SaveGame"
+ },
+ "00473dc0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::LoadGame"
+ },
+ "00473dd0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::ScalarDeletingDestructor"
+ },
+ "00473df0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::~C_VertexAnimModule"
  },
  "00473e30": {
-  "module": "moving_actors",
-  "name": "C_VertexAnimModule::FindAnimation"
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::FindAnimation",
+  "proto": "void * __thiscall FindAnimation(C_VertexAnimModule * this, C_str * name)"
+ },
+ "00473ec0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::LoadAnimations",
+  "proto": "bool __thiscall LoadAnimations(C_VertexAnimModule * this)"
+ },
+ "00474290": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::LoadPlayers",
+  "proto": "bool __thiscall LoadPlayers(C_VertexAnimModule * this)"
  },
  "004746b0": {
-  "module": "moving_actors",
-  "name": "C_VertexAnimModule::RemovePlayer"
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::RemovePlayer",
+  "proto": "void __thiscall RemovePlayer(C_VertexAnimModule * this, void * player, bool destroy)"
+ },
+ "00474740": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::Tick",
+  "proto": "void __thiscall Tick(C_VertexAnimModule * this, int timeDelta)"
+ },
+ "004749a0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::Update",
+  "proto": "void __thiscall Update(C_VertexAnimModule * this, int timeDelta)"
+ },
+ "00474a00": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::Init"
+ },
+ "00474a20": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::Done"
+ },
+ "00474aa0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::LoadMissionData",
+  "proto": "void __thiscall LoadMissionData(C_VertexAnimModule * this, bool server)"
+ },
+ "00474ac0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::FreeMissionData",
+  "proto": "void __thiscall FreeMissionData(C_VertexAnimModule * this, bool server)"
+ },
+ "00474b40": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::StartMission",
+  "proto": "void __thiscall StartMission(C_VertexAnimModule * this, bool server)"
+ },
+ "00474c10": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::StopMission",
+  "proto": "void __thiscall StopMission(C_VertexAnimModule * this, bool server)"
+ },
+ "00474c90": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::RestartMission",
+  "proto": "void __thiscall RestartMission(C_VertexAnimModule * this, bool server)"
  },
  "00474cb0": {
   "module": "zz_idioms",
@@ -6526,9 +6673,103 @@
   "module": "zz_idioms",
   "name": "empty_function_48b680"
  },
+ "0048c710": {
+  "module": "world_modules",
+  "name": "StaticInit_48c710"
+ },
+ "0048c740": {
+  "module": "world_modules",
+  "name": "StaticInit_LightMapGroupsModule"
+ },
+ "0048c750": {
+  "module": "world_modules",
+  "name": "LightMapGroupsModule_Construct"
+ },
+ "0048c770": {
+  "module": "world_modules",
+  "name": "LightMapGroupsModule_RegisterAtExit"
+ },
+ "0048c780": {
+  "module": "world_modules",
+  "name": "LightMapGroupsModule_Destroy"
+ },
+ "0048c790": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::RestartMission",
+  "proto": "void __thiscall RestartMission(C_LightMapGroupsModule * this, bool server)"
+ },
+ "0048c820": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::SaveGame",
+  "proto": "bool __thiscall SaveGame(C_LightMapGroupsModule * this, C_chunk * chunk)"
+ },
+ "0048c920": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::LoadGame",
+  "proto": "bool __thiscall LoadGame(C_LightMapGroupsModule * this, C_chunk * chunk)"
+ },
  "0048cb00": {
   "module": "script",
   "name": "GetLightMapGroups"
+ },
+ "0048cb10": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::C_LightMapGroupsModule",
+  "proto": "C_LightMapGroupsModule * __thiscall C_LightMapGroupsModule(C_LightMapGroupsModule * this, int id, char * name)"
+ },
+ "0048cb60": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::StopMission",
+  "proto": "void __thiscall StopMission(C_LightMapGroupsModule * this, bool server)"
+ },
+ "0048cb70": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::FreeMissionData",
+  "proto": "void __thiscall FreeMissionData(C_LightMapGroupsModule * this, bool server)"
+ },
+ "0048cc40": {
+  "module": "world_modules",
+  "name": "S_LightmapGroup::~S_LightmapGroup"
+ },
+ "0048cd10": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::ScalarDeletingDestructor"
+ },
+ "0048cd30": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::~C_LightMapGroupsModule"
+ },
+ "0048cd70": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::LoadGroups",
+  "proto": "bool __thiscall LoadGroups(C_LightMapGroupsModule * this, C_chunk * chunk)"
+ },
+ "0048d100": {
+  "module": "world_modules",
+  "name": "S_LightmapGroup::S_LightmapGroup"
+ },
+ "0048d1d0": {
+  "module": "world_modules",
+  "name": "S_LightmapGroup::HasFrame",
+  "proto": "bool __thiscall HasFrame(void * this, char * frame)"
+ },
+ "0048d230": {
+  "module": "world_modules",
+  "name": "S_LightmapGroup::ScalarDeletingDestructor"
+ },
+ "0048d250": {
+  "module": "world_modules",
+  "name": "S_LightmapChange::ScalarDeletingDestructor"
+ },
+ "0048d270": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::SetFrameLightmap",
+  "proto": "void __thiscall SetFrameLightmap(C_LightMapGroupsModule * this, I3D_frame * frame, int lightmap)"
+ },
+ "0048d4e0": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::SetGroupLightmap",
+  "proto": "void __thiscall SetGroupLightmap(C_LightMapGroupsModule * this, void * group, int lightmap)"
  },
  "0048d5b0": {
   "module": "zz_idioms",
@@ -6541,6 +6782,10 @@
  "0048d600": {
   "module": "zz_idioms",
   "name": "vector_clear_48d600"
+ },
+ "0048d630": {
+  "module": "world_modules",
+  "name": "LightmapGroupVector_Insert"
  },
  "0048d7d0": {
   "module": "zz_idioms",
@@ -6660,29 +6905,110 @@
   "module": "track",
   "name": "ModuleManager::LoadGame"
  },
+ "0048e100": {
+  "module": "world_modules",
+  "name": "StaticInit_48e100"
+ },
+ "0048e130": {
+  "module": "world_modules",
+  "name": "StaticInit_TShiftModule"
+ },
+ "0048e140": {
+  "module": "world_modules",
+  "name": "TShiftModule_Construct"
+ },
+ "0048e160": {
+  "module": "world_modules",
+  "name": "TShiftModule_RegisterAtExit"
+ },
+ "0048e170": {
+  "module": "world_modules",
+  "name": "TShiftModule_Destroy"
+ },
  "0048e180": {
   "module": "zz_idioms",
   "name": "empty_function_48e180"
+ },
+ "0048e190": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::FreeMissionData",
+  "proto": "void __thiscall FreeMissionData(C_TShiftModule * this, bool server)"
  },
  "0048e1d0": {
   "module": "zz_idioms",
   "name": "empty_function_48e1d0"
  },
+ "0048e1f0": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::C_TShiftModule",
+  "proto": "C_TShiftModule * __thiscall C_TShiftModule(C_TShiftModule * this, int id, char * name)"
+ },
+ "0048e230": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::ScalarDeletingDestructor"
+ },
+ "0048e250": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::~C_TShiftModule"
+ },
+ "0048e280": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::HasMesh",
+  "proto": "bool __thiscall HasMesh(C_TShiftModule * this, I3D_mesh * mesh)"
+ },
  "0048e2d0": {
-  "module": "script",
-  "name": "C_TShiftModule::HasFrame"
+  "module": "world_modules",
+  "name": "C_TShiftModule::HasFrame",
+  "proto": "bool __thiscall HasFrame(C_TShiftModule * this, I3D_frame * frame)"
+ },
+ "0048e330": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::AddVisual",
+  "proto": "void __thiscall AddVisual(C_TShiftModule * this, I3D_frame * frame, I3D_mesh * mesh)"
+ },
+ "0048e580": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::RemoveMesh",
+  "proto": "void __thiscall RemoveMesh(C_TShiftModule * this, I3D_mesh * mesh)"
+ },
+ "0048e620": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::RemoveFrame",
+  "proto": "void __thiscall RemoveFrame(C_TShiftModule * this, I3D_frame * frame)"
+ },
+ "0048e6d0": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::RemoveModel",
+  "proto": "void __thiscall RemoveModel(C_TShiftModule * this, I3D_frame * model)"
  },
  "0048e780": {
-  "module": "script",
-  "name": "C_TShiftModule::GetEntry"
+  "module": "world_modules",
+  "name": "C_TShiftModule::GetEntry",
+  "proto": "void * __thiscall GetEntry(C_TShiftModule * this, I3D_mesh * mesh)"
  },
  "0048e7e0": {
   "module": "zz_idioms",
   "name": "empty_function_48e7e0"
  },
+ "0048e9f0": {
+  "module": "world_modules",
+  "name": "TShiftEntryVector_Size"
+ },
  "0048ea20": {
   "module": "zz_idioms",
   "name": "empty_function_48ea20"
+ },
+ "0048ea30": {
+  "module": "world_modules",
+  "name": "TShiftEntry_UninitializedCopy"
+ },
+ "0048ea70": {
+  "module": "world_modules",
+  "name": "TShiftEntry_UninitializedFill"
+ },
+ "0048eaa0": {
+  "module": "world_modules",
+  "name": "TShiftEntry_Construct"
  },
  "0048eb70": {
   "module": "game",

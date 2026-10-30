@@ -154,8 +154,8 @@
                 ok = g_streams[i]->id == x->m_netId && g_streams[i]->bits == m.streams[i] && g_streams[i]->sent && !g_streams[i]->ex;
             if (ok && x->m_flagAnim) {
                 const S_VertexAnimPlayer &p = *x->m_flagAnim, &q = m.anim;
-                ok = p.frame == q.frame && p.visual == q.visual && p.unknown08 == q.unknown08 && p.frameTime == q.frameTime &&
-                     p.unknown1C == q.unknown1C && p.unknown1E == q.unknown1E && p.unknown1F == q.unknown1F &&
+                ok = p.maxLevel == q.maxLevel && p.visual == q.visual && p.startFrame == q.startFrame && p.frameTime == q.frameTime &&
+                     p.pingPong == q.pingPong && p.stopped == q.stopped && p.loop == q.loop &&
                      p.animation == q.animation;
             }
             return ok;
@@ -169,7 +169,7 @@
             return std::string(text);
         };
         S_VertexAnimation flagAnimation = {};
-        flagAnimation.frameCount = 12;
+        flagAnimation.levelCount = 12;
         const auto send = [&](S_MaZone &m, uint32_t kind) {
             std::vector<std::pair<uint32_t, int>> bits = {{kind, 2}};
             if (kind == 2)
@@ -193,18 +193,18 @@
                 I3D_frame *visual = Find(flag, "vlajka", ENUMF_WILDMASK | FRAME_MASK_VISUAL);
                 S_VertexAnimation *anim = g_maAnimations.count("vlajka") ? g_maAnimations["vlajka"] : nullptr;
                 if (visual && anim) {
-                    m.log.push_back(line("animreset %s %d", ItName(m.anim.visual).c_str(), m.anim.frame));
+                    m.log.push_back(line("animreset %s %d", ItName(m.anim.visual).c_str(), m.anim.maxLevel));
                     m.log.push_back(line("removeplayer %s 0", ItName(m.anim.visual).c_str()));
                     m.log.push_back("animinit " + ItName(visual));
                     m.anim.visual = visual;
                     m.anim.animation = anim;
                     m.log.push_back(line("addplayer %s %d", ItName(visual).c_str(), m.anim.frameTime));
-                    m.anim.unknown1C = false;
-                    m.anim.frame = anim->frameCount - 1;
+                    m.anim.pingPong = false;
+                    m.anim.maxLevel = anim->levelCount - 1;
                     m.anim.frameTime = 210;
-                    m.anim.unknown08 = 0;
-                    m.anim.unknown1F = true;
-                    m.anim.unknown1E = false;
+                    m.anim.startFrame = 0;
+                    m.anim.loop = true;
+                    m.anim.stopped = false;
                 }
             }
             m.team = m.newTeam;
@@ -592,8 +592,8 @@
             if (noAnimation)
                 g_maAnimations.erase("vlajka");
             if (rnd(0, 1) < 0.2f) {
-                z->m_flagAnim->unknown08 = 5;
-                z->m_flagAnim->unknown1F = false;
+                z->m_flagAnim->startFrame = 5;
+                z->m_flagAnim->loop = false;
             }
             // The call.
             S_MaZone m = modelOf(z);

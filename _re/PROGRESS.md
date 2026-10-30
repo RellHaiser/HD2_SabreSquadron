@@ -5180,6 +5180,60 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     (0x005f54b0 NoPathNote, 0x005f54c0 PathNote), 177 decompiles exported; 145 functions in ported.txt
     (32 helpers absorbed). Stats: 7,279 of 12,288 functions by hand (67.8 % by size).
 
+  PART 8 PLAN (2026-10-30): the mission and world modules, ~150 KB left after the actors, by source
+  file: 8a the vertex animations, the lightmap groups, texture shifting (0x004736d0.., 0x0048c710..,
+  0x0048e100..); 8b the sight module (0x0046d5d0..0x004702f0: observers, targets); 8c the effects
+  module GEffects with the lens flares (0x00484ec0..0x0048c700); 8d the decorations, the birds'
+  models, volumetrics, clouds and the mesh player (0x00479790..0x00484e70); 8e the camera module
+  with the command map's tactical camera (0x00462320..0x0046cb20); 8f the mission loading: the
+  loader screen, tree.klz, scene2.bin with the cache, check / actors (0x006c97b0..0x006d4eb0).
+
+  PART 8a DONE (2026-10-30): the vertex animations, the lightmap groups and texture shifting
+  (src/game/vertex_anim.*, lightmap_groups.*, tshift.*, new).
+  - C_VertexAnimModule ("Vertex anim", module 9, 0x0089b474, 0x004736d0..0x00474f80): flags, palm
+    leaves and the supply box's lid. Tables\Vertanim.def holds the animations (name, last frame,
+    levels, vertex counts, then per frame and level the vertices as two S_vector4: position and
+    normal); Missions\<m>\Vertanim.bin places players (version 1 adds a cull flag; a record whose
+    frame is missing or not an object visual leaves its rest to be read as the next one, quirk
+    kept; Init sets the file's time back to 0). Client side only, with the detail switch 1
+    (DETAIL_VERTEX_ANIMATION). A player blends the drawn level's vertices (level 0 for texture-LOD
+    objects; only up to its maximal level) from frame to next frame by time / frame time, round or
+    ping-pong, stopping at the end without loop; a culled player only after its visual was drawn.
+    Tick sorts the players every 300 ms (unsigned) by their size on screen (1.7 m at the distance
+    under the camera's view, below 0.02: far, if culled); far ones advance in the ticks, near ones
+    every frame. StartMission picks random start frames for negative ones (quirk kept: the last
+    frame's number as the count). Fix: a Vertanim.def cut short frees only what it allocated.
+  - C_LightMapGroupsModule ("LMapsGrp", module 8, 0x0089bbbc, 0x0048c710..0x0048d8f0): groups (chunk
+    0x100 a name, 0x110 its frames; case insensitive, no duplicates; another chunk is entered and
+    not left, quirk kept) and the switched lightmaps (frame referenced, its original kept; switched
+    back: forgotten); RestartMission / StopMission set them back; saved as count, then lightmap and
+    name per switch, last first. Fixes: a frame chunk before the first group is dropped (the
+    original read before the vector); a saved name over 1023 characters is skipped (the original
+    read its rest into one byte).
+  - C_TShiftModule ("TShift", module 10, 0x0089bc34, 0x0048e100..0x0048eaa0): only the list the scene
+    loader fills (mesh, frame, on, reverse; the scripts' frm_setshifting). I3D_visual::GetShiftId
+    (+0x1E0) was the visual's mesh. 5 functions without callers that Ghidra had not found created
+    and ported (HasMesh 0x0048e280, AddVisual, RemoveMesh, RemoveFrame, RemoveModel; Fix: reverse
+    starts false where the original leaves a stack byte).
+  - S_VertexAnimPlayer's fields named (the zone's and the supply box's frame = maxLevel, frameCount
+    = levelCount). I3D_object_visual slot 0xB0 RefreshLevels, GetTextureLevel (+0x1E4),
+    VISFLAGS_TEXTURE_LOD. pending.h / world.h declarations replaced by the headers.
+  - Harness: a world build (build_world.bat, -DWORLD_TEST: harness.cpp with world_modules_test.inc,
+    check_world.py: "vanim:", "lmaps:", "tshift:", 26 checks) run on mission lists ("mission NAME":
+    the 21 missions with a Vertanim.bin and AFRICA2 without); the real Vertanim.def / .bin in the
+    memory files (Brest's water animations are not in the table: dropped). The stub vertex_anim.h
+    forwards to the real one under WORLD_TEST; the profile stub has the detail switches; car_stubs'
+    dtaOpen keeps its flag. Baselines: 0 of 22 in both orders; the item build 0 of 37; the other
+    five builds 0 of 37 each.
+  - Mutations (mutations/mutate_8a.py, 265 after dropping 30 equivalent and 5 that did not
+    compile): the first run caught 233 of 287 run; new cases for 19 (see the
+    file's docstring); regenerated with TShift's new functions, the rerun caught 265 of 267, the
+    last 2 went with the entry's header defaults. All 265 caught.
+  - Build: 193 files clean (MSVC). Tier 1: 566 errors in 99 files, 233 stubs. ret_audit --src: 52.
+  - Ghidra: 79 names (names/world_modules.txt; 6 moved from moving_actors.txt / script.txt), 5
+    functions created, 104 decompiles exported; 76 functions in ported.txt (21 helpers
+    absorbed). Stats: 7,376 of 12,293 functions by hand (68.1 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

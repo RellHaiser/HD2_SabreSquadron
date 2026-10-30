@@ -115,8 +115,6 @@
 00479450 C_TemporaryActorsList::CreateDebris | C_Debris * __thiscall CreateDebris(C_TemporaryActorsList *this, I3D_frame *frame, S_vector *pos, S_vector *dir)
 0047b010 C_Decorators::SetOn
 0048cb00 GetLightMapGroups
-0048e2d0 C_TShiftModule::HasFrame
-0048e780 C_TShiftModule::GetEntry
 004ddcf0 C_Car::IsDestroyed | bool __thiscall IsDestroyed(C_Car *this)
 004e95b0 C_Vehicle::Reset | void __thiscall Reset(C_Vehicle * this, uchar flags)
 004f2530 C_Vehicle::SetEngine | bool __thiscall SetEngine(C_Vehicle * this, bool on, bool instant)

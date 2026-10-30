@@ -146,9 +146,5 @@
 005edcc0 StaticInit_5edcc0
 
 # --- the vertex animation module (not ported; the zone's flag)
-00473790 S_VertexAnimPlayer::Init
-004737c0 S_VertexAnimPlayer::Reset
-00473e30 C_VertexAnimModule::FindAnimation
-004746b0 C_VertexAnimModule::RemovePlayer
 00474cf0 C_VertexAnimModule::PlayerVectorInsert
 00420800 std_string::AssignChars

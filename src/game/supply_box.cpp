@@ -10,7 +10,8 @@
 #include "game/actors_module.h"                         // CreateActorMessage, SendActorMessage
 #include "game/collision.h"
 #include "game/game.h"
-#include "game/pending.h"                               // g_gameRole, g_texts, g_vertexAnimModule, GetGEffects
+#include "game/pending.h"                               // g_gameRole, g_texts, GetGEffects
+#include "game/vertex_anim.h"
 #include "game/resource_cache.h"                        // g_modelCache, g_animationCache
 #include "game/sound_module.h"
 #include "ls3d/i3d.h"
@@ -211,14 +212,14 @@ void C_SupplyBox::InitBox()                             // 0x005f9a60
     if (animation && morph) {
         static_cast<I3D_object_visual *>(morph)->DuplicateMesh();
         m_morphPlayer->Init(morph, animation);
-        m_morphPlayer->unknown1E = true;
+        m_morphPlayer->stopped = true;
         m_morphPlayer->Reset();
         g_vertexAnimModule.AddPlayer(m_morphPlayer);
-        m_morphPlayer->unknown1C = true;
-        m_morphPlayer->frame = animation->frameCount - 1;
+        m_morphPlayer->pingPong = true;
+        m_morphPlayer->maxLevel = animation->levelCount - 1;
         m_morphPlayer->frameTime = 130;
-        m_morphPlayer->unknown08 = 0;
-        m_morphPlayer->unknown1F = false;
+        m_morphPlayer->startFrame = 0;
+        m_morphPlayer->loop = false;
     }
     // The box: the hierarchy's under the frame's own scale; the sphere from x and z.
     I3D_bbox hierarchy;
@@ -391,7 +392,7 @@ void C_SupplyBox::StopMission(bool server)              // 0x005fb220
         return;
     Deactivate(server);
     m_started = false;
-    m_morphPlayer->unknown1E = true;
+    m_morphPlayer->stopped = true;
     m_morphPlayer->Reset();
     m_crateDummy->SetOn(false);
     m_parachute->LinkTo(nullptr, 1);
@@ -800,7 +801,7 @@ void C_SupplyBox::SetState(int state)                   // 0x005fcd80
     }
     case SUPPLY_HIDDEN:
         SetVisibility(SUPPLY_FLAG_4);
-        m_morphPlayer->unknown1E = true;
+        m_morphPlayer->stopped = true;
         m_morphPlayer->Reset();
         m_stateTime = m_respawnTime > 0 ? m_respawnTime * 1000 : -1;
         break;
@@ -820,7 +821,7 @@ void C_SupplyBox::SetState(int state)                   // 0x005fcd80
         Scene()->UpdateFrameSector(m_parachute, m_parachute->GetWorldPos());
         Scene()->UpdateFrameSector(m_frame, m_frame->GetWorldPos());
         m_frame->SetRot(m_dropRot);
-        m_morphPlayer->unknown1E = false;
+        m_morphPlayer->stopped = false;
         m_planeFlying = false;
         PlaySound(SOUND_GROUP_LANDED);
         break;
@@ -830,7 +831,7 @@ void C_SupplyBox::SetState(int state)                   // 0x005fcd80
         break;
     case SUPPLY_OPENING: {
         SetAnimation(ANIM_OPEN);
-        m_morphPlayer->unknown1E = true;
+        m_morphPlayer->stopped = true;
         I3D_animation_set *anim = m_anims[ANIM_OPEN];
         m_stateTime = anim ? anim->GetEndTime() : DEFAULT_STATE_TIME;
         if (m_stateTime < DEFAULT_STATE_TIME)
@@ -877,7 +878,7 @@ void C_SupplyBox::GetState(S_State &state)              // 0x005fd180
 
 void C_SupplyBox::ApplyState(const S_State &state)      // 0x005fd2a0
 {
-    m_morphPlayer->unknown1E = true;
+    m_morphPlayer->stopped = true;
     m_morphPlayer->Reset();
     m_crateDummy->SetOn(false);
     m_parachute->LinkTo(nullptr, 1);

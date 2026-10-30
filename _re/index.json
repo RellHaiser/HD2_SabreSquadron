@@ -42218,10 +42218,10 @@
 "in_vtables": []
 },
 "004736d0": {
-"name": "FUN_004736d0",
+"name": "StaticInit_4736d0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -42240,10 +42240,10 @@
 ]
 },
 "00473700": {
-"name": "FUN_00473700",
+"name": "S_VertexAnimation::S_VertexAnimation",
 "size": 17,
 "lines": 11,
-"chars": 226,
+"chars": 250,
 "callers": [
 "00473ec0"
 ],
@@ -42255,10 +42255,10 @@
 "in_vtables": []
 },
 "00473720": {
-"name": "FUN_00473720",
+"name": "S_VertexAnimation::~S_VertexAnimation",
 "size": 107,
 "lines": 25,
-"chars": 712,
+"chars": 737,
 "callers": [
 "00473ec0",
 "00474a20"
@@ -42277,7 +42277,7 @@
 "name": "S_VertexAnimPlayer::Init",
 "size": 38,
 "lines": 14,
-"chars": 417,
+"chars": 409,
 "callers": [
 "00474290",
 "005ec8b0",
@@ -42293,8 +42293,8 @@
 "004737c0": {
 "name": "S_VertexAnimPlayer::Reset",
 "size": 409,
-"lines": 72,
-"chars": 2032,
+"lines": 73,
+"chars": 2192,
 "callers": [
 "005ec8b0",
 "005f9a60",
@@ -42312,10 +42312,10 @@
 "in_vtables": []
 },
 "00473960": {
-"name": "FUN_00473960",
+"name": "S_VertexAnimPlayer::Update",
 "size": 759,
 "lines": 144,
-"chars": 5023,
+"chars": 5041,
 "callers": [
 "00474740",
 "004749a0"
@@ -42332,10 +42332,10 @@
 "in_vtables": []
 },
 "00473c60": {
-"name": "FUN_00473c60",
+"name": "StaticInit_473c60",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -42354,10 +42354,10 @@
 ]
 },
 "00473c90": {
-"name": "FUN_00473c90",
+"name": "StaticInit_473c90",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 101,
 "callers": [],
 "callees": [
 "00473ca0",
@@ -42375,10 +42375,10 @@
 ]
 },
 "00473ca0": {
-"name": "FUN_00473ca0",
+"name": "StaticInit_473ca0",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 72,
 "callers": [
 "00473c90"
 ],
@@ -42394,10 +42394,10 @@
 "in_vtables": []
 },
 "00473cb0": {
-"name": "FUN_00473cb0",
+"name": "StaticInit_473cb0",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 83,
 "callers": [
 "00473c90"
 ],
@@ -42411,10 +42411,10 @@
 "in_vtables": []
 },
 "00473cc0": {
-"name": "FUN_00473cc0",
+"name": "StaticInit_473cc0",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 72,
 "callers": [
 "00473cb0"
 ],
@@ -42430,10 +42430,10 @@
 "in_vtables": []
 },
 "00473cd0": {
-"name": "FUN_00473cd0",
+"name": "StaticInit_473cd0",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 101,
 "callers": [],
 "callees": [
 "00473ce0",
@@ -42451,10 +42451,10 @@
 ]
 },
 "00473ce0": {
-"name": "FUN_00473ce0",
+"name": "StaticInit_473ce0",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 72,
 "callers": [
 "00473cd0"
 ],
@@ -42470,10 +42470,10 @@
 "in_vtables": []
 },
 "00473cf0": {
-"name": "FUN_00473cf0",
+"name": "StaticInit_473cf0",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 83,
 "callers": [
 "00473cd0"
 ],
@@ -42487,10 +42487,10 @@
 "in_vtables": []
 },
 "00473d00": {
-"name": "FUN_00473d00",
+"name": "StaticInit_473d00",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 72,
 "callers": [
 "00473cf0"
 ],
@@ -42506,10 +42506,10 @@
 "in_vtables": []
 },
 "00473d10": {
-"name": "FUN_00473d10",
+"name": "StaticInit_VertexAnimModule",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 134,
 "callers": [],
 "callees": [
 "00473d20",
@@ -42527,10 +42527,10 @@
 ]
 },
 "00473d20": {
-"name": "FUN_00473d20",
+"name": "VertexAnimModule_Construct",
 "size": 18,
 "lines": 9,
-"chars": 167,
+"chars": 187,
 "callers": [
 "00473d10"
 ],
@@ -42548,10 +42548,10 @@
 "in_vtables": []
 },
 "00473d40": {
-"name": "FUN_00473d40",
+"name": "VertexAnimModule_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 104,
 "callers": [
 "00473d10"
 ],
@@ -42565,10 +42565,10 @@
 "in_vtables": []
 },
 "00473d50": {
-"name": "FUN_00473d50",
+"name": "VertexAnimModule_Destroy",
 "size": 10,
 "lines": 8,
-"chars": 122,
+"chars": 147,
 "callers": [
 "00473d40"
 ],
@@ -42584,12 +42584,13 @@
 "in_vtables": []
 },
 "00473d60": {
-"name": "FUN_00473d60",
+"name": "C_VertexAnimModule",
 "size": 66,
 "lines": 18,
-"chars": 455,
+"chars": 459,
 "callers": [
-"00473d20"
+"00473d20",
+"00473dd0"
 ],
 "callees": [
 "0048d950"
@@ -42603,10 +42604,10 @@
 "in_vtables": []
 },
 "00473db0": {
-"name": "FUN_00473db0",
+"name": "SaveGame",
 "size": 5,
 "lines": 7,
-"chars": 107,
+"chars": 103,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -42621,10 +42622,10 @@
 ]
 },
 "00473dc0": {
-"name": "FUN_00473dc0",
+"name": "LoadGame",
 "size": 5,
 "lines": 7,
-"chars": 107,
+"chars": 103,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -42639,12 +42640,13 @@
 ]
 },
 "00473dd0": {
-"name": "FUN_00473dd0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 217,
+"lines": 12,
+"chars": 237,
 "callers": [],
 "callees": [
+"00473d60",
 "00473df0",
 "007e559c"
 ],
@@ -42660,10 +42662,10 @@
 ]
 },
 "00473df0": {
-"name": "FUN_00473df0",
+"name": "~C_VertexAnimModule",
 "size": 60,
 "lines": 17,
-"chars": 407,
+"chars": 435,
 "callers": [
 "00473d50",
 "00473dd0"
@@ -42684,7 +42686,7 @@
 "name": "FindAnimation",
 "size": 140,
 "lines": 45,
-"chars": 1158,
+"chars": 1168,
 "callers": [
 "00474290",
 "005ec8b0",
@@ -42702,10 +42704,10 @@
 "in_vtables": []
 },
 "00473ec0": {
-"name": "FUN_00473ec0",
+"name": "LoadAnimations",
 "size": 966,
-"lines": 170,
-"chars": 5916,
+"lines": 168,
+"chars": 5918,
 "callers": [
 "00474a00"
 ],
@@ -42733,10 +42735,10 @@
 "in_vtables": []
 },
 "00474290": {
-"name": "FUN_00474290",
+"name": "LoadPlayers",
 "size": 1047,
-"lines": 205,
-"chars": 6819,
+"lines": 203,
+"chars": 6726,
 "callers": [
 "00474aa0"
 ],
@@ -42772,7 +42774,7 @@
 "name": "RemovePlayer",
 "size": 132,
 "lines": 36,
-"chars": 951,
+"chars": 945,
 "callers": [
 "005ec8b0",
 "005ed260",
@@ -42789,10 +42791,10 @@
 "in_vtables": []
 },
 "00474740": {
-"name": "FUN_00474740",
+"name": "Tick",
 "size": 600,
 "lines": 87,
-"chars": 2930,
+"chars": 2942,
 "callers": [],
 "callees": [
 "00473960",
@@ -42823,10 +42825,10 @@
 ]
 },
 "004749a0": {
-"name": "FUN_004749a0",
+"name": "Update",
 "size": 89,
 "lines": 28,
-"chars": 721,
+"chars": 733,
 "callers": [],
 "callees": [
 "00473960",
@@ -42848,10 +42850,10 @@
 ]
 },
 "00474a00": {
-"name": "FUN_00474a00",
+"name": "Init",
 "size": 22,
 "lines": 15,
-"chars": 311,
+"chars": 305,
 "callers": [],
 "callees": [
 "00473ec0"
@@ -42870,10 +42872,10 @@
 ]
 },
 "00474a20": {
-"name": "FUN_00474a20",
+"name": "Done",
 "size": 113,
 "lines": 28,
-"chars": 705,
+"chars": 722,
 "callers": [],
 "callees": [
 "00473720",
@@ -42893,10 +42895,10 @@
 ]
 },
 "00474aa0": {
-"name": "FUN_00474aa0",
+"name": "LoadMissionData",
 "size": 25,
 "lines": 10,
-"chars": 199,
+"chars": 196,
 "callers": [],
 "callees": [
 "00474290"
@@ -42915,10 +42917,10 @@
 ]
 },
 "00474ac0": {
-"name": "FUN_00474ac0",
+"name": "FreeMissionData",
 "size": 114,
 "lines": 27,
-"chars": 693,
+"chars": 687,
 "callers": [],
 "callees": [
 "007e2120"
@@ -42937,10 +42939,10 @@
 ]
 },
 "00474b40": {
-"name": "FUN_00474b40",
+"name": "StartMission",
 "size": 208,
 "lines": 50,
-"chars": 1600,
+"chars": 1612,
 "callers": [],
 "callees": [
 "007e6393"
@@ -42959,10 +42961,10 @@
 ]
 },
 "00474c10": {
-"name": "FUN_00474c10",
+"name": "StopMission",
 "size": 122,
 "lines": 31,
-"chars": 830,
+"chars": 841,
 "callers": [],
 "callees": [
 "007e2120"
@@ -42981,10 +42983,10 @@
 ]
 },
 "00474c90": {
-"name": "FUN_00474c90",
+"name": "RestartMission",
 "size": 32,
-"lines": 22,
-"chars": 591,
+"lines": 20,
+"chars": 550,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -51648,10 +51650,10 @@
 "in_vtables": []
 },
 "0048c710": {
-"name": "FUN_0048c710",
+"name": "StaticInit_48c710",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -51670,10 +51672,10 @@
 ]
 },
 "0048c740": {
-"name": "FUN_0048c740",
+"name": "StaticInit_LightMapGroupsModule",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 146,
 "callers": [],
 "callees": [
 "0048c750",
@@ -51691,10 +51693,10 @@
 ]
 },
 "0048c750": {
-"name": "FUN_0048c750",
+"name": "LightMapGroupsModule_Construct",
 "size": 18,
 "lines": 9,
-"chars": 176,
+"chars": 204,
 "callers": [
 "0048c740"
 ],
@@ -51712,10 +51714,10 @@
 "in_vtables": []
 },
 "0048c770": {
-"name": "FUN_0048c770",
+"name": "LightMapGroupsModule_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 112,
 "callers": [
 "0048c740"
 ],
@@ -51729,10 +51731,10 @@
 "in_vtables": []
 },
 "0048c780": {
-"name": "FUN_0048c780",
+"name": "LightMapGroupsModule_Destroy",
 "size": 10,
-"lines": 8,
-"chars": 126,
+"lines": 9,
+"chars": 171,
 "callers": [
 "0048c770"
 ],
@@ -51748,10 +51750,10 @@
 "in_vtables": []
 },
 "0048c790": {
-"name": "FUN_0048c790",
+"name": "RestartMission",
 "size": 139,
 "lines": 33,
-"chars": 930,
+"chars": 944,
 "callers": [],
 "callees": [
 "007e2120"
@@ -51768,10 +51770,10 @@
 ]
 },
 "0048c820": {
-"name": "FUN_0048c820",
+"name": "SaveGame",
 "size": 246,
-"lines": 66,
-"chars": 1748,
+"lines": 60,
+"chars": 1550,
 "callers": [],
 "callees": [
 "007e5392"
@@ -51790,10 +51792,10 @@
 ]
 },
 "0048c920": {
-"name": "FUN_0048c920",
+"name": "LoadGame",
 "size": 471,
-"lines": 117,
-"chars": 3442,
+"lines": 112,
+"chars": 3121,
 "callers": [],
 "callees": [
 "00405940",
@@ -51834,12 +51836,13 @@
 "in_vtables": []
 },
 "0048cb10": {
-"name": "FUN_0048cb10",
+"name": "C_LightMapGroupsModule",
 "size": 66,
 "lines": 18,
-"chars": 467,
+"chars": 479,
 "callers": [
-"0048c750"
+"0048c750",
+"0048cd10"
 ],
 "callees": [
 "0048d950"
@@ -51853,10 +51856,10 @@
 "in_vtables": []
 },
 "0048cb60": {
-"name": "FUN_0048cb60",
+"name": "StopMission",
 "size": 13,
-"lines": 13,
-"chars": 350,
+"lines": 10,
+"chars": 304,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -51871,10 +51874,10 @@
 ]
 },
 "0048cb70": {
-"name": "FUN_0048cb70",
+"name": "FreeMissionData",
 "size": 194,
 "lines": 43,
-"chars": 1264,
+"chars": 1279,
 "callers": [],
 "callees": [
 "0048cc40",
@@ -51894,10 +51897,10 @@
 ]
 },
 "0048cc40": {
-"name": "FUN_0048cc40",
+"name": "S_LightmapGroup::~S_LightmapGroup",
 "size": 200,
 "lines": 47,
-"chars": 1276,
+"chars": 1297,
 "callers": [
 "0048cb70",
 "0048d230"
@@ -51914,12 +51917,13 @@
 "in_vtables": []
 },
 "0048cd10": {
-"name": "FUN_0048cd10",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 12,
-"chars": 226,
+"chars": 249,
 "callers": [],
 "callees": [
+"0048cb10",
 "0048cd30",
 "007e559c"
 ],
@@ -51935,10 +51939,10 @@
 ]
 },
 "0048cd30": {
-"name": "FUN_0048cd30",
+"name": "~C_LightMapGroupsModule",
 "size": 60,
 "lines": 17,
-"chars": 419,
+"chars": 451,
 "callers": [
 "0048c780",
 "0048cd10"
@@ -51956,10 +51960,10 @@
 "in_vtables": []
 },
 "0048cd70": {
-"name": "FUN_0048cd70",
+"name": "LoadGroups",
 "size": 900,
-"lines": 190,
-"chars": 6740,
+"lines": 183,
+"chars": 6016,
 "callers": [
 "006ccab0"
 ],
@@ -51993,10 +51997,10 @@
 "in_vtables": []
 },
 "0048d100": {
-"name": "FUN_0048d100",
+"name": "S_LightmapGroup::S_LightmapGroup",
 "size": 194,
 "lines": 69,
-"chars": 1757,
+"chars": 1777,
 "callers": [
 "0048cd70"
 ],
@@ -52011,10 +52015,10 @@
 "in_vtables": []
 },
 "0048d1d0": {
-"name": "FUN_0048d1d0",
+"name": "S_LightmapGroup::HasFrame",
 "size": 83,
-"lines": 30,
-"chars": 618,
+"lines": 28,
+"chars": 586,
 "callers": [
 "0048cd70"
 ],
@@ -52030,10 +52034,10 @@
 "in_vtables": []
 },
 "0048d230": {
-"name": "FUN_0048d230",
+"name": "S_LightmapGroup::ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 176,
+"chars": 226,
 "callers": [
 "0048cd70"
 ],
@@ -52048,10 +52052,10 @@
 "in_vtables": []
 },
 "0048d250": {
-"name": "FUN_0048d250",
+"name": "S_LightmapChange::ScalarDeletingDestructor",
 "size": 32,
 "lines": 13,
-"chars": 253,
+"chars": 283,
 "callers": [
 "0048cd70"
 ],
@@ -52065,10 +52069,10 @@
 "in_vtables": []
 },
 "0048d270": {
-"name": "FUN_0048d270",
+"name": "SetFrameLightmap",
 "size": 617,
-"lines": 105,
-"chars": 3732,
+"lines": 107,
+"chars": 3747,
 "callers": [
 "0042b650",
 "0048c920",
@@ -52089,10 +52093,10 @@
 "in_vtables": []
 },
 "0048d4e0": {
-"name": "FUN_0048d4e0",
+"name": "SetGroupLightmap",
 "size": 205,
-"lines": 53,
-"chars": 1404,
+"lines": 54,
+"chars": 1473,
 "callers": [
 "0042b650"
 ],
@@ -52156,10 +52160,10 @@
 "in_vtables": []
 },
 "0048d630": {
-"name": "FUN_0048d630",
+"name": "LightmapGroupVector_Insert",
 "size": 406,
-"lines": 74,
-"chars": 2333,
+"lines": 75,
+"chars": 2348,
 "callers": [
 "0048cd70"
 ],
@@ -52913,10 +52917,10 @@
 "in_vtables": []
 },
 "0048e100": {
-"name": "FUN_0048e100",
+"name": "StaticInit_48e100",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -52935,10 +52939,10 @@
 ]
 },
 "0048e130": {
-"name": "FUN_0048e130",
+"name": "StaticInit_TShiftModule",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 122,
 "callers": [],
 "callees": [
 "0048e140",
@@ -52956,10 +52960,10 @@
 ]
 },
 "0048e140": {
-"name": "FUN_0048e140",
+"name": "TShiftModule_Construct",
 "size": 18,
 "lines": 8,
-"chars": 137,
+"chars": 149,
 "callers": [
 "0048e130"
 ],
@@ -52977,10 +52981,10 @@
 "in_vtables": []
 },
 "0048e160": {
-"name": "FUN_0048e160",
+"name": "TShiftModule_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 96,
 "callers": [
 "0048e130"
 ],
@@ -52994,10 +52998,10 @@
 "in_vtables": []
 },
 "0048e170": {
-"name": "FUN_0048e170",
+"name": "TShiftModule_Destroy",
 "size": 10,
 "lines": 8,
-"chars": 118,
+"chars": 127,
 "callers": [
 "0048e160"
 ],
@@ -53031,10 +53035,10 @@
 ]
 },
 "0048e190": {
-"name": "FUN_0048e190",
+"name": "FreeMissionData",
 "size": 57,
 "lines": 16,
-"chars": 454,
+"chars": 448,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -53067,12 +53071,13 @@
 ]
 },
 "0048e1f0": {
-"name": "FUN_0048e1f0",
+"name": "C_TShiftModule",
 "size": 50,
 "lines": 13,
-"chars": 349,
+"chars": 348,
 "callers": [
-"0048e140"
+"0048e140",
+"0048e230"
 ],
 "callees": [
 "0048d950"
@@ -53086,12 +53091,13 @@
 "in_vtables": []
 },
 "0048e230": {
-"name": "FUN_0048e230",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 209,
+"chars": 224,
 "callers": [],
 "callees": [
+"0048e1f0",
 "0048e250",
 "007e559c"
 ],
@@ -53107,10 +53113,10 @@
 ]
 },
 "0048e250": {
-"name": "FUN_0048e250",
+"name": "~C_TShiftModule",
 "size": 40,
 "lines": 13,
-"chars": 294,
+"chars": 318,
 "callers": [
 "0048e170",
 "0048e230"
@@ -53127,14 +53133,96 @@
 ],
 "in_vtables": []
 },
+"0048e280": {
+"name": "HasMesh",
+"size": 80,
+"lines": 25,
+"chars": 537,
+"callers": [
+"0048e330",
+"0048e580"
+],
+"callees": [],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
 "0048e2d0": {
 "name": "HasFrame",
 "size": 81,
-"lines": 29,
-"chars": 640,
+"lines": 25,
+"chars": 546,
 "callers": [
-"00416e10"
+"00416e10",
+"0048e620"
 ],
+"callees": [],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"0048e330": {
+"name": "AddVisual",
+"size": 592,
+"lines": 98,
+"chars": 3007,
+"callers": [],
+"callees": [
+"0048e280",
+"0048e9f0",
+"0048ea20",
+"0048ea30",
+"0048ea70",
+"0048eaa0",
+"007e2120",
+"007e566f"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"0048e580": {
+"name": "RemoveMesh",
+"size": 160,
+"lines": 48,
+"chars": 1249,
+"callers": [],
+"callees": [
+"0048e280"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"0048e620": {
+"name": "RemoveFrame",
+"size": 161,
+"lines": 48,
+"chars": 1260,
+"callers": [],
+"callees": [
+"0048e2d0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"0048e6d0": {
+"name": "RemoveModel",
+"size": 175,
+"lines": 56,
+"chars": 1445,
+"callers": [],
 "callees": [],
 "imports": [],
 "strings": [],
@@ -53146,7 +53234,7 @@
 "name": "GetEntry",
 "size": 93,
 "lines": 25,
-"chars": 543,
+"chars": 578,
 "callers": [
 "00416e10"
 ],
@@ -53176,11 +53264,12 @@
 ]
 },
 "0048e9f0": {
-"name": "FUN_0048e9f0",
+"name": "TShiftEntryVector_Size",
 "size": 35,
 "lines": 10,
-"chars": 177,
+"chars": 187,
 "callers": [
+"0048e330",
 "006d39f0"
 ],
 "callees": [],
@@ -53196,6 +53285,7 @@
 "lines": 7,
 "chars": 57,
 "callers": [
+"0048e330",
 "006d39f0"
 ],
 "callees": [],
@@ -53206,11 +53296,12 @@
 "in_vtables": []
 },
 "0048ea30": {
-"name": "FUN_0048ea30",
+"name": "TShiftEntry_UninitializedCopy",
 "size": 50,
 "lines": 23,
-"chars": 507,
+"chars": 524,
 "callers": [
+"0048e330",
 "006d39f0"
 ],
 "callees": [],
@@ -53221,11 +53312,12 @@
 "in_vtables": []
 },
 "0048ea70": {
-"name": "FUN_0048ea70",
+"name": "TShiftEntry_UninitializedFill",
 "size": 48,
 "lines": 23,
-"chars": 494,
+"chars": 511,
 "callers": [
+"0048e330",
 "006d39f0"
 ],
 "callees": [],
@@ -53236,11 +53328,12 @@
 "in_vtables": []
 },
 "0048eaa0": {
-"name": "FUN_0048eaa0",
+"name": "TShiftEntry_Construct",
 "size": 20,
 "lines": 16,
-"chars": 306,
+"chars": 315,
 "callers": [
+"0048e330",
 "006d39f0"
 ],
 "callees": [],
@@ -298564,6 +298657,7 @@
 "0048d950",
 "0048da30",
 "0048e250",
+"0048e330",
 "0048ecd0",
 "0048ecf0",
 "0048edb0",
@@ -311255,6 +311349,7 @@
 "0048d270",
 "0048d630",
 "0048d950",
+"0048e330",
 "0048eb70",
 "0048f420",
 "0048f7d0",

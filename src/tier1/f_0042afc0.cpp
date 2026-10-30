@@ -390,7 +390,7 @@ LAB_0042bce6:
       uVar7 = (*pIVar3->vtable->GetVisualType)(pIVar3);
       if (uVar7 == 0x50414d4c) {
         puVar12 = GetLightMapGroups();
-        FUN_0048d270(puVar12,(int *)pIVar3,uVar4);
+        C_LightMapGroupsModule__SetFrameLightmap((C_LightMapGroupsModule*)(puVar12),(I3D_frame*)((int *)pIVar3),uVar4);
         return 0;
       }
     }
@@ -434,7 +434,7 @@ LAB_0042bce6:
         if ((iVar14 != -1) &&
            (iVar14 = *(int *)(*(int *)(puVar12 + 0x10) + iVar14 * 4), iVar14 != 0)) {
           puVar12 = GetLightMapGroups();
-          FUN_0048d4e0(puVar12,iVar14,uVar4);
+          C_LightMapGroupsModule__SetGroupLightmap((C_LightMapGroupsModule*)(puVar12),iVar14,uVar4);
           return 0;
         }
       }

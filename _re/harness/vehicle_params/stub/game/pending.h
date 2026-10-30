@@ -217,35 +217,4 @@ extern std::vector<C_Bird *> g_birds;                  // 0x0089bb90
 extern std::vector<class I3D_frame *> g_spareBirdModels;   // 0x0089bba0
 float RandomFloat(float max);                           // 0x00475190
 
-// ---- the vertex animation module (the multiplayer zone's flag, part 7d; as the real header declares it)
-struct S_VertexAnimation {
-    uint8_t unknown00[0x18];
-    int frameCount;                                     // +0x18
-};
-struct S_VertexAnimPlayer {
-    int frame = 0;                                      // +0x00
-    class I3D_frame *visual = nullptr;                  // +0x04
-    int unknown08 = 0;
-    int unknown0C = 0;
-    int unknown10 = 1;
-    int unknown14 = 0;
-    int frameTime = 250;                                // +0x18 ms
-    bool unknown1C = false;
-    bool unknown1D = false;
-    bool unknown1E = false;
-    bool unknown1F = true;
-    int unknown20 = 0;
-    S_VertexAnimation *animation = nullptr;             // +0x24
-    int unknown28 = 1;
-
-    void Reset();
-    void Init(class I3D_frame *visual, S_VertexAnimation *animation);
-};
-class C_str;
-class C_VertexAnimModule {
-public:
-    S_VertexAnimation *FindAnimation(const C_str &name);
-    void RemovePlayer(S_VertexAnimPlayer *player, bool destroy);
-    void AddPlayer(S_VertexAnimPlayer *player);
-};
-extern C_VertexAnimModule g_vertexAnimModule;
+// The vertex animation module: stub/game/vertex_anim.h.
