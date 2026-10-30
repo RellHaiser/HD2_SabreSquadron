@@ -106,6 +106,8 @@ public:
         return m_state == GAME_STATE_RUNNING || m_state == GAME_STATE_STARTING || m_state == GAME_STATE_ENDING;
     }
     I3D_scene *GetScene() const { return m_scene; }
+    // The far clipping distance (m; the birds fly off beyond it).
+    float GetFarClip() const { return m_farClip; }
     const char *GetMissionName() const { return m_missionName; }
     // Simulation time of the mission in ms; advances every unpaused frame and is
     // still 0 before the first one (scripts wait for it).

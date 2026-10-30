@@ -19,6 +19,8 @@ LINES = {
                  "gfCamera gfMission").split(),
     "geffects2": ("gfShadow gfShadowName gfShadowFind gfFace gfFaceFind gfUniform gfUniformFile gfGlass gfShardSplit "
                   "gfShardPhysics").split(),
+    "birds": ("bdMake bdDelete bdSit bdHop bdFlyAway bdTakeOff bdClimb bdGlide bdModule bdMovie bdMovieFile "
+              "bdMovieUpdate bdEffects").split(),
 }
 
 

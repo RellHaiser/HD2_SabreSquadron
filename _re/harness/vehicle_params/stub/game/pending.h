@@ -158,20 +158,8 @@ public:
 private:
     uint8_t m_data[0x20];
 };
-class C_MeshPlayer {
-public:
-    C_MeshPlayer();
-    ~C_MeshPlayer();
-    void Load();
-    void Update(int timeDelta);
-    void Free();
-
-private:
-    uint8_t m_data[0x28];
-};
-void UpdateBirds(int timeDelta);
-void CollectBirds();
-void FreeBirds();
+#include "game/mesh_player.h"
+#include "game/birds.h"
 void FreeClouds();
 void LoadClouds();
 float RandomFloat(float max);
@@ -249,6 +237,9 @@ public:
 };
 extern C_SightModule g_sightModule;                 // 0x0089b288
 #endif
+#ifdef WORLD_TEST
+#include "game/birds.h"
+#else
 class C_Bird {                                          // 0x70 bytes
 public:
     // On `model`, whose frame data then points at the bird; `ownModel`: the model is the bird's,
@@ -271,6 +262,7 @@ private:
 // The birds sitting in the mission (the birds module's) and the models of the birds deleted.
 extern std::vector<C_Bird *> g_birds;                  // 0x0089bb90
 extern std::vector<class I3D_frame *> g_spareBirdModels;   // 0x0089bba0
+#endif
 float RandomFloat(float max);                           // 0x00475190
 
 // The vertex animation module: stub/game/vertex_anim.h.

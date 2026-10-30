@@ -114,8 +114,4 @@
 0060d9f0 C_ExplosivePlace::Disarm | bool __thiscall Disarm(C_ExplosivePlace * this, C_Human * human)
 0060da50 C_ExplosivePlace::OnDisarmed | void __thiscall OnDisarmed(C_ExplosivePlace * this)
 0060da70 C_ExplosivePlace::Hit
-# The bird (0x00479790..0x0047a640; not ported).
-004797c0 C_Bird::C_Bird
-004799e0 C_Bird::~C_Bird
-0047a2e0 C_Bird::Update
-0047a2f0 C_Bird::FlyAway
+# (The bird: birds.txt.)

@@ -6700,21 +6700,33 @@
   "name": "C_TemporaryActorsList::DestroyMinesOf",
   "proto": "void __thiscall DestroyMinesOf(C_TemporaryActorsList *this, C_Human * owner)"
  },
+ "00479790": {
+  "module": "birds",
+  "name": "StaticInit_479790"
+ },
  "004797c0": {
-  "module": "world_actors",
-  "name": "C_Bird::C_Bird"
+  "module": "birds",
+  "name": "C_Bird::C_Bird",
+  "proto": "void * __thiscall C_Bird(void * this, I3D_frame * model, bool ownModel)"
  },
  "004799e0": {
-  "module": "world_actors",
+  "module": "birds",
   "name": "C_Bird::~C_Bird"
  },
+ "00479c70": {
+  "module": "birds",
+  "name": "C_Bird::Fly",
+  "proto": "bool __thiscall Fly(void * this, float time)"
+ },
  "0047a2e0": {
-  "module": "world_actors",
-  "name": "C_Bird::Update"
+  "module": "birds",
+  "name": "C_Bird::Update",
+  "proto": "bool __thiscall Update(void * this, int time)"
  },
  "0047a2f0": {
-  "module": "world_actors",
-  "name": "C_Bird::FlyAway"
+  "module": "birds",
+  "name": "C_Bird::FlyAway",
+  "proto": "void __thiscall FlyAway(void * this)"
  },
  "0047a640": {
   "module": "zz_idioms",
@@ -6731,6 +6743,39 @@
  "0047a6a0": {
   "module": "zz_idioms",
   "name": "uninitialized_fill_n4_47a6a0"
+ },
+ "0047a6d0": {
+  "module": "birds",
+  "name": "StaticInit_47a6d0"
+ },
+ "0047a700": {
+  "module": "birds",
+  "name": "UpdateBirds",
+  "proto": "void __thiscall UpdateBirds(void * this, int timeDelta)"
+ },
+ "0047a790": {
+  "module": "birds",
+  "name": "CollectBirds",
+  "proto": "void __fastcall CollectBirds(void * birds)"
+ },
+ "0047a7b0": {
+  "module": "birds",
+  "name": "CollectBird",
+  "proto": "uint __stdcall CollectBird(I3D_frame * frame, void * birds)"
+ },
+ "0047a9f0": {
+  "module": "birds",
+  "name": "Bird_AlignedFree"
+ },
+ "0047aa10": {
+  "module": "birds",
+  "name": "FreeBirds",
+  "proto": "void __fastcall FreeBirds(void * birds)"
+ },
+ "0047aac0": {
+  "module": "birds",
+  "name": "BirdVector_EraseAt",
+  "proto": "void __thiscall BirdVector_EraseAt(void * this, int index)"
  },
  "0047ab10": {
   "module": "zz_idioms",
@@ -6840,6 +6885,54 @@
   "module": "zz_idioms",
   "name": "empty_function_483eb0"
  },
+ "004840d0": {
+  "module": "birds",
+  "name": "StaticInit_4840d0"
+ },
+ "00484100": {
+  "module": "birds",
+  "name": "C_MeshPlayer::C_MeshPlayer",
+  "proto": "void * __fastcall C_MeshPlayer(void * this)"
+ },
+ "004841e0": {
+  "module": "birds",
+  "name": "C_MeshPlayer::~C_MeshPlayer"
+ },
+ "00484260": {
+  "module": "birds",
+  "name": "C_MeshPlayer::Load",
+  "proto": "void __fastcall Load(void * this)"
+ },
+ "004846a0": {
+  "module": "birds",
+  "name": "MeshPlayer_VisualMesh",
+  "proto": "void * __fastcall MeshPlayer_VisualMesh(I3D_frame * frame)"
+ },
+ "004846e0": {
+  "module": "birds",
+  "name": "MeshPlayer_OwnTexture",
+  "proto": "void * __fastcall MeshPlayer_OwnTexture(I3D_frame * frame)"
+ },
+ "00484740": {
+  "module": "birds",
+  "name": "MeshPlayer_ShowTexture",
+  "proto": "void __fastcall MeshPlayer_ShowTexture(I3D_frame * frame, void * texture)"
+ },
+ "004847a0": {
+  "module": "birds",
+  "name": "C_MeshPlayer::Play",
+  "proto": "void __thiscall Play(void * this, void * frames, char * movie)"
+ },
+ "00484a70": {
+  "module": "birds",
+  "name": "C_MeshPlayer::Update",
+  "proto": "void __thiscall Update(void * this, int timeDelta)"
+ },
+ "00484ae0": {
+  "module": "birds",
+  "name": "C_MeshPlayer::Free",
+  "proto": "void __fastcall Free(void * this)"
+ },
  "00484b90": {
   "module": "zz_idioms",
   "name": "vector_tidy_484b90"
@@ -6867,6 +6960,34 @@
  "00484e70": {
   "module": "zz_idioms",
   "name": "copy4_484e70"
+ },
+ "00484e90": {
+  "module": "birds",
+  "name": "StaticInit_484e90"
+ },
+ "00484ec0": {
+  "module": "birds",
+  "name": "StaticInit_Birds"
+ },
+ "00484ed0": {
+  "module": "birds",
+  "name": "BirdLists_Construct0"
+ },
+ "00484ee0": {
+  "module": "birds",
+  "name": "BirdLists_RegisterAtExit"
+ },
+ "00484ef0": {
+  "module": "birds",
+  "name": "BirdLists_Destroy0"
+ },
+ "00484f00": {
+  "module": "birds",
+  "name": "BirdLists_Destroy"
+ },
+ "00484f30": {
+  "module": "birds",
+  "name": "BirdLists_Construct"
  },
  "00484f60": {
   "module": "geffects",
@@ -36740,6 +36861,16 @@
   "data": true,
   "module": "geffects",
   "name": "g_geffectsModule"
+ },
+ "0089bb90": {
+  "data": true,
+  "module": "birds",
+  "name": "g_birds"
+ },
+ "0089bba0": {
+  "data": true,
+  "module": "birds",
+  "name": "g_spareBirdModels"
  },
  "0089bbb0": {
   "data": true,

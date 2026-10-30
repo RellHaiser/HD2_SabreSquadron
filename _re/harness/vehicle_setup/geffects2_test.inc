@@ -39,7 +39,7 @@ struct S_GfLevel {
     uint8_t unknown04[0x50];
     int numVertices;                                    // +0x54
     int numGroups;                                      // +0x58
-    S_GfGroup **groupArray;                             // +0x5C
+    S_GfGroup *firstGroup;                              // +0x5C the list's head (LS3DF: faceGroups)
     std::vector<S_GfGroup *> groups;
     std::vector<S_GfVertex> vertices;
 };
@@ -62,9 +62,11 @@ uint32_t __stdcall F_GfMatRelease(S_GfMaterial *self)
     GfLog("matrelease %s", self->id.c_str());
     return static_cast<uint32_t>(--self->refs);
 }
+std::map<const void *, std::string> g_gfTextureNames;  // (logged by name; others "image")
 void __stdcall F_GfMatTexture(S_GfMaterial *self, void *texture)
 {
-    GfLog("settex %s %s", self->id.c_str(), texture ? "image" : "0");
+    auto it = g_gfTextureNames.find(texture);
+    GfLog("settex %s %s", self->id.c_str(), !texture ? "0" : it != g_gfTextureNames.end() ? it->second.c_str() : "image");
 }
 void __stdcall F_GfMatResolve(S_GfMaterial *self) { GfLog("resolve %s", self->id.c_str()); }
 void __stdcall F_GfGroupMaterial(S_GfGroup *self, S_GfMaterial *material)
@@ -150,6 +152,7 @@ S_GfLevel *GfLevel(std::initializer_list<S_GfGroup *> groups)
     l->vtable = g_gfLevelVt;
     l->groups = groups;
     l->numGroups = static_cast<int>(l->groups.size());
+    l->firstGroup = l->groups.empty() ? nullptr : l->groups[0];
     return l;
 }
 S_GfMesh *GfMesh(const std::string &id, std::initializer_list<S_GfLevel *> levels)

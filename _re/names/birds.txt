@@ -1,0 +1,36 @@
+# Part 8d-i: the birds (src/game/birds.*, 0x00479790..0x0047ab10 and the lists' statics
+# 0x00484ec0..0x00484f30) and the mesh player (src/game/mesh_player.*, 0x004840d0..0x00484e70).
+# 4 names moved from world_actors.txt. StaticInit_<addr>: the files' guarded statics (atexit).
+
+00479790 StaticInit_479790
+004797c0 C_Bird::C_Bird | void * __thiscall C_Bird(void * this, I3D_frame * model, bool ownModel)
+004799e0 C_Bird::~C_Bird
+00479c70 C_Bird::Fly | bool __thiscall Fly(void * this, float time)
+0047a2e0 C_Bird::Update | bool __thiscall Update(void * this, int time)
+0047a2f0 C_Bird::FlyAway | void __thiscall FlyAway(void * this)
+0047a6d0 StaticInit_47a6d0
+0047a700 UpdateBirds | void __thiscall UpdateBirds(void * this, int timeDelta)
+0047a790 CollectBirds | void __fastcall CollectBirds(void * birds)
+0047a7b0 CollectBird | uint __stdcall CollectBird(I3D_frame * frame, void * birds)
+0047a9f0 Bird_AlignedFree
+0047aa10 FreeBirds | void __fastcall FreeBirds(void * birds)
+0047aac0 BirdVector_EraseAt | void __thiscall BirdVector_EraseAt(void * this, int index)
+004840d0 StaticInit_4840d0
+00484100 C_MeshPlayer::C_MeshPlayer | void * __fastcall C_MeshPlayer(void * this)
+004841e0 C_MeshPlayer::~C_MeshPlayer
+00484260 C_MeshPlayer::Load | void __fastcall Load(void * this)
+004846a0 MeshPlayer_VisualMesh | void * __fastcall MeshPlayer_VisualMesh(I3D_frame * frame)
+004846e0 MeshPlayer_OwnTexture | void * __fastcall MeshPlayer_OwnTexture(I3D_frame * frame)
+00484740 MeshPlayer_ShowTexture | void __fastcall MeshPlayer_ShowTexture(I3D_frame * frame, void * texture)
+004847a0 C_MeshPlayer::Play | void __thiscall Play(void * this, void * frames, char * movie)
+00484a70 C_MeshPlayer::Update | void __thiscall Update(void * this, int timeDelta)
+00484ae0 C_MeshPlayer::Free | void __fastcall Free(void * this)
+00484e90 StaticInit_484e90
+00484ec0 StaticInit_Birds
+00484ed0 BirdLists_Construct0
+00484ee0 BirdLists_RegisterAtExit
+00484ef0 BirdLists_Destroy0
+00484f00 BirdLists_Destroy
+00484f30 BirdLists_Construct
+0089bb90 g_birds @
+0089bba0 g_spareBirdModels @

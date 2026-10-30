@@ -45757,10 +45757,10 @@
 "in_vtables": []
 },
 "00479790": {
-"name": "FUN_00479790",
+"name": "StaticInit_479790",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -45782,7 +45782,7 @@
 "name": "C_Bird::C_Bird",
 "size": 530,
 "lines": 83,
-"chars": 3313,
+"chars": 3319,
 "callers": [
 "0047a7b0",
 "005ba8b0"
@@ -45834,10 +45834,10 @@
 "in_vtables": []
 },
 "00479c70": {
-"name": "FUN_00479c70",
+"name": "C_Bird::Fly",
 "size": 1622,
-"lines": 247,
-"chars": 9217,
+"lines": 240,
+"chars": 9018,
 "callers": [
 "00479c70",
 "0047a2e0"
@@ -45879,8 +45879,8 @@
 "0047a2e0": {
 "name": "C_Bird::Update",
 "size": 16,
-"lines": 8,
-"chars": 117,
+"lines": 10,
+"chars": 143,
 "callers": [
 "0047a700",
 "005bb3c0"
@@ -45897,8 +45897,8 @@
 "0047a2f0": {
 "name": "C_Bird::FlyAway",
 "size": 846,
-"lines": 118,
-"chars": 3277,
+"lines": 119,
+"chars": 3800,
 "callers": [
 "005bb140"
 ],
@@ -45989,10 +45989,10 @@
 "in_vtables": []
 },
 "0047a6d0": {
-"name": "FUN_0047a6d0",
+"name": "StaticInit_47a6d0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -46011,10 +46011,10 @@
 ]
 },
 "0047a700": {
-"name": "FUN_0047a700",
+"name": "UpdateBirds",
 "size": 138,
 "lines": 39,
-"chars": 1083,
+"chars": 1079,
 "callers": [
 "00487240"
 ],
@@ -46030,10 +46030,10 @@
 "in_vtables": []
 },
 "0047a790": {
-"name": "FUN_0047a790",
+"name": "CollectBirds",
 "size": 32,
 "lines": 11,
-"chars": 202,
+"chars": 207,
 "callers": [
 "004863f0",
 "004885d0"
@@ -46048,10 +46048,10 @@
 "in_vtables": []
 },
 "0047a7b0": {
-"name": "FUN_0047a7b0",
+"name": "CollectBird",
 "size": 572,
 "lines": 107,
-"chars": 3250,
+"chars": 3277,
 "callers": [
 "0047a790"
 ],
@@ -46079,10 +46079,10 @@
 "in_vtables": []
 },
 "0047a9f0": {
-"name": "FUN_0047a9f0",
+"name": "Bird_AlignedFree",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 106,
 "callers": [
 "007fc000",
 "007ff9b3"
@@ -46097,10 +46097,10 @@
 "in_vtables": []
 },
 "0047aa00": {
-"name": "thunk_FUN_0047aa10",
+"name": "FreeBirds",
 "size": 5,
 "lines": 37,
-"chars": 1104,
+"chars": 1134,
 "callers": [
 "004863f0",
 "004888c0"
@@ -46115,10 +46115,10 @@
 "in_vtables": []
 },
 "0047aa10": {
-"name": "FUN_0047aa10",
+"name": "FreeBirds",
 "size": 163,
 "lines": 37,
-"chars": 1098,
+"chars": 1134,
 "callers": [
 "0047aa00"
 ],
@@ -46133,10 +46133,10 @@
 "in_vtables": []
 },
 "0047aac0": {
-"name": "FUN_0047aac0",
+"name": "BirdVector_EraseAt",
 "size": 73,
 "lines": 23,
-"chars": 568,
+"chars": 570,
 "callers": [
 "005ba670"
 ],
@@ -48638,10 +48638,10 @@
 "in_vtables": []
 },
 "004840d0": {
-"name": "FUN_004840d0",
+"name": "StaticInit_4840d0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -48660,10 +48660,10 @@
 ]
 },
 "00484100": {
-"name": "FUN_00484100",
+"name": "C_MeshPlayer::C_MeshPlayer",
 "size": 209,
 "lines": 73,
-"chars": 1785,
+"chars": 1984,
 "callers": [
 "004860b0"
 ],
@@ -48683,10 +48683,10 @@
 "in_vtables": []
 },
 "004841e0": {
-"name": "FUN_004841e0",
+"name": "C_MeshPlayer::~C_MeshPlayer",
 "size": 124,
 "lines": 31,
-"chars": 660,
+"chars": 681,
 "callers": [
 "00486f00",
 "007fc420",
@@ -48703,10 +48703,10 @@
 "in_vtables": []
 },
 "00484260": {
-"name": "FUN_00484260",
+"name": "C_MeshPlayer::Load",
 "size": 1064,
 "lines": 175,
-"chars": 5937,
+"chars": 5974,
 "callers": [
 "00488560"
 ],
@@ -48741,10 +48741,10 @@
 "in_vtables": []
 },
 "00484690": {
-"name": "thunk_FUN_00484ae0",
+"name": "C_MeshPlayer::Free",
 "size": 5,
-"lines": 33,
-"chars": 982,
+"lines": 35,
+"chars": 1241,
 "callers": [
 "004885a0"
 ],
@@ -48759,10 +48759,10 @@
 "in_vtables": []
 },
 "004846a0": {
-"name": "FUN_004846a0",
+"name": "MeshPlayer_VisualMesh",
 "size": 63,
 "lines": 23,
-"chars": 456,
+"chars": 501,
 "callers": [
 "004846e0",
 "00484740"
@@ -48775,10 +48775,10 @@
 "in_vtables": []
 },
 "004846e0": {
-"name": "FUN_004846e0",
+"name": "MeshPlayer_OwnTexture",
 "size": 81,
 "lines": 27,
-"chars": 667,
+"chars": 701,
 "callers": [
 "004847a0"
 ],
@@ -48792,10 +48792,10 @@
 "in_vtables": []
 },
 "00484740": {
-"name": "FUN_00484740",
+"name": "MeshPlayer_ShowTexture",
 "size": 86,
 "lines": 25,
-"chars": 722,
+"chars": 731,
 "callers": [
 "00484690",
 "004847a0",
@@ -48811,10 +48811,10 @@
 "in_vtables": []
 },
 "004847a0": {
-"name": "FUN_004847a0",
+"name": "C_MeshPlayer::Play",
 "size": 715,
-"lines": 116,
-"chars": 4447,
+"lines": 118,
+"chars": 4631,
 "callers": [
 "00484260"
 ],
@@ -48845,10 +48845,10 @@
 "in_vtables": []
 },
 "00484a70": {
-"name": "FUN_00484a70",
+"name": "C_MeshPlayer::Update",
 "size": 104,
-"lines": 31,
-"chars": 779,
+"lines": 32,
+"chars": 858,
 "callers": [
 "00487240"
 ],
@@ -48862,10 +48862,10 @@
 "in_vtables": []
 },
 "00484ae0": {
-"name": "FUN_00484ae0",
+"name": "C_MeshPlayer::Free",
 "size": 173,
-"lines": 33,
-"chars": 976,
+"lines": 35,
+"chars": 1241,
 "callers": [
 "004841e0",
 "00484260",
@@ -49014,10 +49014,10 @@
 "in_vtables": []
 },
 "00484e90": {
-"name": "FUN_00484e90",
+"name": "StaticInit_484e90",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -49036,10 +49036,10 @@
 ]
 },
 "00484ec0": {
-"name": "FUN_00484ec0",
+"name": "StaticInit_Birds",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 110,
 "callers": [],
 "callees": [
 "00484ed0",
@@ -49057,10 +49057,10 @@
 ]
 },
 "00484ed0": {
-"name": "FUN_00484ed0",
+"name": "BirdLists_Construct0",
 "size": 10,
 "lines": 8,
-"chars": 80,
+"chars": 90,
 "callers": [
 "00484ec0"
 ],
@@ -49076,10 +49076,10 @@
 "in_vtables": []
 },
 "00484ee0": {
-"name": "FUN_00484ee0",
+"name": "BirdLists_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 91,
 "callers": [
 "00484ec0"
 ],
@@ -49093,10 +49093,10 @@
 "in_vtables": []
 },
 "00484ef0": {
-"name": "FUN_00484ef0",
+"name": "BirdLists_Destroy0",
 "size": 10,
 "lines": 8,
-"chars": 75,
+"chars": 86,
 "callers": [
 "00484ee0"
 ],
@@ -49112,10 +49112,10 @@
 "in_vtables": []
 },
 "00484f00": {
-"name": "FUN_00484f00",
+"name": "BirdLists_Destroy",
 "size": 48,
 "lines": 15,
-"chars": 392,
+"chars": 397,
 "callers": [
 "00484ef0"
 ],
@@ -49129,10 +49129,10 @@
 "in_vtables": []
 },
 "00484f30": {
-"name": "FUN_00484f30",
+"name": "BirdLists_Construct",
 "size": 38,
 "lines": 18,
-"chars": 435,
+"chars": 442,
 "callers": [
 "00484ed0"
 ],

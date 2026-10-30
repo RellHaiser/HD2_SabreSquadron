@@ -5364,6 +5364,34 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     12 functions in ported.txt (23 helpers absorbed: the shadow cache's and the face groups'
     containers; the decorators' still left for 8d). Stats: 7,531 of 12,293 functions by hand (69.2 % by size).
 
+  PART 8d-i DONE (2026-10-30): the birds and the mesh player (src/game/birds.*, mesh_player.*, new).
+  - C_Bird (0x004797c0..0x0047a2f0): a "ptacekletacek" model linked to the primary sector, its
+    frame data pointing at the bird, wings "Object03" / "Object01" (off). Sitting it hops after
+    3..23 s (RandomFloat(0.001) + 0.0001 m/ms up, 1e-6 down per ms) and lands back at its start
+    (then 20..40 s); FlyAway: 5..7 m/s along its z axis and up (plus up to 0.5 m sideways at
+    random), taking off 10 m, climbing at 0.75 the speed with gravity until it points down, then
+    gliding at y -0.1 until beyond the far clip or 500 m (then deleted). The wings flap about z,
+    the right one mirrored. Deleted, a scene model goes back to its start, hidden, to
+    g_spareBirdModels (the fowl generator's); its own model leaves the scene. Quirk kept: any frame
+    data on the model is taken for a bird there before (its start reused).
+  - UpdateBirds, CollectBirds (EnumFrames over models, the lowercase name), FreeBirds (the spares
+    shown again).
+  - C_MeshPlayer (0x00484100..0x00484ae0): missions\<mission>\meshplayer.bin's movie (chunk 0x44C)
+    and frames (0x4B0) found in the scene; GameMovie\<movie> streamed onto the first mesh level's
+    face groups of each object visual with flag 0x800 (the first group's texture kept and given
+    back by Free); replayed at its end, the picture updated when one of the frames was drawn.
+  - C_Bird's w fields left out (never used). Game::GetFarClip.
+  - Harness: birds_test.inc ("birds:", 13 checks); the GEffects fakes of the birds and mesh player
+    dropped (the real ones linked); the scene's EnumFrames faked (its returns 1 / 2 honoured), the
+    stream and its textures logging fakes; RandomFloat's last max kept. Baselines: 0 of 22 in both
+    orders; the item build 0 of 37; the other five 0 of 37 each.
+  - Mutations (mutations/mutate_8d1.py): the first run caught 189 of 247 (52 survived, 6 did not
+    build); 29 equivalent (see the file's docstring), new cases for 23. The second run: all 209 caught.
+  - Build: 197 files clean (MSVC). Tier 1: 546 errors in 97 files, 226 stubs. ret_audit --src: 52.
+  - Ghidra: 32 names (names/birds.txt; C_Bird's moved from world_actors.txt), 43 decompiles
+    exported; 22 functions in ported.txt (16 helpers absorbed: the birds' and the mesh player's
+    containers). Stats: 7,569 of 12,293 functions by hand (69.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

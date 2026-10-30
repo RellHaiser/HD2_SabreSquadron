@@ -14841,6 +14841,7 @@ void PartsHitTest(const char *path)
 #include "sight_test.inc"
 #include "geffects_test.inc"
 #include "geffects2_test.inc"
+#include "birds_test.inc"
 #endif
 
 int main(int argc, char **argv)

@@ -130,23 +130,8 @@ private:
     uint8_t m_data[0x20];
 };
 
-// The mesh player (the GEffects module's +0xE4).
-class C_MeshPlayer {                                    // 0x28 bytes
-public:
-    C_MeshPlayer();                                     // 0x00484100
-    ~C_MeshPlayer();                                    // 0x004841e0
-    void Load();                                        // 0x00484260
-    void Update(int timeDelta);                         // 0x00484a70
-    void Free();                                        // 0x00484ae0
-
-private:
-    uint8_t m_data[0x28];
-};
-
-// The birds (on g_birds, 0x0089bb90): flown on, gathered from the scene, freed.
-void UpdateBirds(int timeDelta);                        // 0x0047a700
-void CollectBirds();                                    // 0x0047a790
-void FreeBirds();                                       // 0x0047aa10
+// The mesh player (the GEffects module's +0xE4): game/mesh_player.h; the birds: game/birds.h.
+#include "game/mesh_player.h"
 // The clouds (the object at 0x0089b74c).
 void FreeClouds();                                      // 0x00483de0
 void LoadClouds();                                      // 0x00483e50
@@ -567,32 +552,8 @@ inline bool CopyProtectionIntactBreath()
 
 // (C_Ladder and the accessors the human movement code uses on it: game/ladder.h.)
 
-// ---- the birds (0x00479790..0x0047ab90, not ported) --------------------------------------------
-// A bird: a bird model (its wings the frames "Object01" and "Object03") sitting at its place until it
-// flies away. The birds module scatters them over the mission; C_FowlGenerator takes them over or
-// makes its own.
-class C_Bird {                                          // 0x70 bytes
-public:
-    // On `model`, whose frame data then points at the bird; `ownModel`: the model is the bird's,
-    // else it goes back to g_spareBirdModels (hidden) when the bird is deleted.
-    C_Bird(class I3D_frame *model, bool ownModel);     // 0x004797c0
-    ~C_Bird();                                          // 0x004799e0
-    // Flying on; false once it has flown off.
-    bool Update(int time);                              // 0x0047a2e0
-    void FlyAway();                                     // 0x0047a2f0
-    class I3D_frame *GetModel() const { return m_model; }   // +0x50
-    bool OwnsModel() const { return m_ownModel; }       // +0x60
-
-private:
-    uint8_t m_unknown00[0x50];
-    class I3D_frame *m_model;                           // +0x50
-    uint8_t m_unknown54[0x0C];
-    bool m_ownModel;                                    // +0x60
-    uint8_t m_unknown61[0x0F];
-};
-// The birds sitting in the mission (the birds module's) and the models of the birds deleted.
-extern std::vector<C_Bird *> g_birds;                  // 0x0089bb90
-extern std::vector<class I3D_frame *> g_spareBirdModels;   // 0x0089bba0
+// The birds (C_Bird, g_birds, g_spareBirdModels): game/birds.h.
+#include "game/birds.h"
 
 // The vertex animation module: see game/vertex_anim.h.
 
