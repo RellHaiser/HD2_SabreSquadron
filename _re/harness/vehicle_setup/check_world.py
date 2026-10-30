@@ -17,6 +17,8 @@ LINES = {
     "sight": "sgRegister sgRelation sgParts sgTestNow sgCanSee sgUpdate sgTiming sgTracker sgTick sgStates sgRemove sgModule".split(),
     "geffects": ("gfModule gfQuad gfFade gfModelFx gfHierarchy gfFades gfHumans gfStorm gfWater gfUnderwater gfRain gfTeamRain "
                  "gfCamera gfMission").split(),
+    "geffects2": ("gfShadow gfShadowName gfShadowFind gfFace gfFaceFind gfUniform gfUniformFile gfGlass gfShardSplit "
+                  "gfShardPhysics").split(),
 }
 
 

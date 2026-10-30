@@ -5321,6 +5321,49 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     decorators' left for 8d). 0x00486d60 (an enum callback, never referenced) stays to tier 1.
     Stats: 7,496 of 12,293 functions by hand (68.8 % by size).
 
+  PART 8c-ii DONE (2026-10-30): the GEffects module's shadows, uniforms, face textures and glass.
+  - CreateShadow (0x004894e0, the client side): the shadow cache's "s<model file>" (its folders
+    and what follows the first '.' dropped; a human's "shdpuppet") copied into a new shadow,
+    "._shad.<model>", under the model's own "a" (else the model), one of the model's frames, with
+    the module's parameters (S_ShadowParams: colour, max height 1, depth 8, range 100, 64 x 64; the
+    opacity sin(10 degrees) squared); a shadow made before is taken off first; the model holds the
+    only reference. GetShadow (no reference added), Set / GetShadowParams. Quirk kept: a load
+    returning a success code above 0 makes no shadow and keeps the cache's reference.
+  - SwitchFaceTexture (0x0048a5c0): the first skinned visual (SNGM / SMMR with visual flag 0x800)
+    whose face groups' textures have "e_f0" in their lowercase names: <texture without its
+    extension>.bmp loaded; the first such face group's own material takes it, the others share it.
+  - DressUniform (0x0048a780): a temporary model loaded with item `uniform`'s model ("NA01" when it
+    is no uniform; quirk kept: the name cut after its last '.', the dot kept) takes the model's 8
+    animation stages and the frames not its own (by their parent's name), the model is reloaded
+    from the file and takes them back; the movement told, the player's side's volumes collected
+    again (the active soldier's view kept), the old face texture switched back. Quirks kept: the
+    temporary model stands up to 4 m off (two RandomFloat calls); the targets' frames are copied
+    within the same model.
+  - ShatterGlass (0x00485ba0) and its recursion (0x00484f60): each face of an object visual with
+    flag 0x800 split at the middle of its longest edge (ties: 0-1, then 1-2) until its area is at
+    most the limit (0.01 for the car's windows), each part a shard: an object visual of the triangle
+    and its back with one normal, the glass's material, at the glass's place, a falling physics
+    object (shoot-through) pushed at random. Quirks kept: the glass's vertices and faces are never
+    unlocked (the faces locked per face); the shard's face group's reference is never given back.
+  - I3D: the driver's CreateFaceGroup / CreateMeshLevel, the mesh level's Release / AddFaceGroup /
+    AllocVertices, the face group's AllocFaces / Lock / numFaces, the model's SetAnimFlags, the
+    target's frames, the shadow's SetSize / SetDepth / SetMaxHeight / SetOpacity / SetColor,
+    the material's AddRef, VISFLAGS_OBJECT_PARAMS (names from the LS3DF port). C_Team::CollectVolumes
+    public.
+  - Harness: geffects2_test.inc ("geffects2:", 10 checks) with made-up meshes, levels, face groups,
+    materials and textures at the engine's offsets, the shadow cache's Get and C_ItemDefs faked
+    (a filled vtable), the model cache's fill making the uniform models; the 8c-i fakes' LinkTo now
+    moves frames between child lists; the fake physics module can make no object. Baselines: 0 of
+    22 in both orders; the item build 0 of 37; the other five 0 of 37 each.
+  - Mutations (mutations/mutate_8c2.py, the 8c-ii code): the first run caught 224 of 255 (30 survived, 1 did not
+    build); 14 equivalent (see the file's docstring), new cases for 16 (and the 1-2 case's
+    redundant b = &p2 removed). The second run: 238 of 240 (the stage check widened); the full
+    rerun: all 240 caught.
+  - Build: 195 files clean (MSVC). Tier 1: 546 errors in 97 files, 226 stubs. ret_audit --src: 52.
+  - Ghidra: 13 names (names/geffects.txt; ShatterGlass moved from car.txt), 35 decompiles exported;
+    12 functions in ported.txt (23 helpers absorbed: the shadow cache's and the face groups'
+    containers; the decorators' still left for 8d). Stats: 7,531 of 12,293 functions by hand (69.2 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

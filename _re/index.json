@@ -49144,10 +49144,10 @@
 "in_vtables": []
 },
 "00484f60": {
-"name": "FUN_00484f60",
+"name": "GEffects_ShatterFace",
 "size": 3044,
-"lines": 393,
-"chars": 13883,
+"lines": 396,
+"chars": 13939,
 "callers": [
 "00484f60",
 "00485ba0"
@@ -49233,8 +49233,8 @@
 "00485ba0": {
 "name": "ShatterGlass",
 "size": 206,
-"lines": 48,
-"chars": 1467,
+"lines": 49,
+"chars": 1488,
 "callers": [],
 "callees": [
 "00484f60"
@@ -50510,10 +50510,10 @@
 ]
 },
 "00489470": {
-"name": "FUN_00489470",
+"name": "GetShadow",
 "size": 50,
 "lines": 18,
-"chars": 392,
+"chars": 432,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -50528,10 +50528,10 @@
 ]
 },
 "004894b0": {
-"name": "FUN_004894b0",
+"name": "GEffects_FindModelShadow",
 "size": 41,
 "lines": 13,
-"chars": 214,
+"chars": 247,
 "callers": [
 "00489470"
 ],
@@ -50543,10 +50543,10 @@
 "in_vtables": []
 },
 "004894e0": {
-"name": "FUN_004894e0",
+"name": "CreateShadow",
 "size": 1726,
-"lines": 354,
-"chars": 11651,
+"lines": 330,
+"chars": 10940,
 "callers": [],
 "callees": [
 "00405040",
@@ -50604,7 +50604,7 @@
 ]
 },
 "00489bd0": {
-"name": "FUN_00489bd0",
+"name": "SetShadowParams",
 "size": 11,
 "lines": 8,
 "chars": 163,
@@ -50624,10 +50624,10 @@
 ]
 },
 "00489be0": {
-"name": "FUN_00489be0",
+"name": "GetShadowParams",
 "size": 7,
 "lines": 7,
-"chars": 123,
+"chars": 122,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -50642,10 +50642,10 @@
 ]
 },
 "00489bf0": {
-"name": "FUN_00489bf0",
+"name": "ShadowParams_Copy",
 "size": 98,
 "lines": 20,
-"chars": 730,
+"chars": 735,
 "callers": [
 "00489bd0"
 ],
@@ -50688,10 +50688,10 @@
 "in_vtables": []
 },
 "00489fd0": {
-"name": "FUN_00489fd0",
+"name": "GEffects_CopyTargetFrames",
 "size": 413,
 "lines": 84,
-"chars": 2574,
+"chars": 2600,
 "callers": [
 "00489fd0",
 "0048a780"
@@ -50713,10 +50713,10 @@
 "in_vtables": []
 },
 "0048a170": {
-"name": "FUN_0048a170",
+"name": "GEffects_MoveForeignFrames",
 "size": 631,
 "lines": 113,
-"chars": 3937,
+"chars": 3965,
 "callers": [
 "0048a170",
 "0048a780"
@@ -50738,10 +50738,10 @@
 "in_vtables": []
 },
 "0048a3f0": {
-"name": "FUN_0048a3f0",
+"name": "GEffects_FindFaceGroups",
 "size": 455,
 "lines": 88,
-"chars": 2961,
+"chars": 2983,
 "callers": [
 "0048a3f0",
 "0048a5c0",
@@ -50764,10 +50764,10 @@
 "in_vtables": []
 },
 "0048a5c0": {
-"name": "FUN_0048a5c0",
+"name": "SwitchFaceTexture",
 "size": 442,
-"lines": 108,
-"chars": 3235,
+"lines": 103,
+"chars": 3045,
 "callers": [],
 "callees": [
 "0048a3f0",
@@ -50795,10 +50795,10 @@
 ]
 },
 "0048a780": {
-"name": "FUN_0048a780",
+"name": "DressUniform",
 "size": 2894,
-"lines": 523,
-"chars": 18506,
+"lines": 526,
+"chars": 18518,
 "callers": [],
 "callees": [
 "00402860",

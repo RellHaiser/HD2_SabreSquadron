@@ -84,34 +84,6 @@ f_00480360.cpp:331:23: 'struct tier1::IGraph_vtbl' has no member named 'Slot84';
     (*pIVar7->vtable->Slot84)(pIVar7,&local_50);
 f_00480360.cpp:335:50: 'SUB14' was not declared in this scope; did you mean 'SUB104'?
     (*pIVar7->vtable->SetRenderState)(pIVar7,0xd,SUB14(fVar1 < fVar2,0));
-f_00484ec0.cpp:367:8: invalid cast from type 'float' to type 'uint32_t (**)(...)' {aka 'unsigned int (**)(...)'}
-    (**(code **)pSVar16->x)(pSVar16,param_11);
-f_00484ec0.cpp:450:48: cannot convert 'uint8_t*' {aka 'unsigned char*'} to 'tier1::I3D_frame*'
-    FUN_00484f60(GH_PIECE(local_a4,0,4),local_a4 + 4,pIVar10,local_ec,local_c4[0].v.x,local_e8,local_e4,
-f_00484ec0.cpp:452:48: cannot convert 'uint8_t*' {aka 'unsigned char*'} to 'tier1::I3D_frame*'
-    FUN_00484f60(GH_PIECE(local_a4,0,4),local_a4 + 4,pIVar3,local_ec,local_c4[0].v.x,local_e8,local_e4,
-f_00486080.cpp:324:26: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    iVar6 = (**(code **)(*DAT_008aed24 + 0x74))(DAT_008aed24,puVar14,0);
-f_00486080.cpp:461:21: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
-    auStack_460 = (uint8_t  [4])pCVar5->rep->length;
-f_00486080.cpp:462:19: incompatible types in assignment of 'uint8_t*' {aka 'unsigned char*'} to 'uint8_t [4]' {aka 'unsigned char [4]'}
-    auStack_45c = (uint8_t  [4])tier1_operator_new((int)auStack_460 + 9);
-f_00486080.cpp:464:26: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
-    if (auStack_45c == (uint8_t  [4])0x0) {
-f_00486080.cpp:478:32: too few arguments to function
-    (*self_00->vtable->SetName)(self_00);
-f_00486080.cpp:499:38: too few arguments to function
-    (*self_00->vtable[1].SetCallback)(self_00,*(uint32_t *)(pcVar12 + 0x1e0));
-f_00486080.cpp:696:40: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    piStack_68 = (int *)(**(code **)(*uStack_60 + 0x48))(uStack_60,pcVar5,0xffff);
-f_00486080.cpp:1331:35: too few arguments to function
-    (*pIVar24[1].FindChildFrame)();
-f_00486080.cpp:1368:48: void value not ignored as it ought to be
-    uVar13 = (*self_00->vtable[1].EnumFrames)(self_00,pIVar22,puVar11,uVar18,(char *)pIVar22);
-f_00486080.cpp:1372:47: void value not ignored as it ought to be
-    uVar18 = (*self_00->vtable[1].Duplicate)(self_00,pIVar20);
-f_00486080.cpp:1374:49: void value not ignored as it ought to be
-    cVar2 = (*self_00->vtable[1].SetUnknown50)(self_00,gh_bitcast<float>(pIVar20));
 f_0048eb30.cpp:124:24: wrong type argument to bit-complement
     ~C_TextBox__C_TextBox(_this);
 f_004a89b0.cpp:55:30: 'struct tier1::I3D_scene_vtbl' has no member named 'Slot94'; did you mean 'Slot04'?

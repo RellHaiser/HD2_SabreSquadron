@@ -1,9 +1,9 @@
 // The graphic effects module ("GEffects", module 1; the object 0x0089b880; game/geffects.cpp,
 // original source 0x00484e90..0x0048c740): the screen fade, visuals fading out and in, humans
 // fading, the thunderstorm's lightning, rain, the underwater view (missions\<name>\watercam.set),
-// the sun following the camera, camera animations, the time scale. It owns the decorators, the
+// the sun following the camera, camera animations, the time scale, the models' shadows (from the
+// shadow cache), uniforms and face textures, shattered glass. It owns the decorators, the
 // volumetrics and the mesh player (part 8d) and drives the birds and the clouds (8d too).
-// Shadows, the uniforms and face textures and the shattered glass are part 8c-ii.
 #pragma once
 
 #include <cstdint>
@@ -41,14 +41,15 @@ struct S_WaterCamera {                                  // 0xA0 bytes (the modul
 };
 static_assert(sizeof(S_WaterCamera) == 0xA0, "S_WaterCamera layout");
 
-// The shadows' parameters (part 8c-ii).
+// The parameters CreateShadow gives a shadow (I3D_shadow's).
 struct S_ShadowParams {                                 // 0x34 bytes (the module's +0x1C0)
-    uint32_t unknown00[8];
-    float unknown20 = 1.0f;                             // +0x20
-    float unknown24 = 8.0f;                             // +0x24
-    float unknown28 = 100.0f;                           // +0x28
-    int unknown2C = 64;                                 // +0x2C
-    int unknown30 = 64;                                 // +0x30
+    S_vector4 color = {0.0f, 0.0f, 0.0f, 0.0f};         // +0x00 SetColor
+    uint32_t unknown10[4] = {};                         // +0x10 (not read)
+    float maxHeight = 1.0f;                             // +0x20 SetMaxHeight
+    float depth = 8.0f;                                 // +0x24 SetDepth
+    float range = 100.0f;                               // +0x28 (I3D_shadow +0x1FC)
+    int width = 64;                                     // +0x2C SetSize
+    int height = 64;                                    // +0x30
 };
 
 // A visual fading out (FadeOutModel) or in (FadeIn).
@@ -130,10 +131,14 @@ public:
     virtual void FadeOutHierarchy(I3D_frame *model, int time, bool switchOff);   // +0x70 0x004890f0
     // Fades a human's model out (`in` false) or back in over `time` ms (0: at once).
     virtual void FadeHuman(C_Human *human, int time, bool in);   // +0x74 0x00489180
-    // The shadow of a model (a new reference; null: none). (Part 8c-ii.)
+    // A shadow for a model (the client side; null without a model or the shadow file): a copy of
+    // the cached "s<the model file's name>" (a human's "shdpuppet"), "._shad.<model>", under the
+    // model's own "a" (else the model), one of the model's frames; a shadow made before is taken
+    // off first. The model holds the only reference.
     virtual I3D_frame *CreateShadow(I3D_frame *model);  // +0x78 0x004894e0
-    virtual I3D_frame *GetShadow(I3D_frame *model);     // +0x7C 0x00489470 (adds a reference)
-    virtual void SetShadowParams(const struct S_ShadowParams *params);   // +0x80 0x00489bd0
+    // The model's shadow (no reference added), null if none.
+    virtual I3D_frame *GetShadow(I3D_frame *model);     // +0x7C 0x00489470
+    virtual void SetShadowParams(const S_ShadowParams *params);   // +0x80 0x00489bd0
     virtual S_ShadowParams *GetShadowParams();          // +0x84 0x00489be0
     // A full-screen quad of `color` (null: black) at opacity `level` (0..1).
     virtual void SetFadeLevel(float level, const S_vector *color);   // +0x88 0x004867f0
@@ -150,15 +155,20 @@ public:
     // The fade's quad (and the start's black screen: 3 s, then gone in 1 s).
     virtual void RenderFade();                          // +0xA0 0x00486c10
     virtual void RenderVolumetrics();                   // +0xA4 0x00486bf0
-    // (Part 8c-ii.)
-    virtual void DressUniform(C_Human *human, int uniform);   // +0xA8 0x0048a780
-    virtual void SwitchFaceTexture(I3D_frame *model, const char *texture);   // +0xAC 0x0048a5c0
+    // A human's model reloaded from item `uniform`'s model ("NA01" when it is not a uniform), its
+    // animations, attached frames and face texture kept; false without a face texture ("e_f0"),
+    // the file or the face texture again.
+    virtual bool DressUniform(C_Human *human, int uniform);   // +0xA8 0x0048a780
+    // The face ("e_f0" in its texture's name) of a skinned model gets `texture` (.bmp); false
+    // without one of them.
+    virtual bool SwitchFaceTexture(I3D_frame *model, const char *texture);   // +0xAC 0x0048a5c0
     // `camera` follows the camera frame of the model `fileName` while its animation plays (an
     // animation of the camera given before is dropped; an empty name only drops it).
     virtual void SetCameraAnimation(I3D_frame *camera, const char *fileName);   // +0xB0 0x00485c70
-    // A glass visual's faces as falling shards (the car's broken windows; `unknown` 0.01, meaning
-    // not identified). (Part 8c-ii.)
-    virtual void ShatterGlass(I3D_frame *visual, float unknown);   // +0xB4 0x00485ba0
+    // A glass visual's faces as falling shards: each split in two at its longest edge until its
+    // area is at most `maxArea` (the car's broken windows: 0.01 square metres), each shard a
+    // physics object pushed at random.
+    virtual void ShatterGlass(I3D_frame *visual, float maxArea);   // +0xB4 0x00485ba0
     virtual void SetCloudsOn(bool on);                  // +0xB8 0x00485b50
     // The backdrop sector's "lensflare" frame on / off (off while the first-person view is on).
     virtual void SetLensFlareOn(bool on);               // +0xBC 0x00485b70
@@ -197,7 +207,7 @@ private:
     S_WaterCamera m_waterCamera = {};                   // +0x10C
     I3D_camera *m_waterCameraFrame = nullptr;           // +0x1AC the camera under water (a reference)
     I3D_frame *m_sun = nullptr;                         // +0x1B0 "mirasun"
-    S_ShadowParams m_shadowParams;                      // +0x1C0 (part 8c-ii)
+    S_ShadowParams m_shadowParams;                      // +0x1C0
     std::vector<S_ModelFade *> m_fadeOuts;              // +0x200
     std::vector<S_ModelFade *> m_fadeIns;               // +0x210
     bool m_unknown220 = false;                          // +0x220 (only cleared)

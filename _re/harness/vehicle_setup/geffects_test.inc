@@ -81,7 +81,21 @@ void __stdcall F_GfSetOn(I3D_frame *self, bool on)
 void __stdcall F_GfLinkTo(I3D_frame *self, I3D_frame *parent, uint32_t flags)
 {
     GfLog("link %s %s %u", GfName(self), GfName(parent), flags);
+    if (self->m_parent) {
+        I3D_frame **link = &self->m_parent->m_firstChild;
+        while (*link && *link != self)
+            link = &(*link)->m_nextSibling;
+        if (*link)
+            *link = self->m_nextSibling;
+    }
     self->m_parent = parent;
+    self->m_nextSibling = nullptr;
+    if (parent) {
+        I3D_frame **link = &parent->m_firstChild;
+        while (*link)
+            link = &(*link)->m_nextSibling;
+        *link = self;
+    }
 }
 int __stdcall F_GfNumChildren(I3D_frame *self)
 {
@@ -294,13 +308,6 @@ void CollectBirds() { GfLog("birds collect"); }
 void FreeBirds() { GfLog("birds free"); }
 void FreeClouds() { GfLog("clouds free"); }
 void LoadClouds() { GfLog("clouds load"); }
-// (Part 8c-ii.)
-I3D_frame *C_GEffectsModule::CreateShadow(I3D_frame *) { return nullptr; }
-I3D_frame *C_GEffectsModule::GetShadow(I3D_frame *) { return nullptr; }
-void C_GEffectsModule::SetShadowParams(const S_ShadowParams *) {}
-S_ShadowParams *C_GEffectsModule::GetShadowParams() { return nullptr; }
-void C_GEffectsModule::DressUniform(C_Human *, int) {}
-void C_GEffectsModule::SwitchFaceTexture(I3D_frame *, const char *) {}
 
 // RandomFloat: the next of g_gfRandoms (else half of max).
 float RandomFloat(float max)
@@ -430,9 +437,10 @@ void GEffectsTest()
                            std::strcmp(m.GetName(), "GEffects") == 0);
         WM(r.gfModule, m.m_rainRate == 200 && m.m_rainArea == 8.0f && !m.m_rain && !m.m_started && m.m_lightningTime == -1 &&
                            m.m_timeScale == 1.0f && m.m_timeScaleTarget == 1.0f && m.m_timeScaleRate == 1.0f);
-        WM(r.gfModule, m.m_shadowParams.unknown20 == 1.0f && m.m_shadowParams.unknown24 == 8.0f &&
-                           m.m_shadowParams.unknown28 == 100.0f && m.m_shadowParams.unknown2C == 64 &&
-                           m.m_shadowParams.unknown30 == 64 && !m.m_waterCamera.enabled && g_rainTeamSteps == 3);
+        WM(r.gfModule, m.m_shadowParams.maxHeight == 1.0f && m.m_shadowParams.depth == 8.0f &&
+                           m.m_shadowParams.range == 100.0f && m.m_shadowParams.width == 64 &&
+                           m.m_shadowParams.height == 64 && m.m_shadowParams.color.x == 0.0f &&
+                           m.m_shadowParams.color.w == 0.0f && !m.m_waterCamera.enabled && g_rainTeamSteps == 3);
         WM(r.gfModule, g_rainTime == 0 && g_waterLevel == 0.0f && m.m_time == 0 && m.m_sunPos.x == 0.0f &&
                            m.m_fadeColor.x == 0.0f && m.m_fadeLevel == 0.0f && m.m_fadeTarget == 0.0f && m.m_fadeRate == 0.0f &&
                            m.m_lightningMode == 0 && m.m_lightningPower == 0.0f && !m.m_lightning && !m.m_unknown220);

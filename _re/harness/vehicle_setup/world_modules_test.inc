@@ -1389,6 +1389,7 @@ void TShiftTest(S_TshiftResults &r)
 
 void SightTest();                                       // (sight_test.inc, part 8b)
 void GEffectsTest();                                    // (geffects_test.inc, part 8c)
+void GEffects2Test();                                   // (geffects2_test.inc, part 8c-ii)
 
 void WorldModulesTest(const char *path)
 {
@@ -1427,5 +1428,6 @@ void WorldModulesTest(const char *path)
     std::printf("tshift: tsFind %d tsAdd %d tsRemove %d tsFree %d\n", ts.tsFind, ts.tsAdd, ts.tsRemove, ts.tsFree);
     SightTest();
     GEffectsTest();
+    GEffects2Test();
     std::fflush(stdout);
 }

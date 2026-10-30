@@ -1,6 +1,6 @@
-# Part 8c-i: the GEffects module (src/game/geffects.*), 0x00485b50..0x00489c60 of 0x00484e90..0x0048c740
-# (8c-ii: shadows, uniforms / face textures, ShatterGlass). 4 names moved from app.txt, hud.txt,
-# physics.txt. The base class C_auto_008102b8 (ctor 0x00486eb0, dtor 0x00486ef0: C_Module's defaults)
+# Parts 8c-i / 8c-ii: the GEffects module (src/game/geffects.*), 0x00484f60..0x0048a780 of
+# 0x00484e90..0x0048c740 (8c-ii: shadows, uniforms / face textures, ShatterGlass). 5 names moved from
+# app.txt, hud.txt, physics.txt, car.txt. The base class C_auto_008102b8 (ctor 0x00486eb0, dtor 0x00486ef0: C_Module's defaults)
 # and the 16-byte copy helpers of the human fades' vector stay idioms; 0x00486d60 (an enum callback
 # fading visuals, never referenced) stays to tier 1.
 
@@ -55,6 +55,20 @@
 00489180 C_GEffectsModule::FadeHuman | void __thiscall FadeHuman(C_GEffectsModule * this, C_Human * human, int time, bool in)
 00489c60 C_GEffectsModule::LoadWaterCamera | void __thiscall LoadWaterCamera(C_GEffectsModule * this)
 0048b880 CameraAnimationVector_Insert
+# 8c-ii
+00484f60 GEffects_ShatterFace
+00485ba0 C_GEffectsModule::ShatterGlass | void __thiscall ShatterGlass(C_GEffectsModule * this, I3D_frame * visual, float maxArea)
+00489470 C_GEffectsModule::GetShadow | I3D_frame * __thiscall GetShadow(C_GEffectsModule * this, I3D_frame * model)
+004894b0 GEffects_FindModelShadow | uint __stdcall GEffects_FindModelShadow(I3D_frame * frame, void * context)
+004894e0 C_GEffectsModule::CreateShadow | I3D_frame * __thiscall CreateShadow(C_GEffectsModule * this, I3D_frame * model)
+00489bd0 C_GEffectsModule::SetShadowParams | void __thiscall SetShadowParams(C_GEffectsModule * this, void * params)
+00489be0 C_GEffectsModule::GetShadowParams | void * __thiscall GetShadowParams(C_GEffectsModule * this)
+00489bf0 ShadowParams_Copy
+00489fd0 GEffects_CopyTargetFrames
+0048a170 GEffects_MoveForeignFrames
+0048a3f0 GEffects_FindFaceGroups
+0048a5c0 C_GEffectsModule::SwitchFaceTexture | bool __thiscall SwitchFaceTexture(C_GEffectsModule * this, I3D_frame * model, char * texture)
+0048a780 C_GEffectsModule::DressUniform | bool __thiscall DressUniform(C_GEffectsModule * this, C_Human * human, int uniform)
 0089b880 g_geffectsModule @
 0089b760 g_waterLevel @ float
 0089bbb4 g_rainTime @ int

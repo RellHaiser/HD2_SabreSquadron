@@ -9435,11 +9435,11 @@ C_GEffectsModule *GetGEffects()
 {
     return &g_geffects;
 }
-#endif
 void C_GEffectsModule::ShatterGlass(I3D_frame *visual, float unknown)
 {
     g_shattered.emplace_back(visual, unknown);
 }
+#endif
 
 S_PhysicsHandle g_noPhysicsHandle;
 T_PhysicsObject const g_noPhysicsObject = &g_noPhysicsHandle;
@@ -9474,12 +9474,13 @@ struct S_PhysicsPush {
 };
 std::vector<S_PhysicsPush> g_physicsPushes;
 S_PhysicsHandle g_physicsHandles[256];
+bool g_physicsNoObject;                                 // (CreateObject: none made, part 8c's shards)
 class C_FakePhysics : public C_PhysicsModuleBase {
 public:
     C_FakePhysics() : C_PhysicsModuleBase(0, "Physics") {}
     T_PhysicsObject CreateObject(const S_PhysicsObjectDesc &d) override
     {
-        T_PhysicsObject handle = &g_physicsHandles[g_physicsMade.size() % 256];
+        T_PhysicsObject handle = g_physicsNoObject ? g_noPhysicsObject : &g_physicsHandles[g_physicsMade.size() % 256];
         g_physicsMade.push_back({d.frame, d.type, d.callback, d.callbackContext, d.materialId, d.unknown14,
                                  d.collideWithBoxes, d.startActive, d.shootThrough, d.unknown18, d.door.freeSwing,
                                  d.door.tree, d.door.breakable, d.door.angle, d.radius, handle});
@@ -14839,6 +14840,7 @@ void PartsHitTest(const char *path)
 #include "world_modules_test.inc"
 #include "sight_test.inc"
 #include "geffects_test.inc"
+#include "geffects2_test.inc"
 #endif
 
 int main(int argc, char **argv)

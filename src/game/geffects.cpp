@@ -1,9 +1,11 @@
 // The graphic effects module (see geffects.h).
 #include "game/geffects.h"
 
+#include <cctype>
 #include <cfloat>
 #include <cmath>
 #include <cstring>
+#include <string>
 
 #include "common/c_str.h"
 #include "common/chunk.h"
@@ -14,7 +16,10 @@
 #include "game/human.h"
 #include "game/human_movement.h"
 #include "game/interface.h"
+#include "game/item_defs.h"
 #include "game/particles.h"
+#include "game/physics.h"
+#include "game/resource_cache.h"
 #include "game/team.h"
 #include "game/world.h"
 #include "ls3d/i3d.h"
@@ -83,6 +88,234 @@ void FollowFrame(I3D_frame *camera, I3D_frame *frame)
     rot.Make(frame->GetMatrix());
     camera->SetRot(rot);
     camera->Update();
+}
+
+// The face textures' mark ("<head>e_f0<n>.bmp").
+const char FACE_MARK[] = "e_f0";
+
+std::string Lowercase(const char *text)
+{
+    std::string out = text;
+    for (char &c : out)
+        c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    return out;
+}
+
+// GetShadow's search (0x004894b0): the first shadow owned by the model in `*context`.
+uint32_t __stdcall FindModelShadow(I3D_frame *frame, void *context)
+{
+    auto *found = static_cast<I3D_frame **>(context);
+    if (found && frame->GetOwnerModel() == *found) {
+        *found = frame;
+        return 2;
+    }
+    return 0;
+}
+
+// The skinned visual (an object visual of type SNGM / SMMR) under `frame` (itself first, then its
+// children from the last) whose face groups' textures have `mark` in their lowercase names:
+// those face groups in `groups` and the last one's material (null: none). (0x0048a3f0)
+I3D_material *FindFaceGroups(I3D_frame *frame, const char *mark, std::vector<I3D_face_group *> &groups)
+{
+    groups.clear();
+    auto *visual = static_cast<I3D_visual *>(frame);
+    if (frame->GetType() == FRAME_VISUAL && (visual->VisualFlags() & VISFLAGS_OBJECT_PARAMS) &&
+        (frame->GetVisualType() == I3DVISUAL_SINGLEMESH || frame->GetVisualType() == I3DVISUAL_SINGLEMORPH)) {
+        if (I3D_mesh *mesh = visual->GetVisualMesh()) {
+            I3D_material *found = nullptr;
+            for (uint32_t l = 0; l < mesh->NumLevels(); ++l) {
+                I3D_mesh_level *level = mesh->GetLevel(static_cast<int>(l));
+                for (int g = level->NumFaceGroups(); g-- > 0;) {
+                    I3D_face_group *group = level->GetFaceGroup(g);
+                    I3D_material *material = group->material;
+                    if (!material || !material->GetTexture())
+                        continue;
+                    material->GetTexture();
+                    if (Lowercase(material->GetTexture()->GetFileName()).find(mark) != std::string::npos) {
+                        found = material;
+                        groups.push_back(group);
+                    }
+                }
+            }
+            if (!groups.empty())
+                return found;
+        }
+    }
+    for (int i = frame->NumChildren(); i-- > 0;) {
+        if (I3D_material *material = FindFaceGroups(frame->GetChild(i), mark, groups))
+            return material;
+    }
+    return nullptr;
+}
+
+// Each target frame under `frame` (the children from the last) adds its frames again to the
+// target of its name in `model`. (0x00489fd0; quirk kept: DressUniform passes the model searched.)
+void CopyTargetFrames(I3D_frame *frame, I3D_frame *model)
+{
+    for (int i = frame->NumChildren(); i-- > 0;) {
+        I3D_frame *child = frame->GetChild(i);
+        if (child->GetType() == FRAME_TARGET) {
+            const auto *target = static_cast<const I3D_target *>(child);
+            std::vector<I3D_frame *> frames;
+            for (int k = target->NumFrames(); k-- > 0;)
+                frames.push_back(target->GetFrame(k));
+            auto *other = static_cast<I3D_target *>(model->FindChildFrame(child->GetShortName(), FRAME_MASK_ANY));
+            for (size_t k = frames.size(); k-- > 0;)
+                other->AddFrame(frames[k]);
+        }
+        CopyTargetFrames(child, model);
+    }
+}
+
+// The frames under `frame` that are not `model`'s own (items held, attached things) move to the
+// frame of `to` named like their parent (else `to`), keeping their local place. (0x0048a170)
+void MoveForeignFrames(I3D_frame *frame, I3D_frame *to, I3D_frame *model)
+{
+    std::vector<I3D_frame *> foreign;
+    for (int i = frame->NumChildren(); i-- > 0;) {
+        I3D_frame *child = frame->GetChild(i);
+        if (child->GetOwnerModel() && child->GetOwnerModel() == model)
+            MoveForeignFrames(child, to, model);
+        else
+            foreign.push_back(child);
+    }
+    for (size_t i = foreign.size(); i-- > 0;) {
+        I3D_frame *f = foreign[i];
+        I3D_frame *dest = to->FindChildFrame(f->GetParent()->GetShortName(), FRAME_MASK_ANY);
+        if (!dest)
+            dest = to;
+        const S_vector pos = f->GetPos();
+        const S_quat rot = f->GetRot();
+        f->LinkTo(dest, 0);
+        f->SetPosInline(pos);
+        f->SetRot(rot);
+        f->Update();
+    }
+}
+
+// A glass shard's vertex (the mesh levels' layout).
+struct S_ShardVertex {                                  // 0x20 bytes
+    S_vector pos;
+    S_vector normal;
+    float u, v;
+};
+
+// The engine's inline normalization with the square summed (z² + y²) + x² (the shard's normal).
+S_vector NormalizedZYX(const S_vector &n)
+{
+    const float sq = (n.z * n.z + n.y * n.y) + n.x * n.x;
+    if (std::fabs(sq - 1.0f) < 1e-8f)
+        return n;
+    if (!(sq < 1e-8f)) {
+        const float k = 1.0f / std::sqrt(sq);
+        return S_vector(n.x * k, n.y * k, n.z * k);
+    }
+    S_vector v = n;
+    if (n.x != 0.0f)
+        v.x = n.x < 0.0f ? -1.0f : 1.0f;
+    else if (n.z != 0.0f)
+        v.z = n.z < 0.0f ? -1.0f : 1.0f;
+    else
+        v.y = n.y < 0.0f ? -1.0f : 1.0f;
+    return v;
+}
+
+// A shard of the glass: an object visual of the triangle and its back (one normal) with
+// `material`, at the glass's place, a falling physics object pushed at random. (Part of
+// 0x00484f60.)
+void MakeShard(const S_vector &p0, const S_vector &p1, const S_vector &p2, float u0, float v0, float u1, float v1,
+               float u2, float v2, I3D_frame *glass, I3D_material *material)
+{
+    I3D_driver *driver = I3DGetDriver();
+    auto *shard = static_cast<I3D_object_visual *>(driver->CreateVisual(I3DVISUAL_OBJECT));
+    I3D_mesh *mesh = driver->CreateMesh();
+    I3D_mesh_level *level = driver->CreateMeshLevel();
+    auto *vertices = static_cast<S_ShardVertex *>(level->AllocVertices(6));
+    const S_vector a = (p2 - p1) * 10000.0f;
+    const S_vector b = (p0 - p1) * 10000.0f;
+    const S_vector normal = NormalizedZYX(S_vector(b.z * a.y - b.y * a.z, b.x * a.z - a.x * b.z, a.x * b.y - b.x * a.y));
+    const S_ShardVertex corners[6] = {{p0, normal, u0, v0}, {p1, normal, u1, v1}, {p2, normal, u2, v2},
+                                      {p2, normal, u2, v2}, {p1, normal, u1, v1}, {p0, normal, u0, v0}};
+    std::memcpy(vertices, corners, sizeof corners);
+    level->UnlockVertices();
+    // (Quirk kept: the face group's own reference is never given back.)
+    I3D_face_group *group = driver->CreateFaceGroup();
+    group->SetMaterial(material);
+    uint16_t *faces = group->AllocFaces(2);
+    for (uint16_t i = 0; i < 6; ++i)
+        faces[i] = i;
+    level->AddFaceGroup(group);
+    level->Unknown2C();
+    mesh->SetLevel(level, 0);
+    shard->SetMesh(mesh, 0);
+    shard->LinkTo(GetGame()->GetScene()->GetPrimarySector(), 0);
+    shard->SetPos(glass->GetWorldPos());
+    S_quat rot;
+    rot.Make(glass->GetMatrix());
+    shard->SetRot(rot);
+    shard->RefreshLevels();
+    shard->Update();
+    S_PhysicsObjectDesc desc;
+    desc.frame = shard;
+    desc.type = PHYS_FALLING;
+    desc.startActive = true;
+    desc.shootThrough = true;
+    desc.radius = -1.0f;
+    const T_PhysicsObject object = GetPhysicsModule()->CreateObject(desc);
+    if (object != g_noPhysicsObject) {
+        const float dz = RandFloat() - 0.5f;
+        const float dy = RandFloat() - 0.5f;
+        const float dx = RandFloat() - 0.5f;
+        const S_vector &at = shard->GetWorldPos();
+        const S_vector point(dx + at.x, dy + at.y, dz + at.z);
+        const float ix = (RandFloat() - 0.5f) * 10.0f;
+        const float iy = (RandFloat() - 0.5f) * 10.0f;
+        const float iz = (RandFloat() - 0.5f) * 10.0f;
+        GetPhysicsModule()->ApplyImpulse(object, S_vector(ix, iy, iz), point, 0.1f);
+    }
+    level->Release();
+    mesh->Release();
+    shard->Release();
+}
+
+// The triangle split at the middle of its longest edge (the first of the three when they tie)
+// until its area is at most `maxArea`, then a shard. (0x00484f60, __fastcall)
+void ShatterFace(const S_vector &p0, const S_vector &p1, const S_vector &p2, float u0, float v0, float u1, float v1,
+                 float u2, float v2, I3D_frame *glass, I3D_material *material, float maxArea)
+{
+    const float len01 = (p0 - p1).Magnitude();
+    const float len12 = (p1 - p2).Magnitude();
+    const float len20 = (p2 - p0).Magnitude();
+    // The longest edge a-b, the corner c.
+    const S_vector *a = &p0, *b = &p2, *c = &p1;
+    float ua = u0, va = v0, ub = u2, vb = v2, uc = u1, vc = v1;
+    if (len01 >= len12 && len01 >= len20) {
+        b = &p1;
+        c = &p2;
+        ub = u1, vb = v1, uc = u2, vc = v2;
+    } else if (len12 >= len01 && len12 >= len20) {
+        a = &p1;
+        c = &p0;
+        ua = u1, va = v1, ub = u2, vb = v2, uc = u0, vc = v0;
+    }
+    // The triangle's height over a-b.
+    const S_vector edge = (*a - *b).Normalized();
+    const float edgeSquare = (edge.x * edge.x + edge.z * edge.z) + edge.y * edge.y;
+    float height = -1e16f;
+    if (!(edgeSquare < 1e-8f)) {
+        const S_vector toC = *a - *c;
+        const float along = ((toC.z * edge.z + toC.y * edge.y) + toC.x * edge.x) / edgeSquare;
+        height = (toC - edge * along).Magnitude();
+    }
+    if (!((*a - *b).Magnitude() * height * 0.5f > maxArea)) {
+        MakeShard(p0, p1, p2, u0, v0, u1, v1, u2, v2, glass, material);
+        return;
+    }
+    const S_vector middle((b->x + a->x) * 0.5f, (b->y + a->y) * 0.5f, (b->z + a->z) * 0.5f);
+    const float um = (ub + ua) * 0.5f;
+    const float vm = (vb + va) * 0.5f;
+    ShatterFace(*c, middle, *a, uc, vc, um, vm, ua, va, glass, material, maxArea);
+    ShatterFace(*c, middle, *b, uc, vc, um, vm, ub, vb, glass, material, maxArea);
 }
 
 }  // namespace
@@ -1028,4 +1261,221 @@ void C_GEffectsModule::LoadWaterCamera()
     chunk.Descend(id);
     chunk.Read(&m_waterCamera, sizeof(m_waterCamera));
     chunk.Ascend();
+}
+
+// 0x00489470
+I3D_frame *C_GEffectsModule::GetShadow(I3D_frame *model)
+{
+    if (!model)
+        return nullptr;
+    I3D_frame *found = model;
+    model->EnumFrames(&FindModelShadow, &found, 0x2000, nullptr);
+    return found != model ? found : nullptr;
+}
+
+// 0x00489bd0
+void C_GEffectsModule::SetShadowParams(const S_ShadowParams *params)
+{
+    m_shadowParams = *params;
+}
+
+// 0x00489be0
+S_ShadowParams *C_GEffectsModule::GetShadowParams()
+{
+    return &m_shadowParams;
+}
+
+// 0x004894e0
+I3D_frame *C_GEffectsModule::CreateShadow(I3D_frame *frame)
+{
+    if (!(g_gameRole & GAME_ROLE_CLIENT) || !frame)
+        return nullptr;
+    auto *model = static_cast<I3D_model *>(frame);
+    if (I3D_frame *old = GetShadow(model)) {
+        old->LinkTo(nullptr, 0);
+        model->RemoveModelFrame(old);
+    }
+    // "s" and the model file's name without its folders and what follows its first '.'.
+    std::string name = model->GetFileName();
+    const size_t dot = name.find('.');
+    if (dot != std::string::npos)
+        name.erase(dot);
+    const size_t slash = name.rfind('\\');
+    C_str file = C_fstr("s%s", name.c_str() + (slash == std::string::npos ? 0 : slash + 1));
+    const S_FrameData *data = model->GetData();
+    if (data && data->actor && data->actor->GetType() == ACTOR_HUMAN)
+        file = "shdpuppet";
+    I3D_shadow *cached = nullptr;
+    // (Quirk kept: a load returning a success code above 0 makes no shadow and keeps the cache's
+    // reference.)
+    if (g_shadowCache.Get(file, &cached) != I3D_OK || !cached)
+        return nullptr;
+    auto *shadow = static_cast<I3D_shadow *>(I3DGetDriver()->CreateFrame(FRAME_SHADOW));
+    shadow->Duplicate(cached);
+    cached->Release();
+    shadow->SetName(C_fstr("._shad.%s", model->GetName()));
+    I3D_frame *body = model->FindChildFrame("a", FRAME_MASK_ANY);
+    shadow->LinkTo(body && body->GetOwnerModel() == model ? body : model, 0);
+    model->AddModelFrame(shadow);
+    // sin(10 degrees) squared.
+    const float sine = static_cast<float>(std::sin(0x1.6571855555556p-3));
+    shadow->SetOpacity(sine * sine);
+    shadow->SetColor(m_shadowParams.color);
+    shadow->SetSize(m_shadowParams.width, m_shadowParams.height);
+    shadow->SetUnknown1FC(m_shadowParams.range);
+    shadow->SetDepth(m_shadowParams.depth);
+    shadow->SetMaxHeight(m_shadowParams.maxHeight);
+    shadow->Update();
+    shadow->Release();
+    return shadow;
+}
+
+// 0x0048a5c0
+bool C_GEffectsModule::SwitchFaceTexture(I3D_frame *model, const char *texture)
+{
+    if (!model)
+        return false;
+    std::string name = Lowercase(texture);
+    if (name.find(FACE_MARK) == std::string::npos)
+        return false;
+    const size_t dot = name.rfind('.');
+    if (dot != std::string::npos)
+        name.erase(dot);
+    std::vector<I3D_face_group *> groups;
+    FindFaceGroups(model, FACE_MARK, groups);
+    if (groups.empty())
+        return false;
+    name += ".bmp";
+    IImage *image = nullptr;
+    if (GetIGraph()->LoadTexture(name.c_str(), "", 0x400, &image) != 0)
+        return false;
+    // The first face group's own material with the texture, shared by the others.
+    groups[0]->DuplicateMaterial();
+    I3D_material *material = groups[0]->material;
+    material->SetTexture(reinterpret_cast<I3D_texture *>(image));
+    material->AddRef();
+    for (size_t i = 1; i < groups.size(); ++i)
+        groups[i]->SetMaterial(material);
+    material->Release();
+    image->Release();
+    return true;
+}
+
+// 0x0048a780
+bool C_GEffectsModule::DressUniform(C_Human *human, int uniform)
+{
+    auto *model = static_cast<I3D_model *>(human->GetFrame());
+    auto *copy = static_cast<I3D_model *>(I3DGetDriver()->CreateFrame(FRAME_MODEL));
+    C_str file = "NA01";
+    std::vector<I3D_face_group *> groups;
+    I3D_material *face = FindFaceGroups(model, FACE_MARK, groups);
+    if (!face || !face->GetTexture()) {
+        copy->Release();
+        return false;
+    }
+    const C_str faceTexture = face->GetTexture()->GetFileName();
+    if (uniform != -1) {
+        C_ItemDef *def = GetItemDef(uniform);
+        if (def && def->GetBehaviour() == ITEM_BEHAVIOUR_UNIFORM) {
+            // (Quirk kept: the name is cut after its last '.', the dot kept.)
+            std::string name = def->GetModelName();
+            const size_t dot = name.rfind('.');
+            if (dot != std::string::npos)
+                name.erase(dot + 1);
+            file = name.c_str();
+        }
+    }
+    if (g_modelCache.OpenInto(copy, file, 0) != I3D_OK) {
+        copy->Release();
+        return false;
+    }
+    // The uniform's model in the model's place (some metres off in x and z) takes its stages and
+    // the frames attached to it.
+    copy->LinkTo(model->GetParent(), 0);
+    const float dz = RandomFloat(6.0f) - 4.0f;
+    const float dx = RandomFloat(6.0f) - 4.0f;
+    const S_vector &at = model->GetPos();
+    copy->SetPosInline(S_vector(dx + at.x, at.y, dz + at.z));
+    copy->SetRot(model->GetRot());
+    copy->SetName(model->GetName());
+    copy->Update();
+    for (int stage = 8; stage-- > 0;) {
+        I3D_animation_set *anim = model->GetAnimation(stage);
+        const bool active = model->IsAnimActive(stage);
+        if (!anim)
+            continue;
+        const float weight = model->GetAnimWeight(stage);
+        copy->SetAnimation(anim, stage, weight, 0);
+        copy->SetAnimFlags(stage, model->GetAnimFlags(stage));
+        copy->SetAnimTime(stage, model->GetAnimTime(stage));
+        if (!active) {
+            copy->StopAnimation(stage);
+            copy->SetAnimWeight(stage, 0.0f);
+        }
+    }
+    CopyTargetFrames(model, model);
+    MoveForeignFrames(model, copy, model);
+    copy->Update();
+    // The model itself reloaded, then everything back.
+    g_modelCache.OpenInto(model, file, 0);
+    for (int stage = 8; stage-- > 0;) {
+        if (!copy->GetAnimation(stage))
+            continue;
+        const float weight = copy->GetAnimWeight(stage);
+        model->SetAnimation(copy->GetAnimation(stage), stage, weight, 0);
+        model->SetAnimTime(stage, copy->GetAnimTime(stage));
+        model->SetAnimFlags(stage, copy->GetAnimFlags(stage));
+        if (!copy->IsAnimActive(stage)) {
+            model->StopAnimation(stage);
+            model->SetAnimWeight(stage, 0.0f);
+        }
+    }
+    CopyTargetFrames(copy, copy);
+    MoveForeignFrames(copy, model, copy);
+    copy->LinkTo(nullptr, 0);
+    copy->Release();
+    model->Update();
+    if (C_HumanMovement *movement = human->GetMovement())
+        movement->OnModelChanged();
+    if (C_HumanMovement *movement = human->GetMovement())
+        movement->UpdateModelNames();
+    model->Update();
+    // The player's soldiers: the team's volumes again, the active one's view kept.
+    if (human->GetRole() == HUMAN_ROLE_PLAYER) {
+        C_Team *team = g_teamManager.GetPlayerTeam();
+        for (int i = team->GetMemberCount(); i-- > 0;) {
+            if (team->GetMember(i) != human)
+                continue;
+            team->CollectVolumes(i);
+            if (human == team->GetActivePlayer()) {
+                S_vector4 dir;
+                GetCameraModule()->GetCameraDir(3, &dir);
+                GetCameraModule()->Unknown40(0);
+                GetCameraModule()->SetViewDir(dir);
+            }
+            break;
+        }
+    }
+    return SwitchFaceTexture(human->GetFrame(), faceTexture);
+}
+
+// 0x00485ba0
+void C_GEffectsModule::ShatterGlass(I3D_frame *frame, float maxArea)
+{
+    auto *glass = static_cast<I3D_visual *>(frame);
+    if (!(glass->VisualFlags() & VISFLAGS_OBJECT_PARAMS))
+        return;
+    // (Quirk kept: neither the vertices nor the faces are unlocked; the faces are locked per face.)
+    I3D_mesh *mesh = glass->GetVisualMesh();
+    I3D_face_group *group = mesh->GetLevel(0)->GetFaceGroup(0);
+    const int count = group->numFaces;
+    const auto *vertices = static_cast<const S_ShardVertex *>(mesh->GetLevel(0)->GetVertices(0));
+    I3D_material *material = group->material;
+    for (int i = count; i-- > 0;) {
+        const uint16_t *face = group->Lock(0) + i * 3;
+        const S_ShardVertex &a = vertices[face[0]];
+        const S_ShardVertex &b = vertices[face[1]];
+        const S_ShardVertex &c = vertices[face[2]];
+        ShatterFace(a.pos, b.pos, c.pos, a.u, a.v, b.u, b.v, c.u, c.v, frame, material, maxArea);
+    }
 }

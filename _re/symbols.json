@@ -6868,6 +6868,10 @@
   "module": "zz_idioms",
   "name": "copy4_484e70"
  },
+ "00484f60": {
+  "module": "geffects",
+  "name": "GEffects_ShatterFace"
+ },
  "00485b50": {
   "module": "geffects",
   "name": "C_GEffectsModule::SetCloudsOn",
@@ -6879,9 +6883,9 @@
   "proto": "void __thiscall SetLensFlareOn(C_GEffectsModule * this, bool on)"
  },
  "00485ba0": {
-  "module": "car",
+  "module": "geffects",
   "name": "C_GEffectsModule::ShatterGlass",
-  "proto": "void __thiscall ShatterGlass(C_GEffectsModule * this, I3D_frame * visual, float unknown)"
+  "proto": "void __thiscall ShatterGlass(C_GEffectsModule * this, I3D_frame * visual, float maxArea)"
  },
  "00485c70": {
   "module": "geffects",
@@ -7114,10 +7118,61 @@
   "name": "C_GEffectsModule::FadeHuman",
   "proto": "void __thiscall FadeHuman(C_GEffectsModule * this, C_Human * human, int time, bool in)"
  },
+ "00489470": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::GetShadow",
+  "proto": "I3D_frame * __thiscall GetShadow(C_GEffectsModule * this, I3D_frame * model)"
+ },
+ "004894b0": {
+  "module": "geffects",
+  "name": "GEffects_FindModelShadow",
+  "proto": "uint __stdcall GEffects_FindModelShadow(I3D_frame * frame, void * context)"
+ },
+ "004894e0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::CreateShadow",
+  "proto": "I3D_frame * __thiscall CreateShadow(C_GEffectsModule * this, I3D_frame * model)"
+ },
+ "00489bd0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetShadowParams",
+  "proto": "void __thiscall SetShadowParams(C_GEffectsModule * this, void * params)"
+ },
+ "00489be0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::GetShadowParams",
+  "proto": "void * __thiscall GetShadowParams(C_GEffectsModule * this)"
+ },
+ "00489bf0": {
+  "module": "geffects",
+  "name": "ShadowParams_Copy"
+ },
  "00489c60": {
   "module": "geffects",
   "name": "C_GEffectsModule::LoadWaterCamera",
   "proto": "void __thiscall LoadWaterCamera(C_GEffectsModule * this)"
+ },
+ "00489fd0": {
+  "module": "geffects",
+  "name": "GEffects_CopyTargetFrames"
+ },
+ "0048a170": {
+  "module": "geffects",
+  "name": "GEffects_MoveForeignFrames"
+ },
+ "0048a3f0": {
+  "module": "geffects",
+  "name": "GEffects_FindFaceGroups"
+ },
+ "0048a5c0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SwitchFaceTexture",
+  "proto": "bool __thiscall SwitchFaceTexture(C_GEffectsModule * this, I3D_frame * model, char * texture)"
+ },
+ "0048a780": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::DressUniform",
+  "proto": "bool __thiscall DressUniform(C_GEffectsModule * this, C_Human * human, int uniform)"
  },
  "0048b300": {
   "module": "zz_idioms",

@@ -427,6 +427,9 @@ enum : uint32_t {
 enum : uint32_t {
     VISFLAGS_TEXTURE_LOD = 0x00000010,     // objects: the levels are texture LODs of level 0's geometry
     VISFLAGS_WORLD_SPACE = 0x00000040,     // geometry is in world space (no inverse transform)
+    // An object visual taking the hierarchy's light level and alpha (LS3DF VISF_OBJECT_PARAMS; the
+    // effects module's glass and face searches require it).
+    VISFLAGS_OBJECT_PARAMS = 0x00000800,
     VISFLAGS_1000 = 0x00001000,            // set on the parts of the HUD's member panels (not identified)
     VISFLAGS_BOUND_VALID = 0x00020000,     // GetLocalBound() is up to date
     VISFLAGS_WBOUND_VALID = 0x00040000,    // GetWorldBound() is up to date
@@ -586,6 +589,8 @@ public:
     I3DMETHOD(void, ResolveTexture)() = 0;                    // 0x44
 
     uint32_t &Flags() { return *reinterpret_cast<uint32_t *>(reinterpret_cast<uint8_t *>(this) + 0x08); }
+    // (The reference count at +0x04 raised inline.)
+    void AddRef() { ++*reinterpret_cast<int *>(reinterpret_cast<uint8_t *>(this) + 0x04); }
     I3D_texture *GetTexture()
     {
         if (Flags() & I3DMATERIAL_TEXTURE_PENDING_BIT)
@@ -600,20 +605,26 @@ class I3D_face_group {
 public:
     // Replaces the face group's material (the vehicle's glass parts; inferred).
     I3DMETHOD(void, SetMaterial)(I3D_material *material) = 0; // 0x00
-    I3D_SLOTS_4(04, 08, 0C, 10);
+    I3D_SLOT(04);
+    // (Names from the LS3DF port.) Room for `count` faces (3 indices each), locked; the faces
+    // locked (bit 0 of `flags`: read only).
+    I3DMETHOD(uint16_t *, AllocFaces)(int count) = 0;         // 0x08
+    I3DMETHOD(uint16_t *, Lock)(uint32_t flags) = 0;          // 0x0C
+    I3D_SLOT(10);
     I3D_SLOT(14);
     // Gives the face group its own copy of its material (the HUD's icons and bars then change
     // theirs alone; inferred).
     I3DMETHOD(void, DuplicateMaterial)() = 0;                 // 0x18
 
     I3D_material *material;                                   // +0x04
+    int numFaces;                                             // +0x08
 };
 
 // Geometry of a billboard visual (reached through its +0x1E0). Only the calls the
 // bullet traces make are known: the first level's first face group.
 class I3D_mesh_level {
 public:
-    I3D_SLOT(00);
+    I3DMETHOD(uint32_t, Release)() = 0;                       // 0x00
     // Vertex array of the level (0x20-byte vertices, position first); the level collision
     // passes 1 (meaning not identified).
     I3DMETHOD(void *, GetVertices)(int unknown) = 0;           // 0x04
@@ -622,10 +633,15 @@ public:
     I3D_SLOT(0C);
     I3D_SLOT(10);
     I3DMETHOD(I3D_face_group *, GetFaceGroup)(int index) = 0;  // 0x14
-    I3D_SLOTS_4(18, 1C, 20, 24);
-    I3D_SLOT(28);
+    I3D_SLOT(18);
+    // (Names from the LS3DF port.) Puts a face group first in the level's list.
+    I3DMETHOD(void, AddFaceGroup)(I3D_face_group *group) = 0; // 0x1C
+    I3D_SLOT(20);
+    I3D_SLOT(24);
+    // Room for `count` vertices (0x20 bytes each), locked.
+    I3DMETHOD(void *, AllocVertices)(int count) = 0;          // 0x28
     // Called after the level's vertex positions were rewritten (the vehicle's repaired parts;
-    // meaning not identified).
+    // LS3DF: the box of the vertices' positions).
     I3DMETHOD(void, Unknown2C)() = 0;                         // 0x2C
 
     int NumVertices() const { return *reinterpret_cast<const int *>(reinterpret_cast<const uint8_t *>(this) + 0x54); }
@@ -925,7 +941,8 @@ public:
     I3DMETHOD(float, GetAnimWeight)(int stage) = 0;           // 0x98
     I3DMETHOD(void, SetAnimTime)(int stage, int time) = 0;    // 0x9C ms
     I3DMETHOD(int, GetAnimTime)(int stage) = 0;               // 0xA0 ms
-    I3D_SLOT(A4);
+    // A stage's flags as SetAnimation() takes them (the uniform's copy of a model's stages).
+    I3DMETHOD(void, SetAnimFlags)(int stage, int flags) = 0;  // 0xA4
     I3DMETHOD(int, GetAnimFlags)(int stage) = 0;              // 0xA8 SetAnimation()'s flags
     I3DMETHOD(bool, IsAnimActive)(int stage) = 0;             // 0xAC
     // Advances the time of each of the 8 stages by times[stage] ms and puts the frames into
@@ -965,6 +982,10 @@ public:
     I3D_SLOT(70);
     I3DMETHOD(void, AddFrame)(I3D_frame *frame) = 0;          // 0x74
     I3DMETHOD(void, RemoveFrame)(I3D_frame *frame) = 0;       // 0x78
+
+    // The frames added (+0x120 array, +0x128 count).
+    int NumFrames() const { return Field<int>(0x128); }
+    I3D_frame *GetFrame(int index) const { return Field<I3D_frame **>(0x120)[index]; }
 };
 
 class I3D_sound : public I3D_frame {
@@ -1150,9 +1171,18 @@ public:
     I3D_SLOTS_4(60, 64, 68, 6C);
     I3D_SLOT(70);
     I3DMETHOD(HRESULT, Open)(const char *fileName, uint32_t flags) = 0;   // 0x74
+    I3D_SLOT(78);
+    // (Names from the LS3DF port.) The map's size, the volume's length along the light, how far
+    // below the frame it may start, its opacity and colour.
+    I3DMETHOD(HRESULT, SetSize)(int width, int height) = 0;   // 0x7C
+    I3DMETHOD(void, SetDepth)(float depth) = 0;               // 0x80
+    I3DMETHOD(HRESULT, SetMaxHeight)(float height) = 0;       // 0x84
+    I3D_SLOT(88);
+    I3DMETHOD(void, SetOpacity)(float opacity) = 0;           // 0x8C
+    I3DMETHOD(void, SetColor)(const S_vector4 &color) = 0;    // 0x90
 
-    // Set to 20 on the shadows of human models (C_HumanVisual::RebuildShadow; meaning not
-    // identified).
+    // How close to the camera it is drawn (LS3DF: range; the effects module sets 100, the
+    // humans' shadows 20 in C_HumanVisual::RebuildShadow).
     void SetUnknown1FC(float value) { Field<float>(0x1FC) = value; }
 };
 
@@ -1407,8 +1437,9 @@ public:
     I3DMETHOD(class I3D_material *, CreateMaterial)() = 0;                // 0x58
     I3D_SLOT(5C);
     I3D_SLOT(60);
-    I3D_SLOT(64);
-    I3D_SLOT(68);
+    // A new face group and a new mesh level (the effects module's glass shards).
+    I3DMETHOD(I3D_face_group *, CreateFaceGroup)() = 0;                   // 0x64
+    I3DMETHOD(I3D_mesh_level *, CreateMeshLevel)() = 0;                   // 0x68
     // A new, empty mesh (the vehicle's damage parts copy their visual's into it; inferred).
     I3DMETHOD(class I3D_mesh *, CreateMesh)() = 0;                        // 0x6C
     I3DMETHOD(I3D_animation_set *, CreateAnimationSet)() = 0;              // 0x70

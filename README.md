@@ -9,7 +9,7 @@ of the game and its data.
 
 ## Status
 
-Work in progress (2026-10-30). Of the game's 12,293 functions, 7,496 (68.8 % of the code by size)
+Work in progress (2026-10-30). Of the game's 12,293 functions, 7,531 (69.2 % of the code by size)
 are ported by hand. Generated code (tier 1, below) covers the rest. The sources are
 compile-checked file by file; there is no linked build of the game yet.
 
@@ -22,9 +22,9 @@ scene objects, clocks, switches, photo places, breakable fences, radios, documen
 timed explosions, spawn points, explosive places, pikes, flocks of birds, ladders, multiplayer
 zones, submarines, trains, static weapons, bikes, schools of fish, doors, supply boxes,
 barrels, air attacks, the Junkers 88, vertex animations, lightmap groups, texture shifting and the AI's
-line of sight, and most of the graphic effects (screen fades, fading models, the thunderstorm, rain,
-the underwater view). In progress: the mission and world modules (shadows, decorations, the camera,
-mission loading).
+line of sight, and the graphic effects (screen fades, fading models, the thunderstorm, rain, the
+underwater view, shadows, uniforms, shattered glass). In progress: the mission and world modules
+(decorations, the camera, mission loading).
 
 ## Approach
 
