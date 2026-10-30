@@ -38,7 +38,7 @@ EXE_SUBSYSTEMS = [
     ("Vehicles", r"game/(vehicle|car|seat_weapon)"),
     ("AI & controllers", r"game/(ai_|squad_|enemy_|sniper_|scripted_controller|checkpoint|controller_|player_(controller|weapons|net|internal)|remote_controller|team)"),
     ("Actors & objects", r"game/(actor|actors_module|animation_actor|item_actor|debris|clock|null_actor|wire_cut|photo_place|switch_actor|mine|radio|document_place|ts_explosion|spawn_point|versions|melee_tracker|frame_box_volume|"
-                         r"explosive_place|ladder|pike|fowl_generator|mp_zone|submarine|train|static_weapon|bike|fish|door|supply_box|barrel)"),
+                         r"explosive_place|ladder|pike|fowl_generator|mp_zone|submarine|train|static_weapon|bike|fish|door|supply_box|barrel|air_attack)"),
     ("Weapons & items", r"game/(shots|items|item_|heavy_fire_support)"),
     ("Physics & collision", r"game/(physics|collision|rigid_body|world)"),
     ("Interface & HUD", r"game/(interface|first_person_view|text_box)"),
@@ -52,7 +52,7 @@ EXE_SUBSYSTEMS = [
 EXE_TESTED = re.compile(r"game/(vehicle|car|seat_weapon|melee_tracker_route|rigid_body|debris|item_actor|animation_actor|"
                         r"clock|null_actor|wire_cut|photo_place|switch_actor|mine|radio|document_place|ts_explosion|spawn_point|"
                         r"explosive_place|ladder|pike|fowl_generator|mp_zone|submarine|train|track|static_weapon|bike|fish|"
-                        r"door|supply_box|barrel|"
+                        r"door|supply_box|barrel|air_attack|"
                         r"checkpoint|profile|player_profile|key_bindings|campaign|soldier)|common/(config_file|os_files)")
 EXE_TEST_NOTES = {
     "Vehicles": "vehicle_params harness (205 shipped car blocks re-pack byte-identical), vehicle_setup harness on the 37 shipped car models, car_tables harness; mutation-tested",

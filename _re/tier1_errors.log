@@ -222,64 +222,6 @@ f_005ac500.cpp:111:55: request for member '_8_4_' in '"\012ControlsEx - "', whic
     *(uint32_t *)(pcVar9 + 7) = "\nControlsEx - "._8_4_;
 f_005ac500.cpp:112:57: request for member '_12_2_' in '"\012ControlsEx - "', which is of non-class type 'const char [15]'
     *(uint16_t *)(pcVar9 + 0xb) = "\nControlsEx - "._12_2_;
-f_005e3a20.cpp:110:22: call of overloaded 'S_matrix__SetDir3(tier1::S_matrix*, tier1::S_vector*)' is ambiguous
-    S_matrix__SetDir3(&local_50,&local_60);
-f_005e3a20.cpp:519:32: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    piVar7 = (int *)(**(code **)(*uStack_154 + 0x48))();
-f_005e3a20.cpp:569:21: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    uStack_154[1] = -1;
-f_005e3a20.cpp:570:11: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    *uStack_154 = (int)piVar7;
-f_005e3a20.cpp:616:30: base operand of '->' is not a pointer
-    FUN_005e9d10(uStack_124->_pad_01ac + 4,uStack_124->m_1b8,1,&local_110.x);
-f_005e3a20.cpp:616:56: base operand of '->' is not a pointer
-    FUN_005e9d10(uStack_124->_pad_01ac + 4,uStack_124->m_1b8,1,&local_110.x);
-f_005e3a20.cpp:622:43: base operand of '->' is not a pointer
-    iVar29 = (**(code **)(*(int *)uStack_124->m_020 + 0x48))
-f_005e3a20.cpp:623:33: base operand of '->' is not a pointer
-    (uStack_124->m_020,"bluur",0xffff);
-f_005e3a20.cpp:625:13: base operand of '->' is not a pointer
-    uStack_124->m_164 = iVar29;
-f_005e3a20.cpp:626:13: base operand of '->' is not a pointer
-    uStack_124->m_168 = 0;
-f_005e3a20.cpp:627:23: base operand of '->' is not a pointer
-    puVar24 = uStack_124->_pad_0170 + 0x14;
-f_005e3a20.cpp:840:11: base operand of '->' is not a pointer
-    local_f4->m_16c = 0;
-f_005e3a20.cpp:841:25: base operand of '->' is not a pointer
-    puStack_11c = local_f4->_pad_0170;
-f_005e3a20.cpp:1043:23: base operand of '->' is not a pointer
-    pIVar11 = local_f4->m_020;
-f_005e3a20.cpp:1067:43: base operand of '->' is not a pointer
-    CStack_dc.rep = (C_str_rep *)(local_f4->_pad_0084 + 0x4c);
-f_005e3a20.cpp:1073:23: base operand of '->' is not a pointer
-    pIVar11 = local_f4->m_020;
-f_005e3a20.cpp:1092:23: base operand of '->' is not a pointer
-    pIVar11 = local_f4->m_020;
-f_005e3a20.cpp:1093:31: base operand of '->' is not a pointer
-    *(C_AirAttack **)(local_f4->_pad_0084 + 0x94) = local_f4;
-f_005e3a20.cpp:1119:23: base operand of '->' is not a pointer
-    pIVar11 = local_f4->m_020;
-f_005e3a20.cpp:1120:29: base operand of '->' is not a pointer
-    *(C_str_rep **)(local_f4->_pad_0084 + 0x90) = CStack_f0.rep;
-f_005e3a20.cpp:1121:29: base operand of '->' is not a pointer
-    *(I3D_frame **)(local_f4->_pad_0084 + 0x50) = pIVar11;
-f_005e3a20.cpp:1122:13: base operand of '->' is not a pointer
-    local_f4->_pad_0084[0x54] = '\0';
-f_005e3a20.cpp:1123:13: base operand of '->' is not a pointer
-    local_f4->_pad_0084[0x55] = '\b';
-f_005e3a20.cpp:1124:13: base operand of '->' is not a pointer
-    local_f4->_pad_0084[0x56] = '\0';
-f_005e3a20.cpp:1125:13: base operand of '->' is not a pointer
-    local_f4->_pad_0084[0x57] = '\0';
-f_005e3a20.cpp:2578:32: too few arguments to function
-    (*pIStack_78->vtable->LinkTo)();
-f_005e3a20.cpp:2584:34: too few arguments to function
-    (*unaff_ESI->vtable[1].SetName)();
-f_005e3a20.cpp:2851:32: too few arguments to function
-    (*pIStack_78->vtable->LinkTo)();
-f_005e3a20.cpp:2857:34: too few arguments to function
-    (*unaff_ESI->vtable[1].SetName)();
 f_005edcf0.cpp:2601:46: no matching function for call to 'gh_bitcast<tier1::C_str_rep*>()'
     local_bc.rep = gh_bitcast<C_str_rep*>()
 f_005f31c0.cpp:1347:43: cannot convert 'float' to 'tier1::I3D_frame*'

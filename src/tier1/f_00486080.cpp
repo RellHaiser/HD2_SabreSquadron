@@ -1376,7 +1376,7 @@ LAB_00487d58:
           fStack_148 = (float)((extraout_ST0 - (long double)_this->m_254) + (long double)fStack_148);
           RandomFloat(gh_bitcast<long double*>((_this->m_254 + _this->m_254)),unaff_EDI);
           fStack_150 = (float)((extraout_ST0_00 - (long double)_this->m_254) + (long double)fStack_150);
-          puVar14 = (uint32_t *)FUN_005e2cc0(&fStack_150,&fStack_e0,&aSStack_130[0].x,0,
+          puVar14 = (uint32_t *)RayTestPastBorders(gh_bitcast<S_vector4*>(&fStack_150),gh_bitcast<S_vector4*>(&fStack_e0),gh_bitcast<S_vector4*>(&aSStack_130[0].x),0,
                                          0xffffffff,0);
           if (puVar14 != 0) {
             bVar5 = (*puVar14 & 0x10000) == 0;

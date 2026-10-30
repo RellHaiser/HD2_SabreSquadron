@@ -185,6 +185,12 @@ struct S_FrameData;
 void SetFrameData(I3D_frame *frame, const S_FrameData &data);
 
 // (The fowl generator, game/fowl_generator.cpp: the birds module's birds and RandomFloat.)
+// The sight module (part 7g: only the air attacks' start wait; +0x34).
+class C_SightModule {
+public:
+    int GetStartDelay() const;
+};
+extern C_SightModule g_sightModule;                 // 0x0089b288
 class C_Bird {                                          // 0x70 bytes
 public:
     // On `model`, whose frame data then points at the bird; `ownModel`: the model is the bird's,

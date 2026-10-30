@@ -1,0 +1,46 @@
+# Part 7g: the air attack (src/game/air_attack.*), 0x005e2c00..0x005ea2f0.
+# StaticInit_<addr>: the file's guarded statics (atexit). The lone JMP thunks in the vtables are
+# named after their slot (the project convention).
+
+005e2c00 StaticInit_AirAttackCreatorThunk
+005e2c10 StaticInit_AirAttackCreator
+005e2c30 C_AirAttackCreator::Create | C_Actor * __thiscall Create(C_ActorCreator * this)
+005e2c90 C_AirAttackCreator::GetName | char * __thiscall GetName(C_ActorCreator * this)
+005e2ca0 C_AirAttackCreator::Destroy | void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)
+005e2cc0 RayTestPastBorders | S_CollisionVolume * __fastcall RayTestPastBorders(S_vector4 * from, S_vector4 * dir, S_vector4 * hitPos, S_vector4 * hitNormal, uint excludeTypes, uint excludeFlags)
+005e3090 C_AirAttack::RestartMission | void __thiscall RestartMission(C_AirAttack * this, bool server)
+005e30b0 C_AirAttack::SaveGame | bool __thiscall SaveGame(C_AirAttack * this, C_chunk * chunk)
+005e3420 C_AirAttack::LoadGame | bool __thiscall LoadGame(C_AirAttack * this, C_chunk * chunk)
+005e3a00 AirAttack_FreeBulletOnThrow
+005e3a10 AirAttack_BulletCtor
+005e3a20 StaticInit_AirAttacks
+005e3a30 AirAttacks_Construct
+005e3a50 AirAttacks_RegisterAtExit
+005e3a60 AirAttacks_Destroy
+005e3a80 C_AirAttack::BulletHit | void __thiscall BulletHit(C_AirAttack * this, S_vector * pos, S_vector * shot)
+005e3b70 C_AirAttack::UnknownD0 | void __thiscall UnknownD0(C_AirAttack * this, int a, int b, int c, int d)
+005e3b80 C_AirAttack::Hit | void __thiscall Hit(C_AirAttack * this, int type, float amount, S_vector * pos, S_vector * dir, C_Actor * attacker, int flags)
+005e3c90 C_AirAttack::C_AirAttack | C_AirAttack * __thiscall C_AirAttack(C_AirAttack * this)
+005e3ee0 C_AirAttack::CopyFrom | void __thiscall CopyFrom(C_AirAttack * this, C_Actor * source)
+005e3ef0 C_AirAttack::ScalarDeletingDestructor | C_AirAttack * __thiscall ScalarDeletingDestructor(C_AirAttack * this, uchar flags)
+005e3f10 C_AirAttack::~C_AirAttack | void __thiscall ~C_AirAttack(C_AirAttack * this)
+005e4070 C_AirAttack::SetFrame | bool __thiscall SetFrame(C_AirAttack * this, I3D_frame * frame)
+005e4090 C_AirAttack::StartMission | void __thiscall StartMission(C_AirAttack * this, bool server)
+005e56d0 C_AirAttack::StopMission | void __thiscall StopMission(C_AirAttack * this, bool server)
+005e5960 C_AirAttack::Update | void __thiscall Update(C_AirAttack * this, int frameTime)
+005e71e0 C_AirAttack::Tick | void __thiscall Tick(C_AirAttack * this, int timeDelta)
+005e7340 C_AirAttack::AddDust | void __thiscall AddDust(C_AirAttack * this, S_vector4 * pos, S_vector4 * dir)
+005e7540 AirAttack_FreeDustOnThrow
+005e7550 C_AirAttack::SetTurn | void __thiscall SetTurn(C_AirAttack * this, float turnRate, float climbRate)
+005e7570 C_AirAttack::SetTarget | void __thiscall SetTarget(C_AirAttack * this, bool stop, I3D_frame * target)
+005e75f0 C_AirAttack::PlayImpactSound | void __thiscall PlayImpactSound(C_AirAttack * this, S_vector * pos)
+005e7bf0 C_AirAttack::PlayWhizzSound | void __thiscall PlayWhizzSound(C_AirAttack * this, S_vector * pos)
+005e81c0 C_AirAttack::Fire | void __thiscall Fire(C_AirAttack * this, int frameTime)
+005e8b70 FindAirAttackFor | C_Actor * __fastcall FindAirAttackFor(C_Human *human)
+005e8d50 PauseAirAttackSounds | void __fastcall PauseAirAttackSounds(bool paused)
+005e8e10 C_AirAttack::WriteProperties | bool __thiscall WriteProperties(C_AirAttack * this, C_chunk * chunk)
+005e9010 C_AirAttack::ReadProperties | bool __thiscall ReadProperties(C_AirAttack * this, C_chunk * chunk)
+005e92b0 AirAttackDust_Ctor | void * __thiscall AirAttackDust_Ctor(void * this, S_vector4 * pos, S_vector4 * dir)
+005e94d0 AirAttackDust_Dtor | void __fastcall AirAttackDust_Dtor(void * dust)
+005e94f0 AirAttackDust_Update | bool __thiscall AirAttackDust_Update(void * this, int frameTime)
+005ea2d0 StaticInit_5ea2d0

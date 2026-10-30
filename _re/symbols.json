@@ -22001,27 +22001,201 @@
   "module": "simple_actors",
   "name": "StaticInit_5e2bd0"
  },
+ "005e2c00": {
+  "module": "air_attack",
+  "name": "StaticInit_AirAttackCreatorThunk"
+ },
+ "005e2c10": {
+  "module": "air_attack",
+  "name": "StaticInit_AirAttackCreator"
+ },
+ "005e2c30": {
+  "module": "air_attack",
+  "name": "C_AirAttackCreator::Create",
+  "proto": "C_Actor * __thiscall Create(C_ActorCreator * this)"
+ },
+ "005e2c90": {
+  "module": "air_attack",
+  "name": "C_AirAttackCreator::GetName",
+  "proto": "char * __thiscall GetName(C_ActorCreator * this)"
+ },
+ "005e2ca0": {
+  "module": "air_attack",
+  "name": "C_AirAttackCreator::Destroy",
+  "proto": "void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)"
+ },
+ "005e2cc0": {
+  "module": "air_attack",
+  "name": "RayTestPastBorders",
+  "proto": "S_CollisionVolume * __fastcall RayTestPastBorders(S_vector4 * from, S_vector4 * dir, S_vector4 * hitPos, S_vector4 * hitNormal, uint excludeTypes, uint excludeFlags)"
+ },
+ "005e3090": {
+  "module": "air_attack",
+  "name": "C_AirAttack::RestartMission",
+  "proto": "void __thiscall RestartMission(C_AirAttack * this, bool server)"
+ },
+ "005e30b0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::SaveGame",
+  "proto": "bool __thiscall SaveGame(C_AirAttack * this, C_chunk * chunk)"
+ },
+ "005e3420": {
+  "module": "air_attack",
+  "name": "C_AirAttack::LoadGame",
+  "proto": "bool __thiscall LoadGame(C_AirAttack * this, C_chunk * chunk)"
+ },
+ "005e3a00": {
+  "module": "air_attack",
+  "name": "AirAttack_FreeBulletOnThrow"
+ },
  "005e3a10": {
-  "module": "zz_idioms",
-  "name": "identity_5e3a10"
+  "module": "air_attack",
+  "name": "AirAttack_BulletCtor"
+ },
+ "005e3a20": {
+  "module": "air_attack",
+  "name": "StaticInit_AirAttacks"
+ },
+ "005e3a30": {
+  "module": "air_attack",
+  "name": "AirAttacks_Construct"
+ },
+ "005e3a50": {
+  "module": "air_attack",
+  "name": "AirAttacks_RegisterAtExit"
+ },
+ "005e3a60": {
+  "module": "air_attack",
+  "name": "AirAttacks_Destroy"
+ },
+ "005e3a80": {
+  "module": "air_attack",
+  "name": "C_AirAttack::BulletHit",
+  "proto": "void __thiscall BulletHit(C_AirAttack * this, S_vector * pos, S_vector * shot)"
  },
  "005e3b70": {
-  "module": "zz_idioms",
-  "name": "empty_function_5e3b70"
+  "module": "air_attack",
+  "name": "C_AirAttack::UnknownD0",
+  "proto": "void __thiscall UnknownD0(C_AirAttack * this, int a, int b, int c, int d)"
+ },
+ "005e3b80": {
+  "module": "air_attack",
+  "name": "C_AirAttack::Hit",
+  "proto": "void __thiscall Hit(C_AirAttack * this, int type, float amount, S_vector * pos, S_vector * dir, C_Actor * attacker, int flags)"
+ },
+ "005e3c90": {
+  "module": "air_attack",
+  "name": "C_AirAttack::C_AirAttack",
+  "proto": "C_AirAttack * __thiscall C_AirAttack(C_AirAttack * this)"
+ },
+ "005e3ee0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::CopyFrom",
+  "proto": "void __thiscall CopyFrom(C_AirAttack * this, C_Actor * source)"
+ },
+ "005e3ef0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::ScalarDeletingDestructor",
+  "proto": "C_AirAttack * __thiscall ScalarDeletingDestructor(C_AirAttack * this, uchar flags)"
+ },
+ "005e3f10": {
+  "module": "air_attack",
+  "name": "C_AirAttack::~C_AirAttack",
+  "proto": "void __thiscall ~C_AirAttack(C_AirAttack * this)"
+ },
+ "005e4070": {
+  "module": "air_attack",
+  "name": "C_AirAttack::SetFrame",
+  "proto": "bool __thiscall SetFrame(C_AirAttack * this, I3D_frame * frame)"
+ },
+ "005e4090": {
+  "module": "air_attack",
+  "name": "C_AirAttack::StartMission",
+  "proto": "void __thiscall StartMission(C_AirAttack * this, bool server)"
+ },
+ "005e56d0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::StopMission",
+  "proto": "void __thiscall StopMission(C_AirAttack * this, bool server)"
+ },
+ "005e5960": {
+  "module": "air_attack",
+  "name": "C_AirAttack::Update",
+  "proto": "void __thiscall Update(C_AirAttack * this, int frameTime)"
+ },
+ "005e71e0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::Tick",
+  "proto": "void __thiscall Tick(C_AirAttack * this, int timeDelta)"
+ },
+ "005e7340": {
+  "module": "air_attack",
+  "name": "C_AirAttack::AddDust",
+  "proto": "void __thiscall AddDust(C_AirAttack * this, S_vector4 * pos, S_vector4 * dir)"
+ },
+ "005e7540": {
+  "module": "air_attack",
+  "name": "AirAttack_FreeDustOnThrow"
+ },
+ "005e7550": {
+  "module": "air_attack",
+  "name": "C_AirAttack::SetTurn",
+  "proto": "void __thiscall SetTurn(C_AirAttack * this, float turnRate, float climbRate)"
  },
  "005e7570": {
-  "module": "script",
-  "name": "C_AirAttack::SetTarget"
+  "module": "air_attack",
+  "name": "C_AirAttack::SetTarget",
+  "proto": "void __thiscall SetTarget(C_AirAttack * this, bool stop, I3D_frame * target)"
+ },
+ "005e75f0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::PlayImpactSound",
+  "proto": "void __thiscall PlayImpactSound(C_AirAttack * this, S_vector * pos)"
+ },
+ "005e7bf0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::PlayWhizzSound",
+  "proto": "void __thiscall PlayWhizzSound(C_AirAttack * this, S_vector * pos)"
+ },
+ "005e81c0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::Fire",
+  "proto": "void __thiscall Fire(C_AirAttack * this, int frameTime)"
  },
  "005e8b70": {
-  "module": "squad",
+  "module": "air_attack",
   "name": "FindAirAttackFor",
   "proto": "C_Actor * __fastcall FindAirAttackFor(C_Human *human)"
  },
  "005e8d50": {
-  "module": "game",
-  "name": "PauseActorEffects",
-  "proto": "void __fastcall PauseActorEffects(bool paused)"
+  "module": "air_attack",
+  "name": "PauseAirAttackSounds",
+  "proto": "void __fastcall PauseAirAttackSounds(bool paused)"
+ },
+ "005e8e10": {
+  "module": "air_attack",
+  "name": "C_AirAttack::WriteProperties",
+  "proto": "bool __thiscall WriteProperties(C_AirAttack * this, C_chunk * chunk)"
+ },
+ "005e9010": {
+  "module": "air_attack",
+  "name": "C_AirAttack::ReadProperties",
+  "proto": "bool __thiscall ReadProperties(C_AirAttack * this, C_chunk * chunk)"
+ },
+ "005e92b0": {
+  "module": "air_attack",
+  "name": "AirAttackDust_Ctor",
+  "proto": "void * __thiscall AirAttackDust_Ctor(void * this, S_vector4 * pos, S_vector4 * dir)"
+ },
+ "005e94d0": {
+  "module": "air_attack",
+  "name": "AirAttackDust_Dtor",
+  "proto": "void __fastcall AirAttackDust_Dtor(void * dust)"
+ },
+ "005e94f0": {
+  "module": "air_attack",
+  "name": "AirAttackDust_Update",
+  "proto": "bool __thiscall AirAttackDust_Update(void * this, int frameTime)"
  },
  "005e9690": {
   "module": "zz_idioms",
@@ -22106,6 +22280,10 @@
  "005ea2c0": {
   "module": "zz_idioms",
   "name": "construct_copy4_5ea2c0"
+ },
+ "005ea2d0": {
+  "module": "air_attack",
+  "name": "StaticInit_5ea2d0"
  },
  "005ea300": {
   "module": "world_actors",

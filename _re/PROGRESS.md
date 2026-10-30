@@ -5090,6 +5090,49 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: 124 names (names/door_supply_box_barrel.txt), 124 decompiles exported; 129 functions in
     ported.txt (5 helpers absorbed). Stats: 7,037 of 12,286 functions by hand (65.9 % by size).
 
+  PART 7g DONE (2026-10-30): the air attack (src/game/air_attack.*, new).
+  - C_AirAttack ("AirAttack", type 36, vtable 0x00812930, 0x1F0 bytes, 0x005e2c00..0x005ea2f0): a plane
+    flying at 100 m/s. Idle it circles (0.75 rad/s); given a target (SetTarget) it runs at it: passing
+    (2) to 80 m past, leaving (0) to 400 m out (x and z; a victory roll one time in four, 0.003 rad a
+    ms), approaching (1: another of the four motor sounds, turning 0.4 rad/s towards it) to within
+    50 m, 35 m clear (25 up to 40 m over it). In sight when the first volume on the line past the
+    border volumes (RayTestPastBorders 0x005e2cc0: on 5 cm past each STOP / PASS border facing the
+    ray) is the target's box: its height approached (0.001 a ms) and the guns, a shot each 25 ms
+    within 200 m (a flash; aimed short of the target by 0.15 of the distance - 125 + up to 50 along the
+    level direction, up to 3 m to a side, the ray 1.2 times as long at the scene only, flags
+    0x820000); on deep sand a bullet landing in twice the miss distance (ms): a particle, a human on
+    the line hit for the damage (70), a gun sound if none, sometimes an impact sound and a whizz
+    within 10 m of the camera (pooled sounds). The ground (ray down from 1000 m up) under the ceiling
+    or in sight and anything ahead within the clearance: climbing by 2 / the normal's y a second;
+    nothing near: levelled (0.0003 / 0.001 a ms up, 0.0015 down). Banking to the turn rate (0.0005 rad
+    a ms). The guns' sound on the approach (a human target outdoors within 400 m), fading out
+    otherwise. Dust (Tick): within 60 m of the camera over sand or a minefield 40 m below, each 3 s,
+    moving on at 37 m/s for 3 s. Hits take the hit points (100); under 0 shot down (state 3, at once
+    2 with no target through SetTarget, quirk kept): smoke from a metre under it, the script's
+    OnDeath; gone 500 m out. The box (COLLISION_TYPE_PIKE; quirk kept: its centre the bound's, the
+    radius as w; at the start w is the local centre's x). Properties: chunk 2 hit points, 4 damage
+    (WriteProperties reports false, quirk kept). Saved game: the base's, then 1000..8000 (bullets
+    last; quirk kept: an unknown chunk is entered, not left). Fixes: StopMission nulls the playing
+    motor / gun sound pointers (the pause called through them); Fire without flashes skips the flash
+    (the original divides by 0); ReadProperties keeps the value on a short chunk; the smoke matrix
+    starts as the identity.
+  - g_airAttacks (0x008ac9c4); FindAirAttackFor (0x005e8b70: the nearest seen approaching or passing
+    within 150 m, for the squads), PauseAirAttackSounds (0x005e8d50, was PauseActorEffects).
+    MakeFrameBoxVolume gained an optional local-centre output. C_SightModule::GetStartDelay in
+    pending.h. world.h's partial class replaced by the header.
+  - Harness (build_item.bat links air_attack.cpp; air_actors_test.inc after PropActorsTest;
+    check_item.py reads "air:", 16 checks): a ray world of planes (material, reported normal), the
+    script module's cutscene flag, the sight module's delay, the camera module, SetDir3 (from the
+    LS3DF port), the sounds' velocity, SetLoop / IsPlaying logged where needed. The flight and the
+    aim against oracles from the asm. Baselines: 0 of 37 in both orders; the other five builds 0 of
+    37 each.
+  - Mutations (mutations/mutate_7g.py, 649 after dropping 55 equivalent and 9 that did not compile):
+    the first run caught 546 of 713; two rounds of new cases (see the file's docstring). All 649
+    caught.
+  - Build: 189 files clean (MSVC). Tier 1: 572 errors in 102 files, 237 stubs. ret_audit --src: 47.
+  - Ghidra: 42 names (names/air_attack.txt), 69 decompiles exported; 42 functions in ported.txt (23
+    helpers absorbed). Stats: 7,102 of 12,286 functions by hand (66.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

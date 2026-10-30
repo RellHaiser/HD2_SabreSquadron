@@ -649,9 +649,7 @@ bool TimedEvents_Load(C_chunk &chunk);              // 0x006dfa60
 
 // Frees the frame data blocks of all the scene's frames.
 void FreeAllFrameData(I3D_scene *scene);            // 0x006e9f20
-// Shows / hides the frames +0x168 / +0x16C of the actors in the list at 0x008ac9c8 when the
-// game pauses (not identified).
-void PauseActorEffects(bool paused);                // 0x005e8d50
+// (PauseAirAttackSounds, FindAirAttackFor: see game/air_attack.h.)
 // The scene's render callback (the fade, the interface, the debug joints; `phase` 1 / 2).
 int __stdcall GameRenderCallback(int phase, int unknown1, int unknown2);   // 0x006c95b0
 
@@ -812,6 +810,9 @@ public:
     bool TestNow(int observer, int target);         // 0x0046f280
     // Registered target `id`, null if there is none (vector at +0x10).
     C_SightTarget *GetTarget(int id) const;
+    // Ms left of the 4 s the module waits at a mission's start (+0x34; the air attacks wait while
+    // over 2000).
+    int GetStartDelay() const;
 };
 extern C_SightModule g_sightModule;                 // 0x0089b288
 
@@ -827,12 +828,8 @@ float RandomFloat(float max);                       // 0x00475190
 void BuildPathPoints(const struct S_vector4 &from, const struct S_vector4 &to, const std::vector<uint16_t> &path,
                      struct S_Vector4Array &points);   // 0x007ce930 (__fastcall)
 
-// The squad's air targets (C_SquadController::FindAirTarget). The nearest air attack plane
-// flying in (state 1 / 2) within 150 m that `human`'s body sees (the list at 0x008ac9c8;
-// null: none).
 class C_Actor;
 class C_Human;
 class I3D_frame;
-C_Actor *FindAirAttackFor(C_Human *human);         // 0x005e8b70 (__fastcall)
 // A Junkers 88 of the setup (g_junkers88Setup; none: null) and the frame to aim at.
 C_Actor *FindJunkersTargetFor(C_Human *human, I3D_frame **frame);   // 0x005f0e40 (__fastcall)

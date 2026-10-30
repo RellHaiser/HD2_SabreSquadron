@@ -13,6 +13,7 @@
 
 #include "game/actor.h"
 #include "game/actors_module.h"
+#include "game/air_attack.h"
 #include "game/car_effects.h"
 #include "game/collision.h"
 #include "game/console.h"
@@ -476,7 +477,7 @@ void C_game::SetPaused(bool paused)                 // 0x0069bb80
     else
         m_paused = false;
     PauseSpeechSlots(m_paused);
-    PauseActorEffects(paused);
+    PauseAirAttackSounds(paused);
     g_scriptModule.SetPauseSoundsPaused(paused);
 }
 

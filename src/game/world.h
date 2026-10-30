@@ -11,6 +11,7 @@
 #include "common/c_str.h"
 #include "game/actor.h"
 #include "game/actors_module.h"
+#include "game/air_attack.h"
 #include "game/animation_actor.h"
 #include "game/barrel.h"
 #include "game/bike.h"
@@ -100,12 +101,7 @@ public:
 
 // C_WireCut ("WireCut", vtable 0x00812750, 0xb0 bytes) is defined in game/wire_cut.h, included above.
 
-class C_AirAttack : public C_Actor {
-public:
-    void SetTarget(bool stop, I3D_frame *target);       // 0x005e7570
-    // m/s along its z axis (the squad's gunners lead it by it).
-    float GetSpeed() const;                             // +0x148
-};
+// C_AirAttack ("AirAttack", vtable 0x00812930, 0x1f0 bytes) is defined in game/air_attack.h, included above.
 
 // C_ItemActor ("Item", vtable 0x00811aa8, 0x6c0 bytes) is defined in game/item_actor.h, included above.
 

@@ -12,6 +12,7 @@
 
 #include "game/actor.h"
 #include "game/actors_module.h"
+#include "game/air_attack.h"
 #include "game/ai_parts.h"
 #include "game/checkpoints.h"
 #include "game/collision.h"

@@ -148936,10 +148936,10 @@
 ]
 },
 "005e2c00": {
-"name": "thunk_FUN_005e2c10",
+"name": "StaticInit_AirAttackCreatorThunk",
 "size": 5,
 "lines": 11,
-"chars": 237,
+"chars": 274,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -148957,10 +148957,10 @@
 ]
 },
 "005e2c10": {
-"name": "FUN_005e2c10",
+"name": "StaticInit_AirAttackCreator",
 "size": 26,
 "lines": 11,
-"chars": 231,
+"chars": 269,
 "callers": [
 "005e2c00"
 ],
@@ -148978,10 +148978,10 @@
 "in_vtables": []
 },
 "005e2c30": {
-"name": "FUN_005e2c30",
+"name": "C_AirAttackCreator::Create",
 "size": 92,
-"lines": 25,
-"chars": 573,
+"lines": 24,
+"chars": 564,
 "callers": [],
 "callees": [
 "005e3c90",
@@ -148999,10 +148999,10 @@
 ]
 },
 "005e2c90": {
-"name": "FUN_005e2c90",
+"name": "C_AirAttackCreator::GetName",
 "size": 6,
 "lines": 7,
-"chars": 108,
+"chars": 123,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -149019,10 +149019,10 @@
 ]
 },
 "005e2ca0": {
-"name": "FUN_005e2ca0",
+"name": "C_AirAttackCreator::Destroy",
 "size": 23,
 "lines": 13,
-"chars": 350,
+"chars": 382,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -149037,10 +149037,10 @@
 ]
 },
 "005e2cc0": {
-"name": "FUN_005e2cc0",
+"name": "RayTestPastBorders",
 "size": 961,
-"lines": 125,
-"chars": 3398,
+"lines": 126,
+"chars": 3475,
 "callers": [
 "00487240",
 "005e5960",
@@ -149066,10 +149066,10 @@
 "in_vtables": []
 },
 "005e3090": {
-"name": "FUN_005e3090",
+"name": "RestartMission",
 "size": 23,
 "lines": 9,
-"chars": 164,
+"chars": 178,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -149084,10 +149084,10 @@
 ]
 },
 "005e30b0": {
-"name": "FUN_005e30b0",
+"name": "SaveGame",
 "size": 874,
-"lines": 128,
-"chars": 4563,
+"lines": 117,
+"chars": 3728,
 "callers": [],
 "callees": [
 "00405820",
@@ -149113,10 +149113,10 @@
 ]
 },
 "005e3420": {
-"name": "FUN_005e3420",
+"name": "LoadGame",
 "size": 1494,
-"lines": 267,
-"chars": 9873,
+"lines": 269,
+"chars": 9314,
 "callers": [],
 "callees": [
 "004050e0",
@@ -149149,10 +149149,10 @@
 ]
 },
 "005e3a00": {
-"name": "FUN_005e3a00",
+"name": "AirAttack_FreeBulletOnThrow",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 117,
 "callers": [
 "007fffc0"
 ],
@@ -149166,10 +149166,10 @@
 "in_vtables": []
 },
 "005e3a10": {
-"name": "identity_5e3a10",
+"name": "AirAttack_BulletCtor",
 "size": 3,
 "lines": 7,
-"chars": 90,
+"chars": 95,
 "callers": [
 "005e3420"
 ],
@@ -149181,10 +149181,10 @@
 "in_vtables": []
 },
 "005e3a20": {
-"name": "FUN_005e3a20",
+"name": "StaticInit_AirAttacks",
 "size": 10,
 "lines": 9,
-"chars": 118,
+"chars": 148,
 "callers": [],
 "callees": [
 "005e3a30",
@@ -149202,10 +149202,10 @@
 ]
 },
 "005e3a30": {
-"name": "FUN_005e3a30",
+"name": "AirAttacks_Construct",
 "size": 29,
 "lines": 14,
-"chars": 240,
+"chars": 248,
 "callers": [
 "005e3a20"
 ],
@@ -149222,10 +149222,10 @@
 "in_vtables": []
 },
 "005e3a50": {
-"name": "FUN_005e3a50",
+"name": "AirAttacks_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 92,
 "callers": [
 "005e3a20"
 ],
@@ -149239,10 +149239,10 @@
 "in_vtables": []
 },
 "005e3a60": {
-"name": "FUN_005e3a60",
+"name": "AirAttacks_Destroy",
 "size": 32,
 "lines": 11,
-"chars": 155,
+"chars": 161,
 "callers": [
 "005e3a50"
 ],
@@ -149260,10 +149260,10 @@
 "in_vtables": []
 },
 "005e3a80": {
-"name": "FUN_005e3a80",
+"name": "BulletHit",
 "size": 236,
-"lines": 40,
-"chars": 1384,
+"lines": 37,
+"chars": 1208,
 "callers": [
 "005e5960"
 ],
@@ -149281,10 +149281,10 @@
 "in_vtables": []
 },
 "005e3b70": {
-"name": "empty_function_5e3b70",
+"name": "UnknownD0",
 "size": 3,
 "lines": 7,
-"chars": 102,
+"chars": 106,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -149299,10 +149299,10 @@
 ]
 },
 "005e3b80": {
-"name": "FUN_005e3b80",
+"name": "Hit",
 "size": 258,
-"lines": 37,
-"chars": 1183,
+"lines": 39,
+"chars": 1253,
 "callers": [],
 "callees": [
 "0041d920",
@@ -149327,12 +149327,13 @@
 ]
 },
 "005e3c90": {
-"name": "FUN_005e3c90",
+"name": "C_AirAttack",
 "size": 579,
 "lines": 108,
-"chars": 3126,
+"chars": 3138,
 "callers": [
-"005e2c30"
+"005e2c30",
+"005e3ef0"
 ],
 "callees": [
 "005e9710",
@@ -149357,10 +149358,10 @@
 "in_vtables": []
 },
 "005e3ee0": {
-"name": "thunk_FUN_006101f0",
+"name": "CopyFrom",
 "size": 5,
 "lines": 8,
-"chars": 153,
+"chars": 143,
 "callers": [],
 "callees": [
 "006101f0"
@@ -149377,12 +149378,13 @@
 ]
 },
 "005e3ef0": {
-"name": "FUN_005e3ef0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 203,
+"chars": 204,
 "callers": [],
 "callees": [
+"005e3c90",
 "005e3f10",
 "007e559c"
 ],
@@ -149398,10 +149400,10 @@
 ]
 },
 "005e3f10": {
-"name": "FUN_005e3f10",
+"name": "~C_AirAttack",
 "size": 338,
 "lines": 71,
-"chars": 2003,
+"chars": 2024,
 "callers": [
 "005e3ef0"
 ],
@@ -149423,10 +149425,10 @@
 "in_vtables": []
 },
 "005e4070": {
-"name": "FUN_005e4070",
+"name": "SetFrame",
 "size": 25,
-"lines": 10,
-"chars": 215,
+"lines": 12,
+"chars": 234,
 "callers": [],
 "callees": [
 "00610200"
@@ -149443,10 +149445,10 @@
 ]
 },
 "005e4090": {
-"name": "FUN_005e4090",
+"name": "StartMission",
 "size": 5607,
 "lines": 895,
-"chars": 31950,
+"chars": 31955,
 "callers": [],
 "callees": [
 "00404280",
@@ -149528,10 +149530,10 @@
 ]
 },
 "005e56d0": {
-"name": "FUN_005e56d0",
+"name": "StopMission",
 "size": 656,
 "lines": 119,
-"chars": 3709,
+"chars": 3627,
 "callers": [],
 "callees": [
 "00429aa0",
@@ -149561,10 +149563,10 @@
 ]
 },
 "005e5960": {
-"name": "FUN_005e5960",
+"name": "Update",
 "size": 6249,
-"lines": 845,
-"chars": 28463,
+"lines": 849,
+"chars": 29460,
 "callers": [],
 "callees": [
 "00445150",
@@ -149636,10 +149638,10 @@
 ]
 },
 "005e71e0": {
-"name": "FUN_005e71e0",
+"name": "Tick",
 "size": 345,
-"lines": 48,
-"chars": 1642,
+"lines": 47,
+"chars": 1631,
 "callers": [],
 "callees": [
 "005e7340",
@@ -149664,10 +149666,10 @@
 ]
 },
 "005e7340": {
-"name": "FUN_005e7340",
+"name": "AddDust",
 "size": 498,
 "lines": 87,
-"chars": 2419,
+"chars": 2409,
 "callers": [
 "005e71e0"
 ],
@@ -149688,10 +149690,10 @@
 "in_vtables": []
 },
 "005e7540": {
-"name": "FUN_005e7540",
+"name": "AirAttack_FreeDustOnThrow",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 115,
 "callers": [
 "008001c0"
 ],
@@ -149705,10 +149707,10 @@
 "in_vtables": []
 },
 "005e7550": {
-"name": "FUN_005e7550",
+"name": "SetTurn",
 "size": 23,
 "lines": 9,
-"chars": 165,
+"chars": 166,
 "callers": [
 "005e5960"
 ],
@@ -149723,7 +149725,7 @@
 "name": "SetTarget",
 "size": 128,
 "lines": 24,
-"chars": 541,
+"chars": 539,
 "callers": [
 "00416e10",
 "005e3b80",
@@ -149737,10 +149739,10 @@
 "in_vtables": []
 },
 "005e75f0": {
-"name": "FUN_005e75f0",
+"name": "PlayImpactSound",
 "size": 1483,
 "lines": 275,
-"chars": 8984,
+"chars": 8982,
 "callers": [
 "005e5960"
 ],
@@ -149789,10 +149791,10 @@
 "in_vtables": []
 },
 "005e7bf0": {
-"name": "FUN_005e7bf0",
+"name": "PlayWhizzSound",
 "size": 1446,
 "lines": 265,
-"chars": 8688,
+"chars": 8685,
 "callers": [
 "005e5960"
 ],
@@ -149839,10 +149841,10 @@
 "in_vtables": []
 },
 "005e81c0": {
-"name": "FUN_005e81c0",
+"name": "Fire",
 "size": 2475,
 "lines": 317,
-"chars": 10329,
+"chars": 10487,
 "callers": [
 "005e5960"
 ],
@@ -149878,8 +149880,8 @@
 "005e8b70": {
 "name": "FindAirAttackFor",
 "size": 479,
-"lines": 96,
-"chars": 2993,
+"lines": 93,
+"chars": 3003,
 "callers": [
 "0052cea0"
 ],
@@ -149900,10 +149902,10 @@
 "in_vtables": []
 },
 "005e8d50": {
-"name": "PauseActorEffects",
+"name": "PauseAirAttackSounds",
 "size": 192,
 "lines": 48,
-"chars": 1215,
+"chars": 1218,
 "callers": [
 "0069bb80"
 ],
@@ -149918,10 +149920,10 @@
 "in_vtables": []
 },
 "005e8e10": {
-"name": "FUN_005e8e10",
+"name": "WriteProperties",
 "size": 509,
-"lines": 84,
-"chars": 2940,
+"lines": 77,
+"chars": 2490,
 "callers": [],
 "callees": [
 "007e5392",
@@ -149939,10 +149941,10 @@
 ]
 },
 "005e9010": {
-"name": "FUN_005e9010",
+"name": "ReadProperties",
 "size": 672,
-"lines": 131,
-"chars": 4446,
+"lines": 120,
+"chars": 3910,
 "callers": [],
 "callees": [
 "00405890",
@@ -149962,10 +149964,10 @@
 ]
 },
 "005e92b0": {
-"name": "FUN_005e92b0",
+"name": "AirAttackDust_Ctor",
 "size": 542,
 "lines": 70,
-"chars": 2435,
+"chars": 2394,
 "callers": [
 "005e7340"
 ],
@@ -149987,10 +149989,10 @@
 "in_vtables": []
 },
 "005e94d0": {
-"name": "FUN_005e94d0",
+"name": "AirAttackDust_Dtor",
 "size": 31,
 "lines": 11,
-"chars": 234,
+"chars": 259,
 "callers": [
 "005e56d0",
 "005e5960"
@@ -150007,10 +150009,10 @@
 "in_vtables": []
 },
 "005e94f0": {
-"name": "FUN_005e94f0",
+"name": "AirAttackDust_Update",
 "size": 403,
-"lines": 51,
-"chars": 1880,
+"lines": 49,
+"chars": 1744,
 "callers": [
 "005e5960"
 ],
@@ -150475,10 +150477,10 @@
 "in_vtables": []
 },
 "005ea2d0": {
-"name": "FUN_005ea2d0",
+"name": "StaticInit_5ea2d0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"

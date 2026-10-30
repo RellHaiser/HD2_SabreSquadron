@@ -208,6 +208,5 @@
 00599040 C_FormationShape::SetSlotTarget | void __thiscall SetSlotTarget(void *this, C_Human *member, S_vector4 *pos)
 0059af30 C_FormationShape::PlanSlot | void __thiscall PlanSlot(void *this, int slot)
 005de7b0 GetSubmarines | void * __cdecl GetSubmarines(void)
-005e8b70 FindAirAttackFor | C_Actor * __fastcall FindAirAttackFor(C_Human *human)
 005f0e40 FindJunkersTargetFor | C_Actor * __fastcall FindJunkersTargetFor(C_Human *human, I3D_frame **frame)
 007ce930 BuildPathPoints | void __fastcall BuildPathPoints(S_vector4 *from, S_vector4 *to, void *path, S_Vector4Array *points)

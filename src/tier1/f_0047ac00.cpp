@@ -487,12 +487,8 @@ long double FUN_0047b4c0(int param_1,uint32_t param_2, ...)
 }
 
 
-// 0x0047b500  (tier1 fallback: translated text kept below, needs hand porting)
+// 0x0047b500
 int * FUN_0047b500(void *_this,uint32_t param_1,uint32_t param_2,uint32_t *param_3,uint8_t *param_4, uint32_t *param_5,uint8_t *param_6, ...)
-{
-  return {};
-}
-#if 0
 {
   uint8_t stack0xffffffc0[64];
   uint8_t stack0xffffffbc[64];
@@ -629,7 +625,6 @@ int * FUN_0047b500(void *_this,uint32_t param_1,uint32_t param_2,uint32_t *param
 }
 
 
-#endif
 // 0x0047b8e0
 uint32_t FUN_0047b8e0(void *_this,int param_1,uint32_t param_2,int param_3, ...)
 {
@@ -698,12 +693,8 @@ uint32_t FUN_0047b8e0(void *_this,int param_1,uint32_t param_2,int param_3, ...)
 }
 
 
-// 0x0047baa0  (tier1 fallback: translated text kept below, needs hand porting)
+// 0x0047baa0
 uint32_t FUN_0047baa0(int *param_1, ...)
-{
-  return {};
-}
-#if 0
 {
   uint8_t stack0xffffff60[64];
   int *piVar1;
@@ -793,13 +784,8 @@ LAB_0047bc30:
 }
 
 
-#endif
-// 0x0047bcc0  (tier1 fallback: translated text kept below, needs hand porting)
+// 0x0047bcc0
 uint32_t FUN_0047bcc0(void *_this,int param_1, ...)
-{
-  return {};
-}
-#if 0
 {
   float fVar1;
   float fVar2;
@@ -946,7 +932,6 @@ LAB_0047bd0f:
 }
 
 
-#endif
 // 0x0047c020
 uint32_t FUN_0047c020(int param_1, ...)
 {
