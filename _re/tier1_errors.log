@@ -222,14 +222,6 @@ f_005ac500.cpp:111:55: request for member '_8_4_' in '"\012ControlsEx - "', whic
     *(uint32_t *)(pcVar9 + 7) = "\nControlsEx - "._8_4_;
 f_005ac500.cpp:112:57: request for member '_12_2_' in '"\012ControlsEx - "', which is of non-class type 'const char [15]'
     *(uint16_t *)(pcVar9 + 0xb) = "\nControlsEx - "._12_2_;
-f_005edcf0.cpp:2601:46: no matching function for call to 'gh_bitcast<tier1::C_str_rep*>()'
-    local_bc.rep = gh_bitcast<C_str_rep*>()
-f_005f31c0.cpp:1347:43: cannot convert 'float' to 'tier1::I3D_frame*'
-    FUN_005f3300(param_1 + 0x34,param_1[0x28],0x40000000);
-f_005f31c0.cpp:1369:20: cannot convert 'float*' to 'uint32_t*' {aka 'unsigned int*'} in assignment
-    puVar8 = param_1 + 0x10;
-f_005f31c0.cpp:2316:29: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    iVar13 = (**(code **)(*DAT_008aed60 + 4))(DAT_008aed60,puVar3,0);
 f_00614100.cpp:834:46: 'struct tier1::C_PlayerProfile' has no member named '_pad_00dc'
     C_MovieList__Get((g_gameProfile.m_player)->_pad_00dc + 0x24,*(uint32_t *)(param_2 + 0x5c),&param_2,
 f_0061bec0.cpp:2076:65: expected primary-expression before '*' token

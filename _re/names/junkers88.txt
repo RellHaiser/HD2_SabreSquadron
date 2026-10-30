@@ -1,0 +1,145 @@
+# Part 7h: the Junkers 88 (src/game/junkers88.*), 0x005edcf0..0x005f9700.
+# StaticInit_<addr>: the file's guarded statics (atexit). The lone JMP thunks in the vtables are
+# named after their slot (the project convention). Junkers88<Struct>_*: the members of the nested
+# structs (S_Fighter, S_Path, S_Part, S_Fall, S_Debris, S_Tracer, S_Chatter).
+
+005edcf0 StaticInit_Junkers88CreatorThunk
+005edd00 StaticInit_Junkers88Creator
+005edd20 C_Junkers88Creator::Create | C_Actor * __thiscall Create(C_ActorCreator * this)
+005edd80 Junkers88_FreeOnThrow
+005edd90 C_Junkers88Creator::GetName | char * __thiscall GetName(C_ActorCreator * this)
+005edda0 C_Junkers88Creator::Destroy | void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)
+005eddc0 C_Junkers88::SetInterceptors | void __thiscall SetInterceptors(C_Junkers88 * this, float firepower, float health)
+005edde0 C_Junkers88::RestartMission | void __thiscall RestartMission(C_Junkers88 * this, bool server)
+005ede30 C_Junkers88::SaveParts
+005ee010 C_Junkers88::LoadParts
+005ee1e0 C_Junkers88::SaveGame | bool __thiscall SaveGame(C_Junkers88 * this, C_chunk * chunk)
+005ee830 C_Junkers88::LoadGame | bool __thiscall LoadGame(C_Junkers88 * this, C_chunk * chunk)
+005ef160 Junkers88_FreeFighterOnThrow
+005ef170 Junkers88_FreeDebrisOnThrow
+005ef180 C_Junkers88::C_Junkers88 | C_Junkers88 * __thiscall C_Junkers88(C_Junkers88 * this)
+005ef400 Junkers88Chatter_Ctor
+005ef420 C_Junkers88::GetSeatCount | int __thiscall GetSeatCount(C_Junkers88 * this)
+005ef430 C_Junkers88::ScalarDeletingDestructor | C_Junkers88 * __thiscall ScalarDeletingDestructor(C_Junkers88 * this, uchar flags)
+005ef450 Junkers88Chatter_Dtor
+005ef470 C_Junkers88::~C_Junkers88 | void __thiscall ~C_Junkers88(C_Junkers88 * this)
+005ef6b0 C_Junkers88::SetFrame | bool __thiscall SetFrame(C_Junkers88 * this, I3D_frame * frame)
+005ef6c0 C_Junkers88::CopyFrom | void __thiscall CopyFrom(C_Junkers88 * this, C_Actor * source)
+005ef6d0 C_Junkers88::StartMission | void __thiscall StartMission(C_Junkers88 * this, bool server)
+005ef840 C_Junkers88::LoadSounds
+005efb80 C_Junkers88::ReleaseSounds
+005efc10 C_Junkers88::StopMission | void __thiscall StopMission(C_Junkers88 * this, bool server)
+005efdd0 C_Junkers88::InitCamera
+005efe50 C_Junkers88::ReleaseCamera
+005efe80 C_Junkers88::AddPart
+005f0580 C_Junkers88::ThrowDebris
+005f07e0 C_Junkers88::InitParts
+005f0830 C_Junkers88::EnumPart
+005f08a0 C_Junkers88::ReleaseParts
+005f0a50 C_Junkers88::InitPropellers
+005f0a90 C_Junkers88::SetState | void __thiscall SetState(C_Junkers88 * this, int count)
+005f0c50 C_Junkers88::FindFighterByPath
+005f0ca0 C_Junkers88::FindFighter
+005f0cf0 C_Junkers88::StartAttack
+005f0d20 C_Junkers88::EndAttack
+005f0d70 C_Junkers88::Hit | void __thiscall Hit(C_Junkers88 * this, int type, float amount, S_vector * pos, S_vector * dir, C_Actor * attacker, int flags)
+005f0e40 FindJunkersTargetFor | C_Actor * __fastcall FindJunkersTargetFor(C_Human *human, I3D_frame **frame)
+005f0e60 C_Junkers88::FindTarget
+005f1390 C_Junkers88::ResetChatter
+005f17c0 C_Junkers88::Chatter | void __thiscall Chatter(C_Junkers88 * this, int group)
+005f29c0 StaticInit_5f29c0
+005f29f0 C_Junkers88::ReadProperties | bool __thiscall ReadProperties(C_Junkers88 * this, C_chunk * chunk)
+005f2c90 StaticInit_5f2c90
+005f2cc0 C_Junkers88::InitSeats
+005f2de0 C_Junkers88::EmptySeats
+005f2e30 C_Junkers88::GetSeatFlags | uint __thiscall GetSeatFlags(C_Junkers88 * this, int seat)
+005f2e60 C_Junkers88::IsSeatBlocked | bool __thiscall IsSeatBlocked(C_Junkers88 * this, int seat)
+005f2e70 C_Junkers88::SetSeatBlocked | bool __thiscall SetSeatBlocked(C_Junkers88 * this, int seat, bool blocked)
+005f2ec0 C_Junkers88::SetSeatOccupant | void __thiscall SetSeatOccupant(C_Junkers88 * this, int seat, C_Actor * occupant)
+005f2fa0 C_Junkers88::GetSeatOccupant | C_Actor * __thiscall GetSeatOccupant(C_Junkers88 * this, int seat)
+005f2fd0 C_Junkers88::FindSeat | int __thiscall FindSeat(C_Junkers88 * this, C_Actor * occupant)
+005f3000 C_Junkers88::LeaveSeat | C_Actor * __thiscall LeaveSeat(C_Junkers88 * this, int seat)
+005f3060 C_Junkers88::GetSeatText | int __thiscall GetSeatText(C_Junkers88 * this, int seat)
+005f30c0 C_Junkers88::ExitSeat | bool __thiscall ExitSeat(C_Junkers88 * this, int seat)
+005f3110 C_Junkers88::GetSeatCamera | I3D_frame * __thiscall GetSeatCamera(C_Junkers88 * this, int seat)
+005f31c0 StaticInit_5f31c0
+005f31f0 Junkers88Fall_Save
+005f3230 Junkers88Fall_Load
+005f32f0 Junkers88Fall_Ctor
+005f3300 Junkers88Fall_Init
+005f3360 Junkers88Fall_Update
+005f34a0 Junkers88Fall_Start
+005f34e0 Junkers88Fighter_Damage
+005f3510 Junkers88Fighter_ShootDown
+005f36e0 Junkers88Fighter_Fire
+005f38f0 Junkers88Fighter_HitBomber
+005f3a70 Junkers88Fighter_Update
+005f3e10 Junkers88Fighter_StopAttack
+005f3e30 Junkers88Fighter_Disengage
+005f3e70 Junkers88Fighter_Save
+005f40e0 Junkers88Fighter_Load
+005f45a0 Junkers88Fighter_StartAttack
+005f45e0 Junkers88_LoadSound
+005f4740 Junkers88Fighter_LoadSounds
+005f4910 Junkers88Fighter_CreateModel
+005f4e50 Junkers88Fighter_InitVolume
+005f5100 Junkers88Fighter_InitGuns
+005f5310 Junkers88Fighter_Ctor
+005f54b0 Junkers88_NoPathNote
+005f54c0 Junkers88_PathNote
+005f5540 Junkers88Fighter_Dtor
+005f5640 Junkers88Debris_Save
+005f57c0 Junkers88Debris_Load
+005f5960 Junkers88Debris_Ctor
+005f5a30 Junkers88Debris_Update
+005f5c40 Junkers88Path_Save
+005f5d20 Junkers88Path_Load
+005f5f20 Junkers88Path_Ctor
+005f60b0 Junkers88Path_SetCallback
+005f60e0 Junkers88Path_Dtor
+005f6100 Junkers88Path_Update
+005f62a0 Junkers88Path_Next
+005f6700 Junkers88Part_Save
+005f6750 Junkers88Part_Load
+005f6840 Junkers88Part_Ctor
+005f6ab0 Junkers88Part_Dtor
+005f6ae0 Junkers88Part_Shown
+005f6b10 Junkers88Part_HasNext
+005f6b40 Junkers88Part_Advance
+005f6ca0 C_Junkers88::EngineFire
+005f6e20 C_Junkers88::EngineDown
+005f6ed0 Junkers88_PlayTableSound
+005f6f50 StaticInit_5f6f50
+005f6f80 Junkers88_PlayAnimation
+005f6ff0 C_Junkers88::ShootDown
+005f70d0 C_Junkers88::ShowDamage
+005f71e0 C_Junkers88::UpdateDamage
+005f75f0 C_Junkers88::UpdateDebris
+005f76a0 C_Junkers88::Tick | void __thiscall Tick(C_Junkers88 * this, int timeDelta)
+005f7710 C_Junkers88::Update | void __thiscall Update(C_Junkers88 * this, int frameTime)
+005f7bb0 C_Junkers88::TurnPropellers
+005f7e10 C_Junkers88::EngineFell
+005f8040 C_Junkers88::BreakPart
+005f8150 StaticInit_5f8150
+005f8180 C_Junkers88::GetSeatWeaponDef | C_ItemDef * __thiscall GetSeatWeaponDef(C_Junkers88 * this, int seat)
+005f81b0 C_Junkers88::InitSeatWeapons
+005f8300 C_Junkers88::ReleaseSeatWeapons
+005f8370 C_Junkers88::HasSeatWeapon | bool __thiscall HasSeatWeapon(C_Junkers88 * this, int seat)
+005f83b0 C_Junkers88::GetSeatWeaponRounds | int __thiscall GetSeatWeaponRounds(C_Junkers88 * this, int seat)
+005f83e0 C_Junkers88::ApplySeatControls | void __thiscall ApplySeatControls(C_Junkers88 * this, int seat, float * axes, float * buttons)
+005f8440 C_Junkers88::GetSeatWeaponOrigin
+005f8490 C_Junkers88::ShowSeatView | void __thiscall ShowSeatView(C_Junkers88 * this, int seat, bool on)
+005f84b0 C_Junkers88::GetSeatWeaponAim
+005f8500 C_Junkers88::UnknownAC
+005f8540 C_Junkers88::IsSeatFirstPersonOnly | bool __thiscall IsSeatFirstPersonOnly(C_Junkers88 * this, int seat)
+005f8570 C_Junkers88::UnknownC8
+005f85a0 C_Junkers88::Fire
+005f87f0 C_Junkers88::UpdateTracers
+005f88c0 Junkers88Tracer_Update
+005f8c20 Junkers88Tracer_Reuse
+005f8c50 Junkers88Tracer_Place
+005f8d70 Junkers88Tracer_Save
+005f8f70 Junkers88Tracer_Load
+005f91b0 Junkers88Tracer_Ctor
+005f9290 Junkers88Tracer_Release
+005f96d0 StaticInit_5f96d0

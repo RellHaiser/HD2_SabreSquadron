@@ -139,6 +139,8 @@ public:
     // (The supply box, part 7f.)
     void FadeInModel(I3D_frame *model, int time, bool turnOn);
     void FadeOutHierarchy(I3D_frame *model, int time, bool unknown);
+    // (The Junkers 88, part 7h.)
+    void SetHierarchyOn(I3D_frame *frame, bool on, uint32_t typeMask);
 };
 C_GEffectsModule *GetGEffects();
 // (The supply box, part 7f: the scene's top, the debug lines.)

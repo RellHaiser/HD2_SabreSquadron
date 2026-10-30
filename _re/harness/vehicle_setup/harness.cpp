@@ -14813,6 +14813,7 @@ void PartsHitTest(const char *path)
 #include "seat_actors_test.inc"
 #include "prop_actors_test.inc"
 #include "air_actors_test.inc"
+#include "junkers_actors_test.inc"
 #endif
 
 int main(int argc, char **argv)
@@ -14845,6 +14846,7 @@ int main(int argc, char **argv)
         SeatActorsTest();
         PropActorsTest();
         AirActorsTest();
+        JunkersActorsTest();
     }
     return 0;
 #endif

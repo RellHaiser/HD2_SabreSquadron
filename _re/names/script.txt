@@ -125,8 +125,6 @@
 005977f0 C_FormationShape::SetScale
 005bc970 C_Train::Start
 005bd490 C_Train::FollowTrack
-005eddc0 C_Junkers88Setup::SetInterceptors
-005f0a90 C_Junkers88::SetState
 006059b0 C_StaticWeapon::SetState
 006df540 S_Explosion::Execute
 006e9ea0 SetFrameData

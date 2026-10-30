@@ -25,6 +25,7 @@
 #include "game/fish.h"
 #include "game/fowl_generator.h"
 #include "game/item_actor.h"
+#include "game/junkers88.h"
 #include "game/ladder.h"
 #include "game/melee_tracker.h"
 #include "game/melee_tracker_ai.h"
@@ -84,12 +85,7 @@ class C_Item;
 // C_Submarine ("Submarine", vtable 0x00812650, 0x120 bytes) and GetSubmarines() are in game/submarine.h, included
 // above.
 // C_Pike ("Pike", vtable 0x00811c90, 0x210 bytes) is defined in game/pike.h, included above.
-class C_Junkers88 : public C_Actor {
-public:
-    void SetState(int state);                           // 0x005f0a90
-    // (+0x280, not identified: the squad's gunners fire at it only while nonzero.)
-    float GetUnknown280() const;
-};
+// C_Junkers88 ("Junkers88", vtable 0x00812c10, 0x330 bytes) is defined in game/junkers88.h, included above.
 // C_TSExplosion ("Explosion [TS]", vtable 0x008136d0, 0xd0 bytes) is defined in game/ts_explosion.h, included above.
 
 // C_Train ("Train", vtable 0x00811e78, 0x8250 bytes) is defined in game/train.h, included above.
@@ -248,11 +244,7 @@ public:
 };
 extern C_Decorators *g_decorators;                      // 0x0089bbb0
 
-class C_Junkers88Setup {
-public:
-    void SetInterceptors(float firepower, float health);   // 0x005eddc0
-};
-extern C_Junkers88Setup *g_junkers88Setup;              // 0x008ac9e4
+// The Junkers 88 setup (SetupJunkers88) is the Junkers itself: see game/junkers88.h.
 
 // Checkpoints (AI navigation graph): see game/checkpoints.h.
 

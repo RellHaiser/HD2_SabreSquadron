@@ -5133,6 +5133,53 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: 42 names (names/air_attack.txt), 69 decompiles exported; 42 functions in ported.txt (23
     helpers absorbed). Stats: 7,102 of 12,286 functions by hand (66.6 % by size).
 
+  PART 7h DONE (2026-10-30): the Junkers 88 (src/game/junkers88.*, new).
+  - C_Junkers88 ("Junkers88", type 34, vtable 0x00812c10, 0x330 bytes, 0x005edcf0..0x005f9700): the
+    bomber of the air-fight mission, client side. Five seats (SEAT00..04; the flags table 0x0083e868
+    is global, quirk kept; seat weapons for bit 8). The camera path ("#aircraftdum" playing
+    "#aircraftA<k>") moves it; its velocity from the step. Parts: every visual ending in 'd' (the
+    intact frame without the 'd', a stump with 'f'), grouped as damage / engines / outer, with the
+    parts hanging on each engine and the rows thrown off with a part's last stage; Advance moves the
+    children on, throws the next stage's pieces as debris (0.8 of the bomber's velocity plus a push,
+    spinning, falling 9.81 m/s^2, gone 500 m down). The blades' parts stop their engine (blur, motor,
+    smoke, damage sounds; quirk kept: the other side's engine part falls). The health goes down by
+    the attacking fighters' rate times the firepower: "#adamage<n>" in five steps (level 4: both
+    engines smoke at the right propeller, quirk kept), parts break from 75 %, engines from 25 %, at 0
+    an outer part, "#jushotdwn<n>", the fall (a 3 m sphere swept along the body), the cutscene 31; on
+    the ground the crash and a 7 s slow motion of the camera path. Fighters (Junkers88_SetState, at
+    most nine, Fix): "la_Bf109Canyon" models on "#airfight_0<n>_A<k>" paths whose notes start / end
+    attacks: tracers each 200 ms from a barrel (pooled, 0.5 m a ms with a jitter, 500 m or to the
+    static ray's hit, a whizz within 25 m of the camera), hit sounds on the bomber, a sphere in the
+    world for the gunners (hits by 1 / the health factor); shot down: smoke, "#bfshotdwn<n>", falling
+    until the animation ends or they land. They fade in between 9 and 11 s. Six chatter groups
+    (group 5 by a fighter's bearing, 20..60 m). Properties 100 / 200 / 300 / 400 / 500 (an unknown
+    chunk entered, not left: quirk kept). Saved game: 1000 holding 2000..20000 (the health written
+    twice, quirk kept). Fixes: chatter group 4 has no pause (the original divides by a leftover);
+    nulls guarded (the tracers' model, a fighter or path without a model or animation, a seat
+    without its dummy, a fighter without guns, empty part lists); short chunks keep their values;
+    LoadParts skips indices out of range. Dropped: the copy protection in UpdateDamage (the
+    0x008ca840 / 0x008caf40 check: 1000 damage a second after two minutes in a cracked copy).
+  - g_junkers88 (0x008ac9e4), g_attackingFighters (0x008ac9e8), FindJunkersTargetFor (0x005f0e40,
+    the squads' gunners). GEffects slot 0x58 is SetHierarchyOn(frame, on, typeMask) 0x004865e0 (was
+    DetachWeapon; FreeHands updated); C_ScriptModule::GetCutscene; SetupJunkers88 calls
+    SetInterceptors; squad_combat uses GetHealth. world.h's partial classes replaced by the header.
+  - Harness (build_item.bat links junkers88.cpp; junkers_actors_test.inc after AirActorsTest;
+    check_item.py reads "junk:", 17 checks): a model of the real part names, fighters and path dummies
+    from the cache fake, model stages / times / ticks, callbacks, the sphere sweeps, the static ray,
+    the cutscene state. S_SeAnim (seat_actors_test.inc) now has the engine's refCount, play mode and
+    file name first; the profile stub has the HUD option and play mode. Baselines: 0 of 37 in both
+    orders; the other five builds 0 of 37 each.
+  - Mutations (mutations/mutate_7h.py, 1,210 after dropping 98 equivalent and 8 that did not
+    compile): the first run caught 990 of 1,290 run; two rounds of new cases (see the file's
+    docstring). A full rerun caught 1,209 of 1,211: a hit to exactly 0 caught one, the other
+    (m_chatter[-1]) dropped. All 1,210 caught.
+  - Build: 190 files clean (MSVC). Tier 1: 568 errors in 100 files, 234 stubs. ret_audit --src: 52
+    (the Junkers' S_Fall::Update and TurnPropellers get an unused frame time; EngineDown's second
+    argument is 0 at its one call; SaveParts / LoadParts take the group's fields one by one).
+  - Ghidra: 140 names (names/junkers88.txt; 3 moved from script.txt / squad.txt), 2 functions created
+    (0x005f54b0 NoPathNote, 0x005f54c0 PathNote), 177 decompiles exported; 145 functions in ported.txt
+    (32 helpers absorbed). Stats: 7,279 of 12,288 functions by hand (67.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

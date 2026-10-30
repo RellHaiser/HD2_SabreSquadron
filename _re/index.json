@@ -151890,10 +151890,10 @@
 ]
 },
 "005edcf0": {
-"name": "thunk_FUN_005edd00",
+"name": "StaticInit_Junkers88CreatorThunk",
 "size": 5,
 "lines": 11,
-"chars": 237,
+"chars": 274,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -151911,10 +151911,10 @@
 ]
 },
 "005edd00": {
-"name": "FUN_005edd00",
+"name": "StaticInit_Junkers88Creator",
 "size": 26,
 "lines": 11,
-"chars": 231,
+"chars": 269,
 "callers": [
 "005edcf0"
 ],
@@ -151933,10 +151933,10 @@
 "in_vtables": []
 },
 "005edd20": {
-"name": "FUN_005edd20",
+"name": "C_Junkers88Creator::Create",
 "size": 92,
-"lines": 25,
-"chars": 524,
+"lines": 24,
+"chars": 544,
 "callers": [],
 "callees": [
 "005ef180",
@@ -151954,10 +151954,10 @@
 ]
 },
 "005edd80": {
-"name": "FUN_005edd80",
+"name": "Junkers88_FreeOnThrow",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 111,
 "callers": [
 "008003c0"
 ],
@@ -151971,10 +151971,10 @@
 "in_vtables": []
 },
 "005edd90": {
-"name": "FUN_005edd90",
+"name": "C_Junkers88Creator::GetName",
 "size": 6,
 "lines": 7,
-"chars": 71,
+"chars": 103,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -151991,10 +151991,10 @@
 ]
 },
 "005edda0": {
-"name": "FUN_005edda0",
+"name": "C_Junkers88Creator::Destroy",
 "size": 23,
 "lines": 13,
-"chars": 308,
+"chars": 362,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -152009,10 +152009,10 @@
 ]
 },
 "005eddc0": {
-"name": "C_Junkers88Setup::SetInterceptors",
+"name": "SetInterceptors",
 "size": 23,
 "lines": 9,
-"chars": 222,
+"chars": 182,
 "callers": [
 "00416e10"
 ],
@@ -152024,10 +152024,10 @@
 "in_vtables": []
 },
 "005edde0": {
-"name": "FUN_005edde0",
+"name": "RestartMission",
 "size": 77,
 "lines": 19,
-"chars": 431,
+"chars": 445,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -152044,10 +152044,10 @@
 ]
 },
 "005ede30": {
-"name": "FUN_005ede30",
+"name": "SaveParts",
 "size": 472,
-"lines": 82,
-"chars": 2427,
+"lines": 84,
+"chars": 2479,
 "callers": [
 "005ee1e0"
 ],
@@ -152062,10 +152062,10 @@
 "in_vtables": []
 },
 "005ee010": {
-"name": "FUN_005ee010",
+"name": "LoadParts",
 "size": 460,
 "lines": 87,
-"chars": 2756,
+"chars": 2753,
 "callers": [
 "005ee830"
 ],
@@ -152083,10 +152083,10 @@
 "in_vtables": []
 },
 "005ee1e0": {
-"name": "FUN_005ee1e0",
+"name": "SaveGame",
 "size": 1614,
-"lines": 197,
-"chars": 7631,
+"lines": 198,
+"chars": 6987,
 "callers": [],
 "callees": [
 "00405820",
@@ -152118,10 +152118,10 @@
 ]
 },
 "005ee830": {
-"name": "FUN_005ee830",
+"name": "LoadGame",
 "size": 2351,
-"lines": 347,
-"chars": 12533,
+"lines": 339,
+"chars": 11630,
 "callers": [],
 "callees": [
 "00405890",
@@ -152161,10 +152161,10 @@
 ]
 },
 "005ef160": {
-"name": "FUN_005ef160",
+"name": "Junkers88_FreeFighterOnThrow",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 118,
 "callers": [
 "008003e8",
 "00800620"
@@ -152179,10 +152179,10 @@
 "in_vtables": []
 },
 "005ef170": {
-"name": "FUN_005ef170",
+"name": "Junkers88_FreeDebrisOnThrow",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 117,
 "callers": [
 "008003e0",
 "00800648"
@@ -152197,12 +152197,13 @@
 "in_vtables": []
 },
 "005ef180": {
-"name": "FUN_005ef180",
+"name": "C_Junkers88",
 "size": 631,
-"lines": 169,
-"chars": 5033,
+"lines": 170,
+"chars": 5073,
 "callers": [
-"005edd20"
+"005edd20",
+"005ef430"
 ],
 "callees": [
 "005f32f0",
@@ -152222,10 +152223,10 @@
 "in_vtables": []
 },
 "005ef400": {
-"name": "FUN_005ef400",
+"name": "Junkers88Chatter_Ctor",
 "size": 31,
 "lines": 17,
-"chars": 306,
+"chars": 315,
 "callers": [
 "005ef180"
 ],
@@ -152237,10 +152238,10 @@
 "in_vtables": []
 },
 "005ef420": {
-"name": "FUN_005ef420",
+"name": "GetSeatCount",
 "size": 6,
 "lines": 7,
-"chars": 93,
+"chars": 86,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -152255,12 +152256,13 @@
 ]
 },
 "005ef430": {
-"name": "FUN_005ef430",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 203,
+"chars": 204,
 "callers": [],
 "callees": [
+"005ef180",
 "005ef470",
 "007e559c"
 ],
@@ -152276,10 +152278,10 @@
 ]
 },
 "005ef450": {
-"name": "FUN_005ef450",
+"name": "Junkers88Chatter_Dtor",
 "size": 28,
 "lines": 11,
-"chars": 234,
+"chars": 243,
 "callers": [
 "005ef180",
 "005ef470",
@@ -152296,10 +152298,10 @@
 "in_vtables": []
 },
 "005ef470": {
-"name": "FUN_005ef470",
+"name": "~C_Junkers88",
 "size": 575,
 "lines": 131,
-"chars": 3970,
+"chars": 4000,
 "callers": [
 "005ef430"
 ],
@@ -152323,10 +152325,10 @@
 "in_vtables": []
 },
 "005ef6b0": {
-"name": "thunk_FUN_00610200",
+"name": "SetFrame",
 "size": 5,
 "lines": 10,
-"chars": 186,
+"chars": 176,
 "callers": [],
 "callees": [
 "00610200"
@@ -152343,10 +152345,10 @@
 ]
 },
 "005ef6c0": {
-"name": "thunk_FUN_006101f0",
+"name": "CopyFrom",
 "size": 5,
 "lines": 8,
-"chars": 153,
+"chars": 143,
 "callers": [],
 "callees": [
 "006101f0"
@@ -152363,10 +152365,10 @@
 ]
 },
 "005ef6d0": {
-"name": "FUN_005ef6d0",
+"name": "StartMission",
 "size": 357,
 "lines": 60,
-"chars": 1959,
+"chars": 1906,
 "callers": [],
 "callees": [
 "004290a0",
@@ -152403,10 +152405,10 @@
 ]
 },
 "005ef840": {
-"name": "FUN_005ef840",
+"name": "LoadSounds",
 "size": 832,
 "lines": 93,
-"chars": 2865,
+"chars": 2908,
 "callers": [
 "005ef6d0"
 ],
@@ -152430,10 +152432,10 @@
 "in_vtables": []
 },
 "005efb80": {
-"name": "FUN_005efb80",
+"name": "ReleaseSounds",
 "size": 135,
-"lines": 39,
-"chars": 1097,
+"lines": 45,
+"chars": 1161,
 "callers": [
 "005efc10"
 ],
@@ -152445,10 +152447,10 @@
 "in_vtables": []
 },
 "005efc10": {
-"name": "FUN_005efc10",
+"name": "StopMission",
 "size": 442,
 "lines": 81,
-"chars": 2362,
+"chars": 2347,
 "callers": [],
 "callees": [
 "00423eb0",
@@ -152484,10 +152486,10 @@
 ]
 },
 "005efdd0": {
-"name": "FUN_005efdd0",
+"name": "InitCamera",
 "size": 126,
 "lines": 30,
-"chars": 741,
+"chars": 730,
 "callers": [
 "005ef6d0"
 ],
@@ -152506,10 +152508,10 @@
 "in_vtables": []
 },
 "005efe50": {
-"name": "FUN_005efe50",
+"name": "ReleaseCamera",
 "size": 43,
 "lines": 15,
-"chars": 253,
+"chars": 252,
 "callers": [
 "005efc10"
 ],
@@ -152524,10 +152526,10 @@
 "in_vtables": []
 },
 "005efe80": {
-"name": "FUN_005efe80",
+"name": "AddPart",
 "size": 1786,
 "lines": 338,
-"chars": 11018,
+"chars": 10483,
 "callers": [
 "005f0830"
 ],
@@ -152577,10 +152579,10 @@
 "in_vtables": []
 },
 "005f0580": {
-"name": "FUN_005f0580",
+"name": "ThrowDebris",
 "size": 603,
-"lines": 94,
-"chars": 3322,
+"lines": 92,
+"chars": 3099,
 "callers": [
 "005f6b40"
 ],
@@ -152606,10 +152608,10 @@
 "in_vtables": []
 },
 "005f07e0": {
-"name": "FUN_005f07e0",
+"name": "InitParts",
 "size": 79,
-"lines": 15,
-"chars": 524,
+"lines": 14,
+"chars": 345,
 "callers": [
 "005ef6d0"
 ],
@@ -152621,10 +152623,10 @@
 "in_vtables": []
 },
 "005f0830": {
-"name": "FUN_005f0830",
+"name": "EnumPart",
 "size": 102,
 "lines": 38,
-"chars": 788,
+"chars": 821,
 "callers": [
 "005f07e0"
 ],
@@ -152640,10 +152642,10 @@
 "in_vtables": []
 },
 "005f08a0": {
-"name": "FUN_005f08a0",
+"name": "ReleaseParts",
 "size": 431,
-"lines": 63,
-"chars": 2398,
+"lines": 57,
+"chars": 2097,
 "callers": [
 "005efc10"
 ],
@@ -152666,10 +152668,10 @@
 "in_vtables": []
 },
 "005f0a50": {
-"name": "FUN_005f0a50",
+"name": "InitPropellers",
 "size": 55,
-"lines": 15,
-"chars": 457,
+"lines": 13,
+"chars": 394,
 "callers": [
 "005ef6d0"
 ],
@@ -152686,8 +152688,8 @@
 "005f0a90": {
 "name": "SetState",
 "size": 435,
-"lines": 81,
-"chars": 2319,
+"lines": 82,
+"chars": 2340,
 "callers": [
 "00416e10"
 ],
@@ -152710,10 +152712,10 @@
 "in_vtables": []
 },
 "005f0c50": {
-"name": "FUN_005f0c50",
+"name": "FindFighterByPath",
 "size": 74,
 "lines": 28,
-"chars": 646,
+"chars": 639,
 "callers": [
 "005f0cf0",
 "005f0d20"
@@ -152726,10 +152728,10 @@
 "in_vtables": []
 },
 "005f0ca0": {
-"name": "FUN_005f0ca0",
+"name": "FindFighter",
 "size": 71,
 "lines": 28,
-"chars": 620,
+"chars": 619,
 "callers": [
 "005f0d70"
 ],
@@ -152741,11 +152743,13 @@
 "in_vtables": []
 },
 "005f0cf0": {
-"name": "FUN_005f0cf0",
+"name": "StartAttack",
 "size": 42,
 "lines": 12,
-"chars": 256,
-"callers": [],
+"chars": 264,
+"callers": [
+"005f54c0"
+],
 "callees": [
 "005f0c50",
 "005f45a0"
@@ -152757,12 +152761,13 @@
 "in_vtables": []
 },
 "005f0d20": {
-"name": "FUN_005f0d20",
+"name": "EndAttack",
 "size": 65,
 "lines": 17,
-"chars": 362,
+"chars": 342,
 "callers": [
-"005f3e30"
+"005f3e30",
+"005f54c0"
 ],
 "callees": [
 "005f0c50",
@@ -152777,10 +152782,10 @@
 "in_vtables": []
 },
 "005f0d70": {
-"name": "FUN_005f0d70",
+"name": "Hit",
 "size": 203,
-"lines": 49,
-"chars": 1240,
+"lines": 48,
+"chars": 1210,
 "callers": [],
 "callees": [
 "005a5fe0",
@@ -152807,7 +152812,7 @@
 "name": "FindJunkersTargetFor",
 "size": 23,
 "lines": 13,
-"chars": 278,
+"chars": 296,
 "callers": [
 "0052cea0"
 ],
@@ -152823,10 +152828,10 @@
 "in_vtables": []
 },
 "005f0e60": {
-"name": "FUN_005f0e60",
+"name": "FindTarget",
 "size": 1323,
 "lines": 191,
-"chars": 5928,
+"chars": 5870,
 "callers": [
 "005f0e40"
 ],
@@ -152852,10 +152857,10 @@
 "in_vtables": []
 },
 "005f1390": {
-"name": "FUN_005f1390",
+"name": "ResetChatter",
 "size": 1069,
-"lines": 110,
-"chars": 4391,
+"lines": 138,
+"chars": 6034,
 "callers": [
 "005ef6d0"
 ],
@@ -152871,10 +152876,10 @@
 "in_vtables": []
 },
 "005f17c0": {
-"name": "FUN_005f17c0",
+"name": "Chatter",
 "size": 1313,
-"lines": 213,
-"chars": 7328,
+"lines": 220,
+"chars": 7444,
 "callers": [
 "005f0d70",
 "005f3510",
@@ -153510,10 +153515,10 @@
 "in_vtables": []
 },
 "005f29c0": {
-"name": "FUN_005f29c0",
+"name": "StaticInit_5f29c0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -153532,10 +153537,10 @@
 ]
 },
 "005f29f0": {
-"name": "FUN_005f29f0",
+"name": "ReadProperties",
 "size": 670,
-"lines": 143,
-"chars": 4758,
+"lines": 126,
+"chars": 4090,
 "callers": [],
 "callees": [
 "00405890",
@@ -153555,10 +153560,10 @@
 ]
 },
 "005f2c90": {
-"name": "FUN_005f2c90",
+"name": "StaticInit_5f2c90",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -153577,10 +153582,10 @@
 ]
 },
 "005f2cc0": {
-"name": "FUN_005f2cc0",
+"name": "InitSeats",
 "size": 287,
-"lines": 67,
-"chars": 1854,
+"lines": 76,
+"chars": 2076,
 "callers": [
 "005ef6d0"
 ],
@@ -153608,10 +153613,10 @@
 "in_vtables": []
 },
 "005f2de0": {
-"name": "FUN_005f2de0",
+"name": "EmptySeats",
 "size": 74,
 "lines": 25,
-"chars": 557,
+"chars": 555,
 "callers": [
 "005efc10"
 ],
@@ -153625,10 +153630,10 @@
 "in_vtables": []
 },
 "005f2e30": {
-"name": "FUN_005f2e30",
+"name": "GetSeatFlags",
 "size": 38,
 "lines": 15,
-"chars": 292,
+"chars": 268,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -153645,10 +153650,10 @@
 ]
 },
 "005f2e60": {
-"name": "FUN_005f2e60",
+"name": "IsSeatBlocked",
 "size": 5,
 "lines": 7,
-"chars": 93,
+"chars": 101,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -153663,10 +153668,10 @@
 ]
 },
 "005f2e70": {
-"name": "FUN_005f2e70",
+"name": "SetSeatBlocked",
 "size": 65,
-"lines": 19,
-"chars": 496,
+"lines": 18,
+"chars": 390,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -153681,10 +153686,10 @@
 ]
 },
 "005f2ec0": {
-"name": "FUN_005f2ec0",
+"name": "SetSeatOccupant",
 "size": 213,
-"lines": 33,
-"chars": 1185,
+"lines": 38,
+"chars": 1306,
 "callers": [],
 "callees": [
 "004c6dd0"
@@ -153701,10 +153706,10 @@
 ]
 },
 "005f2fa0": {
-"name": "FUN_005f2fa0",
+"name": "GetSeatOccupant",
 "size": 46,
 "lines": 15,
-"chars": 290,
+"chars": 305,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -153719,10 +153724,10 @@
 ]
 },
 "005f2fd0": {
-"name": "FUN_005f2fd0",
+"name": "FindSeat",
 "size": 38,
 "lines": 21,
-"chars": 380,
+"chars": 388,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -153737,10 +153742,10 @@
 ]
 },
 "005f3000": {
-"name": "FUN_005f3000",
+"name": "LeaveSeat",
 "size": 94,
 "lines": 30,
-"chars": 724,
+"chars": 775,
 "callers": [],
 "callees": [
 "004c6dd0"
@@ -153757,10 +153762,10 @@
 ]
 },
 "005f3060": {
-"name": "FUN_005f3060",
+"name": "GetSeatText",
 "size": 92,
 "lines": 24,
-"chars": 563,
+"chars": 542,
 "callers": [],
 "callees": [
 "007e5ea0",
@@ -153781,10 +153786,10 @@
 ]
 },
 "005f30c0": {
-"name": "FUN_005f30c0",
+"name": "ExitSeat",
 "size": 74,
 "lines": 26,
-"chars": 655,
+"chars": 608,
 "callers": [],
 "callees": [
 "004c6dd0"
@@ -153801,10 +153806,10 @@
 ]
 },
 "005f3110": {
-"name": "FUN_005f3110",
+"name": "GetSeatCamera",
 "size": 176,
-"lines": 41,
-"chars": 1437,
+"lines": 42,
+"chars": 1462,
 "callers": [],
 "callees": [
 "006987d0",
@@ -153824,10 +153829,10 @@
 ]
 },
 "005f31c0": {
-"name": "FUN_005f31c0",
+"name": "StaticInit_5f31c0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -153846,10 +153851,10 @@
 ]
 },
 "005f31f0": {
-"name": "FUN_005f31f0",
+"name": "Junkers88Fall_Save",
 "size": 64,
 "lines": 15,
-"chars": 329,
+"chars": 335,
 "callers": [
 "005ee1e0",
 "005f3e70"
@@ -153864,10 +153869,10 @@
 "in_vtables": []
 },
 "005f3230": {
-"name": "FUN_005f3230",
+"name": "Junkers88Fall_Load",
 "size": 184,
 "lines": 49,
-"chars": 1268,
+"chars": 1274,
 "callers": [
 "005ee830",
 "005f40e0"
@@ -153883,10 +153888,10 @@
 "in_vtables": []
 },
 "005f32f0": {
-"name": "FUN_005f32f0",
+"name": "Junkers88Fall_Ctor",
 "size": 11,
 "lines": 9,
-"chars": 146,
+"chars": 152,
 "callers": [
 "005ef180",
 "005f40e0",
@@ -153900,10 +153905,10 @@
 "in_vtables": []
 },
 "005f3300": {
-"name": "FUN_005f3300",
+"name": "Junkers88Fall_Init",
 "size": 84,
 "lines": 21,
-"chars": 698,
+"chars": 704,
 "callers": [
 "005efdd0",
 "005f4e50"
@@ -153920,10 +153925,10 @@
 "in_vtables": []
 },
 "005f3360": {
-"name": "FUN_005f3360",
+"name": "Junkers88Fall_Update",
 "size": 319,
 "lines": 66,
-"chars": 2274,
+"chars": 2282,
 "callers": [
 "005f3a70",
 "005f7710"
@@ -153941,10 +153946,10 @@
 "in_vtables": []
 },
 "005f34a0": {
-"name": "FUN_005f34a0",
+"name": "Junkers88Fall_Start",
 "size": 61,
 "lines": 22,
-"chars": 537,
+"chars": 544,
 "callers": [
 "005f3510",
 "005f71e0"
@@ -153959,10 +153964,10 @@
 "in_vtables": []
 },
 "005f34e0": {
-"name": "FUN_005f34e0",
+"name": "Junkers88Fighter_Damage",
 "size": 47,
 "lines": 15,
-"chars": 313,
+"chars": 338,
 "callers": [
 "005f0d70"
 ],
@@ -153978,10 +153983,10 @@
 "in_vtables": []
 },
 "005f3510": {
-"name": "FUN_005f3510",
+"name": "Junkers88Fighter_ShootDown",
 "size": 461,
 "lines": 79,
-"chars": 2672,
+"chars": 2708,
 "callers": [
 "005f34e0"
 ],
@@ -154014,10 +154019,10 @@
 "in_vtables": []
 },
 "005f36e0": {
-"name": "FUN_005f36e0",
+"name": "Junkers88Fighter_Fire",
 "size": 523,
 "lines": 80,
-"chars": 2206,
+"chars": 2220,
 "callers": [
 "005f3a70"
 ],
@@ -154039,10 +154044,10 @@
 "in_vtables": []
 },
 "005f38f0": {
-"name": "FUN_005f38f0",
+"name": "Junkers88Fighter_HitBomber",
 "size": 377,
 "lines": 50,
-"chars": 1726,
+"chars": 1764,
 "callers": [
 "005f3a70"
 ],
@@ -154061,10 +154066,10 @@
 "in_vtables": []
 },
 "005f3a70": {
-"name": "FUN_005f3a70",
+"name": "Junkers88Fighter_Update",
 "size": 923,
 "lines": 176,
-"chars": 5969,
+"chars": 6019,
 "callers": [
 "005f7710"
 ],
@@ -154092,10 +154097,10 @@
 "in_vtables": []
 },
 "005f3e10": {
-"name": "FUN_005f3e10",
+"name": "Junkers88Fighter_StopAttack",
 "size": 21,
 "lines": 9,
-"chars": 143,
+"chars": 158,
 "callers": [
 "005f0d20"
 ],
@@ -154109,10 +154114,10 @@
 "in_vtables": []
 },
 "005f3e30": {
-"name": "FUN_005f3e30",
+"name": "Junkers88Fighter_Disengage",
 "size": 52,
 "lines": 11,
-"chars": 234,
+"chars": 271,
 "callers": [
 "005f3510",
 "005f71e0"
@@ -154130,10 +154135,10 @@
 "in_vtables": []
 },
 "005f3e70": {
-"name": "FUN_005f3e70",
+"name": "Junkers88Fighter_Save",
 "size": 624,
 "lines": 109,
-"chars": 3583,
+"chars": 3604,
 "callers": [
 "005ee1e0"
 ],
@@ -154153,10 +154158,10 @@
 "in_vtables": []
 },
 "005f40e0": {
-"name": "FUN_005f40e0",
+"name": "Junkers88Fighter_Load",
 "size": 1201,
 "lines": 224,
-"chars": 7408,
+"chars": 7530,
 "callers": [
 "005ee830"
 ],
@@ -154195,10 +154200,10 @@
 "in_vtables": []
 },
 "005f45a0": {
-"name": "FUN_005f45a0",
+"name": "Junkers88Fighter_StartAttack",
 "size": 51,
 "lines": 12,
-"chars": 245,
+"chars": 251,
 "callers": [
 "005f0cf0"
 ],
@@ -154216,10 +154221,10 @@
 "in_vtables": []
 },
 "005f45e0": {
-"name": "FUN_005f45e0",
+"name": "Junkers88_LoadSound",
 "size": 347,
 "lines": 66,
-"chars": 2304,
+"chars": 2311,
 "callers": [
 "005ef840",
 "005f4740"
@@ -154241,10 +154246,10 @@
 "in_vtables": []
 },
 "005f4740": {
-"name": "FUN_005f4740",
+"name": "Junkers88Fighter_LoadSounds",
 "size": 456,
 "lines": 78,
-"chars": 2202,
+"chars": 2231,
 "callers": [
 "005f40e0",
 "005f5310"
@@ -154265,10 +154270,10 @@
 "in_vtables": []
 },
 "005f4910": {
-"name": "FUN_005f4910",
+"name": "Junkers88Fighter_CreateModel",
 "size": 1293,
 "lines": 241,
-"chars": 7702,
+"chars": 7718,
 "callers": [
 "005f40e0",
 "005f5310"
@@ -154314,10 +154319,10 @@
 "in_vtables": []
 },
 "005f4e50": {
-"name": "FUN_005f4e50",
+"name": "Junkers88Fighter_InitVolume",
 "size": 676,
 "lines": 132,
-"chars": 4259,
+"chars": 4280,
 "callers": [
 "005f40e0",
 "005f5310"
@@ -154344,10 +154349,10 @@
 "in_vtables": []
 },
 "005f5100": {
-"name": "FUN_005f5100",
+"name": "Junkers88Fighter_InitGuns",
 "size": 518,
 "lines": 98,
-"chars": 3367,
+"chars": 3380,
 "callers": [
 "005f40e0",
 "005f5310"
@@ -154377,10 +154382,10 @@
 "in_vtables": []
 },
 "005f5310": {
-"name": "FUN_005f5310",
+"name": "Junkers88Fighter_Ctor",
 "size": 403,
-"lines": 72,
-"chars": 2394,
+"lines": 73,
+"chars": 2503,
 "callers": [
 "005f0a90"
 ],
@@ -154412,11 +154417,53 @@
 ],
 "in_vtables": []
 },
+"005f54b0": {
+"name": "Junkers88_NoPathNote",
+"size": 5,
+"lines": 7,
+"chars": 64,
+"callers": [
+"005f3e30",
+"005f5d20"
+],
+"callees": [],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"005f54c0": {
+"name": "Junkers88_PathNote",
+"size": 119,
+"lines": 21,
+"chars": 593,
+"callers": [
+"005f40e0",
+"005f5d20",
+"005f5f20"
+],
+"callees": [
+"005f0cf0",
+"005f0d20",
+"007e5ea0"
+],
+"imports": [],
+"strings": [
+"0083e928",
+"0083e934"
+],
+"vtables": [],
+"globals": [
+"008ac9e4"
+],
+"in_vtables": []
+},
 "005f5540": {
-"name": "FUN_005f5540",
+"name": "Junkers88Fighter_Dtor",
 "size": 251,
 "lines": 62,
-"chars": 1613,
+"chars": 1628,
 "callers": [
 "005efc10",
 "005f7710"
@@ -154437,10 +154484,10 @@
 "in_vtables": []
 },
 "005f5640": {
-"name": "FUN_005f5640",
+"name": "Junkers88Debris_Save",
 "size": 370,
 "lines": 70,
-"chars": 2021,
+"chars": 2029,
 "callers": [
 "005ee1e0"
 ],
@@ -154459,10 +154506,10 @@
 "in_vtables": []
 },
 "005f57c0": {
-"name": "FUN_005f57c0",
+"name": "Junkers88Debris_Load",
 "size": 414,
 "lines": 71,
-"chars": 2312,
+"chars": 2320,
 "callers": [
 "005ee830"
 ],
@@ -154479,10 +154526,10 @@
 "in_vtables": []
 },
 "005f5960": {
-"name": "FUN_005f5960",
+"name": "Junkers88Debris_Ctor",
 "size": 207,
 "lines": 36,
-"chars": 1296,
+"chars": 1304,
 "callers": [
 "005f0580"
 ],
@@ -154499,10 +154546,10 @@
 "in_vtables": []
 },
 "005f5a30": {
-"name": "FUN_005f5a30",
+"name": "Junkers88Debris_Update",
 "size": 518,
 "lines": 69,
-"chars": 2659,
+"chars": 2669,
 "callers": [
 "005f75f0"
 ],
@@ -154526,10 +154573,10 @@
 "in_vtables": []
 },
 "005f5c40": {
-"name": "FUN_005f5c40",
+"name": "Junkers88Path_Save",
 "size": 219,
 "lines": 46,
-"chars": 1240,
+"chars": 1246,
 "callers": [
 "005ee1e0",
 "005f3e70"
@@ -154547,10 +154594,10 @@
 "in_vtables": []
 },
 "005f5d20": {
-"name": "FUN_005f5d20",
+"name": "Junkers88Path_Load",
 "size": 503,
 "lines": 107,
-"chars": 3145,
+"chars": 3183,
 "callers": [
 "005ee830",
 "005f40e0"
@@ -154570,10 +154617,10 @@
 "in_vtables": []
 },
 "005f5f20": {
-"name": "FUN_005f5f20",
+"name": "Junkers88Path_Ctor",
 "size": 398,
-"lines": 98,
-"chars": 3006,
+"lines": 99,
+"chars": 3032,
 "callers": [
 "005efdd0",
 "005f40e0",
@@ -154597,10 +154644,10 @@
 "in_vtables": []
 },
 "005f60b0": {
-"name": "FUN_005f60b0",
+"name": "Junkers88Path_SetCallback",
 "size": 34,
 "lines": 15,
-"chars": 306,
+"chars": 319,
 "callers": [
 "005f3e30",
 "005f40e0",
@@ -154615,10 +154662,10 @@
 "in_vtables": []
 },
 "005f60e0": {
-"name": "FUN_005f60e0",
+"name": "Junkers88Path_Dtor",
 "size": 22,
 "lines": 14,
-"chars": 248,
+"chars": 254,
 "callers": [
 "005efe50",
 "005f5540"
@@ -154633,10 +154680,10 @@
 "in_vtables": []
 },
 "005f6100": {
-"name": "FUN_005f6100",
+"name": "Junkers88Path_Update",
 "size": 412,
 "lines": 89,
-"chars": 3267,
+"chars": 3281,
 "callers": [
 "005f3a70",
 "005f7710"
@@ -154655,10 +154702,10 @@
 "in_vtables": []
 },
 "005f62a0": {
-"name": "FUN_005f62a0",
+"name": "Junkers88Path_Next",
 "size": 1072,
 "lines": 229,
-"chars": 7287,
+"chars": 7304,
 "callers": [
 "005f5d20",
 "005f5f20",
@@ -154706,10 +154753,10 @@
 "in_vtables": []
 },
 "005f6700": {
-"name": "FUN_005f6700",
+"name": "Junkers88Part_Save",
 "size": 78,
 "lines": 18,
-"chars": 406,
+"chars": 412,
 "callers": [
 "005ee1e0"
 ],
@@ -154723,10 +154770,10 @@
 "in_vtables": []
 },
 "005f6750": {
-"name": "FUN_005f6750",
+"name": "Junkers88Part_Load",
 "size": 226,
 "lines": 53,
-"chars": 1476,
+"chars": 1489,
 "callers": [
 "005ee830"
 ],
@@ -154742,10 +154789,10 @@
 "in_vtables": []
 },
 "005f6840": {
-"name": "FUN_005f6840",
+"name": "Junkers88Part_Ctor",
 "size": 618,
 "lines": 137,
-"chars": 4706,
+"chars": 4712,
 "callers": [
 "005efe80"
 ],
@@ -154764,10 +154811,10 @@
 "in_vtables": []
 },
 "005f6ab0": {
-"name": "FUN_005f6ab0",
+"name": "Junkers88Part_Dtor",
 "size": 48,
 "lines": 15,
-"chars": 402,
+"chars": 408,
 "callers": [
 "005f08a0"
 ],
@@ -154781,10 +154828,10 @@
 "in_vtables": []
 },
 "005f6ae0": {
-"name": "FUN_005f6ae0",
+"name": "Junkers88Part_Shown",
 "size": 43,
 "lines": 25,
-"chars": 391,
+"chars": 398,
 "callers": [
 "005f6750",
 "005f6b40"
@@ -154797,10 +154844,10 @@
 "in_vtables": []
 },
 "005f6b10": {
-"name": "FUN_005f6b10",
+"name": "Junkers88Part_HasNext",
 "size": 33,
 "lines": 16,
-"chars": 379,
+"chars": 388,
 "callers": [
 "005f8040"
 ],
@@ -154812,10 +154859,10 @@
 "in_vtables": []
 },
 "005f6b40": {
-"name": "FUN_005f6b40",
+"name": "Junkers88Part_Advance",
 "size": 349,
 "lines": 87,
-"chars": 2754,
+"chars": 2821,
 "callers": [
 "005f6b40",
 "005f8040"
@@ -154833,10 +154880,10 @@
 "in_vtables": []
 },
 "005f6ca0": {
-"name": "FUN_005f6ca0",
+"name": "EngineFire",
 "size": 371,
 "lines": 67,
-"chars": 1923,
+"chars": 1921,
 "callers": [
 "005f6e20",
 "005f70d0"
@@ -154854,10 +154901,10 @@
 "in_vtables": []
 },
 "005f6e20": {
-"name": "FUN_005f6e20",
+"name": "EngineDown",
 "size": 167,
 "lines": 35,
-"chars": 1075,
+"chars": 972,
 "callers": [
 "005f6b40"
 ],
@@ -154872,10 +154919,10 @@
 "in_vtables": []
 },
 "005f6ed0": {
-"name": "FUN_005f6ed0",
+"name": "Junkers88_PlayTableSound",
 "size": 115,
-"lines": 31,
-"chars": 723,
+"lines": 32,
+"chars": 750,
 "callers": [
 "005f38f0",
 "005f7710",
@@ -154892,10 +154939,10 @@
 "in_vtables": []
 },
 "005f6f50": {
-"name": "FUN_005f6f50",
+"name": "StaticInit_5f6f50",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -154914,10 +154961,10 @@
 ]
 },
 "005f6f80": {
-"name": "FUN_005f6f80",
+"name": "Junkers88_PlayAnimation",
 "size": 99,
 "lines": 20,
-"chars": 582,
+"chars": 593,
 "callers": [
 "005f3510",
 "005f40e0",
@@ -154937,10 +154984,10 @@
 "in_vtables": []
 },
 "005f6ff0": {
-"name": "FUN_005f6ff0",
+"name": "ShootDown",
 "size": 215,
-"lines": 53,
-"chars": 1407,
+"lines": 55,
+"chars": 1555,
 "callers": [
 "005f71e0"
 ],
@@ -154965,10 +155012,10 @@
 "in_vtables": []
 },
 "005f70d0": {
-"name": "FUN_005f70d0",
+"name": "ShowDamage",
 "size": 265,
 "lines": 49,
-"chars": 1232,
+"chars": 1237,
 "callers": [
 "005ef6d0",
 "005efc10",
@@ -154991,10 +155038,10 @@
 "in_vtables": []
 },
 "005f71e0": {
-"name": "FUN_005f71e0",
+"name": "UpdateDamage",
 "size": 1032,
-"lines": 153,
-"chars": 4975,
+"lines": 150,
+"chars": 4782,
 "callers": [
 "005f7710"
 ],
@@ -155032,10 +155079,10 @@
 "in_vtables": []
 },
 "005f75f0": {
-"name": "FUN_005f75f0",
+"name": "UpdateDebris",
 "size": 161,
 "lines": 32,
-"chars": 865,
+"chars": 875,
 "callers": [
 "005f7710"
 ],
@@ -155050,10 +155097,10 @@
 "in_vtables": []
 },
 "005f76a0": {
-"name": "FUN_005f76a0",
+"name": "Tick",
 "size": 100,
 "lines": 24,
-"chars": 500,
+"chars": 515,
 "callers": [],
 "callees": [
 "004c55e0",
@@ -155074,10 +155121,10 @@
 ]
 },
 "005f7710": {
-"name": "FUN_005f7710",
+"name": "Update",
 "size": 1172,
-"lines": 177,
-"chars": 5869,
+"lines": 178,
+"chars": 5985,
 "callers": [],
 "callees": [
 "00445150",
@@ -155119,10 +155166,10 @@
 ]
 },
 "005f7bb0": {
-"name": "FUN_005f7bb0",
+"name": "TurnPropellers",
 "size": 603,
 "lines": 72,
-"chars": 2594,
+"chars": 2481,
 "callers": [
 "005f7710"
 ],
@@ -155143,10 +155190,10 @@
 "in_vtables": []
 },
 "005f7e10": {
-"name": "FUN_005f7e10",
+"name": "EngineFell",
 "size": 546,
-"lines": 82,
-"chars": 3012,
+"lines": 79,
+"chars": 2637,
 "callers": [
 "005f6e20"
 ],
@@ -155165,10 +155212,10 @@
 "in_vtables": []
 },
 "005f8040": {
-"name": "FUN_005f8040",
+"name": "BreakPart",
 "size": 230,
 "lines": 66,
-"chars": 1796,
+"chars": 1803,
 "callers": [
 "005f71e0"
 ],
@@ -155199,10 +155246,10 @@
 "in_vtables": []
 },
 "005f8150": {
-"name": "FUN_005f8150",
+"name": "StaticInit_5f8150",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -155221,10 +155268,10 @@
 ]
 },
 "005f8180": {
-"name": "FUN_005f8180",
+"name": "GetSeatWeaponDef",
 "size": 36,
-"lines": 9,
-"chars": 207,
+"lines": 11,
+"chars": 261,
 "callers": [],
 "callees": [
 "004c57b0"
@@ -155241,10 +155288,10 @@
 ]
 },
 "005f81b0": {
-"name": "FUN_005f81b0",
+"name": "InitSeatWeapons",
 "size": 325,
 "lines": 69,
-"chars": 2037,
+"chars": 2040,
 "callers": [
 "005ef6d0"
 ],
@@ -155270,10 +155317,10 @@
 "in_vtables": []
 },
 "005f8300": {
-"name": "FUN_005f8300",
+"name": "ReleaseSeatWeapons",
 "size": 104,
 "lines": 24,
-"chars": 615,
+"chars": 557,
 "callers": [
 "005efc10"
 ],
@@ -155288,10 +155335,10 @@
 "in_vtables": []
 },
 "005f8370": {
-"name": "FUN_005f8370",
+"name": "HasSeatWeapon",
 "size": 50,
-"lines": 15,
-"chars": 349,
+"lines": 10,
+"chars": 243,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -155306,10 +155353,10 @@
 ]
 },
 "005f83b0": {
-"name": "FUN_005f83b0",
+"name": "GetSeatWeaponRounds",
 "size": 47,
 "lines": 15,
-"chars": 314,
+"chars": 305,
 "callers": [],
 "callees": [
 "004c6550"
@@ -155326,10 +155373,10 @@
 ]
 },
 "005f83e0": {
-"name": "FUN_005f83e0",
+"name": "ApplySeatControls",
 "size": 81,
-"lines": 29,
-"chars": 679,
+"lines": 30,
+"chars": 700,
 "callers": [],
 "callees": [
 "004c3b60",
@@ -155349,10 +155396,10 @@
 ]
 },
 "005f8440": {
-"name": "FUN_005f8440",
+"name": "GetSeatWeaponOrigin",
 "size": 68,
-"lines": 18,
-"chars": 443,
+"lines": 19,
+"chars": 474,
 "callers": [],
 "callees": [
 "004c5800"
@@ -155369,10 +155416,10 @@
 ]
 },
 "005f8490": {
-"name": "FUN_005f8490",
+"name": "ShowSeatView",
 "size": 30,
 "lines": 13,
-"chars": 274,
+"chars": 276,
 "callers": [],
 "callees": [
 "004c6d90"
@@ -155389,10 +155436,10 @@
 ]
 },
 "005f84b0": {
-"name": "FUN_005f84b0",
+"name": "GetSeatWeaponAim",
 "size": 68,
 "lines": 18,
-"chars": 436,
+"chars": 462,
 "callers": [],
 "callees": [
 "004c5870"
@@ -155409,10 +155456,10 @@
 ]
 },
 "005f8500": {
-"name": "FUN_005f8500",
+"name": "UnknownAC",
 "size": 51,
 "lines": 17,
-"chars": 406,
+"chars": 468,
 "callers": [],
 "callees": [
 "004c57f0"
@@ -155431,10 +155478,10 @@
 ]
 },
 "005f8540": {
-"name": "FUN_005f8540",
+"name": "IsSeatFirstPersonOnly",
 "size": 33,
 "lines": 15,
-"chars": 306,
+"chars": 250,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -155449,10 +155496,10 @@
 ]
 },
 "005f8570": {
-"name": "FUN_005f8570",
+"name": "UnknownC8",
 "size": 47,
-"lines": 16,
-"chars": 389,
+"lines": 19,
+"chars": 466,
 "callers": [],
 "callees": [
 "004c7670"
@@ -155469,10 +155516,10 @@
 ]
 },
 "005f85a0": {
-"name": "FUN_005f85a0",
+"name": "Fire",
 "size": 585,
-"lines": 93,
-"chars": 3116,
+"lines": 89,
+"chars": 2816,
 "callers": [
 "005f36e0"
 ],
@@ -155493,10 +155540,10 @@
 "in_vtables": []
 },
 "005f87f0": {
-"name": "FUN_005f87f0",
+"name": "UpdateTracers",
 "size": 208,
 "lines": 40,
-"chars": 1141,
+"chars": 1152,
 "callers": [
 "005f7710"
 ],
@@ -155511,10 +155558,10 @@
 "in_vtables": []
 },
 "005f88c0": {
-"name": "FUN_005f88c0",
+"name": "Junkers88Tracer_Update",
 "size": 851,
 "lines": 112,
-"chars": 3575,
+"chars": 3597,
 "callers": [
 "005f87f0"
 ],
@@ -155542,10 +155589,10 @@
 "in_vtables": []
 },
 "005f8c20": {
-"name": "FUN_005f8c20",
+"name": "Junkers88Tracer_Reuse",
 "size": 38,
 "lines": 14,
-"chars": 263,
+"chars": 281,
 "callers": [
 "005f85a0"
 ],
@@ -155559,10 +155606,10 @@
 "in_vtables": []
 },
 "005f8c50": {
-"name": "FUN_005f8c50",
+"name": "Junkers88Tracer_Place",
 "size": 276,
 "lines": 41,
-"chars": 1378,
+"chars": 1387,
 "callers": [
 "005f8c20",
 "005f91b0"
@@ -155582,10 +155629,10 @@
 "in_vtables": []
 },
 "005f8d70": {
-"name": "FUN_005f8d70",
+"name": "Junkers88Tracer_Save",
 "size": 497,
 "lines": 75,
-"chars": 1965,
+"chars": 1973,
 "callers": [
 "005ee1e0"
 ],
@@ -155605,10 +155652,10 @@
 "in_vtables": []
 },
 "005f8f70": {
-"name": "FUN_005f8f70",
+"name": "Junkers88Tracer_Load",
 "size": 562,
 "lines": 92,
-"chars": 3151,
+"chars": 3159,
 "callers": [
 "005ee830"
 ],
@@ -155626,10 +155673,10 @@
 "in_vtables": []
 },
 "005f91b0": {
-"name": "FUN_005f91b0",
+"name": "Junkers88Tracer_Ctor",
 "size": 214,
 "lines": 33,
-"chars": 1078,
+"chars": 1095,
 "callers": [
 "005f85a0"
 ],
@@ -155646,10 +155693,10 @@
 "in_vtables": []
 },
 "005f9290": {
-"name": "FUN_005f9290",
+"name": "Junkers88Tracer_Release",
 "size": 22,
 "lines": 14,
-"chars": 227,
+"chars": 238,
 "callers": [
 "005efc10"
 ],
@@ -155697,10 +155744,10 @@
 "in_vtables": []
 },
 "005f96d0": {
-"name": "FUN_005f96d0",
+"name": "StaticInit_5f96d0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -313230,6 +313277,7 @@
 "005e02c0",
 "005ea5d0",
 "005f3060",
+"005f54c0",
 "00600950",
 "00604a10",
 "00604b10",

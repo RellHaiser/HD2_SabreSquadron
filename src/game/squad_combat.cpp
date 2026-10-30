@@ -1463,7 +1463,7 @@ bool C_SquadController::VehicleCombat(int timeDelta)
     const int seat = m_human->m_seat;
     float cone = 0.99f;
     if (vehicle->GetType() == ACTOR_JUNKERS88) {
-        if (static_cast<C_Junkers88 *>(vehicle)->GetUnknown280() == 0.0f)
+        if (static_cast<C_Junkers88 *>(vehicle)->GetHealth() == 0.0f)
             return true;
         cone = 0.9f;
     }

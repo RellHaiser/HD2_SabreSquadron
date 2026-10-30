@@ -9,7 +9,7 @@ of the game and its data.
 
 ## Status
 
-Work in progress (2026-10-30). Of the game's 12,286 functions, 7,102 (66.6 % of the code by size)
+Work in progress (2026-10-30). Of the game's 12,288 functions, 7,279 (67.8 % of the code by size)
 are ported by hand. Generated code (tier 1, below) covers the rest. The sources are
 compile-checked file by file; there is no linked build of the game yet.
 
@@ -21,7 +21,7 @@ seat weapons, shots, collision, the rigid body, debris, items lying in the world
 scene objects, clocks, switches, photo places, breakable fences, radios, document places, mines,
 timed explosions, spawn points, explosive places, pikes, flocks of birds, ladders, multiplayer
 zones, submarines, trains, static weapons, bikes, schools of fish, doors, supply boxes,
-barrels and air attacks. In progress:
+barrels, air attacks and the Junkers 88. In progress:
 the remaining actor types.
 
 ## Approach

@@ -477,8 +477,8 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
         break;
 
     case OP_SetupJunkers88:
-        if (g_junkers88Setup)
-            g_junkers88Setup->SetInterceptors(numberArg(0) * 0.01f, numberArg(1) * 0.01f);
+        if (g_junkers88)
+            g_junkers88->SetInterceptors(numberArg(0) * 0.01f, numberArg(1) * 0.01f);
         break;
 
     case OP_FRM_SwitchFaceTexture: {
@@ -1244,10 +1244,10 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
         if (!model)
             break;
         if (I3D_frame *hw1 = model->FindChildFrame("hw1", 0xFFFF))
-            GetGEffects()->DetachWeapon(hw1, false, true);
+            GetGEffects()->SetHierarchyOn(hw1, false, 1);
         I3D_frame *hw2 = model->FindChildFrame("hw2", 0xFFFF);
         if (hw2)
-            GetGEffects()->DetachWeapon(hw2, false, true);
+            GetGEffects()->SetHierarchyOn(hw2, false, 1);
         break;
     }
 

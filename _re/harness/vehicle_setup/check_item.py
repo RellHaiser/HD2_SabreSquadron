@@ -7,7 +7,8 @@ check of AnimationTest met (part 6b), a simple line with every check of SimpleAc
 (part 7a) and an objective line with every check of ObjectiveActorsTest met (part 7b) a world line with every
 check of WorldActorsTest met (part 7c), a moving line with every check of MovingActorsTest met
 (part 7d), a seat line with every check of SeatActorsTest met (part 7e) and a prop line with every check
-of PropActorsTest met (part 7f) and an air line with every check of AirActorsTest met (part 7g). Prints
+of PropActorsTest met (part 7f) and an air line with every check of AirActorsTest met (part 7g) and a junk line with every check of
+JunkersActorsTest met (part 7h). Prints
 "N models, M with differences" (mutfast.py reads it).
 """
 import glob
@@ -36,6 +37,8 @@ LINES = {
              "barrelLeak barrelSlosh barrelDestroy barrelNet barrelSave barrelStop").split(),
     "air": ("air airProps airStart airStop airTarget airFly airClimb airStates airFire airBullets airSounds airDust "
             "airHit airSave airFind airRay").split(),
+    "junk": ("junk junkProps junkStart junkChatter junkSeats junkParts junkBreak junkDamage junkUpdate junkDebris "
+             "junkTracers junkFighters junkFly junkHit junkTarget junkSave junkStop").split(),
 }
 
 

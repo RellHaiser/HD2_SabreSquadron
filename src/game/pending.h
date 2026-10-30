@@ -104,7 +104,10 @@ public:
     void SetModelHighlight(I3D_frame *model, float level);   // vtable +0x50
     // Light level of a model (C_HumanLighting; 1: full light).
     void SetModelLightLevel(I3D_frame *model, float level);   // vtable +0x54
-    void DetachWeapon(I3D_frame *joint, bool flag, bool hide);   // vtable +0x58
+    // Switches on / off every frame under `frame` (itself included) whose type is in `typeMask`
+    // (bits by type: 1 visual, 2 light, 4 camera, 8 sound, 0x10 sector, 0x20 dummy, 0x40 target,
+    // 0x100 user, 0x80 model, ...; sounds also start / stop).
+    void SetHierarchyOn(I3D_frame *frame, bool on, uint32_t typeMask);   // vtable +0x58 0x004865e0
     void HideVisual(I3D_frame *visual, bool flag);  // vtable +0x5C
     // SetModelHighlight(model, 0); false for no model (debris and item actors going away).
     bool ClearModelHighlight(I3D_frame *model);     // vtable +0x60 (0x00486e90)
@@ -831,5 +834,4 @@ void BuildPathPoints(const struct S_vector4 &from, const struct S_vector4 &to, c
 class C_Actor;
 class C_Human;
 class I3D_frame;
-// A Junkers 88 of the setup (g_junkers88Setup; none: null) and the frame to aim at.
-C_Actor *FindJunkersTargetFor(C_Human *human, I3D_frame **frame);   // 0x005f0e40 (__fastcall)
+// FindJunkersTargetFor (0x005f0e40): see game/junkers88.h.

@@ -31,6 +31,10 @@ HRESULT C_ResourceCache<I3D_model>::Get(const char *fileName, I3D_model **out, T
 }
 struct S_SeAnim {
     void **vtable;
+    // (The engine's members first: I3D_animation_set's inline accessors read them; part 7h.)
+    int refCount = 1;                                   // +0x04
+    int playMode = 0;                                   // +0x08 SetPlayMode
+    const char *fileName = nullptr;                     // +0x0C
     std::string name;
     int releases = 0;
 };
@@ -63,7 +67,8 @@ HRESULT C_ResourceCache<I3D_animation_set>::Get(const char *fileName, I3D_animat
     S_SeAnim *&anim = g_seAnims[fileName];
     if (!anim) {
         g_seAnimVtable[0] = reinterpret_cast<void *>(&F_SeAnimRelease);
-        anim = new S_SeAnim{g_seAnimVtable, fileName};
+        anim = new S_SeAnim{g_seAnimVtable, 1, 0, nullptr, fileName};
+        anim->fileName = anim->name.c_str();
     }
     *out = reinterpret_cast<I3D_animation_set *>(anim);
     return I3D_OK;

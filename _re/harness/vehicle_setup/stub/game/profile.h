@@ -12,10 +12,23 @@ struct S_DetailSettings {
     bool voiceChat = false;
 };
 
+// (The Junkers 88, part 7h: the HUD option and the play mode, as the real header has them.)
+struct S_HudOption {
+    bool shown = false;
+};
+struct S_PlayMode {
+    int singleMission = 0;
+    int mode = 0;
+    int unknown0C = 0;
+    int unknown10 = 0;
+};
+
 class C_GameProfile {
 public:
     bool IsCooperativeGame() const;
     S_DetailSettings *GetDetailSettings();
+    S_HudOption *m_hudOption = nullptr;
+    S_PlayMode *m_playMode = nullptr;
 };
 extern C_GameProfile g_gameProfile;
 extern S_MultiplayerSettings *g_mpSettings;             // (a reference into g_gameProfile in the real header)
