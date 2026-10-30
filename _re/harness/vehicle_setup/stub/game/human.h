@@ -69,6 +69,13 @@ public:
     // (The multiplayer zone, part 7d.)
     int GetHealth() const { return health; }
     void SetMpZone(int zoneId) { mpZone = zoneId; }
+    // The sight module's calls (part 8b; the world test defines them).
+    bool IsFriendOf(const C_Actor *other) const;
+    void OnSightEvent(int lost, int targetId);
+    void TestSightOfHuman(C_Human *target, int *status, float *visibility);
+    void TestSightOfMeleeTracker(C_Actor *meleeTracker, int *status, float *visibility);
+    void RemoveCollision(bool unknown);
+    void RestoreCollision(bool unknown);
     // The car's hits and crew queries (game/car_hits.cpp).
     bool IsHostileTo(const C_Actor *other) const
     {

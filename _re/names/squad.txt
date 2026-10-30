@@ -192,7 +192,6 @@
 0058d720 S_HumanOrder::CopyFrom | void __thiscall CopyFrom(S_HumanOrder *this, S_HumanOrder *other)
 
 # --- called by the squad, no names before
-0046f320 C_SightModule::CanSee | int __thiscall CanSee(void *this, int observer, int target, int *out, bool *visible)
 004b9080 C_CommandPanel::ReleaseOrderMarker | void __thiscall ReleaseOrderMarker(C_CommandPanel *this, I3D_frame *marker)
 004b9240 C_CommandPanel::AcquireOrderMarker | I3D_frame * __thiscall AcquireOrderMarker(C_CommandPanel *this, S_HumanOrder *order)
 004b9b10 C_CommandPanel::UpdateOrderMarker | void __thiscall UpdateOrderMarker(C_CommandPanel *this, S_HumanOrder *order, I3D_frame *marker)

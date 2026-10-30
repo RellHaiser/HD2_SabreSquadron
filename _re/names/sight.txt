@@ -1,0 +1,68 @@
+# Part 8b: the sight module (src/game/sight.*), 0x0046d5d0..0x004702f0, and the meleeTracker's view
+# test it calls. StaticInit_<addr>: the file's guarded statics (atexit). The observers' and targets'
+# classes were auto classes C_auto_0080ff68.. (vtables 0x0080ff68 / ff7c / ff90 observers,
+# 0x0080ffa4 / ffb0 / ffbc targets). 0x0046eb10 (C_SightTarget::Refresh, empty) stays an idiom.
+
+0046d5d0 StaticInit_46d5d0
+0046d600 C_SightObserver::SetRelation | bool __thiscall SetRelation(void * this, int target, int relation)
+0046d6f0 C_SightObserver::C_SightObserver
+0046d730 C_HumanSightObserver::C_HumanSightObserver
+0046d760 C_MeleeTrackerSightObserver::C_MeleeTrackerSightObserver
+0046d790 C_MeleeTrackerSightObserver::TestNow
+0046d7a0 C_MeleeTrackerSightObserver::CanSee
+0046d7b0 C_MeleeTrackerSightObserver::GetVisibleParts
+0046d800 SightObserverNoParts_Destroy
+0046d840 C_HumanSightObserver::WantsTest | bool __thiscall WantsTest(void * this, int target)
+0046d8c0 C_HumanSightObserver::TestNow | bool __thiscall TestNow(void * this, int target)
+0046db60 C_HumanSightObserver::CanSee | int __thiscall CanSee(void * this, int target, int * before, bool * visible)
+0046dc10 C_HumanSightObserver::GetVisibleParts | void * __thiscall GetVisibleParts(void * this, int target, uint * parts)
+0046dc70 C_MeleeTrackerSightObserver::WantsTest | bool __thiscall WantsTest(void * this, int target)
+0046dcf0 C_HumanSightObserver::Update | void __thiscall Update(void * this, uint mask, int target, int timeDelta)
+0046dea0 C_MeleeTrackerSightObserver::Update | void __thiscall Update(void * this, uint mask, int target, int timeDelta)
+0046df80 C_HumanSightObserver::TestPart | bool __thiscall TestPart(void * this, int target, int timeDelta, bool * skipped)
+0046e3b0 C_MeleeTrackerSightObserver::TestPart | bool __thiscall TestPart(void * this, int target, int timeDelta)
+0046e790 SightRecordVector_Insert
+0046ea90 StaticInit_46ea90
+0046eac0 C_SightTarget::C_SightTarget
+0046eb20 C_HumanSightTarget::Refresh
+0046ebf0 SightTarget_FindPart
+0046ec40 C_HumanSightTarget::C_HumanSightTarget
+0046ecb0 C_HumanSightTarget::GetActor
+0046ecc0 C_HumanSightTarget::GetKind
+0046ecd0 C_SightTarget::FreeParts
+0046ecf0 C_MeleeTrackerSightTarget::C_MeleeTrackerSightTarget
+0046edc0 C_MeleeTrackerSightTarget::GetActor
+0046edd0 C_MeleeTrackerSightTarget::GetKind
+0046ede0 SightTarget_FindMeleeTrackerPart
+0046ee30 StaticInit_46ee30
+0046ee60 StaticInit_SightModule
+0046ee70 SightModule_Construct
+0046ee90 C_SightModule::C_SightModule | C_SightModule * __thiscall C_SightModule(C_SightModule * this, int id, char * name)
+0046eee0 C_SightModule::LoadMissionData | void __thiscall LoadMissionData(C_SightModule * this, bool server)
+0046eef0 C_SightModule::FreeMissionData | void __thiscall FreeMissionData(C_SightModule * this, bool server)
+0046ef00 C_SightModule::SaveGame
+0046ef10 C_SightModule::LoadGame
+0046ef20 C_SightModule::ScalarDeletingDestructor
+0046ef40 C_SightModule::~C_SightModule
+0046ef80 SightModule_RegisterAtExit
+0046ef90 SightModule_Destroy
+0046efd0 C_SightModule::StartMission | void __thiscall StartMission(C_SightModule * this, bool server)
+0046eff0 C_SightModule::StopMission | void __thiscall StopMission(C_SightModule * this, bool server)
+0046f000 C_SightModule::Tick | void __thiscall Tick(C_SightModule * this, int timeDelta)
+0046f280 C_SightModule::TestNow | bool __thiscall TestNow(C_SightModule * this, int observer, int target)
+0046f2a0 C_SightModule::GetVisibleParts | void __thiscall GetVisibleParts(C_SightModule * this, int observer, int target, uint * parts)
+0046f300 SightModuleNoParts_Destroy
+0046f320 C_SightModule::CanSee | int __thiscall CanSee(C_SightModule * this, int observer, int target, int * before, bool * visible)
+0046f350 C_SightModule::AddObserver | int __thiscall AddObserver(C_SightModule * this, I3D_frame * frame, uint mask)
+0046f700 C_SightModule::SetTargetState | void __thiscall SetTargetState(C_SightModule * this, int id, int state)
+0046f8c0 C_SightModule::SetObserverState | void __thiscall SetObserverState(C_SightModule * this, int id, int state)
+0046f9d0 C_SightModule::AddTarget | int __thiscall AddTarget(C_SightModule * this, I3D_frame * frame, uint mask)
+0046fd50 C_SightModule::RemoveObserver | bool __thiscall RemoveObserver(C_SightModule * this, int id)
+0046fdf0 C_SightModule::RemoveTarget | bool __thiscall RemoveTarget(C_SightModule * this, int id)
+0046ffb0 C_SightModule::Clear | void __thiscall Clear(C_SightModule * this)
+00470070 C_SightObserver::FreeRecords
+00470090 C_SightModule::RestartMission | void __thiscall RestartMission(C_SightModule * this, bool server)
+004700e0 SightTargetVector_Insert
+004702f0 SightObserverVector_Insert
+005d64c0 C_MeleeTracker::TestSight | void __thiscall TestSight(C_MeleeTracker * this, C_Actor * target, int * status, float * visibility)
+00839390 g_sightTime @ float

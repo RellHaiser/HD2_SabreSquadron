@@ -94,6 +94,12 @@ bool IsMeleeTrackerTargetRole(const C_Actor *actor)
 }
 }  // namespace
 
+void C_MeleeTracker::TestSight(C_Actor *target, int *status, float *visibility)   // 0x005d64c0
+{
+    if (m_ai->GetMode() != 1)
+        m_ai->TestSight(target, status, visibility);
+}
+
 void C_MeleeTracker::OnSightEvent(int lost, int targetIndex)    // 0x005d5cb0
 {
     if (!m_ai || (m_ai->GetOrders() & 0x40000000u) != 0)   // no AI, or suspended

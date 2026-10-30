@@ -123,4 +123,3 @@
 
 # What the team calls
 0058d900 C_ScriptedController::SetFormation | void __thiscall SetFormation(C_ScriptedController *this, C_FormationShape * formation)
-0046f280 C_SightModule::TestNow | bool __thiscall TestNow(C_SightModule *this, int observer, int target)

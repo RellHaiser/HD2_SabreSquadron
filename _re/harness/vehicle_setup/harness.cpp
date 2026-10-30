@@ -55,6 +55,8 @@
 #ifdef WORLD_TEST
 #include <malloc.h>
 #include "game/lightmap_groups.h"
+#include "game/melee_tracker.h"
+#include "game/sight.h"
 #include "game/tshift.h"
 #endif
 #include "game/resource_cache.h"
@@ -1654,10 +1656,16 @@ void C_CollisionWorld::SetIgnoredVolume(S_CollisionVolume *volume, int arg)
     ++(volume ? g_ignores : g_ignoreClears);
 }
 int g_ignoreLists;
-void C_CollisionWorld::SetIgnoredVolumes(S_CollisionVolume **, uint32_t, int)
+S_CollisionVolume **g_ignoreListVolumes;                // the last SetIgnoredVolumes' arguments (part 8b)
+uint32_t g_ignoreListCount;
+int g_ignoreListArg;
+void C_CollisionWorld::SetIgnoredVolumes(S_CollisionVolume **volumes, uint32_t count, int arg)
 {
     ++g_ignores;
     ++g_ignoreLists;
+    g_ignoreListVolumes = volumes;
+    g_ignoreListCount = count;
+    g_ignoreListArg = arg;
 }
 bool g_traceDrive = true;                               // the first model's drive, second by second
 
@@ -14823,6 +14831,7 @@ void PartsHitTest(const char *path)
 #endif
 #ifdef WORLD_TEST
 #include "world_modules_test.inc"
+#include "sight_test.inc"
 #endif
 
 int main(int argc, char **argv)

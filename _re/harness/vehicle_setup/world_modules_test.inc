@@ -1387,6 +1387,8 @@ void TShiftTest(S_TshiftResults &r)
     WM(r.tsFree, m.m_entries.empty() && !m.HasFrame(a) && !m.GetEntry(ma));
 }
 
+void SightTest();                                       // (sight_test.inc, part 8b)
+
 void WorldModulesTest(const char *path)
 {
     if (const char *data = std::getenv("WORLD_DATA"))
@@ -1422,5 +1424,6 @@ void WorldModulesTest(const char *path)
     S_TshiftResults ts;
     TShiftTest(ts);
     std::printf("tshift: tsFind %d tsAdd %d tsRemove %d tsFree %d\n", ts.tsFind, ts.tsAdd, ts.tsRemove, ts.tsFree);
+    SightTest();
     std::fflush(stdout);
 }

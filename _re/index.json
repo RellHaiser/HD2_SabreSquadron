@@ -39714,10 +39714,10 @@
 ]
 },
 "0046d5d0": {
-"name": "FUN_0046d5d0",
+"name": "StaticInit_46d5d0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -39736,10 +39736,10 @@
 ]
 },
 "0046d600": {
-"name": "FUN_0046d600",
+"name": "C_SightObserver::SetRelation",
 "size": 239,
-"lines": 53,
-"chars": 1536,
+"lines": 49,
+"chars": 1360,
 "callers": [
 "0046f350",
 "0046f9d0"
@@ -39754,10 +39754,10 @@
 "in_vtables": []
 },
 "0046d6f0": {
-"name": "FUN_0046d6f0",
+"name": "C_SightObserver::C_SightObserver",
 "size": 60,
-"lines": 18,
-"chars": 423,
+"lines": 19,
+"chars": 455,
 "callers": [
 "0046d730",
 "0046d760"
@@ -39772,10 +39772,10 @@
 "in_vtables": []
 },
 "0046d730": {
-"name": "FUN_0046d730",
+"name": "C_HumanSightObserver::C_HumanSightObserver",
 "size": 45,
 "lines": 13,
-"chars": 386,
+"chars": 461,
 "callers": [
 "0046f350"
 ],
@@ -39791,10 +39791,10 @@
 "in_vtables": []
 },
 "0046d760": {
-"name": "FUN_0046d760",
+"name": "C_MeleeTrackerSightObserver::C_MeleeTrackerSightObserver",
 "size": 45,
 "lines": 13,
-"chars": 386,
+"chars": 482,
 "callers": [
 "0046f350"
 ],
@@ -39810,10 +39810,10 @@
 "in_vtables": []
 },
 "0046d790": {
-"name": "FUN_0046d790",
+"name": "C_MeleeTrackerSightObserver::TestNow",
 "size": 5,
 "lines": 7,
-"chars": 101,
+"chars": 125,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -39828,10 +39828,10 @@
 ]
 },
 "0046d7a0": {
-"name": "FUN_0046d7a0",
+"name": "C_MeleeTrackerSightObserver::CanSee",
 "size": 5,
 "lines": 7,
-"chars": 101,
+"chars": 124,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -39846,10 +39846,10 @@
 ]
 },
 "0046d7b0": {
-"name": "FUN_0046d7b0",
+"name": "C_MeleeTrackerSightObserver::GetVisibleParts",
 "size": 71,
-"lines": 20,
-"chars": 479,
+"lines": 21,
+"chars": 528,
 "callers": [],
 "callees": [
 "007e562e"
@@ -39872,10 +39872,10 @@
 ]
 },
 "0046d800": {
-"name": "FUN_0046d800",
+"name": "SightObserverNoParts_Destroy",
 "size": 32,
 "lines": 13,
-"chars": 242,
+"chars": 258,
 "callers": [
 "0046d7b0"
 ],
@@ -39893,10 +39893,10 @@
 "in_vtables": []
 },
 "0046d840": {
-"name": "FUN_0046d840",
+"name": "C_HumanSightObserver::WantsTest",
 "size": 119,
-"lines": 28,
-"chars": 843,
+"lines": 25,
+"chars": 756,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -39914,10 +39914,10 @@
 ]
 },
 "0046d8c0": {
-"name": "FUN_0046d8c0",
+"name": "C_HumanSightObserver::TestNow",
 "size": 667,
-"lines": 115,
-"chars": 4594,
+"lines": 100,
+"chars": 3904,
 "callers": [],
 "callees": [
 "005a5250",
@@ -39944,10 +39944,10 @@
 ]
 },
 "0046db60": {
-"name": "FUN_0046db60",
+"name": "C_HumanSightObserver::CanSee",
 "size": 173,
 "lines": 37,
-"chars": 1149,
+"chars": 1088,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -39965,10 +39965,10 @@
 ]
 },
 "0046dc10": {
-"name": "FUN_0046dc10",
+"name": "C_HumanSightObserver::GetVisibleParts",
 "size": 95,
-"lines": 22,
-"chars": 586,
+"lines": 23,
+"chars": 604,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -39986,10 +39986,10 @@
 ]
 },
 "0046dc70": {
-"name": "FUN_0046dc70",
+"name": "C_MeleeTrackerSightObserver::WantsTest",
 "size": 119,
-"lines": 28,
-"chars": 843,
+"lines": 26,
+"chars": 764,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -40007,10 +40007,10 @@
 ]
 },
 "0046dcf0": {
-"name": "FUN_0046dcf0",
+"name": "C_HumanSightObserver::Update",
 "size": 427,
-"lines": 88,
-"chars": 2802,
+"lines": 89,
+"chars": 2863,
 "callers": [],
 "callees": [
 "0046df80",
@@ -40034,10 +40034,10 @@
 ]
 },
 "0046dea0": {
-"name": "FUN_0046dea0",
+"name": "C_MeleeTrackerSightObserver::Update",
 "size": 196,
-"lines": 42,
-"chars": 1271,
+"lines": 43,
+"chars": 1300,
 "callers": [],
 "callees": [
 "0046e3b0",
@@ -40055,10 +40055,10 @@
 ]
 },
 "0046df80": {
-"name": "FUN_0046df80",
+"name": "C_HumanSightObserver::TestPart",
 "size": 1071,
 "lines": 147,
-"chars": 5631,
+"chars": 5683,
 "callers": [
 "0046dcf0"
 ],
@@ -40086,10 +40086,10 @@
 "in_vtables": []
 },
 "0046e3b0": {
-"name": "FUN_0046e3b0",
+"name": "C_MeleeTrackerSightObserver::TestPart",
 "size": 988,
-"lines": 143,
-"chars": 6070,
+"lines": 145,
+"chars": 6056,
 "callers": [
 "0046dea0"
 ],
@@ -40112,10 +40112,10 @@
 "in_vtables": []
 },
 "0046e790": {
-"name": "FUN_0046e790",
+"name": "SightRecordVector_Insert",
 "size": 757,
 "lines": 179,
-"chars": 5580,
+"chars": 5592,
 "callers": [
 "0046d600"
 ],
@@ -40130,10 +40130,10 @@
 "in_vtables": []
 },
 "0046ea90": {
-"name": "FUN_0046ea90",
+"name": "StaticInit_46ea90",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -40152,10 +40152,10 @@
 ]
 },
 "0046eac0": {
-"name": "FUN_0046eac0",
+"name": "C_SightTarget::C_SightTarget",
 "size": 66,
-"lines": 20,
-"chars": 466,
+"lines": 21,
+"chars": 494,
 "callers": [
 "0046ec40",
 "0046ecf0"
@@ -40192,10 +40192,10 @@
 ]
 },
 "0046eb20": {
-"name": "FUN_0046eb20",
+"name": "C_HumanSightTarget::Refresh",
 "size": 196,
 "lines": 37,
-"chars": 1181,
+"chars": 1204,
 "callers": [
 "0046ec40"
 ],
@@ -40221,10 +40221,10 @@
 ]
 },
 "0046ebf0": {
-"name": "FUN_0046ebf0",
+"name": "SightTarget_FindPart",
 "size": 74,
 "lines": 21,
-"chars": 393,
+"chars": 401,
 "callers": [
 "0046eb20"
 ],
@@ -40240,10 +40240,10 @@
 "in_vtables": []
 },
 "0046ec40": {
-"name": "FUN_0046ec40",
+"name": "C_HumanSightTarget::C_HumanSightTarget",
 "size": 107,
 "lines": 25,
-"chars": 656,
+"chars": 738,
 "callers": [
 "0046f9d0"
 ],
@@ -40260,10 +40260,10 @@
 "in_vtables": []
 },
 "0046ecb0": {
-"name": "FUN_0046ecb0",
+"name": "C_HumanSightTarget::GetActor",
 "size": 4,
 "lines": 7,
-"chars": 104,
+"chars": 120,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -40278,10 +40278,10 @@
 ]
 },
 "0046ecc0": {
-"name": "FUN_0046ecc0",
+"name": "C_HumanSightTarget::GetKind",
 "size": 3,
 "lines": 7,
-"chars": 101,
+"chars": 116,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -40296,10 +40296,10 @@
 ]
 },
 "0046ecd0": {
-"name": "FUN_0046ecd0",
+"name": "C_SightTarget::FreeParts",
 "size": 28,
 "lines": 11,
-"chars": 234,
+"chars": 246,
 "callers": [
 "0046ffb0",
 "007fbc00",
@@ -40315,10 +40315,10 @@
 "in_vtables": []
 },
 "0046ecf0": {
-"name": "FUN_0046ecf0",
+"name": "C_MeleeTrackerSightTarget::C_MeleeTrackerSightTarget",
 "size": 205,
 "lines": 41,
-"chars": 1220,
+"chars": 1328,
 "callers": [
 "0046f9d0"
 ],
@@ -40339,10 +40339,10 @@
 "in_vtables": []
 },
 "0046edc0": {
-"name": "FUN_0046edc0",
+"name": "C_MeleeTrackerSightTarget::GetActor",
 "size": 4,
 "lines": 7,
-"chars": 105,
+"chars": 128,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -40357,10 +40357,10 @@
 ]
 },
 "0046edd0": {
-"name": "FUN_0046edd0",
+"name": "C_MeleeTrackerSightTarget::GetKind",
 "size": 6,
 "lines": 7,
-"chars": 101,
+"chars": 123,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -40375,10 +40375,10 @@
 ]
 },
 "0046ede0": {
-"name": "FUN_0046ede0",
+"name": "SightTarget_FindMeleeTrackerPart",
 "size": 74,
 "lines": 21,
-"chars": 393,
+"chars": 413,
 "callers": [
 "0046ecf0"
 ],
@@ -40394,10 +40394,10 @@
 "in_vtables": []
 },
 "0046ee30": {
-"name": "FUN_0046ee30",
+"name": "StaticInit_46ee30",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -40416,10 +40416,10 @@
 ]
 },
 "0046ee60": {
-"name": "FUN_0046ee60",
+"name": "StaticInit_SightModule",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 119,
 "callers": [],
 "callees": [
 "0046ee70",
@@ -40437,10 +40437,10 @@
 ]
 },
 "0046ee70": {
-"name": "FUN_0046ee70",
+"name": "SightModule_Construct",
 "size": 18,
 "lines": 8,
-"chars": 132,
+"chars": 142,
 "callers": [
 "0046ee60"
 ],
@@ -40458,12 +40458,13 @@
 "in_vtables": []
 },
 "0046ee90": {
-"name": "FUN_0046ee90",
+"name": "C_SightModule",
 "size": 66,
 "lines": 17,
-"chars": 439,
+"chars": 433,
 "callers": [
-"0046ee70"
+"0046ee70",
+"0046ef20"
 ],
 "callees": [
 "0048d950"
@@ -40477,10 +40478,10 @@
 "in_vtables": []
 },
 "0046eee0": {
-"name": "FUN_0046eee0",
+"name": "LoadMissionData",
 "size": 16,
 "lines": 10,
-"chars": 158,
+"chars": 144,
 "callers": [],
 "callees": [
 "0046ffb0"
@@ -40497,10 +40498,10 @@
 ]
 },
 "0046eef0": {
-"name": "FUN_0046eef0",
+"name": "FreeMissionData",
 "size": 16,
 "lines": 10,
-"chars": 158,
+"chars": 144,
 "callers": [],
 "callees": [
 "0046ffb0"
@@ -40517,10 +40518,10 @@
 ]
 },
 "0046ef00": {
-"name": "FUN_0046ef00",
+"name": "SaveGame",
 "size": 5,
 "lines": 7,
-"chars": 97,
+"chars": 93,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -40535,10 +40536,10 @@
 ]
 },
 "0046ef10": {
-"name": "FUN_0046ef10",
+"name": "LoadGame",
 "size": 5,
 "lines": 7,
-"chars": 97,
+"chars": 93,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -40553,12 +40554,13 @@
 ]
 },
 "0046ef20": {
-"name": "FUN_0046ef20",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 207,
+"chars": 221,
 "callers": [],
 "callees": [
+"0046ee90",
 "0046ef40",
 "007e559c"
 ],
@@ -40574,10 +40576,10 @@
 ]
 },
 "0046ef40": {
-"name": "FUN_0046ef40",
+"name": "~C_SightModule",
 "size": 54,
 "lines": 16,
-"chars": 333,
+"chars": 335,
 "callers": [
 "0046ef20",
 "0046ef90"
@@ -40593,10 +40595,10 @@
 "in_vtables": []
 },
 "0046ef80": {
-"name": "FUN_0046ef80",
+"name": "SightModule_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 94,
 "callers": [
 "0046ee60"
 ],
@@ -40610,10 +40612,10 @@
 "in_vtables": []
 },
 "0046ef90": {
-"name": "FUN_0046ef90",
+"name": "SightModule_Destroy",
 "size": 10,
 "lines": 8,
-"chars": 117,
+"chars": 122,
 "callers": [
 "0046ef80"
 ],
@@ -40629,10 +40631,10 @@
 "in_vtables": []
 },
 "0046efd0": {
-"name": "FUN_0046efd0",
+"name": "StartMission",
 "size": 26,
 "lines": 12,
-"chars": 202,
+"chars": 192,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -40647,10 +40649,10 @@
 ]
 },
 "0046eff0": {
-"name": "FUN_0046eff0",
+"name": "StopMission",
 "size": 16,
 "lines": 10,
-"chars": 158,
+"chars": 140,
 "callers": [],
 "callees": [
 "0046ffb0"
@@ -40667,10 +40669,10 @@
 ]
 },
 "0046f000": {
-"name": "FUN_0046f000",
+"name": "Tick",
 "size": 626,
-"lines": 132,
-"chars": 4193,
+"lines": 130,
+"chars": 4119,
 "callers": [],
 "callees": [
 "007e6260"
@@ -40693,8 +40695,8 @@
 "0046f280": {
 "name": "TestNow",
 "size": 23,
-"lines": 8,
-"chars": 178,
+"lines": 10,
+"chars": 223,
 "callers": [
 "00459500",
 "0045f080",
@@ -40710,10 +40712,10 @@
 "in_vtables": []
 },
 "0046f2a0": {
-"name": "FUN_0046f2a0",
+"name": "GetVisibleParts",
 "size": 93,
-"lines": 18,
-"chars": 512,
+"lines": 19,
+"chars": 524,
 "callers": [
 "005710b0",
 "005a3ab0"
@@ -40734,10 +40736,10 @@
 "in_vtables": []
 },
 "0046f300": {
-"name": "FUN_0046f300",
+"name": "SightModuleNoParts_Destroy",
 "size": 32,
 "lines": 13,
-"chars": 242,
+"chars": 256,
 "callers": [
 "0046f2a0"
 ],
@@ -40758,7 +40760,7 @@
 "name": "CanSee",
 "size": 33,
 "lines": 11,
-"chars": 246,
+"chars": 252,
 "callers": [
 "0052b180",
 "00532a20",
@@ -40775,10 +40777,10 @@
 "in_vtables": []
 },
 "0046f350": {
-"name": "FUN_0046f350",
+"name": "AddObserver",
 "size": 938,
 "lines": 234,
-"chars": 7151,
+"chars": 6927,
 "callers": [
 "0059c4d0",
 "0059ca00",
@@ -40805,10 +40807,10 @@
 "in_vtables": []
 },
 "0046f700": {
-"name": "FUN_0046f700",
+"name": "SetTargetState",
 "size": 419,
-"lines": 94,
-"chars": 3483,
+"lines": 81,
+"chars": 2834,
 "callers": [
 "0059ddf0",
 "0059f050",
@@ -40828,10 +40830,10 @@
 "in_vtables": []
 },
 "0046f8c0": {
-"name": "FUN_0046f8c0",
+"name": "SetObserverState",
 "size": 266,
-"lines": 53,
-"chars": 2005,
+"lines": 45,
+"chars": 1623,
 "callers": [
 "0059ddf0",
 "005a0220",
@@ -40849,10 +40851,10 @@
 "in_vtables": []
 },
 "0046f9d0": {
-"name": "FUN_0046f9d0",
+"name": "AddTarget",
 "size": 884,
-"lines": 219,
-"chars": 7271,
+"lines": 214,
+"chars": 6908,
 "callers": [
 "0059c4d0",
 "0059ca00",
@@ -40879,10 +40881,10 @@
 "in_vtables": []
 },
 "0046fd50": {
-"name": "FUN_0046fd50",
+"name": "RemoveObserver",
 "size": 153,
-"lines": 33,
-"chars": 1269,
+"lines": 26,
+"chars": 941,
 "callers": [
 "0059fa60",
 "005a7fe0",
@@ -40898,10 +40900,10 @@
 "in_vtables": []
 },
 "0046fdf0": {
-"name": "FUN_0046fdf0",
+"name": "RemoveTarget",
 "size": 285,
-"lines": 60,
-"chars": 2406,
+"lines": 52,
+"chars": 1932,
 "callers": [
 "0059fa60",
 "005a7fe0",
@@ -40919,10 +40921,10 @@
 "in_vtables": []
 },
 "0046ffb0": {
-"name": "FUN_0046ffb0",
+"name": "Clear",
 "size": 180,
 "lines": 39,
-"chars": 956,
+"chars": 977,
 "callers": [
 "0046eee0",
 "0046eef0",
@@ -40942,10 +40944,10 @@
 "in_vtables": []
 },
 "00470070": {
-"name": "FUN_00470070",
+"name": "C_SightObserver::FreeRecords",
 "size": 28,
 "lines": 11,
-"chars": 234,
+"chars": 250,
 "callers": [
 "0046ffb0"
 ],
@@ -40959,10 +40961,10 @@
 "in_vtables": []
 },
 "00470090": {
-"name": "FUN_00470090",
+"name": "RestartMission",
 "size": 19,
 "lines": 9,
-"chars": 135,
+"chars": 142,
 "callers": [],
 "callees": [
 "0046ffb0"
@@ -41011,10 +41013,10 @@
 "in_vtables": []
 },
 "004700e0": {
-"name": "FUN_004700e0",
+"name": "SightTargetVector_Insert",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3533,
 "callers": [
 "0046f9d0"
 ],
@@ -41029,10 +41031,10 @@
 "in_vtables": []
 },
 "004702f0": {
-"name": "FUN_004702f0",
+"name": "SightObserverVector_Insert",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3535,
 "callers": [
 "0046f350"
 ],
@@ -144980,10 +144982,10 @@
 "in_vtables": []
 },
 "005d64c0": {
-"name": "FUN_005d64c0",
+"name": "TestSight",
 "size": 20,
-"lines": 13,
-"chars": 347,
+"lines": 14,
+"chars": 410,
 "callers": [
 "0046e3b0"
 ],

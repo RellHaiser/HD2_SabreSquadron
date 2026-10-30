@@ -5606,19 +5606,272 @@
   "name": "C_CameraModule::SetSpecialMode",
   "proto": "void __thiscall SetSpecialMode(C_CameraModule *this, int mode, bool on, I3D_frame * target)"
  },
+ "0046d5d0": {
+  "module": "sight",
+  "name": "StaticInit_46d5d0"
+ },
+ "0046d600": {
+  "module": "sight",
+  "name": "C_SightObserver::SetRelation",
+  "proto": "bool __thiscall SetRelation(void * this, int target, int relation)"
+ },
+ "0046d6f0": {
+  "module": "sight",
+  "name": "C_SightObserver::C_SightObserver"
+ },
+ "0046d730": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::C_HumanSightObserver"
+ },
+ "0046d760": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::C_MeleeTrackerSightObserver"
+ },
+ "0046d790": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::TestNow"
+ },
+ "0046d7a0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::CanSee"
+ },
+ "0046d7b0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::GetVisibleParts"
+ },
+ "0046d800": {
+  "module": "sight",
+  "name": "SightObserverNoParts_Destroy"
+ },
+ "0046d840": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::WantsTest",
+  "proto": "bool __thiscall WantsTest(void * this, int target)"
+ },
+ "0046d8c0": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::TestNow",
+  "proto": "bool __thiscall TestNow(void * this, int target)"
+ },
+ "0046db60": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::CanSee",
+  "proto": "int __thiscall CanSee(void * this, int target, int * before, bool * visible)"
+ },
+ "0046dc10": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::GetVisibleParts",
+  "proto": "void * __thiscall GetVisibleParts(void * this, int target, uint * parts)"
+ },
+ "0046dc70": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::WantsTest",
+  "proto": "bool __thiscall WantsTest(void * this, int target)"
+ },
+ "0046dcf0": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::Update",
+  "proto": "void __thiscall Update(void * this, uint mask, int target, int timeDelta)"
+ },
+ "0046dea0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::Update",
+  "proto": "void __thiscall Update(void * this, uint mask, int target, int timeDelta)"
+ },
+ "0046df80": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::TestPart",
+  "proto": "bool __thiscall TestPart(void * this, int target, int timeDelta, bool * skipped)"
+ },
+ "0046e3b0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::TestPart",
+  "proto": "bool __thiscall TestPart(void * this, int target, int timeDelta)"
+ },
+ "0046e790": {
+  "module": "sight",
+  "name": "SightRecordVector_Insert"
+ },
+ "0046ea90": {
+  "module": "sight",
+  "name": "StaticInit_46ea90"
+ },
+ "0046eac0": {
+  "module": "sight",
+  "name": "C_SightTarget::C_SightTarget"
+ },
  "0046eb10": {
   "module": "zz_idioms",
   "name": "empty_function_46eb10"
  },
+ "0046eb20": {
+  "module": "sight",
+  "name": "C_HumanSightTarget::Refresh"
+ },
+ "0046ebf0": {
+  "module": "sight",
+  "name": "SightTarget_FindPart"
+ },
+ "0046ec40": {
+  "module": "sight",
+  "name": "C_HumanSightTarget::C_HumanSightTarget"
+ },
+ "0046ecb0": {
+  "module": "sight",
+  "name": "C_HumanSightTarget::GetActor"
+ },
+ "0046ecc0": {
+  "module": "sight",
+  "name": "C_HumanSightTarget::GetKind"
+ },
+ "0046ecd0": {
+  "module": "sight",
+  "name": "C_SightTarget::FreeParts"
+ },
+ "0046ecf0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightTarget::C_MeleeTrackerSightTarget"
+ },
+ "0046edc0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightTarget::GetActor"
+ },
+ "0046edd0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightTarget::GetKind"
+ },
+ "0046ede0": {
+  "module": "sight",
+  "name": "SightTarget_FindMeleeTrackerPart"
+ },
+ "0046ee30": {
+  "module": "sight",
+  "name": "StaticInit_46ee30"
+ },
+ "0046ee60": {
+  "module": "sight",
+  "name": "StaticInit_SightModule"
+ },
+ "0046ee70": {
+  "module": "sight",
+  "name": "SightModule_Construct"
+ },
+ "0046ee90": {
+  "module": "sight",
+  "name": "C_SightModule::C_SightModule",
+  "proto": "C_SightModule * __thiscall C_SightModule(C_SightModule * this, int id, char * name)"
+ },
+ "0046eee0": {
+  "module": "sight",
+  "name": "C_SightModule::LoadMissionData",
+  "proto": "void __thiscall LoadMissionData(C_SightModule * this, bool server)"
+ },
+ "0046eef0": {
+  "module": "sight",
+  "name": "C_SightModule::FreeMissionData",
+  "proto": "void __thiscall FreeMissionData(C_SightModule * this, bool server)"
+ },
+ "0046ef00": {
+  "module": "sight",
+  "name": "C_SightModule::SaveGame"
+ },
+ "0046ef10": {
+  "module": "sight",
+  "name": "C_SightModule::LoadGame"
+ },
+ "0046ef20": {
+  "module": "sight",
+  "name": "C_SightModule::ScalarDeletingDestructor"
+ },
+ "0046ef40": {
+  "module": "sight",
+  "name": "C_SightModule::~C_SightModule"
+ },
+ "0046ef80": {
+  "module": "sight",
+  "name": "SightModule_RegisterAtExit"
+ },
+ "0046ef90": {
+  "module": "sight",
+  "name": "SightModule_Destroy"
+ },
+ "0046efd0": {
+  "module": "sight",
+  "name": "C_SightModule::StartMission",
+  "proto": "void __thiscall StartMission(C_SightModule * this, bool server)"
+ },
+ "0046eff0": {
+  "module": "sight",
+  "name": "C_SightModule::StopMission",
+  "proto": "void __thiscall StopMission(C_SightModule * this, bool server)"
+ },
+ "0046f000": {
+  "module": "sight",
+  "name": "C_SightModule::Tick",
+  "proto": "void __thiscall Tick(C_SightModule * this, int timeDelta)"
+ },
  "0046f280": {
-  "module": "team",
+  "module": "sight",
   "name": "C_SightModule::TestNow",
-  "proto": "bool __thiscall TestNow(C_SightModule *this, int observer, int target)"
+  "proto": "bool __thiscall TestNow(C_SightModule * this, int observer, int target)"
+ },
+ "0046f2a0": {
+  "module": "sight",
+  "name": "C_SightModule::GetVisibleParts",
+  "proto": "void __thiscall GetVisibleParts(C_SightModule * this, int observer, int target, uint * parts)"
+ },
+ "0046f300": {
+  "module": "sight",
+  "name": "SightModuleNoParts_Destroy"
  },
  "0046f320": {
-  "module": "squad",
+  "module": "sight",
   "name": "C_SightModule::CanSee",
-  "proto": "int __thiscall CanSee(void *this, int observer, int target, int *out, bool *visible)"
+  "proto": "int __thiscall CanSee(C_SightModule * this, int observer, int target, int * before, bool * visible)"
+ },
+ "0046f350": {
+  "module": "sight",
+  "name": "C_SightModule::AddObserver",
+  "proto": "int __thiscall AddObserver(C_SightModule * this, I3D_frame * frame, uint mask)"
+ },
+ "0046f700": {
+  "module": "sight",
+  "name": "C_SightModule::SetTargetState",
+  "proto": "void __thiscall SetTargetState(C_SightModule * this, int id, int state)"
+ },
+ "0046f8c0": {
+  "module": "sight",
+  "name": "C_SightModule::SetObserverState",
+  "proto": "void __thiscall SetObserverState(C_SightModule * this, int id, int state)"
+ },
+ "0046f9d0": {
+  "module": "sight",
+  "name": "C_SightModule::AddTarget",
+  "proto": "int __thiscall AddTarget(C_SightModule * this, I3D_frame * frame, uint mask)"
+ },
+ "0046fd50": {
+  "module": "sight",
+  "name": "C_SightModule::RemoveObserver",
+  "proto": "bool __thiscall RemoveObserver(C_SightModule * this, int id)"
+ },
+ "0046fdf0": {
+  "module": "sight",
+  "name": "C_SightModule::RemoveTarget",
+  "proto": "bool __thiscall RemoveTarget(C_SightModule * this, int id)"
+ },
+ "0046ffb0": {
+  "module": "sight",
+  "name": "C_SightModule::Clear",
+  "proto": "void __thiscall Clear(C_SightModule * this)"
+ },
+ "00470070": {
+  "module": "sight",
+  "name": "C_SightObserver::FreeRecords"
+ },
+ "00470090": {
+  "module": "sight",
+  "name": "C_SightModule::RestartMission",
+  "proto": "void __thiscall RestartMission(C_SightModule * this, bool server)"
  },
  "004700b0": {
   "module": "zz_idioms",
@@ -5627,6 +5880,14 @@
  "004700d0": {
   "module": "zz_idioms",
   "name": "empty_function_4700d0"
+ },
+ "004700e0": {
+  "module": "sight",
+  "name": "SightTargetVector_Insert"
+ },
+ "004702f0": {
+  "module": "sight",
+  "name": "SightObserverVector_Insert"
  },
  "00470530": {
   "module": "heavy_fire_support",
@@ -21516,6 +21777,11 @@
   "name": "C_MeleeTracker::OnSoundHeard",
   "proto": "void __stdcall OnSoundHeard(S_HeardSound * sound)"
  },
+ "005d64c0": {
+  "module": "sight",
+  "name": "C_MeleeTracker::TestSight",
+  "proto": "void __thiscall TestSight(C_MeleeTracker * this, C_Actor * target, int * status, float * visibility)"
+ },
  "005d64e0": {
   "module": "melee_tracker",
   "name": "C_MeleeTracker::TrackVelocity",
@@ -35779,6 +36045,12 @@
   "data": true,
   "module": "script",
   "name": "g_scriptMessageTypeBits"
+ },
+ "00839390": {
+  "data": true,
+  "module": "sight",
+  "name": "g_sightTime",
+  "type": "float"
  },
  "00839460": {
   "data": true,

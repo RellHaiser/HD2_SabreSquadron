@@ -5234,6 +5234,43 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     functions created, 104 decompiles exported; 76 functions in ported.txt (21 helpers
     absorbed). Stats: 7,376 of 12,293 functions by hand (68.1 % by size).
 
+  PART 8b DONE (2026-10-30): the sight module (src/game/sight.*, new).
+  - C_SightModule ("Sight", module 5, 0x0089b288, 0x0046d5d0..0x004702f0): humans and meleeTrackers
+    register as observers and targets (a free slot from the end reused, else appended; -1 for a
+    frame registered already, no human / meleeTracker, a target mask of 0 or over 15; another
+    actor's frame registers a null target, quirk kept). Each observer keeps a 0x68-byte record per
+    target: the parts seen, their count, the relation (friend: seen at once and told, never tested;
+    neutral; hostile: tested), per part the view, the last and the next test. Relations: IsFriendOf
+    / IsHostileTo for humans (the player's side and the enemy always hostile), by role for
+    meleeTrackers (roles 2, 3 friends; 1, 4, 5 hostile; other trackers friends). Targets' parts are
+    the collision volume frames d, z (else f), i, m, q / c, f, k, o. TestNow: the view test (the
+    target's collision off meanwhile), then rays to the parts from the last; a clear ray (or one
+    meeting the target's vehicle) counts. The tick: 4 s after the start, then a budget of pair tests
+    (each pair once a second: g_sightTime 0x00839390, starting at 1) walked by a target and an
+    observer cursor, each pair also the other way round (quirk kept: the budget is charged for the
+    observers left when a target is passed). A human's test: the view test, then the next part's
+    ray when it is due (not due: "SAFE ..." printed, the answer "anything seen" kept, quirk kept);
+    a meleeTracker's: its AI's view test into the part's view, then a ray that has to meet the
+    target. States: observer off / on; target alive (light objects block) / not, dead (friends test
+    it from then on), hidden / shown. Fixes: a meleeTracker without its body frame looks from its
+    frame (the original reads the null frame); its wait for a negative view is 0 (unset there).
+  - C_MeleeTracker::TestSight (0x005d64c0: the AI's view test unless its mode is 1) and
+    GetBodyVolumes. pending.h's declarations replaced by the header; the target states named
+    (SIGHT_TARGET_NOT_ALIVE = 1), the relations SIGHT_FRIEND / NEUTRAL / HOSTILE.
+  - Harness: the world build links sight.cpp; sight_test.inc ("sight:", 12 checks) with the stub
+    C_Human's sight calls (friend lists, view tests, collision; the stub human.h declares them),
+    zeroed C_MeleeTracker memory as meleeTrackers, a RayTest answering by the point aimed at;
+    SetIgnoredVolumes' fake keeps its arguments; the stub pending.h takes the real sight.h under
+    WORLD_TEST. Baselines: 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37 each.
+  - Mutations (mutations/mutate_8b.py, 402 after dropping 18 equivalent and 12 that did not
+    compile): the first run caught 354 of 432 (66 survived); new cases for 49 (see the file's
+    docstring). A test of an id past the records wrote out of bounds (random crashes, false
+    catches): removed; 3 more cases, 1 more equivalent. The full rerun: all 402 caught.
+  - Build: 194 files clean (MSVC). Tier 1: 566 errors in 99 files, 233 stubs. ret_audit --src: 52.
+  - Ghidra: 63 names (names/sight.txt; 2 moved from squad.txt / team.txt; the observer and target
+    classes were auto classes 0x0080ff68..ffbc), 65 decompiles exported; 59 functions in ported.txt
+    (5 helpers absorbed). Stats: 7,440 of 12,293 functions by hand (68.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

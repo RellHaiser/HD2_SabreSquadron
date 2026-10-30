@@ -95,6 +95,8 @@ public:
     C_MeleeTrackerAI *GetFullAI() const;
     C_MeleeTrackerScriptedAI *GetScriptedAI() const;
     I3D_frame *GetBodyFrame() const { return m_bodyFrame; }   // +0x544
+    // The body's two collision volumes (+0x26C; the sight module ignores them on its rays).
+    S_CollisionVolume **GetBodyVolumes() { return m_movement.m_volumeA; }
     int GetSightId() const { return m_sightId; }        // +0x540
     bool IsAlive() const { return m_stats.health > 0; } // +0x4A0 > 0 (0x0041d780)
     uint32_t GetAlarmType() const { return static_cast<uint32_t>(m_ai->GetAlarmValue()); }  // AI +0x1C
@@ -130,6 +132,8 @@ public:
     // The sight module's observer callback: a target entered view (lost == 0) or left it. Keeps the
     // seen-enemy list (+0x574) and alarms the AI.
     void OnSightEvent(int lost, int targetIndex);       // 0x005d5cb0
+    // The AI's view test (none in the AI's mode 1; the sight module's tests).
+    void TestSight(C_Actor *target, int *status, float *visibility);   // 0x005d64c0
     // The sound module's listener callback (AddListener in SetupFrame): a sound the tracker can hear.
     // Sounds of the player's side within the hearing range become (or refresh) sightings with a
     // loudness by kind, and the controller is told.

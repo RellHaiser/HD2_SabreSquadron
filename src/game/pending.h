@@ -724,63 +724,8 @@ void HumanPass_Tick(int timeDelta, const std::vector<C_Actor *> &active);   // 0
 // Set while the script module restarts a mission (StopMission + StartMission).
 extern bool g_scriptModuleRestarting;               // 0x008693e0
 
-// ---- sight module (0x0089b288) ------------------------------------------------------
-// Observers (humans, meleeTrackers) watch targets (humans, meleeTrackers); the module calls their owners
-// back (C_Human::OnSightEvent) when a target comes into view or leaves it.
-enum : uint32_t {
-    SIGHT_ALL = 0xF,                                // what humans register with
-};
-// C_SightModule::SetObserverState() states.
-enum : int {
-    SIGHT_OBSERVER_OFF = 0,
-    SIGHT_OBSERVER_ON = 1,
-};
-// C_SightModule::SetTargetState() states.
-enum : int {
-    SIGHT_TARGET_ALIVE = 0,
-    SIGHT_TARGET_DEAD = 2,                          // seen as a body
-    SIGHT_TARGET_HIDDEN = 3,                        // frozen / suspended
-    SIGHT_TARGET_SHOWN = 4,
-};
-// C_SightModule::GetVisibleParts() bits (which bones a shooter can aim at, inferred).
-enum : uint32_t {
-    SIGHT_PART_BODY = 0x01,
-    SIGHT_PART_HEAD = 0x02,
-    SIGHT_PART_LEFT_ARM = 0x04,
-    SIGHT_PART_RIGHT_ARM = 0x08,
-    SIGHT_PART_LEGS = 0x10,
-};
-class C_SightTarget {
-public:
-    virtual C_Actor *GetActor();                    // vtable +0x00
-    virtual int GetKind();                          // vtable +0x04 0 human, 1 meleeTracker
-    virtual void Refresh();                         // vtable +0x08 (the model changed)
-};
-class C_SightModule {
-public:
-    // Registration ids; -1 on failure.
-    int AddObserver(I3D_frame *frame, uint32_t mask);   // 0x0046f350
-    int AddTarget(I3D_frame *frame, uint32_t mask);     // 0x0046f9d0
-    bool RemoveObserver(int id);                    // 0x0046fd50
-    bool RemoveTarget(int id);                      // 0x0046fdf0
-    void SetObserverState(int id, int state);       // 0x0046f8c0
-    void SetTargetState(int id, int state);         // 0x0046f700
-    // Whether observer `observer` sees target `target` now (the observer's vtable +0x0C). The
-    // result is a count the AI compares (it fires at a target out of view when it is at least
-    // 1, defensive AI at least 3; meaning not identified); `out` may be null.
-    int CanSee(int observer, int target, int *out, bool *visible);   // 0x0046f320
-    // SIGHT_PART_* of target `target` that `observer` sees.
-    void GetVisibleParts(int observer, int target, uint32_t *parts);   // 0x0046f2a0
-    // Tests now whether `observer` sees `target` (the observer's vtable +0x08, whose answer
-    // it passes on; inferred).
-    bool TestNow(int observer, int target);         // 0x0046f280
-    // Registered target `id`, null if there is none (vector at +0x10).
-    C_SightTarget *GetTarget(int id) const;
-    // Ms left of the 4 s the module waits at a mission's start (+0x34; the air attacks wait while
-    // over 2000).
-    int GetStartDelay() const;
-};
-extern C_SightModule g_sightModule;                 // 0x0089b288
+// The sight module: see game/sight.h.
+#include "game/sight.h"
 
 // Physics: see game/physics.h.
 

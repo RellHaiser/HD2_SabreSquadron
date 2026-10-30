@@ -14,6 +14,7 @@ LINES = {
     "vanim": "vaLoad vaCut vaDone vaFind vaPlayers vaBin vaBlend vaReset vaUpdate vaPing vaTick vaStart vaStop vaRemove".split(),
     "lmaps": "lmLoad lmFind lmSet lmGroup lmSave lmLoadGame lmRestart lmFree".split(),
     "tshift": "tsFind tsAdd tsRemove tsFree".split(),
+    "sight": "sgRegister sgRelation sgParts sgTestNow sgCanSee sgUpdate sgTiming sgTracker sgTick sgStates sgRemove sgModule".split(),
 }
 
 

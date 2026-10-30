@@ -35,16 +35,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Actors & objects",
   "state": "ported",
-  "functions": 515,
-  "bytes": 117783,
+  "functions": 516,
+  "bytes": 117803,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Actors & objects",
   "state": "pending",
-  "functions": 124,
-  "bytes": 32443,
+  "functions": 123,
+  "bytes": 32423,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -67,8 +67,8 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "App & core",
   "state": "pending",
-  "functions": 633,
-  "bytes": 155716,
+  "functions": 603,
+  "bytes": 147955,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -123,16 +123,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Mission & world modules",
   "state": "verified",
-  "functions": 97,
-  "bytes": 11964,
+  "functions": 160,
+  "bytes": 23284,
   "evidence": "vehicle_setup harness's world build on 22 missions (Tables/Vertanim.def and their Vertanim.bin); mutation-tested"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Mission & world modules",
   "state": "pending",
-  "functions": 295,
-  "bytes": 118565,
+  "functions": 275,
+  "bytes": 116362,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -195,8 +195,8 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "STL & compiler idioms",
   "state": "excluded",
-  "functions": 516,
-  "bytes": 9761,
+  "functions": 514,
+  "bytes": 9730,
   "evidence": "MSVC 6 STL instantiations and empty functions (stl_idioms.py); the port uses the standard library"
  },
  {
@@ -243,8 +243,8 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Vehicles",
   "state": "pending",
-  "functions": 83,
-  "bytes": 8366,
+  "functions": 72,
+  "bytes": 7041,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
