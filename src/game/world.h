@@ -125,7 +125,7 @@ enum E_FadeDirection {
     FADE_OUT = 1,
 };
 
-// (the module object itself is declared in pending.h)
+// (the module object itself: game/geffects.h)
 class C_GEffectsModule;
 
 // Humans whose movement takes an effect value from the camera (list at +0x8C of the
@@ -177,6 +177,8 @@ public:
     void SetSpecialMode(int mode, bool on, I3D_frame *target);   // vtable +0x44
     // The same slot with 1 as the third argument (the game's free camera; not identified).
     void SetSpecialMode(int mode, bool on, int unknown);
+    // The same slot with a height (CAMERA_MODE_UNDERWATER: the water's surface).
+    void SetSpecialMode(int mode, bool on, float height);
     // Called when the active soldier moves into another sector (not identified).
     void Unknown40(int arg);                            // vtable +0x40
     bool IsGameCamera(I3D_frame *camera);               // vtable +0x4C
@@ -212,19 +214,18 @@ public:
     I3D_sector *GetListenerSector();                    // vtable +0x8C
 };
 C_CameraModule *GetCameraModule();                      // 0x00464e90 (&g_cameraModule)
+// The command map's tactical camera (null before the camera module made it).
+extern C_CameraHumanEffects *g_cameraHumanEffects;      // 0x0089afbc
 // C_CameraModule::SetSpecialMode() modes.
 enum : int {
+    CAMERA_MODE_UNDERWATER = 4,                         // the effects module's water camera
     CAMERA_MODE_AIM = 7,                                // the first-person view through the sights / scope
     CAMERA_MODE_PROJECTILE = 9,                         // rides along with a fired projectile
 };
 
 // The texture shifting module: see game/tshift.h; the lightmap groups: game/lightmap_groups.h.
 
-class C_Decorators {
-public:
-    void SetOn(bool on);                                // 0x0047b010
-};
-extern C_Decorators *g_decorators;                      // 0x0089bbb0
+// The decorators (C_Decorators, g_decorators): game/pending.h (part 8d).
 
 // The Junkers 88 setup (SetupJunkers88) is the Junkers itself: see game/junkers88.h.
 

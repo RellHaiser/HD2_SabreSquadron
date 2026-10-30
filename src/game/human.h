@@ -661,6 +661,7 @@ public:
 
     // --- body ------------------------------------------------------------------------------
     C_HumanMovement *GetMovement() const { return m_body.movement; }
+    I3D_sector *GetBodySector() const { return m_body.GetSector(); }
     C_HumanWork *GetWork() const { return m_body.work; }
     // Models of the carried items (holsters, belt, hands).
     C_HumanEquipment *GetEquipment() const { return m_body.equipment; }

@@ -127,11 +127,61 @@ struct S_MultiplayerSettings {
 };
 
 // --- the car's callbacks (game/car_callbacks.cpp; as the real header declares them) --------------
+#ifdef WORLD_TEST
+// The GEffects module's objects (part 8d; as the real header declares them) and the module itself
+// (part 8c-i, the world build tests the real one).
+class C_Decorators {
+public:
+    C_Decorators();
+    ~C_Decorators();
+    void SetOn(bool on);
+    void Clear();
+    void Free();
+    void Load();
+    void Start();
+    void Update(int timeDelta);
+    float GetGroundCover(int material);
+
+private:
+    uint8_t m_data[0xA4];
+};
+extern C_Decorators *g_decorators;
+class C_Volumetrics {
+public:
+    C_Volumetrics();
+    ~C_Volumetrics();
+    void Render(int time);
+    void Load();
+    void Prune(bool unknown);
+    void Free();
+
+private:
+    uint8_t m_data[0x20];
+};
+class C_MeshPlayer {
+public:
+    C_MeshPlayer();
+    ~C_MeshPlayer();
+    void Load();
+    void Update(int timeDelta);
+    void Free();
+
+private:
+    uint8_t m_data[0x28];
+};
+void UpdateBirds(int timeDelta);
+void CollectBirds();
+void FreeBirds();
+void FreeClouds();
+void LoadClouds();
+float RandomFloat(float max);
+#include "game/geffects.h"
+#else
 class C_GEffectsModule {
 public:
     void ShatterGlass(I3D_frame *visual, float unknown);
     // (The debris and item actors, game/debris.cpp and game/item_actor.cpp.)
-    bool ClearModelHighlight(I3D_frame *model);
+    bool ClearModelTransparency(I3D_frame *model);
     void FadeOutModel(I3D_frame *model, int time, bool unknown);
     // (The bike, part 7e.)
     I3D_frame *CreateShadow(I3D_frame *model);
@@ -143,6 +193,7 @@ public:
     void SetHierarchyOn(I3D_frame *frame, bool on, uint32_t typeMask);
 };
 C_GEffectsModule *GetGEffects();
+#endif
 // (The supply box, part 7f: the scene's top, the debug lines.)
 extern float g_netSceneTop;
 void DrawDebugLine(const float *from, const float *to, uint32_t color, uint32_t color2);

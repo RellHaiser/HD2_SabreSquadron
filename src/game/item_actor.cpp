@@ -215,7 +215,7 @@ void C_ItemActor::OnMessage(C_BitStream *stream)        // 0x005b7110
     auto *msg = static_cast<C_NetMessage *>(stream);
     switch (msg->ReadBits(MSG_KIND_BITS)) {
     case MSG_REMOVE:
-        GetGEffects()->ClearModelHighlight(m_frame);
+        GetGEffects()->ClearModelTransparency(m_frame);
         m_frame->SetOn(false);
         m_frame->Update();
         g_temporaryActors.DestroyActor(this);
@@ -267,7 +267,7 @@ void C_ItemActor::Tick(int timeDelta)                   // 0x005b7320
         return;
     m_lifeTime -= timeDelta;
     if (m_lifeTime < 1) {
-        GetGEffects()->ClearModelHighlight(m_frame);
+        GetGEffects()->ClearModelTransparency(m_frame);
         m_frame->SetOn(false);
         m_frame->Update();
         C_BitStream *msg = CreateTempActorMessage(m_netId, true);

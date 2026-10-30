@@ -346,8 +346,6 @@
 004b01e0 C_CountdownText::Update | void __thiscall Update(C_CountdownText *this, int timeDelta)
 004b0210 C_CountdownText::Render | void __thiscall Render(C_CountdownText *this)
 
-# --- the GEffects module (called by the first-person view)
-00485b70 C_GEffectsModule::SetLensFlareOn | void __thiscall SetLensFlareOn(C_GEffectsModule *this, bool on)
 
 # Referenced by the interface core, not ported.
 006c7510 C_Controls::ClearKey

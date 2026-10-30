@@ -49186,10 +49186,10 @@
 "in_vtables": []
 },
 "00485b50": {
-"name": "FUN_00485b50",
+"name": "SetCloudsOn",
 "size": 29,
 "lines": 12,
-"chars": 232,
+"chars": 214,
 "callers": [],
 "callees": [
 "00483de0",
@@ -49251,10 +49251,10 @@
 ]
 },
 "00485c70": {
-"name": "FUN_00485c70",
+"name": "SetCameraAnimation",
 "size": 762,
-"lines": 165,
-"chars": 5451,
+"lines": 168,
+"chars": 5523,
 "callers": [],
 "callees": [
 "0040b7a0",
@@ -49289,10 +49289,10 @@
 ]
 },
 "00485f70": {
-"name": "FUN_00485f70",
+"name": "GEffects_SetFramePos",
 "size": 65,
 "lines": 16,
-"chars": 467,
+"chars": 404,
 "callers": [
 "00485c70"
 ],
@@ -49304,10 +49304,10 @@
 "in_vtables": []
 },
 "00485fc0": {
-"name": "FUN_00485fc0",
+"name": "CameraAnimation_Free",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 110,
 "callers": [
 "007fc3b0"
 ],
@@ -49321,10 +49321,10 @@
 "in_vtables": []
 },
 "00485fd0": {
-"name": "FUN_00485fd0",
+"name": "S_CameraAnimation::Restore",
 "size": 168,
-"lines": 27,
-"chars": 1010,
+"lines": 28,
+"chars": 1273,
 "callers": [
 "00485c70"
 ],
@@ -49338,10 +49338,10 @@
 "in_vtables": []
 },
 "00486080": {
-"name": "FUN_00486080",
+"name": "StaticInit_GEffectsModule",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 128,
 "callers": [],
 "callees": [
 "00486090",
@@ -49359,10 +49359,10 @@
 ]
 },
 "00486090": {
-"name": "FUN_00486090",
+"name": "GEffectsModule_Construct",
 "size": 18,
 "lines": 8,
-"chars": 144,
+"chars": 160,
 "callers": [
 "00486080"
 ],
@@ -49380,12 +49380,13 @@
 "in_vtables": []
 },
 "004860b0": {
-"name": "FUN_004860b0",
+"name": "C_GEffectsModule",
 "size": 500,
 "lines": 94,
-"chars": 2507,
+"chars": 2481,
 "callers": [
-"00486090"
+"00486090",
+"004864b0"
 ],
 "callees": [
 "0047c020",
@@ -49476,10 +49477,10 @@
 "in_vtables": []
 },
 "004863e0": {
-"name": "FUN_004863e0",
+"name": "SetRain",
 "size": 13,
 "lines": 8,
-"chars": 135,
+"chars": 119,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -49494,10 +49495,10 @@
 ]
 },
 "004863f0": {
-"name": "FUN_004863f0",
+"name": "RestartMission",
 "size": 107,
 "lines": 22,
-"chars": 503,
+"chars": 521,
 "callers": [],
 "callees": [
 "00462ae0",
@@ -49523,10 +49524,10 @@
 ]
 },
 "00486460": {
-"name": "FUN_00486460",
+"name": "SaveGame",
 "size": 5,
 "lines": 7,
-"chars": 103,
+"chars": 111,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -49541,10 +49542,10 @@
 ]
 },
 "00486470": {
-"name": "FUN_00486470",
+"name": "LoadGame",
 "size": 15,
 "lines": 8,
-"chars": 127,
+"chars": 135,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -49559,10 +49560,10 @@
 ]
 },
 "00486480": {
-"name": "FUN_00486480",
+"name": "SetTimeScale",
 "size": 25,
-"lines": 9,
-"chars": 180,
+"lines": 10,
+"chars": 187,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -49577,10 +49578,10 @@
 ]
 },
 "004864a0": {
-"name": "FUN_004864a0",
+"name": "GetTimeScale",
 "size": 7,
-"lines": 10,
-"chars": 164,
+"lines": 7,
+"chars": 108,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -49595,12 +49596,13 @@
 ]
 },
 "004864b0": {
-"name": "FUN_004864b0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 213,
+"lines": 12,
+"chars": 231,
 "callers": [],
 "callees": [
+"004860b0",
 "00486f00",
 "007e559c"
 ],
@@ -49634,10 +49636,10 @@
 "in_vtables": []
 },
 "004864f0": {
-"name": "FUN_004864f0",
+"name": "GEffectsModule_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 100,
 "callers": [
 "00486080"
 ],
@@ -49651,10 +49653,10 @@
 "in_vtables": []
 },
 "00486500": {
-"name": "FUN_00486500",
+"name": "GEffectsModule_Destroy",
 "size": 10,
 "lines": 8,
-"chars": 120,
+"chars": 137,
 "callers": [
 "004864f0"
 ],
@@ -49673,7 +49675,7 @@
 "name": "GetGEffects",
 "size": 6,
 "lines": 7,
-"chars": 72,
+"chars": 99,
 "callers": [
 "0040bd70",
 "00416e10",
@@ -49733,10 +49735,10 @@
 "in_vtables": []
 },
 "00486520": {
-"name": "FUN_00486520",
+"name": "ShowBackdrop",
 "size": 90,
 "lines": 24,
-"chars": 636,
+"chars": 650,
 "callers": [
 "00487240",
 "004888c0"
@@ -49751,10 +49753,10 @@
 "in_vtables": []
 },
 "00486580": {
-"name": "FUN_00486580",
+"name": "ShowAboveWater",
 "size": 83,
 "lines": 32,
-"chars": 721,
+"chars": 731,
 "callers": [
 "00487240",
 "004888c0"
@@ -49769,10 +49771,10 @@
 "in_vtables": []
 },
 "004865e0": {
-"name": "FUN_004865e0",
+"name": "SetHierarchyOn",
 "size": 197,
-"lines": 77,
-"chars": 1685,
+"lines": 79,
+"chars": 1627,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -49787,10 +49789,10 @@
 ]
 },
 "004866f0": {
-"name": "FUN_004866f0",
+"name": "HideVisual",
 "size": 87,
-"lines": 20,
-"chars": 532,
+"lines": 19,
+"chars": 457,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -49805,10 +49807,10 @@
 ]
 },
 "00486750": {
-"name": "FUN_00486750",
+"name": "ShowUnderWater",
 "size": 83,
 "lines": 32,
-"chars": 756,
+"chars": 766,
 "callers": [
 "00487240",
 "004888c0"
@@ -49823,10 +49825,10 @@
 "in_vtables": []
 },
 "004867b0": {
-"name": "FUN_004867b0",
+"name": "SetWeatherOn",
 "size": 42,
 "lines": 13,
-"chars": 278,
+"chars": 270,
 "callers": [],
 "callees": [
 "006987d0"
@@ -49845,10 +49847,10 @@
 ]
 },
 "004867e0": {
-"name": "FUN_004867e0",
+"name": "GetGroundCover",
 "size": 8,
-"lines": 8,
-"chars": 155,
+"lines": 10,
+"chars": 202,
 "callers": [],
 "callees": [
 "0047b4c0"
@@ -49865,10 +49867,10 @@
 ]
 },
 "004867f0": {
-"name": "FUN_004867f0",
+"name": "SetFadeLevel",
 "size": 830,
 "lines": 67,
-"chars": 2140,
+"chars": 2145,
 "callers": [],
 "callees": [
 "007e529c",
@@ -49900,10 +49902,10 @@
 ]
 },
 "00486b30": {
-"name": "FUN_00486b30",
+"name": "Fade",
 "size": 185,
-"lines": 34,
-"chars": 683,
+"lines": 33,
+"chars": 677,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -49922,10 +49924,10 @@
 ]
 },
 "00486bf0": {
-"name": "FUN_00486bf0",
+"name": "RenderVolumetrics",
 "size": 19,
 "lines": 8,
-"chars": 138,
+"chars": 143,
 "callers": [],
 "callees": [
 "00482260"
@@ -49942,10 +49944,10 @@
 ]
 },
 "00486c10": {
-"name": "FUN_00486c10",
+"name": "RenderFade",
 "size": 273,
 "lines": 34,
-"chars": 796,
+"chars": 794,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -49964,10 +49966,10 @@
 ]
 },
 "00486d30": {
-"name": "FUN_00486d30",
+"name": "SetModelTransparency",
 "size": 41,
-"lines": 14,
-"chars": 309,
+"lines": 12,
+"chars": 257,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -49984,10 +49986,10 @@
 ]
 },
 "00486d60": {
-"name": "FUN_00486d60",
+"name": "GEffects_FadeVisualCallback",
 "size": 143,
-"lines": 34,
-"chars": 1043,
+"lines": 35,
+"chars": 1088,
 "callers": [],
 "callees": [
 "00486e60"
@@ -50002,10 +50004,10 @@
 "in_vtables": []
 },
 "00486df0": {
-"name": "FUN_00486df0",
+"name": "SetModelLightLevel",
 "size": 43,
-"lines": 18,
-"chars": 394,
+"lines": 15,
+"chars": 306,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -50022,10 +50024,10 @@
 ]
 },
 "00486e60": {
-"name": "FUN_00486e60",
+"name": "SetModelAlpha",
 "size": 41,
-"lines": 14,
-"chars": 309,
+"lines": 11,
+"chars": 258,
 "callers": [
 "00486d60"
 ],
@@ -50044,10 +50046,10 @@
 ]
 },
 "00486e90": {
-"name": "FUN_00486e90",
+"name": "ClearModelTransparency",
 "size": 26,
-"lines": 13,
-"chars": 263,
+"lines": 11,
+"chars": 222,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -50124,10 +50126,10 @@
 "in_vtables": []
 },
 "00486f00": {
-"name": "FUN_00486f00",
+"name": "~C_GEffectsModule",
 "size": 413,
 "lines": 80,
-"chars": 2282,
+"chars": 2296,
 "callers": [
 "004864b0",
 "00486500"
@@ -50151,10 +50153,10 @@
 "in_vtables": []
 },
 "004870a0": {
-"name": "FUN_004870a0",
+"name": "SetThunderstorm",
 "size": 244,
 "lines": 39,
-"chars": 1186,
+"chars": 1178,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -50169,10 +50171,10 @@
 ]
 },
 "004871a0": {
-"name": "FUN_004871a0",
+"name": "StartMpLightning",
 "size": 148,
 "lines": 27,
-"chars": 791,
+"chars": 804,
 "callers": [],
 "callees": [
 "006987d0"
@@ -50191,10 +50193,10 @@
 ]
 },
 "00487240": {
-"name": "FUN_00487240",
+"name": "Update",
 "size": 4882,
-"lines": 669,
-"chars": 26788,
+"lines": 664,
+"chars": 26766,
 "callers": [],
 "callees": [
 "00402860",
@@ -50258,10 +50260,10 @@
 ]
 },
 "00488560": {
-"name": "FUN_00488560",
+"name": "LoadMissionData",
 "size": 55,
 "lines": 13,
-"chars": 294,
+"chars": 276,
 "callers": [],
 "callees": [
 "00482980",
@@ -50281,10 +50283,10 @@
 ]
 },
 "004885a0": {
-"name": "FUN_004885a0",
+"name": "FreeMissionData",
 "size": 42,
 "lines": 12,
-"chars": 265,
+"chars": 247,
 "callers": [],
 "callees": [
 "00482d70",
@@ -50303,10 +50305,10 @@
 ]
 },
 "004885d0": {
-"name": "FUN_004885d0",
+"name": "StartMission",
 "size": 748,
 "lines": 118,
-"chars": 3996,
+"chars": 3982,
 "callers": [],
 "callees": [
 "0047a790",
@@ -50338,10 +50340,10 @@
 ]
 },
 "004888c0": {
-"name": "FUN_004888c0",
+"name": "StopMission",
 "size": 697,
 "lines": 95,
-"chars": 3249,
+"chars": 3258,
 "callers": [],
 "callees": [
 "00402860",
@@ -50372,10 +50374,10 @@
 ]
 },
 "00488b80": {
-"name": "FUN_00488b80",
+"name": "Reset",
 "size": 479,
-"lines": 83,
-"chars": 2901,
+"lines": 86,
+"chars": 2538,
 "callers": [
 "004860b0",
 "004863f0",
@@ -50403,8 +50405,8 @@
 "00488d60": {
 "name": "FadeOutModel",
 "size": 377,
-"lines": 82,
-"chars": 2376,
+"lines": 83,
+"chars": 2433,
 "callers": [],
 "callees": [
 "007e2120",
@@ -50422,10 +50424,10 @@
 ]
 },
 "00488ee0": {
-"name": "FUN_00488ee0",
+"name": "FadeIn",
 "size": 377,
 "lines": 81,
-"chars": 2381,
+"chars": 2362,
 "callers": [],
 "callees": [
 "007e2120",
@@ -50443,10 +50445,10 @@
 ]
 },
 "00489060": {
-"name": "FUN_00489060",
+"name": "FadeInModel",
 "size": 140,
-"lines": 31,
-"chars": 859,
+"lines": 32,
+"chars": 860,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -50461,10 +50463,10 @@
 ]
 },
 "004890f0": {
-"name": "FUN_004890f0",
+"name": "FadeOutHierarchy",
 "size": 140,
-"lines": 31,
-"chars": 867,
+"lines": 32,
+"chars": 876,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -50479,10 +50481,10 @@
 ]
 },
 "00489180": {
-"name": "FUN_00489180",
+"name": "FadeHuman",
 "size": 750,
-"lines": 118,
-"chars": 3453,
+"lines": 115,
+"chars": 3378,
 "callers": [],
 "callees": [
 "0048b3e0",
@@ -50655,10 +50657,10 @@
 "in_vtables": []
 },
 "00489c60": {
-"name": "FUN_00489c60",
+"name": "LoadWaterCamera",
 "size": 872,
 "lines": 171,
-"chars": 5241,
+"chars": 5237,
 "callers": [
 "004885d0"
 ],
@@ -51289,10 +51291,10 @@
 "in_vtables": []
 },
 "0048b880": {
-"name": "FUN_0048b880",
+"name": "CameraAnimationVector_Insert",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3537,
 "callers": [
 "00485c70"
 ],

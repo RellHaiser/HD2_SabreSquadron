@@ -467,10 +467,10 @@ void C_HumanMovement::PlayDubbing(int dubbing, I3D_frame *frame, C_Human *owner,
 
 void C_HumanMovement::SetUnknown94(float value)
 {
-    GetGEffects()->SetModelHighlight(m_owner->GetFrame(), value);
+    GetGEffects()->SetModelTransparency(m_owner->GetFrame(), value);
     if (m_unknownA30 == 1) {
         if (I3D_frame *body = m_owner->GetEquipment()->GetModel(EQUIPMENT_PLACE_CARRIED))
-            GetGEffects()->SetModelHighlight(body, value);
+            GetGEffects()->SetModelTransparency(body, value);
     }
 }
 

@@ -26,6 +26,7 @@ class I3D_camera;
 class I3D_driver;
 class I3D_sector;
 struct I3D_particle_vertex;
+struct S_dummyBox;
 
 using PI3D_frame = I3D_frame *;
 using PI3D_scene = I3D_scene *;
@@ -412,6 +413,8 @@ enum : uint32_t {
     I3DVISUAL_OBJECT = 0x5F4A424F,// 'OBJ_'
     I3DVISUAL_SINGLEMESH = 0x4D474E53,  // 'SNGM' skinned mesh
     I3DVISUAL_SINGLEMORPH = 0x524D4D53, // 'SMMR' skinned morphed mesh
+    I3DVISUAL_MORPH = 0x4850524D,       // 'MRPH' morphed object
+    I3DVISUAL_LENSFLARE = 0x534E454C,   // 'LENS'
     I3DVISUAL_PROJECTOR = 0x4A4F5250,   // 'PROJ' projected texture (decal)
     I3DVISUAL_EMITTER = 0x52544D45,     // 'EMTR' particle quads
     I3DVISUAL_MIRROR = 0x5252494D,      // 'MIRR'
@@ -1119,6 +1122,13 @@ public:
     // Registers a sound with the sector and takes it back (meaning inferred from their uses).
     I3DMETHOD(void, AddSound)(class I3D_sound *sound) = 0;    // 0x7C
     I3DMETHOD(void, RemoveSound)(class I3D_sound *sound) = 0; // 0x80
+    I3D_SLOT(84);
+    I3D_SLOT(88);
+    I3D_SLOT(8C);
+    I3D_SLOT(90);
+    // The environment preset (the sound's; LS3DF 0x1004e510; the effects module sets 1 on the
+    // primary and the omni sector at the mission's start).
+    I3DMETHOD(void, SetEnvironment)(int id) = 0;              // 0x94
 
     // Portals of this sector (leading to GetConnected()).
     int NumPortals() const { return Field<int>(0x254); }
@@ -1274,8 +1284,10 @@ public:
     I3DMETHOD(void, SetWeather)(int param, uint32_t value) = 0;   // 0x11C
 
     I3D_SLOTS_4(120, 124, 128, 12C);
-    I3D_SLOT(130);
-    I3D_SLOT(134);
+    // The dummies drawn in the last frame, as boxes (LS3DF 0x10049800 / 0x10049810; the effects
+    // module keeps rain off the soldiers under them).
+    I3DMETHOD(int, NumDrawnDummies)() = 0;                    // 0x130
+    I3DMETHOD(const S_dummyBox *, GetDrawnDummies)() = 0;   // 0x134
     // Registers a human model with two of its frames ("q", "z") / forgets it (C_HumanMovement
     // Init / Done; meaning not identified).
     I3DMETHOD(void, AddHumanModel)(I3D_frame *model, I3D_frame *frameQ, I3D_frame *frameZ) = 0;   // 0x138
@@ -1293,6 +1305,10 @@ public:
     I3D_camera *GetActiveCamera() const { return Field<I3D_camera *>(0x15C); }
     // The outdoor sector everything else is inside of.
     I3D_sector *GetPrimarySector() const { return Field<I3D_sector *>(0x1F8); }
+    // The sector drawn behind everything with its own projection (the sky's).
+    I3D_sector *GetBackdropSector() const { return Field<I3D_sector *>(0x1FC); }
+    // The "Omni sector" (the frame GetDynamicRoot() returns).
+    I3D_sector *GetOmniSector() const { return Field<I3D_sector *>(0x200); }
     // Frame flying shots, shells and the hit zone model are linked to (+0x200).
     I3D_frame *GetDynamicRoot() const { return Field<I3D_frame *>(0x200); }
     // Frame of the first-person weapon view (+0x204; the player's own shells go there).
@@ -1305,6 +1321,17 @@ private:
     {
         return *reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(this) + offset);
     }
+};
+
+// A dummy drawn in the last frame (I3D_scene::GetDrawnDummies()).
+struct S_dummyBox {                                         // 0x60 bytes
+    I3D_frame *frame;             // +0x00 (an I3D_dummy)
+    int changeCount;              // +0x04
+    uint8_t unknown08[0x38];      // +0x08 (three faces' planes from +0x10)
+    S_vector center;              // +0x40 of the bounding sphere (world)
+    float radiusSquare;           // +0x4C
+    float extents[3];             // +0x50
+    uint32_t unknown5C;
 };
 
 // Result of I3D_scene::IntersectFrame() (only the members the game reads are known).

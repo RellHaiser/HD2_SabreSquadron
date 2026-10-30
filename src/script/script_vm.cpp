@@ -1195,7 +1195,7 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
         I3D_model *copy = static_cast<I3D_model *>(I3DGetDriver()->CreateFrame(FRAME_MODEL));
         if (source->GetType() == FRAME_MODEL) {
             copy->DuplicateModel(static_cast<I3D_model *>(source));
-            GetGEffects()->SetModelHighlight(copy, 0.0f);
+            GetGEffects()->SetModelTransparency(copy, 0.0f);
         }
         copy->LinkTo(source->GetParent(), 0);
         copy->SetPosInline(source->GetPos());
@@ -1315,7 +1315,7 @@ bool C_Script::ExecuteCommand(const S_ScriptCommand &cmd)
         I3D_frame *light = frameArg(1);
         if (light && light->GetType() != FRAME_LIGHT)
             light = nullptr;
-        GetGEffects()->SetThunderstorm(on, light, nullptr);
+        GetGEffects()->SetThunderstorm(on, static_cast<I3D_light *>(light), false);
         break;
     }
 

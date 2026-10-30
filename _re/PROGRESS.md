@@ -5271,6 +5271,56 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     classes were auto classes 0x0080ff68..ffbc), 65 decompiles exported; 59 functions in ported.txt
     (5 helpers absorbed). Stats: 7,440 of 12,293 functions by hand (68.4 % by size).
 
+  PART 8c-i DONE (2026-10-30): the GEffects module's core (src/game/geffects.*, new); 8c-ii: its
+  shadows, uniforms / face textures and ShatterGlass.
+  - C_GEffectsModule ("GEffects", module 1, 0x0089b880, vtable 0x008101f0, 0x00485b50..0x00489c60):
+    the screen fade (Fade: a rate per second, the level -1 once past the target, the render then
+    holds the target; RenderFade also draws the mission start's black screen, 3 s and gone in 1 s;
+    SetFadeLevel: a full-screen pre-transformed quad, driver state 3 and render state 14 off while it
+    draws); visuals fading out / in (records with a reference; FadeOutModel drops a fade-in of the
+    visual and the other way round; the hierarchy fades act on LMAP, BBRD, MRPH, SNGM, SMMR, MIRR,
+    OBJ_); humans fading (the "a" visual's alpha as the start); SetHierarchyOn (the children first,
+    the last first; a type's bit, the model's and the user frame's bits swapped against the search
+    masks; sounds also SetActive); the thunderstorm (the light flickers at RandFloat times its
+    power, on above 0.5; off at once or at the next update; StartMpLightning(time): "MP_Lightning"
+    for a time); rain (each 100 ms, rate / 10 rays from 100 m above the camera within the area
+    down 200 m past the borders: a drop, a ring on water; every third step drops on the player's
+    team: members in the primary sector within 10 m, drawn in the last frame, under none of the
+    dummies drawn (a sphere, then the box in the dummy's space)); the decorators update while paused
+    too, rain only with the command map open; the underwater view (missions\<name>\watercam.set: a
+    version 1 chunk, then a 0xA0-byte block: under water below the surface of the player's head (or
+    in a submarine) the camera's fov and range change (its own kept and given back), the camera
+    module's mode 4, the above / underwater hierarchies, the backdrop's children, the sea and
+    ambient sounds and the weather switch; the fov sways; quirk kept: the camera is taken again
+    when surfacing); the sun ("mirasun") keeps its place relative to the camera; camera animations
+    (a model of the file, the camera follows its "*cam*" frame (else its first child) and keeps the
+    last key; restored at the end); the time scale. Fixes: a fade dropped by the other kind frees
+    its record and reference (the original drops them); StartMpLightning keeps no frame that is not
+    a light; a camera animation without a camera frame is not followed (null read); the fade colour
+    has no fourth float read past the caller's vector; the water file's version 0 when unread.
+  - The decorators, volumetrics, mesh player, birds and clouds it owns or drives (part 8d) are
+    declared in pending.h (C_Decorators moved there from world.h). I3D: the scene's backdrop and
+    omni sectors, NumDrawnDummies / GetDrawnDummies (S_dummyBox), the sector's SetEnvironment, the
+    light's GetPower, I3DVISUAL_MORPH / LENSFLARE; the camera module's SetSpecialMode with a height
+    (CAMERA_MODE_UNDERWATER), g_cameraHumanEffects. SetModelHighlight / ClearModelHighlight renamed
+    SetModelTransparency / ClearModelTransparency (slot 0x54 is the hierarchy's alpha); the
+    thunderstorm's third argument is `immediate`; Fade / SetFadeLevel take S_vector colours.
+  - Harness: the world build links geffects.cpp; geffects_test.inc ("geffects:", 14 checks) with
+    logging fakes of the frames', scene's, driver's and IGraph's slots and of the 8d objects, the
+    team, the camera module, the head's water test, the rays and particles. The scene's fake vtable
+    grew to 128 slots (its 0x11C..0x134 wrote past it into the sound cache: a crash at exit). The
+    stub pending.h takes the real geffects.h under WORLD_TEST. Baselines: 0 of 22 in both orders;
+    the item build 0 of 37; the other five 0 of 37 each.
+  - Mutations (mutations/mutate_8c.py): the first run caught 495 of 570 (58 survived,
+    17 did not build); 20 equivalent (see the file's docstring), new cases for 38 (the mesh
+    player's Update takes the frame time and GetShadowParams returns the block's address, both
+    found by ret_audit meanwhile). The full rerun: all 533 caught.
+  - Build: 195 files clean (MSVC). Tier 1: 560 errors in 99 files, 230 stubs. ret_audit --src: 52.
+  - Ghidra: 57 names (names/geffects.txt; 4 moved from app.txt, hud.txt, physics.txt; 3 made
+    __thiscall), 64 decompiles exported; 47 functions in ported.txt (9 helpers absorbed by hand: the
+    decorators' left for 8d). 0x00486d60 (an enum callback, never referenced) stays to tier 1.
+    Stats: 7,496 of 12,293 functions by hand (68.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

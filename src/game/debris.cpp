@@ -61,7 +61,7 @@ void C_Debris::Update(int frameTime)                    // 0x005fdd10
     if (m_lifeTime < 1) {
         // (Without fade-out the debris stays: the life counts on below 0 and stops.)
         if (m_fadeOut) {
-            GetGEffects()->ClearModelHighlight(m_frame);
+            GetGEffects()->ClearModelTransparency(m_frame);
             g_temporaryActors.DestroyActor(this);
         }
         return;

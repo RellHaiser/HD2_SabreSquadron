@@ -126,7 +126,7 @@ void __stdcall F_ItUpdateFrameSector(void *, I3D_frame *frame, const S_vector &p
     ItLog("sector %s %s", ItName(frame).c_str(), ItV(pos).c_str());
 }
 
-bool C_GEffectsModule::ClearModelHighlight(I3D_frame *model)
+bool C_GEffectsModule::ClearModelTransparency(I3D_frame *model)
 {
     ItLog("clear %s", ItName(model).c_str());
     return model != nullptr;

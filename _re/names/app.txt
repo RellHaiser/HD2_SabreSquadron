@@ -21,7 +21,6 @@
 006dd920 WinMain | int __stdcall WinMain(void *instance, void *prevInstance, char *cmdLine, int showCmd)
 
 # referenced, not yet ported
-00486510 GetGEffects
 006c7bc0 C_Controls::Update
 006c7340 InitControls
 006c7010 BindControls
@@ -51,7 +50,6 @@
 008aeb08 g_archives @
 00981e6c g_graphFlags @
 00843534 g_pollKeyboard @
-0089b880 g_geffectsModule @
 00867aa0 g_physicsModule @ C_PhysicsModule
 0098b020 g_itemsModule @
 00868b18 g_scriptModule @

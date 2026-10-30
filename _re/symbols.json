@@ -6868,27 +6868,256 @@
   "module": "zz_idioms",
   "name": "copy4_484e70"
  },
+ "00485b50": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetCloudsOn",
+  "proto": "void __thiscall SetCloudsOn(C_GEffectsModule * this, bool on)"
+ },
  "00485b70": {
-  "module": "hud",
+  "module": "geffects",
   "name": "C_GEffectsModule::SetLensFlareOn",
-  "proto": "void __thiscall SetLensFlareOn(C_GEffectsModule *this, bool on)"
+  "proto": "void __thiscall SetLensFlareOn(C_GEffectsModule * this, bool on)"
  },
  "00485ba0": {
   "module": "car",
   "name": "C_GEffectsModule::ShatterGlass",
   "proto": "void __thiscall ShatterGlass(C_GEffectsModule * this, I3D_frame * visual, float unknown)"
  },
+ "00485c70": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetCameraAnimation",
+  "proto": "void __thiscall SetCameraAnimation(C_GEffectsModule * this, I3D_frame * camera, char * fileName)"
+ },
+ "00485f70": {
+  "module": "geffects",
+  "name": "GEffects_SetFramePos",
+  "proto": "void __thiscall GEffects_SetFramePos(I3D_frame * this, float * x, float * y, float * z)"
+ },
+ "00485fc0": {
+  "module": "geffects",
+  "name": "CameraAnimation_Free"
+ },
+ "00485fd0": {
+  "module": "geffects",
+  "name": "S_CameraAnimation::Restore",
+  "proto": "void __fastcall Restore(void * this)"
+ },
+ "00486080": {
+  "module": "geffects",
+  "name": "StaticInit_GEffectsModule"
+ },
+ "00486090": {
+  "module": "geffects",
+  "name": "GEffectsModule_Construct"
+ },
+ "004860b0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::C_GEffectsModule",
+  "proto": "C_GEffectsModule * __thiscall C_GEffectsModule(C_GEffectsModule * this, int id, char * name)"
+ },
+ "004863e0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetRain",
+  "proto": "void __thiscall SetRain(C_GEffectsModule * this, bool on)"
+ },
+ "004863f0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::RestartMission",
+  "proto": "void __thiscall RestartMission(C_GEffectsModule * this, bool server)"
+ },
+ "00486460": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SaveGame",
+  "proto": "bool __thiscall SaveGame(C_GEffectsModule * this, C_chunk * chunk)"
+ },
+ "00486470": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::LoadGame",
+  "proto": "bool __thiscall LoadGame(C_GEffectsModule * this, C_chunk * chunk)"
+ },
+ "00486480": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetTimeScale",
+  "proto": "void __thiscall SetTimeScale(C_GEffectsModule * this, float scale, float acceleration)"
+ },
+ "004864a0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::GetTimeScale",
+  "proto": "float __thiscall GetTimeScale(C_GEffectsModule * this)"
+ },
+ "004864b0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::ScalarDeletingDestructor"
+ },
  "004864d0": {
   "module": "zz_idioms",
   "name": "vector_tidy_4864d0"
  },
+ "004864f0": {
+  "module": "geffects",
+  "name": "GEffectsModule_RegisterAtExit"
+ },
+ "00486500": {
+  "module": "geffects",
+  "name": "GEffectsModule_Destroy"
+ },
  "00486510": {
-  "module": "app",
-  "name": "GetGEffects"
+  "module": "geffects",
+  "name": "GetGEffects",
+  "proto": "C_GEffectsModule * GetGEffects(void)"
+ },
+ "00486520": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::ShowBackdrop",
+  "proto": "void __thiscall ShowBackdrop(C_GEffectsModule * this, bool on)"
+ },
+ "00486580": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::ShowAboveWater",
+  "proto": "void __thiscall ShowAboveWater(C_GEffectsModule * this, bool on)"
+ },
+ "004865e0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetHierarchyOn",
+  "proto": "void __thiscall SetHierarchyOn(C_GEffectsModule * this, I3D_frame * frame, bool on, uint typeMask)"
+ },
+ "004866f0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::HideVisual",
+  "proto": "void __thiscall HideVisual(C_GEffectsModule * this, I3D_frame * visual, bool on)"
+ },
+ "00486750": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::ShowUnderWater",
+  "proto": "void __thiscall ShowUnderWater(C_GEffectsModule * this, bool on)"
+ },
+ "004867b0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetWeatherOn",
+  "proto": "void __thiscall SetWeatherOn(C_GEffectsModule * this, bool on)"
+ },
+ "004867e0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::GetGroundCover",
+  "proto": "float __thiscall GetGroundCover(C_GEffectsModule * this, int material)"
+ },
+ "004867f0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetFadeLevel",
+  "proto": "void __thiscall SetFadeLevel(C_GEffectsModule * this, float level, float * color)"
+ },
+ "00486b30": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::Fade",
+  "proto": "void __thiscall Fade(C_GEffectsModule * this, int time, int direction, float * color)"
+ },
+ "00486bf0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::RenderVolumetrics",
+  "proto": "void __thiscall RenderVolumetrics(C_GEffectsModule * this)"
+ },
+ "00486c10": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::RenderFade",
+  "proto": "void __thiscall RenderFade(C_GEffectsModule * this)"
+ },
+ "00486d30": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetModelTransparency",
+  "proto": "bool __thiscall SetModelTransparency(C_GEffectsModule * this, I3D_frame * model, float level)"
+ },
+ "00486d60": {
+  "module": "geffects",
+  "name": "GEffects_FadeVisualCallback"
+ },
+ "00486df0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetModelLightLevel",
+  "proto": "bool __thiscall SetModelLightLevel(C_GEffectsModule * this, I3D_frame * model, float level)"
+ },
+ "00486e60": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetModelAlpha",
+  "proto": "bool __thiscall SetModelAlpha(C_GEffectsModule * this, I3D_frame * model, float level)"
+ },
+ "00486e90": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::ClearModelTransparency",
+  "proto": "bool __thiscall ClearModelTransparency(C_GEffectsModule * this, I3D_frame * model)"
+ },
+ "00486f00": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::~C_GEffectsModule"
+ },
+ "004870a0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetThunderstorm",
+  "proto": "void __thiscall SetThunderstorm(C_GEffectsModule * this, bool on, void * light, bool immediate)"
+ },
+ "004871a0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::StartMpLightning",
+  "proto": "void __thiscall StartMpLightning(C_GEffectsModule * this, int time)"
+ },
+ "00487240": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::Update",
+  "proto": "void __thiscall Update(C_GEffectsModule * this, int timeDelta)"
+ },
+ "00488560": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::LoadMissionData",
+  "proto": "void __thiscall LoadMissionData(C_GEffectsModule * this, bool server)"
+ },
+ "004885a0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::FreeMissionData",
+  "proto": "void __thiscall FreeMissionData(C_GEffectsModule * this, bool server)"
+ },
+ "004885d0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::StartMission",
+  "proto": "void __thiscall StartMission(C_GEffectsModule * this, bool server)"
+ },
+ "004888c0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::StopMission",
+  "proto": "void __thiscall StopMission(C_GEffectsModule * this, bool server)"
+ },
+ "00488b80": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::Reset",
+  "proto": "void __thiscall Reset(C_GEffectsModule * this)"
  },
  "00488d60": {
-  "module": "physics",
-  "name": "C_GEffectsModule::FadeOutModel"
+  "module": "geffects",
+  "name": "C_GEffectsModule::FadeOutModel",
+  "proto": "void __thiscall FadeOutModel(C_GEffectsModule * this, I3D_frame * model, int time, bool switchOff)"
+ },
+ "00488ee0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::FadeIn",
+  "proto": "void __thiscall FadeIn(C_GEffectsModule * this, I3D_frame * model, int time, bool turnOn)"
+ },
+ "00489060": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::FadeInModel",
+  "proto": "void __thiscall FadeInModel(C_GEffectsModule * this, I3D_frame * model, int time, bool turnOn)"
+ },
+ "004890f0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::FadeOutHierarchy",
+  "proto": "void __thiscall FadeOutHierarchy(C_GEffectsModule * this, I3D_frame * model, int time, bool switchOff)"
+ },
+ "00489180": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::FadeHuman",
+  "proto": "void __thiscall FadeHuman(C_GEffectsModule * this, C_Human * human, int time, bool in)"
+ },
+ "00489c60": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::LoadWaterCamera",
+  "proto": "void __thiscall LoadWaterCamera(C_GEffectsModule * this)"
  },
  "0048b300": {
   "module": "zz_idioms",
@@ -6933,6 +7162,10 @@
  "0048b680": {
   "module": "zz_idioms",
   "name": "empty_function_48b680"
+ },
+ "0048b880": {
+  "module": "geffects",
+  "name": "CameraAnimationVector_Insert"
  },
  "0048c710": {
   "module": "world_modules",
@@ -36058,6 +36291,12 @@
   "name": "g_actorCreators",
   "type": "C_ActorCreator **"
  },
+ "008396e8": {
+  "data": true,
+  "module": "geffects",
+  "name": "g_rainTeamSteps",
+  "type": "int"
+ },
  "0083bed4": {
   "data": true,
   "module": "vehicle",
@@ -36394,6 +36633,11 @@
   "module": "app",
   "name": "g_cameraModule"
  },
+ "0089afbc": {
+  "data": true,
+  "module": "geffects",
+  "name": "g_cameraHumanEffects"
+ },
  "0089b288": {
   "data": true,
   "module": "app",
@@ -36426,15 +36670,32 @@
   "module": "app",
   "name": "g_temporaryActors"
  },
+ "0089b760": {
+  "data": true,
+  "module": "geffects",
+  "name": "g_waterLevel",
+  "type": "float"
+ },
+ "0089b7f8": {
+  "data": true,
+  "module": "geffects",
+  "name": "g_fadeQuad"
+ },
  "0089b880": {
   "data": true,
-  "module": "app",
+  "module": "geffects",
   "name": "g_geffectsModule"
  },
  "0089bbb0": {
   "data": true,
   "module": "script",
   "name": "g_decorators"
+ },
+ "0089bbb4": {
+  "data": true,
+  "module": "geffects",
+  "name": "g_rainTime",
+  "type": "int"
  },
  "0089bbbc": {
   "data": true,

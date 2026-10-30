@@ -1676,14 +1676,16 @@ std::vector<std::string> g_cacheLoads;
 std::vector<I3D_frame *> g_skidFrames;
 std::string g_cacheFailName;
 void (*g_cacheFill)(I3D_model *object);
+uint32_t g_cacheLoadFlags;                              // (the last OpenInto's flags)
 template <>
 C_ResourceCache<I3D_model>::~C_ResourceCache()
 {
 }
 template <>
-HRESULT C_ResourceCache<I3D_model>::OpenInto(I3D_model *object, const char *fileName, uint32_t, void *, void *, int)
+HRESULT C_ResourceCache<I3D_model>::OpenInto(I3D_model *object, const char *fileName, uint32_t flags, void *, void *, int)
 {
     g_cacheLoads.push_back(fileName);
+    g_cacheLoadFlags = flags;
     if (g_cacheFailName == fileName)
         return I3DERR_NOFILE;
     if (std::toupper(static_cast<unsigned char>(fileName[0])) == 'D' &&
@@ -1728,8 +1730,10 @@ void C_SoundCache::Duplicate(I3D_sound *, I3D_sound *)
 }
 C_SoundCache g_soundCache;
 
-// The scene: slot 0xEC UpdateFrameSector, +0x1F8 the primary sector (a stub frame).
-void *g_sceneVtable[SLOTS];
+// The scene: slot 0xEC UpdateFrameSector, +0x1F8 the primary sector (a stub frame). (Its slots
+// go past 0xFC: twice SLOTS.)
+constexpr int SCENE_SLOTS = 2 * SLOTS;
+void *g_sceneVtable[SCENE_SLOTS];
 I3D_frame *g_sector;
 int g_sectorUpdates;
 struct S_SectorUpdate {
@@ -1744,7 +1748,7 @@ void __stdcall F_UpdateFrameSector(void *, I3D_frame *frame, const S_vector &pos
 }
 I3D_scene *MakeScene()
 {
-    FillTraps(g_sceneVtable, std::make_integer_sequence<int, SLOTS>());
+    FillTraps(g_sceneVtable, std::make_integer_sequence<int, SCENE_SLOTS>());
     g_sceneVtable[0xEC / 4] = reinterpret_cast<void *>(&F_UpdateFrameSector);
     auto *mem = static_cast<uint8_t *>(::operator new(FRAME_SIZE, std::align_val_t(16)));
     std::memset(mem, 0, FRAME_SIZE);
@@ -9424,12 +9428,14 @@ void C_Debris::SetupWheel(const S_WheelDebrisParams &params)
 }
 #endif
 
-C_GEffectsModule g_geffects;
 std::vector<std::pair<I3D_frame *, float>> g_shattered;
+#ifndef WORLD_TEST                                      // (the world build links the real module, part 8c)
+C_GEffectsModule g_geffects;
 C_GEffectsModule *GetGEffects()
 {
     return &g_geffects;
 }
+#endif
 void C_GEffectsModule::ShatterGlass(I3D_frame *visual, float unknown)
 {
     g_shattered.emplace_back(visual, unknown);
@@ -14832,6 +14838,7 @@ void PartsHitTest(const char *path)
 #ifdef WORLD_TEST
 #include "world_modules_test.inc"
 #include "sight_test.inc"
+#include "geffects_test.inc"
 #endif
 
 int main(int argc, char **argv)

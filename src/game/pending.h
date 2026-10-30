@@ -92,58 +92,67 @@ public:
 // end. `*cursor` moves past it.
 int ReadConsoleToken(const char **cursor, char *out, int *unknown, char *unknown2);   // 0x007445d0
 
-// ---- 0x00486090 GEffects module ---------------------------------------------
-class I3D_frame;
-struct S_vector;
-class C_GEffectsModule {                            // "GEffects", vtable 0x008101f0
+// ---- the objects of the GEffects module (part 8d) --------------------------
+// The decorators (grass, ground cover; the GEffects module's +0x20, g_decorators).
+class C_Decorators {                                    // 0xA4 bytes
 public:
-    // (C_Module::Update; the command map calls it itself while the game is paused.)
-    void Update(int timeDelta);                     // vtable +0x10
-    void SetThunderstorm(bool on, I3D_frame *light, void *unused);   // vtable +0x44
-    // Highlight of a human's model (C_Human::SetUnknown94; meaning inferred from the camera code).
-    void SetModelHighlight(I3D_frame *model, float level);   // vtable +0x50
-    // Light level of a model (C_HumanLighting; 1: full light).
-    void SetModelLightLevel(I3D_frame *model, float level);   // vtable +0x54
-    // Switches on / off every frame under `frame` (itself included) whose type is in `typeMask`
-    // (bits by type: 1 visual, 2 light, 4 camera, 8 sound, 0x10 sector, 0x20 dummy, 0x40 target,
-    // 0x100 user, 0x80 model, ...; sounds also start / stop).
-    void SetHierarchyOn(I3D_frame *frame, bool on, uint32_t typeMask);   // vtable +0x58 0x004865e0
-    void HideVisual(I3D_frame *visual, bool flag);  // vtable +0x5C
-    // SetModelHighlight(model, 0); false for no model (debris and item actors going away).
-    bool ClearModelHighlight(I3D_frame *model);     // vtable +0x60 (0x00486e90)
-    // Fades the model out over `time` ms (debris).
-    void FadeOutModel(I3D_frame *model, int time, bool unknown);   // vtable +0x64 (0x00488d60)
-    // Fades every visual under `model` back in over `time` ms (0: fully opaque at once; it also
-    // cancels a fade-out in progress). `turnOn` switches the visuals on (meaning inferred).
-    void FadeInModel(I3D_frame *model, int time, bool turnOn);   // vtable +0x6C (0x00489060)
-    // Fades every visual under `model` out over `time` ms (FadeOutModel on each; the supply box).
-    void FadeOutHierarchy(I3D_frame *model, int time, bool unknown);   // vtable +0x70 (0x004890f0)
-    // The shadow of a model (a new reference; null: none).
-    I3D_frame *CreateShadow(I3D_frame *model);      // vtable +0x78
-    I3D_frame *GetShadow(I3D_frame *model);         // vtable +0x7C (adds a reference)
-    // Screen fade over `time` ms; `color` null = black.
-    // The screen's fade level (0..1).
-    // (`color` null: black; the HUD's photo flash passes black too.)
-    void SetFadeLevel(float level, const S_vector *color);   // vtable +0x88
-    void Fade(int time, int direction, const S_vector *color);   // vtable +0x8C
-    // Game speed (1.0 = normal) and its rate of change per second.
-    void SetTimeScale(float scale, float acceleration);   // vtable +0x98
-    float GetTimeScale();                           // vtable +0x9C
-    // Fades a human's model out (`in` false) or back in over `time` ms.
-    void FadeHuman(class C_Human *human, int time, bool in);   // vtable +0x74
+    // (Both inlined in the GEffects module's constructor and destructor.)
+    C_Decorators();
+    ~C_Decorators();
+    void SetOn(bool on);                                // 0x0047b010
+    void Clear();                                       // 0x0047c020
+    void Free();                                        // 0x0047b090
+    void Load();                                        // 0x0047c530
+    void Start();                                       // 0x0047b0b0
+    void Update(int timeDelta);                         // 0x0047bcc0
     // How much ground of material `material` hides a lying / crouching human (1 = none).
-    float GetGroundCover(int material);             // vtable +0x94
-    void DressUniform(class C_Human *human, int uniform);   // vtable +0xA8
-    void SwitchFaceTexture(I3D_frame *model, const char *texture);   // vtable +0xAC
-    void SetCameraAnimation(I3D_frame *camera, const char *fileName);   // vtable +0xB0
-    // A glass visual's faces as falling shards (the car's broken windows; `unknown` 0.01, meaning
-    // not identified).
-    void ShatterGlass(I3D_frame *visual, float unknown);   // vtable +0xB4 0x00485ba0
-    void SetCloudsOn(bool on);                      // vtable +0xB8
-    // The primary sector's "lensflare" frame on / off (off while the first-person view is on).
-    void SetLensFlareOn(bool on);                   // vtable +0xBC 0x00485b70
+    float GetGroundCover(int material);                 // 0x0047b4c0
+
+private:
+    uint8_t m_data[0xA4];
 };
-C_GEffectsModule *GetGEffects();                    // 0x00486510
+extern C_Decorators *g_decorators;                      // 0x0089bbb0
+
+// The volumetrics (the GEffects module's +0xC4).
+class C_Volumetrics {                                   // 0x20 bytes
+public:
+    // (Both inlined in the GEffects module's constructor and destructor.)
+    C_Volumetrics();
+    ~C_Volumetrics();
+    // `time`: ms since the mission's start.
+    void Render(int time);                              // 0x00482260
+    void Load();                                        // 0x00482a00
+    // (LoadMissionData passes true; meaning not identified.)
+    void Prune(bool unknown);                           // 0x00482980
+    void Free();                                        // 0x00482d70
+
+private:
+    uint8_t m_data[0x20];
+};
+
+// The mesh player (the GEffects module's +0xE4).
+class C_MeshPlayer {                                    // 0x28 bytes
+public:
+    C_MeshPlayer();                                     // 0x00484100
+    ~C_MeshPlayer();                                    // 0x004841e0
+    void Load();                                        // 0x00484260
+    void Update(int timeDelta);                         // 0x00484a70
+    void Free();                                        // 0x00484ae0
+
+private:
+    uint8_t m_data[0x28];
+};
+
+// The birds (on g_birds, 0x0089bb90): flown on, gathered from the scene, freed.
+void UpdateBirds(int timeDelta);                        // 0x0047a700
+void CollectBirds();                                    // 0x0047a790
+void FreeBirds();                                       // 0x0047aa10
+// The clouds (the object at 0x0089b74c).
+void FreeClouds();                                      // 0x00483de0
+void LoadClouds();                                      // 0x00483e50
+
+// The GEffects module: game/geffects.h.
+#include "game/geffects.h"
 
 // The highest y of the scene's frames' bounds (the top of the box C_NetGame::Command gathers at
 // 0x0072d9c0 for the network game; the supply box's drop height stays under it).
