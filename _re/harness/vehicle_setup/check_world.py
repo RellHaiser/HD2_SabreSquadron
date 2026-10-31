@@ -25,6 +25,8 @@ LINES = {
                    "dcModule").split(),
     "decorators2": ("dmSlope dmLight dmTake dmPool dmPrepare dmCell dmRefill dmRefillSeed dmFollow dmFollowMove dmShift "
                     "dmBend dmBendSpring dmBendUpdate dmBends dmHuman dmCar dmUpdate dmSway").split(),
+    "volumetrics": ("vlCone vlConeLoad vlBuild vlBuildCone vlTexture vlRender vlRenderCone vlShaft vlShaftLoad vlRefresh "
+                    "vlDraw vlFade vlList vlPrune vlListRender vlSort vlClouds vlCloudDraw vlModule").split(),
 }
 
 

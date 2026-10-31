@@ -297,15 +297,6 @@ alignas(16) uint8_t g_gfCameraEffects[16], g_gfInterface[16];
 
 }  // namespace
 
-// The objects of part 8d.
-C_Volumetrics::C_Volumetrics() {}
-C_Volumetrics::~C_Volumetrics() {}
-void C_Volumetrics::Render(int time) { GfLog("vol render %d", time); }
-void C_Volumetrics::Load() { GfLog("vol load"); }
-void C_Volumetrics::Prune(bool unknown) { GfLog("vol prune %d", unknown); }
-void C_Volumetrics::Free() { GfLog("vol free"); }
-void FreeClouds() { GfLog("clouds free"); }
-void LoadClouds() { GfLog("clouds load"); }
 
 // RandomFloat: the next of g_gfRandoms (else half of max).
 float g_gfRandomMax;                                     // the last call's max
@@ -523,12 +514,8 @@ void GEffectsTest()
         m.SetRain(false);
         WM(r.gfModule, !m.m_rain);
         WM(r.gfModule, m.GetGroundCover(3) == 1.0f && g_gfLog.empty());
-        g_gfLog.clear();
+        // (The volumetrics' and clouds' calls: volumetrics_test.inc, part 8d-iv.)
         m.m_time = 1234;
-        m.RenderVolumetrics();
-        m.SetCloudsOn(true);
-        m.SetCloudsOn(false);
-        WM(r.gfModule, GfLogIs({"vol render 1234", "clouds load", "clouds free"}));
         g_gfLog.clear();
         m.SetLensFlareOn(false);
         WM(r.gfModule, GfLogIs({"find backdrop lensflare ffff", "on lensflare 0"}));
@@ -1808,12 +1795,12 @@ void GEffectsTest()
         I3D_frame *v = GfVisual("fv", I3DVISUAL_OBJECT);
         m.FadeOutModel(v, 100, false);
         m.LoadMissionData(false);
-        WM(r.gfMission, GfLogIs({"release fv", "vol load", "vol prune 1"}) && m.m_fadeOuts.empty());
+        WM(r.gfMission, GfLogIs({"release fv"}) && m.m_fadeOuts.empty());
         g_gfLog.clear();
         m.FadeIn(v, 100, false);
         m.m_timeScale = 0.5f;
         m.FreeMissionData(false);
-        WM(r.gfMission, GfLogIs({"alpha fv 0.000", "release fv", "vol free"}) && m.m_fadeIns.empty() &&
+        WM(r.gfMission, GfLogIs({"alpha fv 0.000", "release fv"}) && m.m_fadeIns.empty() &&
                             m.m_timeScale == 1.0f);
         // Restart: the decorators and birds again, the time from 0, no rain, the storm and the
         // tactical camera off.

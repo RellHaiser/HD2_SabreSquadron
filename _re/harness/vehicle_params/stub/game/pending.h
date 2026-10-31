@@ -131,22 +131,9 @@ struct S_MultiplayerSettings {
 // The GEffects module's objects (part 8d; as the real header declares them) and the module itself
 // (part 8c-i, the world build tests the real one).
 #include "game/decorators.h"
-class C_Volumetrics {
-public:
-    C_Volumetrics();
-    ~C_Volumetrics();
-    void Render(int time);
-    void Load();
-    void Prune(bool unknown);
-    void Free();
-
-private:
-    uint8_t m_data[0x20];
-};
+#include "game/volumetrics.h"
 #include "game/mesh_player.h"
 #include "game/birds.h"
-void FreeClouds();
-void LoadClouds();
 float RandomFloat(float max);
 #include "game/geffects.h"
 #else

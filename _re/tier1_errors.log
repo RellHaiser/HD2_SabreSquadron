@@ -66,10 +66,6 @@ f_0046c340.cpp:480:9: '_on' was not declared in this scope; did you mean 'on'?
     if (_on != 0) {
 f_0046c340.cpp:487:20: '_on' was not declared in this scope; did you mean 'on'?
     _this->m_270 = _on != 0;
-f_00480360.cpp:319:23: 'struct tier1::IGraph_vtbl' has no member named 'Slot84'; did you mean 'Slot24'?
-    (*pIVar7->vtable->Slot84)(pIVar7,&local_50);
-f_00480360.cpp:323:50: 'SUB14' was not declared in this scope; did you mean 'SUB104'?
-    (*pIVar7->vtable->SetRenderState)(pIVar7,0xd,SUB14(fVar1 < fVar2,0));
 f_0048eb30.cpp:124:24: wrong type argument to bit-complement
     ~C_TextBox__C_TextBox(_this);
 f_004a89b0.cpp:55:30: 'struct tier1::I3D_scene_vtbl' has no member named 'Slot94'; did you mean 'Slot04'?

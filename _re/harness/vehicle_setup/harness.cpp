@@ -14844,6 +14844,7 @@ void PartsHitTest(const char *path)
 #include "birds_test.inc"
 #include "decorators_test.inc"
 #include "decorators2_test.inc"
+#include "volumetrics_test.inc"
 #endif
 
 int main(int argc, char **argv)

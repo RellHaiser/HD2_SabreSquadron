@@ -5455,6 +5455,39 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: 26 names (names/decorators.txt), 27 decompiles exported; 22 functions in ported.txt (4
     helpers absorbed). Stats: 7,648 of 12,293 functions by hand (69.8 % by size).
 
+  PART 8d-iv DONE (2026-10-30): the volumetrics and the clouds (src/game/volumetrics.*, new). Part 8d done.
+  - The volumetrics (C_Volumetrics, GEffects +0xC4): light shafts from volumetrics.bin (top chunk
+    id 1; a shaft per chunk: its light by name (chunk 10, FRAME_MASK_LIGHT), depth / fade distances,
+    phases, its cones in chunk 0x28 (subchunks 0x3F2..0x460: texture, width, length, alphas, flat,
+    turn, segments (up to 10), spread, scrolls, uv scale)). Prune deletes those whose light is gone;
+    Refresh builds the cones (textures with ".bmp" when the name has no extension).
+  - Render (0x00482260): the states 3 / 0xE / 0xD kept, the clouds drawn first; the camera's turn on
+    the ground summed (AngleBetween2D); a shaft is visible in a sector drawn this frame (SCTF_VISIBLE,
+    I3D_sector::IsVisible, new), in front of the camera and nearer than its fade's end (its turn round
+    the viewer summed); drawn farthest first (Draw: its z axis kept, turned to the camera, state 0xD
+    beyond its depth distance, faded in / out by the distance; the cones' phase from the turns, the
+    distance and the camera's turn: a flat fan's texture scrolled by the time, a cone's rims' turned).
+  - The clouds (0x00482e50): a billboard in each 16 m cell of the 12 x 12 x 12 around the camera
+    (sin / cos of the cell's index for its place and size), in front of it, faded in from 10 m to
+    20 m and out from 45 m (to about 71 m; the near fade's double constants rounded once), in one of
+    two buffers by the sine's sign, a texture each (clouder.tga / clouder2.tga).
+  - Quirks kept: the list's destructor leaves the shafts; Refresh overwrites the shaft's random
+    angle with its light's distance from the origin; a light not found still keeps the shaft (Prune
+    deletes it). Fixes: the cones' segment count clamped to their room, the texture name not used as
+    a format, the name buffers terminated.
+  - S_Volumetric / S_VolumetricCone's CopyFrom (0x00481230 / 0x00481190) not ported (never called).
+    DrawClouds takes the original's (unused) time.
+  - Harness: volumetrics_test.inc ("volumetrics:", 19 checks; IGraph's textures, render states,
+    world matrix and draws and the driver's states faked, the draws' vertices kept; the clouds
+    compared vertex by vertex), S_matrix::SetDir(dir, up) as LS3DF's; the GEffects test's volumetrics
+    fakes dropped. Baselines: 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
+  - Mutations (mutations/mutate_8d4.py): the first run caught 298 of 442 (138 survived, 6 did not
+    build); 73 equivalent (see the file's docstring), new cases for 67. The second run 359 of 365, 4
+    more cases; the full rerun: all 363 caught.
+  - Build: 199 files clean (MSVC). Tier 1: 537 errors in 94 files, 221 stubs. ret_audit --src: 52.
+  - Ghidra: 33 names (names/volumetrics.txt), 37 decompiles exported; 25 functions in ported.txt
+    (9 helpers absorbed). Stats: 7,682 of 12,293 functions by hand (70.3 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

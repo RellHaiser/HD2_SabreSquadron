@@ -7142,9 +7142,81 @@
   "module": "decorators",
   "name": "StaticInit_480360"
  },
+ "00480390": {
+  "module": "volumetrics",
+  "name": "S_VolumetricCone::Render",
+  "proto": "void __thiscall Render(void * this, int time, float phase, float fade)"
+ },
+ "00480710": {
+  "module": "volumetrics",
+  "name": "Volumetric_SetVertex",
+  "proto": "void __fastcall Volumetric_SetVertex(void * vertex, float * pos, uint color, float u, float v)"
+ },
+ "00480740": {
+  "module": "volumetrics",
+  "name": "S_VolumetricCone::Build",
+  "proto": "void __thiscall Build(void * this, bool load, float base)"
+ },
+ "00480d00": {
+  "module": "volumetrics",
+  "name": "S_VolumetricCone::~S_VolumetricCone"
+ },
+ "00480d80": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::Draw",
+  "proto": "bool __thiscall Draw(void * this, int time, float * camera, float yaw)"
+ },
+ "00480fa0": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::Refresh",
+  "proto": "void __thiscall Refresh(void * this, bool load)"
+ },
+ "00481080": {
+  "module": "volumetrics",
+  "name": "S_VolumetricCone::S_VolumetricCone",
+  "proto": "void * __thiscall S_VolumetricCone(void * this, float base)"
+ },
+ "00481190": {
+  "module": "volumetrics",
+  "name": "S_VolumetricCone::CopyFrom",
+  "proto": "void __thiscall CopyFrom(void * this, void * other)"
+ },
+ "00481230": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::CopyFrom",
+  "proto": "void __thiscall CopyFrom(void * this, void * other)"
+ },
+ "00481320": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::S_Volumetric",
+  "proto": "void * __thiscall S_Volumetric(void * this, void * frame)"
+ },
+ "00481380": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::~S_Volumetric"
+ },
+ "004813d0": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::DeleteCones",
+  "proto": "void __fastcall DeleteCones(void * this)"
+ },
+ "00481440": {
+  "module": "volumetrics",
+  "name": "S_VolumetricCone::Load",
+  "proto": "bool __thiscall Load(void * this, void * chunk)"
+ },
+ "00481810": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::Load",
+  "proto": "bool __thiscall Load(void * this, void * chunk)"
+ },
  "00481cd0": {
   "module": "zz_idioms",
   "name": "vector_tidy_481cd0"
+ },
+ "00481cf0": {
+  "module": "volumetrics",
+  "name": "VolumetricConeVector_Insert"
  },
  "00481e90": {
   "module": "zz_idioms",
@@ -7153,6 +7225,10 @@
  "00481eb0": {
   "module": "zz_idioms",
   "name": "empty_function_481eb0"
+ },
+ "00481ec0": {
+  "module": "volumetrics",
+  "name": "VolumetricConeVector_InsertN"
  },
  "004820d0": {
   "module": "zz_idioms",
@@ -7165,6 +7241,71 @@
  "00482130": {
   "module": "zz_idioms",
   "name": "construct_copy4_482130"
+ },
+ "00482140": {
+  "module": "volumetrics",
+  "name": "StaticInit_482140"
+ },
+ "00482170": {
+  "module": "volumetrics",
+  "name": "Chunk_ReadFloatAndAscend",
+  "proto": "float __fastcall Chunk_ReadFloatAndAscend(void * chunk)"
+ },
+ "00482260": {
+  "module": "volumetrics",
+  "name": "C_Volumetrics::Render",
+  "proto": "void __thiscall Render(void * this, int time)"
+ },
+ "00482980": {
+  "module": "volumetrics",
+  "name": "C_Volumetrics::Prune",
+  "proto": "void __thiscall Prune(void * this, bool load)"
+ },
+ "00482a00": {
+  "module": "volumetrics",
+  "name": "C_Volumetrics::Load",
+  "proto": "void __fastcall Load(void * this)"
+ },
+ "00482d70": {
+  "module": "volumetrics",
+  "name": "C_Volumetrics::Free",
+  "proto": "void __fastcall Free(void * this)"
+ },
+ "00482df0": {
+  "module": "volumetrics",
+  "name": "StaticInit_Clouds"
+ },
+ "00482e00": {
+  "module": "volumetrics",
+  "name": "Clouds_Construct0"
+ },
+ "00482e10": {
+  "module": "volumetrics",
+  "name": "Clouds_RegisterAtExit"
+ },
+ "00482e20": {
+  "module": "volumetrics",
+  "name": "Clouds_Destroy0"
+ },
+ "00482e30": {
+  "module": "volumetrics",
+  "name": "S_Clouds::S_Clouds",
+  "proto": "void * __fastcall S_Clouds(void * this)"
+ },
+ "00482e50": {
+  "module": "volumetrics",
+  "name": "DrawClouds",
+  "proto": "void __fastcall DrawClouds(void * clouds)"
+ },
+ "00483de0": {
+  "module": "volumetrics",
+  "name": "FreeClouds",
+  "proto": "void __fastcall FreeClouds(void * clouds)"
+ },
+ "00483e50": {
+  "module": "volumetrics",
+  "name": "LoadClouds",
+  "proto": "void __fastcall LoadClouds(void * clouds)"
  },
  "00483eb0": {
   "module": "zz_idioms",
@@ -37153,6 +37294,21 @@
   "data": true,
   "module": "decorators",
   "name": "g_decoratorsEnabled"
+ },
+ "0089b74c": {
+  "data": true,
+  "module": "volumetrics",
+  "name": "g_clouds"
+ },
+ "0089b754": {
+  "data": true,
+  "module": "volumetrics",
+  "name": "g_cloudVertices0"
+ },
+ "0089b758": {
+  "data": true,
+  "module": "volumetrics",
+  "name": "g_cloudVertices1"
  },
  "0089b760": {
   "data": true,

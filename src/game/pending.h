@@ -95,28 +95,11 @@ int ReadConsoleToken(const char **cursor, char *out, int *unknown, char *unknown
 // ---- the objects of the GEffects module (part 8d) --------------------------
 #include "game/decorators.h"
 
-// The volumetrics (the GEffects module's +0xC4).
-class C_Volumetrics {                                   // 0x20 bytes
-public:
-    // (Both inlined in the GEffects module's constructor and destructor.)
-    C_Volumetrics();
-    ~C_Volumetrics();
-    // `time`: ms since the mission's start.
-    void Render(int time);                              // 0x00482260
-    void Load();                                        // 0x00482a00
-    // (LoadMissionData passes true; meaning not identified.)
-    void Prune(bool unknown);                           // 0x00482980
-    void Free();                                        // 0x00482d70
-
-private:
-    uint8_t m_data[0x20];
-};
+// The volumetrics (the GEffects module's +0xC4) and the clouds: game/volumetrics.h.
+#include "game/volumetrics.h"
 
 // The mesh player (the GEffects module's +0xE4): game/mesh_player.h; the birds: game/birds.h.
 #include "game/mesh_player.h"
-// The clouds (the object at 0x0089b74c).
-void FreeClouds();                                      // 0x00483de0
-void LoadClouds();                                      // 0x00483e50
 
 // The GEffects module: game/geffects.h.
 #include "game/geffects.h"

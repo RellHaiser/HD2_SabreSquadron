@@ -1151,6 +1151,8 @@ public:
     // primary and the omni sector at the mission's start).
     I3DMETHOD(void, SetEnvironment)(int id) = 0;              // 0x94
 
+    // Drawn this frame (+0x160 bit 0; LS3DF: SCTF_VISIBLE, the volumetrics' test).
+    bool IsVisible() const { return (Field<uint32_t>(0x160) & 1) != 0; }
     // Portals of this sector (leading to GetConnected()).
     int NumPortals() const { return Field<int>(0x254); }
     I3D_portal *GetPortal(int i) const { return Field<I3D_portal **>(0x24C)[i]; }

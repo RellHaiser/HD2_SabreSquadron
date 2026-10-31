@@ -1393,6 +1393,7 @@ void GEffects2Test();                                   // (geffects2_test.inc, 
 void BirdsTest();                                       // (birds_test.inc, part 8d-i)
 void DecoratorsTest();                                  // (decorators_test.inc, part 8d-ii)
 void Decorators2Test();                                 // (decorators2_test.inc, part 8d-iii)
+void VolumetricsTest();                                 // (volumetrics_test.inc, part 8d-iv)
 
 void WorldModulesTest(const char *path)
 {
@@ -1435,5 +1436,6 @@ void WorldModulesTest(const char *path)
     BirdsTest();
     DecoratorsTest();
     Decorators2Test();
+    VolumetricsTest();
     std::fflush(stdout);
 }

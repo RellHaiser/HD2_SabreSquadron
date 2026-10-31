@@ -47807,10 +47807,10 @@
 ]
 },
 "00480390": {
-"name": "FUN_00480390",
+"name": "S_VolumetricCone::Render",
 "size": 886,
 "lines": 89,
-"chars": 3212,
+"chars": 3301,
 "callers": [
 "00480d80"
 ],
@@ -47833,10 +47833,10 @@
 "in_vtables": []
 },
 "00480710": {
-"name": "FUN_00480710",
+"name": "Volumetric_SetVertex",
 "size": 40,
-"lines": 15,
-"chars": 321,
+"lines": 13,
+"chars": 342,
 "callers": [
 "00480740",
 "00482e50"
@@ -47849,10 +47849,10 @@
 "in_vtables": []
 },
 "00480740": {
-"name": "FUN_00480740",
+"name": "S_VolumetricCone::Build",
 "size": 1466,
-"lines": 140,
-"chars": 5886,
+"lines": 147,
+"chars": 5894,
 "callers": [
 "00480fa0"
 ],
@@ -47877,10 +47877,10 @@
 "in_vtables": []
 },
 "00480d00": {
-"name": "FUN_00480d00",
+"name": "S_VolumetricCone::~S_VolumetricCone",
 "size": 94,
 "lines": 29,
-"chars": 646,
+"chars": 669,
 "callers": [
 "004813d0",
 "00481810"
@@ -47895,10 +47895,10 @@
 "in_vtables": []
 },
 "00480d80": {
-"name": "FUN_00480d80",
+"name": "S_Volumetric::Draw",
 "size": 535,
-"lines": 105,
-"chars": 4086,
+"lines": 95,
+"chars": 3247,
 "callers": [
 "00482260"
 ],
@@ -47918,10 +47918,10 @@
 "in_vtables": []
 },
 "00480fa0": {
-"name": "FUN_00480fa0",
+"name": "S_Volumetric::Refresh",
 "size": 221,
-"lines": 54,
-"chars": 1381,
+"lines": 55,
+"chars": 1402,
 "callers": [
 "00481230",
 "00482980"
@@ -47941,7 +47941,7 @@
 "in_vtables": []
 },
 "00481080": {
-"name": "FUN_00481080",
+"name": "S_VolumetricCone::S_VolumetricCone",
 "size": 260,
 "lines": 76,
 "chars": 2178,
@@ -47965,10 +47965,10 @@
 "in_vtables": []
 },
 "00481190": {
-"name": "FUN_00481190",
+"name": "S_VolumetricCone::CopyFrom",
 "size": 149,
 "lines": 30,
-"chars": 998,
+"chars": 1242,
 "callers": [
 "00481230"
 ],
@@ -47982,10 +47982,10 @@
 "in_vtables": []
 },
 "00481230": {
-"name": "FUN_00481230",
+"name": "S_Volumetric::CopyFrom",
 "size": 234,
-"lines": 44,
-"chars": 1404,
+"lines": 49,
+"chars": 1752,
 "callers": [],
 "callees": [
 "00480fa0",
@@ -48002,10 +48002,10 @@
 "in_vtables": []
 },
 "00481320": {
-"name": "FUN_00481320",
+"name": "S_Volumetric::S_Volumetric",
 "size": 85,
 "lines": 24,
-"chars": 770,
+"chars": 756,
 "callers": [
 "00482a00"
 ],
@@ -48021,10 +48021,10 @@
 "in_vtables": []
 },
 "00481380": {
-"name": "FUN_00481380",
+"name": "S_Volumetric::~S_Volumetric",
 "size": 79,
 "lines": 21,
-"chars": 455,
+"chars": 491,
 "callers": [
 "00482260",
 "00482980",
@@ -48042,10 +48042,10 @@
 "in_vtables": []
 },
 "004813d0": {
-"name": "FUN_004813d0",
+"name": "S_Volumetric::DeleteCones",
 "size": 86,
 "lines": 24,
-"chars": 571,
+"chars": 618,
 "callers": [
 "00481230",
 "00481380",
@@ -48062,10 +48062,10 @@
 "in_vtables": []
 },
 "00481440": {
-"name": "FUN_00481440",
+"name": "S_VolumetricCone::Load",
 "size": 798,
-"lines": 127,
-"chars": 4641,
+"lines": 125,
+"chars": 4341,
 "callers": [
 "00481810"
 ],
@@ -48083,10 +48083,10 @@
 "in_vtables": []
 },
 "00481810": {
-"name": "FUN_00481810",
+"name": "S_Volumetric::Load",
 "size": 1117,
-"lines": 189,
-"chars": 6688,
+"lines": 191,
+"chars": 6649,
 "callers": [
 "00482a00"
 ],
@@ -48136,10 +48136,10 @@
 "in_vtables": []
 },
 "00481cf0": {
-"name": "FUN_00481cf0",
+"name": "VolumetricConeVector_Insert",
 "size": 406,
-"lines": 74,
-"chars": 2333,
+"lines": 75,
+"chars": 2349,
 "callers": [
 "00481810"
 ],
@@ -48189,10 +48189,10 @@
 "in_vtables": []
 },
 "00481ec0": {
-"name": "FUN_00481ec0",
+"name": "VolumetricConeVector_InsertN",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3537,
 "callers": [
 "00481230"
 ],
@@ -48252,10 +48252,10 @@
 "in_vtables": []
 },
 "00482140": {
-"name": "FUN_00482140",
+"name": "StaticInit_482140",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -48274,10 +48274,10 @@
 ]
 },
 "00482170": {
-"name": "FUN_00482170",
+"name": "Chunk_ReadFloatAndAscend",
 "size": 235,
-"lines": 50,
-"chars": 1424,
+"lines": 51,
+"chars": 1458,
 "callers": [
 "00481810",
 "00539990",
@@ -48305,10 +48305,10 @@
 "in_vtables": []
 },
 "00482260": {
-"name": "FUN_00482260",
+"name": "C_Volumetrics::Render",
 "size": 1813,
-"lines": 284,
-"chars": 9627,
+"lines": 285,
+"chars": 9695,
 "callers": [
 "00486bf0"
 ],
@@ -48342,10 +48342,10 @@
 "in_vtables": []
 },
 "00482980": {
-"name": "FUN_00482980",
+"name": "C_Volumetrics::Prune",
 "size": 126,
 "lines": 39,
-"chars": 1025,
+"chars": 1051,
 "callers": [
 "00482a00",
 "00488560"
@@ -48362,10 +48362,10 @@
 "in_vtables": []
 },
 "00482a00": {
-"name": "FUN_00482a00",
+"name": "C_Volumetrics::Load",
 "size": 871,
-"lines": 152,
-"chars": 4654,
+"lines": 149,
+"chars": 4628,
 "callers": [
 "00488560"
 ],
@@ -48399,10 +48399,10 @@
 "in_vtables": []
 },
 "00482d70": {
-"name": "FUN_00482d70",
+"name": "C_Volumetrics::Free",
 "size": 124,
 "lines": 29,
-"chars": 762,
+"chars": 790,
 "callers": [
 "00482a00",
 "004885a0"
@@ -48421,10 +48421,10 @@
 "in_vtables": []
 },
 "00482df0": {
-"name": "FUN_00482df0",
+"name": "StaticInit_Clouds",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 105,
 "callers": [],
 "callees": [
 "00482e00",
@@ -48442,10 +48442,10 @@
 ]
 },
 "00482e00": {
-"name": "FUN_00482e00",
+"name": "Clouds_Construct0",
 "size": 10,
 "lines": 8,
-"chars": 94,
+"chars": 87,
 "callers": [
 "00482df0"
 ],
@@ -48461,10 +48461,10 @@
 "in_vtables": []
 },
 "00482e10": {
-"name": "FUN_00482e10",
+"name": "Clouds_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 85,
 "callers": [
 "00482df0"
 ],
@@ -48478,10 +48478,10 @@
 "in_vtables": []
 },
 "00482e20": {
-"name": "FUN_00482e20",
+"name": "Clouds_Destroy0",
 "size": 11,
 "lines": 7,
-"chars": 48,
+"chars": 51,
 "callers": [
 "00482e10"
 ],
@@ -48495,10 +48495,10 @@
 "in_vtables": []
 },
 "00482e30": {
-"name": "FUN_00482e30",
+"name": "S_Clouds::S_Clouds",
 "size": 16,
 "lines": 9,
-"chars": 110,
+"chars": 145,
 "callers": [
 "00482e00"
 ],
@@ -48510,10 +48510,10 @@
 "in_vtables": []
 },
 "00482e50": {
-"name": "FUN_00482e50",
+"name": "DrawClouds",
 "size": 3971,
-"lines": 481,
-"chars": 18611,
+"lines": 488,
+"chars": 18882,
 "callers": [
 "00482260"
 ],
@@ -48558,10 +48558,10 @@
 "in_vtables": []
 },
 "00483de0": {
-"name": "FUN_00483de0",
+"name": "FreeClouds",
 "size": 97,
 "lines": 27,
-"chars": 588,
+"chars": 654,
 "callers": [
 "00482d70",
 "00483e50",
@@ -48580,10 +48580,10 @@
 "in_vtables": []
 },
 "00483e50": {
-"name": "FUN_00483e50",
+"name": "LoadClouds",
 "size": 94,
-"lines": 18,
-"chars": 479,
+"lines": 17,
+"chars": 470,
 "callers": [
 "00485b50"
 ],
