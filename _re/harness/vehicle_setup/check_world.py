@@ -23,6 +23,8 @@ LINES = {
               "bdMovieUpdate bdEffects").split(),
     "decorators": ("dcMake dcLoad dcVersions dcLoadEnd dcLight dcStart dcGrid dcOn dcClear dcFree dcCover "
                    "dcModule").split(),
+    "decorators2": ("dmSlope dmLight dmTake dmPool dmPrepare dmCell dmRefill dmRefillSeed dmFollow dmFollowMove dmShift "
+                    "dmBend dmBendSpring dmBendUpdate dmBends dmHuman dmCar dmUpdate dmSway").split(),
 }
 
 

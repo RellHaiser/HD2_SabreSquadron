@@ -5418,6 +5418,43 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     decompiles exported; 25 functions in ported.txt (29 helpers absorbed; Update 0x0047bcc0 left for
     8d-iii). Stats: 7,622 of 12,293 functions by hand (69.6 % by size).
 
+  PART 8d-iii DONE (2026-10-30): the decorators' update (src/game/decorators.*).
+  - Update (0x0047bcc0): the detail option followed (SetOn); the animated decorators sway (the
+    phase time * frequency * 0.001 + their index; mode 1: (x, sqrt(2 y^2 - s^2), z + s) with
+    s = sin * amplitude, mode 2 with c = cos * s; quirk kept: y twice, not the length), their levels
+    unlocked and refreshed; the grid follows the camera, or the player's soldier unless in a
+    cutscene (or the scripts' fake one, IsFakeCutscene, new) or the tactical view.
+  - The grid (C_DecoratorGrid): Follow (0x0047eb80) refills the cells passed as the viewer moves
+    (all anew from half the grid off), its ring buffer shifted (ShiftX / Z), then bends around the
+    player's soldier on foot and the cars within half the grid's width. Refill (0x0047e2d0): a seed
+    from the cell's world place (sin / cos hash, srand), the place jittered by 0.75 of a cell, a ray
+    down from 100 m (500), a set's decorator picked by RandomFloat(100) on ground whose normal's y is
+    above the set's minimum; lit at half the light map (also kept as a float in the model's frame
+    data, the bends' darkening reads it), turned at random or aligned to the ground, scaled 0.6..1.
+  - The models: TakeModel (0x0047b500) a pool's spare, a copy of its original, or the original
+    loaded (lit by its own colours; a copy kept in the pool; an animated decorator's mesh taken
+    first, PrepareAnimated 0x0047baa0: the vertices within 0.1 m of the line along the bound's top
+    xz diagonal); ReturnModel; the light map's bilinear SampleLight (quirk kept: no bounds).
+  - The bends: Bend (0x0047fae0) the bendable models within the radius' cells, those inside the
+    outer radius bent away from the move (inside the inner one darkened, between a small swing);
+    the soldier's radii by stance (0.25 / 0.4, 0.3 / 0.5, crouched 0.75 / 1; the first person's
+    crouch fades the near models' alpha over 1 s); a car's wheels (0.2 m towards the axle's other
+    one, 0.5 / 0.6) or its tracks' axle middles (2.4 / 2.5). S_DecoratorBend::Update: the roll on
+    towards its target, a spring swinging back at -0.9 until under a degree, the light back at
+    0.0003 per ms.
+  - C_Vehicle befriends C_DecoratorGrid; the human stub's velocity and stance. A Python model of
+    Follow (_re/tools/decorator_follow_sim.py, from the asm) gives the tests' refill sequences.
+  - Harness: decorators2_test.inc ("decorators2:", 19 checks; its own frame vtable, the ray hook as
+    the ground, probes of rings of models for the bend points); the GEffects test sees the
+    decorators' update through the detail flag. Baselines: 0 of 22 in both orders; the item build 0
+    of 37; the other five 0 of 37 each.
+  - Mutations (mutations/mutate_8d3.py): the first run caught 477 of 642 (165 survived); 68
+    equivalent (see the file's docstring), new cases for 97. The second run 571 of 574, one more
+    case; the full rerun: all 573 caught.
+  - Build: 198 files clean (MSVC). Tier 1: 539 errors in 95 files, 222 stubs. ret_audit --src: 52.
+  - Ghidra: 26 names (names/decorators.txt), 27 decompiles exported; 22 functions in ported.txt (4
+    helpers absorbed). Stats: 7,648 of 12,293 functions by hand (69.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

@@ -66,23 +66,9 @@ f_0046c340.cpp:480:9: '_on' was not declared in this scope; did you mean 'on'?
     if (_on != 0) {
 f_0046c340.cpp:487:20: '_on' was not declared in this scope; did you mean 'on'?
     _this->m_270 = _on != 0;
-f_0047ac00.cpp:146:32: too few arguments to function
-    (*pIVar5->vtable[2].Tick)();
-f_0047ac00.cpp:148:32: too few arguments to function
-    (*pIVar5->vtable->LinkTo)();
-f_0047ac00.cpp:281:70: expected primary-expression before ')' token
-    unaff_EDI = gh_bitcast<float*>((SStack_8c.x * SStack_8c.x +)
-f_0047ac00.cpp:441:49: expected primary-expression before '*' token
-    pCVar15 = GetCameraModule(C_CameraModule*)((this_03));
-f_0047ac00.cpp:441:50: expected primary-expression before ')' token
-    pCVar15 = GetCameraModule(C_CameraModule*)((this_03));
-f_0047e0c0.cpp:92:44: no matching function for call to 'gh_bitcast<tier1::S_CollisionVolume*>()'
-    local_68 = gh_bitcast<S_CollisionVolume*>()
-f_0047e0c0.cpp:93:15: expected primary-expression before 'float'
-    (float)(((extraout_ST0 - (long double)0.5) * (long double)0.75 +
-f_00480360.cpp:331:23: 'struct tier1::IGraph_vtbl' has no member named 'Slot84'; did you mean 'Slot24'?
+f_00480360.cpp:319:23: 'struct tier1::IGraph_vtbl' has no member named 'Slot84'; did you mean 'Slot24'?
     (*pIVar7->vtable->Slot84)(pIVar7,&local_50);
-f_00480360.cpp:335:50: 'SUB14' was not declared in this scope; did you mean 'SUB104'?
+f_00480360.cpp:323:50: 'SUB14' was not declared in this scope; did you mean 'SUB104'?
     (*pIVar7->vtable->SetRenderState)(pIVar7,0xd,SUB14(fVar1 < fVar2,0));
 f_0048eb30.cpp:124:24: wrong type argument to bit-complement
     ~C_TextBox__C_TextBox(_this);
@@ -320,7 +306,7 @@ f_00638620.cpp:217:47: no matching function for call to 'tier1::C_str::C_str(int
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
 f_00638620.cpp:227:47: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00638dc0.cpp:71:16: 'UNK_00804150' was not declared in this scope; did you mean 'FUN_00480150'?
+f_00638dc0.cpp:71:16: 'UNK_00804150' was not declared in this scope; did you mean 'DAT_00840150'?
     puStack_8 = &UNK_00804150;
 f_00638dc0.cpp:1003:47: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {

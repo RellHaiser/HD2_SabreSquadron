@@ -830,8 +830,9 @@ public:
 
 private:
     // The car reaches into its vehicle as the original does (C_Car +0x90), and so do its
-    // callbacks (game/car_callbacks.cpp).
+    // callbacks (game/car_callbacks.cpp), and the decorators' bends (its wheels and tracks).
     friend class C_Car;
+    friend class C_DecoratorGrid;
     friend void __fastcall CarOnBodyActorTouch(void *context, S_CollisionVolume *hit, const S_vector4 *point,
                                                const S_vector4 *velocity, const S_vector *normal);
     friend void __fastcall CarOnVehicleImpact(void *context, const S_vector *impulse, const S_vector *largest,

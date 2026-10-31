@@ -6871,10 +6871,35 @@
   "name": "C_Decorators::Start",
   "proto": "void __fastcall Start(void * this)"
  },
+ "0047b480": {
+  "module": "decorators",
+  "name": "C_Decorators::GetMinSlope",
+  "proto": "float __thiscall GetMinSlope(void * this, uint material)"
+ },
  "0047b4c0": {
   "module": "decorators",
   "name": "C_Decorators::GetGroundCover",
   "proto": "float __thiscall GetGroundCover(void * this, uint material)"
+ },
+ "0047b500": {
+  "module": "decorators",
+  "name": "C_Decorators::TakeModel",
+  "proto": "void * __thiscall TakeModel(void * this, uint set, int seed, int * decorator, bool * randomRotation, float * height, bool * alignToGround)"
+ },
+ "0047b8e0": {
+  "module": "decorators",
+  "name": "C_Decorators::ReturnModel",
+  "proto": "void __thiscall ReturnModel(void * this, int set, void * model, int decorator)"
+ },
+ "0047baa0": {
+  "module": "decorators",
+  "name": "S_Decorator::PrepareAnimated",
+  "proto": "void __thiscall PrepareAnimated(void * this, void * model)"
+ },
+ "0047bcc0": {
+  "module": "decorators",
+  "name": "C_Decorators::Update",
+  "proto": "void __thiscall Update(void * this, int timeDelta)"
  },
  "0047c020": {
   "module": "decorators",
@@ -6906,6 +6931,16 @@
   "name": "C_Decorators::FreeLightMap",
   "proto": "void __fastcall FreeLightMap(void * this)"
  },
+ "0047d0f0": {
+  "module": "decorators",
+  "name": "Decorators_Lerp",
+  "proto": "float __stdcall Decorators_Lerp(float a, float b, float t)"
+ },
+ "0047d110": {
+  "module": "decorators",
+  "name": "C_Decorators::SampleLight",
+  "proto": "float __thiscall SampleLight(void * this, float x, float z)"
+ },
  "0047d220": {
   "module": "zz_idioms",
   "name": "vector_tidy_47d220"
@@ -6929,6 +6964,10 @@
  "0047d2c0": {
   "module": "decorators",
   "name": "Vec4Array_Free2"
+ },
+ "0047d2e0": {
+  "module": "decorators",
+  "name": "Vec4Array_Push"
  },
  "0047d380": {
   "module": "zz_idioms",
@@ -6965,6 +7004,10 @@
  "0047d770": {
   "module": "decorators",
   "name": "DecoratorPoolVector_InsertN"
+ },
+ "0047d980": {
+  "module": "decorators",
+  "name": "FloatPtrVector_InsertN"
  },
  "0047dfb0": {
   "module": "zz_idioms",
@@ -7012,10 +7055,92 @@
   "name": "S_DecoratorCell::S_DecoratorCell",
   "proto": "void * __fastcall S_DecoratorCell(void * this)"
  },
+ "0047e240": {
+  "module": "decorators",
+  "name": "S_DecoratorCell::Place",
+  "proto": "void * __thiscall Place(void * this, int set, int seed, bool * randomRotation, float * height, bool * alignToGround)"
+ },
+ "0047e290": {
+  "module": "decorators",
+  "name": "S_DecoratorCell::Clear",
+  "proto": "void __fastcall Clear(void * this)"
+ },
+ "0047e2d0": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::Refill",
+  "proto": "void __thiscall Refill(void * this, int z, int x)"
+ },
+ "0047e930": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::RefillAll",
+  "proto": "void __fastcall RefillAll(void * this)"
+ },
+ "0047e960": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::ShiftX",
+  "proto": "void __thiscall ShiftX(void * this, bool back)"
+ },
+ "0047e9b0": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::ShiftZ",
+  "proto": "void __thiscall ShiftZ(void * this, bool back)"
+ },
+ "0047ea00": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::RefillColumn",
+  "proto": "void __thiscall RefillColumn(void * this, int x)"
+ },
+ "0047ea30": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::RefillRow",
+  "proto": "void __thiscall RefillRow(void * this, int z)"
+ },
  "0047ea60": {
   "module": "decorators",
   "name": "C_DecoratorGrid::Free",
   "proto": "void __fastcall Free(void * this)"
+ },
+ "0047eb80": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::Follow",
+  "proto": "void __thiscall Follow(void * this, float x, float z)"
+ },
+ "0047f150": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::UpdateBends",
+  "proto": "void __thiscall UpdateBends(void * this, int time)"
+ },
+ "0047f200": {
+  "module": "decorators",
+  "name": "S_DecoratorBend::Update",
+  "proto": "bool __thiscall Update(void * this, int time)"
+ },
+ "0047f4e0": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::BendAroundHuman",
+  "proto": "void __thiscall BendAroundHuman(void * this, void * human)"
+ },
+ "0047f730": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::BendAroundCar",
+  "proto": "void __thiscall BendAroundCar(void * this, void * car)"
+ },
+ "0047fae0": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::Bend",
+  "proto": "void __thiscall Bend(void * this, float * pos, float dirX, float dirZ, float innerSq, float outerSq, float radius, float darken, bool fade)"
+ },
+ "00480120": {
+  "module": "decorators",
+  "name": "DecoratorTrackVector_Size"
+ },
+ "00480150": {
+  "module": "decorators",
+  "name": "DecoratorBendVector_InsertN"
+ },
+ "00480360": {
+  "module": "decorators",
+  "name": "StaticInit_480360"
  },
  "00481cd0": {
   "module": "zz_idioms",

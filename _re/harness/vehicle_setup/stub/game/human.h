@@ -89,6 +89,11 @@ public:
     // (The effects module's rain, part 8c.)
     I3D_sector *GetBodySector() const { return bodySector; }
     I3D_sector *bodySector = nullptr;
+    // (The decorators' bends, part 8d-iii.)
+    const S_vector &GetVelocity() const { return velocity; }
+    int GetStance() const { return stance; }
+    S_vector velocity = {0.0f, 0.0f, 0.0f};
+    int stance = 0;
     // The vehicle it sits in (the animation actor's wings, game/animation_actor.cpp).
     C_Actor *GetVehicle() const { return vehicle; }
     const S_vector &GetRandomBonePos() const { return bonePos; }

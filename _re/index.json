@@ -46574,10 +46574,10 @@
 "in_vtables": []
 },
 "0047b480": {
-"name": "FUN_0047b480",
+"name": "C_Decorators::GetMinSlope",
 "size": 57,
 "lines": 14,
-"chars": 379,
+"chars": 382,
 "callers": [
 "0047e2d0"
 ],
@@ -46608,10 +46608,10 @@
 "in_vtables": []
 },
 "0047b500": {
-"name": "FUN_0047b500",
+"name": "C_Decorators::TakeModel",
 "size": 983,
-"lines": 140,
-"chars": 5788,
+"lines": 142,
+"chars": 5785,
 "callers": [
 "0047e240"
 ],
@@ -46636,10 +46636,10 @@
 "in_vtables": []
 },
 "0047b8e0": {
-"name": "FUN_0047b8e0",
+"name": "C_Decorators::ReturnModel",
 "size": 433,
 "lines": 74,
-"chars": 2360,
+"chars": 2364,
 "callers": [
 "0047e290"
 ],
@@ -46658,10 +46658,10 @@
 "in_vtables": []
 },
 "0047baa0": {
-"name": "FUN_0047baa0",
+"name": "S_Decorator::PrepareAnimated",
 "size": 529,
-"lines": 91,
-"chars": 3062,
+"lines": 92,
+"chars": 3144,
 "callers": [
 "0047b500"
 ],
@@ -46683,10 +46683,10 @@
 "in_vtables": []
 },
 "0047bcc0": {
-"name": "FUN_0047bcc0",
+"name": "C_Decorators::Update",
 "size": 864,
-"lines": 149,
-"chars": 5461,
+"lines": 148,
+"chars": 5505,
 "callers": [
 "00487240"
 ],
@@ -46878,10 +46878,10 @@
 "in_vtables": []
 },
 "0047d0f0": {
-"name": "FUN_0047d0f0",
+"name": "Decorators_Lerp",
 "size": 27,
 "lines": 7,
-"chars": 179,
+"chars": 93,
 "callers": [
 "0047d110"
 ],
@@ -46895,10 +46895,10 @@
 "in_vtables": []
 },
 "0047d110": {
-"name": "FUN_0047d110",
+"name": "C_Decorators::SampleLight",
 "size": 257,
-"lines": 42,
-"chars": 1263,
+"lines": 35,
+"chars": 1016,
 "callers": [
 "0047e2d0"
 ],
@@ -47020,10 +47020,10 @@
 "in_vtables": []
 },
 "0047d2e0": {
-"name": "FUN_0047d2e0",
+"name": "Vec4Array_Push",
 "size": 154,
 "lines": 40,
-"chars": 1140,
+"chars": 1142,
 "callers": [
 "0047baa0",
 "004b68e0",
@@ -47206,10 +47206,10 @@
 "in_vtables": []
 },
 "0047d980": {
-"name": "FUN_0047d980",
+"name": "FloatPtrVector_InsertN",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3531,
 "callers": [
 "0047baa0"
 ],
@@ -47404,10 +47404,10 @@
 "in_vtables": []
 },
 "0047e240": {
-"name": "FUN_0047e240",
+"name": "S_DecoratorCell::Place",
 "size": 67,
-"lines": 18,
-"chars": 494,
+"lines": 19,
+"chars": 517,
 "callers": [
 "0047e2d0"
 ],
@@ -47423,10 +47423,10 @@
 "in_vtables": []
 },
 "0047e290": {
-"name": "FUN_0047e290",
+"name": "S_DecoratorCell::Clear",
 "size": 49,
-"lines": 15,
-"chars": 285,
+"lines": 16,
+"chars": 381,
 "callers": [
 "0047e2d0"
 ],
@@ -47442,10 +47442,10 @@
 "in_vtables": []
 },
 "0047e2d0": {
-"name": "FUN_0047e2d0",
+"name": "C_DecoratorGrid::Refill",
 "size": 1621,
-"lines": 235,
-"chars": 9900,
+"lines": 234,
+"chars": 9946,
 "callers": [
 "0047ea00",
 "0047ea30",
@@ -47482,10 +47482,10 @@
 "in_vtables": []
 },
 "0047e930": {
-"name": "FUN_0047e930",
+"name": "C_DecoratorGrid::RefillAll",
 "size": 36,
 "lines": 18,
-"chars": 270,
+"chars": 326,
 "callers": [
 "0047eb80"
 ],
@@ -47499,10 +47499,10 @@
 "in_vtables": []
 },
 "0047e960": {
-"name": "FUN_0047e960",
+"name": "C_DecoratorGrid::ShiftX",
 "size": 66,
 "lines": 26,
-"chars": 655,
+"chars": 652,
 "callers": [
 "0047eb80"
 ],
@@ -47514,10 +47514,10 @@
 "in_vtables": []
 },
 "0047e9b0": {
-"name": "FUN_0047e9b0",
+"name": "C_DecoratorGrid::ShiftZ",
 "size": 68,
 "lines": 26,
-"chars": 703,
+"chars": 700,
 "callers": [
 "0047eb80"
 ],
@@ -47529,10 +47529,10 @@
 "in_vtables": []
 },
 "0047ea00": {
-"name": "FUN_0047ea00",
+"name": "C_DecoratorGrid::RefillColumn",
 "size": 41,
 "lines": 16,
-"chars": 277,
+"chars": 269,
 "callers": [
 "0047e930",
 "0047eb80"
@@ -47547,10 +47547,10 @@
 "in_vtables": []
 },
 "0047ea30": {
-"name": "FUN_0047ea30",
+"name": "C_DecoratorGrid::RefillRow",
 "size": 38,
 "lines": 16,
-"chars": 255,
+"chars": 244,
 "callers": [
 "0047eb80"
 ],
@@ -47582,10 +47582,10 @@
 "in_vtables": []
 },
 "0047eb80": {
-"name": "FUN_0047eb80",
+"name": "C_DecoratorGrid::Follow",
 "size": 1488,
-"lines": 273,
-"chars": 8293,
+"lines": 274,
+"chars": 8594,
 "callers": [
 "0047bcc0"
 ],
@@ -47616,10 +47616,10 @@
 "in_vtables": []
 },
 "0047f150": {
-"name": "FUN_0047f150",
+"name": "C_DecoratorGrid::UpdateBends",
 "size": 167,
 "lines": 42,
-"chars": 1364,
+"chars": 1372,
 "callers": [
 "0047bcc0"
 ],
@@ -47634,10 +47634,10 @@
 "in_vtables": []
 },
 "0047f200": {
-"name": "FUN_0047f200",
+"name": "S_DecoratorBend::Update",
 "size": 725,
-"lines": 120,
-"chars": 3795,
+"lines": 113,
+"chars": 3461,
 "callers": [
 "0047f150"
 ],
@@ -47664,10 +47664,10 @@
 "in_vtables": []
 },
 "0047f4e0": {
-"name": "FUN_0047f4e0",
+"name": "C_DecoratorGrid::BendAroundHuman",
 "size": 579,
 "lines": 98,
-"chars": 2839,
+"chars": 2857,
 "callers": [
 "0047eb80"
 ],
@@ -47696,10 +47696,10 @@
 "in_vtables": []
 },
 "0047f730": {
-"name": "FUN_0047f730",
+"name": "C_DecoratorGrid::BendAroundCar",
 "size": 943,
-"lines": 132,
-"chars": 4187,
+"lines": 131,
+"chars": 4185,
 "callers": [
 "0047eb80"
 ],
@@ -47722,10 +47722,10 @@
 "in_vtables": []
 },
 "0047fae0": {
-"name": "FUN_0047fae0",
+"name": "C_DecoratorGrid::Bend",
 "size": 1587,
-"lines": 243,
-"chars": 10215,
+"lines": 245,
+"chars": 10216,
 "callers": [
 "0047f4e0",
 "0047f730"
@@ -47752,10 +47752,10 @@
 "in_vtables": []
 },
 "00480120": {
-"name": "FUN_00480120",
+"name": "DecoratorTrackVector_Size",
 "size": 33,
 "lines": 10,
-"chars": 177,
+"chars": 190,
 "callers": [
 "0047f730"
 ],
@@ -47767,10 +47767,10 @@
 "in_vtables": []
 },
 "00480150": {
-"name": "FUN_00480150",
+"name": "DecoratorBendVector_InsertN",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3536,
 "callers": [
 "0047fae0"
 ],
@@ -47785,10 +47785,10 @@
 "in_vtables": []
 },
 "00480360": {
-"name": "FUN_00480360",
+"name": "StaticInit_480360",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"

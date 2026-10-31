@@ -21,7 +21,7 @@ struct S_DcDecorator {
     std::string name;
     float chance = 1.0f;
     int bendable = 1;
-    float unknown04 = 0.0f;
+    float height = 0.0f;
     int randomRotation = 1;
     int animation = 0;
     float amplitude = 0.2f;
@@ -32,7 +32,7 @@ std::string DcDecorator(const S_DcDecorator &d, int version)
 {
     std::string s = DcChunk(1, d.name + std::string(1, '\0')) + DcF(d.chance) + DcB(d.bendable);
     if (version > 3)
-        s += DcF(d.unknown04);
+        s += DcF(d.height);
     if (version > 4)
         s += DcB(d.randomRotation);
     if (version > 5)
@@ -58,7 +58,7 @@ std::string DcSet(const std::vector<S_DcDecorator> &ds, int version, float minSl
 bool DcIs(const S_Decorator *d, const S_DcDecorator &e)
 {
     return d && std::string(d->model.c_str()) == e.name && d->chance == e.chance && d->bendable == (e.bendable != 0) &&
-           d->unknown04 == e.unknown04 && d->randomRotation == (e.randomRotation != 0) && d->animation == e.animation &&
+           d->height == e.height && d->randomRotation == (e.randomRotation != 0) && d->animation == e.animation &&
            d->amplitude == e.amplitude && d->frequency == e.frequency && d->alignToGround == (e.alignToGround != 0) &&
            !d->pool && !d->loadFailed && !d->mesh && d->vertices.empty() && d->restPositions.empty();
 }
@@ -91,14 +91,14 @@ void DecoratorsTest()
         const C_DecoratorGrid &g = d.m_grid;
         WM(r.dcMake, !d.m_on && g.m_sizeX == 60 && g.m_sizeZ == 60 && g.m_cellSize == 0.5f && g.m_originX == -1 &&
                          g.m_originZ == -1 && g.m_shiftX == 0 && g.m_shiftZ == 0 && !g.m_cells && g.m_bends.empty() &&
-                         g.m_unknown3C == 0.05f && !g.m_unknown40 && g.m_unknown44 == 0 && g.m_unknown48 == 0 &&
+                         g.m_fadeAlpha == 0.05f && !g.m_fading && g.m_fadeTime == 0 && g.m_stance == 0 &&
                          !g.m_firstPerson && !d.m_light && d.m_sets.empty() && d.m_pools.empty() && d.m_animated.empty());
         WM(r.dcMake, d.m_lightX == 0.0f && d.m_lightZ == 0.0f && d.m_unknown7C == 0 && d.m_unknown80 == 0 &&
-                         d.m_lightCellSize == 0.0f && d.m_lightWidth == 0 && d.m_lightHeight == 0 && g.m_unknown1C == 0.0f &&
-                         g.m_unknown20 == 0.0f && g.m_unknown38 == 0);
+                         d.m_lightCellSize == 0.0f && d.m_lightWidth == 0 && d.m_lightHeight == 0 && g.m_subX == 0.0f &&
+                         g.m_subZ == 0.0f && g.m_time == 0);
         S_DecoratorBend bend;
-        WM(r.dcMake, !bend.model && bend.unknown04 == 0.0f && bend.unknown08 == 0.0f && bend.unknown0C == 0.0f &&
-                         bend.unknown10 == 0.0f && bend.unknown14 == 0.0f && bend.unknown18 == 0 && bend.unknown1C == 8000 &&
+        WM(r.dcMake, !bend.model && bend.target == 0.0f && bend.angle == 0.0f && bend.speed == 0.0f &&
+                         bend.light == 0.0f && bend.lightTarget == 0.0f && bend.springing == 0 && bend.unknown1C == 8000 &&
                          !bend.cell);
         S_DecoratorSet set;
         WM(r.dcMake, set.minSlope == 0.95f && set.groundCover == 0.5f && set.decorators.empty());
@@ -114,7 +114,7 @@ void DecoratorsTest()
         dec.chance = 5.0f;
         dec.bendable = dec.randomRotation = false;
         dec.loadFailed = dec.alignToGround = true;
-        dec.unknown04 = 3.0f;
+        dec.height = 3.0f;
         dec.animation = 2;
         dec.amplitude = dec.frequency = 7.0f;
         dec.model = "x";
@@ -141,7 +141,7 @@ void DecoratorsTest()
         // (What this version does not hold keeps its default.)
         S_DcDecorator ea{"Grass01", 40.0f, 0}, eb{"flower", 75.0f, 2};
         if (version > 3)
-            ea.unknown04 = 2.5f, eb.unknown04 = -1.0f;
+            ea.height = 2.5f, eb.height = -1.0f;
         if (version > 4)
             ea.randomRotation = 0, eb.randomRotation = 5;
         if (version > 5)
@@ -297,10 +297,10 @@ void DecoratorsTest()
         S_Decorator *da = d.m_sets[0]->decorators[0], *db = d.m_sets[0]->decorators[1], *dc = d.m_sets[2]->decorators[0];
         details.switches[DETAIL_DECORATORS] = true;
         g_firstPerson = true;
-        d.m_grid.m_unknown40 = true;
-        d.m_grid.m_unknown44 = 7;
-        d.m_grid.m_unknown3C = 1.0f;
-        d.m_grid.m_unknown48 = 9;
+        d.m_grid.m_fading = true;
+        d.m_grid.m_fadeTime = 7;
+        d.m_grid.m_fadeAlpha = 1.0f;
+        d.m_grid.m_stance = 9;
         g_gfLog.clear();
         d.Start();
         WM(r.dcStart, d.m_pools.size() == 2 && std::string(d.m_pools[0]->name.c_str()) == "grass01" &&
@@ -313,8 +313,8 @@ void DecoratorsTest()
         for (int i = 0; cells && i < 4; ++i)
             for (int j = 0; j < 4; ++j)
                 cells = cells && g.m_cells[i][j].decorator == -1 && !g.m_cells[i][j].model && !g.m_cells[i][j].bend;
-        WM(r.dcGrid, cells && g.m_originX == 100000 && g.m_originZ == 100000 && !g.m_unknown40 && g.m_unknown44 == 0 &&
-                         g.m_unknown3C == 0.05f && g.m_unknown48 == 0 && g.m_firstPerson && g.m_sizeX == 4);
+        WM(r.dcGrid, cells && g.m_originX == 100000 && g.m_originZ == 100000 && !g.m_fading && g.m_fadeTime == 0 &&
+                         g.m_fadeAlpha == 0.05f && g.m_stance == 0 && g.m_firstPerson && g.m_sizeX == 4);
         // Started again (no Free): the pools found, the animated listed twice.
         d.m_grid.Free();
         g_firstPerson = false;
@@ -394,9 +394,9 @@ void DecoratorsTest()
         cs[1][0].model = f10;
         auto *b1 = new S_DecoratorBend(), *b2 = new S_DecoratorBend(), *b3 = new S_DecoratorBend();
         b1->cell = &cs[0][1];
-        b1->unknown18 = 1;
+        b1->springing = 1;
         b2->cell = &cs[1][1];
-        b3->unknown18 = 1;
+        b3->springing = 1;
         cs[0][1].bend = b1;
         cs[1][1].bend = b2;
         cs[0][1].bending = cs[1][1].bending = true;
@@ -410,7 +410,7 @@ void DecoratorsTest()
             pc[0].bending = pc[1].bending = true;
             auto *q1 = new S_DecoratorBend(), *q2 = new S_DecoratorBend();
             q1->cell = &pc[0];
-            q1->unknown18 = 1;
+            q1->springing = 1;
             q2->cell = &pc[1];
             pc[0].bend = q1;
             pc[1].bend = q2;

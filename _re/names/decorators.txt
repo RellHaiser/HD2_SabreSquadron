@@ -45,3 +45,31 @@
 0048b360 DecoratorSetVector_Construct
 0089b749 g_decoratorsEnabled @
 0089bbb0 g_decorators @
+
+# Part 8d-iii: the update (0x0047bcc0, 0x0047eb80..0x00480360 and the helpers in between).
+0047b480 C_Decorators::GetMinSlope | float __thiscall GetMinSlope(void * this, uint material)
+0047b500 C_Decorators::TakeModel | void * __thiscall TakeModel(void * this, uint set, int seed, int * decorator, bool * randomRotation, float * height, bool * alignToGround)
+0047b8e0 C_Decorators::ReturnModel | void __thiscall ReturnModel(void * this, int set, void * model, int decorator)
+0047baa0 S_Decorator::PrepareAnimated | void __thiscall PrepareAnimated(void * this, void * model)
+0047bcc0 C_Decorators::Update | void __thiscall Update(void * this, int timeDelta)
+0047d0f0 Decorators_Lerp | float __stdcall Decorators_Lerp(float a, float b, float t)
+0047d110 C_Decorators::SampleLight | float __thiscall SampleLight(void * this, float x, float z)
+0047d2e0 Vec4Array_Push
+0047d980 FloatPtrVector_InsertN
+0047e240 S_DecoratorCell::Place | void * __thiscall Place(void * this, int set, int seed, bool * randomRotation, float * height, bool * alignToGround)
+0047e290 S_DecoratorCell::Clear | void __fastcall Clear(void * this)
+0047e2d0 C_DecoratorGrid::Refill | void __thiscall Refill(void * this, int z, int x)
+0047e930 C_DecoratorGrid::RefillAll | void __fastcall RefillAll(void * this)
+0047e960 C_DecoratorGrid::ShiftX | void __thiscall ShiftX(void * this, bool back)
+0047e9b0 C_DecoratorGrid::ShiftZ | void __thiscall ShiftZ(void * this, bool back)
+0047ea00 C_DecoratorGrid::RefillColumn | void __thiscall RefillColumn(void * this, int x)
+0047ea30 C_DecoratorGrid::RefillRow | void __thiscall RefillRow(void * this, int z)
+0047eb80 C_DecoratorGrid::Follow | void __thiscall Follow(void * this, float x, float z)
+0047f150 C_DecoratorGrid::UpdateBends | void __thiscall UpdateBends(void * this, int time)
+0047f200 S_DecoratorBend::Update | bool __thiscall Update(void * this, int time)
+0047f4e0 C_DecoratorGrid::BendAroundHuman | void __thiscall BendAroundHuman(void * this, void * human)
+0047f730 C_DecoratorGrid::BendAroundCar | void __thiscall BendAroundCar(void * this, void * car)
+0047fae0 C_DecoratorGrid::Bend | void __thiscall Bend(void * this, float * pos, float dirX, float dirZ, float innerSq, float outerSq, float radius, float darken, bool fade)
+00480120 DecoratorTrackVector_Size
+00480150 DecoratorBendVector_InsertN
+00480360 StaticInit_480360

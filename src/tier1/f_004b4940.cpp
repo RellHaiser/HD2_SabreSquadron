@@ -190,7 +190,7 @@ uint32_t SubdivideRouteCurve(float *param_1,float *param_2,float *param_3,float 
       local_d0[0].x = 0.0;
       local_d0[0].y = 0.0;
       local_d0[0].z = 0.0;
-      FUN_0047d2e0(param_7,gh_bitcast<uint32_t*>(&local_d0[0].x));
+      Vec4Array_Push(param_7,gh_bitcast<uint32_t*>(&local_d0[0].x));
     } while (param_7[2] <= *param_8);
   }
   pfVar3 = (float *)(*param_8 * 0x10 + *param_7);
@@ -249,8 +249,8 @@ uint32_t SmoothRoute(int *param_1,uint32_t *param_2, ...)
   param_2[2] = 0;
   param_2[1] = 0;
   if (param_1[2] == 2) {
-    FUN_0047d2e0(param_2,(uint32_t *)*param_1);
-    FUN_0047d2e0(param_2,(uint32_t *)(*param_1 + 0x10));
+    Vec4Array_Push(param_2,(uint32_t *)*param_1);
+    Vec4Array_Push(param_2,(uint32_t *)(*param_1 + 0x10));
     return 0;
   }
   local_ac[0] = 0;
@@ -260,8 +260,8 @@ uint32_t SmoothRoute(int *param_1,uint32_t *param_2, ...)
   local_9c = *(uint32_t *)(iVar2 + 4);
   local_98 = *(uint32_t *)(iVar2 + 8);
   local_94 = *(uint32_t *)(iVar2 + 0xc);
-  FUN_0047d2e0(param_1,&local_a0);
-  FUN_0047d2e0(param_1,&local_a0);
+  Vec4Array_Push(param_1,&local_a0);
+  Vec4Array_Push(param_1,&local_a0);
   iVar1 = param_1[2] - 2;
   iVar2 = 0;
   if (0 < iVar1) {
@@ -470,7 +470,7 @@ uint32_t BuildRouteFromCheckpoints(float *param_1,float *param_2,int param_3,uin
                    );
       pSVar8 = local_20;
     }
-    FUN_0047d2e0(param_4,gh_bitcast<uint32_t*>(&pSVar8->x));
+    Vec4Array_Push(param_4,gh_bitcast<uint32_t*>(&pSVar8->x));
     local_e0 = local_c0.x;
     local_dc = local_c0.y;
     local_d8 = local_c0.z;
@@ -478,7 +478,7 @@ uint32_t BuildRouteFromCheckpoints(float *param_1,float *param_2,int param_3,uin
     uVar7++;
   }
   if ((*(int *)(param_3 + 4) == 0) || (*(int *)(param_3 + 8) - *(int *)(param_3 + 4) >> 1 == 0)) {
-    FUN_0047d2e0(param_4,gh_bitcast<uint32_t*>(param_1));
+    Vec4Array_Push(param_4,gh_bitcast<uint32_t*>(param_1));
   }
   else {
     pfVar2 = (float *)*param_4;
@@ -496,7 +496,7 @@ uint32_t BuildRouteFromCheckpoints(float *param_1,float *param_2,int param_3,uin
     pfVar2[3] = param_2[3];
     return 0;
   }
-  FUN_0047d2e0(param_4,gh_bitcast<uint32_t*>(param_2));
+  Vec4Array_Push(param_4,gh_bitcast<uint32_t*>(param_2));
   return 0;
 }
 

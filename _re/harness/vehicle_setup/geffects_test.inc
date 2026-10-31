@@ -298,7 +298,6 @@ alignas(16) uint8_t g_gfCameraEffects[16], g_gfInterface[16];
 }  // namespace
 
 // The objects of part 8d.
-void C_Decorators::Update(int timeDelta) { GfLog("dec update %d", timeDelta); }
 C_Volumetrics::C_Volumetrics() {}
 C_Volumetrics::~C_Volumetrics() {}
 void C_Volumetrics::Render(int time) { GfLog("vol render %d", time); }
@@ -564,12 +563,14 @@ void GEffectsTest()
         // Update's own calls without any effect (the decorators while started; the birds and the mesh
         // player have nothing).
         g_gfLog.clear();
+        // (The decorators' update seen by the detail flag: it follows the option, off here.)
+        g_decoratorsEnabled = true;
         m.Update(16);
-        WM(r.gfModule, g_gfLog.empty());
+        WM(r.gfModule, g_gfLog.empty() && g_decoratorsEnabled);
         g_gfLog.clear();
         m.m_started = true;
         m.Update(17);
-        WM(r.gfModule, GfLogIs({"dec update 17"}) && m.m_time == 1234 + 16 + 17 + 100 + 200 +
+        WM(r.gfModule, g_gfLog.empty() && !g_decoratorsEnabled && m.m_time == 1234 + 16 + 17 + 100 + 200 +
                                                                                              500 + 1500 + 100 + 250);
     }
 
@@ -1537,12 +1538,14 @@ void GEffectsTest()
         m.m_started = true;
         game->m_paused = true;
         g_gfLog.clear();
+        g_decoratorsEnabled = true;
         m.Update(16);
-        WM(r.gfRain, std::count(g_gfLog.begin(), g_gfLog.end(), "dec update 16") == 1);
+        WM(r.gfRain, !g_decoratorsEnabled);
         g_gfMapOpen = true;
         g_gfLog.clear();
+        g_decoratorsEnabled = true;
         m.Update(16);
-        WM(r.gfRain, std::count(g_gfLog.begin(), g_gfLog.end(), "dec update 16") == 1);
+        WM(r.gfRain, !g_decoratorsEnabled);
         g_gfMapOpen = false;
         game->m_paused = false;
         GfClear(m);

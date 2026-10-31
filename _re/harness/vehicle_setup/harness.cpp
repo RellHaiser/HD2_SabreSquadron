@@ -14843,6 +14843,7 @@ void PartsHitTest(const char *path)
 #include "geffects2_test.inc"
 #include "birds_test.inc"
 #include "decorators_test.inc"
+#include "decorators2_test.inc"
 #endif
 
 int main(int argc, char **argv)
