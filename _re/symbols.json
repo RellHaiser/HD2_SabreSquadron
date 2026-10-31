@@ -5474,6 +5474,15 @@
   "name": "C_TeamBase::GetMemberCount",
   "proto": "int __thiscall GetMemberCount(C_TeamBase *this)"
  },
+ "00462320": {
+  "module": "camera",
+  "name": "StaticInit_462320"
+ },
+ "00462350": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::StartFlight",
+  "proto": "void __fastcall StartFlight(void * this)"
+ },
  "00462650": {
   "module": "camera",
   "name": "C_CameraHumanEffects::C_CameraHumanEffects",
@@ -5492,12 +5501,23 @@
   "name": "C_CameraHumanEffects::IsTactical"
  },
  "00462780": {
-  "module": "hud",
-  "name": "C_CameraHumanEffects::LookAt"
+  "module": "camera",
+  "name": "C_CameraHumanEffects::LookAt",
+  "proto": "void __thiscall LookAt(void * this, void * human)"
  },
  "00462ae0": {
   "module": "camera",
   "name": "C_CameraHumanEffects::SetTactical"
+ },
+ "00463040": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::Remove",
+  "proto": "void __thiscall Remove(void * this, void * human)"
+ },
+ "004630e0": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::UpdateLookPoint",
+  "proto": "void __fastcall UpdateLookPoint(void * this)"
  },
  "004632c0": {
   "module": "camera",
@@ -5507,17 +5527,56 @@
   "module": "camera",
   "name": "C_CameraHumanEffects::SetTacticalMotion"
  },
+ "00463620": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::ResetHumans",
+  "proto": "void __thiscall ResetHumans(void * this, bool tactical)"
+ },
+ "00463690": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::GetTransparency",
+  "proto": "float __thiscall GetTransparency(void * this, void * human)"
+ },
+ "00463780": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::UpdateHuman",
+  "proto": "void __thiscall UpdateHuman(void * this, void * human)"
+ },
+ "00463890": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::UpdateHumans",
+  "proto": "void __thiscall UpdateHumans(void * this, int timeDelta)"
+ },
  "00463910": {
   "module": "zz_idioms",
   "name": "vector_tidy_463910"
+ },
+ "00463930": {
+  "module": "camera",
+  "name": "FadedHumans_Insert",
+  "proto": "void __thiscall FadedHumans_Insert(void * this, void * pos, uint count, void * value)"
+ },
+ "00463b70": {
+  "module": "camera",
+  "name": "StaticInit_463b70"
  },
  "00463ba0": {
   "module": "camera",
   "name": "C_CameraHumanEffects::UpdateTactical"
  },
+ "00464a40": {
+  "module": "camera",
+  "name": "S_quat_FromAxisAngle",
+  "proto": "void * __thiscall S_quat_FromAxisAngle(void * this, void * axis, float angle)"
+ },
  "00464a60": {
   "module": "zz_idioms",
   "name": "empty_function_464a60"
+ },
+ "00464b80": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::Move",
+  "proto": "void * __thiscall Move(void * this, void * move)"
  },
  "00464d90": {
   "module": "camera",

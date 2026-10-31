@@ -14,6 +14,8 @@ LINES = {
     "camera": ("cmMake cmGetters cmSaveLoad cmRestart cmStart cmStartNone cmSettings cmSettingsFile cmStop cmPos cmDir "
                "cmBlend cmTarget cmFov cmViewDir").split(),
     "keeper": "kpMake kpRestore kpUpdate kpCar kpSubmarine kpPlayer".split(),
+    "tactical": ("tcBasics tcOn tcOff tcMove tcLookAt tcMode tcFlight tcUpdate tcMoveMode tcTurn tcDrag tcUpDown "
+                 "tcZoom tcFly tcHumans").split(),
 }
 
 

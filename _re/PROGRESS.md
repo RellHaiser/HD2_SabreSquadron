@@ -5531,6 +5531,45 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/camera.txt (8e-i's added, SetFov2 / GetFov2 renamed); 45 functions in ported.txt.
     Stats: 7,727 of 12,293 functions by hand (70.4 % by size).
 
+  PART 8e-ii DONE (2026-10-31): the human effects, the command map's tactical camera
+  (src/game/camera_module.*, 0x00462320..0x00464d77).
+  - C_CameraHumanEffects (0xA0, behind g_cameraHumanEffects): its layout named (the map point, the
+    look point, the position, the motion, the zoom, the double click's time, the mode, the
+    flight's rotations, speed, acceleration, distance and time; the faded humans, pairs of a human
+    and its transparency).
+  - SetTactical: on, the scene's camera kept and duplicated (field of view, range, aspect), then 7 m
+    behind and 3 m above the active soldier along his flat view, looking down (-0.35); off, the
+    scene's camera back, the module's Unknown40(0), the faded humans back. LookAt (the map's double
+    click on a soldier): 3 m behind and 1.5 m above along his view (5 m, and 1.5 m higher, in a car,
+    a submarine, a static weapon or the Junkers); null: the game camera's.
+  - SetTacticalMode: leaving a mode other than a turn puts the look point in front (10 m; 2 m
+    outside the primary sector); a second drag within 500 ms starts the flight (TACTICAL_FLY, 10):
+    to three quarters of the way to the point (the point moved to an obstacle; not within 1 m),
+    turning to look along it, 1.25 / 1.875 / 2.5 s by the distance (5 m, 35 m), sped up for its
+    first third and slowed for its last; idle and a drag within 300 ms leave it, a later drag keeps
+    its speed for the next.
+  - UpdateTactical: moves (10 m/s by the zoom; a quarter outside the primary sector) sideways and
+    forward, turns (2.1 rad/s; quirk kept: past +89 degrees the angle becomes the excess, past
+    -89 the way back), drags the ground, goes up and down 12 m/s (through a water surface when
+    there is room), zooms along the view 8 m/s, flies; then fades the player team's known enemies
+    and members near it (1 within 0.4 m^2 of the segment from the body frame to the frame, 0 past
+    2.4, C_Human::SetUnknown94). The camera slides along what it hits, 5 cm off it.
+  - Quirks kept: Remove moves only the last human into the freed place (it keeps the removed one's
+    transparency); a human whose transparency went to 0 is dropped at its next change. 0x004633c0
+    and 0x00464a70 are not referenced (left to tier 1).
+  - Harness: tactical_test.inc in the camera build ("tactical:", 15 checks): the slide sphere, the
+    quaternion's SetDir / Slerp / GetDir, RotateByMatrix, RotateYMatrix and the scene's GetSector
+    faked; the GEffects and decorators tests' SetTactical / IsTactical fakes left out of it; the
+    module's stop checked with the real tactical camera. 0 of 22 in both orders.
+  - Mutations (mutations/mutate_8e2.py): the first run caught 260 of 299 (25 survived, 14 did not
+    build); 9 equivalent (see the file's docstring), new cases for 16 (the hit's point, the
+    boundaries of the flight, the click time and the fades, the roll, the members apart from the
+    enemies); the full rerun: all 276 caught. Baselines: the world build 0 of 22 in both orders; the
+    item build 0 of 37; the other five 0 of 37.
+  - Build: 200 files clean (MSVC). Tier 1: 536 errors in 93 files, 220 stubs (537 / 94 / 221 before). ret_audit --src: 52.
+  - Ghidra: names/camera.txt (13 added; hud.txt's LookAt dropped); 21 functions in ported.txt.
+    Stats: 7,748 of 12,293 functions by hand (70.7 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

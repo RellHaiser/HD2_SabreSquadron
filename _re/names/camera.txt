@@ -59,3 +59,19 @@
 004668c0 StaticInit_4668c0
 0089afb0 g_cameraModule @
 0089b208 g_vehicleCameraSpeed @
+
+# Part 8e-ii: the human effects, the command map's tactical camera (0x00462320..0x00464d77).
+# 0x004633c0 and 0x00464a70 are not referenced (left to tier 1).
+00462320 StaticInit_462320
+00462350 C_CameraHumanEffects::StartFlight | void __fastcall StartFlight(void * this)
+00462780 C_CameraHumanEffects::LookAt | void __thiscall LookAt(void * this, void * human)
+00463040 C_CameraHumanEffects::Remove | void __thiscall Remove(void * this, void * human)
+004630e0 C_CameraHumanEffects::UpdateLookPoint | void __fastcall UpdateLookPoint(void * this)
+00463620 C_CameraHumanEffects::ResetHumans | void __thiscall ResetHumans(void * this, bool tactical)
+00463690 C_CameraHumanEffects::GetTransparency | float __thiscall GetTransparency(void * this, void * human)
+00463780 C_CameraHumanEffects::UpdateHuman | void __thiscall UpdateHuman(void * this, void * human)
+00463890 C_CameraHumanEffects::UpdateHumans | void __thiscall UpdateHumans(void * this, int timeDelta)
+00463930 FadedHumans_Insert | void __thiscall FadedHumans_Insert(void * this, void * pos, uint count, void * value)
+00463b70 StaticInit_463b70
+00464a40 S_quat_FromAxisAngle | void * __thiscall S_quat_FromAxisAngle(void * this, void * axis, float angle)
+00464b80 C_CameraHumanEffects::Move | void * __thiscall Move(void * this, void * move)

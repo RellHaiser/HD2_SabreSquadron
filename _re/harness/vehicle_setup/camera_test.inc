@@ -69,9 +69,21 @@ void __stdcall F_CmSetPos(I3D_frame *self, const S_vector &pos)
     GfLog("setpos %s %.4f %.4f %.4f", GfName(self), pos.x, pos.y, pos.z);
     self->m_localMatrix(3) = pos;
 }
+// (The last direction exactly, for the tactical camera's checks.)
+S_vector g_cmLastDir;
+float g_cmLastRoll;
 void __stdcall F_CmSetDir(I3D_frame *self, const S_vector &dir, float roll)
 {
     GfLog("setdir %s %.5f %.5f %.5f %.6f", GfName(self), dir.x, dir.y, dir.z, roll);
+    g_cmLastDir = dir;
+    g_cmLastRoll = roll;
+}
+// The humans' names in the log ("?": unnamed).
+std::map<const C_Human *, std::string> g_cmHumanNames;
+const char *CmHumanName(const C_Human *h)
+{
+    const auto it = g_cmHumanNames.find(h);
+    return it == g_cmHumanNames.end() ? "?" : it->second.c_str();
 }
 void __stdcall F_CmSetName(I3D_frame *self, const char *name) { GfLog("name %s %s", GfName(self), name); }
 void __stdcall F_CmNearFov(I3D_frame *self, float fov)
@@ -222,6 +234,9 @@ struct S_CameraResults {
     bool cmSettings = true, cmSettingsFile = true, cmStop = true, cmPos = true, cmDir = true, cmBlend = true;
     bool cmTarget = true, cmFov = true, cmViewDir = true;
     bool kpMake = true, kpRestore = true, kpUpdate = true, kpCar = true, kpSubmarine = true, kpPlayer = true;
+    bool tcBasics = true, tcOn = true, tcOff = true, tcMove = true, tcLookAt = true, tcMode = true, tcFlight = true;
+    bool tcUpdate = true, tcMoveMode = true, tcTurn = true, tcDrag = true, tcUpDown = true, tcZoom = true, tcFly = true;
+    bool tcHumans = true;
 };
 
 void CameraModuleTest(S_CameraResults &r)
@@ -261,7 +276,7 @@ void CameraModuleTest(S_CameraResults &r)
         if (e) {
             WM(r.cmMake, e->m_camera == effects && !e->m_gameCamera && !e->m_tactical && e->m_height == 5.0f &&
                              e->m_zoom == 1.0f && e->m_motionX == 0.0f && e->m_motionY == 0.0f &&
-                             e->m_unknown44 == 0.0f && e->m_humans.empty());
+                             e->m_clickTime == 0.0f && e->m_humans.empty());
         }
         g_gfLog.clear();
         m->~C_CameraModule();
@@ -628,29 +643,31 @@ void CameraModuleTest(S_CameraResults &r)
             m->m_gameCamera = reinterpret_cast<I3D_camera *>(cam);
             m->m_camera = dummy;
             CmActive() = cam;
-            g_dmTactical = false;
             g_gfLog.clear();
             m->StopMission(false);
             std::vector<std::string> want = {"active scene", "release game"};
             if (c.unknown94)
-                want.push_back("unknown94 0.0");
+                want.push_back("unknown94 ? 0.0000");
             want.push_back("release camera3RD");
             WM(r.cmStop, GfVecIs(g_gfLog, want) && !m->m_sceneCamera && !m->m_gameCamera && !m->m_camera &&
                              CmActive() == scene);
         }
-        // The tactical view off first, on both sides; the server stops nothing else.
+        // The tactical view off first (the camera it kept back, the module's Unknown40), on both
+        // sides; the server stops nothing else.
         I3D_frame *scene = CmCamera("scene", S_vector(0.0f, 0.0f, 0.0f));
+        I3D_frame *kept = CmCamera("kept", S_vector(0.0f, 0.0f, 0.0f));
         m->m_sceneCamera = reinterpret_cast<I3D_camera *>(scene);
         m->m_gameCamera = nullptr;
         m->m_camera = nullptr;
-        g_dmTactical = true;
+        m->m_humanEffects->m_gameCamera = reinterpret_cast<I3D_camera *>(kept);
+        m->m_humanEffects->m_tactical = true;
         g_gfLog.clear();
         m->StopMission(true);
-        WM(r.cmStop, GfLogIs({"tactical 0"}) && m->m_sceneCamera == scene);
+        WM(r.cmStop, GfLogIs({"active kept", "cam40 0"}) && m->m_sceneCamera == scene && !m->m_humanEffects->m_tactical);
+        m->m_humanEffects->m_tactical = true;
         g_gfLog.clear();
         m->StopMission(false);
-        WM(r.cmStop, GfLogIs({"tactical 0", "active scene"}) && !m->m_sceneCamera);
-        g_dmTactical = false;
+        WM(r.cmStop, GfLogIs({"active kept", "cam40 0", "active scene"}) && !m->m_sceneCamera);
         g_gfLog.clear();
         m->StopMission(false);
         m->StopMission(true);
@@ -1119,7 +1136,9 @@ void KeeperTest(S_CameraResults &r)
 
 // (Faked: the update, part 8e-iii; the human's effect value.)
 void C_CameraModule::Update(int timeDelta) { GfLog("camupdate %d", timeDelta); }
-void C_Human::SetUnknown94(float value) { GfLog("unknown94 %.1f", value); }
+void C_Human::SetUnknown94(float value) { GfLog("unknown94 %s %.4f", CmHumanName(this), value); }
+
+#include "tactical_test.inc"
 
 void CameraTest(const char *path)
 {
@@ -1147,10 +1166,15 @@ void CameraTest(const char *path)
     S_CameraResults r;
     CameraModuleTest(r);
     KeeperTest(r);
+    TacticalTest(r);
     std::printf("camera: cmMake %d cmGetters %d cmSaveLoad %d cmRestart %d cmStart %d cmStartNone %d cmSettings %d "
                 "cmSettingsFile %d cmStop %d cmPos %d cmDir %d cmBlend %d cmTarget %d cmFov %d cmViewDir %d\n",
                 r.cmMake, r.cmGetters, r.cmSaveLoad, r.cmRestart, r.cmStart, r.cmStartNone, r.cmSettings,
                 r.cmSettingsFile, r.cmStop, r.cmPos, r.cmDir, r.cmBlend, r.cmTarget, r.cmFov, r.cmViewDir);
     std::printf("keeper: kpMake %d kpRestore %d kpUpdate %d kpCar %d kpSubmarine %d kpPlayer %d\n", r.kpMake,
                 r.kpRestore, r.kpUpdate, r.kpCar, r.kpSubmarine, r.kpPlayer);
+    std::printf("tactical: tcBasics %d tcOn %d tcOff %d tcMove %d tcLookAt %d tcMode %d tcFlight %d tcUpdate %d "
+                "tcMoveMode %d tcTurn %d tcDrag %d tcUpDown %d tcZoom %d tcFly %d tcHumans %d\n",
+                r.tcBasics, r.tcOn, r.tcOff, r.tcMove, r.tcLookAt, r.tcMode, r.tcFlight, r.tcUpdate, r.tcMoveMode,
+                r.tcTurn, r.tcDrag, r.tcUpDown, r.tcZoom, r.tcFly, r.tcHumans);
 }

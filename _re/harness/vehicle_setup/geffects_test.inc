@@ -355,7 +355,9 @@ void C_CameraModule::SetSpecialMode(int mode, bool on, float height) { GfLog("sp
 C_CameraHumanEffects *g_gfHumanEffects;
 C_CameraHumanEffects *&g_cameraHumanEffects = g_gfHumanEffects;
 #endif
+#ifndef CAMERA_TEST                                    // (the camera build's is real)
 void C_CameraHumanEffects::SetTactical(bool on) { GfLog("tactical %d", on); }
+#endif
 bool C_HumanMovement::GetHeadWater(bool *underWater, float *surface) const
 {
     GfLog("headwater");

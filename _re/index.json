@@ -37648,10 +37648,10 @@
 "in_vtables": []
 },
 "00462320": {
-"name": "FUN_00462320",
+"name": "StaticInit_462320",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -37670,10 +37670,10 @@
 ]
 },
 "00462350": {
-"name": "FUN_00462350",
+"name": "C_CameraHumanEffects::StartFlight",
 "size": 754,
 "lines": 99,
-"chars": 2748,
+"chars": 3349,
 "callers": [
 "004632c0"
 ],
@@ -37772,7 +37772,7 @@
 "name": "C_CameraHumanEffects::LookAt",
 "size": 822,
 "lines": 114,
-"chars": 3262,
+"chars": 3306,
 "callers": [
 "004bf210"
 ],
@@ -37799,7 +37799,7 @@
 "name": "C_CameraHumanEffects::SetTactical",
 "size": 1373,
 "lines": 165,
-"chars": 5712,
+"chars": 5768,
 "callers": [
 "00465610",
 "004863f0",
@@ -37834,10 +37834,10 @@
 "in_vtables": []
 },
 "00463040": {
-"name": "FUN_00463040",
+"name": "C_CameraHumanEffects::Remove",
 "size": 146,
 "lines": 37,
-"chars": 1031,
+"chars": 1041,
 "callers": [
 "0059fa60"
 ],
@@ -37851,10 +37851,10 @@
 "in_vtables": []
 },
 "004630e0": {
-"name": "FUN_004630e0",
+"name": "C_CameraHumanEffects::UpdateLookPoint",
 "size": 480,
 "lines": 71,
-"chars": 1922,
+"chars": 1994,
 "callers": [
 "004632c0",
 "00463ba0"
@@ -37878,7 +37878,7 @@
 "name": "C_CameraHumanEffects::SetTacticalMode",
 "size": 176,
 "lines": 54,
-"chars": 1431,
+"chars": 1472,
 "callers": [
 "004b5e40",
 "004b81a0"
@@ -37935,10 +37935,10 @@
 "in_vtables": []
 },
 "00463620": {
-"name": "FUN_00463620",
+"name": "C_CameraHumanEffects::ResetHumans",
 "size": 105,
 "lines": 21,
-"chars": 547,
+"chars": 563,
 "callers": [
 "00462ae0"
 ],
@@ -37952,10 +37952,10 @@
 "in_vtables": []
 },
 "00463690": {
-"name": "FUN_00463690",
+"name": "C_CameraHumanEffects::GetTransparency",
 "size": 236,
 "lines": 36,
-"chars": 1098,
+"chars": 1074,
 "callers": [
 "00463780"
 ],
@@ -37977,10 +37977,10 @@
 "in_vtables": []
 },
 "00463780": {
-"name": "FUN_00463780",
+"name": "C_CameraHumanEffects::UpdateHuman",
 "size": 260,
-"lines": 59,
-"chars": 1756,
+"lines": 57,
+"chars": 1739,
 "callers": [
 "00463890"
 ],
@@ -37998,10 +37998,10 @@
 "in_vtables": []
 },
 "00463890": {
-"name": "FUN_00463890",
+"name": "C_CameraHumanEffects::UpdateHumans",
 "size": 118,
-"lines": 31,
-"chars": 905,
+"lines": 32,
+"chars": 979,
 "callers": [
 "00463ba0"
 ],
@@ -38038,10 +38038,10 @@
 "in_vtables": []
 },
 "00463930": {
-"name": "FUN_00463930",
+"name": "FadedHumans_Insert",
 "size": 575,
 "lines": 126,
-"chars": 3897,
+"chars": 4048,
 "callers": [
 "00463780"
 ],
@@ -38056,10 +38056,10 @@
 "in_vtables": []
 },
 "00463b70": {
-"name": "FUN_00463b70",
+"name": "StaticInit_463b70",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -38081,7 +38081,7 @@
 "name": "C_CameraHumanEffects::UpdateTactical",
 "size": 3695,
 "lines": 429,
-"chars": 14947,
+"chars": 15324,
 "callers": [
 "004b6420"
 ],
@@ -38130,10 +38130,10 @@
 "in_vtables": []
 },
 "00464a40": {
-"name": "FUN_00464a40",
+"name": "S_quat_FromAxisAngle",
 "size": 25,
-"lines": 10,
-"chars": 179,
+"lines": 8,
+"chars": 137,
 "callers": [
 "00463ba0",
 "004c68b0",
@@ -38184,10 +38184,10 @@
 "in_vtables": []
 },
 "00464b80": {
-"name": "FUN_00464b80",
+"name": "C_CameraHumanEffects::Move",
 "size": 503,
-"lines": 69,
-"chars": 2093,
+"lines": 68,
+"chars": 2092,
 "callers": [
 "00462780",
 "00462ae0",

@@ -132,7 +132,9 @@ struct S_DmResults {
 #ifndef CAMERA_TEST                                    // (the camera build links the real module, part 8e)
 C_CameraHumanEffects *C_CameraModule::GetHumanEffects() { return reinterpret_cast<C_CameraHumanEffects *>(g_dmHumanEffects); }
 #endif
+#ifndef CAMERA_TEST                                    // (the camera build's is real)
 bool C_CameraHumanEffects::IsTactical() const { return g_dmTactical; }
+#endif
 // (As game/human_movement.cpp has it.)
 float AngleBetween2D(const float *a, const float *b)
 {

@@ -48,8 +48,6 @@ f_00433580.cpp:8:3: 'C_SoundModule__C_SoundModule___C_SoundModule' was not decla
     C_SoundModule__C_SoundModule___C_SoundModule((C_SoundModule *)&g_soundModule);
 f_00459690.cpp:122:11: '_pIVar15' was not declared in this scope; did you mean 'pIVar15'?
     _pIVar15 = (*pCVar10->m_scene->vtable->GetSector)(pCVar10->m_scene,&SStack_58);
-f_00463b70.cpp:393:37: 'SUB43' was not declared in this scope; did you mean 'SUB42'?
-    local_1c8 = (float)CONCAT13(1,SUB43(fVar2,0));
 f_00466930.cpp:527:16: 'void*' is not a pointer-to-object type
     if ((pCVar13->m_248->m_frameFlags & 0x20) == 0) {
 f_00466930.cpp:1228:38: no matching function for call to 'gh_bitcast<tier1::C_Actor*>()'

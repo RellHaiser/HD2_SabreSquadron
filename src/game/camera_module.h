@@ -16,53 +16,93 @@ class C_Human;
 class I3D_camera;
 class I3D_frame;
 class I3D_sector;
+struct S_CollisionVolume;
 
-// Humans whose movement takes an effect value from the camera (the list at +0x8C; C_Human::
-// SetUnknown94) and the command map's tactical camera (0xA0 bytes, _aligned_malloc'd by the
-// module's constructor).
+// The command map's tactical camera (0xA0 bytes, _aligned_malloc'd by the module's constructor;
+// the object behind g_cameraHumanEffects): its own camera, made the scene's active one while the
+// map is up, moved by the map's cursor modes (TACTICAL_*), and the humans it comes near faded out
+// (C_Human::SetUnknown94, their models' transparency) and back.
 class alignas(16) C_CameraHumanEffects {
 public:
     // Makes its camera (+0x80): the zoom 1, the height 5.
     C_CameraHumanEffects();                             // 0x00462650
     ~C_CameraHumanEffects();                            // 0x004626e0
 
-    // Removes `human` (its value goes back to 0).
+    // Drops `human` from the faded ones (its transparency back to 0). (Quirk kept: the last one
+    // takes its place keeping the dropped one's value.)
     void Remove(C_Human *human);                        // 0x00463040
-    // Puts its camera (+0x80) 3 m behind and 1.5 m above `human` along its view (5 m in a
-    // car, a submarine, a seat weapon or the Junkers), looking at it; null: the default
-    // frame's (+0x84) place and direction. (The command map's double click.)
+    // Puts its camera 3 m behind and 1.5 m above `human` along its view (in a car, a submarine,
+    // a static weapon or the Junkers: 5 m behind, 3 m above), looking at it; null: the game
+    // camera's (+0x84) place and direction. (The command map's double click.)
     void LookAt(C_Human *human);                        // 0x00462780
 
-    // The command map's tactical camera (its own camera +0x80; the game's active one is kept at
-    // +0x84 meanwhile).
-    // On: it starts 7 m behind and 3 m above the active soldier, looking down along his view;
-    // off: the game's camera back.
+    // On: the scene's camera kept (+0x84) and copied, then 7 m behind and 3 m above the active
+    // soldier, looking down along his view; off: the scene's camera back, the module's
+    // Unknown40(0), the faded humans back.
     void SetTactical(bool on);                          // 0x00462ae0
-    bool IsTactical() const;                            // 0x00462770 (byte +0x48)
-    // Its motion mode (TACTICAL_*; +0x4C) and the point it follows (TACTICAL_DRAG; null: kept).
+    bool IsTactical() const;                            // 0x00462770
+    // The cursor's mode (TACTICAL_*) and the map point under it (null: kept). Leaving a mode
+    // other than a turn puts the look point (+0x10) in front of the camera. A second TACTICAL_DRAG
+    // within 500 ms starts the flight to the point (TACTICAL_FLY); the flight ends at the next
+    // mode but TACTICAL_IDLE, or a TACTICAL_DRAG after 300 ms (a third click: the flight again,
+    // its speed kept).
     void SetTacticalMode(int mode, const S_vector4 *point);   // 0x004632c0
-    // The mode's speeds along the two axes (+0x34, +0x38).
+    // The mode's speeds along the two axes (the cursor's or the keys').
     void SetTacticalMotion(float x, float y);           // 0x004633a0
-    // The zoom (+0x40; 0.25 .. 4).
+    // The zoom (the moves' speed; 0.25 .. 4).
     void SetTacticalZoom(float zoom);                   // 0x00462750
-    // Moves it by its mode (the command map calls it while the game is paused).
+    // Moves it by its mode (the command map calls it while the game is paused), then fades the
+    // humans near it.
     void UpdateTactical(int timeDelta);                 // 0x00463ba0
 
 private:
-    uint8_t m_unknown00[0x20];                          // +0x00 (not set by the constructor)
+    struct S_FadedHuman {                               // 8 bytes
+        C_Human *human;
+        float transparency;
+    };
+
+    // The flight (TACTICAL_FLY): to three quarters of the way to the point (not at all within
+    // 1 m; the point moved to the obstacle in between), turning to look along the way; its
+    // acceleration for a flight of 1.25 / 1.875 / 2.5 s (under 5 m / 35 m / farther), its first
+    // third speeding up, its last slowing down.
+    void StartFlight();                                 // 0x00462350
+    // The look point: 10 m in front of the camera (2 m outside the primary sector).
+    void UpdateLookPoint();                             // 0x004630e0
+    // Off: the faded humans' transparency back to 0, the list emptied.
+    void ResetHumans(bool tactical);                    // 0x00463620
+    // 1 within 0.4 m^2 (squared distance) of the camera, 0 beyond 2.4, linear in between: the
+    // segment from the human's body frame to his frame (0.1 m up).
+    float GetTransparency(C_Human *human) const;        // 0x00463690
+    // A human's transparency set when it changes; one at 0 dropped at its next change (quirk
+    // kept), one not listed added when it is not 0.
+    void UpdateHuman(C_Human *human);                   // 0x00463780
+    // The player team's known enemies, then its members (the time not used).
+    void UpdateHumans(int timeDelta);                   // 0x00463890
+    // The camera moved by `move`, sliding along what it hits (then 5 cm off it); what it hit.
+    S_CollisionVolume *Move(const S_vector &move);     // 0x00464b80
+
+    S_vector4 m_target;                                 // +0x00 the map point (the flight's end)
+    S_vector4 m_lookPoint;                              // +0x10 (not read)
     S_vector4 m_pos;                                    // +0x20 its camera's position
-    uint8_t m_unknown30[4];                             // +0x30
+    float m_lookDistance;                               // +0x30
     float m_motionX = 0.0f;                             // +0x34
     float m_motionY = 0.0f;                             // +0x38
-    float m_height = 5.0f;                              // +0x3C
+    float m_height = 5.0f;                              // +0x3C (not read)
     float m_zoom = 1.0f;                                // +0x40
-    float m_unknown44 = 0.0f;                           // +0x44
+    int m_clickTime = 0;                                // +0x44 ms left for a double click
     bool m_tactical = false;                            // +0x48
-    uint8_t m_unknown49[0x37];                          // +0x49 (+0x4C the mode)
+    bool m_keepSpeed;                                   // +0x49 the next flight keeps the speed
+    int m_mode;                                         // +0x4C TACTICAL_*
+    S_quat m_flightFrom;                                // +0x50 the camera's rotation at the start
+    S_quat m_flightTo;                                  // +0x60 ... looking along the flight
+    float m_flightSpeed;                                // +0x70 m/s
+    float m_flightAccel;                                // +0x74 m/s^2
+    float m_flightDistance;                             // +0x78 m
+    float m_flightTime;                                 // +0x7C ms
     I3D_camera *m_camera;                               // +0x80
     I3D_camera *m_gameCamera = nullptr;                 // +0x84 the scene's camera while tactical
     uint8_t m_unknown88[4];                             // +0x88 (MSVC 6: the vector's allocator)
-    std::vector<C_Human *> m_humans;                    // +0x8C
+    std::vector<S_FadedHuman> m_humans;                 // +0x8C
     uint8_t m_unknown98[8];                             // +0x98
 };
 
@@ -72,8 +112,10 @@ enum : int {
     TACTICAL_MOVE = 1,                                  // the arrows / the screen's edges
     TACTICAL_TURN = 2,                                  // the keypad's 4, 6, 8, 2 / the middle button
     TACTICAL_DRAG = 3,                                  // the map dragged with the left button
+    // 4 .. 7 turn as TACTICAL_TURN (not set by the command map).
     TACTICAL_UP = 8,                                    // page up / the wheel
     TACTICAL_DOWN = 9,
+    TACTICAL_FLY = 10,                                  // the double click's flight
     TACTICAL_PLUS = 11,                                 // the keypad's + / -
     TACTICAL_MINUS = 12,
 };
