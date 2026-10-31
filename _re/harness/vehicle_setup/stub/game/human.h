@@ -96,6 +96,8 @@ public:
     int stance = 0;
     // The vehicle it sits in (the animation actor's wings, game/animation_actor.cpp).
     C_Actor *GetVehicle() const { return vehicle; }
+    // The camera module's effect value (part 8e-i; the camera test defines it).
+    void SetUnknown94(float value);
     const S_vector &GetRandomBonePos() const { return bonePos; }
     void RemoveItem(int uid, bool destroy) { removedItems.push_back({uid, destroy}); }
     bool IsInPlay() const { return inPlay; }

@@ -1194,9 +1194,10 @@ public:
     I3D_SLOTS_4(60, 64, 68, 6C);
     I3D_SLOT(70);
     I3DMETHOD(void, SetFOV)(float radians) = 0;               // 0x74
-    I3D_SLOT(78);
+    // The near sector's projection (LS3DF: the first-person view's weapon is drawn with it).
+    I3DMETHOD(void, SetNearSectorFOV)(float radians) = 0;     // 0x78
     I3DMETHOD(void, SetRange)(float nearRange, float farRange) = 0;   // 0x7C
-    I3D_SLOT(80);
+    I3DMETHOD(void, SetNearSectorRange)(float nearRange, float farRange) = 0;   // 0x80
     // The interface's camera: 2 and on (meanings inferred: an orthogonal projection and its
     // scale).
     I3DMETHOD(void, SetOrthoScale)(float scale) = 0;          // 0x84
@@ -1204,6 +1205,7 @@ public:
     I3DMETHOD(void, SetAspectRatio)(float aspect) = 0;        // 0x8C (field +0x138)
 
     float GetFOV() const { return Field<float>(0x120); }
+    float GetNearSectorFOV() const { return Field<float>(0x12C); }
     void GetRange(float &nearRange, float &farRange) const
     {
         nearRange = Field<float>(0x124);

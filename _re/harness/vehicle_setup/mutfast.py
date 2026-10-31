@@ -67,10 +67,10 @@ class Tree:
         os.makedirs(self.obj)
 
     def sources(self):
-        """The harness's sources as the build's .bat lists them (in the copy); its -D options join the flags."""
+        """The harness's sources as the build's .bat lists them (in the copy); its -D and -f options join the flags."""
         bat = open(os.path.join(HERE, self.build)).read()
         line = next(l for l in bat.splitlines() if l.startswith("g++"))
-        self.flags += [t for t in line.split() if t.startswith("-D") and t not in self.flags]
+        self.flags += [t for t in line.split() if t.startswith(("-D", "-f")) and t not in self.flags]
         self.link_flags = [t for t in line.split() if t.startswith("-Wl,")]   # (part 7d's --wrap)
         return [os.path.normpath(os.path.join(self.harness, t)) for t in line.split() if t.endswith(".cpp")]
 

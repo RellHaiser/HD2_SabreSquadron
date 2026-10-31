@@ -15,6 +15,7 @@
 #include "game/animation_actor.h"
 #include "game/barrel.h"
 #include "game/bike.h"
+#include "game/camera_module.h"
 #include "game/car.h"
 #include "game/checkpoints.h"
 #include "game/clock.h"
@@ -128,100 +129,8 @@ enum E_FadeDirection {
 // (the module object itself: game/geffects.h)
 class C_GEffectsModule;
 
-// Humans whose movement takes an effect value from the camera (list at +0x8C of the
-// object the camera module returns; C_Human::SetUnknown94).
-class C_CameraHumanEffects {
-public:
-    // Removes `human` (its value goes back to 0).
-    void Remove(C_Human *human);                        // 0x00463040
-    // Puts its camera (+0x80) 3 m behind and 1.5 m above `human` along its view (5 m in a
-    // car, a submarine, a seat weapon or the Junkers), looking at it; null: the default
-    // frame's (+0x84) place and direction. (The command map's double click.)
-    void LookAt(C_Human *human);                        // 0x00462780
-
-    // The command map's tactical camera (its own camera +0x80; the game's active one is kept at
-    // +0x84 meanwhile).
-    // On: it starts 7 m behind and 3 m above the active soldier, looking down along his view;
-    // off: the game's camera back.
-    void SetTactical(bool on);                          // 0x00462ae0
-    bool IsTactical() const;                            // 0x00462770 (byte +0x48)
-    // Its motion mode (TACTICAL_*; +0x4C) and the point it follows (TACTICAL_DRAG; null: kept).
-    void SetTacticalMode(int mode, const S_vector4 *point);   // 0x004632c0
-    // The mode's speeds along the two axes (+0x34, +0x38).
-    void SetTacticalMotion(float x, float y);           // 0x004633a0
-    // The zoom (+0x40; 0.25 .. 4).
-    void SetTacticalZoom(float zoom);                   // 0x00462750
-    // Moves it by its mode (the command map calls it while the game is paused).
-    void UpdateTactical(int timeDelta);                 // 0x00463ba0
-};
-// C_CameraHumanEffects::SetTacticalMode() modes (named by the command map's cursor shapes).
-enum : int {
-    TACTICAL_IDLE = 0,
-    TACTICAL_MOVE = 1,                                  // the arrows / the screen's edges
-    TACTICAL_TURN = 2,                                  // the keypad's 4, 6, 8, 2 / the middle button
-    TACTICAL_DRAG = 3,                                  // the map dragged with the left button
-    TACTICAL_UP = 8,                                    // page up / the wheel
-    TACTICAL_DOWN = 9,
-    TACTICAL_PLUS = 11,                                 // the keypad's + / -
-    TACTICAL_MINUS = 12,
-};
-
-class C_CameraModule {                                  // "CameraModule", vtable 0x0080fdd0
-public:
-    // (C_Module::Update; the game calls it itself while paused.)
-    void Update(int timeDelta);                         // vtable +0x10
-    C_CameraHumanEffects *GetHumanEffects();            // vtable +0x88
-    // The game camera eases into its next position over `time` ms.
-    void SetBlendTime(int time);                        // vtable +0x70
-    // Special camera `mode` on or off; mode CAMERA_MODE_PROJECTILE follows `target`.
-    void SetSpecialMode(int mode, bool on, I3D_frame *target);   // vtable +0x44
-    // The same slot with 1 as the third argument (the game's free camera; not identified).
-    void SetSpecialMode(int mode, bool on, int unknown);
-    // The same slot with a height (CAMERA_MODE_UNDERWATER: the water's surface).
-    void SetSpecialMode(int mode, bool on, float height);
-    // Called when the active soldier moves into another sector (not identified).
-    void Unknown40(int arg);                            // vtable +0x40
-    bool IsGameCamera(I3D_frame *camera);               // vtable +0x4C
-    // Position and view direction of camera `index` (0: the scene's camera, 1: the game camera;
-    // false without one). They write a whole S_vector4.
-    bool GetCameraPos(int index, S_vector4 *pos);       // vtable +0x64 0x00465a10
-    bool GetCameraDir(int index, S_vector4 *dir);       // vtable +0x68 0x00465b40
-    // The game camera's field of view (radians; 80 degrees without one) and its second one
-    // (camera +0x12C through I3D_camera slot 0x78; the first-person view sets 65 degrees, 40
-    // through the sights).
-    bool SetFov(float fov);                             // vtable +0x50 0x00465e50
-    float GetFov();                                     // vtable +0x54 0x00465e80
-    bool SetFov2(float fov);                            // vtable +0x5C 0x00465e00
-    float GetFov2();                                    // vtable +0x60 0x00465e30
-    // The direction the player's camera looks along (not in mode 10 or while the target's
-    // flag 8 is set; +0x20).
-    void SetViewDir(const S_vector4 &dir);              // vtable +0x48 0x00465ea0
-    // The object at +0x2B4 is set (a scripted view, inferred): the player's controls are
-    // dropped meanwhile.
-    bool HasScriptedView();                             // vtable +0x80 0x00465080
-    // The view distance of the scene's active camera (its +0x128; the AI's sight range limit).
-    float GetViewDistance();                            // vtable +0x58
-    // The camera frame in use (a human's "camera3RD" / "cameraFPV" dummy when it follows one).
-    I3D_frame *GetCamera();                             // vtable +0x6C
-    // Makes the game camera watch `frame`; speed -1 = cut, else degrees per second.
-    void SetTarget(I3D_frame *frame, int speed);        // vtable +0x74
-    // The byte at +0x26D (not identified; the player-driven meleeTracker ignores the mouse while it
-    // is set).
-    bool GetUnknown78();                                // vtable +0x78 0x00465060
-    bool GetState();                                    // vtable +0x7C (1 = underwater)
-    bool IsUnderwater() { return GetState(); }
-    // Sector the camera (the sound listener) is in.
-    I3D_sector *GetListenerSector();                    // vtable +0x8C
-};
-C_CameraModule *GetCameraModule();                      // 0x00464e90 (&g_cameraModule)
-// The command map's tactical camera (null before the camera module made it).
-extern C_CameraHumanEffects *g_cameraHumanEffects;      // 0x0089afbc
-// C_CameraModule::SetSpecialMode() modes.
-enum : int {
-    CAMERA_MODE_UNDERWATER = 4,                         // the effects module's water camera
-    CAMERA_MODE_AIM = 7,                                // the first-person view through the sights / scope
-    CAMERA_MODE_PROJECTILE = 9,                         // rides along with a fired projectile
-};
+// The camera module (C_CameraModule, C_CameraHumanEffects, C_CameraFrameKeeper):
+// game/camera_module.h.
 
 // The texture shifting module: see game/tshift.h; the lightmap groups: game/lightmap_groups.h.
 

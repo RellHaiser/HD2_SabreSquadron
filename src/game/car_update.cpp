@@ -9,6 +9,7 @@
 #include <cstdint>
 
 #include "game/actors_module.h"                         // CreateActorMessage, SendActorMessage
+#include "game/camera_module.h"
 #include "game/car_internal.h"
 #include "game/collision.h"
 #include "game/game.h"

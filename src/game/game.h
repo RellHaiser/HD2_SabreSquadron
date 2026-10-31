@@ -108,6 +108,7 @@ public:
     I3D_scene *GetScene() const { return m_scene; }
     // The far clipping distance (m; the birds fly off beyond it).
     float GetFarClip() const { return m_farClip; }
+    float GetNearClip() const { return m_nearClip; }
     const char *GetMissionName() const { return m_missionName; }
     // Simulation time of the mission in ms; advances every unpaused frame and is
     // still 0 before the first one (scripts wait for it).

@@ -434,14 +434,18 @@ C_ItemDef *GetItemDef(int typeId)
 void C_Team::CollectVolumes(int index) { GfLog("volumes %d", index); }
 void C_HumanMovement::OnModelChanged() { GfLog("modelchanged"); }
 void C_HumanMovement::UpdateModelNames() { GfLog("modelnames"); }
+#ifndef CAMERA_TEST                                    // (the camera build links the real module, part 8e)
 bool C_CameraModule::GetCameraDir(int index, S_vector4 *dir)
 {
     GfLog("camdir %d", index);
     *dir = {1.0f, 2.0f, 3.0f, 4.0f};
     return true;
 }
+#endif
 void C_CameraModule::Unknown40(int arg) { GfLog("cam40 %d", arg); }
+#ifndef CAMERA_TEST
 void C_CameraModule::SetViewDir(const S_vector4 &dir) { GfLog("viewdir %.1f %.1f %.1f", dir.x, dir.y, dir.z); }
+#endif
 
 void GEffects2Test()
 {

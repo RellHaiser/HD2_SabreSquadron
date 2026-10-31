@@ -5488,6 +5488,49 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: 33 names (names/volumetrics.txt), 37 decompiles exported; 25 functions in ported.txt
     (9 helpers absorbed). Stats: 7,682 of 12,293 functions by hand (70.3 % by size).
 
+  PART 8e-i DONE (2026-10-31): the camera module's core (src/game/camera_module.*, new; part 8e, the
+  camera module 0x00462320..0x0046cb20, begun).
+  - C_CameraModule ("CameraModule", module 15, the object 0x0089afb0, 0x2C0 bytes): a C_Module (its
+    intermediate class's vtable 0x0080fdd0 / 0x0080fd40 folded into C_Module), the slots past
+    C_Module's (+0x40 ..) called directly (non-virtual, the sound module's way; nothing calls them
+    through the vtable). Its layout: the positions / directions of indices 2 and 3 (+0x10 .. +0x4C),
+    the 11 views' settings (+0xE0, S_CameraSettings: tables\gamecam.set, chunk 0 the version 2,
+    chunk 0 the records: as many whole ones as the chunk holds; defaults otherwise), the game camera,
+    the scene's camera, the camera in use, the view (+0x260) and its settings, the blend time, the
+    target and its speed; the rest named by offset until 8e-iii.
+  - StartMission (the client side): the settings loaded, a camera made the scene's active one in
+    the scene camera's place (the game's field of view and range, "GameCamera", the near sector's
+    65 degrees and 0.01 .. 10 m), the fields reset. StopMission: the tactical view off (both sides),
+    the scene's camera back, the game camera and the camera in use released (a human's dummy: its
+    SetUnknown94(0)). RestartMission (a client): stop, start, Unknown40(0) unless in the Junkers;
+    LoadGame: Unknown40(0), an update of 100 ms. The getters and setters (positions, directions,
+    the fields of view, the blend time, the target, the view direction).
+  - C_CameraFrameKeeper (moved from pending.h): the constructor, Restore (the destructor's JMP),
+    Update: the dummy raised over its parent by its height (a sphere test down to the ground), a
+    car: looking along its heading / 2 plus its velocity, the blend speed (speed + 2.5) * 0.3; a
+    submarine: along its heading times its speed + 0.5, lowered with its bobbing and rolled with
+    the time, the speed / 40 at least 0.03; 1000 after a Restore; the active soldier's vehicle's
+    speed to g_vehicleCameraSpeed (0x0089b208, not read). Quirk kept: the dummy's y compared with
+    +0.3 (its direction is set with -0.3), so it is always turned.
+  - C_CameraHumanEffects: its layout (0xA0, the rest in 8e-ii), the constructor and destructor;
+    g_cameraHumanEffects (0x0089afbc) is the module's +0xC (now a reference to it).
+  - I3D_camera slots 0x78 / 0x80 named (SetNearSectorFOV / SetNearSectorRange, as LS3DF), +0x12C;
+    SetFov2 / GetFov2 renamed SetNearSectorFov / GetNearSectorFov; C_game::GetNearClip,
+    C_Submarine::GetBob.
+  - Harness: the camera build (build_camera.bat, CAMERA_TEST: the world build with the real module,
+    the world tests' camera fakes and the base harness's keeper fakes left out; -faligned-new=8;
+    mutfast.py takes a .bat's -f options too); camera_test.inc ("camera:" 15 checks, "keeper:" 6);
+    check_camera.py. The stub pending.h takes the keeper from the real header. 0 of 22 in both
+    orders.
+  - Mutations (mutations/mutate_8e1.py): the first run caught 202 of 300 (71 survived, 27 did not
+    build); 37 equivalent (see the file's docstring), new cases for 34 (the zeroed fields, the near
+    sector's range, the short directions, the views off the axes, a dive along the view); the full
+    rerun: all 236 caught. Baselines: the world build 0 of 22 in both orders; the item build 0 of 37;
+    the other five 0 of 37.
+  - Build: 200 files clean (MSVC). Tier 1: 537 errors in 94 files, 221 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/camera.txt (8e-i's added, SetFov2 / GetFov2 renamed); 45 functions in ported.txt.
+    Stats: 7,727 of 12,293 functions by hand (70.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

@@ -15,6 +15,7 @@ class I3D_scene;
 extern I3D_scene *g_carScene;
 
 #include "common/c_str.h"
+#include "game/camera_module.h"                       // C_CameraFrameKeeper (the real header)
 
 // The game's texts (C_Car's name).
 class C_GameTexts {
@@ -101,16 +102,7 @@ public:
     void SetUnknownC8(int value);
 };
 extern C_NetReplication *g_netReplication;
-class alignas(16) C_CameraFrameKeeper {
-public:
-    C_CameraFrameKeeper(C_Actor *owner, I3D_frame *frame);
-    ~C_CameraFrameKeeper();
-    bool Restore();
-    void Update(int time);
-
-private:
-    uint8_t m_unknown[0x50];
-};
+// (C_CameraFrameKeeper: the real header, part 8e-i.)
 
 // --- the car's updates (game/car_update.cpp; as the real header declares them) -------------------
 enum : int {

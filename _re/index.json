@@ -37703,10 +37703,10 @@
 "in_vtables": []
 },
 "00462650": {
-"name": "FUN_00462650",
+"name": "C_CameraHumanEffects::C_CameraHumanEffects",
 "size": 136,
 "lines": 33,
-"chars": 944,
+"chars": 997,
 "callers": [
 "00464ef0"
 ],
@@ -37720,10 +37720,10 @@
 "in_vtables": []
 },
 "004626e0": {
-"name": "FUN_004626e0",
+"name": "C_CameraHumanEffects::~C_CameraHumanEffects",
 "size": 107,
 "lines": 27,
-"chars": 666,
+"chars": 697,
 "callers": [
 "004650f0"
 ],
@@ -38210,10 +38210,10 @@
 "in_vtables": []
 },
 "00464d90": {
-"name": "FUN_00464d90",
+"name": "StaticInit_464d90",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -38232,10 +38232,10 @@
 ]
 },
 "00464dc0": {
-"name": "FUN_00464dc0",
+"name": "StaticInit_CameraModule",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 123,
 "callers": [],
 "callees": [
 "00464dd0",
@@ -38253,10 +38253,10 @@
 ]
 },
 "00464dd0": {
-"name": "FUN_00464dd0",
+"name": "CameraModule_Construct0",
 "size": 18,
 "lines": 8,
-"chars": 144,
+"chars": 157,
 "callers": [
 "00464dc0"
 ],
@@ -38274,10 +38274,10 @@
 "in_vtables": []
 },
 "00464df0": {
-"name": "FUN_00464df0",
+"name": "CameraModule_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 97,
 "callers": [
 "00464dc0"
 ],
@@ -38291,10 +38291,10 @@
 "in_vtables": []
 },
 "00464e00": {
-"name": "FUN_00464e00",
+"name": "CameraModule_Destroy0",
 "size": 10,
 "lines": 8,
-"chars": 118,
+"chars": 128,
 "callers": [
 "00464df0"
 ],
@@ -38310,10 +38310,10 @@
 "in_vtables": []
 },
 "00464e10": {
-"name": "FUN_00464e10",
+"name": "RestartMission",
 "size": 78,
 "lines": 20,
-"chars": 529,
+"chars": 543,
 "callers": [],
 "callees": [
 "0045d1d0",
@@ -38334,10 +38334,10 @@
 ]
 },
 "00464e60": {
-"name": "FUN_00464e60",
+"name": "SaveGame",
 "size": 5,
 "lines": 7,
-"chars": 99,
+"chars": 104,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -38352,10 +38352,10 @@
 ]
 },
 "00464e70": {
-"name": "FUN_00464e70",
+"name": "LoadGame",
 "size": 25,
-"lines": 11,
-"chars": 227,
+"lines": 9,
+"chars": 164,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -38411,10 +38411,10 @@
 "in_vtables": []
 },
 "00464ea0": {
-"name": "FUN_00464ea0",
+"name": "C_CameraModuleBase::C_CameraModuleBase",
 "size": 32,
 "lines": 10,
-"chars": 251,
+"chars": 296,
 "callers": [
 "00464ef0"
 ],
@@ -38430,10 +38430,10 @@
 "in_vtables": []
 },
 "00464ec0": {
-"name": "FUN_00464ec0",
+"name": "C_CameraModuleBase::ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 202,
+"lines": 12,
+"chars": 253,
 "callers": [],
 "callees": [
 "00464ee0",
@@ -38451,10 +38451,10 @@
 ]
 },
 "00464ee0": {
-"name": "FUN_00464ee0",
+"name": "C_CameraModuleBase::~C_CameraModuleBase",
 "size": 11,
 "lines": 9,
-"chars": 196,
+"chars": 264,
 "callers": [
 "00464ec0",
 "004650f0",
@@ -38473,12 +38473,13 @@
 "in_vtables": []
 },
 "00464ef0": {
-"name": "FUN_00464ef0",
+"name": "C_CameraModule",
 "size": 349,
 "lines": 95,
-"chars": 2362,
+"chars": 2423,
 "callers": [
-"00464dd0"
+"00464dd0",
+"004650d0"
 ],
 "callees": [
 "00462650",
@@ -38494,10 +38495,10 @@
 "in_vtables": []
 },
 "00465050": {
-"name": "FUN_00465050",
+"name": "CameraHumanEffects_AlignedFree",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 109,
 "callers": [
 "007fbb78"
 ],
@@ -38511,10 +38512,10 @@
 "in_vtables": []
 },
 "00465060": {
-"name": "FUN_00465060",
+"name": "GetUnknown78",
 "size": 7,
 "lines": 7,
-"chars": 103,
+"chars": 109,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -38565,10 +38566,10 @@
 ]
 },
 "00465090": {
-"name": "FUN_00465090",
+"name": "GetUnknown84",
 "size": 7,
 "lines": 7,
-"chars": 103,
+"chars": 109,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -38583,10 +38584,10 @@
 ]
 },
 "004650a0": {
-"name": "FUN_004650a0",
+"name": "GetHumanEffects",
 "size": 4,
 "lines": 7,
-"chars": 102,
+"chars": 116,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -38637,12 +38638,13 @@
 ]
 },
 "004650d0": {
-"name": "FUN_004650d0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 209,
+"chars": 206,
 "callers": [],
 "callees": [
+"00464ef0",
 "004650f0",
 "007e559c"
 ],
@@ -38658,10 +38660,10 @@
 ]
 },
 "004650f0": {
-"name": "FUN_004650f0",
+"name": "~C_CameraModule",
 "size": 99,
 "lines": 25,
-"chars": 577,
+"chars": 659,
 "callers": [
 "00464e00",
 "004650d0"
@@ -38680,10 +38682,10 @@
 "in_vtables": []
 },
 "00465160": {
-"name": "FUN_00465160",
+"name": "StartMission",
 "size": 1193,
 "lines": 173,
-"chars": 5823,
+"chars": 5805,
 "callers": [],
 "callees": [
 "00405100",
@@ -38717,10 +38719,10 @@
 ]
 },
 "00465610": {
-"name": "FUN_00465610",
+"name": "StopMission",
 "size": 190,
 "lines": 40,
-"chars": 1235,
+"chars": 1225,
 "callers": [],
 "callees": [
 "00462770",
@@ -38740,10 +38742,10 @@
 ]
 },
 "004656d0": {
-"name": "FUN_004656d0",
+"name": "LoadSettings",
 "size": 814,
-"lines": 148,
-"chars": 4742,
+"lines": 149,
+"chars": 4759,
 "callers": [
 "00465160"
 ],
@@ -38772,10 +38774,10 @@
 "in_vtables": []
 },
 "00465a00": {
-"name": "FUN_00465a00",
+"name": "ResetUnknown2AC",
 "size": 11,
-"lines": 8,
-"chars": 116,
+"lines": 10,
+"chars": 146,
 "callers": [
 "004656d0"
 ],
@@ -38898,10 +38900,10 @@
 ]
 },
 "00465e00": {
-"name": "SetFov2",
+"name": "SetNearSectorFov",
 "size": 48,
 "lines": 15,
-"chars": 306,
+"chars": 315,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -38916,10 +38918,10 @@
 ]
 },
 "00465e30": {
-"name": "GetFov2",
+"name": "GetNearSectorFov",
 "size": 24,
 "lines": 10,
-"chars": 187,
+"chars": 196,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -39014,8 +39016,8 @@
 "00465f00": {
 "name": "C_CameraFrameKeeper::C_CameraFrameKeeper",
 "size": 244,
-"lines": 46,
-"chars": 2023,
+"lines": 45,
+"chars": 2037,
 "callers": [
 "004d16a0",
 "005df3d0"
@@ -39034,7 +39036,7 @@
 "name": "C_CameraFrameKeeper::Restore",
 "size": 5,
 "lines": 46,
-"chars": 1673,
+"chars": 1981,
 "callers": [
 "004d25c0",
 "005dfca0"
@@ -39052,7 +39054,7 @@
 "name": "C_CameraFrameKeeper::Restore",
 "size": 250,
 "lines": 46,
-"chars": 1673,
+"chars": 1981,
 "callers": [
 "00466000",
 "004d9a40",
@@ -39072,8 +39074,8 @@
 "00466110": {
 "name": "C_CameraFrameKeeper::Update",
 "size": 1961,
-"lines": 248,
-"chars": 7816,
+"lines": 247,
+"chars": 7815,
 "callers": [
 "004d3110",
 "005e0e20"
@@ -39113,10 +39115,10 @@
 "in_vtables": []
 },
 "004668c0": {
-"name": "FUN_004668c0",
+"name": "StaticInit_4668c0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"

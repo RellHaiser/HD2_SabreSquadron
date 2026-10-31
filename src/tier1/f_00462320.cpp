@@ -112,51 +112,6 @@ LAB_00462463:
 }
 
 
-// 0x00462650
-int FUN_00462650(int param_1, ...)
-{
-  I3D_driver *self;
-  I3D_frame *pIVar1;
-  uint32_t uStack_14;
-  uint32_t local_4;
-  *(uint8_t *)(param_1 + 0x88) = GH_PIECE(uStack_14,3,1);
-  *(uint32_t *)(param_1 + 0x8c) = 0;
-  *(uint32_t *)(param_1 + 0x90) = 0;
-  *(uint32_t *)(param_1 + 0x94) = 0;
-  local_4 = 0;
-  *(uint8_t *)(param_1 + 0x48) = 0;
-  self = I3DGetDriver();
-  pIVar1 = (*self->vtable->CreateFrame)(self,3);
-  *(I3D_frame **)(param_1 + 0x80) = pIVar1;
-  *(uint32_t *)(param_1 + 0x84) = 0;
-  *(uint32_t *)(param_1 + 0x3c) = 0x40a00000;
-  *(uint32_t *)(param_1 + 0x34) = 0;
-  *(uint32_t *)(param_1 + 0x38) = 0;
-  *(uint32_t *)(param_1 + 0x44) = 0;
-  *(uint32_t *)(param_1 + 0x40) = 0x3f800000;
-  return param_1;
-}
-
-
-// 0x004626e0
-uint32_t FUN_004626e0(int param_1, ...)
-{
-  uint32_t *puVar1;
-  uint32_t local_4;
-  puVar1 = *(uint32_t **)(param_1 + 0x80);
-  local_4 = 0;
-  if (puVar1 != 0) {
-    (**(code **)*puVar1)(puVar1);
-    *(uint32_t *)(param_1 + 0x80) = 0;
-  }
-  tier1_operator_delete(*(void **)(param_1 + 0x8c));
-  *(uint32_t *)(param_1 + 0x8c) = 0;
-  *(uint32_t *)(param_1 + 0x90) = 0;
-  *(uint32_t *)(param_1 + 0x94) = 0;
-  return 0;
-}
-
-
 // 0x00462750
 uint32_t C_CameraHumanEffects__SetTacticalZoom(void *_this,uint32_t param_1, ...)
 {

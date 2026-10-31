@@ -24,6 +24,8 @@ public:
     // m/s along its heading (-6..6; the squad lets it run down).
     float GetSpeed() const { return m_speed; }          // +0xF4
     void SetSpeed(float speed) { m_speed = speed; }
+    // How far the body is raised by its bobbing (m; +0xF0).
+    float GetBob() const { return m_bob; }
     // The turn rate (-0.5..0.5).
     void SetTurn(float turn) { m_turn = turn; }         // +0xF8
 

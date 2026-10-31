@@ -338,6 +338,7 @@ I3D_frame *C_Team::GetRandomVolume(int index) const
     GfLog("volume %d", index);
     return g_gfVolumes.at(index);
 }
+#ifndef CAMERA_TEST                                    // (the camera build links the real module, part 8e)
 C_CameraModule *GetCameraModule()
 {
     alignas(16) static uint8_t module[16];
@@ -348,8 +349,12 @@ bool C_CameraModule::IsGameCamera(I3D_frame *camera)
     GfLog("isgame %s", GfName(camera));
     return g_gfGameCamera;
 }
+#endif
 void C_CameraModule::SetSpecialMode(int mode, bool on, float height) { GfLog("special %d %d %.3f", mode, on, height); }
-C_CameraHumanEffects *g_cameraHumanEffects;
+#ifndef CAMERA_TEST
+C_CameraHumanEffects *g_gfHumanEffects;
+C_CameraHumanEffects *&g_cameraHumanEffects = g_gfHumanEffects;
+#endif
 void C_CameraHumanEffects::SetTactical(bool on) { GfLog("tactical %d", on); }
 bool C_HumanMovement::GetHeadWater(bool *underWater, float *surface) const
 {

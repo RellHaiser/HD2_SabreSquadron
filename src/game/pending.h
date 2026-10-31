@@ -613,24 +613,8 @@ void SetFrameData(I3D_frame *frame, const S_FrameData &data);   // 0x006e9ea0
 // Frees the frame's data block (S_FrameData).
 void FreeFrameData(I3D_frame *frame);               // 0x006e9ef0
 
-// The camera module's keeper of a camera dummy's placement (0x50 bytes, 16-byte aligned; the
-// car's StartMission makes one per seat with a "camera3RD*" dummy, S_VehicleSeat::camera): the
-// dummy's local rotation and position, its parent's and its own world position (inferred: the
-// third-person camera moves the dummy).
-class alignas(16) C_CameraFrameKeeper {
-public:
-    C_CameraFrameKeeper(C_Actor *owner, I3D_frame *frame);   // 0x00465f00
-    // Restore (0x00466000, a JMP to it; its two callers, the car's StopMission and 0x005dfca0,
-    // _aligned_free the keeper after it).
-    ~C_CameraFrameKeeper();
-    // Puts the dummy back where it was made (true; false without a frame).
-    bool Restore();                                 // 0x00466010
-    // Every frame (the car's Update).
-    void Update(int time);                          // 0x00466110
-
-private:
-    uint8_t m_unknown[0x50];                        // (the camera module names the 0x50 bytes)
-};
+// The camera module's keeper of a camera dummy's placement (C_CameraFrameKeeper):
+// game/camera_module.h.
 
 // ---- items (game/items_module.h) ----------------------------------------------------
 class C_Actor;

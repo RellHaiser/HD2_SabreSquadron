@@ -5474,6 +5474,15 @@
   "name": "C_TeamBase::GetMemberCount",
   "proto": "int __thiscall GetMemberCount(C_TeamBase *this)"
  },
+ "00462650": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::C_CameraHumanEffects",
+  "proto": "void * __fastcall C_CameraHumanEffects(void * this)"
+ },
+ "004626e0": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::~C_CameraHumanEffects"
+ },
  "00462750": {
   "module": "camera",
   "name": "C_CameraHumanEffects::SetTacticalZoom"
@@ -5510,9 +5519,73 @@
   "module": "zz_idioms",
   "name": "empty_function_464a60"
  },
+ "00464d90": {
+  "module": "camera",
+  "name": "StaticInit_464d90"
+ },
+ "00464dc0": {
+  "module": "camera",
+  "name": "StaticInit_CameraModule"
+ },
+ "00464dd0": {
+  "module": "camera",
+  "name": "CameraModule_Construct0"
+ },
+ "00464df0": {
+  "module": "camera",
+  "name": "CameraModule_RegisterAtExit"
+ },
+ "00464e00": {
+  "module": "camera",
+  "name": "CameraModule_Destroy0"
+ },
+ "00464e10": {
+  "module": "camera",
+  "name": "C_CameraModule::RestartMission",
+  "proto": "void __thiscall RestartMission(void * this, bool server)"
+ },
+ "00464e60": {
+  "module": "camera",
+  "name": "C_CameraModule::SaveGame",
+  "proto": "bool __thiscall SaveGame(void * this, void * chunk)"
+ },
+ "00464e70": {
+  "module": "camera",
+  "name": "C_CameraModule::LoadGame",
+  "proto": "bool __thiscall LoadGame(void * this, void * chunk)"
+ },
  "00464e90": {
   "module": "sound",
   "name": "GetCameraModule"
+ },
+ "00464ea0": {
+  "module": "camera",
+  "name": "C_CameraModuleBase::C_CameraModuleBase",
+  "proto": "void * __thiscall C_CameraModuleBase(void * this, int id, char * name)"
+ },
+ "00464ec0": {
+  "module": "camera",
+  "name": "C_CameraModuleBase::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void * this, uchar flags)"
+ },
+ "00464ee0": {
+  "module": "camera",
+  "name": "C_CameraModuleBase::~C_CameraModuleBase"
+ },
+ "00464ef0": {
+  "module": "camera",
+  "name": "C_CameraModule::C_CameraModule",
+  "proto": "void * __thiscall C_CameraModule(void * this, int id, char * name)"
+ },
+ "00465050": {
+  "module": "camera",
+  "name": "CameraHumanEffects_AlignedFree",
+  "proto": "void __fastcall CameraHumanEffects_AlignedFree(void * block)"
+ },
+ "00465060": {
+  "module": "camera",
+  "name": "C_CameraModule::GetUnknown78",
+  "proto": "bool __thiscall GetUnknown78(void * this)"
  },
  "00465070": {
   "module": "camera",
@@ -5524,6 +5597,16 @@
   "name": "C_CameraModule::HasScriptedView",
   "proto": "bool __thiscall HasScriptedView(C_CameraModule *this)"
  },
+ "00465090": {
+  "module": "camera",
+  "name": "C_CameraModule::GetUnknown84",
+  "proto": "bool __thiscall GetUnknown84(void * this)"
+ },
+ "004650a0": {
+  "module": "camera",
+  "name": "C_CameraModule::GetHumanEffects",
+  "proto": "void * __thiscall GetHumanEffects(void * this)"
+ },
  "004650b0": {
   "module": "camera",
   "name": "C_CameraModule::GetCamera",
@@ -5533,6 +5616,35 @@
   "module": "camera",
   "name": "C_CameraModule::GetListenerSector",
   "proto": "I3D_sector * __thiscall GetListenerSector(C_CameraModule *this)"
+ },
+ "004650d0": {
+  "module": "camera",
+  "name": "C_CameraModule::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void * this, uchar flags)"
+ },
+ "004650f0": {
+  "module": "camera",
+  "name": "C_CameraModule::~C_CameraModule"
+ },
+ "00465160": {
+  "module": "camera",
+  "name": "C_CameraModule::StartMission",
+  "proto": "void __thiscall StartMission(void * this, bool server)"
+ },
+ "00465610": {
+  "module": "camera",
+  "name": "C_CameraModule::StopMission",
+  "proto": "void __thiscall StopMission(void * this, bool server)"
+ },
+ "004656d0": {
+  "module": "camera",
+  "name": "C_CameraModule::LoadSettings",
+  "proto": "void __fastcall LoadSettings(void * this)"
+ },
+ "00465a00": {
+  "module": "camera",
+  "name": "C_CameraModule::ResetUnknown2AC",
+  "proto": "void __fastcall ResetUnknown2AC(void * this)"
  },
  "00465a10": {
   "module": "camera",
@@ -5561,13 +5673,13 @@
  },
  "00465e00": {
   "module": "camera",
-  "name": "C_CameraModule::SetFov2",
-  "proto": "bool __thiscall SetFov2(C_CameraModule *this, float fov)"
+  "name": "C_CameraModule::SetNearSectorFov",
+  "proto": "bool __thiscall SetNearSectorFov(C_CameraModule *this, float fov)"
  },
  "00465e30": {
   "module": "camera",
-  "name": "C_CameraModule::GetFov2",
-  "proto": "float __thiscall GetFov2(C_CameraModule *this)"
+  "name": "C_CameraModule::GetNearSectorFov",
+  "proto": "float __thiscall GetNearSectorFov(C_CameraModule *this)"
  },
  "00465e50": {
   "module": "camera",
@@ -5591,15 +5703,22 @@
  },
  "00465f00": {
   "module": "camera",
-  "name": "C_CameraFrameKeeper::C_CameraFrameKeeper"
+  "name": "C_CameraFrameKeeper::C_CameraFrameKeeper",
+  "proto": "void * __thiscall C_CameraFrameKeeper(void * this, void * owner, void * frame)"
  },
  "00466010": {
   "module": "camera",
-  "name": "C_CameraFrameKeeper::Restore"
+  "name": "C_CameraFrameKeeper::Restore",
+  "proto": "bool __fastcall Restore(void * this)"
  },
  "00466110": {
   "module": "camera",
-  "name": "C_CameraFrameKeeper::Update"
+  "name": "C_CameraFrameKeeper::Update",
+  "proto": "bool __thiscall Update(void * this, int time)"
+ },
+ "004668c0": {
+  "module": "camera",
+  "name": "StaticInit_4668c0"
  },
  "0046cb20": {
   "module": "camera",
@@ -37250,13 +37369,18 @@
  },
  "0089afb0": {
   "data": true,
-  "module": "app",
+  "module": "camera",
   "name": "g_cameraModule"
  },
  "0089afbc": {
   "data": true,
   "module": "geffects",
   "name": "g_cameraHumanEffects"
+ },
+ "0089b208": {
+  "data": true,
+  "module": "camera",
+  "name": "g_vehicleCameraSpeed"
  },
  "0089b288": {
   "data": true,

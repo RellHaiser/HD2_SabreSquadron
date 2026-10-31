@@ -1,5 +1,5 @@
-# The camera module (C_CameraModule, "CameraModule", vtable 0x0080fdd0; not ported yet, declared in
-# src/game/world.h). Only the slots other ports call are named here; m_240 is the game camera.
+# The camera module (C_CameraModule, "CameraModule", vtable 0x0080fdd0; src/game/camera_module.*,
+# part 8e). m_240 is the game camera.
 
 00465a10 C_CameraModule::GetCameraPos | bool __thiscall GetCameraPos(C_CameraModule *this, int index, S_vector4 * pos)
 00465b40 C_CameraModule::GetCameraDir | bool __thiscall GetCameraDir(C_CameraModule *this, int index, S_vector4 * dir)
@@ -8,8 +8,8 @@
 00465e50 C_CameraModule::SetFov | bool __thiscall SetFov(C_CameraModule *this, float fov)
 00465e80 C_CameraModule::GetFov | float __thiscall GetFov(C_CameraModule *this)
 00465de0 C_CameraModule::GetViewDistance | float __thiscall GetViewDistance(C_CameraModule *this)
-00465e00 C_CameraModule::SetFov2 | bool __thiscall SetFov2(C_CameraModule *this, float fov)
-00465e30 C_CameraModule::GetFov2 | float __thiscall GetFov2(C_CameraModule *this)
+00465e00 C_CameraModule::SetNearSectorFov | bool __thiscall SetNearSectorFov(C_CameraModule *this, float fov)
+00465e30 C_CameraModule::GetNearSectorFov | float __thiscall GetNearSectorFov(C_CameraModule *this)
 004650b0 C_CameraModule::GetCamera | I3D_frame * __thiscall GetCamera(C_CameraModule *this)
 00465ad0 C_CameraModule::SetBlendTime | void __thiscall SetBlendTime(C_CameraModule *this, int time)
 00465b20 C_CameraModule::SetTarget | void __thiscall SetTarget(C_CameraModule *this, I3D_frame * frame, int speed)
@@ -17,14 +17,45 @@
 004650c0 C_CameraModule::GetListenerSector | I3D_sector * __thiscall GetListenerSector(C_CameraModule *this)
 
 # The command map's tactical camera (the object behind C_CameraModule's slot +0x88, named
-# C_CameraHumanEffects for its LookAt; see src/game/world.h).
+# C_CameraHumanEffects for its LookAt; see src/game/camera_module.h).
 00462ae0 C_CameraHumanEffects::SetTactical
 00462770 C_CameraHumanEffects::IsTactical
 004632c0 C_CameraHumanEffects::SetTacticalMode
 004633a0 C_CameraHumanEffects::SetTacticalMotion
 00462750 C_CameraHumanEffects::SetTacticalZoom
 00463ba0 C_CameraHumanEffects::UpdateTactical
-# The keeper of a camera dummy's placement (pending.h; the car's seats).
-00465f00 C_CameraFrameKeeper::C_CameraFrameKeeper
-00466010 C_CameraFrameKeeper::Restore
-00466110 C_CameraFrameKeeper::Update
+# The keeper of a camera dummy's placement (camera_module.h; the car's seats, the submarine). Its
+# destructor 0x00466000 is a JMP to Restore (named as its target).
+00465f00 C_CameraFrameKeeper::C_CameraFrameKeeper | void * __thiscall C_CameraFrameKeeper(void * this, void * owner, void * frame)
+00466010 C_CameraFrameKeeper::Restore | bool __fastcall Restore(void * this)
+00466110 C_CameraFrameKeeper::Update | bool __thiscall Update(void * this, int time)
+
+# Part 8e-i: the module's core (0x00464d90..0x004668c0), the human effects' constructor and
+# destructor, the object and the vehicles' camera blend speed.
+00462650 C_CameraHumanEffects::C_CameraHumanEffects | void * __fastcall C_CameraHumanEffects(void * this)
+004626e0 C_CameraHumanEffects::~C_CameraHumanEffects
+00464d90 StaticInit_464d90
+00464dc0 StaticInit_CameraModule
+00464dd0 CameraModule_Construct0
+00464df0 CameraModule_RegisterAtExit
+00464e00 CameraModule_Destroy0
+00464e10 C_CameraModule::RestartMission | void __thiscall RestartMission(void * this, bool server)
+00464e60 C_CameraModule::SaveGame | bool __thiscall SaveGame(void * this, void * chunk)
+00464e70 C_CameraModule::LoadGame | bool __thiscall LoadGame(void * this, void * chunk)
+00464ea0 C_CameraModuleBase::C_CameraModuleBase | void * __thiscall C_CameraModuleBase(void * this, int id, char * name)
+00464ec0 C_CameraModuleBase::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(void * this, uchar flags)
+00464ee0 C_CameraModuleBase::~C_CameraModuleBase
+00464ef0 C_CameraModule::C_CameraModule | void * __thiscall C_CameraModule(void * this, int id, char * name)
+00465050 CameraHumanEffects_AlignedFree | void __fastcall CameraHumanEffects_AlignedFree(void * block)
+00465060 C_CameraModule::GetUnknown78 | bool __thiscall GetUnknown78(void * this)
+00465090 C_CameraModule::GetUnknown84 | bool __thiscall GetUnknown84(void * this)
+004650a0 C_CameraModule::GetHumanEffects | void * __thiscall GetHumanEffects(void * this)
+004650d0 C_CameraModule::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(void * this, uchar flags)
+004650f0 C_CameraModule::~C_CameraModule
+00465160 C_CameraModule::StartMission | void __thiscall StartMission(void * this, bool server)
+00465610 C_CameraModule::StopMission | void __thiscall StopMission(void * this, bool server)
+004656d0 C_CameraModule::LoadSettings | void __fastcall LoadSettings(void * this)
+00465a00 C_CameraModule::ResetUnknown2AC | void __fastcall ResetUnknown2AC(void * this)
+004668c0 StaticInit_4668c0
+0089afb0 g_cameraModule @
+0089b208 g_vehicleCameraSpeed @
