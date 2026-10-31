@@ -873,7 +873,7 @@ LAB_006cd123:
       if (uVar7 == 0xb810) {
         pCVar15 = param_1;
         _this = GetLightMapGroups();
-        FUN_0048cd70(_this,(char*)(&pCVar15->m_open));
+        C_LightMapGroupsModule__LoadGroups((C_LightMapGroupsModule*)(_this),(C_chunk*)(&pCVar15->m_open));
         C_chunk__Ascend(param_1,0);
         pIVar5 = (I3D_camera *)((uint32_t)extraout_var_14 << 8);
       }
@@ -2005,23 +2005,23 @@ int FUN_006d39f0(void *_this,uint32_t *param_1,uint32_t *param_2, ...)
     puVar2 = tier1_operator_new(iVar5 * 0x1c);
     puVar8 = puVar2;
     for (puVar7 = *(uint32_t **)((int)_this + 4); puVar7 != param_1; puVar7 = puVar7 + 7) {
-      FUN_0048eaa0(puVar8,puVar7);
+      TShiftEntry_Construct(puVar8,puVar7);
       puVar8 += 7;
     }
-    FUN_0048eaa0(puVar8,param_2);
-    FUN_0048ea30(param_1,*(uint32_t **)((int)_this + 8),puVar8 + 7);
+    TShiftEntry_Construct(puVar8,param_2);
+    TShiftEntry_UninitializedCopy(param_1,*(uint32_t **)((int)_this + 8),puVar8 + 7);
     empty_function_48ea20();
     tier1_operator_delete(*(void **)((int)_this + 4));
     *(uint32_t **)((int)_this + 0xc) = puVar2 + iVar3 * 7;
-    iVar3 = FUN_0048e9f0((int)_this);
+    iVar3 = TShiftEntryVector_Size((int)_this);
     *(uint32_t **)((int)_this + 4) = puVar2;
     *(uint32_t **)((int)_this + 8) = puVar2 + (iVar3 + 1) * 7;
   }
   else {
     iVar3 = (int)puVar7 - (int)param_1 >> 0x1f;
     if (((int)puVar7 - (int)param_1) / 0x1c + iVar3 == iVar3) {
-      FUN_0048ea30(param_1,puVar7,param_1 + 7);
-      FUN_0048ea70(*(uint32_t **)((int)_this + 8),
+      TShiftEntry_UninitializedCopy(param_1,puVar7,param_1 + 7);
+      TShiftEntry_UninitializedFill(*(uint32_t **)((int)_this + 8),
                    1 - ((int)*(uint32_t **)((int)_this + 8) - (int)param_1) / 0x1c,param_2);
       puVar7 = *(uint32_t **)((int)_this + 8);
       puVar8 = param_1;
@@ -2037,7 +2037,7 @@ int FUN_006d39f0(void *_this,uint32_t *param_1,uint32_t *param_2, ...)
       }
     }
     else {
-      FUN_0048ea30(puVar7 - 7,puVar7,puVar7);
+      TShiftEntry_UninitializedCopy(puVar7 - 7,puVar7,puVar7);
       puVar8 = *(uint32_t **)((int)_this + 8);
       puVar7 = puVar8 - 7;
       while (param_1 != puVar7) {

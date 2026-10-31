@@ -51,6 +51,14 @@
 #include "game/car_effects.h"
 #include "ls3d/i3d.h"
 #include "game/pending.h"
+#include "game/vertex_anim.h"
+#ifdef WORLD_TEST
+#include <malloc.h>
+#include "game/lightmap_groups.h"
+#include "game/melee_tracker.h"
+#include "game/sight.h"
+#include "game/tshift.h"
+#endif
 #include "game/resource_cache.h"
 #include "game/game.h"
 #include "game/physics.h"
@@ -1648,10 +1656,16 @@ void C_CollisionWorld::SetIgnoredVolume(S_CollisionVolume *volume, int arg)
     ++(volume ? g_ignores : g_ignoreClears);
 }
 int g_ignoreLists;
-void C_CollisionWorld::SetIgnoredVolumes(S_CollisionVolume **, uint32_t, int)
+S_CollisionVolume **g_ignoreListVolumes;                // the last SetIgnoredVolumes' arguments (part 8b)
+uint32_t g_ignoreListCount;
+int g_ignoreListArg;
+void C_CollisionWorld::SetIgnoredVolumes(S_CollisionVolume **volumes, uint32_t count, int arg)
 {
     ++g_ignores;
     ++g_ignoreLists;
+    g_ignoreListVolumes = volumes;
+    g_ignoreListCount = count;
+    g_ignoreListArg = arg;
 }
 bool g_traceDrive = true;                               // the first model's drive, second by second
 
@@ -1662,14 +1676,16 @@ std::vector<std::string> g_cacheLoads;
 std::vector<I3D_frame *> g_skidFrames;
 std::string g_cacheFailName;
 void (*g_cacheFill)(I3D_model *object);
+uint32_t g_cacheLoadFlags;                              // (the last OpenInto's flags)
 template <>
 C_ResourceCache<I3D_model>::~C_ResourceCache()
 {
 }
 template <>
-HRESULT C_ResourceCache<I3D_model>::OpenInto(I3D_model *object, const char *fileName, uint32_t, void *, void *, int)
+HRESULT C_ResourceCache<I3D_model>::OpenInto(I3D_model *object, const char *fileName, uint32_t flags, void *, void *, int)
 {
     g_cacheLoads.push_back(fileName);
+    g_cacheLoadFlags = flags;
     if (g_cacheFailName == fileName)
         return I3DERR_NOFILE;
     if (std::toupper(static_cast<unsigned char>(fileName[0])) == 'D' &&
@@ -1714,8 +1730,10 @@ void C_SoundCache::Duplicate(I3D_sound *, I3D_sound *)
 }
 C_SoundCache g_soundCache;
 
-// The scene: slot 0xEC UpdateFrameSector, +0x1F8 the primary sector (a stub frame).
-void *g_sceneVtable[SLOTS];
+// The scene: slot 0xEC UpdateFrameSector, +0x1F8 the primary sector (a stub frame). (Its slots
+// go past 0xFC: twice SLOTS.)
+constexpr int SCENE_SLOTS = 2 * SLOTS;
+void *g_sceneVtable[SCENE_SLOTS];
 I3D_frame *g_sector;
 int g_sectorUpdates;
 struct S_SectorUpdate {
@@ -1730,7 +1748,7 @@ void __stdcall F_UpdateFrameSector(void *, I3D_frame *frame, const S_vector &pos
 }
 I3D_scene *MakeScene()
 {
-    FillTraps(g_sceneVtable, std::make_integer_sequence<int, SLOTS>());
+    FillTraps(g_sceneVtable, std::make_integer_sequence<int, SCENE_SLOTS>());
     g_sceneVtable[0xEC / 4] = reinterpret_cast<void *>(&F_UpdateFrameSector);
     auto *mem = static_cast<uint8_t *>(::operator new(FRAME_SIZE, std::align_val_t(16)));
     std::memset(mem, 0, FRAME_SIZE);
@@ -9410,8 +9428,9 @@ void C_Debris::SetupWheel(const S_WheelDebrisParams &params)
 }
 #endif
 
-C_GEffectsModule g_geffects;
 std::vector<std::pair<I3D_frame *, float>> g_shattered;
+#ifndef WORLD_TEST                                      // (the world build links the real module, part 8c)
+C_GEffectsModule g_geffects;
 C_GEffectsModule *GetGEffects()
 {
     return &g_geffects;
@@ -9420,6 +9439,7 @@ void C_GEffectsModule::ShatterGlass(I3D_frame *visual, float unknown)
 {
     g_shattered.emplace_back(visual, unknown);
 }
+#endif
 
 S_PhysicsHandle g_noPhysicsHandle;
 T_PhysicsObject const g_noPhysicsObject = &g_noPhysicsHandle;
@@ -9454,12 +9474,13 @@ struct S_PhysicsPush {
 };
 std::vector<S_PhysicsPush> g_physicsPushes;
 S_PhysicsHandle g_physicsHandles[256];
+bool g_physicsNoObject;                                 // (CreateObject: none made, part 8c's shards)
 class C_FakePhysics : public C_PhysicsModuleBase {
 public:
     C_FakePhysics() : C_PhysicsModuleBase(0, "Physics") {}
     T_PhysicsObject CreateObject(const S_PhysicsObjectDesc &d) override
     {
-        T_PhysicsObject handle = &g_physicsHandles[g_physicsMade.size() % 256];
+        T_PhysicsObject handle = g_physicsNoObject ? g_noPhysicsObject : &g_physicsHandles[g_physicsMade.size() % 256];
         g_physicsMade.push_back({d.frame, d.type, d.callback, d.callbackContext, d.materialId, d.unknown14,
                                  d.collideWithBoxes, d.startActive, d.shootThrough, d.unknown18, d.door.freeSwing,
                                  d.door.tree, d.door.breakable, d.door.angle, d.radius, handle});
@@ -14812,12 +14833,25 @@ void PartsHitTest(const char *path)
 #include "moving_actors_test.inc"
 #include "seat_actors_test.inc"
 #include "prop_actors_test.inc"
+#include "air_actors_test.inc"
+#include "junkers_actors_test.inc"
+#endif
+#ifdef WORLD_TEST
+#include "world_modules_test.inc"
+#include "sight_test.inc"
+#include "geffects_test.inc"
+#include "geffects2_test.inc"
 #endif
 
 int main(int argc, char **argv)
 {
     InitVtables();
     g_carScene = MakeScene();
+#ifdef WORLD_TEST
+    for (int i = 1; i < argc; ++i)
+        WorldModulesTest(argv[i]);
+    return 0;
+#endif
 #ifdef REAL_SEAT_WEAPON
     for (int i = 1; i < argc; ++i)
         SeatWeaponTest(argv[i]);
@@ -14843,6 +14877,8 @@ int main(int argc, char **argv)
         MovingActorsTest();
         SeatActorsTest();
         PropActorsTest();
+        AirActorsTest();
+        JunkersActorsTest();
     }
     return 0;
 #endif

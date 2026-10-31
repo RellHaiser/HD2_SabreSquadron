@@ -196,39 +196,6 @@ int I3D_frame__I3D_frame__GetParentAddress(I3D_frame *_this, ...)
 }
 
 
-// 0x0041d5e0
-uint32_t C_LightMapGroupsModule__FindGroup(C_LightMapGroupsModule *_this,uint8_t *param_1, ...)
-{
-  char *a;
-  int iVar1;
-  int iVar2;
-  if (param_1 == 0) {
-    return 0;
-  }
-  if ((_this->m_010 != 0) && (iVar2 = (int)(_this->m_014 - _this->m_010) >> 2, iVar2 != 0)) {
-    while( true ) {
-      iVar2--;
-      iVar1 = **(int **)(_this->m_010 + iVar2 * 4);
-      if (iVar1 == 0) {
-        a = &DAT_00867a90;
-      }
-      else {
-        a = (char *)(iVar1 + 8);
-      }
-      iVar1 = _stricmp(a,(char *)param_1);
-      if (iVar1 == 0) break;
-      if (iVar2 == 0) {
-        return 0;
-      }
-    }
-    if (iVar2 != -1) {
-      return *(uint32_t *)(_this->m_010 + iVar2 * 4);
-    }
-  }
-  return 0;
-}
-
-
 // 0x0041d750
 uint32_t get_first_field_41d750(uint32_t *param_1, ...)
 {

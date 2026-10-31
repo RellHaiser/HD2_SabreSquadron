@@ -59,7 +59,7 @@ constexpr int DIFFICULTY_NO_RECOIL_CHEAT = 4;           // the "heal" cheat's re
 constexpr int DIFFICULTY_EASY = 1;
 constexpr int DIFFICULTY_MEDIUM = 2;
 
-// The moving flags that lower a raised weapon of behaviour 5 (anything but lying still).
+// The moving flags that lower a raised LMG (anything but lying still).
 constexpr uint32_t MOVE_NOT_LYING_STILL = 0xFE;
 // Behaviour 6 (launchers) wants a still human, not lying.
 constexpr uint32_t MOVE_LAUNCHER_BLOCK = 0xF9;
@@ -70,12 +70,12 @@ bool IsFirearm(int behaviour)
 {
     switch (behaviour) {
     case ITEM_BEHAVIOUR_SIDEARM:
-    case 3:
-    case 4:
-    case 5:
+    case ITEM_BEHAVIOUR_SMG:
+    case ITEM_BEHAVIOUR_RIFLE:
+    case ITEM_BEHAVIOUR_LMG:
     case ITEM_BEHAVIOUR_LAUNCHER:
     case 7:
-    case 12:
+    case ITEM_BEHAVIOUR_ASSAULT:
         return true;
     default:
         return false;
@@ -215,7 +215,7 @@ void C_PlayerController::WeaponControls(int timeDelta)
             IssueCommand(command);
         }
         return;
-    case ITEM_BEHAVIOUR_11: {
+    case ITEM_BEHAVIOUR_STICKY_CHARGE: {
         // A charge on the car looked at.
         if (m_buttons[BUTTON_FIRE] == 0.0f || m_interaction != -1)
             return;
@@ -249,13 +249,13 @@ void C_PlayerController::WeaponControls(int timeDelta)
         m_buttons[BUTTON_RELOAD] = 0.0f;
         m_buttons[BUTTON_FIRE] = 0.0f;
     }
-    if (behaviour == ITEM_BEHAVIOUR_SIDEARM || behaviour == 4 || behaviour == ITEM_BEHAVIOUR_LAUNCHER)
+    if (behaviour == ITEM_BEHAVIOUR_SIDEARM || behaviour == ITEM_BEHAVIOUR_RIFLE || behaviour == ITEM_BEHAVIOUR_LAUNCHER)
         m_axes[AXIS_FIRE] = 0.0f;                       // no automatic fire
     if (m_buttons[BUTTON_FIRE] == 0.0f && m_axes[AXIS_FIRE] == 0.0f) {
         // The reload key, when the human is free for it and the weapon not full.
         if (m_buttons[BUTTON_RELOAD] == 0.0f)
             return;
-        if (behaviour == 5 && (m_moveFlags & MOVE_NOT_LYING_STILL))
+        if (behaviour == ITEM_BEHAVIOUR_LMG && (m_moveFlags & MOVE_NOT_LYING_STILL))
             return;
         if (m_human->m_body.GetClimbState() != 0 || m_human->m_body.IsWorkState5() || m_human->m_carried)
             return;
@@ -573,7 +573,7 @@ void C_PlayerController::UpdateZoom()
             return;
         if ((m_moveFlags & MOVE_MOVING_MASK) && (m_moveFlags & (MOVE_PACE_MARCH | MOVE_PACE_4)))
             return;
-        if (BehaviourOf(item) == 5 && (m_moveFlags & MOVE_NOT_LYING_STILL))
+        if (BehaviourOf(item) == ITEM_BEHAVIOUR_LMG && (m_moveFlags & MOVE_NOT_LYING_STILL))
             return;
         if (m_viewMode == VIEW_NORMAL) {
             const bool sights = static_cast<const C_ScopeComp *>(scope)->GetAimMode() == SCOPE_AIM_MODE_IRON_SIGHTS;
@@ -615,21 +615,21 @@ void C_PlayerController::UpdateWeaponReady(int timeDelta)
                     SetViewMode(VIEW_NORMAL);
                 return;
             }
-            // Raised for the sights and the scopes, for a lying behaviour 5 weapon, and for a
+            // Raised for the sights and the scopes, for an LMG, and for a
             // reload.
             if (m_viewMode != VIEW_IRON_SIGHTS && m_viewMode != VIEW_SCOPE &&
-                (behaviour != 5 || !(flags & MOVE_LYING) || moving)) {
+                (behaviour != ITEM_BEHAVIOUR_LMG || !(flags & MOVE_LYING) || moving)) {
                 if (m_buttons[BUTTON_RELOAD] == 0.0f)
                     return;
-                if (behaviour == 5 && (flags & MOVE_NOT_LYING_STILL))
+                if (behaviour == ITEM_BEHAVIOUR_LMG && (flags & MOVE_NOT_LYING_STILL))
                     return;
             }
             RaiseWeapon();
             return;
         }
-        // The trigger raises the weapon (behaviour 5 lying still, 6 standing still, not
+        // The trigger raises the weapon (LMG lying still, 6 standing still, not
         // marching or crawling).
-        if (behaviour == 5) {
+        if (behaviour == ITEM_BEHAVIOUR_LMG) {
             if (moving || (flags & (MOVE_CROUCHING | MOVE_STANDING)))
                 return;
         } else if (behaviour == ITEM_BEHAVIOUR_LAUNCHER && (flags & MOVE_LAUNCHER_BLOCK)) {
@@ -645,7 +645,7 @@ void C_PlayerController::UpdateWeaponReady(int timeDelta)
     if (!lower) {
         if (behaviour == ITEM_BEHAVIOUR_LAUNCHER)
             lower = moving || (flags & MOVE_LYING);
-        else if (behaviour == 5)
+        else if (behaviour == ITEM_BEHAVIOUR_LMG)
             lower = (flags & MOVE_NOT_LYING_STILL) != 0;
     }
     if (lower) {

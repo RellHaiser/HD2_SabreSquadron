@@ -92,55 +92,67 @@ public:
 // end. `*cursor` moves past it.
 int ReadConsoleToken(const char **cursor, char *out, int *unknown, char *unknown2);   // 0x007445d0
 
-// ---- 0x00486090 GEffects module ---------------------------------------------
-class I3D_frame;
-struct S_vector;
-class C_GEffectsModule {                            // "GEffects", vtable 0x008101f0
+// ---- the objects of the GEffects module (part 8d) --------------------------
+// The decorators (grass, ground cover; the GEffects module's +0x20, g_decorators).
+class C_Decorators {                                    // 0xA4 bytes
 public:
-    // (C_Module::Update; the command map calls it itself while the game is paused.)
-    void Update(int timeDelta);                     // vtable +0x10
-    void SetThunderstorm(bool on, I3D_frame *light, void *unused);   // vtable +0x44
-    // Highlight of a human's model (C_Human::SetUnknown94; meaning inferred from the camera code).
-    void SetModelHighlight(I3D_frame *model, float level);   // vtable +0x50
-    // Light level of a model (C_HumanLighting; 1: full light).
-    void SetModelLightLevel(I3D_frame *model, float level);   // vtable +0x54
-    void DetachWeapon(I3D_frame *joint, bool flag, bool hide);   // vtable +0x58
-    void HideVisual(I3D_frame *visual, bool flag);  // vtable +0x5C
-    // SetModelHighlight(model, 0); false for no model (debris and item actors going away).
-    bool ClearModelHighlight(I3D_frame *model);     // vtable +0x60 (0x00486e90)
-    // Fades the model out over `time` ms (debris).
-    void FadeOutModel(I3D_frame *model, int time, bool unknown);   // vtable +0x64 (0x00488d60)
-    // Fades every visual under `model` back in over `time` ms (0: fully opaque at once; it also
-    // cancels a fade-out in progress). `turnOn` switches the visuals on (meaning inferred).
-    void FadeInModel(I3D_frame *model, int time, bool turnOn);   // vtable +0x6C (0x00489060)
-    // Fades every visual under `model` out over `time` ms (FadeOutModel on each; the supply box).
-    void FadeOutHierarchy(I3D_frame *model, int time, bool unknown);   // vtable +0x70 (0x004890f0)
-    // The shadow of a model (a new reference; null: none).
-    I3D_frame *CreateShadow(I3D_frame *model);      // vtable +0x78
-    I3D_frame *GetShadow(I3D_frame *model);         // vtable +0x7C (adds a reference)
-    // Screen fade over `time` ms; `color` null = black.
-    // The screen's fade level (0..1).
-    // (`color` null: black; the HUD's photo flash passes black too.)
-    void SetFadeLevel(float level, const S_vector *color);   // vtable +0x88
-    void Fade(int time, int direction, const S_vector *color);   // vtable +0x8C
-    // Game speed (1.0 = normal) and its rate of change per second.
-    void SetTimeScale(float scale, float acceleration);   // vtable +0x98
-    float GetTimeScale();                           // vtable +0x9C
-    // Fades a human's model out (`in` false) or back in over `time` ms.
-    void FadeHuman(class C_Human *human, int time, bool in);   // vtable +0x74
+    // (Both inlined in the GEffects module's constructor and destructor.)
+    C_Decorators();
+    ~C_Decorators();
+    void SetOn(bool on);                                // 0x0047b010
+    void Clear();                                       // 0x0047c020
+    void Free();                                        // 0x0047b090
+    void Load();                                        // 0x0047c530
+    void Start();                                       // 0x0047b0b0
+    void Update(int timeDelta);                         // 0x0047bcc0
     // How much ground of material `material` hides a lying / crouching human (1 = none).
-    float GetGroundCover(int material);             // vtable +0x94
-    void DressUniform(class C_Human *human, int uniform);   // vtable +0xA8
-    void SwitchFaceTexture(I3D_frame *model, const char *texture);   // vtable +0xAC
-    void SetCameraAnimation(I3D_frame *camera, const char *fileName);   // vtable +0xB0
-    // A glass visual's faces as falling shards (the car's broken windows; `unknown` 0.01, meaning
-    // not identified).
-    void ShatterGlass(I3D_frame *visual, float unknown);   // vtable +0xB4 0x00485ba0
-    void SetCloudsOn(bool on);                      // vtable +0xB8
-    // The primary sector's "lensflare" frame on / off (off while the first-person view is on).
-    void SetLensFlareOn(bool on);                   // vtable +0xBC 0x00485b70
+    float GetGroundCover(int material);                 // 0x0047b4c0
+
+private:
+    uint8_t m_data[0xA4];
 };
-C_GEffectsModule *GetGEffects();                    // 0x00486510
+extern C_Decorators *g_decorators;                      // 0x0089bbb0
+
+// The volumetrics (the GEffects module's +0xC4).
+class C_Volumetrics {                                   // 0x20 bytes
+public:
+    // (Both inlined in the GEffects module's constructor and destructor.)
+    C_Volumetrics();
+    ~C_Volumetrics();
+    // `time`: ms since the mission's start.
+    void Render(int time);                              // 0x00482260
+    void Load();                                        // 0x00482a00
+    // (LoadMissionData passes true; meaning not identified.)
+    void Prune(bool unknown);                           // 0x00482980
+    void Free();                                        // 0x00482d70
+
+private:
+    uint8_t m_data[0x20];
+};
+
+// The mesh player (the GEffects module's +0xE4).
+class C_MeshPlayer {                                    // 0x28 bytes
+public:
+    C_MeshPlayer();                                     // 0x00484100
+    ~C_MeshPlayer();                                    // 0x004841e0
+    void Load();                                        // 0x00484260
+    void Update(int timeDelta);                         // 0x00484a70
+    void Free();                                        // 0x00484ae0
+
+private:
+    uint8_t m_data[0x28];
+};
+
+// The birds (on g_birds, 0x0089bb90): flown on, gathered from the scene, freed.
+void UpdateBirds(int timeDelta);                        // 0x0047a700
+void CollectBirds();                                    // 0x0047a790
+void FreeBirds();                                       // 0x0047aa10
+// The clouds (the object at 0x0089b74c).
+void FreeClouds();                                      // 0x00483de0
+void LoadClouds();                                      // 0x00483e50
+
+// The GEffects module: game/geffects.h.
+#include "game/geffects.h"
 
 // The highest y of the scene's frames' bounds (the top of the box C_NetGame::Command gathers at
 // 0x0072d9c0 for the network game; the supply box's drop height stays under it).
@@ -582,44 +594,7 @@ private:
 extern std::vector<C_Bird *> g_birds;                  // 0x0089bb90
 extern std::vector<class I3D_frame *> g_spareBirdModels;   // 0x0089bba0
 
-// ---- the vertex animation module (C_VertexAnimModule, MODULE_VERTEX_ANIM; not ported) -------
-// A loaded vertex animation (the module's list at +0x10).
-struct S_VertexAnimation {
-    uint8_t unknown00[0x18];
-    int frameCount;                                     // +0x18
-};
-// A player of a vertex animation on an object visual (0x2C bytes; the multiplayer zone's flag
-// makes one with new: 0x005ed220).
-struct S_VertexAnimPlayer {
-    int frame = 0;                                      // +0x00
-    class I3D_frame *visual = nullptr;                  // +0x04
-    int unknown08 = 0;
-    int unknown0C = 0;
-    int unknown10 = 1;
-    int unknown14 = 0;
-    int frameTime = 250;                                // +0x18 ms
-    bool unknown1C = false;
-    bool unknown1D = false;
-    bool unknown1E = false;
-    bool unknown1F = true;
-    int unknown20 = 0;                                  // (not set by the constructor)
-    S_VertexAnimation *animation = nullptr;             // +0x24 (not set by the constructor)
-    int unknown28 = 1;
-
-    // The visual's mesh back to the animation's first frame.
-    void Reset();                                       // 0x004737c0
-    void Init(class I3D_frame *visual, S_VertexAnimation *animation);   // 0x00473790
-};
-class C_VertexAnimModule {
-public:
-    // The loaded animation of that name, or null.
-    S_VertexAnimation *FindAnimation(const C_str &name);   // 0x00473e30
-    // The player out of the playing ones (the last one fills its place), deleted with `destroy`.
-    void RemovePlayer(S_VertexAnimPlayer *player, bool destroy);   // 0x004746b0
-    // Plays it (appended to the vector at +0x20: vector::insert 0x00474cf0).
-    void AddPlayer(S_VertexAnimPlayer *player);
-};
-extern C_VertexAnimModule g_vertexAnimModule;          // 0x0089b474
+// The vertex animation module: see game/vertex_anim.h.
 
 // ---- the game's collaborators (C_game, game/game.h) -------------------------------
 // The campaign tree: game/campaign.h; the profile's objects (g_campaign, g_missionSquad,
@@ -649,9 +624,7 @@ bool TimedEvents_Load(C_chunk &chunk);              // 0x006dfa60
 
 // Frees the frame data blocks of all the scene's frames.
 void FreeAllFrameData(I3D_scene *scene);            // 0x006e9f20
-// Shows / hides the frames +0x168 / +0x16C of the actors in the list at 0x008ac9c8 when the
-// game pauses (not identified).
-void PauseActorEffects(bool paused);                // 0x005e8d50
+// (PauseAirAttackSounds, FindAirAttackFor: see game/air_attack.h.)
 // The scene's render callback (the fade, the interface, the debug joints; `phase` 1 / 2).
 int __stdcall GameRenderCallback(int phase, int unknown1, int unknown2);   // 0x006c95b0
 
@@ -760,60 +733,8 @@ void HumanPass_Tick(int timeDelta, const std::vector<C_Actor *> &active);   // 0
 // Set while the script module restarts a mission (StopMission + StartMission).
 extern bool g_scriptModuleRestarting;               // 0x008693e0
 
-// ---- sight module (0x0089b288) ------------------------------------------------------
-// Observers (humans, meleeTrackers) watch targets (humans, meleeTrackers); the module calls their owners
-// back (C_Human::OnSightEvent) when a target comes into view or leaves it.
-enum : uint32_t {
-    SIGHT_ALL = 0xF,                                // what humans register with
-};
-// C_SightModule::SetObserverState() states.
-enum : int {
-    SIGHT_OBSERVER_OFF = 0,
-    SIGHT_OBSERVER_ON = 1,
-};
-// C_SightModule::SetTargetState() states.
-enum : int {
-    SIGHT_TARGET_ALIVE = 0,
-    SIGHT_TARGET_DEAD = 2,                          // seen as a body
-    SIGHT_TARGET_HIDDEN = 3,                        // frozen / suspended
-    SIGHT_TARGET_SHOWN = 4,
-};
-// C_SightModule::GetVisibleParts() bits (which bones a shooter can aim at, inferred).
-enum : uint32_t {
-    SIGHT_PART_BODY = 0x01,
-    SIGHT_PART_HEAD = 0x02,
-    SIGHT_PART_LEFT_ARM = 0x04,
-    SIGHT_PART_RIGHT_ARM = 0x08,
-    SIGHT_PART_LEGS = 0x10,
-};
-class C_SightTarget {
-public:
-    virtual C_Actor *GetActor();                    // vtable +0x00
-    virtual int GetKind();                          // vtable +0x04 0 human, 1 meleeTracker
-    virtual void Refresh();                         // vtable +0x08 (the model changed)
-};
-class C_SightModule {
-public:
-    // Registration ids; -1 on failure.
-    int AddObserver(I3D_frame *frame, uint32_t mask);   // 0x0046f350
-    int AddTarget(I3D_frame *frame, uint32_t mask);     // 0x0046f9d0
-    bool RemoveObserver(int id);                    // 0x0046fd50
-    bool RemoveTarget(int id);                      // 0x0046fdf0
-    void SetObserverState(int id, int state);       // 0x0046f8c0
-    void SetTargetState(int id, int state);         // 0x0046f700
-    // Whether observer `observer` sees target `target` now (the observer's vtable +0x0C). The
-    // result is a count the AI compares (it fires at a target out of view when it is at least
-    // 1, defensive AI at least 3; meaning not identified); `out` may be null.
-    int CanSee(int observer, int target, int *out, bool *visible);   // 0x0046f320
-    // SIGHT_PART_* of target `target` that `observer` sees.
-    void GetVisibleParts(int observer, int target, uint32_t *parts);   // 0x0046f2a0
-    // Tests now whether `observer` sees `target` (the observer's vtable +0x08, whose answer
-    // it passes on; inferred).
-    bool TestNow(int observer, int target);         // 0x0046f280
-    // Registered target `id`, null if there is none (vector at +0x10).
-    C_SightTarget *GetTarget(int id) const;
-};
-extern C_SightModule g_sightModule;                 // 0x0089b288
+// The sight module: see game/sight.h.
+#include "game/sight.h"
 
 // Physics: see game/physics.h.
 
@@ -827,12 +748,7 @@ float RandomFloat(float max);                       // 0x00475190
 void BuildPathPoints(const struct S_vector4 &from, const struct S_vector4 &to, const std::vector<uint16_t> &path,
                      struct S_Vector4Array &points);   // 0x007ce930 (__fastcall)
 
-// The squad's air targets (C_SquadController::FindAirTarget). The nearest air attack plane
-// flying in (state 1 / 2) within 150 m that `human`'s body sees (the list at 0x008ac9c8;
-// null: none).
 class C_Actor;
 class C_Human;
 class I3D_frame;
-C_Actor *FindAirAttackFor(C_Human *human);         // 0x005e8b70 (__fastcall)
-// A Junkers 88 of the setup (g_junkers88Setup; none: null) and the frame to aim at.
-C_Actor *FindJunkersTargetFor(C_Human *human, I3D_frame **frame);   // 0x005f0e40 (__fastcall)
+// FindJunkersTargetFor (0x005f0e40): see game/junkers88.h.

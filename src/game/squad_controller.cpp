@@ -718,7 +718,7 @@ void C_SquadController::UpdateIdle(int /*timeDelta*/)
                 LowerWeapon();
             return;
         }
-    } else if (BehaviourOf(m_handsItem) == 5) {
+    } else if (BehaviourOf(m_handsItem) == ITEM_BEHAVIOUR_LMG) {
         return;
     }
     if (m_human->m_role != HUMAN_ROLE_NPC_TEAM_5)

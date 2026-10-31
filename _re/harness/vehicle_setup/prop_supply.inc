@@ -134,7 +134,7 @@
     // --- the start: the models, the plane's dummy, the animations, the box, shown and opening -------------
     I3D_frame *letibedna = nullptr, *morph = nullptr;
     static S_VertexAnimation ammoboxAnim;
-    ammoboxAnim.frameCount = 17;
+    ammoboxAnim.levelCount = 17;
     g_maAnimations["ammobox"] = &ammoboxAnim;
     static std::string fillName;
     struct S_Fill {
@@ -175,8 +175,8 @@
                        reinterpret_cast<S_SeAnim *>(box->m_anims[3])->name == "cratedrop" && !box->m_anims[4] && !box->m_anims[5]);
     // The morph player: on the parachute's morph (its own mesh), the animation's last frame, 130 ms.
     PR(r.boxStart, box->m_morphPlayer && box->m_morphPlayer->visual == morph && box->m_morphPlayer->animation == &ammoboxAnim &&
-                       box->m_morphPlayer->frame == 16 && box->m_morphPlayer->frameTime == 130 && box->m_morphPlayer->unknown1C &&
-                       box->m_morphPlayer->unknown1E && !box->m_morphPlayer->unknown1F && box->m_morphPlayer->unknown08 == 0 &&
+                       box->m_morphPlayer->maxLevel == 16 && box->m_morphPlayer->frameTime == 130 && box->m_morphPlayer->pingPong &&
+                       box->m_morphPlayer->stopped && !box->m_morphPlayer->loop && box->m_morphPlayer->startFrame == 0 &&
                        std::count(g_itLog.begin(), g_itLog.end(), "dupmesh morph") == 1 &&
                        std::count(g_itLog.begin(), g_itLog.end(), "addplayer morph 250") == 1);
     // The box volume: the hierarchy's box under the frame's scale; the matrices without it; the
@@ -376,7 +376,7 @@
         // parachute and the crate put back in the world, the crate turned back.
         PR(r.boxFall, box->m_state == C_SupplyBox::SUPPLY_LANDED && sweeps > 0 && box->m_stateTime == 2000 &&
                           box->m_anim == 3 && !box->m_planeFlying && crate->m_parent == nullptr &&
-                          box->m_parachute->m_parent == nullptr && !box->m_morphPlayer->unknown1E &&
+                          box->m_parachute->m_parent == nullptr && !box->m_morphPlayer->stopped &&
                           SaSameQuat(crate->m_rot, SaNormalized(box->m_dropRot)) &&
                           g_soundRequests.size() == 1 && g_soundRequests[0].group == 9);
         float lowest = 1e9f;
@@ -390,7 +390,7 @@
                           std::count(g_itLog.begin(), g_itLog.end(), "fadeout chute 1000 1") == 1);
         reset();
         box->Update(1000);
-        PR(r.boxFall, box->m_state == C_SupplyBox::SUPPLY_OPENING && box->m_stateTime == 1000 && box->m_morphPlayer->unknown1E &&
+        PR(r.boxFall, box->m_state == C_SupplyBox::SUPPLY_OPENING && box->m_stateTime == 1000 && box->m_morphPlayer->stopped &&
                           g_soundRequests.size() == 1 && g_soundRequests[0].group == 10);
         animEnds["crateopen"] = 1700;
         box->SetState(C_SupplyBox::SUPPLY_OPENING);
@@ -696,8 +696,8 @@
         box->m_state = C::SUPPLY_LANDED;
         box->m_stateTime = 9;
         box->m_planeFlying = true;
-        box->m_morphPlayer->unknown1E = false;
-        box->m_morphPlayer->unknown08 = 3;
+        box->m_morphPlayer->stopped = false;
+        box->m_morphPlayer->startFrame = 3;
         std::memset(&box->m_boxMatrix, 0, sizeof box->m_boxMatrix);
         std::memset(&box->m_boxInvMatrix, 0, sizeof box->m_boxInvMatrix);
         for (I3D_frame *a : ammo)
@@ -719,7 +719,7 @@
             partsOn = partsOn && (!a || a->IsOn());
         PR(r.boxStop, box->m_health == 6000 && box->m_blendTime == 0 && box->m_animStage == -1 && box->m_anim == 5 &&
                           box->m_state == C::SUPPLY_READY && box->m_stateTime == 0 && !box->m_planeFlying &&
-                          box->m_morphPlayer->unknown1E && box->m_morphPlayer->unknown08 == 0 && partsOn &&
+                          box->m_morphPlayer->stopped && box->m_morphPlayer->startFrame == 0 && partsOn &&
                           SaSame(&box->m_boxMatrix, &m, sizeof m) && g_obReactivations.size() == reactivations + 1);
         {
             S_matrix inv;
@@ -835,9 +835,9 @@
         box->TickState(5);
         PR(r.boxStates, box->m_state == C::SUPPLY_HIDDEN && box->m_stateTime == -1 && !box->m_planeFlying && g_soundRequests.empty());
         box->m_respawnTime = 0;
-        box->m_morphPlayer->unknown1E = false;
+        box->m_morphPlayer->stopped = false;
         box->SetState(C::SUPPLY_HIDDEN);
-        PR(r.boxStates, box->m_stateTime == -1 && box->m_morphPlayer->unknown1E);
+        PR(r.boxStates, box->m_stateTime == -1 && box->m_morphPlayer->stopped);
         box->m_respawnTime = 1;
         box->SetState(C::SUPPLY_HIDDEN);
         PR(r.boxStates, box->m_stateTime == 1000);
@@ -976,12 +976,12 @@
             s.pos = {1.0f, 2.0f, 3.0f, 1.0f};
             s.crate = {0.5f, -1.0f, 0.25f, 1.0f};
             s.animTime = 66;
-            box->m_morphPlayer->unknown1E = false;
+            box->m_morphPlayer->stopped = false;
             box->m_blendTime = 0;
             reset();
             box->ApplyState(s);
             const bool drop = state == C::SUPPLY_FALLING;       // (the drop fills it up)
-            return box->m_morphPlayer->unknown1E && box->GetCharges() == (drop ? box->m_capacity : charges) &&
+            return box->m_morphPlayer->stopped && box->GetCharges() == (drop ? box->m_capacity : charges) &&
                    box->m_health == (drop ? 6000 : 500) && box->m_stateTime == 1234 && SaLogIs(log);
         };
         box->m_charges = box->m_capacity;

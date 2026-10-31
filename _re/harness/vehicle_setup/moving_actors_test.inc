@@ -238,7 +238,7 @@ void C_VertexAnimModule::AddPlayer(S_VertexAnimPlayer *player)
 }
 void S_VertexAnimPlayer::Reset()
 {
-    ItLog("animreset %s %d", ItName(visual).c_str(), frame);
+    ItLog("animreset %s %d", ItName(visual).c_str(), maxLevel);
 }
 void S_VertexAnimPlayer::Init(I3D_frame *v, S_VertexAnimation *a)
 {

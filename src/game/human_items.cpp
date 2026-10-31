@@ -349,9 +349,9 @@ C_Item *C_Human::GetMedkit() const
     return FindBeltItem(ITEM_BEHAVIOUR_MEDKIT);
 }
 
-C_Item *C_Human::FindBeltItem19() const
+C_Item *C_Human::FindWireCutter() const
 {
-    return FindBeltItem(ITEM_BEHAVIOUR_19);
+    return FindBeltItem(ITEM_BEHAVIOUR_WIRE_CUTTER);
 }
 
 C_Item *C_Human::FindContainerOfBehaviour(int behaviour, int *container) const
@@ -695,7 +695,7 @@ void C_Human::DropAllItems()
     }
     if (C_ItemContainer *backpack = GetContainer(ITEM_CONTAINER_BACKPACK)) {
         C_Item *item = backpack->GetItem();
-        if (item && item->GetDef()->GetBehaviour() == ITEM_BEHAVIOUR_21)
+        if (item && item->GetDef()->GetBehaviour() == ITEM_BEHAVIOUR_MISSION_EXPLOSIVE)
             DropItem(item->GetUid(), DropVelocity(base));
     }
     // Multiplayer pick-ups in the stores.
@@ -703,7 +703,7 @@ void C_Human::DropAllItems()
         for (int i = store->GetUsedSlotCount(); i-- > 0;) {
             const std::vector<C_Item *> &slot = store->GetSlots()[i];
             const int behaviour = slot.front()->GetDef()->GetBehaviour();
-            if (behaviour != ITEM_BEHAVIOUR_RESPAWNING && behaviour != ITEM_BEHAVIOUR_21)
+            if (behaviour != ITEM_BEHAVIOUR_RESPAWNING && behaviour != ITEM_BEHAVIOUR_MISSION_EXPLOSIVE)
                 continue;
             // (Copied: dropping changes the slot.)
             const std::vector<C_Item *> items = slot;

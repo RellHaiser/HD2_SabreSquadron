@@ -35,12 +35,19 @@ struct S_WaRay {
 std::vector<S_WaRay> g_waRays;
 int g_waBlockAt = -1;
 S_CollisionVolume g_waWall;
+S_vector g_waHitPos, g_waHitNormal;                     // (written into a blocked ray's outputs)
 S_CollisionVolume *C_CollisionWorld::RayTestDynamic(const S_vector &from, const S_vector &dir, S_vector *hitPos,
                                                      S_vector *hitNormal, uint32_t excludeTypes,
                                                      uint32_t excludeFlags) const
 {
     g_waRays.push_back({from, dir, excludeTypes, excludeFlags, hitPos != nullptr, hitNormal != nullptr});
-    return static_cast<int>(g_waRays.size()) - 1 == g_waBlockAt ? &g_waWall : nullptr;
+    if (static_cast<int>(g_waRays.size()) - 1 != g_waBlockAt)
+        return nullptr;
+    if (hitPos)                                         // (part 7g: where it meets)
+        *hitPos = g_waHitPos;
+    if (hitNormal)
+        *hitNormal = g_waHitNormal;
+    return &g_waWall;
 }
 // The sound module's loops and listeners.
 std::vector<int> g_waStops;

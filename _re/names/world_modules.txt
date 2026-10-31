@@ -1,0 +1,88 @@
+# Part 8a: the vertex animations, the lightmap groups and texture shifting (src/game/vertex_anim.*,
+# lightmap_groups.*, tshift.*): 0x004736d0..0x00474f80, 0x0048c710..0x0048d8f0, 0x0048e100..0x0048eaa0.
+# StaticInit_<addr>: the files' guarded statics and their iostream inits (atexit).
+
+# vertex_anim.cpp
+004736d0 StaticInit_4736d0
+00473700 S_VertexAnimation::S_VertexAnimation
+00473720 S_VertexAnimation::~S_VertexAnimation
+00473790 S_VertexAnimPlayer::Init | void __thiscall Init(void * this, I3D_frame * visual, void * animation)
+004737c0 S_VertexAnimPlayer::Reset | void __thiscall Reset(void * this)
+00473960 S_VertexAnimPlayer::Update | void __thiscall Update(void * this, int timeDelta)
+00473c60 StaticInit_473c60
+00473c90 StaticInit_473c90
+00473ca0 StaticInit_473ca0
+00473cb0 StaticInit_473cb0
+00473cc0 StaticInit_473cc0
+00473cd0 StaticInit_473cd0
+00473ce0 StaticInit_473ce0
+00473cf0 StaticInit_473cf0
+00473d00 StaticInit_473d00
+00473d10 StaticInit_VertexAnimModule
+00473d20 VertexAnimModule_Construct
+00473d40 VertexAnimModule_RegisterAtExit
+00473d50 VertexAnimModule_Destroy
+00473d60 C_VertexAnimModule::C_VertexAnimModule | C_VertexAnimModule * __thiscall C_VertexAnimModule(C_VertexAnimModule * this, int id, char * name)
+00473db0 C_VertexAnimModule::SaveGame
+00473dc0 C_VertexAnimModule::LoadGame
+00473dd0 C_VertexAnimModule::ScalarDeletingDestructor
+00473df0 C_VertexAnimModule::~C_VertexAnimModule
+00473e30 C_VertexAnimModule::FindAnimation | void * __thiscall FindAnimation(C_VertexAnimModule * this, C_str * name)
+00473ec0 C_VertexAnimModule::LoadAnimations | bool __thiscall LoadAnimations(C_VertexAnimModule * this)
+00474290 C_VertexAnimModule::LoadPlayers | bool __thiscall LoadPlayers(C_VertexAnimModule * this)
+004746b0 C_VertexAnimModule::RemovePlayer | void __thiscall RemovePlayer(C_VertexAnimModule * this, void * player, bool destroy)
+00474740 C_VertexAnimModule::Tick | void __thiscall Tick(C_VertexAnimModule * this, int timeDelta)
+004749a0 C_VertexAnimModule::Update | void __thiscall Update(C_VertexAnimModule * this, int timeDelta)
+00474a00 C_VertexAnimModule::Init
+00474a20 C_VertexAnimModule::Done
+00474aa0 C_VertexAnimModule::LoadMissionData | void __thiscall LoadMissionData(C_VertexAnimModule * this, bool server)
+00474ac0 C_VertexAnimModule::FreeMissionData | void __thiscall FreeMissionData(C_VertexAnimModule * this, bool server)
+00474b40 C_VertexAnimModule::StartMission | void __thiscall StartMission(C_VertexAnimModule * this, bool server)
+00474c10 C_VertexAnimModule::StopMission | void __thiscall StopMission(C_VertexAnimModule * this, bool server)
+00474c90 C_VertexAnimModule::RestartMission | void __thiscall RestartMission(C_VertexAnimModule * this, bool server)
+
+# lightmap_groups.cpp
+0048c710 StaticInit_48c710
+0048c740 StaticInit_LightMapGroupsModule
+0048c750 LightMapGroupsModule_Construct
+0048c770 LightMapGroupsModule_RegisterAtExit
+0048c780 LightMapGroupsModule_Destroy
+0048c790 C_LightMapGroupsModule::RestartMission | void __thiscall RestartMission(C_LightMapGroupsModule * this, bool server)
+0048c820 C_LightMapGroupsModule::SaveGame | bool __thiscall SaveGame(C_LightMapGroupsModule * this, C_chunk * chunk)
+0048c920 C_LightMapGroupsModule::LoadGame | bool __thiscall LoadGame(C_LightMapGroupsModule * this, C_chunk * chunk)
+0048cb10 C_LightMapGroupsModule::C_LightMapGroupsModule | C_LightMapGroupsModule * __thiscall C_LightMapGroupsModule(C_LightMapGroupsModule * this, int id, char * name)
+0048cb60 C_LightMapGroupsModule::StopMission | void __thiscall StopMission(C_LightMapGroupsModule * this, bool server)
+0048cb70 C_LightMapGroupsModule::FreeMissionData | void __thiscall FreeMissionData(C_LightMapGroupsModule * this, bool server)
+0048cc40 S_LightmapGroup::~S_LightmapGroup
+0048cd10 C_LightMapGroupsModule::ScalarDeletingDestructor
+0048cd30 C_LightMapGroupsModule::~C_LightMapGroupsModule
+0048cd70 C_LightMapGroupsModule::LoadGroups | bool __thiscall LoadGroups(C_LightMapGroupsModule * this, C_chunk * chunk)
+0048d100 S_LightmapGroup::S_LightmapGroup
+0048d1d0 S_LightmapGroup::HasFrame | bool __thiscall HasFrame(void * this, char * frame)
+0048d230 S_LightmapGroup::ScalarDeletingDestructor
+0048d250 S_LightmapChange::ScalarDeletingDestructor
+0048d270 C_LightMapGroupsModule::SetFrameLightmap | void __thiscall SetFrameLightmap(C_LightMapGroupsModule * this, I3D_frame * frame, int lightmap)
+0048d4e0 C_LightMapGroupsModule::SetGroupLightmap | void __thiscall SetGroupLightmap(C_LightMapGroupsModule * this, void * group, int lightmap)
+0048d630 LightmapGroupVector_Insert
+
+# tshift.cpp
+0048e100 StaticInit_48e100
+0048e130 StaticInit_TShiftModule
+0048e140 TShiftModule_Construct
+0048e160 TShiftModule_RegisterAtExit
+0048e170 TShiftModule_Destroy
+0048e190 C_TShiftModule::FreeMissionData | void __thiscall FreeMissionData(C_TShiftModule * this, bool server)
+0048e1f0 C_TShiftModule::C_TShiftModule | C_TShiftModule * __thiscall C_TShiftModule(C_TShiftModule * this, int id, char * name)
+0048e230 C_TShiftModule::ScalarDeletingDestructor
+0048e250 C_TShiftModule::~C_TShiftModule
+0048e280 C_TShiftModule::HasMesh | bool __thiscall HasMesh(C_TShiftModule * this, I3D_mesh * mesh)
+0048e2d0 C_TShiftModule::HasFrame | bool __thiscall HasFrame(C_TShiftModule * this, I3D_frame * frame)
+0048e330 C_TShiftModule::AddVisual | void __thiscall AddVisual(C_TShiftModule * this, I3D_frame * frame, I3D_mesh * mesh)
+0048e580 C_TShiftModule::RemoveMesh | void __thiscall RemoveMesh(C_TShiftModule * this, I3D_mesh * mesh)
+0048e620 C_TShiftModule::RemoveFrame | void __thiscall RemoveFrame(C_TShiftModule * this, I3D_frame * frame)
+0048e6d0 C_TShiftModule::RemoveModel | void __thiscall RemoveModel(C_TShiftModule * this, I3D_frame * model)
+0048e780 C_TShiftModule::GetEntry | void * __thiscall GetEntry(C_TShiftModule * this, I3D_mesh * mesh)
+0048e9f0 TShiftEntryVector_Size
+0048ea30 TShiftEntry_UninitializedCopy
+0048ea70 TShiftEntry_UninitializedFill
+0048eaa0 TShiftEntry_Construct

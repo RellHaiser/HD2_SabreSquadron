@@ -100,7 +100,6 @@
 006df890 TimedEvents_Save | bool __fastcall TimedEvents_Save(C_chunk * chunk)
 006dfa60 TimedEvents_Load | bool __fastcall TimedEvents_Load(C_chunk * chunk)
 006e9f20 FreeAllFrameData | void __fastcall FreeAllFrameData(I3D_scene * scene)
-005e8d50 PauseActorEffects | void __fastcall PauseActorEffects(bool paused)
 004d6900 LoadTyres | bool __cdecl LoadTyres(void)
 004d57a0 InitCarSurfaces | bool __cdecl InitCarSurfaces(void)
 004d5a50 InitCarEffects | bool __cdecl InitCarEffects(void)

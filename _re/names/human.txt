@@ -354,7 +354,7 @@
 005a7430 C_Human::FindItemByRecordType | C_Item *__thiscall FindItemByRecordType(C_Human *this, int recordType)
 005a6730 C_Human::FindBeltItem | C_Item *__thiscall FindBeltItem(C_Human *this, int behaviour)
 005a7e00 C_Human::GetMedkit | C_Item *__thiscall GetMedkit(C_Human *this)
-005a7ed0 C_Human::FindBeltItem19 | C_Item *__thiscall FindBeltItem19(C_Human *this)
+005a7ed0 C_Human::FindWireCutter | C_Item *__thiscall FindWireCutter(C_Human *this)
 005a7810 C_Human::FindContainerOfBehaviour | C_Item * __thiscall FindContainerOfBehaviour(C_Human *this, int behaviour, int *container)
 005a7850 C_Human::CollectItems | bool __thiscall CollectItems(C_Human *this, int behaviour, void *items, void *containers)
 005a6aa0 C_Human::CountItems | int __thiscall CountItems(C_Human *this, int typeId)

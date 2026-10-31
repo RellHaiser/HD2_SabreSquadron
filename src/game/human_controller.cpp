@@ -1086,7 +1086,7 @@ bool C_HumanController::ExecuteCommand(const S_HumanCommand &command)
         }
         return false;
     case HUMAN_COMMAND_CUT_WIRE: {
-        C_Item *cutter = m_human->FindBeltItem19();
+        C_Item *cutter = m_human->FindWireCutter();
         if (!cutter)
             return false;
         m_interactionTarget = g_temporaryActors.FindActor(command.param1);
@@ -1127,7 +1127,7 @@ bool C_HumanController::ExecuteCommand(const S_HumanCommand &command)
     case HUMAN_COMMAND_PLACE_CAR_CHARGE: {
         UpdateHandsItem();
         C_Car *car = static_cast<C_Car *>(g_actorsModule.GetActorById(command.param1));
-        if (!car || !m_handsItem || BehaviourOf(m_handsItem) != ITEM_BEHAVIOUR_11)
+        if (!car || !m_handsItem || BehaviourOf(m_handsItem) != ITEM_BEHAVIOUR_STICKY_CHARGE)
             return false;
         const S_matrix &body = m_human->GetBodyFrame()->GetMatrix();
         const S_vector4 &from = reinterpret_cast<const S_vector4 &>(body.m[3]);
@@ -1586,15 +1586,15 @@ void C_HumanController::ApplyWeaponControls(int timeDelta, uint32_t fireFlags)
         }
         return;
     case ITEM_BEHAVIOUR_SIDEARM:
-    case 4:
+    case ITEM_BEHAVIOUR_RIFLE:
     case ITEM_BEHAVIOUR_LAUNCHER:
         // No automatic fire.
         m_axes[AXIS_FIRE] = 0.0f;
         break;
-    case 3:
-    case 5:
+    case ITEM_BEHAVIOUR_SMG:
+    case ITEM_BEHAVIOUR_LMG:
     case 7:
-    case 12:
+    case ITEM_BEHAVIOUR_ASSAULT:
         break;
     default:
         return;

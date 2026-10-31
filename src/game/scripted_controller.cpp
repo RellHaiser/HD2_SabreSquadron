@@ -1021,27 +1021,27 @@ void C_ScriptedController::DecideAttack()
     int mode = FIRE_NONE;
     int base = 0;
     switch (BehaviourOf(m_handsItem)) {
-    case 2:
+    case ITEM_BEHAVIOUR_SIDEARM:
         if (distance < 30.0f)
             mode = Rand01() * 10.0f < 7.0f ? FIRE_STANDING : FIRE_WALKING;
         base = 300;
         break;
-    case 3:
+    case ITEM_BEHAVIOUR_SMG:
         if (distance < 70.0f)
             mode = Rand01() * 10.0f < 5.0f ? FIRE_STANDING : FIRE_WALKING;
         base = 300;
         break;
-    case 4:
+    case ITEM_BEHAVIOUR_RIFLE:
         if (distance < 250.0f)
             mode = Rand01() * 10.0f < 7.0f ? FIRE_STANDING : FIRE_CROUCHED;
         base = 1000;
         break;
-    case 12:
+    case ITEM_BEHAVIOUR_ASSAULT:
         if (distance < 300.0f)
             mode = Rand01() * 10.0f < 7.0f ? FIRE_STANDING : FIRE_CROUCHED;
         base = 1000;
         break;
-    case 5:
+    case ITEM_BEHAVIOUR_LMG:
         if (distance < 300.0f)
             mode = FIRE_CROUCHED;
         base = 600;

@@ -325,6 +325,7 @@ struct C_PlayerOptions {
 };
 enum : int {
     DETAIL_HARDWARE = 0,                                // the 3D driver's state 0x2B
+    DETAIL_VERTEX_ANIMATION = 1,                        // flags and palms moving (C_VertexAnimModule)
     DETAIL_DECALS = 2,                                  // bullet holes, scorch marks and blood
     DETAIL_STAINS = 3,                                  // blood stains on the bodies (C_HumanStains)
     DETAIL_RAGDOLL = 5,                                 // dead bodies fall as ragdolls

@@ -185,8 +185,8 @@
   "group": "Mission files",
   "item": "Vertanim",
   "weight": 1,
-  "state": "pending",
-  "evidence": "Vertanim.def / .bin: vertex animation module not ported"
+  "state": "verified",
+  "evidence": "world harness: Tables/Vertanim.def's 5 animations and 21 missions' Vertanim.bin load as the files have them"
  },
  {
   "group": "Tables",

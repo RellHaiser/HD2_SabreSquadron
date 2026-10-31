@@ -69,6 +69,13 @@ public:
     // (The multiplayer zone, part 7d.)
     int GetHealth() const { return health; }
     void SetMpZone(int zoneId) { mpZone = zoneId; }
+    // The sight module's calls (part 8b; the world test defines them).
+    bool IsFriendOf(const C_Actor *other) const;
+    void OnSightEvent(int lost, int targetId);
+    void TestSightOfHuman(C_Human *target, int *status, float *visibility);
+    void TestSightOfMeleeTracker(C_Actor *meleeTracker, int *status, float *visibility);
+    void RemoveCollision(bool unknown);
+    void RestoreCollision(bool unknown);
     // The car's hits and crew queries (game/car_hits.cpp).
     bool IsHostileTo(const C_Actor *other) const
     {
@@ -79,6 +86,9 @@ public:
     }
     void AddExperience(int amount) { experience += amount; }
     I3D_frame *GetBodyFrame() const { return bodyFrame; }
+    // (The effects module's rain, part 8c.)
+    I3D_sector *GetBodySector() const { return bodySector; }
+    I3D_sector *bodySector = nullptr;
     // The vehicle it sits in (the animation actor's wings, game/animation_actor.cpp).
     C_Actor *GetVehicle() const { return vehicle; }
     const S_vector &GetRandomBonePos() const { return bonePos; }

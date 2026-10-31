@@ -5606,19 +5606,272 @@
   "name": "C_CameraModule::SetSpecialMode",
   "proto": "void __thiscall SetSpecialMode(C_CameraModule *this, int mode, bool on, I3D_frame * target)"
  },
+ "0046d5d0": {
+  "module": "sight",
+  "name": "StaticInit_46d5d0"
+ },
+ "0046d600": {
+  "module": "sight",
+  "name": "C_SightObserver::SetRelation",
+  "proto": "bool __thiscall SetRelation(void * this, int target, int relation)"
+ },
+ "0046d6f0": {
+  "module": "sight",
+  "name": "C_SightObserver::C_SightObserver"
+ },
+ "0046d730": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::C_HumanSightObserver"
+ },
+ "0046d760": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::C_MeleeTrackerSightObserver"
+ },
+ "0046d790": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::TestNow"
+ },
+ "0046d7a0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::CanSee"
+ },
+ "0046d7b0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::GetVisibleParts"
+ },
+ "0046d800": {
+  "module": "sight",
+  "name": "SightObserverNoParts_Destroy"
+ },
+ "0046d840": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::WantsTest",
+  "proto": "bool __thiscall WantsTest(void * this, int target)"
+ },
+ "0046d8c0": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::TestNow",
+  "proto": "bool __thiscall TestNow(void * this, int target)"
+ },
+ "0046db60": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::CanSee",
+  "proto": "int __thiscall CanSee(void * this, int target, int * before, bool * visible)"
+ },
+ "0046dc10": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::GetVisibleParts",
+  "proto": "void * __thiscall GetVisibleParts(void * this, int target, uint * parts)"
+ },
+ "0046dc70": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::WantsTest",
+  "proto": "bool __thiscall WantsTest(void * this, int target)"
+ },
+ "0046dcf0": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::Update",
+  "proto": "void __thiscall Update(void * this, uint mask, int target, int timeDelta)"
+ },
+ "0046dea0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::Update",
+  "proto": "void __thiscall Update(void * this, uint mask, int target, int timeDelta)"
+ },
+ "0046df80": {
+  "module": "sight",
+  "name": "C_HumanSightObserver::TestPart",
+  "proto": "bool __thiscall TestPart(void * this, int target, int timeDelta, bool * skipped)"
+ },
+ "0046e3b0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightObserver::TestPart",
+  "proto": "bool __thiscall TestPart(void * this, int target, int timeDelta)"
+ },
+ "0046e790": {
+  "module": "sight",
+  "name": "SightRecordVector_Insert"
+ },
+ "0046ea90": {
+  "module": "sight",
+  "name": "StaticInit_46ea90"
+ },
+ "0046eac0": {
+  "module": "sight",
+  "name": "C_SightTarget::C_SightTarget"
+ },
  "0046eb10": {
   "module": "zz_idioms",
   "name": "empty_function_46eb10"
  },
+ "0046eb20": {
+  "module": "sight",
+  "name": "C_HumanSightTarget::Refresh"
+ },
+ "0046ebf0": {
+  "module": "sight",
+  "name": "SightTarget_FindPart"
+ },
+ "0046ec40": {
+  "module": "sight",
+  "name": "C_HumanSightTarget::C_HumanSightTarget"
+ },
+ "0046ecb0": {
+  "module": "sight",
+  "name": "C_HumanSightTarget::GetActor"
+ },
+ "0046ecc0": {
+  "module": "sight",
+  "name": "C_HumanSightTarget::GetKind"
+ },
+ "0046ecd0": {
+  "module": "sight",
+  "name": "C_SightTarget::FreeParts"
+ },
+ "0046ecf0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightTarget::C_MeleeTrackerSightTarget"
+ },
+ "0046edc0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightTarget::GetActor"
+ },
+ "0046edd0": {
+  "module": "sight",
+  "name": "C_MeleeTrackerSightTarget::GetKind"
+ },
+ "0046ede0": {
+  "module": "sight",
+  "name": "SightTarget_FindMeleeTrackerPart"
+ },
+ "0046ee30": {
+  "module": "sight",
+  "name": "StaticInit_46ee30"
+ },
+ "0046ee60": {
+  "module": "sight",
+  "name": "StaticInit_SightModule"
+ },
+ "0046ee70": {
+  "module": "sight",
+  "name": "SightModule_Construct"
+ },
+ "0046ee90": {
+  "module": "sight",
+  "name": "C_SightModule::C_SightModule",
+  "proto": "C_SightModule * __thiscall C_SightModule(C_SightModule * this, int id, char * name)"
+ },
+ "0046eee0": {
+  "module": "sight",
+  "name": "C_SightModule::LoadMissionData",
+  "proto": "void __thiscall LoadMissionData(C_SightModule * this, bool server)"
+ },
+ "0046eef0": {
+  "module": "sight",
+  "name": "C_SightModule::FreeMissionData",
+  "proto": "void __thiscall FreeMissionData(C_SightModule * this, bool server)"
+ },
+ "0046ef00": {
+  "module": "sight",
+  "name": "C_SightModule::SaveGame"
+ },
+ "0046ef10": {
+  "module": "sight",
+  "name": "C_SightModule::LoadGame"
+ },
+ "0046ef20": {
+  "module": "sight",
+  "name": "C_SightModule::ScalarDeletingDestructor"
+ },
+ "0046ef40": {
+  "module": "sight",
+  "name": "C_SightModule::~C_SightModule"
+ },
+ "0046ef80": {
+  "module": "sight",
+  "name": "SightModule_RegisterAtExit"
+ },
+ "0046ef90": {
+  "module": "sight",
+  "name": "SightModule_Destroy"
+ },
+ "0046efd0": {
+  "module": "sight",
+  "name": "C_SightModule::StartMission",
+  "proto": "void __thiscall StartMission(C_SightModule * this, bool server)"
+ },
+ "0046eff0": {
+  "module": "sight",
+  "name": "C_SightModule::StopMission",
+  "proto": "void __thiscall StopMission(C_SightModule * this, bool server)"
+ },
+ "0046f000": {
+  "module": "sight",
+  "name": "C_SightModule::Tick",
+  "proto": "void __thiscall Tick(C_SightModule * this, int timeDelta)"
+ },
  "0046f280": {
-  "module": "team",
+  "module": "sight",
   "name": "C_SightModule::TestNow",
-  "proto": "bool __thiscall TestNow(C_SightModule *this, int observer, int target)"
+  "proto": "bool __thiscall TestNow(C_SightModule * this, int observer, int target)"
+ },
+ "0046f2a0": {
+  "module": "sight",
+  "name": "C_SightModule::GetVisibleParts",
+  "proto": "void __thiscall GetVisibleParts(C_SightModule * this, int observer, int target, uint * parts)"
+ },
+ "0046f300": {
+  "module": "sight",
+  "name": "SightModuleNoParts_Destroy"
  },
  "0046f320": {
-  "module": "squad",
+  "module": "sight",
   "name": "C_SightModule::CanSee",
-  "proto": "int __thiscall CanSee(void *this, int observer, int target, int *out, bool *visible)"
+  "proto": "int __thiscall CanSee(C_SightModule * this, int observer, int target, int * before, bool * visible)"
+ },
+ "0046f350": {
+  "module": "sight",
+  "name": "C_SightModule::AddObserver",
+  "proto": "int __thiscall AddObserver(C_SightModule * this, I3D_frame * frame, uint mask)"
+ },
+ "0046f700": {
+  "module": "sight",
+  "name": "C_SightModule::SetTargetState",
+  "proto": "void __thiscall SetTargetState(C_SightModule * this, int id, int state)"
+ },
+ "0046f8c0": {
+  "module": "sight",
+  "name": "C_SightModule::SetObserverState",
+  "proto": "void __thiscall SetObserverState(C_SightModule * this, int id, int state)"
+ },
+ "0046f9d0": {
+  "module": "sight",
+  "name": "C_SightModule::AddTarget",
+  "proto": "int __thiscall AddTarget(C_SightModule * this, I3D_frame * frame, uint mask)"
+ },
+ "0046fd50": {
+  "module": "sight",
+  "name": "C_SightModule::RemoveObserver",
+  "proto": "bool __thiscall RemoveObserver(C_SightModule * this, int id)"
+ },
+ "0046fdf0": {
+  "module": "sight",
+  "name": "C_SightModule::RemoveTarget",
+  "proto": "bool __thiscall RemoveTarget(C_SightModule * this, int id)"
+ },
+ "0046ffb0": {
+  "module": "sight",
+  "name": "C_SightModule::Clear",
+  "proto": "void __thiscall Clear(C_SightModule * this)"
+ },
+ "00470070": {
+  "module": "sight",
+  "name": "C_SightObserver::FreeRecords"
+ },
+ "00470090": {
+  "module": "sight",
+  "name": "C_SightModule::RestartMission",
+  "proto": "void __thiscall RestartMission(C_SightModule * this, bool server)"
  },
  "004700b0": {
   "module": "zz_idioms",
@@ -5627,6 +5880,14 @@
  "004700d0": {
   "module": "zz_idioms",
   "name": "empty_function_4700d0"
+ },
+ "004700e0": {
+  "module": "sight",
+  "name": "SightTargetVector_Insert"
+ },
+ "004702f0": {
+  "module": "sight",
+  "name": "SightObserverVector_Insert"
  },
  "00470530": {
   "module": "heavy_fire_support",
@@ -5827,21 +6088,168 @@
   "name": "C_HeavyFireSupport::LoadTable",
   "proto": "bool __fastcall LoadTable(C_HeavyFireSupport *this)"
  },
+ "004736d0": {
+  "module": "world_modules",
+  "name": "StaticInit_4736d0"
+ },
+ "00473700": {
+  "module": "world_modules",
+  "name": "S_VertexAnimation::S_VertexAnimation"
+ },
+ "00473720": {
+  "module": "world_modules",
+  "name": "S_VertexAnimation::~S_VertexAnimation"
+ },
  "00473790": {
-  "module": "moving_actors",
-  "name": "S_VertexAnimPlayer::Init"
+  "module": "world_modules",
+  "name": "S_VertexAnimPlayer::Init",
+  "proto": "void __thiscall Init(void * this, I3D_frame * visual, void * animation)"
  },
  "004737c0": {
-  "module": "moving_actors",
-  "name": "S_VertexAnimPlayer::Reset"
+  "module": "world_modules",
+  "name": "S_VertexAnimPlayer::Reset",
+  "proto": "void __thiscall Reset(void * this)"
+ },
+ "00473960": {
+  "module": "world_modules",
+  "name": "S_VertexAnimPlayer::Update",
+  "proto": "void __thiscall Update(void * this, int timeDelta)"
+ },
+ "00473c60": {
+  "module": "world_modules",
+  "name": "StaticInit_473c60"
+ },
+ "00473c90": {
+  "module": "world_modules",
+  "name": "StaticInit_473c90"
+ },
+ "00473ca0": {
+  "module": "world_modules",
+  "name": "StaticInit_473ca0"
+ },
+ "00473cb0": {
+  "module": "world_modules",
+  "name": "StaticInit_473cb0"
+ },
+ "00473cc0": {
+  "module": "world_modules",
+  "name": "StaticInit_473cc0"
+ },
+ "00473cd0": {
+  "module": "world_modules",
+  "name": "StaticInit_473cd0"
+ },
+ "00473ce0": {
+  "module": "world_modules",
+  "name": "StaticInit_473ce0"
+ },
+ "00473cf0": {
+  "module": "world_modules",
+  "name": "StaticInit_473cf0"
+ },
+ "00473d00": {
+  "module": "world_modules",
+  "name": "StaticInit_473d00"
+ },
+ "00473d10": {
+  "module": "world_modules",
+  "name": "StaticInit_VertexAnimModule"
+ },
+ "00473d20": {
+  "module": "world_modules",
+  "name": "VertexAnimModule_Construct"
+ },
+ "00473d40": {
+  "module": "world_modules",
+  "name": "VertexAnimModule_RegisterAtExit"
+ },
+ "00473d50": {
+  "module": "world_modules",
+  "name": "VertexAnimModule_Destroy"
+ },
+ "00473d60": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::C_VertexAnimModule",
+  "proto": "C_VertexAnimModule * __thiscall C_VertexAnimModule(C_VertexAnimModule * this, int id, char * name)"
+ },
+ "00473db0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::SaveGame"
+ },
+ "00473dc0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::LoadGame"
+ },
+ "00473dd0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::ScalarDeletingDestructor"
+ },
+ "00473df0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::~C_VertexAnimModule"
  },
  "00473e30": {
-  "module": "moving_actors",
-  "name": "C_VertexAnimModule::FindAnimation"
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::FindAnimation",
+  "proto": "void * __thiscall FindAnimation(C_VertexAnimModule * this, C_str * name)"
+ },
+ "00473ec0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::LoadAnimations",
+  "proto": "bool __thiscall LoadAnimations(C_VertexAnimModule * this)"
+ },
+ "00474290": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::LoadPlayers",
+  "proto": "bool __thiscall LoadPlayers(C_VertexAnimModule * this)"
  },
  "004746b0": {
-  "module": "moving_actors",
-  "name": "C_VertexAnimModule::RemovePlayer"
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::RemovePlayer",
+  "proto": "void __thiscall RemovePlayer(C_VertexAnimModule * this, void * player, bool destroy)"
+ },
+ "00474740": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::Tick",
+  "proto": "void __thiscall Tick(C_VertexAnimModule * this, int timeDelta)"
+ },
+ "004749a0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::Update",
+  "proto": "void __thiscall Update(C_VertexAnimModule * this, int timeDelta)"
+ },
+ "00474a00": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::Init"
+ },
+ "00474a20": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::Done"
+ },
+ "00474aa0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::LoadMissionData",
+  "proto": "void __thiscall LoadMissionData(C_VertexAnimModule * this, bool server)"
+ },
+ "00474ac0": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::FreeMissionData",
+  "proto": "void __thiscall FreeMissionData(C_VertexAnimModule * this, bool server)"
+ },
+ "00474b40": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::StartMission",
+  "proto": "void __thiscall StartMission(C_VertexAnimModule * this, bool server)"
+ },
+ "00474c10": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::StopMission",
+  "proto": "void __thiscall StopMission(C_VertexAnimModule * this, bool server)"
+ },
+ "00474c90": {
+  "module": "world_modules",
+  "name": "C_VertexAnimModule::RestartMission",
+  "proto": "void __thiscall RestartMission(C_VertexAnimModule * this, bool server)"
  },
  "00474cb0": {
   "module": "zz_idioms",
@@ -6460,27 +6868,311 @@
   "module": "zz_idioms",
   "name": "copy4_484e70"
  },
+ "00484f60": {
+  "module": "geffects",
+  "name": "GEffects_ShatterFace"
+ },
+ "00485b50": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetCloudsOn",
+  "proto": "void __thiscall SetCloudsOn(C_GEffectsModule * this, bool on)"
+ },
  "00485b70": {
-  "module": "hud",
+  "module": "geffects",
   "name": "C_GEffectsModule::SetLensFlareOn",
-  "proto": "void __thiscall SetLensFlareOn(C_GEffectsModule *this, bool on)"
+  "proto": "void __thiscall SetLensFlareOn(C_GEffectsModule * this, bool on)"
  },
  "00485ba0": {
-  "module": "car",
+  "module": "geffects",
   "name": "C_GEffectsModule::ShatterGlass",
-  "proto": "void __thiscall ShatterGlass(C_GEffectsModule * this, I3D_frame * visual, float unknown)"
+  "proto": "void __thiscall ShatterGlass(C_GEffectsModule * this, I3D_frame * visual, float maxArea)"
+ },
+ "00485c70": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetCameraAnimation",
+  "proto": "void __thiscall SetCameraAnimation(C_GEffectsModule * this, I3D_frame * camera, char * fileName)"
+ },
+ "00485f70": {
+  "module": "geffects",
+  "name": "GEffects_SetFramePos",
+  "proto": "void __thiscall GEffects_SetFramePos(I3D_frame * this, float * x, float * y, float * z)"
+ },
+ "00485fc0": {
+  "module": "geffects",
+  "name": "CameraAnimation_Free"
+ },
+ "00485fd0": {
+  "module": "geffects",
+  "name": "S_CameraAnimation::Restore",
+  "proto": "void __fastcall Restore(void * this)"
+ },
+ "00486080": {
+  "module": "geffects",
+  "name": "StaticInit_GEffectsModule"
+ },
+ "00486090": {
+  "module": "geffects",
+  "name": "GEffectsModule_Construct"
+ },
+ "004860b0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::C_GEffectsModule",
+  "proto": "C_GEffectsModule * __thiscall C_GEffectsModule(C_GEffectsModule * this, int id, char * name)"
+ },
+ "004863e0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetRain",
+  "proto": "void __thiscall SetRain(C_GEffectsModule * this, bool on)"
+ },
+ "004863f0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::RestartMission",
+  "proto": "void __thiscall RestartMission(C_GEffectsModule * this, bool server)"
+ },
+ "00486460": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SaveGame",
+  "proto": "bool __thiscall SaveGame(C_GEffectsModule * this, C_chunk * chunk)"
+ },
+ "00486470": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::LoadGame",
+  "proto": "bool __thiscall LoadGame(C_GEffectsModule * this, C_chunk * chunk)"
+ },
+ "00486480": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetTimeScale",
+  "proto": "void __thiscall SetTimeScale(C_GEffectsModule * this, float scale, float acceleration)"
+ },
+ "004864a0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::GetTimeScale",
+  "proto": "float __thiscall GetTimeScale(C_GEffectsModule * this)"
+ },
+ "004864b0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::ScalarDeletingDestructor"
  },
  "004864d0": {
   "module": "zz_idioms",
   "name": "vector_tidy_4864d0"
  },
+ "004864f0": {
+  "module": "geffects",
+  "name": "GEffectsModule_RegisterAtExit"
+ },
+ "00486500": {
+  "module": "geffects",
+  "name": "GEffectsModule_Destroy"
+ },
  "00486510": {
-  "module": "app",
-  "name": "GetGEffects"
+  "module": "geffects",
+  "name": "GetGEffects",
+  "proto": "C_GEffectsModule * GetGEffects(void)"
+ },
+ "00486520": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::ShowBackdrop",
+  "proto": "void __thiscall ShowBackdrop(C_GEffectsModule * this, bool on)"
+ },
+ "00486580": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::ShowAboveWater",
+  "proto": "void __thiscall ShowAboveWater(C_GEffectsModule * this, bool on)"
+ },
+ "004865e0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetHierarchyOn",
+  "proto": "void __thiscall SetHierarchyOn(C_GEffectsModule * this, I3D_frame * frame, bool on, uint typeMask)"
+ },
+ "004866f0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::HideVisual",
+  "proto": "void __thiscall HideVisual(C_GEffectsModule * this, I3D_frame * visual, bool on)"
+ },
+ "00486750": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::ShowUnderWater",
+  "proto": "void __thiscall ShowUnderWater(C_GEffectsModule * this, bool on)"
+ },
+ "004867b0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetWeatherOn",
+  "proto": "void __thiscall SetWeatherOn(C_GEffectsModule * this, bool on)"
+ },
+ "004867e0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::GetGroundCover",
+  "proto": "float __thiscall GetGroundCover(C_GEffectsModule * this, int material)"
+ },
+ "004867f0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetFadeLevel",
+  "proto": "void __thiscall SetFadeLevel(C_GEffectsModule * this, float level, float * color)"
+ },
+ "00486b30": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::Fade",
+  "proto": "void __thiscall Fade(C_GEffectsModule * this, int time, int direction, float * color)"
+ },
+ "00486bf0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::RenderVolumetrics",
+  "proto": "void __thiscall RenderVolumetrics(C_GEffectsModule * this)"
+ },
+ "00486c10": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::RenderFade",
+  "proto": "void __thiscall RenderFade(C_GEffectsModule * this)"
+ },
+ "00486d30": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetModelTransparency",
+  "proto": "bool __thiscall SetModelTransparency(C_GEffectsModule * this, I3D_frame * model, float level)"
+ },
+ "00486d60": {
+  "module": "geffects",
+  "name": "GEffects_FadeVisualCallback"
+ },
+ "00486df0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetModelLightLevel",
+  "proto": "bool __thiscall SetModelLightLevel(C_GEffectsModule * this, I3D_frame * model, float level)"
+ },
+ "00486e60": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetModelAlpha",
+  "proto": "bool __thiscall SetModelAlpha(C_GEffectsModule * this, I3D_frame * model, float level)"
+ },
+ "00486e90": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::ClearModelTransparency",
+  "proto": "bool __thiscall ClearModelTransparency(C_GEffectsModule * this, I3D_frame * model)"
+ },
+ "00486f00": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::~C_GEffectsModule"
+ },
+ "004870a0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetThunderstorm",
+  "proto": "void __thiscall SetThunderstorm(C_GEffectsModule * this, bool on, void * light, bool immediate)"
+ },
+ "004871a0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::StartMpLightning",
+  "proto": "void __thiscall StartMpLightning(C_GEffectsModule * this, int time)"
+ },
+ "00487240": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::Update",
+  "proto": "void __thiscall Update(C_GEffectsModule * this, int timeDelta)"
+ },
+ "00488560": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::LoadMissionData",
+  "proto": "void __thiscall LoadMissionData(C_GEffectsModule * this, bool server)"
+ },
+ "004885a0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::FreeMissionData",
+  "proto": "void __thiscall FreeMissionData(C_GEffectsModule * this, bool server)"
+ },
+ "004885d0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::StartMission",
+  "proto": "void __thiscall StartMission(C_GEffectsModule * this, bool server)"
+ },
+ "004888c0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::StopMission",
+  "proto": "void __thiscall StopMission(C_GEffectsModule * this, bool server)"
+ },
+ "00488b80": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::Reset",
+  "proto": "void __thiscall Reset(C_GEffectsModule * this)"
  },
  "00488d60": {
-  "module": "physics",
-  "name": "C_GEffectsModule::FadeOutModel"
+  "module": "geffects",
+  "name": "C_GEffectsModule::FadeOutModel",
+  "proto": "void __thiscall FadeOutModel(C_GEffectsModule * this, I3D_frame * model, int time, bool switchOff)"
+ },
+ "00488ee0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::FadeIn",
+  "proto": "void __thiscall FadeIn(C_GEffectsModule * this, I3D_frame * model, int time, bool turnOn)"
+ },
+ "00489060": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::FadeInModel",
+  "proto": "void __thiscall FadeInModel(C_GEffectsModule * this, I3D_frame * model, int time, bool turnOn)"
+ },
+ "004890f0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::FadeOutHierarchy",
+  "proto": "void __thiscall FadeOutHierarchy(C_GEffectsModule * this, I3D_frame * model, int time, bool switchOff)"
+ },
+ "00489180": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::FadeHuman",
+  "proto": "void __thiscall FadeHuman(C_GEffectsModule * this, C_Human * human, int time, bool in)"
+ },
+ "00489470": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::GetShadow",
+  "proto": "I3D_frame * __thiscall GetShadow(C_GEffectsModule * this, I3D_frame * model)"
+ },
+ "004894b0": {
+  "module": "geffects",
+  "name": "GEffects_FindModelShadow",
+  "proto": "uint __stdcall GEffects_FindModelShadow(I3D_frame * frame, void * context)"
+ },
+ "004894e0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::CreateShadow",
+  "proto": "I3D_frame * __thiscall CreateShadow(C_GEffectsModule * this, I3D_frame * model)"
+ },
+ "00489bd0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SetShadowParams",
+  "proto": "void __thiscall SetShadowParams(C_GEffectsModule * this, void * params)"
+ },
+ "00489be0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::GetShadowParams",
+  "proto": "void * __thiscall GetShadowParams(C_GEffectsModule * this)"
+ },
+ "00489bf0": {
+  "module": "geffects",
+  "name": "ShadowParams_Copy"
+ },
+ "00489c60": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::LoadWaterCamera",
+  "proto": "void __thiscall LoadWaterCamera(C_GEffectsModule * this)"
+ },
+ "00489fd0": {
+  "module": "geffects",
+  "name": "GEffects_CopyTargetFrames"
+ },
+ "0048a170": {
+  "module": "geffects",
+  "name": "GEffects_MoveForeignFrames"
+ },
+ "0048a3f0": {
+  "module": "geffects",
+  "name": "GEffects_FindFaceGroups"
+ },
+ "0048a5c0": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::SwitchFaceTexture",
+  "proto": "bool __thiscall SwitchFaceTexture(C_GEffectsModule * this, I3D_frame * model, char * texture)"
+ },
+ "0048a780": {
+  "module": "geffects",
+  "name": "C_GEffectsModule::DressUniform",
+  "proto": "bool __thiscall DressUniform(C_GEffectsModule * this, C_Human * human, int uniform)"
  },
  "0048b300": {
   "module": "zz_idioms",
@@ -6526,9 +7218,107 @@
   "module": "zz_idioms",
   "name": "empty_function_48b680"
  },
+ "0048b880": {
+  "module": "geffects",
+  "name": "CameraAnimationVector_Insert"
+ },
+ "0048c710": {
+  "module": "world_modules",
+  "name": "StaticInit_48c710"
+ },
+ "0048c740": {
+  "module": "world_modules",
+  "name": "StaticInit_LightMapGroupsModule"
+ },
+ "0048c750": {
+  "module": "world_modules",
+  "name": "LightMapGroupsModule_Construct"
+ },
+ "0048c770": {
+  "module": "world_modules",
+  "name": "LightMapGroupsModule_RegisterAtExit"
+ },
+ "0048c780": {
+  "module": "world_modules",
+  "name": "LightMapGroupsModule_Destroy"
+ },
+ "0048c790": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::RestartMission",
+  "proto": "void __thiscall RestartMission(C_LightMapGroupsModule * this, bool server)"
+ },
+ "0048c820": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::SaveGame",
+  "proto": "bool __thiscall SaveGame(C_LightMapGroupsModule * this, C_chunk * chunk)"
+ },
+ "0048c920": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::LoadGame",
+  "proto": "bool __thiscall LoadGame(C_LightMapGroupsModule * this, C_chunk * chunk)"
+ },
  "0048cb00": {
   "module": "script",
   "name": "GetLightMapGroups"
+ },
+ "0048cb10": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::C_LightMapGroupsModule",
+  "proto": "C_LightMapGroupsModule * __thiscall C_LightMapGroupsModule(C_LightMapGroupsModule * this, int id, char * name)"
+ },
+ "0048cb60": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::StopMission",
+  "proto": "void __thiscall StopMission(C_LightMapGroupsModule * this, bool server)"
+ },
+ "0048cb70": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::FreeMissionData",
+  "proto": "void __thiscall FreeMissionData(C_LightMapGroupsModule * this, bool server)"
+ },
+ "0048cc40": {
+  "module": "world_modules",
+  "name": "S_LightmapGroup::~S_LightmapGroup"
+ },
+ "0048cd10": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::ScalarDeletingDestructor"
+ },
+ "0048cd30": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::~C_LightMapGroupsModule"
+ },
+ "0048cd70": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::LoadGroups",
+  "proto": "bool __thiscall LoadGroups(C_LightMapGroupsModule * this, C_chunk * chunk)"
+ },
+ "0048d100": {
+  "module": "world_modules",
+  "name": "S_LightmapGroup::S_LightmapGroup"
+ },
+ "0048d1d0": {
+  "module": "world_modules",
+  "name": "S_LightmapGroup::HasFrame",
+  "proto": "bool __thiscall HasFrame(void * this, char * frame)"
+ },
+ "0048d230": {
+  "module": "world_modules",
+  "name": "S_LightmapGroup::ScalarDeletingDestructor"
+ },
+ "0048d250": {
+  "module": "world_modules",
+  "name": "S_LightmapChange::ScalarDeletingDestructor"
+ },
+ "0048d270": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::SetFrameLightmap",
+  "proto": "void __thiscall SetFrameLightmap(C_LightMapGroupsModule * this, I3D_frame * frame, int lightmap)"
+ },
+ "0048d4e0": {
+  "module": "world_modules",
+  "name": "C_LightMapGroupsModule::SetGroupLightmap",
+  "proto": "void __thiscall SetGroupLightmap(C_LightMapGroupsModule * this, void * group, int lightmap)"
  },
  "0048d5b0": {
   "module": "zz_idioms",
@@ -6541,6 +7331,10 @@
  "0048d600": {
   "module": "zz_idioms",
   "name": "vector_clear_48d600"
+ },
+ "0048d630": {
+  "module": "world_modules",
+  "name": "LightmapGroupVector_Insert"
  },
  "0048d7d0": {
   "module": "zz_idioms",
@@ -6660,29 +7454,110 @@
   "module": "track",
   "name": "ModuleManager::LoadGame"
  },
+ "0048e100": {
+  "module": "world_modules",
+  "name": "StaticInit_48e100"
+ },
+ "0048e130": {
+  "module": "world_modules",
+  "name": "StaticInit_TShiftModule"
+ },
+ "0048e140": {
+  "module": "world_modules",
+  "name": "TShiftModule_Construct"
+ },
+ "0048e160": {
+  "module": "world_modules",
+  "name": "TShiftModule_RegisterAtExit"
+ },
+ "0048e170": {
+  "module": "world_modules",
+  "name": "TShiftModule_Destroy"
+ },
  "0048e180": {
   "module": "zz_idioms",
   "name": "empty_function_48e180"
+ },
+ "0048e190": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::FreeMissionData",
+  "proto": "void __thiscall FreeMissionData(C_TShiftModule * this, bool server)"
  },
  "0048e1d0": {
   "module": "zz_idioms",
   "name": "empty_function_48e1d0"
  },
+ "0048e1f0": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::C_TShiftModule",
+  "proto": "C_TShiftModule * __thiscall C_TShiftModule(C_TShiftModule * this, int id, char * name)"
+ },
+ "0048e230": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::ScalarDeletingDestructor"
+ },
+ "0048e250": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::~C_TShiftModule"
+ },
+ "0048e280": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::HasMesh",
+  "proto": "bool __thiscall HasMesh(C_TShiftModule * this, I3D_mesh * mesh)"
+ },
  "0048e2d0": {
-  "module": "script",
-  "name": "C_TShiftModule::HasFrame"
+  "module": "world_modules",
+  "name": "C_TShiftModule::HasFrame",
+  "proto": "bool __thiscall HasFrame(C_TShiftModule * this, I3D_frame * frame)"
+ },
+ "0048e330": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::AddVisual",
+  "proto": "void __thiscall AddVisual(C_TShiftModule * this, I3D_frame * frame, I3D_mesh * mesh)"
+ },
+ "0048e580": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::RemoveMesh",
+  "proto": "void __thiscall RemoveMesh(C_TShiftModule * this, I3D_mesh * mesh)"
+ },
+ "0048e620": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::RemoveFrame",
+  "proto": "void __thiscall RemoveFrame(C_TShiftModule * this, I3D_frame * frame)"
+ },
+ "0048e6d0": {
+  "module": "world_modules",
+  "name": "C_TShiftModule::RemoveModel",
+  "proto": "void __thiscall RemoveModel(C_TShiftModule * this, I3D_frame * model)"
  },
  "0048e780": {
-  "module": "script",
-  "name": "C_TShiftModule::GetEntry"
+  "module": "world_modules",
+  "name": "C_TShiftModule::GetEntry",
+  "proto": "void * __thiscall GetEntry(C_TShiftModule * this, I3D_mesh * mesh)"
  },
  "0048e7e0": {
   "module": "zz_idioms",
   "name": "empty_function_48e7e0"
  },
+ "0048e9f0": {
+  "module": "world_modules",
+  "name": "TShiftEntryVector_Size"
+ },
  "0048ea20": {
   "module": "zz_idioms",
   "name": "empty_function_48ea20"
+ },
+ "0048ea30": {
+  "module": "world_modules",
+  "name": "TShiftEntry_UninitializedCopy"
+ },
+ "0048ea70": {
+  "module": "world_modules",
+  "name": "TShiftEntry_UninitializedFill"
+ },
+ "0048eaa0": {
+  "module": "world_modules",
+  "name": "TShiftEntry_Construct"
  },
  "0048eb70": {
   "module": "game",
@@ -17720,8 +18595,8 @@
  },
  "005a7ed0": {
   "module": "human",
-  "name": "C_Human::FindBeltItem19",
-  "proto": "C_Item *__thiscall FindBeltItem19(C_Human *this)"
+  "name": "C_Human::FindWireCutter",
+  "proto": "C_Item *__thiscall FindWireCutter(C_Human *this)"
  },
  "005a7f50": {
   "module": "human",
@@ -21190,6 +22065,11 @@
   "name": "C_MeleeTracker::OnSoundHeard",
   "proto": "void __stdcall OnSoundHeard(S_HeardSound * sound)"
  },
+ "005d64c0": {
+  "module": "sight",
+  "name": "C_MeleeTracker::TestSight",
+  "proto": "void __thiscall TestSight(C_MeleeTracker * this, C_Actor * target, int * status, float * visibility)"
+ },
  "005d64e0": {
   "module": "melee_tracker",
   "name": "C_MeleeTracker::TrackVelocity",
@@ -22001,27 +22881,201 @@
   "module": "simple_actors",
   "name": "StaticInit_5e2bd0"
  },
+ "005e2c00": {
+  "module": "air_attack",
+  "name": "StaticInit_AirAttackCreatorThunk"
+ },
+ "005e2c10": {
+  "module": "air_attack",
+  "name": "StaticInit_AirAttackCreator"
+ },
+ "005e2c30": {
+  "module": "air_attack",
+  "name": "C_AirAttackCreator::Create",
+  "proto": "C_Actor * __thiscall Create(C_ActorCreator * this)"
+ },
+ "005e2c90": {
+  "module": "air_attack",
+  "name": "C_AirAttackCreator::GetName",
+  "proto": "char * __thiscall GetName(C_ActorCreator * this)"
+ },
+ "005e2ca0": {
+  "module": "air_attack",
+  "name": "C_AirAttackCreator::Destroy",
+  "proto": "void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)"
+ },
+ "005e2cc0": {
+  "module": "air_attack",
+  "name": "RayTestPastBorders",
+  "proto": "S_CollisionVolume * __fastcall RayTestPastBorders(S_vector4 * from, S_vector4 * dir, S_vector4 * hitPos, S_vector4 * hitNormal, uint excludeTypes, uint excludeFlags)"
+ },
+ "005e3090": {
+  "module": "air_attack",
+  "name": "C_AirAttack::RestartMission",
+  "proto": "void __thiscall RestartMission(C_AirAttack * this, bool server)"
+ },
+ "005e30b0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::SaveGame",
+  "proto": "bool __thiscall SaveGame(C_AirAttack * this, C_chunk * chunk)"
+ },
+ "005e3420": {
+  "module": "air_attack",
+  "name": "C_AirAttack::LoadGame",
+  "proto": "bool __thiscall LoadGame(C_AirAttack * this, C_chunk * chunk)"
+ },
+ "005e3a00": {
+  "module": "air_attack",
+  "name": "AirAttack_FreeBulletOnThrow"
+ },
  "005e3a10": {
-  "module": "zz_idioms",
-  "name": "identity_5e3a10"
+  "module": "air_attack",
+  "name": "AirAttack_BulletCtor"
+ },
+ "005e3a20": {
+  "module": "air_attack",
+  "name": "StaticInit_AirAttacks"
+ },
+ "005e3a30": {
+  "module": "air_attack",
+  "name": "AirAttacks_Construct"
+ },
+ "005e3a50": {
+  "module": "air_attack",
+  "name": "AirAttacks_RegisterAtExit"
+ },
+ "005e3a60": {
+  "module": "air_attack",
+  "name": "AirAttacks_Destroy"
+ },
+ "005e3a80": {
+  "module": "air_attack",
+  "name": "C_AirAttack::BulletHit",
+  "proto": "void __thiscall BulletHit(C_AirAttack * this, S_vector * pos, S_vector * shot)"
  },
  "005e3b70": {
-  "module": "zz_idioms",
-  "name": "empty_function_5e3b70"
+  "module": "air_attack",
+  "name": "C_AirAttack::UnknownD0",
+  "proto": "void __thiscall UnknownD0(C_AirAttack * this, int a, int b, int c, int d)"
+ },
+ "005e3b80": {
+  "module": "air_attack",
+  "name": "C_AirAttack::Hit",
+  "proto": "void __thiscall Hit(C_AirAttack * this, int type, float amount, S_vector * pos, S_vector * dir, C_Actor * attacker, int flags)"
+ },
+ "005e3c90": {
+  "module": "air_attack",
+  "name": "C_AirAttack::C_AirAttack",
+  "proto": "C_AirAttack * __thiscall C_AirAttack(C_AirAttack * this)"
+ },
+ "005e3ee0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::CopyFrom",
+  "proto": "void __thiscall CopyFrom(C_AirAttack * this, C_Actor * source)"
+ },
+ "005e3ef0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::ScalarDeletingDestructor",
+  "proto": "C_AirAttack * __thiscall ScalarDeletingDestructor(C_AirAttack * this, uchar flags)"
+ },
+ "005e3f10": {
+  "module": "air_attack",
+  "name": "C_AirAttack::~C_AirAttack",
+  "proto": "void __thiscall ~C_AirAttack(C_AirAttack * this)"
+ },
+ "005e4070": {
+  "module": "air_attack",
+  "name": "C_AirAttack::SetFrame",
+  "proto": "bool __thiscall SetFrame(C_AirAttack * this, I3D_frame * frame)"
+ },
+ "005e4090": {
+  "module": "air_attack",
+  "name": "C_AirAttack::StartMission",
+  "proto": "void __thiscall StartMission(C_AirAttack * this, bool server)"
+ },
+ "005e56d0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::StopMission",
+  "proto": "void __thiscall StopMission(C_AirAttack * this, bool server)"
+ },
+ "005e5960": {
+  "module": "air_attack",
+  "name": "C_AirAttack::Update",
+  "proto": "void __thiscall Update(C_AirAttack * this, int frameTime)"
+ },
+ "005e71e0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::Tick",
+  "proto": "void __thiscall Tick(C_AirAttack * this, int timeDelta)"
+ },
+ "005e7340": {
+  "module": "air_attack",
+  "name": "C_AirAttack::AddDust",
+  "proto": "void __thiscall AddDust(C_AirAttack * this, S_vector4 * pos, S_vector4 * dir)"
+ },
+ "005e7540": {
+  "module": "air_attack",
+  "name": "AirAttack_FreeDustOnThrow"
+ },
+ "005e7550": {
+  "module": "air_attack",
+  "name": "C_AirAttack::SetTurn",
+  "proto": "void __thiscall SetTurn(C_AirAttack * this, float turnRate, float climbRate)"
  },
  "005e7570": {
-  "module": "script",
-  "name": "C_AirAttack::SetTarget"
+  "module": "air_attack",
+  "name": "C_AirAttack::SetTarget",
+  "proto": "void __thiscall SetTarget(C_AirAttack * this, bool stop, I3D_frame * target)"
+ },
+ "005e75f0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::PlayImpactSound",
+  "proto": "void __thiscall PlayImpactSound(C_AirAttack * this, S_vector * pos)"
+ },
+ "005e7bf0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::PlayWhizzSound",
+  "proto": "void __thiscall PlayWhizzSound(C_AirAttack * this, S_vector * pos)"
+ },
+ "005e81c0": {
+  "module": "air_attack",
+  "name": "C_AirAttack::Fire",
+  "proto": "void __thiscall Fire(C_AirAttack * this, int frameTime)"
  },
  "005e8b70": {
-  "module": "squad",
+  "module": "air_attack",
   "name": "FindAirAttackFor",
   "proto": "C_Actor * __fastcall FindAirAttackFor(C_Human *human)"
  },
  "005e8d50": {
-  "module": "game",
-  "name": "PauseActorEffects",
-  "proto": "void __fastcall PauseActorEffects(bool paused)"
+  "module": "air_attack",
+  "name": "PauseAirAttackSounds",
+  "proto": "void __fastcall PauseAirAttackSounds(bool paused)"
+ },
+ "005e8e10": {
+  "module": "air_attack",
+  "name": "C_AirAttack::WriteProperties",
+  "proto": "bool __thiscall WriteProperties(C_AirAttack * this, C_chunk * chunk)"
+ },
+ "005e9010": {
+  "module": "air_attack",
+  "name": "C_AirAttack::ReadProperties",
+  "proto": "bool __thiscall ReadProperties(C_AirAttack * this, C_chunk * chunk)"
+ },
+ "005e92b0": {
+  "module": "air_attack",
+  "name": "AirAttackDust_Ctor",
+  "proto": "void * __thiscall AirAttackDust_Ctor(void * this, S_vector4 * pos, S_vector4 * dir)"
+ },
+ "005e94d0": {
+  "module": "air_attack",
+  "name": "AirAttackDust_Dtor",
+  "proto": "void __fastcall AirAttackDust_Dtor(void * dust)"
+ },
+ "005e94f0": {
+  "module": "air_attack",
+  "name": "AirAttackDust_Update",
+  "proto": "bool __thiscall AirAttackDust_Update(void * this, int frameTime)"
  },
  "005e9690": {
   "module": "zz_idioms",
@@ -22106,6 +23160,10 @@
  "005ea2c0": {
   "module": "zz_idioms",
   "name": "construct_copy4_5ea2c0"
+ },
+ "005ea2d0": {
+  "module": "air_attack",
+  "name": "StaticInit_5ea2d0"
  },
  "005ea300": {
   "module": "world_actors",
@@ -22403,18 +23461,200 @@
   "module": "moving_actors",
   "name": "StaticInit_5edcc0"
  },
+ "005edcf0": {
+  "module": "junkers88",
+  "name": "StaticInit_Junkers88CreatorThunk"
+ },
+ "005edd00": {
+  "module": "junkers88",
+  "name": "StaticInit_Junkers88Creator"
+ },
+ "005edd20": {
+  "module": "junkers88",
+  "name": "C_Junkers88Creator::Create",
+  "proto": "C_Actor * __thiscall Create(C_ActorCreator * this)"
+ },
+ "005edd80": {
+  "module": "junkers88",
+  "name": "Junkers88_FreeOnThrow"
+ },
+ "005edd90": {
+  "module": "junkers88",
+  "name": "C_Junkers88Creator::GetName",
+  "proto": "char * __thiscall GetName(C_ActorCreator * this)"
+ },
+ "005edda0": {
+  "module": "junkers88",
+  "name": "C_Junkers88Creator::Destroy",
+  "proto": "void __thiscall Destroy(C_ActorCreator * this, C_Actor * actor)"
+ },
  "005eddc0": {
-  "module": "script",
-  "name": "C_Junkers88Setup::SetInterceptors"
+  "module": "junkers88",
+  "name": "C_Junkers88::SetInterceptors",
+  "proto": "void __thiscall SetInterceptors(C_Junkers88 * this, float firepower, float health)"
+ },
+ "005edde0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::RestartMission",
+  "proto": "void __thiscall RestartMission(C_Junkers88 * this, bool server)"
+ },
+ "005ede30": {
+  "module": "junkers88",
+  "name": "C_Junkers88::SaveParts"
+ },
+ "005ee010": {
+  "module": "junkers88",
+  "name": "C_Junkers88::LoadParts"
+ },
+ "005ee1e0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::SaveGame",
+  "proto": "bool __thiscall SaveGame(C_Junkers88 * this, C_chunk * chunk)"
+ },
+ "005ee830": {
+  "module": "junkers88",
+  "name": "C_Junkers88::LoadGame",
+  "proto": "bool __thiscall LoadGame(C_Junkers88 * this, C_chunk * chunk)"
+ },
+ "005ef160": {
+  "module": "junkers88",
+  "name": "Junkers88_FreeFighterOnThrow"
+ },
+ "005ef170": {
+  "module": "junkers88",
+  "name": "Junkers88_FreeDebrisOnThrow"
+ },
+ "005ef180": {
+  "module": "junkers88",
+  "name": "C_Junkers88::C_Junkers88",
+  "proto": "C_Junkers88 * __thiscall C_Junkers88(C_Junkers88 * this)"
+ },
+ "005ef400": {
+  "module": "junkers88",
+  "name": "Junkers88Chatter_Ctor"
+ },
+ "005ef420": {
+  "module": "junkers88",
+  "name": "C_Junkers88::GetSeatCount",
+  "proto": "int __thiscall GetSeatCount(C_Junkers88 * this)"
+ },
+ "005ef430": {
+  "module": "junkers88",
+  "name": "C_Junkers88::ScalarDeletingDestructor",
+  "proto": "C_Junkers88 * __thiscall ScalarDeletingDestructor(C_Junkers88 * this, uchar flags)"
+ },
+ "005ef450": {
+  "module": "junkers88",
+  "name": "Junkers88Chatter_Dtor"
+ },
+ "005ef470": {
+  "module": "junkers88",
+  "name": "C_Junkers88::~C_Junkers88",
+  "proto": "void __thiscall ~C_Junkers88(C_Junkers88 * this)"
+ },
+ "005ef6b0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::SetFrame",
+  "proto": "bool __thiscall SetFrame(C_Junkers88 * this, I3D_frame * frame)"
+ },
+ "005ef6c0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::CopyFrom",
+  "proto": "void __thiscall CopyFrom(C_Junkers88 * this, C_Actor * source)"
+ },
+ "005ef6d0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::StartMission",
+  "proto": "void __thiscall StartMission(C_Junkers88 * this, bool server)"
+ },
+ "005ef840": {
+  "module": "junkers88",
+  "name": "C_Junkers88::LoadSounds"
+ },
+ "005efb80": {
+  "module": "junkers88",
+  "name": "C_Junkers88::ReleaseSounds"
+ },
+ "005efc10": {
+  "module": "junkers88",
+  "name": "C_Junkers88::StopMission",
+  "proto": "void __thiscall StopMission(C_Junkers88 * this, bool server)"
+ },
+ "005efdd0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::InitCamera"
+ },
+ "005efe50": {
+  "module": "junkers88",
+  "name": "C_Junkers88::ReleaseCamera"
+ },
+ "005efe80": {
+  "module": "junkers88",
+  "name": "C_Junkers88::AddPart"
+ },
+ "005f0580": {
+  "module": "junkers88",
+  "name": "C_Junkers88::ThrowDebris"
+ },
+ "005f07e0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::InitParts"
+ },
+ "005f0830": {
+  "module": "junkers88",
+  "name": "C_Junkers88::EnumPart"
+ },
+ "005f08a0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::ReleaseParts"
+ },
+ "005f0a50": {
+  "module": "junkers88",
+  "name": "C_Junkers88::InitPropellers"
  },
  "005f0a90": {
-  "module": "script",
-  "name": "C_Junkers88::SetState"
+  "module": "junkers88",
+  "name": "C_Junkers88::SetState",
+  "proto": "void __thiscall SetState(C_Junkers88 * this, int count)"
+ },
+ "005f0c50": {
+  "module": "junkers88",
+  "name": "C_Junkers88::FindFighterByPath"
+ },
+ "005f0ca0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::FindFighter"
+ },
+ "005f0cf0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::StartAttack"
+ },
+ "005f0d20": {
+  "module": "junkers88",
+  "name": "C_Junkers88::EndAttack"
+ },
+ "005f0d70": {
+  "module": "junkers88",
+  "name": "C_Junkers88::Hit",
+  "proto": "void __thiscall Hit(C_Junkers88 * this, int type, float amount, S_vector * pos, S_vector * dir, C_Actor * attacker, int flags)"
  },
  "005f0e40": {
-  "module": "squad",
+  "module": "junkers88",
   "name": "FindJunkersTargetFor",
   "proto": "C_Actor * __fastcall FindJunkersTargetFor(C_Human *human, I3D_frame **frame)"
+ },
+ "005f0e60": {
+  "module": "junkers88",
+  "name": "C_Junkers88::FindTarget"
+ },
+ "005f1390": {
+  "module": "junkers88",
+  "name": "C_Junkers88::ResetChatter"
+ },
+ "005f17c0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::Chatter",
+  "proto": "void __thiscall Chatter(C_Junkers88 * this, int group)"
  },
  "005f1cf0": {
   "module": "zz_idioms",
@@ -22524,9 +23764,412 @@
   "module": "zz_idioms",
   "name": "construct_copy4_5f29b0"
  },
+ "005f29c0": {
+  "module": "junkers88",
+  "name": "StaticInit_5f29c0"
+ },
+ "005f29f0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::ReadProperties",
+  "proto": "bool __thiscall ReadProperties(C_Junkers88 * this, C_chunk * chunk)"
+ },
+ "005f2c90": {
+  "module": "junkers88",
+  "name": "StaticInit_5f2c90"
+ },
+ "005f2cc0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::InitSeats"
+ },
+ "005f2de0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::EmptySeats"
+ },
+ "005f2e30": {
+  "module": "junkers88",
+  "name": "C_Junkers88::GetSeatFlags",
+  "proto": "uint __thiscall GetSeatFlags(C_Junkers88 * this, int seat)"
+ },
+ "005f2e60": {
+  "module": "junkers88",
+  "name": "C_Junkers88::IsSeatBlocked",
+  "proto": "bool __thiscall IsSeatBlocked(C_Junkers88 * this, int seat)"
+ },
+ "005f2e70": {
+  "module": "junkers88",
+  "name": "C_Junkers88::SetSeatBlocked",
+  "proto": "bool __thiscall SetSeatBlocked(C_Junkers88 * this, int seat, bool blocked)"
+ },
+ "005f2ec0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::SetSeatOccupant",
+  "proto": "void __thiscall SetSeatOccupant(C_Junkers88 * this, int seat, C_Actor * occupant)"
+ },
+ "005f2fa0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::GetSeatOccupant",
+  "proto": "C_Actor * __thiscall GetSeatOccupant(C_Junkers88 * this, int seat)"
+ },
+ "005f2fd0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::FindSeat",
+  "proto": "int __thiscall FindSeat(C_Junkers88 * this, C_Actor * occupant)"
+ },
+ "005f3000": {
+  "module": "junkers88",
+  "name": "C_Junkers88::LeaveSeat",
+  "proto": "C_Actor * __thiscall LeaveSeat(C_Junkers88 * this, int seat)"
+ },
+ "005f3060": {
+  "module": "junkers88",
+  "name": "C_Junkers88::GetSeatText",
+  "proto": "int __thiscall GetSeatText(C_Junkers88 * this, int seat)"
+ },
+ "005f30c0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::ExitSeat",
+  "proto": "bool __thiscall ExitSeat(C_Junkers88 * this, int seat)"
+ },
+ "005f3110": {
+  "module": "junkers88",
+  "name": "C_Junkers88::GetSeatCamera",
+  "proto": "I3D_frame * __thiscall GetSeatCamera(C_Junkers88 * this, int seat)"
+ },
+ "005f31c0": {
+  "module": "junkers88",
+  "name": "StaticInit_5f31c0"
+ },
+ "005f31f0": {
+  "module": "junkers88",
+  "name": "Junkers88Fall_Save"
+ },
+ "005f3230": {
+  "module": "junkers88",
+  "name": "Junkers88Fall_Load"
+ },
+ "005f32f0": {
+  "module": "junkers88",
+  "name": "Junkers88Fall_Ctor"
+ },
+ "005f3300": {
+  "module": "junkers88",
+  "name": "Junkers88Fall_Init"
+ },
+ "005f3360": {
+  "module": "junkers88",
+  "name": "Junkers88Fall_Update"
+ },
+ "005f34a0": {
+  "module": "junkers88",
+  "name": "Junkers88Fall_Start"
+ },
+ "005f34e0": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_Damage"
+ },
+ "005f3510": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_ShootDown"
+ },
+ "005f36e0": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_Fire"
+ },
+ "005f38f0": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_HitBomber"
+ },
+ "005f3a70": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_Update"
+ },
+ "005f3e10": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_StopAttack"
+ },
+ "005f3e30": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_Disengage"
+ },
+ "005f3e70": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_Save"
+ },
+ "005f40e0": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_Load"
+ },
+ "005f45a0": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_StartAttack"
+ },
+ "005f45e0": {
+  "module": "junkers88",
+  "name": "Junkers88_LoadSound"
+ },
+ "005f4740": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_LoadSounds"
+ },
+ "005f4910": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_CreateModel"
+ },
+ "005f4e50": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_InitVolume"
+ },
+ "005f5100": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_InitGuns"
+ },
+ "005f5310": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_Ctor"
+ },
+ "005f54b0": {
+  "module": "junkers88",
+  "name": "Junkers88_NoPathNote"
+ },
+ "005f54c0": {
+  "module": "junkers88",
+  "name": "Junkers88_PathNote"
+ },
+ "005f5540": {
+  "module": "junkers88",
+  "name": "Junkers88Fighter_Dtor"
+ },
+ "005f5640": {
+  "module": "junkers88",
+  "name": "Junkers88Debris_Save"
+ },
+ "005f57c0": {
+  "module": "junkers88",
+  "name": "Junkers88Debris_Load"
+ },
+ "005f5960": {
+  "module": "junkers88",
+  "name": "Junkers88Debris_Ctor"
+ },
+ "005f5a30": {
+  "module": "junkers88",
+  "name": "Junkers88Debris_Update"
+ },
+ "005f5c40": {
+  "module": "junkers88",
+  "name": "Junkers88Path_Save"
+ },
+ "005f5d20": {
+  "module": "junkers88",
+  "name": "Junkers88Path_Load"
+ },
+ "005f5f20": {
+  "module": "junkers88",
+  "name": "Junkers88Path_Ctor"
+ },
+ "005f60b0": {
+  "module": "junkers88",
+  "name": "Junkers88Path_SetCallback"
+ },
+ "005f60e0": {
+  "module": "junkers88",
+  "name": "Junkers88Path_Dtor"
+ },
+ "005f6100": {
+  "module": "junkers88",
+  "name": "Junkers88Path_Update"
+ },
+ "005f62a0": {
+  "module": "junkers88",
+  "name": "Junkers88Path_Next"
+ },
+ "005f6700": {
+  "module": "junkers88",
+  "name": "Junkers88Part_Save"
+ },
+ "005f6750": {
+  "module": "junkers88",
+  "name": "Junkers88Part_Load"
+ },
+ "005f6840": {
+  "module": "junkers88",
+  "name": "Junkers88Part_Ctor"
+ },
+ "005f6ab0": {
+  "module": "junkers88",
+  "name": "Junkers88Part_Dtor"
+ },
+ "005f6ae0": {
+  "module": "junkers88",
+  "name": "Junkers88Part_Shown"
+ },
+ "005f6b10": {
+  "module": "junkers88",
+  "name": "Junkers88Part_HasNext"
+ },
+ "005f6b40": {
+  "module": "junkers88",
+  "name": "Junkers88Part_Advance"
+ },
+ "005f6ca0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::EngineFire"
+ },
+ "005f6e20": {
+  "module": "junkers88",
+  "name": "C_Junkers88::EngineDown"
+ },
+ "005f6ed0": {
+  "module": "junkers88",
+  "name": "Junkers88_PlayTableSound"
+ },
+ "005f6f50": {
+  "module": "junkers88",
+  "name": "StaticInit_5f6f50"
+ },
+ "005f6f80": {
+  "module": "junkers88",
+  "name": "Junkers88_PlayAnimation"
+ },
+ "005f6ff0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::ShootDown"
+ },
+ "005f70d0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::ShowDamage"
+ },
+ "005f71e0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::UpdateDamage"
+ },
+ "005f75f0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::UpdateDebris"
+ },
+ "005f76a0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::Tick",
+  "proto": "void __thiscall Tick(C_Junkers88 * this, int timeDelta)"
+ },
+ "005f7710": {
+  "module": "junkers88",
+  "name": "C_Junkers88::Update",
+  "proto": "void __thiscall Update(C_Junkers88 * this, int frameTime)"
+ },
+ "005f7bb0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::TurnPropellers"
+ },
+ "005f7e10": {
+  "module": "junkers88",
+  "name": "C_Junkers88::EngineFell"
+ },
+ "005f8040": {
+  "module": "junkers88",
+  "name": "C_Junkers88::BreakPart"
+ },
  "005f8130": {
   "module": "zz_idioms",
   "name": "copy4_5f8130"
+ },
+ "005f8150": {
+  "module": "junkers88",
+  "name": "StaticInit_5f8150"
+ },
+ "005f8180": {
+  "module": "junkers88",
+  "name": "C_Junkers88::GetSeatWeaponDef",
+  "proto": "C_ItemDef * __thiscall GetSeatWeaponDef(C_Junkers88 * this, int seat)"
+ },
+ "005f81b0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::InitSeatWeapons"
+ },
+ "005f8300": {
+  "module": "junkers88",
+  "name": "C_Junkers88::ReleaseSeatWeapons"
+ },
+ "005f8370": {
+  "module": "junkers88",
+  "name": "C_Junkers88::HasSeatWeapon",
+  "proto": "bool __thiscall HasSeatWeapon(C_Junkers88 * this, int seat)"
+ },
+ "005f83b0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::GetSeatWeaponRounds",
+  "proto": "int __thiscall GetSeatWeaponRounds(C_Junkers88 * this, int seat)"
+ },
+ "005f83e0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::ApplySeatControls",
+  "proto": "void __thiscall ApplySeatControls(C_Junkers88 * this, int seat, float * axes, float * buttons)"
+ },
+ "005f8440": {
+  "module": "junkers88",
+  "name": "C_Junkers88::GetSeatWeaponOrigin"
+ },
+ "005f8490": {
+  "module": "junkers88",
+  "name": "C_Junkers88::ShowSeatView",
+  "proto": "void __thiscall ShowSeatView(C_Junkers88 * this, int seat, bool on)"
+ },
+ "005f84b0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::GetSeatWeaponAim"
+ },
+ "005f8500": {
+  "module": "junkers88",
+  "name": "C_Junkers88::UnknownAC"
+ },
+ "005f8540": {
+  "module": "junkers88",
+  "name": "C_Junkers88::IsSeatFirstPersonOnly",
+  "proto": "bool __thiscall IsSeatFirstPersonOnly(C_Junkers88 * this, int seat)"
+ },
+ "005f8570": {
+  "module": "junkers88",
+  "name": "C_Junkers88::UnknownC8"
+ },
+ "005f85a0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::Fire"
+ },
+ "005f87f0": {
+  "module": "junkers88",
+  "name": "C_Junkers88::UpdateTracers"
+ },
+ "005f88c0": {
+  "module": "junkers88",
+  "name": "Junkers88Tracer_Update"
+ },
+ "005f8c20": {
+  "module": "junkers88",
+  "name": "Junkers88Tracer_Reuse"
+ },
+ "005f8c50": {
+  "module": "junkers88",
+  "name": "Junkers88Tracer_Place"
+ },
+ "005f8d70": {
+  "module": "junkers88",
+  "name": "Junkers88Tracer_Save"
+ },
+ "005f8f70": {
+  "module": "junkers88",
+  "name": "Junkers88Tracer_Load"
+ },
+ "005f91b0": {
+  "module": "junkers88",
+  "name": "Junkers88Tracer_Ctor"
+ },
+ "005f9290": {
+  "module": "junkers88",
+  "name": "Junkers88Tracer_Release"
+ },
+ "005f96d0": {
+  "module": "junkers88",
+  "name": "StaticInit_5f96d0"
  },
  "005f9700": {
   "module": "door_supply_box_barrel",
@@ -34691,11 +36334,23 @@
   "module": "script",
   "name": "g_scriptMessageTypeBits"
  },
+ "00839390": {
+  "data": true,
+  "module": "sight",
+  "name": "g_sightTime",
+  "type": "float"
+ },
  "00839460": {
   "data": true,
   "module": "actors",
   "name": "g_actorCreators",
   "type": "C_ActorCreator **"
+ },
+ "008396e8": {
+  "data": true,
+  "module": "geffects",
+  "name": "g_rainTeamSteps",
+  "type": "int"
  },
  "0083bed4": {
   "data": true,
@@ -35033,6 +36688,11 @@
   "module": "app",
   "name": "g_cameraModule"
  },
+ "0089afbc": {
+  "data": true,
+  "module": "geffects",
+  "name": "g_cameraHumanEffects"
+ },
  "0089b288": {
   "data": true,
   "module": "app",
@@ -35065,15 +36725,32 @@
   "module": "app",
   "name": "g_temporaryActors"
  },
+ "0089b760": {
+  "data": true,
+  "module": "geffects",
+  "name": "g_waterLevel",
+  "type": "float"
+ },
+ "0089b7f8": {
+  "data": true,
+  "module": "geffects",
+  "name": "g_fadeQuad"
+ },
  "0089b880": {
   "data": true,
-  "module": "app",
+  "module": "geffects",
   "name": "g_geffectsModule"
  },
  "0089bbb0": {
   "data": true,
   "module": "script",
   "name": "g_decorators"
+ },
+ "0089bbb4": {
+  "data": true,
+  "module": "geffects",
+  "name": "g_rainTime",
+  "type": "int"
  },
  "0089bbbc": {
   "data": true,

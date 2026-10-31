@@ -32,24 +32,45 @@ enum E_ItemComponentKind {
     ICK_NONE = 10,                  // what code that finds no component assumes
 };
 
-// C_ItemDef::GetBehaviour() values identified so far.
+// C_ItemDef::GetBehaviour() values identified so far (examples from Sabre Squadron's items.sav).
 enum : int {
-    ITEM_BEHAVIOUR_MELEE = 0,       // the knife (the player's stab and its second attack)
-    ITEM_BEHAVIOUR_SIDEARM = 2,     // what humans draw from the belt (pistols, inferred)
+    ITEM_BEHAVIOUR_MELEE = 0,       // the knife (the player's stab and its second attack); empty hands
+    ITEM_BEHAVIOUR_SIDEARM = 2,     // pistols: drawn from the belt
+    ITEM_BEHAVIOUR_SMG = 3,         // submachine guns (MP 40, Thompson, Sten, PPSh)
+    ITEM_BEHAVIOUR_RIFLE = 4,       // rifles (Kar 98k, Lee-Enfield, Garand)
+    ITEM_BEHAVIOUR_LMG = 5,         // light machine guns firing only from prone (Bren, DP-28, ZB 26)
     ITEM_BEHAVIOUR_LAUNCHER = 6,    // single-shot weapons: one round without an ammo item, the
                                     // round shows as the "mag1" frame, reloads from the backpack
+    ITEM_BEHAVIOUR_FIXED = 8,       // fixed weapons (MG 42, Browning 1919, the vehicles' guns and flak)
     ITEM_BEHAVIOUR_THROWN = 9,      // grenades: firing throws the item itself
     ITEM_BEHAVIOUR_MINE = 10,
-    ITEM_BEHAVIOUR_11 = 11,         // carried like mines and ammo (backpack contents)
+    ITEM_BEHAVIOUR_STICKY_CHARGE = 11,  // charges stuck on vehicles (only the Clam Mk.III); carried
+                                    // like mines and ammo (backpack contents)
+    ITEM_BEHAVIOUR_ASSAULT = 12,    // heavy weapons counted as assault weapons (BAR, MP 44)
     ITEM_BEHAVIOUR_MEDKIT = 13,
     ITEM_BEHAVIOUR_BINOCULARS = 14, // on the belt: the player's view mode 1
     ITEM_BEHAVIOUR_UNIFORM = 15,
     ITEM_BEHAVIOUR_HEADGEAR = 16,
     ITEM_BEHAVIOUR_BACKPACK = 17,
-    ITEM_BEHAVIOUR_19 = 19,   // worn in ITEM_CONTAINER_BACKPACK (taking it off drops the contents container)
-    ITEM_BEHAVIOUR_RESPAWNING = 20, // multiplayer pick-ups
-    ITEM_BEHAVIOUR_21 = 21,         // dropped on death in multiplayer like the pick-ups
+    ITEM_BEHAVIOUR_COMPASS_CAMERA = 18, // the compass and the camera
+    ITEM_BEHAVIOUR_WIRE_CUTTER = 19,    // on the belt: the wire-cut command
+    ITEM_BEHAVIOUR_RESPAWNING = 20, // multiplayer pick-ups (also the documents to take)
+    ITEM_BEHAVIOUR_MISSION_EXPLOSIVE = 21,  // explosives for objectives (explosives bag, dynamite);
+                                    // dropped on death in multiplayer like the pick-ups
+    ITEM_BEHAVIOUR_KEY = 22,        // keys for doors (the base game's items.sav has them as 18)
     ITEM_BEHAVIOUR_AMMO = 23,       // every C_AmmoItemDef
+};
+
+// C_ItemDef::GetCarryMode() values: how a human holds and carries the item.
+enum : int {
+    ITEM_CARRY_FIXED = 0,           // fixed weapons (the guns and flak on vehicles and mounts)
+    ITEM_CARRY_SMG = 1,
+    ITEM_CARRY_SIDEARM = 2,
+    ITEM_CARRY_RIFLE = 3,
+    ITEM_CARRY_LMG = 4,             // light and mounted machine guns
+    ITEM_CARRY_LAUNCHER = 5,        // bazooka, Panzerfaust, Panzerschreck
+    ITEM_CARRY_EQUIPMENT = 6,       // grenades, explosives, helmets, uniforms, other equipment
+    ITEM_CARRY_AMMO = 100,          // every C_AmmoItemDef
 };
 
 // C_ItemDef::GetAllowedContainers() bits.
@@ -410,7 +431,7 @@ public:
     explicit C_AmmoItemDef(int id) : C_ItemDef(ITEM_AMMO, id) {}   // 0x007e0850
     void Save(int *ioSize, void *buffer) override;      // 0x007e08d0
     void Load(int *outSize, const void *data) override; // 0x007e0910
-    int GetCarryMode() override { return 100; }         // 0x007e0880
+    int GetCarryMode() override { return ITEM_CARRY_AMMO; }   // 0x007e0880
     int GetBehaviour() override { return ITEM_BEHAVIOUR_AMMO; }   // 0x007e0890
     float GetAmmoAmount() override { return m_ammoAmount; }       // 0x007e0870
 

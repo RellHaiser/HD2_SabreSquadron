@@ -66,7 +66,7 @@ S_vector4 Point4(const S_vector &v) { return {v.x, v.y, v.z, 0.0f}; }
 bool IsPickUp(const C_Item *item)
 {
     const int behaviour = item->GetDef()->GetBehaviour();
-    return behaviour == ITEM_BEHAVIOUR_RESPAWNING || behaviour == ITEM_BEHAVIOUR_21;
+    return behaviour == ITEM_BEHAVIOUR_RESPAWNING || behaviour == ITEM_BEHAVIOUR_MISSION_EXPLOSIVE;
 }
 
 // S_vector::Normalized with the original's sum ((y² + z²) + x²); a NaN square scales.
@@ -215,7 +215,7 @@ void C_ItemActor::OnMessage(C_BitStream *stream)        // 0x005b7110
     auto *msg = static_cast<C_NetMessage *>(stream);
     switch (msg->ReadBits(MSG_KIND_BITS)) {
     case MSG_REMOVE:
-        GetGEffects()->ClearModelHighlight(m_frame);
+        GetGEffects()->ClearModelTransparency(m_frame);
         m_frame->SetOn(false);
         m_frame->Update();
         g_temporaryActors.DestroyActor(this);
@@ -267,7 +267,7 @@ void C_ItemActor::Tick(int timeDelta)                   // 0x005b7320
         return;
     m_lifeTime -= timeDelta;
     if (m_lifeTime < 1) {
-        GetGEffects()->ClearModelHighlight(m_frame);
+        GetGEffects()->ClearModelTransparency(m_frame);
         m_frame->SetOn(false);
         m_frame->Update();
         C_BitStream *msg = CreateTempActorMessage(m_netId, true);

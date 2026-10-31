@@ -34,17 +34,6 @@ uint32_t FUN_005d5ba0(uint32_t param_1, ...)
 }
 
 
-// 0x005d64c0
-uint32_t FUN_005d64c0(int param_1, ...)
-{
-  if ((*(int **)(param_1 + 0x534))[5] != 1) {
-    (**(code **)(**(int **)(param_1 + 0x534) + 0x1c))();
-    return 0;
-  }
-  return 0;
-}
-
-
 // 0x005d7070
 int * FUN_005d7070(void *_this,char *param_1, ...)
 {

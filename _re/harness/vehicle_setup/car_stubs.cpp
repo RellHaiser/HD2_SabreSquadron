@@ -132,8 +132,10 @@ std::map<int, S_OpenFile> g_handles;
 int g_nextHandle = 1;
 }  // namespace
 
-int __stdcall dtaOpen(const char *fileName, bool)
+bool g_dtaArchivesFirst;                                // the last dtaOpen's flag (part 8's test)
+int __stdcall dtaOpen(const char *fileName, bool archivesFirst)
 {
+    g_dtaArchivesFirst = archivesFirst;
     if (!g_files.count(fileName))
         return -1;
     g_handles[g_nextHandle] = {fileName, 0};

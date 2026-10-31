@@ -975,7 +975,7 @@ void C_PlayerController::OnHit(int type, int zone, int health, C_Actor *attacker
         UpdateHandsItem();
         if (m_handsItem) {
             const int carryMode = m_handsItem->GetDef()->GetCarryMode();
-            if (carryMode == 1 || (carryMode > 2 && carryMode < 5)) {
+            if (carryMode == ITEM_CARRY_SMG || carryMode == ITEM_CARRY_RIFLE || carryMode == ITEM_CARRY_LMG) {
                 m_human->DropItem(m_handsItem->GetUid(), away);
                 m_handsItem = nullptr;
             }

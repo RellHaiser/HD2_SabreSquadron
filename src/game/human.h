@@ -661,6 +661,7 @@ public:
 
     // --- body ------------------------------------------------------------------------------
     C_HumanMovement *GetMovement() const { return m_body.movement; }
+    I3D_sector *GetBodySector() const { return m_body.GetSector(); }
     C_HumanWork *GetWork() const { return m_body.work; }
     // Models of the carried items (holsters, belt, hands).
     C_HumanEquipment *GetEquipment() const { return m_body.equipment; }
@@ -746,7 +747,7 @@ public:
     // Belt item of behaviour `behaviour` that is not busy.
     C_Item *FindBeltItem(int behaviour) const;          // 0x005a6730
     C_Item *GetMedkit() const;                          // 0x005a7e00
-    C_Item *FindBeltItem19() const;                     // 0x005a7ed0
+    C_Item *FindWireCutter() const;                     // 0x005a7ed0
     // The first item of behaviour `behaviour` (null: none) and in `*container` its container
     // (C_HumanController::UseMedkit uses the item).
     C_Item *FindContainerOfBehaviour(int behaviour, int *container) const;   // 0x005a7810

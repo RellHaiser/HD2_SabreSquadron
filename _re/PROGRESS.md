@@ -5090,6 +5090,280 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: 124 names (names/door_supply_box_barrel.txt), 124 decompiles exported; 129 functions in
     ported.txt (5 helpers absorbed). Stats: 7,037 of 12,286 functions by hand (65.9 % by size).
 
+  PART 7g DONE (2026-10-30): the air attack (src/game/air_attack.*, new).
+  - C_AirAttack ("AirAttack", type 36, vtable 0x00812930, 0x1F0 bytes, 0x005e2c00..0x005ea2f0): a plane
+    flying at 100 m/s. Idle it circles (0.75 rad/s); given a target (SetTarget) it runs at it: passing
+    (2) to 80 m past, leaving (0) to 400 m out (x and z; a victory roll one time in four, 0.003 rad a
+    ms), approaching (1: another of the four motor sounds, turning 0.4 rad/s towards it) to within
+    50 m, 35 m clear (25 up to 40 m over it). In sight when the first volume on the line past the
+    border volumes (RayTestPastBorders 0x005e2cc0: on 5 cm past each STOP / PASS border facing the
+    ray) is the target's box: its height approached (0.001 a ms) and the guns, a shot each 25 ms
+    within 200 m (a flash; aimed short of the target by 0.15 of the distance - 125 + up to 50 along the
+    level direction, up to 3 m to a side, the ray 1.2 times as long at the scene only, flags
+    0x820000); on deep sand a bullet landing in twice the miss distance (ms): a particle, a human on
+    the line hit for the damage (70), a gun sound if none, sometimes an impact sound and a whizz
+    within 10 m of the camera (pooled sounds). The ground (ray down from 1000 m up) under the ceiling
+    or in sight and anything ahead within the clearance: climbing by 2 / the normal's y a second;
+    nothing near: levelled (0.0003 / 0.001 a ms up, 0.0015 down). Banking to the turn rate (0.0005 rad
+    a ms). The guns' sound on the approach (a human target outdoors within 400 m), fading out
+    otherwise. Dust (Tick): within 60 m of the camera over sand or a minefield 40 m below, each 3 s,
+    moving on at 37 m/s for 3 s. Hits take the hit points (100); under 0 shot down (state 3, at once
+    2 with no target through SetTarget, quirk kept): smoke from a metre under it, the script's
+    OnDeath; gone 500 m out. The box (COLLISION_TYPE_PIKE; quirk kept: its centre the bound's, the
+    radius as w; at the start w is the local centre's x). Properties: chunk 2 hit points, 4 damage
+    (WriteProperties reports false, quirk kept). Saved game: the base's, then 1000..8000 (bullets
+    last; quirk kept: an unknown chunk is entered, not left). Fixes: StopMission nulls the playing
+    motor / gun sound pointers (the pause called through them); Fire without flashes skips the flash
+    (the original divides by 0); ReadProperties keeps the value on a short chunk; the smoke matrix
+    starts as the identity.
+  - g_airAttacks (0x008ac9c4); FindAirAttackFor (0x005e8b70: the nearest seen approaching or passing
+    within 150 m, for the squads), PauseAirAttackSounds (0x005e8d50, was PauseActorEffects).
+    MakeFrameBoxVolume gained an optional local-centre output. C_SightModule::GetStartDelay in
+    pending.h. world.h's partial class replaced by the header.
+  - Harness (build_item.bat links air_attack.cpp; air_actors_test.inc after PropActorsTest;
+    check_item.py reads "air:", 16 checks): a ray world of planes (material, reported normal), the
+    script module's cutscene flag, the sight module's delay, the camera module, SetDir3 (from the
+    LS3DF port), the sounds' velocity, SetLoop / IsPlaying logged where needed. The flight and the
+    aim against oracles from the asm. Baselines: 0 of 37 in both orders; the other five builds 0 of
+    37 each.
+  - Mutations (mutations/mutate_7g.py, 649 after dropping 55 equivalent and 9 that did not compile):
+    the first run caught 546 of 713; two rounds of new cases (see the file's docstring). All 649
+    caught.
+  - Build: 189 files clean (MSVC). Tier 1: 572 errors in 102 files, 237 stubs. ret_audit --src: 47.
+  - Ghidra: 42 names (names/air_attack.txt), 69 decompiles exported; 42 functions in ported.txt (23
+    helpers absorbed). Stats: 7,102 of 12,286 functions by hand (66.6 % by size).
+
+  PART 7h DONE (2026-10-30): the Junkers 88 (src/game/junkers88.*, new).
+  - C_Junkers88 ("Junkers88", type 34, vtable 0x00812c10, 0x330 bytes, 0x005edcf0..0x005f9700): the
+    bomber of the air-fight mission, client side. Five seats (SEAT00..04; the flags table 0x0083e868
+    is global, quirk kept; seat weapons for bit 8). The camera path ("#aircraftdum" playing
+    "#aircraftA<k>") moves it; its velocity from the step. Parts: every visual ending in 'd' (the
+    intact frame without the 'd', a stump with 'f'), grouped as damage / engines / outer, with the
+    parts hanging on each engine and the rows thrown off with a part's last stage; Advance moves the
+    children on, throws the next stage's pieces as debris (0.8 of the bomber's velocity plus a push,
+    spinning, falling 9.81 m/s^2, gone 500 m down). The blades' parts stop their engine (blur, motor,
+    smoke, damage sounds; quirk kept: the other side's engine part falls). The health goes down by
+    the attacking fighters' rate times the firepower: "#adamage<n>" in five steps (level 4: both
+    engines smoke at the right propeller, quirk kept), parts break from 75 %, engines from 25 %, at 0
+    an outer part, "#jushotdwn<n>", the fall (a 3 m sphere swept along the body), the cutscene 31; on
+    the ground the crash and a 7 s slow motion of the camera path. Fighters (Junkers88_SetState, at
+    most nine, Fix): "la_Bf109Canyon" models on "#airfight_0<n>_A<k>" paths whose notes start / end
+    attacks: tracers each 200 ms from a barrel (pooled, 0.5 m a ms with a jitter, 500 m or to the
+    static ray's hit, a whizz within 25 m of the camera), hit sounds on the bomber, a sphere in the
+    world for the gunners (hits by 1 / the health factor); shot down: smoke, "#bfshotdwn<n>", falling
+    until the animation ends or they land. They fade in between 9 and 11 s. Six chatter groups
+    (group 5 by a fighter's bearing, 20..60 m). Properties 100 / 200 / 300 / 400 / 500 (an unknown
+    chunk entered, not left: quirk kept). Saved game: 1000 holding 2000..20000 (the health written
+    twice, quirk kept). Fixes: chatter group 4 has no pause (the original divides by a leftover);
+    nulls guarded (the tracers' model, a fighter or path without a model or animation, a seat
+    without its dummy, a fighter without guns, empty part lists); short chunks keep their values;
+    LoadParts skips indices out of range. Dropped: the copy protection in UpdateDamage (the
+    0x008ca840 / 0x008caf40 check: 1000 damage a second after two minutes in a cracked copy).
+  - g_junkers88 (0x008ac9e4), g_attackingFighters (0x008ac9e8), FindJunkersTargetFor (0x005f0e40,
+    the squads' gunners). GEffects slot 0x58 is SetHierarchyOn(frame, on, typeMask) 0x004865e0 (was
+    DetachWeapon; FreeHands updated); C_ScriptModule::GetCutscene; SetupJunkers88 calls
+    SetInterceptors; squad_combat uses GetHealth. world.h's partial classes replaced by the header.
+  - Harness (build_item.bat links junkers88.cpp; junkers_actors_test.inc after AirActorsTest;
+    check_item.py reads "junk:", 17 checks): a model of the real part names, fighters and path dummies
+    from the cache fake, model stages / times / ticks, callbacks, the sphere sweeps, the static ray,
+    the cutscene state. S_SeAnim (seat_actors_test.inc) now has the engine's refCount, play mode and
+    file name first; the profile stub has the HUD option and play mode. Baselines: 0 of 37 in both
+    orders; the other five builds 0 of 37 each.
+  - Mutations (mutations/mutate_7h.py, 1,210 after dropping 98 equivalent and 8 that did not
+    compile): the first run caught 990 of 1,290 run; two rounds of new cases (see the file's
+    docstring). A full rerun caught 1,209 of 1,211: a hit to exactly 0 caught one, the other
+    (m_chatter[-1]) dropped. All 1,210 caught.
+  - Build: 190 files clean (MSVC). Tier 1: 568 errors in 100 files, 234 stubs. ret_audit --src: 52
+    (the Junkers' S_Fall::Update and TurnPropellers get an unused frame time; EngineDown's second
+    argument is 0 at its one call; SaveParts / LoadParts take the group's fields one by one).
+  - Ghidra: 140 names (names/junkers88.txt; 3 moved from script.txt / squad.txt), 2 functions created
+    (0x005f54b0 NoPathNote, 0x005f54c0 PathNote), 177 decompiles exported; 145 functions in ported.txt
+    (32 helpers absorbed). Stats: 7,279 of 12,288 functions by hand (67.8 % by size).
+
+  PART 8 PLAN (2026-10-30): the mission and world modules, ~150 KB left after the actors, by source
+  file: 8a the vertex animations, the lightmap groups, texture shifting (0x004736d0.., 0x0048c710..,
+  0x0048e100..); 8b the sight module (0x0046d5d0..0x004702f0: observers, targets); 8c the effects
+  module GEffects with the lens flares (0x00484ec0..0x0048c700); 8d the decorations, the birds'
+  models, volumetrics, clouds and the mesh player (0x00479790..0x00484e70); 8e the camera module
+  with the command map's tactical camera (0x00462320..0x0046cb20); 8f the mission loading: the
+  loader screen, tree.klz, scene2.bin with the cache, check / actors (0x006c97b0..0x006d4eb0).
+
+  PART 8a DONE (2026-10-30): the vertex animations, the lightmap groups and texture shifting
+  (src/game/vertex_anim.*, lightmap_groups.*, tshift.*, new).
+  - C_VertexAnimModule ("Vertex anim", module 9, 0x0089b474, 0x004736d0..0x00474f80): flags, palm
+    leaves and the supply box's lid. Tables\Vertanim.def holds the animations (name, last frame,
+    levels, vertex counts, then per frame and level the vertices as two S_vector4: position and
+    normal); Missions\<m>\Vertanim.bin places players (version 1 adds a cull flag; a record whose
+    frame is missing or not an object visual leaves its rest to be read as the next one, quirk
+    kept; Init sets the file's time back to 0). Client side only, with the detail switch 1
+    (DETAIL_VERTEX_ANIMATION). A player blends the drawn level's vertices (level 0 for texture-LOD
+    objects; only up to its maximal level) from frame to next frame by time / frame time, round or
+    ping-pong, stopping at the end without loop; a culled player only after its visual was drawn.
+    Tick sorts the players every 300 ms (unsigned) by their size on screen (1.7 m at the distance
+    under the camera's view, below 0.02: far, if culled); far ones advance in the ticks, near ones
+    every frame. StartMission picks random start frames for negative ones (quirk kept: the last
+    frame's number as the count). Fix: a Vertanim.def cut short frees only what it allocated.
+  - C_LightMapGroupsModule ("LMapsGrp", module 8, 0x0089bbbc, 0x0048c710..0x0048d8f0): groups (chunk
+    0x100 a name, 0x110 its frames; case insensitive, no duplicates; another chunk is entered and
+    not left, quirk kept) and the switched lightmaps (frame referenced, its original kept; switched
+    back: forgotten); RestartMission / StopMission set them back; saved as count, then lightmap and
+    name per switch, last first. Fixes: a frame chunk before the first group is dropped (the
+    original read before the vector); a saved name over 1023 characters is skipped (the original
+    read its rest into one byte).
+  - C_TShiftModule ("TShift", module 10, 0x0089bc34, 0x0048e100..0x0048eaa0): only the list the scene
+    loader fills (mesh, frame, on, reverse; the scripts' frm_setshifting). I3D_visual::GetShiftId
+    (+0x1E0) was the visual's mesh. 5 functions without callers that Ghidra had not found created
+    and ported (HasMesh 0x0048e280, AddVisual, RemoveMesh, RemoveFrame, RemoveModel; Fix: reverse
+    starts false where the original leaves a stack byte).
+  - S_VertexAnimPlayer's fields named (the zone's and the supply box's frame = maxLevel, frameCount
+    = levelCount). I3D_object_visual slot 0xB0 RefreshLevels, GetTextureLevel (+0x1E4),
+    VISFLAGS_TEXTURE_LOD. pending.h / world.h declarations replaced by the headers.
+  - Harness: a world build (build_world.bat, -DWORLD_TEST: harness.cpp with world_modules_test.inc,
+    check_world.py: "vanim:", "lmaps:", "tshift:", 26 checks) run on mission lists ("mission NAME":
+    the 21 missions with a Vertanim.bin and AFRICA2 without); the real Vertanim.def / .bin in the
+    memory files (Brest's water animations are not in the table: dropped). The stub vertex_anim.h
+    forwards to the real one under WORLD_TEST; the profile stub has the detail switches; car_stubs'
+    dtaOpen keeps its flag. Baselines: 0 of 22 in both orders; the item build 0 of 37; the other
+    five builds 0 of 37 each.
+  - Mutations (mutations/mutate_8a.py, 265 after dropping 30 equivalent and 5 that did not
+    compile): the first run caught 233 of 287 run; new cases for 19 (see the
+    file's docstring); regenerated with TShift's new functions, the rerun caught 265 of 267, the
+    last 2 went with the entry's header defaults. All 265 caught.
+  - Build: 193 files clean (MSVC). Tier 1: 566 errors in 99 files, 233 stubs. ret_audit --src: 52.
+  - Ghidra: 79 names (names/world_modules.txt; 6 moved from moving_actors.txt / script.txt), 5
+    functions created, 104 decompiles exported; 76 functions in ported.txt (21 helpers
+    absorbed). Stats: 7,376 of 12,293 functions by hand (68.1 % by size).
+
+  PART 8b DONE (2026-10-30): the sight module (src/game/sight.*, new).
+  - C_SightModule ("Sight", module 5, 0x0089b288, 0x0046d5d0..0x004702f0): humans and meleeTrackers
+    register as observers and targets (a free slot from the end reused, else appended; -1 for a
+    frame registered already, no human / meleeTracker, a target mask of 0 or over 15; another
+    actor's frame registers a null target, quirk kept). Each observer keeps a 0x68-byte record per
+    target: the parts seen, their count, the relation (friend: seen at once and told, never tested;
+    neutral; hostile: tested), per part the view, the last and the next test. Relations: IsFriendOf
+    / IsHostileTo for humans (the player's side and the enemy always hostile), by role for
+    meleeTrackers (roles 2, 3 friends; 1, 4, 5 hostile; other trackers friends). Targets' parts are
+    the collision volume frames d, z (else f), i, m, q / c, f, k, o. TestNow: the view test (the
+    target's collision off meanwhile), then rays to the parts from the last; a clear ray (or one
+    meeting the target's vehicle) counts. The tick: 4 s after the start, then a budget of pair tests
+    (each pair once a second: g_sightTime 0x00839390, starting at 1) walked by a target and an
+    observer cursor, each pair also the other way round (quirk kept: the budget is charged for the
+    observers left when a target is passed). A human's test: the view test, then the next part's
+    ray when it is due (not due: "SAFE ..." printed, the answer "anything seen" kept, quirk kept);
+    a meleeTracker's: its AI's view test into the part's view, then a ray that has to meet the
+    target. States: observer off / on; target alive (light objects block) / not, dead (friends test
+    it from then on), hidden / shown. Fixes: a meleeTracker without its body frame looks from its
+    frame (the original reads the null frame); its wait for a negative view is 0 (unset there).
+  - C_MeleeTracker::TestSight (0x005d64c0: the AI's view test unless its mode is 1) and
+    GetBodyVolumes. pending.h's declarations replaced by the header; the target states named
+    (SIGHT_TARGET_NOT_ALIVE = 1), the relations SIGHT_FRIEND / NEUTRAL / HOSTILE.
+  - Harness: the world build links sight.cpp; sight_test.inc ("sight:", 12 checks) with the stub
+    C_Human's sight calls (friend lists, view tests, collision; the stub human.h declares them),
+    zeroed C_MeleeTracker memory as meleeTrackers, a RayTest answering by the point aimed at;
+    SetIgnoredVolumes' fake keeps its arguments; the stub pending.h takes the real sight.h under
+    WORLD_TEST. Baselines: 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37 each.
+  - Mutations (mutations/mutate_8b.py, 402 after dropping 18 equivalent and 12 that did not
+    compile): the first run caught 354 of 432 (66 survived); new cases for 49 (see the file's
+    docstring). A test of an id past the records wrote out of bounds (random crashes, false
+    catches): removed; 3 more cases, 1 more equivalent. The full rerun: all 402 caught.
+  - Build: 194 files clean (MSVC). Tier 1: 566 errors in 99 files, 233 stubs. ret_audit --src: 52.
+  - Ghidra: 63 names (names/sight.txt; 2 moved from squad.txt / team.txt; the observer and target
+    classes were auto classes 0x0080ff68..ffbc), 65 decompiles exported; 59 functions in ported.txt
+    (5 helpers absorbed). Stats: 7,440 of 12,293 functions by hand (68.4 % by size).
+
+  PART 8c-i DONE (2026-10-30): the GEffects module's core (src/game/geffects.*, new); 8c-ii: its
+  shadows, uniforms / face textures and ShatterGlass.
+  - C_GEffectsModule ("GEffects", module 1, 0x0089b880, vtable 0x008101f0, 0x00485b50..0x00489c60):
+    the screen fade (Fade: a rate per second, the level -1 once past the target, the render then
+    holds the target; RenderFade also draws the mission start's black screen, 3 s and gone in 1 s;
+    SetFadeLevel: a full-screen pre-transformed quad, driver state 3 and render state 14 off while it
+    draws); visuals fading out / in (records with a reference; FadeOutModel drops a fade-in of the
+    visual and the other way round; the hierarchy fades act on LMAP, BBRD, MRPH, SNGM, SMMR, MIRR,
+    OBJ_); humans fading (the "a" visual's alpha as the start); SetHierarchyOn (the children first,
+    the last first; a type's bit, the model's and the user frame's bits swapped against the search
+    masks; sounds also SetActive); the thunderstorm (the light flickers at RandFloat times its
+    power, on above 0.5; off at once or at the next update; StartMpLightning(time): "MP_Lightning"
+    for a time); rain (each 100 ms, rate / 10 rays from 100 m above the camera within the area
+    down 200 m past the borders: a drop, a ring on water; every third step drops on the player's
+    team: members in the primary sector within 10 m, drawn in the last frame, under none of the
+    dummies drawn (a sphere, then the box in the dummy's space)); the decorators update while paused
+    too, rain only with the command map open; the underwater view (missions\<name>\watercam.set: a
+    version 1 chunk, then a 0xA0-byte block: under water below the surface of the player's head (or
+    in a submarine) the camera's fov and range change (its own kept and given back), the camera
+    module's mode 4, the above / underwater hierarchies, the backdrop's children, the sea and
+    ambient sounds and the weather switch; the fov sways; quirk kept: the camera is taken again
+    when surfacing); the sun ("mirasun") keeps its place relative to the camera; camera animations
+    (a model of the file, the camera follows its "*cam*" frame (else its first child) and keeps the
+    last key; restored at the end); the time scale. Fixes: a fade dropped by the other kind frees
+    its record and reference (the original drops them); StartMpLightning keeps no frame that is not
+    a light; a camera animation without a camera frame is not followed (null read); the fade colour
+    has no fourth float read past the caller's vector; the water file's version 0 when unread.
+  - The decorators, volumetrics, mesh player, birds and clouds it owns or drives (part 8d) are
+    declared in pending.h (C_Decorators moved there from world.h). I3D: the scene's backdrop and
+    omni sectors, NumDrawnDummies / GetDrawnDummies (S_dummyBox), the sector's SetEnvironment, the
+    light's GetPower, I3DVISUAL_MORPH / LENSFLARE; the camera module's SetSpecialMode with a height
+    (CAMERA_MODE_UNDERWATER), g_cameraHumanEffects. SetModelHighlight / ClearModelHighlight renamed
+    SetModelTransparency / ClearModelTransparency (slot 0x54 is the hierarchy's alpha); the
+    thunderstorm's third argument is `immediate`; Fade / SetFadeLevel take S_vector colours.
+  - Harness: the world build links geffects.cpp; geffects_test.inc ("geffects:", 14 checks) with
+    logging fakes of the frames', scene's, driver's and IGraph's slots and of the 8d objects, the
+    team, the camera module, the head's water test, the rays and particles. The scene's fake vtable
+    grew to 128 slots (its 0x11C..0x134 wrote past it into the sound cache: a crash at exit). The
+    stub pending.h takes the real geffects.h under WORLD_TEST. Baselines: 0 of 22 in both orders;
+    the item build 0 of 37; the other five 0 of 37 each.
+  - Mutations (mutations/mutate_8c.py): the first run caught 495 of 570 (58 survived,
+    17 did not build); 20 equivalent (see the file's docstring), new cases for 38 (the mesh
+    player's Update takes the frame time and GetShadowParams returns the block's address, both
+    found by ret_audit meanwhile). The full rerun: all 533 caught.
+  - Build: 195 files clean (MSVC). Tier 1: 560 errors in 99 files, 230 stubs. ret_audit --src: 52.
+  - Ghidra: 57 names (names/geffects.txt; 4 moved from app.txt, hud.txt, physics.txt; 3 made
+    __thiscall), 64 decompiles exported; 47 functions in ported.txt (9 helpers absorbed by hand: the
+    decorators' left for 8d). 0x00486d60 (an enum callback, never referenced) stays to tier 1.
+    Stats: 7,496 of 12,293 functions by hand (68.8 % by size).
+
+  PART 8c-ii DONE (2026-10-30): the GEffects module's shadows, uniforms, face textures and glass.
+  - CreateShadow (0x004894e0, the client side): the shadow cache's "s<model file>" (its folders
+    and what follows the first '.' dropped; a human's "shdpuppet") copied into a new shadow,
+    "._shad.<model>", under the model's own "a" (else the model), one of the model's frames, with
+    the module's parameters (S_ShadowParams: colour, max height 1, depth 8, range 100, 64 x 64; the
+    opacity sin(10 degrees) squared); a shadow made before is taken off first; the model holds the
+    only reference. GetShadow (no reference added), Set / GetShadowParams. Quirk kept: a load
+    returning a success code above 0 makes no shadow and keeps the cache's reference.
+  - SwitchFaceTexture (0x0048a5c0): the first skinned visual (SNGM / SMMR with visual flag 0x800)
+    whose face groups' textures have "e_f0" in their lowercase names: <texture without its
+    extension>.bmp loaded; the first such face group's own material takes it, the others share it.
+  - DressUniform (0x0048a780): a temporary model loaded with item `uniform`'s model ("NA01" when it
+    is no uniform; quirk kept: the name cut after its last '.', the dot kept) takes the model's 8
+    animation stages and the frames not its own (by their parent's name), the model is reloaded
+    from the file and takes them back; the movement told, the player's side's volumes collected
+    again (the active soldier's view kept), the old face texture switched back. Quirks kept: the
+    temporary model stands up to 4 m off (two RandomFloat calls); the targets' frames are copied
+    within the same model.
+  - ShatterGlass (0x00485ba0) and its recursion (0x00484f60): each face of an object visual with
+    flag 0x800 split at the middle of its longest edge (ties: 0-1, then 1-2) until its area is at
+    most the limit (0.01 for the car's windows), each part a shard: an object visual of the triangle
+    and its back with one normal, the glass's material, at the glass's place, a falling physics
+    object (shoot-through) pushed at random. Quirks kept: the glass's vertices and faces are never
+    unlocked (the faces locked per face); the shard's face group's reference is never given back.
+  - I3D: the driver's CreateFaceGroup / CreateMeshLevel, the mesh level's Release / AddFaceGroup /
+    AllocVertices, the face group's AllocFaces / Lock / numFaces, the model's SetAnimFlags, the
+    target's frames, the shadow's SetSize / SetDepth / SetMaxHeight / SetOpacity / SetColor,
+    the material's AddRef, VISFLAGS_OBJECT_PARAMS (names from the LS3DF port). C_Team::CollectVolumes
+    public.
+  - Harness: geffects2_test.inc ("geffects2:", 10 checks) with made-up meshes, levels, face groups,
+    materials and textures at the engine's offsets, the shadow cache's Get and C_ItemDefs faked
+    (a filled vtable), the model cache's fill making the uniform models; the 8c-i fakes' LinkTo now
+    moves frames between child lists; the fake physics module can make no object. Baselines: 0 of
+    22 in both orders; the item build 0 of 37; the other five 0 of 37 each.
+  - Mutations (mutations/mutate_8c2.py, the 8c-ii code): the first run caught 224 of 255 (30 survived, 1 did not
+    build); 14 equivalent (see the file's docstring), new cases for 16 (and the 1-2 case's
+    redundant b = &p2 removed). The second run: 238 of 240 (the stage check widened); the full
+    rerun: all 240 caught.
+  - Build: 195 files clean (MSVC). Tier 1: 546 errors in 97 files, 226 stubs. ret_audit --src: 52.
+  - Ghidra: 13 names (names/geffects.txt; ShatterGlass moved from car.txt), 35 decompiles exported;
+    12 functions in ported.txt (23 helpers absorbed: the shadow cache's and the face groups'
+    containers; the decorators' still left for 8d). Stats: 7,531 of 12,293 functions by hand (69.2 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

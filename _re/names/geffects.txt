@@ -1,0 +1,77 @@
+# Parts 8c-i / 8c-ii: the GEffects module (src/game/geffects.*), 0x00484f60..0x0048a780 of
+# 0x00484e90..0x0048c740 (8c-ii: shadows, uniforms / face textures, ShatterGlass). 5 names moved from
+# app.txt, hud.txt, physics.txt, car.txt. The base class C_auto_008102b8 (ctor 0x00486eb0, dtor 0x00486ef0: C_Module's defaults)
+# and the 16-byte copy helpers of the human fades' vector stay idioms; 0x00486d60 (an enum callback
+# fading visuals, never referenced) stays to tier 1.
+
+00485b50 C_GEffectsModule::SetCloudsOn | void __thiscall SetCloudsOn(C_GEffectsModule * this, bool on)
+00485b70 C_GEffectsModule::SetLensFlareOn | void __thiscall SetLensFlareOn(C_GEffectsModule * this, bool on)
+00485c70 C_GEffectsModule::SetCameraAnimation | void __thiscall SetCameraAnimation(C_GEffectsModule * this, I3D_frame * camera, char * fileName)
+00485f70 GEffects_SetFramePos | void __thiscall GEffects_SetFramePos(I3D_frame * this, float * x, float * y, float * z)
+00485fc0 CameraAnimation_Free
+00485fd0 S_CameraAnimation::Restore | void __fastcall Restore(void * this)
+00486080 StaticInit_GEffectsModule
+00486090 GEffectsModule_Construct
+004860b0 C_GEffectsModule::C_GEffectsModule | C_GEffectsModule * __thiscall C_GEffectsModule(C_GEffectsModule * this, int id, char * name)
+004863e0 C_GEffectsModule::SetRain | void __thiscall SetRain(C_GEffectsModule * this, bool on)
+004863f0 C_GEffectsModule::RestartMission | void __thiscall RestartMission(C_GEffectsModule * this, bool server)
+00486460 C_GEffectsModule::SaveGame | bool __thiscall SaveGame(C_GEffectsModule * this, C_chunk * chunk)
+00486470 C_GEffectsModule::LoadGame | bool __thiscall LoadGame(C_GEffectsModule * this, C_chunk * chunk)
+00486480 C_GEffectsModule::SetTimeScale | void __thiscall SetTimeScale(C_GEffectsModule * this, float scale, float acceleration)
+004864a0 C_GEffectsModule::GetTimeScale | float __thiscall GetTimeScale(C_GEffectsModule * this)
+004864b0 C_GEffectsModule::ScalarDeletingDestructor
+004864f0 GEffectsModule_RegisterAtExit
+00486500 GEffectsModule_Destroy
+00486510 GetGEffects | C_GEffectsModule * GetGEffects(void)
+00486520 C_GEffectsModule::ShowBackdrop | void __thiscall ShowBackdrop(C_GEffectsModule * this, bool on)
+00486580 C_GEffectsModule::ShowAboveWater | void __thiscall ShowAboveWater(C_GEffectsModule * this, bool on)
+004865e0 C_GEffectsModule::SetHierarchyOn | void __thiscall SetHierarchyOn(C_GEffectsModule * this, I3D_frame * frame, bool on, uint typeMask)
+004866f0 C_GEffectsModule::HideVisual | void __thiscall HideVisual(C_GEffectsModule * this, I3D_frame * visual, bool on)
+00486750 C_GEffectsModule::ShowUnderWater | void __thiscall ShowUnderWater(C_GEffectsModule * this, bool on)
+004867b0 C_GEffectsModule::SetWeatherOn | void __thiscall SetWeatherOn(C_GEffectsModule * this, bool on)
+004867e0 C_GEffectsModule::GetGroundCover | float __thiscall GetGroundCover(C_GEffectsModule * this, int material)
+004867f0 C_GEffectsModule::SetFadeLevel | void __thiscall SetFadeLevel(C_GEffectsModule * this, float level, float * color)
+00486b30 C_GEffectsModule::Fade | void __thiscall Fade(C_GEffectsModule * this, int time, int direction, float * color)
+00486bf0 C_GEffectsModule::RenderVolumetrics | void __thiscall RenderVolumetrics(C_GEffectsModule * this)
+00486c10 C_GEffectsModule::RenderFade | void __thiscall RenderFade(C_GEffectsModule * this)
+00486d30 C_GEffectsModule::SetModelTransparency | bool __thiscall SetModelTransparency(C_GEffectsModule * this, I3D_frame * model, float level)
+00486d60 GEffects_FadeVisualCallback
+00486df0 C_GEffectsModule::SetModelLightLevel | bool __thiscall SetModelLightLevel(C_GEffectsModule * this, I3D_frame * model, float level)
+00486e60 C_GEffectsModule::SetModelAlpha | bool __thiscall SetModelAlpha(C_GEffectsModule * this, I3D_frame * model, float level)
+00486e90 C_GEffectsModule::ClearModelTransparency | bool __thiscall ClearModelTransparency(C_GEffectsModule * this, I3D_frame * model)
+00486f00 C_GEffectsModule::~C_GEffectsModule
+004870a0 C_GEffectsModule::SetThunderstorm | void __thiscall SetThunderstorm(C_GEffectsModule * this, bool on, void * light, bool immediate)
+004871a0 C_GEffectsModule::StartMpLightning | void __thiscall StartMpLightning(C_GEffectsModule * this, int time)
+00487240 C_GEffectsModule::Update | void __thiscall Update(C_GEffectsModule * this, int timeDelta)
+00488560 C_GEffectsModule::LoadMissionData | void __thiscall LoadMissionData(C_GEffectsModule * this, bool server)
+004885a0 C_GEffectsModule::FreeMissionData | void __thiscall FreeMissionData(C_GEffectsModule * this, bool server)
+004885d0 C_GEffectsModule::StartMission | void __thiscall StartMission(C_GEffectsModule * this, bool server)
+004888c0 C_GEffectsModule::StopMission | void __thiscall StopMission(C_GEffectsModule * this, bool server)
+00488b80 C_GEffectsModule::Reset | void __thiscall Reset(C_GEffectsModule * this)
+00488d60 C_GEffectsModule::FadeOutModel | void __thiscall FadeOutModel(C_GEffectsModule * this, I3D_frame * model, int time, bool switchOff)
+00488ee0 C_GEffectsModule::FadeIn | void __thiscall FadeIn(C_GEffectsModule * this, I3D_frame * model, int time, bool turnOn)
+00489060 C_GEffectsModule::FadeInModel | void __thiscall FadeInModel(C_GEffectsModule * this, I3D_frame * model, int time, bool turnOn)
+004890f0 C_GEffectsModule::FadeOutHierarchy | void __thiscall FadeOutHierarchy(C_GEffectsModule * this, I3D_frame * model, int time, bool switchOff)
+00489180 C_GEffectsModule::FadeHuman | void __thiscall FadeHuman(C_GEffectsModule * this, C_Human * human, int time, bool in)
+00489c60 C_GEffectsModule::LoadWaterCamera | void __thiscall LoadWaterCamera(C_GEffectsModule * this)
+0048b880 CameraAnimationVector_Insert
+# 8c-ii
+00484f60 GEffects_ShatterFace
+00485ba0 C_GEffectsModule::ShatterGlass | void __thiscall ShatterGlass(C_GEffectsModule * this, I3D_frame * visual, float maxArea)
+00489470 C_GEffectsModule::GetShadow | I3D_frame * __thiscall GetShadow(C_GEffectsModule * this, I3D_frame * model)
+004894b0 GEffects_FindModelShadow | uint __stdcall GEffects_FindModelShadow(I3D_frame * frame, void * context)
+004894e0 C_GEffectsModule::CreateShadow | I3D_frame * __thiscall CreateShadow(C_GEffectsModule * this, I3D_frame * model)
+00489bd0 C_GEffectsModule::SetShadowParams | void __thiscall SetShadowParams(C_GEffectsModule * this, void * params)
+00489be0 C_GEffectsModule::GetShadowParams | void * __thiscall GetShadowParams(C_GEffectsModule * this)
+00489bf0 ShadowParams_Copy
+00489fd0 GEffects_CopyTargetFrames
+0048a170 GEffects_MoveForeignFrames
+0048a3f0 GEffects_FindFaceGroups
+0048a5c0 C_GEffectsModule::SwitchFaceTexture | bool __thiscall SwitchFaceTexture(C_GEffectsModule * this, I3D_frame * model, char * texture)
+0048a780 C_GEffectsModule::DressUniform | bool __thiscall DressUniform(C_GEffectsModule * this, C_Human * human, int uniform)
+0089b880 g_geffectsModule @
+0089b760 g_waterLevel @ float
+0089bbb4 g_rainTime @ int
+008396e8 g_rainTeamSteps @ int
+0089b7f8 g_fadeQuad @
+0089afbc g_cameraHumanEffects @

@@ -597,15 +597,15 @@ uint32_t C_ItemDef::GetAllowedContainers()
     uint32_t fits = 0;
     // Long weapons.
     if ((size == 2 || size == 3) && !ammo &&
-        (behaviour == 3 || behaviour == 4 || behaviour == 5 || behaviour == ITEM_BEHAVIOUR_LAUNCHER || behaviour == 12))
+        (behaviour == ITEM_BEHAVIOUR_SMG || behaviour == ITEM_BEHAVIOUR_RIFLE || behaviour == ITEM_BEHAVIOUR_LMG || behaviour == ITEM_BEHAVIOUR_LAUNCHER || behaviour == ITEM_BEHAVIOUR_ASSAULT))
         fits = ITEM_FITS_LONG_GUN;
     // Anything usable.
-    if (size != 4 && !ammo && (behaviour < ITEM_BEHAVIOUR_MINE || behaviour == 12))
+    if (size != 4 && !ammo && (behaviour < ITEM_BEHAVIOUR_MINE || behaviour == ITEM_BEHAVIOUR_ASSAULT))
         fits |= ITEM_FITS_HANDS;
     if (size == 0 || size == 1)
         fits |= ITEM_FITS_BELT | ITEM_FITS_BACKPACK_CONTENTS;
     if (size == 2) {
-        if (ammo || behaviour == ITEM_BEHAVIOUR_11 || behaviour == ITEM_BEHAVIOUR_MINE)
+        if (ammo || behaviour == ITEM_BEHAVIOUR_STICKY_CHARGE || behaviour == ITEM_BEHAVIOUR_MINE)
             fits |= ITEM_FITS_BACKPACK_CONTENTS;
         if (behaviour == ITEM_BEHAVIOUR_MEDKIT)
             fits |= ITEM_FITS_BELT | ITEM_FITS_BACKPACK_CONTENTS;
@@ -616,7 +616,7 @@ uint32_t C_ItemDef::GetAllowedContainers()
 int C_ItemDef::GetInventoryGroup()
 {
     const int behaviour = GetBehaviour();
-    if (behaviour == 8)
+    if (behaviour == ITEM_BEHAVIOUR_FIXED)
         return 0;
     if (m_recordType == ITEM_AMMO)
         return 4;
@@ -624,22 +624,22 @@ int C_ItemDef::GetInventoryGroup()
     case ITEM_BEHAVIOUR_HEADGEAR:
     case ITEM_BEHAVIOUR_UNIFORM:
         return 6;
-    case 0:
+    case ITEM_BEHAVIOUR_MELEE:
     case 1:
-    case 2:
+    case ITEM_BEHAVIOUR_SIDEARM:
         return 1;
-    case 3:
-    case 4:
+    case ITEM_BEHAVIOUR_SMG:
+    case ITEM_BEHAVIOUR_RIFLE:
         return 2;
-    case 5:
+    case ITEM_BEHAVIOUR_LMG:
     case ITEM_BEHAVIOUR_LAUNCHER:
     case 7:
-    case 12:
+    case ITEM_BEHAVIOUR_ASSAULT:
         return 3;
     case ITEM_BEHAVIOUR_THROWN:
     case ITEM_BEHAVIOUR_MINE:
-    case ITEM_BEHAVIOUR_11:
-    case 21:
+    case ITEM_BEHAVIOUR_STICKY_CHARGE:
+    case ITEM_BEHAVIOUR_MISSION_EXPLOSIVE:
         return 5;
     default:
         return 7;

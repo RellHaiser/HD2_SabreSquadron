@@ -127,11 +127,61 @@ struct S_MultiplayerSettings {
 };
 
 // --- the car's callbacks (game/car_callbacks.cpp; as the real header declares them) --------------
+#ifdef WORLD_TEST
+// The GEffects module's objects (part 8d; as the real header declares them) and the module itself
+// (part 8c-i, the world build tests the real one).
+class C_Decorators {
+public:
+    C_Decorators();
+    ~C_Decorators();
+    void SetOn(bool on);
+    void Clear();
+    void Free();
+    void Load();
+    void Start();
+    void Update(int timeDelta);
+    float GetGroundCover(int material);
+
+private:
+    uint8_t m_data[0xA4];
+};
+extern C_Decorators *g_decorators;
+class C_Volumetrics {
+public:
+    C_Volumetrics();
+    ~C_Volumetrics();
+    void Render(int time);
+    void Load();
+    void Prune(bool unknown);
+    void Free();
+
+private:
+    uint8_t m_data[0x20];
+};
+class C_MeshPlayer {
+public:
+    C_MeshPlayer();
+    ~C_MeshPlayer();
+    void Load();
+    void Update(int timeDelta);
+    void Free();
+
+private:
+    uint8_t m_data[0x28];
+};
+void UpdateBirds(int timeDelta);
+void CollectBirds();
+void FreeBirds();
+void FreeClouds();
+void LoadClouds();
+float RandomFloat(float max);
+#include "game/geffects.h"
+#else
 class C_GEffectsModule {
 public:
     void ShatterGlass(I3D_frame *visual, float unknown);
     // (The debris and item actors, game/debris.cpp and game/item_actor.cpp.)
-    bool ClearModelHighlight(I3D_frame *model);
+    bool ClearModelTransparency(I3D_frame *model);
     void FadeOutModel(I3D_frame *model, int time, bool unknown);
     // (The bike, part 7e.)
     I3D_frame *CreateShadow(I3D_frame *model);
@@ -139,8 +189,11 @@ public:
     // (The supply box, part 7f.)
     void FadeInModel(I3D_frame *model, int time, bool turnOn);
     void FadeOutHierarchy(I3D_frame *model, int time, bool unknown);
+    // (The Junkers 88, part 7h.)
+    void SetHierarchyOn(I3D_frame *frame, bool on, uint32_t typeMask);
 };
 C_GEffectsModule *GetGEffects();
+#endif
 // (The supply box, part 7f: the scene's top, the debug lines.)
 extern float g_netSceneTop;
 void DrawDebugLine(const float *from, const float *to, uint32_t color, uint32_t color2);
@@ -185,6 +238,17 @@ struct S_FrameData;
 void SetFrameData(I3D_frame *frame, const S_FrameData &data);
 
 // (The fowl generator, game/fowl_generator.cpp: the birds module's birds and RandomFloat.)
+// The sight module (part 7g: only the air attacks' start wait; +0x34; the world build, part 8b,
+// tests the real one).
+#ifdef WORLD_TEST
+#include "game/sight.h"
+#else
+class C_SightModule {
+public:
+    int GetStartDelay() const;
+};
+extern C_SightModule g_sightModule;                 // 0x0089b288
+#endif
 class C_Bird {                                          // 0x70 bytes
 public:
     // On `model`, whose frame data then points at the bird; `ownModel`: the model is the bird's,
@@ -209,35 +273,4 @@ extern std::vector<C_Bird *> g_birds;                  // 0x0089bb90
 extern std::vector<class I3D_frame *> g_spareBirdModels;   // 0x0089bba0
 float RandomFloat(float max);                           // 0x00475190
 
-// ---- the vertex animation module (the multiplayer zone's flag, part 7d; as the real header declares it)
-struct S_VertexAnimation {
-    uint8_t unknown00[0x18];
-    int frameCount;                                     // +0x18
-};
-struct S_VertexAnimPlayer {
-    int frame = 0;                                      // +0x00
-    class I3D_frame *visual = nullptr;                  // +0x04
-    int unknown08 = 0;
-    int unknown0C = 0;
-    int unknown10 = 1;
-    int unknown14 = 0;
-    int frameTime = 250;                                // +0x18 ms
-    bool unknown1C = false;
-    bool unknown1D = false;
-    bool unknown1E = false;
-    bool unknown1F = true;
-    int unknown20 = 0;
-    S_VertexAnimation *animation = nullptr;             // +0x24
-    int unknown28 = 1;
-
-    void Reset();
-    void Init(class I3D_frame *visual, S_VertexAnimation *animation);
-};
-class C_str;
-class C_VertexAnimModule {
-public:
-    S_VertexAnimation *FindAnimation(const C_str &name);
-    void RemovePlayer(S_VertexAnimPlayer *player, bool destroy);
-    void AddPlayer(S_VertexAnimPlayer *player);
-};
-extern C_VertexAnimModule g_vertexAnimModule;
+// The vertex animation module: stub/game/vertex_anim.h.

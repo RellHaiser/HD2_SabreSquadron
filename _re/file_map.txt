@@ -20,7 +20,7 @@
 004235e0-004235e0 n=1    bytes=37     ported=0   cls= :: 
 00423610-00427730 n=33   bytes=17328  ported=23  cls=C_ScriptModule :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | Rotated frame '%s' not found | (MO) Unknown chunk. | Script on frame '%s' don't k
 00427b20-00428f00 n=22   bytes=5013   ported=16  cls=C_ScriptModule :: missions\%s\%s | Scripts.dta | mpscripts.dta
-00428f50-0042afb0 n=74   bytes=7634   ported=31  cls=@815f90 :: Script | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s' 
+00428f50-0042afb0 n=74   bytes=7634   ported=32  cls=@815f90 :: Script | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s' 
 0042afc0-0042b650 n=4    bytes=3690   ported=0   cls=C_ScriptModule :: ScriptModule : send state fo | false | ScriptModule : send state fo | ScriptModule : receive state | ScriptModule : recieve state
 0042bf30-0042bf30 n=1    bytes=37     ported=0   cls= :: 
 0042bf60-0042d120 n=20   bytes=4042   ported=19  cls= :: Scripts\%s\%s | Scripts\include\%s |         | #include | FORMATION_Destroy
@@ -113,7 +113,7 @@
 004750b0-004750b0 n=1    bytes=37     ported=0   cls= :: 
 004750e0-004750e0 n=1    bytes=37     ported=0   cls= :: 
 00475110-00475110 n=1    bytes=37     ported=0   cls= :: 
-00475140-00476e30 n=54   bytes=6917   ported=43  cls=C_ActorsModule :: Actors
+00475140-00476e30 n=54   bytes=6917   ported=45  cls=C_ActorsModule :: Actors
 00476e40-00476e40 n=1    bytes=37     ported=1   cls= :: 
 00476e70-00479770 n=49   bytes=10042  ported=47  cls=C_TemporaryActorsList :: Temp. Actors | C_TemporaryActorsList::ClCre | C_TemporaryActorsList::ClCre | C_TemporaryActorsList::ClCre | C_TemporaryActorsList::ClCre
 00479790-0047a6a0 n=10   bytes=3799   ported=0   cls= :: Object01 | Object03
@@ -155,27 +155,27 @@
 004b4900-004b4930 n=4    bytes=42     ported=0   cls= :: 
 004b4940-004bf280 n=65   bytes=42623  ported=55  cls= :: Border | info%02d | aggresive | defensive | passive
 004bf2b0-004c11c0 n=21   bytes=7542   ported=20  cls= :: signals
-004c1200-004c7d10 n=73   bytes=26431  ported=1   cls=@810630,@815f90 :: projectile | GunShells | AIM%02d* | VERT%02d* | %s_f%02d_%02d
+004c1200-004c7d10 n=74   bytes=26823  ported=55  cls=@810630,@815f90 :: projectile | GunShells | AIM%02d* | VERT%02d* | %s_f%02d_%02d
 004c7d30-004c7d30 n=1    bytes=37     ported=0   cls= :: 
 004c7d60-004c7d60 n=1    bytes=37     ported=0   cls= :: 
-004c7d90-004cff70 n=40   bytes=32966  ported=0   cls=@810700 :: 
+004c7d90-004cff70 n=40   bytes=32966  ported=30  cls=C_RigidBody :: 
 004cffb0-004d00b0 n=9    bytes=229    ported=0   cls= :: 
-004d00e0-004d0440 n=4    bytes=838    ported=0   cls= :: 
-004d0490-004d0490 n=1    bytes=37     ported=0   cls= :: 
-004d04c0-004d0570 n=6    bytes=157    ported=0   cls= :: 
-004d0590-004e0000 n=153  bytes=60159  ported=6   cls=C_Car :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | camera3RD* | send svcl car impuls | car do collision
-004e0010-004e0800 n=17   bytes=1571   ported=0   cls= :: 
-004e0890-004e2600 n=28   bytes=7375   ported=0   cls= :: matid | particle | PSMOKE | PFIRE | PARTID
+004d00e0-004d0440 n=4    bytes=838    ported=1   cls= :: 
+004d0490-004d0490 n=1    bytes=37     ported=1   cls= :: 
+004d04c0-004d0570 n=6    bytes=157    ported=6   cls= :: 
+004d0590-004e0000 n=155  bytes=61483  ported=127 cls=C_Car :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | camera3RD* | send svcl car impuls | car do collision
+004e0010-004e0830 n=23   bytes=1977   ported=22  cls= :: 
+004e0890-004e2600 n=28   bytes=7375   ported=22  cls= :: matid | particle | PSMOKE | PFIRE | PARTID
 004e2630-004e2630 n=1    bytes=37     ported=0   cls= :: 
 004e2660-004e2670 n=2    bytes=6      ported=0   cls= :: 
 004e2680-004e26c0 n=4    bytes=105    ported=0   cls= :: 
 004e2700-004e2740 n=4    bytes=105    ported=0   cls= :: 
-004e2780-004e27c0 n=4    bytes=104    ported=0   cls= :: 
-004e2800-004e2840 n=4    bytes=105    ported=0   cls= :: 
-004e2880-004fcb80 n=153  bytes=99739  ported=0   cls=@8108f8 :: ft19r+.bmp | ft19r.bmp | STRIPR* | STRIPL* | SMOKE_MOTOR
-004fcba0-00509a50 n=25   bytes=52557  ported=0   cls= :: 
-00509a70-005172d0 n=13   bytes=55381  ported=0   cls= :: 
-00517340-0051c180 n=23   bytes=21276  ported=1   cls= :: PNEU_PUNC.WAV
+004e2780-004e27c0 n=4    bytes=104    ported=2   cls= :: 
+004e2800-004e2840 n=4    bytes=105    ported=4   cls= :: 
+004e2880-004fcb80 n=161  bytes=103500 ported=142 cls=C_Vehicle :: ft19r+.bmp | ft19r.bmp | STRIPR* | STRIPL* | SMOKE_MOTOR
+004fcba0-00509a50 n=25   bytes=52557  ported=25  cls=C_Vehicle :: 
+00509a70-005172d0 n=13   bytes=55381  ported=13  cls=C_Vehicle :: 
+00517340-0051c180 n=24   bytes=21310  ported=24  cls=C_Vehicle :: PNEU_PUNC.WAV
 0051c760-0051e8a0 n=30   bytes=7901   ported=26  cls= :: 
 0051ea60-00520110 n=17   bytes=5863   ported=9   cls= :: 
 00520410-00520ed0 n=12   bytes=2757   ported=12  cls= :: 
@@ -241,7 +241,7 @@
 0059bd80-0059bd80 n=1    bytes=37     ported=0   cls= :: 
 0059bdb0-0059bde0 n=4    bytes=42     ported=0   cls= :: 
 0059bdf0-0059be20 n=4    bytes=42     ported=0   cls= :: 
-0059be30-005ab2e0 n=339  bytes=58438  ported=321 cls=C_EnemyController,C_Human,C_HumanController,C_NeutralController :: Human | %s doesnt have speechset.. u | %s have empty speechset.. Pl | Unknow damage zone !!!! | SvDropItem: failed - _TempAc
+0059be30-005ab2e0 n=339  bytes=58438  ported=323 cls=C_EnemyController,C_Human,C_HumanController,C_NeutralController :: Human | %s doesnt have speechset.. u | %s have empty speechset.. Pl | Unknow damage zone !!!! | SvDropItem: failed - _TempAc
 005ab300-005ac4c0 n=59   bytes=3891   ported=59  cls= :: 
 005ac4d0-005ac4d0 n=1    bytes=37     ported=1   cls= :: 
 005ac500-005ac770 n=8    bytes=958    ported=6   cls= :: 
@@ -253,26 +253,26 @@ Controls -  | (Plr sig) MOVE_HOLD_POS
 005af7a0-005b0e10 n=38   bytes=5011   ported=33  cls= :: Tables\speech.set
 005b0e20-005b3080 n=56   bytes=8332   ported=56  cls=@810cfc :: %s DONT HAVE ITEM %s (%d) in | %s DONT HAVE ITEM %s (%d) in | %s DONT HAVE ITEM %s (%d) as | %s DONT HAVE ITEM %s (%d) in | %s DONT HAVE ITEM %s (%d) in
 005b30d0-005b30d0 n=1    bytes=37     ported=1   cls= :: 
-005b3100-005b58d0 n=33   bytes=9923   ported=0   cls=C_AnimationActor :: Animation | BODYCOLB%02d | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | particle
-005b5900-005b66d0 n=28   bytes=3258   ported=3   cls=C_AnimationActor :: Collision frame name | Particle ID | Show no info flag | Actor name text ID | Sound ID from chapter explos
+005b3100-005b58d0 n=33   bytes=9923   ported=33  cls=C_AnimationActor :: Animation | BODYCOLB%02d | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | particle
+005b5900-005b66d0 n=28   bytes=3258   ported=28  cls=C_AnimationActor :: Collision frame name | Particle ID | Show no info flag | Actor name text ID | Sound ID from chapter explos
 005b66e0-005b66e0 n=1    bytes=37     ported=0   cls= :: 
-005b6710-005b7ec0 n=37   bytes=5882   ported=0   cls=C_AnimationActor,C_ItemActor :: 
+005b6710-005b7ec0 n=38   bytes=5982   ported=38  cls=C_AnimationActor,C_ItemActor :: 
 005b7fe0-005b7fe0 n=1    bytes=37     ported=0   cls= :: 
-005b8010-005b8610 n=17   bytes=1947   ported=0   cls=C_Clock :: Clock
-005b8830-005b88b0 n=7    bytes=62     ported=6   cls=C_Clock :: 
-005b88c0-005ba070 n=27   bytes=5917   ported=0   cls=C_Pike :: 
-005ba0d0-005ba0d0 n=1    bytes=37     ported=0   cls= :: 
-005ba100-005bbb70 n=24   bytes=7069   ported=0   cls=C_FowlGenerator,C_Pike :: FowlGenerator | ptacekletacek | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | _bird_%d_%d
-005bbd80-005bbd80 n=1    bytes=37     ported=0   cls= :: 
-005bbdb0-005befa0 n=44   bytes=12420  ported=0   cls=C_FowlGenerator,C_Train :: Train | l_sts%d%c.wav | l_jar.wav | l_brake.wav | l_braklp.wav
-005befb0-005c0a30 n=10   bytes=7383   ported=0   cls=C_Train :: 
+005b8010-005b8610 n=17   bytes=1947   ported=17  cls=C_Clock :: Clock
+005b8830-005b88b0 n=7    bytes=62     ported=7   cls=C_Clock :: 
+005b88c0-005ba070 n=27   bytes=5917   ported=27  cls=C_Pike :: 
+005ba0d0-005ba0d0 n=1    bytes=37     ported=1   cls= :: 
+005ba100-005bbb70 n=24   bytes=7069   ported=24  cls=C_FowlGenerator,C_Pike :: FowlGenerator | ptacekletacek | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | _bird_%d_%d
+005bbd80-005bbd80 n=1    bytes=37     ported=1   cls= :: 
+005bbdb0-005befa0 n=44   bytes=12420  ported=44  cls=C_FowlGenerator,C_Train :: Train | l_sts%d%c.wav | l_jar.wav | l_brake.wav | l_braklp.wav
+005befb0-005c0a30 n=10   bytes=7383   ported=10  cls=C_Train :: 
 005c0ce0-005c18c0 n=7    bytes=3636   ported=6   cls=C_MeleeTracker :: 
 005c1b50-005c4b50 n=13   bytes=12214  ported=9   cls= :: Kousnul jsem humana
 005c4b60-005c5bf0 n=8    bytes=5722   ported=7   cls= :: 
 005c6220-005c6c70 n=8    bytes=2650   ported=5   cls= :: 
 005c6ce0-005c7b00 n=16   bytes=3124   ported=14  cls=@8121d0 :: 
 005c7d00-005c8b30 n=17   bytes=4799   ported=16  cls=C_MeleeTracker :: col dummy | col dummy2 | col dummy1 | anim2
-005c9050-005cb090 n=18   bytes=8132   ported=1   cls= :: 
+005c9050-005cb090 n=18   bytes=8132   ported=9   cls= :: 
 005cb0a0-005ce250 n=61   bytes=12226  ported=56  cls=C_MeleeTrackerAI,C_MeleeTrackerController :: Found target %s
 005ce280-005ce280 n=1    bytes=37     ported=0   cls= :: 
 005ce2b0-005cf000 n=21   bytes=3384   ported=9   cls=C_MeleeTrackerAI,C_MeleeTrackerController,@8120c0,@8120c4 :: 
@@ -285,32 +285,32 @@ Controls -  | (Plr sig) MOVE_HOLD_POS
 005d1fd0-005d32b0 n=20   bytes=4574   ported=16  cls=C_MeleeTrackerAI,C_MeleeTrackerController :: 
 005d32e0-005d49f0 n=11   bytes=5735   ported=4   cls=C_MeleeTracker :: 
 005d4a00-005d4a00 n=1    bytes=37     ported=0   cls= :: 
-005d4a30-005d79c0 n=61   bytes=11523  ported=43  cls=C_MeleeTracker,C_MeleeTrackerAI,C_MeleeTrackerController,@8121d0 :: bcdefghijklmnopqrstuvwxy | Enemy(%s) lost !!! | Enemy(%s) spotted !!! | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s' 
+005d4a30-005d79c0 n=61   bytes=11523  ported=51  cls=C_MeleeTracker,C_MeleeTrackerAI,C_MeleeTrackerController,@8121d0 :: bcdefghijklmnopqrstuvwxy | Enemy(%s) lost !!! | Enemy(%s) spotted !!! | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s' 
 005d79e0-005d82b0 n=4    bytes=3224   ported=3   cls=C_MeleeTracker :: 
 005d86c0-005d86f0 n=2    bytes=145    ported=1   cls= :: 
-005d8760-005d8760 n=1    bytes=37     ported=0   cls= :: 
-005d8790-005d8790 n=1    bytes=37     ported=0   cls= :: 
-005d87c0-005db770 n=22   bytes=11954  ported=0   cls=C_Bike :: bike_ride | bike_legs | %s_ridedupl | kliky | riditka
-005db780-005db780 n=1    bytes=37     ported=0   cls= :: 
-005db7b0-005de650 n=28   bytes=11687  ported=0   cls=C_Fish :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s' 
-005de660-005de660 n=1    bytes=37     ported=0   cls= :: 
-005de690-005de730 n=5    bytes=149    ported=0   cls= :: Submarine
-005de750-005dfca0 n=21   bytes=5664   ported=0   cls= :: SEAT%02d | sroub | camera3RD* | BODYCOLB00
-005dfde0-005e0230 n=12   bytes=993    ported=0   cls= :: %1(m) | Max waterlevel
-005e0240-005e0cc0 n=14   bytes=2836   ported=0   cls= :: cameraFPV* | camera3RD*
-005e0da0-005e1d90 n=10   bytes=4684   ported=0   cls= :: 
-005e2040-005e2040 n=1    bytes=37     ported=0   cls= :: 
-005e2070-005e29a0 n=25   bytes=2220   ported=0   cls=C_WireCut :: WireCut
-005e29e0-005e29e0 n=1    bytes=37     ported=0   cls= :: 
-005e2a10-005e2bc0 n=17   bytes=327    ported=0   cls=C_NullActor,C_WireCut :: NullActor
-005e2bd0-005e2bd0 n=1    bytes=37     ported=0   cls= :: 
-005e2c00-005e3a10 n=11   bytes=3515   ported=0   cls=C_AirAttack,C_NullActor :: AirAttack
-005e3a20-005ea2c0 n=57   bytes=26198  ported=0   cls=C_AirAttack :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | sand%02d.wav | whizz%d.wav | kul_d%d.wav
-005ea2d0-005ea2d0 n=1    bytes=37     ported=0   cls= :: 
-005ea300-005ebbd0 n=26   bytes=6665   ported=0   cls=C_Ladder :: Ladder | matid | ' nenalezen dumac 'down' | ' nenalezen dumac 'up' | TS: chyba - u zebriku '
-005ebde0-005ebde0 n=1    bytes=37     ported=0   cls= :: 
-005ebe10-005eda60 n=34   bytes=7631   ported=0   cls=C_MPZone :: vlajka | New zone owner: Axis | New zone owner: Alied | New zone owner: Neutral
-005edcc0-005edcc0 n=1    bytes=37     ported=0   cls= :: 
+005d8760-005d8760 n=1    bytes=37     ported=1   cls= :: 
+005d8790-005d8790 n=1    bytes=37     ported=1   cls= :: 
+005d87c0-005db770 n=22   bytes=11954  ported=22  cls=C_Bike :: bike_ride | bike_legs | %s_ridedupl | kliky | riditka
+005db780-005db780 n=1    bytes=37     ported=1   cls= :: 
+005db7b0-005de650 n=28   bytes=11687  ported=27  cls=C_Fish :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s' 
+005de660-005de660 n=1    bytes=37     ported=1   cls= :: 
+005de690-005de730 n=5    bytes=149    ported=5   cls= :: Submarine
+005de750-005dfca0 n=21   bytes=5664   ported=21  cls= :: SEAT%02d | sroub | camera3RD* | BODYCOLB00
+005dfde0-005e0230 n=12   bytes=993    ported=12  cls= :: %1(m) | Max waterlevel
+005e0240-005e0cc0 n=14   bytes=2836   ported=14  cls= :: cameraFPV* | camera3RD*
+005e0da0-005e1d90 n=10   bytes=4684   ported=10  cls= :: 
+005e2040-005e2040 n=1    bytes=37     ported=1   cls= :: 
+005e2070-005e29a0 n=25   bytes=2220   ported=25  cls=C_WireCut :: WireCut
+005e29e0-005e29e0 n=1    bytes=37     ported=1   cls= :: 
+005e2a10-005e2bc0 n=17   bytes=327    ported=17  cls=C_NullActor,C_WireCut :: NullActor
+005e2bd0-005e2bd0 n=1    bytes=37     ported=1   cls= :: 
+005e2c00-005e3a10 n=11   bytes=3515   ported=11  cls=C_AirAttack,C_NullActor :: AirAttack
+005e3a20-005ea2c0 n=57   bytes=26198  ported=53  cls=C_AirAttack :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | sand%02d.wav | whizz%d.wav | kul_d%d.wav
+005ea2d0-005ea2d0 n=1    bytes=37     ported=1   cls= :: 
+005ea300-005ebbd0 n=26   bytes=6665   ported=26  cls=C_Ladder :: Ladder | matid | ' nenalezen dumac 'down' | ' nenalezen dumac 'up' | TS: chyba - u zebriku '
+005ebde0-005ebde0 n=1    bytes=37     ported=1   cls= :: 
+005ebe10-005eda60 n=34   bytes=7631   ported=34  cls=C_MPZone :: vlajka | New zone owner: Axis | New zone owner: Alied | New zone owner: Neutral
+005edcc0-005edcc0 n=1    bytes=37     ported=1   cls= :: 
 005edcf0-005f29b0 n=78   bytes=19060  ported=0   cls=C_Junkers88 :: Junkers88 | la_Bf109Canyon | trace | WeaponOdds | vrtule_r00
 005f29c0-005f29f0 n=2    bytes=707    ported=0   cls=C_Junkers88 :: 
 005f2c90-005f3110 n=13   bytes=1239   ported=0   cls=C_Junkers88 :: SEAT%02d | weapon_r00 | cameraFPV*
@@ -318,30 +318,30 @@ Controls -  | (Plr sig) MOVE_HOLD_POS
 005f6f50-005f8130 n=12   bytes=4487   ported=0   cls=C_Junkers88 :: #jushotdwn%d | #adamage%d
 005f8150-005f94c0 n=24   bytes=5264   ported=0   cls=C_Junkers88 :: 
 005f96d0-005f96d0 n=1    bytes=37     ported=0   cls= :: 
-005f9700-005fd970 n=43   bytes=16618  ported=0   cls=C_SupplyBox :: SupplyBox | Ammo%d | Ammo0%d | Steny02 | morph
-005fd990-005fd990 n=1    bytes=37     ported=0   cls= :: 
-005fd9c0-005fd9c0 n=1    bytes=37     ported=0   cls= :: 
-005fd9f0-005fddc0 n=24   bytes=783    ported=0   cls=C_Debris :: Debris
+005f9700-005fd970 n=43   bytes=16618  ported=43  cls=C_SupplyBox :: SupplyBox | Ammo%d | Ammo0%d | Steny02 | morph
+005fd990-005fd990 n=1    bytes=37     ported=1   cls= :: 
+005fd9c0-005fd9c0 n=1    bytes=37     ported=1   cls= :: 
+005fd9f0-005fddc0 n=24   bytes=783    ported=24  cls=C_Debris :: Debris
 005fddd0-005fddd0 n=1    bytes=37     ported=0   cls= :: 
-005fde00-005fefb0 n=30   bytes=4613   ported=0   cls=C_Debris,C_Mine :: Actor_mine
-005ff120-005ff120 n=1    bytes=37     ported=0   cls= :: 
-005ff150-006029f0 n=39   bytes=14116  ported=0   cls=C_Door,C_Mine :: d2handle | dhandle
-00602a10-00602a10 n=1    bytes=37     ported=0   cls= :: 
-00602a40-00602ae0 n=5    bytes=149    ported=0   cls= :: StaticWeapon
-00602b00-00605f20 n=61   bytes=13585  ported=0   cls=C_StaticWeapon :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | SEAT%02d | cameraFPV* | camera3RD*
-00606250-00606250 n=1    bytes=37     ported=0   cls= :: 
-00606280-0060a220 n=41   bytes=15927  ported=0   cls=C_Barrel,C_StaticWeapon :: Barrel | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | %s_destroyed
-0060a250-0060a280 n=2    bytes=1119   ported=0   cls=C_Barrel :: 
-0060a6c0-0060a6c0 n=1    bytes=37     ported=0   cls= :: 
-0060a6f0-0060b570 n=25   bytes=3612   ported=0   cls=C_Radio :: Radio
-0060b5e0-0060b5e0 n=1    bytes=37     ported=0   cls= :: 
-0060b610-0060c130 n=23   bytes=2662   ported=0   cls=C_PhotoPlace,C_Radio :: Photo place
-0060c140-0060c140 n=1    bytes=37     ported=0   cls= :: 
-0060c170-0060da70 n=34   bytes=6089   ported=0   cls=C_ExplosivePlace,C_PhotoPlace :: Explosive place | explosive_off | explosive_on | Exploded, you should not see | Hidden, you should not see t
+005fde00-005fefb0 n=30   bytes=4613   ported=30  cls=C_Debris,C_Mine :: Actor_mine
+005ff120-005ff120 n=1    bytes=37     ported=1   cls= :: 
+005ff150-006029f0 n=39   bytes=14116  ported=39  cls=C_Door,C_Mine :: d2handle | dhandle
+00602a10-00602a10 n=1    bytes=37     ported=1   cls= :: 
+00602a40-00602ae0 n=5    bytes=149    ported=5   cls= :: StaticWeapon
+00602b00-00605f20 n=61   bytes=13585  ported=58  cls=C_StaticWeapon :: Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | SEAT%02d | cameraFPV* | camera3RD*
+00606250-00606250 n=1    bytes=37     ported=1   cls= :: 
+00606280-0060a220 n=41   bytes=15927  ported=41  cls=C_Barrel,C_StaticWeapon :: Barrel | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | %s_destroyed
+0060a250-0060a280 n=2    bytes=1119   ported=2   cls=C_Barrel :: 
+0060a6c0-0060a6c0 n=1    bytes=37     ported=1   cls= :: 
+0060a6f0-0060b570 n=25   bytes=3612   ported=25  cls=C_Radio :: Radio
+0060b5e0-0060b5e0 n=1    bytes=37     ported=1   cls= :: 
+0060b610-0060c130 n=23   bytes=2662   ported=23  cls=C_PhotoPlace,C_Radio :: Photo place
+0060c140-0060c140 n=1    bytes=37     ported=1   cls= :: 
+0060c170-0060da70 n=34   bytes=6089   ported=34  cls=C_ExplosivePlace,C_PhotoPlace :: Explosive place | explosive_off | explosive_on | Exploded, you should not see | Hidden, you should not see t
 0060da80-0060da80 n=1    bytes=37     ported=0   cls= :: 
-0060dab0-0060eb60 n=29   bytes=4535   ported=0   cls=C_DocumentPlace,C_ExplosivePlace :: Document place
-0060ed60-0060ed60 n=1    bytes=37     ported=0   cls= :: 
-0060ed90-0060fe50 n=27   bytes=4521   ported=0   cls=C_DocumentPlace,C_TSExplosion :: Explosion [TS] | x_expl00.tga
+0060dab0-0060eb60 n=29   bytes=4535   ported=29  cls=C_DocumentPlace,C_ExplosivePlace :: Document place
+0060ed60-0060ed60 n=1    bytes=37     ported=1   cls= :: 
+0060ed90-0060fe50 n=27   bytes=4521   ported=27  cls=C_DocumentPlace,C_TSExplosion :: Explosion [TS] | x_expl00.tga
 00610010-00610010 n=1    bytes=37     ported=1   cls= :: 
 00610040-00610040 n=1    bytes=37     ported=1   cls= :: 
 0061006e-00611140 n=20   bytes=4162   ported=20  cls=C_Actor,C_Car,C_Clock,C_WireCut :: Missing actor name!! | matid
@@ -349,10 +349,10 @@ Controls -  | (Plr sig) MOVE_HOLD_POS
 00611680-00611680 n=1    bytes=37     ported=1   cls= :: 
 006116b0-006116e0 n=4    bytes=42     ported=4   cls= :: 
 006116f0-00611720 n=4    bytes=42     ported=4   cls= :: 
-00611730-00612a60 n=20   bytes=6543   ported=1   cls=C_Actor,C_SpawnPoint :: SpawnPoint | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | _PLAYER_%2d
-006131a0-006131a0 n=1    bytes=37     ported=0   cls= :: 
-006131d0-00613e10 n=25   bytes=3587   ported=0   cls=C_SpawnPoint,C_Switch :: Switch
-00614090-00614090 n=1    bytes=37     ported=0   cls= :: 
+00611730-00612a60 n=20   bytes=6543   ported=20  cls=C_Actor,C_SpawnPoint :: SpawnPoint | Cache : BADFILETIME '%s' (3d | Cache : BADFILEVERSION '%s'  | _PLAYER_%2d
+006131a0-006131a0 n=1    bytes=37     ported=1   cls= :: 
+006131d0-00613e10 n=24   bytes=3587   ported=24  cls=C_SpawnPoint,C_Switch :: Switch
+00614090-00614090 n=1    bytes=37     ported=1   cls= :: 
 006140c0-006140f0 n=4    bytes=42     ported=0   cls= :: 
 00614100-00616b80 n=50   bytes=10526  ported=0   cls=@813ab0 :: bload mission | Load Last save | bload lastsave | text_h&dversion | text_list of profiles
 00616ba0-00616ba0 n=1    bytes=37     ported=0   cls= :: 
@@ -614,7 +614,7 @@ to %s | %d. %s. %d  %02d:%02d
 007334e0-00733690 n=5    bytes=492    ported=0   cls= :: 
 00733700-0073cf20 n=223  bytes=26726  ported=0   cls= :: %s%d%s | CD Key or challenge too long | %I64x | dtime | errmsg
 0073cf60-0073d0c0 n=10   bytes=698    ported=0   cls=@816380 :: 
-0073d260-0073dda0 n=27   bytes=2309   ported=21  cls=C_BitStream,C_GrowingBitStream,C_NetMessage :: 
+0073d260-0073dda0 n=27   bytes=2309   ported=24  cls=C_BitStream,C_GrowingBitStream,C_NetMessage :: 
 0073ddf0-0073e110 n=13   bytes=789    ported=0   cls=@81641c,@816438 :: 
 0073e160-0073efe0 n=35   bytes=3466   ported=0   cls=@816438,@816448 :: 
 0073eff0-0073fb00 n=24   bytes=2673   ported=0   cls=@816438,@81646c :: 
@@ -641,7 +641,7 @@ to %s | %d. %s. %d  %02d:%02d
 00747400-00747500 n=9    bytes=280    ported=0   cls=@816688,@81669c :: 
 00747570-00747900 n=15   bytes=820    ported=0   cls=@81669c,@8166b0,@8166c4 :: 
 00747910-00748990 n=32   bytes=3992   ported=0   cls= :: 
-007489b0-00748dc0 n=6    bytes=1072   ported=0   cls= :: 
+007489b0-00748dc0 n=6    bytes=1072   ported=2   cls= :: 
 00748e10-00748e10 n=1    bytes=37     ported=0   cls= :: 
 00748e40-00748e80 n=4    bytes=83     ported=0   cls= :: 
 007497c0-007497c0 n=1    bytes=37     ported=0   cls= :: 

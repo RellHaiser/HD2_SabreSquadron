@@ -12,7 +12,8 @@
 #include "game/game.h"                                  // IsSpawnBlocked
 #include "game/human.h"
 #include "game/interface.h"
-#include "game/pending.h"                               // g_gameRole, g_netGame, g_vertexAnimModule
+#include "game/pending.h"                               // g_gameRole, g_netGame
+#include "game/vertex_anim.h"
 #include "game/profile.h"                               // g_gameProfile, g_mpSettings
 #include "ls3d/i3d.h"
 #include "net/bitstream.h"
@@ -285,17 +286,17 @@ void C_MPZone::ApplyTeam()                              // 0x005ec8b0
         S_VertexAnimation *animation = g_vertexAnimModule.FindAnimation(C_str(FLAG_ANIMATION));
         I3D_frame *visual = flag->FindChildFrame(FLAG_ANIMATION, ENUMF_WILDMASK | FRAME_MASK_VISUAL);
         if (visual && visual->GetVisualType() == I3DVISUAL_OBJECT && animation) {
-            m_flagAnim->unknown1E = true;
+            m_flagAnim->stopped = true;
             m_flagAnim->Reset();
             g_vertexAnimModule.RemovePlayer(m_flagAnim, false);
             m_flagAnim->Init(visual, animation);
             g_vertexAnimModule.AddPlayer(m_flagAnim);
-            m_flagAnim->unknown1C = false;
-            m_flagAnim->frame = animation->frameCount - 1;
+            m_flagAnim->pingPong = false;
+            m_flagAnim->maxLevel = animation->levelCount - 1;
             m_flagAnim->frameTime = FLAG_FRAME_TIME;
-            m_flagAnim->unknown08 = 0;
-            m_flagAnim->unknown1F = true;
-            m_flagAnim->unknown1E = false;
+            m_flagAnim->startFrame = 0;
+            m_flagAnim->loop = true;
+            m_flagAnim->stopped = false;
         }
     }
     m_team = m_newTeam;

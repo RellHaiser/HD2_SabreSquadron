@@ -1142,7 +1142,7 @@ private:
     bool m_quiet = false;                               // +0x188 sneaking, whispering
     bool m_following = true;                            // +0x189
     bool m_silentMode = false;                          // +0x18A the _ALT combat orders
-    bool m_lyingToFire = false;                         // +0x18B (weapons of behaviour 5)
+    bool m_lyingToFire = false;                         // +0x18B (LMGs)
     bool m_steppedAside = false;                        // +0x18C
     bool m_ordersHeld = false;                          // +0x18D HoldOrders
     bool m_restartOrder = false;                        // +0x18E the first order changed (SetOrder)

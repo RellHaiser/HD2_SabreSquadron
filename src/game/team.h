@@ -277,10 +277,11 @@ public:
     const std::vector<C_MeleeTracker *> &GetSeenMeleeTrackers() const { return m_seenMeleeTrackers; }   // +0xBC
     // (The squad drops the dead ones from it.)
     std::vector<C_MeleeTracker *> &GetSeenMeleeTrackers() { return m_seenMeleeTrackers; }
+    // Collects member `index`'s collision volumes (frames of type 11) into its list (also after
+    // a new uniform, C_GEffectsModule::DressUniform).
+    void CollectVolumes(int index);                     // 0x0045d710
 
 private:
-    // Collects member `index`'s collision volumes (frames of type 11) into its list.
-    void CollectVolumes(int index);                     // 0x0045d710
     static uint32_t __stdcall AddVolume(I3D_frame *frame, void *list);   // 0x0045d7c0
     // Single player, while the mission is not decided: the members' environment flags
     // (HUMAN_ENV_DEADLY fails the mission, HUMAN_ENV_RESTRICTED shows a warning).

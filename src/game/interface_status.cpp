@@ -287,7 +287,7 @@ void C_WeaponPanel::Update(int /*timeDelta*/)
         int ammo = 0;
         if (C_Item *item = human->GetHandsItem()) {
             ShowHandsItem(item->GetDef());
-            if (item->GetDef()->GetCarryMode() == 6) {
+            if (item->GetDef()->GetCarryMode() == ITEM_CARRY_EQUIPMENT) {
                 rounds = 1;
                 ammo = 1;
             } else {

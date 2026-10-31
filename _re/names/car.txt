@@ -99,7 +99,6 @@
 004e0270 C_CarHitMessage::Write | void __thiscall Write(C_CarHitMessage * this, C_BitStream * stream)
 004e0540 C_CarWheelMessage::Read | void __thiscall Read(C_CarWheelMessage * this, C_BitStream * stream)
 004e05b0 C_CarWheelMessage::Write | void __thiscall Write(C_CarWheelMessage * this, C_BitStream * stream)
-00485ba0 C_GEffectsModule::ShatterGlass | void __thiscall ShatterGlass(C_GEffectsModule * this, I3D_frame * visual, float unknown)
 # Part 2d-ii: contacts, hits, the wreck and the charges (car_hits.cpp; the queries and charges named elsewhere).
 004d3d10 C_Car::TakePush | void __thiscall TakePush(C_Car *this, int id, S_vector4 *point)
 004d3b70 C_Car::IsTyreHit | int __thiscall IsTyreHit(C_Car *this, int wheel, S_vector *pos, bool axle)

@@ -559,7 +559,7 @@ void C_CommandPanel::Open(bool open)
         }
         // (The third argument is 1 here; the scripts pass 0.)
         if (!m_realtime)
-            GetGEffects()->SetThunderstorm(false, nullptr, reinterpret_cast<void *>(1));
+            GetGEffects()->SetThunderstorm(false, nullptr, true);
         g_gameProfile.SetControlMode(BINDING_MODE_COMMAND_MAP);
         return;
     }

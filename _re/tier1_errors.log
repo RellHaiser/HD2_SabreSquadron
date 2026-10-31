@@ -66,10 +66,6 @@ f_0046c340.cpp:480:9: '_on' was not declared in this scope; did you mean 'on'?
     if (_on != 0) {
 f_0046c340.cpp:487:20: '_on' was not declared in this scope; did you mean 'on'?
     _this->m_270 = _on != 0;
-f_00473d10.cpp:794:15: 'C_auto_00810060_vtbl' was not declared in this scope; did you mean 'C_auto_008160a0_vtbl'?
-    pCVar1 = (C_auto_00810060_vtbl*)(_this->vtable);
-f_00473d10.cpp:794:36: expected primary-expression before ')' token
-    pCVar1 = (C_auto_00810060_vtbl*)(_this->vtable);
 f_0047ac00.cpp:617:32: too few arguments to function
     (*pIVar5->vtable[2].Tick)();
 f_0047ac00.cpp:619:32: too few arguments to function
@@ -88,46 +84,6 @@ f_00480360.cpp:331:23: 'struct tier1::IGraph_vtbl' has no member named 'Slot84';
     (*pIVar7->vtable->Slot84)(pIVar7,&local_50);
 f_00480360.cpp:335:50: 'SUB14' was not declared in this scope; did you mean 'SUB104'?
     (*pIVar7->vtable->SetRenderState)(pIVar7,0xd,SUB14(fVar1 < fVar2,0));
-f_00484ec0.cpp:367:8: invalid cast from type 'float' to type 'uint32_t (**)(...)' {aka 'unsigned int (**)(...)'}
-    (**(code **)pSVar16->x)(pSVar16,param_11);
-f_00484ec0.cpp:450:48: cannot convert 'uint8_t*' {aka 'unsigned char*'} to 'tier1::I3D_frame*'
-    FUN_00484f60(GH_PIECE(local_a4,0,4),local_a4 + 4,pIVar10,local_ec,local_c4[0].v.x,local_e8,local_e4,
-f_00484ec0.cpp:452:48: cannot convert 'uint8_t*' {aka 'unsigned char*'} to 'tier1::I3D_frame*'
-    FUN_00484f60(GH_PIECE(local_a4,0,4),local_a4 + 4,pIVar3,local_ec,local_c4[0].v.x,local_e8,local_e4,
-f_00486080.cpp:475:62: '_param_1' was not declared in this scope; did you mean 'param_1'?
-    (*pCVar1->m_scene->vtable->SetWeather)(pCVar1->m_scene,0,_param_1);
-f_00486080.cpp:1117:53: expected primary-expression before '*' token
-    pCVar12 = GetCameraModule(C_CameraModule*)((this_00));
-f_00486080.cpp:1117:54: expected primary-expression before ')' token
-    pCVar12 = GetCameraModule(C_CameraModule*)((this_00));
-f_00486080.cpp:1158:51: expected primary-expression before '*' token
-    pCVar12 = GetCameraModule(C_CameraModule*)((DAT_0089b760));
-f_00486080.cpp:1158:52: expected primary-expression before ')' token
-    pCVar12 = GetCameraModule(C_CameraModule*)((DAT_0089b760));
-f_00486080.cpp:1719:22: 'struct tier1::C_GEffectsModule_vtbl' has no member named 'vf2f'; did you mean 'vf1f'?
-    (*_this->vtable->vf2f)(1);
-f_00486080.cpp:2364:26: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    iVar6 = (**(code **)(*DAT_008aed24 + 0x74))(DAT_008aed24,puVar14,0);
-f_00486080.cpp:2501:21: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
-    auStack_460 = (uint8_t  [4])pCVar5->rep->length;
-f_00486080.cpp:2502:19: incompatible types in assignment of 'uint8_t*' {aka 'unsigned char*'} to 'uint8_t [4]' {aka 'unsigned char [4]'}
-    auStack_45c = (uint8_t  [4])tier1_operator_new((int)auStack_460 + 9);
-f_00486080.cpp:2504:26: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
-    if (auStack_45c == (uint8_t  [4])0x0) {
-f_00486080.cpp:2518:32: too few arguments to function
-    (*self_00->vtable->SetName)(self_00);
-f_00486080.cpp:2539:38: too few arguments to function
-    (*self_00->vtable[1].SetCallback)(self_00,*(uint32_t *)(pcVar12 + 0x1e0));
-f_00486080.cpp:2893:40: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    piStack_68 = (int *)(**(code **)(*uStack_60 + 0x48))(uStack_60,pcVar5,0xffff);
-f_00486080.cpp:3528:35: too few arguments to function
-    (*pIVar24[1].FindChildFrame)();
-f_00486080.cpp:3565:48: void value not ignored as it ought to be
-    uVar13 = (*self_00->vtable[1].EnumFrames)(self_00,pIVar22,puVar11,uVar18,(char *)pIVar22);
-f_00486080.cpp:3569:47: void value not ignored as it ought to be
-    uVar18 = (*self_00->vtable[1].Duplicate)(self_00,pIVar20);
-f_00486080.cpp:3571:49: void value not ignored as it ought to be
-    cVar2 = (*self_00->vtable[1].SetUnknown50)(self_00,gh_bitcast<float>(pIVar20));
 f_0048eb30.cpp:124:24: wrong type argument to bit-complement
     ~C_TextBox__C_TextBox(_this);
 f_004a89b0.cpp:55:30: 'struct tier1::I3D_scene_vtbl' has no member named 'Slot94'; did you mean 'Slot04'?
@@ -222,72 +178,6 @@ f_005ac500.cpp:111:55: request for member '_8_4_' in '"\012ControlsEx - "', whic
     *(uint32_t *)(pcVar9 + 7) = "\nControlsEx - "._8_4_;
 f_005ac500.cpp:112:57: request for member '_12_2_' in '"\012ControlsEx - "', which is of non-class type 'const char [15]'
     *(uint16_t *)(pcVar9 + 0xb) = "\nControlsEx - "._12_2_;
-f_005e3a20.cpp:110:22: call of overloaded 'S_matrix__SetDir3(tier1::S_matrix*, tier1::S_vector*)' is ambiguous
-    S_matrix__SetDir3(&local_50,&local_60);
-f_005e3a20.cpp:519:32: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    piVar7 = (int *)(**(code **)(*uStack_154 + 0x48))();
-f_005e3a20.cpp:569:21: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    uStack_154[1] = -1;
-f_005e3a20.cpp:570:11: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    *uStack_154 = (int)piVar7;
-f_005e3a20.cpp:616:30: base operand of '->' is not a pointer
-    FUN_005e9d10(uStack_124->_pad_01ac + 4,uStack_124->m_1b8,1,&local_110.x);
-f_005e3a20.cpp:616:56: base operand of '->' is not a pointer
-    FUN_005e9d10(uStack_124->_pad_01ac + 4,uStack_124->m_1b8,1,&local_110.x);
-f_005e3a20.cpp:622:43: base operand of '->' is not a pointer
-    iVar29 = (**(code **)(*(int *)uStack_124->m_020 + 0x48))
-f_005e3a20.cpp:623:33: base operand of '->' is not a pointer
-    (uStack_124->m_020,"bluur",0xffff);
-f_005e3a20.cpp:625:13: base operand of '->' is not a pointer
-    uStack_124->m_164 = iVar29;
-f_005e3a20.cpp:626:13: base operand of '->' is not a pointer
-    uStack_124->m_168 = 0;
-f_005e3a20.cpp:627:23: base operand of '->' is not a pointer
-    puVar24 = uStack_124->_pad_0170 + 0x14;
-f_005e3a20.cpp:840:11: base operand of '->' is not a pointer
-    local_f4->m_16c = 0;
-f_005e3a20.cpp:841:25: base operand of '->' is not a pointer
-    puStack_11c = local_f4->_pad_0170;
-f_005e3a20.cpp:1043:23: base operand of '->' is not a pointer
-    pIVar11 = local_f4->m_020;
-f_005e3a20.cpp:1067:43: base operand of '->' is not a pointer
-    CStack_dc.rep = (C_str_rep *)(local_f4->_pad_0084 + 0x4c);
-f_005e3a20.cpp:1073:23: base operand of '->' is not a pointer
-    pIVar11 = local_f4->m_020;
-f_005e3a20.cpp:1092:23: base operand of '->' is not a pointer
-    pIVar11 = local_f4->m_020;
-f_005e3a20.cpp:1093:31: base operand of '->' is not a pointer
-    *(C_AirAttack **)(local_f4->_pad_0084 + 0x94) = local_f4;
-f_005e3a20.cpp:1119:23: base operand of '->' is not a pointer
-    pIVar11 = local_f4->m_020;
-f_005e3a20.cpp:1120:29: base operand of '->' is not a pointer
-    *(C_str_rep **)(local_f4->_pad_0084 + 0x90) = CStack_f0.rep;
-f_005e3a20.cpp:1121:29: base operand of '->' is not a pointer
-    *(I3D_frame **)(local_f4->_pad_0084 + 0x50) = pIVar11;
-f_005e3a20.cpp:1122:13: base operand of '->' is not a pointer
-    local_f4->_pad_0084[0x54] = '\0';
-f_005e3a20.cpp:1123:13: base operand of '->' is not a pointer
-    local_f4->_pad_0084[0x55] = '\b';
-f_005e3a20.cpp:1124:13: base operand of '->' is not a pointer
-    local_f4->_pad_0084[0x56] = '\0';
-f_005e3a20.cpp:1125:13: base operand of '->' is not a pointer
-    local_f4->_pad_0084[0x57] = '\0';
-f_005e3a20.cpp:2578:32: too few arguments to function
-    (*pIStack_78->vtable->LinkTo)();
-f_005e3a20.cpp:2584:34: too few arguments to function
-    (*unaff_ESI->vtable[1].SetName)();
-f_005e3a20.cpp:2851:32: too few arguments to function
-    (*pIStack_78->vtable->LinkTo)();
-f_005e3a20.cpp:2857:34: too few arguments to function
-    (*unaff_ESI->vtable[1].SetName)();
-f_005edcf0.cpp:2601:46: no matching function for call to 'gh_bitcast<tier1::C_str_rep*>()'
-    local_bc.rep = gh_bitcast<C_str_rep*>()
-f_005f31c0.cpp:1347:43: cannot convert 'float' to 'tier1::I3D_frame*'
-    FUN_005f3300(param_1 + 0x34,param_1[0x28],0x40000000);
-f_005f31c0.cpp:1369:20: cannot convert 'float*' to 'uint32_t*' {aka 'unsigned int*'} in assignment
-    puVar8 = param_1 + 0x10;
-f_005f31c0.cpp:2316:29: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    iVar13 = (**(code **)(*DAT_008aed60 + 4))(DAT_008aed60,puVar3,0);
 f_00614100.cpp:834:46: 'struct tier1::C_PlayerProfile' has no member named '_pad_00dc'
     C_MovieList__Get((g_gameProfile.m_player)->_pad_00dc + 0x24,*(uint32_t *)(param_2 + 0x5c),&param_2,
 f_0061bec0.cpp:2076:65: expected primary-expression before '*' token

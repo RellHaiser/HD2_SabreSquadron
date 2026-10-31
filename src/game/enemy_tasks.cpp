@@ -71,8 +71,8 @@ bool C_EnemyController::IsLightWeapon()
     if (!m_handsItem)
         return true;
     switch (BehaviourOf(m_handsItem)) {
-    case 0:
-    case 3:
+    case ITEM_BEHAVIOUR_MELEE:
+    case ITEM_BEHAVIOUR_SMG:
     case 7:
     case ITEM_BEHAVIOUR_THROWN:
         return true;

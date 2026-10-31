@@ -121,4 +121,3 @@
 0073db30 C_NetMessage::WriteDirection
 0073db70 C_NetMessage::ReadDirection
 006efe40 C_CollisionWorld::SetIgnoredVolume
-00488d60 C_GEffectsModule::FadeOutModel

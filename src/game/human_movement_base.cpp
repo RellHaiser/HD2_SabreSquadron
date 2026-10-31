@@ -1210,7 +1210,7 @@ void C_HumanMovement::OnPickUpBody(C_Human *body)
             if (frame->GetType() == FRAME_VISUAL)
                 static_cast<I3D_visual *>(frame)->SetModeA(0);
         }
-        GetGEffects()->SetModelHighlight(body->GetFrame(), m_owner->GetUnknown94());
+        GetGEffects()->SetModelTransparency(body->GetFrame(), m_owner->GetUnknown94());
     }
     equipment->OnAnimationEvent(EQUIPMENT_EVENT_SPECIAL_LAST);
     m_owner->GetMovement()->UpdateModelNames();
@@ -1263,7 +1263,7 @@ void C_HumanMovement::OnDropBody(C_Human *body)
         const float zero[3] = {0.0f, 0.0f, 0.0f};
         bodyMovement->m_weaponPose->StartDeath(8, zero, 0, 4, m_owner);
         body->GetFrame()->SetOn(true);
-        GetGEffects()->SetModelHighlight(body->GetFrame(), 0.0f);
+        GetGEffects()->SetModelTransparency(body->GetFrame(), 0.0f);
     }
     m_owner->GetMovement()->UpdateModelNames();
     work->SetFlagsD0(0x8, false);

@@ -11,6 +11,7 @@
 #include "common/c_str.h"
 #include "game/actor.h"
 #include "game/actors_module.h"
+#include "game/air_attack.h"
 #include "game/animation_actor.h"
 #include "game/barrel.h"
 #include "game/bike.h"
@@ -24,6 +25,7 @@
 #include "game/fish.h"
 #include "game/fowl_generator.h"
 #include "game/item_actor.h"
+#include "game/junkers88.h"
 #include "game/ladder.h"
 #include "game/melee_tracker.h"
 #include "game/melee_tracker_ai.h"
@@ -83,12 +85,7 @@ class C_Item;
 // C_Submarine ("Submarine", vtable 0x00812650, 0x120 bytes) and GetSubmarines() are in game/submarine.h, included
 // above.
 // C_Pike ("Pike", vtable 0x00811c90, 0x210 bytes) is defined in game/pike.h, included above.
-class C_Junkers88 : public C_Actor {
-public:
-    void SetState(int state);                           // 0x005f0a90
-    // (+0x280, not identified: the squad's gunners fire at it only while nonzero.)
-    float GetUnknown280() const;
-};
+// C_Junkers88 ("Junkers88", vtable 0x00812c10, 0x330 bytes) is defined in game/junkers88.h, included above.
 // C_TSExplosion ("Explosion [TS]", vtable 0x008136d0, 0xd0 bytes) is defined in game/ts_explosion.h, included above.
 
 // C_Train ("Train", vtable 0x00811e78, 0x8250 bytes) is defined in game/train.h, included above.
@@ -100,12 +97,7 @@ public:
 
 // C_WireCut ("WireCut", vtable 0x00812750, 0xb0 bytes) is defined in game/wire_cut.h, included above.
 
-class C_AirAttack : public C_Actor {
-public:
-    void SetTarget(bool stop, I3D_frame *target);       // 0x005e7570
-    // m/s along its z axis (the squad's gunners lead it by it).
-    float GetSpeed() const;                             // +0x148
-};
+// C_AirAttack ("AirAttack", vtable 0x00812930, 0x1f0 bytes) is defined in game/air_attack.h, included above.
 
 // C_ItemActor ("Item", vtable 0x00811aa8, 0x6c0 bytes) is defined in game/item_actor.h, included above.
 
@@ -133,7 +125,7 @@ enum E_FadeDirection {
     FADE_OUT = 1,
 };
 
-// (the module object itself is declared in pending.h)
+// (the module object itself: game/geffects.h)
 class C_GEffectsModule;
 
 // Humans whose movement takes an effect value from the camera (list at +0x8C of the
@@ -185,6 +177,8 @@ public:
     void SetSpecialMode(int mode, bool on, I3D_frame *target);   // vtable +0x44
     // The same slot with 1 as the third argument (the game's free camera; not identified).
     void SetSpecialMode(int mode, bool on, int unknown);
+    // The same slot with a height (CAMERA_MODE_UNDERWATER: the water's surface).
+    void SetSpecialMode(int mode, bool on, float height);
     // Called when the active soldier moves into another sector (not identified).
     void Unknown40(int arg);                            // vtable +0x40
     bool IsGameCamera(I3D_frame *camera);               // vtable +0x4C
@@ -220,43 +214,20 @@ public:
     I3D_sector *GetListenerSector();                    // vtable +0x8C
 };
 C_CameraModule *GetCameraModule();                      // 0x00464e90 (&g_cameraModule)
+// The command map's tactical camera (null before the camera module made it).
+extern C_CameraHumanEffects *g_cameraHumanEffects;      // 0x0089afbc
 // C_CameraModule::SetSpecialMode() modes.
 enum : int {
+    CAMERA_MODE_UNDERWATER = 4,                         // the effects module's water camera
     CAMERA_MODE_AIM = 7,                                // the first-person view through the sights / scope
     CAMERA_MODE_PROJECTILE = 9,                         // rides along with a fired projectile
 };
 
-struct S_TShiftEntry {                                  // 0x1C bytes
-    int id;
-    int unknown04;
-    bool on;                                            // +0x08
-    bool reverse;                                       // +0x09
-};
+// The texture shifting module: see game/tshift.h; the lightmap groups: game/lightmap_groups.h.
 
-class C_TShiftModule {                                  // "TShift", vtable 0x00810418
-public:
-    bool HasFrame(I3D_frame *frame) const;              // 0x0048e2d0
-    S_TShiftEntry *GetEntry(uint32_t id);               // 0x0048e780
-};
-extern C_TShiftModule g_tshiftModule;                   // 0x0089bc34
+// The decorators (C_Decorators, g_decorators): game/pending.h (part 8d).
 
-class C_LightMapGroupsModule {                          // "LMapsGrp", vtable 0x00810398
-public:
-    void *FindGroup(const char *name) const;            // 0x0041d5e0
-};
-C_LightMapGroupsModule *GetLightMapGroups();            // 0x0048cb00
-
-class C_Decorators {
-public:
-    void SetOn(bool on);                                // 0x0047b010
-};
-extern C_Decorators *g_decorators;                      // 0x0089bbb0
-
-class C_Junkers88Setup {
-public:
-    void SetInterceptors(float firepower, float health);   // 0x005eddc0
-};
-extern C_Junkers88Setup *g_junkers88Setup;              // 0x008ac9e4
+// The Junkers 88 setup (SetupJunkers88) is the Junkers itself: see game/junkers88.h.
 
 // Checkpoints (AI navigation graph): see game/checkpoints.h.
 
