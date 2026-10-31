@@ -2270,7 +2270,7 @@ uint32_t FUN_007310e0(void *_this,uint8_t *param_1,uint32_t param_2,uint32_t par
   local_210.sa_data[0xb] = '\0';
   local_210.sa_data[0xc] = '\0';
   local_210.sa_data[0xd] = '\0';
-  uVar1 = htons((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)(param_4))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));
+  uVar1 = htons((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)(param_4))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))));
   local_210.sa_data[0] = gh_bitcast<char>(uVar1);
   local_210.sa_data[1] = (char)(uVar1 >> 8);
   GH_PIECE(local_210.sa_data,2,4) = param_3;
@@ -2852,7 +2852,7 @@ int C_NetGame__GetConnectionState(C_NetGame *net, ...)
 
 
 // 0x00731af0  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_00731af0(int *param_1, ...)
+uint32_t C_NetGame__PrintLoadProgress(C_NetGame *_this,int percent, ...)
 {
   return {};
 }
@@ -2860,34 +2860,35 @@ uint32_t FUN_00731af0(int *param_1, ...)
 {
   void *pvStack_c;
   S_MultiplayerSettings *settings;
-  uint8_t uVar1;
-  uint32_t uVar2;
-  C_str *pCVar3;
-  C_MpMap *pCVar4;
-  int *piVar5;
-  char *pcVar6;
-  bool bVar7;
+  int iVar1;
+  uint8_t uVar2;
+  uint32_t uVar3;
+  C_str *pCVar4;
+  C_MpMap *pCVar5;
+  int *piVar6;
+  char *pcVar7;
+  bool bVar8;
   C_str CStack_1c;
   int *piStack_18;
   C_str CStack_14;
   C_str CStack_10;
   uint32_t local_4;
-  piVar5 = param_1;
+  iVar1 = percent;
   local_4 = 0xffffffff;
-  uVar2 = (uint32_t)param_1 & 0x80000003;
-  bVar7 = uVar2 == 0;
-  if ((int)uVar2 < 0) {
-    bVar7 = (uVar2 - 1 | 0xfffffffc) == 0xffffffff;
+  uVar3 = percent & 0x80000003;
+  bVar8 = uVar3 == 0;
+  if ((int)uVar3 < 0) {
+    bVar8 = (uVar3 - 1 | 0xfffffffc) == 0xffffffff;
   }
-  if ((bVar7) && (ExceptionList = &pvStack_c, DAT_009820fc != 0)) {
+  if ((bVar8) && (ExceptionList = &pvStack_c, DAT_009820fc != 0)) {
     if (DAT_0098c100 == 0) {
-      param_1 = tier1_operator_new(0x70);
+      percent = (int)tier1_operator_new(0x70);
       local_4 = 0;
-      if ((C_Console *)param_1 == 0) {
+      if ((C_Console *)percent == 0) {
         DAT_0098c100 = 0;
       }
       else {
-        DAT_0098c100 = (C_Console *)C_Console__C_Console((C_Console *)param_1);
+        DAT_0098c100 = (C_Console *)C_Console__C_Console((C_Console *)percent);
       }
       local_4 = 0xffffffff;
       (*DAT_0098c100->vtable->Create)();
@@ -2895,34 +2896,34 @@ uint32_t FUN_00731af0(int *param_1, ...)
     C_Console__OnChar(DAT_0098c100,'.');
   }
   settings = g_gameProfile.m_mpSettings;
-  if (piVar5 == (int *)0x64) {
+  if (iVar1 == 100) {
     if (DAT_009820fc != 0) {
       if (DAT_0098c100 == 0) {
-        param_1 = tier1_operator_new(0x70);
+        percent = (int)tier1_operator_new(0x70);
         local_4 = 1;
-        if ((C_Console *)param_1 == 0) {
+        if ((C_Console *)percent == 0) {
           DAT_0098c100 = 0;
         }
         else {
-          DAT_0098c100 = (C_Console *)C_Console__C_Console((C_Console *)param_1);
+          DAT_0098c100 = (C_Console *)C_Console__C_Console((C_Console *)percent);
         }
         local_4 = 0xffffffff;
         (*DAT_0098c100->vtable->Create)();
       }
       C_Console__MoveInputLineToHistory(DAT_0098c100);
-      pCVar3 = C_TextDatabase__GetText(&DAT_008c1368,&CStack_1c,0x22c9);
+      pCVar4 = C_TextDatabase__GetText(&DAT_008c1368,&CStack_1c,0x22c9);
       local_4 = 2;
-      if (pCVar3->rep == 0) {
-        pcVar6 = &DAT_00867a90;
+      if (pCVar4->rep == 0) {
+        pcVar7 = &DAT_00867a90;
       }
       else {
-        pcVar6 = pCVar3->rep->chars;
+        pcVar7 = pCVar4->rep->chars;
       }
-      pCVar3 = C_fstr_Construct((C_str *)&param_1,&DAT_00832cfc,pcVar6);
+      pCVar4 = C_fstr_Construct((C_str *)&percent,&DAT_00832cfc,pcVar7);
       GH_PIECE(local_4,0,1) = 3;
-      pcVar6 = pCVar3->rep->chars;
-      if (pCVar3->rep == 0) {
-        pcVar6 = &DAT_00867a90;
+      pcVar7 = pCVar4->rep->chars;
+      if (pCVar4->rep == 0) {
+        pcVar7 = &DAT_00867a90;
       }
       if (DAT_0098c100 == 0) {
         CStack_10.rep = tier1_operator_new(0x70);
@@ -2936,9 +2937,9 @@ uint32_t FUN_00731af0(int *param_1, ...)
         GH_PIECE(local_4,0,1) = 3;
         (*DAT_0098c100->vtable->Create)();
       }
-      C_Console__AddLine(DAT_0098c100,pcVar6);
-      if ((param_1 != 0) && (*param_1 = *param_1 - 1, *param_1 == 0)) {
-        tier1_operator_delete(param_1);
+      C_Console__AddLine(DAT_0098c100,pcVar7);
+      if ((percent != 0) && (*(int *)percent = *(int *)percent - 1, *(int *)percent == 0)) {
+        tier1_operator_delete((void *)percent);
       }
       if ((CStack_1c.rep != 0) &&
          ((CStack_1c.rep)->refCount = (CStack_1c.rep)->refCount - 1, (CStack_1c.rep)->refCount == 0
@@ -2949,41 +2950,41 @@ uint32_t FUN_00731af0(int *param_1, ...)
       return 0;
     }
   }
-  else if ((piVar5 == 0) && (DAT_009820fc == 0)) {
-    pCVar3 = C_TextDatabase__GetText(&DAT_008c1368,&CStack_10,0x22c8);
+  else if ((iVar1 == 0) && (DAT_009820fc == 0)) {
+    pCVar4 = C_TextDatabase__GetText(&DAT_008c1368,&CStack_10,0x22c8);
     local_4 = 5;
-    if (pCVar3->rep == 0) {
-      pcVar6 = &DAT_00867a90;
+    if (pCVar4->rep == 0) {
+      pcVar7 = &DAT_00867a90;
     }
     else {
-      pcVar6 = pCVar3->rep->chars;
+      pcVar7 = pCVar4->rep->chars;
     }
-    pCVar3 = C_fstr_Construct(&CStack_14,&DAT_00845168,pcVar6);
+    pCVar4 = C_fstr_Construct(&CStack_14,&DAT_00845168,pcVar7);
     GH_PIECE(local_4,0,1) = 6;
-    pCVar4 = S_MultiplayerSettings__GetCurrentMap(settings);
-    piVar5 = FUN_00688130(pCVar3,(uint32_t*)(&piStack_18),(int *)&pCVar4->m_name);
+    pCVar5 = S_MultiplayerSettings__GetCurrentMap(settings);
+    piVar6 = FUN_00688130(pCVar4,(uint32_t*)(&piStack_18),(int *)&pCVar5->m_name);
     GH_PIECE(local_4,0,1) = 7;
-    uVar1 = (uint8_t)local_4;
+    uVar2 = (uint8_t)local_4;
     GH_PIECE(local_4,0,1) = 7;
-    pcVar6 = (char *)(*piVar5 + 8);
-    if (*piVar5 == 0) {
-      pcVar6 = &DAT_00867a90;
+    pcVar7 = (char *)(*piVar6 + 8);
+    if (*piVar6 == 0) {
+      pcVar7 = &DAT_00867a90;
     }
     if (DAT_0098c100 == 0) {
-      param_1 = tier1_operator_new(0x70);
+      percent = (int)tier1_operator_new(0x70);
       GH_PIECE(local_4,0,1) = 8;
-      if ((C_Console *)param_1 == 0) {
+      if ((C_Console *)percent == 0) {
         DAT_0098c100 = 0;
       }
       else {
-        DAT_0098c100 = (C_Console *)C_Console__C_Console((C_Console *)param_1);
+        DAT_0098c100 = (C_Console *)C_Console__C_Console((C_Console *)percent);
       }
       GH_PIECE(local_4,0,1) = 7;
       (*DAT_0098c100->vtable->Create)();
-      uVar1 = (uint8_t)local_4;
+      uVar2 = (uint8_t)local_4;
     }
-    GH_PIECE(local_4,0,1) = uVar1;
-    C_Console__AddLine(DAT_0098c100,pcVar6);
+    GH_PIECE(local_4,0,1) = uVar2;
+    C_Console__AddLine(DAT_0098c100,pcVar7);
     if ((piStack_18 != 0) && (*piStack_18 = *piStack_18 - 1, *piStack_18 == 0)) {
       tier1_operator_delete(piStack_18);
     }

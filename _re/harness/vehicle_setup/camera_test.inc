@@ -1206,6 +1206,7 @@ void C_Human::SetUnknown94(float value) { GfLog("unknown94 %s %.4f", CmHumanName
 #include "tactical_test.inc"
 #include "update_test.inc"
 #include "placement_test.inc"
+#include "loader_test.inc"
 
 void CameraTest(const char *path)
 {
@@ -1236,6 +1237,7 @@ void CameraTest(const char *path)
     TacticalTest(r);
     UpdateTest(r);
     PlacementTest(r);
+    LoaderTest(r);
     std::printf("camera: cmMake %d cmGetters %d cmSaveLoad %d cmRestart %d cmStart %d cmStartNone %d cmSettings %d "
                 "cmSettingsFile %d cmStop %d cmPos %d cmDir %d cmBlend %d cmTarget %d cmFov %d cmViewDir %d\n",
                 r.cmMake, r.cmGetters, r.cmSaveLoad, r.cmRestart, r.cmStart, r.cmStartNone, r.cmSettings,

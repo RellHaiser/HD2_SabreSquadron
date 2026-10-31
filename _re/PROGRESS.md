@@ -5655,6 +5655,47 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/camera.txt (11 added), car.txt (1); 16 functions in ported.txt. Stats: 7,768 of
     12,293 functions by hand (71.4 % by size).
 
+  PART 8f PLAN (2026-10-31): the mission loading (0x006c97b0..0x006d4eb0, 71 functions, ~44 KB):
+  8f-i the loading screen (0x006c97b0..0x006caad0); 8f-ii C_game::LoadMission and its loader
+  object (the containers 0x006caf30..0x006cc250; the mission's start 0x006d4270, "Scene",
+  check2.bin, actors.bin and the rest 0x006d44d0..0x006d4ea0); 8f-iii scene2.bin's top level and
+  the cache (0x006cc280, 0x006ccab0, 0x006d38f0..0x006d4240); 8f-iv scene2.bin's chunk reader
+  0x006cdc90 (16.5 KB) and 0x006d1ef0 (5.4 KB, no direct callers).
+
+  PART 8f-i DONE (2026-10-31): the loading screen (src/game/loader_screen.*, new; C_LoaderScreen,
+  0x006c97b0..0x006caad0; the object at 0x008aea80, moved out of pending.h).
+  - Start (0x006c9990; the mission's start calls it: shown on a client, waiting for space in single
+    player, in two parts): "missions\<m>\loader" opened as its own scene (the driver's states 0x15 /
+    0x19 / 0x11 set meanwhile; failed: let go, not started), the interface's orthogonal camera and
+    ambient light, then the scene's 15 text visuals (the table at 0x00843078: briefing, textbar,
+    title, MP_list1 / 2, MP_objective1 / 2, MP_title, MP_text_screen, MP_team allied1 / 2, MP_map
+    survey, MP_progress, MP_designated, text_h&dversion) as text boxes with their labels: the
+    briefing and title from the mission's texts (a cooperative map's briefing, value 5, and name),
+    the players AddPlayer collected (team 1 the first list; then forgotten), a network map's
+    objectives with their sides' texts, its name, game type, deathmatch teams, the version.
+  - SetProgress: the stage's part of the bar (6 stages, named by the table: scene, scene2.bin,
+    actors.bin, sounds.bin, stuff.bin, mission init; the second table when C_game::Start follows),
+    drawn when it moved on by more than 0.003: the "loadbar" scaled in x, the scene, the boxes
+    (IGraph 0x68 / 0x6C named BeginScene / EndScene, inferred); a dedicated server prints the percent
+    instead (C_NetGame::PrintLoadProgress 0x00731af0, declared). Finish / FinishLoading (0x006c9900)
+    close a two-part / one-part screen: at 1, single player waits for space ("press space" in the
+    bar, the effects module updated once), the boxes deleted, the frames released.
+  - Quirks kept: no check of the scene CreateFrame made; the "loadbar" found in the scene is released
+    at the close; the close of a closed screen leaves the progress at 1; not shown, the screen counts
+    as started. Fix: the mission's and the players' names as text (the original used them as the
+    format).
+  - I3D_scene slot 0xF4 named Open; C_MpMissionDef::m_briefingText (+0x64); LOADER_STAGE_* named
+    by the table (LOADER_STAGE_START is LOADER_STAGE_MISSION_INIT); GetGameTypeTextId 0x006acb80
+    declared.
+  - Harness: loader_test.inc in the camera build ("loader:", 10 checks; the text boxes, the scene's,
+    the driver's, IGraph's, the camera's and the light's slots faked; the effects module's Update
+    through a copy of its vtable, slot 0x14 in g++); the stubs: S_MultiplayerSettings::dedicated,
+    C_NetGame::PrintLoadProgress. 0 of 22 in both orders.
+  - Mutations (mutations/mutate_8f1.py): the first run caught 190 of 197 (7 survived: 3 unused enumerators, dropped; new cases for 4: the two styles without a visual, the driver's state 0x11 at 1, a dedicated server with a scene); the full rerun: all 184 that build caught (10 do not build: duplicate case labels, a declaration). Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
+  - Build: 201 files clean (MSVC). Tier 1: 526 errors in 90 files, 216 stubs (was 528 / 91 / 217). ret_audit --src: 52.
+  - Ghidra: names/loader_screen.txt (18; 3 moved from game.txt / game_app.txt); 16 functions in
+    ported.txt. Stats: 7,784 of 12,293 functions by hand (71.5 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

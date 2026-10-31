@@ -222014,10 +222014,10 @@
 "in_vtables": []
 },
 "006acb80": {
-"name": "FUN_006acb80",
+"name": "GetGameTypeTextId",
 "size": 32,
 "lines": 10,
-"chars": 179,
+"chars": 182,
 "callers": [
 "00628610",
 "0062fa30",
@@ -232960,10 +232960,10 @@
 "in_vtables": []
 },
 "006c97b0": {
-"name": "FUN_006c97b0",
+"name": "StaticInit_LoaderScreen",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 122,
 "callers": [],
 "callees": [
 "006c97c0",
@@ -232981,10 +232981,10 @@
 ]
 },
 "006c97c0": {
-"name": "FUN_006c97c0",
+"name": "LoaderScreen_Construct",
 "size": 10,
 "lines": 8,
-"chars": 94,
+"chars": 95,
 "callers": [
 "006c97b0"
 ],
@@ -233000,10 +233000,10 @@
 "in_vtables": []
 },
 "006c97d0": {
-"name": "FUN_006c97d0",
+"name": "LoaderScreen_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 97,
 "callers": [
 "006c97b0"
 ],
@@ -233017,10 +233017,10 @@
 "in_vtables": []
 },
 "006c97e0": {
-"name": "FUN_006c97e0",
+"name": "LoaderScreen_Destruct",
 "size": 10,
 "lines": 8,
-"chars": 87,
+"chars": 95,
 "callers": [
 "006c97d0"
 ],
@@ -233036,10 +233036,10 @@
 "in_vtables": []
 },
 "006c97f0": {
-"name": "FUN_006c97f0",
+"name": "C_LoaderScreen",
 "size": 79,
-"lines": 35,
-"chars": 763,
+"lines": 36,
+"chars": 772,
 "callers": [
 "006c97c0"
 ],
@@ -233051,10 +233051,10 @@
 "in_vtables": []
 },
 "006c9840": {
-"name": "FUN_006c9840",
+"name": "~C_LoaderScreen",
 "size": 186,
-"lines": 43,
-"chars": 1183,
+"lines": 44,
+"chars": 1321,
 "callers": [
 "006c97e0"
 ],
@@ -233069,10 +233069,10 @@
 "in_vtables": []
 },
 "006c9900": {
-"name": "FUN_006c9900",
+"name": "FinishLoading",
 "size": 13,
-"lines": 11,
-"chars": 159,
+"lines": 13,
+"chars": 167,
 "callers": [
 "006caad0"
 ],
@@ -233088,8 +233088,8 @@
 "006c9910": {
 "name": "Finish",
 "size": 13,
-"lines": 11,
-"chars": 178,
+"lines": 13,
+"chars": 160,
 "callers": [
 "00698c80"
 ],
@@ -233106,7 +233106,7 @@
 "name": "SetProgress",
 "size": 107,
 "lines": 30,
-"chars": 740,
+"chars": 686,
 "callers": [
 "00698c80",
 "006caad0",
@@ -233130,10 +233130,10 @@
 "in_vtables": []
 },
 "006c9990": {
-"name": "FUN_006c9990",
+"name": "Start",
 "size": 3132,
-"lines": 519,
-"chars": 19902,
+"lines": 539,
+"chars": 20946,
 "callers": [
 "006d4270"
 ],
@@ -233188,10 +233188,10 @@
 "in_vtables": []
 },
 "006ca610": {
-"name": "get_field_4_6ca610",
+"name": "IsShown",
 "size": 4,
-"lines": 7,
-"chars": 107,
+"lines": 9,
+"chars": 123,
 "callers": [
 "006c9920",
 "006ca620"
@@ -233204,10 +233204,10 @@
 "in_vtables": []
 },
 "006ca620": {
-"name": "FUN_006ca620",
+"name": "Close",
 "size": 413,
-"lines": 103,
-"chars": 3055,
+"lines": 107,
+"chars": 3326,
 "callers": [
 "006c9840",
 "006c9900",
@@ -233236,10 +233236,10 @@
 "in_vtables": []
 },
 "006ca7c0": {
-"name": "FUN_006ca7c0",
+"name": "Draw",
 "size": 342,
-"lines": 61,
-"chars": 1850,
+"lines": 62,
+"chars": 1898,
 "callers": [
 "006c9920",
 "006c9990",
@@ -233284,10 +233284,10 @@
 "in_vtables": []
 },
 "006ca9c0": {
-"name": "FUN_006ca9c0",
+"name": "ClearPlayers",
 "size": 196,
-"lines": 43,
-"chars": 1578,
+"lines": 44,
+"chars": 1596,
 "callers": [
 "006c9990",
 "006ca620"
@@ -233304,10 +233304,10 @@
 "in_vtables": []
 },
 "006caaa0": {
-"name": "FUN_006caaa0",
+"name": "StaticInit_6caaa0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -256159,10 +256159,10 @@
 "in_vtables": []
 },
 "00731af0": {
-"name": "FUN_00731af0",
+"name": "PrintLoadProgress",
 "size": 787,
-"lines": 158,
-"chars": 5112,
+"lines": 159,
+"chars": 5177,
 "callers": [
 "006ca7c0"
 ],

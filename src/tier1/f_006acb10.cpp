@@ -25,10 +25,10 @@ uint32_t FUN_006acb60(int param_1, ...)
 
 
 // 0x006acb80
-uint32_t FUN_006acb80(int param_1, ...)
+int GetGameTypeTextId(int gameType, ...)
 {
-  if ((-2 < param_1) && (param_1 < 4)) {
-    return *(uint32_t *)(&DAT_008429fc + param_1 * 4);
+  if ((-2 < gameType) && (gameType < 4)) {
+    return *(int *)(&DAT_008429fc + gameType * 4);
   }
   return DAT_00842a0c;
 }

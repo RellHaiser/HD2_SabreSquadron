@@ -19,6 +19,8 @@ LINES = {
     "update": "upGate upMouse upFirst upFollow upTail upCar upScripted upDebug".split(),
     "place": ("plNull plTurn plPlain plSweep plBlend mvShake mvOffsets mvTarget mvAim mvTurret mvFade svFoot svSeat "
               "svChange smModes").split(),
+    "loader": ("lsQuiet lsOpenFail lsScene lsTexts lsMpTexts lsProgress lsDraw lsClose lsWait "
+               "lsPlayers").split(),
 }
 
 

@@ -685,7 +685,7 @@ LAB_0062fd8c:
          (CStack_128.rep)->refCount == 0)) {
         tier1_operator_delete(CStack_128.rep);
       }
-      uVar7 = FUN_006acb80(*(int *)(pbVar3 + 0x70));
+      uVar7 = GetGameTypeTextId(*(int *)(pbVar3 + 0x70));
       CStack_128.rep = 0;
       uStack_13c = 0x30200000;
       uStack_138 = 0x1000017;

@@ -33,7 +33,7 @@ uint32_t FUN_006d4270(uint8_t *param_1,int *param_2, ...)
   uint32_t local_4;
   format = param_1;
   local_4 = 0xffffffff;
-  FUN_006c9990(&DAT_008aea80,param_1,(uint8_t)(g_gameRole >> 1) & 1,((uint8_t)g_gameRole & 7) == 7,1,
+  C_LoaderScreen__Start((C_LoaderScreen*)(&DAT_008aea80),param_1,(uint8_t)(g_gameRole >> 1) & 1,((uint8_t)g_gameRole & 7) == 7,1,
                (int)param_2);
   pCVar3 = GetGame();
   C_game__FreeMission(pCVar3);

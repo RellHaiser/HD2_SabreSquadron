@@ -160,7 +160,7 @@ bool C_game::Start(void *arg)                       // 0x00698c80
         m_mission = mission;
     }
 
-    g_loaderScreen.SetProgress(LOADER_STAGE_START, 0.05f);
+    g_loaderScreen.SetProgress(LOADER_STAGE_MISSION_INIT, 0.05f);
     m_playerInputEnabled = true;
     m_missionFailed = false;
     LoadMaterialTables();
@@ -168,21 +168,21 @@ bool C_game::Start(void *arg)                       // 0x00698c80
     InitCarSurfaces();
     InitCarEffects();
     g_netGame.Command(NET_COMMAND_SCAN_LEVEL, nullptr, 0);
-    g_loaderScreen.SetProgress(LOADER_STAGE_START, 0.1f);
+    g_loaderScreen.SetProgress(LOADER_STAGE_MISSION_INIT, 0.1f);
     SwitchStaticLights(false);
     if (IsLocalGame() && g_gameProfile.GetDetailSettings()->IsEnabled(DETAIL_STAINS))
         g_stainManager.Init(0);
     if (IsServer())
         ModuleManager::BroadcastStartMission(true);
-    g_loaderScreen.SetProgress(LOADER_STAGE_START, 0.35f);
+    g_loaderScreen.SetProgress(LOADER_STAGE_MISSION_INIT, 0.35f);
     if (IsClient()) {
         m_interface->Init();
         ModuleManager::BroadcastStartMission(false);
     }
-    g_loaderScreen.SetProgress(LOADER_STAGE_START, 0.5f);
+    g_loaderScreen.SetProgress(LOADER_STAGE_MISSION_INIT, 0.5f);
     if (IsClient())
         m_firstPersonView->Init();
-    g_loaderScreen.SetProgress(LOADER_STAGE_START, 0.8f);
+    g_loaderScreen.SetProgress(LOADER_STAGE_MISSION_INIT, 0.8f);
 
     m_state = GAME_STATE_STARTING;
     m_fadeTime = 500;
@@ -202,7 +202,7 @@ bool C_game::Start(void *arg)                       // 0x00698c80
     if (IsClient())
         ClearSpeechSlots();
     m_paused = false;
-    g_loaderScreen.SetProgress(LOADER_STAGE_START, 0.9f);
+    g_loaderScreen.SetProgress(LOADER_STAGE_MISSION_INIT, 0.9f);
     if (m_quickMessages)
         m_quickMessages->Init(m_missionName);
     m_round = 0;

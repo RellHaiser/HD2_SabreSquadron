@@ -29082,6 +29082,11 @@
   "module": "zz_idioms",
   "name": "empty_function_6ac750"
  },
+ "006acb80": {
+  "module": "loader_screen",
+  "name": "GetGameTypeTextId",
+  "proto": "int __cdecl GetGameTypeTextId(int gameType)"
+ },
  "006ad780": {
   "module": "game",
   "name": "S_MultiplayerSettings::SelectMap",
@@ -30484,24 +30489,80 @@
   "name": "GameRenderCallback",
   "proto": "int __stdcall GameRenderCallback(int phase, int unknown1, int unknown2)"
  },
+ "006c97b0": {
+  "module": "loader_screen",
+  "name": "StaticInit_LoaderScreen"
+ },
+ "006c97c0": {
+  "module": "loader_screen",
+  "name": "LoaderScreen_Construct"
+ },
+ "006c97d0": {
+  "module": "loader_screen",
+  "name": "LoaderScreen_RegisterAtExit"
+ },
+ "006c97e0": {
+  "module": "loader_screen",
+  "name": "LoaderScreen_Destruct"
+ },
+ "006c97f0": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::C_LoaderScreen",
+  "proto": "void __fastcall C_LoaderScreen(C_LoaderScreen *this)"
+ },
+ "006c9840": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::~C_LoaderScreen",
+  "proto": "void __fastcall ~C_LoaderScreen(C_LoaderScreen *this)"
+ },
+ "006c9900": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::FinishLoading",
+  "proto": "void __fastcall FinishLoading(C_LoaderScreen *this)"
+ },
  "006c9910": {
-  "module": "game",
+  "module": "loader_screen",
   "name": "C_LoaderScreen::Finish",
-  "proto": "void __fastcall Finish(C_LoaderScreen * loader)"
+  "proto": "void __fastcall Finish(C_LoaderScreen *this)"
  },
  "006c9920": {
-  "module": "game",
+  "module": "loader_screen",
   "name": "C_LoaderScreen::SetProgress",
   "proto": "void __thiscall SetProgress(C_LoaderScreen *this, int stage, float fraction)"
  },
+ "006c9990": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::Start",
+  "proto": "void __thiscall Start(C_LoaderScreen *this, char * name, bool show, bool waitForKey, bool twoParts, C_MissionDef * mission)"
+ },
  "006ca610": {
-  "module": "zz_idioms",
-  "name": "get_field_4_6ca610"
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::IsShown",
+  "proto": "bool __fastcall IsShown(C_LoaderScreen *this)"
+ },
+ "006ca620": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::Close",
+  "proto": "void __fastcall Close(C_LoaderScreen *this)"
+ },
+ "006ca7c0": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::Draw",
+  "proto": "void __fastcall Draw(C_LoaderScreen *this)"
  },
  "006ca920": {
-  "module": "game_app",
+  "module": "loader_screen",
   "name": "C_LoaderScreen::AddPlayer",
   "proto": "void __thiscall AddPlayer(C_LoaderScreen *this, char * text, int team)"
+ },
+ "006ca9c0": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::ClearPlayers",
+  "proto": "void __fastcall ClearPlayers(C_LoaderScreen *this)"
+ },
+ "006caaa0": {
+  "module": "loader_screen",
+  "name": "StaticInit_6caaa0"
  },
  "006caad0": {
   "module": "game",
@@ -32054,6 +32115,11 @@
   "module": "game",
   "name": "C_NetGame::GetConnectionState",
   "proto": "int __fastcall GetConnectionState(C_NetGame * net)"
+ },
+ "00731af0": {
+  "module": "loader_screen",
+  "name": "C_NetGame::PrintLoadProgress",
+  "proto": "void __thiscall PrintLoadProgress(C_NetGame *this, int percent)"
  },
  "00731fd0": {
   "module": "zz_idioms",

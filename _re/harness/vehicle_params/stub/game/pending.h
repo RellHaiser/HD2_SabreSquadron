@@ -23,6 +23,7 @@ public:
     C_str Get(int id) const;
 };
 extern C_GameTexts g_texts;
+int GetGameTypeTextId(int gameType);                    // (the loading screen, part 8f-i)
 
 // --- the car's seats (game/car_seats.cpp; as the real header declares them) ---------------------
 class C_Actor;
@@ -116,6 +117,7 @@ struct S_MultiplayerSettings {
     int allowVehicles;                                  // (the car's StartMission, RestartMission)
     int allowRespawn;                                   // (the spawn point, part 7b)
     int warmup;                                         // (the multiplayer zone, part 7d) s
+    bool dedicated;                                     // (the loading screen, part 8f-i)
 };
 
 // --- the car's callbacks (game/car_callbacks.cpp; as the real header declares them) --------------
@@ -178,6 +180,7 @@ public:
     int GetPlayerCount() const;
     void AddScore(int slot, int points);
     void AddTeamScore(int team, float points);
+    void PrintLoadProgress(int percent);                // (the loading screen, part 8f-i)
 };
 extern C_NetGame g_netGame;
 class C_NetMessage;

@@ -192,6 +192,8 @@ public:
     void SendMessage(C_BitStream *msg);            // 0x0072c360
     void Init();                                    // 0x0072e570
     void Shutdown();                                // 0x0072e830
+    // A dedicated server's loading progress (`percent` 0..100) on its console.
+    void PrintLoadProgress(int percent);            // 0x00731af0
     void ReceiveMessages(int timeDelta, bool beforeUpdate);   // 0x0072c780
     void SendMessages(int timeDelta);               // 0x0072d240
     // Name of the player in `slot` (+0x08 of its state), null if there is none.
@@ -529,20 +531,11 @@ inline bool CopyProtectionIntactBreath()
 // g_hudOption, g_mpSettings, g_gameMode): game/profile.h.
 class I3D_scene;
 
-// The loading screen's progress bar (the object at 0x008aea80).
-class C_LoaderScreen {
-public:
-    // Progress `fraction` of loading stage `stage`.
-    void SetProgress(int stage, float fraction);    // 0x006c9920
-    void Finish();                                  // 0x006c9910
-    // A player's line on the screen of a network map (`team` 1: the second list).
-    void AddPlayer(const char *text, int team);     // 0x006ca920
-};
-extern C_LoaderScreen g_loaderScreen;               // 0x008aea80
-enum : int {
-    LOADER_STAGE_MISSION = 4,                       // C_game::LoadMission
-    LOADER_STAGE_START = 5,                         // C_game::Start
-};
+// The text id of a network game type (-1 .. 3; others: "unknown"; the menus' code).
+int GetGameTypeTextId(int gameType);                // 0x006acb80
+
+// The loading screen (C_LoaderScreen, g_loaderScreen): game/loader_screen.h.
+#include "game/loader_screen.h"
 
 // Effects that run for a while (the list at 0x008aee58; saved with the game).
 void TimedEvents_Update(int timeDelta, bool clear); // 0x006df760 (`clear`: all go)

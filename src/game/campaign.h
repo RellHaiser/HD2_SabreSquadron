@@ -333,6 +333,8 @@ public:
     // The map's value 4 (not in the shipped mpmaplist: 0): 1 makes the occupation zones be
     // taken in their numbers' order.
     int GetUnknown60() const { return m_unknown60; }
+    // The briefing's text id of a cooperative map (the loading screen's "briefing").
+    int GetBriefingText() const { return m_briefingText; }
 
 private:
     friend class C_Campaign;
@@ -343,7 +345,7 @@ private:
     int m_balanceAllied = -1;                           // +0x58
     int m_balanceAxis = -1;                             // +0x5C
     int m_unknown60 = 0;                                // +0x60
-    int m_unknown64 = 0;                                // +0x64
+    int m_briefingText = 0;                             // +0x64 the map's value 5 (a cooperative map's briefing)
     C_str m_presets;                                    // +0x68 the map's allowed presets ("Allied gunner" ...)
     C_str m_mapName;                                    // +0x6C
     std::vector<S_CampaignItem> m_items;                // +0x70 the map's allowed items

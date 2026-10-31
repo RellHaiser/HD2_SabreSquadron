@@ -92,8 +92,6 @@
 0067fda0 C_MissionDef::AreObjectivesDecided | bool __fastcall AreObjectivesDecided(C_MissionDef * mission)
 006ad780 S_MultiplayerSettings::SelectMap | bool __thiscall SelectMap(S_MultiplayerSettings *this, char * name)
 006ad830 S_MultiplayerSettings::GetCurrentMap | C_MpMap * __fastcall GetCurrentMap(S_MultiplayerSettings * settings)
-006c9910 C_LoaderScreen::Finish | void __fastcall Finish(C_LoaderScreen * loader)
-006c9920 C_LoaderScreen::SetProgress | void __thiscall SetProgress(C_LoaderScreen *this, int stage, float fraction)
 006c95b0 GameRenderCallback | int __stdcall GameRenderCallback(int phase, int unknown1, int unknown2)
 006df760 TimedEvents_Update | void __fastcall TimedEvents_Update(int timeDelta, bool clear)
 006df880 TimedEvents_Clear | void __cdecl TimedEvents_Clear(void)
