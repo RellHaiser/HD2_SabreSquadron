@@ -21,6 +21,8 @@ LINES = {
                   "gfShardPhysics").split(),
     "birds": ("bdMake bdDelete bdSit bdHop bdFlyAway bdTakeOff bdClimb bdGlide bdModule bdMovie bdMovieFile "
               "bdMovieUpdate bdEffects").split(),
+    "decorators": ("dcMake dcLoad dcVersions dcLoadEnd dcLight dcStart dcGrid dcOn dcClear dcFree dcCover "
+                   "dcModule").split(),
 }
 
 

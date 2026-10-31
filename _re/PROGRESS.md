@@ -5392,6 +5392,32 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     exported; 22 functions in ported.txt (16 helpers absorbed: the birds' and the mesh player's
     containers). Stats: 7,569 of 12,293 functions by hand (69.4 % by size).
 
+  PART 8d-ii DONE (2026-10-30): the decorators' setup, load, start and free (src/game/decorators.*, new).
+  - decorations.bin (0x0047c530, S_DecoratorSet::Load 0x0047cc90): the top chunk's id is the version
+    (1: nothing read); the grid's size (square) and cell size, then per ground material its set
+    (minimum slope 0.95 from version 3, ground cover 0.5 from 9) of decorators: the model's name chunk,
+    the cumulative chance (%), bendable; from version 4 a float (unknown), 5 random rotation, 6 the
+    sway (none / along x / z) and its amplitude, 7 its frequency, 8 align to the ground. A material
+    read again replaces its set; a set without its header ends the load. decorator_sl.bin
+    (0x0047c930): the ground's light, a byte per cell (width, height, cell size, origin x / z, 2 ints
+    unknown), only after decorations.bin opened.
+  - Start (0x0047b0b0): each decorator's pool of free models by its lowercase name (made when new),
+    the animated ones listed, the grid made (60 x 60 cells of 0.5 m by default, rows [z][x]); off when
+    the detail option DETAIL_DECORATORS (4, new) is. SetOn, Clear, Free, GetGroundCover (1 for a
+    material without a set). C_DecoratorGrid's Init / Free, S_DecoratorBend's fields (the update's).
+  - Quirks kept: Start without Free lists the animated decorators again; a material index cut short
+    by the file's end keeps its bytes read. Fixes: the name buffers terminated, the light map cleared,
+    Start's name not copied into 256 bytes.
+  - Harness: decorators_test.inc ("decorators:", 12 checks), the GEffects test's decorator fakes
+    dropped (Update kept for 8d-iii). Baselines: 0 of 22 in both orders; the item build 0 of 37; the
+    other five 0 of 37 each.
+  - Mutations (mutations/mutate_8d2.py): the first run caught 172 of 209 (33 survived, 4 did not
+    build); 11 equivalent, new cases for 21. The second run: all 195 built caught.
+  - Build: 198 files clean (MSVC). Tier 1: 546 errors in 97 files, 226 stubs. ret_audit --src: 52.
+  - Ghidra: 43 names (names/decorators.txt; SetOn and g_decorators moved from script.txt), 54
+    decompiles exported; 25 functions in ported.txt (29 helpers absorbed; Update 0x0047bcc0 left for
+    8d-iii). Stats: 7,622 of 12,293 functions by hand (69.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

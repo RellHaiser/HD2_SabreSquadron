@@ -225,7 +225,7 @@ enum : int {
 
 // The texture shifting module: see game/tshift.h; the lightmap groups: game/lightmap_groups.h.
 
-// The decorators (C_Decorators, g_decorators): game/pending.h (part 8d).
+// The decorators (C_Decorators, g_decorators): game/decorators.h.
 
 // The Junkers 88 setup (SetupJunkers88) is the Junkers itself: see game/junkers88.h.
 

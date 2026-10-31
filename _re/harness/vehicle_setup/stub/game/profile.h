@@ -16,6 +16,7 @@ struct S_DetailSettings {
 };
 enum : int {
     DETAIL_VERTEX_ANIMATION = 1,
+    DETAIL_DECORATORS = 4,
 };
 
 // (The Junkers 88, part 7h: the HUD option and the play mode, as the real header has them.)

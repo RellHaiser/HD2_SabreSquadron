@@ -46208,10 +46208,10 @@
 "in_vtables": []
 },
 "0047ab90": {
-"name": "FUN_0047ab90",
+"name": "StaticInit_47ab90",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -46230,10 +46230,10 @@
 ]
 },
 "0047abc0": {
-"name": "FUN_0047abc0",
+"name": "StaticInit_47abc0",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 126,
 "callers": [],
 "callees": [
 "0047abd0",
@@ -46251,10 +46251,10 @@
 ]
 },
 "0047abd0": {
-"name": "FUN_0047abd0",
+"name": "DecoratorStatics_Construct0",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 82,
 "callers": [
 "0047abc0"
 ],
@@ -46270,10 +46270,10 @@
 "in_vtables": []
 },
 "0047abe0": {
-"name": "FUN_0047abe0",
+"name": "DecoratorStatics_RegisterAtExit0",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 106,
 "callers": [
 "0047abc0"
 ],
@@ -46287,10 +46287,10 @@
 "in_vtables": []
 },
 "0047abf0": {
-"name": "FUN_0047abf0",
+"name": "DecoratorStatics_Destroy0",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 80,
 "callers": [
 "0047abe0"
 ],
@@ -46306,10 +46306,10 @@
 "in_vtables": []
 },
 "0047ac00": {
-"name": "FUN_0047ac00",
+"name": "StaticInit_47ac00",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 126,
 "callers": [],
 "callees": [
 "0047ac10",
@@ -46327,10 +46327,10 @@
 ]
 },
 "0047ac10": {
-"name": "FUN_0047ac10",
+"name": "DecoratorStatics_Construct1",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 82,
 "callers": [
 "0047ac00"
 ],
@@ -46346,10 +46346,10 @@
 "in_vtables": []
 },
 "0047ac20": {
-"name": "FUN_0047ac20",
+"name": "DecoratorStatics_RegisterAtExit1",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 106,
 "callers": [
 "0047ac00"
 ],
@@ -46363,10 +46363,10 @@
 "in_vtables": []
 },
 "0047ac30": {
-"name": "FUN_0047ac30",
+"name": "DecoratorStatics_Destroy1",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 80,
 "callers": [
 "0047ac20"
 ],
@@ -46382,10 +46382,10 @@
 "in_vtables": []
 },
 "0047ac40": {
-"name": "FUN_0047ac40",
+"name": "S_DecoratorPool::S_DecoratorPool",
 "size": 194,
 "lines": 69,
-"chars": 1757,
+"chars": 1741,
 "callers": [
 "0047b0b0"
 ],
@@ -46400,10 +46400,10 @@
 "in_vtables": []
 },
 "0047ad10": {
-"name": "FUN_0047ad10",
+"name": "S_DecoratorPool::~S_DecoratorPool",
 "size": 176,
 "lines": 44,
-"chars": 1101,
+"chars": 1122,
 "callers": [
 "0047c020"
 ],
@@ -46417,10 +46417,10 @@
 "in_vtables": []
 },
 "0047adc0": {
-"name": "FUN_0047adc0",
+"name": "S_DecoratorSet::S_DecoratorSet",
 "size": 75,
 "lines": 22,
-"chars": 484,
+"chars": 502,
 "callers": [
 "0047c530"
 ],
@@ -46434,10 +46434,10 @@
 "in_vtables": []
 },
 "0047ae10": {
-"name": "FUN_0047ae10",
+"name": "S_DecoratorSet::~S_DecoratorSet",
 "size": 79,
 "lines": 21,
-"chars": 452,
+"chars": 488,
 "callers": [
 "0047c020",
 "0047c530"
@@ -46453,10 +46453,10 @@
 "in_vtables": []
 },
 "0047ae60": {
-"name": "FUN_0047ae60",
+"name": "S_DecoratorSet::Reset",
 "size": 100,
 "lines": 26,
-"chars": 665,
+"chars": 702,
 "callers": [
 "0047adc0",
 "0047ae10",
@@ -46473,10 +46473,10 @@
 "in_vtables": []
 },
 "0047aed0": {
-"name": "FUN_0047aed0",
+"name": "S_Decorator::~S_Decorator",
 "size": 311,
 "lines": 82,
-"chars": 2072,
+"chars": 2096,
 "callers": [
 "0047ae60"
 ],
@@ -46501,8 +46501,8 @@
 "0047b010": {
 "name": "C_Decorators::SetOn",
 "size": 123,
-"lines": 36,
-"chars": 1094,
+"lines": 35,
+"chars": 1068,
 "callers": [
 "00416e10",
 "0047b0b0",
@@ -46518,10 +46518,10 @@
 "in_vtables": []
 },
 "0047b090": {
-"name": "FUN_0047b090",
+"name": "C_Decorators::Free",
 "size": 23,
 "lines": 10,
-"chars": 161,
+"chars": 180,
 "callers": [
 "004863f0",
 "004888c0"
@@ -46537,10 +46537,10 @@
 "in_vtables": []
 },
 "0047b0b0": {
-"name": "FUN_0047b0b0",
+"name": "C_Decorators::Start",
 "size": 961,
-"lines": 181,
-"chars": 6734,
+"lines": 183,
+"chars": 6919,
 "callers": [
 "004863f0",
 "004885d0"
@@ -46591,10 +46591,10 @@
 "in_vtables": []
 },
 "0047b4c0": {
-"name": "FUN_0047b4c0",
+"name": "C_Decorators::GetGroundCover",
 "size": 57,
 "lines": 14,
-"chars": 376,
+"chars": 382,
 "callers": [
 "004867e0"
 ],
@@ -46717,10 +46717,10 @@
 "in_vtables": []
 },
 "0047c020": {
-"name": "FUN_0047c020",
+"name": "C_Decorators::Clear",
 "size": 280,
 "lines": 57,
-"chars": 1841,
+"chars": 1940,
 "callers": [
 "0047b090",
 "004860b0",
@@ -46743,10 +46743,10 @@
 "in_vtables": []
 },
 "0047c530": {
-"name": "FUN_0047c530",
+"name": "C_Decorators::Load",
 "size": 1010,
-"lines": 174,
-"chars": 6215,
+"lines": 175,
+"chars": 6297,
 "callers": [
 "004863f0",
 "004885d0"
@@ -46779,10 +46779,10 @@
 "in_vtables": []
 },
 "0047c930": {
-"name": "FUN_0047c930",
+"name": "C_Decorators::LoadLightMap",
 "size": 864,
 "lines": 147,
-"chars": 4840,
+"chars": 4884,
 "callers": [
 "0047c530"
 ],
@@ -46813,10 +46813,10 @@
 "in_vtables": []
 },
 "0047cc90": {
-"name": "FUN_0047cc90",
+"name": "S_DecoratorSet::Load",
 "size": 920,
 "lines": 161,
-"chars": 5798,
+"chars": 5807,
 "callers": [
 "0047c530"
 ],
@@ -46840,10 +46840,10 @@
 "in_vtables": []
 },
 "0047d030": {
-"name": "FUN_0047d030",
+"name": "S_Decorator::Reset",
 "size": 132,
 "lines": 34,
-"chars": 922,
+"chars": 1185,
 "callers": [
 "0047cc90"
 ],
@@ -46860,10 +46860,10 @@
 "in_vtables": []
 },
 "0047d0c0": {
-"name": "FUN_0047d0c0",
+"name": "C_Decorators::FreeLightMap",
 "size": 34,
 "lines": 11,
-"chars": 215,
+"chars": 234,
 "callers": [
 "0047c020",
 "0047c930"
@@ -46935,10 +46935,10 @@
 "in_vtables": []
 },
 "0047d240": {
-"name": "FUN_0047d240",
+"name": "DecoratorVector_Construct",
 "size": 24,
 "lines": 11,
-"chars": 239,
+"chars": 252,
 "callers": [
 "0047cc90"
 ],
@@ -46969,10 +46969,10 @@
 "in_vtables": []
 },
 "0047d280": {
-"name": "FUN_0047d280",
+"name": "Vec4Array_Construct",
 "size": 20,
 "lines": 11,
-"chars": 148,
+"chars": 155,
 "callers": [
 "0047cc90"
 ],
@@ -46984,10 +46984,10 @@
 "in_vtables": []
 },
 "0047d2a0": {
-"name": "FUN_0047d2a0",
+"name": "Vec4Array_Free",
 "size": 26,
 "lines": 11,
-"chars": 159,
+"chars": 161,
 "callers": [
 "007fc0b6",
 "007fc138",
@@ -47003,10 +47003,10 @@
 "in_vtables": []
 },
 "0047d2c0": {
-"name": "FUN_0047d2c0",
+"name": "Vec4Array_Free2",
 "size": 26,
 "lines": 11,
-"chars": 159,
+"chars": 162,
 "callers": [
 "0047aed0"
 ],
@@ -47078,10 +47078,10 @@
 "in_vtables": []
 },
 "0047d3c0": {
-"name": "FUN_0047d3c0",
+"name": "FloatPtrVector_Erase",
 "size": 43,
 "lines": 15,
-"chars": 336,
+"chars": 344,
 "callers": [
 "0047aed0"
 ],
@@ -47093,10 +47093,10 @@
 "in_vtables": []
 },
 "0047d3f0": {
-"name": "FUN_0047d3f0",
+"name": "DecoratorVector_Insert",
 "size": 406,
 "lines": 74,
-"chars": 2333,
+"chars": 2343,
 "callers": [
 "0047cc90"
 ],
@@ -47134,10 +47134,10 @@
 "in_vtables": []
 },
 "0047d5a0": {
-"name": "FUN_0047d5a0",
+"name": "DecoratorSetVector_Insert",
 "size": 406,
-"lines": 74,
-"chars": 2333,
+"lines": 75,
+"chars": 2347,
 "callers": [
 "0047c530"
 ],
@@ -47188,10 +47188,10 @@
 "in_vtables": []
 },
 "0047d770": {
-"name": "FUN_0047d770",
+"name": "DecoratorPoolVector_InsertN",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3536,
 "callers": [
 "0047b0b0"
 ],
@@ -47347,10 +47347,10 @@
 "in_vtables": []
 },
 "0047e0c0": {
-"name": "FUN_0047e0c0",
+"name": "StaticInit_47e0c0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -47369,10 +47369,10 @@
 ]
 },
 "0047e0f0": {
-"name": "FUN_0047e0f0",
+"name": "C_DecoratorGrid::Init",
 "size": 207,
-"lines": 53,
-"chars": 1309,
+"lines": 54,
+"chars": 1535,
 "callers": [
 "0047b0b0"
 ],
@@ -47389,10 +47389,10 @@
 "in_vtables": []
 },
 "0047e1c0": {
-"name": "FUN_0047e1c0",
+"name": "S_DecoratorCell::S_DecoratorCell",
 "size": 23,
 "lines": 12,
-"chars": 194,
+"chars": 290,
 "callers": [
 "0047e0f0"
 ],
@@ -47564,10 +47564,10 @@
 "in_vtables": []
 },
 "0047ea60": {
-"name": "FUN_0047ea60",
+"name": "C_DecoratorGrid::Free",
 "size": 274,
-"lines": 68,
-"chars": 2035,
+"lines": 69,
+"chars": 2325,
 "callers": [
 "0047b090"
 ],
@@ -49409,10 +49409,10 @@
 "in_vtables": []
 },
 "004862b0": {
-"name": "FUN_004862b0",
+"name": "C_DecoratorGrid::C_DecoratorGrid",
 "size": 80,
 "lines": 27,
-"chars": 595,
+"chars": 907,
 "callers": [
 "004860b0"
 ],
@@ -49424,10 +49424,10 @@
 "in_vtables": []
 },
 "00486300": {
-"name": "FUN_00486300",
+"name": "Decorators_ClearLightMap",
 "size": 18,
-"lines": 15,
-"chars": 254,
+"lines": 13,
+"chars": 234,
 "callers": [
 "004860b0"
 ],
@@ -50907,10 +50907,10 @@
 "in_vtables": []
 },
 "0048b340": {
-"name": "FUN_0048b340",
+"name": "DecoratorPoolVector_Construct",
 "size": 24,
 "lines": 11,
-"chars": 239,
+"chars": 256,
 "callers": [
 "004860b0"
 ],
@@ -50922,10 +50922,10 @@
 "in_vtables": []
 },
 "0048b360": {
-"name": "FUN_0048b360",
+"name": "DecoratorSetVector_Construct",
 "size": 24,
 "lines": 11,
-"chars": 239,
+"chars": 255,
 "callers": [
 "004860b0"
 ],

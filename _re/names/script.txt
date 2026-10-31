@@ -113,7 +113,6 @@
 004374d0 S_SoundRequest::Init
 00478a20 C_TemporaryActorsList::IsItemInRange
 00479450 C_TemporaryActorsList::CreateDebris | C_Debris * __thiscall CreateDebris(C_TemporaryActorsList *this, I3D_frame *frame, S_vector *pos, S_vector *dir)
-0047b010 C_Decorators::SetOn
 0048cb00 GetLightMapGroups
 004ddcf0 C_Car::IsDestroyed | bool __thiscall IsDestroyed(C_Car *this)
 004e95b0 C_Vehicle::Reset | void __thiscall Reset(C_Vehicle * this, uchar flags)
@@ -136,7 +135,6 @@
 00835b68 g_scriptKeywords @
 008993e8 g_scriptKeywordCount @
 008993f0 g_scriptCompiler @
-0089bbb0 g_decorators @
 008ac9e4 g_junkers88Setup @
 0098b808 g_modelPool @
 0098b810 g_modelPoolCount @

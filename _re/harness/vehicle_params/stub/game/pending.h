@@ -130,22 +130,7 @@ struct S_MultiplayerSettings {
 #ifdef WORLD_TEST
 // The GEffects module's objects (part 8d; as the real header declares them) and the module itself
 // (part 8c-i, the world build tests the real one).
-class C_Decorators {
-public:
-    C_Decorators();
-    ~C_Decorators();
-    void SetOn(bool on);
-    void Clear();
-    void Free();
-    void Load();
-    void Start();
-    void Update(int timeDelta);
-    float GetGroundCover(int material);
-
-private:
-    uint8_t m_data[0xA4];
-};
-extern C_Decorators *g_decorators;
+#include "game/decorators.h"
 class C_Volumetrics {
 public:
     C_Volumetrics();

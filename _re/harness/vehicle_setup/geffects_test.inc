@@ -298,20 +298,7 @@ alignas(16) uint8_t g_gfCameraEffects[16], g_gfInterface[16];
 }  // namespace
 
 // The objects of part 8d.
-C_Decorators *g_decorators;
-C_Decorators::C_Decorators() {}
-C_Decorators::~C_Decorators() {}
-void C_Decorators::SetOn(bool on) { GfLog("dec on %d", on); }
-void C_Decorators::Clear() { GfLog("dec clear"); }
-void C_Decorators::Free() { GfLog("dec free"); }
-void C_Decorators::Load() { GfLog("dec load"); }
-void C_Decorators::Start() { GfLog("dec start"); }
 void C_Decorators::Update(int timeDelta) { GfLog("dec update %d", timeDelta); }
-float C_Decorators::GetGroundCover(int material)
-{
-    GfLog("dec cover %d", material);
-    return 0.25f * static_cast<float>(material);
-}
 C_Volumetrics::C_Volumetrics() {}
 C_Volumetrics::~C_Volumetrics() {}
 void C_Volumetrics::Render(int time) { GfLog("vol render %d", time); }
@@ -536,7 +523,7 @@ void GEffectsTest()
         WM(r.gfModule, m.m_rain);
         m.SetRain(false);
         WM(r.gfModule, !m.m_rain);
-        WM(r.gfModule, m.GetGroundCover(3) == 0.75f && GfLogIs({"dec cover 3"}));
+        WM(r.gfModule, m.GetGroundCover(3) == 1.0f && g_gfLog.empty());
         g_gfLog.clear();
         m.m_time = 1234;
         m.RenderVolumetrics();
@@ -1201,7 +1188,7 @@ void GEffectsTest()
                                "weather 0 0", "sfind a_nsea_ 4", "sfind a_undw_ 4", "dfind a_undw_", "on sea 1",
                                "active sea 1 0", "update sea", "on undw 0", "active undw 0 0", "update undw", "sfind amb 2",
                                "sfind sea_amb 2", "dfind sea_amb", "on amb 1", "active amb 1 0", "update amb", "on seaamb 0",
-                               "active seaamb 0 0", "update seaamb", "dec load", "dec start"}));
+                               "active seaamb 0 0", "update seaamb"}));
         WM(r.gfWater, m.m_waterCamera.enabled && !m.m_waterCamera.underwaterNow && m.m_waterCamera.savedFov == 1.2f &&
                           m.m_waterCamera.savedNear == 0.5f && m.m_waterCamera.savedFar == 300.0f && !m.m_waterCameraFrame &&
                           m.m_seaSound == sea && m.m_underwaterSound == undw && m.m_ambientSound == amb &&
@@ -1219,8 +1206,7 @@ void GEffectsTest()
         GfClear(m);
         m.StartMission(false);
         WM(r.gfWater, GfLogIs({"env primary 1", "env omni 1", "sfind mirasun ffff", "sfind a_nsea_ 4", "dfind a_nsea_",
-                               "sfind a_undw_ 4", "dfind a_undw_", "sfind amb 2", "dfind amb", "sfind sea_amb 2", "dfind sea_amb",
-                               "dec load", "dec start"}) &&
+                               "sfind a_undw_ 4", "dfind a_undw_", "sfind amb 2", "dfind amb", "sfind sea_amb 2", "dfind sea_amb"}) &&
                           !m.m_seaSound && !m.m_underwaterSound && !m.m_ambientSound && !m.m_seaAmbientSound && !m.m_sun);
         // A client only gathers the birds; the server side only that.
         g_files.erase(name);
@@ -1228,7 +1214,7 @@ void GEffectsTest()
         g_gameRole = GAME_ROLE_CLIENT;
         m.StartMission(false);
         g_gameRole = GAME_ROLE_LOCAL;
-        WM(r.gfWater, GfLogIs({"env primary 1", "env omni 1", "sfind mirasun ffff", "senum 80", "dec load", "dec start"}) &&
+        WM(r.gfWater, GfLogIs({"env primary 1", "env omni 1", "sfind mirasun ffff", "senum 80"}) &&
                           !m.m_waterCamera.enabled);
         GfClear(m);
         m.m_time = 50;
@@ -1437,7 +1423,7 @@ void GEffectsTest()
                                     "fov cam 1.2000", "range cam 0.5 300.0", "update cam", "release cam", "weather 0 0",
                                     "sfind hill ffff", "on hill 1", "update hill", "sfind reef ffff", "on reef 0", "update reef",
                                     "on sea 1", "update sea", "on undw 0", "update undw", "on amb 1", "update amb", "on seaamb 0",
-                                    "update seaamb", "on sky1 1", "on lensflare 1", "dec free", "weather 0 0"}));
+                                    "update seaamb", "on sky1 1", "on lensflare 1", "weather 0 0"}));
         WM(r.gfUnderwater, !m.m_waterCameraFrame && !m.m_seaSound && !m.m_underwaterSound && !m.m_ambientSound &&
                                !m.m_seaAmbientSound && !m.m_sun && sun->GetPos().x == 7.0f && sun->GetPos().y == 8.0f &&
                                sun->GetPos().z == 9.0f && !m.m_started && !m.m_rain && m.m_fadeLevel == -1000.0f &&
@@ -1459,7 +1445,7 @@ void GEffectsTest()
         g_cameraHumanEffects = nullptr;
         m.StopMission(false);
         g_cameraHumanEffects = reinterpret_cast<C_CameraHumanEffects *>(g_gfCameraEffects);
-        WM(r.gfUnderwater, GfLogIs({"find backdrop lensflare ffff", "on lensflare 1", "dec free", "weather 0 0"}) &&
+        WM(r.gfUnderwater, GfLogIs({"find backdrop lensflare ffff", "on lensflare 1", "weather 0 0"}) &&
                                m.m_seaSound);
         // The lens flare without its frame.
         I3D_frame *flareFrame = flare;
@@ -1835,14 +1821,14 @@ void GEffectsTest()
         m.m_humanFades.push_back({nullptr, true, 1.0f, 0.5f});
         g_gfLog.clear();
         m.RestartMission(false);
-        WM(r.gfMission, GfLogIs({"dec free", "dec load", "dec start", "senum 80", "tactical 0", "mode rl 0",
+        WM(r.gfMission, GfLogIs({"senum 80", "tactical 0", "mode rl 0",
                                  "power rl 0.000", "on rl 0", "release rl"}) &&
                             m.m_time == 0 && !m.m_rain && !m.m_lightning && m.m_humanFades.empty());
         g_cameraHumanEffects = nullptr;
         g_gfLog.clear();
         m.RestartMission(true);
         g_cameraHumanEffects = reinterpret_cast<C_CameraHumanEffects *>(g_gfCameraEffects);
-        WM(r.gfMission, GfLogIs({"dec free", "dec load", "dec start", "senum 80"}));
+        WM(r.gfMission, GfLogIs({"senum 80"}));
         // The sun with the camera; a locked one stays.
         I3D_frame *sun = GfFrame(FRAME_DUMMY, "sun2");
         m.m_sun = sun;

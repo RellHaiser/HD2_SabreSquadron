@@ -6793,17 +6793,142 @@
   "module": "zz_idioms",
   "name": "construct_copy4_47ab80"
  },
+ "0047ab90": {
+  "module": "decorators",
+  "name": "StaticInit_47ab90"
+ },
+ "0047abc0": {
+  "module": "decorators",
+  "name": "StaticInit_47abc0"
+ },
+ "0047abd0": {
+  "module": "decorators",
+  "name": "DecoratorStatics_Construct0"
+ },
+ "0047abe0": {
+  "module": "decorators",
+  "name": "DecoratorStatics_RegisterAtExit0"
+ },
+ "0047abf0": {
+  "module": "decorators",
+  "name": "DecoratorStatics_Destroy0"
+ },
+ "0047ac00": {
+  "module": "decorators",
+  "name": "StaticInit_47ac00"
+ },
+ "0047ac10": {
+  "module": "decorators",
+  "name": "DecoratorStatics_Construct1"
+ },
+ "0047ac20": {
+  "module": "decorators",
+  "name": "DecoratorStatics_RegisterAtExit1"
+ },
+ "0047ac30": {
+  "module": "decorators",
+  "name": "DecoratorStatics_Destroy1"
+ },
+ "0047ac40": {
+  "module": "decorators",
+  "name": "S_DecoratorPool::S_DecoratorPool",
+  "proto": "void * __thiscall S_DecoratorPool(void * this, char * name)"
+ },
+ "0047ad10": {
+  "module": "decorators",
+  "name": "S_DecoratorPool::~S_DecoratorPool"
+ },
+ "0047adc0": {
+  "module": "decorators",
+  "name": "S_DecoratorSet::S_DecoratorSet",
+  "proto": "void * __fastcall S_DecoratorSet(void * this)"
+ },
+ "0047ae10": {
+  "module": "decorators",
+  "name": "S_DecoratorSet::~S_DecoratorSet"
+ },
+ "0047ae60": {
+  "module": "decorators",
+  "name": "S_DecoratorSet::Reset",
+  "proto": "void __fastcall Reset(void * this)"
+ },
+ "0047aed0": {
+  "module": "decorators",
+  "name": "S_Decorator::~S_Decorator"
+ },
  "0047b010": {
-  "module": "script",
-  "name": "C_Decorators::SetOn"
+  "module": "decorators",
+  "name": "C_Decorators::SetOn",
+  "proto": "void __thiscall SetOn(void * this, bool on)"
+ },
+ "0047b090": {
+  "module": "decorators",
+  "name": "C_Decorators::Free",
+  "proto": "void __fastcall Free(void * this)"
+ },
+ "0047b0b0": {
+  "module": "decorators",
+  "name": "C_Decorators::Start",
+  "proto": "void __fastcall Start(void * this)"
+ },
+ "0047b4c0": {
+  "module": "decorators",
+  "name": "C_Decorators::GetGroundCover",
+  "proto": "float __thiscall GetGroundCover(void * this, uint material)"
+ },
+ "0047c020": {
+  "module": "decorators",
+  "name": "C_Decorators::Clear",
+  "proto": "void __fastcall Clear(void * this)"
+ },
+ "0047c530": {
+  "module": "decorators",
+  "name": "C_Decorators::Load",
+  "proto": "void __fastcall Load(void * this)"
+ },
+ "0047c930": {
+  "module": "decorators",
+  "name": "C_Decorators::LoadLightMap",
+  "proto": "void __fastcall LoadLightMap(void * this)"
+ },
+ "0047cc90": {
+  "module": "decorators",
+  "name": "S_DecoratorSet::Load",
+  "proto": "bool __thiscall Load(void * this, void * chunk, int version)"
+ },
+ "0047d030": {
+  "module": "decorators",
+  "name": "S_Decorator::Reset",
+  "proto": "void __fastcall Reset(void * this)"
+ },
+ "0047d0c0": {
+  "module": "decorators",
+  "name": "C_Decorators::FreeLightMap",
+  "proto": "void __fastcall FreeLightMap(void * this)"
  },
  "0047d220": {
   "module": "zz_idioms",
   "name": "vector_tidy_47d220"
  },
+ "0047d240": {
+  "module": "decorators",
+  "name": "DecoratorVector_Construct"
+ },
  "0047d260": {
   "module": "zz_idioms",
   "name": "vector_tidy_47d260"
+ },
+ "0047d280": {
+  "module": "decorators",
+  "name": "Vec4Array_Construct"
+ },
+ "0047d2a0": {
+  "module": "decorators",
+  "name": "Vec4Array_Free"
+ },
+ "0047d2c0": {
+  "module": "decorators",
+  "name": "Vec4Array_Free2"
  },
  "0047d380": {
   "module": "zz_idioms",
@@ -6813,9 +6938,21 @@
   "module": "zz_idioms",
   "name": "vector_size_e4_47d3a0"
  },
+ "0047d3c0": {
+  "module": "decorators",
+  "name": "FloatPtrVector_Erase"
+ },
+ "0047d3f0": {
+  "module": "decorators",
+  "name": "DecoratorVector_Insert"
+ },
  "0047d590": {
   "module": "zz_idioms",
   "name": "empty_function_47d590"
+ },
+ "0047d5a0": {
+  "module": "decorators",
+  "name": "DecoratorSetVector_Insert"
  },
  "0047d740": {
   "module": "zz_idioms",
@@ -6824,6 +6961,10 @@
  "0047d760": {
   "module": "zz_idioms",
   "name": "empty_function_47d760"
+ },
+ "0047d770": {
+  "module": "decorators",
+  "name": "DecoratorPoolVector_InsertN"
  },
  "0047dfb0": {
   "module": "zz_idioms",
@@ -6856,6 +6997,25 @@
  "0047e0b0": {
   "module": "zz_idioms",
   "name": "construct_copy4_47e0b0"
+ },
+ "0047e0c0": {
+  "module": "decorators",
+  "name": "StaticInit_47e0c0"
+ },
+ "0047e0f0": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::Init",
+  "proto": "void __fastcall Init(void * this)"
+ },
+ "0047e1c0": {
+  "module": "decorators",
+  "name": "S_DecoratorCell::S_DecoratorCell",
+  "proto": "void * __fastcall S_DecoratorCell(void * this)"
+ },
+ "0047ea60": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::Free",
+  "proto": "void __fastcall Free(void * this)"
  },
  "00481cd0": {
   "module": "zz_idioms",
@@ -7039,6 +7199,16 @@
   "module": "geffects",
   "name": "C_GEffectsModule::C_GEffectsModule",
   "proto": "C_GEffectsModule * __thiscall C_GEffectsModule(C_GEffectsModule * this, int id, char * name)"
+ },
+ "004862b0": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::C_DecoratorGrid",
+  "proto": "void * __fastcall C_DecoratorGrid(void * this)"
+ },
+ "00486300": {
+  "module": "decorators",
+  "name": "Decorators_ClearLightMap",
+  "proto": "void __fastcall Decorators_ClearLightMap(void * fields)"
  },
  "004863e0": {
   "module": "geffects",
@@ -7302,6 +7472,14 @@
  "0048b320": {
   "module": "zz_idioms",
   "name": "vector_tidy_48b320"
+ },
+ "0048b340": {
+  "module": "decorators",
+  "name": "DecoratorPoolVector_Construct"
+ },
+ "0048b360": {
+  "module": "decorators",
+  "name": "DecoratorSetVector_Construct"
  },
  "0048b380": {
   "module": "zz_idioms",
@@ -36846,6 +37024,11 @@
   "module": "app",
   "name": "g_temporaryActors"
  },
+ "0089b749": {
+  "data": true,
+  "module": "decorators",
+  "name": "g_decoratorsEnabled"
+ },
  "0089b760": {
   "data": true,
   "module": "geffects",
@@ -36874,7 +37057,7 @@
  },
  "0089bbb0": {
   "data": true,
-  "module": "script",
+  "module": "decorators",
   "name": "g_decorators"
  },
  "0089bbb4": {

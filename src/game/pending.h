@@ -93,25 +93,7 @@ public:
 int ReadConsoleToken(const char **cursor, char *out, int *unknown, char *unknown2);   // 0x007445d0
 
 // ---- the objects of the GEffects module (part 8d) --------------------------
-// The decorators (grass, ground cover; the GEffects module's +0x20, g_decorators).
-class C_Decorators {                                    // 0xA4 bytes
-public:
-    // (Both inlined in the GEffects module's constructor and destructor.)
-    C_Decorators();
-    ~C_Decorators();
-    void SetOn(bool on);                                // 0x0047b010
-    void Clear();                                       // 0x0047c020
-    void Free();                                        // 0x0047b090
-    void Load();                                        // 0x0047c530
-    void Start();                                       // 0x0047b0b0
-    void Update(int timeDelta);                         // 0x0047bcc0
-    // How much ground of material `material` hides a lying / crouching human (1 = none).
-    float GetGroundCover(int material);                 // 0x0047b4c0
-
-private:
-    uint8_t m_data[0xA4];
-};
-extern C_Decorators *g_decorators;                      // 0x0089bbb0
+#include "game/decorators.h"
 
 // The volumetrics (the GEffects module's +0xC4).
 class C_Volumetrics {                                   // 0x20 bytes
