@@ -17,6 +17,8 @@ LINES = {
     "tactical": ("tcBasics tcOn tcOff tcMove tcLookAt tcMode tcFlight tcUpdate tcMoveMode tcTurn tcDrag tcUpDown "
                  "tcZoom tcFly tcHumans").split(),
     "update": "upGate upMouse upFirst upFollow upTail upCar upScripted upDebug".split(),
+    "place": ("plNull plTurn plPlain plSweep plBlend mvShake mvOffsets mvTarget mvAim mvTurret mvFade svFoot svSeat "
+              "svChange smModes").split(),
 }
 
 

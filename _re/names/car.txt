@@ -164,3 +164,6 @@
 004e1820 S_CarParts::ExplosiveAt | int __thiscall ExplosiveAt(S_CarParts *this, S_vector *from, S_vector *dir)
 004e18c0 S_CarParts::HitSeats | void __thiscall HitSeats(S_CarParts *this, S_vector *from, S_vector *dir, float amount, C_Actor *attacker)
 004e1680 S_CarParts::HitZoneUnused | bool __thiscall HitZoneUnused(S_CarParts *this, S_vector *from, S_vector *dir, float amount)
+
+# Part 8e-iv (the camera module's SelectView).
+004def80 C_Car::HasSeatCamera | bool __thiscall HasSeatCamera(void * this, int seat)

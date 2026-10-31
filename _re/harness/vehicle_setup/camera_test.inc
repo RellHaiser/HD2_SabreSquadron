@@ -8,6 +8,7 @@
 #include <new>
 
 #include "game/camera_module.h"
+#include "game/first_person_view.h"
 #include "game/submarine.h"
 
 extern std::vector<std::string> g_dbgPrints;           // (harness.cpp: dbgPrintf's reports)
@@ -96,6 +97,9 @@ void __stdcall F_CmNearRange(I3D_frame *self, float nearRange, float farRange)
     GfLog("nearrange %s %.3f %.1f", GfName(self), nearRange, farRange);
 }
 
+// The scene's GetSector (0xE0) before the tactical test's: none.
+I3D_sector *__stdcall F_CmNoSector(void *, const S_vector &) { return nullptr; }
+
 void CmInitVtables()
 {
     GfInitVtables();
@@ -108,6 +112,10 @@ void CmInitVtables()
     g_gfCameraVt[0x80 / 4] = reinterpret_cast<void *>(&F_CmNearRange);
     g_driverVtable[0x54 / 4] = reinterpret_cast<void *>(&F_CmCreateFrame);
     g_sceneVtable[0x90 / 4] = reinterpret_cast<void *>(&F_CmSetActive);
+    g_sceneVtable[0xE0 / 4] = reinterpret_cast<void *>(&F_CmNoSector);
+    // The first-person view (part 8e-iv's SelectView asks it): off.
+    alignas(16) static uint8_t fpv[sizeof(C_FirstPersonView)];
+    GetGame()->m_firstPersonView = reinterpret_cast<C_FirstPersonView *>(fpv);
 }
 
 I3D_frame *CmCamera(const char *name, const S_vector &pos)
@@ -136,6 +144,37 @@ S_CollisionVolume *CmSphereHook(const S_vector &from, const S_vector &dir, float
     return g_cmHit ? reinterpret_cast<S_CollisionVolume *>(g_cmVolume) : nullptr;
 }
 
+// A vehicle whose seats' flags are g_upSeatFlags, its seats' camera dummy g_upSeatCamera (logged),
+// first-person-only when g_upSeatFirstOnly (ShowSeatView logged).
+uint32_t g_upSeatFlags;
+int g_upSeatAsked;
+I3D_frame *g_upSeatCamera;
+bool g_upSeatFirstOnly;
+class C_UpCar : public C_Actor {
+public:
+    explicit C_UpCar(E_ActorType type) : C_Actor(type) {}
+    void CopyFrom(const C_Actor *) override {}
+    void StartMission(bool) override {}
+    void StopMission(bool) override {}
+    void RestartMission(bool) override {}
+    uint32_t GetSeatFlags(int seat) override
+    {
+        g_upSeatAsked = seat;
+        return g_upSeatFlags;
+    }
+    I3D_frame *GetSeatCamera(int seat) override
+    {
+        GfLog("seatcam %d", seat);
+        return g_upSeatCamera;
+    }
+    bool IsSeatFirstPersonOnly(int seat) override
+    {
+        GfLog("firstonly %d", seat);
+        return g_upSeatFirstOnly;
+    }
+    void ShowSeatView(int seat, bool on) override { GfLog("seatview %d %d", seat, on); }
+};
+
 // --- the module --------------------------------------------------------------------------------
 
 alignas(16) uint8_t g_cmModule[sizeof(C_CameraModule)];
@@ -156,8 +195,8 @@ void CmDelete(C_CameraModule *m)
 
 bool CmDefault(const S_CameraSettings &s)
 {
-    return s.distance == 3.0f && s.unknown04 == 0.5f && s.unknown08 == 1.0f && s.waterBand == 0.2f && s.flags == 0x8B &&
-           s.maxPitch == 0.5f && s.minPitch == -0.5f && s.unknown1C == 12.0f;
+    return s.distance == 3.0f && s.unknown04 == 0.5f && s.unknown08 == 1.0f && s.radius == 0.2f && s.flags == 0x8B &&
+           s.maxPitch == 0.5f && s.minPitch == -0.5f && s.speed == 12.0f;
 }
 bool CmVec4(const S_vector4 &v, float x, float y, float z, float w)
 {
@@ -206,11 +245,11 @@ std::vector<S_CameraSettings> CmRecords(int count, float base)
         s.distance = base + static_cast<float>(i);
         s.unknown04 = base + 0.25f;
         s.unknown08 = -base;
-        s.waterBand = 0.125f * static_cast<float>(i);
+        s.radius = 0.125f * static_cast<float>(i);
         s.flags = 0x100u + static_cast<uint32_t>(i);
         s.maxPitch = 1.5f;
         s.minPitch = -1.25f;
-        s.unknown1C = 7.0f + static_cast<float>(i);
+        s.speed = 7.0f + static_cast<float>(i);
     }
     return out;
 }
@@ -239,6 +278,9 @@ struct S_CameraResults {
     bool tcHumans = true;
     bool upGate = true, upMouse = true, upFirst = true, upFollow = true, upTail = true, upCar = true;
     bool upScripted = true, upDebug = true;
+    bool plNull = true, plTurn = true, plPlain = true, plSweep = true, plBlend = true, mvShake = true, mvOffsets = true;
+    bool mvTarget = true, mvAim = true, mvTurret = true, mvFade = true, svFoot = true, svSeat = true, svChange = true;
+    bool smModes = true;
 };
 
 void CameraModuleTest(S_CameraResults &r)
@@ -260,18 +302,18 @@ void CameraModuleTest(S_CameraResults &r)
             WM(r.cmMake, CmDefault(m->m_settings[i]));
         WM(r.cmMake, m->m_wantedDir.x == 0.0f && m->m_wantedDir.y == -1.0f && m->m_wantedDir.z == 1.0f);
         WM(r.cmMake, m->m_view == 1 && m->m_viewSettings == &m->m_settings[1]);
-        WM(r.cmMake, !m->m_gameCamera && !m->m_sceneCamera && !m->m_camera && m->m_unknown254 == 0.0f &&
-                         !m->m_unknown25C);
-        WM(r.cmMake, !m->m_debugCamera && !m->m_unknown26E && m->m_mouseLook && !m->m_underwater);
+        WM(r.cmMake, !m->m_gameCamera && !m->m_sceneCamera && !m->m_camera && m->m_distance == 0.0f &&
+                         !m->m_hit);
+        WM(r.cmMake, !m->m_debugCamera && !m->m_spectating && m->m_mouseLook && !m->m_underwater);
         // The fields the original leaves: 0, as in its zeroed static object.
         WM(r.cmMake, m->m_shakePos.x == 0 && m->m_shakePos.y == 0 && m->m_shakePos.z == 0 && m->m_shakePos.w == 0.0f &&
                          m->m_shakeDir.x == 0 && m->m_shakeDir.y == 0 && m->m_shakeDir.z == 0 &&
                          m->m_shakeDir.w == 0.0f && m->m_unknown0D0 == 0 && m->m_listenerTime == 0 &&
-                         m->m_unknown258 == 0.0f && m->m_debugSpeed == 0 && m->m_unknown274 == 0 &&
+                         m->m_turnSpeed == 0.0f && m->m_debugSpeed == 0 && m->m_spectator == 0 &&
                          m->m_waterLevel == 0.0f && m->m_blendTime == 0 && m->m_shakeTime == 0 &&
-                         m->m_targetSpeed == 0.0f && m->m_unknown294 == 0 && m->m_time == 0 &&
-                         m->m_offsetPosDelay == 0 && m->m_offsetDirDelay == 0 && m->m_unknown2A4 == 0.0f &&
-                         m->m_unknown2A8 == 0.0f && m->m_unknown2AC == 0.0f && m->m_carPitch == 0.0f &&
+                         m->m_targetSpeed == 0.0f && m->m_aimTime == 0 && m->m_time == 0 &&
+                         m->m_offsetPosDelay == 0 && m->m_offsetDirDelay == 0 && m->m_fadeTarget == 0.0f &&
+                         m->m_fade == 0.0f && m->m_unknown2AC == 0.0f && m->m_carPitch == 0.0f &&
                          m->m_carYaw == 0.0f);
         C_CameraHumanEffects *e = m->m_humanEffects;
         WM(r.cmMake, e && (reinterpret_cast<uintptr_t>(e) & 15) == 0);
@@ -313,9 +355,9 @@ void CameraModuleTest(S_CameraResults &r)
         m->m_scriptedView = reinterpret_cast<I3D_frame *>(&marker);
         WM(r.cmGetters, m->HasScriptedView() && !m->GetState());
         m->m_scriptedView = nullptr;
-        m->m_unknown26E = true;
+        m->m_spectating = true;
         WM(r.cmGetters, m->GetUnknown84() && !m->GetUnknown78() && !m->HasScriptedView());
-        m->m_unknown26E = false;
+        m->m_spectating = false;
         WM(r.cmGetters, m->GetHumanEffects() == m->m_humanEffects && !m->GetCamera() && !m->GetListenerSector());
         m->m_camera = cam;
         m->m_listenerSector = reinterpret_cast<I3D_sector *>(&marker);
@@ -334,10 +376,17 @@ void CameraModuleTest(S_CameraResults &r)
         C_chunk chunk;
         g_gfLog.clear();
         WM(r.cmSaveLoad, m->SaveGame(chunk) && g_gfLog.empty());
-        // (The update: part 8e-iii's test; here it does nothing.)
-        m->m_unknown26E = true;
-        WM(r.cmSaveLoad, m->LoadGame(chunk) && GfLogIs({"cam40 0"}));
-        m->m_unknown26E = false;
+        // SelectView (no soldier: only the negative blend time ended), then the update (part 8e-iii's
+        // test; here it does nothing).
+        I3D_camera *const oldGame = m->m_gameCamera;
+        m->m_gameCamera = reinterpret_cast<I3D_camera *>(CmCamera("loadgame", S_vector(0.0f, 0.0f, 0.0f)));
+        m->m_blendTime = -1;
+        m->m_viewSettings->unknown08 = 1.75f;
+        m->m_spectating = true;
+        g_gfActive = nullptr;
+        WM(r.cmSaveLoad, m->LoadGame(chunk) && g_gfLog.empty() && m->m_blendTime == 0 && m->m_distance == 1.75f);
+        m->m_spectating = false;
+        m->m_gameCamera = oldGame;
     }
 
     // The settings file and the game's view.
@@ -349,12 +398,16 @@ void CameraModuleTest(S_CameraResults &r)
 
     // --- a client's restart: stop, start, the sector call unless in the Junkers ---
     {
-        alignas(16) static uint8_t humanMem[sizeof(C_Human)], carMem[sizeof(C_Car)], junkersMem[sizeof(C_Car)];
+        alignas(16) static uint8_t humanMem[sizeof(C_Human)];
         C_Human *player = reinterpret_cast<C_Human *>(humanMem);
-        C_Actor *car = reinterpret_cast<C_Actor *>(carMem);
-        C_Actor *junkers = reinterpret_cast<C_Actor *>(junkersMem);
-        car->m_type = ACTOR_CAR;
-        junkers->m_type = ACTOR_JUNKERS88;
+        static C_UpCar carObject(ACTOR_CAR), junkersObject(ACTOR_JUNKERS88);
+        C_Actor *car = &carObject;
+        C_Actor *junkers = &junkersObject;
+        g_upSeatCamera = nullptr;
+        g_sceneVtable[0xE0 / 4] = reinterpret_cast<void *>(&F_CmNoSector);  // (the tactical test's logs)
+        // (SelectView on foot: the soldier's "camera3RD".)
+        player->m_frame = GfFrame(FRAME_MODEL, "soldier");
+        GfFrame(FRAME_DUMMY, "camera3RD", player->m_frame);
         g_files[tables] = CmSettingsFile(2, 4, CmRecords(11, 20.0f));
         struct S_Case {
             uint32_t role;
@@ -386,8 +439,10 @@ void CameraModuleTest(S_CameraResults &r)
             std::vector<std::string> want;
             if (c.restarts)
                 want = CmStartLog("game");
-            if (c.sector)
-                want.push_back("cam40 0");
+            if (c.sector && c.active && !c.vehicle)
+                want.push_back("find soldier camera3RD* 10020");
+            if (c.sector && c.vehicle)
+                want.push_back("seatcam 0");
             WM(r.cmRestart, GfVecIs(g_gfLog, want));
             WM(r.cmRestart, (m->m_debugSpeed == 5) == c.restarts && (m->m_sceneCamera == scene) == c.restarts);
         }
@@ -405,7 +460,6 @@ void CameraModuleTest(S_CameraResults &r)
         std::vector<std::string> want = {"active scene", "release game"};
         for (const std::string &l : CmStartLog("game2"))
             want.push_back(l);
-        want.push_back("cam40 0");
         WM(r.cmRestart, GfVecIs(g_gfLog, want) && m->m_sceneCamera == scene);
         g_gameRole = GAME_ROLE_LOCAL;
         player->vehicle = nullptr;
@@ -417,11 +471,11 @@ void CameraModuleTest(S_CameraResults &r)
         auto junk = [&]() {
             m->m_scriptedViewOn = true;
             m->m_scriptedView = reinterpret_cast<I3D_frame *>(&marker);
-            m->m_unknown258 = 1.0f;
-            m->m_unknown26C = true;
+            m->m_turnSpeed = 1.0f;
+            m->m_cut = true;
             m->m_debugCamera = true;
             m->m_debugSpeed = 9;
-            m->m_unknown26E = true;
+            m->m_spectating = true;
             m->m_mouseLook = false;
             m->m_underwater = true;
             m->m_unknown278 = true;
@@ -435,31 +489,31 @@ void CameraModuleTest(S_CameraResults &r)
             m->m_targetSpeed = 7.0f;
             m->m_listenerSector = reinterpret_cast<I3D_sector *>(&marker);
             m->m_listenerTime = 7;
-            m->m_unknown290 = true;
+            m->m_aiming = true;
             m->m_time = m->m_offsetPosDelay = m->m_offsetDirDelay = 7;
             m->m_unknown0D0 = 7;
             // Not touched.
-            m->m_unknown294 = 7;
-            m->m_unknown254 = 7.0f;
-            m->m_unknown274 = 7;
+            m->m_aimTime = 7;
+            m->m_distance = 7.0f;
+            m->m_spectator = 7;
             m->m_waterLevel = 7.0f;
-            m->m_unknown2A4 = 7.0f;
+            m->m_fadeTarget = 7.0f;
             m->m_shakePos.w = 7.0f;
             m->m_pos = m->m_wantedPos = m->m_dir = m->m_wantedDir = {7.0f, 7.0f, 7.0f, 7.0f};
             m->m_sceneCamera = nullptr;
             m->m_gameCamera = nullptr;
         };
         auto reset = [&]() {
-            return !m->m_scriptedViewOn && !m->m_scriptedView && m->m_unknown258 == 6.0f && !m->m_unknown26C &&
-                   !m->m_debugCamera && m->m_debugSpeed == 5 && !m->m_unknown26E && m->m_mouseLook && !m->m_underwater &&
+            return !m->m_scriptedViewOn && !m->m_scriptedView && m->m_turnSpeed == 6.0f && !m->m_cut &&
+                   !m->m_debugCamera && m->m_debugSpeed == 5 && !m->m_spectating && m->m_mouseLook && !m->m_underwater &&
                    !m->m_unknown278 && m->m_blendTime == 0 && m->m_shakeTime == 0 && m->m_shakePos.x == 0 &&
                    m->m_shakePos.y == 0 && m->m_shakePos.z == 0 && m->m_shakeDir.x == 0 && m->m_shakeDir.y == 0 &&
                    m->m_shakeDir.z == 0 && m->m_offsetDir.x == 0.0f && m->m_offsetDir.y == 0.0f &&
                    m->m_offsetDir.z == 0.0f && m->m_offsetPos.x == 0.0f && m->m_offsetPos.y == 0.0f &&
                    m->m_offsetPos.z == 0.0f && !m->m_target && m->m_targetSpeed == -1.0f && !m->m_listenerSector &&
-                   m->m_listenerTime == 0 && !m->m_unknown290 && m->m_time == 0 && m->m_offsetPosDelay == 0 &&
-                   m->m_offsetDirDelay == 0 && m->m_unknown0D0 == 0 && m->m_unknown294 == 7 && m->m_unknown254 == 7.0f &&
-                   m->m_unknown274 == 7 && m->m_waterLevel == 7.0f && m->m_unknown2A4 == 7.0f && m->m_shakePos.w == 7.0f;
+                   m->m_listenerTime == 0 && !m->m_aiming && m->m_time == 0 && m->m_offsetPosDelay == 0 &&
+                   m->m_offsetDirDelay == 0 && m->m_unknown0D0 == 0 && m->m_aimTime == 7 && m->m_distance == 7.0f &&
+                   m->m_spectator == 7 && m->m_waterLevel == 7.0f && m->m_fadeTarget == 7.0f && m->m_shakePos.w == 7.0f;
         };
         g_files[tables] = realFile;
         // The server's side: nothing.
@@ -657,10 +711,14 @@ void CameraModuleTest(S_CameraResults &r)
             WM(r.cmStop, GfVecIs(g_gfLog, want) && !m->m_sceneCamera && !m->m_gameCamera && !m->m_camera &&
                              CmActive() == scene);
         }
-        // The tactical view off first (the camera it kept back, the module's Unknown40), on both
-        // sides; the server stops nothing else.
+        // The tactical view off first (the camera it kept back, the game module's SelectView: here
+        // only its negative blend time ended), on both sides; the server stops nothing else.
         I3D_frame *scene = CmCamera("scene", S_vector(0.0f, 0.0f, 0.0f));
         I3D_frame *kept = CmCamera("kept", S_vector(0.0f, 0.0f, 0.0f));
+        I3D_camera *const oldGlobal = g_cameraModule.m_gameCamera;
+        g_cameraModule.m_gameCamera = reinterpret_cast<I3D_camera *>(kept);
+        g_cameraModule.m_blendTime = -1;
+        g_gfActive = nullptr;
         m->m_sceneCamera = reinterpret_cast<I3D_camera *>(scene);
         m->m_gameCamera = nullptr;
         m->m_camera = nullptr;
@@ -668,11 +726,14 @@ void CameraModuleTest(S_CameraResults &r)
         m->m_humanEffects->m_tactical = true;
         g_gfLog.clear();
         m->StopMission(true);
-        WM(r.cmStop, GfLogIs({"active kept", "cam40 0"}) && m->m_sceneCamera == scene && !m->m_humanEffects->m_tactical);
+        WM(r.cmStop, GfLogIs({"active kept"}) && m->m_sceneCamera == scene && !m->m_humanEffects->m_tactical &&
+                         g_cameraModule.m_blendTime == 0);
+        g_cameraModule.m_blendTime = -1;
         m->m_humanEffects->m_tactical = true;
         g_gfLog.clear();
         m->StopMission(false);
-        WM(r.cmStop, GfLogIs({"active kept", "cam40 0", "active scene"}) && !m->m_sceneCamera);
+        WM(r.cmStop, GfLogIs({"active kept", "active scene"}) && !m->m_sceneCamera && g_cameraModule.m_blendTime == 0);
+        g_cameraModule.m_gameCamera = oldGlobal;
         g_gfLog.clear();
         m->StopMission(false);
         m->StopMission(true);
@@ -1144,6 +1205,7 @@ void C_Human::SetUnknown94(float value) { GfLog("unknown94 %s %.4f", CmHumanName
 
 #include "tactical_test.inc"
 #include "update_test.inc"
+#include "placement_test.inc"
 
 void CameraTest(const char *path)
 {
@@ -1173,6 +1235,7 @@ void CameraTest(const char *path)
     KeeperTest(r);
     TacticalTest(r);
     UpdateTest(r);
+    PlacementTest(r);
     std::printf("camera: cmMake %d cmGetters %d cmSaveLoad %d cmRestart %d cmStart %d cmStartNone %d cmSettings %d "
                 "cmSettingsFile %d cmStop %d cmPos %d cmDir %d cmBlend %d cmTarget %d cmFov %d cmViewDir %d\n",
                 r.cmMake, r.cmGetters, r.cmSaveLoad, r.cmRestart, r.cmStart, r.cmStartNone, r.cmSettings,
@@ -1185,4 +1248,8 @@ void CameraTest(const char *path)
                 r.tcTurn, r.tcDrag, r.tcUpDown, r.tcZoom, r.tcFly, r.tcHumans);
     std::printf("update: upGate %d upMouse %d upFirst %d upFollow %d upTail %d upCar %d upScripted %d upDebug %d\n",
                 r.upGate, r.upMouse, r.upFirst, r.upFollow, r.upTail, r.upCar, r.upScripted, r.upDebug);
+    std::printf("place: plNull %d plTurn %d plPlain %d plSweep %d plBlend %d mvShake %d mvOffsets %d mvTarget %d "
+                "mvAim %d mvTurret %d mvFade %d svFoot %d svSeat %d svChange %d smModes %d\n",
+                r.plNull, r.plTurn, r.plPlain, r.plSweep, r.plBlend, r.mvShake, r.mvOffsets, r.mvTarget, r.mvAim,
+                r.mvTurret, r.mvFade, r.svFoot, r.svSeat, r.svChange, r.smModes);
 }

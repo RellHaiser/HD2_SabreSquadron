@@ -3,9 +3,6 @@
 // buttons), the controls' values, PoseGetRoll, the camera's SetWorldDir and part 8e-iv's
 // PlaceCamera / MoveCamera faked here. Prints "update:" with 1 per check met.
 
-// (Part 8e-iv's, faked.)
-void C_CameraModule::PlaceCamera(int timeDelta) { GfLog("place %d", timeDelta); }
-void C_CameraModule::MoveCamera(int timeDelta) { GfLog("move %d", timeDelta); }
 
 // The controls: g_upValues per (action, pressed); 0 otherwise.
 C_Controls g_controls;
@@ -41,23 +38,6 @@ void __stdcall F_UpWorldDir(I3D_frame *self, const S_vector &dir, float roll)
     g_upWorldRoll = roll;
 }
 
-// A car whose seats' flags are g_upSeatFlags.
-uint32_t g_upSeatFlags;
-int g_upSeatAsked;
-class C_UpCar : public C_Actor {
-public:
-    explicit C_UpCar(E_ActorType type) : C_Actor(type) {}
-    void CopyFrom(const C_Actor *) override {}
-    void StartMission(bool) override {}
-    void StopMission(bool) override {}
-    void RestartMission(bool) override {}
-    uint32_t GetSeatFlags(int seat) override
-    {
-        g_upSeatAsked = seat;
-        return g_upSeatFlags;
-    }
-};
-
 bool UpVec(const S_vector &a, const S_vector &b)
 {
     return a.x == b.x && a.y == b.y && a.z == b.z;
@@ -65,6 +45,28 @@ bool UpVec(const S_vector &a, const S_vector &b)
 bool UpVec4(const S_vector4 &a, const S_vector &b)
 {
     return a.x == b.x && a.y == b.y && a.z == b.z;
+}
+// The wanted direction as PlaceCamera leaves it (turned aside near +z, normalized; part 8e-iv's,
+// run by Update, MoveCamera idle while paused).
+S_vector UpPlaced(S_vector w)
+{
+    const double aside = std::fabs(S_vector(w.x, 0.0f, w.z).AngleTo(S_vector(0.0f, 0.0f, 1.0f)));
+    if (aside < 0.08) {
+        S_quat q;
+        q.Make(S_vector(0.0f, 1.0f, 0.0f), 0.5f);
+        w *= q.RotationMatrix();
+    }
+    w.Normalize();
+    if (aside < 0.08) {
+        S_quat q;
+        q.Make(S_vector(0.0f, 1.0f, 0.0f), -0.5f);
+        w *= q.RotationMatrix();
+    }
+    return w;
+}
+bool UpVecW(const S_vector4 &a, const S_vector &b)
+{
+    return UpVec4(a, UpPlaced(b));
 }
 S_vector UpXyz(const S_vector4 &v)
 {
@@ -131,6 +133,7 @@ void UpdateTest(S_CameraResults &r)
     C_game *game = GetGame();
     const bool oldInput = game->m_playerInputEnabled;
     game->m_playerInputEnabled = true;
+    game->m_paused = true;                              // (MoveCamera idle: part 8e-iv's test)
     g_igraphVtable[0xEC / 4] = reinterpret_cast<void *>(&F_UpMouseX);
     g_igraphVtable[0xF0 / 4] = reinterpret_cast<void *>(&F_UpMouseY);
     g_igraphVtable[0x104 / 4] = reinterpret_cast<void *>(&F_UpButtons);
@@ -148,26 +151,26 @@ void UpdateTest(S_CameraResults &r)
     // --- gated: +0x26E (but the debug camera), the debug camera, the scripted view ---
     {
         C_CameraModule *m = UpNew();
-        m->m_unknown26E = true;
+        m->m_spectating = true;
         m->Update(16);
         WM(r.upGate, g_gfLog.empty() && m->m_time == 0);
-        m->m_unknown26E = false;
+        m->m_spectating = false;
         m->m_scriptedViewOn = true;
         m->Update(16);
         WM(r.upGate, g_gfLog.empty() && m->m_time == 0);
         m->m_scriptedViewOn = false;
         m->m_debugCamera = true;
-        m->m_unknown26E = true;
+        m->m_spectating = true;
         m->Update(16);
         WM(r.upGate, g_gfLog.size() == 2 && g_gfLog[1] == "update game" && m->m_time == 0);
-        m->m_debugCamera = m->m_unknown26E = false;
+        m->m_debugCamera = m->m_spectating = false;
         g_gfLog.clear();
         m->Update(16);
-        WM(r.upGate, GfLogIs({"place 16", "move 16", "update game"}) && m->m_time == 16);
+        WM(r.upGate, GfLogIs({"update game"}) && m->m_time == 16);
         // The saved game's update.
         C_chunk chunk;
         g_gfLog.clear();
-        WM(r.upGate, m->LoadGame(chunk) && GfLogIs({"cam40 0", "place 100", "move 100", "update game"}) &&
+        WM(r.upGate, m->LoadGame(chunk) && GfLogIs({"update game"}) &&
                          m->m_time == 116);
         // In a car's seat: the car's camera (not a seat weapon's, not another vehicle's).
         g_gfActive = &player;
@@ -176,11 +179,11 @@ void UpdateTest(S_CameraResults &r)
         g_upSeatFlags = SEAT_FLAG_WEAPON;
         g_gfLog.clear();
         m->Update(16);
-        WM(r.upGate, g_upSeatAsked == 3 && GfLogIs({"place 16", "move 16", "update game"}) && g_prints.empty());
+        WM(r.upGate, g_upSeatAsked == 3 && GfLogIs({"update game"}) && g_prints.empty());
         g_upSeatFlags = 0;
         g_gfLog.clear();
         m->Update(16);
-        WM(r.upGate, GfLogIs({"place 16", "move 16", "update game"}) && g_prints.size() == 1);
+        WM(r.upGate, GfLogIs({"update game"}) && g_prints.size() == 1);
         player.vehicle = &boat;
         g_prints.clear();
         m->Update(16);
@@ -195,17 +198,17 @@ void UpdateTest(S_CameraResults &r)
         const S_vector start(0.6f, 0.0f, 0.8f);
         g_upMouseX = 10;
         m->Update(16);
-        WM(r.upMouse, UpVec4(m->m_wantedDir, UpYaw(start, 10)) && m->m_wantedDir.w == 0.5f);
+        WM(r.upMouse, UpVecW(m->m_wantedDir, UpYaw(start, 10)) && m->m_wantedDir.w == 0.5f);
         // A member selected: not turned (but in view 10).
         static C_Human member;
         g_selectedMember = &member;
         m->m_wantedDir = {0.6f, 0.0f, 0.8f, 0.5f};
         m->Update(16);
-        WM(r.upMouse, UpVec4(m->m_wantedDir, start));
+        WM(r.upMouse, UpVecW(m->m_wantedDir, start));
         m->m_view = 10;
         m->m_viewSettings = &m->m_settings[10];
         m->Update(16);
-        WM(r.upMouse, UpVec4(m->m_wantedDir, UpYaw(start, 10)));
+        WM(r.upMouse, UpVecW(m->m_wantedDir, UpYaw(start, 10)));
         g_selectedMember = nullptr;
         m->m_view = 1;
         m->m_viewSettings = &m->m_settings[1];
@@ -214,21 +217,21 @@ void UpdateTest(S_CameraResults &r)
         g_upMouseY = 5;
         m->m_wantedDir = {0.6f, 0.0f, 0.8f, 0.5f};
         m->Update(16);
-        WM(r.upMouse, UpVec4(m->m_wantedDir, UpPitch(start, 5, 0.5f, -0.5f)));
+        WM(r.upMouse, UpVecW(m->m_wantedDir, UpPitch(start, 5, 0.5f, -0.5f)));
         detail->invertMouse = true;
         m->m_wantedDir = {0.6f, 0.0f, 0.8f, 0.5f};
         m->Update(16);
-        WM(r.upMouse, UpVec4(m->m_wantedDir, UpPitch(start, -5, 0.5f, -0.5f)));
+        WM(r.upMouse, UpVecW(m->m_wantedDir, UpPitch(start, -5, 0.5f, -0.5f)));
         detail->invertMouse = false;
         // With a member selected only with CAMERA_SETTINGS_PITCH.
         g_selectedMember = &member;
         m->m_settings[1].flags = 0;
         m->m_wantedDir = {0.6f, 0.0f, 0.8f, 0.5f};
         m->Update(16);
-        WM(r.upMouse, UpVec4(m->m_wantedDir, start));
+        WM(r.upMouse, UpVecW(m->m_wantedDir, start));
         m->m_settings[1].flags = CAMERA_SETTINGS_PITCH;
         m->Update(16);
-        WM(r.upMouse, UpVec4(m->m_wantedDir, UpPitch(start, 5, 0.5f, -0.5f)));
+        WM(r.upMouse, UpVecW(m->m_wantedDir, UpPitch(start, 5, 0.5f, -0.5f)));
         g_selectedMember = nullptr;
         m->m_settings[1].flags = 0;
         // The limits (the view's) and their edges.
@@ -244,7 +247,7 @@ void UpdateTest(S_CameraResults &r)
             m->m_settings[1].maxPitch = 0.45f;
             m->m_settings[1].minPitch = -0.45f;
             m->Update(16);
-            WM(r.upMouse, UpVec4(m->m_wantedDir, UpPitch(d, c.pitch, 0.45f, -0.45f)));
+            WM(r.upMouse, UpVecW(m->m_wantedDir, UpPitch(d, c.pitch, 0.45f, -0.45f)));
         }
         // Exactly at the limits: limited.
         for (float limit : {0.45f, -0.45f}) {
@@ -258,7 +261,7 @@ void UpdateTest(S_CameraResults &r)
             g_upMouseY = found;
             m->Update(16);
             const S_vector want = UpPitch(d, found, 0.45f, -0.45f);
-            WM(r.upMouse, found == 0 || UpVec4(m->m_wantedDir, want));
+            WM(r.upMouse, found == 0 || UpVecW(m->m_wantedDir, want));
         }
         m->m_settings[1].maxPitch = 0.5f;
         m->m_settings[1].minPitch = -0.5f;
@@ -267,39 +270,39 @@ void UpdateTest(S_CameraResults &r)
             m->m_wantedDir = {0.0f, y, 0.0f, 0.5f};
             g_upMouseY = 5;
             m->Update(16);
-            WM(r.upMouse, UpVec4(m->m_wantedDir, UpPitch(S_vector(0.0f, y, 0.0f), 5, 0.5f, -0.5f)));
+            WM(r.upMouse, UpVecW(m->m_wantedDir, UpPitch(S_vector(0.0f, y, 0.0f), 5, 0.5f, -0.5f)));
         }
         // Not a unit direction: normalized first (the sum's order).
         m->m_wantedDir = {1.2f, 0.3f, -2.0f, 0.5f};
         g_upMouseY = 0;
         g_upMouseX = 7;
         m->Update(16);
-        WM(r.upMouse, UpVec4(m->m_wantedDir, UpYaw(S_vector(1.2f, 0.3f, -2.0f), 7)));
+        WM(r.upMouse, UpVecW(m->m_wantedDir, UpYaw(S_vector(1.2f, 0.3f, -2.0f), 7)));
         // Many turns (each rounding of the normalizations shows).
         g_upMouseY = 0;
         for (int yaw = -40; yaw <= 40; yaw += 3) {
             m->m_wantedDir = {1.2f, 0.3f, -2.0f, 0.5f};
             g_upMouseX = yaw;
             m->Update(16);
-            WM(r.upMouse, UpVec4(m->m_wantedDir, yaw == 0 ? S_vector(1.2f, 0.3f, -2.0f) : UpYaw(S_vector(1.2f, 0.3f, -2.0f), yaw)));
+            WM(r.upMouse, UpVecW(m->m_wantedDir, yaw == 0 ? S_vector(1.2f, 0.3f, -2.0f) : UpYaw(S_vector(1.2f, 0.3f, -2.0f), yaw)));
         }
         g_upMouseX = 0;
         for (int p = -40; p <= 40; p += 3) {
             m->m_wantedDir = {0.5f, 0.3f, 0.8f, 0.5f};
             g_upMouseY = p;
             m->Update(16);
-            WM(r.upMouse, UpVec4(m->m_wantedDir, p == 0 ? S_vector(0.5f, 0.3f, 0.8f) : UpPitch(S_vector(0.5f, 0.3f, 0.8f), p, 0.5f, -0.5f)));
+            WM(r.upMouse, UpVecW(m->m_wantedDir, p == 0 ? S_vector(0.5f, 0.3f, 0.8f) : UpPitch(S_vector(0.5f, 0.3f, 0.8f), p, 0.5f, -0.5f)));
         }
         // The mouse off, the input off: still.
         m->m_wantedDir = {0.6f, 0.0f, 0.8f, 0.5f};
         g_upMouseY = 5;
         m->m_mouseLook = false;
         m->Update(16);
-        WM(r.upMouse, UpVec4(m->m_wantedDir, start));
+        WM(r.upMouse, UpVecW(m->m_wantedDir, start));
         m->m_mouseLook = true;
         game->m_playerInputEnabled = false;
         m->Update(16);
-        WM(r.upMouse, UpVec4(m->m_wantedDir, start));
+        WM(r.upMouse, UpVecW(m->m_wantedDir, start));
         game->m_playerInputEnabled = true;
     }
 
@@ -310,8 +313,8 @@ void UpdateTest(S_CameraResults &r)
         g_upMouseX = 10;
         m->m_waterOffset = 9.0f;
         m->Update(16);
-        WM(r.upFirst, UpVec4(m->m_wantedDir, S_vector(0.0f, 0.6f, -0.8f)) && m->m_waterOffset == 0.0f &&
-                          GfLogIs({"headwater", "place 16", "move 16", "update game"}));
+        WM(r.upFirst, UpVecW(m->m_wantedDir, S_vector(0.0f, 0.6f, -0.8f)) && m->m_waterOffset == 0.0f &&
+                          GfLogIs({"headwater", "update game"}));
         // A member selected: the mouse's, the water checked too.
         static C_Human member;
         g_selectedMember = &member;
@@ -321,20 +324,20 @@ void UpdateTest(S_CameraResults &r)
         g_upMouseY = 5;
         g_gfLog.clear();
         m->Update(16);
-        WM(r.upFirst, UpVec4(m->m_wantedDir, UpPitch(S_vector(0.6f, 0.0f, 0.8f), 5, m->m_settings[2].maxPitch,
+        WM(r.upFirst, UpVecW(m->m_wantedDir, UpPitch(S_vector(0.6f, 0.0f, 0.8f), 5, m->m_settings[2].maxPitch,
                                                      m->m_settings[2].minPitch)) &&
-                          g_gfLog.size() == 4 && g_gfLog[0] == "headwater");
+                          g_gfLog.size() == 2 && g_gfLog[0] == "headwater");
         g_selectedMember = nullptr;
         // No soldier: not asked.
         g_gfActive = nullptr;
         g_gfLog.clear();
         m->Update(16);
-        WM(r.upFirst, GfLogIs({"place 16", "move 16", "update game"}));
+        WM(r.upFirst, GfLogIs({"update game"}));
         g_gfActive = &player;
         // Under water: out of the band (level 5, band 0.2).
         g_gfHeadUnder = true;
         m->m_waterLevel = 5.0f;
-        m->m_settings[2].waterBand = 0.2f;
+        m->m_settings[2].radius = 0.2f;
         struct S_Case {
             float y, offset;
         };
@@ -358,7 +361,7 @@ void UpdateTest(S_CameraResults &r)
         m->m_waterOffset = 9.0f;
         g_gfLog.clear();
         m->Update(16);
-        WM(r.upFirst, m->m_waterOffset == 0.0f && g_gfLog.size() == 3);
+        WM(r.upFirst, m->m_waterOffset == 0.0f && g_gfLog.size() == 1);
         g_gfHeadUnder = false;
         g_gfActive = nullptr;
     }
@@ -390,8 +393,8 @@ void UpdateTest(S_CameraResults &r)
             S_vector norm = S_vector(1.2f, 0.3f, -2.0f);
             if (c.flags & 1)
                 norm.Normalize();
-            WM(r.upFollow, c.taken ? UpVec4(m->m_wantedDir, own) && m->m_wantedDir.w == 0.25f
-                                   : UpVec4(m->m_wantedDir, norm) && m->m_wantedDir.w == 0.5f);
+            WM(r.upFollow, c.taken ? UpVecW(m->m_wantedDir, own) && m->m_wantedDir.w == 0.25f
+                                   : UpVecW(m->m_wantedDir, norm) && m->m_wantedDir.w == 0.5f);
         }
         // Other directions of the dummy (the normalizations' roundings).
         m->m_view = 1;
@@ -408,7 +411,7 @@ void UpdateTest(S_CameraResults &r)
             m->Update(16);
             S_vector want = o.NormalizedGame();
             want.Normalize();
-            WM(r.upFollow, UpVec4(m->m_wantedDir, want));
+            WM(r.upFollow, UpVecW(m->m_wantedDir, want));
         }
         // Without a camera dummy: not normalized.
         m->m_camera = nullptr;
@@ -429,7 +432,7 @@ void UpdateTest(S_CameraResults &r)
         m->m_listenerTime = 10;
         m->Update(16);
         WM(r.upTail, m->m_listenerSector == g_tcSector && m->m_listenerTime == 494 &&
-                         GfLogIs({"place 16", "move 16", "update game", "sector 4.0000 5.0000 6.0000"}));
+                         GfLogIs({"update game", "sector 4.0000 5.0000 6.0000"}));
         m->m_listenerSector = nullptr;
         m->m_listenerTime = 0;
         m->Update(1100);
@@ -489,19 +492,19 @@ void UpdateTest(S_CameraResults &r)
             }
         }
         // +0x294 counts up to 5000 while +0x290.
-        m->m_unknown290 = true;
-        m->m_unknown294 = 4980;
+        m->m_aiming = true;
+        m->m_aimTime = 4980;
         m->Update(16);
-        WM(r.upTail, m->m_unknown294 == 4996);
+        WM(r.upTail, m->m_aimTime == 4996);
         m->Update(16);
-        WM(r.upTail, m->m_unknown294 == 5000);
-        m->m_unknown294 = 4984;
+        WM(r.upTail, m->m_aimTime == 5000);
+        m->m_aimTime = 4984;
         m->Update(16);
-        WM(r.upTail, m->m_unknown294 == 5000);
-        m->m_unknown290 = false;
-        m->m_unknown294 = 4990;
+        WM(r.upTail, m->m_aimTime == 5000);
+        m->m_aiming = false;
+        m->m_aimTime = 4990;
         m->Update(16);
-        WM(r.upTail, m->m_unknown294 == 4990);
+        WM(r.upTail, m->m_aimTime == 4990);
     }
 
     // --- the car's camera ---
@@ -548,11 +551,11 @@ void UpdateTest(S_CameraResults &r)
         g_tcQuatDirs.clear();
         m->Update(16);
         const float yaw1 = 0.2f * 0.9424779f + 0.0f, pitch1 = 0.0f - 0.1f * 0.9424779f;
-        WM(r.upCar, m->m_carYaw == yaw1 && m->m_carPitch == pitch1 && UpVec4(m->m_wantedDir, expect(yaw1, pitch1)) &&
+        WM(r.upCar, m->m_carYaw == yaw1 && m->m_carPitch == pitch1 && UpVecW(m->m_wantedDir, expect(yaw1, pitch1)) &&
                         m->m_wantedDir.w == 0.5f && g_upSeatAsked == 1 && g_upRollMatrix == &dummy->GetMatrix());
-        WM(r.upCar, GfLogIs({"place 16", "move 16", "update game"}) && g_tcQuatDirs.size() == 1 &&
-                        UpVec(g_tcQuatDirs[0].dir, S_vector(-0.5f, 0.1f, 2.0f).NormalizedGame()) &&
-                        g_tcQuatDirs[0].roll == 0.125f && (cam->m_frameFlags & FRMFLAGS_ROT_DIRTY) &&
+        WM(r.upCar, GfLogIs({"update game"}) && g_tcQuatDirs.size() == 3 &&
+                        UpVec(g_tcQuatDirs[2].dir, S_vector(-0.5f, 0.1f, 2.0f).NormalizedGame()) &&
+                        g_tcQuatDirs[2].roll == 0.125f && (cam->m_frameFlags & FRMFLAGS_ROT_DIRTY) &&
                         g_prints.size() == 1 && g_prints[0] == CmText("Yaw %.2f, Pitch %.2f, Roll %.2f", yaw1, pitch1, 0.125f));
         // Inverted, and limited (30 degrees aside, 25 up or down).
         detail->invertMouse = true;
@@ -588,7 +591,7 @@ void UpdateTest(S_CameraResults &r)
         m->m_carPitch = 0.05f;
         game->m_playerInputEnabled = false;
         m->Update(16);
-        WM(r.upCar, m->m_carYaw == 0.1f && m->m_carPitch == 0.05f && UpVec4(m->m_wantedDir, expect(0.1f, 0.05f)));
+        WM(r.upCar, m->m_carYaw == 0.1f && m->m_carPitch == 0.05f && UpVecW(m->m_wantedDir, expect(0.1f, 0.05f)));
         game->m_playerInputEnabled = true;
         player.health = 0;
         m->Update(16);
@@ -613,7 +616,7 @@ void UpdateTest(S_CameraResults &r)
             S_vector d(static_cast<float>(ce * std::sin(static_cast<double>(heading))), static_cast<float>(std::sin(static_cast<double>(elevation))),
                        static_cast<float>(std::cos(static_cast<double>(heading)) * ce));
             d.Normalize();
-            WM(r.upCar, UpVec4(m->m_wantedDir, d));
+            WM(r.upCar, UpVecW(m->m_wantedDir, d));
         }
         for (float y : {3.0f, -3.0f}) {
             dummy->m_localMatrix.m[2][0] = 0.3f;
@@ -627,7 +630,7 @@ void UpdateTest(S_CameraResults &r)
             S_vector d(static_cast<float>(ce * std::sin(static_cast<double>(heading))), static_cast<float>(std::sin(static_cast<double>(elevation))),
                        static_cast<float>(std::cos(static_cast<double>(heading)) * ce));
             d.Normalize();
-            WM(r.upCar, UpVec4(m->m_wantedDir, d));
+            WM(r.upCar, UpVecW(m->m_wantedDir, d));
         }
         // Straight along z (the heading 0, kept); 0.6 radians up (limited to 30 degrees).
         dummy->m_localMatrix.m[2][0] = 0.0f;
@@ -641,7 +644,7 @@ void UpdateTest(S_CameraResults &r)
             S_vector d(static_cast<float>(std::cos(static_cast<double>(elevation)) * std::sin(0.0)), static_cast<float>(std::sin(static_cast<double>(elevation))),
                        static_cast<float>(std::cos(0.0) * std::cos(static_cast<double>(elevation))));
             d.Normalize();
-            WM(r.upCar, UpVec4(m->m_wantedDir, d) && m->m_wantedDir.x == 0.0f);
+            WM(r.upCar, UpVecW(m->m_wantedDir, d) && m->m_wantedDir.x == 0.0f);
         }
         for (float sign : {1.0f, -1.0f}) {
             dummy->m_localMatrix.m[2][1] = sign * static_cast<float>(std::tan(0.6)) * 0.9f;
@@ -653,7 +656,7 @@ void UpdateTest(S_CameraResults &r)
             S_vector d(static_cast<float>(ce * std::sin(static_cast<double>(heading))), static_cast<float>(std::sin(static_cast<double>(limited))),
                        static_cast<float>(std::cos(static_cast<double>(heading)) * ce));
             d.Normalize();
-            WM(r.upCar, UpVec4(m->m_wantedDir, d));
+            WM(r.upCar, UpVecW(m->m_wantedDir, d));
         }
         dummy->m_localMatrix.m[2][0] = 0.3f;
         dummy->m_localMatrix.m[2][1] = 0.2f;
@@ -679,7 +682,7 @@ void UpdateTest(S_CameraResults &r)
             m->m_carYaw = m->m_carPitch = 0.0f;
             m->m_wantedDir = {0.6f, 0.0f, 0.8f, 0.5f};
             m->UpdateCarCamera(16);
-            WM(r.upCar, UpVec4(m->m_wantedDir, c.own ? S_vector(0.0f, 0.6f, -0.8f).Normalized() : expect(0.0f, 0.0f)));
+            WM(r.upCar, UpVecW(m->m_wantedDir, c.own ? S_vector(0.0f, 0.6f, -0.8f).Normalized() : expect(0.0f, 0.0f)));
         }
         player.localPlayer = false;
         player.vehicle = nullptr;
@@ -909,6 +912,7 @@ void UpdateTest(S_CameraResults &r)
     }
 
     game->m_playerInputEnabled = oldInput;
+    game->m_paused = false;
     g_igraphVtable[0x104 / 4] = g_igraphVtable[0x100 / 4];
     g_gfActive = nullptr;
     g_selectedMember = nullptr;

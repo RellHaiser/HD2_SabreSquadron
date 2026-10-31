@@ -82,6 +82,8 @@ public:
     bool UnknownC8(int seat, int *a, int *b, int *c) override;   // 0xC8 0x005f8570
     // Every seat.
     bool IsSeatFirstPersonOnly(int seat) override;      // 0xCC 0x005f8540
+    // The gunner's first-person field of view (property 400).
+    float GetGunFov() const { return m_gunFov; }
     // A hit on a fighter's model (`flags`: the frame hit) takes its hit points (by the setup's
     // health factor); the bomber's own frames nothing. Only two hits by others than the player.
     void Hit(E_HitType type, float amount, const S_vector &pos, const S_vector &dir, C_Actor *attacker,
@@ -341,7 +343,8 @@ private:
     float m_maxHealth = 1000.0f;                        // +0x31C (property 100)
     float m_fighterHealth = 10.0f;                      // +0x320 (property 200)
     float m_fighterDamage = 30.0f;                      // +0x324 a second (property 300)
-    float m_unknown328 = 1.04719758f;                   // +0x328 (property 400, not used)
+    float m_gunFov = 1.04719758f;                       // +0x328 (property 400) the gunner's first-person
+                                                        //   field of view (the camera module's view 8)
     int m_unknown32C = 0x1BFE;                          // +0x32C (property 500, not used)
 };
 

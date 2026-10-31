@@ -612,7 +612,7 @@ void C_HumanMovement::Ragdoll(bool volumes, bool light)
         m_visual.m_sector = GetGame()->GetScene()->GetSector(m_owner->GetFrame()->GetWorldPos());
         if (previous != m_visual.m_sector) {
             if (IsClient() && g_teamManager.GetPlayerTeam()->GetActivePlayer() == m_owner)
-                GetGame()->GetCameraModule()->Unknown40(0);
+                GetGame()->GetCameraModule()->SelectView(0);
             m_visual.m_lighting.SetSector(m_visual.m_sector);
         }
     }

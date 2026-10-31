@@ -38,7 +38,7 @@ public:
 
     // On: the scene's camera kept (+0x84) and copied, then 7 m behind and 3 m above the active
     // soldier, looking down along his view; off: the scene's camera back, the module's
-    // Unknown40(0), the faded humans back.
+    // SelectView(0), the faded humans back.
     void SetTactical(bool on);                          // 0x00462ae0
     bool IsTactical() const;                            // 0x00462770
     // The cursor's mode (TACTICAL_*) and the map point under it (null: kept). Leaving a mode
@@ -127,17 +127,18 @@ struct S_CameraSettings {                               // 0x20 bytes
     float distance = 3.0f;                              // +0x00 behind the target
     float unknown04 = 0.5f;                             // +0x04
     float unknown08 = 1.0f;                             // +0x08
-    float waterBand = 0.2f;                             // +0x0C the camera kept that far off the water's surface
+    float radius = 0.2f;                                // +0x0C the camera's sphere (also off the water's surface)
     uint32_t flags = 0x8B;                              // +0x10 (CAMERA_SETTINGS_*)
     float maxPitch = 0.5f;                              // +0x14 radians
     float minPitch = -0.5f;                             // +0x18
-    float unknown1C = 12.0f;                            // +0x1C
+    float speed = 12.0f;                                // +0x1C m/s the distance eases at
 };
 enum : uint32_t {
     CAMERA_SETTINGS_FOLLOW = 0x01,                      // (with FIXED_DIR: the camera's direction kept)
     CAMERA_SETTINGS_PITCH = 0x02,                       // the mouse pitches it with a member selected too
     CAMERA_SETTINGS_FIXED_DIR = 0x08,                   // SetViewDir ignored; the camera's direction
                                                         //   taken (views 7 .. 9 or none selected)
+    CAMERA_SETTINGS_COLLIDE = 0x80,                     // the camera swept back to what is in the way
 };
 enum : int {
     CAMERA_VIEW_COUNT = 11,
@@ -161,21 +162,27 @@ public:
     void StartMission(bool server) override;            // 0x00465160
     // The client side: the scene's camera back, the game camera and the camera in use released.
     void StopMission(bool server) override;             // 0x00465610
-    // A client stops and starts again, then Unknown40(0) unless the active soldier is in the
+    // A client stops and starts again, then SelectView(0) unless the active soldier is in the
     // Junkers.
     void RestartMission(bool server) override;          // 0x00464e10
     bool SaveGame(C_chunk &chunk) override;             // 0x00464e60
-    // Unknown40(0) and an update of 100 ms.
+    // SelectView(0) and an update of 100 ms.
     bool LoadGame(C_chunk &chunk) override;             // 0x00464e70
 
-    // Called when the active soldier moves into another sector (not identified).
-    void Unknown40(int arg);                            // +0x40 0x0046c370
-    // Special camera `mode` on or off; mode CAMERA_MODE_PROJECTILE follows `target`.
+    // The camera dummy and the view for the active soldier: a seat's camera (8 a seat weapon's,
+    // 10 the Junkers gunner's in third person, 7 / 9 a passenger's, 1 / 2 an armed seat's), else
+    // his "camera3RD*" (1 outdoors, 3 indoors, 4 close indoors, 5 / 6 under water) or "cameraFPV*"
+    // (2). A new dummy is held and the camera starts from it. (The argument is not used.)
+    void SelectView(int unused);                        // +0x40 0x0046c370
+    // Special camera mode `mode` (CAMERA_MODE_*): `on` sets it to whether the third argument is
+    // non-zero, else toggles it (CAMERA_MODE_DEBUG, _SPECTATOR, _MOUSE_LOOK); CAMERA_MODE_AIM,
+    // _UNDERWATER and _PROJECTILE take `on` itself (the projectile's frame, the water's surface).
     void SetSpecialMode(int mode, bool on, I3D_frame *target);   // +0x44 0x0046cb20
-    // The same slot with 1 as the third argument (the game's free camera; not identified).
-    void SetSpecialMode(int mode, bool on, int unknown);
-    // The same slot with a height (CAMERA_MODE_UNDERWATER: the water's surface).
+    void SetSpecialMode(int mode, bool on, int value);
     void SetSpecialMode(int mode, bool on, float height);
+    // The same slot with a vector: CAMERA_MODE_EXPLOSION's place (`value` metres: the shake
+    // within), CAMERA_MODE_KICK_DIR / _POS's kick.
+    void SetSpecialMode(int mode, const S_vector4 *vector, uint32_t value);
     // The direction the player's camera looks along (+0x20; not in view 10 or while the view's
     // CAMERA_SETTINGS_FIXED_DIR is set).
     void SetViewDir(const S_vector4 &dir);              // +0x48 0x00465ea0
@@ -199,15 +206,15 @@ public:
     void SetBlendTime(int time);                        // +0x70 0x00465ad0
     // Makes the game camera watch `frame`; speed -1 = cut, else degrees per second.
     void SetTarget(I3D_frame *frame, int speed);        // +0x74 0x00465b20
-    // The byte at +0x26D (not identified; the player-driven meleeTracker ignores the mouse while it
-    // is set).
+    // The debug camera is on (+0x26D; the player-driven meleeTracker ignores the mouse
+    // meanwhile).
     bool GetUnknown78();                                // +0x78 0x00465060
     bool GetState();                                    // +0x7C 0x00465070 (1 = underwater)
     bool IsUnderwater() { return GetState(); }
     // The object at +0x2B4 is set (a scripted view, inferred): the player's controls are
     // dropped meanwhile.
     bool HasScriptedView();                             // +0x80 0x00465080
-    // The byte at +0x26E (not identified).
+    // A spectator's camera is on (+0x26E).
     bool GetUnknown84();                                // +0x84 0x00465090
     C_CameraHumanEffects *GetHumanEffects();            // +0x88 0x004650a0
     // Sector the camera (the sound listener) is in.
@@ -229,9 +236,22 @@ private:
     // The debug camera: turned by the look actions, moved along its view by the mouse buttons
     // (DEBUG_CAMERA_SPEEDS by m_debugSpeed, the speed action).
     void UpdateDebugCamera(int timeDelta);              // 0x0046beb0
-    // (Part 8e-iv.) The camera's place for the view, and the game camera moved there.
+    // The camera's place for the view: its direction turned towards the wanted one, then the
+    // distance behind the camera dummy (CAMERA_SETTINGS_COLLIDE: swept back to what is in the
+    // way, easing in and out at the view's speed); kept out of the water's surface.
     void PlaceCamera(int timeDelta);                    // 0x00468130
+    // The game camera there (unless the turret's view), shaken and offset, turned (to the
+    // target: the active camera; aiming: swaying); the turret's view; the camera dummy's soldier
+    // faded as the camera nears him.
     void MoveCamera(int timeDelta);                     // 0x00466970
+    // (Inline in MoveCamera and UpdateScriptedView.) The shake's offsets for the time left.
+    void UpdateShake(int timeDelta);
+    // (Inline in MoveCamera.) The scene's active camera turned to the target.
+    void TurnToTarget(int timeDelta);
+    // (Inline in MoveCamera.) The turret's view (8) and the seat's own view.
+    void PlaceTurretCamera();
+    // SetSpecialMode's switch (the overloads' arguments as the original's slot takes them).
+    void SpecialMode(int mode, bool on, bool value, I3D_frame *frame, const S_vector4 *vector, float number);
 
     C_CameraHumanEffects *m_humanEffects;               // +0x00C
     S_vector4 m_wantedPos = {};                         // +0x010 (index 3)
@@ -241,7 +261,7 @@ private:
     S_vector4 m_dir = {};                               // +0x040 (index 2)
     float m_unknown050 = 0.0f;                          // +0x050
     // This frame's push out of the band around the water's surface (in the first-person view
-    // with the head under water; m_waterLevel +- the view's waterBand + 0.1 m).
+    // with the head under water; m_waterLevel +- the view's radius + 0.1 m).
     float m_waterOffset = 0.0f;                         // +0x054
     float m_unknown058 = 0.0f;                          // +0x058
     uint8_t m_unknown05C[4] = {};                       // +0x05C
@@ -261,31 +281,31 @@ private:
     I3D_frame *m_camera = nullptr;                      // +0x248 in use (held)
     I3D_sector *m_listenerSector = nullptr;             // +0x24C
     int m_listenerTime = 0;                             // +0x250 ms to the listener sector's next look
-    float m_unknown254 = 0.0f;                          // +0x254
-    float m_unknown258 = 0.0f;                          // +0x258
-    void *m_unknown25C = nullptr;                       // +0x25C
+    float m_distance = 0.0f;                            // +0x254 the camera's distance now (eases)
+    float m_turnSpeed = 0.0f;                           // +0x258 the turn's (16; 6 in view 7 after a frame)
+    S_CollisionVolume *m_hit = nullptr;                 // +0x25C what the camera is held off by
     int m_view = 1;                                     // +0x260 its settings' index
     S_CameraSettings *m_viewSettings = &m_settings[1];  // +0x264
     int m_debugSpeed = 0;                               // +0x268 the debug camera's speed (0 .. 9)
-    bool m_unknown26C = false;                          // +0x26C
+    bool m_cut = false;                                 // +0x26C the next placement at once (speed 1000)
     bool m_debugCamera = false;                         // +0x26D the free debug camera
-    bool m_unknown26E = false;                          // +0x26E (Update does nothing but the debug camera)
+    bool m_spectating = false;                          // +0x26E a spectator's camera (Update: only the debug camera)
     bool m_mouseLook = true;                            // +0x26F the mouse turns it
     bool m_underwater = false;                          // +0x270
-    int m_unknown274 = 0;                               // +0x274
-    bool m_unknown278 = false;                          // +0x278
+    int m_spectator = 0;                                // +0x274 its number
+    bool m_unknown278 = false;                          // +0x278 (never set: the first-person view off at unknown08)
     float m_waterLevel = 0.0f;                          // +0x27C (CAMERA_MODE_UNDERWATER's)
     int m_blendTime = 0;                                // +0x280 ms
     int m_shakeTime = 0;                                // +0x284 ms
     I3D_frame *m_target = nullptr;                      // +0x288
     float m_targetSpeed = 0.0f;                         // +0x28C radians per second (-1: cut)
-    bool m_unknown290 = false;                          // +0x290
-    int m_unknown294 = 0;                               // +0x294
+    bool m_aiming = false;                              // +0x290 (CAMERA_MODE_AIM: the sway; no kicks)
+    int m_aimTime = 0;                                  // +0x294 ms (up to 5000)
     int m_time = 0;                                     // +0x298 ms of updates
     int m_offsetPosDelay = 0;                           // +0x29C ms
     int m_offsetDirDelay = 0;                           // +0x2A0 ms
-    float m_unknown2A4 = 0.0f;                          // +0x2A4
-    float m_unknown2A8 = 0.0f;                          // +0x2A8
+    float m_fadeTarget = 0.0f;                          // +0x2A4 the camera dummy's soldier's transparency
+    float m_fade = 0.0f;                                // +0x2A8 ... now (0.1 a frame towards it)
     float m_unknown2AC = 0.0f;                          // +0x2AC
     bool m_scriptedViewOn = false;                      // +0x2B0
     I3D_frame *m_scriptedView = nullptr;                // +0x2B4 the camera 10 m behind it, swaying
@@ -306,8 +326,15 @@ C_CameraModule *GetCameraModule();                      // 0x00464e90 (&g_camera
 extern C_CameraHumanEffects *&g_cameraHumanEffects;
 // C_CameraModule::SetSpecialMode() modes.
 enum : int {
+    CAMERA_MODE_DEBUG = 0,                              // the free debug camera
+    CAMERA_MODE_EXPLOSION = 1,                          // a client's shake near an explosion
+    CAMERA_MODE_SPECTATOR = 2,                          // a "spectator<n>" camera (at random)
+    CAMERA_MODE_MOUSE_LOOK = 3,                         // the mouse turns the camera
     CAMERA_MODE_UNDERWATER = 4,                         // the effects module's water camera
+    CAMERA_MODE_KICK_DIR = 5,                           // a kick of the view direction (at most 0.25)
+    CAMERA_MODE_KICK_POS = 6,                           // a kick of the position (at most 1 m)
     CAMERA_MODE_AIM = 7,                                // the first-person view through the sights / scope
+    CAMERA_MODE_NEXT_SPECTATOR = 8,                     // the next spectator's camera
     CAMERA_MODE_PROJECTILE = 9,                         // rides along with a fired projectile
 };
 

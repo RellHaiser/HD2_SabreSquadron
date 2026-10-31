@@ -1,7 +1,8 @@
 // The camera module (0x00462320..0x0046cb20): see game/camera_module.h. This file: the module's
 // core (part 8e-i: 0x00464d90..0x004668c0), the human effects, the command map's tactical
 // camera (part 8e-ii: 0x00462320..0x00464d77), the update (part 8e-iii: 0x00469300 and the car's
-// camera, the scripted view, the debug camera).
+// camera, the scripted view, the debug camera), the placement, the move, the view and the special
+// modes (part 8e-iv: 0x00466970, 0x00468130, 0x0046c370, 0x0046cb20).
 #include "game/camera_module.h"
 
 #include <cmath>
@@ -13,10 +14,12 @@
 #include "game/car.h"
 #include "game/checkpoints.h"
 #include "game/collision.h"
+#include "game/first_person_view.h"
 #include "game/game.h"
 #include "game/human.h"
 #include "game/human_movement.h"
 #include "game/human_pose_internal.h"
+#include "game/junkers88.h"
 #include "game/pending.h"
 #include "game/profile.h"
 #include "game/submarine.h"
@@ -90,7 +93,7 @@ C_CameraModule::C_CameraModule(int id, const char *name) : C_Module(id, name)
     static_assert(offsetof(C_CameraModule, m_settings) == 0x0E0, "C_CameraModule layout");
     static_assert(offsetof(C_CameraModule, m_gameCamera) == 0x240, "C_CameraModule layout");
     static_assert(offsetof(C_CameraModule, m_underwater) == 0x270, "C_CameraModule layout");
-    static_assert(offsetof(C_CameraModule, m_unknown274) == 0x274, "C_CameraModule layout");
+    static_assert(offsetof(C_CameraModule, m_spectator) == 0x274, "C_CameraModule layout");
     static_assert(offsetof(C_CameraModule, m_scriptedView) == 0x2B4, "C_CameraModule layout");
     static_assert(sizeof(S_CameraSettings) == 0x20, "S_CameraSettings layout");
     m_humanEffects = new C_CameraHumanEffects;
@@ -110,7 +113,7 @@ void C_CameraModule::RestartMission(bool)
     StartMission(false);
     C_Human *player = g_teamManager.GetPlayerTeam()->GetActivePlayer();
     if (!player || !player->GetVehicle() || player->GetVehicle()->GetType() != ACTOR_JUNKERS88)
-        Unknown40(0);
+        SelectView(0);
 }
 
 bool C_CameraModule::SaveGame(C_chunk &)
@@ -120,7 +123,7 @@ bool C_CameraModule::SaveGame(C_chunk &)
 
 bool C_CameraModule::LoadGame(C_chunk &)
 {
-    Unknown40(0);
+    SelectView(0);
     Update(100);
     return true;
 }
@@ -142,7 +145,7 @@ bool C_CameraModule::HasScriptedView()
 
 bool C_CameraModule::GetUnknown84()
 {
-    return m_unknown26E;
+    return m_spectating;
 }
 
 C_CameraHumanEffects *C_CameraModule::GetHumanEffects()
@@ -166,8 +169,8 @@ void C_CameraModule::StartMission(bool server)
         return;
     m_scriptedViewOn = false;
     m_scriptedView = nullptr;
-    m_unknown258 = 6.0f;
-    m_unknown26C = false;
+    m_turnSpeed = 6.0f;
+    m_cut = false;
     LoadSettings();
     m_gameCamera = static_cast<I3D_camera *>(I3DGetDriver()->CreateFrame(FRAME_CAMERA));
     C_game *game = GetGame();
@@ -190,7 +193,7 @@ void C_CameraModule::StartMission(bool server)
     }
     m_debugCamera = false;
     m_debugSpeed = 5;
-    m_unknown26E = false;
+    m_spectating = false;
     m_mouseLook = true;
     m_underwater = false;
     m_unknown278 = false;
@@ -204,7 +207,7 @@ void C_CameraModule::StartMission(bool server)
     m_targetSpeed = -1.0f;
     m_listenerSector = nullptr;
     m_listenerTime = 0;
-    m_unknown290 = false;
+    m_aiming = false;
     m_time = m_offsetPosDelay = m_offsetDirDelay = 0;
     m_unknown0D0 = 0;
 }
@@ -619,7 +622,7 @@ void C_CameraHumanEffects::SetTactical(bool on)
     m_tactical = !m_tactical;
     if (!m_tactical) {
         GetGame()->GetScene()->SetActiveCamera(m_gameCamera);
-        g_cameraModule.Unknown40(0);
+        g_cameraModule.SelectView(0);
         ResetHumans(m_tactical);
         return;
     }
@@ -964,7 +967,7 @@ void ShrinkOffset(S_vector4 &offset, int &delay, int timeDelta)
 
 void C_CameraModule::Update(int timeDelta)
 {
-    if (m_unknown26E && !m_debugCamera)
+    if (m_spectating && !m_debugCamera)
         return;
     if (m_debugCamera) {
         UpdateDebugCamera(timeDelta);
@@ -1005,11 +1008,11 @@ void C_CameraModule::Update(int timeDelta)
         if (player && (player->GetMovement()->GetHeadWater(&underWater, &surface), underWater)) {
             const float height = m_camera->GetMatrix().m[3][1];
             if (height < m_waterLevel) {
-                const float limit = (m_waterLevel - 0.1f) - m_viewSettings->waterBand;
+                const float limit = (m_waterLevel - 0.1f) - m_viewSettings->radius;
                 if (height > limit)
                     m_waterOffset = limit - height;
             } else {
-                const float limit = (m_viewSettings->waterBand + m_waterLevel) + 0.1f;
+                const float limit = (m_viewSettings->radius + m_waterLevel) + 0.1f;
                 if (height < limit)
                     m_waterOffset = limit - height;
             }
@@ -1070,10 +1073,10 @@ void C_CameraModule::Update(int timeDelta)
     }
     ShrinkOffset(m_offsetDir, m_offsetDirDelay, timeDelta);
     ShrinkOffset(m_offsetPos, m_offsetPosDelay, timeDelta);
-    if (m_unknown290) {
-        m_unknown294 += timeDelta;
-        if (static_cast<float>(m_unknown294) > 5000.0f)
-            m_unknown294 = 5000;
+    if (m_aiming) {
+        m_aimTime += timeDelta;
+        if (static_cast<float>(m_aimTime) > 5000.0f)
+            m_aimTime = 5000;
     }
 }
 
@@ -1280,4 +1283,747 @@ void C_CameraModule::UpdateDebugCamera(int timeDelta)
     m_gameCamera->SetPosInline(Xyz(m_wantedPos));
     m_gameCamera->SetWorldDir(Xyz(m_wantedDir), 0.0f);
     m_gameCamera->Update();
+}
+
+// --- the placement and the move (part 8e-iv) --------------------------------------------------------
+
+namespace {
+
+// (A constant 1 the distance's speed is scaled by; 0x0083926c.)
+const float DISTANCE_SPEED_SCALE = 1.0f;
+
+// The water band PlaceCamera keeps the camera out of (`inner`: 0.1 m; the push 0.3 m past it on
+// the collision path, 0.1 m on the simple one).
+float WaterPush(float height, float level, float radius, float push)
+{
+    if (height < level) {
+        if ((level - 0.1f) - radius < height)
+            return ((level - push) - radius) - height;
+        return 0.0f;
+    }
+    const float edge = radius + level;
+    if (!(0.1f + edge <= height))
+        return (edge + push) - height;
+    return 0.0f;
+}
+
+} // namespace
+
+void C_CameraModule::PlaceCamera(int timeDelta)
+{
+    if (!m_gameCamera || !m_camera)
+        return;
+    S_CameraSettings *settings = m_viewSettings;
+    float savedDistance = 0.0f;
+    const float savedSpeed = settings->speed;
+    if (m_cut)
+        settings->speed = 1000.0f;
+    if (m_blendTime > 0) {
+        savedDistance = settings->distance;
+        settings->distance = 0.0f;
+    }
+    S_vector &wanted = XyzRef(m_wantedDir);
+    S_vector &dir = XyzRef(m_dir);
+
+    // Turned towards the wanted direction (16 degree-ish units per second; 6 in view 7 after the
+    // first frame). Near +z the turn is done 0.5 radians aside (the quaternions' blind spot).
+    const double aside = std::fabs(S_vector(m_wantedDir.x, 0.0f, m_wantedDir.z).AngleTo(S_vector(0.0f, 0.0f, 1.0f)));
+    if (aside < 0.08) {
+        S_quat q;
+        q.Make(S_vector(0.0f, 1.0f, 0.0f), 0.5f);
+        wanted *= q.RotationMatrix();
+        dir *= q.RotationMatrix();
+    }
+    dir.Normalize();
+    S_quat from;
+    from.SetDir(dir, 0.0f);
+    wanted.Normalize();
+    S_quat to;
+    to.SetDir(wanted, 0.0f);
+    const float turn = dir.AngleTo(wanted);
+    if (m_view != 7)
+        m_turnSpeed = 16.0f;
+    const float t = static_cast<float>(timeDelta);
+    const float step = t * m_turnSpeed * 0.0031415930f;
+    m_turnSpeed = 6.0f;
+    float ratio = 0.0f;
+    if (turn != 0.0f) {
+        ratio = step / turn;
+        if (ratio > 1.0f)
+            ratio = 1.0f;
+    }
+    S_vector4 look;
+    {
+        const S_vector d = from.Slerp(to, ratio, false).GetDir();
+        look = {d.x, d.y, d.z, m_dir.w};               // (the w: a local's in the original)
+    }
+    if (aside < 0.08) {
+        S_quat q;
+        q.Make(S_vector(0.0f, 1.0f, 0.0f), -0.5f);
+        wanted *= q.RotationMatrix();
+        dir *= q.RotationMatrix();
+        XyzRef(look) *= q.RotationMatrix();
+    }
+    XyzRef(look) = Xyz(look).NormalizedGame();
+
+    if (!(settings->flags & CAMERA_SETTINGS_COLLIDE)) {
+        // The plain placement: behind the dummy by the distance.
+        if (m_view != 2) {
+            m_waterOffset = 0.0f;
+            if (m_underwater)
+                m_waterOffset = WaterPush(m_camera->GetMatrix().m[3][1], m_waterLevel, settings->radius, 0.1f);
+        }
+        m_dir = look;
+        const S_vector back(m_dir.x * settings->distance, m_dir.y * settings->distance, m_dir.z * settings->distance);
+        const S_vector &at = m_camera->GetMatrix()(3);
+        m_pos.x = (at.x + m_unknown050) - back.x;
+        m_pos.y = (at.y + m_waterOffset) - back.y;
+        m_pos.z = (at.z + m_unknown058) - back.z;
+    } else {
+        // Swept back from the dummy (the turret's arm in view 8) up to the distance + 1 m; the
+        // distance eases in and out at the view's speed.
+        if (m_view != 2) {
+            m_waterOffset = 0.0f;
+            if (m_underwater)
+                m_waterOffset = WaterPush(m_camera->GetMatrix().m[3][1], m_waterLevel, settings->radius, 0.3f);
+        }
+        const S_vector &at = m_camera->GetMatrix()(3);
+        S_vector start(m_unknown050 + at.x, at.y + m_waterOffset, at.z + m_unknown058);
+        float distance = settings->distance;
+        S_vector sweep(-look.x * (distance + 1.0f), -look.y * (distance + 1.0f), -look.z * (distance + 1.0f));
+        const float radius = settings->radius;
+        if (m_view == 8) {
+            I3D_frame *arm = m_camera->GetParent();
+            start = arm->GetMatrix()(3);
+            distance = m_camera->GetPos().Magnitude();
+            const S_vector &end = m_camera->GetMatrix()(3);
+            const S_vector &pivot = arm->GetMatrix()(3);
+            sweep = S_vector(end.x - pivot.x, end.y - pivot.y, end.z - pivot.z);
+            NormalizeSummed(sweep, (sweep.z * sweep.z + sweep.y * sweep.y) + sweep.x * sweep.x);
+            sweep *= distance + 1.0f;
+        }
+        C_Human *player = g_teamManager.GetPlayerTeam()->GetActivePlayer();
+        C_Actor *vehicle = player ? player->GetVehicle() : nullptr;
+        if (player)
+            player->RemoveCollision(false);
+        const uint32_t types = vehicle && vehicle->GetType() == ACTOR_CAR ? 0x98002u : 0x98000u;
+        S_vector hitPos, normal;
+        S_CollisionVolume *hit = CollisionSphereTest(start, sweep, radius, &hitPos, &normal, types, 0x200000);
+        if (!hit && !(vehicle && vehicle->GetType() == ACTOR_CAR)) {
+            hit = g_collisionWorld.RayTest(start, sweep, &hitPos, &normal, types, 0x200000);
+            if (hit) {
+                const float off = radius + 0.05f;
+                hitPos = S_vector(normal.x * off + hitPos.x, hitPos.y + normal.y * off, hitPos.z + normal.z * off);
+            }
+        }
+        // (The camera dummy's own model: its name begins with the dummy's.)
+        if (hit && (hit->flags & COLLISION_FLAG_DYNAMIC) && hit->frame) {
+            const char *name = hit->frame->GetName();
+            const char *own = m_camera->GetName();
+            if (std::strncmp(own, name, std::strlen(name)) == 0)
+                hit = nullptr;
+        }
+        const float rate = t * settings->speed * DISTANCE_SPEED_SCALE * 0.001f;
+        if (!hit) {
+            if (m_distance > distance) {
+                m_distance = m_distance - rate;
+                if (m_distance < 0.0f)
+                    m_distance = 0.0f;
+            } else {
+                m_distance = rate + m_distance;
+                if (m_distance > distance)
+                    m_distance = distance;
+            }
+            m_hit = nullptr;
+            m_dir = look;
+        } else {
+            const S_vector gap(start.x - hitPos.x, start.y - hitPos.y, start.z - hitPos.z);
+            float free = SummedLength((gap.z * gap.z + gap.y * gap.y) + gap.x * gap.x);
+            if (free > distance)
+                free = distance;
+            if (m_underwater)
+                free = m_camera->GetMatrix().m[3][1] < m_waterLevel ? free - 1.0f : free + 1.0f;
+            if (!(radius + 0.05f <= free))
+                free = 0.0f;
+            if (!m_underwater && m_distance == settings->unknown04) {
+                m_dir = look;
+                m_hit = hit;
+            } else if (!(free <= m_distance)) {
+                m_dir = look;
+                m_hit = hit;
+                m_distance = rate + m_distance;
+                if (m_distance > free)
+                    m_distance = free;
+                if (m_distance > distance)
+                    m_distance = distance;
+            } else if (m_hit) {
+                m_dir = look;
+                m_distance = free;
+            } else {
+                m_distance = m_distance - rate;
+                if (m_distance < free - 0.01f)
+                    m_distance = free - 0.01f;
+                if (!m_underwater && m_distance < settings->unknown04)
+                    m_hit = hit;
+            }
+        }
+        if (player)
+            player->RestoreCollision(false);
+
+        if (!m_unknown278) {
+            // (A GetGame() call when nearer than unknown04, its result unused.)
+            const S_vector back(m_distance * m_dir.x, m_distance * m_dir.y, m_distance * m_dir.z);
+            I3D_frame *base = m_view == 8 ? m_camera->GetParent() : m_camera;
+            const S_vector &b = base->GetMatrix()(3);
+            m_pos.x = (b.x + m_unknown050) - back.x;
+            m_pos.y = (b.y + m_waterOffset) - back.y;
+            m_pos.z = (b.z + m_unknown058) - back.z;
+        } else {
+            // Close enough: out of the first-person view.
+            if (m_distance >= settings->unknown08) {
+                C_FirstPersonView *fpv = GetGame()->GetFirstPersonView();
+                if (fpv->IsShown() || fpv->IsBinocularsShown()) {
+                    m_unknown278 = false;
+                    GetGame()->GetFirstPersonView()->Show(false);
+                }
+            }
+            const S_vector &b = m_camera->GetMatrix()(3);
+            m_pos.x = b.x + m_unknown050;
+            m_pos.y = b.y + m_waterOffset;
+            m_pos.z = b.z + m_unknown058;
+        }
+    }
+
+    // The blend: the distance 0 meanwhile (quirk kept: a negative blend time sets it 0).
+    if (m_blendTime > 0) {
+        settings->distance = savedDistance;
+        m_blendTime -= timeDelta;
+        if (m_blendTime < 0)
+            m_blendTime = 0;
+    }
+    if (m_blendTime < 0) {
+        settings->distance = savedDistance;
+        m_blendTime += timeDelta;
+        if (m_blendTime > 0)
+            m_blendTime = 0;
+    }
+    if (m_cut) {
+        settings->speed = savedSpeed;
+        m_cut = false;
+    }
+}
+
+namespace {
+
+// The aiming sway's size (0x00839268): shrinks to 0.0015 while the soldier holds his breath,
+// grows back to 0.008 otherwise; 0.002 in view mode 2.
+float g_aimSway = 0.005f;
+
+// An offset in the game camera's space, turned into the world's.
+S_vector Turned(const S_vector4 &offset, I3D_frame *camera)
+{
+    S_vector v = Xyz(offset);
+    v *= camera->GetMatrix();
+    const S_vector &at = camera->GetMatrix()(3);
+    return S_vector(v.x - at.x, v.y - at.y, v.z - at.z);
+}
+
+} // namespace
+
+void C_CameraModule::UpdateShake(int timeDelta)
+{
+    if (m_shakeTime <= 0)
+        return;
+    m_shakeTime -= timeDelta;
+    if (m_shakeTime < 0) {
+        m_shakeTime = 0;
+        m_shakePos.x = m_shakePos.y = m_shakePos.z = 0.0f;
+        m_shakeDir.x = m_shakeDir.y = m_shakeDir.z = 0.0f;
+        return;
+    }
+    const double left = static_cast<double>(m_shakeTime);
+    const float a = static_cast<float>(std::sin(static_cast<double>(static_cast<float>(0.07f * left))) *
+                                       static_cast<double>(static_cast<float>(left * 6e-05f)));
+    const float b = static_cast<float>(std::sin(static_cast<double>(static_cast<float>(left * 0.08f))) *
+                                       static_cast<double>(static_cast<float>(left * 4e-05f)));
+    const float c = static_cast<float>(std::sin(static_cast<double>(static_cast<float>(left * 0.05f))) *
+                                       static_cast<double>(static_cast<float>(left * 7e-05f)));
+    // (Their w: a local's in the original; kept here.)
+    m_shakePos.x = a;
+    m_shakePos.y = b;
+    m_shakePos.z = c;
+    m_shakeDir.x = c * 0.15f;
+    m_shakeDir.y = b * -0.25f;
+    m_shakeDir.z = a * 0.15f;
+}
+
+void C_CameraModule::MoveCamera(int timeDelta)
+{
+    if (!m_gameCamera || GetGame()->IsPaused())
+        return;
+    UpdateShake(timeDelta);
+    if (!m_debugCamera) {
+        // The place, shaken and offset (the turret's view places itself below).
+        const S_vector off = Turned(m_offsetPos, m_gameCamera);
+        if (m_view != 8)
+            m_gameCamera->SetPosInline(S_vector((m_pos.x + m_shakePos.x) + off.x, off.y + (m_shakePos.y + m_pos.y),
+                                                off.z + (m_shakePos.z + m_pos.z)));
+        if (m_target) {
+            TurnToTarget(timeDelta);
+        } else if (!m_aiming) {
+            const S_vector turn = Turned(m_offsetDir, m_gameCamera);
+            if (m_view != 8)
+                m_gameCamera->SetWorldDir(S_vector((m_dir.x + m_shakeDir.x) + turn.x, turn.y + (m_shakeDir.y + m_dir.y),
+                                                   turn.z + (m_shakeDir.z + m_dir.z)),
+                                          0.0f);
+        } else {
+            // Aiming: the view sways (less while the breath is held, more with less skill).
+            S_vector base((m_dir.x + m_shakeDir.x) + m_offsetDir.x, (m_shakeDir.y + m_dir.y) + m_offsetDir.y,
+                          (m_shakeDir.z + m_dir.z) + m_offsetDir.z);
+            S_vector side(base.y * 0.0f - base.z, base.z * 0.0f - base.x * 0.0f, base.x - base.y * 0.0f);
+            S_vector up(side.z * base.y - side.y * base.z, base.z * side.x - side.z * base.x,
+                        side.y * base.x - base.y * side.x);
+            NormalizeSummed(up, (up.z * up.z + up.y * up.y) + up.x * up.x);
+            NormalizeSummed(side, (side.z * side.z + side.y * side.y) + side.x * side.x);
+            float amplitude = 0.006f;
+            if (C_Human *player = g_teamManager.GetPlayerTeam()->GetActivePlayer()) {
+                if (player->GetPlayerViewMode() == 2) {
+                    g_aimSway = 0.002f;
+                } else if (player->IsPlayerHoldingBreath()) {
+                    if (g_aimSway > 0.0015f) {
+                        g_aimSway = static_cast<float>(g_aimSway - static_cast<float>(static_cast<double>(timeDelta) * 5e-06));
+                        if (g_aimSway < 0.0015f)
+                            g_aimSway = 0.0015f;
+                    }
+                } else if (g_aimSway < 0.008f) {
+                    g_aimSway = static_cast<float>(static_cast<double>(timeDelta) * 4e-06) + g_aimSway;
+                    if (g_aimSway > 0.008f)
+                        g_aimSway = 0.008f;
+                }
+                amplitude = (2.0f - player->GetStatFactor(4)) * g_aimSway;
+            }
+            const double time = static_cast<double>(m_time);
+            const float swayUp = static_cast<float>(
+                std::sin(std::cos(static_cast<double>(static_cast<float>(time * 0.0018f)))) * amplitude);
+            up *= swayUp;
+            const float phase = static_cast<float>(time * 0.0008f) + 3.0f;
+            const float wave = static_cast<float>(std::sin(static_cast<double>(phase)) + 1.0);
+            const float swaySide = static_cast<float>(std::cos(static_cast<double>(wave)) * amplitude);
+            side *= swaySide;
+            base = S_vector(base.x + up.x, up.y + base.y, up.z + base.z);
+            const S_vector final = S_vector(base.x + side.x, base.y + side.y, base.z + side.z).NormalizedGame();
+            m_gameCamera->SetWorldDir(final, 0.0f);
+        }
+
+        if (m_view == 8 && m_camera)
+            PlaceTurretCamera();
+        m_gameCamera->Update();
+    }
+
+    // The soldier the camera dummy belongs to fades out as the camera nears his body (0.1 per
+    // frame towards 1 within 0.2 m^2 of the segment from his body frame to his model, 0 past 1.2).
+    if (!m_camera)
+        return;
+    C_FirstPersonView *fpv = GetGame()->GetFirstPersonView();
+    if (fpv->IsShown() || fpv->IsBinocularsShown())
+        return;
+    C_Human *human = nullptr;
+    I3D_frame *model = m_camera->GetOwnerModel();
+    if (model && model->GetType() == FRAME_MODEL) {
+        human = GetFrameActorAs<C_Human>(model, ACTOR_HUMAN);
+        if (human) {
+            const S_vector4 body = WorldPos(human->GetBodyFrame());
+            const S_vector &top = model->GetMatrix()(3);
+            const S_vector head(top.x, top.y + 0.1f, top.z);
+            const S_vector4 camera = WorldPos(m_gameCamera);
+            float fade = 0.0f;
+            if (m_gameCamera == GetGame()->GetScene()->GetActiveCamera()) {
+                float t;
+                const float distance2 = SegmentDistance2(Xyz(camera), Xyz(body), head, &t);
+                if (!(distance2 > 1.2f))
+                    fade = distance2 < 0.2f ? 1.0f : 1.0f - (distance2 - 0.2f);
+            }
+            if (fade != m_fadeTarget)
+                m_fadeTarget = fade;
+        }
+    }
+    if (m_fadeTarget != m_fade) {
+        if (m_fadeTarget > m_fade) {
+            m_fade = m_fade + 0.1f;
+            if (m_fade > m_fadeTarget)
+                m_fade = m_fadeTarget;
+        } else {
+            m_fade = m_fade - 0.1f;
+            if (m_fade < m_fadeTarget)
+                m_fade = m_fadeTarget;
+        }
+        if (human)
+            human->SetUnknown94(m_fade);
+    }
+}
+
+void C_CameraModule::TurnToTarget(int timeDelta)
+{
+    // The scene's active camera turns to the target (the game camera's ScriptCamera target; at
+    // once with a speed of 0 or less, else at the speed's radians per second, then at once).
+    if (!GetGame() || !GetGame()->GetScene())
+        return;
+    I3D_camera *active = GetGame()->GetScene()->GetActiveCamera();
+    if (!active)
+        return;
+    const S_vector &from = active->GetMatrix()(3);
+    const S_vector &to = m_target->GetMatrix()(3);
+    S_vector way(to.x - from.x, to.y - from.y, to.z - from.z);
+    way.Normalize();
+    if (m_targetSpeed <= 0.0f) {
+        active->SetDir(way, 0.0f);
+        active->Update();
+        return;
+    }
+    const S_vector view = active->GetMatrix()(2).NormalizedGame();
+    S_quat a, b;
+    a.SetDir(view, 0.0f);
+    b.SetDir(way, 0.0f);
+    const float angle = view.AngleTo(way);
+    float ratio = static_cast<float>(timeDelta) * m_targetSpeed * 0.001f / angle;
+    if (ratio > 1.0f) {
+        ratio = 1.0f;
+        m_targetSpeed = -1.0f;
+    }
+    active->SetDir(a.Slerp(b, ratio, false).GetDir().NormalizedGame(), 0.0f);
+    active->Update();
+}
+
+void C_CameraModule::PlaceTurretCamera()
+{
+    // The turret's view (8): in first person (or a seat that only has it) the game camera at the
+    // camera dummy, turned as it; else between the dummy and its pivot, the distance back from
+    // the dummy towards the pivot.
+    C_Human *player = g_teamManager.GetPlayerTeam()->GetActivePlayer();
+    C_FirstPersonView *fpv = GetGame()->GetFirstPersonView();
+    if (fpv->IsShown() || fpv->IsBinocularsShown() ||
+        (player && player->GetVehicle() && player->GetVehicle()->IsSeatFirstPersonOnly(player->GetVehicleSeat()))) {
+        m_gameCamera->SetPos(m_camera->GetMatrix()(3));
+        S_quat rot;
+        rot.Make(m_camera->GetMatrix());
+        m_gameCamera->SetRot(rot);
+    } else {
+        const float arm = m_camera->GetPos().Magnitude();
+        const S_vector &at = m_camera->GetMatrix()(3);
+        const S_vector &pivot = m_camera->GetParent()->GetMatrix()(3);
+        S_vector way(pivot.x - at.x, pivot.y - at.y, pivot.z - at.z);
+        NormalizeSummed(way, (way.x * way.x + way.z * way.z) + way.y * way.y);
+        const float along = arm - m_distance;
+        const S_vector off(way.x * along, way.y * along, way.z * along);
+        const S_vector &dummy = m_camera->GetMatrix()(3);
+        m_gameCamera->SetPosInline(S_vector(off.x + dummy.x, off.y + dummy.y, off.z + dummy.z));
+        m_gameCamera->SetWorldDir(m_camera->GetMatrix()(2).NormalizedGame(), 0.0f);
+    }
+    // The seat's own view shown (a seat that only has the first-person one).
+    if (player) {
+        I3D_frame *model = m_camera->GetOwnerModel();
+        if (model && player->GetVehicle() && model->GetData() && model->GetData()->actor) {
+            C_Actor *owner = model->GetData()->actor;
+            if (owner->IsSeatFirstPersonOnly(player->GetVehicleSeat()))
+                owner->ShowSeatView(player->GetVehicleSeat(), true);
+        }
+    }
+}
+
+// --- the view, the special modes (part 8e-iv) --------------------------------------------------------
+
+namespace {
+
+// The first-person view (or the binoculars) is up. (The original asks the binoculars again on a
+// client: the same.)
+bool InFirstPerson()
+{
+    C_FirstPersonView *fpv = GetGame()->GetFirstPersonView();
+    return fpv->IsShown() || fpv->IsBinocularsShown();
+}
+
+} // namespace
+
+void C_CameraModule::SelectView(int)
+{
+    if (m_debugCamera || !m_gameCamera)
+        return;
+    I3D_frame *old = m_camera;
+    C_Human *player = g_teamManager.GetPlayerTeam()->GetActivePlayer();
+    if (player) {
+        if (C_Actor *vehicle = player->GetVehicle()) {
+            // In a seat: its camera dummy (nothing changes without one).
+            const int seat = player->GetVehicleSeat();
+            m_camera = vehicle->GetSeatCamera(seat);
+            const uint32_t flags = vehicle->GetSeatFlags(seat);
+            if (!m_camera)
+                return;
+            if (!InFirstPerson()) {
+                if (vehicle->IsSeatFirstPersonOnly(seat))
+                    vehicle->ShowSeatView(seat, true);
+            } else {
+                m_blendTime = 0;
+            }
+            if (flags & SEAT_FLAG_WEAPON) {
+                // A seat weapon: the turret's view (8); the Junkers' gunner's own view (10) in
+                // third person, with the game's field of view (the gun's in first person). An
+                // AI-held Junkers gives the control back.
+                if (vehicle->GetType() == ACTOR_JUNKERS88 && player->GetControllerType() != 5 && !player->IsLocalPlayer())
+                    g_teamManager.GetPlayerTeam()->ReturnControl();
+                const bool firstPerson = InFirstPerson();
+                if (vehicle->GetType() == ACTOR_JUNKERS88) {
+                    if (!firstPerson) {
+                        m_view = 10;
+                        m_gameCamera->SetFOV(GetGame()->GetCutsceneFOV());
+                    } else {
+                        m_view = 8;
+                        m_gameCamera->SetFOV(static_cast<C_Junkers88 *>(vehicle)->GetGunFov());
+                    }
+                } else {
+                    m_view = 8;
+                }
+            } else if (!(flags & SEAT_FLAG_ARMED)) {
+                // A passenger: view 7 (a car's seat with its own camera keeper: as far as the
+                // car's camera offset), 9 in first person.
+                if (!InFirstPerson()) {
+                    m_view = 7;
+                    if (vehicle->GetType() == ACTOR_CAR) {
+                        C_Car *car = static_cast<C_Car *>(vehicle);
+                        if (car->HasSeatCamera(seat)) {
+                            S_vector offset;
+                            car->GetCameraOffset(&offset);
+                            m_settings[7].distance = offset.y;
+                        } else {
+                            m_settings[m_view].distance = m_unknown2AC;
+                        }
+                    }
+                } else {
+                    m_view = 9;
+                }
+                m_carPitch = m_carYaw = 0.0f;
+            } else if (!InFirstPerson()) {
+                // Armed in the seat: on foot's view (1).
+                m_view = 1;
+                m_settings[1].distance = m_unknown2AC;
+            } else {
+                m_view = 2;
+            }
+        } else if (!InFirstPerson()) {
+            // On foot: behind the soldier ("camera3RD*"), view 1 outdoors (or "nointerier"
+            // sectors), 3 indoors, 4 in "interierclose" sectors; under water 5 / 6.
+            m_blendTime = -1;
+            m_camera = player->GetFrame()->FindChildFrame("camera3RD*", ENUMF_WILDMASK | FRAME_MASK_DUMMY);
+            I3D_sector *sector;
+            if (player->GetMovement())
+                sector = player->GetBodySector();
+            else
+                sector = GetGame()->GetScene()->GetSector(player->GetFrame()->GetMatrix()(3));
+            I3D_sector *primary = GetGame()->GetScene()->GetPrimarySector();
+            bool outdoor = false, close = false;
+            if (sector) {
+                const char *props = sector->GetUserProps();
+                if (std::strstr(props, "nointerier") || std::strstr(props, "NOINTERIER"))
+                    outdoor = true;
+                if (std::strstr(props, "interierclose") || std::strstr(props, "INTERIERCLOSE"))
+                    close = true;
+            }
+            if (!m_underwater) {
+                if (sector == primary || outdoor) {
+                    m_view = 1;
+                    m_settings[1].distance = m_unknown2AC;
+                } else {
+                    m_view = close ? 4 : 3;
+                }
+            } else {
+                m_view = sector == primary || outdoor ? 5 : 6;
+            }
+        } else {
+            m_camera = player->GetFrame()->FindChildFrame("cameraFPV*", ENUMF_WILDMASK | FRAME_MASK_DUMMY);
+            m_view = 2;
+        }
+        m_viewSettings = &m_settings[m_view];
+        if (!m_camera)
+            m_camera = player->GetFrame();
+    }
+
+    if (old != m_camera) {
+        // A new camera dummy: held (the old one let go, its soldier no longer faded); the view
+        // and the place start from it.
+        m_fadeTarget = m_fade = 0.0f;
+        if (old) {
+            I3D_frame *model = old->GetOwnerModel();
+            if (model && model->GetType() == FRAME_MODEL) {
+                if (C_Human *human = GetFrameActorAs<C_Human>(model, ACTOR_HUMAN))
+                    human->SetUnknown94(0.0f);
+            }
+            old->Release();
+        }
+        if (m_camera)
+            m_camera->AddRef();
+        m_wantedDir = WorldDir(m_camera);
+        const S_vector back(m_wantedDir.x * m_viewSettings->distance, m_wantedDir.y * m_viewSettings->distance,
+                            m_wantedDir.z * m_viewSettings->distance);
+        const S_vector &at = m_camera->GetMatrix()(3);
+        // (The w: a local's in the original; kept here.)
+        m_pos.x = at.x - back.x;
+        m_pos.y = at.y - back.y;
+        m_pos.z = at.z - back.z;
+        m_wantedPos = m_pos;
+        m_distance = m_viewSettings->distance;
+        m_hit = nullptr;
+        m_cut = true;
+    }
+    if (m_blendTime < 0) {
+        m_blendTime = 0;
+        m_distance = m_viewSettings->unknown08;
+    }
+}
+
+void C_CameraModule::SetSpecialMode(int mode, bool on, I3D_frame *target)
+{
+    SpecialMode(mode, on, target != nullptr, target, nullptr, 0.0f);
+}
+
+void C_CameraModule::SetSpecialMode(int mode, bool on, int value)
+{
+    SpecialMode(mode, on, value != 0, nullptr, nullptr, 0.0f);
+}
+
+void C_CameraModule::SetSpecialMode(int mode, bool on, float height)
+{
+    uint32_t bits;
+    std::memcpy(&bits, &height, sizeof bits);
+    SpecialMode(mode, on, bits != 0, nullptr, nullptr, height);
+}
+
+void C_CameraModule::SetSpecialMode(int mode, const S_vector4 *vector, uint32_t value)
+{
+    SpecialMode(mode, vector != nullptr, value != 0, nullptr, vector, static_cast<float>(value));
+}
+
+void C_CameraModule::SpecialMode(int mode, bool on, bool value, I3D_frame *frame, const S_vector4 *vector, float number)
+{
+    switch (mode) {
+    case CAMERA_MODE_DEBUG: {
+        // The free debug camera (on: from the active camera's place); the spectators' camera kept.
+        m_debugCamera = on ? value : !m_debugCamera;
+        I3D_camera *active = GetGame()->GetScene()->GetActiveCamera();
+        if (m_debugCamera && active)
+            m_wantedPos = WorldPos(active);
+        if (m_spectating) {
+            if (!m_debugCamera) {
+                GetGame()->GetScene()->SetActiveCamera(m_gameCamera);
+                m_spectating = false;
+            } else if (I3D_frame *spectator = GetGame()->GetScene()->FindFrame("spectator", FRAME_MASK_CAMERA)) {
+                GetGame()->GetScene()->SetActiveCamera(static_cast<I3D_camera *>(spectator));
+            }
+        }
+        if (!m_debugCamera)
+            SelectView(0);
+        break;
+    }
+    case CAMERA_MODE_EXPLOSION: {
+        // A client: the shake (2 s) when the game camera is within `value` metres (2.5 times
+        // that in the scripted view).
+        if (!(g_gameRole & GAME_ROLE_CLIENT))
+            break;
+        float radius = number;
+        if (m_scriptedView)
+            radius = radius * 2.5f;
+        const S_vector &at = m_gameCamera->GetMatrix()(3);
+        const S_vector way(vector->x - at.x, vector->y - at.y, vector->z - at.z);
+        if (SummedLength((way.y * way.y + way.x * way.x) + way.z * way.z) < radius)
+            m_shakeTime = 2000;
+        break;
+    }
+    case CAMERA_MODE_SPECTATOR: {
+        // A spectator's camera ("spectator<n>", one at random); off: the game camera back.
+        if ((g_gameRole & 7) == 7)
+            break;
+        m_spectating = on ? value : !m_spectating;
+        if (!m_spectating) {
+            GetGame()->GetScene()->SetActiveCamera(m_gameCamera);
+            break;
+        }
+        int count = 0;
+        while (GetGame()->GetScene()->FindFrame(C_fstr("spectator%d", count), FRAME_MASK_CAMERA))
+            ++count;
+        const int roll = std::rand();
+        m_spectator = static_cast<int>(std::floor(static_cast<double>(static_cast<float>(
+            static_cast<float>(roll) * 3.051851e-05f * static_cast<float>(count)))));
+        if (I3D_frame *spectator = GetGame()->GetScene()->FindFrame(C_fstr("spectator%d", m_spectator), FRAME_MASK_CAMERA))
+            GetGame()->GetScene()->SetActiveCamera(static_cast<I3D_camera *>(spectator));
+        break;
+    }
+    case CAMERA_MODE_MOUSE_LOOK:
+        m_mouseLook = on ? value : !m_mouseLook;
+        break;
+    case CAMERA_MODE_UNDERWATER:
+        m_underwater = on;
+        m_waterLevel = number;
+        C_HumanMovement::SetCameraUnderWater(on);
+        SelectView(0);
+        break;
+    case CAMERA_MODE_KICK_DIR: {
+        // A kick of the view direction (at most 0.25), shrinking after 200 ms.
+        if (m_aiming)
+            break;
+        S_vector &v = XyzRef(m_offsetDir);
+        v = S_vector(vector->x + v.x, vector->y + v.y, vector->z + v.z);
+        const float square = v.Square();
+        if (!(square < 1e-8f) && !(std::fabs(square - 1.0f) >= 1e-8f && !(std::sqrt(square) > 0.25f))) {
+            v.Normalize();
+            v *= 0.25f;
+        }
+        m_offsetDirDelay = 200;
+        break;
+    }
+    case CAMERA_MODE_KICK_POS: {
+        // A kick of the position (at most 1 m), shrinking after 200 ms.
+        if (m_aiming)
+            break;
+        S_vector &v = XyzRef(m_offsetPos);
+        v = S_vector(vector->x + v.x, vector->y + v.y, vector->z + v.z);
+        const float square = v.Square();
+        if (!(square < 1e-8f) && std::fabs(square - 1.0f) >= 1e-8f && std::sqrt(square) > 1.0f)
+            v.Normalize();
+        m_offsetPosDelay = 200;
+        break;
+    }
+    case CAMERA_MODE_AIM:
+        m_aimTime = 0;
+        m_aiming = on;
+        break;
+    case CAMERA_MODE_NEXT_SPECTATOR: {
+        // The next spectator's camera (back to the first after the last).
+        if (!m_spectating)
+            break;
+        ++m_spectator;
+        for (;;) {
+            if (I3D_frame *spectator = GetGame()->GetScene()->FindFrame(C_fstr("spectator%d", m_spectator), FRAME_MASK_CAMERA)) {
+                GetGame()->GetScene()->SetActiveCamera(static_cast<I3D_camera *>(spectator));
+                break;
+            }
+            if (m_spectator == 0)
+                break;
+            m_spectator = 0;
+        }
+        break;
+    }
+    case CAMERA_MODE_PROJECTILE: {
+        // The scripted view behind `frame` (held); off without one.
+        I3D_frame *old = m_scriptedView;
+        m_scriptedViewOn = on;
+        m_scriptedView = frame;
+        if (frame)
+            frame->AddRef();
+        if (old)
+            old->Release();
+        if (!m_scriptedView && m_scriptedViewOn)
+            m_scriptedViewOn = false;
+        break;
+    }
+    default:
+        break;
+    }
 }

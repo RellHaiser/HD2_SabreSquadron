@@ -5609,6 +5609,52 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/camera.txt (7 added); 4 functions in ported.txt. Stats: 7,752 of 12,293
     functions by hand (71.0 % by size).
 
+  PART 8e-iv DONE (2026-10-31): the camera's placement and move, the view's choice, the special
+  modes (src/game/camera_module.*; 0x00468130, 0x00466970, 0x0046c370, 0x0046cb20; the iostream
+  statics 0x004668f0..0x00466960, 0x0046c310, 0x0046c340; C_Car::HasSeatCamera 0x004def80;
+  C_Controls::GetValue 0x006c76a0 counted here).
+  - PlaceCamera: the direction turned towards the wanted one by a slerp (16 units a second, 6 in
+    view 7 after its first frame; 0.5 radians aside near +z, the quaternions' blind spot); then
+    the distance behind the camera dummy, or with CAMERA_SETTINGS_COLLIDE (0x80) a sphere swept
+    back from the dummy (the turret's view: from its arm) to the distance + 1 m (in a car: its own
+    type kept out; else a ray too, its hit held off by the radius + 0.05), the dummy's own model
+    ignored, the distance easing out and in at the view's speed (1 cm before what is in the way;
+    1 m less / more under water); kept out of the water's surface (0.1 m past its band, 0.3 m on
+    the collide path); the blend (the distance 0 meanwhile) and the cut (the speed 1000).
+  - MoveCamera: the shake (UpdateShake, inline), the offsets in the game camera's space; the
+    target's turn (the scene's active camera; at once at speed 0); aiming: the sway (0.002 in
+    view mode 2, shrinking to 0.0015 while the breath is held, growing to 0.008; times 2 - the
+    soldier's stat factor 4); the turret's view (8: at the dummy in the first-person view, else
+    along its arm; the seat's own view shown); the dummy's soldier faded as the camera nears him.
+  - SelectView (was Unknown40; its argument unused): a seat's camera dummy (8 a seat weapon's, 10
+    the Junkers gunner's in third person with the game's field of view, else 8 with the gun's;
+    an AI-held Junkers' control given back; 7 / 9 a passenger's, a car's seat camera's distance
+    from the car's camera offset; 1 / 2 an armed seat's), else the soldier's "camera3RD*" (1
+    outdoors or "nointerier", 3 indoors, 4 "interierclose", 5 / 6 under water) or "cameraFPV*"
+    (2). A new dummy is held, the old one let go (its soldier no longer faded).
+  - SetSpecialMode (the slot's four overloads): the debug camera, a client's explosion shake, a
+    spectator's camera (one at random; the next one), the mouse look, the water's surface, the
+    two kicks (0.25 / 1 m at most), aiming, the projectile's view. Quirk kept: a seat without a
+    camera dummy leaves the old one held but the module's pointer null; the float overload's
+    "value" is its bits (-0.0 is on).
+  - Fields named (the distance, the turn's speed, the hit, the cut, the spectating and its
+    number, aiming and its time, the fade and its target; S_CameraSettings radius / speed;
+    CAMERA_MODE_*, CAMERA_SETTINGS_COLLIDE, FRAME_MASK_CAMERA); C_Junkers88::m_gunFov.
+  - Harness: placement_test.inc in the camera build ("place:", 15 checks; the first-person view's
+    Show / ShowBinoculars, the water flag, the team's ReturnControl, the ray (sight_test's new
+    g_worldRayHook) and the scene's FindFrame / GetSector faked; a C_Car's seats in a raw block).
+    The earlier tests: SelectView real (the restart, stop, load and tactical expectations). 0 of
+    22 in both orders.
+  - Mutations (mutations/mutate_8e4.py): the first run caught 378 of 452 (74 survived); 38
+    equivalent (see the file's docstring), new cases for 36 (the water band's edges on both paths,
+    the blend's and shake's last milliseconds, ratios just past 1, the clamps' 1 cm and 0.008
+    edges, rolls 0, a non-unit slerp, view 9's move, the fade near the head, the views' old values,
+    larger random rolls, a 1.5 kick); the full rerun: all 414 caught. Baselines: the world build 0 of 22 in both orders; the item build 0 of 37 (its Junkers test and mutate_7h.py renamed to m_gunFov); the other five 0 of 37.
+  - Build: 200 files clean (MSVC). Tier 1: 528 errors in 91 files, 217 stubs (was 536 / 93 /
+    220). ret_audit --src: 52.
+  - Ghidra: names/camera.txt (11 added), car.txt (1); 16 functions in ported.txt. Stats: 7,768 of
+    12,293 functions by hand (71.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

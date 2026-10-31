@@ -369,25 +369,6 @@ int C_Controls__GetValues(void *_this,uint32_t *param_1,uint8_t param_2, ...)
 }
 
 
-// 0x006c76a0
-float C_Controls__GetValue(void *_this,int action,bool pressed, ...)
-{
-  if (pressed) {
-    if (((*(int *)((int)_this + 0xdc) != 0) &&
-        ((uint32_t)action < (uint32_t)(*(int *)((int)_this + 0xe0) - *(int *)((int)_this + 0xdc) >> 2))) &&
-       (-1 < action)) {
-      return *(float *)(*(int *)((int)_this + 0xdc) + action * 4);
-    }
-  }
-  else if (((*(int *)((int)_this + 0xcc) != 0) &&
-           ((uint32_t)action < (uint32_t)(*(int *)((int)_this + 0xd0) - *(int *)((int)_this + 0xcc) >> 2))) &&
-          (-1 < action)) {
-    return *(float *)(*(int *)((int)_this + 0xcc) + action * 4);
-  }
-  return 0.0;
-}
-
-
 // 0x006c7790
 uint32_t FUN_006c7790(void *_this,uint32_t param_1,uint16_t param_2,uint16_t param_3,uint32_t param_4, int param_5, ...)
 {

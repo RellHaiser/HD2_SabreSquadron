@@ -482,7 +482,7 @@ void C_Team::SelectMember(C_Human *human)               // 0x0045da60
         m_active = i;
         m_selected = i;
         if (i != previous)
-            ::GetCameraModule()->Unknown40(0);
+            ::GetCameraModule()->SelectView(0);
         m_commanded = -1;
         return;
     }
@@ -585,7 +585,7 @@ void C_Team::UpdateCameraTarget()                       // 0x0045dac0
     C_Human *active = GetActivePlayer();
     if (!active)
         return;
-    ::GetCameraModule()->Unknown40(0);
+    ::GetCameraModule()->SelectView(0);
     if (IsHiddenInSeat(active)) {
         active->GetFrame()->SetOn(false);
         return;
@@ -598,7 +598,7 @@ void C_Team::UpdateCameraTarget()                       // 0x0045dac0
 void C_Team::SetWatchedHuman(C_Human *human)            // 0x0045e8f0
 {
     m_watchedHuman = human;
-    ::GetCameraModule()->Unknown40(0);
+    ::GetCameraModule()->SelectView(0);
     GetGame()->GetFirstPersonView()->Refresh();
 }
 

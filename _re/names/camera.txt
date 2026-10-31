@@ -85,3 +85,17 @@
 00468130 C_CameraModule::PlaceCamera | void __thiscall PlaceCamera(void * this, int timeDelta)
 00466970 C_CameraModule::MoveCamera | void __thiscall MoveCamera(void * this, int timeDelta)
 006c76a0 C_Controls::GetValue | float __thiscall GetValue(void * this, int action, bool pressed)
+
+# Part 8e-iv: the placement and the move (named in 8e-iii), the view's choice, the special modes;
+# the iostream statics of the placement's and the view's files (the 0x0089b270 / 0x0089b271 bytes).
+0046c370 C_CameraModule::SelectView | void __thiscall SelectView(void * this, int unused)
+004668f0 StaticInit_4668f0
+00466900 StaticInit_4668f0_Construct
+00466910 StaticInit_4668f0_RegisterAtExit
+00466920 StaticInit_4668f0_Destruct
+00466930 StaticInit_466930
+00466940 StaticInit_466930_Construct
+00466950 StaticInit_466930_RegisterAtExit
+00466960 StaticInit_466930_Destruct
+0046c310 StaticInit_46c310
+0046c340 StaticInit_46c340

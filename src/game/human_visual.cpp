@@ -578,7 +578,7 @@ void C_HumanVisual::Update(int time)
             if (IsClient()) {
                 I3D_sector *primary = scene->GetPrimarySector();
                 if ((primary == previous || primary == m_sector || !previous || !m_sector) && IsActivePlayer(m_owner))
-                    GetGame()->GetCameraModule()->Unknown40(0);
+                    GetGame()->GetCameraModule()->SelectView(0);
             }
             m_lighting.SetSector(m_sector);
         }

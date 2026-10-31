@@ -48,22 +48,6 @@ f_00433580.cpp:8:3: 'C_SoundModule__C_SoundModule___C_SoundModule' was not decla
     C_SoundModule__C_SoundModule___C_SoundModule((C_SoundModule *)&g_soundModule);
 f_00459690.cpp:122:11: '_pIVar15' was not declared in this scope; did you mean 'pIVar15'?
     _pIVar15 = (*pCVar10->m_scene->vtable->GetSector)(pCVar10->m_scene,&SStack_58);
-f_00466930.cpp:527:16: 'void*' is not a pointer-to-object type
-    if ((pCVar13->m_248->m_frameFlags & 0x20) == 0) {
-f_00466930.cpp:1228:38: no matching function for call to 'gh_bitcast<tier1::C_Actor*>()'
-    pCVar6 = gh_bitcast<C_Actor*>()
-f_00466930.cpp:63:76: invalid 'static_cast' from type 'tier1::C_Human*' to type 'uint64_t' {aka 'long long unsigned int'}
-    C_Human *local_e4;
-f_0046c340.cpp:346:9: '_on' was not declared in this scope; did you mean 'on'?
-    if (_on == 0) {
-f_0046c340.cpp:389:19: '_on' was not declared in this scope; did you mean 'on'?
-    local_30 = *_on;
-f_0046c340.cpp:423:11: '_on' was not declared in this scope; did you mean 'on'?
-    if (_on == 0) {
-f_0046c340.cpp:480:9: '_on' was not declared in this scope; did you mean 'on'?
-    if (_on != 0) {
-f_0046c340.cpp:487:20: '_on' was not declared in this scope; did you mean 'on'?
-    _this->m_270 = _on != 0;
 f_0048eb30.cpp:124:24: wrong type argument to bit-complement
     ~C_TextBox__C_TextBox(_this);
 f_004a89b0.cpp:55:30: 'struct tier1::I3D_scene_vtbl' has no member named 'Slot94'; did you mean 'Slot04'?
@@ -596,9 +580,9 @@ f_006c0a30.cpp:270:20: no matching function for call to 'tier1::C_MainMenu::C_Ma
     ~C_MainMenu(_this);
 f_006c0a30.cpp:551:25: no matching function for call to 'tier1::C_EquipmentMenu::C_EquipmentMenu(tier1::C_EquipmentMenu*&)'
     ~C_EquipmentMenu(_this);
-f_006c6d40.cpp:665:32: wrong type argument to unary minus
+f_006c6d40.cpp:646:32: wrong type argument to unary minus
     piVar1 = gh_bitcast<int*>(-gh_bitcast)<float>(piVar1);
-f_006c6d40.cpp:665:44: expected primary-expression before 'float'
+f_006c6d40.cpp:646:44: expected primary-expression before 'float'
     piVar1 = gh_bitcast<int*>(-gh_bitcast)<float>(piVar1);
 f_006c97b0.cpp:240:33: too few arguments to function
     (*pIStack_50->vtable->ScrnX)();

@@ -250,14 +250,14 @@ void TacticalTest(S_CameraResults &r)
         e->SetTactical(true);
         WM(r.tcOn, g_gfLog.empty() && e->IsTactical());
 
-        // Off: the scene's camera back, the module's Unknown40(0), the faded humans back.
+        // Off: the scene's camera back, the module's SelectView(0), the faded humans back.
         C_Human *h1 = TcHuman("h1", S_vector(0.0f, 0.0f, 0.0f), S_vector(0.0f, 0.0f, 0.0f));
         C_Human *h2 = TcHuman("h2", S_vector(0.0f, 0.0f, 0.0f), S_vector(0.0f, 0.0f, 0.0f));
         e->m_humans = {{h1, 0.5f}, {h2, 1.0f}};
         e->m_mode = TACTICAL_MOVE;
         g_gfLog.clear();
         e->SetTactical(false);
-        WM(r.tcOff, GfLogIs({"active scenecam", "cam40 0", "unknown94 h2 0.0000", "unknown94 h1 0.0000"}) &&
+        WM(r.tcOff, GfLogIs({"active scenecam", "unknown94 h2 0.0000", "unknown94 h1 0.0000"}) &&
                         !e->IsTactical() && e->m_mode == TACTICAL_IDLE && e->m_humans.empty() && CmActive() == sceneCam);
         g_gfLog.clear();
         e->SetTactical(false);

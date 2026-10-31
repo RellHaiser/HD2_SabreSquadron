@@ -83,6 +83,7 @@ constexpr uint32_t FRAME_MASK_ANY = 0xFFFF;
 // Single types in such masks (bit type-1).
 constexpr uint32_t FRAME_MASK_VISUAL = 1u << (FRAME_VISUAL - 1);
 constexpr uint32_t FRAME_MASK_DUMMY = 1u << (FRAME_DUMMY - 1);
+constexpr uint32_t FRAME_MASK_CAMERA = 1u << (FRAME_CAMERA - 1);
 constexpr uint32_t FRAME_MASK_USER = 1u << (FRAME_USER - 1);
 constexpr uint32_t FRAME_MASK_LIGHT = 1u << (FRAME_LIGHT - 1);
 constexpr uint32_t FRAME_MASK_VOLUME = 1u << (FRAME_VOLUME - 1);

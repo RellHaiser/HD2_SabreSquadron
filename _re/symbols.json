@@ -5779,6 +5779,38 @@
   "module": "camera",
   "name": "StaticInit_4668c0"
  },
+ "004668f0": {
+  "module": "camera",
+  "name": "StaticInit_4668f0"
+ },
+ "00466900": {
+  "module": "camera",
+  "name": "StaticInit_4668f0_Construct"
+ },
+ "00466910": {
+  "module": "camera",
+  "name": "StaticInit_4668f0_RegisterAtExit"
+ },
+ "00466920": {
+  "module": "camera",
+  "name": "StaticInit_4668f0_Destruct"
+ },
+ "00466930": {
+  "module": "camera",
+  "name": "StaticInit_466930"
+ },
+ "00466940": {
+  "module": "camera",
+  "name": "StaticInit_466930_Construct"
+ },
+ "00466950": {
+  "module": "camera",
+  "name": "StaticInit_466930_RegisterAtExit"
+ },
+ "00466960": {
+  "module": "camera",
+  "name": "StaticInit_466930_Destruct"
+ },
  "00466970": {
   "module": "camera",
   "name": "C_CameraModule::MoveCamera",
@@ -5808,6 +5840,19 @@
   "module": "camera",
   "name": "C_CameraModule::UpdateDebugCamera",
   "proto": "void __thiscall UpdateDebugCamera(void * this, int timeDelta)"
+ },
+ "0046c310": {
+  "module": "camera",
+  "name": "StaticInit_46c310"
+ },
+ "0046c340": {
+  "module": "camera",
+  "name": "StaticInit_46c340"
+ },
+ "0046c370": {
+  "module": "camera",
+  "name": "C_CameraModule::SelectView",
+  "proto": "void __thiscall SelectView(void * this, int unused)"
  },
  "0046cb20": {
   "module": "camera",
@@ -12206,6 +12251,11 @@
   "module": "controller",
   "name": "C_Car::RayTest",
   "proto": "bool __thiscall RayTest(C_Car *this, S_vector4 *from, S_vector *dir, S_vector4 *pos, S_vector4 *normal)"
+ },
+ "004def80": {
+  "module": "car",
+  "name": "C_Car::HasSeatCamera",
+  "proto": "bool __thiscall HasSeatCamera(void * this, int seat)"
  },
  "004defa0": {
   "module": "zz_idioms",

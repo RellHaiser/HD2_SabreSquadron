@@ -350,7 +350,9 @@ bool C_CameraModule::IsGameCamera(I3D_frame *camera)
     return g_gfGameCamera;
 }
 #endif
+#ifndef CAMERA_TEST                                    // (the camera build's is real)
 void C_CameraModule::SetSpecialMode(int mode, bool on, float height) { GfLog("special %d %d %.3f", mode, on, height); }
+#endif
 #ifndef CAMERA_TEST
 C_CameraHumanEffects *g_gfHumanEffects;
 C_CameraHumanEffects *&g_cameraHumanEffects = g_gfHumanEffects;

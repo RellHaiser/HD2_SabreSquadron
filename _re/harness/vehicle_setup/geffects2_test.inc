@@ -442,7 +442,9 @@ bool C_CameraModule::GetCameraDir(int index, S_vector4 *dir)
     return true;
 }
 #endif
-void C_CameraModule::Unknown40(int arg) { GfLog("cam40 %d", arg); }
+#ifndef CAMERA_TEST                                    // (the camera build's is real)
+void C_CameraModule::SelectView(int arg) { GfLog("cam40 %d", arg); }
+#endif
 #ifndef CAMERA_TEST
 void C_CameraModule::SetViewDir(const S_vector4 &dir) { GfLog("viewdir %.1f %.1f %.1f", dir.x, dir.y, dir.z); }
 #endif

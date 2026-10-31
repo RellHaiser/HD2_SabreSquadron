@@ -520,6 +520,9 @@ public:
     C_SeatWeapon *GetSeatWeapon(int seat) const;
     // The number of entries: the vehicle's seats (+0x1040).
     int GetEntryCount() const { return static_cast<int>(m_vehicle.m_seats.size()); }
+    // Seat `seat` has its own camera dummy keeper (the camera module's passenger view).
+    bool HasSeatCamera(int seat) const { return m_vehicle.m_seats[seat].camera != nullptr; }   // 0x004def80
+    void GetCameraOffset(S_vector *offset) const { m_vehicle.GetCameraOffset(offset); }
 
     // --- the members -----------------------------------------------------------------------------
     C_Vehicle m_vehicle;                                // +0x090
