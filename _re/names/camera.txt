@@ -75,3 +75,13 @@
 00463b70 StaticInit_463b70
 00464a40 S_quat_FromAxisAngle | void * __thiscall S_quat_FromAxisAngle(void * this, void * axis, float angle)
 00464b80 C_CameraHumanEffects::Move | void * __thiscall Move(void * this, void * move)
+
+# Part 8e-iii: the update (0x00469300), the car's camera, the scripted view, the debug camera; the
+# placement and the move (0x00468130 / 0x00466970) named for part 8e-iv.
+00469300 C_CameraModule::Update | void __thiscall Update(void * this, int timeDelta)
+0046ada0 C_CameraModule::UpdateCarCamera | void __thiscall UpdateCarCamera(void * this, int timeDelta)
+0046b550 C_CameraModule::UpdateScriptedView | void __thiscall UpdateScriptedView(void * this, int timeDelta)
+0046beb0 C_CameraModule::UpdateDebugCamera | void __thiscall UpdateDebugCamera(void * this, int timeDelta)
+00468130 C_CameraModule::PlaceCamera | void __thiscall PlaceCamera(void * this, int timeDelta)
+00466970 C_CameraModule::MoveCamera | void __thiscall MoveCamera(void * this, int timeDelta)
+006c76a0 C_Controls::GetValue | float __thiscall GetValue(void * this, int action, bool pressed)

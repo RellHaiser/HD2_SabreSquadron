@@ -96,6 +96,7 @@ public:
     int stance = 0;
     // The vehicle it sits in (the animation actor's wings, game/animation_actor.cpp).
     C_Actor *GetVehicle() const { return vehicle; }
+    int GetVehicleSeat() const { return vehicleSeat; }  // (the camera module, part 8e-iii)
     // The camera module's effect value (part 8e-i; the camera test defines it).
     void SetUnknown94(float value);
     const S_vector &GetRandomBonePos() const { return bonePos; }
@@ -182,6 +183,7 @@ public:
     int experience = 0;
     I3D_frame *bodyFrame = nullptr;
     C_Actor *vehicle = nullptr;
+    int vehicleSeat = 0;
     S_vector bonePos = S_vector(0.0f, 0.0f, 0.0f);
     std::vector<std::pair<int, bool>> removedItems;
     bool inPlay = true, spectating = false;

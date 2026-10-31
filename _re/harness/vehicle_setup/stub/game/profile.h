@@ -13,6 +13,7 @@ struct S_DetailSettings {
     bool IsEnabled(int option) const { return option >= 0 && option < 8 && switches[option]; }
     bool voiceChat = false;
     bool switches[8] = {};
+    bool invertMouse = false;                           // (the camera module, part 8e-iii)
 };
 enum : int {
     DETAIL_VERTEX_ANIMATION = 1,

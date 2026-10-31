@@ -16,6 +16,7 @@ LINES = {
     "keeper": "kpMake kpRestore kpUpdate kpCar kpSubmarine kpPlayer".split(),
     "tactical": ("tcBasics tcOn tcOff tcMove tcLookAt tcMode tcFlight tcUpdate tcMoveMode tcTurn tcDrag tcUpDown "
                  "tcZoom tcFly tcHumans").split(),
+    "update": "upGate upMouse upFirst upFollow upTail upCar upScripted upDebug".split(),
 }
 
 

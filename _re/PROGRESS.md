@@ -5570,6 +5570,45 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/camera.txt (13 added; hud.txt's LookAt dropped); 21 functions in ported.txt.
     Stats: 7,748 of 12,293 functions by hand (70.7 % by size).
 
+  PART 8e-iii DONE (2026-10-31): the camera module's update (src/game/camera_module.*; 0x00469300,
+  0x0046ada0, 0x0046b550, 0x0046beb0).
+  - Update: nothing while +0x26E (but the debug camera); the debug camera, the scripted view, or
+    (the active soldier in a car seat but a seat weapon's) the car's camera; else the mouse turns
+    the view direction (+0x20) about y (no member selected, or view 10) and pitches it about its
+    side axis within the view's limits (CAMERA_SETTINGS_PITCH: with a member selected too); the
+    first-person view (2) takes the soldier's view without a selection and keeps the camera out
+    of the band around the water's surface (the view's waterBand + 0.1 m) while his head is under
+    it; views 7 .. 9 (or no selection) take the camera dummy's direction (CAMERA_SETTINGS_FOLLOW +
+    FIXED_DIR); then PlaceCamera / MoveCamera (0x00468130 / 0x00466970, part 8e-iv, declared), the
+    game camera's update, the listener's sector every 500 ms, the two offsets (+0x80 the
+    direction's, +0x90 the position's) shrinking 1 per second after their delays, +0x294 up to
+    5000. The debug camera's branches after the start are not reached (it returns there): left out.
+  - The car's camera: the look actions (C_Controls::GetValue, 0x006c76a0, declared) turn it up to
+    30 degrees aside and 25 up or down from the camera dummy's view (the soldier's own view in a
+    hidden seat in view 9 or an armed one as the local player); the game camera rolled with the
+    dummy (PoseGetRoll), the yaw / pitch / roll printed (C_game::Print). The scripted view: 10 m
+    behind the script's frame (+0x2B4), swaying with the game's time; the shake (+0x60 / +0x70 for
+    +0x284 ms) and the offsets turned with the camera on top. The debug camera: the look actions
+    turn it (85 degrees at most), the mouse buttons (IGraph::GetMouseButtons, slot 0x104) move it
+    at 0.2 .. 200 m/s, the speed action steps the speed.
+  - Quirk kept: the car and debug cameras bring the pitch back into -pi .. pi by pi (not 2 pi).
+  - The module's fields named (the water offset and level, the shake, the offsets and their
+    delays, the debug camera and its speed, the mouse look, the listener's time, the scripted
+    view, the car's yaw and pitch; S_CameraSettings::waterBand); m_scriptedView an I3D_frame.
+  - Harness: update_test.inc in the camera build ("update:", 8 checks; the mouse, the controls'
+    values, PoseGetRoll, the camera's SetWorldDir and PlaceCamera / MoveCamera faked; a C_Actor
+    car with its seats' flags); the stubs: C_Human::GetVehicleSeat, S_DetailSettings::invertMouse,
+    C_Controls. The 8e-i load test with +0x26E set. 0 of 22 in both orders.
+  - Mutations (mutations/mutate_8e3.py): the first run caught 218 of 275 (57 survived); 30
+    equivalent (see the file's docstring), new cases for 27 (the delays' and lengths' edges, more
+    turns and dummy directions, the listener at 0, the car camera's heading 0 and limits without
+    input, the shake's last millisecond, the debug camera's pi wrap, the moves' y); the full rerun:
+    all 245 caught. Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the
+    other five 0 of 37.
+  - Build: 200 files clean (MSVC). Tier 1: 536 errors in 93 files, 220 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/camera.txt (7 added); 4 functions in ported.txt. Stats: 7,752 of 12,293
+    functions by hand (71.0 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

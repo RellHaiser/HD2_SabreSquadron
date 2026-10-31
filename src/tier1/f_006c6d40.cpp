@@ -370,21 +370,21 @@ int C_Controls__GetValues(void *_this,uint32_t *param_1,uint8_t param_2, ...)
 
 
 // 0x006c76a0
-long double FUN_006c76a0(int param_1,uint32_t param_2,uint8_t param_3, ...)
+float C_Controls__GetValue(void *_this,int action,bool pressed, ...)
 {
-  if ((param_3 & 1) == 0) {
-    if (((*(int *)(param_1 + 0xcc) != 0) &&
-        (param_2 < (uint32_t)(*(int *)(param_1 + 0xd0) - *(int *)(param_1 + 0xcc) >> 2))) &&
-       (-1 < (int)param_2)) {
-      return (long double)*(float *)(*(int *)(param_1 + 0xcc) + param_2 * 4);
+  if (pressed) {
+    if (((*(int *)((int)_this + 0xdc) != 0) &&
+        ((uint32_t)action < (uint32_t)(*(int *)((int)_this + 0xe0) - *(int *)((int)_this + 0xdc) >> 2))) &&
+       (-1 < action)) {
+      return *(float *)(*(int *)((int)_this + 0xdc) + action * 4);
     }
   }
-  else if (((*(int *)(param_1 + 0xdc) != 0) &&
-           (param_2 < (uint32_t)(*(int *)(param_1 + 0xe0) - *(int *)(param_1 + 0xdc) >> 2))) &&
-          (-1 < (int)param_2)) {
-    return (long double)*(float *)(*(int *)(param_1 + 0xdc) + param_2 * 4);
+  else if (((*(int *)((int)_this + 0xcc) != 0) &&
+           ((uint32_t)action < (uint32_t)(*(int *)((int)_this + 0xd0) - *(int *)((int)_this + 0xcc) >> 2))) &&
+          (-1 < action)) {
+    return *(float *)(*(int *)((int)_this + 0xcc) + action * 4);
   }
-  return (long double)0.0;
+  return 0.0;
 }
 
 

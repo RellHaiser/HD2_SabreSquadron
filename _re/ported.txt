@@ -7934,3 +7934,9 @@
 00464a40
 00464a60
 00464b80
+
+# part 8e-iii: the camera update, the car camera, the scripted view, the debug camera
+00469300
+0046ada0
+0046b550
+0046beb0

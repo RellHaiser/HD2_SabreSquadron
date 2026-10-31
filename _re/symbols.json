@@ -5779,6 +5779,36 @@
   "module": "camera",
   "name": "StaticInit_4668c0"
  },
+ "00466970": {
+  "module": "camera",
+  "name": "C_CameraModule::MoveCamera",
+  "proto": "void __thiscall MoveCamera(void * this, int timeDelta)"
+ },
+ "00468130": {
+  "module": "camera",
+  "name": "C_CameraModule::PlaceCamera",
+  "proto": "void __thiscall PlaceCamera(void * this, int timeDelta)"
+ },
+ "00469300": {
+  "module": "camera",
+  "name": "C_CameraModule::Update",
+  "proto": "void __thiscall Update(void * this, int timeDelta)"
+ },
+ "0046ada0": {
+  "module": "camera",
+  "name": "C_CameraModule::UpdateCarCamera",
+  "proto": "void __thiscall UpdateCarCamera(void * this, int timeDelta)"
+ },
+ "0046b550": {
+  "module": "camera",
+  "name": "C_CameraModule::UpdateScriptedView",
+  "proto": "void __thiscall UpdateScriptedView(void * this, int timeDelta)"
+ },
+ "0046beb0": {
+  "module": "camera",
+  "name": "C_CameraModule::UpdateDebugCamera",
+  "proto": "void __thiscall UpdateDebugCamera(void * this, int timeDelta)"
+ },
  "0046cb20": {
   "module": "camera",
   "name": "C_CameraModule::SetSpecialMode",
@@ -30373,6 +30403,11 @@
  "006c7600": {
   "module": "game_app",
   "name": "C_Controls::GetValues"
+ },
+ "006c76a0": {
+  "module": "camera",
+  "name": "C_Controls::GetValue",
+  "proto": "float __thiscall GetValue(void * this, int action, bool pressed)"
  },
  "006c7bc0": {
   "module": "app",

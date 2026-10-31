@@ -137,7 +137,8 @@ public:
     I3D_SLOT(F8);
     I3D_SLOT(FC);
     I3D_SLOT(100);
-    I3D_SLOT(104);
+    // Mouse buttons 0 .. 4 as bits (LS3DF's name).
+    I3DMETHOD(uint32_t, GetMouseButtons)() = 0;                          // 0x104
     I3DMETHOD(void, Unknown108)() = 0;                                   // 0x108
     I3D_SLOT(10C);
     // Adds a texture search directory.

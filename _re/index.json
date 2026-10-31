@@ -39289,10 +39289,10 @@
 "in_vtables": []
 },
 "00466970": {
-"name": "FUN_00466970",
+"name": "MoveCamera",
 "size": 5792,
 "lines": 698,
-"chars": 28058,
+"chars": 28065,
 "callers": [
 "00469300",
 "0046ada0"
@@ -39353,10 +39353,10 @@
 "in_vtables": []
 },
 "00468130": {
-"name": "FUN_00468130",
+"name": "PlaceCamera",
 "size": 4554,
 "lines": 608,
-"chars": 19142,
+"chars": 19149,
 "callers": [
 "00469300",
 "0046ada0"
@@ -39404,10 +39404,10 @@
 "in_vtables": []
 },
 "00469300": {
-"name": "FUN_00469300",
+"name": "Update",
 "size": 6806,
 "lines": 847,
-"chars": 25390,
+"chars": 25435,
 "callers": [],
 "callees": [
 "0045d160",
@@ -39460,10 +39460,10 @@
 ]
 },
 "0046ada0": {
-"name": "FUN_0046ada0",
+"name": "UpdateCarCamera",
 "size": 1963,
-"lines": 286,
-"chars": 8869,
+"lines": 285,
+"chars": 8797,
 "callers": [
 "00469300"
 ],
@@ -39509,10 +39509,10 @@
 "in_vtables": []
 },
 "0046b550": {
-"name": "FUN_0046b550",
+"name": "UpdateScriptedView",
 "size": 2399,
 "lines": 292,
-"chars": 10549,
+"chars": 10559,
 "callers": [
 "00469300"
 ],
@@ -39547,10 +39547,10 @@
 "in_vtables": []
 },
 "0046beb0": {
-"name": "FUN_0046beb0",
+"name": "UpdateDebugCamera",
 "size": 1105,
-"lines": 155,
-"chars": 4735,
+"lines": 153,
+"chars": 4746,
 "callers": [
 "00469300"
 ],
@@ -232549,10 +232549,10 @@
 "in_vtables": []
 },
 "006c76a0": {
-"name": "FUN_006c76a0",
+"name": "C_Controls::GetValue",
 "size": 106,
 "lines": 19,
-"chars": 643,
+"chars": 620,
 "callers": [
 "00469300",
 "0046ada0",

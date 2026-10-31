@@ -1,6 +1,7 @@
 // The camera module (0x00462320..0x0046cb20): see game/camera_module.h. This file: the module's
-// core (part 8e-i: 0x00464d90..0x004668c0) and the human effects, the command map's tactical
-// camera (part 8e-ii: 0x00462320..0x00464d77).
+// core (part 8e-i: 0x00464d90..0x004668c0), the human effects, the command map's tactical
+// camera (part 8e-ii: 0x00462320..0x00464d77), the update (part 8e-iii: 0x00469300 and the car's
+// camera, the scripted view, the debug camera).
 #include "game/camera_module.h"
 
 #include <cmath>
@@ -14,7 +15,10 @@
 #include "game/collision.h"
 #include "game/game.h"
 #include "game/human.h"
+#include "game/human_movement.h"
+#include "game/human_pose_internal.h"
 #include "game/pending.h"
+#include "game/profile.h"
 #include "game/submarine.h"
 #include "game/team.h"
 #include "ls3d/i3d.h"
@@ -123,7 +127,7 @@ bool C_CameraModule::LoadGame(C_chunk &)
 
 bool C_CameraModule::GetUnknown78()
 {
-    return m_unknown26D;
+    return m_debugCamera;
 }
 
 bool C_CameraModule::GetState()
@@ -160,7 +164,7 @@ void C_CameraModule::StartMission(bool server)
 {
     if (server)
         return;
-    m_unknown2B0 = false;
+    m_scriptedViewOn = false;
     m_scriptedView = nullptr;
     m_unknown258 = 6.0f;
     m_unknown26C = false;
@@ -184,24 +188,24 @@ void C_CameraModule::StartMission(bool server)
         m_dir = m_wantedDir = WorldDir(m_gameCamera);
         m_pos = m_wantedPos = WorldPos(m_gameCamera);
     }
-    m_unknown26D = false;
-    m_unknown268 = 5;
+    m_debugCamera = false;
+    m_debugSpeed = 5;
     m_unknown26E = false;
-    m_unknown26F = true;
+    m_mouseLook = true;
     m_underwater = false;
     m_unknown278 = false;
     m_blendTime = 0;
-    m_unknown284 = 0;
-    m_unknown060 = m_unknown064 = m_unknown068 = 0;
-    m_unknown070 = m_unknown074 = m_unknown078 = 0;
-    m_unknown080[0] = m_unknown080[1] = m_unknown080[2] = 0.0f;
-    m_unknown090[0] = m_unknown090[1] = m_unknown090[2] = 0.0f;
+    m_shakeTime = 0;
+    m_shakePos.x = m_shakePos.y = m_shakePos.z = 0.0f;
+    m_shakeDir.x = m_shakeDir.y = m_shakeDir.z = 0.0f;
+    m_offsetDir.x = m_offsetDir.y = m_offsetDir.z = 0.0f;
+    m_offsetPos.x = m_offsetPos.y = m_offsetPos.z = 0.0f;
     m_target = nullptr;
     m_targetSpeed = -1.0f;
     m_listenerSector = nullptr;
-    m_unknown250 = 0;
+    m_listenerTime = 0;
     m_unknown290 = false;
-    m_unknown298 = m_unknown29C = m_unknown2A0 = 0;
+    m_time = m_offsetPosDelay = m_offsetDirDelay = 0;
     m_unknown0D0 = 0;
 }
 
@@ -916,4 +920,364 @@ S_CollisionVolume *C_CameraHumanEffects::Move(const S_vector &move)
     m_camera->SetPos(Xyz(m_pos));
     m_camera->Update();
     return hit;
+}
+
+// --- the update (part 8e-iii) ----------------------------------------------------------------------
+
+namespace {
+
+// The look actions (C_Controls; the car's camera and the debug camera) and the debug camera's
+// speed steps.
+const int ACTION_LOOK_X = 0x34;
+const int ACTION_LOOK_Y = 0x35;
+const int ACTION_DEBUG_SPEED = 0x36;
+const float LOOK_TURN = 0.9424779f;                     // radians per unit of a look action
+// The debug camera's speeds (m/s; 0x0080feac).
+const float DEBUG_CAMERA_SPEEDS[10] = {0.2f, 0.5f, 1.0f, 2.0f, 5.0f, 10.0f, 20.0f, 50.0f, 100.0f, 200.0f};
+const float PI_F = 3.1415927f;
+
+S_vector &XyzRef(S_vector4 &v)
+{
+    return reinterpret_cast<S_vector &>(v);
+}
+
+// An offset shrinks by 1 per second once its delay is over (then the delay stays 0).
+void ShrinkOffset(S_vector4 &offset, int &delay, int timeDelta)
+{
+    S_vector &v = XyzRef(offset);
+    float length = v.Magnitude();
+    if (length == 0.0f)
+        return;
+    if (delay != 0)
+        delay -= timeDelta;
+    if (delay > 0)
+        return;
+    length -= static_cast<float>(timeDelta - delay) * 0.001f;
+    if (length < 0.0f)
+        length = 0.0f;
+    v.Normalize();
+    v *= length;
+    delay = 0;
+}
+
+} // namespace
+
+void C_CameraModule::Update(int timeDelta)
+{
+    if (m_unknown26E && !m_debugCamera)
+        return;
+    if (m_debugCamera) {
+        UpdateDebugCamera(timeDelta);
+        return;
+    }
+    if (m_scriptedViewOn) {
+        UpdateScriptedView(timeDelta);
+        return;
+    }
+    C_Human *player = g_teamManager.GetPlayerTeam()->GetActivePlayer();
+    if (player && player->GetVehicle() && player->GetVehicle()->GetType() == ACTOR_CAR &&
+        !(player->GetVehicle()->GetSeatFlags(player->GetVehicleSeat()) & SEAT_FLAG_WEAPON)) {
+        UpdateCarCamera(timeDelta);
+        return;
+    }
+
+    int yaw = GetIGraph()->GetMouseDeltaX();
+    int pitch = GetIGraph()->GetMouseDeltaY();
+    if (g_gameProfile.GetDetailSettings()->invertMouse)
+        pitch = -pitch;
+    C_Human *selected = g_teamManager.GetPlayerTeam()->GetSelectedMember();
+    m_time += timeDelta;
+    if (!m_mouseLook || !GetGame()->IsPlayerInputEnabled())
+        pitch = yaw = 0;
+    S_vector &dir = XyzRef(m_wantedDir);
+
+    // The first-person view: the soldier's view without a member selected; the camera kept out
+    // of the band around the water's surface while his head is under it.
+    m_waterOffset = 0.0f;
+    if (m_view == 2) {
+        if (!selected) {
+            pitch = yaw = 0;
+            if (player)
+                m_wantedDir = reinterpret_cast<const S_vector4 &>(player->GetViewDir());   // (an S_vector4)
+        }
+        bool underWater = false;
+        float surface;
+        if (player && (player->GetMovement()->GetHeadWater(&underWater, &surface), underWater)) {
+            const float height = m_camera->GetMatrix().m[3][1];
+            if (height < m_waterLevel) {
+                const float limit = (m_waterLevel - 0.1f) - m_viewSettings->waterBand;
+                if (height > limit)
+                    m_waterOffset = limit - height;
+            } else {
+                const float limit = (m_viewSettings->waterBand + m_waterLevel) + 0.1f;
+                if (height < limit)
+                    m_waterOffset = limit - height;
+            }
+        }
+    }
+
+    // (The debug camera's branches here are not reached: it returned above.)
+    // Turned by the mouse about the y axis (without a member selected, or in view 10) ...
+    if (yaw != 0 && (!selected || m_view == 10)) {
+        dir.Normalize();
+        S_quat turn;
+        turn.Make(S_vector(0.0f, -1.0f, 0.0f), static_cast<float>(yaw) * 0.004f);
+        dir.Normalize();
+        dir = dir.RotateByMatrix(turn.RotationMatrix());   // (the w: a local's, kept here)
+        dir.Normalize();
+    }
+    // ... and pitched about its side axis within the view's limits.
+    if (((m_viewSettings->flags & CAMERA_SETTINGS_PITCH) || !selected) && pitch != 0) {
+        dir.Normalize();
+        S_vector axis(1.0f, 0.0f, 0.0f);
+        if (!((dir.x == 0.0f && dir.y == 1.0f && dir.z == 0.0f) || (dir.x == 0.0f && dir.y == -1.0f && dir.z == 0.0f)))
+            axis = S_vector(dir.y * 0.0f - dir.z, dir.z * 0.0f - dir.x * 0.0f, dir.x - dir.y * 0.0f).NormalizedGame();
+        float angle = static_cast<float>(pitch) * 0.004f;
+        const double current = std::asin(static_cast<double>(dir.y));
+        const float after = static_cast<float>(current - angle);
+        if (after >= m_viewSettings->maxPitch)
+            angle = static_cast<float>(current - m_viewSettings->maxPitch);
+        if (after <= m_viewSettings->minPitch)
+            angle = static_cast<float>(current - m_viewSettings->minPitch);
+        S_quat turn;
+        turn.Make(axis, angle);
+        dir.Normalize();
+        dir = dir.RotateByMatrix(turn.RotationMatrix());
+        dir.Normalize();
+    }
+    // The camera dummy's own direction taken (views 7 .. 9, or none selected).
+    if ((m_viewSettings->flags & CAMERA_SETTINGS_FOLLOW) && m_camera) {
+        dir.Normalize();
+        const bool own = m_view == 9 || m_view == 7 || m_view == 8;
+        if ((m_viewSettings->flags & CAMERA_SETTINGS_FIXED_DIR) && (own || !selected)) {
+            m_wantedDir = WorldDir(m_camera);
+            dir.Normalize();
+        }
+    }
+
+    PlaceCamera(timeDelta);
+    MoveCamera(timeDelta);
+    m_gameCamera->Update();
+
+    // The sound listener's sector, every 500 ms.
+    m_listenerTime -= timeDelta;
+    if (m_listenerTime < 0) {
+        I3D_camera *active = GetGame()->GetScene()->GetActiveCamera();
+        const S_vector &pos = active->GetMatrix()(3);
+        m_listenerSector = GetGame()->GetScene()->GetSector(pos);
+        while (m_listenerTime < 0)
+            m_listenerTime += 500;
+    }
+    ShrinkOffset(m_offsetDir, m_offsetDirDelay, timeDelta);
+    ShrinkOffset(m_offsetPos, m_offsetPosDelay, timeDelta);
+    if (m_unknown290) {
+        m_unknown294 += timeDelta;
+        if (static_cast<float>(m_unknown294) > 5000.0f)
+            m_unknown294 = 5000;
+    }
+}
+
+void C_CameraModule::UpdateCarCamera(int timeDelta)
+{
+    float lookX = g_controls.GetValue(ACTION_LOOK_X, false);
+    float lookY = g_controls.GetValue(ACTION_LOOK_Y, false);
+    if (g_gameProfile.GetDetailSettings()->invertMouse)
+        lookY = -lookY;
+    const float roll = PoseGetRoll(m_camera->GetMatrix());
+    C_Human *player = g_teamManager.GetPlayerTeam()->GetActivePlayer();
+    const uint32_t flags = player->GetVehicle()->GetSeatFlags(player->GetVehicleSeat());
+    if (!GetGame()->IsPlayerInputEnabled() || player->GetHealth() <= 0)
+        lookX = lookY = 0.0f;
+
+    if ((flags & SEAT_FLAG_WEAPON) || ((flags & SEAT_FLAG_HIDDEN) && m_view == 9) ||
+        ((flags & SEAT_FLAG_ARMED) && player->IsLocalPlayer())) {
+        m_wantedDir = reinterpret_cast<const S_vector4 &>(player->GetViewDir());   // (an S_vector4)
+    } else {
+        // Turned from the camera dummy's view: 30 degrees aside, 25 up or down.
+        if (lookX != 0.0f) {
+            m_carYaw = lookX * LOOK_TURN + m_carYaw;
+            if (m_carYaw > 0.5235988f)
+                m_carYaw = 0.5235988f;
+            else if (m_carYaw < -0.5235988f)
+                m_carYaw = -0.5235988f;
+        }
+        if (lookY != 0.0f) {
+            m_carPitch = m_carPitch - lookY * LOOK_TURN;
+            if (m_carPitch > 0.43633232f)
+                m_carPitch = 0.43633232f;
+            else if (m_carPitch < -0.43633232f)
+                m_carPitch = -0.43633232f;
+        }
+        const S_vector view = m_camera->GetMatrix()(2).NormalizedGame();
+        const float viewPitch = static_cast<float>(
+            std::atan2(static_cast<double>(view.y), static_cast<double>(std::sqrt(view.z * view.z + view.x * view.x))));
+        float heading =
+            static_cast<float>(std::atan2(static_cast<double>(view.x), static_cast<double>(view.z)) + m_carYaw);
+        if (heading < 0.0f)
+            heading = heading + 6.2831855f;
+        else if (heading > 6.2831855f)
+            heading = heading - 6.2831855f;
+        // (Quirk kept: out of -pi .. pi by pi, not 2 pi.)
+        float elevation = viewPitch + m_carPitch;
+        if (elevation < -PI_F)
+            elevation = elevation + PI_F;
+        else if (elevation > PI_F)
+            elevation = elevation - PI_F;
+        if (elevation > 0.5235988f)
+            elevation = 0.5235988f;
+        else if (elevation < -0.5235988f)
+            elevation = -0.5235988f;
+        const double cosElevation = std::cos(static_cast<double>(elevation));
+        m_wantedDir.x = static_cast<float>(cosElevation * std::sin(static_cast<double>(heading)));
+        m_wantedDir.z = static_cast<float>(std::cos(static_cast<double>(heading)) * cosElevation);
+        m_wantedDir.y = static_cast<float>(std::sin(static_cast<double>(elevation)));
+    }
+    // (Then an empty function, 0x004d0440, given the camera dummy's position and that plus the
+    // direction: a debug line's leftover.)
+    XyzRef(m_wantedDir).Normalize();
+    PlaceCamera(timeDelta);
+    MoveCamera(timeDelta);
+    // Rolled with the camera dummy.
+    S_quat rot;
+    rot.SetDir(m_gameCamera->GetMatrix()(2).NormalizedGame(), roll);
+    m_gameCamera->SetRot(rot);
+    m_gameCamera->Update();
+    GetGame()->Print("Yaw %.2f, Pitch %.2f, Roll %.2f", m_carYaw, m_carPitch, roll);
+}
+
+void C_CameraModule::UpdateScriptedView(int timeDelta)
+{
+    if (!m_scriptedView || !m_gameCamera)
+        return;
+    S_vector4 pos = WorldPos(m_scriptedView);
+    const S_matrix &frame = m_scriptedView->GetMatrix();
+    S_vector4 dir = {frame.m[2][0], frame.m[2][1], frame.m[2][2], frame.m[2][3]};
+    XyzRef(dir).Normalize();
+    // 10 m behind it.
+    const S_vector back(dir.x * 10.0f, dir.y * 10.0f, dir.z * 10.0f);
+    pos.x -= back.x;
+    pos.y -= back.y;
+    pos.z -= back.z;
+    // Swaying up and down and aside with the game's time.
+    S_vector side(dir.y * 0.0f - dir.z, dir.z * 0.0f - dir.x * 0.0f, dir.x - dir.y * 0.0f);
+    S_vector up(dir.y * side.z - dir.z * side.y, dir.z * side.x - side.z * dir.x, side.y * dir.x - dir.y * side.x);
+    NormalizeSummed(up, (up.z * up.z + up.y * up.y) + up.x * up.x);
+    side = side.NormalizedGame();
+    const float phase = static_cast<float>(static_cast<double>(GetGame()->GetTime()) * 0.0015f);
+    const float swayUp = static_cast<float>(std::sin(std::cos(static_cast<double>(phase))) * 0.30000001192092896);
+    up.x *= swayUp;
+    up.y *= swayUp;
+    up.z *= swayUp;
+    const float phase2 = static_cast<float>(static_cast<double>(GetGame()->GetTime()) * 0.0015f) + 3.0f;
+    const float wave = static_cast<float>(std::sin(static_cast<double>(phase2)) + 1.0);
+    const float swaySide = static_cast<float>(std::cos(static_cast<double>(wave)) * 0.30000001192092896);
+    side.x *= swaySide;
+    side.y *= swaySide;
+    side.z *= swaySide;
+    pos.x = (up.x + pos.x) + side.x;
+    pos.y = (pos.y + up.y) + side.y;
+    pos.z = (pos.z + up.z) + side.z;
+    m_gameCamera->SetPosInline(Xyz(pos));
+    m_gameCamera->SetWorldDir(Xyz(dir), 0.0f);
+
+    // The shake, and the offsets turned with the game camera.
+    if (m_shakeTime > 0) {
+        m_shakeTime -= timeDelta;
+        if (m_shakeTime < 0) {
+            m_shakeTime = 0;
+            m_shakePos.x = m_shakePos.y = m_shakePos.z = 0.0f;
+            m_shakeDir.x = m_shakeDir.y = m_shakeDir.z = 0.0f;
+            m_gameCamera->Update();
+            return;
+        }
+        const double left = static_cast<double>(m_shakeTime);
+        const float a = static_cast<float>(std::sin(static_cast<double>(static_cast<float>(0.07f * left))) *
+                                           static_cast<double>(static_cast<float>(left * 6e-05f)));
+        const float b = static_cast<float>(std::sin(static_cast<double>(static_cast<float>(left * 0.08f))) *
+                                           static_cast<double>(static_cast<float>(left * 4e-05f)));
+        const float c = static_cast<float>(std::sin(static_cast<double>(static_cast<float>(left * 0.05f))) *
+                                           static_cast<double>(static_cast<float>(left * 7e-05f)));
+        // (Their w: a local's in the original; kept here.)
+        m_shakePos.x = a;
+        m_shakePos.y = b;
+        m_shakePos.z = c;
+        m_shakeDir.x = c * 0.15f;
+        m_shakeDir.y = b * -0.25f;
+        m_shakeDir.z = a * 0.15f;
+        S_vector offset = Xyz(m_offsetPos);
+        offset *= m_gameCamera->GetMatrix();
+        const S_vector &camera = m_gameCamera->GetMatrix()(3);
+        offset = S_vector(offset.x - camera.x, offset.y - camera.y, offset.z - camera.z);
+        m_gameCamera->SetPosInline(S_vector((pos.x + m_shakePos.x) + offset.x, offset.y + (pos.y + m_shakePos.y),
+                                            offset.z + (pos.z + m_shakePos.z)));
+        S_vector turn = Xyz(m_offsetDir);
+        turn *= m_gameCamera->GetMatrix();
+        const S_vector &moved = m_gameCamera->GetMatrix()(3);
+        turn = S_vector(turn.x - moved.x, turn.y - moved.y, turn.z - moved.z);
+        const S_vector shaken(dir.x + m_shakeDir.x, dir.y + m_shakeDir.y, dir.z + m_shakeDir.z);
+        m_gameCamera->SetWorldDir(S_vector(shaken.x + turn.x, turn.y + shaken.y, turn.z + shaken.z), 0.0f);
+    }
+    m_gameCamera->Update();
+}
+
+void C_CameraModule::UpdateDebugCamera(int timeDelta)
+{
+    const float lookX = g_controls.GetValue(ACTION_LOOK_X, false);
+    float lookY = g_controls.GetValue(ACTION_LOOK_Y, false);
+    if (g_gameProfile.GetDetailSettings()->invertMouse)
+        lookY = -lookY;
+    if (lookX != 0.0f || lookY != 0.0f) {
+        float heading = static_cast<float>(std::atan2(static_cast<double>(m_wantedDir.x), static_cast<double>(m_wantedDir.z)));
+        double elevation = std::atan2(static_cast<double>(m_wantedDir.y),
+                                      static_cast<double>(std::sqrt(m_wantedDir.z * m_wantedDir.z + m_wantedDir.x * m_wantedDir.x)));
+        if (lookX != 0.0f)
+            heading = lookX * LOOK_TURN + heading;
+        if (lookY != 0.0f)
+            elevation = static_cast<float>(elevation - static_cast<double>(lookY * LOOK_TURN));
+        // (Quirk kept: out of -pi .. pi by pi, not 2 pi.) At most 85 degrees up or down.
+        if (elevation < -PI_F)
+            elevation = static_cast<float>(elevation + PI_F);
+        else if (elevation > PI_F)
+            elevation = static_cast<float>(elevation - PI_F);
+        if (elevation > 1.4835299f)
+            elevation = 1.4835299f;
+        else if (elevation < -1.4835299f)
+            elevation = -1.4835299f;
+        const double cosElevation = std::cos(elevation);
+        m_wantedDir.x = static_cast<float>(cosElevation * std::sin(static_cast<double>(heading)));
+        m_wantedDir.z = static_cast<float>(std::cos(static_cast<double>(heading)) * cosElevation);
+        m_wantedDir.y = static_cast<float>(std::sin(elevation));
+        XyzRef(m_wantedDir).Normalize();
+    }
+    // The mouse buttons: forward, back.
+    uint32_t buttons = GetIGraph()->GetMouseButtons();
+    if (!m_mouseLook || !GetGame()->IsPlayerInputEnabled())
+        buttons = 0;
+    if (buttons & 1) {
+        const float t = static_cast<float>(timeDelta) * 0.001f;
+        const float speed = DEBUG_CAMERA_SPEEDS[m_debugSpeed];
+        m_wantedPos.x = t * m_wantedDir.x * speed + m_wantedPos.x;
+        m_wantedPos.y = t * m_wantedDir.y * speed + m_wantedPos.y;
+        m_wantedPos.z = t * m_wantedDir.z * speed + m_wantedPos.z;
+    }
+    if (buttons & 2) {
+        const float t = static_cast<float>(timeDelta) * 0.001f;
+        const float speed = DEBUG_CAMERA_SPEEDS[m_debugSpeed];
+        m_wantedPos.x = m_wantedPos.x - t * m_wantedDir.x * speed;
+        m_wantedPos.y = m_wantedPos.y - t * m_wantedDir.y * speed;
+        m_wantedPos.z = m_wantedPos.z - t * m_wantedDir.z * speed;
+    }
+    // The speed action steps through the speeds.
+    if (g_controls.GetValue(ACTION_DEBUG_SPEED, true) > 0.0f) {
+        if (++m_debugSpeed > 9)
+            m_debugSpeed = 9;
+        GetGame()->Print("Debug camera speed %.2f", DEBUG_CAMERA_SPEEDS[m_debugSpeed]);
+    } else if (g_controls.GetValue(ACTION_DEBUG_SPEED, true) < 0.0f) {
+        if (--m_debugSpeed < 0)
+            m_debugSpeed = 0;
+        GetGame()->Print("Debug camera speed %.2f", DEBUG_CAMERA_SPEEDS[m_debugSpeed]);
+    }
+    m_gameCamera->SetPosInline(Xyz(m_wantedPos));
+    m_gameCamera->SetWorldDir(Xyz(m_wantedDir), 0.0f);
+    m_gameCamera->Update();
 }

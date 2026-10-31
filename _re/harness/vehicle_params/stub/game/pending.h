@@ -229,4 +229,11 @@ extern std::vector<class I3D_frame *> g_spareBirdModels;   // 0x0089bba0
 #endif
 float RandomFloat(float max);                           // 0x00475190
 
+// The controls (the camera module's look actions, part 8e-iii; the camera test defines GetValue).
+class C_Controls {
+public:
+    float GetValue(int action, bool pressed);          // 0x006c76a0
+};
+extern C_Controls g_controls;                           // 0x008aeb58
+
 // The vertex animation module: stub/game/vertex_anim.h.

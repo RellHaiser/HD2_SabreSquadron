@@ -117,6 +117,8 @@ public:
     // The frame's values per action: held (+0xCC) or pressed in this frame (+0xDC); their
     // count, -1 when there are none.
     int GetValues(float **values, bool pressed);    // 0x006c7600
+    // One action's value (held, or pressed in this frame); 0 out of range.
+    float GetValue(int action, bool pressed);       // 0x006c76a0
     // Binds `action` to a device's key (C_KeyBindings; `unknown` is always 0).
     void Bind(int action, int16_t device, uint16_t key, int unknown, int direction);   // 0x006c7790
     // The mouse's divisors (+0xA8 x, +0xAC y, +0xB0 the third; floats).

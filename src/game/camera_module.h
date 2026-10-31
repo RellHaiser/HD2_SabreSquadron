@@ -127,14 +127,17 @@ struct S_CameraSettings {                               // 0x20 bytes
     float distance = 3.0f;                              // +0x00 behind the target
     float unknown04 = 0.5f;                             // +0x04
     float unknown08 = 1.0f;                             // +0x08
-    float unknown0C = 0.2f;                             // +0x0C
+    float waterBand = 0.2f;                             // +0x0C the camera kept that far off the water's surface
     uint32_t flags = 0x8B;                              // +0x10 (CAMERA_SETTINGS_*)
     float maxPitch = 0.5f;                              // +0x14 radians
     float minPitch = -0.5f;                             // +0x18
     float unknown1C = 12.0f;                            // +0x1C
 };
 enum : uint32_t {
-    CAMERA_SETTINGS_FIXED_DIR = 0x08,                   // SetViewDir ignored
+    CAMERA_SETTINGS_FOLLOW = 0x01,                      // (with FIXED_DIR: the camera's direction kept)
+    CAMERA_SETTINGS_PITCH = 0x02,                       // the mouse pitches it with a member selected too
+    CAMERA_SETTINGS_FIXED_DIR = 0x08,                   // SetViewDir ignored; the camera's direction
+                                                        //   taken (views 7 .. 9 or none selected)
 };
 enum : int {
     CAMERA_VIEW_COUNT = 11,
@@ -147,7 +150,11 @@ public:
     C_CameraModule(int id, const char *name);           // 0x00464ef0
     ~C_CameraModule() override;                         // 0x004650f0
 
-    // (C_Module::Update; the game calls it itself while paused.)
+    // (C_Module::Update; the game calls it itself while paused.) The debug camera, the scripted
+    // view or the car's camera when on; else the view direction turned by the mouse (in the
+    // view's pitch limits; the first-person view: the soldier's, kept out of the water's surface),
+    // the camera placed and moved (PlaceCamera, MoveCamera), the listener's sector looked up every
+    // 500 ms, the offsets shrunk.
     void Update(int timeDelta) override;                // 0x00469300
     // The client side: the settings loaded, the game camera made the scene's active one (in the
     // place of the scene's camera, with the game's field of view and range).
@@ -212,6 +219,19 @@ private:
     // holds, up to the 11); +0x2AC from view 1's distance.
     void LoadSettings();                                // 0x004656d0
     void ResetUnknown2AC();                             // 0x00465a00
+    // The active soldier in a car seat (not a seat weapon's): the car's own camera, turned by
+    // the look actions (30 degrees aside, 25 up or down) about the camera dummy's view; the
+    // soldier's view in view 9 from a hidden seat or from an armed one (the local player).
+    void UpdateCarCamera(int timeDelta);                // 0x0046ada0
+    // The scripted view: 10 m behind its frame looking along it, swaying with the game's time;
+    // the shake and the offsets on top.
+    void UpdateScriptedView(int timeDelta);             // 0x0046b550
+    // The debug camera: turned by the look actions, moved along its view by the mouse buttons
+    // (DEBUG_CAMERA_SPEEDS by m_debugSpeed, the speed action).
+    void UpdateDebugCamera(int timeDelta);              // 0x0046beb0
+    // (Part 8e-iv.) The camera's place for the view, and the game camera moved there.
+    void PlaceCamera(int timeDelta);                    // 0x00468130
+    void MoveCamera(int timeDelta);                     // 0x00466970
 
     C_CameraHumanEffects *m_humanEffects;               // +0x00C
     S_vector4 m_wantedPos = {};                         // +0x010 (index 3)
@@ -219,20 +239,20 @@ private:
                                                         //   w not set by the original)
     S_vector4 m_pos = {};                               // +0x030 (index 2)
     S_vector4 m_dir = {};                               // +0x040 (index 2)
-    float m_unknown050[3] = {};                         // +0x050
+    float m_unknown050 = 0.0f;                          // +0x050
+    // This frame's push out of the band around the water's surface (in the first-person view
+    // with the head under water; m_waterLevel +- the view's waterBand + 0.1 m).
+    float m_waterOffset = 0.0f;                         // +0x054
+    float m_unknown058 = 0.0f;                          // +0x058
     uint8_t m_unknown05C[4] = {};                       // +0x05C
-    int m_unknown060 = 0;                               // +0x060
-    int m_unknown064 = 0;                               // +0x064
-    int m_unknown068 = 0;                               // +0x068
-    float m_unknown06C = 0.0f;                          // +0x06C
-    int m_unknown070 = 0;                               // +0x070
-    int m_unknown074 = 0;                               // +0x074
-    int m_unknown078 = 0;                               // +0x078
-    float m_unknown07C = 0.0f;                          // +0x07C
-    float m_unknown080[3] = {};                         // +0x080
-    uint8_t m_unknown08C[4] = {};                       // +0x08C
-    float m_unknown090[3] = {};                         // +0x090
-    uint8_t m_unknown09C[0x34] = {};                    // +0x09C
+    // The shake (m_shakeTime ms left): offsets of the position and of the view direction.
+    S_vector4 m_shakePos = {};                          // +0x060
+    S_vector4 m_shakeDir = {};                          // +0x070
+    // Offsets of the view direction and of the position in the game camera's space, shrinking
+    // by 1 per second once their delays (m_offsetDirDelay, m_offsetPosDelay) are over.
+    S_vector4 m_offsetDir = {};                         // +0x080
+    S_vector4 m_offsetPos = {};                         // +0x090
+    uint8_t m_unknown0A0[0x30] = {};                    // +0x0A0
     int m_unknown0D0 = 0;                               // +0x0D0
     uint8_t m_unknown0D4[0xC] = {};                     // +0x0D4
     S_CameraSettings m_settings[CAMERA_VIEW_COUNT];     // +0x0E0
@@ -240,37 +260,37 @@ private:
     I3D_camera *m_sceneCamera = nullptr;                // +0x244 the scene's camera, back at the stop
     I3D_frame *m_camera = nullptr;                      // +0x248 in use (held)
     I3D_sector *m_listenerSector = nullptr;             // +0x24C
-    int m_unknown250 = 0;                               // +0x250
+    int m_listenerTime = 0;                             // +0x250 ms to the listener sector's next look
     float m_unknown254 = 0.0f;                          // +0x254
     float m_unknown258 = 0.0f;                          // +0x258
     void *m_unknown25C = nullptr;                       // +0x25C
     int m_view = 1;                                     // +0x260 its settings' index
     S_CameraSettings *m_viewSettings = &m_settings[1];  // +0x264
-    int m_unknown268 = 0;                               // +0x268
+    int m_debugSpeed = 0;                               // +0x268 the debug camera's speed (0 .. 9)
     bool m_unknown26C = false;                          // +0x26C
-    bool m_unknown26D = false;                          // +0x26D
-    bool m_unknown26E = false;                          // +0x26E
-    bool m_unknown26F = true;                           // +0x26F
+    bool m_debugCamera = false;                         // +0x26D the free debug camera
+    bool m_unknown26E = false;                          // +0x26E (Update does nothing but the debug camera)
+    bool m_mouseLook = true;                            // +0x26F the mouse turns it
     bool m_underwater = false;                          // +0x270
     int m_unknown274 = 0;                               // +0x274
     bool m_unknown278 = false;                          // +0x278
-    float m_unknown27C = 0.0f;                          // +0x27C
+    float m_waterLevel = 0.0f;                          // +0x27C (CAMERA_MODE_UNDERWATER's)
     int m_blendTime = 0;                                // +0x280 ms
-    int m_unknown284 = 0;                               // +0x284
+    int m_shakeTime = 0;                                // +0x284 ms
     I3D_frame *m_target = nullptr;                      // +0x288
     float m_targetSpeed = 0.0f;                         // +0x28C radians per second (-1: cut)
     bool m_unknown290 = false;                          // +0x290
     int m_unknown294 = 0;                               // +0x294
-    int m_unknown298 = 0;                               // +0x298
-    int m_unknown29C = 0;                               // +0x29C
-    int m_unknown2A0 = 0;                               // +0x2A0
+    int m_time = 0;                                     // +0x298 ms of updates
+    int m_offsetPosDelay = 0;                           // +0x29C ms
+    int m_offsetDirDelay = 0;                           // +0x2A0 ms
     float m_unknown2A4 = 0.0f;                          // +0x2A4
     float m_unknown2A8 = 0.0f;                          // +0x2A8
     float m_unknown2AC = 0.0f;                          // +0x2AC
-    bool m_unknown2B0 = false;                          // +0x2B0
-    void *m_scriptedView = nullptr;                     // +0x2B4
-    float m_unknown2B8 = 0.0f;                          // +0x2B8
-    float m_unknown2BC = 0.0f;                          // +0x2BC
+    bool m_scriptedViewOn = false;                      // +0x2B0
+    I3D_frame *m_scriptedView = nullptr;                // +0x2B4 the camera 10 m behind it, swaying
+    float m_carPitch = 0.0f;                            // +0x2B8 the car camera's look (radians)
+    float m_carYaw = 0.0f;                              // +0x2BC
 };
 // GetCameraPos / GetCameraDir indices.
 enum : int {
