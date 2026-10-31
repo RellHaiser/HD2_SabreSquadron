@@ -246,6 +246,9 @@ void LsBoxLog(std::vector<std::string> &l, const std::string &visual)
     l.push_back("tb " + visual + " clear");
 }
 
+// Part 8f-ii's test (mission_test.inc), run inside these fakes.
+void MissionLoaderTest();
+
 void LoaderTest(S_CameraResults &)
 {
     S_LoaderResults r;
@@ -609,6 +612,7 @@ void LoaderTest(S_CameraResults &)
     }
 
     delete ls;
+    MissionLoaderTest();
     g_coop = oldCoop;
     g_mpSettings = oldSettings;
     g_textIds = oldTextIds;

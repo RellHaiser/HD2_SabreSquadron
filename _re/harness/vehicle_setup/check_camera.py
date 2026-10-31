@@ -21,6 +21,7 @@ LINES = {
               "svChange smModes").split(),
     "loader": ("lsQuiet lsOpenFail lsScene lsTexts lsMpTexts lsProgress lsDraw lsClose lsWait "
                "lsPlayers").split(),
+    "mission": "msBegin msScene msObjects msCheckpoints msLoad msFail msModules".split(),
 }
 
 

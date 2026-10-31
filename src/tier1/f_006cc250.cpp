@@ -2,21 +2,9 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 extern uint8_t LAB_006cc8d0;
-extern uint8_t LAB_00405c90;
-
-// 0x006cc250
-uint32_t FUN_006cc250(...)
-{
-  if ((DAT_0098c1c0 & 1) == 0) {
-    DAT_0098c1c0 |= 1;
-  }
-  atexit(&LAB_00405c90);
-  return 0;
-}
-
 
 // 0x006cc280
-uint32_t FUN_006cc280(void *param_1, ...)
+int C_MissionLoader__LoadScene2(void *_this, ...)
 {
   uint8_t stack0xfffffb98[64];
   uint8_t stack0xfffffb94[64];
@@ -26,7 +14,8 @@ uint32_t FUN_006cc280(void *param_1, ...)
   I3D_scene *pIVar1;
   uint32_t uVar2;
   bool bVar3;
-  C_str *_this;
+  char extraout_AL;
+  C_str *this_00;
   uint32_t uVar4;
   int *piVar5;
   C_game *pCVar6;
@@ -52,24 +41,24 @@ uint32_t FUN_006cc280(void *param_1, ...)
   GH_PIECE(local_14,1,3) = 0;
   LoadTyres();
   InitCarSurfaces();
-  if (**(int **)((int)param_1 + 0x30) != 1) {
-    local_45c = (*(int **)((int)param_1 + 0x30))[1];
-    _this = tier1_operator_new(local_45c + 9);
-    local_458 = (short)_this;
-    uStack_456 = (uint16_t)((uint32_t)_this >> 0x10);
+  if (**(int **)((int)_this + 0x30) != 1) {
+    local_45c = (*(int **)((int)_this + 0x30))[1];
+    this_00 = tier1_operator_new(local_45c + 9);
+    local_458 = (short)this_00;
+    uStack_456 = (uint16_t)((uint32_t)this_00 >> 0x10);
     GH_PIECE(local_14,0,1) = 2;
-    if (_this == 0) {
+    if (this_00 == 0) {
       uVar4 = 0;
     }
     else {
-      uVar4 = C_str__CreateRep(_this,(uint32_t *)(*(int *)((int)param_1 + 0x30) + 8),
-                               *(uint32_t *)(*(int *)((int)param_1 + 0x30) + 4));
+      uVar4 = C_str__CreateRep(this_00,(uint32_t *)(*(int *)((int)_this + 0x30) + 8),
+                               *(uint32_t *)(*(int *)((int)_this + 0x30) + 4));
     }
     GH_PIECE(local_14,0,1) = 1;
-    C_str__ReleaseRep(*(C_str **)((int)param_1 + 0x30));
-    *(uint32_t *)((int)param_1 + 0x30) = uVar4;
+    C_str__ReleaseRep(*(C_str **)((int)_this + 0x30));
+    *(uint32_t *)((int)_this + 0x30) = uVar4;
   }
-  piVar5 = FUN_006cc9a0((uint32_t*)(&local_460),(uint8_t *)"missions\\%s\\scene2.bin");
+  piVar5 = FormatStr(&local_460,"missions\\%s\\scene2.bin");
   GH_PIECE(local_14,0,1) = 3;
   if (*piVar5 != 0) {
     piVar5 = (int *)(*piVar5 + 8);
@@ -85,7 +74,7 @@ uint32_t FUN_006cc280(void *param_1, ...)
     return 3;
   }
   pCVar6 = GetGame();
-  (*pCVar6->m_scene->vtable->EnumFrames)(pCVar6->m_scene,&LAB_006cc8d0,param_1,0x4ffff,0);
+  (*pCVar6->m_scene->vtable->EnumFrames)(pCVar6->m_scene,&LAB_006cc8d0,_this,0x4ffff,0);
   pCVar6 = GetGame();
   pcVar7 = pCVar6->m_scene->m_primarySector->m_name;
   if (pcVar7 == 0) {
@@ -98,7 +87,7 @@ uint32_t FUN_006cc280(void *param_1, ...)
   local_45c = 0;
   piVar5 = (int *)FUN_006d39d0(&local_458,(uint32_t*)(&local_460),&local_45c);
   GH_PIECE(local_14,0,1) = 5;
-  piVar5 = (int *)FUN_006d38f0(param_1,gh_bitcast<uint32_t*>(&SStack_450.x),piVar5);
+  piVar5 = (int *)FUN_006d38f0(_this,gh_bitcast<uint32_t*>(&SStack_450.x),piVar5);
   iVar8 = *piVar5;
   GH_PIECE(local_14,0,1) = 4;
   if ((C_str *)CONCAT22(uStack_456,local_458) != 0) {
@@ -121,7 +110,7 @@ uint32_t FUN_006cc280(void *param_1, ...)
   local_45c = 0;
   piVar5 = (int *)FUN_006d39d0(&local_458,(uint32_t*)(&local_460),&local_45c);
   GH_PIECE(local_14,0,1) = 7;
-  piVar5 = (int *)FUN_006d38f0(param_1,gh_bitcast<uint32_t*>(&SStack_450.x),piVar5);
+  piVar5 = (int *)FUN_006d38f0(_this,gh_bitcast<uint32_t*>(&SStack_450.x),piVar5);
   iVar8 = *piVar5;
   GH_PIECE(local_14,0,1) = 6;
   if ((C_str *)CONCAT22(uStack_456,local_458) != 0) {
@@ -146,7 +135,7 @@ uint32_t FUN_006cc280(void *param_1, ...)
   local_45c = 0;
   piVar5 = (int *)FUN_006d39d0(&local_458,(uint32_t*)(&local_460),&local_45c);
   GH_PIECE(local_14,0,1) = 9;
-  piVar5 = (int *)FUN_006d38f0(param_1,gh_bitcast<uint32_t*>(&SStack_450.x),piVar5);
+  piVar5 = (int *)FUN_006d38f0(_this,gh_bitcast<uint32_t*>(&SStack_450.x),piVar5);
   iVar8 = *piVar5;
   GH_PIECE(local_14,0,1) = 8;
   if ((C_str *)CONCAT22(uStack_456,local_458) != 0) {
@@ -194,7 +183,8 @@ uint32_t FUN_006cc280(void *param_1, ...)
       iVar8 = dtaSeek(local_438.m_handle,0,1);
       local_438.m_stack[local_438.m_depth] = iVar8 - 6 + CONCAT22(uStack_454,uStack_456);
       local_438.m_depth = local_438.m_depth + 1;
-      if ((local_458 != 0x4c53) || (uVar4 = FUN_006ccab0(&local_438,1), (char)uVar4 != '\0')) {
+      if ((local_458 != 0x4c53) ||
+         (C_MissionLoader__LoadObjects(_this,&local_438,1), extraout_AL != '\0')) {
         if (local_438.m_open != false) {
           if (local_438.m_writing == false) {
             iVar8 = local_438.m_stack[local_438.m_depth - 1];
@@ -249,85 +239,8 @@ uint32_t FUN_006cc280(void *param_1, ...)
 }
 
 
-// 0x006cc9a0  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t * FUN_006cc9a0(uint32_t *param_1,uint8_t *param_2, ...)
-{
-  return {};
-}
-#if 0
-{
-  uint8_t stack0x0000000c[64];
-  char cVar1;
-  int *ptr;
-  int iVar2;
-  uint32_t *puVar3;
-  uint32_t uVar4;
-  uint32_t uVar5;
-  uint32_t uVar6;
-  char *pcVar7;
-  uint32_t *puVar8;
-  char *pcVar9;
-  char local_40c [1024];
-  uint32_t local_4;
-  *param_1 = 0;
-  local_4 = 0;
-  _vsnprintf(local_40c,0x400,(char *)param_2,(va_list)(&stack0x0000000c));
-  uVar4 = strlen(local_40c) + 1;
-  pcVar7 = local_40c + uVar4;
-  uVar5 = uVar4 - 1;
-  puVar3 = tier1_operator_new(uVar4 + 8);
-  puVar8 = 0;
-  if (puVar3 != 0) {
-    *puVar3 = 1;
-    puVar3[1] = uVar5;
-    pcVar7 = local_40c;
-    pcVar9 = (char *)(puVar3 + 2);
-    memcpy(pcVar9, pcVar7, uVar5);
-    pcVar7 += uVar5;
-    pcVar9 += uVar5;
-    uVar6 = 0;
-    uVar5 = 0;
-    *(uint8_t *)((int)puVar3 + uVar4 + 7) = 0;
-    puVar8 = puVar3;
-  }
-  ptr = (int *)*param_1;
-  if ((ptr != 0) && (iVar2 = *ptr, *ptr = iVar2 - 1, iVar2 - 1 == 0)) {
-    tier1_operator_delete(ptr);
-  }
-  *param_1 = puVar8;
-  return param_1;
-}
-
-
-#endif
-// 0x006cca70
-uint32_t FUN_006cca70(uint32_t *param_1, ...)
-{
-  int *ptr;
-  int iVar1;
-  ptr = (int *)*param_1;
-  if ((ptr != 0) && (iVar1 = *ptr, *ptr = iVar1 - 1, iVar1 - 1 == 0)) {
-    tier1_operator_delete(ptr);
-  }
-  return 0;
-}
-
-
-// 0x006cca90
-uint32_t FUN_006cca90(uint32_t *param_1, ...)
-{
-  int *ptr;
-  int iVar1;
-  ptr = (int *)*param_1;
-  if ((ptr != 0) && (iVar1 = *ptr, *ptr = iVar1 - 1, iVar1 - 1 == 0)) {
-    tier1_operator_delete(ptr);
-  }
-  return 0;
-}
-
-
 // 0x006ccab0  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_006ccab0(C_chunk *param_1,int param_2, ...)
+uint32_t C_MissionLoader__LoadObjects(void *_this,C_chunk *chunk,int stage, ...)
 {
   return {};
 }
@@ -335,41 +248,24 @@ uint32_t FUN_006ccab0(C_chunk *param_1,int param_2, ...)
 {
   I3D_scene *pIVar1;
   C_str CVar2;
+  I3D_camera *self;
   bool bVar3;
   C_game *pCVar4;
-  I3D_camera *pIVar5;
-  int iVar6;
-  uint32_t uVar7;
-  uint3 extraout_var;
-  uint3 extraout_var_00;
-  uint3 extraout_var_01;
-  int iVar8;
-  uint3 extraout_var_02;
-  uint3 extraout_var_03;
-  uint3 extraout_var_04;
+  int iVar5;
+  uint32_t uVar6;
+  int iVar7;
+  uint32_t uVar8;
   float *pfVar9;
-  uint3 extraout_var_05;
   C_str *pCVar10;
   int *piVar11;
-  undefined3 extraout_var_06;
-  undefined3 extraout_var_07;
   I3D_driver *pIVar12;
   E_ActorType type;
-  uint3 extraout_var_08;
-  uint3 extraout_var_09;
-  IGraph *self;
-  uint3 extraout_var_10;
-  uint3 extraout_var_11;
-  uint3 extraout_var_12;
-  uint3 extraout_var_13;
-  uint8_t *_this;
-  uint3 extraout_var_14;
-  uint3 extraout_var_15;
-  uint3 extraout_var_16;
-  I3D_frame *pIVar13;
-  uint3 extraout_var_17;
-  char *pcVar14;
-  C_chunk *pCVar15;
+  IGraph *self_00;
+  C_GEffectsModule *pCVar13;
+  C_LightMapGroupsModule *this_00;
+  I3D_frame *pIVar14;
+  char *pcVar15;
+  C_chunk *chunk_00;
   C_str CStack_65c;
   C_str CStack_658;
   C_str CStack_654;
@@ -446,63 +342,60 @@ uint32_t FUN_006ccab0(C_chunk *param_1,int param_2, ...)
   uint32_t local_14;
   local_648.rep = 0;
   local_14 = 0;
+  local_644 = _this;
   pCVar4 = GetGame();
-  pIVar5 = pCVar4->m_scene->m_activeCamera;
-  local_618 = pIVar5;
+  local_618 = pCVar4->m_scene->m_activeCamera;
 LAB_006ccaf9:
-  if ((((param_1->m_open == false) || (pIVar5 = 0, param_1->m_depth == 0)) ||
-      (pIVar5 = (I3D_camera *)dtaSeek(param_1->m_handle,0,1), pIVar5 == (I3D_camera *)0xffffffff))
-     || (CStack_658.rep = (C_str_rep *)(param_1->m_stack[param_1->m_depth - 1] - (int)pIVar5),
-        CStack_658.rep == 0)) {
+  if ((((chunk->m_open == false) || (chunk->m_depth == 0)) ||
+      (iVar5 = dtaSeek(chunk->m_handle,0,1), iVar5 == -1)) ||
+     (CStack_658.rep = (C_str_rep *)(chunk->m_stack[chunk->m_depth - 1] - iVar5),
+     CStack_658.rep == 0)) {
     local_14 = 0xffffffff;
     if (local_648.rep != 0) {
-      pIVar5 = (I3D_camera *)C_str__ReleaseRep((C_str *)local_648.rep);
+      C_str__ReleaseRep((C_str *)local_648.rep);
     }
-    return CONCAT31((int3)((uint32_t)pIVar5 >> 8),1);
+    return 0;
   }
-  if ((param_1->m_open == false) ||
-     (pIVar5 = (I3D_camera *)dtaRead(param_1->m_handle,&uStack_5e8,6), pIVar5 != (I3D_camera *)0x6))
-  {
+  if ((chunk->m_open == false) || (iVar5 = dtaRead(chunk->m_handle,&uStack_5e8,6), iVar5 != 6)) {
 LAB_006cdbf3:
     local_14 = 0xffffffff;
     if (local_648.rep != 0) {
-      pIVar5 = (I3D_camera *)C_str__ReleaseRep((C_str *)local_648.rep);
+      C_str__ReleaseRep((C_str *)local_648.rep);
     }
-    return (uint32_t)pIVar5 & 0xffffff00;
+    return 0;
   }
-  iVar6 = dtaSeek(param_1->m_handle,0,1);
-  param_1->m_stack[param_1->m_depth] = iVar6 - 6 + CONCAT22(uStack_5e4,uStack_5e6);
+  iVar5 = dtaSeek(chunk->m_handle,0,1);
+  chunk->m_stack[chunk->m_depth] = iVar5 - 6 + CONCAT22(uStack_5e4,uStack_5e6);
   uStack_64e = CONCAT22(uStack_5e6,uStack_5e8);
-  param_1->m_depth = param_1->m_depth + 1;
-  CStack_654.rep = (C_str_rep *)dtaSeek(param_1->m_handle,0,1);
-  CStack_65c.rep = (C_str_rep *)param_1->m_fileSize;
+  chunk->m_depth = chunk->m_depth + 1;
+  CStack_654.rep = (C_str_rep *)dtaSeek(chunk->m_handle,0,1);
+  CStack_65c.rep = (C_str_rep *)chunk->m_fileSize;
   if ((C_Actor *)CStack_65c.rep == 0) {
     fStack_620 = 1.0;
   }
   else {
     fStack_620 = (float)(int)CStack_654.rep / (float)(int)CStack_65c.rep;
   }
-  C_LoaderScreen__SetProgress((C_LoaderScreen *)&DAT_008aea80,param_2,fStack_620);
-  pIVar5 = local_618;
-  uVar7 = uStack_64e & 0xffff;
-  if (uVar7 < 0xae41) {
-    if (uVar7 == 0xae40) {
+  C_LoaderScreen__SetProgress((C_LoaderScreen *)&DAT_008aea80,stage,fStack_620);
+  self = local_618;
+  uVar6 = uStack_64e & 0xffff;
+  if (uVar6 < 0xae41) {
+    if (uVar6 == 0xae40) {
       pCVar4 = GetGame();
-      LoadCheckpointNetwork(param_1,(C_CheckpointNetwork *)pCVar4->m_checkpoints);
+      LoadCheckpointNetwork(chunk,(C_CheckpointNetwork *)pCVar4->m_checkpoints);
       pCVar4 = GetGame();
-      LoadCheckpointNetwork(param_1,&pCVar4->m_checkpoints->m_roads);
+      LoadCheckpointNetwork(chunk,&pCVar4->m_checkpoints->m_roads);
       GetGame();
-      C_chunk__Ascend(param_1,0);
-      pIVar5 = (I3D_camera *)((uint32_t)extraout_var_09 << 8);
+      C_chunk__Ascend(chunk,0);
       goto LAB_006ccaf9;
     }
-    if (uVar7 < 0x3201) {
-      if (uVar7 == 0x3200) {
-        if ((param_1->m_open != false) && (param_1->m_writing == false)) {
-          if (param_1->m_depth != 0) {
-            iVar6 = param_1->m_stack[param_1->m_depth - 1];
-            iVar8 = dtaSeek(param_1->m_handle,0,1);
-            CStack_65c.rep = (C_str_rep *)(iVar6 - iVar8);
+    if (uVar6 < 0x3201) {
+      if (uVar6 == 0x3200) {
+        if ((chunk->m_open != false) && (chunk->m_writing == false)) {
+          if (chunk->m_depth != 0) {
+            iVar5 = chunk->m_stack[chunk->m_depth - 1];
+            iVar7 = dtaSeek(chunk->m_handle,0,1);
+            CStack_65c.rep = (C_str_rep *)(iVar5 - iVar7);
             CStack_658.rep = 0;
             pCVar10 = &CStack_658;
             if (-1 < (int)CStack_65c.rep) {
@@ -510,7 +403,7 @@ LAB_006cdbf3:
             }
             if ((int)pCVar10->rep < 0xc) goto LAB_006cce79;
           }
-          dtaRead(param_1->m_handle,&uStack_5b8,0xc);
+          dtaRead(chunk->m_handle,&uStack_5b8,0xc);
         }
 LAB_006cce79:
         uStack_5d0 = uStack_5b8;
@@ -522,28 +415,26 @@ LAB_006cce79:
         *(uint32_t *)(pIVar1->_pad_01fc + 0x18) = uStack_5cc;
         *(uint32_t *)(pIVar1->_pad_01fc + 0x1c) = uStack_5c8;
         *(uint32_t *)(pIVar1->_pad_01fc + 0x20) = uStack_5c4;
-        C_chunk__Ascend(param_1,0);
-        pIVar5 = (I3D_camera *)((uint32_t)extraout_var_04 << 8);
+        C_chunk__Ascend(chunk,0);
         goto LAB_006ccaf9;
       }
-      if (uVar7 < 0x3013) {
-        if (uVar7 == 0x3012) {
+      if (uVar6 < 0x3013) {
+        if (uVar6 == 0x3012) {
           if (local_618 != 0) {
             (*local_618->vtable->SetOrthogonal)(local_618,true);
-            (*pIVar5->vtable->Update)((I3D_frame *)pIVar5);
-            C_chunk__Ascend(param_1,0);
-            pIVar5 = (I3D_camera *)((uint32_t)extraout_var_01 << 8);
+            (*self->vtable->Update)((I3D_frame *)self);
+            C_chunk__Ascend(chunk,0);
             goto LAB_006ccaf9;
           }
         }
-        else if (uVar7 == 1) {
+        else if (uVar6 == 1) {
           pCVar4 = GetGame();
           CStack_658.rep = (C_str_rep *)&pCVar4->m_unknown66;
-          if ((param_1->m_open != false) && (param_1->m_writing == false)) {
-            if (param_1->m_depth != 0) {
-              iVar6 = param_1->m_stack[param_1->m_depth - 1];
-              iVar8 = dtaSeek(param_1->m_handle,0,1);
-              CStack_654.rep = (C_str_rep *)(iVar6 - iVar8);
+          if ((chunk->m_open != false) && (chunk->m_writing == false)) {
+            if (chunk->m_depth != 0) {
+              iVar5 = chunk->m_stack[chunk->m_depth - 1];
+              iVar7 = dtaSeek(chunk->m_handle,0,1);
+              CStack_654.rep = (C_str_rep *)(iVar5 - iVar7);
               CStack_65c.rep = 0;
               pCVar10 = &CStack_65c;
               if (-1 < (int)CStack_654.rep) {
@@ -551,16 +442,16 @@ LAB_006cce79:
               }
               if ((int)pCVar10->rep < 2) goto LAB_006ccca8;
             }
-            dtaRead(param_1->m_handle,CStack_658.rep,2);
+            dtaRead(chunk->m_handle,CStack_658.rep,2);
           }
 LAB_006ccca8:
           pCVar4 = GetGame();
           CStack_654.rep = (C_str_rep *)&pCVar4->m_unknown68;
-          if ((param_1->m_open != false) && (param_1->m_writing == false)) {
-            if (param_1->m_depth != 0) {
-              iVar6 = param_1->m_stack[param_1->m_depth - 1];
-              iVar8 = dtaSeek(param_1->m_handle,0,1);
-              CStack_65c.rep = (C_str_rep *)(iVar6 - iVar8);
+          if ((chunk->m_open != false) && (chunk->m_writing == false)) {
+            if (chunk->m_depth != 0) {
+              iVar5 = chunk->m_stack[chunk->m_depth - 1];
+              iVar7 = dtaSeek(chunk->m_handle,0,1);
+              CStack_65c.rep = (C_str_rep *)(iVar5 - iVar7);
               CStack_658.rep = 0;
               pCVar10 = &CStack_658;
               if (-1 < (int)CStack_65c.rep) {
@@ -568,26 +459,24 @@ LAB_006ccca8:
               }
               if ((int)pCVar10->rep < 2) goto LAB_006cdbe5;
             }
-            dtaRead(param_1->m_handle,CStack_654.rep,2);
-            C_chunk__Ascend(param_1,0);
-            pIVar5 = (I3D_camera *)((uint32_t)extraout_var_00 << 8);
+            dtaRead(chunk->m_handle,CStack_654.rep,2);
+            C_chunk__Ascend(chunk,0);
             goto LAB_006ccaf9;
           }
         }
-        else if (0x300f < uVar7) {
-          if (uVar7 < 0x3012) goto LAB_006ccd5b;
-          C_chunk__Ascend(param_1,0);
-          pIVar5 = (I3D_camera *)((uint32_t)extraout_var << 8);
+        else if (0x300f < uVar6) {
+          if (uVar6 < 0x3012) goto LAB_006ccd5b;
+          C_chunk__Ascend(chunk,0);
           goto LAB_006ccaf9;
         }
       }
-      else if (uVar7 == 0x3013) {
+      else if (uVar6 == 0x3013) {
 LAB_006ccd5b:
-        if ((param_1->m_open != false) && (param_1->m_writing == false)) {
-          if (param_1->m_depth != 0) {
-            iVar6 = param_1->m_stack[param_1->m_depth - 1];
-            iVar8 = dtaSeek(param_1->m_handle,0,1);
-            CStack_65c.rep = (C_str_rep *)(iVar6 - iVar8);
+        if ((chunk->m_open != false) && (chunk->m_writing == false)) {
+          if (chunk->m_depth != 0) {
+            iVar5 = chunk->m_stack[chunk->m_depth - 1];
+            iVar7 = dtaSeek(chunk->m_handle,0,1);
+            CStack_65c.rep = (C_str_rep *)(iVar5 - iVar7);
             CStack_658.rep = 0;
             pCVar10 = &CStack_658;
             if (-1 < (int)CStack_65c.rep) {
@@ -595,15 +484,14 @@ LAB_006ccd5b:
             }
             if ((int)pCVar10->rep < 4) goto LAB_006ccdb3;
           }
-          dtaRead(param_1->m_handle,&fStack_640,4);
+          dtaRead(chunk->m_handle,&fStack_640,4);
         }
 LAB_006ccdb3:
         if ((uStack_64e & 0xffff) == 0x3010) {
           fStack_604 = fStack_640;
           pCVar4 = GetGame();
           pCVar4->m_fov = fStack_604;
-          C_chunk__Ascend(param_1,0);
-          pIVar5 = (I3D_camera *)((uint32_t)extraout_var_03 << 8);
+          C_chunk__Ascend(chunk,0);
           goto LAB_006ccaf9;
         }
         if ((uStack_64e & 0xffff) == 0x3011) {
@@ -612,35 +500,31 @@ LAB_006ccdb3:
           fStack_5f4 = fStack_640;
           pCVar4 = GetGame();
           pCVar4->m_farClip = fStack_5f4;
-          C_chunk__Ascend(param_1,0);
-          pIVar5 = (I3D_camera *)((uint32_t)extraout_var_02 << 8);
+          C_chunk__Ascend(chunk,0);
           goto LAB_006ccaf9;
         }
       }
     }
-    else if (uVar7 < 0xae01) {
-      if (uVar7 == 0xae00) {
-        while ((((param_1->m_open != false && (param_1->m_depth != 0)) &&
-                (pIVar5 = (I3D_camera *)dtaSeek(param_1->m_handle,0,1),
-                pIVar5 != (I3D_camera *)0xffffffff)) &&
-               (CStack_658.rep =
-                     (C_str_rep *)(param_1->m_stack[param_1->m_depth - 1] - (int)pIVar5),
+    else if (uVar6 < 0xae01) {
+      if (uVar6 == 0xae00) {
+        while ((((chunk->m_open != false && (chunk->m_depth != 0)) &&
+                (iVar5 = dtaSeek(chunk->m_handle,0,1), iVar5 != -1)) &&
+               (CStack_658.rep = (C_str_rep *)(chunk->m_stack[chunk->m_depth - 1] - iVar5),
                CStack_658.rep != 0))) {
-          if ((param_1->m_open == false) ||
-             (pIVar5 = (I3D_camera *)dtaRead(param_1->m_handle,&sStack_5fc,6),
-             pIVar5 != (I3D_camera *)0x6)) goto LAB_006cdbf3;
-          iVar6 = dtaSeek(param_1->m_handle,0,1);
-          param_1->m_stack[param_1->m_depth] = iVar6 - 6 + CONCAT22(uStack_5f8,uStack_5fa);
-          iVar6 = param_1->m_depth;
-          iVar8 = iVar6 + 1;
-          param_1->m_depth = iVar8;
+          if ((chunk->m_open == false) ||
+             (iVar5 = dtaRead(chunk->m_handle,&sStack_5fc,6), iVar5 != 6)) goto LAB_006cdbf3;
+          iVar5 = dtaSeek(chunk->m_handle,0,1);
+          chunk->m_stack[chunk->m_depth] = iVar5 - 6 + CONCAT22(uStack_5f8,uStack_5fa);
+          iVar5 = chunk->m_depth;
+          iVar7 = iVar5 + 1;
+          chunk->m_depth = iVar7;
           if (sStack_5fc == -0x51ff) {
-            if (param_1->m_open != false) {
-              if (param_1->m_writing == false) {
-                if (iVar8 != 0) {
-                  iVar6 = param_1->m_stack[iVar6];
-                  iVar8 = dtaSeek(param_1->m_handle,0,1);
-                  CStack_65c.rep = (C_str_rep *)(iVar6 - iVar8);
+            if (chunk->m_open != false) {
+              if (chunk->m_writing == false) {
+                if (iVar7 != 0) {
+                  iVar5 = chunk->m_stack[iVar5];
+                  iVar7 = dtaSeek(chunk->m_handle,0,1);
+                  CStack_65c.rep = (C_str_rep *)(iVar5 - iVar7);
                   CStack_658.rep = 0;
                   pCVar10 = &CStack_658;
                   if (-1 < (int)CStack_65c.rep) {
@@ -648,15 +532,15 @@ LAB_006ccdb3:
                   }
                   if ((int)pCVar10->rep < 4) goto LAB_006cd26f;
                 }
-                dtaRead(param_1->m_handle,&uStack_5ec,4);
+                dtaRead(chunk->m_handle,&uStack_5ec,4);
               }
 LAB_006cd26f:
-              if (param_1->m_open != false) {
-                if (param_1->m_writing == false) {
-                  if (param_1->m_depth != 0) {
-                    iVar6 = param_1->m_stack[param_1->m_depth - 1];
-                    iVar8 = dtaSeek(param_1->m_handle,0,1);
-                    CStack_65c.rep = (C_str_rep *)(iVar6 - iVar8);
+              if (chunk->m_open != false) {
+                if (chunk->m_writing == false) {
+                  if (chunk->m_depth != 0) {
+                    iVar5 = chunk->m_stack[chunk->m_depth - 1];
+                    iVar7 = dtaSeek(chunk->m_handle,0,1);
+                    CStack_65c.rep = (C_str_rep *)(iVar5 - iVar7);
                     CStack_658.rep = 0;
                     pCVar10 = &CStack_658;
                     if (-1 < (int)CStack_65c.rep) {
@@ -664,14 +548,14 @@ LAB_006cd26f:
                     }
                     if ((int)pCVar10->rep < 4) goto LAB_006cd2c7;
                   }
-                  dtaRead(param_1->m_handle,&uStack_600,4);
+                  dtaRead(chunk->m_handle,&uStack_600,4);
                 }
 LAB_006cd2c7:
-                if ((param_1->m_open != false) && (param_1->m_writing == false)) {
-                  if (param_1->m_depth != 0) {
-                    iVar6 = param_1->m_stack[param_1->m_depth - 1];
-                    iVar8 = dtaSeek(param_1->m_handle,0,1);
-                    CStack_65c.rep = (C_str_rep *)(iVar6 - iVar8);
+                if ((chunk->m_open != false) && (chunk->m_writing == false)) {
+                  if (chunk->m_depth != 0) {
+                    iVar5 = chunk->m_stack[chunk->m_depth - 1];
+                    iVar7 = dtaSeek(chunk->m_handle,0,1);
+                    CStack_65c.rep = (C_str_rep *)(iVar5 - iVar7);
                     CStack_658.rep = 0;
                     pCVar10 = &CStack_658;
                     if (-1 < (int)CStack_65c.rep) {
@@ -679,12 +563,12 @@ LAB_006cd2c7:
                     }
                     if ((int)pCVar10->rep < 4) goto LAB_006cd31b;
                   }
-                  dtaRead(param_1->m_handle,&iStack_62c,4);
+                  dtaRead(chunk->m_handle,&iStack_62c,4);
                 }
               }
             }
 LAB_006cd31b:
-            C_chunk__Read(param_1,acStack_508,iStack_62c);
+            C_chunk__Read(chunk,acStack_508,iStack_62c);
             acStack_508[iStack_62c] = '\0';
             C_fstr_Construct(&CStack_61c,acStack_508);
             GH_PIECE(local_14,0,1) = 2;
@@ -692,15 +576,15 @@ LAB_006cd31b:
             piVar11 = (int *)FUN_006d39d0(apCStack_534,(uint32_t*)(&CStack_61c),(uint32_t*)(&CStack_658));
             GH_PIECE(local_14,0,1) = 3;
             piVar11 = (int *)FUN_006d38f0(local_644,auStack_52c,piVar11);
-            iVar6 = *piVar11;
+            iVar5 = *piVar11;
             local_14 = CONCAT31(GH_PIECE(local_14,1,3),2);
             if (apCStack_534[0] != 0) {
               C_str__ReleaseRep(apCStack_534[0]);
             }
-            piVar11 = *(int **)(iVar6 + 0x10);
+            piVar11 = *(int **)(iVar5 + 0x10);
             if ((piVar11 != 0) &&
-               (((iVar6 = (**(code **)(*piVar11 + 4))(piVar11), iVar6 == 0x50414d4c ||
-                 (iVar6 == 0x5f4a424f)) && (piVar11[0x78] != 0)))) {
+               (((iVar5 = (**(code **)(*piVar11 + 4))(piVar11), iVar5 == 0x50414d4c ||
+                 (iVar5 == 0x5f4a424f)) && (piVar11[0x78] != 0)))) {
               FUN_006cdc60(auStack_524,piVar11,piVar11[0x78],uStack_5ec,uStack_600);
               FUN_006d39f0(&DAT_0089bc40,DAT_0089bc48,auStack_524);
             }
@@ -709,16 +593,16 @@ LAB_006cd31b:
               C_str__ReleaseRep((C_str *)CStack_61c.rep);
             }
           }
-          C_chunk__Ascend(param_1,0);
+          C_chunk__Ascend(chunk,0);
         }
       }
       else {
-        if (uVar7 == 0x3211) {
-          if ((param_1->m_open != false) && (param_1->m_writing == false)) {
-            if (param_1->m_depth != 0) {
-              iVar6 = param_1->m_stack[param_1->m_depth - 1];
-              iVar8 = dtaSeek(param_1->m_handle,0,1);
-              CStack_65c.rep = (C_str_rep *)(iVar6 - iVar8);
+        if (uVar6 == 0x3211) {
+          if ((chunk->m_open != false) && (chunk->m_writing == false)) {
+            if (chunk->m_depth != 0) {
+              iVar5 = chunk->m_stack[chunk->m_depth - 1];
+              iVar7 = dtaSeek(chunk->m_handle,0,1);
+              CStack_65c.rep = (C_str_rep *)(iVar5 - iVar7);
               CStack_658.rep = 0;
               pCVar10 = &CStack_658;
               if (-1 < (int)CStack_65c.rep) {
@@ -726,7 +610,7 @@ LAB_006cd31b:
               }
               if ((int)pCVar10->rep < 8) goto LAB_006cd123;
             }
-            dtaRead(param_1->m_handle,&fStack_638,8);
+            dtaRead(chunk->m_handle,&fStack_638,8);
           }
 LAB_006cd123:
           fStack_614 = 0.1;
@@ -737,78 +621,71 @@ LAB_006cd123:
           fStack_638 = *pfVar9;
           pCVar4 = GetGame();
           (*pCVar4->m_scene->vtable->SlotE4)(pCVar4->m_scene,fStack_638,uStack_634);
-          C_chunk__Ascend(param_1,0);
-          pIVar5 = (I3D_camera *)((uint32_t)extraout_var_05 << 8);
+          C_chunk__Ascend(chunk,0);
           goto LAB_006ccaf9;
         }
-        if (uVar7 == 0x4000) {
-          while (((param_1->m_open != false && (param_1->m_depth != 0)) &&
-                 ((iVar6 = dtaSeek(param_1->m_handle,0,1), iVar6 != -1 &&
-                  (CStack_658.rep = (C_str_rep *)(param_1->m_stack[param_1->m_depth - 1] - iVar6),
+        if (uVar6 == 0x4000) {
+          while (((chunk->m_open != false && (chunk->m_depth != 0)) &&
+                 ((iVar5 = dtaSeek(chunk->m_handle,0,1), iVar5 != -1 &&
+                  (CStack_658.rep = (C_str_rep *)(chunk->m_stack[chunk->m_depth - 1] - iVar5),
                   CStack_658.rep != 0))))) {
-            CStack_658.rep = (C_str_rep *)dtaSeek(param_1->m_handle,0,1);
-            CStack_65c.rep = (C_str_rep *)param_1->m_fileSize;
+            CStack_658.rep = (C_str_rep *)dtaSeek(chunk->m_handle,0,1);
+            CStack_65c.rep = (C_str_rep *)chunk->m_fileSize;
             if ((C_Actor *)CStack_65c.rep == 0) {
               fStack_624 = 1.0;
             }
             else {
               fStack_624 = (float)(int)CStack_658.rep / (float)(int)CStack_65c.rep;
             }
-            C_LoaderScreen__SetProgress((C_LoaderScreen *)&DAT_008aea80,param_2,fStack_624);
-            if ((((param_1->m_open != false) && (param_1->m_depth != 0)) &&
-                (pIVar5 = (I3D_camera *)dtaSeek(param_1->m_handle,0,1),
-                pIVar5 != (I3D_camera *)0xffffffff)) &&
-               (CStack_658.rep =
-                     (C_str_rep *)(param_1->m_stack[param_1->m_depth - 1] - (int)pIVar5),
+            C_LoaderScreen__SetProgress((C_LoaderScreen *)&DAT_008aea80,stage,fStack_624);
+            if ((((chunk->m_open != false) && (chunk->m_depth != 0)) &&
+                (iVar5 = dtaSeek(chunk->m_handle,0,1), iVar5 != -1)) &&
+               (CStack_658.rep = (C_str_rep *)(chunk->m_stack[chunk->m_depth - 1] - iVar5),
                CStack_658.rep != 0)) {
-              if ((param_1->m_open == false) ||
-                 (pIVar5 = (I3D_camera *)dtaRead(param_1->m_handle,&uStack_5d8,6),
-                 pIVar5 != (I3D_camera *)0x6)) goto LAB_006cdbf3;
-              iVar6 = dtaSeek(param_1->m_handle,0,1);
-              param_1->m_stack[param_1->m_depth] = iVar6 - 6 + CONCAT22(uStack_5d4,uStack_5d6);
+              if ((chunk->m_open == false) ||
+                 (iVar5 = dtaRead(chunk->m_handle,&uStack_5d8,6), iVar5 != 6)) goto LAB_006cdbf3;
+              iVar5 = dtaSeek(chunk->m_handle,0,1);
+              chunk->m_stack[chunk->m_depth] = iVar5 - 6 + CONCAT22(uStack_5d4,uStack_5d6);
               uStack_64e = CONCAT22(uStack_5d6,uStack_5d8);
-              param_1->m_depth = param_1->m_depth + 1;
+              chunk->m_depth = chunk->m_depth + 1;
             }
             if (((short)uStack_64e == 0x4010) &&
-               (pIVar5 = (I3D_camera *)FUN_006cdc90(local_644,param_1), (char)pIVar5 == '\0'))
-            goto LAB_006cdbf3;
-            if (param_1->m_open == false) break;
-            iVar6 = param_1->m_handle;
-            if (param_1->m_writing == false) {
-              iVar8 = param_1->m_stack[param_1->m_depth - 1];
+               (uVar8 = FUN_006cdc90(local_644,chunk), (char)uVar8 == '\0')) goto LAB_006cdbf3;
+            if (chunk->m_open == false) break;
+            iVar5 = chunk->m_handle;
+            if (chunk->m_writing == false) {
+              iVar7 = chunk->m_stack[chunk->m_depth - 1];
             }
             else {
-              iVar8 = dtaSeek(iVar6,0,1);
-              iStack_608 = iVar8 - param_1->m_stack[param_1->m_depth - 1];
-              dtaSeek(param_1->m_handle,param_1->m_stack[param_1->m_depth - 1] + 2,0);
-              dtaWrite(param_1->m_handle,&iStack_608,4);
-              iVar6 = param_1->m_handle;
+              iVar7 = dtaSeek(iVar5,0,1);
+              iStack_608 = iVar7 - chunk->m_stack[chunk->m_depth - 1];
+              dtaSeek(chunk->m_handle,chunk->m_stack[chunk->m_depth - 1] + 2,0);
+              dtaWrite(chunk->m_handle,&iStack_608,4);
+              iVar5 = chunk->m_handle;
             }
-            dtaSeek(iVar6,iVar8,0);
-            if (param_1->m_depth != 0) {
-              param_1->m_depth = param_1->m_depth - 1;
+            dtaSeek(iVar5,iVar7,0);
+            if (chunk->m_depth != 0) {
+              chunk->m_depth = chunk->m_depth - 1;
             }
           }
         }
       }
     }
-    else if ((uVar7 == 0xae20) && (iVar6 = C_chunk__RemainingSizeInline(), iVar6 != 0)) {
+    else if ((uVar6 == 0xae20) && (iVar5 = C_chunk__RemainingSizeInline(), iVar5 != 0)) {
       do {
-        bVar3 = C_chunk__DescendInline(param_1,(uint16_t *)&uStack_64e);
-        pIVar5 = (I3D_camera *)CONCAT31(extraout_var_06,bVar3);
+        bVar3 = C_chunk__DescendInline(chunk,(uint16_t *)&uStack_64e);
         if (!bVar3) goto LAB_006cdbf3;
         if ((short)uStack_64e == -0x51df) {
           CStack_65c.rep = 0;
           CStack_654.rep = 0;
-          iVar6 = C_chunk__RemainingSizeInline();
-          while (iVar6 != 0) {
-            bVar3 = C_chunk__DescendInline(param_1,(uint16_t *)&uStack_64e);
+          iVar5 = C_chunk__RemainingSizeInline();
+          while (iVar5 != 0) {
+            bVar3 = C_chunk__DescendInline(chunk,(uint16_t *)&uStack_64e);
             CVar2.rep = CStack_65c.rep;
-            pIVar5 = (I3D_camera *)CONCAT31(extraout_var_07,bVar3);
             if (!bVar3) goto LAB_006cdbf3;
-            uVar7 = uStack_64e & 0xffff;
-            if (uVar7 == 0xae22) {
-              type = FUN_0053b1d0((char*)(&param_1->m_open));
+            uVar6 = uStack_64e & 0xffff;
+            if (uVar6 == 0xae22) {
+              type = FUN_0053b1d0((char*)(&chunk->m_open));
               CVar2.rep = CStack_654.rep;
               CStack_65c.rep =
                    (C_str_rep *)
@@ -822,19 +699,19 @@ LAB_006cd123:
                 CStack_65c.rep = 0;
               }
             }
-            else if (uVar7 == 0xae23) {
-              C_chunk__ReadRemainingString(param_1,&local_648);
+            else if (uVar6 == 0xae23) {
+              C_chunk__ReadRemainingString(chunk,&local_648);
               piVar11 = (int *)FUN_006d3840(local_644,(uint32_t*)(&local_648));
               CStack_654.rep = (C_str_rep *)*piVar11;
               if ((I3D_frame *)CStack_654.rep == 0) {
-                pcVar14 = (local_648.rep)->chars;
+                pcVar15 = (local_648.rep)->chars;
                 if (local_648.rep == 0) {
-                  pcVar14 = &DAT_00867a90;
+                  pcVar15 = &DAT_00867a90;
                 }
                 pCVar4 = GetGame();
                 CStack_654.rep =
                      (C_str_rep *)
-                     (*pCVar4->m_scene->vtable->FindFrame)(pCVar4->m_scene,pcVar14,0xcffff);
+                     (*pCVar4->m_scene->vtable->FindFrame)(pCVar4->m_scene,pcVar15,0xcffff);
                 if ((I3D_frame *)CStack_654.rep == 0) {
                   if (local_648.rep == 0) {
                     CStack_654.rep = (C_str_rep *)&DAT_00867a90;
@@ -850,41 +727,39 @@ LAB_006cd123:
                 }
               }
             }
-            else if (uVar7 == 0xae24) {
+            else if (uVar6 == 0xae24) {
               if (((C_Actor *)CStack_65c.rep != 0) &&
-                 (iVar6 = C_chunk__RemainingSizeInline(), iVar6 != 0)) {
-                (*((C_Actor_vtbl *)(CVar2.rep)->refCount)->ReadProperties)(param_1);
+                 (iVar5 = C_chunk__RemainingSizeInline(), iVar5 != 0)) {
+                (*((C_Actor_vtbl *)(CVar2.rep)->refCount)->ReadProperties)(chunk);
               }
-              C_chunk__Ascend(param_1,0);
+              C_chunk__Ascend(chunk,0);
             }
-            iVar6 = C_chunk__RemainingSizeInline();
+            iVar5 = C_chunk__RemainingSizeInline();
           }
         }
-        C_chunk__Ascend(param_1,0);
-        iVar6 = C_chunk__RemainingSizeInline();
-      } while (iVar6 != 0);
-      C_chunk__Ascend(param_1,0);
-      pIVar5 = (I3D_camera *)((uint32_t)extraout_var_08 << 8);
+        C_chunk__Ascend(chunk,0);
+        iVar5 = C_chunk__RemainingSizeInline();
+      } while (iVar5 != 0);
+      C_chunk__Ascend(chunk,0);
       goto LAB_006ccaf9;
     }
   }
   else {
-    if (uVar7 < 0xb811) {
-      if (uVar7 == 0xb810) {
-        pCVar15 = param_1;
-        _this = GetLightMapGroups();
-        C_LightMapGroupsModule__LoadGroups((C_LightMapGroupsModule*)(_this),(C_chunk*)(&pCVar15->m_open));
-        C_chunk__Ascend(param_1,0);
-        pIVar5 = (I3D_camera *)((uint32_t)extraout_var_14 << 8);
+    if (uVar6 < 0xb811) {
+      if (uVar6 == 0xb810) {
+        chunk_00 = chunk;
+        this_00 = (C_LightMapGroupsModule *)GetLightMapGroups();
+        C_LightMapGroupsModule__LoadGroups(this_00,chunk_00);
+        C_chunk__Ascend(chunk,0);
       }
-      else if (uVar7 < 0xb651) {
-        if (uVar7 == 0xb650) {
+      else if (uVar6 < 0xb651) {
+        if (uVar6 == 0xb650) {
           CStack_65c.rep = 0;
-          if ((param_1->m_open != false) && (param_1->m_writing == false)) {
-            if (param_1->m_depth != 0) {
-              iVar6 = param_1->m_stack[param_1->m_depth - 1];
-              iVar8 = dtaSeek(param_1->m_handle,0,1);
-              CStack_654.rep = (C_str_rep *)(iVar6 - iVar8);
+          if ((chunk->m_open != false) && (chunk->m_writing == false)) {
+            if (chunk->m_depth != 0) {
+              iVar5 = chunk->m_stack[chunk->m_depth - 1];
+              iVar7 = dtaSeek(chunk->m_handle,0,1);
+              CStack_654.rep = (C_str_rep *)(iVar5 - iVar7);
               CStack_658.rep = 0;
               pCVar10 = &CStack_658;
               if (-1 < (int)CStack_654.rep) {
@@ -892,24 +767,23 @@ LAB_006cd123:
               }
               if ((int)pCVar10->rep < 4) goto LAB_006cd7c5;
             }
-            dtaRead(param_1->m_handle,&CStack_65c,4);
+            dtaRead(chunk->m_handle,&CStack_65c,4);
           }
 LAB_006cd7c5:
           CVar2.rep = CStack_65c.rep;
           pCVar4 = GetGame();
           pCVar4->m_unknownD8 = (int)CVar2.rep;
-          C_chunk__Ascend(param_1,0);
-          pIVar5 = (I3D_camera *)((uint32_t)extraout_var_12 << 8);
+          C_chunk__Ascend(chunk,0);
         }
-        else if (uVar7 == 0xb004) {
+        else if (uVar6 == 0xb004) {
           pIVar12 = I3DGetDriver();
-          uVar7 = (*pIVar12->vtable->GetState)(pIVar12,1);
-          cStack_649 = uVar7 != 0;
-          if ((param_1->m_open != false) && (param_1->m_writing == false)) {
-            if (param_1->m_depth != 0) {
-              iVar6 = param_1->m_stack[param_1->m_depth - 1];
-              iVar8 = dtaSeek(param_1->m_handle,0,1);
-              CStack_65c.rep = (C_str_rep *)(iVar6 - iVar8);
+          uVar6 = (*pIVar12->vtable->GetState)(pIVar12,1);
+          cStack_649 = uVar6 != 0;
+          if ((chunk->m_open != false) && (chunk->m_writing == false)) {
+            if (chunk->m_depth != 0) {
+              iVar5 = chunk->m_stack[chunk->m_depth - 1];
+              iVar7 = dtaSeek(chunk->m_handle,0,1);
+              CStack_65c.rep = (C_str_rep *)(iVar5 - iVar7);
               CStack_658.rep = 0;
               pCVar10 = &CStack_658;
               if (-1 < (int)CStack_65c.rep) {
@@ -917,22 +791,21 @@ LAB_006cd7c5:
               }
               if ((int)pCVar10->rep < 1) goto LAB_006cd732;
             }
-            dtaRead(param_1->m_handle,&uStack_63c,1);
+            dtaRead(chunk->m_handle,&uStack_63c,1);
           }
 LAB_006cd732:
           if ((char)uStack_63c == cStack_649) goto LAB_006cdbe5;
           pIVar12 = I3DGetDriver();
           (*pIVar12->vtable->SetState)(pIVar12,1,uStack_63c & 0xff);
-          C_chunk__Ascend(param_1,0);
-          pIVar5 = (I3D_camera *)((uint32_t)extraout_var_11 << 8);
+          C_chunk__Ascend(chunk,0);
         }
         else {
-          if (uVar7 != 0xb600) goto LAB_006cdbe5;
-          if ((param_1->m_open != false) && (param_1->m_writing == false)) {
-            if (param_1->m_depth != 0) {
-              iVar6 = param_1->m_stack[param_1->m_depth - 1];
-              iVar8 = dtaSeek(param_1->m_handle,0,1);
-              CStack_65c.rep = (C_str_rep *)(iVar6 - iVar8);
+          if (uVar6 != 0xb600) goto LAB_006cdbe5;
+          if ((chunk->m_open != false) && (chunk->m_writing == false)) {
+            if (chunk->m_depth != 0) {
+              iVar5 = chunk->m_stack[chunk->m_depth - 1];
+              iVar7 = dtaSeek(chunk->m_handle,0,1);
+              CStack_65c.rep = (C_str_rep *)(iVar5 - iVar7);
               CStack_658.rep = 0;
               pCVar10 = &CStack_658;
               if (-1 < (int)CStack_65c.rep) {
@@ -940,27 +813,26 @@ LAB_006cd732:
               }
               if ((int)pCVar10->rep < 4) goto LAB_006cd6a6;
             }
-            dtaRead(param_1->m_handle,&iStack_5e0,4);
+            dtaRead(chunk->m_handle,&iStack_5e0,4);
           }
 LAB_006cd6a6:
-          self = GetIGraph();
-          (*self->vtable->SetRenderState)(self,0xc,iStack_5e0);
-          C_chunk__Ascend(param_1,0);
-          pIVar5 = (I3D_camera *)((uint32_t)extraout_var_10 << 8);
+          self_00 = GetIGraph();
+          (*self_00->vtable->SetRenderState)(self_00,0xc,iStack_5e0);
+          C_chunk__Ascend(chunk,0);
         }
       }
       else {
-        if (uVar7 != 0xb700) goto LAB_006cdbe5;
+        if (uVar6 != 0xb700) goto LAB_006cdbe5;
         uStack_560 = 0x3f800000;
         uStack_554 = 0x40;
         uStack_550 = 0x40;
         uStack_55c = 0x41000000;
         uStack_558 = 0x42c80000;
-        if ((param_1->m_open != false) && (param_1->m_writing == false)) {
-          if (param_1->m_depth != 0) {
-            iVar6 = param_1->m_stack[param_1->m_depth - 1];
-            iVar8 = dtaSeek(param_1->m_handle,0,1);
-            CStack_65c.rep = (C_str_rep *)(iVar6 - iVar8);
+        if ((chunk->m_open != false) && (chunk->m_writing == false)) {
+          if (chunk->m_depth != 0) {
+            iVar5 = chunk->m_stack[chunk->m_depth - 1];
+            iVar7 = dtaSeek(chunk->m_handle,0,1);
+            CStack_65c.rep = (C_str_rep *)(iVar5 - iVar7);
             CStack_658.rep = 0;
             pCVar10 = &CStack_658;
             if (-1 < (int)CStack_65c.rep) {
@@ -968,7 +840,7 @@ LAB_006cd6a6:
             }
             if ((int)pCVar10->rep < 0x2c) goto LAB_006cd879;
           }
-          dtaRead(param_1->m_handle,&uStack_5ac,0x2c);
+          dtaRead(chunk->m_handle,&uStack_5ac,0x2c);
         }
 LAB_006cd879:
         uStack_580 = uStack_598;
@@ -982,102 +854,99 @@ LAB_006cd879:
         uStack_55c = uStack_5a8;
         uStack_554 = uStack_5a0;
         uStack_550 = uStack_59c;
-        piVar11 = (int *)GetGEffects();
-        (**(code **)(*piVar11 + 0x80))(&uStack_580);
-        C_chunk__Ascend(param_1,0);
-        pIVar5 = (I3D_camera *)((uint32_t)extraout_var_13 << 8);
+        pCVar13 = GetGEffects();
+        (*pCVar13->vtable->vf20)(&uStack_580);
+        C_chunk__Ascend(chunk,0);
       }
       goto LAB_006ccaf9;
     }
-    if (uVar7 != 0xb820) {
-      if (uVar7 == 0xb840) {
+    if (uVar6 != 0xb820) {
+      if (uVar6 == 0xb840) {
         pCVar4 = GetGame();
         iStack_628 = pCVar4->m_music;
-        iVar6 = pCVar4->m_alarmMusic;
-        C_chunk__Read(param_1,&iStack_628,4);
+        iVar5 = pCVar4->m_alarmMusic;
+        C_chunk__Read(chunk,&iStack_628,4);
         pCVar4 = GetGame();
         pCVar4->m_music = iStack_628;
-        pCVar4->m_alarmMusic = iVar6;
-        C_chunk__Ascend(param_1,0);
-        pIVar5 = (I3D_camera *)((uint32_t)extraout_var_16 << 8);
+        pCVar4->m_alarmMusic = iVar5;
+        C_chunk__Ascend(chunk,0);
       }
       else {
-        if (uVar7 != 0xb880) goto LAB_006cdbe5;
+        if (uVar6 != 0xb880) goto LAB_006cdbe5;
         pCVar4 = GetGame();
-        iVar6 = pCVar4->m_music;
+        iVar5 = pCVar4->m_music;
         iStack_630 = pCVar4->m_alarmMusic;
-        C_chunk__Read(param_1,&iStack_630,4);
+        C_chunk__Read(chunk,&iStack_630,4);
         pCVar4 = GetGame();
-        pCVar4->m_music = iVar6;
+        pCVar4->m_music = iVar5;
         pCVar4->m_alarmMusic = iStack_630;
-        C_chunk__Ascend(param_1,0);
-        pIVar5 = (I3D_camera *)((uint32_t)extraout_var_15 << 8);
+        C_chunk__Ascend(chunk,0);
       }
       goto LAB_006ccaf9;
     }
     while( true ) {
-      if ((((param_1->m_open == false) || (param_1->m_depth == 0)) ||
-          (iVar6 = dtaSeek(param_1->m_handle,0,1), iVar6 == -1)) ||
-         (CStack_658.rep = (C_str_rep *)(param_1->m_stack[param_1->m_depth - 1] - iVar6),
+      if ((((chunk->m_open == false) || (chunk->m_depth == 0)) ||
+          (iVar5 = dtaSeek(chunk->m_handle,0,1), iVar5 == -1)) ||
+         (CStack_658.rep = (C_str_rep *)(chunk->m_stack[chunk->m_depth - 1] - iVar5),
          CStack_658.rep == 0)) goto LAB_006cdbe5;
-      if ((param_1->m_open != false) &&
-         (iVar6 = dtaRead(param_1->m_handle,&uStack_610,6), iVar6 == 6)) {
-        iVar6 = dtaSeek(param_1->m_handle,0,1);
-        param_1->m_stack[param_1->m_depth] = iVar6 - 6 + CONCAT22(uStack_60c,uStack_60e);
+      if ((chunk->m_open != false) && (iVar5 = dtaRead(chunk->m_handle,&uStack_610,6), iVar5 == 6))
+      {
+        iVar5 = dtaSeek(chunk->m_handle,0,1);
+        chunk->m_stack[chunk->m_depth] = iVar5 - 6 + CONCAT22(uStack_60c,uStack_60e);
         uStack_5f0 = CONCAT22(uStack_60e,uStack_610);
-        param_1->m_depth = param_1->m_depth + 1;
+        chunk->m_depth = chunk->m_depth + 1;
       }
       if ((short)uStack_5f0 != -0x47e0) break;
       CStack_65c.rep = 0;
-      iVar6 = param_1->m_stack[param_1->m_depth - 1];
+      iVar5 = chunk->m_stack[chunk->m_depth - 1];
       local_14 = CONCAT31(GH_PIECE(local_14,1,3),1);
-      iVar8 = dtaSeek(param_1->m_handle,0,1);
-      CStack_654.rep = (C_str_rep *)(iVar6 - iVar8);
+      iVar7 = dtaSeek(chunk->m_handle,0,1);
+      CStack_654.rep = (C_str_rep *)(iVar5 - iVar7);
       CStack_658.rep = (C_str_rep *)0x3e7;
       pCVar10 = &CStack_658;
       if ((int)CStack_654.rep < 1000) {
         pCVar10 = &CStack_654;
       }
-      C_chunk__Read(param_1,acStack_408,(int)pCVar10->rep);
+      C_chunk__Read(chunk,acStack_408,(int)pCVar10->rep);
       C_str__operator_assign(&CStack_65c,acStack_408);
-      C_chunk__Ascend(param_1,0);
-      pcVar14 = (CStack_65c.rep)->chars;
+      C_chunk__Ascend(chunk,0);
+      pcVar15 = (CStack_65c.rep)->chars;
       if ((C_Actor *)CStack_65c.rep == 0) {
-        pcVar14 = &DAT_00867a90;
+        pcVar15 = &DAT_00867a90;
       }
       pCVar4 = GetGame();
-      pIVar13 = (*pCVar4->m_scene->vtable->FindFrame)(pCVar4->m_scene,pcVar14,0xffff);
-      if (pIVar13 != 0) {
+      pIVar14 = (*pCVar4->m_scene->vtable->FindFrame)(pCVar4->m_scene,pcVar15,0xffff);
+      if (pIVar14 != 0) {
         pCVar4 = GetGame();
-        (*pCVar4->m_scene->vtable->Slot128)(pCVar4->m_scene,pIVar13);
+        (*pCVar4->m_scene->vtable->Slot128)(pCVar4->m_scene,pIVar14);
       }
       local_14 &= 0xffffff00;
       if ((C_Actor *)CStack_65c.rep != 0) {
         C_str__ReleaseRep((C_str *)CStack_65c.rep);
       }
     }
-    if (param_1->m_open != false) {
-      iVar6 = param_1->m_handle;
-      if (param_1->m_writing == false) {
-        iVar8 = param_1->m_stack[param_1->m_depth - 1];
+    if (chunk->m_open != false) {
+      iVar5 = chunk->m_handle;
+      if (chunk->m_writing == false) {
+        iVar7 = chunk->m_stack[chunk->m_depth - 1];
       }
       else {
-        iVar8 = dtaSeek(iVar6,0,1);
-        iStack_5dc = iVar8 - param_1->m_stack[param_1->m_depth - 1];
-        dtaSeek(param_1->m_handle,param_1->m_stack[param_1->m_depth - 1] + 2,0);
-        dtaWrite(param_1->m_handle,&iStack_5dc,4);
-        iVar6 = param_1->m_handle;
+        iVar7 = dtaSeek(iVar5,0,1);
+        iStack_5dc = iVar7 - chunk->m_stack[chunk->m_depth - 1];
+        dtaSeek(chunk->m_handle,chunk->m_stack[chunk->m_depth - 1] + 2,0);
+        dtaWrite(chunk->m_handle,&iStack_5dc,4);
+        iVar5 = chunk->m_handle;
       }
-      dtaSeek(iVar6,iVar8,0);
-      if (param_1->m_depth != 0) {
-        param_1->m_depth = param_1->m_depth - 1;
+      dtaSeek(iVar5,iVar7,0);
+      if (chunk->m_depth != 0) {
+        chunk->m_depth = chunk->m_depth - 1;
       }
     }
   }
 LAB_006cdbe5:
-  C_chunk__Ascend(param_1,0);
-  pIVar5 = (I3D_camera *)((uint32_t)extraout_var_17 << 8);
+  C_chunk__Ascend(chunk,0);
   goto LAB_006ccaf9;
+  return 0;
 }
 
 
@@ -1263,7 +1132,7 @@ int FUN_006d1ef0(char *param_1,int *param_2,uint32_t param_3,uint32_t param_4,in
   cStack00000158 = false;
   iStack0000015c = -1;
   cStack00000160 = false;
-  piVar4 = FUN_006cc9a0((uint32_t*)(&local_8),(uint8_t *)"missions\\%s\\scene2.bin");
+  piVar4 = FormatStr(&local_8,(uint8_t *)"missions\\%s\\scene2.bin");
   if (*piVar4 != 0) {
     piVar4 = (int *)(*piVar4 + 8);
   }

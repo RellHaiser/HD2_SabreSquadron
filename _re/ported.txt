@@ -7976,3 +7976,19 @@
 006ca920
 006ca9c0
 006caaa0
+
+# part 8f-ii: C_game::LoadMission and the mission loader (the maps and scene2.bin: part 8f-iii)
+006caad0
+006d4270
+006d44d0
+006d45d0
+006d4910
+006d4bd0
+006d4e90
+006d4ea0
+006d4fc0
+006cb130
+006cc9a0
+006cc250
+006cca70
+006cca90

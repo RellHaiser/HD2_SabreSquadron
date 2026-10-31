@@ -1207,6 +1207,7 @@ void C_Human::SetUnknown94(float value) { GfLog("unknown94 %s %.4f", CmHumanName
 #include "update_test.inc"
 #include "placement_test.inc"
 #include "loader_test.inc"
+#include "mission_test.inc"
 
 void CameraTest(const char *path)
 {

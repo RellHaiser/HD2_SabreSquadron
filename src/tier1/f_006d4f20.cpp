@@ -53,14 +53,4 @@ uint32_t FUN_006d4f50(int *param_1,int *param_2, ...)
 }
 
 
-// 0x006d4fc0
-uint32_t FUN_006d4fc0(int param_1,float param_2, ...)
-{
-  if ((param_1 != 0x10) && (param_1 != 0x20)) {
-    C_LoaderScreen__SetProgress((C_LoaderScreen *)&DAT_008aea80,0,param_2);
-  }
-  return 0;
-}
-
-
 } // namespace tier1

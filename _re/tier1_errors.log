@@ -584,32 +584,22 @@ f_006c6d40.cpp:646:32: wrong type argument to unary minus
     piVar1 = gh_bitcast<int*>(-gh_bitcast)<float>(piVar1);
 f_006c6d40.cpp:646:44: expected primary-expression before 'float'
     piVar1 = gh_bitcast<int*>(-gh_bitcast)<float>(piVar1);
-f_006caaa0.cpp:462:17: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
+f_006caaa0.cpp:274:17: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008aeb00[2] = 0;
-f_006caaa0.cpp:958:17: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
+f_006caaa0.cpp:770:17: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008aeaf8[2] = 0;
-f_006cc250.cpp:270:72: no matching function for call to 'tier1::va_list::va_list(uint8_t (*)[64])'
-    _vsnprintf(local_40c,0x400,(char *)param_2,(va_list)(&stack0x0000000c));
-f_006cc250.cpp:764:40: 'FUN_006cdc90' was not declared in this scope; did you mean 'FUN_006cdc60'?
-    (pIVar5 = (I3D_camera *)FUN_006cdc90(local_644,param_1), (char)pIVar5 == '\0'))
-f_006cc250.cpp:1346:37: incompatible types in assignment of 'uint32_t' {aka 'unsigned int'} to 'uint8_t [64]' {aka 'unsigned char [64]'}
+f_006cc250.cpp:649:25: 'FUN_006cdc90' was not declared in this scope; did you mean 'FUN_006cdc60'?
+    (uVar8 = FUN_006cdc90(local_644,chunk), (char)uVar8 == '\0')) goto LAB_006cdbf3;
+f_006cc250.cpp:1220:37: incompatible types in assignment of 'uint32_t' {aka 'unsigned int'} to 'uint8_t [64]' {aka 'unsigned char [64]'}
     (&stack0x00000168)[iVar7] = iVar8 - 6 + CONCAT22(in_stack_0000007c,in_stack_0000007a);
-f_006cc250.cpp:1361:43: incompatible types in assignment of 'uint32_t' {aka 'unsigned int'} to 'uint8_t [64]' {aka 'unsigned char [64]'}
+f_006cc250.cpp:1235:43: incompatible types in assignment of 'uint32_t' {aka 'unsigned int'} to 'uint8_t [64]' {aka 'unsigned char [64]'}
     (&stack0x00000168)[iVar7] =
-f_006cc250.cpp:1398:45: incompatible types in assignment of 'uint32_t' {aka 'unsigned int'} to 'uint8_t [64]' {aka 'unsigned char [64]'}
+f_006cc250.cpp:1272:45: incompatible types in assignment of 'uint32_t' {aka 'unsigned int'} to 'uint8_t [64]' {aka 'unsigned char [64]'}
     (&stack0x00000168)[iVar8] =
-f_006cc250.cpp:1422:51: incompatible types in assignment of 'uint32_t' {aka 'unsigned int'} to 'uint8_t [64]' {aka 'unsigned char [64]'}
+f_006cc250.cpp:1296:51: incompatible types in assignment of 'uint32_t' {aka 'unsigned int'} to 'uint8_t [64]' {aka 'unsigned char [64]'}
     (&stack0x00000168)[iVar7] =
-f_006cc250.cpp:1495:53: incompatible types in assignment of 'uint32_t' {aka 'unsigned int'} to 'uint8_t [64]' {aka 'unsigned char [64]'}
+f_006cc250.cpp:1369:53: incompatible types in assignment of 'uint32_t' {aka 'unsigned int'} to 'uint8_t [64]' {aka 'unsigned char [64]'}
     (&stack0x00000168)[iVar8] =
-f_006d4240.cpp:75:17: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    (**(code **)*DAT_008aedd8)(DAT_008aedd8);
-f_006d4240.cpp:85:17: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    (**(code **)*DAT_008aed24)(DAT_008aed24);
-f_006d4240.cpp:89:47: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    FUN_006c54c0(&DAT_008aecb4,&local_10,(int *)*DAT_008aecb8,DAT_008aecb8);
-f_006d4240.cpp:91:17: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    (**(code **)*DAT_008aece8)(DAT_008aece8);
 f_006d5690.cpp:8:3: 'C_AnimationCache__C_AnimationCache___C_AnimationCache' was not declared in this scope; did you mean 'C_AnimationCache__dtor_C_AnimationCache'?
     C_AnimationCache__C_AnimationCache___C_AnimationCache((C_AnimationCache *)&g_animationCache);
 f_006db370.cpp:10:3: 'ram0x008aedfa' was not declared in this scope

@@ -1,6 +1,6 @@
 // C_game — the game state of a running mission (the scene, the mission clock, the HUD
 // objects, the multiplayer rounds; original source 0x006987d0..0x0069f3c0, the scene loader
-// C_game::LoadMission 0x006caad0 lives with the loader).
+// C_game::LoadMission 0x006caad0 lives with the loader, game/mission_loader.cpp).
 #pragma once
 
 #include <cstdint>
@@ -127,8 +127,9 @@ public:
     // `pos`. With `occlusion` lights blocked by level geometry are skipped.
     float GetLightIntensity(const S_vector &pos, I3D_sector *sector, bool occlusion);   // 0x0069eca0
 
-    // Loads the mission's scene, actors and data (0 when it loaded, else an error).
-    int LoadMission(const char *name, C_MissionDef *mission);   // 0x006caad0 (the loader, not ported)
+    // Loads the mission's scene, actors and data (0 when it loaded, else an error; the modules'
+    // LoadMissionData follows either way). game/mission_loader.cpp.
+    int LoadMission(const char *name, C_MissionDef *mission);   // 0x006caad0
     // Frees the mission's data (the modules, the scene's frames).
     void FreeMission();                             // 0x0069a6a0
     // Starts the fade out; the mission ends after it (every caller passes 100, which is not
@@ -248,6 +249,7 @@ public:
     static void SendToPlayers(int type);            // 0x00699560
 
 private:
+    friend class C_MissionLoader;                   // (the mission's name)
     void ReleaseScene();                            // 0x00699540
     // Switches the scene's static lights off for the mission (`restore`: back on).
     void SwitchStaticLights(bool restore);          // 0x0069c2c0

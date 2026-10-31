@@ -30565,17 +30565,172 @@
   "name": "StaticInit_6caaa0"
  },
  "006caad0": {
-  "module": "game",
+  "module": "mission_loader",
   "name": "C_game::LoadMission",
   "proto": "int __thiscall LoadMission(C_game *this, char * name, C_MissionDef * mission)"
  },
+ "006caf30": {
+  "module": "mission_loader",
+  "name": "MissionMapA_DtorEh"
+ },
+ "006cb030": {
+  "module": "mission_loader",
+  "name": "MissionMapB_DtorEh"
+ },
+ "006cb130": {
+  "module": "mission_loader",
+  "name": "ModuleMissionData_Dtor",
+  "proto": "void __fastcall ModuleMissionData_Dtor(void * this)"
+ },
+ "006cb160": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::~C_MissionLoader",
+  "proto": "void __fastcall ~C_MissionLoader(void * this)"
+ },
+ "006cb340": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Dtor"
+ },
+ "006cb430": {
+  "module": "mission_loader",
+  "name": "MissionMapB_Ctor"
+ },
+ "006cb4e0": {
+  "module": "mission_loader",
+  "name": "MissionMapB_Dtor"
+ },
+ "006cb5d0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Ctor"
+ },
+ "006cb600": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Begin"
+ },
+ "006cb610": {
+  "module": "mission_loader",
+  "name": "MissionMapB_Begin"
+ },
+ "006cb620": {
+  "module": "mission_loader",
+  "name": "MissionMapB_EraseRange"
+ },
+ "006cb700": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Erase"
+ },
+ "006cbb20": {
+  "module": "mission_loader",
+  "name": "MissionMapA_EraseSubtree"
+ },
+ "006cbb70": {
+  "module": "mission_loader",
+  "name": "MissionMapA_PairDtor"
+ },
+ "006cbb90": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Init"
+ },
+ "006cbc30": {
+  "module": "mission_loader",
+  "name": "MissionMapA_IterDec"
+ },
+ "006cbc90": {
+  "module": "mission_loader",
+  "name": "MissionMapB_Erase"
+ },
+ "006cc0d0": {
+  "module": "mission_loader",
+  "name": "MissionMapB_EraseSubtree"
+ },
+ "006cc120": {
+  "module": "mission_loader",
+  "name": "MissionMapB_Leftmost"
+ },
+ "006cc140": {
+  "module": "mission_loader",
+  "name": "MissionMapA_IterInc"
+ },
+ "006cc190": {
+  "module": "mission_loader",
+  "name": "MissionMapB_IterInc"
+ },
+ "006cc1e0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_PairDeletingDtor"
+ },
+ "006cc200": {
+  "module": "mission_loader",
+  "name": "MissionMapB_PairDeletingDtor"
+ },
+ "006cc220": {
+  "module": "mission_loader",
+  "name": "MissionMapB_PairDtor"
+ },
+ "006cc250": {
+  "module": "mission_loader",
+  "name": "StaticInit_6cc250"
+ },
+ "006cc280": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadScene2",
+  "proto": "int __fastcall LoadScene2(void * this)"
+ },
+ "006cc9a0": {
+  "module": "mission_loader",
+  "name": "FormatStr",
+  "proto": "void * __cdecl FormatStr(void * out, char * format)"
+ },
+ "006cca70": {
+  "module": "mission_loader",
+  "name": "MissionLoader_StrDtor1"
+ },
+ "006cca90": {
+  "module": "mission_loader",
+  "name": "MissionLoader_StrDtor2"
+ },
+ "006ccab0": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadObjects",
+  "proto": "void __thiscall LoadObjects(void * this, C_chunk * chunk, int stage)"
+ },
+ "006d4270": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::Begin",
+  "proto": "void __thiscall Begin(void * this, char * name, C_MissionDef * mission)"
+ },
+ "006d44d0": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadScene",
+  "proto": "int __fastcall LoadScene(void * this)"
+ },
+ "006d45d0": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadCheckpoints",
+  "proto": "void __fastcall LoadCheckpoints(void * this)"
+ },
+ "006d4910": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadActors",
+  "proto": "void __fastcall LoadActors(void * this)"
+ },
+ "006d4bd0": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadSounds",
+  "proto": "void __fastcall LoadSounds(void * this)"
+ },
  "006d4e90": {
-  "module": "zz_idioms",
-  "name": "empty_function_6d4e90"
+  "module": "mission_loader",
+  "name": "MissionLoader_Empty1"
  },
  "006d4ea0": {
-  "module": "zz_idioms",
-  "name": "empty_function_6d4ea0"
+  "module": "mission_loader",
+  "name": "MissionLoader_Empty2"
+ },
+ "006d4fc0": {
+  "module": "mission_loader",
+  "name": "SceneLoadProgress",
+  "proto": "void __stdcall SceneLoadProgress(int message, float fraction, uint unused, void * context)"
  },
  "006d5020": {
   "module": "cache",

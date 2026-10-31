@@ -1294,7 +1294,8 @@ public:
     I3D_SLOT(E8);
     // Re-evaluates which sector `frame` belongs to after it was moved to `pos`.
     I3DMETHOD(void, UpdateFrameSector)(PI3D_frame frame, const S_vector &pos) = 0;   // 0xEC
-    I3D_SLOT(F0);
+    // Called by C_game::LoadMission after the scene's file (meaning not identified).
+    I3DMETHOD(void, UnknownF0)() = 0;                         // 0xF0
     // Loads the scene file `name` (the loading screen: flags 0, no callback; failed: < 0).
     I3DMETHOD(HRESULT, Open)(const char *name, uint32_t flags, void *callback, void *context) = 0;   // 0xF4
     // Frees the scene's contents (C_game::FreeMission).

@@ -5696,6 +5696,36 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/loader_screen.txt (18; 3 moved from game.txt / game_app.txt); 16 functions in
     ported.txt. Stats: 7,784 of 12,293 functions by hand (71.5 % by size).
 
+  PART 8f-ii DONE (2026-10-31): C_game::LoadMission and the mission loader (src/game/mission_loader.*,
+  new; 0x006caad0, 0x006d4270..0x006d4ea0, the scene's progress callback 0x006d4fc0).
+  - C_game::LoadMission: the loader object on its stack (C_MissionLoader, 0x34 bytes: two maps and
+    four texts for scene2.bin, part 8f-iii, and the mission's name at +0x30) and a guard whose end
+    broadcasts the modules' LoadMissionData (the server's side, then the client's) however the
+    loading ends. Begin (0x006d4270): the loading screen (shown on a client, waiting for space in
+    single player, in two parts), the old mission freed, the name kept, g_carScene, the model,
+    shadow and version model caches cleared (inline). Then the human animation tables (failed: 1),
+    "Scene" into the game's scene (flags 7; its progress: the screen's first stage but messages
+    0x10 / 0x20), the scene's slot 0xF0 (UnknownF0), scene2.bin (part 8f-iii, declared: its failure
+    returns 1 after the files below), actors.bin / sounds.bin (an object chunk "SL" 0x4C53 read by
+    LoadObjects, part 8f-iii, declared; stages 2 / 3), check2.bin (the walking and road networks;
+    without it both cleared, check.bin only opened), tree.klz (the collision world, the grid built),
+    the particles' static emitters (C_ParticlesModule::SetScene added). Dropped: the copy
+    protection's three stamps. Fix: the name as text (the original used it as the format).
+  - Harness: mission_test.inc in the camera build ("mission:", 7 checks; run inside the loading
+    screen test's fakes; scene2.bin's reader, the caches' Clear, FreeMission, the networks, the
+    collision world, the modules and the emitters faked; the files in g_files). 0 of 22 in both
+    orders.
+  - Mutations (mutations/mutate_8f2.py): the first run caught 49 of 53 (4 survived); 3 equivalent
+    (see the file's docstring), a new check for 1 (the stuff stage's 0.3 step); the full rerun:
+    all 50 caught. Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the
+    other five 0 of 37.
+  - Build: 202 files clean (MSVC). Tier 1: 521 errors in 89 files, 214 stubs (was 526 / 90 / 216).
+    ret_audit --src: 52.
+  - Ghidra: names/mission_loader.txt (39: the loader, the maps' std::map code; LoadMission moved
+    from game.txt); 14 functions in ported.txt (the maps', the loader's destructor and scene2.bin's
+    left for 8f-iii; absorb would take the scene2 reader). Stats: 7,798 of 12,293 functions by hand
+    (71.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

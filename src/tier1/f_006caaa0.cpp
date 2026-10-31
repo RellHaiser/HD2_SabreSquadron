@@ -2,179 +2,8 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
-// 0x006caad0
-int C_game__LoadMission(C_game *_this,char *name,C_MissionDef *mission, ...)
-{
-  bool bVar1;
-  IGraph *pIVar2;
-  void *pvVar3;
-  uint32_t uVar4;
-  uint32_t uVar5;
-  char local_15c [256];
-  uint32_t *local_5c;
-  uint32_t local_58;
-  uint8_t local_54 [16];
-  uint8_t local_44 [16];
-  C_str *local_34;
-  C_str *local_30;
-  C_str *local_2c;
-  C_str *local_28;
-  C_str *local_24;
-  uint8_t local_20;
-  uint8_t local_1f;
-  uint8_t local_1e;
-  uint8_t local_1d;
-  uint32_t local_1c;
-  uint32_t *local_18;
-  uint8_t local_14 [4];
-  int local_8;
-  local_8 = 0;
-  _this->m_unknown66 = 0;
-  _this->m_unknown68 = 0;
-  _this->m_unknownD8 = 0;
-  FUN_006cb5d0(local_54,&local_20,0,&local_1e);
-  GH_PIECE(local_8,0,1) = 1;
-  FUN_006cb430(local_44,&local_1d,&local_1f);
-  local_34 = 0;
-  local_30 = 0;
-  local_2c = 0;
-  local_28 = 0;
-  local_24 = 0;
-  GH_PIECE(local_8,0,1) = 2;
-  FUN_006d4270((uint8_t *)name,(int *)mission);
-  bVar1 = EnsureHumanAnimTablesLoaded();
-  if (!bVar1) {
-    GH_PIECE(local_8,0,1) = 8;
-    if (local_24 != 0) {
-      C_str__ReleaseRep(local_24);
-    }
-    GH_PIECE(local_8,0,1) = 7;
-    if (local_28 != 0) {
-      C_str__ReleaseRep(local_28);
-    }
-    GH_PIECE(local_8,0,1) = 6;
-    if (local_2c != 0) {
-      C_str__ReleaseRep(local_2c);
-    }
-    GH_PIECE(local_8,0,1) = 5;
-    if (local_30 != 0) {
-      C_str__ReleaseRep(local_30);
-    }
-    GH_PIECE(local_8,0,1) = 4;
-    if (local_34 != 0) {
-      C_str__ReleaseRep(local_34);
-    }
-    GH_PIECE(local_8,0,1) = 3;
-    FUN_006cb4e0(local_44);
-    local_8 = (uint32_t)GH_PIECE(local_8,1,3) << 8;
-    FUN_006cb340(local_54);
-    local_8 = 0xffffffff;
-    FUN_006cb130(local_14);
-    return 1;
-  }
-  FUN_006d44d0((int)local_54);
-  (*_this->m_scene->vtable->SlotF0)(_this->m_scene);
-  local_18 = (uint32_t *)FUN_006cc280(local_54);
-  uVar5 = (uint32_t)DAT_008cb42a;
-  local_58 = 0x75ac025;
-  local_1c = *(uint32_t *)(g_configLine + (uint32_t)DAT_008cad2a * 4 + 0x268);
-  local_5c = &DAT_008caf40 + uVar5;
-  pIVar2 = GetIGraph();
-  pvVar3 = (*pIVar2->vtable->GetHWND)(pIVar2);
-  *(void **)(&DAT_008cad40 + uVar5 * 4) = pvVar3;
-  uVar4 = (*(code *)PTR_00a59000)(pvVar3);
-  *(uint32_t *)(&DAT_008cad40 + uVar5 * 4) = uVar4;
-  FUN_006d4910((int)local_54);
-  FUN_006d4bd0((int)local_54);
-  FUN_006d45d0((int)local_54);
-  C_LoaderScreen__SetProgress((C_LoaderScreen *)&DAT_008aea80,4,0.3);
-  empty_function_6d4ea0();
-  if (local_18 != 0) {
-    GH_PIECE(local_8,0,1) = 0xe;
-    if (local_24 != 0) {
-      C_str__ReleaseRep(local_24);
-    }
-    GH_PIECE(local_8,0,1) = 0xd;
-    if (local_28 != 0) {
-      C_str__ReleaseRep(local_28);
-    }
-    GH_PIECE(local_8,0,1) = 0xc;
-    if (local_2c != 0) {
-      C_str__ReleaseRep(local_2c);
-    }
-    GH_PIECE(local_8,0,1) = 0xb;
-    if (local_30 != 0) {
-      C_str__ReleaseRep(local_30);
-    }
-    GH_PIECE(local_8,0,1) = 10;
-    if (local_34 != 0) {
-      C_str__ReleaseRep(local_34);
-    }
-    GH_PIECE(local_8,0,1) = 9;
-    FUN_006cb4e0(local_44);
-    local_8 = (uint32_t)GH_PIECE(local_8,1,3) << 8;
-    FUN_006cb340(local_54);
-    local_8 = 0xffffffff;
-    FUN_006cb130(local_14);
-    return 1;
-  }
-  sprintf(local_15c,"missions\\%s\\tree.klz",name);
-  C_CollisionWorld__Load((C_CollisionWorld*)(&g_collisionWorld),local_15c,true);
-  C_LoaderScreen__SetProgress((C_LoaderScreen *)&DAT_008aea80,4,0.8);
-  g_particlesModule.m_scene = _this->m_scene;
-  C_ParticlesModule__LoadStaticEmitters((C_ParticlesModule*)(&g_particlesModule));
-  C_LoaderScreen__SetProgress((C_LoaderScreen *)&DAT_008aea80,4,1.0);
-  _this->m_missionLoaded = true;
-  empty_function_6d4e90();
-  C_LoaderScreen__FinishLoading((int *)&DAT_008aea80);
-  uVar5 = _DAT_008cb384 & 0xffff;
-  local_1c = *(uint32_t *)(g_configLine + (_DAT_008cac84 & 0xffff) * 4 + 0x268);
-  local_18 = &DAT_008caf40 + uVar5;
-  pIVar2 = GetIGraph();
-  pvVar3 = (*pIVar2->vtable->GetHWND)(pIVar2);
-  *(void **)(&DAT_008cad40 + uVar5 * 4) = pvVar3;
-  uVar4 = (*(code *)PTR_00a59000)(pvVar3);
-  *(uint32_t *)(&DAT_008cad40 + uVar5 * 4) = uVar4;
-  uVar5 = (uint32_t)g_protectionIndexBreathB;
-  local_1c = *(uint32_t *)(g_configLine + (uint32_t)g_protectionIndexBreathA * 4 + 0x268);
-  local_18 = &DAT_008caf40 + uVar5;
-  pIVar2 = GetIGraph();
-  pvVar3 = (*pIVar2->vtable->GetHWND)(pIVar2);
-  *(void **)(&DAT_008cad40 + uVar5 * 4) = pvVar3;
-  uVar4 = (*(code *)PTR_00a59000)(pvVar3);
-  *(uint32_t *)(&DAT_008cad40 + uVar5 * 4) = uVar4;
-  GH_PIECE(local_8,0,1) = 0x14;
-  if (local_24 != 0) {
-    C_str__ReleaseRep(local_24);
-  }
-  GH_PIECE(local_8,0,1) = 0x13;
-  if (local_28 != 0) {
-    C_str__ReleaseRep(local_28);
-  }
-  local_8 = CONCAT31(GH_PIECE(local_8,1,3),0x12);
-  if (local_2c != 0) {
-    C_str__ReleaseRep(local_2c);
-  }
-  if ((local_30 != 0) &&
-     (local_30->rep = (C_str_rep *)local_30->rep[-1].chars, local_30->rep == 0)) {
-    tier1_operator_delete(local_30);
-  }
-  if ((local_34 != 0) &&
-     (local_34->rep = (C_str_rep *)local_34->rep[-1].chars, local_34->rep == 0)) {
-    tier1_operator_delete(local_34);
-  }
-  GH_PIECE(local_8,0,1) = 0xf;
-  FUN_006cb4e0(local_44);
-  local_8 = (uint32_t)GH_PIECE(local_8,1,3) << 8;
-  FUN_006cb340(local_54);
-  local_8 = 0xffffffff;
-  FUN_006cb130(local_14);
-  return 0;
-}
-
-
 // 0x006caf30
-uint32_t FUN_006caf30(void *param_1, ...)
+uint32_t MissionMapA_DtorEh(void *param_1, ...)
 {
   int *piVar1;
   int *piVar2;
@@ -186,8 +15,8 @@ uint32_t FUN_006caf30(void *param_1, ...)
   piVar2 = local_c;
   if (*(int *)((int)param_1 + 0xc) == 0) {
     while (local_c = piVar2, piVar2 != piVar1) {
-      FUN_006cc140((int *)&local_c);
-      FUN_006cb700(param_1,&local_4,piVar2);
+      MissionMapA_IterInc((int *)&local_c);
+      MissionMapA_Erase(param_1,&local_4,piVar2);
       piVar2 = local_c;
     }
   }
@@ -195,9 +24,9 @@ uint32_t FUN_006caf30(void *param_1, ...)
     piVar2 = (int *)piVar1[1];
     if ((int *)piVar1[1] != DAT_008aeaf8) {
       do {
-        FUN_006cbb20((int *)piVar2[2]);
+        MissionMapA_EraseSubtree((int *)piVar2[2]);
         piVar1 = (int *)*piVar2;
-        FUN_006cc1e0(piVar2 + 3,0);
+        MissionMapA_PairDeletingDtor(piVar2 + 3,0);
         tier1_operator_delete(piVar2);
         piVar2 = piVar1;
       } while (piVar1 != DAT_008aeaf8);
@@ -206,7 +35,7 @@ uint32_t FUN_006caf30(void *param_1, ...)
     *(uint32_t *)((int)param_1 + 0xc) = 0;
     *(uint32_t *)*(uint32_t *)((int)param_1 + 4) = *(uint32_t *)((int)param_1 + 4);
     *(int *)(*(int *)((int)param_1 + 4) + 8) = *(int *)((int)param_1 + 4);
-    FUN_006cb600(param_1,&local_8);
+    MissionMapA_Begin(param_1,&local_8);
   }
   tier1_operator_delete(*(void **)((int)param_1 + 4));
   *(uint32_t *)((int)param_1 + 4) = 0;
@@ -228,7 +57,7 @@ uint32_t FUN_006caf30(void *param_1, ...)
 
 
 // 0x006cb030
-uint32_t FUN_006cb030(void *param_1, ...)
+uint32_t MissionMapB_DtorEh(void *param_1, ...)
 {
   int *piVar1;
   int *piVar2;
@@ -240,8 +69,8 @@ uint32_t FUN_006cb030(void *param_1, ...)
   piVar2 = local_c;
   if (*(int *)((int)param_1 + 0xc) == 0) {
     while (local_c = piVar2, piVar2 != piVar1) {
-      FUN_006cc190((int *)&local_c);
-      FUN_006cbc90(param_1,&local_4,piVar2);
+      MissionMapB_IterInc((int *)&local_c);
+      MissionMapB_Erase(param_1,&local_4,piVar2);
       piVar2 = local_c;
     }
   }
@@ -249,9 +78,9 @@ uint32_t FUN_006cb030(void *param_1, ...)
     piVar2 = (int *)piVar1[1];
     if ((int *)piVar1[1] != DAT_008aeb00) {
       do {
-        FUN_006cc0d0((int *)piVar2[2]);
+        MissionMapB_EraseSubtree((int *)piVar2[2]);
         piVar1 = (int *)*piVar2;
-        FUN_006cc200(piVar2 + 3,0);
+        MissionMapB_PairDeletingDtor(piVar2 + 3,0);
         tier1_operator_delete(piVar2);
         piVar2 = piVar1;
       } while (piVar1 != DAT_008aeb00);
@@ -260,7 +89,7 @@ uint32_t FUN_006cb030(void *param_1, ...)
     *(uint32_t *)((int)param_1 + 0xc) = 0;
     *(uint32_t *)*(uint32_t *)((int)param_1 + 4) = *(uint32_t *)((int)param_1 + 4);
     *(int *)(*(int *)((int)param_1 + 4) + 8) = *(int *)((int)param_1 + 4);
-    FUN_006cb610(param_1,&local_8);
+    MissionMapB_Begin(param_1,&local_8);
   }
   tier1_operator_delete(*(void **)((int)param_1 + 4));
   *(uint32_t *)((int)param_1 + 4) = 0;
@@ -281,26 +110,8 @@ uint32_t FUN_006cb030(void *param_1, ...)
 }
 
 
-// 0x006cb130
-uint32_t FUN_006cb130(uint32_t param_1, ...)
-{
-  uint32_t uVar1;
-  uint32_t extraout_ECX;
-  uVar1 = CONCAT31((int3)((uint32_t)param_1 >> 8),1);
-  if (((uint8_t)g_gameRole & 1) != 0) {
-    ModuleManager__BroadcastLoadMissionData(uVar1);
-    uVar1 = extraout_ECX;
-  }
-  if (((uint8_t)g_gameRole & 2) != 0) {
-    ModuleManager__BroadcastLoadMissionData(uVar1 & 0xffffff00);
-    return 0;
-  }
-  return 0;
-}
-
-
 // 0x006cb160
-uint32_t FUN_006cb160(void *param_1, ...)
+uint32_t C_MissionLoader___C_MissionLoader(void *_this, ...)
 {
   void *local_c;
   int *piVar1;
@@ -315,34 +126,35 @@ uint32_t FUN_006cb160(void *param_1, ...)
   int local_14;
   uint32_t local_10;
   uint32_t local_4;
-  piVar1 = *(int **)((int)param_1 + 0x30);
+  piVar1 = *(int **)((int)_this + 0x30);
   local_4 = 0;
-  local_1c = param_1;
+  local_1c = _this;
   if ((piVar1 != 0) &&
      (iVar2 = *piVar1, ExceptionList = &local_c, *piVar1 = iVar2 - 1, iVar2 - 1 == 0)) {
     tier1_operator_delete(piVar1);
   }
-  piVar1 = *(int **)((int)param_1 + 0x2c);
+  piVar1 = *(int **)((int)_this + 0x2c);
   if ((piVar1 != 0) && (iVar2 = *piVar1, *piVar1 = iVar2 - 1, iVar2 - 1 == 0)) {
     tier1_operator_delete(piVar1);
   }
-  piVar1 = *(int **)((int)param_1 + 0x28);
+  piVar1 = *(int **)((int)_this + 0x28);
   if ((piVar1 != 0) && (iVar2 = *piVar1, *piVar1 = iVar2 - 1, iVar2 - 1 == 0)) {
     tier1_operator_delete(piVar1);
   }
-  piVar1 = *(int **)((int)param_1 + 0x24);
+  piVar1 = *(int **)((int)_this + 0x24);
   if ((piVar1 != 0) && (iVar2 = *piVar1, *piVar1 = iVar2 - 1, iVar2 - 1 == 0)) {
     tier1_operator_delete(piVar1);
   }
-  piVar1 = *(int **)((int)param_1 + 0x20);
+  piVar1 = *(int **)((int)_this + 0x20);
   if ((piVar1 != 0) && (iVar2 = *piVar1, *piVar1 = iVar2 - 1, iVar2 - 1 == 0)) {
     tier1_operator_delete(piVar1);
   }
-  FUN_006cb620((void *)((int)param_1 + 0x10),(uint32_t*)(&local_20),(int *)**(int **)((int)param_1 + 0x14),
-               *(int **)((int)param_1 + 0x14));
-  tier1_operator_delete(*(void **)((int)param_1 + 0x14));
-  *(uint32_t *)((int)param_1 + 0x14) = 0;
-  *(uint32_t *)((int)param_1 + 0x1c) = 0;
+  MissionMapB_EraseRange
+            ((void *)((int)_this + 0x10),(uint32_t*)(&local_20),(int *)**(int **)((int)_this + 0x14),
+             *(int **)((int)_this + 0x14));
+  tier1_operator_delete(*(void **)((int)_this + 0x14));
+  *(uint32_t *)((int)_this + 0x14) = 0;
+  *(uint32_t *)((int)_this + 0x1c) = 0;
   std_Lockit_ctor(&local_20);
   pvVar4 = DAT_008aeb00;
   DAT_008aeafc--;
@@ -355,26 +167,26 @@ uint32_t FUN_006cb160(void *param_1, ...)
   if (pvVar6 != 0) {
     tier1_operator_delete(pvVar6);
   }
-  puVar3 = *(uint32_t **)((int)param_1 + 4);
+  puVar3 = *(uint32_t **)((int)_this + 4);
   local_4 = 0xffffffff;
   local_20 = (uint32_t *)*puVar3;
-  if (*(int *)((int)param_1 + 0xc) == 0) {
+  if (*(int *)((int)_this + 0xc) == 0) {
     while (local_20 != puVar3) {
-      puVar5 = (uint32_t *)FUN_006cbc30(&local_20,&local_14);
-      FUN_006cb700(param_1,&local_10,(int *)*puVar5);
+      puVar5 = (uint32_t *)MissionMapA_IterDec(&local_20,&local_14);
+      MissionMapA_Erase(_this,&local_10,(int *)*puVar5);
     }
   }
   else {
-    FUN_006cbb20((int *)puVar3[1]);
-    *(void **)(*(int *)((int)param_1 + 4) + 4) = DAT_008aeaf8;
-    *(uint32_t *)((int)param_1 + 0xc) = 0;
-    *(uint32_t *)*(uint32_t *)((int)param_1 + 4) = *(uint32_t *)((int)param_1 + 4);
-    *(int *)(*(int *)((int)param_1 + 4) + 8) = *(int *)((int)param_1 + 4);
-    FUN_006cb600(param_1,&local_18);
+    MissionMapA_EraseSubtree((int *)puVar3[1]);
+    *(void **)(*(int *)((int)_this + 4) + 4) = DAT_008aeaf8;
+    *(uint32_t *)((int)_this + 0xc) = 0;
+    *(uint32_t *)*(uint32_t *)((int)_this + 4) = *(uint32_t *)((int)_this + 4);
+    *(int *)(*(int *)((int)_this + 4) + 8) = *(int *)((int)_this + 4);
+    MissionMapA_Begin(_this,&local_18);
   }
-  tier1_operator_delete(*(void **)((int)param_1 + 4));
-  *(uint32_t *)((int)param_1 + 4) = 0;
-  *(uint32_t *)((int)param_1 + 0xc) = 0;
+  tier1_operator_delete(*(void **)((int)_this + 4));
+  *(uint32_t *)((int)_this + 4) = 0;
+  *(uint32_t *)((int)_this + 0xc) = 0;
   std_Lockit_ctor(&local_1c);
   pvVar4 = DAT_008aeaf8;
   DAT_008aeaf4--;
@@ -392,7 +204,7 @@ uint32_t FUN_006cb160(void *param_1, ...)
 
 
 // 0x006cb340
-uint32_t FUN_006cb340(void *param_1, ...)
+uint32_t MissionMapA_Dtor(void *param_1, ...)
 {
   int *piVar1;
   int *piVar2;
@@ -403,8 +215,8 @@ uint32_t FUN_006cb340(void *param_1, ...)
   piVar2 = local_8;
   if (*(int *)((int)param_1 + 0xc) == 0) {
     while (local_8 = piVar2, piVar2 != piVar1) {
-      FUN_006cc140((int *)&local_8);
-      FUN_006cb700(param_1,&local_4,piVar2);
+      MissionMapA_IterInc((int *)&local_8);
+      MissionMapA_Erase(param_1,&local_4,piVar2);
       piVar2 = local_8;
     }
   }
@@ -412,9 +224,9 @@ uint32_t FUN_006cb340(void *param_1, ...)
     piVar2 = (int *)piVar1[1];
     if ((int *)piVar1[1] != DAT_008aeaf8) {
       do {
-        FUN_006cbb20((int *)piVar2[2]);
+        MissionMapA_EraseSubtree((int *)piVar2[2]);
         piVar1 = (int *)*piVar2;
-        FUN_006cc1e0(piVar2 + 3,0);
+        MissionMapA_PairDeletingDtor(piVar2 + 3,0);
         tier1_operator_delete(piVar2);
         piVar2 = piVar1;
       } while (piVar1 != DAT_008aeaf8);
@@ -444,7 +256,7 @@ uint32_t FUN_006cb340(void *param_1, ...)
 
 
 // 0x006cb430  (tier1 fallback: translated text kept below, needs hand porting)
-uint8_t * FUN_006cb430(void *_this,uint8_t *param_1,uint8_t *param_2, ...)
+uint8_t * MissionMapB_Ctor(void *_this,uint8_t *param_1,uint8_t *param_2, ...)
 {
   return {};
 }
@@ -484,7 +296,7 @@ uint8_t * FUN_006cb430(void *_this,uint8_t *param_1,uint8_t *param_2, ...)
 
 #endif
 // 0x006cb4e0
-uint32_t FUN_006cb4e0(void *param_1, ...)
+uint32_t MissionMapB_Dtor(void *param_1, ...)
 {
   int *piVar1;
   int *piVar2;
@@ -495,8 +307,8 @@ uint32_t FUN_006cb4e0(void *param_1, ...)
   piVar2 = local_8;
   if (*(int *)((int)param_1 + 0xc) == 0) {
     while (local_8 = piVar2, piVar2 != piVar1) {
-      FUN_006cc190((int *)&local_8);
-      FUN_006cbc90(param_1,&local_4,piVar2);
+      MissionMapB_IterInc((int *)&local_8);
+      MissionMapB_Erase(param_1,&local_4,piVar2);
       piVar2 = local_8;
     }
   }
@@ -504,9 +316,9 @@ uint32_t FUN_006cb4e0(void *param_1, ...)
     piVar2 = (int *)piVar1[1];
     if ((int *)piVar1[1] != DAT_008aeb00) {
       do {
-        FUN_006cc0d0((int *)piVar2[2]);
+        MissionMapB_EraseSubtree((int *)piVar2[2]);
         piVar1 = (int *)*piVar2;
-        FUN_006cc200(piVar2 + 3,0);
+        MissionMapB_PairDeletingDtor(piVar2 + 3,0);
         tier1_operator_delete(piVar2);
         piVar2 = piVar1;
       } while (piVar1 != DAT_008aeb00);
@@ -536,20 +348,20 @@ uint32_t FUN_006cb4e0(void *param_1, ...)
 
 
 // 0x006cb5d0
-uint8_t * FUN_006cb5d0(void *_this,uint8_t *param_1,uint8_t param_2,uint8_t *param_3, ...)
+uint8_t * MissionMapA_Ctor(void *_this,uint8_t *param_1,uint8_t param_2,uint8_t *param_3, ...)
 {
   uint8_t uVar1;
   *(uint8_t *)_this = *param_3;
   uVar1 = *param_1;
   *(uint8_t *)((int)_this + 8) = param_2;
   *(uint8_t *)((int)_this + 1) = uVar1;
-  FUN_006cbb90((int)_this);
+  MissionMapA_Init((int)_this);
   return _this;
 }
 
 
 // 0x006cb600
-uint32_t FUN_006cb600(void *_this,uint32_t *param_1, ...)
+uint32_t MissionMapA_Begin(void *_this,uint32_t *param_1, ...)
 {
   *param_1 = **(uint32_t **)((int)_this + 4);
   return 0;
@@ -557,7 +369,7 @@ uint32_t FUN_006cb600(void *_this,uint32_t *param_1, ...)
 
 
 // 0x006cb610
-uint32_t FUN_006cb610(void *_this,uint32_t *param_1, ...)
+uint32_t MissionMapB_Begin(void *_this,uint32_t *param_1, ...)
 {
   *param_1 = **(uint32_t **)((int)_this + 4);
   return 0;
@@ -565,7 +377,7 @@ uint32_t FUN_006cb610(void *_this,uint32_t *param_1, ...)
 
 
 // 0x006cb620
-uint32_t FUN_006cb620(void *_this,uint32_t *param_1,int *param_2,int *param_3, ...)
+uint32_t MissionMapB_EraseRange(void *_this,uint32_t *param_1,int *param_2,int *param_3, ...)
 {
   int *piVar1;
   int *piVar2;
@@ -576,9 +388,9 @@ uint32_t FUN_006cb620(void *_this,uint32_t *param_1,int *param_2,int *param_3, .
     piVar2 = (int *)piVar1[1];
     if ((int *)piVar1[1] != DAT_008aeb00) {
       do {
-        FUN_006cc0d0((int *)piVar2[2]);
+        MissionMapB_EraseSubtree((int *)piVar2[2]);
         piVar1 = (int *)*piVar2;
-        FUN_006cc220(piVar2 + 3);
+        MissionMapB_PairDtor(piVar2 + 3);
         tier1_operator_delete(piVar2);
         piVar2 = piVar1;
       } while (piVar1 != DAT_008aeb00);
@@ -607,11 +419,11 @@ uint32_t FUN_006cb620(void *_this,uint32_t *param_1,int *param_2,int *param_3, .
       if ((int *)piVar3[2] != piVar1) goto LAB_006cb6d1;
     }
     else {
-      piVar1 = (int *)FUN_006cc120((int *)param_2[2]);
+      piVar1 = (int *)MissionMapB_Leftmost((int *)param_2[2]);
 LAB_006cb6d1:
       piVar3 = piVar1;
     }
-    FUN_006cbc90(_this,(uint32_t*)(&param_3),param_2);
+    MissionMapB_Erase(_this,(uint32_t*)(&param_3),param_2);
     param_2 = piVar3;
   } while( true );
   return 0;
@@ -619,7 +431,7 @@ LAB_006cb6d1:
 
 
 // 0x006cb700
-uint32_t FUN_006cb700(void *_this,uint32_t *param_1,int *param_2, ...)
+uint32_t MissionMapA_Erase(void *_this,uint32_t *param_1,int *param_2, ...)
 {
   int *piVar1;
   int iVar2;
@@ -634,7 +446,7 @@ uint32_t FUN_006cb700(void *_this,uint32_t *param_1,int *param_2, ...)
   int *local_c;
   uint8_t local_4 [4];
   piVar3 = param_2;
-  FUN_006cc140((int *)&param_2);
+  MissionMapA_IterInc((int *)&param_2);
   piVar10 = (int *)*piVar3;
   piVar6 = piVar3 + 2;
   local_c = piVar3;
@@ -916,14 +728,14 @@ LAB_006cbacf:
 
 
 // 0x006cbb20
-uint32_t FUN_006cbb20(int *param_1, ...)
+uint32_t MissionMapA_EraseSubtree(int *param_1, ...)
 {
   int *piVar1;
   if (param_1 != DAT_008aeaf8) {
     do {
-      FUN_006cbb20((int *)param_1[2]);
+      MissionMapA_EraseSubtree((int *)param_1[2]);
       piVar1 = (int *)*param_1;
-      FUN_006cbb70(param_1 + 3);
+      MissionMapA_PairDtor(param_1 + 3);
       tier1_operator_delete(param_1);
       param_1 = piVar1;
     } while (piVar1 != DAT_008aeaf8);
@@ -933,7 +745,7 @@ uint32_t FUN_006cbb20(int *param_1, ...)
 
 
 // 0x006cbb70
-uint32_t FUN_006cbb70(uint32_t *param_1, ...)
+uint32_t MissionMapA_PairDtor(uint32_t *param_1, ...)
 {
   int *ptr;
   int iVar1;
@@ -946,7 +758,7 @@ uint32_t FUN_006cbb70(uint32_t *param_1, ...)
 
 
 // 0x006cbb90  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_006cbb90(int param_1, ...)
+uint32_t MissionMapA_Init(int param_1, ...)
 {
   return {};
 }
@@ -985,7 +797,7 @@ uint32_t FUN_006cbb90(int param_1, ...)
 
 #endif
 // 0x006cbc30
-uint32_t FUN_006cbc30(void *_this,int *param_1, ...)
+uint32_t MissionMapA_IterDec(void *_this,int *param_1, ...)
 {
   int iVar1;
   uint32_t *puVar2;
@@ -1017,7 +829,7 @@ uint32_t FUN_006cbc30(void *_this,int *param_1, ...)
 
 
 // 0x006cbc90
-uint32_t FUN_006cbc90(void *_this,uint32_t *param_1,int *param_2, ...)
+uint32_t MissionMapB_Erase(void *_this,uint32_t *param_1,int *param_2, ...)
 {
   int *piVar1;
   int iVar2;
@@ -1032,7 +844,7 @@ uint32_t FUN_006cbc90(void *_this,uint32_t *param_1,int *param_2, ...)
   int *local_c;
   uint8_t local_4 [4];
   piVar3 = param_2;
-  FUN_006cc190((int *)&param_2);
+  MissionMapB_IterInc((int *)&param_2);
   piVar10 = (int *)*piVar3;
   piVar6 = piVar3 + 2;
   local_c = piVar3;
@@ -1318,14 +1130,14 @@ LAB_006cc05f:
 
 
 // 0x006cc0d0
-uint32_t FUN_006cc0d0(int *param_1, ...)
+uint32_t MissionMapB_EraseSubtree(int *param_1, ...)
 {
   int *piVar1;
   if (param_1 != DAT_008aeb00) {
     do {
-      FUN_006cc0d0((int *)param_1[2]);
+      MissionMapB_EraseSubtree((int *)param_1[2]);
       piVar1 = (int *)*param_1;
-      FUN_006cc220(param_1 + 3);
+      MissionMapB_PairDtor(param_1 + 3);
       tier1_operator_delete(param_1);
       param_1 = piVar1;
     } while (piVar1 != DAT_008aeb00);
@@ -1335,7 +1147,7 @@ uint32_t FUN_006cc0d0(int *param_1, ...)
 
 
 // 0x006cc120
-uint32_t FUN_006cc120(uint32_t *param_1, ...)
+uint32_t MissionMapB_Leftmost(uint32_t *param_1, ...)
 {
   uint32_t *puVar1;
   for (puVar1 = (uint32_t *)*param_1; puVar1 != DAT_008aeb00; puVar1 = (uint32_t *)*puVar1) {
@@ -1345,7 +1157,7 @@ uint32_t FUN_006cc120(uint32_t *param_1, ...)
 
 
 // 0x006cc140
-uint32_t FUN_006cc140(int *param_1, ...)
+uint32_t MissionMapA_IterInc(int *param_1, ...)
 {
   uint32_t *puVar1;
   uint32_t *puVar2;
@@ -1373,7 +1185,7 @@ uint32_t FUN_006cc140(int *param_1, ...)
 
 
 // 0x006cc190
-uint32_t FUN_006cc190(int *param_1, ...)
+uint32_t MissionMapB_IterInc(int *param_1, ...)
 {
   uint32_t *puVar1;
   uint32_t *puVar2;
@@ -1401,9 +1213,9 @@ uint32_t FUN_006cc190(int *param_1, ...)
 
 
 // 0x006cc1e0
-uint32_t * FUN_006cc1e0(void *_this,uint8_t param_1, ...)
+uint32_t * MissionMapA_PairDeletingDtor(void *_this,uint8_t param_1, ...)
 {
-  FUN_006cbb70(_this);
+  MissionMapA_PairDtor(_this);
   if ((param_1 & 1) != 0) {
     tier1_operator_delete(_this);
   }
@@ -1412,9 +1224,9 @@ uint32_t * FUN_006cc1e0(void *_this,uint8_t param_1, ...)
 
 
 // 0x006cc200
-uint32_t * FUN_006cc200(void *_this,uint8_t param_1, ...)
+uint32_t * MissionMapB_PairDeletingDtor(void *_this,uint8_t param_1, ...)
 {
-  FUN_006cc220(_this);
+  MissionMapB_PairDtor(_this);
   if ((param_1 & 1) != 0) {
     tier1_operator_delete(_this);
   }
@@ -1423,7 +1235,7 @@ uint32_t * FUN_006cc200(void *_this,uint8_t param_1, ...)
 
 
 // 0x006cc220
-uint32_t FUN_006cc220(uint32_t *param_1, ...)
+uint32_t MissionMapB_PairDtor(uint32_t *param_1, ...)
 {
   int *piVar1;
   int iVar2;

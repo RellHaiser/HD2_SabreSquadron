@@ -344,6 +344,8 @@ public:
     void Finish(int handle);                                // 0x004458d0
     // Creates the mission's static emitters (missions\<name>\effects.bin).
     void LoadStaticEmitters();                              // 0x00445d90
+    // The scene the effects go into (C_game::LoadMission sets the game's before the static ones).
+    void SetScene(I3D_scene *scene) { m_scene = scene; }
 
 private:
     S_ActiveEmitter *FindActive(int handle, int *outIndex); // 0x00445740
