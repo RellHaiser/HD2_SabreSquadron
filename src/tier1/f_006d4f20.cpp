@@ -14,43 +14,4 @@ uint32_t FUN_006d4f20(...)
 }
 
 
-// 0x006d4f50
-uint32_t FUN_006d4f50(int *param_1,int *param_2, ...)
-{
-  uint8_t bVar1;
-  uint8_t *pbVar2;
-  int iVar3;
-  uint8_t *pbVar4;
-  bool bVar5;
-  pbVar4 = (uint8_t *)(*param_2 + 8);
-  if (*param_2 == 0) {
-    pbVar4 = &DAT_00867a90;
-  }
-  if (*param_1 == 0) {
-    pbVar2 = &DAT_00867a90;
-  }
-  else {
-    pbVar2 = (uint8_t *)(*param_1 + 8);
-  }
-  while( true ) {
-    bVar1 = *pbVar2;
-    bVar5 = bVar1 < *pbVar4;
-    if (bVar1 != *pbVar4) break;
-    if (bVar1 == 0) {
-      return 0;
-    }
-    bVar1 = pbVar2[1];
-    bVar5 = bVar1 < pbVar4[1];
-    if (bVar1 != pbVar4[1]) break;
-    pbVar2 += 2;
-    pbVar4 += 2;
-    if (bVar1 == 0) {
-      return 0;
-    }
-  }
-  iVar3 = (1 - (uint32_t)bVar5) - (uint32_t)(bVar5 != 0);
-  return CONCAT31((int3)((uint32_t)iVar3 >> 8),iVar3 < 0);
-}
-
-
 } // namespace tier1

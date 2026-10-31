@@ -30676,6 +30676,11 @@
   "name": "C_MissionLoader::LoadScene2",
   "proto": "int __fastcall LoadScene2(void * this)"
  },
+ "006cc8d0": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::NameFrame",
+  "proto": "uint __stdcall NameFrame(I3D_frame * frame, void * context)"
+ },
  "006cc9a0": {
   "module": "mission_loader",
   "name": "FormatStr",
@@ -30692,7 +30697,61 @@
  "006ccab0": {
   "module": "mission_loader",
   "name": "C_MissionLoader::LoadObjects",
-  "proto": "void __thiscall LoadObjects(void * this, C_chunk * chunk, int stage)"
+  "proto": "bool __thiscall LoadObjects(void * this, C_chunk * chunk, int stage)"
+ },
+ "006cdc60": {
+  "module": "mission_loader",
+  "name": "S_TShiftEntry::S_TShiftEntry",
+  "proto": "void * __thiscall S_TShiftEntry(void * this, void * frame, void * mesh, int unknown0C, int unknown10)"
+ },
+ "006cdc90": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadObject",
+  "proto": "bool __thiscall LoadObject(void * this, C_chunk * chunk)"
+ },
+ "006d3840": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Index"
+ },
+ "006d38f0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Insert"
+ },
+ "006d39d0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_MakePair"
+ },
+ "006d39f0": {
+  "module": "mission_loader",
+  "name": "TShiftEntries_Insert"
+ },
+ "006d3c10": {
+  "module": "mission_loader",
+  "name": "MissionMapA_FindOrInsert"
+ },
+ "006d3e70": {
+  "module": "mission_loader",
+  "name": "MissionMapA_InsertNode"
+ },
+ "006d40e0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_RotateLeft"
+ },
+ "006d4140": {
+  "module": "mission_loader",
+  "name": "MissionMapA_RotateRight"
+ },
+ "006d41a0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_NewNode"
+ },
+ "006d41c0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_IterDec2"
+ },
+ "006d4220": {
+  "module": "mission_loader",
+  "name": "MissionMapA_PairCopy"
  },
  "006d4270": {
   "module": "mission_loader",
@@ -30726,6 +30785,11 @@
  "006d4ea0": {
   "module": "mission_loader",
   "name": "MissionLoader_Empty2"
+ },
+ "006d4f50": {
+  "module": "mission_loader",
+  "name": "S_MissionNameLess",
+  "proto": "bool __fastcall S_MissionNameLess(void * a, void * b)"
  },
  "006d4fc0": {
   "module": "mission_loader",

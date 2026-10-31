@@ -88,6 +88,14 @@ int C_chunk::RemainingSize() const
     return m_stack[m_depth - 1] - pos;
 }
 
+bool C_chunk::HasMore() const
+{
+    if (!m_open || m_depth == 0)
+        return false;
+    const int pos = Tell();
+    return pos != -1 && m_stack[m_depth - 1] - pos != 0;
+}
+
 bool C_chunk::Read(void *buffer, int size)
 {
     if (!m_open || m_writing)

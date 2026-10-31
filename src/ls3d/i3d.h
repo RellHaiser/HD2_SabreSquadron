@@ -1290,7 +1290,8 @@ public:
     I3D_SLOT(DC);
     // Sector containing `pos`, null if none.
     I3DMETHOD(I3D_sector *, GetSector)(const S_vector &pos) = 0;  // 0xE0
-    I3D_SLOT(E4);
+    // scene2.bin's chunk 0x3211: its two floats (the first at least 0.1; meaning not identified).
+    I3DMETHOD(void, UnknownE4)(float a, float b) = 0;         // 0xE4
     I3D_SLOT(E8);
     // Re-evaluates which sector `frame` belongs to after it was moved to `pos`.
     I3DMETHOD(void, UpdateFrameSector)(PI3D_frame frame, const S_vector &pos) = 0;   // 0xEC
@@ -1320,7 +1321,11 @@ public:
     // Weather simulation parameter (E_WeatherParam); floats are passed as their bits.
     I3DMETHOD(void, SetWeather)(int param, uint32_t value) = 0;   // 0x11C
 
-    I3D_SLOTS_4(120, 124, 128, 12C);
+    I3D_SLOT(120);
+    I3D_SLOT(124);
+    // Called for the frames scene2.bin's chunk 0xB820 names (meaning not identified).
+    I3DMETHOD(void, Unknown128)(I3D_frame *frame) = 0;        // 0x128
+    I3D_SLOT(12C);
     // The dummies drawn in the last frame, as boxes (LS3DF 0x10049800 / 0x10049810; the effects
     // module keeps rain off the soldiers under them).
     I3DMETHOD(int, NumDrawnDummies)() = 0;                    // 0x130
@@ -1352,11 +1357,18 @@ public:
     I3D_frame *GetFirstPersonRoot() const { return Field<I3D_frame *>(0x204); }
     // Listener of the 3D sound (moves with the camera).
     class I3D_sound_listener *GetSoundListener() const { return Field<class I3D_sound_listener *>(0x28C); }
+    // +0x210: scene2.bin's chunk 0x3200, three floats (meaning not identified; the original also
+    // writes +0x21C from its stack).
+    void SetUnknown210(const S_vector &v) { MutableField<S_vector>(0x210) = v; }
 
 private:
     template <class T> const T &Field(size_t offset) const
     {
         return *reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(this) + offset);
+    }
+    template <class T> T &MutableField(size_t offset)
+    {
+        return *reinterpret_cast<T *>(reinterpret_cast<uint8_t *>(this) + offset);
     }
 };
 

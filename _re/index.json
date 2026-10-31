@@ -2096,6 +2096,7 @@
 "006ca620",
 "006ca920",
 "006cc280",
+"006cc8d0",
 "006ccab0",
 "006cdc90",
 "006d1ef0",
@@ -233951,7 +233952,7 @@
 "name": "C_MissionLoader::LoadScene2",
 "size": 1602,
 "lines": 240,
-"chars": 8240,
+"chars": 8279,
 "callers": [
 "006caad0"
 ],
@@ -233982,6 +233983,29 @@
 "strings": [
 "008432bc"
 ],
+"vtables": [],
+"globals": [
+"00867a90"
+],
+"in_vtables": []
+},
+"006cc8d0": {
+"name": "C_MissionLoader::NameFrame",
+"size": 197,
+"lines": 45,
+"chars": 1274,
+"callers": [
+"006cc280",
+"006cdc90",
+"006d1ef0"
+],
+"callees": [
+"00405100",
+"006d3c10",
+"007e2120"
+],
+"imports": [],
+"strings": [],
 "vtables": [],
 "globals": [
 "00867a90"
@@ -234050,7 +234074,7 @@
 "name": "C_MissionLoader::LoadObjects",
 "size": 4515,
 "lines": 714,
-"chars": 27681,
+"chars": 27714,
 "callers": [
 "006cc280",
 "006d4910",
@@ -234100,10 +234124,10 @@
 "in_vtables": []
 },
 "006cdc60": {
-"name": "FUN_006cdc60",
+"name": "S_TShiftEntry::S_TShiftEntry",
 "size": 42,
 "lines": 15,
-"chars": 439,
+"chars": 413,
 "callers": [
 "006ccab0"
 ],
@@ -234115,7 +234139,7 @@
 "in_vtables": []
 },
 "006cdc90": {
-"name": "FUN_006cdc90",
+"name": "C_MissionLoader::LoadObject",
 "size": 16528,
 "lines": 0,
 "chars": 0,
@@ -234284,10 +234308,10 @@
 "in_vtables": []
 },
 "006d3840": {
-"name": "FUN_006d3840",
+"name": "MissionMapA_Index",
 "size": 171,
 "lines": 36,
-"chars": 833,
+"chars": 850,
 "callers": [
 "006ccab0"
 ],
@@ -234302,10 +234326,10 @@
 "in_vtables": []
 },
 "006d38f0": {
-"name": "FUN_006d38f0",
+"name": "MissionMapA_Insert",
 "size": 217,
-"lines": 54,
-"chars": 1352,
+"lines": 52,
+"chars": 1310,
 "callers": [
 "006cc280",
 "006ccab0",
@@ -234326,10 +234350,10 @@
 "in_vtables": []
 },
 "006d39d0": {
-"name": "FUN_006d39d0",
+"name": "MissionMapA_MakePair",
 "size": 28,
 "lines": 15,
-"chars": 291,
+"chars": 299,
 "callers": [
 "006cc280",
 "006ccab0",
@@ -234344,10 +234368,10 @@
 "in_vtables": []
 },
 "006d39f0": {
-"name": "FUN_006d39f0",
+"name": "TShiftEntries_Insert",
 "size": 544,
-"lines": 99,
-"chars": 3065,
+"lines": 100,
+"chars": 3185,
 "callers": [
 "006ccab0"
 ],
@@ -234367,11 +234391,12 @@
 "in_vtables": []
 },
 "006d3c10": {
-"name": "FUN_006d3c10",
+"name": "MissionMapA_FindOrInsert",
 "size": 600,
-"lines": 126,
-"chars": 3821,
+"lines": 125,
+"chars": 3869,
 "callers": [
+"006cc8d0",
 "006d3840"
 ],
 "callees": [
@@ -234392,10 +234417,10 @@
 "in_vtables": []
 },
 "006d3e70": {
-"name": "FUN_006d3e70",
+"name": "MissionMapA_InsertNode",
 "size": 617,
-"lines": 166,
-"chars": 5370,
+"lines": 167,
+"chars": 5375,
 "callers": [
 "006d38f0",
 "006d3c10"
@@ -234414,10 +234439,10 @@
 "in_vtables": []
 },
 "006d40e0": {
-"name": "FUN_006d40e0",
+"name": "MissionMapA_RotateLeft",
 "size": 82,
 "lines": 32,
-"chars": 752,
+"chars": 762,
 "callers": [
 "006d3c10"
 ],
@@ -234431,10 +234456,10 @@
 "in_vtables": []
 },
 "006d4140": {
-"name": "FUN_006d4140",
+"name": "MissionMapA_RotateRight",
 "size": 86,
 "lines": 32,
-"chars": 750,
+"chars": 761,
 "callers": [
 "006d3c10"
 ],
@@ -234448,10 +234473,10 @@
 "in_vtables": []
 },
 "006d41a0": {
-"name": "FUN_006d41a0",
+"name": "MissionMapA_NewNode",
 "size": 27,
 "lines": 12,
-"chars": 231,
+"chars": 238,
 "callers": [
 "006d3c10"
 ],
@@ -234465,10 +234490,10 @@
 "in_vtables": []
 },
 "006d41c0": {
-"name": "FUN_006d41c0",
+"name": "MissionMapA_IterDec2",
 "size": 81,
 "lines": 32,
-"chars": 682,
+"chars": 690,
 "callers": [
 "006d38f0",
 "006d3c10"
@@ -234483,10 +234508,10 @@
 "in_vtables": []
 },
 "006d4220": {
-"name": "FUN_006d4220",
+"name": "MissionMapA_PairCopy",
 "size": 26,
 "lines": 17,
-"chars": 297,
+"chars": 305,
 "callers": [
 "006d3c10",
 "006d3e70"
@@ -234762,10 +234787,10 @@
 ]
 },
 "006d4f50": {
-"name": "FUN_006d4f50",
+"name": "S_MissionNameLess",
 "size": 99,
-"lines": 40,
-"chars": 817,
+"lines": 38,
+"chars": 758,
 "callers": [
 "006d38f0",
 "006d3c10",
@@ -300022,6 +300047,7 @@
 "006cc200",
 "006cc220",
 "006cc280",
+"006cc8d0",
 "006cc9a0",
 "006cca70",
 "006cca90",

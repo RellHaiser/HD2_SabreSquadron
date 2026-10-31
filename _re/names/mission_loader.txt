@@ -18,9 +18,25 @@
 006cc250 StaticInit_6cc250
 006cca70 MissionLoader_StrDtor1
 006cca90 MissionLoader_StrDtor2
-# (Declared for part 8f-iii.)
+# Part 8f-iii: scene2.bin (0x006cc280..0x006cdc90, the map code 0x006d3840..0x006d4240).
 006cc280 C_MissionLoader::LoadScene2 | int __fastcall LoadScene2(void * this)
-006ccab0 C_MissionLoader::LoadObjects | void __thiscall LoadObjects(void * this, C_chunk * chunk, int stage)
+006ccab0 C_MissionLoader::LoadObjects | bool __thiscall LoadObjects(void * this, C_chunk * chunk, int stage)
+006cc8d0 C_MissionLoader::NameFrame | uint __stdcall NameFrame(I3D_frame * frame, void * context)
+006cdc60 S_TShiftEntry::S_TShiftEntry | void * __thiscall S_TShiftEntry(void * this, void * frame, void * mesh, int unknown0C, int unknown10)
+006d39f0 TShiftEntries_Insert
+006d4f50 S_MissionNameLess | bool __fastcall S_MissionNameLess(void * a, void * b)
+006d3840 MissionMapA_Index
+006d38f0 MissionMapA_Insert
+006d39d0 MissionMapA_MakePair
+006d3c10 MissionMapA_FindOrInsert
+006d3e70 MissionMapA_InsertNode
+006d40e0 MissionMapA_RotateLeft
+006d4140 MissionMapA_RotateRight
+006d41a0 MissionMapA_NewNode
+006d41c0 MissionMapA_IterDec2
+006d4220 MissionMapA_PairCopy
+# (Declared for part 8f-iv.)
+006cdc90 C_MissionLoader::LoadObject | bool __thiscall LoadObject(void * this, C_chunk * chunk)
 # The maps' code (std::map, MSVC6).
 006cb5d0 MissionMapA_Ctor
 006cbb90 MissionMapA_Init

@@ -5726,6 +5726,48 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     left for 8f-iii; absorb would take the scene2 reader). Stats: 7,798 of 12,293 functions by hand
     (71.6 % by size).
 
+  PART 8f-iii DONE (2026-10-31): scene2.bin (src/game/mission_loader.*: C_MissionLoader::LoadScene2
+  0x006cc280, LoadObjects 0x006ccab0, the scene's EnumFrames callback 0x006cc8d0, created as a
+  function in Ghidra; the loader's two std::map instances, their code and its destructor).
+  - LoadScene2: the tyres and the car surfaces, then scene2.bin (none: 3): the scene's frames named
+    in m_frames (EnumFrames, types 0x4FFFF; the primary, backdrop and omni sectors by their names;
+    the maps' order strcmp, 0x006d4f50), the scene's camera (none: one made at (10, 5, 10) looking
+    (-1, -0.1, -1) and added) perspective, 0.1 .. 500 m, 80 degrees, active; then its object chunk
+    (another chunk: 0; a header or the chunk failing: 1).
+  - LoadObjects (bool; actors.bin and sounds.bin use it too): per entry the loading screen's
+    progress (the file's position over its size); 0x0001 C_game +0x66 / +0x68, 0x3010 the field of
+    view, 0x3011 the far clip (the near 0.1), 0x3012 the camera orthogonal, 0x3013 a float unused,
+    0x3200 the scene's +0x210 (SetUnknown210), 0x3211 the scene's slot 0xE4 (UnknownE4; the first
+    float at least 0.1), 0x4000 the objects (0x4010: LoadObject, 0x006cdc90, part 8f-iv, declared;
+    progress per object), 0xAE00 the shifting textures (0xAE01: two values and a name: a
+    lightmapped or object visual with a mesh goes to g_tshiftModule), 0xAE20 the actors (0xAE23
+    the frame: m_frames, else the scene's, else the driver's FindFrame; 0xAE22 the type:
+    CreateActor, SetFrame failing destroys it; 0xAE24 the properties), 0xAE40 the checkpoint
+    networks, 0xB004 the driver's state 1 (set when it differs), 0xB600 IGraph's render state 0xC,
+    0xB650 C_game +0xD8, 0xB700 the effects module's shadow parameters (SetShadowParams; the file's
+    order: the heights and sizes first), 0xB810 the lightmap groups, 0xB820 frames named for the
+    scene's slot 0x128 (Unknown128), 0xB840 / 0xB880 the music and the alarm music.
+  - Quirks kept: an entry too short keeps the value the last of its kind read (zero here where the
+    original reads its stack); an actor's unknown part is not left; a B820 header that does not
+    read keeps the last id; the name lookups leave null entries in m_frames. Fixes: the shifting
+    texture's name length kept in its buffer; the names as text (not as the format).
+  - C_chunk::HasMore (the original's inline loop test 0x004476c0 != 0), GetPosition, GetFileSize.
+  - Harness: mission_test.inc's MsScene2Test in the camera build ("scene2:", 13 checks; the
+    actors module's CreateActor / DestroyActor, the scene's EnumFrames / slots 0xE4 / 0x128 /
+    AddFrame, the driver's FindFrame, the tyres, the surfaces and LoadObject faked; the effects
+    module, the texture shifting and the lightmap groups real); the 8f-ii tests on the real reader.
+    0 of 22 in both orders.
+  - Mutations (mutations/mutate_8f3.py): the first run caught 105 of 126 (21 survived); 5
+    equivalent (see the file's docstring), new cases for 16 (short entries' first values, the name
+    length's edges, the progress inside the object list and before the file's end, the EnumFrames
+    callback's result, a destroyed actor's properties, an over-ascended object chunk); the full rerun: all 121 caught.
+    Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0 of
+    37.
+  - Build: 202 files clean (MSVC). Tier 1: 518 errors in 88 files, 211 stubs (was 521 / 89 / 214). ret_audit --src: 52.
+  - Ghidra: names/mission_loader.txt (16 added: the map code, the texture entry, the comparison);
+    39 functions in ported.txt (with the maps' code left from 8f-ii). Stats: 7,837 of 12,294
+    functions by hand (72.0 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
