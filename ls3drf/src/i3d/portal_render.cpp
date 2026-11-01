@@ -7,7 +7,6 @@
 #include "core/debug.h"
 #include "i3d/camera.h"
 #include "i3d/i3d_hooks.h"
-#include "i3d/occluder.h"
 #include "i3d/portal.h"
 #include "i3d/render_passes.h"
 #include "i3d/render_state.h"
@@ -193,8 +192,8 @@ S_vector EdgeNormal(const S_vector &a, const S_vector &b)
 }  // namespace
 
 // The frames below `parent` within the depth range and the side planes join the list sector's
-// render list (with a portal: marked for the portal pass); a sector then tests its occluders
-// against the camera's whole view (0x1003f380).
+// render list (with a portal: marked for the portal pass): 0x1003f380 without its tail, which
+// tested the sector's occluders (LS3DRF has no occlusion).
 static void CollectFrames(I3D_frame *parent)
 {
     for (I3D_frame *f = parent->firstChild; f; f = f->nextSibling) {
@@ -236,53 +235,6 @@ static void CollectFrames(I3D_frame *parent)
         }
         if (f->firstChild)
             CollectFrames(f);
-    }
-    if (parent->type != FRAME_SECTOR)
-        return;
-
-    // The sector's occluders against the camera's whole view.
-    I3D_camera *cam = g_renderCamera;
-    const float w = cam->nearHalfWidth * 100.0f;
-    const float h = cam->nearHalfHeight * 100.0f;
-    const float n = cam->nearRange * 100.0f;
-    const S_vector q0 = S_vector(-w, h, n) * cam->invViewMatrix;
-    const S_vector q1 = S_vector(-w, -h, n) * cam->invViewMatrix;
-    const S_vector q2 = S_vector(w, h, n) * cam->invViewMatrix;
-    const S_vector q3 = S_vector(w, -h, n) * cam->invViewMatrix;
-    const S_vector eye = cam->GetMatrix()(3);
-    const S_vector p0 = cam->frustum[0].normal;
-    const float d0 = cam->frustumD[0];
-    S_vector na = EdgeNormal(q1 - q0, eye - q0);
-    NormalizeWithSquare(na, SquareXZY(na));
-    const float da = -((eye.x * na.x + eye.z * na.z) + eye.y * na.y);
-    S_vector nb = EdgeNormal(q2 - q3, eye - q3);
-    NormalizeWithSquare(nb, SquareZYX(nb));
-    const float db = -((eye.x * nb.x + nb.z * eye.z) + nb.y * eye.y);
-    S_vector nc = EdgeNormal(q0 - q2, eye - q2);
-    NormalizeWithSquare(nc, SquareZYX(nc));
-    const float dc = -((eye.x * nc.x + nc.z * eye.z) + nc.y * eye.y);
-    S_vector nd = EdgeNormal(q3 - q1, eye - q1);
-    NormalizeWithSquare(nd, SquareZYX(nd));
-    const float dd = -((nd.z * eye.z + nd.y * eye.y) + nd.x * eye.x);
-    I3D_sector *sector = static_cast<I3D_sector *>(parent);
-    for (I3D_occluder *o = sector->occluders; o; o = o->nextInSector) {
-        const S_vector &oc = o->center;
-        const float depth = ((oc.z * p0.z + oc.y * p0.y) + oc.x * p0.x) + d0;
-        o->viewDepth = depth;
-        if (!(depth + o->radius > cam->nearRange))
-            continue;
-        if (!(depth - o->radius < cam->farRange))
-            continue;
-        const float nr = -o->radius;
-        if (!(((na.z * oc.z + na.y * oc.y) + na.x * oc.x) + da > nr))
-            continue;
-        if (!(((nb.z * oc.z + nb.y * oc.y) + nb.x * oc.x) + db > nr))
-            continue;
-        if (!(((nc.z * oc.z + nc.y * oc.y) + nc.x * oc.x) + dc > nr))
-            continue;
-        if (!(((oc.y * nd.y + nd.x * oc.x) + nd.z * oc.z) + dd > nr))
-            continue;
-        o->frameFlags |= FRMFLAGS_PORTAL_TEST;
     }
 }
 
@@ -398,8 +350,8 @@ static void CollectVisuals(I3D_sector *sector, I3D_portal *portal, uint32_t mode
 // its projection overlaps the clip rect of the portal it is seen through (0x10041dc0).
 static void ParsePortal(I3D_portal *prev, I3D_portal *portal, bool backwards);
 
-// Enters `sector` (through `portal`, null for the camera's): its visuals, its occluders, then the
-// portals the camera sees (0x10042620).
+// Enters `sector` (through `portal`, null for the camera's): its visuals, then the portals the
+// camera sees (0x10042620).
 static void TraverseSector(I3D_sector *sector, I3D_portal *portal)
 {
     if (!(sector->frameFlags & FRMFLAGS_ON))
@@ -454,18 +406,14 @@ static void TraverseSector(I3D_sector *sector, I3D_portal *portal)
         s_sectorStackOverflow = true;
     }
     s_listSector = sector;
-    if (!(sector->sectorFlags & 0x10)) {
+    if (!(sector->sectorFlags & 0x10))
         sector->renderVisuals = nullptr;
-        CollectVisuals(sector, portal, 0);
-        OccludePortals(sector);
-    } else {
-        CollectVisuals(sector, portal, 0);
-    }
+    CollectVisuals(sector, portal, 0);
     const S_vector e = cam->GetMatrix()(3);
     for (int i = 0; i < sector->portals.Size(); ++i) {
         I3D_portal *p = sector->portals[i];
         const float d = ((e.y * p->plane.normal.y + e.z * p->plane.normal.z) + e.x * p->plane.normal.x) + p->plane.d;
-        if (d > 0.0f && !(p->portalFlags & PRTF_OCCLUDED))
+        if (d > 0.0f)
             ParsePortal(portal, p, false);
     }
     for (int i = 0; i < sector->incomingPortals.Size(); ++i) {
@@ -473,7 +421,7 @@ static void TraverseSector(I3D_sector *sector, I3D_portal *portal)
         if (p->otherSide)
             continue;
         const float d = ((e.y * p->plane.normal.y + e.z * p->plane.normal.z) + e.x * p->plane.normal.x) + p->plane.d;
-        if (d < 0.0f && !(p->portalFlags & PRTF_OCCLUDED))
+        if (d < 0.0f)
             ParsePortal(portal, p, true);
     }
     if (pushed)
@@ -643,7 +591,6 @@ void TraverseSectors(I3D_scene *scene)
             } while (p != scene->firstPortal);
         }
     }
-    RebuildOccluderLists(scene);
     I3D_sector *start = g_renderCamera->sector;
     if (!start)
         return;

@@ -18,7 +18,6 @@
 #include "i3d/mesh.h"
 #include "i3d/mirror.h"
 #include "i3d/object.h"
-#include "i3d/occluder.h"
 #include "i3d/render_helpers.h"
 #include "i3d/render_passes.h"
 #include "i3d/render_state.h"
@@ -806,7 +805,6 @@ I3D_RESULT I3D_driver::Render(I3D_scene *scene, bool keepScene)
     g_rc.sector = nullptr;
     g_viewProjection = &cam->viewProjection;
     TraverseSectors(scene);
-    OccludeSectors(scene);
     if (!g_inRenderCallback && g_driverStates[DRVSTATE_DRAW_VISUALS]) {
         // The backdrop, around the camera: back to front by the distance from it.
         if (scene->backdropSector->sectorFlags & SCTF_VISIBLE) {

@@ -107,7 +107,7 @@ enum : int {
     DRVSTATE_LOD_SCALE = 0x14,          // (a float) LOD distance scale
     DRVSTATE_TEX_HALF = 0x15,           // ... at half size
     DRVSTATE_TEX_COMPRESS = 0x19,       // ... DXT compressed
-    DRVSTATE_OCCLUSION = 0x27,          // occluders hide sectors' visuals and portals
+    DRVSTATE_OCCLUSION = 0x27,          // occluders hide sectors' visuals and portals (unread: no occlusion)
     DRVSTATE_LM_SAMPLES = 0x28,         // Construct: light samples per lightmap texel, along each axis
     DRVSTATE_SHADOWS = 0x2B,            // shadows are drawn
     DRVSTATE_LM_TRUECOLOR = 0x22,       // lightmap atlas textures 32-bit (when the device has it)

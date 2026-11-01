@@ -161,7 +161,7 @@ public:
     S_plane *planes;                        // +0x274 world space, the inside behind (16-byte aligned)
     I3D_sector *nextInScene;                // +0x278 scene ring (null: not in the ring)
     I3D_sector *prevInScene;                // +0x27C
-    I3D_occluder *occluders;                // +0x280 (renderer) the occluders in it (RebuildOccluderLists)
+    I3D_occluder *occluders;                // +0x280 (renderer) the occluders in it (Init's null: no occlusion)
     I3D_occluder *occluder;                 // +0x284 MakeReady's
     I3D_visual *renderVisuals;              // +0x288 (renderer) its visuals drawn this frame
     uint32_t padding28C;
