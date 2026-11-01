@@ -131,6 +131,8 @@ struct S_OpenFile {
 std::map<int, S_OpenFile> g_handles;
 int g_nextHandle = 1;
 }  // namespace
+// The files open (part 9a's test: each opened one closed).
+size_t DtaOpenCount() { return g_handles.size(); }
 
 bool g_dtaArchivesFirst;                                // the last dtaOpen's flag (part 8's test)
 int __stdcall dtaOpen(const char *fileName, bool archivesFirst)

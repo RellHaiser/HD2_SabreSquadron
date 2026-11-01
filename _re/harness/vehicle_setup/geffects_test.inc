@@ -9,6 +9,11 @@
 #include "game/collision.h"
 #include "game/geffects.h"
 #include "game/human_movement.h"
+#define private public
+#define protected public
+#include "game/font.h"                                 // (fonts_test.inc)
+#undef protected
+#undef private
 #include "game/interface.h"
 
 namespace {

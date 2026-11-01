@@ -27432,6 +27432,26 @@
   "name": "C_FontManager::FindFont",
   "proto": "void * __thiscall FindFont(void *this, int id)"
  },
+ "0063e000": {
+  "module": "font",
+  "name": "C_FontManager::Load",
+  "proto": "void __thiscall Load(void *this)"
+ },
+ "0063edd0": {
+  "module": "font",
+  "name": "C_FontManager::Free",
+  "proto": "void __thiscall Free(void *this)"
+ },
+ "0063efc0": {
+  "module": "font",
+  "name": "C_Font::~C_Font",
+  "proto": "void __thiscall ~C_Font(void *this)"
+ },
+ "0063efd0": {
+  "module": "font",
+  "name": "C_Font::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
  "0063eff0": {
   "module": "zz_idioms",
   "name": "empty_function_63eff0"
@@ -27447,6 +27467,34 @@
  "0063f020": {
   "module": "zz_idioms",
   "name": "empty_function_63f020"
+ },
+ "0063f230": {
+  "module": "font",
+  "name": "C_FontManager::AddCp1250Font"
+ },
+ "0063f3c0": {
+  "module": "font",
+  "name": "C_TextureFont::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0063f3e0": {
+  "module": "font",
+  "name": "C_MapFont::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0063f400": {
+  "module": "font",
+  "name": "C_FontManager::AddMapFont",
+  "proto": "bool __thiscall AddMapFont(void *this, char * texture, char * table, int id)"
+ },
+ "0063f590": {
+  "module": "font",
+  "name": "C_FontManager::AddTextureFont",
+  "proto": "bool __thiscall AddTextureFont(void *this, char * texture, char * table, int id)"
+ },
+ "0063f620": {
+  "module": "font",
+  "name": "FontList_PushBack"
  },
  "00640460": {
   "module": "zz_idioms",
@@ -27467,6 +27515,118 @@
  "00640500": {
   "module": "zz_idioms",
   "name": "construct_copy4_640500"
+ },
+ "00640540": {
+  "module": "font",
+  "name": "C_TextureFont::~C_TextureFont",
+  "proto": "void __thiscall ~C_TextureFont(void *this)"
+ },
+ "006405c0": {
+  "module": "font",
+  "name": "C_TextureFont::Select",
+  "proto": "void __thiscall Select(void *this)"
+ },
+ "006405e0": {
+  "module": "font",
+  "name": "C_TextureFont::GetGlyph",
+  "proto": "void * __thiscall GetGlyph(void *this, int ch)"
+ },
+ "00640600": {
+  "module": "font",
+  "name": "C_TextureFont::LoadWithId",
+  "proto": "bool __thiscall LoadWithId(void *this, char * texture, char * table, int id)"
+ },
+ "00640630": {
+  "module": "font",
+  "name": "C_TextureFont::Load",
+  "proto": "bool __thiscall Load(void *this, char * texture, char * table)"
+ },
+ "006406c0": {
+  "module": "font",
+  "name": "C_TextureFont::ClearVertices",
+  "proto": "void __thiscall ClearVertices(void *this)"
+ },
+ "006406d0": {
+  "module": "font",
+  "name": "C_TextureFont::Flush",
+  "proto": "void __thiscall Flush(void *this)"
+ },
+ "00640740": {
+  "module": "font",
+  "name": "C_TextureFont::GrowVertices",
+  "proto": "void __thiscall GrowVertices(void *this)"
+ },
+ "006407e0": {
+  "module": "font",
+  "name": "C_TextureFont::AddQuad",
+  "proto": "void __thiscall AddQuad(void *this, int ch, uint color, int width, int height, int x, int y, float z)"
+ },
+ "00640a00": {
+  "module": "font",
+  "name": "C_MapFont::~C_MapFont",
+  "proto": "void __thiscall ~C_MapFont(void *this)"
+ },
+ "00640bd0": {
+  "module": "font",
+  "name": "GlyphMap_Dtor"
+ },
+ "00640cc0": {
+  "module": "font",
+  "name": "C_MapFont::GetGlyph",
+  "proto": "void * __thiscall GetGlyph(void *this, int ch)"
+ },
+ "00640d30": {
+  "module": "font",
+  "name": "C_MapFont::Load",
+  "proto": "bool __thiscall Load(void *this, char * texture, char * table)"
+ },
+ "00640f60": {
+  "module": "font",
+  "name": "C_MapFont::MapCp1250"
+ },
+ "00641720": {
+  "module": "font",
+  "name": "C_MapFont::LoadCp1250"
+ },
+ "00641760": {
+  "module": "font",
+  "name": "GlyphMap_Begin"
+ },
+ "00641770": {
+  "module": "font",
+  "name": "GlyphMap_MakePairResult"
+ },
+ "00641790": {
+  "module": "font",
+  "name": "GlyphMap_Erase"
+ },
+ "00641ba0": {
+  "module": "font",
+  "name": "GlyphMap_EraseSubtree"
+ },
+ "00641be0": {
+  "module": "font",
+  "name": "GlyphMap_InsertNode"
+ },
+ "00641e50": {
+  "module": "font",
+  "name": "GlyphMap_IterIncCopy"
+ },
+ "00641eb0": {
+  "module": "font",
+  "name": "GlyphMap_LowerBound"
+ },
+ "00641ee0": {
+  "module": "font",
+  "name": "GlyphMap_IterDec"
+ },
+ "00641f40": {
+  "module": "font",
+  "name": "GlyphMap_IterInc"
+ },
+ "00641f90": {
+  "module": "font",
+  "name": "GlyphMap_NewNode"
  },
  "00643bf0": {
   "module": "hud",

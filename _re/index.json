@@ -2003,7 +2003,6 @@
 "00639b40",
 "0063a1a0",
 "0063e000",
-"0063e054",
 "0063f870",
 "00644520",
 "00650390",
@@ -178070,7 +178069,7 @@
 "name": "AcquireFontManager",
 "size": 43,
 "lines": 12,
-"chars": 258,
+"chars": 265,
 "callers": [
 "0048eb70",
 "00495f40",
@@ -178121,7 +178120,7 @@
 "name": "ReleaseFontManager",
 "size": 45,
 "lines": 14,
-"chars": 273,
+"chars": 315,
 "callers": [
 "004960f0"
 ],
@@ -178140,7 +178139,7 @@
 "name": "C_FontManager::Release",
 "size": 25,
 "lines": 15,
-"chars": 249,
+"chars": 251,
 "callers": [
 "0048ecf0",
 "004950c0",
@@ -178184,7 +178183,7 @@
 "00495190",
 "00495360",
 "00495a00",
-"0063e054",
+"0063e000",
 "00645010"
 ],
 "callees": [],
@@ -178195,43 +178194,12 @@
 "in_vtables": []
 },
 "0063e000": {
-"name": "FUN_0063e000",
-"size": 84,
+"name": "C_FontManager::Load",
+"size": 2772,
 "lines": 499,
-"chars": 16605,
+"chars": 16703,
 "callers": [
 "0063df00"
-],
-"callees": [
-"00405100",
-"00409f20",
-"0048fbc0",
-"0063eae0",
-"0063ee20",
-"0063f400",
-"0063f590",
-"0063f870",
-"006b6a70",
-"006b6ad0",
-"006b6d50",
-"007e2120",
-"007e530e"
-],
-"imports": [],
-"strings": [],
-"vtables": [],
-"globals": [
-"008aea0c"
-],
-"in_vtables": []
-},
-"0063e054": {
-"name": "FUN_0063e054",
-"size": 2688,
-"lines": 461,
-"chars": 14998,
-"callers": [
-"0063e000"
 ],
 "callees": [
 "00405100",
@@ -178242,8 +178210,10 @@
 "0063ee20",
 "0063f400",
 "0063f590",
+"0063f870",
 "006b6a70",
 "006b6ad0",
+"006b6d50",
 "007e2120",
 "007e530e"
 ],
@@ -178333,10 +178303,10 @@
 "in_vtables": []
 },
 "0063edd0": {
-"name": "FUN_0063edd0",
+"name": "C_FontManager::Free",
 "size": 75,
 "lines": 23,
-"chars": 556,
+"chars": 574,
 "callers": [
 "0063df30",
 "0063df60"
@@ -178382,10 +178352,10 @@
 "in_vtables": []
 },
 "0063efc0": {
-"name": "FUN_0063efc0",
+"name": "C_Font::~C_Font",
 "size": 7,
 "lines": 8,
-"chars": 160,
+"chars": 163,
 "callers": [
 "008046eb",
 "00804720",
@@ -178401,10 +178371,10 @@
 "in_vtables": []
 },
 "0063efd0": {
-"name": "FUN_0063efd0",
+"name": "C_Font::ScalarDeletingDestructor",
 "size": 32,
-"lines": 11,
-"chars": 248,
+"lines": 12,
+"chars": 260,
 "callers": [],
 "callees": [
 "007e2120"
@@ -178572,10 +178542,10 @@
 "in_vtables": []
 },
 "0063f230": {
-"name": "FUN_0063f230",
+"name": "C_FontManager::AddCp1250Font",
 "size": 392,
 "lines": 80,
-"chars": 2135,
+"chars": 2213,
 "callers": [],
 "callees": [
 "0063f3e0",
@@ -178599,10 +178569,10 @@
 "in_vtables": []
 },
 "0063f3c0": {
-"name": "FUN_0063f3c0",
+"name": "C_TextureFont::ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 204,
+"lines": 12,
+"chars": 240,
 "callers": [
 "0063f590"
 ],
@@ -178622,10 +178592,10 @@
 ]
 },
 "0063f3e0": {
-"name": "FUN_0063f3e0",
+"name": "C_MapFont::ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 213,
+"lines": 12,
+"chars": 228,
 "callers": [
 "0063f230",
 "0063f400"
@@ -178646,13 +178616,12 @@
 ]
 },
 "0063f400": {
-"name": "FUN_0063f400",
+"name": "C_FontManager::AddMapFont",
 "size": 392,
 "lines": 80,
-"chars": 2096,
+"chars": 2113,
 "callers": [
-"0063e000",
-"0063e054"
+"0063e000"
 ],
 "callees": [
 "0063f3e0",
@@ -178676,13 +178645,12 @@
 "in_vtables": []
 },
 "0063f590": {
-"name": "FUN_0063f590",
+"name": "C_FontManager::AddTextureFont",
 "size": 138,
-"lines": 36,
-"chars": 814,
+"lines": 35,
+"chars": 774,
 "callers": [
 "0063e000",
-"0063e054",
 "0063f870"
 ],
 "callees": [
@@ -178701,10 +178669,10 @@
 "in_vtables": []
 },
 "0063f620": {
-"name": "FUN_0063f620",
+"name": "FontList_PushBack",
 "size": 424,
 "lines": 72,
-"chars": 2293,
+"chars": 2298,
 "callers": [
 "0063ee20",
 "0063f230",
@@ -178910,10 +178878,10 @@
 ]
 },
 "00640540": {
-"name": "FUN_00640540",
+"name": "C_TextureFont::~C_TextureFont",
 "size": 113,
 "lines": 28,
-"chars": 798,
+"chars": 839,
 "callers": [
 "0063f3c0",
 "00640a00",
@@ -178934,10 +178902,10 @@
 "in_vtables": []
 },
 "006405c0": {
-"name": "FUN_006405c0",
+"name": "C_TextureFont::Select",
 "size": 29,
 "lines": 13,
-"chars": 269,
+"chars": 278,
 "callers": [],
 "callees": [
 "007e530e"
@@ -178958,10 +178926,10 @@
 ]
 },
 "006405e0": {
-"name": "FUN_006405e0",
+"name": "C_TextureFont::GetGlyph",
 "size": 27,
 "lines": 10,
-"chars": 195,
+"chars": 185,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -178976,10 +178944,10 @@
 ]
 },
 "00640600": {
-"name": "FUN_00640600",
+"name": "C_TextureFont::LoadWithId",
 "size": 43,
 "lines": 14,
-"chars": 334,
+"chars": 290,
 "callers": [
 "0063f400",
 "0063f590"
@@ -178992,10 +178960,10 @@
 "in_vtables": []
 },
 "00640630": {
-"name": "FUN_00640630",
+"name": "C_TextureFont::Load",
 "size": 133,
 "lines": 39,
-"chars": 1067,
+"chars": 992,
 "callers": [
 "00641720"
 ],
@@ -179017,10 +178985,10 @@
 ]
 },
 "006406c0": {
-"name": "FUN_006406c0",
+"name": "C_TextureFont::ClearVertices",
 "size": 11,
 "lines": 8,
-"chars": 114,
+"chars": 130,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -179039,10 +179007,10 @@
 ]
 },
 "006406d0": {
-"name": "FUN_006406d0",
+"name": "C_TextureFont::Flush",
 "size": 99,
 "lines": 15,
-"chars": 444,
+"chars": 452,
 "callers": [],
 "callees": [
 "007e530e"
@@ -179063,10 +179031,10 @@
 ]
 },
 "00640740": {
-"name": "FUN_00640740",
+"name": "C_TextureFont::GrowVertices",
 "size": 159,
 "lines": 43,
-"chars": 1101,
+"chars": 1116,
 "callers": [],
 "callees": [
 "007e2120",
@@ -179088,10 +179056,10 @@
 ]
 },
 "006407e0": {
-"name": "FUN_006407e0",
+"name": "C_TextureFont::AddQuad",
 "size": 532,
-"lines": 99,
-"chars": 2887,
+"lines": 98,
+"chars": 2811,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -179112,10 +179080,10 @@
 ]
 },
 "00640a00": {
-"name": "FUN_00640a00",
+"name": "C_MapFont::~C_MapFont",
 "size": 454,
 "lines": 91,
-"chars": 2536,
+"chars": 2626,
 "callers": [
 "0063f3e0"
 ],
@@ -179141,10 +179109,10 @@
 "in_vtables": []
 },
 "00640bd0": {
-"name": "FUN_00640bd0",
+"name": "GlyphMap_Dtor",
 "size": 234,
 "lines": 54,
-"chars": 1501,
+"chars": 1519,
 "callers": [
 "00804918"
 ],
@@ -179167,10 +179135,10 @@
 "in_vtables": []
 },
 "00640cc0": {
-"name": "FUN_00640cc0",
+"name": "C_MapFont::GetGlyph",
 "size": 97,
 "lines": 21,
-"chars": 588,
+"chars": 526,
 "callers": [],
 "callees": [
 "00641eb0"
@@ -179187,10 +179155,10 @@
 ]
 },
 "00640d30": {
-"name": "FUN_00640d30",
+"name": "C_MapFont::Load",
 "size": 559,
 "lines": 132,
-"chars": 3804,
+"chars": 3748,
 "callers": [],
 "callees": [
 "00641760",
@@ -179219,10 +179187,10 @@
 ]
 },
 "00640f60": {
-"name": "FUN_00640f60",
+"name": "C_MapFont::MapCp1250",
 "size": 1977,
-"lines": 336,
-"chars": 9294,
+"lines": 337,
+"chars": 9416,
 "callers": [
 "00641720"
 ],
@@ -179241,10 +179209,10 @@
 "in_vtables": []
 },
 "00641720": {
-"name": "FUN_00641720",
+"name": "C_MapFont::LoadCp1250",
 "size": 50,
-"lines": 17,
-"chars": 417,
+"lines": 18,
+"chars": 453,
 "callers": [
 "0063f230"
 ],
@@ -179259,10 +179227,10 @@
 "in_vtables": []
 },
 "00641760": {
-"name": "FUN_00641760",
+"name": "GlyphMap_Begin",
 "size": 14,
 "lines": 8,
-"chars": 133,
+"chars": 135,
 "callers": [
 "00640a00",
 "00640bd0",
@@ -179277,10 +179245,10 @@
 "in_vtables": []
 },
 "00641770": {
-"name": "FUN_00641770",
+"name": "GlyphMap_MakePairResult",
 "size": 22,
 "lines": 9,
-"chars": 186,
+"chars": 197,
 "callers": [
 "00640d30",
 "00640f60"
@@ -179293,10 +179261,10 @@
 "in_vtables": []
 },
 "00641790": {
-"name": "FUN_00641790",
+"name": "GlyphMap_Erase",
 "size": 1030,
 "lines": 294,
-"chars": 9443,
+"chars": 9449,
 "callers": [
 "00640a00",
 "00640bd0",
@@ -179317,10 +179285,10 @@
 "in_vtables": []
 },
 "00641ba0": {
-"name": "FUN_00641ba0",
+"name": "GlyphMap_EraseSubtree",
 "size": 59,
 "lines": 17,
-"chars": 295,
+"chars": 313,
 "callers": [
 "00640a00",
 "00640bd0",
@@ -179340,10 +179308,10 @@
 "in_vtables": []
 },
 "00641be0": {
-"name": "FUN_00641be0",
+"name": "GlyphMap_InsertNode",
 "size": 612,
-"lines": 163,
-"chars": 5281,
+"lines": 164,
+"chars": 5293,
 "callers": [
 "00640d30",
 "00640f60"
@@ -179361,10 +179329,10 @@
 "in_vtables": []
 },
 "00641e50": {
-"name": "FUN_00641e50",
+"name": "GlyphMap_IterIncCopy",
 "size": 86,
 "lines": 33,
-"chars": 784,
+"chars": 792,
 "callers": [
 "00640a00",
 "00640d30"
@@ -179379,10 +179347,10 @@
 "in_vtables": []
 },
 "00641eb0": {
-"name": "FUN_00641eb0",
+"name": "GlyphMap_LowerBound",
 "size": 45,
 "lines": 27,
-"chars": 606,
+"chars": 613,
 "callers": [
 "00640cc0"
 ],
@@ -179396,10 +179364,10 @@
 "in_vtables": []
 },
 "00641ee0": {
-"name": "FUN_00641ee0",
+"name": "GlyphMap_IterDec",
 "size": 81,
 "lines": 32,
-"chars": 682,
+"chars": 686,
 "callers": [
 "00640d30",
 "00640f60"
@@ -179414,10 +179382,10 @@
 "in_vtables": []
 },
 "00641f40": {
-"name": "FUN_00641f40",
+"name": "GlyphMap_IterInc",
 "size": 67,
 "lines": 29,
-"chars": 669,
+"chars": 673,
 "callers": [
 "00640a00",
 "00640bd0",
@@ -179433,10 +179401,10 @@
 "in_vtables": []
 },
 "00641f90": {
-"name": "FUN_00641f90",
+"name": "GlyphMap_NewNode",
 "size": 20,
 "lines": 16,
-"chars": 306,
+"chars": 310,
 "callers": [
 "00641be0"
 ],
@@ -299445,7 +299413,6 @@
 "0063deb0",
 "0063ded0",
 "0063e000",
-"0063e054",
 "0063ee20",
 "0063efd0",
 "0063f030",
@@ -307786,7 +307753,6 @@
 "0063c2f0",
 "0063c9d0",
 "0063e000",
-"0063e054",
 "0063eae0",
 "0063f870",
 "006405c0",

@@ -26,6 +26,8 @@ LINES = {
                "s2Progress s2Fail").split(),
     "objects": ("moName moCreate moPlace moParent moModel moCamera moLight moLightOld moBox moSound moMesh "
                 "moVisual moLightmaps moProjector moB110 moSector moFail").split(),
+    "fonts": ("foSets foLanguages foJapanese foConfig foVersion foShared foMissing foTable foQuads foGrow foFlush "
+              "foMap").split(),
 }
 
 

@@ -5849,6 +5849,45 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   9i the rest (0x00697090..0x006b0000, 15 KB: the leftovers among the ported multiplayer code, the
     key names' texts).
 
+  PART 9a-i DONE (2026-10-31): the font manager and the texture fonts (src/game/font.*, new; 9a is
+  split: 9a-i these, 9a-ii the GDI fonts and FontConfig.hxml 0x0063c2f0..0x0063ddb0 / 0x0063eae0 /
+  0x0063ee20, 9a-iii the text styles 0x00641fe0..0x006441a0; 9a starts at 0x0063c2f0, not the plan's
+  0x0063c740).
+  - C_FontManager (its object 0x008acbbc, g_fontManager 0x008acbdc; reference counted): Load
+    0x0063e000 (Ghidra had split it at its early RET: 0x0063e054 deleted, the function created
+    again whole): the set by the screen's width (1 below 800, 2 below 1024, else 3), the kind (Ce
+    for Czech / Polish, Japan, else Ansi); SYMBOLS (4) from Text\Fonts\, the Ce set's BIG / SMALL
+    (5 / 6); the eight languages with their own set (Czech, Polish, Italian, French, Spanish,
+    German, English, EnglishUS): its BIG / SMALL (2 / 3); Japanese: FontConfig.hxml ("Japanese"),
+    else GDI fonts (by the set: MS UI Gothic / Lucida Sans Unicode, their sizes), else the set's map
+    fonts; the others: FontConfig.hxml (the language), else the set's. Free 0x0063edd0 (the fonts
+    deleted from the last), AddTextureFont 0x0063f590 / AddMapFont 0x0063f400 (their id the third
+    argument, which Ghidra dropped), FindFont, the acquire and release.
+  - C_Font (vtable 0x00813b2c, abstract; 7 slots: GrowVertices, Flush, ClearVertices, the
+    destructor, Select, GetGlyph, AddQuad); C_TextureFont (0x00813b68: 256 glyphs, the .tbl file
+    whole, 0x1400 bytes; Load 0x00640630, the id wrapper 0x00640600; the quads: two triangles of
+    screen vertices each, the buffer 192 then doubled, Flush a triangle list with the texture);
+    C_MapFont (0x00813b48: std::map<int, S_Glyph>, the .tbl a count then code and glyph; the first
+    of a code kept). text_box.h takes them from font.h.
+  - Quirks kept: a vertex buffer gone with its size kept is not made again; Flush leaves the quads;
+    a map font's entries' reads are not checked (a short file repeats the last values). Fixes: a
+    map font's quads take their glyphs from its table, zero (the original's is not set). Dropped:
+    the 1.0 / 1.1 versions' own font set 0x0063f870 (the version is the constant 1.12).
+  - Unreferenced (no code or data references; left in tier 1): a code page 1250 map font
+    (0x0063f230, 0x00641720, its table of Unicode codes 0x00640f60).
+  - Harness: fonts_test.inc in the camera build ("fonts:", 12 checks; the profile's language and
+    text directory, the version, FontConfig.hxml / the GDI fonts and IGraph faked; the stub
+    profile.h's language methods; car_stubs.cpp's DtaOpenCount). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9a1.py): the first run caught 77 of 93 (16 survived); 8
+    equivalent (see the file's docstring), new cases for 8 (a size of 1, one vertex, the disk
+    first, the files closed, a count without entries, the first font freed); the full rerun caught
+    85 of 93 (the 8 equivalent). Baselines: the world build 0 of 22 in both orders; the item build 0
+    of 37; the other five 0 of 37.
+  - Build: 203 files clean (MSVC). Tier 1: 516 errors in 87 files, 209 stubs (518 / 88 / 211
+    before). ret_audit --src: 52.
+  - Ghidra: names/font.txt (35); 40 functions in ported.txt. Stats: 7,879 of 12,293 functions by
+    hand (72.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

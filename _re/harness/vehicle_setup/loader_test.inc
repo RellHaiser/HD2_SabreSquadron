@@ -7,7 +7,11 @@
 #define private public
 #include "game/campaign.h"
 #include "game/loader_screen.h"
-#include "game/text_box.h"
+#define private public
+#define protected public
+#include "game/text_box.h"                             // (with game/font.h: fonts_test.inc)
+#undef protected
+#undef private
 #undef private
 
 extern bool g_textIds;                                  // (car_stubs.cpp: every text "text <id>")

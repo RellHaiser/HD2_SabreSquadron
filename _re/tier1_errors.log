@@ -306,14 +306,10 @@ f_00638dc0.cpp:2096:13: invalid type argument of unary '*' (have 'uint32_t' {aka
     *DAT_008ae5b0 = (int)pvVar3;
 f_0063c2c0.cpp:296:3: '_param_3' was not declared in this scope; did you mean 'param_3'?
     _param_3 = (uint32_t)param_3;
-f_0063de40.cpp:1331:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
+f_0063de40.cpp:302:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbb8[2] = 0;
-f_0063de40.cpp:1575:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
+f_0063de40.cpp:527:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_0063de40.cpp:1669:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    DAT_008acbe8[2] = 0;
-f_00640510.cpp:100:29: request for member 'Release' in '* self->tier1::C_auto_00813b68_vtbl::vf00', which is of non-class type 'tier1::code' {aka 'unsigned int(...)'}
-    uVar1 = (*self->vf00->Release)((IImage *)self);
 f_00643b20.cpp:2427:7: '_local_1c' was not declared in this scope; did you mean 'local_1c'?
     _local_1c = CONCAT31(uStack_1b,bVar2);
 f_00643b20.cpp:3413:78: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}

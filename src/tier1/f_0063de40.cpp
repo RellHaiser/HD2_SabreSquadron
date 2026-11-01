@@ -74,1015 +74,6 @@ uint32_t FUN_0063ded0(uint32_t *param_1, ...)
 }
 
 
-// 0x0063df00
-void * AcquireFontManager(...)
-{
-  if (DAT_008acbdc == 0) {
-    DAT_008acbdc = &DAT_008acbbc;
-    FUN_0063e000(&DAT_008acbbc);
-  }
-  *(int *)(DAT_008acbdc + 4) = *(int *)(DAT_008acbdc + 4) + 1;
-  return DAT_008acbdc;
-  return 0;
-}
-
-
-// 0x0063df30
-uint32_t ReleaseFontManager(...)
-{
-  if (DAT_008acbdc != 0) {
-    *(int *)(DAT_008acbdc + 4) = *(int *)(DAT_008acbdc + 4) - 1;
-    if (*(int *)(DAT_008acbdc + 4) == 0) {
-      FUN_0063edd0(DAT_008acbdc);
-      DAT_008acbdc = 0;
-    }
-  }
-  return 0;
-}
-
-
-// 0x0063df60
-uint32_t C_FontManager__Release(void *_this, ...)
-{
-  int iVar1;
-  iVar1 = *(int *)((int)_this + 4) - 1;
-  *(int *)((int)_this + 4) = iVar1;
-  if (iVar1 == 0) {
-    FUN_0063edd0((int)_this);
-    DAT_008acbdc = 0;
-  }
-  return 0;
-}
-
-
-// 0x0063df80
-void * C_FontManager__FindFont(void *_this,int id, ...)
-{
-  uint32_t uVar1;
-  for (uVar1 = 0;
-      (*(int *)((int)_this + 0x10) != 0 &&
-      (uVar1 < (uint32_t)(*(int *)((int)_this + 0x14) - *(int *)((int)_this + 0x10) >> 2)));
-      uVar1 = uVar1 + 1) {
-    if (*(int *)(*(int *)(*(int *)((int)_this + 0x10) + uVar1 * 4) + 0x18) == id) {
-      return *(void **)(*(int *)((int)_this + 0x10) + uVar1 * 4);
-    }
-  }
-  return 0;
-  return 0;
-}
-
-
-// 0x0063e000
-uint32_t FUN_0063e000(void *param_1, ...)
-{
-  uint8_t stack0xffffffd0[64];
-  uint8_t *puStack_8;
-  bool bVar1;
-  uint8_t bVar2;
-  char cVar3;
-  IGraph *self;
-  int iVar4;
-  char *pcVar5;
-  C_str *pCVar6;
-  void *pvVar7;
-  int *piVar8;
-  char *pcVar9;
-  int *unaff_EBP;
-  uint32_t uVar10;
-  int iVar11;
-  C_str CStack_2c;
-  C_str aCStack_28 [2];
-  int local_20;
-  C_str local_1c;
-  C_str CStack_18;
-  C_str CStack_14;
-  void *pvStack_10;
-  uint32_t uStack_4;
-  uStack_4 = 0xffffffff;
-  GetGameVersion(&local_20,(int *)&local_1c);
-  if ((local_20 == 1) && ((int)local_1c.rep < 2)) {
-    FUN_0063f870(param_1);
-    return 0;
-  }
-  self = GetIGraph();
-  iVar4 = (*self->vtable->ScrnX)(self);
-  if (iVar4 < 0x400) {
-    iVar4 = (799 < iVar4) + 1;
-  }
-  else {
-    iVar4 = 3;
-  }
-  bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Czech");
-  if (bVar1) {
-    pcVar5 = &DAT_0084025c;
-  }
-  else {
-    bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Polish");
-    if (bVar1) {
-      pcVar5 = &DAT_0084025c;
-    }
-    else {
-      bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Japan");
-      pcVar5 = "Japan";
-      if (!bVar1) {
-        pcVar5 = &DAT_00840244;
-      }
-    }
-  }
-  C_fstr_Construct((C_str *)&stack0xffffffd0,"Text\\Fonts\\%s\\Set%d\\",pcVar5,iVar4);
-  puStack_8 = 0;
-  C_fstr_Construct(&CStack_2c,"Text\\Fonts\\Ce\\Set%d\\",iVar4);
-  GH_PIECE(puStack_8,0,1) = 1;
-  pCVar6 = C_fstr_Construct(&local_1c,"%s\\%s.tbl","Text\\Fonts\\","SYMBOLS"
-                           );
-  GH_PIECE(puStack_8,0,1) = 2;
-  pcVar5 = pCVar6->rep->chars;
-  if (pCVar6->rep == 0) {
-    pcVar5 = &DAT_00867a90;
-  }
-  pCVar6 = C_fstr_Construct(aCStack_28,"%s\\%s.tga","Text\\Fonts\\",
-                            "SYMBOLS");
-  puStack_8 = (uint8_t *)CONCAT31(GH_PIECE(puStack_8,1,3),3);
-  if (pCVar6->rep == 0) {
-    pcVar9 = &DAT_00867a90;
-  }
-  else {
-    pcVar9 = pCVar6->rep->chars;
-  }
-  FUN_0063f590(param_1,(int)pcVar9,pcVar5);
-  if ((aCStack_28[0].rep != 0) &&
-     ((aCStack_28[0].rep)->refCount = (aCStack_28[0].rep)->refCount - 1,
-     (aCStack_28[0].rep)->refCount == 0)) {
-    tier1_operator_delete(aCStack_28[0].rep);
-  }
-  GH_PIECE(puStack_8,0,1) = 1;
-  if ((local_1c.rep != 0) &&
-     ((local_1c.rep)->refCount = (local_1c.rep)->refCount - 1, (local_1c.rep)->refCount == 0)) {
-    tier1_operator_delete(local_1c.rep);
-  }
-  if (CStack_2c.rep == 0) {
-    pcVar5 = &DAT_00867a90;
-  }
-  else {
-    pcVar5 = (CStack_2c.rep)->chars;
-  }
-  pCVar6 = C_fstr_Construct(aCStack_28,"%s\\%s.tbl",pcVar5,&DAT_008401e4);
-  GH_PIECE(puStack_8,0,1) = 4;
-  pcVar5 = pCVar6->rep->chars;
-  if (pCVar6->rep == 0) {
-    pcVar5 = &DAT_00867a90;
-  }
-  if (CStack_2c.rep == 0) {
-    pcVar9 = &DAT_00867a90;
-  }
-  else {
-    pcVar9 = (CStack_2c.rep)->chars;
-  }
-  pCVar6 = C_fstr_Construct(&local_1c,"%s\\%s.tga",pcVar9,&DAT_008401e4);
-  puStack_8 = (uint8_t *)CONCAT31(GH_PIECE(puStack_8,1,3),5);
-  if (pCVar6->rep == 0) {
-    pcVar9 = &DAT_00867a90;
-  }
-  else {
-    pcVar9 = pCVar6->rep->chars;
-  }
-  FUN_0063f590(param_1,(int)pcVar9,pcVar5);
-  if ((local_1c.rep != 0) &&
-     ((local_1c.rep)->refCount = (local_1c.rep)->refCount - 1, (local_1c.rep)->refCount == 0)) {
-    tier1_operator_delete(local_1c.rep);
-  }
-  GH_PIECE(puStack_8,0,1) = 1;
-  if ((aCStack_28[0].rep != 0) &&
-     ((aCStack_28[0].rep)->refCount = (aCStack_28[0].rep)->refCount - 1,
-     (aCStack_28[0].rep)->refCount == 0)) {
-    tier1_operator_delete(aCStack_28[0].rep);
-  }
-  if (CStack_2c.rep == 0) {
-    pcVar5 = &DAT_00867a90;
-  }
-  else {
-    pcVar5 = (CStack_2c.rep)->chars;
-  }
-  pCVar6 = C_fstr_Construct(aCStack_28,"%s\\%s.tbl",pcVar5,"SMALL");
-  GH_PIECE(puStack_8,0,1) = 6;
-  pcVar5 = pCVar6->rep->chars;
-  if (pCVar6->rep == 0) {
-    pcVar5 = &DAT_00867a90;
-  }
-  if (CStack_2c.rep == 0) {
-    pcVar9 = &DAT_00867a90;
-  }
-  else {
-    pcVar9 = (CStack_2c.rep)->chars;
-  }
-  pCVar6 = C_fstr_Construct(&local_1c,"%s\\%s.tga",pcVar9,"SMALL");
-  puStack_8 = (uint8_t *)CONCAT31(GH_PIECE(puStack_8,1,3),7);
-  if (pCVar6->rep == 0) {
-    pcVar9 = &DAT_00867a90;
-  }
-  else {
-    pcVar9 = pCVar6->rep->chars;
-  }
-  FUN_0063f590(param_1,(int)pcVar9,pcVar5);
-  if ((local_1c.rep != 0) &&
-     ((local_1c.rep)->refCount = (local_1c.rep)->refCount - 1, (local_1c.rep)->refCount == 0)) {
-    tier1_operator_delete(local_1c.rep);
-  }
-  GH_PIECE(puStack_8,0,1) = 1;
-  if ((aCStack_28[0].rep != 0) &&
-     ((aCStack_28[0].rep)->refCount = (aCStack_28[0].rep)->refCount - 1,
-     (aCStack_28[0].rep)->refCount == 0)) {
-    tier1_operator_delete(aCStack_28[0].rep);
-  }
-  bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Czech");
-  if (((((bVar1) || (bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Polish"), bVar1)) ||
-       (bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Italian"), bVar1)) ||
-      ((bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"French"), bVar1 ||
-       (bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Spanish"), bVar1)))) ||
-     ((bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"German"), bVar1 ||
-      ((bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"English"), bVar1 ||
-       (bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"EnglishUS"), bVar1)))))) {
-    if (unaff_EBP == 0) {
-      piVar8 = (int *)&DAT_00867a90;
-    }
-    else {
-      piVar8 = unaff_EBP + 2;
-    }
-    pCVar6 = C_fstr_Construct(&CStack_18,"%s\\%s.tbl",piVar8,&DAT_008401e4);
-    GH_PIECE(puStack_8,0,1) = 8;
-    pcVar5 = pCVar6->rep->chars;
-    if (pCVar6->rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    if (unaff_EBP == 0) {
-      piVar8 = (int *)&DAT_00867a90;
-    }
-    else {
-      piVar8 = unaff_EBP + 2;
-    }
-    pCVar6 = C_fstr_Construct(&CStack_14,"%s\\%s.tga",piVar8,&DAT_008401e4);
-    puStack_8 = (uint8_t *)CONCAT31(GH_PIECE(puStack_8,1,3),9);
-    if (pCVar6->rep == 0) {
-      pcVar9 = &DAT_00867a90;
-    }
-    else {
-      pcVar9 = pCVar6->rep->chars;
-    }
-    FUN_0063f590(param_1,(int)pcVar9,pcVar5);
-    if ((CStack_14.rep != 0) &&
-       ((CStack_14.rep)->refCount = (CStack_14.rep)->refCount - 1, (CStack_14.rep)->refCount == 0))
-    {
-      tier1_operator_delete(CStack_14.rep);
-    }
-    GH_PIECE(puStack_8,0,1) = 1;
-    if ((CStack_18.rep != 0) &&
-       ((CStack_18.rep)->refCount = (CStack_18.rep)->refCount - 1, (CStack_18.rep)->refCount == 0))
-    {
-      tier1_operator_delete(CStack_18.rep);
-    }
-    if (unaff_EBP == 0) {
-      piVar8 = (int *)&DAT_00867a90;
-    }
-    else {
-      piVar8 = unaff_EBP + 2;
-    }
-    pCVar6 = C_fstr_Construct(&CStack_18,"%s\\%s.tbl",piVar8,"SMALL");
-    GH_PIECE(puStack_8,0,1) = 10;
-    pcVar5 = pCVar6->rep->chars;
-    if (pCVar6->rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    if (unaff_EBP == 0) {
-      piVar8 = (int *)&DAT_00867a90;
-    }
-    else {
-      piVar8 = unaff_EBP + 2;
-    }
-    pCVar6 = C_fstr_Construct(&CStack_14,"%s\\%s.tga",piVar8,"SMALL");
-    GH_PIECE(puStack_8,0,1) = 0xb;
-    if (pCVar6->rep == 0) {
-      pcVar9 = &DAT_00867a90;
-    }
-    else {
-      pcVar9 = pCVar6->rep->chars;
-    }
-    FUN_0063f590(param_1,(int)pcVar9,pcVar5);
-    aCStack_28[0].rep = CStack_18.rep;
-    if ((CStack_14.rep != 0) &&
-       ((CStack_14.rep)->refCount = (CStack_14.rep)->refCount - 1, (CStack_14.rep)->refCount == 0))
-    {
-      tier1_operator_delete(CStack_14.rep);
-      aCStack_28[0].rep = CStack_18.rep;
-    }
-    goto LAB_0063ea71;
-  }
-  bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Japan");
-  if (bVar1) {
-    pCVar6 = C_GameProfile__GetTextDirectory(&g_gameProfile,&local_1c);
-    GH_PIECE(puStack_8,0,1) = 0xc;
-    FUN_00409f20(pCVar6,(uint32_t*)(aCStack_28),(uint8_t *)"FontConfig.hxml");
-    GH_PIECE(puStack_8,0,1) = 0xe;
-    if ((local_1c.rep != 0) &&
-       ((local_1c.rep)->refCount = (local_1c.rep)->refCount - 1, (local_1c.rep)->refCount == 0)) {
-      tier1_operator_delete(local_1c.rep);
-    }
-    if (aCStack_28[0].rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    else {
-      pcVar5 = (aCStack_28[0].rep)->chars;
-    }
-    bVar2 = FUN_0063eae0((uint8_t *)pcVar5);
-    if (bVar2 != 0) goto LAB_0063ea71;
-    pvVar7 = C_FontManager__FindFont(param_1,2);
-    if (pvVar7 == 0) {
-      if (iVar4 == 3) {
-        iVar11 = 0x22;
-        uVar10 = 0x400;
-LAB_0063e49d:
-        uVar10 = FUN_0063ee20("Lucida Sans Unicode",0x200,uVar10,iVar11,2,'\0');
-        cVar3 = (char)uVar10;
-      }
-      else {
-        if (iVar4 == 2) {
-          iVar11 = 0x1c;
-          uVar10 = 0x200;
-          goto LAB_0063e49d;
-        }
-        if (iVar4 != 1) goto LAB_0063e5a7;
-        uVar10 = FUN_0063ee20("MS UI Gothic",0x200,0x200,0x1f,2,'\0');
-        cVar3 = (char)uVar10;
-      }
-      if (cVar3 == '\0') {
-        if (unaff_EBP == 0) {
-          piVar8 = (int *)&DAT_00867a90;
-        }
-        else {
-          piVar8 = unaff_EBP + 2;
-        }
-        pCVar6 = C_fstr_Construct(&CStack_14,"%s\\%s.tbl",piVar8,&DAT_008401e4);
-        GH_PIECE(puStack_8,0,1) = 0xf;
-        pcVar5 = pCVar6->rep->chars;
-        if (pCVar6->rep == 0) {
-          pcVar5 = &DAT_00867a90;
-        }
-        if (unaff_EBP == 0) {
-          piVar8 = (int *)&DAT_00867a90;
-        }
-        else {
-          piVar8 = unaff_EBP + 2;
-        }
-        pCVar6 = C_fstr_Construct(&CStack_18,"%s\\%s.tga",piVar8,&DAT_008401e4);
-        puStack_8 = (uint8_t *)CONCAT31(GH_PIECE(puStack_8,1,3),0x10);
-        if (pCVar6->rep == 0) {
-          pcVar9 = &DAT_00867a90;
-        }
-        else {
-          pcVar9 = pCVar6->rep->chars;
-        }
-        FUN_0063f400((int)pcVar9,pcVar5,2);
-        if ((CStack_18.rep != 0) &&
-           ((CStack_18.rep)->refCount = (CStack_18.rep)->refCount - 1,
-           (CStack_18.rep)->refCount == 0)) {
-          tier1_operator_delete(CStack_18.rep);
-        }
-        GH_PIECE(puStack_8,0,1) = 0xe;
-        if ((CStack_14.rep != 0) &&
-           ((CStack_14.rep)->refCount = (CStack_14.rep)->refCount - 1,
-           (CStack_14.rep)->refCount == 0)) {
-          tier1_operator_delete(CStack_14.rep);
-        }
-      }
-    }
-LAB_0063e5a7:
-    pvVar7 = C_FontManager__FindFont(param_1,3);
-    if (pvVar7 != 0) goto LAB_0063ea71;
-    if (iVar4 == 3) {
-      iVar4 = 0x14;
-LAB_0063e5ce:
-      uVar10 = FUN_0063ee20("MS UI Gothic",0x200,0x200,iVar4,3,'\0');
-      cVar3 = (char)uVar10;
-    }
-    else {
-      if (iVar4 == 2) {
-        iVar4 = 0xf;
-        goto LAB_0063e5ce;
-      }
-      if (iVar4 != 1) goto LAB_0063ea71;
-      uVar10 = FUN_0063ee20("MS UI Gothic",0x200,0x200,0xe,3,'\0');
-      cVar3 = (char)uVar10;
-    }
-    if (cVar3 != '\0') goto LAB_0063ea71;
-    if (unaff_EBP == 0) {
-      piVar8 = (int *)&DAT_00867a90;
-    }
-    else {
-      piVar8 = unaff_EBP + 2;
-    }
-    pCVar6 = C_fstr_Construct(&CStack_18,"%s\\%s.tbl",piVar8,"SMALL");
-    GH_PIECE(puStack_8,0,1) = 0x11;
-    pcVar5 = pCVar6->rep->chars;
-    if (pCVar6->rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    if (unaff_EBP == 0) {
-      piVar8 = (int *)&DAT_00867a90;
-    }
-    else {
-      piVar8 = unaff_EBP + 2;
-    }
-    pCVar6 = C_fstr_Construct(&CStack_14,"%s\\%s.tga",piVar8,"SMALL");
-    GH_PIECE(puStack_8,0,1) = 0x12;
-    if (pCVar6->rep == 0) {
-      pcVar9 = &DAT_00867a90;
-    }
-    else {
-      pcVar9 = pCVar6->rep->chars;
-    }
-    FUN_0063f400((int)pcVar9,pcVar5,3);
-    local_1c.rep = CStack_18.rep;
-    if ((CStack_14.rep != 0) &&
-       ((CStack_14.rep)->refCount = (CStack_14.rep)->refCount - 1, (CStack_14.rep)->refCount == 0))
-    {
-      tier1_operator_delete(CStack_14.rep);
-      local_1c.rep = CStack_18.rep;
-    }
-  }
-  else {
-    pCVar6 = C_GameProfile__GetTextDirectory(&g_gameProfile,&CStack_14);
-    GH_PIECE(puStack_8,0,1) = 0x13;
-    FUN_00409f20(pCVar6,(uint32_t*)(aCStack_28),(uint8_t *)"FontConfig.hxml");
-    GH_PIECE(puStack_8,0,1) = 0x15;
-    if ((CStack_14.rep != 0) &&
-       ((CStack_14.rep)->refCount = (CStack_14.rep)->refCount - 1, (CStack_14.rep)->refCount == 0))
-    {
-      tier1_operator_delete(CStack_14.rep);
-    }
-    C_GameProfile__GetLanguage(&g_gameProfile,&CStack_18);
-    GH_PIECE(puStack_8,0,1) = 0x16;
-    if (aCStack_28[0].rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    else {
-      pcVar5 = (aCStack_28[0].rep)->chars;
-    }
-    bVar2 = FUN_0063eae0((uint8_t *)pcVar5);
-    GH_PIECE(puStack_8,0,1) = 0x15;
-    if ((CStack_18.rep != 0) &&
-       ((CStack_18.rep)->refCount = (CStack_18.rep)->refCount - 1, (CStack_18.rep)->refCount == 0))
-    {
-      tier1_operator_delete(CStack_18.rep);
-    }
-    if (bVar2 != 0) goto LAB_0063ea71;
-    if (unaff_EBP == 0) {
-      piVar8 = (int *)&DAT_00867a90;
-    }
-    else {
-      piVar8 = unaff_EBP + 2;
-    }
-    pCVar6 = C_fstr_Construct(&local_1c,"%s\\%s.tbl",piVar8,&DAT_008401e4);
-    GH_PIECE(puStack_8,0,1) = 0x17;
-    pcVar5 = pCVar6->rep->chars;
-    if (pCVar6->rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    if (unaff_EBP == 0) {
-      piVar8 = (int *)&DAT_00867a90;
-    }
-    else {
-      piVar8 = unaff_EBP + 2;
-    }
-    pCVar6 = C_fstr_Construct(&CStack_18,"%s\\%s.tga",piVar8,&DAT_008401e4);
-    puStack_8 = (uint8_t *)CONCAT31(GH_PIECE(puStack_8,1,3),0x18);
-    if (pCVar6->rep == 0) {
-      pcVar9 = &DAT_00867a90;
-    }
-    else {
-      pcVar9 = pCVar6->rep->chars;
-    }
-    FUN_0063f590(param_1,(int)pcVar9,pcVar5);
-    if ((CStack_18.rep != 0) &&
-       ((CStack_18.rep)->refCount = (CStack_18.rep)->refCount - 1, (CStack_18.rep)->refCount == 0))
-    {
-      tier1_operator_delete(CStack_18.rep);
-    }
-    GH_PIECE(puStack_8,0,1) = 0x15;
-    if ((local_1c.rep != 0) &&
-       ((local_1c.rep)->refCount = (local_1c.rep)->refCount - 1, (local_1c.rep)->refCount == 0)) {
-      tier1_operator_delete(local_1c.rep);
-    }
-    if (unaff_EBP == 0) {
-      piVar8 = (int *)&DAT_00867a90;
-    }
-    else {
-      piVar8 = unaff_EBP + 2;
-    }
-    pCVar6 = C_fstr_Construct(&local_1c,"%s\\%s.tbl",piVar8,"SMALL");
-    GH_PIECE(puStack_8,0,1) = 0x19;
-    pcVar5 = pCVar6->rep->chars;
-    if (pCVar6->rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    if (unaff_EBP == 0) {
-      piVar8 = (int *)&DAT_00867a90;
-    }
-    else {
-      piVar8 = unaff_EBP + 2;
-    }
-    pCVar6 = C_fstr_Construct(&CStack_18,"%s\\%s.tga",piVar8,"SMALL");
-    GH_PIECE(puStack_8,0,1) = 0x1a;
-    if (pCVar6->rep == 0) {
-      pcVar9 = &DAT_00867a90;
-    }
-    else {
-      pcVar9 = pCVar6->rep->chars;
-    }
-    FUN_0063f590(param_1,(int)pcVar9,pcVar5);
-    if ((CStack_18.rep != 0) &&
-       ((CStack_18.rep)->refCount = (CStack_18.rep)->refCount - 1, (CStack_18.rep)->refCount == 0))
-    {
-      tier1_operator_delete(CStack_18.rep);
-    }
-  }
-  if ((local_1c.rep != 0) &&
-     ((local_1c.rep)->refCount = (local_1c.rep)->refCount - 1, (local_1c.rep)->refCount == 0)) {
-    tier1_operator_delete(local_1c.rep);
-  }
-LAB_0063ea71:
-  if ((aCStack_28[0].rep != 0) &&
-     ((aCStack_28[0].rep)->refCount = (aCStack_28[0].rep)->refCount - 1,
-     (aCStack_28[0].rep)->refCount == 0)) {
-    tier1_operator_delete(aCStack_28[0].rep);
-  }
-  if ((CStack_2c.rep != 0) &&
-     ((CStack_2c.rep)->refCount = (CStack_2c.rep)->refCount - 1, (CStack_2c.rep)->refCount == 0)) {
-    tier1_operator_delete(CStack_2c.rep);
-  }
-  if ((unaff_EBP != 0) && (*unaff_EBP = *unaff_EBP - 1, *unaff_EBP == 0)) {
-    tier1_operator_delete(unaff_EBP);
-  }
-  return 0;
-}
-
-
-// 0x0063e054
-uint32_t FUN_0063e054(int *param_1,int *param_2,uint32_t param_3,uint32_t param_4,int *param_5, int *param_6,int *param_7,void *param_8,uint32_t param_9,uint32_t param_10, ...)
-{
-  uint8_t stack0x00000000[64];
-  bool bVar1;
-  uint8_t bVar2;
-  char cVar3;
-  IGraph *self;
-  int iVar4;
-  char *pcVar5;
-  C_str *pCVar6;
-  int *piVar7;
-  uint8_t *pbVar8;
-  void *pvVar9;
-  char *pcVar10;
-  int *ptr;
-  void *unaff_EBP;
-  C_str unaff_retaddr;
-  uint32_t uVar11;
-  int iVar12;
-  self = GetIGraph();
-  iVar4 = (*self->vtable->ScrnX)(self);
-  if (iVar4 < 0x400) {
-    iVar4 = (799 < iVar4) + 1;
-  }
-  else {
-    iVar4 = 3;
-  }
-  bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Czech");
-  if (bVar1) {
-    pcVar5 = &DAT_0084025c;
-  }
-  else {
-    bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Polish");
-    if (bVar1) {
-      pcVar5 = &DAT_0084025c;
-    }
-    else {
-      bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Japan");
-      pcVar5 = "Japan";
-      if (!bVar1) {
-        pcVar5 = &DAT_00840244;
-      }
-    }
-  }
-  C_fstr_Construct((C_str *)&stack0x00000000,"Text\\Fonts\\%s\\Set%d\\",pcVar5,iVar4);
-  param_10 = 0;
-  C_fstr_Construct((C_str *)&param_1,"Text\\Fonts\\Ce\\Set%d\\",iVar4);
-  GH_PIECE(param_10,0,1) = 1;
-  pCVar6 = C_fstr_Construct((C_str *)&param_5,"%s\\%s.tbl","Text\\Fonts\\",
-                            "SYMBOLS");
-  GH_PIECE(param_10,0,1) = 2;
-  pcVar5 = pCVar6->rep->chars;
-  if (pCVar6->rep == 0) {
-    pcVar5 = &DAT_00867a90;
-  }
-  pCVar6 = C_fstr_Construct((C_str *)&param_2,"%s\\%s.tga","Text\\Fonts\\",
-                            "SYMBOLS");
-  param_10 = CONCAT31(GH_PIECE(param_10,1,3),3);
-  if (pCVar6->rep == 0) {
-    pcVar10 = &DAT_00867a90;
-  }
-  else {
-    pcVar10 = pCVar6->rep->chars;
-  }
-  FUN_0063f590(unaff_EBP,(int)pcVar10,pcVar5);
-  if ((param_2 != 0) && (*param_2 = *param_2 - 1, *param_2 == 0)) {
-    tier1_operator_delete(param_2);
-  }
-  GH_PIECE(param_10,0,1) = 1;
-  if ((param_5 != 0) && (*param_5 = *param_5 - 1, *param_5 == 0)) {
-    tier1_operator_delete(param_5);
-  }
-  if (param_1 == 0) {
-    piVar7 = (int *)&DAT_00867a90;
-  }
-  else {
-    piVar7 = param_1 + 2;
-  }
-  pCVar6 = C_fstr_Construct((C_str *)&param_2,"%s\\%s.tbl",piVar7,&DAT_008401e4);
-  GH_PIECE(param_10,0,1) = 4;
-  pcVar5 = pCVar6->rep->chars;
-  if (pCVar6->rep == 0) {
-    pcVar5 = &DAT_00867a90;
-  }
-  if (param_1 == 0) {
-    piVar7 = (int *)&DAT_00867a90;
-  }
-  else {
-    piVar7 = param_1 + 2;
-  }
-  pCVar6 = C_fstr_Construct((C_str *)&param_5,"%s\\%s.tga",piVar7,&DAT_008401e4);
-  param_10 = CONCAT31(GH_PIECE(param_10,1,3),5);
-  if (pCVar6->rep == 0) {
-    pcVar10 = &DAT_00867a90;
-  }
-  else {
-    pcVar10 = pCVar6->rep->chars;
-  }
-  FUN_0063f590(unaff_EBP,(int)pcVar10,pcVar5);
-  if ((param_5 != 0) && (*param_5 = *param_5 - 1, *param_5 == 0)) {
-    tier1_operator_delete(param_5);
-  }
-  GH_PIECE(param_10,0,1) = 1;
-  if ((param_2 != 0) && (*param_2 = *param_2 - 1, *param_2 == 0)) {
-    tier1_operator_delete(param_2);
-  }
-  if (param_1 == 0) {
-    piVar7 = (int *)&DAT_00867a90;
-  }
-  else {
-    piVar7 = param_1 + 2;
-  }
-  pCVar6 = C_fstr_Construct((C_str *)&param_2,"%s\\%s.tbl",piVar7,"SMALL");
-  GH_PIECE(param_10,0,1) = 6;
-  pcVar5 = pCVar6->rep->chars;
-  if (pCVar6->rep == 0) {
-    pcVar5 = &DAT_00867a90;
-  }
-  if (param_1 == 0) {
-    piVar7 = (int *)&DAT_00867a90;
-  }
-  else {
-    piVar7 = param_1 + 2;
-  }
-  pCVar6 = C_fstr_Construct((C_str *)&param_5,"%s\\%s.tga",piVar7,"SMALL");
-  param_10 = CONCAT31(GH_PIECE(param_10,1,3),7);
-  if (pCVar6->rep == 0) {
-    pcVar10 = &DAT_00867a90;
-  }
-  else {
-    pcVar10 = pCVar6->rep->chars;
-  }
-  FUN_0063f590(unaff_EBP,(int)pcVar10,pcVar5);
-  if ((param_5 != 0) && (*param_5 = *param_5 - 1, *param_5 == 0)) {
-    tier1_operator_delete(param_5);
-  }
-  GH_PIECE(param_10,0,1) = 1;
-  if ((param_2 != 0) && (*param_2 = *param_2 - 1, *param_2 == 0)) {
-    tier1_operator_delete(param_2);
-  }
-  bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Czech");
-  if (((((bVar1) || (bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Polish"), bVar1)) ||
-       (bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Italian"), bVar1)) ||
-      ((bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"French"), bVar1 ||
-       (bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Spanish"), bVar1)))) ||
-     ((bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"German"), bVar1 ||
-      ((bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"English"), bVar1 ||
-       (bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"EnglishUS"), bVar1)))))) {
-    if (unaff_retaddr.rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    else {
-      pcVar5 = (unaff_retaddr.rep)->chars;
-    }
-    pCVar6 = C_fstr_Construct((C_str *)&param_6,"%s\\%s.tbl",pcVar5,&DAT_008401e4);
-    GH_PIECE(param_10,0,1) = 8;
-    pcVar5 = pCVar6->rep->chars;
-    if (pCVar6->rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    if (unaff_retaddr.rep == 0) {
-      pcVar10 = &DAT_00867a90;
-    }
-    else {
-      pcVar10 = (unaff_retaddr.rep)->chars;
-    }
-    pCVar6 = C_fstr_Construct((C_str *)&param_7,"%s\\%s.tga",pcVar10,&DAT_008401e4);
-    param_10 = CONCAT31(GH_PIECE(param_10,1,3),9);
-    if (pCVar6->rep == 0) {
-      pcVar10 = &DAT_00867a90;
-    }
-    else {
-      pcVar10 = pCVar6->rep->chars;
-    }
-    FUN_0063f590(unaff_EBP,(int)pcVar10,pcVar5);
-    if ((param_7 != 0) && (*param_7 = *param_7 - 1, *param_7 == 0)) {
-      tier1_operator_delete(param_7);
-    }
-    GH_PIECE(param_10,0,1) = 1;
-    if ((param_6 != 0) && (*param_6 = *param_6 - 1, *param_6 == 0)) {
-      tier1_operator_delete(param_6);
-    }
-    if (unaff_retaddr.rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    else {
-      pcVar5 = (unaff_retaddr.rep)->chars;
-    }
-    pCVar6 = C_fstr_Construct((C_str *)&param_6,"%s\\%s.tbl",pcVar5,"SMALL");
-    GH_PIECE(param_10,0,1) = 10;
-    pcVar5 = pCVar6->rep->chars;
-    if (pCVar6->rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    if (unaff_retaddr.rep == 0) {
-      pcVar10 = &DAT_00867a90;
-    }
-    else {
-      pcVar10 = (unaff_retaddr.rep)->chars;
-    }
-    pCVar6 = C_fstr_Construct((C_str *)&param_7,"%s\\%s.tga",pcVar10,"SMALL");
-    GH_PIECE(param_10,0,1) = 0xb;
-    if (pCVar6->rep == 0) {
-      pcVar10 = &DAT_00867a90;
-    }
-    else {
-      pcVar10 = pCVar6->rep->chars;
-    }
-    FUN_0063f590(unaff_EBP,(int)pcVar10,pcVar5);
-    piVar7 = param_6;
-    if ((param_7 != 0) && (*param_7 = *param_7 - 1, *param_7 == 0)) {
-      tier1_operator_delete(param_7);
-      piVar7 = param_6;
-    }
-    goto LAB_0063ea71;
-  }
-  bVar1 = C_GameProfile__IsLanguage(&g_gameProfile,"Japan");
-  if (bVar1) {
-    pCVar6 = C_GameProfile__GetTextDirectory(&g_gameProfile,(C_str *)&param_5);
-    GH_PIECE(param_10,0,1) = 0xc;
-    FUN_00409f20(pCVar6,(uint32_t*)(&param_2),(uint8_t *)"FontConfig.hxml");
-    GH_PIECE(param_10,0,1) = 0xe;
-    if ((param_5 != 0) && (*param_5 = *param_5 - 1, *param_5 == 0)) {
-      tier1_operator_delete(param_5);
-    }
-    if (param_2 == 0) {
-      pbVar8 = &DAT_00867a90;
-    }
-    else {
-      pbVar8 = (uint8_t *)(param_2 + 2);
-    }
-    bVar2 = FUN_0063eae0(pbVar8);
-    piVar7 = param_2;
-    if (bVar2 != 0) goto LAB_0063ea71;
-    pvVar9 = C_FontManager__FindFont(unaff_EBP,2);
-    if (pvVar9 == 0) {
-      if (iVar4 == 3) {
-        iVar12 = 0x22;
-        uVar11 = 0x400;
-LAB_0063e49d:
-        uVar11 = FUN_0063ee20("Lucida Sans Unicode",0x200,uVar11,iVar12,2,'\0');
-        cVar3 = (char)uVar11;
-      }
-      else {
-        if (iVar4 == 2) {
-          iVar12 = 0x1c;
-          uVar11 = 0x200;
-          goto LAB_0063e49d;
-        }
-        if (iVar4 != 1) goto LAB_0063e5a7;
-        uVar11 = FUN_0063ee20("MS UI Gothic",0x200,0x200,0x1f,2,'\0');
-        cVar3 = (char)uVar11;
-      }
-      if (cVar3 == '\0') {
-        if (unaff_retaddr.rep == 0) {
-          pcVar5 = &DAT_00867a90;
-        }
-        else {
-          pcVar5 = (unaff_retaddr.rep)->chars;
-        }
-        pCVar6 = C_fstr_Construct((C_str *)&param_7,"%s\\%s.tbl",pcVar5,&DAT_008401e4);
-        GH_PIECE(param_10,0,1) = 0xf;
-        pcVar5 = pCVar6->rep->chars;
-        if (pCVar6->rep == 0) {
-          pcVar5 = &DAT_00867a90;
-        }
-        if (unaff_retaddr.rep == 0) {
-          pcVar10 = &DAT_00867a90;
-        }
-        else {
-          pcVar10 = (unaff_retaddr.rep)->chars;
-        }
-        pCVar6 = C_fstr_Construct((C_str *)&param_6,"%s\\%s.tga",pcVar10,&DAT_008401e4);
-        param_10 = CONCAT31(GH_PIECE(param_10,1,3),0x10);
-        if (pCVar6->rep == 0) {
-          pcVar10 = &DAT_00867a90;
-        }
-        else {
-          pcVar10 = pCVar6->rep->chars;
-        }
-        FUN_0063f400((int)pcVar10,pcVar5,2);
-        if ((param_6 != 0) && (*param_6 = *param_6 - 1, *param_6 == 0)) {
-          tier1_operator_delete(param_6);
-        }
-        GH_PIECE(param_10,0,1) = 0xe;
-        if ((param_7 != 0) && (*param_7 = *param_7 - 1, *param_7 == 0)) {
-          tier1_operator_delete(param_7);
-        }
-      }
-    }
-LAB_0063e5a7:
-    pvVar9 = C_FontManager__FindFont(unaff_EBP,3);
-    piVar7 = param_2;
-    if (pvVar9 != 0) goto LAB_0063ea71;
-    if (iVar4 == 3) {
-      iVar4 = 0x14;
-LAB_0063e5ce:
-      uVar11 = FUN_0063ee20("MS UI Gothic",0x200,0x200,iVar4,3,'\0');
-      cVar3 = (char)uVar11;
-      piVar7 = param_2;
-    }
-    else {
-      if (iVar4 == 2) {
-        iVar4 = 0xf;
-        goto LAB_0063e5ce;
-      }
-      if (iVar4 != 1) goto LAB_0063ea71;
-      uVar11 = FUN_0063ee20("MS UI Gothic",0x200,0x200,0xe,3,'\0');
-      cVar3 = (char)uVar11;
-      piVar7 = param_2;
-    }
-    param_2 = piVar7;
-    if (cVar3 != '\0') goto LAB_0063ea71;
-    if (unaff_retaddr.rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    else {
-      pcVar5 = (unaff_retaddr.rep)->chars;
-    }
-    pCVar6 = C_fstr_Construct((C_str *)&param_6,"%s\\%s.tbl",pcVar5,"SMALL");
-    GH_PIECE(param_10,0,1) = 0x11;
-    pcVar5 = pCVar6->rep->chars;
-    if (pCVar6->rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    if (unaff_retaddr.rep == 0) {
-      pcVar10 = &DAT_00867a90;
-    }
-    else {
-      pcVar10 = (unaff_retaddr.rep)->chars;
-    }
-    pCVar6 = C_fstr_Construct((C_str *)&param_7,"%s\\%s.tga",pcVar10,"SMALL");
-    GH_PIECE(param_10,0,1) = 0x12;
-    if (pCVar6->rep == 0) {
-      pcVar10 = &DAT_00867a90;
-    }
-    else {
-      pcVar10 = pCVar6->rep->chars;
-    }
-    FUN_0063f400((int)pcVar10,pcVar5,3);
-    ptr = param_6;
-    if ((param_7 != 0) && (*param_7 = *param_7 - 1, *param_7 == 0)) {
-      tier1_operator_delete(param_7);
-      ptr = param_6;
-    }
-  }
-  else {
-    pCVar6 = C_GameProfile__GetTextDirectory(&g_gameProfile,(C_str *)&param_7);
-    GH_PIECE(param_10,0,1) = 0x13;
-    FUN_00409f20(pCVar6,(uint32_t*)(&param_2),(uint8_t *)"FontConfig.hxml");
-    GH_PIECE(param_10,0,1) = 0x15;
-    if ((param_7 != 0) && (*param_7 = *param_7 - 1, *param_7 == 0)) {
-      tier1_operator_delete(param_7);
-    }
-    C_GameProfile__GetLanguage(&g_gameProfile,(C_str *)&param_6);
-    GH_PIECE(param_10,0,1) = 0x16;
-    if (param_2 == 0) {
-      pbVar8 = &DAT_00867a90;
-    }
-    else {
-      pbVar8 = (uint8_t *)(param_2 + 2);
-    }
-    bVar2 = FUN_0063eae0(pbVar8);
-    GH_PIECE(param_10,0,1) = 0x15;
-    if ((param_6 != 0) && (*param_6 = *param_6 - 1, *param_6 == 0)) {
-      tier1_operator_delete(param_6);
-    }
-    piVar7 = param_2;
-    if (bVar2 != 0) goto LAB_0063ea71;
-    if (unaff_retaddr.rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    else {
-      pcVar5 = (unaff_retaddr.rep)->chars;
-    }
-    pCVar6 = C_fstr_Construct((C_str *)&param_5,"%s\\%s.tbl",pcVar5,&DAT_008401e4);
-    GH_PIECE(param_10,0,1) = 0x17;
-    pcVar5 = pCVar6->rep->chars;
-    if (pCVar6->rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    if (unaff_retaddr.rep == 0) {
-      pcVar10 = &DAT_00867a90;
-    }
-    else {
-      pcVar10 = (unaff_retaddr.rep)->chars;
-    }
-    pCVar6 = C_fstr_Construct((C_str *)&param_6,"%s\\%s.tga",pcVar10,&DAT_008401e4);
-    param_10 = CONCAT31(GH_PIECE(param_10,1,3),0x18);
-    if (pCVar6->rep == 0) {
-      pcVar10 = &DAT_00867a90;
-    }
-    else {
-      pcVar10 = pCVar6->rep->chars;
-    }
-    FUN_0063f590(unaff_EBP,(int)pcVar10,pcVar5);
-    if ((param_6 != 0) && (*param_6 = *param_6 - 1, *param_6 == 0)) {
-      tier1_operator_delete(param_6);
-    }
-    GH_PIECE(param_10,0,1) = 0x15;
-    if ((param_5 != 0) && (*param_5 = *param_5 - 1, *param_5 == 0)) {
-      tier1_operator_delete(param_5);
-    }
-    if (unaff_retaddr.rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    else {
-      pcVar5 = (unaff_retaddr.rep)->chars;
-    }
-    pCVar6 = C_fstr_Construct((C_str *)&param_5,"%s\\%s.tbl",pcVar5,"SMALL");
-    GH_PIECE(param_10,0,1) = 0x19;
-    pcVar5 = pCVar6->rep->chars;
-    if (pCVar6->rep == 0) {
-      pcVar5 = &DAT_00867a90;
-    }
-    if (unaff_retaddr.rep == 0) {
-      pcVar10 = &DAT_00867a90;
-    }
-    else {
-      pcVar10 = (unaff_retaddr.rep)->chars;
-    }
-    pCVar6 = C_fstr_Construct((C_str *)&param_6,"%s\\%s.tga",pcVar10,"SMALL");
-    GH_PIECE(param_10,0,1) = 0x1a;
-    if (pCVar6->rep == 0) {
-      pcVar10 = &DAT_00867a90;
-    }
-    else {
-      pcVar10 = pCVar6->rep->chars;
-    }
-    FUN_0063f590(unaff_EBP,(int)pcVar10,pcVar5);
-    ptr = param_5;
-    if ((param_6 != 0) && (*param_6 = *param_6 - 1, *param_6 == 0)) {
-      tier1_operator_delete(param_6);
-      ptr = param_5;
-    }
-  }
-  piVar7 = param_2;
-  if ((ptr != 0) && (*ptr = *ptr - 1, *ptr == 0)) {
-    tier1_operator_delete(ptr);
-    piVar7 = param_2;
-  }
-LAB_0063ea71:
-  if ((piVar7 != 0) && (*piVar7 = *piVar7 - 1, *piVar7 == 0)) {
-    tier1_operator_delete(piVar7);
-  }
-  if ((param_1 != 0) && (*param_1 = *param_1 - 1, *param_1 == 0)) {
-    tier1_operator_delete(param_1);
-  }
-  if ((unaff_retaddr.rep != 0) &&
-     ((unaff_retaddr.rep)->refCount = (unaff_retaddr.rep)->refCount - 1,
-     (unaff_retaddr.rep)->refCount == 0)) {
-    tier1_operator_delete(unaff_retaddr.rep);
-  }
-  return 0;
-}
-
-
 // 0x0063eae0
 uint8_t FUN_0063eae0(uint8_t *param_1, ...)
 {
@@ -1265,26 +256,6 @@ LAB_0063ed90:
 }
 
 
-// 0x0063edd0
-uint32_t FUN_0063edd0(int param_1, ...)
-{
-  int *piVar1;
-  int iVar2;
-  if (*(int *)(param_1 + 0x10) != 0) {
-    iVar2 = *(int *)(param_1 + 0x14) - *(int *)(param_1 + 0x10) >> 2;
-    while (iVar2 != 0) {
-      iVar2--;
-      piVar1 = *(int **)(*(int *)(param_1 + 0x10) + iVar2 * 4);
-      if (piVar1 != 0) {
-        (**(code **)(*piVar1 + 0xc))(1);
-      }
-    }
-  }
-  *(uint32_t *)(param_1 + 0x14) = *(uint32_t *)(param_1 + 0x10);
-  return 0;
-}
-
-
 // 0x0063ee20  (tier1 fallback: translated text kept below, needs hand porting)
 uint32_t FUN_0063ee20(char *param_1,uint32_t param_2,uint32_t param_3,int param_4,int param_5, char param_6, ...)
 {
@@ -1355,7 +326,7 @@ uint32_t FUN_0063ee20(char *param_1,uint32_t param_2,uint32_t param_3,int param_
   uVar4 = FUN_0063c2f0(piVar1,(HDC)0x0,param_1,param_2,param_3,param_4,param_6);
   if ((char)uVar4 != '\0') {
     piVar1[6] = param_5;
-    uVar4 = FUN_0063f620(local_14,piVar1);
+    uVar4 = FontList_PushBack(local_14,piVar1);
     return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
   }
   uVar5 = FUN_0063c740((int)piVar1);
@@ -1367,25 +338,6 @@ uint32_t FUN_0063ee20(char *param_1,uint32_t param_2,uint32_t param_3,int param_
 
 
 #endif
-// 0x0063efc0
-uint32_t C_auto_00813b2c__FUN_0063efc0(C_auto_00813b2c *_this, ...)
-{
-  _this->vtable = (C_auto_00813b2c_vtbl *)&PTR_00813b2c;
-  return 0;
-}
-
-
-// 0x0063efd0
-uint32_t * C_auto_00813b2c__FUN_0063efd0(C_auto_00813b2c *_this,uint8_t param_1, ...)
-{
-  _this->vtable = (C_auto_00813b2c_vtbl *)&PTR_00813b2c;
-  if ((param_1 & 1) != 0) {
-    tier1_operator_delete(_this);
-  }
-  return (uint32_t*)(_this);
-}
-
-
 // 0x0063eff0
 uint32_t C_auto_00813b10__empty_function_63eff0(C_auto_00813b10 *_this, ...)
 {
@@ -1536,7 +488,7 @@ uint32_t FUN_0063f140(void *param_1, ...)
 
 
 // 0x0063f230  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_0063f230(uint32_t param_1,uint32_t param_2,uint32_t param_3, ...)
+uint32_t C_FontManager__AddCp1250Font(uint32_t param_1,uint32_t param_2,uint32_t param_3, ...)
 {
   return {};
 }
@@ -1599,9 +551,9 @@ uint32_t FUN_0063f230(uint32_t param_1,uint32_t param_2,uint32_t param_3, ...)
     *piVar1 = (int)&PTR_00813b48;
   }
   local_4 = 0xffffffff;
-  uVar4 = FUN_00641720(piVar1,param_1,param_2,param_3);
+  uVar4 = C_MapFont__LoadCp1250(piVar1,param_1,param_2,param_3);
   if ((char)uVar4 != '\0') {
-    uVar5 = FUN_0063f620(local_14,piVar1);
+    uVar5 = FontList_PushBack(local_14,piVar1);
     return CONCAT31((int3)((uint32_t)uVar5 >> 8),1);
   }
   if (piVar1 != 0) {
@@ -1612,206 +564,6 @@ uint32_t FUN_0063f230(uint32_t param_1,uint32_t param_2,uint32_t param_3, ...)
 
 
 #endif
-// 0x0063f3c0
-uint32_t * C_auto_00813b68__FUN_0063f3c0(C_auto_00813b68 *_this,uint8_t param_1, ...)
-{
-  C_auto_00813b68__FUN_00640540(_this);
-  if ((param_1 & 1) != 0) {
-    tier1_operator_delete(_this);
-  }
-  return (uint32_t*)(_this);
-}
-
-
-// 0x0063f3e0
-uint32_t * C_auto_00813b48__FUN_0063f3e0(C_auto_00813b48 *_this,uint8_t param_1, ...)
-{
-  C_auto_00813b48__FUN_00640a00(_this);
-  if ((param_1 & 1) != 0) {
-    tier1_operator_delete(_this);
-  }
-  return (uint32_t*)(&_this->vtable);
-}
-
-
-// 0x0063f400  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_0063f400(int param_1,uint32_t param_2,uint8_t param_3, ...)
-{
-  return {};
-}
-#if 0
-{
-  int *piVar1;
-  uint32_t *puVar2;
-  void *pvVar3;
-  uint32_t uVar4;
-  uint32_t uVar5;
-  uint8_t local_18 [4];
-  void *local_14;
-  int *local_10;
-  uint32_t local_4;
-  local_4 = 0xffffffff;
-  piVar1 = tier1_operator_new(0x143c);
-  local_10 = piVar1;
-  if (piVar1 == 0) {
-    piVar1 = 0;
-  }
-  else {
-    piVar1[6] = 0;
-    piVar1[5] = 0;
-    piVar1[4] = 0;
-    piVar1[3] = 0;
-    piVar1[2] = 0;
-    piVar1[1] = 0;
-    piVar1[7] = 0;
-    piVar1[0x508] = 0;
-    piVar1[0x509] = 0;
-    piVar1[0x50a] = 0;
-    *piVar1 = (int)&PTR_00813b68;
-    local_4 = 1;
-    *(uint8_t *)(piVar1 + 0x50b) = param_3;
-    *(uint8_t *)((int)piVar1 + 0x142d) = param_3;
-    *(uint8_t *)(piVar1 + 0x50d) = 0;
-    puVar2 = tier1_operator_new(0x28);
-    puVar2[1] = 0;
-    puVar2[9] = 1;
-    std_Lockit_ctor(local_18);
-    if (DAT_008acbe8 == 0) {
-      DAT_008acbe8 = puVar2;
-      *puVar2 = 0;
-      puVar2 = 0;
-      DAT_008acbe8[2] = 0;
-    }
-    DAT_008acbe4++;
-    std_Lockit_dtor();
-    if (puVar2 != 0) {
-      tier1_operator_delete(puVar2);
-    }
-    puVar2 = DAT_008acbe8;
-    pvVar3 = tier1_operator_new(0x28);
-    *(uint32_t **)((int)pvVar3 + 4) = puVar2;
-    *(uint32_t *)((int)pvVar3 + 0x24) = 0;
-    piVar1[0x50c] = (int)pvVar3;
-    piVar1[0x50e] = 0;
-    *(void **)pvVar3 = pvVar3;
-    *(int *)(piVar1[0x50c] + 8) = piVar1[0x50c];
-    *piVar1 = (int)&PTR_00813b48;
-  }
-  local_4 = 0xffffffff;
-  uVar4 = FUN_00640600(piVar1,param_1,param_2);
-  if ((char)uVar4 != '\0') {
-    uVar5 = FUN_0063f620(local_14,piVar1);
-    return CONCAT31((int3)((uint32_t)uVar5 >> 8),1);
-  }
-  if (piVar1 != 0) {
-    uVar4 = (**(code **)(*piVar1 + 0xc))(1);
-  }
-  return uVar4 & 0xffffff00;
-}
-
-
-#endif
-// 0x0063f590
-uint32_t FUN_0063f590(void *_this,int param_1,uint32_t param_2, ...)
-{
-  int *this_00;
-  uint32_t uVar1;
-  uint32_t uVar2;
-  this_00 = tier1_operator_new(0x142c);
-  if (this_00 == 0) {
-    this_00 = 0;
-  }
-  else {
-    this_00[6] = 0;
-    this_00[5] = 0;
-    this_00[4] = 0;
-    this_00[3] = 0;
-    this_00[2] = 0;
-    this_00[1] = 0;
-    this_00[7] = 0;
-    this_00[0x508] = 0;
-    this_00[0x509] = 0;
-    this_00[0x50a] = 0;
-    *this_00 = (int)&PTR_00813b68;
-  }
-  uVar1 = FUN_00640600(this_00,param_1,param_2);
-  if ((char)uVar1 != '\0') {
-    uVar2 = FUN_0063f620(_this,this_00);
-    return CONCAT31((int3)((uint32_t)uVar2 >> 8),1);
-  }
-  if (this_00 != 0) {
-    uVar1 = (**(code **)(*this_00 + 0xc))(1);
-  }
-  return uVar1 & 0xffffff00;
-}
-
-
-// 0x0063f620
-uint32_t FUN_0063f620(void *_this,uint32_t param_1, ...)
-{
-  int iVar1;
-  int iVar2;
-  uint32_t *puVar3;
-  uint32_t uVar4;
-  uint32_t *puVar5;
-  uint32_t *puVar6;
-  uint32_t *puVar7;
-  puVar7 = *(uint32_t **)((int)_this + 0x14);
-  if (*(int *)((int)_this + 0x18) - (int)puVar7 >> 2 != 0) {
-    uninitialized_copy4_6404a0(puVar7,puVar7,puVar7 + 1);
-    uninitialized_fill_n4_6404d0
-              (*(uint32_t **)((int)_this + 0x14),
-               1 - ((int)*(uint32_t **)((int)_this + 0x14) - (int)puVar7 >> 2),&param_1);
-    puVar6 = *(uint32_t **)((int)_this + 0x14);
-    if (puVar7 != puVar6) {
-      do {
-        *puVar7 = param_1;
-        puVar7++;
-      } while (puVar7 != puVar6);
-      *(int *)((int)_this + 0x14) = *(int *)((int)_this + 0x14) + 4;
-      return 0;
-    }
-    *(int *)((int)_this + 0x14) = *(int *)((int)_this + 0x14) + 4;
-    return 0;
-  }
-  iVar1 = *(int *)((int)_this + 0x10);
-  if ((iVar1 == 0) || (uVar4 = (int)puVar7 - iVar1 >> 2, uVar4 < 2)) {
-    uVar4 = 1;
-  }
-  if (iVar1 == 0) {
-    iVar1 = 0;
-  }
-  else {
-    iVar1 = (int)puVar7 - iVar1 >> 2;
-  }
-  iVar1 += uVar4;
-  iVar2 = iVar1;
-  if (iVar1 < 0) {
-    iVar2 = 0;
-  }
-  puVar3 = tier1_operator_new(iVar2 * 4);
-  puVar5 = puVar3;
-  for (puVar6 = *(uint32_t **)((int)_this + 0x10); puVar6 != puVar7; puVar6 = puVar6 + 1) {
-    construct_copy4_640500(puVar5,puVar6);
-    puVar5++;
-  }
-  uninitialized_fill_n4_6404d0(puVar5,1,&param_1);
-  uninitialized_copy4_6404a0(puVar7,*(uint32_t **)((int)_this + 0x14),puVar5 + 1);
-  empty_function_640480();
-  tier1_operator_delete(*(void **)((int)_this + 0x10));
-  iVar2 = *(int *)((int)_this + 0x10);
-  *(uint32_t **)((int)_this + 0x18) = puVar3 + iVar1;
-  if (iVar2 == 0) {
-    *(uint32_t **)((int)_this + 0x10) = puVar3;
-    *(uint32_t **)((int)_this + 0x14) = puVar3 + 1;
-    return 0;
-  }
-  *(uint32_t **)((int)_this + 0x10) = puVar3;
-  *(uint32_t **)((int)_this + 0x14) = puVar3 + (*(int *)((int)_this + 0x14) - iVar2 >> 2) + 1;
-  return 0;
-}
-
-
 // 0x0063f7d0
 uint32_t FUN_0063f7d0(...)
 {
@@ -1914,7 +666,7 @@ uint32_t FUN_0063f870(void *param_1, ...)
   else {
     pcVar4 = pCVar2->rep->chars;
   }
-  FUN_0063f590(param_1,(int)pcVar4,pcVar5);
+  C_FontManager__AddTextureFont(param_1,(int)pcVar4,pcVar5);
   GH_PIECE(puStack_8,0,1) = 2;
   if (unaff_EBX != 0) {
     C_str__ReleaseRep(unaff_EBX);
@@ -1963,7 +715,7 @@ uint32_t FUN_0063f870(void *param_1, ...)
   else {
     pcVar4 = pCVar2->rep->chars;
   }
-  FUN_0063f590(param_1,(int)pcVar4,pcVar5);
+  C_FontManager__AddTextureFont(param_1,(int)pcVar4,pcVar5);
   GH_PIECE(puStack_8,0,1) = 6;
   if (CStack_24.rep != 0) {
     C_str__ReleaseRep((C_str *)CStack_24.rep);
@@ -2012,7 +764,7 @@ uint32_t FUN_0063f870(void *param_1, ...)
   else {
     pcVar4 = pCVar2->rep->chars;
   }
-  uVar3 = FUN_0063f590(param_1,(int)pcVar4,pcVar5);
+  uVar3 = C_FontManager__AddTextureFont(param_1,(int)pcVar4,pcVar5);
   GH_PIECE(puStack_8,0,1) = 10;
   if (CStack_24.rep != 0) {
     C_str__ReleaseRep((C_str *)CStack_24.rep);
@@ -2062,7 +814,7 @@ uint32_t FUN_0063f870(void *param_1, ...)
     else {
       pcVar4 = pCVar2->rep->chars;
     }
-    FUN_0063f590(param_1,(int)pcVar4,pcVar5);
+    C_FontManager__AddTextureFont(param_1,(int)pcVar4,pcVar5);
     if ((CStack_24.rep != 0) &&
        ((CStack_24.rep)->refCount = (int)((C_str_rep *)(CStack_24.rep)->refCount)[-1].chars,
        (C_str_rep *)(CStack_24.rep)->refCount == 0)) {
@@ -2101,7 +853,7 @@ uint32_t FUN_0063f870(void *param_1, ...)
   else {
     pcVar4 = pCVar2->rep->chars;
   }
-  uVar3 = FUN_0063f590(param_1,(int)pcVar4,pcVar5);
+  uVar3 = C_FontManager__AddTextureFont(param_1,(int)pcVar4,pcVar5);
   if ((CStack_24.rep != 0) &&
      ((CStack_24.rep)->refCount = (int)((C_str_rep *)(CStack_24.rep)->refCount)[-1].chars,
      (C_str_rep *)(CStack_24.rep)->refCount == 0)) {
@@ -2146,7 +898,7 @@ uint32_t FUN_0063f870(void *param_1, ...)
     else {
       pcVar4 = pCVar2->rep->chars;
     }
-    FUN_0063f590(param_1,(int)pcVar4,pcVar5);
+    C_FontManager__AddTextureFont(param_1,(int)pcVar4,pcVar5);
     if ((CStack_24.rep != 0) &&
        ((CStack_24.rep)->refCount = (int)((C_str_rep *)(CStack_24.rep)->refCount)[-1].chars,
        (C_str_rep *)(CStack_24.rep)->refCount == 0)) {
@@ -2185,7 +937,7 @@ uint32_t FUN_0063f870(void *param_1, ...)
   else {
     pcVar4 = pCVar2->rep->chars;
   }
-  uVar3 = FUN_0063f590(param_1,(int)pcVar4,pcVar5);
+  uVar3 = C_FontManager__AddTextureFont(param_1,(int)pcVar4,pcVar5);
   if ((CStack_24.rep != 0) &&
      ((CStack_24.rep)->refCount = (int)((C_str_rep *)(CStack_24.rep)->refCount)[-1].chars,
      (C_str_rep *)(CStack_24.rep)->refCount == 0)) {
@@ -2230,7 +982,7 @@ uint32_t FUN_0063f870(void *param_1, ...)
     else {
       pcVar4 = pCVar2->rep->chars;
     }
-    FUN_0063f590(param_1,(int)pcVar4,pcVar5);
+    C_FontManager__AddTextureFont(param_1,(int)pcVar4,pcVar5);
     if ((CStack_24.rep != 0) &&
        ((CStack_24.rep)->refCount = (int)((C_str_rep *)(CStack_24.rep)->refCount)[-1].chars,
        (C_str_rep *)(CStack_24.rep)->refCount == 0)) {
@@ -2285,7 +1037,7 @@ uint32_t FUN_0063f870(void *param_1, ...)
   else {
     pcVar4 = pCVar2->rep->chars;
   }
-  uVar3 = FUN_0063f590(param_1,(int)pcVar4,pcVar5);
+  uVar3 = C_FontManager__AddTextureFont(param_1,(int)pcVar4,pcVar5);
   if ((CStack_24.rep != 0) &&
      ((CStack_24.rep)->refCount = (int)((C_str_rep *)(CStack_24.rep)->refCount)[-1].chars,
      (C_str_rep *)(CStack_24.rep)->refCount == 0)) {
@@ -2339,7 +1091,7 @@ uint32_t FUN_0063f870(void *param_1, ...)
     else {
       pcVar4 = pCVar2->rep->chars;
     }
-    uVar3 = FUN_0063f590(param_1,(int)pcVar4,pcVar5);
+    uVar3 = C_FontManager__AddTextureFont(param_1,(int)pcVar4,pcVar5);
     if ((CStack_24.rep != 0) &&
        ((CStack_24.rep)->refCount = (int)((C_str_rep *)(CStack_24.rep)->refCount)[-1].chars,
        (C_str_rep *)(CStack_24.rep)->refCount == 0)) {
@@ -2394,7 +1146,7 @@ uint32_t FUN_0063f870(void *param_1, ...)
       else {
         pcVar4 = pCVar2->rep->chars;
       }
-      FUN_0063f590(param_1,(int)pcVar4,pcVar5);
+      C_FontManager__AddTextureFont(param_1,(int)pcVar4,pcVar5);
       if ((CStack_20.rep != 0) &&
          ((CStack_20.rep)->refCount = (CStack_20.rep)->refCount - 1, (CStack_20.rep)->refCount == 0
          )) {
@@ -2432,53 +1184,10 @@ uint32_t vector_tidy_640460(int param_1, ...)
 }
 
 
-// 0x00640480
-uint32_t empty_function_640480(...)
-{
-  return 0;
-}
-
-
 // 0x00640490
 uint32_t FUN_00640490(void *_this,uint32_t *param_1, ...)
 {
   *param_1 = **(uint32_t **)((int)_this + 4);
-  return 0;
-}
-
-
-// 0x006404a0
-uint32_t uninitialized_copy4_6404a0(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3, ...)
-{
-  for (; param_1 != param_2; param_1 = param_1 + 1) {
-    if (param_3 != 0) {
-      *param_3 = *param_1;
-    }
-    param_3++;
-  }
-  return 0;
-}
-
-
-// 0x006404d0
-uint32_t uninitialized_fill_n4_6404d0(uint32_t *param_1,int param_2,uint32_t *param_3, ...)
-{
-  for (; param_2 != 0; param_2 = param_2 - 1) {
-    if (param_1 != 0) {
-      *param_1 = *param_3;
-    }
-    param_1++;
-  }
-  return 0;
-}
-
-
-// 0x00640500
-uint32_t construct_copy4_640500(uint32_t *param_1,uint32_t *param_2, ...)
-{
-  if (param_1 != 0) {
-    *param_1 = *param_2;
-  }
   return 0;
 }
 

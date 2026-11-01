@@ -1,37 +1,15 @@
-// The game's text library (the menus' code, 0x0063de40..0x0064d060; not ported yet): fonts
-// (FontConfig.hxml), text boxes on interface visuals and text styles. Declared here for the HUD,
+// The game's text library (the menus' code, 0x0063de40..0x0064d060): fonts (game/font.h, part 9a),
+// text boxes on interface visuals and text styles (not ported yet). Declared here for the HUD,
 // which uses it for its texts and the message log's glyphs.
 #pragma once
 
 #include <cstdint>
 
 #include "common/c_str.h"
+#include "game/font.h"
 
 class I3D_frame;
 class I3D_scene;
-
-// A glyph of a font's texture: its texture rectangle and its width per height.
-struct S_Glyph {                                        // 0x14 bytes
-    float u0, v0, u1, v1;
-    float aspect;                                       // 0: a blank (0.4 of the height wide)
-};
-
-class C_Font {
-public:
-    // Selects the font's texture for the next primitives.
-    void Select();                                      // vtable +0x10
-    const S_Glyph *GetGlyph(int ch);                    // vtable +0x14
-};
-
-// The shared font manager (FontConfig.hxml), reference counted.
-class C_FontManager {
-public:
-    C_Font *FindFont(int id);                           // 0x0063df80
-    void Release();                                     // 0x0063df60
-};
-C_FontManager *AcquireFontManager();                    // 0x0063df00
-// Releases the shared manager (when there is one).
-void ReleaseFontManager();                              // 0x0063df30
 
 // A text style (CreateTextStyle): font, colour, size and placement in the text box (fractions of
 // the box; -1: automatic) and flags. (The fields' meanings are inferred from the HUD's tables: the
