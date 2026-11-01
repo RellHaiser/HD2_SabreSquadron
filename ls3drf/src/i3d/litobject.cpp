@@ -219,34 +219,32 @@ void I3D_lit_object::Init()
     }
 }
 
+// LS3DRF 0x10018f10 (from LS3DF 0x10023320): the object's part only; no levels to delete (Construct
+// and LoadLightmaps make none).
 void I3D_lit_object::Uninit()
 {
-    for (S_lightmapSet &s : sets) {
-        for (S_lightmapLevel *&l : s.levels) {
-            delete l;
-            l = nullptr;
-        }
-    }
     I3D_object::Uninit();
 }
 
+// LS3DRF 0x10018f60 (from LS3DF 0x100237c0): no lightmap baker, so I3DERR_UNSUPPORTED.
+I3D_RESULT I3D_lit_object::Construct(I3D_scene *, const S_vector *, float, uint32_t, I3D_LIGHTMAP_PROGRESS *,
+                                     void *)
+{
+    return I3DERR_UNSUPPORTED;
+}
+
+// LS3DRF 0x10018f70 (from LS3DF 0x10028a00): the current set marked not loaded; it has no levels.
 I3D_RESULT I3D_lit_object::FreeLightmaps(int)
 {
-    S_lightmapSet &s = CurrentSet();
-    s.loaded = false;
-    for (S_lightmapLevel *&l : s.levels) {
-        delete l;
-        l = nullptr;
-    }
+    CurrentSet().loaded = false;
     return I3D_OK;
 }
 
-I3D_RESULT I3D_lit_object::SaveLightmaps(int)
-{
-    dbgPrintf("NEMUZETE UKLADAT LM, KDYZ JE #define LS3D_FINAL !!!!!!!");
-    return I3DERR_GENERIC;
-}
+// LS3DRF 0x10018fa0 (from LS3DF 0x100292f0): I3DERR_UNSUPPORTED, with no message.
+I3D_RESULT I3D_lit_object::SaveLightmaps(int) { return I3DERR_UNSUPPORTED; }
 
+// LS3DRF 0x10018fb0 (from LS3DF 0x10029310): the current set freed (FreeLightmaps through the vtable),
+// its flags set.
 I3D_RESULT I3D_lit_object::SetSetFlags(uint32_t flags)
 {
     FreeLightmaps(0);
@@ -254,15 +252,12 @@ I3D_RESULT I3D_lit_object::SetSetFlags(uint32_t flags)
     return I3D_OK;
 }
 
+// LS3DRF 0x10018f20 (from LS3DF 0x100233c0): the set stored; no levels to make again.
 void I3D_lit_object::SetCurrentSet(int set)
 {
     // (Fix: the original takes any number, and later indexes past the sets with it.)
     if (set < 0 || set >= 6)
         return;
-    for (S_lightmapLevel *l : CurrentSet().levels) {
-        if (l)
-            l->dirty = true;
-    }
     currentSet = set;
 }
 
@@ -300,80 +295,11 @@ S_lightmapPart *I3D_lit_object::GetParts(int level, int set)
     return l ? l->parts : nullptr;
 }
 
-void I3D_lit_object::RewriteParts(int level, int set)
-{
-    if (!LightmapsTrueColor() || !ig::g_fmtTrueColor)
-        return;
-    S_lightmapLevel *l = LevelAt(level, set);
-    if (!l || !l->lightmap)                 // (fix: a level without patches has no lightmap)
-        return;
-    ITexture *texture = l->lightmap->texture;
-    int pitch = 0;
-    auto *bits = static_cast<uint8_t *>(texture->Lock(nullptr, &pitch, 0));
-    if (!bits)
-        return;
-    for (int i = 0; i < l->numParts; ++i) {
-        const S_lightmapPart &p = l->parts[i];
-        const bool turned = !(p.u < 2.0f);
-        const int x = turned ? Ftol(static_cast<float>(texture->width) * (p.u - 2.0f))
-                             : Ftol(static_cast<float>(texture->width) * p.u);
-        const int y = Ftol(static_cast<float>(texture->height) * p.v);
-        uint8_t *d = bits + y * pitch + x * 4;
-        if (p.IsUniform()) {
-            for (int r = 0; r < 3; ++r, d += pitch - p.width * 4) {
-                for (int c = 0; c < 3; ++c, d += 4) {
-                    d[0] = static_cast<uint8_t>(p.color);
-                    d[1] = static_cast<uint8_t>(p.color >> 8);
-                    d[2] = static_cast<uint8_t>(p.color >> 16);
-                }
-            }
-            continue;
-        }
-        // (Fix: the atlas frees the pixels of placed patches, which the original reads here.)
-        if (!p.pixels)
-            continue;
-        // The pixels at the patch's size in the atlas (resized when it shrank).
-        uint8_t *resized = nullptr;
-        const uint8_t *src = p.pixels;
-        if (p.sourceWidth != p.width || p.sourceHeight != p.height) {
-            g_pIGraph->ResizeImage(p.sourceWidth, p.sourceHeight, p.sourceWidth * 3, p.pixels, p.width, p.height,
-                                   p.width * 3, &resized, 3, true);
-            src = resized;
-        }
-        if (src) {
-            if (turned) {
-                for (int r = 0; r < p.height; ++r) {
-                    uint8_t *q = d + r * 4;
-                    for (int c = 0; c < p.width; ++c, q += pitch, src += 3) {
-                        q[0] = src[0];
-                        q[1] = src[1];
-                        q[2] = src[2];
-                    }
-                }
-            } else {
-                for (int r = 0; r < p.height; ++r, d += pitch - p.width * 4) {
-                    for (int c = 0; c < p.width; ++c, d += 4, src += 3) {
-                        d[0] = src[0];
-                        d[1] = src[1];
-                        d[2] = src[2];
-                    }
-                }
-            }
-        }
-        ::operator delete(resized);
-    }
-    texture->Unlock();
-}
+// LS3DRF 0x10018f40 (from LS3DF 0x10023460): a no-op (no lightmap textures).
+void I3D_lit_object::RewriteParts(int, int) {}
 
-I3D_RESULT I3D_lit_object::LockFaces(int level, int set, uint16_t **)
-{
-    S_lightmapLevel *l = LevelAt(level, set);
-    if (!l)
-        return -1;
-    if (l->faces.buffer)                    // (fix: vertex colour levels have no faces)
-        l->faces.buffer->Lock(0);
-    return I3D_OK;
-}
+// LS3DRF 0x10018f50 (from LS3DF 0x100236e0): I3D_OK; no level to lock.
+I3D_RESULT I3D_lit_object::LockFaces(int, int, uint16_t **) { return I3D_OK; }
 
 void I3D_lit_object::RefreshLevel(int level)
 {
@@ -475,215 +401,9 @@ I3D_RESULT I3D_lit_object::Duplicate(I3D_frame *source)
     return I3D_OK;
 }
 
-namespace {
-
-// One level of a set from the lightmap file (LoadLightmaps): textures (patches, lightmap
-// vertices, faces) or vertex colours.
-I3D_RESULT ReadLevel(int file, S_lightmapLevel *l, I3D_mesh_level *ml, uint32_t flags, uint8_t version,
-                     const I3D_frame *owner)
-{
-    if (!(flags & LMSET_TEXTURES)) {
-        if (flags & LMSET_VERTEX_COUNT) {
-            dtaRead(file, &l->numVertices, 4);
-            if (l->numVertices != ml->numVertices)
-                return I3DERR_FILECORRUPTED;
-        } else {
-            l->numVertices = ml->numVertices;
-        }
-        l->colors = static_cast<uint32_t *>(::operator new(sizeof(uint32_t) * l->numVertices, std::nothrow));
-        if (!l->colors) {
-            ReportError(I3DERR_OUTOFMEM, kSevFatal);
-            return I3DERR_OUTOFMEM;
-        }
-        if (dtaRead(file, l->colors, l->numVertices * 4) != l->numVertices * 4)
-            return I3DERR_FILECORRUPTED;
-        return I3D_OK;
-    }
-    uint16_t counts[2];                     // patches, face groups
-    if (dtaRead(file, counts, 4) != 4)
-        return I3DERR_FILECORRUPTED;
-    if (counts[1] != ml->numFaceGroups)
-        return I3DERR_INVALIDPARAMS;
-    const int numParts = counts[0];
-    auto *parts = static_cast<S_lightmapPart *>(::operator new(sizeof(S_lightmapPart) * numParts, std::nothrow));
-    if (!parts) {
-        ReportError(I3DERR_OUTOFMEM, kSevFatal);
-        return I3DERR_OUTOFMEM;
-    }
-    std::memset(parts, 0, sizeof(S_lightmapPart) * numParts);
-    l->parts = parts;
-    l->numParts = numParts;
-    for (int k = 0; k < numParts; ++k) {
-        S_lightmapPart &p = parts[k];
-        uint8_t uniform = 0;
-        if (dtaRead(file, &uniform, 1) != 1)
-            return I3DERR_FILECORRUPTED;
-        if (uniform) {
-            p.sourceWidth = p.sourceHeight = p.width = p.height = 3;
-            p.area = 9;
-            if (dtaRead(file, &p.color, 4) != 4)
-                return I3DERR_FILECORRUPTED;
-        }
-        // Mip images: the first one is the patch, the others are skipped.
-        uint32_t numImages = 0;
-        if (dtaRead(file, &numImages, 4) != 4)
-            return I3DERR_FILECORRUPTED;
-        for (uint32_t j = 0; j < numImages; ++j) {
-            int w = 0, h = 0;
-            if (dtaRead(file, &w, 4) != 4 || dtaRead(file, &h, 4) != 4)
-                return I3DERR_FILECORRUPTED;
-            if (uniform)
-                continue;
-            const int size = h * w * 3;
-            auto *buf = static_cast<uint8_t *>(::operator new(static_cast<size_t>(size), std::nothrow));
-            if (!buf)
-                return I3DERR_OUTOFMEM;
-            if (dtaRead(file, buf, size) != size) {
-                ::operator delete(buf);
-                return I3DERR_FILECORRUPTED;
-            }
-            // Version 0x21 stores RGB (the atlas wants BGR).
-            if (version == 0x21) {
-                for (int n = 0; n < size; n += 3) {
-                    const uint8_t t = buf[n];
-                    buf[n] = buf[n + 2];
-                    buf[n + 2] = t;
-                }
-            }
-            if (j != 0) {
-                ::operator delete(buf);
-                continue;
-            }
-            // (A 3 x 3 image would read as a uniform patch.)
-            if (w == 3 && h == 3) {
-                ::operator delete(buf);     // (fix: the original leaks it)
-                return I3DERR_FILECORRUPTED;
-            }
-            p.sourceHeight = p.height = static_cast<int16_t>(h);
-            p.pixels = buf;
-            p.sourceWidth = p.width = static_cast<int16_t>(w);
-            p.area = h * w;
-        }
-    }
-    // The lightmap vertices: their uv in their patch and their vertex and patch.
-    uint32_t numVertices = 0;
-    if (!dtaRead(file, &numVertices, 4))
-        return I3DERR_FILECORRUPTED;
-    l->numVertices = static_cast<int>(numVertices);
-    l->uvs = static_cast<S_lightmapUV *>(::operator new(sizeof(S_lightmapUV) * numVertices, std::nothrow));
-    if (!l->uvs)
-        return I3DERR_OUTOFMEM;
-    if (!dtaRead(file, l->uvs, l->numVertices * 8))
-        return I3DERR_FILECORRUPTED;
-    l->vertexMap = static_cast<S_lightmapVertex *>(::operator new(sizeof(S_lightmapVertex) * numVertices, std::nothrow));
-    if (!l->vertexMap)
-        return I3DERR_OUTOFMEM;
-    if (!dtaRead(file, l->vertexMap, l->numVertices * 4))
-        return I3DERR_FILECORRUPTED;
-    uint32_t numIndices = 0;
-    if (!dtaRead(file, &numIndices, 4))
-        return I3DERR_FILECORRUPTED;
-    if (static_cast<uint32_t>(ml->NumFaces() * 3) != numIndices)
-        return I3DERR_FILECORRUPTED;
-    if (!g_ibManager.Alloc(D3DUSAGE_SOFTWAREPROCESSING, numIndices, &l->faces)) {
-        ReportError(I3DERR_OUTOFMEM, kSevFatal);
-        return I3DERR_OUTOFMEM;
-    }
-    uint16_t *indices = l->faces.buffer->Lock(0) + l->faces.offset;
-    if (!dtaRead(file, indices, static_cast<int>(numIndices) * 2))
-        return I3DERR_FILECORRUPTED;
-    // Each face group's faces' patches.
-    const int numFaceGroups = counts[1];
-    l->faceParts = static_cast<uint16_t **>(::operator new(sizeof(uint16_t *) * numFaceGroups, std::nothrow));
-    if (!l->faceParts) {
-        ReportError(I3DERR_OUTOFMEM, kSevFatal);
-        return I3DERR_OUTOFMEM;
-    }
-    l->numFaceGroups = numFaceGroups;
-    std::memset(l->faceParts, 0, sizeof(uint16_t *) * numFaceGroups);
-    I3D_face_group *fg = ml->faceGroups;
-    for (int b = 0; b < numFaceGroups; ++b, fg = fg->next) {
-        int n = 0;
-        if (dtaRead(file, &n, 4) != 4 || n != fg->numFaces)
-            return I3DERR_FILECORRUPTED;
-        auto *fp = static_cast<uint16_t *>(::operator new(sizeof(uint16_t) * static_cast<size_t>(n), std::nothrow));
-        if (!fp) {
-            ReportError(I3DERR_OUTOFMEM, kSevFatal);
-            return I3DERR_OUTOFMEM;
-        }
-        if (dtaRead(file, fp, n * 2) != n * 2) {
-            ::operator delete(fp);          // (fix: the original leaks it)
-            ReportError(I3DERR_OUTOFMEM, kSevFatal);    // (sic)
-            return I3DERR_FILECORRUPTED;
-        }
-        l->SetFaceParts(fp, b);
-    }
-    if (!l->Build(ml, true, owner))
-        return I3DERR_GENERIC;
-    return I3D_OK;
-}
-
-}  // namespace
-
-I3D_RESULT I3D_lit_object::LoadLightmaps(int file)
-{
-    FreeLightmaps(0);
-    if (!mesh)
-        return I3DERR_INVALIDPARAMS;
-    uint8_t mask = 0;
-    dtaRead(file, &mask, 1);
-    if (!mask)
-        return I3D_OK;
-    int numSets = 0;
-    for (int b = 0; b < 8; ++b)
-        numSets += (mask >> b) & 1;
-    for (int s = 0; s < numSets; ++s) {
-        // version, flags, levels, resolution, smoothing angle, set number (1 - 6)
-        uint8_t header[15];
-        if (dtaRead(file, header, 15) != 15)
-            return I3DERR_FILECORRUPTED;
-        uint8_t number = header[14];
-        if (number > 6)
-            number = 1;
-        // (Fix: number 0 makes the original write its set over the object's fields before them.)
-        if (number == 0)
-            number = 1;
-        S_lightmapSet &set = sets[number - 1];
-        set.flags = header[1];
-        std::memcpy(&set.resolution, header + 6, 4);
-        std::memcpy(&set.smoothAngle, header + 10, 4);
-        int numLevels = 0;
-        std::memcpy(&numLevels, header + 2, 4);
-        const uint8_t version = header[0];
-        if ((version != 0x22 && version != 0x21) || static_cast<uint32_t>(numLevels) != mesh->numLevels)
-            return I3DERR_INVALIDPARAMS;
-        for (int i = 0; i < numLevels; ++i) {
-            I3D_mesh_level *ml = mesh->levels[i];
-            uint16_t unused = 0;
-            if (dtaRead(file, &unused, 2) != 2)
-                return I3DERR_FILECORRUPTED;
-            S_lightmapLevel *l = set.levels[i];
-            if (l) {
-                // (Fix: the original overwrites the level's data without freeing it.)
-                l->Free();
-            } else if (!(l = new (std::nothrow) S_lightmapLevel)) {
-                ReportError(I3DERR_OUTOFMEM, kSevFatal);
-                return I3DERR_OUTOFMEM;
-            }
-            const I3D_RESULT r = ReadLevel(file, l, ml, set.flags, version, this);
-            if (r != I3D_OK) {
-                // (Fix: the original frees a level still in the set.)
-                if (set.levels[i] == l)
-                    set.levels[i] = nullptr;
-                delete l;
-                return r;
-            }
-            set.levels[i] = l;
-        }
-        set.loaded = true;
-    }
-    return I3D_OK;
-}
+// LS3DRF's shared return-0 stub 0x10018f90 (marked at sound SetCurrTime; from LS3DF 0x10028a60): no
+// lightmaps, nothing read from `file`.
+I3D_RESULT I3D_lit_object::LoadLightmaps(int) { return I3D_OK; }
 
 void I3D_lit_object::Prepare()
 {
