@@ -84,7 +84,7 @@ public:
     ls3d::C_vector<I3D_sector *> envSectors;
     ls3d::C_vector<ITexture *> lightmapTextures;                        // +0x28 the lightmap atlas textures
     ls3d::C_vector<I3D_scene *> scenes;                                 // +0x38
-    int16_t mirrorStamp;                                                // +0x48 counts the mirrors made (I3D_mirror::stamp)
+    int16_t mirrorStamp;                                                // +0x48 (nothing counts: mirrors keep no stamp)
 };
 static_assert(sizeof(I3D_driver) == 0x4C, "I3D_driver layout");
 

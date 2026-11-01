@@ -4,6 +4,9 @@
 // renderer clears z to 0, draws the mirror's faces with z always written (so only they can be
 // drawn over), then each reflected visual through a copy of its own (VISF_MIRRORED, `data` the
 // original) placed at the original's position reflected through the mirror's plane.
+//
+// LS3DRF's mirror is only its plane, color and geometry (ray tests read them): it joins no scene's
+// list and keeps no copies, so that render path is never reached.
 #pragma once
 
 #include "core/c_vector.h"
@@ -22,27 +25,17 @@ enum : uint32_t {
 
 class I3D_mirror : public I3D_visual {
 public:
-    // 0x20 0x10032d80: the copies of visuals going away (no parent, or the copy's reference the
-    // last) released.
-    void __stdcall Tick(int time) override;
-    // 0x38 0x10032c90: the frame linked; the mirror moves to the new sector's scene.
-    I3D_RESULT __stdcall LinkTo(I3D_frame *newParent, uint32_t flags) override;
-    // 0x4C 0x10032630: the frame; of another mirror its plane, geometry and color.
-    I3D_RESULT __stdcall Duplicate(I3D_frame *source) override;
+    // (Tick, LinkTo, Duplicate and MatrixChanged: the frame's and the visual's, as in LS3DRF.)
     void Init() override;                                                      // 0x60 0x10032280
-    // 0x64 0x10032330: out of the scene, the copies and the geometry released.
+    // 0x64 0x10032330: the geometry released.
     void Uninit() override;
-    // 0x68 0x10032cf0: a moved mirror's reflection is made again (and its copies' placement); it
-    // joins its sector's scene.
-    void MatrixChanged() override;
     // 0x70 0x10033e80: the frame, then the bound, plane, color, range and geometry.
     void Load() override;
     // 0x9C 0x10033d50: the plane matrix: `matrix` scaled by the box's half size, at its center.
     virtual void __stdcall SetPlane(const I3D_bbox &box, const S_matrix &matrix);
-    // 0xA0 0x100323c0: the color (clamped to 0 - 1; the colored vertices refilled); true when
-    // unchanged.
+    // 0xA0 0x100323c0: the color (clamped to 0 - 1); true when unchanged.
     virtual bool __stdcall SetColor(const S_vector4 &newColor);
-    // 0xA4 0x10032520: the faces from the index buffer's lock (bit 0 of `flags`: read only).
+    // 0xA4 0x10032520: the faces (the index memory; `flags` unread); null without faces.
     virtual I3D_triface *__stdcall LockFaces(uint32_t flags);
     // 0xA8 / 0xAC 0x10057630 (nothing: 0)
     virtual int __stdcall Reserved0() { return 0; }
@@ -54,7 +47,7 @@ public:
 
     S_matrix planeMatrix;                   // +0x1E0 the plane in the frame's space (its z the normal)
     S_vector4 color;                        // +0x220 the surface's color (0)
-    float range;                            // +0x230 (100) reflects within range x the LOD scale
+    float range;                            // +0x230 (Load) reflects within range x the LOD scale
     int numVertices;                        // +0x234
     int numFaces;                           // +0x238
     S_vector4 *vertices;                    // +0x23C 16-byte aligned
@@ -65,11 +58,11 @@ public:
     float planeRadius;                      // +0x25C the plane's sphere: what it reflects must touch it
     S_matrix planeInverse;                  // +0x260 world space into the plane's (-1 - 1 within it)
     S_matrix reflection;                    // +0x2A0 world space reflection through the mirror plane
-    I3D_scene *scene;                       // +0x2E0 the scene it is in the list of
+    I3D_scene *scene;                       // +0x2E0 (not initialised; nothing sets it)
     ls3d::C_vector<I3D_visual *> copies;    // +0x2E4 (grow 0x20) the mirrored copies (their data: the originals)
-    uint16_t stamp;                         // +0x2F4 the driver's count when made (mirrored lights follow it)
+    uint16_t stamp;                         // +0x2F4 (not initialised) mirrored lights follow it
     uint16_t padding2F6;
-    ls3d::S_VBAlloc colorVertices;          // +0x2F8 position and color (0x18 bytes)
+    ls3d::S_VBAlloc colorVertices;          // +0x2F8 (not initialised) position and color (0x18 bytes)
     ls3d::S_IBAlloc faces;                  // +0x304
 };
 static_assert(sizeof(I3D_mirror) == 0x310, "I3D_mirror layout");
