@@ -177,31 +177,6 @@ void I3D_occluder::Uninit()
     I3D_frame::Uninit();
 }
 
-I3D_RESULT I3D_occluder::LinkTo(I3D_frame *newParent, uint32_t flags)
-{
-    if (newParent == parent)
-        return I3D_OK;
-    SetScene(nullptr);
-    if (newParent) {
-        I3D_frame *owner = newParent->ownerModel;
-        I3D_scene *newScene;
-        if (owner && owner->GetType() == FRAME_SCENE) {
-            newScene = static_cast<I3D_scene *>(owner);
-        } else {
-            I3D_frame *f = newParent;
-            while (f->GetType() != FRAME_SECTOR) {
-                f = f->parent;
-                if (!f)
-                    return I3D_frame::LinkTo(newParent, flags);
-            }
-            newScene = static_cast<I3D_sector *>(f)->scene;
-        }
-        if (newScene)
-            SetScene(newScene);
-    }
-    return I3D_frame::LinkTo(newParent, flags);
-}
-
 I3D_RESULT I3D_occluder::Duplicate(I3D_frame *source)
 {
     if (!source)

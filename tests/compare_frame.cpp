@@ -18,9 +18,15 @@
 // indices, portals as (sector, index), strings by content), and so must the name trees, the
 // target lists and the scene rings.
 //
+// The port follows LS3DRF, which gives a new scene to fewer frames than LS3DF.dll: its LinkTo has
+// no occluder or area pass after the sector pass, its sector SetScene leaves the portals' scene as
+// it was, and its occluder has no LinkTo of its own (the frame's). The test patches the original
+// to match: LinkTo (0x1001d680) and SetScene (0x1004cd40) jump over those passes, and the
+// occluder's slot 0x38 is the frame's LinkTo.
+//
 // The original's portal destructor leaves the portal in its scene's ring, and its FreeGeometry keeps
-// the plane count (the port fixes both): before the original's Duplicate of a sector the test takes
-// the old portals out of the ring, and after its FreeGeometry clears the count.
+// the plane count (the port fixes both): the test patches the destructor (0x1003ed60) to leave the
+// ring, and clears the count after the original's FreeGeometry.
 //
 // The original's RebalanceNameTree leaves the left link of the last frame of a run of equal
 // names as it was (frame.cpp fixes it); the test clears those links in the original after each of
@@ -918,24 +924,6 @@ int SubtreeHeight(I3D_frame *f)
     return h + 1;
 }
 
-// The scene of the first sector up from `f` (LinkTo's rule), null if none.
-I3D_scene *SceneAbove(I3D_frame *f)
-{
-    for (; f; f = f->parent) {
-        if (f->GetType() == FRAME_SECTOR)
-            return static_cast<I3D_sector *>(f)->scene;
-    }
-    return nullptr;
-}
-bool HasAreaBelow(I3D_frame *f)
-{
-    for (I3D_frame *c = f->firstChild; c; c = c->nextSibling) {
-        if (c->GetType() == FRAME_AREA || HasAreaBelow(c))
-            return true;
-    }
-    return false;
-}
-
 bool IsDescendant(int frame, int of)
 {
     for (I3D_frame *f = g_port[frame]; f; f = f->parent) {
@@ -1317,14 +1305,6 @@ void ResetNearPlane(int i)
     std::memcpy(g_orig[i] + 0x5B0, &q->nearPlane, 16);
 }
 
-// Before the original frees a sector's portals: they leave their scene's ring, as the port's
-// destructor makes them (the original's stay).
-void OrigPortalsLeaveScene(uint8_t *o)
-{
-    for (int k = 0; k < Field<int>(o, 0x254); ++k)
-        OrigFn<ThisPtrFn>(0x1003ee20)(Field<void **>(o, 0x24C)[k], nullptr, nullptr);
-}
-
 // Takes a portal (sector frame i, index k) off the sector it leads to, in both.
 void Disconnect(int i, int k)
 {
@@ -1408,10 +1388,6 @@ void RunOp()
             if (!f || !static_cast<I3D_sector *>(f)->scene)
                 t = -1;
         }
-        // (A new scene reaches the areas below the frame in LS3DF's LinkTo, not in LS3DRF's: no
-        // such move.)
-        if (SceneAbove(p->parent) != SceneAbove(t >= 0 ? g_port[t] : nullptr) && HasAreaBelow(p))
-            break;
         const uint32_t flags = g_rng() & 7;
         std::snprintf(text, sizeof text, "LinkTo %d flags %u", t, flags);
         g_lastOp = text;
@@ -1504,8 +1480,6 @@ void RunOp()
             s = -1;
         std::snprintf(text, sizeof text, "Duplicate %d", s);
         g_lastOp = text;
-        if (TypeOf(i) == FRAME_SECTOR && s >= 0 && TypeOf(s) == FRAME_SECTOR)
-            OrigPortalsLeaveScene(o);
         const I3D_RESULT ro = CallV<I3D_RESULT>(o, 0x4C, s >= 0 ? g_orig[s] : nullptr);
         const I3D_RESULT rp = p->Duplicate(s >= 0 ? g_port[s] : nullptr);
         if ((TypeOf(i) == FRAME_OCCLUDER && s >= 0 && TypeOf(s) == FRAME_OCCLUDER) ||
@@ -1933,7 +1907,6 @@ void RunOp()
         const int sIdx = Rand(kFrames / 10) * 10 + 6;
         std::snprintf(text, sizeof text, "sector %d new geometry", sIdx);
         g_lastOp = text;
-        OrigPortalsLeaveScene(g_orig[sIdx]);
         OrigFn<ThisFn>(0x1004cbc0)(g_orig[sIdx], nullptr);
         Field<int>(g_orig[sIdx], 0x270) = 0;    // (as the port's FreeGeometry)
         static_cast<I3D_sector *>(g_port[sIdx])->FreeGeometry();
@@ -2333,6 +2306,53 @@ LONG WINAPI CrashFilter(EXCEPTION_POINTERS *info)
     return EXCEPTION_EXECUTE_HANDLER;
 }
 
+// Writes `with` over the original's code at `va`, which must hold `expect` (`size` bytes each).
+void PatchCode(uint32_t va, const uint8_t *expect, const uint8_t *with, size_t size)
+{
+    uint8_t *at = &Orig<uint8_t>(va);
+    if (std::memcmp(at, expect, size)) {
+        std::printf("the original's code at %08x is not what it was\n", va);
+        std::exit(2);
+    }
+    DWORD old;
+    VirtualProtect(at, size, PAGE_EXECUTE_READWRITE, &old);
+    std::memcpy(at, with, size);
+    VirtualProtect(at, size, old, &old);
+    FlushInstructionCache(GetCurrentProcess(), at, size);
+}
+// A jump from `va` to `to` over the instruction `expect` names (5 bytes or more).
+void PatchJump(uint32_t va, uint32_t to, const uint8_t *expect, size_t size)
+{
+    uint8_t with[16];
+    std::memcpy(with, expect, size);
+    with[0] = 0xe9;
+    const int32_t rel = static_cast<int32_t>(to - (va + 5));
+    std::memcpy(with + 1, &rel, 4);
+    PatchCode(va, expect, with, size);
+}
+
+// LS3DRF's LinkTo, sector SetScene and occluder LinkTo in the original, and the port's portal
+// destructor (`occluder`: one of its occluders).
+void PatchOrigScenePasses(uint8_t *occluder)
+{
+    static const uint8_t linkTail[] = {0x83, 0xbe, 0xf8, 0x00, 0x00, 0x00, 0x0c};    // cmp [esi+0xf8], 0xc
+    PatchJump(0x1001da9e, 0x1001dae6, linkTail, sizeof linkTail);
+    static const uint8_t portalLoop[] = {0x8b, 0xbe, 0x4c, 0x02, 0x00, 0x00};        // mov edi, [esi+0x24c]
+    PatchJump(0x1004ce6d, 0x1004cea6, portalLoop, sizeof portalLoop);
+    static const uint8_t ownScene[] = {0x8b, 0x86, 0xa0, 0x01, 0x00, 0x00};          // mov eax, [esi+0x1a0]
+    static const uint8_t noScene[] = {0x31, 0xc0, 0x90, 0x90, 0x90, 0x90};           // xor eax, eax
+    PatchCode(0x1003ed6f, ownScene, noScene, sizeof ownScene);
+    void **slot = *reinterpret_cast<void ***>(occluder) + 0x38 / 4;
+    if (*slot != &Orig<uint8_t>(0x10038730)) {
+        std::printf("the original's occluder LinkTo is not where it was\n");
+        std::exit(2);
+    }
+    DWORD old;
+    VirtualProtect(slot, 4, PAGE_READWRITE, &old);
+    *slot = &Orig<uint8_t>(0x1001d680);
+    VirtualProtect(slot, 4, old, &old);
+}
+
 }  // namespace
 
 int main(int argc, char **argv)
@@ -2385,6 +2405,7 @@ int main(int argc, char **argv)
         if (TypeOf(i) == FRAME_OCCLUDER)
             ResetNearPlane(i);
     }
+    PatchOrigScenePasses(g_orig[7]);
     // The models' own frames (named after the tracks, with the recording callback), the
     // animation sets, poses and the pose set.
     for (int i = kFrames; i < kTotal; ++i) {

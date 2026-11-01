@@ -29,8 +29,6 @@ public:
     static constexpr int kMaxSilhouettePlanes = 35;    // 32 + the 3 edges of the last face
     static constexpr int kMaxFrontPlanes = 33;
 
-    // 0x38 0x10038730: also the scene of the new parent's sector (or of the scene that loaded it).
-    I3D_RESULT __stdcall LinkTo(I3D_frame *newParent, uint32_t flags) override;
     // 0x4C 0x10038be0: also the mesh of another occluder.
     I3D_RESULT __stdcall Duplicate(I3D_frame *source) override;
     // 0x60 / 0x64 0x10038490 / 0x10038550
