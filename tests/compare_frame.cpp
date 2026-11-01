@@ -118,17 +118,6 @@ I3D_RESULT __stdcall I3D_driver::GetStats(int, void *) { return 0; }
 I3D_RESULT __stdcall I3D_driver::SetState(int, uint32_t) { return 0; }
 uint32_t __stdcall I3D_driver::GetState(int) { return 0; }
 I3D_RESULT __stdcall I3D_driver::Render(I3D_scene *, bool) { return 0; }
-I3D_RESULT __stdcall I3D_driver::DrawPoint(const S_vector &, const S_vector &, uint32_t) { return 0; }
-I3D_RESULT __stdcall I3D_driver::DrawPoint2D(int, int, const S_vector &, uint32_t) { return 0; }
-I3D_RESULT __stdcall I3D_driver::DrawLine(const S_vector &, const S_vector &, const S_vector &, uint32_t) { return 0; }
-I3D_RESULT __stdcall I3D_driver::DrawLines(const void *, int, const uint16_t *, int, const S_vector &, int, uint32_t) { return 0; }
-I3D_RESULT __stdcall I3D_driver::DrawTriangles(const void *, int, const uint16_t *, int, const S_vector &, int, uint32_t, const float *) { return 0; }
-I3D_RESULT __stdcall I3D_driver::DrawCircle2D(const float *, float, const S_vector &, int, uint32_t) { return 0; }
-I3D_RESULT __stdcall I3D_driver::DrawText3D(const S_vector &, const char *, uint32_t, float) { return 0; }
-I3D_RESULT __stdcall I3D_driver::DrawText2D(int, int, const char *, uint32_t, float) { return 0; }
-I3D_RESULT __stdcall I3D_driver::DrawSprite(const S_vector &, I3D_material *, uint32_t, float) { return 0; }
-I3D_RESULT __stdcall I3D_driver::DrawBox(const I3D_bbox &, const S_vector *, const S_vector *, uint32_t) { return 0; }
-I3D_RESULT __stdcall I3D_driver::DrawSphere(const S_matrix &, const I3D_bsphere &, const S_vector &, uint32_t) { return 0; }
 I3D_frame *__stdcall I3D_driver::CreateVisual(uint32_t) { return nullptr; }
 I3D_frame *__stdcall I3D_driver::CreateFrame(int) { return nullptr; }
 I3D_material *__stdcall I3D_driver::CreateMaterial() { return nullptr; }
@@ -143,7 +132,6 @@ I3D_pose_set *__stdcall I3D_driver::CreatePoseSet() { return nullptr; }
 const char *__stdcall I3D_driver::GetFrameTypeName(int) { return nullptr; }
 const char *__stdcall I3D_driver::GetVisualTypeName(uint32_t) { return nullptr; }
 I3D_RESULT __stdcall I3D_driver::EnumVisualTypes(I3D_VISUALTYPEPROC *, bool) { return 0; }
-I3D_RESULT __stdcall I3D_driver::ResetDevice(I3D_scene *) { return 0; }
 
 // The camera asks IGraph for the screen size: the original's IGraph serves both sides.
 IGraph *g_pIGraph;

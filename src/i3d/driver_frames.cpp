@@ -261,7 +261,7 @@ void __stdcall I3D_driver::FrameReleased(I3D_frame *frame)
     }
 }
 
-void __stdcall I3D_driver::RemoveShadowCaster(I3D_frame *frame) { ls3d::i3d::RemoveShadowCaster(frame); }
+void __stdcall I3D_driver::RemoveShadowCaster(I3D_frame *) {}
 void __stdcall I3D_driver::RemoveTargetFrame(I3D_frame *frame) { RemoveFromTargets(frame); }
 
 void __stdcall I3D_driver::SetHierarchyLightLevel(I3D_frame *frame, float level)
