@@ -104,6 +104,7 @@ bool EnumNameNodes(I3D_ENUMPROC *proc, void *context, I3D_frame *node)
     return false;
 }
 
+// LS3DRF 0x10010b20 (from LS3DF 0x1001a730)
 void SetLightLevelProc(I3D_frame *frame)            // 0x1001a730
 {
     if (frame->type == FRAME_VISUAL && (static_cast<I3D_visual *>(frame)->visualFlags & VISF_OBJECT_PARAMS))
@@ -112,6 +113,7 @@ void SetLightLevelProc(I3D_frame *frame)            // 0x1001a730
         SetLightLevelProc(c);
 }
 
+// LS3DRF 0x10010bd0 (from LS3DF 0x1001a7e0)
 void SetAlphaProc(I3D_frame *frame)                 // 0x1001a7e0
 {
     if (frame->type == FRAME_VISUAL && (static_cast<I3D_visual *>(frame)->visualFlags & VISF_OBJECT_PARAMS))
@@ -264,12 +266,14 @@ void __stdcall I3D_driver::FrameReleased(I3D_frame *frame)
 void __stdcall I3D_driver::RemoveShadowCaster(I3D_frame *) {}
 void __stdcall I3D_driver::RemoveTargetFrame(I3D_frame *frame) { RemoveFromTargets(frame); }
 
+// LS3DRF 0x10010ac0 (from LS3DF 0x1001a6d0)
 void __stdcall I3D_driver::SetHierarchyLightLevel(I3D_frame *frame, float level)
 {
     g_hierarchyValue = level;
     SetLightLevelProc(frame);
 }
 
+// LS3DRF 0x10010b70 (from LS3DF 0x1001a780)
 void __stdcall I3D_driver::SetHierarchyAlpha(I3D_frame *frame, float alpha)
 {
     g_hierarchyValue = alpha;
