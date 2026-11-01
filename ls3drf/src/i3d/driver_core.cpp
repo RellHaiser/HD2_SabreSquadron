@@ -55,10 +55,7 @@ uint32_t g_renderStats[8];
 // Unused frames by type and visuals by index, reused by the factories (0x100aded8, 0x100adb10).
 I3D_frame *g_frameFreeLists[17];
 I3D_frame *g_visualFreeLists[16];
-// The text drawers' font (0x100be404: in LS3DF, bitmap 0x7D of the dll; LS3DRF's Init loads none,
-// so it stays null and DrawText3D / DrawText2D draw nothing) and a list Close releases that
-// nothing fills (0x100be380).
-I3D_material *g_resourceMaterial;
+// A list Close releases that nothing fills (0x100be380).
 C_vector<I3D_material *> g_driverMaterials;
 // Driver state side values: the inverse of state 0x35 (0x100adb90), states 0x36 (the projectors'
 // z bias) / 0x37 as used (0x100be018 / 0x100aded4: a quarter on ATI hardware).

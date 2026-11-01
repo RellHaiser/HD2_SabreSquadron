@@ -130,7 +130,7 @@ struct I3D_bbox {
 };
 static_assert(sizeof(I3D_bbox) == 0x20, "I3D_bbox layout");
 
-// A sphere (the driver's DrawSphere).
+// A sphere.
 struct I3D_bsphere {
     S_vector center;
     float radius;

@@ -354,10 +354,9 @@ void CompareManagers()
               FakeIndex(g_vbManager.lockedBuffers[k]->vb, g_vbs[1]));
 }
 
-// The port's driver for the managers alone: SlotB4 (a no-op) is all they call.
+// The port's driver for the managers alone: SlotB4 (a plain no-op member) is all they call.
 void __stdcall NoOp(void *) {}
-void *g_driverVtable[64];
-void *g_fakeDriver = g_driverVtable;
+void *g_fakeDriver;
 
 // Loads the original, points each side at its fake device. False when it cannot.
 bool SetUpBuffers(const char *origPath)
@@ -377,8 +376,6 @@ bool SetUpBuffers(const char *origPath)
     g_device[1].side = 1;
     Orig<IDirect3DDevice8 *>(0x100d216c) = &g_device[0];
     ig::g_pDevice = &g_device[1];
-    for (void *&slot : g_driverVtable)
-        slot = reinterpret_cast<void *>(&NoOp);
     return true;
 }
 

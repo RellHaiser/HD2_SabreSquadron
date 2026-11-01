@@ -1,5 +1,5 @@
-// I3D_driver::Render (0x1005edc0) and the render core: the queue's sorts (0x1005e770, 0x10062620),
-// RenderVisual (0x100632a0) and the device reset pass (0x100633b0, 0x10063560).
+// I3D_driver::Render (0x1005edc0) and the render core: the queue's sorts (0x1005e770, 0x10062620)
+// and RenderVisual (0x100632a0).
 #include <windows.h>
 
 #include <cmath>
@@ -497,41 +497,6 @@ bool SortBlended()
     return true;
 }
 
-// ---------------------------------------------------------------- the device reset pass
-
-// The visuals of a hierarchy prepared once (each LOD level of an object), so their device
-// buffers exist before the first frame (0x100633b0).
-void PrepareHierarchy(I3D_frame *f)
-{
-    for (; f; f = f->nextSibling) {
-        if (!(f->frameFlags & FRMFLAGS_ON))
-            continue;
-        if (f->type == FRAME_VISUAL) {
-            I3D_visual *v = static_cast<I3D_visual *>(f);
-            I3D_mesh *mesh = (v->visualFlags & VISF_OBJECT_PARAMS) ? static_cast<I3D_object *>(v)->mesh : nullptr;
-            if (mesh) {
-                const int levels = (v->visualFlags & VISF_TEXTURE_LOD) ? 1 : mesh->numLevels;
-                float prev = 0.0f;
-                for (int i = 0; i < levels; ++i) {
-                    g_rc.lodPosition = LodPoint(v);
-                    g_lodScale = 1.0f / v->worldScale;
-                    // The LOD point moved to the middle of the level's distance range.
-                    const float d = std::sqrt(std::sqrt(mesh->GetLevel(i)->lodDistance));
-                    g_rc.lodPosition.z = (d + prev) * 0.5f + g_rc.lodPosition.z;
-                    prev = d;
-                    v->Prepare();
-                }
-            } else {
-                g_rc.lodPosition = LodPoint(v);
-                g_lodScale = 1.0f / v->worldScale;
-                v->Prepare();
-            }
-            g_rc.items.Clear();
-        }
-        PrepareHierarchy(f->firstChild);
-    }
-}
-
 }  // namespace
 
 namespace ls3d::i3d {
@@ -571,28 +536,6 @@ void RenderVisual(I3D_visual *visual)
 }
 
 }  // namespace ls3d::i3d
-
-// 0x10063560
-I3D_RESULT I3D_driver::ResetDevice(I3D_scene *scene)
-{
-    if (!scene) {
-        g_vbManager.ReleaseDefaultPool();
-        g_ibManager.ReleaseDefaultPool();
-        return InitParticleBuffers();
-    }
-    I3D_frame *temp = CreateFrame(FRAME_SECTOR);
-    g_rc.ResetQueue();
-    g_rc.scene = scene;
-    g_rc.camera = scene->activeCamera;
-    g_rc.sector = static_cast<I3D_sector *>(temp);
-    PrepareHierarchy(scene->primarySector->firstChild);
-    PrepareHierarchy(scene->omniSector->firstChild);
-    PrepareHierarchy(scene->backdropSector->firstChild);
-    PrepareHierarchy(scene->nearSector->firstChild);
-    temp->Release();
-    g_rc.ResetQueue();
-    return I3D_OK;
-}
 
 // 0x1005edc0
 I3D_RESULT I3D_driver::Render(I3D_scene *scene, bool keepScene)
