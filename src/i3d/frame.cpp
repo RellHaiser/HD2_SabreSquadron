@@ -245,6 +245,7 @@ void I3D_frame::NotifyOwnerRemoved()
         SceneFrameReleased(ownerModel, this);
 }
 
+// LS3DRF 0x100121d0 (from LS3DF 0x1001c1f0)
 void I3D_frame::Uninit()
 {
     if (frameFlags & FRMFLAGS_NAMED)

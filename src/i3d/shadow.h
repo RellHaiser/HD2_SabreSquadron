@@ -89,7 +89,7 @@ public:
     virtual void __stdcall SetColor(const S_vector4 &color);
     virtual void __stdcall SetOrthogonal(bool on);                             // 0x94 0x1004f520
 
-    // 0x1004e970: the casters looked up in `source`'s hierarchy (null: none; the scene is left).
+    // 0x1004e970: does nothing (no casters are looked up; the shadow keeps none).
     void SetSource(I3D_frame *source);
 
     bool orthogonal;                        // +0x120 (1) the volume is a box, not a pyramid
