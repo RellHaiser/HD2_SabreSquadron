@@ -29,6 +29,9 @@
 // the plane count (the port fixes both): the test patches the destructor (0x1003ed60) to leave the
 // ring, and clears the count after the original's FreeGeometry.
 //
+// The port's light Uninit, LS3DRF's, leaves the light in the device light list: the test patches
+// the original's call of 0x10063ca0 out of its Uninit (0x10021765).
+//
 // The original's RebalanceNameTree leaves the left link of the last frame of a run of equal
 // names as it was (frame.cpp fixes it); the test clears those links in the original after each of
 // its rebalances.
@@ -2412,6 +2415,9 @@ int main(int argc, char **argv)
             ResetNearPlane(i);
     }
     PatchOrigScenePasses(g_orig[7]);
+    static const uint8_t unregisterLight[] = {0xe8, 0x36, 0x25, 0x04, 0x00};    // call 0x10063ca0
+    static const uint8_t nops[] = {0x90, 0x90, 0x90, 0x90, 0x90};
+    PatchCode(0x10021765, unregisterLight, nops, sizeof unregisterLight);
     // The models' own frames (named after the tracks, with the recording callback), the
     // animation sets, poses and the pose set.
     for (int i = kFrames; i < kTotal; ++i) {
