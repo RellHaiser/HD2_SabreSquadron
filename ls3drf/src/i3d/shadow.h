@@ -33,25 +33,6 @@ enum : uint32_t {
     SHDF_FAILED = 0x8000,                   // no shadow (no light, texture failure)
 };
 
-// The shadow file: a mesh in named parts, each the vertices and faces cast by the frame of that
-// name (refcounted, shared by Duplicate).
-struct S_shadowPart {
-    char *name;
-    int numVertices;
-    int numFaces;
-};
-struct S_shadowData {
-    int refCount;                           // +0x00
-    ls3d::C_vector<S_vector4> vertices;     // +0x04 (16-byte aligned blocks in the original; grow 8)
-    ls3d::C_vector<uint16_t> indices;       // +0x14 (grow 0x40)
-    ls3d::C_vector<S_shadowPart> parts;     // +0x24 (grow 10)
-
-    S_shadowData() : refCount(1), vertices(8), indices(0x40), parts(10) {}
-    // 0x10050770: the parts' names freed.
-    ~S_shadowData();
-};
-static_assert(sizeof(S_shadowData) == 0x34, "S_shadowData layout");
-
 // A caster: a frame and how many of the shadow's vertices it moves.
 struct S_shadowCaster {
     I3D_frame *frame;                       // null once the frame went away
@@ -62,7 +43,7 @@ class I3D_shadow : public I3D_frame {
 public:
     // 0x38 0x1004ef20: the casters are looked up in the new parent's hierarchy.
     I3D_RESULT __stdcall LinkTo(I3D_frame *parent, uint32_t flags) override;
-    // 0x4C 0x1004e840: also the shadow file and settings of another shadow.
+    // 0x4C 0x1004e840: also the settings of another shadow.
     I3D_RESULT __stdcall Duplicate(I3D_frame *source) override;
     void Init() override;                                                      // 0x60 0x1004e5d0
     void Uninit() override;                                                    // 0x64 0x1004e7a0
@@ -70,7 +51,7 @@ public:
     void MatrixChanged() override;
     // 0x74 0x1004f120: the shadow file `fileName` with its extension replaced by ".6ds".
     virtual I3D_RESULT __stdcall Open(const char *fileName, uint32_t flags);
-    // 0x78 0x1004f030: the file, the casters and the map freed.
+    // 0x78 0x1004f030: does nothing (nothing is kept to free).
     virtual void __stdcall Close();
     // 0x7C 0x1004f560: the map size (powers of 2 from 4, at most 128; both from `width`).
     virtual I3D_RESULT __stdcall SetSize(int width, int height);
@@ -91,7 +72,7 @@ public:
 
     bool orthogonal;                        // +0x120 (1) the volume is a box, not a pyramid
     uint8_t padding121[3];
-    S_shadowData *data;                     // +0x124 the shadow file
+    uint32_t unknown124;                    // +0x124 (LS3DF: the shadow file; never set)
     S_vector4 *localVertices;               // +0x128 the casters' parts (16-byte aligned, then the world ones)
     S_vector4 *worldVertices;               // +0x12C
     float (*points)[2];                     // +0x130 the vertices in light space (x, y)
@@ -122,7 +103,7 @@ public:
     float opacity;                          // +0x20C (0.117)
 };
 static_assert(sizeof(I3D_shadow) == 0x210, "I3D_shadow layout");
-static_assert(offsetof(I3D_shadow, data) == 0x124, "I3D_shadow layout");
+static_assert(offsetof(I3D_shadow, unknown124) == 0x124, "I3D_shadow layout");
 static_assert(offsetof(I3D_shadow, bounds) == 0x150, "I3D_shadow layout");
 static_assert(offsetof(I3D_shadow, lightMatrix) == 0x1B0, "I3D_shadow layout");
 static_assert(offsetof(I3D_shadow, opacity) == 0x20C, "I3D_shadow layout");

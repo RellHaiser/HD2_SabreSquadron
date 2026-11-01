@@ -464,6 +464,7 @@ I3D_RESULT __stdcall I3D_frame::SetUserProps(const char *props)
 
 // --- Names -------------------------------------------------------------------------------------
 
+// LS3DRF 0x100130d0 (from LS3DF 0x1001d100)
 void I3D_frame::InsertName()
 {
     if (!name)
