@@ -8033,3 +8033,7 @@
 006cc190
 006cc200
 006cc220
+
+# part 8f-iv: scene2.bin's objects (C_MissionLoader::LoadObject)
+006cdc90
+006d1ed0

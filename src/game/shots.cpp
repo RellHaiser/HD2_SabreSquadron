@@ -1331,8 +1331,8 @@ void C_MuzzleLight::Init(I3D_frame *muzzle, I3D_frame *flash, int duration)
     m_light->SetLightType(I3DLIGHT_POINT);
     m_light->SetColor(S_vector(1.0f, 1.0f, 1.0f));
     m_light->SetPower(1.5f);
-    m_light->SetColor2(S_vector(1.0f, 1.0f, 1.0f));
-    m_light->SetUnknown8C(1.0f);
+    m_light->SetSpecularColor(S_vector(1.0f, 1.0f, 1.0f));
+    m_light->SetSpecularPower(1.0f);
     m_light->SetPosInline(S_vector(0.0f, 0.0f, 0.0f));
 
     m_sector = GetScene()->GetSector(muzzle->GetWorldPos());
@@ -1347,7 +1347,7 @@ void C_MuzzleLight::Init(I3D_frame *muzzle, I3D_frame *flash, int duration)
     }
     m_light->SetRange(4.0f);
     m_light->SetScale(S_vector(1.0f, 1.0f, 1.0f));
-    m_light->SetUnknown9C(0.99f, 0.0f, 0.01f);
+    m_light->SetAttenuation(0.99f, 0.0f, 0.01f);
     m_light->SetOn(true);
     m_light->Update();
 

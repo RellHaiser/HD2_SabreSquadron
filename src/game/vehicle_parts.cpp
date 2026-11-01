@@ -136,7 +136,7 @@ I3D_projector_visual *__stdcall CreateLamp(I3D_frame *frame, I3D_light **light) 
         spot->SetPower(2.0f);
         spot->SetRange(60.0f);
         spot->SetCone(0.52f, 1.22f);
-        spot->SetUnknown78(0.769f, 0.675f, 0.541f);
+        spot->SetColorRGB(0.769f, 0.675f, 0.541f);
         spot->LinkTo(nullptr, 0);
         spot->SetOn(false);
         spot->Update();
@@ -373,7 +373,7 @@ I3D_projector_visual *C_Vehicle::CreateProjector(I3D_frame *frame, I3D_light **l
         spot->SetPower(2.0f);
         spot->SetRange(60.0f);
         spot->SetCone(0.52f, 1.22f);
-        spot->SetUnknown78(0.769f, 0.675f, 0.541f);
+        spot->SetColorRGB(0.769f, 0.675f, 0.541f);
         spot->LinkTo(nullptr, 0);
         spot->SetOn(false);
         spot->Update();

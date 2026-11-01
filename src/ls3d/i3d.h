@@ -60,7 +60,9 @@ enum E_I3D_FRAME_TYPE : uint16_t {
     FRAME_MODEL = 9,              // animated model
     FRAME_JOINT = 10,
     FRAME_VOLUME = 11,            // collision volume of a model (C_Team collects a member's; inferred)
+    FRAME_OCCLUDER = 12,          // (LS3DF's names)
     FRAME_SCENE = 13,             // the scene itself (I3D_driver::CreateFrame; C_game)
+    FRAME_AREA = 14,
     FRAME_SHADOW = 15,            // projected shadow ("._shad." frames, see the shadow cache)
 };
 
@@ -183,7 +185,7 @@ public:
                                 const char *mask) = 0;        // 0x44
     I3DMETHOD(I3D_frame *, FindChildFrame)(const char *name, uint32_t typeMask) = 0;   // 0x48
     // Copies the contents (visual, children) of another frame of the same type.
-    I3DMETHOD(void, Duplicate)(I3D_frame *source) = 0;       // 0x4C
+    I3DMETHOD(HRESULT, Duplicate)(I3D_frame *source) = 0;    // 0x4C
     // Called with 1.0 on a weapon's "flash" visual when it fires (meaning not identified).
     I3DMETHOD(void, SetUnknown50)(float value) = 0;           // 0x50
     // Opacity of the object visuals of the hierarchy (LS3DF 0x1001ebf0; 0x50 is their light level).
@@ -506,6 +508,14 @@ public:
     // The signal flare grows and fades its "flare" child through these three fields
     // (+0x1E0, +0x1E4, +0x244; read back from +0x1E4). Meaning inferred: the flare's size.
     float GetFlareScale() const { return Field<float>(0x1E4); }
+
+    // scene2.bin's entry 0xB110 sets these (on any frame; not identified).
+    void SetUnknown1E0(float value) { Field<float>(0x1E0) = value; }
+    void SetUnknown1E4(float value) { Field<float>(0x1E4) = value; }
+    void SetUnknown1EC(int value) { Field<int>(0x1EC) = value; }
+    void SetUnknown220(float value) { Field<float>(0x220) = value; }
+    void SetUnknown224(float value) { Field<float>(0x224) = value; }
+    void SetUnknown240(float value) { Field<float>(0x240) = value; }
     void SetFlareScale(float scale)
     {
         Field<float>(0x1E0) = scale;
@@ -726,7 +736,9 @@ public:
     I3DMETHOD(void, Relight)(I3D_scene *scene, const S_vector &up, uint32_t param, int quality,
                              int unknown1, int unknown2) = 0;     // 0xB4
     I3D_SLOT(B8);
-    I3D_SLOT(BC);
+    // The lightmap sets from `file`, a dta file handle (scene2.bin's chunk 0x40A0; LS3DF's
+    // name; the current set freed first).
+    I3DMETHOD(HRESULT, LoadLightmapSets)(int file) = 0;      // 0xBC
     I3D_SLOT(C0);
     I3DMETHOD(void, LoadLightmap)(uint32_t lightmapId) = 0;  // 0xC4
     I3DMETHOD(void, SelectLightmap)(int index) = 0;          // 0xC8
@@ -842,6 +854,27 @@ public:
 class I3D_dummy : public I3D_frame {
 public:
     const I3D_bbox &GetBBox() const { return Field<I3D_bbox>(0x120); }
+    // (scene2.bin's loader writes it whole.)
+    void SetBBox(const I3D_bbox &box) { *reinterpret_cast<I3D_bbox *>(reinterpret_cast<uint8_t *>(this) + 0x120) = box; }
+};
+
+// A convex mesh hiding what is behind it (FRAME_OCCLUDER) and a sound area (FRAME_AREA): their
+// meshes from `numVerts` vertices `stride` bytes apart and their triangles (3 uint16 each).
+class I3D_occluder : public I3D_frame {
+public:
+    I3D_SLOT(5C);
+    I3D_SLOTS_4(60, 64, 68, 6C);
+    I3D_SLOT(70);
+    I3DMETHOD(HRESULT, Build)(const void *verts, int numVerts, const void *tris, int numTris, uint32_t stride) = 0;   // 0x74
+};
+class I3D_area : public I3D_frame {
+public:
+    I3D_SLOT(5C);
+    I3D_SLOTS_4(60, 64, 68, 6C);
+    I3D_SLOT(70);
+    I3DMETHOD(HRESULT, Build)(const void *verts, int numVerts, const void *tris, int numTris, uint32_t stride) = 0;   // 0x74
+    // A sound plays in the area.
+    I3DMETHOD(void, AddSound)(class I3D_sound *sound) = 0;    // 0x78
 };
 
 
@@ -1001,8 +1034,8 @@ public:
     I3DMETHOD(void, SetRange)(float nearRange, float farRange, float unknown1, float unknown2) = 0;   // 0x80
     // Inner / outer cone angles (radians) of a directional sound (meaning inferred).
     I3DMETHOD(void, SetCone)(float inner, float outer) = 0;   // 0x84
-    // (C_Vehicle::LoadSound passes 0 after SetCone; meaning not identified.)
-    I3DMETHOD(void, Unknown88)(int value) = 0;                // 0x88
+    // The volume outside the cone (LS3DF's name; C_Vehicle::LoadSound passes 0 after SetCone).
+    I3DMETHOD(void, SetOutVolume)(float volume) = 0;          // 0x88
     I3DMETHOD(void, SetVolume)(float volume) = 0;             // 0x8C 1.0 = 100 %
     I3DMETHOD(void, SetLoop)(bool loop) = 0;                  // 0x90
     // Starts playing at `position`.
@@ -1086,19 +1119,20 @@ public:
     I3D_SLOTS_4(60, 64, 68, 6C);
     I3D_SLOT(70);
     I3DMETHOD(void, SetLightType)(int type) = 0;              // 0x74
-    // (Not identified: the vehicle's lamps pass 0.769, 0.675, 0.541, a warm white.)
-    I3DMETHOD(void, SetUnknown78)(float a, float b, float c) = 0;   // 0x78
+    // (The names as the LS3DF port has them; the vehicle's lamps pass 0.769, 0.675, 0.541.)
+    I3DMETHOD(void, SetColorRGB)(float r, float g, float b) = 0;    // 0x78
     I3DMETHOD(void, SetColor)(const S_vector &color) = 0;     // 0x7C
-    I3DMETHOD(void, SetColor2)(const S_vector &color) = 0;    // 0x80 (second color, not identified)
-    // (Not identified: the interface's light gets 1, 1, 1.)
-    I3DMETHOD(void, SetUnknown84)(const S_vector &value) = 0; // 0x84
+    I3DMETHOD(void, SetSpecularColor)(const S_vector &color) = 0;   // 0x80
+    I3DMETHOD(void, SetAmbientColor)(const S_vector &color) = 0;    // 0x84
     I3DMETHOD(void, SetPower)(float power) = 0;               // 0x88
-    I3DMETHOD(void, SetUnknown8C)(float value) = 0;           // 0x8C
-    I3DMETHOD(void, SetUnknown90)(float value) = 0;           // 0x90 (the interface's light: 1)
+    I3DMETHOD(void, SetSpecularPower)(float power) = 0;       // 0x8C
+    I3DMETHOD(void, SetAmbientPower)(float power) = 0;        // 0x90 (the interface's light: 1)
     I3DMETHOD(void, SetMode)(uint32_t mode) = 0;              // 0x94
     I3DMETHOD(void, SetRange)(float range) = 0;               // 0x98
-    I3DMETHOD(void, SetUnknown9C)(float a, float b, float c) = 0;   // 0x9C
-    I3D_SLOT(A0);
+    // Constant, linear, quadratic.
+    I3DMETHOD(void, SetAttenuation)(float a0, float a1, float a2) = 0;   // 0x9C
+    // Fog lights only.
+    I3DMETHOD(void, SetFogRange)(float nearRange, float farRange) = 0;   // 0xA0
     // Spot cone (the vehicle's lamps: 0.52 and 1.22, radians; inferred).
     I3DMETHOD(void, SetCone)(float inner, float outer) = 0;   // 0xA4
 
@@ -1114,8 +1148,10 @@ public:
     // Where the light is and where it points, as the light computes them (+0x224 / +0x230).
     const S_vector &GetLightPos() const { return Field<S_vector>(0x224); }
     const S_vector &GetLightDir() const { return Field<S_vector>(0x230); }
-    // Attenuation: constant, linear, quadratic (+0x244).
+    // Attenuation: constant, linear, quadratic (+0x244, the light's Direct3D copy).
     float GetAttenuation(int index) const { return (&Field<float>(0x244))[index]; }
+    // ... as SetAttenuation set it (+0x17C).
+    float GetOwnAttenuation(int index) const { return (&Field<float>(0x17C))[index]; }
     const S_vector &GetColor() const { return Field<S_vector>(0x130); }   // SetColor
     float GetPower() const { return Field<float>(0x168); }      // SetPower
     // Sectors the light was added to (I3D_sector::AddLight()).
@@ -1144,7 +1180,9 @@ public:
     // Registers a sound with the sector and takes it back (meaning inferred from their uses).
     I3DMETHOD(void, AddSound)(class I3D_sound *sound) = 0;    // 0x7C
     I3DMETHOD(void, RemoveSound)(class I3D_sound *sound) = 0; // 0x80
-    I3D_SLOT(84);
+    // The sound environment's parameter `index` (LS3DF's E_I3D_SECTOR_ENV: 0 .. 19 the value's
+    // bits, 20 / 21 an S_vector4 *).
+    I3DMETHOD(HRESULT, SetEnvironmentParam)(int index, uintptr_t value) = 0;   // 0x84
     I3D_SLOT(88);
     I3D_SLOT(8C);
     I3D_SLOT(90);

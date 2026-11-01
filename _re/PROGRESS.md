@@ -5768,6 +5768,58 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     39 functions in ported.txt (with the maps' code left from 8f-ii). Stats: 7,837 of 12,294
     functions by hand (72.0 % by size).
 
+  PART 8f-iv DONE (2026-10-31): scene2.bin's objects (src/game/mission_loader.cpp:
+  C_MissionLoader::LoadObject 0x006cdc90, ported from the asm: its decompile times out; its vector
+  copy 0x006d1ed0). 0x006d1ef0 (MissionLoader_DeadScene2Reader, 5.4 KB) is an older reader of a whole
+  scene2.bin: no references (code or data), left in tier 1.
+  - LoadObject (chunk 0x4010): the frame by its name (0x0010; type 0 the scene's, from m_frames;
+    another type a new one unless the name is taken: visual 1 by its 0x4012 type, camera 3 at 80
+    degrees, 2 / 4 / 6 / 8 / 9 / 12 / 14 by CreateFrame, the others none: the object's last frame
+    kept; named, added to the scene, released, in m_frames); 0x0020 / 0x0022 (s, x, y, z) / 0x002D
+    the place, 0x002C the position used when the parent (0x4020's 0x0010) is not named, 0x4033
+    hidden; 0x2012 a model's file (its extension cut; the model cache's copy, its frames named, its
+    shadow; empty: the model out of m_frames and the scene); 0x4036 a camera's field of view and
+    far clip (near 0.1); 0x4040 a light (out of its sectors first; scene version 7 on: the specular
+    and ambient power and colour after the power and colour, the range then the attenuation;
+    before it the range's second value and, unless linear-free and quadratic, (1 / 1.01, 0, 0.01 /
+    1.01); the mode | 0x40 below version 5, | 0x20 below 6; 0x4046 the sector it lights); 0x4050 a
+    dummy's box; 0x4060 a sound (off and not looping first; its type, volumes, cone, ranges, loop,
+    on, file (.wav added without an extension; the sound cache's), sector, area, frequency);
+    0x4080 / 0xB150 an occluder's / an area's mesh (vertices to S_vector4, 0x10 apart; built per
+    faces entry); 0x4090 a visual's type (another takes its place: copied, its parent, children,
+    name, its model's frames or the scene's); 0x40A0 a lightmapped visual's sets (version 3 on; the
+    chunk's file handle); 0x40F0 a projector (range +0x1E4, intensity, colour, mode, buffered,
+    orthogonal, its texture: projected again); 0xB110 six fields of any frame (+0x1E0 / 1E4 / 1EC
+    (int) / 220 / 224 / 240; a lens flare's, inferred); 0xB401 a sector's sound environment (20
+    values, two vectors). The end: placed, its sector (new and unparented), linked, rotated,
+    scaled, hidden, the game's animated models.
+  - Quirks kept: a short entry keeps the last value of its kind read in the object (zero first,
+    the original's stack there); unknown entries inside a camera, a mesh and 0xB110 are not left
+    (the next entries read inside them); a camera's header that does not read is skipped and
+    0xB110's keeps the last id. Fixes: the names as text (not as the format), a model's or a
+    sound's name terminated. Dropped: the copy protection's fog for mission "agtlgf7".
+  - i3d.h: I3D_light's slots by LS3DF's names (SetColorRGB 0x78, SetSpecularColor 0x80,
+    SetAmbientColor 0x84, SetSpecularPower 0x8C, SetAmbientPower 0x90, SetAttenuation 0x9C,
+    SetFogRange 0xA0; GetOwnAttenuation +0x17C; the call sites in human_equipment, interface,
+    loader_screen, shots, vehicle_parts), I3D_sound SetOutVolume (0x88, vehicle_sounds), the frame's
+    Duplicate returns HRESULT, I3D_sector SetEnvironmentParam (0x84), I3D_dummy SetBBox, new
+    I3D_occluder / I3D_area (Build 0x74, the area's AddSound 0x78), FRAME_OCCLUDER / FRAME_AREA,
+    I3D_lmap_visual LoadLightmapSets (0xBC), the lens flare's 0xB110 fields. C_chunk::GetHandle.
+  - Harness: mission_test.inc's MsObjectTest in the camera build ("objects:", 17 checks; the
+    frames, the scene's RemoveFrame / UpdateFrameSector, the driver's CreateFrame / CreateVisual,
+    IGraph's LoadTexture faked and logged; the model and sound caches the harness's; the effects
+    module's CreateShadow real); the 8f-ii / 8f-iii tests on the real reader (their stand-in
+    objects: user frames whose SetName logs). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_8f4.py): the first run caught 224 of 243 (18 survived, 1 did not
+    build); 4 equivalent (see the file's docstring), new cases for 14 (one vertex and one face, a
+    type 1 without a visual type, entries after a hidden, a light's and a sound's chunk, the empty
+    model's reference, a loaded sound reported by Open above 0 and at 0, the area before the sector,
+    the first short values, the projector's texture released); the full rerun caught 237 of 243 (the 4 equivalent, M 1015 del not building, and M 910 cmp: the new entry order hid it; an area's entry naming a sector added, caught). Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
+  - Build: 202 files clean (MSVC). Tier 1: 518 errors in 88 files, 211 stubs (unchanged).
+    ret_audit --src: 52.
+  - Ghidra: names/mission_loader.txt (2 added: the vector copy, the dead reader); 2 functions in
+    ported.txt. Stats: 7,839 of 12,294 functions by hand (72.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

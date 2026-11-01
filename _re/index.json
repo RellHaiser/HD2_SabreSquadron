@@ -234255,10 +234255,10 @@
 "in_vtables": []
 },
 "006d1ed0": {
-"name": "FUN_006d1ed0",
+"name": "MissionLoader_Vector4From3",
 "size": 25,
 "lines": 10,
-"chars": 216,
+"chars": 198,
 "callers": [
 "006cdc90"
 ],
@@ -234270,10 +234270,10 @@
 "in_vtables": []
 },
 "006d1ef0": {
-"name": "FUN_006d1ef0",
+"name": "MissionLoader_DeadScene2Reader",
 "size": 5422,
-"lines": 700,
-"chars": 35413,
+"lines": 702,
+"chars": 35620,
 "callers": [],
 "callees": [
 "004050e0",

@@ -35,8 +35,11 @@
 006d41a0 MissionMapA_NewNode
 006d41c0 MissionMapA_IterDec2
 006d4220 MissionMapA_PairCopy
-# (Declared for part 8f-iv.)
+# Part 8f-iv: scene2.bin's objects (0x006cdc90..0x006d1ef0; 0x006d1ef0 itself an older, unreferenced
+# reader of a whole scene2.bin, left in tier 1).
 006cdc90 C_MissionLoader::LoadObject | bool __thiscall LoadObject(void * this, C_chunk * chunk)
+006d1ed0 MissionLoader_Vector4From3 | void * __thiscall MissionLoader_Vector4From3(void * this, S_vector * v)
+006d1ef0 MissionLoader_DeadScene2Reader
 # The maps' code (std::map, MSVC6).
 006cb5d0 MissionMapA_Ctor
 006cbb90 MissionMapA_Init

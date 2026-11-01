@@ -131,16 +131,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Mission & world modules",
   "state": "ported",
-  "functions": 276,
-  "bytes": 102139,
+  "functions": 278,
+  "bytes": 118692,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Mission & world modules",
   "state": "pending",
-  "functions": 33,
-  "bytes": 23317,
+  "functions": 31,
+  "bytes": 6764,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {

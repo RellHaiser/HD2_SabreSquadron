@@ -1857,9 +1857,9 @@ void C_HumanEquipment::SetFlashlight(bool on)
         light->SetLightType(I3DLIGHT_POINT);
         light->SetColor(S_vector(0.35f, 0.35f, 0.1f));
         light->SetPower(0.4f);
-        light->SetUnknown8C(0.0f);
-        light->SetUnknown90(0);
-        light->SetUnknown9C(0.3f, 0.0f, 0.0f);
+        light->SetSpecularPower(0.0f);
+        light->SetAmbientPower(0);
+        light->SetAttenuation(0.3f, 0.0f, 0.0f);
         light->SetRange(1.5f);
         light->LinkTo(fire, 0);
         m_flashlightTime = LIGHT_TIME;

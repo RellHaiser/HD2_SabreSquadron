@@ -37,6 +37,8 @@ public:
     // The file's position and size (-1: not known; the loading screen's progress).
     int GetPosition() const { return Tell(); }
     int GetFileSize() const { return m_fileSize; }
+    // The rw_data handle (a lightmapped visual reads its lightmaps from it).
+    int GetHandle() const { return m_handle; }
     bool Read(void *buffer, int size);             // 0x00405940
     template <typename T> bool Read(T &value) { return Read(&value, sizeof(T)); }
     // Reads the remainder of the current chunk as a string (at most bufferSize-1 chars).

@@ -30709,6 +30709,15 @@
   "name": "C_MissionLoader::LoadObject",
   "proto": "bool __thiscall LoadObject(void * this, C_chunk * chunk)"
  },
+ "006d1ed0": {
+  "module": "mission_loader",
+  "name": "MissionLoader_Vector4From3",
+  "proto": "void * __thiscall MissionLoader_Vector4From3(void * this, S_vector * v)"
+ },
+ "006d1ef0": {
+  "module": "mission_loader",
+  "name": "MissionLoader_DeadScene2Reader"
+ },
  "006d3840": {
   "module": "mission_loader",
   "name": "MissionMapA_Index"

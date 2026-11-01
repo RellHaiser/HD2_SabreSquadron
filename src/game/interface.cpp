@@ -232,8 +232,8 @@ bool C_Interface::Init()
     auto *light = static_cast<I3D_light *>(driver->CreateFrame(FRAME_LIGHT));
     light->SetName("GI_Light");
     light->SetLightType(4);
-    light->SetUnknown84(S_vector(1.0f, 1.0f, 1.0f));
-    light->SetUnknown90(1.0f);
+    light->SetAmbientColor(S_vector(1.0f, 1.0f, 1.0f));
+    light->SetAmbientPower(1.0f);
     light->SetMode(0x11);
     m_scene->AddFrame(light);
     m_scene->GetPrimarySector()->AddLight(light);

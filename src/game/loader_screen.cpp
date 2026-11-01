@@ -147,8 +147,8 @@ void C_LoaderScreen::Start(const char *name, bool show, bool waitForKey, bool tw
         m_light = light;
         light->SetName("C_LoaderScreen");
         light->SetLightType(4);
-        light->SetUnknown84(S_vector(1.0f, 1.0f, 1.0f));
-        light->SetUnknown90(1.0f);
+        light->SetAmbientColor(S_vector(1.0f, 1.0f, 1.0f));
+        light->SetAmbientPower(1.0f);
         light->SetMode(0x11);
         m_scene->GetPrimarySector()->AddLight(light);
 
