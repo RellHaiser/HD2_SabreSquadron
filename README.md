@@ -9,7 +9,7 @@ of the game and its data.
 
 ## Status
 
-Work in progress (2026-11-01). Of the game's 12,293 functions, 8,175 (74.3 % of the code by size)
+Work in progress (2026-11-01). Of the game's 12,293 functions, 8,254 (74.6 % of the code by size)
 are ported by hand. Generated code (tier 1, below) covers the rest. The sources are
 compile-checked file by file; there is no linked build of the game yet.
 

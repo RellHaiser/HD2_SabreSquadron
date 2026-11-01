@@ -383,7 +383,7 @@ class C_Control size=0x70 vtable=0x00813dd0:33
   0x06c uint32_t m_06c
 end
 
-class C_auto_00813e58 size=0x70 vtable=0x00813e58:33
+class C_TextControl size=0x70 vtable=0x00813e58:33
   0x008 int m_008
   0x00c int m_00c
   0x010 uint32_t m_010
@@ -406,13 +406,13 @@ class C_auto_00813ee0 size=0x70 vtable=0x00813ee0:33
   0x06c void* m_06c
 end
 
-class C_auto_00813f68 size=0x84 vtable=0x00813f68:33
+class C_Button size=0x84 vtable=0x00813f68:33
   0x064 int8_t m_064
   0x07c uint8_t m_07c
   0x080 uint32_t m_080
 end
 
-class C_auto_00814188 size=0x70 vtable=0x00814188:33
+class C_LabelControl size=0x70 vtable=0x00814188:33
   0x050 void* m_050
   0x060 uint32_t m_060
   0x065 int8_t m_065
@@ -423,7 +423,7 @@ end
 class C_auto_00814298 size=0x4 vtable=0x00814298:67
 end
 
-class C_auto_00814430 size=0x78 vtable=0x00814430:33
+class C_ControlGroup size=0x78 vtable=0x00814430:33
   0x008 int m_008
   0x00c int m_00c
   0x010 uint32_t m_010
@@ -464,7 +464,7 @@ class C_auto_008147e8 size=0x7c vtable=0x008147e8:67
   0x078 uint32_t m_078
 end
 
-class C_auto_008148f8 size=0x4 vtable=0x008148f8:33
+class C_Tooltip size=0x4 vtable=0x008148f8:33
 end
 
 class C_auto_00814980 size=0xb4 vtable=0x00814980:34
@@ -483,10 +483,10 @@ class C_auto_00814ba0 size=0x8c vtable=0x00814ba0:33
   0x088 uint32_t m_088
 end
 
-class C_auto_00814cb0 size=0x4 vtable=0x00814cb0:33
+class C_TextButton size=0x4 vtable=0x00814cb0:33
 end
 
-class C_auto_00814d38 size=0x4 vtable=0x00814d38:33
+class C_PagesControl size=0x4 vtable=0x00814d38:33
 end
 
 class C_auto_00814e48 size=0x7d vtable=0x00814e48:33
@@ -506,7 +506,7 @@ end
 class C_auto_00815288 size=0x4 vtable=0x00815288:33
 end
 
-class C_auto_00815310 size=0x4 vtable=0x00815310:33
+class C_FrameSwitch size=0x4 vtable=0x00815310:33
 end
 
 class C_auto_00815398 size=0x88 vtable=0x00815398:33
@@ -531,7 +531,7 @@ class C_auto_00815398 size=0x88 vtable=0x00815398:33
   0x084 uint32_t m_084
 end
 
-class C_auto_00815420 size=0x70 vtable=0x00815420:33
+class C_PagedTextControl size=0x70 vtable=0x00815420:33
   0x008 int m_008
   0x00c int m_00c
   0x065 int8_t m_065

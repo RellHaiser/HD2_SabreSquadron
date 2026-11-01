@@ -6332,6 +6332,57 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     name too); 52 functions in ported.txt (5 vector helpers absorbed). Stats: 8,175 of 12,293
     functions by hand (74.3 % by size).
 
+  PART 9c-ii DONE (2026-11-01): the small controls (src/game/controls.*, new; src/game/cursor.h, new:
+  the cursor's interface, its code 9c-vi). Type 6 (0x00814ed0, a selectable item: its click calls
+  its group's select 0x006569f0) moves to the group's part (type 0xb, 9c-v); 0x00814078 /
+  0x00814100 (made by hand inside types 0x24 / 0x21) to their owners'.
+  - C_TextControl (vtable 0x00813e58, 0x70 bytes): a C_TextBox (+0x6C) made by Create (not placed);
+    the text messages its box's (SET_TEXT 0x1000014 .. SET_RUN_TEXT 0x1000018, REMOVE_RUN 0x1000068,
+    CLEAR_TEXT 0x1000077 / CLEAR 0x2000018, SET_COLOUR 0x10000A3, GET_RUNS 0x2000030), the box placed
+    on the frame by REFRESH (the children not refreshed), SET_MARGIN 0x2000073 and FACE_FRONT
+    0x1000099 (the frame turned to (0, 0, 1)); Refresh draws the box, then the children; inactive
+    dims the box. C_TitleControl (type 0x13, 0x00813cc0): the frame turned to (0, 0, -1), its id,
+    the box placed at once with a margin of 1; no input. C_LabelControl (type 0x12, 0x00814188):
+    turned and placed (its margin kept); only the box drawn.
+  - C_PictureControl (type 4, 0x00813ff0): the visual's first face group (+0x74) and its texture
+    (+0x70); SET_TEXTURE 0x1000038 (value2; 0: hidden, else shown), RESTORE_TEXTURE 0x1000039,
+    LOAD_TEXTURE 0x100003A (a file; not loaded: the original), FIND_FACE_GROUP 0x100009A (by the
+    texture's name, the level's groups by +0x0C, new in i3d.h), REFRESH also the children's;
+    inactive: the visual's alpha 0.4 (the box not dimmed).
+  - C_ControlGroup (type 5, 0x00814430, the base of 0x008143a8 / 0x008144b8 / 0x008145c8): the input
+    to the focus (+0x6C, the child under the cursor): the enter picks it by the id (taking input; id
+    0xF: Unknown20(0xF)), the leave clears it when handled, slot 16 (OnInput05, the cursor's move)
+    moves it between children, the release only for the child with the id; messages to the child
+    their target names.
+  - C_FrameSwitch (type 0xc, 0x00815310): ADD_FRAME 0x1000032 (a child frame named value2, off),
+    SELECT_FRAME 0x2000019, HIDE_FRAME 0x200001A; its IsChild the frames'; no input.
+  - C_TextButton (type 0x14, 0x00814cb0): "normal*" / "actived*" (the active one where the normal
+    is, off; GetHighlightFrame, slot 3 renamed), the box on the normal one; enter / leave swap them,
+    click notifies unless inactive; WHITE_TEXT 0x2000076.
+  - C_Tooltip (type 0x15, 0x008148f8): posts CONTROL_MSG_TOOLTIP 0x200007A (value2 itself) when
+    made; SHOW arms it, its Tick shows it by the cursor (x + 0.15, y + 0.015, its own z) once the
+    cursor has stayed 500 ms, hides it when it moves or a button is down.
+  - C_Button (type 2, 0x00813f68): the cursor; "normal*" / "actived*" / "inactived*" (3 children
+    needed); held, its press repeated every frame once the cursor has stayed 300 ms; the key click
+    only notifies.
+  - C_PagedTextControl (0x00815420): the text messages on a C_PagedTextBox (REFRESH: the empty
+    Reattach); C_PagesControl (type 0x25, 0x00814d38): ADD_AREA 0x100009D (a frame by name, turned,
+    its id), SET_PAGE 0x1000067, GET_PAGES 0x100009C, GET_PAGE_BREAK 0x100009E, REFRESH relays out.
+  - C_Control: slot 3 GetHighlightFrame (was Unknown0C). C_TextBox::SetColour (new).
+  - Fixes: the messages the tooltip sends itself and posts have their other values 0 (the
+    original's stack).
+  - Harness: controls_test.inc in the text build ("controls:", 16 checks; the cursor faked, the
+    picture's mesh / materials / textures faked, the boxes' Render logged by subclasses). 0 of 22 in
+    both orders; the camera and the world builds 0 of 22 in both orders; the item build and the other
+    five 0 of 37.
+  - Mutations (mutations/mutate_9c2.py, the text build): the first run caught 160 of 188; new cases;
+    185 of 188 (3 equivalent, see the file's docstring).
+  - Build: 210 files clean (MSVC). Tier 1: 483 errors in 81 files, 196 stubs (485 / 82 / 198
+    before). ret_audit --src: 52.
+  - Ghidra: 9 auto classes renamed (90_auto.spec, class_names.json, auto_members.json,
+    tier1_fixups.json); names/controls.txt (79); 79 functions in ported.txt. Stats: 8,254 of
+    12,293 functions by hand (74.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

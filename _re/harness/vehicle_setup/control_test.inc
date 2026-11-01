@@ -119,7 +119,7 @@ void ControlTest()
         WM(r.ctNew, c.m_scene == scene && c.m_id == 0x00300000 && c.m_parent == &parent && !c.m_frame && c.m_type == 0 &&
                         c.m_value == 0 && c.m_index == -1 && !c.m_inactive && c.m_shown && c.m_takesInput && c.m_children.empty() &&
                         c.m_routes.empty() && c.m_callbacks.empty() && c.m_anyCallback.notification == 0 && !c.m_anyCallback.function);
-        WM(r.ctNew, c.Unknown0C() == 0 && !c.Unknown20(1) && !c.Unknown24(1) && !c.Unknown28() &&
+        WM(r.ctNew, !c.GetHighlightFrame() && !c.Unknown20(1) && !c.Unknown24(1) && !c.Unknown28() &&
                         c.Unknown68(1) == CONTROL_NOT_HANDLED);
     }
 

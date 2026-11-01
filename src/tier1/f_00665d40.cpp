@@ -20,14 +20,17 @@ uint32_t FUN_00665d40(...)
 
 
 // 0x00665d70
-uint32_t FUN_00665d70(void *_this,int *param_1,uint32_t param_2,uint32_t param_3, ...)
+uint32_t FUN_00665d70(void *_this,int *param_1,void *param_2,void *param_3, ...)
 {
   int *piVar1;
-  uint32_t uVar2;
+  bool bVar2;
+  undefined3 extraout_var;
   uint32_t uVar3;
+  uint32_t uVar4;
   uint32_t extraout_EAX;
-  uVar2 = C_auto_00814cb0__FUN_00655400(_this,param_1,param_2,param_3);
-  if ((char)uVar2 != '\0') {
+  bVar2 = C_TextButton__Create(_this,param_1,param_2,param_3);
+  uVar4 = CONCAT31(extraout_var,bVar2);
+  if (bVar2) {
     uVar3 = (**(code **)(*param_1 + 0x48))(param_1,"xpassword",0x10001);
     *(uint32_t *)((int)_this + 0x78) = uVar3;
     uVar3 = (**(code **)(*param_1 + 0x48))(param_1,"xdedicated",0x10001);
@@ -38,12 +41,12 @@ uint32_t FUN_00665d70(void *_this,int *param_1,uint32_t param_2,uint32_t param_3
     *(uint32_t *)((int)_this + 0x84) = uVar3;
     uVar3 = (**(code **)(*param_1 + 0x48))(param_1,"xdedicated01",0x10001);
     *(uint32_t *)((int)_this + 0x88) = uVar3;
-    uVar2 = (**(code **)(*param_1 + 0x48))(param_1,"xvoice01",0x10001);
+    uVar4 = (**(code **)(*param_1 + 0x48))(param_1,"xvoice01",0x10001);
     piVar1 = *(int **)((int)_this + 0x78);
-    *(uint32_t *)((int)_this + 0x8c) = uVar2;
+    *(uint32_t *)((int)_this + 0x8c) = uVar4;
     if ((((piVar1 != 0) && (*(int *)((int)_this + 0x7c) != 0)) &&
         (*(int *)((int)_this + 0x80) != 0)) &&
-       (((*(int *)((int)_this + 0x84) != 0 && (*(int *)((int)_this + 0x88) != 0)) && (uVar2 != 0)))) {
+       (((*(int *)((int)_this + 0x84) != 0 && (*(int *)((int)_this + 0x88) != 0)) && (uVar4 != 0)))) {
       (**(code **)(*piVar1 + 0x30))(piVar1,0);
       (**(code **)(**(int **)((int)_this + 0x7c) + 0x30))(*(int **)((int)_this + 0x7c),0);
       (**(code **)(**(int **)((int)_this + 0x80) + 0x30))(*(int **)((int)_this + 0x80),0);
@@ -78,7 +81,7 @@ uint32_t FUN_00665d70(void *_this,int *param_1,uint32_t param_2,uint32_t param_3
       return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
     }
   }
-  return uVar2 & 0xffffff00;
+  return uVar4 & 0xffffff00;
 }
 
 
@@ -95,12 +98,14 @@ uint32_t FUN_00665f90(void *_this,uint32_t *param_1, ...)
   uchar uVar1;
   uchar *begin;
   bool bVar2;
+  uint3 extraout_var;
   C_str CVar3;
   char *pcVar4;
   int textId;
   C_str_rep *extraout_EAX;
   C_str_rep *extraout_EAX_00;
   C_str_rep *extraout_EAX_01;
+  uint3 extraout_var_00;
   uint32_t uVar5;
   uchar *puVar6;
   C_str CStack_ac;
@@ -139,7 +144,8 @@ uint32_t FUN_00665f90(void *_this,uint32_t *param_1, ...)
   uint32_t uStack_4;
   uStack_4 = 0xffffffff;
   if ((param_1[1] & 0x40ff000) != 0) {
-    CVar3.rep = (C_str_rep *)C_auto_00814cb0__FUN_006554f0(_this,param_1);
+    C_TextButton__HandleMessage(_this,param_1);
+    CVar3.rep = (C_str_rep *)((uint32_t)extraout_var << 8);
     goto LAB_006665d4;
   }
   CVar3.rep = (C_str_rep *)((param_1[1] & 0x3000fff) + 0xfeffff9c);
@@ -150,7 +156,8 @@ uint32_t FUN_00665f90(void *_this,uint32_t *param_1, ...)
     }
     break;
   default:
-    CVar3.rep = (C_str_rep *)C_auto_00814cb0__FUN_006554f0(_this,param_1);
+    C_TextButton__HandleMessage(_this,param_1);
+    CVar3.rep = (C_str_rep *)((uint32_t)extraout_var_00 << 8);
     break;
   case 0x3:
     begin = (uchar *)param_1[3];
@@ -608,7 +615,7 @@ uint32_t C_Control__FUN_00666ad0(C_Control *_this,uint32_t param_1,uint32_t para
 // 0x00666b80
 uint32_t * FUN_00666b80(void *_this,uint8_t param_1, ...)
 {
-  C_auto_00813e58__FUN_00666ba0(_this);
+  C_TextControl__FUN_00666ba0(_this);
   if ((param_1 & 1) != 0) {
     tier1_operator_delete(_this);
   }
@@ -617,7 +624,7 @@ uint32_t * FUN_00666b80(void *_this,uint8_t param_1, ...)
 
 
 // 0x00666ba0
-uint32_t C_auto_00813e58__FUN_00666ba0(C_auto_00813e58 *_this, ...)
+uint32_t C_TextControl__FUN_00666ba0(C_TextControl *_this, ...)
 {
   int *piVar1;
   uint32_t *puVar2;
@@ -634,13 +641,13 @@ uint32_t C_auto_00813e58__FUN_00666ba0(C_auto_00813e58 *_this, ...)
   _this[1]._pad_0004[1] = '\0';
   _this[1]._pad_0004[2] = '\0';
   _this[1]._pad_0004[3] = '\0';
-  _this->vtable = (C_auto_00813e58_vtbl *)&PTR_00813e58;
+  _this->vtable = (C_auto_00813e58_vtbl*)((C_TextControl_vtbl *)&PTR_00813e58);
   local_4 = 0;
   if (_this->m_06c != 0) {
     (**(code **)(*(int *)_this->m_06c + 0xc))(1);
     _this->m_06c = 0;
   }
-  _this->vtable = (C_auto_00813e58_vtbl *)&PTR_00813dd0;
+  _this->vtable = (C_auto_00813e58_vtbl*)((C_TextControl_vtbl *)&PTR_00813dd0);
   local_4 = 3;
   iVar4 = vector_size_e4_653b60((int)_this->_pad_0004);
   while (iVar4 != 0) {

@@ -28540,8 +28540,8 @@
  },
  "0064dd30": {
   "module": "control",
-  "name": "C_Control::Unknown0C",
-  "proto": "int __thiscall Unknown0C(C_Control *this)"
+  "name": "C_Control::GetHighlightFrame",
+  "proto": "void * __thiscall GetHighlightFrame(C_Control *this)"
  },
  "0064dd40": {
   "module": "control",
@@ -28666,13 +28666,98 @@
   "module": "zz_idioms",
   "name": "vector_tidy_64e240"
  },
+ "0064e260": {
+  "module": "controls",
+  "name": "C_TitleControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0064e280": {
+  "module": "controls",
+  "name": "C_TitleControl::~C_TitleControl",
+  "proto": "void __thiscall ~C_TitleControl(void *this)"
+ },
+ "0064e3b0": {
+  "module": "controls",
+  "name": "C_TextControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_TextControl *this, uchar flags)"
+ },
+ "0064e3d0": {
+  "module": "controls",
+  "name": "C_TextControl::~C_TextControl",
+  "proto": "void __thiscall ~C_TextControl(C_TextControl *this)"
+ },
  "0064e510": {
   "module": "zz_idioms",
   "name": "get_field_7c_64e510"
  },
+ "0064f220": {
+  "module": "controls",
+  "name": "C_TextControl::C_TextControl",
+  "proto": "void * __thiscall C_TextControl(C_TextControl *this, void * scene, uint id, void * parent)"
+ },
+ "0064f710": {
+  "module": "controls",
+  "name": "C_Button::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Button *this, uchar flags)"
+ },
+ "0064f730": {
+  "module": "controls",
+  "name": "C_Button::~C_Button",
+  "proto": "void __thiscall ~C_Button(C_Button *this)"
+ },
  "00650170": {
   "module": "zz_idioms",
   "name": "empty_function_650170"
+ },
+ "00650a50": {
+  "module": "controls",
+  "name": "C_PictureControl::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "00650ad0": {
+  "module": "controls",
+  "name": "C_PictureControl::SetInactive",
+  "proto": "void __thiscall SetInactive(void *this, bool inactive)"
+ },
+ "00650b00": {
+  "module": "controls",
+  "name": "C_PictureControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "00650d20": {
+  "module": "controls",
+  "name": "C_FrameSwitch::Create",
+  "proto": "bool __thiscall Create(C_FrameSwitch *this, void * frame, void * root, void * desc)"
+ },
+ "00650d30": {
+  "module": "controls",
+  "name": "C_FrameSwitch::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_FrameSwitch *this, void * message)"
+ },
+ "006513d0": {
+  "module": "controls",
+  "name": "C_PictureControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "006513f0": {
+  "module": "controls",
+  "name": "C_PictureControl::~C_PictureControl",
+  "proto": "void __thiscall ~C_PictureControl(void *this)"
+ },
+ "00651540": {
+  "module": "controls",
+  "name": "C_Tooltip::Create",
+  "proto": "bool __thiscall Create(C_Tooltip *this, void * frame, void * root, void * desc)"
+ },
+ "00651640": {
+  "module": "controls",
+  "name": "C_Tooltip::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_Tooltip *this, void * message)"
+ },
+ "00651690": {
+  "module": "controls",
+  "name": "C_Tooltip::Tick",
+  "proto": "void __thiscall Tick(C_Tooltip *this, int time)"
  },
  "00653b60": {
   "module": "zz_idioms",
@@ -28686,9 +28771,149 @@
   "module": "zz_idioms",
   "name": "copy4_653ea0"
  },
+ "00655400": {
+  "module": "controls",
+  "name": "C_TextButton::Create",
+  "proto": "bool __thiscall Create(C_TextButton *this, void * frame, void * root, void * desc)"
+ },
+ "006554f0": {
+  "module": "controls",
+  "name": "C_TextButton::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_TextButton *this, void * message)"
+ },
+ "00655570": {
+  "module": "controls",
+  "name": "C_TextButton::OnEnter",
+  "proto": "int __thiscall OnEnter(C_TextButton *this, int id)"
+ },
+ "006555c0": {
+  "module": "controls",
+  "name": "C_TextButton::OnLeave",
+  "proto": "int __thiscall OnLeave(C_TextButton *this, int id)"
+ },
+ "00655610": {
+  "module": "controls",
+  "name": "C_TextButton::OnClick",
+  "proto": "int __thiscall OnClick(C_TextButton *this, int id)"
+ },
+ "00655630": {
+  "module": "controls",
+  "name": "C_TextButton::GetHighlightFrame",
+  "proto": "void * __thiscall GetHighlightFrame(C_TextButton *this)"
+ },
  "00655660": {
   "module": "zz_idioms",
   "name": "vector_clear_655660"
+ },
+ "00656dc0": {
+  "module": "controls",
+  "name": "C_ControlGroup::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_ControlGroup *this, int value)"
+ },
+ "00656e10": {
+  "module": "controls",
+  "name": "C_ControlGroup::Tick",
+  "proto": "void __thiscall Tick(C_ControlGroup *this, int time)"
+ },
+ "00656e40": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnEnter",
+  "proto": "int __thiscall OnEnter(C_ControlGroup *this, int id)"
+ },
+ "00656eb0": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnLeave",
+  "proto": "int __thiscall OnLeave(C_ControlGroup *this, int id)"
+ },
+ "00656ef0": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnClick",
+  "proto": "int __thiscall OnClick(C_ControlGroup *this, int id)"
+ },
+ "00656f20": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnInput02",
+  "proto": "int __thiscall OnInput02(C_ControlGroup *this, int id)"
+ },
+ "00656f50": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnInput05",
+  "proto": "int __thiscall OnInput05(C_ControlGroup *this, int id)"
+ },
+ "00656fc0": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnPress",
+  "proto": "int __thiscall OnPress(C_ControlGroup *this, int id)"
+ },
+ "00656ff0": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnRelease",
+  "proto": "int __thiscall OnRelease(C_ControlGroup *this, int id)"
+ },
+ "00657030": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnInput08",
+  "proto": "int __thiscall OnInput08(C_ControlGroup *this, int id)"
+ },
+ "00657060": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnInput09",
+  "proto": "int __thiscall OnInput09(C_ControlGroup *this, int id)"
+ },
+ "00657090": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnInput0A",
+  "proto": "int __thiscall OnInput0A(C_ControlGroup *this, int id)"
+ },
+ "006570c0": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnWheel",
+  "proto": "int __thiscall OnWheel(C_ControlGroup *this, int id, int amount)"
+ },
+ "006570f0": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(C_ControlGroup *this, int id)"
+ },
+ "00657120": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnInput13",
+  "proto": "int __thiscall OnInput13(C_ControlGroup *this, int id)"
+ },
+ "00657150": {
+  "module": "controls",
+  "name": "C_ControlGroup::Refresh",
+  "proto": "void __thiscall Refresh(C_ControlGroup *this)"
+ },
+ "00657180": {
+  "module": "controls",
+  "name": "C_ControlGroup::Create",
+  "proto": "bool __thiscall Create(C_ControlGroup *this, void * frame, void * root, void * desc)"
+ },
+ "006571a0": {
+  "module": "controls",
+  "name": "C_ControlGroup::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ControlGroup *this, void * message)"
+ },
+ "00657980": {
+  "module": "controls",
+  "name": "C_LabelControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_LabelControl *this, uchar flags)"
+ },
+ "006579a0": {
+  "module": "controls",
+  "name": "C_LabelControl::~C_LabelControl",
+  "proto": "void __thiscall ~C_LabelControl(C_LabelControl *this)"
+ },
+ "00658f00": {
+  "module": "controls",
+  "name": "C_ControlGroup::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ControlGroup *this, uchar flags)"
+ },
+ "00658f20": {
+  "module": "controls",
+  "name": "C_ControlGroup::~C_ControlGroup",
+  "proto": "void __thiscall ~C_ControlGroup(C_ControlGroup *this)"
  },
  "0065a5a0": {
   "module": "zz_idioms",
@@ -28701,6 +28926,41 @@
  "0065ae70": {
   "module": "zz_idioms",
   "name": "vector_at_e196_65ae70"
+ },
+ "0065c6c0": {
+  "module": "controls",
+  "name": "C_LabelControl::Refresh",
+  "proto": "void __thiscall Refresh(C_LabelControl *this)"
+ },
+ "0065c6e0": {
+  "module": "controls",
+  "name": "C_LabelControl::Create",
+  "proto": "bool __thiscall Create(C_LabelControl *this, void * frame, void * root, void * desc)"
+ },
+ "0065c770": {
+  "module": "controls",
+  "name": "C_LabelControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_LabelControl *this, void * message)"
+ },
+ "0065c7d0": {
+  "module": "controls",
+  "name": "C_PagesControl::Refresh",
+  "proto": "void __thiscall Refresh(C_PagesControl *this)"
+ },
+ "0065c7f0": {
+  "module": "controls",
+  "name": "C_PagesControl::Create",
+  "proto": "bool __thiscall Create(C_PagesControl *this, void * frame, void * root, void * desc)"
+ },
+ "0065c800": {
+  "module": "controls",
+  "name": "C_PagesControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_PagesControl *this, void * message)"
+ },
+ "0065c9a0": {
+  "module": "controls",
+  "name": "C_TitleControl::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
  },
  "0065ca30": {
   "module": "zz_idioms",
@@ -28761,6 +29021,61 @@
   "name": "C_Control::CreateChild",
   "proto": "bool __thiscall CreateChild(C_Control *this, void * frame, void * root, void * desc)"
  },
+ "0065e410": {
+  "module": "controls",
+  "name": "C_FrameSwitch::IsChild",
+  "proto": "bool __thiscall IsChild(C_FrameSwitch *this, int index)"
+ },
+ "0065e440": {
+  "module": "controls",
+  "name": "C_FrameSwitch::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_FrameSwitch *this, uchar flags)"
+ },
+ "0065e460": {
+  "module": "controls",
+  "name": "C_FrameSwitch::~C_FrameSwitch",
+  "proto": "void __thiscall ~C_FrameSwitch(C_FrameSwitch *this)"
+ },
+ "0065f8d0": {
+  "module": "controls",
+  "name": "C_Tooltip::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Tooltip *this, uchar flags)"
+ },
+ "0065f8f0": {
+  "module": "controls",
+  "name": "C_Tooltip::~C_Tooltip",
+  "proto": "void __thiscall ~C_Tooltip(C_Tooltip *this)"
+ },
+ "0065fd80": {
+  "module": "controls",
+  "name": "C_PagesControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_PagesControl *this, uchar flags)"
+ },
+ "0065fda0": {
+  "module": "controls",
+  "name": "C_PagesControl::~C_PagesControl",
+  "proto": "void __thiscall ~C_PagesControl(C_PagesControl *this)"
+ },
+ "0065fef0": {
+  "module": "controls",
+  "name": "C_PagedTextControl::~C_PagedTextControl",
+  "proto": "void __thiscall ~C_PagedTextControl(C_PagedTextControl *this)"
+ },
+ "00660030": {
+  "module": "controls",
+  "name": "C_PagedTextControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_PagedTextControl *this, uchar flags)"
+ },
+ "00660050": {
+  "module": "controls",
+  "name": "C_TextButton::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_TextButton *this, uchar flags)"
+ },
+ "00660070": {
+  "module": "controls",
+  "name": "C_TextButton::~C_TextButton",
+  "proto": "void __thiscall ~C_TextButton(C_TextButton *this)"
+ },
  "00661bc0": {
   "module": "control",
   "name": "C_Control::Create",
@@ -28775,6 +29090,36 @@
   "module": "control",
   "name": "C_Control::Refresh",
   "proto": "void __thiscall Refresh(C_Control *this)"
+ },
+ "00661c60": {
+  "module": "controls",
+  "name": "C_TextControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_TextControl *this, void * message)"
+ },
+ "00661e50": {
+  "module": "controls",
+  "name": "C_TextControl::Create",
+  "proto": "bool __thiscall Create(C_TextControl *this, void * frame, void * root, void * desc)"
+ },
+ "00661fa0": {
+  "module": "controls",
+  "name": "C_TextControl::Refresh",
+  "proto": "void __thiscall Refresh(C_TextControl *this)"
+ },
+ "00661fe0": {
+  "module": "controls",
+  "name": "C_TextControl::SetInactive",
+  "proto": "void __thiscall SetInactive(C_TextControl *this, bool inactive)"
+ },
+ "00662000": {
+  "module": "controls",
+  "name": "C_PagedTextControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_PagedTextControl *this, void * message)"
+ },
+ "00662160": {
+  "module": "controls",
+  "name": "C_PagedTextControl::Create",
+  "proto": "bool __thiscall Create(C_PagedTextControl *this, void * frame, void * root, void * desc)"
  },
  "006622f0": {
   "module": "text_box",
@@ -28793,6 +29138,16 @@
  "00662430": {
   "module": "zz_idioms",
   "name": "vector_tidy_662430"
+ },
+ "00662450": {
+  "module": "controls",
+  "name": "C_PagedTextControl::Refresh",
+  "proto": "void __thiscall Refresh(C_PagedTextControl *this)"
+ },
+ "00662490": {
+  "module": "controls",
+  "name": "C_PagedTextControl::SetInactive",
+  "proto": "void __thiscall SetInactive(C_PagedTextControl *this, bool inactive)"
  },
  "00663ad0": {
   "module": "zz_idioms",
@@ -28813,6 +29168,46 @@
  "00663dc0": {
   "module": "zz_idioms",
   "name": "construct_copy4_663dc0"
+ },
+ "00664300": {
+  "module": "controls",
+  "name": "C_Button::Create",
+  "proto": "bool __thiscall Create(C_Button *this, void * frame, void * root, void * desc)"
+ },
+ "00664460": {
+  "module": "controls",
+  "name": "C_Button::OnEnter",
+  "proto": "int __thiscall OnEnter(C_Button *this, int id)"
+ },
+ "006644c0": {
+  "module": "controls",
+  "name": "C_Button::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(C_Button *this, int id)"
+ },
+ "006644e0": {
+  "module": "controls",
+  "name": "C_Button::OnLeave",
+  "proto": "int __thiscall OnLeave(C_Button *this, int id)"
+ },
+ "00664540": {
+  "module": "controls",
+  "name": "C_Button::SetInactive",
+  "proto": "void __thiscall SetInactive(C_Button *this, bool inactive)"
+ },
+ "00664590": {
+  "module": "controls",
+  "name": "C_Button::OnPress",
+  "proto": "int __thiscall OnPress(C_Button *this, int id)"
+ },
+ "006645c0": {
+  "module": "controls",
+  "name": "C_Button::OnRelease",
+  "proto": "int __thiscall OnRelease(C_Button *this, int id)"
+ },
+ "006645d0": {
+  "module": "controls",
+  "name": "C_Button::Tick",
+  "proto": "void __thiscall Tick(C_Button *this, int time)"
  },
  "00667b20": {
   "module": "zz_idioms",

@@ -122,7 +122,8 @@ public:
     virtual bool IsChild(int index) const;              // +0x04 0x0064dce0
     // Shown, not inactive and taking input.
     virtual bool TakesInput() const;                    // +0x08 0x0064dd10
-    virtual int Unknown0C() const { return 0; }         // +0x0C 0x0064dd30
+    // The frame shown while the cursor is over the control (the text buttons'; the base: none).
+    virtual I3D_frame *GetHighlightFrame() const { return nullptr; }   // +0x0C 0x0064dd30
     // The frame on (or off) and the notification.
     virtual void Show();                                // +0x10 0x0065ca80
     virtual void Hide();                                // +0x14 0x0065cab0

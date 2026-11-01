@@ -133,6 +133,8 @@ public:
     // Drawn dimmed: the styles' colours at 0x60 of alpha (the inventory's list captions while the
     // list has no container; no effect when the box has its own colour, m_colour).
     void SetDimmed(bool value) { m_dimmed = value; }
+    // Every word's colour (0: their styles'; the text controls' CONTROL_MSG_SET_COLOUR).
+    void SetColour(uint32_t colour) { m_colour = colour; }
     // Nothing (the interface's text control's message 0x200002c and its margin's, with its scene and
     // root frame; the paged box lays itself out again on 0x200002c).
     void Reattach(I3D_scene *, I3D_frame *) {}          // 0x0064b1e0

@@ -629,6 +629,8 @@ public:
 
     I3D_material *material;                                   // +0x04
     int numFaces;                                             // +0x08
+    // The level's next face group (the menus' pictures look for one by its texture's name).
+    I3D_face_group *next;                                     // +0x0C
 };
 
 // Geometry of a billboard visual (reached through its +0x1E0). Only the calls the

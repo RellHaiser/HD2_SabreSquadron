@@ -1212,6 +1212,7 @@ void C_Human::SetUnknown94(float value) { GfLog("unknown94 %s %.4f", CmHumanName
 #ifdef TEXT_TEST
 #include "textbox_test.inc"
 #include "control_test.inc"
+#include "controls_test.inc"
 #endif
 
 void CameraTest(const char *path)
@@ -1240,6 +1241,7 @@ void CameraTest(const char *path)
 #ifdef TEXT_TEST
     TextBoxTest();
     ControlTest();
+    ControlsTest();
     return;
 #endif
     S_CameraResults r;

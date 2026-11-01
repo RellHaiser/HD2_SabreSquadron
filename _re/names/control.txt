@@ -6,7 +6,7 @@
 0065cb50 C_Control::FindChild | int __thiscall FindChild(C_Control *this, uint id)
 0064dce0 C_Control::IsChild | bool __thiscall IsChild(C_Control *this, int index)
 0064dd10 C_Control::TakesInput | bool __thiscall TakesInput(C_Control *this)
-0064dd30 C_Control::Unknown0C | int __thiscall Unknown0C(C_Control *this)
+0064dd30 C_Control::GetHighlightFrame | void * __thiscall GetHighlightFrame(C_Control *this)
 0065ca80 C_Control::Show | void __thiscall Show(C_Control *this)
 0065cab0 C_Control::Hide | void __thiscall Hide(C_Control *this)
 00661c30 C_Control::Refresh | void __thiscall Refresh(C_Control *this)
