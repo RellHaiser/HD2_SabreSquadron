@@ -115,10 +115,6 @@ struct S_particle {
     float turnSpread;                       // +0xAC
     S_vector4 startColor;                   // +0xB0
     S_vector4 endColor;                     // +0xC0
-
-    // 0x1003bfe0: ages the particle by `time` ms, in steps of 10; a dead one goes from the
-    // emitter's active list (entry `activeIndex`) to its free slots.
-    void Update(int time, I3D_emitor *emitter, int activeIndex);
 };
 static_assert(sizeof(S_particle) == 0xD0, "S_particle layout");
 
@@ -132,6 +128,7 @@ struct S_particleVertex {
 class I3D_emitor : public I3D_visual {
 public:
     I3D_emitor();
+    // LS3DRF 0x100100d0: the scalar deleting destructor (0x5C).
     ~I3D_emitor() override;
 
     // 0x20 0x1003c530: the particles aged; while emitting, the particles due let out.
@@ -233,9 +230,6 @@ public:
     uint32_t unknown2F4[3];                 // +0x2F4
 
 private:
-    // A new particle slot (the slots grown by particleGrowBy into a new aligned block; null when
-    // out of memory).
-    S_particle *NewParticleSlot();
     void FreeGroups();
 };
 static_assert(sizeof(I3D_emitor) == 0x300, "I3D_emitor layout");
