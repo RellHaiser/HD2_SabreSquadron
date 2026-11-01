@@ -37,8 +37,6 @@ namespace {
 // Quads per shared vertex buffer (0x5554 vertices): the write position at kMaxQuads means the
 // buffer in turn has not been locked since it was drawn.
 constexpr int kMaxQuads = 0x1555;
-// The particle count an emitter stops letting out at (one more than a buffer's quads).
-constexpr int kMaxParticles = 0x1556;
 
 // The quads' index buffer (0x100be6c0) and the two vertex buffers (0x100be6f0) used in turn
 // (0x100be718), the lock of the current one (0x100be714) and its write position in quads
@@ -218,80 +216,22 @@ S_emitorGroup &S_emitorGroup::operator=(const S_emitorGroup &src)
     return *this;
 }
 
-// ---------------------------------------------------------------- S_particle
-
-void S_particle::Update(int time, I3D_emitor *e, int activeIndex)
-{
-    age += static_cast<uint32_t>(time);
-    if (age >= life) {
-        e->freeSlots.PushBack(e->active[activeIndex]);
-        e->active.RemoveAtSwap(activeIndex);
-        return;
-    }
-    while (time > 0) {
-        const int step = time < 10 ? time : 10;
-        time -= 10;
-        if (turnInterval > 0 && (turnTime += step) >= turnInterval) {
-            turnTime = 0;
-            turnInterval = static_cast<int>(RandomInterval(turnIntervalMin, turnIntervalRandom));
-            prevDir = dir;
-            dir = endDir;
-            for (float *f : { &dir.x, &dir.y, &dir.z }) {
-                const float half = turnSpread * 0.5f;
-                *f = (half - RandFloat() * turnSpread) + *f;
-            }
-            AsVector(dir).Normalize();
-        }
-        const float fstep = static_cast<float>(step);
-        scale = (fstep * growth + 1.0f) * scale;
-        if (scale < 0.0f)
-            scale = 0.0f;
-        const uint32_t a = age;
-        if (a < fadeInEnd)
-            alpha = static_cast<float>(static_cast<int>(a)) / static_cast<float>(static_cast<int>(fadeInEnd));
-        else if (a > fadeOutStart)
-            alpha = static_cast<float>(life - a) / static_cast<float>(static_cast<int>(life - fadeOutStart));
-        else
-            alpha = 1.0f;
-        alpha = alpha * opacity;
-        const float fa = static_cast<float>(static_cast<int>(a));
-        const float t = fa / static_cast<float>(life);
-        speed = (endSpeed - startSpeed) * t + startSpeed;
-        color.x = (endColor.x - startColor.x) * t + startColor.x;
-        color.y = (endColor.y - startColor.y) * t + startColor.y;
-        color.z = t * (endColor.z - startColor.z) + startColor.z;
-        // How far the direction has turned: through the current turn, or over the longest life.
-        float blend;
-        if (turnInterval > 0) {
-            int n = maxLife - static_cast<int>(a);
-            if (turnInterval < n)
-                n = turnInterval;
-            blend = static_cast<float>(turnTime) / static_cast<float>(n);
-        } else {
-            blend = fa / static_cast<float>(maxLife);
-        }
-        const float inv = 1.0f - blend;
-        const float k = (speed * fstep) * 0.001f;
-        position.x = (blend * dir.x + inv * prevDir.x) * k + position.x;
-        position.y = (blend * dir.y + inv * prevDir.y) * k + position.y;
-        position.z = (blend * dir.z + inv * prevDir.z) * k + position.z;
-    }
-}
-
 // ---------------------------------------------------------------- I3D_emitor
 
-// (The driver's factory, 0x10019750: the vectors' grow steps.)
+// (The driver's factory, 0x10019750: the vectors' grow steps. No Init sets firstQuad or the blend
+// factors in LS3DRF; the port starts them here: -1 for the render path, 0 where LS3DRF's block holds
+// whatever the heap left.)
 I3D_emitor::I3D_emitor()
     : groups(nullptr), groupCapacity(0), numGroups(0), groupGrowBy(2), particles(nullptr), particleCapacity(0),
-      numParticles(0), particleGrowBy(1), active(0x20), freeSlots(0x20)
+      numParticles(0), particleGrowBy(1), active(0x20), freeSlots(0x20), firstQuad(-1), srcBlend(0), destBlend(0)
 {
 }
 
-// (The original's visuals share a destructor that frees none of this, at driver shutdown.)
+// LS3DRF 0x10010120: the groups freed (LS3DF's emitter has the visuals' shared destructor 0x10019c60,
+// which frees none of this).
 I3D_emitor::~I3D_emitor()
 {
     FreeGroups();
-    AlignedFree(particles);
 }
 
 void I3D_emitor::FreeGroups()
@@ -300,6 +240,7 @@ void I3D_emitor::FreeGroups()
     groups = nullptr;
 }
 
+// LS3DRF 0x10022ac0 (from LS3DF 0x1003ae80): no particle lists to set up, no blend factors.
 void I3D_emitor::Init()
 {
     I3D_visual::Init();
@@ -308,43 +249,26 @@ void I3D_emitor::Init()
     emitTime = 0;
     emitWait = 0;
     numEmitted = 0;
-    active.SetGrowBy(0x32);
-    freeSlots.SetGrowBy(0x32);
-    particleGrowBy = 0x32;
-    firstQuad = -1;
-    fixedGroup = -1;
     userVertices = false;
     userQuads = 0;
     userDepth = 0.0f;
-    srcBlend = D3DBLEND_SRCALPHA;
-    destBlend = D3DBLEND_INVSRCALPHA;
+    fixedGroup = -1;
     visualFlags |= VISF_NO_ZWRITE;
 }
 
-// (The groups and the storage stay for the next use.)
+// LS3DRF 0x10022b20 (from LS3DF 0x1003af10): only the group count reset (no texture, no particles);
+// the groups' storage stays for the next use.
 void I3D_emitor::Uninit()
 {
-    if (texture)
-        texture->Release();
-    texture = nullptr;                      // (fix: the original leaves it dangling until Init)
-    numParticles = 0;
-    active.Clear();
-    freeSlots.Clear();
     numGroups = 0;
     I3D_frame::Uninit();
 }
 
-void I3D_emitor::SetTexture(ITexture *newTexture)
-{
-    if (newTexture == texture)
-        return;
-    if (texture)
-        texture->Release();
-    if (newTexture)
-        ++newTexture->refCount;
-    texture = newTexture;
-}
+// LS3DRF's shared empty stub 0x10002470 (marked at the visual's SetWorldSpace; from LS3DF 0x1003af50):
+// an emitter keeps no texture.
+void I3D_emitor::SetTexture(ITexture *) {}
 
+// LS3DRF 0x10022b30 (from LS3DF 0x1003af80)
 I3D_RESULT I3D_emitor::SetParam(int index, uint32_t value)
 {
     if (index >= EMTP_COUNT) {
@@ -416,6 +340,7 @@ I3D_RESULT I3D_emitor::SetParam(int index, uint32_t value)
     return I3D_OK;
 }
 
+// LS3DRF 0x10023190 (from LS3DF 0x1003b5e0): no EMTP_NUM_PARTICLES case (0).
 uint32_t I3D_emitor::GetParam(int index)
 {
     if (index >= EMTP_COUNT) {
@@ -450,7 +375,6 @@ uint32_t I3D_emitor::GetParam(int index)
     case EMTP_ROTATION_MIN: return BitsOf(rotationMin);
     case EMTP_ROTATION_MAX: return BitsOf(rotationMax);
     case EMTP_START_SCALE: return BitsOf(startScale);
-    case EMTP_NUM_PARTICLES: return static_cast<uint32_t>(numParticles);
     case EMTP_START_COLOR: return static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&startColor));
     case EMTP_END_COLOR: return static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&endColor));
     case EMTP_OPACITY: return BitsOf(opacity);
@@ -458,6 +382,7 @@ uint32_t I3D_emitor::GetParam(int index)
     }
 }
 
+// LS3DRF 0x10023440 (from LS3DF 0x1003b8a0)
 void I3D_emitor::SetDefaults()
 {
     fadeIn = 0.5f;
@@ -580,149 +505,15 @@ void I3D_emitor::RemoveGroup(int index)
         groups[index] = groups[numGroups];
 }
 
-void I3D_emitor::ClearParticles()
-{
-    freeSlots.Clear();
-    active.Clear();
-    numParticles = 0;
-}
+// LS3DRF's shared empty stub 0x1002b0a0 (marked at sound UpdateSound; from LS3DF 0x1003d6a0): no
+// particles.
+void I3D_emitor::ClearParticles() {}
 
-S_particle *I3D_emitor::NewParticleSlot()
-{
-    if (numParticles >= particleCapacity) {
-        const int capacity = particleCapacity + particleGrowBy;
-        auto *grown = static_cast<S_particle *>(AlignedAlloc(sizeof(S_particle) * capacity, 16));
-        if (!grown)                         // (fix: the original writes through the null block)
-            return nullptr;
-        particleCapacity = capacity;
-        for (int i = 0; i < numParticles; ++i)
-            grown[i] = particles[i];
-        AlignedFree(particles);
-        particles = grown;
-    }
-    return &particles[numParticles++];
-}
+// LS3DRF's shared empty stub 0x10002470 (marked at the visual's SetWorldSpace; from LS3DF 0x1003c530):
+// no particles to age or let out.
+void I3D_emitor::Tick(int) {}
 
-void I3D_emitor::Tick(int time)
-{
-    for (int i = active.Size(); i != 0;) {
-        --i;
-        particles[active[i]].Update(time, this, i);
-    }
-    if (emitting) {
-        emitTime += static_cast<uint32_t>(time);
-        while (emitTime >= emitWait) {
-            if (active.Size() == kMaxParticles) {
-                emitTime = 0;
-                break;
-            }
-            emitTime -= emitWait;
-            ++numEmitted;
-            if (maxEmitted && numEmitted > maxEmitted) {
-                emitting = false;
-                break;
-            }
-            // A free slot, else a new one.
-            int slot;
-            S_particle *p;
-            if (freeSlots.Size() > 0) {
-                slot = freeSlots[freeSlots.Size() - 1];
-                active.PushBack(slot);
-                freeSlots.PopBack();
-                p = &particles[slot];
-            } else {
-                slot = numParticles;
-                if (!(p = NewParticleSlot()))
-                    break;
-                active.PushBack(slot);
-            }
-            if (fixedGroup == -1)
-                p->group = numGroups > 1 ? std::rand() % numGroups : 0;
-            else
-                p->group = fixedGroup;
-            p->scale = startScale;
-            const S_matrix &m = GetMatrix();
-            p->position = reinterpret_cast<const S_vector4 &>(m.m[3]);
-            for (float *f : { &p->position.x, &p->position.y, &p->position.z }) {
-                const float r = RandFloat();
-                *f = (r * positionSpread + positionSpread * -0.5f) + *f;
-            }
-            // The velocities: in the frame's space unless given in world space. (The w components
-            // are unused; the original copies stack garbage into the rotated ones.)
-            const S_matrix &w = GetMatrix();
-            if (startVelocityWorld) {
-                p->startDir = startVelocity;
-            } else {
-                AsVector(p->startDir) = AsVector(startVelocity).RotateByMatrix(w);
-                p->startDir.w = startVelocity.w;
-            }
-            if (endVelocityWorld) {
-                p->endDir = endVelocity;
-            } else {
-                AsVector(p->endDir) = AsVector(endVelocity).RotateByMatrix(w);
-                p->endDir.w = endVelocity.w;
-            }
-            p->startSpeed = MagnitudeOfSquare(SquareXYZ(AsVector(startVelocity)));
-            p->speed = p->startSpeed;
-            p->endSpeed = MagnitudeOfSquare(SquareXYZ(AsVector(endVelocity)));
-            AsVector(p->startDir).Normalize();
-            AsVector(p->endDir).Normalize();
-            p->prevDir = p->startDir;
-            p->dir = p->endDir;
-            for (float *f : { &p->dir.x, &p->dir.y, &p->dir.z }) {
-                const float half = directionSpread * 0.5f;
-                *f = (half - RandFloat() * directionSpread) + *f;
-            }
-            AsVector(p->dir).Normalize();
-            p->age = 0;
-            p->life = RandomInterval(lifeMin, lifeRandom);
-            p->maxLife = lifeRandom + lifeMin;
-            p->turnTime = 0;
-            p->turnInterval = static_cast<int>(RandomInterval(turnIntervalMin, turnIntervalRandom));
-            const float life = static_cast<float>(p->life);
-            const float fadeInTime = life * fadeIn;
-            p->fadeInEnd = static_cast<uint32_t>(Ftol(fadeInTime));
-            const float fadeOutTime = life - life * fadeOut;
-            p->fadeOutStart = static_cast<uint32_t>(Ftol(fadeOutTime));
-            // A negative fade in starts at a random opacity (up to the cap).
-            if (!(fadeIn < 0.0f)) {
-                p->alpha = 0.0f;
-            } else {
-                const float a = (RandFloat() + 1.0f) * 0.5f;
-                p->alpha = a > opacity ? opacity : a;
-            }
-            p->color = AsVector(startColor);
-            p->opacity = opacity;
-            p->turnIntervalMin = turnIntervalMin;
-            p->turnIntervalRandom = turnIntervalRandom;
-            p->turnSpread = turnSpread;
-            p->startColor = startColor;
-            p->endColor = endColor;
-            {
-                const float r = RandFloat();
-                p->rotationSpeed = ((rotationMax - rotationMin) * r + rotationMin) * 0.001f;
-            }
-            {
-                const float lo = growthB > growthA ? growthA : growthB;
-                const float hi = growthB < growthA ? growthA : growthB;
-                const float r = RandFloat();
-                p->growth = ((hi - lo) * r + lo) * 0.001f;
-            }
-            const int interval = intervalMin;
-            emitWait = RandomInterval(intervalMin, intervalRandom);
-            // The time since the particle was due, roughly: what is left over the base interval.
-            if (emitTime > emitWait) {
-                const int late = static_cast<int>(emitTime - static_cast<uint32_t>(interval));
-                // (Fix: the original passes the particle's slot as its active-list index, so a
-                // particle dying here takes another one off the list, or writes past it.)
-                if (late > 0)
-                    p->Update(late, this, active.Size() - 1);
-            }
-        }
-    }
-    UpdateParticleBound();
-}
-
+// LS3DRF 0x10023c00 (from LS3DF 0x1003d340)
 I3D_RESULT I3D_emitor::Duplicate(I3D_frame *source)
 {
     if (!source || source == this)
@@ -806,29 +597,13 @@ I3D_RESULT I3D_emitor::Duplicate(I3D_frame *source)
     return I3D_OK;
 }
 
+// LS3DRF 0x10023f60 (from LS3DF 0x1003d6c0): the texture's name and alpha name read and dropped (no
+// texture flags, no LoadTexture).
 void I3D_emitor::Load()
 {
     I3D_frame::Load();
     uint32_t flags = 0;
     dtaRead(g_loadFile, &flags, 4);
-    // The texture flags as a material's (I3D_material::TextureFlags).
-    uint32_t tf = flags >> 5 & ITC_STREAMED;
-    if (g_driverStates[DRVSTATE_TEX_DITHER])
-        tf |= ITC_DITHER;
-    if (g_driverStates[DRVSTATE_TEX_TRUECOLOR] || (flags & 0x100000))
-        tf |= ITC_TRUECOLOR;
-    else if (g_driverStates[DRVSTATE_TEX_COMPRESS] && !(flags & 0x200000))
-        tf |= ITC_COMPRESS;
-    if ((flags & 0x800000) && g_driverStates[DRVSTATE_TEX_MIPMAP])
-        tf |= ITC_MIPMAP;
-    if (g_driverStates[DRVSTATE_TEX_HALF] && !(flags & 0x400000))
-        tf |= ITC_HALF;
-    if (flags & 0x8000)
-        tf |= ITC_KEEP_PIXELS;
-    if (flags & MATF_COLORKEY)
-        tf |= flags & 0x1000000 ? (ITC_ALPHA_1BIT | ITC_SOURCE_ALPHA) : ITC_ALPHA_1BIT;
-    else if (flags & MATF_ALPHA)
-        tf |= flags & 0x1000000 ? ITC_SOURCE_ALPHA : ITC_USE_ALPHA;
     char texName[256], alphaName[256];
     int length = 0;
     dtaRead(g_loadFile, &length, 1);
@@ -836,61 +611,27 @@ void I3D_emitor::Load()
         return;
     dtaRead(g_loadFile, texName, length);
     texName[length] = 0;
-    alphaName[0] = 0;
     if ((flags & MATF_ALPHA) && !(flags & 0xa1000000)) {
         length = 0;
         dtaRead(g_loadFile, &length, 1);
         if (length)
             dtaRead(g_loadFile, alphaName, length);
-        else
-            tf &= ~ITC_USE_ALPHA;
         alphaName[length] = 0;
     }
-    g_pIGraph->LoadTexture(texName, alphaName, tf, &texture);
 }
 
+// LS3DRF 0x10023b80 (from LS3DF 0x1003d0e0): no particles, so always the sphere around the empty
+// box's 1e16 corners.
 void I3D_emitor::UpdateParticleBound()
 {
     ClearParentBounds();
     I3D_bound_volume v{};
     v.bbox.min = S_vector(1e16f, 1e16f, 1e16f);
     v.bbox.max = S_vector(-1e16f, -1e16f, -1e16f);
-    const S_matrix *inv;
-    if (visualFlags & VISF_WORLD_SPACE) {
-        inv = &kIdentityMatrix;
-    } else {
-        if (!(visualFlags & VISF_INVMATRIX_VALID)) {
-            visualFlags |= VISF_INVMATRIX_VALID;
-            invWorldMatrix.Inverse(GetMatrix());
-        }
-        inv = &invWorldMatrix;
-    }
-    for (int i = active.Size(); i != 0;) {
-        const S_particle &p = particles[active[--i]];
-        const S_vector lp = AsVector(p.position) * *inv;
-        // The quad's corners lie within the cube around its center.
-        const float r = p.scale * 0.8660255f;
-        const S_vector lo(lp.x - r, lp.y - r, lp.z - r);
-        if (lo.x < v.bbox.min.x)
-            v.bbox.min.x = lo.x;
-        if (lo.y < v.bbox.min.y)
-            v.bbox.min.y = lo.y;
-        if (lo.z < v.bbox.min.z)
-            v.bbox.min.z = lo.z;
-        const S_vector hi(lp.x + r, lp.y + r, lp.z + r);
-        if (hi.x > v.bbox.max.x)
-            v.bbox.max.x = hi.x;
-        if (hi.y > v.bbox.max.y)
-            v.bbox.max.y = hi.y;
-        if (hi.z > v.bbox.max.z)
-            v.bbox.max.z = hi.z;
-    }
-    // (Without particles the sphere spans the empty box's 1e16 corners.)
-    const float hx = (v.bbox.max.x - v.bbox.min.x) * 0.5f;
-    const float hy = (v.bbox.max.y - v.bbox.min.y) * 0.5f;
-    const float hz = (v.bbox.max.z - v.bbox.min.z) * 0.5f;
-    v.center = S_vector(hx + v.bbox.min.x, hy + v.bbox.min.y, hz + v.bbox.min.z);
-    v.radius = std::sqrt((hz * hz + hy * hy) + hx * hx);
+    v.center = S_vector(0.0f, 0.0f, 0.0f);
+    // sqrt(3) x 1e16f rounded once: LS3DRF takes the fsqrt of a folded double (0x5a7623a5); the
+    // float steps of LS3DF's code give one ulp less.
+    v.radius = 1.7320509e16f;
     SetBoundVolume(v);
 }
 
