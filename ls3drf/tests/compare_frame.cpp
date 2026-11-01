@@ -30,7 +30,9 @@
 // ring, and clears the count after the original's FreeGeometry.
 //
 // The port's light Uninit, LS3DRF's, leaves the light in the device light list: the test patches
-// the original's call of 0x10063ca0 out of its Uninit (0x10021765).
+// the original's call of 0x10063ca0 out of its Uninit (0x10021765). Its SetRange, SetAttenuation
+// and SetFogRange, LS3DRF's, leave the Direct3D light as it was: the test takes their writes of it
+// out of the original's (0x10022240, 0x100222d0, 0x10022360).
 //
 // The original's RebalanceNameTree leaves the left link of the last frame of a run of equal
 // names as it was (frame.cpp fixes it); the test clears those links in the original after each of
@@ -2338,6 +2340,44 @@ void PatchJump(uint32_t va, uint32_t to, const uint8_t *expect, size_t size)
     PatchCode(va, expect, with, size);
 }
 
+// Fills the original's code at `va`, which must hold `expect` (at most 16 bytes), with nops.
+void PatchNops(uint32_t va, const uint8_t *expect, size_t size)
+{
+    uint8_t nops[16];
+    std::memset(nops, 0x90, sizeof nops);
+    PatchCode(va, expect, nops, size);
+}
+
+// LS3DRF's light SetRange, SetAttenuation and SetFogRange in the original: no writes of the
+// Direct3D light (+0x1f0).
+void PatchOrigLightSetters()
+{
+    static const uint8_t fldRange[] = {0xd9, 0x44, 0x24, 0x08};                     // fld [esp+8]
+    static const uint8_t fmulScale[] = {0xd8, 0x89, 0xfc, 0x00, 0x00, 0x00};        // fmul [ecx+0xfc]
+    static const uint8_t fstpRange[] = {0xd9, 0x99, 0x3c, 0x02, 0x00, 0x00};        // fstp [ecx+0x23c]
+    PatchNops(0x10022244, fldRange, sizeof fldRange);
+    PatchNops(0x1002224e, fmulScale, sizeof fmulScale);
+    PatchNops(0x10022261, fstpRange, sizeof fstpRange);
+    static const uint8_t scaleAtt1[] = {0xd9, 0x44, 0x24, 0x0c, 0xd8, 0xb0, 0xfc, 0x00, 0x00, 0x00};
+    PatchJump(0x100222d4, 0x100222de, scaleAtt1, sizeof scaleAtt1);  // over fld a1, fdiv
+    static const uint8_t storeAtt[] = {0x8b, 0x54, 0x24, 0x08, 0x89, 0x90, 0x44, 0x02, 0x00, 0x00};
+    PatchJump(0x10022313, 0x10022339, storeAtt, sizeof storeAtt);  // over the stores at +0x244..+0x24c
+    // (SetFogRange's scale is a constant at 0x1009b544, relocated with the DLL.)
+    const uint32_t hundredth = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&Orig<uint8_t>(0x1009b544)));
+    uint8_t fmulHundredth[6] = {0xd8, 0x0d};                                        // fmul [0x1009b544]
+    std::memcpy(fmulHundredth + 2, &hundredth, 4);
+    static const uint8_t fldNear[] = {0xd9, 0x44, 0x24, 0x08};                      // fld [esp+8]
+    static const uint8_t fstpNear[] = {0xd9, 0x98, 0x44, 0x02, 0x00, 0x00};         // fstp [eax+0x244]
+    static const uint8_t fldFar[] = {0xd9, 0x44, 0x24, 0x0c};                       // fld [esp+0xc]
+    static const uint8_t fstpFar[] = {0xd9, 0x98, 0x3c, 0x02, 0x00, 0x00};          // fstp [eax+0x23c]
+    PatchNops(0x10022389, fldNear, sizeof fldNear);
+    PatchNops(0x10022393, fmulHundredth, sizeof fmulHundredth);
+    PatchNops(0x100223aa, fstpNear, sizeof fstpNear);
+    PatchNops(0x100223b0, fldFar, sizeof fldFar);
+    PatchNops(0x100223ba, fmulHundredth, sizeof fmulHundredth);
+    PatchNops(0x100223c6, fstpFar, sizeof fstpFar);
+}
+
 // LS3DRF's LinkTo, sector SetScene and MatrixChanged and occluder LinkTo in the original, and the
 // port's portal destructor (`occluder`: one of its occluders).
 void PatchOrigScenePasses(uint8_t *occluder)
@@ -2418,6 +2458,7 @@ int main(int argc, char **argv)
     static const uint8_t unregisterLight[] = {0xe8, 0x36, 0x25, 0x04, 0x00};    // call 0x10063ca0
     static const uint8_t nops[] = {0x90, 0x90, 0x90, 0x90, 0x90};
     PatchCode(0x10021765, unregisterLight, nops, sizeof unregisterLight);
+    PatchOrigLightSetters();
     // The models' own frames (named after the tracks, with the recording callback), the
     // animation sets, poses and the pose set.
     for (int i = kFrames; i < kTotal; ++i) {

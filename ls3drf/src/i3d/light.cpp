@@ -451,10 +451,10 @@ void __stdcall I3D_light::SetMode(uint32_t m)
     NotifySectors();
 }
 
+// LS3DRF 0x10017f90 (from LS3DF 0x10022240): d3dLight is left as it was.
 void __stdcall I3D_light::SetRange(float r)
 {
     lightFlags |= 5;
-    d3dLight.Range = r * worldScale;
     range = r;
     for (int i = sectors.Size(); i > 0; --i)
         ++sectors[i - 1]->lightChanges;
@@ -462,19 +462,18 @@ void __stdcall I3D_light::SetRange(float r)
         coneRange = ConeRange(range, coneOuter);
 }
 
+// LS3DRF 0x10018010 (from LS3DF 0x100222d0): d3dLight is left as it was.
 void __stdcall I3D_light::SetAttenuation(float a0, float a1, float a2)
 {
     lightFlags |= 5;
     attenuation[0] = a0;
     attenuation[2] = a2;
     attenuation[1] = a1;
-    d3dLight.Attenuation0 = a0;
-    d3dLight.Attenuation1 = a1 / worldScale;
-    d3dLight.Attenuation2 = a2 / (worldScale * worldScale);
     for (int i = sectors.Size(); i > 0; --i)
         ++sectors[i - 1]->lightChanges;
 }
 
+// LS3DRF 0x10018070 (from LS3DF 0x10022360): d3dLight is left as it was.
 void __stdcall I3D_light::SetFogRange(float nearRange, float farRange)
 {
     if (!IsFogType(lightType)) {
@@ -482,10 +481,8 @@ void __stdcall I3D_light::SetFogRange(float nearRange, float farRange)
         return;
     }
     lightFlags |= 5;
-    d3dLight.Attenuation0 = nearRange * 0.01f;
     attenuation[0] = nearRange;
     range = farRange;
-    d3dLight.Range = farRange * 0.01f;
 }
 
 void __stdcall I3D_light::SetCone(float inner, float outer)
