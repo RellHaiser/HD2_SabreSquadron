@@ -3,7 +3,6 @@
 #include "i3d/shadow.h"
 
 #include "i3d/i3d_hooks.h"
-#include "igraph/itexture.h"
 
 using namespace ls3d;
 using namespace ls3d::i3d;
@@ -14,15 +13,6 @@ C_vector<I3D_shadow *> g_shadows;
 
 }  // namespace ls3d::i3d
 
-// S_shadowData ------------------------------------------------------------------------------------
-
-// 0x10050770
-S_shadowData::~S_shadowData()
-{
-    for (S_shadowPart &p : parts)
-        ::operator delete(p.name);
-}
-
 // I3D_shadow --------------------------------------------------------------------------------------
 
 // LS3DRF 0x1002ad90 (from LS3DF 0x1004e5d0): no shadow visual is made.
@@ -32,7 +22,7 @@ void I3D_shadow::Init()
     mapHeight = 0x40;
     mapWidth = 0x40;
     orthogonal = true;
-    data = nullptr;
+    unknown124 = 0;
     scene = nullptr;
     lightSector = nullptr;
     localVertices = nullptr;
@@ -70,7 +60,7 @@ void I3D_shadow::Uninit()
     I3D_frame::Uninit();
 }
 
-// 0x1004e840
+// LS3DRF 0x1002afd0 (from LS3DF 0x1004e840): no shadow file is shared.
 I3D_RESULT I3D_shadow::Duplicate(I3D_frame *source)
 {
     if (!source || source == this)
@@ -80,10 +70,6 @@ I3D_RESULT I3D_shadow::Duplicate(I3D_frame *source)
     if (source->type != FRAME_SHADOW)
         return I3D_OK;
     auto *src = static_cast<I3D_shadow *>(source);
-    if (src->data) {
-        data = src->data;
-        ++data->refCount;
-    }
     maxHeight = src->maxHeight;
     depth = src->depth;
     mapWidth = src->mapWidth;
@@ -114,35 +100,9 @@ void I3D_shadow::SetMode(int newMode)
 
 void I3D_shadow::MatrixChanged() {}
 
-// 0x1004f030
-void I3D_shadow::Close()
-{
-    for (int i = 0; i < numCasters; ++i) {
-        if (casters[i].frame)
-            casters[i].frame->frameFlags &= ~FRMFLAGS_SHADOW_CASTER;
-    }
-    ::operator delete(casters);
-    casters = nullptr;
-    numCasters = 0;
-    if (data && --data->refCount == 0)
-        delete data;
-    data = nullptr;
-    AlignedFree(localVertices);
-    localVertices = nullptr;
-    numVertices = 0;
-    ::operator delete(points);
-    points = nullptr;
-    ::operator delete(faces);
-    faces = nullptr;
-    numFaces = 0;
-    if (texture) {
-        texture->Release();
-        texture = nullptr;
-    }
-    shadowFlags = 0;
-    casterStamp = -1;
-    lightStamp = -1;
-}
+// LS3DRF's shared empty stub 0x1002b0a0 (marked at sound UpdateSound; from LS3DF 0x1004f030): no
+// shadow file, casters or map to free.
+void I3D_shadow::Close() {}
 
 // 0x1004f120. In LS3DRF the return-0 stub shared with sound Open: no file read, nothing closed.
 I3D_RESULT I3D_shadow::Open(const char *, uint32_t) { return I3D_OK; }
