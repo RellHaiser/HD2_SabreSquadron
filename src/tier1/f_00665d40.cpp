@@ -92,9 +92,9 @@ uint32_t FUN_00665f90(void *_this,uint32_t *param_1, ...)
   uint8_t stack0xffffff3c[64];
   void *local_c;
   uint8_t *puStack_8;
-  uint8_t bVar1;
-  uint8_t *format;
-  char cVar2;
+  uchar uVar1;
+  uchar *begin;
+  bool bVar2;
   C_str CVar3;
   char *pcVar4;
   int textId;
@@ -102,7 +102,7 @@ uint32_t FUN_00665f90(void *_this,uint32_t *param_1, ...)
   C_str_rep *extraout_EAX_00;
   C_str_rep *extraout_EAX_01;
   uint32_t uVar5;
-  uint8_t *pbVar6;
+  uchar *puVar6;
   C_str CStack_ac;
   C_str CStack_a8;
   C_str CStack_a4;
@@ -153,19 +153,18 @@ uint32_t FUN_00665f90(void *_this,uint32_t *param_1, ...)
     CVar3.rep = (C_str_rep *)C_auto_00814cb0__FUN_006554f0(_this,param_1);
     break;
   case 0x3:
-    format = (uint8_t *)param_1[3];
+    begin = (uchar *)param_1[3];
     CVar3.rep = *(C_str_rep **)((int)_this + 0x6c);
-    *(uint8_t **)((int)_this + 0x5c) = format;
+    *(uchar **)((int)_this + 0x5c) = begin;
     CVar3.rep[0x10].length = 0;
-    if (format == 0) {
+    if (begin == 0) {
       if (*(C_TextBox **)((int)_this + 0x6c) != 0) {
         C_TextBox__Clear(*(C_TextBox **)((int)_this + 0x6c));
         CVar3.rep = extraout_EAX_00;
       }
       break;
     }
-    if ((*(int *)(format + 0x90) == g_versionMajor) && (*(int *)(format + 0x8c) == g_versionMinor))
-    {
+    if ((*(int *)(begin + 0x90) == g_versionMajor) && (*(int *)(begin + 0x8c) == g_versionMinor)) {
       (**(code **)(*(int *)_this + 0x7c))();
     }
     else {
@@ -174,8 +173,8 @@ uint32_t FUN_00665f90(void *_this,uint32_t *param_1, ...)
     CStack_a0.rep = 0;
     puStack_8 = 0;
     if (g_gameProfile.m_unicodeFont == false) {
-      cVar2 = FUN_0064d9e0(format);
-      if (cVar2 == '\0') {
+      bVar2 = HasUtf8Sequences((char *)begin);
+      if (!bVar2) {
         if (g_gameProfile.m_unicodeFont != false) goto LAB_0066607f;
         goto LAB_006660f7;
       }
@@ -200,17 +199,17 @@ LAB_0066609a:
     else {
 LAB_0066607f:
       uVar5 = 0xffffffff;
-      pbVar6 = format;
+      puVar6 = begin;
       do {
         if (uVar5 == 0) break;
         uVar5--;
-        bVar1 = *pbVar6;
-        pbVar6++;
-      } while (bVar1 != 0);
-      uVar5 = FUN_0064d3d0(format,format + (~uVar5 - 1));
-      if ((char)uVar5 == '\0') goto LAB_0066609a;
+        uVar1 = *puVar6;
+        puVar6++;
+      } while (uVar1 != '\0');
+      bVar2 = IsLegalUtf8Range(begin,begin + (~uVar5 - 1));
+      if (!bVar2) goto LAB_0066609a;
 LAB_006660f7:
-      C_fstr_Construct(&CStack_9c,(char *)format);
+      C_fstr_Construct(&CStack_9c,(char *)begin);
       CVar3.rep = CStack_9c.rep;
       uStack_70 = 0;
       uStack_6c = 0x1000018;
@@ -244,7 +243,7 @@ LAB_006660f7:
       tier1_operator_delete(CVar3.rep);
     }
     (**(code **)(*(int *)_this + 0x74))(&stack0xffffff4c);
-    C_fstr_Construct(&CStack_9c,(char *)(format + 0x33));
+    C_fstr_Construct(&CStack_9c,(char *)(begin + 0x33));
     if (CStack_9c.rep != 0) {
       (CStack_9c.rep)->refCount =
            (int)((int)&((C_str_rep *)(CStack_9c.rep)->refCount)->refCount + 1);
@@ -269,7 +268,7 @@ LAB_006660f7:
       tier1_operator_delete(apCStack_78[0]);
     }
     (**(code **)(*(int *)_this + 0x74))(&stack0xffffff48);
-    textId = GetGameTypeTextId(*(int *)(format + 0x70));
+    textId = GetGameTypeTextId(*(int *)(begin + 0x70));
     C_TextDatabase__GetText(&DAT_008c1368,&CStack_9c,textId);
     if (CStack_9c.rep != 0) {
       (CStack_9c.rep)->refCount =
@@ -294,7 +293,7 @@ LAB_006660f7:
       tier1_operator_delete(pCStack_4c);
     }
     (**(code **)(*(int *)_this + 0x74))(&stack0xffffff44);
-    C_fstr_Construct(aCStack_98,&DAT_00832d40,*(uint32_t *)(format + 0x74));
+    C_fstr_Construct(aCStack_98,&DAT_00832d40,*(uint32_t *)(begin + 0x74));
     CStack_38.rep = 0;
     uStack_14 = 0xe;
     pCStack_4c = 0;
@@ -316,8 +315,8 @@ LAB_006660f7:
       tier1_operator_delete(CStack_38.rep);
     }
     (**(code **)(*(int *)_this + 0x74))(&stack0xffffff40);
-    C_fstr_Construct(&CStack_a0,"%d / %d",*(uint32_t *)(format + 0x7c),
-                     *(uint32_t *)(format + 0x78));
+    C_fstr_Construct(&CStack_a0,"%d / %d",*(uint32_t *)(begin + 0x7c),
+                     *(uint32_t *)(begin + 0x78));
     aCStack_24[0].rep = 0;
     uStack_18 = 0x11;
     CStack_38.rep = 0;
@@ -336,12 +335,12 @@ LAB_006660f7:
       C_str__ReleaseRep((C_str *)aCStack_24[0].rep);
     }
     (**(code **)(*(int *)_this + 0x74))(&stack0xffffff3c);
-    (**(code **)(**(int **)((int)_this + 0x78) + 0x30))(*(int **)((int)_this + 0x78),format[0x82]);
-    (**(code **)(**(int **)((int)_this + 0x84) + 0x30))(*(int **)((int)_this + 0x84),format[0x82]);
-    (**(code **)(**(int **)((int)_this + 0x7c) + 0x30))(*(int **)((int)_this + 0x7c),format[0x80]);
-    (**(code **)(**(int **)((int)_this + 0x88) + 0x30))(*(int **)((int)_this + 0x88),format[0x80]);
-    (**(code **)(**(int **)((int)_this + 0x80) + 0x30))(*(int **)((int)_this + 0x80),format[0x88]);
-    (**(code **)(**(int **)((int)_this + 0x8c) + 0x30))(*(int **)((int)_this + 0x8c),format[0x88]);
+    (**(code **)(**(int **)((int)_this + 0x78) + 0x30))(*(int **)((int)_this + 0x78),begin[0x82]);
+    (**(code **)(**(int **)((int)_this + 0x84) + 0x30))(*(int **)((int)_this + 0x84),begin[0x82]);
+    (**(code **)(**(int **)((int)_this + 0x7c) + 0x30))(*(int **)((int)_this + 0x7c),begin[0x80]);
+    (**(code **)(**(int **)((int)_this + 0x88) + 0x30))(*(int **)((int)_this + 0x88),begin[0x80]);
+    (**(code **)(**(int **)((int)_this + 0x80) + 0x30))(*(int **)((int)_this + 0x80),begin[0x88]);
+    (**(code **)(**(int **)((int)_this + 0x8c) + 0x30))(*(int **)((int)_this + 0x8c),begin[0x88]);
     CVar3.rep = CStack_9c.rep;
     if ((CStack_9c.rep != 0) &&
        ((CStack_9c.rep)->refCount = (int)((C_str_rep *)(CStack_9c.rep)->refCount)[-1].chars,

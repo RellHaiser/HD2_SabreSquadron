@@ -4496,6 +4496,7 @@ uint32_t C_auto_00815420__FUN_00662000(C_auto_00815420 *_this,uint32_t *param_1,
   undefined3 extraout_var_02;
   undefined3 extraout_var_03;
   uint32_t extraout_EAX;
+  uint32_t extraout_EAX_00;
   int iVar3;
   if ((param_1[1] & 0x40ff000) != 0) {
     uVar1 = C_auto_00813dd0__FUN_0065d060((C_auto_00813dd0 *)_this,param_1);
@@ -4532,8 +4533,9 @@ uint32_t C_auto_00815420__FUN_00662000(C_auto_00815420 *_this,uint32_t *param_1,
   if (uVar2 < 0x200002d) {
     if (uVar2 == 0x200002c) {
 LAB_006620ff:
-      uVar1 = empty_function_64b1e0();
-      return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
+      C_TextBox__Reattach(_this->m_06c,*(I3D_scene **)(_this->_pad_0004 + 100),
+                          *(void **)(_this->_pad_0004 + 0x4c));
+      return CONCAT31((int3)((uint32_t)extraout_EAX_00 >> 8),1);
     }
     if ((uVar2 == 0x1000077) || (uVar2 == 0x2000018)) {
       C_TextBox__Clear(_this->m_06c);
@@ -4921,7 +4923,7 @@ uint32_t C_auto_00813ee0__FUN_006627b0(C_auto_00813ee0 *_this,uint32_t param_1, 
         param_1 -= 0xfee0;
       }
       if ((0x7f < param_1) && (g_gameProfile.m_unicodeFont)) {
-        _Count = (C_str_rep *)FUN_0064d910((int)local_14,&param_1,6);
+        _Count = (C_str_rep *)EncodeUtf8(local_14,&param_1,6);
         CVar6.rep = _Count;
         if (0 < (int)_Count) {
           pcVar4 = *(char **)_this[1]._pad_0004;

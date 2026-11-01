@@ -119,3 +119,10 @@
 006497f0 C_PagedTextBox::NextJustified | bool __thiscall NextJustified(C_PagedTextBox *this, int page, int line)
 0064b7f0 C_PagedTextBox::AlignPageLine | void __thiscall AlignPageLine(C_PagedTextBox *this, int page, int line, bool last)
 0064bad0 C_PagedTextBox::JustifyPageGap | float __thiscall JustifyPageGap(C_PagedTextBox *this, void * page, void * line)
+
+# Part 9b-v: the UTF-8 helpers and the plain box's empty reattach.
+0064d3d0 IsLegalUtf8Range | bool __fastcall IsLegalUtf8Range(uchar * begin, uchar * end)
+0064d910 EncodeUtf8 | int __fastcall EncodeUtf8(char * out, uint * codePoint, int maxBytes)
+0064d9e0 HasUtf8Sequences | bool __fastcall HasUtf8Sequences(char * text)
+0064da80 HasCjkCharacters | bool __fastcall HasCjkCharacters(ushort * text)
+0064b1e0 C_TextBox::Reattach | void __thiscall Reattach(C_TextBox *this, I3D_scene * scene, void * root)

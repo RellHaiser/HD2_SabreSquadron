@@ -56213,7 +56213,7 @@
 "name": "HandleKeys",
 "size": 918,
 "lines": 231,
-"chars": 6400,
+"chars": 6393,
 "callers": [
 "00496230"
 ],
@@ -174706,8 +174706,8 @@
 "0062fa30": {
 "name": "FUN_0062fa30",
 "size": 8043,
-"lines": 1072,
-"chars": 40725,
+"lines": 1071,
+"chars": 40693,
 "callers": [
 "00631c20"
 ],
@@ -181806,10 +181806,10 @@
 "in_vtables": []
 },
 "0064b1e0": {
-"name": "empty_function_64b1e0",
+"name": "Reattach",
 "size": 3,
 "lines": 7,
-"chars": 57,
+"chars": 105,
 "callers": [
 "00662000"
 ],
@@ -182608,10 +182608,10 @@
 ]
 },
 "0064d3d0": {
-"name": "FUN_0064d3d0",
+"name": "IsLegalUtf8Range",
 "size": 46,
-"lines": 24,
-"chars": 541,
+"lines": 22,
+"chars": 424,
 "callers": [
 "00665f90",
 "006a0db0"
@@ -182671,10 +182671,10 @@
 "in_vtables": []
 },
 "0064d910": {
-"name": "FUN_0064d910",
+"name": "EncodeUtf8",
 "size": 184,
 "lines": 54,
-"chars": 1068,
+"chars": 1066,
 "callers": [
 "00494d20",
 "006627b0"
@@ -182689,10 +182689,10 @@
 "in_vtables": []
 },
 "0064d9e0": {
-"name": "FUN_0064d9e0",
+"name": "HasUtf8Sequences",
 "size": 81,
 "lines": 44,
-"chars": 888,
+"chars": 884,
 "callers": [
 "0062fa30",
 "00665f90",
@@ -182706,10 +182706,10 @@
 "in_vtables": []
 },
 "0064da80": {
-"name": "FUN_0064da80",
+"name": "HasCjkCharacters",
 "size": 32,
 "lines": 18,
-"chars": 305,
+"chars": 266,
 "callers": [
 "00722550",
 "00726470"
@@ -197513,8 +197513,8 @@
 "00662000": {
 "name": "FUN_00662000",
 "size": 331,
-"lines": 78,
-"chars": 2431,
+"lines": 80,
+"chars": 2575,
 "callers": [
 "0065c800"
 ],
@@ -197831,7 +197831,7 @@
 "name": "FUN_006627b0",
 "size": 680,
 "lines": 153,
-"chars": 5302,
+"chars": 5295,
 "callers": [],
 "callees": [
 "00405100",
@@ -199347,8 +199347,8 @@
 "00665f90": {
 "name": "FUN_00665f90",
 "size": 1630,
-"lines": 290,
-"chars": 10349,
+"lines": 289,
+"chars": 10327,
 "callers": [],
 "callees": [
 "004050e0",
@@ -219018,8 +219018,8 @@
 "006a0db0": {
 "name": "IsUtf8",
 "size": 63,
-"lines": 17,
-"chars": 388,
+"lines": 18,
+"chars": 393,
 "callers": [
 "006a10e0"
 ],
@@ -250617,7 +250617,7 @@
 "name": "FUN_00722550",
 "size": 1094,
 "lines": 177,
-"chars": 6448,
+"chars": 6432,
 "callers": [
 "00722520"
 ],
@@ -252351,8 +252351,8 @@
 "00726470": {
 "name": "FUN_00726470",
 "size": 3565,
-"lines": 627,
-"chars": 21572,
+"lines": 626,
+"chars": 21495,
 "callers": [
 "00726440"
 ],
@@ -252846,7 +252846,7 @@
 "name": "FUN_00728820",
 "size": 7153,
 "lines": 1085,
-"chars": 39528,
+"chars": 39530,
 "callers": [
 "0072c480"
 ],

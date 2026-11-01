@@ -9,39 +9,6 @@ extern uint8_t LAB_00805490;
 extern uint8_t LAB_008051b8;
 extern uint8_t LAB_00805120;
 
-// 0x0064dae0
-uint32_t FUN_0064dae0(...)
-{
-  FUN_0064daf0();
-  FUN_0064db00();
-  return 0;
-}
-
-
-// 0x0064daf0
-uint32_t FUN_0064daf0(...)
-{
-  FUN_007e35d3();
-  return 0;
-}
-
-
-// 0x0064db00
-uint32_t FUN_0064db00(...)
-{
-  atexit(FUN_0064db10);
-  return 0;
-}
-
-
-// 0x0064db10
-uint32_t FUN_0064db10(...)
-{
-  FUN_007e3754();
-  return 0;
-}
-
-
 // 0x0064db20
 uint32_t C_auto_00814fe0__FUN_0064db20(C_auto_00814fe0 *_this,int *param_1, ...)
 {

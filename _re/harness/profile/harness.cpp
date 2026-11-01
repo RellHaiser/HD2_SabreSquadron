@@ -40,7 +40,7 @@ C_str C_GameTexts::Get(int id) const
     return C_fstr("T%X", id);
 }
 void C_GameTexts::Load(const char *fileName) { std::printf("texts.Load(%s)\n", fileName); }
-bool IsLegalUtf8(const uint8_t *begin, const uint8_t *end)
+bool IsLegalUtf8Range(const uint8_t *begin, const uint8_t *end)
 {
     for (const uint8_t *p = begin; p < end;) {
         int n = *p < 0x80 ? 1 : (*p & 0xE0) == 0xC0 ? 2 : (*p & 0xF0) == 0xE0 ? 3 : (*p & 0xF8) == 0xF0 ? 4 : 0;

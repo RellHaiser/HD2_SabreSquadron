@@ -4,8 +4,8 @@
 // build with TEXT_TEST and the real C_TextBox; the loader's text box fakes left out), run by
 // CameraTest instead of the camera's tests: IGraph's screen 800 x 600; the fonts 2 and 3 fakes
 // (C_TbFont); the render's IGraph and driver calls logged. Prints "textbox:" (9b-i), "layout:"
-// (9b-ii-a), "position:" (9b-ii-b), "render:" (9b-iii), "pages:" (9b-iv-a) and "paged:" (9b-iv-b, the
-// paged box's layout) with 1 per check met.
+// (9b-ii-a), "position:" (9b-ii-b), "render:" (9b-iii), "pages:" (9b-iv-a), "paged:" (9b-iv-b, the
+// paged box's layout) and "utf8:" (9b-v, the UTF-8 helpers) with 1 per check met.
 
 #define private public
 #define protected public
@@ -457,6 +457,30 @@ std::string LpPages(const C_PagedTextBox &box)
     }
     return s;
 }
+// --- part 9b-v ---
+
+struct S_Utf8Results {
+    bool u8Range = true, u8Encode = true, u8Room = true, u8Sequences = true, u8Cjk = true, u8Reattach = true;
+};
+
+// IsLegalUtf8Range over a text's first `length` bytes (-1: all).
+bool U8Range(const char *text, int length = -1)
+{
+    const auto *begin = reinterpret_cast<const uint8_t *>(text);
+    return IsLegalUtf8Range(begin, begin + (length < 0 ? static_cast<int>(std::strlen(text)) : length));
+}
+// EncodeUtf8's result and bytes ("result:" then the bytes in hex; the buffer's byte after them too).
+std::string U8Encode(uint32_t ch, int maxBytes = 6)
+{
+    char out[8];
+    std::memset(out, 'x', sizeof(out));
+    const int n = EncodeUtf8(out, &ch, maxBytes);
+    std::string s = CmText("%d:", n);
+    for (int i = 0; i < (n > 0 ? n + 1 : 1); ++i)
+        s += CmText(" %02x", static_cast<uint8_t>(out[i]));
+    return s;
+}
+
 // The box's pages deleted, its runs these, laid out (LayoutPages' result).
 bool LpLayout(C_PagedTextBox &box, std::initializer_list<std::pair<const char *, int>> runs)
 {
@@ -2893,6 +2917,55 @@ void TextBoxTest()
                 "lpJoins %d lpBreak %d lpStack %d lpAlign %d lpJustify %d lpNext %d lpOverflow %d lpAppend %d lpUtf8 %d\n",
                 lp.lpNone, lp.lpLines, lp.lpWrap, lp.lpPages, lp.lpAreas, lp.lpForced, lp.lpFail, lp.lpNoWrap, lp.lpMeasures,
                 lp.lpJoins, lp.lpBreak, lp.lpStack, lp.lpAlign, lp.lpJustify, lp.lpNext, lp.lpOverflow, lp.lpAppend, lp.lpUtf8);
+
+    // ===== part 9b-v: the UTF-8 helpers =====
+    S_Utf8Results u;
+    {
+        // --- a range of whole, well-formed sequences (empty: false; no surrogates' test) ---
+        WM(u.u8Range, !U8Range("") && U8Range("abc") && U8Range("\xC3\xA9") && !U8Range("\xC3") && !U8Range("a\xC3") &&
+                          U8Range("\xE2\x82\xAC") && !U8Range("\xE0\x80\x80") && U8Range("\xED\xA0\x80") &&
+                          U8Range("\xF0\x90\x80\x80") && !U8Range("\xF4\x90\x80\x80") && !U8Range("\xF8\x88\x80\x80\x80") &&
+                          !U8Range("\x80") && !U8Range("\xC0\x80") && !U8Range("\xFF") && U8Range("ab\xC3\xA9" "cd"));
+        WM(u.u8Range, !U8Range("\xC3\xA9", 1) && U8Range("\xC3\xA9", 2) && U8Range("a\xC3\xA9", 1) && !U8Range("a\xC3\xA9", 2) &&
+                          U8Range("\xF4\x8F\xBF\xBF") && !U8Range("\xE2\x82\xAC", 2) && !U8Range("\xC3\xA9\xC3", 3));
+        // --- a code point encoded (not terminated) ---
+        WM(u.u8Encode, U8Encode('A') == "1: 41 78" && U8Encode(0x7F) == "1: 7f 78" && U8Encode(0x80) == "2: c2 80 78" &&
+                           U8Encode(0xE9) == "2: c3 a9 78" && U8Encode(0x7FF) == "2: df bf 78" && U8Encode(0x800) == "3: e0 a0 80 78" &&
+                           U8Encode(0xFFFF) == "3: ef bf bf 78" && U8Encode(0x10000) == "4: f0 90 80 80 78" &&
+                           U8Encode(0x1FFFFF) == "4: f7 bf bf bf 78");
+        // Surrogates: -3; over 0x1FFFFF: 0xFFFD in 2 bytes (the quirk).
+        WM(u.u8Encode, U8Encode(0xD800) == "-3: 78" && U8Encode(0xDFFF) == "-3: 78" && U8Encode(0xD7FF) == "3: ed 9f bf 78" &&
+                           U8Encode(0xE000) == "3: ee 80 80 78" && U8Encode(0x200000) == "2: ff bd 78" && U8Encode(0xFFFFFFFF) == "2: ff bd 78" &&
+                           U8Encode(0xD800, 0) == "-3: 78");
+        // --- the room: fewer bytes than asked for ---
+        WM(u.u8Room, U8Encode('A', 1) == "-4: 78" && U8Encode('A', 2) == "1: 41 78" && U8Encode(0xE9, 2) == "-4: 78" &&
+                         U8Encode(0xE9, 3) == "2: c3 a9 78" && U8Encode(0x800, 3) == "-4: 78" && U8Encode(0x800, 4) == "3: e0 a0 80 78" &&
+                         U8Encode(0x10000, 4) == "-4: 78" && U8Encode(0x10000, 5) == "4: f0 90 80 80 78" &&
+                         U8Encode(0x200000, 2) == "-4: 78" && U8Encode(0x200000, 3) == "2: ff bd 78" && U8Encode('A', -1) == "-4: 78");
+        // --- a text with sequences of more than a byte (by lead bytes and continuations only) ---
+        WM(u.u8Sequences, !HasUtf8Sequences("") && !HasUtf8Sequences("abc") && HasUtf8Sequences("a\xC3\xA9") &&
+                              HasUtf8Sequences("\xC3\xA9") && !HasUtf8Sequences("\xC3") && !HasUtf8Sequences("\x80") &&
+                              !HasUtf8Sequences("\xC3\xA9\x80") && !HasUtf8Sequences("\xF8\x80\x80\x80") &&
+                              HasUtf8Sequences("\xF7\x80\x80\x80") && HasUtf8Sequences("\xC0\x80") && HasUtf8Sequences("\xE0\x80\x80") &&
+                              !HasUtf8Sequences("\xC3\x41") && !HasUtf8Sequences("\xC3\xC3") && !HasUtf8Sequences("\xEF\xBF") &&
+                              HasUtf8Sequences("\xC3\xA9 abc") && HasUtf8Sequences("\xDF\xBF") && HasUtf8Sequences("\xEF\xBF\xBF") &&
+                              HasUtf8Sequences("\xF0\x80\x80\xBF") && !HasUtf8Sequences("\xF0\x80\x80\xC0") &&
+                              !HasUtf8Sequences("\xE0\x80\x7F") && !HasUtf8Sequences("\xBF") && !HasUtf8Sequences("\xC3\xA9\xFF"));
+        // --- a wide text with a character over U+3000 ---
+        const uint16_t none[] = {0}, edge[] = {'a', 0x3000, 0}, over[] = {0x3001, 0}, later[] = {'a', 'b', 0x4E00, 0},
+                       plain[] = {'a', 'b', 0}, top[] = {0xFFFF, 0}, after[] = {'a', 0, 0x4E00, 0};
+        WM(u.u8Cjk, !HasCjkCharacters(none) && !HasCjkCharacters(edge) && HasCjkCharacters(over) && HasCjkCharacters(later) &&
+                        !HasCjkCharacters(plain) && HasCjkCharacters(top) && !HasCjkCharacters(after));
+        // --- the plain box's reattach: nothing ---
+        {
+            C_TextBox plainBox;
+            plainBox.AddText(C_str("a"), 3);
+            plainBox.Reattach(nullptr, nullptr);
+            WM(u.u8Reattach, plainBox.m_dirty && plainBox.m_lines.empty());
+        }
+    }
+    std::printf("utf8: u8Range %d u8Encode %d u8Room %d u8Sequences %d u8Cjk %d u8Reattach %d\n", u.u8Range, u.u8Encode, u.u8Room,
+                u.u8Sequences, u.u8Cjk, u.u8Reattach);
 
     box.m_fonts->m_fonts.erase(box.m_fonts->m_fonts.begin(), box.m_fonts->m_fonts.begin() + 2);
     g_textIds = oldIds;

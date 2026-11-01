@@ -117,6 +117,108 @@ int DecodeUtf8(uint32_t *codePoint, const char *text, int length)
     return static_cast<int>(p - source);
 }
 
+// --- the UTF-8 helpers (part 9b-v) -----------------------------------------------------------------
+
+namespace {
+
+// EncodeUtf8: a sequence's lead byte's mark by its length (ConvertUTF.c's firstByteMark, 0x00813cb8).
+const uint8_t UTF8_FIRST_BYTE[7] = {0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC};
+
+} // namespace
+
+bool IsLegalUtf8Range(const uint8_t *begin, const uint8_t *end)
+{
+    // (Empty: false; the original reads the byte at the end first, which cannot make it true.)
+    if (begin >= end)
+        return false;
+    for (const uint8_t *p = begin;;) {
+        const int length = UTF8_TRAILING[*p] + 1;
+        if (end - p < length)
+            return false;
+        if (!IsLegalUtf8(p, length))
+            return false;
+        p += length;
+        if (p >= end)
+            return true;
+    }
+}
+
+int EncodeUtf8(char *out, const uint32_t *codePoint, int maxBytes)
+{
+    uint32_t ch = *codePoint;
+    if (ch >= 0xD800 && ch <= 0xDFFF)
+        return -3;
+    int length;
+    if (ch < 0x80) {
+        length = 1;
+    } else if (ch < 0x800) {
+        length = 2;
+    } else if (ch < 0x10000) {
+        length = 3;
+    } else if (ch < 0x200000) {
+        length = 4;
+    } else {
+        // Quirk kept: the replacement character in 2 bytes (FF BD; ConvertUTF.c's takes 3).
+        ch = 0xFFFD;
+        length = 2;
+    }
+    // (Room for a byte more: the caller's terminator.)
+    if (length >= maxBytes)
+        return -4;
+    char *p = out + length;
+    switch (length) {
+    case 4:
+        *--p = static_cast<char>((ch & 0x3F) | 0x80);
+        ch >>= 6;
+        [[fallthrough]];
+    case 3:
+        *--p = static_cast<char>((ch & 0x3F) | 0x80);
+        ch >>= 6;
+        [[fallthrough]];
+    case 2:
+        *--p = static_cast<char>((ch & 0x3F) | 0x80);
+        ch >>= 6;
+        [[fallthrough]];
+    case 1:
+        *--p = static_cast<char>(UTF8_FIRST_BYTE[length] | (ch & 0xFF));
+    }
+    return length;
+}
+
+bool HasUtf8Sequences(const char *text)
+{
+    const auto *p = reinterpret_cast<const uint8_t *>(text);
+    bool multibyte = false;
+    while (*p) {
+        int length = 0;
+        if (*p < 0x80)
+            length = 1;
+        else if (*p >= 0xC0 && *p < 0xE0)
+            length = 2;
+        else if (*p >= 0xE0 && *p < 0xF0)
+            length = 3;
+        else if (*p >= 0xF0 && *p < 0xF8)
+            length = 4;
+        if (length == 0)
+            return false;
+        for (int k = 1; k < length; ++k)
+            if (p[k] < 0x80 || p[k] >= 0xC0)
+                return false;
+        if (length > 1)
+            multibyte = true;
+        p += length;
+    }
+    return multibyte;
+}
+
+bool HasCjkCharacters(const uint16_t *text)
+{
+    for (; *text; ++text)
+        if (*text > 0x3000)
+            return true;
+    return false;
+}
+
 S_TextLine::~S_TextLine()
 {
     while (!words.empty()) {

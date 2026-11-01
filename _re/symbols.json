@@ -28286,8 +28286,9 @@
   "proto": "bool __thiscall ClipArea(C_PagedTextBox *this, void * viewport, float * area)"
  },
  "0064b1e0": {
-  "module": "zz_idioms",
-  "name": "empty_function_64b1e0"
+  "module": "text_box",
+  "name": "C_TextBox::Reattach",
+  "proto": "void __thiscall Reattach(C_TextBox *this, I3D_scene * scene, void * root)"
  },
  "0064b200": {
   "module": "text_box",
@@ -28457,6 +28458,11 @@
   "module": "zz_idioms",
   "name": "construct_copy4_64d050"
  },
+ "0064d3d0": {
+  "module": "text_box",
+  "name": "IsLegalUtf8Range",
+  "proto": "bool __fastcall IsLegalUtf8Range(uchar * begin, uchar * end)"
+ },
  "0064d400": {
   "module": "text_box",
   "name": "IsLegalUtf8",
@@ -28466,6 +28472,21 @@
   "module": "text_box",
   "name": "DecodeUtf8",
   "proto": "int __fastcall DecodeUtf8(uint * codePoint, char * text, int length)"
+ },
+ "0064d910": {
+  "module": "text_box",
+  "name": "EncodeUtf8",
+  "proto": "int __fastcall EncodeUtf8(char * out, uint * codePoint, int maxBytes)"
+ },
+ "0064d9e0": {
+  "module": "text_box",
+  "name": "HasUtf8Sequences",
+  "proto": "bool __fastcall HasUtf8Sequences(char * text)"
+ },
+ "0064da80": {
+  "module": "text_box",
+  "name": "HasCjkCharacters",
+  "proto": "bool __fastcall HasCjkCharacters(ushort * text)"
  },
  "0064dd40": {
   "module": "zz_idioms",

@@ -244,9 +244,9 @@ f_006285d0.cpp:3436:51: no matching function for call to 'tier1::C_str::C_str(in
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
 f_006285d0.cpp:3446:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_0062f470.cpp:181:56: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_0062f470.cpp:180:56: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     (ExceptionList = &local_c, iVar5 = (**(code **)(*DAT_008ae5f8 + 0x1c))(),
-f_0062f470.cpp:1308:26: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_0062f470.cpp:1307:26: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     iVar1 = (**(code **)(*DAT_008ae5f8 + 0x1c))();
 f_00632110.cpp:155:16: 'UNK_008038b0' was not declared in this scope; did you mean 'FUN_007028b0'?
     puStack_8 = &UNK_008038b0;
@@ -306,9 +306,7 @@ f_00638dc0.cpp:2096:13: invalid type argument of unary '*' (have 'uint32_t' {aka
     *DAT_008ae5b0 = (int)pvVar3;
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_0064d080.cpp:85:20: 'UNK_00813cb8' was not declared in this scope; did you mean 'PTR_00813ab8'?
-    pbVar1[-1] = (&UNK_00813cb8)[iVar3] | (uint8_t)uVar2;
-f_0064dae0.cpp:2639:3: '_param_1' was not declared in this scope; did you mean 'param_1'?
+f_0064dae0.cpp:2606:3: '_param_1' was not declared in this scope; did you mean 'param_1'?
     _param_1 = 0x3ecccccd;
 f_0065ae90.cpp:31:46: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_t (*)(...)' {aka 'unsigned int (*)(...)'} in assignment
     (_this[0x14].vtable)->vf3b = _this[0x18].vtable;

@@ -133,6 +133,9 @@ public:
     // Drawn dimmed: the styles' colours at 0x60 of alpha (the inventory's list captions while the
     // list has no container; no effect when the box has its own colour, m_colour).
     void SetDimmed(bool value) { m_dimmed = value; }
+    // Nothing (the interface's text control's message 0x200002c and its margin's, with its scene and
+    // root frame; the paged box lays itself out again on 0x200002c).
+    void Reattach(I3D_scene *, I3D_frame *) {}          // 0x0064b1e0
 
 protected:
     bool AddRun(S_TextRun run);                         // 0x006448b0
@@ -265,7 +268,15 @@ void ReadScreenSize(int x, int y);                      // 0x00648190 (__stdcall
 
 // UTF-8 of the menus' text input (the unicode font option).
 bool ReadUnicodeInput(wchar_t *buffer, int maxLength);  // 0x0066b680 (__fastcall)
-// One code point to UTF-8 (at most `maxBytes`; the bytes written, 0 or less: none).
+// One code point to UTF-8, not terminated (fewer bytes than `maxBytes`; the bytes written; a
+// surrogate: -3; no room: -4; over 0x1FFFFF: 0xFFFD in 2 bytes, the original's quirk).
 int EncodeUtf8(char *out, const uint32_t *codePoint, int maxBytes);   // 0x0064d910 (__fastcall)
 // The code point at `text` (`length` bytes left; the bytes it takes, 0 or less: invalid).
 int DecodeUtf8(uint32_t *codePoint, const char *text, int length);    // 0x0064d830 (__fastcall)
+// The bytes from `begin` to `end` are whole, well-formed UTF-8 sequences (empty: false).
+bool IsLegalUtf8Range(const uint8_t *begin, const uint8_t *end);      // 0x0064d3d0 (__fastcall)
+// A NUL-terminated text of UTF-8 sequences by their lead bytes and continuations (not checked further)
+// with at least one of more than a byte: plain ASCII is false, as is an empty text.
+bool HasUtf8Sequences(const char *text);                // 0x0064d9e0 (__fastcall)
+// A NUL-terminated wide text with a character over U+3000 (the CJK blocks and above).
+bool HasCjkCharacters(const uint16_t *text);            // 0x0064da80 (__fastcall)

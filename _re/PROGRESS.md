@@ -6236,6 +6236,36 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/text_box.txt (+13); 32 functions in ported.txt (15 + 17 absorbed). Stats: 8,103 of
     12,293 functions by hand (74.1 % by size).
 
+  PART 9b-v DONE (2026-11-01): the UTF-8 helpers and the rest of the text library (src/game/text_box.*;
+  0x0064d3d0, 0x0064d910, 0x0064d9e0, 0x0064da80, 0x0064b1e0). Part 9 (the text library,
+  0x0063de40..0x0064d060) is done but for the unreferenced code page 1250 font (0x0063f230,
+  0x00641720, 0x00640f60; left in tier 1).
+  - IsLegalUtf8Range 0x0064d3d0 (was pending.h's IsLegalUtf8; renamed: the sequence check 0x0064d400
+    has that name): whole well-formed sequences from begin to end (empty: false; the original reads
+    the byte at the end first, false either way). profile_roster.cpp's IsUtf8 takes it from
+    text_box.h; the profile harness's fake renamed.
+  - EncodeUtf8 0x0064d910 (HandleKeys' typed characters): a surrogate -3; fewer bytes than maxBytes
+    (else -4: room for the caller's terminator); not terminated. Quirk kept: over 0x1FFFFF the
+    replacement 0xFFFD in 2 bytes (FF BD).
+  - HasUtf8Sequences 0x0064d9e0: a NUL-terminated text of lead bytes and continuations (not checked
+    further: C0 80 passes) with a sequence of more than a byte (plain ASCII, empty: false).
+    HasCjkCharacters 0x0064da80: a wide text with a character over U+3000. (Their callers are tier 1.)
+  - C_TextBox::Reattach 0x0064b1e0 (RET 8: the text control's scene and root): empty; the text
+    control's message 0x200002c and its margin's call it (the paged box lays itself out again instead).
+  - Done without code: the run's copy 0x006446c0; the vectors' tidy 0x00640460 / 0x00645a80 (unwind
+    funclets); the static / iostream atexit stubs 0x00640510, 0x00641fb0, 0x0064d080,
+    0x0064daa0..0x0064db10; the 1.0 / 1.1 font set 0x0063f870 (dropped in 9a; absorbed, its only
+    caller ported).
+  - Harness: textbox_test.inc's "utf8:" line in the text build (6 checks). 0 of 22 in both orders;
+    the profile harness 0 failures.
+  - Mutations (mutations/mutate_9b7.py, the text build): the first run caught 58 of 59; 1 equivalent
+    (see the file's docstring). Baselines: the camera and the world builds 0 of 22 in both orders;
+    the item build 0 of 37; the other five 0 of 37.
+  - Build: 208 files clean (MSVC). Tier 1: 496 errors in 83 files, 199 stubs (497 / 84 / 200
+    before). ret_audit --src: 52 (Reattach's two arguments found by it).
+  - Ghidra: names/text_box.txt (+5); 20 functions in ported.txt. Stats: 8,123 of 12,293 functions by
+    hand (74.2 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

@@ -8322,3 +8322,25 @@
 0064d040
 0064d050
 0064c060
+
+# part 9b-v: the UTF-8 helpers, the plain box's relayout, the run's copy; the iostream / static atexit stubs
+0064d3d0
+0064d910
+0064d9e0
+0064da80
+0064b1e0
+006446c0
+0064d080
+00640510
+00641fb0
+0064daa0
+0064dab0
+0064dac0
+0064dad0
+0064dae0
+0064daf0
+0064db00
+0064db10
+00640460
+00645a80
+0063f870
