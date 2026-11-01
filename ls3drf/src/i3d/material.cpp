@@ -1,12 +1,10 @@
 // I3D_material, I3D_anim_material (0x1002b030 - 0x1002c400).
 #include "i3d/material.h"
 
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 
 #include "external/rw_data.h"
-#include "igraph/igraph.h"
 #include "igraph/itexture.h"
 #include "i3d/driver.h"
 #include "i3d/loader.h"
@@ -39,13 +37,8 @@ I3D_material::I3D_material()
 {
 }
 
-I3D_material::~I3D_material()
-{
-    if (texture)
-        texture->Release();
-    if (envTexture)
-        envTexture->Release();
-}
+// LS3DRF 0x10019370 (from LS3DF 0x1002b0b0): the scalar deleting destructor; no textures to release.
+I3D_material::~I3D_material() {}
 
 // LS3DRF 0x10019390 (from LS3DF 0x1002b120)
 uint32_t I3D_material::Release()
@@ -108,60 +101,11 @@ I3D_RESULT I3D_material::SetOpacity(float value)
     return I3D_OK;
 }
 
-I3D_RESULT I3D_material::SetTexture(ITexture *newTexture)
-{
-    if (newTexture == texture)
-        return I3D_OK;
-    if (texture)
-        texture->Release();
-    // The alpha flags as the second texture alone leaves them.
-    const uint32_t old = matFlags;
-    matFlags = old & 0x7ffbffff;
-    if (!envTexture) {
-        matFlags = old & 0x1ffbffff;
-    } else {
-        if (!(envTexture->flags & ITC_SOURCE_ALPHA))
-            matFlags = old & 0x3ffbffff;
-        if (!(envTexture->flags & ITC_ALPHA_1BIT))
-            matFlags &= ~MATF_COLORKEY;
-    }
-    texture = newTexture;
-    if (newTexture) {
-        ++newTexture->refCount;
-        if (newTexture->flags & (ITC_SOURCE_ALPHA | ITC_USE_ALPHA))
-            matFlags |= MATF_ALPHA;
-        if (newTexture->flags & ITC_ALPHA_1BIT)
-            matFlags |= newTexture->flags & ITC_MIPMAP ? (MATF_COLORKEY | MATF_ALPHA) : MATF_COLORKEY;
-        matFlags |= MATF_TEXTURE;
-    }
-    return I3D_OK;
-}
+// LS3DRF's shared return-0 stub 0x10018f90 (marked at sound SetCurrTime; from LS3DF 0x1002b1e0 and
+// 0x1002b280): no textures; the material and its flags stay as they are.
+I3D_RESULT I3D_material::SetTexture(ITexture *) { return I3D_OK; }
 
-I3D_RESULT I3D_material::SetEnvTexture(ITexture *newTexture)
-{
-    if (newTexture == envTexture)
-        return I3D_OK;
-    if (envTexture)
-        envTexture->Release();
-    envTexture = newTexture;
-    if (!texture) {
-        matFlags &= ~(MATF_ALPHA | MATF_COLORKEY);
-    } else {
-        if (!(texture->flags & (ITC_SOURCE_ALPHA | ITC_USE_ALPHA)))
-            matFlags &= ~MATF_ALPHA;
-        if (!(texture->flags & ITC_ALPHA_1BIT))
-            matFlags &= ~MATF_COLORKEY;
-    }
-    if (!newTexture) {
-        matFlags &= ~MATF_ENV_TEXTURE;
-        return I3D_OK;
-    }
-    ++newTexture->refCount;
-    if (newTexture->flags & ITC_SOURCE_ALPHA)
-        matFlags |= MATF_ALPHA;
-    matFlags |= MATF_ENV_TEXTURE;
-    return I3D_OK;
-}
+I3D_RESULT I3D_material::SetEnvTexture(ITexture *) { return I3D_OK; }
 
 I3D_RESULT I3D_material::CopyFrom(const I3D_material *source)
 {
@@ -256,33 +200,26 @@ uint32_t I3D_material::TextureFlags()
     return tf;
 }
 
+// LS3DRF 0x10019aa0 (from LS3DF 0x1002bbe0): the names are read and dropped (no textures). The texture
+// flags are still worked out first, for their one side effect: a mip-mapped 1-bit alpha sets
+// MATF_ALPHA, which decides whether an alpha name follows.
 void I3D_material::Load()
 {
-    uint32_t tf = TextureFlags();
-    char name[256], alphaName[256];
+    TextureFlags();
+    char name[256];
     if (!(matFlags & MATF_ENV_TEXTURE)) {
         dtaRead(g_loadFile, &diffuse, 0x48);
     } else {
         dtaRead(g_loadFile, &diffuse, 0x4C);
         ReadName(name, g_loadFile);
-        if (*name) {
-            const uint32_t envFlags = (g_driverStates[DRVSTATE_TEX_MIPMAP] ? ITC_MIPMAP : 0) | (tf & 0xffffef31) | 0x80000;
-            g_pIGraph->LoadTexture(name, nullptr, envFlags, &envTexture);
-        }
     }
     int length = 0;
     dtaRead(g_loadFile, &length, 1);
     if (!length)
         return;
     dtaRead(g_loadFile, name, length);
-    name[length] = 0;
-    alphaName[0] = 0;
-    if ((matFlags & MATF_ALPHA) && !(matFlags & 0xa1000000)) {
-        ReadName(alphaName, g_loadFile);
-        if (!*alphaName)
-            tf &= ~ITC_USE_ALPHA;
-    }
-    g_pIGraph->LoadTexture(name, alphaName, tf, &texture);
+    if ((matFlags & MATF_ALPHA) && !(matFlags & 0xa1000000))
+        ReadName(name, g_loadFile);
 }
 
 // ---------------------------------------------------------------- I3D_anim_material
@@ -300,27 +237,11 @@ I3D_anim_material::I3D_anim_material() : loopStart(0), interval(1), envLoopStart
     matFlags |= MATF_ANIMATED;
 }
 
-I3D_anim_material::~I3D_anim_material()
-{
-    // The frames own their textures; the current ones are theirs.
-    if (textures.frames.Size()) {
-        for (int i = textures.frames.Size(); i > 0; --i) {
-            if (ITexture *t = textures.frames[i - 1])
-                t->Release();
-        }
-        textures.frames.Free();
-        texture = nullptr;
-    }
-    if (envTextures.frames.Size()) {
-        for (int i = envTextures.frames.Size(); i > 0; --i) {
-            if (ITexture *t = envTextures.frames[i - 1])
-                t->Release();
-        }
-        envTextures.frames.Free();
-        envTexture = nullptr;
-    }
-}
+// LS3DRF 0x10019680 (from LS3DF 0x1002b530): only the members' destructors free the frames' storage;
+// no textures to release.
+I3D_anim_material::~I3D_anim_material() {}
 
+// LS3DRF 0x10019a60 (from LS3DF 0x1002bba0)
 I3D_RESULT I3D_anim_material::SetTexture(ITexture *newTexture)
 {
     if (textures.frames.Size())
@@ -328,6 +249,7 @@ I3D_RESULT I3D_anim_material::SetTexture(ITexture *newTexture)
     return I3D_material::SetTexture(newTexture);
 }
 
+// LS3DRF 0x10019a80 (from LS3DF 0x1002bbc0)
 I3D_RESULT I3D_anim_material::SetEnvTexture(ITexture *newTexture)
 {
     if (envTextures.frames.Size())
@@ -335,20 +257,10 @@ I3D_RESULT I3D_anim_material::SetEnvTexture(ITexture *newTexture)
     return I3D_material::SetEnvTexture(newTexture);
 }
 
+// LS3DRF 0x100198d0 (from LS3DF 0x1002b840): no frames to release or copy (Load fills none); the
+// colors, flags and timing are copied.
 I3D_RESULT I3D_anim_material::CopyFrom(const I3D_material *source)
 {
-    for (int i = textures.frames.Size(); i > 0; --i) {
-        if (ITexture *t = textures.frames[i - 1])
-            t->Release();
-    }
-    textures.frames.Clear();
-    for (int i = envTextures.frames.Size(); i > 0; --i) {
-        if (ITexture *t = envTextures.frames[i - 1])
-            t->Release();
-    }
-    envTextures.frames.Clear();
-    // (The current textures are dropped without a release: a reference of a material without
-    // frames leaks, as in the original.)
     textures.elapsed = 0;
     textures.lastTime = g_driverTime;
     textures.frame = 0;
@@ -374,26 +286,6 @@ I3D_RESULT I3D_anim_material::CopyFrom(const I3D_material *source)
     loopStart = src->loopStart;
     envInterval = src->envInterval;
     envLoopStart = src->envLoopStart;
-    if (src->textures.frames.Size() > 0) {
-        if (texture)
-            texture->Release();       // (the original releases a null one through null)
-        for (ITexture *t : src->textures.frames) {
-            textures.frames.PushBack(t);
-            if (t)
-                ++t->refCount;
-        }
-        texture = textures.frames[0];
-    }
-    if (src->envTextures.frames.Size() > 0) {
-        if (envTexture)
-            envTexture->Release();       // (the original releases a null one through null)
-        for (ITexture *t : src->envTextures.frames) {
-            envTextures.frames.PushBack(t);
-            if (t)
-                ++t->refCount;
-        }
-        envTexture = envTextures.frames[0];
-    }
     return I3D_OK;
 }
 
@@ -479,79 +371,27 @@ bool I3D_anim_material::SetEnvFrame(int frame)
     return true;
 }
 
+// LS3DRF 0x10019c70 (from LS3DF 0x1002be30): the names, frame counts and timing are read; no textures
+// or frames are loaded, no texture flags worked out (so no MATF_ALPHA from them, unlike the plain
+// material) and no frame is set.
 void I3D_anim_material::Load()
 {
-    char envName[256], name[256], alphaName[256];
+    char name[256];
     if (!(matFlags & MATF_ENV_TEXTURE)) {
         dtaRead(g_loadFile, &diffuse, 0x48);
     } else {
         dtaRead(g_loadFile, &diffuse, 0x4C);
-        ReadName(envName, g_loadFile);
+        ReadName(name, g_loadFile);
     }
     int length = 0;
     dtaRead(g_loadFile, &length, 1);
-    name[0] = 0;
-    alphaName[0] = 0;
     if (length) {
         dtaRead(g_loadFile, name, length);
-        name[length] = 0;
         if ((matFlags & MATF_ALPHA) && !(matFlags & 0xa1000000))
-            ReadName(alphaName, g_loadFile);
+            ReadName(name, g_loadFile);
     }
     int frames = 0, envFrames = 0;
     dtaRead(g_loadFile, &frames, 1);
     dtaRead(g_loadFile, &envFrames, 1);
     dtaRead(g_loadFile, &loopStart, 0x10);      // loopStart, interval, envLoopStart, envInterval
-    const uint32_t tf = TextureFlags();
-
-    // The sequences: "name00.ext", "name01.ext" ... (names of under 6 characters: one empty frame).
-    if (matFlags & MATF_ENV_TEXTURE) {
-        const uint32_t envFlags = (g_driverStates[DRVSTATE_TEX_MIPMAP] ? ITC_MIPMAP : 0) | (tf & 0xffffef31) | 0x80000;
-        if (envFrames < 2) {
-            g_pIGraph->LoadTexture(envName, nullptr, envFlags, &envTexture);
-        } else {
-            const int at = static_cast<int>(std::strlen(envName)) - 6;
-            if (at < 0) {
-                envTextures.frames.PushBack(nullptr);
-            } else {
-                for (int i = 0; i < envFrames; ++i) {
-                    std::sprintf(envName + at, "%02i", i);
-                    envName[at + 2] = '.';
-                    ITexture *t = nullptr;
-                    g_pIGraph->LoadTexture(envName, nullptr, envFlags, &t);
-                    envTextures.frames.PushBack(t);
-                }
-            }
-        }
-    }
-    if (*name || *alphaName) {
-        if (frames < 2) {
-            g_pIGraph->LoadTexture(name, alphaName, tf, &texture);
-        } else {
-            const int at = static_cast<int>(std::strlen(name)) - 6;
-            if (at < 0) {
-                textures.frames.PushBack(nullptr);
-            } else {
-                char *alphaAt = nullptr;
-                if ((matFlags & 0x2000000) && !(matFlags & 0xa1000000)) {
-                    const int a = static_cast<int>(std::strlen(alphaName)) - 6;
-                    if (a >= 0)
-                        alphaAt = alphaName + a;
-                }
-                for (int i = 0; i < frames; ++i) {
-                    std::sprintf(name + at, "%02i", i);
-                    name[at + 2] = '.';
-                    if (alphaAt) {
-                        std::sprintf(alphaAt, "%02i", i);
-                        alphaAt[2] = '.';
-                    }
-                    ITexture *t = nullptr;
-                    g_pIGraph->LoadTexture(name, alphaName, tf, &t);
-                    textures.frames.PushBack(t);
-                }
-            }
-        }
-    }
-    SetFrame(-1);
-    SetEnvFrame(-1);
 }

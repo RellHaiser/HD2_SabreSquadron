@@ -1,19 +1,19 @@
 // Differential test of I3D_material and I3D_anim_material (src/i3d/material.cpp): the original
-// LS3DF.dll's materials (made by its driver, slots 0x58 / 0x5C) and the port's run the same random
-// operations - the color, power and flag setters, SetAlpha, the textures and their alpha flags,
-// CopyFrom between both kinds, SetEnvironment, Release and extra references, Load from generated
-// model-file blocks (names, alpha names, frame sequences) under random driver texture states, the
-// animated sequences' updates as the driver time moves (looped, and random: each side's CRT rand
-// seeded the same) and SetFrame / SetEnvFrame. Textures are fake objects (a pool per side, the same
-// flags); IGraph is a fake whose LoadTexture logs its arguments and hands out the pool's textures
-// by name. After every operation the materials' fields (textures as pool indices), the textures'
+// LS3DRF.dll's materials (made by its driver, slots 0x28 / 0x2C) and the port's run the same random
+// operations - the color, power and flag setters, SetAlpha, the texture setters, CopyFrom between
+// both kinds, SetEnvironment, Release and extra references, Load from generated model-file blocks
+// (names, alpha names, frame counts) under random driver texture states, the animated updates as the
+// driver time moves and SetFrame / SetEnvFrame. LS3DRF's materials keep no textures: the setters
+// change nothing, Load reads the names and drops them, no frame sequence is ever filled. Textures are
+// fake objects (a pool per side, the same flags); IGraph is a fake whose LoadTexture logs its
+// arguments and hands out the pool's textures by name (installed on both sides: a call is a
+// mismatch). After every operation the materials' fields (textures as pool indices), the textures'
 // reference counts, the files' read positions and the LoadTexture logs must be identical.
 //
-// The original crashes where the port refuses or guards (see material.cpp): an animated CopyFrom
-// from null, or from an animated material with frames but no current texture; SetEnvFrame while
-// the texture sequence's frame is past the end of the environment sequence. The test avoids those.
+// The original crashes where the port refuses (see material.cpp): an animated CopyFrom from null.
+// The test avoids it.
 //
-// Usage: compare_material.exe [original LS3DF.dll] [operations] [seed]
+// Usage: compare_material.exe [original LS3DRF.dll] [operations] [seed]
 //
 // test-sources: src/i3d/material.cpp
 #include <windows.h>
@@ -162,12 +162,14 @@ struct Slot {
 };
 Slot g_mats[kMats];
 
-constexpr uint32_t kOrigLoad = 0x1002bbe0;
-constexpr uint32_t kOrigAnimLoad = 0x1002be30;
-constexpr uint32_t kOrigLoadFile = 0x100d00f0;
-constexpr uint32_t kOrigDriverStates = 0x100be058;
-constexpr uint32_t kOrigDriverTime = 0x100be394;
-constexpr uint32_t kOrigIGraph = 0x100d16f4;
+// LS3DRF.dll's.
+constexpr uint32_t kOrigLoad = 0x10019aa0;
+constexpr uint32_t kOrigAnimLoad = 0x10019c70;
+constexpr uint32_t kOrigLoadFile = 0x10057790;
+constexpr uint32_t kOrigDriverStates = 0x10045ca8;
+constexpr uint32_t kOrigDriverTime = 0x10045ddc;
+constexpr uint32_t kOrigIGraph = 0x10058b74;
+constexpr uint32_t kOrigDriver = 0x10058b78;
 
 I3D_anim_material *Anim(const Slot &s) { return static_cast<I3D_anim_material *>(s.port); }
 
@@ -301,7 +303,7 @@ uint32_t RandMaterialFlags(bool anim)
     return anim ? f | MATF_ANIMATED : f & ~MATF_ANIMATED;
 }
 
-long g_loads, g_sequenceLoads, g_frameSteps, g_randomSteps, g_copiedSequences;
+long g_loads;
 
 // Load on a fresh material: a generated block, read through two handles of one file.
 void LoadMaterial(Slot &s)
@@ -358,14 +360,12 @@ void LoadMaterial(Slot &s)
     dtaClose(hp);
     DeleteFileA(path);
     ++g_loads;
-    if (s.anim && (Anim(s)->textures.frames.Size() > 1 || Anim(s)->envTextures.frames.Size() > 1))
-        ++g_sequenceLoads;
 }
 
 void Create(Slot &s, bool anim)
 {
     s.anim = anim;
-    s.orig = CallV<uint8_t *>(g_origDriver, anim ? 0x5C : 0x58);
+    s.orig = CallV<uint8_t *>(g_origDriver, anim ? 0x2C : 0x28);
     s.port = anim ? new I3D_anim_material : new I3D_material;
     if (!s.orig || !s.port) {
         std::printf("no material\n");
@@ -373,18 +373,8 @@ void Create(Slot &s, bool anim)
     }
 }
 
-// The original reads past the frames or calls through null in these (see material.cpp).
-bool OrigCopyCrashes(const Slot &dest, const Slot *src)
-{
-    if (!dest.anim)
-        return false;
-    if (!src)
-        return true;
-    if (src == &dest || !src->anim)
-        return false;
-    const I3D_anim_material *a = Anim(*src);
-    return (a->textures.frames.Size() > 0 && !a->texture) || (a->envTextures.frames.Size() > 0 && !a->envTexture);
-}
+// The original's animated CopyFrom reads a null source's flags (see material.cpp).
+bool OrigCopyCrashes(const Slot &dest, const Slot *src) { return dest.anim && !src; }
 
 void RunOp()
 {
@@ -463,11 +453,7 @@ void RunOp()
             src = nullptr;
         if (OrigCopyCrashes(s, src))
             break;
-        const bool sequences = src && src->anim && s.anim &&
-                               (Anim(*src)->textures.frames.Size() > 1 || Anim(*src)->envTextures.frames.Size() > 1);
         Check("CopyFrom", CallV<I3D_RESULT>(o, 0x20, src ? src->orig : nullptr), p->CopyFrom(src ? src->port : nullptr));
-        if (sequences)
-            ++g_copiedSequences;
         break;
     }
     case 10:
@@ -504,18 +490,11 @@ void RunOp()
     case 16: {
         g_lastOp = "UpdateTexture / UpdateEnvTexture";
         const bool env = Rand(2) != 0;
-        const int before = s.anim ? (env ? Anim(s)->envTextures.frame : Anim(s)->textures.frame) : 0;
         CallV<void>(o, env ? 0x48 : 0x44);
         if (env)
             p->UpdateEnvTexture();
         else
             p->UpdateTexture();
-        if (s.anim) {
-            const int after = env ? Anim(s)->envTextures.frame : Anim(s)->textures.frame;
-            const int start = env ? Anim(s)->envLoopStart : Anim(s)->loopStart;
-            if (after != before)
-                ++(start < 0 ? g_randomSteps : g_frameSteps);
-        }
         break;
     }
     case 17:
@@ -528,8 +507,6 @@ void RunOp()
         const int n = env ? a->envTextures.frames.Size() : a->textures.frames.Size();
         const int frame = Rand(2 * n + 4) - 2;
         if (env) {
-            if (n > 0 && Field<int>(o, 0x78) >= n)
-                break;
             Check("SetEnvFrame", CallV<bool>(o, 0x50, frame), a->SetEnvFrame(frame));
         } else {
             Check("SetFrame", CallV<bool>(o, 0x4C, frame), a->SetFrame(frame));
@@ -579,7 +556,7 @@ LONG WINAPI CrashFilter(EXCEPTION_POINTERS *info)
 int main(int argc, char **argv)
 {
     SetUnhandledExceptionFilter(&CrashFilter);
-    const char *origPath = OriginalDllPath(argc > 1 ? argv[1] : nullptr);
+    const char *origPath = OriginalDllPath(argc > 1 ? argv[1] : nullptr, "LS3DRF.dll");
     const long ops = argc > 2 ? std::atol(argv[2]) : 200000;
     const uint32_t seed = argc > 3 ? static_cast<uint32_t>(std::strtoul(argv[3], nullptr, 0)) : 1;
     HMODULE dll = LoadLibraryA(origPath);
@@ -588,8 +565,7 @@ int main(int argc, char **argv)
         return 2;
     }
     g_base = reinterpret_cast<uint8_t *>(dll);
-    Orig<uint8_t>(0x100d16f2) = 1;              // no log
-    g_origDriver = Orig<uint8_t *>(0x100d16f8);
+    g_origDriver = Orig<uint8_t *>(kOrigDriver);
     if (!g_origDriver) {
         std::printf("the original's driver does not exist\n");
         return 2;
@@ -617,20 +593,16 @@ int main(int argc, char **argv)
     Orig<void *>(kOrigIGraph) = &g_fakeIGraph[0];
     g_pIGraph = reinterpret_cast<IGraph *>(&g_fakeIGraph[1]);
 
-    // The driver time starts at 0 (a sequence's "not updated yet"); both CRTs' rand alike.
+    // The driver time starts at 0 (a sequence's "not updated yet").
     Orig<int>(kOrigDriverTime) = 0;
     g_driverTime = 0;
-    void *ptd = OrigFn<void *(__cdecl *)()>(0x10090118)();     // _getptd
-    Field<uint32_t>(ptd, 0x14) = seed;
-    std::srand(seed);
 
     for (g_op = 0; g_op < ops; ++g_op) {
         RunOp();
         CompareAll();
     }
     Orig<void *>(kOrigIGraph) = origIGraph;
-    std::printf("coverage: loads %ld (with sequences %ld), sequence steps %ld (random %ld), copied sequences %ld\n",
-                g_loads, g_sequenceLoads, g_frameSteps, g_randomSteps, g_copiedSequences);
+    std::printf("coverage: loads %ld\n", g_loads);
     std::printf("compare_material: %ld operations, seed %u: identical\n", ops, seed);
     return 0;
 }
