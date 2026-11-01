@@ -48,8 +48,6 @@ f_00433580.cpp:8:3: 'C_SoundModule__C_SoundModule___C_SoundModule' was not decla
     C_SoundModule__C_SoundModule___C_SoundModule((C_SoundModule *)&g_soundModule);
 f_00459690.cpp:122:11: '_pIVar15' was not declared in this scope; did you mean 'pIVar15'?
     _pIVar15 = (*pCVar10->m_scene->vtable->GetSector)(pCVar10->m_scene,&SStack_58);
-f_0048eb30.cpp:124:24: wrong type argument to bit-complement
-    ~C_TextBox__C_TextBox(_this);
 f_004a89b0.cpp:55:30: 'struct tier1::I3D_scene_vtbl' has no member named 'Slot94'; did you mean 'Slot04'?
     (*pCVar1->m_scene->vtable->Slot94)(pCVar1->m_scene,local_44.x,local_48,local_20);
 f_004d0590.cpp:19:10: incompatible types in assignment of 'uint8_t' {aka 'unsigned char'} to 'void* [4]'
@@ -308,39 +306,39 @@ f_00638dc0.cpp:2096:13: invalid type argument of unary '*' (have 'uint32_t' {aka
     *DAT_008ae5b0 = (int)pvVar3;
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_00643b20.cpp:2352:7: '_local_1c' was not declared in this scope; did you mean 'local_1c'?
+f_00643b20.cpp:1239:7: '_local_1c' was not declared in this scope; did you mean 'local_1c'?
     _local_1c = CONCAT31(uStack_1b,bVar2);
-f_00643b20.cpp:3338:78: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:2225:78: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
     pCVar5 = (C_str *)C_str__CreateRep((C_str *)pCStack_10,this_00 + 2,
-f_00643b20.cpp:3361:80: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:2248:80: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
     this_00 = (C_str *)C_str__CreateRep((C_str *)pCStack_30,pCVar5 + 2,
-f_00643b20.cpp:3434:80: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:2321:80: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
     pCVar5 = (C_str *)C_str__CreateRep((C_str *)pCStack_1c,this_00 + 2,
-f_00643b20.cpp:3636:79: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:2523:79: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
     this_00 = (C_str *)C_str__CreateRep((C_str *)pCStack_10,pCVar10 + 2,
-f_00643b20.cpp:3649:11: '_bStack_24' was not declared in this scope; did you mean 'bStack_24'?
+f_00643b20.cpp:2536:11: '_bStack_24' was not declared in this scope; did you mean 'bStack_24'?
     _bStack_24 = CONCAT31(uStack_23,bVar2);
-f_00643b20.cpp:3717:81: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:2604:81: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
     pCVar10 = (C_str *)C_str__CreateRep((C_str *)pCStack_14,this_00 + 2,
-f_00643b20.cpp:4179:55: void value not ignored as it ought to be
+f_00643b20.cpp:3066:55: void value not ignored as it ought to be
     lVar15 = (*pIVar9->vtable->DrawPrimitives)(pIVar9,3,DAT_008acbf0 / 3,&DAT_008acbf8,1);
-f_00643b20.cpp:4975:73: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:3862:73: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
     pCVar6 = (C_str *)C_str__CreateRep((C_str *)local_10,local_4c + 2,(uint32_t)local_4c[1].rep);
-f_00643b20.cpp:4997:75: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:3884:75: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
     pCVar6 = (C_str *)C_str__CreateRep((C_str *)local_40,local_4c + 2,(uint32_t)local_4c[1].rep)
-f_00643b20.cpp:5114:77: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:4001:77: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
     pCVar6 = (C_str *)C_str__CreateRep((C_str *)local_20,local_4c + 2,
-f_00643b20.cpp:5243:77: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:4130:77: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
     pCVar6 = (C_str *)C_str__CreateRep((C_str *)local_20,local_4c + 2,
-f_00643b20.cpp:5546:73: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:4433:73: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
     pCVar7 = (C_str *)C_str__CreateRep((C_str *)local_10,local_4c + 2,(uint32_t)local_4c[1].rep);
-f_00643b20.cpp:5557:7: '_local_18' was not declared in this scope; did you mean 'local_18'?
+f_00643b20.cpp:4444:7: '_local_18' was not declared in this scope; did you mean 'local_18'?
     _local_18 = CONCAT31(uStack_17,bVar4);
-f_00643b20.cpp:5661:77: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:4548:77: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
     pCVar7 = (C_str *)C_str__CreateRep((C_str *)local_14,local_4c + 2,
-f_00643b20.cpp:5788:77: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:4675:77: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
     pCVar7 = (C_str *)C_str__CreateRep((C_str *)local_14,local_4c + 2,
-f_00643b20.cpp:6145:85: cannot convert 'float*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:5032:85: cannot convert 'float*' to 'uint32_t*' {aka 'unsigned int*'}
     FUN_0064cf30(gh_bitcast<uint32_t*>(pfVar9),gh_bitcast<uint32_t*>(pfVar9),pfVar9 + 7);
 f_0064d080.cpp:192:20: 'UNK_00813cb8' was not declared in this scope; did you mean 'PTR_00813ab8'?
     pbVar1[-1] = (&UNK_00813cb8)[iVar3] | (uint8_t)uVar2;
@@ -348,9 +346,9 @@ f_0064dae0.cpp:2639:3: '_param_1' was not declared in this scope; did you mean '
     _param_1 = 0x3ecccccd;
 f_0065ae90.cpp:31:46: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_t (*)(...)' {aka 'unsigned int (*)(...)'} in assignment
     (_this[0x14].vtable)->vf3b = _this[0x18].vtable;
-f_0065ae90.cpp:881:46: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_t (*)(...)' {aka 'unsigned int (*)(...)'} in assignment
+f_0065ae90.cpp:889:46: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_t (*)(...)' {aka 'unsigned int (*)(...)'} in assignment
     (_this[0x14].vtable)->vf3b = _this[0x18].vtable;
-f_0065ae90.cpp:889:48: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_t (*)(...)' {aka 'unsigned int (*)(...)'} in assignment
+f_0065ae90.cpp:897:48: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_t (*)(...)' {aka 'unsigned int (*)(...)'} in assignment
     (_this[0x22].vtable)->vf3b = _this[0x18].vtable;
 f_00663df0.cpp:27:5: '_param_1' was not declared in this scope; did you mean 'param_1'?
     _param_1 = 0x3ecccccd;

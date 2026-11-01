@@ -27852,10 +27852,70 @@
   "name": "CreateTextStyle",
   "proto": "int __fastcall CreateTextStyle(void * desc)"
  },
+ "00643c20": {
+  "module": "text_box",
+  "name": "C_TextBox::EditRun",
+  "proto": "bool __thiscall EditRun(C_TextBox *this, int index)"
+ },
+ "00643ca0": {
+  "module": "text_box",
+  "name": "C_TextBox::GetLineCentre",
+  "proto": "S_vector4 * __thiscall GetLineCentre(C_TextBox *this, S_vector4 * out, int line)"
+ },
+ "00643dd0": {
+  "module": "text_box",
+  "name": "C_TextBox::GetRunText",
+  "proto": "C_str * __thiscall GetRunText(C_TextBox *this, C_str * out, int index)"
+ },
+ "00643e40": {
+  "module": "text_box",
+  "name": "C_TextBox::ScrollToLine",
+  "proto": "bool __thiscall ScrollToLine(C_TextBox *this, int line)"
+ },
+ "00643f10": {
+  "module": "text_box",
+  "name": "C_TextBox::SelectHovered",
+  "proto": "short __thiscall SelectHovered(C_TextBox *this)"
+ },
+ "00643f50": {
+  "module": "text_box",
+  "name": "C_TextBox::SelectRun",
+  "proto": "short __thiscall SelectRun(C_TextBox *this, int index)"
+ },
+ "00643fb0": {
+  "module": "text_box",
+  "name": "C_TextBox::GetSelection",
+  "proto": "short __thiscall GetSelection(C_TextBox *this)"
+ },
+ "00644090": {
+  "module": "text_box",
+  "name": "C_TextBox::SetHover",
+  "proto": "bool __thiscall SetHover(C_TextBox *this, int line)"
+ },
+ "006440e0": {
+  "module": "text_box",
+  "name": "C_TextBox::HoverAt",
+  "proto": "bool __thiscall HoverAt(C_TextBox *this, int x, int y)"
+ },
+ "00644120": {
+  "module": "text_box",
+  "name": "C_TextBox::ClearHover",
+  "proto": "bool __thiscall ClearHover(C_TextBox *this)"
+ },
+ "00644140": {
+  "module": "text_box",
+  "name": "C_TextBox::LineAt",
+  "proto": "short __thiscall LineAt(C_TextBox *this, int x, int y)"
+ },
  "006441a0": {
   "module": "hud",
   "name": "C_TextBox::UpdateScrollRange",
   "proto": "void __thiscall UpdateScrollRange(C_TextBox *this)"
+ },
+ "00644230": {
+  "module": "text_box",
+  "name": "C_TextBox::GetScrollRange",
+  "proto": "short __thiscall GetScrollRange(C_TextBox *this)"
  },
  "00644250": {
   "module": "hud",
@@ -27863,8 +27923,29 @@
   "proto": "bool __thiscall ScrollTo(C_TextBox *this, int line)"
  },
  "00644270": {
-  "module": "zz_idioms",
-  "name": "get_field_78_644270"
+  "module": "text_box",
+  "name": "C_TextBox::GetScroll",
+  "proto": "int __thiscall GetScroll(C_TextBox *this)"
+ },
+ "00644280": {
+  "module": "text_box",
+  "name": "C_TextBox::TickCaret",
+  "proto": "void __thiscall TickCaret(C_TextBox *this, int time)"
+ },
+ "00644320": {
+  "module": "text_box",
+  "name": "C_TextBox::SetSelectedText",
+  "proto": "bool __thiscall SetSelectedText(C_TextBox *this, C_str * text)"
+ },
+ "006443a0": {
+  "module": "text_box",
+  "name": "C_TextBox::GetSelectedText",
+  "proto": "C_str * __thiscall GetSelectedText(C_TextBox *this, C_str * out)"
+ },
+ "00644410": {
+  "module": "text_box",
+  "name": "C_TextBox::SetRun",
+  "proto": "bool __thiscall SetRun(C_TextBox *this, C_str * text, uchar style, int index)"
  },
  "00644520": {
   "module": "hud",
@@ -27887,14 +27968,39 @@
   "proto": "bool __thiscall AddText(C_TextBox *this, C_str * text, uchar style)"
  },
  "006448b0": {
-  "module": "hud",
+  "module": "text_box",
   "name": "C_TextBox::AddRun",
   "proto": "bool __thiscall AddRun(C_TextBox *this, C_str * text, uchar style)"
+ },
+ "00644920": {
+  "module": "text_box",
+  "name": "C_TextBox::InsertRun",
+  "proto": "bool __thiscall InsertRun(C_TextBox *this, C_str * text, uchar style, int index)"
+ },
+ "00644a50": {
+  "module": "text_box",
+  "name": "C_TextBox::InsertTextId",
+  "proto": "bool __thiscall InsertTextId(C_TextBox *this, int textId, uchar style, int index)"
+ },
+ "00644b20": {
+  "module": "text_box",
+  "name": "C_TextBox::InsertText",
+  "proto": "bool __thiscall InsertText(C_TextBox *this, C_str * text, uchar style, int index)"
+ },
+ "00644bb0": {
+  "module": "text_box",
+  "name": "C_TextBox::RemoveRun",
+  "proto": "bool __thiscall RemoveRun(C_TextBox *this, int index)"
  },
  "00644c80": {
   "module": "hud",
   "name": "C_TextBox::Clear",
   "proto": "void __thiscall Clear(C_TextBox *this)"
+ },
+ "00644cf0": {
+  "module": "text_box",
+  "name": "C_TextBox::VisualDepth",
+  "proto": "float __stdcall VisualDepth(I3D_scene * scene, I3D_frame * visual)"
  },
  "00644da0": {
   "module": "hud",
@@ -27910,6 +28016,11 @@
   "module": "hud",
   "name": "C_TextBox::FreeLayout",
   "proto": "void __thiscall FreeLayout(C_TextBox *this)"
+ },
+ "00644f70": {
+  "module": "text_box",
+  "name": "S_TextLine::~S_TextLine",
+  "proto": "void __thiscall ~S_TextLine(void *this)"
  },
  "00645200": {
   "module": "zz_idioms",
@@ -27948,9 +28059,19 @@
   "module": "zz_idioms",
   "name": "vector_size_e4_64c130"
  },
+ "0064c150": {
+  "module": "text_box",
+  "name": "S_TextPiece::~S_TextPiece",
+  "proto": "void __thiscall ~S_TextPiece(void *this)"
+ },
  "0064c310": {
   "module": "zz_idioms",
   "name": "empty_function_64c310"
+ },
+ "0064c320": {
+  "module": "text_box",
+  "name": "vector_insert_text_run_64c320",
+  "proto": "void __thiscall vector_insert_text_run_64c320(void * this, void * where, uint count, void * value)"
  },
  "0064c610": {
   "module": "zz_idioms",
@@ -27991,6 +28112,11 @@
  "0064d000": {
   "module": "zz_idioms",
   "name": "copy4_64d000"
+ },
+ "0064d020": {
+  "module": "text_box",
+  "name": "construct_text_run_64d020",
+  "proto": "void __fastcall construct_text_run_64d020(void * where, void * run)"
  },
  "0064d040": {
   "module": "zz_idioms",

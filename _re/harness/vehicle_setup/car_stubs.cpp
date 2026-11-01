@@ -94,6 +94,8 @@ C_GameTexts g_texts;
 bool g_textIds;                                         // (part 7a: every text is "text <id>")
 C_str C_GameTexts::Get(int id) const
 {
+    if (id == 99999)                                    // (part 9b: a version's format)
+        return C_str("Version %d.%02d");
     if (g_textIds) {
         char text[32];
         std::snprintf(text, sizeof text, "text %d", id);

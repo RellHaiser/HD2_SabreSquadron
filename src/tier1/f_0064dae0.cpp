@@ -1935,7 +1935,7 @@ uint32_t C_auto_00815398__FUN_0064fc80(C_auto_00815398 *_this,uint32_t param_1, 
   char cVar2;
   void *pvVar3;
   uint32_t uVar4;
-  FUN_00644090(_this->m_06c,0);
+  C_TextBox__SetHover(_this->m_06c,0);
   pvVar3 = (void *)(*_this->vtable->vf00)(param_1);
   pCVar1 = _this->vtable;
   _this[1].m_008 = pvVar3;
@@ -1954,7 +1954,7 @@ uint32_t C_auto_00815398__FUN_0064fcd0(C_auto_00815398 *_this, ...)
   char cVar1;
   int iVar2;
   uint32_t unaff_retaddr;
-  FUN_00644120((int)_this->m_06c);
+  C_TextBox__ClearHover(_this->m_06c);
   cVar1 = (*_this->vtable->vf01)(_this[1].m_008);
   if (cVar1 != '\0') {
     iVar2 = (**(code **)(**(int **)((int)_this->m_008 + (int)_this[1].m_008 * 4) + 0x34))

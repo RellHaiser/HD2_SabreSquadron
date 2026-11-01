@@ -156,17 +156,4 @@ void * S_TextRun__ScalarDeletingDestructor(void *_this,uchar flags, ...)
 }
 
 
-// 0x0049fea0
-uint32_t S_TextRun___S_TextRun(void *_this, ...)
-{
-  int *ptr;
-  int iVar1;
-  ptr = *(int **)_this;
-  if ((ptr != 0) && (iVar1 = *ptr, *ptr = iVar1 - 1, iVar1 - 1 == 0)) {
-    tier1_operator_delete(ptr);
-  }
-  return 0;
-}
-
-
 } // namespace tier1

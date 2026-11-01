@@ -1209,6 +1209,9 @@ void C_Human::SetUnknown94(float value) { GfLog("unknown94 %s %.4f", CmHumanName
 #include "loader_test.inc"
 #include "mission_test.inc"
 #include "fonts_test.inc"
+#ifdef TEXT_TEST
+#include "textbox_test.inc"
+#endif
 
 void CameraTest(const char *path)
 {
@@ -1233,6 +1236,10 @@ void CameraTest(const char *path)
     GetGame()->m_scene = g_carScene;
     g_gameRole = GAME_ROLE_LOCAL;
     std::printf("== %s\n", mission.c_str());
+#ifdef TEXT_TEST
+    TextBoxTest();
+    return;
+#endif
     S_CameraResults r;
     CameraModuleTest(r);
     KeeperTest(r);

@@ -39,7 +39,7 @@ uint32_t FUN_00653f60(...)
 uint32_t FUN_00653f70(void *param_1, ...)
 {
   if (*(char *)((int)param_1 + 0x78) == '\0') {
-    FUN_00644090(*(void **)((int)param_1 + 0x6c),0);
+    C_TextBox__SetHover(*(C_TextBox **)((int)param_1 + 0x6c),0);
   }
   FUN_0065d270(param_1,0x4003000,0);
   return 1;
@@ -50,7 +50,7 @@ uint32_t FUN_00653f70(void *param_1, ...)
 uint32_t FUN_00653fa0(void *param_1, ...)
 {
   if (*(char *)((int)param_1 + 0x78) == '\0') {
-    FUN_00644120(*(int *)((int)param_1 + 0x6c));
+    C_TextBox__ClearHover(*(C_TextBox **)((int)param_1 + 0x6c));
   }
   FUN_0065d270(param_1,0x4004000,0);
   return 1;
@@ -93,8 +93,8 @@ uint32_t FUN_00654040(void *_this,uint32_t param_1, ...)
 uint32_t FUN_00654060(void *param_1, ...)
 {
   if (*(char *)((int)param_1 + 100) == '\0') {
-    if (*(void **)((int)param_1 + 0x6c) != 0) {
-      FUN_00644090(*(void **)((int)param_1 + 0x6c),0);
+    if (*(C_TextBox **)((int)param_1 + 0x6c) != 0) {
+      C_TextBox__SetHover(*(C_TextBox **)((int)param_1 + 0x6c),0);
     }
     FUN_0065d270(param_1,0x4003000,0);
     return 1;
@@ -106,8 +106,8 @@ uint32_t FUN_00654060(void *param_1, ...)
 // 0x006540a0
 uint32_t FUN_006540a0(void *param_1, ...)
 {
-  if (*(int *)((int)param_1 + 0x6c) != 0) {
-    FUN_00644120(*(int *)((int)param_1 + 0x6c));
+  if (*(C_TextBox **)((int)param_1 + 0x6c) != 0) {
+    C_TextBox__ClearHover(*(C_TextBox **)((int)param_1 + 0x6c));
   }
   FUN_0065d270(param_1,0x4003000,0);
   return 1;
@@ -609,8 +609,8 @@ LAB_00654b07:
 uint32_t FUN_00654b60(void *_this,uint32_t param_1, ...)
 {
   if (*(char *)((int)_this + 100) == '\0') {
-    if (*(void **)((int)_this + 0x6c) != 0) {
-      FUN_00644090(*(void **)((int)_this + 0x6c),0);
+    if (*(C_TextBox **)((int)_this + 0x6c) != 0) {
+      C_TextBox__SetHover(*(C_TextBox **)((int)_this + 0x6c),0);
     }
     if ((param_1 & 0xf) == 1) {
       (**(code **)(**(int **)((int)_this + 0x70) + 0x30))(param_1);
@@ -629,8 +629,8 @@ uint32_t FUN_00654b60(void *_this,uint32_t param_1, ...)
 // 0x00654bd0
 uint32_t FUN_00654bd0(void *_this,uint32_t param_1, ...)
 {
-  if (*(int *)((int)_this + 0x6c) != 0) {
-    FUN_00644120(*(int *)((int)_this + 0x6c));
+  if (*(C_TextBox **)((int)_this + 0x6c) != 0) {
+    C_TextBox__ClearHover(*(C_TextBox **)((int)_this + 0x6c));
   }
   if (((uint8_t)*(uint32_t *)((int)_this + 0x7c) & 0xf) == 1) {
     (**(code **)(**(int **)((int)_this + 0x70) + 0x34))(param_1);

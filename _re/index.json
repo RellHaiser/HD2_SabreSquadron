@@ -57166,7 +57166,7 @@
 "name": "AddCoopPlayers",
 "size": 1107,
 "lines": 181,
-"chars": 6083,
+"chars": 6085,
 "callers": [
 "004971c0"
 ],
@@ -57204,7 +57204,7 @@
 "name": "AddDeathmatchPlayers",
 "size": 1650,
 "lines": 295,
-"chars": 9909,
+"chars": 9911,
 "callers": [
 "004970f0"
 ],
@@ -57243,7 +57243,7 @@
 "name": "AddTeamPlayers",
 "size": 1484,
 "lines": 262,
-"chars": 9432,
+"chars": 9440,
 "callers": [
 "00497130",
 "00497170"
@@ -57906,8 +57906,8 @@
 "0049a420": {
 "name": "C_Interface",
 "size": 438,
-"lines": 98,
-"chars": 3427,
+"lines": 91,
+"chars": 3286,
 "callers": [
 "006987e0"
 ],
@@ -58040,8 +58040,8 @@
 "0049a750": {
 "name": "~C_Interface",
 "size": 490,
-"lines": 79,
-"chars": 3302,
+"lines": 69,
+"chars": 2859,
 "callers": [
 "00698b00"
 ],
@@ -179658,10 +179658,10 @@
 "in_vtables": []
 },
 "00643c20": {
-"name": "FUN_00643c20",
+"name": "EditRun",
 "size": 116,
-"lines": 39,
-"chars": 1010,
+"lines": 32,
+"chars": 632,
 "callers": [
 "00662520",
 "00662ca0",
@@ -179675,10 +179675,10 @@
 "in_vtables": []
 },
 "00643ca0": {
-"name": "FUN_00643ca0",
+"name": "GetLineCentre",
 "size": 294,
 "lines": 52,
-"chars": 1468,
+"chars": 1381,
 "callers": [
 "0065c160"
 ],
@@ -179696,10 +179696,10 @@
 "in_vtables": []
 },
 "00643dd0": {
-"name": "FUN_00643dd0",
+"name": "GetRunText",
 "size": 100,
 "lines": 30,
-"chars": 617,
+"chars": 636,
 "callers": [
 "0065b750"
 ],
@@ -179711,10 +179711,10 @@
 "in_vtables": []
 },
 "00643e40": {
-"name": "FUN_00643e40",
+"name": "ScrollToLine",
 "size": 196,
-"lines": 42,
-"chars": 1402,
+"lines": 32,
+"chars": 907,
 "callers": [
 "00643f10",
 "00643f50"
@@ -179732,10 +179732,10 @@
 "in_vtables": []
 },
 "00643f10": {
-"name": "FUN_00643f10",
+"name": "SelectHovered",
 "size": 55,
-"lines": 18,
-"chars": 503,
+"lines": 14,
+"chars": 261,
 "callers": [
 "0065b070",
 "0065b470",
@@ -179753,10 +179753,10 @@
 "in_vtables": []
 },
 "00643f50": {
-"name": "FUN_00643f50",
+"name": "SelectRun",
 "size": 96,
 "lines": 26,
-"chars": 551,
+"chars": 509,
 "callers": [
 "0065b750"
 ],
@@ -179770,10 +179770,10 @@
 "in_vtables": []
 },
 "00643fb0": {
-"name": "FUN_00643fb0",
+"name": "GetSelection",
 "size": 220,
-"lines": 60,
-"chars": 1737,
+"lines": 45,
+"chars": 948,
 "callers": [
 "0065b750"
 ],
@@ -179785,10 +179785,10 @@
 "in_vtables": []
 },
 "00644090": {
-"name": "FUN_00644090",
+"name": "SetHover",
 "size": 67,
-"lines": 30,
-"chars": 691,
+"lines": 24,
+"chars": 401,
 "callers": [
 "0064fc80",
 "00653f70",
@@ -179803,10 +179803,10 @@
 "in_vtables": []
 },
 "006440e0": {
-"name": "FUN_006440e0",
+"name": "HoverAt",
 "size": 54,
 "lines": 14,
-"chars": 302,
+"chars": 231,
 "callers": [
 "0065c630"
 ],
@@ -179820,10 +179820,10 @@
 "in_vtables": []
 },
 "00644120": {
-"name": "FUN_00644120",
+"name": "ClearHover",
 "size": 26,
 "lines": 11,
-"chars": 187,
+"chars": 167,
 "callers": [
 "0064fcd0",
 "00653fa0",
@@ -179843,10 +179843,10 @@
 "in_vtables": []
 },
 "00644140": {
-"name": "FUN_00644140",
+"name": "LineAt",
 "size": 89,
-"lines": 34,
-"chars": 979,
+"lines": 26,
+"chars": 750,
 "callers": [
 "006440e0"
 ],
@@ -179884,10 +179884,10 @@
 ]
 },
 "00644230": {
-"name": "FUN_00644230",
+"name": "GetScrollRange",
 "size": 21,
 "lines": 10,
-"chars": 194,
+"chars": 172,
 "callers": [
 "0065b750",
 "0065c240",
@@ -179925,10 +179925,10 @@
 ]
 },
 "00644270": {
-"name": "get_field_78_644270",
+"name": "GetScroll",
 "size": 4,
 "lines": 7,
-"chars": 111,
+"chars": 89,
 "callers": [
 "0065b750",
 "0065c240",
@@ -179942,10 +179942,10 @@
 "in_vtables": []
 },
 "00644280": {
-"name": "FUN_00644280",
+"name": "TickCaret",
 "size": 70,
 "lines": 20,
-"chars": 435,
+"chars": 349,
 "callers": [
 "00662500"
 ],
@@ -179983,10 +179983,10 @@
 "in_vtables": []
 },
 "00644320": {
-"name": "FUN_00644320",
+"name": "SetSelectedText",
 "size": 116,
-"lines": 42,
-"chars": 1088,
+"lines": 36,
+"chars": 836,
 "callers": [
 "006626a0",
 "006627b0"
@@ -180001,10 +180001,10 @@
 "in_vtables": []
 },
 "006443a0": {
-"name": "FUN_006443a0",
+"name": "GetSelectedText",
 "size": 101,
 "lines": 30,
-"chars": 617,
+"chars": 636,
 "callers": [
 "00662520",
 "00662ce0"
@@ -180017,10 +180017,10 @@
 "in_vtables": []
 },
 "00644410": {
-"name": "FUN_00644410",
+"name": "SetRun",
 "size": 257,
-"lines": 72,
-"chars": 1961,
+"lines": 59,
+"chars": 1632,
 "callers": [
 "00644520",
 "006446e0"
@@ -180039,7 +180039,7 @@
 "name": "SetTextId",
 "size": 401,
 "lines": 92,
-"chars": 2637,
+"chars": 2630,
 "callers": [
 "004a0ee0",
 "004a7c60",
@@ -180095,7 +180095,7 @@
 "name": "SetText",
 "size": 138,
 "lines": 37,
-"chars": 967,
+"chars": 949,
 "callers": [
 "0048f080",
 "0048f180",
@@ -180234,7 +180234,7 @@
 "name": "AddRun",
 "size": 103,
 "lines": 22,
-"chars": 549,
+"chars": 560,
 "callers": [
 "00644410",
 "00644770",
@@ -180252,10 +180252,10 @@
 "in_vtables": []
 },
 "00644920": {
-"name": "FUN_00644920",
+"name": "InsertRun",
 "size": 292,
-"lines": 64,
-"chars": 1778,
+"lines": 62,
+"chars": 1568,
 "callers": [
 "00644a50",
 "00644b20"
@@ -180272,10 +180272,10 @@
 "in_vtables": []
 },
 "00644a50": {
-"name": "FUN_00644a50",
+"name": "InsertTextId",
 "size": 195,
-"lines": 56,
-"chars": 1465,
+"lines": 50,
+"chars": 1320,
 "callers": [],
 "callees": [
 "006446c0",
@@ -180292,10 +180292,10 @@
 "in_vtables": []
 },
 "00644b20": {
-"name": "FUN_00644b20",
+"name": "InsertText",
 "size": 138,
-"lines": 44,
-"chars": 1066,
+"lines": 37,
+"chars": 955,
 "callers": [
 "0065b750"
 ],
@@ -180311,10 +180311,10 @@
 "in_vtables": []
 },
 "00644bb0": {
-"name": "FUN_00644bb0",
+"name": "RemoveRun",
 "size": 194,
-"lines": 54,
-"chars": 1646,
+"lines": 55,
+"chars": 1538,
 "callers": [
 "0065b750",
 "00661c60",
@@ -180385,10 +180385,10 @@
 "in_vtables": []
 },
 "00644cf0": {
-"name": "FUN_00644cf0",
+"name": "VisualDepth",
 "size": 173,
-"lines": 33,
-"chars": 930,
+"lines": 31,
+"chars": 804,
 "callers": [
 "00644da0",
 "0064b200"
@@ -180411,7 +180411,7 @@
 "name": "AttachTo",
 "size": 242,
 "lines": 43,
-"chars": 1449,
+"chars": 1434,
 "callers": [
 "00496450",
 "0049a940",
@@ -180498,8 +180498,8 @@
 "00644ec0": {
 "name": "FreeLayout",
 "size": 163,
-"lines": 38,
-"chars": 929,
+"lines": 37,
+"chars": 928,
 "callers": [
 "0048ecf0",
 "0049a750",
@@ -180535,10 +180535,10 @@
 "in_vtables": []
 },
 "00644f70": {
-"name": "FUN_00644f70",
+"name": "S_TextLine::~S_TextLine",
 "size": 159,
 "lines": 35,
-"chars": 1086,
+"chars": 1133,
 "callers": [
 "00644ec0"
 ],
@@ -181824,7 +181824,7 @@
 "name": "FUN_0064b200",
 "size": 856,
 "lines": 114,
-"chars": 4169,
+"chars": 4196,
 "callers": [
 "0065c800"
 ],
@@ -182198,10 +182198,10 @@
 "in_vtables": []
 },
 "0064c150": {
-"name": "FUN_0064c150",
+"name": "S_TextPiece::~S_TextPiece",
 "size": 21,
 "lines": 14,
-"chars": 247,
+"chars": 249,
 "callers": [
 "00644ec0"
 ],
@@ -182259,10 +182259,10 @@
 "in_vtables": []
 },
 "0064c320": {
-"name": "FUN_0064c320",
+"name": "vector_insert_text_run_64c320",
 "size": 738,
 "lines": 119,
-"chars": 4100,
+"chars": 4270,
 "callers": [
 "006448b0",
 "00644920"
@@ -182525,10 +182525,10 @@
 "in_vtables": []
 },
 "0064d020": {
-"name": "FUN_0064d020",
+"name": "construct_text_run_64d020",
 "size": 26,
 "lines": 17,
-"chars": 315,
+"chars": 343,
 "callers": [
 "0064c320"
 ],
@@ -187491,7 +187491,7 @@
 "name": "FUN_0064fc80",
 "size": 76,
 "lines": 21,
-"chars": 530,
+"chars": 537,
 "callers": [],
 "callees": [
 "00644090"
@@ -187511,7 +187511,7 @@
 "name": "FUN_0064fcd0",
 "size": 80,
 "lines": 21,
-"chars": 493,
+"chars": 497,
 "callers": [],
 "callees": [
 "00644120"
@@ -189190,7 +189190,7 @@
 "name": "FUN_00653f70",
 "size": 43,
 "lines": 11,
-"chars": 222,
+"chars": 234,
 "callers": [],
 "callees": [
 "00644090",
@@ -189211,7 +189211,7 @@
 "name": "FUN_00653fa0",
 "size": 41,
 "lines": 11,
-"chars": 218,
+"chars": 234,
 "callers": [],
 "callees": [
 "00644120",
@@ -189295,7 +189295,7 @@
 "name": "FUN_00654060",
 "size": 53,
 "lines": 14,
-"chars": 306,
+"chars": 328,
 "callers": [],
 "callees": [
 "00644090",
@@ -189316,7 +189316,7 @@
 "name": "FUN_006540a0",
 "size": 38,
 "lines": 11,
-"chars": 214,
+"chars": 252,
 "callers": [],
 "callees": [
 "00644120",
@@ -189687,7 +189687,7 @@
 "name": "FUN_00654b60",
 "size": 97,
 "lines": 21,
-"chars": 564,
+"chars": 586,
 "callers": [],
 "callees": [
 "00644090",
@@ -189708,7 +189708,7 @@
 "name": "FUN_00654bd0",
 "size": 89,
 "lines": 18,
-"chars": 531,
+"chars": 569,
 "callers": [],
 "callees": [
 "00644120",
@@ -193338,7 +193338,7 @@
 "name": "FUN_0065aff0",
 "size": 48,
 "lines": 16,
-"chars": 308,
+"chars": 317,
 "callers": [],
 "callees": [
 "00644120",
@@ -193396,7 +193396,7 @@
 "name": "FUN_0065b070",
 "size": 46,
 "lines": 15,
-"chars": 308,
+"chars": 350,
 "callers": [],
 "callees": [
 "00643f10",
@@ -193553,7 +193553,7 @@
 "name": "FUN_0065b470",
 "size": 368,
 "lines": 72,
-"chars": 2210,
+"chars": 2243,
 "callers": [],
 "callees": [
 "00405100",
@@ -193608,8 +193608,8 @@
 "0065b750": {
 "name": "FUN_0065b750",
 "size": 2159,
-"lines": 417,
-"chars": 14556,
+"lines": 425,
+"chars": 15327,
 "callers": [],
 "callees": [
 "00615a90",
@@ -193675,8 +193675,8 @@
 "0065c160": {
 "name": "FUN_0065c160",
 "size": 214,
-"lines": 34,
-"chars": 1130,
+"lines": 36,
+"chars": 1241,
 "callers": [],
 "callees": [
 "00643ca0",
@@ -193698,8 +193698,8 @@
 "0065c240": {
 "name": "FUN_0065c240",
 "size": 504,
-"lines": 97,
-"chars": 2596,
+"lines": 96,
+"chars": 2618,
 "callers": [],
 "callees": [
 "006157d0",
@@ -193730,8 +193730,8 @@
 "0065c440": {
 "name": "FUN_0065c440",
 "size": 491,
-"lines": 96,
-"chars": 2576,
+"lines": 95,
+"chars": 2598,
 "callers": [],
 "callees": [
 "006157d0",
@@ -193763,7 +193763,7 @@
 "name": "FUN_0065c630",
 "size": 95,
 "lines": 20,
-"chars": 530,
+"chars": 533,
 "callers": [],
 "callees": [
 "006440e0",
@@ -193804,7 +193804,7 @@
 "name": "FUN_0065c6a0",
 "size": 24,
 "lines": 9,
-"chars": 157,
+"chars": 174,
 "callers": [],
 "callees": [
 "00644120",
@@ -197319,8 +197319,8 @@
 "00661c60": {
 "name": "FUN_00661c60",
 "size": 476,
-"lines": 89,
-"chars": 2983,
+"lines": 90,
+"chars": 3005,
 "callers": [
 "0064f870",
 "00650b00",
@@ -197513,8 +197513,8 @@
 "00662000": {
 "name": "FUN_00662000",
 "size": 331,
-"lines": 77,
-"chars": 2409,
+"lines": 78,
+"chars": 2431,
 "callers": [
 "0065c800"
 ],
@@ -197748,7 +197748,7 @@
 "name": "FUN_00662500",
 "size": 22,
 "lines": 11,
-"chars": 236,
+"chars": 249,
 "callers": [],
 "callees": [
 "00644280"
@@ -197779,8 +197779,8 @@
 "00662520": {
 "name": "FUN_00662520",
 "size": 369,
-"lines": 84,
-"chars": 2675,
+"lines": 86,
+"chars": 2740,
 "callers": [
 "0065af50",
 "0065b1b0",
@@ -197810,7 +197810,7 @@
 "name": "FUN_006626a0",
 "size": 259,
 "lines": 86,
-"chars": 2389,
+"chars": 2397,
 "callers": [
 "006627b0"
 ],
@@ -197831,7 +197831,7 @@
 "name": "FUN_006627b0",
 "size": 680,
 "lines": 153,
-"chars": 5256,
+"chars": 5302,
 "callers": [],
 "callees": [
 "00405100",
@@ -197991,7 +197991,7 @@
 "name": "FUN_00662ca0",
 "size": 60,
 "lines": 17,
-"chars": 349,
+"chars": 335,
 "callers": [
 "0065b5e0"
 ],
@@ -198021,8 +198021,8 @@
 "00662ce0": {
 "name": "FUN_00662ce0",
 "size": 388,
-"lines": 94,
-"chars": 2980,
+"lines": 105,
+"chars": 3378,
 "callers": [],
 "callees": [
 "00643c20",
@@ -199348,7 +199348,7 @@
 "name": "FUN_00665f90",
 "size": 1630,
 "lines": 290,
-"chars": 10344,
+"chars": 10349,
 "callers": [],
 "callees": [
 "004050e0",
@@ -325372,6 +325372,21 @@
 "globals": [],
 "in_vtables": []
 },
+"007fce1f": {
+"name": "Unwind@007fce1f",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
 "007fce90": {
 "name": "Unwind@007fce90",
 "size": 11,
@@ -325380,6 +325395,36 @@
 "callers": [],
 "callees": [
 "004a0bc0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fcf10": {
+"name": "Unwind@007fcf10",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fcfe1": {
+"name": "Unwind@007fcfe1",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
 ],
 "imports": [],
 "strings": [],
@@ -325432,6 +325477,36 @@
 "globals": [],
 "in_vtables": []
 },
+"007fd03d": {
+"name": "Unwind@007fd03d",
+"size": 11,
+"lines": 10,
+"chars": 147,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd048": {
+"name": "Unwind@007fd048",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
 "007fd063": {
 "name": "Unwind@007fd063",
 "size": 14,
@@ -325462,6 +325537,51 @@
 "globals": [],
 "in_vtables": []
 },
+"007fd0ad": {
+"name": "Unwind@007fd0ad",
+"size": 14,
+"lines": 10,
+"chars": 152,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd0bb": {
+"name": "Unwind@007fd0bb",
+"size": 14,
+"lines": 10,
+"chars": 152,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd0c9": {
+"name": "Unwind@007fd0c9",
+"size": 14,
+"lines": 10,
+"chars": 152,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
 "007fd0f0": {
 "name": "Unwind@007fd0f0",
 "size": 11,
@@ -325485,6 +325605,141 @@
 "callers": [],
 "callees": [
 "004a03d0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd131": {
+"name": "Unwind@007fd131",
+"size": 8,
+"lines": 10,
+"chars": 135,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd191": {
+"name": "Unwind@007fd191",
+"size": 8,
+"lines": 10,
+"chars": 135,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd199": {
+"name": "Unwind@007fd199",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd1e0": {
+"name": "Unwind@007fd1e0",
+"size": 8,
+"lines": 10,
+"chars": 135,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd240": {
+"name": "Unwind@007fd240",
+"size": 8,
+"lines": 10,
+"chars": 135,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd248": {
+"name": "Unwind@007fd248",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd2b0": {
+"name": "Unwind@007fd2b0",
+"size": 11,
+"lines": 10,
+"chars": 147,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd2bb": {
+"name": "Unwind@007fd2bb",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd310": {
+"name": "Unwind@007fd310",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
 ],
 "imports": [],
 "strings": [],
@@ -325560,6 +325815,351 @@
 "callers": [],
 "callees": [
 "007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd395": {
+"name": "Unwind@007fd395",
+"size": 14,
+"lines": 10,
+"chars": 152,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd3a3": {
+"name": "Unwind@007fd3a3",
+"size": 14,
+"lines": 10,
+"chars": 152,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd3b1": {
+"name": "Unwind@007fd3b1",
+"size": 14,
+"lines": 10,
+"chars": 152,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd443": {
+"name": "Unwind@007fd443",
+"size": 11,
+"lines": 10,
+"chars": 147,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd44e": {
+"name": "Unwind@007fd44e",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd961": {
+"name": "Unwind@007fd961",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd980": {
+"name": "Unwind@007fd980",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804930": {
+"name": "Unwind@00804930",
+"size": 8,
+"lines": 10,
+"chars": 124,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804950": {
+"name": "Unwind@00804950",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804970": {
+"name": "Unwind@00804970",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804990": {
+"name": "Unwind@00804990",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"008049b0": {
+"name": "Unwind@008049b0",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"008049d0": {
+"name": "Unwind@008049d0",
+"size": 8,
+"lines": 10,
+"chars": 124,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"008049f0": {
+"name": "Unwind@008049f0",
+"size": 8,
+"lines": 10,
+"chars": 124,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804a10": {
+"name": "Unwind@00804a10",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804a30": {
+"name": "Unwind@00804a30",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804ab0": {
+"name": "Unwind@00804ab0",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804cc0": {
+"name": "Unwind@00804cc0",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"008068c0": {
+"name": "Unwind@008068c0",
+"size": 8,
+"lines": 10,
+"chars": 135,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00808018": {
+"name": "Unwind@00808018",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00808b00": {
+"name": "Unwind@00808b00",
+"size": 8,
+"lines": 10,
+"chars": 135,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"0080b1b8": {
+"name": "Unwind@0080b1b8",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"0080b511": {
+"name": "Unwind@0080b511",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
 ],
 "imports": [],
 "strings": [],

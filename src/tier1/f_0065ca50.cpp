@@ -4305,6 +4305,7 @@ uint32_t C_auto_00813e58__FUN_00661c60(C_auto_00813e58 *_this,uint32_t *param_1,
   undefined3 extraout_var_00;
   undefined3 extraout_var_01;
   undefined3 extraout_var_02;
+  undefined3 extraout_var_03;
   uint32_t extraout_EAX;
   uint32_t extraout_EAX_00;
   uint32_t extraout_EAX_01;
@@ -4319,8 +4320,8 @@ uint32_t C_auto_00813e58__FUN_00661c60(C_auto_00813e58 *_this,uint32_t *param_1,
   uVar2 = param_1[1] & 0x3000fff;
   if (uVar2 < 0x1000069) {
     if (uVar2 == 0x1000068) {
-      uVar1 = FUN_00644bb0(_this->m_06c,param_1[2]);
-      return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
+      C_TextBox__RemoveRun(_this->m_06c,param_1[2]);
+      return CONCAT31(extraout_var_03,1);
     }
     switch(uVar2) {
     case 0x1000014:
@@ -4493,6 +4494,7 @@ uint32_t C_auto_00815420__FUN_00662000(C_auto_00815420 *_this,uint32_t *param_1,
   undefined3 extraout_var_00;
   undefined3 extraout_var_01;
   undefined3 extraout_var_02;
+  undefined3 extraout_var_03;
   uint32_t extraout_EAX;
   int iVar3;
   if ((param_1[1] & 0x40ff000) != 0) {
@@ -4502,8 +4504,8 @@ uint32_t C_auto_00815420__FUN_00662000(C_auto_00815420 *_this,uint32_t *param_1,
   uVar2 = param_1[1] & 0x3000fff;
   if (uVar2 < 0x1000069) {
     if (uVar2 == 0x1000068) {
-      uVar1 = FUN_00644bb0(_this->m_06c,param_1[2]);
-      return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
+      C_TextBox__RemoveRun(_this->m_06c,param_1[2]);
+      return CONCAT31(extraout_var_03,1);
     }
     switch(uVar2) {
     case 0x1000014:
@@ -4792,7 +4794,7 @@ uint32_t C_auto_00813ee0__FUN_006624d0(C_auto_00813ee0 *_this,uint32_t param_1,u
 uint32_t C_auto_00813ee0__FUN_00662500(C_auto_00813ee0 *_this,int param_1, ...)
 {
   if ((_this[1]._pad_0004[8] != '\0') && (_this->m_06c != 0)) {
-    FUN_00644280(_this->m_06c,param_1);
+    C_TextBox__TickCaret(_this->m_06c,param_1);
     return 0;
   }
   return 0;
@@ -4803,12 +4805,14 @@ uint32_t C_auto_00813ee0__FUN_00662500(C_auto_00813ee0 *_this,int param_1, ...)
 uint32_t C_auto_00813ee0__FUN_00662520(C_auto_00813ee0 *_this,int *param_1, ...)
 {
   int iVar1;
-  int *piVar2;
+  C_str_rep *pCVar2;
+  int *ptr;
   int *piVar3;
   uint32_t uVar4;
   uint32_t uVar5;
   void *pvVar6;
-  int *piVar7;
+  C_str *pCVar7;
+  undefined3 extraout_var;
   piVar3 = param_1;
   if ((param_1[1] & 0x40ff000U) != 0) {
     uVar4 = C_auto_00813e58__FUN_00661c60((C_auto_00813e58 *)_this,param_1);
@@ -4851,22 +4855,22 @@ uint32_t C_auto_00813ee0__FUN_00662520(C_auto_00813ee0 *_this,int *param_1, ...)
   }
   else {
     if (uVar5 == 0x200002f) {
-      FUN_00643c20(_this->m_06c,0);
-      piVar7 = (int *)FUN_006443a0(_this->m_06c,(int *)&param_1);
-      piVar2 = (int *)*piVar7;
-      if (piVar2 != 0) {
-        *piVar2 = *piVar2 + 1;
+      C_TextBox__EditRun(_this->m_06c,0);
+      pCVar7 = C_TextBox__GetSelectedText(_this->m_06c,(C_str *)&param_1);
+      pCVar2 = pCVar7->rep;
+      if (pCVar2 != 0) {
+        pCVar2->refCount = pCVar2->refCount + 1;
       }
-      piVar2 = (int *)piVar3[5];
-      if ((piVar2 != 0) && (iVar1 = *piVar2, *piVar2 = iVar1 - 1, iVar1 - 1 == 0)) {
-        tier1_operator_delete(piVar2);
+      ptr = (int *)piVar3[5];
+      if ((ptr != 0) && (iVar1 = *ptr, *ptr = iVar1 - 1, iVar1 - 1 == 0)) {
+        tier1_operator_delete(ptr);
       }
-      piVar3[5] = *piVar7;
+      piVar3[5] = (int)pCVar7->rep;
       if ((param_1 != 0) && (*param_1 = *param_1 - 1, *param_1 == 0)) {
         tier1_operator_delete(param_1);
       }
-      uVar4 = FUN_00643c20(_this->m_06c,-1);
-      return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
+      C_TextBox__EditRun(_this->m_06c,-1);
+      return CONCAT31(extraout_var,1);
     }
     if (uVar5 != 0x20000ab) {
       uVar4 = C_auto_00813e58__FUN_00661c60((C_auto_00813e58 *)_this,param_1);
@@ -4888,66 +4892,66 @@ uint32_t C_auto_00813ee0__FUN_006626a0(C_auto_00813ee0 *_this, ...)
   char cVar1;
   char *pcVar2;
   uint32_t uVar3;
-  C_str *pCVar4;
+  C_str *text;
   C_auto_00813ee0 *extraout_EAX;
+  uint32_t uVar4;
   uint32_t uVar5;
-  uint32_t uVar6;
-  int iVar7;
-  char *pcVar8;
-  bool bVar9;
+  int iVar6;
+  char *pcVar7;
+  bool bVar8;
   C_str local_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
   pcVar2 = *(char **)_this[1]._pad_0004;
   local_10.rep = ExceptionList;
   if (*pcVar2 == '\0') goto LAB_00662790;
-  uVar5 = 0xffffffff;
-  pcVar8 = pcVar2;
+  uVar4 = 0xffffffff;
+  pcVar7 = pcVar2;
   do {
-    if (uVar5 == 0) break;
-    uVar5--;
-    cVar1 = *pcVar8;
-    pcVar8++;
+    if (uVar4 == 0) break;
+    uVar4--;
+    cVar1 = *pcVar7;
+    pcVar7++;
   } while (cVar1 != '\0');
-  uVar6 = ~uVar5 - 1;
-  uVar3 = uVar6;
+  uVar5 = ~uVar4 - 1;
+  uVar3 = uVar5;
   if (g_gameProfile.m_unicodeFont) {
     do {
       uVar3--;
       if (((int)uVar3 < 0) || ((uint8_t)pcVar2[uVar3] < 0x80)) break;
     } while ((uint8_t)pcVar2[uVar3] < 0xc0);
-    iVar7 = uVar6 - uVar3;
-    if (iVar7 == 1) {
-      bVar9 = (uint8_t)pcVar2[uVar3] < 0x80;
+    iVar6 = uVar5 - uVar3;
+    if (iVar6 == 1) {
+      bVar8 = (uint8_t)pcVar2[uVar3] < 0x80;
 LAB_006626fc:
-      if (!bVar9) {
+      if (!bVar8) {
 LAB_006626fe:
         return uVar3 & 0xffffff00;
       }
     }
     else {
-      if (iVar7 == 2) {
+      if (iVar6 == 2) {
         if ((uint8_t)pcVar2[uVar3] < 0xc0) goto LAB_006626fe;
-        bVar9 = (uint8_t)pcVar2[uVar3] < 0xe0;
+        bVar8 = (uint8_t)pcVar2[uVar3] < 0xe0;
         goto LAB_006626fc;
       }
-      if (iVar7 == 3) {
+      if (iVar6 == 3) {
         if ((uint8_t)pcVar2[uVar3] < 0xe0) goto LAB_006626fe;
-        bVar9 = (uint8_t)pcVar2[uVar3] < 0xf0;
+        bVar8 = (uint8_t)pcVar2[uVar3] < 0xf0;
         goto LAB_006626fc;
       }
-      if (((iVar7 != 4) || ((uint8_t)pcVar2[uVar3] < 0xf0)) || (0xf7 < (uint8_t)pcVar2[uVar3]))
+      if (((iVar6 != 4) || ((uint8_t)pcVar2[uVar3] < 0xf0)) || (0xf7 < (uint8_t)pcVar2[uVar3]))
       goto LAB_006626fe;
     }
     pcVar2[uVar3] = '\0';
   }
   else {
-    pcVar2[~uVar5 - 2] = '\0';
+    pcVar2[~uVar4 - 2] = '\0';
   }
   local_10.rep = (C_str_rep *)_this;
-  pCVar4 = C_fstr_Construct(&local_10,*(char **)_this[1]._pad_0004);
+  text = C_fstr_Construct(&local_10,*(char **)_this[1]._pad_0004);
   local_4 = 0;
-  FUN_00644320(_this->m_06c,(uint32_t*)(pCVar4));
+  C_TextBox__SetSelectedText(_this->m_06c,text);
   if (((C_auto_00813ee0 *)local_10.rep != 0) &&
      ((local_10.rep)->refCount =
            (int)((int)&((C_auto_00813ee0_vtbl *)(local_10.rep)->refCount)[-1].vf20 + 3),
@@ -5014,7 +5018,7 @@ uint32_t C_auto_00813ee0__FUN_006627b0(C_auto_00813ee0 *_this,uint32_t param_1, 
             strncat(pcVar4,local_14,(size_t)_Count);
             pCVar3 = C_fstr_Construct(&local_1c,*(char **)_this[1]._pad_0004);
             local_4 = 1;
-            FUN_00644320(_this->m_06c,(uint32_t*)(pCVar3));
+            C_TextBox__SetSelectedText(_this->m_06c,pCVar3);
             CVar6.rep = local_1c.rep;
             if ((local_1c.rep != 0) &&
                ((local_1c.rep)->refCount = (local_1c.rep)->refCount - 1,
@@ -5064,7 +5068,7 @@ uint32_t C_auto_00813ee0__FUN_006627b0(C_auto_00813ee0 *_this,uint32_t param_1, 
           strncat(*(char **)_this[1]._pad_0004,&local_1d,1);
           pCVar3 = C_fstr_Construct(&local_18,*(char **)_this[1]._pad_0004);
           local_4 = 0;
-          FUN_00644320(_this->m_06c,(uint32_t*)(pCVar3));
+          C_TextBox__SetSelectedText(_this->m_06c,pCVar3);
           CVar6.rep = local_18.rep;
           if ((local_18.rep != 0) &&
              ((local_18.rep)->refCount = (local_18.rep)->refCount - 1,
@@ -5084,7 +5088,7 @@ uint32_t C_auto_00813ee0__FUN_006627b0(C_auto_00813ee0 *_this,uint32_t param_1, 
       uVar2 = FUN_0065d270(_this,0x4017000,0);
       uVar7 = CONCAT31((int3)((uint32_t)uVar2 >> 8),_this[1]._pad_0004[8]);
       if (_this[1]._pad_0004[8] != '\0') {
-        FUN_00644320(_this->m_06c,(uint32_t*)(&_this[1].vtable));
+        C_TextBox__SetSelectedText(_this->m_06c,(C_str *)(_this + 1));
         uVar2 = (*_this->vtable->vf0f)(0);
         return CONCAT31((int3)((uint32_t)uVar2 >> 8),1);
       }
@@ -5218,12 +5222,12 @@ LAB_00662c65:
 // 0x00662ca0
 uint32_t C_auto_00813ee0__FUN_00662ca0(C_auto_00813ee0 *_this,uint32_t param_1, ...)
 {
-  uint32_t uVar1;
+  bool bVar1;
   if (_this[1]._pad_0004[8] == '\0') {
     return 0;
   }
-  uVar1 = FUN_00643c20(_this->m_06c,-1);
-  if ((char)uVar1 != '\0') {
+  bVar1 = C_TextBox__EditRun(_this->m_06c,-1);
+  if (bVar1) {
     FUN_0065d270(_this,0x400b000,param_1);
   }
   _this[1]._pad_0004[8] = '\0';
@@ -5236,15 +5240,19 @@ uint32_t C_auto_00813ee0__FUN_00662ce0(C_auto_00813ee0 *_this, ...)
 {
   int iVar1;
   C_TextBox *this_00;
-  int *piVar2;
+  C_str_rep *pCVar2;
   C_auto_00813ee0_vtbl *ptr;
-  uint32_t uVar3;
-  uint32_t *puVar4;
+  bool bVar3;
+  C_str CVar4;
+  C_auto_00813ee0 *extraout_EAX;
+  C_str *pCVar5;
   void **_Source;
-  void *pvVar5;
-  uint32_t uVar6;
+  void *pvVar6;
   uint32_t uVar7;
-  int iVar8;
+  uint32_t uVar8;
+  int iVar9;
+  int iVar10;
+  uint32_t *puVar11;
   C_str local_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
@@ -5256,53 +5264,60 @@ uint32_t C_auto_00813ee0__FUN_00662ce0(C_auto_00813ee0 *_this, ...)
   _this[1]._pad_0004[8] = '\x01';
   if (-1 < iVar1) {
     if (this_00->m_034 == 0) {
-      iVar8 = 0;
+      iVar9 = 0;
+      CVar4.rep = 0;
     }
     else {
-      iVar8 = (int)(this_00->m_038 - this_00->m_034) / 5;
+      iVar10 = this_00->m_038 - this_00->m_034;
+      iVar9 = iVar10 / 5;
+      CVar4.rep = (C_str_rep *)-(iVar10 >> 0x1f);
     }
     local_10.rep = (C_str_rep *)_this;
-    if (iVar1 <= iVar8 - 1) goto LAB_00662d91;
+    if (iVar1 <= iVar9 - 1) goto LAB_00662d91;
   }
   local_10.rep = 0;
   local_4 = 0;
   C_TextBox__SetText(this_00,&local_10,'\0',0);
   local_4 = 0xffffffff;
+  CVar4.rep = local_10.rep;
   if (((C_auto_00813ee0 *)local_10.rep != 0) &&
      ((local_10.rep)->refCount =
            (int)((int)&((C_auto_00813ee0_vtbl *)(local_10.rep)->refCount)[-1].vf20 + 3),
      (C_auto_00813ee0_vtbl *)(local_10.rep)->refCount == 0)) {
     tier1_operator_delete(local_10.rep);
+    CVar4.rep = (C_str_rep *)extraout_EAX;
   }
 LAB_00662d91:
-  uVar3 = FUN_00643c20(_this->m_06c,*(short *)(_this[1]._pad_0004 + 0xc));
-  if ((char)uVar3 != '\0') {
-    puVar4 = (uint32_t *)FUN_006443a0(_this->m_06c,(int *)&local_10);
-    piVar2 = (int *)*puVar4;
-    if (piVar2 != 0) {
-      *piVar2 = *piVar2 + 1;
+  bVar3 = C_TextBox__EditRun(_this->m_06c,
+                             CONCAT22((short)((uint32_t)CVar4.rep >> 0x10),
+                                      *(uint16_t *)(_this[1]._pad_0004 + 0xc)));
+  if (bVar3) {
+    pCVar5 = C_TextBox__GetSelectedText(_this->m_06c,&local_10);
+    pCVar2 = pCVar5->rep;
+    if (pCVar2 != 0) {
+      pCVar2->refCount = pCVar2->refCount + 1;
     }
     ptr = _this[1].vtable;
     if ((ptr != 0) &&
-       (pvVar5 = (void *)((int)ptr->vf00 - 1), ptr->vf00 = pvVar5, pvVar5 == 0)) {
+       (pvVar6 = (void *)((int)ptr->vf00 - 1), ptr->vf00 = pvVar6, pvVar6 == 0)) {
       tier1_operator_delete(ptr);
     }
-    _this[1].vtable = (C_auto_00813ee0_vtbl *)*puVar4;
+    _this[1].vtable = (C_auto_00813ee0_vtbl *)pCVar5->rep;
     if (((C_auto_00813ee0 *)local_10.rep != 0) &&
        ((local_10.rep)->refCount =
              (int)((int)&((C_auto_00813ee0_vtbl *)(local_10.rep)->refCount)[-1].vf20 + 3),
        (C_auto_00813ee0_vtbl *)(local_10.rep)->refCount == 0)) {
       tier1_operator_delete(local_10.rep);
     }
-    uVar6 = *(int *)(_this[1]._pad_0004 + 0x10) + 1;
-    puVar4 = *(uint32_t **)_this[1]._pad_0004;
-    for (uVar7 = uVar6 >> 2; uVar7 != 0; uVar7 = uVar7 - 1) {
-      *puVar4 = 0;
-      puVar4++;
+    uVar7 = *(int *)(_this[1]._pad_0004 + 0x10) + 1;
+    puVar11 = *(uint32_t **)_this[1]._pad_0004;
+    for (uVar8 = uVar7 >> 2; uVar8 != 0; uVar8 = uVar8 - 1) {
+      *puVar11 = 0;
+      puVar11++;
     }
-    for (uVar6 = uVar6 & 3; uVar6 != 0; uVar6 = uVar6 - 1) {
-      *(uint8_t *)puVar4 = 0;
-      puVar4 = (uint32_t *)((int)puVar4 + 1);
+    for (uVar7 = uVar7 & 3; uVar7 != 0; uVar7 = uVar7 - 1) {
+      *(uint8_t *)puVar11 = 0;
+      puVar11 = (uint32_t *)((int)puVar11 + 1);
     }
     if (_this[1].vtable == 0) {
       _Source = (void **)&DAT_00867a90;

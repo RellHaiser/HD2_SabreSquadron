@@ -5983,6 +5983,43 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/text_style.txt (10); 12 functions in ported.txt. Stats: 7,963 of 12,293 functions
     by hand (73.1 % by size).
 
+  PART 9b-i DONE (2026-10-31): the text box's runs, edit, selection, hover, scroll and place
+  (src/game/text_box.*, new: the real C_TextBox, vtable 0x00810458, 0x9C bytes, replacing the HUD's
+  opaque one; 0x00643c20..0x00644f70 less the render's 0x006442d0, the constructor 0x00496cc0 and
+  destructors 0x0048ecf0 / 0x0048ecd0, the run vector's insert 0x0064c320). 9b split: 9b-ii the
+  layout (0x00645590 and its helpers), 9b-iii the render (0x00648200, 0x006442d0), 9b-iv the text
+  control (0x0064b200's group) and the subtitles' class (vtable 0x008158f8), 9b-v the UTF-8
+  helpers and what is left.
+  - The runs (S_TextRun: a text and a style; passed by value): Add / Set / Insert (out of range:
+    appended), their text-id forms (SetTextId's style 0x28: the text a format of the game's
+    version), RemoveRun, Clear, GetRunText. Every change marks the box for the layout, which the
+    queries (ScrollToLine, GetScrollRange, GetLineCentre) run first.
+  - The edit and caret (EditRun: one run at a time; out of range ends it; TickCaret on for 500 of
+    each 1000 ms), the selection (GetSelection clamps; SelectRun, Get / SetSelectedText), the hover
+    (SetHover, HoverAt by the line under the scroll's y, ClearHover, SelectHovered), the scroll
+    (UpdateScrollRange from the last line's y, ScrollTo, ScrollToLine into the box, GetLineCentre
+    in the interface's coordinates), the place (AttachTo: the visual's world box on the screen, a
+    margin of 10 / 1024 of the width, the y scaled by 4 / 3, the depth between the scene camera's
+    near and far planes, VisualDepth; SetRect), FreeLayout (the lines' and the pieces' records;
+    S_TextLine / S_TextWord / S_TextPiece, their other fields 9b-ii).
+  - Quirks kept: SelectRun scrolls to the line with the run's index; GetLineCentre's y divided by
+    the screen's width too. Fix: GetLineCentre's w 0 (the original's is its stack's).
+  - The HUD and the loader: the margin (+0x90) and +0x71 through SetUnknown90 / SetUnknown71; the
+    loader tests' raw offsets replaced by the members.
+  - Harness: a new text build (build_text.bat / check_text.py: the camera build with TEXT_TEST and
+    the real text box; textbox_test.inc, 16 checks; Layout / Render / the visuals' world boxes
+    faked). 0 of 22 in both orders; the camera build 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9b1.py, the text build): the first run's survivors given new cases
+    (fractions in the rectangle, the selection's clamps, run 0 and line 0, the depth at the near
+    plane); 13 equivalent (see the file's docstring); the full rerun caught 175 of 188 (the 13
+    equivalent). Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the
+    other five 0 of 37.
+  - Build: 206 files clean (MSVC). Tier 1: 513 errors in 85 files, 206 stubs (514 / 86 / 207
+    before; the renamed functions' callers exported again). ret_audit --src: 52 (S_TextRun's 8
+    bytes added to its sizes).
+  - Ghidra: names/text_box.txt (27); 41 functions in ported.txt. Stats: 8,004 of 12,293 functions
+    by hand (73.3 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
