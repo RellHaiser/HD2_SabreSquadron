@@ -211,6 +211,7 @@ void *I3D_scene::SetRenderCallback(void *function, uint32_t flags)
 
 I3D_RESULT I3D_scene::Render(uint32_t flags) { return g_driver->Render(this, flags); }
 
+// LS3DRF 0x10025e20 (from LS3DF 0x10046920)
 I3D_frame *I3D_scene::FindFrame(const char *frameName, uint32_t flags)
 {
     if (I3D_frame *f = primarySector->FindChild(frameName, flags))
@@ -274,6 +275,7 @@ I3D_RESULT I3D_scene::RemoveTickFrame(I3D_frame *frame)
     return I3D_OK;
 }
 
+// LS3DRF 0x10026150 (from LS3DF 0x10046c50)
 void I3D_scene::SetLightsColor(const S_vector &color)
 {
     C_vector<I3D_light *> &lights = primarySector->lights;
@@ -460,6 +462,7 @@ I3D_RESULT I3D_scene::SetAnimation(I3D_animation_set *set, int stage, float weig
     return animStack->SetAnimation(set, stage, weight, mode);
 }
 
+// LS3DRF 0x100276b0 (from LS3DF 0x10048c60)
 I3D_animation_set *I3D_scene::GetAnimation(int stage)
 {
     if (static_cast<uint32_t>(stage) > 7 || !animStack)
@@ -467,6 +470,7 @@ I3D_animation_set *I3D_scene::GetAnimation(int stage)
     return animStack->stages[stage].set;
 }
 
+// LS3DRF 0x100276e0 (from LS3DF 0x10048c90)
 void I3D_scene::StopAnimation(int stage)
 {
     if (static_cast<uint32_t>(stage) < 8 && animStack)
@@ -490,6 +494,7 @@ I3D_RESULT I3D_scene::SetAnimWeight(int stage, float weight)
     return I3D_OK;
 }
 
+// LS3DRF 0x10027790 (from LS3DF 0x10048d40)
 float I3D_scene::GetAnimWeight(int stage)
 {
     if (static_cast<uint32_t>(stage) > 7 || !animStack)
@@ -497,6 +502,7 @@ float I3D_scene::GetAnimWeight(int stage)
     return animStack->stages[stage].weight;
 }
 
+// LS3DRF 0x100277d0 (from LS3DF 0x10048d80)
 I3D_RESULT I3D_scene::SetAnimTime(int stage, int time)
 {
     if (static_cast<uint32_t>(stage) > 7)
@@ -509,6 +515,7 @@ I3D_RESULT I3D_scene::SetAnimTime(int stage, int time)
     return I3D_OK;
 }
 
+// LS3DRF 0x10027810 (from LS3DF 0x10048dc0)
 int I3D_scene::GetAnimTime(int stage)
 {
     if (static_cast<uint32_t>(stage) > 7 || !animStack)
@@ -516,6 +523,7 @@ int I3D_scene::GetAnimTime(int stage)
     return animStack->stages[stage].time;
 }
 
+// LS3DRF 0x10027840 (from LS3DF 0x10048df0)
 bool I3D_scene::IsAnimActive(int stage)
 {
     if (static_cast<uint32_t>(stage) > 7 || !animStack)
@@ -523,8 +531,10 @@ bool I3D_scene::IsAnimActive(int stage)
     return animStack->stages[stage].active;
 }
 
+// LS3DRF 0x10027870 (from LS3DF 0x10048e20)
 int I3D_scene::NumTracks() { return animStack ? animStack->tracks.Size() : 0; }
 
+// LS3DRF 0x10027890 (from LS3DF 0x10048e40)
 void *I3D_scene::GetTracks() { return animStack ? animStack->tracks.Data() : nullptr; }
 
 // ---------------------------------------------------------------- sectors
@@ -537,6 +547,7 @@ I3D_sector *I3D_scene::CreateSector()
     return s;
 }
 
+// LS3DRF 0x10027120 (from LS3DF 0x10047c20)
 I3D_sector *I3D_scene::LocateSectorIn(const S_vector &pos, I3D_sector **sectors, int count)
 {
     for (int i = count; i != 0; --i) {
@@ -581,6 +592,7 @@ I3D_sector *I3D_scene::LocateSector(const S_vector &pos, I3D_sector *hint)
     return primarySector;
 }
 
+// LS3DRF 0x10026f90 (from LS3DF 0x10047a90)
 I3D_sector *I3D_scene::GetSector(const S_vector &pos)
 {
     I3D_sector *s = firstSector;
@@ -601,12 +613,14 @@ void I3D_scene::SetBackdropRange(float nearRange, float farRange)
         activeCamera->BuildProjection();
 }
 
+// LS3DRF 0x100271f0 (from LS3DF 0x10047cf0)
 void I3D_scene::UpdateFrameSectorIdle(I3D_frame *frame, const S_vector &pos, int)
 {
     if (!activeCamera)
         UpdateFrameSector(frame, pos);
 }
 
+// LS3DRF 0x10027170 (from LS3DF 0x10047c70)
 void I3D_scene::UpdateFrameSector(I3D_frame *frame, const S_vector &pos)
 {
     I3D_frame *p = frame->parent;
@@ -1057,6 +1071,7 @@ I3D_RESULT I3D_scene::RemoveTrackedModel(I3D_frame *model)
     return I3DERR_OBJECTNOTFOUND;
 }
 
+// LS3DRF 0x10028df0 (from LS3DF 0x1004c070)
 void I3D_scene::ClearTrackedModels()
 {
     for (S_trackedModel &t : trackedModels) {

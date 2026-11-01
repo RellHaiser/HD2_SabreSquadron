@@ -91,6 +91,7 @@ void I3D_camera::Init()
     nearSectorViewProjection = nearSectorProjection;
 }
 
+// LS3DRF 0x10004370 (from LS3DF 0x100099a0)
 void I3D_camera::Uninit()
 {
     if (scene)

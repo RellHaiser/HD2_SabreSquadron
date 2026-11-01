@@ -269,7 +269,7 @@ void I3D_projector::SetMaterial(I3D_material *m)
         ++m->refCount;
 }
 
-// 0x10043b50
+// LS3DRF 0x10025540 (from LS3DF 0x10043b50)
 void I3D_projector::SetOrthogonal(bool on)
 {
     orthogonal = on;
@@ -277,7 +277,7 @@ void I3D_projector::SetOrthogonal(bool on)
     receiverSum = 0;
 }
 
-// 0x10043c50
+// LS3DRF 0x10025640 (from LS3DF 0x10043c50)
 void I3D_projector::SetIntensity(float value)
 {
     intensity = value < 0.0f ? 0.0f : value;
@@ -285,7 +285,7 @@ void I3D_projector::SetIntensity(float value)
     receiverSum = 0;
 }
 
-// 0x10043ca0
+// LS3DRF 0x10025690 (from LS3DF 0x10043ca0)
 void I3D_projector::SetOpacity(float value)
 {
     opacity = Clamp01(value);
@@ -304,7 +304,7 @@ void I3D_projector::SetColor(const S_vector4 &c)
     receiverSum = 0;
 }
 
-// 0x10043d10
+// LS3DRF 0x10025700 (from LS3DF 0x10043d10)
 void I3D_projector::SetMode(int newMode)
 {
     mode = newMode;
@@ -312,7 +312,7 @@ void I3D_projector::SetMode(int newMode)
     receiverSum = 0;
 }
 
-// 0x10043d30
+// LS3DRF 0x10025720 (from LS3DF 0x10043d30)
 void I3D_projector::SetBuffered(uint32_t value)
 {
     buffered = value;
