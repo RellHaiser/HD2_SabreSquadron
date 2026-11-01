@@ -160,19 +160,6 @@ int InitParticleBuffers()
     return I3D_OK;
 }
 
-// 0x1003add0
-void ReleaseParticleBuffers()
-{
-    FreeIB(&s_ib);
-    // (Fix: the original keeps the index buffer's record, which InitParticleBuffers frees again:
-    // by then the block may be another mesh's, or its buffer gone.)
-    s_ib = {};
-    for (S_VBAlloc &vb : s_vbs) {
-        FreeVB(&vb);
-        vb = {};
-    }
-}
-
 // 0x1003ae10
 void FlushParticles()
 {

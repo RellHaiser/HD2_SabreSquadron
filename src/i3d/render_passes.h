@@ -24,8 +24,6 @@ void RenderProjectors();
 // Particles (emitter.cpp): the batched particles written out before a queue is drawn
 // (0x1003ae10) and after the frame (0x1003ae40).
 void FlushParticles();
-// The emitters' shared particle buffers released (0x1003add0).
-void ReleaseParticleBuffers();
 // The skinned visuals' shared buffers freed (0x10053b90, singlemesh.cpp).
 void FreeSkinBuffers();
 // The projectors' shared geometry buffers freed (0x10001470, projector.cpp).

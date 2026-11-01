@@ -78,7 +78,7 @@ namespace ls3d::i3d {
 void DrawMeshItem(I3D_object *visual, const S_renderItem *item);
 
 // The lightmap visuals' shared material (0x100be408): DrawMeshItem draws them with it, set from
-// the face group's material.
+// the face group's material. (Null: the driver's Init makes none.)
 extern I3D_material *g_lightmapMaterial;
 // The last level's fade-out range (0x100adf30; set by the driver's states).
 extern float g_lodFadeScale;

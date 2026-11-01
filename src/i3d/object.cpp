@@ -535,10 +535,12 @@ void DrawMeshItem(I3D_object *v, const S_renderItem *item)
             matAlpha = mat->alpha;
         }
         mat = g_lightmapMaterial;
-        mat->SetOpacity(opacity);
-        mat->SetBits12(bits12);
-        mat->SetBits8(bits8);
-        mat->SetAlpha(matAlpha);
+        if (mat) {                          // (fix: the driver makes no shared material)
+            mat->SetOpacity(opacity);
+            mat->SetBits12(bits12);
+            mat->SetBits8(bits8);
+            mat->SetAlpha(matAlpha);
+        }
         matrix = &DrawMatrix(v);
         const int lvl = original->textureLevel;
         vb = &levelOf(original, lvl)->renderVertices;
