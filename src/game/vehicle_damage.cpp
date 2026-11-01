@@ -197,11 +197,11 @@ void C_Vehicle::Deform(const S_vector4 &point, const S_vector4 &direction, float
         m_unknown58C |= 1;
         if (!part.frames) {
             if (hit0)
-                part.mesh->GetLevel(0)->ComputeBounds();
+                part.mesh->GetLevel(0)->Unknown2C();
             if (hit1)
-                part.mesh->GetLevel(1)->ComputeBounds();
+                part.mesh->GetLevel(1)->Unknown2C();
             part.mesh->ComputeBounds();
-            static_cast<I3D_object_visual *>(part.frame)->RefreshLevel(0);
+            static_cast<I3D_object_visual *>(part.frame)->UnknownAC(0);
             part.frame->Update();
         }
         if (!wear)
