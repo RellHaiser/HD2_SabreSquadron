@@ -490,6 +490,7 @@ void I3D_emitor::SetDefaults()
     opacity = 1.0f;
 }
 
+// LS3DRF 0x10023b50 (from LS3DF 0x1003bfb0)
 void I3D_emitor::EmitOn(bool on)
 {
     emitting = on;

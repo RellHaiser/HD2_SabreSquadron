@@ -130,7 +130,7 @@ I3D_driver::~I3D_driver()
 // 0x100152c0
 void I3D_driver::Tick(int time) { g_driverTime += time; }
 
-// 0x100152e0
+// LS3DRF 0x1000ec30 (from LS3DF 0x100152e0)
 int I3D_driver::GetTime() { return g_driverTime; }
 
 // 0x100152f0

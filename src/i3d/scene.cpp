@@ -989,8 +989,10 @@ void I3D_scene::RemoveDrawnDummy(I3D_frame *dummy)
     dummy->frameFlags &= ~FRMFLAGS_SCENE_DUMMY;
 }
 
+// LS3DRF 0x10028230 (from LS3DF 0x10049800)
 int I3D_scene::NumDrawnDummies() { return drawnDummies.Size(); }
 
+// LS3DRF 0x10028240 (from LS3DF 0x10049810)
 S_dummyBox *I3D_scene::GetDrawnDummies() { return drawnDummies.Data(); }
 
 // ---------------------------------------------------------------- tracked models

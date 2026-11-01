@@ -72,11 +72,16 @@ enum : uint32_t {
 class I3D_scene : public I3D_frame {
 public:
     // (Frame slots the scene does not support.)
+    // LS3DRF 0x10011b40 (from LS3DF 0x1001ba60): one empty stub for SetDir and SetCallback (also
+    // a projector slot).
     void __stdcall SetDir(const S_vector &, float) override {}           // 0x1C 0x1001ba60
     void __stdcall Tick(int time) override;                             // 0x20 0x10047910
+    // LS3DRF 0x10011a30 (from LS3DF 0x1002b0a0): an empty stub (also material 0x44 / 0x48).
     void __stdcall Update() override {}                                 // 0x24 0x1002b0a0
     void __stdcall SetCallback(I3D_CALLBACK *, uint32_t) override {}     // 0x28 0x1001ba60
+    // LS3DRF 0x10011a40 (from LS3DF 0x1001ba70): one return-0 stub for SetName and Duplicate.
     I3D_RESULT __stdcall SetName(const char *) override { return I3D_OK; }    // 0x34 0x1001ba70
+    // LS3DRF 0x10011a50 (from LS3DF 0x1001ba80)
     I3D_RESULT __stdcall LinkTo(I3D_frame *, uint32_t) override { return I3DERR_UNSUPPORTED; }  // 0x38 0x1001ba80
     // 0x44 0x10046880: the primary sector's frames, then those of the special sectors the flags
     // ask for (ENUMF_BACKDROP / ENUMF_OMNI / ENUMF_NEAR).

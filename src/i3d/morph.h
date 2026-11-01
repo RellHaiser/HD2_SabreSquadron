@@ -74,6 +74,7 @@ public:
     // vertices are morphed in place).
     I3D_RESULT __stdcall Duplicate(I3D_frame *source) override;
     void Init() override;                                                      // 0x60 0x100356f0
+    // LS3DRF 0x100118c0 (from LS3DF 0x1001ba30): C_morph's Uninit adjustor (this - 0x210).
     void Uninit() override;                                                    // 0x64 0x10035730
     // 0x70 0x10035f00: the object, then the morph data; the bound is the data's.
     void Load() override;

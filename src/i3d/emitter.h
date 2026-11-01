@@ -156,9 +156,13 @@ public:
     virtual void __stdcall SetDefaults();                                      // 0xA8 0x1003b8a0
     // 0xAC 0x1003bfb0: emitting on or off (on: the wait and the emitted count start again).
     virtual void __stdcall EmitOn(bool on);
+    // LS3DRF 0x10011a60 (from LS3DF 0x1001ba90)
     virtual void __stdcall SetSrcBlend(uint32_t blend) { srcBlend = blend; }    // 0xB0 0x1001ba90
+    // LS3DRF 0x10011a80 (from LS3DF 0x1001bab0)
     virtual uint32_t __stdcall GetSrcBlend() { return srcBlend; }             // 0xB4 0x1001bab0
+    // LS3DRF 0x10011a90 (from LS3DF 0x1001bac0)
     virtual void __stdcall SetDestBlend(uint32_t blend) { destBlend = blend; }  // 0xB8 0x1001bac0
+    // LS3DRF 0x10011ab0 (from LS3DF 0x1001bae0)
     virtual uint32_t __stdcall GetDestBlend() { return destBlend; }           // 0xBC 0x1001bae0
     // 0xC0 0x1001baf0: the group every particle gets (-1: one at random).
     virtual void __stdcall SetGroup(int group) { fixedGroup = group; }
