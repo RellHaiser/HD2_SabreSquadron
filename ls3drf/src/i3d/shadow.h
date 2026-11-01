@@ -69,7 +69,7 @@ public:
     I3D_RESULT __stdcall Duplicate(I3D_frame *source) override;
     void Init() override;                                                      // 0x60 0x1004e5d0
     void Uninit() override;                                                    // 0x64 0x1004e7a0
-    // 0x68 0x1004ef80: without a scene, joins the scene of the sectors above it.
+    // 0x68 0x1004ef80: does nothing (the shadow joins no scene; its scene stays null).
     void MatrixChanged() override;
     // 0x74 0x1004f120: the shadow file `fileName` with its extension replaced by ".6ds".
     virtual I3D_RESULT __stdcall Open(const char *fileName, uint32_t flags);

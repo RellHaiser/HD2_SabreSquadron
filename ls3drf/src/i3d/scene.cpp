@@ -659,6 +659,8 @@ I3D_RESULT I3D_scene::Open(const char *fileName, uint32_t flags, void *loadCallb
     return r;
 }
 
+// LS3DRF 0x10027290 (from LS3DF 0x10047db0): lets go of no active areas, primary sector sounds,
+// lens flares, environment sectors, shadows, mirrors or render lists, and discards no resources.
 void I3D_scene::Close()
 {
     ClearTrackedModels();
@@ -666,13 +668,6 @@ void I3D_scene::Close()
     backdropSector->renderVisuals = nullptr;
     omniSector->renderVisuals = nullptr;
     nearSector->renderVisuals = nullptr;
-    g_activeAreas.Clear();
-    for (int n = primarySector->sounds.Size(); n != 0; --n)
-        primarySector->RemoveSound(primarySector->sounds[0]);
-    for (int i = lensFlares.Size(); i != 0; --i)
-        lensFlares[i - 1]->Release();
-    lensFlares.Clear();
-    g_driver->envSectors.Clear();
     tickFrames.Clear();
     delete animStack;
     animStack = nullptr;
@@ -690,14 +685,8 @@ void I3D_scene::Close()
     primarySector->environmentBlend = 0.0f;
     primarySector->environmentTime = 0;
     primarySector->environment.SetDefaults();
-    g_pGfx->ResourceManagerDiscardBytes(0);
     g_vbManager.FreeUnused();
     g_ibManager.FreeUnused();
-    for (I3D_shadow *s : shadows)
-        s->scene = nullptr;
-    shadows.Clear();
-    mirrors.Clear();                        // (their +0x2E0 keeps the scene)
-    ResetRenderLists();
 }
 
 // ---------------------------------------------------------------- weather and visuals
@@ -1253,15 +1242,6 @@ void SetFog(int on, int mode, float start, float end, uint32_t color)
 }
 
 }  // namespace ls3d::i3d
-
-// 0x10047fd0
-void I3D_scene::AddShadow(I3D_shadow *shadow)
-{
-    if (shadow->scene == this)
-        return;
-    shadows.PushBack(shadow);
-    shadow->scene = this;
-}
 
 // 0x10048070
 I3D_RESULT I3D_scene::RemoveShadow(I3D_shadow *shadow)

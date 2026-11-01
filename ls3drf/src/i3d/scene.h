@@ -214,9 +214,8 @@ private:
     static void MakeDummyBox(S_dummyBox &out, I3D_frame *frame);
 
 public:
-    // 0x10047fd0 / 0x10048070: a shadow joins / leaves the scene's shadow list (and its scene
-    // field follows); I3DERR_OBJECTNOTFOUND when it is not there.
-    void AddShadow(I3D_shadow *shadow);
+    // 0x10048070: a shadow leaves the scene's shadow list (its scene field cleared);
+    // I3DERR_OBJECTNOTFOUND when it is not there. Nothing joins the list (shadow MatrixChanged).
     I3D_RESULT RemoveShadow(I3D_shadow *shadow);
     // 0x10048120 / 0x100481c0: the same for the mirror list (mirror.cpp).
     void AddMirror(I3D_mirror *mirror);
