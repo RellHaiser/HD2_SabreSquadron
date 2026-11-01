@@ -748,9 +748,10 @@ void I3D_projector::Draw(const S_renderItem *item)
                                             IGV_COLOR_TEX);
     } else {
         SetVertexFormat(2);
-        g_pGfx->SetStreamSource(0, vb.vb, sizeof(S_projectedVertex));
+        // (LS3DRF's buffers are heap memory: no device buffers to draw from.)
+        g_pGfx->SetStreamSource(0, nullptr, sizeof(S_projectedVertex));
         // (The blended faces offset the base vertex, not the first index: the original's.)
-        g_pGfx->SetIndices(ib.ib, (opaque ? 0 : numOpaque * 3) + vb.offset);
+        g_pGfx->SetIndices(nullptr, (opaque ? 0 : numOpaque * 3) + vb.offset);
         g_pGfx->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, numVertices, ib.offset, opaque ? numOpaque : numBlended);
     }
     g_pGfx->SetRenderState(D3DRS_LIGHTING, TRUE);

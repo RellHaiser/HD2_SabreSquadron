@@ -588,8 +588,9 @@ void I3D_lit_object::Draw(const S_renderItem *item)
     const S_matrix &m = (visualFlags & VISF_WORLD_SPACE) ? kIdentityMatrix : GetMatrix();
     g_pGfx->SetTransform(D3DTS_WORLD, reinterpret_cast<const D3DMATRIX *>(&m));
     SetVertexFormat(static_cast<int>(l->vertices.buffer->format), false);
-    g_pGfx->SetStreamSource(0, l->vertices.vb, l->vertices.buffer->stride);
-    g_pGfx->SetIndices(ib->ib, l->vertices.offset);
+    // (LS3DRF's buffers are heap memory: no device buffers to draw from.)
+    g_pGfx->SetStreamSource(0, nullptr, l->vertices.buffer->stride);
+    g_pGfx->SetIndices(nullptr, l->vertices.offset);
     g_pGfx->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, static_cast<UINT>(numVertices), ib->offset + item->data08,
                                  static_cast<UINT>(fg->numFaces));
     if (set.flags & LMSET_TEXTURES) {

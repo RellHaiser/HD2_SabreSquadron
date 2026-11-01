@@ -201,8 +201,6 @@ void DrawItem(S_renderItem &item)
 // without a null check.)
 void DrawQueue()
 {
-    g_vbManager.UnlockAll();
-    g_ibManager.UnlockAll();
     FlushParticles();
     g_pGfx->SetRenderState(D3DRS_LIGHTING, TRUE);
     for (int i = 0; i < g_rc.numOpaque; ++i)

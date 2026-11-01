@@ -459,8 +459,9 @@ bool MirrorBeginReflection(I3D_mirror *mirror)
             constants[i][j] = wvp[j][i];
     g_pGfx->SetVertexShaderConstant(0, constants, 4);
     SetVertexFormat(9);
-    g_pGfx->SetIndices(mirror->faces.ib, mirror->colorVertices.offset);
-    g_pGfx->SetStreamSource(0, mirror->colorVertices.vb, mirror->colorVertices.buffer->stride);
+    // (LS3DRF's buffers are heap memory: no device buffers to draw from.)
+    g_pGfx->SetIndices(nullptr, mirror->colorVertices.offset);
+    g_pGfx->SetStreamSource(0, nullptr, mirror->colorVertices.buffer->stride);
     g_pGfx->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, mirror->numVertices, mirror->faces.offset,
                                  mirror->numFaces);
     if (g_rs.zFunc != 1) {
@@ -528,8 +529,9 @@ void MirrorDrawSurface(I3D_mirror *mirror)
     g_pIGraph->SetWorldMatrix(&mirror->GetMatrix());
     g_pGfx->SetTexture(0, nullptr);
     SetVertexFormat(static_cast<int>(mirror->colorVertices.buffer->format));
-    g_pGfx->SetIndices(mirror->faces.ib, mirror->colorVertices.offset);
-    g_pGfx->SetStreamSource(0, mirror->colorVertices.vb, mirror->colorVertices.buffer->stride);
+    // (LS3DRF's buffers are heap memory: no device buffers to draw from.)
+    g_pGfx->SetIndices(nullptr, mirror->colorVertices.offset);
+    g_pGfx->SetStreamSource(0, nullptr, mirror->colorVertices.buffer->stride);
     g_pGfx->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, mirror->numVertices, mirror->faces.offset,
                                  mirror->numFaces);
 }

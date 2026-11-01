@@ -76,19 +76,15 @@ I3D_triface *I3D_face_group::AllocFaces(int count)
     return Lock(0);
 }
 
-I3D_triface *I3D_face_group::Lock(uint32_t flags)
+// LS3DRF 0x1001e310 (from LS3DF 0x10030b40)
+I3D_triface *I3D_face_group::Lock(uint32_t)
 {
     if (!numFaces)
         return nullptr;
-    uint16_t *data = faces.buffer->Lock(flags & 1 ? D3DLOCK_READONLY : 0);
-    return reinterpret_cast<I3D_triface *>(data + faces.offset);
+    return reinterpret_cast<I3D_triface *>(faces.buffer->data);
 }
 
-void I3D_face_group::Unlock()
-{
-    if (faces.buffer)                       // (the original reads through a null buffer)
-        faces.buffer->Unlock();
-}
+void I3D_face_group::Unlock() {}
 
 I3D_RESULT I3D_face_group::Duplicate(I3D_face_group *src)
 {
@@ -155,19 +151,15 @@ uint32_t I3D_mesh_level::Release()
     return 0;
 }
 
-void *I3D_mesh_level::LockVertices(uint32_t lockFlags)
+// LS3DRF 0x1001e870 (from LS3DF 0x10031380)
+void *I3D_mesh_level::LockVertices(uint32_t)
 {
     if (!vertices.vb)
         return nullptr;
-    C_VertexBuffer *b = vertices.buffer;
-    return b->Lock(lockFlags & 1 ? D3DLOCK_READONLY : 0) + b->stride * vertices.offset;
+    return vertices.buffer->data;
 }
 
-void I3D_mesh_level::UnlockVertices()
-{
-    if (vertices.vb && vertices.buffer->lockedData)
-        vertices.buffer->Unlock();
-}
+void I3D_mesh_level::UnlockVertices() {}
 
 I3D_RESULT I3D_mesh_level::Duplicate(I3D_mesh_level *src)
 {
