@@ -87,6 +87,7 @@ public:
     // ask for (ENUMF_BACKDROP / ENUMF_OMNI / ENUMF_NEAR).
     I3D_RESULT __stdcall EnumFrames(I3D_ENUMPROC *proc, void *context, uint32_t flags, const char *mask) override;
     I3D_RESULT __stdcall Duplicate(I3D_frame *) override { return I3D_OK; }   // 0x4C 0x1001ba70
+    // LS3DRF 0x1000fa10 (from LS3DF 0x10019470): the scalar deleting destructor.
     ~I3D_scene() override;                                              // 0x5C 0x10019470 / 0x100195d0
     void Init() override;                                               // 0x60 0x100462b0
     void Uninit() override;                                             // 0x64 0x100466c0

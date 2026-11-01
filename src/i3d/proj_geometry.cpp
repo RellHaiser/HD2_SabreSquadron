@@ -721,27 +721,6 @@ float ColumnLength(const S_matrix &m, int c)
 
 }  // namespace
 
-namespace ls3d::i3d {
-
-// 0x10001470
-void FreeProjectionBuffers()
-{
-    AlignedFree(s_temp);
-    s_temp = nullptr;
-    s_tempCapacity = 0;
-    ::operator delete(s_faces);
-    s_faces = nullptr;
-    s_numFaces = 0;
-    s_blendedFaces = nullptr;
-    AlignedFree(s_out);
-    s_out = nullptr;
-    s_numOut = 0;
-    s_outCapacity = 0;
-    s_faceCapacity = 0;
-}
-
-}  // namespace ls3d::i3d
-
 namespace ls3d::i3d::proj {
 
 I3D_visual *g_receivers[0x200];

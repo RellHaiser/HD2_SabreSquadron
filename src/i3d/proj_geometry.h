@@ -38,7 +38,7 @@ void ProjectWorldMesh(const void *verts, int numVerts, I3D_face_group *groups, i
                       uint32_t withBlended);                                // 0x10004380
 void ProjectWorldMesh4(const void *verts, int numVerts, I3D_face_group *groups, int numFaces,
                        uint32_t withBlended);                               // 0x100048e0
-// (The buffers are freed by FreeProjectionBuffers, render_passes.h.)
+// (Nothing frees the buffers: LS3DRF has none.)
 
 // The collection: the vertices (volume space), the opaque materials' faces, then the blended
 // ones' (indices into the vertices).

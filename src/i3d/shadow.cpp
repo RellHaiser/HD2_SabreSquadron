@@ -721,6 +721,7 @@ void RemoveShadowCaster(I3D_frame *frame)
     }
 }
 
+// LS3DRF 0x1000f9b0 (from LS3DF 0x100193e0): I3D_shadow's constructor (the vtable only) is called here.
 I3D_frame *NewShadowFrame() { return new I3D_shadow; }
 
 // 0x10050590: before the sector pass: a shadow near enough to the camera is brought up to date

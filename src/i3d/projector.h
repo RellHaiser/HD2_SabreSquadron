@@ -35,8 +35,7 @@ public:
     I3D_RESULT __stdcall Duplicate(I3D_frame *source) override;
     void Init() override;                                                      // 0x60 0x10043730
     void Uninit() override;                                                    // 0x64 0x100438f0
-    // 0x68 0x10043d50: a moved projector looks for its sector again.
-    void MatrixChanged() override;
+    // (MatrixChanged: the visual's, as in LS3DRF; a moved projector keeps its sector.)
     // 0x70 0x10046130: the frame, then orthogonal, the mode and the material.
     void Load() override;
     // 0x94 0x10043fe0: in range, the projected geometry queued (or the projector waits for
@@ -90,7 +89,7 @@ public:
     uint32_t unknown24C;
     S_vector4 blendedCenter;                // +0x250 world space (the blended item's depth)
     int buildStamp;                         // +0x260 (-1) changeCount when the geometry was made
-    I3D_sector *sector;                     // +0x264 the sector it is in (found when null)
+    I3D_sector *sector;                     // +0x264 the sector it is in (found when null; only Init clears it)
     int numReceivers;                       // +0x268 ... and the receivers then
     int receiverSum;                        // +0x26C ... and their change counts' sum
 };
