@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include "game/cursor.h"
+#include "game/mp_zone.h"
 #include "game/pending.h"
 #include "game/paged_text_box.h"
 #include "game/text_box.h"
@@ -44,6 +45,16 @@ constexpr uint32_t CHILD_ID_MASK = 0xF;
 constexpr uint32_t UP_ARROW = 1, DOWN_ARROW = 2, SLIDER = 3;
 // The spin control's items' style.
 constexpr uint8_t SPIN_STYLE = 0x14;
+// The check boxes' frames' ids' last bits (their halves' too), the toggle buttons'.
+constexpr uint32_t CHECK_NO = 1, CHECK_YES = 2;
+// The highlighted check box's halves' ids' last bits (the yes half's 1: unlike type 9's frames).
+constexpr uint32_t HALF_YES = 1, HALF_NO = 2;
+constexpr uint32_t TOGGLE_DOWN = 1, TOGGLE_UP = 2;
+// The side indicator: the time between its looks at the zone; the sides (TEAM_*).
+constexpr int SIDE_PERIOD = 2000;
+constexpr int SIDE_AXIS = 0, SIDE_ALLIED = 1, SIDE_NONE = 2;
+// The mark's title's style.
+constexpr uint32_t MARK_STYLE = 0xB;
 
 // A frame's data: the control's id.
 void SetFrameId(I3D_frame *frame, uint32_t id)
@@ -1477,4 +1488,675 @@ void C_SpinControl::SetInactive(bool inactive)
         m_upButton->SetInactive(m_inactive);
     if (m_downButton)
         m_downButton->SetInactive(m_inactive);
+}
+
+// ----- the check box (type 9) -----
+
+bool C_CheckBox::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_TextControl::Create(frame, root, desc) || frame->NumChildren() != 4)
+        return false;
+    m_yesFull = frame->FindChildFrame("yes_full*", FIND_FRAMES);
+    m_yesEmpty = frame->FindChildFrame("yes_empty*", FIND_FRAMES);
+    m_noFull = frame->FindChildFrame("no_full*", FIND_FRAMES);
+    m_noEmpty = frame->FindChildFrame("no_empty*", FIND_FRAMES);
+    if (!m_yesFull || !m_yesEmpty || !m_noFull || !m_noEmpty)
+        return false;
+    m_noEmpty->SetOn(true);
+    SetFrameId(m_noEmpty, m_id | CHECK_NO);
+    m_noEmpty->Update();
+    m_noFull->SetPosInline(m_noEmpty->GetPos());   // (not when its place is locked)
+    m_noFull->SetOn(false);
+    SetFrameId(m_noFull, m_id | CHECK_NO);
+    m_noFull->Update();
+    m_yesEmpty->SetOn(false);
+    SetFrameId(m_yesEmpty, m_id | CHECK_YES);
+    m_yesEmpty->Update();
+    m_yesFull->SetPosInline(m_yesEmpty->GetPos());
+    m_yesFull->SetOn(true);
+    SetFrameId(m_yesFull, m_id | CHECK_YES);
+    m_yesFull->Update();
+    if (!m_box)
+        return false;
+    AttachBox();
+    return true;
+}
+
+int C_CheckBox::OnEnter(int)
+{
+    if (m_inactive)
+        return 0;
+    if (m_box)
+        m_box->SetHover(0);
+    Notify(CONTROL_NOTIFY_ENTER, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_CheckBox::OnLeave(int)
+{
+    if (m_box)
+        m_box->ClearHover();
+    Notify(CONTROL_NOTIFY_ENTER, 0);   // (not LEAVE: the original's)
+    return CONTROL_HANDLED;
+}
+
+int C_CheckBox::OnClick(int)
+{
+    Toggle();
+    return CONTROL_HANDLED;
+}
+
+int C_CheckBox::OnKeyClick(int id)
+{
+    if ((static_cast<uint32_t>(id) & CHILD_ID_MASK) == CHECK_NO && m_checked)
+        Toggle();
+    if ((static_cast<uint32_t>(id) & CHILD_ID_MASK) == CHECK_YES && !m_checked)
+        Toggle();
+    return CONTROL_HANDLED;
+}
+
+bool C_CheckBox::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_TextControl::HandleMessage(message);
+    // (The value's low byte against the state: another than 0 or 1 toggles, then sets it back; the
+    // original's.)
+    const auto value = static_cast<uint8_t>(message->value);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_GET_CHECKED:
+        message->value = m_checked;
+        return true;
+    case CONTROL_MSG_SET_CHECKED:
+        if (value != static_cast<uint8_t>(m_checked))
+            Toggle();
+        [[fallthrough]];
+    case CONTROL_MSG_SET_CHECKED_QUIET:
+        if (value != static_cast<uint8_t>(m_checked)) {
+            if (m_checked)
+                Uncheck();
+            else
+                Check();
+        }
+        return true;
+    }
+    return C_TextControl::HandleMessage(message);
+}
+
+void C_CheckBox::Toggle()
+{
+    if (!m_checked)
+        Check();
+    else
+        Uncheck();
+    Notify(CONTROL_NOTIFY_CHANGED, m_checked);
+}
+
+void C_CheckBox::Check()
+{
+    if (m_checked)
+        return;
+    m_noEmpty->SetOn(true);
+    m_noFull->SetOn(false);
+    m_yesEmpty->SetOn(false);
+    m_yesFull->SetOn(true);
+    m_noEmpty->Update();
+    m_noFull->Update();
+    m_yesEmpty->Update();
+    m_yesFull->Update();
+    m_checked = true;
+}
+
+void C_CheckBox::Uncheck()
+{
+    if (!m_checked)
+        return;
+    m_noEmpty->SetOn(false);
+    m_noFull->SetOn(true);
+    m_yesEmpty->SetOn(true);
+    m_yesFull->SetOn(false);
+    m_noEmpty->Update();
+    m_noFull->Update();
+    m_yesEmpty->Update();
+    m_yesFull->Update();
+    m_checked = false;
+}
+
+// ----- the toggle buttons (type 0xa; the "all" one) -----
+
+bool C_ToggleButton::CreateFrames(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc, const char *activeDown,
+                                  const char *normalDown, const char *activeUp, const char *normalUp)
+{
+    C_Control::Create(frame, root, desc);
+    if (frame->NumChildren() != 4)
+        return false;
+    m_activeDown = frame->FindChildFrame(activeDown, FIND_FRAMES);
+    m_normalDown = frame->FindChildFrame(normalDown, FIND_FRAMES);
+    m_activeUp = frame->FindChildFrame(activeUp, FIND_FRAMES);
+    m_normalUp = frame->FindChildFrame(normalUp, FIND_FRAMES);
+    if (!m_activeDown || !m_normalDown || !m_activeUp || !m_normalUp)
+        return false;
+    const S_vector place = m_normalDown->GetPos();
+    m_normalDown->SetOn(true);
+    SetFrameId(m_normalDown, m_id | TOGGLE_DOWN);
+    m_normalDown->Update();
+    m_activeDown->SetPosInline(place);   // (not when its place is locked)
+    m_activeDown->SetOn(false);
+    SetFrameId(m_activeDown, m_id | TOGGLE_DOWN);
+    m_activeDown->Update();
+    for (I3D_frame *up : {m_activeUp, m_normalUp}) {
+        up->SetPosInline(place);
+        up->SetOn(false);
+        SetFrameId(up, m_id | TOGGLE_UP);
+        up->Update();
+    }
+    return true;
+}
+
+bool C_ToggleButton::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    return CreateFrames(frame, root, desc, "activeddown*", "normaldown*", "activedup*", "normalup*");
+}
+
+bool C_AllToggleButton::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    return CreateFrames(frame, root, desc, "allactived", "allnormal", "xallactived", "xallnormal");
+}
+
+int C_ToggleButton::OnEnter(int)
+{
+    I3D_frame *active = m_down ? m_activeDown : m_activeUp;
+    I3D_frame *normal = m_down ? m_normalDown : m_normalUp;
+    active->SetOn(true);
+    normal->SetOn(false);
+    active->Update();
+    normal->Update();
+    m_over = true;
+    return CONTROL_HANDLED;
+}
+
+int C_ToggleButton::OnLeave(int)
+{
+    I3D_frame *active = m_down ? m_activeDown : m_activeUp;
+    I3D_frame *normal = m_down ? m_normalDown : m_normalUp;
+    normal->SetOn(true);
+    active->SetOn(false);
+    active->Update();
+    normal->Update();
+    m_over = false;
+    return CONTROL_HANDLED;
+}
+
+int C_ToggleButton::OnClick(int)
+{
+    Toggle();
+    return CONTROL_HANDLED;
+}
+
+bool C_ToggleButton::HandleMessage(S_ControlMessage *message)
+{
+    if (!(message->id & CONTROL_NOTIFY_MASK)) {
+        switch (message->id & CONTROL_MSG_MASK) {
+        case CONTROL_MSG_GET_CHECKED:
+            message->value = m_down;
+            return true;
+        case CONTROL_MSG_SET_CHECKED:
+            if ((message->value != 0) != m_down)
+                Toggle();
+            return true;
+        }
+    }
+    return C_Control::HandleMessage(message);
+}
+
+void C_ToggleButton::Toggle()
+{
+    // The frames the cursor's over shows.
+    I3D_frame *down = m_over ? m_activeDown : m_normalDown;
+    I3D_frame *up = m_over ? m_activeUp : m_normalUp;
+    m_down = !m_down;
+    down->SetOn(m_down);
+    down->Update();
+    up->SetOn(!m_down);
+    up->Update();
+    Notify(CONTROL_NOTIFY_CHANGED, 0);
+}
+
+// ----- the highlighted check box's halves (vtable 0x00814078) -----
+
+bool C_CheckBoxHalf::Setup(I3D_frame *empty, I3D_frame *full, I3D_frame *activeFull, I3D_frame *activeEmpty)
+{
+    m_fullFrame = full;
+    m_frame = empty;
+    m_emptyFrame = empty;
+    m_activeFullFrame = activeFull;
+    m_activeEmptyFrame = activeEmpty;
+    empty->SetOn(true);
+    SetFrameId(empty, m_id);
+    empty->Update();
+    for (I3D_frame *other : {full, activeFull}) {
+        other->SetOn(false);
+        SetFrameId(other, m_id);
+        other->SetPosInline(empty->GetPos());   // (not when its place is locked)
+        other->Update();
+    }
+    return true;
+}
+
+void C_CheckBoxHalf::ShowActiveEmpty()
+{
+    m_activeEmptyFrame->SetOn(true);
+    SetFrameId(m_activeEmptyFrame, m_id);
+    m_activeEmptyFrame->SetPosInline(m_emptyFrame->GetPos());
+}
+
+int C_CheckBoxHalf::OnEnter(int)
+{
+    if (m_inactive || m_over)
+        return 0;
+    if (m_empty) {
+        m_emptyFrame->SetOn(false);
+        m_emptyFrame->Update();
+        ShowActiveEmpty();
+        m_activeEmptyFrame->Update();
+    } else {
+        m_fullFrame->SetOn(false);
+        m_fullFrame->Update();
+        m_activeFullFrame->SetOn(true);
+        m_activeFullFrame->Update();
+    }
+    m_over = true;
+    return CONTROL_HANDLED;
+}
+
+int C_CheckBoxHalf::OnLeave(int)
+{
+    if (!m_over)
+        return 0;
+    I3D_frame *normal = m_empty ? m_emptyFrame : m_fullFrame;
+    I3D_frame *active = m_empty ? m_activeEmptyFrame : m_activeFullFrame;
+    normal->SetOn(true);
+    normal->Update();
+    active->SetOn(false);
+    active->Update();
+    m_over = false;
+    return CONTROL_HANDLED;
+}
+
+int C_CheckBoxHalf::OnKeyClick(int)
+{
+    if (!m_over)
+        return 0;
+    if (m_empty) {
+        m_activeEmptyFrame->SetOn(false);
+        m_activeEmptyFrame->Update();
+        m_activeFullFrame->SetOn(true);
+        m_activeFullFrame->Update();
+    } else {
+        m_activeFullFrame->SetOn(false);
+        m_activeFullFrame->Update();
+        ShowActiveEmpty();
+        m_activeEmptyFrame->Update();
+    }
+    return CONTROL_HANDLED;
+}
+
+void C_CheckBoxHalf::SetInactive(bool inactive)
+{
+    if (inactive == m_inactive)
+        return;
+    m_inactive = inactive;
+    static_cast<I3D_object_visual *>(m_emptyFrame)->SetAlpha(inactive ? INACTIVE_ALPHA : 1.0f);
+    static_cast<I3D_object_visual *>(m_fullFrame)->SetAlpha(m_inactive ? INACTIVE_ALPHA : 1.0f);
+}
+
+void C_CheckBoxHalf::SetFull(bool full)
+{
+    if (m_empty == !full)
+        return;
+    m_empty = !full;
+    if (m_over) {
+        if (m_empty) {
+            ShowActiveEmpty();
+            m_activeFullFrame->SetOn(false);
+        } else {
+            m_activeFullFrame->SetOn(true);
+            m_activeEmptyFrame->SetOn(false);
+        }
+        m_activeFullFrame->Update();
+        m_activeEmptyFrame->Update();
+        return;
+    }
+    m_emptyFrame->SetOn(m_empty);
+    m_fullFrame->SetOn(!m_empty);
+    m_emptyFrame->Update();
+    m_fullFrame->Update();
+}
+
+void C_CheckBoxHalf::LinkFrames(I3D_frame *parent)
+{
+    for (I3D_frame *frame : {m_emptyFrame, m_fullFrame, m_activeFullFrame, m_activeEmptyFrame})
+        frame->LinkTo(parent, I3DLINK_KEEP_WORLD);
+}
+
+// ----- the highlighted check box (type 0x24) -----
+
+bool C_HighlightCheckBox::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_TextControl::Create(frame, root, desc) || !m_box || frame->NumChildren() != 7)
+        return false;
+    AttachBox();
+    I3D_frame *yesEmpty = frame->FindChildFrame("yes_empty*", FIND_FRAMES);
+    I3D_frame *yesFull = frame->FindChildFrame("yes_full*", FIND_FRAMES);
+    I3D_frame *yesActiveFull = frame->FindChildFrame("yesactived_full*", FIND_FRAMES);
+    I3D_frame *noEmpty = frame->FindChildFrame("no_empty*", FIND_FRAMES);
+    I3D_frame *noFull = frame->FindChildFrame("no_full*", FIND_FRAMES);
+    I3D_frame *noActiveFull = frame->FindChildFrame("noactived_full*", FIND_FRAMES);
+    I3D_frame *activeEmpty = frame->FindChildFrame("noactived_empty*", FIND_FRAMES);   // (both halves')
+    if (!yesEmpty || !yesFull || !yesActiveFull || !noEmpty || !noFull || !noActiveFull || !activeEmpty)
+        return false;
+    m_yes = new C_CheckBoxHalf(m_scene, m_id | HALF_YES, this);
+    m_yes->Setup(yesEmpty, yesFull, yesActiveFull, activeEmpty);
+    m_children.push_back(m_yes);
+    m_no = new C_CheckBoxHalf(m_scene, m_id | HALF_NO, this);
+    m_no->Setup(noEmpty, noFull, noActiveFull, activeEmpty);
+    m_children.push_back(m_no);
+    m_yes->SetFull(true);
+    m_no->SetFull(false);
+    return true;
+}
+
+C_CheckBoxHalf *C_HighlightCheckBox::Half(uint32_t id) const
+{
+    switch (id & CHILD_ID_MASK) {
+    case HALF_YES:
+        return m_yes;
+    case HALF_NO:
+        return m_no;
+    }
+    return nullptr;
+}
+
+int C_HighlightCheckBox::OnEnter(int id)
+{
+    if (m_inactive)
+        return 0;
+    if (m_box)
+        m_box->SetHover(0);
+    if (C_CheckBoxHalf *half = Half(static_cast<uint32_t>(id)))
+        half->OnEnter(id);
+    m_overId = static_cast<uint32_t>(id);
+    Notify(CONTROL_NOTIFY_ENTER, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_HighlightCheckBox::OnLeave(int id)
+{
+    if (m_box)
+        m_box->ClearHover();
+    if (C_CheckBoxHalf *half = Half(m_overId))
+        half->OnLeave(id);
+    m_overId = 0;
+    Notify(CONTROL_NOTIFY_LEAVE, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_HighlightCheckBox::OnClick(int)
+{
+    Toggle();
+    return CONTROL_HANDLED;
+}
+
+int C_HighlightCheckBox::OnInput05(int id)
+{
+    if (m_overId != 0 && m_overId != static_cast<uint32_t>(id)) {
+        if (C_CheckBoxHalf *half = Half(m_overId))
+            half->OnLeave(id);
+        if (C_CheckBoxHalf *half = Half(static_cast<uint32_t>(id)))
+            half->OnEnter(id);
+        m_overId = static_cast<uint32_t>(id);
+    }
+    return CONTROL_HANDLED;
+}
+
+int C_HighlightCheckBox::OnKeyClick(int)
+{
+    Toggle();
+    return CONTROL_HANDLED;
+}
+
+bool C_HighlightCheckBox::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_TextControl::HandleMessage(message);
+    // (The value's low byte against the state: C_CheckBox's.)
+    const auto value = static_cast<uint8_t>(message->value);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_GET_CHECKED:
+        message->value = m_checked;
+        return true;
+    case CONTROL_MSG_SET_CHECKED:
+        if (value != static_cast<uint8_t>(m_checked))
+            Toggle();
+        [[fallthrough]];
+    case CONTROL_MSG_SET_CHECKED_QUIET:
+        if (value != static_cast<uint8_t>(m_checked)) {
+            if (m_checked)
+                Uncheck();
+            else
+                Check();
+        }
+        return true;
+    case CONTROL_MSG_FACE_FRONT:
+        // The halves' frames unlinked while the frame turns (to the back, not the front).
+        m_yes->LinkFrames(nullptr);
+        m_no->LinkFrames(nullptr);
+        m_frame->SetDir(FACE_BACK, 0.0f);
+        m_yes->LinkFrames(m_frame);
+        m_no->LinkFrames(m_frame);
+        return true;
+    }
+    return C_TextControl::HandleMessage(message);
+}
+
+void C_HighlightCheckBox::SetInactive(bool inactive)
+{
+    if (inactive == m_inactive)
+        return;
+    C_TextControl::SetInactive(inactive);
+    if (m_yes)
+        m_yes->SetInactive(inactive);
+    if (m_no)
+        m_no->SetInactive(inactive);
+}
+
+void C_HighlightCheckBox::Toggle()
+{
+    if (!m_checked)
+        Check();
+    else
+        Uncheck();
+    Notify(CONTROL_NOTIFY_CHANGED, m_checked);
+}
+
+void C_HighlightCheckBox::Check()
+{
+    if (m_checked)
+        return;
+    m_yes->SetFull(true);
+    m_no->SetFull(false);
+    m_checked = true;
+}
+
+void C_HighlightCheckBox::Uncheck()
+{
+    if (!m_checked)
+        return;
+    m_yes->SetFull(false);
+    m_no->SetFull(true);
+    m_checked = false;
+}
+
+// ----- the side indicator (type 0x1e) -----
+
+void C_SideIndicator::Tick(int time)
+{
+    m_timer -= time;
+    if (m_timer >= 1)
+        return;
+    m_timer = SIDE_PERIOD;
+    // (The index is the zone's address: the menus'.)
+    const int side = reinterpret_cast<const C_MPZone *>(static_cast<uintptr_t>(static_cast<uint32_t>(m_index)))->GetTeam();
+    if (m_side != side)
+        SetSide(side);
+}
+
+bool C_SideIndicator::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_Control::Create(frame, root, desc) || frame->NumChildren() < 3)
+        return false;
+    m_alliedFrame = frame->FindChildFrame("allied*", FIND_FRAMES);
+    m_axisFrame = frame->FindChildFrame("axis*", FIND_FRAMES);
+    m_alliedFrame->SetOn(false);
+    SetFrameId(m_alliedFrame, m_id);
+    m_axisFrame->SetOn(false);
+    SetFrameId(m_axisFrame, m_id);
+    m_side = SIDE_NONE;
+    S_ControlMessage ticker = Message(CONTROL_MSG_ADD_TICKER);
+    ticker.value2 = reinterpret_cast<uintptr_t>(this);
+    PostControlMessage(ticker);
+    return true;
+}
+
+int C_SideIndicator::OnKeyClick(int)
+{
+    Notify(CONTROL_NOTIFY_KEY_CLICK, 0);
+    return CONTROL_HANDLED;
+}
+
+bool C_SideIndicator::HandleMessage(S_ControlMessage *message)
+{
+    if (!(message->id & CONTROL_NOTIFY_MASK)) {
+        switch (message->id & CONTROL_MSG_MASK) {
+        case CONTROL_MSG_SET_SIDE:
+            SetSide(static_cast<int>(message->value));
+            return true;
+        case CONTROL_MSG_GET_SIDE:
+            message->value = static_cast<uint32_t>(m_side);
+            return true;
+        }
+    }
+    return C_Control::HandleMessage(message);
+}
+
+void C_SideIndicator::SetSide(int side)
+{
+    if (m_side == side)
+        return;
+    m_side = side;
+    m_alliedFrame->SetOn(side == SIDE_ALLIED);
+    m_axisFrame->SetOn(side == SIDE_AXIS);
+    m_alliedFrame->Update();
+    m_axisFrame->Update();
+    Notify(CONTROL_NOTIFY_CHANGED, 0);
+}
+
+// ----- the mark (type 0x1f) -----
+
+C_MarkBox::~C_MarkBox()
+{
+    delete m_title;
+}
+
+void C_MarkBox::Refresh()
+{
+    if (m_title)
+        m_title->Refresh();
+}
+
+bool C_MarkBox::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_Control::Create(frame, root, desc))
+        return false;
+    if (I3D_frame *text = frame->FindChildFrame("text_*", FIND_FRAMES)) {
+        m_title = new C_TitleControl(m_scene, m_id | 1, this);
+        m_title->Create(text, root, nullptr);
+        S_ControlMessage set = Message(CONTROL_MSG_SET_TEXT);
+        set.value = MARK_STYLE;
+        set.text = "00";
+        m_title->HandleMessageCopy(set);
+    }
+    m_noActive = frame->FindChildFrame("noactived*", FIND_FRAMES);
+    m_noNormal = frame->FindChildFrame("nonormal*", FIND_FRAMES);
+    m_yesActive = frame->FindChildFrame("yesactived*", FIND_FRAMES);
+    m_yesNormal = frame->FindChildFrame("yesnormal*", FIND_FRAMES);
+    m_emptyActive = frame->FindChildFrame("emptyactived*", FIND_FRAMES);
+    m_emptyNormal = frame->FindChildFrame("emptynormal*", FIND_FRAMES);
+    if (!m_noActive || !m_noNormal || !m_yesActive || !m_yesNormal || !m_emptyActive || !m_emptyNormal)
+        return false;
+    m_emptyNormal->SetOn(true);
+    SetFrameId(m_emptyNormal, m_id | 1);
+    m_emptyNormal->Update();
+    for (I3D_frame *other : {m_emptyActive, m_yesNormal, m_yesActive, m_noNormal, m_noActive})
+        PlaceFrame(other, m_emptyNormal);
+    return true;
+}
+
+void C_MarkBox::PlaceFrame(I3D_frame *frame, I3D_frame *place)
+{
+    frame->SetPosInline(place->GetPos());   // (not when its place is locked)
+    frame->SetOn(false);
+    SetFrameId(frame, m_id);
+    frame->Update();
+}
+
+int C_MarkBox::OnClick(int)
+{
+    Notify(CONTROL_NOTIFY_0E, m_value);
+    return CONTROL_HANDLED;
+}
+
+int C_MarkBox::OnKeyClick(int)
+{
+    Notify(CONTROL_NOTIFY_0E, m_value);
+    return CONTROL_HANDLED;
+}
+
+bool C_MarkBox::HandleMessage(S_ControlMessage *message)
+{
+    if (!(message->id & CONTROL_NOTIFY_MASK)) {
+        switch (message->id & CONTROL_MSG_MASK) {
+        case CONTROL_MSG_GET_CHECKED:
+            message->value = m_value;
+            return true;
+        case CONTROL_MSG_SET_CHECKED:
+            if (static_cast<uint8_t>(message->value) != 0)
+                Mark();
+            else
+                Unmark();
+            return true;
+        case CONTROL_MSG_SET_NUMBER:
+            if (m_title) {
+                S_ControlMessage set = Message(CONTROL_MSG_SET_TEXT);
+                set.value = MARK_STYLE;
+                set.text = C_fstr("%02d", static_cast<int>(message->value));
+                m_title->HandleMessageCopy(set);
+            }
+            return true;
+        }
+    }
+    return C_Control::HandleMessage(message);
+}
+
+void C_MarkBox::Mark()
+{
+    m_value = 1;
+    m_yesNormal->SetOn(true);
+    m_emptyNormal->SetOn(false);
+}
+
+void C_MarkBox::Unmark()
+{
+    m_value = 0;
+    m_yesNormal->SetOn(false);
+    m_emptyNormal->SetOn(true);
 }

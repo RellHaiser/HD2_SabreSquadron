@@ -28804,6 +28804,81 @@
   "name": "C_Tooltip::Tick",
   "proto": "void __thiscall Tick(C_Tooltip *this, int time)"
  },
+ "006521f0": {
+  "module": "controls",
+  "name": "C_SideIndicator::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "00652380": {
+  "module": "controls",
+  "name": "C_SideIndicator::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "006523d0": {
+  "module": "controls",
+  "name": "C_SideIndicator::SetSide",
+  "proto": "void __thiscall SetSide(void *this, int side)"
+ },
+ "00652430": {
+  "module": "controls",
+  "name": "C_SideIndicator::Tick",
+  "proto": "void __thiscall Tick(void *this, int time)"
+ },
+ "00652470": {
+  "module": "controls",
+  "name": "C_SideIndicator::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(void *this, int id)"
+ },
+ "00652490": {
+  "module": "controls",
+  "name": "C_MarkBox::OnEnter",
+  "proto": "int __thiscall OnEnter(C_MarkBox *this, int id)"
+ },
+ "006524a0": {
+  "module": "controls",
+  "name": "C_MarkBox::OnLeave",
+  "proto": "int __thiscall OnLeave(C_MarkBox *this, int id)"
+ },
+ "006524b0": {
+  "module": "controls",
+  "name": "C_MarkBox::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(C_MarkBox *this, int id)"
+ },
+ "006524e0": {
+  "module": "controls",
+  "name": "C_MarkBox::OnClick",
+  "proto": "int __thiscall OnClick(C_MarkBox *this, int id)"
+ },
+ "00652510": {
+  "module": "controls",
+  "name": "C_MarkBox::Mark",
+  "proto": "void __thiscall Mark(C_MarkBox *this)"
+ },
+ "00652540": {
+  "module": "controls",
+  "name": "C_MarkBox::Unmark",
+  "proto": "void __thiscall Unmark(C_MarkBox *this)"
+ },
+ "00652570": {
+  "module": "controls",
+  "name": "C_MarkBox::PlaceFrame",
+  "proto": "void __thiscall PlaceFrame(C_MarkBox *this, void * frame, void * emptyNormal)"
+ },
+ "006525e0": {
+  "module": "controls",
+  "name": "C_MarkBox::Refresh",
+  "proto": "void __thiscall Refresh(C_MarkBox *this)"
+ },
+ "006525f0": {
+  "module": "controls",
+  "name": "C_MarkBox::Create",
+  "proto": "bool __thiscall Create(C_MarkBox *this, void * frame, void * root, void * desc)"
+ },
+ "006528a0": {
+  "module": "controls",
+  "name": "C_MarkBox::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_MarkBox *this, void * message)"
+ },
  "00653b60": {
   "module": "zz_idioms",
   "name": "vector_size_e4_653b60"
@@ -28815,6 +28890,156 @@
  "00653ea0": {
   "module": "zz_idioms",
   "name": "copy4_653ea0"
+ },
+ "00654060": {
+  "module": "controls",
+  "name": "C_CheckBox::OnEnter",
+  "proto": "int __thiscall OnEnter(void *this, int id)"
+ },
+ "006540a0": {
+  "module": "controls",
+  "name": "C_CheckBox::OnLeave",
+  "proto": "int __thiscall OnLeave(void *this, int id)"
+ },
+ "006540d0": {
+  "module": "controls",
+  "name": "C_CheckBox::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(void *this, int id)"
+ },
+ "00654110": {
+  "module": "controls",
+  "name": "C_CheckBox::OnClick",
+  "proto": "int __thiscall OnClick(void *this, int id)"
+ },
+ "00654120": {
+  "module": "controls",
+  "name": "C_CheckBox::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "00654300": {
+  "module": "controls",
+  "name": "C_CheckBox::Toggle",
+  "proto": "void __thiscall Toggle(void *this)"
+ },
+ "00654340": {
+  "module": "controls",
+  "name": "C_CheckBox::Check",
+  "proto": "void __thiscall Check(void *this)"
+ },
+ "006543b0": {
+  "module": "controls",
+  "name": "C_CheckBox::Uncheck",
+  "proto": "void __thiscall Uncheck(void *this)"
+ },
+ "00654420": {
+  "module": "controls",
+  "name": "C_CheckBox::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "006544c0": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::SetInactive",
+  "proto": "void __thiscall SetInactive(void *this, bool inactive)"
+ },
+ "00654500": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "006548c0": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "006548e0": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::~C_CheckBoxHalf",
+  "proto": "void __thiscall ~C_CheckBoxHalf(void *this)"
+ },
+ "00654a10": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "00654b60": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::OnEnter",
+  "proto": "int __thiscall OnEnter(void *this, int id)"
+ },
+ "00654bd0": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::OnLeave",
+  "proto": "int __thiscall OnLeave(void *this, int id)"
+ },
+ "00654c30": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(void *this, int id)"
+ },
+ "00654c40": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::OnClick",
+  "proto": "int __thiscall OnClick(void *this, int id)"
+ },
+ "00654c50": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::OnInput05",
+  "proto": "int __thiscall OnInput05(void *this, int id)"
+ },
+ "00654cc0": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::Toggle",
+  "proto": "void __thiscall Toggle(void *this)"
+ },
+ "00654d00": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::Check",
+  "proto": "void __thiscall Check(void *this)"
+ },
+ "00654d30": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::Uncheck",
+  "proto": "void __thiscall Uncheck(void *this)"
+ },
+ "00654d60": {
+  "module": "controls",
+  "name": "C_AllToggleButton::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "00654f80": {
+  "module": "controls",
+  "name": "C_ToggleButton::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "006551a0": {
+  "module": "controls",
+  "name": "C_ToggleButton::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "00655200": {
+  "module": "controls",
+  "name": "C_ToggleButton::Toggle",
+  "proto": "void __thiscall Toggle(void *this)"
+ },
+ "00655300": {
+  "module": "controls",
+  "name": "C_ToggleButton::OnClick",
+  "proto": "int __thiscall OnClick(void *this, int id)"
+ },
+ "00655310": {
+  "module": "controls",
+  "name": "C_ToggleButton::OnPress",
+  "proto": "int __thiscall OnPress(void *this, int id)"
+ },
+ "00655320": {
+  "module": "controls",
+  "name": "C_ToggleButton::OnEnter",
+  "proto": "int __thiscall OnEnter(void *this, int id)"
+ },
+ "00655390": {
+  "module": "controls",
+  "name": "C_ToggleButton::OnLeave",
+  "proto": "int __thiscall OnLeave(void *this, int id)"
  },
  "00655400": {
   "module": "controls",
@@ -28939,6 +29164,16 @@
   "module": "controls",
   "name": "C_ControlGroup::HandleMessage",
   "proto": "bool __thiscall HandleMessage(C_ControlGroup *this, void * message)"
+ },
+ "00657830": {
+  "module": "controls",
+  "name": "C_AllToggleButton::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00657850": {
+  "module": "controls",
+  "name": "C_AllToggleButton::~C_AllToggleButton",
+  "proto": "void __thiscall ~C_AllToggleButton(void *this)"
  },
  "00657980": {
   "module": "controls",
@@ -29106,6 +29341,16 @@
   "name": "C_Slider::~C_Slider",
   "proto": "void __thiscall ~C_Slider(C_Slider *this)"
  },
+ "0065f610": {
+  "module": "controls",
+  "name": "C_ToggleButton::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0065f630": {
+  "module": "controls",
+  "name": "C_ToggleButton::~C_ToggleButton",
+  "proto": "void __thiscall ~C_ToggleButton(void *this)"
+ },
  "0065f8d0": {
   "module": "controls",
   "name": "C_Tooltip::ScalarDeletingDestructor",
@@ -29146,6 +29391,26 @@
   "name": "C_TextButton::~C_TextButton",
   "proto": "void __thiscall ~C_TextButton(C_TextButton *this)"
  },
+ "00660310": {
+  "module": "controls",
+  "name": "C_CheckBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00660330": {
+  "module": "controls",
+  "name": "C_CheckBox::~C_CheckBox",
+  "proto": "void __thiscall ~C_CheckBox(void *this)"
+ },
+ "00660470": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00660490": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::~C_HighlightCheckBox",
+  "proto": "void __thiscall ~C_HighlightCheckBox(void *this)"
+ },
  "006605c0": {
   "module": "controls",
   "name": "C_SpinControl::ScalarDeletingDestructor",
@@ -29155,6 +29420,26 @@
   "module": "controls",
   "name": "C_SpinControl::~C_SpinControl",
   "proto": "void __thiscall ~C_SpinControl(C_SpinControl *this)"
+ },
+ "00660e00": {
+  "module": "controls",
+  "name": "C_SideIndicator::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00660e20": {
+  "module": "controls",
+  "name": "C_SideIndicator::~C_SideIndicator",
+  "proto": "void __thiscall ~C_SideIndicator(void *this)"
+ },
+ "00660f50": {
+  "module": "controls",
+  "name": "C_MarkBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_MarkBox *this, uchar flags)"
+ },
+ "00660f70": {
+  "module": "controls",
+  "name": "C_MarkBox::~C_MarkBox",
+  "proto": "void __thiscall ~C_MarkBox(C_MarkBox *this)"
  },
  "00661bc0": {
   "module": "control",
@@ -29248,6 +29533,41 @@
  "00663dc0": {
   "module": "zz_idioms",
   "name": "construct_copy4_663dc0"
+ },
+ "00663e20": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::SetInactive",
+  "proto": "void __thiscall SetInactive(void *this, bool inactive)"
+ },
+ "00663e80": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::Setup",
+  "proto": "bool __thiscall Setup(void *this, void * empty, void * full, void * activeFull, void * activeEmpty)"
+ },
+ "00663f90": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::OnEnter",
+  "proto": "int __thiscall OnEnter(void *this, int id)"
+ },
+ "00664070": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::OnLeave",
+  "proto": "int __thiscall OnLeave(void *this, int id)"
+ },
+ "006640f0": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(void *this, int id)"
+ },
+ "006641c0": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::LinkFrames",
+  "proto": "void __thiscall LinkFrames(void *this, void * parent)"
+ },
+ "00664200": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::SetFull",
+  "proto": "void __thiscall SetFull(void *this, bool full)"
  },
  "00664300": {
   "module": "controls",

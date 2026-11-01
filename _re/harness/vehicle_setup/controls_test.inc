@@ -8,6 +8,7 @@
 #define protected public
 #include "game/controls.h"
 #include "game/cursor.h"
+#include "game/mp_zone.h"
 #include "game/paged_text_box.h"
 #undef protected
 #undef private
@@ -40,6 +41,7 @@ int C_Cursor::GetStillTime() const { return g_csCursor.still; }
 void C_Cursor::GetMove(S_vector *move) const { *move = g_csCursor.move; }
 
 void ScrollTest(I3D_scene *scene, int st);
+void CheckTest(I3D_scene *scene);
 
 namespace {
 
@@ -988,6 +990,7 @@ void ControlsTest()
 
     WM(r.csHandled, g_csHandled);
     ScrollTest(scene, st);
+    CheckTest(scene);
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
     g_gfLog.clear();
@@ -1003,3 +1006,4 @@ void ControlsTest()
 }
 
 #include "scroll_test.inc"
+#include "check_test.inc"

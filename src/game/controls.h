@@ -1,8 +1,9 @@
 // The interface's small controls (game/controls.cpp, part 9c-ii; the base: game/control.h): the
 // text controls (a text box on the control's frame), the button, the text button, the picture, the
 // tooltip, the frame switch, the group (its input passed to the child under the cursor) and the
-// paged text control; part 9c-iii-a: the slider, the scroll bar and the spin control. Made by the
-// factory (C_Control::CreateChild) by their descriptions' types.
+// paged text control; part 9c-iii-a: the slider, the scroll bar and the spin control; part 9c-iii-b:
+// the check boxes, the toggle buttons, the side indicator and the mark. Made by the factory
+// (C_Control::CreateChild) by their descriptions' types.
 #pragma once
 
 #include "game/control.h"
@@ -13,6 +14,9 @@ class C_TextBox;
 struct S_vector;
 class I3D_face_group;
 class I3D_texture;
+
+// The mark's click (value: its value).
+constexpr uint32_t CONTROL_NOTIFY_0E = 0x400E000;
 
 // The text controls' messages (their box's).
 enum : uint32_t {
@@ -65,6 +69,15 @@ enum : uint32_t {
     CONTROL_MSG_CLEAR_ITEMS = 0x2000065,                // (inactive)
     CONTROL_MSG_PREVIOUS_ITEM = 0x200001B,              // (its arrows' press; around)
     CONTROL_MSG_NEXT_ITEM = 0x200001C,
+    // The check boxes' and the toggle buttons' (value: checked; also the mark's).
+    CONTROL_MSG_GET_CHECKED = 0x100006C,
+    CONTROL_MSG_SET_CHECKED = 0x100006D,                // (changed: CONTROL_NOTIFY_CHANGED)
+    CONTROL_MSG_SET_CHECKED_QUIET = 0x1000076,          // (the check boxes': no notification)
+    // The side indicator's (value: 0 axis, 1 allied, else none).
+    CONTROL_MSG_SET_SIDE = 0x1000097,
+    CONTROL_MSG_GET_SIDE = 0x1000098,
+    // The mark's: its title shows the value, two digits.
+    CONTROL_MSG_SET_NUMBER = 0x1000078,
     // A control to be ticked (posted to target 0 when made, value2 the control: the tooltip, the
     // scroll bar and its arrows).
     CONTROL_MSG_ADD_TICKER = 0x200007A,
@@ -409,4 +422,209 @@ protected:
     std::vector<C_str> m_items;                         // +0x78
     int m_selected = -1;                                // +0x8C
     int m_focus = -1;                                   // +0x90
+};
+
+// A check box (type 9, vtable 0x00815200): a text control with "yes_full*" / "yes_empty*" /
+// "no_full*" / "no_empty*" frames, checked (yes full, no empty) or not; a click toggles it.
+class C_CheckBox : public C_TextControl {               // 0x84 bytes
+public:
+    C_CheckBox(I3D_scene *scene, uint32_t id, C_Control *parent) : C_TextControl(scene, id, parent) {}
+    ~C_CheckBox() override = default;                   // 0x00660310 (0x00660330)
+
+    // The frames (false: not 4 children, one not found, no box), checked; the box placed.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00654120
+    // The box's hover (inactive: not handled).
+    int OnEnter(int id) override;                       // 0x00654060
+    // (Its notification CONTROL_NOTIFY_ENTER too: the original's.)
+    int OnLeave(int id) override;                       // 0x006540a0
+    int OnClick(int id) override;                       // 0x00654110
+    // The id's last bits: 1 (a no frame) unchecks, 2 (a yes frame) checks.
+    int OnKeyClick(int id) override;                    // 0x006540d0
+    // GET_CHECKED, SET_CHECKED, SET_CHECKED_QUIET.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00654420
+
+protected:
+    // Checked or not, then CONTROL_NOTIFY_CHANGED (the value: checked).
+    void Toggle();                                      // 0x00654300
+    void Check();                                       // 0x00654340
+    void Uncheck();                                     // 0x006543b0
+
+    I3D_frame *m_yesFull = nullptr;                     // +0x70
+    I3D_frame *m_yesEmpty = nullptr;                    // +0x74
+    I3D_frame *m_noFull = nullptr;                      // +0x78
+    I3D_frame *m_noEmpty = nullptr;                     // +0x7C
+    bool m_checked = true;                              // +0x80
+};
+
+// A toggle button (type 0xa, vtable 0x00814c28): down or up, its "normaldown*" / "normalup*"
+// frame, the "actived" one while the cursor is over it; a click toggles it.
+class C_ToggleButton : public C_Control {               // 0x84 bytes
+public:
+    C_ToggleButton(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
+    ~C_ToggleButton() override = default;               // 0x0065f610 (0x0065f630)
+
+    // The frames (false: not 4 children, one not found), down.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00654f80
+    int OnEnter(int id) override;                       // 0x00655320
+    int OnLeave(int id) override;                       // 0x00655390
+    int OnClick(int id) override;                       // 0x00655300
+    int OnPress(int) override { return CONTROL_HANDLED; }   // 0x00655310
+    // GET_CHECKED (down), SET_CHECKED.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x006551a0
+
+protected:
+    // Create's, with the frames' names.
+    bool CreateFrames(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc, const char *activeDown,
+                      const char *normalDown, const char *activeUp, const char *normalUp);
+    // Up or down, then CONTROL_NOTIFY_CHANGED (0).
+    void Toggle();                                      // 0x00655200
+
+    I3D_frame *m_activeDown = nullptr;                  // +0x6C
+    I3D_frame *m_normalDown = nullptr;                  // +0x70
+    I3D_frame *m_activeUp = nullptr;                    // +0x74
+    I3D_frame *m_normalUp = nullptr;                    // +0x78
+    int m_unknown7C = -1;                               // +0x7C (not read)
+    bool m_down = true;                                 // +0x80
+    bool m_over = false;                                // +0x81 the cursor over it
+};
+
+// The "all" toggle button (vtable 0x00814100; made by the control of vtable 0x008145c8): its
+// frames "allactived" / "allnormal" (down) and "xallactived" / "xallnormal" (up).
+class C_AllToggleButton : public C_ToggleButton {       // 0x84 bytes
+public:
+    C_AllToggleButton(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ToggleButton(scene, id, parent) {}
+    ~C_AllToggleButton() override = default;            // 0x00657830
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00654d60
+};
+
+// A half of the highlighted check box (vtable 0x00814078): empty or full, its "actived" frame
+// while the cursor is over it (the active empty frame shared by both halves).
+class C_CheckBoxHalf : public C_Control {               // 0x80 bytes
+public:
+    C_CheckBoxHalf(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
+    ~C_CheckBoxHalf() override = default;               // 0x006548c0 (0x006548e0)
+
+    // Not while inactive or already over it.
+    int OnEnter(int id) override;                       // 0x00663f90
+    int OnLeave(int id) override;                       // 0x00664070
+    // While over it: the other state's active frame shown (the state kept).
+    int OnKeyClick(int id) override;                    // 0x006640f0
+    // The normal frames' alpha 0.4 (inactive) or 1.
+    void SetInactive(bool inactive) override;           // 0x00663e20
+
+    // Its frames, the empty one its frame (on); true.
+    bool Setup(I3D_frame *empty, I3D_frame *full, I3D_frame *activeFull, I3D_frame *activeEmpty);   // 0x00663e80
+    // Full or empty (the frames shown).
+    void SetFull(bool full);                            // 0x00664200
+    // The frames linked to `parent` (null: unlinked).
+    void LinkFrames(I3D_frame *parent);                 // 0x006641c0
+
+protected:
+    // The active empty frame on at the empty one's place.
+    void ShowActiveEmpty();
+
+    I3D_frame *m_emptyFrame = nullptr;                  // +0x6C
+    I3D_frame *m_fullFrame = nullptr;                   // +0x70
+    I3D_frame *m_activeFullFrame = nullptr;             // +0x74
+    I3D_frame *m_activeEmptyFrame = nullptr;            // +0x78
+    bool m_over = false;                                // +0x7C
+    bool m_empty = true;                                // +0x7D
+};
+
+// A highlighted check box (type 0x24, vtable 0x00815178): a text control with a yes and a no half
+// (C_CheckBoxHalf, its children), checked (yes full, no empty) or not; a click toggles it.
+class C_HighlightCheckBox : public C_TextControl {      // 0x80 bytes
+public:
+    C_HighlightCheckBox(I3D_scene *scene, uint32_t id, C_Control *parent) : C_TextControl(scene, id, parent) {}
+    ~C_HighlightCheckBox() override = default;          // 0x00660470 (0x00660490)
+
+    // The box placed, the halves made (false: no box, not 7 children, a frame not found), checked.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00654500
+    // The box's hover, the half with the id's (inactive: not handled).
+    int OnEnter(int id) override;                       // 0x00654b60
+    int OnLeave(int id) override;                       // 0x00654bd0
+    int OnClick(int id) override;                       // 0x00654c40
+    // To another half: the leave, the enter (nothing before an enter).
+    int OnInput05(int id) override;                     // 0x00654c50
+    int OnKeyClick(int id) override;                    // 0x00654c30
+    // GET_CHECKED, SET_CHECKED, SET_CHECKED_QUIET; FACE_FRONT turns its frame to (0, 0, -1).
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00654a10
+    void SetInactive(bool inactive) override;           // 0x006544c0
+
+protected:
+    // The half the id's last bits name (1 yes, 2 no; else null).
+    C_CheckBoxHalf *Half(uint32_t id) const;
+    // Checked or not, then CONTROL_NOTIFY_CHANGED (the value: checked).
+    void Toggle();                                      // 0x00654cc0
+    void Check();                                       // 0x00654d00
+    void Uncheck();                                     // 0x00654d30
+
+    C_CheckBoxHalf *m_yes = nullptr;                    // +0x70
+    C_CheckBoxHalf *m_no = nullptr;                     // +0x74
+    bool m_checked = true;                              // +0x78
+    uint32_t m_overId = 0;                              // +0x7C the half's id under the cursor (0: none)
+};
+
+// A side indicator (type 0x1e, vtable 0x008146d8): its "allied*" or "axis*" frame shown by a side;
+// every 2 s the side of the zone (a C_MPZone) set as its index (CONTROL_MSG_SET_INDEX).
+class C_SideIndicator : public C_Control {              // 0x80 bytes
+public:
+    C_SideIndicator(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
+    ~C_SideIndicator() override = default;              // 0x00660e00 (0x00660e20)
+
+    // Every 2 s the zone's team.
+    void Tick(int time) override;                       // 0x00652430
+    // The frames (false: fewer than 3 children; both off), no side; posted to be ticked.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006521f0
+    // Its notification only.
+    int OnKeyClick(int id) override;                    // 0x00652470
+    // SET_SIDE, GET_SIDE.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00652380
+
+protected:
+    // The side (TEAM_*) shown, then CONTROL_NOTIFY_CHANGED (0); unless already.
+    void SetSide(int side);                             // 0x006523d0
+
+    int m_unknown6C = 0;                                // +0x6C (not read)
+    I3D_frame *m_alliedFrame = nullptr;                 // +0x70
+    I3D_frame *m_axisFrame = nullptr;                   // +0x74
+    int m_side = 0;                                     // +0x78
+    int m_timer = 0;                                    // +0x7C ms to the next look
+};
+
+// A mark (type 0x1f, vtable 0x00814650): its "yesnormal*" frame (marked) or its "emptynormal*" one
+// (the other four kept off), and a title on its "text_*" frame showing a number ("00").
+class C_MarkBox : public C_Control {                    // 0x8C bytes
+public:
+    C_MarkBox(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
+    ~C_MarkBox() override;                              // 0x00660f50 (0x00660f70): the title deleted
+
+    // The title's only.
+    void Refresh() override;                            // 0x006525e0
+    // The title (optional), the frames (false: one not found), the empty one shown.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006525f0
+    // Handled unless inactive.
+    int OnEnter(int) override { return m_inactive ? 0 : CONTROL_HANDLED; }   // 0x00652490
+    int OnLeave(int) override { return CONTROL_HANDLED; }   // 0x006524a0
+    // CONTROL_NOTIFY_0E (its value).
+    int OnClick(int id) override;                       // 0x006524e0
+    int OnKeyClick(int id) override;                    // 0x006524b0
+    // GET_CHECKED, SET_CHECKED (marked), SET_NUMBER.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x006528a0
+
+protected:
+    // A frame at `place`'s place, off.
+    void PlaceFrame(I3D_frame *frame, I3D_frame *place);   // 0x00652570
+    // Marked (the yes frame shown) or not (the empty one).
+    void Mark();                                        // 0x00652510
+    void Unmark();                                      // 0x00652540
+
+    C_TitleControl *m_title = nullptr;                  // +0x6C
+    I3D_frame *m_noActive = nullptr;                    // +0x70
+    I3D_frame *m_noNormal = nullptr;                    // +0x74
+    I3D_frame *m_yesActive = nullptr;                   // +0x78
+    I3D_frame *m_yesNormal = nullptr;                   // +0x7C
+    I3D_frame *m_emptyActive = nullptr;                 // +0x80
+    I3D_frame *m_emptyNormal = nullptr;                 // +0x84
+    uint8_t m_value = 0;                                // +0x88
 };

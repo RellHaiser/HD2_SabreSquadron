@@ -107,6 +107,7 @@ struct C_MPZone;
 struct C_MPZone__stub;
 struct C_MPZone_vtbl__stub;
 struct C_MainMenu;
+struct C_MarkBox;
 struct C_MeleeTracker;
 struct C_MeleeTrackerScript;
 struct C_MeleeTrackerScript__stub;
@@ -277,7 +278,6 @@ struct C_auto_00813b68;
 struct C_auto_00813ee0;
 struct C_auto_00814298;
 struct C_auto_00814540;
-struct C_auto_00814650;
 struct C_auto_00814760;
 struct C_auto_008147e8;
 struct C_auto_00814980;
@@ -18298,6 +18298,21 @@ struct C_MainMenu {
     uint8_t _pad_01e8[43];
     void * m_213;
 };
+struct C_MarkBox {
+    C_auto_00814650_vtbl * vtable;
+    uint8_t _pad_0004[92];
+    uint32_t m_060;
+    uint8_t _pad_0064[4];
+    uint32_t m_068;
+    void * m_06c;
+    uint32_t m_070;
+    uint32_t m_074;
+    uint32_t m_078;
+    uint32_t m_07c;
+    uint32_t m_080;
+    int m_084;
+    uint8_t m_088;
+};
 struct C_MeleeTracker {
     C_MeleeTracker_vtbl * vtable;
     uint8_t _pad_0004[12];
@@ -21711,21 +21726,6 @@ struct C_auto_00814540 {
     void * m_050;
     uint8_t _pad_0054[24];
     void * m_06c;
-};
-struct C_auto_00814650 {
-    C_auto_00814650_vtbl * vtable;
-    uint8_t _pad_0004[92];
-    uint32_t m_060;
-    uint8_t _pad_0064[4];
-    uint32_t m_068;
-    void * m_06c;
-    uint32_t m_070;
-    uint32_t m_074;
-    uint32_t m_078;
-    uint32_t m_07c;
-    uint32_t m_080;
-    int m_084;
-    uint8_t m_088;
 };
 struct C_auto_00814760 {
     C_auto_00814760_vtbl * vtable;

@@ -6421,6 +6421,38 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     class_names.json, auto_members.json; 0x0065cae0 moved to C_Control); names/controls.txt (40) and
     control.txt (FindControl); 41 functions in ported.txt. Stats: 8,295 of 12,293 functions by hand (74.8 % by size).
 
+  PART 9c-iii-b DONE (2026-11-01): the check boxes, the toggle buttons, the side indicator and the
+  mark (src/game/controls.*). Messages: GET_CHECKED 0x100006C / SET_CHECKED 0x100006D (the spin
+  control's GET_SELECTED_2 / SELECT_ITEM codes), SET_CHECKED_QUIET 0x1000076, SET_SIDE 0x1000097 /
+  GET_SIDE 0x1000098, SET_NUMBER 0x1000078; CONTROL_NOTIFY_0E 0x400E000 (the mark's click).
+  - C_CheckBox (type 9, vtable 0x00815200, 0x84 bytes): a text control, "yes_full*" / "yes_empty*" /
+    "no_full*" / "no_empty*" (exactly 4 children; the no frames' ids | 1, the yes frames' | 2),
+    checked at first; the click toggles (CONTROL_NOTIFY_CHANGED, the state), the key click by the
+    frame's id; the leave notifies ENTER (kept). SET_CHECKED compares the value's low byte (2:
+    toggled, then set back: kept).
+  - C_ToggleButton (type 0xa, vtable 0x00814c28, 0x84): down / up, "normaldown*" / "normalup*" and
+    their "actived" frames over it; C_AllToggleButton (vtable 0x00814100, made by the 0x008145c8
+    control's Create 0x006574d0): the frames "allactived" / "allnormal" / "xallactived" / "xallnormal".
+  - C_HighlightCheckBox (type 0x24, vtable 0x00815178, 0x80): a text control with two
+    C_CheckBoxHalf children (vtable 0x00814078, 0x80; ids | 1 yes, | 2 no; empty / full, the active
+    frame under the cursor; "noactived_empty*" shared by both halves; exactly 7 children); FACE_FRONT
+    unlinks the halves' frames, turns the frame to (0, 0, -1) and links them again.
+  - C_SideIndicator (type 0x1e, vtable 0x008146d8, 0x80): "allied*" / "axis*" by the side (TEAM_*);
+    ticked (ADD_TICKER), every 2 s the team of the C_MPZone whose address the menus set as its index
+    (+0x98, C_MPZone::GetTeam).
+  - C_MarkBox (type 0x1f, vtable 0x00814650, 0x8C; was C_auto_00814650): "yesnormal*" (marked) or
+    "emptynormal*" (the four other frames kept off), a title on "text_*" ("00"; SET_NUMBER "%02d").
+  - Harness: check_test.inc in the text build, run by ControlsTest after ScrollTest ("check:", 12
+    checks; the zone a C_MPZone-sized buffer). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9c3b.py, generated, the text build on one mission in 4 parallel
+    runs): 313 of 317 caught (8 more do not build; 9 survived the first run: new cases for the first frame missing and the toggle button's frame; 4 equivalent, see the file's docstring)
+  - Build: MSVC clean. Tier 1: 482 errors in 80 files, 195 stubs (from 483 / 81 / 196). ret_audit
+    --src: 52 (PlaceFrame / Mark / Unmark kept the original's arguments).
+  - Ghidra: C_auto_00814650 renamed C_MarkBox (90_auto.spec, class_names.json, auto_members.json;
+    OnEnter's `this` set by hand: names.py's transaction error); names/controls.txt (64; the other
+    classes have no struct: void *this); 64 functions in ported.txt. Stats: 8,359 of 12,293
+    functions by hand (75.1 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

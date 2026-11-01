@@ -292,8 +292,6 @@ f_0065ae90.cpp:889:46: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_
     (_this[0x14].vtable)->vf3b = _this[0x18].vtable;
 f_0065ae90.cpp:897:48: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_t (*)(...)' {aka 'unsigned int (*)(...)'} in assignment
     (_this[0x22].vtable)->vf3b = _this[0x18].vtable;
-f_00663df0.cpp:25:5: '_param_1' was not declared in this scope; did you mean 'param_1'?
-    _param_1 = 0x3ecccccd;
 f_006683f0.cpp:690:53: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
 f_006683f0.cpp:700:53: no matching function for call to 'tier1::C_str::C_str(int)'

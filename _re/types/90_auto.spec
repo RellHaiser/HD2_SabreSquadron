@@ -442,7 +442,7 @@ end
 class C_auto_00814540 size=0x4 vtable=0x00814540:33
 end
 
-class C_auto_00814650 size=0x89 vtable=0x00814650:33
+class C_MarkBox size=0x89 vtable=0x00814650:33
   0x088 uint8_t m_088
 end
 
