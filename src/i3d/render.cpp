@@ -804,10 +804,6 @@ I3D_RESULT I3D_driver::Render(I3D_scene *scene, bool keepScene)
     g_rc.lodPosition = *reinterpret_cast<const S_vector4 *>(&cam->GetMatrix()(3));
     g_rc.scene = scene;
     g_rc.sector = nullptr;
-    if (g_driverStates[DRVSTATE_SHADOWS]) {
-        for (int i = 0; i < scene->shadows.Size(); ++i)
-            PrepareShadow(scene->shadows[i]);
-    }
     g_viewProjection = &cam->viewProjection;
     TraverseSectors(scene);
     OccludeSectors(scene);
@@ -918,8 +914,6 @@ I3D_RESULT I3D_driver::Render(I3D_scene *scene, bool keepScene)
     }
     if (g_driverStates[DRVSTATE_PROJECTORS])
         RenderProjectors();
-    if (g_driverStates[DRVSTATE_SHADOWS])
-        RenderShadows();
     scene->UpdateWeather();
     BuildKeys();
     RadixSort(g_rc.keys, g_rc.numKeys);

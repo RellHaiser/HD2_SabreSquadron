@@ -1,26 +1,23 @@
 // Projected shadows: I3D_shadow (FRAME_SHADOW; vtable 0x1009bf30, 0x210 bytes; 0x1004e5d0 -
-// 0x10050770) and its visual I3D_shadow_visual ('SHD'; vtable 0x1009c8a0, 0x230 bytes; 0x100507e0 -
-// 0x10051d20).
+// 0x10050770). In LS3DF also its visual I3D_shadow_visual ('SHD'; vtable 0x1009c8a0, 0x230 bytes;
+// 0x100507e0 - 0x10051d20).
 //
 // A shadow is linked into a model; its shadow file (.6ds: named parts of a simplified mesh) picks
 // the model's frames whose names match the parts (the casters). Each frame the renderer finds the
 // strongest light of the shadow's sector that casts shadows (SetMode bit 8), looks along it,
 // rasterizes the casters' silhouette into an A4R4G4B4 alpha texture and moves the visual (a box
 // along the light: the shadow volume); the visual projects that texture onto the meshes it meets.
+//
+// LS3DRF has neither the visual nor that render path: a shadow keeps its settings only, and the
+// visual factory makes nothing for 'SHD'.
 #pragma once
 
 #include "core/c_vector.h"
-#include "i3d/vb_manager.h"
-#include "i3d/visual.h"
+#include "i3d/frame.h"
 
 class I3D_scene;
 class I3D_sector;
-class I3D_shadow_visual;
 class ITexture;
-
-namespace ls3d::i3d {
-struct S_renderItem;
-}
 
 // I3D_shadow::shadowFlags.
 enum : uint32_t {
@@ -105,11 +102,11 @@ public:
     uint32_t unknown144[3];                 // +0x144
     I3D_bbox bounds;                        // +0x150 the casters in light space
     S_vector4 color;                        // +0x170
-    I3D_scene *scene;                       // +0x180 the scene whose shadow list holds it
+    I3D_scene *scene;                       // +0x180 (null: no scene keeps a shadow list)
     I3D_sector *lightSector;                // +0x184 the sector above it
     S_shadowCaster *casters;                // +0x188
     int numCasters;                         // +0x18C
-    I3D_shadow_visual *visual;              // +0x190
+    uint32_t unknown190;                    // +0x190 (LS3DF: the shadow visual; never set)
     int mapWidth;                           // +0x194 (64)
     int mapHeight;                          // +0x198 (64)
     float depth;                            // +0x19C (8)
@@ -129,43 +126,6 @@ static_assert(offsetof(I3D_shadow, data) == 0x124, "I3D_shadow layout");
 static_assert(offsetof(I3D_shadow, bounds) == 0x150, "I3D_shadow layout");
 static_assert(offsetof(I3D_shadow, lightMatrix) == 0x1B0, "I3D_shadow layout");
 static_assert(offsetof(I3D_shadow, opacity) == 0x20C, "I3D_shadow layout");
-
-class I3D_shadow_visual : public I3D_visual {
-public:
-    void Init() override;                                                      // 0x60 0x100507e0
-    void Uninit() override;                                                    // 0x64 0x10050920
-    // 0x94 0x100509c0: queued for the shadow pass (or its kept geometry queued at once).
-    void Prepare() override;
-    void Draw(const ls3d::i3d::S_renderItem *item) override;                  // 0x98 0x100519b0
-
-    // 0x10050ac0: the geometry's items queued (blended, the first part first).
-    void QueueItems();
-    // 0x10050cf0: the meshes under the shadow projected into its volume.
-    void Build();
-
-    struct S_vertex {
-        S_vector pos;
-        uint32_t color;
-        float u, v;
-    };
-
-    S_vector4 center;                       // +0x1E0 (renderer) the blended part's center (never set)
-    I3D_shadow *owner;                      // +0x1F0
-    S_vertex *vertices;                     // +0x1F4 (modes 0 - 2)
-    int vertexCapacity;                     // +0x1F8
-    int numVertices;                        // +0x1FC
-    uint16_t *faceIndices;                  // +0x200 (modes 0 - 2)
-    int faceCapacity;                       // +0x204
-    int numOpaqueFaces;                     // +0x208
-    int numBlendedFaces;                    // +0x20C
-    ls3d::S_VBAlloc vb;                     // +0x210 (mode 3)
-    ls3d::S_IBAlloc ib;                     // +0x21C (mode 3)
-    int numReceivers;                       // +0x228 the meshes under it, last built
-    int receiverStamp;                      // +0x22C their changes
-};
-static_assert(sizeof(I3D_shadow_visual) == 0x230, "I3D_shadow_visual layout");
-static_assert(offsetof(I3D_shadow_visual, owner) == 0x1F0, "I3D_shadow_visual layout");
-static_assert(offsetof(I3D_shadow_visual, vb) == 0x210, "I3D_shadow_visual layout");
 
 namespace ls3d::i3d {
 
