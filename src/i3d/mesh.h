@@ -49,7 +49,7 @@ static_assert(sizeof(I3D_face_group) == 0x1C, "I3D_face_group layout");
 enum : uint32_t {
     // How FillRenderVB makes the environment texture coordinates (the material's SetBits12
     // value): 2 - 4 from the position transformed by the matrix it gets (x z, y z, x y), 5 the
-    // level's extra data.
+    // level's extra data. (LS3DRF: 5 only; 2 - 4 write nothing.)
     MLF_ENV_SOURCE_MASK = 0x07,
     MLF_ENV = 0x08,                         // a face group's material has an environment texture
     MLF_RENDER_STALE = 0x20,                // the render vertex buffer waits for FillRenderVB
@@ -99,7 +99,7 @@ public:
     virtual bool __stdcall CreateRenderVB(uint32_t flags, const S_matrix *envMatrix, ls3d::S_VBAlloc *dest);
     virtual void __stdcall FreeRenderVB();                      // 0x34 0x10031a00
     // 0x38 0x10031a30: copies the vertices into the render vertex buffer with what it adds;
-    // `deferred` (or no buffer) only marks it stale.
+    // `deferred` (or no buffer) only marks it stale. (LS3DRF: `envMatrix` unused.)
     virtual void __stdcall FillRenderVB(bool deferred, const S_matrix *envMatrix, ls3d::S_VBAlloc *dest);
     // 0x3C 0x10031d20: the extra per-vertex data's layout (bits: 1 four bytes, 2 eight, 4 16, 8
     // 24); returns the new (uninitialised) array.
@@ -168,13 +168,3 @@ public:
 };
 static_assert(sizeof(I3D_mesh) == 0x70, "I3D_mesh layout");
 static_assert(offsetof(I3D_mesh, levels) == 0x48, "I3D_mesh layout");
-
-namespace ls3d::i3d {
-
-// The renderer's environment texture coordinates (0x10065a90): each vertex copied with (u, v)
-// after it, from two axes of its position times `matrix`, scaled by `scale` and the driver's
-// DRVSTATE_ENV_UV_SCALE / 2 sqrt(2).
-void MakeEnvCoordinates(uint8_t *dst, int dstStride, const uint8_t *src, int srcStride, int count,
-                        const S_matrix *matrix, float scale, int source);
-
-}  // namespace ls3d::i3d

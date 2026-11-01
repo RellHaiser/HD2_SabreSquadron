@@ -37,10 +37,18 @@
 //        ray, 2 the targeted rays' hit rate]
 //
 // test-sources: src/i3d/collision_ray.cpp src/i3d/collision_sphere.cpp src/math/math.cpp src/core/debug.cpp src/dx/dxerr8.cpp
+#include <windows.h>
+
 #include <float.h>
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <random>
+#include <string>
+#include <vector>
 
 #include "../src/core/debug.h"
 #include "../src/i3d/billboard.h"
@@ -53,7 +61,8 @@
 #include "../src/i3d/sector.h"
 #include "../src/igraph/igraph_state.h"
 #include "../src/igraph/itexture.h"
-#include "buffer_check.h"
+#include "d3d8/d3d8_device.h"
+#include "fake_d3d8_base.h"
 #include "test_paths.h"
 
 // ---------------------------------------------------------------- engine parts not linked
@@ -61,9 +70,103 @@
 namespace ls3d::i3d {
 uint32_t g_driverStates[DRVSTATE_COUNT];
 }
-namespace ls3d::ig {
-IDirect3DDevice8 *g_pDevice;
+
+// ---------------------------------------------------------------- the original
+
+namespace {
+
+using namespace ls3d;
+
+uint8_t *g_base;
+template <class T> T &Orig(uint32_t va) { return *reinterpret_cast<T *>(g_base + (va - 0x10000000)); }
+template <class F> F OrigFn(uint32_t va) { return reinterpret_cast<F>(g_base + (va - 0x10000000)); }
+
+std::mt19937 g_rng;
+long g_op;
+std::string g_lastOp = "start";
+int Rand(int n) { return static_cast<int>(g_rng() % static_cast<uint32_t>(n)); }
+
+[[noreturn]] void Fail(const std::string &what, long a, long b)
+{
+    std::printf("MISMATCH after op %ld (%s): %s: original %ld (0x%lx), port %ld (0x%lx)\n", g_op, g_lastOp.c_str(),
+                what.c_str(), a, static_cast<unsigned long>(a), b, static_cast<unsigned long>(b));
+    std::exit(1);
 }
+void Check(const std::string &what, long a, long b)
+{
+    if (a != b)
+        Fail(what, a, b);
+}
+
+// The original's meshes lock their buffers on its Direct3D device: a fake one whose vertex and
+// index buffers keep their bytes.
+struct FakeIB : FakeDirect3DIndexBuffer8Base {
+    std::vector<uint8_t> data;
+    HRESULT __stdcall Lock(UINT, UINT, BYTE **out, DWORD) override
+    {
+        *out = data.data();
+        return S_OK;
+    }
+    HRESULT __stdcall Unlock() override { return S_OK; }
+};
+struct FakeVB : FakeDirect3DVertexBuffer8Base {
+    std::vector<uint8_t> data;
+    HRESULT __stdcall Lock(UINT, UINT, BYTE **out, DWORD) override
+    {
+        *out = data.data();
+        return S_OK;
+    }
+    HRESULT __stdcall Unlock() override { return S_OK; }
+};
+
+struct BufferDevice : FakeDirect3DDevice8Base {
+    HRESULT __stdcall ResourceManagerDiscardBytes(DWORD) override { return S_OK; }
+    HRESULT __stdcall CreateIndexBuffer(UINT length, DWORD, D3DFORMAT, D3DPOOL, IDirect3DIndexBuffer8 **out) override
+    {
+        auto *b = new FakeIB;
+        b->data.resize(length);
+        *out = b;
+        return S_OK;
+    }
+    HRESULT __stdcall CreateVertexBuffer(UINT length, DWORD, DWORD, D3DPOOL, IDirect3DVertexBuffer8 **out) override
+    {
+        auto *b = new FakeVB;
+        b->data.resize(length);
+        *out = b;
+        return S_OK;
+    }
+};
+BufferDevice g_device;
+
+// Loads the original and points it at the fake device. False when it cannot.
+bool SetUpOriginal(const char *origPath)
+{
+    HMODULE dll = LoadLibraryA(origPath);
+    if (!dll) {
+        std::printf("cannot load %s (%lu)\n", origPath, GetLastError());
+        return false;
+    }
+    g_base = reinterpret_cast<uint8_t *>(dll);
+    Orig<uint8_t>(0x100d16f2) = 1;              // no log
+    if (!Orig<void *>(0x100d16f8)) {
+        std::printf("the original's driver does not exist\n");
+        return false;
+    }
+    Orig<IDirect3DDevice8 *>(0x100d216c) = &g_device;
+    return true;
+}
+
+void __stdcall NoOp(void *) {}
+
+LONG WINAPI CrashFilter(EXCEPTION_POINTERS *info)
+{
+    std::printf("CRASH (0x%08lx at %p) in op %ld (%s)\n", info->ExceptionRecord->ExceptionCode,
+                info->ExceptionRecord->ExceptionAddress, g_op, g_lastOp.c_str());
+    std::fflush(stdout);
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
+}  // namespace
 
 // The original's functions for what the port's collision code calls outside it.
 void I3D_frame::UpdateWMatrixProc() { OrigFn<void(__fastcall *)(I3D_frame *, void *)>(0x1001e390)(this, nullptr); }
@@ -942,12 +1045,11 @@ int main(int argc, char **argv)
     const char *origPath = OriginalDllPath(argc > 1 ? argv[1] : nullptr);
     const long ops = argc > 2 ? std::atol(argv[2]) : 20000;
     const uint32_t seed = argc > 3 ? static_cast<uint32_t>(std::strtoul(argv[3], nullptr, 0)) : 1;
-    if (!SetUpBuffers(origPath))
+    if (!SetUpOriginal(origPath))
         return 2;
     g_logDisabled = true;
     _controlfp(_PC_24, _MCW_PC);
     g_rng.seed(seed);
-    g_ownerIndex = [](const void *, int, bool) { return 0; };
     g_origDriver = Orig<uint8_t *>(0x100d16f8);
     BuildScene();
     if (argc > 4 && std::atoi(argv[4]) == 1) {

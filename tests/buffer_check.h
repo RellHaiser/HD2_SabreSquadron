@@ -1,28 +1,26 @@
-// Test support shared by compare_buffers and compare_mesh: the original DLL's address helpers,
-// mismatch reports, a fake Direct3D device per side whose vertex / index buffers keep their bytes
-// and log every call, and the comparison of both sides' buffer managers (trees node for node,
-// buffers, locked lists, device logs).
-//
-// The including test sets g_ownerIndex: an allocation record's identity (the S_IBAlloc /
-// S_VBAlloc a block points back to) on its side.
+// Test support shared by compare_buffers and compare_mesh: the original LS3DRF.dll's address
+// helpers, mismatch reports, and the buffers' memory. LS3DRF's vertex and index buffers are heap
+// blocks of their own (vb_manager.h); the original's four calls that make and free that memory
+// (IB Alloc's operator new, IB Free's delete, VB Alloc's _aligned_malloc, VB Free's _aligned_free)
+// are patched to the test's, which take the same functions of the test's C runtime and record each
+// block's size as the heap reports it. Both sides' blocks then compare by size: the original's
+// from the record, the port's from the heap (_msize / _aligned_msize).
 #pragma once
 
 #include <windows.h>
 
-#include <cstdarg>
+#include <malloc.h>
+
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <map>
+#include <new>
 #include <random>
 #include <string>
-#include <vector>
 
-#include "d3d8/d3d8_device.h"
 #include "../src/i3d/vb_manager.h"
-#include "../src/igraph/igraph_state.h"
-#include "fake_d3d8_base.h"
 
 namespace {
 
@@ -49,316 +47,104 @@ void Check(const std::string &what, long a, long b)
         Fail(what, a, b);
 }
 
-// ---------------------------------------------------------------- the fake devices
+// ---------------------------------------------------------------- the original's buffer memory
 
-std::vector<std::string> g_log[2];          // [0] the original's device, [1] the port's
-int g_failCreates[2];
+std::map<const void *, size_t> g_origSizes;     // the original's live blocks
 
-void Log(int side, const char *format, ...)
+void *__cdecl OrigNew(size_t size)
 {
-    char text[160];
-    va_list args;
-    va_start(args, format);
-    std::vsnprintf(text, sizeof(text), format, args);
-    va_end(args);
-    g_log[side].push_back(text);
+    void *p = ::operator new(size);
+    g_origSizes[p] = _msize(p);
+    return p;
+}
+void __cdecl OrigDelete(void *p)
+{
+    g_origSizes.erase(p);
+    ::operator delete(p);
+}
+void *__cdecl OrigAlignedMalloc(size_t size, size_t alignment)
+{
+    void *p = _aligned_malloc(size, alignment);
+    if (p)
+        g_origSizes[p] = _aligned_msize(p, alignment, 0);
+    return p;
+}
+void __cdecl OrigAlignedFree(void *p)
+{
+    g_origSizes.erase(p);
+    _aligned_free(p);
 }
 
-struct FakeIB : FakeDirect3DIndexBuffer8Base {
-    int side = 0, id = 0;
-    std::vector<uint8_t> data;
-    HRESULT __stdcall Lock(UINT offset, UINT size, BYTE **out, DWORD flags) override
-    {
-        Log(side, "IB %d lock %u %u %lx", id, offset, size, flags);
-        *out = data.data();
-        return S_OK;
-    }
-    HRESULT __stdcall Unlock() override
-    {
-        Log(side, "IB %d unlock", id);
-        return S_OK;
-    }
-    // (The object stays, for its identity; its bytes go: thousands of freed buffers would fill
-    // the 32-bit address space.)
-    void OnFinalRelease() override
-    {
-        Log(side, "IB %d freed", id);
-        std::vector<uint8_t>().swap(data);
-    }
-};
-struct FakeVB : FakeDirect3DVertexBuffer8Base {
-    int side = 0, id = 0;
-    std::vector<uint8_t> data;
-    HRESULT __stdcall Lock(UINT offset, UINT size, BYTE **out, DWORD flags) override
-    {
-        Log(side, "VB %d lock %u %u %lx", id, offset, size, flags);
-        *out = data.data();
-        return S_OK;
-    }
-    HRESULT __stdcall Unlock() override
-    {
-        Log(side, "VB %d unlock", id);
-        return S_OK;
-    }
-    // (The object stays, for its identity; its bytes go: thousands of freed buffers would fill
-    // the 32-bit address space.)
-    void OnFinalRelease() override
-    {
-        Log(side, "VB %d freed", id);
-        std::vector<uint8_t>().swap(data);
-    }
-};
-
-std::vector<FakeIB *> g_ibs[2];
-std::vector<FakeVB *> g_vbs[2];
-
-struct BufferDevice : FakeDirect3DDevice8Base {
-    int side = 0;
-    HRESULT __stdcall ResourceManagerDiscardBytes(DWORD bytes) override
-    {
-        Log(side, "discard %lu", bytes);
-        return S_OK;
-    }
-    HRESULT __stdcall CreateIndexBuffer(UINT length, DWORD usage, D3DFORMAT format, D3DPOOL pool,
-                                        IDirect3DIndexBuffer8 **out) override
-    {
-        Log(side, "create IB %u %lx %d %d", length, usage, format, pool);
-        if (g_failCreates[side] > 0) {
-            --g_failCreates[side];
-            return E_OUTOFMEMORY;
-        }
-        auto *b = new FakeIB;
-        b->side = side;
-        b->id = static_cast<int>(g_ibs[side].size());
-        b->data.resize(length + 0x10000);      // (slack: some fills write past their allocation)
-        g_ibs[side].push_back(b);
-        *out = b;
-        return S_OK;
-    }
-    HRESULT __stdcall CreateVertexBuffer(UINT length, DWORD usage, DWORD fvf, D3DPOOL pool,
-                                         IDirect3DVertexBuffer8 **out) override
-    {
-        Log(side, "create VB %u %lx %lx %d", length, usage, fvf, pool);
-        if (g_failCreates[side] > 0) {
-            --g_failCreates[side];
-            return E_OUTOFMEMORY;
-        }
-        auto *b = new FakeVB;
-        b->side = side;
-        b->id = static_cast<int>(g_vbs[side].size());
-        b->data.resize(length + 0x10000);      // (slack: some fills write past their allocation)
-        g_vbs[side].push_back(b);
-        *out = b;
-        return S_OK;
-    }
-};
-BufferDevice g_device[2];
-
-template <class F> int FakeIndex(const void *b, const std::vector<F *> &list)
+// The original's `call rel32` at `va` (to `target`) calls `hook` instead. False when the bytes
+// are not the expected call.
+bool PatchCall(uint32_t va, uint32_t target, const void *hook)
 {
-    if (!b)
+    uint8_t *at = &Orig<uint8_t>(va);
+    int32_t rel;
+    std::memcpy(&rel, at + 1, 4);
+    if (at[0] != 0xE8 || va + 5 + static_cast<uint32_t>(rel) != target) {
+        std::printf("the original's call at 0x%08x is not to 0x%08x\n", va, target);
+        return false;
+    }
+    DWORD old;
+    VirtualProtect(at, 5, PAGE_EXECUTE_READWRITE, &old);
+    rel = static_cast<int32_t>(reinterpret_cast<uintptr_t>(hook) - reinterpret_cast<uintptr_t>(at + 5));
+    std::memcpy(at + 1, &rel, 4);
+    VirtualProtect(at, 5, old, &old);
+    FlushInstructionCache(GetCurrentProcess(), at, 5);
+    return true;
+}
+
+// A block's size: the original's recorded (-2 unknown), the port's from its heap; -1 for none.
+long OrigIBSize(const void *p)
+{
+    const auto it = g_origSizes.find(p);
+    return !p ? -1 : it == g_origSizes.end() ? -2 : static_cast<long>(it->second);
+}
+long PortIBSize(void *p) { return p ? static_cast<long>(_msize(p)) : -1; }
+long OrigVBSize(const void *p) { return OrigIBSize(p); }
+long PortVBSize(void *p) { return p ? static_cast<long>(_aligned_msize(p, 16, 0)) : -1; }
+
+// A pointer as an offset into an allocation's memory: -1 null, -2 outside it.
+long OffsetIn(const void *ptr, const void *data, long size)
+{
+    if (!ptr)
         return -1;
-    for (size_t k = 0; k < list.size(); ++k) {
-        if (b == static_cast<const void *>(list[k]))
-            return static_cast<int>(k);
-    }
-    return -2;
+    const auto *p = static_cast<const uint8_t *>(ptr), *d = static_cast<const uint8_t *>(data);
+    return d && p >= d && p - d <= size ? static_cast<long>(p - d) : -2;
 }
 
-// A locked pointer as (buffer, byte offset).
-template <class F> long LockedAt(const void *p, const std::vector<F *> &list)
-{
-    if (!p)
-        return -1;
-    for (size_t k = 0; k < list.size(); ++k) {
-        const uint8_t *d = list[k]->data.data();
-        if (p >= d && p <= d + list[k]->data.size())
-            return static_cast<long>(k << 24 | static_cast<size_t>(static_cast<const uint8_t *>(p) - d));
-    }
-    return -2;
-}
-
-// Both sides' device logs, then cleared.
-void CompareLogs()
-{
-    Check("device calls", static_cast<long>(g_log[0].size()), static_cast<long>(g_log[1].size()));
-    for (size_t k = 0; k < g_log[0].size(); ++k) {
-        if (g_log[0][k] != g_log[1][k]) {
-            std::printf("MISMATCH after op %ld (%s): device call %zu: original \"%s\", port \"%s\"\n", g_op,
-                        g_lastOp.c_str(), k, g_log[0][k].c_str(), g_log[1][k].c_str());
-            std::exit(1);
-        }
-    }
-    g_log[0].clear();
-    g_log[1].clear();
-}
-
-// Every fake buffer's bytes (slow: now and then).
-void CompareBufferContents()
-{
-    for (int kind = 0; kind < 2; ++kind) {
-        const size_t n = kind ? g_vbs[0].size() : g_ibs[0].size();
-        for (size_t k = 0; k < n; ++k) {
-            const std::vector<uint8_t> &a = kind ? g_vbs[0][k]->data : g_ibs[0][k]->data;
-            const std::vector<uint8_t> &b = kind ? g_vbs[1][k]->data : g_ibs[1][k]->data;
-            if (a != b) {
-                size_t at = 0;
-                while (at < a.size() && at < b.size() && a[at] == b[at])
-                    ++at;
-                Fail(std::string(kind ? "VB" : "IB") + " " + std::to_string(k) + " contents at byte", static_cast<long>(at),
-                     static_cast<long>(at));
-            }
-        }
-    }
-}
-
-// ---------------------------------------------------------------- the managers
-
-int (*g_ownerIndex)(const void *owner, int side, bool vb);
-
-template <class T, class L> using Node = typename Multiset<T, L>::Node;
-
-// A tree's values in order (the original's tree has its own nil node: no iterators).
-template <class N, class T> void InOrder(const N *n, const void *nil, std::vector<T> &out)
-{
-    if (n == nil)
-        return;
-    InOrder(n->left, nil, out);
-    out.push_back(n->value);
-    InOrder(n->right, nil, out);
-}
-
-// Both trees node for node; `same` compares two values.
-template <class T, class L, class F>
-void CompareTree(const std::string &what, const Multiset<T, L> &o, void *origNil, const Multiset<T, L> &p, F same)
-{
-    using N = Node<T, L>;
-    Check(what + " size", o.Size(), p.Size());
-    std::map<const N *, const N *> pairs;
-    const N *pNil = Multiset<T, L>::Nil();
-    struct Walk {
-        static void Go(const std::string &w, const N *a, const N *b, const void *aNil, const N *bNil,
-                       std::map<const N *, const N *> &pairs, F &same, int depth)
-        {
-            Check(w + " node", a == aNil, b == bNil);
-            if (a == aNil)
-                return;
-            if (depth > 64)
-                Fail(w + " too deep", depth, depth);
-            Check(w + " colour", a->color, b->color);
-            same(a->value, b->value);
-            pairs[a] = b;
-            Go(w, a->left, b->left, aNil, bNil, pairs, same, depth + 1);
-            Go(w, a->right, b->right, aNil, bNil, pairs, same, depth + 1);
-        }
-    };
-    const N *oh = o.Head(), *ph = p.Head();
-    pairs[oh] = ph;
-    Walk::Go(what, oh->parent, ph->parent, origNil, pNil, pairs, same, 0);
-    Check(what + " leftmost", pairs.count(oh->left) && pairs[oh->left] == ph->left, 1);
-    Check(what + " rightmost", pairs.count(oh->right) && pairs[oh->right] == ph->right, 1);
-    Check(what + " head colour", oh->color, ph->color);
-    // The parents follow from the shape unless a link is broken.
-    for (auto &[a, b] : pairs) {
-        if (a == oh)
-            continue;
-        const N *ap = a->parent;
-        Check(what + " parent", pairs.count(ap) && pairs[ap] == b->parent, 1);
-    }
-}
-
-// (A free block keeps the owner it had: compared for used blocks only.)
-void CompareBlock(const std::string &what, const S_bufferBlock *o, const S_bufferBlock *p, bool vb, bool used)
-{
-    if (used)
-        Check(what + " owner", g_ownerIndex(o->owner, 0, vb), g_ownerIndex(p->owner, 1, vb));
-    Check(what + " offset", o->offset, p->offset);
-    Check(what + " count", o->count, p->count);
-}
-
-template <class V> void CompareVector(const std::string &what, const C_vector<V> &o, const C_vector<V> &p)
-{
-    Check(what + " size", o.Size(), p.Size());
-    Check(what + " capacity", o.Capacity(), p.Capacity());
-    Check(what + " grow", reinterpret_cast<const int *>(&o)[3], reinterpret_cast<const int *>(&p)[3]);
-    Check(what + " data", o.Data() != nullptr, p.Data() != nullptr);
-}
-
-void CompareIB(const C_IndexBuffer *o, const C_IndexBuffer *p)
-{
-    Check("IB", FakeIndex(o->ib, g_ibs[0]), FakeIndex(p->ib, g_ibs[1]));
-    Check("IB locked", LockedAt(o->lockedData, g_ibs[0]), LockedAt(p->lockedData, g_ibs[1]));
-    Check("IB lockFlags", o->lockFlags, p->lockFlags);
-    Check("IB usage", o->usage, p->usage);
-    Check("IB pool", o->pool, p->pool);
-    Check("IB capacity", o->capacity, p->capacity);
-    Check("IB available", o->available, p->available);
-    Check("IB lockIndex", o->lockIndex, p->lockIndex);
-    CompareTree("IB free blocks", o->freeBlocks, Orig<void *>(0x100c0624), p->freeBlocks,
-                [](S_bufferBlock *a, S_bufferBlock *b) { CompareBlock("IB free block", a, b, false, false); });
-    CompareVector("IB used", o->usedBlocks, p->usedBlocks);
-    for (int k = 0; k < o->usedBlocks.Size(); ++k)
-        CompareBlock("IB used block", o->usedBlocks[k], p->usedBlocks[k], false, true);
-}
-
-void CompareVBuf(const C_VertexBuffer *o, const C_VertexBuffer *p)
-{
-    Check("VB", FakeIndex(o->vb, g_vbs[0]), FakeIndex(p->vb, g_vbs[1]));
-    Check("VB locked", LockedAt(o->lockedData, g_vbs[0]), LockedAt(p->lockedData, g_vbs[1]));
-    Check("VB lockFlags", o->lockFlags, p->lockFlags);
-    Check("VB format", o->format, p->format);
-    Check("VB pool", o->pool, p->pool);
-    Check("VB usage", o->usage, p->usage);
-    Check("VB stride", o->stride, p->stride);
-    Check("VB capacity", o->capacity, p->capacity);
-    Check("VB available", o->available, p->available);
-    Check("VB lockIndex", o->lockIndex, p->lockIndex);
-    CompareTree("VB free blocks", o->freeBlocks, Orig<void *>(0x100d1424), p->freeBlocks,
-                [](S_bufferBlock *a, S_bufferBlock *b) { CompareBlock("VB free block", a, b, true, false); });
-    CompareVector("VB used", o->usedBlocks, p->usedBlocks);
-    for (int k = 0; k < o->usedBlocks.Size(); ++k)
-        CompareBlock("VB used block", o->usedBlocks[k], p->usedBlocks[k], true, true);
-}
-
-const C_IBManager &OrigIBM() { return Orig<C_IBManager>(0x100c05f0); }
-const C_VBManager &OrigVBM() { return Orig<C_VBManager>(0x100d1400); }
-
-// An allocation record's buffer by its fake Direct3D buffer.
-long BufferOf(const C_IndexBuffer *b, int side) { return b ? FakeIndex(b->ib, g_ibs[side]) : -1; }
-long BufferOf(const C_VertexBuffer *b, int side) { return b ? FakeIndex(b->vb, g_vbs[side]) : -1; }
-
+// Both sides' allocation records. A freed record keeps its memory pointer (dangling) and
+// offset: compared for presence only.
 void CompareAlloc(const std::string &what, const S_IBAlloc &a, const S_IBAlloc &b)
 {
-    Check(what + " buffer", BufferOf(a.buffer, 0), BufferOf(b.buffer, 1));
-    Check(what + " ib", FakeIndex(a.ib, g_ibs[0]), FakeIndex(b.ib, g_ibs[1]));
+    Check(what + " buffer", a.buffer != nullptr, b.buffer != nullptr);
     Check(what + " offset", a.offset, b.offset);
+    Check(what + " ib", a.ib != nullptr, b.ib != nullptr);
+    if (!b.buffer)
+        return;
+    Check(what + " ib is the memory", a.ib == a.buffer->data, b.ib == b.buffer->data);
+    Check(what + " unknown04", a.buffer->unknown04, b.buffer->unknown04);
+    Check(what + " size", OrigIBSize(a.buffer->data), PortIBSize(b.buffer->data));
 }
 void CompareAlloc(const std::string &what, const S_VBAlloc &a, const S_VBAlloc &b)
 {
-    Check(what + " buffer", BufferOf(a.buffer, 0), BufferOf(b.buffer, 1));
-    Check(what + " vb", FakeIndex(a.vb, g_vbs[0]), FakeIndex(b.vb, g_vbs[1]));
+    Check(what + " buffer", a.buffer != nullptr, b.buffer != nullptr);
     Check(what + " offset", a.offset, b.offset);
+    Check(what + " vb", a.vb != nullptr, b.vb != nullptr);
+    if (!b.buffer)
+        return;
+    const C_VertexBuffer *o = a.buffer, *p = b.buffer;
+    Check(what + " vb is the memory", a.vb == o->data, b.vb == p->data);
+    Check(what + " unknown00", o->unknown00, p->unknown00);
+    Check(what + " format", o->format, p->format);
+    Check(what + " usage", o->usage, p->usage);
+    Check(what + " stride", o->stride, p->stride);
+    Check(what + " aligned", reinterpret_cast<uintptr_t>(o->data) % 16, reinterpret_cast<uintptr_t>(p->data) % 16);
+    Check(what + " size", OrigVBSize(o->data), PortVBSize(p->data));
 }
 
-void CompareManagers()
-{
-    CompareTree("IB buffers", OrigIBM().buffers, Orig<void *>(0x100c062c), g_ibManager.buffers, CompareIB);
-    CompareVector("IB locked list", OrigIBM().lockedBuffers, g_ibManager.lockedBuffers);
-    for (int k = 0; k < OrigIBM().lockedBuffers.Size(); ++k)
-        Check("IB locked list entry", FakeIndex(OrigIBM().lockedBuffers[k]->ib, g_ibs[0]),
-              FakeIndex(g_ibManager.lockedBuffers[k]->ib, g_ibs[1]));
-    CompareTree("VB buffers", OrigVBM().buffers, Orig<void *>(0x100d142c), g_vbManager.buffers, CompareVBuf);
-    CompareVector("VB locked list", OrigVBM().lockedBuffers, g_vbManager.lockedBuffers);
-    for (int k = 0; k < OrigVBM().lockedBuffers.Size(); ++k)
-        Check("VB locked list entry", FakeIndex(OrigVBM().lockedBuffers[k]->vb, g_vbs[0]),
-              FakeIndex(g_vbManager.lockedBuffers[k]->vb, g_vbs[1]));
-}
-
-// The port's driver for the managers alone: SlotB4 (a plain no-op member) is all they call.
-void __stdcall NoOp(void *) {}
-void *g_fakeDriver;
-
-// Loads the original, points each side at its fake device. False when it cannot.
+// Loads the original LS3DRF.dll and patches its buffer memory calls. False when it cannot.
 bool SetUpBuffers(const char *origPath)
 {
     HMODULE dll = LoadLibraryA(origPath);
@@ -367,16 +153,14 @@ bool SetUpBuffers(const char *origPath)
         return false;
     }
     g_base = reinterpret_cast<uint8_t *>(dll);
-    Orig<uint8_t>(0x100d16f2) = 1;              // no log
-    if (!Orig<void *>(0x100d16f8)) {
+    if (!Orig<void *>(0x10058b78)) {
         std::printf("the original's driver does not exist\n");
         return false;
     }
-    g_device[0].side = 0;
-    g_device[1].side = 1;
-    Orig<IDirect3DDevice8 *>(0x100d216c) = &g_device[0];
-    ig::g_pDevice = &g_device[1];
-    return true;
+    return PatchCall(0x1002edb4, 0x1003150b, reinterpret_cast<const void *>(&OrigNew)) &&
+           PatchCall(0x1002edf3, 0x100314b0, reinterpret_cast<const void *>(&OrigDelete)) &&
+           PatchCall(0x10030046, 0x10031519, reinterpret_cast<const void *>(&OrigAlignedMalloc)) &&
+           PatchCall(0x10030084, 0x10031561, reinterpret_cast<const void *>(&OrigAlignedFree));
 }
 
 LONG WINAPI CrashFilter(EXCEPTION_POINTERS *info)
