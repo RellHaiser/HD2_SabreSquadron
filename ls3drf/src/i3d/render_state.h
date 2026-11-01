@@ -113,7 +113,7 @@ extern float g_lensFlareScale;
 extern bool g_rendering;                // 0x100d1299 inside Render (not reentrant)
 extern bool g_inRenderCallback;         // 0x100d1298 the scene's render callback runs
 extern bool g_cameraChanged;            // 0x100d1260 the camera moved or changed sector
-extern bool g_forceCameraChanged;       // 0x100a7258 (initially set; SetState sets it)
+extern bool g_forceCameraChanged;       // 0x100a7258 (initially set)
 extern bool g_mainPass;                 // 0x100d1258 the main pass draws (the weather goes with it)
 
 // The areas the camera is inside (0x100d1268, grow 0x20) and the sounds that leave with an area

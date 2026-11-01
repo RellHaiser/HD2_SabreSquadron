@@ -44,7 +44,6 @@
 
 using namespace ls3d;
 using namespace ls3d::i3d;
-using gfx::g_pGfx;
 
 namespace ls3d::i3d {
 
@@ -55,8 +54,6 @@ uint32_t g_renderStats[8];
 // Unused frames by type and visuals by index, reused by the factories (0x100aded8, 0x100adb10).
 I3D_frame *g_frameFreeLists[17];
 I3D_frame *g_visualFreeLists[16];
-// A list Close releases that nothing fills (0x100be380).
-C_vector<I3D_material *> g_driverMaterials;
 // Driver state side values: the inverse of state 0x35 (0x100adb90), states 0x36 (the projectors'
 // z bias) / 0x37 as used (0x100be018 / 0x100aded4: a quarter on ATI hardware).
 float g_state35Inverse = 0.02f;
@@ -92,26 +89,6 @@ void ReapplyDriverStates()
 
 }  // namespace ls3d::i3d
 
-namespace {
-
-// 0x1005ed90: the particle buffers released, the blended items' overlap cache freed.
-void ReleaseRenderBuffers()
-{
-    ReleaseParticleBuffers();
-    g_alphaCacheSize = 0;
-    AlignedFree(g_alphaCache);
-    g_alphaCache = nullptr;
-}
-
-// 0x1005ed60: the same, then the particle buffers made again.
-void ResetRenderBuffers()
-{
-    ReleaseRenderBuffers();
-    InitParticleBuffers();
-}
-
-}  // namespace
-
 // 0x100151c0
 I3D_driver::I3D_driver() : unknown04(0), mirrorStamp(0) {}
 
@@ -130,7 +107,7 @@ void I3D_driver::Tick(int time) { g_driverTime += time; }
 // LS3DRF 0x1000ec30 (from LS3DF 0x100152e0)
 int I3D_driver::GetTime() { return g_driverTime; }
 
-// 0x100152f0
+// LS3DRF 0x1000ec40 (from LS3DF 0x100152f0): no render buffers, no lightmap material.
 I3D_RESULT I3D_driver::Init(const void *init)
 {
     unknown04 = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(init));
@@ -180,11 +157,6 @@ I3D_RESULT I3D_driver::Init(const void *init)
     std::memset(g_frameFreeLists, 0, sizeof g_frameFreeLists);
     std::memset(g_visualFreeLists, 0, sizeof g_visualFreeLists);
     g_driverInitialized = true;
-    ResetRenderBuffers();
-    g_lightmapMaterial = CreateMaterial();
-    g_lightmapMaterial->SetDiffuse(S_vector(0.0f, 1.0f, 1.0f));
-    g_lightmapMaterial->SetEmissive(S_vector(0.0f, 1.0f, 1.0f));
-    g_lightmapMaterial->matFlags |= MATF_COLORS;
     g_nameRoot = nullptr;
     g_driverUnknownADED0 = 0;
     if (!(ig::g_init.flags & IG_VERBOSE))
@@ -192,8 +164,8 @@ I3D_RESULT I3D_driver::Init(const void *init)
     return I3D_OK;
 }
 
-// 0x10015560: every unused frame and visual deleted, the render queue's storage and the unused
-// device buffers freed.
+// LS3DRF 0x1000ee30 (from LS3DF 0x10015560): every unused frame and visual deleted, the unused
+// device buffers freed (no render queue, no projection buffers).
 void I3D_driver::FreeUnusedResources()
 {
     for (I3D_frame *&head : g_frameFreeLists) {
@@ -212,32 +184,15 @@ void I3D_driver::FreeUnusedResources()
         }
     }
     std::memset(g_visualFreeLists, 0, sizeof g_visualFreeLists);
-    g_rc.items.Free();
-    ::operator delete(g_rc.keys);
-    g_rc.keys = nullptr;
-    g_rc.keyCapacity = 0;
-    g_rc.numKeys = 0;
     g_vbManager.FreeUnused();
     g_ibManager.FreeUnused();
-    FreeProjectionBuffers();
 }
 
-// 0x10015650
+// LS3DRF 0x1000eed0 (from LS3DF 0x10015650): no render buffers or materials to release. (The
+// original returns 0, as LS3DF's does; no caller reads it.)
 void I3D_driver::Close()
 {
     FreeUnusedResources();
-    ReleaseRenderBuffers();
-    for (int i = 0; i < g_driverMaterials.Size(); ++i) {
-        if (g_driverMaterials[i]) {
-            g_driverMaterials[i]->Release();
-            g_driverMaterials[i] = nullptr;
-        }
-    }
-    g_driverMaterials.Free();
-    if (g_lightmapMaterial) {
-        g_lightmapMaterial->Release();
-        g_lightmapMaterial = nullptr;
-    }
     g_driverInitialized = false;
 }
 
@@ -266,64 +221,13 @@ I3D_RESULT I3D_driver::GetStats(int index, void *out)
     return I3DERR_INVALIDPARAMS;
 }
 
-// 0x10015770
+// LS3DRF 0x1000ef70 (from LS3DF 0x10015770): no device states (filters, z, dither, LOD bias, fill
+// mode) and no camera refresh on DRVSTATE_DRAW_VISUALS; the state only stored.
 I3D_RESULT I3D_driver::SetState(int state, uint32_t value)
 {
     if (state > 0x44)
         return I3DERR_INVALIDPARAMS;
-    auto filters = [](DWORD minFilter, DWORD magFilter) {
-        for (DWORD stage = 0; stage < 3; ++stage) {
-            g_pGfx->SetTextureStageState(stage, D3DTSS_MINFILTER, minFilter);
-            g_pGfx->SetTextureStageState(stage, D3DTSS_MAGFILTER, magFilter);
-            // (Port enhancement, LS3DF.ini AnisotropicFiltering; set again here after a device
-            // reset cleared it.)
-            if (minFilter == D3DTEXF_ANISOTROPIC)
-                g_pGfx->SetTextureStageState(stage, D3DTSS_MAXANISOTROPY, static_cast<DWORD>(ig::g_anisotropy));
-        }
-    };
     switch (state) {
-    case 0:
-        filters(value ? ig::LinearMinFilter() : D3DTEXF_POINT, value ? D3DTEXF_LINEAR : D3DTEXF_POINT);
-        break;
-    case 2:
-        if (value <= 2) {
-            // (Port enhancement, LS3DF.ini TrilinearFiltering: the levels always blended; the
-            // state keeps the value asked for.)
-            DWORD mipFilter = value;
-            if (Enhancements().trilinear && mipFilter != D3DTEXF_LINEAR) {
-                static bool s_logged;
-                if (!s_logged) {
-                    s_logged = true;
-                    EnhancementLog("TrilinearFiltering: mip filter %u asked for, linear used", value);
-                }
-                mipFilter = D3DTEXF_LINEAR;
-            }
-            for (DWORD stage = 0; stage < 3; ++stage)
-                g_pGfx->SetTextureStageState(stage, D3DTSS_MIPFILTER, mipFilter);
-        }
-        break;
-    case 3:
-        g_pGfx->SetRenderState(D3DRS_ZENABLE, value ? ig::g_zBufferType : 0);
-        break;
-    case 4:
-        ig::g_zBufferType = value ? D3DZB_USEW : D3DZB_TRUE;
-        if (g_driverStates[DRVSTATE_ZBUFFER])
-            g_pGfx->SetRenderState(D3DRS_ZENABLE, ig::g_zBufferType);
-        break;
-    case 7:
-        g_pGfx->SetRenderState(D3DRS_DITHERENABLE, value);
-        break;
-    case 8:
-        g_pGfx->SetTextureStageState(0, D3DTSS_MIPMAPLODBIAS, value);
-        g_pGfx->SetTextureStageState(1, D3DTSS_MIPMAPLODBIAS, value);
-        break;
-    case 9:
-        g_pGfx->SetRenderState(D3DRS_FILLMODE, value ? D3DFILL_WIREFRAME : D3DFILL_SOLID);
-        break;
-    case DRVSTATE_DRAW_VISUALS:
-        if (value)
-            g_forceCameraChanged = true;
-        break;
     case 0x35:
         g_state35Inverse = 1.0f / static_cast<float>(static_cast<int>(value));
         break;
