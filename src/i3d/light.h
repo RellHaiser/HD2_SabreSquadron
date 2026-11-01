@@ -108,10 +108,9 @@ static_assert(offsetof(I3D_light, hardwareIndex) == 0x25C, "I3D_light layout");
 
 namespace ls3d::i3d {
 
-// Every light, by device light index (0x100d13bc; render helpers 0x10063c20 / 0x10063ca0).
+// Every light, by device light index (0x100d13bc; render helper 0x10063c20). Nothing takes a
+// light out: its Uninit leaves it in.
 extern C_vector<I3D_light *> g_lights;
 int RegisterLight(I3D_light *light);
-// Takes the light out; the last one moves into its device light.
-void UnregisterLight(I3D_light *light);
 
 }  // namespace ls3d::i3d

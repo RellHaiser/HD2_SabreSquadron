@@ -8,7 +8,6 @@
 #include "i3d/i3d_hooks.h"
 #include "i3d/loader.h"
 #include "i3d/sector.h"
-#include "igraph/igraph_state.h"
 
 namespace ls3d::i3d {
 
@@ -18,30 +17,6 @@ int RegisterLight(I3D_light *light)
 {
     g_lights.PushBack(light);
     return g_lights.Size() - 1;
-}
-
-void UnregisterLight(I3D_light *light)
-{
-    if (!(light->lightFlags & 2) && static_cast<uint16_t>(light->linkedLight) != 0xffff) {
-        g_lights[static_cast<uint16_t>(light->linkedLight)]->Release();
-        light->linkedLight = -1;
-    }
-    const uint16_t index = static_cast<uint16_t>(light->hardwareIndex);
-    gfx::g_pGfx->LightEnable(index, FALSE);
-    g_lights.PopBack();
-    const int count = g_lights.Size();
-    if (count)
-        g_lights[index] = g_lights[count];
-    if (index < count) {
-        I3D_light *moved = g_lights[index];
-        gfx::g_pGfx->LightEnable(static_cast<uint16_t>(moved->hardwareIndex), FALSE);
-        moved->hardwareIndex = static_cast<int16_t>(index);
-        moved->lightFlags |= 1;
-        if (static_cast<uint16_t>(moved->linkedLight) != 0xffff)
-            g_lights[static_cast<uint16_t>(moved->linkedLight)]->linkedLight = moved->hardwareIndex;
-        for (I3D_sector *s : moved->sectors)
-            ++s->lightChanges;
-    }
 }
 
 }  // namespace ls3d::i3d
@@ -167,9 +142,10 @@ void I3D_light::Init()
     hardwareIndex = static_cast<int16_t>(RegisterLight(this));
 }
 
+// LS3DRF 0x100175e0 (from LS3DF 0x10021760): the light stays in g_lights, and a mirror copy
+// (linkedLight) stays alive.
 void I3D_light::Uninit()
 {
-    UnregisterLight(this);
     if (lightType == I3DLIGHT_AMBIENT) {
         for (int i = sectors.Size(); i > 0; --i)
             sectors[i - 1]->sectorFlags |= SCTF_AMBIENT_CHANGED;
