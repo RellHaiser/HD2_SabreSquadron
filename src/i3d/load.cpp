@@ -1,5 +1,5 @@
 // The file loaders (load.cpp, 0x1005d170 - 0x1005e6c0): model / scene files (.4ds), animation
-// files (.5ds), shadow files (.6ds) and the meshes in model files.
+// files (.5ds) and the meshes in model files.
 //
 // A model file holds the materials, then the frames in hierarchy order (each with the index of its
 // parent among the frames read before it); each frame reads its own data (slot 0x70), meshes
@@ -19,7 +19,6 @@
 #include "i3d/object.h"
 #include "i3d/scene.h"
 #include "i3d/sector.h"
-#include "i3d/shadow.h"
 #include "i3d/target.h"
 #include "i3d/visual.h"
 #include "igraph/igraph.h"
@@ -49,7 +48,7 @@ namespace {
 // The load callback: (8, progress 0 - 1, 0 start / 1 progress / 2 end, context).
 typedef uint32_t __stdcall LoadCallback(uint32_t message, float progress, uint32_t state, void *context);
 
-bool s_modelLoading;                        // 0x100d00a8 a model, scene or shadow file is being read
+bool s_modelLoading;                        // 0x100d00a8 a model or scene file is being read
 bool s_animLoading;                         // 0x100d00a9 an animation file is being read
 LoadCallback *s_callback;                   // 0x100c0664
 void *s_callbackContext;                    // 0x100d00a4
@@ -284,54 +283,6 @@ HRESULT ReadAnimationFile(const char *fileName, uint8_t **blob, const FILETIME *
     return I3D_OK;
 }
 
-// 0x1005e1a0: a shadow file: its vertices, indices and parts.
-HRESULT ReadShadowFile(S_shadowData *data, const char *fileName, const FILETIME *time)
-{
-    if (!fileName || !*fileName)
-        return I3DERR_INVALIDPARAMS;
-    g_loadFile = dtaOpen(fileName, false);
-    if (g_loadFile < 0)
-        return I3DERR_NOFILE;
-    const HRESULT header = ReadHeader(g_loadFile, "6DS", 0xc, time);
-    if (header < 0)
-        return header;
-    // The counts (0x100d00d4): vertices, indices, parts.
-    static uint16_t s_counts[3];
-    dtaRead(g_loadFile, s_counts, 6);
-    if (s_counts[0]) {
-        data->vertices.Reserve(s_counts[0]);
-        dtaRead(g_loadFile, data->vertices.Data(), s_counts[0] * 16);
-        data->vertices.SetCount(s_counts[0]);
-    }
-    if (s_counts[1]) {
-        data->indices.Reserve(s_counts[1]);
-        dtaRead(g_loadFile, data->indices.Data(), s_counts[1] * 2);
-        data->indices.SetCount(s_counts[1]);
-    }
-    if (s_counts[2]) {
-        data->parts.Reserve(s_counts[2]);
-        data->parts.SetCount(s_counts[2]);
-        S_shadowPart *p = data->parts.Data();
-        for (; s_counts[2]; --s_counts[2], ++p) {
-            dtaRead(g_loadFile, &p->numVertices, 8);
-            int length = 0;
-            dtaRead(g_loadFile, &length, 1);
-            p->name = static_cast<char *>(::operator new(static_cast<size_t>(length) + 1));
-            if (!p->name) {
-                ReportError(I3DERR_OUTOFMEM, kSevFatal);
-                return I3DERR_OUTOFMEM;
-            }
-            if (length)
-                dtaRead(g_loadFile, p->name, length);
-            p->name[length] = 0;
-        }
-        s_counts[2] = 0xffff;
-    }
-    dtaClose(g_loadFile);
-    g_loadFile = -1;
-    return I3D_OK;
-}
-
 }  // namespace
 
 namespace ls3d::i3d {
@@ -438,23 +389,6 @@ I3D_RESULT OpenAnimationFile(const char *fileName, I3D_animation_set *set)
         dbgPrintf("!! %s  load.cpp  I3D_animation_set::Open()  %s", I3DGetResultMessage(result), fileName);
     }
     s_animLoading = false;
-    return result;
-}
-
-// 0x1005d740
-I3D_RESULT OpenShadowFile(const char *fileName, uint32_t flags, S_shadowData *data)
-{
-    if (!data || !fileName || !*fileName)
-        return I3DERR_INVALIDPARAMS;
-    if (!WaitFor(s_modelLoading))
-        return I3DERR_GENERIC;
-    s_modelLoading = true;
-    s_callback = nullptr;
-    s_loadFlags = 0;
-    char name[0x114];
-    ReplaceExtension(name, fileName, ".6ds");
-    const HRESULT result = ReadShadowFile(data, name, nullptr);
-    s_modelLoading = false;
     return result;
 }
 

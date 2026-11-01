@@ -29,7 +29,6 @@ using ig::g_rs;
 namespace ls3d::i3d {
 
 int g_sceneCount;
-ITexture *g_snowTexture;
 S_VBAlloc g_weatherVB;
 S_IBAlloc g_weatherIB;
 int g_weatherCapacity;
@@ -98,6 +97,7 @@ int FloatToInt(float f) { return static_cast<int>(f); }   // __ftol: truncation
 // shadows, mirrors or lensFlares vectors to destroy.
 I3D_scene::~I3D_scene() {}
 
+// LS3DRF 0x100258c0 (from LS3DF 0x100462b0): no snow texture to load.
 void I3D_scene::Init()
 {
     I3D_frame::Init();
@@ -130,10 +130,6 @@ void I3D_scene::Init()
     ++g_sceneCount;
     weatherFlags = WEATHER_RESHAPE | WEATHER_RECOLOR;
     ResetWeather();
-    if (!g_snowTexture) {
-        if (FAILED(g_pIGraph->LoadTexture("Snow.dds", nullptr, ITC_SOURCE_ALPHA, &g_snowTexture)))
-            g_pIGraph->LoadTexture("Snow.tga", nullptr, ITC_SOURCE_ALPHA, &g_snowTexture);
-    }
     g_defaultEnvironment.SetDefaults();
     trackedCameraSector = nullptr;
     trackedModels.SetGrowBy(25);
@@ -142,6 +138,8 @@ void I3D_scene::Init()
     g_driver->scenes.PushBack(this);
 }
 
+// LS3DRF 0x10025c70 (from LS3DF 0x100466c0): the scene count stays and the weather buffers are kept
+// (the next SetWeather reallocates them); there is no snow texture.
 void I3D_scene::Uninit()
 {
     Close();
@@ -150,20 +148,6 @@ void I3D_scene::Uninit()
     for (I3D_sector *s : {primarySector, backdropSector, omniSector, nearSector}) {
         if (s)
             s->Release();
-    }
-    if (--g_sceneCount < 1) {
-        if (g_snowTexture) {
-            g_snowTexture->Release();
-            g_snowTexture = nullptr;
-        }
-        if (g_weatherVB.vb) {
-            FreeVB(&g_weatherVB);
-            g_weatherVB = S_VBAlloc{};
-        }
-        if (g_weatherIB.ib) {
-            FreeIB(&g_weatherIB);
-            g_weatherIB = S_IBAlloc{};
-        }
     }
     g_driver->scenes.RemoveSwap(this);
     I3D_frame::Uninit();

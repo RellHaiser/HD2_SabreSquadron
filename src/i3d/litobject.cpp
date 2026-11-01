@@ -323,6 +323,7 @@ void I3D_lit_object::RefreshLevels()
     }
 }
 
+// LS3DRF 0x100191a0 (from LS3DF 0x10029500)
 I3D_RESULT I3D_lit_object::SetMesh(I3D_mesh *newMesh, uint32_t keep)
 {
     auto takeBound = [this](const I3D_mesh *m) {
