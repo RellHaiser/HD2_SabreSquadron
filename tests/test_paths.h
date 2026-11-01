@@ -1,6 +1,7 @@
 // Where the tests find the original game. The original LS3DF.dll: the test's first argument, else
 // %HD2_DIR%\LS3DF.dll, else the LS3DF.dll on the DLL search path (the game folder has to be on PATH
 // anyway: the original imports rw_data.dll, binkw32.dll, vorbisfile.dll and ogg.dll from it).
+// compare_material runs against the original LS3DRF.dll, found the same way.
 // compare_loader also lists the game's files from the unpacked archives: %HD2_UNPACKED%, else
 // HD2_Unpacked next to the game folder.
 #pragma once
@@ -27,26 +28,27 @@ inline int LinkerVersion(const char *path)
     return version;
 }
 
-// The original LS3DF.dll (`arg` if given and not empty); exits when there is none.
-inline const char *OriginalDllPath(const char *arg = nullptr)
+// The original LS3DF.dll, or the original `name` (`arg` if given and not empty); exits when there
+// is none.
+inline const char *OriginalDllPath(const char *arg = nullptr, const char *name = "LS3DF.dll")
 {
     static std::string path;
     if (arg && *arg) {
         path = arg;
     } else if (const char *dir = std::getenv("HD2_DIR"); dir && *dir) {
-        path = std::string(dir) + "\\LS3DF.dll";
+        path = std::string(dir) + "\\" + name;
     } else {
         char found[MAX_PATH];
-        if (SearchPathA(nullptr, "LS3DF.dll", nullptr, MAX_PATH, found, nullptr))
+        if (SearchPathA(nullptr, name, nullptr, MAX_PATH, found, nullptr))
             path = found;
     }
     if (path.empty()) {
-        std::printf("no original LS3DF.dll: pass its path, set HD2_DIR to the game folder or put the folder on PATH\n");
+        std::printf("no original %s: pass its path, set HD2_DIR to the game folder or put the folder on PATH\n", name);
         std::exit(2);
     }
     const int version = LinkerVersion(path.c_str());
     if (version != 6) {
-        std::printf("%s is not the original LS3DF.dll (linker version %d, the original's is 6)\n", path.c_str(),
+        std::printf("%s is not the original %s (linker version %d, the original's is 6)\n", path.c_str(), name,
                     version);
         std::exit(2);
     }
