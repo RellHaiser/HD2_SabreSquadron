@@ -9,11 +9,9 @@
 #include "core/c_vector.h"
 #include "core/debug.h"
 #include "external/rw_data.h"
-#include "i3d/area.h"
 #include "i3d/driver.h"
 #include "i3d/i3d_hooks.h"
 #include "i3d/loader.h"
-#include "i3d/occluder.h"
 #include "i3d/sector.h"
 #include "i3d/visual.h"
 
@@ -127,20 +125,10 @@ char *NewProps(size_t textSize)
     return reinterpret_cast<char *>(block + 1);
 }
 
-// The LinkTo enumeration callbacks (0x1001daf0, 0x1001db10, 0x1001db30).
+// The LinkTo enumeration callback (0x1001daf0).
 uint32_t __stdcall SectorSceneProc(I3D_frame *frame, void *scene)
 {
     static_cast<I3D_sector *>(frame)->SetScene(static_cast<I3D_scene *>(scene));
-    return 0;
-}
-uint32_t __stdcall OccluderSceneProc(I3D_frame *frame, void *scene)
-{
-    static_cast<I3D_occluder *>(frame)->SetScene(static_cast<I3D_scene *>(scene));
-    return 0;
-}
-uint32_t __stdcall AreaSceneProc(I3D_frame *frame, void *scene)
-{
-    static_cast<I3D_area *>(frame)->SetScene(static_cast<I3D_scene *>(scene));
     return 0;
 }
 
@@ -654,6 +642,8 @@ I3D_frame *__stdcall I3D_frame::GetChild(int index)
     return nullptr;
 }
 
+// LS3DRF 0x10013650 (from LS3DF 0x1001d680): a new scene reaches the sectors only (no occluder
+// or area pass).
 I3D_RESULT __stdcall I3D_frame::LinkTo(I3D_frame *newParent, uint32_t flags)
 {
     I3D_frame *const oldParent = parent;
@@ -721,13 +711,6 @@ I3D_RESULT __stdcall I3D_frame::LinkTo(I3D_frame *newParent, uint32_t flags)
     if (type == FRAME_SECTOR)
         static_cast<I3D_sector *>(this)->SetScene(newScene);
     EnumFrames(SectorSceneProc, newScene, EnumTypeBit(FRAME_SECTOR), nullptr);
-    if (type == FRAME_OCCLUDER)
-        static_cast<I3D_occluder *>(this)->SetScene(newScene);
-    // (0x800 is no type bit EnumFrames knows: the original's occluder pass finds nothing.)
-    EnumFrames(OccluderSceneProc, newScene, 0x800, nullptr);
-    if (type == FRAME_AREA)
-        static_cast<I3D_area *>(this)->SetScene(newScene);
-    EnumFrames(AreaSceneProc, newScene, EnumTypeBit(FRAME_AREA), nullptr);
     return I3D_OK;
 }
 
@@ -966,6 +949,7 @@ void __stdcall I3D_frame::UpdateBound()
     frameFlags |= FRMFLAGS_BOUND_VALID;
 }
 
+// LS3DRF 0x10014af0 (from LS3DF 0x1001eba0)
 void __stdcall I3D_frame::SetHierarchyLightLevel(float level)
 {
     if (type == FRAME_VISUAL && (static_cast<I3D_visual *>(this)->visualFlags & VISF_OBJECT_PARAMS))
@@ -974,6 +958,7 @@ void __stdcall I3D_frame::SetHierarchyLightLevel(float level)
         c->SetHierarchyLightLevel(level);
 }
 
+// LS3DRF 0x10014b40 (from LS3DF 0x1001ebf0)
 void __stdcall I3D_frame::SetHierarchyAlpha(float alpha)
 {
     if (type == FRAME_VISUAL && (static_cast<I3D_visual *>(this)->visualFlags & VISF_OBJECT_PARAMS))
