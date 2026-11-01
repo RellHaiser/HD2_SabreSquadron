@@ -110,7 +110,7 @@ public:
     // 0x94 0x1004e510: the environment id (the sectors' preset, for the application).
     virtual void __stdcall SetEnvironment(int id);
 
-    // 0x1004cd40: the scene ring (I3D_scene::firstSector); the portals and the occluder follow.
+    // 0x1004cd40: the scene ring (I3D_scene::firstSector); the occluder follows.
     void SetScene(I3D_scene *newScene);
     // 0x1004cb90: the box (the bound becomes stale).
     void SetBox(const I3D_bbox &newBox);

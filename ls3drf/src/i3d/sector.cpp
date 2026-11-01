@@ -523,6 +523,7 @@ void I3D_sector::FreeGeometry()
 
 // ---------------------------------------------------------------- scene and occluder
 
+// LS3DRF 0x10029570 (from LS3DF 0x1004cd40): the portals keep their scene (no portal loop).
 void I3D_sector::SetScene(I3D_scene *newScene)
 {
     if (scene == newScene)
@@ -560,8 +561,6 @@ void I3D_sector::SetScene(I3D_scene *newScene)
             occluder->LinkTo(newScene->primarySector, I3DLINK_UPDMATRIX);
     }
     ++g_sectorChanges;
-    for (I3D_portal *portal : portals)
-        portal->SetScene(scene);
 }
 
 void I3D_sector::SetBox(const I3D_bbox &newBox)
