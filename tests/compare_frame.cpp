@@ -20,9 +20,10 @@
 //
 // The port follows LS3DRF, which gives a new scene to fewer frames than LS3DF.dll: its LinkTo has
 // no occluder or area pass after the sector pass, its sector SetScene leaves the portals' scene as
-// it was, and its occluder has no LinkTo of its own (the frame's). The test patches the original
-// to match: LinkTo (0x1001d680) and SetScene (0x1004cd40) jump over those passes, and the
-// occluder's slot 0x38 is the frame's LinkTo.
+// it was, its sector MatrixChanged leaves the portals as they were, and its occluder has no LinkTo
+// of its own (the frame's). The test patches the original to match: LinkTo (0x1001d680), SetScene
+// (0x1004cd40) and MatrixChanged (0x1004d1d0) jump over those passes, and the occluder's slot 0x38
+// is the frame's LinkTo. Where the test makes portals it runs their MatrixChanged in both.
 //
 // The original's portal destructor leaves the portal in its scene's ring, and its FreeGeometry keeps
 // the plane count (the port fixes both): the test patches the destructor (0x1003ed60) to leave the
@@ -979,8 +980,20 @@ I3D_frame *PortCreate(uint16_t type, I3D_frame *reuse)
 
 using NamePrefixFn = I3D_RESULT(__fastcall *)(void *self, void *edx, const char *prefix);
 
+// Portal MatrixChanged (0x1003ef70) for each portal of sector i, in both: their world values and
+// scene, which the sector's MatrixChanged leaves as they were.
+void PortalsMatrixChanged(int i)
+{
+    uint8_t *o = g_orig[i];
+    for (int k = 0; k < Field<int>(o, 0x254); ++k)
+        OrigFn<void(__fastcall *)(void *, void *)>(0x1003ef70)(Field<void **>(o, 0x24C)[k], nullptr);
+    for (I3D_portal *portal : static_cast<I3D_sector *>(g_port[i])->portals)
+        portal->MatrixChanged();
+}
+
 // A sector's geometry, made the same in both: a box hull (sometimes with a degenerate and a
-// repeated face) and up to three portals on its faces; then MatrixChanged in both.
+// repeated face) and up to three portals on its faces; then MatrixChanged in both, the sector's
+// and its portals'.
 void MakeGeometry(int i)
 {
     uint8_t *o = g_orig[i];
@@ -1077,6 +1090,7 @@ void MakeGeometry(int i)
     }
     CallThisV(o, 0x68);
     sector->MatrixChanged();
+    PortalsMatrixChanged(i);
 }
 
 // An occluder's mesh (Build in both from the same arrays: a box, a tetrahedron or a soup with
@@ -1490,9 +1504,11 @@ void RunOp()
         }
         if (TypeOf(i) == FRAME_SECTOR && s >= 0 && TypeOf(s) == FRAME_SECTOR) {
             Field<int>(o, 0x270) = 0;       // (the port's FreeGeometry clears the plane count)
-            // The new portals' world values are unset until MatrixChanged: run it in both.
+            // The new portals' world values are unset until MatrixChanged: run it in both, the
+            // sector's and its portals'.
             CallThisV(o, 0x68);
             p->MatrixChanged();
+            PortalsMatrixChanged(i);
         }
         if (ro != rp)
             Fail("Duplicate result", i);
@@ -2331,14 +2347,16 @@ void PatchJump(uint32_t va, uint32_t to, const uint8_t *expect, size_t size)
     PatchCode(va, expect, with, size);
 }
 
-// LS3DRF's LinkTo, sector SetScene and occluder LinkTo in the original, and the port's portal
-// destructor (`occluder`: one of its occluders).
+// LS3DRF's LinkTo, sector SetScene and MatrixChanged and occluder LinkTo in the original, and the
+// port's portal destructor (`occluder`: one of its occluders).
 void PatchOrigScenePasses(uint8_t *occluder)
 {
     static const uint8_t linkTail[] = {0x83, 0xbe, 0xf8, 0x00, 0x00, 0x00, 0x0c};    // cmp [esi+0xf8], 0xc
     PatchJump(0x1001da9e, 0x1001dae6, linkTail, sizeof linkTail);
     static const uint8_t portalLoop[] = {0x8b, 0xbe, 0x4c, 0x02, 0x00, 0x00};        // mov edi, [esi+0x24c]
     PatchJump(0x1004ce6d, 0x1004cea6, portalLoop, sizeof portalLoop);
+    static const uint8_t matrixLoop[] = {0x8b, 0x86, 0x54, 0x02, 0x00, 0x00};        // mov eax, [esi+0x254]
+    PatchJump(0x1004d1da, 0x1004d205, matrixLoop, sizeof matrixLoop);
     static const uint8_t ownScene[] = {0x8b, 0x86, 0xa0, 0x01, 0x00, 0x00};          // mov eax, [esi+0x1a0]
     static const uint8_t noScene[] = {0x31, 0xc0, 0x90, 0x90, 0x90, 0x90};           // xor eax, eax
     PatchCode(0x1003ed6f, ownScene, noScene, sizeof ownScene);

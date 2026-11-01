@@ -86,8 +86,8 @@ public:
     // 0x60 / 0x64 0x1004c9b0 / 0x1004ca80
     void Init() override;
     void Uninit() override;
-    // 0x68 0x1004d1d0: the hull planes and portals follow the frame; a sector without a scene
-    // takes that of the sector it is in.
+    // 0x68 0x1004d1d0: the hull planes follow the frame; a sector without a scene takes that of
+    // the sector it is in.
     void MatrixChanged() override;
     // 0x70 0x1004e250: the frame, the 0x30 bytes from sectorFlags on, vertices, faces, portals.
     void Load() override;

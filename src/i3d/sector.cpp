@@ -249,11 +249,10 @@ I3D_RESULT I3D_sector::Duplicate(I3D_frame *source)
     return I3D_OK;
 }
 
+// LS3DRF 0x100299d0 (from LS3DF 0x1004d1d0): the portals keep their world values (no portal loop).
 void I3D_sector::MatrixChanged()
 {
     ComputePlanes();
-    for (I3D_portal *portal : portals)
-        portal->MatrixChanged();
     if (!scene && parent) {
         for (I3D_frame *f = parent; f; f = f->parent) {
             if (f->GetType() == FRAME_SECTOR) {
