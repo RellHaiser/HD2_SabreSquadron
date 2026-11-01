@@ -1,5 +1,5 @@
 // The game's text library (the menus' code, 0x0063de40..0x0064d060): fonts (game/font.h, part 9a),
-// text boxes on interface visuals and text styles (not ported yet). Declared here for the HUD,
+// text boxes on interface visuals (not ported yet) and text styles (game/text_style.h, part 9a-iv). Declared here for the HUD,
 // which uses it for its texts and the message log's glyphs.
 #pragma once
 
@@ -7,30 +7,11 @@
 
 #include "common/c_str.h"
 #include "game/font.h"
+#include "game/text_style.h"
 
 class I3D_frame;
 class I3D_scene;
 
-// A text style (CreateTextStyle): font, colour, size and placement in the text box (fractions of
-// the box; -1: automatic) and flags. (The fields' meanings are inferred from the HUD's tables: the
-// columns of a score table share +0x10 down the rows.)
-struct S_TextStyleDesc {                                // 0x34 bytes
-    int font;
-    uint32_t color;                                     // ARGB
-    float size;                                         // of the screen height
-    float width;                                        // +0x0C the column's width
-    float x;                                            // +0x10 the column's left
-    float unknown14;                                    // -1 or 0.95 .. 0.98
-    float unknown18;
-    float unknown1C;
-    int unknown20;
-    int align;                                          // +0x24 1 left, 2 right, 3 centred
-    int unknown28;
-    uint32_t flags2C;
-    uint32_t flags30;                                   // 0x08: starts a new line
-};
-int CreateTextStyle(const S_TextStyleDesc &desc);       // 0x00643c00 (__fastcall)
-void ReleaseTextStyle(int style);                       // 0x00643bf0 (__fastcall)
 
 // Rich text in the rectangle of an interface visual: runs of text, each with a style (vtable
 // 0x00810458; was C_auto_00810458).

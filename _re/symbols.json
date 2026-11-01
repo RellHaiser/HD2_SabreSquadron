@@ -27802,6 +27802,46 @@
   "module": "font",
   "name": "GlyphMap_NewNode"
  },
+ "00641fe0": {
+  "module": "text_style",
+  "name": "TextStyles_Release",
+  "proto": "bool __thiscall TextStyles_Release(void *this, int style)"
+ },
+ "006420b0": {
+  "module": "text_style",
+  "name": "TextStyles_Create",
+  "proto": "int __thiscall TextStyles_Create(void *this, void * desc)"
+ },
+ "00642150": {
+  "module": "text_style",
+  "name": "TextStyles_AddDefaults",
+  "proto": "void __fastcall TextStyles_AddDefaults(void *this)"
+ },
+ "00643ab0": {
+  "module": "text_style",
+  "name": "S_TextStyleDesc_Set"
+ },
+ "00643b20": {
+  "module": "text_style",
+  "name": "TextStyles_StaticInit"
+ },
+ "00643b30": {
+  "module": "text_style",
+  "name": "TextStyles_Construct"
+ },
+ "00643b60": {
+  "module": "text_style",
+  "name": "TextStyles_RegisterDestroy"
+ },
+ "00643b70": {
+  "module": "text_style",
+  "name": "TextStyles_Destroy"
+ },
+ "00643b80": {
+  "module": "text_style",
+  "name": "TextStyles_Dtor",
+  "proto": "void __fastcall TextStyles_Dtor(void *this)"
+ },
  "00643bf0": {
   "module": "hud",
   "name": "ReleaseTextStyle",
@@ -27919,6 +27959,10 @@
  "0064c620": {
   "module": "zz_idioms",
   "name": "empty_function_64c620"
+ },
+ "0064cc60": {
+  "module": "text_style",
+  "name": "TextStyleList_Insert"
  },
  "0064ce70": {
   "module": "zz_idioms",

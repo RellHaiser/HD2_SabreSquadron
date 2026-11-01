@@ -179435,10 +179435,10 @@
 ]
 },
 "00641fe0": {
-"name": "FUN_00641fe0",
+"name": "TextStyles_Release",
 "size": 197,
-"lines": 67,
-"chars": 1969,
+"lines": 63,
+"chars": 1811,
 "callers": [
 "00643bf0"
 ],
@@ -179453,10 +179453,10 @@
 "in_vtables": []
 },
 "006420b0": {
-"name": "FUN_006420b0",
+"name": "TextStyles_Create",
 "size": 158,
 "lines": 41,
-"chars": 1102,
+"chars": 1134,
 "callers": [
 "00642150",
 "00643c00"
@@ -179473,10 +179473,10 @@
 "in_vtables": []
 },
 "00642150": {
-"name": "FUN_00642150",
+"name": "TextStyles_AddDefaults",
 "size": 6494,
-"lines": 904,
-"chars": 22691,
+"lines": 893,
+"chars": 23726,
 "callers": [
 "00641fe0",
 "006420b0",
@@ -179501,10 +179501,10 @@
 "in_vtables": []
 },
 "00643ab0": {
-"name": "FUN_00643ab0",
+"name": "S_TextStyleDesc_Set",
 "size": 102,
 "lines": 25,
-"chars": 1035,
+"chars": 1063,
 "callers": [
 "00642150"
 ],
@@ -179516,10 +179516,10 @@
 "in_vtables": []
 },
 "00643b20": {
-"name": "FUN_00643b20",
+"name": "TextStyles_StaticInit",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 117,
 "callers": [],
 "callees": [
 "00643b30",
@@ -179537,10 +179537,10 @@
 ]
 },
 "00643b30": {
-"name": "FUN_00643b30",
+"name": "TextStyles_Construct",
 "size": 35,
 "lines": 12,
-"chars": 153,
+"chars": 161,
 "callers": [
 "00643b20"
 ],
@@ -179558,10 +179558,10 @@
 "in_vtables": []
 },
 "00643b60": {
-"name": "FUN_00643b60",
+"name": "TextStyles_RegisterDestroy",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 93,
 "callers": [
 "00643b20"
 ],
@@ -179575,10 +179575,10 @@
 "in_vtables": []
 },
 "00643b70": {
-"name": "FUN_00643b70",
+"name": "TextStyles_Destroy",
 "size": 10,
 "lines": 8,
-"chars": 80,
+"chars": 89,
 "callers": [
 "00643b60"
 ],
@@ -179594,10 +179594,10 @@
 "in_vtables": []
 },
 "00643b80": {
-"name": "FUN_00643b80",
+"name": "TextStyles_Dtor",
 "size": 109,
 "lines": 24,
-"chars": 635,
+"chars": 660,
 "callers": [
 "00643b70"
 ],
@@ -179614,7 +179614,7 @@
 "name": "ReleaseTextStyle",
 "size": 12,
 "lines": 8,
-"chars": 106,
+"chars": 112,
 "callers": [
 "00496dc0",
 "0062f740",
@@ -179637,7 +179637,7 @@
 "name": "CreateTextStyle",
 "size": 12,
 "lines": 10,
-"chars": 137,
+"chars": 141,
 "callers": [
 "00496450",
 "0062f4b0",
@@ -182369,10 +182369,10 @@
 "in_vtables": []
 },
 "0064cc60": {
-"name": "FUN_0064cc60",
+"name": "TextStyleList_Insert",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3529,
 "callers": [
 "006420b0"
 ],

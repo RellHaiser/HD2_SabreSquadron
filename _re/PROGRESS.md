@@ -5959,6 +5959,30 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/gdi_font.txt (45); 43 functions in ported.txt. Stats: 7,951 of 12,293 functions
     by hand (72.9 % by size).
 
+  PART 9a-iv DONE (2026-10-31): the text styles (src/game/text_style.*, new; 0x00641fe0..0x00643c20,
+  the list's vector insert 0x0064cc60). Part 9a done. (0x00643c20..0x006441a0, which the plan put in
+  9a, are C_TextBox's: part 9b.)
+  - The list (0x008ae3f8: a flag, std::vector<S_TextStyleDesc *>): its first use adds the game's 90
+    styles (0x00642150: indices 0 .. 89; their values read from the asm by a simulation of its
+    stores, scratchpad styles_sim.py); Create 0x006420b0 (a copy in the first free place, else at
+    the end), Release 0x00641fe0 (the style deleted, the free places at the end given back but the
+    first; an index not in the list: nothing), its destructor at exit. GetTextStyle and
+    NumTextStyles the port's own (the text box, 9b, reads the list where it is: 0x00645010 and
+    0x00646b40 add the game's styles themselves when it is not loaded yet).
+  - S_TextStyleDesc moved from text_box.h into text_style.h; +0x2C / +0x2D are two bytes (they were
+    one dword: the HUD's table's 0x101 / 0x100 / 0x1 now 1, 1 / 0, 1 / 1, 0).
+  - Harness: fonts_test.inc's "styles:" line in the camera build (4 checks; the 90 styles by an
+    FNV hash of the asm's values; the list left as it was found, the first use only on the first
+    mission). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9a4.py): the first run caught 106 of 113 (7 survived); 5 equivalent
+    (see the file's docstring), the end's trimming tested by NumTextStyles (2); the full rerun
+    caught 108 of 113 (the 5 equivalent). Baselines: the world build 0 of 22 in both orders; the
+    item build 0 of 37; the other five 0 of 37.
+  - Build: 205 files clean (MSVC). Tier 1: 514 errors in 86 files, 207 stubs (unchanged). ret_audit
+    --src: 52.
+  - Ghidra: names/text_style.txt (10); 12 functions in ported.txt. Stats: 7,963 of 12,293 functions
+    by hand (73.1 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

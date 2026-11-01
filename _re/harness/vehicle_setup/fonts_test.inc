@@ -250,6 +250,7 @@ struct S_FontResults {
     bool xmFile = true, cfLanguage = true, cfSet = true, cfFonts = true, cfValues = true;
     bool gdInit = true, gdCells = true, gdFail = true, gdGlyph = true, gdTexture = true, gdReuse = true;
     bool gdEvict = true, gdOrder = true, gdSelect = true, gdClose = true;
+    bool stFirst = true, stDefaults = true, stCreate = true, stRelease = true;
 };
 
 // IGraph: the screen's width; textures ("missing": not found; "fail1": the code 1, loaded) logged.
@@ -1173,6 +1174,93 @@ void FontTest()
         g_foGdi = false;
     }
 
+
+    // --- part 9a-iv: the text styles ---
+    {
+        // The first use of the process (the first mission): the list empty until then; a release
+        // adds the game's styles too.
+        static bool used;
+        if (!used) {
+            used = true;
+            WM(r.stFirst, GetTextStyle(0) == nullptr);
+            ReleaseTextStyle(-5);
+            WM(r.stFirst, GetTextStyle(0) != nullptr && GetTextStyle(89) != nullptr && GetTextStyle(90) == nullptr);
+        }
+        // The game's 90 styles (their values: the asm's, by styles_sim.py's hash) and a few by hand.
+        uint32_t hash = 0x811C9DC5;
+        const auto mix = [&hash](uint32_t v) {
+            for (int k = 0; k < 4; ++k) {
+                hash ^= (v >> (8 * k)) & 0xFF;
+                hash *= 0x01000193;
+            }
+        };
+        const auto bits = [](float f) {
+            uint32_t u;
+            std::memcpy(&u, &f, 4);
+            return u;
+        };
+        bool all = true;
+        for (int i = 0; i < 90; ++i) {
+            const S_TextStyleDesc *d = GetTextStyle(i);
+            all = all && d;
+            if (!d)
+                break;
+            for (uint32_t v : {static_cast<uint32_t>(d->font), d->color, bits(d->size), bits(d->width), bits(d->x),
+                               bits(d->unknown14), bits(d->unknown18), bits(d->unknown1C), static_cast<uint32_t>(d->unknown20),
+                               static_cast<uint32_t>(d->align), static_cast<uint32_t>(d->unknown28),
+                               static_cast<uint32_t>(d->unknown2C), static_cast<uint32_t>(d->unknown2D), d->flags30})
+                mix(v);
+        }
+        WM(r.stDefaults, all && hash == 0xD7D65343u);
+        const S_TextStyleDesc *s85 = GetTextStyle(85);
+        WM(r.stDefaults, s85 && s85->font == 4 && s85->color == 0xFFFFFFFF && s85->size == 0.012f && s85->align == 1 &&
+                             s85->unknown2C == 1 && s85->unknown2D == 1 && s85->flags30 == 0x88);
+        // New styles: after the game's; a freed place taken again; the free places at the end given
+        // back (not the first place); an index not in the list: nothing.
+        S_TextStyleDesc desc = {3, 0x12345678, 0.5f, 0.25f, 0.125f, 1.0f, 2.0f, 3.0f, 4, 5, 6, 7, 8, 9};
+        const int a = CreateTextStyle(desc);
+        desc.font = 9;
+        const int b = CreateTextStyle(desc);
+        const int c = CreateTextStyle(desc);
+        WM(r.stCreate, a == 90 && b == 91 && c == 92 && GetTextStyle(90)->color == 0x12345678 && GetTextStyle(91)->font == 9 &&
+                           GetTextStyle(90) != &desc && GetTextStyle(90)->flags30 == 9 && GetTextStyle(90)->unknown2D == 8);
+        ReleaseTextStyle(91);
+        WM(r.stRelease, GetTextStyle(91) == nullptr && GetTextStyle(92) != nullptr && NumTextStyles() == 93);
+        desc.font = 11;
+        WM(r.stCreate, CreateTextStyle(desc) == 91 && GetTextStyle(91)->font == 11);
+        ReleaseTextStyle(91);
+        ReleaseTextStyle(92);
+        // (92 and the free 91 given back: the next new one is 91.)
+        desc.font = 12;
+        WM(r.stRelease, NumTextStyles() == 91 && GetTextStyle(92) == nullptr && GetTextStyle(91) == nullptr &&
+                            CreateTextStyle(desc) == 91);
+        ReleaseTextStyle(93);
+        ReleaseTextStyle(-1);
+        WM(r.stRelease, GetTextStyle(91) && GetTextStyle(91)->font == 12 && GetTextStyle(92) == nullptr);
+        WM(r.stRelease, CreateTextStyle(desc) == 92);
+        ReleaseTextStyle(92);
+        ReleaseTextStyle(91);
+        ReleaseTextStyle(90);
+        WM(r.stRelease, GetTextStyle(90) == nullptr && GetTextStyle(89) != nullptr && CreateTextStyle(desc) == 90);
+        ReleaseTextStyle(90);
+        // Every style freed: the first place kept (empty); the game's styles made again in order.
+        std::vector<S_TextStyleDesc> saved;
+        for (int i = 0; i < 90; ++i)
+            saved.push_back(*GetTextStyle(i));
+        ReleaseTextStyle(45);
+        WM(r.stRelease, GetTextStyle(45) == nullptr && GetTextStyle(89) != nullptr && NumTextStyles() == 90);
+        for (int i = 89; i >= 0; --i)
+            ReleaseTextStyle(i);
+        WM(r.stRelease, GetTextStyle(0) == nullptr && GetTextStyle(1) == nullptr && NumTextStyles() == 1);
+        bool back = true;
+        for (int i = 0; i < 90; ++i)
+            back = back && CreateTextStyle(saved[i]) == i;
+        desc.font = 13;
+        WM(r.stRelease, back && GetTextStyle(89)->flags30 == saved[89].flags30 && CreateTextStyle(desc) == 90);
+        ReleaseTextStyle(90);
+        WM(r.stRelease, GetTextStyle(90) == nullptr);
+    }
+
     while (g_fontManager)
         ReleaseFontManager();
     g_foLanguage = "English";
@@ -1194,4 +1282,6 @@ void FontTest()
                 "gdClose %d\n",
                 r.gdInit, r.gdCells, r.gdFail, r.gdGlyph, r.gdTexture, r.gdReuse, r.gdEvict, r.gdOrder, r.gdSelect,
                 r.gdClose);
+    std::printf("styles: stFirst %d stDefaults %d stCreate %d stRelease %d\n", r.stFirst, r.stDefaults, r.stCreate,
+                r.stRelease);
 }

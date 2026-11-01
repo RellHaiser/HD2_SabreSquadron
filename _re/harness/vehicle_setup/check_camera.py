@@ -31,6 +31,7 @@ LINES = {
     "xml": ("xmTree xmText xmComments xmAttributes xmBad xmWalk xmFile cfLanguage cfSet cfFonts "
             "cfValues").split(),
     "gdi": ("gdInit gdCells gdFail gdGlyph gdTexture gdReuse gdEvict gdOrder gdSelect gdClose").split(),
+    "styles": "stFirst stDefaults stCreate stRelease".split(),
 }
 
 
