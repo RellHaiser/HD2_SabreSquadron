@@ -14,7 +14,7 @@ enum : uint32_t {
     ITC_SOURCE_ALPHA = 0x00000002,      // use the image's own alpha (32-bit; 16-bit: its top bit)
     ITC_USE_ALPHA = 0x00000004,         // a separate opacity map (alpha file name)
     ITC_ALPHA_1BIT = 0x00000008,        // 1-bit alpha (colour key: palette entry 0 / black)
-    ITC_STREAMED = 0x00000040,          // loaded on demand by the texture thread
+    ITC_STREAMED = 0x00000040,          // (LS3DF) loaded on demand by the texture thread; ignored here
     ITC_DITHER = 0x00000080,            // Floyd-Steinberg dithering into 16-bit formats
     ITC_MIPMAP = 0x00000100,
     ITC_COMPRESS = 0x00000200,          // DXT, when the device has it
@@ -28,15 +28,9 @@ enum : uint32_t {
     ITC_NOCACHE = 0x00200000,           // not shared through IGraph's cached texture list
     ITC_NORESIZE = 0x00400000,          // keep the image size (no power of 2, no maximum)
     ITC_PIXEL_MASK = 0x01000000,        // (internal) pixels is a 1-bit mask of the alpha
-    ITC_QUEUED = 0x40000000,            // (internal) ITC_STREAMED: requested from the thread
-    ITC_RESIDENT = 0x80000000,          // (internal) ITC_STREAMED: holds a staging texture
     // Options a .dds file does not take (LoadTexture clears them).
     ITC_DDS_IGNORED = ITC_DITHER | ITC_MIPMAP | ITC_COMPRESS | ITC_TRUECOLOR | ITC_HALF,
 };
-
-namespace ls3d::tex {
-struct S_streamRecord;
-}
 
 class ITexture {
 public:
@@ -94,7 +88,7 @@ public:
     uint16_t levels;                            // +0x38
     uint16_t pad3A;
     uint32_t memorySize;                        // +0x3C bytes of all levels
-    ls3d::tex::S_streamRecord *stream;          // +0x40 ITC_STREAMED
+    uint32_t pad40;                             // +0x40 (LS3DF: the ITC_STREAMED texture's record)
 };
 static_assert(sizeof(ITexture) == 0x44, "ITexture layout");
 
@@ -116,11 +110,5 @@ bool CompressSurface(const char *name, int kind, gfx::Surface *source, gfx::Surf
 void DecodeDxt1(const uint8_t *src, uint32_t *dst, uint32_t width, uint32_t height);
 void DecodeDxt3(const uint8_t *src, uint32_t *dst, uint32_t width, uint32_t height);
 void DecodeDxt5(const uint8_t *src, uint32_t *dst, uint32_t width, uint32_t height);
-
-// Texture thread bookkeeping (texture_stream.cpp).
-bool StreamAdd(ITexture *texture, const char *fileName, uint32_t flags);     // 0x10079230
-void StreamRemove(ITexture *texture);                                       // 0x10079340
-bool StreamRequest(ITexture *texture);                                      // 0x10078e40
-void StreamReleaseAll();                                                    // 0x10079440
 
 }  // namespace ls3d::tex

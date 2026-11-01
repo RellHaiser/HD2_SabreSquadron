@@ -294,37 +294,15 @@ chosen:
         textureLevel = level;
         return level;
     }
-    const int last = n - 1;
-    if (level > last)
+    if (level > n - 1)
         return level;
-    // Texture LODs: the chosen level's textures, or (while they stream in) the first other level
-    // whose texture is loaded, else the last.
-    auto firstMaterial = [this](int i) {
-        I3D_material *m = mesh->levels[i]->faceGroups->material;
-        if (m->matFlags & MATF_ANIMATED)
-            m->UpdateTexture();
-        return m;
-    };
-    int use = level;
-    I3D_material *m = firstMaterial(level);
-    if (m->texture && !tex::StreamRequest(m->texture)) {
-        use = last;
-        for (int j = 0; j < last; ++j) {
-            if (j == level)
-                continue;
-            I3D_material *mj = firstMaterial(j);
-            if (!mj->texture)
-                continue;
-            if (mj->matFlags & MATF_ANIMATED)
-                mj->UpdateTexture();
-            if (mj->texture->flags & ITC_RESIDENT) {
-                use = j;
-                break;
-            }
-        }
-    }
-    if (textureLevel != use) {
-        textureLevel = use;
+    // Texture LODs: the chosen level's textures. (LS3DF fell back to another level while a streamed
+    // texture loaded; nothing streams here.)
+    I3D_material *m = mesh->levels[level]->faceGroups->material;
+    if (m->matFlags & MATF_ANIMATED)
+        m->UpdateTexture();
+    if (textureLevel != level) {
+        textureLevel = level;
         visualFlags |= VISF_UV_STALE;
     }
     return 0;

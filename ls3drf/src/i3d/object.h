@@ -5,7 +5,7 @@
 // An object draws one level of its mesh, chosen by the camera distance (the levels' lodDistance;
 // the last level fades out with g_lodFadeScale), each face group a queued item with its material's
 // textures. With VISF_TEXTURE_LOD the levels share level 0's geometry and the chosen level gives
-// the texture coordinates and materials (falling back to a level whose textures are loaded).
+// the texture coordinates and materials.
 // A mirror's copy (VISF_MIRRORED) draws the visual it reflects (`data`) with mirrored lights.
 #pragma once
 

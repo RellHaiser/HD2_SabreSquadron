@@ -1,5 +1,5 @@
-// The platform: the operating system services the engine uses besides drawing - time, locks and
-// the mouse cursor.
+// The platform: the operating system services the engine uses besides drawing - time and the mouse
+// cursor.
 //
 // Unlike the devices (gfx), the platform is chosen when the DLL is built: one backend source is
 // compiled in. Nothing needs two platforms in one process, and the engine reads the clock from
@@ -19,14 +19,6 @@ namespace ls3d::platform {
 uint32_t Milliseconds();
 // Waits `ms` milliseconds; 0 gives up the rest of the time slice.
 void Pause(uint32_t ms);
-
-// ---------------------------------------------------------------- locks
-
-struct Mutex;                   // opaque
-
-Mutex *NewMutex();
-void Lock(Mutex *mutex);
-void Unlock(Mutex *mutex);
 
 // ---------------------------------------------------------------- the mouse
 
