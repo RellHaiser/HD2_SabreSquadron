@@ -398,6 +398,12 @@ def src_audit(globs):
             n += 4
         if free and r == {0}:
             continue  # __cdecl / register arguments: nothing to compare
+        # The controls' callbacks (ControlCallback): __thiscall members of `object` in the original,
+        # `object` in ECX and again as the first stack argument; the port's `argument` is that one.
+        if free and re.search(r"void\s*\*\s*\w+\s*,\s*void\s*\*\s*\w*\s*,\s*C_Control\s*\*", params):
+            n -= 4
+            if r == {n}:
+                continue
         if re.search(r"inline in|scalar deleting|added by the port", text) or (name.startswith("~") and r == {4}):
             continue
         # Members marked "(__fastcall" in their address comment were __fastcall functions taking

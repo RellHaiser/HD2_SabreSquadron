@@ -2733,3 +2733,599 @@ bool C_SelectList::HandleMessage(S_ControlMessage *message)
     }
     return C_EditControl::HandleMessage(message);
 }
+
+// ----- the group's shared slots (part 9c-iv-b) -----
+
+int C_ControlGroup::EnterChild(int id)
+{
+    if (id == GROUP_ENTER_UNKNOWN) {
+        if (Unknown20(GROUP_ENTER_UNKNOWN))
+            return CONTROL_NOT_HANDLED;
+    } else if (C_Control *focus = Focus()) {
+        if (focus->OnLeave(id) == 0)
+            return CONTROL_NOT_HANDLED;
+    }
+    const int index = FindChild(static_cast<uint32_t>(id));
+    if (IsChild(index) && m_children[index]->OnEnter(id) != 0) {
+        m_focus = index;
+        return CONTROL_HANDLED;
+    }
+    return 0;
+}
+
+bool C_ControlGroup::FocusUnknown20(int value)
+{
+    C_Control *focus = Focus();
+    return focus && focus->Unknown20(value);
+}
+
+// ----- the scrolled text (type 0xf) -----
+
+namespace {
+
+// The scrolled text's parts' ids' last bits, its bar's page step; its lines' style.
+constexpr uint32_t SCROLLED_LIST = 8, SCROLLED_BAR = 4;
+constexpr uint32_t SCROLLED_PAGE_STEP = 5;
+constexpr uint32_t SCROLLED_LINE_STYLE = 0x13;
+// The combo box's parts' ids' last bits; the header's text style.
+constexpr uint32_t COMBO_BUTTON = 1, COMBO_HEADER = 2;
+constexpr uint32_t COMBO_HEADER_STYLE = 0xC;
+// The chat input's parts' ids' last bits, its prompt, its length, the lines kept.
+constexpr uint32_t CHAT_INPUT = 4, CHAT_LABEL = 8, CHAT_TOGGLE = 0xC;
+constexpr int CHAT_PROMPT_TEXT = 2002;
+constexpr uint32_t CHAT_PROMPT_STYLE = 0xD;
+constexpr uint32_t CHAT_MAX_LENGTH = 100;
+constexpr uint32_t CHAT_LINES = 8;
+
+// A message with a value (and a text).
+S_ControlMessage ValueMessage(uint32_t id, uint32_t value, const C_str &text = C_str())
+{
+    S_ControlMessage message = Message(id);
+    message.value = value;
+    message.text = text;
+    return message;
+}
+
+} // namespace
+
+int C_ScrolledText::FindChild(uint32_t id) const
+{
+    const uint32_t bits = id & CHILD_ID_MASK;
+    if (bits == SCROLLED_LIST)
+        return 0;
+    if (bits > 3 && bits < 8)
+        return 1;
+    return -1;
+}
+
+bool C_ScrolledText::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_Control::Create(frame, root, desc);
+    m_frame->SetData(nullptr);
+    if (I3D_frame *text = frame->FindChildFrame("text*", FIND_FRAMES)) {
+        m_list = new C_SelectList(m_scene, m_id | SCROLLED_LIST, this);
+        m_list->Create(text, root, nullptr);
+        m_children.push_back(m_list);
+    }
+    if (I3D_frame *scroll = frame->FindChildFrame("scroll*", FIND_FRAMES)) {
+        m_bar = new C_ScrollBar(m_scene, m_id | SCROLLED_BAR, this);
+        m_bar->Create(scroll, root, nullptr);
+        m_bar->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_PAGE_STEP, SCROLLED_PAGE_STEP));
+        m_children.push_back(m_bar);
+    }
+    if (m_bar && m_list) {
+        m_bar->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_VALUE, m_id | SCROLLED_LIST));
+        m_list->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_VALUE, m_id | SCROLLED_BAR));
+    }
+    return true;
+}
+
+int C_ScrolledText::OnPress(int id)
+{
+    if (!IsChild(m_focus) || m_focus != FindChild(static_cast<uint32_t>(id)))
+        return 0;
+    const int result = m_children[m_focus]->OnPress(id);
+    if (m_focus == 0)
+        Notify(CONTROL_NOTIFY_PRESS, 0);
+    return result;
+}
+
+int C_ScrolledText::OnWheel(int, int amount)
+{
+    if (!m_bar || amount == 0)
+        return CONTROL_NOT_HANDLED;
+    if (amount > 0) {
+        for (unsigned steps = (static_cast<unsigned>(amount) - 1) / WHEEL_STEP + 1; steps; --steps)
+            m_bar->HandleMessageCopy(Message(CONTROL_MSG_SCROLL_UP));
+    } else {
+        for (unsigned steps = (static_cast<unsigned>(-amount) - 1) / WHEEL_STEP + 1; steps; --steps)
+            m_bar->HandleMessageCopy(Message(CONTROL_MSG_SCROLL_DOWN));
+    }
+    return CONTROL_HANDLED;
+}
+
+bool C_ScrolledText::HandleMessage(S_ControlMessage *message)
+{
+    const int index = FindChild(message->target);
+    if (IsChild(index))
+        return m_children[index]->HandleMessage(message);
+    if (!(message->id & CONTROL_NOTIFY_MASK)) {
+        switch (message->id & CONTROL_MSG_MASK) {
+        case CONTROL_MSG_IGNORE_INPUT:
+        case CONTROL_MSG_ADD_CALLBACK:
+        case CONTROL_MSG_SET_VALUE:
+        case CONTROL_MSG_ADD_TEXT:
+        case CONTROL_MSG_ADD_TEXT_ID:
+        case CONTROL_MSG_SET_RUN_TEXT:
+        case CONTROL_MSG_GET_ITEM:
+        case CONTROL_MSG_INSERT_FIRST:
+        case CONTROL_MSG_EDIT:
+        case CONTROL_MSG_REMOVE_SELECTED:
+        case CONTROL_MSG_CLEAR:
+        case CONTROL_MSG_PREVIOUS_ITEM:
+        case CONTROL_MSG_NEXT_ITEM:
+        case CONTROL_MSG_SET_POSITION:
+        case CONTROL_MSG_REFRESH:
+        case CONTROL_MSG_GET_TEXT:
+        case CONTROL_MSG_SET_MARGIN:
+        case CONTROL_MSG_SELECT_TEXT:
+            // (The list checked: the fix, the original's without it crashes.)
+            if (m_list)
+                m_list->HandleMessage(message);
+            return true;
+        }
+    }
+    C_Control::HandleMessage(message);
+    return true;
+}
+
+void C_ScrolledText::SetStrings(const std::vector<C_str> &strings)
+{
+    if (!m_list)
+        return;
+    for (const C_str &line : strings)
+        m_list->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, SCROLLED_LINE_STYLE, line));
+    m_list->HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+}
+
+void C_ScrolledText::SetInactive(bool inactive)
+{
+    m_inactive = inactive;
+    if (m_bar)
+        m_bar->SetInactive(inactive);
+    if (m_list)
+        m_list->SetInactive(inactive);
+}
+
+// ----- the combo box's header (vtable 0x00814320) -----
+
+bool C_ComboEdit::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_EditControl::Create(frame, root, desc))
+        return false;
+    m_frame->SetDir(FACE_BACK, 0.0f);
+    SetFrameId(m_frame, m_id);
+    m_frame->Update();
+    if (!m_box)
+        return false;
+    m_run = 0;
+    m_box->AttachTo(m_scene, m_frame);
+    return true;
+}
+
+int C_ComboEdit::OnEnter(int)
+{
+    if (m_inactive)
+        return 0;
+    Notify(CONTROL_NOTIFY_ENTER, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_ComboEdit::OnLeave(int)
+{
+    if (!m_box->ClearHover())
+        return 0;
+    Notify(CONTROL_NOTIFY_LEAVE, 0);
+    return C_EditControl::OnLeave(0);
+}
+
+int C_ComboEdit::OnInput02(int)
+{
+    if (C_EditControl::OnInput02(0) != CONTROL_HANDLED)
+        return 0;
+    m_box->ClearHover();
+    m_box->SelectHovered();
+    return CONTROL_HANDLED;
+}
+
+int C_ComboEdit::OnKeyClick(int id)
+{
+    if (m_inactive || static_cast<uint32_t>(id) != m_id)
+        return 0;
+    return IsEditing() ? OnInput02(id) : OnClick(id);
+}
+
+bool C_ComboEdit::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_EditControl::HandleMessage(message);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_EDIT:
+        C_EditControl::OnClick(0);
+        return true;
+    case CONTROL_MSG_SET_MARGIN:
+        if (m_box)
+            m_box->SetUnknown90(static_cast<uint8_t>(message->value));
+        [[fallthrough]];
+    case CONTROL_MSG_REFRESH:
+        if (m_box)
+            m_box->AttachTo(m_scene, m_frame);
+        return true;
+    }
+    return C_EditControl::HandleMessage(message);
+}
+
+// ----- the combo box (type 0x11) -----
+
+int C_ComboBox::FindChild(uint32_t id) const
+{
+    const uint32_t bits = id & CHILD_ID_MASK;
+    if (bits > 3)
+        return 0;
+    if (bits == COMBO_BUTTON)
+        return 1;
+    return bits == COMBO_HEADER ? 2 : -1;
+}
+
+void C_ComboBox::SendTo(C_Control *part, const S_ControlMessage &message)
+{
+    if (part)
+        part->HandleMessageCopy(message);
+}
+
+bool C_ComboBox::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_Control::Create(frame, root, desc);
+    m_frame->SetData(nullptr);
+    if (I3D_frame *list = frame->FindChildFrame("listbox*", FIND_FRAMES | FIND_DUMMIES)) {
+        m_list = new C_ScrolledText(m_scene, m_id, this);
+        m_list->Create(list, root, nullptr);
+        m_list->HandleMessageCopy(Message(CONTROL_MSG_HIDE));
+        m_list->HandleMessageCopy(Route(m_id, CONTROL_NOTIFY_PRESS | CONTROL_MSG_PICK_SELECTED));
+        m_children.push_back(m_list);
+    }
+    if (I3D_frame *button = frame->FindChildFrame("cbdown*", FIND_DUMMIES)) {
+        m_button = new C_Button(m_scene, m_id | COMBO_BUTTON, this);
+        m_button->Create(button, root, nullptr);
+        m_button->HandleMessageCopy(Route(m_id, CONTROL_NOTIFY_PRESS | CONTROL_MSG_TOGGLE_LIST));
+        m_children.push_back(m_button);
+    }
+    if (I3D_frame *header = frame->FindChildFrame("header*", FIND_FRAMES)) {
+        m_header = new C_ComboEdit(m_scene, m_id | COMBO_HEADER, this);
+        m_header->Create(header, root, nullptr);
+        S_ControlMessage takeInput = Message(CONTROL_MSG_TAKE_INPUT);
+        takeInput.target = m_id;
+        m_header->HandleMessageCopy(takeInput);
+        m_header->HandleMessageCopy(Route(m_id, CONTROL_NOTIFY_PRESS | CONTROL_MSG_TOGGLE_LIST));
+        S_ControlMessage callback = ValueMessage(CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0B);
+        callback.value2 = reinterpret_cast<uintptr_t>(this);
+        callback.value3 = reinterpret_cast<uintptr_t>(&C_ComboBox::HeaderEdited);
+        m_header->HandleMessageCopy(callback);
+        m_children.push_back(m_header);
+    }
+    return true;
+}
+
+bool C_ComboBox::HeaderEdited(void *object, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *combo = static_cast<C_ComboBox *>(object);
+    if (combo->m_picked >= 0) {
+        S_ControlMessage get = Message(CONTROL_MSG_GET_TEXT);
+        combo->m_header->HandleMessage(&get);
+        combo->m_pickedText = get.text;
+        S_ControlMessage set = ValueMessage(CONTROL_MSG_SET_RUN_TEXT, SCROLLED_LINE_STYLE, combo->m_pickedText);
+        set.value2 = static_cast<uint32_t>(combo->m_picked);
+        SendTo(combo->m_list, set);
+    }
+    combo->Notify(CONTROL_NOTIFY_0B, 0);
+    return true;
+}
+
+int C_ComboBox::OnLeave(int id)
+{
+    if (C_Control *focus = Focus()) {
+        if (focus->OnLeave(id) == 0)
+            return 0;
+        m_focus = -1;
+    }
+    return m_open ? 0 : CONTROL_HANDLED;
+}
+
+int C_ComboBox::OnInput05(int id)
+{
+    if (!IsChild(FindChild(static_cast<uint32_t>(id))))
+        return OnLeave(id);
+    if (m_focus != FindChild(static_cast<uint32_t>(id))) {
+        OnLeave(id);
+        return OnEnter(id);
+    }
+    return m_children[m_focus]->OnInput05(id);
+}
+
+int C_ComboBox::OnPress(int id)
+{
+    if (IsChild(m_focus) && m_focus == FindChild(static_cast<uint32_t>(id)))
+        return m_children[m_focus]->OnPress(id);
+    // A press outside the box closes the open list.
+    if (m_id != (static_cast<uint32_t>(id) & ~CHILD_ID_MASK) && m_open) {
+        S_ControlMessage toggle = Message(CONTROL_MSG_TOGGLE_LIST);
+        HandleMessage(&toggle);
+    }
+    return 0;
+}
+
+void C_ComboBox::ShowPicked(int index, const C_str &text)
+{
+    m_picked = index;
+    m_pickedText = text;
+    SendTo(m_header, ValueMessage(CONTROL_MSG_SET_TEXT, COMBO_HEADER_STYLE, m_pickedText));
+    SendTo(m_list, Message(CONTROL_MSG_HIDE));
+    m_open = false;
+}
+
+bool C_ComboBox::HandleMessage(S_ControlMessage *message)
+{
+    const int index = FindChild(message->target);
+    if (IsChild(index))
+        return m_children[index]->HandleMessage(message);
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    // (The parts checked: the fix, the original's without them crashes.)
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_ADD_TEXT:
+    case CONTROL_MSG_ADD_TEXT_ID:
+        if (m_list)
+            m_list->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_PICK_INDEX: {
+        S_ControlMessage get = ValueMessage(CONTROL_MSG_GET_ITEM, message->value);
+        if (m_list)
+            m_list->HandleMessage(&get);
+        if (static_cast<int>(message->value) >= 0)
+            ShowPicked(static_cast<int>(get.value), get.text);
+        return true;
+    }
+    case CONTROL_MSG_SET_HEADER_TEXT:
+        message->id = CONTROL_MSG_SET_TEXT;
+        if (m_header)
+            m_header->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_SET_HEADER_TEXT_ID:
+        message->id = CONTROL_MSG_SET_TEXT_ID;
+        [[fallthrough]];
+    case CONTROL_MSG_EDIT:
+        if (m_header)
+            m_header->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_CLEAR:
+        if (m_header)
+            m_header->HandleMessage(message);
+        if (m_list)
+            m_list->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_TOGGLE_LIST:
+        SendTo(m_list, Message(m_open ? CONTROL_MSG_HIDE : CONTROL_MSG_SHOW));
+        m_open = !m_open;
+        return true;
+    case CONTROL_MSG_PICK_SELECTED: {
+        S_ControlMessage get = Message(CONTROL_MSG_GET_TEXT);
+        if (m_list)
+            m_list->HandleMessage(&get);
+        if (static_cast<int>(get.value) >= 0) {
+            ShowPicked(static_cast<int>(get.value), get.text);
+            Notify(CONTROL_NOTIFY_0E, 0);
+        }
+        return true;
+    }
+    case CONTROL_MSG_GET_TEXT:
+        message->value = static_cast<uint32_t>(m_picked);
+        message->text = m_pickedText;
+        return true;
+    }
+    C_Control::HandleMessage(message);
+    return true;
+}
+
+void C_ComboBox::SetStrings(const std::vector<C_str> &strings)
+{
+    if (!m_list)
+        return;
+    if (!strings.empty())
+        SendTo(m_header, ValueMessage(CONTROL_MSG_SET_TEXT, COMBO_HEADER_STYLE, strings[0]));
+    m_list->SetStrings(strings);
+}
+
+void C_ComboBox::SetInactive(bool inactive)
+{
+    m_inactive = inactive;
+    // (The parts checked: the fix, the original's without them crashes.)
+    if (m_button)
+        m_button->SetInactive(inactive);
+    if (m_list)
+        m_list->SetInactive(inactive);
+    if (m_header)
+        m_header->SetInactive(inactive);
+}
+
+// ----- the titled combo box (type 0x28) -----
+
+int C_TitledComboBox::FindChild(uint32_t id) const
+{
+    if (!m_title || !m_combo)
+        return -1;
+    return (id & CHILD_ID_MASK) != 0 ? 1 : 0;
+}
+
+bool C_TitledComboBox::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_ControlGroup::Create(frame, root, desc))
+        return false;
+    m_frame->SetData(nullptr);
+    if (I3D_frame *text = frame->FindChildFrame("text18", FRAME_MASK_VISUAL)) {
+        m_title = new C_TitleControl(m_scene, m_id, this);
+        m_title->Create(text, root, nullptr);
+        m_title->HandleMessageCopy(Message(CONTROL_MSG_TAKE_INPUT));
+        m_children.push_back(m_title);
+    }
+    I3D_frame *combo = frame->FindChildFrame("game difficulty", FRAME_MASK_VISUAL);
+    if (!combo)
+        return false;
+    m_combo = new C_ComboBox(m_scene, m_id, this);
+    m_combo->Create(combo, root, nullptr);
+    m_children.push_back(m_combo);
+    return true;
+}
+
+bool C_TitledComboBox::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_Control::HandleMessage(message);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_DEACTIVATE:
+        if (!m_inactive)
+            SetInactive(true);
+        return true;
+    case CONTROL_MSG_ACTIVATE:
+        if (m_inactive)
+            SetInactive(false);
+        return true;
+    case CONTROL_MSG_SHOW:
+        Show();
+        return true;
+    case CONTROL_MSG_HIDE:
+        Hide();
+        return true;
+    case CONTROL_MSG_SET_TEXT:
+    case CONTROL_MSG_SET_TEXT_ID:
+        // (The parts checked: the fix, the original's without them crashes.)
+        return m_title ? m_title->HandleMessage(message) : true;
+    }
+    return m_combo ? m_combo->HandleMessage(message) : true;
+}
+
+void C_TitledComboBox::SetInactive(bool inactive)
+{
+    m_inactive = inactive;
+    if (m_title)
+        m_title->SetInactive(inactive);
+    if (m_combo)
+        m_combo->SetInactive(inactive);
+}
+
+// ----- the chat input (type 0x21) -----
+
+int C_ChatInput::FindChild(uint32_t id) const
+{
+    const uint32_t bits = id & CHILD_ID_MASK;
+    if (bits == CHAT_INPUT)
+        return 0;
+    if (bits == CHAT_LABEL)
+        return 1;
+    return bits > CHAT_TOGGLE ? 2 : -1;
+}
+
+bool C_ChatInput::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_ControlGroup::Create(frame, root, desc);
+    m_frame->SetData(nullptr);
+    if (I3D_frame *input = frame->FindChildFrame("binput*", FIND_DUMMIES)) {
+        m_input = new C_EditBox(m_scene, m_id | CHAT_INPUT, this);
+        m_input->Create(input, root, nullptr);
+        S_ControlMessage prompt = ValueMessage(CONTROL_MSG_SET_TEXT_ID, CHAT_PROMPT_STYLE);
+        prompt.value2 = CHAT_PROMPT_TEXT;
+        m_input->HandleMessageCopy(prompt);
+        m_input->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_MAX_LENGTH, CHAT_MAX_LENGTH));
+        S_ControlMessage callback = ValueMessage(CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_02);
+        callback.value2 = reinterpret_cast<uintptr_t>(this);
+        callback.value3 = reinterpret_cast<uintptr_t>(&C_ChatInput::LineEntered);
+        m_input->HandleMessageCopy(callback);
+        m_children.push_back(m_input);
+    }
+    if (I3D_frame *text = frame->FindChildFrame("text*", FIND_FRAMES)) {
+        m_label = new C_LabelControl(m_scene, m_id | CHAT_LABEL, this);
+        m_label->Create(text, root, nullptr);
+        m_children.push_back(m_label);
+    }
+    if (I3D_frame *team = frame->FindChildFrame("bTeam", FIND_DUMMIES)) {
+        m_teamToggle = new C_AllToggleButton(m_scene, m_id | CHAT_TOGGLE, this);
+        m_teamToggle->Create(team, root, nullptr);
+        m_teamToggle->HandleMessageCopy(Route(m_id, CONTROL_NOTIFY_CHANGED | CONTROL_MSG_TEAM_TOGGLED));
+        m_children.push_back(m_teamToggle);
+    }
+    return true;
+}
+
+bool C_ChatInput::LineEntered(void *object, void *, C_Control *control, uint32_t, uint32_t)
+{
+    if (!control)
+        return true;
+    auto *chat = static_cast<C_ChatInput *>(object);
+    S_ControlMessage get = Message(CONTROL_MSG_GET_TEXT);
+    control->HandleMessage(&get);
+    const char *text = get.text.c_str();
+    while (static_cast<uint8_t>(*text) < 0x80 && std::isspace(static_cast<unsigned char>(*text)))
+        ++text;
+    if (*text != '\0') {
+        // A command kept; else to the team ("/t") or to all ("/a").
+        C_str line;
+        if (std::strstr(text, "/t") == text || std::strstr(text, "/a") == text)
+            line = C_str(text);
+        else
+            line = C_fstr(chat->m_team ? "/t%s" : "/a%s", text);
+        chat->Notify(CONTROL_NOTIFY_SEND, static_cast<uint32_t>(reinterpret_cast<uintptr_t>(line.c_str())));
+    }
+    S_ControlMessage prompt = ValueMessage(CONTROL_MSG_SET_TEXT_ID, CHAT_PROMPT_STYLE);
+    prompt.value2 = CHAT_PROMPT_TEXT;
+    control->HandleMessageCopy(prompt);
+    S_ControlMessage edit = Message(CONTROL_MSG_EDIT);
+    edit.target = control->GetId();
+    PostControlMessage(edit);
+    return true;
+}
+
+bool C_ChatInput::HandleMessage(S_ControlMessage *message)
+{
+    const int index = FindChild(message->target);
+    if (IsChild(index))
+        return m_children[index]->HandleMessage(message);
+    if (!(message->id & CONTROL_NOTIFY_MASK)) {
+        switch (message->id & CONTROL_MSG_MASK) {
+        case CONTROL_MSG_ADD_TEXT:
+        case CONTROL_MSG_ADD_TEXT_ID:
+        case CONTROL_MSG_INSERT_FIRST:
+        case CONTROL_MSG_CLEAR: {
+            // (The label checked: the fix, the original's without it crashes.)
+            if (!m_label)
+                return true;
+            m_label->HandleMessage(message);
+            // The oldest line removed past 8.
+            S_ControlMessage runs = Message(CONTROL_MSG_GET_RUNS);
+            m_label->HandleMessage(&runs);
+            if (runs.value > CHAT_LINES)
+                m_label->HandleMessageCopy(Message(CONTROL_MSG_REMOVE_RUN));
+            return true;
+        }
+        case CONTROL_MSG_TEAM_TOGGLED: {
+            S_ControlMessage get = Message(CONTROL_MSG_GET_CHECKED);
+            get.target = m_id;
+            if (m_teamToggle)
+                m_teamToggle->HandleMessage(&get);
+            m_team = get.value == 0;
+            return true;
+        }
+        }
+    }
+    return C_ControlGroup::HandleMessage(message);
+}

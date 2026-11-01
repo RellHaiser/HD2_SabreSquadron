@@ -53,6 +53,7 @@ void C_Cursor::GetScreenPosition(float *x, float *y, float *unknown30) const
 void ScrollTest(I3D_scene *scene, int st);
 void CheckTest(I3D_scene *scene);
 void EditTest(I3D_scene *scene);
+void ComboTest(I3D_scene *scene);
 
 namespace {
 
@@ -1003,6 +1004,7 @@ void ControlsTest()
     ScrollTest(scene, st);
     CheckTest(scene);
     EditTest(scene);
+    ComboTest(scene);
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
     g_gfLog.clear();
@@ -1020,3 +1022,4 @@ void ControlsTest()
 #include "scroll_test.inc"
 #include "check_test.inc"
 #include "edit_test.inc"
+#include "combo_test.inc"

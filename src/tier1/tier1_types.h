@@ -38,6 +38,7 @@ struct C_Class_815850_vtbl__stub;
 struct C_Clock;
 struct C_Clock__stub;
 struct C_Clock_vtbl__stub;
+struct C_ComboBox;
 struct C_CommandProcessor;
 struct C_Console;
 struct C_ConsoleBase;
@@ -283,7 +284,6 @@ struct C_auto_008147e8;
 struct C_auto_00814980;
 struct C_auto_00814a08;
 struct C_auto_00814ba0;
-struct C_auto_00814e48;
 struct C_auto_00814fe0;
 struct C_auto_00815068;
 struct C_auto_00815540;
@@ -354,10 +354,9 @@ struct vector_S_SoldierStatePtr;
 struct zz_junk_wchar_t;
 // Types Ghidra knows only by name: 1-byte placeholders (pointer math is bytewise).
 struct C_Class_815850 { uint8_t _unknown[1]; };
+struct C_ComboBox_vtbl { uint8_t _unknown[1]; };
 struct C_ControlGroup_vtbl { uint8_t _unknown[1]; };
 struct C_Control_vtbl { uint8_t _unknown[1]; };
-struct C_EditControl_vtbl { uint8_t _unknown[1]; };
-struct C_SelectList_vtbl { uint8_t _unknown[1]; };
 struct C_TextControl_vtbl { uint8_t _unknown[1]; };
 struct C_auto_00810778 { uint8_t _unknown[1]; };
 struct C_auto_00810fb8 { uint8_t _unknown[1]; };
@@ -16419,6 +16418,17 @@ struct C_Clock_vtbl__stub {
     void * vf36;
     void * vf37;
 };
+struct C_ComboBox {
+    C_auto_00814e48_vtbl * vtable;
+    uint8_t _pad_0004[4];
+    int m_008;
+    uint8_t _pad_000c[96];
+    uint32_t m_06c;
+    uint8_t _pad_0070[4];
+    int m_074;
+    void * m_078;
+    char m_07c;
+};
 struct C_CommandProcessor {
     C_CommandProcessor_vtbl * vtable;
 };
@@ -21856,17 +21866,6 @@ struct C_auto_00814ba0 {
     int m_080;
     int m_084;
     uint32_t m_088;
-};
-struct C_auto_00814e48 {
-    C_auto_00814e48_vtbl * vtable;
-    uint8_t _pad_0004[4];
-    int m_008;
-    uint8_t _pad_000c[96];
-    uint32_t m_06c;
-    uint8_t _pad_0070[4];
-    int m_074;
-    void * m_078;
-    char m_07c;
 };
 struct C_auto_00814fe0 {
     C_auto_00814fe0_vtbl * vtable;

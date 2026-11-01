@@ -489,7 +489,7 @@ end
 class C_PagesControl size=0x4 vtable=0x00814d38:33
 end
 
-class C_auto_00814e48 size=0x7d vtable=0x00814e48:33
+class C_ComboBox size=0x7d vtable=0x00814e48:33
   0x008 int m_008
   0x06c uint32_t m_06c
   0x074 int m_074

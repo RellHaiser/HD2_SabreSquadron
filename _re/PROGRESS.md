@@ -6494,6 +6494,45 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     class_names.json, auto_members.json); ~C_EditBox's `this` set by hand; names/controls.txt (36);
     36 functions in ported.txt. Stats: 8,395 of 12,293 functions by hand (75.3 % by size).
 
+  PART 9c-iv-b DONE (2026-11-01): the scrolled text, the combo boxes and the chat input
+  (src/game/controls.*), all groups (C_ControlGroup, its ctor 0x00658e50 named; new helpers
+  EnterChild: the scrolled text's / combo box's enter 0x00658550 / 0x00659a30, and FocusUnknown20:
+  0x00658370 / 0x00657ba0, the focus' without the group's TakesInput).
+  - C_ScrolledText (type 0xf, vtable 0x008143a8, 0x78): a C_SelectList on "text*" (id | 8, child
+    0) and a C_ScrollBar on "scroll*" (id | 4, page step 5), each the other's value; FindChild by
+    the id's bits (8 the list, 4 .. 7 the bar); the list's messages (IGNORE_INPUT, ADD_CALLBACK,
+    SET_VALUE, the texts, GET_ITEM, 0x2000015 .. 18, PREVIOUS / NEXT, SET_POSITION, REFRESH,
+    GET_TEXT, SET_MARGIN, SELECT_TEXT) passed to the list; the wheel to the bar; the list's press
+    notified; SetStrings: lines of style 0x13, a refresh.
+  - C_ComboEdit (vtable 0x00814320, 0x88): an edit control on its frame turned back, the run 0; its
+    click not handled (so its key click on its own id does nothing unless editing: kept).
+  - C_ComboBox (type 0x11, vtable 0x00814e48, 0x88; was C_auto_00814e48): a scrolled text on
+    "listbox*" (its own id, hidden; routed on PRESS to PICK_SELECTED 0x200002E), a "cbdown*" button
+    (id | 1) and a C_ComboEdit on "header*" (id | 2), both routed on PRESS to TOGGLE_LIST 0x200002D;
+    PICK_INDEX 0x1000076 (an index past the lines: none picked, kept), SET_HEADER_TEXT 0x100007A /
+    _ID 0x1000081, GET_TEXT the picked; a pick notifies CONTROL_NOTIFY_0E; the header's edit
+    callback 0x00658930 (made a function) puts its text in the picked line; a press outside closes
+    the list; OnLeave not handled while open.
+  - C_TitledComboBox (type 0x28, vtable 0x00814dc0, 0x78): a title on "text18" (taking input) and a
+    combo box on "game difficulty" (both its id; false without it); the texts to the title, the rest
+    to the combo box.
+  - C_ChatInput (type 0x21, vtable 0x008145c8, 0x80): a C_EditBox on "binput*" (id | 4, the prompt
+    text 2002 style 0xd, 100 characters), a label on "text*" (id | 8, 8 lines kept) and the
+    C_AllToggleButton "bTeam" (id | 0xc, routed on CHANGED to TEAM_TOGGLED 0x200000B: up, to the
+    team). Enter (the box's CONTROL_NOTIFY_02 callback 0x006571f0): the run's text (its spaces
+    skipped; the prompt is kept in it, BeginEdit's) sent as CONTROL_NOTIFY_SEND 0x4015000 (its
+    address) with "/t" or "/a" put first unless there, the prompt back, EDIT posted to the box.
+  - Fixes: the parts checked everywhere (the original's without them crash).
+  - Harness: combo_test.inc in the text build, run by ControlsTest after EditTest ("combo:", 10
+    checks). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9c4b.py, generated, the text build on one mission in 4 parallel
+    runs): 242 of 269 caught (8 more do not build); new cases (only the list, the wheel's two steps down, empty strings, picked 0, a refusing focus, a route kept, the combo box's frame); 255 of 269 (14 equivalent, see the file's docstring)
+  - Build: MSVC clean. Tier 1: 482 errors in 80 files, 194 stubs (from 483 / 81 / 196). ret_audit
+    --src: 52 (it now takes a ControlCallback's object in ECX).
+  - Ghidra: C_auto_00814e48 renamed C_ComboBox; names/controls.txt (47; the other classes have no
+    struct: void *this); 0x00658930 made a function; 47 functions in ported.txt. Stats: 8,441 of
+    12,293 functions by hand (75.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
