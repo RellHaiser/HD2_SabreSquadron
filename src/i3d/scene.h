@@ -217,9 +217,6 @@ public:
     // 0x10048070: a shadow leaves the scene's shadow list (its scene field cleared);
     // I3DERR_OBJECTNOTFOUND when it is not there. Nothing joins the list (shadow MatrixChanged).
     I3D_RESULT RemoveShadow(I3D_shadow *shadow);
-    // 0x10048120 / 0x100481c0: the same for the mirror list (mirror.cpp).
-    void AddMirror(I3D_mirror *mirror);
-    I3D_RESULT RemoveMirror(I3D_mirror *mirror);
 
 public:
 
@@ -227,7 +224,7 @@ public:
     uint32_t renderCallbackFlags;           // +0x124
     ls3d::C_vector<I3D_frame *> tickFrames; // +0x128 AddTickFrame
     ls3d::C_vector<I3D_shadow *> shadows;   // +0x138 (their scene field: this scene)
-    ls3d::C_vector<I3D_frame *> mirrors;    // +0x148 (their +0x2E0: the scene)
+    ls3d::C_vector<I3D_frame *> mirrors;    // +0x148 (nothing joins it: mirrors keep no scene)
     I3D_anim_stack *animStack;              // +0x158 made by SetAnimation
     I3D_camera *activeCamera;               // +0x15C SetActiveCamera
     float viewportCenterX;                  // +0x160

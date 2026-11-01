@@ -1,6 +1,5 @@
-// I3D_mirror (0x10032280 - 0x10033fb0) and the scenes' mirror lists (I3D_scene 0x10048120 /
-// 0x100481c0). (0x10033f90 is the static initialiser of this file's copy of a header's zero
-// vector; 0x10033f70 the vertex buffer manager's locked-list removal, inlined.)
+// I3D_mirror (0x10032280 - 0x10033fb0). (0x10033f90 is the static initialiser of this file's copy
+// of a header's zero vector; 0x10033f70 the vertex buffer manager's locked-list removal, inlined.)
 #include "i3d/mirror.h"
 
 #include <cmath>
@@ -32,16 +31,6 @@ namespace {
 // make and free it) and that mirror (0x100be5a0).
 C_vector<I3D_visual *> s_reflected(0x20);
 I3D_mirror *s_mirror;
-
-// The scene of the sector above `f` (none: null).
-I3D_scene *SectorScene(I3D_frame *f)
-{
-    for (; f; f = f->parent) {
-        if (f->type == FRAME_SECTOR)
-            return static_cast<I3D_sector *>(f)->scene;
-    }
-    return nullptr;
-}
 
 // 0x100331c0: the visuals below `f` inside the mirror's plane box (their bound's sphere touching
 // the plane's, a corner of their box inside it on every side).
@@ -85,40 +74,11 @@ void CollectReflected(I3D_frame *f)
         CollectReflected(c);
 }
 
-// The copies released (their originals' references too).
-void ReleaseCopies(C_vector<I3D_visual *> &copies)
-{
-    for (I3D_visual *c : copies) {
-        static_cast<I3D_frame *>(c->data)->Release();
-        c->Release();
-    }
-}
-
 }  // namespace
-
-// I3D_scene's mirror list ------------------------------------------------------------------------------
-
-// 0x10048120
-void I3D_scene::AddMirror(I3D_mirror *mirror)
-{
-    if (mirror->scene == this)
-        return;
-    mirrors.PushBack(mirror);
-    mirror->scene = this;
-}
-
-// 0x100481c0
-I3D_RESULT I3D_scene::RemoveMirror(I3D_mirror *mirror)
-{
-    if (!mirrors.RemoveSwap(mirror))
-        return I3DERR_OBJECTNOTFOUND;
-    mirror->scene = nullptr;
-    return I3D_OK;
-}
 
 // I3D_mirror ----------------------------------------------------------------------------------------------
 
-// 0x10032280
+// LS3DRF 0x1001f4c0 (from LS3DF 0x10032280)
 void I3D_mirror::Init()
 {
     I3D_visual::Init();
@@ -128,24 +88,14 @@ void I3D_mirror::Init()
     numFaces = 0;
     vertices = nullptr;
     mirrorFlags = 0;
-    stamp = static_cast<uint16_t>(g_driver->mirrorStamp++);
-    scene = nullptr;
-    planeCenter = S_vector(0.0f, 0.0f, 0.0f);
-    planeRadius = 0.0f;
-    range = 100.0f;
-    colorVertices = S_VBAlloc{};
+    // (No stamp, scene, plane sphere, range or colored vertices: LS3DRF's mirror has none.)
     faces = S_IBAlloc{};
 }
 
-// 0x10032330
+// LS3DRF 0x1001f520 (from LS3DF 0x10032330)
 void I3D_mirror::Uninit()
 {
-    if (scene)
-        scene->RemoveMirror(this);
-    if (colorVertices.vb)
-        FreeVB(&colorVertices);
-    ReleaseCopies(copies);
-    copies.Clear();
+    // (In no scene, with no copies or colored vertices: LS3DRF's mirror has none.)
     AlignedFree(vertices);
     // (Fix: the original leaves the pointer to the freed vertices.)
     vertices = nullptr;
@@ -153,7 +103,7 @@ void I3D_mirror::Uninit()
     I3D_frame::Uninit();
 }
 
-// 0x100323c0
+// LS3DRF 0x1001f550 (from LS3DF 0x100323c0)
 bool I3D_mirror::SetColor(const S_vector4 &c)
 {
     if (IsTinyBits(std::fabs(color.x - c.x)) && IsTinyBits(std::fabs(color.y - c.y)) &&
@@ -169,68 +119,16 @@ bool I3D_mirror::SetColor(const S_vector4 &c)
     clamp(color.x);
     clamp(color.y);
     clamp(color.z);
-    if (colorVertices.vb)
-        FillColorVertices();
+    // (No colored vertices to refill: LS3DRF's mirror has none.)
     return false;
 }
 
-// 0x10032520
-I3D_triface *I3D_mirror::LockFaces(uint32_t flags)
+// LS3DRF 0x1001f6a0 (from LS3DF 0x10032520)
+I3D_triface *I3D_mirror::LockFaces(uint32_t)
 {
     if (!numFaces)
         return nullptr;
-    uint16_t *p = faces.buffer->Lock((flags & 1) ? D3DLOCK_READONLY : 0);
-    return reinterpret_cast<I3D_triface *>(p + faces.offset);
-}
-
-// 0x10032630
-I3D_RESULT I3D_mirror::Duplicate(I3D_frame *source)
-{
-    if (!source || source == this)
-        return I3DERR_INVALIDPARAMS;
-    ReleaseCopies(copies);
-    // (Fix: the original keeps the released copies listed.)
-    copies.Clear();
-    AlignedFree(vertices);
-    vertices = nullptr;
-    numVertices = 0;
-    FreeIB(&faces);
-    faces = S_IBAlloc{};
-    if (colorVertices.vb) {
-        FreeVB(&colorVertices);
-        colorVertices = S_VBAlloc{};
-    }
-    numFaces = 0;
-    I3D_frame::Duplicate(source);
-    if (source->type != FRAME_VISUAL)
-        return I3D_OK;
-    if (static_cast<I3D_visual *>(source)->GetVisualType() != FourCC("MIRR"))
-        return I3D_OK;
-    auto *src = static_cast<I3D_mirror *>(source);
-    planeMatrix = src->planeMatrix;
-    mirrorFlags = (mirrorFlags & ~MIRF_REFLECTION_VALID) | MIRF_PLANE;
-    vertices = static_cast<S_vector4 *>(AlignedAlloc(sizeof(S_vector4) * src->numVertices, 16));
-    // (Fix: the original copies into a failed allocation.)
-    if (!vertices) {
-        ReportError(I3DERR_OUTOFMEM, kSevFatal);
-        return I3DERR_OUTOFMEM;
-    }
-    numVertices = src->numVertices;
-    for (int i = 0; i < numVertices; ++i)
-        vertices[i] = src->vertices[i];
-    if (!g_ibManager.Alloc(D3DUSAGE_SOFTWAREPROCESSING, src->numFaces * 3, &faces)) {
-        ReportError(I3DERR_OUTOFMEM, kSevFatal);
-        return I3DERR_OUTOFMEM;
-    }
-    numFaces = src->numFaces;
-    const I3D_triface *from = src->LockFaces(1);
-    I3D_triface *to = LockFaces(1);
-    std::memcpy(to, from, static_cast<size_t>(numFaces) * sizeof(I3D_triface));
-    localBound = src->localBound;
-    visualFlags = (visualFlags & ~VISF_WBOUND_VALID) | VISF_BOUND_VALID;
-    range = src->range;
-    color = src->color;
-    return I3D_OK;
+    return reinterpret_cast<I3D_triface *>(faces.buffer->data);
 }
 
 // 0x10032880
@@ -252,53 +150,7 @@ void I3D_mirror::FillColorVertices()
     }
 }
 
-// 0x10032c90
-I3D_RESULT I3D_mirror::LinkTo(I3D_frame *newParent, uint32_t flags)
-{
-    if (scene)
-        scene->RemoveMirror(this);
-    if (I3D_scene *s = SectorScene(newParent))
-        s->AddMirror(this);
-    const I3D_RESULT r = I3D_frame::LinkTo(newParent, flags);
-    MatrixChanged();
-    return r;
-}
-
-// 0x10032cf0
-void I3D_mirror::MatrixChanged()
-{
-    if (frameFlags & (FRMFLAGS_CHANGED | FRMFLAGS_CHILD_CHANGED)) {
-        visualFlags &= ~(VISF_WBOUND_VALID | VISF_INVMATRIX_VALID);
-        mirrorFlags &= ~MIRF_REFLECTION_VALID;
-        // The copies are placed again when next drawn.
-        for (I3D_visual *c : copies)
-            c->changeCount = -1;
-    }
-    if (!scene) {
-        if (I3D_scene *s = SectorScene(parent))
-            s->AddMirror(this);
-    }
-}
-
-// 0x10032d80
-void I3D_mirror::Tick(int)
-{
-    I3D_visual **c = copies.Data();
-    for (int n = copies.Size(); n; --n) {
-        auto *original = static_cast<I3D_frame *>((*c)->data);
-        if (original->refCount >= 2 && original->parent) {
-            ++c;
-            continue;
-        }
-        original->Release();
-        I3D_visual *copy = *c;
-        copy->Release();
-        // (The slot gets the last copy, looked at next.)
-        copies.RemoveSwap(copy);
-    }
-}
-
-// 0x10033d50
+// LS3DRF 0x1001f6c0 (from LS3DF 0x10033d50)
 void I3D_mirror::SetPlane(const I3D_bbox &box, const S_matrix &matrix)
 {
     planeMatrix = matrix;
@@ -315,7 +167,7 @@ void I3D_mirror::SetPlane(const I3D_bbox &box, const S_matrix &matrix)
     mirrorFlags = (mirrorFlags & ~MIRF_REFLECTION_VALID) | MIRF_PLANE;
 }
 
-// 0x10033e80
+// LS3DRF 0x1001f7f0 (from LS3DF 0x10033e80)
 void I3D_mirror::Load()
 {
     I3D_frame::Load();
