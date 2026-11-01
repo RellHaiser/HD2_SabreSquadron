@@ -17,6 +17,9 @@ class I3D_texture;
 
 // The mark's click (value: its value).
 constexpr uint32_t CONTROL_NOTIFY_0E = 0x400E000;
+// The edit controls' Enter and Escape.
+constexpr uint32_t CONTROL_NOTIFY_RETURN = 0x4016000;
+constexpr uint32_t CONTROL_NOTIFY_ESCAPE = 0x4017000;
 
 // The text controls' messages (their box's).
 enum : uint32_t {
@@ -78,6 +81,27 @@ enum : uint32_t {
     CONTROL_MSG_GET_SIDE = 0x1000098,
     // The mark's: its title shows the value, two digits.
     CONTROL_MSG_SET_NUMBER = 0x1000078,
+    // The edit controls': the characters refused (value2 a char *), the length (value; 0: kept),
+    // digits only (value), the editing asked for (to the screen, START_EDITING) or stopped
+    // (STOP_EDITING; value2 the control), the text got.
+    CONTROL_MSG_SET_FORBIDDEN = 0x100009B,
+    CONTROL_MSG_SET_MAX_LENGTH = 0x100006E,
+    CONTROL_MSG_SET_DIGITS_ONLY = 0x100006F,
+    CONTROL_MSG_IGNORED_74 = 0x1000074,                 // (nothing)
+    CONTROL_MSG_EDIT = 0x2000016,                       // (the edit control's click)
+    CONTROL_MSG_END_EDIT = 0x20000AB,                   // (while editing: OnInput02)
+    CONTROL_MSG_START_EDITING = 0x20000BF,
+    CONTROL_MSG_STOP_EDITING = 0x20000C0,
+    CONTROL_MSG_GET_TEXT = 0x200002F,
+    // The edit box's: a range (value .. value2; the same: none) its number is kept in on the
+    // editing's end; the number got (value2; digits only).
+    CONTROL_MSG_SET_RANGE = 0x10000A0,
+    CONTROL_MSG_GET_NUMBER = 0x1000079,
+    // The selection list's: a line put first (selected), the selected one removed, a line selected
+    // by its text (no case; value: its index, else -1).
+    CONTROL_MSG_INSERT_FIRST = 0x2000015,
+    CONTROL_MSG_REMOVE_SELECTED = 0x2000017,
+    CONTROL_MSG_SELECT_TEXT = 0x2000076,
     // A control to be ticked (posted to target 0 when made, value2 the control: the tooltip, the
     // scroll bar and its arrows).
     CONTROL_MSG_ADD_TICKER = 0x200007A,
@@ -627,4 +651,128 @@ protected:
     I3D_frame *m_emptyActive = nullptr;                 // +0x80
     I3D_frame *m_emptyNormal = nullptr;                 // +0x84
     uint8_t m_value = 0;                                // +0x88
+};
+
+// An edit control (vtable 0x00813ee0; the base of the edit box and the selection list): a text
+// control whose run `m_run` is typed into. A click asks the screen to start the editing
+// (CONTROL_MSG_START_EDITING), which calls BeginEdit; the typed characters go to a buffer of up to
+// `m_maxLength` bytes, shown as the run; Enter or Escape (the text back) ask the screen to stop it
+// (STOP_EDITING), which calls OnInput0B.
+class C_EditControl : public C_TextControl {            // 0x88 bytes
+public:
+    C_EditControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_TextControl(scene, id, parent) {}
+    ~C_EditControl() override = default;                // 0x0064e6c0 (0x0064e6e0)
+
+    // The shown control's box drawn (no children).
+    void Refresh() override;                            // 0x006624b0
+    // While editing: the box's caret.
+    void Tick(int time) override;                       // 0x00662500
+    // (0x00662a80: Unknown20 false, the base's.)
+    // While editing: the character (8 Backspace, 0xd Enter, 0x1b Escape; full-width digits as
+    // ASCII; above 0x7f with the Unicode font as UTF-8), true when taken.
+    bool OnChar(int key) override;                      // 0x006627b0
+    bool IsEditing() override { return m_editing; }     // 0x0064e510
+    // The buffer made, then the text control's.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006624d0
+    // Its notification, not handled.
+    int OnLeave(int id) override;                       // 0x00662a90
+    // Not editing: START_EDITING posted (handled).
+    int OnClick(int id) override;                       // 0x00662ab0
+    // Editing: STOP_EDITING posted, CONTROL_NOTIFY_02 (handled).
+    int OnInput02(int id) override;                     // 0x00662ba0
+    // Editing: stopped (the run's text changed: CONTROL_NOTIFY_0B with the id).
+    int OnInput0B(int id) override;                     // 0x00662ca0
+    // Not editing: the run edited (none: the text cleared first), its text kept and in the buffer.
+    int BeginEdit(int) override;                        // 0x00662ce0
+    // SET_FORBIDDEN, SET_MAX_LENGTH, SET_DIGITS_ONLY, EDIT (OnClick), GET_TEXT, END_EDIT.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00662520
+
+protected:
+    // The buffer's last character removed (UTF-8: its sequence; a broken one: false), shown.
+    bool Backspace();                                   // 0x006626a0
+    // The buffer shown as the run's text.
+    void ShowBuffer();
+    // A buffer of `m_maxLength` + 1 bytes, empty.
+    void MakeBuffer();
+
+    C_str m_savedText;                                  // +0x70 the run's text before the editing
+    std::vector<char> m_buffer;                         // +0x74 (the original's a char *)
+    const char *m_forbidden = nullptr;                  // +0x78 characters refused (not owned)
+    bool m_editing = false;                             // +0x7C
+    bool m_digitsOnly = false;                          // +0x7D (a '-' first allowed)
+    int m_run = -1;                                     // +0x80 the box's run edited
+    int m_maxLength = 30;                               // +0x84
+};
+
+// An edit box (type 0x1b, vtable 0x00813d48): an edit control on its "normal*" frame, its
+// "actived*" one while the cursor is over it; a number in a range kept when the editing ends.
+class C_EditBox : public C_EditControl {                // 0x9C bytes
+public:
+    C_EditBox(I3D_scene *scene, uint32_t id, C_Control *parent) : C_EditControl(scene, id, parent) {}
+    ~C_EditBox() override = default;                    // 0x0064e520 (0x0064e540)
+
+    // The frames (false: one not found), the box on the normal one (the run 0).
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0065b0a0
+    // The active frame (inactive: not handled).
+    int OnEnter(int id) override;                       // 0x0065b350
+    // The edit control's (not handled); the normal frame, CONTROL_NOTIFY_LEAVE again (the original's).
+    int OnLeave(int id) override;                       // 0x0065b3b0
+    // Not while inactive.
+    int OnClick(int id) override;                       // 0x0065b410
+    // The edit control's; the box's hover cleared and selected; the range kept.
+    int OnInput02(int id) override;                     // 0x0065b470
+    // Its own id, active: the editing stopped (editing) or asked for.
+    int OnKeyClick(int id) override;                    // 0x0065b430
+    // The edit control's; the range kept.
+    int OnInput0B(int id) override;                     // 0x0065b5e0
+    // SET_RANGE, SET_NUMBER (digits only: value2 as "%d"), GET_NUMBER, REFRESH and SET_MARGIN (on
+    // the normal frame).
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0065b1b0
+
+protected:
+    // The text's number (sscanf "%d", none: 0) set to the range's end it is past.
+    void KeepInRange();
+
+    bool m_hasRange = false;                            // +0x88
+    int m_min = 0;                                      // +0x8C
+    int m_max = 0;                                      // +0x90
+    I3D_frame *m_normalFrame = nullptr;                 // +0x94
+    I3D_frame *m_activeFrame = nullptr;                 // +0x98
+};
+
+// A selection list (type 0x1a, vtable 0x00814298; the scrolled text's lines): an edit control whose
+// runs are lines, one selected (its "select*" frame moved to it); the click selects the line under
+// the cursor. Its range and scroll posted to the control its value names (a scroll bar: SET_COUNT,
+// SET_POSITION).
+class C_SelectList : public C_EditControl {             // 0x98 bytes
+public:
+    C_SelectList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_EditControl(scene, id, parent) {}
+    ~C_SelectList() override;                           // 0x006581c0 (0x006581e0): the cursor released
+
+    // The cursor taken; the frame turned to (0, 0, -1), the select frame to (0, 0, 1) (off, linked
+    // to the root); the box placed (false: none).
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0065c040
+    int OnEnter(int) override { return CONTROL_HANDLED; }   // 0x0065c690
+    // The box's hover cleared, the edit control's.
+    int OnLeave(int id) override;                       // 0x0065c6a0
+    // Not editing: the hovered line selected, the scroll posted, notified (CLICK / PRESS).
+    int OnClick(int id) override;                       // 0x0065c240
+    int OnPress(int id) override;                       // 0x0065c440
+    // Taking input, not editing: CONTROL_NOTIFY_05, the line under the cursor hovered.
+    int OnInput05(int id) override;                     // 0x0065c630
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0065b750
+    // The select frame at the selected line's centre (none there: off).
+    virtual void UpdateSelectBar();                     // +0x84 0x0065c160
+
+protected:
+    // The hovered line selected; the range and the scroll posted; the bar moved.
+    void SelectHoveredLine();
+    // SET_COUNT (the box's scroll range) and SET_POSITION (its scroll; `always` false: only with a
+    // range) posted to the control the value names.
+    void PostScroll(bool always);
+
+    I3D_frame *m_selectFrame = nullptr;                 // +0x88
+    C_Cursor *m_cursor = nullptr;                       // +0x8C
+    bool m_unknown90 = true;                            // +0x90 (not read)
+    int m_selected = -1;                                // +0x94
 };

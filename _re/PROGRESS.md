@@ -6453,6 +6453,47 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     classes have no struct: void *this); 64 functions in ported.txt. Stats: 8,359 of 12,293
     functions by hand (75.1 % by size).
 
+  PART 9c-iv-a DONE (2026-11-01): the edit control, the edit box and the selection list
+  (src/game/controls.*). 9c-iv split (the plan's "67 slots" were two 33-slot vtables back to back;
+  type 0xf builds a 0x1a list, 0x11 extends 0xf): iv-a the edit controls (0x00813ee0, 0x1b
+  0x00813d48, 0x1a 0x00814298); iv-b 0xf (0x008143a8), 0x11 (0x00814e48), 0x21 (0x008145c8, with
+  C_AllToggleButton), 0x28 (0x00814dc0); iv-c 0x19 (0x00814ba0), 0x1c (0x00814b18).
+  - C_Control's slots named: +0x24 OnChar(key), +0x28 IsEditing, +0x68 BeginEdit (were Unknown24 /
+    28 / 68; names/control.txt too).
+  - C_EditControl (vtable 0x00813ee0, 0x88 bytes, ctor 0x00657af0; was C_auto_00813ee0): a text
+    control typed into (its run m_run, -1 at first): the click posts START_EDITING 0x20000BF (value2
+    the control) for the screen, which calls BeginEdit (the run's text kept, in the buffer; no such
+    run: the text cleared first); characters (8 Backspace by UTF-8 sequence with the Unicode font,
+    0xd Enter CONTROL_NOTIFY_RETURN 0x4016000, 0x1b Escape 0x4017000 with the kept text back: both
+    post STOP_EDITING 0x20000C0, CONTROL_NOTIFY_02; full-width digits as ASCII; above 0x7f with the
+    Unicode font as UTF-8) up to m_maxLength (30) bytes; refused characters (SET_FORBIDDEN 0x100009B,
+    value2), digits only (0x100006F, a '-' first); SET_MAX_LENGTH 0x100006E, EDIT 0x2000016,
+    END_EDIT 0x20000AB, GET_TEXT 0x200002F (the box's run 0; ends the box's editing: kept), 0x1000074
+    nothing. OnInput0B ends it (the run changed: CONTROL_NOTIFY_0B with the id).
+  - C_EditBox (type 0x1b, vtable 0x00813d48, 0x9C): "normal*" / "actived*", the run 0; SET_RANGE
+    0x10000A0 (the number kept in it, "%d" style 0xd, when the editing ends), SET_NUMBER 0x1000078
+    (turned into SET_TEXT), GET_NUMBER 0x1000079 (digits only); the leave notifies LEAVE twice (kept).
+  - C_SelectList (type 0x1a, vtable 0x00814298, 0x98; was C_auto_00814298; its new slot +0x84
+    UpdateSelectBar): its runs as lines, one selected ("select*" frame at its centre, linked to the
+    root); posts SET_COUNT / SET_POSITION to the control its value names; CLEAR, GET_ITEM, ADD_TEXT
+    (a refresh), INSERT_FIRST 0x2000015, EDIT (the selected), REMOVE_SELECTED 0x2000017, SET_POSITION,
+    REFRESH, GET_TEXT, GET_RUNS, SELECT_TEXT 0x2000076 (no case). C_Cursor::GetScreenPosition
+    0x0066a480 declared.
+  - Fixes: the edit buffer shown as is (the original formats it with C_fstr: a '%' read stray
+    arguments), emptied when made (SET_MAX_LENGTH's was not), UTF-8 Backspace back to the start (read
+    the byte before), the UTF-8 bytes' buffer 8 (4 for up to 6), isdigit unsigned;
+    C_TextBox::ScrollToLine out of its lines false (SelectRun passes a run's index: the harness
+    crashed).
+  - Harness: edit_test.inc in the text build, run by ControlsTest after CheckTest ("edit:", 10
+    checks; the cursor's screen place faked). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9c4a.py, generated, the text build on one mission in 4 parallel
+    runs): 257 of 315 caught (8 more do not build); new cases (the caret, the bar's updates, a real range's values, the first and last lines, UTF-8 leads at their ranges' ends); 294 of 315 (21 equivalent, see the file's docstring)
+  - Build: MSVC clean. Tier 1: 483 errors in 81 files, 196 stubs (482 / 80 / 195 before: the stale
+    C_auto_* vtbl types of tier1_types.h; the callers of the new names re-exported). ret_audit --src: 52.
+  - Ghidra: C_auto_00813ee0 / C_auto_00814298 renamed C_EditControl / C_SelectList (90_auto.spec,
+    class_names.json, auto_members.json); ~C_EditBox's `this` set by hand; names/controls.txt (36);
+    36 functions in ported.txt. Stats: 8,395 of 12,293 functions by hand (75.3 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

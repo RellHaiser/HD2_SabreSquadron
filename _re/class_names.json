@@ -61,6 +61,8 @@
 "00815288": "C_Slider",
 "00815398": "C_SpinControl",
 "00814650": "C_MarkBox",
+"00813ee0": "C_EditControl",
+"00814298": "C_SelectList",
 "00814d38": "C_PagesControl",
 "008105a0": "S_HumanCommand",
 "00810778": "C_Car",

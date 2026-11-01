@@ -465,6 +465,10 @@ bool C_TextBox::ScrollToLine(int index)
 {
     if (m_dirty)
         Layout();
+    // (A line that is not there: the fix, false; the original's reads past its lines, SelectRun
+    // passing a run's index.)
+    if (index < 0 || index >= static_cast<int>(m_lines.size()))
+        return false;
     const S_TextLine *line = m_lines[index];
     if (!(static_cast<float>(line->above + line->below + line->gap) < m_height))
         return false;

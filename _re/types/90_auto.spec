@@ -401,7 +401,7 @@ class C_TextControl size=0x70 vtable=0x00813e58:33
   0x06c void* m_06c
 end
 
-class C_auto_00813ee0 size=0x70 vtable=0x00813ee0:33
+class C_EditControl size=0x70 vtable=0x00813ee0:33
   0x065 int8_t m_065
   0x06c void* m_06c
 end
@@ -420,7 +420,7 @@ class C_LabelControl size=0x70 vtable=0x00814188:33
   0x06c void* m_06c
 end
 
-class C_auto_00814298 size=0x4 vtable=0x00814298:67
+class C_SelectList size=0x4 vtable=0x00814298:67
 end
 
 class C_ControlGroup size=0x78 vtable=0x00814430:33

@@ -57,6 +57,7 @@ struct C_DocumentPlace_vtbl__stub;
 struct C_Door;
 struct C_Door__stub;
 struct C_Door_vtbl__stub;
+struct C_EditControl;
 struct C_EquipmentMenu;
 struct C_EquipmentMenuBase;
 struct C_ExplosivePlace;
@@ -144,6 +145,7 @@ struct C_ScriptModule__stub;
 struct C_ScriptModule_vtbl__stub;
 struct C_Script__stub;
 struct C_Script_vtbl__stub;
+struct C_SelectList;
 struct C_ShotManager__stub;
 struct C_ShotManager_vtbl__stub;
 struct C_SightModule;
@@ -275,8 +277,6 @@ struct C_auto_00813b10;
 struct C_auto_00813b2c;
 struct C_auto_00813b48;
 struct C_auto_00813b68;
-struct C_auto_00813ee0;
-struct C_auto_00814298;
 struct C_auto_00814540;
 struct C_auto_00814760;
 struct C_auto_008147e8;
@@ -356,6 +356,8 @@ struct zz_junk_wchar_t;
 struct C_Class_815850 { uint8_t _unknown[1]; };
 struct C_ControlGroup_vtbl { uint8_t _unknown[1]; };
 struct C_Control_vtbl { uint8_t _unknown[1]; };
+struct C_EditControl_vtbl { uint8_t _unknown[1]; };
+struct C_SelectList_vtbl { uint8_t _unknown[1]; };
 struct C_TextControl_vtbl { uint8_t _unknown[1]; };
 struct C_auto_00810778 { uint8_t _unknown[1]; };
 struct C_auto_00810fb8 { uint8_t _unknown[1]; };
@@ -16874,6 +16876,13 @@ struct C_Door_vtbl__stub {
     void * vf36;
     void * vf37;
 };
+struct C_EditControl {
+    C_auto_00813ee0_vtbl * vtable;
+    uint8_t _pad_0004[97];
+    char m_065;
+    uint8_t _pad_0066[6];
+    void * m_06c;
+};
 struct C_EquipmentMenu {
     C_EquipmentMenu_vtbl * vtable;
     uint8_t _pad_0004[28];
@@ -19465,6 +19474,9 @@ struct C_Script__stub {
 struct C_Script_vtbl__stub {
     void * ExecuteCommand;
 };
+struct C_SelectList {
+    C_auto_00814298_vtbl * vtable;
+};
 struct C_ShotManager__stub {
     C_ShotManager_vtbl__stub * vtable;
 };
@@ -21709,16 +21721,6 @@ struct C_auto_00813b48 {
 };
 struct C_auto_00813b68 {
     C_auto_00813b68_vtbl * vtable;
-};
-struct C_auto_00813ee0 {
-    C_auto_00813ee0_vtbl * vtable;
-    uint8_t _pad_0004[97];
-    char m_065;
-    uint8_t _pad_0066[6];
-    void * m_06c;
-};
-struct C_auto_00814298 {
-    C_auto_00814298_vtbl * vtable;
 };
 struct C_auto_00814540 {
     C_auto_00814540_vtbl * vtable;

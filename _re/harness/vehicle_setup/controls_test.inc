@@ -20,6 +20,7 @@ struct S_CsCursor {
     int still = 0;
     S_vector position;
     S_vector move;
+    float screenX = 0.0f, screenY = 0.0f;
 } g_csCursor;
 C_Cursor *C_Cursor::Acquire(I3D_scene *scene)
 {
@@ -39,9 +40,19 @@ bool C_Cursor::IsButtonDown(uint32_t buttons) const
 void C_Cursor::GetPosition(S_vector *position) const { *position = g_csCursor.position; }
 int C_Cursor::GetStillTime() const { return g_csCursor.still; }
 void C_Cursor::GetMove(S_vector *move) const { *move = g_csCursor.move; }
+void C_Cursor::GetScreenPosition(float *x, float *y, float *unknown30) const
+{
+    if (x)
+        *x = g_csCursor.screenX;
+    if (y)
+        *y = g_csCursor.screenY;
+    if (unknown30)
+        *unknown30 = 0.0f;
+}
 
 void ScrollTest(I3D_scene *scene, int st);
 void CheckTest(I3D_scene *scene);
+void EditTest(I3D_scene *scene);
 
 namespace {
 
@@ -991,6 +1002,7 @@ void ControlsTest()
     WM(r.csHandled, g_csHandled);
     ScrollTest(scene, st);
     CheckTest(scene);
+    EditTest(scene);
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
     g_gfLog.clear();
@@ -1007,3 +1019,4 @@ void ControlsTest()
 
 #include "scroll_test.inc"
 #include "check_test.inc"
+#include "edit_test.inc"
