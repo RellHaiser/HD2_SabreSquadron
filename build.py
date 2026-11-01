@@ -104,8 +104,8 @@ SEAMS = [
                 r'\bBink[A-Z]\w*\s*\(|\b(IGraphBuilder|IMediaControl|IMediaSeeking|IBasicAudio|IMediaEvent|'
                 r'CTextureRenderer)\b')),
     # The window, its messages, the cursor, time, threads, locks and events (docs/platform.md). (The
-    # DirectShow base classes keep theirs: they belong to the video backend. The window is cut from
-    # this build, platform/null; the Win32 window lives on in tests/win32 for the tests.)
+    # DirectShow base classes keep theirs: they belong to the video backend. The window and the
+    # threads are cut from this build.)
     ("the Win32 platform", ("platform/win32/", "dshow/"),
      re.compile(r'#include <mmsystem\.h>|\b(timeGetTime|GetTickCount|Sleep|CreateWindowExA|RegisterClassExA|'
                 r'DefWindowProcA|PeekMessageA|DispatchMessageA|TranslateMessage|IsDialogMessageA|WaitMessage|'

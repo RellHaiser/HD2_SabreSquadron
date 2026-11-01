@@ -56,6 +56,12 @@ int g_queueRead = 0;
 int g_queueWrite = 0;
 int g_queueCount = 0;
 
+// The thread's lock (0x100d1720), made on first use: LS3DF's IGraph constructor made it, LS3DRF's
+// does not. (Nothing starts the thread in this build.)
+platform::Mutex *g_textureLock = nullptr;
+volatile int g_frameCounter = 0;                // 0x100a7864 LS3DF's Flip count (no Flip here)
+bool g_textureThreadRun = false;                // 0x100d21c7
+
 void AddSlot(int sizeClass, D3DFORMAT format)
 {
     S_slot slot = {};
@@ -68,7 +74,12 @@ void AddSlot(int sizeClass, D3DFORMAT format)
     g_poolBytes[sizeClass] += slot.desc.Size;
 }
 
-void Lock() { platform::Lock(g_textureLock); }
+void Lock()
+{
+    if (!g_textureLock)
+        g_textureLock = platform::NewMutex();
+    platform::Lock(g_textureLock);
+}
 void Unlock() { platform::Unlock(g_textureLock); }
 
 }  // namespace

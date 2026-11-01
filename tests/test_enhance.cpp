@@ -113,21 +113,19 @@ void TestIni()
     }
     {
         FILE *f = std::fopen(ini.c_str(), "wt");
-        std::fprintf(f, "[Other]\nImprovedMipmaps=0\n[Graphics]\nAnisotropicFiltering=32\nTrilinearFiltering=1\n"
-                        "ImprovedMipmaps=1\nTrueColorLightmaps=5\n");
+        std::fprintf(f, "[Other]\nImprovedMipmaps=0\n[Graphics]\nImprovedMipmaps=1\nTrueColorLightmaps=5\n");
         std::fclose(f);
     }
     const ls3d::S_enhancements &e = ls3d::Enhancements();
     DeleteFileA(ini.c_str());
-    std::printf("ini: anisotropy %d, trilinear %d, mipmaps %d, true colour textures %d, lightmaps %d\n", e.anisotropy,
-                e.trilinear, e.mipmaps, e.trueColorTextures, e.trueColorLightmaps);
-    Check(e.anisotropy == 16, "AnisotropicFiltering=32 capped at 16");
-    Check(e.trilinear && e.mipmaps && e.trueColorLightmaps, "keys set");
+    std::printf("ini: mipmaps %d, true colour textures %d, lightmaps %d\n", e.mipmaps, e.trueColorTextures,
+                e.trueColorLightmaps);
+    Check(e.mipmaps && e.trueColorLightmaps, "keys set");
     Check(!e.trueColorTextures, "missing key off");
     ls3d::S_enhancements off = {};
-    off.anisotropy = 1;
+    off.trueColorTextures = true;
     ls3d::SetEnhancements(off);
-    Check(ls3d::Enhancements().anisotropy == 1 && !ls3d::Enhancements().mipmaps, "SetEnhancements");
+    Check(ls3d::Enhancements().trueColorTextures && !ls3d::Enhancements().mipmaps, "SetEnhancements");
 }
 
 void TestUniform(std::mt19937 &rng)

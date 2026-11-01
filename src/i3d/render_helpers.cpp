@@ -408,21 +408,6 @@ void MirrorLights(const S_visualLights &src, S_visualLights &dst)
     dst.count = src.count;
 }
 
-// 0x100647f0
-void InvalidateLights()
-{
-    s_ambient = 0x00ff00ff;
-    s_numEnabledLights = 0;
-    for (int i = g_lights.Size(); i != 0; --i) {
-        I3D_light *light = g_lights[i - 1];
-        if (light->lightType == I3DLIGHT_POINT || light->lightType == I3DLIGHT_SPOT ||
-            light->lightType == I3DLIGHT_DIRECTIONAL) {
-            light->lightFlags |= LIGHTF_DIRTY;
-            g_pGfx->LightEnable(static_cast<uint16_t>(light->hardwareIndex), FALSE);
-        }
-    }
-}
-
 // 0x100695a0
 const S_vector4 *BoxCorners(const I3D_bbox &box)
 {
