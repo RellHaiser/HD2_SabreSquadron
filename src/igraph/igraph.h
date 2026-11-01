@@ -49,7 +49,7 @@ enum : uint32_t {
     IG_FSAA4 = 0x00002000,
     IG_SMALL_LIGHTMAPS = 0x00004000,    // (LS3DF) lightmap atlas textures at most 256 a side (else 512)
     IG_NO_DEBUG_KEYS = 0x00010000,      // no Ctrl+Alt+Shift+F10..F12 overlays
-    IG_TEXTURE_THREAD = 0x00100000,     // load textures in a background thread
+    IG_TEXTURE_THREAD = 0x00100000,     // (LS3DF) load textures in a background thread; ignored here
 };
 
 // IGraph::GetCaps() bits (0x100d1dac).

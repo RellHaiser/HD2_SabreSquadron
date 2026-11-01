@@ -662,7 +662,6 @@ I3D_RESULT I3D_scene::Open(const char *fileName, uint32_t flags, void *loadCallb
 void I3D_scene::Close()
 {
     ClearTrackedModels();
-    tex::StreamReleaseAll();
     primarySector->renderVisuals = nullptr;
     backdropSector->renderVisuals = nullptr;
     omniSector->renderVisuals = nullptr;

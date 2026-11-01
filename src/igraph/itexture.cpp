@@ -344,12 +344,12 @@ uint32_t KeyColor(D3DFORMAT format, uint8_t r, uint8_t g, uint8_t b, bool *known
 
 }  // namespace
 
-// 0x10073720 (The original leaves the size, format, color key, level count and stream record
-// unset until Create; the port starts them at 0.)
+// 0x10073720 (The original leaves the size, format, color key, level count and +0x40 unset until
+// Create; the port starts them at 0.)
 ITexture::ITexture()
     : id(0), pad06(0), deviceTexture(nullptr), lockedSurface(nullptr), loaded(false), refCount(1), fileName(nullptr),
       alphaFileName(nullptr), width(0), height(0), format(D3DFMT_UNKNOWN), flags(0), requestedFlags(0), colorKey(0),
-      pixels(nullptr), levels(0), pad3A(0), memorySize(0), stream(nullptr)
+      pixels(nullptr), levels(0), pad3A(0), memorySize(0), pad40(0)
 {
     pad11[0] = pad11[1] = pad11[2] = 0;
 }
@@ -442,19 +442,7 @@ HRESULT __stdcall ITexture::Create(const char *name, const char *alphaName, uint
     Close();
     flags = createFlags;
     requestedFlags = createFlags;
-
-    // ---- streamed: only a record for the texture thread
-    if (flags & ITC_STREAMED) {
-        if (name && !CopyBaseName(name, &fileName))
-            goto out_of_memory;
-        if (alphaName && !CopyBaseName(alphaName, &alphaFileName))
-            goto out_of_memory;
-        if (!tex::StreamAdd(this, name, flags))
-            return I3DERR_GENERIC;
-        loaded = true;
-        AddToList(g_cachedTextures, this);
-        return 0;
-    }
+    // (No ITC_STREAMED branch: LS3DRF.dll has no texture thread, so a streamed texture loads as any other.)
 
     // ---- .dds: the file's own format and levels
     if (name) {
@@ -463,21 +451,12 @@ HRESULT __stdcall ITexture::Create(const char *name, const char *alphaName, uint
             return CreateFromDds(name);
     }
     return CreateFromImage(name, alphaName, widthParam, heightParam, levelsParam);
-
-out_of_memory:
-    ReportError(I3DERR_OUTOFMEM, kSevFatal);
-    return I3DERR_OUTOFMEM;
 }
 
 // 0x10076ae0
 HRESULT __stdcall ITexture::Close()
 {
     Unlock();
-    if (flags & ITC_STREAMED) {
-        tex::StreamRemove(this);
-        stream = nullptr;
-        deviceTexture = nullptr;                // (a staging texture of the thread's pools)
-    }
     ::operator delete(pixels);
     pixels = nullptr;
     width = 0;

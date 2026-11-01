@@ -143,7 +143,7 @@ HRESULT __stdcall FakeLoadTexture(FakeIGraph *self, const char *name, const char
 uint32_t RandTextureFlags()
 {
     static const uint32_t kBits[] = {ITC_SOURCE_ALPHA, ITC_USE_ALPHA, ITC_ALPHA_1BIT, ITC_STREAMED, ITC_MIPMAP,
-                                     ITC_COMPRESS, ITC_TRUECOLOR, ITC_PIXEL_MASK, ITC_QUEUED};
+                                     ITC_COMPRESS, ITC_TRUECOLOR, ITC_PIXEL_MASK, 0x40000000 /* LS3DF's ITC_QUEUED */};
     uint32_t f = 0;
     for (uint32_t b : kBits) {
         if (Rand(3) == 0)
