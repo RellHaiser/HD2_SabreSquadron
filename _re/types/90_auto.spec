@@ -538,7 +538,7 @@ class C_auto_00815420 size=0x70 vtable=0x00815420:33
   0x06c void* m_06c
 end
 
-class C_auto_008154a4 size=0x4 vtable=0x008154a4:4
+class C_PagedTextBox size=0x4 vtable=0x008154a4:4
 end
 
 class C_auto_00815540 size=0x4 vtable=0x00815540:36
@@ -574,7 +574,7 @@ end
 class C_MenuState size=0x4 vtable=0x00815850:23
 end
 
-class C_auto_008158f8 size=0x7c vtable=0x008158f8:4
+class C_VideoTextBox size=0x7c vtable=0x008158f8:4
   0x078 uint32_t m_078
 end
 

@@ -123,18 +123,15 @@ uint32_t FUN_00649470(int param_1, ...)
 
 
 // 0x006494a0
-uint32_t C_auto_008154a4__FUN_006494a0(C_auto_008154a4 *_this, ...)
+bool C_PagedTextBox__LayoutPages(C_PagedTextBox *_this, ...)
 {
   bool bVar1;
   bool bVar2;
   char cVar3;
   int iVar4;
   uint8_t *puVar5;
-  int *extraout_EAX;
-  int *piVar6;
-  uint32_t uVar7;
-  int iVar8;
-  int64_t lVar9;
+  int iVar6;
+  int64_t lVar7;
   uint8_t local_25;
   uint8_t *local_24;
   uint32_t local_20;
@@ -144,140 +141,132 @@ uint32_t C_auto_008154a4__FUN_006494a0(C_auto_008154a4 *_this, ...)
   uint8_t local_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
-  empty_function_64ae60();
-  piVar6 = 0;
-  if ((_this->m_034 != 0) &&
-     (iVar8 = _this->m_038 - _this->m_034, piVar6 = (int *)-(iVar8 >> 0x1f), iVar8 / 5 != 0)) {
-    piVar6 = 0;
-    if ((_this->m_0a4 != 0) &&
-       (iVar8 = _this->m_0a8 - _this->m_0a4, piVar6 = (int *)(iVar8 * -0x6db6db6d), iVar8 / 0x1c != 0)
-       ) {
-      bVar1 = false;
-      local_24 = 0;
-      local_20 = 0;
-      iVar8 = 0;
-      while( true ) {
-        local_1c = iVar8;
-        if ((_this->m_034 == 0) || ((uint32_t)((_this->m_038 - _this->m_034) / 5) <= local_20)) {
-          if (local_24 != 0) {
-            C_auto_008154a4__FUN_00649a90(_this,(int)local_24);
-          }
-          uVar7 = C_auto_008154a4__FUN_006497b0(_this);
-          _this->m_072 = '\0';
-          return CONCAT31((int3)((uint32_t)uVar7 >> 8),1);
+  C_PagedTextBox__FreePages(_this);
+  if ((((_this->m_034 != 0) && ((_this->m_038 - _this->m_034) / 5 != 0)) && (_this->m_0a4 != 0)) &&
+     ((_this->m_0a8 - _this->m_0a4) / 0x1c != 0)) {
+    bVar1 = false;
+    local_24 = 0;
+    local_20 = 0;
+    iVar6 = 0;
+    while( true ) {
+      local_1c = iVar6;
+      if ((_this->m_034 == 0) || ((uint32_t)((_this->m_038 - _this->m_034) / 5) <= local_20)) {
+        if (local_24 != 0) {
+          C_PagedTextBox__FUN_00649a90(_this,(int)local_24);
         }
-        iVar4 = _this->m_034;
-        local_14 = *(int **)(iVar4 + iVar8);
-        if (local_14 != 0) {
-          *local_14 = *local_14 + 1;
-        }
-        local_10 = *(uint8_t *)(iVar4 + 4 + iVar8);
-        GH_PIECE(local_4,0,1) = 0;
-        GH_PIECE(local_4,1,3) = 0;
-        bVar2 = C_TextBox__SelectStyle((C_TextBox *)_this,(uint32_t)*(uint8_t *)(_this->m_034 + 4 + iVar8));
-        if (!bVar2) break;
+        C_PagedTextBox__FUN_006497b0(_this);
+        _this->m_072 = '\0';
+        return true;
+      }
+      iVar4 = _this->m_034;
+      local_14 = *(int **)(iVar4 + iVar6);
+      if (local_14 != 0) {
+        *local_14 = *local_14 + 1;
+      }
+      local_10 = *(uint8_t *)(iVar4 + 4 + iVar6);
+      GH_PIECE(local_4,0,1) = 0;
+      GH_PIECE(local_4,1,3) = 0;
+      bVar2 = C_TextBox__SelectStyle((C_TextBox *)_this,(uint32_t)*(uint8_t *)(_this->m_034 + 4 + iVar6));
+      if (!bVar2) break;
+      iVar4 = FUN_00649470((int)_this);
+      if (iVar4 == 0) {
+        FUN_00649250((int)_this);
+      }
+      if ((*(uint8_t *)(_this->m_02c + 0x30) & 0x20) != 0) {
         iVar4 = FUN_00649470((int)_this);
-        if (iVar4 == 0) {
+        if ((*(int *)(iVar4 + 0x10) != 0) &&
+           (local_18 = (uint8_t *)(*(int *)(iVar4 + 0x14) - *(int *)(iVar4 + 0x10) >> 2),
+           local_18 != 0)) {
+          if (local_24 != 0) {
+            C_PagedTextBox__FUN_00649a90(_this,(int)local_24);
+          }
+          local_24 = 0;
           FUN_00649250((int)_this);
         }
-        if ((*(uint8_t *)(_this->m_02c + 0x30) & 0x20) != 0) {
-          iVar4 = FUN_00649470((int)_this);
-          if ((*(int *)(iVar4 + 0x10) != 0) &&
-             (local_18 = (uint8_t *)(*(int *)(iVar4 + 0x14) - *(int *)(iVar4 + 0x10) >> 2),
-             local_18 != 0)) {
-            if (local_24 != 0) {
-              C_auto_008154a4__FUN_00649a90(_this,(int)local_24);
-            }
-            local_24 = 0;
-            FUN_00649250((int)_this);
-          }
-        }
-        if (*(char *)(_this->m_02c + 0x2c) == '\0') {
-          bVar1 = false;
-          if (local_24 != 0) {
-            C_auto_008154a4__FUN_00649a90(_this,(int)local_24);
-          }
-          puVar5 = tier1_operator_new(0x20);
-          local_18 = puVar5;
-          if (puVar5 == 0) {
-            local_24 = 0;
-          }
-          else {
-            FUN_00649470((int)_this);
-            lVar9 = tier1_ftol();
-            *puVar5 = local_25;
-            *(uint32_t *)(puVar5 + 4) = 0;
-            *(uint32_t *)(puVar5 + 8) = 0;
-            *(uint32_t *)(puVar5 + 0xc) = 0;
-            GH_PIECE(local_4,0,1) = 4;
-            S_TextLine__Reset(puVar5);
-            *(short *)(puVar5 + 0x1c) = (short)lVar9;
-            iVar8 = local_1c;
-            local_24 = puVar5;
-          }
-LAB_006496fa:
-          GH_PIECE(local_4,0,1) = 0;
-        }
-        else if (((*(uint8_t *)(_this->m_02c + 0x30) & 8) != 0) || (!bVar1)) {
-          bVar1 = true;
-          if (local_24 != 0) {
-            C_auto_008154a4__FUN_00649a90(_this,(int)local_24);
-          }
-          puVar5 = tier1_operator_new(0x20);
-          GH_PIECE(local_4,0,1) = 1;
-          local_18 = puVar5;
-          if (puVar5 == 0) {
-            local_24 = 0;
-          }
-          else {
-            FUN_00649470((int)_this);
-            lVar9 = tier1_ftol();
-            construct_text_words_64c040(puVar5,&local_25);
-            GH_PIECE(local_4,0,1) = 2;
-            S_TextLine__Reset(puVar5);
-            *(short *)(puVar5 + 0x1c) = (short)lVar9;
-            iVar8 = local_1c;
-            local_24 = puVar5;
-          }
-          goto LAB_006496fa;
-        }
-        cVar3 = C_auto_008154a4__FUN_00649c60(_this,(int *)&local_14,(int *)&local_24);
-        if (cVar3 == '\0') break;
-        local_4 = 0xffffffff;
-        if ((local_14 != 0) && (*local_14 = *local_14 - 1, *local_14 == 0)) {
-          tier1_operator_delete(local_14);
-        }
-        local_20++;
-        iVar8 += 5;
       }
-      piVar6 = local_14;
+      if (*(char *)(_this->m_02c + 0x2c) == '\0') {
+        bVar1 = false;
+        if (local_24 != 0) {
+          C_PagedTextBox__FUN_00649a90(_this,(int)local_24);
+        }
+        puVar5 = tier1_operator_new(0x20);
+        local_18 = puVar5;
+        if (puVar5 == 0) {
+          local_24 = 0;
+        }
+        else {
+          FUN_00649470((int)_this);
+          lVar7 = tier1_ftol();
+          *puVar5 = local_25;
+          *(uint32_t *)(puVar5 + 4) = 0;
+          *(uint32_t *)(puVar5 + 8) = 0;
+          *(uint32_t *)(puVar5 + 0xc) = 0;
+          GH_PIECE(local_4,0,1) = 4;
+          S_TextLine__Reset(puVar5);
+          *(short *)(puVar5 + 0x1c) = (short)lVar7;
+          iVar6 = local_1c;
+          local_24 = puVar5;
+        }
+LAB_006496fa:
+        GH_PIECE(local_4,0,1) = 0;
+      }
+      else if (((*(uint8_t *)(_this->m_02c + 0x30) & 8) != 0) || (!bVar1)) {
+        bVar1 = true;
+        if (local_24 != 0) {
+          C_PagedTextBox__FUN_00649a90(_this,(int)local_24);
+        }
+        puVar5 = tier1_operator_new(0x20);
+        GH_PIECE(local_4,0,1) = 1;
+        local_18 = puVar5;
+        if (puVar5 == 0) {
+          local_24 = 0;
+        }
+        else {
+          FUN_00649470((int)_this);
+          lVar7 = tier1_ftol();
+          construct_text_words_64c040(puVar5,&local_25);
+          GH_PIECE(local_4,0,1) = 2;
+          S_TextLine__Reset(puVar5);
+          *(short *)(puVar5 + 0x1c) = (short)lVar7;
+          iVar6 = local_1c;
+          local_24 = puVar5;
+        }
+        goto LAB_006496fa;
+      }
+      cVar3 = C_PagedTextBox__FUN_00649c60(_this,(int *)&local_14,(int *)&local_24);
+      if (cVar3 == '\0') break;
+      local_4 = 0xffffffff;
       if ((local_14 != 0) && (*local_14 = *local_14 - 1, *local_14 == 0)) {
         tier1_operator_delete(local_14);
-        piVar6 = extraout_EAX;
       }
+      local_20++;
+      iVar6 += 5;
+    }
+    if ((local_14 != 0) && (*local_14 = *local_14 - 1, *local_14 == 0)) {
+      tier1_operator_delete(local_14);
     }
   }
-  return (uint32_t)piVar6 & 0xffffff00;
+  return false;
 }
 
 
 // 0x006497b0
-uint32_t C_auto_008154a4__FUN_006497b0(C_auto_008154a4 *_this, ...)
+uint32_t C_PagedTextBox__FUN_006497b0(C_PagedTextBox *_this, ...)
 {
   int iVar1;
   uint32_t uVar2;
   for (uVar2 = 0; (iVar1 = _this->m_0b8, iVar1 != 0 && (uVar2 < (uint32_t)(_this->m_0bc - iVar1 >> 2)));
       uVar2 = uVar2 + 1) {
     *(uint8_t *)(*(int *)(iVar1 + uVar2 * 4) + 4) = 0;
-    C_auto_008154a4__FUN_006499f0(_this,uVar2);
-    C_auto_008154a4__FUN_00649970(_this,uVar2);
+    C_PagedTextBox__FUN_006499f0(_this,uVar2);
+    C_PagedTextBox__FUN_00649970(_this,uVar2);
   }
   return 0;
 }
 
 
 // 0x006497f0
-uint32_t C_auto_008154a4__FUN_006497f0(C_auto_008154a4 *_this,int param_1,int param_2, ...)
+uint32_t C_PagedTextBox__FUN_006497f0(C_PagedTextBox *_this,int param_1,int param_2, ...)
 {
   uint8_t bVar1;
   int *piVar2;
@@ -356,7 +345,7 @@ LAB_0064995b:
 
 
 // 0x00649970
-uint32_t C_auto_008154a4__FUN_00649970(C_auto_008154a4 *_this,int param_1, ...)
+uint32_t C_PagedTextBox__FUN_00649970(C_PagedTextBox *_this,int param_1, ...)
 {
   int iVar1;
   int iVar2;
@@ -370,8 +359,8 @@ uint32_t C_auto_008154a4__FUN_00649970(C_auto_008154a4 *_this,int param_1, ...)
     iVar2 = *(int *)(iVar2 + uVar5 * 4);
     iVar3 = *(int *)(iVar2 + 4);
     if ((iVar3 != 0) && (*(int *)(iVar2 + 8) - iVar3 >> 2 != 0)) {
-      uVar4 = C_auto_008154a4__FUN_006497f0(_this,param_1,uVar5);
-      C_auto_008154a4__FUN_0064b7f0(_this,param_1,uVar5,(char)uVar4 == '\0');
+      uVar4 = C_PagedTextBox__FUN_006497f0(_this,param_1,uVar5);
+      C_PagedTextBox__FUN_0064b7f0(_this,param_1,uVar5,(char)uVar4 == '\0');
       _this->m_073 = _this->m_073 |
                     *(short *)(*(int *)(*(int *)(iVar1 + 0x10) + uVar5 * 4) + 0x1c) < 0;
     }
@@ -381,7 +370,7 @@ uint32_t C_auto_008154a4__FUN_00649970(C_auto_008154a4 *_this,int param_1, ...)
 
 
 // 0x006499f0
-uint32_t C_auto_008154a4__FUN_006499f0(C_auto_008154a4 *_this,int param_1, ...)
+uint32_t C_PagedTextBox__FUN_006499f0(C_PagedTextBox *_this,int param_1, ...)
 {
   int iVar1;
   int iVar2;
@@ -411,7 +400,7 @@ uint32_t C_auto_008154a4__FUN_006499f0(C_auto_008154a4 *_this,int param_1, ...)
 
 
 // 0x00649a90
-uint32_t C_auto_008154a4__FUN_00649a90(C_auto_008154a4 *_this,int param_1, ...)
+uint32_t C_PagedTextBox__FUN_00649a90(C_PagedTextBox *_this,int param_1, ...)
 {
   int *piVar1;
   int *piVar2;
@@ -478,19 +467,19 @@ uint32_t C_auto_008154a4__FUN_00649a90(C_auto_008154a4 *_this,int param_1, ...)
 
 
 // 0x00649c60
-uint32_t C_auto_008154a4__FUN_00649c60(C_auto_008154a4 *_this,int *param_1,int *param_2, ...)
+uint32_t C_PagedTextBox__FUN_00649c60(C_PagedTextBox *_this,int *param_1,int *param_2, ...)
 {
   if (g_gameProfile.m_unicodeFont) {
-    C_auto_008154a4__FUN_00649c80(_this,param_1,param_2);
+    C_PagedTextBox__FUN_00649c80(_this,param_1,param_2);
     return 0;
   }
-  C_auto_008154a4__FUN_0064a6c0(_this,param_1,param_2);
+  C_PagedTextBox__FUN_0064a6c0(_this,param_1,param_2);
   return 0;
 }
 
 
 // 0x00649c80
-uint32_t C_auto_008154a4__FUN_00649c80(C_auto_008154a4 *_this,int *param_1,int *param_2, ...)
+uint32_t C_PagedTextBox__FUN_00649c80(C_PagedTextBox *_this,int *param_1,int *param_2, ...)
 {
   uint8_t stack0xffffff98[64];
   char cVar1;
@@ -527,7 +516,7 @@ uint32_t C_auto_008154a4__FUN_00649c80(C_auto_008154a4 *_this,int *param_1,int *
   uint32_t local_28;
   C_str local_24;
   C_str_rep *local_20;
-  C_auto_008154a4 *local_1c;
+  C_PagedTextBox *local_1c;
   C_str local_18;
   C_str_rep *local_14;
   C_str_rep *local_10;
@@ -908,7 +897,7 @@ LAB_00649ec4:
         }
         pCVar17 = 0;
         if (*param_2 != 0) {
-          C_auto_008154a4__FUN_00649a90(local_1c,*param_2);
+          C_PagedTextBox__FUN_00649a90(local_1c,*param_2);
         }
         pCVar11 = tier1_operator_new(0x20);
         GH_PIECE(local_4,0,1) = 0xe;
@@ -1067,7 +1056,7 @@ uint32_t FUN_0064a6a0(uint8_t *param_1, ...)
 
 
 // 0x0064a6c0  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t C_auto_008154a4__FUN_0064a6c0(C_auto_008154a4 *_this,int *param_1,int *param_2, ...)
+uint32_t C_PagedTextBox__FUN_0064a6c0(C_PagedTextBox *_this,int *param_1,int *param_2, ...)
 {
   return {};
 }
@@ -1106,7 +1095,7 @@ uint32_t C_auto_008154a4__FUN_0064a6c0(C_auto_008154a4 *_this,int *param_1,int *
   int local_30;
   int local_2c;
   C_str local_28;
-  C_auto_008154a4 *local_24;
+  C_PagedTextBox *local_24;
   C_str local_20;
   int local_1c;
   uint8_t local_18;
@@ -1459,7 +1448,7 @@ LAB_0064a88a:
         }
         iVar14 = 0;
         if (*param_2 != 0) {
-          C_auto_008154a4__FUN_00649a90(local_24,*param_2);
+          C_PagedTextBox__FUN_00649a90(local_24,*param_2);
         }
         pCVar11 = tier1_operator_new(0x20);
         local_10 = (C_str_rep *)pCVar11;
@@ -1508,176 +1497,9 @@ LAB_0064ae0a:
 
 #endif
 // 0x0064ae60
-uint32_t empty_function_64ae60(...)
+uint32_t C_PagedTextBox__FreePages(C_PagedTextBox *_this, ...)
 {
   return 0;
-}
-
-
-// 0x0064ae70
-uint32_t C_auto_008154a4__FUN_0064ae70(C_auto_008154a4 *_this, ...)
-{
-  int iVar1;
-  int iVar2;
-  uint32_t uVar3;
-  if (_this->m_070 != '\0') {
-    _this->m_074 = *(uchar *)(_this->m_028 + 0x1c);
-    if (_this->m_072 != '\0') {
-      C_auto_008154a4__FUN_006494a0(_this);
-    }
-    for (uVar3 = 0; (_this->m_0a4 != 0 && (uVar3 < (uint32_t)((_this->m_0a8 - _this->m_0a4) / 0x1c)));
-        uVar3 = uVar3 + 1) {
-      iVar1 = _this->m_09c + uVar3;
-      if (-1 < iVar1) {
-        if (_this->m_0b8 == 0) {
-          iVar2 = 0;
-        }
-        else {
-          iVar2 = _this->m_0bc - _this->m_0b8 >> 2;
-        }
-        if (iVar1 <= iVar2 - 1) {
-          C_auto_008154a4__FUN_0064af10(_this,*(int *)(_this->m_0b8 + iVar1 * 4));
-        }
-      }
-    }
-  }
-  return 0;
-}
-
-
-// 0x0064af10
-uint32_t C_auto_008154a4__FUN_0064af10(C_auto_008154a4 *_this,int param_1, ...)
-{
-  float *pfVar1;
-  int iVar2;
-  bool bVar3;
-  bool bVar4;
-  IGraph *pIVar5;
-  S_IGraphViewport *pSVar6;
-  uint32_t colour;
-  int iVar7;
-  uint32_t *puVar8;
-  uint32_t uVar9;
-  uint64_t uVar10;
-  uint32_t local_34 [6];
-  uint32_t uStack_1c;
-  S_IGraphViewport aSStack_18 [24];
-  bVar3 = false;
-  if (*(char *)(param_1 + 4) != '\0') {
-    pIVar5 = GetIGraph();
-    pSVar6 = (*pIVar5->vtable->GetViewport)(pIVar5);
-    pfVar1 = *(float **)(param_1 + 8);
-    puVar8 = &uStack_1c;
-    for (iVar7 = 6; iVar7 != 0; iVar7 = iVar7 - 1) {
-      *puVar8 = *(uint32_t *)pSVar6;
-      pSVar6 += 4;
-      puVar8++;
-    }
-    uVar10 = C_auto_008154a4__FUN_0064b070(_this,local_34,pfVar1);
-    if ((char)uVar10 == '\0') {
-      return 0;
-    }
-    pIVar5 = GetIGraph();
-    (*pIVar5->vtable->SetViewport)(pIVar5,(S_IGraphViewport *)local_34);
-  }
-  local_34[0] = 0;
-  do {
-    iVar7 = *(int *)(param_1 + 0x10);
-    if (((iVar7 == 0) || ((uint32_t)(*(int *)(param_1 + 0x14) - iVar7 >> 2) <= local_34[0])) || (bVar3))
-    {
-      if (*(char *)(param_1 + 4) != '\0') {
-        pIVar5 = GetIGraph();
-        (*pIVar5->vtable->SetViewport)(pIVar5,aSStack_18);
-      }
-      return 0;
-    }
-    uVar9 = 0;
-    iVar7 = *(int *)(iVar7 + local_34[0] * 4);
-    _this->m_06e = *(uint16_t *)(iVar7 + 0x14);
-    while( true ) {
-      while( true ) {
-        iVar2 = *(int *)(iVar7 + 4);
-        if ((iVar2 == 0) || ((uint32_t)(*(int *)(iVar7 + 8) - iVar2 >> 2) <= uVar9)) goto LAB_0064b03c;
-        bVar4 = C_TextBox__SelectStyle
-                          ((C_TextBox *)_this,(uint32_t)*(uint8_t *)(*(int *)(iVar2 + uVar9 * 4) + 4));
-        if (bVar4) break;
-        bVar3 = true;
-        uVar9++;
-      }
-      colour = _this->m_094;
-      if (colour == 0) {
-        if (_this->m_071 == '\0') {
-          colour = *(uint32_t *)(_this->m_02c + 4);
-        }
-        else {
-          colour = *(uint32_t *)(_this->m_02c + 4) & 0xffffff | 0x60000000;
-        }
-      }
-      _this->m_06c = *(uint16_t *)(*(int *)(*(int *)(iVar7 + 4) + uVar9 * 4) + 8);
-      bVar4 = C_TextBox__DrawString
-                        ((C_TextBox *)_this,*(void **)(*(int *)(iVar7 + 4) + uVar9 * 4),colour);
-      if (!bVar4) break;
-      uVar9++;
-    }
-    bVar3 = true;
-LAB_0064b03c:
-    local_34[0] = local_34[0] + 1;
-  } while( true );
-  return 0;
-}
-
-
-// 0x0064b070
-uint64_t C_auto_008154a4__FUN_0064b070(C_auto_008154a4 *_this,uint32_t *param_1,float *param_2, ...)
-{
-  short sVar1;
-  float fVar2;
-  float fVar3;
-  int iVar4;
-  float *pfVar5;
-  int64_t lVar6;
-  uint64_t uVar7;
-  float local_1c [7];
-  sVar1 = _this->m_004;
-  pfVar5 = local_1c;
-  for (iVar4 = 7; iVar4 != 0; iVar4 = iVar4 - 1) {
-    *pfVar5 = *param_2;
-    param_2++;
-    pfVar5++;
-  }
-  fVar2 = (float)(int)sVar1;
-  fVar3 = fVar2;
-  if ((local_1c[2] <= fVar2) && (fVar3 = local_1c[2], local_1c[2] < 0.0)) {
-    local_1c[2] = 0.0;
-    fVar3 = local_1c[2];
-  }
-  local_1c[2] = fVar3;
-  fVar3 = (float)(int)_this->m_006;
-  if ((local_1c[3] <= (float)(int)_this->m_006) && (fVar3 = local_1c[3], local_1c[3] < 0.0)) {
-    local_1c[3] = 0.0;
-    fVar3 = local_1c[3];
-  }
-  local_1c[3] = fVar3;
-  if ((local_1c[0] <= fVar2) && (fVar2 = local_1c[0], local_1c[0] < 0.0)) {
-    local_1c[0] = 0.0;
-    fVar2 = local_1c[0];
-  }
-  local_1c[0] = fVar2;
-  local_1c[4] = local_1c[2] - local_1c[0];
-  lVar6 = tier1_ftol();
-  *param_1 = (int)lVar6;
-  lVar6 = tier1_ftol();
-  param_1[1] = (int)lVar6;
-  lVar6 = tier1_ftol();
-  param_1[3] = (int)lVar6;
-  uVar7 = tier1_ftol();
-  param_1[2] = (int)uVar7;
-  param_1[5] = 0x3f800000;
-  param_1[4] = 0;
-  if ((0 < (int)lVar6) && (0 < (int)uVar7)) {
-    return CONCAT44((int)(uVar7 >> 0x20),CONCAT31((int3)(uVar7 >> 8),1));
-  }
-  return uVar7 & 0xffffffffffffff00;
 }
 
 
@@ -1688,116 +1510,8 @@ uint32_t empty_function_64b1e0(...)
 }
 
 
-// 0x0064b200  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_0064b200(void *_this,I3D_scene *param_1,I3D_frame *param_3, ...)
-{
-  return {};
-}
-#if 0
-{
-  uint32_t *puVar1;
-  uint32_t *puVar2;
-  float *pfVar3;
-  float *pfVar4;
-  int iVar5;
-  int iVar6;
-  float *pfVar7;
-  float *pfVar8;
-  float *pfVar9;
-  float *pfVar10;
-  long double extraout_ST0;
-  long double extraout_ST1;
-  int64_t lVar11;
-  float fVar12;
-  uint32_t local_40;
-  float local_30 [4];
-  float local_20;
-  float local_1c;
-  if (param_3 != 0) {
-    if (((uint32_t)param_3[1].m_localMatrix.m[3][3] & 0x40000) == 0) {
-      I3D_visual__UpdateWBoundProc(param_3);
-    }
-    pfVar7 = param_3[1].m_worldMatrix.m[1] + 3;
-    pfVar9 = local_30;
-    for (iVar5 = 8; iVar5 != 0; iVar5 = iVar5 - 1) {
-      *pfVar9 = *pfVar7;
-      pfVar7++;
-      pfVar9++;
-    }
-    lVar11 = tier1_ftol();
-    pfVar7 = (float *)((int)_this + 8);
-    *pfVar7 = (float)(extraout_ST1 * (long double)local_30[0] + (long double)(int)lVar11);
-    *(float *)((int)_this + 0xc) =
-         (float)(extraout_ST0 * (long double)local_30[1] * (long double)-1.3333334 - (long double)1.0);
-    *(float *)((int)_this + 0x10) = (float)(extraout_ST1 * (long double)local_20 - (long double)(int)lVar11);
-    *(float *)((int)_this + 0x14) =
-         (float)((long double)1.0 - extraout_ST0 * (long double)local_1c * (long double)1.3333334);
-    *(float *)((int)_this + 0x18) = *(float *)((int)_this + 0x10) - *pfVar7;
-    *(float *)((int)_this + 0x1c) = *(float *)((int)_this + 0xc) - *(float *)((int)_this + 0x14);
-    fVar12 = C_TextBox__VisualDepth(param_1,param_3);
-    *(float *)((int)_this + 0x20) = fVar12;
-    pfVar9 = *(float **)((int)_this + 0xa8);
-    iVar6 = *(int *)((int)_this + 0xac) - (int)pfVar9;
-    iVar5 = iVar6 >> 0x1f;
-    if (iVar6 / 0x1c + iVar5 == iVar5) {
-      if ((*(int *)((int)_this + 0xa4) == 0) ||
-         (local_40 = ((int)pfVar9 - *(int *)((int)_this + 0xa4)) / 0x1c, local_40 < 2)) {
-        local_40 = 1;
-      }
-      if (*(int *)((int)_this + 0xa4) == 0) {
-        iVar5 = 0;
-      }
-      else {
-        iVar5 = ((int)pfVar9 - *(int *)((int)_this + 0xa4)) / 0x1c;
-      }
-      iVar5 = local_40 + iVar5;
-      iVar6 = iVar5;
-      if (iVar5 < 0) {
-        iVar6 = 0;
-      }
-      puVar1 = tier1_operator_new(iVar6 * 0x1c);
-      puVar2 = puVar1;
-      for (pfVar3 = *(float **)((int)_this + 0xa4); pfVar3 != pfVar9; pfVar3 = pfVar3 + 7) {
-        FUN_0064d060(puVar2,gh_bitcast<uint32_t*>(pfVar3));
-        puVar2 += 7;
-      }
-      FUN_0064cf70(puVar2,1,gh_bitcast<uint32_t*>(pfVar7));
-      FUN_0064cf30(gh_bitcast<uint32_t*>(pfVar9),*(uint32_t **)((int)_this + 0xa8),puVar2 + 7);
-      empty_function_64c610();
-      tier1_operator_delete(*(void **)((int)_this + 0xa4));
-      *(uint32_t **)((int)_this + 0xac) = puVar1 + iVar5 * 7;
-      iVar5 = FUN_0064c0b0((int)_this + 0xa0);
-      *(uint32_t **)((int)_this + 0xa4) = puVar1;
-      *(uint32_t **)((int)_this + 0xa8) = puVar1 + (iVar5 + 1) * 7;
-      *(uint8_t *)((int)_this + 0x72) = 1;
-      *(uint8_t *)((int)_this + 0x70) = 1;
-      return 0;
-    }
-    FUN_0064cf30(gh_bitcast<uint32_t*>(pfVar9),gh_bitcast<uint32_t*>(pfVar9),pfVar9 + 7);
-    FUN_0064cf70(*(uint32_t **)((int)_this + 0xa8),
-                 1 - (*(int *)((int)_this + 0xa8) - (int)pfVar9) / 0x1c,gh_bitcast<uint32_t*>(pfVar7));
-    pfVar3 = *(float **)((int)_this + 0xa8);
-    while (pfVar9 != pfVar3) {
-      pfVar4 = pfVar9 + 7;
-      pfVar8 = pfVar7;
-      pfVar10 = pfVar9;
-      for (iVar5 = 7; pfVar9 = pfVar4, iVar5 != 0; iVar5 = iVar5 - 1) {
-        *pfVar10 = *pfVar8;
-        pfVar8++;
-        pfVar10++;
-      }
-    }
-    *(int *)((int)_this + 0xa8) = *(int *)((int)_this + 0xa8) + 0x1c;
-    *(uint8_t *)((int)_this + 0x72) = 1;
-    *(uint8_t *)((int)_this + 0x70) = 1;
-  }
-  return 0;
-}
-
-
-#endif
 // 0x0064b7f0
-uint32_t C_auto_008154a4__FUN_0064b7f0(C_auto_008154a4 *_this,int param_1,int param_2,char param_3, ...)
+uint32_t C_PagedTextBox__FUN_0064b7f0(C_PagedTextBox *_this,int param_1,int param_2,char param_3, ...)
 {
   void *line;
   int iVar1;
@@ -1933,228 +1647,6 @@ long double FUN_0064bad0(int param_1,int param_2, ...)
 }
 
 
-// 0x0064bb30
-uint32_t FUN_0064bb30(void *_this,uint32_t param_1, ...)
-{
-  if ((param_1 == 0) ||
-     (((*(int *)((int)_this + 0xb8) != 0 &&
-       (param_1 < (uint32_t)(*(int *)((int)_this + 0xbc) - *(int *)((int)_this + 0xb8) >> 2))) &&
-      (-1 < (int)param_1)))) {
-    *(uint32_t *)((int)_this + 0x9c) = param_1;
-  }
-  return 0;
-}
-
-
-// 0x0064bb60
-int FUN_0064bb60(int param_1, ...)
-{
-  if (*(int *)(param_1 + 0xb8) == 0) {
-    return 0;
-  }
-  return *(int *)(param_1 + 0xbc) - *(int *)(param_1 + 0xb8) >> 2;
-}
-
-
-// 0x0064bb80
-uint32_t FUN_0064bb80(void *param_1, ...)
-{
-  *(uint8_t *)((int)param_1 + 0x72) = 1;
-  C_auto_008154a4__FUN_006494a0(param_1);
-  return 0;
-}
-
-
-// 0x0064bb90
-int FUN_0064bb90(int param_1, ...)
-{
-  uint8_t bVar1;
-  int *piVar2;
-  int *piVar3;
-  int iVar4;
-  int iVar5;
-  int iVar6;
-  if (*(int *)(param_1 + 0xb8) != 0) {
-    iVar6 = *(int *)(param_1 + 0xbc) - *(int *)(param_1 + 0xb8) >> 2;
-    iVar5 = DAT_008ae400;
-    while (iVar6 != 0) {
-      iVar6--;
-      iVar4 = *(int *)(*(int *)(param_1 + 0xb8) + iVar6 * 4);
-      piVar2 = *(int **)(iVar4 + 0x10);
-      if ((piVar2 != 0) && (*(int *)(iVar4 + 0x14) - (int)piVar2 >> 2 != 0)) {
-        piVar3 = *(int **)(*piVar2 + 4);
-        if ((piVar3 != 0) && (*(int *)(*piVar2 + 8) - (int)piVar3 >> 2 != 0)) {
-          bVar1 = *(uint8_t *)(*piVar3 + 4);
-          if (DAT_008ae3f8 == '\0') {
-            TextStyles_AddDefaults(&DAT_008ae3f8);
-            iVar5 = DAT_008ae400;
-          }
-          if (iVar5 == 0) {
-            iVar4 = 0;
-          }
-          else {
-            iVar4 = DAT_008ae404 - iVar5 >> 2;
-          }
-          if (iVar4 - 1 < (int)(uint32_t)bVar1) {
-            iVar4 = 0;
-          }
-          else {
-            iVar4 = *(int *)(iVar5 + (uint32_t)bVar1 * 4);
-          }
-          if ((*(uint8_t *)(iVar4 + 0x30) & 0x20) != 0) {
-            return iVar6;
-          }
-        }
-      }
-    }
-  }
-  return -1;
-}
-
-
-// 0x0064bc60
-uint32_t FUN_0064bc60(void *_this,uint32_t param_1, ...)
-{
-  *(uint32_t *)((int)_this + 0x78) = param_1;
-  return CONCAT31((int3)((uint32_t)param_1 >> 8),1);
-}
-
-
-// 0x0064bc70
-uint32_t C_auto_008158f8__FUN_0064bc70(C_auto_008158f8 *_this, ...)
-{
-  char cVar1;
-  int iVar2;
-  int iVar3;
-  bool bVar4;
-  short sVar5;
-  uint32_t colour;
-  IGraph *pIVar6;
-  int unaff_EBX;
-  uint32_t line;
-  uint32_t uVar7;
-  int64_t lVar8;
-  if (_this->_pad_0070[0] == '\0') {
-    return 0;
-  }
-  cVar1 = _this->m_072;
-  _this->_pad_0073[1] = *(uchar *)(*(int *)(_this->_pad_0008 + 0x20) + 0x1c);
-  if (cVar1 != '\0') {
-    C_TextBox__Layout((C_TextBox *)_this);
-    _this[1]._pad_0008[0x18] = '\0';
-    _this[1]._pad_0008[0x19] = '\0';
-    _this[1]._pad_0008[0x1a] = '\0';
-    _this[1]._pad_0008[0x1b] = '\0';
-  }
-  line = *(uint32_t *)(_this[1]._pad_0008 + 0x18);
-  do {
-    iVar2 = *(int *)(_this->_pad_0008 + 0x40);
-    if ((iVar2 == 0) || ((uint32_t)(*(int *)(_this->_pad_0008 + 0x44) - iVar2 >> 2) <= line))
-    goto LAB_0064bd4c;
-    iVar2 = *(int *)(iVar2 + line * 4);
-    sVar5 = *(short *)(iVar2 + 0x14) - (short)_this->m_078;
-    _this->m_06e = sVar5;
-    if (sVar5 < 0) {
-      *(uint32_t *)(_this[1]._pad_0008 + 0x18) = line + 1;
-    }
-    else {
-      if (_this->m_006 + 100 < (int)sVar5) {
-LAB_0064bd4c:
-        lVar8 = tier1_ftol();
-        pIVar6 = GetIGraph();
-        (*pIVar6->vtable->SetTexture)(pIVar6,0,0);
-        _DAT_008ae410 = 0;
-        _DAT_008ae414 = 0.0;
-        _DAT_008ae418 = 0x3ce8bf06;
-        _DAT_008ae41c = 0x420cc9df;
-        _DAT_008ae420 = 0xff000000;
-        _DAT_008ae428 = 0;
-        _DAT_008ae42c = 0;
-        _DAT_008ae434 = 0.0;
-        _DAT_008ae430 = (float)(int)*(short *)_this->_pad_0004;
-        _DAT_008ae438 = 0x3ce8bf06;
-        _DAT_008ae43c = 0x420cc9df;
-        _DAT_008ae440 = 0xff000000;
-        _DAT_008ae448 = 0x3f800000;
-        _DAT_008ae44c = 0;
-        _DAT_008ae458 = 0x3ce8bf06;
-        _DAT_008ae450 = (float)(int)*(short *)_this->_pad_0004;
-        _DAT_008ae45c = 0x420cc9df;
-        _DAT_008ae460 = 0;
-        _DAT_008ae468 = 0;
-        _DAT_008ae46c = 0x3f800000;
-        _DAT_008ae454 = (float)unaff_EBX;
-        _DAT_008ae470 = 0;
-        _DAT_008ae478 = 0x3ce8bf06;
-        _DAT_008ae47c = 0x420cc9df;
-        _DAT_008ae480 = 0;
-        _DAT_008ae488 = 0x3f800000;
-        _DAT_008ae48c = 0x3f800000;
-        _DAT_008ae474 = _DAT_008ae454;
-        pIVar6 = GetIGraph();
-        (*pIVar6->vtable->DrawPrimitives)(pIVar6,4,2,&DAT_008ae410,1);
-        _DAT_008ae410 = 0;
-        _DAT_008ae418 = 0x3ce8bf06;
-        _DAT_008ae414 = (float)((int)_this->m_006 - (int)lVar8);
-        _DAT_008ae41c = 0x420cc9df;
-        _DAT_008ae420 = 0;
-        _DAT_008ae428 = 0;
-        _DAT_008ae42c = 0;
-        _DAT_008ae434 = (float)((int)_this->m_006 - (int)lVar8);
-        _DAT_008ae430 = (float)(int)*(short *)_this->_pad_0004;
-        _DAT_008ae438 = 0x3ce8bf06;
-        _DAT_008ae43c = 0x420cc9df;
-        _DAT_008ae440 = 0;
-        _DAT_008ae448 = 0x3f800000;
-        _DAT_008ae44c = 0;
-        _DAT_008ae458 = 0x3ce8bf06;
-        _DAT_008ae454 = (float)(int)_this->m_006;
-        _DAT_008ae45c = 0x420cc9df;
-        _DAT_008ae450 = (float)(int)*(short *)_this->_pad_0004;
-        _DAT_008ae460 = 0xff000000;
-        _DAT_008ae468 = 0;
-        _DAT_008ae46c = 0x3f800000;
-        _DAT_008ae470 = 0;
-        _DAT_008ae474 = (float)(int)_this->m_006;
-        _DAT_008ae478 = 0x3ce8bf06;
-        _DAT_008ae47c = 0x420cc9df;
-        _DAT_008ae480 = 0xff000000;
-        _DAT_008ae488 = 0x3f800000;
-        _DAT_008ae48c = 0x3f800000;
-        pIVar6 = GetIGraph();
-        (*pIVar6->vtable->DrawPrimitives)(pIVar6,4,2,&DAT_008ae410,1);
-        return 0;
-      }
-      uVar7 = 0;
-      while (((iVar3 = *(int *)(iVar2 + 4), iVar3 != 0 &&
-              (uVar7 < (uint32_t)(*(int *)(iVar2 + 8) - iVar3 >> 2))) &&
-             (bVar4 = C_TextBox__SelectStyle
-                                ((C_TextBox *)_this,(uint32_t)*(uint8_t *)(*(int *)(iVar3 + uVar7 * 4) + 4))
-             , bVar4))) {
-        colour = C_TextBox__WordColour((C_TextBox *)_this,line);
-        *(uint16_t *)(_this->_pad_0008 + 100) =
-             *(uint16_t *)(*(int *)(*(int *)(iVar2 + 4) + uVar7 * 4) + 8);
-        C_TextBox__DrawString((C_TextBox *)_this,*(void **)(*(int *)(iVar2 + 4) + uVar7 * 4),colour);
-        uVar7++;
-      }
-    }
-    line++;
-  } while( true );
-  return 0;
-}
-
-
-// 0x0064bfe0
-bool FUN_0064bfe0(int param_1, ...)
-{
-  if (*(int *)(param_1 + 0x48) == 0) {
-    return true;
-  }
-  return (bool)('\x01' - (*(uint32_t *)(param_1 + 0x9c) <
-                         (uint32_t)(*(int *)(param_1 + 0x4c) - *(int *)(param_1 + 0x48) >> 2)));
-}
-
-
 // 0x0064c060
 int vector_size_e4_64c060(int param_1, ...)
 {
@@ -2172,16 +1664,6 @@ int vector_size_e4_64c090(int param_1, ...)
     return 0;
   }
   return *(int *)(param_1 + 8) - *(int *)(param_1 + 4) >> 2;
-}
-
-
-// 0x0064c0b0
-int FUN_0064c0b0(int param_1, ...)
-{
-  if (*(int *)(param_1 + 4) == 0) {
-    return 0;
-  }
-  return (*(int *)(param_1 + 8) - *(int *)(param_1 + 4)) / 0x1c;
 }
 
 
@@ -2285,13 +1767,6 @@ uint32_t empty_function_64c310(...)
 }
 
 
-// 0x0064c610
-uint32_t empty_function_64c610(...)
-{
-  return 0;
-}
-
-
 // 0x0064c620
 uint32_t empty_function_64c620(...)
 {
@@ -2351,50 +1826,6 @@ uint32_t uninitialized_fill_n4_64cf00(uint32_t *param_1,int param_2,uint32_t *pa
 }
 
 
-// 0x0064cf30
-uint32_t FUN_0064cf30(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3, ...)
-{
-  int iVar1;
-  uint32_t *puVar2;
-  uint32_t *puVar3;
-  for (; param_1 != param_2; param_1 = param_1 + 7) {
-    if (param_3 != 0) {
-      puVar2 = param_1;
-      puVar3 = param_3;
-      for (iVar1 = 7; iVar1 != 0; iVar1 = iVar1 - 1) {
-        *puVar3 = *puVar2;
-        puVar2++;
-        puVar3++;
-      }
-    }
-    param_3 += 7;
-  }
-  return 0;
-}
-
-
-// 0x0064cf70
-uint32_t FUN_0064cf70(uint32_t *param_1,int param_2,uint32_t *param_3, ...)
-{
-  int iVar1;
-  uint32_t *puVar2;
-  uint32_t *puVar3;
-  for (; param_2 != 0; param_2 = param_2 - 1) {
-    if (param_1 != 0) {
-      puVar2 = param_3;
-      puVar3 = param_1;
-      for (iVar1 = 7; iVar1 != 0; iVar1 = iVar1 - 1) {
-        *puVar3 = *puVar2;
-        puVar2++;
-        puVar3++;
-      }
-    }
-    param_1 += 7;
-  }
-  return 0;
-}
-
-
 // 0x0064cfa0
 uint32_t uninitialized_copy4_64cfa0(uint32_t *param_1,uint32_t *param_2,uint32_t *param_3, ...)
 {
@@ -2436,21 +1867,6 @@ uint32_t construct_copy4_64d050(uint32_t *param_1,uint32_t *param_2, ...)
 {
   if (param_1 != 0) {
     *param_1 = *param_2;
-  }
-  return 0;
-}
-
-
-// 0x0064d060
-uint32_t FUN_0064d060(uint32_t *param_1,uint32_t *param_2, ...)
-{
-  int iVar1;
-  if (param_1 != 0) {
-    for (iVar1 = 7; iVar1 != 0; iVar1 = iVar1 - 1) {
-      *param_1 = *param_2;
-      param_2++;
-      param_1++;
-    }
   }
   return 0;
 }

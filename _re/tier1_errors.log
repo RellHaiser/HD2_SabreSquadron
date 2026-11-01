@@ -306,10 +306,8 @@ f_00638dc0.cpp:2096:13: invalid type argument of unary '*' (have 'uint32_t' {aka
     *DAT_008ae5b0 = (int)pvVar3;
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_00643b20.cpp:1173:7: '_local_18' was not declared in this scope; did you mean 'local_18'?
+f_00643b20.cpp:1162:7: '_local_18' was not declared in this scope; did you mean 'local_18'?
     _local_18 = CONCAT31(uStack_17,bVar2);
-f_00643b20.cpp:1767:85: cannot convert 'float*' to 'uint32_t*' {aka 'unsigned int*'}
-    FUN_0064cf30(gh_bitcast<uint32_t*>(pfVar9),gh_bitcast<uint32_t*>(pfVar9),pfVar9 + 7);
 f_0064d080.cpp:85:20: 'UNK_00813cb8' was not declared in this scope; did you mean 'PTR_00813ab8'?
     pbVar1[-1] = (&UNK_00813cb8)[iVar3] | (uint8_t)uVar2;
 f_0064dae0.cpp:2639:3: '_param_1' was not declared in this scope; did you mean 'param_1'?
@@ -320,6 +318,8 @@ f_0065ae90.cpp:889:46: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_
     (_this[0x14].vtable)->vf3b = _this[0x18].vtable;
 f_0065ae90.cpp:897:48: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_t (*)(...)' {aka 'unsigned int (*)(...)'} in assignment
     (_this[0x22].vtable)->vf3b = _this[0x18].vtable;
+f_0065ae90.cpp:1345:40: void value not ignored as it ought to be
+    iVar3 = (*self->vtable->Update)(self);
 f_00663df0.cpp:27:5: '_param_1' was not declared in this scope; did you mean 'param_1'?
     _param_1 = 0x3ecccccd;
 f_006683f0.cpp:684:53: no matching function for call to 'tier1::C_str::C_str(int)'
@@ -476,9 +476,9 @@ f_00686c60.cpp:245:55: no matching function for call to 'tier1::C_str::C_str(int
     (*pCStack_10 = (C_str)(*(int *)pCStack_10 - 1), *(int *)pCStack_10 == 0)) {
 f_00686c60.cpp:256:55: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_10 = (C_str)(*(int *)pCStack_10 - 1), *(int *)pCStack_10 == 0)) {
-f_006882f0.cpp:725:49: no matching function for call to '_LARGE_INTEGER::_LARGE_INTEGER(uint64_t)'
+f_006882f0.cpp:645:49: no matching function for call to '_LARGE_INTEGER::_LARGE_INTEGER(uint64_t)'
     LStack_c.u.HighPart);
-f_006882f0.cpp:1467:40: void value not ignored as it ought to be
+f_006882f0.cpp:1387:40: void value not ignored as it ought to be
     iVar13 = (*self->vtable[1].Close)(self);
 f_0068bfc0.cpp:205:20: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     (**(code **)(*uStack_44 + 0x70))(*(int *)(local_34 + uVar4 * 4) + 4);

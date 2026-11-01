@@ -496,86 +496,6 @@ uint32_t C_VideoState__FUN_00688ab0(C_VideoState *_this,int param_1,int param_2,
 }
 
 
-// 0x00688cb0
-uint32_t empty_function_688cb0(void *_this, ...)
-{
-  return 0;
-}
-
-
-// 0x00688cc0
-uint32_t * C_auto_008158f8__FUN_00688cc0(C_auto_008158f8 *_this,uint8_t param_1, ...)
-{
-  C_auto_008158f8__FUN_00688ce0(_this);
-  if ((param_1 & 1) != 0) {
-    tier1_operator_delete(_this);
-  }
-  return (uint32_t*)(&_this->vtable);
-}
-
-
-// 0x00688ce0
-uint32_t C_auto_008158f8__FUN_00688ce0(C_auto_008158f8 *_this, ...)
-{
-  C_str *pCVar1;
-  C_str *this_00;
-  uint32_t local_4;
-  _this->vtable = (C_auto_008158f8_vtbl *)&PTR_008158f8;
-  local_4 = 0;
-  C_TextBox__FreeLayout((C_TextBox *)_this);
-  _this->vtable = (C_auto_008158f8_vtbl *)&PTR_00810458;
-  local_4 = 3;
-  C_FontManager__Release(*(void **)(_this->_pad_0008 + 0x20));
-  C_TextBox__FreeLayout((C_TextBox *)_this);
-  tier1_operator_delete(*(void **)(_this->_pad_0008 + 0x54));
-  _this->_pad_0008[0x54] = '\0';
-  _this->_pad_0008[0x55] = '\0';
-  _this->_pad_0008[0x56] = '\0';
-  _this->_pad_0008[0x57] = '\0';
-  _this->_pad_0008[0x58] = '\0';
-  _this->_pad_0008[0x59] = '\0';
-  _this->_pad_0008[0x5a] = '\0';
-  _this->_pad_0008[0x5b] = '\0';
-  _this->_pad_0008[0x5c] = '\0';
-  _this->_pad_0008[0x5d] = '\0';
-  _this->_pad_0008[0x5e] = '\0';
-  _this->_pad_0008[0x5f] = '\0';
-  tier1_operator_delete(*(void **)(_this->_pad_0008 + 0x40));
-  _this->_pad_0008[0x40] = '\0';
-  _this->_pad_0008[0x41] = '\0';
-  _this->_pad_0008[0x42] = '\0';
-  _this->_pad_0008[0x43] = '\0';
-  _this->_pad_0008[0x44] = '\0';
-  _this->_pad_0008[0x45] = '\0';
-  _this->_pad_0008[0x46] = '\0';
-  _this->_pad_0008[0x47] = '\0';
-  _this->_pad_0008[0x48] = '\0';
-  _this->_pad_0008[0x49] = '\0';
-  _this->_pad_0008[0x4a] = '\0';
-  _this->_pad_0008[0x4b] = '\0';
-  pCVar1 = *(C_str **)(_this->_pad_0008 + 0x30);
-  this_00 = *(C_str **)(_this->_pad_0008 + 0x2c);
-  local_4 = 0xffffffff;
-  for (; this_00 != pCVar1; this_00 = (C_str *)((int)&this_00[1].rep + 1)) {
-    C_str__dtor_C_str(this_00);
-  }
-  tier1_operator_delete(*(void **)(_this->_pad_0008 + 0x2c));
-  _this->_pad_0008[0x2c] = '\0';
-  _this->_pad_0008[0x2d] = '\0';
-  _this->_pad_0008[0x2e] = '\0';
-  _this->_pad_0008[0x2f] = '\0';
-  _this->_pad_0008[0x30] = '\0';
-  _this->_pad_0008[0x31] = '\0';
-  _this->_pad_0008[0x32] = '\0';
-  _this->_pad_0008[0x33] = '\0';
-  _this->_pad_0008[0x34] = '\0';
-  _this->_pad_0008[0x35] = '\0';
-  _this->_pad_0008[0x36] = '\0';
-  _this->_pad_0008[0x37] = '\0';
-  return 0;
-}
-
-
 // 0x00688da0
 uint32_t C_VideoState__FUN_00688da0(C_VideoState *_this,int param_1,int param_2, ...)
 {
@@ -740,7 +660,7 @@ LAB_00688f40:
       iVar4 = *(int *)_this->m_038;
       lVar8 = tier1_ftol();
       (**(code **)(iVar4 + 8))((int)lVar8);
-      if ((_this->m_01c == '\0') || (bVar2 = FUN_0064bfe0((int)_this->m_038), !bVar2)) {
+      if ((_this->m_01c == '\0') || (bVar2 = C_VideoTextBox__Finished(_this->m_038), !bVar2)) {
         if ((_this->m_01e == false) || (_this->_pad_001f[0] == '\0')) goto LAB_00689098;
         *(int *)(_this->_pad_003d + 3) = *(int *)(_this->_pad_003d + 3) + timeDelta;
         lVar8 = tier1_ftol();

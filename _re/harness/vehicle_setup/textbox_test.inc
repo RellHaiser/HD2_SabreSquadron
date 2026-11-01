@@ -1,9 +1,17 @@
 // Part 9b's text box (game/text_box.cpp: 9b-i its runs, edit, selection, hover, scroll and place;
-// 9b-ii its layout and positioning; 9b-iii its render), in the text build (build_text.bat: the camera
+// 9b-ii its layout and positioning; 9b-iii its render; 9b-iv the paged and the video text boxes,
+// game/paged_text_box.cpp and game/video_text_box.cpp), in the text build (build_text.bat: the camera
 // build with TEXT_TEST and the real C_TextBox; the loader's text box fakes left out), run by
 // CameraTest instead of the camera's tests: IGraph's screen 800 x 600; the fonts 2 and 3 fakes
 // (C_TbFont); the render's IGraph and driver calls logged. Prints "textbox:" (9b-i), "layout:"
-// (9b-ii-a), "position:" (9b-ii-b) and "render:" (9b-iii) with 1 per check met.
+// (9b-ii-a), "position:" (9b-ii-b), "render:" (9b-iii) and "pages:" (9b-iv) with 1 per check met.
+
+#define private public
+#define protected public
+#include "game/paged_text_box.h"
+#include "game/video_text_box.h"
+#undef protected
+#undef private
 
 // The lines asked for (y, above, below, gap): the 9b-i tests' (TbLayout).
 std::vector<std::array<int16_t, 4>> g_tbLines;
@@ -20,6 +28,13 @@ void TbSetLines(std::vector<S_TextLine *> &lines)
         line->gap = l[3];
         lines.push_back(line);
     }
+}
+// The paged box's layout (part 9b-iv-b) faked: logged (with the dirty flag), the box laid out.
+bool C_PagedTextBox::LayoutPages()
+{
+    GfLog("layout pages %d", m_dirty);
+    m_dirty = false;
+    return true;
 }
 // The visuals' world boxes: logged, then up to date.
 void __stdcall I3D_visual::UpdateWBoundProc()
@@ -351,6 +366,71 @@ void TrPiece(C_TextBox &box, const char *text, int style, int x, int y)
     piece->x = static_cast<int16_t>(x);
     piece->y = static_cast<int16_t>(y);
     box.m_pieces.push_back(piece);
+}
+
+// --- part 9b-iv ---
+
+struct S_PagesResults {
+    bool pgNew = true, pgArea = true, pgPage = true, pgRelayout = true, pgBreak = true, pgRender = true;
+    bool pgLines = true, pgColour = true, pgStop = true, pgClip = true, vtNew = true, vtLines = true;
+    bool vtFirst = true, vtStop = true, vtFade = true, vtScroll = true, vtFinished = true, vtVirtual = true;
+};
+
+// The fans drawn logged with their corners "(x y u v colour)"; the triangles as F_TrDraw.
+void __stdcall F_PgDraw(void *, int kind, int count, const void *vertices, int transformed)
+{
+    if (kind != 4)
+        return F_TrDraw(nullptr, kind, count, vertices, transformed);
+    const auto *v = static_cast<const S_FontVertex *>(vertices);
+    std::string s = CmText("fan %d %d", count, transformed);
+    for (int i = 0; i < 4; ++i)
+        s += CmText(" (%g %g %g %g %08x)", v[i].x, v[i].y, v[i].u, v[i].v, v[i].color);
+    GfLog("%s", s.c_str());
+}
+// The fades' log: the texture, the top fan `fade` high, the bottom one from `height` less it.
+std::vector<std::string> PgFades(int width, int height, int fade)
+{
+    return {"texture 0 0",
+            CmText("fan 2 1 (0 0 0 0 ff000000) (%d 0 1 0 ff000000) (%d %d 0 1 00000000) (0 %d 1 1 00000000)", width, width,
+                   fade, fade),
+            CmText("fan 2 1 (0 %d 0 0 00000000) (%d %d 1 0 00000000) (%d %d 0 1 ff000000) (0 %d 1 1 ff000000)", height - fade,
+                   width, height - fade, width, height, height)};
+}
+// A page of the paged box in area `area`.
+S_TextPage *PgPage(C_PagedTextBox &box, int area, bool overflows = false)
+{
+    auto *page = new S_TextPage();
+    page->area = area;
+    page->overflows = overflows;
+    box.m_pages.push_back(page);
+    return page;
+}
+S_TextLine *PgLine(S_TextPage *page, int y)
+{
+    auto *line = new S_TextLine();
+    line->y = static_cast<int16_t>(y);
+    page->lines.push_back(line);
+    return line;
+}
+// The paged box's pages deleted; laid out, placed, at page 0; the log and the codes asked cleared.
+void PgClear(C_PagedTextBox &box, C_TbFont &font)
+{
+    for (S_TextPage *page : box.m_pages)
+        delete page;
+    box.m_pages.clear();
+    box.m_dirty = false;
+    box.m_placed = true;
+    box.m_page = 0;
+    g_gfLog.clear();
+    g_trVertices.clear();
+    font.asked.clear();
+}
+// The area's viewport: "x y width height minZ maxZ" (false: "- " first).
+std::string PgClip(const C_PagedTextBox &box, S_TextArea area)
+{
+    S_IGraphViewport clip = {7, 7, 7, 7, 7.0f, 7.0f};
+    const bool on = box.ClipArea(&clip, area);
+    return CmText("%s%d %d %d %d %g %g", on ? "" : "- ", clip.x, clip.y, clip.width, clip.height, clip.minZ, clip.maxZ);
 }
 } // namespace
 
@@ -1897,6 +1977,506 @@ void TextBoxTest()
                 "tbPieces %d tbFail %d tbClip %d tbBackground %d tbOutline %d tbUtf8 %d tbStep %d tbFonts %d\n",
                 v.tbPlaced, v.tbGlyphs, v.tbBlank, v.tbFlush, v.tbBatch, v.tbColour, v.tbCentred, v.tbCaret, v.tbPieces,
                 v.tbFail, v.tbClip, v.tbBackground, v.tbOutline, v.tbUtf8, v.tbStep, v.tbFonts);
+
+    // ===== part 9b-iv: the paged box and the video text box =====
+    S_PagesResults g;
+    {
+        void *const oldGraph[] = {g_igraphVtable[0x44 / 4], g_igraphVtable[0x7C / 4], g_igraphVtable[0x80 / 4],
+                                  g_igraphVtable[0x88 / 4]};
+        g_igraphVtable[0x44 / 4] = reinterpret_cast<void *>(&F_TrSetTexture);
+        g_igraphVtable[0x7C / 4] = reinterpret_cast<void *>(&F_TrSetViewport);
+        g_igraphVtable[0x80 / 4] = reinterpret_cast<void *>(&F_TrGetViewport);
+        g_igraphVtable[0x88 / 4] = reinterpret_cast<void *>(&F_PgDraw);
+        font3.logging = true;
+        const uint32_t grey = 0xAABBCCDD;
+        const int st = TrStyle(grey);
+        const int brk = TrStyle(grey, STYLE_NEW_PAGE);
+        const int zero = TrStyle(grey, 0, 0.0f);
+        const int bad = 250;
+
+        // --- a new paged box: page 0, no areas or pages, not placed; deleted: its pages and their lines too ---
+        {
+            C_FontManager *const fonts = g_fontManager;
+            const int refs = fonts->m_refs;
+            auto *paged = new C_PagedTextBox();
+            WM(g.pgNew, paged->m_page == 0 && paged->m_areas.empty() && paged->NumPages() == 0 && !paged->m_placed &&
+                            paged->m_screenWidth == 800 && paged->m_screenHeight == 600 && paged->m_margin == 10 &&
+                            fonts->m_refs == refs + 1);
+            const C_str shared("p");
+            S_TextLine *line = PgLine(PgPage(*paged, 0), 5);
+            TrWord(line, "", st, 0);
+            line->words[0]->text = shared;
+            TrWord(PgLine(PgPage(*paged, 0), 5), "q", st, 0);
+            WM(g.pgNew, shared.m_rep->refCount == 2);
+            C_TextBox *base = paged;
+            delete base;
+            WM(g.pgNew, shared.m_rep->refCount == 1 && fonts->m_refs == refs);
+        }
+
+        C_PagedTextBox pb;
+        // --- an area: the visual's screen rectangle (AttachTo's) the box's and a copy after the others ---
+        {
+            I3D_frame *visual = GfVisual("pgvisual", I3DVISUAL_OBJECT);
+            WmField<uint32_t>(visual, 0x1D0) |= VISFLAGS_WBOUND_VALID;
+            I3D_bbox bbox;
+            bbox.min = S_vector(0.25f, -0.5f, 0.0f);
+            bbox.max = S_vector(0.75f, -0.125f, 0.0f);
+            bbox.minW = bbox.maxW = 0.0f;
+            WmField<I3D_bbox>(visual, 0x170) = bbox;
+            pb.AddArea(nullptr, visual);
+            const S_TextArea a = pb.m_areas[0];
+            WM(g.pgArea, pb.m_areas.size() == 1 && a.left == 800.0f * 0.25f + 7.0f && a.top == 600.0f * -0.5f * -1.3333334f - 1.0f &&
+                             a.right == 800.0f * 0.75f - 7.0f && a.bottom == 1.0f - 600.0f * -0.125f * 1.3333334f &&
+                             a.width == a.right - a.left && a.height == a.top - a.bottom && a.depth == 0.0f &&
+                             pb.m_left == a.left && pb.m_top == a.top && pb.m_right == a.right && pb.m_bottom == a.bottom &&
+                             pb.m_width == a.width && pb.m_height == a.height && pb.m_depth == 0.0f && pb.m_dirty && pb.m_placed);
+            bbox.min = S_vector(0.5f, -0.25f, 0.0f);
+            bbox.max = S_vector(0.625f, 0.0f, 0.0f);
+            WmField<I3D_bbox>(visual, 0x170) = bbox;
+            pb.m_dirty = false;
+            pb.AddArea(nullptr, visual);
+            WM(g.pgArea, pb.m_areas.size() == 2 && pb.m_areas[0].left == 207.0f && pb.m_areas[1].left == 407.0f &&
+                             pb.m_areas[1].right == 493.0f && pb.m_areas[1].bottom == 1.0f && pb.m_areas[1].top == 199.0f &&
+                             pb.m_areas[1].width == 86.0f && pb.m_areas[1].height == 198.0f && pb.m_dirty && pb.m_left == 407.0f);
+            pb.m_dirty = false;
+            pb.AddArea(nullptr, nullptr);
+            WM(g.pgArea, pb.m_areas.size() == 2 && !pb.m_dirty);
+        }
+
+        // --- the page shown: 0 always; another in range ---
+        {
+            PgClear(pb, font3);
+            pb.m_page = 5;
+            pb.SetPage(0);
+            WM(g.pgPage, pb.m_page == 0 && pb.NumPages() == 0);
+            pb.SetPage(1);
+            WM(g.pgPage, pb.m_page == 0);
+            PgPage(pb, 0);
+            PgPage(pb, 1);
+            PgPage(pb, 0);
+            pb.SetPage(2);
+            WM(g.pgPage, pb.m_page == 2 && pb.NumPages() == 3 && pb.GetPage() == 2);
+            pb.SetPage(3);
+            WM(g.pgPage, pb.m_page == 2);
+            pb.SetPage(-1);
+            WM(g.pgPage, pb.m_page == 2);
+            pb.SetPage(1);
+            WM(g.pgPage, pb.m_page == 1);
+            pb.SetPage(0);
+            WM(g.pgPage, pb.m_page == 0);
+        }
+
+        // --- laid out again now ---
+        {
+            PgClear(pb, font3);
+            pb.Relayout();
+            WM(g.pgRelayout, GfLogIs({"layout pages 1"}) && !pb.m_dirty);
+        }
+
+        // --- the last page starting with a new page's run (its first line's first word) ---
+        {
+            PgClear(pb, font3);
+            WM(g.pgBreak, pb.LastPageBreak() == -1);
+            TrWord(PgLine(PgPage(pb, 0), 5), "a", brk, 0);
+            WM(g.pgBreak, pb.LastPageBreak() == 0);
+            TrWord(PgLine(PgPage(pb, 0), 5), "a", st, 0);
+            WM(g.pgBreak, pb.LastPageBreak() == 0);
+            S_TextLine *line = PgLine(PgPage(pb, 0), 5);
+            TrWord(line, "a", brk, 0);
+            TrWord(line, "b", st, 0);
+            WM(g.pgBreak, pb.LastPageBreak() == 2);
+            line = PgLine(PgPage(pb, 0), 5);
+            TrWord(line, "a", st, 0);
+            TrWord(line, "b", brk, 0);
+            TrWord(PgLine(pb.m_pages.back(), 9), "c", brk, 0);
+            PgPage(pb, 0);
+            PgLine(PgPage(pb, 0), 5);
+            WM(g.pgBreak, pb.LastPageBreak() == 2);
+        }
+
+        // Two areas (on the screen); the box's rectangle the first's.
+        const std::vector<S_TextArea> areas = {{10.0f, 120.0f, 210.0f, 20.0f, 200.0f, 100.0f, 0.5f},
+                                               {300.0f, 120.0f, 500.0f, 20.0f, 200.0f, 100.0f, 0.5f}};
+        pb.m_areas = areas;
+        TbRect(pb, 10.0f, 20.0f, 200.0f, 100.0f);
+
+        // --- the render: nothing before the box is placed; laid out first when dirty (the fonts' batching
+        // taken); the pages from the shown one, one per area ---
+        {
+            PgClear(pb, font3);
+            pb.m_placed = false;
+            pb.m_dirty = true;
+            TrWord(PgLine(PgPage(pb, 0), 50), "a", st, 30);
+            pb.Render();
+            WM(g.pgRender, g_gfLog.empty() && pb.m_dirty);
+            pb.m_placed = true;
+            pb.m_batching = !g_fontManager->IsBatching();
+            pb.Render();
+            WM(g.pgRender, GfLogIs({"layout pages 1", "select 3", "draw 3 2 1"}) && !pb.m_dirty &&
+                               pb.m_batching == g_fontManager->IsBatching());
+            TrWord(PgLine(PgPage(pb, 1), 50), "b", st, 230);
+            TrWord(PgLine(PgPage(pb, 0), 50), "c", st, 330);
+            const std::vector<std::pair<int, std::vector<int>>> shown = {
+                {0, {'a', 'b'}}, {1, {'b', 'c'}}, {2, {'c'}}, {3, {}}, {-1, {'a'}}, {-2, {}}};
+            for (const auto &want : shown) {
+                pb.m_page = want.first;
+                font3.asked.clear();
+                pb.Render();
+                WM(g.pgRender, font3.asked == want.second);
+            }
+            pb.m_page = 1;
+            font3.asked.clear();
+            pb.m_areas.push_back(areas[0]);
+            pb.Render();
+            WM(g.pgRender, font3.asked == (std::vector<int>{'b', 'c'}));
+            pb.m_areas.resize(1);
+            font3.asked.clear();
+            pb.Render();
+            WM(g.pgRender, font3.asked == (std::vector<int>{'b'}));
+            pb.m_areas.clear();
+            font3.asked.clear();
+            g_gfLog.clear();
+            pb.Render();
+            WM(g.pgRender, font3.asked.empty() && g_gfLog.empty());
+            pb.m_areas = areas;
+        }
+
+        // --- a page's lines: at their bases (the scroll not used), the words at their x ---
+        {
+            PgClear(pb, font3);
+            S_TextPage *page = PgPage(pb, 0);
+            S_TextLine *line = PgLine(page, 50);
+            TrWord(line, "a", st, 30);
+            TrWord(line, "b", st, 40);
+            pb.m_scroll = 7;
+            pb.Render();
+            WM(g.pgLines, TrVertices() == TrQuad(40, 50, 6, 12) && TrUniform(grey, 0.5f, 2.0f) && pb.m_penX == 46 && pb.m_penY == 50 &&
+                              font3.asked == (std::vector<int>{'a', 'b'}));
+            TrWord(PgLine(page, 80), "i", st, 7);
+            pb.Render();
+            WM(g.pgLines, TrVertices() == TrQuad(7, 80, 3, 12) && pb.m_penY == 80);
+            pb.m_scroll = 0;
+        }
+
+        // --- the colours: the box's; dimmed (alpha 0x60); the style's (the hovered line's too) ---
+        {
+            PgClear(pb, font3);
+            TrWord(PgLine(PgPage(pb, 0), 50), "a", st, 30);
+            pb.m_colour = 0x11223344;
+            pb.m_dimmed = true;
+            pb.Render();
+            WM(g.pgColour, TrUniform(0x11223344, 0.5f, 2.0f));
+            pb.m_colour = 0;
+            pb.Render();
+            WM(g.pgColour, TrUniform(0x60BBCCDD, 0.5f, 2.0f));
+            pb.m_dimmed = false;
+            pb.m_hover = 0;
+            pb.Render();
+            WM(g.pgColour, TrUniform(grey, 0.5f, 2.0f));
+            pb.m_hover = -1;
+        }
+
+        // --- a word without its style: its line's others drawn, not the page's next lines (the next
+        // area's page drawn); a word not drawn (font size 0): the page ends ---
+        {
+            PgClear(pb, font3);
+            S_TextPage *page = PgPage(pb, 0);
+            S_TextLine *line = PgLine(page, 50);
+            TrWord(line, "a", bad, 30);
+            TrWord(line, "b", st, 40);
+            TrWord(PgLine(page, 80), "c", st, 30);
+            TrWord(PgLine(PgPage(pb, 1), 50), "d", st, 300);
+            pb.Render();
+            WM(g.pgStop, font3.asked == (std::vector<int>{'b', 'd'}));
+            PgClear(pb, font3);
+            page = PgPage(pb, 0);
+            line = PgLine(page, 50);
+            TrWord(line, "a", zero, 30);
+            TrWord(line, "b", st, 40);
+            TrWord(PgLine(page, 80), "c", st, 30);
+            TrWord(PgLine(PgPage(pb, 1), 50), "d", st, 300);
+            pb.Render();
+            WM(g.pgStop, font3.asked == (std::vector<int>{'d'}) && GfLogIs({"select 3", "draw 3 2 1"}));
+            PgClear(pb, font3);
+            line = PgLine(PgPage(pb, 0), 50);
+            TrWord(line, "a", st, 30);
+            TrWord(line, "b", zero, 40);
+            TrWord(line, "c", st, 50);
+            pb.Render();
+            WM(g.pgStop, font3.asked == (std::vector<int>{'a'}));
+        }
+
+        // --- an overflowing page: clipped to its area (5 pixels more at the top, on the screen, truncated),
+        // the screen's viewport back after; its area off the screen: nothing ---
+        {
+            PgClear(pb, font3);
+            pb.m_areas[1] = {10.5f, 120.7f, 210.9f, 20.2f, 0.0f, 0.0f, 0.5f};
+            TrWord(PgLine(PgPage(pb, 1, true), 50), "a", st, 30);
+            pb.Render();
+            WM(g.pgClip, GfLogIs({"getviewport", "viewport 10 20 200 105 0 1", "select 3", "draw 3 2 1", "viewport 0 0 800 600 0 1"}));
+            g_trScreen = {3, 4, 640, 480, 0.25f, 0.75f};
+            g_gfLog.clear();
+            pb.Render();
+            WM(g.pgClip, GfLogIs({"getviewport", "viewport 10 20 200 105 0 1", "select 3", "draw 3 2 1", "viewport 3 4 640 480 0.25 0.75"}));
+            g_trScreen = {0, 0, 800, 600, 0.0f, 1.0f};
+            pb.m_areas[1] = {-50.0f, 120.0f, -10.0f, 20.0f, 0.0f, 0.0f, 0.5f};
+            g_gfLog.clear();
+            font3.asked.clear();
+            pb.Render();
+            WM(g.pgClip, GfLogIs({"getviewport"}) && font3.asked.empty());
+            pb.m_areas = areas;
+            // The clip itself (the area's width and height not used).
+            WM(g.pgClip, PgClip(pb, {10.5f, 120.7f, 210.9f, 20.2f, 1.0f, 1.0f, 0.5f}) == "10 20 200 105 0 1");
+            WM(g.pgClip, PgClip(pb, {-5.0f, 700.0f, 900.0f, -3.0f, 1.0f, 1.0f, 0.5f}) == "0 0 800 600 0 1");
+            WM(g.pgClip, PgClip(pb, {-50.0f, 120.0f, -10.0f, 20.0f, 1.0f, 1.0f, 0.5f}) == "- 0 20 0 105 0 1");
+            WM(g.pgClip, PgClip(pb, {900.0f, 100.0f, 950.0f, 10.0f, 1.0f, 1.0f, 0.5f}) == "- 800 10 0 95 0 1");
+            WM(g.pgClip, PgClip(pb, {700.0f, 100.0f, 950.0f, 10.0f, 1.0f, 1.0f, 0.5f}) == "700 10 100 95 0 1");
+            WM(g.pgClip, PgClip(pb, {10.0f, 700.0f, 100.0f, 650.0f, 1.0f, 1.0f, 0.5f}) == "- 10 600 90 0 0 1");
+            WM(g.pgClip, PgClip(pb, {10.0f, 15.0f, 50.0f, 20.0f, 1.0f, 1.0f, 0.5f}) == "- 10 20 40 0 0 1");
+            WM(g.pgClip, PgClip(pb, {10.0f, 14.9f, 50.0f, 10.0f, 1.0f, 1.0f, 0.5f}) == "10 10 40 9 0 1");
+            WM(g.pgClip, PgClip(pb, {10.0f, -10.0f, 50.0f, -20.0f, 1.0f, 1.0f, 0.5f}) == "- 10 0 40 0 0 1");
+            WM(g.pgClip, PgClip(pb, {10.0f, -4.5f, 50.0f, -20.0f, 1.0f, 1.0f, 0.5f}) == "- 10 0 40 0 0 1");
+            WM(g.pgClip, PgClip(pb, {10.0f, -3.5f, 50.0f, -20.0f, 1.0f, 1.0f, 0.5f}) == "10 0 40 1 0 1");
+            WM(g.pgClip, PgClip(pb, {10.0f, 100.0f, 10.9f, -20.0f, 1.0f, 1.0f, 0.5f}) == "- 10 0 0 105 0 1");
+            WM(g.pgClip, PgClip(pb, {-0.5f, 100.0f, 0.75f, -20.0f, 1.0f, 1.0f, 0.5f}) == "- 0 0 0 105 0 1");
+            WM(g.pgClip, PgClip(pb, {-0.5f, 100.0f, 1.0f, -20.0f, 1.0f, 1.0f, 0.5f}) == "0 0 1 105 0 1");
+            // Fractions near 0 (truncated toward 0, negative ones too).
+            WM(g.pgClip, PgClip(pb, {10.0f, 100.0f, -5.0f, -20.0f, 1.0f, 1.0f, 0.5f}) == "- 10 0 -10 105 0 1");
+            WM(g.pgClip, PgClip(pb, {10.0f, 100.0f, 0.3f, -20.0f, 1.0f, 1.0f, 0.5f}) == "- 10 0 -9 105 0 1");
+            WM(g.pgClip, PgClip(pb, {10.0f, 5.2f, 50.0f, 0.3f, 1.0f, 1.0f, 0.5f}) == "10 0 40 9 0 1");
+            WM(g.pgClip, PgClip(pb, {0.3f, 100.0f, 10.2f, 0.0f, 1.0f, 1.0f, 0.5f}) == "0 0 9 105 0 1");
+            WM(g.pgClip, PgClip(pb, {10.0f, -4.6f, 50.0f, 10.0f, 1.0f, 1.0f, 0.5f}) == "- 10 10 40 -9 0 1");
+            WM(g.pgClip, PgClip(pb, {10.0f, -20.0f, 50.0f, 10.0f, 1.0f, 1.0f, 0.5f}) == "- 10 10 40 -10 0 1");
+            pb.m_screenWidth = 1000;
+            pb.m_screenHeight = 700;
+            WM(g.pgClip, PgClip(pb, {-5.0f, 800.0f, 1200.0f, -3.0f, 1.0f, 1.0f, 0.5f}) == "0 0 1000 700 0 1");
+            pb.m_screenWidth = 800;
+            pb.m_screenHeight = 600;
+        }
+        PgClear(pb, font3);
+
+        // ----- the video text box -----
+        // --- a new one: from the first line, no lines (finished), not placed: nothing drawn ---
+        C_VideoTextBox vb;
+        {
+            WM(g.vtNew, vb.m_firstLine == 0 && vb.Finished() && !vb.m_placed && vb.m_screenWidth == 800 && vb.m_margin == 10);
+            g_gfLog.clear();
+            vb.Render();
+            WM(g.vtNew, g_gfLog.empty());
+        }
+        // The box over the screen.
+        TbRect(vb, 0.0f, 0.0f, 800.0f, 600.0f);
+        const std::vector<std::string> fades = PgFades(800, 600, 78);
+        const auto logIs = [](std::vector<std::string> head, const std::vector<std::string> &tail) {
+            head.insert(head.end(), tail.begin(), tail.end());
+            return g_gfLog == head;
+        };
+
+        // --- the lines at their bases less the scroll (down to 100 pixels under the screen), then the fades ---
+        {
+            TrClear(vb);
+            vb.m_firstLine = 0;
+            S_TextLine *line = TrLine(vb, 50);
+            TrWord(line, "a", st, 30);
+            TrWord(line, "b", st, 40);
+            TrWord(TrLine(vb, 120), "c", st, 50);
+            font3.asked.clear();
+            vb.Render();
+            WM(g.vtLines, logIs({"select 3", "draw 3 2 1", "select 3", "draw 3 2 1", "select 3", "draw 3 2 1"}, fades) &&
+                              font3.asked == (std::vector<int>{'a', 'b', 'c'}) && TrVertices() == TrQuad(50, 120, 6, 12) &&
+                              TrUniform(grey, 0.5f, 2.0f) && vb.m_penY == 120 && vb.m_penX == 56);
+            // The quads' depth.
+            WM(g.vtLines, g_textBoxQuad[0].z == 0.0284113996f && g_textBoxQuad[3].rhw == 35.1971397f);
+            vb.m_scroll = 20;
+            vb.Render();
+            WM(g.vtLines, TrVertices() == TrQuad(50, 100, 6, 12) && vb.m_firstLine == 0);
+            // 700 drawn; 701: the lines end.
+            TrClear(vb);
+            vb.m_scroll = 0;
+            TrWord(TrLine(vb, 700), "a", st, 30);
+            TrWord(TrLine(vb, 701), "b", st, 30);
+            TrWord(TrLine(vb, 100), "c", st, 30);
+            font3.asked.clear();
+            vb.Render();
+            WM(g.vtLines, font3.asked == (std::vector<int>{'a'}));
+            vb.m_screenHeight = 500;
+            TrClear(vb);
+            TrWord(TrLine(vb, 600), "a", st, 30);
+            TrWord(TrLine(vb, 601), "b", st, 30);
+            font3.asked.clear();
+            vb.Render();
+            WM(g.vtLines, font3.asked == (std::vector<int>{'a'}) && logIs({"select 3", "draw 3 2 1"}, PgFades(800, 500, 78)));
+            vb.m_screenHeight = 600;
+            // The hovered line's white (WordColour).
+            TrClear(vb);
+            TrWord(TrLine(vb, 50), "a", st, 30);
+            TrWord(TrLine(vb, 60), "b", st, 30);
+            vb.m_hover = 1;
+            vb.Render();
+            WM(g.vtLines, TrUniform(0xFFFFFFFF, 0.5f, 2.0f));
+            vb.m_hover = 0;
+            vb.Render();
+            WM(g.vtLines, TrUniform(grey, 0.5f, 2.0f));
+            vb.m_hover = -1;
+        }
+
+        // --- the lines above the top passed for good (the base's 16 bits less the scroll's); laid out:
+        // from the first ---
+        {
+            TrClear(vb);
+            vb.m_firstLine = 0;
+            TrWord(TrLine(vb, 50), "a", st, 30);
+            TrWord(TrLine(vb, 120), "b", st, 30);
+            vb.m_scroll = 50;
+            font3.asked.clear();
+            vb.Render();
+            WM(g.vtFirst, vb.m_firstLine == 0 && font3.asked == (std::vector<int>{'a', 'b'}) && TrVertices() == TrQuad(30, 70, 6, 12));
+            vb.m_scroll = 51;
+            font3.asked.clear();
+            vb.Render();
+            WM(g.vtFirst, vb.m_firstLine == 1 && font3.asked == (std::vector<int>{'b'}) && !vb.Finished());
+            vb.m_scroll = 0;
+            font3.asked.clear();
+            vb.Render();
+            WM(g.vtFirst, vb.m_firstLine == 1 && font3.asked == (std::vector<int>{'b'}));
+            vb.m_scroll = 121;
+            vb.Render();
+            WM(g.vtFirst, vb.m_firstLine == 2 && vb.Finished());
+            // (30000 + 5000 in 16 bits: negative.)
+            TrClear(vb);
+            vb.m_firstLine = 0;
+            TrWord(TrLine(vb, 30000), "a", st, 30);
+            vb.m_scroll = -5000;
+            font3.asked.clear();
+            vb.Render();
+            WM(g.vtFirst, vb.m_firstLine == 1 && font3.asked.empty() && logIs({}, fades));
+            vb.m_scroll = 0;
+            // Out of order: a later line above the top passes those before it.
+            TrClear(vb);
+            vb.m_firstLine = 0;
+            TrWord(TrLine(vb, 100), "a", st, 30);
+            TrWord(TrLine(vb, -5), "b", st, 30);
+            TrWord(TrLine(vb, 200), "c", st, 30);
+            font3.asked.clear();
+            vb.Render();
+            WM(g.vtFirst, vb.m_firstLine == 2 && font3.asked == (std::vector<int>{'a', 'c'}));
+            // Laid out (dirty): from the first line.
+            TrClear(vb);
+            vb.m_firstLine = 5;
+            vb.AddText(C_str("ab"), static_cast<uint8_t>(st));
+            vb.m_batching = !g_fontManager->IsBatching();
+            g_gfLog.clear();
+            vb.Render();
+            WM(g.vtFirst, !vb.m_dirty && vb.m_lines.size() == 1 && vb.m_firstLine == 0 && vb.m_batching == g_fontManager->IsBatching() &&
+                              std::count(g_gfLog.begin(), g_gfLog.end(), "draw 3 4 1") == 1);
+            vb.Clear();
+            TrClear(vb);
+        }
+
+        // --- a word without its style ends its line (the next drawn); one not drawn: the next words drawn ---
+        {
+            TrClear(vb);
+            vb.m_firstLine = 0;
+            S_TextLine *line = TrLine(vb, 50);
+            TrWord(line, "a", bad, 30);
+            TrWord(line, "b", st, 40);
+            TrWord(TrLine(vb, 60), "c", st, 30);
+            font3.asked.clear();
+            vb.Render();
+            WM(g.vtStop, font3.asked == (std::vector<int>{'c'}));
+            TrClear(vb);
+            line = TrLine(vb, 50);
+            TrWord(line, "a", zero, 30);
+            TrWord(line, "b", st, 40);
+            font3.asked.clear();
+            vb.Render();
+            WM(g.vtStop, font3.asked == (std::vector<int>{'b'}) && TrVertices() == TrQuad(40, 50, 6, 12));
+        }
+
+        // --- the fades: 100 / 1024 of the screen's width high (truncated) ---
+        {
+            TrClear(vb);
+            vb.m_screenWidth = 1000;
+            vb.m_screenHeight = 700;
+            vb.Render();
+            WM(g.vtFade, g_gfLog == PgFades(1000, 700, 97));
+            vb.m_screenWidth = 1024;
+            g_gfLog.clear();
+            vb.Render();
+            WM(g.vtFade, g_gfLog == PgFades(1024, 700, 100));
+            vb.m_screenWidth = 1023;
+            g_gfLog.clear();
+            vb.Render();
+            WM(g.vtFade, g_gfLog == PgFades(1023, 700, 99));
+            vb.m_screenWidth = 800;
+            vb.m_screenHeight = 600;
+        }
+
+        // --- the scroll: the pixels (true); no scroll range ---
+        {
+            C_TextBox *base = &vb;
+            vb.m_scrollRange = 5;
+            vb.m_scroll = 3;
+            TrClear(vb);
+            TrLine(vb, 900);
+            WM(g.vtScroll, vb.ScrollTo(-42) && vb.m_scroll == -42 && base->ScrollTo(1000) && vb.m_scroll == 1000);
+            base->UpdateScrollRange();
+            vb.UpdateScrollRange();
+            WM(g.vtScroll, vb.m_scrollRange == 5 && vb.m_scroll == 1000);
+            vb.m_scroll = 0;
+            vb.m_scrollRange = 0;
+        }
+
+        // --- finished: the first line past the last ---
+        {
+            TrClear(vb);
+            TrLine(vb, 10);
+            TrLine(vb, 20);
+            const bool want[] = {false, false, true, true};
+            for (unsigned i = 0; i < 4; ++i) {
+                vb.m_firstLine = i;
+                WM(g.vtFinished, vb.Finished() == want[i]);
+            }
+            TrClear(vb);
+            vb.m_firstLine = 0;
+            WM(g.vtFinished, vb.Finished());
+        }
+
+        // --- through the base: the render and the scroll the video box's; deleted: the fonts released ---
+        {
+            C_FontManager *const fonts = g_fontManager;
+            const int refs = fonts->m_refs;
+            C_TextBox *base = new C_VideoTextBox();
+            WM(g.vtVirtual, fonts->m_refs == refs + 1);
+            TbRect(*base, 0.0f, 0.0f, 800.0f, 600.0f);
+            base->m_dirty = false;
+            g_gfLog.clear();
+            base->Render();
+            WM(g.vtVirtual, g_gfLog == fades && base->ScrollTo(12345) && base->m_scroll == 12345);
+            delete base;
+            WM(g.vtVirtual, fonts->m_refs == refs);
+            base = new C_PagedTextBox();
+            TbRect(*base, 0.0f, 0.0f, 800.0f, 600.0f);
+            g_gfLog.clear();
+            base->Render();
+            WM(g.vtVirtual, GfLogIs({"layout pages 1"}));
+            delete base;
+            WM(g.vtVirtual, fonts->m_refs == refs);
+        }
+
+        ReleaseTextStyle(zero);
+        ReleaseTextStyle(brk);
+        ReleaseTextStyle(st);
+        font3.logging = false;
+        g_igraphVtable[0x44 / 4] = oldGraph[0];
+        g_igraphVtable[0x7C / 4] = oldGraph[1];
+        g_igraphVtable[0x80 / 4] = oldGraph[2];
+        g_igraphVtable[0x88 / 4] = oldGraph[3];
+    }
+    std::printf("pages: pgNew %d pgArea %d pgPage %d pgRelayout %d pgBreak %d pgRender %d pgLines %d pgColour %d pgStop %d "
+                "pgClip %d vtNew %d vtLines %d vtFirst %d vtStop %d vtFade %d vtScroll %d vtFinished %d vtVirtual %d\n",
+                g.pgNew, g.pgArea, g.pgPage, g.pgRelayout, g.pgBreak, g.pgRender, g.pgLines, g.pgColour, g.pgStop, g.pgClip,
+                g.vtNew, g.vtLines, g.vtFirst, g.vtStop, g.vtFade, g.vtScroll, g.vtFinished, g.vtVirtual);
 
     box.m_fonts->m_fonts.erase(box.m_fonts->m_fonts.begin(), box.m_fonts->m_fonts.begin() + 2);
     g_textIds = oldIds;

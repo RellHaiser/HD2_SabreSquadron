@@ -6154,6 +6154,46 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/text_box.txt (+9); 10 functions in ported.txt. Stats: 8,050 of 12,293 functions
     by hand (73.8 % by size).
 
+  PART 9b-iv-a DONE (2026-11-01): the paged text box and the video text box (new:
+  src/game/paged_text_box.* C_PagedTextBox, vtable 0x008154a4, 0xC8 bytes: the interface's text
+  control's, 0x0064ae70..0x0064bb90 less its layout, destructors 0x006622f0 / 0x00662310;
+  src/game/video_text_box.* C_VideoTextBox, vtable 0x008158f8, 0xA0 bytes: C_VideoState's +0x38,
+  0x0064bc60..0x0064bfe0, 0x00688cb0..0x00688ce0). 9b-iv split: 9b-iv-b the paged box's layout
+  (LayoutPages 0x006494a0 and 0x00649250..0x0064a6c0, 0x0064b7f0 / 0x0064bad0).
+  - C_PagedTextBox: areas (S_TextArea, a rectangle as C_TextBox's; AddArea: AttachTo's rectangle
+    the box's and a copy after the others, the control's message 0x100009d with a frame by name) and
+    pages (S_TextPage: the room left, an overflow flag, its area, its lines). Render: nothing before
+    the box is placed; the fonts' batching taken; laid out when dirty (LayoutPages); the page shown
+    (SetPage: 0 always, another in range) in the first area, the next in the second, ... (pages out
+    of range skipped). RenderPage: the lines at their bases (no scroll), the words at their x, the
+    colours WordColour's without the hovered line's white; a word without its style ends the lines
+    after its own, one not drawn (the font size 0) at once; overflowing: clipped to its area
+    (ClipArea: ClipViewport's clamps, 5 pixels up, without its extra pixel; off the screen:
+    nothing). NumPages, Relayout (dirty, laid out now), LastPageBreak (the last page whose first
+    line's first word has STYLE_NEW_PAGE, 0x20, new in paged_text_box.h; none: -1).
+  - Fixes: a page's area is an index (the original's pointer into the areas' vector dangles once an
+    area is added after a layout: the old pages are kept, see 9b-iv-b); the destructor deletes the
+    pages and their lines (the original's FreePages 0x0064ae60 is empty: they leak).
+  - C_VideoTextBox (the subtitles, or the credits scrolled by ScrollTo's pixels): UpdateScrollRange
+    nothing; Render: laid out when dirty (from the first line); from the first line not yet off the
+    top (its base less the scroll in 16 bits under 0: passed for good, m_firstLine +0x9C) to 100
+    pixels under the screen; a word without its style ends its line; then the top's and the
+    bottom's fades (black to clear, 100 / 1024 of the screen's width high, truncated). Finished:
+    every line passed (C_VideoState::Update ends the credits on it).
+  - text_box: the background's quad shared (g_textBoxQuad, SetTextBoxQuad with two colours,
+    DrawTextBoxQuad); C_TextBox's private members protected.
+  - Harness: textbox_test.inc's "pages:" line in the text build (18 checks; LayoutPages faked,
+    logged with the dirty flag; the fans logged with their corners). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9b5.py, the text build): the first run caught 102 of 120; 10
+    equivalent (see the file's docstring), new cases for the rest (ClipArea's fractions near 0 and
+    widths below 0, the layout's dirty flag); 110 of 120 caught. Baselines: the camera and the world
+    builds 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
+  - Build: 208 files clean (MSVC). Tier 1: 498 errors in 85 files, 201 stubs (unchanged; the classes' members exported again). ret_audit --src: 52.
+  - Ghidra: C_auto_008154a4 / C_auto_008158f8 renamed C_PagedTextBox / C_VideoTextBox (90_auto.spec,
+    class_names.json, auto_members.json, tier1_fixups.json; rename_auto_structs.py, apply_members.py);
+    names/text_box.txt (+18, LayoutPages and FreePages for 9b-iv-b); 21 functions in ported.txt (5
+    of them AddArea's vector helpers). Stats: 8,071 of 12,293 functions by hand (73.9 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

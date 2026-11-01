@@ -1322,17 +1322,24 @@ uint32_t C_auto_00814d38__thunk_FUN_00662160(C_auto_00814d38 *_this,int *param_1
 }
 
 
-// 0x0065c800
+// 0x0065c800  (tier1 fallback: translated text kept below, needs hand porting)
 uint32_t C_auto_00814d38__FUN_0065c800(C_auto_00814d38 *_this,uint32_t *param_1, ...)
+{
+  return {};
+}
+#if 0
 {
   uint8_t stack0xffffffd4[64];
   uint32_t uVar1;
   uint32_t uVar2;
   int iVar3;
-  undefined3 extraout_var;
-  int *piVar4;
   uint32_t extraout_EAX;
-  uint8_t *puVar5;
+  undefined3 extraout_var;
+  I3D_frame *self;
+  uint32_t extraout_EAX_00;
+  uint32_t extraout_EAX_01;
+  uint32_t extraout_EAX_02;
+  uint8_t *puVar4;
   if ((param_1[1] & 0x40ff000) != 0) {
     uVar1 = C_auto_00815420__FUN_00662000((C_auto_00815420 *)_this,param_1);
     return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
@@ -1340,19 +1347,19 @@ uint32_t C_auto_00814d38__FUN_0065c800(C_auto_00814d38 *_this,uint32_t *param_1,
   uVar2 = param_1[1] & 0x3000fff;
   if (uVar2 < 0x100009e) {
     if (uVar2 == 0x100009d) {
-      puVar5 = (uint8_t *)(param_1[5] + 8);
+      puVar4 = (uint8_t *)(param_1[5] + 8);
       if (param_1[5] == 0) {
-        puVar5 = &DAT_00867a90;
+        puVar4 = &DAT_00867a90;
       }
-      piVar4 = (int *)(**(code **)(*(int *)_this->m_050 + 0x48))(_this->m_050,puVar5,0xffff);
+      self = (I3D_frame *)(**(code **)(*(int *)_this->m_050 + 0x48))(_this->m_050,puVar4,0xffff);
       iVar3 = 0;
-      if (piVar4 != 0) {
-        (**(code **)(*piVar4 + 0xc))(piVar4,&stack0xffffffd4,0);
-        piVar4[0x3b] = _this->m_060;
-        iVar3 = (**(code **)(*piVar4 + 0x24))(piVar4);
+      if (self != 0) {
+        (*self->vtable->SetDir)(self,(S_vector *)&stack0xffffffd4,0.0);
+        self->m_data = (S_FrameData *)_this->m_060;
+        iVar3 = (*self->vtable->Update)(self);
         if (_this->m_06c != 0) {
-          uVar1 = FUN_0064b200(_this->m_06c,_this->m_068,(I3D_frame*)(piVar4));
-          return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
+          C_PagedTextBox__AddArea(_this->m_06c,(I3D_scene *)_this->m_068,self);
+          return CONCAT31((int3)((uint32_t)extraout_EAX_00 >> 8),1);
         }
       }
     }
@@ -1364,7 +1371,7 @@ uint32_t C_auto_00814d38__FUN_0065c800(C_auto_00814d38 *_this,uint32_t *param_1,
       if (uVar2 != 0x1000067) {
         if (uVar2 == 0x100009c) {
           if (_this->m_06c != 0) {
-            iVar3 = FUN_0064bb60((int)_this->m_06c);
+            iVar3 = C_PagedTextBox__NumPages(_this->m_06c);
             param_1[2] = iVar3;
             return CONCAT31((int3)((uint32_t)iVar3 >> 8),1);
           }
@@ -1377,34 +1384,35 @@ LAB_0065c93f:
       }
       iVar3 = 0;
       if (_this->m_06c != 0) {
-        uVar1 = FUN_0064bb30(_this->m_06c,param_1[2]);
-        return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
+        C_PagedTextBox__SetPage(_this->m_06c,param_1[2]);
+        return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
       }
     }
   }
   else if (uVar2 == 0x100009e) {
     iVar3 = 0;
     if (_this->m_06c != 0) {
-      iVar3 = FUN_0064bb90((int)_this->m_06c);
+      iVar3 = C_PagedTextBox__LastPageBreak(_this->m_06c);
       param_1[2] = iVar3;
     }
   }
   else {
     if (uVar2 == 0x2000018) {
       C_TextBox__Clear(_this->m_06c);
-      return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
+      return CONCAT31((int3)((uint32_t)extraout_EAX_02 >> 8),1);
     }
     if (uVar2 != 0x200002c) goto LAB_0065c93f;
     iVar3 = 0;
     if (_this->m_06c != 0) {
-      uVar1 = FUN_0064bb80(_this->m_06c);
-      return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
+      C_PagedTextBox__Relayout(_this->m_06c);
+      return CONCAT31((int3)((uint32_t)extraout_EAX_01 >> 8),1);
     }
   }
   return CONCAT31((int3)((uint32_t)iVar3 >> 8),1);
 }
 
 
+#endif
 // 0x0065c9a0
 uint32_t FUN_0065c9a0(void *_this,uint32_t param_1,uint32_t param_2,uint32_t param_3, ...)
 {

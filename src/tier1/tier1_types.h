@@ -119,6 +119,7 @@ struct C_NetMessage_vtbl__stub;
 struct C_NullActor;
 struct C_NullActor__stub;
 struct C_NullActor_vtbl__stub;
+struct C_PagedTextBox;
 struct C_PhotoPlace;
 struct C_PhotoPlace__stub;
 struct C_PhotoPlace_vtbl__stub;
@@ -175,6 +176,7 @@ struct C_Train_vtbl__stub;
 struct C_VertexAnimModule;
 struct C_VertexAnimModule__stub;
 struct C_VertexAnimModule_vtbl__stub;
+struct C_VideoTextBox;
 struct C_WireCut;
 struct C_WireCut__stub;
 struct C_WireCut_vtbl__stub;
@@ -285,13 +287,11 @@ struct C_auto_00815288;
 struct C_auto_00815310;
 struct C_auto_00815398;
 struct C_auto_00815420;
-struct C_auto_008154a4;
 struct C_auto_00815540;
 struct C_auto_008155d0;
 struct C_auto_008156b8;
 struct C_auto_008157c4;
 struct C_auto_008157cc;
-struct C_auto_008158f8;
 struct C_auto_00815918;
 struct C_auto_008159f8;
 struct C_auto_00815e8c;
@@ -18807,6 +18807,35 @@ struct C_NullActor_vtbl__stub {
     void * vf39;
     void * vf3a;
 };
+struct C_PagedTextBox {
+    C_auto_008154a4_vtbl * vtable;
+    short m_004;
+    short m_006;
+    uint8_t _pad_0008[32];
+    int m_028;
+    int m_02c;
+    uint8_t _pad_0030[4];
+    int m_034;
+    int m_038;
+    uint8_t _pad_003c[48];
+    uint16_t m_06c;
+    uint16_t m_06e;
+    char m_070;
+    char m_071;
+    char m_072;
+    uint8_t m_073;
+    uint8_t m_074;
+    uint8_t _pad_0075[31];
+    uint32_t m_094;
+    uint8_t _pad_0098[4];
+    int m_09c;
+    uint8_t _pad_00a0[4];
+    int m_0a4;
+    int m_0a8;
+    uint8_t _pad_00ac[12];
+    int m_0b8;
+    int m_0bc;
+};
 struct C_PhotoPlace {
     C_PhotoPlace_vtbl * vtable;
     uint8_t _pad_0004[12];
@@ -20358,6 +20387,17 @@ struct C_VertexAnimModule_vtbl__stub {
     void * Unknown38;
     void * Unknown3C;
 };
+struct C_VideoTextBox {
+    C_auto_008158f8_vtbl * vtable;
+    uint8_t _pad_0004[2];
+    short m_006;
+    uint8_t _pad_0008[102];
+    short m_06e;
+    uint8_t _pad_0070[2];
+    char m_072;
+    uint8_t _pad_0073[5];
+    uint32_t m_078;
+};
 struct C_WireCut {
     C_WireCut_vtbl * vtable;
     uint8_t _pad_0004[12];
@@ -21863,35 +21903,6 @@ struct C_auto_00815420 {
     uint8_t _pad_0004[104];
     void * m_06c;
 };
-struct C_auto_008154a4 {
-    C_auto_008154a4_vtbl * vtable;
-    short m_004;
-    short m_006;
-    uint8_t _pad_0008[32];
-    int m_028;
-    int m_02c;
-    uint8_t _pad_0030[4];
-    int m_034;
-    int m_038;
-    uint8_t _pad_003c[48];
-    uint16_t m_06c;
-    uint16_t m_06e;
-    char m_070;
-    char m_071;
-    char m_072;
-    uint8_t m_073;
-    uint8_t m_074;
-    uint8_t _pad_0075[31];
-    uint32_t m_094;
-    uint8_t _pad_0098[4];
-    int m_09c;
-    uint8_t _pad_00a0[4];
-    int m_0a4;
-    int m_0a8;
-    uint8_t _pad_00ac[12];
-    int m_0b8;
-    int m_0bc;
-};
 struct C_auto_00815540 {
     C_auto_00815540_vtbl * vtable;
     uint8_t _pad_0004[4];
@@ -21960,17 +21971,6 @@ struct C_auto_008157c4 {
 };
 struct C_auto_008157cc {
     C_auto_008157cc_vtbl * vtable;
-};
-struct C_auto_008158f8 {
-    C_auto_008158f8_vtbl * vtable;
-    uint8_t _pad_0004[2];
-    short m_006;
-    uint8_t _pad_0008[102];
-    short m_06e;
-    uint8_t _pad_0070[2];
-    char m_072;
-    uint8_t _pad_0073[5];
-    uint32_t m_078;
 };
 struct C_auto_00815918 {
     C_auto_00815918_vtbl * vtable;

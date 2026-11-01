@@ -28205,13 +28205,74 @@
   "name": "C_TextBox::StepUnknown76",
   "proto": "void __thiscall StepUnknown76(C_TextBox *this, short step, short * value)"
  },
+ "006494a0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::LayoutPages",
+  "proto": "bool __thiscall LayoutPages(C_PagedTextBox *this)"
+ },
  "0064ae60": {
-  "module": "zz_idioms",
-  "name": "empty_function_64ae60"
+  "module": "text_box",
+  "name": "C_PagedTextBox::FreePages",
+  "proto": "void __thiscall FreePages(C_PagedTextBox *this)"
+ },
+ "0064ae70": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::Render",
+  "proto": "void __thiscall Render(C_PagedTextBox *this)"
+ },
+ "0064af10": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::RenderPage",
+  "proto": "void __thiscall RenderPage(C_PagedTextBox *this, void * page)"
+ },
+ "0064b070": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::ClipArea",
+  "proto": "bool __thiscall ClipArea(C_PagedTextBox *this, void * viewport, float * area)"
  },
  "0064b1e0": {
   "module": "zz_idioms",
   "name": "empty_function_64b1e0"
+ },
+ "0064b200": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::AddArea",
+  "proto": "void __thiscall AddArea(C_PagedTextBox *this, I3D_scene * scene, I3D_frame * visual)"
+ },
+ "0064bb30": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::SetPage",
+  "proto": "void __thiscall SetPage(C_PagedTextBox *this, int page)"
+ },
+ "0064bb60": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::NumPages",
+  "proto": "int __thiscall NumPages(C_PagedTextBox *this)"
+ },
+ "0064bb80": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::Relayout",
+  "proto": "void __thiscall Relayout(C_PagedTextBox *this)"
+ },
+ "0064bb90": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::LastPageBreak",
+  "proto": "int __thiscall LastPageBreak(C_PagedTextBox *this)"
+ },
+ "0064bc60": {
+  "module": "text_box",
+  "name": "C_VideoTextBox::ScrollTo",
+  "proto": "bool __thiscall ScrollTo(C_VideoTextBox *this, int pixels)"
+ },
+ "0064bc70": {
+  "module": "text_box",
+  "name": "C_VideoTextBox::Render",
+  "proto": "void __thiscall Render(C_VideoTextBox *this)"
+ },
+ "0064bfe0": {
+  "module": "text_box",
+  "name": "C_VideoTextBox::Finished",
+  "proto": "bool __thiscall Finished(C_VideoTextBox *this)"
  },
  "0064c010": {
   "module": "text_box",
@@ -28396,6 +28457,16 @@
  "0065d050": {
   "module": "zz_idioms",
   "name": "empty_function_65d050"
+ },
+ "006622f0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_PagedTextBox *this, uchar flags)"
+ },
+ "00662310": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::~C_PagedTextBox",
+  "proto": "void __thiscall ~C_PagedTextBox(C_PagedTextBox *this)"
  },
  "00662410": {
   "module": "zz_idioms",
@@ -28654,8 +28725,19 @@
   "proto": "bool __thiscall Stop(C_VideoState *this)"
  },
  "00688cb0": {
-  "module": "zz_idioms",
-  "name": "empty_function_688cb0"
+  "module": "text_box",
+  "name": "C_VideoTextBox::UpdateScrollRange",
+  "proto": "void __thiscall UpdateScrollRange(C_VideoTextBox *this)"
+ },
+ "00688cc0": {
+  "module": "text_box",
+  "name": "C_VideoTextBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_VideoTextBox *this, uchar flags)"
+ },
+ "00688ce0": {
+  "module": "text_box",
+  "name": "C_VideoTextBox::~C_VideoTextBox",
+  "proto": "void __thiscall ~C_VideoTextBox(C_VideoTextBox *this)"
  },
  "00688ea0": {
   "module": "game_app",

@@ -1016,8 +1016,7 @@ namespace {
 constexpr int MAX_TEXT_VERTICES = 0xC0;
 S_FontVertex g_textVertices[MAX_TEXT_VERTICES];         // 0x008acbf8
 int g_numTextVertices;                                  // 0x008acbf0
-// The background's and the outline's quad (a fan of 4), its depth and 1 / depth.
-S_FontVertex g_textBoxQuad[4];                          // 0x008ae410
+// The quad's depth and 1 / depth.
 constexpr float QUAD_Z = 0.0284113996f;
 constexpr float QUAD_RHW = 35.1971397f;
 // The outline's colour.
@@ -1037,8 +1036,11 @@ constexpr float CARET_DROP = 0.1f;
 constexpr int DRIVER_STATE_3 = 3;
 constexpr int DRIVER_STATE_9 = 9;
 
-// The quad from (x0, y0) to (x1, y1), its texture's corners (0, 0), (1, 0), (0, 1), (1, 1).
-void SetQuad(float x0, float y0, float x1, float y1, uint32_t colour)
+} // namespace
+
+S_FontVertex g_textBoxQuad[4];                          // 0x008ae410
+
+void SetTextBoxQuad(float x0, float y0, float x1, float y1, uint32_t colour0, uint32_t colour1)
 {
     const float xy[4][2] = {{x0, y0}, {x1, y0}, {x1, y1}, {x0, y1}};
     const float uv[4][2] = {{0.0f, 0.0f}, {1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}};
@@ -1048,13 +1050,16 @@ void SetQuad(float x0, float y0, float x1, float y1, uint32_t colour)
         v.y = xy[i][1];
         v.z = QUAD_Z;
         v.rhw = QUAD_RHW;
-        v.color = colour;
+        v.color = i < 2 ? colour0 : colour1;
         v.u = uv[i][0];
         v.v = uv[i][1];
     }
 }
 
-} // namespace
+void DrawTextBoxQuad()
+{
+    GetIGraph()->DrawPrimitives(PRIMITIVE_FAN, 2, g_textBoxQuad, 1);
+}
 
 void ReadScreenSize(int, int)
 {
@@ -1082,9 +1087,9 @@ void C_TextBox::Render()
     if (m_background != 0) {
         const bool state = I3DGetDriver()->GetState(DRIVER_STATE_3) != 0;
         I3DGetDriver()->SetState(DRIVER_STATE_3, 0);
-        SetQuad(m_left, m_bottom, m_right, m_top, m_background);
+        SetTextBoxQuad(m_left, m_bottom, m_right, m_top, m_background, m_background);
         GetIGraph()->SetTexture(nullptr, 0);
-        GetIGraph()->DrawPrimitives(PRIMITIVE_FAN, 2, g_textBoxQuad, 1);
+        DrawTextBoxQuad();
         I3DGetDriver()->SetState(DRIVER_STATE_3, state);
     }
     StepUnknown76(static_cast<int16_t>(g_textBoxStep76), &m_unknown76);
@@ -1139,9 +1144,9 @@ void C_TextBox::Render()
         I3DGetDriver()->SetState(DRIVER_STATE_9, 0);
         // (The clip's numbers as unsigned.)
         const auto pixels = [](int value) { return static_cast<float>(static_cast<uint32_t>(value)); };
-        SetQuad(pixels(clip.x), pixels(clip.y), pixels(clip.x + clip.width), pixels(clip.y + clip.height),
-                OUTLINE_COLOUR);
-        GetIGraph()->DrawPrimitives(PRIMITIVE_FAN, 2, g_textBoxQuad, 1);
+        SetTextBoxQuad(pixels(clip.x), pixels(clip.y), pixels(clip.x + clip.width), pixels(clip.y + clip.height),
+                       OUTLINE_COLOUR, OUTLINE_COLOUR);
+        DrawTextBoxQuad();
         I3DGetDriver()->SetState(DRIVER_STATE_9, state);
     }
 }

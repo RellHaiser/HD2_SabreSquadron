@@ -82,3 +82,25 @@
 006491d0 C_TextBox::StepUnknown76 | void __thiscall StepUnknown76(C_TextBox *this, short step, short * value)
 0063f7d0 FlushFonts | void __cdecl FlushFonts(void)
 0063f800 SetFontBatching | void __fastcall SetFontBatching(bool on)
+
+# Part 9b-iv-a: the paged text box (vtable 0x008154a4: the interface's text control's) and the video
+# state's text box (vtable 0x008158f8); the paged box's layout 0x006494a0 and its empty FreePages
+# named for 9b-iv-b.
+0064ae70 C_PagedTextBox::Render | void __thiscall Render(C_PagedTextBox *this)
+0064af10 C_PagedTextBox::RenderPage | void __thiscall RenderPage(C_PagedTextBox *this, void * page)
+0064b070 C_PagedTextBox::ClipArea | bool __thiscall ClipArea(C_PagedTextBox *this, void * viewport, float * area)
+0064b200 C_PagedTextBox::AddArea | void __thiscall AddArea(C_PagedTextBox *this, I3D_scene * scene, I3D_frame * visual)
+0064bb30 C_PagedTextBox::SetPage | void __thiscall SetPage(C_PagedTextBox *this, int page)
+0064bb60 C_PagedTextBox::NumPages | int __thiscall NumPages(C_PagedTextBox *this)
+0064bb80 C_PagedTextBox::Relayout | void __thiscall Relayout(C_PagedTextBox *this)
+0064bb90 C_PagedTextBox::LastPageBreak | int __thiscall LastPageBreak(C_PagedTextBox *this)
+006494a0 C_PagedTextBox::LayoutPages | bool __thiscall LayoutPages(C_PagedTextBox *this)
+0064ae60 C_PagedTextBox::FreePages | void __thiscall FreePages(C_PagedTextBox *this)
+006622f0 C_PagedTextBox::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(C_PagedTextBox *this, uchar flags)
+00662310 C_PagedTextBox::~C_PagedTextBox | void __thiscall ~C_PagedTextBox(C_PagedTextBox *this)
+00688cb0 C_VideoTextBox::UpdateScrollRange | void __thiscall UpdateScrollRange(C_VideoTextBox *this)
+0064bc70 C_VideoTextBox::Render | void __thiscall Render(C_VideoTextBox *this)
+0064bc60 C_VideoTextBox::ScrollTo | bool __thiscall ScrollTo(C_VideoTextBox *this, int pixels)
+0064bfe0 C_VideoTextBox::Finished | bool __thiscall Finished(C_VideoTextBox *this)
+00688cc0 C_VideoTextBox::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(C_VideoTextBox *this, uchar flags)
+00688ce0 C_VideoTextBox::~C_VideoTextBox | void __thiscall ~C_VideoTextBox(C_VideoTextBox *this)

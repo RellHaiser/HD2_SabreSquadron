@@ -134,7 +134,7 @@ public:
     // list has no container; no effect when the box has its own colour, m_colour).
     void SetDimmed(bool value) { m_dimmed = value; }
 
-private:
+protected:
     bool AddRun(S_TextRun run);                         // 0x006448b0
     bool SetRun(S_TextRun run, int index);              // 0x00644410
     bool InsertRun(S_TextRun run, int index);           // 0x00644920
@@ -253,6 +253,13 @@ private:
 // step (C_TextBox::StepUnknown76).
 extern bool g_textBoxOutline;                           // 0x008ae600
 extern int g_textBoxStep76;                             // 0x008ae604
+// The quad the boxes fill or fade the screen with (a fan of 4; the render's background and outline, the
+// video text box's fades): from (x0, y0) to (x1, y1) at a fixed depth, its texture's corners (0, 0),
+// (1, 0), (0, 1), (1, 1); the first two corners `colour0`, the others `colour1`. Drawn with the
+// texture the caller set (all of them: none).
+extern S_FontVertex g_textBoxQuad[4];                   // 0x008ae410
+void SetTextBoxQuad(float x0, float y0, float x1, float y1, uint32_t colour0, uint32_t colour1);
+void DrawTextBoxQuad();
 // Reads the screen's size and drops it (a check left without its body; the render's and RunGame's).
 void ReadScreenSize(int x, int y);                      // 0x00648190 (__stdcall)
 

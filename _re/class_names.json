@@ -46,6 +46,8 @@
 "00810398": "C_LightMapGroupsModule",
 "00810418": "C_TShiftModule",
 "00810458": "C_TextBox",
+"008154a4": "C_PagedTextBox",
+"008158f8": "C_VideoTextBox",
 "008105a0": "S_HumanCommand",
 "00810778": "C_Car",
 "008108f8": "C_Vehicle",

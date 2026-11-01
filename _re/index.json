@@ -181447,10 +181447,10 @@
 "in_vtables": []
 },
 "006494a0": {
-"name": "FUN_006494a0",
+"name": "LayoutPages",
 "size": 770,
-"lines": 147,
-"chars": 4788,
+"lines": 136,
+"chars": 4220,
 "callers": [
 "0064ae70",
 "0064bb80"
@@ -181479,7 +181479,7 @@
 "name": "FUN_006497b0",
 "size": 62,
 "lines": 16,
-"chars": 380,
+"chars": 378,
 "callers": [
 "006494a0"
 ],
@@ -181497,7 +181497,7 @@
 "name": "FUN_006497f0",
 "size": 371,
 "lines": 80,
-"chars": 2303,
+"chars": 2321,
 "callers": [
 "00649970"
 ],
@@ -181520,7 +181520,7 @@
 "name": "FUN_00649970",
 "size": 126,
 "lines": 26,
-"chars": 777,
+"chars": 775,
 "callers": [
 "006497b0"
 ],
@@ -181538,7 +181538,7 @@
 "name": "FUN_006499f0",
 "size": 147,
 "lines": 31,
-"chars": 968,
+"chars": 966,
 "callers": [
 "006497b0"
 ],
@@ -181555,7 +181555,7 @@
 "name": "FUN_00649a90",
 "size": 464,
 "lines": 73,
-"chars": 2199,
+"chars": 2197,
 "callers": [
 "006494a0",
 "00649c80",
@@ -181582,7 +181582,7 @@
 "name": "FUN_00649c60",
 "size": 19,
 "lines": 12,
-"chars": 255,
+"chars": 253,
 "callers": [
 "006494a0"
 ],
@@ -181602,7 +181602,7 @@
 "name": "FUN_00649c80",
 "size": 2050,
 "lines": 473,
-"chars": 17694,
+"chars": 17691,
 "callers": [
 "00649c60"
 ],
@@ -181696,7 +181696,7 @@
 "name": "FUN_0064a6c0",
 "size": 1949,
 "lines": 444,
-"chars": 16557,
+"chars": 16554,
 "callers": [
 "00649c60"
 ],
@@ -181729,10 +181729,10 @@
 "in_vtables": []
 },
 "0064ae60": {
-"name": "empty_function_64ae60",
+"name": "FreePages",
 "size": 1,
 "lines": 7,
-"chars": 57,
+"chars": 88,
 "callers": [
 "006494a0",
 "00662310"
@@ -181745,10 +181745,10 @@
 "in_vtables": []
 },
 "0064ae70": {
-"name": "FUN_0064ae70",
+"name": "Render",
 "size": 147,
 "lines": 32,
-"chars": 752,
+"chars": 743,
 "callers": [],
 "callees": [
 "006494a0",
@@ -181766,10 +181766,10 @@
 ]
 },
 "0064af10": {
-"name": "FUN_0064af10",
+"name": "RenderPage",
 "size": 343,
-"lines": 82,
-"chars": 2438,
+"lines": 81,
+"chars": 2400,
 "callers": [
 "0064ae70"
 ],
@@ -181786,10 +181786,10 @@
 "in_vtables": []
 },
 "0064b070": {
-"name": "FUN_0064b070",
+"name": "ClipArea",
 "size": 353,
-"lines": 56,
-"chars": 1472,
+"lines": 55,
+"chars": 1479,
 "callers": [
 "0064af10"
 ],
@@ -181821,10 +181821,10 @@
 "in_vtables": []
 },
 "0064b200": {
-"name": "FUN_0064b200",
+"name": "AddArea",
 "size": 856,
-"lines": 114,
-"chars": 4196,
+"lines": 115,
+"chars": 4078,
 "callers": [
 "0065c800"
 ],
@@ -181855,7 +181855,7 @@
 "name": "FUN_0064b7f0",
 "size": 734,
 "lines": 119,
-"chars": 3861,
+"chars": 3859,
 "callers": [
 "00649970"
 ],
@@ -181895,10 +181895,10 @@
 "in_vtables": []
 },
 "0064bb30": {
-"name": "FUN_0064bb30",
+"name": "SetPage",
 "size": 48,
-"lines": 13,
-"chars": 321,
+"lines": 12,
+"chars": 254,
 "callers": [
 "0065c800"
 ],
@@ -181910,10 +181910,10 @@
 "in_vtables": []
 },
 "0064bb60": {
-"name": "FUN_0064bb60",
+"name": "NumPages",
 "size": 25,
 "lines": 10,
-"chars": 182,
+"chars": 164,
 "callers": [
 "0065c800"
 ],
@@ -181925,10 +181925,10 @@
 "in_vtables": []
 },
 "0064bb80": {
-"name": "FUN_0064bb80",
+"name": "Relayout",
 "size": 9,
 "lines": 9,
-"chars": 156,
+"chars": 134,
 "callers": [
 "0065c800"
 ],
@@ -181942,10 +181942,10 @@
 "in_vtables": []
 },
 "0064bb90": {
-"name": "FUN_0064bb90",
+"name": "LastPageBreak",
 "size": 196,
 "lines": 48,
-"chars": 1294,
+"chars": 1278,
 "callers": [
 "0065c800"
 ],
@@ -181963,10 +181963,10 @@
 "in_vtables": []
 },
 "0064bc60": {
-"name": "FUN_0064bc60",
+"name": "ScrollTo",
 "size": 12,
 "lines": 8,
-"chars": 177,
+"chars": 128,
 "callers": [
 "00688ab0"
 ],
@@ -181983,10 +181983,10 @@
 ]
 },
 "0064bc70": {
-"name": "FUN_0064bc70",
+"name": "Render",
 "size": 869,
 "lines": 126,
-"chars": 4389,
+"chars": 4381,
 "callers": [],
 "callees": [
 "00645010",
@@ -182039,10 +182039,10 @@
 ]
 },
 "0064bfe0": {
-"name": "FUN_0064bfe0",
+"name": "Finished",
 "size": 41,
-"lines": 11,
-"chars": 267,
+"lines": 12,
+"chars": 354,
 "callers": [
 "00688f00"
 ],
@@ -193934,8 +193934,8 @@
 "0065c800": {
 "name": "FUN_0065c800",
 "size": 402,
-"lines": 83,
-"chars": 2572,
+"lines": 86,
+"chars": 2811,
 "callers": [],
 "callees": [
 "00644830",
@@ -197571,10 +197571,10 @@
 ]
 },
 "006622f0": {
-"name": "FUN_006622f0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 213,
+"chars": 208,
 "callers": [],
 "callees": [
 "00662310",
@@ -197592,10 +197592,10 @@
 ]
 },
 "00662310": {
-"name": "FUN_00662310",
+"name": "~C_PagedTextBox",
 "size": 256,
 "lines": 74,
-"chars": 2256,
+"chars": 2246,
 "callers": [
 "006622f0"
 ],
@@ -211025,7 +211025,7 @@
 "name": "FUN_00688ab0",
 "size": 507,
 "lines": 114,
-"chars": 3161,
+"chars": 3157,
 "callers": [
 "00688330"
 ],
@@ -211065,10 +211065,10 @@
 "in_vtables": []
 },
 "00688cb0": {
-"name": "empty_function_688cb0",
+"name": "UpdateScrollRange",
 "size": 1,
 "lines": 7,
-"chars": 74,
+"chars": 96,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -211083,10 +211083,10 @@
 ]
 },
 "00688cc0": {
-"name": "FUN_00688cc0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 213,
+"chars": 208,
 "callers": [],
 "callees": [
 "00688ce0",
@@ -211104,10 +211104,10 @@
 ]
 },
 "00688ce0": {
-"name": "FUN_00688ce0",
+"name": "~C_VideoTextBox",
 "size": 189,
 "lines": 69,
-"chars": 2247,
+"chars": 2242,
 "callers": [
 "00688cc0"
 ],
@@ -211176,7 +211176,7 @@
 "name": "Update",
 "size": 823,
 "lines": 136,
-"chars": 5195,
+"chars": 5202,
 "callers": [
 "0066f080"
 ],
