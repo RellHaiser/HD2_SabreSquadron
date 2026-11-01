@@ -74,6 +74,9 @@ constexpr uint32_t ROUTE_MESSAGE_MASK = ~CONTROL_NOTIFY_MASK;
 constexpr uint32_t NOTIFICATION_BIT = 0x4000000;
 // The ids' fields: a child's index (+ 1) in the first, the second, the third.
 constexpr uint32_t ID_FIELD1 = 0x3F00000, ID_FIELD2 = 0xFF000;
+// FindControl: no id; the ids' top bits (the screen's), the same for the whole search.
+constexpr uint32_t NO_ID = 0xFFFFFFFF;
+constexpr uint32_t ID_TOP_MASK = 0xFC000000;
 
 } // namespace
 
@@ -324,6 +327,25 @@ void C_Control::Notify(uint32_t notification, uint32_t value)
         else
             HandleMessage(&message);
     }
+}
+
+C_Control *C_Control::FindControl(uint32_t id, bool up)
+{
+    C_Control *control = this;
+    while (control->m_id != NO_ID && id != NO_ID && ((control->m_id ^ id) & ID_TOP_MASK) == 0) {
+        if (control->m_id == id)
+            return control;
+        if (up && control->m_parent) {
+            control = control->m_parent;
+            continue;
+        }
+        const int index = control->FindChild(id);
+        if (index == -1)
+            return nullptr;
+        up = false;
+        control = control->m_children[index];
+    }
+    return nullptr;
 }
 
 bool C_Control::CallCallbacks(uint32_t notification, uint32_t value)

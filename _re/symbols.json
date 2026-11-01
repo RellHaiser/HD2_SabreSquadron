@@ -28695,6 +28695,16 @@
   "name": "C_TextControl::C_TextControl",
   "proto": "void * __thiscall C_TextControl(C_TextControl *this, void * scene, uint id, void * parent)"
  },
+ "0064f4a0": {
+  "module": "controls",
+  "name": "C_SpinControl::FindChild",
+  "proto": "int __thiscall FindChild(C_SpinControl *this, uint id)"
+ },
+ "0064f4e0": {
+  "module": "controls",
+  "name": "C_SpinControl::Create",
+  "proto": "bool __thiscall Create(C_SpinControl *this, void * frame, void * root, void * desc)"
+ },
  "0064f710": {
   "module": "controls",
   "name": "C_Button::ScalarDeletingDestructor",
@@ -28704,6 +28714,41 @@
   "module": "controls",
   "name": "C_Button::~C_Button",
   "proto": "void __thiscall ~C_Button(C_Button *this)"
+ },
+ "0064f870": {
+  "module": "controls",
+  "name": "C_SpinControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_SpinControl *this, void * message)"
+ },
+ "0064fc20": {
+  "module": "controls",
+  "name": "C_SpinControl::OnInput05",
+  "proto": "int __thiscall OnInput05(C_SpinControl *this, int id)"
+ },
+ "0064fc80": {
+  "module": "controls",
+  "name": "C_SpinControl::OnEnter",
+  "proto": "int __thiscall OnEnter(C_SpinControl *this, int id)"
+ },
+ "0064fcd0": {
+  "module": "controls",
+  "name": "C_SpinControl::OnLeave",
+  "proto": "int __thiscall OnLeave(C_SpinControl *this, int id)"
+ },
+ "0064fd20": {
+  "module": "controls",
+  "name": "C_SpinControl::OnClick",
+  "proto": "int __thiscall OnClick(C_SpinControl *this, int id)"
+ },
+ "0064fd30": {
+  "module": "controls",
+  "name": "C_SpinControl::OnPress",
+  "proto": "int __thiscall OnPress(C_SpinControl *this, int id)"
+ },
+ "0064fd70": {
+  "module": "controls",
+  "name": "C_SpinControl::SetInactive",
+  "proto": "void __thiscall SetInactive(C_SpinControl *this, bool inactive)"
  },
  "00650170": {
   "module": "zz_idioms",
@@ -28905,6 +28950,16 @@
   "name": "C_LabelControl::~C_LabelControl",
   "proto": "void __thiscall ~C_LabelControl(C_LabelControl *this)"
  },
+ "00658070": {
+  "module": "controls",
+  "name": "C_ScrollBar::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00658090": {
+  "module": "controls",
+  "name": "C_ScrollBar::~C_ScrollBar",
+  "proto": "void __thiscall ~C_ScrollBar(void *this)"
+ },
  "00658f00": {
   "module": "controls",
   "name": "C_ControlGroup::ScalarDeletingDestructor",
@@ -28976,6 +29031,11 @@
   "name": "C_Control::Hide",
   "proto": "void __thiscall Hide(C_Control *this)"
  },
+ "0065cae0": {
+  "module": "control",
+  "name": "C_Control::FindControl",
+  "proto": "void * __thiscall FindControl(C_Control *this, uint id, bool up)"
+ },
  "0065cb50": {
   "module": "control",
   "name": "C_Control::FindChild",
@@ -29036,6 +29096,16 @@
   "name": "C_FrameSwitch::~C_FrameSwitch",
   "proto": "void __thiscall ~C_FrameSwitch(C_FrameSwitch *this)"
  },
+ "0065e600": {
+  "module": "controls",
+  "name": "C_Slider::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Slider *this, uchar flags)"
+ },
+ "0065e620": {
+  "module": "controls",
+  "name": "C_Slider::~C_Slider",
+  "proto": "void __thiscall ~C_Slider(C_Slider *this)"
+ },
  "0065f8d0": {
   "module": "controls",
   "name": "C_Tooltip::ScalarDeletingDestructor",
@@ -29075,6 +29145,16 @@
   "module": "controls",
   "name": "C_TextButton::~C_TextButton",
   "proto": "void __thiscall ~C_TextButton(C_TextButton *this)"
+ },
+ "006605c0": {
+  "module": "controls",
+  "name": "C_SpinControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_SpinControl *this, uchar flags)"
+ },
+ "006605e0": {
+  "module": "controls",
+  "name": "C_SpinControl::~C_SpinControl",
+  "proto": "void __thiscall ~C_SpinControl(C_SpinControl *this)"
  },
  "00661bc0": {
   "module": "control",
@@ -29208,6 +29288,131 @@
   "module": "controls",
   "name": "C_Button::Tick",
   "proto": "void __thiscall Tick(C_Button *this, int time)"
+ },
+ "00664630": {
+  "module": "controls",
+  "name": "C_Slider::SetInactive",
+  "proto": "void __thiscall SetInactive(C_Slider *this, bool inactive)"
+ },
+ "00664680": {
+  "module": "controls",
+  "name": "C_Slider::Create",
+  "proto": "bool __thiscall Create(C_Slider *this, void * frame, void * root, void * desc)"
+ },
+ "006647c0": {
+  "module": "controls",
+  "name": "C_Slider::OnEnter",
+  "proto": "int __thiscall OnEnter(C_Slider *this, int id)"
+ },
+ "00664810": {
+  "module": "controls",
+  "name": "C_Slider::OnLeave",
+  "proto": "int __thiscall OnLeave(C_Slider *this, int id)"
+ },
+ "00664860": {
+  "module": "controls",
+  "name": "C_Slider::OnInput08",
+  "proto": "int __thiscall OnInput08(C_Slider *this, int id)"
+ },
+ "00664890": {
+  "module": "controls",
+  "name": "C_Slider::SetLimits",
+  "proto": "void __thiscall SetLimits(C_Slider *this)"
+ },
+ "00664ac0": {
+  "module": "controls",
+  "name": "C_Slider::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_Slider *this, void * message)"
+ },
+ "00664b10": {
+  "module": "controls",
+  "name": "C_Slider::MoveTo",
+  "proto": "void __thiscall MoveTo(C_Slider *this, void * position)"
+ },
+ "00664b30": {
+  "module": "controls",
+  "name": "C_Slider::Drag",
+  "proto": "bool __thiscall Drag(C_Slider *this)"
+ },
+ "00664ca0": {
+  "module": "controls",
+  "name": "C_Slider::SetValueFrom",
+  "proto": "bool __thiscall SetValueFrom(C_Slider *this, float place)"
+ },
+ "00664d10": {
+  "module": "controls",
+  "name": "C_Slider::SetValue",
+  "proto": "void __thiscall SetValue(C_Slider *this, float value)"
+ },
+ "00664e70": {
+  "module": "controls",
+  "name": "C_ScrollBar::FindChild",
+  "proto": "int __thiscall FindChild(void *this, uint id)"
+ },
+ "00664eb0": {
+  "module": "controls",
+  "name": "C_ScrollBar::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "00665330": {
+  "module": "controls",
+  "name": "C_ScrollBar::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "006656c0": {
+  "module": "controls",
+  "name": "C_ScrollBar::SendPosition",
+  "proto": "void __thiscall SendPosition(void *this)"
+ },
+ "00665750": {
+  "module": "controls",
+  "name": "C_ScrollBar::OnEnter",
+  "proto": "int __thiscall OnEnter(void *this, int id)"
+ },
+ "006657d0": {
+  "module": "controls",
+  "name": "C_ScrollBar::OnLeave",
+  "proto": "int __thiscall OnLeave(void *this, int id)"
+ },
+ "00665820": {
+  "module": "controls",
+  "name": "C_ScrollBar::OnInput05",
+  "proto": "int __thiscall OnInput05(void *this, int id)"
+ },
+ "00665890": {
+  "module": "controls",
+  "name": "C_ScrollBar::StepToCursor",
+  "proto": "void __thiscall StepToCursor(void *this)"
+ },
+ "006659f0": {
+  "module": "controls",
+  "name": "C_ScrollBar::OnPress",
+  "proto": "int __thiscall OnPress(void *this, int id)"
+ },
+ "00665a40": {
+  "module": "controls",
+  "name": "C_ScrollBar::OnInput08",
+  "proto": "int __thiscall OnInput08(void *this, int id)"
+ },
+ "00665a80": {
+  "module": "controls",
+  "name": "C_ScrollBar::SetInactive",
+  "proto": "void __thiscall SetInactive(void *this, bool inactive)"
+ },
+ "00665ae0": {
+  "module": "controls",
+  "name": "C_ScrollBar::Update",
+  "proto": "void __thiscall Update(void *this)"
+ },
+ "00665be0": {
+  "module": "controls",
+  "name": "C_ScrollBar::OnWheel",
+  "proto": "int __thiscall OnWheel(void *this, int id, int amount)"
+ },
+ "00665ce0": {
+  "module": "controls",
+  "name": "C_ScrollBar::Tick",
+  "proto": "void __thiscall Tick(void *this, int time)"
  },
  "00667b20": {
   "module": "zz_idioms",

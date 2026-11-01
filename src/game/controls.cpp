@@ -1,8 +1,10 @@
 #include "game/controls.h"
 
+#include <cmath>
 #include <cstring>
 
 #include "game/cursor.h"
+#include "game/pending.h"
 #include "game/paged_text_box.h"
 #include "game/text_box.h"
 #include "ls3d/i3d.h"
@@ -29,6 +31,19 @@ constexpr float TOOLTIP_DX = 0.15f, TOOLTIP_DY = 0.015f;
 constexpr int REPEAT_WAIT = 300;
 // The group: the enter's id that asks Unknown20 instead.
 constexpr int GROUP_ENTER_UNKNOWN = 0xF;
+// The arrows' and the slider's frames (dummies, wildcards).
+constexpr uint32_t FIND_DUMMIES = 0x10020;
+// The slider: the interface's limits (x 0 .. 1, y -0.75 .. 0), its value at first.
+constexpr float SLIDER_MAX_X = 1.0f, SLIDER_MIN_Y = -0.75f;
+constexpr float SLIDER_START = 50.0f;
+// The scroll bar: the wait before its held steps, between them; the wheel's step.
+constexpr int SCROLL_HOLD_WAIT = 300, SCROLL_REPEAT = 50;
+constexpr int WHEEL_STEP = 120;
+// The children's ids' last 4 bits (their index + 1 in the arrows' and the bar's).
+constexpr uint32_t CHILD_ID_MASK = 0xF;
+constexpr uint32_t UP_ARROW = 1, DOWN_ARROW = 2, SLIDER = 3;
+// The spin control's items' style.
+constexpr uint8_t SPIN_STYLE = 0x14;
 
 // A frame's data: the control's id.
 void SetFrameId(I3D_frame *frame, uint32_t id)
@@ -42,6 +57,52 @@ S_ControlMessage Message(uint32_t id)
     S_ControlMessage message;
     message.id = id;
     return message;
+}
+
+// A route: on the notification in `id`, the message in it to `target`.
+S_ControlMessage Route(uint32_t target, uint32_t id)
+{
+    S_ControlMessage message = Message(id);
+    message.target = target;
+    return message;
+}
+
+// A float in a message's value2 (its bits).
+uintptr_t FloatValue(float value)
+{
+    uint32_t bits;
+    std::memcpy(&bits, &value, sizeof(bits));
+    return bits;
+}
+float ValueFloat(uintptr_t value)
+{
+    const auto bits = static_cast<uint32_t>(value);
+    float result;
+    std::memcpy(&result, &bits, sizeof(result));
+    return result;
+}
+
+// The index of the child whose id's last 4 bits are `id`'s (none: -1).
+int FindChildByLastBits(const std::vector<C_Control *> &children, uint32_t id)
+{
+    for (size_t i = 0; i < children.size(); ++i)
+        if (((children[i]->GetId() ^ id) & CHILD_ID_MASK) == 0)
+            return static_cast<int>(i);
+    return -1;
+}
+
+// An arrow (a button) made on the frame's child `name` (none: null), routing its press to `owner`'s
+// message `pressMessage`.
+C_Button *MakeArrow(C_Control *owner, I3D_scene *scene, I3D_frame *frame, I3D_frame *root, const char *name,
+                    uint32_t id, uint32_t pressMessage)
+{
+    I3D_frame *arrow = frame->FindChildFrame(name, FIND_DUMMIES);
+    if (!arrow)
+        return nullptr;
+    auto *button = new C_Button(scene, id, owner);
+    button->Create(arrow, root, nullptr);
+    button->HandleMessageCopy(Route(owner->GetId(), CONTROL_NOTIFY_PRESS | pressMessage));
+    return button;
 }
 
 } // namespace
@@ -515,7 +576,7 @@ bool C_Tooltip::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *d
     if (!C_TextControl::Create(frame, root, desc))
         return true;
     m_cursor = C_Cursor::Acquire(m_scene);
-    S_ControlMessage message = Message(CONTROL_MSG_TOOLTIP);
+    S_ControlMessage message = Message(CONTROL_MSG_ADD_TICKER);
     message.value2 = reinterpret_cast<uintptr_t>(this);
     PostControlMessage(message);
     return true;
@@ -781,4 +842,639 @@ bool C_PagesControl::HandleMessage(S_ControlMessage *message)
         return true;
     }
     return C_PagedTextControl::HandleMessage(message);
+}
+
+// ----- the slider (type 7) -----
+
+C_Slider::~C_Slider()
+{
+    if (m_cursor)
+        m_cursor->Release();
+}
+
+bool C_Slider::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_Control::Create(frame, root, desc);
+    m_normalFrame = frame->FindChildFrame("normal*", FIND_FRAMES);
+    m_activeFrame = frame->FindChildFrame("actived*", FIND_FRAMES);
+    m_baseFrame = frame->FindChildFrame("sliderbase*", FIND_FRAMES);
+    m_cursor = C_Cursor::Acquire(m_scene);
+    if (!m_cursor || !m_normalFrame || !m_activeFrame || !m_baseFrame)
+        return false;
+    m_normalFrame->GetMatrix();
+    m_activeFrame->SetPosInline(m_normalFrame->GetPos());   // (not when its place is locked)
+    m_activeFrame->SetOn(false);
+    SetFrameId(m_normalFrame, m_id);
+    SetFrameId(m_activeFrame, m_id);
+    m_normalFrame->Update();
+    m_activeFrame->Update();
+    m_baseFrame->SetOn(false);
+    m_baseFrame->Update();
+    SetLimits();
+    return true;
+}
+
+void C_Slider::SetLimits()
+{
+    const I3D_bbox &own = m_normalFrame->GetBound().bbox;
+    const float halfWidth = (own.max.x - own.min.x) * 0.5f;
+    const float halfHeight = (own.min.y - own.max.y) * 0.5f;   // (negative)
+    const I3D_bbox &base = m_baseFrame->GetBound().bbox;
+    m_minX = halfWidth + base.min.x;
+    m_maxX = base.max.x - halfWidth;
+    m_minY = base.min.y - halfHeight;
+    m_maxY = halfHeight + base.max.y;
+    if (!(m_maxX <= SLIDER_MAX_X))
+        m_maxX = SLIDER_MAX_X;
+    else if (m_maxX < 0.0f)
+        m_maxX = 0.0f;
+    if (!(SLIDER_MIN_Y <= m_maxY))
+        m_maxY = SLIDER_MIN_Y;
+    else if (0.0f < m_maxY)
+        m_maxY = 0.0f;
+    if (!(m_minX <= SLIDER_MAX_X))
+        m_minX = SLIDER_MAX_X;
+    else if (m_minX < 0.0f)
+        m_minX = 0.0f;
+    if (!(SLIDER_MIN_Y <= m_minY))
+        m_minY = SLIDER_MIN_Y;
+    else if (0.0f < m_minY)
+        m_minY = 0.0f;
+    // From the normal frame's place (its z for the y: the original's).
+    const S_vector place = m_normalFrame->GetPos();
+    m_minX -= place.x;
+    m_maxX -= place.x;
+    m_minY -= place.z;
+    m_maxY -= place.z;
+    m_rangeY = m_maxY - m_minY;
+    m_rangeX = m_maxX - m_minX;
+    m_horizontal = !(m_rangeX < m_rangeY);
+    m_vertical = !m_horizontal;
+    SetValue(SLIDER_START);
+}
+
+int C_Slider::OnEnter(int)
+{
+    if (!m_inactive) {
+        m_activeFrame->SetOn(true);
+        m_normalFrame->SetOn(false);
+        m_activeFrame->Update();
+        m_normalFrame->Update();
+        Notify(CONTROL_NOTIFY_ENTER, 0);
+    }
+    return CONTROL_HANDLED;
+}
+
+int C_Slider::OnLeave(int)
+{
+    m_normalFrame->SetOn(true);
+    m_activeFrame->SetOn(false);
+    m_normalFrame->Update();
+    m_activeFrame->Update();
+    Notify(CONTROL_NOTIFY_LEAVE, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_Slider::OnInput08(int)
+{
+    if (Drag())
+        Notify(CONTROL_NOTIFY_08, 0);
+    return CONTROL_HANDLED;
+}
+
+bool C_Slider::Drag()
+{
+    S_vector move;
+    m_cursor->GetMove(&move);
+    S_vector position = m_frame->GetWorldPos();
+    S_vector cursor;
+    if (m_vertical && move.y != 0.0f) {
+        m_cursor->GetPosition(&cursor);
+        position.y = cursor.y - m_normalFrame->GetPos().z;
+        if (position.y < m_minY)
+            position.y = m_minY;
+        if (m_maxY < position.y)
+            position.y = m_maxY;
+        MoveTo(position);
+        return SetValueFrom(position.y);
+    }
+    if (m_horizontal && move.x != 0.0f) {
+        m_cursor->GetPosition(&cursor);
+        position.x = cursor.x - m_normalFrame->GetPos().x;
+        if (position.x < m_minX)
+            position.x = m_minX;
+        if (m_maxX < position.x)
+            position.x = m_maxX;
+        MoveTo(position);
+        return SetValueFrom(position.x);
+    }
+    return false;
+}
+
+void C_Slider::MoveTo(const S_vector &position)
+{
+    m_frame->SetPos(position);
+    m_frame->Update();
+}
+
+bool C_Slider::SetValueFrom(float place)
+{
+    float value = 0.0f;
+    if (m_vertical)
+        value = (m_maxY - place) / m_rangeY * 100.0f;
+    if (m_horizontal)
+        value = (place - m_minX) / m_rangeX * 100.0f;
+    if (value == m_value)
+        return false;
+    m_value = value;
+    return true;
+}
+
+void C_Slider::SetValue(float value)
+{
+    if (m_value == value)
+        return;
+    m_value = value;
+    S_vector position = m_frame->GetWorldPos();
+    if (m_value < 0.0f)
+        m_value = 0.0f;
+    if (100.0f < m_value)
+        m_value = 100.0f;
+    if (m_vertical) {
+        position.y = m_maxY - m_rangeY * m_value * 0.01f;
+        if (position.y < m_minY)
+            position.y = m_minY;
+        if (m_maxY < position.y)
+            position.y = m_maxY;
+        MoveTo(position);
+    }
+    if (m_horizontal) {
+        position.x = m_rangeX * m_value * 0.01f + m_minX;
+        if (position.x < m_minX)
+            position.x = m_minX;
+        if (m_maxX < position.x)
+            position.x = m_maxX;
+        MoveTo(position);
+    }
+}
+
+bool C_Slider::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_Control::HandleMessage(message);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_SLIDER:
+        SetValue(ValueFloat(message->value2));
+        return true;
+    case CONTROL_MSG_GET_SLIDER:
+        message->value2 = FloatValue(m_value);
+        return true;
+    }
+    return C_Control::HandleMessage(message);
+}
+
+void C_Slider::SetInactive(bool inactive)
+{
+    m_inactive = inactive;
+    if (inactive) {
+        m_normalFrame->SetOn(false);
+        m_activeFrame->SetOn(false);
+        m_normalFrame->Update();
+        m_activeFrame->Update();
+        return;
+    }
+    m_normalFrame->SetOn(true);
+    m_normalFrame->Update();
+}
+
+// ----- the scroll bar (type 8) -----
+
+int C_ScrollBar::FindChild(uint32_t id) const
+{
+    return FindChildByLastBits(m_children, id);
+}
+
+void C_ScrollBar::Tick(int time)
+{
+    if (!m_held)
+        return;
+    C_Cursor *cursor = C_Cursor::Acquire(nullptr);
+    if (!cursor->IsButtonDown(0)) {
+        m_held = false;
+    } else {
+        m_repeatTime -= time;
+        if (m_repeatTime < 0) {
+            StepToCursor();
+            m_repeatTime = SCROLL_REPEAT;
+        }
+    }
+    cursor->Release();
+}
+
+bool C_ScrollBar::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_Control::Create(frame, root, desc);
+    S_ControlMessage ticker = Message(CONTROL_MSG_ADD_TICKER);
+    m_upButton = MakeArrow(this, m_scene, frame, root, "barrow up*", m_id | UP_ARROW, CONTROL_MSG_SCROLL_UP);
+    if (m_upButton) {
+        m_children.push_back(m_upButton);
+        ticker.value2 = reinterpret_cast<uintptr_t>(m_upButton);
+        PostControlMessage(ticker);
+    }
+    m_downButton = MakeArrow(this, m_scene, frame, root, "barrow down*", m_id | DOWN_ARROW, CONTROL_MSG_SCROLL_DOWN);
+    if (m_downButton) {
+        m_children.push_back(m_downButton);
+        ticker.value2 = reinterpret_cast<uintptr_t>(m_downButton);
+        PostControlMessage(ticker);
+    }
+    if (I3D_frame *sliderFrame = frame->FindChildFrame("slider*", FIND_DUMMIES)) {
+        m_slider = new C_Slider(m_scene, m_id | SLIDER, this);
+        m_slider->Create(sliderFrame, root, nullptr);
+        m_slider->HandleMessageCopy(Route(m_id, CONTROL_NOTIFY_08 | CONTROL_MSG_SLIDER_MOVED));
+        m_slider->HandleMessageCopy(Message(CONTROL_MSG_SET_SLIDER));
+        m_children.push_back(m_slider);
+    }
+    ticker.value2 = reinterpret_cast<uintptr_t>(this);
+    PostControlMessage(ticker);
+    SetInactive(true);
+    return true;
+}
+
+int C_ScrollBar::OnEnter(int id)
+{
+    if (C_Control *focus = Focus()) {
+        if (focus->OnLeave(id) == 0)
+            return CONTROL_NOT_HANDLED;
+    }
+    m_focus = FindChild(static_cast<uint32_t>(id));
+    if (C_Control *focus = Focus())
+        return focus->OnEnter(id);
+    return 0;
+}
+
+int C_ScrollBar::OnLeave(int id)
+{
+    if (C_Control *focus = Focus()) {
+        if (focus->OnLeave(id) == 0)
+            return 0;
+        m_focus = -1;
+    }
+    return CONTROL_HANDLED;
+}
+
+int C_ScrollBar::OnInput05(int id)
+{
+    if (!IsChild(FindChild(static_cast<uint32_t>(id))))
+        return OnLeave(id);
+    if (m_focus != FindChild(static_cast<uint32_t>(id))) {
+        if (OnLeave(id) == 0)
+            return CONTROL_HANDLED;
+        return OnEnter(id);
+    }
+    return m_children[m_focus]->OnInput05(id);
+}
+
+int C_ScrollBar::OnPress(int id)
+{
+    if (!m_inactive) {
+        if (C_Control *focus = Focus())
+            return focus->OnPress(id);
+        m_held = true;
+        m_repeatTime = SCROLL_HOLD_WAIT;
+        StepToCursor();
+    }
+    return CONTROL_HANDLED;
+}
+
+int C_ScrollBar::OnWheel(int, int amount)
+{
+    if (amount > 0) {
+        for (unsigned steps = (static_cast<unsigned>(amount) - 1) / WHEEL_STEP + 1; steps; --steps)
+            HandleMessageCopy(Message(CONTROL_MSG_SCROLL_UP));
+    } else if (amount < 0) {
+        for (unsigned steps = (static_cast<unsigned>(-amount) - 1) / WHEEL_STEP + 1; steps; --steps)
+            HandleMessageCopy(Message(CONTROL_MSG_SCROLL_DOWN));
+    }
+    return CONTROL_HANDLED;
+}
+
+int C_ScrollBar::OnInput08(int id)
+{
+    if (m_inactive)
+        return CONTROL_HANDLED;
+    if (C_Control *focus = Focus())
+        return focus->OnInput08(id);
+    return 0;
+}
+
+bool C_ScrollBar::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_Control::HandleMessage(message);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_COUNT: {
+        const int count = static_cast<int>(message->value);
+        if (count < 2) {
+            m_count = 0;
+            m_position = 0;
+            m_step = 100.0f;
+            SetInactive(true);
+            Update();
+            return true;
+        }
+        if (m_count == 0) {
+            m_count = count;
+            SetInactive(false);
+        }
+        m_count = count;
+        m_step = 100.0f / static_cast<float>(count - 1);
+        if (m_count <= m_position)
+            m_position = m_count - 1;
+        Update();
+        return true;
+    }
+    case CONTROL_MSG_GET_SLIDER:
+        if (m_slider)   // (the fix: the original's without a slider crashes)
+            m_slider->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_SCROLL_UP:
+        if (m_position > 0) {
+            m_position -= m_pageStep;
+            if (m_position < 0)
+                m_position = 0;
+            Update();
+            SendPosition();
+            Notify(CONTROL_NOTIFY_CHANGED, 0);
+        }
+        return true;
+    case CONTROL_MSG_SCROLL_DOWN:
+        if (m_position < m_count - 1) {
+            m_position += m_pageStep;
+            if (m_position > m_count)   // (the count, not the last: the original's)
+                m_position = m_count;
+            Update();
+            SendPosition();
+            Notify(CONTROL_NOTIFY_CHANGED, 0);
+        }
+        return true;
+    case CONTROL_MSG_SLIDER_MOVED: {
+        S_ControlMessage get = Message(CONTROL_MSG_GET_SLIDER);
+        m_slider->HandleMessage(&get);
+        auto position = static_cast<uint32_t>(static_cast<int>(std::floor(ValueFloat(get.value2) / m_step + 0.5f)));
+        if (position > static_cast<uint32_t>(m_count - 1))
+            position = static_cast<uint32_t>(m_count - 1);
+        if (position != static_cast<uint32_t>(m_position)) {
+            m_position = static_cast<int>(position);
+            if (m_value != 0) {
+                S_ControlMessage set = Message(CONTROL_MSG_SET_POSITION);
+                set.target = m_value;
+                set.value = position;
+                PostControlMessage(set);
+            }
+            Notify(CONTROL_NOTIFY_CHANGED, 0);
+        }
+        return true;
+    }
+    case CONTROL_MSG_SET_PAGE_STEP:
+        if (message->value != 0)
+            m_pageStep = static_cast<int>(message->value);
+        return true;
+    case CONTROL_MSG_GET_POSITION:
+        message->value = static_cast<uint32_t>(m_position);
+        return true;
+    case CONTROL_MSG_SET_POSITION:
+        if (message->value <= static_cast<uint32_t>(m_count)) {   // (the count too: the original's)
+            m_position = static_cast<int>(message->value);
+            Update();
+        }
+        return true;
+    }
+    return C_Control::HandleMessage(message);
+}
+
+void C_ScrollBar::SetInactive(bool inactive)
+{
+    if (!inactive && ((m_parent && m_parent->IsInactive()) || m_count == 0))
+        return;
+    m_inactive = inactive;
+    // (The arrows checked: the fix, the original's without them crashes.)
+    if (m_upButton)
+        m_upButton->SetInactive(inactive);
+    if (m_downButton)
+        m_downButton->SetInactive(m_inactive);
+    if (m_slider)
+        m_slider->SetInactive(m_inactive);
+    Update();
+}
+
+void C_ScrollBar::SendPosition()
+{
+    if (C_Control *target = FindControl(m_value, true)) {
+        S_ControlMessage set = Message(CONTROL_MSG_SET_POSITION);
+        set.value = static_cast<uint32_t>(m_position);
+        target->HandleMessageCopy(set);
+    }
+}
+
+void C_ScrollBar::StepToCursor()
+{
+    C_Cursor *cursor = C_Cursor::Acquire(nullptr);
+    S_vector position;
+    cursor->GetPosition(&position);
+    cursor->Release();
+    if (m_frame->GetType() != FRAME_VISUAL)
+        return;
+    const I3D_bbox &bound = static_cast<I3D_visual *>(m_frame)->GetWorldBound();
+    const float height = bound.max.y - bound.min.y;
+    const float width = bound.max.x - bound.min.x;
+    float value;
+    if (height <= width)
+        value = (position.x - bound.min.x) / width * 100.0f;
+    else
+        value = 100.0f - (position.y - bound.min.y) / height * 100.0f;
+    if (value < 0.0f)
+        value = 0.0f;
+    auto target = static_cast<uint32_t>(static_cast<int>(std::floor(value / m_step + 0.5f)));
+    if (target > static_cast<uint32_t>(m_count - 1))
+        target = static_cast<uint32_t>(m_count - 1);
+    const auto current = static_cast<uint32_t>(m_position);
+    if (current == target)
+        return;
+    if (target < current)
+        m_position = static_cast<int>(current - 1);
+    if (static_cast<uint32_t>(m_position) < target)
+        ++m_position;
+    Update();
+    SendPosition();
+    Notify(CONTROL_NOTIFY_CHANGED, 0);
+}
+
+void C_ScrollBar::Update()
+{
+    if (m_inactive)
+        return;
+    if (m_slider) {
+        S_ControlMessage set = Message(CONTROL_MSG_SET_SLIDER);
+        set.value2 = FloatValue(static_cast<float>(m_position) * m_step);
+        m_slider->HandleMessageCopy(set);
+        return;
+    }
+    if (m_upButton)
+        m_upButton->SetInactive(m_position == 0);
+    if (m_downButton)
+        m_downButton->SetInactive(!(m_position < m_count - 1));
+}
+
+// ----- the spin control (type 0x10) -----
+
+int C_SpinControl::FindChild(uint32_t id) const
+{
+    return FindChildByLastBits(m_children, id);
+}
+
+bool C_SpinControl::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_TextControl::Create(frame, root, desc))
+        return false;
+    m_upButton = MakeArrow(this, m_scene, frame, root, "barrow up*", m_id | UP_ARROW, CONTROL_MSG_PREVIOUS_ITEM);
+    if (m_upButton)
+        m_children.push_back(m_upButton);
+    m_downButton = MakeArrow(this, m_scene, frame, root, "barrow down*", m_id | DOWN_ARROW, CONTROL_MSG_NEXT_ITEM);
+    if (m_downButton)
+        m_children.push_back(m_downButton);
+    if (!m_box)
+        return false;
+    AttachBox();
+    SetInactive(true);
+    return true;
+}
+
+int C_SpinControl::OnEnter(int id)
+{
+    m_box->SetHover(0);
+    m_focus = FindChild(static_cast<uint32_t>(id));
+    if (C_Control *focus = Focus())
+        return focus->OnEnter(id);
+    return CONTROL_HANDLED;
+}
+
+int C_SpinControl::OnLeave(int id)
+{
+    m_box->ClearHover();
+    if (C_Control *focus = Focus()) {
+        if (focus->OnLeave(id) == 0)
+            return 0;
+        m_focus = -1;
+    }
+    return CONTROL_HANDLED;
+}
+
+int C_SpinControl::OnInput05(int id)
+{
+    const int focus = m_focus;
+    if (focus == FindChild(static_cast<uint32_t>(id))) {
+        if (IsChild(focus))
+            return m_children[focus]->OnInput05(id);
+    } else if (OnLeave(id) != 0) {
+        return OnEnter(id);
+    }
+    return CONTROL_HANDLED;
+}
+
+int C_SpinControl::OnPress(int id)
+{
+    if (m_inactive)
+        return CONTROL_HANDLED;
+    if (C_Control *focus = Focus())
+        return focus->OnPress(id);
+    return 0;
+}
+
+void C_SpinControl::ShowSelected()
+{
+    // (Without items: the original's shows the item past the end; the fix, none.)
+    if (static_cast<size_t>(m_selected) < m_items.size())
+        m_box->SetText(m_items[m_selected], SPIN_STYLE, 0);
+    Notify(CONTROL_NOTIFY_CHANGED, static_cast<uint32_t>(m_selected));
+}
+
+bool C_SpinControl::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_TextControl::HandleMessage(message);
+    const int count = static_cast<int>(m_items.size());
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_PREVIOUS_ITEM:
+        if (!m_inactive) {
+            if (--m_selected < 0)
+                m_selected = count - 1;
+            ShowSelected();
+        }
+        return true;
+    case CONTROL_MSG_NEXT_ITEM:
+        if (!m_inactive) {
+            if (static_cast<uint32_t>(++m_selected) >= static_cast<uint32_t>(count))
+                m_selected = 0;
+            ShowSelected();
+        }
+        return true;
+    case CONTROL_MSG_CLEAR_ITEMS:
+        m_items.clear();
+        m_selected = -1;
+        SetInactive(true);
+        return true;
+    case CONTROL_MSG_ADD_ITEM:
+        if (message->value != 0)
+            m_items.push_back(g_texts.Get(static_cast<int>(message->value)));
+        else
+            m_items.push_back(message->text);
+        if (m_selected < 0) {
+            m_selected = 0;
+            m_box->SetText(m_items[0], SPIN_STYLE, 0);
+        }
+        if (m_inactive)
+            SetInactive(false);
+        return true;
+    case CONTROL_MSG_REMOVE_ITEM: {
+        const int index = static_cast<int>(message->value);
+        if (index >= 0 && index <= count - 1)
+            m_items.erase(m_items.begin() + index);
+        if (m_selected > static_cast<int>(m_items.size()) - 1)
+            m_selected = static_cast<int>(m_items.size()) - 1;
+        // (The first selected too: the original's.)
+        if (m_selected <= 0)
+            SetInactive(true);
+        return true;
+    }
+    case CONTROL_MSG_GET_SELECTED:
+    case CONTROL_MSG_GET_SELECTED_2:
+        message->value = static_cast<uint32_t>(m_selected);
+        [[fallthrough]];
+    case CONTROL_MSG_GET_ITEM: {
+        const int index = static_cast<int>(message->value);
+        if (index >= 0 && index <= count - 1)
+            message->text = m_items[index];
+        else
+            message->value = static_cast<uint32_t>(-1);
+        return true;
+    }
+    case CONTROL_MSG_SELECT_ITEM:
+        if (message->value < static_cast<uint32_t>(count)) {
+            m_selected = static_cast<int>(message->value);
+            ShowSelected();
+        }
+        return true;
+    }
+    return C_TextControl::HandleMessage(message);
+}
+
+void C_SpinControl::SetInactive(bool inactive)
+{
+    m_inactive = inactive;
+    m_box->SetDimmed(inactive);
+    // (The arrows checked: the fix, the original's without them crashes.)
+    if (m_upButton)
+        m_upButton->SetInactive(m_inactive);
+    if (m_downButton)
+        m_downButton->SetInactive(m_inactive);
 }

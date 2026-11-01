@@ -1,7 +1,8 @@
 // The interface's small controls (game/controls.cpp, part 9c-ii; the base: game/control.h): the
 // text controls (a text box on the control's frame), the button, the text button, the picture, the
 // tooltip, the frame switch, the group (its input passed to the child under the cursor) and the
-// paged text control. Made by the factory (C_Control::CreateChild) by their descriptions' types.
+// paged text control; part 9c-iii-a: the slider, the scroll bar and the spin control. Made by the
+// factory (C_Control::CreateChild) by their descriptions' types.
 #pragma once
 
 #include "game/control.h"
@@ -9,6 +10,7 @@
 class C_Cursor;
 class C_PagedTextBox;
 class C_TextBox;
+struct S_vector;
 class I3D_face_group;
 class I3D_texture;
 
@@ -42,8 +44,30 @@ enum : uint32_t {
     CONTROL_MSG_GET_PAGES = 0x100009C,
     CONTROL_MSG_ADD_AREA = 0x100009D,                   // the frame named the text (under the root)
     CONTROL_MSG_GET_PAGE_BREAK = 0x100009E,
-    // A tooltip made (posted to target 0, value2 the tooltip).
-    CONTROL_MSG_TOOLTIP = 0x200007A,
+    // The slider's (value2 a float, 0 .. 100).
+    CONTROL_MSG_SET_SLIDER = 0x1000021,
+    CONTROL_MSG_GET_SLIDER = 0x1000022,                 // (value2 set; the scroll bar: its slider's)
+    // The scroll bar's.
+    CONTROL_MSG_SET_COUNT = 0x1000020,                  // positions (value; < 2: none, inactive)
+    CONTROL_MSG_SCROLL_UP = 0x1000023,                  // a page step (its arrows' press)
+    CONTROL_MSG_SCROLL_DOWN = 0x1000024,
+    CONTROL_MSG_SLIDER_MOVED = 0x1000025,               // (its slider's drag) the position from the slider
+    CONTROL_MSG_SET_PAGE_STEP = 0x1000080,              // (0: kept)
+    CONTROL_MSG_GET_POSITION = 0x100008F,
+    CONTROL_MSG_SET_POSITION = 0x200002B,               // (sent to the control its value names)
+    // The spin control's.
+    CONTROL_MSG_ADD_ITEM = 0x1000067,                   // the text, or the text id (value)
+    CONTROL_MSG_REMOVE_ITEM = 0x1000068,
+    CONTROL_MSG_GET_SELECTED = 0x1000069,               // its index (value) and text (also 0x100006C)
+    CONTROL_MSG_GET_ITEM = 0x100006A,                   // the text of the item `value` (none: value -1)
+    CONTROL_MSG_GET_SELECTED_2 = 0x100006C,
+    CONTROL_MSG_SELECT_ITEM = 0x100006D,
+    CONTROL_MSG_CLEAR_ITEMS = 0x2000065,                // (inactive)
+    CONTROL_MSG_PREVIOUS_ITEM = 0x200001B,              // (its arrows' press; around)
+    CONTROL_MSG_NEXT_ITEM = 0x200001C,
+    // A control to be ticked (posted to target 0 when made, value2 the control: the tooltip, the
+    // scroll bar and its arrows).
+    CONTROL_MSG_ADD_TICKER = 0x200007A,
 };
 
 // A control with a text box on its frame (vtable 0x00813e58): the text messages its box's; placed
@@ -183,7 +207,7 @@ protected:
     I3D_frame *m_activeFrame = nullptr;                 // +0x74
 };
 
-// A tooltip (type 0x15, vtable 0x008148f8): announced to the screen when made (CONTROL_MSG_TOOLTIP);
+// A tooltip (type 0x15, vtable 0x008148f8): announced to the screen when made (CONTROL_MSG_ADD_TICKER);
 // SHOW only arms it: it shows by the cursor once the cursor has stayed 500 ms, and hides when it
 // moves or a button is held. Not taking input.
 class C_Tooltip : public C_TextControl {                // 0x78 bytes
@@ -257,4 +281,132 @@ public:
     void Refresh() override;                            // 0x0065c7d0
     // (0x0065c7f0: C_PagedTextControl's.)
     bool HandleMessage(S_ControlMessage *message) override;   // 0x0065c800
+};
+
+// A slider (type 7, vtable 0x00815288; the scroll bar's): its "normal*" frame (its "actived*" one
+// while the cursor is over it) moved by the cursor along its "sliderbase*" frame (hidden), across
+// or up and down, whichever way the base is longer; its value 0 .. 100.
+class C_Slider : public C_Control {                     // 0xA0 bytes
+public:
+    C_Slider(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
+    ~C_Slider() override;                               // 0x0065e600 (0x0065e620): the cursor released
+
+    // The cursor taken, the frames found (false: one not), the limits set, the value 50.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00664680
+    int OnEnter(int id) override;                       // 0x006647c0
+    int OnLeave(int id) override;                       // 0x00664810
+    // The cursor's drag: moved with it (CONTROL_NOTIFY_08 when its value changed).
+    int OnInput08(int id) override;                     // 0x00664860
+    // SET_SLIDER / GET_SLIDER.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00664ac0
+    void SetInactive(bool inactive) override;           // 0x00664630
+
+protected:
+    // The limits from the frames' bounds (in the base by the slider's half size), the direction.
+    void SetLimits();                                   // 0x00664890
+    // The frame at the cursor's place along the base (when the cursor moved that way): its value
+    // changed (true).
+    bool Drag();                                        // 0x00664b30
+    void MoveTo(const S_vector &position);              // 0x00664b10
+    // The value from the place along the base (changed: true).
+    bool SetValueFrom(float place);                     // 0x00664ca0
+    // The value (clamped) and the frame there.
+    void SetValue(float value);                         // 0x00664d10
+
+    C_Cursor *m_cursor = nullptr;                       // +0x6C
+    I3D_frame *m_normalFrame = nullptr;                 // +0x70
+    I3D_frame *m_activeFrame = nullptr;                 // +0x74
+    I3D_frame *m_baseFrame = nullptr;                   // +0x78
+    // The frame's place's limits (from the normal frame's place) and their ranges.
+    float m_minX = 0.0f;                                // +0x7C
+    float m_minY = 0.0f;                                // +0x80
+    float m_maxX = 0.0f;                                // +0x84
+    float m_maxY = 0.0f;                                // +0x88
+    float m_rangeX = 0.0f;                              // +0x8C
+    float m_rangeY = 0.0f;                              // +0x90
+    bool m_horizontal = false;                          // +0x98
+    bool m_vertical = false;                            // +0x99
+    float m_value = 0.0f;                               // +0x9C
+};
+
+// A scroll bar (type 8, vtable 0x00814210): a position among `count`, its "barrow up*" / "barrow
+// down*" arrows (buttons) and its "slider*" (a slider) its children; held on its frame, it steps the
+// position toward the cursor every 50 ms. Its position sent to the control its value names.
+class C_ScrollBar : public C_Control {                  // 0x94 bytes
+public:
+    C_ScrollBar(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
+    ~C_ScrollBar() override = default;                  // 0x00658070 (0x00658090)
+
+    // The index of the child whose id's last 4 bits are `id`'s.
+    int FindChild(uint32_t id) const override;          // 0x00664e70
+    // While held: a step toward the cursor.
+    void Tick(int time) override;                       // 0x00665ce0
+    // The children made (each optional; posted to be ticked, the bar too); inactive.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00664eb0
+    // The focus' leave (not handled: not), the child with the id's enter.
+    int OnEnter(int id) override;                       // 0x00665750
+    int OnLeave(int id) override;                       // 0x006657d0
+    int OnInput05(int id) override;                     // 0x00665820
+    // The focus', else held (a step toward the cursor).
+    int OnPress(int id) override;                       // 0x006659f0
+    // A page up or down per 120.
+    int OnWheel(int id, int amount) override;           // 0x00665be0
+    int OnInput08(int id) override;                     // 0x00665a40
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00665330
+    // Not made active without positions or under an inactive parent.
+    void SetInactive(bool inactive) override;           // 0x00665a80
+
+protected:
+    // The focus (the child under the cursor), or null.
+    C_Control *Focus() const { return IsChild(m_focus) ? m_children[m_focus] : nullptr; }
+    // The position sent to the control the value names (SET_POSITION).
+    void SendPosition();                                // 0x006656c0
+    // A step toward the cursor's place on the frame (a visual's world bound).
+    void StepToCursor();                                // 0x00665890
+    // The arrows inactive at the ends, or the slider at the position.
+    void Update();                                      // 0x00665ae0
+
+    int m_repeatTime = 0;                               // +0x6C ms to the next step while held
+    bool m_held = false;                                // +0x70
+    C_Button *m_upButton = nullptr;                     // +0x74
+    C_Button *m_downButton = nullptr;                   // +0x78
+    C_Slider *m_slider = nullptr;                       // +0x7C
+    int m_count = 0;                                    // +0x80
+    int m_position = 0;                                 // +0x84
+    float m_step = 0.0f;                                // +0x88 the slider's value per position
+    int m_focus = -1;                                   // +0x8C
+    int m_pageStep = 1;                                 // +0x90
+};
+
+// A spin control (type 0x10, vtable 0x00815398): a text control showing one of its items, its
+// "barrow up*" / "barrow down*" arrows (buttons, its children) choosing the previous or the next.
+class C_SpinControl : public C_TextControl {            // 0x94 bytes
+public:
+    C_SpinControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_TextControl(scene, id, parent) {}
+    ~C_SpinControl() override = default;                // 0x006605c0 (0x006605e0)
+
+    // The index of the child whose id's last 4 bits are `id`'s.
+    int FindChild(uint32_t id) const override;          // 0x0064f4a0
+    // The arrows made (each optional), the box placed; inactive (false: no box).
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0064f4e0
+    // The box's hover; the input to the arrow with the id.
+    int OnEnter(int id) override;                       // 0x0064fc80
+    int OnLeave(int id) override;                       // 0x0064fcd0
+    int OnClick(int) override { return CONTROL_HANDLED; }   // 0x0064fd20
+    int OnInput05(int id) override;                     // 0x0064fc20
+    int OnPress(int id) override;                       // 0x0064fd30
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0064f870
+    // The box dimmed, the arrows inactive.
+    void SetInactive(bool inactive) override;           // 0x0064fd70
+
+protected:
+    C_Control *Focus() const { return IsChild(m_focus) ? m_children[m_focus] : nullptr; }
+    // The selected item shown, then CONTROL_NOTIFY_CHANGED.
+    void ShowSelected();
+
+    C_Button *m_upButton = nullptr;                     // +0x70
+    C_Button *m_downButton = nullptr;                   // +0x74
+    std::vector<C_str> m_items;                         // +0x78
+    int m_selected = -1;                                // +0x8C
+    int m_focus = -1;                                   // +0x90
 };

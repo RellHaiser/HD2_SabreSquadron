@@ -41,7 +41,7 @@ uint32_t FUN_00696fb0(uint32_t param_1, ...)
 {
   uint32_t uVar1;
   int *piVar2;
-  C_auto_00814980 *_this;
+  C_Control *_this;
   uint32_t local_34;
   uint32_t local_30;
   uint32_t *local_2c;
@@ -62,9 +62,9 @@ uint32_t FUN_00696fb0(uint32_t param_1, ...)
     local_2c = DAT_008ae5e0;
     local_28 = DAT_008ae5e4;
     FUN_00633370(&local_34,-1);
-    _this = (C_auto_00814980 *)*local_2c;
+    _this = (C_Control *)*local_2c;
   }
-  piVar2 = C_auto_00814980__FUN_0065cae0(_this,param_1,'\x01');
+  piVar2 = C_auto_00814980__C_Control__FindControl((C_auto_00814980*)(_this),param_1,true);
   if (piVar2 == 0) {
     return 0xffffffff;
   }

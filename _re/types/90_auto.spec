@@ -503,13 +503,13 @@ end
 class C_auto_00815068 size=0x4 vtable=0x00815068:67
 end
 
-class C_auto_00815288 size=0x4 vtable=0x00815288:33
+class C_Slider size=0x4 vtable=0x00815288:33
 end
 
 class C_FrameSwitch size=0x4 vtable=0x00815310:33
 end
 
-class C_auto_00815398 size=0x88 vtable=0x00815398:33
+class C_SpinControl size=0x88 vtable=0x00815398:33
   0x008 void* m_008
   0x00c int m_00c
   0x010 uint32_t m_010

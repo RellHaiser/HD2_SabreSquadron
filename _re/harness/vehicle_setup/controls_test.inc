@@ -18,6 +18,7 @@ struct S_CsCursor {
     uint32_t buttons = 0;
     int still = 0;
     S_vector position;
+    S_vector move;
 } g_csCursor;
 C_Cursor *C_Cursor::Acquire(I3D_scene *scene)
 {
@@ -36,6 +37,9 @@ bool C_Cursor::IsButtonDown(uint32_t buttons) const
 }
 void C_Cursor::GetPosition(S_vector *position) const { *position = g_csCursor.position; }
 int C_Cursor::GetStillTime() const { return g_csCursor.still; }
+void C_Cursor::GetMove(S_vector *move) const { *move = g_csCursor.move; }
+
+void ScrollTest(I3D_scene *scene, int st);
 
 namespace {
 
@@ -704,7 +708,7 @@ void ControlsTest()
         const int refs = g_csCursor.refs;
         WM(r.csTooltip, t->Create(frame, frame, nullptr) && t->m_cursor && g_csCursor.refs == refs + 1 && GfLogIs({"cursor acquire 1"}) &&
                             g_controlMessages.size() == 1 && g_controlMessages[0].target == 0 &&
-                            g_controlMessages[0].id == CONTROL_MSG_TOOLTIP && g_controlMessages[0].value == 0 &&
+                            g_controlMessages[0].id == CONTROL_MSG_ADD_TICKER && g_controlMessages[0].value == 0 &&
                             g_controlMessages[0].value2 == reinterpret_cast<uintptr_t>(t) && g_controlMessages[0].value3 == 0 &&
                             !t->m_box->m_placed);
         g_controlMessages.clear();
@@ -983,6 +987,7 @@ void ControlsTest()
     }
 
     WM(r.csHandled, g_csHandled);
+    ScrollTest(scene, st);
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
     g_gfLog.clear();
@@ -996,3 +1001,5 @@ void ControlsTest()
                 r.csText, r.csTextMsgs, r.csTitle, r.csLabel, r.csPicture, r.csPicMsgs, r.csGroup, r.csGroupInput, r.csSwitch,
                 r.csTextButton, r.csTooltip, r.csButton, r.csButtonHeld, r.csPaged, r.csPages, r.csHandled);
 }
+
+#include "scroll_test.inc"

@@ -292,7 +292,7 @@ f_0065ae90.cpp:889:46: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_
     (_this[0x14].vtable)->vf3b = _this[0x18].vtable;
 f_0065ae90.cpp:897:48: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_t (*)(...)' {aka 'unsigned int (*)(...)'} in assignment
     (_this[0x22].vtable)->vf3b = _this[0x18].vtable;
-f_00663df0.cpp:27:5: '_param_1' was not declared in this scope; did you mean 'param_1'?
+f_00663df0.cpp:25:5: '_param_1' was not declared in this scope; did you mean 'param_1'?
     _param_1 = 0x3ecccccd;
 f_006683f0.cpp:690:53: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
@@ -348,9 +348,9 @@ f_0066af00.cpp:1669:49: invalid type argument of unary '*' (have 'uint32_t' {aka
     tier1_operator_delete((void *)*DAT_008ae5d4);
 f_0066af00.cpp:1683:42: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     FUN_0066ed80(&puStack_a4,*DAT_008ae5e4 + 0x1000,DAT_008ae5e4);
-f_0066af00.cpp:1984:29: too few arguments to function
+f_0066af00.cpp:1983:29: too few arguments to function
     (*local_4->vtable->LinkTo)(local_4,param_2);
-f_0066af00.cpp:2064:25: too few arguments to function
+f_0066af00.cpp:2063:25: too few arguments to function
     (*pos->vtable->LinkTo)();
 f_0066f120.cpp:1244:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
@@ -488,13 +488,13 @@ f_00690970.cpp:2728:49: no matching function for call to 'tier1::C_str::C_str(in
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
 f_00690970.cpp:2740:47: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00690970.cpp:2913:48: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    this_00 = (C_auto_00814980 *)DAT_008ae5e0[-1];
-f_00690970.cpp:3032:21: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    *DAT_008ae5b0 = (int)pvVar6;
-f_00690970.cpp:3404:11: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_00690970.cpp:2913:42: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
+    this_00 = (C_Control *)DAT_008ae5e0[-1];
+f_00690970.cpp:3031:21: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+    *DAT_008ae5b0 = (int)pvVar5;
+f_00690970.cpp:3403:11: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     *DAT_008ae5b0 = (int)pvVar7;
-f_00690970.cpp:4192:43: could not convert '(tier1::C_str_rep*)(& piStack_14)' from 'tier1::C_str_rep*' to 'tier1::C_str'
+f_00690970.cpp:4191:43: could not convert '(tier1::C_str_rep*)(& piStack_14)' from 'tier1::C_str_rep*' to 'tier1::C_str'
     S_SoldierProfile__SetCustomName(this_00,(C_str_rep *)&piStack_14);
 f_00696f70.cpp:547:105: cannot convert 'char**' to 'uint32_t*' {aka 'unsigned int*'}
     uninitialized_copy4_42a730((uint32_t*)(ppcVar4),gh_bitcast<uint32_t*>(_this[2].m_014),ppcStack_a4 + 1);

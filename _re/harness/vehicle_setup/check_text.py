@@ -27,6 +27,8 @@ LINES = {
                 "ctRefresh ctDelete ctQueue").split(),
     "controls": ("csText csTextMsgs csTitle csLabel csPicture csPicMsgs csGroup csGroupInput csSwitch csTextButton "
                  "csTooltip csButton csButtonHeld csPaged csPages csHandled").split(),
+    "scroll": ("scFind scSlider scSliderDrag scSliderMsgs scBar scBarMsgs scBarInput scBarHeld scBarArrows scSpin "
+               "scSpinMsgs scSpinInput").split(),
 }
 
 

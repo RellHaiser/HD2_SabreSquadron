@@ -18,6 +18,8 @@ public:
     bool IsButtonDown(uint32_t buttons) const;          // 0x0066a3a0
     // Its place in the interface's coordinates (z -1).
     void GetPosition(S_vector *position) const;         // 0x0066a420
+    // Its last move in the interface's coordinates (z -1).
+    void GetMove(S_vector *move) const;                 // 0x0066a450
     // The milliseconds the cursor has stayed as it is (+0x40: the tooltips' wait, the buttons' repeat).
     int GetStillTime() const;
 };

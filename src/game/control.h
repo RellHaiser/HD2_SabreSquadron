@@ -64,6 +64,7 @@ enum : uint32_t {
     CONTROL_NOTIFY_SHOWN = 0x400D000,
     CONTROL_NOTIFY_WHEEL = 0x4011000,                   // (the amount not passed on)
     CONTROL_NOTIFY_KEY_CLICK = 0x4012000,               // (then the click)
+    CONTROL_NOTIFY_CHANGED = 0x4010000,                 // a value chosen (the scroll bar's, the spin control's)
     CONTROL_NOTIFY_13 = 0x4013000,
     CONTROL_NOTIFY_ANY = 0x4021000,                     // a callback for every notification (instead of the list)
 };
@@ -168,6 +169,11 @@ public:
     // The notification: the callbacks (their result dropped), then each route on it: its message
     // (the notification bits cleared) posted to its target, or handled by the control (-1).
     void Notify(uint32_t notification, uint32_t value);   // 0x0065d270
+    uint32_t GetId() const { return m_id; }
+    bool IsInactive() const { return m_inactive; }
+    // The control with `id` among this one's descendants (`up`: first up the parents to the top,
+    // then down; the ids' top 6 bits must match all the way; none: null).
+    C_Control *FindControl(uint32_t id, bool up);       // 0x0065cae0
     // A child control from its description (the factory; part 9c's last).
     bool CreateChild(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc);   // 0x0065d470
 

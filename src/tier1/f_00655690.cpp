@@ -484,7 +484,7 @@ uint32_t C_auto_00814980__FUN_00655fe0(C_auto_00814980 *_this,uint32_t param_1,i
   if (_this->m_058 == 0) {
     return 7;
   }
-  piVar1 = C_auto_00814980__FUN_0065cae0(_this,_this->m_058,'\x01');
+  piVar1 = C_auto_00814980__C_Control__FindControl((C_auto_00814980*)((C_Control *)_this),_this->m_058,true);
   if (0 < param_2) {
     iVar2 = (param_2 - 1U) / 0x78 + 1;
     do {
@@ -1658,70 +1658,6 @@ uint32_t FUN_00657dd0(void *_this,int *param_1,char *param_2,void *param_3, ...)
     uVar4 = 0;
   }
   return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
-}
-
-
-// 0x00658070
-uint32_t * FUN_00658070(void *_this,uint8_t param_1, ...)
-{
-  C_Control__FUN_00658090(_this);
-  if ((param_1 & 1) != 0) {
-    tier1_operator_delete(_this);
-  }
-  return _this;
-}
-
-
-// 0x00658090
-uint32_t C_Control__FUN_00658090(C_Control *_this, ...)
-{
-  int *piVar1;
-  uint32_t *puVar2;
-  uint32_t uVar3;
-  uint32_t uVar4;
-  uint32_t local_4;
-  _this[1].m_004 = '\0';
-  _this[1]._pad_0005[0] = '\0';
-  _this[1]._pad_0005[1] = '\0';
-  _this[1]._pad_0005[2] = '\0';
-  _this[1].m_008 = 0;
-  _this[1].m_00c = 0;
-  _this->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813dd0);
-  local_4 = 2;
-  while ((_this->m_008 != 0 && ((int)(_this->m_00c - _this->m_008) >> 2 != 0))) {
-    piVar1 = *(int **)(_this->m_00c - 4);
-    if (piVar1 != 0) {
-      (**(code **)(*piVar1 + 0x80))(1);
-    }
-    puVar2 = (uint32_t *)_this->m_00c;
-    copy4_653ea0(puVar2,puVar2,puVar2 - 1);
-    empty_function_653c80();
-    _this->m_00c = _this->m_00c - 4;
-  }
-  FUN_00653b80(&_this->m_018,(uint32_t *)_this->m_01c,(uint32_t *)_this->m_020);
-  _this->m_068 = 0;
-  _this->m_050 = 0;
-  _this->m_04c = 0;
-  _this->m_058 = 0;
-  tier1_operator_delete((void *)_this->m_030);
-  _this->m_030 = 0;
-  _this->m_034 = 0;
-  _this->m_038 = 0;
-  uVar3 = _this->m_020;
-  uVar4 = _this->m_01c;
-  local_4 &= 0xffffff00;
-  for (; uVar4 != uVar3; uVar4 = uVar4 + 0x18) {
-    C_str__dtor_C_str((C_str *)(uVar4 + 0x14));
-  }
-  tier1_operator_delete((void *)_this->m_01c);
-  _this->m_01c = 0;
-  _this->m_020 = 0;
-  _this->m_024 = 0;
-  tier1_operator_delete((void *)_this->m_008);
-  _this->m_008 = 0;
-  _this->m_00c = 0;
-  _this->m_010 = 0;
-  return 0;
 }
 
 

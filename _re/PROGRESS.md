@@ -6383,6 +6383,44 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     tier1_fixups.json); names/controls.txt (79); 79 functions in ported.txt. Stats: 8,254 of
     12,293 functions by hand (74.6 % by size).
 
+  PART 9c-iii-a DONE (2026-11-01): the slider, the scroll bar and the spin control (src/game/controls.*).
+  9c-iii split: iii-a types 7, 8 and 0x10; iii-b types 9 (0x00815200), 0xa (0x00814c28), 0x24
+  (0x00815178, with its 0x00814078 sub-control and helpers 0x00663e80 / 0x00664200 / 0x006641c0),
+  0x1e (0x008146d8) and 0x1f (0x00814650).
+  - C_Slider (type 7, vtable 0x00815288, 0xA0 bytes): "normal*" / "actived*" / "sliderbase*" (the base
+    hidden, its bound the track): the limits the base's bound less the slider's half size, clamped
+    to the interface (x 0 .. 1, y -0.75 .. 0), less the normal frame's place (its z for the y: the
+    original's); across or up and down, whichever range is longer; the value 0 .. 100 (50 at first).
+    SET_SLIDER 0x1000021 / GET_SLIDER 0x1000022 (value2 a float); its drag (OnInput08, the cursor's
+    move, C_Cursor::GetMove 0x0066a450 declared) moves the frame to the cursor and notifies
+    CONTROL_NOTIFY_08 when the value changed.
+  - C_ScrollBar (type 8, vtable 0x00814210, 0x94 bytes): its children "barrow up*" / "barrow down*"
+    (buttons, routed on the press to SCROLL_UP 0x1000023 / SCROLL_DOWN 0x1000024) and "slider*" (a
+    slider, routed on its drag to SLIDER_MOVED 0x1000025), each optional, posted to be ticked with
+    the bar (0x200007A, renamed CONTROL_MSG_ADD_TICKER: not only the tooltip's); SET_COUNT 0x1000020
+    (< 2: none, inactive; the slider's step 100 / (count - 1)), SET_PAGE_STEP 0x1000080,
+    GET_POSITION 0x100008F, SET_POSITION 0x200002B; a step sends SET_POSITION to the control its
+    value names (C_Control::FindControl 0x0065cae0, ported: up to the top, then down by the ids'
+    fields), SLIDER_MOVED posts it; CONTROL_NOTIFY_CHANGED 0x4010000. Held on its frame: a step
+    toward the cursor (the visual's world bound) at once, then every 50 ms after 300; the wheel a
+    page per 120. Kept: down past the last stops at the count, SET_POSITION takes the count.
+  - C_SpinControl (type 0x10, vtable 0x00815398, 0x94 bytes): a text control showing one of its
+    items (style 0x14), "barrow up*" / "barrow down*" routed to PREVIOUS 0x200001B / NEXT 0x200001C
+    (around); ADD_ITEM 0x1000067 (a text or a text id), REMOVE_ITEM 0x1000068 (kept: inactive when
+    the first is selected), GET_SELECTED 0x1000069 / 0x100006C, GET_ITEM 0x100006A, SELECT_ITEM
+    0x100006D, CLEAR_ITEMS 0x2000065; the enter sets the box's hover.
+  - Fixes: the scroll bar and the spin control without their arrows (the original's SetInactive
+    crashes), GET_SLIDER without a slider, the spin control's next / previous without items (it
+    showed the item past the end).
+  - Harness: scroll_test.inc in the text build, run by ControlsTest ("scroll:", 12 checks; the
+    cursor's move faked). 0 of 22 in both orders (no other build compiles the controls).
+  - Mutations (mutations/mutate_9c3a.py, generated, the text build on one mission in 4 parallel
+    runs): 333 of 407 caught (15 more do not build); new cases; 366 of 407 (41 equivalent, see the file's docstring).
+  - Build: MSVC clean. Tier 1: 483 errors in 81 files, 196 stubs (unchanged; six FindControl callers re-exported). ret_audit --src: 52.
+  - Ghidra: C_auto_00815288 / C_auto_00815398 renamed C_Slider / C_SpinControl (90_auto.spec,
+    class_names.json, auto_members.json; 0x0065cae0 moved to C_Control); names/controls.txt (40) and
+    control.txt (FindControl); 41 functions in ported.txt. Stats: 8,295 of 12,293 functions by hand (74.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

@@ -48,3 +48,4 @@
 0061e100 AddDescMessage3 | void __cdecl AddDescMessage3(void * desc, uint target, uint id, uint value, uint value2, uint value3)
 00614fa0 AddDescMessageText | void __cdecl AddDescMessageText(void * desc, uint target, uint id, uint value, int text)
 00615a90 PostControlMessage | void __thiscall PostControlMessage(void *this, void * message)
+0065cae0 C_Control::FindControl | void * __thiscall FindControl(C_Control *this, uint id, bool up)
