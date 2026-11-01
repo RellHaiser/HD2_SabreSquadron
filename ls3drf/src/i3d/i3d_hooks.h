@@ -10,7 +10,6 @@ class I3D_light;
 class I3D_model;
 class I3D_scene;
 class I3D_sector;
-struct S_shadowData;
 
 namespace ls3d::i3d {
 
@@ -46,9 +45,6 @@ I3D_frame *NewShadowFrame();
 // A skinned visual's (SNGM / SMMR) vertices of mesh level `level` in world or local space as it
 // draws them (I3D_singlemesh slot 0xBC).
 const S_vector4 *SkinnedVertices(I3D_frame *visual, int level);
-// The loader (load.cpp, 0x1005d740): a shadow file into `data` (`fileName`'s extension replaced
-// by ".6ds"; waits up to 4 s for a load in progress).
-I3D_RESULT OpenShadowFile(const char *fileName, uint32_t flags, S_shadowData *data);
 // The portals of a scene's sectors connected again (0x10042940, portal_build.cpp).
 void BuildPortals(I3D_scene *scene);
 

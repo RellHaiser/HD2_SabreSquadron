@@ -263,7 +263,7 @@ void I3D_morph::Init()
     C_morph::Init();
 }
 
-// 0x10035730
+// LS3DRF 0x10021010 (from LS3DF 0x10035730)
 void I3D_morph::Uninit()
 {
     C_morph::Uninit();

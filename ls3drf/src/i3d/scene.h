@@ -305,10 +305,9 @@ enum : uint32_t {
 
 namespace ls3d::i3d {
 
-// The scenes' shared resources (0x100bf2xx): their count, the snow texture, the weather's vertex
-// and index buffers.
+// The scenes' shared resources (0x100bf2xx): their count (Init counts up, nothing reads it), the
+// weather's vertex and index buffers.
 extern int g_sceneCount;                    // 0x100bf324
-extern ITexture *g_snowTexture;             // 0x100bf32c
 extern S_VBAlloc g_weatherVB;               // 0x100bf308
 extern S_IBAlloc g_weatherIB;               // 0x100bf314
 extern int g_weatherCapacity;               // 0x100bf320 particles the buffers hold

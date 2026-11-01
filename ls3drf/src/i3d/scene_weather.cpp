@@ -302,7 +302,7 @@ void I3D_scene::DrawWeather()
     }
     SetAlphaState(1);
     SetBlendState(0);
-    ITexture *texture = ((weatherFlags & WEATHER_SNOW) && g_snowTexture) ? g_snowTexture : ig::g_defaultTexture;
+    ITexture *texture = ig::g_defaultTexture;   // (no snow texture)
     g_pGfx->SetTexture(0, texture->deviceTexture);
     ig::SetZWrite(0);
     g_pGfx->SetRenderState(D3DRS_LIGHTING, FALSE);
