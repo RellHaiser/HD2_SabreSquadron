@@ -50,7 +50,7 @@ MUTATIONS = [
     (B, 'B 61 num', '        m_scroll = 0;\n', '        m_scroll = 1;\n'),
     (B, 'B 62 cmp', '    if (m_scrollRange != 0)\n', '    if (m_scrollRange == 0)\n'),
     (B, 'B 62 num', '    if (m_scrollRange != 0)\n', '    if (m_scrollRange != 1)\n'),
-    (B, 'B 63 bool', '        m_scrolls = true;\n', '        m_scrolls = false;\n'),
+    (B, 'B 63 bool', '        m_overflows = true;\n', '        m_overflows = false;\n'),
     (B, 'B 68 cmp', '    if (line > m_scrollRange)\n', '    if (line >= m_scrollRange)\n'),
     (B, 'B 69 bool', '    if (line > m_scrollRange)\n        return false;\n', '    if (line > m_scrollRange)\n        return true;\n'),
     (B, 'B 70 del', '    m_scroll = line;\n', '\n'),

@@ -4,8 +4,8 @@
 
 namespace {
 
-// The game's own styles (0x00642150; its first 90 indices): font, colour, size, width, x,
-// unknown14, unknown18, unknown1C, unknown20, align, unknown28, unknown2C, unknown2D, flags30.
+// The game's own styles (0x00642150; its first 90 indices): font, colour, size, width, x, y,
+// below, above, unknown20, align, valign, joins, wraps, flags30.
 const S_TextStyleDesc DEFAULT_STYLES[] = {
     {2, 0xFF000000, 0.04f, 0.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0, 1, 2, 0, 0, 0x4},   // 0
     {3, 0xFF000000, 0.02f, 0.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0, 4, 1, 1, 1, 0x0},   // 1
@@ -163,6 +163,12 @@ int CreateTextStyle(const S_TextStyleDesc &desc)
 void ReleaseTextStyle(int style)
 {
     g_textStyles.Release(style);
+}
+
+void LoadTextStyles()
+{
+    if (!g_textStyles.loaded)
+        g_textStyles.AddDefaults();
 }
 
 int NumTextStyles()

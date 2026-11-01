@@ -14,17 +14,22 @@ struct S_TextStyleDesc {                                // 0x34 bytes
     uint32_t color;                                     // ARGB
     float size;                                         // of the screen height
     float width;                                        // +0x0C the column's width
+    // A piece's place in the box (both >= 0; else the run is flowed into the lines).
     float x;                                            // +0x10 the column's left
-    float unknown14;                                    // -1 or 0.95 .. 0.98
-    float unknown18;
-    float unknown1C;
+    float y;                                            // +0x14 (-1 or 0.95 .. 0.98)
+    float below;                                        // +0x18 a line's space below its base
+    float above;                                        // +0x1C above its base (of the screen height)
     int unknown20;
     int align;                                          // +0x24 1 left, 2 right, 3 centred
-    int unknown28;
-    uint8_t unknown2C;
-    uint8_t unknown2D;
-    uint32_t flags30;                                   // 0x08: starts a new line
+    int valign;                                         // +0x28 the lines in the box: 1 top, 2 middle, 3 bottom
+    uint8_t joins;                                      // +0x2C continues the line (0: a line of its own)
+    uint8_t wraps;                                      // +0x2D wrapped into lines (0: one word)
+    uint32_t flags30;                                   // STYLE_* below
 };
+
+// S_TextStyleDesc::flags30.
+constexpr uint32_t STYLE_PASSWORD = 0x04;               // drawn (and measured) as '*'
+constexpr uint32_t STYLE_NEW_LINE = 0x08;               // a joined run starts a new line
 
 // A new style (a copy of `desc`): its index.
 int CreateTextStyle(const S_TextStyleDesc &desc);       // 0x00643c00 (__fastcall; 0x006420b0)
@@ -34,3 +39,6 @@ void ReleaseTextStyle(int style);                       // 0x00643bf0 (__fastcal
 const S_TextStyleDesc *GetTextStyle(int style);
 // The list's size (the freed places at its end not in it).
 int NumTextStyles();
+// The game's styles added to the list unless they are already (the text boxes' layout does it
+// before it reads the list).
+void LoadTextStyles();

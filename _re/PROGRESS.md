@@ -6020,6 +6020,51 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/text_box.txt (27); 41 functions in ported.txt. Stats: 8,004 of 12,293 functions
     by hand (73.3 % by size).
 
+  PART 9b-ii-a DONE (2026-11-01): the text box's layout and the UTF-8 decoder (src/game/text_box.*;
+  0x00645010..0x00646ab0 less the positioning, the vectors' code 0x0064c040 / 0x0064c080 /
+  0x0064c630 / 0x0064c840 / 0x0064ca50, DecodeUtf8 0x0064d830 and its test 0x0064d400). 9b-ii split:
+  9b-ii-b the positioning (0x00646ab0..0x00647b50: the lines' and pieces' places, the alignments,
+  the justified lines).
+  - Layout 0x00645590: the lines and pieces freed; no runs: false (the box stays dirty). Each run's
+    style and font selected (SelectStyle; none: false, the lines so far kept); a style with x and y
+    both >= 0 places a piece (its font size, its width, cut to the screen's width times the style's
+    width); else the run is flowed: a line of its own (joins 0), or joined to the last (the first
+    joined run after a line of its own, or one with the new-line flag 8, starts a new line); then
+    Position (9b-ii-b) and not dirty. A new line's room is the box's width (truncated).
+  - The measures: FontSize (the screen's height times the style's size, rounded), Advance (the
+    glyph's aspect times the size, rounded; a blank glyph 0.4 of the size; the password flag 4:
+    '*'; the glyph asked for twice), TextWidth (bytes, or the unicode font's UTF-8 characters, a bad
+    byte one signed character), Truncate (the first characters that fit; none or all: the text).
+  - FlowWords 0x00646240 (bytes): the room the line's, or the style's column (rounded) when less;
+    wrapped at the last blank (isspace under 0x80) that fits: the words before it on the line, the
+    rest on a new line. None on the first line: an empty line left, then on the new line the part
+    that fits is kept with no width and the run's rest dropped. Not wrapped (+0x2D 0): one word cut
+    to the column (the line's room less its whole width). A line's measures: its words' largest
+    font size (+0x1A), space above (+0x16) and below (+0x18) of the screen's height, rounded.
+  - FlowUtf8 0x00645ae0 (the unicode font): wrapped at the character that does not fit (blanks not
+    looked for); otherwise as FlowWords.
+  - DecodeUtf8: Unicode, Inc.'s ConvertUTF (its tables 0x00813ba0 / 0x00813ca0; isLegalUTF8 without
+    the surrogates' test): the bytes taken, -1 malformed, -2 too few bytes (the code point 0).
+  - Fixes: a blank first on an empty line with too long a word after it (FlowWords), and a
+    character wider than an empty line (FlowUtf8): the original starts new lines without end (the
+    port keeps what fits, and the character, on the line).
+  - text_style.h: S_TextStyleDesc's y (+0x14), below (+0x18), above (+0x1C), valign (+0x28), joins
+    (+0x2C), wraps (+0x2D), STYLE_PASSWORD / STYLE_NEW_LINE; LoadTextStyles (the layout loads the
+    game's styles first). text_box.h: S_TextWord (10 bytes), S_TextPiece (0x0E), S_TextLine's room
+    (+0x1C) and Reset 0x00645a10; C_TextBox's font (+0x24), style (+0x2C), m_overflows (+0x73,
+    was m_scrolls).
+  - Harness: textbox_test.inc's "layout:" line in the text build (11 checks; the fonts 2 and 3 fakes
+    with their glyphs' aspects, the positioning faked; the 9b-i checks on the real layout); the stub
+    profile's unicode option. 0 of 22 in both orders; the camera build 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9b2.py, the text build): the first run caught 169 of 206 (33
+    survived, 4 did not build); 17 equivalent (see the file's docstring), new cases for the rest
+    (fractions of 0.3 in the roundings, a column of 1 pixel, a tiny font without a column, a break's
+    blank width, the bad byte's glyph), FlowWords' needless reset of its blank flag dropped; the full
+    rerun caught 184 of 205 (the 17 equivalent). Baselines: the world build 0 of 22 in both
+    orders; the item build 0 of 37; the other five 0 of 37.
+  - Build: 206 files clean (MSVC). Tier 1: 505 errors in 85 files, 204 stubs (513 / 85 / 206 before; the layout's callers exported again). ret_audit --src: 52.
+  - Ghidra: names/text_box.txt (+18); 19 functions in ported.txt. Stats: 8,023 of 12,293 functions by hand (73.5 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

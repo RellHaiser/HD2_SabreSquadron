@@ -40,6 +40,9 @@ public:
     C_str GetLanguage();
     bool IsLanguage(const char *language);
     C_str GetTextDirectory();
+    // (The text boxes' layout, part 9b-ii: textbox_test.inc.)
+    bool UsesUnicodeFont() const { return m_unicodeFont; }
+    bool m_unicodeFont = false;
     S_HudOption *m_hudOption = nullptr;
     S_PlayMode *m_playMode = nullptr;
 };

@@ -21,11 +21,14 @@ struct S_TextRun {                                      // 5 bytes in the origin
     uint8_t style = 0;
 };
 
-// The laid-out text (the layout's, part 9b-ii): a line's words and its measures in the box's
-// pixels (y up), and the pieces the layout keeps.
-struct S_TextWord {
+// The laid-out text (Layout's): the lines of the flowed runs, their words (a run's text or a part
+// of it) and their measures in the box's pixels (y up), and the pieces (runs placed where their
+// styles say). Their places are Position's (part 9b-ii-b).
+struct S_TextWord {                                     // 10 bytes
     C_str text;                                         // +0x00
-    // (Its other fields: part 9b-ii.)
+    uint8_t style = 0;                                  // +0x04
+    int16_t width = 0;                                  // +0x06 pixels
+    int16_t x = -1;                                     // +0x08 in the line
 };
 struct S_TextLine {                                     // 0x20 bytes
     S_TextLine() = default;
@@ -33,16 +36,23 @@ struct S_TextLine {                                     // 0x20 bytes
     S_TextLine(const S_TextLine &) = delete;
     S_TextLine &operator=(const S_TextLine &) = delete;
 
+    // Its words deleted, its measures -1.
+    void Reset();                                       // 0x00645a10
+
     std::vector<S_TextWord *> words;                    // +0x00
     int16_t y = -1;                                     // +0x14 its base
-    int16_t above = -1;                                 // +0x16 its height above y
+    int16_t above = -1;                                 // +0x16 its height above y (its styles' largest)
     int16_t below = -1;                                 // +0x18 below y
-    int16_t gap = -1;                                   // +0x1A below that (to the next line)
-    int16_t unknown1C = -1;                             // +0x1C
+    int16_t gap = -1;                                   // +0x1A below that (its largest font size)
+    int16_t remaining = -1;                             // +0x1C the width left (the box's at first)
 };
-struct S_TextPiece {
+struct S_TextPiece {                                    // 0x0E bytes
     C_str text;                                         // +0x00
-    // (Its other fields: part 9b-ii.)
+    uint8_t style = 0;                                  // +0x04
+    int16_t width = -1;                                 // +0x06 pixels
+    int16_t height = -1;                                // +0x08 its font size
+    int16_t x = -1;                                     // +0x0A
+    int16_t y = -1;                                     // +0x0C
 };
 
 // Rich text in the rectangle of an interface visual: runs of text, each with a style (vtable
@@ -110,8 +120,9 @@ public:
     void SetRect(const float *rect);                    // 0x00644ea0
     // The lines and the pieces freed.
     void FreeLayout();                                  // 0x00644ec0
-    // The runs laid out into lines (part 9b-ii).
-    void Layout();                                      // 0x00645590
+    // The runs laid out: the flowed ones into lines, the placed ones into pieces, then positioned
+    // (false: a run without its style or font, or no runs; the box stays dirty).
+    bool Layout();                                      // 0x00645590
     // The margin left and right in 1024ths of the screen's width (AttachTo; 10 after construction,
     // the HUD's panels 0).
     void SetUnknown90(uint8_t value) { m_margin = value; }
@@ -129,6 +140,29 @@ private:
     // scene: 0).
     static float VisualDepth(I3D_scene *scene, I3D_frame *visual);   // 0x00644cf0
 
+    // The layout (part 9b-ii).
+    // A style and its font selected for the measures (false: no such style or font).
+    bool SelectStyle(int style);                        // 0x00645010
+    // The style's font size: its share of the screen's height in pixels (rounded).
+    int FontSize() const;                               // 0x006451d0
+    // A character's advance at `size` pixels (a blank's 0.4 of the size; the password style's: '*').
+    int Advance(int ch, int size);                      // 0x00645130
+    int TextWidth(const C_str &text, int size);         // 0x00645080
+    // The text's first characters that fit in `maxWidth` (none fit, or all: the text).
+    C_str Truncate(const C_str &text, float size, float maxWidth);   // 0x00645210
+    // A line at the end (the box's width left).
+    S_TextLine *AddLine();
+    // A run flowed into the lines from the last: by its UTF-8 characters with the unicode font,
+    // else by its words (both: 0).
+    int FlowRun(const S_TextRun &run);                  // 0x00645ac0
+    int FlowUtf8(const S_TextRun &run);                 // 0x00645ae0
+    int FlowWords(const S_TextRun &run);                // 0x00646240
+    // A word added to the last line: its measures the line's if larger, its width taken from the
+    // line's room.
+    void AddWord(S_TextLine *line, const C_str &text, uint8_t style, int width, int height, int above, int below);
+    // The lines and the pieces placed in the box (part 9b-ii-b).
+    bool Position();                                    // 0x00646b40
+
     int16_t m_screenWidth = 0;                          // +0x04
     int16_t m_screenHeight = 0;                         // +0x06
     // The rectangle (pixels; y up: top above bottom).
@@ -139,15 +173,16 @@ private:
     float m_width = 0.0f;                               // +0x18
     float m_height = 0.0f;                              // +0x1C
     float m_depth = 0.0f;                               // +0x20
+    C_Font *m_font = nullptr;                           // +0x24 the selected style's (the layout's)
     C_FontManager *m_fonts = nullptr;                   // +0x28
-    int m_unknown2C = 0;                                // +0x2C
+    const S_TextStyleDesc *m_style = nullptr;           // +0x2C the selected style
     std::vector<S_TextRun> m_runs;                      // +0x30
     std::vector<S_TextLine *> m_lines;                  // +0x44
     std::vector<S_TextPiece *> m_pieces;                // +0x58
     bool m_placed = false;                              // +0x70 (AttachTo / SetRect)
     bool m_unknown71 = false;                           // +0x71
     bool m_dirty = false;                               // +0x72 laid out again before use
-    bool m_scrolls = false;                             // +0x73 (a range once)
+    bool m_overflows = false;                           // +0x73 the text does not fit the box
     bool m_unknown74 = false;                           // +0x74
     int16_t m_unknown76 = 0;                            // +0x76
     int m_scroll = 0;                                   // +0x78 pixels

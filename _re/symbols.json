@@ -28022,13 +28022,68 @@
   "name": "S_TextLine::~S_TextLine",
   "proto": "void __thiscall ~S_TextLine(void *this)"
  },
+ "00645010": {
+  "module": "text_box",
+  "name": "C_TextBox::SelectStyle",
+  "proto": "bool __thiscall SelectStyle(C_TextBox *this, int style)"
+ },
+ "00645080": {
+  "module": "text_box",
+  "name": "C_TextBox::TextWidth",
+  "proto": "int __thiscall TextWidth(C_TextBox *this, C_str * text, int size)"
+ },
+ "00645130": {
+  "module": "text_box",
+  "name": "C_TextBox::Advance",
+  "proto": "int __thiscall Advance(C_TextBox *this, int ch, int size)"
+ },
+ "006451d0": {
+  "module": "text_box",
+  "name": "C_TextBox::FontSize",
+  "proto": "int __thiscall FontSize(C_TextBox *this)"
+ },
  "00645200": {
   "module": "zz_idioms",
   "name": "identity_645200"
  },
+ "00645210": {
+  "module": "text_box",
+  "name": "C_TextBox::Truncate",
+  "proto": "C_str * __thiscall Truncate(C_TextBox *this, C_str * out, C_str * text, float size, float maxWidth)"
+ },
+ "00645590": {
+  "module": "text_box",
+  "name": "C_TextBox::Layout",
+  "proto": "bool __thiscall Layout(C_TextBox *this)"
+ },
+ "00645a10": {
+  "module": "text_box",
+  "name": "S_TextLine::Reset",
+  "proto": "void __thiscall Reset(void *this)"
+ },
  "00645a80": {
   "module": "zz_idioms",
   "name": "vector_tidy_645a80"
+ },
+ "00645aa0": {
+  "module": "text_box",
+  "name": "S_TextWord::~S_TextWord",
+  "proto": "void __thiscall ~S_TextWord(void *this)"
+ },
+ "00645ac0": {
+  "module": "text_box",
+  "name": "C_TextBox::FlowRun",
+  "proto": "int __thiscall FlowRun(C_TextBox *this, void * run)"
+ },
+ "00645ae0": {
+  "module": "text_box",
+  "name": "C_TextBox::FlowUtf8",
+  "proto": "int __thiscall FlowUtf8(C_TextBox *this, void * run)"
+ },
+ "00646240": {
+  "module": "text_box",
+  "name": "C_TextBox::FlowWords",
+  "proto": "int __thiscall FlowWords(C_TextBox *this, void * run)"
  },
  "00648200": {
   "module": "hud",
@@ -28043,9 +28098,19 @@
   "module": "zz_idioms",
   "name": "empty_function_64b1e0"
  },
+ "0064c040": {
+  "module": "text_box",
+  "name": "construct_text_words_64c040",
+  "proto": "void * __thiscall construct_text_words_64c040(void * this, void * allocator)"
+ },
  "0064c060": {
   "module": "zz_idioms",
   "name": "vector_size_e4_64c060"
+ },
+ "0064c080": {
+  "module": "text_box",
+  "name": "text_run_at_64c080",
+  "proto": "void * __thiscall text_run_at_64c080(void * this, int index)"
  },
  "0064c090": {
   "module": "zz_idioms",
@@ -28080,6 +28145,21 @@
  "0064c620": {
   "module": "zz_idioms",
   "name": "empty_function_64c620"
+ },
+ "0064c630": {
+  "module": "text_box",
+  "name": "vector_insert_text_word_64c630",
+  "proto": "void __thiscall vector_insert_text_word_64c630(void * this, void * where, uint count, void * value)"
+ },
+ "0064c840": {
+  "module": "text_box",
+  "name": "vector_insert_text_line_64c840",
+  "proto": "void __thiscall vector_insert_text_line_64c840(void * this, void * where, uint count, void * value)"
+ },
+ "0064ca50": {
+  "module": "text_box",
+  "name": "vector_insert_text_piece_64ca50",
+  "proto": "void __thiscall vector_insert_text_piece_64ca50(void * this, void * where, uint count, void * value)"
  },
  "0064cc60": {
   "module": "text_style",
@@ -28125,6 +28205,16 @@
  "0064d050": {
   "module": "zz_idioms",
   "name": "construct_copy4_64d050"
+ },
+ "0064d400": {
+  "module": "text_box",
+  "name": "IsLegalUtf8",
+  "proto": "bool __fastcall IsLegalUtf8(uchar * source, int length)"
+ },
+ "0064d830": {
+  "module": "text_box",
+  "name": "DecodeUtf8",
+  "proto": "int __fastcall DecodeUtf8(uint * codePoint, char * text, int length)"
  },
  "0064dd40": {
   "module": "zz_idioms",

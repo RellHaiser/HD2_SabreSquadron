@@ -29,3 +29,25 @@
 0064c150 S_TextPiece::~S_TextPiece | void __thiscall ~S_TextPiece(void *this)
 0064c320 vector_insert_text_run_64c320 | void __thiscall vector_insert_text_run_64c320(void * this, void * where, uint count, void * value)
 0064d020 construct_text_run_64d020 | void __fastcall construct_text_run_64d020(void * where, void * run)
+
+# Part 9b-ii-a: the layout (0x00645010..0x00646ab0 less the positioning, its vectors' code
+# 0x0064c040 / 0x0064c080 / 0x0064c630 / 0x0064c840 / 0x0064ca50) and the UTF-8 decoder
+# (0x0064d400, 0x0064d830).
+00645010 C_TextBox::SelectStyle | bool __thiscall SelectStyle(C_TextBox *this, int style)
+00645080 C_TextBox::TextWidth | int __thiscall TextWidth(C_TextBox *this, C_str * text, int size)
+00645130 C_TextBox::Advance | int __thiscall Advance(C_TextBox *this, int ch, int size)
+006451d0 C_TextBox::FontSize | int __thiscall FontSize(C_TextBox *this)
+00645210 C_TextBox::Truncate | C_str * __thiscall Truncate(C_TextBox *this, C_str * out, C_str * text, float size, float maxWidth)
+00645590 C_TextBox::Layout | bool __thiscall Layout(C_TextBox *this)
+00645a10 S_TextLine::Reset | void __thiscall Reset(void *this)
+00645aa0 S_TextWord::~S_TextWord | void __thiscall ~S_TextWord(void *this)
+00645ac0 C_TextBox::FlowRun | int __thiscall FlowRun(C_TextBox *this, void * run)
+00645ae0 C_TextBox::FlowUtf8 | int __thiscall FlowUtf8(C_TextBox *this, void * run)
+00646240 C_TextBox::FlowWords | int __thiscall FlowWords(C_TextBox *this, void * run)
+0064c040 construct_text_words_64c040 | void * __thiscall construct_text_words_64c040(void * this, void * allocator)
+0064c080 text_run_at_64c080 | void * __thiscall text_run_at_64c080(void * this, int index)
+0064c630 vector_insert_text_word_64c630 | void __thiscall vector_insert_text_word_64c630(void * this, void * where, uint count, void * value)
+0064c840 vector_insert_text_line_64c840 | void __thiscall vector_insert_text_line_64c840(void * this, void * where, uint count, void * value)
+0064ca50 vector_insert_text_piece_64ca50 | void __thiscall vector_insert_text_piece_64ca50(void * this, void * where, uint count, void * value)
+0064d400 IsLegalUtf8 | bool __fastcall IsLegalUtf8(uchar * source, int length)
+0064d830 DecodeUtf8 | int __fastcall DecodeUtf8(uint * codePoint, char * text, int length)

@@ -1,5 +1,6 @@
 #include "game/text_box.h"
 
+#include <cctype>
 #include <cmath>
 
 #include "game/pending.h"
@@ -21,8 +22,100 @@ constexpr float INTERFACE_Y_SCALE = 1.3333334f;
 constexpr float MARGIN_UNIT = 1.0f / 1024.0f;
 // VisualDepth: the visual's distance less this.
 constexpr float DEPTH_OFFSET = 0.1f;
+// Advance: a blank glyph's width (of the font size).
+constexpr double BLANK_WIDTH = 0.4;
+
+// UTF-8 (Unicode, Inc.'s ConvertUTF.c, 0x00813ba0 / 0x00813ca0): a lead byte's trailing bytes, and
+// what the sum of a sequence's shifted bytes is over its code point.
+const int8_t UTF8_TRAILING[256] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
+};
+const uint32_t UTF8_OFFSETS[6] = {0x00000000, 0x00003080, 0x000E2080, 0x03C82080, 0xFA082080, 0x82082080};
+
+// A sequence of `length` bytes well formed (ConvertUTF.c's isLegalUTF8 without its surrogates' test).
+bool IsLegalUtf8(const uint8_t *source, int length)     // 0x0064d400 (__fastcall)
+{
+    const uint8_t *p = source + length;
+    uint8_t a;
+    switch (length) {
+    default:
+        return false;
+    case 4:
+        if ((a = *--p) < 0x80 || a > 0xBF)
+            return false;
+        [[fallthrough]];
+    case 3:
+        if ((a = *--p) < 0x80 || a > 0xBF)
+            return false;
+        [[fallthrough]];
+    case 2:
+        if ((a = *--p) > 0xBF)
+            return false;
+        switch (*source) {
+        case 0xE0:
+            if (a < 0xA0)
+                return false;
+            break;
+        case 0xF0:
+            if (a < 0x90)
+                return false;
+            break;
+        case 0xF4:
+            if (a > 0x8F)
+                return false;
+            break;
+        default:
+            if (a < 0x80)
+                return false;
+        }
+        [[fallthrough]];
+    case 1:
+        if (*source >= 0x80 && *source < 0xC2)
+            return false;
+    }
+    return *source <= 0xF4;
+}
 
 } // namespace
+
+int DecodeUtf8(uint32_t *codePoint, const char *text, int length)
+{
+    *codePoint = 0;
+    const auto *source = reinterpret_cast<const uint8_t *>(text);
+    const int extra = UTF8_TRAILING[*source];
+    if (extra >= length)
+        return -2;
+    if (!IsLegalUtf8(source, extra + 1))
+        return -1;
+    const uint8_t *p = source;
+    uint32_t ch = 0;
+    switch (extra) {
+    case 3:
+        ch += *p++;
+        ch <<= 6;
+        [[fallthrough]];
+    case 2:
+        ch += *p++;
+        ch <<= 6;
+        [[fallthrough]];
+    case 1:
+        ch += *p++;
+        ch <<= 6;
+        [[fallthrough]];
+    case 0:
+        ch += *p++;
+    }
+    ch -= UTF8_OFFSETS[extra];
+    *codePoint = ch > 0x7FFFFFFF ? 0xFFFD : ch;
+    return static_cast<int>(p - source);
+}
 
 S_TextLine::~S_TextLine()
 {
@@ -60,7 +153,7 @@ void C_TextBox::UpdateScrollRange()
     if (m_scroll < 0)
         m_scroll = 0;
     if (m_scrollRange != 0)
-        m_scrolls = true;
+        m_overflows = true;
 }
 
 bool C_TextBox::ScrollTo(int line)
@@ -369,4 +462,292 @@ void C_TextBox::FreeLayout()
     for (size_t i = m_pieces.size(); i-- > 0;)
         delete m_pieces[i];
     m_pieces.clear();
+}
+
+// --- the layout: the runs into lines of words and into pieces (part 9b-ii) -------------------------
+
+void S_TextLine::Reset()
+{
+    while (!words.empty()) {
+        delete words.back();
+        words.pop_back();
+    }
+    remaining = -1;
+    gap = -1;
+    y = -1;
+    above = -1;
+    below = -1;
+}
+
+bool C_TextBox::SelectStyle(int style)
+{
+    LoadTextStyles();
+    m_style = GetTextStyle(style);
+    if (!m_style)
+        return false;
+    m_font = m_fonts->FindFont(m_style->font);
+    return m_font != nullptr;
+}
+
+int C_TextBox::FontSize() const
+{
+    return static_cast<int>(static_cast<float>(m_screenHeight) * m_style->size + 0.5f);
+}
+
+int C_TextBox::Advance(int ch, int size)
+{
+    if (m_style->flags30 & STYLE_PASSWORD)
+        return static_cast<int>(static_cast<float>(size) * m_font->GetGlyph('*')->aspect + 0.5f);
+    const float pixels = static_cast<float>(size);
+    if (pixels * m_font->GetGlyph(ch)->aspect == 0.0f)
+        return static_cast<int>(static_cast<float>(static_cast<float>(size * BLANK_WIDTH) + 0.5));
+    // (The glyph asked for again.)
+    return static_cast<int>(pixels * m_font->GetGlyph(ch)->aspect + 0.5f);
+}
+
+int C_TextBox::TextWidth(const C_str &text, int size)
+{
+    const int length = static_cast<int>(text.Size());
+    int width = 0;
+    if (g_gameProfile.UsesUnicodeFont()) {
+        for (int i = 0; i < length;) {
+            uint32_t ch;
+            const int bytes = DecodeUtf8(&ch, text.c_str() + i, length - i);
+            if (bytes > 0) {
+                i += bytes;
+            } else {
+                ch = static_cast<uint32_t>(static_cast<signed char>(text.c_str()[i]));
+                ++i;
+            }
+            width += Advance(static_cast<int>(ch), size);
+        }
+    } else {
+        for (int i = 0; i < length; ++i)
+            width += Advance(static_cast<uint8_t>(text.c_str()[i]), size);
+    }
+    return width;
+}
+
+C_str C_TextBox::Truncate(const C_str &text, float size, float maxWidth)
+{
+    const int length = static_cast<int>(text.Size());
+    const bool unicode = g_gameProfile.UsesUnicodeFont();
+    int width = 0;
+    int i = 0;
+    while (i < length) {
+        int ch = static_cast<uint8_t>(text.c_str()[i]);
+        int bytes = 1;
+        if (unicode) {
+            uint32_t code;
+            bytes = DecodeUtf8(&code, text.c_str() + i, length - i);
+            if (bytes < 1) {
+                code = static_cast<uint32_t>(static_cast<signed char>(text.c_str()[i]));
+                bytes = 1;
+            }
+            ch = static_cast<int>(code);
+        }
+        width += Advance(ch, static_cast<int>(size));
+        if (static_cast<float>(width) > maxWidth)
+            break;
+        i += bytes;
+    }
+    if (i == 0 || i >= length)
+        return text;
+    return C_str(text.c_str(), static_cast<size_t>(i));
+}
+
+S_TextLine *C_TextBox::AddLine()
+{
+    auto *line = new S_TextLine();                      // (measures -1: the original resets it too)
+    line->remaining = static_cast<int16_t>(static_cast<int>(m_width));
+    m_lines.push_back(line);
+    return line;
+}
+
+void C_TextBox::AddWord(S_TextLine *line, const C_str &text, uint8_t style, int width, int height, int above, int below)
+{
+    line->words.push_back(new S_TextWord{text, style, static_cast<int16_t>(width)});
+    if (height > line->gap)
+        line->gap = static_cast<int16_t>(height);
+    if (above > line->above)
+        line->above = static_cast<int16_t>(above);
+    if (below > line->below)
+        line->below = static_cast<int16_t>(below);
+    line->remaining = static_cast<int16_t>(line->remaining - width);
+}
+
+int C_TextBox::FlowRun(const S_TextRun &run)
+{
+    if (g_gameProfile.UsesUnicodeFont())
+        return FlowUtf8(run);
+    return FlowWords(run);
+}
+
+namespace {
+
+// A flow's measures from the selected style, in pixels: the font size, the column's width, the room
+// in the line (the column's width when it is less), the line's space above and below its base.
+struct S_FlowMeasures {
+    int size, column, room, above, below;
+};
+
+S_FlowMeasures FlowMeasures(const S_TextStyleDesc &style, int screenWidth, int screenHeight, const S_TextLine &line)
+{
+    const float height = static_cast<float>(screenHeight);
+    S_FlowMeasures m;
+    m.size = static_cast<int>(height * style.size + 0.5f);
+    m.column = static_cast<int>(static_cast<float>(screenWidth) * style.width + 0.5f);
+    m.room = line.remaining;
+    if (m.column > 0 && m.column < m.room)
+        m.room = m.column;
+    m.above = static_cast<int>(height * style.above + 0.5f);
+    m.below = static_cast<int>(height * style.below + 0.5f);
+    return m;
+}
+
+} // namespace
+
+int C_TextBox::FlowWords(const S_TextRun &run)
+{
+    C_str text = run.text;
+    S_TextLine *line = m_lines.back();
+    S_FlowMeasures m = FlowMeasures(*m_style, m_screenWidth, m_screenHeight, *line);
+    if (!m_style->wraps) {
+        // One word, cut to the column.
+        AddWord(line, text, run.style, TextWidth(text, FontSize()), m.size, m.above, m.below);
+        S_TextWord *word = line->words.back();
+        if (m_style->width != 0.0f && m.column < word->width) {
+            word->text = Truncate(word->text, static_cast<float>(FontSize()), static_cast<float>(m.column));
+            word->width = static_cast<int16_t>(TextWidth(word->text, FontSize()));
+        }
+        return 0;
+    }
+    // Wrapped at the last blank that fits (none yet: 0 on the first line, -1 on the flow's own; 0 is
+    // a blank first too).
+    int lastSpace = 0, spaceX = 0, x = 0;
+    bool spaceSeen = false;                             // (a blank first: once one is, it stays)
+    for (int i = 0; i < static_cast<int>(text.Size());) {
+        const uint8_t ch = static_cast<uint8_t>(text.c_str()[i]);
+        const int next = Advance(ch, m.size) + x;
+        if (next <= m.room) {
+            if (ch < 0x80 && std::isspace(ch)) {
+                spaceX = x;
+                lastSpace = i;
+                spaceSeen = true;
+            }
+            x = next;
+            ++i;
+            continue;
+        }
+        // (Fix: a blank first on an empty line with too long a word after it taken as no blank; the
+        // original starts new lines without end.)
+        if (lastSpace == -1 || (lastSpace == 0 && spaceSeen && line->words.empty())) {
+            // A word wider than a line: the part that fits kept (no width), the run's rest dropped.
+            AddWord(line, C_str(text.c_str(), static_cast<size_t>(i)), run.style, spaceX, m.size, m.above, m.below);
+            return 0;
+        }
+        if (lastSpace != 0) {
+            AddWord(line, C_str(text.c_str(), static_cast<size_t>(lastSpace)), run.style, spaceX, m.size, m.above,
+                    m.below);
+            text = C_str(text.c_str() + lastSpace + 1);
+        }
+        line = AddLine();
+        m.room = line->remaining;
+        if (m.column > 0 && m.column < m.room)
+            m.room = m.column;
+        lastSpace = -1;
+        spaceX = 0;
+        x = 0;
+        i = 0;
+    }
+    AddWord(line, text, run.style, x, m.size, m.above, m.below);
+    return 0;
+}
+
+int C_TextBox::FlowUtf8(const S_TextRun &run)
+{
+    C_str text = run.text;
+    S_TextLine *line = m_lines.back();
+    S_FlowMeasures m = FlowMeasures(*m_style, m_screenWidth, m_screenHeight, *line);
+    if (!m_style->wraps) {
+        AddWord(line, text, run.style, TextWidth(text, FontSize()), m.size, m.above, m.below);
+        S_TextWord *word = line->words.back();
+        if (m_style->width != 0.0f && word->width > m.column) {
+            word->text = Truncate(word->text, static_cast<float>(FontSize()), static_cast<float>(m.column));
+            word->width = static_cast<int16_t>(TextWidth(word->text, FontSize()));
+        }
+        return 0;
+    }
+    // Wrapped at the character that does not fit (the blanks not looked for).
+    int x = 0;
+    for (int i = 0; i < static_cast<int>(text.Size());) {
+        uint32_t ch;
+        int bytes = DecodeUtf8(&ch, text.c_str() + i, static_cast<int>(text.Size()) - i);
+        if (bytes <= 0) {
+            ch = static_cast<uint32_t>(static_cast<signed char>(text.c_str()[i]));
+            bytes = 1;
+        }
+        const int next = Advance(static_cast<int>(ch), m.size) + x;
+        // (Fix: a character wider than an empty line kept on it; the original starts new lines without
+        // end.)
+        if (next > m.room && !(i == 0 && line->words.empty())) {
+            AddWord(line, C_str(text.c_str(), static_cast<size_t>(i)), run.style, x, m.size, m.above, m.below);
+            text = C_str(text.c_str() + i);
+            line = AddLine();
+            m.room = line->remaining;
+            if (m.column > 0 && m.column < m.room)
+                m.room = m.column;
+            i = 0;
+            x = 0;
+            continue;
+        }
+        i += bytes;
+        x = next;
+    }
+    AddWord(line, text, run.style, x, m.size, m.above, m.below);
+    return 0;
+}
+
+bool C_TextBox::Layout()
+{
+    FreeLayout();
+    if (m_runs.empty())
+        return false;
+    bool started = false;
+    for (size_t i = 0; i < m_runs.size(); ++i) {
+        if (!SelectStyle(m_runs[i].style))
+            return false;
+        const S_TextRun run = m_runs[i];
+        if (m_style->x >= 0.0f && m_style->y >= 0.0f) {
+            // A piece, cut to its column.
+            auto *piece = new S_TextPiece{run.text, run.style};
+            m_pieces.push_back(piece);
+            piece->height = static_cast<int16_t>(FontSize());
+            piece->width = static_cast<int16_t>(TextWidth(run.text, FontSize()));
+            if (m_style->width != 0.0f) {
+                const float maxWidth = static_cast<float>(m_screenWidth) * m_style->width;
+                if (static_cast<float>(piece->width) > maxWidth) {
+                    piece->text = Truncate(piece->text, static_cast<float>(piece->height), maxWidth);
+                    piece->width = static_cast<int16_t>(TextWidth(piece->text, FontSize()));
+                }
+            }
+            continue;
+        }
+        // Flowed: a line of its own, or joined to the last (a new line for the first, or asked for).
+        if (!m_style->joins) {
+            started = false;
+            AddLine();
+        } else if (m_style->flags30 & STYLE_NEW_LINE) {
+            started = true;
+            AddLine();
+        } else if (!started) {
+            started = true;
+            AddLine();
+        }
+        if (FlowRun(run) < 0)
+            return false;
+    }
+    Position();
+    m_dirty = false;
+    return true;
 }

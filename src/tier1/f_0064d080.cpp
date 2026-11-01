@@ -18,129 +18,22 @@ uint32_t FUN_0064d080(...)
 uint32_t FUN_0064d3d0(uint8_t *param_1,uint8_t *param_2, ...)
 {
   uint8_t *pbVar1;
-  uint32_t uVar2;
+  bool bVar2;
+  uint32_t uVar3;
+  undefined3 extraout_var;
   while( true ) {
-    uVar2 = (uint32_t)*param_1;
-    pbVar1 = param_1 + (char)(&DAT_00813ba0)[uVar2] + 1;
+    uVar3 = (uint32_t)*param_1;
+    pbVar1 = param_1 + (char)(&DAT_00813ba0)[uVar3] + 1;
     if (param_2 < pbVar1) break;
-    uVar2 = FUN_0064d400(param_1,(char)(&DAT_00813ba0)[uVar2] + 1);
-    if ((char)uVar2 != '\x01') break;
+    bVar2 = IsLegalUtf8(param_1,(char)(&DAT_00813ba0)[uVar3] + 1);
+    uVar3 = CONCAT31(extraout_var,bVar2);
+    if (!bVar2) break;
     param_1 = pbVar1;
     if (param_2 <= pbVar1) {
-      return uVar2;
+      return uVar3;
     }
   }
-  return uVar2 & 0xffffff00;
-}
-
-
-// 0x0064d400
-uint32_t FUN_0064d400(uint8_t *param_1,int param_2, ...)
-{
-  uint8_t *pbVar1;
-  uint8_t bVar2;
-  uint8_t bVar3;
-  uint8_t *pbVar4;
-  uint3 uVar5;
-  undefined3 uVar6;
-  bool bVar7;
-  pbVar4 = param_1 + param_2;
-  switch(param_2) {
-  case 1:
-    goto switchD_0064d409_caseD_1;
-  case 2:
-    goto switchD_0064d409_caseD_2;
-  case 3:
-    break;
-  case 4:
-    pbVar1 = pbVar4 - 1;
-    pbVar4--;
-    if ((*pbVar1 < 0x80) || (0xbf < *pbVar1)) goto switchD_0064d409_default;
-    break;
-  default:
-    goto switchD_0064d409_default;
-  }
-  pbVar1 = pbVar4 - 1;
-  pbVar4--;
-  if ((*pbVar1 < 0x80) || (0xbf < *pbVar1)) goto switchD_0064d409_default;
-switchD_0064d409_caseD_2:
-  bVar2 = pbVar4[-1];
-  uVar5 = (uint3)((uint32_t)pbVar4 >> 8);
-  pbVar4 = (uint8_t *)CONCAT31(uVar5,bVar2);
-  if (0xbf < bVar2) goto switchD_0064d409_default;
-  bVar3 = *param_1;
-  if (bVar3 == 0xe0) {
-    if (bVar2 < 0xa0) goto switchD_0064d409_default;
-  }
-  else {
-    if (bVar3 == 0xf0) {
-      bVar7 = bVar2 < 0x90;
-    }
-    else {
-      if (bVar3 == 0xf4) {
-        if (0x8f < bVar2) {
-          return (uint32_t)uVar5 << 8;
-        }
-        goto switchD_0064d409_caseD_1;
-      }
-      bVar7 = bVar2 < 0x80;
-    }
-    if (bVar7) goto switchD_0064d409_default;
-  }
-switchD_0064d409_caseD_1:
-  bVar2 = *param_1;
-  uVar6 = (undefined3)((uint32_t)pbVar4 >> 8);
-  pbVar4 = (uint8_t *)CONCAT31(uVar6,bVar2);
-  if ((bVar2 < 0x80) || (0xc1 < bVar2)) {
-    return CONCAT31(uVar6,bVar2 < 0xf5);
-  }
-switchD_0064d409_default:
-  return (uint32_t)pbVar4 & 0xffffff00;
-}
-
-
-// 0x0064d830
-int FUN_0064d830(uint32_t *param_1,uint8_t *param_2,int param_3, ...)
-{
-  uint8_t bVar1;
-  uint32_t uVar2;
-  uint32_t uVar3;
-  uint8_t *pbVar4;
-  uint8_t *pbVar5;
-  int iVar6;
-  *param_1 = 0;
-  iVar6 = 0;
-  bVar1 = *param_2;
-  uVar3 = (uint32_t)(uint16_t)(short)(char)(&DAT_00813ba0)[bVar1];
-  if (param_3 <= (int)uVar3) {
-    return -2;
-  }
-  uVar2 = FUN_0064d400(param_2,uVar3 + 1);
-  if ((char)uVar2 == '\0') {
-    return -1;
-  }
-  pbVar5 = param_2;
-  pbVar4 = param_2;
-  switch(uVar3) {
-  case 3:
-    pbVar5 = param_2 + 1;
-    iVar6 = (uint32_t)bVar1 << 6;
-  case 2:
-    pbVar4 = pbVar5 + 1;
-    iVar6 = (iVar6 + (uint32_t)*pbVar5) * 0x40;
-  case 1:
-    pbVar5 = pbVar4 + 1;
-    iVar6 = (iVar6 + (uint32_t)*pbVar4) * 0x40;
-  case 0:
-    iVar6 = iVar6 + (uint32_t)*pbVar5;
-    pbVar5++;
-  }
-  if (0x7fffffff < (uint32_t)(iVar6 - *(int *)(&DAT_00813ca0 + uVar3 * 4))) {
-    *param_1 = 0xfffd;
-    return (int)pbVar5 - (int)param_2;
-  }
-  *param_1 = iVar6 - *(int *)(&DAT_00813ca0 + uVar3 * 4);
-  return (int)pbVar5 - (int)param_2;
+  return uVar3 & 0xffffff00;
 }
 
 

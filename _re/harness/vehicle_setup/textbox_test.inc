@@ -1,24 +1,33 @@
-// Part 9b-i's text box (game/text_box.cpp: its runs, edit, selection, hover, scroll and place), in
-// the text build (build_text.bat: the camera build with TEXT_TEST and the real C_TextBox; the
-// loader's text box fakes left out), run by CameraTest instead of the camera's tests: the layout
-// (part 9b-ii; its lines from g_tbLines) and Render (9b-iii) faked; IGraph's screen 800 x 600.
-// Prints "textbox:" with 1 per check met.
+// Part 9b's text box (game/text_box.cpp: 9b-i its runs, edit, selection, hover, scroll and place;
+// 9b-ii its layout), in the text build (build_text.bat: the camera build with TEXT_TEST and the real
+// C_TextBox; the loader's text box fakes left out), run by CameraTest instead of the camera's tests:
+// the positioning (part 9b-ii-b) and Render (9b-iii) faked; IGraph's screen 800 x 600; the fonts 2
+// and 3 fakes (C_TbFont). Prints "textbox:" (9b-i) and "layout:" (9b-ii) with 1 per check met.
 
-// The layout: the lines asked for (y, above, below, gap), logged.
+// The lines asked for (y, above, below, gap): the 9b-i tests' (TbLayout), and the positioning's
+// in place of the layout's when there are any.
 std::vector<std::array<int16_t, 4>> g_tbLines;
-void C_TextBox::Layout()
+void TbSetLines(std::vector<S_TextLine *> &lines)
 {
-    GfLog("layout");
-    FreeLayout();
+    for (size_t i = lines.size(); i-- > 0;)
+        delete lines[i];
+    lines.clear();
     for (const auto &l : g_tbLines) {
         auto *line = new S_TextLine();
         line->y = l[0];
         line->above = l[1];
         line->below = l[2];
         line->gap = l[3];
-        m_lines.push_back(line);
+        lines.push_back(line);
     }
-    m_dirty = false;
+}
+// The positioning: logged.
+bool C_TextBox::Position()
+{
+    GfLog("position");
+    if (!g_tbLines.empty())
+        TbSetLines(m_lines);
+    return true;
 }
 void C_TextBox::Render() { GfLog("render"); }
 // The visuals' world boxes: logged, then up to date.
@@ -70,8 +79,101 @@ void TbPlaceFractions(C_TextBox &box)
 }
 void TbLayout(C_TextBox &box)
 {
-    box.Layout();
+    box.FreeLayout();
+    TbSetLines(box.m_lines);
+    box.m_dirty = false;
     g_gfLog.clear();
+}
+
+// --- part 9b-ii ---
+
+struct S_LayoutResults {
+    bool tbStyle = true, tbAdvance = true, tbWidth = true, tbUtf8 = true, tbTruncate = true, tbPieces = true;
+    bool tbLines = true, tbWords = true, tbChars = true, tbFail = true, tbMeasures = true;
+};
+
+// A font whose glyphs' aspects are its table's (others 0.5), the codes asked for kept.
+struct C_TbFont : C_Font {
+    std::vector<int> asked;
+    S_Glyph glyph = {};
+    void GrowVertices() override {}
+    void Flush() override {}
+    void ClearVertices() override {}
+    void Select() override {}
+    const S_Glyph *GetGlyph(int ch) override
+    {
+        asked.push_back(ch);
+        switch (ch) {
+        case ' ':
+            glyph.aspect = 0.0f;
+            break;
+        case 'W':
+        case 0x416:                                     // (Cyrillic Zhe)
+            glyph.aspect = 1.0f;
+            break;
+        case 'i':
+            glyph.aspect = 0.25f;
+            break;
+        case '*':
+            glyph.aspect = 0.75f;
+            break;
+        default:
+            glyph.aspect = 0.5f;
+        }
+        return &glyph;
+    }
+    void AddQuad(int, uint32_t, int, int, int, int, float) override {}
+};
+
+// The profile's unicode font option.
+void TbUnicode(bool on) { g_gameProfile.m_unicodeFont = on; }
+
+// A style (font 3, 0.02 of the height: 12 pixels; above 18, below 6; left aligned): its index.
+int TbStyle(float width, uint8_t joins, uint8_t wraps, uint32_t flags = 0, float x = -1.0f, float y = -1.0f, int font = 3,
+            float size = 0.02f, float above = 0.03f, float below = 0.01f)
+{
+    const S_TextStyleDesc desc = {font, 0xFFFFFFFF, size, width, x, y, below, above, 0, 1, 1, joins, wraps, flags};
+    return CreateTextStyle(desc);
+}
+// The box `width` pixels wide (100 high).
+void TbWidth(C_TextBox &box, float width)
+{
+    const float rect[7] = {0.0f, 100.0f, width, 0.0f, width, 100.0f, 0.5f};
+    box.SetRect(rect);
+}
+// The box's runs (text, style), laid out; the log cleared first.
+bool TbLayoutRuns(C_TextBox &box, std::initializer_list<std::pair<const char *, int>> runs)
+{
+    box.Clear();
+    for (const auto &r : runs)
+        box.AddText(C_str(r.first), static_cast<uint8_t>(r.second));
+    g_gfLog.clear();
+    return box.Layout();
+}
+// The lines: their words (text/width) and measures (gap above below remaining).
+std::string TbLinesText(const C_TextBox &box)
+{
+    std::string s;
+    for (const S_TextLine *line : box.m_lines) {
+        s += "[";
+        for (const S_TextWord *w : line->words)
+            s += CmText("%s/%d ", w->text.c_str(), w->width);
+        s += CmText("%d %d %d %d]", line->gap, line->above, line->below, line->remaining);
+    }
+    return s;
+}
+std::string TbPiecesText(const C_TextBox &box)
+{
+    std::string s;
+    for (const S_TextPiece *p : box.m_pieces)
+        s += CmText("[%s/%d %d %d %d %d]", p->text.c_str(), p->style, p->width, p->height, p->x, p->y);
+    return s;
+}
+// A code point decoded: its bytes taken (and the code point).
+int TbDecode(const char *text, int length, uint32_t *ch)
+{
+    *ch = 0x12345;
+    return DecodeUtf8(ch, text, length);
 }
 
 } // namespace
@@ -103,6 +205,11 @@ void TextBoxTest()
     }
 
     C_TextBox box;
+    // The fonts 2 and 3 the fakes (first in the manager's list).
+    C_TbFont font2, font3;
+    font2.m_id = 2;
+    font3.m_id = 3;
+    box.m_fonts->m_fonts.insert(box.m_fonts->m_fonts.begin(), {&font2, &font3});
     // --- runs: added, by id, replaced (out of range: added), the text of one ---
     {
         box.m_dirty = false;
@@ -238,14 +345,14 @@ void TextBoxTest()
         g_tbLines = {};
         TbLayout(box);
         box.m_scroll = 5;
-        box.m_scrolls = false;
+        box.m_overflows = false;
         box.UpdateScrollRange();
-        WM(r.tbRange, box.m_scrollRange == 0 && box.m_scroll == 0 && !box.m_scrolls);
+        WM(r.tbRange, box.m_scrollRange == 0 && box.m_scroll == 0 && !box.m_overflows);
         g_tbLines = {{300, 1, 1, 1}, {250, 1, 1, 1}};
         TbLayout(box);
         box.m_scroll = 80;
         box.UpdateScrollRange();
-        WM(r.tbRange, box.m_scrollRange == 52 && box.m_scroll == 52 && box.m_scrolls);
+        WM(r.tbRange, box.m_scrollRange == 52 && box.m_scroll == 52 && box.m_overflows);
         g_tbLines = {{300, 1, 1, 1}, {199, 1, 1, 1}};
         TbLayout(box);
         box.UpdateScrollRange();
@@ -272,7 +379,7 @@ void TextBoxTest()
         box.m_dirty = true;
         box.m_scrollRange = 33;
         g_gfLog.clear();
-        WM(r.tbRange, box.GetScrollRange() == 33 && GfLogIs({"layout"}) && box.GetScrollRange() == 33 && g_gfLog.size() == 1);
+        WM(r.tbRange, box.GetScrollRange() == 33 && GfLogIs({"position"}) && box.GetScrollRange() == 33 && g_gfLog.size() == 1);
     }
     // --- a line scrolled into the box: above it, below it; already in it, or too high: none ---
     {
@@ -309,7 +416,7 @@ void TextBoxTest()
         box.m_dirty = true;
         box.m_scroll = 0;
         g_gfLog.clear();
-        WM(r.tbScrollTo, box.ScrollToLine(0) && GfLogIs({"layout"}));
+        WM(r.tbScrollTo, box.ScrollToLine(0) && GfLogIs({"position"}));
     }
     // --- a line's centre: the box's x over the screen's width, its y (less half its gap and the
     // scroll) over the width negated; outside the box: 0, 0 ---
@@ -340,7 +447,7 @@ void TextBoxTest()
         box.m_dirty = true;
         g_gfLog.clear();
         box.GetLineCentre(0);
-        WM(r.tbCentre, GfLogIs({"layout"}));
+        WM(r.tbCentre, GfLogIs({"position"}));
     }
     // --- the rectangle: set, attached to a visual (its world box, the margins), its depth ---
     {
@@ -422,9 +529,341 @@ void TextBoxTest()
         box.FreeLayout();
         WM(r.tbFree, box.m_lines.empty() && box.m_pieces.empty());
         S_TextLine line;
-        WM(r.tbFree, line.y == -1 && line.above == -1 && line.below == -1 && line.gap == -1 && line.unknown1C == -1);
+        WM(r.tbFree, line.y == -1 && line.above == -1 && line.below == -1 && line.gap == -1 && line.remaining == -1);
     }
 
+    // ===== part 9b-ii: the layout =====
+    S_LayoutResults l;
+    g_tbLines.clear();
+    const int st12 = TbStyle(0.0f, 1, 1);
+    // --- the style selected: its font (the manager's), its font size; none: false ---
+    {
+        WM(l.tbStyle, box.SelectStyle(st12) && box.m_style == GetTextStyle(st12) && box.m_font == &font3 && box.FontSize() == 12);
+        WM(l.tbStyle, !box.SelectStyle(-1) && box.m_style == nullptr && box.m_font == &font3);
+        WM(l.tbStyle, !box.SelectStyle(NumTextStyles()) && box.m_style == nullptr);
+        const int noFont = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 99);
+        WM(l.tbStyle, !box.SelectStyle(noFont) && box.m_style == GetTextStyle(noFont) && box.m_font == nullptr);
+        // (15.54 and 15.06, rounded.)
+        const int big = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 2, 0.0259f);
+        WM(l.tbStyle, box.SelectStyle(big) && box.m_font == &font2 && box.FontSize() == 16);
+        const int small = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.0251f);
+        WM(l.tbStyle, box.SelectStyle(small) && box.m_font == &font3 && box.FontSize() == 15);
+        const int third = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.0255f);
+        WM(l.tbStyle, box.SelectStyle(third) && box.FontSize() == 15);
+        ReleaseTextStyle(third);
+        ReleaseTextStyle(small);
+        ReleaseTextStyle(big);
+        ReleaseTextStyle(noFont);
+    }
+    // --- a character's advance: its glyph's aspect at the size, rounded (the glyph asked for twice);
+    // a blank 0.4 of the size; the password style's '*' ---
+    {
+        box.SelectStyle(st12);
+        font3.asked.clear();
+        WM(l.tbAdvance, box.Advance('a', 12) == 6 && (font3.asked == std::vector<int>{'a', 'a'}));
+        font3.asked.clear();
+        WM(l.tbAdvance, box.Advance(' ', 12) == 5 && (font3.asked == std::vector<int>{' '}));
+        WM(l.tbAdvance, box.Advance('W', 12) == 12 && box.Advance('i', 20) == 5 && box.Advance('a', 13) == 7);
+        WM(l.tbAdvance, box.Advance(' ', 13) == 5 && box.Advance(' ', 14) == 6 && box.Advance('i', 2) == 1 && box.Advance('i', 1) == 0 &&
+                            box.Advance(' ', 0) == 0 && box.Advance('W', -4) == -3);
+        font3.asked.clear();
+        WM(l.tbAdvance, box.Advance(-61, 12) == 6 && (font3.asked == std::vector<int>{-61, -61}));
+        const int password = TbStyle(0.0f, 1, 1, STYLE_PASSWORD);
+        box.SelectStyle(password);
+        font3.asked.clear();
+        WM(l.tbAdvance, box.Advance('a', 12) == 9 && box.Advance(' ', 12) == 9 && (font3.asked == std::vector<int>{'*', '*'}) &&
+                            box.Advance('a', 13) == 10 && box.Advance('a', 11) == 8);
+        const int others = TbStyle(0.0f, 1, 1, ~STYLE_PASSWORD);
+        box.SelectStyle(others);
+        WM(l.tbAdvance, box.Advance('a', 12) == 6 && box.Advance(' ', 12) == 5);
+        ReleaseTextStyle(others);
+        ReleaseTextStyle(password);
+    }
+    // --- a text's width: its characters' advances (the unicode font: its UTF-8 characters, a bad
+    // byte one, signed) ---
+    {
+        box.SelectStyle(st12);
+        WM(l.tbWidth, box.TextWidth(C_str("a Wi"), 12) == 26 && box.TextWidth(C_str(""), 12) == 0 && box.TextWidth(C_str(), 12) == 0);
+        font3.asked.clear();
+        WM(l.tbWidth, box.TextWidth(C_str("\xD0\x96"), 12) == 12 && (font3.asked == std::vector<int>{0xD0, 0xD0, 0x96, 0x96}));
+        TbUnicode(true);
+        font3.asked.clear();
+        WM(l.tbWidth, box.TextWidth(C_str("a\xD0\x96"), 12) == 18 && (font3.asked == std::vector<int>{'a', 'a', 0x416, 0x416}));
+        font3.asked.clear();
+        WM(l.tbWidth, box.TextWidth(C_str("\xC3("), 12) == 12 && (font3.asked == std::vector<int>{-61, -61, '(', '('}));
+        font3.asked.clear();
+        WM(l.tbWidth, box.TextWidth(C_str("a\xD0"), 12) == 12 && (font3.asked == std::vector<int>{'a', 'a', -48, -48}));
+        font3.asked.clear();
+        WM(l.tbWidth, box.TextWidth(C_str("\xF0\x9F\x98\x80" "b"), 12) == 12 &&
+                          (font3.asked == std::vector<int>{0x1F600, 0x1F600, 'b', 'b'}));
+        WM(l.tbWidth, box.TextWidth(C_str("a Wi"), 12) == 26);
+        TbUnicode(false);
+    }
+    // --- UTF-8: a code point and its bytes; malformed: -1; too few bytes: -2 (the code point 0) ---
+    {
+        uint32_t ch;
+        WM(l.tbUtf8, TbDecode("A", 1, &ch) == 1 && ch == 'A' && TbDecode("\xD0\x96", 2, &ch) == 2 && ch == 0x416);
+        WM(l.tbUtf8, TbDecode("\xE2\x82\xAC", 3, &ch) == 3 && ch == 0x20AC && TbDecode("\xF0\x9F\x98\x80", 4, &ch) == 4 && ch == 0x1F600);
+        WM(l.tbUtf8, TbDecode("\xE0\xA0\x80", 3, &ch) == 3 && ch == 0x800 && TbDecode("\xE0\x9F\xBF", 3, &ch) == -1 && ch == 0);
+        WM(l.tbUtf8, TbDecode("\xF0\x90\x80\x80", 4, &ch) == 4 && ch == 0x10000 && TbDecode("\xF0\x8F\xBF\xBF", 4, &ch) == -1);
+        WM(l.tbUtf8, TbDecode("\xF4\x8F\xBF\xBF", 4, &ch) == 4 && ch == 0x10FFFF && TbDecode("\xF4\x90\x80\x80", 4, &ch) == -1);
+        // (No surrogates' test: 0xD800 taken.)
+        WM(l.tbUtf8, TbDecode("\xED\xA0\x80", 3, &ch) == 3 && ch == 0xD800);
+        // A continuation below 0x80 or above 0xBF, in each place; 0x80 and 0xBF taken.
+        WM(l.tbUtf8, TbDecode("\xD0\x7F", 2, &ch) == -1 && TbDecode("\xD0\xC0", 2, &ch) == -1 && TbDecode("\xE2\x7F\x80", 3, &ch) == -1 &&
+                         TbDecode("\xE2\xC0\x80", 3, &ch) == -1);
+        WM(l.tbUtf8, TbDecode("\xE2\x82\x7F", 3, &ch) == -1 && TbDecode("\xE2\x82\xC0", 3, &ch) == -1 &&
+                         TbDecode("\xF0\x9F\x98\x7F", 4, &ch) == -1 && TbDecode("\xF0\x9F\x98\xC0", 4, &ch) == -1);
+        WM(l.tbUtf8, TbDecode("\xF0\x9F\x7F\x80", 4, &ch) == -1 && TbDecode("\xF0\x9F\xC0\x80", 4, &ch) == -1 &&
+                         TbDecode("\xF0\xC0\x98\x80", 4, &ch) == -1);
+        WM(l.tbUtf8, TbDecode("\xDF\xBF", 2, &ch) == 2 && ch == 0x7FF && TbDecode("\xC2\x80", 2, &ch) == 2 && ch == 0x80);
+        WM(l.tbUtf8, TbDecode("\xEF\xBF\xBF", 3, &ch) == 3 && ch == 0xFFFF && TbDecode("\xE1\x80\x80", 3, &ch) == 3 && ch == 0x1000);
+        WM(l.tbUtf8, TbDecode("\xF1\x80\x80\x80", 4, &ch) == 4 && ch == 0x40000 && TbDecode("\xF3\xBF\xBF\xBF", 4, &ch) == 4 &&
+                         ch == 0xFFFFF);
+        // Lone continuations, C0 and C1: malformed.
+        WM(l.tbUtf8, TbDecode("\x80", 1, &ch) == -1 && TbDecode("\xBF", 1, &ch) == -1 && TbDecode("\xC1\x81", 2, &ch) == -1 &&
+                         TbDecode("\xC0\x80", 2, &ch) == -1);
+        WM(l.tbUtf8, TbDecode("\x7F", 1, &ch) == 1 && ch == 0x7F && TbDecode("\xD0\x96", 1, &ch) == -2 && ch == 0 &&
+                         TbDecode("A", 0, &ch) == -2);
+        WM(l.tbUtf8, TbDecode("\xF5\x80\x80\x80", 4, &ch) == -1 && TbDecode("\xF8\x88\x80\x80", 4, &ch) == -2 &&
+                         TbDecode("\xF8\x88\x80\x80\x80", 5, &ch) == -1 && TbDecode("\xFC\x84\x80\x80\x80", 5, &ch) == -2);
+        // Each lead byte: its sequence's length (with 4 and 5 bytes: the long ones' too few).
+        int wrong = 0;
+        for (int b = 0; b < 256; ++b) {
+            char seq[6] = {static_cast<char>(b), '\x80', '\x80', '\x80', '\x80', '\x80'};
+            if (b == 0xE0)
+                seq[1] = '\xA0';
+            if (b == 0xF0)
+                seq[1] = '\x90';
+            const int want = b < 0x80 ? 1 : b < 0xC2 ? -1 : b < 0xE0 ? 2 : b < 0xF0 ? 3 : b < 0xF5 ? 4 : -1;
+            const uint32_t c1 = static_cast<uint8_t>(seq[1]) & 0x3F;
+            const uint32_t cp = b < 0x80 ? b : b < 0xE0 ? (b & 0x1F) << 6 : b < 0xF0 ? ((b & 0x0F) << 12) | (c1 << 6)
+                                                                                  : ((b & 0x07) << 18) | (c1 << 12);
+            const int got = TbDecode(seq, 6, &ch);
+            wrong += got != want || (want > 0 && ch != cp);
+            if (b >= 0xF8)
+                wrong += TbDecode(seq, 4, &ch) != -2;
+            if (b >= 0xF8)
+                wrong += TbDecode(seq, 5, &ch) != (b >= 0xFC ? -2 : -1);
+        }
+        WM(l.tbUtf8, wrong == 0);
+    }
+    // --- a text cut to its first characters that fit (none fit, or all: the text; the size truncated) ---
+    {
+        box.SelectStyle(st12);
+        WM(l.tbTruncate, box.Truncate(C_str("abcdef"), 12.0f, 20.0f) == "abc" && box.Truncate(C_str("abcdef"), 12.0f, 18.0f) == "abc" &&
+                             box.Truncate(C_str("abcdef"), 12.0f, 17.9f) == "ab");
+        WM(l.tbTruncate, box.Truncate(C_str("Wa"), 12.0f, 5.0f) == "Wa" && box.Truncate(C_str("ab"), 12.0f, 100.0f) == "ab" &&
+                             box.Truncate(C_str("ab"), 12.0f, 12.0f) == "ab" && box.Truncate(C_str("abc"), 12.0f, 12.0f) == "ab" &&
+                             box.Truncate(C_str(""), 12.0f, 1.0f) == "");
+        WM(l.tbTruncate, box.Truncate(C_str("abcdef"), 12.9f, 20.0f) == "abc" && box.Truncate(C_str("abcdef"), 13.0f, 20.0f) == "ab");
+        font3.asked.clear();
+        WM(l.tbTruncate, box.Truncate(C_str("ab"), 12.0f, 100.0f) == "ab" && (font3.asked == std::vector<int>{'a', 'a', 'b', 'b'}));
+        // (By bytes: a two-byte character two.)
+        WM(l.tbTruncate, box.Truncate(C_str("\xD0\x96" "a"), 12.0f, 13.0f) == "\xD0\x96");
+        TbUnicode(true);
+        WM(l.tbTruncate, box.Truncate(C_str("a\xD0\x96" "b"), 12.0f, 20.0f) == "a\xD0\x96" &&
+                             box.Truncate(C_str("a\xD0\x96" "b"), 12.0f, 10.0f) == "a");
+        font3.asked.clear();
+        WM(l.tbTruncate, box.Truncate(C_str("a\xC3("), 12.0f, 100.0f) == "a\xC3(" &&
+                             (font3.asked == std::vector<int>{'a', 'a', -61, -61, '(', '('}));
+        WM(l.tbTruncate, box.Truncate(C_str("a\xC3("), 12.0f, 13.0f) == "a\xC3" &&
+                             box.Truncate(C_str("\xD0\x96\xD0\x96"), 12.0f, 5.0f) == "\xD0\x96\xD0\x96" &&
+                             box.Truncate(C_str("abcdef"), 12.9f, 20.0f) == "abc" && box.Truncate(C_str("ab"), 12.0f, 12.0f) == "ab");
+        TbUnicode(false);
+    }
+    // --- pieces: the runs whose styles place them (x and y both >= 0), their font size and width,
+    // cut to their column (the screen's width times the style's, not rounded); not in the lines ---
+    {
+        TbWidth(box, 200.0f);
+        const int place = TbStyle(0.0f, 1, 1, 0, 0.1f, 0.2f);
+        const int placeCut = TbStyle(0.0201f, 1, 1, 0, 0.0f, 0.0f);
+        const int half = TbStyle(0.0f, 1, 1, 0, 0.1f, -1.0f);
+        const int otherHalf = TbStyle(0.0f, 1, 1, 0, -0.5f, 0.3f);
+        const int nan = TbStyle(0.0f, 1, 1, 0, std::nanf(""), 0.3f);
+        WM(l.tbPieces, TbLayoutRuns(box, {{"ab", place}, {"abcdef", placeCut}, {"x", half}, {"abc", placeCut}, {"y", otherHalf},
+                                          {"aiii", placeCut}, {"z", nan}, {"abcdefghijklmnop", place}}) &&
+                           !box.m_dirty && GfLogIs({"position"}));
+        // (16.08 pixels: "ab", 12; "aiii", 15.)
+        WM(l.tbPieces, TbPiecesText(box) == CmText("[ab/%d 12 12 -1 -1][ab/%d 12 12 -1 -1][ab/%d 12 12 -1 -1][aiii/%d 15 12 -1 -1]"
+                                                   "[abcdefghijklmnop/%d 93 12 -1 -1]",
+                                                   place, placeCut, placeCut, placeCut, place) &&
+                           TbLinesText(box) == "[x/6 y/6 z/6 12 18 6 182]");
+        WM(l.tbPieces, TbLayoutRuns(box, {{"ab", place}}) && box.m_lines.empty() && box.m_pieces.size() == 1);
+        const int tiny = TbStyle(0.0f, 1, 1, 0, 0.1f, 0.2f, 3, 0.001f);
+        WM(l.tbPieces, TbLayoutRuns(box, {{" ab", tiny}}) && TbPiecesText(box) == CmText("[ ab/%d 2 1 -1 -1]", tiny));
+        ReleaseTextStyle(tiny);
+        ReleaseTextStyle(nan);
+        ReleaseTextStyle(otherHalf);
+        ReleaseTextStyle(half);
+        ReleaseTextStyle(placeCut);
+        ReleaseTextStyle(place);
+    }
+    // --- the lines: a run of its own on a new line; joined to the last (the first joined after one
+    // of its own on a new line; the new-line flag: a new line) ---
+    {
+        TbWidth(box, 200.0f);
+        const int own = TbStyle(0.0f, 0, 1);
+        const int newLine = TbStyle(0.0f, 1, 1, STYLE_NEW_LINE);
+        const int other = TbStyle(0.0f, 1, 1, ~(STYLE_NEW_LINE | STYLE_PASSWORD));
+        WM(l.tbLines, TbLayoutRuns(box, {{"x", own}, {"y", st12}, {"z", newLine}, {"w", st12}, {"v", own}, {"u", st12}}) &&
+                          !box.m_dirty && GfLogIs({"position"}));
+        WM(l.tbLines, TbLinesText(box) == "[x/6 12 18 6 194][y/6 12 18 6 194][z/6 w/6 12 18 6 188][v/6 12 18 6 194][u/6 12 18 6 194]");
+        WM(l.tbLines, TbLayoutRuns(box, {{"a", own}, {"b", own}, {"c", st12}, {"d", other}, {"e", newLine}}) &&
+                          TbLinesText(box) == "[a/6 12 18 6 194][b/6 12 18 6 194][c/6 d/6 12 18 6 188][e/6 12 18 6 194]");
+        WM(l.tbLines, TbLayoutRuns(box, {{"z", newLine}, {"w", st12}}) && TbLinesText(box) == "[z/6 w/6 12 18 6 188]");
+        WM(l.tbLines, box.m_lines[0]->words[1]->x == -1 && box.m_lines[0]->words[1]->style == st12 &&
+                          box.m_lines[0]->words[0]->style == newLine);
+        ReleaseTextStyle(other);
+        ReleaseTextStyle(newLine);
+        ReleaseTextStyle(own);
+    }
+    // --- words: wrapped at the last blank that fits; none on the first line: an empty line, then
+    // what fits (no width) and the rest dropped; a style's column; one word when not wrapped ---
+    {
+        TbWidth(box, 60.0f);
+        WM(l.tbWords, TbLayoutRuns(box, {{"ab cd ef", st12}}) && TbLinesText(box) == "[ab cd ef/46 12 18 6 14]");
+        TbWidth(box, 30.0f);
+        WM(l.tbWords, TbLayoutRuns(box, {{"ab cd ef", st12}}) && TbLinesText(box) == "[ab/12 12 18 6 18][cd ef/29 12 18 6 1]");
+        WM(l.tbWords, TbLayoutRuns(box, {{"a b c d e", st12}}) && TbLinesText(box) == "[a b/17 12 18 6 13][c d e/28 12 18 6 2]");
+        WM(l.tbWords, TbLayoutRuns(box, {{"abcdefgh", st12}}) && TbLinesText(box) == "[-1 -1 -1 30][abcde/0 12 18 6 30]");
+        WM(l.tbWords, TbLayoutRuns(box, {{"", st12}}) && TbLinesText(box) == "[/0 12 18 6 30]");
+        // The fix: a blank first on an empty line, too long a word after it.
+        WM(l.tbWords, TbLayoutRuns(box, {{" abcdefgh", st12}}) && TbLinesText(box) == "[ abcd/0 12 18 6 30]");
+        WM(l.tbWords, TbLayoutRuns(box, {{"ab", st12}, {" cdefghij", st12}}) &&
+                          TbLinesText(box) == "[ab/12 12 18 6 18][ cdef/0 12 18 6 30]");
+        WM(l.tbWords, TbLayoutRuns(box, {{"abcd  xxxxxxxxx", st12}}) && TbLinesText(box) == "[abcd/24 12 18 6 6][ xxxx/0 12 18 6 30]");
+        WM(l.tbWords, TbLayoutRuns(box, {{"abcd  xy", st12}}) && TbLinesText(box) == "[abcd/24 12 18 6 6][ xy/17 12 18 6 13]");
+        WM(l.tbWords, TbLayoutRuns(box, {{"ab cdefghijkl", st12}}) && TbLinesText(box) == "[ab/12 12 18 6 18][cdefg/0 12 18 6 30]");
+        const int column1 = TbStyle(0.001f, 1, 1);
+        WM(l.tbWords, TbLayoutRuns(box, {{"ab cd", column1}}) && TbLinesText(box) == "[-1 -1 -1 30][/0 12 18 6 30]");
+        const int tinyWhole = TbStyle(0.0f, 1, 0, 0, -1.0f, -1.0f, 3, 0.001f);
+        WM(l.tbWords, TbLayoutRuns(box, {{" ab", tinyWhole}}) && TbLinesText(box) == "[ ab/2 1 18 6 28]");
+        ReleaseTextStyle(tinyWhole);
+        ReleaseTextStyle(column1);
+        TbWidth(box, 12.0f);
+        WM(l.tbWords, TbLayoutRuns(box, {{"ab", st12}}) && TbLinesText(box) == "[ab/12 12 18 6 0]");
+        TbWidth(box, 11.0f);
+        WM(l.tbWords, TbLayoutRuns(box, {{"ab", st12}}) && TbLinesText(box) == "[-1 -1 -1 11][a/0 12 18 6 11]");
+        // A tab a blank; a byte over 0x7F not.
+        TbWidth(box, 20.0f);
+        WM(l.tbWords, TbLayoutRuns(box, {{"ab\tcd", st12}}) && TbLinesText(box) == "[ab/12 12 18 6 8][cd/12 12 18 6 8]");
+        WM(l.tbWords, TbLayoutRuns(box, {{"ab\xA0" "cd", st12}}) && TbLinesText(box) == "[-1 -1 -1 20][ab\xA0/0 12 18 6 20]");
+        // A column: 20 pixels; wider than the line's room: the room.
+        const int column = TbStyle(0.025f, 1, 1);
+        TbWidth(box, 60.0f);
+        WM(l.tbWords, TbLayoutRuns(box, {{"ab cd", column}}) && TbLinesText(box) == "[ab/12 12 18 6 48][cd/12 12 18 6 48]");
+        TbWidth(box, 15.0f);
+        WM(l.tbWords, TbLayoutRuns(box, {{"ab cd", column}}) && TbLinesText(box) == "[-1 -1 -1 15][ab/0 12 18 6 15]");
+        // Not wrapped: one word (the box's width not looked at), cut to the column (rounded: 20.98, 21.06).
+        const int cut = TbStyle(0.025f, 1, 0);
+        const int whole = TbStyle(0.0f, 1, 0);
+        const int cut20 = TbStyle(0.0256f, 1, 0);
+        const int cut21 = TbStyle(0.0257f, 1, 0);
+        TbWidth(box, 60.0f);
+        WM(l.tbWords, TbLayoutRuns(box, {{"abcdef", cut}}) && TbLinesText(box) == "[abc/18 12 18 6 24]");
+        WM(l.tbWords, TbLayoutRuns(box, {{"abcdef", whole}}) && TbLinesText(box) == "[abcdef/36 12 18 6 24]");
+        WM(l.tbWords, TbLayoutRuns(box, {{"ab", cut}}) && TbLinesText(box) == "[ab/12 12 18 6 48]");
+        WM(l.tbWords, TbLayoutRuns(box, {{"abcdefghijklmn", whole}}) && TbLinesText(box) == "[abcdefghijklmn/81 12 18 6 -21]");
+        WM(l.tbWords, TbLayoutRuns(box, {{"iiiiiiii", cut20}}) && TbLinesText(box) == "[iiiiii/18 12 18 6 36]");
+        WM(l.tbWords, TbLayoutRuns(box, {{"iiiiiiii", cut21}}) && TbLinesText(box) == "[iiiiiii/21 12 18 6 36]");
+        ReleaseTextStyle(cut21);
+        ReleaseTextStyle(cut20);
+        ReleaseTextStyle(whole);
+        ReleaseTextStyle(cut);
+        ReleaseTextStyle(column);
+    }
+    // --- the unicode font's flow: wrapped at the character that does not fit (blanks or not); one
+    // wider than an empty line kept on it (the fix) ---
+    {
+        TbUnicode(true);
+        TbWidth(box, 30.0f);
+        WM(l.tbChars, TbLayoutRuns(box, {{"abcdefgh", st12}}) && TbLinesText(box) == "[abcde/30 12 18 6 0][fgh/18 12 18 6 12]");
+        WM(l.tbChars, TbLayoutRuns(box, {{"ab cd ef", st12}}) && TbLinesText(box) == "[ab cd/29 12 18 6 1][ ef/17 12 18 6 13]");
+        WM(l.tbChars, TbLayoutRuns(box, {{"\xD0\x96\xD0\x96\xD0\x96", st12}}) &&
+                          TbLinesText(box) == "[\xD0\x96\xD0\x96/24 12 18 6 6][\xD0\x96/12 12 18 6 18]");
+        font3.asked.clear();
+        WM(l.tbChars, TbLayoutRuns(box, {{"abcd\xC3(x", st12}}) && TbLinesText(box) == "[abcd\xC3/30 12 18 6 0][(x/12 12 18 6 18]" &&
+                          std::count(font3.asked.begin(), font3.asked.end(), -61) == 2);
+        const int column1 = TbStyle(0.001f, 1, 1);
+        WM(l.tbChars, TbLayoutRuns(box, {{"abc", column1}}) && TbLinesText(box) == "[a/6 12 18 6 24][b/6 12 18 6 24][c/6 12 18 6 24]");
+        const int tinyWhole = TbStyle(0.0f, 1, 0, 0, -1.0f, -1.0f, 3, 0.001f);
+        WM(l.tbChars, TbLayoutRuns(box, {{" ab", tinyWhole}}) && TbLinesText(box) == "[ ab/2 1 18 6 28]");
+        ReleaseTextStyle(tinyWhole);
+        ReleaseTextStyle(column1);
+        WM(l.tbChars, TbLayoutRuns(box, {{"", st12}}) && TbLinesText(box) == "[/0 12 18 6 30]");
+        TbWidth(box, 10.0f);
+        WM(l.tbChars, TbLayoutRuns(box, {{"Wa", st12}}) && TbLinesText(box) == "[W/12 12 18 6 -2][a/6 12 18 6 4]");
+        // Not first on an empty line: an empty word, a new line.
+        TbWidth(box, 20.0f);
+        WM(l.tbChars, TbLayoutRuns(box, {{"ab", st12}, {"Wc", st12}}) && TbLinesText(box) == "[ab/12 /0 12 18 6 8][Wc/18 12 18 6 2]");
+        WM(l.tbChars, TbLayoutRuns(box, {{"abc", st12}}) && TbLinesText(box) == "[abc/18 12 18 6 2]");
+        const int column = TbStyle(0.025f, 1, 1);
+        const int cut = TbStyle(0.025f, 1, 0);
+        const int cut21 = TbStyle(0.0257f, 1, 0);
+        TbWidth(box, 60.0f);
+        WM(l.tbChars, TbLayoutRuns(box, {{"abcdefgh", column}}) &&
+                          TbLinesText(box) == "[abc/18 12 18 6 42][def/18 12 18 6 42][gh/12 12 18 6 48]");
+        WM(l.tbChars, TbLayoutRuns(box, {{"a\xD0\x96" "bc", cut}}) && TbLinesText(box) == "[a\xD0\x96/18 12 18 6 30]");
+        WM(l.tbChars, TbLayoutRuns(box, {{"ab", cut}}) && TbLinesText(box) == "[ab/12 12 18 6 48]");
+        WM(l.tbChars, TbLayoutRuns(box, {{"iiiiiiii", cut21}}) && TbLinesText(box) == "[iiiiiii/21 12 18 6 36]");
+        TbWidth(box, 15.0f);
+        WM(l.tbChars, TbLayoutRuns(box, {{"abc", column}}) && TbLinesText(box) == "[ab/12 12 18 6 3][c/6 12 18 6 9]");
+        ReleaseTextStyle(cut21);
+        ReleaseTextStyle(cut);
+        ReleaseTextStyle(column);
+        TbUnicode(false);
+    }
+    // --- no layout: no runs, a run's style or font missing (the box stays dirty; not positioned) ---
+    {
+        TbWidth(box, 60.0f);
+        TbLayoutRuns(box, {{"a", st12}, {"b", st12}});
+        box.Clear();
+        g_gfLog.clear();
+        WM(l.tbFail, !box.Layout() && box.m_dirty && box.m_lines.empty() && box.m_pieces.empty() && g_gfLog.empty());
+        const int noFont = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 99);
+        WM(l.tbFail, !TbLayoutRuns(box, {{"a", st12}, {"b", noFont}, {"c", st12}}) && box.m_dirty && TbLinesText(box) == "[a/6 12 18 6 54]" &&
+                         g_gfLog.empty());
+        WM(l.tbFail, !TbLayoutRuns(box, {{"a", st12}, {"b", 250}}) && box.m_dirty && box.m_lines.size() == 1);
+        const int placedNoFont = TbStyle(0.0f, 1, 1, 0, 0.1f, 0.1f, 99);
+        WM(l.tbFail, !TbLayoutRuns(box, {{"p", placedNoFont}}) && box.m_pieces.empty() && box.m_dirty);
+        WM(l.tbFail, TbLayoutRuns(box, {{"a", st12}}) && !box.m_dirty && GfLogIs({"position"}));
+        ReleaseTextStyle(placedNoFont);
+        ReleaseTextStyle(noFont);
+    }
+    // --- a line's measures: its words' largest font size, space above and below (rounded); its room
+    // the box's width (truncated) less its words'; a line reset ---
+    {
+        TbWidth(box, 200.0f);
+        const int tall = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 2, 0.04f, 0.05f);
+        const int deep = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.02f);
+        const int rounded = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.0259f, 0.0251f);
+        WM(l.tbMeasures, TbLayoutRuns(box, {{"a", st12}, {"b", tall}, {"c", st12}}) && TbLinesText(box) == "[a/6 b/12 c/6 24 30 6 176]");
+        WM(l.tbMeasures, TbLayoutRuns(box, {{"b", tall}, {"a", st12}}) && TbLinesText(box) == "[b/12 a/6 24 30 6 182]");
+        WM(l.tbMeasures, TbLayoutRuns(box, {{"a", st12}, {"d", deep}}) && TbLinesText(box) == "[a/6 d/6 12 18 12 188]");
+        WM(l.tbMeasures, TbLayoutRuns(box, {{"a", rounded}}) && TbLinesText(box) == "[a/6 12 16 15 194]");
+        const int third = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.0255f, 0.0255f, 0.0255f);
+        WM(l.tbMeasures, TbLayoutRuns(box, {{"a", third}}) && TbLinesText(box) == "[a/8 15 15 15 192]");
+        ReleaseTextStyle(third);
+        TbWidth(box, 30.9f);
+        WM(l.tbMeasures, TbLayoutRuns(box, {{"a", st12}}) && TbLinesText(box) == "[a/6 12 18 6 24]");
+        S_TextLine line;
+        line.words.push_back(new S_TextWord{C_str("w")});
+        line.y = line.above = line.below = line.gap = line.remaining = 5;
+        line.Reset();
+        WM(l.tbMeasures, line.words.empty() && line.y == -1 && line.above == -1 && line.below == -1 && line.gap == -1 &&
+                             line.remaining == -1);
+        ReleaseTextStyle(rounded);
+        ReleaseTextStyle(deep);
+        ReleaseTextStyle(tall);
+    }
+    ReleaseTextStyle(st12);
+    std::printf("layout: tbStyle %d tbAdvance %d tbWidth %d tbUtf8 %d tbTruncate %d tbPieces %d tbLines %d tbWords %d tbChars %d "
+                "tbFail %d tbMeasures %d\n",
+                l.tbStyle, l.tbAdvance, l.tbWidth, l.tbUtf8, l.tbTruncate, l.tbPieces, l.tbLines, l.tbWords, l.tbChars, l.tbFail,
+                l.tbMeasures);
+
+    box.m_fonts->m_fonts.erase(box.m_fonts->m_fonts.begin(), box.m_fonts->m_fonts.begin() + 2);
     g_textIds = oldIds;
     g_igraphVtable[0x18 / 4] = oldX;
     g_igraphVtable[0x1C / 4] = oldY;

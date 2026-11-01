@@ -1206,15 +1206,15 @@ void FontTest()
             if (!d)
                 break;
             for (uint32_t v : {static_cast<uint32_t>(d->font), d->color, bits(d->size), bits(d->width), bits(d->x),
-                               bits(d->unknown14), bits(d->unknown18), bits(d->unknown1C), static_cast<uint32_t>(d->unknown20),
-                               static_cast<uint32_t>(d->align), static_cast<uint32_t>(d->unknown28),
-                               static_cast<uint32_t>(d->unknown2C), static_cast<uint32_t>(d->unknown2D), d->flags30})
+                               bits(d->y), bits(d->below), bits(d->above), static_cast<uint32_t>(d->unknown20),
+                               static_cast<uint32_t>(d->align), static_cast<uint32_t>(d->valign),
+                               static_cast<uint32_t>(d->joins), static_cast<uint32_t>(d->wraps), d->flags30})
                 mix(v);
         }
         WM(r.stDefaults, all && hash == 0xD7D65343u);
         const S_TextStyleDesc *s85 = GetTextStyle(85);
         WM(r.stDefaults, s85 && s85->font == 4 && s85->color == 0xFFFFFFFF && s85->size == 0.012f && s85->align == 1 &&
-                             s85->unknown2C == 1 && s85->unknown2D == 1 && s85->flags30 == 0x88);
+                             s85->joins == 1 && s85->wraps == 1 && s85->flags30 == 0x88);
         // New styles: after the game's; a freed place taken again; the free places at the end given
         // back (not the first place); an index not in the list: nothing.
         S_TextStyleDesc desc = {3, 0x12345678, 0.5f, 0.25f, 0.125f, 1.0f, 2.0f, 3.0f, 4, 5, 6, 7, 8, 9};
@@ -1223,7 +1223,7 @@ void FontTest()
         const int b = CreateTextStyle(desc);
         const int c = CreateTextStyle(desc);
         WM(r.stCreate, a == 90 && b == 91 && c == 92 && GetTextStyle(90)->color == 0x12345678 && GetTextStyle(91)->font == 9 &&
-                           GetTextStyle(90) != &desc && GetTextStyle(90)->flags30 == 9 && GetTextStyle(90)->unknown2D == 8);
+                           GetTextStyle(90) != &desc && GetTextStyle(90)->flags30 == 9 && GetTextStyle(90)->wraps == 8);
         ReleaseTextStyle(91);
         WM(r.stRelease, GetTextStyle(91) == nullptr && GetTextStyle(92) != nullptr && NumTextStyles() == 93);
         desc.font = 11;
