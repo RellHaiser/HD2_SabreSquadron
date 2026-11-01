@@ -42,12 +42,13 @@ I3D_portal::I3D_portal()
     ++g_portalChanges;
 }
 
+// LS3DRF 0x10024500 (from LS3DF 0x1003ed60)
 I3D_portal::~I3D_portal()
 {
     ++g_portalChanges;
-    // The original passes the portal's own scene here, which changes nothing: a portal destroyed
-    // while in a scene (I3D_sector::Duplicate frees the old ones) stayed in the scene's ring,
-    // dangling. It leaves the ring.
+    // LS3DF passes the portal's own scene here, which changes nothing, and LS3DRF makes no call: a
+    // portal destroyed while in a scene (I3D_sector::Duplicate frees the old ones) stayed in the
+    // scene's ring, dangling. It leaves the ring.
     SetScene(nullptr);
     if (otherSide) {
         otherSide->otherSide = nullptr;
