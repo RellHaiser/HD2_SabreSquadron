@@ -733,6 +733,7 @@ void I3D_scene::ResetWeather()
     weatherParticles.Clear();
 }
 
+// LS3DRF 0x10028250 (from LS3DF 0x10049820)
 void I3D_scene::SetWeather(int param, uint32_t value)
 {
     float f;
@@ -853,6 +854,7 @@ int I3D_scene::GetWeather(int param)
     }
 }
 
+// Inlined in SetWeather (case 10), which carries the address.
 void I3D_scene::SetWeatherCount(int count)
 {
     weatherCount = count;
@@ -870,8 +872,7 @@ void I3D_scene::SetWeatherCount(int count)
             dbgPrintf("WeatherSystem ERROR !!! VB creating !");
             return;
         }
-        C_VertexBuffer *vb = g_weatherVB.buffer;
-        auto *v = reinterpret_cast<float *>(vb->Lock(0) + vb->stride * g_weatherVB.offset);
+        auto *v = reinterpret_cast<float *>(g_weatherVB.buffer->data);
         static const float kUV[5][2] = {{1.0f, 0.0f}, {0.0f, 0.0f}, {1.0f, 1.0f}, {0.0f, 1.0f}, {0.5f, 0.5f}};
         for (int n = weatherCount; n != 0; --n, v += 30) {
             for (int k = 0; k < 5; ++k) {
@@ -886,7 +887,7 @@ void I3D_scene::SetWeatherCount(int count)
         }
         // Four triangles around the middle (0x100a6b84).
         static const uint16_t kFan[12] = {1, 0, 4, 0, 2, 4, 2, 3, 4, 3, 1, 4};
-        uint16_t *idx = g_weatherIB.buffer->Lock(0) + g_weatherIB.offset;
+        uint16_t *idx = g_weatherIB.buffer->data;
         for (int i = 0; i < weatherCount; ++i) {
             for (uint16_t f : kFan)
                 *idx++ = static_cast<uint16_t>(f + i * 5);
