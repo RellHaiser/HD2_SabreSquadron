@@ -306,11 +306,9 @@ f_00638dc0.cpp:2096:13: invalid type argument of unary '*' (have 'uint32_t' {aka
     *DAT_008ae5b0 = (int)pvVar3;
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_00643b20.cpp:425:55: void value not ignored as it ought to be
-    lVar13 = (*pIVar8->vtable->DrawPrimitives)(pIVar8,3,DAT_008acbf0 / 3,&DAT_008acbf8,1);
-f_00643b20.cpp:1810:7: '_local_18' was not declared in this scope; did you mean 'local_18'?
+f_00643b20.cpp:1173:7: '_local_18' was not declared in this scope; did you mean 'local_18'?
     _local_18 = CONCAT31(uStack_17,bVar2);
-f_00643b20.cpp:2403:85: cannot convert 'float*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:1767:85: cannot convert 'float*' to 'uint32_t*' {aka 'unsigned int*'}
     FUN_0064cf30(gh_bitcast<uint32_t*>(pfVar9),gh_bitcast<uint32_t*>(pfVar9),pfVar9 + 7);
 f_0064d080.cpp:85:20: 'UNK_00813cb8' was not declared in this scope; did you mean 'PTR_00813ab8'?
     pbVar1[-1] = (&UNK_00813cb8)[iVar3] | (uint8_t)uVar2;

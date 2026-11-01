@@ -202,16 +202,26 @@ public:
     bool LoadConfig(const char *path, const char *language);   // 0x0063eae0
     // A GDI font `face` drawn into a texture (part 9a-iii).
     bool AddGdiFont(const char *face, int textureWidth, int textureHeight, int size, int id, bool unknown);   // 0x0063ee20
+    // The text boxes' quads gathered in their fonts (SetFontBatching), not drawn glyph by glyph.
+    bool IsBatching() const { return m_batching; }
 
 private:
     int m_refs = 0;                                     // +0x04
     std::vector<C_Font *> m_fonts;                      // +0x10
+    bool m_batching = false;                            // +0x1C
 
     friend C_FontManager *AcquireFontManager();
     friend void ReleaseFontManager();
+    friend void SetFontBatching(bool on);
+    friend void FlushFonts();
 };
 // The shared manager while it is acquired (none: null).
 extern C_FontManager *g_fontManager;                    // 0x008acbdc
 C_FontManager *AcquireFontManager();                    // 0x0063df00
 // Releases the shared manager (when there is one).
 void ReleaseFontManager();                              // 0x0063df30
+// The shared manager's batching (on: every font's quads cleared first; a menu's render, its flag
+// never set). Both need the manager acquired.
+void SetFontBatching(bool on);                          // 0x0063f800 (__fastcall)
+// Every font's gathered quads drawn.
+void FlushFonts();                                      // 0x0063f7d0

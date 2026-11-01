@@ -2263,7 +2263,7 @@ uint32_t C_GameMenu__FUN_0066e300(C_GameMenu *_this, ...)
     piVar3 = (int *)*local_8;
   }
   if (DAT_008ae608 != '\0') {
-    FUN_0063f800('\x01');
+    SetFontBatching(true);
   }
   piVar1 = (int *)_this->m_0f8;
   if ((piVar1 != 0) && ((*(uint8_t *)(piVar1[0x1d] + 0xe0) & 1) != 0)) {
@@ -2281,8 +2281,8 @@ uint32_t C_GameMenu__FUN_0066e300(C_GameMenu *_this, ...)
   }
   FUN_0066e450(_this->_pad_0040,(int)_this->m_030);
   if (DAT_008ae608 != '\0') {
-    FUN_0063f800('\0');
-    FUN_0063f7d0();
+    SetFontBatching(false);
+    FlushFonts();
     return 0;
   }
   return 0;

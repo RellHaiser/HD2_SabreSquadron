@@ -1,9 +1,9 @@
 // Part 9b's text box (game/text_box.cpp: 9b-i its runs, edit, selection, hover, scroll and place;
-// 9b-ii its layout and positioning), in the text build (build_text.bat: the camera build with
-// TEXT_TEST and the real C_TextBox; the loader's text box fakes left out), run by CameraTest instead
-// of the camera's tests: Render (9b-iii) faked; IGraph's screen 800 x 600; the fonts 2 and 3 fakes
-// (C_TbFont). Prints "textbox:" (9b-i), "layout:" (9b-ii-a) and "position:" (9b-ii-b) with 1 per
-// check met.
+// 9b-ii its layout and positioning; 9b-iii its render), in the text build (build_text.bat: the camera
+// build with TEXT_TEST and the real C_TextBox; the loader's text box fakes left out), run by
+// CameraTest instead of the camera's tests: IGraph's screen 800 x 600; the fonts 2 and 3 fakes
+// (C_TbFont); the render's IGraph and driver calls logged. Prints "textbox:" (9b-i), "layout:"
+// (9b-ii-a), "position:" (9b-ii-b) and "render:" (9b-iii) with 1 per check met.
 
 // The lines asked for (y, above, below, gap): the 9b-i tests' (TbLayout).
 std::vector<std::array<int16_t, 4>> g_tbLines;
@@ -21,7 +21,6 @@ void TbSetLines(std::vector<S_TextLine *> &lines)
         lines.push_back(line);
     }
 }
-void C_TextBox::Render() { GfLog("render"); }
 // The visuals' world boxes: logged, then up to date.
 void __stdcall I3D_visual::UpdateWBoundProc()
 {
@@ -132,14 +131,29 @@ struct S_LayoutResults {
     bool tbLines = true, tbWords = true, tbChars = true, tbFail = true, tbMeasures = true;
 };
 
-// A font whose glyphs' aspects are its table's (others 0.5), the codes asked for kept.
+// A font whose glyphs' aspects are its table's (others 0.5), the codes asked for kept; its texture
+// corners 0.125, 0.25, 0.5, 0.75. Logging: its quads and its other calls (the render's tests).
 struct C_TbFont : C_Font {
     std::vector<int> asked;
-    S_Glyph glyph = {};
+    S_Glyph glyph = {0.125f, 0.25f, 0.5f, 0.75f, 0.0f};
+    bool logging = false;
+    float caretAspect = 1.0f;                           // '_'
     void GrowVertices() override {}
-    void Flush() override {}
-    void ClearVertices() override {}
-    void Select() override {}
+    void Flush() override
+    {
+        if (logging)
+            GfLog("flush %d", m_id);
+    }
+    void ClearVertices() override
+    {
+        if (logging)
+            GfLog("clear %d", m_id);
+    }
+    void Select() override
+    {
+        if (logging)
+            GfLog("select %d", m_id);
+    }
     const S_Glyph *GetGlyph(int ch) override
     {
         asked.push_back(ch);
@@ -148,9 +162,11 @@ struct C_TbFont : C_Font {
             glyph.aspect = 0.0f;
             break;
         case 'W':
-        case '_':                                       // (the caret)
         case 0x416:                                     // (Cyrillic Zhe)
             glyph.aspect = 1.0f;
+            break;
+        case '_':                                       // (the caret)
+            glyph.aspect = caretAspect;
             break;
         case 'i':
             glyph.aspect = 0.25f;
@@ -163,7 +179,11 @@ struct C_TbFont : C_Font {
         }
         return &glyph;
     }
-    void AddQuad(int, uint32_t, int, int, int, int, float) override {}
+    void AddQuad(int ch, uint32_t color, int width, int height, int x, int y, float z) override
+    {
+        if (logging)
+            GfLog("quad %d %08x %d %d %d %d %g", ch, color, width, height, x, y, z);
+    }
 };
 
 // The profile's unicode font option.
@@ -217,6 +237,121 @@ int TbDecode(const char *text, int length, uint32_t *ch)
     return DecodeUtf8(ch, text, length);
 }
 
+// --- part 9b-iii ---
+
+struct S_RenderResults {
+    bool tbPlaced = true, tbGlyphs = true, tbBlank = true, tbFlush = true, tbBatch = true, tbColour = true;
+    bool tbCentred = true, tbCaret = true, tbPieces = true, tbFail = true, tbClip = true, tbBackground = true;
+    bool tbOutline = true, tbUtf8 = true, tbStep = true, tbFonts = true;
+};
+
+// IGraph's viewport (the screen's), the last primitives drawn, the driver's states.
+S_IGraphViewport g_trScreen = {0, 0, 800, 600, 0.0f, 1.0f};
+std::vector<S_FontVertex> g_trVertices;
+uint32_t g_trStates[16];
+const S_IGraphViewport *__stdcall F_TrGetViewport(void *)
+{
+    GfLog("getviewport");
+    return &g_trScreen;
+}
+void __stdcall F_TrSetViewport(void *, const S_IGraphViewport *v)
+{
+    GfLog("viewport %d %d %d %d %g %g", v->x, v->y, v->width, v->height, v->minZ, v->maxZ);
+}
+void __stdcall F_TrSetTexture(void *, void *texture, int stage) { GfLog("texture %d %d", texture != nullptr, stage); }
+void __stdcall F_TrDraw(void *, int kind, int count, const void *vertices, int transformed)
+{
+    const int n = kind == 3 ? count * 3 : count + 2;
+    const auto *v = static_cast<const S_FontVertex *>(vertices);
+    g_trVertices.assign(v, v + n);
+    GfLog("draw %d %d %d", kind, count, transformed);
+}
+uint32_t __stdcall F_TrGetState(void *, int state)
+{
+    GfLog("get %d", state);
+    return g_trStates[state];
+}
+void __stdcall F_TrSetState(void *, int state, uint32_t value) { GfLog("set %d %u", state, value); }
+int __stdcall F_TrScrnX(void *)
+{
+    GfLog("scrnx");
+    return 800;
+}
+int __stdcall F_TrScrnY(void *)
+{
+    GfLog("scrny");
+    return 600;
+}
+// An overflowing render's log: the screen's viewport read, the clip set, `inner`, the screen's set back.
+std::vector<std::string> TrClipped(const char *clip, std::vector<std::string> inner,
+                                   const char *screen = "viewport 0 0 800 600 0 1")
+{
+    std::vector<std::string> log = {"getviewport", "scrnx", "scrny", "scrnx", "scrny", clip};
+    log.insert(log.end(), inner.begin(), inner.end());
+    log.insert(log.end(), {"scrnx", "scrny", screen});
+    return log;
+}
+
+// The last primitives' vertices: "(x y u v)" each.
+std::string TrVertices()
+{
+    std::string s;
+    for (const S_FontVertex &v : g_trVertices)
+        s += CmText("(%g %g %g %g)", v.x, v.y, v.u, v.v);
+    return s;
+}
+// Every vertex of the last primitives with this colour, depth and 1 / depth.
+bool TrUniform(uint32_t color, float z, float rhw)
+{
+    for (const S_FontVertex &v : g_trVertices)
+        if (v.color != color || v.z != z || v.rhw != rhw)
+            return false;
+    return !g_trVertices.empty();
+}
+// A glyph's two triangles at the pen (x, y), `width` wide, `size` high.
+std::string TrQuad(int x, int y, int width, int size)
+{
+    const int r = x + width, t = y - size;
+    return CmText("(%d %d 0.125 0.75)(%d %d 0.125 0.25)(%d %d 0.5 0.25)(%d %d 0.5 0.75)(%d %d 0.125 0.75)(%d %d 0.5 0.25)",
+                  x, y, x, t, r, t, r, y, x, y, r, t);
+}
+// A style of font 3 with this colour and flags (`size` of the height: 0.02, 12 pixels).
+int TrStyle(uint32_t color, uint32_t flags = 0, float size = 0.02f)
+{
+    const S_TextStyleDesc desc = {3, color, size, 0.0f, -1.0f, -1.0f, 0.01f, 0.03f, 0, 1, 1, 1, 1, flags};
+    return CreateTextStyle(desc);
+}
+// The box's layout replaced: no lines or pieces, laid out, placed, not overflowing; the log cleared.
+void TrClear(C_TextBox &box)
+{
+    box.FreeLayout();
+    box.m_dirty = false;
+    box.m_placed = true;
+    box.m_overflows = false;
+    g_gfLog.clear();
+    g_trVertices.clear();
+}
+S_TextLine *TrLine(C_TextBox &box, int y, int gap = 12)
+{
+    auto *line = new S_TextLine();
+    line->y = static_cast<int16_t>(y);
+    line->gap = static_cast<int16_t>(gap);
+    box.m_lines.push_back(line);
+    return line;
+}
+void TrWord(S_TextLine *line, const char *text, int style, int x)
+{
+    line->words.push_back(new S_TextWord{C_str(text), static_cast<uint8_t>(style), 0, static_cast<int16_t>(x)});
+}
+void TrPiece(C_TextBox &box, const char *text, int style, int x, int y)
+{
+    auto *piece = new S_TextPiece();
+    piece->text = C_str(text);
+    piece->style = static_cast<uint8_t>(style);
+    piece->x = static_cast<int16_t>(x);
+    piece->y = static_cast<int16_t>(y);
+    box.m_pieces.push_back(piece);
+}
 } // namespace
 
 void TextBoxTest()
@@ -613,7 +748,7 @@ void TextBoxTest()
         const int password = TbStyle(0.0f, 1, 1, STYLE_PASSWORD);
         box.SelectStyle(password);
         font3.asked.clear();
-        WM(l.tbAdvance, box.Advance('a', 12) == 9 && box.Advance(' ', 12) == 9 && (font3.asked == std::vector<int>{'*', '*'}) &&
+        WM(l.tbAdvance, box.Advance('a', 12) == 9 && box.Advance(' ', 12) == 9 && (font3.asked == (std::vector<int>{'*', '*'})) &&
                             box.Advance('a', 13) == 10 && box.Advance('a', 11) == 8);
         const int others = TbStyle(0.0f, 1, 1, ~STYLE_PASSWORD);
         box.SelectStyle(others);
@@ -1211,6 +1346,557 @@ void TextBoxTest()
                 "tbFail %d tbMeasures %d\n",
                 l.tbStyle, l.tbAdvance, l.tbWidth, l.tbUtf8, l.tbTruncate, l.tbPieces, l.tbLines, l.tbWords, l.tbChars, l.tbFail,
                 l.tbMeasures);
+
+    // ===== part 9b-iii: the render =====
+    S_RenderResults v;
+    {
+        void *const oldGraph[] = {g_igraphVtable[0x44 / 4], g_igraphVtable[0x7C / 4], g_igraphVtable[0x80 / 4],
+                                  g_igraphVtable[0x88 / 4]};
+        void *const oldDriver[] = {g_driverVtable[0x18 / 4], g_driverVtable[0x1C / 4]};
+        g_igraphVtable[0x44 / 4] = reinterpret_cast<void *>(&F_TrSetTexture);
+        g_igraphVtable[0x7C / 4] = reinterpret_cast<void *>(&F_TrSetViewport);
+        g_igraphVtable[0x80 / 4] = reinterpret_cast<void *>(&F_TrGetViewport);
+        g_igraphVtable[0x88 / 4] = reinterpret_cast<void *>(&F_TrDraw);
+        g_driverVtable[0x18 / 4] = reinterpret_cast<void *>(&F_TrSetState);
+        g_driverVtable[0x1C / 4] = reinterpret_cast<void *>(&F_TrGetState);
+        g_igraphVtable[0x18 / 4] = reinterpret_cast<void *>(&F_TrScrnX);
+        g_igraphVtable[0x1C / 4] = reinterpret_cast<void *>(&F_TrScrnY);
+        font3.logging = true;
+        const uint32_t white = 0xFFFFFFFF, grey = 0xAABBCCDD;
+        const int st = TrStyle(grey);
+        // The box: left 10, bottom 20, 200 by 100 (top 120), depth 0.5.
+        TbRect(box, 10.0f, 20.0f, 200.0f, 100.0f);
+        box.m_scroll = 0;
+        box.m_hover = -1;
+        box.m_editing = false;
+        box.m_caretOn = false;
+
+        // --- nothing before the box is placed; laid out first when dirty (the fonts' batching taken) ---
+        {
+            C_TextBox fresh;
+            fresh.AddText(C_str("ab"), static_cast<uint8_t>(st));
+            g_gfLog.clear();
+            fresh.Render();
+            WM(v.tbPlaced, g_gfLog.empty() && fresh.m_dirty && fresh.m_lines.empty());
+            TbRect(fresh, 10.0f, 20.0f, 200.0f, 100.0f);
+            fresh.m_batching = true;
+            g_gfLog.clear();
+            fresh.Render();
+            WM(v.tbPlaced, !fresh.m_dirty && !fresh.m_batching && fresh.m_lines.size() == 1 &&
+                               std::count(g_gfLog.begin(), g_gfLog.end(), "draw 3 4 1") == 1);
+        }
+
+        // --- a word's glyphs: two triangles each at the pen (the line's base less the scroll) ---
+        {
+            TrClear(box);
+            TrWord(TrLine(box, 50), "ab", st, 30);
+            box.Render();
+            WM(v.tbGlyphs, GfLogIs({"select 3", "draw 3 4 1"}) && TrVertices() == TrQuad(30, 50, 6, 12) + TrQuad(36, 50, 6, 12) &&
+                               TrUniform(grey, 0.5f, 2.0f) && box.m_penX == 42 && box.m_penY == 50);
+            box.m_scroll = 5;
+            TrClear(box);
+            TrWord(TrLine(box, 50), "aW", st, 30);
+            TrWord(TrLine(box, 80), "i", st, 7);
+            box.Render();
+            WM(v.tbGlyphs, GfLogIs({"select 3", "draw 3 4 1", "select 3", "draw 3 2 1"}) && TrVertices() == TrQuad(7, 75, 3, 12) &&
+                               box.m_penX == 10 && box.m_penY == 75);
+            box.m_scroll = 0;
+            // (The depth 0.3: 1 / 0.3.)
+            const float rect[7] = {10.0f, 120.0f, 210.0f, 20.0f, 200.0f, 100.0f, 0.3f};
+            box.SetRect(rect);
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a", st, 30);
+            box.Render();
+            WM(v.tbGlyphs, TrUniform(grey, 0.3f, 1.0f / 0.3f));
+            TbRect(box, 10.0f, 20.0f, 200.0f, 100.0f);
+            // (The bytes unsigned.)
+            font3.asked.clear();
+            TrClear(box);
+            TrWord(TrLine(box, 50), "\xFF", st, 30);
+            box.Render();
+            WM(v.tbGlyphs, font3.asked == std::vector<int>{255} && GfLogIs({"select 3", "draw 3 2 1"}));
+        }
+
+        // --- a blank: the pen moved 0.4 of the size (rounded), nothing drawn ---
+        {
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a b", st, 30);
+            box.Render();
+            WM(v.tbBlank, GfLogIs({"select 3", "draw 3 4 1"}) && TrVertices() == TrQuad(30, 50, 6, 12) + TrQuad(41, 50, 6, 12) &&
+                              box.m_penX == 47);
+            // (27 pixels: 10.8, 11.)
+            const int big = TrStyle(grey, 0, 27.0f / 600.0f);
+            TrClear(box);
+            TrWord(TrLine(box, 50), " ", big, 30);
+            box.Render();
+            WM(v.tbBlank, g_gfLog.empty() && box.m_penX == 41);
+            ReleaseTextStyle(big);
+            TrClear(box);
+            TrWord(TrLine(box, 50), "", st, 30);
+            box.Render();
+            WM(v.tbBlank, g_gfLog.empty() && box.m_penX == 30);
+        }
+
+        // --- 32 glyphs drawn at once, the rest after ---
+        {
+            TrClear(box);
+            TrWord(TrLine(box, 50), "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", st, 0);
+            box.Render();
+            WM(v.tbFlush, GfLogIs({"select 3", "draw 3 64 1", "select 3", "draw 3 2 1"}) && TrVertices() == TrQuad(192, 50, 6, 12));
+            TrClear(box);
+            TrWord(TrLine(box, 50), "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", st, 0);
+            box.Render();
+            WM(v.tbFlush, GfLogIs({"select 3", "draw 3 64 1"}));
+            TrClear(box);
+            TrWord(TrLine(box, 50), "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ", st, 0);
+            box.Render();
+            WM(v.tbFlush, GfLogIs({"select 3", "draw 3 64 1"}) && box.m_penX == 197);
+        }
+
+        // --- the fonts batching: the quads the font's (not drawn) ---
+        {
+            g_gfLog.clear();
+            font2.logging = true;
+            SetFontBatching(true);
+            font2.logging = false;
+            WM(v.tbFonts, g_fontManager->IsBatching() && GfLogIs({"clear 2", "clear 3"}));
+            TrClear(box);
+            TrWord(TrLine(box, 50), "ab", st, 30);
+            box.Render();
+            WM(v.tbBatch, box.m_batching && GfLogIs({"quad 97 aabbccdd 6 12 30 50 0.5", "quad 98 aabbccdd 6 12 36 50 0.5"}) &&
+                              box.m_penX == 42);
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a b", st, 30);
+            box.Render();
+            WM(v.tbBatch, GfLogIs({"quad 97 aabbccdd 6 12 30 50 0.5", "quad 98 aabbccdd 6 12 41 50 0.5"}));
+            box.m_editing = true;
+            box.m_selection = 0;
+            box.m_caretOn = true;
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a", st, 30);
+            box.Render();
+            WM(v.tbBatch, GfLogIs({"quad 97 aabbccdd 6 12 30 50 0.5", "quad 95 aabbccdd 12 12 36 48 0.5"}) && box.m_penX == 48 &&
+                              box.m_penY == 50);
+            box.m_editing = false;
+            box.m_caretOn = false;
+            g_gfLog.clear();
+            SetFontBatching(false);
+            WM(v.tbFonts, !g_fontManager->IsBatching() && g_gfLog.empty());
+            font2.logging = true;
+            FlushFonts();
+            font2.logging = false;
+            WM(v.tbFonts, GfLogIs({"flush 2", "flush 3"}));
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a", st, 30);
+            box.Render();
+            WM(v.tbBatch, !box.m_batching && GfLogIs({"select 3", "draw 3 2 1"}));
+        }
+
+        // --- the colours: the box's; dimmed (alpha 0x60); the hovered line's white; the style's ---
+        {
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a", st, 30);
+            box.m_colour = 0x11223344;
+            box.m_dimmed = true;
+            box.m_hover = 0;
+            box.Render();
+            WM(v.tbColour, TrUniform(0x11223344, 0.5f, 2.0f));
+            box.m_colour = 0;
+            box.Render();
+            WM(v.tbColour, TrUniform(0x60BBCCDD, 0.5f, 2.0f));
+            box.m_dimmed = false;
+            box.Render();
+            WM(v.tbColour, TrUniform(white, 0.5f, 2.0f));
+            box.m_hover = 1;
+            box.Render();
+            WM(v.tbColour, TrUniform(grey, 0.5f, 2.0f));
+            const int black = TrStyle(0x00000000);
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a", black, 30);
+            box.m_dimmed = true;
+            box.Render();
+            WM(v.tbColour, TrUniform(0x60000000, 0.5f, 2.0f));
+            box.m_dimmed = false;
+            box.m_hover = -1;
+            ReleaseTextStyle(black);
+        }
+
+        // --- a centred word: up by half its line's gap over its size (truncated), the next not ---
+        {
+            const int centred = TrStyle(grey, STYLE_CENTRED);
+            TrClear(box);
+            S_TextLine *line = TrLine(box, 50, 20);
+            TrWord(line, "a", centred, 30);
+            TrWord(line, "b", st, 40);
+            box.Render();
+            WM(v.tbCentred, GfLogIs({"select 3", "draw 3 2 1", "select 3", "draw 3 2 1"}) && TrVertices() == TrQuad(40, 50, 6, 12));
+            g_gfLog.clear();
+            delete line->words.back();
+            line->words.pop_back();
+            box.Render();
+            WM(v.tbCentred, TrVertices() == TrQuad(30, 46, 6, 12) && box.m_penY == 50);
+            line->gap = 15;
+            box.Render();
+            WM(v.tbCentred, TrVertices() == TrQuad(30, 49, 6, 12));
+            line->gap = 9;
+            box.Render();
+            WM(v.tbCentred, TrVertices() == TrQuad(30, 51, 6, 12));
+            line->gap = 12;
+            box.m_scroll = 3;
+            box.Render();
+            WM(v.tbCentred, TrVertices() == TrQuad(30, 47, 6, 12) && box.m_penY == 47);
+            box.m_scroll = 0;
+            ReleaseTextStyle(centred);
+        }
+
+        // --- the caret on the edited run's line ('_' 0.1 of the size under the base, truncated), in the
+        // last word's colour ---
+        {
+            box.m_editing = true;
+            box.m_selection = 0;
+            box.m_caretOn = true;
+            font3.asked.clear();
+            TrClear(box);
+            TrWord(TrLine(box, 50), "ab", st, 30);
+            box.Render();
+            WM(v.tbCaret, GfLogIs({"select 3", "draw 3 4 1", "select 3", "draw 3 2 1"}) && TrVertices() == TrQuad(42, 48, 12, 12) &&
+                              TrUniform(grey, 0.5f, 2.0f) && box.m_penX == 54 && box.m_penY == 50 &&
+                              font3.asked == (std::vector<int>{'a', 'b', '_'}));
+            box.m_caretOn = false;
+            g_gfLog.clear();
+            box.Render();
+            WM(v.tbCaret, GfLogIs({"select 3", "draw 3 4 1"}));
+            box.m_caretOn = true;
+            box.m_editing = false;
+            g_gfLog.clear();
+            box.Render();
+            WM(v.tbCaret, GfLogIs({"select 3", "draw 3 4 1"}));
+            box.m_editing = true;
+            box.m_selection = 1;
+            g_gfLog.clear();
+            box.Render();
+            WM(v.tbCaret, GfLogIs({"select 3", "draw 3 4 1"}));
+            // Line 1's caret: line 0's colour (the hovered white) and pen x.
+            TrClear(box);
+            TrWord(TrLine(box, 50), "ab", st, 30);
+            TrLine(box, 80);
+            box.m_hover = 0;
+            box.Render();
+            WM(v.tbCaret, GfLogIs({"select 3", "draw 3 4 1", "select 3", "draw 3 2 1"}) && TrVertices() == TrQuad(42, 78, 12, 12) &&
+                              TrUniform(white, 0.5f, 2.0f));
+            box.m_hover = -1;
+            // No word yet: colour 0; the base 0: -1.2, -1.
+            box.m_selection = 0;
+            TrClear(box);
+            TrLine(box, 0);
+            box.m_penX = 9;
+            box.Render();
+            WM(v.tbCaret, GfLogIs({"select 3", "draw 3 2 1"}) && TrVertices() == TrQuad(9, -1, 12, 12) && TrUniform(0, 0.5f, 2.0f));
+            // (25 pixels: 2.5 under the base, 25 wide.)
+            const int big = TrStyle(grey, 0, 25.0f / 600.0f);
+            TrClear(box);
+            TrWord(TrLine(box, 50), "", big, 30);
+            box.Render();
+            WM(v.tbCaret, TrVertices() == TrQuad(30, 47, 25, 25));
+            box.m_editing = false;
+            TrClear(box);
+            TrWord(TrLine(box, 50), "i", big, 30);
+            box.Render();
+            WM(v.tbGlyphs, TrVertices() == TrQuad(30, 50, 6, 25) && box.m_penX == 36);
+            box.m_editing = true;
+            ReleaseTextStyle(big);
+            // A blank caret: the pen moved only.
+            font3.caretAspect = 0.0f;
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a", st, 30);
+            box.Render();
+            WM(v.tbCaret, GfLogIs({"select 3", "draw 3 2 1"}) && box.m_penX == 41);
+            font3.caretAspect = 1.0f;
+            box.m_editing = false;
+            box.m_caretOn = false;
+        }
+
+        // --- the pieces: at their x and y from the box's left and bottom, coloured as the line the
+        // lines stopped at; a piece without its style skipped ---
+        {
+            TbRect(box, 10.5f, 20.75f, 200.0f, 100.0f);
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a", st, 30);
+            TrWord(TrLine(box, 60), "a", st, 30);
+            TrPiece(box, "b", 250, 0, 0);
+            TrPiece(box, "a", st, 5, 7);
+            box.m_hover = 2;
+            box.Render();
+            WM(v.tbPieces, GfLogIs({"select 3", "draw 3 2 1", "select 3", "draw 3 2 1", "select 3", "draw 3 2 1"}) &&
+                               TrVertices() == TrQuad(15, 27, 6, 12) && TrUniform(white, 0.5f, 2.0f) && box.m_penX == 21);
+            box.m_hover = 1;
+            box.Render();
+            WM(v.tbPieces, TrUniform(grey, 0.5f, 2.0f));
+            TrClear(box);
+            TrPiece(box, "a", st, -15, -27);
+            box.Render();
+            WM(v.tbPieces, TrVertices() == TrQuad(-4, -6, 6, 12));
+            TbRect(box, 10.0f, 20.0f, 200.0f, 100.0f);
+            box.m_hover = -1;
+        }
+
+        // --- a word without its style or font size ends the lines (the pieces still drawn) ---
+        {
+            const int none = TrStyle(grey, 0, 0.0f);
+            TrClear(box);
+            S_TextLine *line = TrLine(box, 50);
+            TrWord(line, "a", st, 30);
+            TrWord(line, "b", 250, 40);
+            TrWord(line, "c", st, 50);
+            TrWord(TrLine(box, 80), "d", st, 30);
+            TrPiece(box, "e", st, 5, 7);
+            box.m_hover = 0;
+            box.m_editing = true;
+            box.m_selection = 0;
+            box.m_caretOn = true;
+            box.Render();
+            WM(v.tbFail, GfLogIs({"select 3", "draw 3 2 1", "select 3", "draw 3 2 1"}) && TrVertices() == TrQuad(15, 27, 6, 12) &&
+                             TrUniform(white, 0.5f, 2.0f));
+            box.m_editing = false;
+            box.m_caretOn = false;
+            box.m_hover = -1;
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a", none, 30);
+            TrWord(TrLine(box, 80), "d", st, 30);
+            box.Render();
+            WM(v.tbFail, g_gfLog.empty() && box.m_penX == 30);
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a", st, 30);
+            TrWord(TrLine(box, 80), "d", none, 30);
+            TrPiece(box, "e", none, 5, 7);
+            TrPiece(box, "f", st, 5, 7);
+            box.Render();
+            WM(v.tbFail, GfLogIs({"select 3", "draw 3 2 1", "select 3", "draw 3 2 1"}) && TrVertices() == TrQuad(15, 27, 6, 12));
+            ReleaseTextStyle(none);
+        }
+
+        // --- overflowing: clipped to the box (5 pixels more at the top, on the screen), the screen's
+        // viewport back after ---
+        {
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a", st, 30);
+            box.m_overflows = true;
+            box.Render();
+            WM(v.tbClip, g_gfLog == TrClipped("viewport 10 20 201 106 0 1", {"select 3", "draw 3 2 1"}));
+            g_trScreen = {3, 4, 640, 480, 0.25f, 0.75f};
+            g_gfLog.clear();
+            box.Render();
+            WM(v.tbClip, g_gfLog == TrClipped("viewport 10 20 201 106 0 1", {"select 3", "draw 3 2 1"},
+                                              "viewport 3 4 640 480 0.25 0.75"));
+            g_trScreen = {0, 0, 800, 600, 0.0f, 1.0f};
+            S_IGraphViewport clip;
+            TbRect(box, -5.0f, -3.0f, 900.0f, 700.0f);
+            WM(v.tbClip, box.ClipViewport(&clip) && clip.x == 0 && clip.y == 0 && clip.width == 801 && clip.height == 601 &&
+                             clip.minZ == 0.0f && clip.maxZ == 1.0f);
+            TbRect(box, 900.0f, 700.0f, 50.0f, 50.0f);
+            WM(v.tbClip, box.ClipViewport(&clip) && clip.x == 800 && clip.y == 600 && clip.width == 1 && clip.height == 1);
+            TbRect(box, -50.0f, -60.0f, 20.0f, 30.0f);
+            WM(v.tbClip, box.ClipViewport(&clip) && clip.x == 0 && clip.y == 0 && clip.width == 1 && clip.height == 1);
+            TbRect(box, 10.5f, 20.25f, 100.75f, 50.5f);
+            WM(v.tbClip, box.ClipViewport(&clip) && clip.x == 10 && clip.y == 20 && clip.width == 101 && clip.height == 56);
+            TbRect(box, 10.0f, 20.0f, -1.0f, 50.0f);
+            WM(v.tbClip, !box.ClipViewport(&clip) && clip.width == 0);
+            TbRect(box, 10.0f, 20.0f, 100.0f, -6.0f);
+            WM(v.tbClip, !box.ClipViewport(&clip) && clip.height == 0);
+            TbRect(box, 10.0f, 20.0f, 100.0f, -5.0f);
+            WM(v.tbClip, box.ClipViewport(&clip) && clip.height == 1);
+            // Edges of fractions near 0: kept (the width and the height cross a whole pixel).
+            TbRect(box, 0.3f, 0.3f, 9.9f, 4.9f);
+            WM(v.tbClip, box.ClipViewport(&clip) && clip.x == 0 && clip.y == 0 && clip.width == 10 && clip.height == 10);
+            TbRect(box, 0.15f, 0.15f, 0.1f, -4.9f);
+            WM(v.tbClip, box.ClipViewport(&clip) && clip.width == 1 && clip.height == 1);
+            // Negative edges at 0.
+            TbRect(box, 0.4f, 0.4f, -1.4f, 50.0f);
+            WM(v.tbClip, !box.ClipViewport(&clip) && clip.width == 0);
+            TbRect(box, 0.4f, 0.4f, 50.0f, -6.4f);
+            WM(v.tbClip, !box.ClipViewport(&clip) && clip.height == 0);
+            // Nothing of it on the screen: nothing drawn, the viewport kept.
+            TbRect(box, 10.0f, 20.0f, -1.0f, 50.0f);
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a", st, 30);
+            box.m_overflows = true;
+            box.m_background = 0x80102030;
+            box.Render();
+            WM(v.tbClip, GfLogIs({"getviewport", "scrnx", "scrny"}));
+            box.m_background = 0;
+            TbRect(box, 10.0f, 20.0f, 200.0f, 100.0f);
+        }
+
+        // --- the background: a quad over the box, the driver's state 3 off around it ---
+        {
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a", st, 30);
+            box.m_background = 0x80102030;
+            g_trStates[3] = 5;
+            box.Render();
+            WM(v.tbBackground, GfLogIs({"get 3", "set 3 0", "texture 0 0", "draw 4 2 1", "set 3 1", "select 3", "draw 3 2 1"}));
+            g_trStates[3] = 0;
+            g_gfLog.clear();
+            box.m_hover = 0;
+            box.m_overflows = true;
+            TrWord(box.m_lines[0], "", 250, 0);
+            box.Render();
+            WM(v.tbBackground, g_gfLog == TrClipped("viewport 10 20 201 106 0 1", {"get 3", "set 3 0", "texture 0 0", "draw 4 2 1",
+                                                                                 "set 3 0", "select 3", "draw 3 2 1"}));
+            box.m_hover = -1;
+            TrClear(box);
+            box.Render();
+            WM(v.tbBackground, GfLogIs({"get 3", "set 3 0", "texture 0 0", "draw 4 2 1", "set 3 0"}) &&
+                                   TrVertices() == "(10 20 0 0)(210 20 1 0)(210 120 0 1)(10 120 1 1)" &&
+                                   g_trVertices[0].color == 0x80102030 && FloatBits(g_trVertices[3].z) == 0x3ce8bf06 &&
+                                   FloatBits(g_trVertices[2].rhw) == 0x420cc9df);
+            box.m_background = 0;
+        }
+
+        // --- the outline (its switch set): the clip's quad after the viewport's restored ---
+        {
+            g_textBoxOutline = true;
+            g_trStates[9] = 7;
+            TrClear(box);
+            box.Render();
+            WM(v.tbOutline, g_gfLog.empty());
+            box.m_overflows = true;
+            box.Render();
+            std::vector<std::string> outlined = TrClipped("viewport 10 20 201 106 0 1", {});
+            outlined.insert(outlined.end(), {"texture 0 0", "get 9", "set 9 0", "draw 4 2 1", "set 9 7"});
+            WM(v.tbOutline, g_gfLog == outlined &&
+                                TrVertices() == "(10 20 0 0)(211 20 1 0)(211 126 0 1)(10 126 1 1)" &&
+                                g_trVertices[1].color == 0x2F005000 && FloatBits(g_trVertices[0].z) == 0x3ce8bf06 &&
+                                FloatBits(g_trVertices[3].rhw) == 0x420cc9df);
+            g_textBoxOutline = false;
+            g_trStates[9] = 0;
+        }
+
+        // --- the unicode font: UTF-8 characters (not UTF-8: the byte, signed), the password's '*' ---
+        {
+            TbUnicode(true);
+            font3.asked.clear();
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a\xD0\x96\xFF", st, 30);
+            box.Render();
+            WM(v.tbUtf8, font3.asked == (std::vector<int>{'a', 0x416, -1}) && GfLogIs({"select 3", "draw 3 6 1"}) &&
+                             TrVertices() == TrQuad(30, 50, 6, 12) + TrQuad(36, 50, 12, 12) + TrQuad(48, 50, 6, 12));
+            font3.asked.clear();
+            TrClear(box);
+            TrWord(TrLine(box, 50), "\xFF" "bc", st, 30);
+            box.Render();
+            WM(v.tbUtf8, font3.asked == (std::vector<int>{-1, 'b', 'c'}) && GfLogIs({"select 3", "draw 3 6 1"}));
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a b", st, 30);
+            box.Render();
+            WM(v.tbUtf8, GfLogIs({"select 3", "draw 3 4 1"}) && TrVertices() == TrQuad(30, 50, 6, 12) + TrQuad(41, 50, 6, 12));
+            TrClear(box);
+            TrWord(TrLine(box, 50), "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", st, 0);
+            box.Render();
+            WM(v.tbUtf8, GfLogIs({"select 3", "draw 3 64 1", "select 3", "draw 3 2 1"}));
+            TrClear(box);
+            TrWord(TrLine(box, 50), "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", st, 0);
+            box.Render();
+            WM(v.tbUtf8, GfLogIs({"select 3", "draw 3 64 1"}));
+            const int password = TrStyle(grey, STYLE_PASSWORD);
+            font3.asked.clear();
+            TrClear(box);
+            TrWord(TrLine(box, 50), "\xD0\x96" "b", password, 30);
+            box.Render();
+            WM(v.tbUtf8, font3.asked == (std::vector<int>{'*', '*'}) && TrVertices() == TrQuad(30, 50, 9, 12) + TrQuad(39, 50, 9, 12));
+            g_gfLog.clear();
+            SetFontBatching(true);
+            TrClear(box);
+            TrWord(TrLine(box, 50), "\xD0\x96 a", st, 30);
+            box.Render();
+            WM(v.tbUtf8, GfLogIs({"quad 1046 aabbccdd 12 12 30 50 0.5", "quad 97 aabbccdd 6 12 47 50 0.5"}));
+            SetFontBatching(false);
+            TrClear(box);
+            TrWord(TrLine(box, 50), "", st, 30);
+            box.Render();
+            WM(v.tbUtf8, g_gfLog.empty());
+            const int none = TrStyle(grey, 0, 0.0f);
+            TrClear(box);
+            TrWord(TrLine(box, 50), "a", none, 30);
+            TrWord(TrLine(box, 80), "d", st, 30);
+            box.Render();
+            WM(v.tbUtf8, g_gfLog.empty());
+            ReleaseTextStyle(none);
+            TbUnicode(false);
+            font3.asked.clear();
+            TrClear(box);
+            TrWord(TrLine(box, 50), "ab", password, 30);
+            box.Render();
+            WM(v.tbUtf8, font3.asked == (std::vector<int>{'*', '*'}) && TrVertices() == TrQuad(30, 50, 9, 12) + TrQuad(39, 50, 9, 12));
+            ReleaseTextStyle(password);
+        }
+
+        // --- +0x76: moved by its step, kept from 0 to 2 under the box's top over the last line ---
+        {
+            TrClear(box);
+            box.m_unknown76 = 0;
+            box.StepUnknown76(5, &box.m_unknown76);
+            WM(v.tbStep, box.m_unknown76 == 0);
+            box.StepUnknown76(1, &box.m_unknown76);
+            WM(v.tbStep, box.m_unknown76 == 0);
+            box.StepUnknown76(-3, &box.m_unknown76);
+            WM(v.tbStep, box.m_unknown76 == -2);
+            TrLine(box, 200);
+            box.m_unknown76 = -50;
+            box.StepUnknown76(0, &box.m_unknown76);
+            WM(v.tbStep, box.m_unknown76 == -50);
+            box.StepUnknown76(-31, &box.m_unknown76);
+            WM(v.tbStep, box.m_unknown76 == -82);
+            box.m_unknown76 = -80;
+            box.StepUnknown76(0, &box.m_unknown76);
+            WM(v.tbStep, box.m_unknown76 == -80);
+            box.m_unknown76 = 30;
+            box.StepUnknown76(10, &box.m_unknown76);
+            WM(v.tbStep, box.m_unknown76 == 0);
+            box.m_lines.back()->y = 120;
+            box.m_unknown76 = -3;
+            box.StepUnknown76(0, &box.m_unknown76);
+            WM(v.tbStep, box.m_unknown76 == -2);
+            box.m_lines.back()->y = 119;
+            box.m_unknown76 = -3;
+            box.StepUnknown76(0, &box.m_unknown76);
+            WM(v.tbStep, box.m_unknown76 == 0);
+            TbRect(box, 10.0f, 20.0f, 200.5f, 100.5f);
+            box.m_dirty = false;
+            box.m_lines.back()->y = 200;
+            box.m_unknown76 = -80;
+            box.StepUnknown76(0, &box.m_unknown76);
+            WM(v.tbStep, box.m_unknown76 == -81);
+            box.m_lines.back()->y = 100;
+            box.m_unknown76 = -80;
+            box.StepUnknown76(0, &box.m_unknown76);
+            WM(v.tbStep, box.m_unknown76 == 0);
+            TbRect(box, 10.0f, 20.0f, 200.0f, 100.0f);
+            // Render's step: its switch's low word.
+            TrClear(box);
+            box.m_unknown76 = 0;
+            g_textBoxStep76 = 0x1FFFD;
+            box.Render();
+            WM(v.tbStep, box.m_unknown76 == -2);
+            g_textBoxStep76 = 0;
+            box.m_unknown76 = 0;
+        }
+
+        ReleaseTextStyle(st);
+        font3.logging = false;
+        g_igraphVtable[0x44 / 4] = oldGraph[0];
+        g_igraphVtable[0x7C / 4] = oldGraph[1];
+        g_igraphVtable[0x80 / 4] = oldGraph[2];
+        g_igraphVtable[0x88 / 4] = oldGraph[3];
+        g_driverVtable[0x18 / 4] = oldDriver[0];
+        g_driverVtable[0x1C / 4] = oldDriver[1];
+        g_igraphVtable[0x18 / 4] = reinterpret_cast<void *>(&F_TbScrnX);
+        g_igraphVtable[0x1C / 4] = reinterpret_cast<void *>(&F_TbScrnY);
+    }
+    std::printf("render: tbPlaced %d tbGlyphs %d tbBlank %d tbFlush %d tbBatch %d tbColour %d tbCentred %d tbCaret %d "
+                "tbPieces %d tbFail %d tbClip %d tbBackground %d tbOutline %d tbUtf8 %d tbStep %d tbFonts %d\n",
+                v.tbPlaced, v.tbGlyphs, v.tbBlank, v.tbFlush, v.tbBatch, v.tbColour, v.tbCentred, v.tbCaret, v.tbPieces,
+                v.tbFail, v.tbClip, v.tbBackground, v.tbOutline, v.tbUtf8, v.tbStep, v.tbFonts);
 
     box.m_fonts->m_fonts.erase(box.m_fonts->m_fonts.begin(), box.m_fonts->m_fonts.begin() + 2);
     g_textIds = oldIds;

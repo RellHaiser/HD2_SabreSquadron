@@ -99,32 +99,32 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Interface & HUD",
   "state": "ported",
-  "functions": 668,
-  "bytes": 204918,
+  "functions": 676,
+  "bytes": 209571,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Interface & HUD",
   "state": "pending",
-  "functions": 56,
-  "bytes": 13143,
+  "functions": 55,
+  "bytes": 11640,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "ported",
-  "functions": 81,
-  "bytes": 21808,
+  "functions": 83,
+  "bytes": 21906,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "pending",
-  "functions": 1426,
-  "bytes": 453457,
+  "functions": 1417,
+  "bytes": 450209,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {

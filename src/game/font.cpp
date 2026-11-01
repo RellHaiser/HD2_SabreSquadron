@@ -226,6 +226,20 @@ void ReleaseFontManager()
     }
 }
 
+void SetFontBatching(bool on)
+{
+    g_fontManager->m_batching = on;
+    if (on)
+        for (size_t i = 0; i < g_fontManager->m_fonts.size(); ++i)
+            g_fontManager->m_fonts[i]->ClearVertices();
+}
+
+void FlushFonts()
+{
+    for (size_t i = 0; i < g_fontManager->m_fonts.size(); ++i)
+        g_fontManager->m_fonts[i]->Flush();
+}
+
 void C_FontManager::Release()
 {
     if (--m_refs == 0) {

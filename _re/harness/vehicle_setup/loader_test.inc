@@ -413,7 +413,7 @@ void LoaderTest(S_CameraResults &)
                           at.x == 0.5f && at.y == -0.375f && at.z == -15.5f && g_lsBoxesLive == 7);
         WM(r.lsTexts, ls->m_texts[0] && ls->m_texts[1] && ls->m_texts[2] && !ls->m_texts[3] && ls->m_texts[11] &&
                           ls->m_texts[14] && ls->m_texts[0]->m_margin == 5 &&
-                          ls->m_texts[0]->m_unknown71 == 0);
+                          ls->m_texts[0]->m_dimmed == 0);
         WM(r.lsDraw, ls->m_loadBar->m_scale.x == 0.0f && ls->m_loadBar->m_scale.y == 1.0f && ls->m_loadBar->m_scale.z == 1.0f);
 
         // The progress: drawn once it moved on by more than 0.003 (the first table).
@@ -586,9 +586,9 @@ void LoaderTest(S_CameraResults &)
             LsDrawLog(want, boxes, 7);
             const bool none = !mission || k == 2;
             WM(r.lsMpTexts, GfVecIs(g_gfLog, want) && ls->m_players[0].empty() && ls->m_players[1].empty() &&
-                                (ls->m_texts[5]->m_unknown71 != 0) == none &&
-                                (ls->m_texts[6]->m_unknown71 != 0) == none &&
-                                ls->m_texts[3]->m_unknown71 == 0);
+                                (ls->m_texts[5]->m_dimmed != 0) == none &&
+                                (ls->m_texts[6]->m_dimmed != 0) == none &&
+                                ls->m_texts[3]->m_dimmed == 0);
             ls->FinishLoading();
         }
         // The texts' labels absent (-1): a single mission's briefing and title without texts.

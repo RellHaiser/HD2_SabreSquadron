@@ -178691,10 +178691,10 @@
 "in_vtables": []
 },
 "0063f7d0": {
-"name": "FUN_0063f7d0",
+"name": "FlushFonts",
 "size": 43,
 "lines": 17,
-"chars": 339,
+"chars": 345,
 "callers": [
 "0066e300"
 ],
@@ -178708,10 +178708,10 @@
 "in_vtables": []
 },
 "0063f800": {
-"name": "FUN_0063f800",
+"name": "SetFontBatching",
 "size": 55,
 "lines": 20,
-"chars": 448,
+"chars": 428,
 "callers": [
 "0066e300"
 ],
@@ -179957,10 +179957,10 @@
 "in_vtables": []
 },
 "006442d0": {
-"name": "FUN_006442d0",
+"name": "AddVertex",
 "size": 80,
-"lines": 23,
-"chars": 702,
+"lines": 20,
+"chars": 572,
 "callers": [
 "00648b80",
 "00648fa0"
@@ -181211,10 +181211,10 @@
 "in_vtables": []
 },
 "00648020": {
-"name": "FUN_00648020",
+"name": "ClipViewport",
 "size": 364,
 "lines": 57,
-"chars": 1513,
+"chars": 1539,
 "callers": [
 "00648200"
 ],
@@ -181232,10 +181232,10 @@
 "in_vtables": []
 },
 "00648190": {
-"name": "FUN_00648190",
+"name": "ReadScreenSize",
 "size": 25,
 "lines": 13,
-"chars": 195,
+"chars": 204,
 "callers": [
 "00648200",
 "006dceb0"
@@ -181250,10 +181250,10 @@
 "in_vtables": []
 },
 "006481b0": {
-"name": "FUN_006481b0",
+"name": "WordColour",
 "size": 65,
 "lines": 19,
-"chars": 443,
+"chars": 374,
 "callers": [
 "00648200",
 "0064bc70"
@@ -181268,8 +181268,8 @@
 "00648200": {
 "name": "Render",
 "size": 1503,
-"lines": 197,
-"chars": 6753,
+"lines": 198,
+"chars": 6850,
 "callers": [],
 "callees": [
 "00645010",
@@ -181328,10 +181328,10 @@
 ]
 },
 "00648b80": {
-"name": "FUN_00648b80",
+"name": "DrawString",
 "size": 1949,
-"lines": 261,
-"chars": 10730,
+"lines": 222,
+"chars": 7867,
 "callers": [
 "00648200",
 "0064af10",
@@ -181360,10 +181360,10 @@
 "in_vtables": []
 },
 "00648fa0": {
-"name": "FUN_00648fa0",
+"name": "DrawCaret",
 "size": 559,
 "lines": 48,
-"chars": 1638,
+"chars": 1581,
 "callers": [
 "00648200"
 ],
@@ -181388,10 +181388,10 @@
 "in_vtables": []
 },
 "006491d0": {
-"name": "FUN_006491d0",
+"name": "StepUnknown76",
 "size": 108,
-"lines": 31,
-"chars": 583,
+"lines": 30,
+"chars": 534,
 "callers": [
 "00648200"
 ],
@@ -181768,8 +181768,8 @@
 "0064af10": {
 "name": "FUN_0064af10",
 "size": 343,
-"lines": 81,
-"chars": 2408,
+"lines": 82,
+"chars": 2438,
 "callers": [
 "0064ae70"
 ],
@@ -181986,7 +181986,7 @@
 "name": "FUN_0064bc70",
 "size": 869,
 "lines": 126,
-"chars": 4353,
+"chars": 4389,
 "callers": [],
 "callees": [
 "00645010",
@@ -202405,7 +202405,7 @@
 "name": "FUN_0066e300",
 "size": 234,
 "lines": 49,
-"chars": 1206,
+"chars": 1209,
 "callers": [],
 "callees": [
 "00633370",
@@ -239005,8 +239005,8 @@
 "006dceb0": {
 "name": "RunGame",
 "size": 2451,
-"lines": 423,
-"chars": 15650,
+"lines": 424,
+"chars": 15773,
 "callers": [
 "006dd920"
 ],

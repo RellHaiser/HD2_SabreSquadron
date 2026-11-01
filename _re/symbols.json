@@ -27666,6 +27666,16 @@
   "module": "font",
   "name": "FontList_PushBack"
  },
+ "0063f7d0": {
+  "module": "text_box",
+  "name": "FlushFonts",
+  "proto": "void __cdecl FlushFonts(void)"
+ },
+ "0063f800": {
+  "module": "text_box",
+  "name": "SetFontBatching",
+  "proto": "void __fastcall SetFontBatching(bool on)"
+ },
  "00640460": {
   "module": "zz_idioms",
   "name": "vector_tidy_640460"
@@ -27932,6 +27942,11 @@
   "name": "C_TextBox::TickCaret",
   "proto": "void __thiscall TickCaret(C_TextBox *this, int time)"
  },
+ "006442d0": {
+  "module": "text_box",
+  "name": "C_TextBox::AddVertex",
+  "proto": "void __thiscall AddVertex(C_TextBox *this, float x, float y, float u, float v, uint colour)"
+ },
  "00644320": {
   "module": "text_box",
   "name": "C_TextBox::SetSelectedText",
@@ -28155,10 +28170,40 @@
   "name": "C_TextBox::SplitWordsBytes",
   "proto": "void __thiscall SplitWordsBytes(C_TextBox *this, void * line)"
  },
+ "00648020": {
+  "module": "text_box",
+  "name": "C_TextBox::ClipViewport",
+  "proto": "bool __thiscall ClipViewport(C_TextBox *this, void * viewport)"
+ },
+ "00648190": {
+  "module": "text_box",
+  "name": "ReadScreenSize",
+  "proto": "void __stdcall ReadScreenSize(int x, int y)"
+ },
+ "006481b0": {
+  "module": "text_box",
+  "name": "C_TextBox::WordColour",
+  "proto": "uint __thiscall WordColour(C_TextBox *this, int line)"
+ },
  "00648200": {
   "module": "hud",
   "name": "C_TextBox::Render",
   "proto": "void __thiscall Render(C_TextBox *this)"
+ },
+ "00648b80": {
+  "module": "text_box",
+  "name": "C_TextBox::DrawString",
+  "proto": "bool __thiscall DrawString(C_TextBox *this, void * text, uint colour)"
+ },
+ "00648fa0": {
+  "module": "text_box",
+  "name": "C_TextBox::DrawCaret",
+  "proto": "void __thiscall DrawCaret(C_TextBox *this, uint colour)"
+ },
+ "006491d0": {
+  "module": "text_box",
+  "name": "C_TextBox::StepUnknown76",
+  "proto": "void __thiscall StepUnknown76(C_TextBox *this, short step, short * value)"
  },
  "0064ae60": {
   "module": "zz_idioms",

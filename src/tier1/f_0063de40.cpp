@@ -79,41 +79,6 @@ uint32_t C_FontManager__AddCp1250Font(uint32_t param_1,uint32_t param_2,uint32_t
 
 
 #endif
-// 0x0063f7d0
-uint32_t FUN_0063f7d0(...)
-{
-  int iVar1;
-  uint32_t uVar2;
-  uVar2 = 0;
-  while( true ) {
-    iVar1 = *(int *)(DAT_008acbdc + 0x10);
-    if ((iVar1 == 0) || ((uint32_t)(*(int *)(DAT_008acbdc + 0x14) - iVar1 >> 2) <= uVar2)) break;
-    (**(code **)(**(int **)(iVar1 + uVar2 * 4) + 4))();
-    uVar2++;
-  }
-  return 0;
-}
-
-
-// 0x0063f800
-uint32_t FUN_0063f800(char param_1, ...)
-{
-  int iVar1;
-  uint32_t uVar2;
-  *(char *)(DAT_008acbdc + 0x1c) = param_1;
-  if (param_1 != '\0') {
-    uVar2 = 0;
-    while( true ) {
-      iVar1 = *(int *)(DAT_008acbdc + 0x10);
-      if ((iVar1 == 0) || ((uint32_t)(*(int *)(DAT_008acbdc + 0x14) - iVar1 >> 2) <= uVar2)) break;
-      (**(code **)(**(int **)(iVar1 + uVar2 * 4) + 8))();
-      uVar2++;
-    }
-  }
-  return 0;
-}
-
-
 // 0x0063f870
 uint32_t FUN_0063f870(void *param_1, ...)
 {

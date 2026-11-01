@@ -1004,3 +1004,318 @@ bool C_TextBox::CheckPieceOverflow(const S_TextPiece *piece)
         m_overflows = true;
     return m_overflows;
 }
+
+// --- the render (part 9b-iii) ----------------------------------------------------------------------
+
+bool g_textBoxOutline;                                  // 0x008ae600
+int g_textBoxStep76;                                    // 0x008ae604
+
+namespace {
+
+// The glyphs' triangles gathered (32 quads' worth), then drawn with the font's texture.
+constexpr int MAX_TEXT_VERTICES = 0xC0;
+S_FontVertex g_textVertices[MAX_TEXT_VERTICES];         // 0x008acbf8
+int g_numTextVertices;                                  // 0x008acbf0
+// The background's and the outline's quad (a fan of 4), its depth and 1 / depth.
+S_FontVertex g_textBoxQuad[4];                          // 0x008ae410
+constexpr float QUAD_Z = 0.0284113996f;
+constexpr float QUAD_RHW = 35.1971397f;
+// The outline's colour.
+constexpr uint32_t OUTLINE_COLOUR = 0x2F005000;
+// IGraph::DrawPrimitives' kinds.
+constexpr int PRIMITIVE_TRIANGLES = 3;
+constexpr int PRIMITIVE_FAN = 4;
+// ClipViewport: the box extended up.
+constexpr float CLIP_TOP_MARGIN = 5.0f;
+// WordColour: a dimmed box's alpha; the hovered line's colour.
+constexpr uint32_t DIMMED_ALPHA = 0x60000000;
+constexpr uint32_t HOVER_COLOUR = 0xFFFFFFFF;
+// DrawCaret: the caret under the base by this of the font size.
+constexpr float CARET_DROP = 0.1f;
+// The driver's states the quads turn off (3 around the background, 9 around the outline; not
+// identified).
+constexpr int DRIVER_STATE_3 = 3;
+constexpr int DRIVER_STATE_9 = 9;
+
+// The quad from (x0, y0) to (x1, y1), its texture's corners (0, 0), (1, 0), (0, 1), (1, 1).
+void SetQuad(float x0, float y0, float x1, float y1, uint32_t colour)
+{
+    const float xy[4][2] = {{x0, y0}, {x1, y0}, {x1, y1}, {x0, y1}};
+    const float uv[4][2] = {{0.0f, 0.0f}, {1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}};
+    for (int i = 0; i < 4; ++i) {
+        S_FontVertex &v = g_textBoxQuad[i];
+        v.x = xy[i][0];
+        v.y = xy[i][1];
+        v.z = QUAD_Z;
+        v.rhw = QUAD_RHW;
+        v.color = colour;
+        v.u = uv[i][0];
+        v.v = uv[i][1];
+    }
+}
+
+} // namespace
+
+void ReadScreenSize(int, int)
+{
+    GetIGraph()->ScrnX();
+    GetIGraph()->ScrnY();
+}
+
+void C_TextBox::Render()
+{
+    if (!m_placed)
+        return;
+    S_IGraphViewport screen = {};
+    S_IGraphViewport clip = {};
+    m_batching = m_fonts->IsBatching();
+    if (m_dirty)
+        Layout();
+    if (m_overflows) {
+        screen = *GetIGraph()->GetViewport();
+        ReadScreenSize(screen.x + screen.width, screen.y + screen.height);
+        if (!ClipViewport(&clip))
+            return;
+        ReadScreenSize(clip.x + clip.width, clip.y + clip.height);
+        GetIGraph()->SetViewport(clip);
+    }
+    if (m_background != 0) {
+        const bool state = I3DGetDriver()->GetState(DRIVER_STATE_3) != 0;
+        I3DGetDriver()->SetState(DRIVER_STATE_3, 0);
+        SetQuad(m_left, m_bottom, m_right, m_top, m_background);
+        GetIGraph()->SetTexture(nullptr, 0);
+        GetIGraph()->DrawPrimitives(PRIMITIVE_FAN, 2, g_textBoxQuad, 1);
+        I3DGetDriver()->SetState(DRIVER_STATE_3, state);
+    }
+    StepUnknown76(static_cast<int16_t>(g_textBoxStep76), &m_unknown76);
+
+    // The lines (a word without its style or font size ends them, the pieces still drawn). The
+    // caret's colour is the last word's drawn (of any line; none yet: 0).
+    uint32_t colour = 0;
+    int index = 0;
+    for (; index < static_cast<int>(m_lines.size()); ++index) {
+        const S_TextLine *line = m_lines[index];
+        m_penY = static_cast<int16_t>(line->y - m_scroll);
+        bool drawn = true;
+        for (const S_TextWord *word : line->words) {
+            if (!SelectStyle(word->style)) {
+                drawn = false;
+                break;
+            }
+            colour = WordColour(index);
+            m_penX = word->x;
+            if (m_style->flags30 & STYLE_CENTRED) {
+                m_penY = static_cast<int16_t>(m_penY - (line->gap - FontSize()) / 2);
+                drawn = DrawString(word->text, colour);
+                m_penY = static_cast<int16_t>(line->y - m_scroll);
+            } else {
+                drawn = DrawString(word->text, colour);
+            }
+            if (!drawn)
+                break;
+        }
+        if (!drawn)
+            break;
+        if (m_editing && index == m_selection && m_caretOn)
+            DrawCaret(colour);
+    }
+    // The pieces (coloured as the line the lines stopped at: their count when all were drawn).
+    for (const S_TextPiece *piece : m_pieces) {
+        if (!SelectStyle(piece->style))
+            continue;
+        const uint32_t pieceColour = WordColour(index);
+        m_penX = static_cast<int16_t>(static_cast<int>(static_cast<float>(piece->x) + m_left));
+        m_penY = static_cast<int16_t>(static_cast<int>(static_cast<float>(piece->y) + m_bottom));
+        DrawString(piece->text, pieceColour);
+    }
+
+    if (m_overflows) {
+        ReadScreenSize(screen.x + screen.width, screen.y + screen.height);
+        GetIGraph()->SetViewport(screen);
+    }
+    if (g_textBoxOutline && m_overflows) {
+        GetIGraph()->SetTexture(nullptr, 0);
+        const uint32_t state = I3DGetDriver()->GetState(DRIVER_STATE_9);
+        I3DGetDriver()->SetState(DRIVER_STATE_9, 0);
+        // (The clip's numbers as unsigned.)
+        const auto pixels = [](int value) { return static_cast<float>(static_cast<uint32_t>(value)); };
+        SetQuad(pixels(clip.x), pixels(clip.y), pixels(clip.x + clip.width), pixels(clip.y + clip.height),
+                OUTLINE_COLOUR);
+        GetIGraph()->DrawPrimitives(PRIMITIVE_FAN, 2, g_textBoxQuad, 1);
+        I3DGetDriver()->SetState(DRIVER_STATE_9, state);
+    }
+}
+
+bool C_TextBox::ClipViewport(S_IGraphViewport *viewport) const
+{
+    const float screenWidth = static_cast<float>(m_screenWidth);
+    const float screenHeight = static_cast<float>(m_screenHeight);
+    // Each edge kept on the screen.
+    float left = m_left, top = m_top + CLIP_TOP_MARGIN, right = m_right, bottom = m_bottom;
+    if (right > screenWidth)
+        right = screenWidth;
+    else if (right < 0.0f)
+        right = 0.0f;
+    if (bottom > screenHeight)
+        bottom = screenHeight;
+    else if (bottom < 0.0f)
+        bottom = 0.0f;
+    if (left > screenWidth)
+        left = screenWidth;
+    else if (left < 0.0f)
+        left = 0.0f;
+    if (top > screenHeight)
+        top = screenHeight;
+    else if (top < 0.0f)
+        top = 0.0f;
+    const float width = right - left;
+    const float height = top - bottom;
+    viewport->x = static_cast<int>(left);
+    viewport->y = static_cast<int>(bottom);
+    viewport->height = static_cast<int>(height + 1.0f);
+    viewport->width = static_cast<int>(width + 1.0f);
+    viewport->maxZ = 1.0f;
+    viewport->minZ = 0.0f;
+    return viewport->height > 0 && viewport->width > 0;
+}
+
+uint32_t C_TextBox::WordColour(int line) const
+{
+    if (m_colour != 0)
+        return m_colour;
+    if (m_dimmed)
+        return (m_style->color & 0xFFFFFF) | DIMMED_ALPHA;
+    if (line == m_hover)
+        return HOVER_COLOUR;
+    return m_style->color;
+}
+
+bool C_TextBox::DrawString(const C_str &text, uint32_t colour)
+{
+    if (g_gameProfile.UsesUnicodeFont())
+        return DrawUtf8(text, colour);
+    return DrawBytes(text, colour);
+}
+
+bool C_TextBox::DrawBytes(const C_str &text, uint32_t colour)
+{
+    const int size = FontSize();
+    const int length = static_cast<int>(text.Size());
+    if (size == 0)
+        return false;
+    if (!m_batching)
+        g_numTextVertices = 0;
+    for (int i = 0; i < length; ++i) {
+        const int ch = m_style->flags30 & STYLE_PASSWORD ? '*' : static_cast<uint8_t>(text.c_str()[i]);
+        DrawGlyph(ch, *m_font->GetGlyph(ch), size, colour);
+        if (!m_batching && g_numTextVertices == MAX_TEXT_VERTICES)
+            FlushVertices();
+    }
+    if (!m_batching && g_numTextVertices != 0)
+        FlushVertices();
+    return true;
+}
+
+bool C_TextBox::DrawUtf8(const C_str &text, uint32_t colour)
+{
+    const int size = FontSize();
+    const int length = static_cast<int>(text.Size());
+    if (size == 0)
+        return false;
+    if (!m_batching)
+        g_numTextVertices = 0;
+    for (int i = 0; i < length;) {
+        uint32_t code;
+        int bytes = DecodeUtf8(&code, text.c_str() + i, static_cast<int>(text.Size()) - i);
+        if (bytes < 1) {
+            // (Not UTF-8: the byte, signed.)
+            code = static_cast<uint32_t>(static_cast<int>(static_cast<signed char>(text.c_str()[i])));
+            bytes = 1;
+        }
+        if (m_style->flags30 & STYLE_PASSWORD)
+            code = '*';
+        DrawGlyph(static_cast<int>(code), *m_font->GetGlyph(static_cast<int>(code)), size, colour);
+        if (!m_batching && g_numTextVertices == MAX_TEXT_VERTICES)
+            FlushVertices();
+        i += bytes;
+    }
+    if (!m_batching && g_numTextVertices != 0)
+        FlushVertices();
+    return true;
+}
+
+void C_TextBox::DrawGlyph(int ch, const S_Glyph &glyph, int size, uint32_t colour)
+{
+    if (glyph.aspect == 0.0f) {
+        m_penX = static_cast<int16_t>(m_penX + static_cast<int>(static_cast<float>(size * BLANK_WIDTH) + 0.5));
+        return;
+    }
+    const int width = static_cast<int>(static_cast<float>(size) * glyph.aspect + 0.5f);
+    if (m_batching) {
+        m_font->AddQuad(ch, colour, width, size, m_penX, m_penY, m_depth);
+    } else {
+        // Two triangles: base left, top left, top right; base right, base left, top right.
+        const float left = static_cast<float>(m_penX), right = static_cast<float>(m_penX + width);
+        const float base = static_cast<float>(m_penY), top = static_cast<float>(m_penY - size);
+        AddVertex(left, base, glyph.u0, glyph.v1, colour);
+        AddVertex(left, top, glyph.u0, glyph.v0, colour);
+        AddVertex(right, top, glyph.u1, glyph.v0, colour);
+        AddVertex(right, base, glyph.u1, glyph.v1, colour);
+        AddVertex(left, base, glyph.u0, glyph.v1, colour);
+        AddVertex(right, top, glyph.u1, glyph.v0, colour);
+    }
+    m_penX = static_cast<int16_t>(m_penX + width);
+}
+
+void C_TextBox::DrawCaret(uint32_t colour)
+{
+    const int size = FontSize();
+    const int16_t base = m_penY;
+    m_penY = static_cast<int16_t>(
+        static_cast<int>(static_cast<float>(m_penY) - static_cast<float>(size) * CARET_DROP));
+    const S_Glyph &glyph = *m_font->GetGlyph('_');
+    const bool quads = glyph.aspect != 0.0f && !m_batching;
+    if (quads)
+        g_numTextVertices = 0;
+    DrawGlyph('_', glyph, size, colour);
+    if (quads)
+        FlushVertices();
+    m_penY = base;
+}
+
+void C_TextBox::AddVertex(float x, float y, float u, float v, uint32_t colour)
+{
+    S_FontVertex &vertex = g_textVertices[g_numTextVertices++];
+    vertex.x = x;
+    vertex.y = y;
+    vertex.z = m_depth;
+    vertex.rhw = 1.0f / m_depth;
+    vertex.color = colour;
+    vertex.u = u;
+    vertex.v = v;
+}
+
+void C_TextBox::FlushVertices()
+{
+    m_font->Select();
+    GetIGraph()->DrawPrimitives(PRIMITIVE_TRIANGLES, g_numTextVertices / 3, g_textVertices, 1);
+    g_numTextVertices = 0;
+}
+
+void C_TextBox::StepUnknown76(int16_t step, int16_t *value)
+{
+    *value = static_cast<int16_t>(*value + step);
+    const int16_t stepped = *value;
+    int limit = 0;
+    if (!m_lines.empty()) {
+        limit = static_cast<int>(m_top - static_cast<float>(m_lines.back()->y));
+        if (limit > 0) {
+            *value = 0;
+            return;
+        }
+    }
+    if (stepped > 0)
+        *value = 0;
+    if (*value < limit)
+        *value = static_cast<int16_t>(limit - 2);
+}

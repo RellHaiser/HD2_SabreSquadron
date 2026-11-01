@@ -3,25 +3,6 @@
 namespace tier1 {
 extern uint32_t uRam00000024;
 
-// 0x006442d0
-uint32_t C_TextBox__FUN_006442d0(C_TextBox *_this,uint32_t param_1,uint32_t param_2,uint32_t param_3, uint32_t param_4,uint32_t param_5, ...)
-{
-  float fVar1;
-  int iVar2;
-  iVar2 = DAT_008acbf0 * 0x20;
-  DAT_008acbf0++;
-  *(uint32_t *)(&DAT_008acbf8 + iVar2) = param_1;
-  *(uint32_t *)(&DAT_008acbfc + iVar2) = param_2;
-  *(uint32_t *)(&DAT_008acc00 + iVar2) = _this->m_020;
-  fVar1 = (float)_this->m_020;
-  *(uint32_t *)(&DAT_008acc08 + iVar2) = param_5;
-  *(uint32_t *)(&DAT_008acc10 + iVar2) = param_3;
-  *(uint32_t *)(&DAT_008acc14 + iVar2) = param_4;
-  *(float *)(&DAT_008acc04 + iVar2) = 1.0 / fVar1;
-  return 0;
-}
-
-
 // 0x006446c0
 uint32_t FUN_006446c0(void *_this,int *param_1, ...)
 {
@@ -43,629 +24,6 @@ uint32_t vector_tidy_645a80(int param_1, ...)
   *(uint32_t *)(param_1 + 4) = 0;
   *(uint32_t *)(param_1 + 8) = 0;
   *(uint32_t *)(param_1 + 0xc) = 0;
-  return 0;
-}
-
-
-// 0x00648020
-uint64_t C_TextBox__FUN_00648020(C_TextBox *_this,uint32_t *param_1, ...)
-{
-  uint16_t uVar1;
-  float fVar2;
-  float fVar3;
-  int iVar4;
-  uint32_t *puVar5;
-  float *pfVar6;
-  int64_t lVar7;
-  uint64_t uVar8;
-  float local_1c [7];
-  uVar1 = _this->m_004;
-  puVar5 = &_this->m_008;
-  pfVar6 = local_1c;
-  for (iVar4 = 7; iVar4 != 0; iVar4 = iVar4 - 1) {
-    *pfVar6 = (float)*puVar5;
-    puVar5++;
-    pfVar6++;
-  }
-  fVar2 = (float)(int)(short)uVar1;
-  fVar3 = fVar2;
-  if ((local_1c[2] <= fVar2) && (fVar3 = local_1c[2], local_1c[2] < 0.0)) {
-    local_1c[2] = 0.0;
-    fVar3 = local_1c[2];
-  }
-  local_1c[2] = fVar3;
-  fVar3 = (float)(int)(short)_this->m_006;
-  if ((local_1c[3] <= (float)(int)(short)_this->m_006) && (fVar3 = local_1c[3], local_1c[3] < 0.0)) {
-    local_1c[3] = 0.0;
-    fVar3 = local_1c[3];
-  }
-  local_1c[3] = fVar3;
-  if ((local_1c[0] <= fVar2) && (fVar2 = local_1c[0], local_1c[0] < 0.0)) {
-    local_1c[0] = 0.0;
-    fVar2 = local_1c[0];
-  }
-  local_1c[0] = fVar2;
-  local_1c[4] = local_1c[2] - local_1c[0];
-  lVar7 = tier1_ftol();
-  *param_1 = (int)lVar7;
-  lVar7 = tier1_ftol();
-  param_1[1] = (int)lVar7;
-  lVar7 = tier1_ftol();
-  param_1[3] = (int)lVar7;
-  uVar8 = tier1_ftol();
-  param_1[2] = (int)uVar8;
-  param_1[5] = 0x3f800000;
-  param_1[4] = 0;
-  if ((0 < (int)lVar7) && (0 < (int)uVar8)) {
-    return CONCAT44((int)(uVar8 >> 0x20),CONCAT31((int3)(uVar8 >> 8),1));
-  }
-  return uVar8 & 0xffffffffffffff00;
-}
-
-
-// 0x00648190
-uint32_t FUN_00648190(...)
-{
-  IGraph *pIVar1;
-  pIVar1 = GetIGraph();
-  (*pIVar1->vtable->ScrnX)(pIVar1);
-  pIVar1 = GetIGraph();
-  (*pIVar1->vtable->ScrnY)(pIVar1);
-  return 0;
-}
-
-
-// 0x006481b0
-uint32_t FUN_006481b0(void *_this,int param_1, ...)
-{
-  uint32_t uVar1;
-  uVar1 = *(uint32_t *)((int)_this + 0x94);
-  if (uVar1 == 0) {
-    if (*(char *)((int)_this + 0x71) != '\0') {
-      return *(uint32_t *)(*(int *)((int)_this + 0x2c) + 4) & 0xffffff | 0x60000000;
-    }
-    if (param_1 == *(int *)((int)_this + 0x8c)) {
-      return 0xffffffff;
-    }
-    uVar1 = *(uint32_t *)(*(int *)((int)_this + 0x2c) + 4);
-  }
-  return uVar1;
-}
-
-
-// 0x00648200
-uint32_t C_TextBox__Render(C_TextBox *_this, ...)
-{
-  bool bVar1;
-  IGraph *pIVar2;
-  S_IGraphViewport *pSVar3;
-  I3D_driver *pIVar4;
-  uint32_t uVar5;
-  uint32_t uVar6;
-  int iVar7;
-  uint32_t uVar8;
-  int iVar9;
-  uint32_t uVar10;
-  uint32_t *puVar11;
-  uint64_t uVar12;
-  int64_t lVar13;
-  uint32_t local_30 [6];
-  uint32_t local_18;
-  uint32_t local_14;
-  int local_10;
-  int local_c;
-  uint32_t local_8;
-  uint32_t local_4;
-  if (_this->m_070 != '\0') {
-    local_30[1] = 0;
-    local_14 = 0;
-    local_30[2] = 0;
-    local_10 = 0;
-    local_30[3] = 0;
-    local_c = 0;
-    uVar10 = 0;
-    local_30[4] = 0;
-    local_8 = 0;
-    local_30[0] = 0;
-    local_30[5] = 0;
-    local_18 = 0;
-    local_4 = 0;
-    _this->m_074 = *(char *)((int)_this->m_028 + 0x1c);
-    if (_this->m_072 != '\0') {
-      C_TextBox__Layout(_this);
-    }
-    if (_this->m_073 != '\0') {
-      pIVar2 = GetIGraph();
-      pSVar3 = (*pIVar2->vtable->GetViewport)(pIVar2);
-      puVar11 = local_30;
-      for (iVar9 = 6; iVar9 != 0; iVar9 = iVar9 - 1) {
-        *puVar11 = *(uint32_t *)pSVar3;
-        pSVar3 += 4;
-        puVar11++;
-      }
-      FUN_00648190();
-      uVar12 = C_TextBox__FUN_00648020(_this,&local_18);
-      if ((char)uVar12 == '\0') {
-        return 0;
-      }
-      FUN_00648190();
-      pIVar2 = GetIGraph();
-      (*pIVar2->vtable->SetViewport)(pIVar2,(S_IGraphViewport *)&local_18);
-    }
-    if (_this->m_098 != 0) {
-      pIVar4 = I3DGetDriver();
-      uVar5 = (*pIVar4->vtable->GetState)(pIVar4,3);
-      pIVar4 = I3DGetDriver();
-      (*pIVar4->vtable->SetState)(pIVar4,3,0);
-      _DAT_008ae414 = (float)_this->m_014;
-      _DAT_008ae410 = (float)_this->m_008;
-      _DAT_008ae420 = _this->m_098;
-      _DAT_008ae418 = 0x3ce8bf06;
-      _DAT_008ae41c = 0x420cc9df;
-      _DAT_008ae428 = 0;
-      _DAT_008ae42c = 0;
-      _DAT_008ae434 = (float)_this->m_014;
-      _DAT_008ae430 = (float)_this->m_010;
-      _DAT_008ae440 = _this->m_098;
-      _DAT_008ae438 = 0x3ce8bf06;
-      _DAT_008ae43c = 0x420cc9df;
-      _DAT_008ae448 = 0x3f800000;
-      _DAT_008ae44c = 0;
-      _DAT_008ae454 = (float)_this->m_00c;
-      _DAT_008ae450 = (float)_this->m_010;
-      _DAT_008ae460 = _this->m_098;
-      _DAT_008ae458 = 0x3ce8bf06;
-      _DAT_008ae45c = 0x420cc9df;
-      _DAT_008ae468 = 0;
-      _DAT_008ae46c = 0x3f800000;
-      _DAT_008ae474 = (float)_this->m_00c;
-      _DAT_008ae470 = (float)_this->m_008;
-      _DAT_008ae480 = _this->m_098;
-      _DAT_008ae478 = 0x3ce8bf06;
-      _DAT_008ae47c = 0x420cc9df;
-      _DAT_008ae488 = 0x3f800000;
-      _DAT_008ae48c = 0x3f800000;
-      pIVar2 = GetIGraph();
-      (*pIVar2->vtable->SetTexture)(pIVar2,0,0);
-      pIVar2 = GetIGraph();
-      (*pIVar2->vtable->DrawPrimitives)(pIVar2,4,2,&DAT_008ae410,1);
-      pIVar4 = I3DGetDriver();
-      (*pIVar4->vtable->SetState)(pIVar4,3,(uint32_t)(uVar5 != 0));
-    }
-    FUN_006491d0(_this,(short)DAT_008ae604,(short *)&_this->m_076);
-    for (; (iVar9 = _this->m_048, iVar9 != 0 && (uVar10 < (uint32_t)((int)(_this->m_04c - iVar9) >> 2)));
-        uVar10 = uVar10 + 1) {
-      iVar9 = *(int *)(iVar9 + uVar10 * 4);
-      uVar5 = 0;
-      _this->m_06e = *(short *)(iVar9 + 0x14) - (short)_this->m_078;
-      while ((iVar7 = *(int *)(iVar9 + 4), iVar7 != 0 &&
-             (uVar5 < (uint32_t)(*(int *)(iVar9 + 8) - iVar7 >> 2)))) {
-        bVar1 = C_TextBox__SelectStyle(_this,(uint32_t)*(uint8_t *)(*(int *)(iVar7 + uVar5 * 4) + 4));
-        if (!bVar1) goto LAB_00648593;
-        uVar6 = FUN_006481b0(_this,uVar10);
-        _this->m_06c = *(short *)(*(int *)(*(int *)(iVar9 + 4) + uVar5 * 4) + 8);
-        if (*(char *)(_this->m_02c + 0x30) < '\0') {
-          iVar7 = C_TextBox__FontSize(_this);
-          _this->m_06e = _this->m_06e - (short)((*(short *)(iVar9 + 0x1a) - iVar7) / 2);
-          uVar12 = FUN_00648b80(_this,*(int **)(*(int *)(iVar9 + 4) + uVar5 * 4),uVar6);
-          if ((char)uVar12 == '\0') goto LAB_00648593;
-          uVar5++;
-          _this->m_06e = *(short *)(iVar9 + 0x14) - (short)_this->m_078;
-        }
-        else {
-          uVar12 = FUN_00648b80(_this,*(int **)(*(int *)(iVar9 + 4) + uVar5 * 4),uVar6);
-          if ((char)uVar12 == '\0') goto LAB_00648593;
-          uVar5++;
-        }
-      }
-      if (((_this->m_081 != '\0') && (uVar10 == _this->m_088)) && (_this->m_080 != '\0')) {
-        C_TextBox__FUN_00648fa0(_this);
-      }
-    }
-LAB_00648593:
-    for (uVar5 = 0;
-        (uVar6 = _this->m_05c, uVar6 != 0 && (uVar5 < (uint32_t)((int)(_this->m_060 - uVar6) >> 2)));
-        uVar5 = uVar5 + 1) {
-      bVar1 = C_TextBox__SelectStyle(_this,(uint32_t)*(uint8_t *)(*(int *)(uVar6 + uVar5 * 4) + 4));
-      if (bVar1) {
-        uVar8 = FUN_006481b0(_this,uVar10);
-        uVar6 = _this->m_05c;
-        lVar13 = tier1_ftol();
-        _this->m_06c = (short)lVar13;
-        lVar13 = tier1_ftol();
-        _this->m_06e = (short)lVar13;
-        FUN_00648b80(_this,*(int **)(uVar6 + uVar5 * 4),uVar8);
-      }
-    }
-    if (_this->m_073 != '\0') {
-      FUN_00648190();
-      pIVar2 = GetIGraph();
-      (*pIVar2->vtable->SetViewport)(pIVar2,(S_IGraphViewport *)local_30);
-    }
-    if ((DAT_008ae600 != '\0') && (_this->m_073 != '\0')) {
-      pIVar2 = GetIGraph();
-      (*pIVar2->vtable->SetTexture)(pIVar2,0,0);
-      pIVar4 = I3DGetDriver();
-      uVar10 = (*pIVar4->vtable->GetState)(pIVar4,9);
-      pIVar4 = I3DGetDriver();
-      (*pIVar4->vtable->SetState)(pIVar4,9,0);
-      _DAT_008ae410 = (float)local_18;
-      _DAT_008ae414 = (float)local_14;
-      _DAT_008ae418 = 0x3ce8bf06;
-      _DAT_008ae430 = (float)(local_10 + local_18);
-      _DAT_008ae41c = 0x420cc9df;
-      _DAT_008ae420 = 0x2f005000;
-      _DAT_008ae428 = 0;
-      _DAT_008ae42c = 0;
-      _DAT_008ae454 = (float)(local_c + local_14);
-      _DAT_008ae438 = 0x3ce8bf06;
-      _DAT_008ae43c = 0x420cc9df;
-      _DAT_008ae440 = 0x2f005000;
-      _DAT_008ae448 = 0x3f800000;
-      _DAT_008ae44c = 0;
-      _DAT_008ae458 = 0x3ce8bf06;
-      _DAT_008ae45c = 0x420cc9df;
-      _DAT_008ae460 = 0x2f005000;
-      _DAT_008ae468 = 0;
-      _DAT_008ae46c = 0x3f800000;
-      _DAT_008ae478 = 0x3ce8bf06;
-      _DAT_008ae47c = 0x420cc9df;
-      _DAT_008ae480 = 0x2f005000;
-      _DAT_008ae488 = 0x3f800000;
-      _DAT_008ae48c = 0x3f800000;
-      _DAT_008ae434 = _DAT_008ae414;
-      _DAT_008ae450 = _DAT_008ae430;
-      _DAT_008ae470 = _DAT_008ae410;
-      _DAT_008ae474 = _DAT_008ae454;
-      pIVar2 = GetIGraph();
-      (*pIVar2->vtable->DrawPrimitives)(pIVar2,4,2,&DAT_008ae410,1);
-      pIVar4 = I3DGetDriver();
-      (*pIVar4->vtable->SetState)(pIVar4,9,uVar10);
-    }
-  }
-  return 0;
-}
-
-
-// 0x00648b80  (tier1 fallback: translated text kept below, needs hand porting)
-uint64_t FUN_00648b80(void *_this,int *param_1,uint32_t param_2, ...)
-{
-  return {};
-}
-#if 0
-{
-  uint8_t stack0xffffffe8[64];
-  uint8_t uVar1;
-  uint8_t *puVar2;
-  int iVar3;
-  undefined3 uVar9;
-  int iVar4;
-  char *pcVar5;
-  int iVar6;
-  uint32_t *puVar7;
-  IGraph *pIVar8;
-  undefined3 extraout_var;
-  uint32_t extraout_EDX;
-  uint32_t uVar10;
-  uint32_t extraout_EDX_00;
-  uint32_t uVar11;
-  uint32_t extraout_EDX_01;
-  uint32_t extraout_EDX_02;
-  uint32_t extraout_EDX_03;
-  uint32_t extraout_EDX_04;
-  uint32_t extraout_EDX_05;
-  int iVar12;
-  int64_t lVar13;
-  uint32_t in_stack_ffffffe8;
-  int local_10;
-  uint32_t local_c;
-  int local_8;
-  int local_4;
-  if (!g_gameProfile.m_unicodeFont) {
-    iVar3 = C_TextBox__FontSize(_this);
-    if (*param_1 == 0) {
-      local_8 = 0;
-    }
-    else {
-      local_8 = *(int *)(*param_1 + 4);
-    }
-    lVar13 = CONCAT44(extraout_EDX,local_8);
-    if (iVar3 != 0) {
-      if (*(char *)((int)_this + 0x74) == '\0') {
-        DAT_008acbf0 = 0;
-        local_4 = 0;
-        if (0 < local_8) {
-          do {
-            if ((*(uint8_t *)(*(int *)((int)_this + 0x2c) + 0x30) & 4) == 0) {
-              puVar2 = (uint8_t *)C_str__GetBufferAt((C_str *)param_1,local_4);
-              uVar1 = *puVar2;
-            }
-            else {
-              uVar1 = 0x2a;
-            }
-            puVar7 = (uint32_t *)(**(code **)(**(int **)((int)_this + 0x24) + 0x14))(uVar1);
-            if ((float)puVar7[4] == 0.0) {
-              lVar13 = tier1_ftol();
-              uVar11 = (uint32_t)((uint64_t)lVar13 >> 0x20);
-              *(short *)((int)_this + 0x6c) = *(short *)((int)_this + 0x6c) + (short)lVar13;
-            }
-            else {
-              lVar13 = tier1_ftol();
-              iVar12 = (int)lVar13;
-              C_TextBox__FUN_006442d0
-                        (_this,(float)(int)*(short *)((int)_this + 0x6c),
-                         (float)(int)*(short *)((int)_this + 0x6e),*puVar7,puVar7[3],param_2);
-              C_TextBox__FUN_006442d0
-                        (_this,(float)(int)*(short *)((int)_this + 0x6c),
-                         (float)(*(short *)((int)_this + 0x6e) - iVar3),*puVar7,puVar7[1],param_2);
-              C_TextBox__FUN_006442d0
-                        (_this,(float)(*(short *)((int)_this + 0x6c) + iVar12),
-                         (float)(*(short *)((int)_this + 0x6e) - iVar3),puVar7[2],puVar7[1],param_2);
-              C_TextBox__FUN_006442d0
-                        (_this,(float)(*(short *)((int)_this + 0x6c) + iVar12),
-                         (float)(int)*(short *)((int)_this + 0x6e),puVar7[2],puVar7[3],param_2);
-              C_TextBox__FUN_006442d0
-                        (_this,(float)(int)*(short *)((int)_this + 0x6c),
-                         (float)(int)*(short *)((int)_this + 0x6e),*puVar7,puVar7[3],param_2);
-              C_TextBox__FUN_006442d0
-                        (_this,(float)(*(short *)((int)_this + 0x6c) + iVar12),
-                         (float)(*(short *)((int)_this + 0x6e) - iVar3),puVar7[2],puVar7[1],param_2);
-              *(short *)((int)_this + 0x6c) = *(short *)((int)_this + 0x6c) + (short)lVar13;
-              uVar11 = extraout_EDX_01;
-            }
-            if (DAT_008acbf0 == 0xc0) {
-              (**(code **)(**(int **)((int)_this + 0x24) + 0x10))();
-              pIVar8 = GetIGraph();
-              (*pIVar8->vtable->DrawPrimitives)(pIVar8,3,DAT_008acbf0 / 3,&DAT_008acbf8,1);
-              DAT_008acbf0 = 0;
-              uVar11 = extraout_EDX_02;
-            }
-            local_4++;
-          } while (local_4 < local_8);
-          lVar13 = (uint64_t)uVar11 << 0x20;
-          if (DAT_008acbf0 != 0) {
-            (**(code **)(**(int **)((int)_this + 0x24) + 0x10))();
-            pIVar8 = GetIGraph();
-            lVar13 = (*pIVar8->vtable->DrawPrimitives)(pIVar8,3,DAT_008acbf0 / 3,&DAT_008acbf8,1);
-            DAT_008acbf0 = 0;
-          }
-        }
-      }
-      else {
-        local_4 = 0;
-        lVar13 = CONCAT44(extraout_EDX,local_8);
-        if (0 < local_8) {
-          do {
-            if ((*(uint8_t *)(*(int *)((int)_this + 0x2c) + 0x30) & 4) == 0) {
-              puVar2 = (uint8_t *)C_str__GetBufferAt((C_str *)param_1,local_4);
-              uVar1 = *puVar2;
-            }
-            else {
-              uVar1 = 0x2a;
-            }
-            iVar12 = (**(code **)(**(int **)((int)_this + 0x24) + 0x14))(uVar1);
-            if (*(float *)(iVar12 + 0x10) == 0.0) {
-              lVar13 = tier1_ftol();
-              uVar10 = (uint32_t)((uint64_t)lVar13 >> 0x20);
-              *(short *)((int)_this + 0x6c) = *(short *)((int)_this + 0x6c) + (short)lVar13;
-            }
-            else {
-              lVar13 = tier1_ftol();
-              (**(code **)(**(int **)((int)_this + 0x24) + 0x18))
-                        (uVar1,param_2,(int)lVar13,iVar3,(int)*(short *)((int)_this + 0x6c),
-                         (int)*(short *)((int)_this + 0x6e),*(uint32_t *)((int)_this + 0x20));
-              *(short *)((int)_this + 0x6c) = *(short *)((int)_this + 0x6c) + (short)lVar13;
-              uVar10 = extraout_EDX_00;
-            }
-            local_4++;
-          } while (local_4 < local_8);
-          return CONCAT44(uVar10,CONCAT31((int3)((uint32_t)local_8 >> 8),1));
-        }
-      }
-      return CONCAT44((int)((uint64_t)lVar13 >> 0x20),CONCAT31((int3)((uint64_t)lVar13 >> 8),1));
-    }
-    return CONCAT44(extraout_EDX,local_8) & 0xffffffffffffff00;
-  }
-  iVar3 = C_TextBox__FontSize(_this);
-  if (*param_1 == 0) {
-    local_10 = 0;
-  }
-  else {
-    local_10 = *(int *)(*param_1 + 4);
-  }
-  uVar9 = (undefined3)((uint32_t)iVar3 >> 8);
-  if (iVar3 != 0) {
-    local_c = extraout_EDX_03;
-    if (*(char *)((int)_this + 0x74) == '\0') {
-      DAT_008acbf0 = 0;
-      local_8 = 0;
-      if (0 < local_10) {
-        do {
-          if (*param_1 == 0) {
-            iVar12 = 0;
-          }
-          else {
-            iVar12 = *(int *)(*param_1 + 4);
-          }
-          iVar12 -= local_8;
-          pcVar5 = (char *)C_str__GetBufferAt((C_str *)param_1,local_8);
-          local_c = DecodeUtf8((uint32_t *)&stack0xffffffe8,pcVar5,iVar12);
-          if ((int)local_c < 1) {
-            pcVar5 = (char *)C_str__GetBufferAt((C_str *)param_1,local_8);
-            in_stack_ffffffe8 = (uint32_t)*pcVar5;
-            local_c = 1;
-          }
-          if ((*(uint8_t *)(*(int *)((int)_this + 0x2c) + 0x30) & 4) != 0) {
-            in_stack_ffffffe8 = 0x2a;
-          }
-          puVar7 = (uint32_t *)
-                   (**(code **)(**(int **)((int)_this + 0x24) + 0x14))(in_stack_ffffffe8);
-          if ((float)puVar7[4] == 0.0) {
-            lVar13 = tier1_ftol();
-            *(short *)((int)_this + 0x6c) = *(short *)((int)_this + 0x6c) + (short)lVar13;
-          }
-          else {
-            lVar13 = tier1_ftol();
-            iVar12 = (int)lVar13;
-            C_TextBox__FUN_006442d0
-                      (_this,(float)(int)*(short *)((int)_this + 0x6c),
-                       (float)(int)*(short *)((int)_this + 0x6e),*puVar7,puVar7[3],param_2);
-            C_TextBox__FUN_006442d0
-                      (_this,(float)(int)*(short *)((int)_this + 0x6c),
-                       (float)(*(short *)((int)_this + 0x6e) - iVar3),*puVar7,puVar7[1],param_2);
-            C_TextBox__FUN_006442d0
-                      (_this,(float)(*(short *)((int)_this + 0x6c) + iVar12),
-                       (float)(*(short *)((int)_this + 0x6e) - iVar3),puVar7[2],puVar7[1],param_2);
-            C_TextBox__FUN_006442d0
-                      (_this,(float)(*(short *)((int)_this + 0x6c) + iVar12),
-                       (float)(int)*(short *)((int)_this + 0x6e),puVar7[2],puVar7[3],param_2);
-            C_TextBox__FUN_006442d0
-                      (_this,(float)(int)*(short *)((int)_this + 0x6c),
-                       (float)(int)*(short *)((int)_this + 0x6e),*puVar7,puVar7[3],param_2);
-            C_TextBox__FUN_006442d0
-                      (_this,(float)(*(short *)((int)_this + 0x6c) + iVar12),
-                       (float)(*(short *)((int)_this + 0x6e) - iVar3),puVar7[2],puVar7[1],param_2);
-            *(short *)((int)_this + 0x6c) = *(short *)((int)_this + 0x6c) + (short)lVar13;
-          }
-          if (DAT_008acbf0 == 0xc0) {
-            (**(code **)(**(int **)((int)_this + 0x24) + 0x10))();
-            pIVar8 = GetIGraph();
-            (*pIVar8->vtable->DrawPrimitives)(pIVar8,3,DAT_008acbf0 / 3,&DAT_008acbf8,1);
-            DAT_008acbf0 = 0;
-          }
-          local_8 += local_c;
-        } while (local_8 < local_10);
-        uVar9 = 0;
-        if (DAT_008acbf0 != 0) {
-          (**(code **)(**(int **)((int)_this + 0x24) + 0x10))();
-          pIVar8 = GetIGraph();
-          (*pIVar8->vtable->DrawPrimitives)(pIVar8,3,DAT_008acbf0 / 3,&DAT_008acbf8,1);
-          DAT_008acbf0 = 0;
-          local_c = extraout_EDX_05;
-          uVar9 = extraout_var;
-        }
-      }
-    }
-    else {
-      iVar12 = 0;
-      if (0 < local_10) {
-        do {
-          if (*param_1 == 0) {
-            iVar4 = 0;
-          }
-          else {
-            iVar4 = *(int *)(*param_1 + 4);
-          }
-          iVar4 -= iVar12;
-          pcVar5 = (char *)C_str__GetBufferAt((C_str *)param_1,iVar12);
-          iVar4 = DecodeUtf8((uint32_t *)&stack0xffffffe8,pcVar5,iVar4);
-          if (iVar4 < 1) {
-            pcVar5 = (char *)C_str__GetBufferAt((C_str *)param_1,iVar12);
-            in_stack_ffffffe8 = (uint32_t)*pcVar5;
-            iVar4 = 1;
-          }
-          if ((*(uint8_t *)(*(int *)((int)_this + 0x2c) + 0x30) & 4) != 0) {
-            in_stack_ffffffe8 = 0x2a;
-          }
-          iVar6 = (**(code **)(**(int **)((int)_this + 0x24) + 0x14))(in_stack_ffffffe8);
-          if (*(float *)(iVar6 + 0x10) == 0.0) {
-            lVar13 = tier1_ftol();
-            uVar10 = (uint32_t)((uint64_t)lVar13 >> 0x20);
-            *(short *)((int)_this + 0x6c) = *(short *)((int)_this + 0x6c) + (short)lVar13;
-          }
-          else {
-            lVar13 = tier1_ftol();
-            (**(code **)(**(int **)((int)_this + 0x24) + 0x18))
-                      (in_stack_ffffffe8,param_2,(int)lVar13,iVar3,(int)*(short *)((int)_this + 0x6c)
-                       ,(int)*(short *)((int)_this + 0x6e),*(uint32_t *)((int)_this + 0x20));
-            *(short *)((int)_this + 0x6c) = *(short *)((int)_this + 0x6c) + (short)lVar13;
-            uVar10 = extraout_EDX_04;
-          }
-          iVar12 += iVar4;
-        } while (iVar12 < local_10);
-        return CONCAT44(uVar10,CONCAT31((int3)((uint32_t)local_10 >> 8),1));
-      }
-    }
-    return CONCAT44(local_c,CONCAT31(uVar9,1));
-  }
-  return (uint64_t)extraout_EDX_03 << 0x20;
-}
-
-
-#endif
-// 0x00648fa0
-uint32_t C_TextBox__FUN_00648fa0(C_TextBox *_this, ...)
-{
-  float fVar1;
-  float fVar2;
-  int iVar3;
-  uint32_t *puVar4;
-  int iVar5;
-  IGraph *self;
-  int64_t lVar6;
-  int64_t lVar7;
-  uint32_t unaff_retaddr;
-  iVar3 = C_TextBox__FontSize(_this);
-  lVar6 = tier1_ftol();
-  puVar4 = (uint32_t *)(**(code **)(*(int *)_this->m_024 + 0x14))(0x5f);
-  if ((float)puVar4[4] == 0.0) {
-    lVar6 = tier1_ftol();
-    _this->m_06c = _this->m_06c + (short)lVar6;
-    return 0;
-  }
-  if (_this->m_074 != '\0') {
-    lVar7 = tier1_ftol();
-    (**(code **)(*(int *)_this->m_024 + 0x18))
-              (0x5f,unaff_retaddr,(int)lVar7,iVar3,(int)_this->m_06c,(int)lVar6,_this->m_020);
-    _this->m_06c = _this->m_06c + (short)lVar7;
-    return 0;
-  }
-  DAT_008acbf0 = 0;
-  lVar6 = tier1_ftol();
-  iVar5 = (int)lVar6;
-  fVar1 = (float)iVar3;
-  C_TextBox__FUN_006442d0(_this,(float)(int)_this->m_06c,fVar1,*puVar4,puVar4[3],unaff_retaddr);
-  fVar2 = (float)(iVar3 - (int)(float)iVar3);
-  C_TextBox__FUN_006442d0(_this,(float)(int)_this->m_06c,fVar2,*puVar4,puVar4[1],unaff_retaddr);
-  C_TextBox__FUN_006442d0(_this,(float)(_this->m_06c + iVar5),fVar2,puVar4[2],puVar4[1],unaff_retaddr);
-  C_TextBox__FUN_006442d0(_this,(float)(_this->m_06c + iVar5),fVar1,puVar4[2],puVar4[3],unaff_retaddr);
-  C_TextBox__FUN_006442d0(_this,(float)(int)_this->m_06c,fVar1,*puVar4,puVar4[3],unaff_retaddr);
-  C_TextBox__FUN_006442d0(_this,(float)(_this->m_06c + iVar5),fVar2,puVar4[2],puVar4[1],unaff_retaddr);
-  _this->m_06c = _this->m_06c + (short)lVar6;
-  (**(code **)(*(int *)_this->m_024 + 0x10))();
-  self = GetIGraph();
-  (*self->vtable->DrawPrimitives)(self,3,DAT_008acbf0 / 3,&DAT_008acbf8,1);
-  DAT_008acbf0 = 0;
-  return 0;
-}
-
-
-// 0x006491d0
-uint32_t FUN_006491d0(void *_this,short param_1,short *param_2, ...)
-{
-  short sVar1;
-  int iVar2;
-  int64_t lVar3;
-  *param_2 = *param_2 + param_1;
-  sVar1 = *param_2;
-  if ((*(int *)((int)_this + 0x48) == 0) ||
-     (*(int *)((int)_this + 0x4c) - *(int *)((int)_this + 0x48) >> 2 == 0)) {
-    iVar2 = 0;
-  }
-  else {
-    lVar3 = tier1_ftol();
-    iVar2 = (int)lVar3;
-    if (0 < iVar2) {
-      *param_2 = 0;
-      return 0;
-    }
-  }
-  if (0 < sVar1) {
-    *param_2 = 0;
-  }
-  if (*param_2 < iVar2) {
-    *param_2 = (short)iVar2 - 2;
-  }
   return 0;
 }
 
@@ -2196,11 +1554,11 @@ uint32_t C_auto_008154a4__FUN_0064af10(C_auto_008154a4 *_this,int param_1, ...)
   bool bVar4;
   IGraph *pIVar5;
   S_IGraphViewport *pSVar6;
-  uint32_t uVar7;
-  int iVar8;
-  uint32_t *puVar9;
-  uint32_t uVar10;
-  uint64_t uVar11;
+  uint32_t colour;
+  int iVar7;
+  uint32_t *puVar8;
+  uint32_t uVar9;
+  uint64_t uVar10;
   uint32_t local_34 [6];
   uint32_t uStack_1c;
   S_IGraphViewport aSStack_18 [24];
@@ -2209,14 +1567,14 @@ uint32_t C_auto_008154a4__FUN_0064af10(C_auto_008154a4 *_this,int param_1, ...)
     pIVar5 = GetIGraph();
     pSVar6 = (*pIVar5->vtable->GetViewport)(pIVar5);
     pfVar1 = *(float **)(param_1 + 8);
-    puVar9 = &uStack_1c;
-    for (iVar8 = 6; iVar8 != 0; iVar8 = iVar8 - 1) {
-      *puVar9 = *(uint32_t *)pSVar6;
+    puVar8 = &uStack_1c;
+    for (iVar7 = 6; iVar7 != 0; iVar7 = iVar7 - 1) {
+      *puVar8 = *(uint32_t *)pSVar6;
       pSVar6 += 4;
-      puVar9++;
+      puVar8++;
     }
-    uVar11 = C_auto_008154a4__FUN_0064b070(_this,local_34,pfVar1);
-    if ((char)uVar11 == '\0') {
+    uVar10 = C_auto_008154a4__FUN_0064b070(_this,local_34,pfVar1);
+    if ((char)uVar10 == '\0') {
       return 0;
     }
     pIVar5 = GetIGraph();
@@ -2224,8 +1582,8 @@ uint32_t C_auto_008154a4__FUN_0064af10(C_auto_008154a4 *_this,int param_1, ...)
   }
   local_34[0] = 0;
   do {
-    iVar8 = *(int *)(param_1 + 0x10);
-    if (((iVar8 == 0) || ((uint32_t)(*(int *)(param_1 + 0x14) - iVar8 >> 2) <= local_34[0])) || (bVar3))
+    iVar7 = *(int *)(param_1 + 0x10);
+    if (((iVar7 == 0) || ((uint32_t)(*(int *)(param_1 + 0x14) - iVar7 >> 2) <= local_34[0])) || (bVar3))
     {
       if (*(char *)(param_1 + 4) != '\0') {
         pIVar5 = GetIGraph();
@@ -2233,32 +1591,33 @@ uint32_t C_auto_008154a4__FUN_0064af10(C_auto_008154a4 *_this,int param_1, ...)
       }
       return 0;
     }
-    uVar10 = 0;
-    iVar8 = *(int *)(iVar8 + local_34[0] * 4);
-    _this->m_06e = *(uint16_t *)(iVar8 + 0x14);
+    uVar9 = 0;
+    iVar7 = *(int *)(iVar7 + local_34[0] * 4);
+    _this->m_06e = *(uint16_t *)(iVar7 + 0x14);
     while( true ) {
       while( true ) {
-        iVar2 = *(int *)(iVar8 + 4);
-        if ((iVar2 == 0) || ((uint32_t)(*(int *)(iVar8 + 8) - iVar2 >> 2) <= uVar10)) goto LAB_0064b03c;
+        iVar2 = *(int *)(iVar7 + 4);
+        if ((iVar2 == 0) || ((uint32_t)(*(int *)(iVar7 + 8) - iVar2 >> 2) <= uVar9)) goto LAB_0064b03c;
         bVar4 = C_TextBox__SelectStyle
-                          ((C_TextBox *)_this,(uint32_t)*(uint8_t *)(*(int *)(iVar2 + uVar10 * 4) + 4));
+                          ((C_TextBox *)_this,(uint32_t)*(uint8_t *)(*(int *)(iVar2 + uVar9 * 4) + 4));
         if (bVar4) break;
         bVar3 = true;
-        uVar10++;
+        uVar9++;
       }
-      uVar7 = _this->m_094;
-      if (uVar7 == 0) {
+      colour = _this->m_094;
+      if (colour == 0) {
         if (_this->m_071 == '\0') {
-          uVar7 = *(uint32_t *)(_this->m_02c + 4);
+          colour = *(uint32_t *)(_this->m_02c + 4);
         }
         else {
-          uVar7 = *(uint32_t *)(_this->m_02c + 4) & 0xffffff | 0x60000000;
+          colour = *(uint32_t *)(_this->m_02c + 4) & 0xffffff | 0x60000000;
         }
       }
-      _this->m_06c = *(uint16_t *)(*(int *)(*(int *)(iVar8 + 4) + uVar10 * 4) + 8);
-      uVar11 = FUN_00648b80(_this,*(int **)(*(int *)(iVar8 + 4) + uVar10 * 4),uVar7);
-      if ((char)uVar11 == '\0') break;
-      uVar10++;
+      _this->m_06c = *(uint16_t *)(*(int *)(*(int *)(iVar7 + 4) + uVar9 * 4) + 8);
+      bVar4 = C_TextBox__DrawString
+                        ((C_TextBox *)_this,*(void **)(*(int *)(iVar7 + 4) + uVar9 * 4),colour);
+      if (!bVar4) break;
+      uVar9++;
     }
     bVar3 = true;
 LAB_0064b03c:
@@ -2669,12 +2028,12 @@ uint32_t C_auto_008158f8__FUN_0064bc70(C_auto_008158f8 *_this, ...)
   int iVar3;
   bool bVar4;
   short sVar5;
-  uint32_t uVar6;
-  IGraph *pIVar7;
+  uint32_t colour;
+  IGraph *pIVar6;
   int unaff_EBX;
-  uint32_t uVar8;
-  uint32_t uVar9;
-  int64_t lVar10;
+  uint32_t line;
+  uint32_t uVar7;
+  int64_t lVar8;
   if (_this->_pad_0070[0] == '\0') {
     return 0;
   }
@@ -2687,23 +2046,23 @@ uint32_t C_auto_008158f8__FUN_0064bc70(C_auto_008158f8 *_this, ...)
     _this[1]._pad_0008[0x1a] = '\0';
     _this[1]._pad_0008[0x1b] = '\0';
   }
-  uVar8 = *(uint32_t *)(_this[1]._pad_0008 + 0x18);
+  line = *(uint32_t *)(_this[1]._pad_0008 + 0x18);
   do {
     iVar2 = *(int *)(_this->_pad_0008 + 0x40);
-    if ((iVar2 == 0) || ((uint32_t)(*(int *)(_this->_pad_0008 + 0x44) - iVar2 >> 2) <= uVar8))
+    if ((iVar2 == 0) || ((uint32_t)(*(int *)(_this->_pad_0008 + 0x44) - iVar2 >> 2) <= line))
     goto LAB_0064bd4c;
-    iVar2 = *(int *)(iVar2 + uVar8 * 4);
+    iVar2 = *(int *)(iVar2 + line * 4);
     sVar5 = *(short *)(iVar2 + 0x14) - (short)_this->m_078;
     _this->m_06e = sVar5;
     if (sVar5 < 0) {
-      *(uint32_t *)(_this[1]._pad_0008 + 0x18) = uVar8 + 1;
+      *(uint32_t *)(_this[1]._pad_0008 + 0x18) = line + 1;
     }
     else {
       if (_this->m_006 + 100 < (int)sVar5) {
 LAB_0064bd4c:
-        lVar10 = tier1_ftol();
-        pIVar7 = GetIGraph();
-        (*pIVar7->vtable->SetTexture)(pIVar7,0,0);
+        lVar8 = tier1_ftol();
+        pIVar6 = GetIGraph();
+        (*pIVar6->vtable->SetTexture)(pIVar6,0,0);
         _DAT_008ae410 = 0;
         _DAT_008ae414 = 0.0;
         _DAT_008ae418 = 0x3ce8bf06;
@@ -2732,16 +2091,16 @@ LAB_0064bd4c:
         _DAT_008ae488 = 0x3f800000;
         _DAT_008ae48c = 0x3f800000;
         _DAT_008ae474 = _DAT_008ae454;
-        pIVar7 = GetIGraph();
-        (*pIVar7->vtable->DrawPrimitives)(pIVar7,4,2,&DAT_008ae410,1);
+        pIVar6 = GetIGraph();
+        (*pIVar6->vtable->DrawPrimitives)(pIVar6,4,2,&DAT_008ae410,1);
         _DAT_008ae410 = 0;
         _DAT_008ae418 = 0x3ce8bf06;
-        _DAT_008ae414 = (float)((int)_this->m_006 - (int)lVar10);
+        _DAT_008ae414 = (float)((int)_this->m_006 - (int)lVar8);
         _DAT_008ae41c = 0x420cc9df;
         _DAT_008ae420 = 0;
         _DAT_008ae428 = 0;
         _DAT_008ae42c = 0;
-        _DAT_008ae434 = (float)((int)_this->m_006 - (int)lVar10);
+        _DAT_008ae434 = (float)((int)_this->m_006 - (int)lVar8);
         _DAT_008ae430 = (float)(int)*(short *)_this->_pad_0004;
         _DAT_008ae438 = 0x3ce8bf06;
         _DAT_008ae43c = 0x420cc9df;
@@ -2762,24 +2121,24 @@ LAB_0064bd4c:
         _DAT_008ae480 = 0xff000000;
         _DAT_008ae488 = 0x3f800000;
         _DAT_008ae48c = 0x3f800000;
-        pIVar7 = GetIGraph();
-        (*pIVar7->vtable->DrawPrimitives)(pIVar7,4,2,&DAT_008ae410,1);
+        pIVar6 = GetIGraph();
+        (*pIVar6->vtable->DrawPrimitives)(pIVar6,4,2,&DAT_008ae410,1);
         return 0;
       }
-      uVar9 = 0;
+      uVar7 = 0;
       while (((iVar3 = *(int *)(iVar2 + 4), iVar3 != 0 &&
-              (uVar9 < (uint32_t)(*(int *)(iVar2 + 8) - iVar3 >> 2))) &&
+              (uVar7 < (uint32_t)(*(int *)(iVar2 + 8) - iVar3 >> 2))) &&
              (bVar4 = C_TextBox__SelectStyle
-                                ((C_TextBox *)_this,(uint32_t)*(uint8_t *)(*(int *)(iVar3 + uVar9 * 4) + 4))
+                                ((C_TextBox *)_this,(uint32_t)*(uint8_t *)(*(int *)(iVar3 + uVar7 * 4) + 4))
              , bVar4))) {
-        uVar6 = FUN_006481b0(_this,uVar8);
+        colour = C_TextBox__WordColour((C_TextBox *)_this,line);
         *(uint16_t *)(_this->_pad_0008 + 100) =
-             *(uint16_t *)(*(int *)(*(int *)(iVar2 + 4) + uVar9 * 4) + 8);
-        FUN_00648b80(_this,*(int **)(*(int *)(iVar2 + 4) + uVar9 * 4),uVar6);
-        uVar9++;
+             *(uint16_t *)(*(int *)(*(int *)(iVar2 + 4) + uVar7 * 4) + 8);
+        C_TextBox__DrawString((C_TextBox *)_this,*(void **)(*(int *)(iVar2 + 4) + uVar7 * 4),colour);
+        uVar7++;
       }
     }
-    uVar8++;
+    line++;
   } while( true );
   return 0;
 }

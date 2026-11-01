@@ -13,6 +13,7 @@
 
 class I3D_frame;
 class I3D_scene;
+struct S_IGraphViewport;
 
 
 // A run of a text box: its text and its style (CreateTextStyle's index).
@@ -67,7 +68,10 @@ public:
 
     // The scroll's range from the last line (the scroll kept in it).
     virtual void UpdateScrollRange();                   // vtable +0x00 0x006441a0
-    virtual void Render();                              // vtable +0x04 0x00648200 (part 9b-iii)
+    // The lines' words, the caret on the edited run's line and the pieces drawn (a background
+    // first, when it has one; overflowing: clipped to the box). Laid out first when something
+    // changed; nothing before the box is placed.
+    virtual void Render();                              // vtable +0x04 0x00648200
     // False past the range.
     virtual bool ScrollTo(int line);                    // vtable +0x08 0x00644250
 
@@ -126,9 +130,9 @@ public:
     // The margin left and right in 1024ths of the screen's width (AttachTo; 10 after construction,
     // the HUD's panels 0).
     void SetUnknown90(uint8_t value) { m_margin = value; }
-    // (Byte +0x71, 0 after construction; the inventory sets it on a list's caption while the list
-    // has no container. Not identified.)
-    void SetUnknown71(bool value) { m_unknown71 = value; }
+    // Drawn dimmed: the styles' colours at 0x60 of alpha (the inventory's list captions while the
+    // list has no container; no effect when the box has its own colour, m_colour).
+    void SetDimmed(bool value) { m_dimmed = value; }
 
 private:
     bool AddRun(S_TextRun run);                         // 0x006448b0
@@ -184,6 +188,30 @@ private:
     // The box overflows: a line without room, a piece outside the box (the flag).
     bool CheckLineOverflow(const S_TextLine *line);     // 0x00646ab0
     bool CheckPieceOverflow(const S_TextPiece *piece);  // 0x00646ad0
+    // The render (part 9b-iii).
+    // The box's rectangle on the screen as a viewport, extended 5 pixels up (false: nothing of it on
+    // the screen).
+    bool ClipViewport(S_IGraphViewport *viewport) const;   // 0x00648020
+    // A word's colour on `line` with the selected style: the box's colour; dimmed; the hovered
+    // line's white; the style's.
+    uint32_t WordColour(int line) const;                // 0x006481b0
+    // The text drawn at the pen with the selected style (moved past it): quads of its glyphs, in
+    // the font's own gathered quads while the fonts batch (false: the font size 0).
+    bool DrawString(const C_str &text, uint32_t colour);  // 0x00648b80 (0x006487e0 bytes, 0x00648ba0 UTF-8)
+    bool DrawBytes(const C_str &text, uint32_t colour);
+    bool DrawUtf8(const C_str &text, uint32_t colour);
+    // A glyph's quad at the pen (`ch`'s glyph; a blank: only the pen moved): its two triangles in
+    // the vertices, or the font's (batching).
+    void DrawGlyph(int ch, const S_Glyph &glyph, int size, uint32_t colour);
+    // The caret at the pen, 0.1 of the font size under the base.
+    void DrawCaret(uint32_t colour);                    // 0x00648fa0
+    // A vertex of the glyphs' triangles at the box's depth.
+    void AddVertex(float x, float y, float u, float v, uint32_t colour);   // 0x006442d0
+    // The quads gathered drawn with the font's texture.
+    void FlushVertices();
+    // `value` (Render: +0x76) moved by `step` and kept from 0 to 2 under what the box's top is over
+    // the last line (Render's only step 0, never set: +0x76 stays 0; it is not read).
+    void StepUnknown76(int16_t step, int16_t *value);   // 0x006491d0
 
     int16_t m_screenWidth = 0;                          // +0x04
     int16_t m_screenHeight = 0;                         // +0x06
@@ -201,11 +229,13 @@ private:
     std::vector<S_TextRun> m_runs;                      // +0x30
     std::vector<S_TextLine *> m_lines;                  // +0x44
     std::vector<S_TextPiece *> m_pieces;                // +0x58
+    int16_t m_penX = 0;                                 // +0x6C the render's (pixels)
+    int16_t m_penY = 0;                                 // +0x6E its base
     bool m_placed = false;                              // +0x70 (AttachTo / SetRect)
-    bool m_unknown71 = false;                           // +0x71
+    bool m_dimmed = false;                              // +0x71
     bool m_dirty = false;                               // +0x72 laid out again before use
     bool m_overflows = false;                           // +0x73 the text does not fit the box
-    bool m_unknown74 = false;                           // +0x74
+    bool m_batching = false;                            // +0x74 the font manager's (Render)
     int16_t m_unknown76 = 0;                            // +0x76
     int m_scroll = 0;                                   // +0x78 pixels
     int m_scrollRange = 0;                              // +0x7C
@@ -215,9 +245,16 @@ private:
     int m_selection = -1;                               // +0x88 a run
     int m_hover = -1;                                   // +0x8C a line
     uint8_t m_margin = 10;                              // +0x90
-    int m_unknown94 = 0;                                // +0x94
-    int m_unknown98 = 0;                                // +0x98
+    uint32_t m_colour = 0;                              // +0x94 every word's (0: their styles')
+    uint32_t m_background = 0;                          // +0x98 the box filled (0: none)
 };
+
+// The render's debugging switches (never set: 0): the overflowing boxes' clips outlined, +0x76's
+// step (C_TextBox::StepUnknown76).
+extern bool g_textBoxOutline;                           // 0x008ae600
+extern int g_textBoxStep76;                             // 0x008ae604
+// Reads the screen's size and drops it (a check left without its body; the render's and RunGame's).
+void ReadScreenSize(int x, int y);                      // 0x00648190 (__stdcall)
 
 // UTF-8 of the menus' text input (the unicode font option).
 bool ReadUnicodeInput(wchar_t *buffer, int maxLength);  // 0x0066b680 (__fastcall)

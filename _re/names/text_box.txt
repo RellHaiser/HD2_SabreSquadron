@@ -70,3 +70,15 @@
 00647b50 C_TextBox::SplitWordsBytes | void __thiscall SplitWordsBytes(C_TextBox *this, void * line)
 0064c010 text_word_valid_64c010 | bool __thiscall text_word_valid_64c010(void * this, int index)
 0064c100 text_style_valid_64c100 | bool __thiscall text_style_valid_64c100(void * this, int index)
+
+# Part 9b-iii: the render (Render 0x00648200 in hud.txt; 0x006442d0, 0x00648020..0x00649250; the font
+# manager's batching 0x0063f800 and flush 0x0063f7d0).
+006442d0 C_TextBox::AddVertex | void __thiscall AddVertex(C_TextBox *this, float x, float y, float u, float v, uint colour)
+00648020 C_TextBox::ClipViewport | bool __thiscall ClipViewport(C_TextBox *this, void * viewport)
+00648190 ReadScreenSize | void __stdcall ReadScreenSize(int x, int y)
+006481b0 C_TextBox::WordColour | uint __thiscall WordColour(C_TextBox *this, int line)
+00648b80 C_TextBox::DrawString | bool __thiscall DrawString(C_TextBox *this, void * text, uint colour)
+00648fa0 C_TextBox::DrawCaret | void __thiscall DrawCaret(C_TextBox *this, uint colour)
+006491d0 C_TextBox::StepUnknown76 | void __thiscall StepUnknown76(C_TextBox *this, short step, short * value)
+0063f7d0 FlushFonts | void __cdecl FlushFonts(void)
+0063f800 SetFontBatching | void __fastcall SetFontBatching(bool on)

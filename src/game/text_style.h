@@ -31,6 +31,7 @@ struct S_TextStyleDesc {                                // 0x34 bytes
 constexpr uint32_t STYLE_PASSWORD = 0x04;               // drawn (and measured) as '*'
 constexpr uint32_t STYLE_NEW_LINE = 0x08;               // a joined run starts a new line
 constexpr uint32_t STYLE_AT_X = 0x10;                   // a word placed at the style's x (its line not aligned)
+constexpr uint32_t STYLE_CENTRED = 0x80;                // a word drawn up by half its line's largest font size over its own
 
 // A new style (a copy of `desc`): its index.
 int CreateTextStyle(const S_TextStyleDesc &desc);       // 0x00643c00 (__fastcall; 0x006420b0)

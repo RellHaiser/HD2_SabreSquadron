@@ -198,9 +198,9 @@ void C_LoaderScreen::Start(const char *name, bool show, bool waitForKey, bool tw
             case LOADER_TEXT_OBJECTIVES_ALLIED:
             case LOADER_TEXT_OBJECTIVES_AXIS: {
                 // A network map's objectives, each with its side's text after a mark (none: the
-                // box's +0x71 set).
+                // box dimmed).
                 if (!mission) {
-                    box->SetUnknown71(true);
+                    box->SetDimmed(true);
                     break;
                 }
                 const bool allied = i == LOADER_TEXT_OBJECTIVES_ALLIED;
@@ -213,7 +213,7 @@ void C_LoaderScreen::Start(const char *name, bool show, bool waitForKey, bool tw
                     m_texts[i]->AddText(C_fstr(" %s", static_cast<const char *>(text)), style);
                 }
                 if (!any)
-                    m_texts[i]->SetUnknown71(true);
+                    m_texts[i]->SetDimmed(true);
                 break;
             }
             case LOADER_TEXT_MP_TITLE: {

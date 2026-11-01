@@ -6108,6 +6108,52 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/text_box.txt (+16); 17 functions in ported.txt. Stats: 8,040 of 12,293 functions
     by hand (73.6 % by size).
 
+  PART 9b-iii DONE (2026-11-01): the text box's render (src/game/text_box.*; Render 0x00648200, its
+  helpers 0x006442d0 and 0x00648020..0x00649250; src/game/font.*: the font manager's batching
+  0x0063f800 and flush 0x0063f7d0).
+  - Render: nothing before the box is placed; the font manager's batching flag taken (+0x1C, set
+    only by SetFontBatching: a menu's render, its own switch 0x008ae608 never set); laid out when
+    dirty. Overflowing: the screen's viewport kept, the box's clip set (ClipViewport: each edge kept
+    on the screen, the top 5 pixels higher, the width and height + 1, truncated; nothing of it on
+    the screen: nothing drawn). A background colour (+0x98): a fan of 4 over the box, the driver's
+    state 3 off around it (back to its old value as a bool), no texture. The lines: the pen at
+    each word's x and the line's base less the scroll; a centred word (style flag 0x80, new
+    STYLE_CENTRED) up by half its line's gap over its font size (truncated) for itself; a word
+    without its style or font size ends the lines. The caret on the edited run's line while it
+    blinks on ('_' 0.1 of the size under the base, truncated; the last word's colour, of any line;
+    none yet: 0). The pieces at their x and y from the box's left and bottom (truncated). The
+    screen's viewport back.
+  - The colours (WordColour): the box's (+0x94); dimmed (+0x71, SetUnknown71 renamed SetDimmed):
+    the style's at 0x60 of alpha; the hovered line's white; the style's.
+  - DrawString 0x00648b80 (bytes 0x006487e0, UTF-8 0x00648ba0; false: the font size 0): its glyphs
+    (bytes unsigned; not UTF-8: the byte signed; the password style's '*'); a blank glyph only moves
+    the pen (0.4 of the size, rounded); else a quad round(size x aspect) wide: two triangles in the
+    192 vertices (the box's depth, 1 / depth; drawn with the font's texture when full and at the
+    end) or, batching, the font's own quad (AddQuad).
+  - Quirks kept: the pieces coloured as the line the lines stopped at (their count: hovered when the
+    hover is one past the last line); the caret's colour carried over from earlier lines.
+  - Debug leftovers (BSS, never set): the overflowing boxes' clip outlined (0x008ae600: a quad
+    0x2F005000, the driver's state 9 off), +0x76's step (0x008ae604; StepUnknown76 0x006491d0, given a pointer to it, keeps
+    it from 0 to 2 under the box's top over the last line: always 0); ReadScreenSize 0x00648190
+    (the screen's size read, dropped; RunGame's too).
+  - text_box.h: the pen (+0x6C / +0x6E), m_batching (+0x74), m_colour (+0x94), m_background
+    (+0x98), m_dimmed (+0x71). font.h: C_FontManager::m_batching, IsBatching, SetFontBatching /
+    FlushFonts. DrawText named DrawString (windows.h's macro).
+  - Harness: textbox_test.inc's "render:" line in the text build (16 checks; IGraph's viewport,
+    texture, primitives and screen size, the driver's states and the fake font's quads logged; the
+    render fake gone). 0 of 22 in both orders; the camera build 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9b4.py, the text build): the first run caught 148 of 180; 15
+    equivalent (see the file's docstring), new cases for the rest (edges of fractions near 0, the
+    screen's size read, an invalid byte inside a text, 6.25 pixels, a limit of 1, every font's
+    batching); the full rerun caught 165 of 180 (the 15 equivalent); StepUnknown76 then given its
+    value's pointer (the original's second argument; ret_audit), its 10 changed mutations caught.
+    Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0 of
+    37.
+  - Build: 206 files clean (MSVC). Tier 1: 498 errors in 85 files, 201 stubs (499 / 85 / 202
+    before). ret_audit --src: 52.
+  - Ghidra: names/text_box.txt (+9); 10 functions in ported.txt. Stats: 8,050 of 12,293 functions
+    by hand (73.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
