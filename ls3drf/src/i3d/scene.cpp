@@ -633,11 +633,12 @@ void I3D_scene::ReadySectors()
         p->MatrixChanged();
 }
 
+// LS3DRF 0x10028bb0 (from LS3DF 0x1004be10): the sectors made ready, the portals left as they were.
 void I3D_scene::UpdateSectors()
 {
     if (sectorChangesSeen != g_sectorChanges) {
         sectorChangesSeen = g_sectorChanges;
-        ReadySectors();
+        EnumFrames(&MakeSectorReady, nullptr, ENUMF_SECTOR, nullptr);
     }
     if (portalChangesSeen != g_portalChanges) {
         portalChangesSeen = g_portalChanges;
@@ -645,6 +646,7 @@ void I3D_scene::UpdateSectors()
     }
 }
 
+// LS3DRF 0x10027220 (from LS3DF 0x10047d20): no portal loop after the sectors.
 I3D_RESULT I3D_scene::Open(const char *fileName, uint32_t flags, void *loadCallback, void *context)
 {
     Close();
@@ -654,9 +656,6 @@ I3D_RESULT I3D_scene::Open(const char *fileName, uint32_t flags, void *loadCallb
     if (activeCamera)
         activeCamera->Update();
     EnumFrames(&MakeSectorReady, nullptr, ENUMF_SECTOR, nullptr);
-    I3D_portal *p = firstPortal;
-    for (int n = portalCount; n != 0; --n, p = p->next)
-        p->MatrixChanged();
     return r;
 }
 
