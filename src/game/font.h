@@ -1,12 +1,16 @@
 // The menus' fonts (game/font.cpp, original source 0x0063c2f0..0x00641fb0, part 9a): the shared font
 // manager (the fonts by their ids, loaded once for every user) and its texture fonts: a texture
 // and a table of glyphs (.tga and .tbl files), drawn as quads they gather into a vertex buffer.
-// FontConfig.hxml: part 9a-ii; the GDI fonts (Japanese): part 9a-iii.
+// FontConfig.hxml: part 9a-ii; the GDI fonts (Japanese): part 9a-iii: TrueType fonts drawn by GDI,
+// glyph by glyph as they are asked for, into the cells of a texture (the cells used least lately
+// drawn over when they run out).
 #pragma once
 
 #include <cstdint>
 #include <map>
 #include <vector>
+
+#include "common/c_str.h"
 
 class IImage;
 
@@ -57,9 +61,10 @@ public:
     int GetId() const { return m_id; }
 
 protected:
+    friend class C_FontManager;                         // (the GDI fonts' id)
+
     S_Glyph m_default = {};                             // +0x04
     int m_id = 0;                                       // +0x18
-    IImage *m_texture = nullptr;                        // +0x1C
 };
 
 // A texture font with its glyphs in a table of 256 (vtable 0x00813b68; the .tbl file is the table).
@@ -81,6 +86,7 @@ public:
     bool Load(const char *texture, const char *table, int id);   // 0x00640600
 
 protected:
+    IImage *m_texture = nullptr;                        // +0x1C
     S_Glyph m_table[256] = {};                          // +0x20
     S_FontVertex *m_vertices = nullptr;                 // +0x1420
     int m_numVertices = 0;                              // +0x1424
@@ -101,6 +107,76 @@ public:
 
 private:
     std::map<int, S_Glyph> m_glyphs;                    // +0x142C
+};
+
+// A cell of a GDI font's texture: its rectangle, its character, its glyph, the frame it was last
+// used in and its neighbours in the use order (newest first).
+struct S_GlyphCell {                                    // 0x34 bytes
+    int x, y;                                           // +0x00
+    int right, bottom;                                  // +0x08 (inclusive)
+    uint16_t ch;                                        // +0x10 (0: none)
+    S_Glyph glyph;                                      // +0x14
+    int frame;                                          // +0x28
+    S_GlyphCell *newer;                                 // +0x2C
+    S_GlyphCell *older;                                 // +0x30
+};
+
+// A GDI font (vtable 0x00813b10): a TrueType font drawn into a 64 x 64 DIB a glyph at a time, then
+// into a free cell of its texture (white, the glyph's coverage its alpha). Its quads are drawn by
+// its users (its vertex slots do nothing).
+class C_GdiFont : public C_Font {                       // 0x80 bytes
+public:
+    C_GdiFont();                                        // (inline in AddGdiFont 0x0063ee20)
+    ~C_GdiFont() override;                              // 0x0063f050 (0x0063f030)
+
+    void GrowVertices() override {}                     // 0x0063eff0
+    void Flush() override {}                            // 0x0063f000
+    void ClearVertices() override {}                    // 0x0063f010
+    // The texture selected; a new frame of glyphs begins (the cells used in it are not drawn over).
+    void Select() override;                             // 0x0063c9d0
+    // The glyph of `ch` (a tab: a space's), drawn first when it is not in a cell (no cell free: the
+    // spare cell's glyph).
+    const S_Glyph *GetGlyph(int ch) override;           // 0x0063ced0
+    void AddQuad(int, uint32_t, int, int, int, int, float) override {}   // 0x0063f020
+
+    // The GDI objects, the texture and its cells for `face` (`size` pixels high, 8 .. 60). False
+    // when one of them is not made (what was made stays, for Close).
+    bool Init(void *dc, const char *face, int textureWidth, int textureHeight, int size, bool bold);   // 0x0063c2f0
+    // The GDI objects, the texture and the cells freed.
+    void Close();                                       // 0x0063c740
+    // Every field cleared (the free cells forgotten).
+    void Reset();                                       // 0x0063d310
+
+private:
+    // The texture cut into cells `width` x `height`, `gap` pixels apart, from `start`.
+    bool MakeCells(int width, int height, int gap, int start);   // 0x0063c500
+    // The cell for a new glyph: a free one, else the least lately used unless used in this frame.
+    S_GlyphCell *TakeCell();                            // 0x0063d150
+    // `ch` drawn into the DIB, copied into `cell`, its glyph's rectangle and width.
+    bool DrawGlyph(S_GlyphCell *cell, int ch);          // 0x0063cda0
+    void CopyToTexture(const S_GlyphCell *cell);        // 0x0063ccc0
+    // The cell first in the use order (once a frame).
+    void Touch(S_GlyphCell *cell);                      // 0x0063d0c0
+
+    void *m_dc = nullptr;                               // +0x1C HDC
+    void *m_bitmap = nullptr;                           // +0x20 the DIB
+    uint8_t *m_bits = nullptr;                          // +0x24 its pixels (24-bit, bottom up)
+    int m_cellWidth = -1;                               // +0x28
+    int m_cellHeight = -1;                              // +0x2C
+    void *m_font = nullptr;                             // +0x30 HFONT
+    int m_size = 0;                                     // +0x34
+    C_str m_face;                                       // +0x38
+    bool m_bold = false;                                // +0x3C
+    IImage *m_image = nullptr;                          // +0x40
+    int m_textureWidth = -1;                            // +0x44
+    int m_textureHeight = -1;                           // +0x48
+    int m_frame = 0;                                    // +0x4C
+    S_GlyphCell *m_spare = nullptr;                     // +0x50 the last cell, kept out
+    std::vector<S_GlyphCell *> m_free;                  // +0x54
+    std::map<uint16_t, S_GlyphCell *> m_cells;          // +0x64 by character
+    S_GlyphCell *m_newest = nullptr;                    // +0x74
+    S_GlyphCell *m_cursor = nullptr;                    // +0x78 (moved off a cell used again; not read)
+    S_GlyphCell *m_oldest = nullptr;                    // +0x7C
 };
 
 // The shared font manager (its object 0x008acbbc), reference counted: the first AcquireFontManager

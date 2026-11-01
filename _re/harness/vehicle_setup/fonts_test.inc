@@ -26,13 +26,220 @@ void __stdcall GetGameVersion(int *major, int *minor)
     *major = g_foMajor;
     *minor = g_foMinor;
 }
-// The GDI fonts (part 9a-iii): logged; their result (none added).
+// The GDI fonts (part 9a-iii): made while g_foGdi (else their image is not); their fonts logged
+// ("gdi FACE SIZE WEIGHT").
 bool g_foGdi;
-bool C_FontManager::AddGdiFont(const char *face, int textureWidth, int textureHeight, int size, int id, bool unknown)
+// --- part 9a-iii: GDI (the fonts' calls through their import pointers) and IGraph's images ---------
+
+// The DCs, fonts and DIBs made; what was deleted (each handle as often as it was).
+struct S_FoGdiObject {
+    int kind = 0;                                       // 1 DC, 2 font, 3 DIB, 4 stock
+    int height = 0;                                     // a font's
+    std::vector<uint8_t> bits;                          // a DIB's (64 x 64, 24-bit)
+    S_FoGdiObject *bitmap = nullptr, *font = nullptr;   // a DC's
+};
+std::vector<S_FoGdiObject *> g_foGdiObjects;
+std::vector<const void *> g_foDeleted;
+// Failing steps: the DC, the font (its face "nofont"), the DIB; the image (g_foGdi false).
+bool g_foNoDc, g_foNoDib, g_foNoLock;
+S_FoGdiObject g_foStock[8];
+S_FoGdiObject *FoGdi(int kind)
 {
-    GfLog("gdi %s %d %d %d %d %d", face, textureWidth, textureHeight, size, id, unknown);
-    return g_foGdi;
+    g_foGdiObjects.push_back(new S_FoGdiObject());
+    g_foGdiObjects.back()->kind = kind;
+    return g_foGdiObjects.back();
 }
+HDC WINAPI F_FoCreateCompatibleDC(HDC dc)
+{
+    GfLog("cdc %d", dc != nullptr);
+    return g_foNoDc ? nullptr : reinterpret_cast<HDC>(FoGdi(1));
+}
+HFONT WINAPI F_FoCreateFontA(int height, int width, int escapement, int orientation, int weight, DWORD italic,
+                             DWORD underline, DWORD strike, DWORD charset, DWORD precision, DWORD clip, DWORD quality,
+                             DWORD pitch, LPCSTR face)
+{
+    GfLog("gdi %s %d %d", face, height, weight);
+    GfLog("cfont %d %d %d %d %u %u %u %u %u %u %u %u", width, escapement, orientation, weight, italic, underline,
+          strike, charset, precision, clip, quality, pitch);
+    if (std::strstr(face, "nofont"))
+        return nullptr;
+    S_FoGdiObject *f = FoGdi(2);
+    f->height = height;
+    return reinterpret_cast<HFONT>(f);
+}
+HBITMAP WINAPI F_FoCreateDIBSection(HDC dc, const BITMAPINFO *info, UINT usage, void **bits, HANDLE section, DWORD offset)
+{
+    GfLog("dib %d %d %d %d %d %d %u %d %u", dc != nullptr, info->bmiHeader.biSize, info->bmiHeader.biWidth,
+          info->bmiHeader.biHeight, info->bmiHeader.biPlanes, info->bmiHeader.biBitCount, info->bmiHeader.biCompression,
+          section != nullptr, usage + offset);
+    if (g_foNoDib) {
+        *bits = nullptr;
+        return nullptr;
+    }
+    S_FoGdiObject *b = FoGdi(3);
+    b->bits.assign(64 * 64 * 3, 0x5A);
+    *bits = b->bits.data();
+    return reinterpret_cast<HBITMAP>(b);
+}
+HGDIOBJ WINAPI F_FoSelectObject(HDC dc, HGDIOBJ object)
+{
+    auto *d = reinterpret_cast<S_FoGdiObject *>(dc);
+    auto *o = static_cast<S_FoGdiObject *>(object);
+    if (o->kind == 3)
+        d->bitmap = o;
+    else if (o->kind == 2)
+        d->font = o;
+    GfLog("select %d %d", o->kind, o->kind == 4 ? static_cast<int>(o - g_foStock) : -1);
+    return nullptr;
+}
+COLORREF WINAPI F_FoSetTextColor(HDC, COLORREF c)
+{
+    GfLog("textcolor %06x", static_cast<unsigned>(c));
+    return 0;
+}
+COLORREF WINAPI F_FoSetBkColor(HDC, COLORREF c)
+{
+    GfLog("bkcolor %06x", static_cast<unsigned>(c));
+    return 0;
+}
+int WINAPI F_FoSetMapMode(HDC, int mode)
+{
+    GfLog("mapmode %d", mode);
+    return 0;
+}
+// A text's extent: the font's height high; "Wg" as wide, a character 4 + its code % 13.
+int g_foExtentHeight = -1;                              // (>= 0: this height instead)
+BOOL WINAPI F_FoGetTextExtentPoint32W(HDC dc, LPCWSTR text, int count, LPSIZE size)
+{
+    const int height = reinterpret_cast<S_FoGdiObject *>(dc)->font->height;
+    size->cy = g_foExtentHeight >= 0 ? g_foExtentHeight : height;
+    size->cx = count == 2 ? height : 4 + text[0] % 13;
+    GfLog("extent %d %d", count, count == 2 && text[0] == L'W' && text[1] == L'g');
+    return TRUE;
+}
+HGDIOBJ WINAPI F_FoGetStockObject(int index)
+{
+    g_foStock[index].kind = 4;
+    return &g_foStock[index];
+}
+BOOL WINAPI F_FoRectangle(HDC dc, int left, int top, int right, int bottom)
+{
+    GfLog("rect %d %d %d %d", left, top, right, bottom);
+    std::vector<uint8_t> &bits = reinterpret_cast<S_FoGdiObject *>(dc)->bitmap->bits;
+    for (int y = top; y < bottom; ++y)
+        for (int x = left; x < right; ++x)
+            for (int c = 0; c < 3; ++c)
+                bits[(63 - y) * 192 + x * 3 + c] = 0;
+    return TRUE;
+}
+// A glyph: its extent's pixels (from the top left), blue (code + x + 7 y) & 0xFF.
+BOOL WINAPI F_FoExtTextOutW(HDC dc, int x0, int y0, UINT options, const RECT *rect, LPCWSTR text, UINT count, const INT *dx)
+{
+    GfLog("textout %d %d %u %d %04x %u %d", x0, y0, options, rect != nullptr, text[0], count, dx != nullptr);
+    auto *d = reinterpret_cast<S_FoGdiObject *>(dc);
+    SIZE size;
+    F_FoGetTextExtentPoint32W(dc, text, 1, &size);
+    g_gfLog.pop_back();
+    for (int y = 0; y < size.cy && y < 64; ++y)
+        for (int x = 0; x < size.cx && x < 64; ++x) {
+            uint8_t *p = &d->bitmap->bits[(63 - y) * 192 + x * 3];
+            p[0] = static_cast<uint8_t>(text[0] + x + 7 * y);
+            p[1] = 0x11;
+            p[2] = 0x22;
+        }
+    return TRUE;
+}
+BOOL WINAPI F_FoDeleteDC(HDC dc)
+{
+    g_foDeleted.push_back(dc);
+    return TRUE;
+}
+BOOL WINAPI F_FoDeleteObject(HGDIOBJ object)
+{
+    g_foDeleted.push_back(object);
+    return TRUE;
+}
+extern "C" {
+HDC(WINAPI *g_foImpCreateCompatibleDC)(HDC) __asm__("__imp__CreateCompatibleDC@4") = &F_FoCreateCompatibleDC;
+HFONT(WINAPI *g_foImpCreateFontA)(int, int, int, int, int, DWORD, DWORD, DWORD, DWORD, DWORD, DWORD, DWORD, DWORD,
+                                  LPCSTR) __asm__("__imp__CreateFontA@56") = &F_FoCreateFontA;
+HBITMAP(WINAPI *g_foImpCreateDIBSection)(HDC, const BITMAPINFO *, UINT, void **, HANDLE, DWORD) __asm__(
+    "__imp__CreateDIBSection@24") = &F_FoCreateDIBSection;
+HGDIOBJ(WINAPI *g_foImpSelectObject)(HDC, HGDIOBJ) __asm__("__imp__SelectObject@8") = &F_FoSelectObject;
+COLORREF(WINAPI *g_foImpSetTextColor)(HDC, COLORREF) __asm__("__imp__SetTextColor@8") = &F_FoSetTextColor;
+COLORREF(WINAPI *g_foImpSetBkColor)(HDC, COLORREF) __asm__("__imp__SetBkColor@8") = &F_FoSetBkColor;
+int(WINAPI *g_foImpSetMapMode)(HDC, int) __asm__("__imp__SetMapMode@8") = &F_FoSetMapMode;
+BOOL(WINAPI *g_foImpGetTextExtentPoint32W)(HDC, LPCWSTR, int, LPSIZE) __asm__("__imp__GetTextExtentPoint32W@16") =
+    &F_FoGetTextExtentPoint32W;
+HGDIOBJ(WINAPI *g_foImpGetStockObject)(int) __asm__("__imp__GetStockObject@4") = &F_FoGetStockObject;
+BOOL(WINAPI *g_foImpRectangle)(HDC, int, int, int, int) __asm__("__imp__Rectangle@20") = &F_FoRectangle;
+BOOL(WINAPI *g_foImpExtTextOutW)(HDC, int, int, UINT, const RECT *, LPCWSTR, UINT, const INT *) __asm__(
+    "__imp__ExtTextOutW@32") = &F_FoExtTextOutW;
+BOOL(WINAPI *g_foImpDeleteDC)(HDC) __asm__("__imp__DeleteDC@4") = &F_FoDeleteDC;
+BOOL(WINAPI *g_foImpDeleteObject)(HGDIOBJ) __asm__("__imp__DeleteObject@4") = &F_FoDeleteObject;
+}
+
+// IGraph's images (slot 0x40, CreateImage: none while g_foGdi is false): a 512-wide buffer of the
+// rows asked for; the calls logged.
+struct S_FoImage {
+    void **vtable;
+    int refs = 1;
+    int width = 0, height = 0;
+    std::vector<uint8_t> pixels;
+};
+void *g_foImageVt[SLOTS];
+std::vector<S_FoImage *> g_foImages;
+uint32_t __stdcall F_FoImageRelease(S_FoImage *self)
+{
+    GfLog("irelease");
+    return static_cast<uint32_t>(--self->refs);
+}
+HRESULT __stdcall F_FoImageOpen(S_FoImage *self, const char *name, const char *alpha, uint32_t flags, int width,
+                                int height, int unknown)
+{
+    GfLog("iopen %d %d %x %d %d %d", name != nullptr, alpha != nullptr, flags, width, height, unknown);
+    self->width = width;
+    self->height = height;
+    self->pixels.assign(static_cast<size_t>(512) * 4 * (height > 0 ? height : 0), 0x77);
+    return 0;
+}
+void *__stdcall F_FoImageLock(S_FoImage *self, int unknown1, int *pitch, int unknown2)
+{
+    GfLog("ilock %d %d %d", unknown1, pitch != nullptr, unknown2);
+    return g_foNoLock ? nullptr : self->pixels.data();
+}
+void __stdcall F_FoImageUnlock(S_FoImage *) { GfLog("iunlock"); }
+void __stdcall F_FoImageFill(S_FoImage *self, const void *rect, uint32_t color, int unknown)
+{
+    GfLog("ifill %d %06x %d", rect != nullptr, color, unknown);
+    for (size_t i = 0; i < self->pixels.size(); i += 4) {
+        self->pixels[i] = static_cast<uint8_t>(color);
+        self->pixels[i + 1] = static_cast<uint8_t>(color >> 8);
+        self->pixels[i + 2] = static_cast<uint8_t>(color >> 16);
+        self->pixels[i + 3] = static_cast<uint8_t>(color >> 24);
+    }
+}
+IImage *__stdcall F_FoCreateImage(void *)
+{
+    GfLog("cimage");
+    if (!g_foGdi)
+        return nullptr;
+    auto *image = new S_FoImage();
+    image->vtable = g_foImageVt;
+    g_foImages.push_back(image);
+    return reinterpret_cast<IImage *>(image);
+}
+void FoInitImages()
+{
+    for (int i = 0; i < SLOTS; ++i)
+        g_foImageVt[i] = g_imageVtable[i];
+    g_foImageVt[0x00 / 4] = reinterpret_cast<void *>(&F_FoImageRelease);
+    g_foImageVt[0x08 / 4] = reinterpret_cast<void *>(&F_FoImageOpen);
+    g_foImageVt[0x14 / 4] = reinterpret_cast<void *>(&F_FoImageLock);
+    g_foImageVt[0x18 / 4] = reinterpret_cast<void *>(&F_FoImageUnlock);
+    g_foImageVt[0x20 / 4] = reinterpret_cast<void *>(&F_FoImageFill);
+}
+
 
 namespace {
 
@@ -41,6 +248,8 @@ struct S_FontResults {
     bool foMissing = true, foTable = true, foQuads = true, foGrow = true, foFlush = true, foMap = true;
     bool xmTree = true, xmText = true, xmComments = true, xmAttributes = true, xmBad = true, xmWalk = true;
     bool xmFile = true, cfLanguage = true, cfSet = true, cfFonts = true, cfValues = true;
+    bool gdInit = true, gdCells = true, gdFail = true, gdGlyph = true, gdTexture = true, gdReuse = true;
+    bool gdEvict = true, gdOrder = true, gdSelect = true, gdClose = true;
 };
 
 // IGraph: the screen's width; textures ("missing": not found; "fail1": the code 1, loaded) logged.
@@ -58,7 +267,8 @@ HRESULT __stdcall F_FoLoadTexture(void *self, const char *name, const char *alph
 }
 void __stdcall F_FoSetTexture(void *, void *texture, int stage)
 {
-    GfLog("settex %s %d", texture ? static_cast<S_Image *>(texture)->name.c_str() : "-", stage);
+    const bool gdi = std::find(g_foImages.begin(), g_foImages.end(), texture) != g_foImages.end();
+    GfLog("settex %s %d", gdi ? "gdi" : texture ? static_cast<S_Image *>(texture)->name.c_str() : "-", stage);
 }
 std::vector<S_FontVertex> g_foDrawn;
 void __stdcall F_FoDraw(void *, int kind, int count, const void *vertices, int transformed)
@@ -135,7 +345,9 @@ void FontTest()
 {
     S_FontResults r;
     void *const oldSlots[] = {g_igraphVtable[0x18 / 4], g_igraphVtable[0x3C / 4], g_igraphVtable[0x44 / 4],
-                              g_igraphVtable[0x88 / 4]};
+                              g_igraphVtable[0x88 / 4], g_igraphVtable[0x40 / 4]};
+    FoInitImages();
+    g_igraphVtable[0x40 / 4] = reinterpret_cast<void *>(&F_FoCreateImage);
     g_igraphVtable[0x18 / 4] = reinterpret_cast<void *>(&F_FoScrnX);
     g_igraphVtable[0x3C / 4] = reinterpret_cast<void *>(&F_FoLoadTexture);
     g_igraphVtable[0x44 / 4] = reinterpret_cast<void *>(&F_FoSetTexture);
@@ -182,21 +394,22 @@ void FontTest()
         FoConfigFile("Japan", "japanese");
         C_FontManager *m = FoLoad();
         WM(r.foJapanese, FoIds(m) == std::vector<int>({4, 5, 6}) &&
-                             FoLines("gdi") == std::vector<std::string>{"gdi Cfg Face 512 256 20 2 1"} &&
+                             FoLines("gdi") == std::vector<std::string>{"gdi Cfg Face 20 700"} &&
                              FoLines("texture").size() == 3 &&
                              FoLines("texture")[1] == "texture Text\\Fonts\\Ce\\Set1\\\\BIG.tga 0 402");
         g_files.erase("Text\\Japan\\FontConfig.hxml");
         const int widths[] = {640, 800, 1024};
-        const char *const big[] = {"gdi MS UI Gothic 512 512 31 2 0", "gdi Lucida Sans Unicode 512 512 28 2 0",
-                                   "gdi Lucida Sans Unicode 512 1024 34 2 0"};
-        const char *const small[] = {"gdi MS UI Gothic 512 512 14 3 0", "gdi MS UI Gothic 512 512 15 3 0",
-                                     "gdi MS UI Gothic 512 512 20 3 0"};
+        const char *const big[] = {"gdi MS UI Gothic 31 400", "gdi Lucida Sans Unicode 28 400",
+                                   "gdi Lucida Sans Unicode 34 400"};
+        const char *const small[] = {"gdi MS UI Gothic 14 400", "gdi MS UI Gothic 15 400",
+                                     "gdi MS UI Gothic 20 400"};
         for (int i = 0; i < 3; ++i) {
             g_foWidth = widths[i];
             FoAddFiles("Japan", i + 1);
             g_foGdi = true;
             m = FoLoad();
-            WM(r.foJapanese, FoIds(m) == std::vector<int>({4, 5, 6}) &&
+            WM(r.foJapanese, FoIds(m) == std::vector<int>({4, 5, 6, 2, 3}) && dynamic_cast<C_GdiFont *>(m->FindFont(2)) &&
+                                 dynamic_cast<C_GdiFont *>(m->FindFont(3)) &&
                                  FoLines("gdi") == std::vector<std::string>({big[i], small[i]}));
             // The GDI fonts failing: the set's, by code.
             g_foGdi = false;
@@ -216,7 +429,7 @@ void FontTest()
         FoConfigFile("Russian", "RUSSIAN");
         C_FontManager *m = FoLoad();
         WM(r.foConfig, FoIds(m) == std::vector<int>({4, 5, 6}) &&
-                           FoLines("gdi") == std::vector<std::string>{"gdi Cfg Face 512 256 20 2 1"});
+                           FoLines("gdi") == std::vector<std::string>{"gdi Cfg Face 20 700"});
         g_files.erase("Text\\Russian\\FontConfig.hxml");
         FoAddFiles("Ansi", 1);
         m = FoLoad();
@@ -624,7 +837,7 @@ void FontTest()
                big + "</SET></LANGUAGE><LANGUAGE name=\"German\"><SET resolution=\"640x480\">" +
                font("FONT_BIG", "Second", "1", "true", "1") + "</SET></LANGUAGE></FONTCONFIG>");
         g_gfLog.clear();
-        WM(r.cfLanguage, m.LoadConfig("cfg.hxml", "German") && FoLines("gdi") == std::vector<std::string>{"gdi Big Face 512 512 24 2 1"});
+        WM(r.cfLanguage, m.LoadConfig("cfg.hxml", "German") && FoLines("gdi") == std::vector<std::string>{"gdi Big Face 24 700"});
         g_gfLog.clear();
         WM(r.cfLanguage, !m.LoadConfig("cfg.hxml", "Spanish") && FoLines("gdi").empty());
         WM(r.cfLanguage, !m.LoadConfig("cfg.hxml", "Germa") && !m.LoadConfig("cfg.hxml", "Germans"));
@@ -642,7 +855,7 @@ void FontTest()
         for (int i = 0; i < 6; ++i) {
             g_foWidth = widths[i];
             g_gfLog.clear();
-            WM(r.cfSet, m.LoadConfig("cfg.hxml", "X") && FoLines("gdi") == std::vector<std::string>{CmText("gdi %s 512 1 1 2 1", faces[i])});
+            WM(r.cfSet, m.LoadConfig("cfg.hxml", "X") && FoLines("gdi") == std::vector<std::string>{CmText("gdi %s 8 700", faces[i])});
         }
         g_foWidth = 640;
         config("<FONTCONFIG><LANGUAGE name=\"X\"><SET resolution=\"800x600\">" + big + "</SET></LANGUAGE><LANGUAGE name=\"Y\">"
@@ -659,8 +872,8 @@ void FontTest()
             g_foGdi = gdi;
             g_gfLog.clear();
             WM(r.cfFonts, m.LoadConfig("cfg.hxml", "X") &&
-                              FoLines("gdi") == std::vector<std::string>({"gdi Big Face 512 512 24 2 1", "gdi Small 512 256 12 3 0",
-                                                                          "gdi Nested 512 64 9 3 0"}));
+                              FoLines("gdi") == std::vector<std::string>({"gdi Big Face 24 700", "gdi Small 12 400",
+                                                                          "gdi Nested 9 400"}));
         }
         g_foGdi = false;
         config("<FONTCONFIG><LANGUAGE name=\"X\"><SET resolution=\"640x480\"></SET></LANGUAGE></FONTCONFIG>");
@@ -675,15 +888,289 @@ void FontTest()
             config("<FONTCONFIG><LANGUAGE name=\"X\"><SET resolution=\"640x480\">" + big + font(v[0], v[1], v[2], v[3], v[4]) +
                    "</SET></LANGUAGE></FONTCONFIG>");
             g_gfLog.clear();
-            WM(r.cfValues, !m.LoadConfig("cfg.hxml", "X") && FoLines("gdi") == std::vector<std::string>{"gdi Big Face 512 512 24 2 1"});
+            WM(r.cfValues, !m.LoadConfig("cfg.hxml", "X") && FoLines("gdi") == std::vector<std::string>{"gdi Big Face 24 700"});
         }
         // The values: atoi, "true" only.
         config("<FONTCONFIG><LANGUAGE name=\"X\"><SET resolution=\"640x480\">" + font("FONT_BIG", "F", "7", "yes", "128") +
                font("FONT_BIG", "G", "x12", "truex", "-3") + font("FONT_BIG", "H", " 5", "true ", "64pt") + "</SET></LANGUAGE></FONTCONFIG>");
         g_gfLog.clear();
-        WM(r.cfValues, m.LoadConfig("cfg.hxml", "X") && FoLines("gdi") == std::vector<std::string>({"gdi F 512 128 7 2 0", "gdi G 512 -3 0 2 0",
-                                                                                                     "gdi H 512 64 5 2 0"}));
+        WM(r.cfValues, m.LoadConfig("cfg.hxml", "X") && FoLines("gdi") == std::vector<std::string>({"gdi F 8 400", "gdi G 8 400",
+                                                                                                     "gdi H 8 400"}));
         m.Free();
+    }
+
+
+    // --- part 9a-iii: the GDI fonts ---
+    {
+        g_foGdi = true;
+        g_foNoDc = g_foNoDib = g_foNoLock = false;
+        g_foExtentHeight = -1;
+        const auto count = [](const void *handle) {
+            return std::count(g_foDeleted.begin(), g_foDeleted.end(), handle);
+        };
+        // The DC, the font, the DIB, the text's settings, the cells' size, the texture, the cells.
+        {
+            C_FontManager m;
+            g_gfLog.clear();
+            WM(r.gdInit, m.AddGdiFont("Face", 512, 128, 20, 2, false) && dynamic_cast<C_GdiFont *>(m.FindFont(2)));
+            auto *f = static_cast<C_GdiFont *>(m.FindFont(2));
+            WM(r.gdInit, GfVecIs(g_gfLog, std::vector<std::string>{"cdc 0", "gdi Face 20 400", "cfont 0 0 0 400 0 0 0 1 4 0 4 2",
+                                                                    "dib 1 40 64 64 1 24 0 0 0", "select 3 -1", "select 2 -1",
+                                                                    "textcolor ffffff", "bkcolor 000000", "mapmode 1", "extent 2 1",
+                                                                    "cimage", "iopen 0 0 8402 512 128 0", "ifill 0 ffffff 0"}));
+            WM(r.gdInit, f && f->m_cellWidth == 20 && f->m_cellHeight == 20 && f->m_size == 20 && f->m_face == "Face" &&
+                             !f->m_bold && f->m_frame == 1 && f->m_textureWidth == 512 && f->m_textureHeight == 128 &&
+                             f->m_bits == g_foGdiObjects.back()->bits.data() && f->m_newest == nullptr && f->m_cells.empty());
+            // The cells: 24 by 6, a pixel apart from (1, 1); the last one the spare.
+            WM(r.gdCells, f && f->m_free.size() == 143 && f->m_spare && f->m_spare->x == 484 && f->m_spare->y == 106 &&
+                              f->m_spare->right == 503 && f->m_spare->bottom == 125 && f->m_free[0]->x == 1 && f->m_free[0]->y == 1 &&
+                              f->m_free[1]->x == 22 && f->m_free[24]->x == 1 && f->m_free[24]->y == 22 && f->m_free[0]->ch == 0 &&
+                              f->m_free[142]->x == 463 && f->m_free[142]->y == 106);
+            // Bold; the size within 8 .. 60; a cell at least 10.
+            g_gfLog.clear();
+            WM(r.gdInit, m.AddGdiFont("Bold", 512, 128, 7, 3, true) && FoLines("gdi") == std::vector<std::string>{"gdi Bold 8 700"} &&
+                             static_cast<C_GdiFont *>(m.FindFont(3))->m_cellHeight == 10 &&
+                             static_cast<C_GdiFont *>(m.FindFont(3))->m_bold);
+            g_gfLog.clear();
+            WM(r.gdInit, m.AddGdiFont("Big", 512, 128, 61, 4, false) && FoLines("gdi") == std::vector<std::string>{"gdi Big 60 400"} &&
+                             static_cast<C_GdiFont *>(m.FindFont(4))->m_cellWidth == 60);
+            g_foExtentHeight = 25;
+            WM(r.gdInit, m.AddGdiFont("Tall", 512, 128, 8, 5, false) && static_cast<C_GdiFont *>(m.FindFont(5))->m_cellWidth == 25 &&
+                             static_cast<C_GdiFont *>(m.FindFont(5))->m_free.size() == 19 * 4 - 1);
+            g_foExtentHeight = 10;
+            WM(r.gdInit, m.AddGdiFont("Ten", 512, 128, 8, 6, false) && static_cast<C_GdiFont *>(m.FindFont(6))->m_cellWidth == 10);
+            g_foExtentHeight = -1;
+            // The grid's edges: a cell 20 needs 22 rows (21 none), 22 columns for one (43 for two).
+            const int sizes[][3] = {{512, 21, 0}, {512, 22, 24}, {42, 22, 1}, {43, 22, 2}, {21, 22, 0}};
+            for (const auto &t : sizes) {
+                C_FontManager grid;
+                WM(r.gdCells, grid.AddGdiFont("G", t[0], t[1], 20, 2, false));
+                auto *g = static_cast<C_GdiFont *>(grid.FindFont(2));
+                WM(r.gdCells, g && static_cast<int>(g->m_free.size()) + (g->m_spare ? 1 : 0) == t[2] && (t[2] == 0) == !g->m_spare);
+                grid.Free();
+            }
+            m.Free();
+        }
+        // A step failing: no font (what was made deleted, twice: the close, then the destructor's).
+        {
+            C_FontManager m;
+            g_foDeleted.clear();
+            g_foNoDc = true;
+            WM(r.gdFail, !m.AddGdiFont("Face", 512, 128, 20, 2, false) && m.m_fonts.empty() && g_foDeleted.size() == 6 &&
+                             count(nullptr) == 6);
+            g_foNoDc = false;
+            g_foDeleted.clear();
+            WM(r.gdFail, !m.AddGdiFont("nofont", 512, 128, 20, 2, false) && m.m_fonts.empty() && g_foDeleted.size() == 6 &&
+                             count(g_foGdiObjects.back()) == 2);
+            g_foNoDib = true;
+            g_foDeleted.clear();
+            WM(r.gdFail, !m.AddGdiFont("Face", 512, 128, 20, 2, false) && m.m_fonts.empty() &&
+                             count(g_foGdiObjects.back()) == 2 && count(g_foGdiObjects[g_foGdiObjects.size() - 2]) == 2 &&
+                             count(nullptr) == 2);
+            g_foNoDib = false;
+            g_foGdi = false;
+            g_foDeleted.clear();
+            g_gfLog.clear();
+            WM(r.gdFail, !m.AddGdiFont("Face", 512, 128, 20, 2, false) && m.m_fonts.empty() && FoLines("cimage").size() == 1 &&
+                             count(g_foGdiObjects.back()) == 2 && count(g_foGdiObjects[g_foGdiObjects.size() - 3]) == 2 &&
+                             FoLines("irelease").empty());
+            g_foGdi = true;
+            // No room for a cell: no spare; its glyphs the default.
+            WM(r.gdFail, m.AddGdiFont("Face", 512, 20, 20, 7, false));
+            auto *f = static_cast<C_GdiFont *>(m.FindFont(7));
+            WM(r.gdFail, f && f->m_spare == nullptr && f->m_free.empty() && f->GetGlyph('A') == &f->m_default);
+            m.Free();
+        }
+        // A glyph: drawn in the last free cell, copied (white, its blue the alpha), its rectangle.
+        {
+            C_FontManager m;
+            m.AddGdiFont("Face", 512, 128, 20, 2, false);
+            auto *f = static_cast<C_GdiFont *>(m.FindFont(2));
+            S_FoImage *image = g_foImages.back();
+            S_GlyphCell *const cell = f->m_free.back();
+            g_gfLog.clear();
+            const S_Glyph *g = f->GetGlyph('A');
+            WM(r.gdGlyph, g == &cell->glyph && cell->ch == 'A' && f->m_free.size() == 142 && f->m_cells.size() == 1 &&
+                              GfVecIs(g_gfLog, std::vector<std::string>{"select 4 4", "select 4 7", "rect 0 0 63 63", "extent 1 0",
+                                                                         "textout 0 0 2 0 0041 1 0", "ilock 0 1 0", "iunlock"}));
+            WM(r.gdGlyph, g->u0 == 463.0f / 511.0f && g->u1 == 467.0f / 511.0f && g->v0 == 106.0f / 127.0f &&
+                              g->v1 == 126.0f / 127.0f && g->aspect == 4.0f / 20.0f);
+            bool pixels = true;
+            for (int row = 0; row < 20; ++row)
+                for (int col = 0; col < 21; ++col) {
+                    const uint8_t *p = &image->pixels[((106 + row) * 512 + 463 + col) * 4];
+                    const int alpha = col == 20 ? 0 : col < 4 ? (0x41 + col + 7 * row) & 0xFF : 0;
+                    pixels = pixels && p[0] == 0xFF && p[1] == 0xFF && p[2] == 0xFF && p[3] == alpha;
+                }
+            const uint8_t *below = &image->pixels[((106 + 20) * 512 + 463) * 4];
+            WM(r.gdTexture, pixels && below[3] == 0 && below[0] == 0xFF);
+            // The DIB cleared to its last row and column: what is left there stays.
+            S_FoGdiObject *dib = g_foGdiObjects[g_foGdiObjects.size() - 1];
+            WM(r.gdTexture, dib->kind == 3 && dib->bits[0] == 0x5A && dib->bits[(63 - 62) * 192 + 62 * 3] == 0 &&
+                                dib->bits[63 * 192 + 63 * 3] == 0x5A);
+            // A cell's rows from the DIB's top: a glyph 25 high in a font of 30.
+            C_FontManager m2;
+            m2.AddGdiFont("Face", 512, 128, 30, 2, false);
+            auto *f2 = static_cast<C_GdiFont *>(m2.FindFont(2));
+            g_foExtentHeight = 25;
+            S_GlyphCell *const cell2 = f2->m_free.back();
+            f2->GetGlyph('B');
+            g_foExtentHeight = -1;
+            const uint8_t *last = &g_foImages.back()->pixels[((cell2->y + 24) * 512 + cell2->x + 1) * 4];
+            const uint8_t *past = &g_foImages.back()->pixels[((cell2->y + 25) * 512 + cell2->x + 1) * 4];
+            WM(r.gdTexture, last[3] == ((0x42 + 1 + 7 * 24) & 0xFF) && past[3] == 0 && past[0] == 0xFF &&
+                                cell2->glyph.v1 == (cell2->y + 25) / 127.0f && cell2->glyph.aspect == 5.0f / 25.0f);
+            // A glyph wider than its cell: the cell's columns only; the colour written over the cell.
+            C_FontManager m3;
+            m3.AddGdiFont("Face", 512, 128, 8, 2, false);
+            auto *f3 = static_cast<C_GdiFont *>(m3.FindFont(2));
+            S_GlyphCell *const cell3 = f3->m_free.back();
+            std::vector<uint8_t> &px3 = g_foImages.back()->pixels;
+            for (int row = 0; row < 10; ++row)
+                for (int col = 0; col < 11; ++col)
+                    std::memset(&px3[((cell3->y + row) * 512 + cell3->x + col) * 4], 0x77, 4);
+            f3->GetGlyph('I');                          // (12 wide in a cell of 10)
+            bool wide = true;
+            for (int row = 0; row < 10; ++row)
+                for (int col = 0; col < 11; ++col) {
+                    const uint8_t *p = &px3[((cell3->y + row) * 512 + cell3->x + col) * 4];
+                    wide = wide && (col == 10 ? p[0] == 0x77 && p[3] == 0x77
+                                              : p[0] == 0xFF && p[1] == 0xFF && p[2] == 0xFF && p[3] == (row < 8 ? (0x49 + col + 7 * row) & 0xFF : 0));
+                }
+            WM(r.gdTexture, wide);
+            m3.Free();
+            // No pixels: nothing copied (unlocked all the same).
+            g_foNoLock = true;
+            g_gfLog.clear();
+            f->GetGlyph('C');
+            WM(r.gdTexture, FoLines("ilock").size() == 1 && FoLines("iunlock").size() == 1);
+            g_foNoLock = false;
+            // An extent 0 high: no width.
+            g_foExtentHeight = 0;
+            WM(r.gdTexture, f->GetGlyph('D')->aspect == 0.0f);
+            g_foExtentHeight = -1;
+            // Again: the same cell, not drawn again; a tab: a space; the code's low 16 bits.
+            g_gfLog.clear();
+            // Code 0: a glyph like the others (a new cell does not forget it).
+            const S_Glyph *zero = f->GetGlyph(0);
+            WM(r.gdReuse, f->GetGlyph('E') != zero && f->GetGlyph(0) == zero && f->m_cells.count(0) == 1);
+            f->m_cells.erase(0);
+            f->m_cells.erase('E');
+            g_gfLog.clear();
+            WM(r.gdReuse, f->GetGlyph('A') == g && g_gfLog.empty() && f->GetGlyph('\t') == f->GetGlyph(' ') &&
+                              f->GetGlyph(0x10041) == g && f->m_cells.size() == 4 && f->m_cells.count(' ') == 1 &&
+                              f->m_cells.count('\t') == 0);
+            m.Free();
+            m2.Free();
+        }
+        // No free cell: the least lately used, unless used in this frame (then the spare's glyph).
+        {
+            C_FontManager m;
+            m.AddGdiFont("Face", 512, 22, 20, 2, false);
+            auto *f = static_cast<C_GdiFont *>(m.FindFont(2));
+            WM(r.gdEvict, f->m_free.size() == 23);
+            std::vector<const S_Glyph *> glyphs;
+            for (int i = 0; i < 23; ++i)
+                glyphs.push_back(f->GetGlyph(0x100 + i));
+            g_gfLog.clear();
+            WM(r.gdEvict, f->GetGlyph(0x200) == &f->m_spare->glyph && FoLines("textout").empty() && f->m_cells.count(0x200) == 0);
+            f->Select();
+            g_gfLog.clear();
+            const S_Glyph *reused = f->GetGlyph(0x200);
+            WM(r.gdEvict, reused == glyphs[0] && FoLines("textout").size() == 1 && f->m_cells.count(0x100) == 0 &&
+                              f->m_cells.count(0x200) == 1 && f->m_newest->ch == 0x200);
+            // The next: the one after; the first again: drawn again, in the next one.
+            WM(r.gdEvict, f->GetGlyph(0x201) == glyphs[1] && f->GetGlyph(0x100) == glyphs[2] && f->m_cells.count(0x101) == 0);
+            WM(r.gdEvict, f->m_oldest->ch == 0x103 && f->m_cells.size() == 23);
+            m.Free();
+        }
+        // The use order: newest first; once a frame; a cell used again moved first.
+        {
+            C_FontManager m;
+            m.AddGdiFont("Face", 512, 22, 20, 2, false);
+            auto *f = static_cast<C_GdiFont *>(m.FindFont(2));
+            const S_Glyph *a = f->GetGlyph('a');
+            const S_Glyph *b = f->GetGlyph('b');
+            const S_Glyph *c = f->GetGlyph('c');
+            S_GlyphCell *const ca = f->m_cells['a'], *const cb = f->m_cells['b'], *const cc = f->m_cells['c'];
+            WM(r.gdOrder, f->m_newest == cc && f->m_oldest == ca && cc->older == cb && cb->older == ca && ca->older == nullptr &&
+                              ca->newer == cb && cb->newer == cc && cc->newer == nullptr);
+            // In the same frame: not moved.
+            f->GetGlyph('a');
+            WM(r.gdOrder, f->m_newest == cc && f->m_oldest == ca);
+            f->Select();
+            f->GetGlyph('a');
+            WM(r.gdOrder, f->m_newest == ca && f->m_oldest == cb && ca->older == cc && cc->newer == ca && cb->newer == cc &&
+                              ca->newer == nullptr && ca->frame == 2);
+            // The middle one moved first.
+            f->GetGlyph('c');
+            WM(r.gdOrder, f->m_newest == cc && cc->older == ca && ca->older == cb && cb->newer == ca && ca->newer == cc &&
+                              f->m_oldest == cb);
+            // The oldest moved first.
+            f->GetGlyph('b');
+            WM(r.gdOrder, f->m_newest == cb && f->m_oldest == ca && cb->older == cc && ca->newer == cc && ca->older == nullptr);
+            for (int i = 0; i < 20; ++i)
+                f->GetGlyph(0x300 + i);
+            f->Select();
+            // The least lately used (here 'a') reused first.
+            WM(r.gdOrder, f->GetGlyph(0x400) == a && f->GetGlyph(0x401) == c && f->GetGlyph(0x402) == b);
+            // (The cursor: moved off a cell used again.)
+            f->m_cursor = f->m_newest;
+            S_GlyphCell *const older = f->m_newest->older;
+            f->Select();
+            f->GetGlyph(0x402);
+            WM(r.gdOrder, f->m_cursor == older);
+            m.Free();
+        }
+        // Select: the texture, the next frame.
+        {
+            C_FontManager m;
+            m.AddGdiFont("Face", 512, 128, 20, 2, false);
+            auto *f = static_cast<C_GdiFont *>(m.FindFont(2));
+            g_gfLog.clear();
+            f->Select();
+            WM(r.gdSelect, GfLogIs({"settex gdi 0"}) && f->m_frame == 2);
+            C_GdiFont none;
+            g_gfLog.clear();
+            none.Select();
+            WM(r.gdSelect, g_gfLog.empty() && none.m_frame == 1 && none.m_cellWidth == -1 && none.m_textureHeight == -1);
+            m.Free();
+        }
+        // Close: the texture released, the GDI objects deleted, every cell freed; then cleared.
+        {
+            C_FontManager m;
+            m.AddGdiFont("Face", 512, 128, 20, 2, false);
+            auto *f = static_cast<C_GdiFont *>(m.FindFont(2));
+            f->GetGlyph('A');
+            f->GetGlyph('B');
+            S_FoGdiObject *const dib = g_foGdiObjects.back();
+            S_FoGdiObject *const font = g_foGdiObjects[g_foGdiObjects.size() - 2];
+            S_FoGdiObject *const dc = g_foGdiObjects[g_foGdiObjects.size() - 3];
+            g_foDeleted.clear();
+            g_gfLog.clear();
+            f->Close();
+            WM(r.gdClose, GfLogIs({"irelease"}) && g_foDeleted == std::vector<const void *>({dc, dib, font}) &&
+                              f->m_image == nullptr && f->m_bits == nullptr && f->m_spare == nullptr && f->m_free.empty() &&
+                              f->m_cells.empty() && f->m_newest == nullptr && f->m_oldest == nullptr && f->m_dc == dc);
+            // Reset: every field cleared.
+            f->m_free.push_back(nullptr);
+            f->m_cells[1] = nullptr;
+            f->m_newest = f->m_cursor = f->m_oldest = reinterpret_cast<S_GlyphCell *>(0x10);
+            f->m_spare = reinterpret_cast<S_GlyphCell *>(0x20);
+            f->m_frame = 9;
+            f->m_bits = reinterpret_cast<uint8_t *>(0x30);
+            f->m_image = reinterpret_cast<IImage *>(0x40);
+            f->Reset();
+            WM(r.gdClose, f->m_dc == nullptr && f->m_bitmap == nullptr && f->m_bits == nullptr && f->m_cellWidth == -1 &&
+                              f->m_cellHeight == -1 && f->m_font == nullptr && f->m_size == 0 && f->m_image == nullptr &&
+                              f->m_textureWidth == -1 && f->m_textureHeight == -1 && f->m_frame == 0 && f->m_spare == nullptr &&
+                              f->m_free.empty() && f->m_cells.empty() && f->m_newest == nullptr && f->m_cursor == nullptr &&
+                              f->m_oldest == nullptr);
+            g_foDeleted.clear();
+            m.Free();
+            WM(r.gdClose, g_foDeleted == std::vector<const void *>({nullptr, nullptr, nullptr}) && m.m_fonts.empty());
+        }
+        g_foGdi = false;
     }
 
     while (g_fontManager)
@@ -694,6 +1181,7 @@ void FontTest()
     g_igraphVtable[0x3C / 4] = oldSlots[1];
     g_igraphVtable[0x44 / 4] = oldSlots[2];
     g_igraphVtable[0x88 / 4] = oldSlots[3];
+    g_igraphVtable[0x40 / 4] = oldSlots[4];
     std::printf("fonts: foSets %d foLanguages %d foJapanese %d foConfig %d foVersion %d foShared %d foMissing %d "
                 "foTable %d foQuads %d foGrow %d foFlush %d foMap %d\n",
                 r.foSets, r.foLanguages, r.foJapanese, r.foConfig, r.foVersion, r.foShared, r.foMissing, r.foTable,
@@ -702,4 +1190,8 @@ void FontTest()
                 "cfSet %d cfFonts %d cfValues %d\n",
                 r.xmTree, r.xmText, r.xmComments, r.xmAttributes, r.xmBad, r.xmWalk, r.xmFile, r.cfLanguage, r.cfSet,
                 r.cfFonts, r.cfValues);
+    std::printf("gdi: gdInit %d gdCells %d gdFail %d gdGlyph %d gdTexture %d gdReuse %d gdEvict %d gdOrder %d gdSelect %d "
+                "gdClose %d\n",
+                r.gdInit, r.gdCells, r.gdFail, r.gdGlyph, r.gdTexture, r.gdReuse, r.gdEvict, r.gdOrder, r.gdSelect,
+                r.gdClose);
 }

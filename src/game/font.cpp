@@ -1,5 +1,7 @@
 #include "game/font.h"
 
+#include <windows.h>
+
 #include <cstdlib>
 #include <cstring>
 
@@ -374,4 +376,288 @@ bool C_FontManager::LoadConfig(const char *path, const char *language)
                             std::strcmp(bold, "true") == 0) || loaded;
     }
     return loaded;
+}
+
+// --- the GDI fonts (part 9a-iii) -------------------------------------------------------------------
+
+namespace {
+
+// The DIB a glyph is drawn into: 64 x 64, 24-bit, bottom up.
+constexpr int DIB_SIZE = 64;
+constexpr int DIB_ROW = DIB_SIZE * 3;
+// The font's size (pixels high): 8 .. 60; a cell at least 10 high.
+constexpr int MIN_GDI_SIZE = 8;
+constexpr int MAX_GDI_SIZE = 60;
+constexpr int MIN_CELL = 10;
+// The texture's flags; its rows (the copy's pitch: the texture's width, 512, in pixels).
+constexpr uint32_t GDI_TEXTURE_FLAGS = 0x8402;
+constexpr int TEXTURE_ROW = 0x200;
+// The cells' gap and start.
+constexpr int CELL_GAP = 1;
+
+HDC Dc(void *dc) { return static_cast<HDC>(dc); }
+
+} // namespace
+
+C_GdiFont::C_GdiFont()
+{
+    Reset();
+}
+
+C_GdiFont::~C_GdiFont()
+{
+    Close();
+    Reset();
+}
+
+bool C_GdiFont::Init(void *dc, const char *face, int textureWidth, int textureHeight, int size, bool bold)
+{
+    m_dc = CreateCompatibleDC(Dc(dc));
+    if (!m_dc)
+        return false;
+    size = size > MAX_GDI_SIZE ? MAX_GDI_SIZE : size < MIN_GDI_SIZE ? MIN_GDI_SIZE : size;
+    m_face = face;
+    m_bold = bold;
+    m_size = size;
+    m_font = CreateFontA(size, 0, 0, 0, bold ? FW_BOLD : FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_TT_PRECIS,
+                         CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, VARIABLE_PITCH, face);
+    if (!m_font)
+        return false;
+    BITMAPINFO info = {};
+    info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    info.bmiHeader.biWidth = DIB_SIZE;
+    info.bmiHeader.biHeight = DIB_SIZE;
+    info.bmiHeader.biPlanes = 1;
+    info.bmiHeader.biBitCount = 24;
+    info.bmiHeader.biCompression = BI_RGB;
+    void *bits = nullptr;
+    m_bitmap = CreateDIBSection(Dc(m_dc), &info, DIB_RGB_COLORS, &bits, nullptr, 0);
+    m_bits = static_cast<uint8_t *>(bits);
+    if (!m_bitmap)
+        return false;
+    SelectObject(Dc(m_dc), static_cast<HGDIOBJ>(m_bitmap));
+    SelectObject(Dc(m_dc), static_cast<HGDIOBJ>(m_font));
+    SetTextColor(Dc(m_dc), RGB(255, 255, 255));
+    SetBkColor(Dc(m_dc), RGB(0, 0, 0));
+    SetMapMode(Dc(m_dc), MM_TEXT);
+    // The cells: as high and as wide as "Wg" is high.
+    SIZE extent = {};
+    GetTextExtentPoint32W(Dc(m_dc), L"Wg", 2, &extent);
+    if (extent.cy < MIN_CELL)
+        extent.cy = MIN_CELL;
+    m_cellHeight = m_cellWidth = extent.cy;
+    m_textureWidth = textureWidth;
+    m_textureHeight = textureHeight;
+    m_image = GetIGraph()->CreateImage();
+    if (!m_image)
+        return false;
+    m_image->Open(nullptr, nullptr, GDI_TEXTURE_FLAGS, textureWidth, textureHeight, 0);
+    m_image->Fill(nullptr, 0xFFFFFF, 0);
+    if (!MakeCells(m_cellWidth, m_cellHeight, CELL_GAP, CELL_GAP))
+        return false;
+    // (Fix: no cell, no spare; the original takes one from the empty list.)
+    if (!m_free.empty()) {
+        m_spare = m_free.back();
+        m_free.pop_back();
+    }
+    m_newest = m_cursor = m_oldest = nullptr;
+    m_frame = 1;
+    return true;
+}
+
+bool C_GdiFont::MakeCells(int width, int height, int gap, int start)
+{
+    const int stepX = width + gap;
+    const int stepY = height + start;
+    for (int y = start; stepY - 1 + y < m_textureHeight; y += stepY) {
+        for (int x = gap; stepX - 1 + x < m_textureWidth; x += stepX) {
+            // (Fix: zero; the original's glyph and links are not set.)
+            auto *cell = new S_GlyphCell{};
+            cell->x = x;
+            cell->y = y;
+            cell->right = width - 1 + x;
+            cell->bottom = height - 1 + y;
+            cell->ch = 0;
+            m_free.push_back(cell);
+        }
+    }
+    return true;
+}
+
+void C_GdiFont::Close()
+{
+    if (m_image) {
+        m_image->Release();
+        m_image = nullptr;
+    }
+    m_bits = nullptr;
+    // (Quirk kept: the handles stay; a second Close deletes them again, as the destructor's does.)
+    DeleteDC(Dc(m_dc));
+    DeleteObject(static_cast<HGDIOBJ>(m_bitmap));
+    DeleteObject(static_cast<HGDIOBJ>(m_font));
+    delete m_spare;
+    m_spare = nullptr;
+    m_cells.clear();
+    for (size_t i = m_free.size(); i-- > 0;)
+        delete m_free[i];
+    m_free.clear();
+    // The cells in use: the use order owns them.
+    while (S_GlyphCell *cell = m_newest) {
+        m_newest = cell->older;
+        delete cell;
+    }
+    m_newest = m_cursor = m_oldest = nullptr;
+}
+
+void C_GdiFont::Reset()
+{
+    m_dc = nullptr;
+    m_bitmap = nullptr;
+    m_bits = nullptr;
+    m_cellWidth = m_cellHeight = -1;
+    m_font = nullptr;
+    m_size = 0;
+    m_image = nullptr;
+    m_textureWidth = m_textureHeight = -1;
+    m_frame = 0;
+    m_spare = nullptr;
+    m_free.clear();                                     // (the cells not deleted)
+    m_cells.clear();
+    m_newest = m_cursor = m_oldest = nullptr;
+}
+
+void C_GdiFont::Select()
+{
+    if (m_image)
+        GetIGraph()->SetTexture(m_image, 0);
+    ++m_frame;
+}
+
+S_GlyphCell *C_GdiFont::TakeCell()
+{
+    if (!m_free.empty()) {
+        S_GlyphCell *cell = m_free.back();
+        m_free.pop_back();
+        cell->newer = cell->older = nullptr;
+        cell->frame = 0;
+        return cell;
+    }
+    // (Fix: none in use, none; the original reads through null.)
+    return m_oldest && m_oldest->frame != m_frame ? m_oldest : nullptr;
+}
+
+const S_Glyph *C_GdiFont::GetGlyph(int ch)
+{
+    if (ch == '\t')
+        ch = ' ';
+    const uint16_t key = static_cast<uint16_t>(ch);
+    S_GlyphCell *cell;
+    const auto it = m_cells.find(key);
+    if (it != m_cells.end()) {
+        cell = it->second;
+    } else {
+        cell = TakeCell();
+        if (!cell)
+            return m_spare ? &m_spare->glyph : &m_default;   // (Fix: no spare: the default)
+        if (cell->ch != 0) {
+            m_cells.erase(cell->ch);
+            cell->ch = 0;
+        }
+        DrawGlyph(cell, ch);
+        cell->ch = key;
+        m_cells.insert({key, cell});
+    }
+    Touch(cell);
+    return &cell->glyph;
+}
+
+bool C_GdiFont::DrawGlyph(S_GlyphCell *cell, int ch)
+{
+    const WCHAR text = static_cast<WCHAR>(ch);
+    SelectObject(Dc(m_dc), GetStockObject(BLACK_BRUSH));
+    SelectObject(Dc(m_dc), GetStockObject(BLACK_PEN));
+    Rectangle(Dc(m_dc), 0, 0, DIB_SIZE - 1, DIB_SIZE - 1);
+    SIZE extent = {};
+    GetTextExtentPoint32W(Dc(m_dc), &text, 1, &extent);
+    ExtTextOutW(Dc(m_dc), 0, 0, ETO_OPAQUE, nullptr, &text, 1, nullptr);
+    CopyToTexture(cell);
+    const float width = static_cast<float>(m_textureWidth - 1);
+    const float height = static_cast<float>(m_textureHeight - 1);
+    cell->glyph.u0 = static_cast<float>(cell->x) / width;
+    cell->glyph.u1 = static_cast<float>(extent.cx + cell->x) / width;
+    cell->glyph.v0 = static_cast<float>(cell->y) / height;
+    cell->glyph.v1 = static_cast<float>(cell->y + extent.cy) / height;
+    cell->glyph.aspect = extent.cy == 0 ? 0.0f : static_cast<float>(extent.cx) / static_cast<float>(extent.cy);
+    return true;
+}
+
+void C_GdiFont::CopyToTexture(const S_GlyphCell *cell)
+{
+    int pitch = 0;
+    auto *pixels = static_cast<uint8_t *>(m_image->Lock(0, &pitch, 0));
+    if (pixels) {
+        // The DIB's rows from its top (its last in memory) into the cell's: white, the blue its alpha.
+        const uint8_t *source = m_bits + (DIB_SIZE - 1) * DIB_ROW;
+        int row = (cell->y * TEXTURE_ROW + cell->x) * 4;
+        for (int line = DIB_SIZE - 1; line >= DIB_SIZE - m_cellHeight; --line) {
+            uint8_t *out = pixels + row;
+            const uint8_t *in = source;
+            for (int column = 0; column < m_cellWidth; ++column) {
+                out[0] = out[1] = out[2] = 0xFF;
+                out[3] = in[0];
+                out += 4;
+                in += 3;
+            }
+            row += TEXTURE_ROW * 4;
+            source -= DIB_ROW;
+        }
+    }
+    m_image->Unlock();
+}
+
+void C_GdiFont::Touch(S_GlyphCell *cell)
+{
+    if (cell->frame == m_frame)
+        return;
+    cell->frame = m_frame;
+    if (!m_newest) {
+        if (!m_oldest) {
+            cell->newer = cell->older = nullptr;
+            m_cursor = nullptr;
+            m_oldest = m_newest = cell;
+        }
+        return;
+    }
+    if (!m_oldest)
+        return;
+    if (cell == m_cursor)
+        m_cursor = cell->older;
+    if (cell == m_newest)
+        return;
+    // Out of its place (when it has one), then first.
+    if (cell->older || cell->newer) {
+        if (cell->older)
+            cell->older->newer = cell->newer;
+        if (cell->newer)
+            cell->newer->older = cell->older;
+        if (cell == m_oldest)
+            m_oldest = cell->newer;
+    }
+    cell->newer = nullptr;
+    cell->older = m_newest;
+    m_newest->newer = cell;
+    m_newest = cell;
+}
+
+bool C_FontManager::AddGdiFont(const char *face, int textureWidth, int textureHeight, int size, int id, bool bold)
+{
+    auto *font = new C_GdiFont();
+    if (!font->Init(nullptr, face, textureWidth, textureHeight, size, bold)) {
+        font->Close();
+        delete font;
+        return false;
+    }
+    font->m_id = id;
+    m_fonts.push_back(font);
+    return true;
 }

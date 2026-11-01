@@ -5922,6 +5922,43 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/xml_node.txt (29); 29 functions in ported.txt. Stats: 7,908 of 12,293 functions
     by hand (72.8 % by size).
 
+  PART 9a-iii DONE (2026-10-31): the GDI fonts (src/game/font.*: C_GdiFont, vtable 0x00813b10,
+  0x80 bytes; 0x0063c2f0..0x0063ddb0, AddGdiFont 0x0063ee20, its destructor 0x0063f050; the font
+  manager's own object code 0x0063de40..0x0063ded0).
+  - Init 0x0063c2f0: a DC, the font (CreateFontA: the size 8 .. 60 high, bold 700 else 400, the
+    default charset, TrueType, antialiased, variable pitch), a 64 x 64 24-bit DIB (white text on
+    black), the cells as high and wide as "Wg" is high (at least 10), the texture (IGraph slot 0x40
+    CreateImage; IImage Open 0x08 (0x8402), Fill 0x20 (0xFFFFFF)), its cells (a pixel apart from
+    (1, 1)), the last cell the spare. GetGlyph 0x0063ced0: a tab a space's; the code's low 16 bits;
+    a cell by its character (std::map), else a free one, else the least lately used unless used in
+    this frame (else the spare's glyph); a glyph drawn (Rectangle, ExtTextOutW) and copied into
+    the cell (IImage Lock 0x14 / Unlock 0x18; the rows 512 pixels: white, the DIB's blue its
+    alpha), its rectangle (u, v over the texture's size less 1) and width per height; the cell
+    first in the use order (once a frame). Select 0x0063c9d0: the texture, the next frame. Close
+    0x0063c740, Reset 0x0063d310; the vertex slots do nothing (its users draw the quads).
+  - igraph.h: IImage Open / Lock / Unlock / Fill, IGraph::CreateImage. C_Font: the texture moved to
+    C_TextureFont (the GDI font's +0x1C is its DC); C_FontManager a friend (the GDI fonts' id).
+  - Quirks kept: a second Close (the destructor's after a failed Init) deletes the GDI objects
+    again; the copy's rows are the texture's width, 512 (the fonts' textures are), and as many as
+    the cell is high from the DIB's top. Fixes: the cells zero (the original's glyph and links are
+    not set); no cell: no spare, the default glyph (the original takes one from the empty list).
+  - Unreferenced (no code or data references; left in tier 1): 0x0063d1d0 / 0x0063d260, the font
+    made again at another size (and weight).
+  - Harness: fonts_test.inc's "gdi:" line in the camera build (10 checks; GDI faked through its
+    import pointers (__imp__CreateFontA@56 ... defined in the test); IGraph's images faked); the
+    9a-ii LoadConfig tests on the real AddGdiFont (their fonts' lines from CreateFontA). 0 of 22 in
+    both orders.
+  - Mutations (mutations/mutate_9a3.py): the first run caught 147 of 188 (39 survived, 2 did not
+    build); 16 equivalent (see the file's docstring), new cases for the rest (Reset's fields, the
+    grid's edges, code 0, a glyph wider than its cell over a painted texture), Close's temporary
+    as a local (the original uses +0x78); the full rerun caught 169 of 187 (the 16 equivalent).
+    Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0
+    of 37.
+  - Build: 204 files clean (MSVC). Tier 1: 514 errors in 86 files, 207 stubs (516 / 87 / 209
+    before). ret_audit --src: 52.
+  - Ghidra: names/gdi_font.txt (45); 43 functions in ported.txt. Stats: 7,951 of 12,293 functions
+    by hand (72.9 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
