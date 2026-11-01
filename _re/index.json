@@ -181405,10 +181405,10 @@
 "in_vtables": []
 },
 "00649250": {
-"name": "FUN_00649250",
+"name": "NewPage",
 "size": 530,
-"lines": 89,
-"chars": 2745,
+"lines": 86,
+"chars": 2497,
 "callers": [
 "006494a0",
 "00649a90"
@@ -181429,10 +181429,10 @@
 "in_vtables": []
 },
 "00649470": {
-"name": "FUN_00649470",
+"name": "LastPage",
 "size": 43,
-"lines": 11,
-"chars": 254,
+"lines": 10,
+"chars": 218,
 "callers": [
 "006494a0",
 "00649a90",
@@ -181449,8 +181449,8 @@
 "006494a0": {
 "name": "LayoutPages",
 "size": 770,
-"lines": 136,
-"chars": 4220,
+"lines": 137,
+"chars": 4180,
 "callers": [
 "0064ae70",
 "0064bb80"
@@ -181476,10 +181476,10 @@
 "in_vtables": []
 },
 "006497b0": {
-"name": "FUN_006497b0",
+"name": "PlacePages",
 "size": 62,
 "lines": 16,
-"chars": 378,
+"chars": 370,
 "callers": [
 "006494a0"
 ],
@@ -181494,10 +181494,10 @@
 "in_vtables": []
 },
 "006497f0": {
-"name": "FUN_006497f0",
+"name": "NextJustified",
 "size": 371,
-"lines": 80,
-"chars": 2321,
+"lines": 82,
+"chars": 2313,
 "callers": [
 "00649970"
 ],
@@ -181517,10 +181517,10 @@
 "in_vtables": []
 },
 "00649970": {
-"name": "FUN_00649970",
+"name": "AlignPage",
 "size": 126,
 "lines": 26,
-"chars": 775,
+"chars": 731,
 "callers": [
 "006497b0"
 ],
@@ -181535,10 +181535,10 @@
 "in_vtables": []
 },
 "006499f0": {
-"name": "FUN_006499f0",
+"name": "StackPage",
 "size": 147,
 "lines": 31,
-"chars": 966,
+"chars": 959,
 "callers": [
 "006497b0"
 ],
@@ -181552,10 +181552,10 @@
 "in_vtables": []
 },
 "00649a90": {
-"name": "FUN_00649a90",
+"name": "AddLineToPage",
 "size": 464,
-"lines": 73,
-"chars": 2197,
+"lines": 74,
+"chars": 2215,
 "callers": [
 "006494a0",
 "00649c80",
@@ -181579,10 +181579,10 @@
 "in_vtables": []
 },
 "00649c60": {
-"name": "FUN_00649c60",
+"name": "FlowPaged",
 "size": 19,
-"lines": 12,
-"chars": 253,
+"lines": 14,
+"chars": 281,
 "callers": [
 "006494a0"
 ],
@@ -181599,10 +181599,10 @@
 "in_vtables": []
 },
 "00649c80": {
-"name": "FUN_00649c80",
+"name": "FlowPagedUtf8",
 "size": 2050,
-"lines": 473,
-"chars": 17691,
+"lines": 470,
+"chars": 17560,
 "callers": [
 "00649c60"
 ],
@@ -181654,10 +181654,10 @@
 "in_vtables": []
 },
 "0064a4d0": {
-"name": "FUN_0064a4d0",
+"name": "S_TextLine::AddWord",
 "size": 462,
 "lines": 87,
-"chars": 2759,
+"chars": 2772,
 "callers": [
 "00649c80",
 "0064a6c0"
@@ -181693,10 +181693,10 @@
 "in_vtables": []
 },
 "0064a6c0": {
-"name": "FUN_0064a6c0",
+"name": "FlowPagedBytes",
 "size": 1949,
-"lines": 444,
-"chars": 16554,
+"lines": 441,
+"chars": 16412,
 "callers": [
 "00649c60"
 ],
@@ -181852,10 +181852,10 @@
 "in_vtables": []
 },
 "0064b7f0": {
-"name": "FUN_0064b7f0",
+"name": "AlignPageLine",
 "size": 734,
 "lines": 119,
-"chars": 3859,
+"chars": 3923,
 "callers": [
 "00649970"
 ],
@@ -181878,10 +181878,10 @@
 "in_vtables": []
 },
 "0064bad0": {
-"name": "FUN_0064bad0",
+"name": "JustifyPageGap",
 "size": 91,
-"lines": 21,
-"chars": 536,
+"lines": 20,
+"chars": 554,
 "callers": [
 "0064b7f0"
 ],

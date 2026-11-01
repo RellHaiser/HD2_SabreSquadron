@@ -306,8 +306,6 @@ f_00638dc0.cpp:2096:13: invalid type argument of unary '*' (have 'uint32_t' {aka
     *DAT_008ae5b0 = (int)pvVar3;
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_00643b20.cpp:1162:7: '_local_18' was not declared in this scope; did you mean 'local_18'?
-    _local_18 = CONCAT31(uStack_17,bVar2);
 f_0064d080.cpp:85:20: 'UNK_00813cb8' was not declared in this scope; did you mean 'PTR_00813ab8'?
     pbVar1[-1] = (&UNK_00813cb8)[iVar3] | (uint8_t)uVar2;
 f_0064dae0.cpp:2639:3: '_param_1' was not declared in this scope; did you mean 'param_1'?

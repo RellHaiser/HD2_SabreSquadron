@@ -4,7 +4,8 @@
 // build with TEXT_TEST and the real C_TextBox; the loader's text box fakes left out), run by
 // CameraTest instead of the camera's tests: IGraph's screen 800 x 600; the fonts 2 and 3 fakes
 // (C_TbFont); the render's IGraph and driver calls logged. Prints "textbox:" (9b-i), "layout:"
-// (9b-ii-a), "position:" (9b-ii-b), "render:" (9b-iii) and "pages:" (9b-iv) with 1 per check met.
+// (9b-ii-a), "position:" (9b-ii-b), "render:" (9b-iii), "pages:" (9b-iv-a) and "paged:" (9b-iv-b, the
+// paged box's layout) with 1 per check met.
 
 #define private public
 #define protected public
@@ -28,13 +29,6 @@ void TbSetLines(std::vector<S_TextLine *> &lines)
         line->gap = l[3];
         lines.push_back(line);
     }
-}
-// The paged box's layout (part 9b-iv-b) faked: logged (with the dirty flag), the box laid out.
-bool C_PagedTextBox::LayoutPages()
-{
-    GfLog("layout pages %d", m_dirty);
-    m_dirty = false;
-    return true;
 }
 // The visuals' world boxes: logged, then up to date.
 void __stdcall I3D_visual::UpdateWBoundProc()
@@ -431,6 +425,48 @@ std::string PgClip(const C_PagedTextBox &box, S_TextArea area)
     S_IGraphViewport clip = {7, 7, 7, 7, 7.0f, 7.0f};
     const bool on = box.ClipArea(&clip, area);
     return CmText("%s%d %d %d %d %g %g", on ? "" : "- ", clip.x, clip.y, clip.width, clip.height, clip.minZ, clip.maxZ);
+}
+
+// --- part 9b-iv-b ---
+
+struct S_PagedResults {
+    bool lpNone = true, lpLines = true, lpWrap = true, lpPages = true, lpAreas = true, lpForced = true, lpFail = true;
+    bool lpNoWrap = true, lpMeasures = true, lpJoins = true, lpBreak = true, lpStack = true, lpAlign = true;
+    bool lpJustify = true, lpNext = true, lpOverflow = true, lpAppend = true, lpUtf8 = true;
+};
+
+// An area at (left, bottom), `width` by `height` (depth 0.5).
+S_TextArea LpRect(float left, float bottom, float width, float height)
+{
+    return {left, bottom + height, left + width, bottom, width, height, 0.5f};
+}
+// The pages: "[area room(! overflowing):" then per line " (y above below gap remaining" and its words
+// " text/width@x", ")".
+std::string LpPages(const C_PagedTextBox &box)
+{
+    std::string s;
+    for (const S_TextPage *p : box.m_pages) {
+        s += CmText("[%d %d%s:", p->area, p->room, p->overflows ? "!" : "");
+        for (const S_TextLine *l : p->lines) {
+            s += CmText(" (%d %d %d %d %d", l->y, l->above, l->below, l->gap, l->remaining);
+            for (const S_TextWord *w : l->words)
+                s += CmText(" %s/%d@%d", w->text.c_str(), w->width, w->x);
+            s += ")";
+        }
+        s += "]";
+    }
+    return s;
+}
+// The box's pages deleted, its runs these, laid out (LayoutPages' result).
+bool LpLayout(C_PagedTextBox &box, std::initializer_list<std::pair<const char *, int>> runs)
+{
+    for (S_TextPage *page : box.m_pages)
+        delete page;
+    box.m_pages.clear();
+    box.Clear();
+    for (const auto &r : runs)
+        box.AddText(C_str(r.first), static_cast<uint8_t>(r.second));
+    return box.LayoutPages();
 }
 } // namespace
 
@@ -2069,8 +2105,17 @@ void TextBoxTest()
         // --- laid out again now ---
         {
             PgClear(pb, font3);
+            pb.AddText(C_str("ab"), static_cast<uint8_t>(st));
+            pb.m_dirty = false;
             pb.Relayout();
-            WM(g.pgRelayout, GfLogIs({"layout pages 1"}) && !pb.m_dirty);
+            WM(g.pgRelayout, !pb.m_dirty && pb.NumPages() == 1 && pb.m_pages[0]->lines.size() == 1 &&
+                                 pb.m_pages[0]->lines[0]->words[0]->text == "ab");
+            // No runs: the layout fails, the box dirty.
+            pb.Clear();
+            pb.m_dirty = false;
+            pb.Relayout();
+            WM(g.pgRelayout, pb.m_dirty && pb.NumPages() == 1);
+            PgClear(pb, font3);
         }
 
         // --- the last page starting with a new page's run (its first line's first word) ---
@@ -2112,8 +2157,17 @@ void TextBoxTest()
             pb.m_placed = true;
             pb.m_batching = !g_fontManager->IsBatching();
             pb.Render();
-            WM(g.pgRender, GfLogIs({"layout pages 1", "select 3", "draw 3 2 1"}) && !pb.m_dirty &&
-                               pb.m_batching == g_fontManager->IsBatching());
+            // (No runs: the layout fails, the pages kept.)
+            WM(g.pgRender, GfLogIs({"select 3", "draw 3 2 1"}) && pb.m_dirty && pb.m_batching == g_fontManager->IsBatching());
+            pb.AddText(C_str("q"), static_cast<uint8_t>(st));
+            font3.asked.clear();
+            pb.Render();
+            // (The layout's measures first: each glyph asked for twice.)
+            WM(g.pgRender, !pb.m_dirty && pb.NumPages() == 2 && font3.asked == (std::vector<int>{'q', 'q', 'a', 'q'}));
+            pb.Clear();
+            pb.m_dirty = false;
+            delete pb.m_pages.back();
+            pb.m_pages.pop_back();
             TrWord(PgLine(PgPage(pb, 1), 50), "b", st, 230);
             TrWord(PgLine(PgPage(pb, 0), 50), "c", st, 330);
             const std::vector<std::pair<int, std::vector<int>>> shown = {
@@ -2459,7 +2513,7 @@ void TextBoxTest()
             TbRect(*base, 0.0f, 0.0f, 800.0f, 600.0f);
             g_gfLog.clear();
             base->Render();
-            WM(g.vtVirtual, GfLogIs({"layout pages 1"}));
+            WM(g.vtVirtual, g_gfLog.empty() && base->m_dirty);
             delete base;
             WM(g.vtVirtual, fonts->m_refs == refs);
         }
@@ -2477,6 +2531,368 @@ void TextBoxTest()
                 "pgClip %d vtNew %d vtLines %d vtFirst %d vtStop %d vtFade %d vtScroll %d vtFinished %d vtVirtual %d\n",
                 g.pgNew, g.pgArea, g.pgPage, g.pgRelayout, g.pgBreak, g.pgRender, g.pgLines, g.pgColour, g.pgStop, g.pgClip,
                 g.vtNew, g.vtLines, g.vtFirst, g.vtStop, g.vtFade, g.vtScroll, g.vtFinished, g.vtVirtual);
+
+    // ===== part 9b-iv-b: the paged box's layout =====
+    // (The default style: 12 pixels, 18 above and 6 below its base: a line's above 6, below 18 (the
+    // quirk), 36 high; 'a' 6 wide, a blank 5, 'i' 3, 'W' and 'Ж' 12.)
+    S_PagedResults lp;
+    {
+        const int st = TbStyle(0.0f, 1, 1);
+        const int own = TbStyle(0.0f, 0, 1);
+        const int newLine = TbStyle(0.0f, 1, 1, STYLE_NEW_LINE);
+        const int newPage = TbStyle(0.0f, 1, 1, STYLE_NEW_PAGE);
+        const int noWrap = TbStyle(0.05f, 1, 0);
+        const int noWrapRight = TbStyle(0.05f, 1, 0, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 3);
+        const int big = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.03f, 0.05f, 0.02f);
+        const int centred = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 2);
+        const int right = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 3);
+        const int none = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 0);
+        const int atX = TbStyle(0.0f, 1, 1, STYLE_AT_X);
+        const int justified = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 4);
+        const int ownJustified = TbStyle(0.0f, 0, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 4);
+        const int bad = 250;
+        C_PagedTextBox lb;
+        TbUnicode(false);
+
+        // --- no runs or no areas: nothing (false) ---
+        {
+            lb.m_areas.clear();
+            WM(lp.lpNone, !LpLayout(lb, {{"aa", st}}) && lb.m_pages.empty());
+            lb.m_areas = {LpRect(10.0f, 20.0f, 100.0f, 100.0f)};
+            WM(lp.lpNone, !LpLayout(lb, {}) && lb.m_pages.empty());
+            lb.m_dirty = true;
+            lb.Relayout();
+            WM(lp.lpNone, lb.m_dirty);
+        }
+
+        // --- a line: as wide as the area, its words' measures, stacked from the area's bottom, aligned
+        // at its left; the page's room less the line's height ---
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 100.0f, 100.0f)};
+            lb.m_dirty = true;
+            WM(lp.lpLines, LpLayout(lb, {{"aa aa aa", st}}) && !lb.m_dirty &&
+                               LpPages(lb) == "[0 64: (50 6 18 12 54 aa aa aa/46@10)]");
+            // (Fractions truncated: the width 100.9, the bottom 20.9, the left 10.6, the height 100.9.)
+            lb.m_areas = {{10.6f, 121.8f, 110.6f, 20.9f, 100.9f, 100.9f, 0.5f}};
+            WM(lp.lpLines, LpLayout(lb, {{"aa", st}, {"aa", st}}) && LpPages(lb) == "[0 64: (50 6 18 12 76 aa/12@10 aa/12@22)]");
+        }
+
+        // --- wrapped at the last blank that fits (a character fits under the room, not at it) ---
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 40.0f, 100.0f)};
+            WM(lp.lpWrap, LpLayout(lb, {{"aa aa aa", st}}) &&
+                              LpPages(lb) == "[0 28: (50 6 18 12 11 aa aa/29@10) (86 6 18 12 28 aa/12@10)]");
+            lb.m_areas = {LpRect(10.0f, 20.0f, 41.0f, 100.0f)};
+            WM(lp.lpWrap, LpLayout(lb, {{"aa aa aa", st}}) &&
+                              LpPages(lb) == "[0 28: (50 6 18 12 12 aa aa/29@10) (86 6 18 12 29 aa/12@10)]");
+            // Two blanks: the last that fits.
+            lb.m_areas = {LpRect(10.0f, 20.0f, 60.0f, 200.0f)};
+            WM(lp.lpWrap, LpLayout(lb, {{"aa aa aa aa aa", st}}) &&
+                              LpPages(lb) == "[0 128: (50 6 18 12 14 aa aa aa/46@10) (86 6 18 12 31 aa aa/29@10)]");
+            // A tab a blank; a byte over 0x7F not (its glyph 6 wide).
+            lb.m_areas = {LpRect(10.0f, 20.0f, 30.0f, 200.0f)};
+            WM(lp.lpWrap, LpLayout(lb, {{"aa\taa", st}}) && LpPages(lb) == "[0 128: (50 6 18 12 18 aa/12@10) (86 6 18 12 18 aa/12@10)]");
+            font3.asked.clear();
+            WM(lp.lpWrap, LpLayout(lb, {{"aa\xA0" "aaaa", st}}) &&
+                              std::count(font3.asked.begin(), font3.asked.end(), 0xA0) == 2 &&
+                              LpPages(lb) == "[0 128: (50 6 18 12 30 aa\xA0" "a/0@10) (86 6 18 12 18 aa/12@10)]");
+        }
+
+        // --- a line with no room on its page: a new page, in the next area in turn (its room the area's
+        // height, truncated), the line as wide as the area it was made for ---
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 40.0f, 50.0f)};
+            WM(lp.lpPages, LpLayout(lb, {{"aa aa aa", st}}) &&
+                               LpPages(lb) == "[0 14: (50 6 18 12 11 aa aa/29@10)][0 14: (50 6 18 12 28 aa/12@10)]");
+            // Exactly the room: kept.
+            lb.m_areas = {LpRect(10.0f, 20.0f, 40.0f, 72.9f)};
+            WM(lp.lpPages, LpLayout(lb, {{"aa aa aa", st}}) &&
+                               LpPages(lb) == "[0 0: (50 6 18 12 11 aa aa/29@10) (86 6 18 12 28 aa/12@10)]");
+            // Less than a line: an empty page first.
+            lb.m_areas = {LpRect(10.0f, 20.0f, 40.0f, 35.0f)};
+            WM(lp.lpPages, LpLayout(lb, {{"aa", st}}) && LpPages(lb) == "[0 35:][0 -1: (50 6 18 12 28 aa/12@10)]");
+            WM(lp.lpPages, lb.LastPage() == lb.m_pages[1]);
+            for (S_TextPage *page : lb.m_pages)
+                delete page;
+            lb.m_pages.clear();
+            WM(lp.lpPages, lb.LastPage() == nullptr);
+        }
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 40.0f, 50.0f), LpRect(300.0f, 25.0f, 60.0f, 60.0f), LpRect(500.0f, 0.0f, 80.0f, 40.0f)};
+            WM(lp.lpAreas, LpLayout(lb, {{"aa aa aa aa aa aa aa", st}}) &&
+                               LpPages(lb) == "[0 14: (50 6 18 12 11 aa aa/29@10)][1 24: (55 6 18 12 11 aa aa/29@300)]"
+                                              "[2 4: (30 6 18 12 14 aa aa aa/46@500)]");
+            lb.NewPage();
+            WM(lp.lpAreas, lb.NumPages() == 4 && lb.m_pages[3]->area == 0 && lb.m_pages[3]->room == 50 && !lb.m_pages[3]->overflows &&
+                               lb.m_pages[3]->lines.empty());
+            lb.NewPage();
+            WM(lp.lpAreas, lb.m_pages[4]->area == 1 && lb.m_pages[4]->room == 60);
+        }
+
+        // --- a word wider than a line: the part that fits (no width), the next character dropped; not a
+        // character on an empty line: the layout fails (the box dirty) ---
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 20.0f, 100.0f)};
+            WM(lp.lpForced, LpLayout(lb, {{"aaaaa", st}}) && LpPages(lb) == "[0 28: (50 6 18 12 20 aaa/0@10) (86 6 18 12 14 a/6@10)]");
+            // A blank first: no blank.
+            WM(lp.lpForced, LpLayout(lb, {{" aaaaa", st}}) && LpPages(lb) == "[0 28: (50 6 18 12 20  aa/0@10) (86 6 18 12 8 aa/12@10)]");
+            // After a wrap too.
+            lb.m_areas = {LpRect(10.0f, 20.0f, 30.0f, 200.0f)};
+            WM(lp.lpForced, LpLayout(lb, {{"aa aaaaaa", st}}) &&
+                                LpPages(lb) == "[0 92: (50 6 18 12 18 aa/12@10) (86 6 18 12 30 aaaa/0@10) (122 6 18 12 24 a/6@10)]");
+        }
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 6.0f, 100.0f)};
+            lb.m_dirty = true;
+            WM(lp.lpFail, !LpLayout(lb, {{"a", st}}) && LpPages(lb) == "[0 100:]" && lb.m_dirty);
+            lb.m_areas = {LpRect(10.0f, 20.0f, 7.0f, 100.0f)};
+            WM(lp.lpFail, LpLayout(lb, {{"a", st}}) && LpPages(lb) == "[0 64: (50 6 18 12 1 a/6@10)]");
+            // A run without its style: false (the line being filled dropped).
+            WM(lp.lpFail, !LpLayout(lb, {{"a", bad}}) && LpPages(lb).empty());
+            lb.m_areas = {LpRect(10.0f, 20.0f, 100.0f, 100.0f)};
+            WM(lp.lpFail, !LpLayout(lb, {{"aa", st}, {"b", bad}}) && LpPages(lb) == "[0 100:]");
+            WM(lp.lpFail, !LpLayout(lb, {{"aa", own}, {"bb", own}, {"b", bad}}) && LpPages(lb) == "[0 64: (-1 6 18 12 88 aa/12@-1)]");
+        }
+
+        // --- not wrapped: one word as wide as its text (not cut to the column), the line's room negative:
+        // aligned at the left (the box overflows) ---
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 40.0f, 100.0f)};
+            lb.m_overflows = false;
+            WM(lp.lpNoWrap, LpLayout(lb, {{"aaaaaaaaaa", noWrap}}) && LpPages(lb) == "[0 64: (50 6 18 12 -20 aaaaaaaaaa/60@10)]" &&
+                                lb.m_overflows);
+            WM(lp.lpNoWrap, LpLayout(lb, {{"aaaaaaaaaa", noWrapRight}}) && LpPages(lb) == "[0 64: (50 6 18 12 -20 aaaaaaaaaa/60@10)]");
+            lb.m_areas = {LpRect(10.0f, 20.0f, 60.0f, 100.0f)};
+            lb.m_overflows = false;
+            WM(lp.lpNoWrap, LpLayout(lb, {{"aaaaaaaaaa", noWrapRight}}) && LpPages(lb) == "[0 64: (50 6 18 12 0 aaaaaaaaaa/60@10)]" &&
+                                !lb.m_overflows);
+            const int noWrapJustified = TbStyle(0.0f, 0, 0, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 4);
+            const int ownJustifiedToo = TbStyle(0.0f, 0, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 4);
+            lb.m_areas = {LpRect(10.0f, 20.0f, 29.0f, 100.0f)};
+            WM(lp.lpNoWrap, LpLayout(lb, {{"aa aa", noWrapJustified}, {"bb", ownJustifiedToo}}) &&
+                                LpPages(lb) == "[0 28: (50 6 18 12 0 aa aa/29@10) (86 6 18 12 17 bb/12@10)]");
+            ReleaseTextStyle(ownJustifiedToo);
+            ReleaseTextStyle(noWrapJustified);
+            lb.m_areas = {LpRect(10.0f, 20.0f, 61.0f, 100.0f)};
+            WM(lp.lpNoWrap, LpLayout(lb, {{"aaaaaaaaaa", noWrapRight}}) && LpPages(lb) == "[0 64: (50 6 18 12 1 aaaaaaaaaa/60@11)]");
+            // (Never reset: overflowing stays.)
+            lb.m_overflows = false;
+            WM(lp.lpNoWrap, LpLayout(lb, {{"a", st}}) && !lb.m_overflows);
+            lb.m_overflows = true;
+            WM(lp.lpNoWrap, LpLayout(lb, {{"a", st}}) && lb.m_overflows);
+            lb.m_overflows = false;
+        }
+
+        // --- the line's measures: its words' largest (the style's space below its above, its above its
+        // below) ---
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 100.0f, 100.0f)};
+            WM(lp.lpMeasures, LpLayout(lb, {{"aa", st}, {"b", big}}) && LpPages(lb) == "[0 40: (68 12 30 18 79 aa/12@10 b/9@22)]");
+            WM(lp.lpMeasures, LpLayout(lb, {{"b", big}, {"aa", st}}) && LpPages(lb) == "[0 40: (68 12 30 18 79 b/9@10 aa/12@19)]");
+            // (Rounded: 0.0251 of 600, 15.06: 15.)
+            const int odd = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.0251f, 0.0259f, 0.0249f);
+            WM(lp.lpMeasures, LpLayout(lb, {{"a", odd}}) && LpPages(lb) == "[0 54: (51 15 16 15 92 a/8@10)]");
+            ReleaseTextStyle(odd);
+            const int low = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.0205f, 0.0305f, 0.0105f);
+            WM(lp.lpMeasures, LpLayout(lb, {{"aa", low}}) && LpPages(lb) == "[0 64: (50 6 18 12 88 aa/12@10)]");
+            ReleaseTextStyle(low);
+        }
+
+        // --- runs on a line of their own, joined to the last (a new line for the first after one of its
+        // own), or on a new line asked for ---
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 100.0f, 200.0f)};
+            WM(lp.lpJoins, LpLayout(lb, {{"aa", st}, {"bb", st}, {"cc", own}, {"dd", st}, {"ee", newLine}, {"ff", st}}) &&
+                               LpPages(lb) == "[0 56: (50 6 18 12 76 aa/12@10 bb/12@22) (86 6 18 12 88 cc/12@10) "
+                                              "(122 6 18 12 88 dd/12@10) (158 6 18 12 76 ee/12@10 ff/12@22)]");
+            WM(lp.lpJoins, LpLayout(lb, {{"aa", own}, {"bb", own}}) &&
+                               LpPages(lb) == "[0 128: (50 6 18 12 88 aa/12@10) (86 6 18 12 88 bb/12@10)]");
+            WM(lp.lpJoins, LpLayout(lb, {{"aa", newLine}, {"bb", newLine}}) &&
+                               LpPages(lb) == "[0 128: (50 6 18 12 88 aa/12@10) (86 6 18 12 88 bb/12@10)]");
+        }
+
+        // --- a new page's run: a new page when the last has lines (the line being filled ends there; a
+        // joined run after it on a new line: the fix) ---
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 100.0f, 200.0f)};
+            WM(lp.lpBreak, LpLayout(lb, {{"aa", newPage}, {"bb", newPage}}) && LpPages(lb) == "[0 164: (50 6 18 12 76 aa/12@10 bb/12@22)]");
+            WM(lp.lpBreak, LpLayout(lb, {{"aa", own}, {"bb", st}, {"cc", newPage}, {"dd", st}}) &&
+                               LpPages(lb) == "[0 128: (50 6 18 12 88 aa/12@10) (86 6 18 12 88 bb/12@10)]"
+                                              "[0 164: (50 6 18 12 76 cc/12@10 dd/12@22)]" &&
+                               lb.LastPageBreak() == 1);
+            WM(lp.lpBreak, LpLayout(lb, {{"aa", own}, {"bb", own}, {"cc", newPage}}) &&
+                               LpPages(lb) == "[0 128: (50 6 18 12 88 aa/12@10) (86 6 18 12 88 bb/12@10)][0 164: (50 6 18 12 88 cc/12@10)]");
+            lb.m_areas = {LpRect(10.0f, 20.0f, 100.0f, 200.0f), LpRect(300.0f, 20.0f, 50.0f, 200.0f)};
+            WM(lp.lpBreak, LpLayout(lb, {{"aa", own}, {"bb", own}, {"cc", newPage}, {"dd", st}}) &&
+                               LpPages(lb) == "[0 128: (50 6 18 12 88 aa/12@10) (86 6 18 12 88 bb/12@10)]"
+                                              "[1 164: (50 6 18 12 26 cc/12@300 dd/12@312)]");
+        }
+
+        // --- stacked from the area's bottom (truncated); overflowing: the last line's base over its top ---
+        {
+            lb.m_areas = {{10.0f, 40.0f, 110.0f, 20.0f, 100.0f, 100.0f, 0.5f}};
+            WM(lp.lpStack, LpLayout(lb, {{"aa", st}}) && LpPages(lb) == "[0 64!: (50 6 18 12 88 aa/12@10)]");
+            lb.m_areas = {{10.0f, 50.0f, 110.0f, 20.9f, 100.0f, 100.0f, 0.5f}};
+            WM(lp.lpStack, LpLayout(lb, {{"aa", st}}) && LpPages(lb) == "[0 64: (50 6 18 12 88 aa/12@10)]");
+            lb.m_areas = {{10.0f, 49.9f, 110.0f, -0.5f, 100.0f, 100.0f, 0.5f}};
+            WM(lp.lpStack, LpLayout(lb, {{"aa", st}}) && LpPages(lb) == "[0 64: (30 6 18 12 88 aa/12@10)]");
+            lb.m_areas = {{10.0f, 85.9f, 110.0f, 20.0f, 100.0f, 100.0f, 0.5f}};
+            WM(lp.lpStack, LpLayout(lb, {{"aa", own}, {"bb", own}}) && LpPages(lb) == "[0 28!: (50 6 18 12 88 aa/12@10) (86 6 18 12 88 bb/12@10)]");
+            lb.m_areas = {{10.0f, 86.0f, 110.0f, 20.0f, 100.0f, 100.0f, 0.5f}};
+            WM(lp.lpStack, LpLayout(lb, {{"aa", own}, {"bb", own}}) && LpPages(lb) == "[0 28: (50 6 18 12 88 aa/12@10) (86 6 18 12 88 bb/12@10)]");
+        }
+
+        // --- aligned by the first word's style: left; centred (half the room, truncated); right; none and
+        // the words at x not placed ---
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 100.0f, 100.0f)};
+            WM(lp.lpAlign, LpLayout(lb, {{"i", centred}}) && LpPages(lb) == "[0 64: (50 6 18 12 97 i/3@58)]");
+            WM(lp.lpAlign, LpLayout(lb, {{"i", right}}) && LpPages(lb) == "[0 64: (50 6 18 12 97 i/3@107)]");
+            WM(lp.lpAlign, LpLayout(lb, {{"i", centred}, {"aa", st}}) && LpPages(lb) == "[0 64: (50 6 18 12 85 i/3@52 aa/12@55)]");
+            WM(lp.lpAlign, LpLayout(lb, {{"i", st}, {"aa", right}}) && LpPages(lb) == "[0 64: (50 6 18 12 85 i/3@10 aa/12@13)]");
+            WM(lp.lpAlign, LpLayout(lb, {{"i", right}, {"aa", st}}) && LpPages(lb) == "[0 64: (50 6 18 12 85 i/3@95 aa/12@98)]");
+            WM(lp.lpAlign, LpLayout(lb, {{"i", none}}) && LpPages(lb) == "[0 64: (50 6 18 12 97 i/3@-1)]");
+            WM(lp.lpAlign, LpLayout(lb, {{"i", atX}}) && LpPages(lb) == "[0 64: (50 6 18 12 97 i/3@-1)]");
+            lb.m_areas = {{10.6f, 120.0f, 110.6f, 20.0f, 100.0f, 100.0f, 0.5f}};
+            WM(lp.lpAlign, LpLayout(lb, {{"i", st}, {"aa", st}}) && LpPages(lb) == "[0 64: (50 6 18 12 85 i/3@10 aa/12@13)]");
+            WM(lp.lpAlign, LpLayout(lb, {{"i", right}, {"aa", st}}) && LpPages(lb) == "[0 64: (50 6 18 12 85 i/3@95 aa/12@98)]");
+            WM(lp.lpAlign, LpLayout(lb, {{"i", centred}, {"aa", st}}) && LpPages(lb) == "[0 64: (50 6 18 12 85 i/3@52 aa/12@55)]");
+            lb.m_areas = {{10.4f, 120.0f, 110.4f, 20.0f, 100.0f, 100.0f, 0.5f}};
+            WM(lp.lpAlign, LpLayout(lb, {{"i", right}, {"aa", st}}) && LpPages(lb) == "[0 64: (50 6 18 12 85 i/3@95 aa/12@98)]");
+        }
+
+        // --- justified: a line followed by a justified one split at its blanks, the area's width shared
+        // out between its words; the paragraph's last line as it is ---
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 40.0f, 100.0f)};
+            WM(lp.lpJustify, LpLayout(lb, {{"aa aa aa", justified}}) &&
+                                 LpPages(lb) == "[0 28: (50 6 18 12 11 aa/12@10 aa/12@38) (86 6 18 12 28 aa/12@10)]");
+            lb.m_areas = {LpRect(10.0f, 20.0f, 101.0f, 200.0f)};
+            WM(lp.lpJustify, LpLayout(lb, {{"aa aa aa", ownJustified}, {"bb", ownJustified}}) &&
+                                 LpPages(lb) == "[0 128: (50 6 18 12 55 aa/12@10 aa/12@54 aa/12@99) (86 6 18 12 89 bb/12@10)]");
+            WM(lp.lpJustify, LpLayout(lb, {{"aa aa", ownJustified}, {"bb", own}}) &&
+                                 LpPages(lb) == "[0 128: (50 6 18 12 72 aa aa/29@10) (86 6 18 12 89 bb/12@10)]");
+            // One word: as it is.
+            WM(lp.lpJustify, LpLayout(lb, {{"aa", ownJustified}, {"bb", ownJustified}}) &&
+                                 LpPages(lb) == "[0 128: (50 6 18 12 89 aa/12@10) (86 6 18 12 89 bb/12@10)]");
+            // The gap direct.
+            S_TextPage page;
+            page.area = 0;
+            S_TextLine line;
+            TrWord(&line, "a", st, 0);
+            WM(lp.lpJustify, lb.JustifyPageGap(&page, &line) == 0.0f);
+            TrWord(&line, "b", st, 0);
+            TrWord(&line, "c", st, 0);
+            line.words[0]->width = 10;
+            line.words[1]->width = 20;
+            line.words[2]->width = 30;
+            WM(lp.lpJustify, lb.JustifyPageGap(&page, &line) == 20.5f);
+        }
+
+        // --- the next line justified: the page's next, else the next page's first (none: not) ---
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 40.0f, 36.0f)};
+            WM(lp.lpNext, LpLayout(lb, {{"aa aa aa", justified}}) &&
+                              LpPages(lb) == "[0 0: (50 6 18 12 11 aa/12@10 aa/12@38)][0 0: (50 6 18 12 28 aa/12@10)]");
+            // Direct: the next line without words, a next page without lines.
+            for (S_TextPage *p : lb.m_pages)
+                delete p;
+            lb.m_pages.clear();
+            S_TextPage *first = PgPage(lb, 0);
+            TrWord(PgLine(first, 5), "a", justified, 0);
+            PgLine(first, 5);
+            S_TextPage *second = PgPage(lb, 0);
+            TrWord(PgLine(second, 5), "a", justified, 0);
+            S_TextPage *third = PgPage(lb, 0);
+            TrWord(PgLine(third, 5), "a", st, 0);
+            PgPage(lb, 0);
+            S_TextPage *fifth = PgPage(lb, 0);
+            TrWord(PgLine(fifth, 5), "a", justified, 0);
+            WM(lp.lpNext, !lb.NextJustified(0, 0) && lb.NextJustified(0, 1) && !lb.NextJustified(1, 0) && !lb.NextJustified(2, 0) &&
+                              lb.NextJustified(3, 0) && !lb.NextJustified(4, 0) && lb.NextJustified(0, -2) && !lb.NextJustified(1, -2) &&
+                              lb.NextJustified(1, -1));
+            first->lines[1]->words.push_back(new S_TextWord{C_str("b"), static_cast<uint8_t>(justified), 1});
+            WM(lp.lpNext, lb.NextJustified(0, 0) && lb.NextJustified(0, 1));
+            const int five = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 5);
+            const int eight = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 8);
+            second->lines[0]->words[0]->style = static_cast<uint8_t>(five);
+            WM(lp.lpNext, lb.NextJustified(0, 1));
+            second->lines[0]->words[0]->style = static_cast<uint8_t>(eight);
+            WM(lp.lpNext, !lb.NextJustified(0, 1));
+            ReleaseTextStyle(eight);
+            ReleaseTextStyle(five);
+            for (S_TextPage *p : lb.m_pages)
+                delete p;
+            lb.m_pages.clear();
+        }
+
+        // --- the box overflows: a line's room negative ---
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 100.0f, 200.0f)};
+            lb.m_overflows = false;
+            WM(lp.lpOverflow, LpLayout(lb, {{"aa", own}, {"aaaaaaaaaaaaaaaaaa", noWrap}}) && lb.m_overflows);
+            lb.m_overflows = false;
+            WM(lp.lpOverflow, LpLayout(lb, {{"aaaaaaaaaaaaaaaa", noWrap}}) && !lb.m_overflows &&
+                                  LpPages(lb) == "[0 164: (50 6 18 12 4 aaaaaaaaaaaaaaaa/96@10)]");
+            WM(lp.lpOverflow, LpLayout(lb, {{"aaaaaaaaaaaaaaaaa", noWrap}, {"aa", own}}) && lb.m_overflows);
+            lb.m_overflows = false;
+        }
+
+        // --- laid out again: the earlier pages kept, the new lines after them (quirk: FreePages empty) ---
+        {
+            lb.m_areas = {LpRect(10.0f, 20.0f, 100.0f, 80.0f), LpRect(300.0f, 20.0f, 100.0f, 80.0f)};
+            WM(lp.lpAppend, LpLayout(lb, {{"aa", st}}) && LpPages(lb) == "[0 44: (50 6 18 12 88 aa/12@10)]");
+            lb.Clear();
+            lb.AddText(C_str("bb"), static_cast<uint8_t>(st));
+            lb.Relayout();
+            WM(lp.lpAppend, LpPages(lb) == "[0 8: (50 6 18 12 88 aa/12@10) (86 6 18 12 88 bb/12@10)]");
+            lb.Relayout();
+            WM(lp.lpAppend, LpPages(lb) == "[0 8: (50 6 18 12 88 aa/12@10) (86 6 18 12 88 bb/12@10)][1 44: (50 6 18 12 88 bb/12@300)]");
+            // (Every page placed again: one moved by hand comes back.)
+            lb.m_pages[0]->lines[0]->y = 7;
+            lb.m_pages[0]->lines[0]->words[0]->x = 7;
+            lb.m_pages[0]->overflows = true;
+            lb.Relayout();
+            WM(lp.lpAppend, lb.NumPages() == 2 && lb.m_pages[1]->lines.size() == 2 && lb.m_pages[0]->lines[0]->y == 50 && lb.m_pages[0]->lines[0]->words[0]->x == 10 &&
+                                !lb.m_pages[0]->overflows);
+        }
+
+        // --- the unicode font: by UTF-8 characters (not UTF-8: the byte, signed); a word wider than a line
+        // keeps its part's width and the next character ---
+        {
+            TbUnicode(true);
+            lb.m_areas = {LpRect(10.0f, 20.0f, 40.0f, 100.0f)};
+            WM(lp.lpUtf8, LpLayout(lb, {{"aa aa aa", st}}) &&
+                              LpPages(lb) == "[0 28: (50 6 18 12 11 aa aa/29@10) (86 6 18 12 28 aa/12@10)]");
+            lb.m_areas = {LpRect(10.0f, 20.0f, 20.0f, 100.0f)};
+            WM(lp.lpUtf8, LpLayout(lb, {{"aaaaa", st}}) && LpPages(lb) == "[0 28: (50 6 18 12 2 aaa/18@10) (86 6 18 12 8 aa/12@10)]");
+            WM(lp.lpUtf8, LpLayout(lb, {{" aaaaa", st}}) && LpPages(lb) == "[0 28: (50 6 18 12 3  aa/17@10) (86 6 18 12 2 aaa/18@10)]");
+            WM(lp.lpUtf8, LpLayout(lb, {{"\xD0\x96\xD0\x96", st}}) &&
+                              LpPages(lb) == "[0 28: (50 6 18 12 8 \xD0\x96/12@10) (86 6 18 12 8 \xD0\x96/12@10)]");
+            lb.m_areas = {LpRect(10.0f, 20.0f, 100.0f, 100.0f)};
+            font3.asked.clear();
+            WM(lp.lpUtf8, LpLayout(lb, {{"\xFF" "a\xD0\x96", st}}) && font3.asked == (std::vector<int>{-1, -1, 'a', 'a', 0x416, 0x416}) &&
+                              LpPages(lb) == "[0 64: (50 6 18 12 76 \xFF" "a\xD0\x96/24@10)]");
+            // (A blank in UTF-8 after a character of two bytes: its index the byte's.)
+            lb.m_areas = {LpRect(10.0f, 20.0f, 28.0f, 100.0f)};
+            WM(lp.lpUtf8, LpLayout(lb, {{"\xD0\x96 aa", st}}) && LpPages(lb) == "[0 28: (50 6 18 12 16 \xD0\x96/12@10) (86 6 18 12 16 aa/12@10)]");
+            lb.m_areas = {LpRect(10.0f, 20.0f, 30.0f, 100.0f)};
+            WM(lp.lpUtf8, LpLayout(lb, {{"aaaaaaa", noWrap}}) && LpPages(lb) == "[0 64: (50 6 18 12 -12 aaaaaaa/42@10)]");
+            lb.m_areas = {LpRect(10.0f, 20.0f, 6.0f, 100.0f)};
+            WM(lp.lpUtf8, !LpLayout(lb, {{"a", st}}) && LpPages(lb) == "[0 100:]");
+            TbUnicode(false);
+        }
+
+        for (S_TextPage *page : lb.m_pages)
+            delete page;
+        lb.m_pages.clear();
+        for (const int style : {ownJustified, justified, atX, none, right, centred, big, noWrapRight, noWrap, newPage, newLine, own, st})
+            ReleaseTextStyle(style);
+    }
+    std::printf("paged: lpNone %d lpLines %d lpWrap %d lpPages %d lpAreas %d lpForced %d lpFail %d lpNoWrap %d lpMeasures %d "
+                "lpJoins %d lpBreak %d lpStack %d lpAlign %d lpJustify %d lpNext %d lpOverflow %d lpAppend %d lpUtf8 %d\n",
+                lp.lpNone, lp.lpLines, lp.lpWrap, lp.lpPages, lp.lpAreas, lp.lpForced, lp.lpFail, lp.lpNoWrap, lp.lpMeasures,
+                lp.lpJoins, lp.lpBreak, lp.lpStack, lp.lpAlign, lp.lpJustify, lp.lpNext, lp.lpOverflow, lp.lpAppend, lp.lpUtf8);
 
     box.m_fonts->m_fonts.erase(box.m_fonts->m_fonts.begin(), box.m_fonts->m_fonts.begin() + 2);
     g_textIds = oldIds;

@@ -6194,6 +6194,48 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     names/text_box.txt (+18, LayoutPages and FreePages for 9b-iv-b); 21 functions in ported.txt (5
     of them AddArea's vector helpers). Stats: 8,071 of 12,293 functions by hand (73.9 % by size).
 
+  PART 9b-iv-b DONE (2026-11-01): the paged text box's layout (src/game/paged_text_box.cpp;
+  LayoutPages 0x006494a0 and 0x00649250..0x0064a6c0, 0x0064b7f0, 0x0064bad0, the empty FreePages
+  0x0064ae60; 17 vector / word helpers absorbed, 0x0064a490..0x0064d050).
+  - LayoutPages: false without runs or areas. Per run: its style (none: false); a first page; a
+    STYLE_NEW_PAGE run when the last page has lines: the line being filled ends there, a new page;
+    a line of its own, or joined to the last (a new line for the first after one of its own, or
+    STYLE_NEW_LINE); the run flowed (false: the layout fails, the box stays dirty). Then the last
+    line added, every page placed (PlacePages), the box clean.
+  - The pages: NewPage in the next area in turn (the pages' count modulo the areas'), its room the
+    area's height (truncated); AddLineToPage: to the last page, or a new one when its room is less
+    than the line's height (gap + above + below; a page with less room than one line stays empty).
+    A new line is as wide as the last page's area (when it was made: it keeps that width on a page
+    of another area).
+  - The flows (FlowPaged: UTF-8 with the unicode font, else bytes): measures from the style (size,
+    above, below, rounded; not cut to the column); not wrapped: one word as wide as its text; else
+    wrapped at the last blank that fits (a character fits under the room, not at it; a blank first
+    in the text or after a wrap does not count), each full line added to the pages and a new one
+    made. A word wider than a line: the part that fits; not a character on an empty line: false.
+  - Placing: StackPage (the bases from the area's bottom, truncated, down by below + gap, then
+    above; overflowing: the last base over the area's top); AlignPage / AlignPageLine (the first
+    word's style: left, centred by half the room (truncated), right, justified when the next line,
+    the next page's first too, starts justified (NextJustified: align bit 2): split at its blanks,
+    the area's width shared out; a room of 0 or less: left; other aligns and STYLE_AT_X words not
+    placed; no caret; a line's negative room sets m_overflows, never reset).
+  - Quirks kept: the line's above and below take the style's below and above (the plain box's the
+    other way round); FreePages empty: a layout again appends (the new lines to the last old page
+    while it has room), every page placed again; a word wider than a line: by bytes its part has no
+    width and the character that did not fit is dropped, by UTF-8 its part keeps its width and the
+    character.
+  - Fixes: a joined run right after a page break gets a new line (the original flows it into a
+    null line); a failed layout deletes the line being filled (the original leaks it).
+  - Harness: textbox_test.inc's "paged:" line in the text build (18 checks, the real layout; the
+    9b-iv-a fake gone, its tests on the real layout). 0 of 22 in both orders; the camera and the
+    world builds 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9b6.py, the text build): the first run caught 97 of 111; 7
+    equivalent (see the file's docstring), new cases for the rest (the measures' rounding at .3, a
+    room of exactly 0, the line before a page's first); 104 of 111 caught.
+  - Build: 208 files clean (MSVC). Tier 1: 497 errors in 84 files, 200 stubs (498 / 85 / 201
+    before). ret_audit --src: 52.
+  - Ghidra: names/text_box.txt (+13); 32 functions in ported.txt (15 + 17 absorbed). Stats: 8,103 of
+    12,293 functions by hand (74.1 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

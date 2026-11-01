@@ -28205,10 +28205,65 @@
   "name": "C_TextBox::StepUnknown76",
   "proto": "void __thiscall StepUnknown76(C_TextBox *this, short step, short * value)"
  },
+ "00649250": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::NewPage",
+  "proto": "void __thiscall NewPage(C_PagedTextBox *this)"
+ },
+ "00649470": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::LastPage",
+  "proto": "void * __thiscall LastPage(C_PagedTextBox *this)"
+ },
  "006494a0": {
   "module": "text_box",
   "name": "C_PagedTextBox::LayoutPages",
   "proto": "bool __thiscall LayoutPages(C_PagedTextBox *this)"
+ },
+ "006497b0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::PlacePages",
+  "proto": "void __thiscall PlacePages(C_PagedTextBox *this)"
+ },
+ "006497f0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::NextJustified",
+  "proto": "bool __thiscall NextJustified(C_PagedTextBox *this, int page, int line)"
+ },
+ "00649970": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::AlignPage",
+  "proto": "void __thiscall AlignPage(C_PagedTextBox *this, int index)"
+ },
+ "006499f0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::StackPage",
+  "proto": "void __thiscall StackPage(C_PagedTextBox *this, int index)"
+ },
+ "00649a90": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::AddLineToPage",
+  "proto": "void __thiscall AddLineToPage(C_PagedTextBox *this, void * line)"
+ },
+ "00649c60": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::FlowPaged",
+  "proto": "bool __thiscall FlowPaged(C_PagedTextBox *this, void * run, void * line)"
+ },
+ "00649c80": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::FlowPagedUtf8",
+  "proto": "bool __thiscall FlowPagedUtf8(C_PagedTextBox *this, void * run, void * line)"
+ },
+ "0064a4d0": {
+  "module": "text_box",
+  "name": "S_TextLine::AddWord",
+  "proto": "void __thiscall AddWord(void *this, void * word, int size, int below, int above)"
+ },
+ "0064a6c0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::FlowPagedBytes",
+  "proto": "bool __thiscall FlowPagedBytes(C_PagedTextBox *this, void * run, void * line)"
  },
  "0064ae60": {
   "module": "text_box",
@@ -28238,6 +28293,16 @@
   "module": "text_box",
   "name": "C_PagedTextBox::AddArea",
   "proto": "void __thiscall AddArea(C_PagedTextBox *this, I3D_scene * scene, I3D_frame * visual)"
+ },
+ "0064b7f0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::AlignPageLine",
+  "proto": "void __thiscall AlignPageLine(C_PagedTextBox *this, int page, int line, bool last)"
+ },
+ "0064bad0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::JustifyPageGap",
+  "proto": "float __thiscall JustifyPageGap(C_PagedTextBox *this, void * page, void * line)"
  },
  "0064bb30": {
   "module": "text_box",

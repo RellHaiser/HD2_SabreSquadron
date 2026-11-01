@@ -22,7 +22,7 @@ struct S_TextPage {                                     // 0x20 bytes
     S_TextPage(const S_TextPage &) = delete;
     S_TextPage &operator=(const S_TextPage &) = delete;
 
-    int room = 0;                                       // +0x00 the height left (the layout's)
+    int room = 0;                                       // +0x00 the height left for lines (pixels)
     bool overflows = false;                             // +0x04 its last line under the area: drawn clipped
     // Its area: an index into the box's areas (the original: a pointer into their vector, left
     // dangling when an area is added after the layout; the fix: the index, the same rectangle).
@@ -55,8 +55,37 @@ public:
     int LastPageBreak() const;                          // 0x0064bb90 (__fastcall)
 
 protected:
-    // The runs laid out into the pages (part 9b-iv-b).
+    // The layout (part 9b-iv-b).
+    // The runs flowed into lines, the lines into pages (a line to a new page when the last has no
+    // room for it; a STYLE_NEW_PAGE run on a page with lines: a new page), then placed. The pages of
+    // earlier layouts stay (quirk: the original's FreePages 0x0064ae60, called first, is empty), the
+    // new ones after them. False: no runs or areas, a run without its style or font, a run that does
+    // not fit (the box stays dirty).
     bool LayoutPages();                                 // 0x006494a0
+    // The last page (none: null).
+    S_TextPage *LastPage() const;                       // 0x00649470
+    // A page in the next area in turn (the pages' count modulo the areas'), its room the area's height.
+    void NewPage();                                     // 0x00649250
+    // A line as wide as the last page's area (not added).
+    S_TextLine *NewLine() const;
+    // A line added to the last page, or to a new page when it has no room for the line's height.
+    void AddLineToPage(S_TextLine *line);               // 0x00649a90
+    // A run flowed into `line` and new lines (each full one added to the pages): by its UTF-8
+    // characters with the unicode font, else by its bytes (false: a character wider than an empty line).
+    bool FlowPaged(const S_TextRun &run, S_TextLine *&line);       // 0x00649c60
+    bool FlowPagedUtf8(const S_TextRun &run, S_TextLine *&line);   // 0x00649c80
+    bool FlowPagedBytes(const S_TextRun &run, S_TextLine *&line);  // 0x0064a6c0
+    // Every page's lines stacked from its area's bottom and aligned.
+    void PlacePages();                                  // 0x006497b0
+    void StackPage(int index);                          // 0x006499f0
+    void AlignPage(int index);                          // 0x00649970
+    // The line after the page's line `line` (the next page's first) starts justified.
+    bool NextJustified(int page, int line) const;       // 0x006497f0
+    // A line's words placed by its first word's style's alignment in the page's area (AlignLine's
+    // without the edited line's caret; the STYLE_AT_X words not placed).
+    void AlignPageLine(int page, int line, bool last);  // 0x0064b7f0
+    // The space between a justified line's words in the page's area.
+    float JustifyPageGap(const S_TextPage *page, const S_TextLine *line) const;   // 0x0064bad0
     // A page's lines drawn at their bases (no scroll), clipped to its area when it overflows (its
     // area off the screen: nothing).
     void RenderPage(const S_TextPage *page);            // 0x0064af10

@@ -99,8 +99,8 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Interface & HUD",
   "state": "ported",
-  "functions": 672,
-  "bytes": 208284,
+  "functions": 680,
+  "bytes": 208530,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
@@ -115,16 +115,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "ported",
-  "functions": 108,
-  "bytes": 26754,
+  "functions": 132,
+  "bytes": 35146,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "pending",
-  "functions": 1399,
-  "bytes": 446672,
+  "functions": 1382,
+  "bytes": 438363,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -211,8 +211,8 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "STL & compiler idioms",
   "state": "excluded",
-  "functions": 454,
-  "bytes": 8735,
+  "functions": 439,
+  "bytes": 8406,
   "evidence": "MSVC 6 STL instantiations and empty functions (stl_idioms.py); the port uses the standard library"
  },
  {

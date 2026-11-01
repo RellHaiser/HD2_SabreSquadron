@@ -104,3 +104,18 @@
 0064bfe0 C_VideoTextBox::Finished | bool __thiscall Finished(C_VideoTextBox *this)
 00688cc0 C_VideoTextBox::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(C_VideoTextBox *this, uchar flags)
 00688ce0 C_VideoTextBox::~C_VideoTextBox | void __thiscall ~C_VideoTextBox(C_VideoTextBox *this)
+
+# Part 9b-iv-b: the paged box's layout (LayoutPages 0x006494a0 and FreePages 0x0064ae60 named in 9b-iv-a).
+00649470 C_PagedTextBox::LastPage | void * __thiscall LastPage(C_PagedTextBox *this)
+00649250 C_PagedTextBox::NewPage | void __thiscall NewPage(C_PagedTextBox *this)
+00649a90 C_PagedTextBox::AddLineToPage | void __thiscall AddLineToPage(C_PagedTextBox *this, void * line)
+00649c60 C_PagedTextBox::FlowPaged | bool __thiscall FlowPaged(C_PagedTextBox *this, void * run, void * line)
+00649c80 C_PagedTextBox::FlowPagedUtf8 | bool __thiscall FlowPagedUtf8(C_PagedTextBox *this, void * run, void * line)
+0064a6c0 C_PagedTextBox::FlowPagedBytes | bool __thiscall FlowPagedBytes(C_PagedTextBox *this, void * run, void * line)
+0064a4d0 S_TextLine::AddWord | void __thiscall AddWord(void *this, void * word, int size, int below, int above)
+006497b0 C_PagedTextBox::PlacePages | void __thiscall PlacePages(C_PagedTextBox *this)
+006499f0 C_PagedTextBox::StackPage | void __thiscall StackPage(C_PagedTextBox *this, int index)
+00649970 C_PagedTextBox::AlignPage | void __thiscall AlignPage(C_PagedTextBox *this, int index)
+006497f0 C_PagedTextBox::NextJustified | bool __thiscall NextJustified(C_PagedTextBox *this, int page, int line)
+0064b7f0 C_PagedTextBox::AlignPageLine | void __thiscall AlignPageLine(C_PagedTextBox *this, int page, int line, bool last)
+0064bad0 C_PagedTextBox::JustifyPageGap | float __thiscall JustifyPageGap(C_PagedTextBox *this, void * page, void * line)
