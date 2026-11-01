@@ -119,6 +119,7 @@ public:
     // its mesh: the vertices are morphed in place).
     I3D_RESULT __stdcall Duplicate(I3D_frame *source) override;
     void Init() override;                                                      // 0x60 0x10053c00
+    // LS3DRF 0x100118e0 (from LS3DF 0x1001ba50): C_morph's Uninit adjustor (this - 0x250).
     void Uninit() override;                                                    // 0x64 0x10053c20
     // 0x70 0x10054240: the skinned mesh, then the morph data; the bound is the data's.
     void Load() override;
@@ -127,6 +128,8 @@ public:
     // 0xBC 0x10054210 / 0xC8 0x100541e0: the level morphed first.
     const S_vector4 *__stdcall SkinnedVertices(int level) override;
     void SkinLevel(int level) override;
+    // LS3DRF 0x1002cde0 (from LS3DF 0x100541d0): 0x90 is a jmp to I3D_singlemesh's UpdateLocalBound,
+    // which the port inherits.
 
     // I3D_visual_morph (0x10053c40 - 0x10053cc0).
     int __stdcall NumMorphTargets() override { return numTargets; }

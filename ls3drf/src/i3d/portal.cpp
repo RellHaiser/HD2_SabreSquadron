@@ -55,6 +55,7 @@ I3D_portal::~I3D_portal()
     }
 }
 
+// LS3DRF 0x100245b0 (from LS3DF 0x1003ef10)
 void I3D_portal::SetOn(bool on)
 {
     if (on)
@@ -69,8 +70,10 @@ void I3D_portal::SetOn(bool on)
     }
 }
 
+// LS3DRF 0x10024600 (from LS3DF 0x1003ef60)
 bool I3D_portal::IsOn() { return (portalFlags & PRTF_ON) != 0; }
 
+// LS3DRF 0x10024530 (from LS3DF 0x1003eda0)
 I3D_RESULT I3D_portal::Duplicate(const I3D_portal *source)
 {
     if (otherSide) {

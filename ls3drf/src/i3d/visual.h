@@ -45,10 +45,12 @@ class I3D_visual_morph {
 public:
     virtual int __stdcall NumMorphTargets() { return 0; }                           // 0x10057630
     virtual int __stdcall NumMorphChannels() { return 0; }                          // 0x10057630
+    // LS3DRF 0x1002ea50 (from LS3DF 0x10057640)
     virtual I3D_RESULT __stdcall SetMorphWeight(int channel, int target, float weight)   // 0x10057640
     {
         return I3DERR_GENERIC;
     }
+    // LS3DRF 0x1002ea60 (from LS3DF 0x10057650)
     virtual float __stdcall GetMorphWeight(int channel, int target) { return 0.0f; }   // 0x10057650
 };
 
@@ -66,6 +68,7 @@ public:
     virtual void __stdcall SetBBox(const I3D_bbox &box);
     // 0x7C 0x100570a0 (nothing in the base): objects and lightmaps bake their vertices into world
     // space (VISF_WORLD_SPACE; the scene does it to the level's static visuals) or back.
+    // LS3DRF 0x10002470 (from LS3DF 0x100570a0): a shared empty stub (ret 8).
     virtual void __stdcall SetWorldSpace(bool on) {}
     // 0x80 / 0x84 0x100570b0 / 0x10057100: a 3-state mode in VISF_MODE_A1/A2 (0 on the visuals of a
     // carried body, 2 when it is put down).

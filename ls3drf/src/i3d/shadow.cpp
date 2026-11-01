@@ -420,10 +420,9 @@ void I3D_shadow::SetSource(I3D_frame *source)
     }
 }
 
-// 0x1004ef20
+// LS3DRF 0x1002b0b0 (from LS3DF 0x1004ef20): the frame's LinkTo only; the casters stay as they were.
 I3D_RESULT I3D_shadow::LinkTo(I3D_frame *newParent, uint32_t flags)
 {
-    SetSource(newParent);
     return I3D_frame::LinkTo(newParent, flags);
 }
 

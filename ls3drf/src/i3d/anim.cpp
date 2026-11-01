@@ -513,6 +513,7 @@ I3D_anim_track::~I3D_anim_track()
         pose->Release();
 }
 
+// LS3DRF 0x10014e00 (from LS3DF 0x1001eeb0)
 void I3D_anim_track::ClearStage(int stage) { stages[stage].flags = 0; }
 
 void I3D_anim_track::SetPose(I3D_pose *newPose)
@@ -531,6 +532,7 @@ void I3D_anim_track::SetPose(I3D_pose *newPose)
     ++newPose->refCount;
 }
 
+// LS3DRF 0x10014df0 (from LS3DF 0x1001eea0)
 void I3D_anim_track::SetPoseWeight(float weight) { poseWeight = weight; }
 
 void I3D_anim_track::Evaluate()

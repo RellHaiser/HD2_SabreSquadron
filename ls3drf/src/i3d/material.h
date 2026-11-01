@@ -99,6 +99,7 @@ static_assert(offsetof(I3D_material, alpha) == 0x5C, "I3D_material layout");
 class I3D_anim_material final : public I3D_material {
 public:
     I3D_anim_material();                    // 0x1002b470
+    // LS3DRF 0x10019660 (from LS3DF 0x1002b510): the scalar deleting destructor (0x40).
     ~I3D_anim_material() override;          // 0x1002b530 (0x40 0x1002b510)
 
     // 0x1C / 0x2C 0x1002bba0 / 0x1002bbc0: only without frames (else I3DERR_UNSUPPORTED).

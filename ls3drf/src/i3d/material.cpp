@@ -47,6 +47,7 @@ I3D_material::~I3D_material()
         envTexture->Release();
 }
 
+// LS3DRF 0x10019390 (from LS3DF 0x1002b120)
 uint32_t I3D_material::Release()
 {
     if (--refCount < 0)
@@ -57,6 +58,7 @@ uint32_t I3D_material::Release()
     return 0;
 }
 
+// LS3DRF 0x100193b0 (from LS3DF 0x1002b140)
 I3D_RESULT I3D_material::SetAmbient(const S_vector &c)
 {
     ambient.x = c.x;
@@ -65,6 +67,7 @@ I3D_RESULT I3D_material::SetAmbient(const S_vector &c)
     return I3D_OK;
 }
 
+// LS3DRF 0x100193d0 (from LS3DF 0x1002b160)
 I3D_RESULT I3D_material::SetDiffuse(const S_vector &c)
 {
     diffuse.x = c.x;
@@ -73,6 +76,7 @@ I3D_RESULT I3D_material::SetDiffuse(const S_vector &c)
     return I3D_OK;
 }
 
+// LS3DRF 0x100193f0 (from LS3DF 0x1002b180)
 I3D_RESULT I3D_material::SetEmissive(const S_vector &c)
 {
     emissive.x = c.x;
@@ -81,6 +85,7 @@ I3D_RESULT I3D_material::SetEmissive(const S_vector &c)
     return I3D_OK;
 }
 
+// LS3DRF 0x10019410 (from LS3DF 0x1002b1a0)
 I3D_RESULT I3D_material::SetSpecular(const S_vector &c)
 {
     specular.x = c.x;
@@ -89,12 +94,14 @@ I3D_RESULT I3D_material::SetSpecular(const S_vector &c)
     return I3D_OK;
 }
 
+// LS3DRF 0x10019430 (from LS3DF 0x1002b1c0)
 I3D_RESULT I3D_material::SetPower(float value)
 {
     power = value;
     return I3D_OK;
 }
 
+// LS3DRF 0x10019440 (from LS3DF 0x1002b1d0)
 I3D_RESULT I3D_material::SetOpacity(float value)
 {
     opacity = value;
@@ -169,12 +176,14 @@ I3D_RESULT I3D_material::CopyFrom(const I3D_material *source)
     return I3D_OK;
 }
 
+// LS3DRF 0x10019500 (from LS3DF 0x1002b3b0)
 I3D_RESULT I3D_material::SetTwoSided()
 {
     matFlags |= MATF_TWO_SIDED;
     return I3D_OK;
 }
 
+// LS3DRF 0x10019450 (from LS3DF 0x1002b300)
 I3D_RESULT I3D_material::SetEnvironment(ITexture *env, uint32_t bits8, uint32_t bits12, float value)
 {
     I3D_RESULT result = SetEnvTexture(env);
@@ -188,24 +197,28 @@ I3D_RESULT I3D_material::SetEnvironment(ITexture *env, uint32_t bits8, uint32_t 
     return result < 0 ? result : I3D_OK;
 }
 
+// LS3DRF 0x10019510 (from LS3DF 0x1002b3c0)
 I3D_RESULT I3D_material::SetBits8(uint32_t value)
 {
     matFlags = (matFlags & ~MATF_BITS8_MASK) | value << 8;
     return I3D_OK;
 }
 
+// LS3DRF 0x10019530 (from LS3DF 0x1002b3e0)
 I3D_RESULT I3D_material::SetBits12(uint32_t value)
 {
     matFlags = (matFlags & ~MATF_BITS12_MASK) | value << 12;
     return I3D_OK;
 }
 
+// LS3DRF 0x10019550 (from LS3DF 0x1002b400)
 I3D_RESULT I3D_material::SetBits0(uint32_t value)
 {
     matFlags = (matFlags & ~MATF_BITS0_MASK) | value;
     return I3D_OK;
 }
 
+// LS3DRF 0x10019570 (from LS3DF 0x1002b420)
 I3D_RESULT I3D_material::SetAlpha(float value)
 {
     if (value < 0.0f)
@@ -425,6 +438,7 @@ void I3D_anim_material::UpdateTexture() { UpdateSequence(textures, texture, loop
 
 void I3D_anim_material::UpdateEnvTexture() { UpdateSequence(envTextures, envTexture, envLoopStart, envInterval, true); }
 
+// LS3DRF 0x10019990 (from LS3DF 0x1002bad0)
 bool I3D_anim_material::SetFrame(int frame)
 {
     const int n = textures.frames.Size();
@@ -443,6 +457,7 @@ bool I3D_anim_material::SetFrame(int frame)
     return true;
 }
 
+// LS3DRF 0x100199f0 (from LS3DF 0x1002bb30)
 bool I3D_anim_material::SetEnvFrame(int frame)
 {
     const int n = envTextures.frames.Size();
