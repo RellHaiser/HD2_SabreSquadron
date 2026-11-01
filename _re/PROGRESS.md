@@ -6065,6 +6065,49 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: 206 files clean (MSVC). Tier 1: 505 errors in 85 files, 204 stubs (513 / 85 / 206 before; the layout's callers exported again). ret_audit --src: 52.
   - Ghidra: names/text_box.txt (+18); 19 functions in ported.txt. Stats: 8,023 of 12,293 functions by hand (73.5 % by size).
 
+  PART 9b-ii-b DONE (2026-11-01): the text box's positioning (src/game/text_box.*; 0x00646ab0..
+  0x00648020, the style list's index test 0x0064c100, the words' 0x0064c010, their copy 0x0064d000).
+  Part 9b-ii done.
+  - Position 0x00646b40: the overflow flag cleared; the lines stacked from the box's bottom moved up
+    by the first run's vertical alignment (whatever its kind; top 0, middle half, bottom all of the
+    box's height over the lines', none when they are higher; truncated): each line's base its space
+    below and font size over the last line's top (TextHeight: the lines' measures less the first's
+    space below and the last's above); each line placed; the pieces placed; the scroll's range
+    (UpdateScrollRange, which sets the flag when there is one).
+  - A line (PlaceLines): its words of the at-x style (flag 0x10) at the style's x of the box's width
+    from its left (left, centred, right by their alignment); then by its first word's style
+    (AlignLine): at-x: nothing more; left (1) or no room: from the left; centred (2: half the room,
+    halved as an integer), right (3), justified (4: split at its blanks, the box's width less the
+    words' shared between them, but on its paragraph's last line: the next line's first word not
+    justified (align & 4)); another alignment: not placed. The edited run's line (the run index as
+    a line's) moved left by what its caret ('_' at the line's style's size, measured with the font
+    selected last) lacks.
+  - SplitWords 0x00647600 (bytes 0x00647b50, UTF-8 0x00647620): each word's parts between its blanks
+    added at the end (a part after the last blank only with a width; a word's style missing: the
+    split stops there, nothing dropped), then the words split dropped.
+  - Pieces (PlacePieces): at their styles' x and y of the box's size (rounded; not offset by the
+    box's place), by their alignment and vertical alignment (top, middle, bottom: the piece's height
+    added); unaligned: -1. Overflows: a line without room; a piece left of or under the box, or past
+    its width or height.
+  - Quirks kept: of a justified line's several words the last stays, first (the split erases one
+    word fewer). Fix: the words split deleted (the original leaks them). The second check of a
+    line's room in PlaceLines dropped (PlaceWordsAtX's is the same).
+  - text_style.h: STYLE_AT_X; align's values (2 centred, 3 right, 4 justified; the old comment had
+    2 and 3 the other way).
+  - Harness: textbox_test.inc's "position:" line in the text build (10 checks; the positioning fake
+    gone: the 9b-i and 9b-ii-a checks on the real one; the fake font's '_' as wide as its size). 0 of
+    22 in both orders; the camera build 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9b3.py, the text build): the first run caught 115 of 133 (14
+    survived, 4 did not build); 6 equivalent (see the file's docstring), new cases for the rest
+    (fractions of 0.3 in the roundings, a justified line without room, the caret's size); the full
+    rerun caught 122 of 132 (the 6 equivalent). mutate_9b2.py regenerated (13 of its anchors were
+    no longer unique): 184 of 205 again (its 17 equivalent). Baselines: the world build 0 of 22 in
+    both orders; the item build 0 of 37; the other five 0 of 37.
+  - Build: 206 files clean (MSVC). Tier 1: 499 errors in 85 files, 202 stubs (505 / 85 / 204 before).
+    ret_audit --src: 52.
+  - Ghidra: names/text_box.txt (+16); 17 functions in ported.txt. Stats: 8,040 of 12,293 functions
+    by hand (73.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

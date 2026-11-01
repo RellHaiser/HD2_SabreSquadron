@@ -51,3 +51,22 @@
 0064ca50 vector_insert_text_piece_64ca50 | void __thiscall vector_insert_text_piece_64ca50(void * this, void * where, uint count, void * value)
 0064d400 IsLegalUtf8 | bool __fastcall IsLegalUtf8(uchar * source, int length)
 0064d830 DecodeUtf8 | int __fastcall DecodeUtf8(uint * codePoint, char * text, int length)
+
+# Part 9b-ii-b: the positioning (0x00646ab0..0x00648020; the style list's index test 0x0064c100,
+# the words' 0x0064c010).
+00646ab0 C_TextBox::CheckLineOverflow | bool __thiscall CheckLineOverflow(C_TextBox *this, void * line)
+00646ad0 C_TextBox::CheckPieceOverflow | bool __thiscall CheckPieceOverflow(C_TextBox *this, void * piece)
+00646b40 C_TextBox::Position | bool __thiscall Position(C_TextBox *this)
+00646bf0 C_TextBox::VAlignOffset | float __thiscall VAlignOffset(C_TextBox *this, int valign)
+00646c60 C_TextBox::TextHeight | int __thiscall TextHeight(C_TextBox *this)
+00646ce0 C_TextBox::StackLines | void __thiscall StackLines(C_TextBox *this, int bottom)
+00646d30 C_TextBox::AlignLine | void __thiscall AlignLine(C_TextBox *this, void * line, bool last, int index)
+006470d0 C_TextBox::PlaceWordsAtX | void __thiscall PlaceWordsAtX(C_TextBox *this, void * line)
+00647250 C_TextBox::PlaceLines | void __thiscall PlaceLines(C_TextBox *this)
+00647360 C_TextBox::PlacePieces | void __thiscall PlacePieces(C_TextBox *this)
+00647590 C_TextBox::JustifyGap | float __thiscall JustifyGap(C_TextBox *this, void * line)
+00647600 C_TextBox::SplitWords | void __thiscall SplitWords(C_TextBox *this, void * line)
+00647620 C_TextBox::SplitWordsUtf8 | void __thiscall SplitWordsUtf8(C_TextBox *this, void * line)
+00647b50 C_TextBox::SplitWordsBytes | void __thiscall SplitWordsBytes(C_TextBox *this, void * line)
+0064c010 text_word_valid_64c010 | bool __thiscall text_word_valid_64c010(void * this, int index)
+0064c100 text_style_valid_64c100 | bool __thiscall text_style_valid_64c100(void * this, int index)

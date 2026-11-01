@@ -2,7 +2,7 @@
 
     python check_text.py MISSIONS_TXT_DIR HARNESS_OUTPUT
 
-MISSIONS_TXT_DIR holds a .txt per mission ("mission NAME"). Per mission: a textbox and a layout line with every check met. Prints "N models, M with differences" (mutfast.py reads it).
+MISSIONS_TXT_DIR holds a .txt per mission ("mission NAME"). Per mission: a textbox, a layout and a position line with every check met. Prints "N models, M with differences" (mutfast.py reads it).
 """
 import glob
 import os
@@ -14,6 +14,8 @@ LINES = {
                 "tbRect tbAttach tbDepth tbFree").split(),
     "layout": ("tbStyle tbAdvance tbWidth tbUtf8 tbTruncate tbPieces tbLines tbWords tbChars tbFail "
                "tbMeasures").split(),
+    "position": ("tbHeight tbStack tbAlign tbCaret tbAtX tbJustify tbSplit tbPieceAt tbOverflow "
+                 "tbPosition").split(),
 }
 
 

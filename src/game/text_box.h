@@ -160,8 +160,30 @@ private:
     // A word added to the last line: its measures the line's if larger, its width taken from the
     // line's room.
     void AddWord(S_TextLine *line, const C_str &text, uint8_t style, int width, int height, int above, int below);
-    // The lines and the pieces placed in the box (part 9b-ii-b).
+    // The positioning (part 9b-ii-b).
+    // The lines stacked from the bottom (moved up by the first run's vertical alignment), each
+    // aligned; the pieces placed; the scroll's range.
     bool Position();                                    // 0x00646b40
+    // The space the box has over the lines' height for the vertical alignment (top: 0; none: 0).
+    float VAlignOffset(int valign) const;               // 0x00646bf0
+    // The lines' height: their measures less the first's space below and the last's above.
+    int TextHeight() const;                             // 0x00646c60
+    // The lines' bases from `bottom` up.
+    void StackLines(int bottom);                        // 0x00646ce0
+    void PlaceLines();                                  // 0x00647250
+    // A line's words with the STYLE_AT_X style placed at their styles' x.
+    void PlaceWordsAtX(S_TextLine *line);               // 0x006470d0
+    // A line's words placed by its first word's style's alignment (`last`: its paragraph's last
+    // line, not justified; `index`: the edited run's, as a line).
+    void AlignLine(S_TextLine *line, bool last, int index);   // 0x00646d30
+    // A line's words split at their blanks (for the justification).
+    void SplitWords(S_TextLine *line);                  // 0x00647600 (0x00647620 UTF-8, 0x00647b50 bytes)
+    // The space between a justified line's words.
+    float JustifyGap(const S_TextLine *line) const;     // 0x00647590
+    void PlacePieces();                                 // 0x00647360
+    // The box overflows: a line without room, a piece outside the box (the flag).
+    bool CheckLineOverflow(const S_TextLine *line);     // 0x00646ab0
+    bool CheckPieceOverflow(const S_TextPiece *piece);  // 0x00646ad0
 
     int16_t m_screenWidth = 0;                          // +0x04
     int16_t m_screenHeight = 0;                         // +0x06

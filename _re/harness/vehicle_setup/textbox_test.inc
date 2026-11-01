@@ -1,11 +1,11 @@
 // Part 9b's text box (game/text_box.cpp: 9b-i its runs, edit, selection, hover, scroll and place;
-// 9b-ii its layout), in the text build (build_text.bat: the camera build with TEXT_TEST and the real
-// C_TextBox; the loader's text box fakes left out), run by CameraTest instead of the camera's tests:
-// the positioning (part 9b-ii-b) and Render (9b-iii) faked; IGraph's screen 800 x 600; the fonts 2
-// and 3 fakes (C_TbFont). Prints "textbox:" (9b-i) and "layout:" (9b-ii) with 1 per check met.
+// 9b-ii its layout and positioning), in the text build (build_text.bat: the camera build with
+// TEXT_TEST and the real C_TextBox; the loader's text box fakes left out), run by CameraTest instead
+// of the camera's tests: Render (9b-iii) faked; IGraph's screen 800 x 600; the fonts 2 and 3 fakes
+// (C_TbFont). Prints "textbox:" (9b-i), "layout:" (9b-ii-a) and "position:" (9b-ii-b) with 1 per
+// check met.
 
-// The lines asked for (y, above, below, gap): the 9b-i tests' (TbLayout), and the positioning's
-// in place of the layout's when there are any.
+// The lines asked for (y, above, below, gap): the 9b-i tests' (TbLayout).
 std::vector<std::array<int16_t, 4>> g_tbLines;
 void TbSetLines(std::vector<S_TextLine *> &lines)
 {
@@ -20,14 +20,6 @@ void TbSetLines(std::vector<S_TextLine *> &lines)
         line->gap = l[3];
         lines.push_back(line);
     }
-}
-// The positioning: logged.
-bool C_TextBox::Position()
-{
-    GfLog("position");
-    if (!g_tbLines.empty())
-        TbSetLines(m_lines);
-    return true;
 }
 void C_TextBox::Render() { GfLog("render"); }
 // The visuals' world boxes: logged, then up to date.
@@ -77,6 +69,12 @@ void TbPlaceFractions(C_TextBox &box)
     box.SetRect(rect);
     box.m_dirty = false;
 }
+// Laid out by the real layout: the runs r0 .. r2 (the game's styles 0 .. 2) on three lines.
+bool TbLaidOut(const C_TextBox &box)
+{
+    return box.m_lines.size() == 3 && box.m_lines[0]->words.size() == 1 && box.m_lines[0]->words[0]->text == "r0" &&
+           box.m_lines[2]->words[0]->text == "r2";
+}
 void TbLayout(C_TextBox &box)
 {
     box.FreeLayout();
@@ -87,6 +85,48 @@ void TbLayout(C_TextBox &box)
 
 // --- part 9b-ii ---
 
+struct S_PositionResults {
+    bool tbHeight = true, tbStack = true, tbAlign = true, tbCaret = true, tbAtX = true, tbJustify = true, tbSplit = true;
+    bool tbPieceAt = true, tbOverflow = true, tbPosition = true;
+};
+
+// The box at (left, bottom), `width` by `height` pixels.
+void TbRect(C_TextBox &box, float left, float bottom, float width, float height)
+{
+    const float rect[7] = {left, bottom + height, left + width, bottom, width, height, 0.5f};
+    box.SetRect(rect);
+}
+// The places: per line its y and its words' x ("[y: x x]"), per piece "(x y)".
+std::string TbPlaces(const C_TextBox &box)
+{
+    std::string s;
+    for (const S_TextLine *line : box.m_lines) {
+        s += CmText("[%d:", line->y);
+        for (const S_TextWord *w : line->words)
+            s += CmText(" %d", w->x);
+        s += "]";
+    }
+    for (const S_TextPiece *p : box.m_pieces)
+        s += CmText("(%d %d)", p->x, p->y);
+    return s;
+}
+// A line's words: their texts and widths.
+std::string TbWordsText(const S_TextLine &line)
+{
+    std::string s;
+    for (const S_TextWord *w : line.words)
+        s += CmText("%s/%d ", w->text.c_str(), w->width);
+    return s;
+}
+// A line of words (text, style), for SplitWords.
+void TbWords(S_TextLine &line, std::initializer_list<std::pair<const char *, int>> words)
+{
+    for (S_TextWord *w : line.words)
+        delete w;
+    line.words.clear();
+    for (const auto &w : words)
+        line.words.push_back(new S_TextWord{C_str(w.first), static_cast<uint8_t>(w.second), 1});
+}
 struct S_LayoutResults {
     bool tbStyle = true, tbAdvance = true, tbWidth = true, tbUtf8 = true, tbTruncate = true, tbPieces = true;
     bool tbLines = true, tbWords = true, tbChars = true, tbFail = true, tbMeasures = true;
@@ -108,6 +148,7 @@ struct C_TbFont : C_Font {
             glyph.aspect = 0.0f;
             break;
         case 'W':
+        case '_':                                       // (the caret)
         case 0x416:                                     // (Cyrillic Zhe)
             glyph.aspect = 1.0f;
             break;
@@ -128,11 +169,11 @@ struct C_TbFont : C_Font {
 // The profile's unicode font option.
 void TbUnicode(bool on) { g_gameProfile.m_unicodeFont = on; }
 
-// A style (font 3, 0.02 of the height: 12 pixels; above 18, below 6; left aligned): its index.
+// A style (font 3, 0.02 of the height: 12 pixels; above 18, below 6; left and top aligned): its index.
 int TbStyle(float width, uint8_t joins, uint8_t wraps, uint32_t flags = 0, float x = -1.0f, float y = -1.0f, int font = 3,
-            float size = 0.02f, float above = 0.03f, float below = 0.01f)
+            float size = 0.02f, float above = 0.03f, float below = 0.01f, int align = 1, int valign = 1)
 {
-    const S_TextStyleDesc desc = {font, 0xFFFFFFFF, size, width, x, y, below, above, 0, 1, 1, joins, wraps, flags};
+    const S_TextStyleDesc desc = {font, 0xFFFFFFFF, size, width, x, y, below, above, 0, align, valign, joins, wraps, flags};
     return CreateTextStyle(desc);
 }
 // The box `width` pixels wide (100 high).
@@ -147,7 +188,7 @@ bool TbLayoutRuns(C_TextBox &box, std::initializer_list<std::pair<const char *, 
     box.Clear();
     for (const auto &r : runs)
         box.AddText(C_str(r.first), static_cast<uint8_t>(r.second));
-    g_gfLog.clear();
+    box.m_overflows = true;                             // (not positioned: left set)
     return box.Layout();
 }
 // The lines: their words (text/width) and measures (gap above below remaining).
@@ -378,8 +419,10 @@ void TextBoxTest()
         // The range after the layout.
         box.m_dirty = true;
         box.m_scrollRange = 33;
-        g_gfLog.clear();
-        WM(r.tbRange, box.GetScrollRange() == 33 && GfLogIs({"position"}) && box.GetScrollRange() == 33 && g_gfLog.size() == 1);
+        const int16_t range = box.GetScrollRange();
+        WM(r.tbRange, range == box.m_scrollRange && range != 33 && !box.m_dirty && TbLaidOut(box));
+        box.m_scrollRange = 33;
+        WM(r.tbRange, box.GetScrollRange() == 33);
     }
     // --- a line scrolled into the box: above it, below it; already in it, or too high: none ---
     {
@@ -415,8 +458,8 @@ void TextBoxTest()
         // The layout first.
         box.m_dirty = true;
         box.m_scroll = 0;
-        g_gfLog.clear();
-        WM(r.tbScrollTo, box.ScrollToLine(0) && GfLogIs({"position"}));
+        box.ScrollToLine(0);
+        WM(r.tbScrollTo, !box.m_dirty && TbLaidOut(box));
     }
     // --- a line's centre: the box's x over the screen's width, its y (less half its gap and the
     // scroll) over the width negated; outside the box: 0, 0 ---
@@ -445,9 +488,8 @@ void TextBoxTest()
                            box.GetLineCentre(3).x == 0.0f);
         TbPlace(box);
         box.m_dirty = true;
-        g_gfLog.clear();
         box.GetLineCentre(0);
-        WM(r.tbCentre, GfLogIs({"position"}));
+        WM(r.tbCentre, !box.m_dirty && TbLaidOut(box));
     }
     // --- the rectangle: set, attached to a visual (its world box, the margins), its depth ---
     {
@@ -683,15 +725,15 @@ void TextBoxTest()
         const int nan = TbStyle(0.0f, 1, 1, 0, std::nanf(""), 0.3f);
         WM(l.tbPieces, TbLayoutRuns(box, {{"ab", place}, {"abcdef", placeCut}, {"x", half}, {"abc", placeCut}, {"y", otherHalf},
                                           {"aiii", placeCut}, {"z", nan}, {"abcdefghijklmnop", place}}) &&
-                           !box.m_dirty && GfLogIs({"position"}));
+                           !box.m_dirty);
         // (16.08 pixels: "ab", 12; "aiii", 15.)
-        WM(l.tbPieces, TbPiecesText(box) == CmText("[ab/%d 12 12 -1 -1][ab/%d 12 12 -1 -1][ab/%d 12 12 -1 -1][aiii/%d 15 12 -1 -1]"
-                                                   "[abcdefghijklmnop/%d 93 12 -1 -1]",
+        WM(l.tbPieces, TbPiecesText(box) == CmText("[ab/%d 12 12 20 20][ab/%d 12 12 0 0][ab/%d 12 12 0 0][aiii/%d 15 12 0 0]"
+                                                   "[abcdefghijklmnop/%d 93 12 20 20]",
                                                    place, placeCut, placeCut, placeCut, place) &&
                            TbLinesText(box) == "[x/6 y/6 z/6 12 18 6 182]");
         WM(l.tbPieces, TbLayoutRuns(box, {{"ab", place}}) && box.m_lines.empty() && box.m_pieces.size() == 1);
         const int tiny = TbStyle(0.0f, 1, 1, 0, 0.1f, 0.2f, 3, 0.001f);
-        WM(l.tbPieces, TbLayoutRuns(box, {{" ab", tiny}}) && TbPiecesText(box) == CmText("[ ab/%d 2 1 -1 -1]", tiny));
+        WM(l.tbPieces, TbLayoutRuns(box, {{" ab", tiny}}) && TbPiecesText(box) == CmText("[ ab/%d 2 1 20 20]", tiny));
         ReleaseTextStyle(tiny);
         ReleaseTextStyle(nan);
         ReleaseTextStyle(otherHalf);
@@ -707,12 +749,12 @@ void TextBoxTest()
         const int newLine = TbStyle(0.0f, 1, 1, STYLE_NEW_LINE);
         const int other = TbStyle(0.0f, 1, 1, ~(STYLE_NEW_LINE | STYLE_PASSWORD));
         WM(l.tbLines, TbLayoutRuns(box, {{"x", own}, {"y", st12}, {"z", newLine}, {"w", st12}, {"v", own}, {"u", st12}}) &&
-                          !box.m_dirty && GfLogIs({"position"}));
+                          !box.m_dirty);
         WM(l.tbLines, TbLinesText(box) == "[x/6 12 18 6 194][y/6 12 18 6 194][z/6 w/6 12 18 6 188][v/6 12 18 6 194][u/6 12 18 6 194]");
         WM(l.tbLines, TbLayoutRuns(box, {{"a", own}, {"b", own}, {"c", st12}, {"d", other}, {"e", newLine}}) &&
                           TbLinesText(box) == "[a/6 12 18 6 194][b/6 12 18 6 194][c/6 d/6 12 18 6 188][e/6 12 18 6 194]");
         WM(l.tbLines, TbLayoutRuns(box, {{"z", newLine}, {"w", st12}}) && TbLinesText(box) == "[z/6 w/6 12 18 6 188]");
-        WM(l.tbLines, box.m_lines[0]->words[1]->x == -1 && box.m_lines[0]->words[1]->style == st12 &&
+        WM(l.tbLines, box.m_lines[0]->words[1]->x == 6 && box.m_lines[0]->words[1]->style == st12 &&
                           box.m_lines[0]->words[0]->style == newLine);
         ReleaseTextStyle(other);
         ReleaseTextStyle(newLine);
@@ -820,14 +862,15 @@ void TextBoxTest()
         TbLayoutRuns(box, {{"a", st12}, {"b", st12}});
         box.Clear();
         g_gfLog.clear();
-        WM(l.tbFail, !box.Layout() && box.m_dirty && box.m_lines.empty() && box.m_pieces.empty() && g_gfLog.empty());
+        box.m_overflows = true;
+        WM(l.tbFail, !box.Layout() && box.m_dirty && box.m_lines.empty() && box.m_pieces.empty() && box.m_overflows);
         const int noFont = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 99);
         WM(l.tbFail, !TbLayoutRuns(box, {{"a", st12}, {"b", noFont}, {"c", st12}}) && box.m_dirty && TbLinesText(box) == "[a/6 12 18 6 54]" &&
-                         g_gfLog.empty());
+                         box.m_overflows);
         WM(l.tbFail, !TbLayoutRuns(box, {{"a", st12}, {"b", 250}}) && box.m_dirty && box.m_lines.size() == 1);
         const int placedNoFont = TbStyle(0.0f, 1, 1, 0, 0.1f, 0.1f, 99);
         WM(l.tbFail, !TbLayoutRuns(box, {{"p", placedNoFont}}) && box.m_pieces.empty() && box.m_dirty);
-        WM(l.tbFail, TbLayoutRuns(box, {{"a", st12}}) && !box.m_dirty && GfLogIs({"position"}));
+        WM(l.tbFail, TbLayoutRuns(box, {{"a", st12}}) && !box.m_dirty);
         ReleaseTextStyle(placedNoFont);
         ReleaseTextStyle(noFont);
     }
@@ -857,6 +900,312 @@ void TextBoxTest()
         ReleaseTextStyle(deep);
         ReleaseTextStyle(tall);
     }
+    // ===== part 9b-ii-b: the positioning =====
+    S_PositionResults q;
+    const int own = TbStyle(0.0f, 0, 1);
+    const int tall = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 2, 0.04f, 0.05f);
+    // --- the lines' height (less the first's space below and the last's above); the vertical
+    // alignment's offset (none when the text is higher than the box) ---
+    {
+        TbRect(box, 0.0f, 0.0f, 100.0f, 100.0f);
+        WM(q.tbHeight, TbLayoutRuns(box, {{"a", st12}}) && box.TextHeight() == 12);
+        WM(q.tbHeight, TbLayoutRuns(box, {{"a", own}, {"b", own}}) && box.TextHeight() == 48);
+        WM(q.tbHeight, TbLayoutRuns(box, {{"a", tall}, {"b", own}}) && box.TextHeight() == 72);
+        TbLayoutRuns(box, {{"a", st12}});
+        WM(q.tbHeight, box.VAlignOffset(1) == 0.0f && box.VAlignOffset(2) == 44.0f && box.VAlignOffset(3) == 88.0f &&
+                           box.VAlignOffset(0) == 0.0f && box.VAlignOffset(4) == 0.0f);
+        TbRect(box, 0.0f, 0.0f, 100.0f, 10.0f);
+        TbLayoutRuns(box, {{"a", st12}});
+        WM(q.tbHeight, box.VAlignOffset(2) == 0.0f && box.VAlignOffset(3) == 0.0f);
+        TbRect(box, 0.0f, 0.0f, 100.0f, 100.5f);
+        TbLayoutRuns(box, {{"a", st12}});
+        WM(q.tbHeight, box.VAlignOffset(2) == 44.25f && box.VAlignOffset(3) == 88.5f);
+    }
+    // --- the lines stacked from the bottom (truncated) and the first run's vertical alignment up:
+    // each base its space below and font size above the last line's top ---
+    {
+        const int v2 = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 1, 2);
+        const int v3 = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 1, 3);
+        const int pieceV3 = TbStyle(0.0f, 1, 1, 0, 0.1f, 0.1f, 3, 0.02f, 0.03f, 0.01f, 1, 3);
+        TbRect(box, 0.0f, 10.75f, 100.0f, 100.0f);
+        WM(q.tbStack, TbLayoutRuns(box, {{"a", own}, {"b", own}}) && TbPlaces(box) == "[28: 0][64: 0]");
+        box.StackLines(-5);
+        WM(q.tbStack, box.m_lines[0]->y == 13 && box.m_lines[1]->y == 49);
+        WM(q.tbStack, TbLayoutRuns(box, {{"a", v3}, {"b", st12}}) && TbPlaces(box) == "[116: 0 6]");
+        WM(q.tbStack, TbLayoutRuns(box, {{"a", st12}, {"b", v3}}) && TbPlaces(box) == "[28: 0 6]");
+        WM(q.tbStack, TbLayoutRuns(box, {{"p", pieceV3}, {"a", st12}}) && TbPlaces(box) == "[116: 0](10 22)");
+        TbRect(box, 0.0f, 10.5f, 100.0f, 100.5f);
+        WM(q.tbStack, TbLayoutRuns(box, {{"a", v2}}) && TbPlaces(box) == "[72: 0]");
+        TbRect(box, 0.0f, 10.75f, 100.0f, 10.0f);
+        WM(q.tbStack, TbLayoutRuns(box, {{"a", v3}}) && TbPlaces(box) == "[28: 0]");
+        TbRect(box, 0.0f, 10.75f, 100.0f, 12.6f);
+        WM(q.tbStack, TbLayoutRuns(box, {{"a", v2}}) && TbPlaces(box) == "[29: 0]" && box.VAlignOffset(2) > 0.25f);
+        ReleaseTextStyle(pieceV3);
+        ReleaseTextStyle(v3);
+        ReleaseTextStyle(v2);
+    }
+    // --- a line's words from the left, centred in its room (halved), right; no room: from the left;
+    // its first word's style decides; another alignment: not placed ---
+    {
+        const int centre = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 2);
+        const int right = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 3);
+        const int wholeCentre = TbStyle(0.0f, 1, 0, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 2);
+        const int none = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 0);
+        const int five = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 5);
+        TbRect(box, 5.0f, 0.0f, 100.0f, 100.0f);
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", st12}, {"cd", st12}}) && TbPlaces(box) == "[18: 5 17]");
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", centre}}) && TbPlaces(box) == "[18: 49]");
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", centre}, {"cd", centre}}) && TbPlaces(box) == "[18: 43 55]");
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", right}, {"cd", right}}) && TbPlaces(box) == "[18: 81 93]");
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", st12}, {"cd", centre}}) && TbPlaces(box) == "[18: 5 17]");
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", centre}, {"cd", st12}}) && TbPlaces(box) == "[18: 43 55]");
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", none}}) && TbPlaces(box) == "[18: -1]");
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", five}}) && TbPlaces(box) == "[18: -1]");
+        TbRect(box, 5.0f, 0.0f, 99.0f, 100.0f);
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", centre}}) && TbPlaces(box) == "[18: 48]");
+        TbRect(box, 5.0f, 0.0f, 12.0f, 100.0f);
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", centre}}) && TbPlaces(box) == "[18: 5]");
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", right}}) && TbPlaces(box) == "[18: 5]");
+        TbRect(box, 5.0f, 0.0f, 10.0f, 100.0f);
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", wholeCentre}}) && TbPlaces(box) == "[18: 5]");
+        TbRect(box, 5.5f, 0.0f, 100.0f, 100.0f);
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", st12}, {"cd", st12}}) && TbPlaces(box) == "[18: 5 17]");
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", centre}, {"cd", centre}}) && TbPlaces(box) == "[18: 43 55]");
+        WM(q.tbAlign, TbLayoutRuns(box, {{"ab", right}}) && TbPlaces(box) == "[18: 93]");
+        // --- the edited line: moved left by what its caret ('_' at its style's size: as wide)
+        // lacks ---
+        TbRect(box, 5.0f, 0.0f, 18.0f, 100.0f);
+        WM(q.tbCaret, TbLayoutRuns(box, {{"ab", centre}}) && TbPlaces(box) == "[18: 8]");
+        box.m_editing = true;
+        box.m_selection = 0;
+        WM(q.tbCaret, TbLayoutRuns(box, {{"ab", centre}}) && TbPlaces(box) == "[18: -1]");
+        TbRect(box, 5.0f, 0.0f, 24.0f, 100.0f);
+        WM(q.tbCaret, TbLayoutRuns(box, {{"ab", centre}}) && TbPlaces(box) == "[18: 5]");
+        TbRect(box, 5.0f, 0.0f, 25.0f, 100.0f);
+        WM(q.tbCaret, TbLayoutRuns(box, {{"ab", centre}}) && TbPlaces(box) == "[18: 11]");
+        TbRect(box, 5.0f, 0.0f, 15.0f, 100.0f);
+        WM(q.tbCaret, TbLayoutRuns(box, {{"a", centre}, {"b", centre}}) && TbPlaces(box) == "[18: -4 2]");
+        const int ownCentre = TbStyle(0.0f, 0, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 2);
+        TbRect(box, 5.0f, 0.0f, 18.0f, 100.0f);
+        box.m_selection = 1;
+        WM(q.tbCaret, TbLayoutRuns(box, {{"ab", ownCentre}, {"cd", ownCentre}}) && TbPlaces(box) == "[18: 8][54: -1]");
+        const int big = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.04f);
+        TbRect(box, 5.0f, 0.0f, 30.0f, 100.0f);
+        box.m_selection = 0;
+        WM(q.tbCaret, TbLayoutRuns(box, {{"ab", big}}) && TbPlaces(box) == "[30: -13]");
+        // (16.3 pixels: 16.)
+        const int size16 = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.0271667f);
+        WM(q.tbCaret, TbLayoutRuns(box, {{"ab", size16}}) && TbPlaces(box) == "[22: 3]");
+        ReleaseTextStyle(size16);
+        box.m_editing = false;
+        WM(q.tbCaret, TbLayoutRuns(box, {{"ab", big}}) && TbPlaces(box) == "[30: 5]");
+        box.m_selection = -1;
+        ReleaseTextStyle(big);
+        ReleaseTextStyle(ownCentre);
+        ReleaseTextStyle(five);
+        ReleaseTextStyle(none);
+        ReleaseTextStyle(wholeCentre);
+        ReleaseTextStyle(right);
+        ReleaseTextStyle(centre);
+    }
+    // --- words at their style's x (of the box's width, from its left; left, centred, right): their
+    // line not aligned; after a word of another style: aligned with it ---
+    {
+        const int at1 = TbStyle(0.0f, 1, 1, STYLE_AT_X, 0.5f, -1.0f);
+        const int at2 = TbStyle(0.0f, 1, 1, STYLE_AT_X, 0.5f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 2);
+        const int at3 = TbStyle(0.0f, 1, 1, STYLE_AT_X, 0.5f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 3);
+        const int at4 = TbStyle(0.0f, 1, 1, STYLE_AT_X, 0.5f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 4);
+        const int atThird = TbStyle(0.0f, 1, 1, STYLE_AT_X, 0.333f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 2);
+        TbRect(box, 5.0f, 0.0f, 100.0f, 100.0f);
+        WM(q.tbAtX, TbLayoutRuns(box, {{"ab", at1}}) && TbPlaces(box) == "[18: 55]");
+        WM(q.tbAtX, TbLayoutRuns(box, {{"ab", at2}}) && TbPlaces(box) == "[18: 49]");
+        WM(q.tbAtX, TbLayoutRuns(box, {{"ab", at3}}) && TbPlaces(box) == "[18: 43]");
+        WM(q.tbAtX, TbLayoutRuns(box, {{"ab", at4}}) && TbPlaces(box) == "[18: -1]");
+        WM(q.tbAtX, TbLayoutRuns(box, {{"a", atThird}}) && TbPlaces(box) == "[18: 35]");
+        WM(q.tbAtX, TbLayoutRuns(box, {{"ab", at1}, {"cd", st12}}) && TbPlaces(box) == "[18: 55 -1]");
+        WM(q.tbAtX, TbLayoutRuns(box, {{"ab", st12}, {"cd", at1}}) && TbPlaces(box) == "[18: 5 17]");
+        ReleaseTextStyle(atThird);
+        ReleaseTextStyle(at4);
+        ReleaseTextStyle(at3);
+        ReleaseTextStyle(at2);
+        ReleaseTextStyle(at1);
+    }
+    // --- justified: a paragraph's lines but its last (the next line's first word justified) split
+    // at their blanks, the box's width less the words' shared between them ---
+    {
+        const int just = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 4);
+        const int justNew = TbStyle(0.0f, 1, 1, STYLE_NEW_LINE, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 4);
+        const int leftNew = TbStyle(0.0f, 1, 1, STYLE_NEW_LINE);
+        const int fiveNew = TbStyle(0.0f, 1, 1, STYLE_NEW_LINE, -1.0f, -1.0f, 3, 0.02f, 0.03f, 0.01f, 5);
+        TbRect(box, 5.0f, 0.0f, 40.0f, 100.0f);
+        WM(q.tbJustify, TbLayoutRuns(box, {{"ab cd ef gh", just}}) && TbPlaces(box) == "[18: 5 33][54: 5]" &&
+                            TbWordsText(*box.m_lines[0]) == "ab/12 cd/12 " && TbWordsText(*box.m_lines[1]) == "ef gh/29 ");
+        TbRect(box, 5.0f, 0.0f, 41.0f, 100.0f);
+        WM(q.tbJustify, TbLayoutRuns(box, {{"ab cd ef gh", just}}) && TbPlaces(box) == "[18: 5 34][54: 5]");
+        TbRect(box, 5.0f, 0.0f, 40.0f, 100.0f);
+        WM(q.tbJustify, TbLayoutRuns(box, {{"ab cd", just}, {"x", leftNew}}) && TbPlaces(box) == "[18: 5][54: 5]" &&
+                            TbWordsText(*box.m_lines[0]) == "ab cd/29 ");
+        WM(q.tbJustify, TbLayoutRuns(box, {{"ab cd", just}, {"x", fiveNew}}) && TbPlaces(box) == "[18: 5 33][54: -1]");
+        WM(q.tbJustify, TbLayoutRuns(box, {{"abcd", just}, {"x", justNew}}) && TbPlaces(box) == "[18: 5][54: 5]" &&
+                            TbWordsText(*box.m_lines[0]) == "abcd/24 ");
+        WM(q.tbJustify, TbLayoutRuns(box, {{"", just}, {"x", justNew}}) && TbPlaces(box) == "[18:][54: 5]");
+        TbRect(box, 5.0f, 0.0f, 29.0f, 100.0f);
+        WM(q.tbJustify, TbLayoutRuns(box, {{"ab cd", just}, {"x", justNew}}) && TbPlaces(box) == "[18: 5][54: 5]" &&
+                            TbWordsText(*box.m_lines[0]) == "ab cd/29 ");
+        // Two words: the last kept first (the quirk), the gap a third of the room.
+        TbRect(box, 5.0f, 0.0f, 100.0f, 100.0f);
+        const float gap = (100.0f - 48.0f) / 3.0f;
+        const float x1 = (12.0f + gap) + 5.0f, x2 = (12.0f + gap) + x1, x3 = (12.0f + gap) + x2;
+        WM(q.tbJustify, TbLayoutRuns(box, {{"ab cd", just}, {"ef", just}, {"gh", justNew}}) &&
+                            TbWordsText(*box.m_lines[0]) == "ef/12 ab/12 cd/12 ef/12 " &&
+                            TbPlaces(box) == CmText("[18: 5 %d %d %d][54: 5]", static_cast<int>(x1), static_cast<int>(x2),
+                                                    static_cast<int>(x3)) &&
+                            static_cast<int>(x1) == 34 && static_cast<int>(x2) == 63);
+        ReleaseTextStyle(fiveNew);
+        ReleaseTextStyle(leftNew);
+        ReleaseTextStyle(justNew);
+        ReleaseTextStyle(just);
+    }
+    // --- a line's words split at their blanks (the blanks' advances asked for too; a part after the
+    // last blank kept with a width); of more than one word the last stays first; a word's style
+    // missing: no more ---
+    {
+        S_TextLine line;
+        const int tiny = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.001f);
+        const int big = TbStyle(0.0f, 1, 1, 0, -1.0f, -1.0f, 3, 0.04f);
+        TbWords(line, {{"ab cd", st12}});
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "ab/12 cd/12 " && line.words[1]->style == st12 && line.words[1]->x == -1);
+        TbWords(line, {{"ab  cd ", st12}});
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "ab/12 /0 cd/12 ");
+        TbWords(line, {{" ab", st12}});
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "/0 ab/12 ");
+        TbWords(line, {{"ab i", tiny}});
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "ab/2 ");
+        TbWords(line, {{"ab", st12}, {"c d", st12}});
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "c d/1 ab/12 c/6 d/6 ");
+        TbWords(line, {{"a", st12}, {"b", st12}, {"c", st12}});
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "c/1 a/6 b/6 c/6 ");
+        TbWords(line, {{"ab cd", 250}});
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "ab cd/1 ");
+        TbWords(line, {{"ab cd", st12}, {"x", 250}});
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "ab cd/1 x/1 ab/12 cd/12 ");
+        TbWords(line, {{"ab cd", big}});
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "ab/24 cd/24 ");
+        TbWords(line, {{"ab\tcd", st12}});
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "ab/12 cd/12 ");
+        TbWords(line, {{"ab\xA0" "cd", st12}});
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "ab\xA0" "cd/30 ");
+        TbWords(line, {{"a b", st12}});
+        font3.asked.clear();
+        box.SplitWords(&line);
+        WM(q.tbSplit, (font3.asked == std::vector<int>{'a', 'a', ' ', 'b', 'b'}));
+        TbWords(line, {});
+        box.SplitWords(&line);
+        WM(q.tbSplit, line.words.empty());
+        TbUnicode(true);
+        TbWords(line, {{"ab\xD0\x96 cd", st12}});
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "ab\xD0\x96/24 cd/12 ");
+        TbWords(line, {{"\xC3 x", st12}});
+        font3.asked.clear();
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "\xC3/6 x/6 " && font3.asked.size() == 5 && font3.asked[0] == -61);
+        TbWords(line, {{"ab cd", st12}});
+        box.SplitWords(&line);
+        WM(q.tbSplit, TbWordsText(line) == "ab/12 cd/12 ");
+        TbUnicode(false);
+        ReleaseTextStyle(big);
+        ReleaseTextStyle(tiny);
+    }
+    // --- pieces at their styles' x and y of the box's size (rounded; not offset by its place),
+    // aligned by their styles: left, centred, right; top, middle, bottom ---
+    {
+        auto piece = [](int align, int valign) {
+            return TbStyle(0.0f, 1, 1, 0, 0.1f, 0.2f, 3, 0.02f, 0.03f, 0.01f, align, valign);
+        };
+        const int p11 = piece(1, 1), p21 = piece(2, 1), p31 = piece(3, 1), p12 = piece(1, 2), p13 = piece(1, 3);
+        const int p00 = piece(0, 0);
+        const int corner = TbStyle(0.0f, 1, 1, 0, 0.0f, 0.0f);
+        TbRect(box, 50.0f, 30.0f, 200.0f, 100.0f);
+        WM(q.tbPieceAt, TbLayoutRuns(box, {{"ab", p11}, {"ab", p21}, {"ab", p31}, {"ab", p12}, {"ab", p13}, {"ab", p00}, {"ab", corner}}) &&
+                            TbPlaces(box) == "(20 20)(14 20)(8 20)(20 26)(20 32)(-1 -1)(0 0)");
+        TbRect(box, 50.0f, 30.0f, 203.0f, 101.5f);
+        WM(q.tbPieceAt, TbLayoutRuns(box, {{"ab", p11}}) && TbPlaces(box) == "(20 20)");
+        TbRect(box, 50.0f, 30.0f, 200.0f, 100.0f);
+        // --- overflows: a line without room, a piece outside the box ---
+        WM(q.tbOverflow, TbLayoutRuns(box, {{"ab", p11}}) && !box.m_overflows);
+        WM(q.tbOverflow, TbLayoutRuns(box, {{"ab", p00}}) && box.m_overflows);
+        const int farRight = TbStyle(0.0f, 1, 1, 0, 0.99f, 0.0f);
+        WM(q.tbOverflow, TbLayoutRuns(box, {{"ab", farRight}}) && box.m_overflows);
+        S_TextPiece pc;
+        pc.width = pc.height = 12;
+        const auto check = [&](int x, int y) {
+            pc.x = static_cast<int16_t>(x);
+            pc.y = static_cast<int16_t>(y);
+            box.m_overflows = false;
+            return box.CheckPieceOverflow(&pc);
+        };
+        WM(q.tbOverflow, !check(0, 0) && check(-1, 0) && check(0, -1) && !check(0, 88) && check(0, 89) && !check(188, 0) &&
+                             check(189, 0));
+        TbRect(box, 0.0f, 0.0f, 200.5f, 100.5f);
+        WM(q.tbOverflow, check(0, 89) && !check(0, 88) && check(189, 0) && !check(188, 0));
+        box.m_overflows = true;
+        pc.x = pc.y = 0;
+        WM(q.tbOverflow, box.CheckPieceOverflow(&pc));
+        S_TextLine line;
+        box.m_overflows = false;
+        line.remaining = 0;
+        WM(q.tbOverflow, !box.CheckLineOverflow(&line));
+        line.remaining = -1;
+        WM(q.tbOverflow, box.CheckLineOverflow(&line));
+        line.remaining = 5;
+        WM(q.tbOverflow, box.CheckLineOverflow(&line));
+        const int whole = TbStyle(0.0f, 1, 0);
+        TbRect(box, 0.0f, 0.0f, 60.0f, 100.0f);
+        WM(q.tbOverflow, TbLayoutRuns(box, {{"abcdefghijklmn", whole}}) && box.m_overflows);
+        WM(q.tbOverflow, TbLayoutRuns(box, {{"ab", whole}}) && !box.m_overflows);
+        ReleaseTextStyle(whole);
+        ReleaseTextStyle(farRight);
+        ReleaseTextStyle(corner);
+        ReleaseTextStyle(p00);
+        ReleaseTextStyle(p13);
+        ReleaseTextStyle(p12);
+        ReleaseTextStyle(p31);
+        ReleaseTextStyle(p21);
+        ReleaseTextStyle(p11);
+    }
+    // --- the positioning: the flag cleared first, the scroll's range after (its flag) ---
+    {
+        const int place = TbStyle(0.0f, 1, 1, 0, 0.1f, 0.2f);
+        TbRect(box, 0.0f, 0.0f, 100.0f, 100.0f);
+        box.m_scrollRange = 77;
+        WM(q.tbPosition, TbLayoutRuns(box, {{"a", own}, {"b", own}, {"c", own}, {"d", own}}) && box.m_scrollRange == 28 &&
+                             box.m_overflows && TbPlaces(box) == "[18: 0][54: 0][90: 0][126: 0]");
+        WM(q.tbPosition, TbLayoutRuns(box, {{"a", own}, {"b", own}, {"c", own}}) && box.m_scrollRange == 0 && !box.m_overflows);
+        box.m_scrollRange = 77;
+        WM(q.tbPosition, TbLayoutRuns(box, {{"ab", place}}) && box.m_scrollRange == 0 && TbPlaces(box) == "(10 20)");
+        box.FreeLayout();
+        box.m_overflows = true;
+        WM(q.tbPosition, box.Position() && !box.m_overflows);
+        ReleaseTextStyle(place);
+    }
+    ReleaseTextStyle(tall);
+    ReleaseTextStyle(own);
+    std::printf("position: tbHeight %d tbStack %d tbAlign %d tbCaret %d tbAtX %d tbJustify %d tbSplit %d tbPieceAt %d "
+                "tbOverflow %d tbPosition %d\n",
+                q.tbHeight, q.tbStack, q.tbAlign, q.tbCaret, q.tbAtX, q.tbJustify, q.tbSplit, q.tbPieceAt, q.tbOverflow,
+                q.tbPosition);
     ReleaseTextStyle(st12);
     std::printf("layout: tbStyle %d tbAdvance %d tbWidth %d tbUtf8 %d tbTruncate %d tbPieces %d tbLines %d tbWords %d tbChars %d "
                 "tbFail %d tbMeasures %d\n",

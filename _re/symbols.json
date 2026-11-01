@@ -28085,6 +28085,76 @@
   "name": "C_TextBox::FlowWords",
   "proto": "int __thiscall FlowWords(C_TextBox *this, void * run)"
  },
+ "00646ab0": {
+  "module": "text_box",
+  "name": "C_TextBox::CheckLineOverflow",
+  "proto": "bool __thiscall CheckLineOverflow(C_TextBox *this, void * line)"
+ },
+ "00646ad0": {
+  "module": "text_box",
+  "name": "C_TextBox::CheckPieceOverflow",
+  "proto": "bool __thiscall CheckPieceOverflow(C_TextBox *this, void * piece)"
+ },
+ "00646b40": {
+  "module": "text_box",
+  "name": "C_TextBox::Position",
+  "proto": "bool __thiscall Position(C_TextBox *this)"
+ },
+ "00646bf0": {
+  "module": "text_box",
+  "name": "C_TextBox::VAlignOffset",
+  "proto": "float __thiscall VAlignOffset(C_TextBox *this, int valign)"
+ },
+ "00646c60": {
+  "module": "text_box",
+  "name": "C_TextBox::TextHeight",
+  "proto": "int __thiscall TextHeight(C_TextBox *this)"
+ },
+ "00646ce0": {
+  "module": "text_box",
+  "name": "C_TextBox::StackLines",
+  "proto": "void __thiscall StackLines(C_TextBox *this, int bottom)"
+ },
+ "00646d30": {
+  "module": "text_box",
+  "name": "C_TextBox::AlignLine",
+  "proto": "void __thiscall AlignLine(C_TextBox *this, void * line, bool last, int index)"
+ },
+ "006470d0": {
+  "module": "text_box",
+  "name": "C_TextBox::PlaceWordsAtX",
+  "proto": "void __thiscall PlaceWordsAtX(C_TextBox *this, void * line)"
+ },
+ "00647250": {
+  "module": "text_box",
+  "name": "C_TextBox::PlaceLines",
+  "proto": "void __thiscall PlaceLines(C_TextBox *this)"
+ },
+ "00647360": {
+  "module": "text_box",
+  "name": "C_TextBox::PlacePieces",
+  "proto": "void __thiscall PlacePieces(C_TextBox *this)"
+ },
+ "00647590": {
+  "module": "text_box",
+  "name": "C_TextBox::JustifyGap",
+  "proto": "float __thiscall JustifyGap(C_TextBox *this, void * line)"
+ },
+ "00647600": {
+  "module": "text_box",
+  "name": "C_TextBox::SplitWords",
+  "proto": "void __thiscall SplitWords(C_TextBox *this, void * line)"
+ },
+ "00647620": {
+  "module": "text_box",
+  "name": "C_TextBox::SplitWordsUtf8",
+  "proto": "void __thiscall SplitWordsUtf8(C_TextBox *this, void * line)"
+ },
+ "00647b50": {
+  "module": "text_box",
+  "name": "C_TextBox::SplitWordsBytes",
+  "proto": "void __thiscall SplitWordsBytes(C_TextBox *this, void * line)"
+ },
  "00648200": {
   "module": "hud",
   "name": "C_TextBox::Render",
@@ -28097,6 +28167,11 @@
  "0064b1e0": {
   "module": "zz_idioms",
   "name": "empty_function_64b1e0"
+ },
+ "0064c010": {
+  "module": "text_box",
+  "name": "text_word_valid_64c010",
+  "proto": "bool __thiscall text_word_valid_64c010(void * this, int index)"
  },
  "0064c040": {
   "module": "text_box",
@@ -28119,6 +28194,11 @@
  "0064c0e0": {
   "module": "zz_idioms",
   "name": "vector_size_e4_64c0e0"
+ },
+ "0064c100": {
+  "module": "text_box",
+  "name": "text_style_valid_64c100",
+  "proto": "bool __thiscall text_style_valid_64c100(void * this, int index)"
  },
  "0064c130": {
   "module": "zz_idioms",

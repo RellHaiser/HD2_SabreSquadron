@@ -751,3 +751,256 @@ bool C_TextBox::Layout()
     m_dirty = false;
     return true;
 }
+
+// --- the positioning: the lines' and pieces' places in the box (part 9b-ii-b) ----------------------
+
+bool C_TextBox::Position()
+{
+    m_overflows = false;
+    if (!m_lines.empty()) {
+        // (The first run's vertical alignment, whatever its kind.)
+        const S_TextStyleDesc *style = GetTextStyle(m_runs[0].style);
+        StackLines(static_cast<int>(VAlignOffset(style->valign) + m_bottom));
+        PlaceLines();
+    }
+    if (!m_pieces.empty())
+        PlacePieces();
+    UpdateScrollRange();
+    return true;
+}
+
+float C_TextBox::VAlignOffset(int valign) const
+{
+    const float height = static_cast<float>(TextHeight());
+    float offset;
+    switch (valign) {
+    case 2:
+        offset = (m_height - height) * 0.5f;
+        break;
+    case 3:
+        offset = m_height - height;
+        break;
+    default:
+        return 0.0f;
+    }
+    return offset < 0.0f ? 0.0f : offset;
+}
+
+int C_TextBox::TextHeight() const
+{
+    int height = -m_lines.front()->below;
+    for (const S_TextLine *line : m_lines)
+        height += line->above + line->gap + line->below;
+    return height - m_lines.back()->above;
+}
+
+void C_TextBox::StackLines(int bottom)
+{
+    for (S_TextLine *line : m_lines) {
+        bottom += line->below + line->gap;
+        line->y = static_cast<int16_t>(bottom);
+        bottom += line->above;
+    }
+}
+
+void C_TextBox::PlaceLines()
+{
+    for (size_t i = 0; i < m_lines.size(); ++i) {
+        S_TextLine *line = m_lines[i];
+        if (line->words.empty())
+            continue;
+        PlaceWordsAtX(line);
+        // A paragraph's last line: the next one's first word not justified.
+        bool last = true;
+        if (i + 1 < m_lines.size()) {
+            const S_TextLine *next = m_lines[i + 1];
+            if (!next->words.empty() && (GetTextStyle(next->words[0]->style)->align & 4))
+                last = false;
+        }
+        // (The original checks the line's room here again: PlaceWordsAtX did.)
+        AlignLine(line, last, static_cast<int>(i));
+    }
+}
+
+void C_TextBox::PlaceWordsAtX(S_TextLine *line)
+{
+    for (S_TextWord *word : line->words) {
+        const S_TextStyleDesc *style = GetTextStyle(word->style);
+        if (!(style->flags30 & STYLE_AT_X))
+            continue;
+        const float x = style->x * m_width + m_left;
+        switch (style->align) {
+        case 1:
+            word->x = static_cast<int16_t>(static_cast<int>(x));
+            break;
+        case 2:
+            word->x = static_cast<int16_t>(static_cast<int>(x - static_cast<float>(word->width) * 0.5f));
+            break;
+        case 3:
+            word->x = static_cast<int16_t>(static_cast<int>(x - static_cast<float>(word->width)));
+            break;
+        }
+    }
+    CheckLineOverflow(line);
+}
+
+void C_TextBox::AlignLine(S_TextLine *line, bool last, int index)
+{
+    float x = m_left;
+    const S_TextStyleDesc *style = GetTextStyle(line->words[0]->style);
+    if (style->flags30 & STYLE_AT_X)
+        return;
+    if (m_editing && m_selection == index) {
+        // The edited line moved left when its caret does not fit. (The caret measured with the
+        // style and font selected last, at the line's style's size.)
+        const int caret = Advance('_', static_cast<int>(static_cast<float>(m_screenHeight) * style->size + 0.5f));
+        const float room = static_cast<float>(line->remaining - caret);
+        if (room <= 0.0f) {
+            x = room + x;
+            for (S_TextWord *word : line->words) {
+                word->x = static_cast<int16_t>(static_cast<int>(x));
+                x += static_cast<float>(word->width);
+            }
+            return;
+        }
+    }
+    if (style->align == 1 || line->remaining <= 0) {
+        for (S_TextWord *word : line->words) {
+            word->x = static_cast<int16_t>(static_cast<int>(x));
+            x = static_cast<float>(word->width) + x;
+        }
+        return;
+    }
+    float gap = 0.0f;
+    switch (style->align) {
+    case 2:
+        x = static_cast<float>(line->remaining / 2) + x;
+        break;
+    case 3:
+        x = static_cast<float>(line->remaining) + x;
+        break;
+    case 4:
+        if (!last)
+            SplitWords(line);
+        if (line->words.size() > 1 && !last)
+            gap = JustifyGap(line);
+        break;
+    default:
+        return;
+    }
+    for (S_TextWord *word : line->words) {
+        word->x = static_cast<int16_t>(static_cast<int>(x));
+        x = (static_cast<float>(word->width) + gap) + x;
+    }
+}
+
+void C_TextBox::SplitWords(S_TextLine *line)
+{
+    const bool unicode = g_gameProfile.UsesUnicodeFont();
+    const int count = static_cast<int>(line->words.size());
+    if (count == 0)
+        return;
+    // Each word's parts between its blanks added at the end (the blanks dropped; a part after the
+    // last blank only when it has a width).
+    for (int k = 0; k < count; ++k) {
+        if (!SelectStyle(line->words[k]->style))
+            return;
+        const int size = FontSize();
+        const uint8_t style = line->words[k]->style;
+        C_str text = line->words[k]->text;
+        int width = 0;
+        for (int i = 0;;) {
+            const int length = static_cast<int>(text.Size());
+            if (i >= length) {
+                if (length != 0 && width > 0)
+                    line->words.push_back(new S_TextWord{text, style, static_cast<int16_t>(width)});
+                break;
+            }
+            int ch = static_cast<uint8_t>(text.c_str()[i]);
+            int bytes = 1;
+            if (unicode) {
+                uint32_t code;
+                bytes = DecodeUtf8(&code, text.c_str() + i, length - i);
+                if (bytes <= 0) {
+                    code = static_cast<uint32_t>(static_cast<signed char>(text.c_str()[i]));
+                    bytes = 1;
+                }
+                ch = static_cast<int>(code);
+            }
+            const int advance = Advance(ch, size);
+            if (static_cast<uint32_t>(ch) < 0x80 && std::isspace(ch)) {
+                line->words.push_back(new S_TextWord{C_str(text.c_str(), static_cast<size_t>(i)), style,
+                                                     static_cast<int16_t>(width)});
+                text = C_str(text.c_str() + i + 1);
+                width = 0;
+                i = 0;
+                continue;
+            }
+            width += advance;
+            i += bytes;
+        }
+    }
+    // The words split dropped. (Quirk kept: of more than one, the last stays, first. Fix: the
+    // dropped words deleted; the original leaks them.)
+    const int dropped = count == 1 ? 1 : count - 1;
+    for (int k = 0; k < dropped; ++k)
+        delete line->words[k];
+    line->words.erase(line->words.begin(), line->words.begin() + dropped);
+}
+
+float C_TextBox::JustifyGap(const S_TextLine *line) const
+{
+    int width = 0;
+    for (const S_TextWord *word : line->words)
+        width += word->width;
+    return (m_width - static_cast<float>(width)) / static_cast<float>(static_cast<int>(line->words.size()) - 1);
+}
+
+void C_TextBox::PlacePieces()
+{
+    for (S_TextPiece *piece : m_pieces) {
+        const S_TextStyleDesc *style = GetTextStyle(piece->style);
+        // (In the box's pixels from its corner, not offset by its place.)
+        const float x = style->x * m_width + 0.5f;
+        const float y = style->y * m_height + 0.5f;
+        switch (style->align) {
+        case 1:
+            piece->x = static_cast<int16_t>(static_cast<int>(x));
+            break;
+        case 2:
+            piece->x = static_cast<int16_t>(static_cast<int>(x - static_cast<float>(piece->width) * 0.5f));
+            break;
+        case 3:
+            piece->x = static_cast<int16_t>(static_cast<int>(x - static_cast<float>(piece->width)));
+            break;
+        }
+        switch (style->valign) {
+        case 1:
+            piece->y = static_cast<int16_t>(static_cast<int>(y));
+            break;
+        case 2:
+            piece->y = static_cast<int16_t>(static_cast<int>(static_cast<float>(piece->height) * 0.5f + y));
+            break;
+        case 3:
+            piece->y = static_cast<int16_t>(static_cast<int>(static_cast<float>(piece->height) + y));
+            break;
+        }
+        CheckPieceOverflow(piece);
+    }
+}
+
+bool C_TextBox::CheckLineOverflow(const S_TextLine *line)
+{
+    if (!m_overflows && line->remaining < 0)
+        m_overflows = true;
+    return m_overflows;
+}
+
+bool C_TextBox::CheckPieceOverflow(const S_TextPiece *piece)
+{
+    if (!m_overflows &&
+        (piece->y < 0 || piece->x < 0 || static_cast<float>(piece->height + piece->y) > m_height ||
+         static_cast<float>(piece->width + piece->x) > m_width))
+        m_overflows = true;
+    return m_overflows;
+}

@@ -20,7 +20,7 @@ struct S_TextStyleDesc {                                // 0x34 bytes
     float below;                                        // +0x18 a line's space below its base
     float above;                                        // +0x1C above its base (of the screen height)
     int unknown20;
-    int align;                                          // +0x24 1 left, 2 right, 3 centred
+    int align;                                          // +0x24 1 left, 2 centred, 3 right, 4 justified
     int valign;                                         // +0x28 the lines in the box: 1 top, 2 middle, 3 bottom
     uint8_t joins;                                      // +0x2C continues the line (0: a line of its own)
     uint8_t wraps;                                      // +0x2D wrapped into lines (0: one word)
@@ -30,6 +30,7 @@ struct S_TextStyleDesc {                                // 0x34 bytes
 // S_TextStyleDesc::flags30.
 constexpr uint32_t STYLE_PASSWORD = 0x04;               // drawn (and measured) as '*'
 constexpr uint32_t STYLE_NEW_LINE = 0x08;               // a joined run starts a new line
+constexpr uint32_t STYLE_AT_X = 0x10;                   // a word placed at the style's x (its line not aligned)
 
 // A new style (a copy of `desc`): its index.
 int CreateTextStyle(const S_TextStyleDesc &desc);       // 0x00643c00 (__fastcall; 0x006420b0)

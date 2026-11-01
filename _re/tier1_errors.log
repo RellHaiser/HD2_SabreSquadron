@@ -306,23 +306,11 @@ f_00638dc0.cpp:2096:13: invalid type argument of unary '*' (have 'uint32_t' {aka
     *DAT_008ae5b0 = (int)pvVar3;
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_00643b20.cpp:701:78: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
-    pCVar5 = (C_str *)C_str__CreateRep((C_str *)pCStack_10,this_01 + 2,
-f_00643b20.cpp:724:80: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
-    this_01 = (C_str *)C_str__CreateRep((C_str *)pCStack_30,pCVar5 + 2,
-f_00643b20.cpp:797:80: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
-    pCVar5 = (C_str *)C_str__CreateRep((C_str *)pCStack_1c,this_01 + 2,
-f_00643b20.cpp:1001:79: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
-    this_01 = (C_str *)C_str__CreateRep((C_str *)pCStack_10,pCVar10 + 2,
-f_00643b20.cpp:1014:11: '_bStack_24' was not declared in this scope; did you mean 'bStack_24'?
-    _bStack_24 = CONCAT31(uStack_23,bVar2);
-f_00643b20.cpp:1082:81: cannot convert 'tier1::C_str*' to 'uint32_t*' {aka 'unsigned int*'}
-    pCVar10 = (C_str *)C_str__CreateRep((C_str *)pCStack_14,this_01 + 2,
-f_00643b20.cpp:1542:55: void value not ignored as it ought to be
+f_00643b20.cpp:425:55: void value not ignored as it ought to be
     lVar13 = (*pIVar8->vtable->DrawPrimitives)(pIVar8,3,DAT_008acbf0 / 3,&DAT_008acbf8,1);
-f_00643b20.cpp:2927:7: '_local_18' was not declared in this scope; did you mean 'local_18'?
+f_00643b20.cpp:1810:7: '_local_18' was not declared in this scope; did you mean 'local_18'?
     _local_18 = CONCAT31(uStack_17,bVar2);
-f_00643b20.cpp:3520:85: cannot convert 'float*' to 'uint32_t*' {aka 'unsigned int*'}
+f_00643b20.cpp:2403:85: cannot convert 'float*' to 'uint32_t*' {aka 'unsigned int*'}
     FUN_0064cf30(gh_bitcast<uint32_t*>(pfVar9),gh_bitcast<uint32_t*>(pfVar9),pfVar9 + 7);
 f_0064d080.cpp:85:20: 'UNK_00813cb8' was not declared in this scope; did you mean 'PTR_00813ab8'?
     pbVar1[-1] = (&UNK_00813cb8)[iVar3] | (uint8_t)uVar2;

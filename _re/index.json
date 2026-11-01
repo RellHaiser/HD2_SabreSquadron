@@ -180710,7 +180710,7 @@
 "name": "Layout",
 "size": 1143,
 "lines": 216,
-"chars": 7307,
+"chars": 7294,
 "callers": [
 "00643ca0",
 "00643e40",
@@ -180901,10 +180901,10 @@
 "in_vtables": []
 },
 "00646ab0": {
-"name": "FUN_00646ab0",
+"name": "CheckLineOverflow",
 "size": 28,
 "lines": 10,
-"chars": 250,
+"chars": 217,
 "callers": [
 "006470d0",
 "00647250"
@@ -180917,10 +180917,10 @@
 "in_vtables": []
 },
 "00646ad0": {
-"name": "FUN_00646ad0",
+"name": "CheckPieceOverflow",
 "size": 101,
-"lines": 34,
-"chars": 1243,
+"lines": 17,
+"chars": 555,
 "callers": [
 "00647360"
 ],
@@ -180932,10 +180932,10 @@
 "in_vtables": []
 },
 "00646b40": {
-"name": "FUN_00646b40",
+"name": "Position",
 "size": 173,
-"lines": 39,
-"chars": 1007,
+"lines": 38,
+"chars": 901,
 "callers": [
 "00645590"
 ],
@@ -180958,10 +180958,10 @@
 "in_vtables": []
 },
 "00646bf0": {
-"name": "FUN_00646bf0",
+"name": "VAlignOffset",
 "size": 105,
 "lines": 25,
-"chars": 526,
+"chars": 454,
 "callers": [
 "00646b40"
 ],
@@ -180978,10 +180978,10 @@
 "in_vtables": []
 },
 "00646c60": {
-"name": "FUN_00646c60",
+"name": "TextHeight",
 "size": 123,
-"lines": 29,
-"chars": 821,
+"lines": 26,
+"chars": 720,
 "callers": [
 "00646bf0"
 ],
@@ -180993,10 +180993,10 @@
 "in_vtables": []
 },
 "00646ce0": {
-"name": "FUN_00646ce0",
+"name": "StackLines",
 "size": 71,
 "lines": 19,
-"chars": 547,
+"chars": 528,
 "callers": [
 "00646b40"
 ],
@@ -181008,10 +181008,10 @@
 "in_vtables": []
 },
 "00646d30": {
-"name": "FUN_00646d30",
+"name": "AlignLine",
 "size": 922,
-"lines": 142,
-"chars": 4698,
+"lines": 140,
+"chars": 4506,
 "callers": [
 "00647250"
 ],
@@ -181036,10 +181036,10 @@
 "in_vtables": []
 },
 "006470d0": {
-"name": "FUN_006470d0",
+"name": "PlaceWordsAtX",
 "size": 372,
 "lines": 68,
-"chars": 1795,
+"chars": 1853,
 "callers": [
 "00647250"
 ],
@@ -181061,10 +181061,10 @@
 "in_vtables": []
 },
 "00647250": {
-"name": "FUN_00647250",
+"name": "PlaceLines",
 "size": 261,
-"lines": 64,
-"chars": 1900,
+"lines": 65,
+"chars": 1794,
 "callers": [
 "00646b40"
 ],
@@ -181085,10 +181085,10 @@
 "in_vtables": []
 },
 "00647360": {
-"name": "FUN_00647360",
+"name": "PlacePieces",
 "size": 560,
 "lines": 87,
-"chars": 2685,
+"chars": 2558,
 "callers": [
 "00646b40"
 ],
@@ -181111,10 +181111,10 @@
 "in_vtables": []
 },
 "00647590": {
-"name": "FUN_00647590",
+"name": "JustifyGap",
 "size": 104,
 "lines": 22,
-"chars": 567,
+"chars": 553,
 "callers": [
 "00646d30"
 ],
@@ -181126,10 +181126,10 @@
 "in_vtables": []
 },
 "00647600": {
-"name": "FUN_00647600",
+"name": "SplitWords",
 "size": 19,
 "lines": 12,
-"chars": 227,
+"chars": 209,
 "callers": [
 "00646d30",
 "0064b7f0"
@@ -181147,10 +181147,10 @@
 "in_vtables": []
 },
 "00647620": {
-"name": "FUN_00647620",
+"name": "SplitWordsUtf8",
 "size": 1320,
-"lines": 303,
-"chars": 11369,
+"lines": 301,
+"chars": 11199,
 "callers": [
 "00647600"
 ],
@@ -181179,10 +181179,10 @@
 "in_vtables": []
 },
 "00647b50": {
-"name": "FUN_00647b50",
+"name": "SplitWordsBytes",
 "size": 1231,
-"lines": 288,
-"chars": 10849,
+"lines": 286,
+"chars": 10677,
 "callers": [
 "00647600"
 ],
@@ -181855,7 +181855,7 @@
 "name": "FUN_0064b7f0",
 "size": 734,
 "lines": 119,
-"chars": 3832,
+"chars": 3861,
 "callers": [
 "00649970"
 ],
@@ -182054,10 +182054,10 @@
 "in_vtables": []
 },
 "0064c010": {
-"name": "FUN_0064c010",
+"name": "text_word_valid_64c010",
 "size": 45,
-"lines": 22,
-"chars": 429,
+"lines": 20,
+"chars": 350,
 "callers": [
 "00647620",
 "00647b50"
@@ -182164,10 +182164,10 @@
 "in_vtables": []
 },
 "0064c100": {
-"name": "FUN_0064c100",
+"name": "text_style_valid_64c100",
 "size": 45,
-"lines": 22,
-"chars": 429,
+"lines": 20,
+"chars": 351,
 "callers": [
 "00647360"
 ],
