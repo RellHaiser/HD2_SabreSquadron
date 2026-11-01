@@ -96,6 +96,7 @@ I3D_RESULT I3D_face_group::Duplicate(I3D_face_group *src)
     return I3D_OK;
 }
 
+// LS3DRF 0x1001e390 (from LS3DF 0x10030d20)
 I3D_RESULT I3D_face_group::DuplicateMaterial()
 {
     if (!material || material->refCount < 2)
@@ -513,6 +514,7 @@ I3D_RESULT I3D_mesh::SetLevel(I3D_mesh_level *level, int index)
     return I3D_OK;
 }
 
+// LS3DRF 0x1001f260 (from LS3DF 0x10032020)
 I3D_RESULT I3D_mesh::Duplicate(I3D_mesh *src)
 {
     if (src == this)

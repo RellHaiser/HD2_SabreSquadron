@@ -305,6 +305,7 @@ void I3D_sector::Load()
 
 // ---------------------------------------------------------------- lights and sounds
 
+// LS3DRF 0x100296b0 (from LS3DF 0x1004ceb0)
 void I3D_sector::AddLight(I3D_light *light)
 {
     if (Contains(lights, light))
@@ -568,6 +569,7 @@ void I3D_sector::SetBox(const I3D_bbox &newBox)
     frameFlags &= ~FRMFLAGS_BOUND_VALID;
 }
 
+// LS3DRF 0x10029d40 (from LS3DF 0x1004d580)
 void I3D_sector::MakeReady()
 {
     if (!numVertices)

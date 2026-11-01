@@ -91,6 +91,7 @@ struct S_vector {
     bool operator==(const S_vector &v) const { return x == v.x && y == v.y && z == v.z; }
     bool operator!=(const S_vector &v) const { return !(*this == v); }
 
+    // LS3DRF 0x10006ff0 (from LS3DF 0x1000c680)
     // (z * v.z + y * v.y) + x * v.x, as the out-of-line copy 0x1000c680.
     float Dot(const S_vector &v) const { return v.z * z + v.y * y + v.x * x; }
     S_vector Cross(const S_vector &v) const                                  // 0x1002ec40

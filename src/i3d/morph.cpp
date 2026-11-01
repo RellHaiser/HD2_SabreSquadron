@@ -95,7 +95,7 @@ void C_morph::Uninit()
     }
 }
 
-// 0x10034ff0
+// LS3DRF 0x10020940 (from LS3DF 0x10034ff0)
 void C_morph::SetWeight(int channel, int target, float weight)
 {
     weights[numTargets * channel + target] = weight;
@@ -256,7 +256,7 @@ void C_morph::Load()
 
 // I3D_morph --------------------------------------------------------------------------------------
 
-// 0x100356f0
+// LS3DRF 0x10020fd0 (from LS3DF 0x100356f0)
 void I3D_morph::Init()
 {
     I3D_object::Init();
