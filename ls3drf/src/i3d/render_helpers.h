@@ -65,7 +65,6 @@ void SelectLights(I3D_visual *visual, S_visualLights &lights, uint32_t mask);
 // `dst` gets mirrored copies of the lights of `src` (g_renderMirror's reflection; the copies are
 // device lights of their own, made on first use, refreshed once per mirror pass) (0x10064260).
 void MirrorLights(const S_visualLights &src, S_visualLights &dst);
-// (InvalidateLights, 0x100647f0: i3d_links.h.)
 
 // 0x100695a0 (an I3D_bbox method): the corners of a box (16 bytes apart, w unset) in a static
 // array: x from max to min, then y, then z from min to max.

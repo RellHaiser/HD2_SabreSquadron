@@ -14,33 +14,21 @@
 #include "igraph/igraph.h"
 
 class ITexture;
-namespace ls3d::platform {
-struct Mutex;
-struct Thread;
-}  // namespace ls3d::platform
 
 namespace ls3d::ig {
 
 extern S_IGraphInit g_init;                     // 0x100d1d18
-extern D3DPRESENT_PARAMETERS g_presentParams;   // 0x100d1740
 extern D3DVIEWPORT8 g_viewport;                 // 0x100d1cf0 the device viewport (the I3D renderer sets it too)
-extern D3DDEVTYPE g_deviceType;                 // 0x100a7804 (HAL; REF with IG_REFERENCE)
 extern HWND g_mainWnd;                          // 0x100d19ec
 extern HWND g_childWnd;                         // 0x100d1894
 extern bool g_initialized;                      // 0x100d2195
 extern bool g_inScene;                          // 0x100d2194 between BeginScene and EndScene
-extern bool g_inactive;                         // 0x100d2190 the application is in the background
 extern bool g_noActivation;                     // 0x100d2191 ignore WM_ACTIVATE
 
 extern uint32_t g_caps;                         // 0x100d1dac IGCAPS_*
 extern uint32_t g_quirks;                       // 0x100d215c IGQ_* below
 extern int g_maxTextureWidth;                   // 0x100d2128
 extern int g_maxTextureHeight;                  // 0x100d1ce8
-// (Port enhancement, LS3DF.ini AnisotropicFiltering) the maximum anisotropy in use: the option
-// capped by the device, 0 when off or unsupported (Init).
-extern int g_anisotropy;
-// The minifying filter of "linear" filtering (driver state 0): anisotropic with g_anisotropy.
-inline DWORD LinearMinFilter() { return g_anisotropy ? D3DTEXF_ANISOTROPIC : D3DTEXF_LINEAR; }
 
 // Texture formats chosen in Init (D3DFMT_UNKNOWN: not available).
 extern D3DFORMAT g_fmt16Bit;                    // 0x100d1da8 R5G6B5 / X1R5G5B5 / A1R5G5B5
@@ -64,7 +52,8 @@ extern DWORD g_vsFarPlane;                      // 0x100d21b4 transformed by c0.
 extern D3DMATRIX g_texProjectXY;
 extern D3DMATRIX g_texProjectXZ;
 
-// IGraph::SetState's cache of device states (-1 / unset values force the next set).
+// The renderer's cache of device states (IGraph::SetState's in LS3DF; -1 / unset values force the
+// next set).
 struct S_stateCache {
     int alpha;                                  // 0x100d1ef0 IGS_ALPHA
     int blend;                                  // 0x100d1a88 IGS_BLEND
@@ -91,7 +80,7 @@ struct S_stateCache {
     int unknown1780;                            // 0x100d1780 (renderer, 0x10037010)
 };
 extern S_stateCache g_rs;
-// D3DRS_ZENABLE value of IGS_ZENABLE (0x100a6340): D3DZB_TRUE, or D3DZB_USEW (the driver's w-buffer state).
+// D3DRS_ZENABLE value of LS3DF's IGS_ZENABLE (0x100a6340): D3DZB_TRUE, or D3DZB_USEW (the driver's w-buffer state).
 extern int g_zBufferType;
 
 // The renderer's material for meshes without colors of their own (0x100d1ba0: white diffuse,
@@ -104,12 +93,6 @@ extern C_vector<ITexture *> g_uncachedTextures; // 0x100d19cc
 extern ITexture *g_defaultTexture;              // 0x100d21b8 8 x 8 white
 extern ITexture *g_bumpAnimTextures[17];        // 0x100d1df8 BumpAnim_00.dds ...
 extern uint16_t g_textureId;                    // 0x100d2192 last ITexture::id given out
-
-// The texture loading thread (IG_TEXTURE_THREAD).
-extern platform::Mutex *g_textureLock;          // 0x100d1720
-extern volatile int g_frameCounter;             // 0x100a7864 Flip count, under g_textureLock
-extern platform::Thread *g_textureThread;       // 0x100d21c8
-extern bool g_textureThreadRun;                 // 0x100d21c7
 
 // Hardware quirks (g_quirks), from the device caps and known adapters.
 enum : uint32_t {
@@ -138,24 +121,9 @@ inline void SetSpecular(int on)
     }
 }
 
-// Input (igraph_input.cpp; no DirectInput in this build).
-void ResetInputState();
-bool KeyboardUsesMessages();
-void QueueChar(int ch);
-// IGKEY_WINDOW_MESSAGES: a key from the window's messages (DIK_* code, 0: none) and its character.
-void KeyMessage(int key, int ch);
-
 // IGraph::ResizeImage (resize_image.cpp).
 bool ResizeImage(int srcWidth, int srcHeight, int srcPitch, const uint8_t *src, int dstWidth, int dstHeight,
                  int dstPitch, uint8_t **dst, int bpp, bool filter);
-
-// Applies the engine's default device states and resets the cache (0x1006a710).
-void ResetDeviceStates();
-// After a lost device or at Init: releases the default-pool buffers, resets the device (if
-// `reset`) and re-creates the vertex shaders (0x1006be50).
-HRESULT RestoreDevice(bool reset);
-// The "!! Error detected" log line of a failed DirectX call (IGraph.cpp line numbers kept).
-void LogDxError(HRESULT hr, int line);
 
 }  // namespace ls3d::ig
 

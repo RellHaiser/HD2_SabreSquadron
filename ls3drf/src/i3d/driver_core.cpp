@@ -62,8 +62,6 @@ int g_state37Value;
 // Cleared by Init (0x100aded0).
 int g_driverUnknownADED0;
 
-bool UseWBuffer() { return g_driverStates[DRVSTATE_WBUFFER] != 0; }
-
 bool LightmapsTrueColor()
 {
     if (g_driverStates[DRVSTATE_LM_TRUECOLOR])
@@ -76,15 +74,6 @@ bool LightmapsTrueColor()
         EnhancementLog("TrueColorLightmaps: driver state 0x22 (32-bit lightmaps) is off, kept on");
     }
     return true;
-}
-
-void ReapplyDriverStates()
-{
-    for (int i = 0; i < DRVSTATE_COUNT; ++i) {
-        const uint32_t value = g_driverStates[i];
-        g_driverStates[i] = 0xffffffffu;
-        g_driver->SetState(i, value);
-    }
 }
 
 }  // namespace ls3d::i3d

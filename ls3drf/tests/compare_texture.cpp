@@ -15,7 +15,7 @@
 //
 // test-sources: src/igraph/*.cpp src/core/debug.cpp src/core/cpu.cpp src/core/enhance.cpp src/dx/dxerr8.cpp src/i3d/ib_manager.cpp src/i3d/vb_manager.cpp
 // test-sources: tests/d3d8/gfx_d3d8.cpp
-// test-sources: src/platform/win32/platform_win32.cpp tests/win32/window_win32.cpp
+// test-sources: src/platform/win32/platform_win32.cpp
 #include <windows.h>
 
 #include <float.h>
@@ -46,10 +46,6 @@ namespace ls3d {
 namespace i3d {
 I3D_driver *g_driver;
 uint32_t g_renderStats[8];
-void ReapplyDriverStates() {}
-bool UseWBuffer() { return false; }
-void InvalidateLights() {}
-int InitParticleBuffers() { return 0; }
 }  // namespace i3d
 }  // namespace ls3d
 

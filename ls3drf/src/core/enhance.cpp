@@ -32,9 +32,6 @@ S_enhancements ReadIni()
     if (GetFileAttributesA(path) == INVALID_FILE_ATTRIBUTES)
         return o;
     auto get = [&](const char *key) { return static_cast<int>(GetPrivateProfileIntA("Graphics", key, 0, path)); };
-    const int aniso = get("AnisotropicFiltering");
-    o.anisotropy = aniso < 2 ? 0 : aniso > 16 ? 16 : aniso;
-    o.trilinear = get("TrilinearFiltering") != 0;
     o.mipmaps = get("ImprovedMipmaps") != 0;
     o.trueColorTextures = get("TrueColorTextures") != 0;
     o.trueColorLightmaps = get("TrueColorLightmaps") != 0;

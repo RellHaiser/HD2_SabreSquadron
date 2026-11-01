@@ -3,8 +3,6 @@
 // original (the compare_* tests run that way).
 //
 //   [Graphics]
-//   AnisotropicFiltering=16    ; 2 - 16: anisotropic texture filtering (capped by the device); 0: off
-//   TrilinearFiltering=1       ; mip levels always blended (driver state 2 raised to linear)
 //   ImprovedMipmaps=1          ; gamma-correct, alpha-weighted mip maps; colour-keyed textures keep
 //                              ; their alpha-tested coverage at every level
 //   TrueColorTextures=1        ; textures from image files in A8R8G8B8 (not 16-bit or DXT)
@@ -14,8 +12,6 @@
 namespace ls3d {
 
 struct S_enhancements {
-    int anisotropy;                         // AnisotropicFiltering (0: off, else 2 - 16)
-    bool trilinear;                         // TrilinearFiltering
     bool mipmaps;                           // ImprovedMipmaps
     bool trueColorTextures;                 // TrueColorTextures
     bool trueColorLightmaps;                // TrueColorLightmaps

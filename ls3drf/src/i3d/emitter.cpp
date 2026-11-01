@@ -126,40 +126,6 @@ S_renderItem &QueueItem(I3D_emitor *e)
 
 namespace ls3d::i3d {
 
-// 0x1003ac00
-int InitParticleBuffers()
-{
-    FreeIB(&s_ib);
-    for (S_VBAlloc &vb : s_vbs) {
-        FreeVB(&vb);
-        vb = {};
-    }
-    s_ib = {};
-    if (!g_ibManager.Alloc(D3DUSAGE_SOFTWAREPROCESSING, 0x7ffe, &s_ib))
-        return I3DERR_OUTOFMEM;
-    // Two triangles per quad: 0 1 2, 2 1 3. (The buffer stays locked until the renderer unlocks
-    // the managers' buffers.)
-    uint16_t *index = s_ib.buffer->Lock(0) + s_ib.offset;
-    for (int i = 0; i < kMaxQuads; ++i) {
-        const uint16_t base = static_cast<uint16_t>(i * 4);
-        index[0] = base;
-        index[1] = static_cast<uint16_t>(base + 1);
-        index[2] = static_cast<uint16_t>(base + 2);
-        index[3] = static_cast<uint16_t>(base + 2);
-        index[4] = static_cast<uint16_t>(base + 1);
-        index[5] = static_cast<uint16_t>(base + 3);
-        index += 6;
-    }
-    for (S_VBAlloc &vb : s_vbs) {
-        vb = {};
-        if (!g_vbManager.Alloc(D3DUSAGE_WRITEONLY, sizeof(S_particleVertex), kMaxQuads * 4, &vb, 2, false))
-            return I3DERR_OUTOFMEM;
-        if (vb.offset != 0)
-            dbgPrintf("!! ERROR !!!  InitParticle() - StartIndex != 0 !!!!!");
-    }
-    return I3D_OK;
-}
-
 // 0x1003ae10
 void FlushParticles()
 {
@@ -639,7 +605,7 @@ S_particleVertex *I3D_emitor::LockVertices(int numQuads, float sortDepth)
             dbgPrintf("ERROR !! - I3D_emitor::LockVRAMVBuffer() - Allocate more memory for global particle VB !! %d", numQuads);
             return nullptr;
         }
-        if (!vb)                            // (fix: no buffers, InitParticleBuffers failed)
+        if (!vb)                            // (fix: no buffers; nothing creates them)
             return nullptr;
         g_pGfx->Lock(vb, 0, 0, &s_lockedVertices, 0);
         firstQuad = 0;
@@ -829,7 +795,7 @@ void I3D_emitor::Draw(const S_renderItem *item)
     g_pGfx->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
     g_pGfx->SetRenderState(D3DRS_LIGHTING, FALSE);
     const S_VBAlloc &vb = s_vbs[s_vbIndex];
-    if (vb.buffer) {                        // (fix: no buffers, InitParticleBuffers failed)
+    if (vb.buffer) {                        // (fix: no buffers; nothing creates them)
         SetVertexFormat(static_cast<int>(vb.buffer->format), false);
         g_pGfx->SetIndices(s_ib.ib, vb.offset + first);
         g_pGfx->SetStreamSource(0, vb.vb, vb.buffer->stride);
