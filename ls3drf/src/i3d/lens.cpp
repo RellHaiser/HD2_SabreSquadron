@@ -133,7 +133,7 @@ void I3D_lens::Uninit()
     I3D_frame::Uninit();
 }
 
-// 0x10007ef0
+// LS3DRF 0x10003d70 (from LS3DF 0x10007ef0)
 I3D_RESULT I3D_lens::Duplicate(I3D_frame *source)
 {
     if (!source || source == this)
@@ -179,7 +179,7 @@ I3D_RESULT I3D_lens::Duplicate(I3D_frame *source)
     return I3D_OK;
 }
 
-// 0x10009610
+// LS3DRF 0x10003f50 (from LS3DF 0x10009610)
 void I3D_lens::Load()
 {
     I3D_frame::Load();

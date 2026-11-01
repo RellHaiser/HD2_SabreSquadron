@@ -459,6 +459,7 @@ void I3D_pose::SetDirSet(const S_vector &dir, float roll)
 
 I3D_pose_set::I3D_pose_set() : refCount(1) {}
 
+// LS3DRF 0x10025000 (from LS3DF 0x100434f0)
 I3D_pose_set::~I3D_pose_set()
 {
     for (I3D_pose *pose : poses)

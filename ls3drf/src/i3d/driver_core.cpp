@@ -297,7 +297,7 @@ const char *I3D_driver::GetFrameTypeName(int type)
     return s_unknown;
 }
 
-// 0x1001a000
+// LS3DRF 0x100103e0 (from LS3DF 0x1001a000)
 const char *I3D_driver::GetVisualTypeName(uint32_t fourCC)
 {
     switch (fourCC) {

@@ -72,7 +72,7 @@ void LogGuid(const GUID *guid)
     }
 }
 
-// 0x10069680
+// LS3DRF 0x10030fd0 (from LS3DF 0x10069680)
 void ReportError(HRESULT code, int severity, const char *text, uintptr_t context)
 {
     if (g_errorCallback)

@@ -93,7 +93,7 @@ void I3D_object::Uninit()
     I3D_frame::Uninit();
 }
 
-// 0x10038410
+// LS3DRF 0x10022160 (from LS3DF 0x10038410)
 void I3D_object::Load()
 {
     I3D_frame::Load();
@@ -133,7 +133,7 @@ I3D_RESULT I3D_object::SetMesh(I3D_mesh *newMesh, uint32_t)
     return I3D_OK;
 }
 
-// 0x10036160
+// LS3DRF 0x10021930 (from LS3DF 0x10036160)
 I3D_RESULT I3D_object::DuplicateMesh()
 {
     if (!mesh || mesh->refCount <= 1)
@@ -175,7 +175,7 @@ void I3D_object::RefreshLevels()
     }
 }
 
-// 0x100361e0
+// LS3DRF 0x100219b0 (from LS3DF 0x100361e0)
 I3D_RESULT I3D_object::Duplicate(I3D_frame *source)
 {
     if (!source || source == this)

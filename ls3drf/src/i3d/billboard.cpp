@@ -96,7 +96,7 @@ I3D_RESULT I3D_billboard::SetMesh(I3D_mesh *newMesh, uint32_t flags)
     return I3D_OK;
 }
 
-// 0x100060d0
+// LS3DRF 0x100025b0 (from LS3DF 0x100060d0)
 I3D_RESULT I3D_billboard::Duplicate(I3D_frame *source)
 {
     if (!source || source == this)

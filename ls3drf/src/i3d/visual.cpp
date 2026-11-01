@@ -28,6 +28,7 @@ int VisualIndex(uint32_t fourCC)
 
 uint32_t __stdcall I3D_visual::GetVisualType() { return VisualFourCC(visualIndex); }
 
+// LS3DRF 0x1002e3e0 (from LS3DF 0x10056fa0)
 void I3D_visual::Init()
 {
     I3D_frame::Init();

@@ -59,6 +59,7 @@ void I3D_area::Uninit()
     I3D_frame::Uninit();
 }
 
+// LS3DRF 0x10001b10 (from LS3DF 0x10005640)
 void I3D_area::SetScene(I3D_scene *newScene)
 {
     if (scene && prevInScene) {
@@ -153,11 +154,13 @@ void I3D_area::MatrixChanged()
     }
 }
 
+// LS3DRF 0x10002410 (from LS3DF 0x10005f40)
 void I3D_area::Load()
 {
     dbgPrintf("** nepodporovany typ:%s  LoadImage()  %s", g_driver->GetFrameTypeName(type), name ? name : "");
 }
 
+// LS3DRF 0x10001fe0 (from LS3DF 0x10005b10)
 I3D_RESULT I3D_area::Build(const void *verts, int numVerts, const I3D_triface *tris, int numTris, int stride)
 {
     // (The original frees its arrays first: duplicating itself read them freed. They go after

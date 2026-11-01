@@ -153,6 +153,7 @@ void I3D_scene::Uninit()
     I3D_frame::Uninit();
 }
 
+// LS3DRF 0x10026e10 (from LS3DF 0x10047910)
 void I3D_scene::Tick(int time)
 {
     for (int i = 0; i < tickFrames.Size(); ++i) {
@@ -335,6 +336,7 @@ float I3D_scene::GetLightIntensity(const S_vector &pos, I3D_sector *sector, uint
     return 1.0f;
 }
 
+// LS3DRF 0x100266a0 (from LS3DF 0x100471a0)
 void I3D_scene::SetActiveCamera(I3D_camera *camera)
 {
     if (activeCamera == camera)
@@ -398,6 +400,7 @@ I3D_RESULT I3D_scene::UnmapScreenPoint(int x, int y, S_vector4 &origin, S_vector
     return I3D_OK;
 }
 
+// LS3DRF 0x10026ba0 (from LS3DF 0x100476a0)
 I3D_RESULT I3D_scene::TransformPoints(const S_vector4 *points, S_vector4 *out, int count)
 {
     if (!activeCamera)
@@ -588,6 +591,7 @@ I3D_sector *I3D_scene::GetSector(const S_vector &pos)
     return primarySector;
 }
 
+// LS3DRF 0x100273b0 (from LS3DF 0x10048270)
 void I3D_scene::SetBackdropRange(float nearRange, float farRange)
 {
     if (!(std::fabs(farRange - nearRange) >= 0.01f) || !(nearRange >= 0.001f) || !(farRange >= 0.001f))
@@ -690,6 +694,7 @@ void I3D_scene::Close()
 
 // ---------------------------------------------------------------- weather and visuals
 
+// LS3DRF 0x10027430 (from LS3DF 0x10048330)
 void I3D_scene::SetWorldSpace(bool value)
 {
     g_worldSpace = value;
@@ -702,6 +707,7 @@ void I3D_scene::SetWorldSpace(bool value)
         SetVisualWorldSpace(c);
 }
 
+// LS3DRF 0x100278b0 (from LS3DF 0x10048e60)
 void I3D_scene::ResetWeather()
 {
     const uint32_t old = weatherFlags;
@@ -951,6 +957,7 @@ void I3D_scene::MakeDummyBox(S_dummyBox &out, I3D_frame *frame)
 
 // ---------------------------------------------------------------- drawn dummies
 
+// LS3DRF 0x100280c0 (from LS3DF 0x10049690)
 void I3D_scene::AddDrawnDummy(I3D_frame *dummy)
 {
     if (dummy->frameFlags & FRMFLAGS_SCENE_DUMMY)
@@ -961,6 +968,7 @@ void I3D_scene::AddDrawnDummy(I3D_frame *dummy)
     }
     S_dummyBox box;
     MakeDummyBox(box, dummy);
+    // LS3DRF 0x10028f30 (from LS3DF 0x1004c4c0): C_vector<S_dummyBox>::PushBack, out of line.
     drawnDummies.PushBack(box);
     dummy->frameFlags |= FRMFLAGS_SCENE_DUMMY;
 }
@@ -984,6 +992,7 @@ S_dummyBox *I3D_scene::GetDrawnDummies() { return drawnDummies.Data(); }
 
 // ---------------------------------------------------------------- tracked models
 
+// LS3DRF 0x10028c00 (from LS3DF 0x1004be80)
 I3D_RESULT I3D_scene::AddTrackedModel(I3D_frame *model, I3D_frame *refA, I3D_frame *refB)
 {
     if (!model || !refA || !refB || refA == refB)
