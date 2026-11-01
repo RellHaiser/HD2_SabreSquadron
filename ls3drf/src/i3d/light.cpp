@@ -170,6 +170,7 @@ void __stdcall I3D_light::SetOn(bool on)
     MatrixChanged();
 }
 
+// LS3DRF 0x10018980 (from LS3DF 0x10022cb0): d3dLight is not copied.
 I3D_RESULT __stdcall I3D_light::Duplicate(I3D_frame *source)
 {
     if (!source)
@@ -201,12 +202,13 @@ I3D_RESULT __stdcall I3D_light::Duplicate(I3D_frame *source)
         attenuation[2] = src->attenuation[2];
         coneInner = src->coneInner;
         coneOuter = src->coneOuter;
-        d3dLight = src->d3dLight;
         MatrixChanged();
     }
     return I3D_OK;
 }
 
+// LS3DRF 0x100181d0 (from LS3DF 0x10022500): LS3DRF stores the same values in a block of its own at
+// +0x1f0 (position +0, direction +0x10, range +0x20, attenuations +0x28 - +0x30), not in d3dLight.
 void I3D_light::MatrixChanged()
 {
     lightFlags |= 5;
@@ -266,6 +268,7 @@ void I3D_light::MatrixChanged()
     }
 }
 
+// LS3DRF 0x10018b20 (from LS3DF 0x10022e60): d3dLight is left as it was.
 void I3D_light::Load()
 {
     I3D_frame::Load();
@@ -281,44 +284,17 @@ void I3D_light::Load()
     coneRange = ConeRange(range, coneOuter);
     coneRangeWorld = coneRange * worldScale;
     SetConeCenter<SquareYZX>(*this);
-    SetConeCosines(*this);
-    if (lightType == I3DLIGHT_POINT)
-        d3dLight.Type = D3DLIGHT_POINT;
-    else if (lightType == I3DLIGHT_SPOT)
-        d3dLight.Type = D3DLIGHT_SPOT;
-    else if (lightType == I3DLIGHT_DIRECTIONAL)
-        d3dLight.Type = D3DLIGHT_DIRECTIONAL;
-    d3dLight.Diffuse.r = effectiveColor.x;
-    d3dLight.Range = range * worldScale;
-    d3dLight.Diffuse.g = effectiveColor.y;
-    d3dLight.Diffuse.b = effectiveColor.z;
-    d3dLight.Specular.r = effectiveSpecular.x;
-    d3dLight.Specular.g = effectiveSpecular.y;
-    d3dLight.Specular.b = effectiveSpecular.z;
-    d3dLight.Ambient.r = effectiveAmbient.x;
-    d3dLight.Ambient.g = effectiveAmbient.y;
-    d3dLight.Ambient.b = effectiveAmbient.z;
-    d3dLight.Falloff = falloff;
-    d3dLight.Attenuation0 = attenuation[0];
-    d3dLight.Theta = coneInner;
-    d3dLight.Phi = coneOuter;
     lightFlags = 5;
-    d3dLight.Attenuation1 = attenuation[1] / worldScale;
-    d3dLight.Attenuation2 = attenuation[2] / (worldScale * worldScale);
+    SetConeCosines(*this);
 }
 
+// LS3DRF 0x10017660 (from LS3DF 0x100217e0): d3dLight is left as it was.
 void __stdcall I3D_light::SetLightType(int newType)
 {
     const int old = lightType;
     if (old == newType)
         return;
     lightFlags |= 5;
-    if (newType == I3DLIGHT_POINT)
-        d3dLight.Type = D3DLIGHT_POINT;
-    else if (newType == I3DLIGHT_SPOT)
-        d3dLight.Type = D3DLIGHT_SPOT;
-    else if (newType == I3DLIGHT_DIRECTIONAL)
-        d3dLight.Type = D3DLIGHT_DIRECTIONAL;
     if (old == I3DLIGHT_AMBIENT) {
         for (int i = sectors.Size(); i > 0; --i)
             sectors[i - 1]->sectorFlags |= SCTF_AMBIENT_CHANGED;
@@ -360,6 +336,7 @@ void __stdcall I3D_light::SetLightType(int newType)
     }
 }
 
+// LS3DRF 0x10017960 (from LS3DF 0x10021b10): d3dLight is left as it was.
 // (The original copies a fourth dword after the colors given, and an unset value into the
 // effective colors' fourth dwords.)
 void __stdcall I3D_light::SetColorRGB(float r, float g, float b)
@@ -367,79 +344,64 @@ void __stdcall I3D_light::SetColorRGB(float r, float g, float b)
     color = S_vector(r, g, b);
     lightFlags |= 5;
     effectiveColor = S_vector((power * color.x) * 0.5f, (color.y * power) * 0.5f, (color.z * power) * 0.5f);
-    d3dLight.Diffuse.r = effectiveColor.x;
-    d3dLight.Diffuse.b = effectiveColor.z;
-    d3dLight.Diffuse.g = effectiveColor.y;
     NotifySectors();
 }
 
+// LS3DRF 0x10017850 (from LS3DF 0x100219e0): d3dLight is left as it was.
 void __stdcall I3D_light::SetColor(const S_vector &c)
 {
     lightFlags |= 5;
     color = c;
     effectiveColor = S_vector((power * color.x) * 0.5f, (color.y * power) * 0.5f, (color.z * power) * 0.5f);
-    d3dLight.Diffuse.r = effectiveColor.x;
-    d3dLight.Diffuse.b = effectiveColor.z;
-    d3dLight.Diffuse.g = effectiveColor.y;
     NotifySectors();
 }
 
+// LS3DRF 0x10017a70 (from LS3DF 0x10021c50): d3dLight is left as it was.
 void __stdcall I3D_light::SetSpecularColor(const S_vector &c)
 {
     lightFlags |= 5;
     specularColor = c;
     effectiveSpecular = S_vector((specularPower * specularColor.x) * 0.5f, (specularColor.y * specularPower) * 0.5f,
                                  (specularColor.z * specularPower) * 0.5f);
-    d3dLight.Specular.r = effectiveSpecular.x;
-    d3dLight.Specular.b = effectiveSpecular.z;
-    d3dLight.Specular.g = effectiveSpecular.y;
     NotifySectors();
 }
 
+// LS3DRF 0x10017b80 (from LS3DF 0x10021db0): d3dLight is left as it was.
 void __stdcall I3D_light::SetAmbientColor(const S_vector &c)
 {
     lightFlags |= 5;
     ambientColor = c;
     effectiveAmbient = S_vector((ambientPower * ambientColor.x) * 0.5f, (ambientColor.y * ambientPower) * 0.5f,
                                 (ambientColor.z * ambientPower) * 0.5f);
-    d3dLight.Ambient.r = effectiveAmbient.x;
-    d3dLight.Ambient.b = effectiveAmbient.z;
-    d3dLight.Ambient.g = effectiveAmbient.y;
     NotifySectors();
 }
 
+// LS3DRF 0x10017c90 (from LS3DF 0x10021ee0): d3dLight is left as it was.
 void __stdcall I3D_light::SetPower(float p)
 {
     power = p;
     lightFlags |= 5;
     effectiveColor = S_vector((power * color.x) * 0.5f, (color.y * power) * 0.5f, (color.z * power) * 0.5f);
-    d3dLight.Diffuse.r = effectiveColor.x;
-    d3dLight.Diffuse.b = effectiveColor.z;
-    d3dLight.Diffuse.g = effectiveColor.y;
     NotifySectors();
 }
 
+// LS3DRF 0x10017d90 (from LS3DF 0x10022000): d3dLight is left as it was.
 void __stdcall I3D_light::SetSpecularPower(float p)
 {
     specularPower = p;
     lightFlags |= 5;
     effectiveSpecular = S_vector((specularPower * specularColor.x) * 0.5f, (specularColor.y * specularPower) * 0.5f,
                                  (specularColor.z * specularPower) * 0.5f);
-    d3dLight.Specular.r = effectiveSpecular.x;
-    d3dLight.Specular.b = effectiveSpecular.z;
-    d3dLight.Specular.g = effectiveSpecular.y;
     NotifySectors();
 }
 
+// LS3DRF 0x10017e90 (from LS3DF 0x10022120): d3dLight is left as it was.
 void __stdcall I3D_light::SetAmbientPower(float p)
 {
     ambientPower = p;
     lightFlags |= 5;
     effectiveAmbient = S_vector((ambientPower * ambientColor.x) * 0.5f, (ambientColor.y * ambientPower) * 0.5f,
                                 (ambientColor.z * ambientPower) * 0.5f);
-    d3dLight.Ambient.r = effectiveAmbient.x;
-    d3dLight.Ambient.b = effectiveAmbient.z;
-    d3dLight.Ambient.g = effectiveAmbient.y;
     NotifySectors();
 }
 
@@ -485,13 +447,12 @@ void __stdcall I3D_light::SetFogRange(float nearRange, float farRange)
     range = farRange;
 }
 
+// LS3DRF 0x100180c0 (from LS3DF 0x100223d0): d3dLight is left as it was.
 void __stdcall I3D_light::SetCone(float inner, float outer)
 {
     lightFlags |= 5;
     coneOuter = outer > kPi ? kPi : outer;
     coneInner = inner > coneOuter ? coneOuter : inner;
-    d3dLight.Phi = coneOuter;
-    d3dLight.Theta = coneInner;
     SetConeCosines(*this);
     for (int i = sectors.Size(); i > 0; --i)
         ++sectors[i - 1]->lightChanges;
