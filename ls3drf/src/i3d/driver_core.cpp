@@ -78,16 +78,17 @@ bool LightmapsTrueColor()
 
 }  // namespace ls3d::i3d
 
-// 0x100151c0
-I3D_driver::I3D_driver() : unknown04(0), mirrorStamp(0) {}
+// LS3DRF 0x1000eb50 (from LS3DF 0x100151c0): the vectors and mirrorStamp (LS3DRF's driver has no
+// lightmapTextures or scenes vectors). Init sets unknown04.
+I3D_driver::I3D_driver() : mirrorStamp(0) {}
 
-// 0x10015210
+// LS3DRF 0x1000eb80 (from LS3DF 0x10015210): no projection buffers to free (LS3DRF's projector
+// makes none).
 I3D_driver::~I3D_driver()
 {
     if (g_driverInitialized)
         dbgPrintf("!! I3D_driver was initialised, but not closed");
     FreeSkinBuffers();
-    FreeProjectionBuffers();
 }
 
 // 0x100152c0
@@ -326,7 +327,8 @@ const char *I3D_driver::GetVisualTypeName(uint32_t fourCC)
 
 namespace ls3d::i3d {
 
-// 0x10018e40
+// LS3DRF 0x1000f430 (from LS3DF 0x10018e40): the same types; the objects are LS3DF's sizes and
+// members (LS3DRF's light and scene are 0x30 smaller).
 I3D_frame *CreateFrameObject(int type)
 {
     // (The original reads the free list of any type; only 0 - 16 have one.)

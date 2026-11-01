@@ -26,8 +26,6 @@ void RenderProjectors();
 void FlushParticles();
 // The skinned visuals' shared buffers freed (0x10053b90, singlemesh.cpp).
 void FreeSkinBuffers();
-// The projectors' shared geometry buffers freed (0x10001470, projector.cpp).
-void FreeProjectionBuffers();
 void EndParticles();
 
 // Mirrors (mirror.cpp): visibility and the reflection's setup (0x10032e50), the reflected pass

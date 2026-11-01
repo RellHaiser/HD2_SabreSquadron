@@ -18,6 +18,8 @@
 
 class I3D_frame {
 public:
+    // LS3DRF 0x1000f9c0 (from LS3DF 0x100193f0): the vtable only (Init sets the fields); the frame
+    // factory's derived constructors call it.
     I3D_frame() = default;
     I3D_frame(const I3D_frame &) = delete;
     I3D_frame &operator=(const I3D_frame &) = delete;
@@ -67,6 +69,9 @@ public:
     virtual void __stdcall SetHierarchyAlpha(float alpha);
     // 0x58 0x1001e7d0: bound of the frame and its children (world space).
     virtual void __stdcall UpdateBound();
+    // LS3DRF 0x100100b0 (from LS3DF 0x10019c00): the scalar deleting destructor of the frames and
+    // visuals with nothing of their own to destroy (16 vtables in both); it calls 0x1000fba0.
+    // LS3DRF 0x1000fba0 (from LS3DF 0x10019740): their destructor, a jmp to this one.
     // 0x5C: scalar deleting destructor (only when the driver frees its free lists).
     virtual ~I3D_frame() = default;
     // Internal slots 0x60 - 0x70 are __thiscall.

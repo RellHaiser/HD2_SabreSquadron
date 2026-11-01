@@ -189,7 +189,7 @@ void I3D_projector::Uninit()
     I3D_frame::Uninit();
 }
 
-// 0x10043960
+// LS3DRF 0x10025390 (from LS3DF 0x10043960): the sector is left as it was.
 I3D_RESULT I3D_projector::Duplicate(I3D_frame *source)
 {
     if (!source || source == this)
@@ -209,7 +209,6 @@ I3D_RESULT I3D_projector::Duplicate(I3D_frame *source)
         SetOpacity(src->opacity);
         SetMode(src->mode);
         SetBuffered(src->buffered);
-        sector = nullptr;
         return I3D_OK;
     }
     case FourCC("LENS"):
@@ -299,15 +298,6 @@ void I3D_projector::SetBuffered(uint32_t value)
     buffered = value;
     projFlags = 0;
     receiverSum = 0;
-}
-
-// 0x10043d50
-void I3D_projector::MatrixChanged()
-{
-    if (!(visualFlags & VISF_WORLD_SPACE) && (frameFlags & (FRMFLAGS_CHANGED | FRMFLAGS_CHILD_CHANGED))) {
-        visualFlags &= ~(VISF_WBOUND_VALID | VISF_INVMATRIX_VALID);
-        sector = nullptr;
-    }
 }
 
 // 0x10046130

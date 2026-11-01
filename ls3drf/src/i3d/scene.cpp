@@ -95,6 +95,8 @@ int FloatToInt(float f) { return static_cast<int>(f); }   // __ftol: truncation
 
 // ---------------------------------------------------------------- frame slots
 
+// LS3DRF 0x1000fbb0 (from LS3DF 0x100195d0): the members' destructors. LS3DRF's scene has no
+// shadows, mirrors or lensFlares vectors to destroy.
 I3D_scene::~I3D_scene() {}
 
 void I3D_scene::Init()
