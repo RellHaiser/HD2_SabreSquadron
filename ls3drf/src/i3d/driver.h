@@ -126,10 +126,6 @@ public:
     ls3d::C_vector<ITexture *> lightmapTextures;                        // +0x28 the lightmap atlas textures
     ls3d::C_vector<I3D_scene *> scenes;                                 // +0x38
     int16_t mirrorStamp;                                                // +0x48 counts the mirrors made (I3D_mirror::stamp)
-
-private:
-    // 0x100163c0: a material textured with a bitmap resource of LS3DF.dll.
-    I3D_material *LoadResourceMaterial(const char *id);
 };
 static_assert(sizeof(I3D_driver) == 0x4C, "I3D_driver layout");
 
