@@ -434,20 +434,7 @@ void I3D_shadow::SetMode(int newMode)
     lightStamp = -1;
 }
 
-// 0x1004ef80
-void I3D_shadow::MatrixChanged()
-{
-    if (scene)
-        return;
-    // (Every sector above joins, not only the nearest.)
-    for (I3D_frame *p = parent; p; p = p->parent) {
-        if (p->type == FRAME_SECTOR) {
-            static_cast<I3D_sector *>(p)->scene->AddShadow(this);
-            shadowFlags = 0;
-            lightStamp = -1;
-        }
-    }
-}
+void I3D_shadow::MatrixChanged() {}
 
 // 0x1004f030
 void I3D_shadow::Close()
