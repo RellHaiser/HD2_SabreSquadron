@@ -5820,6 +5820,35 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/mission_loader.txt (2 added: the vector copy, the dead reader); 2 functions in
     ported.txt. Stats: 7,839 of 12,294 functions by hand (72.4 % by size).
 
+  PART 9 PLAN (2026-10-31): the menus (0x00611200..0x006b0000, ~1,990 functions left, 511 KB). The
+  screens are LS3D scenes whose named frames are the controls ("bback", "text_screen",
+  "barrow up*", "listbox*", "slider*"; the layouts are not in the unpacked data); a widget toolkit
+  under them; the menu states over it (C_MenuState 0x00815850 and its screens, already switched
+  to by the game's state machine). Bottom-up, by address:
+  9a the fonts and text (0x0063c740..0x006441a0, 28 KB: FontConfig.hxml, the languages' fonts,
+    the class of vtable 0x00813b0c);
+  9b the controls' base (0x006441a0..0x0064dce0, 35 KB: the code the controls share, the classes
+    of vtables 0x00815420 and 0x008158f8);
+  9c the controls (0x0064dce0..0x0066b010, 109 KB: about 40 classes of 33 slots on one base at
+    0x0064dce0, the 135-slot one 0x00814f58 and the larger 0x00814298 / 0x008144b8 / 0x00814760 /
+    0x00814980 / 0x008155d8: buttons, yes / no boxes, list boxes, sliders, scroll arrows, the
+    skills' and the hotkeys' texts; split by class when started);
+  9d the menu states' base (0x0066b010..0x0066f0b0, 15 KB: C_MenuState, the slots its screens
+    share, the cursor, the confirmation);
+  9e the in-game menu C_GameMenu (vtable 0x00815750; 0x0067b070..0x00688130, 50 KB);
+  9f the equipment menu (C_EquipmentMenu / C_EquipmentMenuBase; 0x0066f0b0..0x0067b070, 46 KB:
+    the body's slots, the item groups, the store);
+  9g the campaign's screens: the squad menu (0x00690be0..0x00697090, 25 KB: HumanStore.def, the
+    medals, the hero stats), the debriefing and the diary (0x0068c520..0x00690be0, 17 KB), the
+    operation's end, the session menu and the movies / credits / subtitles (0x00688130..
+    0x0068c520, 16 KB);
+  9h the main menu C_MainMenu (vtable 0x00815e30; 0x00611200..0x0063c740, 155 KB, its screens by
+    the dispatcher 0x006271e0: the profiles and the saved games 0x00614140 / 0x0061cfc0, the
+    options 0x00623e30, the multiplayer game's set-up and map list 0x00628610 / 0x0062a060, the
+    join and team status 0x0062cd50, the server browser 0x00631c20 / 0x00632150; split by screen);
+  9i the rest (0x00697090..0x006b0000, 15 KB: the leftovers among the ported multiplayer code, the
+    key names' texts).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
