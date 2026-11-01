@@ -4,7 +4,6 @@
 class I3D_frame;
 class I3D_mirror;
 class I3D_scene;
-class I3D_shadow;
 class I3D_visual;
 
 namespace ls3d::i3d {
@@ -12,11 +11,6 @@ namespace ls3d::i3d {
 // The sectors seen from the camera through the portals (portal_render.cpp, 0x10042fc0): each
 // visible sector's visible visuals chained in renderVisuals with this frame's renderStamp.
 void TraverseSectors(I3D_scene *scene);
-
-// Shadows (shadow.cpp): each of the scene's before the sector pass (0x10050590), the queued
-// ones' geometry built after the visuals (0x10050cc0; driver state DRVSTATE_SHADOWS).
-void PrepareShadow(I3D_shadow *shadow);
-void RenderShadows();
 
 // Projectors (projector.cpp, 0x10044190; driver state DRVSTATE_PROJECTORS).
 void RenderProjectors();

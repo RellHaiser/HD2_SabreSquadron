@@ -31,7 +31,6 @@
 #include "i3d/render_state.h"
 #include "i3d/scene.h"
 #include "i3d/sector.h"
-#include "i3d/shadow.h"
 #include "i3d/singlemesh.h"
 #include "i3d/sound.h"
 #include "i3d/target.h"
@@ -367,7 +366,8 @@ I3D_frame *CreateFrameObject(int type)
     return f;
 }
 
-// 0x10019750
+// LS3DRF 0x1000fc90 (from LS3DF 0x10019750): types 0 - 9, no shadow visual; the objects are LS3DF's
+// sizes and members (LS3DRF's projector, mirror and emitor are smaller).
 I3D_frame *CreateVisualObject(int index)
 {
     // (Fix: the original reads the free list of any index, past the 16 lists.)
@@ -378,9 +378,13 @@ I3D_frame *CreateVisualObject(int index)
         g_visualFreeLists[index] = f->nextSibling;
     } else {
         switch (index) {
+        // LS3DRF 0x10010070 (from LS3DF 0x10019be0): I3D_visual's constructor (its two vtable
+        // pointers), which each type but 3 calls first.
         case 0: f = new I3D_object; break;
         case 1: f = new I3D_lit_object; break;
         case 2: f = new I3D_singlemesh; break;
+        // LS3DRF 0x10010050 (from LS3DF 0x10019b90): the constructor of a base of the single morph,
+        // called here: I3D_object's in LS3DRF, I3D_singlemesh's in LS3DF.
         case 3: f = new I3D_singlemorph; break;
         case 4: f = new I3D_billboard; break;
         case 5: f = new I3D_morph; break;
@@ -388,8 +392,7 @@ I3D_frame *CreateVisualObject(int index)
         case 7: f = new I3D_projector; break;
         case 8: f = new I3D_mirror; break;
         case 9: f = new I3D_emitor; break;
-        case 11: f = new I3D_shadow_visual; break;
-        default:                            // 10: LNDP, not in this engine
+        default:                            // 10: LNDP, 11: SHD; not in this engine
             return nullptr;
         }
         if (!f) {

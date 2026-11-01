@@ -14,7 +14,6 @@
 #include "i3d/light.h"
 #include "i3d/portal.h"
 #include "i3d/render_state.h"
-#include "i3d/shadow.h"
 #include "i3d/vb_manager.h"
 #include "i3d/visual.h"
 #include "igraph/igraph.h"
@@ -1259,12 +1258,3 @@ void SetFog(int on, int mode, float start, float end, uint32_t color)
 }
 
 }  // namespace ls3d::i3d
-
-// 0x10048070
-I3D_RESULT I3D_scene::RemoveShadow(I3D_shadow *shadow)
-{
-    if (!shadows.RemoveSwap(shadow))
-        return I3DERR_OBJECTNOTFOUND;
-    shadow->scene = nullptr;
-    return I3D_OK;
-}
