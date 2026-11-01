@@ -252,10 +252,11 @@ public:
     int sectorCount;                        // +0x268
     I3D_sector *firstSector;                // +0x26C ring (I3D_sector::prevInScene / nextInScene)
     int sectorChangesSeen;                  // +0x270 g_sectorChanges when UpdateSectors last ran
+    // The occluder ring: Init's zeros, nothing joins it (no occlusion).
     int occluderCount;                      // +0x274
     I3D_occluder *firstOccluder;            // +0x278 ring (I3D_occluder::prevInScene / nextInScene)
     bool occludersChanged;                  // +0x27C set when one joins
-    bool occluderListsStale;                // +0x27D the sectors' lists need RebuildOccluderLists
+    bool occluderListsStale;                // +0x27D the sectors' occluder lists need rebuilding
     uint8_t padding27E[2];
     int areaCount;                          // +0x280
     I3D_area *firstArea;                    // +0x284 ring (I3D_area::prevInScene / nextInScene)

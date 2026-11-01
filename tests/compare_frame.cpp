@@ -9,8 +9,7 @@
 // and Direct3D lights (each side on its own fake device, the LightEnable calls compared), the
 // sectors' geometry (hull planes, portals; made in both with each side's allocators), lights,
 // environments, inside tests and their scene rings (two zeroed blocks per side stand in for
-// scenes), the occluders' meshes, scene rings and occlusion volumes (frame 4 is the render camera
-// of both) and the renderer's occlusion passes over them, the areas' meshes, inside tests and
+// scenes), the occluders' meshes and their sectors, the areas' meshes, inside tests and
 // scene ring (their sounds wait for the sound frame's port), and the models' animation: each model
 // owns three named frames of its own (frames 40 - 51, not chosen by the other operations), plays
 // animation sets built the same in both (keys, notes) on its stack, with poses and pose sets; the
@@ -34,6 +33,13 @@
 // attenuation, fog range and cone setters and its Duplicate, LS3DRF's, leave the Direct3D light as
 // it was: the test takes their writes of it out of the original's (0x100217e0 - 0x100223d0,
 // 0x10022cb0).
+//
+// The port's occluder, LS3DRF's, has no occlusion: its MatrixChanged is the frame's (empty) and
+// its Uninit leaves no scene ring. The test points the original's occluder slot 0x68 at the
+// frame's empty one (0x100881e0) and takes the SetScene(nullptr) call out of its Uninit
+// (0x100385f6), a call that changes nothing here: no occluder joins a ring (the original's only
+// other caller left, UpdateOcclusionVolume, is not called). The occluders' world vertices and
+// face planes, allocated and never filled, are not compared.
 //
 // The original's RebalanceNameTree leaves the left link of the last frame of a run of equal
 // names as it was (frame.cpp fixes it); the test clears those links in the original after each of
@@ -466,8 +472,7 @@ void CompareOccluder(int i, uint8_t *o, I3D_occluder *q)
     // (the vertices' fourth dwords: unset)
     for (int k = 0; k < nv; ++k) {
         for (int c = 0; c < 3; ++c) {
-            if (!SameField(Field<uint8_t *>(o, 0x128) + 16 * k + 4 * c, reinterpret_cast<uint8_t *>(q->vertices) + 16 * k + 4 * c) ||
-                !SameField(Field<uint8_t *>(o, 0x12C) + 16 * k + 4 * c, reinterpret_cast<uint8_t *>(q->worldVertices) + 16 * k + 4 * c))
+            if (!SameField(Field<uint8_t *>(o, 0x128) + 16 * k + 4 * c, reinterpret_cast<uint8_t *>(q->vertices) + 16 * k + 4 * c))
                 Fail("occluder vertices", i, 0x128);
         }
     }
@@ -476,10 +481,6 @@ void CompareOccluder(int i, uint8_t *o, I3D_occluder *q)
                std::memcmp(Field<uint8_t *>(o, 0x140), q->neighborEdges, 3 * nf) ||
                std::memcmp(Field<uint8_t *>(o, 0x148), q->faceFlags, 2 * nf)))
         Fail("occluder faces / edges", i, 0x130);
-    for (int k = 0; k < 4 * nf; ++k) {
-        if (!SameField(Field<uint8_t *>(o, 0x144) + 4 * k, reinterpret_cast<uint8_t *>(q->facePlanes) + 4 * k))
-            Fail("occluder face planes", i, 0x144);
-    }
     const bool ring = q->scene != nullptr;
     for (size_t off : {0x134, 0x138, 0x5E8, 0x5EC}) {
         if ((off == 0x134 || off == 0x138) && !ring)
@@ -1332,7 +1333,7 @@ void RunOp()
     uint8_t *o = g_orig[i];
     I3D_frame *p = g_port[i];
     char text[160];
-    switch (Rand(54)) {
+    switch (Rand(53)) {
     case 0:
     case 1: {
         const S_vector v = RandVector();
@@ -1924,26 +1925,16 @@ void RunOp()
         break;
     }
     case 44: {
-        // An occluder: a new mesh, the renderer's view flag and depth, its sector (as MakeReady
-        // links them), or its occlusion volume.
+        // An occluder: a new mesh or its sector (as MakeReady links them).
         const int q = Rand(kFrames / 10) * 10 + 7;
         auto *occ = static_cast<I3D_occluder *>(g_port[q]);
         uint8_t *oq = g_orig[q];
-        const int k = Rand(5);
+        const int k = Rand(2);
         std::snprintf(text, sizeof text, "occluder %d op %d", q, k);
         g_lastOp = text;
         switch (k) {
         case 0: MakeOccluderMesh(q); break;
-        case 1:
-            occ->frameFlags ^= FRMFLAGS_IN_VIEW;
-            Field<uint32_t>(oq, 0xE0) ^= FRMFLAGS_IN_VIEW;
-            break;
-        case 2: {
-            occ->viewDepth = Rand(4) ? RandF(0.0f, 60.0f) : RandF(-5.0f, 0.0f);
-            std::memcpy(oq + 0x5F0, &occ->viewDepth, 4);
-            break;
-        }
-        case 3: {
+        default: {
             const int sIdx = Rand(kFrames / 10) * 10 + 6;
             auto *sector = static_cast<I3D_sector *>(g_port[sIdx]);
             if (sector->occluder || occ->ownerSector)
@@ -1952,40 +1943,6 @@ void RunOp()
             occ->ownerSector = sector;
             Field<void *>(g_orig[sIdx], 0x284) = oq;
             Field<void *>(oq, 0x5EC) = g_orig[sIdx];
-            break;
-        }
-        default:
-            OrigFn<void(__fastcall *)(void *, void *)>(0x100390f0)(oq, nullptr);
-            occ->UpdateOcclusionVolume();
-            break;
-        }
-        break;
-    }
-    case 45: {
-        // The renderer's passes: a scene's occluder lists, a sector's portals, the occlusion of the
-        // rendered sectors (sector flags 1 and 0x80 toggled in both first, now and then).
-        const int k = Rand(2);
-        const int sIdx = Rand(kFrames / 10) * 10 + 6;
-        const int m = Rand(4);
-        std::snprintf(text, sizeof text, "occlusion pass %d scene %d sector %d", m, k, sIdx);
-        g_lastOp = text;
-        switch (m) {
-        case 0:
-            OrigFn<void(__fastcall *)(void *)>(0x10039ee0)(g_origScenes[k]);
-            RebuildOccluderLists(PortScene(k));
-            break;
-        case 1:
-            OrigFn<void(__fastcall *)(void *)>(0x1003a5a0)(g_orig[sIdx]);
-            OccludePortals(static_cast<I3D_sector *>(g_port[sIdx]));
-            break;
-        case 2:
-            OrigFn<void(__fastcall *)(void *)>(0x1003a000)(g_origScenes[k]);
-            OccludeSectors(PortScene(k));
-            break;
-        default: {
-            const uint32_t bit = Rand(2) ? SCTF_VISIBLE : SCTF_ON_PATH;
-            static_cast<I3D_sector *>(g_port[sIdx])->sectorFlags ^= bit;
-            Field<uint32_t>(g_orig[sIdx], 0x160) ^= bit;
             break;
         }
         }
@@ -2188,7 +2145,7 @@ void RunOp()
         }
         break;
     }
-    case 53: {
+    case 45: {
         // An animation set's keys.
         const int si = Rand(kSets);
         uint8_t *os = g_origSets[si];
@@ -2244,24 +2201,8 @@ void RunOp()
 
 // Keeps the frames' values realistic (see the top): out-of-range scales and positions are reset
 // in both, the way the SDK's inline setters would.
-// How often the occlusion paths had something to work on (printed at the end).
-long g_seenActive, g_seenStraddle, g_seenOccludedPortal, g_seenInScene, g_seenListed;
 void CountCoverage()
 {
-    bool active = false, straddle = false, portal = false, inScene = false, listed = false;
-    for (int i = 0; i < kFrames; ++i) {
-        if (TypeOf(i) == FRAME_OCCLUDER) {
-            const auto *q = static_cast<const I3D_occluder *>(g_port[i]);
-            active |= (q->occluderFlags & OCCF_ACTIVE) != 0;
-            straddle |= (q->occluderFlags & OCCF_STRADDLES_PORTALS) != 0;
-            inScene |= q->scene != nullptr;
-        } else if (TypeOf(i) == FRAME_SECTOR) {
-            const auto *sector = static_cast<const I3D_sector *>(g_port[i]);
-            listed |= sector->occluders != nullptr;
-            for (const I3D_portal *pt : sector->portals)
-                portal |= (pt->portalFlags & PRTF_OCCLUDED) != 0;
-        }
-    }
     for (int m = 9; m < kFrames; m += 10) {
         const I3D_anim_stack *stack = static_cast<const I3D_model *>(g_port[m])->animStack;
         if (!stack)
@@ -2275,11 +2216,6 @@ void CountCoverage()
         g_seenPosed += posed;
         g_seenPlaying += playing;
     }
-    g_seenActive += active;
-    g_seenStraddle += straddle;
-    g_seenOccludedPortal += portal;
-    g_seenInScene += inScene;
-    g_seenListed += listed;
 }
 
 void Sanitize()
@@ -2416,8 +2352,8 @@ void PatchOrigLightSetters()
     PatchNops(0x10022e4d, copyLight, sizeof copyLight);                           // Duplicate
 }
 
-// LS3DRF's LinkTo, sector SetScene and MatrixChanged and occluder LinkTo in the original, and the
-// port's portal destructor (`occluder`: one of its occluders).
+// LS3DRF's LinkTo, sector SetScene and MatrixChanged and occluder LinkTo, MatrixChanged and Uninit
+// in the original, and the port's portal destructor (`occluder`: one of its occluders).
 void PatchOrigScenePasses(uint8_t *occluder)
 {
     static const uint8_t linkTail[] = {0x83, 0xbe, 0xf8, 0x00, 0x00, 0x00, 0x0c};    // cmp [esi+0xf8], 0xc
@@ -2429,15 +2365,24 @@ void PatchOrigScenePasses(uint8_t *occluder)
     static const uint8_t ownScene[] = {0x8b, 0x86, 0xa0, 0x01, 0x00, 0x00};          // mov eax, [esi+0x1a0]
     static const uint8_t noScene[] = {0x31, 0xc0, 0x90, 0x90, 0x90, 0x90};           // xor eax, eax
     PatchCode(0x1003ed6f, ownScene, noScene, sizeof ownScene);
-    void **slot = *reinterpret_cast<void ***>(occluder) + 0x38 / 4;
-    if (*slot != &Orig<uint8_t>(0x10038730)) {
-        std::printf("the original's occluder LinkTo is not where it was\n");
-        std::exit(2);
+    static const uint8_t leaveScene[] = {0x6a, 0x00, 0x8b, 0xce, 0xe8, 0x11, 0x00, 0x00, 0x00};    // SetScene(nullptr)
+    PatchNops(0x100385f6, leaveScene, sizeof leaveScene);
+    void **const vtable = *reinterpret_cast<void ***>(occluder);
+    const struct {
+        int offset;
+        uint32_t was, now;
+    } slots[] = {{0x38, 0x10038730, 0x1001d680}, {0x68, 0x100387c0, 0x100881e0}};    // LinkTo, MatrixChanged
+    for (const auto &s : slots) {
+        void **slot = vtable + s.offset / 4;
+        if (*slot != &Orig<uint8_t>(s.was)) {
+            std::printf("the original's occluder slot 0x%x is not where it was\n", s.offset);
+            std::exit(2);
+        }
+        DWORD old;
+        VirtualProtect(slot, 4, PAGE_READWRITE, &old);
+        *slot = &Orig<uint8_t>(s.now);
+        VirtualProtect(slot, 4, old, &old);
     }
-    DWORD old;
-    VirtualProtect(slot, 4, PAGE_READWRITE, &old);
-    *slot = &Orig<uint8_t>(0x1001d680);
-    VirtualProtect(slot, 4, old, &old);
 }
 
 }  // namespace
@@ -2521,7 +2466,7 @@ int main(int argc, char **argv)
     }
     g_origPoseSet = CallV<uint8_t *>(g_origDriver, 0x78);
     g_portPoseSet = new I3D_pose_set;
-    // The stand-in scenes' primary sectors; frame 4 renders; occlusion on.
+    // The stand-in scenes' primary sectors; frame 4 renders.
     for (int k = 0; k < 2; ++k) {
         g_origPrimary[k] = OrigCreate(FRAME_SECTOR);
         g_portPrimary[k] = static_cast<I3D_sector *>(PortCreate(FRAME_SECTOR, nullptr));
@@ -2532,8 +2477,6 @@ int main(int argc, char **argv)
     }
     Orig<void *>(0x100d127c) = g_orig[4];
     g_renderCamera = static_cast<I3D_camera *>(g_port[4]);
-    Orig<uint32_t>(0x100be058 + 4 * DRVSTATE_OCCLUSION) = 1;
-    g_driverStates[DRVSTATE_OCCLUSION] = 1;
     g_lastOp = "create";
     CompareAll();
     for (g_op = 0; g_op < ops; ++g_op) {
@@ -2542,9 +2485,7 @@ int main(int argc, char **argv)
         CountCoverage();
         Sanitize();
     }
-    std::printf("coverage (operations after which): occluder active %ld, straddling %ld, portal occluded %ld, "
-                "occluder in a scene %ld, sector occluder list %ld; IsInside true %ld\n",
-                g_seenActive, g_seenStraddle, g_seenOccludedPortal, g_seenInScene, g_seenListed, g_seenInside);
+    std::printf("coverage: IsInside true %ld\n", g_seenInside);
     std::printf("animation coverage: callbacks %ld; model stacks with tracks %ld, posed %ld, playing %ld\n",
                 g_seenCallbacks, g_seenTracks, g_seenPosed, g_seenPlaying);
     std::printf("compare_frame: %ld operations, seed %u: identical\n", ops, seed);

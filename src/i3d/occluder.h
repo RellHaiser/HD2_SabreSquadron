@@ -7,6 +7,10 @@
 // to the camera and one turned away. Occluders then hide farther occluders, visuals and portals
 // that lie entirely inside those planes (OccludeSectors, OccludePortals). Sectors make one of
 // their geometry on request (I3D_sector::MakeReady).
+//
+// LS3DRF's occluder is only its mesh and its sector: its MatrixChanged is empty and it joins no
+// scene's ring, and there is no occlusion volume or pass, so the world vertices and face planes
+// stay unfilled and the renderer's fields at their Init values.
 #pragma once
 
 #include "i3d/frame.h"
@@ -21,9 +25,6 @@ enum : uint32_t {
     OCCF_STRADDLES_PORTALS = 0x4,           // the camera sees both sides of its sector's portals
 };
 
-// (renderer) The frame is inside the view this frame.
-constexpr uint32_t FRMFLAGS_IN_VIEW = 0x00010000;
-
 class I3D_occluder : public I3D_frame {
 public:
     static constexpr int kMaxSilhouettePlanes = 35;    // 32 + the 3 edges of the last face
@@ -34,20 +35,12 @@ public:
     // 0x60 / 0x64 0x10038490 / 0x10038550
     void Init() override;
     void Uninit() override;
-    // 0x68 0x100387c0: world vertices, face planes and the bounding sphere.
-    void MatrixChanged() override;
+    // (MatrixChanged: the frame's, as in LS3DRF.)
     // 0x70 0x1003a960: the counts, vertices and faces.
     void Load() override;
     // 0x74 0x10038c40: the mesh from `numVerts` vertices `stride` bytes apart and their triangles.
     virtual I3D_RESULT __stdcall Build(const void *verts, int numVerts, const I3D_triface *tris, int numTris,
                                        int stride);
-
-    // 0x10038610: the scene's occluder ring (I3D_scene::firstOccluder); always leaves the old ring
-    // first, so the same scene moves the occluder to the ring's end.
-    void SetScene(I3D_scene *newScene);
-    // 0x100390f0: the occlusion volume as seen from g_renderCamera (OCCF_ACTIVE when it has one).
-    // An occluder outside a scene takes its sector's scene instead.
-    void UpdateOcclusionVolume();
 
 private:
     // 0x10038d60: the face across each edge (neighbors, neighborEdges) and the face flags.
@@ -96,19 +89,3 @@ static_assert(offsetof(I3D_occluder, frontPlanes) == 0x390, "I3D_occluder layout
 static_assert(offsetof(I3D_occluder, nearPlane) == 0x5B0, "I3D_occluder layout");
 static_assert(offsetof(I3D_occluder, center) == 0x5D0, "I3D_occluder layout");
 static_assert(offsetof(I3D_occluder, viewDepth) == 0x5F0, "I3D_occluder layout");
-
-namespace ls3d::i3d {
-
-// The renderer's occlusion passes.
-// 0x10039ee0: when the scene's occluders changed, every sector's list of the occluders in it
-// (not inside cameras or other sectors), the primary sector's last.
-void RebuildOccluderLists(I3D_scene *scene);
-// 0x1003a5a0: the sector's occluders get their volumes; its portals entirely hidden by one get
-// PRTF_OCCLUDED (outgoing ones the camera sees from the front, incoming ones without another side
-// from the back).
-void OccludePortals(I3D_sector *sector);
-// 0x1003a000: with occlusion on (driver state 0x27), in each rendered sector the nearer occluders
-// hide farther ones, then the visuals of its render list.
-void OccludeSectors(I3D_scene *scene);
-
-}  // namespace ls3d::i3d
