@@ -83,6 +83,7 @@ constexpr uint32_t FRAME_MASK_ANY = 0xFFFF;
 // Single types in such masks (bit type-1).
 constexpr uint32_t FRAME_MASK_VISUAL = 1u << (FRAME_VISUAL - 1);
 constexpr uint32_t FRAME_MASK_DUMMY = 1u << (FRAME_DUMMY - 1);
+constexpr uint32_t FRAME_MASK_CAMERA = 1u << (FRAME_CAMERA - 1);
 constexpr uint32_t FRAME_MASK_USER = 1u << (FRAME_USER - 1);
 constexpr uint32_t FRAME_MASK_LIGHT = 1u << (FRAME_LIGHT - 1);
 constexpr uint32_t FRAME_MASK_VOLUME = 1u << (FRAME_VOLUME - 1);
@@ -1151,6 +1152,8 @@ public:
     // primary and the omni sector at the mission's start).
     I3DMETHOD(void, SetEnvironment)(int id) = 0;              // 0x94
 
+    // Drawn this frame (+0x160 bit 0; LS3DF: SCTF_VISIBLE, the volumetrics' test).
+    bool IsVisible() const { return (Field<uint32_t>(0x160) & 1) != 0; }
     // Portals of this sector (leading to GetConnected()).
     int NumPortals() const { return Field<int>(0x254); }
     I3D_portal *GetPortal(int i) const { return Field<I3D_portal **>(0x24C)[i]; }
@@ -1192,9 +1195,10 @@ public:
     I3D_SLOTS_4(60, 64, 68, 6C);                              // LS3DF: Init, Uninit, MatrixChanged, Slot6C
     I3D_SLOT(70);                                             // LS3DF: Load
     I3DMETHOD(void, SetFOV)(float radians) = 0;               // 0x74
-    I3D_SLOT(78);                                             // LS3DF: SetNearSectorFOV
+    // The near sector's projection (LS3DF: the first-person view's weapon is drawn with it).
+    I3DMETHOD(void, SetNearSectorFOV)(float radians) = 0;     // 0x78
     I3DMETHOD(void, SetRange)(float nearRange, float farRange) = 0;   // 0x7C
-    I3D_SLOT(80);                                             // LS3DF: SetNearSectorRange
+    I3DMETHOD(void, SetNearSectorRange)(float nearRange, float farRange) = 0;   // 0x80
     // The interface's camera: 2 and on (meanings inferred: an orthogonal projection and its
     // scale).
     I3DMETHOD(void, SetOrthoScale)(float scale) = 0;          // 0x84
@@ -1202,6 +1206,7 @@ public:
     I3DMETHOD(void, SetAspectRatio)(float aspect) = 0;        // 0x8C (field +0x138)
 
     float GetFOV() const { return Field<float>(0x120); }
+    float GetNearSectorFOV() const { return Field<float>(0x12C); }
     void GetRange(float &nearRange, float &farRange) const
     {
         nearRange = Field<float>(0x124);
@@ -1285,12 +1290,15 @@ public:
     I3D_SLOT(DC);                                             // LS3DF: LocateSector
     // Sector containing `pos`, null if none.
     I3DMETHOD(I3D_sector *, GetSector)(const S_vector &pos) = 0;  // 0xE0
-    I3D_SLOT(E4);                                             // LS3DF: SetBackdropRange
+    // scene2.bin's chunk 0x3211: its two floats (the first at least 0.1; meaning not identified).
+    I3DMETHOD(void, UnknownE4)(float a, float b) = 0;         // 0xE4
     I3D_SLOT(E8);                                             // LS3DF: UpdateFrameSectorIdle
     // Re-evaluates which sector `frame` belongs to after it was moved to `pos`.
     I3DMETHOD(void, UpdateFrameSector)(PI3D_frame frame, const S_vector &pos) = 0;   // 0xEC
-    I3D_SLOT(F0);                                             // LS3DF: UpdateSectors
-    I3D_SLOT(F4);                                             // LS3DF: Open
+    // Called by C_game::LoadMission after the scene's file (meaning not identified).
+    I3DMETHOD(void, UnknownF0)() = 0;                         // 0xF0
+    // Loads the scene file `name` (the loading screen: flags 0, no callback; failed: < 0).
+    I3DMETHOD(HRESULT, Open)(const char *name, uint32_t flags, void *callback, void *context) = 0;   // 0xF4
     // Frees the scene's contents (C_game::FreeMission).
     I3DMETHOD(void, Close)() = 0;                             // 0xF8
     // The frame a ray from `from` along `dir` hits first, null: none (the interface's visual
@@ -1313,7 +1321,11 @@ public:
     // Weather simulation parameter (E_WeatherParam); floats are passed as their bits.
     I3DMETHOD(void, SetWeather)(int param, uint32_t value) = 0;   // 0x11C
 
-    I3D_SLOTS_4(120, 124, 128, 12C);                          // LS3DF: GetWeather, ResetWeather, AddDrawnDummy, RemoveDrawnDummy
+    I3D_SLOT(120);                                            // LS3DF: GetWeather
+    I3D_SLOT(124);                                            // LS3DF: ResetWeather
+    // Called for the frames scene2.bin's chunk 0xB820 names (meaning not identified).
+    I3DMETHOD(void, Unknown128)(I3D_frame *frame) = 0;        // 0x128
+    I3D_SLOT(12C);                                            // LS3DF: RemoveDrawnDummy
     // The dummies drawn in the last frame, as boxes (LS3DF 0x10049800 / 0x10049810; the effects
     // module keeps rain off the soldiers under them).
     I3DMETHOD(int, NumDrawnDummies)() = 0;                    // 0x130
@@ -1345,11 +1357,18 @@ public:
     I3D_frame *GetFirstPersonRoot() const { return Field<I3D_frame *>(0x204); }
     // Listener of the 3D sound (moves with the camera).
     class I3D_sound_listener *GetSoundListener() const { return Field<class I3D_sound_listener *>(0x28C); }
+    // +0x210: scene2.bin's chunk 0x3200, three floats (meaning not identified; the original also
+    // writes +0x21C from its stack).
+    void SetUnknown210(const S_vector &v) { MutableField<S_vector>(0x210) = v; }
 
 private:
     template <class T> const T &Field(size_t offset) const
     {
         return *reinterpret_cast<const T *>(reinterpret_cast<const uint8_t *>(this) + offset);
+    }
+    template <class T> T &MutableField(size_t offset)
+    {
+        return *reinterpret_cast<T *>(reinterpret_cast<uint8_t *>(this) + offset);
     }
 };
 

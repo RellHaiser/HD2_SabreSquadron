@@ -247,7 +247,7 @@ bool C_Junkers88::ReadProperties(C_chunk &chunk)        // 0x005f29f0
             chunk.Ascend();
             break;
         case PROP_UNKNOWN_400:
-            chunk.Read(m_unknown328);
+            chunk.Read(m_gunFov);
             chunk.Ascend();
             break;
         case PROP_UNKNOWN_500:

@@ -517,7 +517,7 @@ void C_FirstPersonView::ResetAimView()
     m_fov = GetGame()->GetCutsceneFOV();
     m_fov2 = FOV2_NORMAL;
     GetCameraModule()->SetFov(m_fov);
-    GetCameraModule()->SetFov2(m_fov2);
+    GetCameraModule()->SetNearSectorFov(m_fov2);
     GetGame()->GetInterface()->SetViewMode(C_PlayerController::VIEW_NORMAL);
 }
 
@@ -691,7 +691,7 @@ void C_FirstPersonView::UpdateView(int timeDelta)
         }
         GetCameraModule()->SetFov(fov);
     }
-    float fov2 = GetCameraModule()->GetFov2();
+    float fov2 = GetCameraModule()->GetNearSectorFov();
     if (fov2 == m_fov2)
         return;
     if (fov2 <= m_fov2) {
@@ -703,7 +703,7 @@ void C_FirstPersonView::UpdateView(int timeDelta)
         if (fov2 < m_fov2)
             fov2 = m_fov2;
     }
-    GetCameraModule()->SetFov2(fov2);
+    GetCameraModule()->SetNearSectorFov(fov2);
 }
 
 // When the animation playing ends within this frame: what follows it.

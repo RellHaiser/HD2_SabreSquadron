@@ -139,7 +139,7 @@ uint32_t C_MainMenu__FUN_00628610(C_MainMenu *_this,int *param_1,int *param_2, .
   }
   param_1 = 0;
   do {
-    uVar6 = FUN_006acb80((int)param_1);
+    uVar6 = GetGameTypeTextId((int)param_1);
     puVar3 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000067,uVar6);
     local_4 = 8;
     FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar3);

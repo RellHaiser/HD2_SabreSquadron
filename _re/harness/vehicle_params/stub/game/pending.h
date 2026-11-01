@@ -15,6 +15,7 @@ class I3D_scene;
 extern I3D_scene *g_carScene;
 
 #include "common/c_str.h"
+#include "game/camera_module.h"                       // C_CameraFrameKeeper (the real header)
 
 // The game's texts (C_Car's name).
 class C_GameTexts {
@@ -22,6 +23,7 @@ public:
     C_str Get(int id) const;
 };
 extern C_GameTexts g_texts;
+int GetGameTypeTextId(int gameType);                    // (the loading screen, part 8f-i)
 
 // --- the car's seats (game/car_seats.cpp; as the real header declares them) ---------------------
 class C_Actor;
@@ -101,16 +103,7 @@ public:
     void SetUnknownC8(int value);
 };
 extern C_NetReplication *g_netReplication;
-class alignas(16) C_CameraFrameKeeper {
-public:
-    C_CameraFrameKeeper(C_Actor *owner, I3D_frame *frame);
-    ~C_CameraFrameKeeper();
-    bool Restore();
-    void Update(int time);
-
-private:
-    uint8_t m_unknown[0x50];
-};
+// (C_CameraFrameKeeper: the real header, part 8e-i.)
 
 // --- the car's updates (game/car_update.cpp; as the real header declares them) -------------------
 enum : int {
@@ -124,56 +117,17 @@ struct S_MultiplayerSettings {
     int allowVehicles;                                  // (the car's StartMission, RestartMission)
     int allowRespawn;                                   // (the spawn point, part 7b)
     int warmup;                                         // (the multiplayer zone, part 7d) s
+    bool dedicated;                                     // (the loading screen, part 8f-i)
 };
 
 // --- the car's callbacks (game/car_callbacks.cpp; as the real header declares them) --------------
 #ifdef WORLD_TEST
 // The GEffects module's objects (part 8d; as the real header declares them) and the module itself
 // (part 8c-i, the world build tests the real one).
-class C_Decorators {
-public:
-    C_Decorators();
-    ~C_Decorators();
-    void SetOn(bool on);
-    void Clear();
-    void Free();
-    void Load();
-    void Start();
-    void Update(int timeDelta);
-    float GetGroundCover(int material);
-
-private:
-    uint8_t m_data[0xA4];
-};
-extern C_Decorators *g_decorators;
-class C_Volumetrics {
-public:
-    C_Volumetrics();
-    ~C_Volumetrics();
-    void Render(int time);
-    void Load();
-    void Prune(bool unknown);
-    void Free();
-
-private:
-    uint8_t m_data[0x20];
-};
-class C_MeshPlayer {
-public:
-    C_MeshPlayer();
-    ~C_MeshPlayer();
-    void Load();
-    void Update(int timeDelta);
-    void Free();
-
-private:
-    uint8_t m_data[0x28];
-};
-void UpdateBirds(int timeDelta);
-void CollectBirds();
-void FreeBirds();
-void FreeClouds();
-void LoadClouds();
+#include "game/decorators.h"
+#include "game/volumetrics.h"
+#include "game/mesh_player.h"
+#include "game/birds.h"
 float RandomFloat(float max);
 #include "game/geffects.h"
 #else
@@ -226,6 +180,7 @@ public:
     int GetPlayerCount() const;
     void AddScore(int slot, int points);
     void AddTeamScore(int team, float points);
+    void PrintLoadProgress(int percent);                // (the loading screen, part 8f-i)
 };
 extern C_NetGame g_netGame;
 class C_NetMessage;
@@ -249,6 +204,9 @@ public:
 };
 extern C_SightModule g_sightModule;                 // 0x0089b288
 #endif
+#ifdef WORLD_TEST
+#include "game/birds.h"
+#else
 class C_Bird {                                          // 0x70 bytes
 public:
     // On `model`, whose frame data then points at the bird; `ownModel`: the model is the bird's,
@@ -271,6 +229,14 @@ private:
 // The birds sitting in the mission (the birds module's) and the models of the birds deleted.
 extern std::vector<C_Bird *> g_birds;                  // 0x0089bb90
 extern std::vector<class I3D_frame *> g_spareBirdModels;   // 0x0089bba0
+#endif
 float RandomFloat(float max);                           // 0x00475190
+
+// The controls (the camera module's look actions, part 8e-iii; the camera test defines GetValue).
+class C_Controls {
+public:
+    float GetValue(int action, bool pressed);          // 0x006c76a0
+};
+extern C_Controls g_controls;                           // 0x008aeb58
 
 // The vertex animation module: stub/game/vertex_anim.h.

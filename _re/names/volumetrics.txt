@@ -1,0 +1,36 @@
+# Part 8d-iv: the volumetrics (src/game/volumetrics.*, 0x00480390..0x00482e50) and the clouds
+# (0x00483de0, 0x00483e50, the object 0x0089b74c and its buffers 0x0089b754 / 0x0089b758).
+
+00480390 S_VolumetricCone::Render | void __thiscall Render(void * this, int time, float phase, float fade)
+00480710 Volumetric_SetVertex | void __fastcall Volumetric_SetVertex(void * vertex, float * pos, uint color, float u, float v)
+00480740 S_VolumetricCone::Build | void __thiscall Build(void * this, bool load, float base)
+00480d00 S_VolumetricCone::~S_VolumetricCone
+00480d80 S_Volumetric::Draw | bool __thiscall Draw(void * this, int time, float * camera, float yaw)
+00480fa0 S_Volumetric::Refresh | void __thiscall Refresh(void * this, bool load)
+00481080 S_VolumetricCone::S_VolumetricCone | void * __thiscall S_VolumetricCone(void * this, float base)
+00481190 S_VolumetricCone::CopyFrom | void __thiscall CopyFrom(void * this, void * other)
+00481230 S_Volumetric::CopyFrom | void __thiscall CopyFrom(void * this, void * other)
+00481320 S_Volumetric::S_Volumetric | void * __thiscall S_Volumetric(void * this, void * frame)
+00481380 S_Volumetric::~S_Volumetric
+004813d0 S_Volumetric::DeleteCones | void __fastcall DeleteCones(void * this)
+00481440 S_VolumetricCone::Load | bool __thiscall Load(void * this, void * chunk)
+00481810 S_Volumetric::Load | bool __thiscall Load(void * this, void * chunk)
+00481cf0 VolumetricConeVector_Insert
+00481ec0 VolumetricConeVector_InsertN
+00482140 StaticInit_482140
+00482170 Chunk_ReadFloatAndAscend | float __fastcall Chunk_ReadFloatAndAscend(void * chunk)
+00482260 C_Volumetrics::Render | void __thiscall Render(void * this, int time)
+00482980 C_Volumetrics::Prune | void __thiscall Prune(void * this, bool load)
+00482a00 C_Volumetrics::Load | void __fastcall Load(void * this)
+00482d70 C_Volumetrics::Free | void __fastcall Free(void * this)
+00482df0 StaticInit_Clouds
+00482e00 Clouds_Construct0
+00482e10 Clouds_RegisterAtExit
+00482e20 Clouds_Destroy0
+00482e30 S_Clouds::S_Clouds | void * __fastcall S_Clouds(void * this)
+00482e50 DrawClouds | void __fastcall DrawClouds(void * clouds)
+00483de0 FreeClouds | void __fastcall FreeClouds(void * clouds)
+00483e50 LoadClouds | void __fastcall LoadClouds(void * clouds)
+0089b74c g_clouds @
+0089b754 g_cloudVertices0 @
+0089b758 g_cloudVertices1 @

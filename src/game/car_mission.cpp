@@ -7,6 +7,7 @@
 #include <cstring>
 #include <string>
 
+#include "game/camera_module.h"
 #include "game/car_internal.h"
 #include "game/game.h"
 #include "game/item_defs.h"

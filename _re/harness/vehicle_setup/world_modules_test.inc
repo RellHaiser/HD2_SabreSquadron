@@ -1390,6 +1390,10 @@ void TShiftTest(S_TshiftResults &r)
 void SightTest();                                       // (sight_test.inc, part 8b)
 void GEffectsTest();                                    // (geffects_test.inc, part 8c)
 void GEffects2Test();                                   // (geffects2_test.inc, part 8c-ii)
+void BirdsTest();                                       // (birds_test.inc, part 8d-i)
+void DecoratorsTest();                                  // (decorators_test.inc, part 8d-ii)
+void Decorators2Test();                                 // (decorators2_test.inc, part 8d-iii)
+void VolumetricsTest();                                 // (volumetrics_test.inc, part 8d-iv)
 
 void WorldModulesTest(const char *path)
 {
@@ -1429,5 +1433,9 @@ void WorldModulesTest(const char *path)
     SightTest();
     GEffectsTest();
     GEffects2Test();
+    BirdsTest();
+    DecoratorsTest();
+    Decorators2Test();
+    VolumetricsTest();
     std::fflush(stdout);
 }

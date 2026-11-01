@@ -328,6 +328,7 @@ enum : int {
     DETAIL_VERTEX_ANIMATION = 1,                        // flags and palms moving (C_VertexAnimModule)
     DETAIL_DECALS = 2,                                  // bullet holes, scorch marks and blood
     DETAIL_STAINS = 3,                                  // blood stains on the bodies (C_HumanStains)
+    DETAIL_DECORATORS = 4,                              // grass and the like (C_Decorators)
     DETAIL_RAGDOLL = 5,                                 // dead bodies fall as ragdolls
 };
 // The game's save slots of a player (the quick saves the menus offer per play mode).

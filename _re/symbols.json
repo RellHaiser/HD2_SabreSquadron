@@ -5474,6 +5474,24 @@
   "name": "C_TeamBase::GetMemberCount",
   "proto": "int __thiscall GetMemberCount(C_TeamBase *this)"
  },
+ "00462320": {
+  "module": "camera",
+  "name": "StaticInit_462320"
+ },
+ "00462350": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::StartFlight",
+  "proto": "void __fastcall StartFlight(void * this)"
+ },
+ "00462650": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::C_CameraHumanEffects",
+  "proto": "void * __fastcall C_CameraHumanEffects(void * this)"
+ },
+ "004626e0": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::~C_CameraHumanEffects"
+ },
  "00462750": {
   "module": "camera",
   "name": "C_CameraHumanEffects::SetTacticalZoom"
@@ -5483,12 +5501,23 @@
   "name": "C_CameraHumanEffects::IsTactical"
  },
  "00462780": {
-  "module": "hud",
-  "name": "C_CameraHumanEffects::LookAt"
+  "module": "camera",
+  "name": "C_CameraHumanEffects::LookAt",
+  "proto": "void __thiscall LookAt(void * this, void * human)"
  },
  "00462ae0": {
   "module": "camera",
   "name": "C_CameraHumanEffects::SetTactical"
+ },
+ "00463040": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::Remove",
+  "proto": "void __thiscall Remove(void * this, void * human)"
+ },
+ "004630e0": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::UpdateLookPoint",
+  "proto": "void __fastcall UpdateLookPoint(void * this)"
  },
  "004632c0": {
   "module": "camera",
@@ -5498,21 +5527,124 @@
   "module": "camera",
   "name": "C_CameraHumanEffects::SetTacticalMotion"
  },
+ "00463620": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::ResetHumans",
+  "proto": "void __thiscall ResetHumans(void * this, bool tactical)"
+ },
+ "00463690": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::GetTransparency",
+  "proto": "float __thiscall GetTransparency(void * this, void * human)"
+ },
+ "00463780": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::UpdateHuman",
+  "proto": "void __thiscall UpdateHuman(void * this, void * human)"
+ },
+ "00463890": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::UpdateHumans",
+  "proto": "void __thiscall UpdateHumans(void * this, int timeDelta)"
+ },
  "00463910": {
   "module": "zz_idioms",
   "name": "vector_tidy_463910"
+ },
+ "00463930": {
+  "module": "camera",
+  "name": "FadedHumans_Insert",
+  "proto": "void __thiscall FadedHumans_Insert(void * this, void * pos, uint count, void * value)"
+ },
+ "00463b70": {
+  "module": "camera",
+  "name": "StaticInit_463b70"
  },
  "00463ba0": {
   "module": "camera",
   "name": "C_CameraHumanEffects::UpdateTactical"
  },
+ "00464a40": {
+  "module": "camera",
+  "name": "S_quat_FromAxisAngle",
+  "proto": "void * __thiscall S_quat_FromAxisAngle(void * this, void * axis, float angle)"
+ },
  "00464a60": {
   "module": "zz_idioms",
   "name": "empty_function_464a60"
  },
+ "00464b80": {
+  "module": "camera",
+  "name": "C_CameraHumanEffects::Move",
+  "proto": "void * __thiscall Move(void * this, void * move)"
+ },
+ "00464d90": {
+  "module": "camera",
+  "name": "StaticInit_464d90"
+ },
+ "00464dc0": {
+  "module": "camera",
+  "name": "StaticInit_CameraModule"
+ },
+ "00464dd0": {
+  "module": "camera",
+  "name": "CameraModule_Construct0"
+ },
+ "00464df0": {
+  "module": "camera",
+  "name": "CameraModule_RegisterAtExit"
+ },
+ "00464e00": {
+  "module": "camera",
+  "name": "CameraModule_Destroy0"
+ },
+ "00464e10": {
+  "module": "camera",
+  "name": "C_CameraModule::RestartMission",
+  "proto": "void __thiscall RestartMission(void * this, bool server)"
+ },
+ "00464e60": {
+  "module": "camera",
+  "name": "C_CameraModule::SaveGame",
+  "proto": "bool __thiscall SaveGame(void * this, void * chunk)"
+ },
+ "00464e70": {
+  "module": "camera",
+  "name": "C_CameraModule::LoadGame",
+  "proto": "bool __thiscall LoadGame(void * this, void * chunk)"
+ },
  "00464e90": {
   "module": "sound",
   "name": "GetCameraModule"
+ },
+ "00464ea0": {
+  "module": "camera",
+  "name": "C_CameraModuleBase::C_CameraModuleBase",
+  "proto": "void * __thiscall C_CameraModuleBase(void * this, int id, char * name)"
+ },
+ "00464ec0": {
+  "module": "camera",
+  "name": "C_CameraModuleBase::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void * this, uchar flags)"
+ },
+ "00464ee0": {
+  "module": "camera",
+  "name": "C_CameraModuleBase::~C_CameraModuleBase"
+ },
+ "00464ef0": {
+  "module": "camera",
+  "name": "C_CameraModule::C_CameraModule",
+  "proto": "void * __thiscall C_CameraModule(void * this, int id, char * name)"
+ },
+ "00465050": {
+  "module": "camera",
+  "name": "CameraHumanEffects_AlignedFree",
+  "proto": "void __fastcall CameraHumanEffects_AlignedFree(void * block)"
+ },
+ "00465060": {
+  "module": "camera",
+  "name": "C_CameraModule::GetUnknown78",
+  "proto": "bool __thiscall GetUnknown78(void * this)"
  },
  "00465070": {
   "module": "camera",
@@ -5524,6 +5656,16 @@
   "name": "C_CameraModule::HasScriptedView",
   "proto": "bool __thiscall HasScriptedView(C_CameraModule *this)"
  },
+ "00465090": {
+  "module": "camera",
+  "name": "C_CameraModule::GetUnknown84",
+  "proto": "bool __thiscall GetUnknown84(void * this)"
+ },
+ "004650a0": {
+  "module": "camera",
+  "name": "C_CameraModule::GetHumanEffects",
+  "proto": "void * __thiscall GetHumanEffects(void * this)"
+ },
  "004650b0": {
   "module": "camera",
   "name": "C_CameraModule::GetCamera",
@@ -5533,6 +5675,35 @@
   "module": "camera",
   "name": "C_CameraModule::GetListenerSector",
   "proto": "I3D_sector * __thiscall GetListenerSector(C_CameraModule *this)"
+ },
+ "004650d0": {
+  "module": "camera",
+  "name": "C_CameraModule::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void * this, uchar flags)"
+ },
+ "004650f0": {
+  "module": "camera",
+  "name": "C_CameraModule::~C_CameraModule"
+ },
+ "00465160": {
+  "module": "camera",
+  "name": "C_CameraModule::StartMission",
+  "proto": "void __thiscall StartMission(void * this, bool server)"
+ },
+ "00465610": {
+  "module": "camera",
+  "name": "C_CameraModule::StopMission",
+  "proto": "void __thiscall StopMission(void * this, bool server)"
+ },
+ "004656d0": {
+  "module": "camera",
+  "name": "C_CameraModule::LoadSettings",
+  "proto": "void __fastcall LoadSettings(void * this)"
+ },
+ "00465a00": {
+  "module": "camera",
+  "name": "C_CameraModule::ResetUnknown2AC",
+  "proto": "void __fastcall ResetUnknown2AC(void * this)"
  },
  "00465a10": {
   "module": "camera",
@@ -5561,13 +5732,13 @@
  },
  "00465e00": {
   "module": "camera",
-  "name": "C_CameraModule::SetFov2",
-  "proto": "bool __thiscall SetFov2(C_CameraModule *this, float fov)"
+  "name": "C_CameraModule::SetNearSectorFov",
+  "proto": "bool __thiscall SetNearSectorFov(C_CameraModule *this, float fov)"
  },
  "00465e30": {
   "module": "camera",
-  "name": "C_CameraModule::GetFov2",
-  "proto": "float __thiscall GetFov2(C_CameraModule *this)"
+  "name": "C_CameraModule::GetNearSectorFov",
+  "proto": "float __thiscall GetNearSectorFov(C_CameraModule *this)"
  },
  "00465e50": {
   "module": "camera",
@@ -5591,15 +5762,97 @@
  },
  "00465f00": {
   "module": "camera",
-  "name": "C_CameraFrameKeeper::C_CameraFrameKeeper"
+  "name": "C_CameraFrameKeeper::C_CameraFrameKeeper",
+  "proto": "void * __thiscall C_CameraFrameKeeper(void * this, void * owner, void * frame)"
  },
  "00466010": {
   "module": "camera",
-  "name": "C_CameraFrameKeeper::Restore"
+  "name": "C_CameraFrameKeeper::Restore",
+  "proto": "bool __fastcall Restore(void * this)"
  },
  "00466110": {
   "module": "camera",
-  "name": "C_CameraFrameKeeper::Update"
+  "name": "C_CameraFrameKeeper::Update",
+  "proto": "bool __thiscall Update(void * this, int time)"
+ },
+ "004668c0": {
+  "module": "camera",
+  "name": "StaticInit_4668c0"
+ },
+ "004668f0": {
+  "module": "camera",
+  "name": "StaticInit_4668f0"
+ },
+ "00466900": {
+  "module": "camera",
+  "name": "StaticInit_4668f0_Construct"
+ },
+ "00466910": {
+  "module": "camera",
+  "name": "StaticInit_4668f0_RegisterAtExit"
+ },
+ "00466920": {
+  "module": "camera",
+  "name": "StaticInit_4668f0_Destruct"
+ },
+ "00466930": {
+  "module": "camera",
+  "name": "StaticInit_466930"
+ },
+ "00466940": {
+  "module": "camera",
+  "name": "StaticInit_466930_Construct"
+ },
+ "00466950": {
+  "module": "camera",
+  "name": "StaticInit_466930_RegisterAtExit"
+ },
+ "00466960": {
+  "module": "camera",
+  "name": "StaticInit_466930_Destruct"
+ },
+ "00466970": {
+  "module": "camera",
+  "name": "C_CameraModule::MoveCamera",
+  "proto": "void __thiscall MoveCamera(void * this, int timeDelta)"
+ },
+ "00468130": {
+  "module": "camera",
+  "name": "C_CameraModule::PlaceCamera",
+  "proto": "void __thiscall PlaceCamera(void * this, int timeDelta)"
+ },
+ "00469300": {
+  "module": "camera",
+  "name": "C_CameraModule::Update",
+  "proto": "void __thiscall Update(void * this, int timeDelta)"
+ },
+ "0046ada0": {
+  "module": "camera",
+  "name": "C_CameraModule::UpdateCarCamera",
+  "proto": "void __thiscall UpdateCarCamera(void * this, int timeDelta)"
+ },
+ "0046b550": {
+  "module": "camera",
+  "name": "C_CameraModule::UpdateScriptedView",
+  "proto": "void __thiscall UpdateScriptedView(void * this, int timeDelta)"
+ },
+ "0046beb0": {
+  "module": "camera",
+  "name": "C_CameraModule::UpdateDebugCamera",
+  "proto": "void __thiscall UpdateDebugCamera(void * this, int timeDelta)"
+ },
+ "0046c310": {
+  "module": "camera",
+  "name": "StaticInit_46c310"
+ },
+ "0046c340": {
+  "module": "camera",
+  "name": "StaticInit_46c340"
+ },
+ "0046c370": {
+  "module": "camera",
+  "name": "C_CameraModule::SelectView",
+  "proto": "void __thiscall SelectView(void * this, int unused)"
  },
  "0046cb20": {
   "module": "camera",
@@ -6700,21 +6953,33 @@
   "name": "C_TemporaryActorsList::DestroyMinesOf",
   "proto": "void __thiscall DestroyMinesOf(C_TemporaryActorsList *this, C_Human * owner)"
  },
+ "00479790": {
+  "module": "birds",
+  "name": "StaticInit_479790"
+ },
  "004797c0": {
-  "module": "world_actors",
-  "name": "C_Bird::C_Bird"
+  "module": "birds",
+  "name": "C_Bird::C_Bird",
+  "proto": "void * __thiscall C_Bird(void * this, I3D_frame * model, bool ownModel)"
  },
  "004799e0": {
-  "module": "world_actors",
+  "module": "birds",
   "name": "C_Bird::~C_Bird"
  },
+ "00479c70": {
+  "module": "birds",
+  "name": "C_Bird::Fly",
+  "proto": "bool __thiscall Fly(void * this, float time)"
+ },
  "0047a2e0": {
-  "module": "world_actors",
-  "name": "C_Bird::Update"
+  "module": "birds",
+  "name": "C_Bird::Update",
+  "proto": "bool __thiscall Update(void * this, int time)"
  },
  "0047a2f0": {
-  "module": "world_actors",
-  "name": "C_Bird::FlyAway"
+  "module": "birds",
+  "name": "C_Bird::FlyAway",
+  "proto": "void __thiscall FlyAway(void * this)"
  },
  "0047a640": {
   "module": "zz_idioms",
@@ -6732,6 +6997,39 @@
   "module": "zz_idioms",
   "name": "uninitialized_fill_n4_47a6a0"
  },
+ "0047a6d0": {
+  "module": "birds",
+  "name": "StaticInit_47a6d0"
+ },
+ "0047a700": {
+  "module": "birds",
+  "name": "UpdateBirds",
+  "proto": "void __thiscall UpdateBirds(void * this, int timeDelta)"
+ },
+ "0047a790": {
+  "module": "birds",
+  "name": "CollectBirds",
+  "proto": "void __fastcall CollectBirds(void * birds)"
+ },
+ "0047a7b0": {
+  "module": "birds",
+  "name": "CollectBird",
+  "proto": "uint __stdcall CollectBird(I3D_frame * frame, void * birds)"
+ },
+ "0047a9f0": {
+  "module": "birds",
+  "name": "Bird_AlignedFree"
+ },
+ "0047aa10": {
+  "module": "birds",
+  "name": "FreeBirds",
+  "proto": "void __fastcall FreeBirds(void * birds)"
+ },
+ "0047aac0": {
+  "module": "birds",
+  "name": "BirdVector_EraseAt",
+  "proto": "void __thiscall BirdVector_EraseAt(void * this, int index)"
+ },
  "0047ab10": {
   "module": "zz_idioms",
   "name": "empty_function_47ab10"
@@ -6748,17 +7046,181 @@
   "module": "zz_idioms",
   "name": "construct_copy4_47ab80"
  },
+ "0047ab90": {
+  "module": "decorators",
+  "name": "StaticInit_47ab90"
+ },
+ "0047abc0": {
+  "module": "decorators",
+  "name": "StaticInit_47abc0"
+ },
+ "0047abd0": {
+  "module": "decorators",
+  "name": "DecoratorStatics_Construct0"
+ },
+ "0047abe0": {
+  "module": "decorators",
+  "name": "DecoratorStatics_RegisterAtExit0"
+ },
+ "0047abf0": {
+  "module": "decorators",
+  "name": "DecoratorStatics_Destroy0"
+ },
+ "0047ac00": {
+  "module": "decorators",
+  "name": "StaticInit_47ac00"
+ },
+ "0047ac10": {
+  "module": "decorators",
+  "name": "DecoratorStatics_Construct1"
+ },
+ "0047ac20": {
+  "module": "decorators",
+  "name": "DecoratorStatics_RegisterAtExit1"
+ },
+ "0047ac30": {
+  "module": "decorators",
+  "name": "DecoratorStatics_Destroy1"
+ },
+ "0047ac40": {
+  "module": "decorators",
+  "name": "S_DecoratorPool::S_DecoratorPool",
+  "proto": "void * __thiscall S_DecoratorPool(void * this, char * name)"
+ },
+ "0047ad10": {
+  "module": "decorators",
+  "name": "S_DecoratorPool::~S_DecoratorPool"
+ },
+ "0047adc0": {
+  "module": "decorators",
+  "name": "S_DecoratorSet::S_DecoratorSet",
+  "proto": "void * __fastcall S_DecoratorSet(void * this)"
+ },
+ "0047ae10": {
+  "module": "decorators",
+  "name": "S_DecoratorSet::~S_DecoratorSet"
+ },
+ "0047ae60": {
+  "module": "decorators",
+  "name": "S_DecoratorSet::Reset",
+  "proto": "void __fastcall Reset(void * this)"
+ },
+ "0047aed0": {
+  "module": "decorators",
+  "name": "S_Decorator::~S_Decorator"
+ },
  "0047b010": {
-  "module": "script",
-  "name": "C_Decorators::SetOn"
+  "module": "decorators",
+  "name": "C_Decorators::SetOn",
+  "proto": "void __thiscall SetOn(void * this, bool on)"
+ },
+ "0047b090": {
+  "module": "decorators",
+  "name": "C_Decorators::Free",
+  "proto": "void __fastcall Free(void * this)"
+ },
+ "0047b0b0": {
+  "module": "decorators",
+  "name": "C_Decorators::Start",
+  "proto": "void __fastcall Start(void * this)"
+ },
+ "0047b480": {
+  "module": "decorators",
+  "name": "C_Decorators::GetMinSlope",
+  "proto": "float __thiscall GetMinSlope(void * this, uint material)"
+ },
+ "0047b4c0": {
+  "module": "decorators",
+  "name": "C_Decorators::GetGroundCover",
+  "proto": "float __thiscall GetGroundCover(void * this, uint material)"
+ },
+ "0047b500": {
+  "module": "decorators",
+  "name": "C_Decorators::TakeModel",
+  "proto": "void * __thiscall TakeModel(void * this, uint set, int seed, int * decorator, bool * randomRotation, float * height, bool * alignToGround)"
+ },
+ "0047b8e0": {
+  "module": "decorators",
+  "name": "C_Decorators::ReturnModel",
+  "proto": "void __thiscall ReturnModel(void * this, int set, void * model, int decorator)"
+ },
+ "0047baa0": {
+  "module": "decorators",
+  "name": "S_Decorator::PrepareAnimated",
+  "proto": "void __thiscall PrepareAnimated(void * this, void * model)"
+ },
+ "0047bcc0": {
+  "module": "decorators",
+  "name": "C_Decorators::Update",
+  "proto": "void __thiscall Update(void * this, int timeDelta)"
+ },
+ "0047c020": {
+  "module": "decorators",
+  "name": "C_Decorators::Clear",
+  "proto": "void __fastcall Clear(void * this)"
+ },
+ "0047c530": {
+  "module": "decorators",
+  "name": "C_Decorators::Load",
+  "proto": "void __fastcall Load(void * this)"
+ },
+ "0047c930": {
+  "module": "decorators",
+  "name": "C_Decorators::LoadLightMap",
+  "proto": "void __fastcall LoadLightMap(void * this)"
+ },
+ "0047cc90": {
+  "module": "decorators",
+  "name": "S_DecoratorSet::Load",
+  "proto": "bool __thiscall Load(void * this, void * chunk, int version)"
+ },
+ "0047d030": {
+  "module": "decorators",
+  "name": "S_Decorator::Reset",
+  "proto": "void __fastcall Reset(void * this)"
+ },
+ "0047d0c0": {
+  "module": "decorators",
+  "name": "C_Decorators::FreeLightMap",
+  "proto": "void __fastcall FreeLightMap(void * this)"
+ },
+ "0047d0f0": {
+  "module": "decorators",
+  "name": "Decorators_Lerp",
+  "proto": "float __stdcall Decorators_Lerp(float a, float b, float t)"
+ },
+ "0047d110": {
+  "module": "decorators",
+  "name": "C_Decorators::SampleLight",
+  "proto": "float __thiscall SampleLight(void * this, float x, float z)"
  },
  "0047d220": {
   "module": "zz_idioms",
   "name": "vector_tidy_47d220"
  },
+ "0047d240": {
+  "module": "decorators",
+  "name": "DecoratorVector_Construct"
+ },
  "0047d260": {
   "module": "zz_idioms",
   "name": "vector_tidy_47d260"
+ },
+ "0047d280": {
+  "module": "decorators",
+  "name": "Vec4Array_Construct"
+ },
+ "0047d2a0": {
+  "module": "decorators",
+  "name": "Vec4Array_Free"
+ },
+ "0047d2c0": {
+  "module": "decorators",
+  "name": "Vec4Array_Free2"
+ },
+ "0047d2e0": {
+  "module": "decorators",
+  "name": "Vec4Array_Push"
  },
  "0047d380": {
   "module": "zz_idioms",
@@ -6768,9 +7230,21 @@
   "module": "zz_idioms",
   "name": "vector_size_e4_47d3a0"
  },
+ "0047d3c0": {
+  "module": "decorators",
+  "name": "FloatPtrVector_Erase"
+ },
+ "0047d3f0": {
+  "module": "decorators",
+  "name": "DecoratorVector_Insert"
+ },
  "0047d590": {
   "module": "zz_idioms",
   "name": "empty_function_47d590"
+ },
+ "0047d5a0": {
+  "module": "decorators",
+  "name": "DecoratorSetVector_Insert"
  },
  "0047d740": {
   "module": "zz_idioms",
@@ -6779,6 +7253,14 @@
  "0047d760": {
   "module": "zz_idioms",
   "name": "empty_function_47d760"
+ },
+ "0047d770": {
+  "module": "decorators",
+  "name": "DecoratorPoolVector_InsertN"
+ },
+ "0047d980": {
+  "module": "decorators",
+  "name": "FloatPtrVector_InsertN"
  },
  "0047dfb0": {
   "module": "zz_idioms",
@@ -6812,9 +7294,182 @@
   "module": "zz_idioms",
   "name": "construct_copy4_47e0b0"
  },
+ "0047e0c0": {
+  "module": "decorators",
+  "name": "StaticInit_47e0c0"
+ },
+ "0047e0f0": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::Init",
+  "proto": "void __fastcall Init(void * this)"
+ },
+ "0047e1c0": {
+  "module": "decorators",
+  "name": "S_DecoratorCell::S_DecoratorCell",
+  "proto": "void * __fastcall S_DecoratorCell(void * this)"
+ },
+ "0047e240": {
+  "module": "decorators",
+  "name": "S_DecoratorCell::Place",
+  "proto": "void * __thiscall Place(void * this, int set, int seed, bool * randomRotation, float * height, bool * alignToGround)"
+ },
+ "0047e290": {
+  "module": "decorators",
+  "name": "S_DecoratorCell::Clear",
+  "proto": "void __fastcall Clear(void * this)"
+ },
+ "0047e2d0": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::Refill",
+  "proto": "void __thiscall Refill(void * this, int z, int x)"
+ },
+ "0047e930": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::RefillAll",
+  "proto": "void __fastcall RefillAll(void * this)"
+ },
+ "0047e960": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::ShiftX",
+  "proto": "void __thiscall ShiftX(void * this, bool back)"
+ },
+ "0047e9b0": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::ShiftZ",
+  "proto": "void __thiscall ShiftZ(void * this, bool back)"
+ },
+ "0047ea00": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::RefillColumn",
+  "proto": "void __thiscall RefillColumn(void * this, int x)"
+ },
+ "0047ea30": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::RefillRow",
+  "proto": "void __thiscall RefillRow(void * this, int z)"
+ },
+ "0047ea60": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::Free",
+  "proto": "void __fastcall Free(void * this)"
+ },
+ "0047eb80": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::Follow",
+  "proto": "void __thiscall Follow(void * this, float x, float z)"
+ },
+ "0047f150": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::UpdateBends",
+  "proto": "void __thiscall UpdateBends(void * this, int time)"
+ },
+ "0047f200": {
+  "module": "decorators",
+  "name": "S_DecoratorBend::Update",
+  "proto": "bool __thiscall Update(void * this, int time)"
+ },
+ "0047f4e0": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::BendAroundHuman",
+  "proto": "void __thiscall BendAroundHuman(void * this, void * human)"
+ },
+ "0047f730": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::BendAroundCar",
+  "proto": "void __thiscall BendAroundCar(void * this, void * car)"
+ },
+ "0047fae0": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::Bend",
+  "proto": "void __thiscall Bend(void * this, float * pos, float dirX, float dirZ, float innerSq, float outerSq, float radius, float darken, bool fade)"
+ },
+ "00480120": {
+  "module": "decorators",
+  "name": "DecoratorTrackVector_Size"
+ },
+ "00480150": {
+  "module": "decorators",
+  "name": "DecoratorBendVector_InsertN"
+ },
+ "00480360": {
+  "module": "decorators",
+  "name": "StaticInit_480360"
+ },
+ "00480390": {
+  "module": "volumetrics",
+  "name": "S_VolumetricCone::Render",
+  "proto": "void __thiscall Render(void * this, int time, float phase, float fade)"
+ },
+ "00480710": {
+  "module": "volumetrics",
+  "name": "Volumetric_SetVertex",
+  "proto": "void __fastcall Volumetric_SetVertex(void * vertex, float * pos, uint color, float u, float v)"
+ },
+ "00480740": {
+  "module": "volumetrics",
+  "name": "S_VolumetricCone::Build",
+  "proto": "void __thiscall Build(void * this, bool load, float base)"
+ },
+ "00480d00": {
+  "module": "volumetrics",
+  "name": "S_VolumetricCone::~S_VolumetricCone"
+ },
+ "00480d80": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::Draw",
+  "proto": "bool __thiscall Draw(void * this, int time, float * camera, float yaw)"
+ },
+ "00480fa0": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::Refresh",
+  "proto": "void __thiscall Refresh(void * this, bool load)"
+ },
+ "00481080": {
+  "module": "volumetrics",
+  "name": "S_VolumetricCone::S_VolumetricCone",
+  "proto": "void * __thiscall S_VolumetricCone(void * this, float base)"
+ },
+ "00481190": {
+  "module": "volumetrics",
+  "name": "S_VolumetricCone::CopyFrom",
+  "proto": "void __thiscall CopyFrom(void * this, void * other)"
+ },
+ "00481230": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::CopyFrom",
+  "proto": "void __thiscall CopyFrom(void * this, void * other)"
+ },
+ "00481320": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::S_Volumetric",
+  "proto": "void * __thiscall S_Volumetric(void * this, void * frame)"
+ },
+ "00481380": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::~S_Volumetric"
+ },
+ "004813d0": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::DeleteCones",
+  "proto": "void __fastcall DeleteCones(void * this)"
+ },
+ "00481440": {
+  "module": "volumetrics",
+  "name": "S_VolumetricCone::Load",
+  "proto": "bool __thiscall Load(void * this, void * chunk)"
+ },
+ "00481810": {
+  "module": "volumetrics",
+  "name": "S_Volumetric::Load",
+  "proto": "bool __thiscall Load(void * this, void * chunk)"
+ },
  "00481cd0": {
   "module": "zz_idioms",
   "name": "vector_tidy_481cd0"
+ },
+ "00481cf0": {
+  "module": "volumetrics",
+  "name": "VolumetricConeVector_Insert"
  },
  "00481e90": {
   "module": "zz_idioms",
@@ -6823,6 +7478,10 @@
  "00481eb0": {
   "module": "zz_idioms",
   "name": "empty_function_481eb0"
+ },
+ "00481ec0": {
+  "module": "volumetrics",
+  "name": "VolumetricConeVector_InsertN"
  },
  "004820d0": {
   "module": "zz_idioms",
@@ -6836,9 +7495,122 @@
   "module": "zz_idioms",
   "name": "construct_copy4_482130"
  },
+ "00482140": {
+  "module": "volumetrics",
+  "name": "StaticInit_482140"
+ },
+ "00482170": {
+  "module": "volumetrics",
+  "name": "Chunk_ReadFloatAndAscend",
+  "proto": "float __fastcall Chunk_ReadFloatAndAscend(void * chunk)"
+ },
+ "00482260": {
+  "module": "volumetrics",
+  "name": "C_Volumetrics::Render",
+  "proto": "void __thiscall Render(void * this, int time)"
+ },
+ "00482980": {
+  "module": "volumetrics",
+  "name": "C_Volumetrics::Prune",
+  "proto": "void __thiscall Prune(void * this, bool load)"
+ },
+ "00482a00": {
+  "module": "volumetrics",
+  "name": "C_Volumetrics::Load",
+  "proto": "void __fastcall Load(void * this)"
+ },
+ "00482d70": {
+  "module": "volumetrics",
+  "name": "C_Volumetrics::Free",
+  "proto": "void __fastcall Free(void * this)"
+ },
+ "00482df0": {
+  "module": "volumetrics",
+  "name": "StaticInit_Clouds"
+ },
+ "00482e00": {
+  "module": "volumetrics",
+  "name": "Clouds_Construct0"
+ },
+ "00482e10": {
+  "module": "volumetrics",
+  "name": "Clouds_RegisterAtExit"
+ },
+ "00482e20": {
+  "module": "volumetrics",
+  "name": "Clouds_Destroy0"
+ },
+ "00482e30": {
+  "module": "volumetrics",
+  "name": "S_Clouds::S_Clouds",
+  "proto": "void * __fastcall S_Clouds(void * this)"
+ },
+ "00482e50": {
+  "module": "volumetrics",
+  "name": "DrawClouds",
+  "proto": "void __fastcall DrawClouds(void * clouds)"
+ },
+ "00483de0": {
+  "module": "volumetrics",
+  "name": "FreeClouds",
+  "proto": "void __fastcall FreeClouds(void * clouds)"
+ },
+ "00483e50": {
+  "module": "volumetrics",
+  "name": "LoadClouds",
+  "proto": "void __fastcall LoadClouds(void * clouds)"
+ },
  "00483eb0": {
   "module": "zz_idioms",
   "name": "empty_function_483eb0"
+ },
+ "004840d0": {
+  "module": "birds",
+  "name": "StaticInit_4840d0"
+ },
+ "00484100": {
+  "module": "birds",
+  "name": "C_MeshPlayer::C_MeshPlayer",
+  "proto": "void * __fastcall C_MeshPlayer(void * this)"
+ },
+ "004841e0": {
+  "module": "birds",
+  "name": "C_MeshPlayer::~C_MeshPlayer"
+ },
+ "00484260": {
+  "module": "birds",
+  "name": "C_MeshPlayer::Load",
+  "proto": "void __fastcall Load(void * this)"
+ },
+ "004846a0": {
+  "module": "birds",
+  "name": "MeshPlayer_VisualMesh",
+  "proto": "void * __fastcall MeshPlayer_VisualMesh(I3D_frame * frame)"
+ },
+ "004846e0": {
+  "module": "birds",
+  "name": "MeshPlayer_OwnTexture",
+  "proto": "void * __fastcall MeshPlayer_OwnTexture(I3D_frame * frame)"
+ },
+ "00484740": {
+  "module": "birds",
+  "name": "MeshPlayer_ShowTexture",
+  "proto": "void __fastcall MeshPlayer_ShowTexture(I3D_frame * frame, void * texture)"
+ },
+ "004847a0": {
+  "module": "birds",
+  "name": "C_MeshPlayer::Play",
+  "proto": "void __thiscall Play(void * this, void * frames, char * movie)"
+ },
+ "00484a70": {
+  "module": "birds",
+  "name": "C_MeshPlayer::Update",
+  "proto": "void __thiscall Update(void * this, int timeDelta)"
+ },
+ "00484ae0": {
+  "module": "birds",
+  "name": "C_MeshPlayer::Free",
+  "proto": "void __fastcall Free(void * this)"
  },
  "00484b90": {
   "module": "zz_idioms",
@@ -6867,6 +7639,34 @@
  "00484e70": {
   "module": "zz_idioms",
   "name": "copy4_484e70"
+ },
+ "00484e90": {
+  "module": "birds",
+  "name": "StaticInit_484e90"
+ },
+ "00484ec0": {
+  "module": "birds",
+  "name": "StaticInit_Birds"
+ },
+ "00484ed0": {
+  "module": "birds",
+  "name": "BirdLists_Construct0"
+ },
+ "00484ee0": {
+  "module": "birds",
+  "name": "BirdLists_RegisterAtExit"
+ },
+ "00484ef0": {
+  "module": "birds",
+  "name": "BirdLists_Destroy0"
+ },
+ "00484f00": {
+  "module": "birds",
+  "name": "BirdLists_Destroy"
+ },
+ "00484f30": {
+  "module": "birds",
+  "name": "BirdLists_Construct"
  },
  "00484f60": {
   "module": "geffects",
@@ -6918,6 +7718,16 @@
   "module": "geffects",
   "name": "C_GEffectsModule::C_GEffectsModule",
   "proto": "C_GEffectsModule * __thiscall C_GEffectsModule(C_GEffectsModule * this, int id, char * name)"
+ },
+ "004862b0": {
+  "module": "decorators",
+  "name": "C_DecoratorGrid::C_DecoratorGrid",
+  "proto": "void * __fastcall C_DecoratorGrid(void * this)"
+ },
+ "00486300": {
+  "module": "decorators",
+  "name": "Decorators_ClearLightMap",
+  "proto": "void __fastcall Decorators_ClearLightMap(void * fields)"
  },
  "004863e0": {
   "module": "geffects",
@@ -7181,6 +7991,14 @@
  "0048b320": {
   "module": "zz_idioms",
   "name": "vector_tidy_48b320"
+ },
+ "0048b340": {
+  "module": "decorators",
+  "name": "DecoratorPoolVector_Construct"
+ },
+ "0048b360": {
+  "module": "decorators",
+  "name": "DecoratorSetVector_Construct"
  },
  "0048b380": {
   "module": "zz_idioms",
@@ -11433,6 +12251,11 @@
   "module": "controller",
   "name": "C_Car::RayTest",
   "proto": "bool __thiscall RayTest(C_Car *this, S_vector4 *from, S_vector *dir, S_vector4 *pos, S_vector4 *normal)"
+ },
+ "004def80": {
+  "module": "car",
+  "name": "C_Car::HasSeatCamera",
+  "proto": "bool __thiscall HasSeatCamera(void * this, int seat)"
  },
  "004defa0": {
   "module": "zz_idioms",
@@ -28259,6 +29082,11 @@
   "module": "zz_idioms",
   "name": "empty_function_6ac750"
  },
+ "006acb80": {
+  "module": "loader_screen",
+  "name": "GetGameTypeTextId",
+  "proto": "int __cdecl GetGameTypeTextId(int gameType)"
+ },
  "006ad780": {
   "module": "game",
   "name": "S_MultiplayerSettings::SelectMap",
@@ -29631,6 +30459,11 @@
   "module": "game_app",
   "name": "C_Controls::GetValues"
  },
+ "006c76a0": {
+  "module": "camera",
+  "name": "C_Controls::GetValue",
+  "proto": "float __thiscall GetValue(void * this, int action, bool pressed)"
+ },
  "006c7bc0": {
   "module": "app",
   "name": "C_Controls::Update"
@@ -29656,37 +30489,312 @@
   "name": "GameRenderCallback",
   "proto": "int __stdcall GameRenderCallback(int phase, int unknown1, int unknown2)"
  },
+ "006c97b0": {
+  "module": "loader_screen",
+  "name": "StaticInit_LoaderScreen"
+ },
+ "006c97c0": {
+  "module": "loader_screen",
+  "name": "LoaderScreen_Construct"
+ },
+ "006c97d0": {
+  "module": "loader_screen",
+  "name": "LoaderScreen_RegisterAtExit"
+ },
+ "006c97e0": {
+  "module": "loader_screen",
+  "name": "LoaderScreen_Destruct"
+ },
+ "006c97f0": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::C_LoaderScreen",
+  "proto": "void __fastcall C_LoaderScreen(C_LoaderScreen *this)"
+ },
+ "006c9840": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::~C_LoaderScreen",
+  "proto": "void __fastcall ~C_LoaderScreen(C_LoaderScreen *this)"
+ },
+ "006c9900": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::FinishLoading",
+  "proto": "void __fastcall FinishLoading(C_LoaderScreen *this)"
+ },
  "006c9910": {
-  "module": "game",
+  "module": "loader_screen",
   "name": "C_LoaderScreen::Finish",
-  "proto": "void __fastcall Finish(C_LoaderScreen * loader)"
+  "proto": "void __fastcall Finish(C_LoaderScreen *this)"
  },
  "006c9920": {
-  "module": "game",
+  "module": "loader_screen",
   "name": "C_LoaderScreen::SetProgress",
   "proto": "void __thiscall SetProgress(C_LoaderScreen *this, int stage, float fraction)"
  },
+ "006c9990": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::Start",
+  "proto": "void __thiscall Start(C_LoaderScreen *this, char * name, bool show, bool waitForKey, bool twoParts, C_MissionDef * mission)"
+ },
  "006ca610": {
-  "module": "zz_idioms",
-  "name": "get_field_4_6ca610"
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::IsShown",
+  "proto": "bool __fastcall IsShown(C_LoaderScreen *this)"
+ },
+ "006ca620": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::Close",
+  "proto": "void __fastcall Close(C_LoaderScreen *this)"
+ },
+ "006ca7c0": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::Draw",
+  "proto": "void __fastcall Draw(C_LoaderScreen *this)"
  },
  "006ca920": {
-  "module": "game_app",
+  "module": "loader_screen",
   "name": "C_LoaderScreen::AddPlayer",
   "proto": "void __thiscall AddPlayer(C_LoaderScreen *this, char * text, int team)"
  },
+ "006ca9c0": {
+  "module": "loader_screen",
+  "name": "C_LoaderScreen::ClearPlayers",
+  "proto": "void __fastcall ClearPlayers(C_LoaderScreen *this)"
+ },
+ "006caaa0": {
+  "module": "loader_screen",
+  "name": "StaticInit_6caaa0"
+ },
  "006caad0": {
-  "module": "game",
+  "module": "mission_loader",
   "name": "C_game::LoadMission",
   "proto": "int __thiscall LoadMission(C_game *this, char * name, C_MissionDef * mission)"
  },
+ "006caf30": {
+  "module": "mission_loader",
+  "name": "MissionMapA_DtorEh"
+ },
+ "006cb030": {
+  "module": "mission_loader",
+  "name": "MissionMapB_DtorEh"
+ },
+ "006cb130": {
+  "module": "mission_loader",
+  "name": "ModuleMissionData_Dtor",
+  "proto": "void __fastcall ModuleMissionData_Dtor(void * this)"
+ },
+ "006cb160": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::~C_MissionLoader",
+  "proto": "void __fastcall ~C_MissionLoader(void * this)"
+ },
+ "006cb340": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Dtor"
+ },
+ "006cb430": {
+  "module": "mission_loader",
+  "name": "MissionMapB_Ctor"
+ },
+ "006cb4e0": {
+  "module": "mission_loader",
+  "name": "MissionMapB_Dtor"
+ },
+ "006cb5d0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Ctor"
+ },
+ "006cb600": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Begin"
+ },
+ "006cb610": {
+  "module": "mission_loader",
+  "name": "MissionMapB_Begin"
+ },
+ "006cb620": {
+  "module": "mission_loader",
+  "name": "MissionMapB_EraseRange"
+ },
+ "006cb700": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Erase"
+ },
+ "006cbb20": {
+  "module": "mission_loader",
+  "name": "MissionMapA_EraseSubtree"
+ },
+ "006cbb70": {
+  "module": "mission_loader",
+  "name": "MissionMapA_PairDtor"
+ },
+ "006cbb90": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Init"
+ },
+ "006cbc30": {
+  "module": "mission_loader",
+  "name": "MissionMapA_IterDec"
+ },
+ "006cbc90": {
+  "module": "mission_loader",
+  "name": "MissionMapB_Erase"
+ },
+ "006cc0d0": {
+  "module": "mission_loader",
+  "name": "MissionMapB_EraseSubtree"
+ },
+ "006cc120": {
+  "module": "mission_loader",
+  "name": "MissionMapB_Leftmost"
+ },
+ "006cc140": {
+  "module": "mission_loader",
+  "name": "MissionMapA_IterInc"
+ },
+ "006cc190": {
+  "module": "mission_loader",
+  "name": "MissionMapB_IterInc"
+ },
+ "006cc1e0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_PairDeletingDtor"
+ },
+ "006cc200": {
+  "module": "mission_loader",
+  "name": "MissionMapB_PairDeletingDtor"
+ },
+ "006cc220": {
+  "module": "mission_loader",
+  "name": "MissionMapB_PairDtor"
+ },
+ "006cc250": {
+  "module": "mission_loader",
+  "name": "StaticInit_6cc250"
+ },
+ "006cc280": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadScene2",
+  "proto": "int __fastcall LoadScene2(void * this)"
+ },
+ "006cc8d0": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::NameFrame",
+  "proto": "uint __stdcall NameFrame(I3D_frame * frame, void * context)"
+ },
+ "006cc9a0": {
+  "module": "mission_loader",
+  "name": "FormatStr",
+  "proto": "void * __cdecl FormatStr(void * out, char * format)"
+ },
+ "006cca70": {
+  "module": "mission_loader",
+  "name": "MissionLoader_StrDtor1"
+ },
+ "006cca90": {
+  "module": "mission_loader",
+  "name": "MissionLoader_StrDtor2"
+ },
+ "006ccab0": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadObjects",
+  "proto": "bool __thiscall LoadObjects(void * this, C_chunk * chunk, int stage)"
+ },
+ "006cdc60": {
+  "module": "mission_loader",
+  "name": "S_TShiftEntry::S_TShiftEntry",
+  "proto": "void * __thiscall S_TShiftEntry(void * this, void * frame, void * mesh, int unknown0C, int unknown10)"
+ },
+ "006cdc90": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadObject",
+  "proto": "bool __thiscall LoadObject(void * this, C_chunk * chunk)"
+ },
+ "006d3840": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Index"
+ },
+ "006d38f0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_Insert"
+ },
+ "006d39d0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_MakePair"
+ },
+ "006d39f0": {
+  "module": "mission_loader",
+  "name": "TShiftEntries_Insert"
+ },
+ "006d3c10": {
+  "module": "mission_loader",
+  "name": "MissionMapA_FindOrInsert"
+ },
+ "006d3e70": {
+  "module": "mission_loader",
+  "name": "MissionMapA_InsertNode"
+ },
+ "006d40e0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_RotateLeft"
+ },
+ "006d4140": {
+  "module": "mission_loader",
+  "name": "MissionMapA_RotateRight"
+ },
+ "006d41a0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_NewNode"
+ },
+ "006d41c0": {
+  "module": "mission_loader",
+  "name": "MissionMapA_IterDec2"
+ },
+ "006d4220": {
+  "module": "mission_loader",
+  "name": "MissionMapA_PairCopy"
+ },
+ "006d4270": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::Begin",
+  "proto": "void __thiscall Begin(void * this, char * name, C_MissionDef * mission)"
+ },
+ "006d44d0": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadScene",
+  "proto": "int __fastcall LoadScene(void * this)"
+ },
+ "006d45d0": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadCheckpoints",
+  "proto": "void __fastcall LoadCheckpoints(void * this)"
+ },
+ "006d4910": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadActors",
+  "proto": "void __fastcall LoadActors(void * this)"
+ },
+ "006d4bd0": {
+  "module": "mission_loader",
+  "name": "C_MissionLoader::LoadSounds",
+  "proto": "void __fastcall LoadSounds(void * this)"
+ },
  "006d4e90": {
-  "module": "zz_idioms",
-  "name": "empty_function_6d4e90"
+  "module": "mission_loader",
+  "name": "MissionLoader_Empty1"
  },
  "006d4ea0": {
-  "module": "zz_idioms",
-  "name": "empty_function_6d4ea0"
+  "module": "mission_loader",
+  "name": "MissionLoader_Empty2"
+ },
+ "006d4f50": {
+  "module": "mission_loader",
+  "name": "S_MissionNameLess",
+  "proto": "bool __fastcall S_MissionNameLess(void * a, void * b)"
+ },
+ "006d4fc0": {
+  "module": "mission_loader",
+  "name": "SceneLoadProgress",
+  "proto": "void __stdcall SceneLoadProgress(int message, float fraction, uint unused, void * context)"
  },
  "006d5020": {
   "module": "cache",
@@ -31226,6 +32334,11 @@
   "module": "game",
   "name": "C_NetGame::GetConnectionState",
   "proto": "int __fastcall GetConnectionState(C_NetGame * net)"
+ },
+ "00731af0": {
+  "module": "loader_screen",
+  "name": "C_NetGame::PrintLoadProgress",
+  "proto": "void __thiscall PrintLoadProgress(C_NetGame *this, int percent)"
  },
  "00731fd0": {
   "module": "zz_idioms",
@@ -36685,13 +37798,18 @@
  },
  "0089afb0": {
   "data": true,
-  "module": "app",
+  "module": "camera",
   "name": "g_cameraModule"
  },
  "0089afbc": {
   "data": true,
   "module": "geffects",
   "name": "g_cameraHumanEffects"
+ },
+ "0089b208": {
+  "data": true,
+  "module": "camera",
+  "name": "g_vehicleCameraSpeed"
  },
  "0089b288": {
   "data": true,
@@ -36725,6 +37843,26 @@
   "module": "app",
   "name": "g_temporaryActors"
  },
+ "0089b749": {
+  "data": true,
+  "module": "decorators",
+  "name": "g_decoratorsEnabled"
+ },
+ "0089b74c": {
+  "data": true,
+  "module": "volumetrics",
+  "name": "g_clouds"
+ },
+ "0089b754": {
+  "data": true,
+  "module": "volumetrics",
+  "name": "g_cloudVertices0"
+ },
+ "0089b758": {
+  "data": true,
+  "module": "volumetrics",
+  "name": "g_cloudVertices1"
+ },
  "0089b760": {
   "data": true,
   "module": "geffects",
@@ -36741,9 +37879,19 @@
   "module": "geffects",
   "name": "g_geffectsModule"
  },
+ "0089bb90": {
+  "data": true,
+  "module": "birds",
+  "name": "g_birds"
+ },
+ "0089bba0": {
+  "data": true,
+  "module": "birds",
+  "name": "g_spareBirdModels"
+ },
  "0089bbb0": {
   "data": true,
-  "module": "script",
+  "module": "decorators",
   "name": "g_decorators"
  },
  "0089bbb4": {

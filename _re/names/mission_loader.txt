@@ -1,0 +1,62 @@
+# Part 8f-ii: the mission's loading (src/game/mission_loader.*: C_game::LoadMission, moved from
+# game.txt, and C_MissionLoader, the object on its stack; 0x006caad0..0x006cc280 and
+# 0x006d4270..0x006d4ea0). MissionMapA / MissionMapB: the loader's two std::map instances (A: C_str
+# to a 4-byte value, B: C_str to C_str; their use is scene2.bin's, part 8f-iii).
+
+006caad0 C_game::LoadMission | int __thiscall LoadMission(C_game *this, char * name, C_MissionDef * mission)
+006d4270 C_MissionLoader::Begin | void __thiscall Begin(void * this, char * name, C_MissionDef * mission)
+006d44d0 C_MissionLoader::LoadScene | int __fastcall LoadScene(void * this)
+006d45d0 C_MissionLoader::LoadCheckpoints | void __fastcall LoadCheckpoints(void * this)
+006d4910 C_MissionLoader::LoadActors | void __fastcall LoadActors(void * this)
+006d4bd0 C_MissionLoader::LoadSounds | void __fastcall LoadSounds(void * this)
+006d4e90 MissionLoader_Empty1
+006d4ea0 MissionLoader_Empty2
+006d4fc0 SceneLoadProgress | void __stdcall SceneLoadProgress(int message, float fraction, uint unused, void * context)
+006cb130 ModuleMissionData_Dtor | void __fastcall ModuleMissionData_Dtor(void * this)
+006cb160 C_MissionLoader::~C_MissionLoader | void __fastcall ~C_MissionLoader(void * this)
+006cc9a0 FormatStr | void * __cdecl FormatStr(void * out, char * format)
+006cc250 StaticInit_6cc250
+006cca70 MissionLoader_StrDtor1
+006cca90 MissionLoader_StrDtor2
+# Part 8f-iii: scene2.bin (0x006cc280..0x006cdc90, the map code 0x006d3840..0x006d4240).
+006cc280 C_MissionLoader::LoadScene2 | int __fastcall LoadScene2(void * this)
+006ccab0 C_MissionLoader::LoadObjects | bool __thiscall LoadObjects(void * this, C_chunk * chunk, int stage)
+006cc8d0 C_MissionLoader::NameFrame | uint __stdcall NameFrame(I3D_frame * frame, void * context)
+006cdc60 S_TShiftEntry::S_TShiftEntry | void * __thiscall S_TShiftEntry(void * this, void * frame, void * mesh, int unknown0C, int unknown10)
+006d39f0 TShiftEntries_Insert
+006d4f50 S_MissionNameLess | bool __fastcall S_MissionNameLess(void * a, void * b)
+006d3840 MissionMapA_Index
+006d38f0 MissionMapA_Insert
+006d39d0 MissionMapA_MakePair
+006d3c10 MissionMapA_FindOrInsert
+006d3e70 MissionMapA_InsertNode
+006d40e0 MissionMapA_RotateLeft
+006d4140 MissionMapA_RotateRight
+006d41a0 MissionMapA_NewNode
+006d41c0 MissionMapA_IterDec2
+006d4220 MissionMapA_PairCopy
+# (Declared for part 8f-iv.)
+006cdc90 C_MissionLoader::LoadObject | bool __thiscall LoadObject(void * this, C_chunk * chunk)
+# The maps' code (std::map, MSVC6).
+006cb5d0 MissionMapA_Ctor
+006cbb90 MissionMapA_Init
+006cb340 MissionMapA_Dtor
+006caf30 MissionMapA_DtorEh
+006cb600 MissionMapA_Begin
+006cb700 MissionMapA_Erase
+006cbb20 MissionMapA_EraseSubtree
+006cbb70 MissionMapA_PairDtor
+006cc1e0 MissionMapA_PairDeletingDtor
+006cbc30 MissionMapA_IterDec
+006cc140 MissionMapA_IterInc
+006cb430 MissionMapB_Ctor
+006cb4e0 MissionMapB_Dtor
+006cb030 MissionMapB_DtorEh
+006cb610 MissionMapB_Begin
+006cb620 MissionMapB_EraseRange
+006cbc90 MissionMapB_Erase
+006cc0d0 MissionMapB_EraseSubtree
+006cc120 MissionMapB_Leftmost
+006cc190 MissionMapB_IterInc
+006cc200 MissionMapB_PairDeletingDtor
+006cc220 MissionMapB_PairDtor

@@ -1365,7 +1365,7 @@ bool C_Campaign::SetupMultiplayerMission()              // 0x006b8a20
     m_mpMission.m_balanceAxis = map->GetValue(2);
     m_mpMission.m_balanceAllied = map->GetValue(3);
     m_mpMission.m_unknown60 = map->GetValue(4);
-    m_mpMission.m_unknown64 = map->GetValue(5);
+    m_mpMission.m_briefingText = map->GetValue(5);
     m_mpMission.m_presets = map->GetPresets();
     m_mpMission.Reset();
     return true;

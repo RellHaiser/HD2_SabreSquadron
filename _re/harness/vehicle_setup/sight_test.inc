@@ -94,9 +94,14 @@ void C_MeleeTracker::TestSight(C_Actor *target, int *status, float *visibility)
     *status = 7;
     *visibility = SgView(this, target);
 }
+// (A test's own ray test, when set: the camera module's placement, part 8e-iv.)
+S_CollisionVolume *(*g_worldRayHook)(const S_vector &from, const S_vector &dir, S_vector *hitPos, S_vector *hitNormal,
+                                     uint32_t excludeTypes, uint32_t excludeFlags);
 S_CollisionVolume *C_CollisionWorld::RayTest(const S_vector &from, const S_vector &dir, S_vector *hitPos,
                                              S_vector *hitNormal, uint32_t excludeTypes, uint32_t excludeFlags) const
 {
+    if (g_worldRayHook)
+        return g_worldRayHook(from, dir, hitPos, hitNormal, excludeTypes, excludeFlags);
     g_sgRays.push_back({from, dir, hitPos != nullptr, excludeTypes, excludeFlags});
     if (hitNormal)
         std::exit(6);

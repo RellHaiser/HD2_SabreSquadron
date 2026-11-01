@@ -2,51 +2,12 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
-// 0x004862b0
-uint32_t FUN_004862b0(uint32_t *param_1, ...)
-{
-  uint8_t local_1;
-  local_1 = (uint8_t)((uint32_t)param_1 >> 0x18);
-  param_1[3] = 0xffffffff;
-  param_1[4] = 0xffffffff;
-  param_1[5] = 0;
-  param_1[6] = 0;
-  *(uint8_t *)(param_1 + 10) = local_1;
-  param_1[0xb] = 0;
-  param_1[0xc] = 0;
-  param_1[0xd] = 0;
-  *param_1 = 0x3c;
-  param_1[1] = 0x3c;
-  param_1[2] = 0x3f000000;
-  param_1[9] = 0;
-  *(uint8_t *)(param_1 + 0x10) = 0;
-  param_1[0x11] = 0;
-  param_1[0xf] = 0x3d4ccccd;
-  param_1[0x12] = 0;
-  *(uint8_t *)(param_1 + 0x13) = 0;
-  return 0;
-}
-
-
-// 0x00486300
-uint32_t * FUN_00486300(uint32_t *param_1, ...)
-{
-  int iVar1;
-  uint32_t *puVar2;
-  puVar2 = param_1;
-  memset(puVar2, 0, 8 * sizeof(*puVar2));
-  puVar2 += 8;
-  iVar1 = 0;
-  return param_1;
-}
-
-
 // 0x00486320
 uint32_t FUN_00486320(int param_1, ...)
 {
   uint32_t local_4;
   local_4 = 3;
-  FUN_0047c020(param_1);
+  C_Decorators__Clear(param_1);
   tier1_operator_delete(*(void **)(param_1 + 0x98));
   *(uint32_t *)(param_1 + 0x98) = 0;
   *(uint32_t *)(param_1 + 0x9c) = 0;
@@ -143,17 +104,6 @@ uint32_t C_auto_008102b8__FUN_00486ef0(C_auto_008102b8 *_this, ...)
 }
 
 
-// 0x0048b300
-uint32_t vector_tidy_48b300(int param_1, ...)
-{
-  tier1_operator_delete(*(void **)(param_1 + 4));
-  *(uint32_t *)(param_1 + 4) = 0;
-  *(uint32_t *)(param_1 + 8) = 0;
-  *(uint32_t *)(param_1 + 0xc) = 0;
-  return 0;
-}
-
-
 // 0x0048b320
 uint32_t vector_tidy_48b320(int param_1, ...)
 {
@@ -161,28 +111,6 @@ uint32_t vector_tidy_48b320(int param_1, ...)
   *(uint32_t *)(param_1 + 4) = 0;
   *(uint32_t *)(param_1 + 8) = 0;
   *(uint32_t *)(param_1 + 0xc) = 0;
-  return 0;
-}
-
-
-// 0x0048b340
-uint32_t FUN_0048b340(void *_this,uint8_t *param_1, ...)
-{
-  *(uint8_t *)_this = *param_1;
-  *(uint32_t *)((int)_this + 4) = 0;
-  *(uint32_t *)((int)_this + 8) = 0;
-  *(uint32_t *)((int)_this + 0xc) = 0;
-  return 0;
-}
-
-
-// 0x0048b360
-uint32_t FUN_0048b360(void *_this,uint8_t *param_1, ...)
-{
-  *(uint8_t *)_this = *param_1;
-  *(uint32_t *)((int)_this + 4) = 0;
-  *(uint32_t *)((int)_this + 8) = 0;
-  *(uint32_t *)((int)_this + 0xc) = 0;
   return 0;
 }
 
@@ -256,13 +184,6 @@ uint32_t FUN_0048b440(int *param_1, ...)
   if (puVar2 != 0) {
     (**(code **)*puVar2)(puVar2);
   }
-  return 0;
-}
-
-
-// 0x0048b630
-uint32_t empty_function_48b630(...)
-{
   return 0;
 }
 

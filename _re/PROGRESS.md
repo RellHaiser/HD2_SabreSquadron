@@ -5364,6 +5364,410 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     12 functions in ported.txt (23 helpers absorbed: the shadow cache's and the face groups'
     containers; the decorators' still left for 8d). Stats: 7,531 of 12,293 functions by hand (69.2 % by size).
 
+  PART 8d-i DONE (2026-10-30): the birds and the mesh player (src/game/birds.*, mesh_player.*, new).
+  - C_Bird (0x004797c0..0x0047a2f0): a "ptacekletacek" model linked to the primary sector, its
+    frame data pointing at the bird, wings "Object03" / "Object01" (off). Sitting it hops after
+    3..23 s (RandomFloat(0.001) + 0.0001 m/ms up, 1e-6 down per ms) and lands back at its start
+    (then 20..40 s); FlyAway: 5..7 m/s along its z axis and up (plus up to 0.5 m sideways at
+    random), taking off 10 m, climbing at 0.75 the speed with gravity until it points down, then
+    gliding at y -0.1 until beyond the far clip or 500 m (then deleted). The wings flap about z,
+    the right one mirrored. Deleted, a scene model goes back to its start, hidden, to
+    g_spareBirdModels (the fowl generator's); its own model leaves the scene. Quirk kept: any frame
+    data on the model is taken for a bird there before (its start reused).
+  - UpdateBirds, CollectBirds (EnumFrames over models, the lowercase name), FreeBirds (the spares
+    shown again).
+  - C_MeshPlayer (0x00484100..0x00484ae0): missions\<mission>\meshplayer.bin's movie (chunk 0x44C)
+    and frames (0x4B0) found in the scene; GameMovie\<movie> streamed onto the first mesh level's
+    face groups of each object visual with flag 0x800 (the first group's texture kept and given
+    back by Free); replayed at its end, the picture updated when one of the frames was drawn.
+  - C_Bird's w fields left out (never used). Game::GetFarClip.
+  - Harness: birds_test.inc ("birds:", 13 checks); the GEffects fakes of the birds and mesh player
+    dropped (the real ones linked); the scene's EnumFrames faked (its returns 1 / 2 honoured), the
+    stream and its textures logging fakes; RandomFloat's last max kept. Baselines: 0 of 22 in both
+    orders; the item build 0 of 37; the other five 0 of 37 each.
+  - Mutations (mutations/mutate_8d1.py): the first run caught 189 of 247 (52 survived, 6 did not
+    build); 29 equivalent (see the file's docstring), new cases for 23. The second run: all 209 caught.
+  - Build: 197 files clean (MSVC). Tier 1: 546 errors in 97 files, 226 stubs. ret_audit --src: 52.
+  - Ghidra: 32 names (names/birds.txt; C_Bird's moved from world_actors.txt), 43 decompiles
+    exported; 22 functions in ported.txt (16 helpers absorbed: the birds' and the mesh player's
+    containers). Stats: 7,569 of 12,293 functions by hand (69.4 % by size).
+
+  PART 8d-ii DONE (2026-10-30): the decorators' setup, load, start and free (src/game/decorators.*, new).
+  - decorations.bin (0x0047c530, S_DecoratorSet::Load 0x0047cc90): the top chunk's id is the version
+    (1: nothing read); the grid's size (square) and cell size, then per ground material its set
+    (minimum slope 0.95 from version 3, ground cover 0.5 from 9) of decorators: the model's name chunk,
+    the cumulative chance (%), bendable; from version 4 a float (unknown), 5 random rotation, 6 the
+    sway (none / along x / z) and its amplitude, 7 its frequency, 8 align to the ground. A material
+    read again replaces its set; a set without its header ends the load. decorator_sl.bin
+    (0x0047c930): the ground's light, a byte per cell (width, height, cell size, origin x / z, 2 ints
+    unknown), only after decorations.bin opened.
+  - Start (0x0047b0b0): each decorator's pool of free models by its lowercase name (made when new),
+    the animated ones listed, the grid made (60 x 60 cells of 0.5 m by default, rows [z][x]); off when
+    the detail option DETAIL_DECORATORS (4, new) is. SetOn, Clear, Free, GetGroundCover (1 for a
+    material without a set). C_DecoratorGrid's Init / Free, S_DecoratorBend's fields (the update's).
+  - Quirks kept: Start without Free lists the animated decorators again; a material index cut short
+    by the file's end keeps its bytes read. Fixes: the name buffers terminated, the light map cleared,
+    Start's name not copied into 256 bytes.
+  - Harness: decorators_test.inc ("decorators:", 12 checks), the GEffects test's decorator fakes
+    dropped (Update kept for 8d-iii). Baselines: 0 of 22 in both orders; the item build 0 of 37; the
+    other five 0 of 37 each.
+  - Mutations (mutations/mutate_8d2.py): the first run caught 172 of 209 (33 survived, 4 did not
+    build); 11 equivalent, new cases for 21. The second run: all 195 built caught.
+  - Build: 198 files clean (MSVC). Tier 1: 546 errors in 97 files, 226 stubs. ret_audit --src: 52.
+  - Ghidra: 43 names (names/decorators.txt; SetOn and g_decorators moved from script.txt), 54
+    decompiles exported; 25 functions in ported.txt (29 helpers absorbed; Update 0x0047bcc0 left for
+    8d-iii). Stats: 7,622 of 12,293 functions by hand (69.6 % by size).
+
+  PART 8d-iii DONE (2026-10-30): the decorators' update (src/game/decorators.*).
+  - Update (0x0047bcc0): the detail option followed (SetOn); the animated decorators sway (the
+    phase time * frequency * 0.001 + their index; mode 1: (x, sqrt(2 y^2 - s^2), z + s) with
+    s = sin * amplitude, mode 2 with c = cos * s; quirk kept: y twice, not the length), their levels
+    unlocked and refreshed; the grid follows the camera, or the player's soldier unless in a
+    cutscene (or the scripts' fake one, IsFakeCutscene, new) or the tactical view.
+  - The grid (C_DecoratorGrid): Follow (0x0047eb80) refills the cells passed as the viewer moves
+    (all anew from half the grid off), its ring buffer shifted (ShiftX / Z), then bends around the
+    player's soldier on foot and the cars within half the grid's width. Refill (0x0047e2d0): a seed
+    from the cell's world place (sin / cos hash, srand), the place jittered by 0.75 of a cell, a ray
+    down from 100 m (500), a set's decorator picked by RandomFloat(100) on ground whose normal's y is
+    above the set's minimum; lit at half the light map (also kept as a float in the model's frame
+    data, the bends' darkening reads it), turned at random or aligned to the ground, scaled 0.6..1.
+  - The models: TakeModel (0x0047b500) a pool's spare, a copy of its original, or the original
+    loaded (lit by its own colours; a copy kept in the pool; an animated decorator's mesh taken
+    first, PrepareAnimated 0x0047baa0: the vertices within 0.1 m of the line along the bound's top
+    xz diagonal); ReturnModel; the light map's bilinear SampleLight (quirk kept: no bounds).
+  - The bends: Bend (0x0047fae0) the bendable models within the radius' cells, those inside the
+    outer radius bent away from the move (inside the inner one darkened, between a small swing);
+    the soldier's radii by stance (0.25 / 0.4, 0.3 / 0.5, crouched 0.75 / 1; the first person's
+    crouch fades the near models' alpha over 1 s); a car's wheels (0.2 m towards the axle's other
+    one, 0.5 / 0.6) or its tracks' axle middles (2.4 / 2.5). S_DecoratorBend::Update: the roll on
+    towards its target, a spring swinging back at -0.9 until under a degree, the light back at
+    0.0003 per ms.
+  - C_Vehicle befriends C_DecoratorGrid; the human stub's velocity and stance. A Python model of
+    Follow (_re/tools/decorator_follow_sim.py, from the asm) gives the tests' refill sequences.
+  - Harness: decorators2_test.inc ("decorators2:", 19 checks; its own frame vtable, the ray hook as
+    the ground, probes of rings of models for the bend points); the GEffects test sees the
+    decorators' update through the detail flag. Baselines: 0 of 22 in both orders; the item build 0
+    of 37; the other five 0 of 37 each.
+  - Mutations (mutations/mutate_8d3.py): the first run caught 477 of 642 (165 survived); 68
+    equivalent (see the file's docstring), new cases for 97. The second run 571 of 574, one more
+    case; the full rerun: all 573 caught.
+  - Build: 198 files clean (MSVC). Tier 1: 539 errors in 95 files, 222 stubs. ret_audit --src: 52.
+  - Ghidra: 26 names (names/decorators.txt), 27 decompiles exported; 22 functions in ported.txt (4
+    helpers absorbed). Stats: 7,648 of 12,293 functions by hand (69.8 % by size).
+
+  PART 8d-iv DONE (2026-10-30): the volumetrics and the clouds (src/game/volumetrics.*, new). Part 8d done.
+  - The volumetrics (C_Volumetrics, GEffects +0xC4): light shafts from volumetrics.bin (top chunk
+    id 1; a shaft per chunk: its light by name (chunk 10, FRAME_MASK_LIGHT), depth / fade distances,
+    phases, its cones in chunk 0x28 (subchunks 0x3F2..0x460: texture, width, length, alphas, flat,
+    turn, segments (up to 10), spread, scrolls, uv scale)). Prune deletes those whose light is gone;
+    Refresh builds the cones (textures with ".bmp" when the name has no extension).
+  - Render (0x00482260): the states 3 / 0xE / 0xD kept, the clouds drawn first; the camera's turn on
+    the ground summed (AngleBetween2D); a shaft is visible in a sector drawn this frame (SCTF_VISIBLE,
+    I3D_sector::IsVisible, new), in front of the camera and nearer than its fade's end (its turn round
+    the viewer summed); drawn farthest first (Draw: its z axis kept, turned to the camera, state 0xD
+    beyond its depth distance, faded in / out by the distance; the cones' phase from the turns, the
+    distance and the camera's turn: a flat fan's texture scrolled by the time, a cone's rims' turned).
+  - The clouds (0x00482e50): a billboard in each 16 m cell of the 12 x 12 x 12 around the camera
+    (sin / cos of the cell's index for its place and size), in front of it, faded in from 10 m to
+    20 m and out from 45 m (to about 71 m; the near fade's double constants rounded once), in one of
+    two buffers by the sine's sign, a texture each (clouder.tga / clouder2.tga).
+  - Quirks kept: the list's destructor leaves the shafts; Refresh overwrites the shaft's random
+    angle with its light's distance from the origin; a light not found still keeps the shaft (Prune
+    deletes it). Fixes: the cones' segment count clamped to their room, the texture name not used as
+    a format, the name buffers terminated.
+  - S_Volumetric / S_VolumetricCone's CopyFrom (0x00481230 / 0x00481190) not ported (never called).
+    DrawClouds takes the original's (unused) time.
+  - Harness: volumetrics_test.inc ("volumetrics:", 19 checks; IGraph's textures, render states,
+    world matrix and draws and the driver's states faked, the draws' vertices kept; the clouds
+    compared vertex by vertex), S_matrix::SetDir(dir, up) as LS3DF's; the GEffects test's volumetrics
+    fakes dropped. Baselines: 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
+  - Mutations (mutations/mutate_8d4.py): the first run caught 298 of 442 (138 survived, 6 did not
+    build); 73 equivalent (see the file's docstring), new cases for 67. The second run 359 of 365, 4
+    more cases; the full rerun: all 363 caught.
+  - Build: 199 files clean (MSVC). Tier 1: 537 errors in 94 files, 221 stubs. ret_audit --src: 52.
+  - Ghidra: 33 names (names/volumetrics.txt), 37 decompiles exported; 25 functions in ported.txt
+    (9 helpers absorbed). Stats: 7,682 of 12,293 functions by hand (70.3 % by size).
+
+  PART 8e-i DONE (2026-10-31): the camera module's core (src/game/camera_module.*, new; part 8e, the
+  camera module 0x00462320..0x0046cb20, begun).
+  - C_CameraModule ("CameraModule", module 15, the object 0x0089afb0, 0x2C0 bytes): a C_Module (its
+    intermediate class's vtable 0x0080fdd0 / 0x0080fd40 folded into C_Module), the slots past
+    C_Module's (+0x40 ..) called directly (non-virtual, the sound module's way; nothing calls them
+    through the vtable). Its layout: the positions / directions of indices 2 and 3 (+0x10 .. +0x4C),
+    the 11 views' settings (+0xE0, S_CameraSettings: tables\gamecam.set, chunk 0 the version 2,
+    chunk 0 the records: as many whole ones as the chunk holds; defaults otherwise), the game camera,
+    the scene's camera, the camera in use, the view (+0x260) and its settings, the blend time, the
+    target and its speed; the rest named by offset until 8e-iii.
+  - StartMission (the client side): the settings loaded, a camera made the scene's active one in
+    the scene camera's place (the game's field of view and range, "GameCamera", the near sector's
+    65 degrees and 0.01 .. 10 m), the fields reset. StopMission: the tactical view off (both sides),
+    the scene's camera back, the game camera and the camera in use released (a human's dummy: its
+    SetUnknown94(0)). RestartMission (a client): stop, start, Unknown40(0) unless in the Junkers;
+    LoadGame: Unknown40(0), an update of 100 ms. The getters and setters (positions, directions,
+    the fields of view, the blend time, the target, the view direction).
+  - C_CameraFrameKeeper (moved from pending.h): the constructor, Restore (the destructor's JMP),
+    Update: the dummy raised over its parent by its height (a sphere test down to the ground), a
+    car: looking along its heading / 2 plus its velocity, the blend speed (speed + 2.5) * 0.3; a
+    submarine: along its heading times its speed + 0.5, lowered with its bobbing and rolled with
+    the time, the speed / 40 at least 0.03; 1000 after a Restore; the active soldier's vehicle's
+    speed to g_vehicleCameraSpeed (0x0089b208, not read). Quirk kept: the dummy's y compared with
+    +0.3 (its direction is set with -0.3), so it is always turned.
+  - C_CameraHumanEffects: its layout (0xA0, the rest in 8e-ii), the constructor and destructor;
+    g_cameraHumanEffects (0x0089afbc) is the module's +0xC (now a reference to it).
+  - I3D_camera slots 0x78 / 0x80 named (SetNearSectorFOV / SetNearSectorRange, as LS3DF), +0x12C;
+    SetFov2 / GetFov2 renamed SetNearSectorFov / GetNearSectorFov; C_game::GetNearClip,
+    C_Submarine::GetBob.
+  - Harness: the camera build (build_camera.bat, CAMERA_TEST: the world build with the real module,
+    the world tests' camera fakes and the base harness's keeper fakes left out; -faligned-new=8;
+    mutfast.py takes a .bat's -f options too); camera_test.inc ("camera:" 15 checks, "keeper:" 6);
+    check_camera.py. The stub pending.h takes the keeper from the real header. 0 of 22 in both
+    orders.
+  - Mutations (mutations/mutate_8e1.py): the first run caught 202 of 300 (71 survived, 27 did not
+    build); 37 equivalent (see the file's docstring), new cases for 34 (the zeroed fields, the near
+    sector's range, the short directions, the views off the axes, a dive along the view); the full
+    rerun: all 236 caught. Baselines: the world build 0 of 22 in both orders; the item build 0 of 37;
+    the other five 0 of 37.
+  - Build: 200 files clean (MSVC). Tier 1: 537 errors in 94 files, 221 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/camera.txt (8e-i's added, SetFov2 / GetFov2 renamed); 45 functions in ported.txt.
+    Stats: 7,727 of 12,293 functions by hand (70.4 % by size).
+
+  PART 8e-ii DONE (2026-10-31): the human effects, the command map's tactical camera
+  (src/game/camera_module.*, 0x00462320..0x00464d77).
+  - C_CameraHumanEffects (0xA0, behind g_cameraHumanEffects): its layout named (the map point, the
+    look point, the position, the motion, the zoom, the double click's time, the mode, the
+    flight's rotations, speed, acceleration, distance and time; the faded humans, pairs of a human
+    and its transparency).
+  - SetTactical: on, the scene's camera kept and duplicated (field of view, range, aspect), then 7 m
+    behind and 3 m above the active soldier along his flat view, looking down (-0.35); off, the
+    scene's camera back, the module's Unknown40(0), the faded humans back. LookAt (the map's double
+    click on a soldier): 3 m behind and 1.5 m above along his view (5 m, and 1.5 m higher, in a car,
+    a submarine, a static weapon or the Junkers); null: the game camera's.
+  - SetTacticalMode: leaving a mode other than a turn puts the look point in front (10 m; 2 m
+    outside the primary sector); a second drag within 500 ms starts the flight (TACTICAL_FLY, 10):
+    to three quarters of the way to the point (the point moved to an obstacle; not within 1 m),
+    turning to look along it, 1.25 / 1.875 / 2.5 s by the distance (5 m, 35 m), sped up for its
+    first third and slowed for its last; idle and a drag within 300 ms leave it, a later drag keeps
+    its speed for the next.
+  - UpdateTactical: moves (10 m/s by the zoom; a quarter outside the primary sector) sideways and
+    forward, turns (2.1 rad/s; quirk kept: past +89 degrees the angle becomes the excess, past
+    -89 the way back), drags the ground, goes up and down 12 m/s (through a water surface when
+    there is room), zooms along the view 8 m/s, flies; then fades the player team's known enemies
+    and members near it (1 within 0.4 m^2 of the segment from the body frame to the frame, 0 past
+    2.4, C_Human::SetUnknown94). The camera slides along what it hits, 5 cm off it.
+  - Quirks kept: Remove moves only the last human into the freed place (it keeps the removed one's
+    transparency); a human whose transparency went to 0 is dropped at its next change. 0x004633c0
+    and 0x00464a70 are not referenced (left to tier 1).
+  - Harness: tactical_test.inc in the camera build ("tactical:", 15 checks): the slide sphere, the
+    quaternion's SetDir / Slerp / GetDir, RotateByMatrix, RotateYMatrix and the scene's GetSector
+    faked; the GEffects and decorators tests' SetTactical / IsTactical fakes left out of it; the
+    module's stop checked with the real tactical camera. 0 of 22 in both orders.
+  - Mutations (mutations/mutate_8e2.py): the first run caught 260 of 299 (25 survived, 14 did not
+    build); 9 equivalent (see the file's docstring), new cases for 16 (the hit's point, the
+    boundaries of the flight, the click time and the fades, the roll, the members apart from the
+    enemies); the full rerun: all 276 caught. Baselines: the world build 0 of 22 in both orders; the
+    item build 0 of 37; the other five 0 of 37.
+  - Build: 200 files clean (MSVC). Tier 1: 536 errors in 93 files, 220 stubs (537 / 94 / 221 before). ret_audit --src: 52.
+  - Ghidra: names/camera.txt (13 added; hud.txt's LookAt dropped); 21 functions in ported.txt.
+    Stats: 7,748 of 12,293 functions by hand (70.7 % by size).
+
+  PART 8e-iii DONE (2026-10-31): the camera module's update (src/game/camera_module.*; 0x00469300,
+  0x0046ada0, 0x0046b550, 0x0046beb0).
+  - Update: nothing while +0x26E (but the debug camera); the debug camera, the scripted view, or
+    (the active soldier in a car seat but a seat weapon's) the car's camera; else the mouse turns
+    the view direction (+0x20) about y (no member selected, or view 10) and pitches it about its
+    side axis within the view's limits (CAMERA_SETTINGS_PITCH: with a member selected too); the
+    first-person view (2) takes the soldier's view without a selection and keeps the camera out
+    of the band around the water's surface (the view's waterBand + 0.1 m) while his head is under
+    it; views 7 .. 9 (or no selection) take the camera dummy's direction (CAMERA_SETTINGS_FOLLOW +
+    FIXED_DIR); then PlaceCamera / MoveCamera (0x00468130 / 0x00466970, part 8e-iv, declared), the
+    game camera's update, the listener's sector every 500 ms, the two offsets (+0x80 the
+    direction's, +0x90 the position's) shrinking 1 per second after their delays, +0x294 up to
+    5000. The debug camera's branches after the start are not reached (it returns there): left out.
+  - The car's camera: the look actions (C_Controls::GetValue, 0x006c76a0, declared) turn it up to
+    30 degrees aside and 25 up or down from the camera dummy's view (the soldier's own view in a
+    hidden seat in view 9 or an armed one as the local player); the game camera rolled with the
+    dummy (PoseGetRoll), the yaw / pitch / roll printed (C_game::Print). The scripted view: 10 m
+    behind the script's frame (+0x2B4), swaying with the game's time; the shake (+0x60 / +0x70 for
+    +0x284 ms) and the offsets turned with the camera on top. The debug camera: the look actions
+    turn it (85 degrees at most), the mouse buttons (IGraph::GetMouseButtons, slot 0x104) move it
+    at 0.2 .. 200 m/s, the speed action steps the speed.
+  - Quirk kept: the car and debug cameras bring the pitch back into -pi .. pi by pi (not 2 pi).
+  - The module's fields named (the water offset and level, the shake, the offsets and their
+    delays, the debug camera and its speed, the mouse look, the listener's time, the scripted
+    view, the car's yaw and pitch; S_CameraSettings::waterBand); m_scriptedView an I3D_frame.
+  - Harness: update_test.inc in the camera build ("update:", 8 checks; the mouse, the controls'
+    values, PoseGetRoll, the camera's SetWorldDir and PlaceCamera / MoveCamera faked; a C_Actor
+    car with its seats' flags); the stubs: C_Human::GetVehicleSeat, S_DetailSettings::invertMouse,
+    C_Controls. The 8e-i load test with +0x26E set. 0 of 22 in both orders.
+  - Mutations (mutations/mutate_8e3.py): the first run caught 218 of 275 (57 survived); 30
+    equivalent (see the file's docstring), new cases for 27 (the delays' and lengths' edges, more
+    turns and dummy directions, the listener at 0, the car camera's heading 0 and limits without
+    input, the shake's last millisecond, the debug camera's pi wrap, the moves' y); the full rerun:
+    all 245 caught. Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the
+    other five 0 of 37.
+  - Build: 200 files clean (MSVC). Tier 1: 536 errors in 93 files, 220 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/camera.txt (7 added); 4 functions in ported.txt. Stats: 7,752 of 12,293
+    functions by hand (71.0 % by size).
+
+  PART 8e-iv DONE (2026-10-31): the camera's placement and move, the view's choice, the special
+  modes (src/game/camera_module.*; 0x00468130, 0x00466970, 0x0046c370, 0x0046cb20; the iostream
+  statics 0x004668f0..0x00466960, 0x0046c310, 0x0046c340; C_Car::HasSeatCamera 0x004def80;
+  C_Controls::GetValue 0x006c76a0 counted here).
+  - PlaceCamera: the direction turned towards the wanted one by a slerp (16 units a second, 6 in
+    view 7 after its first frame; 0.5 radians aside near +z, the quaternions' blind spot); then
+    the distance behind the camera dummy, or with CAMERA_SETTINGS_COLLIDE (0x80) a sphere swept
+    back from the dummy (the turret's view: from its arm) to the distance + 1 m (in a car: its own
+    type kept out; else a ray too, its hit held off by the radius + 0.05), the dummy's own model
+    ignored, the distance easing out and in at the view's speed (1 cm before what is in the way;
+    1 m less / more under water); kept out of the water's surface (0.1 m past its band, 0.3 m on
+    the collide path); the blend (the distance 0 meanwhile) and the cut (the speed 1000).
+  - MoveCamera: the shake (UpdateShake, inline), the offsets in the game camera's space; the
+    target's turn (the scene's active camera; at once at speed 0); aiming: the sway (0.002 in
+    view mode 2, shrinking to 0.0015 while the breath is held, growing to 0.008; times 2 - the
+    soldier's stat factor 4); the turret's view (8: at the dummy in the first-person view, else
+    along its arm; the seat's own view shown); the dummy's soldier faded as the camera nears him.
+  - SelectView (was Unknown40; its argument unused): a seat's camera dummy (8 a seat weapon's, 10
+    the Junkers gunner's in third person with the game's field of view, else 8 with the gun's;
+    an AI-held Junkers' control given back; 7 / 9 a passenger's, a car's seat camera's distance
+    from the car's camera offset; 1 / 2 an armed seat's), else the soldier's "camera3RD*" (1
+    outdoors or "nointerier", 3 indoors, 4 "interierclose", 5 / 6 under water) or "cameraFPV*"
+    (2). A new dummy is held, the old one let go (its soldier no longer faded).
+  - SetSpecialMode (the slot's four overloads): the debug camera, a client's explosion shake, a
+    spectator's camera (one at random; the next one), the mouse look, the water's surface, the
+    two kicks (0.25 / 1 m at most), aiming, the projectile's view. Quirk kept: a seat without a
+    camera dummy leaves the old one held but the module's pointer null; the float overload's
+    "value" is its bits (-0.0 is on).
+  - Fields named (the distance, the turn's speed, the hit, the cut, the spectating and its
+    number, aiming and its time, the fade and its target; S_CameraSettings radius / speed;
+    CAMERA_MODE_*, CAMERA_SETTINGS_COLLIDE, FRAME_MASK_CAMERA); C_Junkers88::m_gunFov.
+  - Harness: placement_test.inc in the camera build ("place:", 15 checks; the first-person view's
+    Show / ShowBinoculars, the water flag, the team's ReturnControl, the ray (sight_test's new
+    g_worldRayHook) and the scene's FindFrame / GetSector faked; a C_Car's seats in a raw block).
+    The earlier tests: SelectView real (the restart, stop, load and tactical expectations). 0 of
+    22 in both orders.
+  - Mutations (mutations/mutate_8e4.py): the first run caught 378 of 452 (74 survived); 38
+    equivalent (see the file's docstring), new cases for 36 (the water band's edges on both paths,
+    the blend's and shake's last milliseconds, ratios just past 1, the clamps' 1 cm and 0.008
+    edges, rolls 0, a non-unit slerp, view 9's move, the fade near the head, the views' old values,
+    larger random rolls, a 1.5 kick); the full rerun: all 414 caught. Baselines: the world build 0 of 22 in both orders; the item build 0 of 37 (its Junkers test and mutate_7h.py renamed to m_gunFov); the other five 0 of 37.
+  - Build: 200 files clean (MSVC). Tier 1: 528 errors in 91 files, 217 stubs (was 536 / 93 /
+    220). ret_audit --src: 52.
+  - Ghidra: names/camera.txt (11 added), car.txt (1); 16 functions in ported.txt. Stats: 7,768 of
+    12,293 functions by hand (71.4 % by size).
+
+  PART 8f PLAN (2026-10-31): the mission loading (0x006c97b0..0x006d4eb0, 71 functions, ~44 KB):
+  8f-i the loading screen (0x006c97b0..0x006caad0); 8f-ii C_game::LoadMission and its loader
+  object (the containers 0x006caf30..0x006cc250; the mission's start 0x006d4270, "Scene",
+  check2.bin, actors.bin and the rest 0x006d44d0..0x006d4ea0); 8f-iii scene2.bin's top level and
+  the cache (0x006cc280, 0x006ccab0, 0x006d38f0..0x006d4240); 8f-iv scene2.bin's chunk reader
+  0x006cdc90 (16.5 KB) and 0x006d1ef0 (5.4 KB, no direct callers).
+
+  PART 8f-i DONE (2026-10-31): the loading screen (src/game/loader_screen.*, new; C_LoaderScreen,
+  0x006c97b0..0x006caad0; the object at 0x008aea80, moved out of pending.h).
+  - Start (0x006c9990; the mission's start calls it: shown on a client, waiting for space in single
+    player, in two parts): "missions\<m>\loader" opened as its own scene (the driver's states 0x15 /
+    0x19 / 0x11 set meanwhile; failed: let go, not started), the interface's orthogonal camera and
+    ambient light, then the scene's 15 text visuals (the table at 0x00843078: briefing, textbar,
+    title, MP_list1 / 2, MP_objective1 / 2, MP_title, MP_text_screen, MP_team allied1 / 2, MP_map
+    survey, MP_progress, MP_designated, text_h&dversion) as text boxes with their labels: the
+    briefing and title from the mission's texts (a cooperative map's briefing, value 5, and name),
+    the players AddPlayer collected (team 1 the first list; then forgotten), a network map's
+    objectives with their sides' texts, its name, game type, deathmatch teams, the version.
+  - SetProgress: the stage's part of the bar (6 stages, named by the table: scene, scene2.bin,
+    actors.bin, sounds.bin, stuff.bin, mission init; the second table when C_game::Start follows),
+    drawn when it moved on by more than 0.003: the "loadbar" scaled in x, the scene, the boxes
+    (IGraph 0x68 / 0x6C named BeginScene / EndScene, inferred); a dedicated server prints the percent
+    instead (C_NetGame::PrintLoadProgress 0x00731af0, declared). Finish / FinishLoading (0x006c9900)
+    close a two-part / one-part screen: at 1, single player waits for space ("press space" in the
+    bar, the effects module updated once), the boxes deleted, the frames released.
+  - Quirks kept: no check of the scene CreateFrame made; the "loadbar" found in the scene is released
+    at the close; the close of a closed screen leaves the progress at 1; not shown, the screen counts
+    as started. Fix: the mission's and the players' names as text (the original used them as the
+    format).
+  - I3D_scene slot 0xF4 named Open; C_MpMissionDef::m_briefingText (+0x64); LOADER_STAGE_* named
+    by the table (LOADER_STAGE_START is LOADER_STAGE_MISSION_INIT); GetGameTypeTextId 0x006acb80
+    declared.
+  - Harness: loader_test.inc in the camera build ("loader:", 10 checks; the text boxes, the scene's,
+    the driver's, IGraph's, the camera's and the light's slots faked; the effects module's Update
+    through a copy of its vtable, slot 0x14 in g++); the stubs: S_MultiplayerSettings::dedicated,
+    C_NetGame::PrintLoadProgress. 0 of 22 in both orders.
+  - Mutations (mutations/mutate_8f1.py): the first run caught 190 of 197 (7 survived: 3 unused enumerators, dropped; new cases for 4: the two styles without a visual, the driver's state 0x11 at 1, a dedicated server with a scene); the full rerun: all 184 that build caught (10 do not build: duplicate case labels, a declaration). Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
+  - Build: 201 files clean (MSVC). Tier 1: 526 errors in 90 files, 216 stubs (was 528 / 91 / 217). ret_audit --src: 52.
+  - Ghidra: names/loader_screen.txt (18; 3 moved from game.txt / game_app.txt); 16 functions in
+    ported.txt. Stats: 7,784 of 12,293 functions by hand (71.5 % by size).
+
+  PART 8f-ii DONE (2026-10-31): C_game::LoadMission and the mission loader (src/game/mission_loader.*,
+  new; 0x006caad0, 0x006d4270..0x006d4ea0, the scene's progress callback 0x006d4fc0).
+  - C_game::LoadMission: the loader object on its stack (C_MissionLoader, 0x34 bytes: two maps and
+    four texts for scene2.bin, part 8f-iii, and the mission's name at +0x30) and a guard whose end
+    broadcasts the modules' LoadMissionData (the server's side, then the client's) however the
+    loading ends. Begin (0x006d4270): the loading screen (shown on a client, waiting for space in
+    single player, in two parts), the old mission freed, the name kept, g_carScene, the model,
+    shadow and version model caches cleared (inline). Then the human animation tables (failed: 1),
+    "Scene" into the game's scene (flags 7; its progress: the screen's first stage but messages
+    0x10 / 0x20), the scene's slot 0xF0 (UnknownF0), scene2.bin (part 8f-iii, declared: its failure
+    returns 1 after the files below), actors.bin / sounds.bin (an object chunk "SL" 0x4C53 read by
+    LoadObjects, part 8f-iii, declared; stages 2 / 3), check2.bin (the walking and road networks;
+    without it both cleared, check.bin only opened), tree.klz (the collision world, the grid built),
+    the particles' static emitters (C_ParticlesModule::SetScene added). Dropped: the copy
+    protection's three stamps. Fix: the name as text (the original used it as the format).
+  - Harness: mission_test.inc in the camera build ("mission:", 7 checks; run inside the loading
+    screen test's fakes; scene2.bin's reader, the caches' Clear, FreeMission, the networks, the
+    collision world, the modules and the emitters faked; the files in g_files). 0 of 22 in both
+    orders.
+  - Mutations (mutations/mutate_8f2.py): the first run caught 49 of 53 (4 survived); 3 equivalent
+    (see the file's docstring), a new check for 1 (the stuff stage's 0.3 step); the full rerun:
+    all 50 caught. Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the
+    other five 0 of 37.
+  - Build: 202 files clean (MSVC). Tier 1: 521 errors in 89 files, 214 stubs (was 526 / 90 / 216).
+    ret_audit --src: 52.
+  - Ghidra: names/mission_loader.txt (39: the loader, the maps' std::map code; LoadMission moved
+    from game.txt); 14 functions in ported.txt (the maps', the loader's destructor and scene2.bin's
+    left for 8f-iii; absorb would take the scene2 reader). Stats: 7,798 of 12,293 functions by hand
+    (71.6 % by size).
+
+  PART 8f-iii DONE (2026-10-31): scene2.bin (src/game/mission_loader.*: C_MissionLoader::LoadScene2
+  0x006cc280, LoadObjects 0x006ccab0, the scene's EnumFrames callback 0x006cc8d0, created as a
+  function in Ghidra; the loader's two std::map instances, their code and its destructor).
+  - LoadScene2: the tyres and the car surfaces, then scene2.bin (none: 3): the scene's frames named
+    in m_frames (EnumFrames, types 0x4FFFF; the primary, backdrop and omni sectors by their names;
+    the maps' order strcmp, 0x006d4f50), the scene's camera (none: one made at (10, 5, 10) looking
+    (-1, -0.1, -1) and added) perspective, 0.1 .. 500 m, 80 degrees, active; then its object chunk
+    (another chunk: 0; a header or the chunk failing: 1).
+  - LoadObjects (bool; actors.bin and sounds.bin use it too): per entry the loading screen's
+    progress (the file's position over its size); 0x0001 C_game +0x66 / +0x68, 0x3010 the field of
+    view, 0x3011 the far clip (the near 0.1), 0x3012 the camera orthogonal, 0x3013 a float unused,
+    0x3200 the scene's +0x210 (SetUnknown210), 0x3211 the scene's slot 0xE4 (UnknownE4; the first
+    float at least 0.1), 0x4000 the objects (0x4010: LoadObject, 0x006cdc90, part 8f-iv, declared;
+    progress per object), 0xAE00 the shifting textures (0xAE01: two values and a name: a
+    lightmapped or object visual with a mesh goes to g_tshiftModule), 0xAE20 the actors (0xAE23
+    the frame: m_frames, else the scene's, else the driver's FindFrame; 0xAE22 the type:
+    CreateActor, SetFrame failing destroys it; 0xAE24 the properties), 0xAE40 the checkpoint
+    networks, 0xB004 the driver's state 1 (set when it differs), 0xB600 IGraph's render state 0xC,
+    0xB650 C_game +0xD8, 0xB700 the effects module's shadow parameters (SetShadowParams; the file's
+    order: the heights and sizes first), 0xB810 the lightmap groups, 0xB820 frames named for the
+    scene's slot 0x128 (Unknown128), 0xB840 / 0xB880 the music and the alarm music.
+  - Quirks kept: an entry too short keeps the value the last of its kind read (zero here where the
+    original reads its stack); an actor's unknown part is not left; a B820 header that does not
+    read keeps the last id; the name lookups leave null entries in m_frames. Fixes: the shifting
+    texture's name length kept in its buffer; the names as text (not as the format).
+  - C_chunk::HasMore (the original's inline loop test 0x004476c0 != 0), GetPosition, GetFileSize.
+  - Harness: mission_test.inc's MsScene2Test in the camera build ("scene2:", 13 checks; the
+    actors module's CreateActor / DestroyActor, the scene's EnumFrames / slots 0xE4 / 0x128 /
+    AddFrame, the driver's FindFrame, the tyres, the surfaces and LoadObject faked; the effects
+    module, the texture shifting and the lightmap groups real); the 8f-ii tests on the real reader.
+    0 of 22 in both orders.
+  - Mutations (mutations/mutate_8f3.py): the first run caught 105 of 126 (21 survived); 5
+    equivalent (see the file's docstring), new cases for 16 (short entries' first values, the name
+    length's edges, the progress inside the object list and before the file's end, the EnumFrames
+    callback's result, a destroyed actor's properties, an over-ascended object chunk); the full rerun: all 121 caught.
+    Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0 of
+    37.
+  - Build: 202 files clean (MSVC). Tier 1: 518 errors in 88 files, 211 stubs (was 521 / 89 / 214). ret_audit --src: 52.
+  - Ghidra: names/mission_loader.txt (16 added: the map code, the texture entry, the comparison);
+    39 functions in ported.txt (with the maps' code left from 8f-ii). Stats: 7,837 of 12,294
+    functions by hand (72.0 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

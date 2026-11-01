@@ -211,7 +211,7 @@ LAB_006ed770:
     DeleteFileA(param_2);
     BVar2 = MoveFileA(param_1,param_2);
     if ((uVar7 & BVar2 == 0) == 0) break;
-    lpText = FUN_006cc9a0((uint32_t*)(&param_3),(uint8_t *)"Failed to move file %s\nto %s");
+    lpText = FormatStr(&param_3,(uint8_t *)"Failed to move file %s\nto %s");
     if (*lpText != 0) {
       lpText = (int *)(*lpText + 8);
     }

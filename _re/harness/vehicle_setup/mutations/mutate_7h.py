@@ -149,8 +149,8 @@ MUTATIONS = [
     (J, 'J 245 del', '            chunk.Read(m_fighterHealth);\n            chunk.Ascend();\n', '            chunk.Read(m_fighterHealth);\n\n'),
     (J, 'J 248 del', '            chunk.Read(m_fighterDamage);\n', '\n'),
     (J, 'J 249 del', '            chunk.Read(m_fighterDamage);\n            chunk.Ascend();\n', '            chunk.Read(m_fighterDamage);\n\n'),
-    (J, 'J 252 del', '            chunk.Read(m_unknown328);\n', '\n'),
-    (J, 'J 253 del', '            chunk.Read(m_unknown328);\n            chunk.Ascend();\n', '            chunk.Read(m_unknown328);\n\n'),
+    (J, 'J 252 del', '            chunk.Read(m_gunFov);\n', '\n'),
+    (J, 'J 253 del', '            chunk.Read(m_gunFov);\n            chunk.Ascend();\n', '            chunk.Read(m_gunFov);\n\n'),
     (J, 'J 256 del', '            chunk.Read(m_unknown32C);\n', '\n'),
     (J, 'J 257 del', '            chunk.Read(m_unknown32C);\n            chunk.Ascend();\n', '            chunk.Read(m_unknown32C);\n\n'),
     (J, 'J 269 del', '    Activate(server);\n', '\n'),
@@ -1268,5 +1268,5 @@ MUTATIONS = [
     (JH, 'JH 337 num', '    float m_maxHealth = 1000.0f;                        // +0x31C (property 100)\n', '    float m_maxHealth = 1500.0f;                        // +0x31C (property 100)\n'),
     (JH, 'JH 338 num', '    float m_fighterHealth = 10.0f;                      // +0x320 (property 200)\n', '    float m_fighterHealth = 15.0f;                      // +0x320 (property 200)\n'),
     (JH, 'JH 339 num', '    float m_fighterDamage = 30.0f;                      // +0x324 a second (property 300)\n', '    float m_fighterDamage = 45.0f;                      // +0x324 a second (property 300)\n'),
-    (JH, 'JH 340 num', '    float m_unknown328 = 1.04719758f;                   // +0x328 (property 400, not used)\n', '    float m_unknown328 = 1.57079637f;                   // +0x328 (property 400, not used)\n'),
+    (JH, 'JH 340 num', '    float m_gunFov = 1.04719758f;                       // +0x328 (property 400) the gunner's first-person\n', '    float m_gunFov = 1.57079637f;                       // +0x328 (property 400) the gunner's first-person\n'),
 ]

@@ -93,63 +93,13 @@ public:
 int ReadConsoleToken(const char **cursor, char *out, int *unknown, char *unknown2);   // 0x007445d0
 
 // ---- the objects of the GEffects module (part 8d) --------------------------
-// The decorators (grass, ground cover; the GEffects module's +0x20, g_decorators).
-class C_Decorators {                                    // 0xA4 bytes
-public:
-    // (Both inlined in the GEffects module's constructor and destructor.)
-    C_Decorators();
-    ~C_Decorators();
-    void SetOn(bool on);                                // 0x0047b010
-    void Clear();                                       // 0x0047c020
-    void Free();                                        // 0x0047b090
-    void Load();                                        // 0x0047c530
-    void Start();                                       // 0x0047b0b0
-    void Update(int timeDelta);                         // 0x0047bcc0
-    // How much ground of material `material` hides a lying / crouching human (1 = none).
-    float GetGroundCover(int material);                 // 0x0047b4c0
+#include "game/decorators.h"
 
-private:
-    uint8_t m_data[0xA4];
-};
-extern C_Decorators *g_decorators;                      // 0x0089bbb0
+// The volumetrics (the GEffects module's +0xC4) and the clouds: game/volumetrics.h.
+#include "game/volumetrics.h"
 
-// The volumetrics (the GEffects module's +0xC4).
-class C_Volumetrics {                                   // 0x20 bytes
-public:
-    // (Both inlined in the GEffects module's constructor and destructor.)
-    C_Volumetrics();
-    ~C_Volumetrics();
-    // `time`: ms since the mission's start.
-    void Render(int time);                              // 0x00482260
-    void Load();                                        // 0x00482a00
-    // (LoadMissionData passes true; meaning not identified.)
-    void Prune(bool unknown);                           // 0x00482980
-    void Free();                                        // 0x00482d70
-
-private:
-    uint8_t m_data[0x20];
-};
-
-// The mesh player (the GEffects module's +0xE4).
-class C_MeshPlayer {                                    // 0x28 bytes
-public:
-    C_MeshPlayer();                                     // 0x00484100
-    ~C_MeshPlayer();                                    // 0x004841e0
-    void Load();                                        // 0x00484260
-    void Update(int timeDelta);                         // 0x00484a70
-    void Free();                                        // 0x00484ae0
-
-private:
-    uint8_t m_data[0x28];
-};
-
-// The birds (on g_birds, 0x0089bb90): flown on, gathered from the scene, freed.
-void UpdateBirds(int timeDelta);                        // 0x0047a700
-void CollectBirds();                                    // 0x0047a790
-void FreeBirds();                                       // 0x0047aa10
-// The clouds (the object at 0x0089b74c).
-void FreeClouds();                                      // 0x00483de0
-void LoadClouds();                                      // 0x00483e50
+// The mesh player (the GEffects module's +0xE4): game/mesh_player.h; the birds: game/birds.h.
+#include "game/mesh_player.h"
 
 // The GEffects module: game/geffects.h.
 #include "game/geffects.h"
@@ -167,6 +117,8 @@ public:
     // The frame's values per action: held (+0xCC) or pressed in this frame (+0xDC); their
     // count, -1 when there are none.
     int GetValues(float **values, bool pressed);    // 0x006c7600
+    // One action's value (held, or pressed in this frame); 0 out of range.
+    float GetValue(int action, bool pressed);       // 0x006c76a0
     // Binds `action` to a device's key (C_KeyBindings; `unknown` is always 0).
     void Bind(int action, int16_t device, uint16_t key, int unknown, int direction);   // 0x006c7790
     // The mouse's divisors (+0xA8 x, +0xAC y, +0xB0 the third; floats).
@@ -240,6 +192,8 @@ public:
     void SendMessage(C_BitStream *msg);            // 0x0072c360
     void Init();                                    // 0x0072e570
     void Shutdown();                                // 0x0072e830
+    // A dedicated server's loading progress (`percent` 0..100) on its console.
+    void PrintLoadProgress(int percent);            // 0x00731af0
     void ReceiveMessages(int timeDelta, bool beforeUpdate);   // 0x0072c780
     void SendMessages(int timeDelta);               // 0x0072d240
     // Name of the player in `slot` (+0x08 of its state), null if there is none.
@@ -567,32 +521,8 @@ inline bool CopyProtectionIntactBreath()
 
 // (C_Ladder and the accessors the human movement code uses on it: game/ladder.h.)
 
-// ---- the birds (0x00479790..0x0047ab90, not ported) --------------------------------------------
-// A bird: a bird model (its wings the frames "Object01" and "Object03") sitting at its place until it
-// flies away. The birds module scatters them over the mission; C_FowlGenerator takes them over or
-// makes its own.
-class C_Bird {                                          // 0x70 bytes
-public:
-    // On `model`, whose frame data then points at the bird; `ownModel`: the model is the bird's,
-    // else it goes back to g_spareBirdModels (hidden) when the bird is deleted.
-    C_Bird(class I3D_frame *model, bool ownModel);     // 0x004797c0
-    ~C_Bird();                                          // 0x004799e0
-    // Flying on; false once it has flown off.
-    bool Update(int time);                              // 0x0047a2e0
-    void FlyAway();                                     // 0x0047a2f0
-    class I3D_frame *GetModel() const { return m_model; }   // +0x50
-    bool OwnsModel() const { return m_ownModel; }       // +0x60
-
-private:
-    uint8_t m_unknown00[0x50];
-    class I3D_frame *m_model;                           // +0x50
-    uint8_t m_unknown54[0x0C];
-    bool m_ownModel;                                    // +0x60
-    uint8_t m_unknown61[0x0F];
-};
-// The birds sitting in the mission (the birds module's) and the models of the birds deleted.
-extern std::vector<C_Bird *> g_birds;                  // 0x0089bb90
-extern std::vector<class I3D_frame *> g_spareBirdModels;   // 0x0089bba0
+// The birds (C_Bird, g_birds, g_spareBirdModels): game/birds.h.
+#include "game/birds.h"
 
 // The vertex animation module: see game/vertex_anim.h.
 
@@ -601,20 +531,11 @@ extern std::vector<class I3D_frame *> g_spareBirdModels;   // 0x0089bba0
 // g_hudOption, g_mpSettings, g_gameMode): game/profile.h.
 class I3D_scene;
 
-// The loading screen's progress bar (the object at 0x008aea80).
-class C_LoaderScreen {
-public:
-    // Progress `fraction` of loading stage `stage`.
-    void SetProgress(int stage, float fraction);    // 0x006c9920
-    void Finish();                                  // 0x006c9910
-    // A player's line on the screen of a network map (`team` 1: the second list).
-    void AddPlayer(const char *text, int team);     // 0x006ca920
-};
-extern C_LoaderScreen g_loaderScreen;               // 0x008aea80
-enum : int {
-    LOADER_STAGE_MISSION = 4,                       // C_game::LoadMission
-    LOADER_STAGE_START = 5,                         // C_game::Start
-};
+// The text id of a network game type (-1 .. 3; others: "unknown"; the menus' code).
+int GetGameTypeTextId(int gameType);                // 0x006acb80
+
+// The loading screen (C_LoaderScreen, g_loaderScreen): game/loader_screen.h.
+#include "game/loader_screen.h"
 
 // Effects that run for a while (the list at 0x008aee58; saved with the game).
 void TimedEvents_Update(int timeDelta, bool clear); // 0x006df760 (`clear`: all go)
@@ -687,24 +608,8 @@ void SetFrameData(I3D_frame *frame, const S_FrameData &data);   // 0x006e9ea0
 // Frees the frame's data block (S_FrameData).
 void FreeFrameData(I3D_frame *frame);               // 0x006e9ef0
 
-// The camera module's keeper of a camera dummy's placement (0x50 bytes, 16-byte aligned; the
-// car's StartMission makes one per seat with a "camera3RD*" dummy, S_VehicleSeat::camera): the
-// dummy's local rotation and position, its parent's and its own world position (inferred: the
-// third-person camera moves the dummy).
-class alignas(16) C_CameraFrameKeeper {
-public:
-    C_CameraFrameKeeper(C_Actor *owner, I3D_frame *frame);   // 0x00465f00
-    // Restore (0x00466000, a JMP to it; its two callers, the car's StopMission and 0x005dfca0,
-    // _aligned_free the keeper after it).
-    ~C_CameraFrameKeeper();
-    // Puts the dummy back where it was made (true; false without a frame).
-    bool Restore();                                 // 0x00466010
-    // Every frame (the car's Update).
-    void Update(int time);                          // 0x00466110
-
-private:
-    uint8_t m_unknown[0x50];                        // (the camera module names the 0x50 bytes)
-};
+// The camera module's keeper of a camera dummy's placement (C_CameraFrameKeeper):
+// game/camera_module.h.
 
 // ---- items (game/items_module.h) ----------------------------------------------------
 class C_Actor;

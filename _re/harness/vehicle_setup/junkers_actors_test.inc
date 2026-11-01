@@ -328,7 +328,7 @@ void JunkersActorsTest()
         JU(r.junk, other->GetType() == ACTOR_JUNKERS88 && g_junkers88 == other &&
                        std::string(other->m_name.c_str()) == "text 7166" && other->m_maxHealth == 1000.0f &&
                        other->m_fighterHealth == 10.0f && other->m_fighterDamage == 30.0f &&
-                       other->m_unknown328 == 1.04719758f && other->m_unknown32C == 0x1BFE &&
+                       other->m_gunFov == 1.04719758f && other->m_unknown32C == 0x1BFE &&
                        other->m_firepower == 1.0f && other->m_interceptorHealth == 1.0f && other->GetSeatCount() == 5);
         // (The seats' flags table: the file's values until the first start.)
         static bool firstJunkers = true;
@@ -439,7 +439,7 @@ void JunkersActorsTest()
             .Head(500, 10).Val(7).Head(200, 8).Val(uint16_t(3)).Head(0x55, 6 + 10).Head(300, 10).Val(6.0f);
         S_SaReader rd(in);
         JU(r.junkProps, j->ReadProperties(rd.c) && j->m_maxHealth == 2000.0f && j->m_fighterHealth == 20.0f &&
-                            j->m_fighterDamage == 6.0f && j->m_unknown328 == 0.5f && j->m_unknown32C == 7);
+                            j->m_fighterDamage == 6.0f && j->m_gunFov == 0.5f && j->m_unknown32C == 7);
         j->m_maxHealth = 1000.0f;
         j->m_fighterHealth = 10.0f;
         j->m_fighterDamage = 30.0f;

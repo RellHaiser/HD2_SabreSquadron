@@ -1,0 +1,23 @@
+# Part 8f-i: the loading screen (C_LoaderScreen, src/game/loader_screen.*, 0x006c97b0..0x006caad0;
+# the object at 0x008aea80). 3 names moved from game.txt / game_app.txt. StaticInit_<addr>: the
+# file's guarded static (atexit).
+
+006c97b0 StaticInit_LoaderScreen
+006c97c0 LoaderScreen_Construct
+006c97d0 LoaderScreen_RegisterAtExit
+006c97e0 LoaderScreen_Destruct
+006c97f0 C_LoaderScreen::C_LoaderScreen | void __fastcall C_LoaderScreen(C_LoaderScreen *this)
+006c9840 C_LoaderScreen::~C_LoaderScreen | void __fastcall ~C_LoaderScreen(C_LoaderScreen *this)
+006c9900 C_LoaderScreen::FinishLoading | void __fastcall FinishLoading(C_LoaderScreen *this)
+006c9910 C_LoaderScreen::Finish | void __fastcall Finish(C_LoaderScreen *this)
+006c9920 C_LoaderScreen::SetProgress | void __thiscall SetProgress(C_LoaderScreen *this, int stage, float fraction)
+006c9990 C_LoaderScreen::Start | void __thiscall Start(C_LoaderScreen *this, char * name, bool show, bool waitForKey, bool twoParts, C_MissionDef * mission)
+006ca610 C_LoaderScreen::IsShown | bool __fastcall IsShown(C_LoaderScreen *this)
+006ca620 C_LoaderScreen::Close | void __fastcall Close(C_LoaderScreen *this)
+006ca7c0 C_LoaderScreen::Draw | void __fastcall Draw(C_LoaderScreen *this)
+006ca920 C_LoaderScreen::AddPlayer | void __thiscall AddPlayer(C_LoaderScreen *this, char * text, int team)
+006ca9c0 C_LoaderScreen::ClearPlayers | void __fastcall ClearPlayers(C_LoaderScreen *this)
+006caaa0 StaticInit_6caaa0
+# (Declared: the dedicated server's console progress, the game type's text.)
+00731af0 C_NetGame::PrintLoadProgress | void __thiscall PrintLoadProgress(C_NetGame *this, int percent)
+006acb80 GetGameTypeTextId | int __cdecl GetGameTypeTextId(int gameType)

@@ -43,6 +43,7 @@ public:
     int FindFreePlayerSlot() const;
     C_Actor *FindRandomSpawnPoint(int team, int kind) const;
     C_Actor *CreateActor(E_ActorType type, I3D_frame *frame, bool active, int slot);
+    void DestroyActor(C_Actor *actor, bool immediately);   // (scene2.bin's actors, part 8f-iii)
     int GetPlayerSlotUse(int slot) const;
     void SetPlayerSlotUse(int slot, int use);
     // (Part 7c: the fowl generator; the first 32 are the players'.)

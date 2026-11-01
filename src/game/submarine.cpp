@@ -8,10 +8,11 @@
 #include <cstring>
 
 #include "common/chunk.h"
+#include "game/camera_module.h"
 #include "game/collision.h"
 #include "game/frame_volume.h"
 #include "game/game.h"
-#include "game/pending.h"                               // g_gameRole, g_texts, C_CameraFrameKeeper
+#include "game/pending.h"                               // g_gameRole, g_texts
 #include "game/sound_module.h"
 #include "ls3d/i3d.h"
 

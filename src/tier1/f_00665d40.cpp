@@ -269,7 +269,7 @@ LAB_006660f7:
       tier1_operator_delete(apCStack_78[0]);
     }
     (**(code **)(*(int *)_this + 0x74))(&stack0xffffff48);
-    textId = FUN_006acb80(*(int *)(format + 0x70));
+    textId = GetGameTypeTextId(*(int *)(format + 0x70));
     C_TextDatabase__GetText(&DAT_008c1368,&CStack_9c,textId);
     if (CStack_9c.rep != 0) {
       (CStack_9c.rep)->refCount =

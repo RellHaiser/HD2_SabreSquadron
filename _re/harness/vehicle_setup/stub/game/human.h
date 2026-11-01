@@ -89,8 +89,20 @@ public:
     // (The effects module's rain, part 8c.)
     I3D_sector *GetBodySector() const { return bodySector; }
     I3D_sector *bodySector = nullptr;
+    // (The decorators' bends, part 8d-iii.)
+    const S_vector &GetVelocity() const { return velocity; }
+    int GetStance() const { return stance; }
+    S_vector velocity = {0.0f, 0.0f, 0.0f};
+    int stance = 0;
     // The vehicle it sits in (the animation actor's wings, game/animation_actor.cpp).
     C_Actor *GetVehicle() const { return vehicle; }
+    int GetVehicleSeat() const { return vehicleSeat; }  // (the camera module, part 8e-iii)
+    // (The camera module's aiming sway, part 8e-iv.)
+    int GetPlayerViewMode() const { return playerViewMode; }
+    bool IsPlayerHoldingBreath() const { return holdingBreath; }
+    float GetStatFactor(int) const { return statFactor; }
+    // The camera module's effect value (part 8e-i; the camera test defines it).
+    void SetUnknown94(float value);
     const S_vector &GetRandomBonePos() const { return bonePos; }
     void RemoveItem(int uid, bool destroy) { removedItems.push_back({uid, destroy}); }
     bool IsInPlay() const { return inPlay; }
@@ -175,6 +187,10 @@ public:
     int experience = 0;
     I3D_frame *bodyFrame = nullptr;
     C_Actor *vehicle = nullptr;
+    int vehicleSeat = 0;
+    int playerViewMode = 0;
+    bool holdingBreath = false;
+    float statFactor = 1.0f;
     S_vector bonePos = S_vector(0.0f, 0.0f, 0.0f);
     std::vector<std::pair<int, bool>> removedItems;
     bool inPlay = true, spectating = false;

@@ -325,14 +325,6 @@ uint32_t FUN_004de880(int *param_1, ...)
 }
 
 
-// 0x004def80
-uint32_t FUN_004def80(void *_this,int param_1, ...)
-{
-  return CONCAT31((int3)((uint32_t)(param_1 * 0x40) >> 8),
-                  *(int *)(*(int *)((int)_this + 0x1038) + 0x34 + param_1 * 0x40) != 0);
-}
-
-
 // 0x004defa0
 uint32_t vector_tidy_4defa0(int param_1, ...)
 {

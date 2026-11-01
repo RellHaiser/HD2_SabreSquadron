@@ -19,6 +19,14 @@ LINES = {
                  "gfCamera gfMission").split(),
     "geffects2": ("gfShadow gfShadowName gfShadowFind gfFace gfFaceFind gfUniform gfUniformFile gfGlass gfShardSplit "
                   "gfShardPhysics").split(),
+    "birds": ("bdMake bdDelete bdSit bdHop bdFlyAway bdTakeOff bdClimb bdGlide bdModule bdMovie bdMovieFile "
+              "bdMovieUpdate bdEffects").split(),
+    "decorators": ("dcMake dcLoad dcVersions dcLoadEnd dcLight dcStart dcGrid dcOn dcClear dcFree dcCover "
+                   "dcModule").split(),
+    "decorators2": ("dmSlope dmLight dmTake dmPool dmPrepare dmCell dmRefill dmRefillSeed dmFollow dmFollowMove dmShift "
+                    "dmBend dmBendSpring dmBendUpdate dmBends dmHuman dmCar dmUpdate dmSway").split(),
+    "volumetrics": ("vlCone vlConeLoad vlBuild vlBuildCone vlTexture vlRender vlRenderCone vlShaft vlShaftLoad vlRefresh "
+                    "vlDraw vlFade vlList vlPrune vlListRender vlSort vlClouds vlCloudDraw vlModule").split(),
 }
 
 

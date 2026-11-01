@@ -80,5 +80,4 @@
 
 # Callees declared with the port
 006c7600 C_Controls::GetValues
-006ca920 C_LoaderScreen::AddPlayer | void __thiscall AddPlayer(C_LoaderScreen *this, char * text, int team)
 0072ec60 C_NetGame::ResetPlayerStats | void __thiscall ResetPlayerStats(C_NetGame *this)

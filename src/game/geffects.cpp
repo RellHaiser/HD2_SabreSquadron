@@ -1450,7 +1450,7 @@ bool C_GEffectsModule::DressUniform(C_Human *human, int uniform)
             if (human == team->GetActivePlayer()) {
                 S_vector4 dir;
                 GetCameraModule()->GetCameraDir(3, &dir);
-                GetCameraModule()->Unknown40(0);
+                GetCameraModule()->SelectView(0);
                 GetCameraModule()->SetViewDir(dir);
             }
             break;

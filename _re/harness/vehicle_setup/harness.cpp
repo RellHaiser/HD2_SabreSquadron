@@ -1435,7 +1435,12 @@ extern "C" IGraph *GetIGraph()
     return reinterpret_cast<IGraph *>(&g_igraph);
 }
 
+#ifdef CAMERA_TEST
+std::vector<std::string> g_dbgPrints;                   // (the camera module's reports, part 8e)
+extern "C" void dbgPrintf(const char *format, ...) { g_dbgPrints.push_back(format); }
+#else
 extern "C" void dbgPrintf(const char *, ...) {}       // (the sound cache's reports)
+#endif
 
 // --- the parts of the vehicle not ported yet (1b-ii / 1c / 1d) --------------------------------
 
@@ -6983,11 +6988,13 @@ void C_Script::OnUse(int arg)
     g_uses.push_back(arg);
 }
 std::vector<const C_CameraFrameKeeper *> g_restored;
+#ifndef CAMERA_TEST                                    // (the camera build links the real keeper, part 8e-i)
 bool C_CameraFrameKeeper::Restore()
 {
     g_restored.push_back(this);
     return true;
 }
+#endif
 C_NetObjectMessage::C_NetObjectMessage(int t) : type(t), sender(0), unknown24(0) {}
 C_NetObjectMessage::~C_NetObjectMessage() = default;
 #ifndef REAL_SEAT_WEAPON
@@ -7271,6 +7278,7 @@ struct S_FakeKeeper {
     I3D_frame *frame;
 };
 std::vector<const C_CameraFrameKeeper *> g_keepersMade, g_keepersDeleted;
+#ifndef CAMERA_TEST
 C_CameraFrameKeeper::C_CameraFrameKeeper(C_Actor *owner, I3D_frame *frame)
 {
     new (static_cast<void *>(this)) S_FakeKeeper{owner, frame};
@@ -7281,6 +7289,7 @@ C_CameraFrameKeeper::~C_CameraFrameKeeper()
     Restore();
     g_keepersDeleted.push_back(this);
 }
+#endif
 const S_FakeKeeper &Keeper(const C_CameraFrameKeeper *k)
 {
     return *reinterpret_cast<const S_FakeKeeper *>(k);
@@ -8352,10 +8361,13 @@ float SegmentDistance2(const S_vector &p, const S_vector &a, const S_vector &b, 
 
 // The camera keepers' updates.
 std::vector<std::pair<const C_CameraFrameKeeper *, int>> g_keeperUpdates;
-void C_CameraFrameKeeper::Update(int time)
+#ifndef CAMERA_TEST
+bool C_CameraFrameKeeper::Update(int time)
 {
     g_keeperUpdates.emplace_back(this, time);
+    return true;
 }
+#endif
 
 #ifndef REAL_SEAT_WEAPON
 void C_SeatWeaponAmmoMessage::Write(C_BitStream *) {}
@@ -14841,12 +14853,24 @@ void PartsHitTest(const char *path)
 #include "sight_test.inc"
 #include "geffects_test.inc"
 #include "geffects2_test.inc"
+#include "birds_test.inc"
+#include "decorators_test.inc"
+#include "decorators2_test.inc"
+#include "volumetrics_test.inc"
+#endif
+#ifdef CAMERA_TEST
+#include "camera_test.inc"
 #endif
 
 int main(int argc, char **argv)
 {
     InitVtables();
     g_carScene = MakeScene();
+#ifdef CAMERA_TEST
+    for (int i = 1; i < argc; ++i)
+        CameraTest(argv[i]);
+    return 0;
+#endif
 #ifdef WORLD_TEST
     for (int i = 1; i < argc; ++i)
         WorldModulesTest(argv[i]);

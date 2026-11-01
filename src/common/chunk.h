@@ -31,6 +31,12 @@ public:
     // Bytes left in the current chunk (0 when no chunk is entered), or -1 on error.
     int RemainingSize() const;
     bool AtEnd() const { return RemainingSize() <= 0; }
+    // The original's inline loop test (0x004476c0 != 0): in a chunk with bytes left (or past its
+    // end), the position known.
+    bool HasMore() const;
+    // The file's position and size (-1: not known; the loading screen's progress).
+    int GetPosition() const { return Tell(); }
+    int GetFileSize() const { return m_fileSize; }
     bool Read(void *buffer, int size);             // 0x00405940
     template <typename T> bool Read(T &value) { return Read(&value, sizeof(T)); }
     // Reads the remainder of the current chunk as a string (at most bufferSize-1 chars).

@@ -4,7 +4,7 @@ namespace tier1 {
 extern uint8_t LAB_00405c90;
 
 // 0x00484e90
-uint32_t FUN_00484e90(...)
+uint32_t StaticInit_484e90(...)
 {
   if ((DAT_0098c1c0 & 1) == 0) {
     DAT_0098c1c0 |= 1;

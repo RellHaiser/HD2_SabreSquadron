@@ -45,7 +45,7 @@ uint32_t C_MainMenu__FUN_00638660(C_MainMenu *_this,void *param_1, ...)
   iVar1 = FUN_00615360(param_1,0x10,"scan style");
   iVar3 = -1;
   do {
-    uVar2 = FUN_006acb80(iVar3);
+    uVar2 = GetGameTypeTextId(iVar3);
     FUN_00614e80(iVar1,0,0x1000067,uVar2);
     iVar3++;
   } while (iVar3 < 4);

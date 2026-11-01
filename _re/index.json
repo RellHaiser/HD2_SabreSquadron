@@ -2096,6 +2096,7 @@
 "006ca620",
 "006ca920",
 "006cc280",
+"006cc8d0",
 "006ccab0",
 "006cdc90",
 "006d1ef0",
@@ -37648,10 +37649,10 @@
 "in_vtables": []
 },
 "00462320": {
-"name": "FUN_00462320",
+"name": "StaticInit_462320",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -37670,10 +37671,10 @@
 ]
 },
 "00462350": {
-"name": "FUN_00462350",
+"name": "C_CameraHumanEffects::StartFlight",
 "size": 754,
 "lines": 99,
-"chars": 2748,
+"chars": 3349,
 "callers": [
 "004632c0"
 ],
@@ -37703,10 +37704,10 @@
 "in_vtables": []
 },
 "00462650": {
-"name": "FUN_00462650",
+"name": "C_CameraHumanEffects::C_CameraHumanEffects",
 "size": 136,
 "lines": 33,
-"chars": 944,
+"chars": 997,
 "callers": [
 "00464ef0"
 ],
@@ -37720,10 +37721,10 @@
 "in_vtables": []
 },
 "004626e0": {
-"name": "FUN_004626e0",
+"name": "C_CameraHumanEffects::~C_CameraHumanEffects",
 "size": 107,
 "lines": 27,
-"chars": 666,
+"chars": 697,
 "callers": [
 "004650f0"
 ],
@@ -37772,7 +37773,7 @@
 "name": "C_CameraHumanEffects::LookAt",
 "size": 822,
 "lines": 114,
-"chars": 3262,
+"chars": 3306,
 "callers": [
 "004bf210"
 ],
@@ -37799,7 +37800,7 @@
 "name": "C_CameraHumanEffects::SetTactical",
 "size": 1373,
 "lines": 165,
-"chars": 5712,
+"chars": 5768,
 "callers": [
 "00465610",
 "004863f0",
@@ -37834,10 +37835,10 @@
 "in_vtables": []
 },
 "00463040": {
-"name": "FUN_00463040",
+"name": "C_CameraHumanEffects::Remove",
 "size": 146,
 "lines": 37,
-"chars": 1031,
+"chars": 1041,
 "callers": [
 "0059fa60"
 ],
@@ -37851,10 +37852,10 @@
 "in_vtables": []
 },
 "004630e0": {
-"name": "FUN_004630e0",
+"name": "C_CameraHumanEffects::UpdateLookPoint",
 "size": 480,
 "lines": 71,
-"chars": 1922,
+"chars": 1994,
 "callers": [
 "004632c0",
 "00463ba0"
@@ -37878,7 +37879,7 @@
 "name": "C_CameraHumanEffects::SetTacticalMode",
 "size": 176,
 "lines": 54,
-"chars": 1431,
+"chars": 1472,
 "callers": [
 "004b5e40",
 "004b81a0"
@@ -37935,10 +37936,10 @@
 "in_vtables": []
 },
 "00463620": {
-"name": "FUN_00463620",
+"name": "C_CameraHumanEffects::ResetHumans",
 "size": 105,
 "lines": 21,
-"chars": 547,
+"chars": 563,
 "callers": [
 "00462ae0"
 ],
@@ -37952,10 +37953,10 @@
 "in_vtables": []
 },
 "00463690": {
-"name": "FUN_00463690",
+"name": "C_CameraHumanEffects::GetTransparency",
 "size": 236,
 "lines": 36,
-"chars": 1098,
+"chars": 1074,
 "callers": [
 "00463780"
 ],
@@ -37977,10 +37978,10 @@
 "in_vtables": []
 },
 "00463780": {
-"name": "FUN_00463780",
+"name": "C_CameraHumanEffects::UpdateHuman",
 "size": 260,
-"lines": 59,
-"chars": 1756,
+"lines": 57,
+"chars": 1739,
 "callers": [
 "00463890"
 ],
@@ -37998,10 +37999,10 @@
 "in_vtables": []
 },
 "00463890": {
-"name": "FUN_00463890",
+"name": "C_CameraHumanEffects::UpdateHumans",
 "size": 118,
-"lines": 31,
-"chars": 905,
+"lines": 32,
+"chars": 979,
 "callers": [
 "00463ba0"
 ],
@@ -38038,10 +38039,10 @@
 "in_vtables": []
 },
 "00463930": {
-"name": "FUN_00463930",
+"name": "FadedHumans_Insert",
 "size": 575,
 "lines": 126,
-"chars": 3897,
+"chars": 4048,
 "callers": [
 "00463780"
 ],
@@ -38056,10 +38057,10 @@
 "in_vtables": []
 },
 "00463b70": {
-"name": "FUN_00463b70",
+"name": "StaticInit_463b70",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -38081,7 +38082,7 @@
 "name": "C_CameraHumanEffects::UpdateTactical",
 "size": 3695,
 "lines": 429,
-"chars": 14947,
+"chars": 15324,
 "callers": [
 "004b6420"
 ],
@@ -38130,10 +38131,10 @@
 "in_vtables": []
 },
 "00464a40": {
-"name": "FUN_00464a40",
+"name": "S_quat_FromAxisAngle",
 "size": 25,
-"lines": 10,
-"chars": 179,
+"lines": 8,
+"chars": 137,
 "callers": [
 "00463ba0",
 "004c68b0",
@@ -38184,10 +38185,10 @@
 "in_vtables": []
 },
 "00464b80": {
-"name": "FUN_00464b80",
+"name": "C_CameraHumanEffects::Move",
 "size": 503,
-"lines": 69,
-"chars": 2093,
+"lines": 68,
+"chars": 2092,
 "callers": [
 "00462780",
 "00462ae0",
@@ -38210,10 +38211,10 @@
 "in_vtables": []
 },
 "00464d90": {
-"name": "FUN_00464d90",
+"name": "StaticInit_464d90",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -38232,10 +38233,10 @@
 ]
 },
 "00464dc0": {
-"name": "FUN_00464dc0",
+"name": "StaticInit_CameraModule",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 123,
 "callers": [],
 "callees": [
 "00464dd0",
@@ -38253,10 +38254,10 @@
 ]
 },
 "00464dd0": {
-"name": "FUN_00464dd0",
+"name": "CameraModule_Construct0",
 "size": 18,
 "lines": 8,
-"chars": 144,
+"chars": 157,
 "callers": [
 "00464dc0"
 ],
@@ -38274,10 +38275,10 @@
 "in_vtables": []
 },
 "00464df0": {
-"name": "FUN_00464df0",
+"name": "CameraModule_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 97,
 "callers": [
 "00464dc0"
 ],
@@ -38291,10 +38292,10 @@
 "in_vtables": []
 },
 "00464e00": {
-"name": "FUN_00464e00",
+"name": "CameraModule_Destroy0",
 "size": 10,
 "lines": 8,
-"chars": 118,
+"chars": 128,
 "callers": [
 "00464df0"
 ],
@@ -38310,10 +38311,10 @@
 "in_vtables": []
 },
 "00464e10": {
-"name": "FUN_00464e10",
+"name": "RestartMission",
 "size": 78,
 "lines": 20,
-"chars": 529,
+"chars": 543,
 "callers": [],
 "callees": [
 "0045d1d0",
@@ -38334,10 +38335,10 @@
 ]
 },
 "00464e60": {
-"name": "FUN_00464e60",
+"name": "SaveGame",
 "size": 5,
 "lines": 7,
-"chars": 99,
+"chars": 104,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -38352,10 +38353,10 @@
 ]
 },
 "00464e70": {
-"name": "FUN_00464e70",
+"name": "LoadGame",
 "size": 25,
-"lines": 11,
-"chars": 227,
+"lines": 9,
+"chars": 164,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -38411,10 +38412,10 @@
 "in_vtables": []
 },
 "00464ea0": {
-"name": "FUN_00464ea0",
+"name": "C_CameraModuleBase::C_CameraModuleBase",
 "size": 32,
 "lines": 10,
-"chars": 251,
+"chars": 296,
 "callers": [
 "00464ef0"
 ],
@@ -38430,10 +38431,10 @@
 "in_vtables": []
 },
 "00464ec0": {
-"name": "FUN_00464ec0",
+"name": "C_CameraModuleBase::ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 202,
+"lines": 12,
+"chars": 253,
 "callers": [],
 "callees": [
 "00464ee0",
@@ -38451,10 +38452,10 @@
 ]
 },
 "00464ee0": {
-"name": "FUN_00464ee0",
+"name": "C_CameraModuleBase::~C_CameraModuleBase",
 "size": 11,
 "lines": 9,
-"chars": 196,
+"chars": 264,
 "callers": [
 "00464ec0",
 "004650f0",
@@ -38473,12 +38474,13 @@
 "in_vtables": []
 },
 "00464ef0": {
-"name": "FUN_00464ef0",
+"name": "C_CameraModule",
 "size": 349,
 "lines": 95,
-"chars": 2362,
+"chars": 2423,
 "callers": [
-"00464dd0"
+"00464dd0",
+"004650d0"
 ],
 "callees": [
 "00462650",
@@ -38494,10 +38496,10 @@
 "in_vtables": []
 },
 "00465050": {
-"name": "FUN_00465050",
+"name": "CameraHumanEffects_AlignedFree",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 109,
 "callers": [
 "007fbb78"
 ],
@@ -38511,10 +38513,10 @@
 "in_vtables": []
 },
 "00465060": {
-"name": "FUN_00465060",
+"name": "GetUnknown78",
 "size": 7,
 "lines": 7,
-"chars": 103,
+"chars": 109,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -38565,10 +38567,10 @@
 ]
 },
 "00465090": {
-"name": "FUN_00465090",
+"name": "GetUnknown84",
 "size": 7,
 "lines": 7,
-"chars": 103,
+"chars": 109,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -38583,10 +38585,10 @@
 ]
 },
 "004650a0": {
-"name": "FUN_004650a0",
+"name": "GetHumanEffects",
 "size": 4,
 "lines": 7,
-"chars": 102,
+"chars": 116,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -38637,12 +38639,13 @@
 ]
 },
 "004650d0": {
-"name": "FUN_004650d0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 209,
+"chars": 206,
 "callers": [],
 "callees": [
+"00464ef0",
 "004650f0",
 "007e559c"
 ],
@@ -38658,10 +38661,10 @@
 ]
 },
 "004650f0": {
-"name": "FUN_004650f0",
+"name": "~C_CameraModule",
 "size": 99,
 "lines": 25,
-"chars": 577,
+"chars": 659,
 "callers": [
 "00464e00",
 "004650d0"
@@ -38680,10 +38683,10 @@
 "in_vtables": []
 },
 "00465160": {
-"name": "FUN_00465160",
+"name": "StartMission",
 "size": 1193,
 "lines": 173,
-"chars": 5823,
+"chars": 5805,
 "callers": [],
 "callees": [
 "00405100",
@@ -38717,10 +38720,10 @@
 ]
 },
 "00465610": {
-"name": "FUN_00465610",
+"name": "StopMission",
 "size": 190,
 "lines": 40,
-"chars": 1235,
+"chars": 1225,
 "callers": [],
 "callees": [
 "00462770",
@@ -38740,10 +38743,10 @@
 ]
 },
 "004656d0": {
-"name": "FUN_004656d0",
+"name": "LoadSettings",
 "size": 814,
-"lines": 148,
-"chars": 4742,
+"lines": 149,
+"chars": 4759,
 "callers": [
 "00465160"
 ],
@@ -38772,10 +38775,10 @@
 "in_vtables": []
 },
 "00465a00": {
-"name": "FUN_00465a00",
+"name": "ResetUnknown2AC",
 "size": 11,
-"lines": 8,
-"chars": 116,
+"lines": 10,
+"chars": 146,
 "callers": [
 "004656d0"
 ],
@@ -38898,10 +38901,10 @@
 ]
 },
 "00465e00": {
-"name": "SetFov2",
+"name": "SetNearSectorFov",
 "size": 48,
 "lines": 15,
-"chars": 306,
+"chars": 315,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -38916,10 +38919,10 @@
 ]
 },
 "00465e30": {
-"name": "GetFov2",
+"name": "GetNearSectorFov",
 "size": 24,
 "lines": 10,
-"chars": 187,
+"chars": 196,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -39014,8 +39017,8 @@
 "00465f00": {
 "name": "C_CameraFrameKeeper::C_CameraFrameKeeper",
 "size": 244,
-"lines": 46,
-"chars": 2023,
+"lines": 45,
+"chars": 2037,
 "callers": [
 "004d16a0",
 "005df3d0"
@@ -39034,7 +39037,7 @@
 "name": "C_CameraFrameKeeper::Restore",
 "size": 5,
 "lines": 46,
-"chars": 1673,
+"chars": 1981,
 "callers": [
 "004d25c0",
 "005dfca0"
@@ -39052,7 +39055,7 @@
 "name": "C_CameraFrameKeeper::Restore",
 "size": 250,
 "lines": 46,
-"chars": 1673,
+"chars": 1981,
 "callers": [
 "00466000",
 "004d9a40",
@@ -39072,8 +39075,8 @@
 "00466110": {
 "name": "C_CameraFrameKeeper::Update",
 "size": 1961,
-"lines": 248,
-"chars": 7816,
+"lines": 247,
+"chars": 7815,
 "callers": [
 "004d3110",
 "005e0e20"
@@ -39113,10 +39116,10 @@
 "in_vtables": []
 },
 "004668c0": {
-"name": "FUN_004668c0",
+"name": "StaticInit_4668c0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -39135,10 +39138,10 @@
 ]
 },
 "004668f0": {
-"name": "FUN_004668f0",
+"name": "StaticInit_4668f0",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 126,
 "callers": [],
 "callees": [
 "00466900",
@@ -39156,10 +39159,10 @@
 ]
 },
 "00466900": {
-"name": "FUN_00466900",
+"name": "StaticInit_4668f0_Construct",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 82,
 "callers": [
 "004668f0"
 ],
@@ -39175,10 +39178,10 @@
 "in_vtables": []
 },
 "00466910": {
-"name": "FUN_00466910",
+"name": "StaticInit_4668f0_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 107,
 "callers": [
 "004668f0"
 ],
@@ -39192,10 +39195,10 @@
 "in_vtables": []
 },
 "00466920": {
-"name": "FUN_00466920",
+"name": "StaticInit_4668f0_Destruct",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 81,
 "callers": [
 "00466910"
 ],
@@ -39211,10 +39214,10 @@
 "in_vtables": []
 },
 "00466930": {
-"name": "FUN_00466930",
+"name": "StaticInit_466930",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 126,
 "callers": [],
 "callees": [
 "00466940",
@@ -39232,10 +39235,10 @@
 ]
 },
 "00466940": {
-"name": "FUN_00466940",
+"name": "StaticInit_466930_Construct",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 82,
 "callers": [
 "00466930"
 ],
@@ -39251,10 +39254,10 @@
 "in_vtables": []
 },
 "00466950": {
-"name": "FUN_00466950",
+"name": "StaticInit_466930_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 107,
 "callers": [
 "00466930"
 ],
@@ -39268,10 +39271,10 @@
 "in_vtables": []
 },
 "00466960": {
-"name": "FUN_00466960",
+"name": "StaticInit_466930_Destruct",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 81,
 "callers": [
 "00466950"
 ],
@@ -39287,10 +39290,10 @@
 "in_vtables": []
 },
 "00466970": {
-"name": "FUN_00466970",
+"name": "MoveCamera",
 "size": 5792,
 "lines": 698,
-"chars": 28058,
+"chars": 28065,
 "callers": [
 "00469300",
 "0046ada0"
@@ -39351,10 +39354,10 @@
 "in_vtables": []
 },
 "00468130": {
-"name": "FUN_00468130",
+"name": "PlaceCamera",
 "size": 4554,
 "lines": 608,
-"chars": 19142,
+"chars": 19149,
 "callers": [
 "00469300",
 "0046ada0"
@@ -39402,10 +39405,10 @@
 "in_vtables": []
 },
 "00469300": {
-"name": "FUN_00469300",
+"name": "Update",
 "size": 6806,
 "lines": 847,
-"chars": 25390,
+"chars": 25435,
 "callers": [],
 "callees": [
 "0045d160",
@@ -39458,10 +39461,10 @@
 ]
 },
 "0046ada0": {
-"name": "FUN_0046ada0",
+"name": "UpdateCarCamera",
 "size": 1963,
-"lines": 286,
-"chars": 8869,
+"lines": 285,
+"chars": 8797,
 "callers": [
 "00469300"
 ],
@@ -39507,10 +39510,10 @@
 "in_vtables": []
 },
 "0046b550": {
-"name": "FUN_0046b550",
+"name": "UpdateScriptedView",
 "size": 2399,
 "lines": 292,
-"chars": 10549,
+"chars": 10559,
 "callers": [
 "00469300"
 ],
@@ -39545,10 +39548,10 @@
 "in_vtables": []
 },
 "0046beb0": {
-"name": "FUN_0046beb0",
+"name": "UpdateDebugCamera",
 "size": 1105,
-"lines": 155,
-"chars": 4735,
+"lines": 153,
+"chars": 4746,
 "callers": [
 "00469300"
 ],
@@ -39582,10 +39585,10 @@
 "in_vtables": []
 },
 "0046c310": {
-"name": "FUN_0046c310",
+"name": "StaticInit_46c310",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -39604,10 +39607,10 @@
 ]
 },
 "0046c340": {
-"name": "FUN_0046c340",
+"name": "StaticInit_46c340",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -39626,10 +39629,10 @@
 ]
 },
 "0046c370": {
-"name": "FUN_0046c370",
+"name": "SelectView",
 "size": 1963,
-"lines": 300,
-"chars": 9958,
+"lines": 302,
+"chars": 10029,
 "callers": [
 "00462ae0"
 ],
@@ -45757,10 +45760,10 @@
 "in_vtables": []
 },
 "00479790": {
-"name": "FUN_00479790",
+"name": "StaticInit_479790",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -45782,7 +45785,7 @@
 "name": "C_Bird::C_Bird",
 "size": 530,
 "lines": 83,
-"chars": 3313,
+"chars": 3319,
 "callers": [
 "0047a7b0",
 "005ba8b0"
@@ -45834,10 +45837,10 @@
 "in_vtables": []
 },
 "00479c70": {
-"name": "FUN_00479c70",
+"name": "C_Bird::Fly",
 "size": 1622,
-"lines": 247,
-"chars": 9217,
+"lines": 240,
+"chars": 9018,
 "callers": [
 "00479c70",
 "0047a2e0"
@@ -45879,8 +45882,8 @@
 "0047a2e0": {
 "name": "C_Bird::Update",
 "size": 16,
-"lines": 8,
-"chars": 117,
+"lines": 10,
+"chars": 143,
 "callers": [
 "0047a700",
 "005bb3c0"
@@ -45897,8 +45900,8 @@
 "0047a2f0": {
 "name": "C_Bird::FlyAway",
 "size": 846,
-"lines": 118,
-"chars": 3277,
+"lines": 119,
+"chars": 3800,
 "callers": [
 "005bb140"
 ],
@@ -45989,10 +45992,10 @@
 "in_vtables": []
 },
 "0047a6d0": {
-"name": "FUN_0047a6d0",
+"name": "StaticInit_47a6d0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -46011,10 +46014,10 @@
 ]
 },
 "0047a700": {
-"name": "FUN_0047a700",
+"name": "UpdateBirds",
 "size": 138,
 "lines": 39,
-"chars": 1083,
+"chars": 1079,
 "callers": [
 "00487240"
 ],
@@ -46030,10 +46033,10 @@
 "in_vtables": []
 },
 "0047a790": {
-"name": "FUN_0047a790",
+"name": "CollectBirds",
 "size": 32,
 "lines": 11,
-"chars": 202,
+"chars": 207,
 "callers": [
 "004863f0",
 "004885d0"
@@ -46048,10 +46051,10 @@
 "in_vtables": []
 },
 "0047a7b0": {
-"name": "FUN_0047a7b0",
+"name": "CollectBird",
 "size": 572,
 "lines": 107,
-"chars": 3250,
+"chars": 3277,
 "callers": [
 "0047a790"
 ],
@@ -46079,10 +46082,10 @@
 "in_vtables": []
 },
 "0047a9f0": {
-"name": "FUN_0047a9f0",
+"name": "Bird_AlignedFree",
 "size": 8,
 "lines": 8,
-"chars": 102,
+"chars": 106,
 "callers": [
 "007fc000",
 "007ff9b3"
@@ -46097,10 +46100,10 @@
 "in_vtables": []
 },
 "0047aa00": {
-"name": "thunk_FUN_0047aa10",
+"name": "FreeBirds",
 "size": 5,
 "lines": 37,
-"chars": 1104,
+"chars": 1134,
 "callers": [
 "004863f0",
 "004888c0"
@@ -46115,10 +46118,10 @@
 "in_vtables": []
 },
 "0047aa10": {
-"name": "FUN_0047aa10",
+"name": "FreeBirds",
 "size": 163,
 "lines": 37,
-"chars": 1098,
+"chars": 1134,
 "callers": [
 "0047aa00"
 ],
@@ -46133,10 +46136,10 @@
 "in_vtables": []
 },
 "0047aac0": {
-"name": "FUN_0047aac0",
+"name": "BirdVector_EraseAt",
 "size": 73,
 "lines": 23,
-"chars": 568,
+"chars": 570,
 "callers": [
 "005ba670"
 ],
@@ -46208,10 +46211,10 @@
 "in_vtables": []
 },
 "0047ab90": {
-"name": "FUN_0047ab90",
+"name": "StaticInit_47ab90",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -46230,10 +46233,10 @@
 ]
 },
 "0047abc0": {
-"name": "FUN_0047abc0",
+"name": "StaticInit_47abc0",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 126,
 "callers": [],
 "callees": [
 "0047abd0",
@@ -46251,10 +46254,10 @@
 ]
 },
 "0047abd0": {
-"name": "FUN_0047abd0",
+"name": "DecoratorStatics_Construct0",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 82,
 "callers": [
 "0047abc0"
 ],
@@ -46270,10 +46273,10 @@
 "in_vtables": []
 },
 "0047abe0": {
-"name": "FUN_0047abe0",
+"name": "DecoratorStatics_RegisterAtExit0",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 106,
 "callers": [
 "0047abc0"
 ],
@@ -46287,10 +46290,10 @@
 "in_vtables": []
 },
 "0047abf0": {
-"name": "FUN_0047abf0",
+"name": "DecoratorStatics_Destroy0",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 80,
 "callers": [
 "0047abe0"
 ],
@@ -46306,10 +46309,10 @@
 "in_vtables": []
 },
 "0047ac00": {
-"name": "FUN_0047ac00",
+"name": "StaticInit_47ac00",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 126,
 "callers": [],
 "callees": [
 "0047ac10",
@@ -46327,10 +46330,10 @@
 ]
 },
 "0047ac10": {
-"name": "FUN_0047ac10",
+"name": "DecoratorStatics_Construct1",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 82,
 "callers": [
 "0047ac00"
 ],
@@ -46346,10 +46349,10 @@
 "in_vtables": []
 },
 "0047ac20": {
-"name": "FUN_0047ac20",
+"name": "DecoratorStatics_RegisterAtExit1",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 106,
 "callers": [
 "0047ac00"
 ],
@@ -46363,10 +46366,10 @@
 "in_vtables": []
 },
 "0047ac30": {
-"name": "FUN_0047ac30",
+"name": "DecoratorStatics_Destroy1",
 "size": 10,
 "lines": 8,
-"chars": 67,
+"chars": 80,
 "callers": [
 "0047ac20"
 ],
@@ -46382,10 +46385,10 @@
 "in_vtables": []
 },
 "0047ac40": {
-"name": "FUN_0047ac40",
+"name": "S_DecoratorPool::S_DecoratorPool",
 "size": 194,
 "lines": 69,
-"chars": 1757,
+"chars": 1741,
 "callers": [
 "0047b0b0"
 ],
@@ -46400,10 +46403,10 @@
 "in_vtables": []
 },
 "0047ad10": {
-"name": "FUN_0047ad10",
+"name": "S_DecoratorPool::~S_DecoratorPool",
 "size": 176,
 "lines": 44,
-"chars": 1101,
+"chars": 1122,
 "callers": [
 "0047c020"
 ],
@@ -46417,10 +46420,10 @@
 "in_vtables": []
 },
 "0047adc0": {
-"name": "FUN_0047adc0",
+"name": "S_DecoratorSet::S_DecoratorSet",
 "size": 75,
 "lines": 22,
-"chars": 484,
+"chars": 502,
 "callers": [
 "0047c530"
 ],
@@ -46434,10 +46437,10 @@
 "in_vtables": []
 },
 "0047ae10": {
-"name": "FUN_0047ae10",
+"name": "S_DecoratorSet::~S_DecoratorSet",
 "size": 79,
 "lines": 21,
-"chars": 452,
+"chars": 488,
 "callers": [
 "0047c020",
 "0047c530"
@@ -46453,10 +46456,10 @@
 "in_vtables": []
 },
 "0047ae60": {
-"name": "FUN_0047ae60",
+"name": "S_DecoratorSet::Reset",
 "size": 100,
 "lines": 26,
-"chars": 665,
+"chars": 702,
 "callers": [
 "0047adc0",
 "0047ae10",
@@ -46473,10 +46476,10 @@
 "in_vtables": []
 },
 "0047aed0": {
-"name": "FUN_0047aed0",
+"name": "S_Decorator::~S_Decorator",
 "size": 311,
 "lines": 82,
-"chars": 2072,
+"chars": 2096,
 "callers": [
 "0047ae60"
 ],
@@ -46501,8 +46504,8 @@
 "0047b010": {
 "name": "C_Decorators::SetOn",
 "size": 123,
-"lines": 36,
-"chars": 1094,
+"lines": 35,
+"chars": 1068,
 "callers": [
 "00416e10",
 "0047b0b0",
@@ -46518,10 +46521,10 @@
 "in_vtables": []
 },
 "0047b090": {
-"name": "FUN_0047b090",
+"name": "C_Decorators::Free",
 "size": 23,
 "lines": 10,
-"chars": 161,
+"chars": 180,
 "callers": [
 "004863f0",
 "004888c0"
@@ -46537,10 +46540,10 @@
 "in_vtables": []
 },
 "0047b0b0": {
-"name": "FUN_0047b0b0",
+"name": "C_Decorators::Start",
 "size": 961,
-"lines": 181,
-"chars": 6734,
+"lines": 183,
+"chars": 6919,
 "callers": [
 "004863f0",
 "004885d0"
@@ -46574,10 +46577,10 @@
 "in_vtables": []
 },
 "0047b480": {
-"name": "FUN_0047b480",
+"name": "C_Decorators::GetMinSlope",
 "size": 57,
 "lines": 14,
-"chars": 379,
+"chars": 382,
 "callers": [
 "0047e2d0"
 ],
@@ -46591,10 +46594,10 @@
 "in_vtables": []
 },
 "0047b4c0": {
-"name": "FUN_0047b4c0",
+"name": "C_Decorators::GetGroundCover",
 "size": 57,
 "lines": 14,
-"chars": 376,
+"chars": 382,
 "callers": [
 "004867e0"
 ],
@@ -46608,10 +46611,10 @@
 "in_vtables": []
 },
 "0047b500": {
-"name": "FUN_0047b500",
+"name": "C_Decorators::TakeModel",
 "size": 983,
-"lines": 140,
-"chars": 5788,
+"lines": 142,
+"chars": 5785,
 "callers": [
 "0047e240"
 ],
@@ -46636,10 +46639,10 @@
 "in_vtables": []
 },
 "0047b8e0": {
-"name": "FUN_0047b8e0",
+"name": "C_Decorators::ReturnModel",
 "size": 433,
 "lines": 74,
-"chars": 2360,
+"chars": 2364,
 "callers": [
 "0047e290"
 ],
@@ -46658,10 +46661,10 @@
 "in_vtables": []
 },
 "0047baa0": {
-"name": "FUN_0047baa0",
+"name": "S_Decorator::PrepareAnimated",
 "size": 529,
-"lines": 91,
-"chars": 3062,
+"lines": 92,
+"chars": 3144,
 "callers": [
 "0047b500"
 ],
@@ -46683,10 +46686,10 @@
 "in_vtables": []
 },
 "0047bcc0": {
-"name": "FUN_0047bcc0",
+"name": "C_Decorators::Update",
 "size": 864,
-"lines": 149,
-"chars": 5461,
+"lines": 148,
+"chars": 5505,
 "callers": [
 "00487240"
 ],
@@ -46717,10 +46720,10 @@
 "in_vtables": []
 },
 "0047c020": {
-"name": "FUN_0047c020",
+"name": "C_Decorators::Clear",
 "size": 280,
 "lines": 57,
-"chars": 1841,
+"chars": 1940,
 "callers": [
 "0047b090",
 "004860b0",
@@ -46743,10 +46746,10 @@
 "in_vtables": []
 },
 "0047c530": {
-"name": "FUN_0047c530",
+"name": "C_Decorators::Load",
 "size": 1010,
-"lines": 174,
-"chars": 6215,
+"lines": 175,
+"chars": 6297,
 "callers": [
 "004863f0",
 "004885d0"
@@ -46779,10 +46782,10 @@
 "in_vtables": []
 },
 "0047c930": {
-"name": "FUN_0047c930",
+"name": "C_Decorators::LoadLightMap",
 "size": 864,
 "lines": 147,
-"chars": 4840,
+"chars": 4884,
 "callers": [
 "0047c530"
 ],
@@ -46813,10 +46816,10 @@
 "in_vtables": []
 },
 "0047cc90": {
-"name": "FUN_0047cc90",
+"name": "S_DecoratorSet::Load",
 "size": 920,
 "lines": 161,
-"chars": 5798,
+"chars": 5807,
 "callers": [
 "0047c530"
 ],
@@ -46840,10 +46843,10 @@
 "in_vtables": []
 },
 "0047d030": {
-"name": "FUN_0047d030",
+"name": "S_Decorator::Reset",
 "size": 132,
 "lines": 34,
-"chars": 922,
+"chars": 1185,
 "callers": [
 "0047cc90"
 ],
@@ -46860,10 +46863,10 @@
 "in_vtables": []
 },
 "0047d0c0": {
-"name": "FUN_0047d0c0",
+"name": "C_Decorators::FreeLightMap",
 "size": 34,
 "lines": 11,
-"chars": 215,
+"chars": 234,
 "callers": [
 "0047c020",
 "0047c930"
@@ -46878,10 +46881,10 @@
 "in_vtables": []
 },
 "0047d0f0": {
-"name": "FUN_0047d0f0",
+"name": "Decorators_Lerp",
 "size": 27,
 "lines": 7,
-"chars": 179,
+"chars": 93,
 "callers": [
 "0047d110"
 ],
@@ -46895,10 +46898,10 @@
 "in_vtables": []
 },
 "0047d110": {
-"name": "FUN_0047d110",
+"name": "C_Decorators::SampleLight",
 "size": 257,
-"lines": 42,
-"chars": 1263,
+"lines": 35,
+"chars": 1016,
 "callers": [
 "0047e2d0"
 ],
@@ -46935,10 +46938,10 @@
 "in_vtables": []
 },
 "0047d240": {
-"name": "FUN_0047d240",
+"name": "DecoratorVector_Construct",
 "size": 24,
 "lines": 11,
-"chars": 239,
+"chars": 252,
 "callers": [
 "0047cc90"
 ],
@@ -46969,10 +46972,10 @@
 "in_vtables": []
 },
 "0047d280": {
-"name": "FUN_0047d280",
+"name": "Vec4Array_Construct",
 "size": 20,
 "lines": 11,
-"chars": 148,
+"chars": 155,
 "callers": [
 "0047cc90"
 ],
@@ -46984,10 +46987,10 @@
 "in_vtables": []
 },
 "0047d2a0": {
-"name": "FUN_0047d2a0",
+"name": "Vec4Array_Free",
 "size": 26,
 "lines": 11,
-"chars": 159,
+"chars": 161,
 "callers": [
 "007fc0b6",
 "007fc138",
@@ -47003,10 +47006,10 @@
 "in_vtables": []
 },
 "0047d2c0": {
-"name": "FUN_0047d2c0",
+"name": "Vec4Array_Free2",
 "size": 26,
 "lines": 11,
-"chars": 159,
+"chars": 162,
 "callers": [
 "0047aed0"
 ],
@@ -47020,10 +47023,10 @@
 "in_vtables": []
 },
 "0047d2e0": {
-"name": "FUN_0047d2e0",
+"name": "Vec4Array_Push",
 "size": 154,
 "lines": 40,
-"chars": 1140,
+"chars": 1142,
 "callers": [
 "0047baa0",
 "004b68e0",
@@ -47078,10 +47081,10 @@
 "in_vtables": []
 },
 "0047d3c0": {
-"name": "FUN_0047d3c0",
+"name": "FloatPtrVector_Erase",
 "size": 43,
 "lines": 15,
-"chars": 336,
+"chars": 344,
 "callers": [
 "0047aed0"
 ],
@@ -47093,10 +47096,10 @@
 "in_vtables": []
 },
 "0047d3f0": {
-"name": "FUN_0047d3f0",
+"name": "DecoratorVector_Insert",
 "size": 406,
 "lines": 74,
-"chars": 2333,
+"chars": 2343,
 "callers": [
 "0047cc90"
 ],
@@ -47134,10 +47137,10 @@
 "in_vtables": []
 },
 "0047d5a0": {
-"name": "FUN_0047d5a0",
+"name": "DecoratorSetVector_Insert",
 "size": 406,
-"lines": 74,
-"chars": 2333,
+"lines": 75,
+"chars": 2347,
 "callers": [
 "0047c530"
 ],
@@ -47188,10 +47191,10 @@
 "in_vtables": []
 },
 "0047d770": {
-"name": "FUN_0047d770",
+"name": "DecoratorPoolVector_InsertN",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3536,
 "callers": [
 "0047b0b0"
 ],
@@ -47206,10 +47209,10 @@
 "in_vtables": []
 },
 "0047d980": {
-"name": "FUN_0047d980",
+"name": "FloatPtrVector_InsertN",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3531,
 "callers": [
 "0047baa0"
 ],
@@ -47347,10 +47350,10 @@
 "in_vtables": []
 },
 "0047e0c0": {
-"name": "FUN_0047e0c0",
+"name": "StaticInit_47e0c0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -47369,10 +47372,10 @@
 ]
 },
 "0047e0f0": {
-"name": "FUN_0047e0f0",
+"name": "C_DecoratorGrid::Init",
 "size": 207,
-"lines": 53,
-"chars": 1309,
+"lines": 54,
+"chars": 1535,
 "callers": [
 "0047b0b0"
 ],
@@ -47389,10 +47392,10 @@
 "in_vtables": []
 },
 "0047e1c0": {
-"name": "FUN_0047e1c0",
+"name": "S_DecoratorCell::S_DecoratorCell",
 "size": 23,
 "lines": 12,
-"chars": 194,
+"chars": 290,
 "callers": [
 "0047e0f0"
 ],
@@ -47404,10 +47407,10 @@
 "in_vtables": []
 },
 "0047e240": {
-"name": "FUN_0047e240",
+"name": "S_DecoratorCell::Place",
 "size": 67,
-"lines": 18,
-"chars": 494,
+"lines": 19,
+"chars": 517,
 "callers": [
 "0047e2d0"
 ],
@@ -47423,10 +47426,10 @@
 "in_vtables": []
 },
 "0047e290": {
-"name": "FUN_0047e290",
+"name": "S_DecoratorCell::Clear",
 "size": 49,
-"lines": 15,
-"chars": 285,
+"lines": 16,
+"chars": 381,
 "callers": [
 "0047e2d0"
 ],
@@ -47442,10 +47445,10 @@
 "in_vtables": []
 },
 "0047e2d0": {
-"name": "FUN_0047e2d0",
+"name": "C_DecoratorGrid::Refill",
 "size": 1621,
-"lines": 235,
-"chars": 9900,
+"lines": 234,
+"chars": 9946,
 "callers": [
 "0047ea00",
 "0047ea30",
@@ -47482,10 +47485,10 @@
 "in_vtables": []
 },
 "0047e930": {
-"name": "FUN_0047e930",
+"name": "C_DecoratorGrid::RefillAll",
 "size": 36,
 "lines": 18,
-"chars": 270,
+"chars": 326,
 "callers": [
 "0047eb80"
 ],
@@ -47499,10 +47502,10 @@
 "in_vtables": []
 },
 "0047e960": {
-"name": "FUN_0047e960",
+"name": "C_DecoratorGrid::ShiftX",
 "size": 66,
 "lines": 26,
-"chars": 655,
+"chars": 652,
 "callers": [
 "0047eb80"
 ],
@@ -47514,10 +47517,10 @@
 "in_vtables": []
 },
 "0047e9b0": {
-"name": "FUN_0047e9b0",
+"name": "C_DecoratorGrid::ShiftZ",
 "size": 68,
 "lines": 26,
-"chars": 703,
+"chars": 700,
 "callers": [
 "0047eb80"
 ],
@@ -47529,10 +47532,10 @@
 "in_vtables": []
 },
 "0047ea00": {
-"name": "FUN_0047ea00",
+"name": "C_DecoratorGrid::RefillColumn",
 "size": 41,
 "lines": 16,
-"chars": 277,
+"chars": 269,
 "callers": [
 "0047e930",
 "0047eb80"
@@ -47547,10 +47550,10 @@
 "in_vtables": []
 },
 "0047ea30": {
-"name": "FUN_0047ea30",
+"name": "C_DecoratorGrid::RefillRow",
 "size": 38,
 "lines": 16,
-"chars": 255,
+"chars": 244,
 "callers": [
 "0047eb80"
 ],
@@ -47564,10 +47567,10 @@
 "in_vtables": []
 },
 "0047ea60": {
-"name": "FUN_0047ea60",
+"name": "C_DecoratorGrid::Free",
 "size": 274,
-"lines": 68,
-"chars": 2035,
+"lines": 69,
+"chars": 2325,
 "callers": [
 "0047b090"
 ],
@@ -47582,10 +47585,10 @@
 "in_vtables": []
 },
 "0047eb80": {
-"name": "FUN_0047eb80",
+"name": "C_DecoratorGrid::Follow",
 "size": 1488,
-"lines": 273,
-"chars": 8293,
+"lines": 274,
+"chars": 8594,
 "callers": [
 "0047bcc0"
 ],
@@ -47616,10 +47619,10 @@
 "in_vtables": []
 },
 "0047f150": {
-"name": "FUN_0047f150",
+"name": "C_DecoratorGrid::UpdateBends",
 "size": 167,
 "lines": 42,
-"chars": 1364,
+"chars": 1372,
 "callers": [
 "0047bcc0"
 ],
@@ -47634,10 +47637,10 @@
 "in_vtables": []
 },
 "0047f200": {
-"name": "FUN_0047f200",
+"name": "S_DecoratorBend::Update",
 "size": 725,
-"lines": 120,
-"chars": 3795,
+"lines": 113,
+"chars": 3461,
 "callers": [
 "0047f150"
 ],
@@ -47664,10 +47667,10 @@
 "in_vtables": []
 },
 "0047f4e0": {
-"name": "FUN_0047f4e0",
+"name": "C_DecoratorGrid::BendAroundHuman",
 "size": 579,
 "lines": 98,
-"chars": 2839,
+"chars": 2857,
 "callers": [
 "0047eb80"
 ],
@@ -47696,10 +47699,10 @@
 "in_vtables": []
 },
 "0047f730": {
-"name": "FUN_0047f730",
+"name": "C_DecoratorGrid::BendAroundCar",
 "size": 943,
-"lines": 132,
-"chars": 4187,
+"lines": 131,
+"chars": 4185,
 "callers": [
 "0047eb80"
 ],
@@ -47722,10 +47725,10 @@
 "in_vtables": []
 },
 "0047fae0": {
-"name": "FUN_0047fae0",
+"name": "C_DecoratorGrid::Bend",
 "size": 1587,
-"lines": 243,
-"chars": 10215,
+"lines": 245,
+"chars": 10216,
 "callers": [
 "0047f4e0",
 "0047f730"
@@ -47752,10 +47755,10 @@
 "in_vtables": []
 },
 "00480120": {
-"name": "FUN_00480120",
+"name": "DecoratorTrackVector_Size",
 "size": 33,
 "lines": 10,
-"chars": 177,
+"chars": 190,
 "callers": [
 "0047f730"
 ],
@@ -47767,10 +47770,10 @@
 "in_vtables": []
 },
 "00480150": {
-"name": "FUN_00480150",
+"name": "DecoratorBendVector_InsertN",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3536,
 "callers": [
 "0047fae0"
 ],
@@ -47785,10 +47788,10 @@
 "in_vtables": []
 },
 "00480360": {
-"name": "FUN_00480360",
+"name": "StaticInit_480360",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -47807,10 +47810,10 @@
 ]
 },
 "00480390": {
-"name": "FUN_00480390",
+"name": "S_VolumetricCone::Render",
 "size": 886,
 "lines": 89,
-"chars": 3212,
+"chars": 3301,
 "callers": [
 "00480d80"
 ],
@@ -47833,10 +47836,10 @@
 "in_vtables": []
 },
 "00480710": {
-"name": "FUN_00480710",
+"name": "Volumetric_SetVertex",
 "size": 40,
-"lines": 15,
-"chars": 321,
+"lines": 13,
+"chars": 342,
 "callers": [
 "00480740",
 "00482e50"
@@ -47849,10 +47852,10 @@
 "in_vtables": []
 },
 "00480740": {
-"name": "FUN_00480740",
+"name": "S_VolumetricCone::Build",
 "size": 1466,
-"lines": 140,
-"chars": 5886,
+"lines": 147,
+"chars": 5894,
 "callers": [
 "00480fa0"
 ],
@@ -47877,10 +47880,10 @@
 "in_vtables": []
 },
 "00480d00": {
-"name": "FUN_00480d00",
+"name": "S_VolumetricCone::~S_VolumetricCone",
 "size": 94,
 "lines": 29,
-"chars": 646,
+"chars": 669,
 "callers": [
 "004813d0",
 "00481810"
@@ -47895,10 +47898,10 @@
 "in_vtables": []
 },
 "00480d80": {
-"name": "FUN_00480d80",
+"name": "S_Volumetric::Draw",
 "size": 535,
-"lines": 105,
-"chars": 4086,
+"lines": 95,
+"chars": 3247,
 "callers": [
 "00482260"
 ],
@@ -47918,10 +47921,10 @@
 "in_vtables": []
 },
 "00480fa0": {
-"name": "FUN_00480fa0",
+"name": "S_Volumetric::Refresh",
 "size": 221,
-"lines": 54,
-"chars": 1381,
+"lines": 55,
+"chars": 1402,
 "callers": [
 "00481230",
 "00482980"
@@ -47941,7 +47944,7 @@
 "in_vtables": []
 },
 "00481080": {
-"name": "FUN_00481080",
+"name": "S_VolumetricCone::S_VolumetricCone",
 "size": 260,
 "lines": 76,
 "chars": 2178,
@@ -47965,10 +47968,10 @@
 "in_vtables": []
 },
 "00481190": {
-"name": "FUN_00481190",
+"name": "S_VolumetricCone::CopyFrom",
 "size": 149,
 "lines": 30,
-"chars": 998,
+"chars": 1242,
 "callers": [
 "00481230"
 ],
@@ -47982,10 +47985,10 @@
 "in_vtables": []
 },
 "00481230": {
-"name": "FUN_00481230",
+"name": "S_Volumetric::CopyFrom",
 "size": 234,
-"lines": 44,
-"chars": 1404,
+"lines": 49,
+"chars": 1752,
 "callers": [],
 "callees": [
 "00480fa0",
@@ -48002,10 +48005,10 @@
 "in_vtables": []
 },
 "00481320": {
-"name": "FUN_00481320",
+"name": "S_Volumetric::S_Volumetric",
 "size": 85,
 "lines": 24,
-"chars": 770,
+"chars": 756,
 "callers": [
 "00482a00"
 ],
@@ -48021,10 +48024,10 @@
 "in_vtables": []
 },
 "00481380": {
-"name": "FUN_00481380",
+"name": "S_Volumetric::~S_Volumetric",
 "size": 79,
 "lines": 21,
-"chars": 455,
+"chars": 491,
 "callers": [
 "00482260",
 "00482980",
@@ -48042,10 +48045,10 @@
 "in_vtables": []
 },
 "004813d0": {
-"name": "FUN_004813d0",
+"name": "S_Volumetric::DeleteCones",
 "size": 86,
 "lines": 24,
-"chars": 571,
+"chars": 618,
 "callers": [
 "00481230",
 "00481380",
@@ -48062,10 +48065,10 @@
 "in_vtables": []
 },
 "00481440": {
-"name": "FUN_00481440",
+"name": "S_VolumetricCone::Load",
 "size": 798,
-"lines": 127,
-"chars": 4641,
+"lines": 125,
+"chars": 4341,
 "callers": [
 "00481810"
 ],
@@ -48083,10 +48086,10 @@
 "in_vtables": []
 },
 "00481810": {
-"name": "FUN_00481810",
+"name": "S_Volumetric::Load",
 "size": 1117,
-"lines": 189,
-"chars": 6688,
+"lines": 191,
+"chars": 6649,
 "callers": [
 "00482a00"
 ],
@@ -48136,10 +48139,10 @@
 "in_vtables": []
 },
 "00481cf0": {
-"name": "FUN_00481cf0",
+"name": "VolumetricConeVector_Insert",
 "size": 406,
-"lines": 74,
-"chars": 2333,
+"lines": 75,
+"chars": 2349,
 "callers": [
 "00481810"
 ],
@@ -48189,10 +48192,10 @@
 "in_vtables": []
 },
 "00481ec0": {
-"name": "FUN_00481ec0",
+"name": "VolumetricConeVector_InsertN",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3537,
 "callers": [
 "00481230"
 ],
@@ -48252,10 +48255,10 @@
 "in_vtables": []
 },
 "00482140": {
-"name": "FUN_00482140",
+"name": "StaticInit_482140",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -48274,10 +48277,10 @@
 ]
 },
 "00482170": {
-"name": "FUN_00482170",
+"name": "Chunk_ReadFloatAndAscend",
 "size": 235,
-"lines": 50,
-"chars": 1424,
+"lines": 51,
+"chars": 1458,
 "callers": [
 "00481810",
 "00539990",
@@ -48305,10 +48308,10 @@
 "in_vtables": []
 },
 "00482260": {
-"name": "FUN_00482260",
+"name": "C_Volumetrics::Render",
 "size": 1813,
-"lines": 284,
-"chars": 9627,
+"lines": 285,
+"chars": 9695,
 "callers": [
 "00486bf0"
 ],
@@ -48342,10 +48345,10 @@
 "in_vtables": []
 },
 "00482980": {
-"name": "FUN_00482980",
+"name": "C_Volumetrics::Prune",
 "size": 126,
 "lines": 39,
-"chars": 1025,
+"chars": 1051,
 "callers": [
 "00482a00",
 "00488560"
@@ -48362,10 +48365,10 @@
 "in_vtables": []
 },
 "00482a00": {
-"name": "FUN_00482a00",
+"name": "C_Volumetrics::Load",
 "size": 871,
-"lines": 152,
-"chars": 4654,
+"lines": 149,
+"chars": 4628,
 "callers": [
 "00488560"
 ],
@@ -48399,10 +48402,10 @@
 "in_vtables": []
 },
 "00482d70": {
-"name": "FUN_00482d70",
+"name": "C_Volumetrics::Free",
 "size": 124,
 "lines": 29,
-"chars": 762,
+"chars": 790,
 "callers": [
 "00482a00",
 "004885a0"
@@ -48421,10 +48424,10 @@
 "in_vtables": []
 },
 "00482df0": {
-"name": "FUN_00482df0",
+"name": "StaticInit_Clouds",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 105,
 "callers": [],
 "callees": [
 "00482e00",
@@ -48442,10 +48445,10 @@
 ]
 },
 "00482e00": {
-"name": "FUN_00482e00",
+"name": "Clouds_Construct0",
 "size": 10,
 "lines": 8,
-"chars": 94,
+"chars": 87,
 "callers": [
 "00482df0"
 ],
@@ -48461,10 +48464,10 @@
 "in_vtables": []
 },
 "00482e10": {
-"name": "FUN_00482e10",
+"name": "Clouds_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 85,
 "callers": [
 "00482df0"
 ],
@@ -48478,10 +48481,10 @@
 "in_vtables": []
 },
 "00482e20": {
-"name": "FUN_00482e20",
+"name": "Clouds_Destroy0",
 "size": 11,
 "lines": 7,
-"chars": 48,
+"chars": 51,
 "callers": [
 "00482e10"
 ],
@@ -48495,10 +48498,10 @@
 "in_vtables": []
 },
 "00482e30": {
-"name": "FUN_00482e30",
+"name": "S_Clouds::S_Clouds",
 "size": 16,
 "lines": 9,
-"chars": 110,
+"chars": 145,
 "callers": [
 "00482e00"
 ],
@@ -48510,10 +48513,10 @@
 "in_vtables": []
 },
 "00482e50": {
-"name": "FUN_00482e50",
+"name": "DrawClouds",
 "size": 3971,
-"lines": 481,
-"chars": 18611,
+"lines": 488,
+"chars": 18882,
 "callers": [
 "00482260"
 ],
@@ -48558,10 +48561,10 @@
 "in_vtables": []
 },
 "00483de0": {
-"name": "FUN_00483de0",
+"name": "FreeClouds",
 "size": 97,
 "lines": 27,
-"chars": 588,
+"chars": 654,
 "callers": [
 "00482d70",
 "00483e50",
@@ -48580,10 +48583,10 @@
 "in_vtables": []
 },
 "00483e50": {
-"name": "FUN_00483e50",
+"name": "LoadClouds",
 "size": 94,
-"lines": 18,
-"chars": 479,
+"lines": 17,
+"chars": 470,
 "callers": [
 "00485b50"
 ],
@@ -48638,10 +48641,10 @@
 "in_vtables": []
 },
 "004840d0": {
-"name": "FUN_004840d0",
+"name": "StaticInit_4840d0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -48660,10 +48663,10 @@
 ]
 },
 "00484100": {
-"name": "FUN_00484100",
+"name": "C_MeshPlayer::C_MeshPlayer",
 "size": 209,
 "lines": 73,
-"chars": 1785,
+"chars": 1984,
 "callers": [
 "004860b0"
 ],
@@ -48683,10 +48686,10 @@
 "in_vtables": []
 },
 "004841e0": {
-"name": "FUN_004841e0",
+"name": "C_MeshPlayer::~C_MeshPlayer",
 "size": 124,
 "lines": 31,
-"chars": 660,
+"chars": 681,
 "callers": [
 "00486f00",
 "007fc420",
@@ -48703,10 +48706,10 @@
 "in_vtables": []
 },
 "00484260": {
-"name": "FUN_00484260",
+"name": "C_MeshPlayer::Load",
 "size": 1064,
 "lines": 175,
-"chars": 5937,
+"chars": 5974,
 "callers": [
 "00488560"
 ],
@@ -48741,10 +48744,10 @@
 "in_vtables": []
 },
 "00484690": {
-"name": "thunk_FUN_00484ae0",
+"name": "C_MeshPlayer::Free",
 "size": 5,
-"lines": 33,
-"chars": 982,
+"lines": 35,
+"chars": 1241,
 "callers": [
 "004885a0"
 ],
@@ -48759,10 +48762,10 @@
 "in_vtables": []
 },
 "004846a0": {
-"name": "FUN_004846a0",
+"name": "MeshPlayer_VisualMesh",
 "size": 63,
 "lines": 23,
-"chars": 456,
+"chars": 501,
 "callers": [
 "004846e0",
 "00484740"
@@ -48775,10 +48778,10 @@
 "in_vtables": []
 },
 "004846e0": {
-"name": "FUN_004846e0",
+"name": "MeshPlayer_OwnTexture",
 "size": 81,
 "lines": 27,
-"chars": 667,
+"chars": 701,
 "callers": [
 "004847a0"
 ],
@@ -48792,10 +48795,10 @@
 "in_vtables": []
 },
 "00484740": {
-"name": "FUN_00484740",
+"name": "MeshPlayer_ShowTexture",
 "size": 86,
 "lines": 25,
-"chars": 722,
+"chars": 731,
 "callers": [
 "00484690",
 "004847a0",
@@ -48811,10 +48814,10 @@
 "in_vtables": []
 },
 "004847a0": {
-"name": "FUN_004847a0",
+"name": "C_MeshPlayer::Play",
 "size": 715,
-"lines": 116,
-"chars": 4447,
+"lines": 118,
+"chars": 4631,
 "callers": [
 "00484260"
 ],
@@ -48845,10 +48848,10 @@
 "in_vtables": []
 },
 "00484a70": {
-"name": "FUN_00484a70",
+"name": "C_MeshPlayer::Update",
 "size": 104,
-"lines": 31,
-"chars": 779,
+"lines": 32,
+"chars": 858,
 "callers": [
 "00487240"
 ],
@@ -48862,10 +48865,10 @@
 "in_vtables": []
 },
 "00484ae0": {
-"name": "FUN_00484ae0",
+"name": "C_MeshPlayer::Free",
 "size": 173,
-"lines": 33,
-"chars": 976,
+"lines": 35,
+"chars": 1241,
 "callers": [
 "004841e0",
 "00484260",
@@ -49014,10 +49017,10 @@
 "in_vtables": []
 },
 "00484e90": {
-"name": "FUN_00484e90",
+"name": "StaticInit_484e90",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -49036,10 +49039,10 @@
 ]
 },
 "00484ec0": {
-"name": "FUN_00484ec0",
+"name": "StaticInit_Birds",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 110,
 "callers": [],
 "callees": [
 "00484ed0",
@@ -49057,10 +49060,10 @@
 ]
 },
 "00484ed0": {
-"name": "FUN_00484ed0",
+"name": "BirdLists_Construct0",
 "size": 10,
 "lines": 8,
-"chars": 80,
+"chars": 90,
 "callers": [
 "00484ec0"
 ],
@@ -49076,10 +49079,10 @@
 "in_vtables": []
 },
 "00484ee0": {
-"name": "FUN_00484ee0",
+"name": "BirdLists_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 91,
 "callers": [
 "00484ec0"
 ],
@@ -49093,10 +49096,10 @@
 "in_vtables": []
 },
 "00484ef0": {
-"name": "FUN_00484ef0",
+"name": "BirdLists_Destroy0",
 "size": 10,
 "lines": 8,
-"chars": 75,
+"chars": 86,
 "callers": [
 "00484ee0"
 ],
@@ -49112,10 +49115,10 @@
 "in_vtables": []
 },
 "00484f00": {
-"name": "FUN_00484f00",
+"name": "BirdLists_Destroy",
 "size": 48,
 "lines": 15,
-"chars": 392,
+"chars": 397,
 "callers": [
 "00484ef0"
 ],
@@ -49129,10 +49132,10 @@
 "in_vtables": []
 },
 "00484f30": {
-"name": "FUN_00484f30",
+"name": "BirdLists_Construct",
 "size": 38,
 "lines": 18,
-"chars": 435,
+"chars": 442,
 "callers": [
 "00484ed0"
 ],
@@ -49409,10 +49412,10 @@
 "in_vtables": []
 },
 "004862b0": {
-"name": "FUN_004862b0",
+"name": "C_DecoratorGrid::C_DecoratorGrid",
 "size": 80,
 "lines": 27,
-"chars": 595,
+"chars": 907,
 "callers": [
 "004860b0"
 ],
@@ -49424,10 +49427,10 @@
 "in_vtables": []
 },
 "00486300": {
-"name": "FUN_00486300",
+"name": "Decorators_ClearLightMap",
 "size": 18,
-"lines": 15,
-"chars": 254,
+"lines": 13,
+"chars": 234,
 "callers": [
 "004860b0"
 ],
@@ -50907,10 +50910,10 @@
 "in_vtables": []
 },
 "0048b340": {
-"name": "FUN_0048b340",
+"name": "DecoratorPoolVector_Construct",
 "size": 24,
 "lines": 11,
-"chars": 239,
+"chars": 256,
 "callers": [
 "004860b0"
 ],
@@ -50922,10 +50925,10 @@
 "in_vtables": []
 },
 "0048b360": {
-"name": "FUN_0048b360",
+"name": "DecoratorSetVector_Construct",
 "size": 24,
 "lines": 11,
-"chars": 239,
+"chars": 255,
 "callers": [
 "004860b0"
 ],
@@ -75797,10 +75800,10 @@
 "in_vtables": []
 },
 "004def80": {
-"name": "FUN_004def80",
+"name": "HasSeatCamera",
 "size": 25,
-"lines": 8,
-"chars": 217,
+"lines": 7,
+"chars": 142,
 "callers": [
 "0046c370"
 ],
@@ -222012,10 +222015,10 @@
 "in_vtables": []
 },
 "006acb80": {
-"name": "FUN_006acb80",
+"name": "GetGameTypeTextId",
 "size": 32,
 "lines": 10,
-"chars": 179,
+"chars": 182,
 "callers": [
 "00628610",
 "0062fa30",
@@ -232547,10 +232550,10 @@
 "in_vtables": []
 },
 "006c76a0": {
-"name": "FUN_006c76a0",
+"name": "C_Controls::GetValue",
 "size": 106,
 "lines": 19,
-"chars": 643,
+"chars": 620,
 "callers": [
 "00469300",
 "0046ada0",
@@ -232958,10 +232961,10 @@
 "in_vtables": []
 },
 "006c97b0": {
-"name": "FUN_006c97b0",
+"name": "StaticInit_LoaderScreen",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 122,
 "callers": [],
 "callees": [
 "006c97c0",
@@ -232979,10 +232982,10 @@
 ]
 },
 "006c97c0": {
-"name": "FUN_006c97c0",
+"name": "LoaderScreen_Construct",
 "size": 10,
 "lines": 8,
-"chars": 94,
+"chars": 95,
 "callers": [
 "006c97b0"
 ],
@@ -232998,10 +233001,10 @@
 "in_vtables": []
 },
 "006c97d0": {
-"name": "FUN_006c97d0",
+"name": "LoaderScreen_RegisterAtExit",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 97,
 "callers": [
 "006c97b0"
 ],
@@ -233015,10 +233018,10 @@
 "in_vtables": []
 },
 "006c97e0": {
-"name": "FUN_006c97e0",
+"name": "LoaderScreen_Destruct",
 "size": 10,
 "lines": 8,
-"chars": 87,
+"chars": 95,
 "callers": [
 "006c97d0"
 ],
@@ -233034,10 +233037,10 @@
 "in_vtables": []
 },
 "006c97f0": {
-"name": "FUN_006c97f0",
+"name": "C_LoaderScreen",
 "size": 79,
-"lines": 35,
-"chars": 763,
+"lines": 36,
+"chars": 772,
 "callers": [
 "006c97c0"
 ],
@@ -233049,10 +233052,10 @@
 "in_vtables": []
 },
 "006c9840": {
-"name": "FUN_006c9840",
+"name": "~C_LoaderScreen",
 "size": 186,
-"lines": 43,
-"chars": 1183,
+"lines": 44,
+"chars": 1321,
 "callers": [
 "006c97e0"
 ],
@@ -233067,10 +233070,10 @@
 "in_vtables": []
 },
 "006c9900": {
-"name": "FUN_006c9900",
+"name": "FinishLoading",
 "size": 13,
-"lines": 11,
-"chars": 159,
+"lines": 13,
+"chars": 167,
 "callers": [
 "006caad0"
 ],
@@ -233086,8 +233089,8 @@
 "006c9910": {
 "name": "Finish",
 "size": 13,
-"lines": 11,
-"chars": 178,
+"lines": 13,
+"chars": 160,
 "callers": [
 "00698c80"
 ],
@@ -233104,7 +233107,7 @@
 "name": "SetProgress",
 "size": 107,
 "lines": 30,
-"chars": 740,
+"chars": 686,
 "callers": [
 "00698c80",
 "006caad0",
@@ -233128,10 +233131,10 @@
 "in_vtables": []
 },
 "006c9990": {
-"name": "FUN_006c9990",
+"name": "Start",
 "size": 3132,
-"lines": 519,
-"chars": 19902,
+"lines": 539,
+"chars": 20946,
 "callers": [
 "006d4270"
 ],
@@ -233186,10 +233189,10 @@
 "in_vtables": []
 },
 "006ca610": {
-"name": "get_field_4_6ca610",
+"name": "IsShown",
 "size": 4,
-"lines": 7,
-"chars": 107,
+"lines": 9,
+"chars": 123,
 "callers": [
 "006c9920",
 "006ca620"
@@ -233202,10 +233205,10 @@
 "in_vtables": []
 },
 "006ca620": {
-"name": "FUN_006ca620",
+"name": "Close",
 "size": 413,
-"lines": 103,
-"chars": 3055,
+"lines": 107,
+"chars": 3326,
 "callers": [
 "006c9840",
 "006c9900",
@@ -233234,10 +233237,10 @@
 "in_vtables": []
 },
 "006ca7c0": {
-"name": "FUN_006ca7c0",
+"name": "Draw",
 "size": 342,
-"lines": 61,
-"chars": 1850,
+"lines": 62,
+"chars": 1898,
 "callers": [
 "006c9920",
 "006c9990",
@@ -233282,10 +233285,10 @@
 "in_vtables": []
 },
 "006ca9c0": {
-"name": "FUN_006ca9c0",
+"name": "ClearPlayers",
 "size": 196,
-"lines": 43,
-"chars": 1578,
+"lines": 44,
+"chars": 1596,
 "callers": [
 "006c9990",
 "006ca620"
@@ -233302,10 +233305,10 @@
 "in_vtables": []
 },
 "006caaa0": {
-"name": "FUN_006caaa0",
+"name": "StaticInit_6caaa0",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -233327,7 +233330,7 @@
 "name": "LoadMission",
 "size": 1113,
 "lines": 182,
-"chars": 5706,
+"chars": 5826,
 "callers": [
 "00698c80"
 ],
@@ -233379,10 +233382,10 @@
 "in_vtables": []
 },
 "006caf30": {
-"name": "FUN_006caf30",
+"name": "MissionMapA_DtorEh",
 "size": 243,
 "lines": 55,
-"chars": 1538,
+"chars": 1589,
 "callers": [
 "0080b7f8",
 "0080b808",
@@ -233410,10 +233413,10 @@
 "in_vtables": []
 },
 "006cb030": {
-"name": "FUN_006cb030",
+"name": "MissionMapB_DtorEh",
 "size": 243,
 "lines": 55,
-"chars": 1538,
+"chars": 1589,
 "callers": [
 "0080b810",
 "0080b840",
@@ -233439,10 +233442,10 @@
 "in_vtables": []
 },
 "006cb130": {
-"name": "FUN_006cb130",
+"name": "ModuleMissionData_Dtor",
 "size": 33,
 "lines": 19,
-"chars": 410,
+"chars": 409,
 "callers": [
 "006caad0",
 "0080b7f0"
@@ -233459,10 +233462,10 @@
 "in_vtables": []
 },
 "006cb160": {
-"name": "FUN_006cb160",
+"name": "C_MissionLoader::~C_MissionLoader",
 "size": 466,
-"lines": 98,
-"chars": 3107,
+"lines": 99,
+"chars": 3101,
 "callers": [
 "0080b800"
 ],
@@ -233488,10 +233491,10 @@
 "in_vtables": []
 },
 "006cb340": {
-"name": "FUN_006cb340",
+"name": "MissionMapA_Dtor",
 "size": 231,
 "lines": 53,
-"chars": 1478,
+"chars": 1522,
 "callers": [
 "006caad0"
 ],
@@ -233514,10 +233517,10 @@
 "in_vtables": []
 },
 "006cb430": {
-"name": "FUN_006cb430",
+"name": "MissionMapB_Ctor",
 "size": 168,
 "lines": 36,
-"chars": 992,
+"chars": 996,
 "callers": [
 "006caad0"
 ],
@@ -233537,10 +233540,10 @@
 "in_vtables": []
 },
 "006cb4e0": {
-"name": "FUN_006cb4e0",
+"name": "MissionMapB_Dtor",
 "size": 231,
 "lines": 53,
-"chars": 1478,
+"chars": 1522,
 "callers": [
 "006caad0"
 ],
@@ -233563,10 +233566,10 @@
 "in_vtables": []
 },
 "006cb5d0": {
-"name": "FUN_006cb5d0",
+"name": "MissionMapA_Ctor",
 "size": 40,
 "lines": 15,
-"chars": 335,
+"chars": 343,
 "callers": [
 "006caad0"
 ],
@@ -233580,10 +233583,10 @@
 "in_vtables": []
 },
 "006cb600": {
-"name": "FUN_006cb600",
+"name": "MissionMapA_Begin",
 "size": 14,
 "lines": 8,
-"chars": 133,
+"chars": 138,
 "callers": [
 "006caf30",
 "006cb160"
@@ -233596,10 +233599,10 @@
 "in_vtables": []
 },
 "006cb610": {
-"name": "FUN_006cb610",
+"name": "MissionMapB_Begin",
 "size": 14,
 "lines": 8,
-"chars": 133,
+"chars": 138,
 "callers": [
 "006cb030"
 ],
@@ -233611,10 +233614,10 @@
 "in_vtables": []
 },
 "006cb620": {
-"name": "FUN_006cb620",
+"name": "MissionMapB_EraseRange",
 "size": 209,
 "lines": 54,
-"chars": 1582,
+"chars": 1625,
 "callers": [
 "006cb160"
 ],
@@ -233634,10 +233637,10 @@
 "in_vtables": []
 },
 "006cb700": {
-"name": "FUN_006cb700",
+"name": "MissionMapA_Erase",
 "size": 1053,
 "lines": 298,
-"chars": 9602,
+"chars": 9614,
 "callers": [
 "006caf30",
 "006cb160",
@@ -233658,10 +233661,10 @@
 "in_vtables": []
 },
 "006cbb20": {
-"name": "FUN_006cbb20",
+"name": "MissionMapA_EraseSubtree",
 "size": 67,
 "lines": 18,
-"chars": 329,
+"chars": 361,
 "callers": [
 "006caf30",
 "006cb160",
@@ -233682,10 +233685,10 @@
 "in_vtables": []
 },
 "006cbb70": {
-"name": "FUN_006cbb70",
+"name": "MissionMapA_PairDtor",
 "size": 21,
 "lines": 14,
-"chars": 247,
+"chars": 255,
 "callers": [
 "006cbb20",
 "006cc1e0",
@@ -233724,10 +233727,10 @@
 "in_vtables": []
 },
 "006cbb90": {
-"name": "FUN_006cbb90",
+"name": "MissionMapA_Init",
 "size": 145,
 "lines": 35,
-"chars": 850,
+"chars": 854,
 "callers": [
 "006cb5d0"
 ],
@@ -233747,10 +233750,10 @@
 "in_vtables": []
 },
 "006cbc30": {
-"name": "FUN_006cbc30",
+"name": "MissionMapA_IterDec",
 "size": 86,
 "lines": 33,
-"chars": 784,
+"chars": 791,
 "callers": [
 "006cb160"
 ],
@@ -233764,10 +233767,10 @@
 "in_vtables": []
 },
 "006cbc90": {
-"name": "FUN_006cbc90",
+"name": "MissionMapB_Erase",
 "size": 1076,
 "lines": 302,
-"chars": 9761,
+"chars": 9773,
 "callers": [
 "006cb030",
 "006cb4e0",
@@ -233788,10 +233791,10 @@
 "in_vtables": []
 },
 "006cc0d0": {
-"name": "FUN_006cc0d0",
+"name": "MissionMapB_EraseSubtree",
 "size": 67,
 "lines": 18,
-"chars": 329,
+"chars": 361,
 "callers": [
 "006cb030",
 "006cb4e0",
@@ -233812,10 +233815,10 @@
 "in_vtables": []
 },
 "006cc120": {
-"name": "FUN_006cc120",
+"name": "MissionMapB_Leftmost",
 "size": 25,
 "lines": 11,
-"chars": 205,
+"chars": 213,
 "callers": [
 "006cb620"
 ],
@@ -233829,10 +233832,10 @@
 "in_vtables": []
 },
 "006cc140": {
-"name": "FUN_006cc140",
+"name": "MissionMapA_IterInc",
 "size": 67,
 "lines": 29,
-"chars": 669,
+"chars": 676,
 "callers": [
 "006caf30",
 "006cb340",
@@ -233848,10 +233851,10 @@
 "in_vtables": []
 },
 "006cc190": {
-"name": "FUN_006cc190",
+"name": "MissionMapB_IterInc",
 "size": 67,
 "lines": 29,
-"chars": 669,
+"chars": 676,
 "callers": [
 "006cb030",
 "006cb4e0",
@@ -233867,10 +233870,10 @@
 "in_vtables": []
 },
 "006cc1e0": {
-"name": "FUN_006cc1e0",
+"name": "MissionMapA_PairDeletingDtor",
 "size": 30,
 "lines": 11,
-"chars": 176,
+"chars": 200,
 "callers": [
 "006caf30",
 "006cb340"
@@ -233886,10 +233889,10 @@
 "in_vtables": []
 },
 "006cc200": {
-"name": "FUN_006cc200",
+"name": "MissionMapB_PairDeletingDtor",
 "size": 30,
 "lines": 11,
-"chars": 176,
+"chars": 200,
 "callers": [
 "006cb030",
 "006cb4e0"
@@ -233905,10 +233908,10 @@
 "in_vtables": []
 },
 "006cc220": {
-"name": "FUN_006cc220",
+"name": "MissionMapB_PairDtor",
 "size": 48,
 "lines": 18,
-"chars": 424,
+"chars": 432,
 "callers": [
 "006cb620",
 "006cc0d0",
@@ -233924,10 +233927,10 @@
 "in_vtables": []
 },
 "006cc250": {
-"name": "FUN_006cc250",
+"name": "StaticInit_6cc250",
 "size": 37,
 "lines": 11,
-"chars": 151,
+"chars": 156,
 "callers": [],
 "callees": [
 "007e562e"
@@ -233946,10 +233949,10 @@
 ]
 },
 "006cc280": {
-"name": "FUN_006cc280",
+"name": "C_MissionLoader::LoadScene2",
 "size": 1602,
-"lines": 238,
-"chars": 8214,
+"lines": 240,
+"chars": 8279,
 "callers": [
 "006caad0"
 ],
@@ -233986,11 +233989,34 @@
 ],
 "in_vtables": []
 },
+"006cc8d0": {
+"name": "C_MissionLoader::NameFrame",
+"size": 197,
+"lines": 45,
+"chars": 1274,
+"callers": [
+"006cc280",
+"006cdc90",
+"006d1ef0"
+],
+"callees": [
+"00405100",
+"006d3c10",
+"007e2120"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [
+"00867a90"
+],
+"in_vtables": []
+},
 "006cc9a0": {
-"name": "FUN_006cc9a0",
+"name": "FormatStr",
 "size": 202,
 "lines": 64,
-"chars": 1583,
+"chars": 1568,
 "callers": [
 "006cc280",
 "006d1ef0",
@@ -234009,10 +234035,10 @@
 "in_vtables": []
 },
 "006cca70": {
-"name": "FUN_006cca70",
+"name": "MissionLoader_StrDtor1",
 "size": 21,
 "lines": 14,
-"chars": 247,
+"chars": 257,
 "callers": [
 "0080b970"
 ],
@@ -234026,10 +234052,10 @@
 "in_vtables": []
 },
 "006cca90": {
-"name": "FUN_006cca90",
+"name": "MissionLoader_StrDtor2",
 "size": 21,
 "lines": 14,
-"chars": 247,
+"chars": 257,
 "callers": [
 "0080b8f7",
 "0080bbbb",
@@ -234045,10 +234071,10 @@
 "in_vtables": []
 },
 "006ccab0": {
-"name": "FUN_006ccab0",
+"name": "C_MissionLoader::LoadObjects",
 "size": 4515,
-"lines": 759,
-"chars": 30174,
+"lines": 714,
+"chars": 27714,
 "callers": [
 "006cc280",
 "006d4910",
@@ -234098,10 +234124,10 @@
 "in_vtables": []
 },
 "006cdc60": {
-"name": "FUN_006cdc60",
+"name": "S_TShiftEntry::S_TShiftEntry",
 "size": 42,
 "lines": 15,
-"chars": 439,
+"chars": 413,
 "callers": [
 "006ccab0"
 ],
@@ -234113,7 +234139,7 @@
 "in_vtables": []
 },
 "006cdc90": {
-"name": "FUN_006cdc90",
+"name": "C_MissionLoader::LoadObject",
 "size": 16528,
 "lines": 0,
 "chars": 0,
@@ -234282,10 +234308,10 @@
 "in_vtables": []
 },
 "006d3840": {
-"name": "FUN_006d3840",
+"name": "MissionMapA_Index",
 "size": 171,
 "lines": 36,
-"chars": 833,
+"chars": 850,
 "callers": [
 "006ccab0"
 ],
@@ -234300,10 +234326,10 @@
 "in_vtables": []
 },
 "006d38f0": {
-"name": "FUN_006d38f0",
+"name": "MissionMapA_Insert",
 "size": 217,
-"lines": 54,
-"chars": 1352,
+"lines": 52,
+"chars": 1310,
 "callers": [
 "006cc280",
 "006ccab0",
@@ -234324,10 +234350,10 @@
 "in_vtables": []
 },
 "006d39d0": {
-"name": "FUN_006d39d0",
+"name": "MissionMapA_MakePair",
 "size": 28,
 "lines": 15,
-"chars": 291,
+"chars": 299,
 "callers": [
 "006cc280",
 "006ccab0",
@@ -234342,10 +234368,10 @@
 "in_vtables": []
 },
 "006d39f0": {
-"name": "FUN_006d39f0",
+"name": "TShiftEntries_Insert",
 "size": 544,
-"lines": 99,
-"chars": 3065,
+"lines": 100,
+"chars": 3185,
 "callers": [
 "006ccab0"
 ],
@@ -234365,11 +234391,12 @@
 "in_vtables": []
 },
 "006d3c10": {
-"name": "FUN_006d3c10",
+"name": "MissionMapA_FindOrInsert",
 "size": 600,
-"lines": 126,
-"chars": 3821,
+"lines": 125,
+"chars": 3869,
 "callers": [
+"006cc8d0",
 "006d3840"
 ],
 "callees": [
@@ -234390,10 +234417,10 @@
 "in_vtables": []
 },
 "006d3e70": {
-"name": "FUN_006d3e70",
+"name": "MissionMapA_InsertNode",
 "size": 617,
-"lines": 166,
-"chars": 5370,
+"lines": 167,
+"chars": 5375,
 "callers": [
 "006d38f0",
 "006d3c10"
@@ -234412,10 +234439,10 @@
 "in_vtables": []
 },
 "006d40e0": {
-"name": "FUN_006d40e0",
+"name": "MissionMapA_RotateLeft",
 "size": 82,
 "lines": 32,
-"chars": 752,
+"chars": 762,
 "callers": [
 "006d3c10"
 ],
@@ -234429,10 +234456,10 @@
 "in_vtables": []
 },
 "006d4140": {
-"name": "FUN_006d4140",
+"name": "MissionMapA_RotateRight",
 "size": 86,
 "lines": 32,
-"chars": 750,
+"chars": 761,
 "callers": [
 "006d3c10"
 ],
@@ -234446,10 +234473,10 @@
 "in_vtables": []
 },
 "006d41a0": {
-"name": "FUN_006d41a0",
+"name": "MissionMapA_NewNode",
 "size": 27,
 "lines": 12,
-"chars": 231,
+"chars": 238,
 "callers": [
 "006d3c10"
 ],
@@ -234463,10 +234490,10 @@
 "in_vtables": []
 },
 "006d41c0": {
-"name": "FUN_006d41c0",
+"name": "MissionMapA_IterDec2",
 "size": 81,
 "lines": 32,
-"chars": 682,
+"chars": 690,
 "callers": [
 "006d38f0",
 "006d3c10"
@@ -234481,10 +234508,10 @@
 "in_vtables": []
 },
 "006d4220": {
-"name": "FUN_006d4220",
+"name": "MissionMapA_PairCopy",
 "size": 26,
 "lines": 17,
-"chars": 297,
+"chars": 305,
 "callers": [
 "006d3c10",
 "006d3e70"
@@ -234519,10 +234546,10 @@
 ]
 },
 "006d4270": {
-"name": "FUN_006d4270",
+"name": "C_MissionLoader::Begin",
 "size": 597,
-"lines": 88,
-"chars": 2912,
+"lines": 96,
+"chars": 3256,
 "callers": [
 "006caad0"
 ],
@@ -234571,10 +234598,10 @@
 "in_vtables": []
 },
 "006d44d0": {
-"name": "FUN_006d44d0",
+"name": "C_MissionLoader::LoadScene",
 "size": 249,
-"lines": 75,
-"chars": 2093,
+"lines": 74,
+"chars": 2078,
 "callers": [
 "006caad0"
 ],
@@ -234593,10 +234620,10 @@
 "in_vtables": []
 },
 "006d45d0": {
-"name": "FUN_006d45d0",
+"name": "C_MissionLoader::LoadCheckpoints",
 "size": 821,
 "lines": 169,
-"chars": 5332,
+"chars": 5377,
 "callers": [
 "006caad0"
 ],
@@ -234627,10 +234654,10 @@
 "in_vtables": []
 },
 "006d4910": {
-"name": "FUN_006d4910",
+"name": "C_MissionLoader::LoadActors",
 "size": 691,
-"lines": 141,
-"chars": 4436,
+"lines": 142,
+"chars": 4504,
 "callers": [
 "006caad0"
 ],
@@ -234657,10 +234684,10 @@
 "in_vtables": []
 },
 "006d4bd0": {
-"name": "FUN_006d4bd0",
+"name": "C_MissionLoader::LoadSounds",
 "size": 691,
-"lines": 141,
-"chars": 4436,
+"lines": 142,
+"chars": 4504,
 "callers": [
 "006caad0"
 ],
@@ -234687,10 +234714,10 @@
 "in_vtables": []
 },
 "006d4e90": {
-"name": "empty_function_6d4e90",
+"name": "MissionLoader_Empty1",
 "size": 1,
 "lines": 7,
-"chars": 57,
+"chars": 56,
 "callers": [
 "006caad0"
 ],
@@ -234702,10 +234729,10 @@
 "in_vtables": []
 },
 "006d4ea0": {
-"name": "empty_function_6d4ea0",
+"name": "MissionLoader_Empty2",
 "size": 1,
 "lines": 7,
-"chars": 57,
+"chars": 56,
 "callers": [
 "006caad0"
 ],
@@ -234760,10 +234787,10 @@
 ]
 },
 "006d4f50": {
-"name": "FUN_006d4f50",
+"name": "S_MissionNameLess",
 "size": 99,
-"lines": 40,
-"chars": 817,
+"lines": 38,
+"chars": 758,
 "callers": [
 "006d38f0",
 "006d3c10",
@@ -234782,10 +234809,10 @@
 "in_vtables": []
 },
 "006d4fc0": {
-"name": "FUN_006d4fc0",
+"name": "SceneLoadProgress",
 "size": 37,
 "lines": 10,
-"chars": 200,
+"chars": 233,
 "callers": [
 "006d44d0"
 ],
@@ -256157,10 +256184,10 @@
 "in_vtables": []
 },
 "00731af0": {
-"name": "FUN_00731af0",
+"name": "PrintLoadProgress",
 "size": 787,
-"lines": 158,
-"chars": 5112,
+"lines": 159,
+"chars": 5177,
 "callers": [
 "006ca7c0"
 ],
@@ -300020,6 +300047,7 @@
 "006cc200",
 "006cc220",
 "006cc280",
+"006cc8d0",
 "006cc9a0",
 "006cca70",
 "006cca90",

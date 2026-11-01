@@ -81,8 +81,9 @@ public:
     I3D_SLOT(5C);                                             // LS3DF: AddDlg
     I3D_SLOT(60);                                             // LS3DF: DelDlg
     I3DMETHOD(void, Clear)(uint32_t color, float z, uint32_t flags) = 0; // 0x64
-    I3D_SLOT(68);                                             // LS3DF: BeginScene
-    I3D_SLOT(6C);                                             // LS3DF: EndScene
+    // Around the loading screen's text boxes (after the scene's own Render; names inferred).
+    I3DMETHOD(bool, BeginScene)() = 0;                                   // 0x68
+    I3DMETHOD(void, EndScene)() = 0;                                     // 0x6C
     I3DMETHOD(bool, Flip)() = 0;                                         // 0x70
     // Render states (the interface's mission information sets state 4 to 4 while it draws).
     I3DMETHOD(void, SetRenderState)(int state, int value) = 0;          // 0x74
@@ -137,7 +138,8 @@ public:
     I3D_SLOT(F8);                                             // LS3DF: SetMousePos
     I3D_SLOT(FC);                                             // LS3DF: GetMouseX
     I3D_SLOT(100);                                            // LS3DF: GetMouseY
-    I3D_SLOT(104);                                            // LS3DF: GetMouseButtons
+    // Mouse buttons 0 .. 4 as bits (LS3DF's name).
+    I3DMETHOD(uint32_t, GetMouseButtons)() = 0;                          // 0x104
     I3DMETHOD(void, ReadTimer)() = 0;                                   // 0x108
     I3D_SLOT(10C);                                            // LS3DF: GetTimer
     // Adds a texture search directory.

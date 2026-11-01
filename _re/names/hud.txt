@@ -350,7 +350,6 @@
 # Referenced by the interface core, not ported.
 006c7510 C_Controls::ClearKey
 004f4c50 C_Vehicle::GetEngineRpm | float __thiscall GetEngineRpm(C_Vehicle * this)
-00462780 C_CameraHumanEffects::LookAt
 004bf210 LookAtOnCommandMap | void __stdcall LookAtOnCommandMap(C_Human * human)
 006ea340 GetExecutableMd5 | void __fastcall GetExecutableMd5(void * digest)
 

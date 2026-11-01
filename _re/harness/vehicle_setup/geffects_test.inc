@@ -162,6 +162,26 @@ I3D_frame *__stdcall F_GfSceneFind(void *, const char *name, uint32_t mask)
 }
 void __stdcall F_GfWeather(void *, int param, uint32_t value) { GfLog("weather %d %u", param, value); }
 int __stdcall F_GfNumDummies(void *) { return static_cast<int>(g_gfBoxes.size()); }
+// The scene's enumeration: logged, the callback on g_gfEnumFrames.
+std::vector<I3D_frame *> g_gfEnumFrames;
+void __stdcall F_GfSceneEnum(void *, I3D_ENUMPROC *callback, void *context, uint32_t typeMask, const char *)
+{
+    GfLog("senum %x", typeMask);
+    // (The engine's returns: 1 skips the frame's children, 2 stops.)
+    std::vector<I3D_frame *> skipped;
+    for (I3D_frame *f : std::vector<I3D_frame *>(g_gfEnumFrames)) {
+        bool under = false;
+        for (I3D_frame *p = f->GetParent(); p; p = p->GetParent())
+            under = under || std::find(skipped.begin(), skipped.end(), p) != skipped.end();
+        if (under)
+            continue;
+        const uint32_t r = callback(f, context);
+        if (r == 2)
+            return;
+        if (r == 1)
+            skipped.push_back(f);
+    }
+}
 const S_dummyBox *__stdcall F_GfDummies(void *) { return g_gfBoxes.data(); }
 
 // The driver: its states, new models, the frames it finds; IGraph: the screen, render states, the
@@ -277,42 +297,13 @@ alignas(16) uint8_t g_gfCameraEffects[16], g_gfInterface[16];
 
 }  // namespace
 
-// The objects of part 8d.
-C_Decorators *g_decorators;
-C_Decorators::C_Decorators() {}
-C_Decorators::~C_Decorators() {}
-void C_Decorators::SetOn(bool on) { GfLog("dec on %d", on); }
-void C_Decorators::Clear() { GfLog("dec clear"); }
-void C_Decorators::Free() { GfLog("dec free"); }
-void C_Decorators::Load() { GfLog("dec load"); }
-void C_Decorators::Start() { GfLog("dec start"); }
-void C_Decorators::Update(int timeDelta) { GfLog("dec update %d", timeDelta); }
-float C_Decorators::GetGroundCover(int material)
-{
-    GfLog("dec cover %d", material);
-    return 0.25f * static_cast<float>(material);
-}
-C_Volumetrics::C_Volumetrics() {}
-C_Volumetrics::~C_Volumetrics() {}
-void C_Volumetrics::Render(int time) { GfLog("vol render %d", time); }
-void C_Volumetrics::Load() { GfLog("vol load"); }
-void C_Volumetrics::Prune(bool unknown) { GfLog("vol prune %d", unknown); }
-void C_Volumetrics::Free() { GfLog("vol free"); }
-C_MeshPlayer::C_MeshPlayer() {}
-C_MeshPlayer::~C_MeshPlayer() {}
-void C_MeshPlayer::Load() { GfLog("mesh load"); }
-void C_MeshPlayer::Update(int timeDelta) { GfLog("mesh update %d", timeDelta); }
-void C_MeshPlayer::Free() { GfLog("mesh free"); }
-void UpdateBirds(int timeDelta) { GfLog("birds update %d", timeDelta); }
-void CollectBirds() { GfLog("birds collect"); }
-void FreeBirds() { GfLog("birds free"); }
-void FreeClouds() { GfLog("clouds free"); }
-void LoadClouds() { GfLog("clouds load"); }
 
 // RandomFloat: the next of g_gfRandoms (else half of max).
+float g_gfRandomMax;                                     // the last call's max
 float RandomFloat(float max)
 {
     GfLog("rand %.1f", max);
+    g_gfRandomMax = max;
     if (g_gfRandoms.empty())
         return max * 0.5f;
     const float v = g_gfRandoms.front();
@@ -347,6 +338,7 @@ I3D_frame *C_Team::GetRandomVolume(int index) const
     GfLog("volume %d", index);
     return g_gfVolumes.at(index);
 }
+#ifndef CAMERA_TEST                                    // (the camera build links the real module, part 8e)
 C_CameraModule *GetCameraModule()
 {
     alignas(16) static uint8_t module[16];
@@ -357,9 +349,17 @@ bool C_CameraModule::IsGameCamera(I3D_frame *camera)
     GfLog("isgame %s", GfName(camera));
     return g_gfGameCamera;
 }
+#endif
+#ifndef CAMERA_TEST                                    // (the camera build's is real)
 void C_CameraModule::SetSpecialMode(int mode, bool on, float height) { GfLog("special %d %d %.3f", mode, on, height); }
-C_CameraHumanEffects *g_cameraHumanEffects;
+#endif
+#ifndef CAMERA_TEST
+C_CameraHumanEffects *g_gfHumanEffects;
+C_CameraHumanEffects *&g_cameraHumanEffects = g_gfHumanEffects;
+#endif
+#ifndef CAMERA_TEST                                    // (the camera build's is real)
 void C_CameraHumanEffects::SetTactical(bool on) { GfLog("tactical %d", on); }
+#endif
 bool C_HumanMovement::GetHeadWater(bool *underWater, float *surface) const
 {
     GfLog("headwater");
@@ -454,6 +454,8 @@ void GEffectsTest()
     g_sceneVtable[0x7C / 4] = reinterpret_cast<void *>(&F_GfSceneFind);
     g_sceneVtable[0x11C / 4] = reinterpret_cast<void *>(&F_GfWeather);
     g_sceneVtable[0x130 / 4] = reinterpret_cast<void *>(&F_GfNumDummies);
+    g_sceneVtable[0x44 / 4] = reinterpret_cast<void *>(&F_GfSceneEnum);
+    g_gfEnumFrames.clear();
     g_sceneVtable[0x134 / 4] = reinterpret_cast<void *>(&F_GfDummies);
     g_driverVtable[0x18 / 4] = reinterpret_cast<void *>(&F_GfSetState);
     g_driverVtable[0x1C / 4] = reinterpret_cast<void *>(&F_GfGetState);
@@ -520,13 +522,9 @@ void GEffectsTest()
         WM(r.gfModule, m.m_rain);
         m.SetRain(false);
         WM(r.gfModule, !m.m_rain);
-        WM(r.gfModule, m.GetGroundCover(3) == 0.75f && GfLogIs({"dec cover 3"}));
-        g_gfLog.clear();
+        WM(r.gfModule, m.GetGroundCover(3) == 1.0f && g_gfLog.empty());
+        // (The volumetrics' and clouds' calls: volumetrics_test.inc, part 8d-iv.)
         m.m_time = 1234;
-        m.RenderVolumetrics();
-        m.SetCloudsOn(true);
-        m.SetCloudsOn(false);
-        WM(r.gfModule, GfLogIs({"vol render 1234", "clouds load", "clouds free"}));
         g_gfLog.clear();
         m.SetLensFlareOn(false);
         WM(r.gfModule, GfLogIs({"find backdrop lensflare ffff", "on lensflare 0"}));
@@ -558,14 +556,17 @@ void GEffectsTest()
         m.SetTimeScale(1.0f, 4.0f);
         m.Update(250);
         WM(r.gfModule, m.m_timeScale == 1.0f);
-        // Update's own calls without any effect: the birds, the mesh player (the decorators while started).
+        // Update's own calls without any effect (the decorators while started; the birds and the mesh
+        // player have nothing).
         g_gfLog.clear();
+        // (The decorators' update seen by the detail flag: it follows the option, off here.)
+        g_decoratorsEnabled = true;
         m.Update(16);
-        WM(r.gfModule, GfLogIs({"birds update 16", "mesh update 16"}));
+        WM(r.gfModule, g_gfLog.empty() && g_decoratorsEnabled);
         g_gfLog.clear();
         m.m_started = true;
         m.Update(17);
-        WM(r.gfModule, GfLogIs({"birds update 17", "dec update 17", "mesh update 17"}) && m.m_time == 1234 + 16 + 17 + 100 + 200 +
+        WM(r.gfModule, g_gfLog.empty() && !g_decoratorsEnabled && m.m_time == 1234 + 16 + 17 + 100 + 200 +
                                                                                              500 + 1500 + 100 + 250);
     }
 
@@ -867,7 +868,7 @@ void GEffectsTest()
         g_gfLog.clear();
         m.Update(100);
         WM(r.gfFades, m.m_fadeOuts.size() == 2 && m.m_fadeOuts[0]->model == z && m.m_fadeOuts[1]->model == y);
-        WM(r.gfFades, GfLogIs({"alpha z 0.667", "alpha y 0.667", "alpha x 0.000", "release x", "birds update 100", "mesh update 100"}));
+        WM(r.gfFades, GfLogIs({"alpha z 0.667", "alpha y 0.667", "alpha x 0.000", "release x"}));
         GfClear(m);
         m.FadeIn(x, 100, false);
         m.FadeIn(y, 300, false);
@@ -875,7 +876,7 @@ void GEffectsTest()
         g_gfLog.clear();
         m.Update(100);
         WM(r.gfFades, m.m_fadeIns.size() == 2 && m.m_fadeIns[0]->model == z && m.m_fadeIns[1]->model == y);
-        WM(r.gfFades, GfLogIs({"alpha z 0.333", "alpha y 0.333", "alpha x 1.000", "release x", "birds update 100", "mesh update 100"}));
+        WM(r.gfFades, GfLogIs({"alpha z 0.333", "alpha y 0.333", "alpha x 1.000", "release x"}));
 
         // The hierarchies: which visuals, the children first, the last first.
         GfClear(m);
@@ -928,7 +929,7 @@ void GEffectsTest()
                            !m.m_humanFades[0].in && m.m_humanFades[0].rate == 1.0f / 500.0f && m.m_humanFades[0].alpha == 0.6f);
         g_gfLog.clear();
         m.Update(100);
-        WM(r.gfHumans, g_gfLog.size() == 3 && g_gfLog[0] == "halpha hm 0.400" && m.m_humanFades.size() == 1);
+        WM(r.gfHumans, g_gfLog.size() == 1 && g_gfLog[0] == "halpha hm 0.400" && m.m_humanFades.size() == 1);
         g_gfLog.clear();
         m.Update(250);
         WM(r.gfHumans, g_gfLog[0] == "halpha hm 0.000" && m.m_humanFades.empty());
@@ -970,7 +971,7 @@ void GEffectsTest()
         g_gfLog.clear();
         m.Update(100);
         WM(r.gfHumans, m.m_humanFades.size() == 2 && m.m_humanFades[0].human == h && m.m_humanFades[1].human == h3 &&
-                           g_gfLog.size() == 5 && g_gfLog[0] == "halpha hm3 0.900" && g_gfLog[1] == "halpha hm 0.200" &&
+                           g_gfLog.size() == 3 && g_gfLog[0] == "halpha hm3 0.900" && g_gfLog[1] == "halpha hm 0.200" &&
                            g_gfLog[2] == "halpha hm2 0.000");
         GfClear(m);
         for (int in = 0; in < 2; ++in) {
@@ -1030,13 +1031,13 @@ void GEffectsTest()
         };
         const unsigned high = seedFor(true), low = seedFor(false);
         std::string power = flick(high, true);
-        WM(r.gfStorm, GfLogIs({power, "update storm", "birds update 16", "mesh update 16"}));
+        WM(r.gfStorm, GfLogIs({power, "update storm"}));
         power = flick(high, false);
-        WM(r.gfStorm, GfLogIs({"on storm 1", power, "update storm", "birds update 16", "mesh update 16"}));
+        WM(r.gfStorm, GfLogIs({"on storm 1", power, "update storm"}));
         flick(low, true);
-        WM(r.gfStorm, GfLogIs({"on storm 0", "update storm", "birds update 16", "mesh update 16"}));
+        WM(r.gfStorm, GfLogIs({"on storm 0", "update storm"}));
         flick(low, false);
-        WM(r.gfStorm, GfLogIs({"birds update 16", "mesh update 16"}));
+        WM(r.gfStorm, g_gfLog.empty());
         {
             unsigned half = 1;
             for (;; ++half) {
@@ -1050,14 +1051,14 @@ void GEffectsTest()
             std::srand(half);
             g_gfLog.clear();
             m.Update(16);
-            WM(r.gfStorm, GfLogIs({"on storm 0", "update storm", "birds update 16", "mesh update 16"}));
+            WM(r.gfStorm, GfLogIs({"on storm 0", "update storm"}));
             m.m_lightningPower = own;
         }
         // Off at the next update, or at once.
         m.SetThunderstorm(false, nullptr, false);
         WM(r.gfStorm, m.m_lightningStop && m.m_lightning == light);
         flick(low, false);
-        WM(r.gfStorm, GfLogIs({"mode storm 5", "power storm 0.900", "on storm 0", "release storm", "birds update 16", "mesh update 16"}) &&
+        WM(r.gfStorm, GfLogIs({"mode storm 5", "power storm 0.900", "on storm 0", "release storm"}) &&
                           !m.m_lightning && l->m_refCount == 1);
         m.SetThunderstorm(true, light, false);
         g_gfLog.clear();
@@ -1184,7 +1185,7 @@ void GEffectsTest()
                                "weather 0 0", "sfind a_nsea_ 4", "sfind a_undw_ 4", "dfind a_undw_", "on sea 1",
                                "active sea 1 0", "update sea", "on undw 0", "active undw 0 0", "update undw", "sfind amb 2",
                                "sfind sea_amb 2", "dfind sea_amb", "on amb 1", "active amb 1 0", "update amb", "on seaamb 0",
-                               "active seaamb 0 0", "update seaamb", "dec load", "dec start"}));
+                               "active seaamb 0 0", "update seaamb"}));
         WM(r.gfWater, m.m_waterCamera.enabled && !m.m_waterCamera.underwaterNow && m.m_waterCamera.savedFov == 1.2f &&
                           m.m_waterCamera.savedNear == 0.5f && m.m_waterCamera.savedFar == 300.0f && !m.m_waterCameraFrame &&
                           m.m_seaSound == sea && m.m_underwaterSound == undw && m.m_ambientSound == amb &&
@@ -1202,8 +1203,7 @@ void GEffectsTest()
         GfClear(m);
         m.StartMission(false);
         WM(r.gfWater, GfLogIs({"env primary 1", "env omni 1", "sfind mirasun ffff", "sfind a_nsea_ 4", "dfind a_nsea_",
-                               "sfind a_undw_ 4", "dfind a_undw_", "sfind amb 2", "dfind amb", "sfind sea_amb 2", "dfind sea_amb",
-                               "dec load", "dec start"}) &&
+                               "sfind a_undw_ 4", "dfind a_undw_", "sfind amb 2", "dfind amb", "sfind sea_amb 2", "dfind sea_amb"}) &&
                           !m.m_seaSound && !m.m_underwaterSound && !m.m_ambientSound && !m.m_seaAmbientSound && !m.m_sun);
         // A client only gathers the birds; the server side only that.
         g_files.erase(name);
@@ -1211,12 +1211,12 @@ void GEffectsTest()
         g_gameRole = GAME_ROLE_CLIENT;
         m.StartMission(false);
         g_gameRole = GAME_ROLE_LOCAL;
-        WM(r.gfWater, GfLogIs({"env primary 1", "env omni 1", "sfind mirasun ffff", "birds collect", "dec load", "dec start"}) &&
+        WM(r.gfWater, GfLogIs({"env primary 1", "env omni 1", "sfind mirasun ffff", "senum 80"}) &&
                           !m.m_waterCamera.enabled);
         GfClear(m);
         m.m_time = 50;
         m.StartMission(true);
-        WM(r.gfWater, GfLogIs({"birds collect"}) && m.m_time == 50 && !m.m_started);
+        WM(r.gfWater, GfLogIs({"senum 80"}) && m.m_time == 50 && !m.m_started);
     }
 
     // --- the underwater view ---
@@ -1416,11 +1416,11 @@ void GEffectsTest()
         m.m_fadeTarget = 1.0f;
         g_gfLog.clear();
         m.StopMission(false);
-        WM(r.gfUnderwater, GfLogIs({"tactical 0", "find backdrop lensflare ffff", "on lensflare 1", "update sun", "birds free",
+        WM(r.gfUnderwater, GfLogIs({"tactical 0", "find backdrop lensflare ffff", "on lensflare 1", "update sun",
                                     "fov cam 1.2000", "range cam 0.5 300.0", "update cam", "release cam", "weather 0 0",
                                     "sfind hill ffff", "on hill 1", "update hill", "sfind reef ffff", "on reef 0", "update reef",
                                     "on sea 1", "update sea", "on undw 0", "update undw", "on amb 1", "update amb", "on seaamb 0",
-                                    "update seaamb", "on sky1 1", "on lensflare 1", "dec free", "weather 0 0"}));
+                                    "update seaamb", "on sky1 1", "on lensflare 1", "weather 0 0"}));
         WM(r.gfUnderwater, !m.m_waterCameraFrame && !m.m_seaSound && !m.m_underwaterSound && !m.m_ambientSound &&
                                !m.m_seaAmbientSound && !m.m_sun && sun->GetPos().x == 7.0f && sun->GetPos().y == 8.0f &&
                                sun->GetPos().z == 9.0f && !m.m_started && !m.m_rain && m.m_fadeLevel == -1000.0f &&
@@ -1442,7 +1442,7 @@ void GEffectsTest()
         g_cameraHumanEffects = nullptr;
         m.StopMission(false);
         g_cameraHumanEffects = reinterpret_cast<C_CameraHumanEffects *>(g_gfCameraEffects);
-        WM(r.gfUnderwater, GfLogIs({"find backdrop lensflare ffff", "on lensflare 1", "birds free", "dec free", "weather 0 0"}) &&
+        WM(r.gfUnderwater, GfLogIs({"find backdrop lensflare ffff", "on lensflare 1", "weather 0 0"}) &&
                                m.m_seaSound);
         // The lens flare without its frame.
         I3D_frame *flareFrame = flare;
@@ -1534,12 +1534,14 @@ void GEffectsTest()
         m.m_started = true;
         game->m_paused = true;
         g_gfLog.clear();
+        g_decoratorsEnabled = true;
         m.Update(16);
-        WM(r.gfRain, std::count(g_gfLog.begin(), g_gfLog.end(), "dec update 16") == 1);
+        WM(r.gfRain, !g_decoratorsEnabled);
         g_gfMapOpen = true;
         g_gfLog.clear();
+        g_decoratorsEnabled = true;
         m.Update(16);
-        WM(r.gfRain, std::count(g_gfLog.begin(), g_gfLog.end(), "dec update 16") == 1);
+        WM(r.gfRain, !g_decoratorsEnabled);
         g_gfMapOpen = false;
         game->m_paused = false;
         GfClear(m);
@@ -1661,7 +1663,7 @@ void GEffectsTest()
         m.m_rainRate = 0;
         g_gfLog.clear();
         m.Update(200);
-        WM(r.gfTeamRain, g_gfLog.size() == 2 && g_rainTeamSteps == 1);
+        WM(r.gfTeamRain, g_gfLog.empty() && g_rainTeamSteps == 1);
         m.Update(100);
         WM(r.gfTeamRain, g_rainTeamSteps == 3 &&
                              std::count_if(g_gfLog.begin(), g_gfLog.end(), [](const std::string &l) { return l.compare(0, 3, "fx ") == 0; }) == 4);
@@ -1739,7 +1741,7 @@ void GEffectsTest()
         g_gfAnims.erase(model);
         g_gfLog.clear();
         m.Update(100);
-        WM(r.gfCamera, GfLogIs({"birds update 100", "mesh update 100"}));
+        WM(r.gfCamera, g_gfLog.empty());
         g_gfAnims[model] = anim;
         // Another animation for the camera: the first one restored.
         fillKind = 1;
@@ -1802,12 +1804,12 @@ void GEffectsTest()
         I3D_frame *v = GfVisual("fv", I3DVISUAL_OBJECT);
         m.FadeOutModel(v, 100, false);
         m.LoadMissionData(false);
-        WM(r.gfMission, GfLogIs({"release fv", "vol load", "vol prune 1", "mesh load"}) && m.m_fadeOuts.empty());
+        WM(r.gfMission, GfLogIs({"release fv"}) && m.m_fadeOuts.empty());
         g_gfLog.clear();
         m.FadeIn(v, 100, false);
         m.m_timeScale = 0.5f;
         m.FreeMissionData(false);
-        WM(r.gfMission, GfLogIs({"alpha fv 0.000", "release fv", "vol free", "mesh free"}) && m.m_fadeIns.empty() &&
+        WM(r.gfMission, GfLogIs({"alpha fv 0.000", "release fv"}) && m.m_fadeIns.empty() &&
                             m.m_timeScale == 1.0f);
         // Restart: the decorators and birds again, the time from 0, no rain, the storm and the
         // tactical camera off.
@@ -1818,14 +1820,14 @@ void GEffectsTest()
         m.m_humanFades.push_back({nullptr, true, 1.0f, 0.5f});
         g_gfLog.clear();
         m.RestartMission(false);
-        WM(r.gfMission, GfLogIs({"dec free", "dec load", "dec start", "birds free", "birds collect", "tactical 0", "mode rl 0",
+        WM(r.gfMission, GfLogIs({"senum 80", "tactical 0", "mode rl 0",
                                  "power rl 0.000", "on rl 0", "release rl"}) &&
                             m.m_time == 0 && !m.m_rain && !m.m_lightning && m.m_humanFades.empty());
         g_cameraHumanEffects = nullptr;
         g_gfLog.clear();
         m.RestartMission(true);
         g_cameraHumanEffects = reinterpret_cast<C_CameraHumanEffects *>(g_gfCameraEffects);
-        WM(r.gfMission, GfLogIs({"dec free", "dec load", "dec start", "birds free", "birds collect"}));
+        WM(r.gfMission, GfLogIs({"senum 80"}));
         // The sun with the camera; a locked one stays.
         I3D_frame *sun = GfFrame(FRAME_DUMMY, "sun2");
         m.m_sun = sun;
@@ -1833,20 +1835,20 @@ void GEffectsTest()
         GfPlace(cam, S_vector(10.0f, 2.0f, 20.0f));
         g_gfLog.clear();
         m.Update(16);
-        WM(r.gfMission, GfLogIs({"update sun2", "birds update 16", "mesh update 16"}) && sun->GetPos().x == 110.0f &&
+        WM(r.gfMission, GfLogIs({"update sun2"}) && sun->GetPos().x == 110.0f &&
                             sun->GetPos().y == 52.0f && sun->GetPos().z == -10.0f);
         sun->m_frameFlags |= FRMFLAGS_POS_LOCKED;
         GfPlace(cam, S_vector(0.0f, 0.0f, 0.0f));
         g_gfLog.clear();
         m.Update(16);
-        WM(r.gfMission, GfLogIs({"update sun2", "birds update 16", "mesh update 16"}) && sun->GetPos().x == 110.0f);
+        WM(r.gfMission, GfLogIs({"update sun2"}) && sun->GetPos().x == 110.0f);
         sun->m_frameFlags &= ~FRMFLAGS_POS_LOCKED;
         WmField<I3D_frame *>(scene, 0x15C) = nullptr;
         g_gfLog.clear();
         m.Update(16);
         WmField<I3D_frame *>(scene, 0x15C) = cam;
         GfPlace(cam, S_vector(10.0f, 2.0f, 20.0f));
-        WM(r.gfMission, GfLogIs({"birds update 16", "mesh update 16"}));
+        WM(r.gfMission, g_gfLog.empty());
         GfClear(m);
     }
 
