@@ -51,47 +51,8 @@ const S_matrix &IdentityMatrix()
     return s_identity;
 }
 
-// The casters SetSource found: a frame and its part (0x100bf394, grow 0x10), the parts' face and
-// vertex totals (0x100bf3a4 / 0x100bf3c0) and the parts being matched (0x100bf390, count 0x100bf3a8).
-struct S_found {
-    I3D_frame *frame;
-    int part;
-};
-C_vector<S_found> s_found(0x10);
-int s_foundFaces;
-int s_foundVertices;
-const S_shadowPart *s_parts;
-int s_numParts;
-
 // The shadow visuals to build this frame (0x100bf370).
 C_vector<I3D_shadow_visual *> s_visibleShadows;
-
-// The name a part matches (a frame's name without its model prefix; "" without one).
-const char *MatchName(const I3D_frame *f) { return f->name ? f->name + f->nameOffset : ""; }
-
-// The frame as a caster when its name matches a part.
-bool MatchPart(I3D_frame *f)
-{
-    for (int i = 0; i < s_numParts; ++i) {
-        if (!std::strcmp(MatchName(f), s_parts[i].name)) {
-            s_found.PushBack(S_found{f, i});
-            s_foundFaces += s_parts[i].numFaces;
-            s_foundVertices += s_parts[i].numVertices;
-            return true;
-        }
-    }
-    return false;
-}
-
-// 0x1004edc0: the frame and its descendants that are on.
-void CollectCasters(I3D_frame *f)
-{
-    if (!(f->frameFlags & FRMFLAGS_ON))
-        return;
-    MatchPart(f);
-    for (I3D_frame *c = f->firstChild; c; c = c->nextSibling)
-        CollectCasters(c);
-}
 
 // Shadow map rasterization (the driver's, 0x10015c40 - 0x10016390) ------------------------------
 
@@ -336,89 +297,7 @@ I3D_RESULT I3D_shadow::Duplicate(I3D_frame *source)
     return I3D_OK;
 }
 
-// 0x1004e970
-void I3D_shadow::SetSource(I3D_frame *source)
-{
-    if (!source && scene)
-        scene->RemoveShadow(this);
-    if (visual && visual->parent)
-        visual->LinkTo(nullptr, 0);
-    for (int i = 0; i < numCasters; ++i) {
-        if (casters[i].frame)
-            casters[i].frame->frameFlags &= ~FRMFLAGS_SHADOW_CASTER;
-    }
-    ::operator delete(casters);
-    casters = nullptr;
-    numCasters = 0;
-    AlignedFree(localVertices);
-    localVertices = nullptr;
-    worldVertices = nullptr;
-    ::operator delete(points);
-    points = nullptr;
-    numVertices = 0;
-    ::operator delete(faces);
-    casterStamp = -1;
-    lightStamp = -1;
-    faces = nullptr;
-    numFaces = 0;
-    shadowFlags = 0;
-    if (!data || !source)
-        return;
-    s_found.Clear();
-    s_foundVertices = 0;
-    s_foundFaces = 0;
-    s_parts = data->parts.Data();
-    s_numParts = data->parts.Size();
-    if (!(source->frameFlags & FRMFLAGS_ON))
-        return;
-    MatchPart(source);
-    for (I3D_frame *c = source->firstChild; c; c = c->nextSibling)
-        CollectCasters(c);
-    if (!s_foundFaces)
-        return;
-    faces = static_cast<uint16_t *>(::operator new(static_cast<size_t>(s_foundFaces) * 6));
-    localVertices = static_cast<S_vector4 *>(AlignedAlloc(static_cast<size_t>(s_foundVertices) * 32, 16));
-    points = static_cast<float(*)[2]>(::operator new(static_cast<size_t>(s_foundVertices) * 8));
-    auto *found = static_cast<S_shadowCaster *>(::operator new(static_cast<size_t>(s_found.Size()) * 8));
-    casters = found;
-    if (!faces || !localVertices || !points || !found) {
-        AlignedFree(localVertices);
-        localVertices = nullptr;
-        ::operator delete(points);
-        points = nullptr;
-        ::operator delete(faces);
-        faces = nullptr;
-        ::operator delete(casters);
-        casters = nullptr;
-        ReportError(I3DERR_OUTOFMEM, kSevFatal);
-        return;
-    }
-    worldVertices = localVertices + s_foundVertices;
-    numVertices = s_foundVertices;
-    numFaces = s_foundFaces;
-    numCasters = s_found.Size();
-    uint16_t *f = faces;
-    S_vector4 *v = localVertices;
-    int base = 0;
-    for (const S_found &c : s_found) {
-        int vertexOffset = 0, faceOffset = 0;
-        for (int i = 0; i < c.part; ++i) {
-            vertexOffset += s_parts[i].numVertices;
-            faceOffset += s_parts[i].numFaces;
-        }
-        const S_shadowPart &part = s_parts[c.part];
-        const uint16_t *src = data->indices.Data() + faceOffset * 3;
-        for (int k = part.numFaces * 3; k; --k)
-            *f++ = static_cast<uint16_t>(*src++ + base);
-        std::memcpy(v, data->vertices.Data() + vertexOffset, static_cast<size_t>(part.numVertices) * sizeof(S_vector4));
-        v += part.numVertices;
-        found->frame = c.frame;
-        found->numVertices = part.numVertices;
-        ++found;
-        base += part.numVertices;
-        c.frame->frameFlags |= FRMFLAGS_SHADOW_CASTER;
-    }
-}
+void I3D_shadow::SetSource(I3D_frame *) {}
 
 // LS3DRF 0x1002b0b0 (from LS3DF 0x1004ef20): the frame's LinkTo only; the casters stay as they were.
 I3D_RESULT I3D_shadow::LinkTo(I3D_frame *newParent, uint32_t flags)
@@ -833,7 +712,7 @@ namespace ls3d::i3d {
 
 void ShadowSetSource(I3D_frame *shadow, I3D_frame *source) { static_cast<I3D_shadow *>(shadow)->SetSource(source); }
 
-// 0x1004efd0
+// LS3DRF 0x1002b0f0 (from LS3DF 0x1004efd0)
 void RemoveShadowCaster(I3D_frame *frame)
 {
     for (I3D_shadow *s : g_shadows) {
