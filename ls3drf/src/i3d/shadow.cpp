@@ -418,7 +418,7 @@ void I3D_shadow::SetOrthogonal(bool on)
     shadowFlags = 0;
 }
 
-// 0x1004f560
+// LS3DRF 0x1002b380 (from LS3DF 0x1004f560): the map is not released (LS3DRF's shadow has none).
 I3D_RESULT I3D_shadow::SetSize(int width, int height)
 {
     if (width > 0x80 || height > 0x80)
@@ -430,10 +430,6 @@ I3D_RESULT I3D_shadow::SetSize(int width, int height)
     mapHeight = 4;
     while (mapHeight < width)
         mapHeight *= 2;
-    if (texture) {
-        texture->Release();
-        texture = nullptr;
-    }
     lightStamp = -1;
     shadowFlags = 0;
     return I3D_OK;

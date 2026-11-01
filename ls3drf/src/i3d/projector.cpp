@@ -177,25 +177,15 @@ void I3D_projector::Init()
     visualFlags |= VISF_NO_ZWRITE;
 }
 
-// 0x100438f0
+// LS3DRF 0x10025370 (from LS3DF 0x100438f0)
 void I3D_projector::Uninit()
 {
-    if (texture)
-        texture->Release();
+    // (No texture: SetTexture keeps none. The vertices, faces and buffers BuildGeometry makes are
+    // not freed: LS3DRF's projector has none.)
     if (material)
         material->Release();
-    ::operator delete(vertices);
-    ::operator delete(faces);
-    // (Fix: the original leaves the freed pointers.)
-    vertices = nullptr;
-    faces = nullptr;
-    vertexCapacity = faceCapacity = 0;
-    texture = nullptr;
+    // (Fix: the original leaves the released pointer.)
     material = nullptr;
-    FreeVB(&vb);
-    FreeIB(&ib);
-    vb = S_VBAlloc{};
-    ib = S_IBAlloc{};
     I3D_frame::Uninit();
 }
 
@@ -245,17 +235,8 @@ I3D_RESULT I3D_projector::Duplicate(I3D_frame *source)
     }
 }
 
-// 0x10043af0
-void I3D_projector::SetTexture(ITexture *t)
-{
-    if (texture == t)
-        return;
-    if (texture)
-        texture->Release();
-    texture = t;
-    if (t)
-        ++t->refCount;
-}
+// 0x10043af0. In LS3DRF the `ret 8` stub shared with other slots: no texture is kept.
+void I3D_projector::SetTexture(ITexture *) {}
 
 // 0x10043b20
 void I3D_projector::SetMaterial(I3D_material *m)

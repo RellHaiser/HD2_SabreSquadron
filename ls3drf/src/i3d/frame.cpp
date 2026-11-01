@@ -235,6 +235,7 @@ void I3D_frame::Init()
     renderStamp = -1;
 }
 
+// LS3DRF 0x100123a0 (from LS3DF 0x1001c3d0)
 void I3D_frame::NotifyOwnerRemoved()
 {
     if (!ownerModel)
