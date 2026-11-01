@@ -64,7 +64,7 @@ void I3D_sound::Init()
     g_driver->soundFrames.PushBack(this);
 }
 
-// 0x100544b0
+// LS3DRF 0x1002d090 (from LS3DF 0x100544b0): no ISND sound or source to release.
 void I3D_sound::Uninit()
 {
     SetOn(false);

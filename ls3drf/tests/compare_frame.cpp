@@ -918,6 +918,24 @@ int SubtreeHeight(I3D_frame *f)
     return h + 1;
 }
 
+// The scene of the first sector up from `f` (LinkTo's rule), null if none.
+I3D_scene *SceneAbove(I3D_frame *f)
+{
+    for (; f; f = f->parent) {
+        if (f->GetType() == FRAME_SECTOR)
+            return static_cast<I3D_sector *>(f)->scene;
+    }
+    return nullptr;
+}
+bool HasAreaBelow(I3D_frame *f)
+{
+    for (I3D_frame *c = f->firstChild; c; c = c->nextSibling) {
+        if (c->GetType() == FRAME_AREA || HasAreaBelow(c))
+            return true;
+    }
+    return false;
+}
+
 bool IsDescendant(int frame, int of)
 {
     for (I3D_frame *f = g_port[frame]; f; f = f->parent) {
@@ -1390,6 +1408,10 @@ void RunOp()
             if (!f || !static_cast<I3D_sector *>(f)->scene)
                 t = -1;
         }
+        // (A new scene reaches the areas below the frame in LS3DF's LinkTo, not in LS3DRF's: no
+        // such move.)
+        if (SceneAbove(p->parent) != SceneAbove(t >= 0 ? g_port[t] : nullptr) && HasAreaBelow(p))
+            break;
         const uint32_t flags = g_rng() & 7;
         std::snprintf(text, sizeof text, "LinkTo %d flags %u", t, flags);
         g_lastOp = text;

@@ -480,26 +480,8 @@ void I3D_shadow::Close()
     lightStamp = -1;
 }
 
-// 0x1004f120
-I3D_RESULT I3D_shadow::Open(const char *fileName, uint32_t flags)
-{
-    Close();
-    auto *d = new (std::nothrow) S_shadowData;
-    if (d) {
-        d->parts.Reserve(20);
-        d->vertices.Reserve(160);
-        d->indices.Reserve(240);
-    }
-    data = d;
-    if (!d)
-        return I3DERR_OUTOFMEM;
-    const I3D_RESULT r = OpenShadowFile(fileName, flags, d);
-    if (r < 0)
-        return r;
-    if (parent)
-        SetSource(parent);
-    return I3D_OK;
-}
+// 0x1004f120. In LS3DRF the return-0 stub shared with sound Open: no file read, nothing closed.
+I3D_RESULT I3D_shadow::Open(const char *, uint32_t) { return I3D_OK; }
 
 // 0x1004f340
 void I3D_shadow::SetDepth(float newDepth)
