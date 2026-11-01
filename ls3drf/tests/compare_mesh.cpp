@@ -1,30 +1,32 @@
 // Differential test of the meshes (src/i3d/mesh.cpp: I3D_face_group, I3D_mesh_level, I3D_mesh)
-// on the buffer managers (vb_manager.cpp, ib_manager.cpp): the original LS3DF.dll's objects (made
+// on the buffer managers (vb_manager.cpp, ib_manager.cpp): the original LS3DRF.dll's objects (made
 // by its driver) and the port's run the same random operations - vertices and faces set, allocated,
 // locked and written through the returned pointers, face groups added, removed, duplicated, their
 // materials shared and duplicated (plain and animated, with environment flags), levels duplicated,
-// their extra data, render vertex buffers (every layout, generated environment coordinates through
-// random matrices and DRVSTATE_ENV_UV_SCALE), bounds, statistics, meshes' levels set and cleared,
-// meshes duplicated and compared, references dropped, the renderer's UnlockAll - each side on its
-// own fake Direct3D device (buffer_check.h). After every operation everything must be identical:
-// both managers node for node, every object's fields (levels a mesh made itself compared by
-// content), the vertex, render vertex, extra and face data, the materials' references, the device
-// logs; every fake buffer's bytes now and then.
+// their extra data, render vertex buffers (every layout, filled into the level's own or another
+// one), bounds, statistics, meshes' levels set and cleared, meshes duplicated and compared,
+// references dropped. After every operation everything must be identical: every object's fields
+// (levels a mesh made itself compared by content), the allocation records and their memory's
+// sizes (buffer_check.h), the vertex, extra and face data, the render data as far as fills wrote
+// it, the materials' references.
 //
 // Left out, as the original misbehaves: removing a face group that is not a level's first (the
-// original truncates the list there; mesh.cpp fixes it), Unlock of a face group without faces
-// (reads through null), a mesh's GetStats with an empty level below its last (the same), and empty
-// allocations (see compare_buffers.cpp): no zero counts, no empty
-// face group joins a level or is a Duplicate source, no render buffer for a level without vertices.
-// A mesh holding levels past its count is not released (the original leaks them, the port
-// releases them). A level is not duplicated from one without face groups while it has some (the original keeps
-// pointing at its deleted list). A level's extra data is made again after its vertex count changes (Duplicate copies the source's
-// count of entries: the original would read past an array made for fewer vertices).
+// original truncates the list there; mesh.cpp fixes it), a mesh's GetStats with an empty level
+// below its last (reads through null), zero counts (a level's bounds read a vertex it does not
+// have; the original's loop then runs 2^32 - 1 times): no empty face group joins a level or is a
+// Duplicate source, no render buffer for a level without vertices. No face group is duplicated
+// from itself (it frees its faces first, then copies its new, unset ones onto themselves; with
+// LS3DF's pools the old ones were still there). No fill writes past its render
+// buffer (a layout CreateRenderVB picks can be smaller than what FillRenderVB writes; the memory
+// is a heap block). A mesh holding levels past its count is not released (the original leaks
+// them, the port releases them). A level is not duplicated from one without face groups while it
+// has some (the original keeps pointing at its deleted list). A level's extra data is made again
+// after its vertex count changes (Duplicate copies the source's count of entries: the original
+// would read past an array made for fewer vertices).
 //
-// Usage: compare_mesh.exe [original LS3DF.dll] [operations] [seed]
+// Usage: compare_mesh.exe [original LS3DRF.dll] [operations] [seed]
 //
-// test-sources: src/i3d/mesh.cpp src/i3d/material.cpp src/i3d/ib_manager.cpp src/i3d/vb_manager.cpp src/i3d/driver_factories.cpp src/i3d/anim.cpp src/math/math.cpp src/core/debug.cpp src/dx/dxerr8.cpp
-// test-sources: tests/d3d8/gfx_d3d8.cpp
+// test-sources: src/i3d/mesh.cpp src/i3d/material.cpp src/i3d/ib_manager.cpp src/i3d/vb_manager.cpp src/i3d/driver_factories.cpp src/i3d/anim.cpp src/math/math.cpp src/core/debug.cpp
 #include <float.h>
 
 #include <algorithm>
@@ -118,58 +120,21 @@ int MatIndex(const void *m, int side)
     return -2;
 }
 
-// Every object reachable on one side, numbered in a fixed walk (slot levels, standalone groups,
-// meshes' own levels, each level's groups): allocation records are known by (object, field).
-struct Walk {
-    std::map<const void *, int> ids;
-    int next = 0;
-    void Group(const uint8_t *g)
-    {
-        if (!g || ids.count(g))
-            return;
-        ids[g] = next;
-        ids[g + 0x10] = next * 4 + 0x10000;     // its faces
-        ++next;
-    }
-    void Level(const uint8_t *l)
-    {
-        if (!l || ids.count(l))
-            return;
-        ids[l] = next;
-        ids[l + 0x34] = next * 4 + 0x10001;     // vertices
-        ids[l + 0x40] = next * 4 + 0x10002;     // render vertices
-        ++next;
-        for (const uint8_t *g = Field<uint8_t *>(const_cast<uint8_t *>(l), 0x5C); g;
-             g = Field<uint8_t *>(const_cast<uint8_t *>(g), 0xC))
-            Group(g);
-    }
-};
-Walk g_walk[2];
+// The bytes fills wrote into a render buffer from its start (by the port's memory: the original's
+// wrote as many), set when CreateRenderVB makes it.
+std::map<const void *, size_t> g_renderWritten;
 
-void BuildWalk(int side)
+// A face group's place in a level's list (-1 none, -2 not in it).
+int GroupIndex(const uint8_t *g, const uint8_t *first, size_t next)
 {
-    Walk &w = g_walk[side];
-    w = Walk{};
-    for (int k = 0; k < kLevels; ++k)
-        w.Level(side ? reinterpret_cast<uint8_t *>(g_pLevel[k]) : g_oLevel[k]);
-    for (int k = 0; k < kGroups; ++k)
-        w.Group(side ? reinterpret_cast<uint8_t *>(g_pGroup[k]) : g_oGroup[k]);
-    for (int k = 0; k < kMeshes; ++k) {
-        uint8_t *m = side ? reinterpret_cast<uint8_t *>(g_pMesh[k]) : g_oMesh[k];
-        if (!m)
-            continue;
-        for (int i = 0; i < 10; ++i)
-            w.Level(Field<uint8_t *>(m, 0x48 + 4 * i));
-    }
-    w.ids[&g_destAlloc[side]] = 0x20000;
-}
-
-int OwnerIndex(const void *owner, int side, bool)
-{
-    if (!owner)
+    if (!g)
         return -1;
-    auto it = g_walk[side].ids.find(owner);
-    return it == g_walk[side].ids.end() ? -2 : it->second;
+    int i = 0;
+    for (const uint8_t *x = first; x; x = *reinterpret_cast<uint8_t *const *>(x + next), ++i) {
+        if (x == g)
+            return i;
+    }
+    return -2;
 }
 
 // ---------------------------------------------------------------- comparing
@@ -184,19 +149,24 @@ void CheckBits(const std::string &what, const void *a, const void *b, size_t n)
     }
 }
 
-// The bytes of an allocation in each side's fake buffer.
+// An allocation's memory, `bytes` of it inside the block.
 const uint8_t *VertexData(const S_VBAlloc &a, int side, size_t bytes)
 {
     if (!a.buffer)
         return nullptr;
-    const int k = FakeIndex(a.vb, g_vbs[side]);
-    if (k < 0)
-        Fail("vertex data's buffer", k, k);
-    const std::vector<uint8_t> &d = g_vbs[side][static_cast<size_t>(k)]->data;
-    const size_t at = static_cast<size_t>(a.offset) * a.buffer->stride;
-    if (at + bytes > d.size())
-        Fail("vertex data past the buffer", static_cast<long>(at), static_cast<long>(bytes));
-    return d.data() + at;
+    const long size = side ? PortVBSize(a.buffer->data) : OrigVBSize(a.buffer->data);
+    if (bytes > static_cast<size_t>(size))
+        Fail("vertex data past the block", static_cast<long>(bytes), size);
+    return a.buffer->data;
+}
+const uint8_t *FaceData(const S_IBAlloc &a, int side, size_t bytes)
+{
+    if (!a.buffer)
+        return nullptr;
+    const long size = side ? PortIBSize(a.buffer->data) : OrigIBSize(a.buffer->data);
+    if (bytes > static_cast<size_t>(size))
+        Fail("face data past the block", static_cast<long>(bytes), size);
+    return reinterpret_cast<const uint8_t *>(a.buffer->data);
 }
 
 void CompareBytes(const std::string &what, const uint8_t *a, const uint8_t *b, size_t n)
@@ -223,13 +193,20 @@ void CompareGroup(const std::string &what, uint8_t *o, I3D_face_group *p)
     CompareAlloc(what + " faces", oa, p->faces);
     if (oa.buffer && p->numFaces > 0) {
         const size_t n = static_cast<size_t>(p->numFaces) * 6;
-        const int ko = FakeIndex(oa.ib, g_ibs[0]), kp = FakeIndex(p->faces.ib, g_ibs[1]);
-        CompareBytes(what + " face data", g_ibs[0][static_cast<size_t>(ko)]->data.data() + oa.offset * 2,
-                     g_ibs[1][static_cast<size_t>(kp)]->data.data() + p->faces.offset * 2, n);
+        CompareBytes(what + " face data", FaceData(oa, 0, n), FaceData(p->faces, 1, n), n);
     }
 }
 
-uint32_t RenderStride(const S_VBAlloc &a) { return a.buffer ? a.buffer->stride : 0; }
+// A render buffer's bytes the fills wrote.
+void CompareRender(const std::string &what, const S_VBAlloc &o, const S_VBAlloc &p)
+{
+    CompareAlloc(what, o, p);
+    if (!p.buffer)
+        return;
+    const auto it = g_renderWritten.find(p.buffer->data);
+    const size_t n = it == g_renderWritten.end() ? 0 : it->second;
+    CompareBytes(what + " data", VertexData(o, 0, n), VertexData(p, 1, n), n);
+}
 
 void CompareLevel(const std::string &what, uint8_t *o, I3D_mesh_level *p)
 {
@@ -240,7 +217,7 @@ void CompareLevel(const std::string &what, uint8_t *o, I3D_mesh_level *p)
     Check(what + " refCount", Field<int>(o, 0x30), p->refCount);
     const auto &ov = Field<S_VBAlloc>(o, 0x34), &orv = Field<S_VBAlloc>(o, 0x40);
     CompareAlloc(what + " vertices", ov, p->vertices);
-    CompareAlloc(what + " render vertices", orv, p->renderVertices);
+    CompareRender(what + " render vertices", orv, p->renderVertices);
     Check(what + " extraFormat", Field<uint32_t>(o, 0x50), p->extraFormat);
     Check(what + " numVertices", Field<int>(o, 0x54), p->numVertices);
     Check(what + " numFaceGroups", Field<int>(o, 0x58), p->numFaceGroups);
@@ -249,8 +226,6 @@ void CompareLevel(const std::string &what, uint8_t *o, I3D_mesh_level *p)
     CheckBits(what + " envScale", o + 0x68, &p->envScale, 4);
     const size_t n = static_cast<size_t>(p->numVertices);
     CompareBytes(what + " vertex data", VertexData(ov, 0, n * 0x20), VertexData(p->vertices, 1, n * 0x20), n * 0x20);
-    const size_t rs = RenderStride(p->renderVertices);
-    CompareBytes(what + " render data", VertexData(orv, 0, n * rs), VertexData(p->renderVertices, 1, n * rs), n * rs);
     Check(what + " extra", Field<void *>(o, 0x4C) != nullptr, p->extraData != nullptr);
     if (p->extraData)
         CompareBytes(what + " extra data", Field<uint8_t *>(o, 0x4C), p->extraData,
@@ -294,9 +269,6 @@ void CompareMesh(const std::string &what, uint8_t *o, I3D_mesh *p)
 
 void CompareAll()
 {
-    BuildWalk(0);
-    BuildWalk(1);
-    CompareManagers();
     for (int k = 0; k < kMats; ++k) {
         Check("material refCount", Field<int>(g_oMat[k], 4), g_pMat[k]->refCount);
         Check("material flags", Field<uint32_t>(g_oMat[k], 8), g_pMat[k]->matFlags);
@@ -307,8 +279,7 @@ void CompareAll()
         CompareLevel("level " + std::to_string(k), g_oLevel[k], g_pLevel[k]);
     for (int k = 0; k < kMeshes; ++k)
         CompareMesh("mesh " + std::to_string(k), g_oMesh[k], g_pMesh[k]);
-    CompareAlloc("dest alloc", g_destAlloc[0], g_destAlloc[1]);
-    CompareLogs();
+    CompareRender("dest alloc", g_destAlloc[0], g_destAlloc[1]);
 }
 
 // ---------------------------------------------------------------- data
@@ -377,9 +348,30 @@ void RandMatrix()
             f = (static_cast<float>(Rand(2001)) - 1000.0f) / 1000.0f;
 }
 
-void DestroyOrigGroup(uint8_t *g) { OrigFn<void *(__fastcall *)(void *, void *, int)>(0x10030e20)(g, nullptr, 1); }
+void DestroyOrigGroup(uint8_t *g) { OrigFn<void *(__fastcall *)(void *, void *, int)>(0x1001e490)(g, nullptr, 1); }
 
-long g_seenEnv, g_seenRender, g_seenAnonymous, g_seenDuplicated;
+long g_seenEnv, g_seenRender, g_seenFills, g_seenAnonymous, g_seenDuplicated;
+
+// The bytes FillRenderVB writes from the start of its buffer for the level as it is (LS3DRF
+// 0x1001edd0): with environment flags only source 5 writes (each vertex and its extra data,
+// unless extra format bit 0); otherwise each position and four extra bytes, or the vertices.
+size_t FillBytes(I3D_mesh_level *p)
+{
+    const size_t n = static_cast<size_t>(p->numVertices);
+    const uint32_t source = p->flags & MLF_ENV_SOURCE_MASK;
+    if ((p->flags & MLF_ENV) && source >= 2)
+        return source == 5 && !(p->extraFormat & 1) ? n * (0x20 + static_cast<size_t>(p->ExtraStride())) : 0;
+    return p->extraFormat & 1 ? n * 16 : n * 0x20;
+}
+
+// The stride CreateRenderVB picks (mesh.cpp's choice: the records compare it with the original's).
+size_t RenderStride(I3D_mesh_level *p, uint32_t vbFlags)
+{
+    const bool env = (p->flags & MLF_ENV_SOURCE_MASK) > 1 && !(vbFlags & 0x10);
+    if (!(vbFlags & 0x20) && !(p->extraFormat & 1))
+        return env ? 0x28 : 0x20;
+    return env ? 0x20 : 0x18;
+}
 
 // The constructors leave the boxes' w unset (and the mesh's box keeps it): the port's copies the
 // original's.
@@ -411,7 +403,7 @@ void LevelOp(int k)
     I3D_mesh_level *&p = g_pLevel[k];
     if (!o) {
         g_lastOp = "level create";
-        o = CallV<uint8_t *>(g_origDriver, 0x68);
+        o = CallV<uint8_t *>(g_origDriver, 0x38);
         p = g_driver->CreateMeshLevel();
         Birth(o, p);
         return;
@@ -443,7 +435,8 @@ void LevelOp(int k)
         const int n = RandCount(300);
         void *ro = CallV<void *>(o, 0x28, n);
         void *rp = p->AllocVertices(n);
-        Check("AllocVertices", LockedAt(ro, g_vbs[0]), LockedAt(rp, g_vbs[1]));
+        Check("AllocVertices", OffsetIn(ro, Field<S_VBAlloc>(o, 0x34).vb, n * 0x20),
+              OffsetIn(rp, p->vertices.vb, n * 0x20));
         if (ro && rp) {
             const std::vector<uint8_t> v = RandVertices(n);
             std::memcpy(ro, v.data(), v.size());
@@ -462,7 +455,7 @@ void LevelOp(int k)
         const uint32_t f = static_cast<uint32_t>(Rand(2));
         void *ro = CallV<void *>(o, 0x04, f);
         void *rp = p->LockVertices(f);
-        Check("LockVertices", LockedAt(ro, g_vbs[0]), LockedAt(rp, g_vbs[1]));
+        Check("LockVertices", OffsetIn(ro, Field<S_VBAlloc>(o, 0x34).vb, 0), OffsetIn(rp, p->vertices.vb, 0));
         if (ro && rp && !f && p->numVertices) {
             const int i = Rand(p->numVertices);
             const std::vector<uint8_t> v = RandVertices(1);
@@ -501,9 +494,8 @@ void LevelOp(int k)
         const int i = Rand(p->numFaceGroups + 2) - 1;
         uint8_t *go = CallV<uint8_t *>(o, 0x14, i);
         I3D_face_group *gp = p->GetFaceGroup(i);
-        BuildWalk(0);
-        BuildWalk(1);
-        Check("GetFaceGroup", OwnerIndex(go, 0, false), OwnerIndex(gp, 1, false));
+        Check("GetFaceGroup", GroupIndex(go, Field<uint8_t *>(o, 0x5C), 0xC),
+              GroupIndex(reinterpret_cast<uint8_t *>(gp), reinterpret_cast<uint8_t *>(p->faceGroups), 0xC));
         Check("ExtraStride", CallV<int>(o, 0x40), p->ExtraStride());
         break;
     }
@@ -555,18 +547,24 @@ void LevelOp(int k)
         uint32_t f = 0;
         for (uint32_t b : kBits)
             f |= Rand(3) == 0 ? b : 0;
+        const size_t fill = f & 8 ? 0 : FillBytes(p);
+        if (fill > RenderStride(p, f) * static_cast<size_t>(p->numVertices))
+            break;                          // (the fill would write past the buffer)
         RandMatrix();
         const bool dest = Rand(4) == 0;
         if (dest) {
-            OrigFn<void(__stdcall *)(S_VBAlloc *)>(0x10066e90)(&g_destAlloc[0]);
+            OrigFn<void(__fastcall *)(void *, void *, S_VBAlloc *)>(0x10030070)(&Orig<uint8_t>(0x100588a0), nullptr,
+                                                                              &g_destAlloc[0]);
             FreeVB(&g_destAlloc[1]);
             g_destAlloc[0] = g_destAlloc[1] = S_VBAlloc{};
         } else {
             CallV<void>(o, 0x34);
             p->FreeRenderVB();
         }
-        Check("CreateRenderVB", CallV<bool>(o, 0x30, f, &g_matrix, dest ? &g_destAlloc[0] : nullptr),
-              p->CreateRenderVB(f, &g_matrix, dest ? &g_destAlloc[1] : nullptr));
+        const bool ro = CallV<bool>(o, 0x30, f, &g_matrix, dest ? &g_destAlloc[0] : nullptr);
+        Check("CreateRenderVB", ro, p->CreateRenderVB(f, &g_matrix, dest ? &g_destAlloc[1] : nullptr));
+        if (const C_VertexBuffer *b = (dest ? g_destAlloc[1] : p->renderVertices).buffer)
+            g_renderWritten[b->data] = fill;
         ++g_seenRender;
         break;
     }
@@ -574,14 +572,22 @@ void LevelOp(int k)
         g_lastOp = "level FillRenderVB";
         const bool deferred = Rand(4) == 0;
         const bool dest = Rand(4) == 0;
-        // (The destination outside the level must fit this level's vertices.)
-        if (dest && (!g_destAlloc[1].buffer || static_cast<int>(g_destAlloc[1].buffer->capacity - g_destAlloc[1].offset) < p->numVertices))
-            break;
-        if (!p->vertices.buffer && (dest || p->renderVertices.vb) && !deferred)
+        const S_VBAlloc &into = dest ? g_destAlloc[1] : p->renderVertices;
+        if (deferred || !into.vb) {
+            // (Only marks the level stale.)
+        } else if (!p->vertices.buffer) {
             break;                          // (no vertices to read: the original reads through null)
+        } else if (FillBytes(p) > static_cast<size_t>(PortVBSize(into.buffer->data))) {
+            break;                          // (the fill would write past the buffer)
+        }
         RandMatrix();
         CallV<void>(o, 0x38, deferred ? 1 : 0, &g_matrix, dest ? &g_destAlloc[0] : nullptr);
         p->FillRenderVB(deferred, &g_matrix, dest ? &g_destAlloc[1] : nullptr);
+        if (!deferred && into.vb) {
+            size_t &w = g_renderWritten[into.buffer->data];
+            w = std::max(w, FillBytes(p));
+        }
+        ++g_seenFills;
         break;
     }
     case 15:
@@ -616,7 +622,7 @@ void GroupOp()
     const int k = Rand(kGroups);
     if (!g_pGroup[k] && Rand(2)) {
         g_lastOp = "group create";
-        g_oGroup[k] = CallV<uint8_t *>(g_origDriver, 0x64);
+        g_oGroup[k] = CallV<uint8_t *>(g_origDriver, 0x34);
         g_pGroup[k] = g_driver->CreateFaceGroup();
         return;
     }
@@ -652,8 +658,9 @@ void GroupOp()
         const int n = RandCount(300);
         const std::vector<uint8_t> f = RandFaces(n);
         const void *src = none ? nullptr : f.data();
-        Check("SetFaces", LockedAt(CallV<void *>(g.o, 0x04, src, n), g_ibs[0]),
-              LockedAt(g.p->SetFaces(static_cast<const I3D_triface *>(src), n), g_ibs[1]));
+        void *ro = CallV<void *>(g.o, 0x04, src, n);
+        void *rp = g.p->SetFaces(static_cast<const I3D_triface *>(src), n);
+        Check("SetFaces", OffsetIn(ro, Field<S_IBAlloc>(g.o, 0x10).ib, 0), OffsetIn(rp, g.p->faces.ib, 0));
         break;
     }
     case 3: {
@@ -661,7 +668,7 @@ void GroupOp()
         const int n = RandCount(300);
         void *ro = CallV<void *>(g.o, 0x08, n);
         void *rp = g.p->AllocFaces(n);
-        Check("AllocFaces", LockedAt(ro, g_ibs[0]), LockedAt(rp, g_ibs[1]));
+        Check("AllocFaces", OffsetIn(ro, Field<S_IBAlloc>(g.o, 0x10).ib, 0), OffsetIn(rp, g.p->faces.ib, 0));
         const std::vector<uint8_t> f = RandFaces(n);
         std::memcpy(ro, f.data(), f.size());
         std::memcpy(rp, f.data(), f.size());
@@ -672,7 +679,7 @@ void GroupOp()
         const uint32_t fl = static_cast<uint32_t>(Rand(2));
         void *ro = CallV<void *>(g.o, 0x0C, fl);
         void *rp = g.p->Lock(fl);
-        Check("Lock", LockedAt(ro, g_ibs[0]), LockedAt(rp, g_ibs[1]));
+        Check("Lock", OffsetIn(ro, Field<S_IBAlloc>(g.o, 0x10).ib, 0), OffsetIn(rp, g.p->faces.ib, 0));
         if (ro && !fl) {
             const int i = Rand(g.p->numFaces);
             const std::vector<uint8_t> f = RandFaces(1);
@@ -682,16 +689,14 @@ void GroupOp()
         break;
     }
     case 5:
-        if (!g.p->faces.buffer)
-            break;
         g_lastOp = "group Unlock";
         CallV<void>(g.o, 0x10);
         g.p->Unlock();
         break;
     case 6: {
         GroupPair s = PickGroup();
-        if (!s.p || !s.p->numFaces)
-            break;
+        if (!s.p || !s.p->numFaces || s.p == g.p)
+            break;                          // (from itself: copies its new, unset faces onto themselves)
         g_lastOp = "group Duplicate";
         Check("Duplicate", CallV<I3D_RESULT>(g.o, 0x14, s.o), g.p->Duplicate(s.p));
         break;
@@ -709,7 +714,7 @@ void MeshOp(int k)
     I3D_mesh *&p = g_pMesh[k];
     if (!o) {
         g_lastOp = "mesh create";
-        o = CallV<uint8_t *>(g_origDriver, 0x6C);
+        o = CallV<uint8_t *>(g_origDriver, 0x3C);
         p = g_driver->CreateMesh();
         Birth(o, p);
         return;
@@ -796,30 +801,15 @@ void RunOp()
         GroupOp();
     } else if (r < 18) {
         MeshOp(Rand(kMeshes));
-    } else if (r == 18) {
-        g_lastOp = "UnlockAll";
-        OrigFn<void(__fastcall *)(void *, void *)>(0x100587f0)(&Orig<uint8_t>(0x100c05f0), nullptr);
-        g_ibManager.UnlockAll();
-        OrigFn<void(__fastcall *)(void *, void *)>(0x10066eb0)(&Orig<uint8_t>(0x100d1400), nullptr);
-        g_vbManager.UnlockAll();
     } else {
-        // A material's environment flags, or the driver's coordinate scale.
-        if (Rand(2)) {
-            g_lastOp = "material flags";
-            const int m = Rand(kMats);
-            uint32_t f = (Field<uint32_t>(g_oMat[m], 8) & ~0x7f07fu) | static_cast<uint32_t>(Rand(Rand(8) ? 127 : 3) + 1) % 128;
-            f = (f & ~(7u << 12)) | static_cast<uint32_t>(Rand(8)) << 12;
-            f = Rand(3) ? f | MATF_ENV_TEXTURE : f & ~MATF_ENV_TEXTURE;
-            Field<uint32_t>(g_oMat[m], 8) = f;
-            g_pMat[m]->matFlags = f;
-        } else {
-            g_lastOp = "env scale";
-            const float s = static_cast<float>(Rand(400)) / 100.0f - 1.0f;
-            uint32_t bits;
-            std::memcpy(&bits, &s, 4);
-            Orig<uint32_t>(0x100be058 + 4 * DRVSTATE_ENV_UV_SCALE) = bits;
-            g_driverStates[DRVSTATE_ENV_UV_SCALE] = bits;
-        }
+        // A material's environment flags.
+        g_lastOp = "material flags";
+        const int m = Rand(kMats);
+        uint32_t f = (Field<uint32_t>(g_oMat[m], 8) & ~0x7f07fu) | static_cast<uint32_t>(Rand(Rand(8) ? 127 : 3) + 1) % 128;
+        f = (f & ~(7u << 12)) | static_cast<uint32_t>(Rand(8)) << 12;
+        f = Rand(3) ? f | MATF_ENV_TEXTURE : f & ~MATF_ENV_TEXTURE;
+        Field<uint32_t>(g_oMat[m], 8) = f;
+        g_pMat[m]->matFlags = f;
     }
 }
 
@@ -828,7 +818,7 @@ void RunOp()
 int main(int argc, char **argv)
 {
     SetUnhandledExceptionFilter(&CrashFilter);
-    const char *origPath = OriginalDllPath(argc > 1 ? argv[1] : nullptr);
+    const char *origPath = OriginalDllPath(argc > 1 ? argv[1] : nullptr, "LS3DRF.dll");
     const long ops = argc > 2 ? std::atol(argv[2]) : 200000;
     const uint32_t seed = argc > 3 ? static_cast<uint32_t>(std::strtoul(argv[3], nullptr, 0)) : 1;
     if (!SetUpBuffers(origPath))
@@ -836,12 +826,11 @@ int main(int argc, char **argv)
     g_logDisabled = true;
     _controlfp(_PC_24, _MCW_PC);
     g_rng.seed(seed);
-    g_ownerIndex = &OwnerIndex;
-    g_origDriver = Orig<uint8_t *>(0x100d16f8);
+    g_origDriver = Orig<uint8_t *>(0x10058b78);
     g_driver = new I3D_driver;
     for (int k = 0; k < kMats; ++k) {
         const bool anim = k % 3 == 2;
-        g_oMat[k] = CallV<uint8_t *>(g_origDriver, anim ? 0x5C : 0x58);
+        g_oMat[k] = CallV<uint8_t *>(g_origDriver, anim ? 0x2C : 0x28);
         g_pMat[k] = anim ? g_driver->CreateAnimMaterial() : g_driver->CreateMaterial();
     }
 
@@ -849,12 +838,9 @@ int main(int argc, char **argv)
     for (g_op = 0; g_op < ops; ++g_op) {
         RunOp();
         CompareAll();
-        if (g_op % 2000 == 1999)
-            CompareBufferContents();
     }
-    CompareBufferContents();
-    std::printf("coverage: levels with environment flags %ld, render buffers %ld, duplicated levels %ld, mesh-made "
-                "levels %ld\n", g_seenEnv, g_seenRender, g_seenDuplicated, g_seenAnonymous);
+    std::printf("coverage: levels with environment flags %ld, render buffers %ld, fills %ld, duplicated levels %ld, "
+                "mesh-made levels %ld\n", g_seenEnv, g_seenRender, g_seenFills, g_seenDuplicated, g_seenAnonymous);
     std::printf("compare_mesh: %ld operations, seed %u: identical\n", ops, seed);
     std::fflush(stdout);
     TerminateProcess(GetCurrentProcess(), 0);

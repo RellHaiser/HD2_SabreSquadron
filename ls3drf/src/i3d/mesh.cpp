@@ -281,6 +281,7 @@ I3D_RESULT I3D_mesh_level::RemoveFaceGroup(I3D_face_group *group)
     return I3DERR_OBJECTNOTFOUND;
 }
 
+// LS3DRF 0x1001e690 (from LS3DF 0x10031020)
 I3D_RESULT I3D_mesh_level::SetVertices(const void *src, int count)
 {
     if (count != numVertices && renderVertices.vb)
@@ -299,14 +300,13 @@ I3D_RESULT I3D_mesh_level::SetVertices(const void *src, int count)
         ReportError(I3DERR_OUTOFMEM, kSevFatal);
         return I3DERR_OUTOFMEM;
     }
-    C_VertexBuffer *b = vertices.buffer;
-    const uint32_t offset = vertices.offset;
-    std::memcpy(b->Lock(0) + b->stride * offset, src, static_cast<size_t>(count) * 0x20);
+    std::memcpy(vertices.buffer->data, src, static_cast<size_t>(count) * 0x20);
     numVertices = count;
     ComputeBounds();
     return I3D_OK;
 }
 
+// LS3DRF 0x1001e790 (from LS3DF 0x100311e0)
 void *I3D_mesh_level::AllocVertices(int count)
 {
     if (count != numVertices && renderVertices.vb)
@@ -326,8 +326,7 @@ void *I3D_mesh_level::AllocVertices(int count)
         return nullptr;
     }
     numVertices = count;
-    C_VertexBuffer *b = vertices.buffer;
-    return b->Lock(0) + b->stride * vertices.offset;
+    return vertices.buffer->data;
 }
 
 void I3D_mesh_level::ComputeBounds()
@@ -390,7 +389,8 @@ void I3D_mesh_level::FreeRenderVB()
     renderVertices = S_VBAlloc{};
 }
 
-void I3D_mesh_level::FillRenderVB(bool deferred, const S_matrix *envMatrix, S_VBAlloc *dest)
+// LS3DRF 0x1001edd0 (from LS3DF 0x10031a30)
+void I3D_mesh_level::FillRenderVB(bool deferred, const S_matrix *, S_VBAlloc *dest)
 {
     if (!dest)
         dest = &renderVertices;
@@ -398,15 +398,12 @@ void I3D_mesh_level::FillRenderVB(bool deferred, const S_matrix *envMatrix, S_VB
         flags |= MLF_RENDER_STALE;
         return;
     }
-    C_VertexBuffer *sb = vertices.buffer;
-    const uint8_t *src = sb->Lock(D3DLOCK_READONLY) + sb->stride * vertices.offset;
-    C_VertexBuffer *db = dest->buffer;
-    uint8_t *dst = db->Lock(0) + db->stride * dest->offset;
+    const uint8_t *src = vertices.buffer->data;
+    uint8_t *dst = dest->buffer->data;
     const uint32_t source = flags & MLF_ENV_SOURCE_MASK;
     if ((flags & MLF_ENV) && source >= 2) {
-        if (source <= 4) {
-            MakeEnvCoordinates(dst, 0x28, src, 0x20, numVertices, envMatrix, envScale, static_cast<int>(source));
-        } else if (source == 5) {
+        // (LS3DRF generates no environment coordinates: sources 2 - 4 write nothing.)
+        if (source == 5) {
             const uint8_t *extra = extraData;
             const int es = ExtraStride();
             if (!(extraFormat & 1)) {
@@ -623,38 +620,3 @@ bool I3D_mesh::SameLayout(const I3D_mesh *other)
     }
     return true;
 }
-
-// ---------------------------------------------------------------- environment coordinates
-
-namespace ls3d::i3d {
-
-void MakeEnvCoordinates(uint8_t *dst, int dstStride, const uint8_t *src, int srcStride, int count,
-                        const S_matrix *matrix, float scale, int source)
-{
-    if (source < 2 || source > 4)
-        return;
-    const float k = DriverStateFloat(DRVSTATE_ENV_UV_SCALE) * scale * 0.3535534f;
-    for (int n = count; n != 0; --n) {
-        const S_vector r = *reinterpret_cast<const S_vector *>(src) * *matrix;
-        std::memcpy(dst, src, 0x20);
-        auto *uv = reinterpret_cast<float *>(dst + 0x20);
-        switch (source) {
-        case 2:
-            uv[0] = r.x * k;
-            uv[1] = r.z * k;
-            break;
-        case 3:
-            uv[0] = r.y * k;
-            uv[1] = r.z * k;
-            break;
-        default:
-            uv[0] = r.x * k;
-            uv[1] = r.y * k;
-            break;
-        }
-        dst += dstStride;
-        src += srcStride;
-    }
-}
-
-}  // namespace ls3d::i3d

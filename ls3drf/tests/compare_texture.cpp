@@ -13,7 +13,7 @@
 // DownsampleMip chain converted by WriteSurface, and the second pass's levels, loaded from the
 // port's own cache file (named apart from the original's), those of the first pass.
 //
-// test-sources: src/igraph/*.cpp src/core/debug.cpp src/core/cpu.cpp src/core/enhance.cpp src/dx/dxerr8.cpp src/i3d/ib_manager.cpp src/i3d/vb_manager.cpp
+// test-sources: src/igraph/*.cpp src/core/debug.cpp src/core/cpu.cpp src/core/enhance.cpp src/dx/dxerr8.cpp
 // test-sources: tests/d3d8/gfx_d3d8.cpp
 // test-sources: src/platform/win32/platform_win32.cpp
 #include <windows.h>
@@ -32,7 +32,6 @@
 #include "d3d8/d3d8_device.h"
 #include "../src/i3d/driver.h"
 #include "../src/i3d/i3d_links.h"
-#include "../src/i3d/vb_manager.h"
 #include "../src/igraph/igraph.h"
 #include "../src/igraph/igraph_state.h"
 #include "../src/igraph/itexture.h"
