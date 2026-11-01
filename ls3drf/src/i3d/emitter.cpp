@@ -40,9 +40,19 @@ constexpr int kMaxQuads = 0x1555;
 
 // The quads' index buffer (0x100be6c0) and the two vertex buffers (0x100be6f0) used in turn
 // (0x100be718), the lock of the current one (0x100be714) and its write position in quads
-// (0x100a6898).
-S_IBAlloc s_ib;
-S_VBAlloc s_vbs[2];
+// (0x100a6898). (LS3DF's S_IBAlloc / S_VBAlloc of device buffers; nothing creates them.)
+struct S_particleIB {
+    C_IndexBuffer *buffer;
+    gfx::IndexBuffer *ib;
+    uint32_t offset;
+};
+struct S_particleVB {
+    C_VertexBuffer *buffer;
+    gfx::VertexBuffer *vb;
+    uint32_t offset;
+};
+S_particleIB s_ib;
+S_particleVB s_vbs[2];
 int s_vbIndex;
 uint8_t *s_lockedVertices;
 int s_writeQuad = kMaxQuads;
@@ -794,7 +804,7 @@ void I3D_emitor::Draw(const S_renderItem *item)
     g_pGfx->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
     g_pGfx->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
     g_pGfx->SetRenderState(D3DRS_LIGHTING, FALSE);
-    const S_VBAlloc &vb = s_vbs[s_vbIndex];
+    const S_particleVB &vb = s_vbs[s_vbIndex];
     if (vb.buffer) {                        // (fix: no buffers; nothing creates them)
         SetVertexFormat(static_cast<int>(vb.buffer->format), false);
         g_pGfx->SetIndices(s_ib.ib, vb.offset + first);

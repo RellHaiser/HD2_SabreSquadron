@@ -312,8 +312,9 @@ void I3D_scene::DrawWeather()
     }
     g_pIGraph->SetWorldMatrix(&kIdentity);
     SetVertexFormat(2);
-    g_pGfx->SetIndices(g_weatherIB.ib, g_weatherVB.offset);
-    g_pGfx->SetStreamSource(0, g_weatherVB.vb, 0x18);
+    // (LS3DRF's buffers are heap memory: no device buffers to draw from.)
+    g_pGfx->SetIndices(nullptr, g_weatherVB.offset);
+    g_pGfx->SetStreamSource(0, nullptr, 0x18);
     g_pGfx->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, g_weatherDrawn * 5, g_weatherIB.offset, g_weatherDrawn * 4);
     g_pGfx->SetRenderState(D3DRS_LIGHTING, TRUE);
 }

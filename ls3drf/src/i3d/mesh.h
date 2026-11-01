@@ -2,11 +2,11 @@
 // class names are the game SDK's).
 //
 // A mesh (vtable 0x1009ce60, 0x70 bytes) has up to ten detail levels. A level (vtable 0x1009ce10,
-// 0x70 bytes) keeps 0x20-byte vertices (position, normal, texture coordinates) in a shared vertex
+// 0x70 bytes) keeps 0x20-byte vertices (position, normal, texture coordinates) in a vertex
 // buffer and a list of face groups (vtable 0x1009cdf0, 0x1C bytes): a material and its triangles
-// in a shared index buffer. For drawing a level gets a second vertex buffer in the layout its
-// materials need (CreateRenderVB / FillRenderVB): generated environment texture coordinates, or
-// the level's extra per-vertex data.
+// in an index buffer (LS3DRF: plain heap memory, vb_manager.h). For drawing a level gets a second
+// vertex buffer in the layout its materials need (CreateRenderVB / FillRenderVB): generated
+// environment texture coordinates, or the level's extra per-vertex data.
 //
 // The driver makes them (slots 0x64 / 0x68 / 0x6C); the levels and meshes count references.
 #pragma once
@@ -27,12 +27,12 @@ public:
     virtual void __stdcall SetMaterial(I3D_material *newMaterial);
     // 0x04 0x10030a70: `count` faces copied in (null: none); returns the faces, locked.
     virtual I3D_triface *__stdcall SetFaces(const I3D_triface *src, int count);
-    // 0x08 0x10030ad0: room for `count` faces in the shared index buffer, locked.
+    // 0x08 0x10030ad0: room for `count` faces in an index buffer, locked.
     virtual I3D_triface *__stdcall AllocFaces(int count);
-    // 0x0C 0x10030b40: the faces from the index buffer's lock (bit 0 of `flags`: read only);
-    // null without faces.
+    // 0x0C 0x10030b40: the faces (the index buffer's memory; `flags` unused); null without
+    // faces.
     virtual I3D_triface *__stdcall Lock(uint32_t flags);
-    virtual void __stdcall Unlock();        // 0x10 0x10030c40
+    virtual void __stdcall Unlock();        // 0x10 0x10030c40 (LS3DRF: nothing)
     // 0x14 0x10030cc0: the faces and the material of another face group.
     virtual I3D_RESULT __stdcall Duplicate(I3D_face_group *src);
     // 0x18 0x10030d20: a material of its own (a copy) when the current one is shared.
@@ -73,10 +73,10 @@ public:
 
     // 0x00 0x10030e70: the last reference deletes the level.
     virtual uint32_t __stdcall Release();
-    // 0x04 0x10031380: the vertices from the vertex buffer's lock (bit 0 of `flags`:
-    // read only); null without a buffer.
+    // 0x04 0x10031380: the vertices (the vertex buffer's memory; `flags` unused); null
+    // without a buffer.
     virtual void *__stdcall LockVertices(uint32_t flags);
-    virtual void __stdcall UnlockVertices();                    // 0x08 0x10031480
+    virtual void __stdcall UnlockVertices();                    // 0x08 0x10031480 (LS3DRF: nothing)
     // 0x0C 0x100314f0: the vertices, extra data, face groups and box of another level.
     virtual I3D_RESULT __stdcall Duplicate(I3D_mesh_level *src);
     virtual int __stdcall NumFaces();                           // 0x10 0x10031790 all face groups'

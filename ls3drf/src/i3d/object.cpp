@@ -814,8 +814,9 @@ void DrawMeshItem(I3D_object *v, const S_renderItem *item)
     EnableLights(item->sector->ambientColor, v->lights.count, v->lights.indices);
     g_pGfx->SetTransform(D3DTS_WORLD, reinterpret_cast<const D3DMATRIX *>(matrix));
     SetVertexFormat(static_cast<int>(vb->buffer->format));
-    g_pGfx->SetStreamSource(0, vb->vb, vb->buffer->stride);
-    g_pGfx->SetIndices(fg->faces.ib, vb->offset);
+    // (LS3DRF's buffers are heap memory: no device buffers to draw from.)
+    g_pGfx->SetStreamSource(0, nullptr, vb->buffer->stride);
+    g_pGfx->SetIndices(nullptr, vb->offset);
     g_pGfx->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, numVertices, fg->faces.offset, fg->numFaces);
 
     if (restore & RESTORE_CLAMP_U)

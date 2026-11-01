@@ -1252,12 +1252,13 @@ void I3D_shadow_visual::Draw(const S_renderItem *item)
     const bool first = item->texture != nullptr;
     if (owner->mode == 3) {
         SetVertexFormat(2);
-        g_pGfx->SetStreamSource(0, vb.vb, sizeof(S_vertex));
+        // (LS3DRF's buffers are heap memory: no device buffers to draw from.)
+        g_pGfx->SetStreamSource(0, nullptr, sizeof(S_vertex));
         if (first) {
-            g_pGfx->SetIndices(ib.ib, vb.offset);
+            g_pGfx->SetIndices(nullptr, vb.offset);
             g_pGfx->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, numVertices, ib.offset, numOpaqueFaces);
         } else {
-            g_pGfx->SetIndices(ib.ib, numOpaqueFaces * 3 + vb.offset);
+            g_pGfx->SetIndices(nullptr, numOpaqueFaces * 3 + vb.offset);
             g_pGfx->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, numVertices, ib.offset, numBlendedFaces);
         }
     } else if (first) {
