@@ -2,16 +2,13 @@
 // Input and timing are in igraph_input.cpp, image files in igraph_image.cpp.
 #include "igraph/igraph.h"
 
-#include <cstdarg>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
-#include <direct.h>
 #include <objbase.h>
 
 #include "core/cpu.h"
 #include "core/debug.h"
-#include "core/enhance.h"
 #include "dx/dxerr8.h"
 #include "i3d/i3d_links.h"
 #include "i3d/vb_manager.h"
@@ -88,8 +85,6 @@ const char kSourceFile[] = "C:\\MyProjects\\Engine8_5\\IGraph\\IGraph.cpp";
 char g_appName[0x100];                          // 0x100d18b0
 char g_savedAppName[0x100];                     // 0x100d1aa0
 
-C_vector<D3DDISPLAYMODE> g_displayModes(8);     // 0x100d2180 (refresh rates cleared)
-C_vector<D3DFORMAT> g_displayFormats(0x20);     // 0x100d2138
 uint8_t g_bitDepth = 0;                         // 0x100d1d40 (16 / 32; Init's request in fullscreen)
 
 // IGraph's decisions about its window (platform/platform.h; below the device code).
@@ -299,31 +294,15 @@ HWND __stdcall IGraph::GetChildHWND()
     return g_childWnd;
 }
 
-// 0x1006a260
-bool __stdcall IGraph::SetAppName(const char *name)
+// 0x1006a260. LS3DRF's slot 0x24 is a shared `ret 8` stub (0x10031490, marked at I3D_frame::Tick):
+// no title, and the name is not kept.
+void __stdcall IGraph::SetAppName(const char *)
 {
-    if (!name) {
-        if (!g_appName[0])
-            return false;
-        g_appName[0] = 0;
-    } else {
-        if (!std::strcmp(g_appName, name))
-            return false;
-        std::strncpy(g_appName, name, 0x100);
-        g_appName[0xff] = 0;
-    }
-    return platform::SetTitle(g_mainWnd, g_appName);
 }
 
-// 0x1006a2f0
-bool __cdecl IGraph::SetAppNameF(const char *format, ...)
+// LS3DRF 0x100314a0 (from LS3DF 0x1006a2f0): does nothing.
+void __cdecl IGraph::SetAppNameF(const char *, ...)
 {
-    char buf[0xfc];
-    va_list args;
-    va_start(args, format);
-    std::vsnprintf(buf, sizeof buf, format, args);  // the original's vsprintf has no limit
-    va_end(args);
-    return SetAppName(buf);
 }
 
 // 0x1006a330
@@ -344,11 +323,10 @@ bool __stdcall IGraph::DelDlg(HWND dialog)
     return platform::RemoveDialog(dialog);
 }
 
-// 0x1006a470
-HRESULT __stdcall IGraph::ProcessWinMessages()
+// 0x1006a470. LS3DRF's slot 0x14 is a shared `ret 4` stub (0x1002b0a0, marked at
+// I3D_sound::UpdateSound): no message loop.
+void __stdcall IGraph::ProcessWinMessages()
 {
-    platform::PumpMessages();
-    return 0;
 }
 
 // ---------------------------------------------------------------- device
@@ -969,136 +947,25 @@ const S_IGraphViewport *__stdcall IGraph::GetViewport()
     return reinterpret_cast<const S_IGraphViewport *>(&g_viewport);
 }
 
-// 0x1006c2c0
+// LS3DRF 0x10031190 (from LS3DF 0x1006c2c0)
 HRESULT __stdcall IGraph::SetFlags(uint32_t flags)
 {
     g_init.flags = flags;
     return 0;
 }
 
-// The display mode list order (0x1006d9a0): width, height, then format descending.
-static int __cdecl CompareModes(const void *a, const void *b)
-{
-    const D3DDISPLAYMODE *m = static_cast<const D3DDISPLAYMODE *>(a);
-    const D3DDISPLAYMODE *n = static_cast<const D3DDISPLAYMODE *>(b);
-    if (m->Width < n->Width)
-        return -1;
-    if (n->Width < m->Width)
-        return 1;
-    if (m->Height < n->Height)
-        return -1;
-    if (n->Height < m->Height)
-        return 1;
-    if (static_cast<int>(n->Format) < static_cast<int>(m->Format))
-        return -1;
-    return static_cast<int>(m->Format) < static_cast<int>(n->Format);
-}
-
-// The first of the 16-bit texture formats the device supports (Init looks twice).
-static bool Find16BitTextureFormat(D3DFORMAT display)
-{
-    static const D3DFORMAT kFormats[] = {D3DFMT_R5G6B5, D3DFMT_X1R5G5B5, D3DFMT_A1R5G5B5};
-    for (D3DFORMAT f : kFormats) {
-        if (gfx::g_pGfx->CheckDeviceFormat(g_init.adapter, g_deviceType, display, 0, D3DRTYPE_TEXTURE, f) >= 0) {
-            g_fmt16Bit = f;
-            return true;
-        }
-    }
-    return false;
-}
-
-// 0x1006c2d0
+// LS3DRF 0x100311a0 (from LS3DF 0x1006c2d0): keeps the init block and logs the OS and CPU; no
+// window, device, display modes or textures, and no DirectX 8.1 check.
 HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
 {
     CoInitialize(nullptr);
-    // dpnhpast.dll comes with DirectX 8.1.
-    if (HMODULE probe = LoadLibraryA("dpnhpast.dll")) {
-        FreeLibrary(probe);
-    } else {
-        dbgPrintf("ERROR! DirectX version is lower than 8.1 !");
-        return I3DERR_UNSUPPORTED;
-    }
     if (!init)
         return I3DERR_INVALIDPARAMS;
     g_init = *init;
     // ReportError reads the callback from the init block (0x100d1d4c = S_IGraphInit::errorCallback).
     g_errorCallback = g_init.errorCallback;
     Close();
-
     std::memset(i3d::g_renderStats, 0, sizeof i3d::g_renderStats);
-    if (!platform::RegisterWindowClass(g_init.instance)) {
-        dbgPrintf("IGraph::Init() - Error register window class !!");
-        return I3DERR_GENERIC;
-    }
-
-    if (!(g_init.flags & IG_FULLSCREEN)) {
-        const bool withMenu = (g_init.flags & IG_MENU) != 0;
-        if (withMenu && !g_init.menu)
-            g_init.menu = platform::LoadDefaultMenu();
-        g_mainWnd = platform::CreateMainWindow(g_init.instance, false, g_init.x, g_init.y, g_init.width,
-                                               g_init.height, withMenu, g_init.menu);
-        if (!g_mainWnd) {
-            dbgPrintf("IGraph::Init() - Error create m_MainHWnd !!");
-            return I3DERR_GENERIC;
-        }
-        platform::Refresh(g_mainWnd);
-        if (g_init.flags & IG_CHILD_WINDOW) {
-            g_childWnd = platform::CreateChildWindow(g_init.instance, g_mainWnd, g_init.childX, g_init.childY,
-                                                     g_init.childWidth, g_init.childHeight);
-            if (!g_childWnd) {
-                dbgPrintf("IGraph::Init() - Error create m_ChildHWnd !!");
-                return I3DERR_GENERIC;
-            }
-            platform::Refresh(g_childWnd);
-        }
-    } else {
-        g_init.flags &= ~IG_CHILD_WINDOW;
-        g_init.childX = g_init.childY = 0;          // (LS3DF: USER32's SetRect on the child rectangle)
-        g_init.childWidth = g_init.childHeight = 0;
-        g_init.flags &= ~IG_MENU;
-        g_init.x = 0;
-        g_init.y = 0;
-        g_init.menu = nullptr;
-        g_mainWnd = platform::CreateMainWindow(g_init.instance, true, g_init.x, g_init.y, g_init.width, g_init.height,
-                                               false, g_init.menu);
-        if (!g_mainWnd)
-            return I3DERR_GENERIC;
-        platform::Refresh(g_mainWnd);
-    }
-    platform::Focus(g_mainWnd);
-
-    if (!gfx::g_pGfx->Open()) {
-        dbgPrintf("IGraph::Init() - Error create D3D8 object !!");
-        return I3DERR_GENERIC;
-    }
-
-    // Display modes without refresh rates, newest enumeration index first; and their formats.
-    for (UINT i = gfx::g_pGfx->GetAdapterModeCount(g_init.adapter); i--;) {
-        D3DDISPLAYMODE mode;
-        gfx::g_pGfx->EnumAdapterModes(g_init.adapter, i, &mode);
-        bool known = false;
-        for (int k = g_displayModes.Size(); k--;) {
-            const D3DDISPLAYMODE &m = g_displayModes[k];
-            if (mode.Width == m.Width && mode.Height == m.Height && mode.Format == m.Format) {
-                known = true;
-                break;
-            }
-        }
-        if (!known) {
-            mode.RefreshRate = 0;
-            g_displayModes.PushBack(mode);
-        }
-        bool knownFormat = false;
-        for (int k = g_displayFormats.Size(); k--;) {
-            if (mode.Format == g_displayFormats[k]) {
-                knownFormat = true;
-                break;
-            }
-        }
-        if (!knownFormat)
-            g_displayFormats.PushBack(mode.Format);
-    }
-    std::qsort(g_displayModes.Data(), g_displayModes.Size(), sizeof(D3DDISPLAYMODE), CompareModes);
 
     S_cpuInfo cpu = {};
     DetectCpu(&cpu);
@@ -1125,449 +992,45 @@ HRESULT __stdcall IGraph::Init(const S_IGraphInit *init)
     const uint32_t mhz = MeasureCpuMhz();
     dbgPrintf("Detected CPU: %s, %s %iMHz, family:%i, model:%i, stepping:%i", cpu.vendor, cpu.name, mhz,
               cpu.family, cpu.model, cpu.stepping);
-    if (g_init.flags & IG_VERBOSE) {
-        dbgPrintf("All usable display modes:");
-        for (int i = g_displayModes.Size(); i--;) {
-            const D3DDISPLAYMODE &m = g_displayModes[i];
-            dbgPrintf("   Width: %4i, Height: %4i, Format: %s, Refresh: %i", m.Width, m.Height,
-                      GetFormatName(m.Format), m.RefreshRate);
-        }
-        dbgPrintf("");
-    }
-
-    D3DDISPLAYMODE desktop;
-    HRESULT hr = gfx::g_pGfx->GetAdapterDisplayMode(g_init.adapter, &desktop);
-    if (hr < 0) {
-        LogDxError(hr, 0x9a7);
-        return I3DERR_GENERIC;
-    }
-    D3DADAPTER_IDENTIFIER8 id;
-    hr = gfx::g_pGfx->GetAdapterIdentifier(g_init.adapter, D3DENUM_NO_WHQL_LEVEL, &id);
-    if (hr < 0) {
-        LogDxError(hr, 0x9ab);
-        return I3DERR_GENERIC;
-    }
-    dbgPrintf("Current display mode: %ix%i, %iHz, format: %s \n", desktop.Width, desktop.Height,
-              desktop.RefreshRate, GetFormatName(desktop.Format));
-    dbgPrintf("Using adapter number: %i", g_init.adapter);
-    dbgPrintf("              Driver: %s", id.Driver);
-    dbgPrintf("         Description: %s", id.Description);
-    dbgPrintf("      Driver version: %d.%02d.%02d.%04d", HIWORD(id.DriverVersion.HighPart),
-              LOWORD(id.DriverVersion.HighPart), HIWORD(id.DriverVersion.LowPart), LOWORD(id.DriverVersion.LowPart));
-    dbgPrintf("           Vendor ID: %lX", id.VendorId);
-    dbgPrintf("           Device ID: %lX", id.DeviceId);
-    dbgPrintf("           SubSys ID: %lX", id.SubSysId);
-    dbgPrintf("            Revision: %lX", id.Revision);
-    LogGuid(&id.DeviceIdentifier);
-    dbgPrintf("");
-
-    D3DCAPS8 caps;
-    hr = gfx::g_pGfx->GetDeviceCaps(g_init.adapter, g_deviceType, &caps);
-    if (hr < 0) {
-        LogDxError(hr, 0x9c5);
-        return I3DERR_GENERIC;
-    }
-    if (caps.MaxSimultaneousTextures < 2) {
-        g_quirks |= IGQ_LIMITED | IGQ_NO_DXT;
-        dbgPrintf("This engine can not run without HARDWARE MULTITEXTURING.");
-    }
-    if (caps.MaxTextureWidth == 256)
-        g_quirks |= IGQ_LIMITED | IGQ_NO_DXT;
-    switch (id.VendorId) {
-    case 0x121a:                                    // 3dfx Voodoo3
-        if (id.DeviceId == 9)
-            g_quirks |= IGQ_LIMITED | IGQ_NO_DXT;
-        break;
-    case 0x5333:                                    // S3 Savage
-        if (id.DeviceId == 0x8a22 || id.DeviceId == 0x8c10)
-            g_quirks |= IGQ_LIMITED | IGQ_NO_BLENDCURRENTALPHA | IGQ_NO_BLENDFACTORALPHA | IGQ_NO_DXT;
-        break;
-    case 0x102b:                                    // Matrox
-        switch (id.DeviceId) {
-        case 0x521: case 0x520: case 0x1000: case 0x1001: case 0x51f: case 0x51b: case 0x51a: case 0x519:
-            g_quirks |= IGQ_LIMITED | IGQ_MATROX | IGQ_NO_DXT;
-            break;
-        }
-        if (id.DeviceId == 0x525)
-            g_quirks |= IGQ_LIMITED;
-        break;
-    case 0x1002:                                    // ATI
-        g_quirks |= IGQ_ATI;
-        break;
-    }
-    if ((g_init.flags & IG_HW_TNL) && (caps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT)) {
-        g_caps |= IGCAPS_HW_TNL;
-        dbgPrintf("Using HARDWARE T&L.");
-        if ((caps.VertexShaderVersion & 0xff00) >= 0x100) {
-            g_caps |= IGCAPS_HW_VERTEX_SHADERS;
-            dbgPrintf("Using HARDWARE VERTEX SHADERS.");
-        }
-    }
-    if (!(caps.TextureOpCaps & D3DTEXOPCAPS_BLENDCURRENTALPHA))
-        g_quirks |= IGQ_NO_BLENDCURRENTALPHA;
-    if (!(caps.TextureOpCaps & D3DTEXOPCAPS_BLENDFACTORALPHA))
-        g_quirks |= IGQ_NO_BLENDFACTORALPHA;
-    if (!(caps.TextureOpCaps & D3DTEXOPCAPS_ADD))
-        g_quirks |= IGQ_NO_TEXOP_ADD;
-    g_maxTextureWidth = static_cast<int>(caps.MaxTextureWidth);
-    g_maxTextureHeight = static_cast<int>(caps.MaxTextureHeight);
-
-    std::memset(&g_presentParams, 0, sizeof g_presentParams);
-    if (!(g_init.flags & IG_FULLSCREEN)) {
-        g_presentParams.Windowed = TRUE;
-        g_presentParams.BackBufferFormat = desktop.Format;
-        SetBitDepthFromFormat(desktop.Format);
-        g_presentParams.hDeviceWindow = (g_init.flags & IG_CHILD_WINDOW) ? g_childWnd : g_mainWnd;
-    } else {
-        g_bitDepth = g_init.bitDepth;
-        g_presentParams.FullScreen_RefreshRateInHz = g_init.refreshRate;
-        g_presentParams.FullScreen_PresentationInterval =
-            (g_init.flags & IG_VSYNC) ? D3DPRESENT_INTERVAL_ONE : D3DPRESENT_INTERVAL_IMMEDIATE;
-        g_presentParams.BackBufferWidth = g_init.width;
-        g_presentParams.BackBufferHeight = g_init.height;
-        g_presentParams.BackBufferCount = (g_init.flags & IG_TRIPLE_BUFFER) ? 2 : 1;
-        // The display mode of the requested size and colour depth, from the end of the sorted list.
-        for (int i = g_displayModes.Size(); i--;) {
-            const D3DDISPLAYMODE &m = g_displayModes[i];
-            if (static_cast<int>(m.Width) != g_init.width || static_cast<int>(m.Height) != g_init.height)
-                continue;
-            const bool match = g_bitDepth == 16 ? Is16BitFormat(m.Format)
-                                                : g_bitDepth == 32 && Is32BitFormat(m.Format);
-            if (match) {
-                g_presentParams.BackBufferFormat = m.Format;
-                break;
-            }
-        }
-        if (!g_presentParams.BackBufferFormat) {
-            dbgPrintf("IGraph::Init() - Error. Useful BackBuffer format not found !!");
-            return I3DERR_GENERIC;
-        }
-    }
-    g_presentParams.EnableAutoDepthStencil = TRUE;
-    hr = ChooseDepthFormat();
-    if (hr < 0)
-        return hr;
-
-    D3DMULTISAMPLE_TYPE samples = D3DMULTISAMPLE_NONE;
-    if (g_init.flags & (IG_FSAA2 | IG_FSAA4)) {
-        if (g_init.flags & IG_FSAA2) {
-            if (g_init.flags & IG_VERBOSE)
-                dbgPrintf("Trying to use 2 samples Full Scene AntiAliasing ...");
-            samples = D3DMULTISAMPLE_2_SAMPLES;
-        } else {
-            if (g_init.flags & IG_VERBOSE)
-                dbgPrintf("Trying to use 4 samples Full Scene AntiAliasing ...");
-            samples = D3DMULTISAMPLE_4_SAMPLES;
-        }
-        if (gfx::g_pGfx->CheckDeviceMultiSampleType(g_init.adapter, D3DDEVTYPE_HAL, g_presentParams.BackBufferFormat,
-                                                    g_presentParams.Windowed, samples) < 0) {
-            if (g_init.flags & IG_VERBOSE)
-                dbgPrintf("ERROR... cannot use FSAA with current backbuffer format !\n");
-            g_init.flags &= ~(IG_FSAA2 | IG_FSAA4);
-            samples = D3DMULTISAMPLE_NONE;
-        } else if (g_init.flags & IG_VERBOSE) {
-            dbgPrintf("OK... FSAA enabled.\n");
-        }
-    }
-    g_presentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    g_presentParams.MultiSampleType = samples;
-    const char *depthName = GetFormatName(g_presentParams.AutoDepthStencilFormat);
-    const char *backName = GetFormatName(g_presentParams.BackBufferFormat);
-    if (g_presentParams.Windowed) {
-        const bool child = (g_init.flags & IG_CHILD_WINDOW) != 0;
-        dbgPrintf("Trying to create device with WINDOWED mode: %ix%i, %iHz, BackFormat: %s, DepthFormat: %s",
-                  child ? g_init.childWidth : g_init.width, child ? g_init.childHeight : g_init.height,
-                  desktop.RefreshRate, backName, depthName);
-    } else {
-        dbgPrintf("Trying to create device with FULLSCREEN mode: %ix%i, %iHz, BackFormat: %s, DepthFormat: %s",
-                  g_presentParams.BackBufferWidth, g_presentParams.BackBufferHeight,
-                  g_presentParams.FullScreen_RefreshRateInHz, backName, depthName);
-    }
-    if (g_init.flags & IG_REFERENCE) {
-        dbgPrintf("\nIGraph::Init() - Warning. SLOW REFERENCE RASTERIZER used !!\n");
-        g_deviceType = D3DDEVTYPE_REF;
-    }
-    // No D3DCREATE_FPU_PRESERVE: Direct3D switches the FPU to single precision, which the engine's
-    // float results depend on. With hardware T&L the device is MIXED ((caps & 1 ? 0x60 : 0) +
-    // 0x20): the engine's index and vertex buffers are all D3DUSAGE_SOFTWAREPROCESSING, which a
-    // HARDWARE_VERTEXPROCESSING device refuses (D3DERR_INVALIDCALL).
-    hr = gfx::g_pGfx->CreateDevice(g_init.adapter, g_deviceType, g_mainWnd,
-                                   ((g_caps & IGCAPS_HW_TNL) ? D3DCREATE_MIXED_VERTEXPROCESSING
-                                                             : D3DCREATE_SOFTWARE_VERTEXPROCESSING) |
-                                       D3DCREATE_MULTITHREADED,
-                                   &g_presentParams);
-    if (hr < 0) {
-        LogDxError(hr, 0xb28);
-        return I3DERR_GENERIC;
-    }
-    for (DWORD stage = 0; stage < 2; ++stage) {
-        gfx::g_pGfx->SetTextureStageState(stage, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
-        gfx::g_pGfx->SetTextureStageState(stage, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
-        gfx::g_pGfx->SetTextureStageState(stage, D3DTSS_MIPFILTER, D3DTEXF_POINT);
-    }
-    gfx::g_pGfx->SetRenderState(D3DRS_DITHERENABLE, TRUE);
-    gfx::g_pGfx->SetRenderState(D3DRS_ZENABLE, D3DZB_TRUE);
-    if (g_init.flags & (IG_FSAA2 | IG_FSAA4))
-        gfx::g_pGfx->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE);
-    if (!(g_caps & IGCAPS_HW_TNL))
-        gfx::g_pGfx->SetRenderState(D3DRS_SOFTWAREVERTEXPROCESSING, TRUE);
-    gfx::g_pGfx->SetTextureStageState(0, D3DTSS_MAXANISOTROPY, 0);
-    // (Port enhancement, LS3DF.ini AnisotropicFiltering: linear minification is anisotropic, up to
-    // the option's degree or the device's. I3D_driver::SetState(0) applies it after a reset.)
-    g_anisotropy = 0;
-    if (const int want = Enhancements().anisotropy) {
-        const int most = static_cast<int>(caps.MaxAnisotropy);
-        if ((caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC) && most > 1)
-            g_anisotropy = want < most ? want : most;
-        if (g_anisotropy) {
-            for (DWORD stage = 0; stage < 3; ++stage) {
-                gfx::g_pGfx->SetTextureStageState(stage, D3DTSS_MAXANISOTROPY, static_cast<DWORD>(g_anisotropy));
-                if (stage < 2)
-                    gfx::g_pGfx->SetTextureStageState(stage, D3DTSS_MINFILTER, D3DTEXF_ANISOTROPIC);
-            }
-        }
-    }
-    gfx::g_pGfx->SetRenderState(D3DRS_ALPHAREF, g_rs.alphaRef);
-    RestoreDevice(false);
-
-    hr = gfx::g_pGfx->GetAdapterDisplayMode(g_init.adapter, &desktop);
-    if (hr < 0) {
-        LogDxError(hr, 0xb4c);
-        return I3DERR_GENERIC;
-    }
-    g_viewport.X = 0;
-    g_viewport.Width = ScrnX();
-    g_viewport.Y = 0;
-    g_viewport.Height = ScrnY();
-    g_viewport.MinZ = 0.0f;
-    g_viewport.MaxZ = 1.0f;
-
-    // Texture formats, checked against the desktop format.
-    const D3DFORMAT display = desktop.Format;
-    auto supported = [&](D3DFORMAT f) {
-        return gfx::g_pGfx->CheckDeviceFormat(g_init.adapter, g_deviceType, display, 0, D3DRTYPE_TEXTURE, f) >= 0;
-    };
-    if (!Find16BitTextureFormat(display))
-        dbgPrintf("IGraph::Init() - Error. Useful 16bit texture format not found !!");
-    if (!Find16BitTextureFormat(display)) {
-        dbgPrintf("IGraph::Init() - Error. Useful 16bit texture format not found !!");
-        return I3DERR_BADTEXTUREFORMAT;
-    }
-    if (!supported(D3DFMT_A1R5G5B5)) {
-        dbgPrintf("IGraph::Init() - Error. Useful 1bit Alpha texture format not found !!");
-        return I3DERR_BADTEXTUREFORMAT;
-    }
-    g_fmt1BitAlpha = D3DFMT_A1R5G5B5;
-    if (supported(D3DFMT_A4R4G4B4)) {
-        g_fmtAlpha = D3DFMT_A4R4G4B4;
-    } else if (supported(D3DFMT_A8R8G8B8)) {
-        g_fmtAlpha = D3DFMT_A8R8G8B8;
-    } else {
-        dbgPrintf("IGraph::Init() - Error. Useful Alpha texture format not found !!");
-        return I3DERR_BADTEXTUREFORMAT;
-    }
-    if (supported(D3DFMT_A8R8G8B8))
-        g_fmtTrueColor = D3DFMT_A8R8G8B8;
-    if (!(g_quirks & IGQ_NO_DXT)) {
-        if (supported(D3DFMT_DXT1)) {
-            g_caps |= IGCAPS_DXT;
-            g_fmtDxt1 = D3DFMT_DXT1;
-        }
-        if (supported(D3DFMT_DXT3)) {
-            g_caps |= IGCAPS_DXT;
-            g_fmtDxt3 = D3DFMT_DXT3;
-        }
-        if (supported(D3DFMT_DXT5)) {
-            g_caps |= IGCAPS_DXT;
-            g_fmtDxt5 = D3DFMT_DXT5;
-        }
-    }
-    if (supported(D3DFMT_V8U8)) {
-        g_caps |= IGCAPS_BUMPMAP;
-        g_fmtBump = D3DFMT_V8U8;
-    }
-    auto nameOrNone = [&](D3DFORMAT f) { return GetFormatName(f > 0 ? f : static_cast<D3DFORMAT>(-1)); };
-    dbgPrintf("\nMaximum available texture memory ( AGP + VRAM ): %i MB", gfx::g_pGfx->GetAvailableTextureMem() >> 20);
-    dbgPrintf("\nUsing texture formats:");
-    dbgPrintf("   16bit textures: %s", GetFormatName(g_fmt16Bit));
-    dbgPrintf("   1bit Alpha textures: %s", GetFormatName(g_fmt1BitAlpha));
-    dbgPrintf("   Alpha textures: %s", GetFormatName(g_fmtAlpha));
-    dbgPrintf("   TrueColor textures: %s", nameOrNone(g_fmtTrueColor));
-    dbgPrintf("   DXT1 textures: %s", nameOrNone(g_fmtDxt1));
-    dbgPrintf("   DXT3 textures: %s", nameOrNone(g_fmtDxt3));
-    dbgPrintf("   DXT5 textures: %s", nameOrNone(g_fmtDxt5));
-    dbgPrintf("   Bump-maps: %s", nameOrNone(g_fmtBump));
-    dbgPrintf("\n");
-    {
-        const S_enhancements &e = Enhancements();
-        if (e.anisotropy || e.trilinear || e.mipmaps || e.trueColorTextures || e.trueColorLightmaps) {
-            EnhancementLog("Port enhancements (LS3DF.ini):");
-            if (e.anisotropy)
-                EnhancementLog("   Anisotropic filtering: %ix asked, %ix used (device maximum %lu%s)", e.anisotropy,
-                               g_anisotropy, caps.MaxAnisotropy,
-                               (caps.TextureFilterCaps & D3DPTFILTERCAPS_MINFANISOTROPIC) ? "" : ", not supported");
-            if (e.trilinear)
-                EnhancementLog("   Trilinear filtering: always");
-            if (e.mipmaps)
-                EnhancementLog("   Mip maps: gamma-correct, alpha-weighted, coverage kept");
-            if (e.trueColorTextures)
-                EnhancementLog("   Textures from image files: %s", g_fmtTrueColor ? "A8R8G8B8" : "unchanged (no A8R8G8B8)");
-            if (e.trueColorLightmaps)
-                EnhancementLog("   Lightmaps: %s", g_fmtTrueColor ? "32-bit" : "unchanged (no A8R8G8B8)");
-            EnhancementLog("");
-        }
-    }
-
-    // (No DirectInput: no input system to create, so no swapped mouse buttons to note.)
-
-    // Sticky keys off while the engine runs (Close restores the saved state).
-    platform::DisableAccessibilityKeys();
-
-    ResetDeviceStates();
-    if (caps.Caps2 & D3DCAPS2_FULLSCREENGAMMA) {
-        g_caps |= IGCAPS_GAMMA;
-        D3DGAMMARAMP ramp;
-        GetGammaRamp(ramp.red);
-        // Drivers that report 8-bit values get them widened by GetGammaRamp.
-        uint32_t caps8 = g_caps | IGCAPS_GAMMA_8BIT;
-        for (int i = 256; i--;) {
-            if (ramp.red[i] > 0xff || ramp.green[i] > 0xff || ramp.blue[i] > 0xff)
-                caps8 &= ~IGCAPS_GAMMA_8BIT;
-        }
-        g_caps = caps8;
-    }
-    if (g_init.flags & IG_TEXTURE_THREAD) {
-        tex::StreamInit(g_init.flags);
-        g_textureThreadRun = true;
-        g_textureThread = platform::StartThread(tex::StreamThread, nullptr);
-        platform::SetPriority(g_textureThread, THREAD_PRIORITY_NORMAL);
-    }
-    Clear(0, 1.0f, 3);
-    Flip();
-    Clear(0, 1.0f, 3);
-    Flip();
-    g_inScene = false;
     g_initialized = true;
-    if (!_mkdir("Maps"))
-        dbgPrintf("Directory '\\Maps' was successfully created.\n");
-
-    g_defaultTexture = CreateITexture();
-    if (g_defaultTexture->Create(nullptr, nullptr, ITC_EMPTY, 8, 8, 0) >= 0)
-        g_defaultTexture->Fill(nullptr, 0xffffffff, 0);
     return 0;
 }
 
-// 0x1006da20
+// LS3DRF 0x10031360 (from LS3DF 0x1006da20)
 bool __stdcall IGraph::IsInitialized()
 {
     return g_initialized;
 }
 
-// 0x1006da30
+// LS3DRF 0x10031370 (from LS3DF 0x1006da30)
 const S_IGraphInit *__stdcall IGraph::GetInitData()
 {
     return &g_init;
 }
 
-// 0x1006da40
-HRESULT __stdcall IGraph::Close()
+// LS3DRF 0x10031380 (from LS3DF 0x1006da40): clears the initialised flag only (Init made nothing to
+// release); EAX stays as the caller had it.
+void __stdcall IGraph::Close()
 {
-    if (g_defaultTexture) {
-        g_defaultTexture->Release();
-        g_defaultTexture = nullptr;
-    }
-    for (ITexture *&texture : g_bumpAnimTextures) {
-        if (texture) {
-            texture->Release();
-            texture = nullptr;
-        }
-    }
-    platform::ReleaseCursorClip();
-    if ((g_init.flags & IG_TEXTURE_THREAD) && g_textureThreadRun) {
-        g_textureThreadRun = false;
-        platform::Join(g_textureThread);
-        platform::Release(g_textureThread);
-    }
-    platform::RestoreAccessibilityKeys();
-    g_vbManager.FreeUnused();
-    g_ibManager.FreeUnused();
-    g_vbManager.FreeAll();
-    g_ibManager.FreeAll();
-    DelAllDirs();
-
-    if (g_cachedTextures.Size() > 0) {
-        dbgPrintf("\nWARNING! Releasing unreleased CACHED textures: %d", g_cachedTextures.Size());
-        for (int i = g_cachedTextures.Size(); i--;) {
-            ITexture *texture = g_cachedTextures[i];
-            dbgPrintf("   %s, %s, Refs:%d", texture->fileName, texture->alphaFileName, texture->refCount);
-            ReportError(I3DERR_UNRELEASED_TEXTURE, kSevWarning, nullptr, reinterpret_cast<uintptr_t>(texture));
-            // The last Release removes the texture from the list.
-            while (g_cachedTextures[i]->Release()) {
-            }
-        }
-        g_cachedTextures.Free();
-    }
-    if (g_uncachedTextures.Size() > 0) {
-        dbgPrintf("\nWARNING! Releasing unreleased UNCACHED textures: %d", g_uncachedTextures.Size());
-        for (int i = g_uncachedTextures.Size(); i--;) {
-            ITexture *texture = g_uncachedTextures[i];
-            ReportError(I3DERR_UNRELEASED_TEXTURE, kSevWarning, nullptr, reinterpret_cast<uintptr_t>(texture));
-            dbgPrintf("   %s, %s, Refs:%d", texture->fileName, texture->alphaFileName, texture->refCount);
-            while (g_uncachedTextures[i]->Release()) {
-            }
-        }
-        g_uncachedTextures.Free();
-    }
-    g_fmtDxt1 = D3DFMT_UNKNOWN;
-    g_fmtDxt3 = D3DFMT_UNKNOWN;
-    g_fmtDxt5 = D3DFMT_UNKNOWN;
-    g_fmt16Bit = D3DFMT_UNKNOWN;
-    g_fmtAlpha = D3DFMT_UNKNOWN;
-    g_fmt1BitAlpha = D3DFMT_UNKNOWN;
-    g_fmtTrueColor = D3DFMT_UNKNOWN;
-    g_displayModes.Free();
-    g_displayFormats.Free();
-    CloseKeyboard();
-    CloseMouse();
-    std::memset(&g_presentParams, 0, sizeof g_presentParams);
-    std::memset(&g_viewport, 0, sizeof g_viewport);
-    g_caps = 0;
-    g_quirks = 0;
-    // (The original also sets an otherwise unused global, 0x100d188c, to 4 here.)
-    g_maxTextureWidth = 0;
-    g_maxTextureHeight = 0;
-    if (gfx::g_pGfx->HasDevice()) {
-        if (g_init.flags & IG_TEXTURE_THREAD) {
-            platform::Terminate(g_textureThread, 0);
-            tex::StreamFlush();
-        }
-        g_textureThread = nullptr;
-        gfx::g_pGfx->ReleaseDevice();
-    }
-    if (gfx::g_pGfx->IsOpen()) {
-        gfx::g_pGfx->Close();
-        CoUninitialize();
-    }
     g_initialized = false;
-    return 0;
 }
 
-// 0x1006de50
+// LS3DRF 0x10031390 (from LS3DF 0x1006de50)
 int __stdcall IGraph::ScrnX()
 {
     return (g_init.flags & IG_CHILD_WINDOW) ? g_init.childWidth : g_init.width;
 }
 
-// 0x1006de70
+// LS3DRF 0x100313b0 (from LS3DF 0x1006de70)
 int __stdcall IGraph::ScrnY()
 {
     return (g_init.flags & IG_CHILD_WINDOW) ? g_init.childHeight : g_init.height;
 }
 
-// 0x1006de90
+// LS3DRF 0x100313d0 (from LS3DF 0x1006de90): the init block's depth, not the device's.
 int __stdcall IGraph::GetBitDepth()
 {
-    return g_bitDepth;
+    return g_init.bitDepth;
 }
 
 // 0x1006deb0
