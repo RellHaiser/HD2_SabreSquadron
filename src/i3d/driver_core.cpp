@@ -1,5 +1,5 @@
 // I3D_driver: construction, Init / Close, states, time, statistics, the frame factory and the
-// type names (0x100151c0 - 0x10015c40, 0x100163c0, 0x10018e40 - 0x1001a0f0).
+// type names (0x100151c0 - 0x10015c40, 0x10018e40 - 0x1001a0f0).
 #include <windows.h>
 
 #include <cstdio>
@@ -41,7 +41,6 @@
 #include "i3d/volume.h"
 #include "igraph/igraph.h"
 #include "igraph/igraph_state.h"
-#include "igraph/itexture.h"
 
 using namespace ls3d;
 using namespace ls3d::i3d;
@@ -56,8 +55,9 @@ uint32_t g_renderStats[8];
 // Unused frames by type and visuals by index, reused by the factories (0x100aded8, 0x100adb10).
 I3D_frame *g_frameFreeLists[17];
 I3D_frame *g_visualFreeLists[16];
-// The resource texture of the driver (0x100be404: bitmap 0x7D of LS3DF.dll, the font) and a
-// list Close releases that nothing fills (0x100be380).
+// The text drawers' font (0x100be404: in LS3DF, bitmap 0x7D of the dll; LS3DRF's Init loads none,
+// so it stays null and DrawText3D / DrawText2D draw nothing) and a list Close releases that
+// nothing fills (0x100be380).
 I3D_material *g_resourceMaterial;
 C_vector<I3D_material *> g_driverMaterials;
 // Driver state side values: the inverse of state 0x35 (0x100adb90), states 0x36 (the projectors'
@@ -190,7 +190,6 @@ I3D_RESULT I3D_driver::Init(const void *init)
     g_lightmapMaterial->matFlags |= MATF_COLORS;
     g_nameRoot = nullptr;
     g_driverUnknownADED0 = 0;
-    g_resourceMaterial = LoadResourceMaterial(MAKEINTRESOURCEA(0x7d));
     if (!(ig::g_init.flags & IG_VERBOSE))
         g_logDisabled = true;
     return I3D_OK;
@@ -241,10 +240,6 @@ void I3D_driver::Close()
     if (g_lightmapMaterial) {
         g_lightmapMaterial->Release();
         g_lightmapMaterial = nullptr;
-    }
-    if (g_resourceMaterial) {
-        g_resourceMaterial->Release();
-        g_resourceMaterial = nullptr;
     }
     g_driverInitialized = false;
 }
@@ -363,31 +358,6 @@ I3D_RESULT I3D_driver::SetState(int state, uint32_t value)
 
 // 0x10015c20
 uint32_t I3D_driver::GetState(int state) { return state > 0x44 ? 0 : g_driverStates[state]; }
-
-// 0x100163c0: a material whose texture is the bitmap resource `id` of LS3DF.dll.
-I3D_material *I3D_driver::LoadResourceMaterial(const char *id)
-{
-    HMODULE module = GetModuleHandleA("LS3DF.dll");
-    HRSRC info = FindResourceA(module, id, MAKEINTRESOURCEA(2));
-    HGLOBAL data = LoadResource(module, info);
-    if (!data) {
-        dbgPrintf("ERROR LOADING RESOURCES !!!!");
-        return nullptr;
-    }
-    void *bits = LockResource(data);
-    I3D_material *m = CreateMaterial();
-    if (!m) {
-        FreeResource(data);
-        return nullptr;
-    }
-    ITexture *t = g_pIGraph->CreateITexture();
-    t->Create(static_cast<const char *>(bits), nullptr, ITC_FROM_MEMORY | ITC_ALPHA_1BIT | ITC_COMPRESS, 0, 0, 0);
-    m->SetTexture(t);
-    t->Release();
-    m->matFlags |= MATF_ALPHA;
-    FreeResource(data);
-    return m;
-}
 
 // 0x10019e10
 I3D_frame *I3D_driver::CreateFrame(int type) { return CreateFrameObject(type); }
