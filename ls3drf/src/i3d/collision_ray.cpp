@@ -474,10 +474,10 @@ void RayVisual(I3D_visual *vis)
                     S_collisionTexel texel = {0.0f, 0.0f, m};
                     bool call = true;
                     if (m->texture) {
-                        // The texture coordinates from the level's vertices (0x20 bytes: uv at +0x18).
-                        C_VertexBuffer *vb = level->vertices.buffer;
-                        const uint8_t *base = vb->Lock(D3DLOCK_READONLY) + vb->stride * level->vertices.offset;
-                        auto uv = [base](uint16_t i) { return reinterpret_cast<const float *>(base + i * 0x20 + 0x18); };
+                        // The texture coordinates from the level's vertices (0x20 bytes: uv at +0x18). The
+                        // original locks the buffer again inline (read only, already locked): the pointer
+                        // LockVertices returned.
+                        auto uv = [vtx](uint16_t i) { return reinterpret_cast<const float *>(vtx + i * 0x20 + 0x18); };
                         const S_vector hit(ldir.x * tt + lfrom.x, ldir.y * tt + lfrom.y, ldir.z * tt + lfrom.z);
                         const S_vector dirA(hit.x - v0.x, hit.y - v0.y, hit.z - v0.z);
                         call = HitTexel(v0, v1, v2, uv(f->v[0]), uv(f->v[1]), uv(f->v[2]), dirA, texel.u, texel.v);

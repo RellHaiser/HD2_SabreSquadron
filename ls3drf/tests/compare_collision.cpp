@@ -73,13 +73,6 @@ void I3D_billboard::ComputeMatrix(const S_vector &camera, S_matrix &out)
     OrigFn<void(__fastcall *)(I3D_billboard *, void *, const S_vector *, S_matrix *)>(0x10006230)(this, nullptr, &camera,
                                                                                                    &out);
 }
-// (Only textured materials' texture coordinates: the vertices are locked already then.)
-uint8_t *C_VertexBuffer::Lock(uint32_t flags)
-{
-    if (!lockedData)
-        ls3d::gfx::d3d8::D3D(vb)->Lock(0, 0, &lockedData, flags);
-    return lockedData;
-}
 
 using namespace ls3d::i3d;
 using ls3d::i3d::col::q;
