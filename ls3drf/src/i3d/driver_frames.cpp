@@ -255,6 +255,7 @@ I3D_RESULT __stdcall I3D_driver::EnumNamedFrames(I3D_ENUMPROC *proc, void *conte
     return EnumNameNodes(proc, context, g_nameRoot) ? I3DERR_CANCELED : I3D_OK;
 }
 
+// LS3DRF 0x10010a70 (from LS3DF 0x1001a670)
 void __stdcall I3D_driver::FrameReleased(I3D_frame *frame)
 {
     for (int i = scenes.Size(); i > 0; --i) {

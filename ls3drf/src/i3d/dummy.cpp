@@ -15,6 +15,7 @@ void I3D_dummy::Init()
     boxFlags = 0;
 }
 
+// LS3DRF 0x10011ba0 (from LS3DF 0x1001bbc0)
 void I3D_dummy::Uninit()
 {
     if (frameFlags & FRMFLAGS_SCENE_DUMMY) {

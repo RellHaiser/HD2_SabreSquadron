@@ -77,6 +77,7 @@ void ReleaseSkin(S_skinData *s)
     AlignedFree(s);
 }
 
+// LS3DRF 0x1002bfc0 (from LS3DF 0x10052960)
 // 0x10052960: the joints in `frame`'s subtree, each child list up to its first skinned visual.
 void CollectJoints(I3D_frame *frame)
 {

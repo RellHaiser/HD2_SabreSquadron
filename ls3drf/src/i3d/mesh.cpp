@@ -463,6 +463,7 @@ int I3D_mesh_level::ExtraStride()
 void *I3D_mesh::operator new(size_t size) noexcept { return AlignedAlloc(size, 16); }
 void I3D_mesh::operator delete(void *p) { AlignedFree(p); }
 
+// LS3DRF 0x1001efc0 (from LS3DF 0x10031d80)
 I3D_mesh::I3D_mesh() : center{}, radius(0.0f), refCount(1), numLevels(0), levels{}
 {
     ResetBox(bboxMin, bboxMax);
