@@ -48,6 +48,8 @@
 "00810458": "C_TextBox",
 "008154a4": "C_PagedTextBox",
 "008158f8": "C_VideoTextBox",
+"00813dd0": "C_Control",
+"00813ab0": "S_ControlDesc",
 "008105a0": "S_HumanCommand",
 "00810778": "C_Car",
 "008108f8": "C_Vehicle",

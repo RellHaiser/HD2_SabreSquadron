@@ -27240,6 +27240,36 @@
   "module": "simple_actors",
   "name": "StaticInit_614090"
  },
+ "00614e80": {
+  "module": "control",
+  "name": "AddDescMessage1",
+  "proto": "void __cdecl AddDescMessage1(void * desc, uint target, uint id, uint value)"
+ },
+ "00614f10": {
+  "module": "control",
+  "name": "AddDescMessage2",
+  "proto": "void __cdecl AddDescMessage2(void * desc, uint target, uint id, uint value, uint value2)"
+ },
+ "00614fa0": {
+  "module": "control",
+  "name": "AddDescMessageText",
+  "proto": "void __cdecl AddDescMessageText(void * desc, uint target, uint id, uint value, int text)"
+ },
+ "00615090": {
+  "module": "control",
+  "name": "S_ControlDesc::S_ControlDesc",
+  "proto": "void * __thiscall S_ControlDesc(S_ControlDesc *this, int type, char * name, uint id)"
+ },
+ "006151b0": {
+  "module": "control",
+  "name": "S_ControlDesc::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(S_ControlDesc *this, uchar flags)"
+ },
+ "006151d0": {
+  "module": "control",
+  "name": "S_ControlDesc::~S_ControlDesc",
+  "proto": "void __thiscall ~S_ControlDesc(S_ControlDesc *this)"
+ },
  "00615a30": {
   "module": "zz_idioms",
   "name": "vector_tidy_615a30"
@@ -27247,6 +27277,11 @@
  "00615a50": {
   "module": "zz_idioms",
   "name": "vector_size_e4_615a50"
+ },
+ "00615a90": {
+  "module": "control",
+  "name": "PostControlMessage",
+  "proto": "void __thiscall PostControlMessage(void *this, void * message)"
  },
  "006160f0": {
   "module": "zz_idioms",
@@ -27339,6 +27374,11 @@
  "0061be20": {
   "module": "xml_node",
   "name": "XmlAttr_Dtor"
+ },
+ "0061e100": {
+  "module": "control",
+  "name": "AddDescMessage3",
+  "proto": "void __cdecl AddDescMessage3(void * desc, uint target, uint id, uint value, uint value2, uint value3)"
  },
  "00620770": {
   "module": "zz_idioms",
@@ -28488,9 +28528,135 @@
   "name": "HasCjkCharacters",
   "proto": "bool __fastcall HasCjkCharacters(ushort * text)"
  },
+ "0064dce0": {
+  "module": "control",
+  "name": "C_Control::IsChild",
+  "proto": "bool __thiscall IsChild(C_Control *this, int index)"
+ },
+ "0064dd10": {
+  "module": "control",
+  "name": "C_Control::TakesInput",
+  "proto": "bool __thiscall TakesInput(C_Control *this)"
+ },
+ "0064dd30": {
+  "module": "control",
+  "name": "C_Control::Unknown0C",
+  "proto": "int __thiscall Unknown0C(C_Control *this)"
+ },
  "0064dd40": {
-  "module": "zz_idioms",
-  "name": "empty_function_64dd40"
+  "module": "control",
+  "name": "C_Control::Tick",
+  "proto": "void __thiscall Tick(C_Control *this, int time)"
+ },
+ "0064dd50": {
+  "module": "control",
+  "name": "C_Control::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_Control *this, int value)"
+ },
+ "0064dd60": {
+  "module": "control",
+  "name": "C_Control::Unknown24",
+  "proto": "bool __thiscall Unknown24(C_Control *this, int value)"
+ },
+ "0064dd70": {
+  "module": "control",
+  "name": "C_Control::Unknown28",
+  "proto": "bool __thiscall Unknown28(C_Control *this)"
+ },
+ "0064dd80": {
+  "module": "control",
+  "name": "C_Control::OnEnter",
+  "proto": "int __thiscall OnEnter(C_Control *this, int id)"
+ },
+ "0064dda0": {
+  "module": "control",
+  "name": "C_Control::OnLeave",
+  "proto": "int __thiscall OnLeave(C_Control *this, int id)"
+ },
+ "0064ddc0": {
+  "module": "control",
+  "name": "C_Control::OnClick",
+  "proto": "int __thiscall OnClick(C_Control *this, int id)"
+ },
+ "0064dde0": {
+  "module": "control",
+  "name": "C_Control::OnInput02",
+  "proto": "int __thiscall OnInput02(C_Control *this, int id)"
+ },
+ "0064de00": {
+  "module": "control",
+  "name": "C_Control::OnInput05",
+  "proto": "int __thiscall OnInput05(C_Control *this, int id)"
+ },
+ "0064de20": {
+  "module": "control",
+  "name": "C_Control::OnRelease",
+  "proto": "int __thiscall OnRelease(C_Control *this, int id)"
+ },
+ "0064de40": {
+  "module": "control",
+  "name": "C_Control::OnPress",
+  "proto": "int __thiscall OnPress(C_Control *this, int id)"
+ },
+ "0064de60": {
+  "module": "control",
+  "name": "C_Control::OnWheel",
+  "proto": "int __thiscall OnWheel(C_Control *this, int id, int amount)"
+ },
+ "0064de80": {
+  "module": "control",
+  "name": "C_Control::OnInput08",
+  "proto": "int __thiscall OnInput08(C_Control *this, int id)"
+ },
+ "0064dea0": {
+  "module": "control",
+  "name": "C_Control::OnInput09",
+  "proto": "int __thiscall OnInput09(C_Control *this, int id)"
+ },
+ "0064dec0": {
+  "module": "control",
+  "name": "C_Control::OnInput0A",
+  "proto": "int __thiscall OnInput0A(C_Control *this, int id)"
+ },
+ "0064dee0": {
+  "module": "control",
+  "name": "C_Control::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(C_Control *this, int id)"
+ },
+ "0064df00": {
+  "module": "control",
+  "name": "C_Control::OnInput13",
+  "proto": "int __thiscall OnInput13(C_Control *this, int id)"
+ },
+ "0064df20": {
+  "module": "control",
+  "name": "C_Control::OnInput0B",
+  "proto": "int __thiscall OnInput0B(C_Control *this, int id)"
+ },
+ "0064df40": {
+  "module": "control",
+  "name": "C_Control::Unknown68",
+  "proto": "int __thiscall Unknown68(C_Control *this, int value)"
+ },
+ "0064df50": {
+  "module": "control",
+  "name": "C_Control::HandleMessageCopy",
+  "proto": "bool __thiscall HandleMessageCopy(C_Control *this, void * message)"
+ },
+ "0064dfe0": {
+  "module": "control",
+  "name": "C_Control::C_Control",
+  "proto": "void * __thiscall C_Control(C_Control *this, void * scene, uint id, void * parent)"
+ },
+ "0064e080": {
+  "module": "control",
+  "name": "C_Control::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Control *this, uchar flags)"
+ },
+ "0064e0a0": {
+  "module": "control",
+  "name": "C_Control::~C_Control",
+  "proto": "void __thiscall ~C_Control(C_Control *this)"
  },
  "0064e1c0": {
   "module": "zz_idioms",
@@ -28540,9 +28706,75 @@
   "module": "zz_idioms",
   "name": "vector_size_e5_65ca30"
  },
+ "0065ca80": {
+  "module": "control",
+  "name": "C_Control::Show",
+  "proto": "void __thiscall Show(C_Control *this)"
+ },
+ "0065cab0": {
+  "module": "control",
+  "name": "C_Control::Hide",
+  "proto": "void __thiscall Hide(C_Control *this)"
+ },
+ "0065cb50": {
+  "module": "control",
+  "name": "C_Control::FindChild",
+  "proto": "int __thiscall FindChild(C_Control *this, uint id)"
+ },
+ "0065cc20": {
+  "module": "control",
+  "name": "C_Control::CallCallbacks",
+  "proto": "bool __thiscall CallCallbacks(C_Control *this, uint notification, uint value)"
+ },
+ "0065ccc0": {
+  "module": "control",
+  "name": "C_Control::RemoveCallback",
+  "proto": "bool __thiscall RemoveCallback(C_Control *this, void * message)"
+ },
+ "0065cde0": {
+  "module": "control",
+  "name": "C_Control::AddCallback",
+  "proto": "bool __thiscall AddCallback(C_Control *this, void * message)"
+ },
  "0065d050": {
-  "module": "zz_idioms",
-  "name": "empty_function_65d050"
+  "module": "control",
+  "name": "C_Control::SetStrings",
+  "proto": "void __thiscall SetStrings(C_Control *this, void * strings)"
+ },
+ "0065d060": {
+  "module": "control",
+  "name": "C_Control::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_Control *this, void * message)"
+ },
+ "0065d220": {
+  "module": "control",
+  "name": "C_Control::HandleMessages",
+  "proto": "bool __thiscall HandleMessages(C_Control *this, void * messages)"
+ },
+ "0065d270": {
+  "module": "control",
+  "name": "C_Control::Notify",
+  "proto": "void __thiscall Notify(C_Control *this, uint notification, uint value)"
+ },
+ "0065d470": {
+  "module": "control",
+  "name": "C_Control::CreateChild",
+  "proto": "bool __thiscall CreateChild(C_Control *this, void * frame, void * root, void * desc)"
+ },
+ "00661bc0": {
+  "module": "control",
+  "name": "C_Control::Create",
+  "proto": "bool __thiscall Create(C_Control *this, void * frame, void * root, void * desc)"
+ },
+ "00661c20": {
+  "module": "control",
+  "name": "C_Control::SetInactive",
+  "proto": "void __thiscall SetInactive(C_Control *this, bool inactive)"
+ },
+ "00661c30": {
+  "module": "control",
+  "name": "C_Control::Refresh",
+  "proto": "void __thiscall Refresh(C_Control *this)"
  },
  "006622f0": {
   "module": "text_box",

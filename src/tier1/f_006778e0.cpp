@@ -629,7 +629,7 @@ uint32_t C_EquipmentMenu__FUN_006785b0(C_EquipmentMenu *_this, ...)
   local_20 = 0x2000018;
   local_1c = 0;
   local_4 = 0;
-  FUN_00615a90(&DAT_008ae590,&local_24);
+  PostControlMessage(&DAT_008ae590,&local_24);
   local_4 = 0xffffffff;
   if ((local_10.rep != 0) &&
      ((local_10.rep)->refCount = (local_10.rep)->refCount - 1, (local_10.rep)->refCount == 0)) {
@@ -643,7 +643,7 @@ uint32_t C_EquipmentMenu__FUN_006785b0(C_EquipmentMenu *_this, ...)
     local_64 = (uint32_t *)0x2;
     local_60 = (uint32_t *)0xaa9;
     local_4 = 1;
-    FUN_00615a90(&DAT_008ae590,&local_6c);
+    PostControlMessage(&DAT_008ae590,&local_6c);
     local_4 = 0xffffffff;
     if ((local_58.rep != 0) &&
        ((local_58.rep)->refCount = (local_58.rep)->refCount - 1, (local_58.rep)->refCount == 0)) {
@@ -785,7 +785,7 @@ LAB_006786ee:
         tier1_operator_delete(CStack_7c.rep);
       }
       local_4 = 4;
-      FUN_00615a90(&DAT_008ae590,&local_6c);
+      PostControlMessage(&DAT_008ae590,&local_6c);
       if ((local_58.rep != 0) &&
          ((local_58.rep)->refCount = (local_58.rep)->refCount - 1, (local_58.rep)->refCount == 0))
       {
@@ -804,7 +804,7 @@ LAB_006786ee:
       uStack_50 = 0x1000017;
       uStack_4c = 0xf;
       local_4 = 5;
-      FUN_00615a90(&DAT_008ae590,&uStack_54);
+      PostControlMessage(&DAT_008ae590,&uStack_54);
       local_4 = 0xffffffff;
       if ((piStack_40 != 0) && (*piStack_40 = *piStack_40 - 1, *piStack_40 == 0)) {
         tier1_operator_delete(piStack_40);
@@ -831,7 +831,7 @@ LAB_006786ee:
           tier1_operator_delete(CStack_78.rep);
         }
         local_4 = 8;
-        FUN_00615a90(&DAT_008ae590,&uStack_3c);
+        PostControlMessage(&DAT_008ae590,&uStack_3c);
         CVar6.rep = CStack_28.rep;
       }
       else {
@@ -848,7 +848,7 @@ LAB_006786ee:
           tier1_operator_delete(CStack_74.rep);
         }
         local_4 = 0xb;
-        FUN_00615a90(&DAT_008ae590,&local_24);
+        PostControlMessage(&DAT_008ae590,&local_24);
         CVar6.rep = local_10.rep;
       }
       local_4 = 0xffffffff;

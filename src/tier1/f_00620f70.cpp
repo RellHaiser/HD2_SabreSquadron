@@ -291,7 +291,7 @@ code_r0x006214b9:
     uStack_38 = 0x2000016;
     uStack_34 = 0;
     uStack_4 = 2;
-    FUN_00615a90(&DAT_008ae590,&uStack_3c);
+    PostControlMessage(&DAT_008ae590,&uStack_3c);
     piVar3 = piStack_28;
   }
   if ((piVar3 != 0) && (*piVar3 = *piVar3 - 1, *piVar3 == 0)) {
@@ -315,11 +315,13 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
   uint32_t *puVar1;
   char cVar2;
   uint8_t bVar3;
+  int *extraout_EAX;
   int *piVar4;
   int iVar5;
+  int *extraout_EAX_00;
   uint32_t uVar6;
   C_GameConfig *this_00;
-  int *extraout_EAX;
+  int *extraout_EAX_01;
   int iVar7;
   C_str *pCVar8;
   uint32_t uVar9;
@@ -551,7 +553,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
         local_3a0 = 0x1000001;
         local_39c = 0;
         local_4 = 0;
-        FUN_00615a90(&DAT_008ae590,&local_3a4);
+        PostControlMessage(&DAT_008ae590,&local_3a4);
         local_4 = 0xffffffff;
         if (local_390 != 0) {
           C_str__ReleaseRep(local_390);
@@ -561,7 +563,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
         local_220 = 0x1000002;
         local_21c = 0;
         local_4 = 1;
-        FUN_00615a90(&DAT_008ae590,&local_224);
+        PostControlMessage(&DAT_008ae590,&local_224);
         local_4 = 0xffffffff;
         if (local_210 != 0) {
           C_str__ReleaseRep(local_210);
@@ -571,7 +573,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
         local_370 = 0x1000002;
         local_36c = 0;
         local_4 = 2;
-        FUN_00615a90(&DAT_008ae590,&local_374);
+        PostControlMessage(&DAT_008ae590,&local_374);
         local_4 = 0xffffffff;
         if (local_360 != 0) {
           C_str__ReleaseRep(local_360);
@@ -583,7 +585,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
           local_160 = 0x1000002;
           local_15c = 0;
           local_4 = 3;
-          FUN_00615a90(&DAT_008ae590,&local_164);
+          PostControlMessage(&DAT_008ae590,&local_164);
           local_4 = 0xffffffff;
           if (local_150 != 0) {
             C_str__ReleaseRep(local_150);
@@ -593,7 +595,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
           local_4c0 = 0x1000002;
           local_4bc = 0;
           local_4 = 4;
-          FUN_00615a90(&DAT_008ae590,&local_4c4);
+          PostControlMessage(&DAT_008ae590,&local_4c4);
           local_4 = 0xffffffff;
           if (local_4b0 != 0) {
             C_str__ReleaseRep(local_4b0);
@@ -604,8 +606,9 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
         local_1f0 = 0x1000002;
         local_1ec = 0;
         local_4 = 5;
-        piVar4 = (int *)FUN_00615a90(&DAT_008ae590,&local_1f4);
+        PostControlMessage(&DAT_008ae590,&local_1f4);
         local_4 = 0xffffffff;
+        piVar4 = extraout_EAX;
         if (local_1e0 != 0) {
           piVar4 = (int *)C_str__ReleaseRep(local_1e0);
         }
@@ -668,7 +671,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               uStack_310 = 0x1000001;
               uStack_30c = 0;
               GH_PIECE(local_4,0,1) = 7;
-              FUN_00615a90(&DAT_008ae590,&uStack_314);
+              PostControlMessage(&DAT_008ae590,&uStack_314);
               GH_PIECE(local_4,0,1) = 6;
               if (pCStack_300 != 0) {
                 C_str__ReleaseRep(pCStack_300);
@@ -678,7 +681,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               uStack_100 = 0x2000018;
               uStack_fc = 0;
               GH_PIECE(local_4,0,1) = 8;
-              FUN_00615a90(&DAT_008ae590,&uStack_104);
+              PostControlMessage(&DAT_008ae590,&uStack_104);
               GH_PIECE(local_4,0,1) = 6;
               if (pCStack_f0 != 0) {
                 C_str__ReleaseRep(pCStack_f0);
@@ -688,7 +691,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               uStack_2e0 = 0x1000002;
               uStack_2dc = 0;
               GH_PIECE(local_4,0,1) = 9;
-              FUN_00615a90(&DAT_008ae590,&uStack_2e4);
+              PostControlMessage(&DAT_008ae590,&uStack_2e4);
               GH_PIECE(local_4,0,1) = 6;
               if (pCStack_2d0 != 0) {
                 C_str__ReleaseRep(pCStack_2d0);
@@ -698,7 +701,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               uStack_1c0 = 0x1000002;
               uStack_1bc = 0;
               GH_PIECE(local_4,0,1) = 10;
-              FUN_00615a90(&DAT_008ae590,&uStack_1c4);
+              PostControlMessage(&DAT_008ae590,&uStack_1c4);
               GH_PIECE(local_4,0,1) = 6;
               if (pCStack_1b0 != 0) {
                 C_str__ReleaseRep(pCStack_1b0);
@@ -708,7 +711,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               uStack_2b0 = 0x1000002;
               uStack_2ac = 0;
               GH_PIECE(local_4,0,1) = 0xb;
-              FUN_00615a90(&DAT_008ae590,&uStack_2b4);
+              PostControlMessage(&DAT_008ae590,&uStack_2b4);
               GH_PIECE(local_4,0,1) = 6;
               if (pCStack_2a0 != 0) {
                 C_str__ReleaseRep(pCStack_2a0);
@@ -718,7 +721,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               uStack_4a8 = 0x1000002;
               uStack_4a4 = 0;
               GH_PIECE(local_4,0,1) = 0xc;
-              FUN_00615a90(&DAT_008ae590,&uStack_4ac);
+              PostControlMessage(&DAT_008ae590,&uStack_4ac);
               GH_PIECE(local_4,0,1) = 6;
               if (pCStack_498 != 0) {
                 C_str__ReleaseRep(pCStack_498);
@@ -766,7 +769,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
                 C_str__ReleaseRep(pCStack_574);
               }
               GH_PIECE(local_4,0,1) = 0x10;
-              FUN_00615a90(&DAT_008ae590,&uStack_524);
+              PostControlMessage(&DAT_008ae590,&uStack_524);
               GH_PIECE(local_4,0,1) = 6;
               if (CStack_510.rep != 0) {
                 C_str__ReleaseRep((C_str *)CStack_510.rep);
@@ -786,8 +789,9 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
                 C_str__ReleaseRep(pCStack_57c);
               }
               GH_PIECE(local_4,0,1) = 0x13;
-              param_3 = FUN_00615a90(&DAT_008ae590,&uStack_554);
+              PostControlMessage(&DAT_008ae590,&uStack_554);
               local_4 = CONCAT31(GH_PIECE(local_4,1,3),6);
+              param_3 = (int)extraout_EAX_00;
               if (CStack_540.rep != 0) {
                 param_3 = C_str__ReleaseRep((C_str *)CStack_540.rep);
               }
@@ -850,7 +854,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               uStack_478 = 0x1000001;
               uStack_474 = 0;
               GH_PIECE(local_4,0,1) = 0x15;
-              FUN_00615a90(&DAT_008ae590,&uStack_47c);
+              PostControlMessage(&DAT_008ae590,&uStack_47c);
               GH_PIECE(local_4,0,1) = 0x14;
               if (pCStack_468 != 0) {
                 C_str__ReleaseRep(pCStack_468);
@@ -870,7 +874,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
                 C_str__ReleaseRep(pCStack_57c);
               }
               GH_PIECE(local_4,0,1) = 0x18;
-              FUN_00615a90(&DAT_008ae590,&uStack_50c);
+              PostControlMessage(&DAT_008ae590,&uStack_50c);
               GH_PIECE(local_4,0,1) = 0x14;
               if (CStack_4f8.rep != 0) {
                 C_str__ReleaseRep((C_str *)CStack_4f8.rep);
@@ -880,7 +884,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               uStack_448 = 0x1000002;
               uStack_444 = 0;
               GH_PIECE(local_4,0,1) = 0x19;
-              FUN_00615a90(&DAT_008ae590,&uStack_44c);
+              PostControlMessage(&DAT_008ae590,&uStack_44c);
               GH_PIECE(local_4,0,1) = 0x14;
               if (pCStack_438 != 0) {
                 C_str__ReleaseRep(pCStack_438);
@@ -890,7 +894,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               uStack_418 = 0x1000002;
               uStack_414 = 0;
               GH_PIECE(local_4,0,1) = 0x1a;
-              FUN_00615a90(&DAT_008ae590,&uStack_41c);
+              PostControlMessage(&DAT_008ae590,&uStack_41c);
               GH_PIECE(local_4,0,1) = 0x14;
               if (pCStack_408 != 0) {
                 C_str__ReleaseRep(pCStack_408);
@@ -900,7 +904,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               uStack_3e8 = 0x1000002;
               uStack_3e4 = 0;
               GH_PIECE(local_4,0,1) = 0x1b;
-              FUN_00615a90(&DAT_008ae590,&uStack_3ec);
+              PostControlMessage(&DAT_008ae590,&uStack_3ec);
               GH_PIECE(local_4,0,1) = 0x14;
               if (pCStack_3d8 != 0) {
                 C_str__ReleaseRep(pCStack_3d8);
@@ -910,7 +914,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               uStack_3b8 = 0x1000002;
               uStack_3b4 = 0;
               GH_PIECE(local_4,0,1) = 0x1c;
-              FUN_00615a90(&DAT_008ae590,&uStack_3bc);
+              PostControlMessage(&DAT_008ae590,&uStack_3bc);
               GH_PIECE(local_4,0,1) = 0x14;
               if (pCStack_3a8 != 0) {
                 C_str__ReleaseRep(pCStack_3a8);
@@ -920,7 +924,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               uStack_388 = 0x1000002;
               uStack_384 = 0;
               GH_PIECE(local_4,0,1) = 0x1d;
-              FUN_00615a90(&DAT_008ae590,&uStack_38c);
+              PostControlMessage(&DAT_008ae590,&uStack_38c);
               local_4 = CONCAT31(GH_PIECE(local_4,1,3),0x14);
               if (pCStack_378 != 0) {
                 C_str__ReleaseRep(pCStack_378);
@@ -946,7 +950,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
                 uStack_358 = 0x1000001;
                 uStack_354 = 0;
                 GH_PIECE(local_4,0,1) = 0x1e;
-                FUN_00615a90(&DAT_008ae590,&uStack_35c);
+                PostControlMessage(&DAT_008ae590,&uStack_35c);
                 GH_PIECE(local_4,0,1) = 0x14;
                 if (pCStack_348 != 0) {
                   C_str__ReleaseRep(pCStack_348);
@@ -956,7 +960,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
                 uStack_328 = 0x2000018;
                 uStack_324 = 0;
                 GH_PIECE(local_4,0,1) = 0x1f;
-                FUN_00615a90(&DAT_008ae590,&uStack_32c);
+                PostControlMessage(&DAT_008ae590,&uStack_32c);
                 GH_PIECE(local_4,0,1) = 0x14;
                 if (pCStack_318 != 0) {
                   C_str__ReleaseRep(pCStack_318);
@@ -966,7 +970,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
                 uStack_2f8 = 0x1000002;
                 uStack_2f4 = 0;
                 GH_PIECE(local_4,0,1) = 0x20;
-                FUN_00615a90(&DAT_008ae590,&uStack_2fc);
+                PostControlMessage(&DAT_008ae590,&uStack_2fc);
                 GH_PIECE(local_4,0,1) = 0x14;
                 if (pCStack_2e8 != 0) {
                   C_str__ReleaseRep(pCStack_2e8);
@@ -976,7 +980,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
                 uStack_2c8 = 0x1000002;
                 uStack_2c4 = 0;
                 GH_PIECE(local_4,0,1) = 0x21;
-                FUN_00615a90(&DAT_008ae590,&uStack_2cc);
+                PostControlMessage(&DAT_008ae590,&uStack_2cc);
                 GH_PIECE(local_4,0,1) = 0x14;
                 if (pCStack_2b8 != 0) {
                   C_str__ReleaseRep(pCStack_2b8);
@@ -986,7 +990,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
                 uStack_298 = 0x1000002;
                 uStack_294 = 0;
                 local_4 = CONCAT31(GH_PIECE(local_4,1,3),0x22);
-                FUN_00615a90(&DAT_008ae590,&uStack_29c);
+                PostControlMessage(&DAT_008ae590,&uStack_29c);
                 if ((piStack_288 != 0) &&
                    (*piStack_288 = *piStack_288 - 1, *piStack_288 == 0)) {
                   tier1_operator_delete(piStack_288);
@@ -996,7 +1000,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
                 uStack_268 = 0x1000002;
                 uStack_264 = 0;
                 local_4 = CONCAT31(GH_PIECE(local_4,1,3),0x23);
-                FUN_00615a90(&DAT_008ae590,&uStack_26c);
+                PostControlMessage(&DAT_008ae590,&uStack_26c);
                 if ((piStack_258 != 0) &&
                    (*piStack_258 = *piStack_258 - 1, *piStack_258 == 0)) {
                   tier1_operator_delete(piStack_258);
@@ -1006,7 +1010,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
                 uStack_238 = 0x1000002;
                 uStack_234 = 0;
                 GH_PIECE(local_4,0,1) = 0x24;
-                FUN_00615a90(&DAT_008ae590,&uStack_23c);
+                PostControlMessage(&DAT_008ae590,&uStack_23c);
                 GH_PIECE(local_4,0,1) = 0x14;
                 if ((piStack_228 != 0) &&
                    (*piStack_228 = *piStack_228 - 1, *piStack_228 == 0)) {
@@ -1052,7 +1056,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
             if ((local_4c8 != 0) &&
                (*local_4c8 = *local_4c8 - 1, piVar4 = local_4c8, *local_4c8 == 0)) {
               tier1_operator_delete(local_4c8);
-              piVar4 = extraout_EAX;
+              piVar4 = extraout_EAX_01;
             }
           }
         }
@@ -1065,7 +1069,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
       local_4ec = 0xd;
       local_4e8 = 0x7d2;
       local_4 = 0x27;
-      FUN_00615a90(&DAT_008ae590,&local_4f4);
+      PostControlMessage(&DAT_008ae590,&local_4f4);
       if ((local_4e0 != 0) && (*local_4e0 = *local_4e0 - 1, *local_4e0 == 0)) {
         tier1_operator_delete(local_4e0);
       }
@@ -1074,7 +1078,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
       local_340 = 0x1000002;
       local_33c = 0;
       local_4 = 0x28;
-      FUN_00615a90(&DAT_008ae590,&local_344);
+      PostControlMessage(&DAT_008ae590,&local_344);
       if ((local_330 != 0) && (*local_330 = *local_330 - 1, *local_330 == 0)) {
         tier1_operator_delete(local_330);
       }
@@ -1083,7 +1087,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
       local_490 = 0x2000016;
       local_48c = 0;
       local_4 = 0x29;
-      FUN_00615a90(&DAT_008ae590,&local_494);
+      PostControlMessage(&DAT_008ae590,&local_494);
       if ((local_480 != 0) && (*local_480 = *local_480 - 1, *local_480 == 0)) {
         tier1_operator_delete(local_480);
       }
@@ -1092,7 +1096,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
       local_130 = 0x1000001;
       local_12c = 0;
       local_4 = 0x2a;
-      FUN_00615a90(&DAT_008ae590,&local_134);
+      PostControlMessage(&DAT_008ae590,&local_134);
       if ((local_120 != 0) && (*local_120 = *local_120 - 1, *local_120 == 0)) {
         tier1_operator_delete(local_120);
       }
@@ -1101,7 +1105,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
       local_460 = 0x1000001;
       local_45c = 0;
       local_4 = 0x2b;
-      FUN_00615a90(&DAT_008ae590,&local_464);
+      PostControlMessage(&DAT_008ae590,&local_464);
       if ((local_450 != 0) && (*local_450 = *local_450 - 1, *local_450 == 0)) {
         tier1_operator_delete(local_450);
       }
@@ -1110,7 +1114,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
       local_280 = 0x1000001;
       local_27c = 0;
       local_4 = 0x2c;
-      FUN_00615a90(&DAT_008ae590,&local_284);
+      PostControlMessage(&DAT_008ae590,&local_284);
       if ((local_270 != 0) && (*local_270 = *local_270 - 1, *local_270 == 0)) {
         tier1_operator_delete(local_270);
       }
@@ -1119,7 +1123,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
       local_430 = 0x1000001;
       local_42c = 0;
       local_4 = 0x2d;
-      FUN_00615a90(&DAT_008ae590,&local_434);
+      PostControlMessage(&DAT_008ae590,&local_434);
       if ((local_420 != 0) && (*local_420 = *local_420 - 1, *local_420 == 0)) {
         tier1_operator_delete(local_420);
       }
@@ -1128,7 +1132,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
       local_190 = 0x1000001;
       local_18c = 0;
       local_4 = 0x2e;
-      FUN_00615a90(&DAT_008ae590,&local_194);
+      PostControlMessage(&DAT_008ae590,&local_194);
       if ((local_180 != 0) && (*local_180 = *local_180 - 1, *local_180 == 0)) {
         tier1_operator_delete(local_180);
       }
@@ -1137,7 +1141,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
       local_400 = 0x2000076;
       local_3fc = 0;
       local_4 = 0x2f;
-      FUN_00615a90(&DAT_008ae590,&local_404);
+      PostControlMessage(&DAT_008ae590,&local_404);
       if ((local_3f0 != 0) && (*local_3f0 = *local_3f0 - 1, *local_3f0 == 0)) {
         tier1_operator_delete(local_3f0);
       }
@@ -1146,7 +1150,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
       local_250 = 0x2000076;
       local_24c = 0;
       local_4 = 0x30;
-      FUN_00615a90(&DAT_008ae590,&local_254);
+      PostControlMessage(&DAT_008ae590,&local_254);
       if ((local_240 != 0) && (*local_240 = *local_240 - 1, *local_240 == 0)) {
         tier1_operator_delete(local_240);
       }
@@ -1155,7 +1159,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
       local_3d0 = 0x2000076;
       local_3cc = 0;
       local_4 = 0x31;
-      FUN_00615a90(&DAT_008ae590,&local_3d4);
+      PostControlMessage(&DAT_008ae590,&local_3d4);
       if ((local_3c0 != 0) && (*local_3c0 = *local_3c0 - 1, *local_3c0 == 0)) {
         tier1_operator_delete(local_3c0);
       }
@@ -1164,7 +1168,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
       local_e8 = 0x2000076;
       local_e4 = 0;
       local_4 = 0x32;
-      FUN_00615a90(&DAT_008ae590,&local_ec);
+      PostControlMessage(&DAT_008ae590,&local_ec);
       if ((local_d8 != 0) && (*local_d8 = *local_d8 - 1, *local_d8 == 0)) {
         tier1_operator_delete(local_d8);
       }
@@ -1178,7 +1182,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
   local_208 = 0x1000002;
   local_204 = 0;
   local_4 = 0x33;
-  FUN_00615a90(&DAT_008ae590,&local_20c);
+  PostControlMessage(&DAT_008ae590,&local_20c);
   if ((local_1f8 != 0) && (*local_1f8 = *local_1f8 - 1, *local_1f8 == 0)) {
     tier1_operator_delete(local_1f8);
   }
@@ -1187,7 +1191,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
   local_1d8 = 0x2000016;
   local_1d4 = 0;
   local_4 = 0x34;
-  FUN_00615a90(&DAT_008ae590,&local_1dc);
+  PostControlMessage(&DAT_008ae590,&local_1dc);
   if ((local_1c8 != 0) && (*local_1c8 = *local_1c8 - 1, *local_1c8 == 0)) {
     tier1_operator_delete(local_1c8);
   }
@@ -1196,7 +1200,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
   local_1a8 = 0x1000001;
   local_1a4 = 0;
   local_4 = 0x35;
-  FUN_00615a90(&DAT_008ae590,&local_1ac);
+  PostControlMessage(&DAT_008ae590,&local_1ac);
   if ((local_198 != 0) && (*local_198 = *local_198 - 1, *local_198 == 0)) {
     tier1_operator_delete(local_198);
   }
@@ -1205,7 +1209,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
   local_178 = 0x1000001;
   local_174 = 0;
   local_4 = 0x36;
-  FUN_00615a90(&DAT_008ae590,&local_17c);
+  PostControlMessage(&DAT_008ae590,&local_17c);
   if ((local_168 != 0) && (*local_168 = *local_168 - 1, *local_168 == 0)) {
     tier1_operator_delete(local_168);
   }
@@ -1214,7 +1218,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
   local_148 = 0x1000001;
   local_144 = 0;
   local_4 = 0x37;
-  FUN_00615a90(&DAT_008ae590,&local_14c);
+  PostControlMessage(&DAT_008ae590,&local_14c);
   if ((local_138 != 0) && (*local_138 = *local_138 - 1, *local_138 == 0)) {
     tier1_operator_delete(local_138);
   }
@@ -1223,7 +1227,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
   local_118 = 0x1000001;
   local_114 = 0;
   local_4 = 0x38;
-  FUN_00615a90(&DAT_008ae590,&local_11c);
+  PostControlMessage(&DAT_008ae590,&local_11c);
   if ((local_108 != 0) && (*local_108 = *local_108 - 1, *local_108 == 0)) {
     tier1_operator_delete(local_108);
   }
@@ -1316,7 +1320,7 @@ uint32_t FUN_00622b50(void *_this,uint32_t param_1,int *param_2, ...)
   local_38 = 0x1000002;
   local_34 = 0;
   local_4 = 0;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -1326,7 +1330,7 @@ uint32_t FUN_00622b50(void *_this,uint32_t param_1,int *param_2, ...)
   local_38 = 0x1000001;
   local_34 = 0;
   local_4 = 1;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -1336,7 +1340,7 @@ uint32_t FUN_00622b50(void *_this,uint32_t param_1,int *param_2, ...)
   local_38 = 0x1000001;
   local_34 = 0;
   local_4 = 2;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -1346,7 +1350,7 @@ uint32_t FUN_00622b50(void *_this,uint32_t param_1,int *param_2, ...)
   local_38 = 0x1000001;
   local_34 = 0;
   local_4 = 3;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -1356,7 +1360,7 @@ uint32_t FUN_00622b50(void *_this,uint32_t param_1,int *param_2, ...)
   local_38 = 0x1000001;
   local_34 = 0;
   local_4 = 4;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -1366,7 +1370,7 @@ uint32_t FUN_00622b50(void *_this,uint32_t param_1,int *param_2, ...)
   local_38 = 0x1000002;
   local_34 = 0;
   local_4 = 5;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   if ((local_28 != 0) &&
      (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
     tier1_operator_delete(local_28);
@@ -1376,7 +1380,7 @@ uint32_t FUN_00622b50(void *_this,uint32_t param_1,int *param_2, ...)
   local_38 = 0x1000002;
   local_34 = 0;
   local_4 = 6;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   if ((local_28 != 0) &&
      (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
     tier1_operator_delete(local_28);
@@ -1386,7 +1390,7 @@ uint32_t FUN_00622b50(void *_this,uint32_t param_1,int *param_2, ...)
   local_38 = 0x1000002;
   local_34 = 0;
   local_4 = 7;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   if ((local_28 != 0) &&
      (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
     tier1_operator_delete(local_28);
@@ -1396,7 +1400,7 @@ uint32_t FUN_00622b50(void *_this,uint32_t param_1,int *param_2, ...)
   local_38 = 0x1000002;
   local_34 = 0;
   local_4 = 8;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   local_4 = 0xffffffff;
   pCVar2 = local_28;
   if ((local_28 != 0) &&
@@ -1533,7 +1537,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_184 = 0xd;
     local_180 = 0x7d2;
     local_4 = 0x18;
-    FUN_00615a90(&DAT_008ae590,&local_18c);
+    PostControlMessage(&DAT_008ae590,&local_18c);
     local_4 = 0xffffffff;
     if (local_178.rep != 0) {
       C_str__ReleaseRep((C_str *)local_178.rep);
@@ -1543,7 +1547,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_1a4 = 0x2000076;
     local_1a0 = 0;
     local_4 = 0x19;
-    FUN_00615a90(&DAT_008ae590,&local_1a8);
+    PostControlMessage(&DAT_008ae590,&local_1a8);
     local_4 = 0xffffffff;
     if (local_194 != 0) {
       C_str__ReleaseRep(local_194);
@@ -1553,7 +1557,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_1a4 = 0x2000076;
     local_1a0 = 0;
     local_4 = 0x1a;
-    FUN_00615a90(&DAT_008ae590,&local_1a8);
+    PostControlMessage(&DAT_008ae590,&local_1a8);
     local_4 = 0xffffffff;
     if (local_194 != 0) {
       C_str__ReleaseRep(local_194);
@@ -1563,7 +1567,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_1a4 = 0x2000076;
     local_1a0 = 0;
     local_4 = 0x1b;
-    FUN_00615a90(&DAT_008ae590,&local_1a8);
+    PostControlMessage(&DAT_008ae590,&local_1a8);
     local_4 = 0xffffffff;
     if (local_194 != 0) {
       C_str__ReleaseRep(local_194);
@@ -1573,7 +1577,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_1a4 = 0x2000076;
     local_1a0 = 0;
     local_4 = 0x1c;
-    FUN_00615a90(&DAT_008ae590,&local_1a8);
+    PostControlMessage(&DAT_008ae590,&local_1a8);
     if ((local_194 != 0) &&
        (*local_194 = (C_str)(*(int *)local_194 - 1), *(int *)local_194 == 0)) {
       tier1_operator_delete(local_194);
@@ -1583,7 +1587,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_1a4 = 0x1000001;
     local_1a0 = 0;
     local_4 = 0x1d;
-    FUN_00615a90(&DAT_008ae590,&local_1a8);
+    PostControlMessage(&DAT_008ae590,&local_1a8);
     if ((local_194 != 0) &&
        (*local_194 = (C_str)(*(int *)local_194 - 1), *(int *)local_194 == 0)) {
       tier1_operator_delete(local_194);
@@ -1593,7 +1597,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_20 = 0x1000001;
     local_1c = 0;
     local_4 = 0x1e;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 == 0) {
       return 0;
     }
@@ -1618,7 +1622,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     C_str__ReleaseRep(local_190);
   }
   local_4 = 2;
-  FUN_00615a90(&DAT_008ae590,&local_18c);
+  PostControlMessage(&DAT_008ae590,&local_18c);
   local_4 = 0xffffffff;
   if (local_178.rep != 0) {
     C_str__ReleaseRep((C_str *)local_178.rep);
@@ -1638,7 +1642,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     C_str__ReleaseRep(local_190);
   }
   local_4 = 5;
-  FUN_00615a90(&DAT_008ae590,&local_18c);
+  PostControlMessage(&DAT_008ae590,&local_18c);
   local_4 = 0xffffffff;
   if (local_178.rep != 0) {
     C_str__ReleaseRep((C_str *)local_178.rep);
@@ -1651,7 +1655,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_188 = 0x2000076;
     local_184 = 1;
     local_4 = 6;
-    FUN_00615a90(&DAT_008ae590,&local_18c);
+    PostControlMessage(&DAT_008ae590,&local_18c);
     local_4 = 0xffffffff;
     if (local_178.rep != 0) {
       C_str__ReleaseRep((C_str *)local_178.rep);
@@ -1661,7 +1665,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_38 = 0x2000076;
     local_34 = 0;
     local_4 = 7;
-    FUN_00615a90(&DAT_008ae590,&local_3c);
+    PostControlMessage(&DAT_008ae590,&local_3c);
     local_4 = 0xffffffff;
     if (local_28 != 0) {
       C_str__ReleaseRep(local_28);
@@ -1671,7 +1675,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_50 = 0x2000076;
     local_4c = 0;
     local_4 = 8;
-    FUN_00615a90(&DAT_008ae590,&local_54);
+    PostControlMessage(&DAT_008ae590,&local_54);
     local_4 = 0xffffffff;
     if (local_40 != 0) {
       C_str__ReleaseRep(local_40);
@@ -1681,7 +1685,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_68 = 0x2000076;
     local_64 = 0;
     local_4 = 9;
-    FUN_00615a90(&DAT_008ae590,&local_6c);
+    PostControlMessage(&DAT_008ae590,&local_6c);
     _this = local_58;
     break;
   case 2:
@@ -1690,7 +1694,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_128 = 0x2000076;
     local_124 = 0;
     local_4 = 10;
-    FUN_00615a90(&DAT_008ae590,&local_12c);
+    PostControlMessage(&DAT_008ae590,&local_12c);
     local_4 = 0xffffffff;
     if (local_118 != 0) {
       C_str__ReleaseRep(local_118);
@@ -1700,7 +1704,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_98 = 0x2000076;
     local_94 = 1;
     local_4 = 0xb;
-    FUN_00615a90(&DAT_008ae590,&local_9c);
+    PostControlMessage(&DAT_008ae590,&local_9c);
     local_4 = 0xffffffff;
     if (local_88 != 0) {
       C_str__ReleaseRep(local_88);
@@ -1710,7 +1714,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_f8 = 0x2000076;
     local_f4 = 0;
     local_4 = 0xc;
-    FUN_00615a90(&DAT_008ae590,&local_fc);
+    PostControlMessage(&DAT_008ae590,&local_fc);
     local_4 = 0xffffffff;
     if (local_e8 != 0) {
       C_str__ReleaseRep(local_e8);
@@ -1720,7 +1724,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_170 = 0x2000076;
     local_16c = 0;
     local_4 = 0xd;
-    FUN_00615a90(&DAT_008ae590,&local_174);
+    PostControlMessage(&DAT_008ae590,&local_174);
     _this = local_160;
     break;
   case 3:
@@ -1729,7 +1733,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_c8 = 0x2000076;
     local_c4 = 0;
     local_4 = 0xe;
-    FUN_00615a90(&DAT_008ae590,&local_cc);
+    PostControlMessage(&DAT_008ae590,&local_cc);
     local_4 = 0xffffffff;
     if (local_b8 != 0) {
       C_str__ReleaseRep(local_b8);
@@ -1739,7 +1743,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_158 = 0x2000076;
     local_154 = 0;
     local_4 = 0xf;
-    FUN_00615a90(&DAT_008ae590,&local_15c);
+    PostControlMessage(&DAT_008ae590,&local_15c);
     local_4 = 0xffffffff;
     if (local_148 != 0) {
       C_str__ReleaseRep(local_148);
@@ -1749,7 +1753,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_140 = 0x2000076;
     local_13c = 1;
     local_4 = 0x10;
-    FUN_00615a90(&DAT_008ae590,&local_144);
+    PostControlMessage(&DAT_008ae590,&local_144);
     local_4 = 0xffffffff;
     if (local_130 != 0) {
       C_str__ReleaseRep(local_130);
@@ -1759,7 +1763,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_110 = 0x2000076;
     local_10c = 0;
     local_4 = 0x11;
-    FUN_00615a90(&DAT_008ae590,&local_114);
+    PostControlMessage(&DAT_008ae590,&local_114);
     _this = local_100;
     break;
   case 4:
@@ -1768,7 +1772,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_e0 = 0x2000076;
     local_dc = 0;
     local_4 = 0x12;
-    FUN_00615a90(&DAT_008ae590,&local_e4);
+    PostControlMessage(&DAT_008ae590,&local_e4);
     local_4 = 0xffffffff;
     if (local_d0 != 0) {
       C_str__ReleaseRep(local_d0);
@@ -1778,7 +1782,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_b0 = 0x2000076;
     local_ac = 0;
     local_4 = 0x13;
-    FUN_00615a90(&DAT_008ae590,&local_b4);
+    PostControlMessage(&DAT_008ae590,&local_b4);
     local_4 = 0xffffffff;
     if (local_a0 != 0) {
       C_str__ReleaseRep(local_a0);
@@ -1788,7 +1792,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_80 = 0x2000076;
     local_7c = 0;
     local_4 = 0x14;
-    FUN_00615a90(&DAT_008ae590,&local_84);
+    PostControlMessage(&DAT_008ae590,&local_84);
     local_4 = 0xffffffff;
     if (local_70 != 0) {
       C_str__ReleaseRep(local_70);
@@ -1798,7 +1802,7 @@ uint32_t FUN_00622ed0(int param_1, ...)
     local_1a4 = 0x2000076;
     local_1a0 = 1;
     local_4 = 0x15;
-    FUN_00615a90(&DAT_008ae590,&local_1a8);
+    PostControlMessage(&DAT_008ae590,&local_1a8);
     _this = local_194;
     break;
   default:
@@ -1814,7 +1818,7 @@ switchD_00623036_default:
   local_1a4 = 0x1000002;
   local_1a0 = 0;
   local_4 = 0x16;
-  FUN_00615a90(&DAT_008ae590,&local_1a8);
+  PostControlMessage(&DAT_008ae590,&local_1a8);
   local_4 = 0xffffffff;
   if (local_194 != 0) {
     C_str__ReleaseRep(local_194);
@@ -1824,7 +1828,7 @@ switchD_00623036_default:
   local_1a4 = 0x1000002;
   local_1a0 = 0;
   local_4 = 0x17;
-  FUN_00615a90(&DAT_008ae590,&local_1a8);
+  PostControlMessage(&DAT_008ae590,&local_1a8);
   local_4 = 0xffffffff;
   if (local_194 != 0) {
     C_str__ReleaseRep(local_194);
@@ -1854,7 +1858,7 @@ uint32_t FUN_006237e0(int param_1, ...)
   local_38 = 0x1000001;
   local_34 = 0;
   local_4 = 0;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -1864,7 +1868,7 @@ uint32_t FUN_006237e0(int param_1, ...)
   local_38 = 0x200002c;
   local_34 = 0;
   local_4 = 1;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -1874,7 +1878,7 @@ uint32_t FUN_006237e0(int param_1, ...)
   local_38 = 0x1000001;
   local_34 = 0;
   local_4 = 2;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -1884,7 +1888,7 @@ uint32_t FUN_006237e0(int param_1, ...)
   local_38 = 0x1000001;
   local_34 = 0;
   local_4 = 3;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -1894,7 +1898,7 @@ uint32_t FUN_006237e0(int param_1, ...)
   local_38 = 0x1000001;
   local_34 = 0;
   local_4 = 4;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -1904,7 +1908,7 @@ uint32_t FUN_006237e0(int param_1, ...)
   local_38 = 0x1000001;
   local_34 = 0;
   local_4 = 5;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -1914,7 +1918,7 @@ uint32_t FUN_006237e0(int param_1, ...)
   local_38 = 0x1000002;
   local_34 = 0;
   local_4 = 6;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -1925,7 +1929,7 @@ uint32_t FUN_006237e0(int param_1, ...)
     local_38 = 0x1000001;
     local_34 = 0;
     local_4 = 9;
-    FUN_00615a90(&DAT_008ae590,&local_3c);
+    PostControlMessage(&DAT_008ae590,&local_3c);
     local_4 = 0xffffffff;
     if (local_28 != 0) {
       C_str__ReleaseRep(local_28);
@@ -1935,7 +1939,7 @@ uint32_t FUN_006237e0(int param_1, ...)
     local_38 = 0x1000001;
     local_34 = 0;
     local_4 = 10;
-    FUN_00615a90(&DAT_008ae590,&local_3c);
+    PostControlMessage(&DAT_008ae590,&local_3c);
     if ((local_28 != 0) &&
        (local_28->rep = (C_str_rep *)local_28->rep[-1].chars, local_28->rep == 0)) {
       tier1_operator_delete(local_28);
@@ -1947,7 +1951,7 @@ uint32_t FUN_006237e0(int param_1, ...)
     local_38 = 0x1000002;
     local_34 = 0;
     local_4 = 7;
-    FUN_00615a90(&DAT_008ae590,&local_3c);
+    PostControlMessage(&DAT_008ae590,&local_3c);
     local_4 = 0xffffffff;
     if (local_28 != 0) {
       C_str__ReleaseRep(local_28);
@@ -1957,7 +1961,7 @@ uint32_t FUN_006237e0(int param_1, ...)
     local_38 = 0x1000002;
     local_34 = 0;
     local_4 = 8;
-    FUN_00615a90(&DAT_008ae590,&local_3c);
+    PostControlMessage(&DAT_008ae590,&local_3c);
     local_4 = 0xffffffff;
     if (local_28 != 0) {
       C_str__ReleaseRep(local_28);
@@ -1968,7 +1972,7 @@ uint32_t FUN_006237e0(int param_1, ...)
   local_20 = 0x1000002;
   local_1c = 0;
   local_4 = 0xb;
-  FUN_00615a90(&DAT_008ae590,&local_24);
+  PostControlMessage(&DAT_008ae590,&local_24);
   if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
     tier1_operator_delete(local_10);
     local_10 = extraout_EAX;

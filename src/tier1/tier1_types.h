@@ -45,6 +45,7 @@ struct C_ConsoleBase_vtbl__stub;
 struct C_ConsoleState;
 struct C_Console__stub;
 struct C_Console_vtbl__stub;
+struct C_Control;
 struct C_Debris;
 struct C_Debris__stub;
 struct C_Debris_vtbl__stub;
@@ -254,7 +255,6 @@ struct C_auto_008110e4;
 struct C_auto_008120c0;
 struct C_auto_008120c4;
 struct C_auto_008121d0;
-struct C_auto_00813ab0;
 struct C_auto_00813ab8;
 struct C_auto_00813abc;
 struct C_auto_00813ac0;
@@ -263,7 +263,6 @@ struct C_auto_00813b10;
 struct C_auto_00813b2c;
 struct C_auto_00813b48;
 struct C_auto_00813b68;
-struct C_auto_00813dd0;
 struct C_auto_00813e58;
 struct C_auto_00813ee0;
 struct C_auto_00813f68;
@@ -332,6 +331,7 @@ struct C_auto_008166d8;
 struct C_auto_008166dc;
 struct C_auto_00816ca4;
 struct IMAGE_RESOURCE_DIRECTORY_ENTRY_DirectoryStruct;
+struct S_ControlDesc;
 struct S_HumanCommand;
 struct S_HumanCommand__stub;
 struct S_HumanCommand_vtbl__stub;
@@ -354,12 +354,13 @@ struct vector_S_SoldierStatePtr;
 struct zz_junk_wchar_t;
 // Types Ghidra knows only by name: 1-byte placeholders (pointer math is bytewise).
 struct C_Class_815850 { uint8_t _unknown[1]; };
-struct C_DetailSettings { uint8_t _unknown[1]; };
+struct C_Control_vtbl { uint8_t _unknown[1]; };
 struct C_auto_00810778 { uint8_t _unknown[1]; };
 struct C_auto_00810fb8 { uint8_t _unknown[1]; };
 struct C_auto_008158ac { uint8_t _unknown[1]; };
 struct C_auto_00815bfc { uint8_t _unknown[1]; };
 struct HandlerType { uint8_t _unknown[1]; };
+struct S_ControlDesc_vtbl { uint8_t _unknown[1]; };
 struct T_test2_Release { uint8_t _unknown[1]; };
 struct T_test2_SetPos { uint8_t _unknown[1]; };
 struct TryBlockMapEntry { uint8_t _unknown[1]; };
@@ -16432,6 +16433,42 @@ struct C_Console_vtbl__stub {
     void * Unknown08;
     void * ScalarDeletingDestructor;
 };
+struct C_Control {
+    C_auto_00813dd0_vtbl * vtable;
+    uint8_t m_004;
+    uint8_t _pad_0005[3];
+    uint32_t m_008;
+    uint32_t m_00c;
+    uint32_t m_010;
+    uint8_t _pad_0014[4];
+    uint8_t m_018;
+    uint8_t _pad_0019[3];
+    uint32_t m_01c;
+    uint32_t m_020;
+    uint32_t m_024;
+    uint8_t _pad_0028[4];
+    uint8_t m_02c;
+    uint8_t _pad_002d[3];
+    uint32_t m_030;
+    uint32_t m_034;
+    uint32_t m_038;
+    uint8_t _pad_003c[4];
+    uint32_t m_040;
+    uint32_t m_044;
+    uint32_t m_048;
+    uint32_t m_04c;
+    uint32_t m_050;
+    uint32_t m_054;
+    uint32_t m_058;
+    uint32_t m_05c;
+    uint32_t m_060;
+    uint8_t m_064;
+    uint8_t m_065;
+    uint8_t m_066;
+    uint8_t _pad_0067[1];
+    uint32_t m_068;
+    uint32_t m_06c;
+};
 struct C_Debris {
     C_Debris_vtbl * vtable;
     uint8_t _pad_0004[12];
@@ -21429,9 +21466,6 @@ struct C_auto_008121d0 {
     void * m_148;
     uint8_t m_14c;
 };
-struct C_auto_00813ab0 {
-    C_auto_00813ab0_vtbl * vtable;
-};
 struct C_auto_00813ab8 {
     C_auto_00813ab8_vtbl * vtable;
 };
@@ -21481,42 +21515,6 @@ struct C_auto_00813b48 {
 };
 struct C_auto_00813b68 {
     C_auto_00813b68_vtbl * vtable;
-};
-struct C_auto_00813dd0 {
-    C_auto_00813dd0_vtbl * vtable;
-    uint8_t m_004;
-    uint8_t _pad_0005[3];
-    uint32_t m_008;
-    uint32_t m_00c;
-    uint32_t m_010;
-    uint8_t _pad_0014[4];
-    uint8_t m_018;
-    uint8_t _pad_0019[3];
-    uint32_t m_01c;
-    uint32_t m_020;
-    uint32_t m_024;
-    uint8_t _pad_0028[4];
-    uint8_t m_02c;
-    uint8_t _pad_002d[3];
-    uint32_t m_030;
-    uint32_t m_034;
-    uint32_t m_038;
-    uint8_t _pad_003c[4];
-    uint32_t m_040;
-    uint32_t m_044;
-    uint32_t m_048;
-    uint32_t m_04c;
-    uint32_t m_050;
-    uint32_t m_054;
-    uint32_t m_058;
-    uint32_t m_05c;
-    uint32_t m_060;
-    uint8_t m_064;
-    uint8_t m_065;
-    uint8_t m_066;
-    uint8_t _pad_0067[1];
-    uint32_t m_068;
-    uint32_t m_06c;
 };
 struct C_auto_00813e58 {
     C_auto_00813e58_vtbl * vtable;
@@ -22355,6 +22353,9 @@ struct C_auto_00816ca4 {
 struct IMAGE_RESOURCE_DIRECTORY_ENTRY_DirectoryStruct {
     uint32_t OffsetToDirectory;
     uint32_t DataIsDirectory;
+};
+struct S_ControlDesc {
+    C_auto_00813ab0_vtbl * vtable;
 };
 struct S_HumanCommand {
     S_HumanCommand_vtbl * vtable;

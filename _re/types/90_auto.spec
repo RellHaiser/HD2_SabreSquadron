@@ -327,7 +327,7 @@ class C_Switch size=0xe1 vtable=0x008139d0:56
   0x0e0 uint8_t m_0e0
 end
 
-class C_auto_00813ab0 size=0x40 vtable=0x00813ab0:1
+class S_ControlDesc size=0x40 vtable=0x00813ab0:1
 end
 
 class C_auto_00813ab8 size=0x4 vtable=0x00813ab8:1
@@ -354,7 +354,7 @@ end
 class C_auto_00813b68 size=0x4 vtable=0x00813b68:8
 end
 
-class C_auto_00813dd0 size=0x70 vtable=0x00813dd0:33
+class C_Control size=0x70 vtable=0x00813dd0:33
   0x004 uint8_t m_004
   0x008 uint32_t m_008
   0x00c uint32_t m_00c

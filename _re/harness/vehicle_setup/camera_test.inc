@@ -1211,6 +1211,7 @@ void C_Human::SetUnknown94(float value) { GfLog("unknown94 %s %.4f", CmHumanName
 #include "fonts_test.inc"
 #ifdef TEXT_TEST
 #include "textbox_test.inc"
+#include "control_test.inc"
 #endif
 
 void CameraTest(const char *path)
@@ -1238,6 +1239,7 @@ void CameraTest(const char *path)
     std::printf("== %s\n", mission.c_str());
 #ifdef TEXT_TEST
     TextBoxTest();
+    ControlTest();
     return;
 #endif
     S_CameraResults r;

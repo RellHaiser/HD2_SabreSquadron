@@ -178,7 +178,7 @@ uint32_t C_MainMenu__FUN_00633490(C_MainMenu *_this,int param_1, ...)
     local_204 = 0;
     local_1fc = 0;
     local_8 = 0x13;
-    FUN_00615a90(&DAT_008ae590,&local_204);
+    PostControlMessage(&DAT_008ae590,&local_204);
     if ((local_1f0 != 0) && (*local_1f0 = *local_1f0 - 1, *local_1f0 == 0)) {
       tier1_operator_delete(local_1f0);
     }
@@ -187,7 +187,7 @@ uint32_t C_MainMenu__FUN_00633490(C_MainMenu *_this,int param_1, ...)
     local_248 = 0x200009b;
     local_244 = 0;
     local_8 = 0x14;
-    FUN_00615a90(&DAT_008ae590,&local_24c);
+    PostControlMessage(&DAT_008ae590,&local_24c);
     if ((local_238 != 0) && (*local_238 = *local_238 - 1, *local_238 == 0)) {
       tier1_operator_delete(local_238);
     }
@@ -196,7 +196,7 @@ uint32_t C_MainMenu__FUN_00633490(C_MainMenu *_this,int param_1, ...)
     local_230 = 0x2000018;
     local_22c = 0;
     local_8 = 0x15;
-    FUN_00615a90(&DAT_008ae590,&local_234);
+    PostControlMessage(&DAT_008ae590,&local_234);
     if ((local_220 != 0) && (*local_220 = *local_220 - 1, *local_220 == 0)) {
       tier1_operator_delete(local_220);
     }
@@ -272,7 +272,7 @@ switchD_006334da_caseD_200000b:
     local_114 = 0;
     local_10c = 0;
     local_8 = 0xe;
-    FUN_00615a90(&DAT_008ae590,&local_114);
+    PostControlMessage(&DAT_008ae590,&local_114);
     pCVar5 = local_100;
     if (local_100 == 0) goto LAB_00633f2b;
     local_100->vtable = (C_MainMenu_vtbl *)((int)&local_100->vtable[-1].vf16 + 3);
@@ -302,7 +302,7 @@ switchD_006334da_caseD_200000b:
     local_1d0 = 0x2000002;
     local_1cc = 0xd;
     local_8 = 0x12;
-    FUN_00615a90(&DAT_008ae590,&local_1d4);
+    PostControlMessage(&DAT_008ae590,&local_1d4);
     pCVar5 = local_1c0;
     if (local_1c0 == 0) goto LAB_00633f2b;
     local_1c0->vtable = (C_MainMenu_vtbl *)((int)&local_1c0->vtable[-1].vf16 + 3);
@@ -332,7 +332,7 @@ switchD_006334da_caseD_200000b:
     local_4c = 10;
     local_48 = 0x910;
     local_8 = 0;
-    FUN_00615a90(&DAT_008ae590,&local_54);
+    PostControlMessage(&DAT_008ae590,&local_54);
     local_8 = 0xffffffff;
     if (local_40 != 0) {
       C_str__ReleaseRep(local_40);
@@ -342,7 +342,7 @@ switchD_006334da_caseD_200000b:
     local_188 = 0x1000001;
     local_184 = 0;
     local_8 = 1;
-    FUN_00615a90(&DAT_008ae590,&local_18c);
+    PostControlMessage(&DAT_008ae590,&local_18c);
     local_8 = 0xffffffff;
     if (local_178 != 0) {
       C_str__ReleaseRep(local_178);
@@ -352,7 +352,7 @@ switchD_006334da_caseD_200000b:
     local_c8 = 0x1000004;
     local_c4 = 0;
     local_8 = 2;
-    FUN_00615a90(&DAT_008ae590,&local_cc);
+    PostControlMessage(&DAT_008ae590,&local_cc);
     local_8 = 0xffffffff;
     if (local_b8 != 0) {
       C_str__ReleaseRep(local_b8);
@@ -362,7 +362,7 @@ switchD_006334da_caseD_200000b:
     local_218 = 0x1000001;
     local_214 = 0;
     local_8 = 3;
-    FUN_00615a90(&DAT_008ae590,&local_21c);
+    PostControlMessage(&DAT_008ae590,&local_21c);
     local_8 = 0xffffffff;
     if (local_208 != 0) {
       C_str__ReleaseRep(local_208);
@@ -372,7 +372,7 @@ switchD_006334da_caseD_200000b:
     local_f8 = 0x1000001;
     local_f4 = 0;
     local_8 = 4;
-    FUN_00615a90(&DAT_008ae590,&local_fc);
+    PostControlMessage(&DAT_008ae590,&local_fc);
     local_8 = 0xffffffff;
     if (local_e8 != 0) {
       C_str__ReleaseRep(local_e8);
@@ -382,7 +382,7 @@ switchD_006334da_caseD_200000b:
     local_1b8 = 0x1000001;
     local_1b4 = 0;
     local_8 = 5;
-    FUN_00615a90(&DAT_008ae590,&local_1bc);
+    PostControlMessage(&DAT_008ae590,&local_1bc);
     local_8 = 0xffffffff;
     if (local_1a8 != 0) {
       C_str__ReleaseRep(local_1a8);
@@ -392,7 +392,7 @@ switchD_006334da_caseD_200000b:
     local_12c = 0;
     local_124 = 8;
     local_8 = 6;
-    FUN_00615a90(&DAT_008ae590,&local_12c);
+    PostControlMessage(&DAT_008ae590,&local_12c);
     pCVar5 = local_118;
     if (local_118 == 0) goto LAB_00633f2b;
     local_118->vtable = (C_MainMenu_vtbl *)((int)&local_118->vtable[-1].vf16 + 3);
@@ -411,7 +411,7 @@ switchD_006334da_caseD_200000b:
     local_64 = 10;
     local_60 = 0x911;
     local_8 = 7;
-    FUN_00615a90(&DAT_008ae590,&local_6c);
+    PostControlMessage(&DAT_008ae590,&local_6c);
     if ((local_58 != 0) && (*local_58 = *local_58 - 1, *local_58 == 0)) {
       tier1_operator_delete(local_58);
     }
@@ -420,7 +420,7 @@ switchD_006334da_caseD_200000b:
     local_80 = 0x1000002;
     local_7c = 0;
     local_8 = 8;
-    FUN_00615a90(&DAT_008ae590,&local_84);
+    PostControlMessage(&DAT_008ae590,&local_84);
     if ((local_70 != 0) && (*local_70 = *local_70 - 1, *local_70 == 0)) {
       tier1_operator_delete(local_70);
     }
@@ -429,7 +429,7 @@ switchD_006334da_caseD_200000b:
     local_158 = 0x1000003;
     local_154 = 0;
     local_8 = 9;
-    FUN_00615a90(&DAT_008ae590,&local_15c);
+    PostControlMessage(&DAT_008ae590,&local_15c);
     if ((local_148 != 0) && (*local_148 = *local_148 - 1, *local_148 == 0)) {
       tier1_operator_delete(local_148);
     }
@@ -438,7 +438,7 @@ switchD_006334da_caseD_200000b:
     local_1e8 = 0x1000002;
     local_1e4 = 0;
     local_8 = 10;
-    FUN_00615a90(&DAT_008ae590,&local_1ec);
+    PostControlMessage(&DAT_008ae590,&local_1ec);
     if ((local_1d8 != 0) && (*local_1d8 = *local_1d8 - 1, *local_1d8 == 0)) {
       tier1_operator_delete(local_1d8);
     }
@@ -447,7 +447,7 @@ switchD_006334da_caseD_200000b:
     local_98 = 0x1000002;
     local_94 = 0;
     local_8 = 0xb;
-    FUN_00615a90(&DAT_008ae590,&local_9c);
+    PostControlMessage(&DAT_008ae590,&local_9c);
     if ((local_88 != 0) && (*local_88 = *local_88 - 1, *local_88 == 0)) {
       tier1_operator_delete(local_88);
     }
@@ -456,7 +456,7 @@ switchD_006334da_caseD_200000b:
     local_b0 = 0x1000001;
     local_ac = 0;
     local_8 = 0xc;
-    FUN_00615a90(&DAT_008ae590,&local_b4);
+    PostControlMessage(&DAT_008ae590,&local_b4);
     if ((local_a0 != 0) && (*local_a0 = *local_a0 - 1, *local_a0 == 0)) {
       tier1_operator_delete(local_a0);
     }
@@ -465,7 +465,7 @@ switchD_006334da_caseD_200000b:
     local_e4 = 0;
     local_dc = 8;
     local_8 = 0xd;
-    FUN_00615a90(&DAT_008ae590,&local_e4);
+    PostControlMessage(&DAT_008ae590,&local_e4);
     pCVar5 = local_d0;
     if (local_d0 == 0) goto LAB_00633f2b;
     local_d0->vtable = (C_MainMenu_vtbl *)((int)&local_d0->vtable[-1].vf16 + 3);
@@ -486,7 +486,7 @@ switchD_006334da_caseD_200000b:
     local_1a4 = 0;
     local_19c = 0xd;
     local_8 = 0x11;
-    FUN_00615a90(&DAT_008ae590,&local_1a4);
+    PostControlMessage(&DAT_008ae590,&local_1a4);
     pCVar5 = local_190;
     if (local_190 == 0) goto LAB_00633f2b;
     local_190->vtable = (C_MainMenu_vtbl *)((int)&local_190->vtable[-1].vf16 + 3);
@@ -498,7 +498,7 @@ switchD_006334da_caseD_200000b:
     local_140 = 0x20000c9;
     local_13c = 0;
     local_8 = 0xf;
-    FUN_00615a90(&DAT_008ae590,&local_144);
+    PostControlMessage(&DAT_008ae590,&local_144);
     pCVar5 = local_130;
     if (local_130 == 0) goto LAB_00633f2b;
     local_130->vtable = (C_MainMenu_vtbl *)((int)&local_130->vtable[-1].vf16 + 3);
@@ -510,7 +510,7 @@ switchD_006334da_caseD_200000b:
     local_174 = 0;
     local_16c = 0;
     local_8 = 0x10;
-    FUN_00615a90(&DAT_008ae590,&local_174);
+    PostControlMessage(&DAT_008ae590,&local_174);
     pCVar5 = local_160;
     if (local_160 == 0) goto LAB_00633f2b;
     local_160->vtable = (C_MainMenu_vtbl *)((int)&local_160->vtable[-1].vf16 + 3);
@@ -528,75 +528,75 @@ LAB_00633f2b:
 // 0x00634050
 uint32_t C_MainMenu__FUN_00634050(C_MainMenu *_this,void *param_1,int *param_2, ...)
 {
-  int iVar1;
+  void *pvVar1;
   FUN_00625f60((int)param_1,0,0x1000007,0x4014000,_this,FUN_00635ba0);
   FUN_00625f60((int)param_1,0,0x1000007,0x400d000,_this,FUN_006356d0);
-  iVar1 = FUN_00615360(param_1,0x13,"text_screen");
-  FUN_00614f10(iVar1,0,0x1000015,10,0x8fd);
-  iVar1 = FUN_00615360(param_1,10,"barrows");
-  FUN_0061e100(iVar1,0,0x1000007,0x4010000,_this,FUN_00636640);
-  iVar1 = FUN_00615360(param_1,0x14,"bhost name");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x8fe);
-  FUN_0061e100(iVar1,0,0x1000007,0x4001000,_this,FUN_00636640);
-  iVar1 = FUN_00615360(param_1,0x14,&DAT_0083fec8);
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x8ff);
-  FUN_0061e100(iVar1,0,0x1000007,0x4001000,_this,FUN_00636640);
-  iVar1 = FUN_00615360(param_1,0x14,"bstyle");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x900);
-  FUN_0061e100(iVar1,0,0x1000007,0x4001000,_this,FUN_00636640);
-  iVar1 = FUN_00615360(param_1,0x14,"bping");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x901);
-  FUN_0061e100(iVar1,0,0x1000007,0x4001000,_this,FUN_00636640);
-  iVar1 = FUN_00615360(param_1,0x14,"bplayers/max");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x902);
-  FUN_0061e100(iVar1,0,0x1000007,0x4001000,_this,FUN_00636640);
+  pvVar1 = (void *)FUN_00615360(param_1,0x13,"text_screen");
+  AddDescMessage2(pvVar1,0,0x1000015,10,0x8fd);
+  pvVar1 = (void *)FUN_00615360(param_1,10,"barrows");
+  AddDescMessage3(pvVar1,0,0x1000007,0x4010000,(uint32_t)_this,0x636640);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bhost name");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x8fe);
+  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x636640);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,&DAT_0083fec8);
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x8ff);
+  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x636640);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bstyle");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x900);
+  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x636640);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bping");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x901);
+  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x636640);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bplayers/max");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x902);
+  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x636640);
   C_MainMenu__FUN_00634580(_this,(int)param_1,param_2);
-  iVar1 = FUN_00615360(param_1,0x14,"brestore list");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x915);
-  FUN_0061e100(iVar1,0,0x1000007,0x4001000,_this,FUN_00634f90);
-  iVar1 = FUN_00615360(param_1,0x14,"brefresh list");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x917);
-  FUN_0061e100(iVar1,0,0x1000007,0x4001000,_this,FUN_00635360);
-  iVar1 = FUN_00615360(param_1,0x14,"benter server ip");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x904);
-  FUN_00614e80(iVar1,0,0x6001002,0xe);
-  FUN_00614e80(iVar1,0,0x1000001,0);
-  iVar1 = FUN_00615360(param_1,0x14,"bserver filters");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x905);
-  FUN_00614e80(iVar1,0,0x6001001,0xb);
-  FUN_00614e80(iVar1,0,0x6001028,0);
-  iVar1 = FUN_00615360(param_1,0x14,"bjoin game");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x906);
-  FUN_00614e80(iVar1,0,0x6001028,0);
-  FUN_00614e80(iVar1,0,0x600109b,0);
-  FUN_00614e80(iVar1,0,0x600102a,0);
-  FUN_00614e80(iVar1,0,0x1000001,0);
-  iVar1 = FUN_00615360(param_1,0x14,"bcreate server");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x907);
-  FUN_00614e80(iVar1,0,0x6001001,9);
-  FUN_00614e80(iVar1,0,0x6001028,0);
-  iVar1 = FUN_00615360(param_1,0x14,"bview game info");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x908);
-  FUN_00614e80(iVar1,0,0x6001001,0xc);
-  FUN_00614e80(iVar1,0,0x1000001,0);
-  iVar1 = FUN_00615360(param_1,0x14,"bback");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x909);
-  FUN_00614e80(iVar1,0,0x6001028,0);
-  FUN_00614e80(iVar1,0,0x600109b,0);
-  FUN_00614e80(iVar1,0x20900000,0x6001018,0);
-  FUN_00614e80(iVar1,0,0x6001003,0);
-  iVar1 = FUN_00615360(param_1,0x13,"text_h&dversion");
-  FUN_00614f10(iVar1,0,0x1000015,0x28,0x7d6);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"brestore list");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x915);
+  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x634f90);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"brefresh list");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x917);
+  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x635360);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"benter server ip");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x904);
+  AddDescMessage1(pvVar1,0,0x6001002,0xe);
+  AddDescMessage1(pvVar1,0,0x1000001,0);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bserver filters");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x905);
+  AddDescMessage1(pvVar1,0,0x6001001,0xb);
+  AddDescMessage1(pvVar1,0,0x6001028,0);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bjoin game");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x906);
+  AddDescMessage1(pvVar1,0,0x6001028,0);
+  AddDescMessage1(pvVar1,0,0x600109b,0);
+  AddDescMessage1(pvVar1,0,0x600102a,0);
+  AddDescMessage1(pvVar1,0,0x1000001,0);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bcreate server");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x907);
+  AddDescMessage1(pvVar1,0,0x6001001,9);
+  AddDescMessage1(pvVar1,0,0x6001028,0);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bview game info");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x908);
+  AddDescMessage1(pvVar1,0,0x6001001,0xc);
+  AddDescMessage1(pvVar1,0,0x1000001,0);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bback");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x909);
+  AddDescMessage1(pvVar1,0,0x6001028,0);
+  AddDescMessage1(pvVar1,0,0x600109b,0);
+  AddDescMessage1(pvVar1,0x20900000,0x6001018,0);
+  AddDescMessage1(pvVar1,0,0x6001003,0);
+  pvVar1 = (void *)FUN_00615360(param_1,0x13,"text_h&dversion");
+  AddDescMessage2(pvVar1,0,0x1000015,0x28,0x7d6);
   FUN_00615360(param_1,4,"gamespylogo");
   FUN_00615360(param_1,4,"esrb-US");
-  iVar1 = FUN_00615360(param_1,0x13,"text_online");
-  FUN_00614f10(iVar1,0,0x1000015,0x28,0x7d6);
-  iVar1 = FUN_00615360(param_1,0x14,"badd/remove");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x4e86);
-  FUN_0061e100(iVar1,0,0x1000007,0x4001000,_this,FUN_00634950);
-  iVar1 = FUN_00615360(param_1,0x14,"bfavorites");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x4e84);
-  FUN_0061e100(iVar1,0,0x1000007,0x4001000,_this,FUN_00634b30);
+  pvVar1 = (void *)FUN_00615360(param_1,0x13,"text_online");
+  AddDescMessage2(pvVar1,0,0x1000015,0x28,0x7d6);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"badd/remove");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x4e86);
+  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x634950);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bfavorites");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x4e84);
+  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x634b30);
   return 1;
 }
 
@@ -606,11 +606,12 @@ uint32_t C_MainMenu__FUN_00634580(C_MainMenu *_this,int param_1,int *param_2, ..
 {
   uint8_t stack0xffffff70[64];
   void *this_00;
+  void *desc;
   C_str *pCVar1;
   C_str_rep *pCVar2;
   C_str_rep *pCVar3;
   int *piVar4;
-  C_auto_00813ab0 *pCVar5;
+  S_ControlDesc *pSVar5;
   uint32_t *puVar6;
   C_str_rep *this_01;
   int iVar7;
@@ -670,16 +671,15 @@ uint32_t C_MainMenu__FUN_00634580(C_MainMenu *_this,int param_1,int *param_2, ..
     else {
       iVar7 = *(int *)(param_1 + 0x2c) - *(int *)(param_1 + 0x28) >> 2;
     }
-    pCVar5 = tier1_operator_new(0x40);
+    pSVar5 = tier1_operator_new(0x40);
     uStack_44 = 2;
-    if (pCVar5 == 0) {
+    if (pSVar5 == 0) {
       CStack_94.rep = 0;
     }
     else {
       CStack_94.rep =
-           (C_str_rep *)
-           C_auto_00813ab0__FUN_00615090
-                     (pCVar5,8,"scroll00",
+           S_ControlDesc__S_ControlDesc
+                     (pSVar5,8,"scroll00",
                       (iVar7 + 1U & 0x3f) << 0x14 | *(uint32_t *)(param_1 + 0x40));
     }
     uStack_44 = 0xffffffff;
@@ -695,38 +695,37 @@ uint32_t C_MainMenu__FUN_00634580(C_MainMenu *_this,int param_1,int *param_2, ..
     else {
       iVar7 = *(int *)(param_1 + 0x2c) - *(int *)(param_1 + 0x28) >> 2;
     }
-    pCVar5 = tier1_operator_new(0x40);
+    pSVar5 = tier1_operator_new(0x40);
     uStack_44 = 4;
-    if (pCVar5 == 0) {
+    if (pSVar5 == 0) {
       CStack_94.rep = 0;
     }
     else {
       CStack_94.rep =
-           (C_str_rep *)
-           C_auto_00813ab0__FUN_00615090
-                     (pCVar5,0x18,"GB_ServerList",
+           S_ControlDesc__S_ControlDesc
+                     (pSVar5,0x18,"GB_ServerList",
                       (iVar7 + 1U & 0x3f) << 0x14 | *(uint32_t *)(param_1 + 0x40));
     }
     uStack_44 = 0xffffffff;
     FUN_00615f50((void *)(param_1 + 0x24),*(uint32_t **)(param_1 + 0x2c),(uint32_t*)(&CStack_94));
-    iVar7 = *(int *)(*(int *)(param_1 + 0x2c) - 4);
-    this_00 = (void *)(iVar7 + 0x10);
+    desc = *(void **)(*(int *)(param_1 + 0x2c) - 4);
+    this_00 = (void *)((int)desc + 0x10);
     uStack_44 = 5;
-    FUN_00615d50(this_00,*(uint32_t **)(iVar7 + 0x18),(uint32_t *)&stack0xffffff70);
+    FUN_00615d50(this_00,*(uint32_t **)((int)desc + 0x18),(uint32_t *)&stack0xffffff70);
     uStack_44 = 0xffffffff;
     puVar6 = (uint32_t *)FUN_00614da0(&stack0xffffff70,0,0x1000007,0x400e000,this_01,FUN_006360c0)
     ;
     uStack_44 = 6;
-    FUN_00615d50(this_00,*(uint32_t **)(iVar7 + 0x18),puVar6);
+    FUN_00615d50(this_00,*(uint32_t **)((int)desc + 0x18),puVar6);
     uStack_44 = 0xffffffff;
     puVar6 = (uint32_t *)FUN_00614da0(local_68,0,0x1000007,0x4013000,this_01,FUN_00636280);
     uStack_44 = 7;
-    FUN_00615d50(this_00,*(uint32_t **)(iVar7 + 0x18),puVar6);
+    FUN_00615d50(this_00,*(uint32_t **)((int)desc + 0x18),puVar6);
     uStack_44 = 0xffffffff;
     if ((piStack_54 != 0) && (*piStack_54 = *piStack_54 - 1, *piStack_54 == 0)) {
       tier1_operator_delete(piStack_54);
     }
-    FUN_0061e100(iVar7,0,0x1000007,0x4010000,this_01,FUN_006364b0);
+    AddDescMessage3(desc,0,0x1000007,0x4010000,(uint32_t)this_01,0x6364b0);
     return 1;
   }
   return 0;
@@ -848,6 +847,7 @@ uint32_t FUN_00634b30(void *param_1, ...)
 {
   void *_this;
   void *pvVar1;
+  void *extraout_EAX;
   uint32_t local_12c;
   uint32_t local_128;
   uint32_t local_124;
@@ -916,7 +916,7 @@ uint32_t FUN_00634b30(void *param_1, ...)
     local_80 = 0x1000001;
     local_7c = 0;
     local_4 = 1;
-    FUN_00615a90(&DAT_008ae590,&local_84);
+    PostControlMessage(&DAT_008ae590,&local_84);
     if (local_70 != 0) {
       C_str__ReleaseRep(local_70);
     }
@@ -925,7 +925,7 @@ uint32_t FUN_00634b30(void *param_1, ...)
     local_50 = 0x1000001;
     local_4c = 0;
     local_4 = 2;
-    FUN_00615a90(&DAT_008ae590,&local_54);
+    PostControlMessage(&DAT_008ae590,&local_54);
     if (local_40 != 0) {
       C_str__ReleaseRep(local_40);
     }
@@ -934,7 +934,7 @@ uint32_t FUN_00634b30(void *param_1, ...)
     local_20 = 0x1000001;
     local_1c = 0;
     local_4 = 3;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
       C_str__ReleaseRep(local_10);
     }
@@ -944,7 +944,7 @@ uint32_t FUN_00634b30(void *param_1, ...)
     local_10c = 0xd;
     local_108 = 0x4e85;
     local_4 = 4;
-    FUN_00615a90(&DAT_008ae590,&local_114);
+    PostControlMessage(&DAT_008ae590,&local_114);
     if (local_100 != 0) {
       C_str__ReleaseRep(local_100);
     }
@@ -954,7 +954,8 @@ uint32_t FUN_00634b30(void *param_1, ...)
     local_dc = 0xd;
     local_d8 = 0x4e87;
     local_4 = 5;
-    pvVar1 = (void *)FUN_00615a90(&DAT_008ae590,&local_e4);
+    PostControlMessage(&DAT_008ae590,&local_e4);
+    pvVar1 = extraout_EAX;
     if (local_d0 != 0) {
       pvVar1 = (void *)C_str__ReleaseRep(local_d0);
     }
@@ -979,7 +980,7 @@ uint32_t FUN_00634b30(void *param_1, ...)
       local_c8 = 0x1000002;
       local_c4 = 0;
       local_4 = 7;
-      FUN_00615a90(&DAT_008ae590,&local_cc);
+      PostControlMessage(&DAT_008ae590,&local_cc);
       if (local_b8 != 0) {
         C_str__ReleaseRep(local_b8);
       }
@@ -988,7 +989,7 @@ uint32_t FUN_00634b30(void *param_1, ...)
       local_38 = 0x1000002;
       local_34 = 0;
       local_4 = 8;
-      FUN_00615a90(&DAT_008ae590,&local_3c);
+      PostControlMessage(&DAT_008ae590,&local_3c);
       if ((local_28 != 0) && (*local_28 = *local_28 - 1, *local_28 == 0)) {
         tier1_operator_delete(local_28);
       }
@@ -997,7 +998,7 @@ uint32_t FUN_00634b30(void *param_1, ...)
       local_68 = 0x1000001;
       local_64 = 0;
       local_4 = 9;
-      FUN_00615a90(&DAT_008ae590,&local_6c);
+      PostControlMessage(&DAT_008ae590,&local_6c);
       if ((local_58 != 0) && (*local_58 = *local_58 - 1, *local_58 == 0)) {
         tier1_operator_delete(local_58);
       }
@@ -1007,7 +1008,7 @@ uint32_t FUN_00634b30(void *param_1, ...)
       local_f4 = 0xd;
       local_f0 = 0x4e84;
       local_4 = 10;
-      FUN_00615a90(&DAT_008ae590,&local_fc);
+      PostControlMessage(&DAT_008ae590,&local_fc);
       if ((local_e8 != 0) && (*local_e8 = *local_e8 - 1, *local_e8 == 0)) {
         tier1_operator_delete(local_e8);
       }
@@ -1017,7 +1018,7 @@ uint32_t FUN_00634b30(void *param_1, ...)
       local_124 = 0xd;
       local_120 = 0x4e86;
       local_4 = 0xb;
-      FUN_00615a90(&DAT_008ae590,&local_12c);
+      PostControlMessage(&DAT_008ae590,&local_12c);
       if ((local_118 != 0) && (*local_118 = *local_118 - 1, *local_118 == 0)) {
         tier1_operator_delete(local_118);
       }
@@ -1059,7 +1060,7 @@ uint32_t FUN_00634f90(int param_1, ...)
       local_20 = 0x2000018;
       local_1c = 0;
       local_4 = 0;
-      FUN_00615a90(&DAT_008ae590,&local_24);
+      PostControlMessage(&DAT_008ae590,&local_24);
       if (local_10 != 0) {
         C_str__ReleaseRep(local_10);
       }
@@ -1070,7 +1071,7 @@ uint32_t FUN_00634f90(int param_1, ...)
     local_20 = 0x1000001;
     local_1c = 0;
     local_4 = 1;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
       C_str__ReleaseRep(local_10);
     }
@@ -1079,7 +1080,7 @@ uint32_t FUN_00634f90(int param_1, ...)
     local_20 = 0x1000001;
     local_1c = 0;
     local_4 = 2;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
       C_str__ReleaseRep(local_10);
     }
@@ -1088,7 +1089,7 @@ uint32_t FUN_00634f90(int param_1, ...)
     local_20 = 0x1000001;
     local_1c = 0;
     local_4 = 3;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
       C_str__ReleaseRep(local_10);
     }
@@ -1097,7 +1098,7 @@ uint32_t FUN_00634f90(int param_1, ...)
     local_20 = 0x200002c;
     local_1c = 0;
     local_4 = 4;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
       C_str__ReleaseRep(local_10);
     }
@@ -1106,7 +1107,7 @@ uint32_t FUN_00634f90(int param_1, ...)
     local_20 = 0x1000001;
     local_1c = 0;
     local_4 = 5;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
       C_str__ReleaseRep(local_10);
     }
@@ -1116,7 +1117,7 @@ uint32_t FUN_00634f90(int param_1, ...)
     local_1c = 0xd;
     local_18 = 0x916;
     local_4 = 6;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
       C_str__ReleaseRep(local_10);
     }
@@ -1125,7 +1126,7 @@ uint32_t FUN_00634f90(int param_1, ...)
     local_20 = 0x2000098;
     local_1c = 0;
     local_4 = 7;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if ((local_10 != 0) &&
        (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
       tier1_operator_delete(local_10);
@@ -1138,7 +1139,7 @@ uint32_t FUN_00634f90(int param_1, ...)
     local_20 = 0x2000028;
     local_1c = 0;
     local_4 = 8;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if ((local_10 != 0) &&
        (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
       tier1_operator_delete(local_10);
@@ -1148,7 +1149,7 @@ uint32_t FUN_00634f90(int param_1, ...)
     local_20 = 0x2000079;
     local_1c = 0;
     local_4 = 9;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if ((local_10 != 0) &&
        (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
       tier1_operator_delete(local_10);
@@ -1159,7 +1160,7 @@ uint32_t FUN_00634f90(int param_1, ...)
     local_1c = 0xd;
     local_18 = 0x915;
     local_4 = 10;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     local_4 = 0xffffffff;
     if ((local_10 != 0) &&
        (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
@@ -1172,7 +1173,7 @@ uint32_t FUN_00634f90(int param_1, ...)
       local_20 = 0x1000002;
       local_1c = 0;
       local_4 = 0xb;
-      FUN_00615a90(&DAT_008ae590,&local_24);
+      PostControlMessage(&DAT_008ae590,&local_24);
       if ((local_10 != 0) &&
          (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
         tier1_operator_delete(local_10);
@@ -1189,8 +1190,9 @@ uint32_t FUN_00634f90(int param_1, ...)
 // 0x00635360
 uint32_t FUN_00635360(int param_1, ...)
 {
-  S_MultiplayerSettings *pSVar1;
   S_MultiplayerSettings *extraout_EAX;
+  S_MultiplayerSettings *pSVar1;
+  S_MultiplayerSettings *extraout_EAX_00;
   uint32_t local_24;
   uint32_t local_20;
   uint32_t local_1c;
@@ -1209,7 +1211,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_20 = 0x1000001;
     local_1c = 0;
     local_4 = 0;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
       C_str__ReleaseRep((C_str *)local_10);
     }
@@ -1218,7 +1220,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_20 = 0x1000001;
     local_1c = 0;
     local_4 = 1;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
       C_str__ReleaseRep((C_str *)local_10);
     }
@@ -1227,7 +1229,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_20 = 0x1000001;
     local_1c = 0;
     local_4 = 2;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
       C_str__ReleaseRep((C_str *)local_10);
     }
@@ -1236,7 +1238,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_20 = 0x2000018;
     local_1c = 0;
     local_4 = 3;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
       C_str__ReleaseRep((C_str *)local_10);
     }
@@ -1245,7 +1247,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_20 = 0x1000001;
     local_1c = 0;
     local_4 = 4;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
       C_str__ReleaseRep((C_str *)local_10);
     }
@@ -1255,7 +1257,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_1c = 0xd;
     local_18 = 0x918;
     local_4 = 5;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
       C_str__ReleaseRep((C_str *)local_10);
     }
@@ -1264,7 +1266,8 @@ uint32_t FUN_00635360(int param_1, ...)
     local_20 = 0x2000027;
     local_1c = 0;
     local_4 = 6;
-    pSVar1 = (S_MultiplayerSettings *)FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
+    pSVar1 = extraout_EAX;
     if (local_10 != 0) {
       pSVar1 = (S_MultiplayerSettings *)C_str__ReleaseRep((C_str *)local_10);
     }
@@ -1276,7 +1279,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_20 = 0x2000028;
     local_1c = 0;
     local_4 = 7;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if ((local_10 != 0) &&
        (*(int *)local_10 = *(int *)local_10 - 1, *(int *)local_10 == 0)) {
       tier1_operator_delete(local_10);
@@ -1286,7 +1289,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_20 = 0x2000079;
     local_1c = 0;
     local_4 = 8;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if ((local_10 != 0) &&
        (*(int *)local_10 = *(int *)local_10 - 1, *(int *)local_10 == 0)) {
       tier1_operator_delete(local_10);
@@ -1297,7 +1300,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_1c = 0xd;
     local_18 = 0x917;
     local_4 = 9;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     local_4 = 0xffffffff;
     if ((local_10 != 0) &&
        (*(int *)local_10 = *(int *)local_10 - 1, *(int *)local_10 == 0)) {
@@ -1310,13 +1313,13 @@ uint32_t FUN_00635360(int param_1, ...)
       local_20 = 0x1000002;
       local_1c = 0;
       local_4 = 10;
-      FUN_00615a90(&DAT_008ae590,&local_24);
+      PostControlMessage(&DAT_008ae590,&local_24);
       pSVar1 = local_10;
       if ((local_10 != 0) &&
          (*(int *)local_10->_pad_0000 = *(int *)local_10->_pad_0000 - 1,
          *(int *)local_10->_pad_0000 == 0)) {
         tier1_operator_delete(local_10);
-        pSVar1 = extraout_EAX;
+        pSVar1 = extraout_EAX_00;
       }
     }
     *(uint32_t *)(param_1 + 0x1c8) = 0;
@@ -1783,7 +1786,7 @@ uint32_t FUN_006360c0(void *_this,uint32_t param_1,int *param_2, ...)
   local_24 = 0x1000002;
   local_20 = 0;
   _local_8 = CONCAT31(uStack_7,1);
-  FUN_00615a90(&DAT_008ae590,&local_28);
+  PostControlMessage(&DAT_008ae590,&local_28);
   if ((local_14 != 0) && (*local_14 = *local_14 - 1, *local_14 == 0)) {
     tier1_operator_delete(local_14);
   }
@@ -1792,7 +1795,7 @@ uint32_t FUN_006360c0(void *_this,uint32_t param_1,int *param_2, ...)
   local_24 = 0x1000002;
   local_20 = 0;
   local_8 = 2;
-  FUN_00615a90(&DAT_008ae590,&local_28);
+  PostControlMessage(&DAT_008ae590,&local_28);
   local_8 = 0;
   if ((local_14 != 0) && (*local_14 = *local_14 - 1, *local_14 == 0)) {
     tier1_operator_delete(local_14);
@@ -1853,7 +1856,7 @@ uint32_t FUN_00636280(int param_1, ...)
     local_20 = 0x2000028;
     local_1c = 0;
     local_4 = 0;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
       tier1_operator_delete(local_10);
     }
@@ -1862,7 +1865,7 @@ uint32_t FUN_00636280(int param_1, ...)
     local_20 = 0x200009b;
     local_1c = 0;
     local_4 = 1;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
       tier1_operator_delete(local_10);
     }
@@ -1979,7 +1982,7 @@ uint32_t FUN_006364b0(void *param_1, ...)
     tier1_operator_delete(local_44.rep);
   }
   local_4 = CONCAT31(GH_PIECE(local_4,1,3),4);
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   if ((local_28 != 0) &&
      (local_28->refCount = local_28->refCount - 1, local_28->refCount == 0)) {
     tier1_operator_delete(local_28);
@@ -2091,7 +2094,7 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
         local_f8 = 0x2000079;
         local_f4 = 0xc0;
         local_4 = CONCAT31(GH_PIECE(local_4,1,3),2);
-        FUN_00615a90(&DAT_008ae590,&local_fc);
+        PostControlMessage(&DAT_008ae590,&local_fc);
         if (local_e8 != 0) {
           C_str__ReleaseRep(local_e8);
         }
@@ -2103,7 +2106,7 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
           local_cc = 0x20200000;
           local_c8 = 0x100006d;
           local_4 = CONCAT31(GH_PIECE(local_4,1,3),3);
-          FUN_00615a90(&DAT_008ae590,&local_cc);
+          PostControlMessage(&DAT_008ae590,&local_cc);
           if (local_b8 != 0) {
             C_str__ReleaseRep(local_b8);
           }
@@ -2114,7 +2117,7 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
           local_68 = 0x2000079;
           local_64 = 1;
           local_4 = CONCAT31(GH_PIECE(local_4,1,3),4);
-          FUN_00615a90(&DAT_008ae590,&local_6c);
+          PostControlMessage(&DAT_008ae590,&local_6c);
           if (local_58 != 0) {
             C_str__ReleaseRep(local_58);
           }
@@ -2128,7 +2131,7 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
           local_100 = 0;
           local_110 = 0x100006d;
           local_4 = CONCAT31(GH_PIECE(local_4,1,3),5);
-          FUN_00615a90(&DAT_008ae590,&local_114);
+          PostControlMessage(&DAT_008ae590,&local_114);
           if (local_100 != 0) {
             C_str__ReleaseRep(local_100);
           }
@@ -2139,7 +2142,7 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
           local_98 = 0x2000079;
           local_94 = 2;
           local_4 = CONCAT31(GH_PIECE(local_4,1,3),6);
-          FUN_00615a90(&DAT_008ae590,&local_9c);
+          PostControlMessage(&DAT_008ae590,&local_9c);
           if (local_88 != 0) {
             C_str__ReleaseRep(local_88);
           }
@@ -2153,7 +2156,7 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
       local_3c = 0x20200000;
       local_38 = 0x100006d;
       local_4 = CONCAT31(GH_PIECE(local_4,1,3),7);
-      FUN_00615a90(&DAT_008ae590,&local_3c);
+      PostControlMessage(&DAT_008ae590,&local_3c);
       if (local_28 != 0) {
         C_str__ReleaseRep(local_28);
       }
@@ -2164,7 +2167,7 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
     local_e0 = 0x2000079;
     local_dc = 3;
     local_4 = CONCAT31(GH_PIECE(local_4,1,3),8);
-    FUN_00615a90(&DAT_008ae590,&local_e4);
+    PostControlMessage(&DAT_008ae590,&local_e4);
     ptr = local_d0;
   }
   else if (iVar1 == 0x20600000) {
@@ -2174,7 +2177,7 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
       local_54 = 0x20200000;
       local_50 = 0x100006d;
       local_4 = CONCAT31(GH_PIECE(local_4,1,3),9);
-      FUN_00615a90(&DAT_008ae590,&local_54);
+      PostControlMessage(&DAT_008ae590,&local_54);
       ptr = local_40;
     }
     else {
@@ -2183,7 +2186,7 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
       local_20 = 0x2000079;
       local_1c = 4;
       local_4 = CONCAT31(GH_PIECE(local_4,1,3),10);
-      FUN_00615a90(&DAT_008ae590,&local_24);
+      PostControlMessage(&DAT_008ae590,&local_24);
       ptr = local_10;
     }
   }
@@ -2204,7 +2207,7 @@ LAB_006369b3:
       local_b4 = 0x20200000;
       local_b0 = 0x100006d;
       local_4 = CONCAT31(GH_PIECE(local_4,1,3),0xb);
-      FUN_00615a90(&DAT_008ae590,&local_b4);
+      PostControlMessage(&DAT_008ae590,&local_b4);
       ptr = local_a0;
     }
     else {
@@ -2213,7 +2216,7 @@ LAB_006369b3:
       local_80 = 0x2000079;
       local_7c = 5;
       local_4 = CONCAT31(GH_PIECE(local_4,1,3),0xc);
-      FUN_00615a90(&DAT_008ae590,&local_84);
+      PostControlMessage(&DAT_008ae590,&local_84);
       ptr = local_70;
     }
   }

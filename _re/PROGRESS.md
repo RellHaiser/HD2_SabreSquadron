@@ -6266,6 +6266,72 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/text_box.txt (+5); 20 functions in ported.txt. Stats: 8,123 of 12,293 functions by
     hand (74.2 % by size).
 
+  PART 9c PLAN (2026-11-01): the controls (0x0064dce0..0x0066b010, ~580 functions, 111 KB, 39 kinds
+  made by the factory CreateChild 0x0065d470 from a description's type 2..0x28). A control wraps a
+  frame of the menu's scene (found by name, a mask: "normal*", "barrow up*"), owns child controls
+  and talks by messages (routes: a notification sends a message, by id through the global queue or
+  to itself; callbacks: thiscall functions of an object). The menus build the descriptions in code
+  (0x00615360 a screen's child, 0x00614e80.. its messages, 0x0061e100 its callbacks). Split:
+  9c-i the base (vtable 0x00813dd0), the descriptions, the messages and the queue;
+  9c-ii the small controls on the base (33 slots, under 1 KB each): types 0x13 (0x00813cc0),
+  2 the button (0x00813f68), 4 (0x00813ff0), 5 (0x00814430), 6 (0x00814ed0, on 0x00813e58),
+  0x12 (0x00814188), 0x14 (0x00814cb0), 0x15 (0x008148f8), 0xc (0x00815310), 0x25 the text control
+  (0x00814d38, on 0x00815420) and the bases 0x00813e58 / 0x00814078 / 0x00814100 / 0x00815420;
+  9c-iii the check / yes-no / arrow / slider kinds: 7 (0x00815288 "sliderbase*"), 9 (0x00815200),
+  0xa (0x00814c28 up / down), 0x24 (0x00815178), 0x1e (0x008146d8 "allied*" / "axis*"), 0x1f
+  (0x00814650 yes / no / empty), 8 (0x00814210, the slider with arrows), 0x10 (0x00815398 arrows);
+  9c-iv the texts and lists: 0xf the scrolled text (0x008143a8), 0x11 the list box (0x00814e48),
+  0x19 the skills (0x00814ba0), 0x21 (0x008145c8, "binput*"), 0x28 (0x00814dc0), 0x1c (0x00814b18,
+  the item's stats), 0x1b / 0x1a (0x00813d48 / 0x00814298 on 0x00813ee0: the selection list, 67
+  slots);
+  9c-v the big ones by class: 0x26 (0x008144b8, 67 slots), 0x17 (0x00814760, 101 slots: the
+  upgrades), 0x18 (0x00814980, 101 slots: the servers / ammo), 0xe (0x00814f58, 135 slots: the
+  hotkeys), 0x23 (0x00814a08), 0xb (0x00815068), 0x16 (0x008147e8), 0x1d / 0x20 / 0x22 / 0x27;
+  9c-vi the screens (0x00815540 the screen root, 0x008155d8, 0x008154b8, 0x00815918), the cursor
+  (0x008155d0 singleton, 0x0066a7e0) and the factory 0x0065d470 last (it news every kind).
+
+  PART 9c-i DONE (2026-11-01): the controls' base (src/game/control.*, new: C_Control, vtable
+  0x00813dd0, 0x6C bytes; S_ControlDesc, vtable 0x00813ab0, 0x40 bytes; S_ControlMessage 0x18
+  bytes; the queue g_controlMessages 0x008ae590).
+  - C_Control: its children (owned, deleted the last first), routes (S_ControlMessage), callbacks
+    (S_ControlCallback {notification, object, function}; the CONTROL_NOTIFY_ANY one instead of the
+    list), parent, frame (its data the control's id), the description's type, a value and an index
+    (messages 0x100000B / 0x1000009 and their gets), its id (a child's index in the field after its
+    parent's: bits 20-25, 12-19, 4-11; FindChild), inactive (+0x64, SetInactive: the button's
+    "inactived*" frame), shown (+0x65), taking input (+0x66), the menu's scene (+0x68).
+  - The slots (33): FindChild, IsChild, TakesInput (shown, active, taking input), Show / Hide (the
+    frame on / off and updated, CONTROL_NOTIFY_SHOWN / _HIDDEN), Refresh (the shown control's
+    children), Tick, Create (the frame, the description's type and its children by the factory
+    CreateChild, faked in the harness until 9c-vi), the cursor's input (one argument, the id; each
+    raises its notification, not handled: 7; OnEnter 0x4003000, OnLeave 0x4004000, OnClick
+    0x4001000, OnRelease 0x4007000, OnPress 0x4006000, OnWheel (id, amount: RET 8, ret_audit;
+    0x4011000), OnKeyClick 0x4012000 then OnClick, the rest by their codes), HandleMessage (a route
+    kept; else DEACTIVATE / ACTIVATE (when it changes), SHOW / HIDE, IGNORE / TAKE_INPUT, the
+    callbacks' ADD / REMOVE, the value and index, NOTIFY (a value with bit 0x04000000), REFRESH
+    0x200002C passed to the children as a copy), HandleMessages, HandleMessageCopy, SetStrings (the
+    description's +0x20, none), SetInactive, the destructor.
+  - Notify 0x0065d270: the callbacks (the first on the notification with a function; ANY's with its
+    argument 0), then each route on it: its message (the notification's bits cleared) posted to
+    the queue, or handled by the control (target -1). RemoveCallback: by the message's object,
+    else its notification, else its function (the last given decides; none: nothing).
+  - S_ControlDesc (type, name, id; messages, strings, children; the destructor deletes the
+    children); AddDescMessage (4 forms: 0x00614e80 one value, 0x00614f10 two, 0x0061e100 three (the
+    callbacks), 0x00614fa0 a text). PostControlMessage 0x00615a90 (the deque's push_back; 100
+    callers).
+  - Fix: REFRESH's copies sent to the children have their other values 0 (the original's stack).
+  - Harness: control_test.inc in the text build ("control:", 14 checks; CameraTest runs ControlTest
+    after TextBoxTest). 0 of 22 in both orders; the camera and the world builds 0 of 22 in both
+    orders.
+  - Mutations (mutations/mutate_9c1.py, the text build): the first run caught 102 of 123; new cases
+    (the notifications' value 0, the first id field's 6 bits, a callback without its function);
+    121 of 123 (HandleMessages one past the end: undefined, a crash in one run; 1 equivalent).
+  - Build: 209 files clean (MSVC). Tier 1: 485 errors in 82 files, 198 stubs (496 / 83 / 199
+    before; C_Control's members and callers exported again). ret_audit --src: 52.
+  - Ghidra: C_auto_00813dd0 / C_auto_00813ab0 renamed C_Control / S_ControlDesc (90_auto.spec,
+    class_names.json, auto_members.json, tier1_fixups.json); names/control.txt (48, the factory's
+    name too); 52 functions in ported.txt (5 vector helpers absorbed). Stats: 8,175 of 12,293
+    functions by hand (74.3 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

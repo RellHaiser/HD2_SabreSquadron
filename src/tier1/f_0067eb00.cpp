@@ -1030,7 +1030,7 @@ uint32_t C_GameMenu__FUN_0067f850(C_GameMenu *_this,int param_1, ...)
         local_38 = 0x2000003;
         local_34 = 0;
         local_4 = 1;
-        FUN_00615a90(&DAT_008ae590,&local_3c);
+        PostControlMessage(&DAT_008ae590,&local_3c);
         ptr = local_28;
         goto LAB_0067fc29;
       }
@@ -1125,7 +1125,7 @@ LAB_0067f932:
     local_50 = 0x200000a;
     local_4c = 0;
     local_4 = 0;
-    FUN_00615a90(&DAT_008ae590,&local_54);
+    PostControlMessage(&DAT_008ae590,&local_54);
     ptr = local_40;
     goto LAB_0067fc29;
   case 0x2000077:
@@ -1152,7 +1152,7 @@ LAB_0067f932:
     local_20 = 0x200000a;
     local_1c = 0;
     local_4 = 2;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     ptr = local_10;
 LAB_0067fc29:
     if ((ptr != 0) && (*ptr = *ptr - 1, *ptr == 0)) {
@@ -1348,7 +1348,7 @@ uint32_t C_GameMenu__FUN_0067fe00(C_GameMenu *_this, ...)
         local_2c = 0;
       }
       else {
-        local_2c = C_auto_00815540__FUN_00668420(local_28,_this->m_030,piVar7);
+        local_2c = C_Control__FUN_00668420((C_Control*)(local_28),_this->m_030,piVar7);
       }
       local_4 = 0xffffffff;
       cVar4 = (**(code **)(*local_2c + 0x8c))(*(uint32_t *)(puVar5[2] + uVar8 * 4));
@@ -1470,7 +1470,7 @@ uint32_t FUN_006802a0(...)
     local_a0[3] = 0;
     local_4 = 0;
     local_a0[0] = iVar4;
-    FUN_00615a90(&DAT_008ae590,local_a0 + 1);
+    PostControlMessage(&DAT_008ae590,local_a0 + 1);
     if (local_88 != 0) {
       C_str__ReleaseRep(local_88);
     }
@@ -1480,7 +1480,7 @@ uint32_t FUN_006802a0(...)
     local_7c = 0x56;
     local_78 = 0x4f4c;
     local_4 = 1;
-    FUN_00615a90(&DAT_008ae590,&local_84);
+    PostControlMessage(&DAT_008ae590,&local_84);
     local_4 = 0xffffffff;
     if (local_70.rep != 0) {
       C_str__ReleaseRep((C_str *)local_70.rep);
@@ -1537,7 +1537,7 @@ uint32_t FUN_006802a0(...)
           tier1_operator_delete(local_a8.rep);
         }
         local_4 = CONCAT31(GH_PIECE(local_4,1,3),7);
-        FUN_00615a90(&DAT_008ae590,&local_84);
+        PostControlMessage(&DAT_008ae590,&local_84);
         if ((local_70.rep != 0) &&
            ((local_70.rep)->refCount = (int)((C_str_rep *)(local_70.rep)->refCount)[-1].chars,
            (C_str_rep *)(local_70.rep)->refCount == 0)) {
@@ -1550,7 +1550,7 @@ uint32_t FUN_006802a0(...)
           local_68[3] = 0x58;
           local_68[4] = 0x4f4d;
           local_4 = CONCAT31(GH_PIECE(local_4,1,3),8);
-          FUN_00615a90(&DAT_008ae590,local_68 + 1);
+          PostControlMessage(&DAT_008ae590,local_68 + 1);
           ptr = local_50;
         }
         else if (*(int *)(*(int *)(CVar2.rep[6].chars + *(int *)(local_a0[0] + 4) - 2) + 0xec) < 1)
@@ -1561,7 +1561,7 @@ uint32_t FUN_006802a0(...)
           local_40 = 0x58;
           local_3c = 0x4f4e;
           local_4 = CONCAT31(GH_PIECE(local_4,1,3),9);
-          FUN_00615a90(&DAT_008ae590,&local_48);
+          PostControlMessage(&DAT_008ae590,&local_48);
           ptr = (C_str_rep *)local_34;
         }
         else {
@@ -1571,7 +1571,7 @@ uint32_t FUN_006802a0(...)
           local_a0[3] = 0x58;
           local_a0[4] = 0x4f4f;
           local_4 = CONCAT31(GH_PIECE(local_4,1,3),10);
-          FUN_00615a90(&DAT_008ae590,local_a0 + 1);
+          PostControlMessage(&DAT_008ae590,local_a0 + 1);
           ptr = (C_str_rep *)local_88;
         }
         if ((ptr != 0) &&
@@ -1603,7 +1603,7 @@ uint32_t FUN_006802a0(...)
     local_a0[2] = 0x1000078;
     local_a0[3] = local_a0[0];
     local_4 = 0xb;
-    FUN_00615a90(&DAT_008ae590,local_a0 + 1);
+    PostControlMessage(&DAT_008ae590,local_a0 + 1);
     if ((local_88 != 0) &&
        (*local_88 = (C_str)(*(int *)local_88 - 1), *(int *)local_88 == 0)) {
       tier1_operator_delete(local_88);
@@ -1613,7 +1613,7 @@ uint32_t FUN_006802a0(...)
     local_a0[2] = 0x1000078;
     local_a0[3] = local_68[0];
     local_4 = 0xc;
-    FUN_00615a90(&DAT_008ae590,local_a0 + 1);
+    PostControlMessage(&DAT_008ae590,local_a0 + 1);
     local_4 = 0xffffffff;
     if ((local_88 != 0) &&
        (*local_88 = (C_str)(*(int *)local_88 - 1), *(int *)local_88 == 0)) {
@@ -1636,7 +1636,7 @@ uint32_t FUN_006802a0(...)
         C_str__ReleaseRep((C_str *)local_a8.rep);
       }
       local_4 = 0xd;
-      FUN_00615a90(&DAT_008ae590,local_68 + 1);
+      PostControlMessage(&DAT_008ae590,local_68 + 1);
       local_4 = 0xffffffff;
       if ((local_50 != 0) &&
          (local_50->refCount = (int)((C_str_rep *)local_50->refCount)[-1].chars,
@@ -1660,7 +1660,7 @@ uint32_t FUN_006802a0(...)
       tier1_operator_delete(local_a4.rep);
     }
     local_4 = 0xe;
-    FUN_00615a90(&DAT_008ae590,&local_84);
+    PostControlMessage(&DAT_008ae590,&local_84);
     if ((local_70.rep != 0) &&
        ((local_70.rep)->refCount = (local_70.rep)->refCount - 1, (local_70.rep)->refCount == 0)) {
       tier1_operator_delete(local_70.rep);
@@ -1716,31 +1716,31 @@ uint32_t FUN_00680980(void *param_1, ...)
   S_MissionObjective **ppSVar2;
   bool bVar3;
   int iVar4;
-  C_game *pCVar5;
-  int iVar6;
+  void *pvVar5;
+  C_game *pCVar6;
+  uint32_t extraout_EAX;
   uint32_t uVar7;
   S_MissionObjective **ppSVar8;
-  uint32_t uVar9;
   if (((uint8_t)g_gameRole & 7) != 7) {
-    iVar4 = FUN_00615360(param_1,0x14,"button06");
-    FUN_00614e80(iVar4,0,0x1000004,0);
-    iVar4 = FUN_00615360(param_1,0x14,"button00");
-    FUN_00614f10(iVar4,0,0x1000015,0xd,0x9d5);
-    FUN_00614e80(iVar4,0,0x600100a,0);
-    iVar4 = FUN_00615360(param_1,0x14,"button01");
-    FUN_00614f10(iVar4,0,0x1000015,0xd,0x9d6);
-    FUN_00614e80(iVar4,0,0x1000001,0);
-    iVar4 = FUN_00615360(param_1,0x14,"button02");
-    FUN_00614f10(iVar4,0,0x1000015,0xd,0x9d7);
-    FUN_00614e80(iVar4,0,0x1000001,0);
-    iVar4 = FUN_00615360(param_1,0x14,"button03");
-    FUN_00614f10(iVar4,0,0x1000015,0xd,0x9d8);
-    FUN_00614e80(iVar4,0,0x6001071,0);
-    iVar4 = FUN_00615360(param_1,0x14,"button04");
-    FUN_00614f10(iVar4,0,0x1000015,0xd,0x9d9);
-    FUN_00614e80(iVar4,0,0x6001001,3);
-    iVar4 = FUN_00615360(param_1,0x14,"button05");
-    uVar9 = 0x9da;
+    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button06");
+    AddDescMessage1(pvVar5,0,0x1000004,0);
+    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button00");
+    AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d5);
+    AddDescMessage1(pvVar5,0,0x600100a,0);
+    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button01");
+    AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d6);
+    AddDescMessage1(pvVar5,0,0x1000001,0);
+    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button02");
+    AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d7);
+    AddDescMessage1(pvVar5,0,0x1000001,0);
+    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button03");
+    AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d8);
+    AddDescMessage1(pvVar5,0,0x6001071,0);
+    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button04");
+    AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d9);
+    AddDescMessage1(pvVar5,0,0x6001001,3);
+    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button05");
+    uVar7 = 0x9da;
     goto LAB_00680db1;
   }
   iVar4 = C_Campaign__GetMissionNumber
@@ -1749,16 +1749,16 @@ uint32_t FUN_00680980(void *param_1, ...)
      (*(int *)(g_configLine + (uint32_t)DAT_008caca0 * 4 + 0x268) != (&DAT_008caf40)[DAT_008cb3a0])) {
     FUN_00680e00((int)param_1,0,0x600d0b8,0);
   }
-  iVar4 = FUN_00615360(param_1,0x14,"button06");
-  FUN_00614f10(iVar4,0,0x1000015,0xd,0x9db);
-  FUN_00614e80(iVar4,0,0x60010c6,0);
-  pCVar5 = GetGame();
-  if (pCVar5->m_mission->m_unknown2C == false) {
-    FUN_00614e80(iVar4,0,0x1000004,0);
+  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button06");
+  AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9db);
+  AddDescMessage1(pvVar5,0,0x60010c6,0);
+  pCVar6 = GetGame();
+  if (pCVar6->m_mission->m_unknown2C == false) {
+    AddDescMessage1(pvVar5,0,0x1000004,0);
   }
-  iVar4 = FUN_00615360(param_1,0x14,"button00");
-  pCVar5 = GetGame();
-  pCVar1 = pCVar5->m_mission;
+  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button00");
+  pCVar6 = GetGame();
+  pCVar1 = pCVar6->m_mission;
   if (pCVar1 != 0) {
     ppSVar2 = (pCVar1->m_objectives).first;
     for (uVar7 = 0;
@@ -1774,15 +1774,15 @@ uint32_t FUN_00680980(void *param_1, ...)
     }
   }
 LAB_00680ad1:
-  pCVar5 = GetGame();
-  if (pCVar5->m_missionFailed == false) {
-    FUN_00614f10(iVar4,0,0x1000015,0xd,0x9cf);
-    uVar9 = 0x600100a;
+  pCVar6 = GetGame();
+  if (pCVar6->m_missionFailed == false) {
+    AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9cf);
+    uVar7 = 0x600100a;
     goto LAB_00680b20;
   }
-  FUN_00614f10(iVar4,0,0x1000015,0xd,0x9cf);
-  FUN_00614e80(iVar4,0,0x600100a,0);
-  FUN_00614e80(iVar4,0,0x1000001,0);
+  AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9cf);
+  AddDescMessage1(pvVar5,0,0x600100a,0);
+  AddDescMessage1(pvVar5,0,0x1000001,0);
   goto LAB_00680b2b;
 LAB_00680a89:
   if ((ppSVar2 == (S_MissionObjective **)0x0) ||
@@ -1792,47 +1792,47 @@ LAB_00680a89:
   ppSVar8++;
   goto LAB_00680a89;
 LAB_00680aa8:
-  pCVar5 = GetGame();
-  if (pCVar5->m_missionFailed != false) goto LAB_00680ad1;
-  FUN_00614f10(iVar4,0,0x1000015,0xd,0x9e1);
-  uVar9 = 0x60010c6;
+  pCVar6 = GetGame();
+  if (pCVar6->m_missionFailed != false) goto LAB_00680ad1;
+  AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9e1);
+  uVar7 = 0x60010c6;
 LAB_00680b20:
-  FUN_00614e80(iVar4,0,uVar9,0);
+  AddDescMessage1(pvVar5,0,uVar7,0);
 LAB_00680b2b:
-  iVar4 = FUN_00615360(param_1,0x14,"button01");
-  FUN_00614f10(iVar4,0,0x1000015,0xd,0x9d3);
-  FUN_00614e80(iVar4,0,0x60010b4,0);
-  iVar4 = FUN_00615360(param_1,0x14,"button02");
-  FUN_00614f10(iVar4,0,0x1000015,0xd,0x9d0);
-  FUN_00614e80(iVar4,0,0x60010b6,0);
-  pCVar5 = GetGame();
-  bVar3 = C_game__CanQuickSave(pCVar5);
+  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button01");
+  AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d3);
+  AddDescMessage1(pvVar5,0,0x60010b4,0);
+  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button02");
+  AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d0);
+  AddDescMessage1(pvVar5,0,0x60010b6,0);
+  pCVar6 = GetGame();
+  bVar3 = C_game__CanQuickSave(pCVar6);
   if (!bVar3) {
-    FUN_00614e80(iVar4,0,0x1000001,0);
+    AddDescMessage1(pvVar5,0,0x1000001,0);
   }
-  iVar4 = FUN_00615360(param_1,0x14,"button03");
-  FUN_00614f10(iVar4,0,0x1000015,0xd,0x9d1);
-  FUN_00614e80(iVar4,0,0x60010b7,0);
-  pCVar5 = GetGame();
-  if (pCVar5->m_hasQuickSave == false) {
+  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button03");
+  AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d1);
+  AddDescMessage1(pvVar5,0,0x60010b7,0);
+  pCVar6 = GetGame();
+  if (pCVar6->m_hasQuickSave == false) {
 LAB_00680c0c:
-    FUN_00614e80(iVar4,0,0x1000001,0);
+    AddDescMessage1(pvVar5,0,0x1000001,0);
   }
   else {
-    iVar6 = C_GameProfile__GetDifficulty(&g_gameProfile);
-    if (iVar6 == 4) goto LAB_00680c0c;
+    iVar4 = C_GameProfile__GetDifficulty(&g_gameProfile);
+    if (iVar4 == 4) goto LAB_00680c0c;
   }
-  iVar4 = FUN_00615360(param_1,0x14,"button04");
-  FUN_00614f10(iVar4,0,0x1000015,0xd,0x9d2);
-  FUN_00614e80(iVar4,0,0x6001071,0);
-  iVar4 = FUN_00615360(param_1,0x14,"button05");
-  uVar9 = 0x9d4;
+  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button04");
+  AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d2);
+  AddDescMessage1(pvVar5,0,0x6001071,0);
+  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button05");
+  uVar7 = 0x9d4;
 LAB_00680db1:
-  FUN_00614f10(iVar4,0,0x1000015,0xd,uVar9);
-  FUN_00614e80(iVar4,0,0x6001078,0);
-  iVar4 = FUN_00615360(param_1,0x13,"text_h&dversion");
-  uVar9 = FUN_00614f10(iVar4,0,0x1000015,0x28,0x7d6);
-  return CONCAT31((int3)((uint32_t)uVar9 >> 8),1);
+  AddDescMessage2(pvVar5,0,0x1000015,0xd,uVar7);
+  AddDescMessage1(pvVar5,0,0x6001078,0);
+  pvVar5 = (void *)FUN_00615360(param_1,0x13,"text_h&dversion");
+  AddDescMessage2(pvVar5,0,0x1000015,0x28,0x7d6);
+  return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
 }
 
 
@@ -1929,7 +1929,7 @@ uint32_t C_GameMenu__FUN_00680ea0(C_GameMenu *_this,uint32_t param_1,int param_2
       local_8c = 0x1000004;
       local_88.rep = 0;
       local_4 = 0x1e;
-      FUN_00615a90(&DAT_008ae590,&local_90);
+      PostControlMessage(&DAT_008ae590,&local_90);
       goto LAB_00681ea6;
     }
     CVar7.rep = *(C_str_rep **)(param_2 + 0x5c);
@@ -1941,7 +1941,7 @@ uint32_t C_GameMenu__FUN_00680ea0(C_GameMenu *_this,uint32_t param_1,int param_2
     local_88.rep = 0;
     local_4 = 0x11;
     local_68 = piVar1;
-    FUN_00615a90(&DAT_008ae590,&local_90);
+    PostControlMessage(&DAT_008ae590,&local_90);
     if ((local_7c.rep != 0) &&
        ((local_7c.rep)->refCount = (local_7c.rep)->refCount - 1, (local_7c.rep)->refCount == 0)) {
       tier1_operator_delete(local_7c.rep);
@@ -1952,7 +1952,7 @@ uint32_t C_GameMenu__FUN_00680ea0(C_GameMenu *_this,uint32_t param_1,int param_2
     local_8c = 0x1000017;
     local_88.rep = (C_str_rep *)&DAT_00000010;
     GH_PIECE(local_4,0,1) = 0x12;
-    FUN_00615a90(&DAT_008ae590,&local_90);
+    PostControlMessage(&DAT_008ae590,&local_90);
     GH_PIECE(local_4,0,1) = 0x10;
     if ((local_7c.rep != 0) &&
        ((local_7c.rep)->refCount = (local_7c.rep)->refCount - 1, (local_7c.rep)->refCount == 0)) {
@@ -1997,7 +1997,7 @@ uint32_t C_GameMenu__FUN_00680ea0(C_GameMenu *_this,uint32_t param_1,int param_2
       tier1_operator_delete(this_00.rep);
     }
     GH_PIECE(local_4,0,1) = 0x14;
-    FUN_00615a90(&DAT_008ae590,&local_90);
+    PostControlMessage(&DAT_008ae590,&local_90);
     GH_PIECE(local_4,0,1) = 0x10;
     if ((local_7c.rep != 0) &&
        ((local_7c.rep)->refCount = (local_7c.rep)->refCount - 1, (local_7c.rep)->refCount == 0)) {
@@ -2050,7 +2050,7 @@ uint32_t C_GameMenu__FUN_00680ea0(C_GameMenu *_this,uint32_t param_1,int param_2
           C_str__ReleaseRep((C_str *)this_00.rep);
         }
         GH_PIECE(local_4,0,1) = 0x16;
-        FUN_00615a90(&DAT_008ae590,&local_90);
+        PostControlMessage(&DAT_008ae590,&local_90);
         GH_PIECE(local_4,0,1) = 0x10;
         if ((local_7c.rep != 0) &&
            ((local_7c.rep)->refCount = (local_7c.rep)->refCount - 1, (local_7c.rep)->refCount == 0)
@@ -2112,7 +2112,7 @@ uint32_t C_GameMenu__FUN_00680ea0(C_GameMenu *_this,uint32_t param_1,int param_2
           C_str__ReleaseRep((C_str *)this_00.rep);
         }
         local_4 = CONCAT31(GH_PIECE(local_4,1,3),0x18);
-        FUN_00615a90(&DAT_008ae590,&iStack_24);
+        PostControlMessage(&DAT_008ae590,&iStack_24);
         CVar7.rep = CStack_10.rep;
 LAB_00681c84:
         GH_PIECE(local_4,0,1) = 0x10;
@@ -2167,7 +2167,7 @@ LAB_00681c84:
           C_str__ReleaseRep((C_str *)this_00.rep);
         }
         local_4 = CONCAT31(GH_PIECE(local_4,1,3),0x1a);
-        FUN_00615a90(&DAT_008ae590,&iStack_3c);
+        PostControlMessage(&DAT_008ae590,&iStack_3c);
         CVar7.rep = CStack_28.rep;
         goto LAB_00681c84;
       }
@@ -2220,7 +2220,7 @@ LAB_00681c84:
           C_str__ReleaseRep((C_str *)this_00.rep);
         }
         GH_PIECE(local_4,0,1) = 0x1c;
-        FUN_00615a90(&DAT_008ae590,&iStack_60);
+        PostControlMessage(&DAT_008ae590,&iStack_60);
         if ((CStack_4c.rep != 0) &&
            ((CStack_4c.rep)->refCount = (CStack_4c.rep)->refCount - 1,
            (CStack_4c.rep)->refCount == 0)) {
@@ -2233,7 +2233,7 @@ LAB_00681c84:
     local_88.rep = 0;
     local_90 = local_78.rep[0x30].refCount;
     local_4 = CONCAT31(GH_PIECE(local_4,1,3),0x1d);
-    FUN_00615a90(&DAT_008ae590,&local_90);
+    PostControlMessage(&DAT_008ae590,&local_90);
     CVar7.rep = local_7c.rep;
     if ((local_7c.rep != 0) &&
        ((local_7c.rep)->refCount = (local_7c.rep)->refCount - 1, (local_7c.rep)->refCount == 0)) {

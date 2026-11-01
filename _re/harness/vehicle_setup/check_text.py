@@ -2,7 +2,7 @@
 
     python check_text.py MISSIONS_TXT_DIR HARNESS_OUTPUT
 
-MISSIONS_TXT_DIR holds a .txt per mission ("mission NAME"). Per mission: a textbox, a layout, a position, a render, a pages, a paged and a utf8 line with every check met. Prints "N models, M with differences" (mutfast.py reads it).
+MISSIONS_TXT_DIR holds a .txt per mission ("mission NAME"). Per mission: a textbox, a layout, a position, a render, a pages, a paged, a utf8 and a control line with every check met. Prints "N models, M with differences" (mutfast.py reads it).
 """
 import glob
 import os
@@ -23,6 +23,8 @@ LINES = {
     "paged": ("lpNone lpLines lpWrap lpPages lpAreas lpForced lpFail lpNoWrap lpMeasures lpJoins lpBreak lpStack "
               "lpAlign lpJustify lpNext lpOverflow lpAppend lpUtf8").split(),
     "utf8": "u8Range u8Encode u8Room u8Sequences u8Cjk u8Reattach".split(),
+    "control": ("ctNew ctDesc ctFind ctInput ctShow ctCreate ctEvents ctMessages ctRoutes ctCallbacks ctRemove "
+                "ctRefresh ctDelete ctQueue").split(),
 }
 
 
