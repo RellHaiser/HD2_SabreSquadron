@@ -787,7 +787,7 @@ void C_InventoryScreen::ShowList(C_Human *human, S_List &list, int container)
             list.materials[j]->SetTexture(m_emptyTexture);
             list.amounts[j].Clear();
         }
-        list.caption.SetUnknown71(true);
+        list.caption.SetDimmed(true);
         SetBar(list.capacityBar, 0.0f);
         list.capacity.Clear();
         return;
@@ -795,7 +795,7 @@ void C_InventoryScreen::ShowList(C_Human *human, S_List &list, int container)
     std::vector<C_Item *> *groups = items->GetSlots();
     SetBar(list.capacityBar, items->GetTotalSpace() / items->GetMaxSpace());
     list.capacityBar->Update();
-    list.caption.SetUnknown71(false);
+    list.caption.SetDimmed(false);
     const C_str label = g_texts.Get(TEXT_CAPACITY);
     list.capacity.SetText(C_fstr("%s: %d/%d", label.c_str(), static_cast<int>(items->GetTotalSpace()),
                                  static_cast<int>(items->GetMaxSpace())),

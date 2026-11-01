@@ -1234,25 +1234,25 @@ uint32_t FUN_006186e0(int param_1,int param_2, ...)
   int local_c;
   int local_8;
   int local_4;
-  _this = (void *)FUN_006e6800(param_1);
+  _this = (void *)C_XmlNode__Next(param_1);
   while (_this != 0) {
-    uVar1 = FUN_006e6740(_this,&DAT_0083ee94);
+    uVar1 = C_XmlNode__IsNamed(_this,&DAT_0083ee94);
     if ((char)uVar1 != '\0') {
-      pcVar2 = FUN_006e67a0(_this,(uint8_t *)"item_id");
+      pcVar2 = C_XmlNode__GetAttribute(_this,(uint8_t *)"item_id");
       if (pcVar2 == 0) {
         local_c = -1;
       }
       else {
         local_c = atoi(pcVar2);
       }
-      pcVar2 = FUN_006e67a0(_this,(uint8_t *)"item_num");
+      pcVar2 = C_XmlNode__GetAttribute(_this,(uint8_t *)"item_num");
       if (pcVar2 == 0) {
         local_8 = -1;
       }
       else {
         local_8 = atoi(pcVar2);
       }
-      pcVar2 = FUN_006e67a0(_this,(uint8_t *)"ammo_num");
+      pcVar2 = C_XmlNode__GetAttribute(_this,(uint8_t *)"ammo_num");
       if (pcVar2 == 0) {
         local_4 = -1;
       }
@@ -1313,7 +1313,7 @@ uint32_t FUN_006186e0(int param_1,int param_2, ...)
       }
       *(uint32_t **)(param_2 + 0x3c) = puVar3;
     }
-    _this = (void *)FUN_006e6800(param_1);
+    _this = (void *)C_XmlNode__Next(param_1);
   }
   return 0;
 }
@@ -1387,37 +1387,37 @@ uint32_t FUN_006189f0(uint8_t *param_1, ...)
   uStack_184 = 0;
   uStack_180 = 0;
   uStack_4 = 2;
-  FUN_0061b450(auStack_17c,&uStack_1f1);
+  XmlAttrs_Ctor(auStack_17c,&uStack_1f1);
   uStack_4 = 3;
-  uVar3 = FUN_006e68c0(&uStack_19c,0x83efd0);
-  if (((char)uVar3 == '\0') && (uVar3 = FUN_006e68c0(&uStack_19c,0x83efb8), (char)uVar3 == '\0')) {
+  uVar3 = C_XmlNode__Load(&uStack_19c,0x83efd0);
+  if (((char)uVar3 == '\0') && (uVar3 = C_XmlNode__Load(&uStack_19c,0x83efb8), (char)uVar3 == '\0')) {
     uStack_4 = 0xffffffff;
-    FUN_006e5e50(&uStack_19c);
+    C_XmlNode__dtor_C_XmlNode(&uStack_19c);
     ExceptionList = apvStack_16c[0x58];
     return 0;
   }
-  pvVar4 = (void *)FUN_006e6800((int)&uStack_19c);
-  uVar5 = FUN_006e6740(pvVar4,(uint8_t *)"MAP_LIST");
+  pvVar4 = (void *)C_XmlNode__Next((int)&uStack_19c);
+  uVar5 = C_XmlNode__IsNamed(pvVar4,(uint8_t *)"MAP_LIST");
   if ((char)uVar5 != '\0') {
     puStack_1e0 = 0;
     puStack_1ec = 0;
-    pvVar4 = (void *)FUN_006e6800((int)&uStack_19c);
+    pvVar4 = (void *)C_XmlNode__Next((int)&uStack_19c);
     while (pvStack_1bc = pvVar4, pvVar4 != 0) {
-      uVar5 = FUN_006e6740(pvVar4,(uint8_t *)"GAMESTYLE");
+      uVar5 = C_XmlNode__IsNamed(pvVar4,(uint8_t *)"GAMESTYLE");
       if ((char)uVar5 == '\0') {
-        uVar5 = FUN_006e6740(pvVar4,&DAT_0083ef60);
+        uVar5 = C_XmlNode__IsNamed(pvVar4,&DAT_0083ef60);
         if ((char)uVar5 == '\0') {
-          uVar5 = FUN_006e6740(pvVar4,(uint8_t *)"OBJECTIVE");
+          uVar5 = C_XmlNode__IsNamed(pvVar4,(uint8_t *)"OBJECTIVE");
           if ((char)uVar5 == '\0') {
-            uVar5 = FUN_006e6740(pvVar4,(uint8_t *)"AIRCRAFTATACK");
+            uVar5 = C_XmlNode__IsNamed(pvVar4,(uint8_t *)"AIRCRAFTATACK");
             if ((char)uVar5 == '\0') {
-              uVar5 = FUN_006e6740(pvVar4,(uint8_t *)"BALANCED");
+              uVar5 = C_XmlNode__IsNamed(pvVar4,(uint8_t *)"BALANCED");
               if ((char)uVar5 == '\0') {
-                uVar5 = FUN_006e6740(pvVar4,(uint8_t *)"ALLOWEDITEMS");
+                uVar5 = C_XmlNode__IsNamed(pvVar4,(uint8_t *)"ALLOWEDITEMS");
                 if ((char)uVar5 == '\0') {
-                  uVar5 = FUN_006e6740(pvVar4,(uint8_t *)"ALLOWEDPRESETS");
+                  uVar5 = C_XmlNode__IsNamed(pvVar4,(uint8_t *)"ALLOWEDPRESETS");
                   if ((char)uVar5 == '\0') {
-                    uVar5 = FUN_006e6740(pvVar4,(uint8_t *)"ZONEGRAPH");
+                    uVar5 = C_XmlNode__IsNamed(pvVar4,(uint8_t *)"ZONEGRAPH");
                     if ((char)uVar5 == '\0') break;
                   }
                   else {
@@ -1459,7 +1459,7 @@ uint32_t FUN_006189f0(uint8_t *param_1, ...)
                   }
                 }
                 else {
-                  pcVar6 = FUN_006e67a0(pvVar4,(uint8_t *)"version");
+                  pcVar6 = C_XmlNode__GetAttribute(pvVar4,(uint8_t *)"version");
                   if (pcVar6 == 0) {
                     dVar20 = 0.0;
                   }
@@ -1506,8 +1506,8 @@ uint32_t FUN_006189f0(uint8_t *param_1, ...)
                 }
               }
               else {
-                pcVar6 = FUN_006e67a0(pvVar4,(uint8_t *)"allied");
-                pcVar8 = FUN_006e67a0(pvVar4,&DAT_00832d10);
+                pcVar6 = C_XmlNode__GetAttribute(pvVar4,(uint8_t *)"allied");
+                pcVar8 = C_XmlNode__GetAttribute(pvVar4,&DAT_00832d10);
                 if ((pcVar6 == 0) || (pcVar8 == 0)) break;
                 iVar11 = atoi(pcVar6);
                 *(int *)(puStack_1ec + 0x18) = iVar11;
@@ -1516,8 +1516,8 @@ uint32_t FUN_006189f0(uint8_t *param_1, ...)
               }
             }
             else {
-              pcVar6 = FUN_006e67a0(pvVar4,(uint8_t *)"allied");
-              pcVar8 = FUN_006e67a0(pvVar4,&DAT_00832d10);
+              pcVar6 = C_XmlNode__GetAttribute(pvVar4,(uint8_t *)"allied");
+              pcVar8 = C_XmlNode__GetAttribute(pvVar4,&DAT_00832d10);
               if (pcVar6 != 0) {
                 iVar11 = atoi(pcVar6);
                 *(int *)(puStack_1ec + 0x10) = iVar11;
@@ -1535,34 +1535,34 @@ uint32_t FUN_006189f0(uint8_t *param_1, ...)
             iStack_1cc = 0xffffffff;
             iStack_1d0 = 0xffffffff;
             iStack_1d4 = -1;
-            pcVar6 = FUN_006e67a0(pvVar4,(uint8_t *)"allied_text");
+            pcVar6 = C_XmlNode__GetAttribute(pvVar4,(uint8_t *)"allied_text");
             if (pcVar6 == 0) {
               iStack_1d0 = -1;
             }
             else {
               iStack_1d0 = atoi(pcVar6);
             }
-            pcVar6 = FUN_006e67a0(pvVar4,(uint8_t *)"axis_text");
+            pcVar6 = C_XmlNode__GetAttribute(pvVar4,(uint8_t *)"axis_text");
             if (pcVar6 == 0) {
               iStack_1d4 = -1;
             }
             else {
               iStack_1d4 = atoi(pcVar6);
             }
-            pcVar6 = FUN_006e67a0(pvVar4,(uint8_t *)"value");
+            pcVar6 = C_XmlNode__GetAttribute(pvVar4,(uint8_t *)"value");
             if (pcVar6 == 0) {
               iStack_1cc = -1;
             }
             else {
               iStack_1cc = atoi(pcVar6);
             }
-            pcVar6 = FUN_006e67a0(pvVar4,&DAT_0083ef98);
+            pcVar6 = C_XmlNode__GetAttribute(pvVar4,&DAT_0083ef98);
             if ((pcVar6 == 0) || (iVar11 = _stricmp(pcVar6,&DAT_0083ef0c), iVar11 != 0)) {
               uStack_1c8 = 0xffffffff;
             }
             else {
               uStack_1c8 = 1;
-              pcVar6 = FUN_006e67a0(pvVar4,(uint8_t *)"vip_uniform_id");
+              pcVar6 = C_XmlNode__GetAttribute(pvVar4,(uint8_t *)"vip_uniform_id");
               if (pcVar6 == 0) {
                 iStack_1c0 = -1;
               }
@@ -1570,7 +1570,7 @@ uint32_t FUN_006189f0(uint8_t *param_1, ...)
                 iStack_1c0 = atoi(pcVar6);
               }
             }
-            pcVar6 = FUN_006e67a0(pvVar4,&DAT_0083eef4);
+            pcVar6 = C_XmlNode__GetAttribute(pvVar4,&DAT_0083eef4);
             if (pcVar6 == 0) {
 LAB_00619048:
               uStack_1c4 = 1;
@@ -1590,8 +1590,8 @@ LAB_00619048:
         }
         else {
           if (puStack_1e0 == 0) break;
-          pcVar6 = FUN_006e67a0(pvVar4,&DAT_0083bdd0);
-          pCStack_1e4 = (C_str *)FUN_006e67a0(pvVar4,&DAT_0083ef5c);
+          pcVar6 = C_XmlNode__GetAttribute(pvVar4,&DAT_0083bdd0);
+          pCStack_1e4 = (C_str *)C_XmlNode__GetAttribute(pvVar4,&DAT_0083ef5c);
           if ((pcVar6 == 0) || (pCStack_1e4 == 0)) {
             puVar7 = tier1_operator_new(0x48);
             GH_PIECE(uStack_4,0,1) = 4;
@@ -1708,7 +1708,7 @@ LAB_00619048:
                (CStack_1b0.rep)->refCount == 0)) {
               tier1_operator_delete(CStack_1b0.rep);
             }
-            pcVar6 = FUN_006e67a0(pvVar4,&DAT_0083ef54);
+            pcVar6 = C_XmlNode__GetAttribute(pvVar4,&DAT_0083ef54);
             if ((pcVar6 == 0) ||
                (iVar11 = _stricmp(pcVar6,"FRONTLINE"), iVar11 != 0)) {
               *(uint32_t *)(puStack_1ec + 0x1c) = 0;
@@ -1717,7 +1717,7 @@ LAB_00619048:
               *(uint32_t *)(puStack_1ec + 0x1c) = 1;
             }
           }
-          pcVar6 = FUN_006e67a0(pvVar4,&DAT_0083ef34);
+          pcVar6 = C_XmlNode__GetAttribute(pvVar4,&DAT_0083ef34);
           if (pcVar6 == 0) {
             iVar11 = -1;
           }
@@ -1730,7 +1730,7 @@ LAB_00619048:
       }
       else {
         puStack_1ec = 0;
-        pcVar6 = FUN_006e67a0(pvVar4,&DAT_0083ef98);
+        pcVar6 = C_XmlNode__GetAttribute(pvVar4,&DAT_0083ef98);
         iVar11 = 0xb;
         bVar19 = true;
         pcVar8 = pcVar6;
@@ -1793,7 +1793,7 @@ LAB_00619048:
         }
       }
 LAB_006192f2:
-      pvVar4 = (void *)FUN_006e6800((int)&uStack_19c);
+      pvVar4 = (void *)C_XmlNode__Next((int)&uStack_19c);
     }
   }
   apvStack_16c[0x2c] = (void *)0x20;
@@ -1971,14 +1971,18 @@ LAB_006192f2:
   local_1e8[0x14] = 0;
   local_1e8[0x15] = 0;
   *local_1e8 = 1;
-  FUN_006e5e50(&uStack_19c);
+  C_XmlNode__dtor_C_XmlNode(&uStack_19c);
   ExceptionList = apvStack_16c[0x58];
   return 0;
 }
 
 
-// 0x00619710
-uint32_t thunk_FUN_006e5e50(uint32_t *param_1, ...)
+// 0x00619710  (tier1 fallback: translated text kept below, needs hand porting)
+uint32_t C_XmlNode__dtor_C_XmlNode(uint32_t *param_1, ...)
+{
+  return {};
+}
+#if 0
 {
   void *pvVar1;
   int *piVar2;
@@ -1987,13 +1991,13 @@ uint32_t thunk_FUN_006e5e50(uint32_t *param_1, ...)
   void *_this;
   uint32_t uStack_4;
   uStack_4 = 3;
-  puVar4 = FUN_006e6e30((uint32_t *)param_1[6],(uint32_t *)param_1[6],(uint32_t *)param_1[5]);
-  FUN_006e6b70(puVar4,(uint32_t *)param_1[6]);
+  puVar4 = XmlAttrs_CopyRange((uint32_t *)param_1[6],(uint32_t *)param_1[6],(uint32_t *)param_1[5]);
+  XmlAttrs_DestroyRange(puVar4,(uint32_t *)param_1[6]);
   param_1[6] = puVar4;
   while ((param_1[9] != 0 && ((int)(param_1[10] - param_1[9]) >> 2 != 0))) {
     puVar4 = *(uint32_t **)(param_1[10] - 4);
     if (puVar4 != 0) {
-      FUN_006e5e50(puVar4);
+      C_XmlNode__dtor_C_XmlNode(puVar4);
       tier1_operator_delete(puVar4);
     }
     empty_function_6e6ba0();
@@ -2007,7 +2011,7 @@ uint32_t thunk_FUN_006e5e50(uint32_t *param_1, ...)
   _this = (void *)param_1[5];
   uStack_4 = CONCAT31(GH_PIECE(uStack_4,1,3),1);
   for (; _this != pvVar1; _this = (void *)((int)_this + 8)) {
-    FUN_006e6fc0(_this,0);
+    XmlAttr_DeletingDtor(_this,0);
   }
   tier1_operator_delete((void *)param_1[5]);
   param_1[5] = 0;
@@ -2025,6 +2029,7 @@ uint32_t thunk_FUN_006e5e50(uint32_t *param_1, ...)
 }
 
 
+#endif
 // 0x00619720
 uint32_t set_field_18_619720(void *_this,uint32_t param_1, ...)
 {
@@ -3288,34 +3293,6 @@ int vector_size_e4_61b3f0(int param_1, ...)
 }
 
 
-// 0x0061b410
-uint32_t FUN_0061b410(int param_1, ...)
-{
-  uint32_t *puVar1;
-  uint32_t *puVar2;
-  puVar1 = *(uint32_t **)(param_1 + 8);
-  for (puVar2 = *(uint32_t **)(param_1 + 4); puVar2 != puVar1; puVar2 = puVar2 + 2) {
-    FUN_0061be20(puVar2);
-  }
-  tier1_operator_delete(*(void **)(param_1 + 4));
-  *(uint32_t *)(param_1 + 4) = 0;
-  *(uint32_t *)(param_1 + 8) = 0;
-  *(uint32_t *)(param_1 + 0xc) = 0;
-  return 0;
-}
-
-
-// 0x0061b450
-uint32_t FUN_0061b450(void *_this,uint8_t *param_1, ...)
-{
-  *(uint8_t *)_this = *param_1;
-  *(uint32_t *)((int)_this + 4) = 0;
-  *(uint32_t *)((int)_this + 8) = 0;
-  *(uint32_t *)((int)_this + 0xc) = 0;
-  return 0;
-}
-
-
 // 0x0061b470
 uint32_t FUN_0061b470(int param_1, ...)
 {
@@ -3854,23 +3831,6 @@ uint32_t construct_copy4_61be10(uint32_t *param_1,uint32_t *param_2, ...)
 {
   if (param_1 != 0) {
     *param_1 = *param_2;
-  }
-  return 0;
-}
-
-
-// 0x0061be20
-uint32_t FUN_0061be20(uint32_t *param_1, ...)
-{
-  int *piVar1;
-  int iVar2;
-  piVar1 = (int *)param_1[1];
-  if ((piVar1 != 0) && (iVar2 = *piVar1, *piVar1 = iVar2 - 1, iVar2 - 1 == 0)) {
-    tier1_operator_delete(piVar1);
-  }
-  piVar1 = (int *)*param_1;
-  if ((piVar1 != 0) && (iVar2 = *piVar1, *piVar1 = iVar2 - 1, iVar2 - 1 == 0)) {
-    tier1_operator_delete(piVar1);
   }
   return 0;
 }

@@ -24,6 +24,14 @@ LINES = {
     "mission": "msBegin msScene msObjects msCheckpoints msLoad msFail msModules".split(),
     "scene2": ("s2File s2Camera s2Settings s2List s2TShift s2Actors s2States s2Shadows s2Groups s2B820 s2Music "
                "s2Progress s2Fail").split(),
+    "objects": ("moName moCreate moPlace moParent moModel moCamera moLight moLightOld moBox moSound moMesh "
+                "moVisual moLightmaps moProjector moB110 moSector moFail").split(),
+    "fonts": ("foSets foLanguages foJapanese foConfig foVersion foShared foMissing foTable foQuads foGrow foFlush "
+              "foMap").split(),
+    "xml": ("xmTree xmText xmComments xmAttributes xmBad xmWalk xmFile cfLanguage cfSet cfFonts "
+            "cfValues").split(),
+    "gdi": ("gdInit gdCells gdFail gdGlyph gdTexture gdReuse gdEvict gdOrder gdSelect gdClose").split(),
+    "styles": "stFirst stDefaults stCreate stRelease".split(),
 }
 
 

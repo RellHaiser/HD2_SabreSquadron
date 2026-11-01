@@ -41,10 +41,23 @@ struct S_IGraphInfo {
 // (meaning not identified).
 constexpr uint32_t IGRAPH_FLAG_20 = 0x20;
 
-// Texture image (IGraph::LoadTexture()). Only the reference release is used.
+// Texture image (IGraph::LoadTexture(), CreateImage()). The slots' names from the GDI fonts' use
+// (part 9a-iii): an empty image made, filled, its pixels locked (512 a row) and unlocked.
 class IImage {
 public:
     I3DMETHOD(uint32_t, Release)() = 0;                                  // 0x00
+    I3D_SLOT(04);
+    // (The GDI fonts pass null, null, 0x8402, the size, 0.)
+    I3DMETHOD(HRESULT, Open)(const char *fileName, const char *alphaFileName, uint32_t flags, int width,
+                             int height, int unknown) = 0;              // 0x08
+    I3D_SLOT(0C);
+    I3D_SLOT(10);
+    // The pixels (32-bit ARGB; null: none). (The GDI fonts pass 0, a pitch out, 0.)
+    I3DMETHOD(void *, Lock)(int unknown1, int *pitch, int unknown2) = 0;   // 0x14
+    I3DMETHOD(void, Unlock)() = 0;                                       // 0x18
+    I3D_SLOT(1C);
+    // The whole image `color` (the GDI fonts: 0, 0xFFFFFF, 0).
+    I3DMETHOD(void, Fill)(const void *rect, uint32_t color, int unknown) = 0;   // 0x20
 };
 
 class IGraph {
@@ -70,7 +83,8 @@ public:
     // success, `out` gets one reference).
     I3DMETHOD(HRESULT, LoadTexture)(const char *fileName, const char *alphaFileName, uint32_t mode,
                                   class IImage **out) = 0;            // 0x3C
-    I3D_SLOT(40);                                             // LS3DF: CreateITexture
+    // A new image, empty (the GDI fonts' textures).
+    I3DMETHOD(IImage *, CreateImage)() = 0;                              // 0x40
     // (The interface passes 0, 0 before it draws its lines: no texture, inferred.)
     I3DMETHOD(void, SetTexture)(void *texture, int stage) = 0;           // 0x44
     I3DMETHOD(HWND, GetHWND)() = 0;                                      // 0x48

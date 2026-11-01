@@ -13,7 +13,7 @@ public:
 };
 extern C_GameTexts g_texts;
 
-bool IsLegalUtf8(const uint8_t *begin, const uint8_t *end);
+bool IsLegalUtf8Range(const uint8_t *begin, const uint8_t *end);
 void WideToAnsi(char *out, const wchar_t *text, int maxLength);
 
 class C_Controls {

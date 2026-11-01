@@ -86,13 +86,14 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
   int iVar2;
   bool bVar3;
   bool bVar4;
+  uint32_t extraout_EAX;
   char *substr;
   C_game *pCVar5;
   C_CampaignNode **ppCVar6;
   char *pcVar7;
   uint8_t *ptr;
   uint32_t uVar8;
-  C_str *extraout_EAX;
+  C_str *extraout_EAX_00;
   int iVar9;
   int *piVar10;
   uint32_t uVar11;
@@ -122,7 +123,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
       uStack_20 = 0x1000001;
       iStack_1c = 0;
       GH_PIECE(local_4,0,1) = 1;
-      FUN_00615a90(&DAT_008ae590,&uStack_24);
+      PostControlMessage(&DAT_008ae590,&uStack_24);
       GH_PIECE(local_4,0,1) = 0;
       if (pCStack_10 != 0) {
         C_str__ReleaseRep(pCStack_10);
@@ -132,8 +133,9 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
       uStack_20 = 0x1000001;
       iStack_1c = 0;
       GH_PIECE(local_4,0,1) = 2;
-      uVar11 = FUN_00615a90(&DAT_008ae590,&uStack_24);
+      PostControlMessage(&DAT_008ae590,&uStack_24);
       local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
+      uVar11 = extraout_EAX;
       if (pCStack_10 != 0) {
         uVar11 = C_str__ReleaseRep(pCStack_10);
       }
@@ -181,7 +183,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
             uStack_24 = 0xc103000;
             GH_PIECE(local_4,0,1) = 6;
           }
-          FUN_00615a90(&DAT_008ae590,&uStack_24);
+          PostControlMessage(&DAT_008ae590,&uStack_24);
           local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
           bVar3 = bVar4;
           if ((pCStack_10 != 0) &&
@@ -203,7 +205,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
       uStack_20 = 0x1000002;
       iStack_1c = 0;
       local_4 = CONCAT31(GH_PIECE(local_4,1,3),7);
-      FUN_00615a90(&DAT_008ae590,&uStack_24);
+      PostControlMessage(&DAT_008ae590,&uStack_24);
       if ((pCStack_10 != 0) &&
          (*pCStack_10 = (C_str)(*(int *)pCStack_10 - 1), *(int *)pCStack_10 == 0)) {
         tier1_operator_delete(pCStack_10);
@@ -213,7 +215,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
       uStack_20 = 0x1000002;
       iStack_1c = 0;
       GH_PIECE(local_4,0,1) = 8;
-      FUN_00615a90(&DAT_008ae590,&uStack_24);
+      PostControlMessage(&DAT_008ae590,&uStack_24);
       local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
       if ((pCStack_10 != 0) &&
          (*pCStack_10 = (C_str)(*(int *)pCStack_10 - 1), *(int *)pCStack_10 == 0)) {
@@ -244,7 +246,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
       uStack_20 = 0x1000001;
       iStack_1c = 0;
       local_4 = CONCAT31(GH_PIECE(local_4,1,3),3);
-      FUN_00615a90(&DAT_008ae590,&uStack_24);
+      PostControlMessage(&DAT_008ae590,&uStack_24);
       if ((pCStack_10 != 0) &&
          (*pCStack_10 = (C_str)(*(int *)pCStack_10 - 1), *(int *)pCStack_10 == 0)) {
         tier1_operator_delete(pCStack_10);
@@ -254,7 +256,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
       uStack_20 = 0x1000001;
       iStack_1c = 0;
       GH_PIECE(local_4,0,1) = 4;
-      FUN_00615a90(&DAT_008ae590,&uStack_24);
+      PostControlMessage(&DAT_008ae590,&uStack_24);
       local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
       if ((pCStack_10 != 0) &&
          (*pCStack_10 = (C_str)(*(int *)pCStack_10 - 1), *(int *)pCStack_10 == 0)) {
@@ -311,7 +313,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
     if ((local_28 != 0) &&
        (local_28->rep = (C_str_rep *)local_28->rep[-1].chars, local_28->rep == 0)) {
       tier1_operator_delete(local_28);
-      local_28 = extraout_EAX;
+      local_28 = extraout_EAX_00;
     }
   }
   return CONCAT31((int3)((uint32_t)local_28 >> 8),1);
@@ -916,7 +918,7 @@ uint32_t FUN_00687dd0(void *_this,uint32_t param_1,int *param_2, ...)
     uStack_24 = 0x2000016;
     uStack_20 = 0;
     puStack_8 = (uint8_t *)CONCAT31(GH_PIECE(puStack_8,1,3),1);
-    FUN_00615a90(&DAT_008ae590,&local_28);
+    PostControlMessage(&DAT_008ae590,&local_28);
     if (piStack_14 == 0) goto LAB_00687f15;
     *piStack_14 = *piStack_14 - 1;
     iVar2 = *piStack_14;
@@ -1035,7 +1037,7 @@ uint32_t FUN_00687f50(void *param_1, ...)
         tier1_operator_delete(local_2c);
       }
       local_4 = CONCAT31(GH_PIECE(local_4,1,3),3);
-      FUN_00615a90(&DAT_008ae590,&local_24);
+      PostControlMessage(&DAT_008ae590,&local_24);
       if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
         tier1_operator_delete(local_10);
       }

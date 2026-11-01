@@ -1,0 +1,54 @@
+# Part 9a-iii: the GDI fonts (src/game/font.*: C_GdiFont, vtable 0x00813b10; 0x0063c2f0..0x0063ddb0,
+# 0x0063ee20..0x0063f140) and the font manager's own object code (vtable 0x00813b0c, its object
+# 0x008acbbc). GlyphCellMap: the font's std::map<uint16, S_GlyphCell *> (MSVC6); GlyphCells: its
+# std::vector of free cells.
+
+0063c2f0 C_GdiFont::Init | bool __thiscall Init(void *this, void * dc, char * face, int textureWidth, int textureHeight, int size, bool bold)
+0063c500 C_GdiFont::MakeCells | bool __thiscall MakeCells(void *this, int width, int height, int gap, int start)
+0063c740 C_GdiFont::Close | void __thiscall Close(void *this)
+0063c9d0 C_GdiFont::Select | void __thiscall Select(void *this)
+0063ccc0 C_GdiFont::CopyToTexture | void __thiscall CopyToTexture(void *this, void * cell)
+0063cda0 C_GdiFont::DrawGlyph | bool __thiscall DrawGlyph(void *this, void * cell, int ch)
+0063ced0 C_GdiFont::GetGlyph | void * __thiscall GetGlyph(void *this, int ch)
+0063d0c0 C_GdiFont::Touch | void __thiscall Touch(void *this, void * cell)
+0063d150 C_GdiFont::TakeCell | void * __thiscall TakeCell(void *this)
+0063d310 C_GdiFont::Reset | void __thiscall Reset(void *this)
+0063f030 C_GdiFont::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)
+0063f050 C_GdiFont::~C_GdiFont | void __thiscall ~C_GdiFont(void *this)
+0063eff0 C_GdiFont::GrowVertices
+0063f000 C_GdiFont::Flush
+0063f010 C_GdiFont::ClearVertices
+0063f020 C_GdiFont::AddQuad
+0063ee20 C_FontManager::AddGdiFont | bool __thiscall AddGdiFont(void *this, char * face, int textureWidth, int textureHeight, int size, int id, bool bold)
+# The cells' map and vector.
+0063d440 GlyphCellMap_EraseRange
+0063d510 GlyphCellMap_MakePairResult
+0063d530 GlyphCellMap_Erase
+0063d940 GlyphCellMap_LowerBound
+0063d980 GlyphCellMap_EraseSubtree
+0063d9c0 GlyphCellMap_InsertNode
+0063dc90 GlyphCellMap_Leftmost
+0063dcb0 GlyphCellMap_IterDec
+0063dd10 GlyphCellMap_UpperBound
+0063dd40 GlyphCellMap_IterInc
+0063dd90 GlyphCellMap_PairCopy
+0063ddb0 GlyphCellMap_Distance
+0063f140 GlyphCellMap_Dtor
+00640490 GlyphCellMap_Begin
+0063d410 GlyphCells_Size
+0063d430 GlyphCells_Empty
+0063dc30 GlyphCells_UninitializedCopy
+0063dc60 GlyphCells_UninitializedFill
+0063dda0 GlyphCells_Construct
+# The font manager's object (its vtable's one slot, the static construction and destruction).
+0063de80 C_FontManager::C_FontManager
+0063ded0 C_FontManager::~C_FontManager
+0063deb0 C_FontManager::ScalarDeletingDestructor
+0063de40 FontManager_StaticInit
+0063de50 FontManager_Construct
+0063de60 FontManager_RegisterDestroy
+0063de70 FontManager_Destroy
+# Unreferenced (no code or data references; left in tier 1): the font made again at another
+# size, and at another size and weight.
+0063d1d0 C_GdiFont::SetSize
+0063d260 C_GdiFont::SetSizeAndWeight

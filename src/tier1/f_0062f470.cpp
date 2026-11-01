@@ -38,57 +38,58 @@ uint32_t FUN_0062f4a0(...)
 // 0x0062f4b0
 uint32_t C_MainMenu__FUN_0062f4b0(C_MainMenu *_this,void *param_1, ...)
 {
-  int iVar1;
-  uint32_t *puVar2;
+  void *pvVar1;
+  int iVar2;
   uint32_t *puVar3;
   uint32_t *puVar4;
+  uint32_t *puVar5;
   int *local_38;
   uint32_t local_34 [13];
   local_38 = &DAT_008aca88;
-  puVar2 = &DAT_0083fad8;
+  puVar3 = &DAT_0083fad8;
   do {
-    puVar3 = puVar2;
-    puVar4 = local_34;
-    for (iVar1 = 0xd; iVar1 != 0; iVar1 = iVar1 - 1) {
-      *puVar4 = *puVar3;
-      puVar3++;
+    puVar4 = puVar3;
+    puVar5 = local_34;
+    for (iVar2 = 0xd; iVar2 != 0; iVar2 = iVar2 - 1) {
+      *puVar5 = *puVar4;
       puVar4++;
+      puVar5++;
     }
-    iVar1 = CreateTextStyle(local_34);
-    puVar2 += 0xd;
-    *local_38 = iVar1;
+    iVar2 = CreateTextStyle(local_34);
+    puVar3 += 0xd;
+    *local_38 = iVar2;
     local_38++;
-  } while ((int)puVar2 < 0x83fd48);
+  } while ((int)puVar3 < 0x83fd48);
   FUN_00625f60((int)param_1,0,0x1000007,0x400d000,_this,FUN_006319a0);
   FUN_00625f60((int)param_1,0,0x1000007,0x4014000,_this,FUN_00631c20);
-  iVar1 = FUN_00615360(param_1,0xf,"LB_Players");
-  FUN_00614e80(iVar1,0,0x2000073,0);
-  FUN_00614e80(iVar1,0,0x1000005,0);
+  pvVar1 = (void *)FUN_00615360(param_1,0xf,"LB_Players");
+  AddDescMessage1(pvVar1,0,0x2000073,0);
+  AddDescMessage1(pvVar1,0,0x1000005,0);
   FUN_00615360(param_1,0x13,"text_01");
-  iVar1 = FUN_00615360(param_1,0x14,"brefresh status");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0xa05);
-  FUN_0061e100(iVar1,0,0x1000007,0x4001000,_this,FUN_006319a0);
-  iVar1 = FUN_00615360(param_1,0x14,"bjoin game");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0xa06);
-  FUN_00614e80(iVar1,0,0x600109b,0);
-  FUN_00614e80(iVar1,0,0x600102a,0);
-  iVar1 = FUN_00615360(param_1,0x14,"breturn");
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0xa07);
-  FUN_00614e80(iVar1,0,0x6001003,0);
-  iVar1 = FUN_00615360(param_1,0x13,"text_screen");
-  FUN_00614f10(iVar1,0,0x1000015,10,0xa08);
-  iVar1 = FUN_00615360(param_1,0x13,"text_h&dversion");
-  FUN_00614f10(iVar1,0,0x1000015,0x28,0x7d6);
-  iVar1 = FUN_00615360(param_1,0x13,"text_team status");
-  FUN_00614f10(iVar1,0,0x1000015,0xb,0xa09);
-  iVar1 = FUN_00615360(param_1,0x13,"text_");
-  FUN_00614f10(iVar1,0,0x1000017,DAT_008aca9c,0xa0a);
-  FUN_00614f10(iVar1,0,0x1000017,DAT_008acaa0,0xa21);
-  FUN_00614f10(iVar1,0,0x1000017,DAT_008acaa4,0xa22);
-  iVar1 = FUN_00615360(param_1,0x13,"allied");
-  FUN_00614e80(iVar1,0,0x1000099,0);
-  iVar1 = FUN_00615360(param_1,0x13,&DAT_00832d10);
-  FUN_00614e80(iVar1,0,0x1000099,0);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"brefresh status");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0xa05);
+  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x6319a0);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bjoin game");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0xa06);
+  AddDescMessage1(pvVar1,0,0x600109b,0);
+  AddDescMessage1(pvVar1,0,0x600102a,0);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"breturn");
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0xa07);
+  AddDescMessage1(pvVar1,0,0x6001003,0);
+  pvVar1 = (void *)FUN_00615360(param_1,0x13,"text_screen");
+  AddDescMessage2(pvVar1,0,0x1000015,10,0xa08);
+  pvVar1 = (void *)FUN_00615360(param_1,0x13,"text_h&dversion");
+  AddDescMessage2(pvVar1,0,0x1000015,0x28,0x7d6);
+  pvVar1 = (void *)FUN_00615360(param_1,0x13,"text_team status");
+  AddDescMessage2(pvVar1,0,0x1000015,0xb,0xa09);
+  pvVar1 = (void *)FUN_00615360(param_1,0x13,"text_");
+  AddDescMessage2(pvVar1,0,0x1000017,DAT_008aca9c,0xa0a);
+  AddDescMessage2(pvVar1,0,0x1000017,DAT_008acaa0,0xa21);
+  AddDescMessage2(pvVar1,0,0x1000017,DAT_008acaa4,0xa22);
+  pvVar1 = (void *)FUN_00615360(param_1,0x13,"allied");
+  AddDescMessage1(pvVar1,0,0x1000099,0);
+  pvVar1 = (void *)FUN_00615360(param_1,0x13,&DAT_00832d10);
+  AddDescMessage1(pvVar1,0,0x1000099,0);
   return 1;
 }
 
@@ -127,21 +128,20 @@ uint32_t FUN_0062fa30(int param_1, ...)
   void *local_c;
   C_str_rep *pCVar1;
   int *piVar2;
-  uint8_t *pbVar3;
-  char cVar4;
+  char *pcVar3;
+  bool bVar4;
   int iVar5;
   int *piVar6;
-  uint32_t uVar7;
   C_str _this;
+  uint32_t *puVar7;
   uint32_t *puVar8;
-  uint32_t *puVar9;
   uint32_t uStack_13c;
   uint32_t uStack_138;
   uint32_t uStack_134;
   int iStack_130;
   C_str CStack_128;
   C_str CStack_124;
-  uint8_t *pbStack_120;
+  char *pcStack_120;
   C_str CStack_11c;
   C_str CStack_118;
   C_str CStack_114;
@@ -194,13 +194,13 @@ uint32_t FUN_0062fa30(int param_1, ...)
       iVar5 = *piVar6;
     }
     if (((*(uint32_t *)(iVar5 + 0x60) & 0xfc000000) == 0x30000000) &&
-       (pbStack_120 = (uint8_t *)piVar2[0x87], pbStack_120 != 0)) {
+       (pcStack_120 = (char *)piVar2[0x87], pcStack_120 != 0)) {
       CStack_128.rep = 0;
       uStack_13c = 0x30100000;
       uStack_138 = 0x2000018;
       uStack_134 = 0;
       uStack_4 = 0;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if (CStack_128.rep != 0) {
         C_str__ReleaseRep((C_str *)CStack_128.rep);
@@ -212,12 +212,12 @@ uint32_t FUN_0062fa30(int param_1, ...)
         CStack_124.rep = pCVar1;
         do {
           iStack_108 -= 0x5c;
-          puVar8 = (uint32_t *)(iStack_108 + *(int *)(param_1 + 4));
-          puVar9 = auStack_68;
+          puVar7 = (uint32_t *)(iStack_108 + *(int *)(param_1 + 4));
+          puVar8 = auStack_68;
           for (iVar5 = 0x17; iVar5 != 0; iVar5 = iVar5 - 1) {
-            *puVar9 = *puVar8;
+            *puVar8 = *puVar7;
+            puVar7++;
             puVar8++;
-            puVar9++;
           }
           if (acStack_40[0] != '\0') {
             if (iStack_44 == 0) {
@@ -233,7 +233,7 @@ uint32_t FUN_0062fa30(int param_1, ...)
                 C_str__ReleaseRep((C_str *)CStack_11c.rep);
               }
               uStack_4 = 6;
-              FUN_00615a90(&DAT_008ae590,&uStack_80);
+              PostControlMessage(&DAT_008ae590,&uStack_80);
               _this.rep = CStack_6c.rep;
 LAB_0062fd8c:
               uStack_4 = 0xffffffff;
@@ -255,7 +255,7 @@ LAB_0062fd8c:
                   C_str__ReleaseRep((C_str *)CStack_104.rep);
                 }
                 uStack_4 = 3;
-                FUN_00615a90(&DAT_008ae590,&uStack_c8);
+                PostControlMessage(&DAT_008ae590,&uStack_c8);
                 _this.rep = CStack_b4.rep;
                 goto LAB_0062fd8c;
               }
@@ -272,7 +272,7 @@ LAB_0062fd8c:
                   C_str__ReleaseRep((C_str *)CStack_10c.rep);
                 }
                 uStack_4 = 9;
-                FUN_00615a90(&DAT_008ae590,&uStack_b0);
+                PostControlMessage(&DAT_008ae590,&uStack_b0);
                 _this.rep = CStack_9c.rep;
                 goto LAB_0062fd8c;
               }
@@ -289,7 +289,7 @@ LAB_0062fd8c:
               C_str__ReleaseRep((C_str *)CStack_110.rep);
             }
             uStack_4 = 0xc;
-            FUN_00615a90(&DAT_008ae590,&uStack_f8);
+            PostControlMessage(&DAT_008ae590,&uStack_f8);
             uStack_4 = 0xffffffff;
             if (CStack_e4.rep != 0) {
               C_str__ReleaseRep((C_str *)CStack_e4.rep);
@@ -306,7 +306,7 @@ LAB_0062fd8c:
               C_str__ReleaseRep((C_str *)CStack_118.rep);
             }
             uStack_4 = 0xf;
-            FUN_00615a90(&DAT_008ae590,&uStack_e0);
+            PostControlMessage(&DAT_008ae590,&uStack_e0);
             uStack_4 = 0xffffffff;
             if (CStack_cc.rep != 0) {
               C_str__ReleaseRep((C_str *)CStack_cc.rep);
@@ -323,7 +323,7 @@ LAB_0062fd8c:
               C_str__ReleaseRep((C_str *)CStack_114.rep);
             }
             uStack_4 = 0x12;
-            FUN_00615a90(&DAT_008ae590,&uStack_13c);
+            PostControlMessage(&DAT_008ae590,&uStack_13c);
             uStack_4 = 0xffffffff;
             if (CStack_128.rep != 0) {
               C_str__ReleaseRep((C_str *)CStack_128.rep);
@@ -337,7 +337,7 @@ LAB_0062fd8c:
       uStack_138 = 0x1000077;
       uStack_134 = 0;
       uStack_4 = 0x13;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if (CStack_128.rep != 0) {
         C_str__ReleaseRep((C_str *)CStack_128.rep);
@@ -347,7 +347,7 @@ LAB_0062fd8c:
       uStack_138 = 0x2000018;
       uStack_134 = 0;
       uStack_4 = 0x14;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if (CStack_128.rep != 0) {
         C_str__ReleaseRep((C_str *)CStack_128.rep);
@@ -357,7 +357,7 @@ LAB_0062fd8c:
       uStack_138 = 0x2000018;
       uStack_134 = 0;
       uStack_4 = 0x15;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if (CStack_128.rep != 0) {
         C_str__ReleaseRep((C_str *)CStack_128.rep);
@@ -368,7 +368,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acab0;
       iStack_130 = 0xa3c;
       uStack_4 = 0x16;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if (CStack_128.rep != 0) {
         C_str__ReleaseRep((C_str *)CStack_128.rep);
@@ -385,7 +385,7 @@ LAB_0062fd8c:
         C_str__ReleaseRep((C_str *)CStack_124.rep);
       }
       uStack_4 = 0x19;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if (CStack_128.rep != 0) {
         C_str__ReleaseRep((C_str *)CStack_128.rep);
@@ -397,7 +397,7 @@ LAB_0062fd8c:
         uStack_134 = DAT_008acab0;
         iStack_130 = 0xa3d;
         uStack_4 = 0x1a;
-        FUN_00615a90(&DAT_008ae590,&uStack_13c);
+        PostControlMessage(&DAT_008ae590,&uStack_13c);
         uStack_4 = 0xffffffff;
         if (CStack_128.rep != 0) {
           C_str__ReleaseRep((C_str *)CStack_128.rep);
@@ -414,7 +414,7 @@ LAB_0062fd8c:
           C_str__ReleaseRep((C_str *)CStack_124.rep);
         }
         uStack_4 = 0x1d;
-        FUN_00615a90(&DAT_008ae590,&uStack_13c);
+        PostControlMessage(&DAT_008ae590,&uStack_13c);
         uStack_4 = 0xffffffff;
         if (CStack_128.rep != 0) {
           C_str__ReleaseRep((C_str *)CStack_128.rep);
@@ -426,7 +426,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa0b;
       uStack_4 = 0x1e;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if (CStack_128.rep != 0) {
         C_str__ReleaseRep((C_str *)CStack_128.rep);
@@ -437,7 +437,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0x7d2;
       uStack_4 = 0x1f;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if (CStack_128.rep != 0) {
         C_str__ReleaseRep((C_str *)CStack_128.rep);
@@ -448,13 +448,13 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa0c;
       uStack_4 = 0x20;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if (CStack_128.rep != 0) {
         C_str__ReleaseRep((C_str *)CStack_128.rep);
       }
-      if ((g_gameProfile.m_unicodeFont == false) &&
-         (cVar4 = FUN_0064d9e0(pbStack_120), cVar4 != '\0')) {
+      if ((g_gameProfile.m_unicodeFont == false) && (bVar4 = HasUtf8Sequences(pcStack_120), bVar4))
+      {
         CStack_128.rep = 0;
         uStack_13c = 0x30200000;
         uStack_138 = 0x1000017;
@@ -463,7 +463,7 @@ LAB_0062fd8c:
         uStack_4 = 0x21;
       }
       else {
-        C_fstr_Construct(&CStack_124,(char *)pbStack_120);
+        C_fstr_Construct(&CStack_124,pcStack_120);
         CStack_128.rep = 0;
         uStack_4 = 0x23;
         uStack_13c = 0x30200000;
@@ -476,7 +476,7 @@ LAB_0062fd8c:
         }
         uStack_4 = 0x24;
       }
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -488,7 +488,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa0d;
       uStack_4 = 0x25;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
@@ -507,7 +507,7 @@ LAB_0062fd8c:
         C_str__ReleaseRep((C_str *)CStack_124.rep);
       }
       uStack_4 = 0x28;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -519,15 +519,15 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa0e;
       uStack_4 = 0x29;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
         tier1_operator_delete(CStack_128.rep);
       }
-      pbVar3 = pbStack_120;
-      C_fstr_Construct(&CStack_124,&DAT_00832d40,*(uint32_t *)(pbStack_120 + 0x74));
+      pcVar3 = pcStack_120;
+      C_fstr_Construct(&CStack_124,&DAT_00832d40,*(uint32_t *)(pcStack_120 + 0x74));
       CStack_128.rep = 0;
       uStack_4 = 0x2b;
       uStack_13c = 0x30200000;
@@ -539,7 +539,7 @@ LAB_0062fd8c:
         C_str__ReleaseRep((C_str *)CStack_124.rep);
       }
       uStack_4 = 0x2c;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if (CStack_128.rep != 0) {
         C_str__ReleaseRep((C_str *)CStack_128.rep);
@@ -550,15 +550,15 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa0f;
       uStack_4 = 0x2d;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
         tier1_operator_delete(CStack_128.rep);
       }
-      C_fstr_Construct(&CStack_124,"%d / %d",*(uint32_t *)(pbVar3 + 0x7c),
-                       *(uint32_t *)(pbVar3 + 0x78));
+      C_fstr_Construct(&CStack_124,"%d / %d",*(uint32_t *)(pcVar3 + 0x7c),
+                       *(uint32_t *)(pcVar3 + 0x78));
       CStack_128.rep = 0;
       uStack_134 = DAT_008acaac;
       uStack_4 = 0x2f;
@@ -570,7 +570,7 @@ LAB_0062fd8c:
         C_str__ReleaseRep((C_str *)CStack_124.rep);
       }
       uStack_4 = 0x30;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -582,19 +582,19 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa10;
       uStack_4 = 0x31;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
         tier1_operator_delete(CStack_128.rep);
       }
       CStack_128.rep = 0;
-      iStack_130 = 0x7fe - (uint32_t)(pbVar3[0x80] != 0);
+      iStack_130 = 0x7fe - (uint32_t)(pcVar3[0x80] != '\0');
       uStack_13c = 0x30200000;
       uStack_138 = 0x1000017;
       uStack_134 = DAT_008acaac;
       uStack_4 = 0x32;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -606,19 +606,19 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa12;
       uStack_4 = 0x33;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
         tier1_operator_delete(CStack_128.rep);
       }
       CStack_128.rep = 0;
-      iStack_130 = 0x7fe - (uint32_t)(pbVar3[0x81] != 0);
+      iStack_130 = 0x7fe - (uint32_t)(pcVar3[0x81] != '\0');
       uStack_13c = 0x30200000;
       uStack_138 = 0x1000017;
       uStack_134 = DAT_008acaac;
       uStack_4 = 0x34;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -630,19 +630,19 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa11;
       uStack_4 = 0x35;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
         tier1_operator_delete(CStack_128.rep);
       }
       CStack_128.rep = 0;
-      iStack_130 = 0x7fe - (uint32_t)(pbVar3[0x82] != 0);
+      iStack_130 = 0x7fe - (uint32_t)(pcVar3[0x82] != '\0');
       uStack_13c = 0x30200000;
       uStack_138 = 0x1000017;
       uStack_134 = DAT_008acaac;
       uStack_4 = 0x36;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -654,7 +654,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0x7d2;
       uStack_4 = 0x37;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -666,7 +666,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa14;
       uStack_4 = 0x38;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -678,21 +678,21 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0x7d2;
       uStack_4 = 0x39;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
         tier1_operator_delete(CStack_128.rep);
       }
-      uVar7 = GetGameTypeTextId(*(int *)(pbVar3 + 0x70));
+      iVar5 = GetGameTypeTextId(*(int *)(pcVar3 + 0x70));
       CStack_128.rep = 0;
       uStack_13c = 0x30200000;
       uStack_138 = 0x1000017;
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa15;
       uStack_4 = 0x3a;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -703,21 +703,21 @@ LAB_0062fd8c:
       uStack_138 = 0x1000017;
       uStack_134 = DAT_008acaac;
       uStack_4 = 0x3b;
-      iStack_130 = uVar7;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      iStack_130 = iVar5;
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
         tier1_operator_delete(CStack_128.rep);
       }
-      if (*(int *)(pbVar3 + 0x70) == 3) {
+      if (*(int *)(pcVar3 + 0x70) == 3) {
         CStack_128.rep = 0;
         uStack_13c = 0x30200000;
         uStack_138 = 0x1000017;
         uStack_134 = DAT_008acaa8;
         iStack_130 = 0x501e;
         uStack_4 = 0x3c;
-        FUN_00615a90(&DAT_008ae590,&uStack_13c);
+        PostControlMessage(&DAT_008ae590,&uStack_13c);
         if ((CStack_128.rep != 0) &&
            ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
            (CStack_128.rep)->refCount == 0)) {
@@ -729,7 +729,7 @@ LAB_0062fd8c:
         iStack_130 = *(int *)(param_1 + 0x48) + 0x5014;
         uStack_134 = DAT_008acaac;
         uStack_4 = 0x3d;
-        FUN_00615a90(&DAT_008ae590,&uStack_13c);
+        PostControlMessage(&DAT_008ae590,&uStack_13c);
         if ((CStack_128.rep != 0) &&
            ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
            (CStack_128.rep)->refCount == 0)) {
@@ -741,7 +741,7 @@ LAB_0062fd8c:
         uStack_134 = DAT_008acaa8;
         iStack_130 = 0x501f;
         uStack_4 = 0x3e;
-        FUN_00615a90(&DAT_008ae590,&uStack_13c);
+        PostControlMessage(&DAT_008ae590,&uStack_13c);
         if ((CStack_128.rep != 0) &&
            ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
            (CStack_128.rep)->refCount == 0)) {
@@ -753,7 +753,7 @@ LAB_0062fd8c:
         uStack_138 = 0x1000017;
         uStack_134 = DAT_008acaac;
         uStack_4 = 0x3f;
-        FUN_00615a90(&DAT_008ae590,&uStack_13c);
+        PostControlMessage(&DAT_008ae590,&uStack_13c);
         if ((CStack_128.rep != 0) &&
            ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
            (CStack_128.rep)->refCount == 0)) {
@@ -765,7 +765,7 @@ LAB_0062fd8c:
         uStack_134 = DAT_008acaa8;
         iStack_130 = 0x5020;
         uStack_4 = 0x40;
-        FUN_00615a90(&DAT_008ae590,&uStack_13c);
+        PostControlMessage(&DAT_008ae590,&uStack_13c);
         uStack_4 = 0xffffffff;
         if ((CStack_128.rep != 0) &&
            ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
@@ -785,7 +785,7 @@ LAB_0062fd8c:
           tier1_operator_delete(CStack_124.rep);
         }
         uStack_4 = 0x43;
-        FUN_00615a90(&DAT_008ae590,&uStack_13c);
+        PostControlMessage(&DAT_008ae590,&uStack_13c);
         if ((CStack_128.rep != 0) &&
            ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
            (CStack_128.rep)->refCount == 0)) {
@@ -798,14 +798,14 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa16;
       uStack_4 = 0x44;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
         tier1_operator_delete(CStack_128.rep);
       }
-      C_fstr_Construct(&CStack_124,(char *)(pbVar3 + 0x33));
+      C_fstr_Construct(&CStack_124,pcVar3 + 0x33);
       CStack_128.rep = 0;
       uStack_4 = 0x46;
       uStack_13c = 0x30200000;
@@ -817,7 +817,7 @@ LAB_0062fd8c:
         C_str__ReleaseRep((C_str *)CStack_124.rep);
       }
       uStack_4 = 0x47;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -829,7 +829,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa17;
       uStack_4 = 0x48;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
@@ -848,7 +848,7 @@ LAB_0062fd8c:
         C_str__ReleaseRep((C_str *)CStack_124.rep);
       }
       uStack_4 = 0x4b;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -860,7 +860,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa18;
       uStack_4 = 0x4c;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
@@ -879,7 +879,7 @@ LAB_0062fd8c:
         C_str__ReleaseRep((C_str *)CStack_124.rep);
       }
       uStack_4 = 0x4f;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -891,7 +891,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa19;
       uStack_4 = 0x50;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
@@ -910,7 +910,7 @@ LAB_0062fd8c:
         C_str__ReleaseRep((C_str *)CStack_124.rep);
       }
       uStack_4 = 0x53;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -922,7 +922,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa1a;
       uStack_4 = 0x54;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
@@ -941,7 +941,7 @@ LAB_0062fd8c:
         C_str__ReleaseRep((C_str *)CStack_124.rep);
       }
       uStack_4 = 0x57;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -953,7 +953,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa1b;
       uStack_4 = 0x58;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
@@ -972,7 +972,7 @@ LAB_0062fd8c:
         C_str__ReleaseRep((C_str *)CStack_124.rep);
       }
       uStack_4 = 0x5b;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -984,7 +984,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa1c;
       uStack_4 = 0x5c;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -996,7 +996,7 @@ LAB_0062fd8c:
       uStack_138 = 0x1000017;
       uStack_134 = DAT_008acaac;
       uStack_4 = 0x5d;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -1008,7 +1008,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa1d;
       uStack_4 = 0x5e;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -1020,7 +1020,7 @@ LAB_0062fd8c:
       uStack_138 = 0x1000017;
       uStack_134 = DAT_008acaac;
       uStack_4 = 0x5f;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -1032,7 +1032,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0x5023;
       uStack_4 = 0x60;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
@@ -1051,7 +1051,7 @@ LAB_0062fd8c:
         C_str__ReleaseRep((C_str *)CStack_124.rep);
       }
       uStack_4 = 99;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -1063,7 +1063,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa1e;
       uStack_4 = 100;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -1075,7 +1075,7 @@ LAB_0062fd8c:
       uStack_138 = 0x1000017;
       uStack_134 = DAT_008acaac;
       uStack_4 = 0x65;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -1087,7 +1087,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa1f;
       uStack_4 = 0x66;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -1099,7 +1099,7 @@ LAB_0062fd8c:
       uStack_138 = 0x1000017;
       uStack_134 = DAT_008acaac;
       uStack_4 = 0x67;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -1111,7 +1111,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0xa20;
       uStack_4 = 0x68;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       uStack_4 = 0xffffffff;
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
@@ -1130,7 +1130,7 @@ LAB_0062fd8c:
         C_str__ReleaseRep((C_str *)CStack_124.rep);
       }
       uStack_4 = 0x6b;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -1142,7 +1142,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0x5021;
       uStack_4 = 0x6c;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -1154,7 +1154,7 @@ LAB_0062fd8c:
       uStack_138 = 0x1000017;
       uStack_134 = DAT_008acaac;
       uStack_4 = 0x6d;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -1166,7 +1166,7 @@ LAB_0062fd8c:
       uStack_134 = DAT_008acaa8;
       iStack_130 = 0x5022;
       uStack_4 = 0x6e;
-      FUN_00615a90(&DAT_008ae590,&uStack_13c);
+      PostControlMessage(&DAT_008ae590,&uStack_13c);
       if ((CStack_128.rep != 0) &&
          ((CStack_128.rep)->refCount = (CStack_128.rep)->refCount - 1,
          (CStack_128.rep)->refCount == 0)) {
@@ -1178,7 +1178,7 @@ LAB_0062fd8c:
       uStack_94 = 0x1000017;
       uStack_90 = DAT_008acaac;
       uStack_4 = 0x6f;
-      FUN_00615a90(&DAT_008ae590,&uStack_98);
+      PostControlMessage(&DAT_008ae590,&uStack_98);
       if ((piStack_84 != 0) && (*piStack_84 = *piStack_84 - 1, *piStack_84 == 0)) {
         tier1_operator_delete(piStack_84);
       }
@@ -1217,7 +1217,7 @@ uint32_t FUN_006319a0(int param_1, ...)
   local_1c = 0;
   local_4 = 0;
   local_40 = param_1;
-  FUN_00615a90(&DAT_008ae590,&local_24);
+  PostControlMessage(&DAT_008ae590,&local_24);
   if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
     tier1_operator_delete(local_10);
   }
@@ -1226,7 +1226,7 @@ uint32_t FUN_006319a0(int param_1, ...)
   local_20 = 0x1000077;
   local_1c = 0;
   local_4 = 1;
-  FUN_00615a90(&DAT_008ae590,&local_24);
+  PostControlMessage(&DAT_008ae590,&local_24);
   local_4 = 0xffffffff;
   if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
     tier1_operator_delete(local_10);
@@ -1244,7 +1244,7 @@ uint32_t FUN_006319a0(int param_1, ...)
     tier1_operator_delete(local_44.rep);
   }
   local_4 = 4;
-  FUN_00615a90(&DAT_008ae590,&local_3c);
+  PostControlMessage(&DAT_008ae590,&local_3c);
   if ((local_28.rep != 0) &&
      ((local_28.rep)->refCount = (local_28.rep)->refCount - 1, (local_28.rep)->refCount == 0)) {
     tier1_operator_delete(local_28.rep);
@@ -1257,7 +1257,7 @@ uint32_t FUN_006319a0(int param_1, ...)
   if (*(int *)(*(int *)(local_40 + 0x21c) + 0x70) == 3) {
     local_20 = 0x1000004;
     local_4 = 5;
-    FUN_00615a90(&DAT_008ae590,&local_24);
+    PostControlMessage(&DAT_008ae590,&local_24);
     goto LAB_00631bc5;
   }
   local_20 = 0x1000003;

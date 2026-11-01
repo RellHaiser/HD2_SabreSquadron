@@ -57,7 +57,7 @@ uint32_t FUN_00722520(uint32_t param_1,uint32_t param_2,int param_3, ...)
 // 0x00722550
 uint32_t FUN_00722550(void *param_1,uint32_t param_2,uint32_t param_3,int param_4, ...)
 {
-  uint16_t uVar1;
+  bool bVar1;
   C_game *pCVar2;
   void *pvVar3;
   LPSTR str;
@@ -104,12 +104,12 @@ uint32_t FUN_00722550(void *param_1,uint32_t param_2,uint32_t param_3,int param_
       local_4 = (LPSTR)0x1;
       local_24.m_010 = (void *)(*(int *)(param_4 + 0x14) * 8);
       *(uint32_t *)(str + 0x74) = *(uint32_t *)(param_4 + 0x1c);
-      uVar1 = FUN_0064da80(*(uint16_t **)(*(int *)(param_4 + 0xc) + 0x30));
-      if ((char)uVar1 == '\0') {
-        FUN_00724b30(str,*(LPCWSTR *)(*(int *)(param_4 + 0xc) + 0x30),0x32);
+      bVar1 = HasCjkCharacters(*(uint16_t **)(*(int *)(param_4 + 0xc) + 0x30));
+      if (bVar1) {
+        FUN_00724bd0(str,*(LPCWSTR *)(*(int *)(param_4 + 0xc) + 0x30),0x32);
       }
       else {
-        FUN_00724bd0(str,*(LPCWSTR *)(*(int *)(param_4 + 0xc) + 0x30),0x32);
+        FUN_00724b30(str,*(LPCWSTR *)(*(int *)(param_4 + 0xc) + 0x30),0x32);
       }
       uVar4 = FUN_00725190(*(int **)(param_4 + 4));
       *(uint32_t *)(str + 0x68) = uVar4;

@@ -2,64 +2,6 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
-// 0x00496cc0
-C_TextBox * C_TextBox__C_TextBox(C_TextBox *_this, ...)
-{
-  IGraph *pIVar1;
-  int iVar2;
-  void *pvVar3;
-  uint32_t uStack_14;
-  uint32_t local_4;
-  _this->m_01c = 0;
-  _this->m_018 = 0;
-  _this->m_020 = 0;
-  _this->m_014 = 0;
-  _this->m_010 = 0;
-  _this->m_00c = 0;
-  _this->m_008 = 0;
-  _this->m_030 = GH_PIECE(uStack_14,3,1);
-  _this->m_034 = 0;
-  _this->m_038 = 0;
-  _this->m_03c = 0;
-  _this->m_044 = GH_PIECE(uStack_14,3,1);
-  _this->m_048 = 0;
-  _this->m_04c = 0;
-  _this->m_050 = 0;
-  _this->m_05c = 0;
-  _this->m_058 = GH_PIECE(uStack_14,3,1);
-  _this->m_060 = 0;
-  _this->m_064 = 0;
-  local_4 = 2;
-  _this->vtable = (C_TextBox_vtbl *)&PTR_00810458;
-  pIVar1 = GetIGraph();
-  iVar2 = (*pIVar1->vtable->ScrnX)(pIVar1);
-  _this->m_004 = (uint16_t)iVar2;
-  pIVar1 = GetIGraph();
-  iVar2 = (*pIVar1->vtable->ScrnY)(pIVar1);
-  _this->m_006 = (uint16_t)iVar2;
-  _this->m_094 = 0;
-  _this->m_073 = '\0';
-  _this->m_071 = '\0';
-  _this->m_02c = 0;
-  _this->m_074 = '\0';
-  _this->m_072 = '\0';
-  pvVar3 = AcquireFontManager();
-  _this->m_028 = pvVar3;
-  _this->m_070 = '\0';
-  _this->m_088 = 0xffffffff;
-  _this->m_08c = 0xffffffff;
-  _this->m_080 = '\0';
-  _this->m_081 = '\0';
-  _this->m_084 = 0;
-  _this->m_076 = 0;
-  _this->m_07c = 0;
-  _this->m_078 = 0;
-  _this->m_090 = '\n';
-  _this->m_098 = 0;
-  return _this;
-}
-
-
 // 0x00498a20
 uint32_t C_InfoScreen__AddAlliedRow(C_InfoScreen *_this,char *name,int a,int b,int c,int d, ...)
 {

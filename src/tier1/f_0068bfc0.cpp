@@ -202,7 +202,7 @@ uint32_t FUN_0068c0d0(void *param_1, ...)
         local_40 = 0;
       }
       else {
-        local_40 = C_auto_00815540__FUN_00668420(local_3c,*(int **)((int)param_1 + 0x30),piVar3);
+        local_40 = C_Control__FUN_00668420((C_Control*)(local_3c),*(int **)((int)param_1 + 0x30),piVar3);
       }
       local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
       (**(code **)(*local_40 + 0x8c))(*(uint32_t *)(local_30 + uVar4 * 4));
@@ -233,35 +233,39 @@ uint32_t FUN_0068c0d0(void *param_1, ...)
 uint32_t FUN_0068c3e0(uint32_t param_1,int *param_2, ...)
 {
   int iVar1;
-  uint8_t **ppuVar2;
-  uint32_t uVar3;
+  void *pvVar2;
+  uint8_t **ppuVar3;
+  uint32_t extraout_EAX;
+  uint32_t uVar4;
   void *unaff_ESI;
-  uint8_t *puVar4;
+  uint8_t *value2;
   iVar1 = (**(code **)(*param_2 + 0x48))(param_2,"title",1);
   if (iVar1 != 0) {
-    iVar1 = FUN_00615360(unaff_ESI,0x13,"title");
-    ppuVar2 = FUN_0068c000();
-    puVar4 = ppuVar2[3];
-    ppuVar2 = FUN_0068c000();
-    FUN_00614f10(iVar1,0,0x1000015,(-(uint32_t)(*(char *)(ppuVar2 + 2) != '\0') & 0x4f) + 10,puVar4);
-    ppuVar2 = FUN_0068c000();
-    FUN_00614e80(iVar1,0,0x10000a3,ppuVar2[1]);
+    pvVar2 = (void *)FUN_00615360(unaff_ESI,0x13,"title");
+    ppuVar3 = FUN_0068c000();
+    value2 = ppuVar3[3];
+    ppuVar3 = FUN_0068c000();
+    AddDescMessage2(pvVar2,0,0x1000015,(-(uint32_t)(*(char *)(ppuVar3 + 2) != '\0') & 0x4f) + 10,
+                    (uint32_t)value2);
+    ppuVar3 = FUN_0068c000();
+    AddDescMessage1(pvVar2,0,0x10000a3,(uint32_t)ppuVar3[1]);
   }
   iVar1 = (**(code **)(*param_2 + 0x48))(param_2,"textbar",1);
   if (iVar1 != 0) {
-    iVar1 = FUN_00615360(unaff_ESI,0x13,"textbar");
-    FUN_00614f10(iVar1,0,0x1000015,0xd,0x7f8);
+    pvVar2 = (void *)FUN_00615360(unaff_ESI,0x13,"textbar");
+    AddDescMessage2(pvVar2,0,0x1000015,0xd,0x7f8);
   }
   iVar1 = (**(code **)(*param_2 + 0x48))(param_2,"text01",1);
-  uVar3 = 0;
+  uVar4 = 0;
   if (iVar1 != 0) {
-    iVar1 = FUN_00615360(unaff_ESI,0x12,"text01");
-    ppuVar2 = FUN_0068c000();
-    FUN_00614f10(iVar1,0,0x1000015,3,ppuVar2[4]);
-    ppuVar2 = FUN_0068c000();
-    uVar3 = FUN_00614e80(iVar1,0,0x10000a3,ppuVar2[1]);
+    pvVar2 = (void *)FUN_00615360(unaff_ESI,0x12,"text01");
+    ppuVar3 = FUN_0068c000();
+    AddDescMessage2(pvVar2,0,0x1000015,3,(uint32_t)ppuVar3[4]);
+    ppuVar3 = FUN_0068c000();
+    AddDescMessage1(pvVar2,0,0x10000a3,(uint32_t)ppuVar3[1]);
+    uVar4 = extraout_EAX;
   }
-  return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
+  return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
 }
 
 

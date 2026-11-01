@@ -686,10 +686,10 @@ switchD_00727c05_default: ;
 // 0x00728820
 int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
 {
-  S_SquadSoldier **ppSVar1;
-  int iVar2;
-  long double fVar3;
-  char cVar4;
+  char cVar1;
+  S_SquadSoldier **ppSVar2;
+  int iVar3;
+  long double fVar4;
   C_Team *pCVar5;
   C_game *pCVar6;
   C_GameState *pCVar7;
@@ -1070,10 +1070,10 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
       if ((bool)local_609) {
         iVar21 = 0;
         do {
-          cVar4 = (&DAT_0084500c)[iVar21];
-          *(char *)((int)&local_3d8 + iVar21) = cVar4;
+          cVar1 = (&DAT_0084500c)[iVar21];
+          *(char *)((int)&local_3d8 + iVar21) = cVar1;
           iVar21++;
-        } while (cVar4 != '\0');
+        } while (cVar1 != '\0');
         puVar25 = &local_3d1;
       }
       else {
@@ -1083,10 +1083,10 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
       iVar19 = C_NetGame__LockPlayers(0x97d070);
       iVar21 = *(int *)(iVar19 + 4);
       iVar23 = uVar15 * 0xc4;
-      iVar2 = *(int *)(iVar21 + 0x3c + (int)DAT_00982104 * 0xc4);
+      iVar3 = *(int *)(iVar21 + 0x3c + (int)DAT_00982104 * 0xc4);
       local_610 = *(C_Human **)(iVar23 + 0x3c + iVar21);
-      if (((local_610 == 0) || (iVar2 == 0)) ||
-         (0 < *(int *)(iVar2 + 0xec) == 0 < local_610->m_stats[0])) {
+      if (((local_610 == 0) || (iVar3 == 0)) ||
+         (0 < *(int *)(iVar3 + 0xec) == 0 < local_610->m_stats[0])) {
         bVar26 = true;
       }
       else {
@@ -1099,13 +1099,13 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
         local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),&local_3d8);
         puVar25 = &local_3d8;
         if (g_gameProfile.m_unicodeFont == false) {
-          cVar4 = FUN_0064d9e0((uint8_t *)local_5f8);
-          if (cVar4 != '\0') {
+          bVar26 = HasUtf8Sequences((char *)local_5f8);
+          if (bVar26) {
             local_5f8 = (C_game *)&DAT_00845008;
           }
-          cVar4 = FUN_0064d9e0((uint8_t *)&local_3d8);
+          bVar26 = HasUtf8Sequences((char *)&local_3d8);
           puVar25 = (uint32_t *)"????????";
-          if (cVar4 == '\0') {
+          if (!bVar26) {
             puVar25 = GH_PIECE(local_608,0,4);
           }
         }
@@ -1267,8 +1267,8 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
     }
     break;
   case 0xc:
-    fVar3 = (long double)log2((long double)2.0);
-    local_608 = (double)((long double)0.6931471805599453 * fVar3);
+    fVar4 = (long double)log2((long double)2.0);
+    local_608 = (double)((long double)0.6931471805599453 * fVar4);
     log2((long double)34.0);
     lVar27 = tier1_ftol();
     local_610 = (C_Human *)lVar27;
@@ -1280,34 +1280,34 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
       do {
         uVar15 = C_BitStream__ReadBits(param_2,(int)GH_PIECE(local_608,0,4));
         if (pCVar6 == DAT_00982104) {
-          ppSVar1 = ((g_gameProfile.m_missionSquad)->states).first;
-          if ((ppSVar1 == (S_SquadSoldier **)0x0) ||
-             ((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar1 >> 2 == 0)) {
+          ppSVar2 = ((g_gameProfile.m_missionSquad)->states).first;
+          if ((ppSVar2 == (S_SquadSoldier **)0x0) ||
+             ((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar2 >> 2 == 0)) {
             pSVar22 = 0;
           }
           else {
-            pSVar22 = *ppSVar1;
+            pSVar22 = *ppSVar2;
           }
           if (uVar15 != pSVar22->team) {
             pCVar18 = GetGameApp();
             iVar21 = (*pCVar18->m_state->vtable->GetTypeId)();
             if (iVar21 == 1) {
-              ppSVar1 = ((g_gameProfile.m_missionSquad)->states).first;
-              if ((ppSVar1 == (S_SquadSoldier **)0x0) ||
-                 ((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar1 >> 2 == 0)) {
+              ppSVar2 = ((g_gameProfile.m_missionSquad)->states).first;
+              if ((ppSVar2 == (S_SquadSoldier **)0x0) ||
+                 ((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar2 >> 2 == 0)) {
                 pSVar22 = 0;
               }
               else {
-                pSVar22 = *ppSVar1;
+                pSVar22 = *ppSVar2;
               }
               pSVar22->team = uVar15;
-              ppSVar1 = ((g_gameProfile.m_missionSquad)->states).first;
-              if ((ppSVar1 == (S_SquadSoldier **)0x0) ||
-                 ((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar1 >> 2 == 0)) {
+              ppSVar2 = ((g_gameProfile.m_missionSquad)->states).first;
+              if ((ppSVar2 == (S_SquadSoldier **)0x0) ||
+                 ((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar2 >> 2 == 0)) {
                 pSVar22 = 0;
               }
               else {
-                pSVar22 = *ppSVar1;
+                pSVar22 = *ppSVar2;
               }
               S_SquadSoldier__ClearItems(pSVar22);
               pCVar18 = GetGameApp();
@@ -1401,16 +1401,16 @@ LAB_007291be:
     if (0 < pCVar13->m_stats[0]) {
       return (int *)pCVar13->m_stats[0];
     }
-    ppSVar1 = ((g_gameProfile.m_missionSquad)->states).first;
-    if (ppSVar1 == (S_SquadSoldier **)0x0) {
+    ppSVar2 = ((g_gameProfile.m_missionSquad)->states).first;
+    if (ppSVar2 == (S_SquadSoldier **)0x0) {
 LAB_0072903a:
       param_1 = 0;
     }
     else {
-      iVar21 = (int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar1 >> 2;
+      iVar21 = (int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar2 >> 2;
       local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),iVar21);
       if (iVar21 == 0) goto LAB_0072903a;
-      param_1 = (int *)*ppSVar1;
+      param_1 = (int *)*ppSVar2;
     }
     if ((*(short *)&((C_game *)param_1)->m_checkpoints != -1) &&
        (*(short *)((int)&((C_game *)param_1)->m_checkpoints + 2) == 1)) {
@@ -1573,9 +1573,9 @@ LAB_0072903a:
         if ((((g_gameRole & 1) == 0) &&
             (FUN_0072b9a0(local_610,*(uint32_t **)((int)local_610 + 8),&local_3d8),
             pCVar6 = local_5f8, local_5f4 != (void *)0xffffffff)) &&
-           (local_39c = (C_Human *)
-                        C_SpawnPoint__CreateSoldier(local_5f8,(int)local_5f4,(S_vector4*)((int *)&local_5e0),&local_5c0,
-                                     (int)&local_560,0,(int *)0xffffffff,0),
+           (local_39c = C_SpawnPoint__CreateSoldier
+                                  ((int)local_5f8,(int)local_5f4,&local_5e0,&local_5c0,
+                                   (S_SoldierState *)&local_560,0,-1,false),
            local_39c != 0)) {
           (*local_39c->vtable->StartMission)(false);
           SStack_410.x = 0.0;

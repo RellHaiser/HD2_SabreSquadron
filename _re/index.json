@@ -2003,7 +2003,6 @@
 "00639b40",
 "0063a1a0",
 "0063e000",
-"0063e054",
 "0063f870",
 "00644520",
 "00650390",
@@ -56214,7 +56213,7 @@
 "name": "HandleKeys",
 "size": 918,
 "lines": 231,
-"chars": 6400,
+"chars": 6393,
 "callers": [
 "00496230"
 ],
@@ -56315,8 +56314,8 @@
 "00495360": {
 "name": "DrawInput",
 "size": 1431,
-"lines": 203,
-"chars": 6571,
+"lines": 202,
+"chars": 6557,
 "callers": [
 "00495a00"
 ],
@@ -56365,7 +56364,7 @@
 "name": "DrawLines",
 "size": 1276,
 "lines": 229,
-"chars": 7983,
+"chars": 7978,
 "callers": [
 "00495f00"
 ],
@@ -57167,7 +57166,7 @@
 "name": "AddCoopPlayers",
 "size": 1107,
 "lines": 181,
-"chars": 6083,
+"chars": 6085,
 "callers": [
 "004971c0"
 ],
@@ -57205,7 +57204,7 @@
 "name": "AddDeathmatchPlayers",
 "size": 1650,
 "lines": 295,
-"chars": 9909,
+"chars": 9911,
 "callers": [
 "004970f0"
 ],
@@ -57244,7 +57243,7 @@
 "name": "AddTeamPlayers",
 "size": 1484,
 "lines": 262,
-"chars": 9432,
+"chars": 9440,
 "callers": [
 "00497130",
 "00497170"
@@ -57907,8 +57906,8 @@
 "0049a420": {
 "name": "C_Interface",
 "size": 438,
-"lines": 98,
-"chars": 3427,
+"lines": 91,
+"chars": 3286,
 "callers": [
 "006987e0"
 ],
@@ -58041,8 +58040,8 @@
 "0049a750": {
 "name": "~C_Interface",
 "size": 490,
-"lines": 79,
-"chars": 3302,
+"lines": 69,
+"chars": 2859,
 "callers": [
 "00698b00"
 ],
@@ -167721,8 +167720,8 @@
 "00614140": {
 "name": "FUN_00614140",
 "size": 3155,
-"lines": 436,
-"chars": 16961,
+"lines": 434,
+"chars": 16864,
 "callers": [
 "006271e0"
 ],
@@ -167935,10 +167934,10 @@
 "in_vtables": []
 },
 "00614e80": {
-"name": "FUN_00614e80",
+"name": "AddDescMessage1",
 "size": 130,
 "lines": 28,
-"chars": 715,
+"chars": 669,
 "callers": [
 "00614140",
 "0061cfc0",
@@ -167997,10 +167996,10 @@
 "in_vtables": []
 },
 "00614f10": {
-"name": "FUN_00614f10",
+"name": "AddDescMessage2",
 "size": 138,
-"lines": 32,
-"chars": 796,
+"lines": 30,
+"chars": 721,
 "callers": [
 "00614140",
 "0061cfc0",
@@ -168051,10 +168050,10 @@
 "in_vtables": []
 },
 "00614fa0": {
-"name": "FUN_00614fa0",
+"name": "AddDescMessageText",
 "size": 228,
-"lines": 47,
-"chars": 1325,
+"lines": 46,
+"chars": 1275,
 "callers": [
 "00614140",
 "00629bc0",
@@ -168072,12 +168071,13 @@
 "in_vtables": []
 },
 "00615090": {
-"name": "FUN_00615090",
+"name": "S_ControlDesc",
 "size": 249,
-"lines": 81,
-"chars": 2605,
+"lines": 78,
+"chars": 2513,
 "callers": [
 "00614140",
+"006151b0",
 "0061cfc0",
 "0061e3f0",
 "0061f600",
@@ -168187,12 +168187,13 @@
 "in_vtables": []
 },
 "006151b0": {
-"name": "FUN_006151b0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 204,
+"chars": 205,
 "callers": [],
 "callees": [
+"00615090",
 "006151d0",
 "007e2120"
 ],
@@ -168208,10 +168209,10 @@
 ]
 },
 "006151d0": {
-"name": "FUN_006151d0",
+"name": "~S_ControlDesc",
 "size": 388,
-"lines": 68,
-"chars": 2072,
+"lines": 69,
+"chars": 2417,
 "callers": [
 "006151b0"
 ],
@@ -168306,8 +168307,8 @@
 "00615470": {
 "name": "FUN_00615470",
 "size": 490,
-"lines": 88,
-"chars": 2429,
+"lines": 91,
+"chars": 2645,
 "callers": [
 "00614140"
 ],
@@ -168436,7 +168437,7 @@
 "name": "FUN_00615820",
 "size": 452,
 "lines": 96,
-"chars": 2561,
+"chars": 2567,
 "callers": [
 "00614140"
 ],
@@ -168575,7 +168576,7 @@
 "in_vtables": []
 },
 "00615a90": {
-"name": "FUN_00615a90",
+"name": "PostControlMessage",
 "size": 698,
 "lines": 124,
 "chars": 5169,
@@ -169943,7 +169944,6 @@
 "callees": [
 "006e5e50",
 "006e6b70",
-"006e6ba0",
 "006e6e30",
 "006e6fc0",
 "007e2120"
@@ -170531,10 +170531,10 @@
 "in_vtables": []
 },
 "0061b410": {
-"name": "FUN_0061b410",
+"name": "XmlAttrs_Dtor",
 "size": 56,
 "lines": 18,
-"chars": 438,
+"chars": 439,
 "callers": [
 "00801286",
 "008046c0",
@@ -170551,10 +170551,10 @@
 "in_vtables": []
 },
 "0061b450": {
-"name": "FUN_0061b450",
+"name": "XmlAttrs_Ctor",
 "size": 24,
 "lines": 11,
-"chars": 239,
+"chars": 240,
 "callers": [
 "006189f0",
 "0063eae0"
@@ -170917,7 +170917,7 @@
 "in_vtables": []
 },
 "0061be20": {
-"name": "FUN_0061be20",
+"name": "XmlAttr_Dtor",
 "size": 48,
 "lines": 18,
 "chars": 424,
@@ -171114,7 +171114,7 @@
 "name": "FUN_0061bf00",
 "size": 4034,
 "lines": 559,
-"chars": 19002,
+"chars": 19188,
 "callers": [
 "00626ca0",
 "0067f850"
@@ -171182,8 +171182,8 @@
 "0061cfc0": {
 "name": "FUN_0061cfc0",
 "size": 2726,
-"lines": 366,
-"chars": 13959,
+"lines": 359,
+"chars": 13586,
 "callers": [
 "006271e0",
 "0067fe00"
@@ -171274,7 +171274,7 @@
 "name": "FUN_0061dc20",
 "size": 1239,
 "lines": 95,
-"chars": 4427,
+"chars": 4654,
 "callers": [
 "0061cfc0"
 ],
@@ -171317,10 +171317,10 @@
 "in_vtables": []
 },
 "0061e100": {
-"name": "FUN_0061e100",
+"name": "AddDescMessage3",
 "size": 146,
-"lines": 34,
-"chars": 862,
+"lines": 32,
+"chars": 773,
 "callers": [
 "0061dc20",
 "0061e1a0",
@@ -171366,7 +171366,7 @@
 "name": "FUN_0061e1a0",
 "size": 590,
 "lines": 39,
-"chars": 1891,
+"chars": 1996,
 "callers": [
 "0061cfc0"
 ],
@@ -171398,7 +171398,7 @@
 "name": "FUN_0061e3f0",
 "size": 3648,
 "lines": 474,
-"chars": 17970,
+"chars": 17938,
 "callers": [
 "0061cfc0"
 ],
@@ -171460,8 +171460,8 @@
 "0061f230": {
 "name": "FUN_0061f230",
 "size": 380,
-"lines": 32,
-"chars": 1360,
+"lines": 34,
+"chars": 1442,
 "callers": [
 "0061cfc0"
 ],
@@ -171490,7 +171490,7 @@
 "name": "FUN_0061f3b0",
 "size": 580,
 "lines": 39,
-"chars": 1923,
+"chars": 2000,
 "callers": [
 "0061cfc0"
 ],
@@ -171522,8 +171522,8 @@
 "0061f600": {
 "name": "FUN_0061f600",
 "size": 1711,
-"lines": 294,
-"chars": 10484,
+"lines": 293,
+"chars": 10452,
 "callers": [
 "0061e3f0"
 ],
@@ -171589,8 +171589,8 @@
 "0061fd00": {
 "name": "FUN_0061fd00",
 "size": 1502,
-"lines": 204,
-"chars": 6486,
+"lines": 210,
+"chars": 6717,
 "callers": [
 "0061dc20"
 ],
@@ -171666,7 +171666,7 @@
 "name": "FUN_00620530",
 "size": 309,
 "lines": 66,
-"chars": 1881,
+"chars": 1887,
 "callers": [
 "0061cfc0"
 ],
@@ -171771,7 +171771,7 @@
 "name": "FUN_006209c0",
 "size": 543,
 "lines": 103,
-"chars": 3487,
+"chars": 3511,
 "callers": [
 "0061e3f0"
 ],
@@ -171792,7 +171792,7 @@
 "name": "FUN_00620be0",
 "size": 482,
 "lines": 83,
-"chars": 2429,
+"chars": 2421,
 "callers": [
 "0061bf00",
 "0061fcb0",
@@ -172134,7 +172134,7 @@
 "name": "FUN_00621240",
 "size": 1,
 "lines": 154,
-"chars": 4495,
+"chars": 4501,
 "callers": [
 "00626ca0"
 ],
@@ -172163,8 +172163,8 @@
 "006214d0": {
 "name": "FUN_006214d0",
 "size": 5659,
-"lines": 967,
-"chars": 33339,
+"lines": 971,
+"chars": 33721,
 "callers": [
 "00623e30"
 ],
@@ -172231,7 +172231,7 @@
 "name": "FUN_00622b50",
 "size": 893,
 "lines": 164,
-"chars": 4312,
+"chars": 4366,
 "callers": [
 "00623e30"
 ],
@@ -172256,7 +172256,7 @@
 "name": "FUN_00622ed0",
 "size": 2296,
 "lines": 396,
-"chars": 10556,
+"chars": 10718,
 "callers": [
 "00621240",
 "006214d0",
@@ -172283,7 +172283,7 @@
 "name": "FUN_006237e0",
 "size": 853,
 "lines": 150,
-"chars": 3896,
+"chars": 3968,
 "callers": [
 "00623e30"
 ],
@@ -172506,8 +172506,8 @@
 "00623e30": {
 "name": "FUN_00623e30",
 "size": 8289,
-"lines": 965,
-"chars": 38015,
+"lines": 941,
+"chars": 37407,
 "callers": [
 "006271e0"
 ],
@@ -173100,7 +173100,7 @@
 "name": "FUN_00626ca0",
 "size": 1125,
 "lines": 259,
-"chars": 7371,
+"chars": 7419,
 "callers": [],
 "callees": [
 "004050e0",
@@ -173185,8 +173185,8 @@
 "006276a0": {
 "name": "FUN_006276a0",
 "size": 2319,
-"lines": 420,
-"chars": 13851,
+"lines": 422,
+"chars": 14066,
 "callers": [
 "00623e30"
 ],
@@ -173671,8 +173671,8 @@
 "00628610": {
 "name": "FUN_00628610",
 "size": 2305,
-"lines": 288,
-"chars": 10550,
+"lines": 289,
+"chars": 10638,
 "callers": [
 "006271e0"
 ],
@@ -173745,7 +173745,7 @@
 "name": "FUN_00628f80",
 "size": 1969,
 "lines": 321,
-"chars": 10126,
+"chars": 10101,
 "callers": [
 "00628610"
 ],
@@ -173782,7 +173782,7 @@
 "name": "FUN_00629740",
 "size": 1147,
 "lines": 195,
-"chars": 6278,
+"chars": 6329,
 "callers": [
 "00628f80"
 ],
@@ -173817,7 +173817,7 @@
 "name": "FUN_00629bc0",
 "size": 1175,
 "lines": 192,
-"chars": 6289,
+"chars": 6269,
 "callers": [
 "00628f80"
 ],
@@ -173854,8 +173854,8 @@
 "0062a060": {
 "name": "FUN_0062a060",
 "size": 8745,
-"lines": 893,
-"chars": 35535,
+"lines": 876,
+"chars": 35950,
 "callers": [
 "00628610"
 ],
@@ -173936,7 +173936,7 @@
 "name": "FUN_0062c2a0",
 "size": 782,
 "lines": 132,
-"chars": 4061,
+"chars": 4109,
 "callers": [
 "00628610"
 ],
@@ -174016,7 +174016,7 @@
 "name": "FUN_0062c780",
 "size": 484,
 "lines": 83,
-"chars": 2368,
+"chars": 2392,
 "callers": [
 "0062c970",
 "0062ca10",
@@ -174153,7 +174153,7 @@
 "name": "FUN_0062ce10",
 "size": 534,
 "lines": 111,
-"chars": 2866,
+"chars": 2884,
 "callers": [
 "0062cd50"
 ],
@@ -174210,7 +174210,7 @@
 "name": "FUN_0062d490",
 "size": 1210,
 "lines": 218,
-"chars": 6615,
+"chars": 6621,
 "callers": [
 "00628610",
 "0062a060"
@@ -174240,7 +174240,7 @@
 "name": "FUN_0062d950",
 "size": 3865,
 "lines": 624,
-"chars": 16975,
+"chars": 17305,
 "callers": [
 "0062cd50"
 ],
@@ -174625,8 +174625,8 @@
 "0062f4b0": {
 "name": "FUN_0062f4b0",
 "size": 655,
-"lines": 59,
-"chars": 2223,
+"lines": 60,
+"chars": 2400,
 "callers": [
 "006271e0"
 ],
@@ -174708,8 +174708,8 @@
 "0062fa30": {
 "name": "FUN_0062fa30",
 "size": 8043,
-"lines": 1072,
-"chars": 40725,
+"lines": 1071,
+"chars": 41107,
 "callers": [
 "00631c20"
 ],
@@ -174756,7 +174756,7 @@
 "name": "FUN_006319a0",
 "size": 634,
 "lines": 108,
-"chars": 3032,
+"chars": 3056,
 "callers": [
 "0062f4b0"
 ],
@@ -175079,8 +175079,8 @@
 "00632150": {
 "name": "FUN_00632150",
 "size": 280,
-"lines": 37,
-"chars": 1182,
+"lines": 38,
+"chars": 1242,
 "callers": [
 "006271e0"
 ],
@@ -175134,7 +175134,7 @@
 "name": "FUN_00632390",
 "size": 1,
 "lines": 90,
-"chars": 2612,
+"chars": 2618,
 "callers": [
 "00626ca0"
 ],
@@ -175166,7 +175166,7 @@
 "name": "FUN_00632560",
 "size": 3405,
 "lines": 584,
-"chars": 17613,
+"chars": 17775,
 "callers": [
 "00632150"
 ],
@@ -175472,7 +175472,7 @@
 "name": "FUN_00633490",
 "size": 2755,
 "lines": 514,
-"chars": 15743,
+"chars": 15875,
 "callers": [
 "00626ca0"
 ],
@@ -175523,7 +175523,7 @@
 "name": "FUN_00634050",
 "size": 1314,
 "lines": 77,
-"chars": 3682,
+"chars": 4052,
 "callers": [
 "006271e0"
 ],
@@ -175567,8 +175567,8 @@
 "00634580": {
 "name": "FUN_00634580",
 "size": 969,
-"lines": 144,
-"chars": 5019,
+"lines": 143,
+"chars": 4995,
 "callers": [
 "00634050"
 ],
@@ -175627,8 +175627,8 @@
 "00634b30": {
 "name": "FUN_00634b30",
 "size": 1110,
-"lines": 194,
-"chars": 5353,
+"lines": 196,
+"chars": 5447,
 "callers": [
 "00634050"
 ],
@@ -175651,7 +175651,7 @@
 "name": "FUN_00634f90",
 "size": 975,
 "lines": 160,
-"chars": 4684,
+"chars": 4756,
 "callers": [
 "00633490",
 "00634050",
@@ -175674,8 +175674,8 @@
 "00635360": {
 "name": "FUN_00635360",
 "size": 865,
-"lines": 147,
-"chars": 4788,
+"lines": 149,
+"chars": 4894,
 "callers": [
 "00633490",
 "00634050",
@@ -175864,7 +175864,7 @@
 "name": "FUN_006360c0",
 "size": 448,
 "lines": 89,
-"chars": 2498,
+"chars": 2510,
 "callers": [
 "00634580"
 ],
@@ -175892,7 +175892,7 @@
 "name": "FUN_00636280",
 "size": 382,
 "lines": 77,
-"chars": 2080,
+"chars": 2092,
 "callers": [
 "00634580"
 ],
@@ -175946,7 +175946,7 @@
 "name": "FUN_006364b0",
 "size": 397,
 "lines": 81,
-"chars": 2564,
+"chars": 2570,
 "callers": [
 "00634580"
 ],
@@ -175975,7 +175975,7 @@
 "name": "FUN_00636640",
 "size": 1337,
 "lines": 242,
-"chars": 6756,
+"chars": 6822,
 "callers": [
 "00634050"
 ],
@@ -176246,7 +176246,7 @@
 "name": "FUN_006370c0",
 "size": 1101,
 "lines": 162,
-"chars": 5999,
+"chars": 6068,
 "callers": [
 "006271e0"
 ],
@@ -176288,7 +176288,7 @@
 "name": "FUN_00637510",
 "size": 882,
 "lines": 171,
-"chars": 5298,
+"chars": 5310,
 "callers": [
 "006370c0"
 ],
@@ -176324,7 +176324,7 @@
 "name": "FUN_00637890",
 "size": 430,
 "lines": 33,
-"chars": 1258,
+"chars": 1369,
 "callers": [
 "006271e0"
 ],
@@ -176372,7 +176372,7 @@
 "name": "FUN_00637a60",
 "size": 408,
 "lines": 75,
-"chars": 1898,
+"chars": 1910,
 "callers": [
 "00633490"
 ],
@@ -176397,8 +176397,8 @@
 "00637c10": {
 "name": "FUN_00637c10",
 "size": 947,
-"lines": 187,
-"chars": 6463,
+"lines": 189,
+"chars": 6553,
 "callers": [
 "00637a40"
 ],
@@ -176421,8 +176421,8 @@
 "00637fd0": {
 "name": "FUN_00637fd0",
 "size": 1502,
-"lines": 254,
-"chars": 8433,
+"lines": 256,
+"chars": 8553,
 "callers": [
 "00637a40"
 ],
@@ -176630,7 +176630,7 @@
 "name": "FUN_00638660",
 "size": 679,
 "lines": 50,
-"chars": 2093,
+"chars": 2317,
 "callers": [
 "006271e0"
 ],
@@ -176882,7 +176882,7 @@
 "name": "FUN_00638e00",
 "size": 1,
 "lines": 194,
-"chars": 6684,
+"chars": 6702,
 "callers": [
 "00626ca0"
 ],
@@ -176938,7 +176938,7 @@
 "name": "FUN_006392b0",
 "size": 2180,
 "lines": 228,
-"chars": 9364,
+"chars": 9417,
 "callers": [
 "006271e0"
 ],
@@ -176985,8 +176985,8 @@
 "00639b40": {
 "name": "FUN_00639b40",
 "size": 1619,
-"lines": 259,
-"chars": 9325,
+"lines": 258,
+"chars": 9257,
 "callers": [
 "006392b0"
 ],
@@ -177030,8 +177030,8 @@
 "0063a1a0": {
 "name": "FUN_0063a1a0",
 "size": 1219,
-"lines": 204,
-"chars": 6931,
+"lines": 201,
+"chars": 6825,
 "callers": [
 "006392b0"
 ],
@@ -177071,7 +177071,7 @@
 "name": "FUN_0063a670",
 "size": 1259,
 "lines": 219,
-"chars": 6074,
+"chars": 6128,
 "callers": [
 "00638e00"
 ],
@@ -177108,7 +177108,7 @@
 "name": "FUN_0063ab60",
 "size": 958,
 "lines": 179,
-"chars": 4802,
+"chars": 4856,
 "callers": [
 "00638e00"
 ],
@@ -177138,7 +177138,7 @@
 "name": "FUN_0063af20",
 "size": 451,
 "lines": 93,
-"chars": 2803,
+"chars": 2821,
 "callers": [],
 "callees": [
 "004050e0",
@@ -177160,7 +177160,7 @@
 "name": "FUN_0063b0f0",
 "size": 541,
 "lines": 140,
-"chars": 4532,
+"chars": 4538,
 "callers": [
 "0063b310"
 ],
@@ -177187,7 +177187,7 @@
 "name": "FUN_0063b310",
 "size": 1246,
 "lines": 231,
-"chars": 7607,
+"chars": 7673,
 "callers": [
 "00639b40",
 "0063a1a0"
@@ -177219,7 +177219,7 @@
 "name": "FUN_0063b7f0",
 "size": 430,
 "lines": 114,
-"chars": 3032,
+"chars": 3038,
 "callers": [
 "00623e30"
 ],
@@ -177249,8 +177249,8 @@
 "0063b9a0": {
 "name": "FUN_0063b9a0",
 "size": 2289,
-"lines": 409,
-"chars": 12422,
+"lines": 419,
+"chars": 12743,
 "callers": [
 "00623e30"
 ],
@@ -177330,10 +177330,10 @@
 ]
 },
 "0063c2f0": {
-"name": "FUN_0063c2f0",
+"name": "C_GdiFont::Init",
 "size": 516,
-"lines": 91,
-"chars": 3164,
+"lines": 88,
+"chars": 3024,
 "callers": [
 "0063d1d0",
 "0063d260",
@@ -177370,10 +177370,10 @@
 "in_vtables": []
 },
 "0063c500": {
-"name": "FUN_0063c500",
+"name": "C_GdiFont::MakeCells",
 "size": 570,
-"lines": 90,
-"chars": 3356,
+"lines": 87,
+"chars": 3175,
 "callers": [
 "0063c2f0"
 ],
@@ -177393,10 +177393,10 @@
 "in_vtables": []
 },
 "0063c740": {
-"name": "FUN_0063c740",
+"name": "C_GdiFont::Close",
 "size": 204,
-"lines": 45,
-"chars": 1466,
+"lines": 46,
+"chars": 1544,
 "callers": [
 "0063d1d0",
 "0063d260",
@@ -177420,10 +177420,10 @@
 "in_vtables": []
 },
 "0063c9d0": {
-"name": "FUN_0063c9d0",
+"name": "C_GdiFont::Select",
 "size": 36,
 "lines": 14,
-"chars": 303,
+"chars": 308,
 "callers": [],
 "callees": [
 "007e530e"
@@ -177440,10 +177440,10 @@
 ]
 },
 "0063ccc0": {
-"name": "FUN_0063ccc0",
+"name": "C_GdiFont::CopyToTexture",
 "size": 218,
 "lines": 51,
-"chars": 1457,
+"chars": 1442,
 "callers": [
 "0063cda0"
 ],
@@ -177455,10 +177455,10 @@
 "in_vtables": []
 },
 "0063cda0": {
-"name": "FUN_0063cda0",
+"name": "C_GdiFont::DrawGlyph",
 "size": 301,
 "lines": 29,
-"chars": 1028,
+"chars": 1099,
 "callers": [
 "0063ced0"
 ],
@@ -177485,10 +177485,10 @@
 "in_vtables": []
 },
 "0063ced0": {
-"name": "FUN_0063ced0",
+"name": "C_GdiFont::GetGlyph",
 "size": 484,
 "lines": 105,
-"chars": 2784,
+"chars": 2773,
 "callers": [],
 "callees": [
 "0063cda0",
@@ -177516,10 +177516,10 @@
 ]
 },
 "0063d0c0": {
-"name": "FUN_0063d0c0",
+"name": "C_GdiFont::Touch",
 "size": 144,
 "lines": 54,
-"chars": 1342,
+"chars": 1422,
 "callers": [
 "0063ced0"
 ],
@@ -177531,10 +177531,10 @@
 "in_vtables": []
 },
 "0063d150": {
-"name": "FUN_0063d150",
+"name": "C_GdiFont::TakeCell",
 "size": 113,
 "lines": 23,
-"chars": 753,
+"chars": 829,
 "callers": [
 "0063ced0"
 ],
@@ -177546,10 +177546,10 @@
 "in_vtables": []
 },
 "0063d1d0": {
-"name": "FUN_0063d1d0",
+"name": "C_GdiFont::SetSize",
 "size": 141,
-"lines": 38,
-"chars": 914,
+"lines": 37,
+"chars": 899,
 "callers": [],
 "callees": [
 "0063c2f0",
@@ -177566,10 +177566,10 @@
 "in_vtables": []
 },
 "0063d260": {
-"name": "FUN_0063d260",
+"name": "C_GdiFont::SetSizeAndWeight",
 "size": 144,
-"lines": 38,
-"chars": 930,
+"lines": 37,
+"chars": 929,
 "callers": [],
 "callees": [
 "0063c2f0",
@@ -177586,10 +177586,10 @@
 "in_vtables": []
 },
 "0063d310": {
-"name": "FUN_0063d310",
+"name": "C_GdiFont::Reset",
 "size": 245,
 "lines": 58,
-"chars": 1891,
+"chars": 1979,
 "callers": [
 "0063d1d0",
 "0063d260",
@@ -177611,10 +177611,10 @@
 "in_vtables": []
 },
 "0063d410": {
-"name": "vector_size_e4_63d410",
+"name": "GlyphCells_Size",
 "size": 19,
 "lines": 10,
-"chars": 182,
+"chars": 176,
 "callers": [
 "0063c500"
 ],
@@ -177626,10 +177626,10 @@
 "in_vtables": []
 },
 "0063d430": {
-"name": "empty_function_63d430",
+"name": "GlyphCells_Empty",
 "size": 3,
 "lines": 7,
-"chars": 57,
+"chars": 52,
 "callers": [
 "0063c500"
 ],
@@ -177641,10 +177641,10 @@
 "in_vtables": []
 },
 "0063d440": {
-"name": "FUN_0063d440",
+"name": "GlyphCellMap_EraseRange",
 "size": 201,
 "lines": 53,
-"chars": 1547,
+"chars": 1586,
 "callers": [
 "0063c740",
 "0063ced0",
@@ -177665,10 +177665,10 @@
 "in_vtables": []
 },
 "0063d510": {
-"name": "FUN_0063d510",
+"name": "GlyphCellMap_MakePairResult",
 "size": 22,
 "lines": 9,
-"chars": 186,
+"chars": 201,
 "callers": [
 "0063ced0"
 ],
@@ -177680,10 +177680,10 @@
 "in_vtables": []
 },
 "0063d530": {
-"name": "FUN_0063d530",
+"name": "GlyphCellMap_Erase",
 "size": 1030,
 "lines": 294,
-"chars": 9443,
+"chars": 9457,
 "callers": [
 "0063d310",
 "0063d440",
@@ -177704,10 +177704,10 @@
 "in_vtables": []
 },
 "0063d940": {
-"name": "FUN_0063d940",
+"name": "GlyphCellMap_LowerBound",
 "size": 53,
 "lines": 26,
-"chars": 597,
+"chars": 608,
 "callers": [
 "0063ced0"
 ],
@@ -177721,10 +177721,10 @@
 "in_vtables": []
 },
 "0063d980": {
-"name": "FUN_0063d980",
+"name": "GlyphCellMap_EraseSubtree",
 "size": 59,
 "lines": 17,
-"chars": 295,
+"chars": 321,
 "callers": [
 "0063d310",
 "0063d440",
@@ -177744,10 +177744,10 @@
 "in_vtables": []
 },
 "0063d9c0": {
-"name": "FUN_0063d9c0",
+"name": "GlyphCellMap_InsertNode",
 "size": 612,
 "lines": 164,
-"chars": 5313,
+"chars": 5333,
 "callers": [
 "0063ced0"
 ],
@@ -177764,10 +177764,10 @@
 "in_vtables": []
 },
 "0063dc30": {
-"name": "uninitialized_copy4_63dc30",
+"name": "GlyphCells_UninitializedCopy",
 "size": 39,
 "lines": 13,
-"chars": 281,
+"chars": 283,
 "callers": [
 "0063c500"
 ],
@@ -177779,7 +177779,7 @@
 "in_vtables": []
 },
 "0063dc60": {
-"name": "uninitialized_fill_n4_63dc60",
+"name": "GlyphCells_UninitializedFill",
 "size": 37,
 "lines": 13,
 "chars": 270,
@@ -177794,10 +177794,10 @@
 "in_vtables": []
 },
 "0063dc90": {
-"name": "FUN_0063dc90",
+"name": "GlyphCellMap_Leftmost",
 "size": 25,
 "lines": 11,
-"chars": 205,
+"chars": 214,
 "callers": [
 "0063d440"
 ],
@@ -177811,10 +177811,10 @@
 "in_vtables": []
 },
 "0063dcb0": {
-"name": "FUN_0063dcb0",
+"name": "GlyphCellMap_IterDec",
 "size": 81,
 "lines": 32,
-"chars": 682,
+"chars": 690,
 "callers": [
 "0063ced0"
 ],
@@ -177828,10 +177828,10 @@
 "in_vtables": []
 },
 "0063dd10": {
-"name": "FUN_0063dd10",
+"name": "GlyphCellMap_UpperBound",
 "size": 47,
 "lines": 25,
-"chars": 572,
+"chars": 583,
 "callers": [
 "0063ced0"
 ],
@@ -177845,10 +177845,10 @@
 "in_vtables": []
 },
 "0063dd40": {
-"name": "FUN_0063dd40",
+"name": "GlyphCellMap_IterInc",
 "size": 67,
 "lines": 29,
-"chars": 669,
+"chars": 677,
 "callers": [
 "0063d310",
 "0063d530",
@@ -177864,10 +177864,10 @@
 "in_vtables": []
 },
 "0063dd90": {
-"name": "FUN_0063dd90",
+"name": "GlyphCellMap_PairCopy",
 "size": 15,
 "lines": 11,
-"chars": 194,
+"chars": 203,
 "callers": [
 "0063d9c0"
 ],
@@ -177879,10 +177879,10 @@
 "in_vtables": []
 },
 "0063dda0": {
-"name": "construct_copy4_63dda0",
+"name": "GlyphCells_Construct",
 "size": 9,
 "lines": 10,
-"chars": 174,
+"chars": 172,
 "callers": [
 "0063c500"
 ],
@@ -177894,10 +177894,10 @@
 "in_vtables": []
 },
 "0063ddb0": {
-"name": "FUN_0063ddb0",
+"name": "GlyphCellMap_Distance",
 "size": 84,
 "lines": 33,
-"chars": 821,
+"chars": 830,
 "callers": [
 "0063ced0"
 ],
@@ -177933,10 +177933,10 @@
 ]
 },
 "0063de40": {
-"name": "FUN_0063de40",
+"name": "FontManager_StaticInit",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 120,
 "callers": [],
 "callees": [
 "0063de50",
@@ -177954,10 +177954,10 @@
 ]
 },
 "0063de50": {
-"name": "FUN_0063de50",
+"name": "FontManager_Construct",
 "size": 10,
 "lines": 8,
-"chars": 116,
+"chars": 141,
 "callers": [
 "0063de40"
 ],
@@ -177973,10 +177973,10 @@
 "in_vtables": []
 },
 "0063de60": {
-"name": "FUN_0063de60",
+"name": "FontManager_RegisterDestroy",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 95,
 "callers": [
 "0063de40"
 ],
@@ -177990,10 +177990,10 @@
 "in_vtables": []
 },
 "0063de70": {
-"name": "FUN_0063de70",
+"name": "FontManager_Destroy",
 "size": 10,
 "lines": 8,
-"chars": 94,
+"chars": 118,
 "callers": [
 "0063de60"
 ],
@@ -178009,10 +178009,10 @@
 "in_vtables": []
 },
 "0063de80": {
-"name": "FUN_0063de80",
+"name": "C_FontManager::C_FontManager",
 "size": 35,
 "lines": 17,
-"chars": 508,
+"chars": 560,
 "callers": [
 "0063de50"
 ],
@@ -178026,10 +178026,10 @@
 "in_vtables": []
 },
 "0063deb0": {
-"name": "FUN_0063deb0",
+"name": "C_FontManager::ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 204,
+"lines": 12,
+"chars": 249,
 "callers": [],
 "callees": [
 "0063ded0",
@@ -178047,10 +178047,10 @@
 ]
 },
 "0063ded0": {
-"name": "FUN_0063ded0",
+"name": "C_FontManager::~C_FontManager",
 "size": 34,
 "lines": 12,
-"chars": 204,
+"chars": 257,
 "callers": [
 "0063de70",
 "0063deb0"
@@ -178070,7 +178070,7 @@
 "name": "AcquireFontManager",
 "size": 43,
 "lines": 12,
-"chars": 258,
+"chars": 265,
 "callers": [
 "0048eb70",
 "00495f40",
@@ -178121,7 +178121,7 @@
 "name": "ReleaseFontManager",
 "size": 45,
 "lines": 14,
-"chars": 273,
+"chars": 315,
 "callers": [
 "004960f0"
 ],
@@ -178140,7 +178140,7 @@
 "name": "C_FontManager::Release",
 "size": 25,
 "lines": 15,
-"chars": 249,
+"chars": 251,
 "callers": [
 "0048ecf0",
 "004950c0",
@@ -178184,7 +178184,7 @@
 "00495190",
 "00495360",
 "00495a00",
-"0063e054",
+"0063e000",
 "00645010"
 ],
 "callees": [],
@@ -178195,43 +178195,12 @@
 "in_vtables": []
 },
 "0063e000": {
-"name": "FUN_0063e000",
-"size": 84,
+"name": "C_FontManager::Load",
+"size": 2772,
 "lines": 499,
-"chars": 16605,
+"chars": 16703,
 "callers": [
 "0063df00"
-],
-"callees": [
-"00405100",
-"00409f20",
-"0048fbc0",
-"0063eae0",
-"0063ee20",
-"0063f400",
-"0063f590",
-"0063f870",
-"006b6a70",
-"006b6ad0",
-"006b6d50",
-"007e2120",
-"007e530e"
-],
-"imports": [],
-"strings": [],
-"vtables": [],
-"globals": [
-"008aea0c"
-],
-"in_vtables": []
-},
-"0063e054": {
-"name": "FUN_0063e054",
-"size": 2688,
-"lines": 461,
-"chars": 14998,
-"callers": [
-"0063e000"
 ],
 "callees": [
 "00405100",
@@ -178242,8 +178211,10 @@
 "0063ee20",
 "0063f400",
 "0063f590",
+"0063f870",
 "006b6a70",
 "006b6ad0",
+"006b6d50",
 "007e2120",
 "007e530e"
 ],
@@ -178281,13 +178252,12 @@
 "in_vtables": []
 },
 "0063eae0": {
-"name": "FUN_0063eae0",
+"name": "C_FontManager::LoadConfig",
 "size": 749,
 "lines": 189,
-"chars": 5207,
+"chars": 5239,
 "callers": [
-"0063e000",
-"0063e054"
+"0063e000"
 ],
 "callees": [
 "0061b450",
@@ -178333,10 +178303,10 @@
 "in_vtables": []
 },
 "0063edd0": {
-"name": "FUN_0063edd0",
+"name": "C_FontManager::Free",
 "size": 75,
 "lines": 23,
-"chars": 556,
+"chars": 574,
 "callers": [
 "0063df30",
 "0063df60"
@@ -178349,13 +178319,12 @@
 "in_vtables": []
 },
 "0063ee20": {
-"name": "FUN_0063ee20",
+"name": "C_FontManager::AddGdiFont",
 "size": 408,
 "lines": 87,
-"chars": 2363,
+"chars": 2288,
 "callers": [
 "0063e000",
-"0063e054",
 "0063eae0"
 ],
 "callees": [
@@ -178382,10 +178351,10 @@
 "in_vtables": []
 },
 "0063efc0": {
-"name": "FUN_0063efc0",
+"name": "C_Font::~C_Font",
 "size": 7,
 "lines": 8,
-"chars": 160,
+"chars": 163,
 "callers": [
 "008046eb",
 "00804720",
@@ -178401,10 +178370,10 @@
 "in_vtables": []
 },
 "0063efd0": {
-"name": "FUN_0063efd0",
+"name": "C_Font::ScalarDeletingDestructor",
 "size": 32,
-"lines": 11,
-"chars": 248,
+"lines": 12,
+"chars": 260,
 "callers": [],
 "callees": [
 "007e2120"
@@ -178423,10 +178392,10 @@
 ]
 },
 "0063eff0": {
-"name": "empty_function_63eff0",
+"name": "C_GdiFont::GrowVertices",
 "size": 1,
 "lines": 7,
-"chars": 102,
+"chars": 104,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -178441,10 +178410,10 @@
 ]
 },
 "0063f000": {
-"name": "empty_function_63f000",
+"name": "C_GdiFont::Flush",
 "size": 1,
 "lines": 7,
-"chars": 102,
+"chars": 97,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -178459,10 +178428,10 @@
 ]
 },
 "0063f010": {
-"name": "empty_function_63f010",
+"name": "C_GdiFont::ClearVertices",
 "size": 1,
 "lines": 7,
-"chars": 102,
+"chars": 105,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -178477,10 +178446,10 @@
 ]
 },
 "0063f020": {
-"name": "empty_function_63f020",
+"name": "C_GdiFont::AddQuad",
 "size": 3,
 "lines": 7,
-"chars": 102,
+"chars": 99,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -178495,10 +178464,10 @@
 ]
 },
 "0063f030": {
-"name": "FUN_0063f030",
+"name": "C_GdiFont::ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 213,
+"lines": 12,
+"chars": 228,
 "callers": [
 "0063ee20"
 ],
@@ -178518,10 +178487,10 @@
 ]
 },
 "0063f050": {
-"name": "FUN_0063f050",
+"name": "C_GdiFont::~C_GdiFont",
 "size": 232,
 "lines": 64,
-"chars": 1819,
+"chars": 1839,
 "callers": [
 "0063f030"
 ],
@@ -178545,10 +178514,10 @@
 "in_vtables": []
 },
 "0063f140": {
-"name": "FUN_0063f140",
+"name": "GlyphCellMap_Dtor",
 "size": 234,
 "lines": 54,
-"chars": 1501,
+"chars": 1539,
 "callers": [
 "00804709",
 "0080473e"
@@ -178572,10 +178541,10 @@
 "in_vtables": []
 },
 "0063f230": {
-"name": "FUN_0063f230",
+"name": "C_FontManager::AddCp1250Font",
 "size": 392,
 "lines": 80,
-"chars": 2135,
+"chars": 2213,
 "callers": [],
 "callees": [
 "0063f3e0",
@@ -178599,10 +178568,10 @@
 "in_vtables": []
 },
 "0063f3c0": {
-"name": "FUN_0063f3c0",
+"name": "C_TextureFont::ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 204,
+"lines": 12,
+"chars": 240,
 "callers": [
 "0063f590"
 ],
@@ -178622,10 +178591,10 @@
 ]
 },
 "0063f3e0": {
-"name": "FUN_0063f3e0",
+"name": "C_MapFont::ScalarDeletingDestructor",
 "size": 30,
-"lines": 11,
-"chars": 213,
+"lines": 12,
+"chars": 228,
 "callers": [
 "0063f230",
 "0063f400"
@@ -178646,13 +178615,12 @@
 ]
 },
 "0063f400": {
-"name": "FUN_0063f400",
+"name": "C_FontManager::AddMapFont",
 "size": 392,
 "lines": 80,
-"chars": 2096,
+"chars": 2113,
 "callers": [
-"0063e000",
-"0063e054"
+"0063e000"
 ],
 "callees": [
 "0063f3e0",
@@ -178676,13 +178644,12 @@
 "in_vtables": []
 },
 "0063f590": {
-"name": "FUN_0063f590",
+"name": "C_FontManager::AddTextureFont",
 "size": 138,
-"lines": 36,
-"chars": 814,
+"lines": 35,
+"chars": 774,
 "callers": [
 "0063e000",
-"0063e054",
 "0063f870"
 ],
 "callees": [
@@ -178701,10 +178668,10 @@
 "in_vtables": []
 },
 "0063f620": {
-"name": "FUN_0063f620",
+"name": "FontList_PushBack",
 "size": 424,
 "lines": 72,
-"chars": 2293,
+"chars": 2298,
 "callers": [
 "0063ee20",
 "0063f230",
@@ -178726,10 +178693,10 @@
 "in_vtables": []
 },
 "0063f7d0": {
-"name": "FUN_0063f7d0",
+"name": "FlushFonts",
 "size": 43,
 "lines": 17,
-"chars": 339,
+"chars": 345,
 "callers": [
 "0066e300"
 ],
@@ -178743,10 +178710,10 @@
 "in_vtables": []
 },
 "0063f800": {
-"name": "FUN_0063f800",
+"name": "SetFontBatching",
 "size": 55,
 "lines": 20,
-"chars": 448,
+"chars": 428,
 "callers": [
 "0066e300"
 ],
@@ -178828,10 +178795,10 @@
 "in_vtables": []
 },
 "00640490": {
-"name": "FUN_00640490",
+"name": "GlyphCellMap_Begin",
 "size": 14,
 "lines": 8,
-"chars": 133,
+"chars": 139,
 "callers": [
 "0063f140"
 ],
@@ -178910,10 +178877,10 @@
 ]
 },
 "00640540": {
-"name": "FUN_00640540",
+"name": "C_TextureFont::~C_TextureFont",
 "size": 113,
 "lines": 28,
-"chars": 798,
+"chars": 839,
 "callers": [
 "0063f3c0",
 "00640a00",
@@ -178934,10 +178901,10 @@
 "in_vtables": []
 },
 "006405c0": {
-"name": "FUN_006405c0",
+"name": "C_TextureFont::Select",
 "size": 29,
 "lines": 13,
-"chars": 269,
+"chars": 278,
 "callers": [],
 "callees": [
 "007e530e"
@@ -178958,10 +178925,10 @@
 ]
 },
 "006405e0": {
-"name": "FUN_006405e0",
+"name": "C_TextureFont::GetGlyph",
 "size": 27,
 "lines": 10,
-"chars": 195,
+"chars": 185,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -178976,10 +178943,10 @@
 ]
 },
 "00640600": {
-"name": "FUN_00640600",
+"name": "C_TextureFont::LoadWithId",
 "size": 43,
 "lines": 14,
-"chars": 334,
+"chars": 290,
 "callers": [
 "0063f400",
 "0063f590"
@@ -178992,10 +178959,10 @@
 "in_vtables": []
 },
 "00640630": {
-"name": "FUN_00640630",
+"name": "C_TextureFont::Load",
 "size": 133,
 "lines": 39,
-"chars": 1067,
+"chars": 992,
 "callers": [
 "00641720"
 ],
@@ -179017,10 +178984,10 @@
 ]
 },
 "006406c0": {
-"name": "FUN_006406c0",
+"name": "C_TextureFont::ClearVertices",
 "size": 11,
 "lines": 8,
-"chars": 114,
+"chars": 130,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -179039,10 +179006,10 @@
 ]
 },
 "006406d0": {
-"name": "FUN_006406d0",
+"name": "C_TextureFont::Flush",
 "size": 99,
 "lines": 15,
-"chars": 444,
+"chars": 452,
 "callers": [],
 "callees": [
 "007e530e"
@@ -179063,10 +179030,10 @@
 ]
 },
 "00640740": {
-"name": "FUN_00640740",
+"name": "C_TextureFont::GrowVertices",
 "size": 159,
 "lines": 43,
-"chars": 1101,
+"chars": 1116,
 "callers": [],
 "callees": [
 "007e2120",
@@ -179088,10 +179055,10 @@
 ]
 },
 "006407e0": {
-"name": "FUN_006407e0",
+"name": "C_TextureFont::AddQuad",
 "size": 532,
-"lines": 99,
-"chars": 2887,
+"lines": 98,
+"chars": 2811,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -179112,10 +179079,10 @@
 ]
 },
 "00640a00": {
-"name": "FUN_00640a00",
+"name": "C_MapFont::~C_MapFont",
 "size": 454,
 "lines": 91,
-"chars": 2536,
+"chars": 2626,
 "callers": [
 "0063f3e0"
 ],
@@ -179141,10 +179108,10 @@
 "in_vtables": []
 },
 "00640bd0": {
-"name": "FUN_00640bd0",
+"name": "GlyphMap_Dtor",
 "size": 234,
 "lines": 54,
-"chars": 1501,
+"chars": 1519,
 "callers": [
 "00804918"
 ],
@@ -179167,10 +179134,10 @@
 "in_vtables": []
 },
 "00640cc0": {
-"name": "FUN_00640cc0",
+"name": "C_MapFont::GetGlyph",
 "size": 97,
 "lines": 21,
-"chars": 588,
+"chars": 526,
 "callers": [],
 "callees": [
 "00641eb0"
@@ -179187,10 +179154,10 @@
 ]
 },
 "00640d30": {
-"name": "FUN_00640d30",
+"name": "C_MapFont::Load",
 "size": 559,
 "lines": 132,
-"chars": 3804,
+"chars": 3748,
 "callers": [],
 "callees": [
 "00641760",
@@ -179219,10 +179186,10 @@
 ]
 },
 "00640f60": {
-"name": "FUN_00640f60",
+"name": "C_MapFont::MapCp1250",
 "size": 1977,
-"lines": 336,
-"chars": 9294,
+"lines": 337,
+"chars": 9416,
 "callers": [
 "00641720"
 ],
@@ -179241,10 +179208,10 @@
 "in_vtables": []
 },
 "00641720": {
-"name": "FUN_00641720",
+"name": "C_MapFont::LoadCp1250",
 "size": 50,
-"lines": 17,
-"chars": 417,
+"lines": 18,
+"chars": 453,
 "callers": [
 "0063f230"
 ],
@@ -179259,10 +179226,10 @@
 "in_vtables": []
 },
 "00641760": {
-"name": "FUN_00641760",
+"name": "GlyphMap_Begin",
 "size": 14,
 "lines": 8,
-"chars": 133,
+"chars": 135,
 "callers": [
 "00640a00",
 "00640bd0",
@@ -179277,10 +179244,10 @@
 "in_vtables": []
 },
 "00641770": {
-"name": "FUN_00641770",
+"name": "GlyphMap_MakePairResult",
 "size": 22,
 "lines": 9,
-"chars": 186,
+"chars": 197,
 "callers": [
 "00640d30",
 "00640f60"
@@ -179293,10 +179260,10 @@
 "in_vtables": []
 },
 "00641790": {
-"name": "FUN_00641790",
+"name": "GlyphMap_Erase",
 "size": 1030,
 "lines": 294,
-"chars": 9443,
+"chars": 9449,
 "callers": [
 "00640a00",
 "00640bd0",
@@ -179317,10 +179284,10 @@
 "in_vtables": []
 },
 "00641ba0": {
-"name": "FUN_00641ba0",
+"name": "GlyphMap_EraseSubtree",
 "size": 59,
 "lines": 17,
-"chars": 295,
+"chars": 313,
 "callers": [
 "00640a00",
 "00640bd0",
@@ -179340,10 +179307,10 @@
 "in_vtables": []
 },
 "00641be0": {
-"name": "FUN_00641be0",
+"name": "GlyphMap_InsertNode",
 "size": 612,
-"lines": 163,
-"chars": 5281,
+"lines": 164,
+"chars": 5293,
 "callers": [
 "00640d30",
 "00640f60"
@@ -179361,10 +179328,10 @@
 "in_vtables": []
 },
 "00641e50": {
-"name": "FUN_00641e50",
+"name": "GlyphMap_IterIncCopy",
 "size": 86,
 "lines": 33,
-"chars": 784,
+"chars": 792,
 "callers": [
 "00640a00",
 "00640d30"
@@ -179379,10 +179346,10 @@
 "in_vtables": []
 },
 "00641eb0": {
-"name": "FUN_00641eb0",
+"name": "GlyphMap_LowerBound",
 "size": 45,
 "lines": 27,
-"chars": 606,
+"chars": 613,
 "callers": [
 "00640cc0"
 ],
@@ -179396,10 +179363,10 @@
 "in_vtables": []
 },
 "00641ee0": {
-"name": "FUN_00641ee0",
+"name": "GlyphMap_IterDec",
 "size": 81,
 "lines": 32,
-"chars": 682,
+"chars": 686,
 "callers": [
 "00640d30",
 "00640f60"
@@ -179414,10 +179381,10 @@
 "in_vtables": []
 },
 "00641f40": {
-"name": "FUN_00641f40",
+"name": "GlyphMap_IterInc",
 "size": 67,
 "lines": 29,
-"chars": 669,
+"chars": 673,
 "callers": [
 "00640a00",
 "00640bd0",
@@ -179433,10 +179400,10 @@
 "in_vtables": []
 },
 "00641f90": {
-"name": "FUN_00641f90",
+"name": "GlyphMap_NewNode",
 "size": 20,
 "lines": 16,
-"chars": 306,
+"chars": 310,
 "callers": [
 "00641be0"
 ],
@@ -179470,10 +179437,10 @@
 ]
 },
 "00641fe0": {
-"name": "FUN_00641fe0",
+"name": "TextStyles_Release",
 "size": 197,
-"lines": 67,
-"chars": 1969,
+"lines": 63,
+"chars": 1811,
 "callers": [
 "00643bf0"
 ],
@@ -179488,10 +179455,10 @@
 "in_vtables": []
 },
 "006420b0": {
-"name": "FUN_006420b0",
+"name": "TextStyles_Create",
 "size": 158,
 "lines": 41,
-"chars": 1102,
+"chars": 1134,
 "callers": [
 "00642150",
 "00643c00"
@@ -179508,10 +179475,10 @@
 "in_vtables": []
 },
 "00642150": {
-"name": "FUN_00642150",
+"name": "TextStyles_AddDefaults",
 "size": 6494,
-"lines": 904,
-"chars": 22691,
+"lines": 893,
+"chars": 23726,
 "callers": [
 "00641fe0",
 "006420b0",
@@ -179536,10 +179503,10 @@
 "in_vtables": []
 },
 "00643ab0": {
-"name": "FUN_00643ab0",
+"name": "S_TextStyleDesc_Set",
 "size": 102,
 "lines": 25,
-"chars": 1035,
+"chars": 1063,
 "callers": [
 "00642150"
 ],
@@ -179551,10 +179518,10 @@
 "in_vtables": []
 },
 "00643b20": {
-"name": "FUN_00643b20",
+"name": "TextStyles_StaticInit",
 "size": 10,
 "lines": 9,
-"chars": 86,
+"chars": 117,
 "callers": [],
 "callees": [
 "00643b30",
@@ -179572,10 +179539,10 @@
 ]
 },
 "00643b30": {
-"name": "FUN_00643b30",
+"name": "TextStyles_Construct",
 "size": 35,
 "lines": 12,
-"chars": 153,
+"chars": 161,
 "callers": [
 "00643b20"
 ],
@@ -179593,10 +179560,10 @@
 "in_vtables": []
 },
 "00643b60": {
-"name": "FUN_00643b60",
+"name": "TextStyles_RegisterDestroy",
 "size": 12,
 "lines": 8,
-"chars": 73,
+"chars": 93,
 "callers": [
 "00643b20"
 ],
@@ -179610,10 +179577,10 @@
 "in_vtables": []
 },
 "00643b70": {
-"name": "FUN_00643b70",
+"name": "TextStyles_Destroy",
 "size": 10,
 "lines": 8,
-"chars": 80,
+"chars": 89,
 "callers": [
 "00643b60"
 ],
@@ -179629,10 +179596,10 @@
 "in_vtables": []
 },
 "00643b80": {
-"name": "FUN_00643b80",
+"name": "TextStyles_Dtor",
 "size": 109,
 "lines": 24,
-"chars": 635,
+"chars": 660,
 "callers": [
 "00643b70"
 ],
@@ -179649,7 +179616,7 @@
 "name": "ReleaseTextStyle",
 "size": 12,
 "lines": 8,
-"chars": 106,
+"chars": 112,
 "callers": [
 "00496dc0",
 "0062f740",
@@ -179672,7 +179639,7 @@
 "name": "CreateTextStyle",
 "size": 12,
 "lines": 10,
-"chars": 137,
+"chars": 141,
 "callers": [
 "00496450",
 "0062f4b0",
@@ -179693,10 +179660,10 @@
 "in_vtables": []
 },
 "00643c20": {
-"name": "FUN_00643c20",
+"name": "EditRun",
 "size": 116,
-"lines": 39,
-"chars": 1010,
+"lines": 32,
+"chars": 632,
 "callers": [
 "00662520",
 "00662ca0",
@@ -179710,10 +179677,10 @@
 "in_vtables": []
 },
 "00643ca0": {
-"name": "FUN_00643ca0",
+"name": "GetLineCentre",
 "size": 294,
 "lines": 52,
-"chars": 1468,
+"chars": 1366,
 "callers": [
 "0065c160"
 ],
@@ -179731,10 +179698,10 @@
 "in_vtables": []
 },
 "00643dd0": {
-"name": "FUN_00643dd0",
+"name": "GetRunText",
 "size": 100,
 "lines": 30,
-"chars": 617,
+"chars": 636,
 "callers": [
 "0065b750"
 ],
@@ -179746,10 +179713,10 @@
 "in_vtables": []
 },
 "00643e40": {
-"name": "FUN_00643e40",
+"name": "ScrollToLine",
 "size": 196,
-"lines": 42,
-"chars": 1402,
+"lines": 32,
+"chars": 892,
 "callers": [
 "00643f10",
 "00643f50"
@@ -179767,10 +179734,10 @@
 "in_vtables": []
 },
 "00643f10": {
-"name": "FUN_00643f10",
+"name": "SelectHovered",
 "size": 55,
-"lines": 18,
-"chars": 503,
+"lines": 14,
+"chars": 261,
 "callers": [
 "0065b070",
 "0065b470",
@@ -179788,10 +179755,10 @@
 "in_vtables": []
 },
 "00643f50": {
-"name": "FUN_00643f50",
+"name": "SelectRun",
 "size": 96,
 "lines": 26,
-"chars": 551,
+"chars": 509,
 "callers": [
 "0065b750"
 ],
@@ -179805,10 +179772,10 @@
 "in_vtables": []
 },
 "00643fb0": {
-"name": "FUN_00643fb0",
+"name": "GetSelection",
 "size": 220,
-"lines": 60,
-"chars": 1737,
+"lines": 45,
+"chars": 948,
 "callers": [
 "0065b750"
 ],
@@ -179820,10 +179787,10 @@
 "in_vtables": []
 },
 "00644090": {
-"name": "FUN_00644090",
+"name": "SetHover",
 "size": 67,
-"lines": 30,
-"chars": 691,
+"lines": 24,
+"chars": 401,
 "callers": [
 "0064fc80",
 "00653f70",
@@ -179838,10 +179805,10 @@
 "in_vtables": []
 },
 "006440e0": {
-"name": "FUN_006440e0",
+"name": "HoverAt",
 "size": 54,
 "lines": 14,
-"chars": 302,
+"chars": 231,
 "callers": [
 "0065c630"
 ],
@@ -179855,10 +179822,10 @@
 "in_vtables": []
 },
 "00644120": {
-"name": "FUN_00644120",
+"name": "ClearHover",
 "size": 26,
 "lines": 11,
-"chars": 187,
+"chars": 167,
 "callers": [
 "0064fcd0",
 "00653fa0",
@@ -179878,10 +179845,10 @@
 "in_vtables": []
 },
 "00644140": {
-"name": "FUN_00644140",
+"name": "LineAt",
 "size": 89,
-"lines": 34,
-"chars": 979,
+"lines": 26,
+"chars": 750,
 "callers": [
 "006440e0"
 ],
@@ -179919,10 +179886,10 @@
 ]
 },
 "00644230": {
-"name": "FUN_00644230",
+"name": "GetScrollRange",
 "size": 21,
 "lines": 10,
-"chars": 194,
+"chars": 157,
 "callers": [
 "0065b750",
 "0065c240",
@@ -179960,10 +179927,10 @@
 ]
 },
 "00644270": {
-"name": "get_field_78_644270",
+"name": "GetScroll",
 "size": 4,
 "lines": 7,
-"chars": 111,
+"chars": 89,
 "callers": [
 "0065b750",
 "0065c240",
@@ -179977,10 +179944,10 @@
 "in_vtables": []
 },
 "00644280": {
-"name": "FUN_00644280",
+"name": "TickCaret",
 "size": 70,
 "lines": 20,
-"chars": 435,
+"chars": 349,
 "callers": [
 "00662500"
 ],
@@ -179992,10 +179959,10 @@
 "in_vtables": []
 },
 "006442d0": {
-"name": "FUN_006442d0",
+"name": "AddVertex",
 "size": 80,
-"lines": 23,
-"chars": 702,
+"lines": 20,
+"chars": 572,
 "callers": [
 "00648b80",
 "00648fa0"
@@ -180018,10 +179985,10 @@
 "in_vtables": []
 },
 "00644320": {
-"name": "FUN_00644320",
+"name": "SetSelectedText",
 "size": 116,
-"lines": 42,
-"chars": 1088,
+"lines": 36,
+"chars": 836,
 "callers": [
 "006626a0",
 "006627b0"
@@ -180036,10 +180003,10 @@
 "in_vtables": []
 },
 "006443a0": {
-"name": "FUN_006443a0",
+"name": "GetSelectedText",
 "size": 101,
 "lines": 30,
-"chars": 617,
+"chars": 636,
 "callers": [
 "00662520",
 "00662ce0"
@@ -180052,10 +180019,10 @@
 "in_vtables": []
 },
 "00644410": {
-"name": "FUN_00644410",
+"name": "SetRun",
 "size": 257,
-"lines": 72,
-"chars": 1961,
+"lines": 59,
+"chars": 1632,
 "callers": [
 "00644520",
 "006446e0"
@@ -180074,7 +180041,7 @@
 "name": "SetTextId",
 "size": 401,
 "lines": 92,
-"chars": 2637,
+"chars": 2630,
 "callers": [
 "004a0ee0",
 "004a7c60",
@@ -180130,7 +180097,7 @@
 "name": "SetText",
 "size": 138,
 "lines": 37,
-"chars": 967,
+"chars": 949,
 "callers": [
 "0048f080",
 "0048f180",
@@ -180269,7 +180236,7 @@
 "name": "AddRun",
 "size": 103,
 "lines": 22,
-"chars": 549,
+"chars": 560,
 "callers": [
 "00644410",
 "00644770",
@@ -180287,10 +180254,10 @@
 "in_vtables": []
 },
 "00644920": {
-"name": "FUN_00644920",
+"name": "InsertRun",
 "size": 292,
-"lines": 64,
-"chars": 1778,
+"lines": 62,
+"chars": 1568,
 "callers": [
 "00644a50",
 "00644b20"
@@ -180307,10 +180274,10 @@
 "in_vtables": []
 },
 "00644a50": {
-"name": "FUN_00644a50",
+"name": "InsertTextId",
 "size": 195,
-"lines": 56,
-"chars": 1465,
+"lines": 50,
+"chars": 1320,
 "callers": [],
 "callees": [
 "006446c0",
@@ -180327,10 +180294,10 @@
 "in_vtables": []
 },
 "00644b20": {
-"name": "FUN_00644b20",
+"name": "InsertText",
 "size": 138,
-"lines": 44,
-"chars": 1066,
+"lines": 37,
+"chars": 955,
 "callers": [
 "0065b750"
 ],
@@ -180346,10 +180313,10 @@
 "in_vtables": []
 },
 "00644bb0": {
-"name": "FUN_00644bb0",
+"name": "RemoveRun",
 "size": 194,
-"lines": 54,
-"chars": 1646,
+"lines": 55,
+"chars": 1538,
 "callers": [
 "0065b750",
 "00661c60",
@@ -180420,10 +180387,10 @@
 "in_vtables": []
 },
 "00644cf0": {
-"name": "FUN_00644cf0",
+"name": "VisualDepth",
 "size": 173,
-"lines": 33,
-"chars": 930,
+"lines": 31,
+"chars": 804,
 "callers": [
 "00644da0",
 "0064b200"
@@ -180446,7 +180413,7 @@
 "name": "AttachTo",
 "size": 242,
 "lines": 43,
-"chars": 1449,
+"chars": 1434,
 "callers": [
 "00496450",
 "0049a940",
@@ -180533,8 +180500,8 @@
 "00644ec0": {
 "name": "FreeLayout",
 "size": 163,
-"lines": 38,
-"chars": 929,
+"lines": 37,
+"chars": 928,
 "callers": [
 "0048ecf0",
 "0049a750",
@@ -180570,10 +180537,10 @@
 "in_vtables": []
 },
 "00644f70": {
-"name": "FUN_00644f70",
+"name": "S_TextLine::~S_TextLine",
 "size": 159,
 "lines": 35,
-"chars": 1086,
+"chars": 1133,
 "callers": [
 "00644ec0"
 ],
@@ -180587,10 +180554,10 @@
 "in_vtables": []
 },
 "00645010": {
-"name": "FUN_00645010",
+"name": "SelectStyle",
 "size": 102,
 "lines": 34,
-"chars": 745,
+"chars": 717,
 "callers": [
 "00645590",
 "00647620",
@@ -180615,10 +180582,10 @@
 "in_vtables": []
 },
 "00645080": {
-"name": "FUN_00645080",
+"name": "TextWidth",
 "size": 176,
-"lines": 50,
-"chars": 1369,
+"lines": 44,
+"chars": 1125,
 "callers": [
 "00645590",
 "00645ae0",
@@ -180640,10 +180607,10 @@
 "in_vtables": []
 },
 "00645130": {
-"name": "FUN_00645130",
+"name": "Advance",
 "size": 146,
 "lines": 23,
-"chars": 585,
+"chars": 551,
 "callers": [
 "00645080",
 "00645210",
@@ -180670,10 +180637,10 @@
 "in_vtables": []
 },
 "006451d0": {
-"name": "FUN_006451d0",
+"name": "FontSize",
 "size": 33,
 "lines": 10,
-"chars": 102,
+"chars": 131,
 "callers": [
 "00645590",
 "00645ae0",
@@ -180713,10 +180680,10 @@
 "in_vtables": []
 },
 "00645210": {
-"name": "FUN_00645210",
+"name": "Truncate",
 "size": 893,
-"lines": 215,
-"chars": 6146,
+"lines": 217,
+"chars": 6693,
 "callers": [
 "00645590",
 "00645ae0",
@@ -180742,10 +180709,10 @@
 "in_vtables": []
 },
 "00645590": {
-"name": "FUN_00645590",
+"name": "Layout",
 "size": 1143,
-"lines": 228,
-"chars": 8448,
+"lines": 216,
+"chars": 7294,
 "callers": [
 "00643ca0",
 "00643e40",
@@ -180782,10 +180749,10 @@
 "in_vtables": []
 },
 "00645a10": {
-"name": "FUN_00645a10",
+"name": "S_TextLine::Reset",
 "size": 111,
 "lines": 26,
-"chars": 755,
+"chars": 801,
 "callers": [
 "00645590",
 "00645ae0",
@@ -180830,7 +180797,7 @@
 "in_vtables": []
 },
 "00645aa0": {
-"name": "FUN_00645aa0",
+"name": "S_TextWord::~S_TextWord",
 "size": 21,
 "lines": 14,
 "chars": 247,
@@ -180847,10 +180814,10 @@
 "in_vtables": []
 },
 "00645ac0": {
-"name": "FUN_00645ac0",
+"name": "FlowRun",
 "size": 19,
-"lines": 12,
-"chars": 198,
+"lines": 14,
+"chars": 236,
 "callers": [
 "00645590"
 ],
@@ -180867,10 +180834,10 @@
 "in_vtables": []
 },
 "00645ae0": {
-"name": "FUN_00645ae0",
+"name": "FlowUtf8",
 "size": 1887,
-"lines": 442,
-"chars": 16118,
+"lines": 440,
+"chars": 16156,
 "callers": [
 "00645ac0"
 ],
@@ -180902,10 +180869,10 @@
 "in_vtables": []
 },
 "00646240": {
-"name": "FUN_00646240",
+"name": "FlowWords",
 "size": 2155,
-"lines": 514,
-"chars": 19754,
+"lines": 515,
+"chars": 19965,
 "callers": [
 "00645ac0"
 ],
@@ -180936,10 +180903,10 @@
 "in_vtables": []
 },
 "00646ab0": {
-"name": "FUN_00646ab0",
+"name": "CheckLineOverflow",
 "size": 28,
 "lines": 10,
-"chars": 250,
+"chars": 217,
 "callers": [
 "006470d0",
 "00647250"
@@ -180952,10 +180919,10 @@
 "in_vtables": []
 },
 "00646ad0": {
-"name": "FUN_00646ad0",
+"name": "CheckPieceOverflow",
 "size": 101,
-"lines": 34,
-"chars": 1243,
+"lines": 17,
+"chars": 555,
 "callers": [
 "00647360"
 ],
@@ -180967,10 +180934,10 @@
 "in_vtables": []
 },
 "00646b40": {
-"name": "FUN_00646b40",
+"name": "Position",
 "size": 173,
-"lines": 39,
-"chars": 1007,
+"lines": 38,
+"chars": 901,
 "callers": [
 "00645590"
 ],
@@ -180993,10 +180960,10 @@
 "in_vtables": []
 },
 "00646bf0": {
-"name": "FUN_00646bf0",
+"name": "VAlignOffset",
 "size": 105,
 "lines": 25,
-"chars": 526,
+"chars": 454,
 "callers": [
 "00646b40"
 ],
@@ -181013,10 +180980,10 @@
 "in_vtables": []
 },
 "00646c60": {
-"name": "FUN_00646c60",
+"name": "TextHeight",
 "size": 123,
-"lines": 29,
-"chars": 821,
+"lines": 26,
+"chars": 720,
 "callers": [
 "00646bf0"
 ],
@@ -181028,10 +180995,10 @@
 "in_vtables": []
 },
 "00646ce0": {
-"name": "FUN_00646ce0",
+"name": "StackLines",
 "size": 71,
 "lines": 19,
-"chars": 547,
+"chars": 528,
 "callers": [
 "00646b40"
 ],
@@ -181043,10 +181010,10 @@
 "in_vtables": []
 },
 "00646d30": {
-"name": "FUN_00646d30",
+"name": "AlignLine",
 "size": 922,
-"lines": 142,
-"chars": 4623,
+"lines": 140,
+"chars": 4506,
 "callers": [
 "00647250"
 ],
@@ -181071,10 +181038,10 @@
 "in_vtables": []
 },
 "006470d0": {
-"name": "FUN_006470d0",
+"name": "PlaceWordsAtX",
 "size": 372,
 "lines": 68,
-"chars": 1795,
+"chars": 1853,
 "callers": [
 "00647250"
 ],
@@ -181096,10 +181063,10 @@
 "in_vtables": []
 },
 "00647250": {
-"name": "FUN_00647250",
+"name": "PlaceLines",
 "size": 261,
-"lines": 64,
-"chars": 1900,
+"lines": 65,
+"chars": 1794,
 "callers": [
 "00646b40"
 ],
@@ -181120,10 +181087,10 @@
 "in_vtables": []
 },
 "00647360": {
-"name": "FUN_00647360",
+"name": "PlacePieces",
 "size": 560,
 "lines": 87,
-"chars": 2685,
+"chars": 2558,
 "callers": [
 "00646b40"
 ],
@@ -181146,10 +181113,10 @@
 "in_vtables": []
 },
 "00647590": {
-"name": "FUN_00647590",
+"name": "JustifyGap",
 "size": 104,
 "lines": 22,
-"chars": 567,
+"chars": 553,
 "callers": [
 "00646d30"
 ],
@@ -181161,10 +181128,10 @@
 "in_vtables": []
 },
 "00647600": {
-"name": "FUN_00647600",
+"name": "SplitWords",
 "size": 19,
 "lines": 12,
-"chars": 227,
+"chars": 209,
 "callers": [
 "00646d30",
 "0064b7f0"
@@ -181182,10 +181149,10 @@
 "in_vtables": []
 },
 "00647620": {
-"name": "FUN_00647620",
+"name": "SplitWordsUtf8",
 "size": 1320,
 "lines": 301,
-"chars": 11314,
+"chars": 11199,
 "callers": [
 "00647600"
 ],
@@ -181214,10 +181181,10 @@
 "in_vtables": []
 },
 "00647b50": {
-"name": "FUN_00647b50",
+"name": "SplitWordsBytes",
 "size": 1231,
 "lines": 286,
-"chars": 10780,
+"chars": 10677,
 "callers": [
 "00647600"
 ],
@@ -181246,10 +181213,10 @@
 "in_vtables": []
 },
 "00648020": {
-"name": "FUN_00648020",
+"name": "ClipViewport",
 "size": 364,
 "lines": 57,
-"chars": 1513,
+"chars": 1539,
 "callers": [
 "00648200"
 ],
@@ -181267,10 +181234,10 @@
 "in_vtables": []
 },
 "00648190": {
-"name": "FUN_00648190",
+"name": "ReadScreenSize",
 "size": 25,
 "lines": 13,
-"chars": 195,
+"chars": 204,
 "callers": [
 "00648200",
 "006dceb0"
@@ -181285,10 +181252,10 @@
 "in_vtables": []
 },
 "006481b0": {
-"name": "FUN_006481b0",
+"name": "WordColour",
 "size": 65,
 "lines": 19,
-"chars": 443,
+"chars": 374,
 "callers": [
 "00648200",
 "0064bc70"
@@ -181303,8 +181270,8 @@
 "00648200": {
 "name": "Render",
 "size": 1503,
-"lines": 197,
-"chars": 6782,
+"lines": 198,
+"chars": 6850,
 "callers": [],
 "callees": [
 "00645010",
@@ -181363,10 +181330,10 @@
 ]
 },
 "00648b80": {
-"name": "FUN_00648b80",
+"name": "DrawString",
 "size": 1949,
-"lines": 264,
-"chars": 10770,
+"lines": 222,
+"chars": 7867,
 "callers": [
 "00648200",
 "0064af10",
@@ -181395,10 +181362,10 @@
 "in_vtables": []
 },
 "00648fa0": {
-"name": "FUN_00648fa0",
+"name": "DrawCaret",
 "size": 559,
-"lines": 49,
-"chars": 1661,
+"lines": 48,
+"chars": 1581,
 "callers": [
 "00648200"
 ],
@@ -181423,10 +181390,10 @@
 "in_vtables": []
 },
 "006491d0": {
-"name": "FUN_006491d0",
+"name": "StepUnknown76",
 "size": 108,
-"lines": 31,
-"chars": 583,
+"lines": 30,
+"chars": 534,
 "callers": [
 "00648200"
 ],
@@ -181440,10 +181407,10 @@
 "in_vtables": []
 },
 "00649250": {
-"name": "FUN_00649250",
+"name": "NewPage",
 "size": 530,
-"lines": 89,
-"chars": 2745,
+"lines": 86,
+"chars": 2497,
 "callers": [
 "006494a0",
 "00649a90"
@@ -181464,10 +181431,10 @@
 "in_vtables": []
 },
 "00649470": {
-"name": "FUN_00649470",
+"name": "LastPage",
 "size": 43,
-"lines": 11,
-"chars": 254,
+"lines": 10,
+"chars": 218,
 "callers": [
 "006494a0",
 "00649a90",
@@ -181482,10 +181449,10 @@
 "in_vtables": []
 },
 "006494a0": {
-"name": "FUN_006494a0",
+"name": "LayoutPages",
 "size": 770,
-"lines": 147,
-"chars": 4750,
+"lines": 137,
+"chars": 4180,
 "callers": [
 "0064ae70",
 "0064bb80"
@@ -181511,10 +181478,10 @@
 "in_vtables": []
 },
 "006497b0": {
-"name": "FUN_006497b0",
+"name": "PlacePages",
 "size": 62,
 "lines": 16,
-"chars": 380,
+"chars": 370,
 "callers": [
 "006494a0"
 ],
@@ -181529,10 +181496,10 @@
 "in_vtables": []
 },
 "006497f0": {
-"name": "FUN_006497f0",
+"name": "NextJustified",
 "size": 371,
-"lines": 80,
-"chars": 2303,
+"lines": 82,
+"chars": 2313,
 "callers": [
 "00649970"
 ],
@@ -181552,10 +181519,10 @@
 "in_vtables": []
 },
 "00649970": {
-"name": "FUN_00649970",
+"name": "AlignPage",
 "size": 126,
 "lines": 26,
-"chars": 777,
+"chars": 731,
 "callers": [
 "006497b0"
 ],
@@ -181570,10 +181537,10 @@
 "in_vtables": []
 },
 "006499f0": {
-"name": "FUN_006499f0",
+"name": "StackPage",
 "size": 147,
 "lines": 31,
-"chars": 968,
+"chars": 959,
 "callers": [
 "006497b0"
 ],
@@ -181587,10 +181554,10 @@
 "in_vtables": []
 },
 "00649a90": {
-"name": "FUN_00649a90",
+"name": "AddLineToPage",
 "size": 464,
-"lines": 73,
-"chars": 2199,
+"lines": 74,
+"chars": 2215,
 "callers": [
 "006494a0",
 "00649c80",
@@ -181614,10 +181581,10 @@
 "in_vtables": []
 },
 "00649c60": {
-"name": "FUN_00649c60",
+"name": "FlowPaged",
 "size": 19,
-"lines": 12,
-"chars": 255,
+"lines": 14,
+"chars": 281,
 "callers": [
 "006494a0"
 ],
@@ -181634,10 +181601,10 @@
 "in_vtables": []
 },
 "00649c80": {
-"name": "FUN_00649c80",
+"name": "FlowPagedUtf8",
 "size": 2050,
-"lines": 466,
-"chars": 16615,
+"lines": 470,
+"chars": 17560,
 "callers": [
 "00649c60"
 ],
@@ -181689,10 +181656,10 @@
 "in_vtables": []
 },
 "0064a4d0": {
-"name": "FUN_0064a4d0",
+"name": "S_TextLine::AddWord",
 "size": 462,
 "lines": 87,
-"chars": 2759,
+"chars": 2772,
 "callers": [
 "00649c80",
 "0064a6c0"
@@ -181728,10 +181695,10 @@
 "in_vtables": []
 },
 "0064a6c0": {
-"name": "FUN_0064a6c0",
+"name": "FlowPagedBytes",
 "size": 1949,
-"lines": 438,
-"chars": 15590,
+"lines": 441,
+"chars": 16412,
 "callers": [
 "00649c60"
 ],
@@ -181764,10 +181731,10 @@
 "in_vtables": []
 },
 "0064ae60": {
-"name": "empty_function_64ae60",
+"name": "FreePages",
 "size": 1,
 "lines": 7,
-"chars": 57,
+"chars": 88,
 "callers": [
 "006494a0",
 "00662310"
@@ -181780,10 +181747,10 @@
 "in_vtables": []
 },
 "0064ae70": {
-"name": "FUN_0064ae70",
+"name": "Render",
 "size": 147,
 "lines": 32,
-"chars": 752,
+"chars": 743,
 "callers": [],
 "callees": [
 "006494a0",
@@ -181801,10 +181768,10 @@
 ]
 },
 "0064af10": {
-"name": "FUN_0064af10",
+"name": "RenderPage",
 "size": 343,
-"lines": 80,
-"chars": 2357,
+"lines": 81,
+"chars": 2400,
 "callers": [
 "0064ae70"
 ],
@@ -181821,10 +181788,10 @@
 "in_vtables": []
 },
 "0064b070": {
-"name": "FUN_0064b070",
+"name": "ClipArea",
 "size": 353,
-"lines": 56,
-"chars": 1472,
+"lines": 55,
+"chars": 1479,
 "callers": [
 "0064af10"
 ],
@@ -181841,10 +181808,10 @@
 "in_vtables": []
 },
 "0064b1e0": {
-"name": "empty_function_64b1e0",
+"name": "Reattach",
 "size": 3,
 "lines": 7,
-"chars": 57,
+"chars": 105,
 "callers": [
 "00662000"
 ],
@@ -181856,10 +181823,10 @@
 "in_vtables": []
 },
 "0064b200": {
-"name": "FUN_0064b200",
+"name": "AddArea",
 "size": 856,
-"lines": 114,
-"chars": 4169,
+"lines": 115,
+"chars": 4078,
 "callers": [
 "0065c800"
 ],
@@ -181887,10 +181854,10 @@
 "in_vtables": []
 },
 "0064b7f0": {
-"name": "FUN_0064b7f0",
+"name": "AlignPageLine",
 "size": 734,
 "lines": 119,
-"chars": 3832,
+"chars": 3923,
 "callers": [
 "00649970"
 ],
@@ -181913,10 +181880,10 @@
 "in_vtables": []
 },
 "0064bad0": {
-"name": "FUN_0064bad0",
+"name": "JustifyPageGap",
 "size": 91,
-"lines": 21,
-"chars": 536,
+"lines": 20,
+"chars": 554,
 "callers": [
 "0064b7f0"
 ],
@@ -181930,10 +181897,10 @@
 "in_vtables": []
 },
 "0064bb30": {
-"name": "FUN_0064bb30",
+"name": "SetPage",
 "size": 48,
-"lines": 13,
-"chars": 321,
+"lines": 12,
+"chars": 254,
 "callers": [
 "0065c800"
 ],
@@ -181945,10 +181912,10 @@
 "in_vtables": []
 },
 "0064bb60": {
-"name": "FUN_0064bb60",
+"name": "NumPages",
 "size": 25,
 "lines": 10,
-"chars": 182,
+"chars": 164,
 "callers": [
 "0065c800"
 ],
@@ -181960,10 +181927,10 @@
 "in_vtables": []
 },
 "0064bb80": {
-"name": "FUN_0064bb80",
+"name": "Relayout",
 "size": 9,
 "lines": 9,
-"chars": 156,
+"chars": 134,
 "callers": [
 "0065c800"
 ],
@@ -181977,10 +181944,10 @@
 "in_vtables": []
 },
 "0064bb90": {
-"name": "FUN_0064bb90",
+"name": "LastPageBreak",
 "size": 196,
 "lines": 48,
-"chars": 1294,
+"chars": 1278,
 "callers": [
 "0065c800"
 ],
@@ -181998,10 +181965,10 @@
 "in_vtables": []
 },
 "0064bc60": {
-"name": "FUN_0064bc60",
+"name": "ScrollTo",
 "size": 12,
 "lines": 8,
-"chars": 177,
+"chars": 128,
 "callers": [
 "00688ab0"
 ],
@@ -182018,10 +181985,10 @@
 ]
 },
 "0064bc70": {
-"name": "FUN_0064bc70",
+"name": "Render",
 "size": 869,
-"lines": 125,
-"chars": 4279,
+"lines": 126,
+"chars": 4381,
 "callers": [],
 "callees": [
 "00645010",
@@ -182074,10 +182041,10 @@
 ]
 },
 "0064bfe0": {
-"name": "FUN_0064bfe0",
+"name": "Finished",
 "size": 41,
-"lines": 11,
-"chars": 267,
+"lines": 12,
+"chars": 354,
 "callers": [
 "00688f00"
 ],
@@ -182089,10 +182056,10 @@
 "in_vtables": []
 },
 "0064c010": {
-"name": "FUN_0064c010",
+"name": "text_word_valid_64c010",
 "size": 45,
-"lines": 22,
-"chars": 429,
+"lines": 20,
+"chars": 350,
 "callers": [
 "00647620",
 "00647b50"
@@ -182105,10 +182072,10 @@
 "in_vtables": []
 },
 "0064c040": {
-"name": "FUN_0064c040",
+"name": "construct_text_words_64c040",
 "size": 24,
 "lines": 11,
-"chars": 239,
+"chars": 273,
 "callers": [
 "00645590",
 "00645ae0",
@@ -182139,10 +182106,10 @@
 "in_vtables": []
 },
 "0064c080": {
-"name": "FUN_0064c080",
+"name": "text_run_at_64c080",
 "size": 15,
 "lines": 7,
-"chars": 114,
+"chars": 129,
 "callers": [
 "00645590"
 ],
@@ -182199,10 +182166,10 @@
 "in_vtables": []
 },
 "0064c100": {
-"name": "FUN_0064c100",
+"name": "text_style_valid_64c100",
 "size": 45,
-"lines": 22,
-"chars": 429,
+"lines": 20,
+"chars": 351,
 "callers": [
 "00647360"
 ],
@@ -182233,10 +182200,10 @@
 "in_vtables": []
 },
 "0064c150": {
-"name": "FUN_0064c150",
+"name": "S_TextPiece::~S_TextPiece",
 "size": 21,
 "lines": 14,
-"chars": 247,
+"chars": 249,
 "callers": [
 "00644ec0"
 ],
@@ -182294,10 +182261,10 @@
 "in_vtables": []
 },
 "0064c320": {
-"name": "FUN_0064c320",
+"name": "vector_insert_text_run_64c320",
 "size": 738,
 "lines": 119,
-"chars": 4100,
+"chars": 4270,
 "callers": [
 "006448b0",
 "00644920"
@@ -182347,10 +182314,10 @@
 "in_vtables": []
 },
 "0064c630": {
-"name": "FUN_0064c630",
+"name": "vector_insert_text_word_64c630",
 "size": 517,
 "lines": 116,
-"chars": 3520,
+"chars": 3605,
 "callers": [
 "00645ae0",
 "00646240"
@@ -182366,10 +182333,10 @@
 "in_vtables": []
 },
 "0064c840": {
-"name": "FUN_0064c840",
+"name": "vector_insert_text_line_64c840",
 "size": 517,
 "lines": 116,
-"chars": 3520,
+"chars": 3605,
 "callers": [
 "00645590",
 "00645ae0",
@@ -182386,10 +182353,10 @@
 "in_vtables": []
 },
 "0064ca50": {
-"name": "FUN_0064ca50",
+"name": "vector_insert_text_piece_64ca50",
 "size": 517,
 "lines": 116,
-"chars": 3520,
+"chars": 3606,
 "callers": [
 "00645590"
 ],
@@ -182404,10 +182371,10 @@
 "in_vtables": []
 },
 "0064cc60": {
-"name": "FUN_0064cc60",
+"name": "TextStyleList_Insert",
 "size": 517,
-"lines": 116,
-"chars": 3520,
+"lines": 117,
+"chars": 3529,
 "callers": [
 "006420b0"
 ],
@@ -182560,10 +182527,10 @@
 "in_vtables": []
 },
 "0064d020": {
-"name": "FUN_0064d020",
+"name": "construct_text_run_64d020",
 "size": 26,
 "lines": 17,
-"chars": 315,
+"chars": 343,
 "callers": [
 "0064c320"
 ],
@@ -182643,10 +182610,10 @@
 ]
 },
 "0064d3d0": {
-"name": "FUN_0064d3d0",
+"name": "IsLegalUtf8Range",
 "size": 46,
-"lines": 21,
-"chars": 471,
+"lines": 22,
+"chars": 424,
 "callers": [
 "00665f90",
 "006a0db0"
@@ -182663,10 +182630,10 @@
 "in_vtables": []
 },
 "0064d400": {
-"name": "FUN_0064d400",
+"name": "IsLegalUtf8",
 "size": 111,
-"lines": 66,
-"chars": 1594,
+"lines": 75,
+"chars": 1339,
 "callers": [
 "0064d3d0",
 "0064d830"
@@ -182679,10 +182646,10 @@
 "in_vtables": []
 },
 "0064d830": {
-"name": "FUN_0064d830",
+"name": "DecodeUtf8",
 "size": 206,
 "lines": 46,
-"chars": 1054,
+"chars": 1055,
 "callers": [
 "00495360",
 "00495a00",
@@ -182706,10 +182673,10 @@
 "in_vtables": []
 },
 "0064d910": {
-"name": "FUN_0064d910",
+"name": "EncodeUtf8",
 "size": 184,
 "lines": 54,
-"chars": 1068,
+"chars": 1066,
 "callers": [
 "00494d20",
 "006627b0"
@@ -182724,10 +182691,10 @@
 "in_vtables": []
 },
 "0064d9e0": {
-"name": "FUN_0064d9e0",
+"name": "HasUtf8Sequences",
 "size": 81,
 "lines": 44,
-"chars": 888,
+"chars": 884,
 "callers": [
 "0062fa30",
 "00665f90",
@@ -182741,10 +182708,10 @@
 "in_vtables": []
 },
 "0064da80": {
-"name": "FUN_0064da80",
+"name": "HasCjkCharacters",
 "size": 32,
 "lines": 18,
-"chars": 305,
+"chars": 266,
 "callers": [
 "00722550",
 "00726470"
@@ -182912,7 +182879,7 @@
 "name": "FUN_0064db20",
 "size": 437,
 "lines": 88,
-"chars": 2740,
+"chars": 2674,
 "callers": [
 "0065d470"
 ],
@@ -182946,10 +182913,10 @@
 ]
 },
 "0064dce0": {
-"name": "FUN_0064dce0",
+"name": "IsChild",
 "size": 40,
-"lines": 17,
-"chars": 366,
+"lines": 11,
+"chars": 233,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -183156,10 +183123,10 @@
 ]
 },
 "0064dd10": {
-"name": "FUN_0064dd10",
+"name": "TakesInput",
 "size": 23,
 "lines": 7,
-"chars": 141,
+"chars": 135,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -183370,10 +183337,10 @@
 ]
 },
 "0064dd30": {
-"name": "FUN_0064dd30",
+"name": "GetHighlightFrame",
 "size": 3,
 "lines": 7,
-"chars": 101,
+"chars": 100,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -183572,10 +183539,10 @@
 ]
 },
 "0064dd40": {
-"name": "empty_function_64dd40",
+"name": "Tick",
 "size": 3,
 "lines": 7,
-"chars": 102,
+"chars": 82,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -183678,10 +183645,10 @@
 ]
 },
 "0064dd50": {
-"name": "FUN_0064dd50",
+"name": "Unknown20",
 "size": 5,
 "lines": 7,
-"chars": 101,
+"chars": 94,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -183796,10 +183763,10 @@
 ]
 },
 "0064dd60": {
-"name": "FUN_0064dd60",
+"name": "Unknown24",
 "size": 5,
 "lines": 7,
-"chars": 101,
+"chars": 94,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -183994,10 +183961,10 @@
 ]
 },
 "0064dd70": {
-"name": "FUN_0064dd70",
+"name": "Unknown28",
 "size": 3,
 "lines": 7,
-"chars": 101,
+"chars": 84,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -184192,10 +184159,10 @@
 ]
 },
 "0064dd80": {
-"name": "FUN_0064dd80",
+"name": "OnEnter",
 "size": 20,
 "lines": 8,
-"chars": 136,
+"chars": 113,
 "callers": [],
 "callees": [
 "0065d270"
@@ -184264,10 +184231,10 @@
 ]
 },
 "0064dda0": {
-"name": "FUN_0064dda0",
+"name": "OnLeave",
 "size": 20,
 "lines": 8,
-"chars": 136,
+"chars": 113,
 "callers": [],
 "callees": [
 "0065d270"
@@ -184332,10 +184299,10 @@
 ]
 },
 "0064ddc0": {
-"name": "FUN_0064ddc0",
+"name": "OnClick",
 "size": 20,
 "lines": 8,
-"chars": 108,
+"chars": 113,
 "callers": [],
 "callees": [
 "0065d270"
@@ -184420,10 +184387,10 @@
 ]
 },
 "0064dde0": {
-"name": "FUN_0064dde0",
+"name": "OnInput02",
 "size": 20,
 "lines": 8,
-"chars": 136,
+"chars": 115,
 "callers": [],
 "callees": [
 "0065d270"
@@ -184540,10 +184507,10 @@
 ]
 },
 "0064de00": {
-"name": "FUN_0064de00",
+"name": "OnInput05",
 "size": 20,
 "lines": 8,
-"chars": 136,
+"chars": 115,
 "callers": [],
 "callees": [
 "0065d270"
@@ -184668,10 +184635,10 @@
 ]
 },
 "0064de20": {
-"name": "FUN_0064de20",
+"name": "OnRelease",
 "size": 20,
 "lines": 8,
-"chars": 108,
+"chars": 115,
 "callers": [],
 "callees": [
 "0065d270"
@@ -184812,10 +184779,10 @@
 ]
 },
 "0064de40": {
-"name": "FUN_0064de40",
+"name": "OnPress",
 "size": 20,
 "lines": 8,
-"chars": 136,
+"chars": 113,
 "callers": [],
 "callees": [
 "0065d270"
@@ -184920,10 +184887,10 @@
 ]
 },
 "0064de60": {
-"name": "FUN_0064de60",
+"name": "OnWheel",
 "size": 20,
 "lines": 8,
-"chars": 136,
+"chars": 124,
 "callers": [],
 "callees": [
 "0065d270"
@@ -185064,10 +185031,10 @@
 ]
 },
 "0064de80": {
-"name": "FUN_0064de80",
+"name": "OnInput08",
 "size": 20,
 "lines": 8,
-"chars": 136,
+"chars": 115,
 "callers": [],
 "callees": [
 "0065d270"
@@ -185200,10 +185167,10 @@
 ]
 },
 "0064dea0": {
-"name": "FUN_0064dea0",
+"name": "OnInput09",
 "size": 20,
 "lines": 8,
-"chars": 136,
+"chars": 115,
 "callers": [],
 "callees": [
 "0065d270"
@@ -185348,10 +185315,10 @@
 ]
 },
 "0064dec0": {
-"name": "FUN_0064dec0",
+"name": "OnInput0A",
 "size": 20,
 "lines": 8,
-"chars": 114,
+"chars": 115,
 "callers": [],
 "callees": [
 "0065d270"
@@ -185496,10 +185463,10 @@
 ]
 },
 "0064dee0": {
-"name": "FUN_0064dee0",
+"name": "OnKeyClick",
 "size": 31,
-"lines": 9,
-"chars": 182,
+"lines": 11,
+"chars": 176,
 "callers": [],
 "callees": [
 "0065d270"
@@ -185604,10 +185571,10 @@
 ]
 },
 "0064df00": {
-"name": "FUN_0064df00",
+"name": "OnInput13",
 "size": 20,
 "lines": 8,
-"chars": 136,
+"chars": 115,
 "callers": [],
 "callees": [
 "0065d270"
@@ -185752,10 +185719,10 @@
 ]
 },
 "0064df20": {
-"name": "FUN_0064df20",
+"name": "OnInput0B",
 "size": 20,
 "lines": 8,
-"chars": 136,
+"chars": 115,
 "callers": [],
 "callees": [
 "0065d270"
@@ -185952,10 +185919,10 @@
 ]
 },
 "0064df40": {
-"name": "FUN_0064df40",
+"name": "Unknown68",
 "size": 8,
 "lines": 7,
-"chars": 73,
+"chars": 89,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -186150,10 +186117,10 @@
 ]
 },
 "0064df50": {
-"name": "FUN_0064df50",
+"name": "HandleMessageCopy",
 "size": 144,
 "lines": 37,
-"chars": 923,
+"chars": 1021,
 "callers": [
 "0064db20",
 "0064f020",
@@ -186381,12 +186348,13 @@
 ]
 },
 "0064dfe0": {
-"name": "FUN_0064dfe0",
+"name": "C_Control",
 "size": 153,
-"lines": 39,
-"chars": 976,
+"lines": 38,
+"chars": 959,
 "callers": [
 "0064db20",
+"0064e080",
 "0064f020",
 "0064f4e0",
 "0064fda0",
@@ -186412,12 +186380,13 @@
 "in_vtables": []
 },
 "0064e080": {
-"name": "FUN_0064e080",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
 "chars": 193,
 "callers": [],
 "callees": [
+"0064dfe0",
 "0064e0a0",
 "007e2120"
 ],
@@ -186433,10 +186402,10 @@
 ]
 },
 "0064e0a0": {
-"name": "FUN_0064e0a0",
+"name": "~C_Control",
 "size": 284,
 "lines": 56,
-"chars": 1506,
+"chars": 1492,
 "callers": [
 "0064e080",
 "00804f00",
@@ -186697,10 +186666,10 @@
 "in_vtables": []
 },
 "0064e260": {
-"name": "FUN_0064e260",
+"name": "C_TitleControl::ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 193,
+"chars": 229,
 "callers": [],
 "callees": [
 "0064e280",
@@ -186718,10 +186687,10 @@
 ]
 },
 "0064e280": {
-"name": "FUN_0064e280",
+"name": "C_TitleControl::~C_TitleControl",
 "size": 300,
 "lines": 59,
-"chars": 1623,
+"chars": 1646,
 "callers": [
 "0064e260"
 ],
@@ -186742,13 +186711,14 @@
 "in_vtables": []
 },
 "0064e3b0": {
-"name": "FUN_0064e3b0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 213,
+"chars": 205,
 "callers": [],
 "callees": [
 "0064e3d0",
+"0064f220",
 "007e2120"
 ],
 "imports": [],
@@ -186763,10 +186733,10 @@
 ]
 },
 "0064e3d0": {
-"name": "FUN_0064e3d0",
+"name": "~C_TextControl",
 "size": 308,
 "lines": 60,
-"chars": 1667,
+"chars": 1673,
 "callers": [
 "0064e3b0",
 "00805840",
@@ -186919,7 +186889,7 @@
 "name": "FUN_0064e850",
 "size": 573,
 "lines": 104,
-"chars": 3394,
+"chars": 3418,
 "callers": [],
 "callees": [
 "006157d0",
@@ -186973,8 +186943,8 @@
 "0064eac0": {
 "name": "FUN_0064eac0",
 "size": 628,
-"lines": 127,
-"chars": 4190,
+"lines": 131,
+"chars": 4286,
 "callers": [],
 "callees": [
 "004050e0",
@@ -187171,8 +187141,8 @@
 "0064f020": {
 "name": "FUN_0064f020",
 "size": 503,
-"lines": 96,
-"chars": 3148,
+"lines": 98,
+"chars": 3185,
 "callers": [
 "0065d470"
 ],
@@ -187208,11 +187178,12 @@
 ]
 },
 "0064f220": {
-"name": "FUN_0064f220",
+"name": "C_TextControl",
 "size": 162,
-"lines": 41,
-"chars": 1057,
+"lines": 55,
+"chars": 1656,
 "callers": [
+"0064e3b0",
 "0064f020",
 "0065d470"
 ],
@@ -187265,8 +187236,8 @@
 "0064f300": {
 "name": "FUN_0064f300",
 "size": 161,
-"lines": 44,
-"chars": 1344,
+"lines": 46,
+"chars": 1356,
 "callers": [],
 "callees": [
 "0065d060"
@@ -187394,7 +187365,7 @@
 "name": "FUN_0064f4e0",
 "size": 551,
 "lines": 91,
-"chars": 3253,
+"chars": 3202,
 "callers": [
 "0065d470"
 ],
@@ -187428,10 +187399,10 @@
 ]
 },
 "0064f710": {
-"name": "FUN_0064f710",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 213,
+"chars": 190,
 "callers": [],
 "callees": [
 "0064f730",
@@ -187449,10 +187420,10 @@
 ]
 },
 "0064f730": {
-"name": "FUN_0064f730",
+"name": "~C_Button",
 "size": 310,
 "lines": 99,
-"chars": 3274,
+"chars": 3255,
 "callers": [
 "0064f710"
 ],
@@ -187476,8 +187447,8 @@
 "0064f870": {
 "name": "FUN_0064f870",
 "size": 914,
-"lines": 237,
-"chars": 7465,
+"lines": 243,
+"chars": 7641,
 "callers": [],
 "callees": [
 "004050e0",
@@ -187526,7 +187497,7 @@
 "name": "FUN_0064fc80",
 "size": 76,
 "lines": 21,
-"chars": 530,
+"chars": 537,
 "callers": [],
 "callees": [
 "00644090"
@@ -187546,7 +187517,7 @@
 "name": "FUN_0064fcd0",
 "size": 80,
 "lines": 21,
-"chars": 493,
+"chars": 497,
 "callers": [],
 "callees": [
 "00644120"
@@ -187619,8 +187590,8 @@
 "0064fda0": {
 "name": "FUN_0064fda0",
 "size": 963,
-"lines": 148,
-"chars": 4809,
+"lines": 147,
+"chars": 4714,
 "callers": [
 "0065d470"
 ],
@@ -187781,8 +187752,8 @@
 "00650670": {
 "name": "FUN_00650670",
 "size": 259,
-"lines": 61,
-"chars": 1730,
+"lines": 62,
+"chars": 1727,
 "callers": [],
 "callees": [
 "006501c0",
@@ -187929,10 +187900,10 @@
 ]
 },
 "00650a50": {
-"name": "FUN_00650a50",
+"name": "C_PictureControl::Create",
 "size": 128,
-"lines": 41,
-"chars": 1221,
+"lines": 35,
+"chars": 1007,
 "callers": [
 "00651810",
 "00652a60",
@@ -187954,10 +187925,10 @@
 ]
 },
 "00650ad0": {
-"name": "FUN_00650ad0",
+"name": "C_PictureControl::SetInactive",
 "size": 47,
 "lines": 16,
-"chars": 332,
+"chars": 347,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -187972,10 +187943,10 @@
 ]
 },
 "00650b00": {
-"name": "FUN_00650b00",
+"name": "C_PictureControl::HandleMessage",
 "size": 531,
-"lines": 141,
-"chars": 4719,
+"lines": 140,
+"chars": 4258,
 "callers": [],
 "callees": [
 "0065d060",
@@ -187999,10 +187970,10 @@
 ]
 },
 "00650d20": {
-"name": "thunk_FUN_00661bc0",
+"name": "Create",
 "size": 5,
-"lines": 12,
-"chars": 284,
+"lines": 10,
+"chars": 207,
 "callers": [
 "0065d470"
 ],
@@ -188021,10 +187992,10 @@
 ]
 },
 "00650d30": {
-"name": "FUN_00650d30",
+"name": "HandleMessage",
 "size": 677,
-"lines": 116,
-"chars": 4241,
+"lines": 113,
+"chars": 3881,
 "callers": [],
 "callees": [
 "00420560",
@@ -188047,10 +188018,10 @@
 ]
 },
 "006513d0": {
-"name": "FUN_006513d0",
+"name": "C_PictureControl::ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 193,
+"chars": 235,
 "callers": [],
 "callees": [
 "006513f0",
@@ -188068,10 +188039,10 @@
 ]
 },
 "006513f0": {
-"name": "FUN_006513f0",
+"name": "C_PictureControl::~C_PictureControl",
 "size": 300,
 "lines": 59,
-"chars": 1623,
+"chars": 1650,
 "callers": [
 "006513d0"
 ],
@@ -188105,10 +188076,10 @@
 "in_vtables": []
 },
 "00651540": {
-"name": "FUN_00651540",
+"name": "Create",
 "size": 244,
-"lines": 64,
-"chars": 1685,
+"lines": 62,
+"chars": 1497,
 "callers": [
 "0065d470"
 ],
@@ -188135,10 +188106,10 @@
 ]
 },
 "00651640": {
-"name": "FUN_00651640",
+"name": "HandleMessage",
 "size": 74,
-"lines": 25,
-"chars": 748,
+"lines": 24,
+"chars": 604,
 "callers": [],
 "callees": [
 "0065d060",
@@ -188156,10 +188127,10 @@
 ]
 },
 "00651690": {
-"name": "FUN_00651690",
+"name": "Tick",
 "size": 377,
 "lines": 83,
-"chars": 2291,
+"chars": 2271,
 "callers": [],
 "callees": [
 "00661c60",
@@ -188186,7 +188157,7 @@
 "name": "FUN_00651810",
 "size": 732,
 "lines": 127,
-"chars": 4269,
+"chars": 4222,
 "callers": [
 "0065d470"
 ],
@@ -188224,8 +188195,8 @@
 "00651af0": {
 "name": "FUN_00651af0",
 "size": 931,
-"lines": 164,
-"chars": 5415,
+"lines": 168,
+"chars": 5527,
 "callers": [],
 "callees": [
 "00651ea0",
@@ -188307,8 +188278,8 @@
 "006521f0": {
 "name": "FUN_006521f0",
 "size": 388,
-"lines": 79,
-"chars": 2546,
+"lines": 81,
+"chars": 2586,
 "callers": [
 "0065d470"
 ],
@@ -188339,8 +188310,8 @@
 "00652380": {
 "name": "FUN_00652380",
 "size": 76,
-"lines": 25,
-"chars": 705,
+"lines": 27,
+"chars": 717,
 "callers": [],
 "callees": [
 "006523d0",
@@ -188361,7 +188332,7 @@
 "name": "FUN_006523d0",
 "size": 96,
 "lines": 31,
-"chars": 862,
+"chars": 867,
 "callers": [
 "00652380",
 "00652430"
@@ -188399,7 +188370,7 @@
 "name": "FUN_00652470",
 "size": 20,
 "lines": 8,
-"chars": 114,
+"chars": 119,
 "callers": [],
 "callees": [
 "0065d270"
@@ -188455,7 +188426,7 @@
 "name": "FUN_006524b0",
 "size": 41,
 "lines": 8,
-"chars": 140,
+"chars": 145,
 "callers": [],
 "callees": [
 "0065d270"
@@ -188475,7 +188446,7 @@
 "name": "FUN_006524e0",
 "size": 41,
 "lines": 8,
-"chars": 149,
+"chars": 154,
 "callers": [],
 "callees": [
 "0065d270"
@@ -188557,8 +188528,8 @@
 "006525f0": {
 "name": "FUN_006525f0",
 "size": 684,
-"lines": 82,
-"chars": 3257,
+"lines": 85,
+"chars": 3286,
 "callers": [
 "0065d470"
 ],
@@ -188600,7 +188571,7 @@
 "006528a0": {
 "name": "FUN_006528a0",
 "size": 447,
-"lines": 80,
+"lines": 82,
 "chars": 2460,
 "callers": [],
 "callees": [
@@ -188627,7 +188598,7 @@
 "name": "FUN_00652a60",
 "size": 857,
 "lines": 151,
-"chars": 5280,
+"chars": 5150,
 "callers": [
 "0065d470"
 ],
@@ -188668,8 +188639,8 @@
 "00652dc0": {
 "name": "FUN_00652dc0",
 "size": 954,
-"lines": 166,
-"chars": 5661,
+"lines": 170,
+"chars": 5775,
 "callers": [],
 "callees": [
 "00653180",
@@ -189225,7 +189196,7 @@
 "name": "FUN_00653f70",
 "size": 43,
 "lines": 11,
-"chars": 222,
+"chars": 239,
 "callers": [],
 "callees": [
 "00644090",
@@ -189246,7 +189217,7 @@
 "name": "FUN_00653fa0",
 "size": 41,
 "lines": 11,
-"chars": 218,
+"chars": 239,
 "callers": [],
 "callees": [
 "00644120",
@@ -189266,8 +189237,8 @@
 "00653fd0": {
 "name": "FUN_00653fd0",
 "size": 51,
-"lines": 11,
-"chars": 263,
+"lines": 13,
+"chars": 318,
 "callers": [],
 "callees": [
 "00655570",
@@ -189289,7 +189260,7 @@
 "name": "FUN_00654010",
 "size": 46,
 "lines": 12,
-"chars": 236,
+"chars": 235,
 "callers": [],
 "callees": [
 "006555c0",
@@ -189310,7 +189281,7 @@
 "name": "FUN_00654040",
 "size": 31,
 "lines": 9,
-"chars": 167,
+"chars": 172,
 "callers": [],
 "callees": [
 "0065d270"
@@ -189330,7 +189301,7 @@
 "name": "FUN_00654060",
 "size": 53,
 "lines": 14,
-"chars": 306,
+"chars": 333,
 "callers": [],
 "callees": [
 "00644090",
@@ -189351,7 +189322,7 @@
 "name": "FUN_006540a0",
 "size": 38,
 "lines": 11,
-"chars": 214,
+"chars": 257,
 "callers": [],
 "callees": [
 "00644120",
@@ -189412,7 +189383,7 @@
 "name": "FUN_00654120",
 "size": 466,
 "lines": 67,
-"chars": 3576,
+"chars": 3558,
 "callers": [
 "0065d470"
 ],
@@ -189440,7 +189411,7 @@
 "name": "FUN_00654300",
 "size": 62,
 "lines": 14,
-"chars": 276,
+"chars": 281,
 "callers": [
 "006540d0",
 "00654110",
@@ -189492,8 +189463,8 @@
 "00654420": {
 "name": "FUN_00654420",
 "size": 147,
-"lines": 44,
-"chars": 1206,
+"lines": 46,
+"chars": 1226,
 "callers": [],
 "callees": [
 "00654300",
@@ -189516,7 +189487,7 @@
 "name": "FUN_006544c0",
 "size": 50,
 "lines": 16,
-"chars": 457,
+"chars": 466,
 "callers": [],
 "callees": [
 "00661fe0"
@@ -189536,7 +189507,7 @@
 "name": "FUN_00654500",
 "size": 847,
 "lines": 132,
-"chars": 5188,
+"chars": 5220,
 "callers": [
 "0065d470",
 "006613f0"
@@ -189675,7 +189646,7 @@
 "name": "FUN_006548e0",
 "size": 299,
 "lines": 63,
-"chars": 1736,
+"chars": 1718,
 "callers": [
 "006548c0"
 ],
@@ -189722,7 +189693,7 @@
 "name": "FUN_00654b60",
 "size": 97,
 "lines": 21,
-"chars": 564,
+"chars": 591,
 "callers": [],
 "callees": [
 "00644090",
@@ -189743,7 +189714,7 @@
 "name": "FUN_00654bd0",
 "size": 89,
 "lines": 18,
-"chars": 531,
+"chars": 574,
 "callers": [],
 "callees": [
 "00644120",
@@ -189822,7 +189793,7 @@
 "name": "FUN_00654cc0",
 "size": 56,
 "lines": 14,
-"chars": 276,
+"chars": 281,
 "callers": [
 "00654a10",
 "00654c30",
@@ -189879,7 +189850,7 @@
 "name": "FUN_00654d60",
 "size": 537,
 "lines": 67,
-"chars": 3115,
+"chars": 3100,
 "callers": [
 "006574d0"
 ],
@@ -189906,7 +189877,7 @@
 "name": "FUN_00654f80",
 "size": 537,
 "lines": 67,
-"chars": 3117,
+"chars": 3102,
 "callers": [
 "0065d470"
 ],
@@ -189932,8 +189903,8 @@
 "006551a0": {
 "name": "FUN_006551a0",
 "size": 95,
-"lines": 32,
-"chars": 877,
+"lines": 34,
+"chars": 889,
 "callers": [],
 "callees": [
 "00655200",
@@ -189958,7 +189929,7 @@
 "name": "FUN_00655200",
 "size": 242,
 "lines": 44,
-"chars": 1922,
+"chars": 1937,
 "callers": [
 "006551a0",
 "00655300"
@@ -190063,10 +190034,10 @@
 ]
 },
 "00655400": {
-"name": "FUN_00655400",
+"name": "Create",
 "size": 233,
-"lines": 43,
-"chars": 1691,
+"lines": 35,
+"chars": 1417,
 "callers": [
 "0065d470",
 "00665d70"
@@ -190094,10 +190065,10 @@
 ]
 },
 "006554f0": {
-"name": "FUN_006554f0",
+"name": "HandleMessage",
 "size": 124,
-"lines": 42,
-"chars": 1177,
+"lines": 35,
+"chars": 917,
 "callers": [
 "00665f90"
 ],
@@ -190121,10 +190092,10 @@
 ]
 },
 "00655570": {
-"name": "FUN_00655570",
+"name": "OnEnter",
 "size": 79,
 "lines": 15,
-"chars": 436,
+"chars": 443,
 "callers": [
 "00653fd0"
 ],
@@ -190147,10 +190118,10 @@
 ]
 },
 "006555c0": {
-"name": "FUN_006555c0",
+"name": "OnLeave",
 "size": 66,
 "lines": 12,
-"chars": 376,
+"chars": 383,
 "callers": [
 "00654010"
 ],
@@ -190173,10 +190144,10 @@
 ]
 },
 "00655610": {
-"name": "FUN_00655610",
+"name": "OnClick",
 "size": 32,
 "lines": 11,
-"chars": 188,
+"chars": 195,
 "callers": [],
 "callees": [
 "0065d270"
@@ -190197,10 +190168,10 @@
 ]
 },
 "00655630": {
-"name": "FUN_00655630",
+"name": "GetHighlightFrame",
 "size": 4,
 "lines": 7,
-"chars": 107,
+"chars": 106,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -190362,8 +190333,8 @@
 "00655b40": {
 "name": "FUN_00655b40",
 "size": 119,
-"lines": 22,
-"chars": 749,
+"lines": 25,
+"chars": 798,
 "callers": [
 "0065d470",
 "006666f0"
@@ -190429,8 +190400,8 @@
 "00655db0": {
 "name": "FUN_00655db0",
 "size": 38,
-"lines": 13,
-"chars": 197,
+"lines": 14,
+"chars": 252,
 "callers": [],
 "callees": [
 "00655e10",
@@ -190462,8 +190433,8 @@
 "00655de0": {
 "name": "FUN_00655de0",
 "size": 38,
-"lines": 13,
-"chars": 222,
+"lines": 14,
+"chars": 295,
 "callers": [],
 "callees": [
 "00655e10",
@@ -190596,8 +190567,8 @@
 "00656230": {
 "name": "FUN_00656230",
 "size": 1837,
-"lines": 325,
-"chars": 10469,
+"lines": 329,
+"chars": 10600,
 "callers": [
 "00659d50",
 "00666e80"
@@ -190696,10 +190667,10 @@
 "in_vtables": []
 },
 "00656dc0": {
-"name": "FUN_00656dc0",
+"name": "Unknown20",
 "size": 71,
 "lines": 20,
-"chars": 550,
+"chars": 492,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -190738,10 +190709,10 @@
 ]
 },
 "00656e10": {
-"name": "FUN_00656e10",
+"name": "Tick",
 "size": 37,
 "lines": 16,
-"chars": 431,
+"chars": 430,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -190800,10 +190771,10 @@
 ]
 },
 "00656e40": {
-"name": "FUN_00656e40",
+"name": "OnEnter",
 "size": 108,
 "lines": 34,
-"chars": 832,
+"chars": 787,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -190870,10 +190841,10 @@
 ]
 },
 "00656eb0": {
-"name": "FUN_00656eb0",
+"name": "OnLeave",
 "size": 63,
 "lines": 19,
-"chars": 410,
+"chars": 403,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -190940,10 +190911,10 @@
 ]
 },
 "00656ef0": {
-"name": "FUN_00656ef0",
+"name": "OnClick",
 "size": 39,
-"lines": 18,
-"chars": 531,
+"lines": 17,
+"chars": 460,
 "callers": [
 "00655de0"
 ],
@@ -191008,10 +190979,10 @@
 ]
 },
 "00656f20": {
-"name": "FUN_00656f20",
+"name": "OnInput02",
 "size": 39,
 "lines": 17,
-"chars": 474,
+"chars": 462,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -191090,10 +191061,10 @@
 ]
 },
 "00656f50": {
-"name": "FUN_00656f50",
+"name": "OnInput05",
 "size": 101,
 "lines": 32,
-"chars": 752,
+"chars": 707,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -191164,10 +191135,10 @@
 ]
 },
 "00656fc0": {
-"name": "FUN_00656fc0",
+"name": "OnPress",
 "size": 39,
 "lines": 17,
-"chars": 457,
+"chars": 460,
 "callers": [
 "00655db0"
 ],
@@ -191220,10 +191191,10 @@
 ]
 },
 "00656ff0": {
-"name": "FUN_00656ff0",
+"name": "OnRelease",
 "size": 64,
 "lines": 22,
-"chars": 497,
+"chars": 485,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -191302,10 +191273,10 @@
 ]
 },
 "00657030": {
-"name": "FUN_00657030",
+"name": "OnInput08",
 "size": 39,
 "lines": 17,
-"chars": 457,
+"chars": 462,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -191380,10 +191351,10 @@
 ]
 },
 "00657060": {
-"name": "FUN_00657060",
+"name": "OnInput09",
 "size": 39,
 "lines": 17,
-"chars": 474,
+"chars": 462,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -191458,10 +191429,10 @@
 ]
 },
 "00657090": {
-"name": "FUN_00657090",
+"name": "OnInput0A",
 "size": 39,
 "lines": 17,
-"chars": 474,
+"chars": 462,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -191536,10 +191507,10 @@
 ]
 },
 "006570c0": {
-"name": "FUN_006570c0",
+"name": "OnWheel",
 "size": 42,
 "lines": 17,
-"chars": 474,
+"chars": 471,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -191598,10 +191569,10 @@
 ]
 },
 "006570f0": {
-"name": "FUN_006570f0",
+"name": "OnKeyClick",
 "size": 42,
 "lines": 17,
-"chars": 474,
+"chars": 463,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -191680,10 +191651,10 @@
 ]
 },
 "00657120": {
-"name": "FUN_00657120",
+"name": "OnInput13",
 "size": 42,
 "lines": 17,
-"chars": 474,
+"chars": 462,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -191762,10 +191733,10 @@
 ]
 },
 "00657150": {
-"name": "FUN_00657150",
+"name": "Refresh",
 "size": 48,
 "lines": 16,
-"chars": 369,
+"chars": 362,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -191828,10 +191799,10 @@
 ]
 },
 "00657180": {
-"name": "FUN_00657180",
+"name": "Create",
 "size": 25,
-"lines": 11,
-"chars": 297,
+"lines": 8,
+"chars": 181,
 "callers": [
 "00651810",
 "00652a60",
@@ -191871,10 +191842,10 @@
 ]
 },
 "006571a0": {
-"name": "FUN_006571a0",
+"name": "HandleMessage",
 "size": 70,
-"lines": 21,
-"chars": 592,
+"lines": 22,
+"chars": 582,
 "callers": [
 "00651af0",
 "00652dc0",
@@ -191902,7 +191873,7 @@
 "name": "FUN_006571f0",
 "size": 721,
 "lines": 150,
-"chars": 4543,
+"chars": 4551,
 "callers": [
 "006574d0"
 ],
@@ -191933,8 +191904,8 @@
 "006574d0": {
 "name": "FUN_006574d0",
 "size": 852,
-"lines": 122,
-"chars": 4298,
+"lines": 118,
+"chars": 3972,
 "callers": [
 "0065d470"
 ],
@@ -192000,7 +191971,7 @@
 "name": "FUN_00657850",
 "size": 292,
 "lines": 61,
-"chars": 1680,
+"chars": 1662,
 "callers": [
 "00657830"
 ],
@@ -192020,10 +191991,10 @@
 "in_vtables": []
 },
 "00657980": {
-"name": "FUN_00657980",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 222,
+"chars": 208,
 "callers": [],
 "callees": [
 "006579a0",
@@ -192041,10 +192012,10 @@
 ]
 },
 "006579a0": {
-"name": "FUN_006579a0",
+"name": "~C_LabelControl",
 "size": 331,
-"lines": 63,
-"chars": 1724,
+"lines": 101,
+"chars": 3402,
 "callers": [
 "00657980"
 ],
@@ -192068,8 +192039,8 @@
 "00657af0": {
 "name": "FUN_00657af0",
 "size": 175,
-"lines": 73,
-"chars": 2553,
+"lines": 44,
+"chars": 1348,
 "callers": [
 "006574d0",
 "00657dd0",
@@ -192130,8 +192101,8 @@
 "00657c00": {
 "name": "FUN_00657c00",
 "size": 412,
-"lines": 72,
-"chars": 2251,
+"lines": 76,
+"chars": 2369,
 "callers": [],
 "callees": [
 "006571a0",
@@ -192169,8 +192140,8 @@
 "00657dd0": {
 "name": "FUN_00657dd0",
 "size": 657,
-"lines": 109,
-"chars": 3982,
+"lines": 102,
+"chars": 3558,
 "callers": [
 "00658a90",
 "0065a620",
@@ -192234,7 +192205,7 @@
 "name": "FUN_00658090",
 "size": 289,
 "lines": 60,
-"chars": 1602,
+"chars": 1590,
 "callers": [
 "00658070"
 ],
@@ -192341,8 +192312,8 @@
 "006583d0": {
 "name": "FUN_006583d0",
 "size": 165,
-"lines": 57,
-"chars": 1457,
+"lines": 58,
+"chars": 1460,
 "callers": [],
 "callees": [
 "0065d060"
@@ -192398,7 +192369,7 @@
 "name": "FUN_00658620",
 "size": 89,
 "lines": 25,
-"chars": 564,
+"chars": 582,
 "callers": [],
 "callees": [
 "0065d270"
@@ -192458,8 +192429,8 @@
 "00658a90": {
 "name": "FUN_00658a90",
 "size": 946,
-"lines": 134,
-"chars": 4782,
+"lines": 136,
+"chars": 4833,
 "callers": [
 "0065d470",
 "00661780"
@@ -192507,7 +192478,7 @@
 "name": "FUN_00658e50",
 "size": 161,
 "lines": 40,
-"chars": 1629,
+"chars": 1053,
 "callers": [
 "00658a90",
 "0065d470"
@@ -192523,10 +192494,10 @@
 "in_vtables": []
 },
 "00658f00": {
-"name": "FUN_00658f00",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 213,
+"chars": 208,
 "callers": [],
 "callees": [
 "00658f20",
@@ -192544,10 +192515,10 @@
 ]
 },
 "00658f20": {
-"name": "FUN_00658f20",
+"name": "~C_ControlGroup",
 "size": 464,
 "lines": 75,
-"chars": 2159,
+"chars": 2170,
 "callers": [
 "00658f00",
 "00806110",
@@ -192604,8 +192575,8 @@
 "00659110": {
 "name": "FUN_00659110",
 "size": 431,
-"lines": 73,
-"chars": 2547,
+"lines": 71,
+"chars": 2020,
 "callers": [
 "006590f0"
 ],
@@ -192696,8 +192667,8 @@
 "00659480": {
 "name": "FUN_00659480",
 "size": 1226,
-"lines": 215,
-"chars": 7412,
+"lines": 217,
+"chars": 7474,
 "callers": [],
 "callees": [
 "004050e0",
@@ -193071,7 +193042,7 @@
 "name": "FUN_0065a620",
 "size": 545,
 "lines": 103,
-"chars": 3246,
+"chars": 3206,
 "callers": [
 "0065d470"
 ],
@@ -193114,8 +193085,8 @@
 "0065a850": {
 "name": "FUN_0065a850",
 "size": 1113,
-"lines": 191,
-"chars": 6629,
+"lines": 193,
+"chars": 6637,
 "callers": [],
 "callees": [
 "004050e0",
@@ -193353,7 +193324,7 @@
 "name": "FUN_0065afd0",
 "size": 32,
 "lines": 11,
-"chars": 204,
+"chars": 222,
 "callers": [],
 "callees": [
 "0065d270"
@@ -193373,7 +193344,7 @@
 "name": "FUN_0065aff0",
 "size": 48,
 "lines": 16,
-"chars": 308,
+"chars": 335,
 "callers": [],
 "callees": [
 "00644120",
@@ -193431,7 +193402,7 @@
 "name": "FUN_0065b070",
 "size": 46,
 "lines": 15,
-"chars": 308,
+"chars": 350,
 "callers": [],
 "callees": [
 "00643f10",
@@ -193509,7 +193480,7 @@
 "name": "FUN_0065b350",
 "size": 91,
 "lines": 15,
-"chars": 556,
+"chars": 561,
 "callers": [],
 "callees": [
 "0065d270"
@@ -193529,7 +193500,7 @@
 "name": "FUN_0065b3b0",
 "size": 90,
 "lines": 17,
-"chars": 563,
+"chars": 568,
 "callers": [],
 "callees": [
 "0065d270",
@@ -193588,7 +193559,7 @@
 "name": "FUN_0065b470",
 "size": 368,
 "lines": 72,
-"chars": 2210,
+"chars": 2243,
 "callers": [],
 "callees": [
 "00405100",
@@ -193643,8 +193614,8 @@
 "0065b750": {
 "name": "FUN_0065b750",
 "size": 2159,
-"lines": 417,
-"chars": 14556,
+"lines": 425,
+"chars": 15387,
 "callers": [],
 "callees": [
 "00615a90",
@@ -193710,8 +193681,8 @@
 "0065c160": {
 "name": "FUN_0065c160",
 "size": 214,
-"lines": 34,
-"chars": 1130,
+"lines": 36,
+"chars": 1241,
 "callers": [],
 "callees": [
 "00643ca0",
@@ -193733,8 +193704,8 @@
 "0065c240": {
 "name": "FUN_0065c240",
 "size": 504,
-"lines": 97,
-"chars": 2596,
+"lines": 96,
+"chars": 2636,
 "callers": [],
 "callees": [
 "006157d0",
@@ -193765,8 +193736,8 @@
 "0065c440": {
 "name": "FUN_0065c440",
 "size": 491,
-"lines": 96,
-"chars": 2576,
+"lines": 95,
+"chars": 2616,
 "callers": [],
 "callees": [
 "006157d0",
@@ -193798,7 +193769,7 @@
 "name": "FUN_0065c630",
 "size": 95,
 "lines": 20,
-"chars": 530,
+"chars": 551,
 "callers": [],
 "callees": [
 "006440e0",
@@ -193839,7 +193810,7 @@
 "name": "FUN_0065c6a0",
 "size": 24,
 "lines": 9,
-"chars": 157,
+"chars": 174,
 "callers": [],
 "callees": [
 "00644120",
@@ -193857,10 +193828,10 @@
 ]
 },
 "0065c6c0": {
-"name": "FUN_0065c6c0",
+"name": "Refresh",
 "size": 22,
 "lines": 13,
-"chars": 392,
+"chars": 372,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -193875,10 +193846,10 @@
 ]
 },
 "0065c6e0": {
-"name": "FUN_0065c6e0",
+"name": "Create",
 "size": 134,
-"lines": 33,
-"chars": 1111,
+"lines": 25,
+"chars": 713,
 "callers": [
 "006574d0",
 "0065d470"
@@ -193899,10 +193870,10 @@
 ]
 },
 "0065c770": {
-"name": "FUN_0065c770",
+"name": "HandleMessage",
 "size": 89,
-"lines": 26,
-"chars": 820,
+"lines": 24,
+"chars": 673,
 "callers": [],
 "callees": [
 "00644830",
@@ -193921,10 +193892,10 @@
 ]
 },
 "0065c7d0": {
-"name": "FUN_0065c7d0",
+"name": "Refresh",
 "size": 22,
 "lines": 13,
-"chars": 386,
+"chars": 379,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -193939,10 +193910,10 @@
 ]
 },
 "0065c7f0": {
-"name": "thunk_FUN_00662160",
+"name": "Create",
 "size": 5,
-"lines": 88,
-"chars": 2581,
+"lines": 83,
+"chars": 2405,
 "callers": [
 "0065d470"
 ],
@@ -193967,10 +193938,10 @@
 ]
 },
 "0065c800": {
-"name": "FUN_0065c800",
+"name": "HandleMessage",
 "size": 402,
-"lines": 83,
-"chars": 2572,
+"lines": 77,
+"chars": 2443,
 "callers": [],
 "callees": [
 "00644830",
@@ -193996,10 +193967,10 @@
 ]
 },
 "0065c9a0": {
-"name": "FUN_0065c9a0",
+"name": "C_TitleControl::Create",
 "size": 144,
-"lines": 33,
-"chars": 1134,
+"lines": 27,
+"chars": 918,
 "callers": [
 "0064db20",
 "0064f020",
@@ -194066,10 +194037,10 @@
 ]
 },
 "0065ca80": {
-"name": "FUN_0065ca80",
+"name": "Show",
 "size": 43,
 "lines": 11,
-"chars": 287,
+"chars": 261,
 "callers": [],
 "callees": [
 "0065d270"
@@ -194282,10 +194253,10 @@
 ]
 },
 "0065cab0": {
-"name": "FUN_0065cab0",
+"name": "Hide",
 "size": 43,
 "lines": 11,
-"chars": 285,
+"chars": 259,
 "callers": [],
 "callees": [
 "0065d270"
@@ -194504,10 +194475,10 @@
 "in_vtables": []
 },
 "0065cb50": {
-"name": "FUN_0065cb50",
+"name": "FindChild",
 "size": 200,
-"lines": 40,
-"chars": 1160,
+"lines": 39,
+"chars": 1105,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -194674,10 +194645,10 @@
 ]
 },
 "0065cc20": {
-"name": "FUN_0065cc20",
+"name": "CallCallbacks",
 "size": 148,
-"lines": 33,
-"chars": 1035,
+"lines": 28,
+"chars": 797,
 "callers": [
 "0065d270"
 ],
@@ -194689,10 +194660,10 @@
 "in_vtables": []
 },
 "0065ccc0": {
-"name": "FUN_0065ccc0",
+"name": "RemoveCallback",
 "size": 281,
-"lines": 79,
-"chars": 2212,
+"lines": 67,
+"chars": 1901,
 "callers": [
 "0065d060"
 ],
@@ -194704,10 +194675,10 @@
 "in_vtables": []
 },
 "0065cde0": {
-"name": "FUN_0065cde0",
+"name": "AddCallback",
 "size": 618,
-"lines": 88,
-"chars": 2555,
+"lines": 86,
+"chars": 2383,
 "callers": [
 "0065d060"
 ],
@@ -194727,10 +194698,10 @@
 "in_vtables": []
 },
 "0065d050": {
-"name": "empty_function_65d050",
+"name": "SetStrings",
 "size": 3,
 "lines": 7,
-"chars": 74,
+"chars": 93,
 "callers": [
 "0065d470"
 ],
@@ -194927,10 +194898,10 @@
 ]
 },
 "0065d060": {
-"name": "FUN_0065d060",
+"name": "HandleMessage",
 "size": 399,
 "lines": 114,
-"chars": 3271,
+"chars": 2806,
 "callers": [
 "0064eac0",
 "0064f300",
@@ -194984,10 +194955,10 @@
 ]
 },
 "0065d220": {
-"name": "FUN_0065d220",
+"name": "HandleMessages",
 "size": 74,
-"lines": 26,
-"chars": 577,
+"lines": 20,
+"chars": 435,
 "callers": [
 "0065d470",
 "00668520"
@@ -195185,10 +195156,10 @@
 ]
 },
 "0065d270": {
-"name": "FUN_0065d270",
+"name": "Notify",
 "size": 511,
-"lines": 100,
-"chars": 2808,
+"lines": 99,
+"chars": 2741,
 "callers": [
 "0064dd80",
 "0064dda0",
@@ -195275,10 +195246,10 @@
 "in_vtables": []
 },
 "0065d470": {
-"name": "FUN_0065d470",
+"name": "CreateChild",
 "size": 3831,
-"lines": 695,
-"chars": 24649,
+"lines": 741,
+"chars": 26074,
 "callers": [
 "00656230",
 "00661bc0",
@@ -195293,6 +195264,7 @@
 "0064f4e0",
 "0064fda0",
 "00650a50",
+"00650d20",
 "00651540",
 "00651810",
 "006521f0",
@@ -195314,8 +195286,8 @@
 "0065b0a0",
 "0065c040",
 "0065c6e0",
+"0065c7f0",
 "0065c9a0",
-"0065d050",
 "0065d220",
 "0065e760",
 "0065ea60",
@@ -195430,10 +195402,10 @@
 "in_vtables": []
 },
 "0065e410": {
-"name": "FUN_0065e410",
+"name": "IsChild",
 "size": 46,
-"lines": 20,
-"chars": 411,
+"lines": 13,
+"chars": 259,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -195448,10 +195420,10 @@
 ]
 },
 "0065e440": {
-"name": "FUN_0065e440",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 213,
+"chars": 205,
 "callers": [],
 "callees": [
 "0065e460",
@@ -195469,10 +195441,10 @@
 ]
 },
 "0065e460": {
-"name": "FUN_0065e460",
+"name": "~C_FrameSwitch",
 "size": 401,
 "lines": 103,
-"chars": 3384,
+"chars": 3390,
 "callers": [
 "0065e440"
 ],
@@ -195544,8 +195516,8 @@
 "0065e760": {
 "name": "FUN_0065e760",
 "size": 221,
-"lines": 63,
-"chars": 1667,
+"lines": 62,
+"chars": 1648,
 "callers": [
 "0065d470"
 ],
@@ -195619,8 +195591,8 @@
 "0065ea60": {
 "name": "FUN_0065ea60",
 "size": 219,
-"lines": 47,
-"chars": 1269,
+"lines": 62,
+"chars": 1785,
 "callers": [
 "0065d470"
 ],
@@ -195791,7 +195763,7 @@
 "name": "FUN_0065f000",
 "size": 432,
 "lines": 72,
-"chars": 2061,
+"chars": 2068,
 "callers": [
 "0065efe0"
 ],
@@ -195817,8 +195789,8 @@
 "0065f1b0": {
 "name": "FUN_0065f1b0",
 "size": 168,
-"lines": 62,
-"chars": 2184,
+"lines": 43,
+"chars": 1300,
 "callers": [
 "0065d470"
 ],
@@ -195961,7 +195933,7 @@
 "name": "FUN_0065f630",
 "size": 292,
 "lines": 61,
-"chars": 1649,
+"chars": 1631,
 "callers": [
 "0065f610"
 ],
@@ -196026,10 +195998,10 @@
 "in_vtables": []
 },
 "0065f8d0": {
-"name": "FUN_0065f8d0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 213,
+"chars": 193,
 "callers": [],
 "callees": [
 "0065f8f0",
@@ -196047,10 +196019,10 @@
 ]
 },
 "0065f8f0": {
-"name": "FUN_0065f8f0",
+"name": "~C_Tooltip",
 "size": 329,
 "lines": 104,
-"chars": 3499,
+"chars": 3485,
 "callers": [
 "0065f8d0"
 ],
@@ -196075,8 +196047,8 @@
 "0065fa40": {
 "name": "FUN_0065fa40",
 "size": 174,
-"lines": 47,
-"chars": 1254,
+"lines": 46,
+"chars": 1235,
 "callers": [
 "0065d470"
 ],
@@ -196116,7 +196088,7 @@
 "name": "FUN_0065fb10",
 "size": 280,
 "lines": 54,
-"chars": 1437,
+"chars": 1425,
 "callers": [
 "0065faf0"
 ],
@@ -196181,10 +196153,10 @@
 "in_vtables": []
 },
 "0065fd80": {
-"name": "FUN_0065fd80",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 213,
+"chars": 208,
 "callers": [],
 "callees": [
 "0065fda0",
@@ -196202,10 +196174,10 @@
 ]
 },
 "0065fda0": {
-"name": "FUN_0065fda0",
+"name": "~C_PagesControl",
 "size": 331,
 "lines": 101,
-"chars": 3386,
+"chars": 3402,
 "callers": [
 "0065fd80"
 ],
@@ -196227,10 +196199,10 @@
 "in_vtables": []
 },
 "0065fef0": {
-"name": "FUN_0065fef0",
+"name": "~C_PagedTextControl",
 "size": 308,
 "lines": 101,
-"chars": 3342,
+"chars": 3373,
 "callers": [
 "00660030",
 "008063d0"
@@ -196252,10 +196224,10 @@
 "in_vtables": []
 },
 "00660030": {
-"name": "FUN_00660030",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 213,
+"chars": 220,
 "callers": [],
 "callees": [
 "0065fef0",
@@ -196273,10 +196245,10 @@
 ]
 },
 "00660050": {
-"name": "FUN_00660050",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 222,
+"chars": 202,
 "callers": [],
 "callees": [
 "00660070",
@@ -196294,10 +196266,10 @@
 ]
 },
 "00660070": {
-"name": "FUN_00660070",
+"name": "~C_TextButton",
 "size": 306,
-"lines": 59,
-"chars": 1593,
+"lines": 100,
+"chars": 3361,
 "callers": [
 "00660050"
 ],
@@ -196341,8 +196313,8 @@
 "006601d0": {
 "name": "FUN_006601d0",
 "size": 318,
-"lines": 63,
-"chars": 1680,
+"lines": 68,
+"chars": 1909,
 "callers": [
 "006601b0"
 ],
@@ -196387,8 +196359,8 @@
 "00660330": {
 "name": "FUN_00660330",
 "size": 312,
-"lines": 61,
-"chars": 1637,
+"lines": 66,
+"chars": 1846,
 "callers": [
 "00660310"
 ],
@@ -196432,8 +196404,8 @@
 "00660490": {
 "name": "FUN_00660490",
 "size": 300,
-"lines": 61,
-"chars": 2138,
+"lines": 59,
+"chars": 1627,
 "callers": [
 "00660470"
 ],
@@ -196641,7 +196613,7 @@
 "name": "FUN_00660a80",
 "size": 427,
 "lines": 69,
-"chars": 1972,
+"chars": 1980,
 "callers": [
 "00660a60"
 ],
@@ -196688,8 +196660,8 @@
 "00660c50": {
 "name": "FUN_00660c50",
 "size": 427,
-"lines": 66,
-"chars": 1849,
+"lines": 69,
+"chars": 1980,
 "callers": [
 "00660c30"
 ],
@@ -196922,8 +196894,8 @@
 "006613f0": {
 "name": "FUN_006613f0",
 "size": 339,
-"lines": 74,
-"chars": 2242,
+"lines": 76,
+"chars": 2294,
 "callers": [
 "0065d470"
 ],
@@ -196981,7 +196953,7 @@
 "name": "FUN_00661570",
 "size": 427,
 "lines": 69,
-"chars": 1972,
+"chars": 1980,
 "callers": [
 "00661550"
 ],
@@ -197043,8 +197015,8 @@
 "00661780": {
 "name": "FUN_00661780",
 "size": 419,
-"lines": 81,
-"chars": 2926,
+"lines": 82,
+"chars": 2857,
 "callers": [
 "0065d470"
 ],
@@ -197082,8 +197054,8 @@
 "00661930": {
 "name": "FUN_00661930",
 "size": 144,
-"lines": 48,
-"chars": 1505,
+"lines": 50,
+"chars": 1572,
 "callers": [],
 "callees": [
 "0065d060"
@@ -197126,7 +197098,7 @@
 "name": "FUN_00661a10",
 "size": 427,
 "lines": 69,
-"chars": 1972,
+"chars": 1980,
 "callers": [
 "006619f0"
 ],
@@ -197150,10 +197122,10 @@
 "in_vtables": []
 },
 "00661bc0": {
-"name": "FUN_00661bc0",
+"name": "Create",
 "size": 88,
-"lines": 23,
-"chars": 638,
+"lines": 20,
+"chars": 551,
 "callers": [
 "0064db20",
 "0064f020",
@@ -197196,10 +197168,10 @@
 ]
 },
 "00661c20": {
-"name": "FUN_00661c20",
+"name": "SetInactive",
 "size": 10,
 "lines": 8,
-"chars": 133,
+"chars": 121,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -197298,10 +197270,10 @@
 ]
 },
 "00661c30": {
-"name": "FUN_00661c30",
+"name": "Refresh",
 "size": 48,
 "lines": 17,
-"chars": 379,
+"chars": 362,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -197352,10 +197324,10 @@
 ]
 },
 "00661c60": {
-"name": "FUN_00661c60",
+"name": "HandleMessage",
 "size": 476,
-"lines": 89,
-"chars": 2983,
+"lines": 83,
+"chars": 2686,
 "callers": [
 "0064f870",
 "00650b00",
@@ -197393,10 +197365,10 @@
 ]
 },
 "00661e50": {
-"name": "FUN_00661e50",
+"name": "Create",
 "size": 335,
-"lines": 81,
-"chars": 2317,
+"lines": 80,
+"chars": 2221,
 "callers": [
 "0064f4e0",
 "00650a50",
@@ -197428,10 +197400,10 @@
 ]
 },
 "00661fa0": {
-"name": "FUN_00661fa0",
+"name": "Refresh",
 "size": 58,
-"lines": 18,
-"chars": 490,
+"lines": 17,
+"chars": 433,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -197482,10 +197454,10 @@
 ]
 },
 "00661fe0": {
-"name": "FUN_00661fe0",
+"name": "SetInactive",
 "size": 20,
 "lines": 11,
-"chars": 234,
+"chars": 230,
 "callers": [
 "006544c0"
 ],
@@ -197546,10 +197518,10 @@
 ]
 },
 "00662000": {
-"name": "FUN_00662000",
+"name": "HandleMessage",
 "size": 331,
-"lines": 77,
-"chars": 2409,
+"lines": 74,
+"chars": 2281,
 "callers": [
 "0065c800"
 ],
@@ -197575,10 +197547,10 @@
 ]
 },
 "00662160": {
-"name": "FUN_00662160",
+"name": "Create",
 "size": 399,
-"lines": 87,
-"chars": 2546,
+"lines": 84,
+"chars": 2397,
 "callers": [
 "0065c7f0"
 ],
@@ -197606,10 +197578,10 @@
 ]
 },
 "006622f0": {
-"name": "FUN_006622f0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 213,
+"chars": 208,
 "callers": [],
 "callees": [
 "00662310",
@@ -197627,10 +197599,10 @@
 ]
 },
 "00662310": {
-"name": "FUN_00662310",
+"name": "~C_PagedTextBox",
 "size": 256,
 "lines": 74,
-"chars": 2256,
+"chars": 2246,
 "callers": [
 "006622f0"
 ],
@@ -197685,10 +197657,10 @@
 "in_vtables": []
 },
 "00662450": {
-"name": "FUN_00662450",
+"name": "Refresh",
 "size": 58,
 "lines": 18,
-"chars": 490,
+"chars": 498,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -197703,10 +197675,10 @@
 ]
 },
 "00662490": {
-"name": "FUN_00662490",
+"name": "SetInactive",
 "size": 20,
 "lines": 11,
-"chars": 227,
+"chars": 243,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -197757,8 +197729,8 @@
 "006624d0": {
 "name": "FUN_006624d0",
 "size": 48,
-"lines": 14,
-"chars": 374,
+"lines": 13,
+"chars": 337,
 "callers": [
 "0065aec0",
 "0065b0a0",
@@ -197783,7 +197755,7 @@
 "name": "FUN_00662500",
 "size": 22,
 "lines": 11,
-"chars": 236,
+"chars": 249,
 "callers": [],
 "callees": [
 "00644280"
@@ -197814,8 +197786,8 @@
 "00662520": {
 "name": "FUN_00662520",
 "size": 369,
-"lines": 84,
-"chars": 2675,
+"lines": 89,
+"chars": 2773,
 "callers": [
 "0065af50",
 "0065b1b0",
@@ -197845,7 +197817,7 @@
 "name": "FUN_006626a0",
 "size": 259,
 "lines": 86,
-"chars": 2389,
+"chars": 2397,
 "callers": [
 "006627b0"
 ],
@@ -197865,8 +197837,8 @@
 "006627b0": {
 "name": "FUN_006627b0",
 "size": 680,
-"lines": 153,
-"chars": 5256,
+"lines": 154,
+"chars": 5364,
 "callers": [],
 "callees": [
 "00405100",
@@ -197938,7 +197910,7 @@
 "name": "FUN_00662a90",
 "size": 20,
 "lines": 8,
-"chars": 114,
+"chars": 119,
 "callers": [
 "0065aff0",
 "0065b3b0",
@@ -197992,7 +197964,7 @@
 "name": "FUN_00662ba0",
 "size": 255,
 "lines": 64,
-"chars": 1526,
+"chars": 1544,
 "callers": [
 "0065b070",
 "0065b470"
@@ -198026,7 +197998,7 @@
 "name": "FUN_00662ca0",
 "size": 60,
 "lines": 17,
-"chars": 349,
+"chars": 353,
 "callers": [
 "0065b5e0"
 ],
@@ -198056,8 +198028,8 @@
 "00662ce0": {
 "name": "FUN_00662ce0",
 "size": 388,
-"lines": 94,
-"chars": 2980,
+"lines": 105,
+"chars": 3378,
 "callers": [],
 "callees": [
 "00643c20",
@@ -198118,7 +198090,7 @@
 "name": "FUN_006630a0",
 "size": 49,
 "lines": 15,
-"chars": 340,
+"chars": 301,
 "callers": [
 "0065d470",
 "00663880"
@@ -198140,8 +198112,8 @@
 "006630e0": {
 "name": "FUN_006630e0",
 "size": 163,
-"lines": 41,
-"chars": 1418,
+"lines": 42,
+"chars": 1421,
 "callers": [
 "00663700"
 ],
@@ -198192,8 +198164,8 @@
 "00663700": {
 "name": "FUN_00663700",
 "size": 235,
-"lines": 52,
-"chars": 1457,
+"lines": 54,
+"chars": 1512,
 "callers": [],
 "callees": [
 "00405180",
@@ -198214,8 +198186,8 @@
 "00663880": {
 "name": "FUN_00663880",
 "size": 516,
-"lines": 94,
-"chars": 3308,
+"lines": 92,
+"chars": 3252,
 "callers": [
 "0065d470"
 ],
@@ -198609,10 +198581,10 @@
 "in_vtables": []
 },
 "00664300": {
-"name": "FUN_00664300",
+"name": "Create",
 "size": 349,
-"lines": 52,
-"chars": 2347,
+"lines": 50,
+"chars": 2221,
 "callers": [
 "0064f4e0",
 "0064fda0",
@@ -198640,10 +198612,10 @@
 ]
 },
 "00664460": {
-"name": "FUN_00664460",
+"name": "OnEnter",
 "size": 85,
 "lines": 16,
-"chars": 523,
+"chars": 504,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -198658,10 +198630,10 @@
 ]
 },
 "006644c0": {
-"name": "FUN_006644c0",
+"name": "OnKeyClick",
 "size": 20,
 "lines": 8,
-"chars": 108,
+"chars": 138,
 "callers": [],
 "callees": [
 "0065d270"
@@ -198678,10 +198650,10 @@
 ]
 },
 "006644e0": {
-"name": "FUN_006644e0",
+"name": "OnLeave",
 "size": 83,
 "lines": 16,
-"chars": 531,
+"chars": 512,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -198696,10 +198668,10 @@
 ]
 },
 "00664540": {
-"name": "FUN_00664540",
+"name": "SetInactive",
 "size": 80,
 "lines": 14,
-"chars": 516,
+"chars": 497,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -198714,10 +198686,10 @@
 ]
 },
 "00664590": {
-"name": "FUN_00664590",
+"name": "OnPress",
 "size": 41,
 "lines": 12,
-"chars": 265,
+"chars": 223,
 "callers": [],
 "callees": [
 "0065d270"
@@ -198734,10 +198706,10 @@
 ]
 },
 "006645c0": {
-"name": "FUN_006645c0",
+"name": "OnRelease",
 "size": 12,
 "lines": 8,
-"chars": 115,
+"chars": 107,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -198752,10 +198724,10 @@
 ]
 },
 "006645d0": {
-"name": "FUN_006645d0",
+"name": "Tick",
 "size": 82,
 "lines": 19,
-"chars": 419,
+"chars": 424,
 "callers": [],
 "callees": [
 "0065d270",
@@ -198794,7 +198766,7 @@
 "name": "FUN_00664680",
 "size": 320,
 "lines": 47,
-"chars": 2063,
+"chars": 2042,
 "callers": [
 "0065d470",
 "00664eb0"
@@ -198824,7 +198796,7 @@
 "name": "FUN_006647c0",
 "size": 73,
 "lines": 14,
-"chars": 421,
+"chars": 439,
 "callers": [],
 "callees": [
 "0065d270"
@@ -198844,7 +198816,7 @@
 "name": "FUN_00664810",
 "size": 66,
 "lines": 12,
-"chars": 376,
+"chars": 394,
 "callers": [],
 "callees": [
 "0065d270"
@@ -198864,7 +198836,7 @@
 "name": "FUN_00664860",
 "size": 35,
 "lines": 13,
-"chars": 223,
+"chars": 241,
 "callers": [],
 "callees": [
 "0065d270",
@@ -198906,7 +198878,7 @@
 "00664ac0": {
 "name": "FUN_00664ac0",
 "size": 79,
-"lines": 26,
+"lines": 28,
 "chars": 772,
 "callers": [],
 "callees": [
@@ -199026,7 +198998,7 @@
 "name": "FUN_00664eb0",
 "size": 1137,
 "lines": 164,
-"chars": 6097,
+"chars": 5889,
 "callers": [
 "00657dd0",
 "0065d470"
@@ -199069,8 +199041,8 @@
 "00665330": {
 "name": "FUN_00665330",
 "size": 881,
-"lines": 191,
-"chars": 5887,
+"lines": 199,
+"chars": 6092,
 "callers": [],
 "callees": [
 "006157d0",
@@ -199178,7 +199150,7 @@
 "name": "FUN_00665890",
 "size": 340,
 "lines": 60,
-"chars": 1705,
+"chars": 1710,
 "callers": [
 "006659f0",
 "00665ce0"
@@ -199352,8 +199324,8 @@
 "00665d70": {
 "name": "FUN_00665d70",
 "size": 537,
-"lines": 64,
-"chars": 3692,
+"lines": 67,
+"chars": 3743,
 "callers": [
 "006666f0"
 ],
@@ -199382,8 +199354,8 @@
 "00665f90": {
 "name": "FUN_00665f90",
 "size": 1630,
-"lines": 290,
-"chars": 10344,
+"lines": 293,
+"chars": 10439,
 "callers": [],
 "callees": [
 "004050e0",
@@ -199422,7 +199394,7 @@
 "name": "FUN_00666650",
 "size": 147,
 "lines": 33,
-"chars": 902,
+"chars": 913,
 "callers": [
 "006666f0"
 ],
@@ -199439,8 +199411,8 @@
 "006666f0": {
 "name": "FUN_006666f0",
 "size": 982,
-"lines": 184,
-"chars": 6011,
+"lines": 183,
+"chars": 5957,
 "callers": [
 "0065d470"
 ],
@@ -199482,8 +199454,8 @@
 "00666ad0": {
 "name": "FUN_00666ad0",
 "size": 168,
-"lines": 46,
-"chars": 1227,
+"lines": 45,
+"chars": 1208,
 "callers": [
 "006666f0"
 ],
@@ -199522,7 +199494,7 @@
 "name": "FUN_00666ba0",
 "size": 321,
 "lines": 72,
-"chars": 2027,
+"chars": 2029,
 "callers": [
 "00666b80"
 ],
@@ -199564,8 +199536,8 @@
 "00666e80": {
 "name": "FUN_00666e80",
 "size": 1650,
-"lines": 324,
-"chars": 9821,
+"lines": 328,
+"chars": 9935,
 "callers": [],
 "callees": [
 "00615a90",
@@ -199778,8 +199750,8 @@
 "00668140": {
 "name": "FUN_00668140",
 "size": 84,
-"lines": 26,
-"chars": 722,
+"lines": 29,
+"chars": 772,
 "callers": [
 "0065d470"
 ],
@@ -199802,8 +199774,8 @@
 "006681a0": {
 "name": "FUN_006681a0",
 "size": 349,
-"lines": 79,
-"chars": 2359,
+"lines": 82,
+"chars": 2417,
 "callers": [],
 "callees": [
 "00405100",
@@ -199888,8 +199860,8 @@
 "00668420": {
 "name": "FUN_00668420",
 "size": 227,
-"lines": 52,
-"chars": 1395,
+"lines": 54,
+"chars": 1547,
 "callers": [
 "006271e0",
 "0066c4d0",
@@ -199944,7 +199916,7 @@
 "name": "thunk_FUN_0065d220",
 "size": 5,
 "lines": 10,
-"chars": 223,
+"chars": 205,
 "callers": [],
 "callees": [
 "0065d220"
@@ -200028,7 +200000,7 @@
 "name": "FUN_00668700",
 "size": 56,
 "lines": 12,
-"chars": 310,
+"chars": 328,
 "callers": [],
 "callees": [
 "0065d270"
@@ -200060,7 +200032,7 @@
 "name": "FUN_00668740",
 "size": 48,
 "lines": 15,
-"chars": 303,
+"chars": 321,
 "callers": [],
 "callees": [
 "0065d270"
@@ -200092,7 +200064,7 @@
 "name": "FUN_00668770",
 "size": 128,
 "lines": 35,
-"chars": 973,
+"chars": 998,
 "callers": [
 "00668a90"
 ],
@@ -200114,8 +200086,8 @@
 "006687f0": {
 "name": "FUN_006687f0",
 "size": 136,
-"lines": 33,
-"chars": 901,
+"lines": 36,
+"chars": 1002,
 "callers": [],
 "callees": [
 "0065d060"
@@ -200213,7 +200185,7 @@
 "name": "FUN_00668a50",
 "size": 54,
 "lines": 14,
-"chars": 321,
+"chars": 339,
 "callers": [],
 "callees": [
 "0065d270"
@@ -200237,7 +200209,7 @@
 "name": "FUN_00668a90",
 "size": 264,
 "lines": 22,
-"chars": 804,
+"chars": 881,
 "callers": [
 "0066c4d0"
 ],
@@ -200269,7 +200241,7 @@
 "name": "FUN_00668ba0",
 "size": 1066,
 "lines": 186,
-"chars": 5488,
+"chars": 5554,
 "callers": [
 "0066da80"
 ],
@@ -200292,7 +200264,7 @@
 "name": "FUN_00668fd0",
 "size": 956,
 "lines": 162,
-"chars": 4456,
+"chars": 4522,
 "callers": [
 "0066daa0"
 ],
@@ -200384,7 +200356,7 @@
 "name": "FUN_006696a0",
 "size": 529,
 "lines": 118,
-"chars": 3037,
+"chars": 3055,
 "callers": [
 "00668a90"
 ],
@@ -200411,7 +200383,7 @@
 "name": "FUN_006698c0",
 "size": 395,
 "lines": 68,
-"chars": 2372,
+"chars": 2384,
 "callers": [
 "00675c80"
 ],
@@ -200510,7 +200482,7 @@
 "name": "FUN_00669c00",
 "size": 649,
 "lines": 134,
-"chars": 4647,
+"chars": 4671,
 "callers": [
 "00691570"
 ],
@@ -201661,7 +201633,7 @@
 "name": "FUN_0066b6e0",
 "size": 1184,
 "lines": 225,
-"chars": 7413,
+"chars": 7419,
 "callers": [],
 "callees": [
 "00405100",
@@ -202107,7 +202079,7 @@
 "name": "FUN_0066cc50",
 "size": 3386,
 "lines": 571,
-"chars": 18814,
+"chars": 18884,
 "callers": [
 "00621240",
 "006271e0",
@@ -202440,7 +202412,7 @@
 "name": "FUN_0066e300",
 "size": 234,
 "lines": 49,
-"chars": 1206,
+"chars": 1209,
 "callers": [],
 "callees": [
 "00633370",
@@ -203487,8 +203459,8 @@
 "0066f200": {
 "name": "FUN_0066f200",
 "size": 6476,
-"lines": 890,
-"chars": 32907,
+"lines": 864,
+"chars": 32362,
 "callers": [
 "00674860",
 "00684690"
@@ -203725,7 +203697,7 @@
 "name": "FUN_00671010",
 "size": 578,
 "lines": 105,
-"chars": 3289,
+"chars": 3313,
 "callers": [
 "006766b0",
 "00677490",
@@ -203947,7 +203919,7 @@
 "name": "FUN_00671ac0",
 "size": 1180,
 "lines": 216,
-"chars": 6341,
+"chars": 6377,
 "callers": [
 "0066f200",
 "006713c0",
@@ -203971,7 +203943,7 @@
 "name": "FUN_00671f60",
 "size": 965,
 "lines": 199,
-"chars": 5827,
+"chars": 5875,
 "callers": [
 "00672580"
 ],
@@ -204000,7 +203972,7 @@
 "name": "FUN_00672330",
 "size": 587,
 "lines": 93,
-"chars": 2790,
+"chars": 2832,
 "callers": [
 "00672580"
 ],
@@ -204161,7 +204133,7 @@
 "name": "FUN_00672a30",
 "size": 1345,
 "lines": 213,
-"chars": 7932,
+"chars": 7998,
 "callers": [],
 "callees": [
 "004050e0",
@@ -204777,7 +204749,7 @@
 "name": "FUN_006740d0",
 "size": 1345,
 "lines": 286,
-"chars": 8413,
+"chars": 8449,
 "callers": [],
 "callees": [
 "004050e0",
@@ -204890,7 +204862,7 @@
 "name": "FUN_00674d60",
 "size": 2151,
 "lines": 292,
-"chars": 10267,
+"chars": 10375,
 "callers": [
 "006755f0",
 "00675c80",
@@ -204940,8 +204912,8 @@
 "006755f0": {
 "name": "FUN_006755f0",
 "size": 763,
-"lines": 129,
-"chars": 3599,
+"lines": 131,
+"chars": 3706,
 "callers": [],
 "callees": [
 "004050e0",
@@ -204968,7 +204940,7 @@
 "name": "FUN_006758f0",
 "size": 776,
 "lines": 60,
-"chars": 2573,
+"chars": 2754,
 "callers": [
 "00675c80"
 ],
@@ -205149,7 +205121,7 @@
 "name": "FUN_00676230",
 "size": 473,
 "lines": 59,
-"chars": 2173,
+"chars": 2252,
 "callers": [
 "00675c80"
 ],
@@ -205203,7 +205175,7 @@
 "name": "FUN_006764a0",
 "size": 516,
 "lines": 80,
-"chars": 2343,
+"chars": 2424,
 "callers": [
 "00675c80"
 ],
@@ -205255,7 +205227,7 @@
 "name": "FUN_006766b0",
 "size": 2399,
 "lines": 458,
-"chars": 16503,
+"chars": 16477,
 "callers": [
 "00675c80"
 ],
@@ -205755,7 +205727,7 @@
 "name": "FUN_006785b0",
 "size": 2059,
 "lines": 383,
-"chars": 13411,
+"chars": 13447,
 "callers": [
 "00678000"
 ],
@@ -206272,7 +206244,7 @@
 "name": "FUN_0067aa70",
 "size": 1528,
 "lines": 211,
-"chars": 7940,
+"chars": 7883,
 "callers": [
 "00684b90"
 ],
@@ -206312,7 +206284,7 @@
 "name": "FUN_0067b070",
 "size": 2239,
 "lines": 372,
-"chars": 14055,
+"chars": 13996,
 "callers": [],
 "callees": [
 "004050e0",
@@ -206394,7 +206366,7 @@
 "name": "FUN_0067b9e0",
 "size": 530,
 "lines": 84,
-"chars": 2557,
+"chars": 2575,
 "callers": [
 "0067b950"
 ],
@@ -206436,7 +206408,7 @@
 "name": "FUN_0067bd60",
 "size": 730,
 "lines": 142,
-"chars": 5201,
+"chars": 5213,
 "callers": [
 "0067c040",
 "0067c060",
@@ -206581,7 +206553,7 @@
 "name": "FUN_0067c150",
 "size": 572,
 "lines": 71,
-"chars": 2410,
+"chars": 2446,
 "callers": [
 "00673b80",
 "00677010",
@@ -206603,7 +206575,7 @@
 "name": "FUN_0067c390",
 "size": 469,
 "lines": 90,
-"chars": 2452,
+"chars": 2470,
 "callers": [
 "00685550"
 ],
@@ -206628,8 +206600,8 @@
 "0067c570": {
 "name": "FUN_0067c570",
 "size": 1510,
-"lines": 211,
-"chars": 7738,
+"lines": 210,
+"chars": 7653,
 "callers": [
 "00677010"
 ],
@@ -206670,7 +206642,7 @@
 "name": "FUN_0067cb60",
 "size": 2228,
 "lines": 372,
-"chars": 14136,
+"chars": 14092,
 "callers": [],
 "callees": [
 "004050e0",
@@ -208828,7 +208800,7 @@
 "name": "FUN_0067f850",
 "size": 1116,
 "lines": 233,
-"chars": 7769,
+"chars": 7787,
 "callers": [],
 "callees": [
 "00496e40",
@@ -208953,8 +208925,8 @@
 "006802a0": {
 "name": "FUN_006802a0",
 "size": 1571,
-"lines": 253,
-"chars": 8652,
+"lines": 254,
+"chars": 8765,
 "callers": [
 "006808d0"
 ],
@@ -209057,7 +209029,7 @@
 "name": "FUN_00680980",
 "size": 1152,
 "lines": 128,
-"chars": 4510,
+"chars": 4786,
 "callers": [
 "0067fe00"
 ],
@@ -209116,7 +209088,7 @@
 "name": "FUN_00680ea0",
 "size": 4159,
 "lines": 728,
-"chars": 28749,
+"chars": 28803,
 "callers": [],
 "callees": [
 "004050e0",
@@ -209643,7 +209615,7 @@
 "name": "FUN_00682c80",
 "size": 3102,
 "lines": 407,
-"chars": 14741,
+"chars": 14849,
 "callers": [
 "0067fe00"
 ],
@@ -209724,8 +209696,8 @@
 "006838e0": {
 "name": "FUN_006838e0",
 "size": 3493,
-"lines": 509,
-"chars": 19130,
+"lines": 508,
+"chars": 19163,
 "callers": [
 "00682c80"
 ],
@@ -209871,7 +209843,7 @@
 "name": "FUN_00684df0",
 "size": 461,
 "lines": 78,
-"chars": 2253,
+"chars": 2313,
 "callers": [
 "00682c80"
 ],
@@ -210056,7 +210028,7 @@
 "name": "FUN_00685550",
 "size": 810,
 "lines": 137,
-"chars": 3999,
+"chars": 4035,
 "callers": [
 "00684fd0",
 "00728820"
@@ -210107,7 +210079,7 @@
 "name": "FUN_00685ab0",
 "size": 744,
 "lines": 124,
-"chars": 3821,
+"chars": 3869,
 "callers": [
 "00685550"
 ],
@@ -210135,7 +210107,7 @@
 "name": "FUN_00685da0",
 "size": 1015,
 "lines": 182,
-"chars": 5729,
+"chars": 5771,
 "callers": [
 "00682c80",
 "00685550",
@@ -210198,7 +210170,7 @@
 "name": "FUN_006861d0",
 "size": 487,
 "lines": 73,
-"chars": 1983,
+"chars": 2013,
 "callers": [],
 "callees": [
 "00615a90",
@@ -210217,7 +210189,7 @@
 "name": "FUN_006863c0",
 "size": 1489,
 "lines": 239,
-"chars": 7429,
+"chars": 7513,
 "callers": [
 "00685420",
 "00685ab0",
@@ -210528,8 +210500,8 @@
 "00686e10": {
 "name": "FUN_00686e10",
 "size": 1351,
-"lines": 249,
-"chars": 7977,
+"lines": 251,
+"chars": 8068,
 "callers": [],
 "callees": [
 "004050e0",
@@ -210649,7 +210621,7 @@
 "name": "FUN_00687dd0",
 "size": 375,
 "lines": 87,
-"chars": 2370,
+"chars": 2376,
 "callers": [
 "00682c80"
 ],
@@ -210673,7 +210645,7 @@
 "name": "FUN_00687f50",
 "size": 475,
 "lines": 95,
-"chars": 2869,
+"chars": 2875,
 "callers": [
 "00682c80"
 ],
@@ -211060,7 +211032,7 @@
 "name": "FUN_00688ab0",
 "size": 507,
 "lines": 114,
-"chars": 3161,
+"chars": 3157,
 "callers": [
 "00688330"
 ],
@@ -211100,10 +211072,10 @@
 "in_vtables": []
 },
 "00688cb0": {
-"name": "empty_function_688cb0",
+"name": "UpdateScrollRange",
 "size": 1,
 "lines": 7,
-"chars": 74,
+"chars": 96,
 "callers": [],
 "callees": [],
 "imports": [],
@@ -211118,10 +211090,10 @@
 ]
 },
 "00688cc0": {
-"name": "FUN_00688cc0",
+"name": "ScalarDeletingDestructor",
 "size": 30,
 "lines": 11,
-"chars": 213,
+"chars": 208,
 "callers": [],
 "callees": [
 "00688ce0",
@@ -211139,10 +211111,10 @@
 ]
 },
 "00688ce0": {
-"name": "FUN_00688ce0",
+"name": "~C_VideoTextBox",
 "size": 189,
 "lines": 69,
-"chars": 2247,
+"chars": 2242,
 "callers": [
 "00688cc0"
 ],
@@ -211211,7 +211183,7 @@
 "name": "Update",
 "size": 823,
 "lines": 136,
-"chars": 5195,
+"chars": 5202,
 "callers": [
 "0066f080"
 ],
@@ -211923,7 +211895,7 @@
 "name": "FUN_0068aa00",
 "size": 632,
 "lines": 125,
-"chars": 3142,
+"chars": 3160,
 "callers": [],
 "callees": [
 "00615a90",
@@ -211957,8 +211929,8 @@
 "0068ac80": {
 "name": "FUN_0068ac80",
 "size": 898,
-"lines": 118,
-"chars": 4241,
+"lines": 119,
+"chars": 4255,
 "callers": [
 "0068a750"
 ],
@@ -211993,7 +211965,7 @@
 "name": "FUN_0068b010",
 "size": 403,
 "lines": 32,
-"chars": 1187,
+"chars": 1292,
 "callers": [
 "0068a750"
 ],
@@ -212035,8 +212007,8 @@
 "0068b1c0": {
 "name": "FUN_0068b1c0",
 "size": 2793,
-"lines": 483,
-"chars": 15162,
+"lines": 487,
+"chars": 15402,
 "callers": [
 "0068ac80"
 ],
@@ -212072,7 +212044,7 @@
 "name": "FUN_0068bce0",
 "size": 611,
 "lines": 123,
-"chars": 3713,
+"chars": 3725,
 "callers": [
 "0068b010"
 ],
@@ -212419,8 +212391,8 @@
 "0068c3e0": {
 "name": "FUN_0068c3e0",
 "size": 260,
-"lines": 37,
-"chars": 1199,
+"lines": 41,
+"chars": 1356,
 "callers": [
 "0068c0d0"
 ],
@@ -212810,7 +212782,7 @@
 "name": "FUN_0068d0f0",
 "size": 1044,
 "lines": 194,
-"chars": 5963,
+"chars": 5981,
 "callers": [],
 "callees": [
 "00615a90",
@@ -212895,8 +212867,8 @@
 "0068d8b0": {
 "name": "FUN_0068d8b0",
 "size": 2210,
-"lines": 286,
-"chars": 10290,
+"lines": 285,
+"chars": 10253,
 "callers": [
 "0068d5e0"
 ],
@@ -212941,7 +212913,7 @@
 "name": "FUN_0068e160",
 "size": 632,
 "lines": 120,
-"chars": 3577,
+"chars": 3595,
 "callers": [
 "0068d8b0",
 "0068edc0"
@@ -212962,8 +212934,8 @@
 "0068e3e0": {
 "name": "FUN_0068e3e0",
 "size": 2522,
-"lines": 384,
-"chars": 13950,
+"lines": 381,
+"chars": 13482,
 "callers": [
 "0068edc0"
 ],
@@ -213050,7 +213022,7 @@
 "name": "FUN_0068edc0",
 "size": 699,
 "lines": 83,
-"chars": 2713,
+"chars": 2883,
 "callers": [
 "0068d5e0"
 ],
@@ -213088,7 +213060,7 @@
 "name": "FUN_0068f080",
 "size": 1517,
 "lines": 275,
-"chars": 9077,
+"chars": 9131,
 "callers": [
 "0068f6c0"
 ],
@@ -213143,7 +213115,7 @@
 "name": "FUN_0068f6c0",
 "size": 557,
 "lines": 102,
-"chars": 2757,
+"chars": 2775,
 "callers": [
 "0068d5e0"
 ],
@@ -213194,7 +213166,7 @@
 "name": "FUN_0068f9f0",
 "size": 1397,
 "lines": 246,
-"chars": 8597,
+"chars": 8669,
 "callers": [
 "0068d5e0",
 "0068ff70"
@@ -213246,7 +213218,7 @@
 "name": "FUN_00690020",
 "size": 1033,
 "lines": 166,
-"chars": 5668,
+"chars": 5716,
 "callers": [
 "0068f9f0"
 ],
@@ -213269,7 +213241,7 @@
 "name": "FUN_00690430",
 "size": 411,
 "lines": 76,
-"chars": 1955,
+"chars": 1967,
 "callers": [
 "006905d0"
 ],
@@ -213635,7 +213607,7 @@
 "name": "FUN_006910d0",
 "size": 565,
 "lines": 106,
-"chars": 3094,
+"chars": 3112,
 "callers": [
 "00690ef0",
 "00696c90"
@@ -213666,7 +213638,7 @@
 "name": "FUN_00691310",
 "size": 601,
 "lines": 130,
-"chars": 3331,
+"chars": 3337,
 "callers": [],
 "callees": [
 "006157d0",
@@ -213824,7 +213796,7 @@
 "name": "FUN_00691b30",
 "size": 393,
 "lines": 45,
-"chars": 1550,
+"chars": 1629,
 "callers": [
 "00691570"
 ],
@@ -213899,7 +213871,7 @@
 "name": "FUN_00691fa0",
 "size": 340,
 "lines": 28,
-"chars": 1054,
+"chars": 1120,
 "callers": [
 "00691570"
 ],
@@ -213929,8 +213901,8 @@
 "00692100": {
 "name": "FUN_00692100",
 "size": 2880,
-"lines": 523,
-"chars": 18540,
+"lines": 520,
+"chars": 18331,
 "callers": [
 "00691fa0"
 ],
@@ -213986,7 +213958,7 @@
 "name": "FUN_00692c40",
 "size": 1760,
 "lines": 275,
-"chars": 9673,
+"chars": 9669,
 "callers": [
 "00691fa0"
 ],
@@ -214042,7 +214014,7 @@
 "name": "FUN_00693320",
 "size": 464,
 "lines": 77,
-"chars": 2189,
+"chars": 2243,
 "callers": [
 "00691fa0"
 ],
@@ -214092,8 +214064,8 @@
 "006934f0": {
 "name": "FUN_006934f0",
 "size": 110,
-"lines": 16,
-"chars": 375,
+"lines": 15,
+"chars": 384,
 "callers": [
 "00691fa0"
 ],
@@ -214114,8 +214086,8 @@
 "00693560": {
 "name": "FUN_00693560",
 "size": 789,
-"lines": 119,
-"chars": 3974,
+"lines": 120,
+"chars": 4089,
 "callers": [
 "00691fa0"
 ],
@@ -214153,7 +214125,7 @@
 "name": "FUN_00693880",
 "size": 462,
 "lines": 44,
-"chars": 1583,
+"chars": 1705,
 "callers": [
 "00691fa0"
 ],
@@ -214210,7 +214182,7 @@
 "name": "FUN_00693ae0",
 "size": 875,
 "lines": 146,
-"chars": 4704,
+"chars": 4710,
 "callers": [
 "00692100",
 "00693560"
@@ -214262,7 +214234,7 @@
 "name": "FUN_00693f00",
 "size": 1717,
 "lines": 262,
-"chars": 9001,
+"chars": 9055,
 "callers": [
 "00692100",
 "00693560"
@@ -214347,7 +214319,7 @@
 "name": "FUN_00694930",
 "size": 656,
 "lines": 99,
-"chars": 2808,
+"chars": 2850,
 "callers": [
 "00691fa0"
 ],
@@ -214369,7 +214341,7 @@
 "name": "FUN_00694bc0",
 "size": 528,
 "lines": 100,
-"chars": 2944,
+"chars": 2950,
 "callers": [
 "00692100",
 "00693560",
@@ -214430,7 +214402,7 @@
 "name": "FUN_00694f30",
 "size": 1902,
 "lines": 297,
-"chars": 11238,
+"chars": 11268,
 "callers": [
 "00693880",
 "00693f00",
@@ -214510,7 +214482,7 @@
 "name": "FUN_00695740",
 "size": 1097,
 "lines": 191,
-"chars": 6013,
+"chars": 6019,
 "callers": [
 "00693880"
 ],
@@ -214646,7 +214618,7 @@
 "name": "FUN_00696140",
 "size": 2284,
 "lines": 317,
-"chars": 10907,
+"chars": 11039,
 "callers": [
 "00694bc0",
 "00694f30",
@@ -214961,7 +214933,7 @@
 "name": "FUN_00697090",
 "size": 997,
 "lines": 187,
-"chars": 5332,
+"chars": 5356,
 "callers": [],
 "callees": [
 "00405100",
@@ -215045,7 +215017,7 @@
 "name": "FUN_006977e0",
 "size": 240,
 "lines": 26,
-"chars": 775,
+"chars": 833,
 "callers": [
 "00697480"
 ],
@@ -215069,7 +215041,7 @@
 "name": "FUN_006978d0",
 "size": 261,
 "lines": 23,
-"chars": 836,
+"chars": 912,
 "callers": [
 "00697480"
 ],
@@ -215095,8 +215067,8 @@
 "006979e0": {
 "name": "FUN_006979e0",
 "size": 828,
-"lines": 147,
-"chars": 4850,
+"lines": 148,
+"chars": 4874,
 "callers": [
 "006978d0"
 ],
@@ -215129,7 +215101,7 @@
 "name": "FUN_00697d20",
 "size": 1281,
 "lines": 181,
-"chars": 5554,
+"chars": 5555,
 "callers": [
 "006978d0"
 ],
@@ -215188,7 +215160,7 @@
 "name": "FUN_00698230",
 "size": 742,
 "lines": 133,
-"chars": 4499,
+"chars": 4439,
 "callers": [
 "00697d20"
 ],
@@ -219053,8 +219025,8 @@
 "006a0db0": {
 "name": "IsUtf8",
 "size": 63,
-"lines": 17,
-"chars": 388,
+"lines": 18,
+"chars": 393,
 "callers": [
 "006a10e0"
 ],
@@ -234255,10 +234227,10 @@
 "in_vtables": []
 },
 "006d1ed0": {
-"name": "FUN_006d1ed0",
+"name": "MissionLoader_Vector4From3",
 "size": 25,
 "lines": 10,
-"chars": 216,
+"chars": 198,
 "callers": [
 "006cdc90"
 ],
@@ -234270,10 +234242,10 @@
 "in_vtables": []
 },
 "006d1ef0": {
-"name": "FUN_006d1ef0",
+"name": "MissionLoader_DeadScene2Reader",
 "size": 5422,
-"lines": 700,
-"chars": 35413,
+"lines": 702,
+"chars": 35620,
 "callers": [],
 "callees": [
 "004050e0",
@@ -239040,8 +239012,8 @@
 "006dceb0": {
 "name": "RunGame",
 "size": 2451,
-"lines": 423,
-"chars": 15650,
+"lines": 424,
+"chars": 15773,
 "callers": [
 "006dd920"
 ],
@@ -242715,10 +242687,10 @@
 ]
 },
 "006e5df0": {
-"name": "FUN_006e5df0",
+"name": "XmlAttr_KeyIs",
 "size": 91,
 "lines": 33,
-"chars": 701,
+"chars": 702,
 "callers": [
 "006e67a0"
 ],
@@ -242735,10 +242707,10 @@
 "in_vtables": []
 },
 "006e5e50": {
-"name": "FUN_006e5e50",
+"name": "C_XmlNode::~C_XmlNode",
 "size": 316,
-"lines": 58,
-"chars": 1668,
+"lines": 60,
+"chars": 2070,
 "callers": [
 "006189f0",
 "00619710",
@@ -242760,10 +242732,10 @@
 "in_vtables": []
 },
 "006e5f90": {
-"name": "FUN_006e5f90",
+"name": "C_XmlNode::ParseContent",
 "size": 464,
-"lines": 121,
-"chars": 3632,
+"lines": 132,
+"chars": 3998,
 "callers": [
 "006e6670"
 ],
@@ -242787,10 +242759,10 @@
 "in_vtables": []
 },
 "006e6160": {
-"name": "FUN_006e6160",
+"name": "C_XmlNode::ParseClose",
 "size": 225,
-"lines": 52,
-"chars": 1311,
+"lines": 51,
+"chars": 1200,
 "callers": [
 "006e5f90"
 ],
@@ -242808,10 +242780,10 @@
 "in_vtables": []
 },
 "006e6250": {
-"name": "FUN_006e6250",
+"name": "C_XmlNode::ParseTag",
 "size": 227,
-"lines": 43,
-"chars": 1146,
+"lines": 41,
+"chars": 1069,
 "callers": [
 "006e6670"
 ],
@@ -242828,10 +242800,10 @@
 "in_vtables": []
 },
 "006e6340": {
-"name": "FUN_006e6340",
+"name": "C_XmlNode::ParseAttributes",
 "size": 816,
-"lines": 155,
-"chars": 5200,
+"lines": 151,
+"chars": 4897,
 "callers": [
 "006e6250"
 ],
@@ -242853,10 +242825,10 @@
 "in_vtables": []
 },
 "006e6670": {
-"name": "FUN_006e6670",
+"name": "C_XmlNode::ParseElement",
 "size": 205,
-"lines": 42,
-"chars": 1216,
+"lines": 52,
+"chars": 1200,
 "callers": [
 "006e5f90",
 "006e68c0"
@@ -242877,10 +242849,10 @@
 "in_vtables": []
 },
 "006e6740": {
-"name": "FUN_006e6740",
+"name": "C_XmlNode::IsNamed",
 "size": 91,
-"lines": 33,
-"chars": 701,
+"lines": 31,
+"chars": 613,
 "callers": [
 "006186e0",
 "006189f0",
@@ -242899,10 +242871,10 @@
 "in_vtables": []
 },
 "006e67a0": {
-"name": "FUN_006e67a0",
+"name": "C_XmlNode::GetAttribute",
 "size": 92,
 "lines": 23,
-"chars": 624,
+"chars": 620,
 "callers": [
 "006186e0",
 "006189f0",
@@ -242920,10 +242892,10 @@
 "in_vtables": []
 },
 "006e6800": {
-"name": "FUN_006e6800",
+"name": "C_XmlNode::Next",
 "size": 131,
-"lines": 37,
-"chars": 1136,
+"lines": 38,
+"chars": 1211,
 "callers": [
 "006186e0",
 "0063eae0",
@@ -242940,10 +242912,10 @@
 "in_vtables": []
 },
 "006e68c0": {
-"name": "FUN_006e68c0",
+"name": "C_XmlNode::Load",
 "size": 197,
 "lines": 40,
-"chars": 924,
+"chars": 854,
 "callers": [
 "006189f0",
 "0063eae0"
@@ -242964,17 +242936,15 @@
 "in_vtables": []
 },
 "006e69a0": {
-"name": "thunk_FUN_006e6800",
+"name": "C_XmlNode::Next_Thunk",
 "size": 5,
-"lines": 37,
-"chars": 1142,
+"lines": 38,
+"chars": 1217,
 "callers": [
 "006189f0",
 "0063eae0"
 ],
-"callees": [
-"006e6800"
-],
+"callees": [],
 "imports": [],
 "strings": [],
 "vtables": [],
@@ -242982,10 +242952,10 @@
 "in_vtables": []
 },
 "006e69b0": {
-"name": "vector_tidy_6e69b0",
+"name": "XmlChildren_Tidy",
 "size": 28,
 "lines": 11,
-"chars": 230,
+"chars": 228,
 "callers": [
 "0080c8be"
 ],
@@ -242999,10 +242969,10 @@
 "in_vtables": []
 },
 "006e69d0": {
-"name": "FUN_006e69d0",
+"name": "XmlAttrs_Insert",
 "size": 372,
-"lines": 62,
-"chars": 1926,
+"lines": 64,
+"chars": 2045,
 "callers": [
 "006e6340"
 ],
@@ -243024,10 +242994,10 @@
 "in_vtables": []
 },
 "006e6b50": {
-"name": "vector_size_e8_6e6b50",
+"name": "XmlAttrs_Size",
 "size": 19,
 "lines": 10,
-"chars": 182,
+"chars": 174,
 "callers": [
 "006e69d0"
 ],
@@ -243039,10 +243009,10 @@
 "in_vtables": []
 },
 "006e6b70": {
-"name": "FUN_006e6b70",
+"name": "XmlAttrs_DestroyRange",
 "size": 33,
 "lines": 10,
-"chars": 171,
+"chars": 180,
 "callers": [
 "00619710",
 "006e5e50",
@@ -243058,12 +243028,11 @@
 "in_vtables": []
 },
 "006e6ba0": {
-"name": "empty_function_6e6ba0",
+"name": "XmlAttrs_Empty",
 "size": 3,
 "lines": 7,
-"chars": 57,
+"chars": 50,
 "callers": [
-"00619710",
 "006e5e50"
 ],
 "callees": [],
@@ -243074,10 +243043,10 @@
 "in_vtables": []
 },
 "006e6bb0": {
-"name": "FUN_006e6bb0",
+"name": "XmlChildren_Insert",
 "size": 517,
 "lines": 116,
-"chars": 3520,
+"chars": 3526,
 "callers": [
 "006e5f90"
 ],
@@ -243092,10 +243061,10 @@
 "in_vtables": []
 },
 "006e6dc0": {
-"name": "FUN_006e6dc0",
+"name": "XmlAttrs_UninitializedCopy",
 "size": 55,
 "lines": 15,
-"chars": 279,
+"chars": 298,
 "callers": [
 "006e69d0"
 ],
@@ -243109,10 +243078,10 @@
 "in_vtables": []
 },
 "006e6e00": {
-"name": "FUN_006e6e00",
+"name": "XmlAttrs_UninitializedFill",
 "size": 40,
 "lines": 11,
-"chars": 200,
+"chars": 219,
 "callers": [
 "006e69d0"
 ],
@@ -243126,10 +243095,10 @@
 "in_vtables": []
 },
 "006e6e30": {
-"name": "FUN_006e6e30",
+"name": "XmlAttrs_CopyRange",
 "size": 114,
-"lines": 37,
-"chars": 955,
+"lines": 38,
+"chars": 962,
 "callers": [
 "00619710",
 "006e5e50"
@@ -243144,10 +243113,10 @@
 "in_vtables": []
 },
 "006e6eb0": {
-"name": "FUN_006e6eb0",
+"name": "XmlAttrs_FillRange",
 "size": 100,
 "lines": 30,
-"chars": 800,
+"chars": 806,
 "callers": [
 "006e69d0"
 ],
@@ -243161,10 +243130,10 @@
 "in_vtables": []
 },
 "006e6f20": {
-"name": "FUN_006e6f20",
+"name": "XmlAttrs_CopyBackward",
 "size": 115,
-"lines": 39,
-"chars": 1002,
+"lines": 40,
+"chars": 1012,
 "callers": [
 "006e69d0"
 ],
@@ -243178,10 +243147,10 @@
 "in_vtables": []
 },
 "006e6fa0": {
-"name": "FUN_006e6fa0",
+"name": "XmlAttr_Construct",
 "size": 32,
 "lines": 21,
-"chars": 401,
+"chars": 406,
 "callers": [
 "006e69d0",
 "006e6dc0",
@@ -243195,10 +243164,10 @@
 "in_vtables": []
 },
 "006e6fc0": {
-"name": "FUN_006e6fc0",
+"name": "XmlAttr_DeletingDtor",
 "size": 30,
 "lines": 11,
-"chars": 176,
+"chars": 184,
 "callers": [
 "00619710",
 "006e5e50"
@@ -250655,7 +250624,7 @@
 "name": "FUN_00722550",
 "size": 1094,
 "lines": 177,
-"chars": 6448,
+"chars": 6432,
 "callers": [
 "00722520"
 ],
@@ -252389,8 +252358,8 @@
 "00726470": {
 "name": "FUN_00726470",
 "size": 3565,
-"lines": 627,
-"chars": 21572,
+"lines": 626,
+"chars": 21495,
 "callers": [
 "00726440"
 ],
@@ -252884,7 +252853,7 @@
 "name": "FUN_00728820",
 "size": 7153,
 "lines": 1085,
-"chars": 39528,
+"chars": 39530,
 "callers": [
 "0072c480"
 ],
@@ -299445,7 +299414,6 @@
 "0063deb0",
 "0063ded0",
 "0063e000",
-"0063e054",
 "0063ee20",
 "0063efd0",
 "0063f030",
@@ -307786,7 +307754,6 @@
 "0063c2f0",
 "0063c9d0",
 "0063e000",
-"0063e054",
 "0063eae0",
 "0063f870",
 "006405c0",
@@ -325412,6 +325379,21 @@
 "globals": [],
 "in_vtables": []
 },
+"007fce1f": {
+"name": "Unwind@007fce1f",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
 "007fce90": {
 "name": "Unwind@007fce90",
 "size": 11,
@@ -325420,6 +325402,36 @@
 "callers": [],
 "callees": [
 "004a0bc0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fcf10": {
+"name": "Unwind@007fcf10",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fcfe1": {
+"name": "Unwind@007fcfe1",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
 ],
 "imports": [],
 "strings": [],
@@ -325472,6 +325484,36 @@
 "globals": [],
 "in_vtables": []
 },
+"007fd03d": {
+"name": "Unwind@007fd03d",
+"size": 11,
+"lines": 10,
+"chars": 147,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd048": {
+"name": "Unwind@007fd048",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
 "007fd063": {
 "name": "Unwind@007fd063",
 "size": 14,
@@ -325502,6 +325544,51 @@
 "globals": [],
 "in_vtables": []
 },
+"007fd0ad": {
+"name": "Unwind@007fd0ad",
+"size": 14,
+"lines": 10,
+"chars": 152,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd0bb": {
+"name": "Unwind@007fd0bb",
+"size": 14,
+"lines": 10,
+"chars": 152,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd0c9": {
+"name": "Unwind@007fd0c9",
+"size": 14,
+"lines": 10,
+"chars": 152,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
 "007fd0f0": {
 "name": "Unwind@007fd0f0",
 "size": 11,
@@ -325525,6 +325612,141 @@
 "callers": [],
 "callees": [
 "004a03d0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd131": {
+"name": "Unwind@007fd131",
+"size": 8,
+"lines": 10,
+"chars": 135,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd191": {
+"name": "Unwind@007fd191",
+"size": 8,
+"lines": 10,
+"chars": 135,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd199": {
+"name": "Unwind@007fd199",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd1e0": {
+"name": "Unwind@007fd1e0",
+"size": 8,
+"lines": 10,
+"chars": 135,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd240": {
+"name": "Unwind@007fd240",
+"size": 8,
+"lines": 10,
+"chars": 135,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd248": {
+"name": "Unwind@007fd248",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd2b0": {
+"name": "Unwind@007fd2b0",
+"size": 11,
+"lines": 10,
+"chars": 147,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd2bb": {
+"name": "Unwind@007fd2bb",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd310": {
+"name": "Unwind@007fd310",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
 ],
 "imports": [],
 "strings": [],
@@ -325600,6 +325822,351 @@
 "callers": [],
 "callees": [
 "007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd395": {
+"name": "Unwind@007fd395",
+"size": 14,
+"lines": 10,
+"chars": 152,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd3a3": {
+"name": "Unwind@007fd3a3",
+"size": 14,
+"lines": 10,
+"chars": 152,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd3b1": {
+"name": "Unwind@007fd3b1",
+"size": 14,
+"lines": 10,
+"chars": 152,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd443": {
+"name": "Unwind@007fd443",
+"size": 11,
+"lines": 10,
+"chars": 147,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd44e": {
+"name": "Unwind@007fd44e",
+"size": 27,
+"lines": 11,
+"chars": 196,
+"callers": [],
+"callees": [
+"007e6471"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd961": {
+"name": "Unwind@007fd961",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"007fd980": {
+"name": "Unwind@007fd980",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804930": {
+"name": "Unwind@00804930",
+"size": 8,
+"lines": 10,
+"chars": 124,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804950": {
+"name": "Unwind@00804950",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804970": {
+"name": "Unwind@00804970",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804990": {
+"name": "Unwind@00804990",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"008049b0": {
+"name": "Unwind@008049b0",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"008049d0": {
+"name": "Unwind@008049d0",
+"size": 8,
+"lines": 10,
+"chars": 124,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"008049f0": {
+"name": "Unwind@008049f0",
+"size": 8,
+"lines": 10,
+"chars": 124,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804a10": {
+"name": "Unwind@00804a10",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804a30": {
+"name": "Unwind@00804a30",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804ab0": {
+"name": "Unwind@00804ab0",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00804cc0": {
+"name": "Unwind@00804cc0",
+"size": 8,
+"lines": 10,
+"chars": 128,
+"callers": [],
+"callees": [
+"0049fea0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"008068c0": {
+"name": "Unwind@008068c0",
+"size": 8,
+"lines": 10,
+"chars": 135,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00808018": {
+"name": "Unwind@00808018",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"00808b00": {
+"name": "Unwind@00808b00",
+"size": 8,
+"lines": 10,
+"chars": 135,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"0080b1b8": {
+"name": "Unwind@0080b1b8",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
+],
+"imports": [],
+"strings": [],
+"vtables": [],
+"globals": [],
+"in_vtables": []
+},
+"0080b511": {
+"name": "Unwind@0080b511",
+"size": 11,
+"lines": 10,
+"chars": 150,
+"callers": [],
+"callees": [
+"0048ecf0"
 ],
 "imports": [],
 "strings": [],

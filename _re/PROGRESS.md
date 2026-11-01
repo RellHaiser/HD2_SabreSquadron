@@ -5768,6 +5768,691 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     39 functions in ported.txt (with the maps' code left from 8f-ii). Stats: 7,837 of 12,294
     functions by hand (72.0 % by size).
 
+  PART 8f-iv DONE (2026-10-31): scene2.bin's objects (src/game/mission_loader.cpp:
+  C_MissionLoader::LoadObject 0x006cdc90, ported from the asm: its decompile times out; its vector
+  copy 0x006d1ed0). 0x006d1ef0 (MissionLoader_DeadScene2Reader, 5.4 KB) is an older reader of a whole
+  scene2.bin: no references (code or data), left in tier 1.
+  - LoadObject (chunk 0x4010): the frame by its name (0x0010; type 0 the scene's, from m_frames;
+    another type a new one unless the name is taken: visual 1 by its 0x4012 type, camera 3 at 80
+    degrees, 2 / 4 / 6 / 8 / 9 / 12 / 14 by CreateFrame, the others none: the object's last frame
+    kept; named, added to the scene, released, in m_frames); 0x0020 / 0x0022 (s, x, y, z) / 0x002D
+    the place, 0x002C the position used when the parent (0x4020's 0x0010) is not named, 0x4033
+    hidden; 0x2012 a model's file (its extension cut; the model cache's copy, its frames named, its
+    shadow; empty: the model out of m_frames and the scene); 0x4036 a camera's field of view and
+    far clip (near 0.1); 0x4040 a light (out of its sectors first; scene version 7 on: the specular
+    and ambient power and colour after the power and colour, the range then the attenuation;
+    before it the range's second value and, unless linear-free and quadratic, (1 / 1.01, 0, 0.01 /
+    1.01); the mode | 0x40 below version 5, | 0x20 below 6; 0x4046 the sector it lights); 0x4050 a
+    dummy's box; 0x4060 a sound (off and not looping first; its type, volumes, cone, ranges, loop,
+    on, file (.wav added without an extension; the sound cache's), sector, area, frequency);
+    0x4080 / 0xB150 an occluder's / an area's mesh (vertices to S_vector4, 0x10 apart; built per
+    faces entry); 0x4090 a visual's type (another takes its place: copied, its parent, children,
+    name, its model's frames or the scene's); 0x40A0 a lightmapped visual's sets (version 3 on; the
+    chunk's file handle); 0x40F0 a projector (range +0x1E4, intensity, colour, mode, buffered,
+    orthogonal, its texture: projected again); 0xB110 six fields of any frame (+0x1E0 / 1E4 / 1EC
+    (int) / 220 / 224 / 240; a lens flare's, inferred); 0xB401 a sector's sound environment (20
+    values, two vectors). The end: placed, its sector (new and unparented), linked, rotated,
+    scaled, hidden, the game's animated models.
+  - Quirks kept: a short entry keeps the last value of its kind read in the object (zero first,
+    the original's stack there); unknown entries inside a camera, a mesh and 0xB110 are not left
+    (the next entries read inside them); a camera's header that does not read is skipped and
+    0xB110's keeps the last id. Fixes: the names as text (not as the format), a model's or a
+    sound's name terminated. Dropped: the copy protection's fog for mission "agtlgf7".
+  - i3d.h: I3D_light's slots by LS3DF's names (SetColorRGB 0x78, SetSpecularColor 0x80,
+    SetAmbientColor 0x84, SetSpecularPower 0x8C, SetAmbientPower 0x90, SetAttenuation 0x9C,
+    SetFogRange 0xA0; GetOwnAttenuation +0x17C; the call sites in human_equipment, interface,
+    loader_screen, shots, vehicle_parts), I3D_sound SetOutVolume (0x88, vehicle_sounds), the frame's
+    Duplicate returns HRESULT, I3D_sector SetEnvironmentParam (0x84), I3D_dummy SetBBox, new
+    I3D_occluder / I3D_area (Build 0x74, the area's AddSound 0x78), FRAME_OCCLUDER / FRAME_AREA,
+    I3D_lmap_visual LoadLightmapSets (0xBC), the lens flare's 0xB110 fields. C_chunk::GetHandle.
+  - Harness: mission_test.inc's MsObjectTest in the camera build ("objects:", 17 checks; the
+    frames, the scene's RemoveFrame / UpdateFrameSector, the driver's CreateFrame / CreateVisual,
+    IGraph's LoadTexture faked and logged; the model and sound caches the harness's; the effects
+    module's CreateShadow real); the 8f-ii / 8f-iii tests on the real reader (their stand-in
+    objects: user frames whose SetName logs). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_8f4.py): the first run caught 224 of 243 (18 survived, 1 did not
+    build); 4 equivalent (see the file's docstring), new cases for 14 (one vertex and one face, a
+    type 1 without a visual type, entries after a hidden, a light's and a sound's chunk, the empty
+    model's reference, a loaded sound reported by Open above 0 and at 0, the area before the sector,
+    the first short values, the projector's texture released); the full rerun caught 237 of 243 (the 4 equivalent, M 1015 del not building, and M 910 cmp: the new entry order hid it; an area's entry naming a sector added, caught). Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
+  - Build: 202 files clean (MSVC). Tier 1: 518 errors in 88 files, 211 stubs (unchanged).
+    ret_audit --src: 52.
+  - Ghidra: names/mission_loader.txt (2 added: the vector copy, the dead reader); 2 functions in
+    ported.txt. Stats: 7,839 of 12,294 functions by hand (72.4 % by size).
+
+  PART 9 PLAN (2026-10-31): the menus (0x00611200..0x006b0000, ~1,990 functions left, 511 KB). The
+  screens are LS3D scenes whose named frames are the controls ("bback", "text_screen",
+  "barrow up*", "listbox*", "slider*"; the layouts are not in the unpacked data); a widget toolkit
+  under them; the menu states over it (C_MenuState 0x00815850 and its screens, already switched
+  to by the game's state machine). Bottom-up, by address:
+  9a the fonts and text (0x0063c740..0x006441a0, 28 KB: FontConfig.hxml, the languages' fonts,
+    the class of vtable 0x00813b0c);
+  9b the controls' base (0x006441a0..0x0064dce0, 35 KB: the code the controls share, the classes
+    of vtables 0x00815420 and 0x008158f8);
+  9c the controls (0x0064dce0..0x0066b010, 109 KB: about 40 classes of 33 slots on one base at
+    0x0064dce0, the 135-slot one 0x00814f58 and the larger 0x00814298 / 0x008144b8 / 0x00814760 /
+    0x00814980 / 0x008155d8: buttons, yes / no boxes, list boxes, sliders, scroll arrows, the
+    skills' and the hotkeys' texts; split by class when started);
+  9d the menu states' base (0x0066b010..0x0066f0b0, 15 KB: C_MenuState, the slots its screens
+    share, the cursor, the confirmation);
+  9e the in-game menu C_GameMenu (vtable 0x00815750; 0x0067b070..0x00688130, 50 KB);
+  9f the equipment menu (C_EquipmentMenu / C_EquipmentMenuBase; 0x0066f0b0..0x0067b070, 46 KB:
+    the body's slots, the item groups, the store);
+  9g the campaign's screens: the squad menu (0x00690be0..0x00697090, 25 KB: HumanStore.def, the
+    medals, the hero stats), the debriefing and the diary (0x0068c520..0x00690be0, 17 KB), the
+    operation's end, the session menu and the movies / credits / subtitles (0x00688130..
+    0x0068c520, 16 KB);
+  9h the main menu C_MainMenu (vtable 0x00815e30; 0x00611200..0x0063c740, 155 KB, its screens by
+    the dispatcher 0x006271e0: the profiles and the saved games 0x00614140 / 0x0061cfc0, the
+    options 0x00623e30, the multiplayer game's set-up and map list 0x00628610 / 0x0062a060, the
+    join and team status 0x0062cd50, the server browser 0x00631c20 / 0x00632150; split by screen);
+  9i the rest (0x00697090..0x006b0000, 15 KB: the leftovers among the ported multiplayer code, the
+    key names' texts).
+
+  PART 9a-i DONE (2026-10-31): the font manager and the texture fonts (src/game/font.*, new; 9a is
+  split: 9a-i these, 9a-ii the GDI fonts and FontConfig.hxml 0x0063c2f0..0x0063ddb0 / 0x0063eae0 /
+  0x0063ee20, 9a-iii the text styles 0x00641fe0..0x006441a0; 9a starts at 0x0063c2f0, not the plan's
+  0x0063c740).
+  - C_FontManager (its object 0x008acbbc, g_fontManager 0x008acbdc; reference counted): Load
+    0x0063e000 (Ghidra had split it at its early RET: 0x0063e054 deleted, the function created
+    again whole): the set by the screen's width (1 below 800, 2 below 1024, else 3), the kind (Ce
+    for Czech / Polish, Japan, else Ansi); SYMBOLS (4) from Text\Fonts\, the Ce set's BIG / SMALL
+    (5 / 6); the eight languages with their own set (Czech, Polish, Italian, French, Spanish,
+    German, English, EnglishUS): its BIG / SMALL (2 / 3); Japanese: FontConfig.hxml ("Japanese"),
+    else GDI fonts (by the set: MS UI Gothic / Lucida Sans Unicode, their sizes), else the set's map
+    fonts; the others: FontConfig.hxml (the language), else the set's. Free 0x0063edd0 (the fonts
+    deleted from the last), AddTextureFont 0x0063f590 / AddMapFont 0x0063f400 (their id the third
+    argument, which Ghidra dropped), FindFont, the acquire and release.
+  - C_Font (vtable 0x00813b2c, abstract; 7 slots: GrowVertices, Flush, ClearVertices, the
+    destructor, Select, GetGlyph, AddQuad); C_TextureFont (0x00813b68: 256 glyphs, the .tbl file
+    whole, 0x1400 bytes; Load 0x00640630, the id wrapper 0x00640600; the quads: two triangles of
+    screen vertices each, the buffer 192 then doubled, Flush a triangle list with the texture);
+    C_MapFont (0x00813b48: std::map<int, S_Glyph>, the .tbl a count then code and glyph; the first
+    of a code kept). text_box.h takes them from font.h.
+  - Quirks kept: a vertex buffer gone with its size kept is not made again; Flush leaves the quads;
+    a map font's entries' reads are not checked (a short file repeats the last values). Fixes: a
+    map font's quads take their glyphs from its table, zero (the original's is not set). Dropped:
+    the 1.0 / 1.1 versions' own font set 0x0063f870 (the version is the constant 1.12).
+  - Unreferenced (no code or data references; left in tier 1): a code page 1250 map font
+    (0x0063f230, 0x00641720, its table of Unicode codes 0x00640f60).
+  - Harness: fonts_test.inc in the camera build ("fonts:", 12 checks; the profile's language and
+    text directory, the version, FontConfig.hxml / the GDI fonts and IGraph faked; the stub
+    profile.h's language methods; car_stubs.cpp's DtaOpenCount). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9a1.py): the first run caught 77 of 93 (16 survived); 8
+    equivalent (see the file's docstring), new cases for 8 (a size of 1, one vertex, the disk
+    first, the files closed, a count without entries, the first font freed); the full rerun caught
+    85 of 93 (the 8 equivalent). Baselines: the world build 0 of 22 in both orders; the item build 0
+    of 37; the other five 0 of 37.
+  - Build: 203 files clean (MSVC). Tier 1: 516 errors in 87 files, 209 stubs (518 / 88 / 211
+    before). ret_audit --src: 52.
+  - Ghidra: names/font.txt (35); 40 functions in ported.txt. Stats: 7,879 of 12,293 functions by
+    hand (72.6 % by size).
+
+  PART 9a-ii DONE (2026-10-31): the menus' XML reader and FontConfig.hxml (src/game/xml_node.*, new;
+  C_FontManager::LoadConfig 0x0063eae0 in font.cpp). 9a split again: 9a-iii the GDI fonts
+  (0x0063c2f0..0x0063ddb0, AddGdiFont 0x0063ee20: a glyph cache in a texture, drawn by GDI), 9a-iv
+  the text styles (0x00641fe0..0x006441a0).
+  - C_XmlNode (0x30 bytes; 0x006e5df0..0x006e6fc0, its vectors' code with 0x0061b410..0x0061be50;
+    the missions' item lists 0x006189f0 use it too, part 9h): Load (at most 1 MB; the file's first
+    element), the tag (a name to a space, '/' or '>'; '<' to '>' 3 .. 255 apart), the attributes
+    (name="value" in their order), the content (children; the text of an element without children,
+    from the content's start; comments <!-- --> skipped, an empty one 4 apart), the closing tag (at
+    most 100; its name the element's), IsNamed, GetAttribute, Next (the walk: the node, then its
+    elements in document order, each node keeping its place).
+  - LoadConfig: <FONTCONFIG>, the LANGUAGE named for the language (any case), its SET of the
+    screen's resolution (640x480, 800x600, 1024x768 by the width), its FONT entries (id FONT_BIG /
+    FONT_SMALL, name, size, bold "true", texture_height: AddGdiFont, the texture 512 wide).
+  - Quirks kept: a value's closing quote looked for past its first character (an empty value
+    breaks the tag); a child's closing tag is scanned through, not left; the text of an element
+    taken from its content's start (a comment before it in it); the walk's state in the nodes;
+    LoadConfig true once the set is found, whatever its fonts do, false at a font missing a value.
+    Fixes: an element's text kept in the original's 4 KB buffer; a LANGUAGE without a name or a SET
+    without a resolution skipped (the original compares through null); control characters taken
+    as unsigned by isspace.
+  - Harness: fonts_test.inc's "xml:" line in the camera build (11 checks); the 9a-i font tests on
+    real FontConfig.hxml files. 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9a2.py): the first run caught 108 of 136 (17 survived, 11 pointer
+    arithmetics did not build); 7 equivalent (see the file's docstring), new cases for 10 (a
+    comment 4 apart, a reload's walk, control characters in a name / before an attribute / in a
+    text, a quote in a name, unquoted and unclosed values, a text after a comment); the full rerun
+    caught 118 of 136 (the 7 equivalent, X 68 num for X 135 num). Baselines: the world build 0 of
+    22 in both orders; the item build 0 of 37; the other five 0 of 37.
+  - Build: 204 files clean (MSVC). Tier 1: 516 errors in 87 files, 209 stubs (unchanged). ret_audit
+    --src: 52.
+  - Ghidra: names/xml_node.txt (29); 29 functions in ported.txt. Stats: 7,908 of 12,293 functions
+    by hand (72.8 % by size).
+
+  PART 9a-iii DONE (2026-10-31): the GDI fonts (src/game/font.*: C_GdiFont, vtable 0x00813b10,
+  0x80 bytes; 0x0063c2f0..0x0063ddb0, AddGdiFont 0x0063ee20, its destructor 0x0063f050; the font
+  manager's own object code 0x0063de40..0x0063ded0).
+  - Init 0x0063c2f0: a DC, the font (CreateFontA: the size 8 .. 60 high, bold 700 else 400, the
+    default charset, TrueType, antialiased, variable pitch), a 64 x 64 24-bit DIB (white text on
+    black), the cells as high and wide as "Wg" is high (at least 10), the texture (IGraph slot 0x40
+    CreateImage; IImage Open 0x08 (0x8402), Fill 0x20 (0xFFFFFF)), its cells (a pixel apart from
+    (1, 1)), the last cell the spare. GetGlyph 0x0063ced0: a tab a space's; the code's low 16 bits;
+    a cell by its character (std::map), else a free one, else the least lately used unless used in
+    this frame (else the spare's glyph); a glyph drawn (Rectangle, ExtTextOutW) and copied into
+    the cell (IImage Lock 0x14 / Unlock 0x18; the rows 512 pixels: white, the DIB's blue its
+    alpha), its rectangle (u, v over the texture's size less 1) and width per height; the cell
+    first in the use order (once a frame). Select 0x0063c9d0: the texture, the next frame. Close
+    0x0063c740, Reset 0x0063d310; the vertex slots do nothing (its users draw the quads).
+  - igraph.h: IImage Open / Lock / Unlock / Fill, IGraph::CreateImage. C_Font: the texture moved to
+    C_TextureFont (the GDI font's +0x1C is its DC); C_FontManager a friend (the GDI fonts' id).
+  - Quirks kept: a second Close (the destructor's after a failed Init) deletes the GDI objects
+    again; the copy's rows are the texture's width, 512 (the fonts' textures are), and as many as
+    the cell is high from the DIB's top. Fixes: the cells zero (the original's glyph and links are
+    not set); no cell: no spare, the default glyph (the original takes one from the empty list).
+  - Unreferenced (no code or data references; left in tier 1): 0x0063d1d0 / 0x0063d260, the font
+    made again at another size (and weight).
+  - Harness: fonts_test.inc's "gdi:" line in the camera build (10 checks; GDI faked through its
+    import pointers (__imp__CreateFontA@56 ... defined in the test); IGraph's images faked); the
+    9a-ii LoadConfig tests on the real AddGdiFont (their fonts' lines from CreateFontA). 0 of 22 in
+    both orders.
+  - Mutations (mutations/mutate_9a3.py): the first run caught 147 of 188 (39 survived, 2 did not
+    build); 16 equivalent (see the file's docstring), new cases for the rest (Reset's fields, the
+    grid's edges, code 0, a glyph wider than its cell over a painted texture), Close's temporary
+    as a local (the original uses +0x78); the full rerun caught 169 of 187 (the 16 equivalent).
+    Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0
+    of 37.
+  - Build: 204 files clean (MSVC). Tier 1: 514 errors in 86 files, 207 stubs (516 / 87 / 209
+    before). ret_audit --src: 52.
+  - Ghidra: names/gdi_font.txt (45); 43 functions in ported.txt. Stats: 7,951 of 12,293 functions
+    by hand (72.9 % by size).
+
+  PART 9a-iv DONE (2026-10-31): the text styles (src/game/text_style.*, new; 0x00641fe0..0x00643c20,
+  the list's vector insert 0x0064cc60). Part 9a done. (0x00643c20..0x006441a0, which the plan put in
+  9a, are C_TextBox's: part 9b.)
+  - The list (0x008ae3f8: a flag, std::vector<S_TextStyleDesc *>): its first use adds the game's 90
+    styles (0x00642150: indices 0 .. 89; their values read from the asm by a simulation of its
+    stores, scratchpad styles_sim.py); Create 0x006420b0 (a copy in the first free place, else at
+    the end), Release 0x00641fe0 (the style deleted, the free places at the end given back but the
+    first; an index not in the list: nothing), its destructor at exit. GetTextStyle and
+    NumTextStyles the port's own (the text box, 9b, reads the list where it is: 0x00645010 and
+    0x00646b40 add the game's styles themselves when it is not loaded yet).
+  - S_TextStyleDesc moved from text_box.h into text_style.h; +0x2C / +0x2D are two bytes (they were
+    one dword: the HUD's table's 0x101 / 0x100 / 0x1 now 1, 1 / 0, 1 / 1, 0).
+  - Harness: fonts_test.inc's "styles:" line in the camera build (4 checks; the 90 styles by an
+    FNV hash of the asm's values; the list left as it was found, the first use only on the first
+    mission). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9a4.py): the first run caught 106 of 113 (7 survived); 5 equivalent
+    (see the file's docstring), the end's trimming tested by NumTextStyles (2); the full rerun
+    caught 108 of 113 (the 5 equivalent). Baselines: the world build 0 of 22 in both orders; the
+    item build 0 of 37; the other five 0 of 37.
+  - Build: 205 files clean (MSVC). Tier 1: 514 errors in 86 files, 207 stubs (unchanged). ret_audit
+    --src: 52.
+  - Ghidra: names/text_style.txt (10); 12 functions in ported.txt. Stats: 7,963 of 12,293 functions
+    by hand (73.1 % by size).
+
+  PART 9b-i DONE (2026-10-31): the text box's runs, edit, selection, hover, scroll and place
+  (src/game/text_box.*, new: the real C_TextBox, vtable 0x00810458, 0x9C bytes, replacing the HUD's
+  opaque one; 0x00643c20..0x00644f70 less the render's 0x006442d0, the constructor 0x00496cc0 and
+  destructors 0x0048ecf0 / 0x0048ecd0, the run vector's insert 0x0064c320). 9b split: 9b-ii the
+  layout (0x00645590 and its helpers), 9b-iii the render (0x00648200, 0x006442d0), 9b-iv the text
+  control (0x0064b200's group) and the subtitles' class (vtable 0x008158f8), 9b-v the UTF-8
+  helpers and what is left.
+  - The runs (S_TextRun: a text and a style; passed by value): Add / Set / Insert (out of range:
+    appended), their text-id forms (SetTextId's style 0x28: the text a format of the game's
+    version), RemoveRun, Clear, GetRunText. Every change marks the box for the layout, which the
+    queries (ScrollToLine, GetScrollRange, GetLineCentre) run first.
+  - The edit and caret (EditRun: one run at a time; out of range ends it; TickCaret on for 500 of
+    each 1000 ms), the selection (GetSelection clamps; SelectRun, Get / SetSelectedText), the hover
+    (SetHover, HoverAt by the line under the scroll's y, ClearHover, SelectHovered), the scroll
+    (UpdateScrollRange from the last line's y, ScrollTo, ScrollToLine into the box, GetLineCentre
+    in the interface's coordinates), the place (AttachTo: the visual's world box on the screen, a
+    margin of 10 / 1024 of the width, the y scaled by 4 / 3, the depth between the scene camera's
+    near and far planes, VisualDepth; SetRect), FreeLayout (the lines' and the pieces' records;
+    S_TextLine / S_TextWord / S_TextPiece, their other fields 9b-ii).
+  - Quirks kept: SelectRun scrolls to the line with the run's index; GetLineCentre's y divided by
+    the screen's width too. Fix: GetLineCentre's w 0 (the original's is its stack's).
+  - The HUD and the loader: the margin (+0x90) and +0x71 through SetUnknown90 / SetUnknown71; the
+    loader tests' raw offsets replaced by the members.
+  - Harness: a new text build (build_text.bat / check_text.py: the camera build with TEXT_TEST and
+    the real text box; textbox_test.inc, 16 checks; Layout / Render / the visuals' world boxes
+    faked). 0 of 22 in both orders; the camera build 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9b1.py, the text build): the first run's survivors given new cases
+    (fractions in the rectangle, the selection's clamps, run 0 and line 0, the depth at the near
+    plane); 13 equivalent (see the file's docstring); the full rerun caught 175 of 188 (the 13
+    equivalent). Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the
+    other five 0 of 37.
+  - Build: 206 files clean (MSVC). Tier 1: 513 errors in 85 files, 206 stubs (514 / 86 / 207
+    before; the renamed functions' callers exported again). ret_audit --src: 52 (S_TextRun's 8
+    bytes added to its sizes).
+  - Ghidra: names/text_box.txt (27); 41 functions in ported.txt. Stats: 8,004 of 12,293 functions
+    by hand (73.3 % by size).
+
+  PART 9b-ii-a DONE (2026-11-01): the text box's layout and the UTF-8 decoder (src/game/text_box.*;
+  0x00645010..0x00646ab0 less the positioning, the vectors' code 0x0064c040 / 0x0064c080 /
+  0x0064c630 / 0x0064c840 / 0x0064ca50, DecodeUtf8 0x0064d830 and its test 0x0064d400). 9b-ii split:
+  9b-ii-b the positioning (0x00646ab0..0x00647b50: the lines' and pieces' places, the alignments,
+  the justified lines).
+  - Layout 0x00645590: the lines and pieces freed; no runs: false (the box stays dirty). Each run's
+    style and font selected (SelectStyle; none: false, the lines so far kept); a style with x and y
+    both >= 0 places a piece (its font size, its width, cut to the screen's width times the style's
+    width); else the run is flowed: a line of its own (joins 0), or joined to the last (the first
+    joined run after a line of its own, or one with the new-line flag 8, starts a new line); then
+    Position (9b-ii-b) and not dirty. A new line's room is the box's width (truncated).
+  - The measures: FontSize (the screen's height times the style's size, rounded), Advance (the
+    glyph's aspect times the size, rounded; a blank glyph 0.4 of the size; the password flag 4:
+    '*'; the glyph asked for twice), TextWidth (bytes, or the unicode font's UTF-8 characters, a bad
+    byte one signed character), Truncate (the first characters that fit; none or all: the text).
+  - FlowWords 0x00646240 (bytes): the room the line's, or the style's column (rounded) when less;
+    wrapped at the last blank (isspace under 0x80) that fits: the words before it on the line, the
+    rest on a new line. None on the first line: an empty line left, then on the new line the part
+    that fits is kept with no width and the run's rest dropped. Not wrapped (+0x2D 0): one word cut
+    to the column (the line's room less its whole width). A line's measures: its words' largest
+    font size (+0x1A), space above (+0x16) and below (+0x18) of the screen's height, rounded.
+  - FlowUtf8 0x00645ae0 (the unicode font): wrapped at the character that does not fit (blanks not
+    looked for); otherwise as FlowWords.
+  - DecodeUtf8: Unicode, Inc.'s ConvertUTF (its tables 0x00813ba0 / 0x00813ca0; isLegalUTF8 without
+    the surrogates' test): the bytes taken, -1 malformed, -2 too few bytes (the code point 0).
+  - Fixes: a blank first on an empty line with too long a word after it (FlowWords), and a
+    character wider than an empty line (FlowUtf8): the original starts new lines without end (the
+    port keeps what fits, and the character, on the line).
+  - text_style.h: S_TextStyleDesc's y (+0x14), below (+0x18), above (+0x1C), valign (+0x28), joins
+    (+0x2C), wraps (+0x2D), STYLE_PASSWORD / STYLE_NEW_LINE; LoadTextStyles (the layout loads the
+    game's styles first). text_box.h: S_TextWord (10 bytes), S_TextPiece (0x0E), S_TextLine's room
+    (+0x1C) and Reset 0x00645a10; C_TextBox's font (+0x24), style (+0x2C), m_overflows (+0x73,
+    was m_scrolls).
+  - Harness: textbox_test.inc's "layout:" line in the text build (11 checks; the fonts 2 and 3 fakes
+    with their glyphs' aspects, the positioning faked; the 9b-i checks on the real layout); the stub
+    profile's unicode option. 0 of 22 in both orders; the camera build 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9b2.py, the text build): the first run caught 169 of 206 (33
+    survived, 4 did not build); 17 equivalent (see the file's docstring), new cases for the rest
+    (fractions of 0.3 in the roundings, a column of 1 pixel, a tiny font without a column, a break's
+    blank width, the bad byte's glyph), FlowWords' needless reset of its blank flag dropped; the full
+    rerun caught 184 of 205 (the 17 equivalent). Baselines: the world build 0 of 22 in both
+    orders; the item build 0 of 37; the other five 0 of 37.
+  - Build: 206 files clean (MSVC). Tier 1: 505 errors in 85 files, 204 stubs (513 / 85 / 206 before; the layout's callers exported again). ret_audit --src: 52.
+  - Ghidra: names/text_box.txt (+18); 19 functions in ported.txt. Stats: 8,023 of 12,293 functions by hand (73.5 % by size).
+
+  PART 9b-ii-b DONE (2026-11-01): the text box's positioning (src/game/text_box.*; 0x00646ab0..
+  0x00648020, the style list's index test 0x0064c100, the words' 0x0064c010, their copy 0x0064d000).
+  Part 9b-ii done.
+  - Position 0x00646b40: the overflow flag cleared; the lines stacked from the box's bottom moved up
+    by the first run's vertical alignment (whatever its kind; top 0, middle half, bottom all of the
+    box's height over the lines', none when they are higher; truncated): each line's base its space
+    below and font size over the last line's top (TextHeight: the lines' measures less the first's
+    space below and the last's above); each line placed; the pieces placed; the scroll's range
+    (UpdateScrollRange, which sets the flag when there is one).
+  - A line (PlaceLines): its words of the at-x style (flag 0x10) at the style's x of the box's width
+    from its left (left, centred, right by their alignment); then by its first word's style
+    (AlignLine): at-x: nothing more; left (1) or no room: from the left; centred (2: half the room,
+    halved as an integer), right (3), justified (4: split at its blanks, the box's width less the
+    words' shared between them, but on its paragraph's last line: the next line's first word not
+    justified (align & 4)); another alignment: not placed. The edited run's line (the run index as
+    a line's) moved left by what its caret ('_' at the line's style's size, measured with the font
+    selected last) lacks.
+  - SplitWords 0x00647600 (bytes 0x00647b50, UTF-8 0x00647620): each word's parts between its blanks
+    added at the end (a part after the last blank only with a width; a word's style missing: the
+    split stops there, nothing dropped), then the words split dropped.
+  - Pieces (PlacePieces): at their styles' x and y of the box's size (rounded; not offset by the
+    box's place), by their alignment and vertical alignment (top, middle, bottom: the piece's height
+    added); unaligned: -1. Overflows: a line without room; a piece left of or under the box, or past
+    its width or height.
+  - Quirks kept: of a justified line's several words the last stays, first (the split erases one
+    word fewer). Fix: the words split deleted (the original leaks them). The second check of a
+    line's room in PlaceLines dropped (PlaceWordsAtX's is the same).
+  - text_style.h: STYLE_AT_X; align's values (2 centred, 3 right, 4 justified; the old comment had
+    2 and 3 the other way).
+  - Harness: textbox_test.inc's "position:" line in the text build (10 checks; the positioning fake
+    gone: the 9b-i and 9b-ii-a checks on the real one; the fake font's '_' as wide as its size). 0 of
+    22 in both orders; the camera build 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9b3.py, the text build): the first run caught 115 of 133 (14
+    survived, 4 did not build); 6 equivalent (see the file's docstring), new cases for the rest
+    (fractions of 0.3 in the roundings, a justified line without room, the caret's size); the full
+    rerun caught 122 of 132 (the 6 equivalent). mutate_9b2.py regenerated (13 of its anchors were
+    no longer unique): 184 of 205 again (its 17 equivalent). Baselines: the world build 0 of 22 in
+    both orders; the item build 0 of 37; the other five 0 of 37.
+  - Build: 206 files clean (MSVC). Tier 1: 499 errors in 85 files, 202 stubs (505 / 85 / 204 before).
+    ret_audit --src: 52.
+  - Ghidra: names/text_box.txt (+16); 17 functions in ported.txt. Stats: 8,040 of 12,293 functions
+    by hand (73.6 % by size).
+
+  PART 9b-iii DONE (2026-11-01): the text box's render (src/game/text_box.*; Render 0x00648200, its
+  helpers 0x006442d0 and 0x00648020..0x00649250; src/game/font.*: the font manager's batching
+  0x0063f800 and flush 0x0063f7d0).
+  - Render: nothing before the box is placed; the font manager's batching flag taken (+0x1C, set
+    only by SetFontBatching: a menu's render, its own switch 0x008ae608 never set); laid out when
+    dirty. Overflowing: the screen's viewport kept, the box's clip set (ClipViewport: each edge kept
+    on the screen, the top 5 pixels higher, the width and height + 1, truncated; nothing of it on
+    the screen: nothing drawn). A background colour (+0x98): a fan of 4 over the box, the driver's
+    state 3 off around it (back to its old value as a bool), no texture. The lines: the pen at
+    each word's x and the line's base less the scroll; a centred word (style flag 0x80, new
+    STYLE_CENTRED) up by half its line's gap over its font size (truncated) for itself; a word
+    without its style or font size ends the lines. The caret on the edited run's line while it
+    blinks on ('_' 0.1 of the size under the base, truncated; the last word's colour, of any line;
+    none yet: 0). The pieces at their x and y from the box's left and bottom (truncated). The
+    screen's viewport back.
+  - The colours (WordColour): the box's (+0x94); dimmed (+0x71, SetUnknown71 renamed SetDimmed):
+    the style's at 0x60 of alpha; the hovered line's white; the style's.
+  - DrawString 0x00648b80 (bytes 0x006487e0, UTF-8 0x00648ba0; false: the font size 0): its glyphs
+    (bytes unsigned; not UTF-8: the byte signed; the password style's '*'); a blank glyph only moves
+    the pen (0.4 of the size, rounded); else a quad round(size x aspect) wide: two triangles in the
+    192 vertices (the box's depth, 1 / depth; drawn with the font's texture when full and at the
+    end) or, batching, the font's own quad (AddQuad).
+  - Quirks kept: the pieces coloured as the line the lines stopped at (their count: hovered when the
+    hover is one past the last line); the caret's colour carried over from earlier lines.
+  - Debug leftovers (BSS, never set): the overflowing boxes' clip outlined (0x008ae600: a quad
+    0x2F005000, the driver's state 9 off), +0x76's step (0x008ae604; StepUnknown76 0x006491d0, given a pointer to it, keeps
+    it from 0 to 2 under the box's top over the last line: always 0); ReadScreenSize 0x00648190
+    (the screen's size read, dropped; RunGame's too).
+  - text_box.h: the pen (+0x6C / +0x6E), m_batching (+0x74), m_colour (+0x94), m_background
+    (+0x98), m_dimmed (+0x71). font.h: C_FontManager::m_batching, IsBatching, SetFontBatching /
+    FlushFonts. DrawText named DrawString (windows.h's macro).
+  - Harness: textbox_test.inc's "render:" line in the text build (16 checks; IGraph's viewport,
+    texture, primitives and screen size, the driver's states and the fake font's quads logged; the
+    render fake gone). 0 of 22 in both orders; the camera build 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9b4.py, the text build): the first run caught 148 of 180; 15
+    equivalent (see the file's docstring), new cases for the rest (edges of fractions near 0, the
+    screen's size read, an invalid byte inside a text, 6.25 pixels, a limit of 1, every font's
+    batching); the full rerun caught 165 of 180 (the 15 equivalent); StepUnknown76 then given its
+    value's pointer (the original's second argument; ret_audit), its 10 changed mutations caught.
+    Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0 of
+    37.
+  - Build: 206 files clean (MSVC). Tier 1: 498 errors in 85 files, 201 stubs (499 / 85 / 202
+    before). ret_audit --src: 52.
+  - Ghidra: names/text_box.txt (+9); 10 functions in ported.txt. Stats: 8,050 of 12,293 functions
+    by hand (73.8 % by size).
+
+  PART 9b-iv-a DONE (2026-11-01): the paged text box and the video text box (new:
+  src/game/paged_text_box.* C_PagedTextBox, vtable 0x008154a4, 0xC8 bytes: the interface's text
+  control's, 0x0064ae70..0x0064bb90 less its layout, destructors 0x006622f0 / 0x00662310;
+  src/game/video_text_box.* C_VideoTextBox, vtable 0x008158f8, 0xA0 bytes: C_VideoState's +0x38,
+  0x0064bc60..0x0064bfe0, 0x00688cb0..0x00688ce0). 9b-iv split: 9b-iv-b the paged box's layout
+  (LayoutPages 0x006494a0 and 0x00649250..0x0064a6c0, 0x0064b7f0 / 0x0064bad0).
+  - C_PagedTextBox: areas (S_TextArea, a rectangle as C_TextBox's; AddArea: AttachTo's rectangle
+    the box's and a copy after the others, the control's message 0x100009d with a frame by name) and
+    pages (S_TextPage: the room left, an overflow flag, its area, its lines). Render: nothing before
+    the box is placed; the fonts' batching taken; laid out when dirty (LayoutPages); the page shown
+    (SetPage: 0 always, another in range) in the first area, the next in the second, ... (pages out
+    of range skipped). RenderPage: the lines at their bases (no scroll), the words at their x, the
+    colours WordColour's without the hovered line's white; a word without its style ends the lines
+    after its own, one not drawn (the font size 0) at once; overflowing: clipped to its area
+    (ClipArea: ClipViewport's clamps, 5 pixels up, without its extra pixel; off the screen:
+    nothing). NumPages, Relayout (dirty, laid out now), LastPageBreak (the last page whose first
+    line's first word has STYLE_NEW_PAGE, 0x20, new in paged_text_box.h; none: -1).
+  - Fixes: a page's area is an index (the original's pointer into the areas' vector dangles once an
+    area is added after a layout: the old pages are kept, see 9b-iv-b); the destructor deletes the
+    pages and their lines (the original's FreePages 0x0064ae60 is empty: they leak).
+  - C_VideoTextBox (the subtitles, or the credits scrolled by ScrollTo's pixels): UpdateScrollRange
+    nothing; Render: laid out when dirty (from the first line); from the first line not yet off the
+    top (its base less the scroll in 16 bits under 0: passed for good, m_firstLine +0x9C) to 100
+    pixels under the screen; a word without its style ends its line; then the top's and the
+    bottom's fades (black to clear, 100 / 1024 of the screen's width high, truncated). Finished:
+    every line passed (C_VideoState::Update ends the credits on it).
+  - text_box: the background's quad shared (g_textBoxQuad, SetTextBoxQuad with two colours,
+    DrawTextBoxQuad); C_TextBox's private members protected.
+  - Harness: textbox_test.inc's "pages:" line in the text build (18 checks; LayoutPages faked,
+    logged with the dirty flag; the fans logged with their corners). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9b5.py, the text build): the first run caught 102 of 120; 10
+    equivalent (see the file's docstring), new cases for the rest (ClipArea's fractions near 0 and
+    widths below 0, the layout's dirty flag); 110 of 120 caught. Baselines: the camera and the world
+    builds 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
+  - Build: 208 files clean (MSVC). Tier 1: 498 errors in 85 files, 201 stubs (unchanged; the classes' members exported again). ret_audit --src: 52.
+  - Ghidra: C_auto_008154a4 / C_auto_008158f8 renamed C_PagedTextBox / C_VideoTextBox (90_auto.spec,
+    class_names.json, auto_members.json, tier1_fixups.json; rename_auto_structs.py, apply_members.py);
+    names/text_box.txt (+18, LayoutPages and FreePages for 9b-iv-b); 21 functions in ported.txt (5
+    of them AddArea's vector helpers). Stats: 8,071 of 12,293 functions by hand (73.9 % by size).
+
+  PART 9b-iv-b DONE (2026-11-01): the paged text box's layout (src/game/paged_text_box.cpp;
+  LayoutPages 0x006494a0 and 0x00649250..0x0064a6c0, 0x0064b7f0, 0x0064bad0, the empty FreePages
+  0x0064ae60; 17 vector / word helpers absorbed, 0x0064a490..0x0064d050).
+  - LayoutPages: false without runs or areas. Per run: its style (none: false); a first page; a
+    STYLE_NEW_PAGE run when the last page has lines: the line being filled ends there, a new page;
+    a line of its own, or joined to the last (a new line for the first after one of its own, or
+    STYLE_NEW_LINE); the run flowed (false: the layout fails, the box stays dirty). Then the last
+    line added, every page placed (PlacePages), the box clean.
+  - The pages: NewPage in the next area in turn (the pages' count modulo the areas'), its room the
+    area's height (truncated); AddLineToPage: to the last page, or a new one when its room is less
+    than the line's height (gap + above + below; a page with less room than one line stays empty).
+    A new line is as wide as the last page's area (when it was made: it keeps that width on a page
+    of another area).
+  - The flows (FlowPaged: UTF-8 with the unicode font, else bytes): measures from the style (size,
+    above, below, rounded; not cut to the column); not wrapped: one word as wide as its text; else
+    wrapped at the last blank that fits (a character fits under the room, not at it; a blank first
+    in the text or after a wrap does not count), each full line added to the pages and a new one
+    made. A word wider than a line: the part that fits; not a character on an empty line: false.
+  - Placing: StackPage (the bases from the area's bottom, truncated, down by below + gap, then
+    above; overflowing: the last base over the area's top); AlignPage / AlignPageLine (the first
+    word's style: left, centred by half the room (truncated), right, justified when the next line,
+    the next page's first too, starts justified (NextJustified: align bit 2): split at its blanks,
+    the area's width shared out; a room of 0 or less: left; other aligns and STYLE_AT_X words not
+    placed; no caret; a line's negative room sets m_overflows, never reset).
+  - Quirks kept: the line's above and below take the style's below and above (the plain box's the
+    other way round); FreePages empty: a layout again appends (the new lines to the last old page
+    while it has room), every page placed again; a word wider than a line: by bytes its part has no
+    width and the character that did not fit is dropped, by UTF-8 its part keeps its width and the
+    character.
+  - Fixes: a joined run right after a page break gets a new line (the original flows it into a
+    null line); a failed layout deletes the line being filled (the original leaks it).
+  - Harness: textbox_test.inc's "paged:" line in the text build (18 checks, the real layout; the
+    9b-iv-a fake gone, its tests on the real layout). 0 of 22 in both orders; the camera and the
+    world builds 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9b6.py, the text build): the first run caught 97 of 111; 7
+    equivalent (see the file's docstring), new cases for the rest (the measures' rounding at .3, a
+    room of exactly 0, the line before a page's first); 104 of 111 caught.
+  - Build: 208 files clean (MSVC). Tier 1: 497 errors in 84 files, 200 stubs (498 / 85 / 201
+    before). ret_audit --src: 52.
+  - Ghidra: names/text_box.txt (+13); 32 functions in ported.txt (15 + 17 absorbed). Stats: 8,103 of
+    12,293 functions by hand (74.1 % by size).
+
+  PART 9b-v DONE (2026-11-01): the UTF-8 helpers and the rest of the text library (src/game/text_box.*;
+  0x0064d3d0, 0x0064d910, 0x0064d9e0, 0x0064da80, 0x0064b1e0). Part 9 (the text library,
+  0x0063de40..0x0064d060) is done but for the unreferenced code page 1250 font (0x0063f230,
+  0x00641720, 0x00640f60; left in tier 1).
+  - IsLegalUtf8Range 0x0064d3d0 (was pending.h's IsLegalUtf8; renamed: the sequence check 0x0064d400
+    has that name): whole well-formed sequences from begin to end (empty: false; the original reads
+    the byte at the end first, false either way). profile_roster.cpp's IsUtf8 takes it from
+    text_box.h; the profile harness's fake renamed.
+  - EncodeUtf8 0x0064d910 (HandleKeys' typed characters): a surrogate -3; fewer bytes than maxBytes
+    (else -4: room for the caller's terminator); not terminated. Quirk kept: over 0x1FFFFF the
+    replacement 0xFFFD in 2 bytes (FF BD).
+  - HasUtf8Sequences 0x0064d9e0: a NUL-terminated text of lead bytes and continuations (not checked
+    further: C0 80 passes) with a sequence of more than a byte (plain ASCII, empty: false).
+    HasCjkCharacters 0x0064da80: a wide text with a character over U+3000. (Their callers are tier 1.)
+  - C_TextBox::Reattach 0x0064b1e0 (RET 8: the text control's scene and root): empty; the text
+    control's message 0x200002c and its margin's call it (the paged box lays itself out again instead).
+  - Done without code: the run's copy 0x006446c0; the vectors' tidy 0x00640460 / 0x00645a80 (unwind
+    funclets); the static / iostream atexit stubs 0x00640510, 0x00641fb0, 0x0064d080,
+    0x0064daa0..0x0064db10; the 1.0 / 1.1 font set 0x0063f870 (dropped in 9a; absorbed, its only
+    caller ported).
+  - Harness: textbox_test.inc's "utf8:" line in the text build (6 checks). 0 of 22 in both orders;
+    the profile harness 0 failures.
+  - Mutations (mutations/mutate_9b7.py, the text build): the first run caught 58 of 59; 1 equivalent
+    (see the file's docstring). Baselines: the camera and the world builds 0 of 22 in both orders;
+    the item build 0 of 37; the other five 0 of 37.
+  - Build: 208 files clean (MSVC). Tier 1: 496 errors in 83 files, 199 stubs (497 / 84 / 200
+    before). ret_audit --src: 52 (Reattach's two arguments found by it).
+  - Ghidra: names/text_box.txt (+5); 20 functions in ported.txt. Stats: 8,123 of 12,293 functions by
+    hand (74.2 % by size).
+
+  PART 9c PLAN (2026-11-01): the controls (0x0064dce0..0x0066b010, ~580 functions, 111 KB, 39 kinds
+  made by the factory CreateChild 0x0065d470 from a description's type 2..0x28). A control wraps a
+  frame of the menu's scene (found by name, a mask: "normal*", "barrow up*"), owns child controls
+  and talks by messages (routes: a notification sends a message, by id through the global queue or
+  to itself; callbacks: thiscall functions of an object). The menus build the descriptions in code
+  (0x00615360 a screen's child, 0x00614e80.. its messages, 0x0061e100 its callbacks). Split:
+  9c-i the base (vtable 0x00813dd0), the descriptions, the messages and the queue;
+  9c-ii the small controls on the base (33 slots, under 1 KB each): types 0x13 (0x00813cc0),
+  2 the button (0x00813f68), 4 (0x00813ff0), 5 (0x00814430), 6 (0x00814ed0, on 0x00813e58),
+  0x12 (0x00814188), 0x14 (0x00814cb0), 0x15 (0x008148f8), 0xc (0x00815310), 0x25 the text control
+  (0x00814d38, on 0x00815420) and the bases 0x00813e58 / 0x00814078 / 0x00814100 / 0x00815420;
+  9c-iii the check / yes-no / arrow / slider kinds: 7 (0x00815288 "sliderbase*"), 9 (0x00815200),
+  0xa (0x00814c28 up / down), 0x24 (0x00815178), 0x1e (0x008146d8 "allied*" / "axis*"), 0x1f
+  (0x00814650 yes / no / empty), 8 (0x00814210, the slider with arrows), 0x10 (0x00815398 arrows);
+  9c-iv the texts and lists: 0xf the scrolled text (0x008143a8), 0x11 the list box (0x00814e48),
+  0x19 the skills (0x00814ba0), 0x21 (0x008145c8, "binput*"), 0x28 (0x00814dc0), 0x1c (0x00814b18,
+  the item's stats), 0x1b / 0x1a (0x00813d48 / 0x00814298 on 0x00813ee0: the selection list, 67
+  slots);
+  9c-v the big ones by class: 0x26 (0x008144b8, 67 slots), 0x17 (0x00814760, 101 slots: the
+  upgrades), 0x18 (0x00814980, 101 slots: the servers / ammo), 0xe (0x00814f58, 135 slots: the
+  hotkeys), 0x23 (0x00814a08), 0xb (0x00815068), 0x16 (0x008147e8), 0x1d / 0x20 / 0x22 / 0x27;
+  9c-vi the screens (0x00815540 the screen root, 0x008155d8, 0x008154b8, 0x00815918), the cursor
+  (0x008155d0 singleton, 0x0066a7e0) and the factory 0x0065d470 last (it news every kind).
+
+  PART 9c-i DONE (2026-11-01): the controls' base (src/game/control.*, new: C_Control, vtable
+  0x00813dd0, 0x6C bytes; S_ControlDesc, vtable 0x00813ab0, 0x40 bytes; S_ControlMessage 0x18
+  bytes; the queue g_controlMessages 0x008ae590).
+  - C_Control: its children (owned, deleted the last first), routes (S_ControlMessage), callbacks
+    (S_ControlCallback {notification, object, function}; the CONTROL_NOTIFY_ANY one instead of the
+    list), parent, frame (its data the control's id), the description's type, a value and an index
+    (messages 0x100000B / 0x1000009 and their gets), its id (a child's index in the field after its
+    parent's: bits 20-25, 12-19, 4-11; FindChild), inactive (+0x64, SetInactive: the button's
+    "inactived*" frame), shown (+0x65), taking input (+0x66), the menu's scene (+0x68).
+  - The slots (33): FindChild, IsChild, TakesInput (shown, active, taking input), Show / Hide (the
+    frame on / off and updated, CONTROL_NOTIFY_SHOWN / _HIDDEN), Refresh (the shown control's
+    children), Tick, Create (the frame, the description's type and its children by the factory
+    CreateChild, faked in the harness until 9c-vi), the cursor's input (one argument, the id; each
+    raises its notification, not handled: 7; OnEnter 0x4003000, OnLeave 0x4004000, OnClick
+    0x4001000, OnRelease 0x4007000, OnPress 0x4006000, OnWheel (id, amount: RET 8, ret_audit;
+    0x4011000), OnKeyClick 0x4012000 then OnClick, the rest by their codes), HandleMessage (a route
+    kept; else DEACTIVATE / ACTIVATE (when it changes), SHOW / HIDE, IGNORE / TAKE_INPUT, the
+    callbacks' ADD / REMOVE, the value and index, NOTIFY (a value with bit 0x04000000), REFRESH
+    0x200002C passed to the children as a copy), HandleMessages, HandleMessageCopy, SetStrings (the
+    description's +0x20, none), SetInactive, the destructor.
+  - Notify 0x0065d270: the callbacks (the first on the notification with a function; ANY's with its
+    argument 0), then each route on it: its message (the notification's bits cleared) posted to
+    the queue, or handled by the control (target -1). RemoveCallback: by the message's object,
+    else its notification, else its function (the last given decides; none: nothing).
+  - S_ControlDesc (type, name, id; messages, strings, children; the destructor deletes the
+    children); AddDescMessage (4 forms: 0x00614e80 one value, 0x00614f10 two, 0x0061e100 three (the
+    callbacks), 0x00614fa0 a text). PostControlMessage 0x00615a90 (the deque's push_back; 100
+    callers).
+  - Fix: REFRESH's copies sent to the children have their other values 0 (the original's stack).
+  - Harness: control_test.inc in the text build ("control:", 14 checks; CameraTest runs ControlTest
+    after TextBoxTest). 0 of 22 in both orders; the camera and the world builds 0 of 22 in both
+    orders.
+  - Mutations (mutations/mutate_9c1.py, the text build): the first run caught 102 of 123; new cases
+    (the notifications' value 0, the first id field's 6 bits, a callback without its function);
+    121 of 123 (HandleMessages one past the end: undefined, a crash in one run; 1 equivalent).
+  - Build: 209 files clean (MSVC). Tier 1: 485 errors in 82 files, 198 stubs (496 / 83 / 199
+    before; C_Control's members and callers exported again). ret_audit --src: 52.
+  - Ghidra: C_auto_00813dd0 / C_auto_00813ab0 renamed C_Control / S_ControlDesc (90_auto.spec,
+    class_names.json, auto_members.json, tier1_fixups.json); names/control.txt (48, the factory's
+    name too); 52 functions in ported.txt (5 vector helpers absorbed). Stats: 8,175 of 12,293
+    functions by hand (74.3 % by size).
+
+  PART 9c-ii DONE (2026-11-01): the small controls (src/game/controls.*, new; src/game/cursor.h, new:
+  the cursor's interface, its code 9c-vi). Type 6 (0x00814ed0, a selectable item: its click calls
+  its group's select 0x006569f0) moves to the group's part (type 0xb, 9c-v); 0x00814078 /
+  0x00814100 (made by hand inside types 0x24 / 0x21) to their owners'.
+  - C_TextControl (vtable 0x00813e58, 0x70 bytes): a C_TextBox (+0x6C) made by Create (not placed);
+    the text messages its box's (SET_TEXT 0x1000014 .. SET_RUN_TEXT 0x1000018, REMOVE_RUN 0x1000068,
+    CLEAR_TEXT 0x1000077 / CLEAR 0x2000018, SET_COLOUR 0x10000A3, GET_RUNS 0x2000030), the box placed
+    on the frame by REFRESH (the children not refreshed), SET_MARGIN 0x2000073 and FACE_FRONT
+    0x1000099 (the frame turned to (0, 0, 1)); Refresh draws the box, then the children; inactive
+    dims the box. C_TitleControl (type 0x13, 0x00813cc0): the frame turned to (0, 0, -1), its id,
+    the box placed at once with a margin of 1; no input. C_LabelControl (type 0x12, 0x00814188):
+    turned and placed (its margin kept); only the box drawn.
+  - C_PictureControl (type 4, 0x00813ff0): the visual's first face group (+0x74) and its texture
+    (+0x70); SET_TEXTURE 0x1000038 (value2; 0: hidden, else shown), RESTORE_TEXTURE 0x1000039,
+    LOAD_TEXTURE 0x100003A (a file; not loaded: the original), FIND_FACE_GROUP 0x100009A (by the
+    texture's name, the level's groups by +0x0C, new in i3d.h), REFRESH also the children's;
+    inactive: the visual's alpha 0.4 (the box not dimmed).
+  - C_ControlGroup (type 5, 0x00814430, the base of 0x008143a8 / 0x008144b8 / 0x008145c8): the input
+    to the focus (+0x6C, the child under the cursor): the enter picks it by the id (taking input; id
+    0xF: Unknown20(0xF)), the leave clears it when handled, slot 16 (OnInput05, the cursor's move)
+    moves it between children, the release only for the child with the id; messages to the child
+    their target names.
+  - C_FrameSwitch (type 0xc, 0x00815310): ADD_FRAME 0x1000032 (a child frame named value2, off),
+    SELECT_FRAME 0x2000019, HIDE_FRAME 0x200001A; its IsChild the frames'; no input.
+  - C_TextButton (type 0x14, 0x00814cb0): "normal*" / "actived*" (the active one where the normal
+    is, off; GetHighlightFrame, slot 3 renamed), the box on the normal one; enter / leave swap them,
+    click notifies unless inactive; WHITE_TEXT 0x2000076.
+  - C_Tooltip (type 0x15, 0x008148f8): posts CONTROL_MSG_TOOLTIP 0x200007A (value2 itself) when
+    made; SHOW arms it, its Tick shows it by the cursor (x + 0.15, y + 0.015, its own z) once the
+    cursor has stayed 500 ms, hides it when it moves or a button is down.
+  - C_Button (type 2, 0x00813f68): the cursor; "normal*" / "actived*" / "inactived*" (3 children
+    needed); held, its press repeated every frame once the cursor has stayed 300 ms; the key click
+    only notifies.
+  - C_PagedTextControl (0x00815420): the text messages on a C_PagedTextBox (REFRESH: the empty
+    Reattach); C_PagesControl (type 0x25, 0x00814d38): ADD_AREA 0x100009D (a frame by name, turned,
+    its id), SET_PAGE 0x1000067, GET_PAGES 0x100009C, GET_PAGE_BREAK 0x100009E, REFRESH relays out.
+  - C_Control: slot 3 GetHighlightFrame (was Unknown0C). C_TextBox::SetColour (new).
+  - Fixes: the messages the tooltip sends itself and posts have their other values 0 (the
+    original's stack).
+  - Harness: controls_test.inc in the text build ("controls:", 16 checks; the cursor faked, the
+    picture's mesh / materials / textures faked, the boxes' Render logged by subclasses). 0 of 22 in
+    both orders; the camera and the world builds 0 of 22 in both orders; the item build and the other
+    five 0 of 37.
+  - Mutations (mutations/mutate_9c2.py, the text build): the first run caught 160 of 188; new cases;
+    185 of 188 (3 equivalent, see the file's docstring).
+  - Build: 210 files clean (MSVC). Tier 1: 483 errors in 81 files, 196 stubs (485 / 82 / 198
+    before). ret_audit --src: 52.
+  - Ghidra: 9 auto classes renamed (90_auto.spec, class_names.json, auto_members.json,
+    tier1_fixups.json); names/controls.txt (79); 79 functions in ported.txt. Stats: 8,254 of
+    12,293 functions by hand (74.6 % by size).
+
+  PART 9c-iii-a DONE (2026-11-01): the slider, the scroll bar and the spin control (src/game/controls.*).
+  9c-iii split: iii-a types 7, 8 and 0x10; iii-b types 9 (0x00815200), 0xa (0x00814c28), 0x24
+  (0x00815178, with its 0x00814078 sub-control and helpers 0x00663e80 / 0x00664200 / 0x006641c0),
+  0x1e (0x008146d8) and 0x1f (0x00814650).
+  - C_Slider (type 7, vtable 0x00815288, 0xA0 bytes): "normal*" / "actived*" / "sliderbase*" (the base
+    hidden, its bound the track): the limits the base's bound less the slider's half size, clamped
+    to the interface (x 0 .. 1, y -0.75 .. 0), less the normal frame's place (its z for the y: the
+    original's); across or up and down, whichever range is longer; the value 0 .. 100 (50 at first).
+    SET_SLIDER 0x1000021 / GET_SLIDER 0x1000022 (value2 a float); its drag (OnInput08, the cursor's
+    move, C_Cursor::GetMove 0x0066a450 declared) moves the frame to the cursor and notifies
+    CONTROL_NOTIFY_08 when the value changed.
+  - C_ScrollBar (type 8, vtable 0x00814210, 0x94 bytes): its children "barrow up*" / "barrow down*"
+    (buttons, routed on the press to SCROLL_UP 0x1000023 / SCROLL_DOWN 0x1000024) and "slider*" (a
+    slider, routed on its drag to SLIDER_MOVED 0x1000025), each optional, posted to be ticked with
+    the bar (0x200007A, renamed CONTROL_MSG_ADD_TICKER: not only the tooltip's); SET_COUNT 0x1000020
+    (< 2: none, inactive; the slider's step 100 / (count - 1)), SET_PAGE_STEP 0x1000080,
+    GET_POSITION 0x100008F, SET_POSITION 0x200002B; a step sends SET_POSITION to the control its
+    value names (C_Control::FindControl 0x0065cae0, ported: up to the top, then down by the ids'
+    fields), SLIDER_MOVED posts it; CONTROL_NOTIFY_CHANGED 0x4010000. Held on its frame: a step
+    toward the cursor (the visual's world bound) at once, then every 50 ms after 300; the wheel a
+    page per 120. Kept: down past the last stops at the count, SET_POSITION takes the count.
+  - C_SpinControl (type 0x10, vtable 0x00815398, 0x94 bytes): a text control showing one of its
+    items (style 0x14), "barrow up*" / "barrow down*" routed to PREVIOUS 0x200001B / NEXT 0x200001C
+    (around); ADD_ITEM 0x1000067 (a text or a text id), REMOVE_ITEM 0x1000068 (kept: inactive when
+    the first is selected), GET_SELECTED 0x1000069 / 0x100006C, GET_ITEM 0x100006A, SELECT_ITEM
+    0x100006D, CLEAR_ITEMS 0x2000065; the enter sets the box's hover.
+  - Fixes: the scroll bar and the spin control without their arrows (the original's SetInactive
+    crashes), GET_SLIDER without a slider, the spin control's next / previous without items (it
+    showed the item past the end).
+  - Harness: scroll_test.inc in the text build, run by ControlsTest ("scroll:", 12 checks; the
+    cursor's move faked). 0 of 22 in both orders (no other build compiles the controls).
+  - Mutations (mutations/mutate_9c3a.py, generated, the text build on one mission in 4 parallel
+    runs): 333 of 407 caught (15 more do not build); new cases; 366 of 407 (41 equivalent, see the file's docstring).
+  - Build: MSVC clean. Tier 1: 483 errors in 81 files, 196 stubs (unchanged; six FindControl callers re-exported). ret_audit --src: 52.
+  - Ghidra: C_auto_00815288 / C_auto_00815398 renamed C_Slider / C_SpinControl (90_auto.spec,
+    class_names.json, auto_members.json; 0x0065cae0 moved to C_Control); names/controls.txt (40) and
+    control.txt (FindControl); 41 functions in ported.txt. Stats: 8,295 of 12,293 functions by hand (74.8 % by size).
+
+  PART 9c-iii-b DONE (2026-11-01): the check boxes, the toggle buttons, the side indicator and the
+  mark (src/game/controls.*). Messages: GET_CHECKED 0x100006C / SET_CHECKED 0x100006D (the spin
+  control's GET_SELECTED_2 / SELECT_ITEM codes), SET_CHECKED_QUIET 0x1000076, SET_SIDE 0x1000097 /
+  GET_SIDE 0x1000098, SET_NUMBER 0x1000078; CONTROL_NOTIFY_0E 0x400E000 (the mark's click).
+  - C_CheckBox (type 9, vtable 0x00815200, 0x84 bytes): a text control, "yes_full*" / "yes_empty*" /
+    "no_full*" / "no_empty*" (exactly 4 children; the no frames' ids | 1, the yes frames' | 2),
+    checked at first; the click toggles (CONTROL_NOTIFY_CHANGED, the state), the key click by the
+    frame's id; the leave notifies ENTER (kept). SET_CHECKED compares the value's low byte (2:
+    toggled, then set back: kept).
+  - C_ToggleButton (type 0xa, vtable 0x00814c28, 0x84): down / up, "normaldown*" / "normalup*" and
+    their "actived" frames over it; C_AllToggleButton (vtable 0x00814100, made by the 0x008145c8
+    control's Create 0x006574d0): the frames "allactived" / "allnormal" / "xallactived" / "xallnormal".
+  - C_HighlightCheckBox (type 0x24, vtable 0x00815178, 0x80): a text control with two
+    C_CheckBoxHalf children (vtable 0x00814078, 0x80; ids | 1 yes, | 2 no; empty / full, the active
+    frame under the cursor; "noactived_empty*" shared by both halves; exactly 7 children); FACE_FRONT
+    unlinks the halves' frames, turns the frame to (0, 0, -1) and links them again.
+  - C_SideIndicator (type 0x1e, vtable 0x008146d8, 0x80): "allied*" / "axis*" by the side (TEAM_*);
+    ticked (ADD_TICKER), every 2 s the team of the C_MPZone whose address the menus set as its index
+    (+0x98, C_MPZone::GetTeam).
+  - C_MarkBox (type 0x1f, vtable 0x00814650, 0x8C; was C_auto_00814650): "yesnormal*" (marked) or
+    "emptynormal*" (the four other frames kept off), a title on "text_*" ("00"; SET_NUMBER "%02d").
+  - Harness: check_test.inc in the text build, run by ControlsTest after ScrollTest ("check:", 12
+    checks; the zone a C_MPZone-sized buffer). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9c3b.py, generated, the text build on one mission in 4 parallel
+    runs): 313 of 317 caught (8 more do not build; 9 survived the first run: new cases for the first frame missing and the toggle button's frame; 4 equivalent, see the file's docstring)
+  - Build: MSVC clean. Tier 1: 482 errors in 80 files, 195 stubs (from 483 / 81 / 196). ret_audit
+    --src: 52 (PlaceFrame / Mark / Unmark kept the original's arguments).
+  - Ghidra: C_auto_00814650 renamed C_MarkBox (90_auto.spec, class_names.json, auto_members.json;
+    OnEnter's `this` set by hand: names.py's transaction error); names/controls.txt (64; the other
+    classes have no struct: void *this); 64 functions in ported.txt. Stats: 8,359 of 12,293
+    functions by hand (75.1 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

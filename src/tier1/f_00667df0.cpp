@@ -167,62 +167,68 @@ uint32_t C_auto_00814540__FUN_00668050(C_auto_00814540 *_this, ...)
 
 
 // 0x00668140
-uint32_t C_auto_00814540__FUN_00668140(C_auto_00814540 *_this,int *param_1,uint32_t param_2,int param_3, ...)
+uint32_t C_auto_00814540__FUN_00668140(C_auto_00814540 *_this,void *param_1,void *param_2,void *param_3, ...)
 {
-  uint32_t uVar1;
+  bool bVar1;
+  undefined3 extraout_var;
   IGraph *self;
-  ISND_stream *pIVar2;
-  uint32_t uVar3;
+  ISND_stream *pIVar3;
+  uint32_t uVar4;
+  uint32_t uVar2;
   _this->m_06c = 0;
-  uVar1 = C_auto_00813dd0__FUN_00661bc0((C_auto_00813dd0 *)_this,param_1,param_2,param_3);
-  if ((char)uVar1 != '\0') {
+  bVar1 = C_Control__Create((C_Control *)_this,param_1,param_2,param_3);
+  uVar2 = CONCAT31(extraout_var,bVar1);
+  if (bVar1) {
     (**(code **)(*(int *)_this->m_050 + 0x30))(_this->m_050,0);
     self = GetIGraph();
-    pIVar2 = (*self->vtable->CreateStream)(self);
-    _this->m_06c = pIVar2;
-    uVar1 = 0;
-    if (pIVar2 != 0) {
-      uVar3 = FUN_00667f90((int)_this);
-      return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
+    pIVar3 = (*self->vtable->CreateStream)(self);
+    _this->m_06c = pIVar3;
+    uVar2 = 0;
+    if (pIVar3 != 0) {
+      uVar4 = FUN_00667f90((int)_this);
+      return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
     }
   }
-  return uVar1 & 0xffffff00;
+  return uVar2 & 0xffffff00;
 }
 
 
 // 0x006681a0
 uint32_t C_auto_00814540__FUN_006681a0(C_auto_00814540 *_this,uint32_t *param_1, ...)
 {
-  char cVar1;
-  uint32_t uVar2;
+  bool bVar1;
+  char cVar2;
+  undefined3 extraout_var;
   uint32_t uVar3;
+  undefined3 extraout_var_00;
   uint8_t *puVar4;
   int iVar5;
   uint32_t extraout_EAX;
-  int *piVar6;
+  uint32_t uVar6;
+  int *piVar7;
   void *unaff_ESI;
   int *piStack_8;
   uint32_t local_4;
   local_4 = 0xffffffff;
   piStack_8 = (int *)&LAB_00806d18;
   if ((param_1[1] & 0x40ff000) != 0) {
-    uVar2 = C_auto_00813dd0__FUN_0065d060((C_auto_00813dd0 *)_this,param_1);
-    return uVar2;
+    bVar1 = C_Control__HandleMessage((C_Control *)_this,param_1);
+    return CONCAT31(extraout_var,bVar1);
   }
   uVar3 = param_1[1] & 0x3000fff;
   if (uVar3 == 0x20000a0) {
     (**(code **)(*(int *)_this->m_06c + 0x18))(_this->m_06c);
-    piVar6 = _this->m_06c;
-    piStack_8 = (int *)(**(code **)(*piVar6 + 0x10))();
+    piVar7 = _this->m_06c;
+    piStack_8 = (int *)(**(code **)(*piVar7 + 0x10))();
     goto LAB_006682e9;
   }
   if (uVar3 == 0x20000a1) {
-    uVar2 = (**(code **)(*(int *)_this->m_06c + 0x18))(_this->m_06c);
-    return CONCAT31((int3)((uint32_t)uVar2 >> 8),1);
+    uVar6 = (**(code **)(*(int *)_this->m_06c + 0x18))(_this->m_06c);
+    return CONCAT31((int3)((uint32_t)uVar6 >> 8),1);
   }
   if (uVar3 != 0x20000a2) {
-    uVar2 = C_auto_00813dd0__FUN_0065d060((C_auto_00813dd0 *)_this,param_1);
-    return CONCAT31((int3)((uint32_t)uVar2 >> 8),1);
+    C_Control__HandleMessage((C_Control *)_this,param_1);
+    return CONCAT31(extraout_var_00,1);
   }
   if (param_1[5] == 0) {
     puVar4 = &DAT_00867a90;
@@ -232,14 +238,14 @@ uint32_t C_auto_00814540__FUN_006681a0(C_auto_00814540 *_this,uint32_t *param_1,
   }
   C_fstr_Construct((C_str *)&param_1,"GameMovie\\%s2",puVar4);
   local_4 = 0;
-  piVar6 = param_1 + 2;
+  piVar7 = param_1 + 2;
   if (param_1 == 0) {
-    piVar6 = (int *)&DAT_00867a90;
+    piVar7 = (int *)&DAT_00867a90;
   }
-  iVar5 = (**(code **)(*(int *)_this->m_06c + 0xc))(_this->m_06c,piVar6,0);
+  iVar5 = (**(code **)(*(int *)_this->m_06c + 0xc))(_this->m_06c,piVar7,0);
   if (iVar5 < 0) {
-    cVar1 = (**(code **)(*(int *)_this->m_06c + 8))(_this->m_06c);
-    if (cVar1 == '\0') goto LAB_0066826f;
+    cVar2 = (**(code **)(*(int *)_this->m_06c + 8))(_this->m_06c);
+    if (cVar2 == '\0') goto LAB_0066826f;
   }
   else {
 LAB_0066826f:

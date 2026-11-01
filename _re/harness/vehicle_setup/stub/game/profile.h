@@ -3,6 +3,7 @@
 // real names.
 #pragma once
 
+#include "common/c_str.h"
 #include "game/pending.h"                               // S_MultiplayerSettings
 #include "game/soldier.h"
 
@@ -35,10 +36,18 @@ class C_GameProfile {
 public:
     bool IsCooperativeGame() const;
     S_DetailSettings *GetDetailSettings();
+    // (The fonts' language, part 9a: fonts_test.inc.)
+    C_str GetLanguage();
+    bool IsLanguage(const char *language);
+    C_str GetTextDirectory();
+    // (The text boxes' layout, part 9b-ii: textbox_test.inc.)
+    bool UsesUnicodeFont() const { return m_unicodeFont; }
+    bool m_unicodeFont = false;
     S_HudOption *m_hudOption = nullptr;
     S_PlayMode *m_playMode = nullptr;
 };
 extern C_GameProfile g_gameProfile;
+void __stdcall GetGameVersion(int *major, int *minor);
 extern S_MultiplayerSettings *g_mpSettings;             // (a reference into g_gameProfile in the real header)
 
 // The squad soldier's slots (S_SquadSoldier::PutItem).

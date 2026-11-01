@@ -1,0 +1,42 @@
+# Part 9a-i: the font manager and the texture fonts (src/game/font.*; 0x0063df00..0x00641fb0 without
+# the GDI fonts and FontConfig.hxml, part 9a-ii). The manager's first four names are in hud.txt.
+# C_Font: vtable 0x00813b2c (abstract); C_TextureFont 0x00813b68; C_MapFont 0x00813b48.
+
+0063e000 C_FontManager::Load | void __thiscall Load(void *this)
+0063edd0 C_FontManager::Free | void __thiscall Free(void *this)
+0063f590 C_FontManager::AddTextureFont | bool __thiscall AddTextureFont(void *this, char * texture, char * table, int id)
+0063f400 C_FontManager::AddMapFont | bool __thiscall AddMapFont(void *this, char * texture, char * table, int id)
+0063f620 FontList_PushBack
+0063efd0 C_Font::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)
+0063efc0 C_Font::~C_Font | void __thiscall ~C_Font(void *this)
+0063f3c0 C_TextureFont::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)
+00640540 C_TextureFont::~C_TextureFont | void __thiscall ~C_TextureFont(void *this)
+00640600 C_TextureFont::LoadWithId | bool __thiscall LoadWithId(void *this, char * texture, char * table, int id)
+00640630 C_TextureFont::Load | bool __thiscall Load(void *this, char * texture, char * table)
+006405c0 C_TextureFont::Select | void __thiscall Select(void *this)
+006405e0 C_TextureFont::GetGlyph | void * __thiscall GetGlyph(void *this, int ch)
+006406c0 C_TextureFont::ClearVertices | void __thiscall ClearVertices(void *this)
+006406d0 C_TextureFont::Flush | void __thiscall Flush(void *this)
+00640740 C_TextureFont::GrowVertices | void __thiscall GrowVertices(void *this)
+006407e0 C_TextureFont::AddQuad | void __thiscall AddQuad(void *this, int ch, uint color, int width, int height, int x, int y, float z)
+0063f3e0 C_MapFont::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)
+00640a00 C_MapFont::~C_MapFont | void __thiscall ~C_MapFont(void *this)
+00640cc0 C_MapFont::GetGlyph | void * __thiscall GetGlyph(void *this, int ch)
+00640d30 C_MapFont::Load | bool __thiscall Load(void *this, char * texture, char * table)
+# The map font's std::map<int, S_Glyph> (MSVC6).
+00640bd0 GlyphMap_Dtor
+00641760 GlyphMap_Begin
+00641770 GlyphMap_MakePairResult
+00641790 GlyphMap_Erase
+00641ba0 GlyphMap_EraseSubtree
+00641be0 GlyphMap_InsertNode
+00641e50 GlyphMap_IterIncCopy
+00641eb0 GlyphMap_LowerBound
+00641ee0 GlyphMap_IterDec
+00641f40 GlyphMap_IterInc
+00641f90 GlyphMap_NewNode
+# Unreferenced (no code or data references; left in tier 1): a map font from a code page 1250
+# table (its 0x80..0xFF glyphs moved to their Unicode codes).
+0063f230 C_FontManager::AddCp1250Font
+00641720 C_MapFont::LoadCp1250
+00640f60 C_MapFont::MapCp1250

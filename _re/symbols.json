@@ -27240,6 +27240,36 @@
   "module": "simple_actors",
   "name": "StaticInit_614090"
  },
+ "00614e80": {
+  "module": "control",
+  "name": "AddDescMessage1",
+  "proto": "void __cdecl AddDescMessage1(void * desc, uint target, uint id, uint value)"
+ },
+ "00614f10": {
+  "module": "control",
+  "name": "AddDescMessage2",
+  "proto": "void __cdecl AddDescMessage2(void * desc, uint target, uint id, uint value, uint value2)"
+ },
+ "00614fa0": {
+  "module": "control",
+  "name": "AddDescMessageText",
+  "proto": "void __cdecl AddDescMessageText(void * desc, uint target, uint id, uint value, int text)"
+ },
+ "00615090": {
+  "module": "control",
+  "name": "S_ControlDesc::S_ControlDesc",
+  "proto": "void * __thiscall S_ControlDesc(S_ControlDesc *this, int type, char * name, uint id)"
+ },
+ "006151b0": {
+  "module": "control",
+  "name": "S_ControlDesc::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(S_ControlDesc *this, uchar flags)"
+ },
+ "006151d0": {
+  "module": "control",
+  "name": "S_ControlDesc::~S_ControlDesc",
+  "proto": "void __thiscall ~S_ControlDesc(S_ControlDesc *this)"
+ },
  "00615a30": {
   "module": "zz_idioms",
   "name": "vector_tidy_615a30"
@@ -27247,6 +27277,11 @@
  "00615a50": {
   "module": "zz_idioms",
   "name": "vector_size_e4_615a50"
+ },
+ "00615a90": {
+  "module": "control",
+  "name": "PostControlMessage",
+  "proto": "void __thiscall PostControlMessage(void *this, void * message)"
  },
  "006160f0": {
   "module": "zz_idioms",
@@ -27288,6 +27323,14 @@
   "module": "zz_idioms",
   "name": "vector_size_e4_61b3f0"
  },
+ "0061b410": {
+  "module": "xml_node",
+  "name": "XmlAttrs_Dtor"
+ },
+ "0061b450": {
+  "module": "xml_node",
+  "name": "XmlAttrs_Ctor"
+ },
  "0061b4f0": {
   "module": "zz_idioms",
   "name": "empty_function_61b4f0"
@@ -27327,6 +27370,15 @@
  "0061be10": {
   "module": "zz_idioms",
   "name": "construct_copy4_61be10"
+ },
+ "0061be20": {
+  "module": "xml_node",
+  "name": "XmlAttr_Dtor"
+ },
+ "0061e100": {
+  "module": "control",
+  "name": "AddDescMessage3",
+  "proto": "void __cdecl AddDescMessage3(void * desc, uint target, uint id, uint value, uint value2, uint value3)"
  },
  "00620770": {
   "module": "zz_idioms",
@@ -27392,25 +27444,159 @@
   "module": "zz_idioms",
   "name": "get_field_10_6392a0"
  },
+ "0063c2f0": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::Init",
+  "proto": "bool __thiscall Init(void *this, void * dc, char * face, int textureWidth, int textureHeight, int size, bool bold)"
+ },
+ "0063c500": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::MakeCells",
+  "proto": "bool __thiscall MakeCells(void *this, int width, int height, int gap, int start)"
+ },
+ "0063c740": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::Close",
+  "proto": "void __thiscall Close(void *this)"
+ },
+ "0063c9d0": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::Select",
+  "proto": "void __thiscall Select(void *this)"
+ },
+ "0063ccc0": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::CopyToTexture",
+  "proto": "void __thiscall CopyToTexture(void *this, void * cell)"
+ },
+ "0063cda0": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::DrawGlyph",
+  "proto": "bool __thiscall DrawGlyph(void *this, void * cell, int ch)"
+ },
+ "0063ced0": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::GetGlyph",
+  "proto": "void * __thiscall GetGlyph(void *this, int ch)"
+ },
+ "0063d0c0": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::Touch",
+  "proto": "void __thiscall Touch(void *this, void * cell)"
+ },
+ "0063d150": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::TakeCell",
+  "proto": "void * __thiscall TakeCell(void *this)"
+ },
+ "0063d1d0": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::SetSize"
+ },
+ "0063d260": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::SetSizeAndWeight"
+ },
+ "0063d310": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::Reset",
+  "proto": "void __thiscall Reset(void *this)"
+ },
  "0063d410": {
-  "module": "zz_idioms",
-  "name": "vector_size_e4_63d410"
+  "module": "gdi_font",
+  "name": "GlyphCells_Size"
  },
  "0063d430": {
-  "module": "zz_idioms",
-  "name": "empty_function_63d430"
+  "module": "gdi_font",
+  "name": "GlyphCells_Empty"
+ },
+ "0063d440": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_EraseRange"
+ },
+ "0063d510": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_MakePairResult"
+ },
+ "0063d530": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_Erase"
+ },
+ "0063d940": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_LowerBound"
+ },
+ "0063d980": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_EraseSubtree"
+ },
+ "0063d9c0": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_InsertNode"
  },
  "0063dc30": {
-  "module": "zz_idioms",
-  "name": "uninitialized_copy4_63dc30"
+  "module": "gdi_font",
+  "name": "GlyphCells_UninitializedCopy"
  },
  "0063dc60": {
-  "module": "zz_idioms",
-  "name": "uninitialized_fill_n4_63dc60"
+  "module": "gdi_font",
+  "name": "GlyphCells_UninitializedFill"
+ },
+ "0063dc90": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_Leftmost"
+ },
+ "0063dcb0": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_IterDec"
+ },
+ "0063dd10": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_UpperBound"
+ },
+ "0063dd40": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_IterInc"
+ },
+ "0063dd90": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_PairCopy"
  },
  "0063dda0": {
-  "module": "zz_idioms",
-  "name": "construct_copy4_63dda0"
+  "module": "gdi_font",
+  "name": "GlyphCells_Construct"
+ },
+ "0063ddb0": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_Distance"
+ },
+ "0063de40": {
+  "module": "gdi_font",
+  "name": "FontManager_StaticInit"
+ },
+ "0063de50": {
+  "module": "gdi_font",
+  "name": "FontManager_Construct"
+ },
+ "0063de60": {
+  "module": "gdi_font",
+  "name": "FontManager_RegisterDestroy"
+ },
+ "0063de70": {
+  "module": "gdi_font",
+  "name": "FontManager_Destroy"
+ },
+ "0063de80": {
+  "module": "gdi_font",
+  "name": "C_FontManager::C_FontManager"
+ },
+ "0063deb0": {
+  "module": "gdi_font",
+  "name": "C_FontManager::ScalarDeletingDestructor"
+ },
+ "0063ded0": {
+  "module": "gdi_font",
+  "name": "C_FontManager::~C_FontManager"
  },
  "0063df00": {
   "module": "hud",
@@ -27432,21 +27618,103 @@
   "name": "C_FontManager::FindFont",
   "proto": "void * __thiscall FindFont(void *this, int id)"
  },
+ "0063e000": {
+  "module": "font",
+  "name": "C_FontManager::Load",
+  "proto": "void __thiscall Load(void *this)"
+ },
+ "0063eae0": {
+  "module": "xml_node",
+  "name": "C_FontManager::LoadConfig",
+  "proto": "bool __thiscall LoadConfig(void *this, char * path, char * language)"
+ },
+ "0063edd0": {
+  "module": "font",
+  "name": "C_FontManager::Free",
+  "proto": "void __thiscall Free(void *this)"
+ },
+ "0063ee20": {
+  "module": "gdi_font",
+  "name": "C_FontManager::AddGdiFont",
+  "proto": "bool __thiscall AddGdiFont(void *this, char * face, int textureWidth, int textureHeight, int size, int id, bool bold)"
+ },
+ "0063efc0": {
+  "module": "font",
+  "name": "C_Font::~C_Font",
+  "proto": "void __thiscall ~C_Font(void *this)"
+ },
+ "0063efd0": {
+  "module": "font",
+  "name": "C_Font::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
  "0063eff0": {
-  "module": "zz_idioms",
-  "name": "empty_function_63eff0"
+  "module": "gdi_font",
+  "name": "C_GdiFont::GrowVertices"
  },
  "0063f000": {
-  "module": "zz_idioms",
-  "name": "empty_function_63f000"
+  "module": "gdi_font",
+  "name": "C_GdiFont::Flush"
  },
  "0063f010": {
-  "module": "zz_idioms",
-  "name": "empty_function_63f010"
+  "module": "gdi_font",
+  "name": "C_GdiFont::ClearVertices"
  },
  "0063f020": {
-  "module": "zz_idioms",
-  "name": "empty_function_63f020"
+  "module": "gdi_font",
+  "name": "C_GdiFont::AddQuad"
+ },
+ "0063f030": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0063f050": {
+  "module": "gdi_font",
+  "name": "C_GdiFont::~C_GdiFont",
+  "proto": "void __thiscall ~C_GdiFont(void *this)"
+ },
+ "0063f140": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_Dtor"
+ },
+ "0063f230": {
+  "module": "font",
+  "name": "C_FontManager::AddCp1250Font"
+ },
+ "0063f3c0": {
+  "module": "font",
+  "name": "C_TextureFont::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0063f3e0": {
+  "module": "font",
+  "name": "C_MapFont::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0063f400": {
+  "module": "font",
+  "name": "C_FontManager::AddMapFont",
+  "proto": "bool __thiscall AddMapFont(void *this, char * texture, char * table, int id)"
+ },
+ "0063f590": {
+  "module": "font",
+  "name": "C_FontManager::AddTextureFont",
+  "proto": "bool __thiscall AddTextureFont(void *this, char * texture, char * table, int id)"
+ },
+ "0063f620": {
+  "module": "font",
+  "name": "FontList_PushBack"
+ },
+ "0063f7d0": {
+  "module": "text_box",
+  "name": "FlushFonts",
+  "proto": "void __cdecl FlushFonts(void)"
+ },
+ "0063f800": {
+  "module": "text_box",
+  "name": "SetFontBatching",
+  "proto": "void __fastcall SetFontBatching(bool on)"
  },
  "00640460": {
   "module": "zz_idioms",
@@ -27455,6 +27723,10 @@
  "00640480": {
   "module": "zz_idioms",
   "name": "empty_function_640480"
+ },
+ "00640490": {
+  "module": "gdi_font",
+  "name": "GlyphCellMap_Begin"
  },
  "006404a0": {
   "module": "zz_idioms",
@@ -27468,6 +27740,158 @@
   "module": "zz_idioms",
   "name": "construct_copy4_640500"
  },
+ "00640540": {
+  "module": "font",
+  "name": "C_TextureFont::~C_TextureFont",
+  "proto": "void __thiscall ~C_TextureFont(void *this)"
+ },
+ "006405c0": {
+  "module": "font",
+  "name": "C_TextureFont::Select",
+  "proto": "void __thiscall Select(void *this)"
+ },
+ "006405e0": {
+  "module": "font",
+  "name": "C_TextureFont::GetGlyph",
+  "proto": "void * __thiscall GetGlyph(void *this, int ch)"
+ },
+ "00640600": {
+  "module": "font",
+  "name": "C_TextureFont::LoadWithId",
+  "proto": "bool __thiscall LoadWithId(void *this, char * texture, char * table, int id)"
+ },
+ "00640630": {
+  "module": "font",
+  "name": "C_TextureFont::Load",
+  "proto": "bool __thiscall Load(void *this, char * texture, char * table)"
+ },
+ "006406c0": {
+  "module": "font",
+  "name": "C_TextureFont::ClearVertices",
+  "proto": "void __thiscall ClearVertices(void *this)"
+ },
+ "006406d0": {
+  "module": "font",
+  "name": "C_TextureFont::Flush",
+  "proto": "void __thiscall Flush(void *this)"
+ },
+ "00640740": {
+  "module": "font",
+  "name": "C_TextureFont::GrowVertices",
+  "proto": "void __thiscall GrowVertices(void *this)"
+ },
+ "006407e0": {
+  "module": "font",
+  "name": "C_TextureFont::AddQuad",
+  "proto": "void __thiscall AddQuad(void *this, int ch, uint color, int width, int height, int x, int y, float z)"
+ },
+ "00640a00": {
+  "module": "font",
+  "name": "C_MapFont::~C_MapFont",
+  "proto": "void __thiscall ~C_MapFont(void *this)"
+ },
+ "00640bd0": {
+  "module": "font",
+  "name": "GlyphMap_Dtor"
+ },
+ "00640cc0": {
+  "module": "font",
+  "name": "C_MapFont::GetGlyph",
+  "proto": "void * __thiscall GetGlyph(void *this, int ch)"
+ },
+ "00640d30": {
+  "module": "font",
+  "name": "C_MapFont::Load",
+  "proto": "bool __thiscall Load(void *this, char * texture, char * table)"
+ },
+ "00640f60": {
+  "module": "font",
+  "name": "C_MapFont::MapCp1250"
+ },
+ "00641720": {
+  "module": "font",
+  "name": "C_MapFont::LoadCp1250"
+ },
+ "00641760": {
+  "module": "font",
+  "name": "GlyphMap_Begin"
+ },
+ "00641770": {
+  "module": "font",
+  "name": "GlyphMap_MakePairResult"
+ },
+ "00641790": {
+  "module": "font",
+  "name": "GlyphMap_Erase"
+ },
+ "00641ba0": {
+  "module": "font",
+  "name": "GlyphMap_EraseSubtree"
+ },
+ "00641be0": {
+  "module": "font",
+  "name": "GlyphMap_InsertNode"
+ },
+ "00641e50": {
+  "module": "font",
+  "name": "GlyphMap_IterIncCopy"
+ },
+ "00641eb0": {
+  "module": "font",
+  "name": "GlyphMap_LowerBound"
+ },
+ "00641ee0": {
+  "module": "font",
+  "name": "GlyphMap_IterDec"
+ },
+ "00641f40": {
+  "module": "font",
+  "name": "GlyphMap_IterInc"
+ },
+ "00641f90": {
+  "module": "font",
+  "name": "GlyphMap_NewNode"
+ },
+ "00641fe0": {
+  "module": "text_style",
+  "name": "TextStyles_Release",
+  "proto": "bool __thiscall TextStyles_Release(void *this, int style)"
+ },
+ "006420b0": {
+  "module": "text_style",
+  "name": "TextStyles_Create",
+  "proto": "int __thiscall TextStyles_Create(void *this, void * desc)"
+ },
+ "00642150": {
+  "module": "text_style",
+  "name": "TextStyles_AddDefaults",
+  "proto": "void __fastcall TextStyles_AddDefaults(void *this)"
+ },
+ "00643ab0": {
+  "module": "text_style",
+  "name": "S_TextStyleDesc_Set"
+ },
+ "00643b20": {
+  "module": "text_style",
+  "name": "TextStyles_StaticInit"
+ },
+ "00643b30": {
+  "module": "text_style",
+  "name": "TextStyles_Construct"
+ },
+ "00643b60": {
+  "module": "text_style",
+  "name": "TextStyles_RegisterDestroy"
+ },
+ "00643b70": {
+  "module": "text_style",
+  "name": "TextStyles_Destroy"
+ },
+ "00643b80": {
+  "module": "text_style",
+  "name": "TextStyles_Dtor",
+  "proto": "void __fastcall TextStyles_Dtor(void *this)"
+ },
  "00643bf0": {
   "module": "hud",
   "name": "ReleaseTextStyle",
@@ -27478,10 +27902,70 @@
   "name": "CreateTextStyle",
   "proto": "int __fastcall CreateTextStyle(void * desc)"
  },
+ "00643c20": {
+  "module": "text_box",
+  "name": "C_TextBox::EditRun",
+  "proto": "bool __thiscall EditRun(C_TextBox *this, int index)"
+ },
+ "00643ca0": {
+  "module": "text_box",
+  "name": "C_TextBox::GetLineCentre",
+  "proto": "S_vector4 * __thiscall GetLineCentre(C_TextBox *this, S_vector4 * out, int line)"
+ },
+ "00643dd0": {
+  "module": "text_box",
+  "name": "C_TextBox::GetRunText",
+  "proto": "C_str * __thiscall GetRunText(C_TextBox *this, C_str * out, int index)"
+ },
+ "00643e40": {
+  "module": "text_box",
+  "name": "C_TextBox::ScrollToLine",
+  "proto": "bool __thiscall ScrollToLine(C_TextBox *this, int line)"
+ },
+ "00643f10": {
+  "module": "text_box",
+  "name": "C_TextBox::SelectHovered",
+  "proto": "short __thiscall SelectHovered(C_TextBox *this)"
+ },
+ "00643f50": {
+  "module": "text_box",
+  "name": "C_TextBox::SelectRun",
+  "proto": "short __thiscall SelectRun(C_TextBox *this, int index)"
+ },
+ "00643fb0": {
+  "module": "text_box",
+  "name": "C_TextBox::GetSelection",
+  "proto": "short __thiscall GetSelection(C_TextBox *this)"
+ },
+ "00644090": {
+  "module": "text_box",
+  "name": "C_TextBox::SetHover",
+  "proto": "bool __thiscall SetHover(C_TextBox *this, int line)"
+ },
+ "006440e0": {
+  "module": "text_box",
+  "name": "C_TextBox::HoverAt",
+  "proto": "bool __thiscall HoverAt(C_TextBox *this, int x, int y)"
+ },
+ "00644120": {
+  "module": "text_box",
+  "name": "C_TextBox::ClearHover",
+  "proto": "bool __thiscall ClearHover(C_TextBox *this)"
+ },
+ "00644140": {
+  "module": "text_box",
+  "name": "C_TextBox::LineAt",
+  "proto": "short __thiscall LineAt(C_TextBox *this, int x, int y)"
+ },
  "006441a0": {
   "module": "hud",
   "name": "C_TextBox::UpdateScrollRange",
   "proto": "void __thiscall UpdateScrollRange(C_TextBox *this)"
+ },
+ "00644230": {
+  "module": "text_box",
+  "name": "C_TextBox::GetScrollRange",
+  "proto": "short __thiscall GetScrollRange(C_TextBox *this)"
  },
  "00644250": {
   "module": "hud",
@@ -27489,8 +27973,34 @@
   "proto": "bool __thiscall ScrollTo(C_TextBox *this, int line)"
  },
  "00644270": {
-  "module": "zz_idioms",
-  "name": "get_field_78_644270"
+  "module": "text_box",
+  "name": "C_TextBox::GetScroll",
+  "proto": "int __thiscall GetScroll(C_TextBox *this)"
+ },
+ "00644280": {
+  "module": "text_box",
+  "name": "C_TextBox::TickCaret",
+  "proto": "void __thiscall TickCaret(C_TextBox *this, int time)"
+ },
+ "006442d0": {
+  "module": "text_box",
+  "name": "C_TextBox::AddVertex",
+  "proto": "void __thiscall AddVertex(C_TextBox *this, float x, float y, float u, float v, uint colour)"
+ },
+ "00644320": {
+  "module": "text_box",
+  "name": "C_TextBox::SetSelectedText",
+  "proto": "bool __thiscall SetSelectedText(C_TextBox *this, C_str * text)"
+ },
+ "006443a0": {
+  "module": "text_box",
+  "name": "C_TextBox::GetSelectedText",
+  "proto": "C_str * __thiscall GetSelectedText(C_TextBox *this, C_str * out)"
+ },
+ "00644410": {
+  "module": "text_box",
+  "name": "C_TextBox::SetRun",
+  "proto": "bool __thiscall SetRun(C_TextBox *this, C_str * text, uchar style, int index)"
  },
  "00644520": {
   "module": "hud",
@@ -27513,14 +28023,39 @@
   "proto": "bool __thiscall AddText(C_TextBox *this, C_str * text, uchar style)"
  },
  "006448b0": {
-  "module": "hud",
+  "module": "text_box",
   "name": "C_TextBox::AddRun",
   "proto": "bool __thiscall AddRun(C_TextBox *this, C_str * text, uchar style)"
+ },
+ "00644920": {
+  "module": "text_box",
+  "name": "C_TextBox::InsertRun",
+  "proto": "bool __thiscall InsertRun(C_TextBox *this, C_str * text, uchar style, int index)"
+ },
+ "00644a50": {
+  "module": "text_box",
+  "name": "C_TextBox::InsertTextId",
+  "proto": "bool __thiscall InsertTextId(C_TextBox *this, int textId, uchar style, int index)"
+ },
+ "00644b20": {
+  "module": "text_box",
+  "name": "C_TextBox::InsertText",
+  "proto": "bool __thiscall InsertText(C_TextBox *this, C_str * text, uchar style, int index)"
+ },
+ "00644bb0": {
+  "module": "text_box",
+  "name": "C_TextBox::RemoveRun",
+  "proto": "bool __thiscall RemoveRun(C_TextBox *this, int index)"
  },
  "00644c80": {
   "module": "hud",
   "name": "C_TextBox::Clear",
   "proto": "void __thiscall Clear(C_TextBox *this)"
+ },
+ "00644cf0": {
+  "module": "text_box",
+  "name": "C_TextBox::VisualDepth",
+  "proto": "float __stdcall VisualDepth(I3D_scene * scene, I3D_frame * visual)"
  },
  "00644da0": {
   "module": "hud",
@@ -27537,30 +28072,332 @@
   "name": "C_TextBox::FreeLayout",
   "proto": "void __thiscall FreeLayout(C_TextBox *this)"
  },
+ "00644f70": {
+  "module": "text_box",
+  "name": "S_TextLine::~S_TextLine",
+  "proto": "void __thiscall ~S_TextLine(void *this)"
+ },
+ "00645010": {
+  "module": "text_box",
+  "name": "C_TextBox::SelectStyle",
+  "proto": "bool __thiscall SelectStyle(C_TextBox *this, int style)"
+ },
+ "00645080": {
+  "module": "text_box",
+  "name": "C_TextBox::TextWidth",
+  "proto": "int __thiscall TextWidth(C_TextBox *this, C_str * text, int size)"
+ },
+ "00645130": {
+  "module": "text_box",
+  "name": "C_TextBox::Advance",
+  "proto": "int __thiscall Advance(C_TextBox *this, int ch, int size)"
+ },
+ "006451d0": {
+  "module": "text_box",
+  "name": "C_TextBox::FontSize",
+  "proto": "int __thiscall FontSize(C_TextBox *this)"
+ },
  "00645200": {
   "module": "zz_idioms",
   "name": "identity_645200"
  },
+ "00645210": {
+  "module": "text_box",
+  "name": "C_TextBox::Truncate",
+  "proto": "C_str * __thiscall Truncate(C_TextBox *this, C_str * out, C_str * text, float size, float maxWidth)"
+ },
+ "00645590": {
+  "module": "text_box",
+  "name": "C_TextBox::Layout",
+  "proto": "bool __thiscall Layout(C_TextBox *this)"
+ },
+ "00645a10": {
+  "module": "text_box",
+  "name": "S_TextLine::Reset",
+  "proto": "void __thiscall Reset(void *this)"
+ },
  "00645a80": {
   "module": "zz_idioms",
   "name": "vector_tidy_645a80"
+ },
+ "00645aa0": {
+  "module": "text_box",
+  "name": "S_TextWord::~S_TextWord",
+  "proto": "void __thiscall ~S_TextWord(void *this)"
+ },
+ "00645ac0": {
+  "module": "text_box",
+  "name": "C_TextBox::FlowRun",
+  "proto": "int __thiscall FlowRun(C_TextBox *this, void * run)"
+ },
+ "00645ae0": {
+  "module": "text_box",
+  "name": "C_TextBox::FlowUtf8",
+  "proto": "int __thiscall FlowUtf8(C_TextBox *this, void * run)"
+ },
+ "00646240": {
+  "module": "text_box",
+  "name": "C_TextBox::FlowWords",
+  "proto": "int __thiscall FlowWords(C_TextBox *this, void * run)"
+ },
+ "00646ab0": {
+  "module": "text_box",
+  "name": "C_TextBox::CheckLineOverflow",
+  "proto": "bool __thiscall CheckLineOverflow(C_TextBox *this, void * line)"
+ },
+ "00646ad0": {
+  "module": "text_box",
+  "name": "C_TextBox::CheckPieceOverflow",
+  "proto": "bool __thiscall CheckPieceOverflow(C_TextBox *this, void * piece)"
+ },
+ "00646b40": {
+  "module": "text_box",
+  "name": "C_TextBox::Position",
+  "proto": "bool __thiscall Position(C_TextBox *this)"
+ },
+ "00646bf0": {
+  "module": "text_box",
+  "name": "C_TextBox::VAlignOffset",
+  "proto": "float __thiscall VAlignOffset(C_TextBox *this, int valign)"
+ },
+ "00646c60": {
+  "module": "text_box",
+  "name": "C_TextBox::TextHeight",
+  "proto": "int __thiscall TextHeight(C_TextBox *this)"
+ },
+ "00646ce0": {
+  "module": "text_box",
+  "name": "C_TextBox::StackLines",
+  "proto": "void __thiscall StackLines(C_TextBox *this, int bottom)"
+ },
+ "00646d30": {
+  "module": "text_box",
+  "name": "C_TextBox::AlignLine",
+  "proto": "void __thiscall AlignLine(C_TextBox *this, void * line, bool last, int index)"
+ },
+ "006470d0": {
+  "module": "text_box",
+  "name": "C_TextBox::PlaceWordsAtX",
+  "proto": "void __thiscall PlaceWordsAtX(C_TextBox *this, void * line)"
+ },
+ "00647250": {
+  "module": "text_box",
+  "name": "C_TextBox::PlaceLines",
+  "proto": "void __thiscall PlaceLines(C_TextBox *this)"
+ },
+ "00647360": {
+  "module": "text_box",
+  "name": "C_TextBox::PlacePieces",
+  "proto": "void __thiscall PlacePieces(C_TextBox *this)"
+ },
+ "00647590": {
+  "module": "text_box",
+  "name": "C_TextBox::JustifyGap",
+  "proto": "float __thiscall JustifyGap(C_TextBox *this, void * line)"
+ },
+ "00647600": {
+  "module": "text_box",
+  "name": "C_TextBox::SplitWords",
+  "proto": "void __thiscall SplitWords(C_TextBox *this, void * line)"
+ },
+ "00647620": {
+  "module": "text_box",
+  "name": "C_TextBox::SplitWordsUtf8",
+  "proto": "void __thiscall SplitWordsUtf8(C_TextBox *this, void * line)"
+ },
+ "00647b50": {
+  "module": "text_box",
+  "name": "C_TextBox::SplitWordsBytes",
+  "proto": "void __thiscall SplitWordsBytes(C_TextBox *this, void * line)"
+ },
+ "00648020": {
+  "module": "text_box",
+  "name": "C_TextBox::ClipViewport",
+  "proto": "bool __thiscall ClipViewport(C_TextBox *this, void * viewport)"
+ },
+ "00648190": {
+  "module": "text_box",
+  "name": "ReadScreenSize",
+  "proto": "void __stdcall ReadScreenSize(int x, int y)"
+ },
+ "006481b0": {
+  "module": "text_box",
+  "name": "C_TextBox::WordColour",
+  "proto": "uint __thiscall WordColour(C_TextBox *this, int line)"
  },
  "00648200": {
   "module": "hud",
   "name": "C_TextBox::Render",
   "proto": "void __thiscall Render(C_TextBox *this)"
  },
+ "00648b80": {
+  "module": "text_box",
+  "name": "C_TextBox::DrawString",
+  "proto": "bool __thiscall DrawString(C_TextBox *this, void * text, uint colour)"
+ },
+ "00648fa0": {
+  "module": "text_box",
+  "name": "C_TextBox::DrawCaret",
+  "proto": "void __thiscall DrawCaret(C_TextBox *this, uint colour)"
+ },
+ "006491d0": {
+  "module": "text_box",
+  "name": "C_TextBox::StepUnknown76",
+  "proto": "void __thiscall StepUnknown76(C_TextBox *this, short step, short * value)"
+ },
+ "00649250": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::NewPage",
+  "proto": "void __thiscall NewPage(C_PagedTextBox *this)"
+ },
+ "00649470": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::LastPage",
+  "proto": "void * __thiscall LastPage(C_PagedTextBox *this)"
+ },
+ "006494a0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::LayoutPages",
+  "proto": "bool __thiscall LayoutPages(C_PagedTextBox *this)"
+ },
+ "006497b0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::PlacePages",
+  "proto": "void __thiscall PlacePages(C_PagedTextBox *this)"
+ },
+ "006497f0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::NextJustified",
+  "proto": "bool __thiscall NextJustified(C_PagedTextBox *this, int page, int line)"
+ },
+ "00649970": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::AlignPage",
+  "proto": "void __thiscall AlignPage(C_PagedTextBox *this, int index)"
+ },
+ "006499f0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::StackPage",
+  "proto": "void __thiscall StackPage(C_PagedTextBox *this, int index)"
+ },
+ "00649a90": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::AddLineToPage",
+  "proto": "void __thiscall AddLineToPage(C_PagedTextBox *this, void * line)"
+ },
+ "00649c60": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::FlowPaged",
+  "proto": "bool __thiscall FlowPaged(C_PagedTextBox *this, void * run, void * line)"
+ },
+ "00649c80": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::FlowPagedUtf8",
+  "proto": "bool __thiscall FlowPagedUtf8(C_PagedTextBox *this, void * run, void * line)"
+ },
+ "0064a4d0": {
+  "module": "text_box",
+  "name": "S_TextLine::AddWord",
+  "proto": "void __thiscall AddWord(void *this, void * word, int size, int below, int above)"
+ },
+ "0064a6c0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::FlowPagedBytes",
+  "proto": "bool __thiscall FlowPagedBytes(C_PagedTextBox *this, void * run, void * line)"
+ },
  "0064ae60": {
-  "module": "zz_idioms",
-  "name": "empty_function_64ae60"
+  "module": "text_box",
+  "name": "C_PagedTextBox::FreePages",
+  "proto": "void __thiscall FreePages(C_PagedTextBox *this)"
+ },
+ "0064ae70": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::Render",
+  "proto": "void __thiscall Render(C_PagedTextBox *this)"
+ },
+ "0064af10": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::RenderPage",
+  "proto": "void __thiscall RenderPage(C_PagedTextBox *this, void * page)"
+ },
+ "0064b070": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::ClipArea",
+  "proto": "bool __thiscall ClipArea(C_PagedTextBox *this, void * viewport, float * area)"
  },
  "0064b1e0": {
-  "module": "zz_idioms",
-  "name": "empty_function_64b1e0"
+  "module": "text_box",
+  "name": "C_TextBox::Reattach",
+  "proto": "void __thiscall Reattach(C_TextBox *this, I3D_scene * scene, void * root)"
+ },
+ "0064b200": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::AddArea",
+  "proto": "void __thiscall AddArea(C_PagedTextBox *this, I3D_scene * scene, I3D_frame * visual)"
+ },
+ "0064b7f0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::AlignPageLine",
+  "proto": "void __thiscall AlignPageLine(C_PagedTextBox *this, int page, int line, bool last)"
+ },
+ "0064bad0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::JustifyPageGap",
+  "proto": "float __thiscall JustifyPageGap(C_PagedTextBox *this, void * page, void * line)"
+ },
+ "0064bb30": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::SetPage",
+  "proto": "void __thiscall SetPage(C_PagedTextBox *this, int page)"
+ },
+ "0064bb60": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::NumPages",
+  "proto": "int __thiscall NumPages(C_PagedTextBox *this)"
+ },
+ "0064bb80": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::Relayout",
+  "proto": "void __thiscall Relayout(C_PagedTextBox *this)"
+ },
+ "0064bb90": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::LastPageBreak",
+  "proto": "int __thiscall LastPageBreak(C_PagedTextBox *this)"
+ },
+ "0064bc60": {
+  "module": "text_box",
+  "name": "C_VideoTextBox::ScrollTo",
+  "proto": "bool __thiscall ScrollTo(C_VideoTextBox *this, int pixels)"
+ },
+ "0064bc70": {
+  "module": "text_box",
+  "name": "C_VideoTextBox::Render",
+  "proto": "void __thiscall Render(C_VideoTextBox *this)"
+ },
+ "0064bfe0": {
+  "module": "text_box",
+  "name": "C_VideoTextBox::Finished",
+  "proto": "bool __thiscall Finished(C_VideoTextBox *this)"
+ },
+ "0064c010": {
+  "module": "text_box",
+  "name": "text_word_valid_64c010",
+  "proto": "bool __thiscall text_word_valid_64c010(void * this, int index)"
+ },
+ "0064c040": {
+  "module": "text_box",
+  "name": "construct_text_words_64c040",
+  "proto": "void * __thiscall construct_text_words_64c040(void * this, void * allocator)"
  },
  "0064c060": {
   "module": "zz_idioms",
   "name": "vector_size_e4_64c060"
+ },
+ "0064c080": {
+  "module": "text_box",
+  "name": "text_run_at_64c080",
+  "proto": "void * __thiscall text_run_at_64c080(void * this, int index)"
  },
  "0064c090": {
   "module": "zz_idioms",
@@ -27570,13 +28407,28 @@
   "module": "zz_idioms",
   "name": "vector_size_e4_64c0e0"
  },
+ "0064c100": {
+  "module": "text_box",
+  "name": "text_style_valid_64c100",
+  "proto": "bool __thiscall text_style_valid_64c100(void * this, int index)"
+ },
  "0064c130": {
   "module": "zz_idioms",
   "name": "vector_size_e4_64c130"
  },
+ "0064c150": {
+  "module": "text_box",
+  "name": "S_TextPiece::~S_TextPiece",
+  "proto": "void __thiscall ~S_TextPiece(void *this)"
+ },
  "0064c310": {
   "module": "zz_idioms",
   "name": "empty_function_64c310"
+ },
+ "0064c320": {
+  "module": "text_box",
+  "name": "vector_insert_text_run_64c320",
+  "proto": "void __thiscall vector_insert_text_run_64c320(void * this, void * where, uint count, void * value)"
  },
  "0064c610": {
   "module": "zz_idioms",
@@ -27585,6 +28437,25 @@
  "0064c620": {
   "module": "zz_idioms",
   "name": "empty_function_64c620"
+ },
+ "0064c630": {
+  "module": "text_box",
+  "name": "vector_insert_text_word_64c630",
+  "proto": "void __thiscall vector_insert_text_word_64c630(void * this, void * where, uint count, void * value)"
+ },
+ "0064c840": {
+  "module": "text_box",
+  "name": "vector_insert_text_line_64c840",
+  "proto": "void __thiscall vector_insert_text_line_64c840(void * this, void * where, uint count, void * value)"
+ },
+ "0064ca50": {
+  "module": "text_box",
+  "name": "vector_insert_text_piece_64ca50",
+  "proto": "void __thiscall vector_insert_text_piece_64ca50(void * this, void * where, uint count, void * value)"
+ },
+ "0064cc60": {
+  "module": "text_style",
+  "name": "TextStyleList_Insert"
  },
  "0064ce70": {
   "module": "zz_idioms",
@@ -27614,6 +28485,11 @@
   "module": "zz_idioms",
   "name": "copy4_64d000"
  },
+ "0064d020": {
+  "module": "text_box",
+  "name": "construct_text_run_64d020",
+  "proto": "void __fastcall construct_text_run_64d020(void * where, void * run)"
+ },
  "0064d040": {
   "module": "zz_idioms",
   "name": "construct_copy4_64d040"
@@ -27622,9 +28498,165 @@
   "module": "zz_idioms",
   "name": "construct_copy4_64d050"
  },
+ "0064d3d0": {
+  "module": "text_box",
+  "name": "IsLegalUtf8Range",
+  "proto": "bool __fastcall IsLegalUtf8Range(uchar * begin, uchar * end)"
+ },
+ "0064d400": {
+  "module": "text_box",
+  "name": "IsLegalUtf8",
+  "proto": "bool __fastcall IsLegalUtf8(uchar * source, int length)"
+ },
+ "0064d830": {
+  "module": "text_box",
+  "name": "DecodeUtf8",
+  "proto": "int __fastcall DecodeUtf8(uint * codePoint, char * text, int length)"
+ },
+ "0064d910": {
+  "module": "text_box",
+  "name": "EncodeUtf8",
+  "proto": "int __fastcall EncodeUtf8(char * out, uint * codePoint, int maxBytes)"
+ },
+ "0064d9e0": {
+  "module": "text_box",
+  "name": "HasUtf8Sequences",
+  "proto": "bool __fastcall HasUtf8Sequences(char * text)"
+ },
+ "0064da80": {
+  "module": "text_box",
+  "name": "HasCjkCharacters",
+  "proto": "bool __fastcall HasCjkCharacters(ushort * text)"
+ },
+ "0064dce0": {
+  "module": "control",
+  "name": "C_Control::IsChild",
+  "proto": "bool __thiscall IsChild(C_Control *this, int index)"
+ },
+ "0064dd10": {
+  "module": "control",
+  "name": "C_Control::TakesInput",
+  "proto": "bool __thiscall TakesInput(C_Control *this)"
+ },
+ "0064dd30": {
+  "module": "control",
+  "name": "C_Control::GetHighlightFrame",
+  "proto": "void * __thiscall GetHighlightFrame(C_Control *this)"
+ },
  "0064dd40": {
-  "module": "zz_idioms",
-  "name": "empty_function_64dd40"
+  "module": "control",
+  "name": "C_Control::Tick",
+  "proto": "void __thiscall Tick(C_Control *this, int time)"
+ },
+ "0064dd50": {
+  "module": "control",
+  "name": "C_Control::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_Control *this, int value)"
+ },
+ "0064dd60": {
+  "module": "control",
+  "name": "C_Control::Unknown24",
+  "proto": "bool __thiscall Unknown24(C_Control *this, int value)"
+ },
+ "0064dd70": {
+  "module": "control",
+  "name": "C_Control::Unknown28",
+  "proto": "bool __thiscall Unknown28(C_Control *this)"
+ },
+ "0064dd80": {
+  "module": "control",
+  "name": "C_Control::OnEnter",
+  "proto": "int __thiscall OnEnter(C_Control *this, int id)"
+ },
+ "0064dda0": {
+  "module": "control",
+  "name": "C_Control::OnLeave",
+  "proto": "int __thiscall OnLeave(C_Control *this, int id)"
+ },
+ "0064ddc0": {
+  "module": "control",
+  "name": "C_Control::OnClick",
+  "proto": "int __thiscall OnClick(C_Control *this, int id)"
+ },
+ "0064dde0": {
+  "module": "control",
+  "name": "C_Control::OnInput02",
+  "proto": "int __thiscall OnInput02(C_Control *this, int id)"
+ },
+ "0064de00": {
+  "module": "control",
+  "name": "C_Control::OnInput05",
+  "proto": "int __thiscall OnInput05(C_Control *this, int id)"
+ },
+ "0064de20": {
+  "module": "control",
+  "name": "C_Control::OnRelease",
+  "proto": "int __thiscall OnRelease(C_Control *this, int id)"
+ },
+ "0064de40": {
+  "module": "control",
+  "name": "C_Control::OnPress",
+  "proto": "int __thiscall OnPress(C_Control *this, int id)"
+ },
+ "0064de60": {
+  "module": "control",
+  "name": "C_Control::OnWheel",
+  "proto": "int __thiscall OnWheel(C_Control *this, int id, int amount)"
+ },
+ "0064de80": {
+  "module": "control",
+  "name": "C_Control::OnInput08",
+  "proto": "int __thiscall OnInput08(C_Control *this, int id)"
+ },
+ "0064dea0": {
+  "module": "control",
+  "name": "C_Control::OnInput09",
+  "proto": "int __thiscall OnInput09(C_Control *this, int id)"
+ },
+ "0064dec0": {
+  "module": "control",
+  "name": "C_Control::OnInput0A",
+  "proto": "int __thiscall OnInput0A(C_Control *this, int id)"
+ },
+ "0064dee0": {
+  "module": "control",
+  "name": "C_Control::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(C_Control *this, int id)"
+ },
+ "0064df00": {
+  "module": "control",
+  "name": "C_Control::OnInput13",
+  "proto": "int __thiscall OnInput13(C_Control *this, int id)"
+ },
+ "0064df20": {
+  "module": "control",
+  "name": "C_Control::OnInput0B",
+  "proto": "int __thiscall OnInput0B(C_Control *this, int id)"
+ },
+ "0064df40": {
+  "module": "control",
+  "name": "C_Control::Unknown68",
+  "proto": "int __thiscall Unknown68(C_Control *this, int value)"
+ },
+ "0064df50": {
+  "module": "control",
+  "name": "C_Control::HandleMessageCopy",
+  "proto": "bool __thiscall HandleMessageCopy(C_Control *this, void * message)"
+ },
+ "0064dfe0": {
+  "module": "control",
+  "name": "C_Control::C_Control",
+  "proto": "void * __thiscall C_Control(C_Control *this, void * scene, uint id, void * parent)"
+ },
+ "0064e080": {
+  "module": "control",
+  "name": "C_Control::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Control *this, uchar flags)"
+ },
+ "0064e0a0": {
+  "module": "control",
+  "name": "C_Control::~C_Control",
+  "proto": "void __thiscall ~C_Control(C_Control *this)"
  },
  "0064e1c0": {
   "module": "zz_idioms",
@@ -27634,13 +28666,218 @@
   "module": "zz_idioms",
   "name": "vector_tidy_64e240"
  },
+ "0064e260": {
+  "module": "controls",
+  "name": "C_TitleControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0064e280": {
+  "module": "controls",
+  "name": "C_TitleControl::~C_TitleControl",
+  "proto": "void __thiscall ~C_TitleControl(void *this)"
+ },
+ "0064e3b0": {
+  "module": "controls",
+  "name": "C_TextControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_TextControl *this, uchar flags)"
+ },
+ "0064e3d0": {
+  "module": "controls",
+  "name": "C_TextControl::~C_TextControl",
+  "proto": "void __thiscall ~C_TextControl(C_TextControl *this)"
+ },
  "0064e510": {
   "module": "zz_idioms",
   "name": "get_field_7c_64e510"
  },
+ "0064f220": {
+  "module": "controls",
+  "name": "C_TextControl::C_TextControl",
+  "proto": "void * __thiscall C_TextControl(C_TextControl *this, void * scene, uint id, void * parent)"
+ },
+ "0064f4a0": {
+  "module": "controls",
+  "name": "C_SpinControl::FindChild",
+  "proto": "int __thiscall FindChild(C_SpinControl *this, uint id)"
+ },
+ "0064f4e0": {
+  "module": "controls",
+  "name": "C_SpinControl::Create",
+  "proto": "bool __thiscall Create(C_SpinControl *this, void * frame, void * root, void * desc)"
+ },
+ "0064f710": {
+  "module": "controls",
+  "name": "C_Button::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Button *this, uchar flags)"
+ },
+ "0064f730": {
+  "module": "controls",
+  "name": "C_Button::~C_Button",
+  "proto": "void __thiscall ~C_Button(C_Button *this)"
+ },
+ "0064f870": {
+  "module": "controls",
+  "name": "C_SpinControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_SpinControl *this, void * message)"
+ },
+ "0064fc20": {
+  "module": "controls",
+  "name": "C_SpinControl::OnInput05",
+  "proto": "int __thiscall OnInput05(C_SpinControl *this, int id)"
+ },
+ "0064fc80": {
+  "module": "controls",
+  "name": "C_SpinControl::OnEnter",
+  "proto": "int __thiscall OnEnter(C_SpinControl *this, int id)"
+ },
+ "0064fcd0": {
+  "module": "controls",
+  "name": "C_SpinControl::OnLeave",
+  "proto": "int __thiscall OnLeave(C_SpinControl *this, int id)"
+ },
+ "0064fd20": {
+  "module": "controls",
+  "name": "C_SpinControl::OnClick",
+  "proto": "int __thiscall OnClick(C_SpinControl *this, int id)"
+ },
+ "0064fd30": {
+  "module": "controls",
+  "name": "C_SpinControl::OnPress",
+  "proto": "int __thiscall OnPress(C_SpinControl *this, int id)"
+ },
+ "0064fd70": {
+  "module": "controls",
+  "name": "C_SpinControl::SetInactive",
+  "proto": "void __thiscall SetInactive(C_SpinControl *this, bool inactive)"
+ },
  "00650170": {
   "module": "zz_idioms",
   "name": "empty_function_650170"
+ },
+ "00650a50": {
+  "module": "controls",
+  "name": "C_PictureControl::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "00650ad0": {
+  "module": "controls",
+  "name": "C_PictureControl::SetInactive",
+  "proto": "void __thiscall SetInactive(void *this, bool inactive)"
+ },
+ "00650b00": {
+  "module": "controls",
+  "name": "C_PictureControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "00650d20": {
+  "module": "controls",
+  "name": "C_FrameSwitch::Create",
+  "proto": "bool __thiscall Create(C_FrameSwitch *this, void * frame, void * root, void * desc)"
+ },
+ "00650d30": {
+  "module": "controls",
+  "name": "C_FrameSwitch::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_FrameSwitch *this, void * message)"
+ },
+ "006513d0": {
+  "module": "controls",
+  "name": "C_PictureControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "006513f0": {
+  "module": "controls",
+  "name": "C_PictureControl::~C_PictureControl",
+  "proto": "void __thiscall ~C_PictureControl(void *this)"
+ },
+ "00651540": {
+  "module": "controls",
+  "name": "C_Tooltip::Create",
+  "proto": "bool __thiscall Create(C_Tooltip *this, void * frame, void * root, void * desc)"
+ },
+ "00651640": {
+  "module": "controls",
+  "name": "C_Tooltip::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_Tooltip *this, void * message)"
+ },
+ "00651690": {
+  "module": "controls",
+  "name": "C_Tooltip::Tick",
+  "proto": "void __thiscall Tick(C_Tooltip *this, int time)"
+ },
+ "006521f0": {
+  "module": "controls",
+  "name": "C_SideIndicator::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "00652380": {
+  "module": "controls",
+  "name": "C_SideIndicator::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "006523d0": {
+  "module": "controls",
+  "name": "C_SideIndicator::SetSide",
+  "proto": "void __thiscall SetSide(void *this, int side)"
+ },
+ "00652430": {
+  "module": "controls",
+  "name": "C_SideIndicator::Tick",
+  "proto": "void __thiscall Tick(void *this, int time)"
+ },
+ "00652470": {
+  "module": "controls",
+  "name": "C_SideIndicator::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(void *this, int id)"
+ },
+ "00652490": {
+  "module": "controls",
+  "name": "C_MarkBox::OnEnter",
+  "proto": "int __thiscall OnEnter(C_MarkBox *this, int id)"
+ },
+ "006524a0": {
+  "module": "controls",
+  "name": "C_MarkBox::OnLeave",
+  "proto": "int __thiscall OnLeave(C_MarkBox *this, int id)"
+ },
+ "006524b0": {
+  "module": "controls",
+  "name": "C_MarkBox::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(C_MarkBox *this, int id)"
+ },
+ "006524e0": {
+  "module": "controls",
+  "name": "C_MarkBox::OnClick",
+  "proto": "int __thiscall OnClick(C_MarkBox *this, int id)"
+ },
+ "00652510": {
+  "module": "controls",
+  "name": "C_MarkBox::Mark",
+  "proto": "void __thiscall Mark(C_MarkBox *this)"
+ },
+ "00652540": {
+  "module": "controls",
+  "name": "C_MarkBox::Unmark",
+  "proto": "void __thiscall Unmark(C_MarkBox *this)"
+ },
+ "00652570": {
+  "module": "controls",
+  "name": "C_MarkBox::PlaceFrame",
+  "proto": "void __thiscall PlaceFrame(C_MarkBox *this, void * frame, void * emptyNormal)"
+ },
+ "006525e0": {
+  "module": "controls",
+  "name": "C_MarkBox::Refresh",
+  "proto": "void __thiscall Refresh(C_MarkBox *this)"
+ },
+ "006525f0": {
+  "module": "controls",
+  "name": "C_MarkBox::Create",
+  "proto": "bool __thiscall Create(C_MarkBox *this, void * frame, void * root, void * desc)"
+ },
+ "006528a0": {
+  "module": "controls",
+  "name": "C_MarkBox::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_MarkBox *this, void * message)"
  },
  "00653b60": {
   "module": "zz_idioms",
@@ -27654,9 +28891,319 @@
   "module": "zz_idioms",
   "name": "copy4_653ea0"
  },
+ "00654060": {
+  "module": "controls",
+  "name": "C_CheckBox::OnEnter",
+  "proto": "int __thiscall OnEnter(void *this, int id)"
+ },
+ "006540a0": {
+  "module": "controls",
+  "name": "C_CheckBox::OnLeave",
+  "proto": "int __thiscall OnLeave(void *this, int id)"
+ },
+ "006540d0": {
+  "module": "controls",
+  "name": "C_CheckBox::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(void *this, int id)"
+ },
+ "00654110": {
+  "module": "controls",
+  "name": "C_CheckBox::OnClick",
+  "proto": "int __thiscall OnClick(void *this, int id)"
+ },
+ "00654120": {
+  "module": "controls",
+  "name": "C_CheckBox::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "00654300": {
+  "module": "controls",
+  "name": "C_CheckBox::Toggle",
+  "proto": "void __thiscall Toggle(void *this)"
+ },
+ "00654340": {
+  "module": "controls",
+  "name": "C_CheckBox::Check",
+  "proto": "void __thiscall Check(void *this)"
+ },
+ "006543b0": {
+  "module": "controls",
+  "name": "C_CheckBox::Uncheck",
+  "proto": "void __thiscall Uncheck(void *this)"
+ },
+ "00654420": {
+  "module": "controls",
+  "name": "C_CheckBox::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "006544c0": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::SetInactive",
+  "proto": "void __thiscall SetInactive(void *this, bool inactive)"
+ },
+ "00654500": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "006548c0": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "006548e0": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::~C_CheckBoxHalf",
+  "proto": "void __thiscall ~C_CheckBoxHalf(void *this)"
+ },
+ "00654a10": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "00654b60": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::OnEnter",
+  "proto": "int __thiscall OnEnter(void *this, int id)"
+ },
+ "00654bd0": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::OnLeave",
+  "proto": "int __thiscall OnLeave(void *this, int id)"
+ },
+ "00654c30": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(void *this, int id)"
+ },
+ "00654c40": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::OnClick",
+  "proto": "int __thiscall OnClick(void *this, int id)"
+ },
+ "00654c50": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::OnInput05",
+  "proto": "int __thiscall OnInput05(void *this, int id)"
+ },
+ "00654cc0": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::Toggle",
+  "proto": "void __thiscall Toggle(void *this)"
+ },
+ "00654d00": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::Check",
+  "proto": "void __thiscall Check(void *this)"
+ },
+ "00654d30": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::Uncheck",
+  "proto": "void __thiscall Uncheck(void *this)"
+ },
+ "00654d60": {
+  "module": "controls",
+  "name": "C_AllToggleButton::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "00654f80": {
+  "module": "controls",
+  "name": "C_ToggleButton::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "006551a0": {
+  "module": "controls",
+  "name": "C_ToggleButton::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "00655200": {
+  "module": "controls",
+  "name": "C_ToggleButton::Toggle",
+  "proto": "void __thiscall Toggle(void *this)"
+ },
+ "00655300": {
+  "module": "controls",
+  "name": "C_ToggleButton::OnClick",
+  "proto": "int __thiscall OnClick(void *this, int id)"
+ },
+ "00655310": {
+  "module": "controls",
+  "name": "C_ToggleButton::OnPress",
+  "proto": "int __thiscall OnPress(void *this, int id)"
+ },
+ "00655320": {
+  "module": "controls",
+  "name": "C_ToggleButton::OnEnter",
+  "proto": "int __thiscall OnEnter(void *this, int id)"
+ },
+ "00655390": {
+  "module": "controls",
+  "name": "C_ToggleButton::OnLeave",
+  "proto": "int __thiscall OnLeave(void *this, int id)"
+ },
+ "00655400": {
+  "module": "controls",
+  "name": "C_TextButton::Create",
+  "proto": "bool __thiscall Create(C_TextButton *this, void * frame, void * root, void * desc)"
+ },
+ "006554f0": {
+  "module": "controls",
+  "name": "C_TextButton::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_TextButton *this, void * message)"
+ },
+ "00655570": {
+  "module": "controls",
+  "name": "C_TextButton::OnEnter",
+  "proto": "int __thiscall OnEnter(C_TextButton *this, int id)"
+ },
+ "006555c0": {
+  "module": "controls",
+  "name": "C_TextButton::OnLeave",
+  "proto": "int __thiscall OnLeave(C_TextButton *this, int id)"
+ },
+ "00655610": {
+  "module": "controls",
+  "name": "C_TextButton::OnClick",
+  "proto": "int __thiscall OnClick(C_TextButton *this, int id)"
+ },
+ "00655630": {
+  "module": "controls",
+  "name": "C_TextButton::GetHighlightFrame",
+  "proto": "void * __thiscall GetHighlightFrame(C_TextButton *this)"
+ },
  "00655660": {
   "module": "zz_idioms",
   "name": "vector_clear_655660"
+ },
+ "00656dc0": {
+  "module": "controls",
+  "name": "C_ControlGroup::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_ControlGroup *this, int value)"
+ },
+ "00656e10": {
+  "module": "controls",
+  "name": "C_ControlGroup::Tick",
+  "proto": "void __thiscall Tick(C_ControlGroup *this, int time)"
+ },
+ "00656e40": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnEnter",
+  "proto": "int __thiscall OnEnter(C_ControlGroup *this, int id)"
+ },
+ "00656eb0": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnLeave",
+  "proto": "int __thiscall OnLeave(C_ControlGroup *this, int id)"
+ },
+ "00656ef0": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnClick",
+  "proto": "int __thiscall OnClick(C_ControlGroup *this, int id)"
+ },
+ "00656f20": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnInput02",
+  "proto": "int __thiscall OnInput02(C_ControlGroup *this, int id)"
+ },
+ "00656f50": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnInput05",
+  "proto": "int __thiscall OnInput05(C_ControlGroup *this, int id)"
+ },
+ "00656fc0": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnPress",
+  "proto": "int __thiscall OnPress(C_ControlGroup *this, int id)"
+ },
+ "00656ff0": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnRelease",
+  "proto": "int __thiscall OnRelease(C_ControlGroup *this, int id)"
+ },
+ "00657030": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnInput08",
+  "proto": "int __thiscall OnInput08(C_ControlGroup *this, int id)"
+ },
+ "00657060": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnInput09",
+  "proto": "int __thiscall OnInput09(C_ControlGroup *this, int id)"
+ },
+ "00657090": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnInput0A",
+  "proto": "int __thiscall OnInput0A(C_ControlGroup *this, int id)"
+ },
+ "006570c0": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnWheel",
+  "proto": "int __thiscall OnWheel(C_ControlGroup *this, int id, int amount)"
+ },
+ "006570f0": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(C_ControlGroup *this, int id)"
+ },
+ "00657120": {
+  "module": "controls",
+  "name": "C_ControlGroup::OnInput13",
+  "proto": "int __thiscall OnInput13(C_ControlGroup *this, int id)"
+ },
+ "00657150": {
+  "module": "controls",
+  "name": "C_ControlGroup::Refresh",
+  "proto": "void __thiscall Refresh(C_ControlGroup *this)"
+ },
+ "00657180": {
+  "module": "controls",
+  "name": "C_ControlGroup::Create",
+  "proto": "bool __thiscall Create(C_ControlGroup *this, void * frame, void * root, void * desc)"
+ },
+ "006571a0": {
+  "module": "controls",
+  "name": "C_ControlGroup::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ControlGroup *this, void * message)"
+ },
+ "00657830": {
+  "module": "controls",
+  "name": "C_AllToggleButton::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00657850": {
+  "module": "controls",
+  "name": "C_AllToggleButton::~C_AllToggleButton",
+  "proto": "void __thiscall ~C_AllToggleButton(void *this)"
+ },
+ "00657980": {
+  "module": "controls",
+  "name": "C_LabelControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_LabelControl *this, uchar flags)"
+ },
+ "006579a0": {
+  "module": "controls",
+  "name": "C_LabelControl::~C_LabelControl",
+  "proto": "void __thiscall ~C_LabelControl(C_LabelControl *this)"
+ },
+ "00658070": {
+  "module": "controls",
+  "name": "C_ScrollBar::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00658090": {
+  "module": "controls",
+  "name": "C_ScrollBar::~C_ScrollBar",
+  "proto": "void __thiscall ~C_ScrollBar(void *this)"
+ },
+ "00658f00": {
+  "module": "controls",
+  "name": "C_ControlGroup::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ControlGroup *this, uchar flags)"
+ },
+ "00658f20": {
+  "module": "controls",
+  "name": "C_ControlGroup::~C_ControlGroup",
+  "proto": "void __thiscall ~C_ControlGroup(C_ControlGroup *this)"
  },
  "0065a5a0": {
   "module": "zz_idioms",
@@ -27670,13 +29217,284 @@
   "module": "zz_idioms",
   "name": "vector_at_e196_65ae70"
  },
+ "0065c6c0": {
+  "module": "controls",
+  "name": "C_LabelControl::Refresh",
+  "proto": "void __thiscall Refresh(C_LabelControl *this)"
+ },
+ "0065c6e0": {
+  "module": "controls",
+  "name": "C_LabelControl::Create",
+  "proto": "bool __thiscall Create(C_LabelControl *this, void * frame, void * root, void * desc)"
+ },
+ "0065c770": {
+  "module": "controls",
+  "name": "C_LabelControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_LabelControl *this, void * message)"
+ },
+ "0065c7d0": {
+  "module": "controls",
+  "name": "C_PagesControl::Refresh",
+  "proto": "void __thiscall Refresh(C_PagesControl *this)"
+ },
+ "0065c7f0": {
+  "module": "controls",
+  "name": "C_PagesControl::Create",
+  "proto": "bool __thiscall Create(C_PagesControl *this, void * frame, void * root, void * desc)"
+ },
+ "0065c800": {
+  "module": "controls",
+  "name": "C_PagesControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_PagesControl *this, void * message)"
+ },
+ "0065c9a0": {
+  "module": "controls",
+  "name": "C_TitleControl::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
  "0065ca30": {
   "module": "zz_idioms",
   "name": "vector_size_e5_65ca30"
  },
+ "0065ca80": {
+  "module": "control",
+  "name": "C_Control::Show",
+  "proto": "void __thiscall Show(C_Control *this)"
+ },
+ "0065cab0": {
+  "module": "control",
+  "name": "C_Control::Hide",
+  "proto": "void __thiscall Hide(C_Control *this)"
+ },
+ "0065cae0": {
+  "module": "control",
+  "name": "C_Control::FindControl",
+  "proto": "void * __thiscall FindControl(C_Control *this, uint id, bool up)"
+ },
+ "0065cb50": {
+  "module": "control",
+  "name": "C_Control::FindChild",
+  "proto": "int __thiscall FindChild(C_Control *this, uint id)"
+ },
+ "0065cc20": {
+  "module": "control",
+  "name": "C_Control::CallCallbacks",
+  "proto": "bool __thiscall CallCallbacks(C_Control *this, uint notification, uint value)"
+ },
+ "0065ccc0": {
+  "module": "control",
+  "name": "C_Control::RemoveCallback",
+  "proto": "bool __thiscall RemoveCallback(C_Control *this, void * message)"
+ },
+ "0065cde0": {
+  "module": "control",
+  "name": "C_Control::AddCallback",
+  "proto": "bool __thiscall AddCallback(C_Control *this, void * message)"
+ },
  "0065d050": {
-  "module": "zz_idioms",
-  "name": "empty_function_65d050"
+  "module": "control",
+  "name": "C_Control::SetStrings",
+  "proto": "void __thiscall SetStrings(C_Control *this, void * strings)"
+ },
+ "0065d060": {
+  "module": "control",
+  "name": "C_Control::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_Control *this, void * message)"
+ },
+ "0065d220": {
+  "module": "control",
+  "name": "C_Control::HandleMessages",
+  "proto": "bool __thiscall HandleMessages(C_Control *this, void * messages)"
+ },
+ "0065d270": {
+  "module": "control",
+  "name": "C_Control::Notify",
+  "proto": "void __thiscall Notify(C_Control *this, uint notification, uint value)"
+ },
+ "0065d470": {
+  "module": "control",
+  "name": "C_Control::CreateChild",
+  "proto": "bool __thiscall CreateChild(C_Control *this, void * frame, void * root, void * desc)"
+ },
+ "0065e410": {
+  "module": "controls",
+  "name": "C_FrameSwitch::IsChild",
+  "proto": "bool __thiscall IsChild(C_FrameSwitch *this, int index)"
+ },
+ "0065e440": {
+  "module": "controls",
+  "name": "C_FrameSwitch::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_FrameSwitch *this, uchar flags)"
+ },
+ "0065e460": {
+  "module": "controls",
+  "name": "C_FrameSwitch::~C_FrameSwitch",
+  "proto": "void __thiscall ~C_FrameSwitch(C_FrameSwitch *this)"
+ },
+ "0065e600": {
+  "module": "controls",
+  "name": "C_Slider::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Slider *this, uchar flags)"
+ },
+ "0065e620": {
+  "module": "controls",
+  "name": "C_Slider::~C_Slider",
+  "proto": "void __thiscall ~C_Slider(C_Slider *this)"
+ },
+ "0065f610": {
+  "module": "controls",
+  "name": "C_ToggleButton::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0065f630": {
+  "module": "controls",
+  "name": "C_ToggleButton::~C_ToggleButton",
+  "proto": "void __thiscall ~C_ToggleButton(void *this)"
+ },
+ "0065f8d0": {
+  "module": "controls",
+  "name": "C_Tooltip::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Tooltip *this, uchar flags)"
+ },
+ "0065f8f0": {
+  "module": "controls",
+  "name": "C_Tooltip::~C_Tooltip",
+  "proto": "void __thiscall ~C_Tooltip(C_Tooltip *this)"
+ },
+ "0065fd80": {
+  "module": "controls",
+  "name": "C_PagesControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_PagesControl *this, uchar flags)"
+ },
+ "0065fda0": {
+  "module": "controls",
+  "name": "C_PagesControl::~C_PagesControl",
+  "proto": "void __thiscall ~C_PagesControl(C_PagesControl *this)"
+ },
+ "0065fef0": {
+  "module": "controls",
+  "name": "C_PagedTextControl::~C_PagedTextControl",
+  "proto": "void __thiscall ~C_PagedTextControl(C_PagedTextControl *this)"
+ },
+ "00660030": {
+  "module": "controls",
+  "name": "C_PagedTextControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_PagedTextControl *this, uchar flags)"
+ },
+ "00660050": {
+  "module": "controls",
+  "name": "C_TextButton::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_TextButton *this, uchar flags)"
+ },
+ "00660070": {
+  "module": "controls",
+  "name": "C_TextButton::~C_TextButton",
+  "proto": "void __thiscall ~C_TextButton(C_TextButton *this)"
+ },
+ "00660310": {
+  "module": "controls",
+  "name": "C_CheckBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00660330": {
+  "module": "controls",
+  "name": "C_CheckBox::~C_CheckBox",
+  "proto": "void __thiscall ~C_CheckBox(void *this)"
+ },
+ "00660470": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00660490": {
+  "module": "controls",
+  "name": "C_HighlightCheckBox::~C_HighlightCheckBox",
+  "proto": "void __thiscall ~C_HighlightCheckBox(void *this)"
+ },
+ "006605c0": {
+  "module": "controls",
+  "name": "C_SpinControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_SpinControl *this, uchar flags)"
+ },
+ "006605e0": {
+  "module": "controls",
+  "name": "C_SpinControl::~C_SpinControl",
+  "proto": "void __thiscall ~C_SpinControl(C_SpinControl *this)"
+ },
+ "00660e00": {
+  "module": "controls",
+  "name": "C_SideIndicator::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00660e20": {
+  "module": "controls",
+  "name": "C_SideIndicator::~C_SideIndicator",
+  "proto": "void __thiscall ~C_SideIndicator(void *this)"
+ },
+ "00660f50": {
+  "module": "controls",
+  "name": "C_MarkBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_MarkBox *this, uchar flags)"
+ },
+ "00660f70": {
+  "module": "controls",
+  "name": "C_MarkBox::~C_MarkBox",
+  "proto": "void __thiscall ~C_MarkBox(C_MarkBox *this)"
+ },
+ "00661bc0": {
+  "module": "control",
+  "name": "C_Control::Create",
+  "proto": "bool __thiscall Create(C_Control *this, void * frame, void * root, void * desc)"
+ },
+ "00661c20": {
+  "module": "control",
+  "name": "C_Control::SetInactive",
+  "proto": "void __thiscall SetInactive(C_Control *this, bool inactive)"
+ },
+ "00661c30": {
+  "module": "control",
+  "name": "C_Control::Refresh",
+  "proto": "void __thiscall Refresh(C_Control *this)"
+ },
+ "00661c60": {
+  "module": "controls",
+  "name": "C_TextControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_TextControl *this, void * message)"
+ },
+ "00661e50": {
+  "module": "controls",
+  "name": "C_TextControl::Create",
+  "proto": "bool __thiscall Create(C_TextControl *this, void * frame, void * root, void * desc)"
+ },
+ "00661fa0": {
+  "module": "controls",
+  "name": "C_TextControl::Refresh",
+  "proto": "void __thiscall Refresh(C_TextControl *this)"
+ },
+ "00661fe0": {
+  "module": "controls",
+  "name": "C_TextControl::SetInactive",
+  "proto": "void __thiscall SetInactive(C_TextControl *this, bool inactive)"
+ },
+ "00662000": {
+  "module": "controls",
+  "name": "C_PagedTextControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_PagedTextControl *this, void * message)"
+ },
+ "00662160": {
+  "module": "controls",
+  "name": "C_PagedTextControl::Create",
+  "proto": "bool __thiscall Create(C_PagedTextControl *this, void * frame, void * root, void * desc)"
+ },
+ "006622f0": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_PagedTextBox *this, uchar flags)"
+ },
+ "00662310": {
+  "module": "text_box",
+  "name": "C_PagedTextBox::~C_PagedTextBox",
+  "proto": "void __thiscall ~C_PagedTextBox(C_PagedTextBox *this)"
  },
  "00662410": {
   "module": "zz_idioms",
@@ -27685,6 +29503,16 @@
  "00662430": {
   "module": "zz_idioms",
   "name": "vector_tidy_662430"
+ },
+ "00662450": {
+  "module": "controls",
+  "name": "C_PagedTextControl::Refresh",
+  "proto": "void __thiscall Refresh(C_PagedTextControl *this)"
+ },
+ "00662490": {
+  "module": "controls",
+  "name": "C_PagedTextControl::SetInactive",
+  "proto": "void __thiscall SetInactive(C_PagedTextControl *this, bool inactive)"
  },
  "00663ad0": {
   "module": "zz_idioms",
@@ -27705,6 +29533,206 @@
  "00663dc0": {
   "module": "zz_idioms",
   "name": "construct_copy4_663dc0"
+ },
+ "00663e20": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::SetInactive",
+  "proto": "void __thiscall SetInactive(void *this, bool inactive)"
+ },
+ "00663e80": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::Setup",
+  "proto": "bool __thiscall Setup(void *this, void * empty, void * full, void * activeFull, void * activeEmpty)"
+ },
+ "00663f90": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::OnEnter",
+  "proto": "int __thiscall OnEnter(void *this, int id)"
+ },
+ "00664070": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::OnLeave",
+  "proto": "int __thiscall OnLeave(void *this, int id)"
+ },
+ "006640f0": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(void *this, int id)"
+ },
+ "006641c0": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::LinkFrames",
+  "proto": "void __thiscall LinkFrames(void *this, void * parent)"
+ },
+ "00664200": {
+  "module": "controls",
+  "name": "C_CheckBoxHalf::SetFull",
+  "proto": "void __thiscall SetFull(void *this, bool full)"
+ },
+ "00664300": {
+  "module": "controls",
+  "name": "C_Button::Create",
+  "proto": "bool __thiscall Create(C_Button *this, void * frame, void * root, void * desc)"
+ },
+ "00664460": {
+  "module": "controls",
+  "name": "C_Button::OnEnter",
+  "proto": "int __thiscall OnEnter(C_Button *this, int id)"
+ },
+ "006644c0": {
+  "module": "controls",
+  "name": "C_Button::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(C_Button *this, int id)"
+ },
+ "006644e0": {
+  "module": "controls",
+  "name": "C_Button::OnLeave",
+  "proto": "int __thiscall OnLeave(C_Button *this, int id)"
+ },
+ "00664540": {
+  "module": "controls",
+  "name": "C_Button::SetInactive",
+  "proto": "void __thiscall SetInactive(C_Button *this, bool inactive)"
+ },
+ "00664590": {
+  "module": "controls",
+  "name": "C_Button::OnPress",
+  "proto": "int __thiscall OnPress(C_Button *this, int id)"
+ },
+ "006645c0": {
+  "module": "controls",
+  "name": "C_Button::OnRelease",
+  "proto": "int __thiscall OnRelease(C_Button *this, int id)"
+ },
+ "006645d0": {
+  "module": "controls",
+  "name": "C_Button::Tick",
+  "proto": "void __thiscall Tick(C_Button *this, int time)"
+ },
+ "00664630": {
+  "module": "controls",
+  "name": "C_Slider::SetInactive",
+  "proto": "void __thiscall SetInactive(C_Slider *this, bool inactive)"
+ },
+ "00664680": {
+  "module": "controls",
+  "name": "C_Slider::Create",
+  "proto": "bool __thiscall Create(C_Slider *this, void * frame, void * root, void * desc)"
+ },
+ "006647c0": {
+  "module": "controls",
+  "name": "C_Slider::OnEnter",
+  "proto": "int __thiscall OnEnter(C_Slider *this, int id)"
+ },
+ "00664810": {
+  "module": "controls",
+  "name": "C_Slider::OnLeave",
+  "proto": "int __thiscall OnLeave(C_Slider *this, int id)"
+ },
+ "00664860": {
+  "module": "controls",
+  "name": "C_Slider::OnInput08",
+  "proto": "int __thiscall OnInput08(C_Slider *this, int id)"
+ },
+ "00664890": {
+  "module": "controls",
+  "name": "C_Slider::SetLimits",
+  "proto": "void __thiscall SetLimits(C_Slider *this)"
+ },
+ "00664ac0": {
+  "module": "controls",
+  "name": "C_Slider::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_Slider *this, void * message)"
+ },
+ "00664b10": {
+  "module": "controls",
+  "name": "C_Slider::MoveTo",
+  "proto": "void __thiscall MoveTo(C_Slider *this, void * position)"
+ },
+ "00664b30": {
+  "module": "controls",
+  "name": "C_Slider::Drag",
+  "proto": "bool __thiscall Drag(C_Slider *this)"
+ },
+ "00664ca0": {
+  "module": "controls",
+  "name": "C_Slider::SetValueFrom",
+  "proto": "bool __thiscall SetValueFrom(C_Slider *this, float place)"
+ },
+ "00664d10": {
+  "module": "controls",
+  "name": "C_Slider::SetValue",
+  "proto": "void __thiscall SetValue(C_Slider *this, float value)"
+ },
+ "00664e70": {
+  "module": "controls",
+  "name": "C_ScrollBar::FindChild",
+  "proto": "int __thiscall FindChild(void *this, uint id)"
+ },
+ "00664eb0": {
+  "module": "controls",
+  "name": "C_ScrollBar::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "00665330": {
+  "module": "controls",
+  "name": "C_ScrollBar::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "006656c0": {
+  "module": "controls",
+  "name": "C_ScrollBar::SendPosition",
+  "proto": "void __thiscall SendPosition(void *this)"
+ },
+ "00665750": {
+  "module": "controls",
+  "name": "C_ScrollBar::OnEnter",
+  "proto": "int __thiscall OnEnter(void *this, int id)"
+ },
+ "006657d0": {
+  "module": "controls",
+  "name": "C_ScrollBar::OnLeave",
+  "proto": "int __thiscall OnLeave(void *this, int id)"
+ },
+ "00665820": {
+  "module": "controls",
+  "name": "C_ScrollBar::OnInput05",
+  "proto": "int __thiscall OnInput05(void *this, int id)"
+ },
+ "00665890": {
+  "module": "controls",
+  "name": "C_ScrollBar::StepToCursor",
+  "proto": "void __thiscall StepToCursor(void *this)"
+ },
+ "006659f0": {
+  "module": "controls",
+  "name": "C_ScrollBar::OnPress",
+  "proto": "int __thiscall OnPress(void *this, int id)"
+ },
+ "00665a40": {
+  "module": "controls",
+  "name": "C_ScrollBar::OnInput08",
+  "proto": "int __thiscall OnInput08(void *this, int id)"
+ },
+ "00665a80": {
+  "module": "controls",
+  "name": "C_ScrollBar::SetInactive",
+  "proto": "void __thiscall SetInactive(void *this, bool inactive)"
+ },
+ "00665ae0": {
+  "module": "controls",
+  "name": "C_ScrollBar::Update",
+  "proto": "void __thiscall Update(void *this)"
+ },
+ "00665be0": {
+  "module": "controls",
+  "name": "C_ScrollBar::OnWheel",
+  "proto": "int __thiscall OnWheel(void *this, int id, int amount)"
+ },
+ "00665ce0": {
+  "module": "controls",
+  "name": "C_ScrollBar::Tick",
+  "proto": "void __thiscall Tick(void *this, int time)"
  },
  "00667b20": {
   "module": "zz_idioms",
@@ -27935,8 +29963,19 @@
   "proto": "bool __thiscall Stop(C_VideoState *this)"
  },
  "00688cb0": {
-  "module": "zz_idioms",
-  "name": "empty_function_688cb0"
+  "module": "text_box",
+  "name": "C_VideoTextBox::UpdateScrollRange",
+  "proto": "void __thiscall UpdateScrollRange(C_VideoTextBox *this)"
+ },
+ "00688cc0": {
+  "module": "text_box",
+  "name": "C_VideoTextBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_VideoTextBox *this, uchar flags)"
+ },
+ "00688ce0": {
+  "module": "text_box",
+  "name": "C_VideoTextBox::~C_VideoTextBox",
+  "proto": "void __thiscall ~C_VideoTextBox(C_VideoTextBox *this)"
  },
  "00688ea0": {
   "module": "game_app",
@@ -30709,6 +32748,15 @@
   "name": "C_MissionLoader::LoadObject",
   "proto": "bool __thiscall LoadObject(void * this, C_chunk * chunk)"
  },
+ "006d1ed0": {
+  "module": "mission_loader",
+  "name": "MissionLoader_Vector4From3",
+  "proto": "void * __thiscall MissionLoader_Vector4From3(void * this, S_vector * v)"
+ },
+ "006d1ef0": {
+  "module": "mission_loader",
+  "name": "MissionLoader_DeadScene2Reader"
+ },
  "006d3840": {
   "module": "mission_loader",
   "name": "MissionMapA_Index"
@@ -31439,17 +33487,115 @@
   "name": "C_TextDatabase::GetText",
   "proto": "C_str * __thiscall GetText(void *this, C_str * out, int textId)"
  },
+ "006e5df0": {
+  "module": "xml_node",
+  "name": "XmlAttr_KeyIs"
+ },
+ "006e5e50": {
+  "module": "xml_node",
+  "name": "C_XmlNode::~C_XmlNode",
+  "proto": "void __thiscall ~C_XmlNode(void *this)"
+ },
+ "006e5f90": {
+  "module": "xml_node",
+  "name": "C_XmlNode::ParseContent",
+  "proto": "bool __thiscall ParseContent(void *this, char * * text)"
+ },
+ "006e6160": {
+  "module": "xml_node",
+  "name": "C_XmlNode::ParseClose",
+  "proto": "bool __thiscall ParseClose(void *this, char * * text)"
+ },
+ "006e6250": {
+  "module": "xml_node",
+  "name": "C_XmlNode::ParseTag",
+  "proto": "bool __thiscall ParseTag(void *this, char * * text)"
+ },
+ "006e6340": {
+  "module": "xml_node",
+  "name": "C_XmlNode::ParseAttributes",
+  "proto": "bool __thiscall ParseAttributes(void *this, char * * text)"
+ },
+ "006e6670": {
+  "module": "xml_node",
+  "name": "C_XmlNode::ParseElement",
+  "proto": "bool __thiscall ParseElement(void *this, char * * text)"
+ },
+ "006e6740": {
+  "module": "xml_node",
+  "name": "C_XmlNode::IsNamed",
+  "proto": "bool __thiscall IsNamed(void *this, char * name)"
+ },
+ "006e67a0": {
+  "module": "xml_node",
+  "name": "C_XmlNode::GetAttribute",
+  "proto": "char * __thiscall GetAttribute(void *this, char * name)"
+ },
+ "006e6800": {
+  "module": "xml_node",
+  "name": "C_XmlNode::Next",
+  "proto": "void * __thiscall Next(void *this)"
+ },
+ "006e68c0": {
+  "module": "xml_node",
+  "name": "C_XmlNode::Load",
+  "proto": "bool __thiscall Load(void *this, char * fileName)"
+ },
+ "006e69a0": {
+  "module": "xml_node",
+  "name": "C_XmlNode::Next_Thunk"
+ },
  "006e69b0": {
-  "module": "zz_idioms",
-  "name": "vector_tidy_6e69b0"
+  "module": "xml_node",
+  "name": "XmlChildren_Tidy"
+ },
+ "006e69d0": {
+  "module": "xml_node",
+  "name": "XmlAttrs_Insert"
  },
  "006e6b50": {
-  "module": "zz_idioms",
-  "name": "vector_size_e8_6e6b50"
+  "module": "xml_node",
+  "name": "XmlAttrs_Size"
+ },
+ "006e6b70": {
+  "module": "xml_node",
+  "name": "XmlAttrs_DestroyRange"
  },
  "006e6ba0": {
-  "module": "zz_idioms",
-  "name": "empty_function_6e6ba0"
+  "module": "xml_node",
+  "name": "XmlAttrs_Empty"
+ },
+ "006e6bb0": {
+  "module": "xml_node",
+  "name": "XmlChildren_Insert"
+ },
+ "006e6dc0": {
+  "module": "xml_node",
+  "name": "XmlAttrs_UninitializedCopy"
+ },
+ "006e6e00": {
+  "module": "xml_node",
+  "name": "XmlAttrs_UninitializedFill"
+ },
+ "006e6e30": {
+  "module": "xml_node",
+  "name": "XmlAttrs_CopyRange"
+ },
+ "006e6eb0": {
+  "module": "xml_node",
+  "name": "XmlAttrs_FillRange"
+ },
+ "006e6f20": {
+  "module": "xml_node",
+  "name": "XmlAttrs_CopyBackward"
+ },
+ "006e6fa0": {
+  "module": "xml_node",
+  "name": "XmlAttr_Construct"
+ },
+ "006e6fc0": {
+  "module": "xml_node",
+  "name": "XmlAttr_DeletingDtor"
  },
  "006e8960": {
   "module": "app",

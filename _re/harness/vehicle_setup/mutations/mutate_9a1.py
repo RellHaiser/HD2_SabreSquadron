@@ -1,0 +1,115 @@
+"""Part 9a-i mutations: the font manager and the texture fonts (game/font.cpp).
+
+Run with the camera build: --build build_camera.bat --check check_camera.py (CAMERA_TEST; the
+checks in fonts_test.inc's FontTest). The deletions are named by the line they delete.
+
+Equivalent (left alive, by design):
+  F 27 del     the destroyed font's texture pointer cleared.
+  F 30 del     the destroyed font's vertices freed (a leak only).
+  F 31 del     the destroyed font's vertex pointer cleared.
+  F 48 num     a larger new vertex buffer (its size kept as double the old).
+  F 50 del     the old vertex buffer freed when it grows (a leak only).
+  F 161 cmp    the count's read: 0 bytes leave the count 0 either way.
+  F 161 num    (the same).
+  F 272 num    the version's start: GetGameVersion writes both.
+"""
+import os
+
+ROOT = r"G:\Programming\HD2 Source Port\C++"
+F = os.path.join(ROOT, r"src/game/font.cpp")
+
+MUTATIONS = [
+    (F, 'F 17 num', 'constexpr int PRIMITIVE_TRIANGLES = 3;\n', 'constexpr int PRIMITIVE_TRIANGLES = 4;\n'),
+    (F, 'F 26 del', '    if (m_texture) {\n        m_texture->Release();\n', '    if (m_texture) {\n\n'),
+    (F, 'F 27 del', '        m_texture->Release();\n        m_texture = nullptr;\n', '        m_texture->Release();\n\n'),
+    (F, 'F 30 del', '        ::operator delete(m_vertices);\n', '\n'),
+    (F, 'F 31 del', '        m_vertices = nullptr;\n', '\n'),
+    (F, 'F 39 cmp', '        if (m_maxVertices == 0) {\n', '        if (m_maxVertices != 0) {\n'),
+    (F, 'F 39 num', '        if (m_maxVertices == 0) {\n', '        if (m_maxVertices == 1) {\n'),
+    (F, 'F 40 del', '            m_vertices = static_cast<S_FontVertex *>(::operator new(sizeof(S_FontVertex) * FIRST_VERTICES));\n', '\n'),
+    (F, 'F 41 del', '            m_maxVertices = FIRST_VERTICES;\n', '\n'),
+    (F, 'F 43 del', '        }\n        return;\n', '        }\n\n'),
+    (F, 'F 46 cmp', '    if (size <= 0)\n', '    if (size < 0)\n'),
+    (F, 'F 46 num', '    if (size <= 0)\n', '    if (size <= 1)\n'),
+    (F, 'F 48 num', '    auto *vertices = static_cast<S_FontVertex *>(::operator new(sizeof(S_FontVertex) * 2 * size));\n', '    auto *vertices = static_cast<S_FontVertex *>(::operator new(sizeof(S_FontVertex) * 3 * size));\n'),
+    (F, 'F 50 del', '    std::memcpy(vertices, m_vertices, sizeof(S_FontVertex) * m_numVertices);\n    ::operator delete(m_vertices);\n', '    std::memcpy(vertices, m_vertices, sizeof(S_FontVertex) * m_numVertices);\n\n'),
+    (F, 'F 51 del', '    m_maxVertices = size * 2;\n', '\n'),
+    (F, 'F 51 num', '    m_maxVertices = size * 2;\n', '    m_maxVertices = size * 3;\n'),
+    (F, 'F 52 del', '    m_vertices = vertices;\n', '\n'),
+    (F, 'F 57 cmp', '    if (m_numVertices != 0 && m_texture && m_vertices) {\n', '    if (m_numVertices == 0 && m_texture && m_vertices) {\n'),
+    (F, 'F 57 num', '    if (m_numVertices != 0 && m_texture && m_vertices) {\n', '    if (m_numVertices != 1 && m_texture && m_vertices) {\n'),
+    (F, 'F 58 del', '    if (m_numVertices != 0 && m_texture && m_vertices) {\n        GetIGraph()->SetTexture(m_texture, 0);\n', '    if (m_numVertices != 0 && m_texture && m_vertices) {\n\n'),
+    (F, 'F 58 num', '    if (m_numVertices != 0 && m_texture && m_vertices) {\n        GetIGraph()->SetTexture(m_texture, 0);\n', '    if (m_numVertices != 0 && m_texture && m_vertices) {\n        GetIGraph()->SetTexture(m_texture, 1);\n'),
+    (F, 'F 59 del', '        GetIGraph()->DrawPrimitives(PRIMITIVE_TRIANGLES, m_numVertices / 3, m_vertices, 1);\n', '\n'),
+    (F, 'F 59 num', '        GetIGraph()->DrawPrimitives(PRIMITIVE_TRIANGLES, m_numVertices / 3, m_vertices, 1);\n', '        GetIGraph()->DrawPrimitives(PRIMITIVE_TRIANGLES, m_numVertices / 4, m_vertices, 1);\n'),
+    (F, 'F 65 del', '    m_numVertices = 0;\n', '\n'),
+    (F, 'F 65 num', '    m_numVertices = 0;\n', '    m_numVertices = 1;\n'),
+    (F, 'F 71 num', '    if (m_texture)\n        GetIGraph()->SetTexture(m_texture, 0);\n', '    if (m_texture)\n        GetIGraph()->SetTexture(m_texture, 1);\n'),
+    (F, 'F 76 num', '    return static_cast<unsigned>(ch) < 256 ? &m_table[ch] : &m_default;\n', '    return static_cast<unsigned>(ch) < 257 ? &m_table[ch] : &m_default;\n'),
+    (F, 'F 81 cmp', '    if (m_maxVertices < m_numVertices + 6)\n', '    if (m_maxVertices <= m_numVertices + 6)\n'),
+    (F, 'F 81 num', '    if (m_maxVertices < m_numVertices + 6)\n', '    if (m_maxVertices < m_numVertices + 7)\n'),
+    (F, 'F 81 arith', '    if (m_maxVertices < m_numVertices + 6)\n', '    if (m_maxVertices < m_numVertices - 6)\n'),
+    (F, 'F 88 arith', '    const float right = static_cast<float>(width + x);\n', '    const float right = static_cast<float>(width - x);\n'),
+    (F, 'F 90 arith', '    const float top = static_cast<float>(y - height);\n', '    const float top = static_cast<float>(y + height);\n'),
+    (F, 'F 91 num', '    const float rhw = 1.0f / z;\n', '    const float rhw = 1.5f / z;\n'),
+    (F, 'F 98 del', '        v.x = c.x;\n', '\n'),
+    (F, 'F 99 del', '        v.y = c.y;\n', '\n'),
+    (F, 'F 100 del', '        v.z = z;\n', '\n'),
+    (F, 'F 101 del', '        v.rhw = rhw;\n', '\n'),
+    (F, 'F 102 del', '        v.color = color;\n', '\n'),
+    (F, 'F 103 del', '        v.u = c.u;\n', '\n'),
+    (F, 'F 104 del', '        v.v = c.v;\n', '\n'),
+    (F, 'F 114 num', '    std::memset(m_table, 0, sizeof m_table);\n', '    std::memset(m_table, 1, sizeof m_table);\n'),
+    (F, 'F 115 bool', '    std::memset(m_table, 0, sizeof m_table);\n    const int file = dtaOpen(table, false);\n', '    std::memset(m_table, 0, sizeof m_table);\n    const int file = dtaOpen(table, true);\n'),
+    (F, 'F 123 del', '    dtaRead(file, m_table, sizeof m_table);\n', '\n'),
+    (F, 'F 124 del', '    dtaRead(file, m_table, sizeof m_table);\n    dtaClose(file);\n', '    dtaRead(file, m_table, sizeof m_table);\n\n'),
+    (F, 'F 131 bool', '    if (!Load(texture, table))\n        return false;\n', '    if (!Load(texture, table))\n        return true;\n'),
+    (F, 'F 132 del', '    m_id = id;\n', '\n'),
+    (F, 'F 133 bool', '    m_id = id;\n    return true;\n', '    m_id = id;\n    return false;\n'),
+    (F, 'F 139 cmp', '    return it != m_glyphs.end() ? &it->second : &m_default;\n', '    return it == m_glyphs.end() ? &it->second : &m_default;\n'),
+    (F, 'F 148 del', '    m_glyphs.clear();\n', '\n'),
+    (F, 'F 149 bool', '    m_glyphs.clear();\n    const int file = dtaOpen(table, false);\n', '    m_glyphs.clear();\n    const int file = dtaOpen(table, true);\n'),
+    (F, 'F 158 num', '    uint32_t count = 0;\n', '    uint32_t count = 1;\n'),
+    (F, 'F 159 num', '    int code = 0;\n', '    int code = 1;\n'),
+    (F, 'F 161 cmp', '    if (dtaRead(file, &count, sizeof count) >= 0) {\n', '    if (dtaRead(file, &count, sizeof count) > 0) {\n'),
+    (F, 'F 161 num', '    if (dtaRead(file, &count, sizeof count) >= 0) {\n', '    if (dtaRead(file, &count, sizeof count) >= 1) {\n'),
+    (F, 'F 162 cmp', '        for (uint32_t i = 0; i < count; ++i) {\n', '        for (uint32_t i = 0; i <= count; ++i) {\n'),
+    (F, 'F 162 num', '        for (uint32_t i = 0; i < count; ++i) {\n', '        for (uint32_t i = 1; i < count; ++i) {\n'),
+    (F, 'F 163 del', '            dtaRead(file, &code, sizeof code);\n', '\n'),
+    (F, 'F 164 del', '            dtaRead(file, &glyph, sizeof glyph);\n', '\n'),
+    (F, 'F 165 del', '            m_glyphs.insert({code, glyph});            // (the first of a code kept)\n', '\n'),
+    (F, 'F 168 del', '    }\n    dtaClose(file);\n', '    }\n\n'),
+    (F, 'F 184 cmp', '    return width >= 1024 ? 3 : width >= 800 ? 2 : 1;\n', '    return width > 1024 ? 3 : width >= 800 ? 2 : 1;\n'),
+    (F, 'F 184 num', '    return width >= 1024 ? 3 : width >= 800 ? 2 : 1;\n', '    return width >= 1025 ? 3 : width >= 800 ? 2 : 1;\n'),
+    (F, 'F 210 del', '        g_fontManager = &g_fontManagerObject;\n', '\n'),
+    (F, 'F 211 del', '        g_fontManagerObject.Load();\n', '\n'),
+    (F, 'F 213 del', '    ++g_fontManager->m_refs;\n', '\n'),
+    (F, 'F 219 cmp', '    if (g_fontManager && --g_fontManager->m_refs == 0) {\n', '    if (g_fontManager && --g_fontManager->m_refs != 0) {\n'),
+    (F, 'F 219 num', '    if (g_fontManager && --g_fontManager->m_refs == 0) {\n', '    if (g_fontManager && --g_fontManager->m_refs == 1) {\n'),
+    (F, 'F 220 del', '        g_fontManager->Free();\n', '\n'),
+    (F, 'F 221 del', '        g_fontManager->Free();\n        g_fontManager = nullptr;\n', '        g_fontManager->Free();\n\n'),
+    (F, 'F 227 cmp', '    if (--m_refs == 0) {\n', '    if (--m_refs != 0) {\n'),
+    (F, 'F 227 num', '    if (--m_refs == 0) {\n', '    if (--m_refs == 1) {\n'),
+    (F, 'F 228 del', '        Free();\n', '\n'),
+    (F, 'F 229 del', '        Free();\n        g_fontManager = nullptr;\n', '        Free();\n\n'),
+    (F, 'F 236 cmp', '        if (font->GetId() == id)\n', '        if (font->GetId() != id)\n'),
+    (F, 'F 243 cmp', '    for (size_t i = m_fonts.size(); i-- > 0;)\n', '    for (size_t i = m_fonts.size(); i-- >= 0;)\n'),
+    (F, 'F 243 num', '    for (size_t i = m_fonts.size(); i-- > 0;)\n', '    for (size_t i = m_fonts.size(); i-- > 1;)\n'),
+    (F, 'F 245 del', '    m_fonts.clear();\n', '\n'),
+    (F, 'F 272 num', '    int major = 0, minor = 0;\n', '    int major = 1, minor = 0;\n'),
+    (F, 'F 273 del', '    GetGameVersion(&major, &minor);\n', '\n'),
+    (F, 'F 275 cmp', '    if (major == 1 && minor < 2)\n', '    if (major != 1 && minor < 2)\n'),
+    (F, 'F 275 num', '    if (major == 1 && minor < 2)\n', '    if (major == 2 && minor < 2)\n'),
+    (F, 'F 283 del', '    AddTextureFont(FontTexture("Text\\\\Fonts\\\\", "SYMBOLS"), FontTable("Text\\\\Fonts\\\\", "SYMBOLS"), FONT_SYMBOLS);\n', '\n'),
+    (F, 'F 284 del', '    AddTextureFont(FontTexture(ceDir, "BIG"), FontTable(ceDir, "BIG"), FONT_CE_BIG);\n', '\n'),
+    (F, 'F 285 del', '    AddTextureFont(FontTexture(ceDir, "SMALL"), FontTable(ceDir, "SMALL"), FONT_CE_SMALL);\n', '\n'),
+    (F, 'F 291 del', '    if (ownSet) {\n        AddTextureFont(FontTexture(dir, "BIG"), FontTable(dir, "BIG"), FONT_BIG);\n', '    if (ownSet) {\n\n'),
+    (F, 'F 296 del', '    config += "FontConfig.hxml";\n', '\n'),
+    (F, 'F 300 del', '            return;\n        AddTextureFont(FontTexture(dir, "BIG"), FontTable(dir, "BIG"), FONT_BIG);\n', '            return;\n\n'),
+    (F, 'F 308 num', '        const S_GdiFontSize &big = JAPANESE_BIG[set - 1];\n', '        const S_GdiFontSize &big = JAPANESE_BIG[set - 2];\n'),
+    (F, 'F 308 arith', '        const S_GdiFontSize &big = JAPANESE_BIG[set - 1];\n', '        const S_GdiFontSize &big = JAPANESE_BIG[set + 1];\n'),
+    (F, 'F 309 bool', '        if (!AddGdiFont(big.face, GDI_TEXTURE_WIDTH, big.textureHeight, big.size, FONT_BIG, false))\n', '        if (!AddGdiFont(big.face, GDI_TEXTURE_WIDTH, big.textureHeight, big.size, FONT_BIG, true))\n'),
+    (F, 'F 314 num', '    const S_GdiFontSize &small = JAPANESE_SMALL[set - 1];\n', '    const S_GdiFontSize &small = JAPANESE_SMALL[set - 2];\n'),
+    (F, 'F 314 arith', '    const S_GdiFontSize &small = JAPANESE_SMALL[set - 1];\n', '    const S_GdiFontSize &small = JAPANESE_SMALL[set + 1];\n'),
+    (F, 'F 315 bool', '    if (!AddGdiFont(small.face, GDI_TEXTURE_WIDTH, small.textureHeight, small.size, FONT_SMALL, false))\n', '    if (!AddGdiFont(small.face, GDI_TEXTURE_WIDTH, small.textureHeight, small.size, FONT_SMALL, true))\n'),
+]

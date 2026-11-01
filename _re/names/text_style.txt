@@ -1,0 +1,14 @@
+# Part 9a-iv: the text styles (src/game/text_style.*; 0x00641fe0..0x00643c20, the list's vector
+# code 0x0064cc60). The list's object 0x008ae3f8 (TextStyles: a flag and std::vector<S_TextStyleDesc *>).
+# The wrappers CreateTextStyle / ReleaseTextStyle are in hud.txt.
+
+00641fe0 TextStyles_Release | bool __thiscall TextStyles_Release(void *this, int style)
+006420b0 TextStyles_Create | int __thiscall TextStyles_Create(void *this, void * desc)
+00642150 TextStyles_AddDefaults | void __fastcall TextStyles_AddDefaults(void *this)
+00643ab0 S_TextStyleDesc_Set
+00643b20 TextStyles_StaticInit
+00643b30 TextStyles_Construct
+00643b60 TextStyles_RegisterDestroy
+00643b70 TextStyles_Destroy
+00643b80 TextStyles_Dtor | void __fastcall TextStyles_Dtor(void *this)
+0064cc60 TextStyleList_Insert

@@ -134,8 +134,6 @@ extern C_Controls g_controls;                       // 0x008aeb58
 
 // Wide text to the ANSI code page, at most `maxLength` chars (and a terminator).
 void WideToAnsi(char *out, const wchar_t *text, int maxLength);   // 0x006c90c0 (__fastcall)
-// The bytes [begin, end) are well-formed UTF-8 (the menus' unicode text code).
-bool IsLegalUtf8(const uint8_t *begin, const uint8_t *end);       // 0x0064d3d0 (__fastcall)
 
 // Objects registered for a per-frame refresh before the controls update.
 class C_FrameListener {

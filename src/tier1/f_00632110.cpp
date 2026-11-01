@@ -38,9 +38,10 @@ uint32_t FUN_00632140(...)
 // 0x00632150
 uint32_t C_MainMenu__FUN_00632150(C_MainMenu *_this,void *param_1,int *param_2, ...)
 {
-  int iVar1;
-  uint32_t *puVar2;
+  void *pvVar1;
+  int iVar2;
   uint32_t *puVar3;
+  uint32_t *puVar4;
   uint32_t local_60;
   uint32_t local_5c;
   uint32_t local_58;
@@ -52,19 +53,19 @@ uint32_t C_MainMenu__FUN_00632150(C_MainMenu *_this,void *param_1,int *param_2, 
   FUN_00625f60((int)param_1,0,0x1000007,0x4014000,_this,FUN_00632560);
   FUN_00625f60((int)param_1,0,0x1000007,0x400c000,_this,FUN_00632270);
   FUN_00615360(param_1,0x12,"oklmpqrnOKLMPQRNtext" + 0x10);
-  iVar1 = FUN_00615360(param_1,0x14,"byes*");
-  FUN_00614e80(iVar1,0,0x1000004,0);
-  iVar1 = FUN_00615360(param_1,0x14,&DAT_0083f564);
-  FUN_00614e80(iVar1,0,0x1000004,0);
-  iVar1 = FUN_00615360(param_1,0x14,&DAT_0083f560);
-  FUN_00614f10(iVar1,0,0x1000015,0xd,0x7d8);
-  FUN_00614e80(iVar1,0,0x600100a,0);
-  puVar2 = &DAT_0083fdd4;
-  puVar3 = auStack_4c;
-  for (iVar1 = 0xd; iVar1 != 0; iVar1 = iVar1 - 1) {
-    *puVar3 = *puVar2;
-    puVar2++;
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,"byes*");
+  AddDescMessage1(pvVar1,0,0x1000004,0);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,&DAT_0083f564);
+  AddDescMessage1(pvVar1,0,0x1000004,0);
+  pvVar1 = (void *)FUN_00615360(param_1,0x14,&DAT_0083f560);
+  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x7d8);
+  AddDescMessage1(pvVar1,0,0x600100a,0);
+  puVar3 = &DAT_0083fdd4;
+  puVar4 = auStack_4c;
+  for (iVar2 = 0xd; iVar2 != 0; iVar2 = iVar2 - 1) {
+    *puVar4 = *puVar3;
     puVar3++;
+    puVar4++;
   }
   DAT_0083fdd0 = CreateTextStyle(auStack_4c);
   return 1;
@@ -170,7 +171,7 @@ uint32_t FUN_00632390(int param_1, ...)
       uStack_20 = 0x2000005;
       uStack_1c = 0;
       uStack_4 = 0;
-      FUN_00615a90(&DAT_008ae590,&uStack_24);
+      PostControlMessage(&DAT_008ae590,&uStack_24);
       if ((piStack_10 != 0) && (*piStack_10 = *piStack_10 - 1, *piStack_10 == 0)) {
         tier1_operator_delete(piStack_10);
       }
@@ -412,7 +413,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
     local_298 = 0x2000018;
     local_294 = 0;
     local_8 = 0;
-    FUN_00615a90(&DAT_008ae590,&local_29c);
+    PostControlMessage(&DAT_008ae590,&local_29c);
     local_8 = 0xffffffff;
     if (local_288 != 0) {
       C_str__ReleaseRep(local_288);
@@ -425,7 +426,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
         local_9c = DAT_0083fdd0;
         local_98 = 0x91e;
         local_8 = 4;
-        FUN_00615a90(&DAT_008ae590,&local_a4);
+        PostControlMessage(&DAT_008ae590,&local_a4);
         local_8 = 0xffffffff;
         if (local_90 != 0) {
           C_str__ReleaseRep(local_90);
@@ -436,7 +437,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
         local_1bc = DAT_0083fdd0;
         local_1b8 = 0x91f;
         local_8 = 5;
-        FUN_00615a90(&DAT_008ae590,&local_1c4);
+        PostControlMessage(&DAT_008ae590,&local_1c4);
         local_8 = 0xffffffff;
         if (local_1b0 != 0) {
           C_str__ReleaseRep(local_1b0);
@@ -451,7 +452,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_6c = DAT_0083fdd0;
       local_68 = 0x91c;
       local_8 = 2;
-      FUN_00615a90(&DAT_008ae590,&local_74);
+      PostControlMessage(&DAT_008ae590,&local_74);
       local_8 = 0xffffffff;
       if (local_60 != 0) {
         C_str__ReleaseRep(local_60);
@@ -462,7 +463,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_264 = DAT_0083fdd0;
       local_260 = 0x91d;
       local_8 = 3;
-      FUN_00615a90(&DAT_008ae590,&local_26c);
+      PostControlMessage(&DAT_008ae590,&local_26c);
       local_8 = 0xffffffff;
       if (local_258 != 0) {
         C_str__ReleaseRep(local_258);
@@ -477,7 +478,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
     local_21c = DAT_0083fdd0;
     local_218 = 0x91b;
     local_8 = 1;
-    FUN_00615a90(&DAT_008ae590,&local_224);
+    PostControlMessage(&DAT_008ae590,&local_224);
     local_8 = 0xffffffff;
     if (local_210 != 0) {
       C_str__ReleaseRep(local_210);
@@ -501,7 +502,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_15c = DAT_0083fdd0;
       local_158 = 0x923;
       local_8 = 0xc;
-      FUN_00615a90(&DAT_008ae590,&local_164);
+      PostControlMessage(&DAT_008ae590,&local_164);
       if ((local_150 != 0) && (*local_150 = *local_150 - 1, *local_150 == 0)) {
         tier1_operator_delete(local_150);
       }
@@ -511,7 +512,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_3c = DAT_0083fdd0;
       local_38 = 0x924;
       local_8 = 0xd;
-      FUN_00615a90(&DAT_008ae590,&local_44);
+      PostControlMessage(&DAT_008ae590,&local_44);
       if ((local_30 != 0) && (*local_30 = *local_30 - 1, *local_30 == 0)) {
         tier1_operator_delete(local_30);
       }
@@ -527,7 +528,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_18c = DAT_0083fdd0;
       local_188 = 0x925;
       local_8 = 0xe;
-      FUN_00615a90(&DAT_008ae590,&local_194);
+      PostControlMessage(&DAT_008ae590,&local_194);
       if ((local_180 != 0) && (*local_180 = *local_180 - 1, *local_180 == 0)) {
         tier1_operator_delete(local_180);
       }
@@ -537,7 +538,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_54 = DAT_0083fdd0;
       local_50 = 0x926;
       local_8 = 0xf;
-      FUN_00615a90(&DAT_008ae590,&local_5c);
+      PostControlMessage(&DAT_008ae590,&local_5c);
       piVar5 = local_48;
       break;
     case 0x3:
@@ -547,7 +548,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_84 = DAT_0083fdd0;
       local_80 = 0x927;
       local_8 = 0x10;
-      FUN_00615a90(&DAT_008ae590,&local_8c);
+      PostControlMessage(&DAT_008ae590,&local_8c);
       if ((local_78 != 0) && (*local_78 = *local_78 - 1, *local_78 == 0)) {
         tier1_operator_delete(local_78);
       }
@@ -557,7 +558,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_b4 = DAT_0083fdd0;
       local_b0 = 0x928;
       local_8 = 0x11;
-      FUN_00615a90(&DAT_008ae590,&local_bc);
+      PostControlMessage(&DAT_008ae590,&local_bc);
       piVar5 = local_a8;
       break;
     case 0x4:
@@ -567,7 +568,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_e4 = DAT_0083fdd0;
       local_e0 = 0x929;
       local_8 = 0x12;
-      FUN_00615a90(&DAT_008ae590,&local_ec);
+      PostControlMessage(&DAT_008ae590,&local_ec);
       if ((local_d8 != 0) && (*local_d8 = *local_d8 - 1, *local_d8 == 0)) {
         tier1_operator_delete(local_d8);
       }
@@ -577,7 +578,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_114 = DAT_0083fdd0;
       local_110 = 0x928;
       local_8 = 0x13;
-      FUN_00615a90(&DAT_008ae590,&local_11c);
+      PostControlMessage(&DAT_008ae590,&local_11c);
       piVar5 = local_108;
       break;
     case 0x5:
@@ -587,7 +588,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_204 = DAT_0083fdd0;
       local_200 = 0x22e9;
       local_8 = 0x18;
-      FUN_00615a90(&DAT_008ae590,&local_20c);
+      PostControlMessage(&DAT_008ae590,&local_20c);
       if ((local_1f8 != 0) && (*local_1f8 = *local_1f8 - 1, *local_1f8 == 0)) {
         tier1_operator_delete(local_1f8);
       }
@@ -597,7 +598,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_234 = DAT_0083fdd0;
       local_230 = 0x928;
       local_8 = 0x19;
-      FUN_00615a90(&DAT_008ae590,&local_23c);
+      PostControlMessage(&DAT_008ae590,&local_23c);
       piVar5 = local_228;
       break;
     case 0x6:
@@ -607,7 +608,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_144 = DAT_0083fdd0;
       local_140 = 0x92a;
       local_8 = 0x14;
-      FUN_00615a90(&DAT_008ae590,&local_14c);
+      PostControlMessage(&DAT_008ae590,&local_14c);
       if ((local_138 != 0) && (*local_138 = *local_138 - 1, *local_138 == 0)) {
         tier1_operator_delete(local_138);
       }
@@ -617,7 +618,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_174 = DAT_0083fdd0;
       local_170 = 0x928;
       local_8 = 0x15;
-      FUN_00615a90(&DAT_008ae590,&local_17c);
+      PostControlMessage(&DAT_008ae590,&local_17c);
       piVar5 = local_168;
       break;
     case 0x7:
@@ -627,7 +628,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_1a4 = DAT_0083fdd0;
       local_1a0 = 0x1cd4;
       local_8 = 0x16;
-      FUN_00615a90(&DAT_008ae590,&local_1ac);
+      PostControlMessage(&DAT_008ae590,&local_1ac);
       if ((local_198 != 0) && (*local_198 = *local_198 - 1, *local_198 == 0)) {
         tier1_operator_delete(local_198);
       }
@@ -637,7 +638,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_1d4 = DAT_0083fdd0;
       local_1d0 = 0x928;
       local_8 = 0x17;
-      FUN_00615a90(&DAT_008ae590,&local_1dc);
+      PostControlMessage(&DAT_008ae590,&local_1dc);
       piVar5 = local_1c8;
     }
     break;
@@ -663,7 +664,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_27c = DAT_0083fdd0;
       local_278 = 0x922;
       local_8 = 0xb;
-      FUN_00615a90(&DAT_008ae590,&local_284);
+      PostControlMessage(&DAT_008ae590,&local_284);
       if ((local_270 != 0) && (*local_270 = *local_270 - 1, *local_270 == 0)) {
         tier1_operator_delete(local_270);
       }
@@ -677,7 +678,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
     local_1ec = DAT_0083fdd0;
     local_1e8 = 0x920;
     local_8 = 9;
-    FUN_00615a90(&DAT_008ae590,&local_1f4);
+    PostControlMessage(&DAT_008ae590,&local_1f4);
     if ((local_1e0 != 0) && (*local_1e0 = *local_1e0 - 1, *local_1e0 == 0)) {
       tier1_operator_delete(local_1e0);
     }
@@ -687,7 +688,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
     local_12c = DAT_0083fdd0;
     local_128 = 0x921;
     local_8 = 10;
-    FUN_00615a90(&DAT_008ae590,&local_134);
+    PostControlMessage(&DAT_008ae590,&local_134);
     piVar5 = local_120;
     break;
   case 0x4:
@@ -696,7 +697,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
     local_2b0 = 0x2000069;
     local_2ac = 0;
     local_8 = 0x1a;
-    FUN_00615a90(&DAT_008ae590,&local_2b4);
+    PostControlMessage(&DAT_008ae590,&local_2b4);
     piVar5 = local_2a0;
     goto LAB_00633264;
   default:
@@ -710,7 +711,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
       local_fc = DAT_0083fdd0;
       local_f8 = 0x922;
       local_8 = 8;
-      FUN_00615a90(&DAT_008ae590,&local_104);
+      PostControlMessage(&DAT_008ae590,&local_104);
       if ((local_f0 != 0) && (*local_f0 = *local_f0 - 1, *local_f0 == 0)) {
         tier1_operator_delete(local_f0);
         local_f0 = extraout_EAX;
@@ -725,7 +726,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
     local_cc = DAT_0083fdd0;
     local_c8 = 0x920;
     local_8 = 6;
-    FUN_00615a90(&DAT_008ae590,&local_d4);
+    PostControlMessage(&DAT_008ae590,&local_d4);
     if ((local_c0 != 0) && (*local_c0 = *local_c0 - 1, *local_c0 == 0)) {
       tier1_operator_delete(local_c0);
     }
@@ -735,7 +736,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
     local_24c = DAT_0083fdd0;
     local_248 = 0x921;
     local_8 = 7;
-    FUN_00615a90(&DAT_008ae590,&local_254);
+    PostControlMessage(&DAT_008ae590,&local_254);
     piVar5 = local_240;
     break;
   case 0x8:

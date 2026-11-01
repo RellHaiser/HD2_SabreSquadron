@@ -118,57 +118,6 @@ int C_QuickMessages__Init(C_QuickMessages *_this,char *missionName, ...)
 }
 
 
-// 0x0048ecd0  (tier1 fallback: translated text kept below, needs hand porting)
-void * C_TextBox__ScalarDeletingDestructor(C_TextBox *_this,uchar flags, ...)
-{
-  return {};
-}
-#if 0
-{
-  ~C_TextBox__C_TextBox(_this);
-  if ((flags & 1) != 0) {
-    tier1_operator_delete(_this);
-  }
-  return _this;
-  return 0;
-}
-
-
-#endif
-// 0x0048ecf0
-uint32_t C_TextBox__dtor_C_TextBox(C_TextBox *_this, ...)
-{
-  uint32_t *puVar1;
-  uint32_t *puVar2;
-  uint32_t local_4;
-  _this->vtable = (C_TextBox_vtbl *)&PTR_00810458;
-  local_4 = 2;
-  C_FontManager__Release(_this->m_028);
-  C_TextBox__FreeLayout(_this);
-  tier1_operator_delete((void *)_this->m_05c);
-  _this->m_05c = 0;
-  _this->m_060 = 0;
-  _this->m_064 = 0;
-  tier1_operator_delete((void *)_this->m_048);
-  _this->m_048 = 0;
-  _this->m_04c = 0;
-  _this->m_050 = 0;
-  puVar1 = (uint32_t *)_this->m_038;
-  puVar2 = (uint32_t *)_this->m_034;
-  local_4 = 0xffffffff;
-  for (; puVar2 != puVar1; puVar2 = (uint32_t *)((int)puVar2 + 5)) {
-    if ((C_str *)*puVar2 != 0) {
-      C_str__ReleaseRep((C_str *)*puVar2);
-    }
-  }
-  tier1_operator_delete((void *)_this->m_034);
-  _this->m_034 = 0;
-  _this->m_038 = 0;
-  _this->m_03c = 0;
-  return 0;
-}
-
-
 // 0x0048edb0
 uint32_t FUN_0048edb0(int param_1, ...)
 {

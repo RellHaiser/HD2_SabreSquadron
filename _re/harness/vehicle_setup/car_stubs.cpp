@@ -94,6 +94,8 @@ C_GameTexts g_texts;
 bool g_textIds;                                         // (part 7a: every text is "text <id>")
 C_str C_GameTexts::Get(int id) const
 {
+    if (id == 99999)                                    // (part 9b: a version's format)
+        return C_str("Version %d.%02d");
     if (g_textIds) {
         char text[32];
         std::snprintf(text, sizeof text, "text %d", id);
@@ -131,6 +133,8 @@ struct S_OpenFile {
 std::map<int, S_OpenFile> g_handles;
 int g_nextHandle = 1;
 }  // namespace
+// The files open (part 9a's test: each opened one closed).
+size_t DtaOpenCount() { return g_handles.size(); }
 
 bool g_dtaArchivesFirst;                                // the last dtaOpen's flag (part 8's test)
 int __stdcall dtaOpen(const char *fileName, bool archivesFirst)

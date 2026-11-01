@@ -338,7 +338,7 @@ def cpp_psize(p):
         return 4
     t = re.sub(r"\b(const|volatile|struct|class|enum|unsigned|signed)\b", "", p).split()
     t = t[0] if t else ""
-    return {"S_vector4": 16, "S_quat": 16, "S_vector2": 8, "S_vector": 12, "S_matrix": 64,
+    return {"S_vector4": 16, "S_quat": 16, "S_vector2": 8, "S_vector": 12, "S_matrix": 64, "S_TextRun": 8,
             "double": 8, "int64_t": 8, "uint64_t": 8, "__int64": 8}.get(t, 4)
 
 

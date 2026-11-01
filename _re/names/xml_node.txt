@@ -1,0 +1,33 @@
+# Part 9a-ii: the menus' XML reader (src/game/xml_node.*; 0x006e5df0..0x006e6fc0 and its vector
+# code in 0x0061b410..0x0061be50) and FontConfig.hxml (src/game/font.cpp). XmlAttrs: the node's
+# std::vector<std::pair<C_str, C_str>> (MSVC6); XmlChildren: its std::vector<C_XmlNode *>.
+
+006e5e50 C_XmlNode::~C_XmlNode | void __thiscall ~C_XmlNode(void *this)
+006e68c0 C_XmlNode::Load | bool __thiscall Load(void *this, char * fileName)
+006e6740 C_XmlNode::IsNamed | bool __thiscall IsNamed(void *this, char * name)
+006e67a0 C_XmlNode::GetAttribute | char * __thiscall GetAttribute(void *this, char * name)
+006e6800 C_XmlNode::Next | void * __thiscall Next(void *this)
+006e69a0 C_XmlNode::Next_Thunk
+006e6670 C_XmlNode::ParseElement | bool __thiscall ParseElement(void *this, char * * text)
+006e6250 C_XmlNode::ParseTag | bool __thiscall ParseTag(void *this, char * * text)
+006e6340 C_XmlNode::ParseAttributes | bool __thiscall ParseAttributes(void *this, char * * text)
+006e5f90 C_XmlNode::ParseContent | bool __thiscall ParseContent(void *this, char * * text)
+006e6160 C_XmlNode::ParseClose | bool __thiscall ParseClose(void *this, char * * text)
+006e5df0 XmlAttr_KeyIs
+0061b450 XmlAttrs_Ctor
+0061b410 XmlAttrs_Dtor
+0061be20 XmlAttr_Dtor
+006e6fc0 XmlAttr_DeletingDtor
+006e6fa0 XmlAttr_Construct
+006e6b70 XmlAttrs_DestroyRange
+006e6ba0 XmlAttrs_Empty
+006e6e30 XmlAttrs_CopyRange
+006e6eb0 XmlAttrs_FillRange
+006e6f20 XmlAttrs_CopyBackward
+006e6dc0 XmlAttrs_UninitializedCopy
+006e6e00 XmlAttrs_UninitializedFill
+006e69d0 XmlAttrs_Insert
+006e6b50 XmlAttrs_Size
+006e69b0 XmlChildren_Tidy
+006e6bb0 XmlChildren_Insert
+0063eae0 C_FontManager::LoadConfig | bool __thiscall LoadConfig(void *this, char * path, char * language)

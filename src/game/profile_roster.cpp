@@ -8,6 +8,7 @@
 
 #include "common/chunk.h"
 #include "game/pending.h"
+#include "game/text_box.h"
 #include "ls3d/igraph.h"
 
 S_RankName g_rankNames[8] = {                           // 0x008ae960 (static init 0x0069f9b0)
@@ -79,7 +80,7 @@ bool IsUtf8(const C_str &text)                          // 0x006a0db0
     if (text.IsEmpty())
         return true;
     const uint8_t *begin = reinterpret_cast<const uint8_t *>(text.c_str());
-    return IsLegalUtf8(begin, begin + text.Size());
+    return IsLegalUtf8Range(begin, begin + text.Size());
 }
 
 // Latin-1 to UTF-8, but only for 'í' (0xED): other non-ASCII bytes leave the text as it is
