@@ -144,6 +144,8 @@ f_005ac500.cpp:112:57: request for member '_12_2_' in '"\012ControlsEx - "', whi
     *(uint16_t *)(pcVar9 + 0xb) = "\nControlsEx - "._12_2_;
 f_00614100.cpp:834:46: 'struct tier1::C_PlayerProfile' has no member named '_pad_00dc'
     C_MovieList__Get((g_gameProfile.m_player)->_pad_00dc + 0x24,*(uint32_t *)(param_2 + 0x5c),&param_2,
+f_00616c10.cpp:1999:5: 'empty_function_6e6ba0' was not declared in this scope; did you mean 'empty_function_6e4a10'?
+    empty_function_6e6ba0();
 f_0061bec0.cpp:2076:65: expected primary-expression before '*' token
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
 f_0061bec0.cpp:2076:66: expected primary-expression before ')' token
@@ -306,9 +308,9 @@ f_00638dc0.cpp:2096:13: invalid type argument of unary '*' (have 'uint32_t' {aka
     *DAT_008ae5b0 = (int)pvVar3;
 f_0063c2c0.cpp:296:3: '_param_3' was not declared in this scope; did you mean 'param_3'?
     _param_3 = (uint32_t)param_3;
-f_0063de40.cpp:302:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
+f_0063de40.cpp:120:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbb8[2] = 0;
-f_0063de40.cpp:527:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
+f_0063de40.cpp:345:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
 f_00643b20.cpp:2427:7: '_local_1c' was not declared in this scope; did you mean 'local_1c'?
     _local_1c = CONCAT31(uStack_1b,bVar2);
@@ -692,8 +694,6 @@ f_006e4f40.cpp:527:53: 'pCVar3' cannot be used as a function
     C_str__Assign(pCVar2 - 3,pCVar3 (uint32_t*)(-) 3);
 f_006e4f40.cpp:527:56: expected primary-expression before ')' token
     C_str__Assign(pCVar2 - 3,pCVar3 (uint32_t*)(-) 3);
-f_006e5dc0.cpp:130:63: incompatible types in assignment of 'int' to 'uint8_t [64]' {aka 'unsigned char [64]'}
-    (&stack0x00000010)[*in_stack_00001014 - (int)pcVar11] = 0;
 f_006e7280.cpp:49:11: 'LocalDescriptorTableRegister' was not declared in this scope
     uVar1 = LocalDescriptorTableRegister();
 f_006e7280.cpp:52:23: void value not ignored as it ought to be

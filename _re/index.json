@@ -169942,7 +169942,6 @@
 "callees": [
 "006e5e50",
 "006e6b70",
-"006e6ba0",
 "006e6e30",
 "006e6fc0",
 "007e2120"
@@ -170530,10 +170529,10 @@
 "in_vtables": []
 },
 "0061b410": {
-"name": "FUN_0061b410",
+"name": "XmlAttrs_Dtor",
 "size": 56,
 "lines": 18,
-"chars": 438,
+"chars": 439,
 "callers": [
 "00801286",
 "008046c0",
@@ -170550,10 +170549,10 @@
 "in_vtables": []
 },
 "0061b450": {
-"name": "FUN_0061b450",
+"name": "XmlAttrs_Ctor",
 "size": 24,
 "lines": 11,
-"chars": 239,
+"chars": 240,
 "callers": [
 "006189f0",
 "0063eae0"
@@ -170916,7 +170915,7 @@
 "in_vtables": []
 },
 "0061be20": {
-"name": "FUN_0061be20",
+"name": "XmlAttr_Dtor",
 "size": 48,
 "lines": 18,
 "chars": 424,
@@ -178251,13 +178250,12 @@
 "in_vtables": []
 },
 "0063eae0": {
-"name": "FUN_0063eae0",
+"name": "C_FontManager::LoadConfig",
 "size": 749,
 "lines": 189,
-"chars": 5207,
+"chars": 5239,
 "callers": [
-"0063e000",
-"0063e054"
+"0063e000"
 ],
 "callees": [
 "0061b450",
@@ -242683,10 +242681,10 @@
 ]
 },
 "006e5df0": {
-"name": "FUN_006e5df0",
+"name": "XmlAttr_KeyIs",
 "size": 91,
 "lines": 33,
-"chars": 701,
+"chars": 702,
 "callers": [
 "006e67a0"
 ],
@@ -242703,10 +242701,10 @@
 "in_vtables": []
 },
 "006e5e50": {
-"name": "FUN_006e5e50",
+"name": "C_XmlNode::~C_XmlNode",
 "size": 316,
-"lines": 58,
-"chars": 1668,
+"lines": 60,
+"chars": 2070,
 "callers": [
 "006189f0",
 "00619710",
@@ -242728,10 +242726,10 @@
 "in_vtables": []
 },
 "006e5f90": {
-"name": "FUN_006e5f90",
+"name": "C_XmlNode::ParseContent",
 "size": 464,
-"lines": 121,
-"chars": 3632,
+"lines": 132,
+"chars": 3998,
 "callers": [
 "006e6670"
 ],
@@ -242755,10 +242753,10 @@
 "in_vtables": []
 },
 "006e6160": {
-"name": "FUN_006e6160",
+"name": "C_XmlNode::ParseClose",
 "size": 225,
-"lines": 52,
-"chars": 1311,
+"lines": 51,
+"chars": 1200,
 "callers": [
 "006e5f90"
 ],
@@ -242776,10 +242774,10 @@
 "in_vtables": []
 },
 "006e6250": {
-"name": "FUN_006e6250",
+"name": "C_XmlNode::ParseTag",
 "size": 227,
-"lines": 43,
-"chars": 1146,
+"lines": 41,
+"chars": 1069,
 "callers": [
 "006e6670"
 ],
@@ -242796,10 +242794,10 @@
 "in_vtables": []
 },
 "006e6340": {
-"name": "FUN_006e6340",
+"name": "C_XmlNode::ParseAttributes",
 "size": 816,
-"lines": 155,
-"chars": 5200,
+"lines": 151,
+"chars": 4897,
 "callers": [
 "006e6250"
 ],
@@ -242821,10 +242819,10 @@
 "in_vtables": []
 },
 "006e6670": {
-"name": "FUN_006e6670",
+"name": "C_XmlNode::ParseElement",
 "size": 205,
-"lines": 42,
-"chars": 1216,
+"lines": 52,
+"chars": 1200,
 "callers": [
 "006e5f90",
 "006e68c0"
@@ -242845,10 +242843,10 @@
 "in_vtables": []
 },
 "006e6740": {
-"name": "FUN_006e6740",
+"name": "C_XmlNode::IsNamed",
 "size": 91,
-"lines": 33,
-"chars": 701,
+"lines": 31,
+"chars": 613,
 "callers": [
 "006186e0",
 "006189f0",
@@ -242867,10 +242865,10 @@
 "in_vtables": []
 },
 "006e67a0": {
-"name": "FUN_006e67a0",
+"name": "C_XmlNode::GetAttribute",
 "size": 92,
 "lines": 23,
-"chars": 624,
+"chars": 620,
 "callers": [
 "006186e0",
 "006189f0",
@@ -242888,10 +242886,10 @@
 "in_vtables": []
 },
 "006e6800": {
-"name": "FUN_006e6800",
+"name": "C_XmlNode::Next",
 "size": 131,
-"lines": 37,
-"chars": 1136,
+"lines": 38,
+"chars": 1211,
 "callers": [
 "006186e0",
 "0063eae0",
@@ -242908,10 +242906,10 @@
 "in_vtables": []
 },
 "006e68c0": {
-"name": "FUN_006e68c0",
+"name": "C_XmlNode::Load",
 "size": 197,
 "lines": 40,
-"chars": 924,
+"chars": 854,
 "callers": [
 "006189f0",
 "0063eae0"
@@ -242932,17 +242930,15 @@
 "in_vtables": []
 },
 "006e69a0": {
-"name": "thunk_FUN_006e6800",
+"name": "C_XmlNode::Next_Thunk",
 "size": 5,
-"lines": 37,
-"chars": 1142,
+"lines": 38,
+"chars": 1217,
 "callers": [
 "006189f0",
 "0063eae0"
 ],
-"callees": [
-"006e6800"
-],
+"callees": [],
 "imports": [],
 "strings": [],
 "vtables": [],
@@ -242950,10 +242946,10 @@
 "in_vtables": []
 },
 "006e69b0": {
-"name": "vector_tidy_6e69b0",
+"name": "XmlChildren_Tidy",
 "size": 28,
 "lines": 11,
-"chars": 230,
+"chars": 228,
 "callers": [
 "0080c8be"
 ],
@@ -242967,10 +242963,10 @@
 "in_vtables": []
 },
 "006e69d0": {
-"name": "FUN_006e69d0",
+"name": "XmlAttrs_Insert",
 "size": 372,
-"lines": 62,
-"chars": 1926,
+"lines": 64,
+"chars": 2045,
 "callers": [
 "006e6340"
 ],
@@ -242992,10 +242988,10 @@
 "in_vtables": []
 },
 "006e6b50": {
-"name": "vector_size_e8_6e6b50",
+"name": "XmlAttrs_Size",
 "size": 19,
 "lines": 10,
-"chars": 182,
+"chars": 174,
 "callers": [
 "006e69d0"
 ],
@@ -243007,10 +243003,10 @@
 "in_vtables": []
 },
 "006e6b70": {
-"name": "FUN_006e6b70",
+"name": "XmlAttrs_DestroyRange",
 "size": 33,
 "lines": 10,
-"chars": 171,
+"chars": 180,
 "callers": [
 "00619710",
 "006e5e50",
@@ -243026,12 +243022,11 @@
 "in_vtables": []
 },
 "006e6ba0": {
-"name": "empty_function_6e6ba0",
+"name": "XmlAttrs_Empty",
 "size": 3,
 "lines": 7,
-"chars": 57,
+"chars": 50,
 "callers": [
-"00619710",
 "006e5e50"
 ],
 "callees": [],
@@ -243042,10 +243037,10 @@
 "in_vtables": []
 },
 "006e6bb0": {
-"name": "FUN_006e6bb0",
+"name": "XmlChildren_Insert",
 "size": 517,
 "lines": 116,
-"chars": 3520,
+"chars": 3526,
 "callers": [
 "006e5f90"
 ],
@@ -243060,10 +243055,10 @@
 "in_vtables": []
 },
 "006e6dc0": {
-"name": "FUN_006e6dc0",
+"name": "XmlAttrs_UninitializedCopy",
 "size": 55,
 "lines": 15,
-"chars": 279,
+"chars": 298,
 "callers": [
 "006e69d0"
 ],
@@ -243077,10 +243072,10 @@
 "in_vtables": []
 },
 "006e6e00": {
-"name": "FUN_006e6e00",
+"name": "XmlAttrs_UninitializedFill",
 "size": 40,
 "lines": 11,
-"chars": 200,
+"chars": 219,
 "callers": [
 "006e69d0"
 ],
@@ -243094,10 +243089,10 @@
 "in_vtables": []
 },
 "006e6e30": {
-"name": "FUN_006e6e30",
+"name": "XmlAttrs_CopyRange",
 "size": 114,
-"lines": 37,
-"chars": 955,
+"lines": 38,
+"chars": 962,
 "callers": [
 "00619710",
 "006e5e50"
@@ -243112,10 +243107,10 @@
 "in_vtables": []
 },
 "006e6eb0": {
-"name": "FUN_006e6eb0",
+"name": "XmlAttrs_FillRange",
 "size": 100,
 "lines": 30,
-"chars": 800,
+"chars": 806,
 "callers": [
 "006e69d0"
 ],
@@ -243129,10 +243124,10 @@
 "in_vtables": []
 },
 "006e6f20": {
-"name": "FUN_006e6f20",
+"name": "XmlAttrs_CopyBackward",
 "size": 115,
-"lines": 39,
-"chars": 1002,
+"lines": 40,
+"chars": 1012,
 "callers": [
 "006e69d0"
 ],
@@ -243146,10 +243141,10 @@
 "in_vtables": []
 },
 "006e6fa0": {
-"name": "FUN_006e6fa0",
+"name": "XmlAttr_Construct",
 "size": 32,
 "lines": 21,
-"chars": 401,
+"chars": 406,
 "callers": [
 "006e69d0",
 "006e6dc0",
@@ -243163,10 +243158,10 @@
 "in_vtables": []
 },
 "006e6fc0": {
-"name": "FUN_006e6fc0",
+"name": "XmlAttr_DeletingDtor",
 "size": 30,
 "lines": 11,
-"chars": 176,
+"chars": 184,
 "callers": [
 "00619710",
 "006e5e50"

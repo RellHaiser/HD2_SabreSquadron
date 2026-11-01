@@ -1,9 +1,11 @@
 #include "game/font.h"
 
+#include <cstdlib>
 #include <cstring>
 
 #include "common/c_str.h"
 #include "game/profile.h"
+#include "game/xml_node.h"
 #include "ls3d/igraph.h"
 #include "ls3d/rw_data.h"
 
@@ -314,4 +316,62 @@ void C_FontManager::Load()
     const S_GdiFontSize &small = JAPANESE_SMALL[set - 1];
     if (!AddGdiFont(small.face, GDI_TEXTURE_WIDTH, small.textureHeight, small.size, FONT_SMALL, false))
         AddMapFont(FontTexture(dir, "SMALL"), FontTable(dir, "SMALL"), FONT_SMALL);
+}
+
+// --- FontConfig.hxml (part 9a-ii) ------------------------------------------------------------------
+
+namespace {
+
+// The GDI fonts' texture width.
+constexpr int CONFIG_TEXTURE_WIDTH = 0x200;
+
+} // namespace
+
+bool C_FontManager::LoadConfig(const char *path, const char *language)
+{
+    // <FONTCONFIG> <LANGUAGE name=".."> <SET resolution=".."> <FONT id="FONT_BIG" name=".." size=".."
+    // bold="true" texture_height=".."/> ... (each found by the walk of the one above it).
+    const int width = GetIGraph()->ScrnX();
+    const char *const resolution = width >= 1024 ? "1024x768" : width >= 800 ? "800x600" : "640x480";
+    C_XmlNode config;
+    if (!config.Load(path) || !config.Next()->IsNamed("FONTCONFIG"))
+        return false;
+    C_XmlNode *entry = config.Next();
+    for (; entry; entry = config.Next()) {
+        // (Fix: an entry without a name skipped; the original compares through null.)
+        const char *name = entry->IsNamed("LANGUAGE") ? entry->GetAttribute("name") : nullptr;
+        if (name && _stricmp(name, language) == 0)
+            break;
+    }
+    if (!entry)
+        return false;
+    C_XmlNode *const lang = entry;
+    C_XmlNode *set = lang->Next();
+    for (; set; set = lang->Next()) {
+        const char *at = set->IsNamed("SET") ? set->GetAttribute("resolution") : nullptr;
+        if (at && std::strcmp(at, resolution) == 0)   // (Fix: as above)
+            break;
+    }
+    if (!set)
+        return false;
+    // (Quirk kept: loaded once the set is found, whatever its fonts do; an entry missing a value
+    // fails it.)
+    bool loaded = true;
+    for (C_XmlNode *font = set->Next(); font; font = set->Next()) {
+        if (!font->IsNamed("FONT"))
+            continue;
+        const char *const id = font->GetAttribute("id");
+        const char *const face = font->GetAttribute("name");
+        const char *const size = font->GetAttribute("size");
+        const char *const bold = font->GetAttribute("bold");
+        const char *const textureHeight = font->GetAttribute("texture_height");
+        if (!id || !face || !size || !bold || !textureHeight)
+            return false;
+        const int fontId = std::strcmp(id, "FONT_BIG") == 0 ? FONT_BIG : std::strcmp(id, "FONT_SMALL") == 0 ? FONT_SMALL : 0;
+        if (fontId == 0)
+            continue;
+        loaded = AddGdiFont(face, CONFIG_TEXTURE_WIDTH, std::atoi(textureHeight), std::atoi(size), fontId,
+                            std::strcmp(bold, "true") == 0) || loaded;
+    }
+    return loaded;
 }

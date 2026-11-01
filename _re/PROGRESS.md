@@ -5888,6 +5888,40 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/font.txt (35); 40 functions in ported.txt. Stats: 7,879 of 12,293 functions by
     hand (72.6 % by size).
 
+  PART 9a-ii DONE (2026-10-31): the menus' XML reader and FontConfig.hxml (src/game/xml_node.*, new;
+  C_FontManager::LoadConfig 0x0063eae0 in font.cpp). 9a split again: 9a-iii the GDI fonts
+  (0x0063c2f0..0x0063ddb0, AddGdiFont 0x0063ee20: a glyph cache in a texture, drawn by GDI), 9a-iv
+  the text styles (0x00641fe0..0x006441a0).
+  - C_XmlNode (0x30 bytes; 0x006e5df0..0x006e6fc0, its vectors' code with 0x0061b410..0x0061be50;
+    the missions' item lists 0x006189f0 use it too, part 9h): Load (at most 1 MB; the file's first
+    element), the tag (a name to a space, '/' or '>'; '<' to '>' 3 .. 255 apart), the attributes
+    (name="value" in their order), the content (children; the text of an element without children,
+    from the content's start; comments <!-- --> skipped, an empty one 4 apart), the closing tag (at
+    most 100; its name the element's), IsNamed, GetAttribute, Next (the walk: the node, then its
+    elements in document order, each node keeping its place).
+  - LoadConfig: <FONTCONFIG>, the LANGUAGE named for the language (any case), its SET of the
+    screen's resolution (640x480, 800x600, 1024x768 by the width), its FONT entries (id FONT_BIG /
+    FONT_SMALL, name, size, bold "true", texture_height: AddGdiFont, the texture 512 wide).
+  - Quirks kept: a value's closing quote looked for past its first character (an empty value
+    breaks the tag); a child's closing tag is scanned through, not left; the text of an element
+    taken from its content's start (a comment before it in it); the walk's state in the nodes;
+    LoadConfig true once the set is found, whatever its fonts do, false at a font missing a value.
+    Fixes: an element's text kept in the original's 4 KB buffer; a LANGUAGE without a name or a SET
+    without a resolution skipped (the original compares through null); control characters taken
+    as unsigned by isspace.
+  - Harness: fonts_test.inc's "xml:" line in the camera build (11 checks); the 9a-i font tests on
+    real FontConfig.hxml files. 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9a2.py): the first run caught 108 of 136 (17 survived, 11 pointer
+    arithmetics did not build); 7 equivalent (see the file's docstring), new cases for 10 (a
+    comment 4 apart, a reload's walk, control characters in a name / before an attribute / in a
+    text, a quote in a name, unquoted and unclosed values, a text after a comment); the full rerun
+    caught 118 of 136 (the 7 equivalent, X 68 num for X 135 num). Baselines: the world build 0 of
+    22 in both orders; the item build 0 of 37; the other five 0 of 37.
+  - Build: 204 files clean (MSVC). Tier 1: 516 errors in 87 files, 209 stubs (unchanged). ret_audit
+    --src: 52.
+  - Ghidra: names/xml_node.txt (29); 29 functions in ported.txt. Stats: 7,908 of 12,293 functions
+    by hand (72.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

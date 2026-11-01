@@ -27288,6 +27288,14 @@
   "module": "zz_idioms",
   "name": "vector_size_e4_61b3f0"
  },
+ "0061b410": {
+  "module": "xml_node",
+  "name": "XmlAttrs_Dtor"
+ },
+ "0061b450": {
+  "module": "xml_node",
+  "name": "XmlAttrs_Ctor"
+ },
  "0061b4f0": {
   "module": "zz_idioms",
   "name": "empty_function_61b4f0"
@@ -27327,6 +27335,10 @@
  "0061be10": {
   "module": "zz_idioms",
   "name": "construct_copy4_61be10"
+ },
+ "0061be20": {
+  "module": "xml_node",
+  "name": "XmlAttr_Dtor"
  },
  "00620770": {
   "module": "zz_idioms",
@@ -27436,6 +27448,11 @@
   "module": "font",
   "name": "C_FontManager::Load",
   "proto": "void __thiscall Load(void *this)"
+ },
+ "0063eae0": {
+  "module": "xml_node",
+  "name": "C_FontManager::LoadConfig",
+  "proto": "bool __thiscall LoadConfig(void *this, char * path, char * language)"
  },
  "0063edd0": {
   "module": "font",
@@ -31608,17 +31625,115 @@
   "name": "C_TextDatabase::GetText",
   "proto": "C_str * __thiscall GetText(void *this, C_str * out, int textId)"
  },
+ "006e5df0": {
+  "module": "xml_node",
+  "name": "XmlAttr_KeyIs"
+ },
+ "006e5e50": {
+  "module": "xml_node",
+  "name": "C_XmlNode::~C_XmlNode",
+  "proto": "void __thiscall ~C_XmlNode(void *this)"
+ },
+ "006e5f90": {
+  "module": "xml_node",
+  "name": "C_XmlNode::ParseContent",
+  "proto": "bool __thiscall ParseContent(void *this, char * * text)"
+ },
+ "006e6160": {
+  "module": "xml_node",
+  "name": "C_XmlNode::ParseClose",
+  "proto": "bool __thiscall ParseClose(void *this, char * * text)"
+ },
+ "006e6250": {
+  "module": "xml_node",
+  "name": "C_XmlNode::ParseTag",
+  "proto": "bool __thiscall ParseTag(void *this, char * * text)"
+ },
+ "006e6340": {
+  "module": "xml_node",
+  "name": "C_XmlNode::ParseAttributes",
+  "proto": "bool __thiscall ParseAttributes(void *this, char * * text)"
+ },
+ "006e6670": {
+  "module": "xml_node",
+  "name": "C_XmlNode::ParseElement",
+  "proto": "bool __thiscall ParseElement(void *this, char * * text)"
+ },
+ "006e6740": {
+  "module": "xml_node",
+  "name": "C_XmlNode::IsNamed",
+  "proto": "bool __thiscall IsNamed(void *this, char * name)"
+ },
+ "006e67a0": {
+  "module": "xml_node",
+  "name": "C_XmlNode::GetAttribute",
+  "proto": "char * __thiscall GetAttribute(void *this, char * name)"
+ },
+ "006e6800": {
+  "module": "xml_node",
+  "name": "C_XmlNode::Next",
+  "proto": "void * __thiscall Next(void *this)"
+ },
+ "006e68c0": {
+  "module": "xml_node",
+  "name": "C_XmlNode::Load",
+  "proto": "bool __thiscall Load(void *this, char * fileName)"
+ },
+ "006e69a0": {
+  "module": "xml_node",
+  "name": "C_XmlNode::Next_Thunk"
+ },
  "006e69b0": {
-  "module": "zz_idioms",
-  "name": "vector_tidy_6e69b0"
+  "module": "xml_node",
+  "name": "XmlChildren_Tidy"
+ },
+ "006e69d0": {
+  "module": "xml_node",
+  "name": "XmlAttrs_Insert"
  },
  "006e6b50": {
-  "module": "zz_idioms",
-  "name": "vector_size_e8_6e6b50"
+  "module": "xml_node",
+  "name": "XmlAttrs_Size"
+ },
+ "006e6b70": {
+  "module": "xml_node",
+  "name": "XmlAttrs_DestroyRange"
  },
  "006e6ba0": {
-  "module": "zz_idioms",
-  "name": "empty_function_6e6ba0"
+  "module": "xml_node",
+  "name": "XmlAttrs_Empty"
+ },
+ "006e6bb0": {
+  "module": "xml_node",
+  "name": "XmlChildren_Insert"
+ },
+ "006e6dc0": {
+  "module": "xml_node",
+  "name": "XmlAttrs_UninitializedCopy"
+ },
+ "006e6e00": {
+  "module": "xml_node",
+  "name": "XmlAttrs_UninitializedFill"
+ },
+ "006e6e30": {
+  "module": "xml_node",
+  "name": "XmlAttrs_CopyRange"
+ },
+ "006e6eb0": {
+  "module": "xml_node",
+  "name": "XmlAttrs_FillRange"
+ },
+ "006e6f20": {
+  "module": "xml_node",
+  "name": "XmlAttrs_CopyBackward"
+ },
+ "006e6fa0": {
+  "module": "xml_node",
+  "name": "XmlAttr_Construct"
+ },
+ "006e6fc0": {
+  "module": "xml_node",
+  "name": "XmlAttr_DeletingDtor"
  },
  "006e8960": {
   "module": "app",

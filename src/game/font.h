@@ -1,7 +1,7 @@
 // The menus' fonts (game/font.cpp, original source 0x0063c2f0..0x00641fb0, part 9a): the shared font
 // manager (the fonts by their ids, loaded once for every user) and its texture fonts: a texture
 // and a table of glyphs (.tga and .tbl files), drawn as quads they gather into a vertex buffer.
-// The GDI fonts (Japanese) and FontConfig.hxml: part 9a-ii.
+// FontConfig.hxml: part 9a-ii; the GDI fonts (Japanese): part 9a-iii.
 #pragma once
 
 #include <cstdint>
@@ -122,9 +122,9 @@ public:
     bool AddTextureFont(const char *texture, const char *table, int id);   // 0x0063f590
     bool AddMapFont(const char *texture, const char *table, int id);       // 0x0063f400
 
-    // FontConfig.hxml's fonts for `language` (part 9a-ii).
+    // FontConfig.hxml's GDI fonts for `language` and the screen's resolution (part 9a-ii).
     bool LoadConfig(const char *path, const char *language);   // 0x0063eae0
-    // A GDI font `face` drawn into a texture (part 9a-ii).
+    // A GDI font `face` drawn into a texture (part 9a-iii).
     bool AddGdiFont(const char *face, int textureWidth, int textureHeight, int size, int id, bool unknown);   // 0x0063ee20
 
 private:

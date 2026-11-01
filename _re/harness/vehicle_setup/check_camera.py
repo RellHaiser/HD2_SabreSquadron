@@ -28,6 +28,8 @@ LINES = {
                 "moVisual moLightmaps moProjector moB110 moSector moFail").split(),
     "fonts": ("foSets foLanguages foJapanese foConfig foVersion foShared foMissing foTable foQuads foGrow foFlush "
               "foMap").split(),
+    "xml": ("xmTree xmText xmComments xmAttributes xmBad xmWalk xmFile cfLanguage cfSet cfFonts "
+            "cfValues").split(),
 }
 
 

@@ -6,6 +6,7 @@
 #define private public
 #define protected public
 #include "game/font.h"
+#include "game/xml_node.h"
 #undef protected
 #undef private
 
@@ -25,13 +26,8 @@ void __stdcall GetGameVersion(int *major, int *minor)
     *major = g_foMajor;
     *minor = g_foMinor;
 }
-// FontConfig.hxml and the GDI fonts: logged; their results (a GDI font: none added).
-bool g_foConfig, g_foGdi;
-bool C_FontManager::LoadConfig(const char *path, const char *language)
-{
-    GfLog("config %s %s", path, language);
-    return g_foConfig;
-}
+// The GDI fonts (part 9a-iii): logged; their result (none added).
+bool g_foGdi;
 bool C_FontManager::AddGdiFont(const char *face, int textureWidth, int textureHeight, int size, int id, bool unknown)
 {
     GfLog("gdi %s %d %d %d %d %d", face, textureWidth, textureHeight, size, id, unknown);
@@ -43,6 +39,8 @@ namespace {
 struct S_FontResults {
     bool foSets = true, foLanguages = true, foJapanese = true, foConfig = true, foVersion = true, foShared = true;
     bool foMissing = true, foTable = true, foQuads = true, foGrow = true, foFlush = true, foMap = true;
+    bool xmTree = true, xmText = true, xmComments = true, xmAttributes = true, xmBad = true, xmWalk = true;
+    bool xmFile = true, cfLanguage = true, cfSet = true, cfFonts = true, cfValues = true;
 };
 
 // IGraph: the screen's width; textures ("missing": not found; "fail1": the code 1, loaded) logged.
@@ -92,6 +90,15 @@ void FoAddFiles(const char *kind, int set)
                                  dir + "\\BIG.tbl", dir + "\\SMALL.tbl"})
         g_files[f] = FoTable();
 }
+// FontConfig.hxml in Text\<dir>\: `language`'s 640x480 set with one big font.
+void FoConfigFile(const char *dir, const char *language)
+{
+    const std::string text = CmText("<FONTCONFIG><LANGUAGE name=\"%s\"><SET resolution=\"640x480\">"
+                                    "<FONT id=\"FONT_BIG\" name=\"Cfg Face\" size=\"20\" bold=\"true\" "
+                                    "texture_height=\"256\"/></SET></LANGUAGE></FONTCONFIG>",
+                                    language);
+    g_files[CmText("Text\\%s\\FontConfig.hxml", dir)] = std::vector<uint8_t>(text.begin(), text.end());
+}
 // The log's lines starting with `prefix`.
 std::vector<std::string> FoLines(const char *prefix)
 {
@@ -133,7 +140,7 @@ void FontTest()
     g_igraphVtable[0x3C / 4] = reinterpret_cast<void *>(&F_FoLoadTexture);
     g_igraphVtable[0x44 / 4] = reinterpret_cast<void *>(&F_FoSetTexture);
     g_igraphVtable[0x88 / 4] = reinterpret_cast<void *>(&F_FoDraw);
-    g_foConfig = g_foGdi = false;
+    g_foGdi = false;
 
     // --- the sets by the screen's width; a language with its own set ---
     {
@@ -152,7 +159,7 @@ void FontTest()
                              tex[2] == "texture Text\\Fonts\\Ce\\" + set + "\\\\SMALL.tga 0 402" &&
                              tex[3] == "texture Text\\Fonts\\Ansi\\" + set + "\\\\BIG.tga 0 402" &&
                              tex[4] == "texture Text\\Fonts\\Ansi\\" + set + "\\\\SMALL.tga 0 402" &&
-                             FoLines("config").empty());
+                             FoLines("gdi").empty());
         }
         g_foWidth = 640;
         FoAddFiles("Ce", 1);
@@ -165,20 +172,20 @@ void FontTest()
             const std::vector<std::string> tex = FoLines("texture");
             WM(r.foLanguages, FoIds(m) == std::vector<int>({4, 5, 6, 2, 3}) && tex.size() == 5 &&
                                   tex[3] == CmText("texture Text\\Fonts\\%s\\Set1\\\\BIG.tga 0 402", kind) &&
-                                  FoLines("config").empty());
+                                  FoLines("gdi").empty());
         }
     }
 
     // --- Japanese: the configuration, else GDI fonts by the set, else the map fonts ---
     {
         g_foLanguage = "Japan";
-        g_foConfig = true;
+        FoConfigFile("Japan", "japanese");
         C_FontManager *m = FoLoad();
-        WM(r.foJapanese, FoIds(m) == std::vector<int>({4, 5, 6}) && FoLines("config") ==
-                                                                         std::vector<std::string>{"config Text\\Japan\\FontConfig.hxml Japanese"} &&
-                             FoLines("gdi").empty() && FoLines("texture").size() == 3 &&
+        WM(r.foJapanese, FoIds(m) == std::vector<int>({4, 5, 6}) &&
+                             FoLines("gdi") == std::vector<std::string>{"gdi Cfg Face 512 256 20 2 1"} &&
+                             FoLines("texture").size() == 3 &&
                              FoLines("texture")[1] == "texture Text\\Fonts\\Ce\\Set1\\\\BIG.tga 0 402");
-        g_foConfig = false;
+        g_files.erase("Text\\Japan\\FontConfig.hxml");
         const int widths[] = {640, 800, 1024};
         const char *const big[] = {"gdi MS UI Gothic 512 512 31 2 0", "gdi Lucida Sans Unicode 512 512 28 2 0",
                                    "gdi Lucida Sans Unicode 512 1024 34 2 0"};
@@ -206,12 +213,11 @@ void FontTest()
     // --- another language: FontConfig.hxml for it, else the set's ---
     {
         g_foLanguage = "Russian";
-        g_foConfig = true;
+        FoConfigFile("Russian", "RUSSIAN");
         C_FontManager *m = FoLoad();
         WM(r.foConfig, FoIds(m) == std::vector<int>({4, 5, 6}) &&
-                           FoLines("config") == std::vector<std::string>{"config Text\\Russian\\FontConfig.hxml Russian"} &&
-                           FoLines("gdi").empty());
-        g_foConfig = false;
+                           FoLines("gdi") == std::vector<std::string>{"gdi Cfg Face 512 256 20 2 1"});
+        g_files.erase("Text\\Russian\\FontConfig.hxml");
         FoAddFiles("Ansi", 1);
         m = FoLoad();
         WM(r.foConfig, FoIds(m) == std::vector<int>({4, 5, 6, 2, 3}) && FoLines("gdi").empty() &&
@@ -437,6 +443,249 @@ void FontTest()
         WM(r.foMap, font.Load("m.tga", "map.tbl") && font.m_glyphs.empty() && font.GetId() == 11);
     }
 
+
+    // --- part 9a-ii: the XML reader ---
+    {
+        const auto file = [](const std::string &text) {
+            g_files["xm.hxml"] = std::vector<uint8_t>(text.begin(), text.end());
+            return "xm.hxml";
+        };
+        const size_t open = DtaOpenCount();
+        g_dtaArchivesFirst = true;
+        {
+            C_XmlNode root;
+            WM(r.xmTree, root.Load(file("<root a=\"1\" b=\"two\"><child x=\"y\">hello</child><empty/><child2><g/></child2></root>")) &&
+                             !g_dtaArchivesFirst && DtaOpenCount() == open);
+            WM(r.xmTree, root.GetName() == "root" && root.m_attributes.size() == 2 && std::string(root.GetAttribute("a")) == "1" &&
+                             std::string(root.GetAttribute("b")) == "two" && root.GetAttribute("c") == nullptr &&
+                             root.NumChildren() == 3);
+            WM(r.xmTree, root.NumChildren() == 3 && root.GetChild(0)->GetName() == "child" &&
+                             std::string(root.GetChild(0)->GetAttribute("x")) == "y" && root.GetChild(0)->GetText() == "hello" &&
+                             root.GetChild(1)->GetName() == "empty" && root.GetChild(1)->NumChildren() == 0 &&
+                             root.GetChild(1)->m_attributes.empty() && root.GetChild(2)->GetChild(0)->GetName() == "g" &&
+                             root.IsNamed("root") && !root.IsNamed("roo") && !root.IsNamed("roots"));
+            // Text: an element without children's, its spaces kept; with children none.
+            WM(r.xmText, root.GetText() == "" && root.GetChild(2)->GetText() == "");
+        }
+        {
+            C_XmlNode node;
+            WM(r.xmText, node.Load(file("<tx>  a b \n</tx>")) && node.GetText() == "  a b \n");
+            C_XmlNode empty;
+            WM(r.xmText, empty.Load(file("<tx></tx>")) && empty.GetText() == "");
+            // (Fix: at most 4095 characters.)
+            C_XmlNode big;
+            WM(r.xmText, big.Load(file("<tx>" + std::string(5000, 'z') + "</tx>")) && big.GetText().Size() == 4095);
+            // A tag with its attributes and spaces; a name ended by '>'.
+            C_XmlNode spaced;
+            WM(r.xmText, spaced.Load(file("<sp  k=\"v\"   ><in>t</in></sp>")) && std::string(spaced.GetAttribute("k")) == "v" &&
+                             spaced.GetChild(0)->GetText() == "t");
+        }
+        {
+            C_XmlNode node;
+            WM(r.xmComments, node.Load(file("<!-- first --><!-- 2nd --><cm><!-- in --><aa/><!--x--><bb/></cm>")) &&
+                                 node.GetName() == "cm" && node.NumChildren() == 2 && node.GetChild(1)->GetName() == "bb");
+            C_XmlNode bad;
+            WM(r.xmComments, !bad.Load(file("<!-><cm></cm>")) && !bad.Load(file("<!--><cm></cm>")) &&
+                                 !bad.Load(file("<cm><!-- open</cm>")) && !bad.Load(file("<cm><!x--></cm>")));
+            // An empty comment (its end 4 after its start), one ending inside its start: none.
+            C_XmlNode four, three;
+            WM(r.xmComments, four.Load(file("<!----><cm/>")) && four.GetName() == "cm" && !three.Load(file("<!---><cm/>")));
+            // Text after a comment: the text from the content's start, the comment in it.
+            C_XmlNode text;
+            WM(r.xmComments, text.Load(file("<cm><!--c-->xy</cm>")) && text.GetText() == "<!--c-->xy");
+            // A comment's end looked for from where the scan is.
+            C_XmlNode after;
+            WM(r.xmComments, after.Load(file("<!-- a --> <cm2>t</cm2>")) && after.GetName() == "cm2" && after.GetText() == "t");
+        }
+        {
+            C_XmlNode node;
+            WM(r.xmAttributes, node.Load(file("<at z=\"3\" y=\"2\" x=\"1\" z=\"4\"/>")) && node.m_attributes.size() == 4 &&
+                                   node.m_attributes[0].first == "z" && node.m_attributes[2].second == "1" &&
+                                   std::string(node.GetAttribute("z")) == "3");
+            // An empty value: the closing quote past it (quirk kept): the element fails.
+            C_XmlNode empty;
+            WM(r.xmAttributes, !empty.Load(file("<at v=\"\" w=\"x\">t</at>")) && empty.m_attributes.size() == 1 &&
+                                   std::string(empty.GetAttribute("v")) == "\" w=");
+            // A name only, no quotes, a value to the tag's end: the element fails.
+            C_XmlNode bad;
+            WM(r.xmAttributes, !bad.Load(file("<at d>t</at>")) && !bad.Load(file("<at d=1>t</at>")) &&
+                                   !bad.Load(file("<at d=\"1>t</at>")) && !bad.Load(file("<at =\"1\">t</at>")));
+            C_XmlNode close;
+            WM(r.xmAttributes, close.Load(file("<at d=\"1\" />")) && std::string(close.GetAttribute("d")) == "1");
+            // A name with a quote in it; a value without quotes; a value not closed.
+            C_XmlNode quoted;
+            WM(r.xmAttributes, quoted.Load(file("<at k\"x=\"v\"/>")) && quoted.m_attributes.size() == 1 &&
+                                   quoted.m_attributes[0].first == "k\"x" && std::string(quoted.GetAttribute("k\"x")) == "v");
+            C_XmlNode bare, open;
+            WM(r.xmAttributes, !bare.Load(file("<at k=123>t</at>")) && !open.Load(file("<at k=\"12>t</at>")));
+            // A control character: a character like the others (in a name, before a name, in a text).
+            C_XmlNode control;
+            WM(r.xmAttributes, control.Load(file("<a\x01" "bc>t</a\x01" "bc>")) && control.GetName() == "a\x01" "bc");
+            C_XmlNode before;
+            WM(r.xmAttributes, before.Load(file("<ab \x01k=\"v\"/>")) && std::string(before.GetAttribute("\x01k")) == "v");
+            C_XmlNode inText;
+            WM(r.xmAttributes, inText.Load(file("<ab>x\x01y</ab>")) && inText.GetText() == "x\x01y");
+            // An '=' and its quote close to the tag's end.
+            C_XmlNode edge;
+            WM(r.xmAttributes, edge.Load(file("<at d=\"a\">t</at>")) && !edge.Load(file("<at d=\"\">t</at>")));
+        }
+        {
+            C_XmlNode node;
+            // The tags' lengths: 3 .. 255; a closing tag at most 100; the closing tag's name.
+            WM(r.xmBad, !node.Load(file("<a>t</a>")) && !node.Load(file("no tags")) && !node.Load(file("<ab")) &&
+                            !node.Load(file("<abc>t</abd>")) && !node.Load(file("<abc>t")) && !node.Load(file("<abc>t<")) &&
+                            !node.Load(file("<abc>t</")));
+            C_XmlNode ok;
+            WM(r.xmBad, ok.Load(file("<ab>t</ab>")) && ok.GetName() == "ab");
+            const std::string n252(253, 'n'), n253(254, 'n'), n97(98, 'n'), n98(99, 'n');
+            C_XmlNode longest, tooLong, longClose, tooLongClose;
+            WM(r.xmBad, longest.Load(file("<" + n252 + "/>")) && longest.GetName().Size() == 253 &&
+                            !tooLong.Load(file("<" + n253 + "/>")));
+            WM(r.xmBad, longClose.Load(file("<" + n97 + ">t</" + n97 + ">")) &&
+                            !tooLongClose.Load(file("<" + n98 + ">t</" + n98 + ">")));
+            // A child that fails fails its parent; an empty name; an element with no name.
+            C_XmlNode parent;
+            WM(r.xmBad, !parent.Load(file("<pa><b c></pa>")) && parent.NumChildren() == 1);
+            C_XmlNode noName;
+            WM(r.xmBad, noName.Load(file("< />")) && noName.GetName() == "");
+            C_XmlNode spaceName;
+            WM(r.xmBad, !spaceName.Load(file("<   ab/>")));
+            // A '>' before the '<': no element.
+            C_XmlNode before;
+            WM(r.xmBad, !before.Load(file("> <ab/>")));
+        }
+        {
+            C_XmlNode root;
+            WM(r.xmWalk, root.Load(file("<rr><aa><a1/><a2/></aa><bb/><cc><c1/></cc></rr>")));
+            std::string order;
+            for (C_XmlNode *n = root.Next(); n; n = root.Next())
+                order += n->GetName().c_str() + std::string(" ");
+            WM(r.xmWalk, order == "rr aa a1 a2 bb cc c1 " && root.Next() == nullptr);
+            // A node's own walk: itself, then its own; the root's walk goes on after it.
+            C_XmlNode tree;
+            WM(r.xmWalk, tree.Load(file("<rr><aa><a1/><a2/></aa><bb/></rr>")));
+            tree.Next();
+            C_XmlNode *a = tree.Next();
+            WM(r.xmWalk, a && a->GetName() == "aa" && a->Next()->GetName() == "a1" && a->Next()->GetName() == "a2" &&
+                             a->Next() == nullptr && tree.Next()->GetName() == "bb" && tree.Next() == nullptr);
+            // A load starts the walk again.
+            WM(r.xmWalk, tree.Load(file("<dd/>")) && tree.Next() == &tree);
+            // A walk of a leaf: itself, then none.
+            C_XmlNode leaf;
+            leaf.Load(file("<lf/>"));
+            WM(r.xmWalk, leaf.Next() == &leaf && leaf.Next() == nullptr && leaf.Next() == nullptr);
+        }
+        {
+            C_XmlNode node;
+            WM(r.xmFile, !node.Load(nullptr) && !node.Load("none.hxml") && DtaOpenCount() == open);
+            // At most 1 MB.
+            std::string text = "<big>" + std::string(0x100000 - 11, ' ') + "</big>";
+            C_XmlNode fits, tooBig;
+            WM(r.xmFile, text.size() == 0x100000 && fits.Load(file(text)) && fits.GetName() == "big" &&
+                             !tooBig.Load(file(text + " ")) && DtaOpenCount() == open);
+            // A short read: none.
+            C_XmlNode empty;
+            WM(r.xmFile, !empty.Load(file("")));
+        }
+    }
+
+    // --- part 9a-ii: FontConfig.hxml ---
+    {
+        C_FontManager m;
+        const auto config = [](const std::string &text) {
+            g_files["cfg.hxml"] = std::vector<uint8_t>(text.begin(), text.end());
+        };
+        const auto font = [](const char *id, const char *name, const char *size, const char *bold, const char *height) {
+            std::string f = "<FONT";
+            if (id)
+                f += std::string(" id=\"") + id + "\"";
+            if (name)
+                f += std::string(" name=\"") + name + "\"";
+            if (size)
+                f += std::string(" size=\"") + size + "\"";
+            if (bold)
+                f += std::string(" bold=\"") + bold + "\"";
+            if (height)
+                f += std::string(" texture_height=\"") + height + "\"";
+            return f + "/>";
+        };
+        const std::string big = font("FONT_BIG", "Big Face", "24", "true", "512");
+        g_foGdi = false;
+        // The root's name; the language's (any case; the first matching; a language without a name
+        // skipped); not found: none.
+        config("<FONTCONF><LANGUAGE name=\"German\"><SET resolution=\"640x480\">" + big + "</SET></LANGUAGE></FONTCONF>");
+        g_gfLog.clear();
+        WM(r.cfLanguage, !m.LoadConfig("cfg.hxml", "German") && FoLines("gdi").empty());
+        WM(r.cfLanguage, !m.LoadConfig("none.hxml", "German"));
+        config("<FONTCONFIG><LANGUAGE><SET resolution=\"640x480\">" + font("FONT_BIG", "Nameless", "1", "true", "1") +
+               "</SET></LANGUAGE><OTHER name=\"german\"><SET resolution=\"640x480\">" +
+               font("FONT_BIG", "Other", "1", "true", "1") + "</SET></OTHER><LANGUAGE name=\"French\"><SET resolution=\"640x480\">" +
+               font("FONT_BIG", "French", "1", "true", "1") + "</SET></LANGUAGE><LANGUAGE name=\"gErMaN\"><SET resolution=\"640x480\">" +
+               big + "</SET></LANGUAGE><LANGUAGE name=\"German\"><SET resolution=\"640x480\">" +
+               font("FONT_BIG", "Second", "1", "true", "1") + "</SET></LANGUAGE></FONTCONFIG>");
+        g_gfLog.clear();
+        WM(r.cfLanguage, m.LoadConfig("cfg.hxml", "German") && FoLines("gdi") == std::vector<std::string>{"gdi Big Face 512 512 24 2 1"});
+        g_gfLog.clear();
+        WM(r.cfLanguage, !m.LoadConfig("cfg.hxml", "Spanish") && FoLines("gdi").empty());
+        WM(r.cfLanguage, !m.LoadConfig("cfg.hxml", "Germa") && !m.LoadConfig("cfg.hxml", "Germans"));
+
+        // The set of the screen's resolution (inside the language), else none.
+        const std::string sets = "<FONTCONFIG><LANGUAGE name=\"X\"><SET resolution=\"640x480\">" + font("FONT_BIG", "S640", "1", "true", "1") +
+                                 "</SET><SET>" + font("FONT_BIG", "NoRes", "1", "true", "1") + "</SET><RES resolution=\"800x600\">" +
+                                 font("FONT_BIG", "NotSet", "1", "true", "1") + "</RES><SET resolution=\"800x600\">" +
+                                 font("FONT_BIG", "S800", "1", "true", "1") + "</SET><SET resolution=\"1024x768\">" +
+                                 font("FONT_BIG", "S1024", "1", "true", "1") + "</SET></LANGUAGE><LANGUAGE name=\"Y\">" +
+                                 "<SET resolution=\"640x480\">" + font("FONT_BIG", "Y640", "1", "true", "1") + "</SET></LANGUAGE></FONTCONFIG>";
+        config(sets);
+        const int widths[] = {640, 799, 800, 1023, 1024, 2000};
+        const char *const faces[] = {"S640", "S640", "S800", "S800", "S1024", "S1024"};
+        for (int i = 0; i < 6; ++i) {
+            g_foWidth = widths[i];
+            g_gfLog.clear();
+            WM(r.cfSet, m.LoadConfig("cfg.hxml", "X") && FoLines("gdi") == std::vector<std::string>{CmText("gdi %s 512 1 1 2 1", faces[i])});
+        }
+        g_foWidth = 640;
+        config("<FONTCONFIG><LANGUAGE name=\"X\"><SET resolution=\"800x600\">" + big + "</SET></LANGUAGE><LANGUAGE name=\"Y\">"
+               "<SET resolution=\"640x480\">" + big + "</SET></LANGUAGE></FONTCONFIG>");
+        g_gfLog.clear();
+        WM(r.cfSet, !m.LoadConfig("cfg.hxml", "X") && FoLines("gdi").empty());
+
+        // The fonts: big and small, others skipped; loaded whatever the fonts do (no fonts too).
+        config("<FONTCONFIG><LANGUAGE name=\"X\"><SET resolution=\"640x480\">" + big + font("FONT_SMALL", "Small", "12", "false", "256") +
+               font("FONT_HUGE", "Huge", "1", "true", "1") + font("FONT_BIGGER", "Bigger", "1", "true", "1") +
+               font("FONT_SMAL", "Smal", "1", "true", "1") + "<NOTFONT id=\"FONT_BIG\" name=\"N\" size=\"1\" bold=\"true\" texture_height=\"1\"/>" +
+               "<GROUP>" + font("FONT_SMALL", "Nested", "9", "True", "64") + "</GROUP></SET></LANGUAGE></FONTCONFIG>");
+        for (const bool gdi : {false, true}) {
+            g_foGdi = gdi;
+            g_gfLog.clear();
+            WM(r.cfFonts, m.LoadConfig("cfg.hxml", "X") &&
+                              FoLines("gdi") == std::vector<std::string>({"gdi Big Face 512 512 24 2 1", "gdi Small 512 256 12 3 0",
+                                                                          "gdi Nested 512 64 9 3 0"}));
+        }
+        g_foGdi = false;
+        config("<FONTCONFIG><LANGUAGE name=\"X\"><SET resolution=\"640x480\"></SET></LANGUAGE></FONTCONFIG>");
+        WM(r.cfFonts, m.LoadConfig("cfg.hxml", "X"));
+
+        // A font missing a value: none (after the fonts before it).
+        const char *const full[5] = {"FONT_BIG", "F", "7", "yes", "128"};
+        for (int missing = 0; missing < 5; ++missing) {
+            const char *v[5];
+            for (int k = 0; k < 5; ++k)
+                v[k] = k == missing ? nullptr : full[k];
+            config("<FONTCONFIG><LANGUAGE name=\"X\"><SET resolution=\"640x480\">" + big + font(v[0], v[1], v[2], v[3], v[4]) +
+                   "</SET></LANGUAGE></FONTCONFIG>");
+            g_gfLog.clear();
+            WM(r.cfValues, !m.LoadConfig("cfg.hxml", "X") && FoLines("gdi") == std::vector<std::string>{"gdi Big Face 512 512 24 2 1"});
+        }
+        // The values: atoi, "true" only.
+        config("<FONTCONFIG><LANGUAGE name=\"X\"><SET resolution=\"640x480\">" + font("FONT_BIG", "F", "7", "yes", "128") +
+               font("FONT_BIG", "G", "x12", "truex", "-3") + font("FONT_BIG", "H", " 5", "true ", "64pt") + "</SET></LANGUAGE></FONTCONFIG>");
+        g_gfLog.clear();
+        WM(r.cfValues, m.LoadConfig("cfg.hxml", "X") && FoLines("gdi") == std::vector<std::string>({"gdi F 512 128 7 2 0", "gdi G 512 -3 0 2 0",
+                                                                                                     "gdi H 512 64 5 2 0"}));
+        m.Free();
+    }
+
     while (g_fontManager)
         ReleaseFontManager();
     g_foLanguage = "English";
@@ -449,4 +698,8 @@ void FontTest()
                 "foTable %d foQuads %d foGrow %d foFlush %d foMap %d\n",
                 r.foSets, r.foLanguages, r.foJapanese, r.foConfig, r.foVersion, r.foShared, r.foMissing, r.foTable,
                 r.foQuads, r.foGrow, r.foFlush, r.foMap);
+    std::printf("xml: xmTree %d xmText %d xmComments %d xmAttributes %d xmBad %d xmWalk %d xmFile %d cfLanguage %d "
+                "cfSet %d cfFonts %d cfValues %d\n",
+                r.xmTree, r.xmText, r.xmComments, r.xmAttributes, r.xmBad, r.xmWalk, r.xmFile, r.cfLanguage, r.cfSet,
+                r.cfFonts, r.cfValues);
 }
