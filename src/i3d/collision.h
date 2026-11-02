@@ -13,8 +13,8 @@ class I3D_material;
 enum : uint32_t {
     I3DCOL_BOX_ONLY = 0x00000001,           // the visuals' boxes, no faces
     I3DCOL_NO_JOINTS = 0x00008000,          // skinned meshes are not tested
-    I3DCOL_ALL_HITS = 0x00010000,           // no pruning by the nearest hit (filters see every face)
-    I3DCOL_FILTER = 0x00020000,             // faces go through a filter (the given one, else alpha)
+    I3DCOL_ALL_HITS = 0x00010000,           // no pruning by the nearest hit
+    I3DCOL_FILTER = 0x00020000,             // ignored (LS3DF: faces go through a filter, the given one, else alpha)
     I3DCOL_UNLIMITED = 0x00040000,          // the ray goes on past its length
     I3DCOL_DONE_AT_ROOT = 0x00080000,       // IntersectFrame: the frame's children are not walked
     I3DCOL_TWO_SIDED = 0x00100000,          // every face is tested from both sides
@@ -56,10 +56,8 @@ struct I3D_collision_info {
 
 namespace ls3d::i3d {
 
-// The face filters (FUN_10010a90, the default: texel alpha x opacity below 0.1 passes; 0x10064860,
-// the lens flares' and the lightmaps': `user` is an S_vector color the faces tint, partly
-// transparent ones passing).
-int __stdcall AlphaFilter(const void *reserved, float t, I3D_frame *frame, void *user, const S_collisionTexel *texel);
+// The transmit filter (0x10064860, the lens flares' and the lightmaps'): `user` is an S_vector color
+// the faces tint, partly transparent ones passing.
 int __stdcall TransmitFilter(const void *reserved, float t, I3D_frame *frame, void *user,
                              const S_collisionTexel *texel);
 
