@@ -1,4 +1,4 @@
-# Build output (build.py: build/msvc/LS3DF.dll, build/*.exe; intermediates go to %TEMP%)
+# Build output (build.py: build/msvc/LS3DRF.dll, build/*.exe; intermediates go to %TEMP%)
 build/
 *.obj
 *.pdb
