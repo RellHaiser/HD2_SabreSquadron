@@ -1,9 +1,11 @@
 """Builds the LS3DRF.dll port (x86, MSVC).
 
-Usage: python build.py [dll] [check] [test] [--debug] [--only SUBSTR]
+Usage: python build.py [dll] [check] [test] [run] [--debug] [--only SUBSTR] [--ops N] [--seeds 1,2]
   dll    (default) compile everything and link build/msvc/LS3DRF.dll with ls3drf.def
   check  compile every translation unit, no link (fast syntax/type check while porting)
   test   build tests/*.cpp into build/<name>.exe
+  run    run the built tests with their standard arguments (--ops, default 20000, each of --seeds,
+         default 1; the originals from %HD2_DIR%), one line each; full output in %TEMP%\\ls3drf_build\\logs
 Intermediate files go to %TEMP%\\ls3drf_build: a synced source folder (Google Drive, OneDrive) locks
 freshly written files while it uploads them, which breaks cl and link.
 Needs Visual Studio with the C++ x86 tools (found with vswhere) and MinGW's dlltool (%DLLTOOL%, PATH
@@ -249,12 +251,56 @@ def build_tests(debug, only=None):
     return ok
 
 
+# Arguments of the tests that take no operation count and seed (after the original's path, "" = found
+# by %HD2_DIR% or PATH). compare_math's count is the rounds; without it "--pc24" is read as 0 rounds.
+RUN_ARGS = {"compare_math": ["{ops}", "--pc24"], "compare_dxerr8": []}
+
+
+def run_tests(only=None, ops="20000", seeds=("1",)):
+    tdir = os.path.join(ROOT, "tests")
+    logs = os.path.join(WORK, "logs")
+    os.makedirs(logs, exist_ok=True)
+    env = dict(os.environ)
+    if env.get("HD2_DIR"):
+        # The originals import rw_data.dll and others from the game folder.
+        env["PATH"] = env["HD2_DIR"] + os.pathsep + env.get("PATH", "")
+    ok = True
+    for f in sorted(os.listdir(tdir)) if os.path.isdir(tdir) else []:
+        name = f[:-4]
+        if not f.endswith(".cpp") or (only and only not in f):
+            continue
+        exe = os.path.join(ROOT, "build", name + ".exe")
+        if not os.path.isfile(exe):
+            print("run %s: not built" % name)
+            ok = False
+            continue
+        runs = [[a.format(ops=ops) for a in RUN_ARGS[name]]] if name in RUN_ARGS else [[ops, s] for s in seeds]
+        for args in runs:
+            r = subprocess.run([exe, "", *args], capture_output=True, text=True, errors="replace", env=env)
+            out = r.stdout + r.stderr
+            with open(os.path.join(logs, "-".join([name, *args]) + ".txt"), "w", encoding="utf-8") as log:
+                log.write(out)
+            last = ([l for l in out.splitlines() if l.strip()] or ["(no output)"])[-1]
+            print("run %s: %s%s" % (" ".join([name, *args]), last, "" if r.returncode == 0 else " (exit %d)" % r.returncode))
+            ok &= r.returncode == 0
+    return ok
+
+
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     debug = "--debug" in sys.argv
-    only = sys.argv[sys.argv.index("--only") + 1] if "--only" in sys.argv else None
-    if only in args:
-        args.remove(only)
+
+    def option(name, default):
+        if name not in sys.argv:
+            return default
+        value = sys.argv[sys.argv.index(name) + 1]
+        if value in args:
+            args.remove(value)
+        return value
+
+    only = option("--only", None)
+    ops = option("--ops", "20000")
+    seeds = option("--seeds", "1").split(",")
     targets = args or ["dll"]
     ok = True
     if "check" in targets or "dll" in targets:
@@ -266,6 +312,8 @@ def main():
         ok &= good and link(objs, debug)
     if "test" in targets:
         ok &= build_tests(debug, only)
+    if "run" in targets and ok:
+        ok &= run_tests(only, ops, seeds)
     sys.exit(0 if ok else 1)
 
 
