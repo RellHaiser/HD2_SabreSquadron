@@ -121,6 +121,7 @@ void Progress(float progress)
     }
 }
 
+// LS3DRF 0x1002f480 (from LS3DF 0x1005d970)
 // 0x1005d970: the model file's materials and frames.
 HRESULT ReadModelFile(const char *fileName)
 {
@@ -287,7 +288,7 @@ HRESULT ReadAnimationFile(const char *fileName, uint8_t **blob, const FILETIME *
 
 namespace ls3d::i3d {
 
-// 0x1005d260
+// LS3DRF 0x1002eeb0 (from LS3DF 0x1005d260)
 I3D_RESULT OpenModelFile(const char *fileName, uint32_t flags, void *callback, void *context, I3D_frame *root)
 {
     if (!root || !fileName || !*fileName)
