@@ -30,3 +30,18 @@
 00670f20 C_EquipmentPanel::DressSoldier | int __fastcall DressSoldier(void * panel)
 00670ee0 C_EquipmentPanel::AddToSoldier | void __thiscall AddToSoldier(void *this, uint place, void * item)
 006a2bb0 S_SquadSoldier::GetFreeBeltVolume | int __thiscall GetFreeBeltVolume(S_SquadSoldier *this)
+# Part 9e-ii-b: the panel's description, the child descriptions, the menu's item slots.
+0066f200 C_EquipmentPanel::BuildDescription | void __thiscall BuildDescription(void *this, void * screen, void * model)
+0061da70 S_ControlDesc::AddChild | void * __thiscall AddChild(void *this, int type, char * name)
+00670b50 AddDescMessage4_670b50 | void __cdecl AddDescMessage4_670b50(void * desc, uint target, uint id, uint value, uint value2)
+00676410 AddDescMessage4_676410 | void __cdecl AddDescMessage4_676410(void * desc, uint target, uint id, uint value, uint value2)
+00672fb0 C_EquipmentMenuBase::CallItemNotify13
+00672fc0 C_EquipmentMenuBase::CallItemNotify0A
+00672fd0 C_EquipmentMenuBase::CallItemNotify08
+00672fe0 C_EquipmentMenuBase::CallItemNotify09
+00672ff0 C_EquipmentMenuBase::CallItemHover
+0067f300 C_EquipmentMenuBase::OnItemNotify13
+0067f310 C_EquipmentMenuBase::OnItemNotify0A
+0067f320 C_EquipmentMenuBase::OnItemNotify08
+0067f330 C_EquipmentMenuBase::OnItemNotify09
+0067f340 C_EquipmentMenuBase::OnItemHover

@@ -6,10 +6,12 @@
 #include "common/c_str.h"
 #include "game/control.h"
 #include "game/controls.h"
+#include "game/equipment_menu.h"
 #include "game/item_defs.h"
 #include "game/menu_soldier.h"
 #include "game/pending.h"
 #include "game/profile.h"
+#include "game/screen.h"
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
 
@@ -81,6 +83,80 @@ void PostText(uint32_t target, uint32_t style, const C_str &text)
     PostControlMessage(message);
 }
 
+// The description's controls (kinds as CreateChild takes them).
+enum : int {
+    DESC_TYPE_BUTTON = 2,
+    DESC_TYPE_ITEM = 4,
+    DESC_TYPE_GROUP = 5,
+    DESC_TYPE_SLIDER = 7,
+    DESC_TYPE_PANE = 0xB,
+    DESC_TYPE_TEXT = 0x13,
+    DESC_TYPE_DESCRIPTION = 0x15,
+    DESC_TYPE_BAR = 0x16,
+};
+// The places' controls, in their ids' kinds' order (1..5), and the drop place's.
+const char *const PLACE_CONTROLS[] = {"head", "uniform", "back", "shoulder", "hands"};
+constexpr int PLACE_UNIFORM = 1;
+const char *const BELT_ITEMS[] = {"item00", "item01", "item02", "item03"};
+const char *const BACKPACK_ITEMS[] = {"item04", "item05", "item06", "item07"};
+// The item controls' texture to replace (its face group).
+const char *const ITEM_TEXTURE = "X_SQUARE.BMP";
+// The labels and their texts.
+struct S_PanelLabel {
+    const char *name;
+    int textId;
+};
+const S_PanelLabel PANEL_LABELS[] = {
+    {"text_back", 0xA96}, {"text_head", 0xA97}, {"text_drop", 0xA98}, {"text_hands", 0xA99},
+    {"text_uniform", 0xA9A}, {"text_shoulder", 0xA9B}, {"text_holsters", 0xA9C}, {"text_backpack", 0xA9D},
+};
+// The bars' first values (the backpack's and the weight's 0.8).
+constexpr float BELT_BAR_START = 0.5f;
+constexpr float LOAD_BAR_START = 0.8f;
+// FindChildFrame type masks the description's frames are looked for with.
+constexpr uint32_t FIND_VISUALS = 1;
+constexpr uint32_t FIND_DUMMIES = 0x20;
+
+// An item control's description: its texture to replace and (with a menu) the menu's slots as its
+// callbacks (not the uniform's first four).
+void AddItemCallbacks(S_ControlDesc *item, C_EquipmentMenuBase *menu, bool all)
+{
+    AddDescMessage(item, 0, CONTROL_MSG_FIND_FACE_GROUP, 0, C_str(ITEM_TEXTURE));
+    if (!menu)
+        return;
+    const auto object = reinterpret_cast<uintptr_t>(menu);
+    const auto add = [&](uint32_t notification, ControlCallback function) {
+        AddDescMessage(item, 0, CONTROL_MSG_ADD_CALLBACK, notification, object, reinterpret_cast<uintptr_t>(function));
+    };
+    if (all) {
+        add(CONTROL_NOTIFY_13, &C_EquipmentMenuBase::CallItemNotify13);
+        add(CONTROL_NOTIFY_0A, &C_EquipmentMenuBase::CallItemNotify0A);
+        add(CONTROL_NOTIFY_08, &C_EquipmentMenuBase::CallItemNotify08);
+        add(CONTROL_NOTIFY_09, &C_EquipmentMenuBase::CallItemNotify09);
+    }
+    add(CONTROL_NOTIFY_ENTER, &C_EquipmentMenuBase::CallItemHover);
+    add(CONTROL_NOTIFY_LEAVE, &C_EquipmentMenuBase::CallItemHover);
+}
+
+// A scroll group of items: its bar, the arrows (off; their presses OnScroll), its caption, its slider
+// (hidden).
+void AddScrollGroup(S_ControlDesc *group, C_EquipmentPanel *panel, const char *bar, float start, const char *up,
+                    const char *down, const char *caption, int captionText, const char *slider)
+{
+    S_ControlDesc *fill = group->AddChild(DESC_TYPE_BAR, bar);
+    AddDescMessage(fill, 0, CONTROL_MSG_SET_BAR_AXIS, 2);
+    AddDescMessage(fill, 0, CONTROL_MSG_SET_BAR_VALUE, 0, FloatValue(start));
+    for (const char *arrow : {up, down}) {
+        S_ControlDesc *button = group->AddChild(DESC_TYPE_BUTTON, arrow);
+        AddDescMessage(button, 0, CONTROL_MSG_DEACTIVATE, 0);
+        AddDescMessage(button, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_PRESS, reinterpret_cast<uintptr_t>(panel),
+                       reinterpret_cast<uintptr_t>(&C_EquipmentPanel::OnScroll));
+    }
+    S_ControlDesc *text = group->AddChild(DESC_TYPE_TEXT, caption);
+    AddDescMessage(text, 0, CONTROL_MSG_SET_TEXT_ID, STYLE_LOAD, static_cast<uintptr_t>(captionText));
+    AddDescMessage(group->AddChild(DESC_TYPE_SLIDER, slider), 0, CONTROL_MSG_HIDE, 0);
+}
+
 // An empty item (the "none" the putting functions give back).
 S_SoldierItem NoItem()
 {
@@ -109,6 +185,113 @@ const S_SoldierItem &PlaceItem(const S_SquadSoldier &soldier, uint32_t slot)
 }
 
 } // namespace
+
+// ---- the description
+
+void C_EquipmentPanel::BuildDescription(S_ScreenDesc *screen, I3D_frame *model)
+{
+    S_ControlDesc *panel = screen->AddControl(DESC_TYPE_GROUP, "P_Equipment");
+    // The places (kinds 1..5) and the drop place (6).
+    for (int i = 0; i < 5; ++i)
+        AddItemCallbacks(panel->AddChild(DESC_TYPE_ITEM, PLACE_CONTROLS[i]), m_menu, i != PLACE_UNIFORM);
+    panel->AddChild(DESC_TYPE_ITEM, "drop");
+    // The belt: its scroll group (7) and items (8), the backpack's (9, 10).
+    AddScrollGroup(panel->AddChild(DESC_TYPE_GROUP, "scroll13"), this, "hlcpct00", BELT_BAR_START, "barrow_up23",
+                   "barrow_down23", "text_hlstrscap", 0xA9C, "slider12");
+    S_ControlDesc *belt = panel->AddChild(DESC_TYPE_PANE, "GB_Holsters");
+    AddDescMessage(belt, 0, CONTROL_MSG_SET_VISIBLE, 4);
+    for (const char *name : BELT_ITEMS)
+        AddItemCallbacks(belt->AddChild(DESC_TYPE_ITEM, name), m_menu, true);
+    AddScrollGroup(panel->AddChild(DESC_TYPE_GROUP, "scroll14"), this, "hlcpct01", LOAD_BAR_START, "barrow_up24",
+                   "barrow_down24", "text_bkpckcap", 0xA9D, "slider13");
+    S_ControlDesc *backpack = panel->AddChild(DESC_TYPE_PANE, "GR_BackPack");
+    AddDescMessage(backpack, 0, CONTROL_MSG_SET_VISIBLE, 4);
+    for (const char *name : BACKPACK_ITEMS)
+        AddItemCallbacks(backpack->AddChild(DESC_TYPE_ITEM, name), m_menu, true);
+    // The capacity's text (11), the weight bar (12), the overweight bar (when the model has its frame).
+    AddDescMessage(panel->AddChild(DESC_TYPE_TEXT, "text_cpcty"), 0, CONTROL_MSG_SET_TEXT_ID, STYLE_LOAD, TEXT_NO_ITEMS);
+    S_ControlDesc *weight = panel->AddChild(DESC_TYPE_BAR, "hlcpct02");
+    AddDescMessage(weight, 0, CONTROL_MSG_SET_BAR_AXIS, 2);
+    AddDescMessage(weight, 0, CONTROL_MSG_SET_BAR_VALUE, 0, FloatValue(LOAD_BAR_START));
+    m_weightBar = weight->id;
+    if (model->FindChildFrame("overload", FIND_VISUALS)) {
+        S_ControlDesc *overweight = panel->AddChild(DESC_TYPE_BAR, "overload");
+        AddDescMessage(overweight, 0, CONTROL_MSG_SET_BAR_AXIS, 2);
+        AddDescMessage(overweight, 0, CONTROL_MSG_SET_BAR_VALUE, 0, FloatValue(0.0f));
+        m_overweightBar = overweight->id;
+    }
+    // The description text: its frame moved under the panel's dummy, hidden.
+    I3D_frame *description = model->FindChildFrame("description", FIND_VISUALS);
+    if (description) {
+        if (I3D_frame *dummy = model->FindChildFrame("P_Equipment", FIND_DUMMIES)) {
+            description->LinkTo(dummy, 1);
+            description->SetOn(false);
+            S_ControlDesc *text = panel->AddChild(DESC_TYPE_DESCRIPTION, "description");
+            AddDescMessage(text, 0, CONTROL_MSG_SET_TEXT_ID, STYLE_LOAD, TEXT_NO_ITEMS);
+            AddDescMessage(text, 0, CONTROL_MSG_HIDE, 0);
+            m_descriptionText = text->id;
+        }
+    }
+    for (const S_PanelLabel &label : PANEL_LABELS)
+        AddDescMessage(panel->AddChild(DESC_TYPE_TEXT, label.name), 0, CONTROL_MSG_SET_TEXT_ID, STYLE_LOAD,
+                       static_cast<uintptr_t>(label.textId));
+
+    // The ids: the panel's with the kinds (bits 12-19) and children (bits 4-11) above.
+    m_squadSoldier = nullptr;
+    const uint32_t id = panel->id;
+    m_headSlot = id | 0x1000;
+    m_uniformSlot = id | 0x2000;
+    m_backpackSlot = id | 0x3000;
+    m_longGunSlot = id | 0x4000;
+    m_handsSlot = id | 0x5000;
+    m_dropSlot = id | 0x6000;
+    m_beltBar = id | 0x7010;
+    m_beltUp = id | 0x7020;
+    m_beltDown = id | 0x7030;
+    m_beltText = id | 0x7040;
+    for (uint32_t i = 0; i < SLOT_COUNT; ++i)
+        m_beltSlots[i] = id | 0x8000 | (i + 1) << 4;
+    m_backpackBar = id | 0x9010;
+    m_backpackUp = id | 0x9020;
+    m_backpackDown = id | 0x9030;
+    m_backpackText = id | 0x9040;
+    for (uint32_t i = 0; i < SLOT_COUNT; ++i)
+        m_backpackSlots[i] = id | 0xA000 | (i + 1) << 4;
+    m_weightText = id | 0xB000;
+    FindHighlights(model);
+}
+
+// ---- the menu's slots as the item controls' callbacks
+
+bool C_EquipmentMenuBase::CallItemNotify13(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                           uint32_t value)
+{
+    return static_cast<C_EquipmentMenuBase *>(menu)->OnItemNotify13(argument, control, notification, value);
+}
+
+bool C_EquipmentMenuBase::CallItemNotify0A(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                           uint32_t value)
+{
+    return static_cast<C_EquipmentMenuBase *>(menu)->OnItemNotify0A(argument, control, notification, value);
+}
+
+bool C_EquipmentMenuBase::CallItemNotify08(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                           uint32_t value)
+{
+    return static_cast<C_EquipmentMenuBase *>(menu)->OnItemNotify08(argument, control, notification, value);
+}
+
+bool C_EquipmentMenuBase::CallItemNotify09(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                           uint32_t value)
+{
+    return static_cast<C_EquipmentMenuBase *>(menu)->OnItemNotify09(argument, control, notification, value);
+}
+
+bool C_EquipmentMenuBase::CallItemHover(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                        uint32_t value)
+{
+    return static_cast<C_EquipmentMenuBase *>(menu)->OnItemHover(argument, control, notification, value);
+}
 
 // ---- the menu soldier
 

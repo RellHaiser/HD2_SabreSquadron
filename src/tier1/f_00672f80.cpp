@@ -14,44 +14,4 @@ uint32_t FUN_00672f80(...)
 }
 
 
-// 0x00672fb0
-uint32_t FUN_00672fb0(int *param_1, ...)
-{
-  (**(code **)(*param_1 + 0x5c))();
-  return 0;
-}
-
-
-// 0x00672fc0
-uint32_t FUN_00672fc0(int *param_1, ...)
-{
-  (**(code **)(*param_1 + 100))();
-  return 0;
-}
-
-
-// 0x00672fd0
-uint32_t FUN_00672fd0(int *param_1, ...)
-{
-  (**(code **)(*param_1 + 0x68))();
-  return 0;
-}
-
-
-// 0x00672fe0
-uint32_t FUN_00672fe0(int *param_1, ...)
-{
-  (**(code **)(*param_1 + 0x6c))();
-  return 0;
-}
-
-
-// 0x00672ff0
-uint32_t FUN_00672ff0(int *param_1, ...)
-{
-  (**(code **)(*param_1 + 0x70))();
-  return 0;
-}
-
-
 } // namespace tier1

@@ -365,41 +365,6 @@ uint32_t C_MenuState__FUN_0067f1f0(C_MenuState *_this, ...)
 }
 
 
-// 0x0067f300
-uint8_t C_EquipmentMenuBase__FUN_0067f300(C_EquipmentMenuBase *_this, ...)
-{
-  return 1;
-}
-
-
-// 0x0067f310
-uint8_t C_EquipmentMenuBase__FUN_0067f310(C_EquipmentMenuBase *_this, ...)
-{
-  return 1;
-}
-
-
-// 0x0067f320
-uint8_t C_EquipmentMenuBase__FUN_0067f320(C_EquipmentMenuBase *_this, ...)
-{
-  return 1;
-}
-
-
-// 0x0067f330
-uint8_t C_EquipmentMenuBase__FUN_0067f330(C_EquipmentMenuBase *_this, ...)
-{
-  return 1;
-}
-
-
-// 0x0067f340
-uint8_t C_EquipmentMenuBase__FUN_0067f340(C_EquipmentMenuBase *_this, ...)
-{
-  return 1;
-}
-
-
 // 0x0067f350
 uint32_t * C_EquipmentMenuBase__FUN_0067f350(C_EquipmentMenuBase *_this,uint8_t param_1, ...)
 {

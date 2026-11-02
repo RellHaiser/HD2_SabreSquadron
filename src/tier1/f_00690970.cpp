@@ -1820,7 +1820,7 @@ uint32_t FUN_00692c40(void *_this,int param_1,int *param_2, ...)
 // 0x00693320
 uint32_t FUN_00693320(void *param_1, ...)
 {
-  void *desc;
+  S_ControlDesc *_this;
   void *pvVar1;
   int iVar2;
   char **ppcVar3;
@@ -1872,18 +1872,18 @@ uint32_t FUN_00693320(void *param_1, ...)
   local_c = "text_lockpick";
   local_8 = "hlcpct06";
   local_4 = "text_lockpick01";
-  desc = (void *)S_ScreenDesc__AddControl(param_1,5,"Panel02");
-  AddDescMessage1(desc,0,0x1000005,0);
+  _this = S_ScreenDesc__AddControl(param_1,5,"Panel02");
+  AddDescMessage1(_this,0,0x1000005,0);
   iVar2 = 0;
   ppcVar3 = local_6c + 1;
   do {
-    pvVar1 = (void *)FUN_0061da70(desc,0x13,ppcVar3[-1]);
+    pvVar1 = S_ControlDesc__AddChild(_this,0x13,ppcVar3[-1]);
     AddDescMessage1(pvVar1,0,0x2000073,0);
     AddDescMessage2(pvVar1,0,0x1000015,0xb,iVar2 + 0xa6e);
-    pvVar1 = (void *)FUN_0061da70(desc,0x16,*ppcVar3);
+    pvVar1 = S_ControlDesc__AddChild(_this,0x16,*ppcVar3);
     AddDescMessage1(pvVar1,0,0x1000093,2);
-    FUN_00670b50((int)pvVar1,0,0x1000092,0,0);
-    pvVar1 = (void *)FUN_0061da70(desc,0x13,ppcVar3[1]);
+    AddDescMessage4_670b50(pvVar1,0,0x1000092,0,0);
+    pvVar1 = S_ControlDesc__AddChild(_this,0x13,ppcVar3[1]);
     AddDescMessage1(pvVar1,0,0x2000073,0);
     AddDescMessage2(pvVar1,0,0x1000015,0xb,0x7d2);
     iVar2++;
@@ -1896,13 +1896,14 @@ uint32_t FUN_00693320(void *param_1, ...)
 // 0x006934f0
 uint32_t FUN_006934f0(void *param_1, ...)
 {
-  void *pvVar1;
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,5,"Panel03");
-  AddDescMessage1(pvVar1,0,0x1000005,0);
-  AddDescMessage1(pvVar1,0,0x1000004,0);
-  pvVar1 = (void *)FUN_0061da70(pvVar1,0x1a,"text_05");
-  AddDescMessage1(pvVar1,0,0x2000073,1);
-  AddDescMessage1(pvVar1,0,0x1000005,0);
+  S_ControlDesc *_this;
+  void *desc;
+  _this = S_ScreenDesc__AddControl(param_1,5,"Panel03");
+  AddDescMessage1(_this,0,0x1000005,0);
+  AddDescMessage1(_this,0,0x1000004,0);
+  desc = S_ControlDesc__AddChild(_this,0x1a,"text_05");
+  AddDescMessage1(desc,0,0x2000073,1);
+  AddDescMessage1(desc,0,0x1000005,0);
   return 1;
 }
 
@@ -1920,7 +1921,7 @@ uint32_t FUN_00693560(void *_this,void *param_1,int *param_2, ...)
   int iVar1;
   I3D_driver *self;
   int *piVar2;
-  void *this_00;
+  S_ControlDesc *this_00;
   void *pvVar3;
   int *unaff_EDI;
   uint32_t *puVar4;
@@ -2000,22 +2001,22 @@ uint32_t FUN_00693560(void *_this,void *param_1,int *param_2, ...)
       } while (iVar5 < 3);
       iVar9 += 4;
     } while (iVar9 < 0x10);
-    this_00 = (void *)S_ScreenDesc__AddControl(param_1,5,"P_SelectedSol");
+    this_00 = S_ScreenDesc__AddControl(param_1,5,"P_SelectedSol");
     ppIVar6 = apIStack_6c + 1;
     iVar9 = 4;
     puVar4 = (uint32_t *)&stack0x00000168;
     do {
       puVar4[-2] = 0xffffffff;
-      pvVar3 = (void *)FUN_0061da70(this_00,0x13,(char *)ppIVar6[-1]);
+      pvVar3 = S_ControlDesc__AddChild(this_00,0x13,(char *)ppIVar6[-1]);
       AddDescMessage2(pvVar3,0,0x1000015,0xb,0x7d2);
       *puVar4 = *(uint32_t *)((int)pvVar3 + 8);
-      pvVar3 = (void *)FUN_0061da70(this_00,0x13,(char *)*ppIVar6);
+      pvVar3 = S_ControlDesc__AddChild(this_00,0x13,(char *)*ppIVar6);
       AddDescMessage2(pvVar3,0,0x1000015,0xb,0x7d2);
       puVar4[1] = *(uint32_t *)((int)pvVar3 + 8);
-      pvVar3 = (void *)FUN_0061da70(this_00,4,(char *)ppIVar6[1]);
+      pvVar3 = S_ControlDesc__AddChild(this_00,4,(char *)ppIVar6[1]);
       puVar4[-1] = *(uint32_t *)((int)pvVar3 + 8);
       AddDescMessage1(pvVar3,0,0x1000009,0xffffffff);
-      FUN_00676410((int)pvVar3,0,0x1000038,0,0);
+      AddDescMessage4_676410(pvVar3,0,0x1000038,0,0);
       AddDescMessage3(pvVar3,0,0x1000007,0x4001000,(uint32_t)apIStack_6c,0x694bc0);
       AddDescMessage3(pvVar3,0,0x1000007,0x400a000,(uint32_t)apIStack_6c,0x693ae0);
       AddDescMessage3(pvVar3,0,0x1000007,0x4008000,(uint32_t)apIStack_6c,0x693e50);

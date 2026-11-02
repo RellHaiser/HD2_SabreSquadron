@@ -929,7 +929,7 @@ LAB_00684218:
         C_str__ReleaseRep(pCStack_54);
       }
       pSVar10 = C_HumanStore__Get(g_gameProfile.m_humanStore,iVar16);
-      FUN_00676410((int)pvVar4,0,0x1000038,0,pSVar10->faceImage);
+      AddDescMessage4_676410(pvVar4,0,0x1000038,0,(uint32_t)pSVar10->faceImage);
       AddDescMessage3(pvVar4,0,0x1000007,0x4001000,(uint32_t)pCVar17,0x685420);
       iVar16++;
       iVar12 = vector_size_e4_686b90((int)g_gameProfile.m_humanStore);
@@ -939,9 +939,9 @@ LAB_00684218:
   bVar2 = C_GameProfile__IsCooperativeGame(&g_gameProfile);
   pCVar14 = pCStack_b8;
   if (!bVar2) {
-    pvVar4 = (void *)FUN_0061da70(pCStack_b8,0x1f,"allies");
+    pvVar4 = S_ControlDesc__AddChild((S_ControlDesc *)pCStack_b8,0x1f,"allies");
     AddDescMessage3(pvVar4,0,0x1000007,0x400e000,(uint32_t)pCVar17,0x6854e0);
-    pvVar4 = (void *)FUN_0061da70(pCVar14,0x1f,&DAT_00832d10);
+    pvVar4 = S_ControlDesc__AddChild((S_ControlDesc *)pCVar14,0x1f,&DAT_00832d10);
     AddDescMessage3(pvVar4,0,0x1000007,0x400e000,(uint32_t)pCVar17,0x6854e0);
   }
   uStack_44 = 0xffffffff;
@@ -967,6 +967,7 @@ uint32_t C_GameMenu__FUN_00684690(C_GameMenu *_this,int param_1,int *param_2, ..
   I3D_driver *pIVar2;
   I3D_frame *pIVar3;
   I3D_frame *pIVar4;
+  uint32_t extraout_EAX;
   int *unaff_ESI;
   int *unaff_EDI;
   uint32_t uVar5;
@@ -1146,8 +1147,8 @@ uint32_t C_GameMenu__FUN_00684690(C_GameMenu *_this,int param_1,int *param_2, ..
       (**(code **)(*piVar1 + 0x38))(piVar1,uVar5,1);
     }
     _this->m_4e4 = _this;
-    uVar5 = FUN_0066f200(&_this->m_4dc,param_1,param_2);
-    return CONCAT31((int3)((uint32_t)uVar5 >> 8),1);
+    C_EquipmentPanel__BuildDescription(&_this->m_4dc,(void *)param_1,param_2);
+    return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
   }
   return (uint32_t)pIVar4 & 0xffffff00;
 }
@@ -1246,7 +1247,7 @@ uint32_t C_GameMenu__FUN_00684b90(C_GameMenu *_this,uint32_t param_1,int *param_
 // 0x00684df0
 uint32_t FUN_00684df0(void *param_1, ...)
 {
-  void *desc;
+  S_ControlDesc *_this;
   void *pvVar1;
   uint32_t extraout_EAX;
   int iVar2;
@@ -1299,18 +1300,18 @@ uint32_t FUN_00684df0(void *param_1, ...)
   local_c = "text_lockpick";
   local_8 = "hlcpct06";
   local_4 = "text_lockpick01";
-  desc = (void *)S_ScreenDesc__AddControl(param_1,5,"Panel02");
-  AddDescMessage1(desc,0,0x1000005,0);
+  _this = S_ScreenDesc__AddControl(param_1,5,"Panel02");
+  AddDescMessage1(_this,0,0x1000005,0);
   iVar2 = 0;
   ppcVar3 = local_6c + 1;
   do {
-    pvVar1 = (void *)FUN_0061da70(desc,0x13,ppcVar3[-1]);
+    pvVar1 = S_ControlDesc__AddChild(_this,0x13,ppcVar3[-1]);
     AddDescMessage1(pvVar1,0,0x2000073,0);
     AddDescMessage2(pvVar1,0,0x1000015,0xb,iVar2 + 0xa78);
-    pvVar1 = (void *)FUN_0061da70(desc,0x16,*ppcVar3);
+    pvVar1 = S_ControlDesc__AddChild(_this,0x16,*ppcVar3);
     AddDescMessage1(pvVar1,0,0x1000093,2);
-    FUN_00670b50((int)pvVar1,0,0x1000092,0,0);
-    pvVar1 = (void *)FUN_0061da70(desc,0x13,ppcVar3[1]);
+    AddDescMessage4_670b50(pvVar1,0,0x1000092,0,0);
+    pvVar1 = S_ControlDesc__AddChild(_this,0x13,ppcVar3[1]);
     AddDescMessage1(pvVar1,0,0x2000073,0);
     AddDescMessage2(pvVar1,0,0x1000015,0xb,0x7d2);
     iVar2++;

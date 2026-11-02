@@ -27380,6 +27380,11 @@
   "module": "xml_node",
   "name": "XmlAttr_Dtor"
  },
+ "0061da70": {
+  "module": "equipment_panel",
+  "name": "S_ControlDesc::AddChild",
+  "proto": "void * __thiscall AddChild(void *this, int type, char * name)"
+ },
  "0061e100": {
   "module": "control",
   "name": "AddDescMessage3",
@@ -31406,6 +31411,16 @@
   "name": "C_EquipmentPanel::HasLargeWeapon",
   "proto": "bool __fastcall HasLargeWeapon(void * panel)"
  },
+ "0066f200": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::BuildDescription",
+  "proto": "void __thiscall BuildDescription(void *this, void * screen, void * model)"
+ },
+ "00670b50": {
+  "module": "equipment_panel",
+  "name": "AddDescMessage4_670b50",
+  "proto": "void __cdecl AddDescMessage4_670b50(void * desc, uint target, uint id, uint value, uint value2)"
+ },
  "00670be0": {
   "module": "equipment_panel",
   "name": "C_EquipmentPanel::TickSoldier",
@@ -31536,10 +31551,35 @@
   "name": "C_EquipmentPanel::UpdateLoad",
   "proto": "void __thiscall UpdateLoad(void *this)"
  },
+ "00672fb0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::CallItemNotify13"
+ },
+ "00672fc0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::CallItemNotify0A"
+ },
+ "00672fd0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::CallItemNotify08"
+ },
+ "00672fe0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::CallItemNotify09"
+ },
+ "00672ff0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::CallItemHover"
+ },
  "00673cf0": {
   "module": "profile",
   "name": "S_MissionSquad::AddSoldier",
   "proto": "S_SquadSoldier * __thiscall AddSoldier(S_MissionSquad *this)"
+ },
+ "00676410": {
+  "module": "equipment_panel",
+  "name": "AddDescMessage4_676410",
+  "proto": "void __cdecl AddDescMessage4_676410(void * desc, uint target, uint id, uint value, uint value2)"
  },
  "0067a950": {
   "module": "zz_idioms",
@@ -31685,6 +31725,26 @@
  "0067f1d0": {
   "module": "zz_idioms",
   "name": "vector_tidy_67f1d0"
+ },
+ "0067f300": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::OnItemNotify13"
+ },
+ "0067f310": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::OnItemNotify0A"
+ },
+ "0067f320": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::OnItemNotify08"
+ },
+ "0067f330": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::OnItemNotify09"
+ },
+ "0067f340": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::OnItemHover"
  },
  "0067f3d0": {
   "module": "equipment_panel",

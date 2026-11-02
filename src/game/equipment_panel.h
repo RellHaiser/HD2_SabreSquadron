@@ -2,8 +2,7 @@
 // C_GameMenu +0x4DC): the squad soldier being dressed, the controls of his places (head, uniform,
 // backpack, long gun, hands, the drop place, four belt and four backpack items with their scroll
 // arrows), the load bars and texts, the highlights of the places an item may go, and the menu
-// soldier that wears it all. Original 0x0066f160..0x00672a30 (part 9e-ii-a; its description,
-// 0x0066f200, part 9e-ii-b).
+// soldier that wears it all. Original 0x0066f160..0x00672a30 (parts 9e-ii-a and -b).
 #pragma once
 
 #include <cstdint>
@@ -16,6 +15,7 @@ class C_ItemStock;
 class C_MenuSoldier;
 class I3D_frame;
 class I3D_visual;
+struct S_ScreenDesc;
 struct S_SquadSoldier;
 
 class C_EquipmentPanel {
@@ -33,6 +33,11 @@ public:
     // belt and the backpack only with room for it).
     virtual void ShowAllowed(const S_SoldierItem &item, bool ignoreWeight);   // 0x04 0x006728a0
     virtual ~C_EquipmentPanel() = default;              // 0x08 0x0067f3d0
+
+    // The panel's description in `screen` (its controls' ids kept; the item controls' callbacks the
+    // menu's slots, the scroll arrows OnScroll), then the highlights; `model` the screen's model (its
+    // overweight bar and description text frames optional).
+    void BuildDescription(S_ScreenDesc *screen, I3D_frame *model);   // 0x0066f200
 
     // The squad soldier `index` of the mission's squad (none past them; the scroll arrows reset).
     void SelectSoldier(int index);                      // 0x00671010
@@ -113,7 +118,7 @@ private:
     uint32_t m_beltDown = 0;                            // +0x48
     uint32_t m_backpackUp = 0;                          // +0x4C
     uint32_t m_backpackDown = 0;                        // +0x50
-    uint32_t m_unknown54 = 0;                           // +0x54
+    uint32_t m_descriptionText = 0;                     // +0x54
     uint32_t m_weightText = 0;                          // +0x58
     uint32_t m_beltText = 0;                            // +0x5C
     uint32_t m_backpackText = 0;                        // +0x60

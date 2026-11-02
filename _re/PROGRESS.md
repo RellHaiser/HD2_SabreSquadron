@@ -7102,6 +7102,33 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     (restarted by the user): the 9e-i names were applied again. 30 functions in ported.txt. Stats:
     8,770 of 12,306 functions by hand (78.0 % by size).
 
+  PART 9e-ii-b DONE (2026-11-02): the equipment panel's description (C_EquipmentPanel::
+  BuildDescription 0x0066f200, game/equipment_panel.cpp), S_ControlDesc::AddChild 0x0061da70
+  (game/control.cpp; 16 callers: the child's id the parent's with its index + 1 in bits 12-19, under a
+  child in bits 4-11) and the first of C_EquipmentMenuBase (src/game/equipment_menu.h: the item
+  controls' slots 0x5C..0x70, base answers true, 0x60 pure, and their callbacks for the 5-byte thunks
+  0x00672fb0..0x00672ff0).
+  - The description: the screen's control 5 "P_Equipment" with the places (4 "head", "uniform",
+    "back", "shoulder", "hands": the face group "X_SQUARE.BMP" and, with a menu, its slots as callbacks
+    for CONTROL_NOTIFY_13 / 0A / 08 / 09 (not the uniform's) and ENTER / LEAVE), "drop", the belt's
+    scroll group 5 "scroll13" (bar "hlcpct00" at 0.5, the arrows "barrow_up23" / "barrow_down23" off,
+    their presses OnScroll, caption text 0xA9C, slider hidden), the belt's pane "GB_Holsters" (items
+    "item00".."item03"), the backpack's ("scroll14", "hlcpct01" at 0.8, caption 0xA9D; "GR_BackPack",
+    "item04".."item07"), "text_cpcty", the weight bar "hlcpct02" (0.8), the overweight bar "overload"
+    and the description text (its frame moved under the "P_Equipment" dummy, hidden) when the model
+    has their frames, eight labels (texts 0xA96..0xA9D); then every id (the kinds and children), the
+    squad soldier cleared, FindHighlights. AddDescMessage4_670b50 / _676410 are copies of
+    AddDescMessage (5 arguments).
+  - Harness: equipment_desc_test.inc in the factory build (check_equipmentdesc.py, "equipmentdesc:", 6
+    checks): the description tree dumped and compared with one written from the original's, the
+    callbacks called, the optional frames each way. 22 of 22 in both orders (the other factory lines
+    too).
+  - Mutations: mutations/mutate_9e2b.py (126 cases, 117 build; all caught but 1 equivalent, listed there).
+  - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/equipment_panel.txt (+14); 14 functions in ported.txt. Stats: 8,784 of 12,306 functions by hand (78.2 % by size).
+  - Next, 9e-iii: C_EquipmentMenuBase's own code and the store panel (vtable 0x008157c4 at C_GameMenu
+    +0x580: 0x0067b070, the item stock's lists 0x0067b950..0x0067c150), then C_GameMenu (9e-iv..).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
