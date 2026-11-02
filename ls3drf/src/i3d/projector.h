@@ -5,25 +5,19 @@
 // meshes in its volume (x, y -1 - 1, z 0 - 1 in the frame's space; orthogonal or perspective),
 // clipped to the volume and drawn blended, the color faded by the mode over the depth. LS3DRF's
 // projector keeps only the parameters: nothing is projected or drawn.
+//
+// LS3DRF's projector is a 0x220-byte object (vtable 0x1003cfc8): LS3DF's fields up to projFlags,
+// then receiverSum, and no projected geometry, sector or build stamp (LS3DF's +0x218 - +0x26B).
 #pragma once
 
-#include "i3d/vb_manager.h"
 #include "i3d/visual.h"
 
 class I3D_material;
-class I3D_sector;
 class ITexture;
 
 // I3D_projector::projFlags.
 enum : uint32_t {
-    PROJF_BUFFERED = 0x00000001,            // the geometry is in the vertex / index buffers
-};
-
-// A projected vertex (0x18 bytes).
-struct S_projectedVertex {
-    float x, y, z;                          // volume space
-    uint32_t color;                         // ARGB
-    float u, v;
+    PROJF_BUFFERED = 0x00000001,            // LS3DF's geometry is in its vertex / index buffers (LS3DRF only clears it)
 };
 
 class I3D_projector : public I3D_visual {
@@ -33,7 +27,7 @@ public:
     I3D_RESULT __stdcall Duplicate(I3D_frame *source) override;
     void Init() override;                                                      // 0x60 0x10043730
     void Uninit() override;                                                    // 0x64 0x100438f0
-    // (MatrixChanged: the visual's, as in LS3DRF; a moved projector keeps its sector.)
+    // (MatrixChanged: the visual's, as in LS3DRF.)
     // 0x70 0x10046130: the frame, then orthogonal, the mode and the material.
     void Load() override;
 
@@ -62,25 +56,12 @@ public:
     int mode;                               // +0x20C how the color fades over the depth (0, 4, 5, 8, 9)
     float opacity;                          // +0x210 (0.117) faces turned away are culled more the lower it is
     uint32_t projFlags;                     // +0x214 PROJF_*
-    // +0x218 - +0x26B: LS3DF's projected geometry, kept for the layout. LS3DRF's projector (0x220
-    // bytes) has none: nothing reads or writes these here.
-    S_projectedVertex *vertices;           // +0x218 system memory
-    int vertexCapacity;                     // +0x21C
-    int numVertices;                        // +0x220
-    uint16_t *faces;                        // +0x224 system memory (opaque, then blended)
-    ls3d::S_VBAlloc vb;                     // +0x228
-    ls3d::S_IBAlloc ib;                     // +0x234
-    int faceCapacity;                       // +0x240
-    int numOpaque;                          // +0x244
-    int numBlended;                         // +0x248
-    uint32_t unknown24C;
-    S_vector4 blendedCenter;                // +0x250 world space (the blended item's depth)
-    int buildStamp;                         // +0x260 (-1) changeCount when the geometry was made
-    I3D_sector *sector;                     // +0x264 the sector it is in
-    int numReceivers;                       // +0x268 ... and the receivers then
-    int receiverSum;                        // +0x26C ... and their change counts' sum
+    int receiverSum;                        // +0x218 Init and the setters clear it (LS3DF: +0x26C)
+    uint32_t padding21C;                    // +0x21C (LS3DRF's pad to 0x220: nothing addresses it)
+    // (No projected vertices, faces or buffers, blended center, build stamp, sector or receiver
+    // count, LS3DF's +0x218 - +0x26B: LS3DRF has none.)
 };
-static_assert(sizeof(I3D_projector) == 0x270, "I3D_projector layout");
+static_assert(sizeof(I3D_projector) == 0x220, "I3D_projector layout");
 static_assert(offsetof(I3D_projector, texture) == 0x204, "I3D_projector layout");
-static_assert(offsetof(I3D_projector, vb) == 0x228, "I3D_projector layout");
-static_assert(offsetof(I3D_projector, sector) == 0x264, "I3D_projector layout");
+static_assert(offsetof(I3D_projector, projFlags) == 0x214, "I3D_projector layout");
+static_assert(offsetof(I3D_projector, receiverSum) == 0x218, "I3D_projector layout");

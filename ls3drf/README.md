@@ -34,7 +34,7 @@ The companion port of `rw_data.dll`, the game's data-file layer, is at
 > **Not tried with the server yet.** Every one of the original's 722 engine functions (the C
 > runtime and static initialisers left out) has a counterpart in the port, 275 of them ported
 > from LS3DRF's own body. The DLL links with the original's 59 exports. It is not a drop-in
-> replacement yet: some classes (projectors and others) still have LS3DF's
+> replacement yet: some classes (emitors and others) still have LS3DF's
 > larger layouts, and the server reads engine objects directly.
 
 - `src/gfx` keeps the render device interface with a null device: LS3DRF draws nothing. The

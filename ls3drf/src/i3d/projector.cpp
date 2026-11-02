@@ -26,9 +26,8 @@ float Clamp01(float f)
 
 }  // namespace
 
-// LS3DRF 0x10025240 (from LS3DF 0x10043730): LS3DRF's projector (0x220 bytes) has no projected
-// geometry. Init stops at receiverSum (LS3DRF's +0x218), leaves the vertices, faces, buffers,
-// sector and stamps as they were, and sets no VISF_NO_ZWRITE.
+// LS3DRF 0x10025240 (from LS3DF 0x10043730): no projected geometry to clear, and sets no
+// VISF_NO_ZWRITE.
 void I3D_projector::Init()
 {
     I3D_visual::Init();
@@ -62,7 +61,7 @@ void I3D_projector::Uninit()
     I3D_frame::Uninit();
 }
 
-// LS3DRF 0x10025390 (from LS3DF 0x10043960): the sector is left as it was.
+// LS3DRF 0x10025390 (from LS3DF 0x10043960)
 I3D_RESULT I3D_projector::Duplicate(I3D_frame *source)
 {
     if (!source || source == this)
