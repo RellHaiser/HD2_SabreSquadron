@@ -6824,6 +6824,63 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names unchanged (C_Control::CreateChild named in 9c-i); 0x0065d470 in ported.txt.
     Stats: 8,607 of 12,293 functions by hand (76.8 % by size).
 
+  PART 9d PLAN (2026-11-02): the menu states' base, split: 9d-i the screens (0x00668420..0x006698c0:
+  C_Screen and the message box) and the descriptions they are built from (0x00615360, 0x00625f60,
+  0x00626000..0x00626420); 9d-ii C_MenuState (0x0066ab70..0x0066edb0, 15 KB: Start 0x0066b010,
+  Stop, HandleInput 0x0066b6e0, Update, Render 0x0066e100, the screens' models 0x0066c2a0, the
+  message box 0x0066c4d0, the queue's delivery; split when started). The two screen subclasses in
+  0x006698c0..0x0066a2c0 go with their menus: 0x008156b8 (C_EquipmentMenu's, its dtor 0x00676020)
+  to 9f, 0x00815918 (C_SquadMenu's: the medals, its dtor 0x00691900) to 9g.
+
+  PART 9d-i DONE (2026-11-02): the screens, the message box and their descriptions
+  (src/game/screen.*, new).
+  - S_MenuDesc (vtable 0x00813ab8, 0x14; was C_auto_00813ab8): the screens' descriptions, AddScreen
+    0x00626300 (name, file; its id its index + 1 in the top 6 bits, SCREEN_ID_SHIFT), deleted last
+    first (0x00626400). S_ScreenDesc (0x00813abc, 0x44; was C_auto_00813abc; ctor 0x00626000 (name,
+    file, id), dtor 0x00626170): messages +0x04, strings +0x14, controls +0x24 (+0x34 not used), the
+    model's file +0x38, its frame's name +0x3C, id +0x40; AddControl 0x00615360 (its id the screen's
+    with its index + 1 in bits 20-25, 6 bits: the 64th wraps to 0), AddScreenMessage 0x00625f60
+    (cdecl, the message by value). (0x00625ed0 is AddDescMessage's value2 overload again, value3
+    left unset: tier 1 until its callers.)
+  - C_Screen (vtable 0x00815540, 0x84; was C_auto_00815540; on C_ControlGroup, whose constructor is
+    inlined: its vtable never written): ctor 0x00668420 (scene, the model's frame: no parent, id -1,
+    the cursor acquired at +0x70, the frame +0x74, a C_str +0x7C, a byte +0x80 zeroed; +0x78 not
+    used), dtor 0x00668550 (the cursor released). Hide 0x00668740 (on: off, OnLeave(0), hidden),
+    Tick 0x00668a50 (CONTROL_NOTIFY_SCREEN_TICK 0x4014000 with the time, the focus' Tick),
+    Unknown20 0x00668970 (a key's low byte: the active focus' first; Enter / Space / the keypad's
+    Enter 0x1C / 0x39 / 0x9C the focus' click with its id), HandleMessage 0x006687f0 (target 0 and
+    notifications: C_Control's, not the group's; CONTROL_MSG_EDIT: OnLeave with the focus' index,
+    then the target's enter; the target's child's, none: false), Open +0x84 0x00668700 (off: the
+    enter, on, shown), HasPopup +0x88 0x00668510 (false; the subclasses' a flag: the menu state
+    draws the screen again under the popup), Build +0x8C 0x00668770 (the controls made on the
+    frame, the root the frame too; its name and id taken; true). 0x00668880 / 0x006688f0 (the focus
+    stepped back / on) and 0x006689f0 (the focus set) unreferenced: tier 1.
+  - C_MessageBox (vtable 0x008155d8, 0x90; "confirm", made by the menu state 0x0066c4d0; its dtor
+    0x0066c6d0 the screen's again): kind +0x84 (-1 none, 0 a text, 1 yes / no, 2 ok, 3 yes / no in
+    the second style 0x19), the answers' messages +0x88 / +0x8C. Build 0x00668a90 adds the text
+    (type 0x13, text 2004, style 0x18) and the buttons "byes*" / "bno*" / "bok" (type 0x14, texts
+    2001 / 2000 / 2013, style 0xD; ok hidden; their clicks to OnButton 0x006696a0) to the
+    description it is given. ShowText 0x00668ba0 / ShowTextId 0x00668fd0 (none shown only): the
+    buttons by the kind (0x200000 / 0x300000 / 0x400000 shown or hidden; kinds above 3 left), the
+    text (0x100000), the answers kept, MENU_MSG_MESSAGE_BOX_SHOWN 0x2000096 to target 0; Close
+    0x00669390 (MENU_MSG_MESSAGE_BOX_CLOSED 0x2000097; the answers kept). Unknown20 0x006694b0: none
+    shown or a text alone: taken; Escape: closed, the second answer; else the screen's. OnButton:
+    no control false, none shown true; else closed and by the button's index (bits 20-25) 2 yes and
+    4 ok the first answer, 3 no the second; the answers cleared (0x006694a0).
+  - Harness: screen_test.inc in the factory build (build_factory.bat with screen.cpp, its real
+    factory making the box's text and buttons; check_screen.py: the "screens:" line, 15 checks:
+    the descriptions, the menu's, the screen made / built / opened / hidden / ticked, its keys and
+    messages; the box built, shown (a text, a text id), closed, its keys and buttons). 22 of 22 in
+    both orders; the factory line unchanged.
+  - Mutations (mutations/mutate_9d1.py, generated plus by hand: the ids' fields, the constants, the
+    buttons by kind, the arguments, the order): 216 cases, 212 build; all caught but 1 equivalent (listed in its docstring). The first run (226 cases) left 6: the box's Post given its always-0 value dropped, new checks for a message to child 0, the root (a scrolled text's select frame) and the 64th control's wrap (a screen id without bit 26).
+  - Build: MSVC clean. Tier 1: 472 errors in 78 files, 191 stubs (was 475 / 78 / 192). ret_audit --src: 52.
+  - Ghidra: C_auto_00815540 / C_auto_00813abc / C_auto_00813ab8 renamed C_Screen / S_ScreenDesc /
+    S_MenuDesc (90_auto.spec, class_names.json, auto_members.json, tier1_fixups.json;
+    rename_auto_structs.py, apply_members.py); the box's functions on C_Screen (no struct of its
+    own); names/screen.txt (28); 28 functions in ported.txt. Stats: 8,635 of 12,293 functions by
+    hand (77.0 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

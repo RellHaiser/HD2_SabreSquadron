@@ -1232,12 +1232,12 @@ uint32_t C_GameMenu__FUN_0067fe00(C_GameMenu *_this, ...)
   char cVar4;
   uint32_t *puVar5;
   int iVar6;
-  int *piVar7;
+  int *frame;
   int *extraout_EAX;
-  uint32_t uVar8;
+  uint32_t uVar7;
   uint8_t local_31;
   int *local_2c;
-  C_auto_00815540 *local_28;
+  C_Screen *local_28;
   uint32_t auStack_24 [5];
   int *piStack_10;
   uint32_t local_4;
@@ -1266,8 +1266,8 @@ uint32_t C_GameMenu__FUN_0067fe00(C_GameMenu *_this, ...)
     local_2c = 0;
   }
   else {
-    local_2c = C_auto_00813abc__FUN_00626000
-                         ((C_auto_00813abc *)local_28,"MAIN_INGAME_MENU",
+    local_2c = S_ScreenDesc__S_ScreenDesc
+                         ((S_ScreenDesc *)local_28,"MAIN_INGAME_MENU",
                           "main ingame",(iVar6 + 1) * 0x4000000);
   }
   local_4 = 0xffffffff;
@@ -1284,8 +1284,8 @@ uint32_t C_GameMenu__FUN_0067fe00(C_GameMenu *_this, ...)
     local_2c = 0;
   }
   else {
-    local_2c = C_auto_00813abc__FUN_00626000
-                         ((C_auto_00813abc *)local_28,"OPTIONS","options",
+    local_2c = S_ScreenDesc__S_ScreenDesc
+                         ((S_ScreenDesc *)local_28,"OPTIONS","options",
                           (iVar6 + 1) * 0x4000000);
   }
   local_4 = 0xffffffff;
@@ -1305,8 +1305,8 @@ uint32_t C_GameMenu__FUN_0067fe00(C_GameMenu *_this, ...)
         local_2c = 0;
       }
       else {
-        local_2c = C_auto_00813abc__FUN_00626000
-                             ((C_auto_00813abc *)local_28,"PLAYER SCREEN",
+        local_2c = S_ScreenDesc__S_ScreenDesc
+                             ((S_ScreenDesc *)local_28,"PLAYER SCREEN",
                               "player screen 2",(iVar6 + 1) * 0x4000000);
       }
     }
@@ -1318,29 +1318,29 @@ uint32_t C_GameMenu__FUN_0067fe00(C_GameMenu *_this, ...)
         local_2c = 0;
       }
       else {
-        local_2c = C_auto_00813abc__FUN_00626000
-                             ((C_auto_00813abc *)local_28,"PLAYER SCREEN",
+        local_2c = S_ScreenDesc__S_ScreenDesc
+                             ((S_ScreenDesc *)local_28,"PLAYER SCREEN",
                               "player screen",(iVar6 + 1) * 0x4000000);
       }
     }
     local_4 = 0xffffffff;
     FUN_00628050(puVar2,(uint32_t *)puVar5[3],(uint32_t*)(&local_2c));
   }
-  for (uVar8 = 0; (puVar5[2] != 0 && (uVar8 < (uint32_t)((int)(puVar5[3] - puVar5[2]) >> 2)));
-      uVar8 = uVar8 + 1) {
-    piVar7 = FUN_0066c2a0((int)_this);
-    if (piVar7 != 0) {
-      pvVar1 = *(void **)(puVar5[2] + uVar8 * 4);
+  for (uVar7 = 0; (puVar5[2] != 0 && (uVar7 < (uint32_t)((int)(puVar5[3] - puVar5[2]) >> 2)));
+      uVar7 = uVar7 + 1) {
+    frame = FUN_0066c2a0((int)_this);
+    if (frame != 0) {
+      pvVar1 = *(void **)(puVar5[2] + uVar7 * 4);
       if ((*(uint32_t *)((int)pvVar1 + 0x40) & 0xfc000000) == 0x4000000) {
         FUN_00680980(pvVar1);
       }
-      pvVar1 = *(void **)(puVar5[2] + uVar8 * 4);
+      pvVar1 = *(void **)(puVar5[2] + uVar7 * 4);
       if ((*(uint32_t *)((int)pvVar1 + 0x40) & 0xfc000000) == 0x8000000) {
-        FUN_0061cfc0(*(void **)(_this->_pad_0138 + 0xb4),pvVar1,piVar7);
+        FUN_0061cfc0(*(void **)(_this->_pad_0138 + 0xb4),pvVar1,frame);
       }
-      puVar2 = *(uint32_t **)(puVar5[2] + uVar8 * 4);
+      puVar2 = *(uint32_t **)(puVar5[2] + uVar7 * 4);
       if ((puVar2[0x10] & 0xfc000000) == 0xc000000) {
-        C_GameMenu__FUN_00682c80(_this,puVar2,piVar7);
+        C_GameMenu__FUN_00682c80(_this,puVar2,frame);
       }
       local_28 = tier1_operator_new(0x84);
       local_4 = 4;
@@ -1348,12 +1348,12 @@ uint32_t C_GameMenu__FUN_0067fe00(C_GameMenu *_this, ...)
         local_2c = 0;
       }
       else {
-        local_2c = C_Control__FUN_00668420((C_Control*)(local_28),_this->m_030,piVar7);
+        local_2c = C_Screen__C_Screen(local_28,_this->m_030,frame);
       }
       local_4 = 0xffffffff;
-      cVar4 = (**(code **)(*local_2c + 0x8c))(*(uint32_t *)(puVar5[2] + uVar8 * 4));
+      cVar4 = (**(code **)(*local_2c + 0x8c))(*(uint32_t *)(puVar5[2] + uVar7 * 4));
       if (cVar4 != '\0') {
-        (**(code **)(*local_2c + 0x70))(*(int *)(puVar5[2] + uVar8 * 4) + 4);
+        (**(code **)(*local_2c + 0x70))(*(int *)(puVar5[2] + uVar7 * 4) + 4);
         FUN_0066ea50(_this->_pad_0138 + 8,*(uint32_t **)(_this->_pad_0138 + 0x10),1,(uint32_t*)(&local_2c));
       }
     }
@@ -1722,24 +1722,24 @@ uint32_t FUN_00680980(void *param_1, ...)
   uint32_t uVar7;
   S_MissionObjective **ppSVar8;
   if (((uint8_t)g_gameRole & 7) != 7) {
-    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button06");
+    pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button06");
     AddDescMessage1(pvVar5,0,0x1000004,0);
-    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button00");
+    pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button00");
     AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d5);
     AddDescMessage1(pvVar5,0,0x600100a,0);
-    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button01");
+    pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button01");
     AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d6);
     AddDescMessage1(pvVar5,0,0x1000001,0);
-    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button02");
+    pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button02");
     AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d7);
     AddDescMessage1(pvVar5,0,0x1000001,0);
-    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button03");
+    pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button03");
     AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d8);
     AddDescMessage1(pvVar5,0,0x6001071,0);
-    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button04");
+    pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button04");
     AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d9);
     AddDescMessage1(pvVar5,0,0x6001001,3);
-    pvVar5 = (void *)FUN_00615360(param_1,0x14,"button05");
+    pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button05");
     uVar7 = 0x9da;
     goto LAB_00680db1;
   }
@@ -1749,14 +1749,14 @@ uint32_t FUN_00680980(void *param_1, ...)
      (*(int *)(g_configLine + (uint32_t)DAT_008caca0 * 4 + 0x268) != (&DAT_008caf40)[DAT_008cb3a0])) {
     FUN_00680e00((int)param_1,0,0x600d0b8,0);
   }
-  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button06");
+  pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button06");
   AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9db);
   AddDescMessage1(pvVar5,0,0x60010c6,0);
   pCVar6 = GetGame();
   if (pCVar6->m_mission->m_unknown2C == false) {
     AddDescMessage1(pvVar5,0,0x1000004,0);
   }
-  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button00");
+  pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button00");
   pCVar6 = GetGame();
   pCVar1 = pCVar6->m_mission;
   if (pCVar1 != 0) {
@@ -1799,10 +1799,10 @@ LAB_00680aa8:
 LAB_00680b20:
   AddDescMessage1(pvVar5,0,uVar7,0);
 LAB_00680b2b:
-  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button01");
+  pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button01");
   AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d3);
   AddDescMessage1(pvVar5,0,0x60010b4,0);
-  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button02");
+  pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button02");
   AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d0);
   AddDescMessage1(pvVar5,0,0x60010b6,0);
   pCVar6 = GetGame();
@@ -1810,7 +1810,7 @@ LAB_00680b2b:
   if (!bVar3) {
     AddDescMessage1(pvVar5,0,0x1000001,0);
   }
-  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button03");
+  pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button03");
   AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d1);
   AddDescMessage1(pvVar5,0,0x60010b7,0);
   pCVar6 = GetGame();
@@ -1822,15 +1822,15 @@ LAB_00680c0c:
     iVar4 = C_GameProfile__GetDifficulty(&g_gameProfile);
     if (iVar4 == 4) goto LAB_00680c0c;
   }
-  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button04");
+  pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button04");
   AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9d2);
   AddDescMessage1(pvVar5,0,0x6001071,0);
-  pvVar5 = (void *)FUN_00615360(param_1,0x14,"button05");
+  pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button05");
   uVar7 = 0x9d4;
 LAB_00680db1:
   AddDescMessage2(pvVar5,0,0x1000015,0xd,uVar7);
   AddDescMessage1(pvVar5,0,0x6001078,0);
-  pvVar5 = (void *)FUN_00615360(param_1,0x13,"text_h&dversion");
+  pvVar5 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_h&dversion");
   AddDescMessage2(pvVar5,0,0x1000015,0x28,0x7d6);
   return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
 }

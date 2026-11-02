@@ -1739,12 +1739,12 @@ uint32_t C_EquipmentMenu__FUN_006758f0(C_EquipmentMenu *_this,void *param_1,int 
   void *pvVar3;
   int *piVar4;
   pvVar3 = param_1;
-  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bassign to all");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bassign to all");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,0xab0);
   AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x677880);
-  pvVar1 = (void *)FUN_00615360(param_1,0x13,"text_inventory");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_inventory");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xaa8);
-  pvVar1 = (void *)FUN_00615360(param_1,0x11,"soldier type");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x11,"soldier type");
   AddDescMessage3(pvVar1,0,0x1000007,0x400e000,(uint32_t)_this,0x677870);
   AddDescMessage2(pvVar1,0,0x1000081,0xc,500);
   AddDescMessage2(pvVar1,0,0x1000017,0x13,500);
@@ -1755,29 +1755,29 @@ uint32_t C_EquipmentMenu__FUN_006758f0(C_EquipmentMenu *_this,void *param_1,int 
     iVar2 = FUN_0067de40(&_this->m_558,(int)param_1,5);
     param_1 = (void *)((int)param_1 + 1);
   }
-  FUN_00615360(pvVar3,0x12,"text_mission essentials");
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x13,"text_screen");
+  S_ScreenDesc__AddControl(pvVar3,0x12,"text_mission essentials");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x13,"text_screen");
   AddDescMessage2(pvVar1,0,0x1000015,10,(_this->m_020 != 3) + 0xa8d);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x13,"text_military storages");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x13,"text_military storages");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xa93);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x13,"text_team");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x13,"text_team");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xa92);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x14,"baccept and continue");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x14,"baccept and continue");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,(-(uint32_t)(_this->m_020 != 3) & 0x21) + 0xa90);
   AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x678000);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x14,"bauto equip");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x14,"bauto equip");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,0xa8f);
   AddDescMessage1(pvVar1,0,0x600100b,0);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x14,"bback");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x14,"bback");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,0xa91);
   AddDescMessage1(pvVar1,0,0x600100a,0);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x13,"text_h&dversion");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x13,"text_h&dversion");
   AddDescMessage2(pvVar1,0,0x1000015,0x28,0x7d6);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x13,"text_assortment");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x13,"text_assortment");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xaa6);
   iVar2 = (**(code **)(*param_2 + 0x48))(param_2,"description",1);
   if (iVar2 != 0) {
-    pvVar3 = (void *)FUN_00615360(pvVar3,0x15,"description");
+    pvVar3 = (void *)S_ScreenDesc__AddControl(pvVar3,0x15,"description");
     AddDescMessage2(pvVar3,0,0x1000015,0xb,0x7d2);
     _this->m_1b0 = *(uint32_t *)((int)pvVar3 + 8);
   }
@@ -1818,12 +1818,12 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
   uint32_t *puVar3;
   int iVar4;
   int *piVar5;
-  C_auto_00815540 *pCVar6;
+  C_Screen *pCVar6;
   uint32_t uVar7;
   uint32_t uVar8;
   uint8_t local_2d;
   int *local_2c;
-  C_auto_00815540 *local_28;
+  C_Screen *local_28;
   uint32_t auStack_24 [5];
   int *piStack_10;
   uint32_t local_4;
@@ -1851,8 +1851,8 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
     local_2c = 0;
   }
   else {
-    local_2c = C_auto_00813abc__FUN_00626000
-                         ((C_auto_00813abc *)local_28,"Items selection",
+    local_2c = S_ScreenDesc__S_ScreenDesc
+                         ((S_ScreenDesc *)local_28,"Items selection",
                           "items selection",(iVar4 + 1) * 0x4000000);
   }
   local_4 = 0xffffffff;
@@ -1869,8 +1869,8 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
     local_2c = 0;
   }
   else {
-    local_2c = C_auto_00813abc__FUN_00626000
-                         ((C_auto_00813abc *)local_28,"SELECTION SCREEN",
+    local_2c = S_ScreenDesc__S_ScreenDesc
+                         ((S_ScreenDesc *)local_28,"SELECTION SCREEN",
                           "selection screen",(iVar4 + 1) * 0x4000000);
   }
   local_4 = 0xffffffff;
@@ -1898,7 +1898,7 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
         local_2c = 0;
       }
       else {
-        local_2c = C_Control__FUN_00668420((C_Control*)(local_28),_this->m_030,piVar5);
+        local_2c = C_Screen__C_Screen(local_28,_this->m_030,piVar5);
       }
       local_4 = 0xffffffff;
       cVar2 = (**(code **)(*local_2c + 0x8c))(*(uint32_t *)(puVar3[2] + uVar8 * 4));
@@ -1932,11 +1932,11 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
       pCVar6 = 0;
     }
     else {
-      C_Control__FUN_00668420((C_Control*)(pCVar6),_this->m_030,piVar5);
+      C_Screen__C_Screen(pCVar6,_this->m_030,piVar5);
       pCVar6[1].vtable = 0;
       pCVar6[1]._pad_0004[0] = '\0';
       pCVar6[1]._pad_0004[1] = '\0';
-      pCVar6->vtable = (C_auto_00815540_vtbl *)&PTR_008156b8;
+      pCVar6->vtable = (C_Screen_vtbl *)&PTR_008156b8;
     }
     _this->m_0fc = pCVar6;
     local_4 = 0xffffffff;
@@ -2055,7 +2055,7 @@ uint32_t C_EquipmentMenu__FUN_00676230(C_EquipmentMenu *_this,void *param_1,int 
   local_10[1] = "photo04";
   local_10[2] = "photo05";
   local_10[3] = "photo06";
-  pvVar4 = (void *)FUN_00615360(param_1,0x13,"text_select one soldier");
+  pvVar4 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_select one soldier");
   AddDescMessage2(pvVar4,0,0x1000015,0xc,0xab2);
   value = 0;
   do {
@@ -2073,7 +2073,7 @@ uint32_t C_EquipmentMenu__FUN_00676230(C_EquipmentMenu *_this,void *param_1,int 
         (**(code **)(*piVar5 + 0x30))(piVar5,1);
         (**(code **)(*piVar5 + 0xa0))(piVar5);
         (**(code **)(*(int *)piVar5[0x78] + 0x18))((int *)piVar5[0x78]);
-        pvVar4 = (void *)FUN_00615360(param_1,4,pcVar1);
+        pvVar4 = (void *)S_ScreenDesc__AddControl(param_1,4,pcVar1);
         AddDescMessage1(pvVar4,0,0x1000009,value);
         pSVar6 = C_HumanStore__Get(g_gameProfile.m_humanStore,pSVar3->profileIndex);
         FUN_00676410((int)pvVar4,0,0x1000038,0,pSVar6->faceImage);
@@ -2082,11 +2082,11 @@ uint32_t C_EquipmentMenu__FUN_00676230(C_EquipmentMenu *_this,void *param_1,int 
     }
     value++;
   } while ((int)value < 4);
-  pvVar4 = (void *)FUN_00615360(param_1,0x14,"button01");
+  pvVar4 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button01");
   AddDescMessage2(pvVar4,0,0x1000015,0xd,0x7d1);
   AddDescMessage1(pvVar4,0,0x600106a,0);
   AddDescMessage1(pvVar4,0,0x6001005,0);
-  pvVar4 = (void *)FUN_00615360(param_1,0x14,"button00");
+  pvVar4 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"button00");
   AddDescMessage2(pvVar4,0,0x1000015,0xd,0x7d8);
   AddDescMessage1(pvVar4,0,0x6001005,0);
   uVar7 = (**(code **)(*param_2 + 0x48))(param_2,"selector",1);
@@ -2173,7 +2173,7 @@ uint32_t FUN_006764a0(void *param_1, ...)
   local_c = "text_lockpick";
   local_8 = "hlcpct06";
   local_4 = "text_lockpick01";
-  pvVar1 = (void *)FUN_00615360(param_1,5,"Panel02");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,5,"Panel02");
   AddDescMessage1(pvVar1,0,0x1000005,0);
   AddDescMessage1(pvVar1,0,0x1000004,0);
   iVar3 = 0;

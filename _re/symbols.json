@@ -27270,6 +27270,11 @@
   "name": "S_ControlDesc::~S_ControlDesc",
   "proto": "void __thiscall ~S_ControlDesc(S_ControlDesc *this)"
  },
+ "00615360": {
+  "module": "screen",
+  "name": "S_ScreenDesc::AddControl",
+  "proto": "void * __thiscall AddControl(S_ScreenDesc *this, int type, char * name)"
+ },
  "00615a30": {
   "module": "zz_idioms",
   "name": "vector_tidy_615a30"
@@ -27383,6 +27388,41 @@
  "00620770": {
   "module": "zz_idioms",
   "name": "get_field_8_620770"
+ },
+ "00625f60": {
+  "module": "screen",
+  "name": "AddScreenMessage",
+  "proto": "void __cdecl AddScreenMessage(void * desc, uint target, uint id, uint value, uint value2, uint value3)"
+ },
+ "00626000": {
+  "module": "screen",
+  "name": "S_ScreenDesc::S_ScreenDesc",
+  "proto": "void * __thiscall S_ScreenDesc(S_ScreenDesc *this, char * name, char * file, uint id)"
+ },
+ "00626170": {
+  "module": "screen",
+  "name": "S_ScreenDesc::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(S_ScreenDesc *this, uchar flags)"
+ },
+ "00626190": {
+  "module": "screen",
+  "name": "S_ScreenDesc::~S_ScreenDesc",
+  "proto": "void __thiscall ~S_ScreenDesc(S_ScreenDesc *this)"
+ },
+ "00626300": {
+  "module": "screen",
+  "name": "S_MenuDesc::AddScreen",
+  "proto": "void * __thiscall AddScreen(S_MenuDesc *this, char * name, char * file)"
+ },
+ "00626400": {
+  "module": "screen",
+  "name": "S_MenuDesc::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(S_MenuDesc *this, uchar flags)"
+ },
+ "00626420": {
+  "module": "screen",
+  "name": "S_MenuDesc::~S_MenuDesc",
+  "proto": "void __thiscall ~S_MenuDesc(S_MenuDesc *this)"
  },
  "006268c0": {
   "module": "zz_idioms",
@@ -30921,6 +30961,96 @@
   "name": "C_MovieControl::CloseStream",
   "proto": "void __fastcall CloseStream(C_MovieControl * control)"
  },
+ "00668420": {
+  "module": "screen",
+  "name": "C_Screen::C_Screen",
+  "proto": "void * __thiscall C_Screen(C_Screen *this, void * scene, void * frame)"
+ },
+ "00668510": {
+  "module": "screen",
+  "name": "C_Screen::HasPopup",
+  "proto": "bool __thiscall HasPopup(C_Screen *this)"
+ },
+ "00668520": {
+  "module": "screen",
+  "name": "C_Screen::HandleMessages",
+  "proto": "bool __thiscall HandleMessages(C_Screen *this, void * messages)"
+ },
+ "00668530": {
+  "module": "screen",
+  "name": "C_Screen::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Screen *this, uchar flags)"
+ },
+ "00668550": {
+  "module": "screen",
+  "name": "C_Screen::~C_Screen",
+  "proto": "void __thiscall ~C_Screen(C_Screen *this)"
+ },
+ "00668700": {
+  "module": "screen",
+  "name": "C_Screen::Open",
+  "proto": "void __thiscall Open(C_Screen *this, int id)"
+ },
+ "00668740": {
+  "module": "screen",
+  "name": "C_Screen::Hide",
+  "proto": "void __thiscall Hide(C_Screen *this)"
+ },
+ "00668770": {
+  "module": "screen",
+  "name": "C_Screen::Build",
+  "proto": "bool __thiscall Build(C_Screen *this, void * desc)"
+ },
+ "006687f0": {
+  "module": "screen",
+  "name": "C_Screen::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_Screen *this, void * message)"
+ },
+ "00668970": {
+  "module": "screen",
+  "name": "C_Screen::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_Screen *this, int key)"
+ },
+ "00668a50": {
+  "module": "screen",
+  "name": "C_Screen::Tick",
+  "proto": "void __thiscall Tick(C_Screen *this, int time)"
+ },
+ "00668a90": {
+  "module": "screen",
+  "name": "C_MessageBox::Build",
+  "proto": "bool __thiscall Build(C_Screen *this, void * desc)"
+ },
+ "00668ba0": {
+  "module": "screen",
+  "name": "C_MessageBox::ShowText",
+  "proto": "void __thiscall ShowText(C_Screen *this, int kind, void * text, uint yesMessage, uint noMessage)"
+ },
+ "00668fd0": {
+  "module": "screen",
+  "name": "C_MessageBox::ShowTextId",
+  "proto": "void __thiscall ShowTextId(C_Screen *this, int kind, uint textId, uint yesMessage, uint noMessage)"
+ },
+ "00669390": {
+  "module": "screen",
+  "name": "C_MessageBox::Close",
+  "proto": "void __fastcall Close(C_Screen * box)"
+ },
+ "006694a0": {
+  "module": "screen",
+  "name": "C_MessageBox::ClearAnswers",
+  "proto": "void __fastcall ClearAnswers(C_Screen * box)"
+ },
+ "006694b0": {
+  "module": "screen",
+  "name": "C_MessageBox::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_Screen *this, int key)"
+ },
+ "006696a0": {
+  "module": "screen",
+  "name": "C_MessageBox::OnButton",
+  "proto": "bool __thiscall OnButton(C_Screen *this, void * argument, void * control, uint notification, uint value)"
+ },
  "0066a2f0": {
   "module": "cursor",
   "name": "C_Cursor::HasMoved",
@@ -31020,6 +31150,16 @@
   "module": "cursor",
   "name": "C_Cursor::SetClicksOff",
   "proto": "void __thiscall SetClicksOff(C_Cursor *this, bool off)"
+ },
+ "0066c6b0": {
+  "module": "screen",
+  "name": "C_MessageBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Screen *this, uchar flags)"
+ },
+ "0066c6d0": {
+  "module": "screen",
+  "name": "C_MessageBox::~C_MessageBox",
+  "proto": "void __thiscall ~C_MessageBox(C_Screen *this)"
  },
  "0066ede0": {
   "module": "game_app",

@@ -936,7 +936,7 @@ LAB_0061d789:
   FUN_0061e3f0(pvVar9,param_1,param_2);
   FUN_0061f230(pvVar9,param_1);
   FUN_0061f3b0(pvVar9,param_1);
-  pvVar9 = (void *)FUN_00615360(param_1,0x13,"text_h&dversion");
+  pvVar9 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_h&dversion");
   AddDescMessage2(pvVar9,0,0x1000015,0x28,0x7d6);
   return CONCAT31((int3)((uint32_t)extraout_EAX_00 >> 8),1);
 }
@@ -1062,7 +1062,7 @@ uint32_t FUN_0061dc20(void *_this,uint32_t param_1,int *param_2, ...)
   if (piVar1 != 0) {
     (**(code **)(*piVar1 + 0x34))(piVar1,&DAT_0083f134);
   }
-  pvVar2 = (void *)FUN_00615360(this_00,5,"graphics setup");
+  pvVar2 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),5,"graphics setup");
   AddDescMessage1(pvVar2,0,0x1000004,0);
   AddDescMessage1(pvVar2,(uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x700000,0x500d004,0);
   AddDescMessage1(pvVar2,(uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x800000,0x500d004,0);
@@ -1124,7 +1124,7 @@ uint32_t FUN_0061e1a0(void *_this,void *param_1, ...)
   void *pvVar1;
   void *pvVar2;
   uint32_t extraout_EAX;
-  pvVar1 = (void *)FUN_00615360(param_1,5,"sound setup");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,5,"sound setup");
   AddDescMessage1(pvVar1,0,0x1000004,0);
   AddDescMessage1(pvVar1,(uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x600000,0x500d004,0);
   AddDescMessage1(pvVar1,(uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x800000,0x500d004,0);
@@ -1555,7 +1555,7 @@ uint32_t FUN_0061e3f0(void *_this,void *param_1,int *param_2, ...)
   pvVar6 = (void *)FUN_0061da70(pvVar3,0x24,"lock fire");
   AddDescMessage2(pvVar6,0,0x1000015,0xd,0x992);
   AddDescMessage1(pvVar6,0,0x1000004,0);
-  pvVar6 = (void *)FUN_00615360(param_1,5,"keysscreen01");
+  pvVar6 = (void *)S_ScreenDesc__AddControl(param_1,5,"keysscreen01");
   AddDescMessage1(pvVar6,0,0x1000004,0);
   AddDescMessage1(pvVar6,(uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x800000,0x500d004,0);
   pvVar3 = (void *)FUN_0061da70(pvVar6,0x13,"text_last save01");
@@ -1633,7 +1633,7 @@ uint32_t FUN_0061f230(void *_this,void *param_1, ...)
   C_game *pCVar3;
   uint32_t extraout_EAX;
   uint32_t uVar4;
-  pvVar1 = (void *)FUN_00615360(param_1,5,"gameoptions");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,5,"gameoptions");
   AddDescMessage1(pvVar1,0,0x1000004,0);
   AddDescMessage1(pvVar1,(uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x600000,0x500d004,0);
   AddDescMessage1(pvVar1,(uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x700000,0x500d004,0);
@@ -1664,7 +1664,7 @@ uint32_t FUN_0061f3b0(void *_this,void *param_1, ...)
   void *pvVar1;
   void *pvVar2;
   uint32_t extraout_EAX;
-  pvVar1 = (void *)FUN_00615360(param_1,5,"network settings");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,5,"network settings");
   AddDescMessage1(pvVar1,0,0x1000004,0);
   AddDescMessage1(pvVar1,(uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x600000,0x500d004,0);
   AddDescMessage1(pvVar1,(uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x700000,0x500d004,0);

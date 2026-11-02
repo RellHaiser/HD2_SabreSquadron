@@ -370,7 +370,7 @@ uint32_t C_GameMenu__FUN_00682c80(C_GameMenu *_this,uint32_t *param_1,int *param
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  iVar4 = FUN_00615360(this_00,0x21,"console");
+  iVar4 = S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x21,"console");
   puVar3 = (uint32_t *)FUN_00614da0(local_24,0,0x1000007,0x4015000,_this,FUN_00682a20);
   local_4 = 0x20;
   FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar3);
@@ -378,29 +378,29 @@ uint32_t C_GameMenu__FUN_00682c80(C_GameMenu *_this,uint32_t *param_1,int *param
   if (local_10 != 0) {
     C_str__ReleaseRep(local_10);
   }
-  FUN_00615360(this_00,0x12,"text03");
-  pvVar10 = (void *)FUN_00615360(this_00,0x13,"text_playerarrangement");
+  S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x12,"text03");
+  pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_playerarrangement");
   AddDescMessage2(pvVar10,0,0x1000015,10,0x9f7);
   bVar2 = C_GameProfile__IsCooperativeGame(&g_gameProfile);
   if (!bVar2) {
-    pvVar10 = (void *)FUN_00615360(this_00,0x13,"text_h&dversion");
+    pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_h&dversion");
     AddDescMessage2(pvVar10,0,0x1000015,0x28,0x7d6);
-    pvVar10 = (void *)FUN_00615360(this_00,0x13,"text_equipment");
+    pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_equipment");
     AddDescMessage2(pvVar10,0,0x1000015,0xb,0x9e7);
   }
-  pvVar10 = (void *)FUN_00615360(this_00,0x13,"text_chat");
+  pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_chat");
   AddDescMessage2(pvVar10,0,0x1000015,0xb,0x9e8);
-  pvVar10 = (void *)FUN_00615360(this_00,0x13,"text_selected soldier stats");
+  pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_selected soldier stats");
   AddDescMessage2(pvVar10,0,0x1000015,0xb,0x9e9);
-  pvVar10 = (void *)FUN_00615360(this_00,0x13,"text_draft");
+  pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_draft");
   AddDescMessage2(pvVar10,0,0x1000015,0xb,0x9ea);
-  pvVar10 = (void *)FUN_00615360(this_00,0x14,"bgame info");
+  pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x14,"bgame info");
   AddDescMessage2(pvVar10,0,0x1000015,0xd,0x9cc);
   AddDescMessage3(pvVar10,0,0x1000007,0x4001000,(uint32_t)_this,0x6861b0);
   bVar2 = C_GameProfile__IsCooperativeGame(&g_gameProfile);
   piVar8 = param_2;
   if (bVar2) {
-    pvVar10 = (void *)FUN_00615360(this_00,0x13,"text_player status");
+    pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_player status");
     AddDescMessage2(pvVar10,0,0x1000015,0xb,0x4f4c);
     piVar7 = FUN_0066c2a0((int)_this);
     piVar8 = param_2;
@@ -422,7 +422,7 @@ uint32_t C_GameMenu__FUN_00682c80(C_GameMenu *_this,uint32_t *param_1,int *param
   else {
     iVar4 = (**(code **)(*param_2 + 0x48))(param_2,"text_weapons info",1);
     if (iVar4 != 0) {
-      pvVar10 = (void *)FUN_00615360(this_00,0x12,"text_weapons info");
+      pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x12,"text_weapons info");
       AddDescMessage2(pvVar10,0,0x1000015,0xb,0x7d2);
       *(uint32_t *)(_this->_pad_0138 + 0x78) = *(uint32_t *)((int)pvVar10 + 8);
     }
@@ -437,9 +437,9 @@ uint32_t C_GameMenu__FUN_00682c80(C_GameMenu *_this,uint32_t *param_1,int *param
 
 
 // 0x006838a0
-uint32_t * C_auto_008156b8__FUN_006838a0(C_auto_008156b8 *_this,int *param_1,uint32_t param_2, ...)
+uint32_t * C_auto_008156b8__FUN_006838a0(C_auto_008156b8 *_this,int *param_1,void *param_2, ...)
 {
-  C_Control__FUN_00668420((C_Control*)((C_auto_00815540 *)_this),param_1,param_2);
+  C_Screen__C_Screen((C_Screen *)_this,param_1,param_2);
   _this->vtable = (C_auto_008156b8_vtbl *)&PTR_008156b8;
   _this->m_084 = 0;
   _this->m_088 = '\0';
@@ -1296,7 +1296,7 @@ uint32_t FUN_00684df0(void *param_1, ...)
   local_c = "text_lockpick";
   local_8 = "hlcpct06";
   local_4 = "text_lockpick01";
-  desc = (void *)FUN_00615360(param_1,5,"Panel02");
+  desc = (void *)S_ScreenDesc__AddControl(param_1,5,"Panel02");
   AddDescMessage1(desc,0,0x1000005,0);
   iVar2 = 0;
   ppcVar3 = local_6c + 1;

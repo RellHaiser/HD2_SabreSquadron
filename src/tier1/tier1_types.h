@@ -163,6 +163,8 @@ struct C_Pike_vtbl__stub;
 struct C_Radio;
 struct C_Radio__stub;
 struct C_Radio_vtbl__stub;
+struct C_Screen;
+struct C_Screen_vtbl;
 struct C_Script;
 struct C_ScriptModule;
 struct C_ScriptModule__stub;
@@ -306,15 +308,12 @@ struct C_auto_008110e4;
 struct C_auto_008120c0;
 struct C_auto_008120c4;
 struct C_auto_008121d0;
-struct C_auto_00813ab8;
-struct C_auto_00813abc;
 struct C_auto_00813ac0;
 struct C_auto_00813b0c;
 struct C_auto_00813b10;
 struct C_auto_00813b2c;
 struct C_auto_00813b48;
 struct C_auto_00813b68;
-struct C_auto_00815540;
 struct C_auto_008156b8;
 struct C_auto_008157c4;
 struct C_auto_008157cc;
@@ -366,7 +365,11 @@ struct S_HumanCommand_vtbl__stub;
 struct S_IGraphInfo;
 struct S_IGraphInit;
 struct S_IGraphViewport;
+struct S_MenuDesc;
+struct S_MenuDesc_vtbl;
 struct S_MissionObjective__auto;
+struct S_ScreenDesc;
+struct S_ScreenDesc_vtbl;
 struct S_bbox;
 struct T_test;
 struct T_test2;
@@ -20076,6 +20079,72 @@ struct C_Radio_vtbl__stub {
     void * vf39;
     void * vf3a;
 };
+struct C_Screen {
+    C_Screen_vtbl * vtable;
+    uint8_t _pad_0004[4];
+    int m_008;
+    void * m_00c;
+    uint8_t _pad_0010[48];
+    uint32_t m_040;
+    uint32_t m_044;
+    uint32_t m_048;
+    uint32_t m_04c;
+    uint32_t m_050;
+    uint32_t m_054;
+    uint32_t m_058;
+    uint32_t m_05c;
+    uint32_t m_060;
+    uint8_t m_064;
+    uint8_t m_065;
+    uint8_t m_066;
+    uint8_t _pad_0067[1];
+    void * m_068;
+    uint32_t m_06c;
+    void * m_070;
+    void * m_074;
+    uint8_t _pad_0078[4];
+    void * m_07c;
+    uint8_t m_080;
+    uint8_t _pad_0081[3];
+};
+struct C_Screen_vtbl {
+    code * vf00;
+    code * vf01;
+    code * vf02;
+    code * vf03;
+    code * vf04;
+    code * vf05;
+    code * vf06;
+    code * vf07;
+    code * vf08;
+    code * vf09;
+    code * vf0a;
+    code * vf0b;
+    code * vf0c;
+    code * vf0d;
+    code * vf0e;
+    code * vf0f;
+    code * vf10;
+    code * vf11;
+    code * vf12;
+    code * vf13;
+    code * vf14;
+    code * vf15;
+    code * vf16;
+    code * vf17;
+    code * vf18;
+    code * vf19;
+    code * vf1a;
+    code * vf1b;
+    code * vf1c;
+    code * vf1d;
+    code * empty_function_65d050;
+    code * vf1f;
+    code * vf20;
+    code * vf21;
+    code * vf22;
+    code * vf23;
+};
 struct C_Script {
     C_Script_vtbl * vtable;
     bool m_004;
@@ -22874,12 +22943,6 @@ struct C_auto_008121d0 {
     void * m_148;
     uint8_t m_14c;
 };
-struct C_auto_00813ab8 {
-    C_auto_00813ab8_vtbl * vtable;
-};
-struct C_auto_00813abc {
-    C_auto_00813abc_vtbl * vtable;
-};
 struct C_auto_00813ac0 {
     C_auto_00813ac0_vtbl * vtable;
     uint8_t _pad_0004[45];
@@ -22923,34 +22986,6 @@ struct C_auto_00813b48 {
 };
 struct C_auto_00813b68 {
     C_auto_00813b68_vtbl * vtable;
-};
-struct C_auto_00815540 {
-    C_auto_00815540_vtbl * vtable;
-    uint8_t _pad_0004[4];
-    int m_008;
-    void * m_00c;
-    uint8_t _pad_0010[48];
-    uint32_t m_040;
-    uint32_t m_044;
-    uint32_t m_048;
-    uint32_t m_04c;
-    uint32_t m_050;
-    uint32_t m_054;
-    uint32_t m_058;
-    uint32_t m_05c;
-    uint32_t m_060;
-    uint8_t m_064;
-    uint8_t m_065;
-    uint8_t m_066;
-    uint8_t _pad_0067[1];
-    void * m_068;
-    uint32_t m_06c;
-    void * m_070;
-    void * m_074;
-    uint8_t _pad_0078[4];
-    void * m_07c;
-    uint8_t m_080;
-    uint8_t _pad_0081[3];
 };
 struct C_auto_008156b8 {
     C_auto_008156b8_vtbl * vtable;
@@ -23409,12 +23444,24 @@ struct S_IGraphInit {
 struct S_IGraphViewport {
     uint8_t _tail_0000[1];
 };
+struct S_MenuDesc {
+    S_MenuDesc_vtbl * vtable;
+};
+struct S_MenuDesc_vtbl {
+    code * vf00;
+};
 struct S_MissionObjective__auto {
     S_MissionObjective_vtbl * vtable;
     uint8_t _pad_0004[12];
     uint32_t m_010;
     uint8_t _pad_0014[1];
     uint8_t m_015;
+};
+struct S_ScreenDesc {
+    S_ScreenDesc_vtbl * vtable;
+};
+struct S_ScreenDesc_vtbl {
+    code * vf00;
 };
 struct S_bbox {
     uint8_t _tail_0000[1];

@@ -437,17 +437,17 @@ uint32_t FUN_00614140(void *param_1,int *param_2, ...)
     if (pCStack_88 != 0) {
       C_str__ReleaseRep(pCStack_88);
     }
-    pvVar10 = (void *)FUN_00615360(param_1,0x13,"text_list of profiles");
+    pvVar10 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_list of profiles");
     AddDescMessage2(pvVar10,0,0x1000015,0xb,0x9f);
-    pvVar10 = (void *)FUN_00615360(param_1,0x13,"text_h&dversion");
+    pvVar10 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_h&dversion");
     AddDescMessage2(pvVar10,0,0x1000015,0x28,0x7d6);
-    pvVar10 = (void *)FUN_00615360(param_1,0x14,"bload lastsave");
+    pvVar10 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bload lastsave");
     pSStack_d8 = (S_ControlDesc *)&stack0xfffffee8;
     text.rep = extraout_ECX;
     C_fstr_Construct((C_str *)&stack0xfffffee8,"Load Last save");
     AddDescMessageText(pvVar10,0,0x1000014,0xd,(int)text.rep);
     AddDescMessage1(pvVar10,0,0x1000004,0);
-    pvVar10 = (void *)FUN_00615360(param_1,0x14,"bload mission");
+    pvVar10 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bload mission");
     AddDescMessage2(pvVar10,0,0x1000015,0xd,0x8d0);
     AddDescMessage1(pvVar10,0,0x1000004,0);
     uStack_78 = CONCAT31(GH_PIECE(uStack_78,1,3),0x15);
@@ -534,53 +534,6 @@ uint32_t FUN_00615190(int param_1, ...)
     tier1_operator_delete(ptr);
   }
   return 0;
-}
-
-
-// 0x00615360
-uint32_t FUN_00615360(void *_this,uint32_t param_1,char *param_2, ...)
-{
-  uint32_t uVar1;
-  int iVar2;
-  uint32_t *local_14;
-  uint32_t *local_10;
-  uint32_t local_4;
-  local_4 = 0xffffffff;
-  if (*(int *)((int)_this + 0x28) == 0) {
-    iVar2 = 0;
-  }
-  else {
-    iVar2 = *(int *)((int)_this + 0x2c) - *(int *)((int)_this + 0x28) >> 2;
-  }
-  local_14 = tier1_operator_new(0x40);
-  local_10 = local_14;
-  if (local_14 == 0) {
-    local_14 = 0;
-  }
-  else {
-    uVar1 = *(uint32_t *)((int)_this + 0x40);
-    ((C_str *)(local_14 + 1))->rep = 0;
-    local_14[5] = 0;
-    *(uint8_t *)(local_14 + 4) = (uint8_t)param_1;
-    local_14[6] = 0;
-    local_14[7] = 0;
-    local_14[9] = 0;
-    *(uint8_t *)(local_14 + 8) = (uint8_t)param_1;
-    local_14[10] = 0;
-    local_14[0xb] = 0;
-    local_14[0xd] = 0;
-    *(uint8_t *)(local_14 + 0xc) = (uint8_t)param_1;
-    local_14[0xe] = 0;
-    local_14[0xf] = 0;
-    local_4 = 4;
-    *local_14 = &PTR_00813ab0;
-    local_14[3] = param_1;
-    C_str__operator_assign((C_str *)(local_14 + 1),param_2);
-    local_14[2] = (iVar2 + 1U & 0x3f) << 0x14 | uVar1;
-  }
-  local_4 = 0xffffffff;
-  FUN_00616550((void *)((int)_this + 0x24),*(uint32_t **)((int)_this + 0x2c),1,(uint32_t*)(&local_14));
-  return *(uint32_t *)(*(int *)((int)_this + 0x2c) - 4);
 }
 
 

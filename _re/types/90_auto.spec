@@ -330,10 +330,10 @@ end
 class S_ControlDesc size=0x40 vtable=0x00813ab0:1
 end
 
-class C_auto_00813ab8 size=0x4 vtable=0x00813ab8:1
+class S_MenuDesc size=0x4 vtable=0x00813ab8:1
 end
 
-class C_auto_00813abc size=0x4 vtable=0x00813abc:1
+class S_ScreenDesc size=0x4 vtable=0x00813abc:1
 end
 
 class C_auto_00813ac0 size=0x4 vtable=0x00813ac0:1
@@ -541,7 +541,7 @@ end
 class C_PagedTextBox size=0x4 vtable=0x008154a4:4
 end
 
-class C_auto_00815540 size=0x4 vtable=0x00815540:36
+class C_Screen size=0x4 vtable=0x00815540:36
 end
 
 class C_Cursor size=0x4 vtable=0x008155d0:1

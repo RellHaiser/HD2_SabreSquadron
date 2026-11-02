@@ -292,7 +292,7 @@ uint32_t C_MainMenu__FUN_00628610(C_MainMenu *_this,int *param_1,int *param_2, .
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  iVar4 = FUN_00615360(this_00,0x13,"text_available maps checklist");
+  iVar4 = S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_available maps checklist");
   puVar3 = (uint32_t *)FUN_00614df0(local_24,0,0x1000015,0xb,0x932);
   local_4 = 0x17;
   FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar3);
@@ -300,15 +300,15 @@ uint32_t C_MainMenu__FUN_00628610(C_MainMenu *_this,int *param_1,int *param_2, .
   if (local_10 != 0) {
     C_str__ReleaseRep(local_10);
   }
-  pvVar8 = (void *)FUN_00615360(this_00,0x13,"text_server options");
+  pvVar8 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_server options");
   AddDescMessage2(pvVar8,0,0x1000015,0xb,0x933);
-  pvVar8 = (void *)FUN_00615360(this_00,0x13,"text_voice chat");
+  pvVar8 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_voice chat");
   AddDescMessage2(pvVar8,0,0x1000015,0xb,0x947);
-  pvVar8 = (void *)FUN_00615360(this_00,0x13,"text_h&dversion");
+  pvVar8 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_h&dversion");
   AddDescMessage2(pvVar8,0,0x1000015,0x28,0x7d6);
-  pvVar8 = (void *)FUN_00615360(this_00,0x13,"text_server type");
+  pvVar8 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_server type");
   AddDescMessage2(pvVar8,0,0x1000015,0xb,0x94c);
-  pvVar8 = (void *)FUN_00615360(this_00,0x11,"maplist preset");
+  pvVar8 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x11,"maplist preset");
   AddDescMessage3(pvVar8,0,0x1000007,0x400e000,(uint32_t)_this,0x62c970);
   AddDescMessage2(pvVar8,0,0x1000081,0xc,500);
   AddDescMessage2(pvVar8,0,0x1000017,0x13,0x4ee8);
@@ -316,9 +316,9 @@ uint32_t C_MainMenu__FUN_00628610(C_MainMenu *_this,int *param_1,int *param_2, .
   AddDescMessage2(pvVar8,0,0x1000017,0x13,0x4eea);
   AddDescMessage2(pvVar8,0,0x1000017,0x13,0x4eeb);
   AddDescMessage2(pvVar8,0,0x1000017,0x13,0x4eec);
-  pvVar8 = (void *)FUN_00615360(this_00,0x13,"text_maplist preset");
+  pvVar8 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_maplist preset");
   AddDescMessage2(pvVar8,0,0x1000015,0xb,0x4eed);
-  pvVar8 = (void *)FUN_00615360(this_00,0x13,"text_maplist");
+  pvVar8 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_maplist");
   AddDescMessage2(pvVar8,0,0x1000015,0xb,0x4eee);
   return 1;
 }

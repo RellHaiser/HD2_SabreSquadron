@@ -425,13 +425,13 @@ uint32_t FUN_006392b0(void *param_1,int *param_2, ...)
     iVar5 = *(int *)(*(int *)((int)param_1 + 0x2c) - 4);
     puVar7 = (uint32_t *)FUN_00614df0(&piStack_ac,0,0x1000015,0xb,0x8d2);
     FUN_00615d50((void *)(iVar5 + 0x10),*(uint32_t **)(iVar5 + 0x18),puVar7);
-    pvVar8 = (void *)FUN_00615360(param_1,0x13,"text_h&dversion");
+    pvVar8 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_h&dversion");
     AddDescMessage2(pvVar8,0,0x1000015,0x28,0x7d6);
-    pvVar8 = (void *)FUN_00615360(param_1,0x14,"bload lastsave");
+    pvVar8 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bload lastsave");
     AddDescMessage2(pvVar8,0,0x1000015,0xd,0x839);
     AddDescMessage1(pvVar8,0,0x1000001,0);
     AddDescMessage1(pvVar8,0,0x6001075,0);
-    pvVar8 = (void *)FUN_00615360(param_1,0x14,"bexit01");
+    pvVar8 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bexit01");
     AddDescMessage2(pvVar8,0,0x1000015,0xd,0x8d0);
     AddDescMessage1(pvVar8,0,0x1000004,0);
     ExceptionList = 0;

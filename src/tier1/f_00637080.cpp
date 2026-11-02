@@ -174,7 +174,7 @@ uint32_t FUN_006370c0(void *param_1,int *param_2, ...)
   if (pCStack_54 != 0) {
     C_str__ReleaseRep(pCStack_54);
   }
-  pvVar4 = (void *)FUN_00615360(param_1,0x14,"byes*");
+  pvVar4 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"byes*");
   puVar2 = (uint32_t *)FUN_00614df0(auStack_40,0,0x1000015,0xd,0x7d1);
   pvStack_1c = (void *)0xa;
   FUN_00615d50((void *)((int)pvVar4 + 0x10),*(uint32_t **)((int)pvVar4 + 0x18),puVar2);
@@ -183,10 +183,10 @@ uint32_t FUN_006370c0(void *param_1,int *param_2, ...)
     C_str__ReleaseRep(pCStack_2c);
   }
   AddDescMessage3(pvVar4,0,0x1000007,0x4001000,uStack_70,0x637510);
-  pvVar4 = (void *)FUN_00615360(param_1,0x14,&DAT_0083f564);
+  pvVar4 = (void *)S_ScreenDesc__AddControl(param_1,0x14,&DAT_0083f564);
   AddDescMessage2(pvVar4,0,0x1000015,0xd,2000);
   AddDescMessage3(pvVar4,0,0x1000007,0x4001000,uStack_70,0x637510);
-  pvVar4 = (void *)FUN_00615360(param_1,3,"binput");
+  pvVar4 = (void *)S_ScreenDesc__AddControl(param_1,3,"binput");
   AddDescMessage1(pvVar4,0,0x1000004,0);
   return 1;
 }
@@ -366,22 +366,22 @@ uint32_t C_MainMenu__FUN_00637890(C_MainMenu *_this,void *param_1,int *param_2, 
   local_1c = 0xbec00000;
   local_18 = 0xbf000000;
   (**(code **)(*param_2 + 8))(param_2,&local_20);
-  pvVar1 = (void *)FUN_00615360(param_1,0x13,"oklmpqrnOKLMPQRNtext" + 0x10);
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"oklmpqrnOKLMPQRNtext" + 0x10);
   AddDescMessage2(pvVar1,0,0x1000015,0xc,0x7d3);
-  pvVar1 = (void *)FUN_00615360(param_1,3,"binput");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,3,"binput");
   FUN_00625ed0((int)pvVar1,0,0x100009b,0," \t>-\"");
   AddDescMessage2(pvVar1,0,0x1000015,0xe,0x7d2);
   AddDescMessage3(pvVar1,0,0x1000007,0x4016000,(uint32_t)_this,0x637a40);
   AddDescMessage3(pvVar1,0,0x1000007,0x4017000,(uint32_t)_this,0x637a40);
-  pvVar1 = (void *)FUN_00615360(param_1,0x14,"byes*");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"byes*");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,0x7d1);
   AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x637a40);
-  pvVar1 = (void *)FUN_00615360(param_1,0x14,&DAT_0083f564);
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,&DAT_0083f564);
   AddDescMessage2(pvVar1,0,0x1000015,0xd,2000);
   AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x637a40);
-  pvVar1 = (void *)FUN_00615360(param_1,3,"binput01");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,3,"binput01");
   AddDescMessage1(pvVar1,0,0x1000004,0);
-  pvVar1 = (void *)FUN_00615360(param_1,3,"binput02");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,3,"binput02");
   AddDescMessage1(pvVar1,0,0x1000004,0);
   return 1;
 }
