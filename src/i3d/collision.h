@@ -53,12 +53,3 @@ struct I3D_collision_info {
     uint16_t unknown26;                     // +0x26
     I3D_face_group *faceGroup;              // +0x28
 };
-
-namespace ls3d::i3d {
-
-// The transmit filter (0x10064860, the lens flares' and the lightmaps'): `user` is an S_vector color
-// the faces tint, partly transparent ones passing.
-int __stdcall TransmitFilter(const void *reserved, float t, I3D_frame *frame, void *user,
-                             const S_collisionTexel *texel);
-
-}  // namespace ls3d::i3d

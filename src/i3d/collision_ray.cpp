@@ -1,6 +1,5 @@
-// The scene's ray queries (I3D_scene slots 0xFC - 0x104; 0x1000c7a0 - 0x10011530) and the transmit
-// filter (0x10064860). (0x10011540 - 0x10011590 are the static initialisers of the collision
-// code's vectors.)
+// The scene's ray queries (I3D_scene slots 0xFC - 0x104; 0x1000c7a0 - 0x10011530).
+// (0x10011540 - 0x10011590 are the static initialisers of the collision code's vectors.)
 //
 // A ray walks the sector trees: a frame whose hierarchy box the ray's line misses is skipped with
 // its children; a visual whose sphere the ray misses is not tested. A visual's test runs in its
@@ -11,7 +10,6 @@
 
 #include <cmath>
 
-#include "core/fpu.h"
 #include "i3d/billboard.h"
 #include "i3d/joint.h"
 #include "i3d/material.h"
@@ -21,7 +19,6 @@
 #include "i3d/sector.h"
 #include "i3d/singlemesh.h"
 #include "i3d/vb_manager.h"
-#include "igraph/itexture.h"
 
 using namespace ls3d;
 using namespace ls3d::i3d;
@@ -661,79 +658,4 @@ I3D_frame *I3D_scene::IntersectFrame(const S_vector &from, const S_vector &dir, 
     return q.hitFrame;
 }
 
-// The face filters ------------------------------------------------------------------------------------
-
-namespace {
-
-// The texel at a hit: the pixel copy's 32-bit BGRA (or its 1-bit mask, then white) at the
-// coordinates rounded to the nearest texel.
-struct S_texelSample {
-    bool pixels;                            // the texture has a pixel copy
-    float r, g, b;                          // (the mask: 1)
-    uint8_t alpha;                          // the alpha byte (the mask: 0 / 255)
-    const uint8_t *bgra;                    // the 32-bit texel (null for the mask)
-};
-S_texelSample SampleTexel(const S_collisionTexel *texel)
-{
-    S_texelSample s = {false, 1.0f, 1.0f, 1.0f, 0, nullptr};
-    const ITexture *tex = texel->material->texture;
-    if (!tex || !tex->pixels)
-        return s;
-    s.pixels = true;
-    const int x = Fistp(static_cast<float>(static_cast<int>(tex->width - 1)) * texel->u);
-    const int y = Fistp(static_cast<float>(static_cast<int>(tex->height - 1)) * texel->v);
-    const int index = static_cast<int>(tex->width) * y + x;
-    if (tex->flags & ITC_PIXEL_MASK) {
-        s.alpha = (tex->pixels[index / 8] & (1 << (index % 8))) ? 0xff : 0;
-    } else {
-        s.bgra = tex->pixels + index * 4;
-        s.alpha = s.bgra[3];
-    }
-    return s;
-}
-
-}  // namespace
-
-namespace ls3d::i3d {
-
-// 0x10064860
-int __stdcall TransmitFilter(const void *, float, I3D_frame *, void *user, const S_collisionTexel *texel)
-{
-    const I3D_material *m = texel->material;
-    auto *color = static_cast<S_vector *>(user);
-    const S_texelSample s = SampleTexel(texel);
-    float a, cr, cg, cb;
-    if (!s.pixels) {
-        a = m->opacity;
-        cr = m->diffuse.x;
-        cg = m->diffuse.y;
-        cb = m->diffuse.z;
-    } else {
-        cr = s.r;
-        cg = s.g;
-        cb = s.b;
-        if (s.bgra) {
-            cr = static_cast<float>(s.bgra[2]) * 0.00392f;
-            cg = static_cast<float>(s.bgra[1]) * 0.00392f;
-            cb = static_cast<float>(s.bgra[0]) * 0.00392f;
-        }
-        if ((m->matFlags & MATF_ADDITIVE) && s.bgra)
-            a = (cb * 0.1f + cg * 0.6f) + cr * 0.3f;
-        else
-            a = static_cast<float>(s.alpha) * 0.00392f;
-        a = a * m->opacity;
-    }
-    if (a < 0.1f)
-        return 2;
-    if (a > 0.95f)
-        return 0;
-    // The light passing: what the face lets through, tinted by its color.
-    const float k = 1.0f - a;
-    const float r = k * color->x, g = k * color->y, b = k * color->z;
-    color->x = r + (cr * r) * a;
-    color->y = g + (g * cg) * a;
-    color->z = b + (b * cb) * a;
-    return 1;
-}
-
-}  // namespace ls3d::i3d
+// (No transmit filter 0x10064860: LS3DRF has none.)
