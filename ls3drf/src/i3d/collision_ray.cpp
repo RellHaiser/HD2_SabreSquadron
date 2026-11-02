@@ -590,9 +590,10 @@ void RayWalk(I3D_frame *f)
     }
 }
 
-// The start shared by the ray queries.
+// The start shared by the ray queries (PickFrame, TestRay, IntersectFrame). No face filter: the
+// queries leave q.filter null.
 void BeginRay(I3D_scene *scene, const S_vector &from, const S_vector &dir, uint32_t flags, I3D_COLLISION_HIT *hitCb,
-              void *user, I3D_COLLISION_FILTER *filter)
+              void *user)
 {
     q.done = false;
     q.from = from;
@@ -602,7 +603,6 @@ void BeginRay(I3D_scene *scene, const S_vector &from, const S_vector &dir, uint3
     q.cbResult = 0;
     q.length2 = SquareZYX(dir);
     q.length = std::sqrt(q.length2);
-    q.filter = (flags & I3DCOL_FILTER) ? (filter ? filter : AlphaFilter) : nullptr;
     q.flags = flags;
     q.scene = scene;
 }
@@ -650,12 +650,13 @@ S_vector WorldHitNormal()
 
 // I3D_scene ----------------------------------------------------------------------------------------
 
-// 0x10010c20
+// LS3DRF 0x1000a4d0 (from LS3DF 0x10010c20): no face filter (the filter argument and I3DCOL_FILTER are
+// ignored).
 I3D_frame *I3D_scene::PickFrame(const S_vector &from, const S_vector &dir, uint32_t flags, S_vector4 *outPoint,
-                                S_vector4 *outNormal, I3D_COLLISION_HIT *hitCb, void *user,
-                                I3D_COLLISION_FILTER *filter, int lodLevel)
+                                S_vector4 *outNormal, I3D_COLLISION_HIT *hitCb, void *user, I3D_COLLISION_FILTER *,
+                                int lodLevel)
 {
-    BeginRay(this, from, dir, flags, hitCb, user, filter);
+    BeginRay(this, from, dir, flags, hitCb, user);
     q.frameLodLevel = lodLevel;
     q.lodLevel = lodLevel;
     q.lodFrame = nullptr;
@@ -679,12 +680,13 @@ I3D_frame *I3D_scene::PickFrame(const S_vector &from, const S_vector &dir, uint3
     return q.hitFrame;
 }
 
-// 0x1000c7a0
+// LS3DRF 0x10007110 (from LS3DF 0x1000c7a0): no face filter (the filter argument and I3DCOL_FILTER are
+// ignored).
 I3D_frame *I3D_scene::TestRay(const S_vector &from, const S_vector &dir, uint32_t flags, float *outDistance,
-                              S_vector4 *outNormal, I3D_COLLISION_HIT *hitCb, void *user,
-                              I3D_COLLISION_FILTER *filter, I3D_frame *frame, int lodLevel)
+                              S_vector4 *outNormal, I3D_COLLISION_HIT *hitCb, void *user, I3D_COLLISION_FILTER *,
+                              I3D_frame *frame, int lodLevel)
 {
-    BeginRay(this, from, dir, flags, hitCb, user, filter);
+    BeginRay(this, from, dir, flags, hitCb, user);
     SetQueryFrame(flags, frame, lodLevel);
     q.normalOut = outNormal;
     q.hitFrame = nullptr;
@@ -701,7 +703,7 @@ I3D_frame *I3D_scene::TestRay(const S_vector &from, const S_vector &dir, uint32_
     return q.hitFrame;
 }
 
-// 0x100110f0
+// LS3DRF 0x1000a9a0 (from LS3DF 0x100110f0): no face filter (I3DCOL_FILTER is ignored).
 I3D_frame *I3D_scene::IntersectFrame(const S_vector &from, const S_vector &dir, I3D_frame *frame,
                                      I3D_collision_info *info, uint32_t flags, I3D_frame *queryFrame,
                                      int lodLevel, I3D_COLLISION_HIT *hitCb)
@@ -709,8 +711,7 @@ I3D_frame *I3D_scene::IntersectFrame(const S_vector &from, const S_vector &dir, 
     if (!frame)
         return nullptr;
     // (The original takes a set I3DCOL_DONE_AT_ROOT as a query already done.)
-    BeginRay(this, from, dir, flags, hitCb, nullptr, nullptr);
-    q.filter = (flags & I3DCOL_FILTER) ? AlphaFilter : nullptr;
+    BeginRay(this, from, dir, flags, hitCb, nullptr);
     q.done = (flags & I3DCOL_DONE_AT_ROOT) != 0;
     SetQueryFrame(flags, queryFrame, lodLevel);
     // The normal is always wanted (0x100ad9c0, a static vector).

@@ -31,6 +31,10 @@
 // callback's, and q.normal unless the ray query hit and wanted a normal). The transmit filter
 // always gets a colour (the original's reads it).
 //
+// LS3DRF's ray queries have no face filter (they ignore the filter argument and I3DCOL_FILTER):
+// the original's PickFrame, TestRay and IntersectFrame are patched to leave q.filter null
+// (PatchOrigRayFilters), so neither side calls a filter.
+//
 // Not covered: skinned meshes (joints), mirrors (their geometry comes from model files).
 //
 // Usage: compare_collision.exe [original LS3DF.dll] [operations] [seed] [diagnosis: 1 each visual's
@@ -46,6 +50,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <random>
 #include <string>
 #include <vector>
@@ -164,6 +169,33 @@ LONG WINAPI CrashFilter(EXCEPTION_POINTERS *info)
                 info->ExceptionRecord->ExceptionAddress, g_op, g_lastOp.c_str());
     std::fflush(stdout);
     return EXCEPTION_EXECUTE_HANDLER;
+}
+
+// Writes `with` over the original's code at `va`, which must hold `expect` (`size` bytes each).
+void PatchCode(uint32_t va, const uint8_t *expect, const uint8_t *with, size_t size)
+{
+    uint8_t *at = &Orig<uint8_t>(va);
+    if (std::memcmp(at, expect, size)) {
+        std::printf("the original's code at %08x is not what it was\n", va);
+        std::exit(2);
+    }
+    DWORD old;
+    VirtualProtect(at, size, PAGE_EXECUTE_READWRITE, &old);
+    std::memcpy(at, with, size);
+    VirtualProtect(at, size, old, &old);
+    FlushInstructionCache(GetCurrentProcess(), at, size);
+}
+
+// LS3DRF's ray queries in the original: q.filter (0x100adafc) always null. PickFrame and TestRay
+// always take their I3DCOL_FILTER test's "not set" branch (its store of edx, 0 there);
+// IntersectFrame's mask of the flag becomes 0 (and so its neg / sbb / and AlphaFilter).
+void PatchOrigRayFilters()
+{
+    static const uint8_t je[] = {0x74, 0x1a}, jmp[] = {0xeb, 0x1a};
+    PatchCode(0x10010df2, je, jmp, sizeof je);              // PickFrame: je 0x10010e0e
+    PatchCode(0x1000c972, je, jmp, sizeof je);              // TestRay: je 0x1000c98e
+    static const uint8_t andFilter[] = {0x25, 0x00, 0x00, 0x02, 0x00}, andZero[] = {0x25, 0x00, 0x00, 0x00, 0x00};
+    PatchCode(0x10011290, andFilter, andZero, sizeof andFilter);   // IntersectFrame: and eax, 0x20000
 }
 
 }  // namespace
@@ -1047,6 +1079,7 @@ int main(int argc, char **argv)
     const uint32_t seed = argc > 3 ? static_cast<uint32_t>(std::strtoul(argv[3], nullptr, 0)) : 1;
     if (!SetUpOriginal(origPath))
         return 2;
+    PatchOrigRayFilters();
     g_logDisabled = true;
     _controlfp(_PC_24, _MCW_PC);
     g_rng.seed(seed);
