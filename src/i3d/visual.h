@@ -8,10 +8,6 @@
 
 #include "i3d/frame.h"
 
-namespace ls3d::i3d {
-struct S_renderItem;
-}
-
 // Visual flags (I3D_visual::visualFlags).
 enum : uint32_t {
     VISF_NO_ZWRITE = 0x00000002,            // (renderer) drawn without writing z
@@ -79,12 +75,7 @@ public:
     virtual int __stdcall GetModeB();
     // 0x90 0x10057190: computes the local bound of the visual's geometry (the base has none).
     virtual void __stdcall UpdateLocalBound();
-    // 0x94 0x10073330 (__thiscall, nothing in the base): in LS3DF queues the visual's primitives
-    // (S_renderItem) for the render pass. LS3DRF's visuals have neither slot: no visual overrides
-    // 0x94 / 0x98, which stay for the LS3DF layout.
-    virtual void Prepare() {}
-    // 0x98 0x1002b0a0 (__thiscall, nothing in the base): draws one queued item.
-    virtual void Draw(const ls3d::i3d::S_renderItem *item) {}
+    // (No Prepare / Draw, LS3DF's slots 0x94 / 0x98 0x10073330 / 0x1002b0a0: LS3DRF has none.)
 
     const I3D_bound_volume &GetLocalBound()
     {

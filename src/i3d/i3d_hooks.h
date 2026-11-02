@@ -43,7 +43,7 @@ I3D_frame *CreateVisualObject(int index);
 // A new FRAME_SHADOW frame (I3D_shadow, shadow.cpp; not initialized).
 I3D_frame *NewShadowFrame();
 // A skinned visual's (SNGM / SMMR) vertices of mesh level `level` in world or local space as it
-// draws them (I3D_singlemesh slot 0xBC).
+// draws them (I3D_singlemesh slot 0xB4).
 const S_vector4 *SkinnedVertices(I3D_frame *visual, int level);
 // The portals of a scene's sectors connected again (0x10042940, portal.cpp).
 void BuildPortals(I3D_scene *scene);
@@ -55,21 +55,21 @@ void FreeSkinBuffers();
 
 
 // The model / scene that loaded a frame keeps it / forgets it (I3D_model slots 0x7C / 0x80,
-// I3D_scene slots 0x80 / 0x84).
+// I3D_scene slots 0x7C / 0x80).
 void ModelAddFrame(I3D_frame *model, I3D_frame *frame);
 void SceneAddFrame(I3D_frame *scene, I3D_frame *frame);
 void ModelFrameReleased(I3D_frame *model, I3D_frame *frame);
 void SceneFrameReleased(I3D_frame *scene, I3D_frame *frame);
-// A scene's list of FRMFLAGS_SCENE_SOUND frames loses `frame` (I3D_scene slot 0xCC);
+// A scene's list of FRMFLAGS_SCENE_SOUND frames loses `frame` (I3D_scene slot 0xC8);
 // I3DERR_OBJECTNOTFOUND when it is not there.
 I3D_RESULT SceneRemoveSoundFrame(I3D_scene *scene, I3D_frame *frame);
-// The sector of `scene` that holds `pos`, starting from `hint` (I3D_scene slot 0xDC).
+// The sector of `scene` that holds `pos`, starting from `hint` (I3D_scene slot 0xD8).
 I3D_sector *SceneLocateSector(I3D_scene *scene, const S_vector &pos, I3D_sector *hint);
-// A scene's list of drawn dummies loses `dummy` (I3D_scene slot 0x12C).
+// A scene's list of drawn dummies loses `dummy` (I3D_scene slot 0x128).
 void SceneRemoveDummy(I3D_scene *scene, I3D_frame *dummy);
 
 
-// I3D_object (object.cpp) slots 0xA4 / 0xA8: the light level / alpha of an object visual.
+// I3D_object (object.cpp) slots 0x9C / 0xA0: the light level / alpha of an object visual.
 void ObjectSetLightLevel(I3D_frame *visual, float level);
 void ObjectSetAlpha(I3D_frame *visual, float alpha);
 

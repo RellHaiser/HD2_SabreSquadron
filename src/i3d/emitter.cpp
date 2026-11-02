@@ -502,7 +502,3 @@ void I3D_emitor::UpdateParticleBound()
     v.radius = 1.7320509e16f;
     SetBoundVolume(v);
 }
-
-// 0x1003d860 (LS3DRF's emitor has no LockVertices slot and no particle buffers: null, as when
-// there is no room; the slot stays for the LS3DF layout.)
-S_particleVertex *I3D_emitor::LockVertices(int, float) { return nullptr; }

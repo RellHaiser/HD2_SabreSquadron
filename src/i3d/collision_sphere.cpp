@@ -1,4 +1,4 @@
-// The scene's moving-sphere queries (I3D_scene slots 0x108 - 0x114; 0x100115a0 - 0x10015050).
+// The scene's moving-sphere queries (I3D_scene slots 0x104 - 0x110; 0x100115a0 - 0x10015050).
 // (0x100145b0 is the static initialiser of an unused vector of the collision code.)
 //
 // A sphere moving from `from` by `dir` against the faces of the visuals' mesh levels (one-sided:
@@ -327,7 +327,7 @@ void BeginSphere(I3D_scene *scene, const S_vector &from, const S_vector &dir, fl
     q.lodFrame = nullptr;
 }
 
-// The box of a sweep along the direction only (slots 0x10C and 0x110): from the start backed off
+// The box of a sweep along the direction only (slots 0x108 and 0x10C): from the start backed off
 // by the radius to the end pushed on by it.
 void AxialSweepBox(float radius)
 {

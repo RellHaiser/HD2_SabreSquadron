@@ -96,36 +96,36 @@ public:
     I3D_RESULT __stdcall Duplicate(I3D_frame *source) override;
     void Init() override;                                                      // 0x60 0x100232d0
     void Uninit() override;                                                    // 0x64 0x10023320
-    // 0x9C 0x10029500: the mesh; the current set's lightmaps freed unless `keep`.
+    // 0x94 0x10029500: the mesh; the current set's lightmaps freed unless `keep`.
     I3D_RESULT __stdcall SetMesh(I3D_mesh *newMesh, uint32_t keep) override;
-    // 0xAC / 0xB0 0x10029680 / 0x10029630: every set's level / levels made again when drawn.
+    // 0xA4 / 0xA8 0x10029680 / 0x10029630: every set's level / levels made again when drawn.
     void __stdcall RefreshLevel(int level) override;
     void __stdcall RefreshLevels() override;
 
-    // 0xB4 0x100237c0 (lightmap_build.cpp): the current set computed from the lights of the
+    // 0xAC 0x100237c0 (lightmap_build.cpp): the current set computed from the lights of the
     // object's sector, at `resolution` texels per unit (the set keeps it). `planeNormal`: the
     // patches' plane with LMCONS_ONE_PATCH; `scene` traces the shadows of LMCONS_SHADOWS.
     virtual I3D_RESULT __stdcall Construct(I3D_scene *scene, const S_vector *planeNormal, float resolution,
                                            uint32_t flags, I3D_LIGHTMAP_PROGRESS *progress, void *context);
-    // 0xB8 0x10028a00: the current set's lightmaps freed (not loaded).
+    // 0xB0 0x10028a00: the current set's lightmaps freed (not loaded).
     virtual I3D_RESULT __stdcall FreeLightmaps(int unused);
-    // 0xBC 0x10028a60: the sets in `file` (a dta file handle; the current set freed first).
+    // 0xB4 0x10028a60: the sets in `file` (a dta file handle; the current set freed first).
     virtual I3D_RESULT __stdcall LoadLightmaps(int file);
-    // 0xC0 0x100292f0: (not in a final build) I3DERR_GENERIC.
+    // 0xB8 0x100292f0: (not in a final build) I3DERR_GENERIC.
     virtual I3D_RESULT __stdcall SaveLightmaps(int file);
-    // 0xC4 0x10029310: the current set's lightmaps freed, its flags set.
+    // 0xBC 0x10029310: the current set's lightmaps freed, its flags set.
     virtual I3D_RESULT __stdcall SetSetFlags(uint32_t flags);
-    // 0xC8 0x100233c0: the set drawn (the current one's levels made again when it is next).
+    // 0xC0 0x100233c0: the set drawn (the current one's levels made again when it is next).
     virtual void __stdcall SetCurrentSet(int set);
-    // 0xCC 0x100296b0: the texture memory of every set's lightmaps.
+    // 0xC4 0x100296b0: the texture memory of every set's lightmaps.
     virtual int __stdcall GetTextureBytes();
-    // 0xD0 / 0xD4 0x10023400 / 0x10023430: a set's level's patches.
+    // 0xC8 / 0xCC 0x10023400 / 0x10023430: a set's level's patches.
     virtual int __stdcall GetNumParts(int level, int set);
     virtual ls3d::i3d::S_lightmapPart *__stdcall GetParts(int level, int set);
-    // 0xD8 0x10023460: a set's level's patches written into the atlas texture again from their
+    // 0xD0 0x10023460: a set's level's patches written into the atlas texture again from their
     // pixels (32-bit lightmap textures only).
     virtual void __stdcall RewriteParts(int level, int set);
-    // 0xDC 0x100236e0: a set's level's faces locked (I3D_OK; -1 without the level). (The
+    // 0xD4 0x100236e0: a set's level's faces locked (I3D_OK; -1 without the level). (The
     // original never stores them in `faces`.)
     virtual I3D_RESULT __stdcall LockFaces(int level, int set, uint16_t **faces);
 

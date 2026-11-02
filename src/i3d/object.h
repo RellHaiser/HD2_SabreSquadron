@@ -30,13 +30,13 @@ public:
     // 0x7C 0x10036350: the mesh copied (DuplicateMesh) and its vertices baked into world space,
     // or back into the frame's space.
     void __stdcall SetWorldSpace(bool on) override;
-    // 0x9C 0x10036040: the mesh (a reference; the local bound follows unless in world space).
+    // 0x94 0x10036040: the mesh (a reference; the local bound follows unless in world space).
     virtual I3D_RESULT __stdcall SetMesh(I3D_mesh *newMesh, uint32_t flags);
-    // 0xA0 0x10036160: a mesh shared with others replaced by a copy of its own.
+    // 0x98 0x10036160: a mesh shared with others replaced by a copy of its own.
     virtual I3D_RESULT __stdcall DuplicateMesh();
-    virtual void __stdcall SetLightLevel(float level);                  // 0xA4 0x100368d0
-    virtual void __stdcall SetAlpha(float value);                       // 0xA8 0x100368f0
-    // 0xAC / 0xB0 0x10036960 / 0x10036910: a level's / every level's render vertices refilled
+    virtual void __stdcall SetLightLevel(float level);                  // 0x9C 0x100368d0
+    virtual void __stdcall SetAlpha(float value);                       // 0xA0 0x100368f0
+    // 0xA4 / 0xA8 0x10036960 / 0x10036910: a level's / every level's render vertices refilled
     // when next drawn.
     virtual void __stdcall RefreshLevel(int level);
     virtual void __stdcall RefreshLevels();

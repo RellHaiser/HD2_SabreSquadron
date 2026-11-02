@@ -118,13 +118,6 @@ struct S_particle {
 };
 static_assert(sizeof(S_particle) == 0xD0, "S_particle layout");
 
-// A particle quad corner in the shared vertex buffers (0x18 bytes).
-struct S_particleVertex {
-    float x, y, z;                          // world space
-    uint32_t color;                         // ARGB
-    float u, v;
-};
-
 class I3D_emitor : public I3D_visual {
 public:
     I3D_emitor();
@@ -140,37 +133,35 @@ public:
     void Uninit() override;                                                    // 0x64 0x1003af10
     // 0x70 0x1003d6c0: the frame, then the texture (flags as a material's, name, alpha name).
     void Load() override;
-    virtual void __stdcall SetTexture(ITexture *newTexture);                  // 0x9C 0x1003af50
-    // 0xA0 0x1003af80: EMTP_* (I3DERR_INVALIDPARAMS for other indices and null colors).
+    virtual void __stdcall SetTexture(ITexture *newTexture);                  // 0x94 0x1003af50
+    // 0x98 0x1003af80: EMTP_* (I3DERR_INVALIDPARAMS for other indices and null colors).
     virtual I3D_RESULT __stdcall SetParam(int index, uint32_t value);
-    virtual uint32_t __stdcall GetParam(int index);                            // 0xA4 0x1003b5e0 (0 for others)
-    virtual void __stdcall SetDefaults();                                      // 0xA8 0x1003b8a0
-    // 0xAC 0x1003bfb0: emitting on or off (on: the wait and the emitted count start again).
+    virtual uint32_t __stdcall GetParam(int index);                            // 0x9C 0x1003b5e0 (0 for others)
+    virtual void __stdcall SetDefaults();                                      // 0xA0 0x1003b8a0
+    // 0xA4 0x1003bfb0: emitting on or off (on: the wait and the emitted count start again).
     virtual void __stdcall EmitOn(bool on);
     // LS3DRF 0x10011a60 (from LS3DF 0x1001ba90)
-    virtual void __stdcall SetSrcBlend(uint32_t blend) { srcBlend = blend; }    // 0xB0 0x1001ba90
+    virtual void __stdcall SetSrcBlend(uint32_t blend) { srcBlend = blend; }    // 0xA8 0x1001ba90
     // LS3DRF 0x10011a80 (from LS3DF 0x1001bab0)
-    virtual uint32_t __stdcall GetSrcBlend() { return srcBlend; }             // 0xB4 0x1001bab0
+    virtual uint32_t __stdcall GetSrcBlend() { return srcBlend; }             // 0xAC 0x1001bab0
     // LS3DRF 0x10011a90 (from LS3DF 0x1001bac0)
-    virtual void __stdcall SetDestBlend(uint32_t blend) { destBlend = blend; }  // 0xB8 0x1001bac0
+    virtual void __stdcall SetDestBlend(uint32_t blend) { destBlend = blend; }  // 0xB0 0x1001bac0
     // LS3DRF 0x10011ab0 (from LS3DF 0x1001bae0)
-    virtual uint32_t __stdcall GetDestBlend() { return destBlend; }           // 0xBC 0x1001bae0
-    // 0xC0 0x1001baf0: the group every particle gets (-1: one at random).
+    virtual uint32_t __stdcall GetDestBlend() { return destBlend; }           // 0xB4 0x1001bae0
+    // 0xB8 0x1001baf0: the group every particle gets (-1: one at random).
     virtual void __stdcall SetGroup(int group) { fixedGroup = group; }
-    // 0xC4 0x1003ba20: the group at `index` replaced (-1: a new one added); returns its index.
+    // 0xBC 0x1003ba20: the group at `index` replaced (-1: a new one added); returns its index.
     virtual int __stdcall AddGroup(const S_emitorGroup &group, int index);
-    // 0xC8 0x1003bed0: the group at `index` taken out (the last one moves into its place).
+    // 0xC0 0x1003bed0: the group at `index` taken out (the last one moves into its place).
     virtual void __stdcall RemoveGroup(int index);
-    // 0xCC 0x1003d6a0: every particle gone (the slots too).
+    // 0xC4 0x1003d6a0: every particle gone (the slots too).
     virtual void __stdcall ClearParticles();
-    // 0xD0 0x1003d0e0: the local bound around the particles.
+    // 0xC8 0x1003d0e0: the local bound around the particles.
     virtual void __stdcall UpdateParticleBound();
-    // 0xD4 0x1003d860: null (LS3DRF's emitor has no LockVertices slot; the slot stays for the
-    // LS3DF layout).
-    virtual S_particleVertex *__stdcall LockVertices(int numQuads, float sortDepth);
+    // (No LockVertices, LS3DF's slot 0xD4 0x1003d860: LS3DRF has none.)
 
     bool emitting;                          // +0x1E0 (SetDefaults: on)
-    bool userVertices;                      // +0x1E1 the quads come from the application (LockVertices)
+    bool userVertices;                      // +0x1E1 the quads come from the application (LS3DF's LockVertices)
     uint8_t padding1E2[2];
     int userQuads;                          // +0x1E4 ... their count
     float userDepth;                        // +0x1E8 ... their sort depth

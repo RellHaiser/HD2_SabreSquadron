@@ -36,17 +36,16 @@ public:
     // (MatrixChanged: the visual's, as in LS3DRF; a moved projector keeps its sector.)
     // 0x70 0x10046130: the frame, then orthogonal, the mode and the material.
     void Load() override;
-    // (Prepare / Draw: the visual's empty ones. LS3DRF's projector draws nothing.)
 
-    virtual void __stdcall SetTexture(ITexture *newTexture);                  // 0x9C 0x10043af0
-    virtual void __stdcall SetMaterial(I3D_material *newMaterial);            // 0xA0 0x10043b20
-    virtual void __stdcall SetOrthogonal(bool on);                           // 0xA4 0x10043b50
-    virtual void __stdcall SetIntensity(float value);                        // 0xA8 0x10043c50 (at least 0)
-    virtual void __stdcall SetOpacity(float value);                          // 0xAC 0x10043ca0 (0 - 1)
-    virtual void __stdcall SetColor(const S_vector4 &newColor);               // 0xB0 0x10043b70 (0 - 1)
-    virtual void __stdcall SetMode(int newMode);                             // 0xB4 0x10043d10
-    virtual void __stdcall SetBuffered(uint32_t value);                      // 0xB8 0x10043d30
-    // 0xBC 0x10045ab0: the geometry made now from the receivers below `root` (null: the scene's
+    virtual void __stdcall SetTexture(ITexture *newTexture);                  // 0x94 0x10043af0
+    virtual void __stdcall SetMaterial(I3D_material *newMaterial);            // 0x98 0x10043b20
+    virtual void __stdcall SetOrthogonal(bool on);                           // 0x9C 0x10043b50
+    virtual void __stdcall SetIntensity(float value);                        // 0xA0 0x10043c50 (at least 0)
+    virtual void __stdcall SetOpacity(float value);                          // 0xA4 0x10043ca0 (0 - 1)
+    virtual void __stdcall SetColor(const S_vector4 &newColor);               // 0xA8 0x10043b70 (0 - 1)
+    virtual void __stdcall SetMode(int newMode);                             // 0xAC 0x10043d10
+    virtual void __stdcall SetBuffered(uint32_t value);                      // 0xB0 0x10043d30
+    // 0xB4 0x10045ab0: the geometry made now from the receivers below `root` (null: the scene's
     // primary sector, with flag 2 also its omni sector; flag 8: the projector's sector only), in
     // the buffers. Flags: 4 models are skipped, 8 other sectors are, 0x10 children are not walked.
     virtual void __stdcall Build(uint32_t flags, I3D_frame *root);

@@ -1,4 +1,4 @@
-// The scene's ray queries (I3D_scene slots 0xFC - 0x104; 0x1000c7a0 - 0x10011530).
+// The scene's ray queries (I3D_scene slots 0xF8 - 0x100; 0x1000c7a0 - 0x10011530).
 // (0x10011540 - 0x10011590 are the static initialisers of the collision code's vectors.)
 //
 // A ray walks the sector trees: a frame whose hierarchy box the ray's line misses is skipped with

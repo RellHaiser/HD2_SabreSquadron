@@ -24,7 +24,7 @@ public:
     void Load() override;
     // 0x90 0x10005fa0: the cube around the mesh's sphere (it turns).
     void __stdcall UpdateLocalBound() override;
-    // 0x9C 0x100060a0: the mesh, then the bound.
+    // 0x94 0x100060a0: the mesh, then the bound.
     I3D_RESULT __stdcall SetMesh(I3D_mesh *newMesh, uint32_t flags) override;
 
     // 0x10006230: the matrix facing `camera` (a world position; the modes 2 - 4 the render camera's
