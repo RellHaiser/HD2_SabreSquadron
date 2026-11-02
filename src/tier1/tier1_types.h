@@ -55,6 +55,8 @@ struct C_Control;
 struct C_ControlGroup;
 struct C_ControlGroup_vtbl;
 struct C_Control_vtbl;
+struct C_Cursor;
+struct C_Cursor_vtbl;
 struct C_Debris;
 struct C_Debris__stub;
 struct C_Debris_vtbl__stub;
@@ -313,7 +315,6 @@ struct C_auto_00813b2c;
 struct C_auto_00813b48;
 struct C_auto_00813b68;
 struct C_auto_00815540;
-struct C_auto_008155d0;
 struct C_auto_008156b8;
 struct C_auto_008157c4;
 struct C_auto_008157cc;
@@ -16769,6 +16770,12 @@ struct C_Control_vtbl {
     code * vf1f;
     code * vf20;
 };
+struct C_Cursor {
+    C_Cursor_vtbl * vtable;
+};
+struct C_Cursor_vtbl {
+    code * vf00;
+};
 struct C_Debris {
     C_Debris_vtbl * vtable;
     uint8_t _pad_0004[12];
@@ -22944,9 +22951,6 @@ struct C_auto_00815540 {
     void * m_07c;
     uint8_t m_080;
     uint8_t _pad_0081[3];
-};
-struct C_auto_008155d0 {
-    C_auto_008155d0_vtbl * vtable;
 };
 struct C_auto_008156b8 {
     C_auto_008156b8_vtbl * vtable;

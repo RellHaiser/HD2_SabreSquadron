@@ -89,20 +89,19 @@ uint32_t C_GameMenu__FUN_0066b010(C_GameMenu *_this,int param_1, ...)
 #if 0
 {
   uint8_t stack0xffffffbc[64];
-  void *pvVar1;
-  bool bVar2;
-  I3D_driver *pIVar3;
-  I3D_frame *pIVar4;
-  IGraph *pIVar5;
+  bool bVar1;
+  I3D_driver *pIVar2;
+  I3D_frame *pIVar3;
+  IGraph *pIVar4;
+  int iVar5;
   int iVar6;
-  int iVar7;
-  IGraph *pIVar8;
-  uint32_t *puVar9;
+  IGraph *pIVar7;
+  void *pvVar8;
   ISND_driver *self;
-  int *piVar10;
-  int iVar11;
+  int *piVar9;
+  int iVar10;
   C_Diary *this_00;
-  uint32_t uVar12;
+  uint32_t uVar11;
   int iStack_8c;
   int *piStack_88;
   int *piStack_84;
@@ -134,37 +133,37 @@ uint32_t C_GameMenu__FUN_0066b010(C_GameMenu *_this,int param_1, ...)
   else {
     _this->m_020 = *(uint32_t *)(param_1 + 0x10);
   }
-  pIVar3 = I3DGetDriver();
-  pIVar4 = (*pIVar3->vtable->CreateFrame)(pIVar3,0xd);
-  _this->m_030 = pIVar4;
-  (*pIVar4->vtable[1].Slot18)();
-  pvVar1 = _this->m_030;
-  iVar11 = *(int *)((int)pvVar1 + 0x250);
-  iVar7 = *(int *)((int)pvVar1 + 0x24c);
-  if ((*(int *)((int)pvVar1 + 0x244) == 0) && (*(int *)((int)pvVar1 + 0x248) == 0)) {
-    pIVar5 = GetIGraph();
-    iVar6 = (*pIVar5->vtable->ScrnX)(pIVar5);
-    if (iVar7 == iVar6) {
-      pIVar5 = GetIGraph();
-      iVar7 = (*pIVar5->vtable->ScrnY)(pIVar5);
-      if (iVar11 == iVar7) goto LAB_0066b0f3;
+  pIVar2 = I3DGetDriver();
+  pIVar3 = (*pIVar2->vtable->CreateFrame)(pIVar2,0xd);
+  _this->m_030 = pIVar3;
+  (*pIVar3->vtable[1].Slot18)();
+  pvVar8 = _this->m_030;
+  iVar10 = *(int *)((int)pvVar8 + 0x250);
+  iVar6 = *(int *)((int)pvVar8 + 0x24c);
+  if ((*(int *)((int)pvVar8 + 0x244) == 0) && (*(int *)((int)pvVar8 + 0x248) == 0)) {
+    pIVar4 = GetIGraph();
+    iVar5 = (*pIVar4->vtable->ScrnX)(pIVar4);
+    if (iVar6 == iVar5) {
+      pIVar4 = GetIGraph();
+      iVar6 = (*pIVar4->vtable->ScrnY)(pIVar4);
+      if (iVar10 == iVar6) goto LAB_0066b0f3;
     }
   }
-  pIVar5 = GetIGraph();
-  pIVar8 = GetIGraph();
-  (*pIVar5->vtable->ScrnY)(pIVar5);
+  pIVar4 = GetIGraph();
+  pIVar7 = GetIGraph();
+  (*pIVar4->vtable->ScrnY)(pIVar4);
   pvStack_48 = (void *)0x66b0e0;
-  pvStack_48 = (void *)(*pIVar8->vtable->ScrnX)();
+  pvStack_48 = (void *)(*pIVar7->vtable->ScrnX)();
   piStack_54 = _this->m_030;
   piStack_4c = 0;
   pcStack_50 = 0;
   uStack_58 = 0x66b0f3;
-  (*(code *)pIVar8[0x52].vtable)();
+  (*(code *)pIVar7[0x52].vtable)();
 LAB_0066b0f3:
-  pIVar3 = I3DGetDriver();
+  pIVar2 = I3DGetDriver();
   pvStack_48 = (void *)0x66b100;
-  pIVar4 = (*pIVar3->vtable->CreateFrame)(pIVar3,3);
-  _this->m_034 = pIVar4;
+  pIVar3 = (*pIVar2->vtable->CreateFrame)(pIVar2,3);
+  _this->m_034 = pIVar3;
   pvStack_48 = (void *)0x66b110;
   (**(code **)(*(int *)_this->m_030 + 0x90))();
   piStack_4c = _this->m_030;
@@ -180,12 +179,12 @@ LAB_0066b0f3:
   uStack_58 = 0;
   uStack_64 = 0x66b156;
   (**(code **)(*piStack_60 + 0x1c))();
-  pvVar1 = _this->m_034;
-  if (-1 < (char)*(uint32_t *)((int)pvVar1 + 0xe0)) {
-    *(uint32_t *)((int)pvVar1 + 0xb0) = 0x3f000000;
-    *(uint32_t *)((int)pvVar1 + 0xb4) = 0xbec00000;
-    *(uint32_t *)((int)pvVar1 + 0xb8) = 0xc1780000;
-    *(uint32_t *)((int)pvVar1 + 0xe0) = *(uint32_t *)((int)pvVar1 + 0xe0) & 0xfffffedf | 0x40000000;
+  pvVar8 = _this->m_034;
+  if (-1 < (char)*(uint32_t *)((int)pvVar8 + 0xe0)) {
+    *(uint32_t *)((int)pvVar8 + 0xb0) = 0x3f000000;
+    *(uint32_t *)((int)pvVar8 + 0xb4) = 0xbec00000;
+    *(uint32_t *)((int)pvVar8 + 0xb8) = 0xc1780000;
+    *(uint32_t *)((int)pvVar8 + 0xe0) = *(uint32_t *)((int)pvVar8 + 0xe0) & 0xfffffedf | 0x40000000;
   }
   piStack_6c = _this->m_034;
   uStack_64 = 0x41a00000;
@@ -210,12 +209,12 @@ LAB_0066b0f3:
   iStack_8c = _this->m_0f0;
   (*_this->vtable->vf10)();
   C_GameMenu__FUN_0066c8b0(_this);
-  puVar9 = FUN_0066a9e0(_this->m_030);
-  _this->m_0f4 = puVar9;
-  pIVar3 = I3DGetDriver();
-  pIVar4 = (*pIVar3->vtable->CreateFrame)(pIVar3,2);
-  _this->m_038 = pIVar4;
-  (*pIVar4->vtable[1].Slot18)(pIVar4,4);
+  pvVar8 = C_Cursor__Acquire(_this->m_030);
+  _this->m_0f4 = pvVar8;
+  pIVar2 = I3DGetDriver();
+  pIVar3 = (*pIVar2->vtable->CreateFrame)(pIVar2,2);
+  _this->m_038 = pIVar3;
+  (*pIVar3->vtable[1].Slot18)(pIVar3,4);
   (**(code **)(*(int *)_this->m_038 + 0x34))(_this->m_038,"ambient");
   iStack_8c = 0x3f800000;
   piStack_88 = (int *)0x3f800000;
@@ -223,15 +222,15 @@ LAB_0066b0f3:
   (**(code **)(*(int *)_this->m_038 + 0x84))(_this->m_038,&iStack_8c);
   (**(code **)(*(int *)_this->m_038 + 0x90))(_this->m_038,0x3f666666);
   (**(code **)(*(int *)_this->m_030 + 0x80))(_this->m_030,_this->m_038);
-  piVar10 = *(int **)((int)_this->m_030 + 0x1f8);
-  (**(code **)(*piVar10 + 0x74))(piVar10,_this->m_038);
+  piVar9 = *(int **)((int)_this->m_030 + 0x1f8);
+  (**(code **)(*piVar9 + 0x74))(piVar9,_this->m_038);
   (*(code *)**(uint32_t **)_this->m_038)(_this->m_038);
-  pIVar3 = I3DGetDriver();
-  pIVar4 = (*pIVar3->vtable->CreateFrame)(pIVar3,4);
-  _this->m_03c = pIVar4;
+  pIVar2 = I3DGetDriver();
+  pIVar3 = (*pIVar2->vtable->CreateFrame)(pIVar2,4);
+  _this->m_03c = pIVar3;
   self = ISndGetDriver();
-  bVar2 = (*self->vtable->IsInitialized)(self);
-  if (bVar2) {
+  bVar1 = (*self->vtable->IsInitialized)(self);
+  if (bVar1) {
     C_auto_00816030__SoundCacheBase_OpenInto
               ((C_auto_00816030 *)&g_soundCache,_this->m_03c,"button.wav",0,0,
                0,0);
@@ -241,49 +240,49 @@ LAB_0066b0f3:
   (**(code **)(*(int *)_this->m_03c + 0x30))(_this->m_03c,0);
   (**(code **)(*(int *)_this->m_03c + 0x8c))(_this->m_03c,0x3f800000);
   (**(code **)(*(int *)_this->m_030 + 0x80))(_this->m_030,_this->m_03c);
-  piVar10 = *(int **)((int)_this->m_030 + 0x1f8);
-  (**(code **)(*piVar10 + 0x7c))(piVar10,_this->m_03c);
+  piVar9 = *(int **)((int)_this->m_030 + 0x1f8);
+  (**(code **)(*piVar9 + 0x7c))(piVar9,_this->m_03c);
   (*(code *)**(uint32_t **)_this->m_03c)(_this->m_03c);
-  uVar12 = _this->m_020;
-  if (((uVar12 != 5) && (uVar12 != 6)) && (uVar12 != 0xb)) {
-    piVar10 = (int *)GetSoundModule();
-    iVar11 = (**(code **)(*piVar10 + 0x70))();
-    if (iVar11 == -1) {
-      piVar10 = (int *)GetSoundModule();
-      (**(code **)(*piVar10 + 0x60))(0,0);
+  uVar11 = _this->m_020;
+  if (((uVar11 != 5) && (uVar11 != 6)) && (uVar11 != 0xb)) {
+    piVar9 = (int *)GetSoundModule();
+    iVar10 = (**(code **)(*piVar9 + 0x70))();
+    if (iVar10 == -1) {
+      piVar9 = (int *)GetSoundModule();
+      (**(code **)(*piVar9 + 0x60))(0,0);
     }
     else {
-      piVar10 = (int *)GetSoundModule();
-      iVar11 = (**(code **)(*piVar10 + 0x70))();
-      if (iVar11 == 0x25) {
-        piVar10 = (int *)GetSoundModule();
-        (**(code **)(*piVar10 + 0x6c))(0,2000,0);
+      piVar9 = (int *)GetSoundModule();
+      iVar10 = (**(code **)(*piVar9 + 0x70))();
+      if (iVar10 == 0x25) {
+        piVar9 = (int *)GetSoundModule();
+        (**(code **)(*piVar9 + 0x6c))(0,2000,0);
       }
     }
   }
   DAT_008ae609 = 0;
-  iVar11 = _this->m_0f0;
-  if (((iVar11 != 0) && (iVar11 != -1)) && (iVar11 != -2)) {
-    uVar12 = 0;
+  iVar10 = _this->m_0f0;
+  if (((iVar10 != 0) && (iVar10 != -1)) && (iVar10 != -2)) {
+    uVar11 = 0;
     while( true ) {
-      iVar11 = _this->m_0f0;
-      if (*(int *)(iVar11 + 0x2c) == 0) {
-        iVar7 = 0;
+      iVar10 = _this->m_0f0;
+      if (*(int *)(iVar10 + 0x2c) == 0) {
+        iVar6 = 0;
       }
       else {
-        iVar7 = *(int *)(iVar11 + 0x30) - *(int *)(iVar11 + 0x2c) >> 2;
+        iVar6 = *(int *)(iVar10 + 0x30) - *(int *)(iVar10 + 0x2c) >> 2;
       }
-      if (iVar7 <= (int)uVar12) break;
-      if ((*(int *)(iVar11 + 0x2c) == 0) ||
-         ((uint32_t)(*(int *)(iVar11 + 0x30) - *(int *)(iVar11 + 0x2c) >> 2) <= uVar12)) {
-        iVar11 = -1;
+      if (iVar6 <= (int)uVar11) break;
+      if ((*(int *)(iVar10 + 0x2c) == 0) ||
+         ((uint32_t)(*(int *)(iVar10 + 0x30) - *(int *)(iVar10 + 0x2c) >> 2) <= uVar11)) {
+        iVar10 = -1;
       }
       else {
-        iVar11 = *(int *)(*(int *)(iVar11 + 0x2c) + uVar12 * 4);
+        iVar10 = *(int *)(*(int *)(iVar10 + 0x2c) + uVar11 * 4);
       }
       this_00 = C_PlayerProfile__GetDiary(g_gameProfile.m_player);
-      C_Diary__AddText(this_00,iVar11);
-      uVar12++;
+      C_Diary__AddText(this_00,iVar10);
+      uVar11++;
     }
   }
   _this->m_024 = 0xffffffff;
@@ -348,7 +347,7 @@ uint32_t C_GameMenu__FUN_0066b440(C_GameMenu *_this, ...)
   FUN_0066c9c0((int)_this);
   _this->m_134 = _this->m_130;
   if (_this->m_0f4 != 0) {
-    FUN_0066aa80((int)_this->m_0f4);
+    C_Cursor__Release(_this->m_0f4);
     _this->m_0f4 = 0;
   }
   puVar2 = _this->m_034;
@@ -660,10 +659,10 @@ uint32_t FUN_0066bb80(int param_1, ...)
   uint32_t local_60;
   uint32_t local_5c;
   uint32_t local_58;
-  float local_50 [2];
+  uint8_t local_50 [8];
   float local_48;
   uint8_t local_40 [60];
-  FUN_0066a420(*(void **)(param_1 + 0xf4),local_50);
+  C_Cursor__GetPosition(*(C_Cursor **)(param_1 + 0xf4),local_50);
   local_48 += 0.1;
   local_6c = DAT_008ae5dc;
   local_70 = DAT_008ae5d8;
@@ -685,19 +684,19 @@ uint32_t C_GameMenu__FUN_0066bc90(C_GameMenu *_this,int param_1, ...)
 {
   uint8_t stack0xffffffdc[64];
   uint8_t stack0xffffffd8[64];
-  char cVar1;
-  uint16_t uVar2;
-  short sVar3;
+  bool bVar1;
   uint32_t in_EAX;
-  int iVar4;
-  int iVar5;
-  uint16_t extraout_var;
-  uint32_t uVar6;
-  uint16_t extraout_var_00;
-  uint32_t uVar7;
-  uint32_t uVar8;
-  int *piVar9;
-  int64_t lVar10;
+  int iVar2;
+  int extraout_EAX;
+  undefined3 extraout_var;
+  undefined3 extraout_var_00;
+  uint32_t uVar3;
+  undefined3 extraout_var_01;
+  uint32_t uVar4;
+  uint32_t extraout_EAX_00;
+  uint32_t uVar5;
+  int *piVar6;
+  int64_t lVar7;
   int *local_20;
   int *local_1c;
   int *local_18;
@@ -710,43 +709,19 @@ uint32_t C_GameMenu__FUN_0066bc90(C_GameMenu *_this,int param_1, ...)
   local_20 = DAT_008ae5d8;
   local_18 = DAT_008ae5e0;
   local_14 = (int *)DAT_008ae5e4;
-  iVar4 = FUN_00620e90(&local_20,local_10,1);
-  iVar4 = FUN_0066aac0(_this->m_0f4,_this->m_030,*(uint32_t *)(**(int **)(iVar4 + 8) + 0x74));
-  iVar5 = FUN_0066a520(_this->m_0f4,param_1);
-  if (((char)iVar5 != '\0') || (_this->m_00c != iVar4)) {
-    _this->m_00c = iVar4;
+  iVar2 = FUN_00620e90(&local_20,local_10,1);
+  C_Cursor__Pick(_this->m_0f4,_this->m_030,*(void **)(**(int **)(iVar2 + 8) + 0x74));
+  bVar1 = C_Cursor__Update(_this->m_0f4,param_1);
+  iVar2 = CONCAT31(extraout_var,bVar1);
+  if ((bVar1) || (_this->m_00c != extraout_EAX)) {
+    _this->m_00c = extraout_EAX;
     if (_this->m_02d == '\0') {
-      cVar1 = FUN_0066a3c0(_this->m_0f4,3);
-      if (cVar1 == '\0') {
-        cVar1 = FUN_0066a3f0(_this->m_0f4,3);
-        if (cVar1 != '\0') {
-          if (_this->m_02c != '\0') {
-            _this->m_02c = '\0';
-            local_1c = DAT_008ae5dc;
-            local_20 = DAT_008ae5d8;
-            local_18 = DAT_008ae5e0;
-            local_14 = (int *)DAT_008ae5e4;
-            FUN_00633370(&local_20,-1);
-            (**(code **)(*(int *)*local_18 + 0x54))(iVar4);
-            local_20 = DAT_008ae5dc;
-            local_1c = DAT_008ae5e0;
-            local_18 = (int *)DAT_008ae5e4;
-            FUN_00633370(&stack0xffffffdc,-1);
-            (**(code **)(*(int *)*local_1c + 0x40))(iVar4);
-          }
-          local_1c = DAT_008ae5dc;
-          local_20 = DAT_008ae5d8;
-          local_18 = DAT_008ae5e0;
-          local_14 = (int *)DAT_008ae5e4;
-          FUN_00633370(&local_20,-1);
-          (**(code **)(*(int *)*local_18 + 0x44))(iVar4);
-        }
-      }
-      else {
-        piVar9 = _this->m_010;
-        if ((piVar9 != 0) && (piVar9[0x18] != iVar4)) {
-          iVar5 = (**(code **)(*piVar9 + 100))(iVar4);
-          if (iVar5 != 1) goto LAB_0066c179;
+      bVar1 = C_Cursor__IsPressed(_this->m_0f4,3);
+      if (bVar1) {
+        piVar6 = _this->m_010;
+        if ((piVar6 != 0) && (piVar6[0x18] != extraout_EAX)) {
+          iVar2 = (**(code **)(*piVar6 + 100))(extraout_EAX);
+          if (iVar2 != 1) goto LAB_0066c179;
           _this->m_010 = 0;
         }
         local_1c = DAT_008ae5dc;
@@ -754,7 +729,32 @@ uint32_t C_GameMenu__FUN_0066bc90(C_GameMenu *_this,int param_1, ...)
         local_18 = DAT_008ae5e0;
         local_14 = (int *)DAT_008ae5e4;
         FUN_00633370(&local_20,-1);
-        (**(code **)(*(int *)*local_18 + 0x48))(iVar4);
+        (**(code **)(*(int *)*local_18 + 0x48))(extraout_EAX);
+      }
+      else {
+        bVar1 = C_Cursor__IsReleased(_this->m_0f4,3);
+        if (bVar1) {
+          if (_this->m_02c != '\0') {
+            _this->m_02c = '\0';
+            local_1c = DAT_008ae5dc;
+            local_20 = DAT_008ae5d8;
+            local_18 = DAT_008ae5e0;
+            local_14 = (int *)DAT_008ae5e4;
+            FUN_00633370(&local_20,-1);
+            (**(code **)(*(int *)*local_18 + 0x54))(extraout_EAX);
+            local_20 = DAT_008ae5dc;
+            local_1c = DAT_008ae5e0;
+            local_18 = (int *)DAT_008ae5e4;
+            FUN_00633370(&stack0xffffffdc,-1);
+            (**(code **)(*(int *)*local_1c + 0x40))(extraout_EAX);
+          }
+          local_1c = DAT_008ae5dc;
+          local_20 = DAT_008ae5d8;
+          local_18 = DAT_008ae5e0;
+          local_14 = (int *)DAT_008ae5e4;
+          FUN_00633370(&local_20,-1);
+          (**(code **)(*(int *)*local_18 + 0x44))(extraout_EAX);
+        }
       }
       if (*(char *)((int)_this->m_0f4 + 0x4a) != '\0') {
         local_1c = DAT_008ae5dc;
@@ -762,32 +762,32 @@ uint32_t C_GameMenu__FUN_0066bc90(C_GameMenu *_this,int param_1, ...)
         local_18 = DAT_008ae5e0;
         local_14 = (int *)DAT_008ae5e4;
         FUN_00633370(&local_20,-1);
-        (**(code **)(*(int *)*local_18 + 0x60))(iVar4);
+        (**(code **)(*(int *)*local_18 + 0x60))(extraout_EAX);
       }
       if ((*(char *)((int)_this->m_0f4 + 0x49) != '\0') &&
-         ((_this->m_010 == 0 || (*(int *)((int)_this->m_010 + 0x60) == iVar4)))) {
+         ((_this->m_010 == 0 || (*(int *)((int)_this->m_010 + 0x60) == extraout_EAX)))) {
         local_1c = DAT_008ae5dc;
         local_20 = DAT_008ae5d8;
         local_18 = DAT_008ae5e0;
         local_14 = (int *)DAT_008ae5e4;
         FUN_00633370(&local_20,-1);
-        iVar5 = (**(code **)(*(int *)*local_18 + 0x5c))(iVar4);
-        if (iVar5 == 1) {
+        iVar2 = (**(code **)(*(int *)*local_18 + 0x5c))(extraout_EAX);
+        if (iVar2 == 1) {
           FUN_0066b410((int)_this);
         }
       }
-      uVar2 = FUN_0066a2f0((int)_this->m_0f4);
-      if ((char)uVar2 != '\0') {
+      bVar1 = C_Cursor__HasMoved(_this->m_0f4);
+      if (bVar1) {
         if (_this->m_02c == '\0') {
           local_1c = DAT_008ae5dc;
           local_20 = DAT_008ae5d8;
           local_18 = DAT_008ae5e0;
           local_14 = (int *)DAT_008ae5e4;
           FUN_00633370(&local_20,-1);
-          (**(code **)(*(int *)*local_18 + 0x40))(iVar4);
+          (**(code **)(*(int *)*local_18 + 0x40))(extraout_EAX);
         }
-        cVar1 = FUN_0066a3a0(_this->m_0f4,3);
-        if (cVar1 != '\0') {
+        bVar1 = C_Cursor__IsButtonDown(_this->m_0f4,3);
+        if (bVar1) {
           if (_this->m_02c != '\0') {
 LAB_0066c02d:
             local_1c = DAT_008ae5dc;
@@ -795,68 +795,68 @@ LAB_0066c02d:
             local_18 = DAT_008ae5e0;
             local_14 = (int *)DAT_008ae5e4;
             FUN_00633370(&local_20,-1);
-            uVar6 = (**(code **)(*(int *)*local_18 + 0x50))(iVar4);
-            return CONCAT31((int3)((uint32_t)uVar6 >> 8),1);
+            uVar3 = (**(code **)(*(int *)*local_18 + 0x50))(extraout_EAX);
+            return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
           }
           local_1c = DAT_008ae5dc;
           local_20 = DAT_008ae5d8;
           local_18 = DAT_008ae5e0;
           local_14 = (int *)DAT_008ae5e4;
           FUN_00633370(&local_20,-1);
-          (**(code **)(*(int *)*local_18 + 0x58))(iVar4);
+          (**(code **)(*(int *)*local_18 + 0x58))(extraout_EAX);
           _this->m_02c = '\x01';
           if (_this->m_02c != '\0') goto LAB_0066c02d;
         }
       }
-      sVar3 = FUN_0066a330((int)_this->m_0f4);
-      iVar5 = CONCAT22(extraout_var_00,sVar3);
-      if ((char)sVar3 != '\0') {
+      bVar1 = C_Cursor__HasWheel(_this->m_0f4);
+      iVar2 = CONCAT31(extraout_var_01,bVar1);
+      if (bVar1) {
         local_1c = DAT_008ae5dc;
         local_20 = DAT_008ae5d8;
         local_18 = DAT_008ae5e0;
         local_14 = (int *)DAT_008ae5e4;
         FUN_00633370(&local_20,-1);
-        iVar5 = *(int *)*local_18;
-        FUN_0066a320((int)_this->m_0f4);
-        lVar10 = tier1_ftol();
-        (**(code **)(iVar5 + 0x4c))(iVar4,(int)lVar10);
+        iVar2 = *(int *)*local_18;
+        C_Cursor__GetWheel(_this->m_0f4);
+        lVar7 = tier1_ftol();
+        (**(code **)(iVar2 + 0x4c))(extraout_EAX,(int)lVar7);
         local_20 = DAT_008ae5e0;
         local_1c = (int *)DAT_008ae5e4;
         FUN_00633370(&stack0xffffffd8,-1);
         local_14 = DAT_008ae5dc;
-        piVar9 = DAT_008ae5e0 - 1;
-        uVar7 = (int)piVar9 - (int)DAT_008ae5d8 >> 2;
-        if ((int)uVar7 < 0) {
-          uVar8 = -(0x3ff - uVar7 >> 10);
+        piVar6 = DAT_008ae5e0 - 1;
+        uVar4 = (int)piVar6 - (int)DAT_008ae5d8 >> 2;
+        if ((int)uVar4 < 0) {
+          uVar5 = -(0x3ff - uVar4 >> 10);
         }
         else {
-          uVar8 = uVar7 >> 10;
+          uVar5 = uVar4 >> 10;
         }
-        if (uVar8 != 0) {
-          piVar9 = (int *)(*(int *)(DAT_008ae5e4 + uVar8 * 4) + (uVar7 + uVar8 * -0x400) * 4);
+        if (uVar5 != 0) {
+          piVar6 = (int *)(*(int *)(DAT_008ae5e4 + uVar5 * 4) + (uVar4 + uVar5 * -0x400) * 4);
         }
-        iVar4 = *(int *)*piVar9;
-        uVar6 = FUN_0066aac0(_this->m_0f4,_this->m_030,*(uint32_t *)(*local_20 + 0x74));
-        iVar5 = (**(code **)(iVar4 + 0x40))(uVar6);
+        iVar2 = *(int *)*piVar6;
+        C_Cursor__Pick(_this->m_0f4,_this->m_030,*(void **)(*local_20 + 0x74));
+        iVar2 = (**(code **)(iVar2 + 0x40))(extraout_EAX_00);
       }
     }
     else {
-      uVar2 = FUN_0066a2f0((int)_this->m_0f4);
-      iVar5 = CONCAT22(extraout_var,uVar2);
-      if ((char)uVar2 != '\0') {
+      bVar1 = C_Cursor__HasMoved(_this->m_0f4);
+      iVar2 = CONCAT31(extraout_var_00,bVar1);
+      if (bVar1) {
         _this->m_02c = '\0';
         local_1c = DAT_008ae5dc;
         local_20 = DAT_008ae5d8;
         local_18 = DAT_008ae5e0;
         local_14 = (int *)DAT_008ae5e4;
-        iVar5 = FUN_00620e90(&local_20,local_10,1);
-        uVar6 = (**(code **)(*(int *)**(uint32_t **)(iVar5 + 8) + 0x40))(iVar4);
-        return CONCAT31((int3)((uint32_t)uVar6 >> 8),1);
+        iVar2 = FUN_00620e90(&local_20,local_10,1);
+        uVar3 = (**(code **)(*(int *)**(uint32_t **)(iVar2 + 8) + 0x40))(extraout_EAX);
+        return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
       }
     }
   }
 LAB_0066c179:
-  return CONCAT31((int3)((uint32_t)iVar5 >> 8),1);
+  return CONCAT31((int3)((uint32_t)iVar2 >> 8),1);
 }
 
 
@@ -1108,7 +1108,7 @@ uint32_t C_auto_00815540__FUN_0066c6d0(C_auto_00815540 *_this, ...)
   _this->vtable = (C_auto_00815540_vtbl *)&PTR_00815540;
   local_4 = 1;
   if (_this->m_070 != 0) {
-    FUN_0066aa80((int)_this->m_070);
+    C_Cursor__Release(_this->m_070);
     _this->m_070 = 0;
   }
   piVar1 = _this->m_07c;
@@ -1338,10 +1338,10 @@ uint32_t FUN_0066cc50(void *_this,uint32_t *param_1, ...)
 }
 #if 0
 {
-  void *ptr;
-  uint32_t uVar1;
-  int iVar2;
-  uint32_t uVar3;
+  void *pvVar1;
+  uint32_t uVar2;
+  int iVar3;
+  uint32_t extraout_EAX;
   int *piVar4;
   uint32_t *puVar5;
   uint32_t uVar6;
@@ -1386,13 +1386,13 @@ uint32_t FUN_0066cc50(void *_this,uint32_t *param_1, ...)
     FUN_0066e510(&DAT_008ae55c,&local_b9);
     atexit(FUN_0066da20);
   }
-  uVar1 = param_1[1];
-  if ((uVar1 & 0x20000000) != 0) {
+  uVar2 = param_1[1];
+  if ((uVar2 & 0x20000000) != 0) {
     PostControlMessage(&DAT_008ae55c,param_1);
     return 0;
   }
-  if ((uVar1 & 0x10000000) != 0) {
-    if ((uVar1 & 0x100) != 0) {
+  if ((uVar2 & 0x10000000) != 0) {
+    if ((uVar2 & 0x100) != 0) {
       while (DAT_008ae588 != 0) {
         *(uint32_t *)((int)DAT_008ae568 + 4) = *(uint32_t *)((int)DAT_008ae568 + 4) & 0xdfffffff;
         PostControlMessage(&DAT_008ae590,DAT_008ae568);
@@ -1412,9 +1412,9 @@ uint32_t FUN_0066cc50(void *_this,uint32_t *param_1, ...)
     (**(code **)(**(int **)(*(int *)((int)_this + 0x144) + (*param_1 >> 0x1a) * 4) + 0x6c))(param_1);
     return 0;
   }
-  uVar1 &= 0x3000fff;
-  if (uVar1 < 0x200000a) {
-    if (uVar1 == 0x2000009) {
+  uVar2 &= 0x3000fff;
+  if (uVar2 < 0x200000a) {
+    if (uVar2 == 0x2000009) {
       local_38 = 0;
       local_4c[0] = 0;
       local_4c[1] = 0x2000068;
@@ -1427,8 +1427,8 @@ uint32_t FUN_0066cc50(void *_this,uint32_t *param_1, ...)
       *(uint32_t *)((int)_this + 4) = 10;
       return 0;
     }
-    if (uVar1 < 0x2000004) {
-      if (uVar1 == 0x2000003) {
+    if (uVar2 < 0x2000004) {
+      if (uVar2 == 0x2000003) {
         if (DAT_008ae5f0 == 1) {
           local_80 = 0;
           local_94 = 0;
@@ -1503,38 +1503,38 @@ uint32_t FUN_0066cc50(void *_this,uint32_t *param_1, ...)
         }
         return 0;
       }
-      if (uVar1 < 0x2000002) {
-        if (uVar1 == 0x2000001) {
+      if (uVar2 < 0x2000002) {
+        if (uVar2 == 0x2000001) {
           if (DAT_008ae5f0 != 0) {
             local_d8 = DAT_008ae5dc;
             local_dc = DAT_008ae5d8;
             local_d4 = DAT_008ae5e0;
             local_d0 = DAT_008ae5e4;
-            iVar2 = FUN_00620e90(&local_dc,local_b8,1);
-            (**(code **)(*(int *)**(uint32_t **)(iVar2 + 8) + 0x14))();
+            iVar3 = FUN_00620e90(&local_dc,local_b8,1);
+            (**(code **)(*(int *)**(uint32_t **)(iVar3 + 8) + 0x14))();
           }
           if (*(int *)((int)_this + 0x144) == 0) {
-            uVar1 = 0;
+            uVar2 = 0;
           }
           else {
-            uVar1 = *(int *)((int)_this + 0x148) - *(int *)((int)_this + 0x144) >> 2;
+            uVar2 = *(int *)((int)_this + 0x148) - *(int *)((int)_this + 0x144) >> 2;
           }
-          if (uVar1 < param_1[2]) {
+          if (uVar2 < param_1[2]) {
             return 0;
           }
           puVar5 = (uint32_t *)(*(int *)((int)_this + 0x144) + param_1[2] * 4);
           goto LAB_0066d861;
         }
-        if (uVar1 == 0x1000068) {
-          iVar2 = *(int *)((int)_this + 0x11c);
+        if (uVar2 == 0x1000068) {
+          iVar3 = *(int *)((int)_this + 0x11c);
           while( true ) {
-            if (iVar2 == 0) {
+            if (iVar3 == 0) {
               return 0;
             }
-            if ((uint32_t)(*(int *)((int)_this + 0x120) - iVar2 >> 2) <= uVar6) {
+            if ((uint32_t)(*(int *)((int)_this + 0x120) - iVar3 >> 2) <= uVar6) {
               return 0;
             }
-            if (param_1[3] == *(uint32_t *)(iVar2 + uVar6 * 4)) break;
+            if (param_1[3] == *(uint32_t *)(iVar3 + uVar6 * 4)) break;
             uVar6++;
           }
           if (uVar6 == 0xffffffff) {
@@ -1542,8 +1542,8 @@ uint32_t FUN_0066cc50(void *_this,uint32_t *param_1, ...)
           }
           ReleaseFrameTree(*(I3D_frame **)(*(int *)((int)_this + 0x11c) + uVar6 * 4));
           if (-1 < (int)uVar6) {
-            iVar2 = vector_size_e4_4202f0((int)_this + 0x118);
-            if ((int)uVar6 <= iVar2 - 1) {
+            iVar3 = vector_size_e4_4202f0((int)_this + 0x118);
+            if ((int)uVar6 <= iVar3 - 1) {
               FUN_0066e5e0((void *)((int)_this + 0x118),*(int *)((int)_this + 0x11c) + uVar6 * 4);
               return 0;
             }
@@ -1551,7 +1551,7 @@ uint32_t FUN_0066cc50(void *_this,uint32_t *param_1, ...)
           }
           return 0;
         }
-        if (uVar1 == 0x10000a1) {
+        if (uVar2 == 0x10000a1) {
           if (DAT_008ae5f0 == 0) {
             return 0;
           }
@@ -1559,44 +1559,44 @@ uint32_t FUN_0066cc50(void *_this,uint32_t *param_1, ...)
           local_c8 = DAT_008ae5dc;
           local_c0 = DAT_008ae5e4;
           local_c4 = DAT_008ae5e0;
-          iVar2 = FUN_00620e90(&local_cc,(int *)&local_dc,1);
-          if (**(int **)(iVar2 + 8) == 0) {
+          iVar3 = FUN_00620e90(&local_cc,(int *)&local_dc,1);
+          if (**(int **)(iVar3 + 8) == 0) {
             return 0;
           }
           local_cc = DAT_008ae5d8;
           local_c8 = DAT_008ae5dc;
           local_c0 = DAT_008ae5e4;
           local_c4 = DAT_008ae5e0;
-          iVar2 = FUN_00620e90(&local_cc,(int *)&local_dc,1);
-          if (*(int *)(**(int **)(iVar2 + 8) + 0x74) == 0) {
+          iVar3 = FUN_00620e90(&local_cc,(int *)&local_dc,1);
+          if (*(int *)(**(int **)(iVar3 + 8) + 0x74) == 0) {
             return 0;
           }
-          uVar1 = param_1[2];
-          if ((uVar1 & 0x4000000) != 0) {
-            if (uVar1 == 0x4005000) {
+          uVar2 = param_1[2];
+          if ((uVar2 & 0x4000000) != 0) {
+            if (uVar2 == 0x4005000) {
               local_c8 = DAT_008ae5dc;
               local_cc = DAT_008ae5d8;
               local_c4 = DAT_008ae5e0;
               local_c0 = DAT_008ae5e4;
-              iVar2 = FUN_00620e90(&local_cc,local_1c,1);
+              iVar3 = FUN_00620e90(&local_cc,local_1c,1);
               local_dc = DAT_008ae5d8;
               local_d8 = DAT_008ae5dc;
-              uVar3 = *(uint32_t *)(**(int **)(iVar2 + 8) + 0x74);
+              pvVar1 = *(void **)(**(int **)(iVar3 + 8) + 0x74);
               local_d4 = DAT_008ae5e0;
               local_d0 = DAT_008ae5e4;
-              iVar2 = FUN_00620e90(&local_dc,local_b8,1);
-              iVar2 = *(int *)**(uint32_t **)(iVar2 + 8);
-              uVar3 = FUN_0066aac0(*(void **)((int)_this + 0xf4),*(int **)((int)_this + 0x30),uVar3);
-              (**(code **)(iVar2 + 0x40))(uVar3);
+              iVar3 = FUN_00620e90(&local_dc,local_b8,1);
+              iVar3 = *(int *)**(uint32_t **)(iVar3 + 8);
+              C_Cursor__Pick(*(C_Cursor **)((int)_this + 0xf4),*(void **)((int)_this + 0x30),pvVar1);
+              (**(code **)(iVar3 + 0x40))(extraout_EAX);
               return 0;
             }
-            if (uVar1 == 0x4004000) {
+            if (uVar2 == 0x4004000) {
               local_dc = DAT_008ae5d8;
               local_d8 = DAT_008ae5dc;
               local_d0 = DAT_008ae5e4;
               local_d4 = DAT_008ae5e0;
-              iVar2 = FUN_00620e90(&local_dc,local_b8,1);
-              (**(code **)(*(int *)**(uint32_t **)(iVar2 + 8) + 0x34))(0);
+              iVar3 = FUN_00620e90(&local_dc,local_b8,1);
+              (**(code **)(*(int *)**(uint32_t **)(iVar3 + 8) + 0x34))(0);
               return 0;
             }
             return 0;
@@ -1604,25 +1604,25 @@ uint32_t FUN_0066cc50(void *_this,uint32_t *param_1, ...)
           return 0;
         }
       }
-      else if (uVar1 == 0x2000002) {
+      else if (uVar2 == 0x2000002) {
         local_d8 = DAT_008ae5dc;
         local_dc = DAT_008ae5d8;
         local_d4 = DAT_008ae5e0;
         local_d0 = DAT_008ae5e4;
-        iVar2 = FUN_00620e90(&local_dc,local_b8,1);
-        *(uint32_t *)((int)_this + 0xf8) = **(uint32_t **)(iVar2 + 8);
+        iVar3 = FUN_00620e90(&local_dc,local_b8,1);
+        *(uint32_t *)((int)_this + 0xf8) = **(uint32_t **)(iVar3 + 8);
         FUN_0066e610(&DAT_008ae5c4,(uint32_t *)(*(int *)((int)_this + 0x144) + param_1[2] * 4));
         local_dc = DAT_008ae5d8;
         local_d8 = DAT_008ae5dc;
         local_d0 = DAT_008ae5e4;
         local_d4 = DAT_008ae5e0;
-        iVar2 = FUN_00620e90(&local_dc,local_b8,1);
-        (**(code **)(*(int *)**(uint32_t **)(iVar2 + 8) + 0x84))(0x10200000);
+        iVar3 = FUN_00620e90(&local_dc,local_b8,1);
+        (**(code **)(*(int *)**(uint32_t **)(iVar3 + 8) + 0x84))(0x10200000);
         return 0;
       }
     }
     else {
-      switch(uVar1) {
+      switch(uVar2) {
       case 0x2000004:
         piVar4 = (int *)GetSoundModule();
         (**(code **)(*piVar4 + 0x48))(1,0);
@@ -1690,9 +1690,9 @@ uint32_t FUN_0066cc50(void *_this,uint32_t *param_1, ...)
             FUN_00633370(&local_cc,-1);
             (**(code **)(*(int *)*local_c4 + 0x14))();
             if (DAT_008ae5e0 == DAT_008ae5d8) {
-              ptr = (void *)*DAT_008ae5e4;
+              pvVar1 = (void *)*DAT_008ae5e4;
               DAT_008ae5e4--;
-              tier1_operator_delete(ptr);
+              tier1_operator_delete(pvVar1);
               if (DAT_008ae5f0 == 0) {
                 if (DAT_008ae5d4 == DAT_008ae5e4) {
                   tier1_operator_delete((void *)*DAT_008ae5d4);
@@ -1729,7 +1729,7 @@ uint32_t FUN_0066cc50(void *_this,uint32_t *param_1, ...)
     }
   }
   else {
-    switch(uVar1) {
+    switch(uVar2) {
     case 0x2000068:
       C_GameProfile__ResetGame(&g_gameProfile);
       return 0;
@@ -1738,11 +1738,11 @@ uint32_t FUN_0066cc50(void *_this,uint32_t *param_1, ...)
       if (local_a8 == 0) {
         return 0;
       }
-      iVar2 = *(int *)((int)_this + 0x130);
+      iVar3 = *(int *)((int)_this + 0x130);
       while( true ) {
-        if ((iVar2 == 0) || ((uint32_t)(*(int *)((int)_this + 0x134) - iVar2 >> 2) <= uVar6))
+        if ((iVar3 == 0) || ((uint32_t)(*(int *)((int)_this + 0x134) - iVar3 >> 2) <= uVar6))
         goto LAB_0066d79f;
-        if (local_a8 == *(uint32_t *)(iVar2 + uVar6 * 4)) break;
+        if (local_a8 == *(uint32_t *)(iVar3 + uVar6 * 4)) break;
         uVar6++;
       }
       if (uVar6 != 0xffffffff) {
@@ -1755,19 +1755,19 @@ LAB_0066d79f:
       if (param_1[3] == 0) {
         return 0;
       }
-      iVar2 = *(int *)((int)_this + 0x130);
-      for (uVar1 = 0; (iVar2 != 0 && (uVar1 < (uint32_t)(*(int *)((int)_this + 0x134) - iVar2 >> 2)));
-          uVar1 = uVar1 + 1) {
-        if (param_1[3] == *(uint32_t *)(iVar2 + uVar1 * 4)) goto LAB_0066d7ee;
+      iVar3 = *(int *)((int)_this + 0x130);
+      for (uVar2 = 0; (iVar3 != 0 && (uVar2 < (uint32_t)(*(int *)((int)_this + 0x134) - iVar3 >> 2)));
+          uVar2 = uVar2 + 1) {
+        if (param_1[3] == *(uint32_t *)(iVar3 + uVar2 * 4)) goto LAB_0066d7ee;
       }
-      uVar1 = 0xffffffff;
+      uVar2 = 0xffffffff;
 LAB_0066d7ee:
-      if ((int)uVar1 < 0) {
+      if ((int)uVar2 < 0) {
         return 0;
       }
-      iVar2 = vector_size_e4_653b60((int)_this + 300);
-      if ((int)uVar1 <= iVar2 - 1) {
-        FUN_00653c50((void *)((int)_this + 300),*(int *)((int)_this + 0x130) + uVar1 * 4);
+      iVar3 = vector_size_e4_653b60((int)_this + 300);
+      if ((int)uVar2 <= iVar3 - 1) {
+        FUN_00653c50((void *)((int)_this + 300),*(int *)((int)_this + 0x130) + uVar2 * 4);
         return 0;
       }
       return 0;
@@ -1776,17 +1776,17 @@ LAB_0066d7ee:
       local_dc = DAT_008ae5d8;
       local_d4 = DAT_008ae5e0;
       local_d0 = DAT_008ae5e4;
-      iVar2 = FUN_00620e90(&local_dc,local_b8,1);
+      iVar3 = FUN_00620e90(&local_dc,local_b8,1);
       puVar5 = *(uint32_t **)((int)_this + 0x144);
-      *(uint32_t *)((int)_this + 0xf8) = **(uint32_t **)(iVar2 + 8);
+      *(uint32_t *)((int)_this + 0xf8) = **(uint32_t **)(iVar3 + 8);
 LAB_0066d861:
       FUN_0066e610(&DAT_008ae5c4,puVar5);
       local_dc = DAT_008ae5d8;
       local_d8 = DAT_008ae5dc;
       local_d0 = DAT_008ae5e4;
       local_d4 = DAT_008ae5e0;
-      iVar2 = FUN_00620e90(&local_dc,local_b8,1);
-      (**(code **)(*(int *)**(uint32_t **)(iVar2 + 8) + 0x84))(0);
+      iVar3 = FUN_00620e90(&local_dc,local_b8,1);
+      (**(code **)(*(int *)**(uint32_t **)(iVar3 + 8) + 0x84))(0);
       return 0;
     case 0x2000097:
       if (DAT_008ae5f0 == 0) {
@@ -1796,14 +1796,14 @@ LAB_0066d861:
       local_dc = DAT_008ae5d8;
       local_d4 = DAT_008ae5e0;
       local_d0 = DAT_008ae5e4;
-      iVar2 = FUN_00620e90(&local_dc,local_b8,1);
-      if ((*(int *)(**(int **)(iVar2 + 8) + 0x60) >> 0x1a & 0x3fU) == 0) {
+      iVar3 = FUN_00620e90(&local_dc,local_b8,1);
+      if ((*(int *)(**(int **)(iVar3 + 8) + 0x60) >> 0x1a & 0x3fU) == 0) {
         local_d8 = DAT_008ae5dc;
         local_dc = DAT_008ae5d8;
         local_d4 = DAT_008ae5e0;
         local_d0 = DAT_008ae5e4;
-        iVar2 = FUN_00620e90(&local_dc,local_b8,1);
-        (**(code **)(*(int *)**(uint32_t **)(iVar2 + 8) + 0x14))();
+        iVar3 = FUN_00620e90(&local_dc,local_b8,1);
+        (**(code **)(*(int *)**(uint32_t **)(iVar3 + 8) + 0x14))();
         FUN_0066e910(0x8ae5c4);
         *(uint32_t *)((int)_this + 0xf8) = 0;
         return 0;
@@ -1811,7 +1811,7 @@ LAB_0066d861:
       return 0;
     case 0x20000bf:
       if ((*(int **)((int)_this + 0x10) != 0) &&
-         (iVar2 = (**(code **)(**(int **)((int)_this + 0x10) + 100))(0), iVar2 == 0)) {
+         (iVar3 = (**(code **)(**(int **)((int)_this + 0x10) + 100))(0), iVar3 == 0)) {
         return 0;
       }
       piVar4 = (int *)param_1[3];
@@ -1826,7 +1826,7 @@ LAB_0066d861:
         *(uint32_t *)((int)_this + 0x10) = 0;
         *(uint8_t *)((int)_this + 0x2d) = 0;
         SetKeyboardPolling(1);
-        set_field_48_66ab60(*(void **)((int)_this + 0xf4),*(uint8_t *)((int)_this + 0x2d));
+        C_Cursor__SetClicksOff(*(C_Cursor **)((int)_this + 0xf4),*(bool *)((int)_this + 0x2d));
         return 0;
       }
       return 0;
@@ -1838,7 +1838,7 @@ LAB_0066d861:
         *(uint8_t *)((int)_this + 0x2d) = 1;
       }
       SetKeyboardPolling(*(char *)((int)_this + 0x2d) == '\0');
-      set_field_48_66ab60(*(void **)((int)_this + 0xf4),*(uint8_t *)((int)_this + 0x2d));
+      C_Cursor__SetClicksOff(*(C_Cursor **)((int)_this + 0xf4),*(bool *)((int)_this + 0x2d));
       return 0;
     }
   }

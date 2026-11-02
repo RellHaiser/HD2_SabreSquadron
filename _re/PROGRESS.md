@@ -6755,6 +6755,39 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     as their parameter; names/controls.txt (8); 8 functions in ported.txt. Stats: 8,586 of 12,293
     functions by hand (76.7 % by size).
 
+  PART 9c-vi-a DONE (2026-11-02): the menus' cursor (src/game/cursor.*, the .cpp new). 9c-vi split:
+  a the cursor, b the screens (0x00815540, 0x00815918, 0x008156b8; 0x008154b8 is 9c-v-c's server
+  row), c the factory CreateChild.
+  - C_Cursor (vtable 0x008155d0, 0x54; was C_auto_008155d0): one shared, counted (Acquire 0x0066a9e0:
+    made with Init 0x0066a7e0, none when it fails; Release 0x0066aa80: the last frees the texture
+    and deletes the shared one, whichever was released). Init: the screen's size, the scene's
+    "CURZOR" frame, the mouse placed at its last place (g_cursorX / g_cursorY 0x00840668 / 0x0084066c,
+    -1 at first: the centre; truncated) and read, the frame placed and off, "x_kursor.tga" (mode
+    0x402). Update 0x0066a520: the buttons, the move and the wheel read; a delay (SetDelay
+    0x0066ab50, the hot key's 200 ms) counted down (false); nothing changed (false); else the place
+    moved and kept on the screen (the move cut by what it lost), the still time reset, the clicks
+    (unless SetClicksOff 0x0066ab60): a release over the control pressed on, a second within 400 ms
+    (the press time, from the last release) a double click; the frame at (x / w, (-1 / h) y 0.75,
+    -1). Pick 0x0066aac0: the id under it, the frame data of what IntersectFrame hits from (x, y,
+    -0.9) along +z (flags 0x140000). The button queries (any button for 0), GetPosition / GetMove
+    (-(y / h) 0.75: the original's other order), GetScreenPosition (the buttons' bits as a float),
+    HasMoved, the wheel.
+  - ls3d/igraph.h: IGraph 0xF4 GetMouseWheel, 0xF8 SetMousePos, 0xFC / 0x100 GetMouseX / Y (the
+    LS3DF port's names). The hot key's SetUnknown44 is SetDelay.
+  - Harness: a standalone one (cursor_test.cpp, build_cursor.bat, check_cursor.py in
+    vehicle_setup: the cursor alone on fake IGraph / scene / frame / image tables; the heap filled,
+    the cursor's deletions counted), 6 checks. The text build keeps its cursor fakes; 22 of 22 in
+    both orders.
+  - Mutations (mutations/mutate_9c6a.py, generated, the cursor harness, 4 parallel runs): 159 cases,
+    155 build; all caught but 25 equivalent (listed in its docstring: Reset's and Init's overlapping
+    fields, the clamps' edges). The first run left 40 (15 killed by the filled heap, the deletion
+    count and edge cases: a delay ending at 0 / 1, a place off 0, a second click at 400 ms).
+  - Build: MSVC clean. Tier 1: 475 errors in 78 files, 192 stubs (was 478 / 79 / 193). ret_audit
+    --src: 52.
+  - Ghidra: C_auto_008155d0 renamed C_Cursor; names/cursor.txt (20 functions, g_cursorX / Y,
+    g_cursor 0x008ae558); 20 functions in ported.txt. Stats: 8,606 of 12,293 functions by hand
+    (76.7 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

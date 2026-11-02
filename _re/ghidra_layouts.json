@@ -16170,6 +16170,28 @@
 }
 ]
 },
+"C_Cursor": {
+"size": 4,
+"fields": [
+{
+"offset": 0,
+"size": 4,
+"type": "C_Cursor_vtbl *",
+"name": "vtable"
+}
+]
+},
+"C_Cursor_vtbl": {
+"size": 4,
+"fields": [
+{
+"offset": 0,
+"size": 4,
+"type": "void *",
+"name": "vf00"
+}
+]
+},
 "C_Debriefing": {
 "size": 16,
 "fields": [
@@ -94488,28 +94510,6 @@
 "size": 4,
 "type": "void *",
 "name": "vf23"
-}
-]
-},
-"C_auto_008155d0": {
-"size": 4,
-"fields": [
-{
-"offset": 0,
-"size": 4,
-"type": "C_auto_008155d0_vtbl *",
-"name": "vtable"
-}
-]
-},
-"C_auto_008155d0_vtbl": {
-"size": 4,
-"fields": [
-{
-"offset": 0,
-"size": 4,
-"type": "void *",
-"name": "vf00"
 }
 ]
 },

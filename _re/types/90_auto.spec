@@ -544,7 +544,7 @@ end
 class C_auto_00815540 size=0x4 vtable=0x00815540:36
 end
 
-class C_auto_008155d0 size=0x4 vtable=0x008155d0:1
+class C_Cursor size=0x4 vtable=0x008155d0:1
 end
 
 class C_auto_008156b8 size=0x89 vtable=0x008156b8:36

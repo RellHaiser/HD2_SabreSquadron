@@ -583,8 +583,8 @@ LAB_0061cea1:
 // 0x0061cfa0
 uint32_t FUN_0061cfa0(int *param_1, ...)
 {
-  if (*param_1 != 0) {
-    FUN_0066aa80(*param_1);
+  if ((C_Cursor *)*param_1 != 0) {
+    C_Cursor__Release((C_Cursor *)*param_1);
     *param_1 = 0;
   }
   return 0;

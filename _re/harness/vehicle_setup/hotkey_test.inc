@@ -20,7 +20,7 @@ bool C_KeyBindings::Bind(int index, int device, int key, int direction)
     return g_hkBound;
 }
 C_str C_KeyBindings::GetBindingName(int index) const { return C_fstr("key%d", index); }
-void C_Cursor::SetUnknown44(int value) { GfLog("cursor 44 %d", value); }
+void C_Cursor::SetDelay(int time) { GfLog("cursor 44 %d", time); }
 
 namespace {
 

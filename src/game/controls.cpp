@@ -4874,7 +4874,7 @@ constexpr uint32_t HOT_KEY_TITLE_STYLE = 0xC, HOT_KEY_KEY_STYLE = 0xD;
 // The poll's argument (0x9A), Escape on the keyboard, the cursor's +0x44 after a binding.
 constexpr int HOT_KEY_POLL = 0x9A;
 constexpr uint16_t DEVICE_KEYBOARD = 1, SCAN_ESCAPE = 1;
-constexpr int HOT_KEY_CURSOR_44 = 200;
+constexpr int HOT_KEY_CURSOR_DELAY = 200;
 // The titled edit box's text at first.
 constexpr uint32_t TITLED_EDIT_STYLE = 0xD, TITLED_EDIT_TEXT = 0x7D2;
 
@@ -4944,7 +4944,7 @@ void C_HotKeyControl::Tick(int time)
     PostControlMessage(Message(CONTROL_MSG_HOT_KEY_DONE));
     // (The cursor checked: the fix, the original's without one crashes.)
     if (C_Cursor *cursor = C_Cursor::Acquire(nullptr)) {
-        cursor->SetUnknown44(HOT_KEY_CURSOR_44);
+        cursor->SetDelay(HOT_KEY_CURSOR_DELAY);
         cursor->Release();
     }
 }

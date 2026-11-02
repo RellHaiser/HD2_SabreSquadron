@@ -30894,7 +30894,7 @@
  "00667f90": {
   "module": "controls",
   "name": "C_MovieControl::FindArea",
-  "proto": "bool __fastcall FindArea(C_MovieControl *this)"
+  "proto": "bool __fastcall FindArea(C_MovieControl * control)"
  },
  "00668050": {
   "module": "controls",
@@ -30919,15 +30919,107 @@
  "006683c0": {
   "module": "controls",
   "name": "C_MovieControl::CloseStream",
-  "proto": "void __fastcall CloseStream(C_MovieControl *this)"
+  "proto": "void __fastcall CloseStream(C_MovieControl * control)"
+ },
+ "0066a2f0": {
+  "module": "cursor",
+  "name": "C_Cursor::HasMoved",
+  "proto": "bool __fastcall HasMoved(C_Cursor * cursor)"
+ },
+ "0066a320": {
+  "module": "cursor",
+  "name": "C_Cursor::GetWheel",
+  "proto": "float __fastcall GetWheel(C_Cursor * cursor)"
+ },
+ "0066a330": {
+  "module": "cursor",
+  "name": "C_Cursor::HasWheel",
+  "proto": "bool __fastcall HasWheel(C_Cursor * cursor)"
+ },
+ "0066a350": {
+  "module": "cursor",
+  "name": "C_Cursor::Matches",
+  "proto": "bool __cdecl Matches(uint buttons, uint state)"
+ },
+ "0066a380": {
+  "module": "cursor",
+  "name": "C_Cursor::WasButtonDown",
+  "proto": "bool __thiscall WasButtonDown(C_Cursor *this, uint buttons)"
+ },
+ "0066a3a0": {
+  "module": "cursor",
+  "name": "C_Cursor::IsButtonDown",
+  "proto": "bool __thiscall IsButtonDown(C_Cursor *this, uint buttons)"
+ },
+ "0066a3c0": {
+  "module": "cursor",
+  "name": "C_Cursor::IsPressed",
+  "proto": "bool __thiscall IsPressed(C_Cursor *this, uint buttons)"
+ },
+ "0066a3f0": {
+  "module": "cursor",
+  "name": "C_Cursor::IsReleased",
+  "proto": "bool __thiscall IsReleased(C_Cursor *this, uint buttons)"
+ },
+ "0066a420": {
+  "module": "cursor",
+  "name": "C_Cursor::GetPosition",
+  "proto": "void __thiscall GetPosition(C_Cursor *this, void * position)"
+ },
+ "0066a450": {
+  "module": "cursor",
+  "name": "C_Cursor::GetMove",
+  "proto": "void __thiscall GetMove(C_Cursor *this, void * move)"
+ },
+ "0066a480": {
+  "module": "cursor",
+  "name": "C_Cursor::GetScreenPosition",
+  "proto": "void __thiscall GetScreenPosition(C_Cursor *this, float * x, float * y, float * buttons)"
+ },
+ "0066a520": {
+  "module": "cursor",
+  "name": "C_Cursor::Update",
+  "proto": "bool __thiscall Update(C_Cursor *this, int time)"
+ },
+ "0066a7b0": {
+  "module": "cursor",
+  "name": "C_Cursor::Reset",
+  "proto": "void __fastcall Reset(C_Cursor * cursor)"
+ },
+ "0066a7e0": {
+  "module": "cursor",
+  "name": "C_Cursor::Init",
+  "proto": "bool __thiscall Init(C_Cursor *this, void * scene)"
+ },
+ "0066a9e0": {
+  "module": "cursor",
+  "name": "C_Cursor::Acquire",
+  "proto": "void * __fastcall Acquire(void * scene)"
+ },
+ "0066aa50": {
+  "module": "cursor",
+  "name": "C_Cursor::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Cursor *this, uchar flags)"
+ },
+ "0066aa80": {
+  "module": "cursor",
+  "name": "C_Cursor::Release",
+  "proto": "void __fastcall Release(C_Cursor * cursor)"
+ },
+ "0066aac0": {
+  "module": "cursor",
+  "name": "C_Cursor::Pick",
+  "proto": "void __thiscall Pick(C_Cursor *this, void * scene, void * frame)"
  },
  "0066ab50": {
-  "module": "zz_idioms",
-  "name": "set_field_44_66ab50"
+  "module": "cursor",
+  "name": "C_Cursor::SetDelay",
+  "proto": "void __thiscall SetDelay(C_Cursor *this, int time)"
  },
  "0066ab60": {
-  "module": "zz_idioms",
-  "name": "set_field_48_66ab60"
+  "module": "cursor",
+  "name": "C_Cursor::SetClicksOff",
+  "proto": "void __thiscall SetClicksOff(C_Cursor *this, bool off)"
  },
  "0066ede0": {
   "module": "game_app",
@@ -40800,6 +40892,18 @@
   "name": "g_vehicleSoundVolume",
   "type": "float"
  },
+ "00840668": {
+  "data": true,
+  "module": "cursor",
+  "name": "g_cursorX",
+  "type": "float"
+ },
+ "0084066c": {
+  "data": true,
+  "module": "cursor",
+  "name": "g_cursorY",
+  "type": "float"
+ },
  "00842570": {
   "data": true,
   "module": "profile",
@@ -41457,6 +41561,12 @@
   "data": true,
   "module": "script",
   "name": "g_junkers88Setup"
+ },
+ "008ae558": {
+  "data": true,
+  "module": "cursor",
+  "name": "g_cursor",
+  "type": "C_Cursor *"
  },
  "008ae8f4": {
   "data": true,

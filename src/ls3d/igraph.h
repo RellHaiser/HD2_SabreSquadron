@@ -148,10 +148,12 @@ public:
     // mouse look, 2 pi per 1000 counts).
     I3DMETHOD(int, GetMouseDeltaX)() = 0;                                // 0xEC
     I3DMETHOD(int, GetMouseDeltaY)() = 0;                                // 0xF0
-    I3D_SLOT(F4);
-    I3D_SLOT(F8);
-    I3D_SLOT(FC);
-    I3D_SLOT(100);
+    // The wheel's turn in this frame.
+    I3DMETHOD(int, GetMouseWheel)() = 0;                                 // 0xF4
+    // The mouse's place in pixels (set: moves the cursor in absolute mode; LS3DF's names).
+    I3DMETHOD(int, SetMousePos)(int x, int y) = 0;                       // 0xF8
+    I3DMETHOD(int, GetMouseX)() = 0;                                     // 0xFC
+    I3DMETHOD(int, GetMouseY)() = 0;                                     // 0x100
     // Mouse buttons 0 .. 4 as bits (LS3DF's name).
     I3DMETHOD(uint32_t, GetMouseButtons)() = 0;                          // 0x104
     I3DMETHOD(void, Unknown108)() = 0;                                   // 0x108
