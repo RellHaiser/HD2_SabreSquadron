@@ -13,7 +13,6 @@
 #include "core/debug.h"
 #include "dx/d3d8_types.h"
 
-struct S_matrix;
 class ITexture;
 
 // IGraph::Init parameters (0x38 bytes, copied to 0x100d1d18).
@@ -121,15 +120,8 @@ public:
     ITexture *__stdcall CreateITexture();
     // 0x1006a1f0
     bool __stdcall SetTexture(ITexture *texture, int stage);
-    // 0x1006b380 / 0x1006b3b0
-    HRESULT __stdcall BeginScene();
-    HRESULT __stdcall EndScene();
-    // 0x1006b360
-    HRESULT __stdcall SetWorldMatrix(const S_matrix *matrix);
-    // 0x1006b5a0 / 0x1006b6e0: user-memory primitives (IGP_*, IGV_*).
+    // 0x1006b5a0: user-memory primitives (IGP_*, IGV_*).
     HRESULT __stdcall DrawPrimitive(int kind, int count, const void *vertices, int vertexFormat);
-    HRESULT __stdcall DrawIndexedPrimitive(int kind, int numVertices, const uint16_t *indices, int count,
-                                           const void *vertices, int vertexFormat);
     // 0x10070160: resamples a 24 / 32-bit image (box filter when shrinking and `filter`).
     bool __stdcall ResizeImage(int srcWidth, int srcHeight, int srcPitch, const uint8_t *src, int dstWidth,
                                int dstHeight, int dstPitch, uint8_t **dst, int bytesPerPixel, bool filter);

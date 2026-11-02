@@ -79,7 +79,9 @@ public:
     // +0x18 the sectors whose sound environments blend (LS3DF's Render stepped them). LS3DRF's
     // driver has none; the field stays for the LS3DF layout.
     ls3d::C_vector<I3D_sector *> envSectors;
-    ls3d::C_vector<ITexture *> lightmapTextures;                        // +0x28 the lightmap atlas textures
+    // +0x28 the lightmap atlas textures. LS3DRF's driver has none; the field stays for the LS3DF
+    // layout.
+    ls3d::C_vector<ITexture *> lightmapTextures;
     ls3d::C_vector<I3D_scene *> scenes;                                 // +0x38
     int16_t mirrorStamp;                                                // +0x48 (nothing counts: mirrors keep no stamp)
 };
@@ -126,9 +128,6 @@ extern bool g_driverInitialized;
 // The driver's time in ms (0x100be394; Tick advances it).
 extern int g_driverTime;
 inline bool NamesEnabled() { return g_driverStates[DRVSTATE_FRAME_NAMES] != 0; }
-// Lightmap atlases in 32-bit (when the device has A8R8G8B8): driver state DRVSTATE_LM_TRUECOLOR,
-// or always with the port's LS3DF.ini TrueColorLightmaps.
-bool LightmapsTrueColor();
 // A state that holds a float's bits.
 inline float DriverStateFloat(int state)
 {

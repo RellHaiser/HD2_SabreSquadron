@@ -10,7 +10,6 @@
 #include "core/c_vector.h"
 #include "core/i3d_result.h"
 #include "dx/d3d8_types.h"
-#include "gfx/gfx.h"
 #include "igraph/igraph.h"
 
 class ITexture;
@@ -18,7 +17,6 @@ class ITexture;
 namespace ls3d::ig {
 
 extern S_IGraphInit g_init;                     // 0x100d1d18
-extern D3DVIEWPORT8 g_viewport;                 // 0x100d1cf0 the device viewport (the I3D renderer sets it too)
 extern HWND g_mainWnd;                          // 0x100d19ec
 extern HWND g_childWnd;                         // 0x100d1894
 extern bool g_initialized;                      // 0x100d2195
@@ -40,17 +38,9 @@ extern D3DFORMAT g_fmtDxt3;                     // 0x100d1edc
 extern D3DFORMAT g_fmtDxt5;                     // 0x100d1a90
 extern D3DFORMAT g_fmtBump;                     // 0x100d1d10 V8U8
 
-// Vertex shaders (declarations of D3DVSD_REG(0) position, ..., created by the device reset).
-extern DWORD g_vsNormalTex1;                    // 0x100d2198 position, normal, uv
-extern DWORD g_vsNormalTex2;                    // 0x100d219c position, normal, uv, uv
+// The vertex shader of IGV_COLOR_TEX (a declaration of D3DVSD_REG(0) position, ..., created by the
+// device reset).
 extern DWORD g_vsColorTex1;                     // 0x100d21ac position, colour, uv
-extern DWORD g_vsColorTex2;                     // 0x100d21b0 position, colour, uv, uv
-extern DWORD g_vsFarPlane;                      // 0x100d21b4 transformed by c0..c3 with z = w (sky)
-
-// Texture coordinate generation matrices (D3DTS_TEXTURE0/1 in the default states): clip space
-// x, y to u, v (0x100d1a30) and x, z to u, v (0x100d19f0).
-extern D3DMATRIX g_texProjectXY;
-extern D3DMATRIX g_texProjectXZ;
 
 // The renderer's cache of device states (IGraph::SetState's in LS3DF; -1 / unset values force the
 // next set).
@@ -80,8 +70,6 @@ struct S_stateCache {
     int unknown1780;                            // 0x100d1780 (renderer, 0x10037010)
 };
 extern S_stateCache g_rs;
-// D3DRS_ZENABLE value of LS3DF's IGS_ZENABLE (0x100a6340): D3DZB_TRUE, or D3DZB_USEW (the driver's w-buffer state).
-extern int g_zBufferType;
 
 // The renderer's material for meshes without colors of their own (0x100d1ba0: white diffuse,
 // ambient and specular, no emissive).
@@ -91,7 +79,6 @@ extern D3DMATERIAL8 g_defaultMaterial;
 extern C_vector<ITexture *> g_cachedTextures;   // 0x100d19dc
 extern C_vector<ITexture *> g_uncachedTextures; // 0x100d19cc
 extern ITexture *g_defaultTexture;              // 0x100d21b8 8 x 8 white
-extern ITexture *g_bumpAnimTextures[17];        // 0x100d1df8 BumpAnim_00.dds ...
 extern uint16_t g_textureId;                    // 0x100d2192 last ITexture::id given out
 
 // Hardware quirks (g_quirks), from the device caps and known adapters.
@@ -105,28 +92,8 @@ enum : uint32_t {
     IGQ_NO_DXT = 0x008,
 };
 
-// Cached D3DRS_ZWRITEENABLE / D3DRS_SPECULARENABLE (0x10063720 / 0x10063760, render helpers).
-inline void SetZWrite(int on)
-{
-    if (g_rs.zWrite != on) {
-        g_rs.zWrite = on;
-        gfx::g_pGfx->SetRenderState(D3DRS_ZWRITEENABLE, on == 1);
-    }
-}
-inline void SetSpecular(int on)
-{
-    if (g_rs.specular != on) {
-        g_rs.specular = on;
-        gfx::g_pGfx->SetRenderState(D3DRS_SPECULARENABLE, on == 1);
-    }
-}
-
 // IGraph::ResizeImage (resize_image.cpp).
 bool ResizeImage(int srcWidth, int srcHeight, int srcPitch, const uint8_t *src, int dstWidth, int dstHeight,
                  int dstPitch, uint8_t **dst, int bpp, bool filter);
 
 }  // namespace ls3d::ig
-
-// The 17 frames of the animated bump map, BumpAnim_00.dds ... (0x100699a0; the renderer loads them
-// on first use).
-bool LoadBumpAnimTextures(IGraph *igraph);

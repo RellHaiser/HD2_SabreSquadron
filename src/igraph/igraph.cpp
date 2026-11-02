@@ -12,7 +12,6 @@
 #include "i3d/i3d_links.h"
 #include "igraph/igraph_state.h"
 #include "igraph/itexture.h"
-#include "math/ls3d_math.h"
 #include "platform/platform.h"
 
 using namespace ls3d;
@@ -43,28 +42,15 @@ D3DFORMAT g_fmtDxt3 = D3DFMT_UNKNOWN;
 D3DFORMAT g_fmtDxt5 = D3DFMT_UNKNOWN;
 D3DFORMAT g_fmtBump = D3DFMT_UNKNOWN;
 
-DWORD g_vsNormalTex1 = 0;
-DWORD g_vsNormalTex2 = 0;
 DWORD g_vsColorTex1 = 0;
-DWORD g_vsColorTex2 = 0;
-DWORD g_vsFarPlane = 0;
-
-// (LS3DF's IGraph constructor built these and the default material below; LS3DRF's does not. The
-// original builds the matrix rows from 4-float temporaries whose last element it never sets: stack
-// garbage in column 3; the port uses 0, which D3DTTFF_COUNT2 ignores.)
-D3DMATRIX g_texProjectXY = {{{0.5f, 0, 0, 0}, {0, -0.5f, 0, 0}, {0, 0, 0, 0}, {0.5f, -0.5f, 0, 0}}};
-D3DMATRIX g_texProjectXZ = {{{0.5f, 0, 0, 0}, {0, 0, 0, 0}, {0, -0.5f, 0, 0}, {0.5f, -0.5f, 0, 0}}};
+// (No other vertex shaders, texture projection matrices, z-buffer type or viewport: LS3DRF has none.)
 
 S_stateCache g_rs = {0, 0, 0, 0, {}, {}, 0, 0, 0, 0x20};   // alphaRef 0x20 (LS3DF's constructor set it)
-int g_zBufferType = D3DZB_TRUE;
 
 C_vector<ITexture *> g_cachedTextures(0x400);
 C_vector<ITexture *> g_uncachedTextures(0x400);
 ITexture *g_defaultTexture = nullptr;
-ITexture *g_bumpAnimTextures[17] = {};
 uint16_t g_textureId = 0;
-
-D3DVIEWPORT8 g_viewport;
 
 }  // namespace ls3d::ig
 
@@ -79,23 +65,14 @@ DWORD g_lastTime = 0;                           // 0x100d1738 ReadTimer
 
 namespace ls3d::ig {
 // 0x100d1ba0: diffuse, ambient and specular white, no emissive, power 0. (D3DMATERIAL8 keeps
-// specular at +0x20 and emissive at +0x30: a white emissive washes every lit vertex out.)
+// specular at +0x20 and emissive at +0x30: a white emissive washes every lit vertex out. LS3DF's
+// IGraph constructor built it; LS3DRF's does not.)
 D3DMATERIAL8 g_defaultMaterial = {{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, {0, 0, 0, 0}, 0};
 }
 
 // ---------------------------------------------------------------- construction
 
-// 0x100699a0: the 17 frames of the animated bump map (called by the renderer on first use).
-bool LoadBumpAnimTextures(IGraph *igraph)
-{
-    for (int i = 0; i < 17; ++i) {
-        char name[100];
-        std::sprintf(name, "BumpAnim_%02i.dds", i);
-        if (igraph->LoadTexture(name, nullptr, 0, &g_bumpAnimTextures[i]) < 0)
-            return false;
-    }
-    return true;
-}
+// (No animated bump map: LS3DRF has none.)
 
 // LS3DRF 0x10031110 (from LS3DF 0x10069a00): the init block, two handles and the name only; no
 // viewport, material, matrices, input state, texture list reserves or texture lock.
@@ -226,29 +203,7 @@ void __stdcall IGraph::ProcessWinMessages()
 
 // ---------------------------------------------------------------- device
 
-// 0x1006b360
-HRESULT __stdcall IGraph::SetWorldMatrix(const S_matrix *matrix)
-{
-    return gfx::g_pGfx->SetTransform(D3DTS_WORLD, reinterpret_cast<const D3DMATRIX *>(matrix));
-}
-
-// 0x1006b380
-HRESULT __stdcall IGraph::BeginScene()
-{
-    if (g_inScene)
-        return 1;
-    g_inScene = true;
-    return gfx::g_pGfx->BeginScene();
-}
-
-// 0x1006b3b0
-HRESULT __stdcall IGraph::EndScene()
-{
-    if (!g_inScene)
-        return 0;
-    g_inScene = false;
-    return gfx::g_pGfx->EndScene();
-}
+// (No world matrix, BeginScene or EndScene: LS3DRF has none.)
 
 // 0x1006b5a0 / 0x1006b6e0: the primitive kinds and vertex formats of DrawPrimitive.
 static bool PrimitiveType(int kind, D3DPRIMITIVETYPE *type)
@@ -305,21 +260,7 @@ HRESULT __stdcall IGraph::DrawPrimitive(int kind, int count, const void *vertice
     return gfx::g_pGfx->DrawPrimitiveUP(type, count, vertices, stride) < 0 ? I3DERR_GENERIC : 0;
 }
 
-// 0x1006b6e0
-HRESULT __stdcall IGraph::DrawIndexedPrimitive(int kind, int numVertices, const uint16_t *indices, int count,
-                                               const void *vertices, int vertexFormat)
-{
-    if (!count)
-        return 0;
-    D3DPRIMITIVETYPE type;
-    UINT stride;
-    if (!PrimitiveType(kind, &type) || !SelectVertexFormat(vertexFormat, &stride))
-        return I3DERR_INVALIDPARAMS;
-    return gfx::g_pGfx->DrawIndexedPrimitiveUP(type, 0, numVertices, count, indices, D3DFMT_INDEX16, vertices,
-                                               stride) < 0
-               ? I3DERR_GENERIC
-               : 0;
-}
+// (No DrawIndexedPrimitive: LS3DRF has none.)
 
 // LS3DRF 0x10031190 (from LS3DF 0x1006c2c0)
 HRESULT __stdcall IGraph::SetFlags(uint32_t flags)
