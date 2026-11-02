@@ -1,6 +1,6 @@
-// The scene's ray queries (I3D_scene slots 0xFC - 0x104; 0x1000c7a0 - 0x10011530) and the face
-// filters (0x10010a90, 0x10064860). (0x10011540 - 0x10011590 are the static initialisers of the
-// collision code's vectors.)
+// The scene's ray queries (I3D_scene slots 0xFC - 0x104; 0x1000c7a0 - 0x10011530) and the transmit
+// filter (0x10064860). (0x10011540 - 0x10011590 are the static initialisers of the collision
+// code's vectors.)
 //
 // A ray walks the sector trees: a frame whose hierarchy box the ray's line misses is skipped with
 // its children; a visual whose sphere the ray misses is not tested. A visual's test runs in its
@@ -51,9 +51,6 @@ const S_matrix &Identity()
     }();
     return s_identity;
 }
-
-// What a filter's first argument points to (the original passes an unset local).
-const S_vector s_filterReserved(0.0f, 0.0f, 0.0f);
 
 // An all-hits query's color goes black at an opaque face, and the filtering ends.
 void BlockColor()
@@ -181,48 +178,6 @@ S_vector FaceNormal(const S_vector &v0, const S_vector &v1, const S_vector &v2)
     return S_vector(b.z * a.y - b.y * a.z, b.x * a.z - a.x * b.z, a.x * b.y - b.x * a.y);
 }
 
-// A material the filters need not see (it blocks): none, or fully opaque without alpha.
-bool OpaqueMaterial(const I3D_material *m)
-{
-    if (!m)
-        return true;
-    const bool unitOpacity = IsTinyBits(std::fabs(m->opacity - 1.0f));
-    if ((!m->texture || !m->texture->pixels) && unitOpacity)
-        return true;
-    return m->texture && m->matFlags <= 0x10000000u && unitOpacity;
-}
-
-// The texture coordinates of a hit at `hit` (local space) on the face (v0, v1, v2) with the
-// coordinates uv0 - uv2: through the line from v0 over the hit to the opposite edge; false when
-// the construction degenerates.
-bool HitTexel(const S_vector &v0, const S_vector &v1, const S_vector &v2, const float *uv0, const float *uv1,
-              const float *uv2, const S_vector &dirA, float &u, float &v)
-{
-    const S_vector dirB(v2.x - v1.x, v2.y - v1.y, v2.z - v1.z);
-    float s1 = 0.0f, s2 = 0.0f;
-    LineLineIntersect(v0, dirA, v1, dirB, s1, s2);
-    if (IsTinyBits(std::fabs(s1)))
-        return false;
-    const S_vector p(s1 * dirA.x + v0.x, s1 * dirA.y + v0.y, s1 * dirA.z + v0.z);
-    const float sumB = (dirB.z + dirB.y) + dirB.x;
-    if (IsTinyBits(std::fabs(sumB)))
-        return false;
-    // (The edge parameter from the components' sums: the original's.)
-    const float s = (((p.z - v1.z) + (p.y - v1.y)) + (p.x - v1.x)) / sumB;
-    const float eu = (uv2[0] - uv1[0]) * s + uv1[0];
-    const float ev = (uv2[1] - uv1[1]) * s + uv1[1];
-    const float inv = 1.0f / s1;
-    u = (eu - uv0[0]) * inv + uv0[0];
-    v = (ev - uv0[1]) * inv + uv0[1];
-    u = static_cast<float>(std::fmod(static_cast<double>(u), 1.0));
-    v = static_cast<float>(std::fmod(static_cast<double>(v), 1.0));
-    if (u < 0.0f)
-        u = u + 1.0f;
-    if (v < 0.0f)
-        v = v + 1.0f;
-    return true;
-}
-
 // The facing matrix of a billboard shown in the camera's orientation (modes 2 and 3) as the ray
 // sees it: looking back along the ray, rows 1 and 2 swapped and scaled, at the frame's position.
 S_matrix RayFacing(I3D_billboard *bb, const S_vector &scale)
@@ -256,6 +211,7 @@ S_matrix col::QueryFacing(I3D_billboard *bb)
 
 namespace {
 
+// LS3DRF 0x10007990 (from LS3DF 0x1000d050): no face filter in the face loops (no texel lookup).
 // 0x1000d050: a visual against the ray.
 void RayVisual(I3D_visual *vis)
 {
@@ -466,37 +422,7 @@ void RayVisual(I3D_visual *vis)
             const float dist2 = SquareYZX(r);
             if (!(q.flags & I3DCOL_UNLIMITED) && q.length2 < dist2)
                 continue;
-            if (q.filter) {
-                I3D_material *m = fg->material;
-                int answer = 1;
-                if (OpaqueMaterial(m)) {
-                    answer = 0;
-                } else {
-                    S_collisionTexel texel = {0.0f, 0.0f, m};
-                    bool call = true;
-                    if (m->texture) {
-                        // The texture coordinates from the level's vertices (0x20 bytes: uv at +0x18). The
-                        // original locks the buffer again inline (read only, already locked): the pointer
-                        // LockVertices returned.
-                        auto uv = [vtx](uint16_t i) { return reinterpret_cast<const float *>(vtx + i * 0x20 + 0x18); };
-                        const S_vector hit(ldir.x * tt + lfrom.x, ldir.y * tt + lfrom.y, ldir.z * tt + lfrom.z);
-                        const S_vector dirA(hit.x - v0.x, hit.y - v0.y, hit.z - v0.z);
-                        call = HitTexel(v0, v1, v2, uv(f->v[0]), uv(f->v[1]), uv(f->v[2]), dirA, texel.u, texel.v);
-                    }
-                    if (call) {
-                        answer = q.filter(&s_filterReserved, tt, vis, q.user, &texel);
-                        if (answer == 2)
-                            continue;
-                    }
-                }
-                if (answer == 0) {
-                    BlockColor();
-                    if (q.flags & I3DCOL_FIRST_HIT) {
-                        firstHit();
-                        return;
-                    }
-                }
-            } else if (q.flags & I3DCOL_FIRST_HIT) {
+            if (q.flags & I3DCOL_FIRST_HIT) {
                 firstHit();
                 return;
             }
@@ -769,26 +695,6 @@ S_texelSample SampleTexel(const S_collisionTexel *texel)
 }  // namespace
 
 namespace ls3d::i3d {
-
-// 0x10010a90
-int __stdcall AlphaFilter(const void *, float, I3D_frame *, void *, const S_collisionTexel *texel)
-{
-    const I3D_material *m = texel->material;
-    const S_texelSample s = SampleTexel(texel);
-    if (!s.pixels)
-        return m->opacity < 0.1f ? 2 : 1;
-    float a;
-    if ((m->matFlags & MATF_ADDITIVE) && s.bgra) {
-        // Additive materials: the texel's brightness.
-        const float r = static_cast<float>(s.bgra[2]) * 0.00392f;
-        const float g = static_cast<float>(s.bgra[1]) * 0.00392f;
-        const float b = static_cast<float>(s.bgra[0]) * 0.00392f;
-        a = (b * 0.1f + g * 0.6f) + r * 0.3f;
-    } else {
-        a = static_cast<float>(s.alpha) * 0.00392f;
-    }
-    return a * m->opacity < 0.1f ? 2 : 1;
-}
 
 // 0x10064860
 int __stdcall TransmitFilter(const void *, float, I3D_frame *, void *user, const S_collisionTexel *texel)

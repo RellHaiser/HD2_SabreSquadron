@@ -775,11 +775,9 @@ void CompareQueryState(bool normal)
     CheckBits("q.dir", o(0x100adae0), &q.dir, 12);
     CheckBits("q.radius", o(0x100adaf4), &q.radius, 4);
     CheckBits("q.hitCb", o(0x100adaf8), &q.hitCb, 4);
-    // (The port's built-in filters stand for the original's.)
+    // (The port's built-in filter stands for the original's.)
     void *portFilter = reinterpret_cast<void *>(q.filter);
-    if (portFilter == reinterpret_cast<void *>(&AlphaFilter))
-        portFilter = &Orig<uint8_t>(0x10010a90);
-    else if (portFilter == reinterpret_cast<void *>(&TransmitFilter))
+    if (portFilter == reinterpret_cast<void *>(&TransmitFilter))
         portFilter = &Orig<uint8_t>(0x10064860);
     Check("q.filter", *reinterpret_cast<void *const *>(o(0x100adafc)) == portFilter, true);
     CheckBits("q.excluded", o(0x100adb00), &q.excluded, 4);
