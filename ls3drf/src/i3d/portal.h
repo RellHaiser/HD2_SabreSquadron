@@ -14,7 +14,7 @@ class I3D_sector;
 
 // Portal flags (I3D_portal::portalFlags).
 enum : uint32_t {
-    PRTF_OCCLUDED = 0x02,                   // (renderer) hidden by an occluder this frame (never set: no occlusion)
+    // (No 0x02, LS3DF's "hidden by an occluder this frame": LS3DRF has no occlusion.)
     PRTF_ON = 0x04,                         // open (SetOn; a closed portal also dampens sound)
     PRTF_VISITED = 0x08,                    // (renderer) looked through this frame
     PRTF_RANGE_CLIP = 0x10,                 // (renderer) not looked through beyond range

@@ -22,7 +22,7 @@ class I3D_visual;
 enum : uint32_t {
     SCTF_VISIBLE = 0x00000001,              // (renderer) rendered this frame (Init sets it)
     SCTF_RENDER_MASK = 0x00000093,          // (renderer) 1, 2: being looked into, 0x10, 0x80
-    SCTF_ON_PATH = 0x00000080,              // (renderer) on the portal path back to the camera
+    // (No 0x80 name, LS3DF's "on the portal path back to the camera": LS3DRF has no sector pass.)
     SCTF_INVMATRIX_VALID = 0x00000020,      // invWorldMatrix up to date
     SCTF_MAKE_OCCLUDER = 0x00000040,        // MakeReady builds an occluder of the geometry
     SCTF_PRIMARY = 0x00000200,              // the scene's primary sector

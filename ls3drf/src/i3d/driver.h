@@ -76,8 +76,8 @@ public:
 
     uint32_t unknown04;                                                 // +0x04
     ls3d::C_vector<I3D_frame *> soundFrames;                            // +0x08
-    // +0x18 the sectors whose sound environments blend (LS3DF's Render steps them; nothing fills
-    // it here).
+    // +0x18 the sectors whose sound environments blend (LS3DF's Render stepped them). LS3DRF's
+    // driver has none; the field stays for the LS3DF layout.
     ls3d::C_vector<I3D_sector *> envSectors;
     ls3d::C_vector<ITexture *> lightmapTextures;                        // +0x28 the lightmap atlas textures
     ls3d::C_vector<I3D_scene *> scenes;                                 // +0x38
@@ -104,7 +104,7 @@ enum : int {
     DRVSTATE_LOD_SCALE = 0x14,          // (a float) LOD distance scale
     DRVSTATE_TEX_HALF = 0x15,           // ... at half size
     DRVSTATE_TEX_COMPRESS = 0x19,       // ... DXT compressed
-    DRVSTATE_OCCLUSION = 0x27,          // occluders hide sectors' visuals and portals (unread: no occlusion)
+    DRVSTATE_OCCLUSION = 0x27,          // occluders hide sectors' visuals and portals (Init sets it, as LS3DRF's; unread: no occlusion)
     DRVSTATE_LM_SAMPLES = 0x28,         // Construct: light samples per lightmap texel, along each axis
     DRVSTATE_SHADOWS = 0x2B,            // shadows are drawn
     DRVSTATE_LM_TRUECOLOR = 0x22,       // lightmap atlas textures 32-bit (when the device has it)
