@@ -5,8 +5,9 @@
 // drawn over), then each reflected visual through a copy of its own (VISF_MIRRORED, `data` the
 // original) placed at the original's position reflected through the mirror's plane.
 //
-// LS3DRF's mirror is only its plane, color and geometry (ray tests read them): it joins no scene's
-// list and keeps no copies, so that render path is never reached.
+// LS3DRF's mirror is only its plane, color and geometry (ray tests read them), with no render path.
+// Its object is 0x250 bytes: the fields up to mirrorFlags (+0x240) as here, then `faces` at +0x244;
+// the ones from planeRadius2 to colorVertices stay for the LS3DF layout.
 #pragma once
 
 #include "core/c_vector.h"
@@ -55,10 +56,10 @@ public:
     S_matrix planeInverse;                  // +0x260 world space into the plane's (-1 - 1 within it)
     S_matrix reflection;                    // +0x2A0 world space reflection through the mirror plane
     I3D_scene *scene;                       // +0x2E0 (not initialised; nothing sets it)
-    ls3d::C_vector<I3D_visual *> copies;    // +0x2E4 (grow 0x20) the mirrored copies (their data: the originals)
+    ls3d::C_vector<I3D_visual *> copies;    // +0x2E4 (grow 0x20) LS3DF's mirrored copies (LS3DRF: none)
     uint16_t stamp;                         // +0x2F4 (not initialised) mirrored lights follow it
     uint16_t padding2F6;
-    ls3d::S_VBAlloc colorVertices;          // +0x2F8 (not initialised) position and color (0x18 bytes)
+    ls3d::S_VBAlloc colorVertices;          // +0x2F8 (not initialised) LS3DF's position and color (LS3DRF: none)
     ls3d::S_IBAlloc faces;                  // +0x304
 };
 static_assert(sizeof(I3D_mirror) == 0x310, "I3D_mirror layout");

@@ -251,7 +251,9 @@ public:
     bool areasChanged;                      // +0x288 set when the ring changes
     uint8_t padding289[3];
     void *listener;                         // +0x28C (LS3DF's ISND listener; null, no ISND)
-    ls3d::C_vector<I3D_frame *> lensFlares; // +0x290 the lens flares seen (referenced; Render draws and drops them)
+    // +0x290 LS3DF's lens flares seen (referenced; its Render drew and dropped them). LS3DRF's scene
+    // has none; the field stays for the LS3DF layout.
+    ls3d::C_vector<I3D_frame *> lensFlares;
     uint32_t weatherFlags;                  // +0x2A0 WEATHER_*
     ls3d::C_vector<S_vector4> weatherParticles{8};   // +0x2A4 positions (w: height reached; grow 1000 once set)
     float weatherFallSpeed;                 // +0x2B4 param 5 (ms -> s)
