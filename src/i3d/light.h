@@ -35,9 +35,9 @@ enum : uint32_t {
 };
 
 // LS3DRF's d3dLight: the values LS3DF keeps in its D3DLIGHT8 from Position on, in the same order,
-// with the two vectors padded to 16 bytes. Init and MatrixChanged write the position, direction,
-// range and attenuations, I3D_scene::GetLightIntensity reads them; the light's code never writes
-// the rest (where D3DLIGHT8 has Falloff, +0x24, and Theta and Phi, +0x34).
+// with the two vectors padded to 16 bytes. MatrixChanged writes the position, direction, range and
+// attenuations (Init only the first two), I3D_scene::GetLightIntensity reads all but the range; the
+// light's code never writes the rest (where D3DLIGHT8 has Falloff, +0x24, and Theta and Phi, +0x34).
 struct S_lightD3D {
     D3DVECTOR Position;                     // +0x00
     float unknown0C;
