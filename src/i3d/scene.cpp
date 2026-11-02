@@ -266,8 +266,7 @@ void I3D_scene::SetLightsColor(const S_vector &color)
         lights[i - 1]->SetColor(color);
 }
 
-// LS3DRF 0x10026190 (from LS3DF 0x10046c90): LS3DRF reads the light's position, direction and
-// attenuations from its own +0x1f0 block (see I3D_light::MatrixChanged), not from d3dLight.
+// LS3DRF 0x10026190 (from LS3DF 0x10046c90)
 float I3D_scene::GetLightIntensity(const S_vector &pos, I3D_sector *sector, uint32_t flags, I3D_frame *excluded)
 {
     if (!sector && !(sector = GetSector(pos)))

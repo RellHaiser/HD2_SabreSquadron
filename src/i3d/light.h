@@ -4,6 +4,10 @@
 // x 0.5 shines), a range with attenuation, a spot cone, and the Direct3D light it sets (d3dLight,
 // in world space). Fog lights (types 5 - 7) use the range as the fog's (x 0.01 for Direct3D).
 // The sectors it was added to (I3D_sector::AddLight) recount their lighting when it changes.
+//
+// LS3DRF's light is a 0x230-byte object (vtable 0x1003cbf0): LS3DF's fields up to coneRangeWorld,
+// then a 0x40-byte d3dLight of its own (S_lightD3D) where LS3DF has a D3DLIGHT8, and no light
+// indices (LS3DF's +0x258 - +0x25D).
 #pragma once
 
 #include "dx/d3d8_types.h"
@@ -29,6 +33,28 @@ enum : uint32_t {
     LIGHTMODE_SHADOW = 0x08,                // casts the shadows' shadows
     LIGHTMODE_LMSHADOW = 0x20,              // ... its light blocked by faces between (LMCONS_SHADOWS)
 };
+
+// LS3DRF's d3dLight: the values LS3DF keeps in its D3DLIGHT8 from Position on, in the same order,
+// with the two vectors padded to 16 bytes. Init and MatrixChanged write the position, direction,
+// range and attenuations, I3D_scene::GetLightIntensity reads them; the light's code never writes
+// the rest (where D3DLIGHT8 has Falloff, +0x24, and Theta and Phi, +0x34).
+struct S_lightD3D {
+    D3DVECTOR Position;                     // +0x00
+    float unknown0C;
+    D3DVECTOR Direction;                    // +0x10
+    float unknown1C;
+    float Range;                            // +0x20
+    float unknown24;
+    float Attenuation0;                     // +0x28
+    float Attenuation1;                     // +0x2C
+    float Attenuation2;                     // +0x30
+    uint32_t unknown34[3];                  // +0x34
+};
+static_assert(sizeof(S_lightD3D) == 0x40, "S_lightD3D layout");
+static_assert(offsetof(S_lightD3D, Direction) == 0x10, "S_lightD3D layout");
+static_assert(offsetof(S_lightD3D, Range) == 0x20, "S_lightD3D layout");
+static_assert(offsetof(S_lightD3D, Attenuation0) == 0x28, "S_lightD3D layout");
+static_assert(offsetof(S_lightD3D, Attenuation2) == 0x30, "S_lightD3D layout");
 
 class I3D_light : public I3D_frame {
 public:
@@ -94,14 +120,10 @@ public:
     float coneRange;                        // +0x1DC range / (2 sin((pi - outer / 2) / 2))
     S_vector coneCenter;                    // +0x1E0 a spot's cone center: along its direction
     float coneRangeWorld;                   // +0x1EC coneRange x the world scale
-    D3DLIGHT8 d3dLight;                     // +0x1F0 in world space
-    int16_t linkedLight;                    // +0x258 index of a light this one owns, -1 if none
-    int16_t unknown25A;                     // +0x25A (-1)
-    int16_t hardwareIndex;                  // +0x25C LS3DF: the device light it is set as (unset here)
-    int16_t padding25E;
+    S_lightD3D d3dLight;                    // +0x1F0 in world space (LS3DF: a D3DLIGHT8)
+    // (No linkedLight, unknown25A or hardwareIndex, LS3DF's +0x258 - +0x25D: LS3DRF has none.)
 };
-static_assert(sizeof(I3D_light) == 0x260, "I3D_light layout");
+static_assert(sizeof(I3D_light) == 0x230, "I3D_light layout");
 static_assert(offsetof(I3D_light, mode) == 0x160, "I3D_light layout");
 static_assert(offsetof(I3D_light, lightFlags) == 0x190, "I3D_light layout");
 static_assert(offsetof(I3D_light, d3dLight) == 0x1F0, "I3D_light layout");
-static_assert(offsetof(I3D_light, hardwareIndex) == 0x25C, "I3D_light layout");

@@ -309,7 +309,7 @@ const char *I3D_driver::GetVisualTypeName(uint32_t fourCC)
 namespace ls3d::i3d {
 
 // LS3DRF 0x1000f430 (from LS3DF 0x10018e40): the same types; the objects are LS3DF's sizes and
-// members except the scene, which is LS3DRF's (LS3DRF's light is 0x30 smaller).
+// members except the scene and the light, which are LS3DRF's.
 I3D_frame *CreateFrameObject(int type)
 {
     // (The original reads the free list of any type; only 0 - 16 have one.)

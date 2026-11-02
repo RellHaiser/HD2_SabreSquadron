@@ -64,7 +64,7 @@ template <float Square(const S_vector &)> static void SetConeCenter(I3D_light &l
 }
 
 // LS3DRF 0x10016bb0 (from LS3DF 0x10020c80): no Direct3D light and no light list. Of d3dLight only the
-// position and the direction are set (LS3DRF's own block at +0x1f0), and the squares sum y, z, x.
+// position and the direction are set, and the squares sum y, z, x.
 void I3D_light::Init()
 {
     I3D_frame::Init();
@@ -119,7 +119,7 @@ void I3D_light::Init()
 }
 
 // LS3DRF 0x100175e0 (from LS3DF 0x10021760): no device light to unregister (LS3DF 0x10063ca0) and
-// no mirror copy (linkedLight) to free.
+// no mirror copy (LS3DF's linkedLight, +0x258) to free.
 void I3D_light::Uninit()
 {
     if (lightType == I3DLIGHT_AMBIENT) {
@@ -183,8 +183,7 @@ I3D_RESULT __stdcall I3D_light::Duplicate(I3D_frame *source)
     return I3D_OK;
 }
 
-// LS3DRF 0x100181d0 (from LS3DF 0x10022500): LS3DRF stores the same values in a block of its own at
-// +0x1f0 (position +0, direction +0x10, range +0x20, attenuations +0x28 - +0x30), not in d3dLight.
+// LS3DRF 0x100181d0 (from LS3DF 0x10022500)
 void I3D_light::MatrixChanged()
 {
     lightFlags |= 5;

@@ -8,7 +8,7 @@
 // Light flags the renderer keeps in I3D_light::lightFlags.
 enum : uint32_t {
     LIGHTF_DIRTY = 0x01,                    // d3dLight changed: SetLight before the next enable
-    LIGHTF_MIRRORED = 0x02,                 // a copy made for a mirror's reflection (linkedLight: the source)
+    LIGHTF_MIRRORED = 0x02,                 // a copy made for a mirror's reflection (LS3DF's linkedLight: the source)
     LIGHTF_MOVED = 0x04,                    // changed since its mirrored copy was made
 };
 
