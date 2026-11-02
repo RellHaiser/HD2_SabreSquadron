@@ -30,11 +30,6 @@ public:
     // 0x7C 0x10036350: the mesh copied (DuplicateMesh) and its vertices baked into world space,
     // or back into the frame's space.
     void __stdcall SetWorldSpace(bool on) override;
-    // 0x94 0x10036990: the level for the camera distance, its render vertices, lights, and an
-    // item per face group.
-    void Prepare() override;
-    // 0x98 0x10037010: DrawMeshItem.
-    void Draw(const ls3d::i3d::S_renderItem *item) override;
     // 0x9C 0x10036040: the mesh (a reference; the local bound follows unless in world space).
     virtual I3D_RESULT __stdcall SetMesh(I3D_mesh *newMesh, uint32_t flags);
     // 0xA0 0x10036160: a mesh shared with others replaced by a copy of its own.
@@ -45,18 +40,6 @@ public:
     // when next drawn.
     virtual void __stdcall RefreshLevel(int level);
     virtual void __stdcall RefreshLevels();
-
-    // The level to draw for the squared distance (0x1005eb90): LOD levels by lodDistance (one
-    // past the last: none); texture LODs pick textureLevel and return 0.
-    int SelectLevel(const float &distance2);
-
-    // Prepare's steps (shared with the billboard's): a mirror's copy prepares its original
-    // (false when not a copy); the squared distance of the LOD point from g_rc.lodPosition; the
-    // last level's fade; an item per face group of `level` (`uvGroup`: the texture level's).
-    bool PrepareMirrored();
-    float LodDistance2();
-    void SetLodFade(int levelIndex, const I3D_mesh_level *level, float distance2);
-    void QueueFaceGroups(I3D_mesh_level *level, I3D_face_group *uvGroup);
 
     I3D_mesh *mesh;                         // +0x1E0
     int textureLevel;                       // +0x1E4 the level drawn (VISF_TEXTURE_LOD: whose UVs and materials)
@@ -72,14 +55,6 @@ static_assert(offsetof(I3D_object, lights) == 0x1F4, "I3D_object layout");
 
 namespace ls3d::i3d {
 
-// The mesh visuals' item drawing (0x10037010; also the lightmap visual's, from 0x10029c90): the
-// material's colors and blending, the textures and their stages by the material's bits, the
-// visual's lights, then the face group's triangles.
-void DrawMeshItem(I3D_object *visual, const S_renderItem *item);
-
-// The lightmap visuals' shared material (0x100be408): DrawMeshItem draws them with it, set from
-// the face group's material. (Null: the driver's Init makes none.)
-extern I3D_material *g_lightmapMaterial;
 // The last level's fade-out range (0x100adf30; set by the driver's states).
 extern float g_lodFadeScale;
 

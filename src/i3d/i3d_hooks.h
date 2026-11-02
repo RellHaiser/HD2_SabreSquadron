@@ -45,11 +45,13 @@ I3D_frame *NewShadowFrame();
 // A skinned visual's (SNGM / SMMR) vertices of mesh level `level` in world or local space as it
 // draws them (I3D_singlemesh slot 0xBC).
 const S_vector4 *SkinnedVertices(I3D_frame *visual, int level);
-// The portals of a scene's sectors connected again (0x10042940, portal_build.cpp).
+// The portals of a scene's sectors connected again (0x10042940, portal.cpp).
 void BuildPortals(I3D_scene *scene);
 
 // A skinned visual's joints after its hierarchy was copied (I3D_singlemesh 0x100527d0).
 void SkinFixJoints(I3D_frame *visual);
+// The skinned visuals' shared buffer freed (0x10053b90, singlemesh.cpp; the driver's destructor).
+void FreeSkinBuffers();
 
 
 // The model / scene that loaded a frame keeps it / forgets it (I3D_model slots 0x7C / 0x80,

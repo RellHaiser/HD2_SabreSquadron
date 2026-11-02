@@ -79,8 +79,9 @@ public:
     virtual int __stdcall GetModeB();
     // 0x90 0x10057190: computes the local bound of the visual's geometry (the base has none).
     virtual void __stdcall UpdateLocalBound();
-    // 0x94 0x10073330 (__thiscall, nothing in the base): queues the visual's primitives
-    // (S_renderItem) for the pass in g_rc.
+    // 0x94 0x10073330 (__thiscall, nothing in the base): in LS3DF queues the visual's primitives
+    // (S_renderItem) for the render pass. LS3DRF's visuals have neither slot: no visual overrides
+    // 0x94 / 0x98, which stay for the LS3DF layout.
     virtual void Prepare() {}
     // 0x98 0x1002b0a0 (__thiscall, nothing in the base): draws one queued item.
     virtual void Draw(const ls3d::i3d::S_renderItem *item) {}

@@ -1,12 +1,12 @@
 // I3D_lens: the lens flare / glow visual (LENS; vtable 0x1009c2c0, 0x250 bytes; 0x10007dd0 -
 // 0x10009810).
 //
-// A lens seen in a frame's pass joins the scene's lensFlares; Render draws the list after
-// everything else with DrawFlare and drops those faded out. One element is a glow: a sprite at the
-// frame, sized by the distance; more are a flare: the frame's position is a direction (a sun),
-// the elements are sprites strung along the line from it through the screen's center. A ray from
-// the camera (through the transmit filter, also through the near sector) decides how much of the
-// lens shows; brightness and color follow at their fade speeds.
+// In LS3DF a lens seen in a frame's pass joins the scene's lensFlares; Render draws the list after
+// everything else with DrawFlare and drops those faded out (LS3DRF draws none). One element is a
+// glow: a sprite at the frame, sized by the distance; more are a flare: the frame's position is a
+// direction (a sun), the elements are sprites strung along the line from it through the screen's
+// center. A ray from the camera (through the transmit filter, also through the near sector)
+// decides how much of the lens shows; brightness and color follow at their fade speeds.
 #pragma once
 
 #include "core/c_vector.h"

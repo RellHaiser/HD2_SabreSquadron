@@ -10,10 +10,10 @@
 // start color to the end one; it is drawn as a quad facing the camera, its texture rectangle the
 // frame of its group's animation (AddGroup) at its age.
 //
-// All emitters write their quads into two shared dynamic vertex buffers in turn (0x5554 vertices
-// each; one shared index buffer of quads): Prepare locks space for the visible particles of the
-// pass, Draw draws them from where Prepare put them. Instead of particles an application can write
-// quads of its own through LockVertices (SetUserVertices).
+// In LS3DF all emitters write their quads into two shared dynamic vertex buffers in turn (0x5554
+// vertices each; one shared index buffer of quads): Prepare locks space for the visible particles
+// of the pass, Draw draws them from where Prepare put them. Instead of particles an application can
+// write quads of its own through LockVertices (SetUserVertices). LS3DRF has none of it.
 #pragma once
 
 #include "core/c_vector.h"
@@ -140,12 +140,6 @@ public:
     void Uninit() override;                                                    // 0x64 0x1003af10
     // 0x70 0x1003d6c0: the frame, then the texture (flags as a material's, name, alpha name).
     void Load() override;
-    // 0x94 0x1003d980: the particles' quads written into the shared vertex buffer, one queued
-    // blended item for them.
-    void Prepare() override;
-    // 0x98 0x1003e3b0: the quads Prepare wrote (a mirrored copy draws its original's).
-    void Draw(const ls3d::i3d::S_renderItem *item) override;
-
     virtual void __stdcall SetTexture(ITexture *newTexture);                  // 0x9C 0x1003af50
     // 0xA0 0x1003af80: EMTP_* (I3DERR_INVALIDPARAMS for other indices and null colors).
     virtual I3D_RESULT __stdcall SetParam(int index, uint32_t value);
@@ -171,8 +165,8 @@ public:
     virtual void __stdcall ClearParticles();
     // 0xD0 0x1003d0e0: the local bound around the particles.
     virtual void __stdcall UpdateParticleBound();
-    // 0xD4 0x1003d860: room for `numQuads` quads in the shared vertex buffer (null when there is
-    // none); with userVertices the count and `sortDepth` (the item's sort depth) are kept for Prepare.
+    // 0xD4 0x1003d860: null (LS3DRF's emitor has no LockVertices slot; the slot stays for the
+    // LS3DF layout).
     virtual S_particleVertex *__stdcall LockVertices(int numQuads, float sortDepth);
 
     bool emitting;                          // +0x1E0 (SetDefaults: on)

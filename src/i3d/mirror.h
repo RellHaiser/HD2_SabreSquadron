@@ -41,10 +41,6 @@ public:
     virtual int __stdcall Reserved0() { return 0; }
     virtual int __stdcall Reserved1() { return 0; }
 
-    // 0x10032880: the colored vertex buffer filled from the vertices and the color (made when
-    // missing); left locked.
-    void FillColorVertices();
-
     S_matrix planeMatrix;                   // +0x1E0 the plane in the frame's space (its z the normal)
     S_vector4 color;                        // +0x220 the surface's color (0)
     float range;                            // +0x230 (Load) reflects within range x the LOD scale
@@ -72,10 +68,3 @@ static_assert(offsetof(I3D_mirror, reflection) == 0x2A0, "I3D_mirror layout");
 static_assert(offsetof(I3D_mirror, copies) == 0x2E4, "I3D_mirror layout");
 static_assert(offsetof(I3D_mirror, stamp) == 0x2F4, "I3D_mirror layout");
 static_assert(offsetof(I3D_mirror, faces) == 0x304, "I3D_mirror layout");
-
-namespace ls3d::i3d {
-
-// The mirror whose reflection is being drawn (0x100be5c0).
-extern I3D_mirror *g_renderMirror;
-
-}  // namespace ls3d::i3d

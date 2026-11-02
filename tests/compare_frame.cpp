@@ -132,7 +132,6 @@ int __stdcall I3D_driver::GetTime() { return 0; }
 I3D_RESULT __stdcall I3D_driver::GetStats(int, void *) { return 0; }
 I3D_RESULT __stdcall I3D_driver::SetState(int, uint32_t) { return 0; }
 uint32_t __stdcall I3D_driver::GetState(int) { return 0; }
-I3D_RESULT __stdcall I3D_driver::Render(I3D_scene *, bool) { return 0; }
 I3D_frame *__stdcall I3D_driver::CreateVisual(uint32_t) { return nullptr; }
 I3D_frame *__stdcall I3D_driver::CreateFrame(int) { return nullptr; }
 I3D_material *__stdcall I3D_driver::CreateMaterial() { return nullptr; }

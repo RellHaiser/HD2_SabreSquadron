@@ -1,6 +1,6 @@
 // I3D_driver: the engine's root object (vtable 0x1009b640; one global instance, I3DGetDriver).
 // Methods 0x10015100 - 0x1001b8f0 (the frame factories, the name tree, hierarchy services) plus
-// Render (0x1005edc0) and the device reset (0x10063560).
+// the device reset (0x10063560). (No Render 0x1005edc0: LS3DRF's driver draws nothing.)
 #pragma once
 
 #include <cstring>
@@ -70,17 +70,14 @@ public:
     // 0x80 0x10063560: does nothing (no device; no return value).
     virtual void __stdcall ResetDevice(I3D_scene *) {}
 
-    // 0x1005edc0: renders the scene from its active camera; `keepScene`: the caller has begun
-    // the device scene (no BeginScene / EndScene).
-    I3D_RESULT __stdcall Render(I3D_scene *scene, bool keepScene);
     // 0x10087b10: does nothing (after the buffer managers, lightmaps and shadows make or free
     // device resources).
     void __stdcall SlotB4() {}
 
     uint32_t unknown04;                                                 // +0x04
     ls3d::C_vector<I3D_frame *> soundFrames;                            // +0x08
-    // +0x18 the sectors whose sound environments blend (the camera's fades in, the one it left
-    // out; Render steps them).
+    // +0x18 the sectors whose sound environments blend (LS3DF's Render steps them; nothing fills
+    // it here).
     ls3d::C_vector<I3D_sector *> envSectors;
     ls3d::C_vector<ITexture *> lightmapTextures;                        // +0x28 the lightmap atlas textures
     ls3d::C_vector<I3D_scene *> scenes;                                 // +0x38

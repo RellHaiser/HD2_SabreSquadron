@@ -68,10 +68,6 @@ struct S_lightmapLevel {
     // `keepFaces`, the faces into the lightmap vertices (each face's corner the vertex of its
     // patch).
     bool Build(I3D_mesh_level *level, bool keepFaces, const I3D_frame *owner);
-    // 0x1002a630: the vertex buffer made (when dirty, again) and filled from the level's vertices:
-    // `flags` LMSET_VERTEX_COLORS the level's own layout with the colors, else the lightmap
-    // vertices.
-    bool FillVertices(I3D_mesh_level *level, I3D_mesh *mesh, uint32_t flags);
     // 0x1002aaa0: a face group's faces' patches (kept).
     void SetFaceParts(uint16_t *faceParts, int faceGroup);
 
@@ -125,11 +121,6 @@ public:
     I3D_RESULT __stdcall Duplicate(I3D_frame *source) override;
     void Init() override;                                                      // 0x60 0x100232d0
     void Uninit() override;                                                    // 0x64 0x10023320
-    // 0x94 0x10029700: the current set's level for the camera distance: its vertices (made when
-    // dirty), lights, and an item per face group (the lightmap texture and the material's).
-    void Prepare() override;
-    // 0x98 0x10029c90
-    void Draw(const ls3d::i3d::S_renderItem *item) override;
     // 0x9C 0x10029500: the mesh; the current set's lightmaps freed unless `keep`.
     I3D_RESULT __stdcall SetMesh(I3D_mesh *newMesh, uint32_t keep) override;
     // 0xAC / 0xB0 0x10029680 / 0x10029630: every set's level / levels made again when drawn.
