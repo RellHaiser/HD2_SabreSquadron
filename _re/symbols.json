@@ -31597,6 +31597,11 @@
   "module": "zz_idioms",
   "name": "construct_copy4_67a9b0"
  },
+ "0067b070": {
+  "module": "store_list",
+  "name": "C_StoreList::BuildPage",
+  "proto": "bool __thiscall BuildPage(void *this, void * parent, void * model, void * name, int group)"
+ },
  "0067b930": {
   "module": "store_list",
   "name": "C_StoreList::GetCount",

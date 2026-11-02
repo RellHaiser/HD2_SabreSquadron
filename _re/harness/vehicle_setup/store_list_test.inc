@@ -22,11 +22,19 @@ int C_ItemStock::Take(int type, int count)
     return taken;
 }
 
+// The item types' inventory groups (item_defs.cpp is not linked).
+std::map<const C_ItemDef *, int> g_slGroups;
+int C_ItemDef::GetInventoryGroup()
+{
+    const auto it = g_slGroups.find(this);
+    return it == g_slGroups.end() ? 0 : it->second;
+}
+
 namespace {
 
 struct S_StoreListResults {
     bool slCount = true, slPage = true, slTab = true, slItem = true, slUpdate = true, slAll = true, slStock = true;
-    bool slAddTake = true, slClear = true;
+    bool slAddTake = true, slClear = true, slBuild = true, slBuildNone = true;
 };
 
 // An item type with its ammunition and head gear.
@@ -281,12 +289,142 @@ void StoreListTest(I3D_scene *)
         WM(r.slClear, ok);
     }
 
+    // --- a page built: the page's dummy under "P_visualstore" (named, the highlight's copy, the template
+    // linked to it), its description (the pages' group, the step, the origin, hidden); an entry per
+    // type of the group (not another team's; group 6 not its head gear): the template's copy with
+    // its own meshes, "frame_<type>", its messages; group 1 the page shown ---
+    {
+        bool ok = true;
+        const int driverSlots[] = {0x54 / 4};
+        void *oldDriver = g_driverVtable[driverSlots[0]];
+        g_driverVtable[0x54 / 4] = reinterpret_cast<void *>(&MrCreateFrame);
+        g_msFrameVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+        g_msFrameVt[0x18 / 4] = reinterpret_cast<void *>(&MrFake<0x18>);
+        g_msFrameVt[0x7C / 4] = reinterpret_cast<void *>(&MrFake<0x7C, void *>);
+        g_msFrameVt[0xA0 / 4] = reinterpret_cast<void *>(&MrFake<0xA0>);
+        d31.m_team = 0;
+        d33.m_team = 3;
+        g_slGroups = {{&d31, 2}, {&d33, 2}, {&d50, 2}, {&d40, 6}, {&d41, 6}, {&d42, 1}};
+        C_EdMenu menu;
+        S_MrObj *model = MsFrame("smodel"), *anchor = MsFrame("anchor"), *hl = MsFrame("hl8"), *tmpl = MsFrame("tmpl");
+        As<I3D_frame>(tmpl)->m_localMatrix.m[3][0] = 0.25f;
+        As<I3D_frame>(tmpl)->m_localMatrix.m[3][1] = 0.5f;
+        As<I3D_frame>(tmpl)->m_localMatrix.m[3][2] = 0.75f;
+        g_msChildren[{model, "P_visualstore"}] = anchor;
+        g_msChildren[{model, "selitem08"}] = hl;
+        g_msChildren[{model, "vi_template"}] = tmpl;
+        S_MrObj *mesh = MrObj("mesh", g_msFrameVt);
+        S_MrObj *dummy = MsFrame("pdummy"), *hlCopy = MsFrame("hlcopy"), *c31 = MsFrame("c31"), *c50 = MsFrame("c50"),
+                *ammo = MsFrame("cammo");
+        for (S_MrObj *c : {c31, c50, ammo})
+            *reinterpret_cast<S_MrObj **>(reinterpret_cast<uint8_t *>(c) + 0x1E0) = mesh;
+        g_msChildren[{c50, "ammo"}] = ammo;
+        g_mrMade.clear();
+        g_mrMade[FRAME_DUMMY] = {dummy};
+        g_mrClones = {As<I3D_frame>(hlCopy), As<I3D_frame>(c31), As<I3D_frame>(c50)};
+        C_StoreList l;
+        make(l);
+        l.m_menu = &menu;
+        l.m_entries.clear();
+        S_ControlDesc top(5, "store", 0x08300000);
+        top.AddChild(1, "tabs");
+        g_gfLog.clear();
+        ok &= l.BuildPage(&top, As<I3D_frame>(model), C_str("page2"), 2);
+        ok &= MsLogIs({"create 6", "smodel 48 P_visualstore 20", "smodel 48 selitem08 1", "smodel 48 selitem08 1",
+                       "smodel 48 vi_template 1", "pdummy 38 anchor 0", "smodel 7c pdummy", "pdummy 8 (0 0 0)",
+                       "pdummy 34 page2", "clone tree hl8 0", "tmpl 38 pdummy 1", "tmpl on 1", "pdummy on 1",
+                       "clone tree tmpl 0", "c31 a0", "mesh 18", "c31 48 ammo 1", "c31 34 frame_31", "c31 38 pdummy 0",
+                       "clone tree tmpl 0", "c50 a0", "mesh 18", "c50 48 ammo 1", "cammo a0", "mesh 18", "c50 34 frame_50",
+                       "c50 38 pdummy 0", "tmpl on 0", "tmpl 24"},
+                      g_gfLog);
+        ok &= l.m_highlight == As<I3D_frame>(hl) && l.m_template == As<I3D_frame>(tmpl) &&
+              menu.GetModels() == std::vector<I3D_frame *>({As<I3D_frame>(dummy)}) &&
+              menu.GetFrames() == std::vector<I3D_frame *>({As<I3D_frame>(hlCopy), As<I3D_frame>(c31), As<I3D_frame>(c50)}) &&
+              l.m_shownPage == 0 && l.m_entries.size() == 500;
+        // The description.
+        std::vector<std::string> got;
+        g_edMenu = &menu;
+        g_edPanel = &l;
+        ok &= top.children.size() == 2;
+        if (ok)
+            EdDump(top.children[1], 0, got);
+        const S_ControlMessage &origin = top.children[1]->messages[3];
+        const auto *o = reinterpret_cast<const float *>(origin.value2);
+        ok &= o && o[0] == 0.25f && o[1] == 0.5f && o[2] == 0.75f && o[3] == 1.0f;
+        const std::string originText = CmText("  0 100006b 0 %x 0 ", static_cast<uint32_t>(origin.value2));
+        const uint32_t page = 0x08302000;
+        ok &= MsLogIs({CmText("0 23 page2 %x", page), CmText("  0 100000b %x 0 0 ", base | 0x2000), "  0 1000028 4 0 0 ",
+                       "  0 1000029 0 3da5e354 0 ", originText, "  0 1000004 0 0 0 ", "  0 2000085 0 0 0 ",
+                       "  0 200002c 0 0 0 ", CmText("1 1d frame_31 %x", page | 0x10), "  0 100007b 1f 0 0 ", "  0 1000009 1f 0 0 ",
+                       CmText("  0 1000007 4021000 panel %x ", static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&C_StoreList::OnItem))),
+                       CmText("1 1d frame_50 %x", page | 0x20), "  0 100007b 32 0 0 ", "  0 1000009 32 0 0 ",
+                       CmText("  0 1000007 4021000 panel %x ", static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&C_StoreList::OnItem)))},
+                      got);
+        ok &= l.m_entries[31] == (page | 0x10) && l.m_entries[50] == (page | 0x20) && l.m_entries[33] == 0;
+        _aligned_free(reinterpret_cast<void *>(top.children[1]->messages[3].value2));
+        // Group 6: not its head gear; group 1: the page shown first.
+        S_MrObj *dummy2 = MsFrame("pdummy2"), *hlCopy2 = MsFrame("hlcopy2"), *c41 = MsFrame("c41");
+        *reinterpret_cast<S_MrObj **>(reinterpret_cast<uint8_t *>(c41) + 0x1E0) = mesh;
+        g_mrMade[FRAME_DUMMY] = {dummy2};
+        g_mrClones = {As<I3D_frame>(hlCopy2), As<I3D_frame>(c41)};
+        g_gfLog.clear();
+        ok &= l.BuildPage(&top, As<I3D_frame>(model), C_str("page6"), 6);
+        ok &= std::count(g_gfLog.begin(), g_gfLog.end(), std::string("clone tree tmpl 0")) == 1 && MrHas("c41 34 frame_41") &&
+              top.children[2]->children.size() == 1 && l.m_shownPage == 0;
+        _aligned_free(reinterpret_cast<void *>(top.children[2]->messages[3].value2));
+        S_MrObj *dummy3 = MsFrame("pdummy3"), *hlCopy3 = MsFrame("hlcopy3"), *c42 = MsFrame("c42");
+        *reinterpret_cast<S_MrObj **>(reinterpret_cast<uint8_t *>(c42) + 0x1E0) = mesh;
+        g_mrMade[FRAME_DUMMY] = {dummy3};
+        g_mrClones = {As<I3D_frame>(hlCopy3), As<I3D_frame>(c42)};
+        ok &= l.BuildPage(&top, As<I3D_frame>(model), C_str("page1"), 1) && l.m_shownPage == 0x08304000;
+        _aligned_free(reinterpret_cast<void *>(top.children[3]->messages[3].value2));
+        // Group 3: type 0 too, and head gear outside the uniforms' group kept.
+        C_SlDef d0(ITEM_STATIC, 2, -1, -1), d46(ITEM_STATIC, 16, -1, -1);
+        g_gfItemDefs[0] = &d0;
+        g_gfItemDefs[46] = &d46;
+        g_slGroups[&d0] = 3;
+        g_slGroups[&d46] = 3;
+        S_MrObj *dummy4 = MsFrame("pdummy4"), *hlCopy4 = MsFrame("hlcopy4"), *c0 = MsFrame("c0"), *c46 = MsFrame("c46");
+        for (S_MrObj *c : {c0, c46})
+            *reinterpret_cast<S_MrObj **>(reinterpret_cast<uint8_t *>(c) + 0x1E0) = mesh;
+        g_mrMade[FRAME_DUMMY] = {dummy4};
+        g_mrClones = {As<I3D_frame>(hlCopy4), As<I3D_frame>(c0), As<I3D_frame>(c46)};
+        ok &= l.BuildPage(&top, As<I3D_frame>(model), C_str("page3"), 3) && top.children[4]->children.size() == 2 &&
+              l.m_entries[0] == 0x08305010 && l.m_entries[46] == 0x08305020;
+        _aligned_free(reinterpret_cast<void *>(top.children[4]->messages[3].value2));
+        g_gfItemDefs.erase(0);
+        g_gfItemDefs.erase(46);
+        WM(r.slBuild, ok);
+
+        // --- without a frame (the anchor, the highlight, the template) or a dummy: false, nothing made ---
+        ok = true;
+        for (int pass = 0; pass < 4; ++pass) {
+            g_msChildren[{model, "P_visualstore"}] = pass == 0 ? nullptr : anchor;
+            g_msChildren[{model, "selitem08"}] = pass == 1 ? nullptr : hl;
+            g_msChildren[{model, "vi_template"}] = pass == 2 ? nullptr : tmpl;
+            g_mrMade[FRAME_DUMMY] = {};
+            if (pass != 3)
+                g_mrMade[FRAME_DUMMY] = {MsFrame("dx")};
+            g_gfLog.clear();
+            const size_t children = top.children.size();
+            ok &= !l.BuildPage(&top, As<I3D_frame>(model), C_str("px"), 2) && top.children.size() == children &&
+                  g_gfLog.size() == 5;
+        }
+        WM(r.slBuildNone, ok);
+        g_driverVtable[driverSlots[0]] = oldDriver;
+        g_mrClones.clear();
+        g_slGroups.clear();
+        g_edMenu = g_edPanel = nullptr;
+        MsInitVtables();
+    }
+
     g_gfItemDefs = oldDefs;
     g_slCounts.clear();
     g_msChildren.clear();
     g_controlMessages.clear();
     g_gfLog.clear();
     std::printf("storelist: slCount %d slPage %d slTab %d slItem %d slUpdate %d slAll %d slStock %d slAddTake %d "
-                "slClear %d\n",
-                r.slCount, r.slPage, r.slTab, r.slItem, r.slUpdate, r.slAll, r.slStock, r.slAddTake, r.slClear);
+                "slClear %d slBuild %d slBuildNone %d\n",
+                r.slCount, r.slPage, r.slTab, r.slItem, r.slUpdate, r.slAll, r.slStock, r.slAddTake, r.slClear,
+                r.slBuild, r.slBuildNone);
 }

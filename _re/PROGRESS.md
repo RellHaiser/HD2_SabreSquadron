@@ -7154,6 +7154,30 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (unchanged). ret_audit --src: 52.
   - Ghidra: names/store_list.txt (+14); 14 functions in ported.txt. Stats: 8,798 of 12,306 functions by hand (78.2 % by size).
 
+  PART 9e-iii-b DONE (2026-11-02): the store lists' pages (C_StoreList::BuildPage, slot 0 0x0067b070,
+  game/store_list.cpp; the name a C_str by value).
+  - A dummy (FRAME_DUMMY) under the model's "P_visualstore" dummy, named the page, a model frame of
+    the model, in the menu's models; the "selitem08" highlight's copy in the menu's frames (the
+    list's highlight the original); the "vi_template" visual linked to it, on. The page's description
+    (0x23, the page's name) under `parent`: the pages' group as its value, CONTROL_MSG_SET_VISIBLE 4,
+    the across step 0.081, its origin (an _aligned_malloc'd copy of the template's local position,
+    w too; the control frees it), hidden; group 1 the page shown first. Per item type of the group (not
+    team 3; group 6 not behaviour 16, the uniforms' head gear) the template's copy with its own meshes
+    (its "ammo" child's too), "frame_<type>" under the dummy, an entry (0x1D) with the type as its item
+    and index and OnItem for every notification, its id in the entries; then the page's
+    CONTROL_MSG_HIDE_ALL and REFRESH, the template off. Without one of the frames or the dummy: false
+    (the dummy leaked, as the original). C_MenuState::GetModels / GetFrames added.
+  - Fix: the original put the previous type's copy into the menu's frames (null first, the last copy
+    never: leaked); each copy now.
+  - Harness: store_list_test.inc's slBuild / slBuildNone (11 checks now; the inventory groups faked,
+    a clone queue, the meshes' slots logged). 22 of 22 in both orders (the other factory lines too).
+  - Mutations: mutations/mutate_9e3b.py (87 cases, 81 build; all caught but 2 equivalent, listed there; the first run left 4, new checks caught 2).
+  - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/store_list.txt (+1). Stats: 8,799 of 12,306 functions by hand (78.3 % by size).
+  - Next, 9e-iv: C_EquipmentMenuBase's own code and C_GameMenu (vtable 0x00815750, 0x5C0 bytes; its
+    constructor 0x0067eb40, the mission records at +0x1F0, the slots 0x34..0x84; 0x0067aa70..
+    0x00688130), in parts.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

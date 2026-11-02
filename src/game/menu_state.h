@@ -155,6 +155,10 @@ public:
     I3D_frame *CloneFrame(const C_str &name, I3D_frame *parent, I3D_frame *source);    // 0x0066dcf0
     I3D_frame *AddFrame(const C_str &name, int type, I3D_frame *parent, const S_vector &pos);   // 0x0066def0
 
+    // The menus' models and frames (the store lists add theirs, part 9e-iii-b).
+    std::vector<I3D_frame *> &GetModels() { return m_models; }
+    std::vector<I3D_frame *> &GetFrames() { return m_frames; }
+
 protected:
     // A model of the scene (off, linked to its sector, kept in m_models; not loaded: none).
     I3D_frame *LoadModel(const char *name, const char *file);   // 0x0066c2a0 (__fastcall)

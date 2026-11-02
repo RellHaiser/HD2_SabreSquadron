@@ -1,18 +1,19 @@
 // The store's item lists of the in-game menu and the equipment screen (vtable 0x008157c4, 0x38 bytes;
 // C_GameMenu +0x580): a page of the item stock per inventory group (the tabs choose the page shown),
-// each item type's entry showing its count. Original 0x0067b070..0x0067c390 (part 9e-iii-a; the
-// pages' descriptions, slot 0 0x0067b070, part 9e-iii-b).
+// each item type's entry showing its count. Original 0x0067b070..0x0067c390 (parts 9e-iii-a and -b).
 #pragma once
 
 #include <cstdint>
 #include <vector>
 
+#include "common/c_str.h"
 #include "game/soldier.h"
 
 class C_Control;
 class C_EquipmentMenuBase;
 class C_ItemStock;
 class I3D_frame;
+struct S_ControlDesc;
 
 class C_StoreList {
 public:
@@ -20,6 +21,11 @@ public:
     C_StoreList() = default;
     C_StoreList(const C_StoreList &) = delete;
     C_StoreList &operator=(const C_StoreList &) = delete;
+    // A page of the items of inventory group `group` under `parent` (the model's "P_visualstore"
+    // dummy gets a dummy `name` with the highlight's copy and the "vi_template" visual; an entry
+    // "frame_<type>" per item type of the group, cloned from the template; group 1 the page shown
+    // first). False without the frames.
+    virtual bool BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name, int group);   // 0x00 0x0067b070
     virtual ~C_StoreList() = default;                   // 0x04 0x0067f3a0 (0x0067f370)
 
     // The count of an item type in the stock (none: 0).
@@ -64,7 +70,7 @@ private:
     int m_unknown1c = -1;                               // +0x1C
     C_EquipmentMenuBase *m_menu = nullptr;              // +0x20
     C_ItemStock *m_stock = nullptr;                     // +0x24
-    uint32_t m_unknown28 = 0;                           // +0x28
+    I3D_frame *m_template = nullptr;                    // +0x28 "vi_template"
     I3D_frame *m_highlight = nullptr;                   // +0x2C
     uint32_t m_screenIndex = 0;                         // +0x30
     int m_controlIndex = 0;                             // +0x34

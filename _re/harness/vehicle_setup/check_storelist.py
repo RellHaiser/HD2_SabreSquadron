@@ -1,4 +1,4 @@
-"""Checks the factory build's store list line (harness_factory.exe, FACTORY_TEST; part 9e-iii-a).
+"""Checks the factory build's store list line (harness_factory.exe, FACTORY_TEST; parts 9e-iii-a and -b).
 
     python check_storelist.py MISSIONS_TXT_DIR HARNESS_OUTPUT
 
@@ -8,7 +8,7 @@ lines are not checked (check_text.py's). Prints "N models, M with differences" (
 import re
 import sys
 
-CHECKS = "slCount slPage slTab slItem slUpdate slAll slStock slAddTake slClear".split()
+CHECKS = "slCount slPage slTab slItem slUpdate slAll slStock slAddTake slClear slBuild slBuildNone".split()
 
 
 def main():

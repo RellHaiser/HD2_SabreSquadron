@@ -1,10 +1,15 @@
 // The store's item lists of the equipment menus (original 0x0067b070..0x0067c390).
 #include "game/store_list.h"
 
+#include <cstring>
+#include <malloc.h>
+
 #include "game/control.h"
 #include "game/controls.h"
 #include "game/equipment_menu.h"
 #include "game/item_defs.h"
+#include "game/items_module.h"
+#include "game/menu_state.h"
 #include "game/profile.h"
 #include "ls3d/i3d.h"
 
@@ -24,6 +29,39 @@ constexpr int BEHAVIOUR_HEADGEAR = 16;
 // Where the highlight sits on an item's frame.
 const S_vector HIGHLIGHT_POS(0.0f, 0.0f, -0.1f);
 
+// The page's frames in the screen's model, and the entries' kinds.
+const char *const STORE_ANCHOR = "P_visualstore";
+const char *const STORE_HIGHLIGHT = "selitem08";
+const char *const STORE_TEMPLATE = "vi_template";
+const char *const STORE_AMMO_FRAME = "ammo";
+constexpr uint32_t FIND_VISUALS = 1;
+constexpr uint32_t FIND_DUMMIES = 0x20;
+constexpr int DESC_TYPE_PAGE = 0x23;
+constexpr int DESC_TYPE_ENTRY = 0x1D;
+// A page's horizontal step between its entries.
+constexpr float PAGE_ACROSS_STEP = 0.081f;
+// The teams of the items no store has.
+constexpr int TEAM_NONE = 3;
+// The inventory group whose head gear (behaviour 16) comes with the uniforms, not on its own.
+constexpr int GROUP_UNIFORMS = 6;
+constexpr int BEHAVIOUR_HEADGEAR_ITEM = 16;
+constexpr int FIRST_GROUP = 1;
+
+uintptr_t FloatValue(float value)
+{
+    uint32_t bits;
+    std::memcpy(&bits, &value, sizeof bits);
+    return bits;
+}
+
+// A visual copy with its own mesh.
+void OwnMesh(I3D_frame *frame)
+{
+    auto *visual = static_cast<I3D_object_visual *>(frame);
+    visual->DuplicateMesh();
+    visual->GetVisualMesh()->Unknown18();
+}
+
 void Post(uint32_t target, uint32_t id, uint32_t value = 0)
 {
     S_ControlMessage message;
@@ -34,6 +72,77 @@ void Post(uint32_t target, uint32_t id, uint32_t value = 0)
 }
 
 } // namespace
+
+bool C_StoreList::BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name, int group)
+{
+    I3D_frame *dummy = I3DGetDriver()->CreateFrame(FRAME_DUMMY);
+    I3D_frame *anchor = model->FindChildFrame(STORE_ANCHOR, FIND_DUMMIES);
+    I3D_frame *highlight = model->FindChildFrame(STORE_HIGHLIGHT, FIND_VISUALS);
+    m_highlight = model->FindChildFrame(STORE_HIGHLIGHT, FIND_VISUALS);
+    m_template = model->FindChildFrame(STORE_TEMPLATE, FIND_VISUALS);
+    // (The dummy is kept without the frames: leaked, as the original.)
+    if (!m_template || !dummy || !highlight || !anchor)
+        return false;
+    // The page's dummy under the anchor, with the highlight's copy and the template.
+    dummy->LinkTo(anchor, 0);
+    static_cast<I3D_model *>(model)->AddModelFrame(dummy);
+    dummy->SetPos(S_vector(0.0f, 0.0f, 0.0f));
+    dummy->SetName(name.c_str());
+    m_menu->GetModels().push_back(dummy);
+    I3D_frame *copy = nullptr;
+    CloneFrameTree(copy, highlight, nullptr);
+    m_menu->GetFrames().push_back(copy);
+    m_template->LinkTo(dummy, 1);
+    m_template->SetOn(true);
+    dummy->SetOn(true);
+
+    S_ControlDesc *page = parent->AddChild(DESC_TYPE_PAGE, name.c_str());
+    AddDescMessage(page, 0, CONTROL_MSG_SET_VALUE, BaseId() | STORE_PAGES);
+    AddDescMessage(page, 0, CONTROL_MSG_SET_VISIBLE, 4);
+    AddDescMessage(page, 0, CONTROL_MSG_SET_ACROSS_STEP, 0, FloatValue(PAGE_ACROSS_STEP));
+    // The first entry's place: the template's (the page's control frees it).
+    auto *origin = static_cast<S_vector4 *>(_aligned_malloc(sizeof(S_vector4), 16));
+    if (origin)
+        std::memcpy(origin, &m_template->GetPos(), sizeof(S_vector4));
+    AddDescMessage(page, 0, CONTROL_MSG_SET_ORIGIN, 0, reinterpret_cast<uintptr_t>(origin));
+    AddDescMessage(page, 0, CONTROL_MSG_HIDE, 0);
+    if (group == FIRST_GROUP)
+        m_shownPage = page->id;
+    // (The menus size the entries for every type.)
+    if (m_entries.size() < static_cast<size_t>(MAX_ITEM_TYPES))
+        m_entries.resize(MAX_ITEM_TYPES);
+
+    // An entry per item type of the group.
+    for (int type = 0; type < MAX_ITEM_TYPES; ++type) {
+        C_ItemDef *def = GetItemDef(type);
+        if (!def || def->GetTeam() == TEAM_NONE || def->GetInventoryGroup() != group)
+            continue;
+        if (group == GROUP_UNIFORMS && def->GetBehaviour() == BEHAVIOUR_HEADGEAR_ITEM)
+            continue;
+        I3D_frame *visual = nullptr;
+        CloneFrameTree(visual, m_template, nullptr);
+        // Fix: the original kept the last type's copy in the menu's frames (a null the first time,
+        // the last copy never: leaked).
+        m_menu->GetFrames().push_back(visual);
+        OwnMesh(visual);
+        if (I3D_frame *ammo = visual->FindChildFrame(STORE_AMMO_FRAME, FIND_VISUALS))
+            OwnMesh(ammo);
+        const C_str frameName = C_fstr("frame_%d", type);
+        visual->SetName(frameName.c_str());
+        visual->LinkTo(dummy, 0);
+        S_ControlDesc *entry = page->AddChild(DESC_TYPE_ENTRY, frameName.c_str());
+        AddDescMessage(entry, 0, CONTROL_MSG_SET_ITEM, static_cast<uint32_t>(type));
+        AddDescMessage(entry, 0, CONTROL_MSG_SET_INDEX, static_cast<uint32_t>(type));
+        AddDescMessage(entry, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_ANY, reinterpret_cast<uintptr_t>(this),
+                       reinterpret_cast<uintptr_t>(&C_StoreList::OnItem));
+        m_entries[static_cast<size_t>(type)] = entry->id;
+    }
+    AddDescMessage(page, 0, CONTROL_MSG_HIDE_ALL, 0);
+    AddDescMessage(page, 0, CONTROL_MSG_REFRESH, 0);
+    m_template->SetOn(false);
+    m_template->Update();
+    return true;
+}
 
 int C_StoreList::GetCount(int typeId) const
 {

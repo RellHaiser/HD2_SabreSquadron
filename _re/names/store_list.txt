@@ -14,3 +14,5 @@
 0067c0d0 C_StoreList::TakeItem | bool __thiscall TakeItem(void *this, void * item, bool fill)
 0067c150 C_StoreList::ClearPages | void __fastcall ClearPages(void * list)
 0067c390 C_StoreList::SetActive | void __thiscall SetActive(void *this, bool on)
+# Part 9e-iii-b: the pages.
+0067b070 C_StoreList::BuildPage | bool __thiscall BuildPage(void *this, void * parent, void * model, void * name, int group)
