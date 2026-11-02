@@ -13,10 +13,10 @@
 // The queries: random starts, directions toward the visuals or anywhere (short, long, unlimited),
 // radii, every flag, frame arguments (skipped, excluded, tested at their level), LOD levels; with
 // the test's hit callback and face filter (each logged, their answers from one random sequence for
-// both sides; the filter tints the colour) or the built-in filters (the original's alpha / transmit
-// filter against the port's). After each query: the result, every output (but the w components
-// the original leaves unset), the colour, both call logs, and the queries' shared state (the
-// original's 0x100ad9b0 - 0x100adb08 against the port's col::q) field by field.
+// both sides; the filter tints the colour), the original's transmit filter or none. After each
+// query: the result, every output (but the w components the original leaves unset), the colour,
+// both call logs, and the queries' shared state (the original's 0x100ad9b0 - 0x100adb08 against
+// the port's col::q) field by field.
 //
 // The port's code runs on the original's objects: their virtual methods (bounds, meshes, face
 // groups, joints) are the original's; the world matrix and world bound updates and the
@@ -29,7 +29,7 @@
 // facing matrix in the original (not made). Values the original leaves unset are not compared: a
 // filter's texture coordinates without a texture, the normal of a box the ray misses (a hit
 // callback's, and q.normal unless the ray query hit and wanted a normal). The transmit filter
-// always gets a colour (the original's reads it).
+// always gets a colour (it reads it).
 //
 // LS3DRF's ray queries have no face filter (they ignore the filter argument and I3DCOL_FILTER):
 // the original's PickFrame, TestRay and IntersectFrame are patched to leave q.filter null
@@ -775,11 +775,7 @@ void CompareQueryState(bool normal)
     CheckBits("q.dir", o(0x100adae0), &q.dir, 12);
     CheckBits("q.radius", o(0x100adaf4), &q.radius, 4);
     CheckBits("q.hitCb", o(0x100adaf8), &q.hitCb, 4);
-    // (The port's built-in filter stands for the original's.)
-    void *portFilter = reinterpret_cast<void *>(q.filter);
-    if (portFilter == reinterpret_cast<void *>(&TransmitFilter))
-        portFilter = &Orig<uint8_t>(0x10064860);
-    Check("q.filter", *reinterpret_cast<void *const *>(o(0x100adafc)) == portFilter, true);
+    CheckBits("q.filter", o(0x100adafc), &q.filter, 4);
     CheckBits("q.excluded", o(0x100adb00), &q.excluded, 4);
     CheckBits("q.skipped", o(0x100adb04), &q.skipped, 4);
     CheckBits("q.lodFrame", o(0x100adb08), &q.lodFrame, 4);
@@ -937,8 +933,8 @@ void RunQuery()
     const bool withCb = Rand(2) != 0;
     bool withUser = Rand(4) != 0;
     const bool withOuts = Rand(6) != 0;
-    // The filter: none, the test's, the built-in transmit filter (which needs a colour), the
-    // built-in alpha (none given).
+    // The filter: none, the test's, the original's transmit filter (0x10064860, which needs a
+    // colour; the port has none), LS3DF's alpha (none given).
     const int filterKind = Rand(4);
     if (filterKind == 2)
         withUser = true;
@@ -992,8 +988,8 @@ void RunQuery()
             filter = &TestFilter;
             origFilter = reinterpret_cast<void *>(&TestFilter);
         } else if (filterKind == 2) {
-            filter = &TransmitFilter;
             origFilter = &Orig<uint8_t>(0x10064860);
+            filter = reinterpret_cast<I3D_COLLISION_FILTER *>(origFilter);
         }
         float *dist = withOuts ? &out[side].distance : nullptr;
         S_vector4 *point = withOuts ? &out[side].point : nullptr;
