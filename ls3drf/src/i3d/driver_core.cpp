@@ -60,8 +60,7 @@ int g_driverUnknownADED0;
 
 }  // namespace ls3d::i3d
 
-// LS3DRF 0x1000eb50 (from LS3DF 0x100151c0): the vectors and mirrorStamp (LS3DRF's driver has no
-// envSectors or lightmapTextures vectors). Init sets unknown04.
+// LS3DRF 0x1000eb50 (from LS3DF 0x100151c0): the vectors and mirrorStamp. Init sets unknown04.
 I3D_driver::I3D_driver() : mirrorStamp(0) {}
 
 // LS3DRF 0x1000eb80 (from LS3DF 0x10015210): no projection buffers to free (LS3DRF's projector

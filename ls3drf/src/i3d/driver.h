@@ -1,6 +1,10 @@
 // I3D_driver: the engine's root object (vtable 0x1009b640; one global instance, I3DGetDriver).
 // Methods 0x10015100 - 0x1001b8f0 (the frame factories, the name tree, hierarchy services) plus
 // the device reset (0x10063560). (No Render 0x1005edc0: LS3DRF's driver draws nothing.)
+//
+// LS3DRF's driver is a 0x2c-byte object (vtable 0x1003c470): LS3DF's fields without the
+// envSectors and lightmapTextures vectors (LS3DF's +0x18 / +0x28), so scenes and mirrorStamp sit
+// 0x20 lower.
 #pragma once
 
 #include <cstring>
@@ -9,8 +13,6 @@
 #include "i3d/i3d.h"
 
 class I3D_scene;
-class I3D_sector;
-class ITexture;
 
 // I3D_driver::EnumVisualTypes callback: a visual fourCC and its display name.
 typedef void __stdcall I3D_VISUALTYPEPROC(uint32_t fourCC, const char *name);
@@ -76,16 +78,15 @@ public:
 
     uint32_t unknown04;                                                 // +0x04
     ls3d::C_vector<I3D_frame *> soundFrames;                            // +0x08
-    // +0x18 the sectors whose sound environments blend (LS3DF's Render stepped them). LS3DRF's
-    // driver has none; the field stays for the LS3DF layout.
-    ls3d::C_vector<I3D_sector *> envSectors;
-    // +0x28 the lightmap atlas textures. LS3DRF's driver has none; the field stays for the LS3DF
-    // layout.
-    ls3d::C_vector<ITexture *> lightmapTextures;
-    ls3d::C_vector<I3D_scene *> scenes;                                 // +0x38
-    int16_t mirrorStamp;                                                // +0x48 (nothing counts: mirrors keep no stamp)
+    // (No envSectors or lightmapTextures vectors, LS3DF's +0x18 / +0x28: LS3DRF has none.)
+    ls3d::C_vector<I3D_scene *> scenes;                                 // +0x18 (LS3DF: +0x38)
+    int16_t mirrorStamp;                                                // +0x28 (LS3DF: +0x48) nothing counts: mirrors keep no stamp
 };
-static_assert(sizeof(I3D_driver) == 0x4C, "I3D_driver layout");
+static_assert(sizeof(I3D_driver) == 0x2C, "I3D_driver layout");
+static_assert(offsetof(I3D_driver, unknown04) == 0x04, "I3D_driver layout");
+static_assert(offsetof(I3D_driver, soundFrames) == 0x08, "I3D_driver layout");
+static_assert(offsetof(I3D_driver, scenes) == 0x18, "I3D_driver layout");
+static_assert(offsetof(I3D_driver, mirrorStamp) == 0x28, "I3D_driver layout");
 
 namespace ls3d::i3d {
 
