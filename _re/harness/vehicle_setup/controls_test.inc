@@ -66,6 +66,7 @@ void MovieTest(I3D_scene *scene);
 void FactoryTest(I3D_scene *scene);
 void ScreenTest(I3D_scene *scene);
 void MenuTest(I3D_scene *scene);
+void MenuRunTest(I3D_scene *scene);
 
 namespace {
 
@@ -1028,6 +1029,7 @@ void ControlsTest()
     FactoryTest(scene);
     ScreenTest(scene);
     MenuTest(scene);
+    MenuRunTest(scene);
 #endif
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
@@ -1058,4 +1060,5 @@ void ControlsTest()
 #include "factory_test.inc"
 #include "screen_test.inc"
 #include "menu_test.inc"
+#include "menu_run_test.inc"
 #endif

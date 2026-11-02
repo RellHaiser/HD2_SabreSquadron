@@ -62,6 +62,29 @@ int __stdcall F_SetMouse(S_Graph *, int x, int y)
 int __stdcall F_MouseX(S_Graph *g) { return g->mouseX; }
 int __stdcall F_MouseY(S_Graph *g) { return g->mouseY; }
 uint32_t __stdcall F_Buttons(S_Graph *g) { return g->buttons; }
+// The drawing (part 9d-ii-b's Draw): logged, the vertices kept.
+struct S_DrawVertex {
+    float x, y, z, rhw;
+    uint32_t color, specular;
+    float u, v;
+};
+S_DrawVertex g_drawn[4];
+bool __stdcall F_BeginScene(S_Graph *)
+{
+    Log("begin");
+    return true;
+}
+void __stdcall F_EndScene(S_Graph *) { Log("end"); }
+void __stdcall F_SetViewport(S_Graph *, const S_IGraphViewport &v)
+{
+    Log("viewport %d %d %d %d %g %g", v.x, v.y, v.width, v.height, v.minZ, v.maxZ);
+}
+void __stdcall F_SetTexture(S_Graph *, void *texture, int stage) { Log("settexture %d %d", texture != nullptr, stage); }
+void __stdcall F_Draw(S_Graph *, int kind, int count, const void *vertices, int transformed)
+{
+    Log("draw %d %d %d", kind, count, transformed);
+    std::memcpy(g_drawn, vertices, sizeof g_drawn);
+}
 struct S_Image {
     void **vtable;
 } g_image;
@@ -149,6 +172,11 @@ int main()
     g_graphVt[0xFC / 4] = reinterpret_cast<void *>(&F_MouseX);
     g_graphVt[0x100 / 4] = reinterpret_cast<void *>(&F_MouseY);
     g_graphVt[0x104 / 4] = reinterpret_cast<void *>(&F_Buttons);
+    g_graphVt[0x68 / 4] = reinterpret_cast<void *>(&F_BeginScene);
+    g_graphVt[0x6C / 4] = reinterpret_cast<void *>(&F_EndScene);
+    g_graphVt[0x7C / 4] = reinterpret_cast<void *>(&F_SetViewport);
+    g_graphVt[0x44 / 4] = reinterpret_cast<void *>(&F_SetTexture);
+    g_graphVt[0x88 / 4] = reinterpret_cast<void *>(&F_Draw);
     g_image.vtable = g_imageVt;
     g_imageVt[0] = reinterpret_cast<void *>(&F_ImageRelease);
     g_frameVt[0] = reinterpret_cast<void *>(&F_FrameRelease);
@@ -160,7 +188,7 @@ int main()
     g_sceneVt[0x104 / 4] = reinterpret_cast<void *>(&F_Intersect);
     auto *scene = reinterpret_cast<I3D_scene *>(&g_scene);
 
-    bool make = true, update = true, clamp = true, clicks = true, query = true, pick = true;
+    bool make = true, update = true, clamp = true, clicks = true, query = true, pick = true, draw = true;
 #define CHECK(flag, cond)                                                                                              \
     do {                                                                                                               \
         if (!(cond)) {                                                                                                 \
@@ -415,12 +443,31 @@ int main()
     g_scene.hit = nullptr;
     CHECK(pick, c->Pick(scene, under) == 0 && c->m_pickedId == 0);
 
+    // --- drawn: its texture on a fan of two triangles from the place, 30 pixels of a 1024 x 768 screen
+    // scaled to the screen (640 x 480): 18.75 x 18.75; the whole screen's viewport ---
+    {
+        g_cursorX = 100.0f;
+        g_cursorY = 50.5f;
+        g_log.clear();
+        c->Draw();
+        CHECK(draw, LogIs({"begin", "viewport 0 0 640 480 0 1", "settexture 1 0", "draw 4 2 1", "end"}));
+        const float w = 640.0f * (1.0f / 1024.0f) * 30.0f, h = 480.0f * (1.0f / 768.0f) * 30.0f;
+        const float expect[4][4] = {{100.0f, 50.5f, 0.0f, 0.0f}, {w + 100.0f, 50.5f, 0.0f, 1.0f},
+                                    {w + 100.0f, h + 50.5f, 1.0f, 1.0f}, {100.0f, h + 50.5f, 1.0f, 0.0f}};
+        for (int i = 0; i < 4; ++i) {
+            const S_DrawVertex &v = g_drawn[i];
+            CHECK(draw, v.x == expect[i][0] && v.y == expect[i][1] && v.u == expect[i][2] && v.v == expect[i][3] &&
+                            v.z == 0.0284113996f && v.rhw == 35.1971397f && v.color == 0xFFFFFFFFu && v.specular == 0);
+        }
+        CHECK(draw, w == 18.75f && h == 18.75f);
+    }
+
     // Released: the texture; the next one new.
     g_log.clear();
     c->Release();
     CHECK(make, LogIs({"texture release"}));
 
-    std::printf("cursor: cuMake %d cuUpdate %d cuClamp %d cuClicks %d cuQuery %d cuPick %d\n", make, update, clamp, clicks,
-                query, pick);
+    std::printf("cursor: cuMake %d cuUpdate %d cuClamp %d cuClicks %d cuQuery %d cuPick %d cuDraw %d\n", make, update, clamp,
+                clicks, query, pick, draw);
     return 0;
 }

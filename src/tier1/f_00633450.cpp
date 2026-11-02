@@ -609,16 +609,16 @@ uint32_t C_MainMenu__FUN_00634580(C_MainMenu *_this,int param_1,int *param_2, ..
   void *this_00;
   void *desc;
   C_str *pCVar1;
-  C_str_rep *pCVar2;
-  C_str_rep *pCVar3;
-  int *piVar4;
-  S_ControlDesc *pSVar5;
-  uint32_t *puVar6;
-  C_str_rep *this_01;
-  int iVar7;
+  C_MenuState *parent;
+  C_MenuState *source;
+  int *piVar2;
+  S_ControlDesc *pSVar3;
+  uint32_t *puVar4;
+  C_MenuState *this_01;
+  int iVar5;
   C_str CStack_94;
   C_str local_6c;
-  C_str_rep *local_68 [2];
+  C_MenuState *local_68 [2];
   uint32_t local_60;
   uint32_t local_5c;
   uint32_t local_58;
@@ -634,78 +634,79 @@ uint32_t C_MainMenu__FUN_00634580(C_MainMenu *_this,int param_1,int *param_2, ..
   pCVar1 = C_fstr_Construct(&local_6c,"GB_ServerList");
   local_14 = 0;
   CStack_94.rep = (C_str_rep *)0x6345eb;
-  pCVar2 = (C_str_rep *)C_MainMenu__FUN_0066def0(_this,pCVar1,(int *)0x6);
+  parent = C_MenuState__AddFrame((C_MenuState *)_this,pCVar1,6,param_2,&local_60);
   local_14 = 0xffffffff;
-  local_68[0] = pCVar2;
+  local_68[0] = parent;
   if ((local_6c.rep != 0) &&
      ((local_6c.rep)->refCount = (local_6c.rep)->refCount - 1, (local_6c.rep)->refCount == 0)) {
     tier1_operator_delete(local_6c.rep);
   }
-  pCVar3 = (C_str_rep *)(**(code **)(*param_2 + 0x48))();
-  if ((pCVar3 != 0) && (pCVar2 != 0)) {
-    CStack_94.rep = pCVar2;
-    (**(code **)(pCVar3->refCount + 0x38))();
-    this_01 = pCVar3;
-    (**(code **)(pCVar3->refCount + 0x30))(pCVar3,0);
-    (**(code **)(pCVar3->refCount + 0x24))(pCVar3);
-    (**(code **)(pCVar2->refCount + 0x30))(pCVar2,1);
-    (**(code **)(pCVar2->refCount + 0x24))(pCVar2);
-    iVar7 = 1;
+  source = (C_MenuState *)(**(code **)(*param_2 + 0x48))();
+  if ((source != 0) && (parent != 0)) {
+    CStack_94.rep = (C_str_rep *)parent;
+    (*source->vtable->_purecall_0e)();
+    this_01 = source;
+    (*source->vtable->CommitPendingState)(source,0);
+    (*source->vtable->SetState)(source);
+    (*parent->vtable->CommitPendingState)(parent,1);
+    (*parent->vtable->SetState)(parent);
+    iVar5 = 1;
     do {
-      pCVar1 = C_fstr_Construct(&CStack_94,"Server%d",iVar7);
+      pCVar1 = C_fstr_Construct(&CStack_94,"Server%d",iVar5);
       uStack_44 = 1;
-      piVar4 = (int *)FUN_0066dcf0(this_01,(int *)pCVar1,pCVar2,(int *)pCVar3);
+      piVar2 = C_MenuState__CloneFrame(this_01,pCVar1,parent,source);
       uStack_44 = 0xffffffff;
-      if ((CStack_94.rep != 0) &&
-         ((CStack_94.rep)->refCount = (CStack_94.rep)->refCount - 1, (CStack_94.rep)->refCount == 0
-         )) {
+      if (((C_MenuState *)CStack_94.rep != 0) &&
+         ((CStack_94.rep)->refCount =
+               (int)((int)&((C_MenuState_vtbl *)(CStack_94.rep)->refCount)[-1].vf16 + 3),
+         (C_MenuState_vtbl *)(CStack_94.rep)->refCount == 0)) {
         tier1_operator_delete(CStack_94.rep);
       }
-      (**(code **)(*piVar4 + 0x30))(piVar4,0);
-      (**(code **)(*piVar4 + 0x24))(piVar4);
-      iVar7++;
-      pCVar2 = pCVar3;
-    } while (iVar7 < 0xc);
+      (**(code **)(*piVar2 + 0x30))(piVar2,0);
+      (**(code **)(*piVar2 + 0x24))(piVar2);
+      iVar5++;
+      parent = source;
+    } while (iVar5 < 0xc);
     if (*(int *)(param_1 + 0x28) == 0) {
-      iVar7 = 0;
+      iVar5 = 0;
     }
     else {
-      iVar7 = *(int *)(param_1 + 0x2c) - *(int *)(param_1 + 0x28) >> 2;
+      iVar5 = *(int *)(param_1 + 0x2c) - *(int *)(param_1 + 0x28) >> 2;
     }
-    pSVar5 = tier1_operator_new(0x40);
+    pSVar3 = tier1_operator_new(0x40);
     uStack_44 = 2;
-    if (pSVar5 == 0) {
+    if (pSVar3 == 0) {
       CStack_94.rep = 0;
     }
     else {
       CStack_94.rep =
            S_ControlDesc__S_ControlDesc
-                     (pSVar5,8,"scroll00",
-                      (iVar7 + 1U & 0x3f) << 0x14 | *(uint32_t *)(param_1 + 0x40));
+                     (pSVar3,8,"scroll00",
+                      (iVar5 + 1U & 0x3f) << 0x14 | *(uint32_t *)(param_1 + 0x40));
     }
     uStack_44 = 0xffffffff;
     FUN_00615f50((void *)(param_1 + 0x24),*(uint32_t **)(param_1 + 0x2c),(uint32_t*)(&CStack_94));
-    iVar7 = *(int *)(*(int *)(param_1 + 0x2c) - 4);
+    iVar5 = *(int *)(*(int *)(param_1 + 0x2c) - 4);
     uStack_44 = 3;
-    FUN_00615d50((void *)(iVar7 + 0x10),*(uint32_t **)(iVar7 + 0x18),
+    FUN_00615d50((void *)(iVar5 + 0x10),*(uint32_t **)(iVar5 + 0x18),
                  (uint32_t *)&stack0xffffff70);
     uStack_44 = 0xffffffff;
     if (*(int *)(param_1 + 0x28) == 0) {
-      iVar7 = 0;
+      iVar5 = 0;
     }
     else {
-      iVar7 = *(int *)(param_1 + 0x2c) - *(int *)(param_1 + 0x28) >> 2;
+      iVar5 = *(int *)(param_1 + 0x2c) - *(int *)(param_1 + 0x28) >> 2;
     }
-    pSVar5 = tier1_operator_new(0x40);
+    pSVar3 = tier1_operator_new(0x40);
     uStack_44 = 4;
-    if (pSVar5 == 0) {
+    if (pSVar3 == 0) {
       CStack_94.rep = 0;
     }
     else {
       CStack_94.rep =
            S_ControlDesc__S_ControlDesc
-                     (pSVar5,0x18,"GB_ServerList",
-                      (iVar7 + 1U & 0x3f) << 0x14 | *(uint32_t *)(param_1 + 0x40));
+                     (pSVar3,0x18,"GB_ServerList",
+                      (iVar5 + 1U & 0x3f) << 0x14 | *(uint32_t *)(param_1 + 0x40));
     }
     uStack_44 = 0xffffffff;
     FUN_00615f50((void *)(param_1 + 0x24),*(uint32_t **)(param_1 + 0x2c),(uint32_t*)(&CStack_94));
@@ -714,14 +715,14 @@ uint32_t C_MainMenu__FUN_00634580(C_MainMenu *_this,int param_1,int *param_2, ..
     uStack_44 = 5;
     FUN_00615d50(this_00,*(uint32_t **)((int)desc + 0x18),(uint32_t *)&stack0xffffff70);
     uStack_44 = 0xffffffff;
-    puVar6 = (uint32_t *)FUN_00614da0(&stack0xffffff70,0,0x1000007,0x400e000,this_01,FUN_006360c0)
+    puVar4 = (uint32_t *)FUN_00614da0(&stack0xffffff70,0,0x1000007,0x400e000,this_01,FUN_006360c0)
     ;
     uStack_44 = 6;
-    FUN_00615d50(this_00,*(uint32_t **)((int)desc + 0x18),puVar6);
+    FUN_00615d50(this_00,*(uint32_t **)((int)desc + 0x18),puVar4);
     uStack_44 = 0xffffffff;
-    puVar6 = (uint32_t *)FUN_00614da0(local_68,0,0x1000007,0x4013000,this_01,FUN_00636280);
+    puVar4 = (uint32_t *)FUN_00614da0(local_68,0,0x1000007,0x4013000,this_01,FUN_00636280);
     uStack_44 = 7;
-    FUN_00615d50(this_00,*(uint32_t **)((int)desc + 0x18),puVar6);
+    FUN_00615d50(this_00,*(uint32_t **)((int)desc + 0x18),puVar4);
     uStack_44 = 0xffffffff;
     if ((piStack_54 != 0) && (*piStack_54 = *piStack_54 - 1, *piStack_54 == 0)) {
       tier1_operator_delete(piStack_54);

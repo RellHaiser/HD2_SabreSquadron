@@ -6932,6 +6932,67 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     zz_idioms), C_Cursor::Pick returns uint; 48 functions in ported.txt. Stats: 8,683 of 12,293
     functions by hand (77.2 % by size).
 
+  PART 9d-ii-b DONE (2026-11-02): the menu state's start, stop, input, update and drawing
+  (src/game/menu_state.cpp), C_Cursor::Draw. Part 9d (the menu states' base) is done.
+  - Start 0x0066b010 (true): the mode (a campaign screen's kind; 0: 10 the main menu; -1 / -2: 11
+    in the game); the scene (FRAME_SCENE, its render callback 0x0066e3f0 with phases 4, created as a
+    function in Ghidra: phase 2 draws g_menuState's screens; it also drew an object at 0x008ae5fc,
+    never set, under a flag 0x0084068c, always 1), the whole screen's viewport; the camera
+    "ActivCamera" (along +z from (0.5, -0.375, -15.5), 0.2 .. 20 m, a quarter turn, orthogonal,
+    scale 2); OnStart; LoadScreens 0x0066c8b0 (driver states 0x15 / 0x19 off, 0x11 off in the game,
+    restored: LoadModel 0x0066c2a0 "CURZOR" from "kurzor_menu", CreateMessageBox 0x0066c4d0 "CONFIRM"
+    / "confirm" (its model at (0.5, -0.375, -0.5), the box screens[0], its id 0), BuildScreens); the
+    cursor; the ambient light (type 4, white, 0.9); the click sound "button.wav" (type 3, off, volume
+    1; opened only with a sound device); the music unless after a mission, at an operation's end or
+    in the game (none playing: SetBackgroundMusic(0, 0); track 37: CrossfadeMusic(0, 2000, 0)); the
+    campaign screen's diary texts (C_CampaignScreen +0x28, now m_diaryTexts / GetDiaryTexts) added;
+    the input lock -1, no popup screen, state 1. A flag 0x008ae609 cleared, never read: dropped.
+  - Stop 0x0066b440 (true): OnStop, the stack emptied, the screens deleted (the last first),
+    ReleaseModels 0x0066c9c0 (the frames' trees, then the models, the last first), the ticked
+    controls, the cursor, the camera, the scene (its camera cleared, closed, released), the queue.
+  - HandleInput 0x0066b6e0 (true): keyboard off nothing; OnInput; with a screen: the character typed
+    (unsigned) to the control editing, with the Unicode font ReadTypedChars 0x0066b680 (up to 0x3FF,
+    MultiByteToWideChar; each to the control, one taken: done; the original printed "KEY VALUE ::"
+    to the debugger: dropped); the key pressed's low byte to the top's Unknown20 (none: the held
+    control / alt / shift key, the left if down (IGraph 0xBC / 0xC0 / 0xC4 IsShiftDown / IsCtrlDown /
+    IsAltDown, the LS3DF port's names), else the controls' action 46 as Escape); Escape not taken:
+    the drag ended (OnInput09(0)), MENU_MSG_ESCAPE 0x200000A with the top's id; Ctrl + Alt + Shift +
+    N: MENU_MSG_SECRET_KEY 0x200007D (the menus').
+  - Update 0x0066c1a0: OnUpdate and the sound module's Update twice (quirk kept; the first not in
+    the network game's in-game menu), the timer, the queue; with a screen: CursorInput 0x0066bc90
+    (the lock -1 only; Pick, the cursor's update; changed or another id: keyboard off: a move only;
+    a press (the editing ended away from its control, OnInput0B 1 or nothing), else a release (the
+    drag ended: OnInput09, OnInput05), the double click (OnInput13), the click (the editing's
+    control only; OnKeyClick 1: PlayClick 0x0066b410, not while playing), a move (OnInput05 unless
+    dragging; a button held: OnInput0A once, OnInput08, done), the wheel (OnWheel truncated, then
+    OnInput05 with the id picked again)), the ticks (the control editing, the top, the popup, the
+    ticked controls the last first).
+  - Render 0x0066e100: OnRender's done: the cursor only; else the scene twice under a popup (the
+    screen under it first, driver state 5 cleared for the second) or the popup screen's own popup,
+    else once; the cursor drawn (C_Cursor::Draw 0x0066ab70: a fan of two triangles from the place,
+    30 pixels of 1024 x 768 scaled, z 0.0284114 rhw 35.19714, white). DrawScreens 0x0066e300 (the
+    screen under the popup and the top when on, OnDrawScreens, the popup's popup with none under,
+    the hint; a font batching under 0x008ae608, never set: dropped). PickFrame 0x0066bb80, CloneVisual
+    0x0066dad0 (its own mesh), CloneFrame 0x0066dcf0 (both into the frames), AddFrame 0x0066def0
+    (into the models). Fix: LoadModel released the model it could not load.
+  - Harness: menu_run_test.inc in the factory build (check_menurun.py, "menurun:", 18 checks): the
+    driver's CreateFrame / states and IGraph's screen, keys and characters put in for the test; the
+    scene, sector, camera, light, sound and models objects of logging stdcall slots (a template per
+    slot); the sound module given a module's vtable (its Update logged; the music's field found by
+    its getter); the diary, CloneFrameTree, ISndGetDriver, the cursor's Update / IsPressed /
+    IsReleased / HasMoved / Draw faked; a campaign screen as zeroed memory (campaign.cpp not
+    linked). menu_test.inc's fakes of these slots removed. cursor_test.cpp: cuDraw. 22 of 22 in
+    both orders (the other three lines too); the text build 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9d2b.py (401 cases, 378 build; all caught but 7 equivalent and the
+    box description's leak; the first run left 24, new checks caught 16); mutate_9d2b_draw.py (the
+    cursor harness, 16 cases, all caught).
+  - Build: MSVC clean. Tier 1: 446 errors in 77 files, 182 stubs (was 460 / 78 / 189). ret_audit
+    --src: 52.
+  - Ghidra: names/menu_state.txt (+18), C_Cursor::Draw; 0x0066e3f0 created; 20 functions in
+    ported.txt. Stats: 8,715 of 12,293 functions by hand (77.4 % by size).
+  - Next, 9e: the in-game menu C_GameMenu (vtable 0x00815750; 0x0067b070..0x00688130, 50 KB), the
+    menu classes of pending.h moved onto C_MenuState.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

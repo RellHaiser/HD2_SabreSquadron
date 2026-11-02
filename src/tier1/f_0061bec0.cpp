@@ -633,8 +633,7 @@ uint32_t FUN_0061cfc0(void *_this,void *param_1,int *param_2, ...)
   pCVar1 = C_fstr_Construct(&local_6c,"GROptions");
   local_14 = 0;
   pSStack_a4 = (S_ControlDesc *)0x61d02f;
-  pSVar2 = (S_ControlDesc *)
-           C_MainMenu__FUN_0066def0(*(C_MainMenu **)((int)_this + 4),pCVar1,(int *)0x6);
+  pSVar2 = C_MenuState__AddFrame(*(C_MenuState **)((int)_this + 4),pCVar1,6,param_2,&local_60);
   local_14 = 0xffffffff;
   CVar8.rep = local_6c.rep;
   if ((local_6c.rep != 0) &&
@@ -936,7 +935,7 @@ LAB_0061d789:
   FUN_0061e3f0(pvVar9,param_1,param_2);
   FUN_0061f230(pvVar9,param_1);
   FUN_0061f3b0(pvVar9,param_1);
-  pvVar9 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_h&dversion");
+  pvVar9 = S_ScreenDesc__AddControl(param_1,0x13,"text_h&dversion");
   AddDescMessage2(pvVar9,0,0x1000015,0x28,0x7d6);
   return CONCAT31((int3)((uint32_t)extraout_EAX_00 >> 8),1);
 }
@@ -2213,12 +2212,8 @@ switchD_0061fd47_default:
 
 
 #endif
-// 0x00620300  (tier1 fallback: translated text kept below, needs hand porting)
+// 0x00620300
 uint32_t FUN_00620300(void *_this,uint32_t param_1,int *param_2, ...)
-{
-  return {};
-}
-#if 0
 {
   int *local_10;
   uint32_t uVar1;
@@ -2243,24 +2238,24 @@ LAB_00620484:
   uVar1 = param_2[0x18];
   uVar2 = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a;
   if (uVar1 == (uVar2 | 0x604000)) {
-    *(float *)(((g_gameProfile.m_player)->m_detailSettings)._pad_0000 + 4) = fStack_18;
-    C_PlayerProfile__ApplyGamma();
+    ((g_gameProfile.m_player)->m_options).gamma = fStack_18;
+    C_PlayerProfile__ApplyGamma(g_gameProfile.m_player);
   }
   else if (uVar1 == (uVar2 | 0x706000)) {
-    *(float *)(((g_gameProfile.m_player)->m_detailSettings)._pad_0000 + 8) = fStack_18;
+    ((g_gameProfile.m_player)->m_options).soundVolume = fStack_18;
     C_PlayerProfile__ApplyVolume(g_gameProfile.m_player);
-    FUN_0066b410(*(int *)((int)_this + 4));
+    C_MenuState__PlayClick(*(C_MenuState **)((int)_this + 4));
   }
   else if (uVar1 == (uVar2 | 0x707000)) {
     if (fStack_18 < 1.0) {
       fStack_18 = 0.0;
     }
-    *(float *)(((g_gameProfile.m_player)->m_detailSettings)._pad_0000 + 0xc) = fStack_18;
-    C_PlayerProfile__ApplyMusicVolume((int)g_gameProfile.m_player);
+    ((g_gameProfile.m_player)->m_options).musicVolume = fStack_18;
+    C_PlayerProfile__ApplyMusicVolume(g_gameProfile.m_player);
   }
   else if (uVar1 == (uVar2 | 0x806000)) {
-    *(float *)((g_gameProfile.m_player)->m_detailSettings)._pad_0000 = fStack_18;
-    C_PlayerProfile__ApplyMouse((int)g_gameProfile.m_player);
+    ((g_gameProfile.m_player)->m_options).mouseSensitivity = fStack_18;
+    C_PlayerProfile__ApplyMouse(g_gameProfile.m_player);
   }
   else {
     if (uVar1 != (uVar2 | 0xb06000)) {
@@ -2270,8 +2265,8 @@ LAB_00620484:
       }
       goto LAB_00620484;
     }
-    *(float *)(((g_gameProfile.m_player)->m_detailSettings)._pad_0000 + 0x10) = fStack_18;
-    C_PlayerProfile__ApplyVoiceValue();
+    ((g_gameProfile.m_player)->m_options).voiceValue = fStack_18;
+    C_PlayerProfile__ApplyVoiceValue(g_gameProfile.m_player);
   }
   if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
     tier1_operator_delete(local_10);
@@ -2281,7 +2276,6 @@ LAB_00620484:
 }
 
 
-#endif
 // 0x006204a0  (tier1 fallback: translated text kept below, needs hand porting)
 uint32_t FUN_006204a0(void *_this,uint32_t param_1,int param_2,uint32_t param_3,bool param_4, ...)
 {

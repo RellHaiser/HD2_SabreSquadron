@@ -975,8 +975,10 @@ uint32_t C_GameMenu__FUN_0067fe00(C_GameMenu *_this, ...)
   char cVar4;
   uint32_t *puVar5;
   int iVar6;
+  char *name;
   int *frame;
   int *extraout_EAX;
+  char *file;
   uint32_t uVar7;
   uint8_t local_31;
   int *local_2c;
@@ -1073,7 +1075,19 @@ uint32_t C_GameMenu__FUN_0067fe00(C_GameMenu *_this, ...)
   }
   for (uVar7 = 0; (puVar5[2] != 0 && (uVar7 < (uint32_t)((int)(puVar5[3] - puVar5[2]) >> 2)));
       uVar7 = uVar7 + 1) {
-    frame = FUN_0066c2a0((int)_this);
+    iVar6 = *(int *)(*(int *)(puVar5[2] + uVar7 * 4) + 0x38);
+    file = (char *)(iVar6 + 8);
+    if (iVar6 == 0) {
+      file = &DAT_00867a90;
+    }
+    iVar6 = *(int *)(*(int *)(puVar5[2] + uVar7 * 4) + 0x3c);
+    if (iVar6 == 0) {
+      name = &DAT_00867a90;
+    }
+    else {
+      name = (char *)(iVar6 + 8);
+    }
+    frame = C_MenuState__LoadModel((C_MenuState *)_this,name,file);
     if (frame != 0) {
       pvVar1 = *(void **)(puVar5[2] + uVar7 * 4);
       if ((*(uint32_t *)((int)pvVar1 + 0x40) & 0xfc000000) == 0x4000000) {
@@ -2486,8 +2500,9 @@ uint32_t C_GameMenu__FUN_00682210(C_GameMenu *_this, ...)
 uint32_t C_GameMenu__FUN_006822b0(C_GameMenu *_this, ...)
 {
   uint32_t *puVar1;
-  int iVar2;
+  void *pvVar2;
   uint32_t uVar3;
+  int iVar4;
   int unaff_retaddr;
   uint16_t local_6;
   uint16_t local_4;
@@ -2496,24 +2511,24 @@ uint32_t C_GameMenu__FUN_006822b0(C_GameMenu *_this, ...)
   if (puVar1 != 0) {
     (**(code **)*puVar1)(puVar1);
   }
-  iVar2 = *(int *)(_this->_pad_0138 + 0x88);
+  iVar4 = *(int *)(_this->_pad_0138 + 0x88);
   _this->_pad_0138[0x7c] = '\0';
   _this->_pad_0138[0x7d] = '\0';
   _this->_pad_0138[0x7e] = '\0';
   _this->_pad_0138[0x7f] = '\0';
-  if (iVar2 != -1) {
+  if (iVar4 != -1) {
     local_4 = 0xffff;
     local_2 = 0;
     local_6 = 0xffff;
     (**(code **)(_this->m_4dc + 4))(&local_6,0);
-    iVar2 = FUN_0066bb80((int)_this);
-    if (iVar2 == 0) {
+    pvVar2 = C_MenuState__PickFrame((C_MenuState *)_this);
+    if (pvVar2 == 0) {
       uVar3 = 0;
     }
     else {
-      uVar3 = *(uint32_t *)(iVar2 + 0xec);
+      uVar3 = *(uint32_t *)((int)pvVar2 + 0xec);
     }
-    iVar2 = C_GameMenu__FUN_00682350(_this,unaff_retaddr,uVar3);
+    iVar4 = C_GameMenu__FUN_00682350(_this,unaff_retaddr,uVar3);
     _this->_pad_0138[0x82] = 0xff;
     _this->_pad_0138[0x83] = 0xff;
     _this->_pad_0138[0x84] = '\0';
@@ -2523,7 +2538,7 @@ uint32_t C_GameMenu__FUN_006822b0(C_GameMenu *_this, ...)
     _this->_pad_0138[0x8a] = 0xff;
     _this->_pad_0138[0x8b] = 0xff;
   }
-  return CONCAT31((int3)((uint32_t)iVar2 >> 8),1);
+  return CONCAT31((int3)((uint32_t)iVar4 >> 8),1);
 }
 
 

@@ -34,8 +34,15 @@ struct S_PlayMode {
 };
 
 // (The hot key control's bindings, part 9c-v-d.)
+// (The menus' diary texts, part 9d-ii-b: menu_run_test.inc.)
+class C_Diary {
+public:
+    void AddText(int textId);
+};
+
 class C_PlayerProfile {
 public:
+    C_Diary *GetDiary();
     C_KeyBindings *GetKeyBindings() { return &m_keyBindings; }
     C_KeyBindings m_keyBindings;
 };

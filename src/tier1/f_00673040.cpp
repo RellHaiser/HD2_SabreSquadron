@@ -314,7 +314,7 @@ uint32_t C_EquipmentMenu__FUN_006735f0(C_EquipmentMenu *_this, ...)
 uint32_t C_EquipmentMenu__FUN_00673690(C_EquipmentMenu *_this, ...)
 {
   uint32_t *puVar1;
-  int iVar2;
+  void *pvVar2;
   uint32_t uVar3;
   int unaff_retaddr;
   uint16_t local_6;
@@ -331,12 +331,12 @@ uint32_t C_EquipmentMenu__FUN_00673690(C_EquipmentMenu *_this, ...)
     local_2 = 0;
     local_6 = 0xffff;
     (**(code **)(_this->m_1d0 + 4))(&local_6,0);
-    iVar2 = FUN_0066bb80((int)_this);
-    if (iVar2 == 0) {
+    pvVar2 = C_MenuState__PickFrame((C_MenuState *)_this);
+    if (pvVar2 == 0) {
       uVar3 = 0;
     }
     else {
-      uVar3 = *(uint32_t *)(iVar2 + 0xec);
+      uVar3 = *(uint32_t *)((int)pvVar2 + 0xec);
     }
     uVar3 = C_EquipmentMenu__FUN_006771e0(_this,unaff_retaddr,uVar3);
     *(uint16_t *)((int)&_this->m_1b8 + 2) = 0xffff;
@@ -1813,13 +1813,16 @@ uint32_t FUN_00675c00(int param_1, ...)
 // 0x00675c80
 uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
 {
-  void *pvVar1;
+  int iVar1;
   char cVar2;
   uint32_t *puVar3;
   int iVar4;
-  int *piVar5;
+  char *name;
+  int *frame;
+  void *pvVar5;
   C_Screen *pCVar6;
   uint32_t uVar7;
+  char *file;
   uint32_t uVar8;
   uint8_t local_2d;
   int *local_2c;
@@ -1877,22 +1880,34 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
   }
   local_4 = 0xffffffff;
   FUN_00628050(puVar3 + 1,(uint32_t *)puVar3[3],(uint32_t*)(&local_2c));
-  for (uVar8 = 0; (puVar3[2] != 0 && (uVar8 < (uint32_t)((int)(puVar3[3] - puVar3[2]) >> 2)));
+  for (uVar8 = 0; (iVar4 = puVar3[2], iVar4 != 0 && (uVar8 < (uint32_t)(puVar3[3] - iVar4 >> 2)));
       uVar8 = uVar8 + 1) {
-    piVar5 = FUN_0066c2a0((int)_this);
-    if (piVar5 != 0) {
+    iVar1 = *(int *)(*(int *)(iVar4 + uVar8 * 4) + 0x38);
+    file = (char *)(iVar1 + 8);
+    if (iVar1 == 0) {
+      file = &DAT_00867a90;
+    }
+    iVar4 = *(int *)(*(int *)(iVar4 + uVar8 * 4) + 0x3c);
+    if (iVar4 == 0) {
+      name = &DAT_00867a90;
+    }
+    else {
+      name = (char *)(iVar4 + 8);
+    }
+    frame = C_MenuState__LoadModel((C_MenuState *)_this,name,file);
+    if (frame != 0) {
       if ((*(uint32_t *)(*(int *)(puVar3[2] + uVar8 * 4) + 0x40) & 0xfc000000) == 0x4000000) {
         FUN_00673ca0();
-        C_EquipmentMenu__FUN_00674860(_this,*(int *)(puVar3[2] + uVar8 * 4),piVar5);
-        FUN_006766b0(*(int *)(puVar3[2] + uVar8 * 4),piVar5);
-        FUN_00677010(*(int *)(puVar3[2] + uVar8 * 4),piVar5);
+        C_EquipmentMenu__FUN_00674860(_this,*(int *)(puVar3[2] + uVar8 * 4),frame);
+        FUN_006766b0(*(int *)(puVar3[2] + uVar8 * 4),frame);
+        FUN_00677010(*(int *)(puVar3[2] + uVar8 * 4),frame);
         FUN_006764a0(*(void **)(puVar3[2] + uVar8 * 4));
-        C_EquipmentMenu__FUN_006758f0(_this,*(void **)(puVar3[2] + uVar8 * 4),piVar5);
+        C_EquipmentMenu__FUN_006758f0(_this,*(void **)(puVar3[2] + uVar8 * 4),frame);
         C_EquipmentMenu__FUN_00678000(_this,0,0,0,0);
       }
-      pvVar1 = *(void **)(puVar3[2] + uVar8 * 4);
-      if ((*(uint32_t *)((int)pvVar1 + 0x40) & 0xfc000000) == 0x8000000) {
-        C_EquipmentMenu__FUN_00676230(_this,pvVar1,piVar5);
+      pvVar5 = *(void **)(puVar3[2] + uVar8 * 4);
+      if ((*(uint32_t *)((int)pvVar5 + 0x40) & 0xfc000000) == 0x8000000) {
+        C_EquipmentMenu__FUN_00676230(_this,pvVar5,frame);
       }
       local_28 = tier1_operator_new(0x84);
       local_4 = 2;
@@ -1900,7 +1915,7 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
         local_2c = 0;
       }
       else {
-        local_2c = C_Screen__C_Screen(local_28,_this->m_030,piVar5);
+        local_2c = C_Screen__C_Screen(local_28,_this->m_030,frame);
       }
       local_4 = 0xffffffff;
       cVar2 = (**(code **)(*local_2c + 0x8c))(*(uint32_t *)(puVar3[2] + uVar8 * 4));
@@ -1924,9 +1939,10 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
     tier1_operator_delete(piStack_10);
   }
   C_EquipmentMenu__FUN_00674d60(_this);
-  piVar5 = FUN_0066c2a0((int)_this);
+  pvVar5 = C_MenuState__LoadModel((C_MenuState *)_this,"DESCRIPTION","description")
+  ;
   uVar7 = 0;
-  if (piVar5 != 0) {
+  if (pvVar5 != 0) {
     pCVar6 = tier1_operator_new(0x8c);
     local_4 = 4;
     local_28 = pCVar6;
@@ -1934,7 +1950,7 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
       pCVar6 = 0;
     }
     else {
-      C_Screen__C_Screen(pCVar6,_this->m_030,piVar5);
+      C_Screen__C_Screen(pCVar6,_this->m_030,pvVar5);
       pCVar6[1].vtable = 0;
       pCVar6[1]._pad_0004[0] = '\0';
       pCVar6[1]._pad_0004[1] = '\0';

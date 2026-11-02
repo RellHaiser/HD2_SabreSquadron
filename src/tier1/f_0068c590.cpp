@@ -771,13 +771,16 @@ switchD_0068d134_caseD_200000b: ;
 // 0x0068d5e0
 uint32_t FUN_0068d5e0(void *param_1, ...)
 {
-  bool bVar1;
-  char cVar2;
-  uint32_t *puVar3;
-  int iVar4;
+  int iVar1;
+  bool bVar2;
+  char cVar3;
+  uint32_t *puVar4;
+  int iVar5;
+  char *name;
   int *frame;
-  uint32_t uVar5;
   uint32_t uVar6;
+  char *file;
+  uint32_t uVar7;
   uint8_t local_2d;
   int *local_2c;
   C_Screen *local_28;
@@ -787,22 +790,22 @@ uint32_t FUN_0068d5e0(void *param_1, ...)
   int *piStack_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
-  puVar3 = tier1_operator_new(0x14);
-  if (puVar3 == 0) {
-    puVar3 = 0;
+  puVar4 = tier1_operator_new(0x14);
+  if (puVar4 == 0) {
+    puVar4 = 0;
   }
   else {
-    puVar3[2] = 0;
-    *(uint8_t *)(puVar3 + 1) = local_2d;
-    puVar3[3] = 0;
-    puVar3[4] = 0;
-    *puVar3 = &PTR_00813ab8;
+    puVar4[2] = 0;
+    *(uint8_t *)(puVar4 + 1) = local_2d;
+    puVar4[3] = 0;
+    puVar4[4] = 0;
+    *puVar4 = &PTR_00813ab8;
   }
-  if (puVar3[2] == 0) {
-    iVar4 = 0;
+  if (puVar4[2] == 0) {
+    iVar5 = 0;
   }
   else {
-    iVar4 = (int)(puVar3[3] - puVar3[2]) >> 2;
+    iVar5 = (int)(puVar4[3] - puVar4[2]) >> 2;
   }
   local_28 = tier1_operator_new(0x44);
   local_4 = 0;
@@ -812,17 +815,17 @@ uint32_t FUN_0068d5e0(void *param_1, ...)
   else {
     local_2c = S_ScreenDesc__S_ScreenDesc
                          ((S_ScreenDesc *)local_28,"debriefing","debriefing",
-                          (iVar4 + 1) * 0x4000000);
+                          (iVar5 + 1) * 0x4000000);
   }
   local_4 = 0xffffffff;
-  FUN_00628050(puVar3 + 1,(uint32_t *)puVar3[3],(uint32_t*)(&local_2c));
-  bVar1 = FUN_0068c5d0();
-  if (bVar1) {
-    if (puVar3[2] == 0) {
-      iVar4 = 0;
+  FUN_00628050(puVar4 + 1,(uint32_t *)puVar4[3],(uint32_t*)(&local_2c));
+  bVar2 = FUN_0068c5d0();
+  if (bVar2) {
+    if (puVar4[2] == 0) {
+      iVar5 = 0;
     }
     else {
-      iVar4 = (int)(puVar3[3] - puVar3[2]) >> 2;
+      iVar5 = (int)(puVar4[3] - puVar4[2]) >> 2;
     }
     local_28 = tier1_operator_new(0x44);
     local_4 = 1;
@@ -832,23 +835,37 @@ uint32_t FUN_0068d5e0(void *param_1, ...)
     else {
       local_2c = S_ScreenDesc__S_ScreenDesc
                            ((S_ScreenDesc *)local_28,"DIARY","diary",
-                            (iVar4 + 1) * 0x4000000);
+                            (iVar5 + 1) * 0x4000000);
     }
     local_4 = 0xffffffff;
-    FUN_00628050(puVar3 + 1,(uint32_t *)puVar3[3],(uint32_t*)(&local_2c));
+    FUN_00628050(puVar4 + 1,(uint32_t *)puVar4[3],(uint32_t*)(&local_2c));
   }
-  for (uVar6 = 0; (puVar3[2] != 0 && (uVar6 < (uint32_t)((int)(puVar3[3] - puVar3[2]) >> 2)));
-      uVar6 = uVar6 + 1) {
-    frame = FUN_0066c2a0((int)param_1);
+  uVar7 = 0;
+  while( true ) {
+    iVar5 = puVar4[2];
+    if ((iVar5 == 0) || ((uint32_t)(puVar4[3] - iVar5 >> 2) <= uVar7)) break;
+    iVar1 = *(int *)(*(int *)(iVar5 + uVar7 * 4) + 0x38);
+    file = (char *)(iVar1 + 8);
+    if (iVar1 == 0) {
+      file = &DAT_00867a90;
+    }
+    iVar5 = *(int *)(*(int *)(iVar5 + uVar7 * 4) + 0x3c);
+    if (iVar5 == 0) {
+      name = &DAT_00867a90;
+    }
+    else {
+      name = (char *)(iVar5 + 8);
+    }
+    frame = C_MenuState__LoadModel(param_1,name,file);
     if (frame != 0) {
-      iVar4 = *(int *)(puVar3[2] + uVar6 * 4);
-      if ((*(uint32_t *)(iVar4 + 0x40) & 0xfc000000) == 0x4000000) {
-        FUN_0068edc0(param_1,iVar4,frame);
+      iVar5 = *(int *)(puVar4[2] + uVar7 * 4);
+      if ((*(uint32_t *)(iVar5 + 0x40) & 0xfc000000) == 0x4000000) {
+        FUN_0068edc0(param_1,iVar5,frame);
         FUN_0068f6c0((int)param_1);
       }
-      iVar4 = *(int *)(puVar3[2] + uVar6 * 4);
-      if ((*(uint32_t *)(iVar4 + 0x40) & 0xfc000000) == 0x8000000) {
-        FUN_0068d8b0(iVar4,frame);
+      iVar5 = *(int *)(puVar4[2] + uVar7 * 4);
+      if ((*(uint32_t *)(iVar5 + 0x40) & 0xfc000000) == 0x8000000) {
+        FUN_0068d8b0(iVar5,frame);
       }
       local_28 = tier1_operator_new(0x84);
       local_4 = 2;
@@ -859,16 +876,17 @@ uint32_t FUN_0068d5e0(void *param_1, ...)
         local_2c = C_Screen__C_Screen(local_28,*(void **)((int)param_1 + 0x30),frame);
       }
       local_4 = 0xffffffff;
-      cVar2 = (**(code **)(*local_2c + 0x8c))(*(uint32_t *)(puVar3[2] + uVar6 * 4));
-      if (cVar2 != '\0') {
-        (**(code **)(*local_2c + 0x70))(*(int *)(puVar3[2] + uVar6 * 4) + 4);
+      cVar3 = (**(code **)(*local_2c + 0x8c))(*(uint32_t *)(puVar4[2] + uVar7 * 4));
+      if (cVar3 != '\0') {
+        (**(code **)(*local_2c + 0x70))(*(int *)(puVar4[2] + uVar7 * 4) + 4);
         FUN_0066ea50((void *)((int)param_1 + 0x140),*(uint32_t **)((int)param_1 + 0x148),1,
                      (uint32_t*)(&local_2c));
       }
     }
+    uVar7++;
   }
-  if (puVar3 != 0) {
-    (**(code **)*puVar3)(1);
+  if (puVar4 != 0) {
+    (**(code **)*puVar4)(1);
   }
   piStack_10 = 0;
   uStack_24 = 0;
@@ -880,8 +898,8 @@ uint32_t FUN_0068d5e0(void *param_1, ...)
   if ((piStack_10 != 0) && (*piStack_10 = *piStack_10 - 1, *piStack_10 == 0)) {
     tier1_operator_delete(piStack_10);
   }
-  uVar5 = FUN_0068f9f0(param_1,0);
-  return CONCAT31((int3)((uint32_t)uVar5 >> 8),1);
+  uVar6 = FUN_0068f9f0(param_1,0);
+  return CONCAT31((int3)((uint32_t)uVar6 >> 8),1);
 }
 
 
@@ -910,7 +928,9 @@ uint32_t FUN_0068d8b0(int param_1,int *param_2, ...)
   uint32_t uStack_c0;
   int *piStack_bc;
   C_str CStack_b8;
-  C_MainMenu *pCStack_b4;
+  C_MenuState *pCStack_b4;
+  uint32_t uStack_a8;
+  uint32_t uStack_a4;
   uint32_t auStack_a0 [5];
   C_str *pCStack_8c;
   uint8_t auStack_88 [20];
@@ -922,7 +942,7 @@ uint32_t FUN_0068d8b0(int param_1,int *param_2, ...)
   uint32_t uStack_2c;
   uint32_t uStack_14;
   uStack_14 = 0xffffffff;
-  pCStack_b4 = (C_MainMenu *)0x1;
+  pCStack_b4 = (C_MenuState *)0x1;
   CStack_b8.rep = (C_str_rep *)"text_02";
   piStack_bc = param_2;
   uStack_c0 = 0x68d8e7;
@@ -933,8 +953,10 @@ uint32_t FUN_0068d8b0(int param_1,int *param_2, ...)
   (**(code **)(*param_2 + 0x48))();
   C_fstr_Construct(&CStack_b8,"multi_page");
   uStack_2c = 0;
+  uStack_a8 = 0;
+  uStack_a4 = 0;
   auStack_a0[0] = 0;
-  C_MainMenu__FUN_0066def0(pCStack_b4,&CStack_b8,(int *)0x6);
+  C_MenuState__AddFrame(pCStack_b4,&CStack_b8,6,param_2,&uStack_a8);
   uStack_2c = 0xffffffff;
   if ((CStack_b8.rep != 0) &&
      ((CStack_b8.rep)->refCount = (CStack_b8.rep)->refCount - 1, (CStack_b8.rep)->refCount == 0)) {

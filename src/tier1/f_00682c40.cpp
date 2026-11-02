@@ -47,9 +47,8 @@ uint32_t C_GameMenu__FUN_00682c80(C_GameMenu *_this,uint32_t *param_1,int *param
   uint32_t *puVar5;
   uint32_t *puVar6;
   int *piVar7;
-  int *piVar8;
-  uint32_t uVar9;
-  void *pvVar10;
+  uint32_t uVar8;
+  void *pvVar9;
   void *local_44;
   S_ControlDesc *local_40;
   uint8_t local_3c [20];
@@ -58,12 +57,12 @@ uint32_t C_GameMenu__FUN_00682c80(C_GameMenu *_this,uint32_t *param_1,int *param
   void *pvStack_18;
   C_str *local_10;
   uint32_t local_4;
-  piVar8 = param_2;
+  piVar7 = param_2;
   this_00 = param_1;
   local_4 = 0xffffffff;
   FUN_006838e0((int)param_1,param_2);
-  C_GameMenu__FUN_00684690(_this,(int)this_00,piVar8);
-  C_GameMenu__FUN_00684b90(_this,this_00,piVar8);
+  C_GameMenu__FUN_00684690(_this,(int)this_00,piVar7);
+  C_GameMenu__FUN_00684b90(_this,this_00,piVar7);
   FUN_00684df0(this_00);
   puVar3 = (uint32_t *)FUN_00614da0(local_3c,0,0x1000007,0x400d000,_this,FUN_00684fd0);
   local_4 = 0;
@@ -156,23 +155,23 @@ uint32_t C_GameMenu__FUN_00682c80(C_GameMenu *_this,uint32_t *param_1,int *param
   FUN_00615f50(puVar3,(uint32_t *)this_00[0xb],(uint32_t*)(&param_1));
   iVar4 = *(int *)(this_00[0xb] - 4);
   puVar6 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0xb,0x9e3);
-  pvVar10 = (void *)(iVar4 + 0x10);
+  pvVar9 = (void *)(iVar4 + 0x10);
   local_4 = 9;
-  FUN_00615d50(pvVar10,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
   puVar6 = (uint32_t *)FUN_00614da0(local_3c,0,0x1000007,0x4001000,_this,FUN_00687f50);
   local_4 = 10;
-  FUN_00615d50(pvVar10,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
   puVar6 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000001,0);
   local_4 = 0xb;
-  FUN_00615d50(pvVar10,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -192,23 +191,23 @@ uint32_t C_GameMenu__FUN_00682c80(C_GameMenu *_this,uint32_t *param_1,int *param
   FUN_00615f50(puVar3,(uint32_t *)this_00[0xb],(uint32_t*)(&param_1));
   iVar4 = *(int *)(this_00[0xb] - 4);
   puVar6 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0xb,0x9e4);
-  pvVar10 = (void *)(iVar4 + 0x10);
+  pvVar9 = (void *)(iVar4 + 0x10);
   local_4 = 0xd;
-  FUN_00615d50(pvVar10,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
   puVar6 = (uint32_t *)FUN_00614dd0(local_3c,*(uint32_t *)(_this->_pad_0138 + 0xa4) | 2,0x6001016,0);
   local_4 = 0xe;
-  FUN_00615d50(pvVar10,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
   puVar6 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000001,0);
   local_4 = 0xf;
-  FUN_00615d50(pvVar10,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -321,23 +320,23 @@ uint32_t C_GameMenu__FUN_00682c80(C_GameMenu *_this,uint32_t *param_1,int *param
   FUN_00615f50(puVar3,(uint32_t *)this_00[0xb],(uint32_t*)(&param_1));
   iVar4 = *(int *)(this_00[0xb] - 4);
   puVar6 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0xd,0x9c9);
-  pvVar10 = (void *)(iVar4 + 0x10);
+  pvVar9 = (void *)(iVar4 + 0x10);
   local_4 = 0x1a;
-  FUN_00615d50(pvVar10,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
   puVar6 = (uint32_t *)FUN_00614dd0(local_3c,0,0x600106a,0);
   local_4 = 0x1b;
-  FUN_00615d50(pvVar10,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
   puVar6 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000001,0);
   local_4 = 0x1c;
-  FUN_00615d50(pvVar10,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
@@ -370,69 +369,71 @@ uint32_t C_GameMenu__FUN_00682c80(C_GameMenu *_this,uint32_t *param_1,int *param
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  iVar4 = S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x21,"console");
+  pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x21,"console");
   puVar3 = (uint32_t *)FUN_00614da0(local_24,0,0x1000007,0x4015000,_this,FUN_00682a20);
   local_4 = 0x20;
-  FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar3);
+  FUN_00615d50((void *)((int)pvVar9 + 0x10),*(uint32_t **)((int)pvVar9 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_10 != 0) {
     C_str__ReleaseRep(local_10);
   }
-  S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x12,"text03");
-  pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_playerarrangement");
-  AddDescMessage2(pvVar10,0,0x1000015,10,0x9f7);
+  S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x12,"text03");
+  pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x13,"text_playerarrangement");
+  AddDescMessage2(pvVar9,0,0x1000015,10,0x9f7);
   bVar2 = C_GameProfile__IsCooperativeGame(&g_gameProfile);
   if (!bVar2) {
-    pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_h&dversion");
-    AddDescMessage2(pvVar10,0,0x1000015,0x28,0x7d6);
-    pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_equipment");
-    AddDescMessage2(pvVar10,0,0x1000015,0xb,0x9e7);
+    pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x13,"text_h&dversion");
+    AddDescMessage2(pvVar9,0,0x1000015,0x28,0x7d6);
+    pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x13,"text_equipment");
+    AddDescMessage2(pvVar9,0,0x1000015,0xb,0x9e7);
   }
-  pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_chat");
-  AddDescMessage2(pvVar10,0,0x1000015,0xb,0x9e8);
-  pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_selected soldier stats");
-  AddDescMessage2(pvVar10,0,0x1000015,0xb,0x9e9);
-  pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_draft");
-  AddDescMessage2(pvVar10,0,0x1000015,0xb,0x9ea);
-  pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x14,"bgame info");
-  AddDescMessage2(pvVar10,0,0x1000015,0xd,0x9cc);
-  AddDescMessage3(pvVar10,0,0x1000007,0x4001000,(uint32_t)_this,0x6861b0);
+  pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x13,"text_chat");
+  AddDescMessage2(pvVar9,0,0x1000015,0xb,0x9e8);
+  pvVar9 = S_ScreenDesc__AddControl
+                     ((S_ScreenDesc *)this_00,0x13,"text_selected soldier stats");
+  AddDescMessage2(pvVar9,0,0x1000015,0xb,0x9e9);
+  pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x13,"text_draft");
+  AddDescMessage2(pvVar9,0,0x1000015,0xb,0x9ea);
+  pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x14,"bgame info");
+  AddDescMessage2(pvVar9,0,0x1000015,0xd,0x9cc);
+  AddDescMessage3(pvVar9,0,0x1000007,0x4001000,(uint32_t)_this,0x6861b0);
   bVar2 = C_GameProfile__IsCooperativeGame(&g_gameProfile);
-  piVar8 = param_2;
+  piVar7 = param_2;
   if (bVar2) {
-    pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x13,"text_player status");
-    AddDescMessage2(pvVar10,0,0x1000015,0xb,0x4f4c);
-    piVar7 = FUN_0066c2a0((int)_this);
-    piVar8 = param_2;
-    if (piVar7 != 0) {
+    pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x13,"text_player status");
+    AddDescMessage2(pvVar9,0,0x1000015,0xb,0x4f4c);
+    pvVar9 = C_MenuState__LoadModel
+                       ((C_MenuState *)_this,"DESCRIPTION","description");
+    piVar7 = param_2;
+    if (pvVar9 != 0) {
       param_1 = tier1_operator_new(0x8c);
       local_4 = 0x21;
       if ((C_auto_008156b8 *)param_1 == 0) {
-        piVar8 = 0;
+        piVar7 = 0;
       }
       else {
-        piVar8 = C_auto_008156b8__FUN_006838a0((C_auto_008156b8 *)param_1,_this->m_030,piVar7);
+        piVar7 = C_auto_008156b8__FUN_006838a0((C_auto_008156b8 *)param_1,_this->m_030,pvVar9);
       }
-      _this->m_0fc = piVar8;
+      _this->m_0fc = piVar7;
       local_4 = 0xffffffff;
-      (**(code **)(*piVar8 + 0x8c))(0);
-      piVar8 = param_2;
+      (**(code **)(*piVar7 + 0x8c))(0);
+      piVar7 = param_2;
     }
   }
   else {
     iVar4 = (**(code **)(*param_2 + 0x48))(param_2,"text_weapons info",1);
     if (iVar4 != 0) {
-      pvVar10 = (void *)S_ScreenDesc__AddControl((S_ScreenDesc*)(this_00),0x12,"text_weapons info");
-      AddDescMessage2(pvVar10,0,0x1000015,0xb,0x7d2);
-      *(uint32_t *)(_this->_pad_0138 + 0x78) = *(uint32_t *)((int)pvVar10 + 8);
+      pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x12,"text_weapons info");
+      AddDescMessage2(pvVar9,0,0x1000015,0xb,0x7d2);
+      *(uint32_t *)(_this->_pad_0138 + 0x78) = *(uint32_t *)((int)pvVar9 + 8);
     }
   }
-  piVar8 = (int *)(**(code **)(*piVar8 + 0x48))(piVar8,"3Dview",1);
-  uVar9 = 0;
-  if (piVar8 != 0) {
-    uVar9 = FUN_00670c00(piVar8);
+  piVar7 = (int *)(**(code **)(*piVar7 + 0x48))(piVar7,"3Dview",1);
+  uVar8 = 0;
+  if (piVar7 != 0) {
+    uVar8 = FUN_00670c00(piVar7);
   }
-  return CONCAT31((int3)((uint32_t)uVar9 >> 8),1);
+  return CONCAT31((int3)((uint32_t)uVar8 >> 8),1);
 }
 
 
@@ -457,33 +458,32 @@ uint32_t FUN_006838e0(int param_1,int *param_2, ...)
   S_SoldierProfile **ppSVar1;
   bool bVar2;
   C_HumanStore *pCVar3;
-  C_str *pCVar4;
-  int *piVar5;
+  void *pvVar4;
+  C_str *pCVar5;
   int *piVar6;
+  int *source;
   int *piVar7;
   uint32_t *puVar8;
-  int *piVar9;
-  int iVar10;
-  S_SoldierProfile *pSVar11;
-  uint32_t uVar12;
+  int iVar9;
+  S_SoldierProfile *pSVar10;
+  uint32_t uVar11;
   int *unaff_ESI;
-  int iVar13;
+  int iVar12;
   C_str _this;
-  void *pvVar14;
+  void *pvVar13;
   void *this_00;
-  C_str_rep *pCVar15;
-  char *pcVar16;
-  int iVar17;
-  void *desc;
+  C_str_rep *pCVar14;
+  char *pcVar15;
+  int iVar16;
   C_str_rep *pCStack_d0;
-  void *pvVar18;
+  C_MenuState *pCVar17;
   C_str_rep *pCStack_b8;
   C_str CStack_b4;
   C_str CStack_a8;
   S_ControlDesc *pSStack_a4;
-  int *piStack_a0;
+  void *pvStack_a0;
   int *local_9c;
-  int *piStack_98;
+  void *pvStack_98;
   C_str aCStack_94 [2];
   C_HumanStore *pCStack_8c;
   uint8_t auStack_80 [4];
@@ -510,14 +510,14 @@ LAB_0068466d:
   }
   CStack_b4.rep = (C_str_rep *)0x20;
   pCStack_b8 = (C_str_rep *)"soldierspanel";
-  (**(code **)(*param_2 + 0x48))();
+  pvVar4 = (void *)(**(code **)(*param_2 + 0x48))();
   uStack_7c = 0;
   uStack_78 = 0;
   uStack_74 = 0;
-  pCVar4 = C_fstr_Construct(aCStack_94,"GB_Soldiers_a");
+  pCVar5 = C_fstr_Construct(aCStack_94,"GB_Soldiers_a");
   uStack_20 = 0;
   pCStack_d0 = (C_str_rep *)0x683980;
-  piStack_a0 = C_MainMenu__FUN_0066def0((C_MainMenu *)CStack_a8.rep,pCVar4,(int *)0x6);
+  pvStack_a0 = C_MenuState__AddFrame((C_MenuState *)CStack_a8.rep,pCVar5,6,pvVar4,&uStack_7c);
   uStack_20 = 0xffffffff;
   if ((aCStack_94[0].rep != 0) &&
      ((aCStack_94[0].rep)->refCount = (aCStack_94[0].rep)->refCount - 1,
@@ -527,23 +527,23 @@ LAB_0068466d:
   uStack_7c = 0;
   uStack_78 = 0;
   uStack_74 = 0;
-  pCVar4 = C_fstr_Construct(aCStack_94,"GB_Soldiers_x");
+  pCVar5 = C_fstr_Construct(aCStack_94,"GB_Soldiers_x");
   uStack_20 = 1;
   pCStack_d0 = (C_str_rep *)0x6839f2;
-  piStack_98 = C_MainMenu__FUN_0066def0((C_MainMenu *)CStack_a8.rep,pCVar4,(int *)0x6);
+  pvStack_98 = C_MenuState__AddFrame((C_MenuState *)CStack_a8.rep,pCVar5,6,pvVar4,&uStack_7c);
   uStack_20 = 0xffffffff;
   if ((aCStack_94[0].rep != 0) &&
      ((aCStack_94[0].rep)->refCount = (aCStack_94[0].rep)->refCount - 1,
      (aCStack_94[0].rep)->refCount == 0)) {
     tier1_operator_delete(aCStack_94[0].rep);
   }
-  pvVar18 = (void *)0x1;
-  piVar5 = (int *)(**(code **)(*param_2 + 0x48))();
+  pCVar17 = (C_MenuState *)0x1;
+  piVar6 = (int *)(**(code **)(*param_2 + 0x48))();
   pCStack_d0 = (C_str_rep *)"selector";
-  piVar6 = (int *)(**(code **)(*param_2 + 0x48))(param_2);
+  source = (int *)(**(code **)(*param_2 + 0x48))(param_2);
   C_fstr_Construct((C_str *)&stack0xffffff54,"selector2");
   uStack_38 = 2;
-  CStack_b4.rep = (C_str_rep *)FUN_0066dcf0(pvVar18,(int *)&stack0xffffff54,0,piVar6);
+  CStack_b4.rep = C_MenuState__CloneFrame(pCVar17,&stack0xffffff54,0,source);
   uStack_38 = 0xffffffff;
   if ((unaff_ESI != 0) && (*unaff_ESI = *unaff_ESI - 1, *unaff_ESI == 0)) {
     tier1_operator_delete(unaff_ESI);
@@ -562,55 +562,55 @@ LAB_0068466d:
     (**(code **)(pCStack_b8->refCount + 0x30))();
   }
   pCVar3 = 0;
-  if ((((piStack_98 == 0) ||
+  if ((((pvStack_98 == 0) ||
        (pCVar3 = 0, aCStack_94[0].rep == 0)) ||
-      (pCVar3 = pCStack_8c, pCStack_8c == 0)) || (piVar6 == 0))
+      (pCVar3 = pCStack_8c, pCStack_8c == 0)) || (source == 0))
   goto LAB_0068466d;
   CStack_b4.rep = 0;
   pCStack_b8 = aCStack_94[0].rep;
-  (**(code **)(*piVar6 + 0x38))();
-  piVar7 = piStack_98;
+  (**(code **)(*source + 0x38))();
+  pvVar4 = pvStack_98;
   (**(code **)(*local_9c + 0x38))();
-  pvVar18 = (void *)0x1;
-  (**(code **)(*piVar5 + 0x38))(piVar5);
-  (**(code **)(*piVar5 + 0x30))(piVar5,1);
-  (**(code **)(*piVar5 + 0x24))(piVar5);
+  pCVar17 = (C_MenuState *)0x1;
+  (**(code **)(*piVar6 + 0x38))(piVar6);
+  (**(code **)(*piVar6 + 0x30))(piVar6,1);
+  (**(code **)(*piVar6 + 0x24))(piVar6);
   if (*(int *)(param_1 + 0x28) == 0) {
-    iVar13 = 0;
+    iVar12 = 0;
   }
   else {
-    iVar13 = *(int *)(param_1 + 0x2c) - *(int *)(param_1 + 0x28) >> 2;
+    iVar12 = *(int *)(param_1 + 0x2c) - *(int *)(param_1 + 0x28) >> 2;
   }
   CStack_a8.rep = tier1_operator_new(0x40);
   uStack_44 = 3;
   if (CStack_a8.rep == 0) {
     pCStack_b8 = 0;
-    piVar5 = local_9c;
+    piVar6 = local_9c;
   }
   else {
     pCStack_b8 = S_ControlDesc__S_ControlDesc
                            ((S_ControlDesc*)(CStack_a8.rep),5,"soldierspanel",
-                            (iVar13 + 1U & 0x3f) << 0x14 | *(uint32_t *)(param_1 + 0x40));
-    piVar5 = local_9c;
+                            (iVar12 + 1U & 0x3f) << 0x14 | *(uint32_t *)(param_1 + 0x40));
+    piVar6 = local_9c;
   }
   uStack_44 = 0xffffffff;
   FUN_00615f50((void *)(param_1 + 0x24),*(uint32_t **)(param_1 + 0x2c),(uint32_t*)(&pCStack_b8));
-  pCVar15 = *(C_str_rep **)(*(int *)(param_1 + 0x2c) - 4);
-  iVar13 = *(int *)((int)&pCVar15[5].length + 3);
-  if (iVar13 == 0) {
-    iVar13 = 0;
+  pCVar14 = *(C_str_rep **)(*(int *)(param_1 + 0x2c) - 4);
+  iVar12 = *(int *)((int)&pCVar14[5].length + 3);
+  if (iVar12 == 0) {
+    iVar12 = 0;
   }
   else {
-    iVar13 = *(int *)((int)&pCVar15[6].refCount + 2) - iVar13 >> 2;
+    iVar12 = *(int *)((int)&pCVar14[6].refCount + 2) - iVar12 >> 2;
   }
-  pCStack_b8 = pCVar15;
-  if ((*(uint32_t *)pCVar15->chars & 0xff000) == 0) {
+  pCStack_b8 = pCVar14;
+  if ((*(uint32_t *)pCVar14->chars & 0xff000) == 0) {
     CStack_a8.rep = tier1_operator_new(0x40);
     uStack_44 = 5;
     if (CStack_a8.rep != 0) {
       S_ControlDesc__S_ControlDesc
                 ((S_ControlDesc *)CStack_a8.rep,8,"scroll11",
-                 (iVar13 + 1U & 0xff) << 0xc | *(uint32_t *)pCVar15->chars);
+                 (iVar12 + 1U & 0xff) << 0xc | *(uint32_t *)pCVar14->chars);
     }
   }
   else {
@@ -619,33 +619,33 @@ LAB_0068466d:
     if (CStack_a8.rep != 0) {
       S_ControlDesc__S_ControlDesc
                 ((S_ControlDesc *)CStack_a8.rep,8,"scroll11",
-                 (iVar13 + 1U & 0xff) << 4 | *(uint32_t *)pCVar15->chars);
+                 (iVar12 + 1U & 0xff) << 4 | *(uint32_t *)pCVar14->chars);
     }
   }
   uStack_44 = 0xffffffff;
-  FUN_00615f50((void *)((int)&pCVar15[5].refCount + 3),
-               *(uint32_t **)((int)&pCVar15[6].refCount + 2),(uint32_t *)&stack0xffffff40);
-  iVar13 = *(int *)(*(int *)((int)&pCVar15[6].refCount + 2) - 4);
-  puVar8 = (uint32_t *)FUN_00614dd0(&piStack_a0,0,0x100000b,0xc102000);
+  FUN_00615f50((void *)((int)&pCVar14[5].refCount + 3),
+               *(uint32_t **)((int)&pCVar14[6].refCount + 2),(uint32_t *)&stack0xffffff40);
+  iVar12 = *(int *)(*(int *)((int)&pCVar14[6].refCount + 2) - 4);
+  puVar8 = (uint32_t *)FUN_00614dd0(&pvStack_a0,0,0x100000b,0xc102000);
   uStack_44 = 6;
-  FUN_00615d50((void *)(iVar13 + 0x10),*(uint32_t **)(iVar13 + 0x18),puVar8);
+  FUN_00615d50((void *)(iVar12 + 0x10),*(uint32_t **)(iVar12 + 0x18),puVar8);
   if ((pCStack_8c != 0) &&
      (*(int *)&pCStack_8c->m_profiles = *(int *)&pCStack_8c->m_profiles - 1,
-     GH_PIECE(iVar13,0,1) = (pCStack_8c->m_profiles).alloc, GH_PIECE(iVar13,1,1) = (pCStack_8c->m_profiles)._pad[0],
-     GH_PIECE(iVar13,2,1) = (pCStack_8c->m_profiles)._pad[1],
-     GH_PIECE(iVar13,3,1) = (pCStack_8c->m_profiles)._pad[2], iVar13 == 0)) {
+     GH_PIECE(iVar12,0,1) = (pCStack_8c->m_profiles).alloc, GH_PIECE(iVar12,1,1) = (pCStack_8c->m_profiles)._pad[0],
+     GH_PIECE(iVar12,2,1) = (pCStack_8c->m_profiles)._pad[1],
+     GH_PIECE(iVar12,3,1) = (pCStack_8c->m_profiles)._pad[2], iVar12 == 0)) {
     tier1_operator_delete(pCStack_8c);
   }
   pCStack_d0 = 0;
   uStack_44 = 7;
-  iVar13 = vector_size_e4_615a50((int)((int)&pCVar15[5].refCount + 3));
-  if ((*(uint32_t *)pCVar15->chars & 0xff000) == 0) {
+  iVar12 = vector_size_e4_615a50((int)((int)&pCVar14[5].refCount + 3));
+  if ((*(uint32_t *)pCVar14->chars & 0xff000) == 0) {
     CStack_a8.rep = tier1_operator_new(0x40);
     GH_PIECE(uStack_44,0,1) = 9;
     if (CStack_a8.rep != 0) {
       S_ControlDesc__S_ControlDesc
                 ((S_ControlDesc *)CStack_a8.rep,0x23,"GB_Soldiers_a",
-                 (iVar13 + 1U & 0xff) << 0xc | *(uint32_t *)pCVar15->chars);
+                 (iVar12 + 1U & 0xff) << 0xc | *(uint32_t *)pCVar14->chars);
     }
   }
   else {
@@ -654,139 +654,139 @@ LAB_0068466d:
     if (CStack_a8.rep != 0) {
       S_ControlDesc__S_ControlDesc
                 ((S_ControlDesc *)CStack_a8.rep,0x23,"GB_Soldiers_a",
-                 (iVar13 + 1U & 0xff) << 4 | *(uint32_t *)pCVar15->chars);
+                 (iVar12 + 1U & 0xff) << 4 | *(uint32_t *)pCVar14->chars);
     }
   }
   GH_PIECE(uStack_44,0,1) = 7;
-  FUN_00615f50((void *)((int)&pCVar15[5].refCount + 3),
-               *(uint32_t **)((int)&pCVar15[6].refCount + 2),(uint32_t *)&stack0xffffff40);
-  iVar13 = *(int *)(*(int *)((int)&pCVar15[6].refCount + 2) - 4);
-  iVar17 = iVar13;
-  puVar8 = (uint32_t *)FUN_00614dd0(&piStack_a0,0,0x1000004,0);
-  _this.rep = (C_str_rep *)(iVar13 + 0x10);
+  FUN_00615f50((void *)((int)&pCVar14[5].refCount + 3),
+               *(uint32_t **)((int)&pCVar14[6].refCount + 2),(uint32_t *)&stack0xffffff40);
+  iVar12 = *(int *)(*(int *)((int)&pCVar14[6].refCount + 2) - 4);
+  iVar16 = iVar12;
+  puVar8 = (uint32_t *)FUN_00614dd0(&pvStack_a0,0,0x1000004,0);
+  _this.rep = (C_str_rep *)(iVar12 + 0x10);
   uStack_44 = CONCAT31(GH_PIECE(uStack_44,1,3),10);
   CStack_a8.rep = _this.rep;
-  FUN_00615d50(_this.rep,*(uint32_t **)(iVar13 + 0x18),puVar8);
+  FUN_00615d50(_this.rep,*(uint32_t **)(iVar12 + 0x18),puVar8);
   if (pCStack_8c != 0) {
     C_str__ReleaseRep((C_str *)pCStack_8c);
   }
-  puVar8 = (uint32_t *)FUN_00614dd0(&piStack_a0,0,0x100000b,0xc101000);
+  puVar8 = (uint32_t *)FUN_00614dd0(&pvStack_a0,0,0x100000b,0xc101000);
   uStack_44 = CONCAT31(GH_PIECE(uStack_44,1,3),0xb);
-  FUN_00615d50(_this.rep,*(uint32_t **)(iVar13 + 0x18),puVar8);
+  FUN_00615d50(_this.rep,*(uint32_t **)(iVar12 + 0x18),puVar8);
   if (pCStack_8c != 0) {
     C_str__ReleaseRep((C_str *)pCStack_8c);
   }
-  puVar8 = (uint32_t *)FUN_00614dd0(&piStack_a0,0,0x1000028,4);
+  puVar8 = (uint32_t *)FUN_00614dd0(&pvStack_a0,0,0x1000028,4);
   GH_PIECE(uStack_44,0,1) = 0xc;
-  FUN_00615d50(_this.rep,*(uint32_t **)(iVar13 + 0x18),puVar8);
+  FUN_00615d50(_this.rep,*(uint32_t **)(iVar12 + 0x18),puVar8);
   GH_PIECE(uStack_44,0,1) = 7;
   if (pCStack_8c != 0) {
     C_str__ReleaseRep((C_str *)pCStack_8c);
   }
-  puVar8 = (uint32_t *)FUN_00614e50(&piStack_a0,0,0x1000029,0,0x3d7df3b6);
+  puVar8 = (uint32_t *)FUN_00614e50(&pvStack_a0,0,0x1000029,0,0x3d7df3b6);
   GH_PIECE(uStack_44,0,1) = 0xd;
-  FUN_00615d50(_this.rep,*(uint32_t **)(iVar13 + 0x18),puVar8);
+  FUN_00615d50(_this.rep,*(uint32_t **)(iVar12 + 0x18),puVar8);
   GH_PIECE(uStack_44,0,1) = 7;
   if (pCStack_8c != 0) {
     C_str__ReleaseRep((C_str *)pCStack_8c);
   }
-  piVar9 = _aligned_malloc(0x10,0x10);
-  if (piVar9 == 0) {
-    piVar9 = 0;
+  piVar7 = _aligned_malloc(0x10,0x10);
+  if (piVar7 == 0) {
+    piVar7 = 0;
   }
   else {
-    *piVar9 = piVar5[0x2c];
-    piVar9[1] = piVar5[0x2d];
-    piVar9[2] = piVar5[0x2e];
-    piVar9[3] = piVar5[0x2f];
+    *piVar7 = piVar6[0x2c];
+    piVar7[1] = piVar6[0x2d];
+    piVar7[2] = piVar6[0x2e];
+    piVar7[3] = piVar6[0x2f];
   }
-  puVar8 = (uint32_t *)FUN_00614e20(&piStack_a0,0,0x100006b,0,piVar9);
+  puVar8 = (uint32_t *)FUN_00614e20(&pvStack_a0,0,0x100006b,0,piVar7);
   GH_PIECE(uStack_44,0,1) = 0xe;
-  FUN_00615d50(_this.rep,*(uint32_t **)(iVar13 + 0x18),puVar8);
+  FUN_00615d50(_this.rep,*(uint32_t **)(iVar12 + 0x18),puVar8);
   uStack_44 = CONCAT31(GH_PIECE(uStack_44,1,3),7);
   if (pCStack_8c != 0) {
     C_str__ReleaseRep((C_str *)pCStack_8c);
   }
-  iVar13 = 0;
+  iVar12 = 0;
   while( true ) {
     ppSVar1 = ((g_gameProfile.m_humanStore)->m_profiles).first;
     if (ppSVar1 == (S_SoldierProfile **)0x0) {
-      iVar10 = 0;
+      iVar9 = 0;
     }
     else {
-      iVar10 = (int)((g_gameProfile.m_humanStore)->m_profiles).last - (int)ppSVar1 >> 2;
+      iVar9 = (int)((g_gameProfile.m_humanStore)->m_profiles).last - (int)ppSVar1 >> 2;
     }
-    if ((iVar10 <= iVar13) || (0x1d < iVar13)) break;
-    pCVar4 = C_fstr_Construct(&CStack_b4,"Soldier_a%02d",iVar13);
-    pCVar15 = pCVar4->rep;
-    if (pCVar15 != 0) {
-      pCVar15->refCount = pCVar15->refCount + 1;
+    if ((iVar9 <= iVar12) || (0x1d < iVar12)) break;
+    pCVar5 = C_fstr_Construct(&CStack_b4,"Soldier_a%02d",iVar12);
+    pCVar14 = pCVar5->rep;
+    if (pCVar14 != 0) {
+      pCVar14->refCount = pCVar14->refCount + 1;
     }
     if (pCStack_d0 != 0) {
       C_str__ReleaseRep((C_str *)pCStack_d0);
     }
-    pCStack_d0 = pCVar4->rep;
+    pCStack_d0 = pCVar5->rep;
     if (CStack_b4.rep != 0) {
       C_str__ReleaseRep((C_str *)CStack_b4.rep);
     }
-    FUN_0066dad0(pvVar18,&pCStack_d0,piVar7,piVar5);
-    pcVar16 = pCStack_d0->chars;
+    C_MenuState__CloneVisual(pCVar17,&pCStack_d0,pvVar4,piVar6);
+    pcVar15 = pCStack_d0->chars;
     if (pCStack_d0 == 0) {
-      pcVar16 = &DAT_00867a90;
+      pcVar15 = &DAT_00867a90;
     }
-    iVar10 = vector_size_e4_615a50(iVar17 + 0x30);
-    if ((*(uint32_t *)(iVar17 + 8) & 0xff000) == 0) {
+    iVar9 = vector_size_e4_615a50(iVar16 + 0x30);
+    if ((*(uint32_t *)(iVar16 + 8) & 0xff000) == 0) {
       pSStack_a4 = tier1_operator_new(0x40);
       GH_PIECE(uStack_44,0,1) = 0x10;
       if (pSStack_a4 != 0) {
         S_ControlDesc__S_ControlDesc
-                  (pSStack_a4,4,pcVar16,(iVar10 + 1U & 0xff) << 0xc | *(uint32_t *)(iVar17 + 8));
+                  (pSStack_a4,4,pcVar15,(iVar9 + 1U & 0xff) << 0xc | *(uint32_t *)(iVar16 + 8));
       }
-      pvVar14 = (void *)(iVar17 + 0x30);
+      pvVar13 = (void *)(iVar16 + 0x30);
       puVar8 = (uint32_t *)&stack0xffffff54;
     }
     else {
       pSStack_a4 = tier1_operator_new(0x40);
       GH_PIECE(uStack_44,0,1) = 0xf;
       if (pSStack_a4 == 0) {
-        pvVar14 = (void *)(iVar17 + 0x30);
+        pvVar13 = (void *)(iVar16 + 0x30);
         puVar8 = (uint32_t *)&stack0xffffff50;
       }
       else {
         S_ControlDesc__S_ControlDesc
-                  (pSStack_a4,4,pcVar16,(iVar10 + 1U & 0xff) << 4 | *(uint32_t *)(iVar17 + 8));
-        pvVar14 = (void *)(iVar17 + 0x30);
+                  (pSStack_a4,4,pcVar15,(iVar9 + 1U & 0xff) << 4 | *(uint32_t *)(iVar16 + 8));
+        pvVar13 = (void *)(iVar16 + 0x30);
         puVar8 = (uint32_t *)&stack0xffffff50;
       }
     }
     GH_PIECE(uStack_44,0,1) = 7;
-    FUN_00615f50(pvVar14,*(uint32_t **)((int)pvVar14 + 8),puVar8);
-    iVar10 = *(int *)(*(int *)(iVar17 + 0x38) - 4);
-    puVar8 = (uint32_t *)FUN_00614dd0(&piStack_a0,0,0x1000009,iVar13);
-    pvVar14 = (void *)(iVar10 + 0x10);
+    FUN_00615f50(pvVar13,*(uint32_t **)((int)pvVar13 + 8),puVar8);
+    iVar9 = *(int *)(*(int *)(iVar16 + 0x38) - 4);
+    puVar8 = (uint32_t *)FUN_00614dd0(&pvStack_a0,0,0x1000009,iVar12);
+    pvVar13 = (void *)(iVar9 + 0x10);
     GH_PIECE(uStack_44,0,1) = 0x11;
-    FUN_00615d50(pvVar14,*(uint32_t **)(iVar10 + 0x18),puVar8);
+    FUN_00615d50(pvVar13,*(uint32_t **)(iVar9 + 0x18),puVar8);
     GH_PIECE(uStack_44,0,1) = 7;
     if (pCStack_8c != 0) {
       C_str__ReleaseRep((C_str *)pCStack_8c);
     }
-    pSVar11 = C_HumanStore__Get(g_gameProfile.m_humanStore,iVar13);
-    puVar8 = (uint32_t *)FUN_00614e20(auStack_80,0,0x1000038,0,pSVar11->faceImage);
+    pSVar10 = C_HumanStore__Get(g_gameProfile.m_humanStore,iVar12);
+    puVar8 = (uint32_t *)FUN_00614e20(auStack_80,0,0x1000038,0,pSVar10->faceImage);
     uStack_44 = CONCAT31(GH_PIECE(uStack_44,1,3),0x12);
-    FUN_00615d50(pvVar14,*(uint32_t **)(iVar10 + 0x18),puVar8);
+    FUN_00615d50(pvVar13,*(uint32_t **)(iVar9 + 0x18),puVar8);
     if (pCStack_6c != 0) {
       C_str__ReleaseRep(pCStack_6c);
     }
-    puVar8 = (uint32_t *)FUN_00614da0(auStack_68,0,0x1000007,0x4001000,pvVar18,FUN_00685420);
+    puVar8 = (uint32_t *)FUN_00614da0(auStack_68,0,0x1000007,0x4001000,pCVar17,FUN_00685420);
     GH_PIECE(uStack_44,0,1) = 0x13;
-    FUN_00615d50(pvVar14,*(uint32_t **)(iVar10 + 0x18),puVar8);
+    FUN_00615d50(pvVar13,*(uint32_t **)(iVar9 + 0x18),puVar8);
     uStack_44 = CONCAT31(GH_PIECE(uStack_44,1,3),7);
     if (pCStack_54 != 0) {
       C_str__ReleaseRep(pCStack_54);
     }
-    iVar13++;
+    iVar12++;
     _this.rep = CStack_a8.rep;
-    pCVar15 = pCStack_b8;
+    pCVar14 = pCStack_b8;
   }
   puVar8 = (uint32_t *)FUN_00614dd0(auStack_68,0,0x200002c,0);
   GH_PIECE(uStack_44,0,1) = 0x14;
@@ -795,15 +795,15 @@ LAB_0068466d:
   if (pCStack_54 != 0) {
     C_str__ReleaseRep(pCStack_54);
   }
-  iVar13 = vector_size_e4_615a50((int)((int)&pCVar15[5].refCount + 3));
-  if ((*(uint32_t *)pCVar15->chars & 0xff000) == 0) {
+  iVar12 = vector_size_e4_615a50((int)((int)&pCVar14[5].refCount + 3));
+  if ((*(uint32_t *)pCVar14->chars & 0xff000) == 0) {
     pSStack_a4 = tier1_operator_new(0x40);
     uStack_44 = CONCAT31(GH_PIECE(uStack_44,1,3),0x16);
     if (pSStack_a4 != 0) {
       CStack_a8.rep =
            S_ControlDesc__S_ControlDesc
                      (pSStack_a4,0x23,"GB_Soldiers_x",
-                      (iVar13 + 1U & 0xff) << 0xc | *(uint32_t *)pCVar15->chars);
+                      (iVar12 + 1U & 0xff) << 0xc | *(uint32_t *)pCVar14->chars);
       goto LAB_00684218;
     }
   }
@@ -814,40 +814,40 @@ LAB_0068466d:
       CStack_a8.rep =
            S_ControlDesc__S_ControlDesc
                      (pSStack_a4,0x23,"GB_Soldiers_x",
-                      (iVar13 + 1U & 0xff) << 4 | *(uint32_t *)pCVar15->chars);
+                      (iVar12 + 1U & 0xff) << 4 | *(uint32_t *)pCVar14->chars);
       goto LAB_00684218;
     }
   }
   CStack_a8.rep = 0;
 LAB_00684218:
   GH_PIECE(uStack_44,0,1) = 7;
-  FUN_00615f50((void *)((int)&pCVar15[5].refCount + 3),
-               *(uint32_t **)((int)&pCVar15[6].refCount + 2),(uint32_t*)(&CStack_a8));
-  pvVar14 = *(void **)(*(int *)((int)&pCVar15[6].refCount + 2) - 4);
-  desc = pvVar14;
+  FUN_00615f50((void *)((int)&pCVar14[5].refCount + 3),
+               *(uint32_t **)((int)&pCVar14[6].refCount + 2),(uint32_t*)(&CStack_a8));
+  pvVar4 = *(void **)(*(int *)((int)&pCVar14[6].refCount + 2) - 4);
+  pvVar13 = pvVar4;
   puVar8 = (uint32_t *)FUN_00614dd0(auStack_68,0,0x1000004,0);
-  this_00 = (void *)((int)pvVar14 + 0x10);
+  this_00 = (void *)((int)pvVar4 + 0x10);
   uStack_44 = CONCAT31(GH_PIECE(uStack_44,1,3),0x17);
-  FUN_00615d50(this_00,*(uint32_t **)((int)pvVar14 + 0x18),puVar8);
+  FUN_00615d50(this_00,*(uint32_t **)((int)pvVar4 + 0x18),puVar8);
   if (pCStack_54 != 0) {
     C_str__ReleaseRep(pCStack_54);
   }
   puVar8 = (uint32_t *)FUN_00614dd0(auStack_68,0,0x100000b,0xc101000);
   uStack_44 = CONCAT31(GH_PIECE(uStack_44,1,3),0x18);
-  FUN_00615d50(this_00,*(uint32_t **)((int)pvVar14 + 0x18),puVar8);
+  FUN_00615d50(this_00,*(uint32_t **)((int)pvVar4 + 0x18),puVar8);
   if (pCStack_54 != 0) {
     C_str__ReleaseRep(pCStack_54);
   }
   puVar8 = (uint32_t *)FUN_00614dd0(auStack_68,0,0x1000028,4);
   GH_PIECE(uStack_44,0,1) = 0x19;
-  FUN_00615d50(this_00,*(uint32_t **)((int)pvVar14 + 0x18),puVar8);
+  FUN_00615d50(this_00,*(uint32_t **)((int)pvVar4 + 0x18),puVar8);
   GH_PIECE(uStack_44,0,1) = 7;
   if (pCStack_54 != 0) {
     C_str__ReleaseRep(pCStack_54);
   }
   puVar8 = (uint32_t *)FUN_00614e50(auStack_68,0,0x1000029,0,0x3d7df3b6);
   GH_PIECE(uStack_44,0,1) = 0x1a;
-  FUN_00615d50(this_00,*(uint32_t **)((int)pvVar14 + 0x18),puVar8);
+  FUN_00615d50(this_00,*(uint32_t **)((int)pvVar4 + 0x18),puVar8);
   GH_PIECE(uStack_44,0,1) = 7;
   if (pCStack_54 != 0) {
     C_str__ReleaseRep(pCStack_54);
@@ -857,49 +857,50 @@ LAB_00684218:
     piVar7 = 0;
   }
   else {
-    *piVar7 = piVar5[0x2c];
-    piVar7[1] = piVar5[0x2d];
-    piVar7[2] = piVar5[0x2e];
-    piVar7[3] = piVar5[0x2f];
+    *piVar7 = piVar6[0x2c];
+    piVar7[1] = piVar6[0x2d];
+    piVar7[2] = piVar6[0x2e];
+    piVar7[3] = piVar6[0x2f];
   }
   puVar8 = (uint32_t *)FUN_00614e20(auStack_68,0,0x100006b,0,piVar7);
   GH_PIECE(uStack_44,0,1) = 0x1b;
-  FUN_00615d50(this_00,*(uint32_t **)((int)pvVar14 + 0x18),puVar8);
+  FUN_00615d50(this_00,*(uint32_t **)((int)pvVar4 + 0x18),puVar8);
   uStack_44 = CONCAT31(GH_PIECE(uStack_44,1,3),7);
   if (pCStack_54 != 0) {
     C_str__ReleaseRep(pCStack_54);
   }
-  iVar17 = 0x1e;
-  iVar13 = vector_size_e4_686b90((int)g_gameProfile.m_humanStore);
-  if (0x1e < iVar13) {
+  iVar16 = 0x1e;
+  iVar12 = vector_size_e4_686b90((int)g_gameProfile.m_humanStore);
+  if (0x1e < iVar12) {
     do {
-      if (0x3b < iVar17) break;
-      pCVar4 = C_fstr_Construct(&CStack_a8,"Soldier_x%02d",iVar17);
-      pCVar15 = pCVar4->rep;
-      if (pCVar15 != 0) {
-        pCVar15->refCount = pCVar15->refCount + 1;
+      if (0x3b < iVar16) break;
+      pCVar5 = C_fstr_Construct(&CStack_a8,"Soldier_x%02d",iVar16);
+      pCVar14 = pCVar5->rep;
+      if (pCVar14 != 0) {
+        pCVar14->refCount = pCVar14->refCount + 1;
       }
       if (pCStack_d0 != 0) {
         C_str__ReleaseRep((C_str *)pCStack_d0);
       }
-      pCStack_d0 = pCVar4->rep;
+      pCStack_d0 = pCVar5->rep;
       if (CStack_a8.rep != 0) {
         C_str__ReleaseRep((C_str *)CStack_a8.rep);
       }
-      FUN_0066dad0(pvVar18,&pCStack_d0,piVar6,piVar5);
+      C_MenuState__CloneVisual(pCVar17,&pCStack_d0,source,piVar6);
       if (pCStack_d0 == 0) {
-        pcVar16 = &DAT_00867a90;
+        pcVar15 = &DAT_00867a90;
       }
       else {
-        pcVar16 = pCStack_d0->chars;
+        pcVar15 = pCStack_d0->chars;
       }
-      iVar13 = vector_size_e4_615a50((int)desc + 0x30);
-      if ((*(uint32_t *)((int)desc + 8) & 0xff000) == 0) {
+      iVar12 = vector_size_e4_615a50((int)pvVar13 + 0x30);
+      if ((*(uint32_t *)((int)pvVar13 + 8) & 0xff000) == 0) {
         pSStack_a4 = tier1_operator_new(0x40);
         GH_PIECE(uStack_44,0,1) = 0x1d;
         if (pSStack_a4 != 0) {
           S_ControlDesc__S_ControlDesc
-                    (pSStack_a4,4,pcVar16,(iVar13 + 1U & 0xff) << 0xc | *(uint32_t *)((int)desc + 8));
+                    (pSStack_a4,4,pcVar15,(iVar12 + 1U & 0xff) << 0xc | *(uint32_t *)((int)pvVar13 + 8))
+          ;
         }
         puVar8 = (uint32_t *)&stack0xffffff50;
       }
@@ -911,43 +912,43 @@ LAB_00684218:
         }
         else {
           S_ControlDesc__S_ControlDesc
-                    (pSStack_a4,4,pcVar16,(iVar13 + 1U & 0xff) << 4 | *(uint32_t *)((int)desc + 8));
+                    (pSStack_a4,4,pcVar15,(iVar12 + 1U & 0xff) << 4 | *(uint32_t *)((int)pvVar13 + 8));
           puVar8 = (uint32_t *)&stack0xffffff54;
         }
       }
       GH_PIECE(uStack_44,0,1) = 7;
-      FUN_00615f50((void *)((int)desc + 0x30),*(uint32_t **)((int)desc + 0x38),puVar8);
-      pvVar14 = *(void **)(*(int *)((int)desc + 0x38) - 4);
-      puVar8 = (uint32_t *)FUN_00614dd0(auStack_68,0,0x1000009,iVar17);
+      FUN_00615f50((void *)((int)pvVar13 + 0x30),*(uint32_t **)((int)pvVar13 + 0x38),puVar8);
+      pvVar4 = *(void **)(*(int *)((int)pvVar13 + 0x38) - 4);
+      puVar8 = (uint32_t *)FUN_00614dd0(auStack_68,0,0x1000009,iVar16);
       GH_PIECE(uStack_44,0,1) = 0x1e;
-      FUN_00615d50((void *)((int)pvVar14 + 0x10),*(uint32_t **)((int)pvVar14 + 0x18),puVar8);
+      FUN_00615d50((void *)((int)pvVar4 + 0x10),*(uint32_t **)((int)pvVar4 + 0x18),puVar8);
       uStack_44 = CONCAT31(GH_PIECE(uStack_44,1,3),7);
       if (pCStack_54 != 0) {
         C_str__ReleaseRep(pCStack_54);
       }
-      pSVar11 = C_HumanStore__Get(g_gameProfile.m_humanStore,iVar17);
-      FUN_00676410((int)pvVar14,0,0x1000038,0,pSVar11->faceImage);
-      AddDescMessage3(pvVar14,0,0x1000007,0x4001000,(uint32_t)pvVar18,0x685420);
-      iVar17++;
-      iVar13 = vector_size_e4_686b90((int)g_gameProfile.m_humanStore);
-    } while (iVar17 < iVar13);
+      pSVar10 = C_HumanStore__Get(g_gameProfile.m_humanStore,iVar16);
+      FUN_00676410((int)pvVar4,0,0x1000038,0,pSVar10->faceImage);
+      AddDescMessage3(pvVar4,0,0x1000007,0x4001000,(uint32_t)pCVar17,0x685420);
+      iVar16++;
+      iVar12 = vector_size_e4_686b90((int)g_gameProfile.m_humanStore);
+    } while (iVar16 < iVar12);
   }
-  AddDescMessage1(desc,0,0x200002c,0);
+  AddDescMessage1(pvVar13,0,0x200002c,0);
   bVar2 = C_GameProfile__IsCooperativeGame(&g_gameProfile);
-  pCVar15 = pCStack_b8;
+  pCVar14 = pCStack_b8;
   if (!bVar2) {
-    pvVar14 = (void *)FUN_0061da70(pCStack_b8,0x1f,"allies");
-    AddDescMessage3(pvVar14,0,0x1000007,0x400e000,(uint32_t)pvVar18,0x6854e0);
-    pvVar14 = (void *)FUN_0061da70(pCVar15,0x1f,&DAT_00832d10);
-    AddDescMessage3(pvVar14,0,0x1000007,0x400e000,(uint32_t)pvVar18,0x6854e0);
+    pvVar4 = (void *)FUN_0061da70(pCStack_b8,0x1f,"allies");
+    AddDescMessage3(pvVar4,0,0x1000007,0x400e000,(uint32_t)pCVar17,0x6854e0);
+    pvVar4 = (void *)FUN_0061da70(pCVar14,0x1f,&DAT_00832d10);
+    AddDescMessage3(pvVar4,0,0x1000007,0x400e000,(uint32_t)pCVar17,0x6854e0);
   }
   uStack_44 = 0xffffffff;
   if (pCStack_d0 != 0) {
     C_str__ReleaseRep((C_str *)pCStack_d0);
   }
-  (**(code **)(*piVar5 + 0x30))(piVar5,0);
-  uVar12 = (**(code **)(*piVar5 + 0x24))(piVar5);
-  return CONCAT31((int3)((uint32_t)uVar12 >> 8),1);
+  (**(code **)(*piVar6 + 0x30))(piVar6,0);
+  uVar11 = (**(code **)(*piVar6 + 0x24))(piVar6);
+  return CONCAT31((int3)((uint32_t)uVar11 >> 8),1);
 }
 
 

@@ -16,6 +16,7 @@
 #include "game/text_box.h"
 
 class C_Cursor;
+struct S_vector;
 class C_MessageBox;
 class C_Screen;
 class I3D_camera;
@@ -63,6 +64,15 @@ enum : uint32_t {
     MENU_MSG_ADD_TICKED = 0x200007A,                    // a control (value2) ticked by the menu
     MENU_MSG_REMOVE_TICKED = 0x200007B,
     MENU_MSG_KEYBOARD_OFF = 0x20000C2,                  // value != 0: the keys and the clicks off
+    // Posted by HandleInput, the menus' own: Escape not taken by the top screen (value its id);
+    // Ctrl + Alt + Shift + N.
+    MENU_MSG_ESCAPE = 0x200000A,
+    MENU_MSG_SECRET_KEY = 0x200007D,
+};
+// The menu state's modes (C_MenuState::m_mode; else the campaign screen's kind, 1 .. 6).
+enum : int {
+    MENU_MODE_MAIN = 10,                                // Start(0): the main menu
+    MENU_MODE_GAME = 11,                                // Start(-1 / -2): the in-game menu
 };
 // The screen asked whether to quit (MENU_MSG_BACK on the last screen opens it; back from it closes it).
 constexpr uint32_t QUIT_SCREEN = 4;
@@ -71,6 +81,9 @@ constexpr uint32_t QUIT_SCREEN = 4;
 extern std::deque<C_Screen *> g_menuScreens;            // 0x008ae5c4
 // The messages kept back (MENU_MSG_DEFER; a static of HandleMessage in the original).
 extern std::deque<S_ControlMessage> g_deferredMessages;   // 0x008ae55c
+// The characters typed (IGraph's, up to the first 0) as wide characters into `out` (`size` of
+// them); true: more than the 0 read (HandleInput's, with the Unicode font).
+bool ReadTypedChars(wchar_t *out, int size);            // 0x0066b680 (__fastcall)
 // The menu state made last (cleared when it is deleted).
 extern class C_MenuState *g_menuState;                  // 0x008ae5f8
 
@@ -81,13 +94,28 @@ public:
     C_MenuState(const C_MenuState &) = delete;
     C_MenuState &operator=(const C_MenuState &) = delete;
 
-    // (Part 9d-ii-b.)
+    // `arg`: the campaign screen (its kind the mode; its diary texts added), 0 the main menu,
+    // -1 / -2 the in-game menu. The scene (the whole screen; its render callback draws the
+    // screens), its camera, the cursor's model, the message box, the menu's screens, the cursor,
+    // the light, the click sound, the music (not after a mission, an operation or in the game:
+    // none playing, track 0; track 37 crossfaded to 0 in 2 s); running, true.
     bool Start(void *arg) override;                     // 0x04 0x0066b010
+    // OnStop, the screens' stack emptied, the screens deleted (the last first), the models and
+    // frames released, the cursor, the camera and the scene released, the queue emptied; true.
     bool Stop() override;                               // 0x08 0x0066b440
+    // (Keyboard off: nothing.) OnInput; with a screen: the characters typed to the control
+    // editing (taken: done), then the key pressed (none: a held control, alt or shift key, else
+    // the controls' escape) to the top's Unknown20; Escape not taken: the drag ended,
+    // MENU_MSG_ESCAPE; Ctrl + Alt + Shift + N: MENU_MSG_SECRET_KEY. True.
     bool HandleInput(float *held, float *pressed) override;   // 0x0C 0x0066b6e0
     // The menu's OnTick.
     void Tick(int timeDelta) override { OnTick(timeDelta); }   // 0x10 0x0066c190
+    // OnUpdate and the sound module's update (twice: the first not in the network game's menu),
+    // the timer, the queue; with a screen: the cursor's input, the ticks (the control editing,
+    // the top, the popup, the ticked controls, the last first).
     void Update(int timeDelta) override;                // 0x14 0x0066c1a0
+    // (OnRender's done: the cursor only.) The scene drawn: twice under the popup (the screen
+    // under it first, without the depth buffer's clear) or the popup's own popup; the cursor.
     void Render() override;                             // 0x18 0x0066e100
     // (0x1C: the base's, 0.)
 
@@ -119,7 +147,29 @@ public:
     void ShowMessageId(int kind, uint32_t textId, uint32_t yesMessage, uint32_t noMessage);   // 0x0066daa0
     void CloseMessage();                                // 0x0066dac0 (__fastcall)
 
+    // The frame the cursor is over in the top screen (a ray from it, along +z).
+    I3D_frame *PickFrame();                             // 0x0066bb80
+    // The menus' frames, released by Stop: a copy of a visual (its own mesh), of a frame tree,
+    // named and linked to `parent`; a new frame of a type, linked, named and placed.
+    I3D_frame *CloneVisual(const C_str &name, I3D_frame *parent, I3D_frame *source);   // 0x0066dad0
+    I3D_frame *CloneFrame(const C_str &name, I3D_frame *parent, I3D_frame *source);    // 0x0066dcf0
+    I3D_frame *AddFrame(const C_str &name, int type, I3D_frame *parent, const S_vector &pos);   // 0x0066def0
+
 protected:
+    // A model of the scene (off, linked to its sector, kept in m_models; not loaded: none).
+    I3D_frame *LoadModel(const char *name, const char *file);   // 0x0066c2a0 (__fastcall)
+    // The message box on its model (placed at (0.5, -0.375, -0.5)), its screen first (index 0).
+    bool CreateMessageBox(const char *name, const char *file);  // 0x0066c4d0
+    // The cursor's model, the message box, the menu's screens (driver states 0x15 / 0x19 off,
+    // 0x11 off in the game; restored).
+    bool LoadScreens();                                 // 0x0066c8b0
+    // The frames (their trees) and the models released, the last first.
+    void ReleaseModels();                               // 0x0066c9c0 (__fastcall)
+    // The click sound played (not while it plays).
+    void PlayClick();                                   // 0x0066b410 (__fastcall)
+    // The cursor's input to the top screen (Update; the input lock -1 only).
+    void CursorInput(int timeDelta);                    // 0x0066bc90
+
     uint32_t m_hoveredId = 0xFFFFFFFF;                  // +0x0C the id under the cursor last update
     C_Control *m_editing = nullptr;                     // +0x10 the control the keys go to
     bool m_timing = false;                              // +0x14

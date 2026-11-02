@@ -266,8 +266,10 @@ uint32_t C_VideoState__FUN_00697480(C_VideoState *_this, ...)
   char cVar2;
   uint32_t *puVar3;
   int iVar4;
+  char *name;
   char **frame;
   int *extraout_EAX;
+  char *file;
   uint32_t uVar5;
   uint8_t local_31;
   int *local_2c;
@@ -352,9 +354,22 @@ uint32_t C_VideoState__FUN_00697480(C_VideoState *_this, ...)
   }
   local_4 = 0xffffffff;
   FUN_00628050(this_00,(uint32_t *)puVar3[3],(uint32_t*)(&local_2c));
-  for (uVar5 = 0; (puVar3[2] != 0 && (uVar5 < (uint32_t)((int)(puVar3[3] - puVar3[2]) >> 2)));
-      uVar5 = uVar5 + 1) {
-    frame = (char **)FUN_0066c2a0((int)_this);
+  uVar5 = 0;
+  while( true ) {
+    if ((puVar3[2] == 0) || ((uint32_t)((int)(puVar3[3] - puVar3[2]) >> 2) <= uVar5)) break;
+    iVar4 = *(int *)(*(int *)(puVar3[2] + uVar5 * 4) + 0x38);
+    file = (char *)(iVar4 + 8);
+    if (iVar4 == 0) {
+      file = &DAT_00867a90;
+    }
+    iVar4 = *(int *)(*(int *)(puVar3[2] + uVar5 * 4) + 0x3c);
+    if (iVar4 == 0) {
+      name = &DAT_00867a90;
+    }
+    else {
+      name = (char *)(iVar4 + 8);
+    }
+    frame = C_MenuState__LoadModel((C_MenuState *)_this,name,file);
     if (frame != (char **)0x0) {
       pvVar1 = *(void **)(puVar3[2] + uVar5 * 4);
       if ((*(uint32_t *)((int)pvVar1 + 0x40) & 0xfc000000) == 0x4000000) {
@@ -379,6 +394,7 @@ uint32_t C_VideoState__FUN_00697480(C_VideoState *_this, ...)
         FUN_0066ea50(&_this[2].m_048,*(uint32_t **)_this[2]._pad_0050,1,(uint32_t*)(&local_2c));
       }
     }
+    uVar5++;
   }
   if (puVar3 != 0) {
     (**(code **)*puVar3)(1);

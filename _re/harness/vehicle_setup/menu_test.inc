@@ -11,22 +11,17 @@
 #include "game/app.h"
 #include "game/items_module.h"
 
-// (Part 9d-ii-b's: not yet ported.)
-bool C_MenuState::Start(void *) { return false; }
-bool C_MenuState::Stop() { return false; }
-bool C_MenuState::HandleInput(float *, float *) { return false; }
-void C_MenuState::Update(int) {}
-void C_MenuState::Render() {}
-void C_MenuState::DrawScreens() {}
-
 void C_SoundModule::StopAll(bool releaseTableSounds, bool keepMusic) { GfLog("stopall %d %d", releaseTableSounds, keepMusic); }
 void C_GameProfile::ResetGame() { GfLog("reset game"); }
 void SetKeyboardPolling(bool enable) { GfLog("polling %d", enable); }
-void ReleaseFrameTree(I3D_frame *frame) { GfLog("release tree %s", GfName(frame)); }
+// (Frame names for the log: GfName's, or a test's own namer.)
+std::string (*g_msNamer)(const void *frame);
+std::string MsFrameName(const I3D_frame *frame) { return g_msNamer ? g_msNamer(frame) : std::string(GfName(frame)); }
+void ReleaseFrameTree(I3D_frame *frame) { GfLog("release tree %s", MsFrameName(frame).c_str()); }
 uint32_t g_msPicked;
 uint32_t C_Cursor::Pick(I3D_scene *scene, I3D_frame *frame)
 {
-    GfLog("pick %d %s", scene != nullptr, GfName(frame));
+    GfLog("pick %d %s", scene != nullptr, MsFrameName(frame).c_str());
     return g_msPicked;
 }
 

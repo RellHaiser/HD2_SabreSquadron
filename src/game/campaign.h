@@ -131,6 +131,8 @@ public:
     // (C_Campaign::PreviousScreen).
     bool GoesBackAcross() const { return m_backAcross; }
     const std::vector<S_CampaignItem> &GetItems() const { return m_items; }
+    // The texts the screen's menu adds to the diary when it starts (C_MenuState::Start).
+    const std::vector<int> &GetDiaryTexts() const { return m_diaryTexts; }
 
 private:
     friend class C_Campaign;
@@ -139,7 +141,7 @@ private:
     bool m_backAcross = false;                          // +0x14
     bool m_unknown15 = false;                           // +0x15
     std::vector<S_CampaignItem> m_items;                // +0x18
-    std::vector<int> m_unknown28;                       // +0x28 (ints of chunk 0x19; not read)
+    std::vector<int> m_diaryTexts;                      // +0x28 chunk 0x19: text ids the menu adds to the diary
 };
 
 // The mission itself (vtable 0x00815b10, type 7; 0x10 bytes): C_GameApp starts the game.

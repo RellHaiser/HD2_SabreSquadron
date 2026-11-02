@@ -30,3 +30,4 @@ bool LoadActorItems(C_Actor *actor, C_chunk &chunk);
 // (The menus' frames, part 9d-ii-a: menu_test.inc fakes it.)
 class I3D_frame;
 void ReleaseFrameTree(I3D_frame *frame);
+bool CloneFrameTree(I3D_frame *&copy, I3D_frame *source, I3D_frame *parent);   // (part 9d-ii-b)

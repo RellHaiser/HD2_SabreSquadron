@@ -22,3 +22,4 @@
 00840668 g_cursorX @ float
 0084066c g_cursorY @ float
 008ae558 g_cursor @ C_Cursor *
+0066ab70 C_Cursor::Draw | void __fastcall Draw(C_Cursor * cursor)
