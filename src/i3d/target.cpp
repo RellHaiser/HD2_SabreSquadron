@@ -31,7 +31,7 @@ void RemoveFromTargets(I3D_frame *frame)
         t->RemoveFrame(frame);
 }
 
-// 0x100566d0
+// LS3DRF 0x1002db10 (from LS3DF 0x100566d0)
 void UpdateTarget(I3D_frame *target) { static_cast<I3D_target *>(target)->UpdateFrames(); }
 
 }  // namespace ls3d::i3d

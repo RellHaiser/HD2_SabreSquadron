@@ -361,6 +361,7 @@ void I3D_sector::AddSound(I3D_sound *sound)
         sound->SetOn(true);
 }
 
+// LS3DRF 0x1002a5e0 (from LS3DF 0x1004de20)
 I3D_RESULT I3D_sector::RemoveSound(I3D_sound *sound)
 {
     if (!Contains(sounds, sound))

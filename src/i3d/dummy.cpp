@@ -40,6 +40,7 @@ void I3D_dummy::Load()
     dtaRead(g_loadFile, &box, sizeof box);
 }
 
+// LS3DRF 0x10011c40 (from LS3DF 0x1001bc60)
 // (scaleW gets an unset value in the original.)
 void __stdcall I3D_dummy::BakeBox(int mode)
 {

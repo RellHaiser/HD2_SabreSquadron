@@ -330,6 +330,7 @@ void *I3D_mesh_level::AllocVertices(int count)
     return vertices.buffer->data;
 }
 
+// LS3DRF 0x1001e5a0 (from LS3DF 0x10030f30)
 void I3D_mesh_level::ComputeBounds()
 {
     const auto *v = static_cast<const uint8_t *>(LockVertices(1));

@@ -66,6 +66,7 @@ void BlockColor()
     }
 }
 
+// LS3DRF 0x10009f20 (from LS3DF 0x10010350)
 // 0x10010350 (also inlined by RayVisual): the parameter where the ray (from `o` along `d`) enters
 // the box, the axis of the face in `normal`; 0 and z when it starts inside, 1e17 when it misses.
 float RayBox(const S_vector &min, const S_vector &max, const S_vector &o, const S_vector &d, S_vector &normal)
@@ -519,6 +520,7 @@ done:
     finish(front);
 }
 
+// LS3DRF 0x10007590 (from LS3DF 0x1000cc50)
 // 0x1000cc50: a frame and its children against the ray.
 void RayWalk(I3D_frame *f)
 {
