@@ -392,7 +392,7 @@ I3D_RESULT OpenAnimationFile(const char *fileName, I3D_animation_set *set)
     return result;
 }
 
-// 0x1005ddd0
+// LS3DRF 0x1002f8e0 (from LS3DF 0x1005ddd0)
 I3D_mesh *LoadMesh()
 {
     // A mesh shared with an earlier frame: that frame's index.

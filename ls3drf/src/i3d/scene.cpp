@@ -357,6 +357,7 @@ void I3D_scene::SetActiveCamera(I3D_camera *camera)
         camera->BuildProjection();
 }
 
+// LS3DRF 0x10026750 (from LS3DF 0x10047250)
 I3D_RESULT I3D_scene::UnmapScreenPoint(int x, int y, S_vector4 &origin, S_vector4 &dir)
 {
     if (!activeCamera)
@@ -924,6 +925,7 @@ void I3D_scene::SetWeatherCount(int count)
     }
 }
 
+// LS3DRF 0x10027a30 (from LS3DF 0x10049000)
 // The box of a drawn dummy (0x10049000): three of its faces as planes, its centre, the squared
 // half diagonal and the edge lengths, in world space.
 void I3D_scene::MakeDummyBox(S_dummyBox &out, I3D_frame *frame)

@@ -214,7 +214,7 @@ I3D_RESULT I3D_object::Duplicate(I3D_frame *source)
     return I3D_OK;
 }
 
-// 0x10036350
+// LS3DRF 0x10021b20 (from LS3DF 0x10036350)
 void I3D_object::SetWorldSpace(bool on)
 {
     if (visualFlags & VISF_WORLD_SPACE) {

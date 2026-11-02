@@ -302,7 +302,7 @@ I3D_RESULT I3D_morph::SetMesh(I3D_mesh *newMesh, uint32_t flags)
     return I3D_OK;
 }
 
-// 0x10035940
+// LS3DRF 0x10021220 (from LS3DF 0x10035940)
 I3D_RESULT I3D_morph::Duplicate(I3D_frame *source)
 {
     if (!source || source == this)

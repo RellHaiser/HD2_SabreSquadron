@@ -244,6 +244,7 @@ void __stdcall S_matrix::SetDir(const S_vector &dir, const S_vector &up)
     ClearTranslation();
 }
 
+// LS3DRF 0x1001a8d0 (from LS3DF 0x1002cf10)
 // 0x1002cf10: rotation looking along `dir` with `up` (made orthogonal to it) as the y axis.
 void __stdcall S_matrix::SetDir3(const S_vector &dir, const S_vector &up)
 {

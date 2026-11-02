@@ -135,6 +135,7 @@ I3D_RESULT __stdcall I3D_camera::Duplicate(I3D_frame *source)
     return I3D_OK;
 }
 
+// LS3DRF 0x10004500 (from LS3DF 0x10009b30)
 void I3D_camera::BuildProjection()
 {
     ZeroMatrix(projection);
