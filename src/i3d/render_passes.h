@@ -12,9 +12,6 @@ namespace ls3d::i3d {
 // visible sector's visible visuals chained in renderVisuals with this frame's renderStamp.
 void TraverseSectors(I3D_scene *scene);
 
-// Projectors (projector.cpp, 0x10044190; driver state DRVSTATE_PROJECTORS).
-void RenderProjectors();
-
 // Particles (emitter.cpp): the batched particles written out before a queue is drawn
 // (0x1003ae10) and after the frame (0x1003ae40).
 void FlushParticles();

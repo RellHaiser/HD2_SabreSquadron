@@ -352,8 +352,7 @@ void I3D_object::Prepare()
             std::memcpy(dst + 0x18, src, 8);
         }
     }
-    SetLightSector(g_rc.sector);
-    SelectLights(this, lights, 1);
+    // (No device lights chosen: LS3DRF has none.)
     QueueFaceGroups(level, (visualFlags & VISF_TEXTURE_LOD) ? mesh->levels[textureLevel]->faceGroups : nullptr);
 }
 
@@ -361,8 +360,8 @@ bool I3D_object::PrepareMirrored()
 {
     if (!(visualFlags & VISF_MIRRORED))
         return false;
-    // A mirror's copy: the reflected visual's items, in its sector, with mirrored lights.
-    // (g_rc.sector is left at that sector.)
+    // A mirror's copy: the reflected visual's items, in its sector (no mirrored lights: LS3DRF has
+    // no device lights). (g_rc.sector is left at that sector.)
     I3D_object *original = static_cast<I3D_object *>(data);
     I3D_frame *f = original->parent;
     while (f && f->type != FRAME_SECTOR)
@@ -370,7 +369,6 @@ bool I3D_object::PrepareMirrored()
     g_rc.sector = f ? static_cast<I3D_sector *>(f) : g_renderScene->primarySector;
     const int first = g_rc.items.Size();
     original->Prepare();
-    MirrorLights(original->lights, lights);
     for (int i = first; i < g_rc.items.Size(); ++i)
         g_rc.items[i].visual = this;
     return true;
@@ -789,7 +787,7 @@ void DrawMeshItem(I3D_object *v, const S_renderItem *item)
         }
     }
 
-    EnableLights(item->sector->ambientColor, v->lights.count, v->lights.indices);
+    // (No device lights enabled: LS3DRF has none.)
     g_pGfx->SetTransform(D3DTS_WORLD, reinterpret_cast<const D3DMATRIX *>(matrix));
     SetVertexFormat(static_cast<int>(vb->buffer->format));
     // (LS3DRF's buffers are heap memory: no device buffers to draw from.)

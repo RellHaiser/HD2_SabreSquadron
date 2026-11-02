@@ -442,8 +442,7 @@ void I3D_lit_object::Prepare()
     uint32_t lightmapId = 0;
     if (!(set.flags & LMSET_VERTEX_COLORS)) {
         SetLodFade(levelIndex, level, distance2);
-        SetLightSector(g_rc.sector);
-        SelectLights(this, lights, 0x10);
+        // (No device lights chosen: LS3DRF has none.)
         if (l->lightmap) {                  // (fix: the original reads a missing lightmap)
             lightmapTexture = l->lightmap->texture;
             lightmapId = lightmapTexture->id;
@@ -560,7 +559,7 @@ void I3D_lit_object::Draw(const S_renderItem *item)
     const S_IBAlloc *ib;
     if (set.flags & LMSET_TEXTURES) {
         ib = &l->faces;
-        EnableLights(item->sector->ambientColor2, lights.count, lights.indices);
+        // (No device lights enabled: LS3DRF has none.)
         if (mat) {
             if (mat->matFlags & MATF_CLAMP_U) {
                 g_pGfx->SetTextureStageState(1, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);

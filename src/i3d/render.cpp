@@ -910,8 +910,7 @@ I3D_RESULT I3D_driver::Render(I3D_scene *scene, bool keepScene)
             PrepareSector(scene->primarySector);
         PrepareSector(scene->omniSector);
     }
-    if (g_driverStates[DRVSTATE_PROJECTORS])
-        RenderProjectors();
+    // (No projected geometry: LS3DRF's projectors draw nothing.)
     scene->UpdateWeather();
     BuildKeys();
     RadixSort(g_rc.keys, g_rc.numKeys);

@@ -321,7 +321,6 @@ void I3D_billboard::Prepare()
     else if (level->flags & MLF_RENDER_STALE)
         level->FillRenderVB(false, nullptr, nullptr);
     SetLodFade(levelIndex, level, distance2);
-    SetLightSector(g_rc.sector);
-    SelectLights(this, lights, 1);
+    // (No device lights chosen: LS3DRF has none.)
     QueueFaceGroups(level, nullptr);
 }

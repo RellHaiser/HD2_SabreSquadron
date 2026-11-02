@@ -562,8 +562,7 @@ void I3D_singlemesh::Prepare()
     if (sl->stamp != jointChanges || !sl->vb.vb)
         SkinLevel(levelIndex);
     SetLodFade(levelIndex, level, distance2);
-    SetLightSector(g_rc.sector);
-    SelectLights(this, lights, 1);
+    // (No device lights chosen: LS3DRF has none.)
     QueueFaceGroups(level, nullptr);
 }
 

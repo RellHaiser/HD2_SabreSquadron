@@ -1,5 +1,6 @@
-// Device state helpers of the visuals' draw code (0x100637a0 - 0x100647f0): z bias, materials,
-// the sectors' ambient colors and the choice of the device lights a visual is lit by.
+// Device state helpers of the visuals' draw code (0x100637a0 - 0x100647f0): z bias, materials and
+// the sectors' ambient colors. LS3DRF has no device lights: LS3DF's EnableLights / SelectLights /
+// MirrorLights (0x10063dc0, 0x10063eb0, 0x10064260) are not ported.
 #pragma once
 
 #include <cstdint>
@@ -8,7 +9,6 @@
 #include "i3d/i3d.h"
 
 class I3D_sector;
-class I3D_visual;
 
 // Light flags the renderer keeps in I3D_light::lightFlags.
 enum : uint32_t {
@@ -20,9 +20,9 @@ enum : uint32_t {
 namespace ls3d::i3d {
 
 // The device lights a visual is lit by (object, lightmap, billboard and single-mesh visuals keep
-// this at +0x1F4).
+// this at +0x1F4). Kept for the layout: object Init clears it, nothing else touches it.
 struct S_visualLights {
-    uint16_t indices[8];                    // +0x1F4 device light indices (g_lights)
+    uint16_t indices[8];                    // +0x1F4 device light indices
     int count;                              // +0x204
     int stamp;                              // +0x208 the light sector's lightChanges + the visual's
                                             // changeCount when they were chosen (-1: never)
@@ -53,18 +53,6 @@ void SetMaterial(D3DMATERIAL8 &material, float alpha, float level);
 // A sector's ambient colors (+0x19C its own ambient lights, +0x1A0 with SetMode bit 0x10) from
 // its ambient lights when SCTF_AMBIENT_CHANGED is set (0x10063930).
 void UpdateSectorAmbient(I3D_sector *sector);
-// D3DRS_AMBIENT (cached) and the device lights `indices` enabled, the previous ones off (0x10063dc0).
-void EnableLights(uint32_t ambient, int count, const uint16_t *indices);
-// The sector SelectLights takes the lights of (0x10063ea0).
-void SetLightSector(I3D_sector *sector);
-I3D_sector *GetLightSector();
-// The 8 strongest lights of the light sector that shine on the visual's world sphere (those whose
-// mode has a bit of `mask`; point and spot lights by intensity / distance, directional ones by
-// intensity), when the sector's lights or the visual changed (0x10063eb0).
-void SelectLights(I3D_visual *visual, S_visualLights &lights, uint32_t mask);
-// `dst` gets mirrored copies of the lights of `src` (g_renderMirror's reflection; the copies are
-// device lights of their own, made on first use, refreshed once per mirror pass) (0x10064260).
-void MirrorLights(const S_visualLights &src, S_visualLights &dst);
 
 // 0x100695a0 (an I3D_bbox method): the corners of a box (16 bytes apart, w unset) in a static
 // array: x from max to min, then y, then z from min to max.

@@ -789,12 +789,9 @@ void CompareAll()
     CompareAnimation();
     if (IndexOf(Orig<void *>(0x100be010), true) != IndexOf(g_nameRoot, false))
         Fail("name root", -1);
-    if (Orig<int>(0x100d13c4) != g_lights.Size())
+    // (The port keeps no device-light list; with PatchOrigLightInit the original's stays empty.)
+    if (Orig<int>(0x100d13c4) != 0)
         Fail("light count", -1);
-    for (int k = 0; k < g_lights.Size(); ++k) {
-        if (IndexOf(Orig<void **>(0x100d13bc)[k], true) != IndexOf(g_lights[k], false))
-            Fail("light list", -1);
-    }
     if (g_origDevice.calls != g_portDevice.calls)
         Fail("LightEnable calls", -1);
     if (Orig<int>(0x100bf350) != g_portalChanges || Orig<int>(0x100bf354) != g_sectorChanges)
