@@ -290,69 +290,69 @@ f_00673040.cpp:90:89: invalid types 'WORD {aka short unsigned int}[int]' for arr
     (*(int *)local_10 = *(int *)local_10 - 1, GH_PIECE(iVar3,0,1) = local_10->e_magic[0],
 f_00673040.cpp:91:47: invalid types 'WORD {aka short unsigned int}[int]' for array subscript
     GH_PIECE(iVar3,1,1) = local_10->e_magic[1], GH_PIECE(iVar3,2,2) = local_10->e_cblp, iVar3 == 0)) {
-f_00673040.cpp:251:33: too few arguments to function
+f_00673040.cpp:253:33: too few arguments to function
     (*pIVar1->vtable->Duplicate)();
-f_00673040.cpp:1147:31: request for member '_0_4_' in '"equippanel"', which is of non-class type 'const char [11]'
+f_00673040.cpp:1151:31: request for member '_0_4_' in '"equippanel"', which is of non-class type 'const char [11]'
     (**(code **)("equippanel"._0_4_ + 8))();
-f_00673040.cpp:1674:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00673040.cpp:1678:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00673040.cpp:1685:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00673040.cpp:1689:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00673040.cpp:1695:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00673040.cpp:1699:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00673040.cpp:1706:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00673040.cpp:1710:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00673040.cpp:2317:34: too few arguments to function
+f_00673040.cpp:2321:34: too few arguments to function
     (*pIStack_12c->vtable->SetOn)();
-f_00673040.cpp:2350:33: too few arguments to function
+f_00673040.cpp:2354:33: too few arguments to function
     (*pIStack_134->vtable->SetPos)((I3D_frame*)((IImage *)pIStack_134));
-f_00673040.cpp:2359:27: too few arguments to function
+f_00673040.cpp:2363:27: too few arguments to function
     (*parent->vtable->SetOn)();
-f_00673040.cpp:2576:53: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00673040.cpp:2580:53: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_b0 = (C_str)(*(int *)pCStack_b0 - 1), *(int *)pCStack_b0 == 0)) {
-f_00673040.cpp:2681:29: request for member '_0_4_' in '"item09"', which is of non-class type 'const char [7]'
+f_00673040.cpp:2685:29: request for member '_0_4_' in '"item09"', which is of non-class type 'const char [7]'
     (**(code **)("item09"._0_4_ + 0x38))("item09",param_2,1);
-f_006778e0.cpp:1489:5: '_param_2' was not declared in this scope; did you mean 'param_2'?
+f_006778e0.cpp:1503:5: '_param_2' was not declared in this scope; did you mean 'param_2'?
     _param_2 = 0;
-f_006778e0.cpp:1492:5: '_param_2' was not declared in this scope; did you mean 'param_2'?
+f_006778e0.cpp:1506:5: '_param_2' was not declared in this scope; did you mean 'param_2'?
     _param_2 = ((int)(this_00->belt).last - (int)pSVar2) / 6;
-f_006778e0.cpp:1494:11: '_param_2' was not declared in this scope; did you mean 'param_2'?
+f_006778e0.cpp:1508:11: '_param_2' was not declared in this scope; did you mean 'param_2'?
     if (0 < _param_2) {
-f_0067eb00.cpp:1317:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0067eb00.cpp:1294:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_88 = (C_str)(*(int *)local_88 - 1), *(int *)local_88 == 0)) {
-f_0067eb00.cpp:1328:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0067eb00.cpp:1305:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_88 = (C_str)(*(int *)local_88 - 1), *(int *)local_88 == 0)) {
-f_0067eb00.cpp:2391:35: too few arguments to function
+f_0067eb00.cpp:2373:35: too few arguments to function
     (*pIVar3->vtable->Duplicate)();
-f_0067eb00.cpp:2616:33: void value not ignored as it ought to be
+f_0067eb00.cpp:2603:33: void value not ignored as it ought to be
     uVar2 = (*self->vtable->Clear)(self,0,1.0,3);
-f_0067eb00.cpp:2663:38: void value not ignored as it ought to be
+f_0067eb00.cpp:2650:38: void value not ignored as it ought to be
     uVar3 = (*pIVar1->vtable->SetState)(pIVar1,6,0);
 f_00682c40.cpp:1005:31: request for member '_0_4_' in '"equippanel"', which is of non-class type 'const char [11]'
     (**(code **)("equippanel"._0_4_ + 8))();
-f_00682c40.cpp:1875:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00682c40.cpp:1878:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00682c40.cpp:1885:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00682c40.cpp:1888:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00682c40.cpp:1897:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00682c40.cpp:1900:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), profileIndex = DAT_008ae634,
-f_00682c40.cpp:1913:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00682c40.cpp:1916:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00682c40.cpp:1923:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00682c40.cpp:1926:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00682c40.cpp:1933:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00682c40.cpp:1936:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00682c40.cpp:1945:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00682c40.cpp:1948:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), profileIndex = DAT_008410ac,
-f_00686c60.cpp:185:59: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00686c60.cpp:192:59: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_10 = (C_str)(*(int *)pCStack_10 - 1), *(int *)pCStack_10 == 0)) {
-f_00686c60.cpp:205:55: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00686c60.cpp:212:55: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_10 = (C_str)(*(int *)pCStack_10 - 1), *(int *)pCStack_10 == 0)) {
-f_00686c60.cpp:216:55: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00686c60.cpp:223:55: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_10 = (C_str)(*(int *)pCStack_10 - 1), *(int *)pCStack_10 == 0)) {
-f_00686c60.cpp:246:55: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00686c60.cpp:253:55: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_10 = (C_str)(*(int *)pCStack_10 - 1), *(int *)pCStack_10 == 0)) {
-f_00686c60.cpp:257:55: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00686c60.cpp:264:55: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_10 = (C_str)(*(int *)pCStack_10 - 1), *(int *)pCStack_10 == 0)) {
 f_006882f0.cpp:645:49: no matching function for call to '_LARGE_INTEGER::_LARGE_INTEGER(uint64_t)'
     LStack_c.u.HighPart);

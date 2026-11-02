@@ -114,6 +114,9 @@ struct S_MissionSquad {
 class C_ItemStock {
 public:
     void Add(int type, int count);
+    // (The store list, part 9e-iii-a: store_list_test.inc.)
+    int Take(int type, int count);
+    int Get(int type) const;
 };
 class C_HumanStore {
 public:

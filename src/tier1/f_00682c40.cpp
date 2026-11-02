@@ -1637,7 +1637,7 @@ uint32_t FUN_00685550(void *_this,int param_1, ...)
   S_SquadSoldier **ppSVar1;
   bool bVar2;
   S_SquadSoldier *pSVar3;
-  uint32_t uVar4;
+  void *stock;
   uint32_t local_24;
   uint32_t local_20;
   uint32_t local_1c;
@@ -1715,7 +1715,7 @@ uint32_t FUN_00685550(void *_this,int param_1, ...)
     }
   }
   if (*(int *)((int)_this + 0x1d4) < 0) {
-    FUN_0067c390((void *)((int)_this + 0x580),'\x01');
+    C_StoreList__SetActive((void *)((int)_this + 0x580),true);
     local_24 = *(uint32_t *)((int)_this + 0x1dc);
     local_10 = 0;
     local_20 = 0x1000002;
@@ -1740,17 +1740,17 @@ uint32_t FUN_00685550(void *_this,int param_1, ...)
     }
     C_EquipmentPanel__ReturnItems((void *)((int)_this + 0x4dc),*(void **)((int)_this + 0x5a4));
   }
-  FUN_0067c150((int)_this + 0x580);
+  C_StoreList__ClearPages((void *)((int)_this + 0x580));
   *(int *)((int)_this + 0x1d4) = param_1;
   *(int *)(*(int *)((int)_this + 0x544) + 0x40) = param_1;
   if (*(int *)((int)_this + 0x1d4) == 1) {
-    uVar4 = *(uint32_t *)((int)_this + 0x1e4);
+    stock = *(void **)((int)_this + 0x1e4);
   }
   else {
     if (*(int *)((int)_this + 0x1d4) != 0) goto LAB_00685849;
-    uVar4 = *(uint32_t *)((int)_this + 0x1e8);
+    stock = *(void **)((int)_this + 0x1e8);
   }
-  FUN_0067c090((void *)((int)_this + 0x580),uVar4);
+  C_StoreList__SetStock((void *)((int)_this + 0x580),stock);
 LAB_00685849:
   FUN_00685ab0(_this,*(int *)((int)_this + 0x1d4));
   FUN_00685880((int)_this);
@@ -1764,14 +1764,14 @@ uint32_t FUN_00685880(int param_1, ...)
 {
   S_SquadSoldier *_this;
   S_SoldierItem *pSVar1;
-  uint32_t uVar2;
+  bool bVar2;
   int iVar3;
   int local_8;
   _this = *(S_SquadSoldier **)(param_1 + 0x544);
   if ((_this->head).typeId != -1) {
     pSVar1 = &_this->head;
-    uVar2 = FUN_0067c0d0((void *)(param_1 + 0x580),(int)pSVar1,'\0');
-    if ((char)uVar2 == '\0') {
+    bVar2 = C_StoreList__TakeItem((void *)(param_1 + 0x580),pSVar1,false);
+    if (!bVar2) {
       pSVar1->uid = -1;
       pSVar1->typeId = -1;
       (_this->head).present = 0;
@@ -1779,8 +1779,8 @@ uint32_t FUN_00685880(int param_1, ...)
   }
   if ((_this->uniform).typeId != -1) {
     pSVar1 = &_this->uniform;
-    uVar2 = FUN_0067c0d0((void *)(param_1 + 0x580),(int)pSVar1,'\0');
-    if ((char)uVar2 == '\0') {
+    bVar2 = C_StoreList__TakeItem((void *)(param_1 + 0x580),pSVar1,false);
+    if (!bVar2) {
       pSVar1->uid = -1;
       pSVar1->typeId = -1;
       (_this->uniform).present = 0;
@@ -1788,8 +1788,8 @@ uint32_t FUN_00685880(int param_1, ...)
   }
   if ((_this->longGun).typeId != -1) {
     pSVar1 = &_this->longGun;
-    uVar2 = FUN_0067c0d0((void *)(param_1 + 0x580),(int)pSVar1,'\0');
-    if ((char)uVar2 == '\0') {
+    bVar2 = C_StoreList__TakeItem((void *)(param_1 + 0x580),pSVar1,false);
+    if (!bVar2) {
       pSVar1->uid = -1;
       pSVar1->typeId = -1;
       (_this->longGun).present = 0;
@@ -1797,8 +1797,8 @@ uint32_t FUN_00685880(int param_1, ...)
   }
   if ((_this->hands).typeId != -1) {
     pSVar1 = &_this->hands;
-    uVar2 = FUN_0067c0d0((void *)(param_1 + 0x580),(int)pSVar1,'\0');
-    if ((char)uVar2 == '\0') {
+    bVar2 = C_StoreList__TakeItem((void *)(param_1 + 0x580),pSVar1,false);
+    if (!bVar2) {
       pSVar1->uid = -1;
       pSVar1->typeId = -1;
       (_this->hands).present = 0;
@@ -1809,8 +1809,10 @@ uint32_t FUN_00685880(int param_1, ...)
      (local_8 = ((int)(_this->belt).last - (int)pSVar1) / 6, local_8 != 0)) {
     iVar3 = local_8 * 6;
     do {
-      uVar2 = FUN_0067c0d0((void *)(param_1 + 0x580),(int)&(_this->belt).first[-1].uid + iVar3,'\0');
-      if ((char)uVar2 == '\0') {
+      bVar2 = C_StoreList__TakeItem
+                        ((void *)(param_1 + 0x580),
+                         (void *)((int)&(_this->belt).first[-1].uid + iVar3),false);
+      if (!bVar2) {
         S_SquadSoldier__RemoveItem
                   (_this,' ',(S_SoldierItem *)((int)&(_this->belt).first[-1].uid + iVar3));
       }
@@ -1820,8 +1822,8 @@ uint32_t FUN_00685880(int param_1, ...)
   }
   if ((_this->backpack).typeId != -1) {
     pSVar1 = &_this->backpack;
-    uVar2 = FUN_0067c0d0((void *)(param_1 + 0x580),(int)pSVar1,'\0');
-    if ((char)uVar2 == '\0') {
+    bVar2 = C_StoreList__TakeItem((void *)(param_1 + 0x580),pSVar1,false);
+    if (!bVar2) {
       pSVar1->uid = -1;
       pSVar1->typeId = -1;
       (_this->backpack).present = 0;
@@ -1833,9 +1835,10 @@ uint32_t FUN_00685880(int param_1, ...)
      (local_8 = ((int)(_this->backpackContents).last - (int)pSVar1) / 6, local_8 != 0)) {
     iVar3 = local_8 * 6;
     do {
-      uVar2 = FUN_0067c0d0((void *)(param_1 + 0x580),
-                           (int)&(_this->backpackContents).first[-1].uid + iVar3,'\0');
-      if ((char)uVar2 == '\0') {
+      bVar2 = C_StoreList__TakeItem
+                        ((void *)(param_1 + 0x580),
+                         (void *)((int)&(_this->backpackContents).first[-1].uid + iVar3),false);
+      if (!bVar2) {
         S_SquadSoldier__RemoveItem
                   (_this,'@',(S_SoldierItem *)((int)&(_this->backpackContents).first[-1].uid + iVar3))
         ;

@@ -40,19 +40,24 @@ uint32_t C_GameMenu__FUN_00686ca0(C_GameMenu *_this,uint32_t param_1,int param_2
 {
   uchar *this_00;
   uint32_t uVar1;
-  uint32_t uVar2;
+  bool bVar2;
+  uint3 extraout_var;
   uint32_t *puVar3;
   uint32_t uVar4;
+  uint32_t extraout_EAX;
+  uint3 extraout_var_00;
+  uint3 uVar5;
   uint32_t local_10;
   short local_c;
   uint8_t local_6 [6];
-  uVar2 = 0xffffffff;
+  uVar5 = 0xffffff;
   if (-1 < param_2) {
     this_00 = _this->_pad_0548 + 0x38;
     local_10 = CONCAT22((short)param_2,0xffff);
     local_c = param_3;
-    uVar2 = FUN_0067c0d0(this_00,(int)&local_10,'\0');
-    if ((char)uVar2 != '\0') {
+    bVar2 = C_StoreList__TakeItem(this_00,&local_10,false);
+    uVar5 = extraout_var;
+    if (bVar2) {
       puVar3 = C_EquipmentPanel__PutItemChecked(&_this->m_4dc,local_6,param_1,&local_10,false);
       uVar1 = *puVar3;
       GH_PIECE(local_10,2,2) = (short)((uint32_t)uVar1 >> 0x10);
@@ -61,16 +66,18 @@ uint32_t C_GameMenu__FUN_00686ca0(C_GameMenu *_this,uint32_t param_1,int param_2
       if ((GH_PIECE(local_10,2,2) != -1) && (local_c != 0)) {
         local_10 = uVar1;
         if (GH_PIECE(local_10,2,2) == param_2) {
-          uVar2 = FUN_0067c0a0(this_00,(int)&local_10);
+          C_StoreList__AddItem(this_00,&local_10);
+          uVar5 = extraout_var_00;
           goto LAB_00686d54;
         }
-        uVar4 = FUN_0067c0a0(this_00,(int)&local_10);
+        C_StoreList__AddItem(this_00,&local_10);
+        uVar4 = extraout_EAX;
       }
       return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
     }
   }
 LAB_00686d54:
-  return uVar2 & 0xffffff00;
+  return (uint32_t)uVar5 << 8;
 }
 
 
@@ -307,7 +314,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
     }
     C_EquipmentPanel__Refresh(&_this->m_4dc);
     C_EquipmentPanel__UpdateFace(&_this->m_4dc);
-    FUN_0067c040(_this->_pad_0548 + 0x38);
+    C_StoreList__UpdateAll(_this->_pad_0548 + 0x38);
     if ((local_28 != 0) &&
        (local_28->rep = (C_str_rep *)local_28->rep[-1].chars, local_28->rep == 0)) {
       tier1_operator_delete(local_28);
@@ -323,7 +330,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
 uint32_t FUN_00687360(int param_1, ...)
 {
   C_EquipmentPanel__ReturnItems((void *)(param_1 + 0x4dc),*(void **)(param_1 + 0x5a4));
-  FUN_0067c040((void *)(param_1 + 0x580));
+  C_StoreList__UpdateAll((void *)(param_1 + 0x580));
   return 0;
 }
 

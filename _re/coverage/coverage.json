@@ -115,16 +115,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "ported",
-  "functions": 713,
-  "bytes": 161300,
+  "functions": 769,
+  "bytes": 180540,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "pending",
-  "functions": 802,
-  "bytes": 311635,
+  "functions": 745,
+  "bytes": 292257,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -195,16 +195,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Profile & campaign",
   "state": "verified",
-  "functions": 405,
-  "bytes": 115756,
+  "functions": 407,
+  "bytes": 115911,
   "evidence": "profile harness round trips (HumanStore.def, profile.sav, Options.bin, game.cfg, key bindings); Gamedata .gdt re-saved byte-identical"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Profile & campaign",
   "state": "pending",
-  "functions": 80,
-  "bytes": 7209,
+  "functions": 79,
+  "bytes": 7192,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {

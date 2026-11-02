@@ -31597,6 +31597,66 @@
   "module": "zz_idioms",
   "name": "construct_copy4_67a9b0"
  },
+ "0067b930": {
+  "module": "store_list",
+  "name": "C_StoreList::GetCount",
+  "proto": "int __thiscall GetCount(void *this, int typeId)"
+ },
+ "0067b950": {
+  "module": "store_list",
+  "name": "C_StoreList::OnTab",
+  "proto": "bool __thiscall OnTab(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0067b9e0": {
+  "module": "store_list",
+  "name": "C_StoreList::ShowPage",
+  "proto": "void __thiscall ShowPage(void *this, int page)"
+ },
+ "0067bc00": {
+  "module": "store_list",
+  "name": "C_StoreList::OnItem",
+  "proto": "bool __thiscall OnItem(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0067bd60": {
+  "module": "store_list",
+  "name": "C_StoreList::UpdateType",
+  "proto": "bool __thiscall UpdateType(void *this, int typeId)"
+ },
+ "0067c040": {
+  "module": "store_list",
+  "name": "C_StoreList::UpdateAll",
+  "proto": "void __fastcall UpdateAll(void * list)"
+ },
+ "0067c060": {
+  "module": "store_list",
+  "name": "C_StoreList::UpdateAllIfStock",
+  "proto": "bool __fastcall UpdateAllIfStock(void * list)"
+ },
+ "0067c090": {
+  "module": "store_list",
+  "name": "C_StoreList::SetStock",
+  "proto": "void __thiscall SetStock(void *this, void * stock)"
+ },
+ "0067c0a0": {
+  "module": "store_list",
+  "name": "C_StoreList::AddItem",
+  "proto": "void __thiscall AddItem(void *this, void * item)"
+ },
+ "0067c0d0": {
+  "module": "store_list",
+  "name": "C_StoreList::TakeItem",
+  "proto": "bool __thiscall TakeItem(void *this, void * item, bool fill)"
+ },
+ "0067c150": {
+  "module": "store_list",
+  "name": "C_StoreList::ClearPages",
+  "proto": "void __fastcall ClearPages(void * list)"
+ },
+ "0067c390": {
+  "module": "store_list",
+  "name": "C_StoreList::SetActive",
+  "proto": "void __thiscall SetActive(void *this, bool on)"
+ },
  "0067e380": {
   "module": "zz_idioms",
   "name": "vector_size_e4_67e380"
@@ -31745,6 +31805,16 @@
  "0067f340": {
   "module": "equipment_panel",
   "name": "C_EquipmentMenuBase::OnItemHover"
+ },
+ "0067f370": {
+  "module": "store_list",
+  "name": "C_StoreList::~C_StoreList",
+  "proto": "void __thiscall ~C_StoreList(void *this)"
+ },
+ "0067f3a0": {
+  "module": "store_list",
+  "name": "C_StoreList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
  },
  "0067f3d0": {
   "module": "equipment_panel",

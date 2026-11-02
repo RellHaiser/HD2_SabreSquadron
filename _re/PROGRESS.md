@@ -7129,6 +7129,31 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e-iii: C_EquipmentMenuBase's own code and the store panel (vtable 0x008157c4 at C_GameMenu
     +0x580: 0x0067b070, the item stock's lists 0x0067b950..0x0067c150), then C_GameMenu (9e-iv..).
 
+  PART 9e-iii-a DONE (2026-11-02): the store's item lists' runtime (src/game/store_list.h/.cpp,
+  C_StoreList, vtable 0x008157c4, 0x38 bytes; C_GameMenu +0x580). Its pages' descriptions (slot 0
+  0x0067b070) are 9e-iii-b.
+  - Fields: +0x08 the item types' entry controls (a vector, 0: none), +0x18 the page shown, +0x1C -1,
+    +0x20 the menu, +0x24 the C_ItemStock, +0x2C the highlight frame, +0x30 / +0x34 the screen's and
+    the control's index (the list's ids: (control & 0x3F | screen << 6) << 20, the tabs bits 12-19 = 1,
+    the pages' group 2, the pages 3..8).
+  - GetCount 0x0067b930, ShowPage 0x0067b9e0 (the last hidden, the page shown, the group's value it,
+    CONTROL_MSG_REFRESH), OnTab 0x0067b950 (the tabs' callback: the page the tab control answers to
+    0x200002F), OnItem 0x0067bc00 (the items' CONTROL_NOTIFY_ANY callback: the menu's item slots by
+    the notification, the cursor entering puts the highlight 0.1 in front of the control's frame;
+    always true), UpdateType 0x0067bd60 (an entry's count; ammunition: the weapons (animated) that
+    take it, their second count, the last first; head gear (behaviour 16): the uniforms (15) that come
+    with it; the stock asked only for a message), UpdateAll 0x0067c040, UpdateAllIfStock 0x0067c060,
+    SetStock 0x0067c090, AddItem 0x0067c0a0, TakeItem 0x0067c0d0 (fill: what the stock lacks added
+    first), ClearPages 0x0067c150 (CONTROL_MSG_HIDE_ALL to the six pages), SetActive 0x0067c390, the
+    destructor 0x0067f370 / 0x0067f3a0.
+  - Harness: store_list_test.inc in the factory build (check_storelist.py, "storelist:", 9 checks):
+    the stock's counts a map (the stub profile.h's C_ItemStock has Get and Take now), the messages
+    from the queue, the menu equipment_desc_test.inc's. 22 of 22 in both orders (the other factory
+    lines too).
+  - Mutations: mutations/mutate_9e3a.py (95 cases, 86 build; all caught but 1 equivalent, listed there; the first run left 5, new checks caught 4).
+  - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/store_list.txt (+14); 14 functions in ported.txt. Stats: 8,798 of 12,306 functions by hand (78.2 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

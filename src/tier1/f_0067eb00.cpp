@@ -376,29 +376,6 @@ uint32_t * C_EquipmentMenuBase__FUN_0067f350(C_EquipmentMenuBase *_this,uint8_t 
 }
 
 
-// 0x0067f370
-uint32_t C_auto_008157c4__FUN_0067f370(C_auto_008157c4 *_this, ...)
-{
-  _this->vtable = (C_auto_008157c4_vtbl *)&PTR_008157c4;
-  tier1_operator_delete(_this[2].vtable);
-  _this[2].vtable = 0;
-  _this[3].vtable = 0;
-  _this[4].vtable = 0;
-  return 0;
-}
-
-
-// 0x0067f3a0
-uint32_t * C_auto_008157c4__FUN_0067f3a0(C_auto_008157c4 *_this,uint8_t param_1, ...)
-{
-  C_auto_008157c4__FUN_0067f370(_this);
-  if ((param_1 & 1) != 0) {
-    tier1_operator_delete(_this);
-  }
-  return (uint32_t*)(_this);
-}
-
-
 // 0x0067f3c0
 uint32_t FUN_0067f3c0(void *_this, ...)
 {
@@ -2295,9 +2272,13 @@ uint32_t C_GameMenu__FUN_00681ee0(C_GameMenu *_this,uint32_t param_1,int param_2
   int *panel;
   bool bVar1;
   uint32_t uVar2;
-  uint32_t uVar3;
-  int iVar4;
+  uint32_t extraout_EAX;
+  int iVar3;
+  uint32_t extraout_EAX_00;
   undefined3 extraout_var;
+  undefined3 extraout_var_00;
+  uint32_t extraout_EAX_01;
+  int extraout_EAX_02;
   int typeId;
   uchar *this_00;
   uint16_t local_10;
@@ -2315,14 +2296,14 @@ uint32_t C_GameMenu__FUN_00681ee0(C_GameMenu *_this,uint32_t param_1,int param_2
       uVar2 = C_EquipmentPanel__SlotOfControl(*(uint32_t *)(param_2 + 0x60));
       if (uVar2 == 8) {
         C_EquipmentPanel__ReturnBackpack(panel,_this->m_5a4);
-        uVar3 = FUN_0067c040(_this->_pad_0548 + 0x38);
-        return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
+        C_StoreList__UpdateAll(_this->_pad_0548 + 0x38);
+        return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
       }
-      iVar4 = C_EquipmentPanel__RemoveItemAt(panel,*(uint32_t *)(param_2 + 0x60),&local_10);
+      iVar3 = C_EquipmentPanel__RemoveItemAt(panel,*(uint32_t *)(param_2 + 0x60),&local_10);
       typeId = 0;
-      if (iVar4 != 0) {
-        uVar3 = FUN_0067c0a0(_this->_pad_0548 + 0x38,(int)&local_10);
-        return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
+      if (iVar3 != 0) {
+        C_StoreList__AddItem(_this->_pad_0548 + 0x38,&local_10);
+        return CONCAT31((int3)((uint32_t)extraout_EAX_00 >> 8),1);
       }
     }
     else {
@@ -2333,18 +2314,19 @@ uint32_t C_GameMenu__FUN_00681ee0(C_GameMenu *_this,uint32_t param_1,int param_2
         if (bVar1) goto LAB_00682006;
       }
       this_00 = _this->_pad_0548 + 0x38;
-      uVar3 = FUN_0067c0d0(this_00,(int)&local_10,'\0');
-      if ((char)uVar3 == '\0') {
-        return uVar3;
+      bVar1 = C_StoreList__TakeItem(this_00,&local_10,false);
+      if (!bVar1) {
+        return CONCAT31(extraout_var_00,bVar1);
       }
       C_EquipmentPanel__DropItem(panel,local_8,&local_10,false);
       typeId = local_6;
       if ((short)local_6 != -1) {
         if ((short)local_6 == local_e) {
-          uVar3 = FUN_0067c0a0(this_00,(int)&local_10);
-          return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
+          C_StoreList__AddItem(this_00,&local_10);
+          return CONCAT31((int3)((uint32_t)extraout_EAX_01 >> 8),1);
         }
-        typeId = FUN_0067c0a0(this_00,(int)local_8);
+        C_StoreList__AddItem(this_00,local_8);
+        typeId = extraout_EAX_02;
       }
     }
   }
@@ -2375,7 +2357,7 @@ uint32_t C_GameMenu__FUN_00682020(C_GameMenu *_this,uint32_t param_1,int *param_
   local_14 = 0;
   (**(code **)(*param_2 + 0x6c))();
   if (((param_2[0x18] & 0x3f00000U) != 0x300000) ||
-     ((iVar2 = FUN_0067b930(_this->_pad_0548 + 0x38,0x100000a), iVar2 != 0 &&
+     ((iVar2 = C_StoreList__GetCount(_this->_pad_0548 + 0x38,0x100000a), iVar2 != 0 &&
       ((bVar1 = C_EquipmentPanel__IsLargeWeapon(0x100000a), !bVar1 ||
        (bVar1 = C_EquipmentPanel__HasLargeWeapon(&_this->m_4dc), !bVar1)))))) {
     _this->_pad_0138[0x88] = '\n';
@@ -2506,53 +2488,58 @@ uint32_t C_GameMenu__FUN_006822b0(C_GameMenu *_this, ...)
 uint32_t C_GameMenu__FUN_00682350(C_GameMenu *_this,int param_1,uint32_t param_2, ...)
 {
   int *this_00;
+  uint32_t extraout_EAX;
   uint32_t uVar1;
-  uint32_t uVar2;
-  int iVar3;
+  uint32_t extraout_EAX_00;
+  int iVar2;
+  uint32_t extraout_EAX_01;
+  uint32_t extraout_EAX_02;
+  uint3 extraout_var;
   uint32_t local_10;
   uint16_t local_c;
   uint8_t local_8 [2];
   void *local_6;
   local_10 = *(uint32_t *)(_this->_pad_0138 + 0x80);
   local_c = *(uint16_t *)(_this->_pad_0138 + 0x84);
-  uVar2 = *(uint32_t *)(param_1 + 0x60);
-  if ((uVar2 & 0x3f00000) == 0x200000) {
+  uVar1 = *(uint32_t *)(param_1 + 0x60);
+  if ((uVar1 & 0x3f00000) == 0x200000) {
     if ((param_2 == 0) || ((param_2 & 0x3f00000) != 0x200000)) {
       this_00 = &_this->m_4dc;
-      uVar2 = C_EquipmentPanel__SlotOfControl(uVar2);
-      if (uVar2 == 8) {
+      uVar1 = C_EquipmentPanel__SlotOfControl(uVar1);
+      if (uVar1 == 8) {
         C_EquipmentPanel__ReturnBackpack(this_00,_this->m_5a4);
-        uVar1 = FUN_0067c040(_this->_pad_0548 + 0x38);
-        return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
+        C_StoreList__UpdateAll(_this->_pad_0548 + 0x38);
+        return CONCAT31((int3)((uint32_t)extraout_EAX_00 >> 8),1);
       }
-      iVar3 = C_EquipmentPanel__CountItems(this_00,*(uint32_t *)(param_1 + 0x60),&local_10);
-      local_c = (uint16_t)iVar3;
-      iVar3 = C_EquipmentPanel__RemoveItemAt(this_00,*(uint32_t *)(param_1 + 0x60),&local_10);
+      iVar2 = C_EquipmentPanel__CountItems(this_00,*(uint32_t *)(param_1 + 0x60),&local_10);
+      local_c = (uint16_t)iVar2;
+      iVar2 = C_EquipmentPanel__RemoveItemAt(this_00,*(uint32_t *)(param_1 + 0x60),&local_10);
       param_2 = 0;
-      if (iVar3 != 0) {
-        uVar1 = FUN_0067c0a0(_this->_pad_0548 + 0x38,(int)&local_10);
-        return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
+      if (iVar2 != 0) {
+        C_StoreList__AddItem(_this->_pad_0548 + 0x38,&local_10);
+        return CONCAT31((int3)((uint32_t)extraout_EAX_01 >> 8),1);
       }
     }
     else {
-      param_2 = (uint32_t)C_EquipmentPanel__MoveItem(&_this->m_4dc,local_8,&local_10,uVar2,param_2);
+      param_2 = (uint32_t)C_EquipmentPanel__MoveItem(&_this->m_4dc,local_8,&local_10,uVar1,param_2);
       if ((short)local_6 != -1) {
-        uVar1 = FUN_0067c0a0(_this->_pad_0548 + 0x38,(int)local_8);
-        return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
+        C_StoreList__AddItem(_this->_pad_0548 + 0x38,local_8);
+        return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
       }
     }
   }
   else if ((param_2 != 0) && ((param_2 & 0x3f00000) == 0x200000)) {
     C_EquipmentPanel__PutItemAt(&_this->m_4dc,local_8,param_2,&local_10);
     if ((short)local_6 == -1) {
-      param_2 = FUN_0067c0d0(_this->_pad_0548 + 0x38,(int)&local_10,'\0');
+      C_StoreList__TakeItem(_this->_pad_0548 + 0x38,&local_10,false);
+      param_2 = (uint32_t)extraout_var << 8;
     }
     else {
       param_2 = (uint32_t)local_6;
       if ((short)local_6 != GH_PIECE(local_10,2,2)) {
-        FUN_0067c0d0(_this->_pad_0548 + 0x38,(int)&local_10,'\0');
-        uVar1 = FUN_0067c0a0(_this->_pad_0548 + 0x38,(int)local_8);
-        return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
+        C_StoreList__TakeItem(_this->_pad_0548 + 0x38,&local_10,false);
+        C_StoreList__AddItem(_this->_pad_0548 + 0x38,local_8);
+        return CONCAT31((int3)((uint32_t)extraout_EAX_02 >> 8),1);
       }
     }
   }
