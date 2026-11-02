@@ -9,12 +9,6 @@
 #include "i3d/loader.h"
 #include "i3d/sector.h"
 
-namespace ls3d::i3d {
-
-C_vector<I3D_light *> g_lights(0x100);
-
-}  // namespace ls3d::i3d
-
 using namespace ls3d;
 using namespace ls3d::i3d;
 
@@ -124,8 +118,8 @@ void I3D_light::Init()
     d3dLight.Direction.z = localDir(2);
 }
 
-// LS3DRF 0x100175e0 (from LS3DF 0x10021760): the light stays in g_lights, and a mirror copy
-// (linkedLight) stays alive.
+// LS3DRF 0x100175e0 (from LS3DF 0x10021760): no device light to unregister (LS3DF 0x10063ca0) and
+// no mirror copy (linkedLight) to free.
 void I3D_light::Uninit()
 {
     if (lightType == I3DLIGHT_AMBIENT) {

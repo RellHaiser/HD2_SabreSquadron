@@ -1,12 +1,10 @@
 // I3D_projector: the texture projector visual (PROJ; vtable 0x1009c1f0, 0x270 bytes; 0x10043730 -
 // 0x100462b0).
 //
-// Projects its texture (or its material's) along the frame's z onto the receiving meshes in its
-// volume (x, y -1 - 1, z 0 - 1 in the frame's space; orthogonal or perspective): the receivers'
-// faces inside are clipped to the volume (proj_geometry.h) and drawn blended with texture
-// coordinates from the volume position and a color faded by the mode over the depth. The geometry
-// is made again when a receiver or the projector changes, by the renderer after the frame's
-// passes (RenderProjectors), or once by Build.
+// In LS3DF it projects its texture (or its material's) along the frame's z onto the receiving
+// meshes in its volume (x, y -1 - 1, z 0 - 1 in the frame's space; orthogonal or perspective),
+// clipped to the volume and drawn blended, the color faded by the mode over the depth. LS3DRF's
+// projector keeps only the parameters: nothing is projected or drawn.
 #pragma once
 
 #include "i3d/vb_manager.h"
@@ -38,11 +36,7 @@ public:
     // (MatrixChanged: the visual's, as in LS3DRF; a moved projector keeps its sector.)
     // 0x70 0x10046130: the frame, then orthogonal, the mode and the material.
     void Load() override;
-    // 0x94 0x10043fe0: in range, the projected geometry queued (or the projector waits for
-    // RenderProjectors to make it).
-    void Prepare() override;
-    // 0x98 0x10045dd0: the projected faces, blended (additive in modes 0, 4 and 8).
-    void Draw(const ls3d::i3d::S_renderItem *item) override;
+    // (Prepare / Draw: the visual's empty ones. LS3DRF's projector draws nothing.)
 
     virtual void __stdcall SetTexture(ITexture *newTexture);                  // 0x9C 0x10043af0
     virtual void __stdcall SetMaterial(I3D_material *newMaterial);            // 0xA0 0x10043b20
@@ -57,15 +51,7 @@ public:
     // the buffers. Flags: 4 models are skipped, 8 other sectors are, 0x10 children are not walked.
     virtual void __stdcall Build(uint32_t flags, I3D_frame *root);
 
-    // 0x100441c0: the receivers' projected geometry into the projector's vertices and faces.
-    void BuildGeometry();
-    // 0x10045860: the receivers from the frame's render queue; the geometry made again when they
-    // or the projector changed, then queued.
-    void Rebuild();
-    // 0x10043d80: the queue items (opaque and blended faces).
-    void QueueItems();
-
-    bool orthogonal;                        // +0x1E0 (1)
+    bool orthogonal;                       // +0x1E0 (1)
     uint8_t padding1E1[3];
     float range;                            // +0x1E4 (100) drawn within range x the projection scale
     float intensity;                        // +0x1E8 (1)
@@ -77,7 +63,9 @@ public:
     int mode;                               // +0x20C how the color fades over the depth (0, 4, 5, 8, 9)
     float opacity;                          // +0x210 (0.117) faces turned away are culled more the lower it is
     uint32_t projFlags;                     // +0x214 PROJF_*
-    S_projectedVertex *vertices;            // +0x218 system memory
+    // +0x218 - +0x26B: LS3DF's projected geometry, kept for the layout. LS3DRF's projector (0x220
+    // bytes) has none: nothing reads or writes these here.
+    S_projectedVertex *vertices;           // +0x218 system memory
     int vertexCapacity;                     // +0x21C
     int numVertices;                        // +0x220
     uint16_t *faces;                        // +0x224 system memory (opaque, then blended)
@@ -89,7 +77,7 @@ public:
     uint32_t unknown24C;
     S_vector4 blendedCenter;                // +0x250 world space (the blended item's depth)
     int buildStamp;                         // +0x260 (-1) changeCount when the geometry was made
-    I3D_sector *sector;                     // +0x264 the sector it is in (found when null; only Init clears it)
+    I3D_sector *sector;                     // +0x264 the sector it is in
     int numReceivers;                       // +0x268 ... and the receivers then
     int receiverSum;                        // +0x26C ... and their change counts' sum
 };

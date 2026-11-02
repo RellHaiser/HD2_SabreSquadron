@@ -1,16 +1,11 @@
 // Device state helpers of the visuals' draw code (0x100637a0 - 0x100647f0).
 #include "i3d/render_helpers.h"
 
-#include <cmath>
-#include <cstring>
-
 #include "core/fpu.h"
 #include "i3d/driver.h"
-#include "i3d/i3d_links.h"
 #include "i3d/light.h"
 #include "i3d/mirror.h"
 #include "i3d/sector.h"
-#include "i3d/visual.h"
 #include "igraph/igraph_state.h"
 
 namespace ls3d::i3d {
@@ -21,13 +16,6 @@ I3D_mirror *g_renderMirror;
 
 namespace {
 
-// The device lights enabled last (0x100d1364, count 0x100d13d0) and D3DRS_AMBIENT's cache
-// (0x100a72d8; 0x00FF00FF: not set yet).
-uint16_t s_enabledLights[8];
-int s_numEnabledLights;
-uint32_t s_ambient = 0x00ff00ff;
-// The sector SelectLights reads (0x100d13d4).
-I3D_sector *s_lightSector;
 // SetMaterial's scaled copy (0x100d1378; the ambient, specular and emissive alphas stay 0).
 D3DMATERIAL8 s_scaledMaterial;
 
@@ -235,177 +223,6 @@ void UpdateSectorAmbient(I3D_sector *sector)
     sector->ambientColor2 = (static_cast<uint32_t>(Fistp(r2 * 255.0f)) << 16) |
         (static_cast<uint32_t>(Fistp(g2 * 255.0f)) << 8) | static_cast<uint32_t>(Fistp(b2 * 255.0f));
     sector->sectorFlags &= ~SCTF_AMBIENT_CHANGED;
-}
-
-// 0x10063dc0
-void EnableLights(uint32_t ambient, int count, const uint16_t *indices)
-{
-    if (ambient != s_ambient) {
-        s_ambient = ambient;
-        g_pGfx->SetRenderState(D3DRS_AMBIENT, ambient);
-    }
-    for (int i = 0; i < s_numEnabledLights; ++i)
-        g_pGfx->LightEnable(s_enabledLights[i], FALSE);
-    for (int i = 0; i < count; ++i) {
-        const uint16_t index = indices[i];
-        I3D_light *light = g_lights[index];
-        if (light->lightFlags & LIGHTF_DIRTY) {
-            g_pGfx->SetLight(index, &light->d3dLight);
-            light->lightFlags &= ~LIGHTF_DIRTY;
-        }
-        g_pGfx->LightEnable(index, TRUE);
-    }
-    std::memcpy(s_enabledLights, indices, sizeof(uint16_t) * static_cast<size_t>(count));
-    s_numEnabledLights = count;
-}
-
-// 0x10063ea0
-void SetLightSector(I3D_sector *sector) { s_lightSector = sector; }
-I3D_sector *GetLightSector() { return s_lightSector; }
-
-// 0x10063eb0
-void SelectLights(I3D_visual *visual, S_visualLights &lights, uint32_t mask)
-{
-    const int stamp = s_lightSector->lightChanges + visual->changeCount;
-    if (stamp == lights.stamp)
-        return;
-    lights.stamp = stamp;
-    if (!(visual->visualFlags & VISF_WBOUND_VALID))
-        visual->UpdateWBoundProc();
-    const S_vector center = visual->worldBound.center;
-    const float radius = visual->worldBound.radius;
-
-    // The best ones so far (0x100d12d0, 0x10 bytes each: intensity, light at +0xC).
-    struct Choice {
-        float intensity;
-        I3D_light *light;
-    } best[8];
-    int count = 0;
-    for (int n = s_lightSector->lights.Size(), i = 0; n != 0; --n, ++i) {
-        I3D_light *light = s_lightSector->lights[i];
-        if (!(light->mode & mask) || !(light->frameFlags & FRMFLAGS_ON))
-            continue;
-        if (IsTinyBits(std::fabs(light->power)) && IsTinyBits(std::fabs(light->ambientPower)))
-            continue;
-        float intensity;
-        switch (light->lightType) {
-        case I3DLIGHT_POINT: {
-            const S_vector &pos = light->GetMatrix()(3);
-            const float dx = center.x - pos.x, dy = center.y - pos.y, dz = center.z - pos.z;
-            const float d2 = (dz * dz + dy * dy) + dx * dx;
-            const float reach = radius + light->d3dLight.Range;
-            if (reach * reach <= d2)
-                continue;
-            intensity = ((light->effectiveColor.z + light->effectiveColor.y) + light->effectiveColor.x) /
-                std::sqrt(d2);
-            break;
-        }
-        case I3DLIGHT_SPOT: {
-            const S_vector &pos = light->coneCenter;
-            const float dx = center.x - pos.x, dy = center.y - pos.y, dz = center.z - pos.z;
-            const float d2 = (dz * dz + dy * dy) + dx * dx;
-            const float reach = radius + light->coneRangeWorld;
-            if (reach * reach <= d2)
-                continue;
-            intensity = ((light->effectiveColor.z + light->effectiveColor.y) + light->effectiveColor.x) /
-                std::sqrt(d2);
-            break;
-        }
-        case I3DLIGHT_DIRECTIONAL:
-            intensity = (light->effectiveColor.z + light->effectiveColor.y) + light->effectiveColor.x;
-            break;
-        default:
-            continue;
-        }
-        // Below 8 lights the new one is added; then it replaces the first weaker one (not the
-        // weakest: the original's choice).
-        int slot;
-        if (count < 8) {
-            slot = count++;
-        } else {
-            slot = -1;
-            for (int j = 0; j < count; ++j) {
-                if (best[j].intensity < intensity) {
-                    slot = j;
-                    break;
-                }
-            }
-        }
-        if (slot >= 0) {
-            best[slot].light = light;
-            best[slot].intensity = intensity;
-        }
-    }
-    for (int i = 0; i < count; ++i)
-        lights.indices[i] = static_cast<uint16_t>(best[i].light->hardwareIndex);
-    lights.count = count;
-}
-
-// 0x10064260
-void MirrorLights(const S_visualLights &src, S_visualLights &dst)
-{
-    const uint16_t stamp = g_renderMirror->stamp;
-    const S_matrix &m = g_renderMirror->reflection;
-    for (int i = 0; i < src.count; ++i) {
-        const uint16_t index = src.indices[i];
-        I3D_light *light = g_lights[index];
-        I3D_light *copy;
-        if (static_cast<uint16_t>(light->linkedLight) == 0xffff) {
-            copy = static_cast<I3D_light *>(g_driver->CreateFrame(FRAME_LIGHT));
-            light->linkedLight = copy->hardwareIndex;
-            light->unknown25A = static_cast<int16_t>(stamp);
-            copy->lightFlags |= LIGHTF_MIRRORED;
-            copy->linkedLight = static_cast<int16_t>(index);
-        } else {
-            copy = g_lights[static_cast<uint16_t>(light->linkedLight)];
-            if (static_cast<uint16_t>(light->unknown25A) != stamp) {
-                light->unknown25A = static_cast<int16_t>(stamp);
-            } else if (!(light->lightFlags & LIGHTF_MOVED)) {
-                dst.indices[i] = static_cast<uint16_t>(light->linkedLight);
-                continue;
-            }
-        }
-        copy->d3dLight = light->d3dLight;
-        switch (light->lightType) {
-        case I3DLIGHT_POINT: {
-            const S_vector pos = S_vector(light->d3dLight.Position.x, light->d3dLight.Position.y,
-                                          light->d3dLight.Position.z) * m;
-            copy->d3dLight.Position.x = pos.x;
-            copy->d3dLight.Position.y = pos.y;
-            copy->d3dLight.Position.z = pos.z;
-            break;
-        }
-        case I3DLIGHT_SPOT: {
-            const S_vector pos = S_vector(light->d3dLight.Position.x, light->d3dLight.Position.y,
-                                          light->d3dLight.Position.z) * m;
-            copy->d3dLight.Position.x = pos.x;
-            copy->d3dLight.Position.y = pos.y;
-            copy->d3dLight.Position.z = pos.z;
-            S_vector dir = S_vector(light->d3dLight.Direction.x, light->d3dLight.Direction.y,
-                                    light->d3dLight.Direction.z).RotateByMatrix(m);
-            NormalizeWithSquare(dir, SquareZYX(dir));
-            copy->d3dLight.Direction.x = dir.x;
-            copy->d3dLight.Direction.y = dir.y;
-            copy->d3dLight.Direction.z = dir.z;
-            break;
-        }
-        case I3DLIGHT_DIRECTIONAL: {
-            S_vector dir = S_vector(light->d3dLight.Direction.x, light->d3dLight.Direction.y,
-                                    light->d3dLight.Direction.z).RotateByMatrix(m);
-            NormalizeWithSquare(dir, SquareZYX(dir));
-            copy->d3dLight.Direction.x = dir.x;
-            copy->d3dLight.Direction.y = dir.y;
-            copy->d3dLight.Direction.z = dir.z;
-            break;
-        }
-        default:
-            break;
-        }
-        copy->lightFlags |= LIGHTF_DIRTY;
-        light->lightFlags &= ~LIGHTF_MOVED;
-        dst.indices[i] = static_cast<uint16_t>(light->linkedLight);
-    }
-    dst.count = src.count;
 }
 
 // 0x100695a0
