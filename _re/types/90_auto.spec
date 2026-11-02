@@ -446,7 +446,7 @@ class C_MarkBox size=0x89 vtable=0x00814650:33
   0x088 uint8_t m_088
 end
 
-class C_auto_00814760 size=0x8c vtable=0x00814760:34
+class C_UpgradeBar size=0x8c vtable=0x00814760:34
   0x00c void* m_00c
   0x060 uint32_t m_060
   0x065 int8_t m_065
@@ -457,7 +457,7 @@ class C_auto_00814760 size=0x8c vtable=0x00814760:34
   0x088 uint32_t m_088
 end
 
-class C_auto_008147e8 size=0x7c vtable=0x008147e8:67
+class C_BarControl size=0x7c vtable=0x008147e8:67
   0x06c uint32_t m_06c
   0x070 uint32_t m_070
   0x074 uint32_t m_074
@@ -474,7 +474,7 @@ class C_auto_00814980 size=0xb4 vtable=0x00814980:34
   0x0b0 void* m_0b0
 end
 
-class C_auto_00814a08 size=0x4 vtable=0x00814a08:67
+class C_HidingList size=0x4 vtable=0x00814a08:67
 end
 
 class C_SkillControl size=0x8c vtable=0x00814ba0:33

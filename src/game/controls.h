@@ -140,6 +140,23 @@ enum : uint32_t {
     CONTROL_MSG_SET_DOWN_STEP = 0x100002A,
     CONTROL_MSG_SET_ORIGIN = 0x100006B,
     CONTROL_MSG_SELECT_INDEX = 0x20000AA,
+    // The bar's: its minimum, maximum and value (value2 a float, got or set; the upgrade bar's by
+    // value: 0 the value, 1 the upgrade, 2 (set) the suffix text, value2 a char *), the axis it
+    // scales along (value: 0 x, 1 y, 2 z).
+    CONTROL_MSG_GET_BAR_MIN = 0x100008D,
+    CONTROL_MSG_GET_BAR_MAX = 0x100008E,
+    CONTROL_MSG_GET_BAR_VALUE = 0x100008F,
+    CONTROL_MSG_SET_BAR_MIN = 0x1000090,
+    CONTROL_MSG_SET_BAR_MAX = 0x1000091,
+    CONTROL_MSG_SET_BAR_VALUE = 0x1000092,
+    CONTROL_MSG_SET_BAR_AXIS = 0x1000093,
+    // The hiding list's: an item hidden (value its id), all hidden; ITEM_COUNTED shows one again.
+    CONTROL_MSG_HIDE_ITEM = 0x2000084,
+    CONTROL_MSG_HIDE_ALL = 0x2000085,
+    // The pool list's: a hidden item filled and shown (value its index, value2 an entry whose name,
+    // a C_str, is at + 1); the current one also hovered.
+    CONTROL_MSG_ADD_CURRENT_ENTRY = 0x1000064,
+    CONTROL_MSG_ADD_ENTRY = 0x1000067,
     // A control to be ticked (posted to target 0 when made, value2 the control: the tooltip, the
     // scroll bar and its arrows).
     CONTROL_MSG_ADD_TICKER = 0x200007A,
@@ -1135,4 +1152,91 @@ public:
 
 protected:
     bool m_picked = false;                              // +0x78
+};
+
+// A bar (type 0x16, vtable 0x008147e8; the base of the upgrade bar): its frame scaled along an axis
+// by its value over its range (max - min; not above 0: 1), off at 0 or below, at most 1; not taking
+// input.
+class C_BarControl : public C_Control {                 // 0x7C bytes
+public:
+    C_BarControl(I3D_scene *scene, uint32_t id, C_Control *parent);
+    ~C_BarControl() override = default;                 // 0x0065fb10 (0x0065faf0)
+
+    // The base's, then placed (false: not made).
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006630a0
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x006630e0
+    // The frame scaled (or off) and updated.
+    virtual void UpdateBar();                           // +0x84 0x00662e70
+
+protected:
+    // A scale of `fraction` along the axis (1 on the others); another axis: none.
+    static void ScaleAlong(I3D_frame *frame, int axis, float fraction);
+
+    float m_value = 0.0f;                               // +0x6C
+    float m_max = 1.0f;                                 // +0x70
+    float m_min = 0.0f;                                 // +0x74
+    int m_axis = 0;                                     // +0x78
+};
+
+// An upgrade bar (type 0x17, vtable 0x00814760; the skills' and the upgrades'): a bar whose
+// "hlcpct*" frame shows the value and "upgrade*" the value with its upgrade; a title on "name_*"
+// (the text messages) and one on "text_*" (the value, the upgrade, the suffix).
+class C_UpgradeBar : public C_BarControl {              // 0x98 bytes
+public:
+    C_UpgradeBar(I3D_scene *scene, uint32_t id, C_Control *parent) : C_BarControl(scene, id, parent) {}
+    ~C_UpgradeBar() override = default;                 // 0x0065fc50 (0x0065fc30)
+
+    // The shown bar's titles.
+    void Refresh() override;                            // 0x00663a90
+    // The bar's; the titles made; both frames found (false: not), placed.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00663880
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00663700
+    // Hidden at value and upgrade 0; else shown, the frames scaled, the text set; the frame updated.
+    void UpdateBar() override;                          // 0x006631a0
+
+protected:
+    C_TitleControl *m_name = nullptr;                   // +0x7C
+    C_TitleControl *m_text = nullptr;                   // +0x80
+    I3D_frame *m_valueFrame = nullptr;                  // +0x84 "hlcpct*"
+    I3D_frame *m_upgradeFrame = nullptr;                // +0x88 "upgrade*"
+    float m_current = 0.0f;                             // +0x8C
+    float m_upgrade = 0.0f;                             // +0x90
+    C_str m_suffix;                                     // +0x94
+};
+
+// A hiding list (type 0x23, vtable 0x00814a08; the base of the pool list): a list group whose items
+// can be hidden (kept, the hidden ones still taking their messages) and shown again (ITEM_COUNTED:
+// the item informations', sorted in).
+class C_HidingList : public C_ListGroup {               // 0xB4 bytes
+public:
+    C_HidingList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ListGroup(scene, id, parent) {}
+    ~C_HidingList() override;                           // 0x0065eb60 (0x0065eb40): the hidden deleted
+
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00659d50
+
+protected:
+    // The hidden item's index by id (the last match; none: -1).
+    int FindHidden(uint32_t id) const;                  // 0x0065a0c0
+    int HiddenCount() const { return static_cast<int>(m_hidden.size()); }
+
+    std::vector<C_Control *> m_hidden;                  // +0xA0 (owned)
+};
+
+// A pool list (type 0x26, vtable 0x008144b8): a hiding list, unsorted, whose hidden items are filled
+// with entries and shown; the focus held from input 0A until input 09 (a drag).
+class C_PoolList : public C_HidingList {                // 0xB8 bytes
+public:
+    C_PoolList(I3D_scene *scene, uint32_t id, C_Control *parent);
+    ~C_PoolList() override = default;                   // 0x0065ee20 (0x0065ee00)
+
+    // The held item's (none: 0).
+    int OnInput08(int id) override;                     // 0x0065a510
+    // The held item's, then none held (none: 0).
+    int OnInput09(int id) override;                     // 0x0065a530
+    // The focus held, its input 0A (none: 0).
+    int OnInput0A(int id) override;                     // 0x0065a4d0
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0065a100
+
+protected:
+    C_Control *m_held = nullptr;                        // +0xB4
 };

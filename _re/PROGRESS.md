@@ -6593,6 +6593,46 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     00814980 moved to it in auto_members.json); names/controls.txt (23); 23 functions in ported.txt.
     Stats: 8,489 of 12,293 functions by hand (76.0 % by size).
 
+  PART 9c-v-b DONE (2026-11-02): the bars, the hiding list and the pool list (src/game/controls.*).
+  The four vtables are 34 slots each (0x88 apart); the 67 / 101 of the plan read into the next
+  ones: 0x00814870 (type 0x20) after the bar, 0x00814a90 (type 0x1d) after the hiding list.
+  - C_BarControl (type 0x16, vtable 0x008147e8, 0x7C; was C_auto_008147e8): its frame scaled along
+    an axis (SET_BAR_AXIS 0x1000093: 0 x, 1 y, 2 z; another none) by value / (max - min) (the value
+    over the range, not its part above the minimum: kept; a range not above 0: 1), off at 0 or
+    below, at most 1; min / max / value got and set as floats in value2 (0x100008D .. 0x1000092);
+    not taking input. UpdateBar a new virtual (+0x84 0x00662e70).
+  - C_UpgradeBar (type 0x17, vtable 0x00814760, 0x98; was C_auto_00814760): the bar with titles on
+    "name_*" (the text messages) and "text_*" ("%.1f " of the value, "+ %.1f" of the upgrade from
+    0.1 (style 0x2C), the suffix; style 0x2B), "hlcpct*" scaled by the value and "upgrade*" by
+    value + upgrade (both needed: else Create false); hidden at value and upgrade 0; GET / SET
+    _BAR_VALUE by value (0 the value, 1 the upgrade, 2 the suffix: a char *). The titles checked
+    in Refresh and SET_TEXT (the fix: the original's without them crashes).
+  - C_HidingList (type 0x23, vtable 0x00814a08, 0xB4; was C_auto_00814a08): a list group with its
+    hidden items (+0xA0, owned, still taking their messages): HIDE_ITEM 0x2000084 (the focus left;
+    the scroll back unsigned, kept), HIDE_ALL 0x2000085 (unpicked; signed), ITEM_COUNTED (the item
+    informations' post) shows one again (left, sorted in). FindHidden 0x0065a0c0.
+  - C_PoolList (type 0x26, vtable 0x008144b8, 0xB8): the hiding list unsorted; ADD_ENTRY 0x1000067
+    / ADD_CURRENT_ENTRY 0x1000064 (value an index, value2 an entry whose name, a C_str, is read at
+    + 1, unaligned: kept) fill the first hidden item (SET_TEXT style 0xD, SET_INDEX) and show it
+    (the current one hovered: OnInput05); its focus held from input 0A to 09 (a drag; 08 passed on;
+    none: 0, not CONTROL_NOT_HANDLED).
+  - Harness: bar_test.inc in the text build, run by ControlsTest after ListTest ("bar:", 14
+    checks). 22 of 22 in both orders.
+  - Mutations (mutations/mutate_9c5b.py, generated, the text build on one mission in 4 parallel
+    runs): 191 cases, 179 build; all caught but 9 equivalent (listed in its docstring: the bars'
+    Create when the base fails, the bar's <= 0 and >= 1, the upgrade bar's equalities, FindHidden's
+    -2, the refresh's target, HIDE_ALL's <=). The first run left 18 (9 killed: a value of 1.25,
+    a range of 0.25, the shown upgrade bar's one update, a message to the first hidden item, all
+    hidden from shown items, an entry to a hidden item, a pool with none hidden).
+  - Build: MSVC clean. Tier 1: 478 errors in 79 files, 193 stubs (was 482 / 80 / 194: the layouts
+    refreshed with fetch_types.py after the renames, the factory CreateChild compiles now).
+    ret_audit --src: 52.
+  - Ghidra: the three auto classes renamed; C_PoolList's this C_HidingList (no struct); the
+    neighbours' 15 functions (types 0x20 and 0x1d) moved to C_auto_00814870 / C_auto_00814a90 in
+    auto_members.json and typed C_BarControl / C_HidingList for now (their structs' recovered
+    layouts; 9c-v-d names them); names/controls.txt (24); 24 functions in ported.txt. Stats: 8,513
+    of 12,293 functions by hand (76.2 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

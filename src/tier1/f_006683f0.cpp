@@ -33,7 +33,7 @@ uint32_t * C_Control__FUN_00668420(C_Control *_this,int *param_1,uint32_t param_
   _this->m_040 = 0;
   _this->m_044 = 0;
   _this->m_048 = 0;
-  _this->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813dd0);
+  _this->vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813dd0));
   _this->m_054 = 0;
   local_4 = CONCAT31(GH_PIECE(local_4,1,3),2);
   FUN_0065a5c0(&_this->m_004,(uint32_t *)_this->m_008,(uint32_t *)_this->m_00c);
@@ -48,7 +48,7 @@ uint32_t * C_Control__FUN_00668420(C_Control *_this,int *param_1,uint32_t param_
   _this->m_066 = '\x01';
   _this[1].m_00c = 0;
   local_4 = 4;
-  _this->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00815540);
+  _this->vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00815540));
   *(uint8_t *)&_this[1].m_010 = 0;
   _this->m_06c = 0xffffffff;
   _this[1].m_004 = (uint8_t)param_2;
@@ -56,7 +56,7 @@ uint32_t * C_Control__FUN_00668420(C_Control *_this,int *param_1,uint32_t param_
   _this[1]._pad_0005[1] = GH_PIECE(param_2,2,1);
   _this[1]._pad_0005[2] = GH_PIECE(param_2,3,1);
   pCVar1 = (C_Control_vtbl *)FUN_0066a9e0(param_1);
-  _this[1].vtable = (C_auto_00813dd0_vtbl*)(pCVar1);
+  _this[1].vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)(pCVar1));
   return (uint32_t*)(&_this->vtable);
 }
 

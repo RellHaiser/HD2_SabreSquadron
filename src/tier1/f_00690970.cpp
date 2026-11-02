@@ -1131,7 +1131,7 @@ uint32_t FUN_00692100(int param_1,int *param_2, ...)
   piVar4 = (int *)(**(code **)(*param_2 + 0x48))();
   if (piVar4 != 0) {
     uStack_160 = 0;
-    SStack_168.vtable = (C_auto_00813ab0_vtbl*)((S_ControlDesc_vtbl *)0x6921a9);
+    SStack_168.vtable = (S_ControlDesc_vtbl*)((C_auto_00813ab0_vtbl*)((S_ControlDesc_vtbl *)0x6921a9));
     piStack_164 = piVar4;
     (**(code **)(*piVar4 + 0x30))();
   }
@@ -1140,7 +1140,7 @@ uint32_t FUN_00692100(int param_1,int *param_2, ...)
   if ((char)uVar5 != '\0') {
     uStack_160 = 1;
     piStack_164 = (int *)"table19";
-    SStack_168.vtable = (C_auto_00813ab0_vtbl*)((S_ControlDesc_vtbl *)param_2);
+    SStack_168.vtable = (S_ControlDesc_vtbl*)((C_auto_00813ab0_vtbl*)((S_ControlDesc_vtbl *)param_2));
     uStack_16c = 0x6921c5;
     piStack_170 = (int *)(**(code **)(*param_2 + 0x48))();
     if (piStack_170 != 0) {
@@ -1179,13 +1179,13 @@ uint32_t FUN_00692100(int param_1,int *param_2, ...)
     piStack_164 = (int *)(**(code **)(*param_2 + 0x48))();
     if (piStack_164 != 0) {
       uStack_160 = 0x3f000000;
-      SStack_168.vtable = (C_auto_00813ab0_vtbl*)((S_ControlDesc_vtbl *)0x692272);
+      SStack_168.vtable = (S_ControlDesc_vtbl*)((C_auto_00813ab0_vtbl*)((S_ControlDesc_vtbl *)0x692272));
       (**(code **)(*piStack_164 + 0xa8))();
     }
   }
   uStack_160 = 0x20;
   piStack_164 = (int *)"panel01";
-  SStack_168.vtable = (C_auto_00813ab0_vtbl*)((S_ControlDesc_vtbl *)param_2);
+  SStack_168.vtable = (S_ControlDesc_vtbl*)((C_auto_00813ab0_vtbl*)((S_ControlDesc_vtbl *)param_2));
   uStack_16c = 0x69227f;
   uStack_148 = (**(code **)(*param_2 + 0x48))();
   uStack_16c = 1;
@@ -1419,7 +1419,7 @@ LAB_0069250c:
     GH_PIECE(uStack_ec,0,1) = 0;
     FUN_00615f50(pvVar14,*(uint32_t **)(iVar16 + 0x38),(uint32_t*)(ppIVar12));
     uStack_16c = 0x1000009;
-    SStack_168.vtable = (C_auto_00813ab0_vtbl*)(pSStack_1c8);
+    SStack_168.vtable = (S_ControlDesc_vtbl*)((C_auto_00813ab0_vtbl*)(pSStack_1c8));
     iVar16 = *(int *)(*(int *)(iStack_1d8 + 0x38) - 4);
     pCStack_15c = 0;
     piStack_170 = 0;
@@ -1786,7 +1786,7 @@ uint32_t FUN_00692c40(void *_this,int param_1,int *param_2, ...)
       uStack_14 = 0xffffffff;
       *puStack_144 = uVar5;
       if ((pSStack_134 != 0) &&
-         (pSStack_134->vtable = (C_auto_00813ab0_vtbl*)((S_ControlDesc_vtbl *)((int)&pSStack_134->vtable[-1].vf00 + 3)),
+         (pSStack_134->vtable = (S_ControlDesc_vtbl*)((C_auto_00813ab0_vtbl*)((S_ControlDesc_vtbl *)((int)&pSStack_134->vtable[-1].vf00 + 3))),
          pSStack_134->vtable == 0)) {
         tier1_operator_delete(pSStack_134);
       }

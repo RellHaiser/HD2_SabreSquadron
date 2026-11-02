@@ -286,12 +286,6 @@ f_00638dc0.cpp:2102:13: invalid type argument of unary '*' (have 'uint32_t' {aka
     *DAT_008ae5b0 = (int)pvVar3;
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_0065ca50.cpp:613:50: 'struct tier1::C_Control_vtbl' has no member named 'vf0b'
-    cVar1 = (*((C_Control_vtbl *)this_00->vtable)->vf0b)(iVar2,uStack_4,desc);
-f_0065ca50.cpp:616:46: 'struct tier1::C_Control_vtbl' has no member named 'vf20'
-    (*((C_Control_vtbl *)this_00->vtable)->vf20)(1);
-f_0065ca50.cpp:620:44: 'struct tier1::C_Control_vtbl' has no member named 'empty_function_65d050'
-    (*((C_Control_vtbl *)this_00->vtable)->empty_function_65d050)((int)desc + 0x20);
 f_006683f0.cpp:690:53: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
 f_006683f0.cpp:700:53: no matching function for call to 'tier1::C_str::C_str(int)'
@@ -468,8 +462,6 @@ f_00690970.cpp:1150:42: too few arguments to function
     (*pIStack_17c->vtable[1].Duplicate)();
 f_00690970.cpp:1221:24: request for member '_0_4_' in '"death"', which is of non-class type 'const char [6]'
     (**(code **)("death"._0_4_ + 0x38))();
-f_00690970.cpp:1473:61: 'struct tier1::S_ControlDesc_vtbl' has no member named 'vf00'
-    pSStack_1c8 = (S_ControlDesc_vtbl *)((int)&pSStack_1c8->vf00 + 1);
 f_00690970.cpp:1607:35: too few arguments to function
     (*pIStack_148->vtable->LinkTo)(pIStack_148,(I3D_frame*)(param_2));
 f_00690970.cpp:1934:38: too few arguments to function

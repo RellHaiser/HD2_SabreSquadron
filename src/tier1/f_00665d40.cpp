@@ -484,7 +484,7 @@ uint32_t C_auto_00814980__FUN_006666f0(C_auto_00814980 *_this,int *param_1,void 
     }
     else {
       C_Control__FUN_00666ad0(pCVar6,_this->m_068,(unaff_retaddr & 0xff) << 0xc | _this->m_060,_this);
-      pCVar6->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_008154b8);
+      pCVar6->vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_008154b8));
       pCVar6->m_05c = 0;
     }
     piStack_10 = (int *)((uint32_t)GH_PIECE(piStack_10,1,3) << 8);
@@ -589,7 +589,7 @@ uint32_t C_Control__FUN_00666ad0(C_Control *_this,uint32_t param_1,uint32_t para
   _this->m_040 = 0;
   _this->m_044 = 0;
   _this->m_048 = 0;
-  _this->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813dd0);
+  _this->vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813dd0));
   _this->m_054 = 0;
   _this->m_00c = _this->m_008;
   _this->m_068 = param_1;
@@ -601,7 +601,7 @@ uint32_t C_Control__FUN_00666ad0(C_Control *_this,uint32_t param_1,uint32_t para
   _this->m_058 = 0;
   _this->m_05c = 0xffffffff;
   _this->m_06c = 0;
-  _this->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00814cb0);
+  _this->vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00814cb0));
   _this[1].vtable = 0;
   _this[1].m_004 = '\0';
   _this[1]._pad_0005[0] = '\0';
@@ -641,13 +641,13 @@ uint32_t C_TextControl__FUN_00666ba0(C_TextControl *_this, ...)
   _this[1]._pad_0004[1] = '\0';
   _this[1]._pad_0004[2] = '\0';
   _this[1]._pad_0004[3] = '\0';
-  _this->vtable = (C_auto_00813e58_vtbl*)((C_TextControl_vtbl *)&PTR_00813e58);
+  _this->vtable = (C_TextControl_vtbl*)((C_auto_00813e58_vtbl*)((C_TextControl_vtbl *)&PTR_00813e58));
   local_4 = 0;
   if (_this->m_06c != 0) {
     (**(code **)(*(int *)_this->m_06c + 0xc))(1);
     _this->m_06c = 0;
   }
-  _this->vtable = (C_auto_00813e58_vtbl*)((C_TextControl_vtbl *)&PTR_00813dd0);
+  _this->vtable = (C_TextControl_vtbl*)((C_auto_00813e58_vtbl*)((C_TextControl_vtbl *)&PTR_00813dd0));
   local_4 = 3;
   iVar4 = vector_size_e4_653b60((int)_this->_pad_0004);
   while (iVar4 != 0) {

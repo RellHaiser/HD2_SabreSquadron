@@ -4183,3 +4183,338 @@ int C_ListItem::OnPress(int id)
     Notify(CONTROL_NOTIFY_PRESS, 0);
     return OnClick(id);
 }
+
+// ----- the bar (type 0x16) and the upgrade bar (type 0x17) -----
+
+namespace {
+
+constexpr int BAR_AXIS_X = 0, BAR_AXIS_Y = 1, BAR_AXIS_Z = 2;
+// The upgrade bar's text: the value and the suffix, the upgrade (shown from 0.1).
+constexpr uint32_t UPGRADE_TEXT_STYLE = 0x2B, UPGRADE_ADDED_STYLE = 0x2C;
+constexpr float UPGRADE_SHOWN = 0.1f;
+
+} // namespace
+
+C_BarControl::C_BarControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent)
+{
+    m_takesInput = false;
+}
+
+bool C_BarControl::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_Control::Create(frame, root, desc))
+        return false;
+    UpdateBar();
+    return true;
+}
+
+bool C_BarControl::HandleMessage(S_ControlMessage *message)
+{
+    if (!(message->id & CONTROL_NOTIFY_MASK)) {
+        switch (message->id & CONTROL_MSG_MASK) {
+        case CONTROL_MSG_GET_BAR_MIN:
+            message->value2 = FloatValue(m_min);
+            return true;
+        case CONTROL_MSG_GET_BAR_MAX:
+            message->value2 = FloatValue(m_max);
+            return true;
+        case CONTROL_MSG_GET_BAR_VALUE:
+            message->value2 = FloatValue(m_value);
+            return true;
+        case CONTROL_MSG_SET_BAR_MIN:
+            m_min = ValueFloat(message->value2);
+            UpdateBar();
+            return true;
+        case CONTROL_MSG_SET_BAR_MAX:
+            m_max = ValueFloat(message->value2);
+            UpdateBar();
+            return true;
+        case CONTROL_MSG_SET_BAR_VALUE:
+            m_value = ValueFloat(message->value2);
+            UpdateBar();
+            return true;
+        case CONTROL_MSG_SET_BAR_AXIS:
+            m_axis = static_cast<int>(message->value);
+            UpdateBar();
+            return true;
+        }
+    }
+    C_Control::HandleMessage(message);
+    return true;
+}
+
+void C_BarControl::ScaleAlong(I3D_frame *frame, int axis, float fraction)
+{
+    if (axis == BAR_AXIS_X)
+        frame->SetScale(S_vector(fraction, 1.0f, 1.0f));
+    else if (axis == BAR_AXIS_Y)
+        frame->SetScale(S_vector(1.0f, fraction, 1.0f));
+    else if (axis == BAR_AXIS_Z)
+        frame->SetScale(S_vector(1.0f, 1.0f, fraction));
+}
+
+void C_BarControl::UpdateBar()
+{
+    float range = m_max - m_min;
+    if (range <= 0.0f)
+        range = 1.0f;
+    // (The value over the range, not its part above the minimum: the original's.)
+    float fraction = m_value / range;
+    if (fraction < 0.0f || fraction == 0.0f) {
+        m_frame->SetOn(false);
+        m_frame->Update();
+        return;
+    }
+    if (fraction > 1.0f)
+        fraction = 1.0f;
+    m_frame->SetOn(true);
+    ScaleAlong(m_frame, m_axis, fraction);
+    m_frame->Update();
+}
+
+void C_UpgradeBar::Refresh()
+{
+    if (!m_shown)
+        return;
+    // (The titles checked: the fix, the original's without them crashes.)
+    if (m_name)
+        m_name->Refresh();
+    if (m_text)
+        m_text->Refresh();
+}
+
+bool C_UpgradeBar::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_BarControl::Create(frame, root, desc))
+        return false;
+    if (I3D_frame *name = frame->FindChildFrame("name_*", FIND_FRAMES)) {
+        m_name = new C_TitleControl(m_scene, m_id, this);
+        m_name->Create(name, root, nullptr);
+        m_children.push_back(m_name);
+    }
+    if (I3D_frame *text = frame->FindChildFrame("text_*", FIND_FRAMES)) {
+        m_text = new C_TitleControl(m_scene, m_id, this);
+        m_text->Create(text, root, nullptr);
+        m_children.push_back(m_text);
+    }
+    m_valueFrame = frame->FindChildFrame("hlcpct*", FIND_FRAMES);
+    m_upgradeFrame = frame->FindChildFrame("upgrade*", FIND_FRAMES);
+    if (!m_valueFrame || !m_upgradeFrame)
+        return false;
+    UpdateBar();
+    return true;
+}
+
+bool C_UpgradeBar::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_Control::HandleMessage(message);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_TEXT:
+    case CONTROL_MSG_SET_TEXT_ID:
+        // (The title checked: the fix, the original's without it crashes.)
+        if (m_name)
+            m_name->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_GET_BAR_VALUE:
+        if (message->value == 0)
+            message->value2 = FloatValue(m_current);
+        else if (message->value == 1)
+            message->value2 = FloatValue(m_upgrade);
+        return true;
+    case CONTROL_MSG_SET_BAR_VALUE:
+        if (message->value == 0)
+            m_current = ValueFloat(message->value2);
+        else if (message->value == 1)
+            m_upgrade = ValueFloat(message->value2);
+        else if (message->value == 2)
+            m_suffix = reinterpret_cast<const char *>(message->value2);
+        UpdateBar();
+        return true;
+    default:
+        C_BarControl::HandleMessage(message);
+        return true;
+    }
+}
+
+void C_UpgradeBar::UpdateBar()
+{
+    if (m_current == 0.0f && m_upgrade == 0.0f) {
+        if (m_shown)
+            Hide();
+        m_frame->Update();
+        return;
+    }
+    if (!m_shown)
+        Show();
+    float range = m_max - m_min;
+    if (range <= 0.0f)
+        range = 1.0f;
+    // (Over the range, as the bar's; a NaN divided: the original's.)
+    const float value = m_current > m_max ? 1.0f : m_current < m_min ? 0.0f : m_current / range;
+    ScaleAlong(m_valueFrame, m_axis, value);
+    const float sum = m_upgrade + m_current;
+    const float upgraded = sum < m_min || m_upgrade == 0.0f ? 0.0f : sum > m_max ? 1.0f : sum / range;
+    ScaleAlong(m_upgradeFrame, m_axis, upgraded);
+    const float shown = m_current > m_max ? m_max : m_current;
+    const float added = shown + m_upgrade > m_max ? m_max - shown : m_upgrade;
+    if (m_text) {
+        m_text->HandleMessageCopy(Message(CONTROL_MSG_CLEAR));
+        m_text->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, UPGRADE_TEXT_STYLE,
+                                               C_fstr("%.1f ", static_cast<double>(shown))));
+        if (added >= UPGRADE_SHOWN)
+            m_text->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, UPGRADE_ADDED_STYLE,
+                                                   C_fstr("+ %.1f", static_cast<double>(added))));
+        m_text->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, UPGRADE_TEXT_STYLE, m_suffix));
+    }
+    m_frame->Update();
+}
+
+// ----- the hiding list (type 0x23) and the pool list (type 0x26) -----
+
+namespace {
+
+constexpr uint32_t POOL_ENTRY_STYLE = 0xD;
+
+} // namespace
+
+C_HidingList::~C_HidingList()
+{
+    while (!m_hidden.empty()) {
+        delete m_hidden.back();
+        m_hidden.pop_back();
+    }
+}
+
+int C_HidingList::FindHidden(uint32_t id) const
+{
+    for (int i = HiddenCount(); i-- > 0;)
+        if (m_hidden[i]->GetId() == id)
+            return i;
+    return -1;
+}
+
+bool C_HidingList::HandleMessage(S_ControlMessage *message)
+{
+    const int target = FindChild(message->target);
+    if (IsChild(target))
+        return m_children[target]->HandleMessage(message);
+    const int hidden = FindHidden(message->target);
+    if (hidden >= 0)
+        return m_hidden[hidden]->HandleMessage(message);
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_ListGroup::HandleMessage(message);
+        return true;
+    }
+    S_ControlMessage refresh = Message(CONTROL_MSG_REFRESH);
+    refresh.target = m_id;
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_ITEM_COUNTED: {
+        if (IsChild(FindChild(message->value)))
+            return true;
+        const int index = FindHidden(message->value);
+        if (index >= 0) {
+            m_children.push_back(m_hidden[index]);
+            m_hidden.erase(m_hidden.begin() + index);
+            m_children.back()->OnLeave(0);
+        }
+        Sort();
+        if (m_shown)
+            HandleMessageCopy(refresh);
+        return true;
+    }
+    case CONTROL_MSG_HIDE_ITEM: {
+        const int index = FindChild(message->value);
+        if (index < 0)
+            return true;
+        C_Control *item = m_children[index];
+        if (index == m_focus) {
+            item->OnLeave(0);
+            m_focus = -1;
+        }
+        item->Hide();
+        m_hidden.push_back(item);
+        m_children.erase(m_children.begin() + index);
+        // (Unsigned: the original's.)
+        while (m_first != 0 && static_cast<uint32_t>(ItemCount() - m_first) < static_cast<uint32_t>(m_visible))
+            Scroll(SCROLL_BACK);
+        if (m_shown)
+            HandleMessageCopy(refresh);
+        return true;
+    }
+    case CONTROL_MSG_HIDE_ALL:
+        PickItem(nullptr);
+        for (int i = ItemCount(); i-- > 0;)
+            m_children[i]->Hide();
+        m_hidden.insert(m_hidden.end(), m_children.begin(), m_children.end());
+        m_children.clear();
+        while (m_first != 0 && ItemCount() - m_first < m_visible)
+            Scroll(SCROLL_BACK);
+        if (m_shown)
+            HandleMessageCopy(refresh);
+        return true;
+    default:
+        C_ListGroup::HandleMessage(message);
+        return true;
+    }
+}
+
+C_PoolList::C_PoolList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_HidingList(scene, id, parent)
+{
+    m_sorted = false;
+}
+
+int C_PoolList::OnInput08(int id)
+{
+    return m_held ? m_held->OnInput08(id) : 0;
+}
+
+int C_PoolList::OnInput09(int id)
+{
+    if (!m_held)
+        return 0;
+    const int result = m_held->OnInput09(id);
+    m_held = nullptr;
+    return result;
+}
+
+int C_PoolList::OnInput0A(int id)
+{
+    if (!IsChild(m_focus))
+        return 0;
+    m_held = m_children[m_focus];
+    return m_held->OnInput0A(id);
+}
+
+bool C_PoolList::HandleMessage(S_ControlMessage *message)
+{
+    const int target = FindChild(message->target);
+    if (IsChild(target))
+        return m_children[target]->HandleMessage(message);
+    const int hidden = FindHidden(message->target);
+    if (hidden >= 0)
+        return m_hidden[hidden]->HandleMessage(message);
+    const uint32_t code = message->id & CONTROL_MSG_MASK;
+    if ((message->id & CONTROL_NOTIFY_MASK) || (code != CONTROL_MSG_ADD_CURRENT_ENTRY && code != CONTROL_MSG_ADD_ENTRY)) {
+        C_HidingList::HandleMessage(message);
+        return true;
+    }
+    if (message->value2 == 0 || HiddenCount() <= 0)
+        return false;
+    // The first hidden item named, indexed and shown.
+    const uint32_t item = m_hidden.front()->GetId();
+    // (The name read at value2 + 1, unaligned: the original's.)
+    alignas(C_str) unsigned char raw[sizeof(C_str)];
+    std::memcpy(raw, reinterpret_cast<const char *>(message->value2) + 1, sizeof(raw));
+    const C_str &name = *reinterpret_cast<const C_str *>(raw);
+    S_ControlMessage text = ValueMessage(CONTROL_MSG_SET_TEXT, POOL_ENTRY_STYLE, name);
+    text.target = item;
+    HandleMessageCopy(text);
+    S_ControlMessage index = ValueMessage(CONTROL_MSG_SET_INDEX, message->value);
+    index.target = item;
+    HandleMessageCopy(index);
+    HandleMessageCopy(ValueMessage(CONTROL_MSG_ITEM_COUNTED, item));
+    if (code == CONTROL_MSG_ADD_CURRENT_ENTRY)
+        OnInput05(item);
+    return true;
+}

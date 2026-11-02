@@ -15,7 +15,7 @@ uint32_t FUN_0065a5f0(...)
 
 
 // 0x0065a620
-uint32_t C_auto_008147e8__FUN_0065a620(C_auto_008147e8 *_this,void *param_1,void *param_2,void *param_3, ...)
+uint32_t C_BarControl__FUN_0065a620(C_BarControl *_this,void *param_1,void *param_2,void *param_3, ...)
 {
   int *piStack_c;
   uint32_t uVar1;
@@ -44,7 +44,7 @@ uint32_t C_auto_008147e8__FUN_0065a620(C_auto_008147e8 *_this,void *param_1,void
     C_Control__C_Control(this_00,(void *)_this->m_068,_this->m_060,_this);
     this_00->m_066 = '\x01';
     this_00->m_06c = 0xffffffff;
-    this_00->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_008143a8);
+    this_00->vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_008143a8));
     this_00[1].vtable = 0;
     this_00[1].m_004 = '\0';
     this_00[1]._pad_0005[0] = '\0';
@@ -111,11 +111,11 @@ uint32_t C_auto_008147e8__FUN_0065a620(C_auto_008147e8 *_this,void *param_1,void
 
 
 // 0x0065a850
-uint32_t C_auto_008147e8__FUN_0065a850(C_auto_008147e8 *_this,int *param_1, ...)
+uint32_t C_BarControl__FUN_0065a850(C_BarControl *_this,int *param_1, ...)
 {
   int *message;
-  C_auto_008147e8_vtbl *this_00;
-  C_auto_008147e8 *pCVar1;
+  C_BarControl_vtbl *this_00;
+  C_BarControl *pCVar1;
   char cVar2;
   uint32_t uVar3;
   int iVar4;
@@ -152,12 +152,12 @@ uint32_t C_auto_008147e8__FUN_0065a850(C_auto_008147e8 *_this,int *param_1, ...)
   C_str local_24;
   int local_20;
   C_str local_1c;
-  C_auto_008147e8_vtbl *local_18;
-  C_auto_008147e8 *local_14;
+  C_BarControl_vtbl *local_18;
+  C_BarControl *local_14;
   uint32_t local_8;
   message = param_1;
   local_8 = 0xffffffff;
-  local_18 = _this->vtable;
+  local_18 = (C_BarControl_vtbl*)(_this->vtable);
   local_14 = _this;
   uVar3 = (*local_18->vf00)(*param_1);
   cVar2 = (*local_18->vf01)(uVar3);
@@ -169,7 +169,7 @@ uint32_t C_auto_008147e8__FUN_0065a850(C_auto_008147e8 *_this,int *param_1, ...)
   if ((message[1] & 0x40ff000U) == 0) {
     uVar5 = message[1] & 0x3000fff;
     if (uVar5 == 0x100007d) {
-      local_18 = (C_auto_008147e8_vtbl *)C_NetGame__LockPlayers(0x97d070);
+      local_18 = (C_BarControl_vtbl *)C_NetGame__LockPlayers(0x97d070);
       pCVar1 = local_14;
       local_70 = 0;
       local_84 = 0;
@@ -289,9 +289,9 @@ uint32_t C_auto_008147e8__FUN_0065a850(C_auto_008147e8 *_this,int *param_1, ...)
 
 
 // 0x0065acb0
-uint32_t C_auto_008147e8__FUN_0065acb0(C_auto_008147e8 *_this, ...)
+uint32_t C_BarControl__FUN_0065acb0(C_BarControl *_this, ...)
 {
-  C_auto_008147e8_vtbl *pCVar1;
+  C_BarControl_vtbl *pCVar1;
   char cVar2;
   int iVar3;
   uint32_t uVar4;
@@ -304,7 +304,7 @@ uint32_t C_auto_008147e8__FUN_0065acb0(C_auto_008147e8 *_this, ...)
       return 7;
     }
   }
-  pCVar1 = _this->vtable;
+  pCVar1 = (C_BarControl_vtbl*)(_this->vtable);
   uVar4 = (*pCVar1->vf00)(unaff_retaddr);
   cVar2 = (*pCVar1->vf01)(uVar4);
   if (cVar2 != '\0') {
@@ -321,7 +321,7 @@ uint32_t C_auto_008147e8__FUN_0065acb0(C_auto_008147e8 *_this, ...)
 
 
 // 0x0065ad30
-uint32_t C_auto_008147e8__FUN_0065ad30(C_auto_008147e8 *_this, ...)
+uint32_t C_BarControl__FUN_0065ad30(C_BarControl *_this, ...)
 {
   char cVar1;
   int iVar2;
@@ -339,14 +339,14 @@ uint32_t C_auto_008147e8__FUN_0065ad30(C_auto_008147e8 *_this, ...)
 
 
 // 0x0065ad70
-uint32_t C_auto_008147e8__FUN_0065ad70(C_auto_008147e8 *_this,uint32_t param_1, ...)
+uint32_t C_BarControl__FUN_0065ad70(C_BarControl *_this,uint32_t param_1, ...)
 {
-  C_auto_008147e8_vtbl *pCVar1;
+  C_BarControl_vtbl *pCVar1;
   uint32_t uVar2;
   char cVar3;
   uint32_t uVar4;
   uint32_t uVar5;
-  pCVar1 = _this->vtable;
+  pCVar1 = (C_BarControl_vtbl*)(_this->vtable);
   uVar4 = (*pCVar1->vf00)(param_1);
   cVar3 = (*pCVar1->vf01)(uVar4);
   if (cVar3 == '\0') {
@@ -366,7 +366,7 @@ uint32_t C_auto_008147e8__FUN_0065ad70(C_auto_008147e8 *_this,uint32_t param_1, 
 
 
 // 0x0065add0
-uint32_t C_auto_008147e8__FUN_0065add0(C_auto_008147e8 *_this, ...)
+uint32_t C_BarControl__FUN_0065add0(C_BarControl *_this, ...)
 {
   uint32_t uVar1;
   char cVar2;
@@ -387,7 +387,7 @@ uint32_t C_auto_008147e8__FUN_0065add0(C_auto_008147e8 *_this, ...)
 
 
 // 0x0065ae10
-int C_auto_008147e8__FUN_0065ae10(C_auto_008147e8 *_this,uint32_t param_1, ...)
+int C_BarControl__FUN_0065ae10(C_BarControl *_this,uint32_t param_1, ...)
 {
   if (3 < (param_1 & 0xf)) {
     return 0;
@@ -397,7 +397,7 @@ int C_auto_008147e8__FUN_0065ae10(C_auto_008147e8 *_this,uint32_t param_1, ...)
 
 
 // 0x0065ae30
-uint32_t C_auto_008147e8__FUN_0065ae30(C_auto_008147e8 *_this,uint32_t param_1, ...)
+uint32_t C_BarControl__FUN_0065ae30(C_BarControl *_this,uint32_t param_1, ...)
 {
   (**(code **)(*(int *)_this->m_088 + 0x7c))(param_1);
   (**(code **)(*(int *)_this->m_08c + 0x7c))(param_1);
@@ -406,7 +406,7 @@ uint32_t C_auto_008147e8__FUN_0065ae30(C_auto_008147e8 *_this,uint32_t param_1, 
 
 
 // 0x0065ae60
-uint32_t C_auto_008147e8__empty_function_65ae60(C_auto_008147e8 *_this, ...)
+uint32_t C_BarControl__empty_function_65ae60(C_BarControl *_this, ...)
 {
   return 0;
 }

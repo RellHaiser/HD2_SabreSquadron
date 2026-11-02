@@ -46,7 +46,7 @@ uint32_t C_auto_00814fe0__FUN_0064db20(C_auto_00814fe0 *_this,int *param_1, ...)
       pCVar2[1]._pad_0014[1] = '\0';
       pCVar2[1]._pad_0014[2] = '\0';
       pCVar2[1]._pad_0014[3] = '\0';
-      pCVar2->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813d48);
+      pCVar2->vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813d48));
       pCVar2[1].m_024 = 0;
       pCVar2[1]._pad_0028[0] = '\0';
       pCVar2[1]._pad_0028[1] = '\0';
@@ -69,7 +69,7 @@ uint32_t C_auto_00814fe0__FUN_0064db20(C_auto_00814fe0 *_this,int *param_1, ...)
     else {
       C_Control__C_Control(pCVar2,(void *)_this->m_068,_this->m_060 | 2,_this);
       pCVar2->m_06c = 0;
-      pCVar2->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813cc0);
+      pCVar2->vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813cc0));
       pCVar2->m_066 = '\0';
     }
     _this->m_074 = pCVar2;
@@ -572,7 +572,7 @@ uint32_t FUN_0064f020(void *_this,int *param_1, ...)
       this_00[1]._pad_0014[1] = '\0';
       this_00[1]._pad_0014[2] = '\0';
       this_00[1]._pad_0014[3] = '\0';
-      this_00->vtable = (C_auto_00813e58_vtbl*)((C_TextControl_vtbl *)&PTR_00813d48);
+      this_00->vtable = (C_TextControl_vtbl*)((C_auto_00813e58_vtbl*)((C_TextControl_vtbl *)&PTR_00813d48));
       this_00[1].m_024 = 0;
       this_00[1]._pad_0028[0] = '\0';
       this_00[1]._pad_0028[1] = '\0';
@@ -602,7 +602,7 @@ uint32_t FUN_0064f020(void *_this,int *param_1, ...)
       C_Control__C_Control
                 (this_01,*(void **)((int)_this + 0x68),*(uint32_t *)((int)_this + 0x60) | 2,_this);
       this_01->m_06c = 0;
-      this_01->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813cc0);
+      this_01->vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813cc0));
       this_01->m_066 = '\0';
     }
     *(C_Control **)((int)_this + 0x74) = this_01;
@@ -740,7 +740,7 @@ uint32_t FUN_00651520(int param_1, ...)
 
 
 // 0x00651810
-uint32_t C_auto_00814a08__FUN_00651810(C_auto_00814a08 *_this,int *param_1,void *param_2,void *param_3, ...)
+uint32_t C_HidingList__FUN_00651810(C_HidingList *_this,int *param_1,void *param_2,void *param_3, ...)
 {
   uint8_t stack0xffffffc0[64];
   uint8_t stack0xffffffb4[64];
@@ -775,7 +775,7 @@ uint32_t C_auto_00814a08__FUN_00651810(C_auto_00814a08 *_this,int *param_1,void 
     else {
       C_Control__C_Control(pCVar3,(void *)_this->m_068,_this->m_060 | 1,_this);
       pCVar3->m_06c = 0;
-      pCVar3->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813ff0);
+      pCVar3->vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813ff0));
       pCVar3->m_066 = '\x01';
     }
     ppvVar1 = &_this->m_080;
@@ -817,7 +817,7 @@ uint32_t C_auto_00814a08__FUN_00651810(C_auto_00814a08 *_this,int *param_1,void 
     else {
       C_Control__C_Control(pCVar3,(void *)_this->m_068,_this->m_060 | 2,_this);
       pCVar3->m_06c = 0;
-      pCVar3->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813ff0);
+      pCVar3->vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813ff0));
       pCVar3->m_066 = '\x01';
     }
     ppvVar1 = &_this->m_084;
@@ -858,7 +858,7 @@ uint32_t C_auto_00814a08__FUN_00651810(C_auto_00814a08 *_this,int *param_1,void 
 
 
 // 0x00651af0
-uint32_t C_auto_00814a08__FUN_00651af0(C_auto_00814a08 *_this,uint32_t *param_1, ...)
+uint32_t C_HidingList__FUN_00651af0(C_HidingList *_this,uint32_t *param_1, ...)
 {
   uint8_t stack0xffffff60[64];
   void *local_c;
@@ -1146,7 +1146,7 @@ uint32_t FUN_00651ea0(int param_1, ...)
 
 
 // 0x00652190
-uint32_t C_auto_00814a08__FUN_00652190(C_auto_00814a08 *_this, ...)
+uint32_t C_HidingList__FUN_00652190(C_HidingList *_this, ...)
 {
   if (_this->m_065 != '\0') {
     (**(code **)(*(int *)_this->m_080 + 0x18))();
@@ -1158,7 +1158,7 @@ uint32_t C_auto_00814a08__FUN_00652190(C_auto_00814a08 *_this, ...)
 
 
 // 0x006521c0
-int C_auto_00814a08__FUN_006521c0(C_auto_00814a08 *_this,uint32_t param_1, ...)
+int C_HidingList__FUN_006521c0(C_HidingList *_this,uint32_t param_1, ...)
 {
   if ((param_1 & 0xf) == 1) {
     return 0;
