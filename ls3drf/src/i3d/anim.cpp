@@ -536,6 +536,7 @@ void I3D_anim_track::SetPose(I3D_pose *newPose)
 // LS3DRF 0x10014df0 (from LS3DF 0x1001eea0)
 void I3D_anim_track::SetPoseWeight(float weight) { poseWeight = weight; }
 
+// LS3DRF 0x10014e20 (from LS3DF 0x1001eed0)
 void I3D_anim_track::Evaluate()
 {
     if (!frame)
@@ -786,6 +787,7 @@ void I3D_anim_stack::PurgeTracks()
     }
 }
 
+// LS3DRF 0x100161b0 (from LS3DF 0x10020260)
 I3D_RESULT I3D_anim_stack::SetAnimation(I3D_animation_set *set, int stage, float weight, int mode)
 {
     Stage &st = stages[stage];
@@ -909,6 +911,7 @@ void I3D_anim_stack::Tick(int delta)
     EndStages();
 }
 
+// LS3DRF 0x10015f90 (from LS3DF 0x10020040)
 void I3D_anim_stack::Tick(const int (&deltas)[8])
 {
     for (int s = 0; s < 8; ++s) {

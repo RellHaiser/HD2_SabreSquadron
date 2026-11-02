@@ -210,6 +210,7 @@ void I3D_camera::UpdateSector()
     sector = SceneLocateSector(scene, worldMatrix(3), sector);
 }
 
+// LS3DRF 0x10004b70 (from LS3DF 0x1000a200)
 void I3D_camera::MatrixChanged()
 {
     UpdateSector();

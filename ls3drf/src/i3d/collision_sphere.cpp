@@ -424,7 +424,7 @@ I3D_frame *I3D_scene::MoveSphereVisual(const S_vector &from, const S_vector &dir
     return q.hitFrame;
 }
 
-// 0x10014ed0
+// LS3DRF 0x1000e830 (from LS3DF 0x10014ed0)
 float I3D_scene::SweepSpheres(float radiusA, const S_vector &fromA, const S_vector &toA, float radiusB,
                               const S_vector &fromB, const S_vector &toB)
 {

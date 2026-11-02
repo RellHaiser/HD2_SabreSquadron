@@ -171,6 +171,7 @@ void I3D_scene::Tick(int time)
     }
 }
 
+// LS3DRF 0x10025d80 (from LS3DF 0x10046880)
 I3D_RESULT I3D_scene::EnumFrames(I3D_ENUMPROC *proc, void *context, uint32_t flags, const char *mask)
 {
     I3D_RESULT r = primarySector->EnumFrames(proc, context, flags, mask);
@@ -212,6 +213,7 @@ I3D_frame *I3D_scene::FindFrame(const char *frameName, uint32_t flags)
     return nullptr;
 }
 
+// LS3DRF 0x10025ea0 (from LS3DF 0x100469a0)
 void I3D_scene::AddFrame(I3D_frame *frame)
 {
     if (frame->ownerModel == frame)
@@ -231,6 +233,7 @@ void I3D_scene::AddFrame(I3D_frame *frame)
     }
 }
 
+// LS3DRF 0x10026030 (from LS3DF 0x10046b30)
 I3D_RESULT I3D_scene::RemoveFrame(I3D_frame *frame)
 {
     if (!frames.RemoveSwap(frame))
@@ -437,6 +440,7 @@ bool I3D_scene::IsFrameVisible(I3D_frame *frame, I3D_camera *camera)
 
 // ---------------------------------------------------------------- animation
 
+// LS3DRF 0x100275d0 (from LS3DF 0x10048b80)
 I3D_RESULT I3D_scene::SetAnimation(I3D_animation_set *set, int stage, float weight, int mode)
 {
     if (static_cast<uint32_t>(stage) > 7)
@@ -466,6 +470,7 @@ void I3D_scene::StopAnimation(int stage)
         animStack->stages[stage].active = false;
 }
 
+// LS3DRF 0x10027710 (from LS3DF 0x10048cc0)
 I3D_RESULT I3D_scene::SetAnimWeight(int stage, float weight)
 {
     if (static_cast<uint32_t>(stage) > 7)
@@ -546,6 +551,7 @@ I3D_sector *I3D_scene::LocateSectorIn(const S_vector &pos, I3D_sector **sectors,
     return primarySector;
 }
 
+// LS3DRF 0x10027070 (from LS3DF 0x10047b70)
 I3D_sector *I3D_scene::LocateSectorDepth(const S_vector &pos, I3D_sector *hint, float *depth)
 {
     if (hint && !(hint->sectorFlags & SCTF_NO_PLANES)) {
@@ -569,6 +575,7 @@ I3D_sector *I3D_scene::LocateSectorDepth(const S_vector &pos, I3D_sector *hint, 
     return primarySector;
 }
 
+// LS3DRF 0x10026ff0 (from LS3DF 0x10047af0)
 I3D_sector *I3D_scene::LocateSector(const S_vector &pos, I3D_sector *hint)
 {
     if (hint && !(hint->sectorFlags & SCTF_NO_PLANES) && hint->IsInside(pos))
@@ -814,6 +821,7 @@ void I3D_scene::SetWeather(int param, uint32_t value)
     }
 }
 
+// LS3DRF 0x10028980 (from LS3DF 0x1004a100)
 int I3D_scene::GetWeather(int param)
 {
     switch (param) {
@@ -975,6 +983,7 @@ void I3D_scene::AddDrawnDummy(I3D_frame *dummy)
     dummy->frameFlags |= FRMFLAGS_SCENE_DUMMY;
 }
 
+// LS3DRF 0x10028130 (from LS3DF 0x10049700)
 void I3D_scene::RemoveDrawnDummy(I3D_frame *dummy)
 {
     for (int i = drawnDummies.Size(); i != 0; --i) {
@@ -1046,6 +1055,7 @@ I3D_RESULT I3D_scene::AddTrackedModel(I3D_frame *model, I3D_frame *refA, I3D_fra
     return I3D_OK;
 }
 
+// LS3DRF 0x10028e60 (from LS3DF 0x1004c0e0)
 I3D_RESULT I3D_scene::RemoveTrackedModel(I3D_frame *model)
 {
     for (int i = 0; i < trackedModels.Size(); ++i) {
@@ -1121,6 +1131,7 @@ void I3D_scene::UpdateTrackedModels(I3D_sector *cameraSector)
 
 // ---------------------------------------------------------------- viewport and sound
 
+// LS3DRF 0x10027540 (from LS3DF 0x10048440)
 void I3D_scene::SetViewport(int left, int top, int right, int bottom)
 {
     viewportRight = right;

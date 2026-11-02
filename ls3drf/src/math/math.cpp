@@ -620,6 +620,7 @@ void __stdcall S_quat::Make(const S_vector &rv)
     s = Cos(half);
 }
 
+// LS3DRF 0x1001ca50 (from LS3DF 0x1002f220)
 // 0x1002f220: the rotation of a matrix (its axes may be scaled). Degenerate axes are rebuilt from
 // the others first; then the rotation is composed of one taking world y to the matrix's y axis and
 // a roll around it that takes x + y to the matrix's (normalized) x + y.
@@ -716,7 +717,7 @@ void __stdcall S_quat::Make(const S_matrix &m)
     MakePositive();
 }
 
-// 0x1002ff50
+// LS3DRF 0x1001d740 (from LS3DF 0x1002ff50)
 void __stdcall S_quat::SetDir(const S_vector &dir, float roll)
 {
     S_matrix m;

@@ -763,6 +763,7 @@ I3D_frame *__stdcall I3D_frame::FindChildFrame(const char *frameName, uint32_t f
     return found;
 }
 
+// LS3DRF 0x10013e50 (from LS3DF 0x1001df00)
 // The frame itself or a descendant, matching the full name.
 I3D_frame *I3D_frame::FindChild(const char *mask, uint32_t flags)
 {

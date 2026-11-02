@@ -273,7 +273,7 @@ void I3D_projector::SetOpacity(float value)
     receiverSum = 0;
 }
 
-// 0x10043b70
+// LS3DRF 0x10025560 (from LS3DF 0x10043b70)
 void I3D_projector::SetColor(const S_vector4 &c)
 {
     color = c;
