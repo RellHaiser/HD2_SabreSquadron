@@ -286,12 +286,12 @@ f_00638dc0.cpp:2102:13: invalid type argument of unary '*' (have 'uint32_t' {aka
     *DAT_008ae5b0 = (int)pvVar3;
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_0065ae90.cpp:31:46: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_t (*)(...)' {aka 'unsigned int (*)(...)'} in assignment
-    (_this[0x14].vtable)->vf3b = _this[0x18].vtable;
-f_0065ae90.cpp:889:46: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_t (*)(...)' {aka 'unsigned int (*)(...)'} in assignment
-    (_this[0x14].vtable)->vf3b = _this[0x18].vtable;
-f_0065ae90.cpp:897:48: cannot convert 'tier1::C_auto_00814298_vtbl*' to 'uint32_t (*)(...)' {aka 'unsigned int (*)(...)'} in assignment
-    (_this[0x22].vtable)->vf3b = _this[0x18].vtable;
+f_0065ca50.cpp:613:50: 'struct tier1::C_Control_vtbl' has no member named 'vf0b'
+    cVar1 = (*((C_Control_vtbl *)this_00->vtable)->vf0b)(iVar2,uStack_4,desc);
+f_0065ca50.cpp:616:46: 'struct tier1::C_Control_vtbl' has no member named 'vf20'
+    (*((C_Control_vtbl *)this_00->vtable)->vf20)(1);
+f_0065ca50.cpp:620:44: 'struct tier1::C_Control_vtbl' has no member named 'empty_function_65d050'
+    (*((C_Control_vtbl *)this_00->vtable)->empty_function_65d050)((int)desc + 0x20);
 f_006683f0.cpp:690:53: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
 f_006683f0.cpp:700:53: no matching function for call to 'tier1::C_str::C_str(int)'

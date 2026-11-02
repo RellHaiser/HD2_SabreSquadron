@@ -6453,6 +6453,115 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     classes have no struct: void *this); 64 functions in ported.txt. Stats: 8,359 of 12,293
     functions by hand (75.1 % by size).
 
+  PART 9c-iv-a DONE (2026-11-01): the edit control, the edit box and the selection list
+  (src/game/controls.*). 9c-iv split (the plan's "67 slots" were two 33-slot vtables back to back;
+  type 0xf builds a 0x1a list, 0x11 extends 0xf): iv-a the edit controls (0x00813ee0, 0x1b
+  0x00813d48, 0x1a 0x00814298); iv-b 0xf (0x008143a8), 0x11 (0x00814e48), 0x21 (0x008145c8, with
+  C_AllToggleButton), 0x28 (0x00814dc0); iv-c 0x19 (0x00814ba0), 0x1c (0x00814b18).
+  - C_Control's slots named: +0x24 OnChar(key), +0x28 IsEditing, +0x68 BeginEdit (were Unknown24 /
+    28 / 68; names/control.txt too).
+  - C_EditControl (vtable 0x00813ee0, 0x88 bytes, ctor 0x00657af0; was C_auto_00813ee0): a text
+    control typed into (its run m_run, -1 at first): the click posts START_EDITING 0x20000BF (value2
+    the control) for the screen, which calls BeginEdit (the run's text kept, in the buffer; no such
+    run: the text cleared first); characters (8 Backspace by UTF-8 sequence with the Unicode font,
+    0xd Enter CONTROL_NOTIFY_RETURN 0x4016000, 0x1b Escape 0x4017000 with the kept text back: both
+    post STOP_EDITING 0x20000C0, CONTROL_NOTIFY_02; full-width digits as ASCII; above 0x7f with the
+    Unicode font as UTF-8) up to m_maxLength (30) bytes; refused characters (SET_FORBIDDEN 0x100009B,
+    value2), digits only (0x100006F, a '-' first); SET_MAX_LENGTH 0x100006E, EDIT 0x2000016,
+    END_EDIT 0x20000AB, GET_TEXT 0x200002F (the box's run 0; ends the box's editing: kept), 0x1000074
+    nothing. OnInput0B ends it (the run changed: CONTROL_NOTIFY_0B with the id).
+  - C_EditBox (type 0x1b, vtable 0x00813d48, 0x9C): "normal*" / "actived*", the run 0; SET_RANGE
+    0x10000A0 (the number kept in it, "%d" style 0xd, when the editing ends), SET_NUMBER 0x1000078
+    (turned into SET_TEXT), GET_NUMBER 0x1000079 (digits only); the leave notifies LEAVE twice (kept).
+  - C_SelectList (type 0x1a, vtable 0x00814298, 0x98; was C_auto_00814298; its new slot +0x84
+    UpdateSelectBar): its runs as lines, one selected ("select*" frame at its centre, linked to the
+    root); posts SET_COUNT / SET_POSITION to the control its value names; CLEAR, GET_ITEM, ADD_TEXT
+    (a refresh), INSERT_FIRST 0x2000015, EDIT (the selected), REMOVE_SELECTED 0x2000017, SET_POSITION,
+    REFRESH, GET_TEXT, GET_RUNS, SELECT_TEXT 0x2000076 (no case). C_Cursor::GetScreenPosition
+    0x0066a480 declared.
+  - Fixes: the edit buffer shown as is (the original formats it with C_fstr: a '%' read stray
+    arguments), emptied when made (SET_MAX_LENGTH's was not), UTF-8 Backspace back to the start (read
+    the byte before), the UTF-8 bytes' buffer 8 (4 for up to 6), isdigit unsigned;
+    C_TextBox::ScrollToLine out of its lines false (SelectRun passes a run's index: the harness
+    crashed).
+  - Harness: edit_test.inc in the text build, run by ControlsTest after CheckTest ("edit:", 10
+    checks; the cursor's screen place faked). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9c4a.py, generated, the text build on one mission in 4 parallel
+    runs): 257 of 315 caught (8 more do not build); new cases (the caret, the bar's updates, a real range's values, the first and last lines, UTF-8 leads at their ranges' ends); 294 of 315 (21 equivalent, see the file's docstring)
+  - Build: MSVC clean. Tier 1: 483 errors in 81 files, 196 stubs (482 / 80 / 195 before: the stale
+    C_auto_* vtbl types of tier1_types.h; the callers of the new names re-exported). ret_audit --src: 52.
+  - Ghidra: C_auto_00813ee0 / C_auto_00814298 renamed C_EditControl / C_SelectList (90_auto.spec,
+    class_names.json, auto_members.json); ~C_EditBox's `this` set by hand; names/controls.txt (36);
+    36 functions in ported.txt. Stats: 8,395 of 12,293 functions by hand (75.3 % by size).
+
+  PART 9c-iv-b DONE (2026-11-01): the scrolled text, the combo boxes and the chat input
+  (src/game/controls.*), all groups (C_ControlGroup, its ctor 0x00658e50 named; new helpers
+  EnterChild: the scrolled text's / combo box's enter 0x00658550 / 0x00659a30, and FocusUnknown20:
+  0x00658370 / 0x00657ba0, the focus' without the group's TakesInput).
+  - C_ScrolledText (type 0xf, vtable 0x008143a8, 0x78): a C_SelectList on "text*" (id | 8, child
+    0) and a C_ScrollBar on "scroll*" (id | 4, page step 5), each the other's value; FindChild by
+    the id's bits (8 the list, 4 .. 7 the bar); the list's messages (IGNORE_INPUT, ADD_CALLBACK,
+    SET_VALUE, the texts, GET_ITEM, 0x2000015 .. 18, PREVIOUS / NEXT, SET_POSITION, REFRESH,
+    GET_TEXT, SET_MARGIN, SELECT_TEXT) passed to the list; the wheel to the bar; the list's press
+    notified; SetStrings: lines of style 0x13, a refresh.
+  - C_ComboEdit (vtable 0x00814320, 0x88): an edit control on its frame turned back, the run 0; its
+    click not handled (so its key click on its own id does nothing unless editing: kept).
+  - C_ComboBox (type 0x11, vtable 0x00814e48, 0x88; was C_auto_00814e48): a scrolled text on
+    "listbox*" (its own id, hidden; routed on PRESS to PICK_SELECTED 0x200002E), a "cbdown*" button
+    (id | 1) and a C_ComboEdit on "header*" (id | 2), both routed on PRESS to TOGGLE_LIST 0x200002D;
+    PICK_INDEX 0x1000076 (an index past the lines: none picked, kept), SET_HEADER_TEXT 0x100007A /
+    _ID 0x1000081, GET_TEXT the picked; a pick notifies CONTROL_NOTIFY_0E; the header's edit
+    callback 0x00658930 (made a function) puts its text in the picked line; a press outside closes
+    the list; OnLeave not handled while open.
+  - C_TitledComboBox (type 0x28, vtable 0x00814dc0, 0x78): a title on "text18" (taking input) and a
+    combo box on "game difficulty" (both its id; false without it); the texts to the title, the rest
+    to the combo box.
+  - C_ChatInput (type 0x21, vtable 0x008145c8, 0x80): a C_EditBox on "binput*" (id | 4, the prompt
+    text 2002 style 0xd, 100 characters), a label on "text*" (id | 8, 8 lines kept) and the
+    C_AllToggleButton "bTeam" (id | 0xc, routed on CHANGED to TEAM_TOGGLED 0x200000B: up, to the
+    team). Enter (the box's CONTROL_NOTIFY_02 callback 0x006571f0): the run's text (its spaces
+    skipped; the prompt is kept in it, BeginEdit's) sent as CONTROL_NOTIFY_SEND 0x4015000 (its
+    address) with "/t" or "/a" put first unless there, the prompt back, EDIT posted to the box.
+  - Fixes: the parts checked everywhere (the original's without them crash).
+  - Harness: combo_test.inc in the text build, run by ControlsTest after EditTest ("combo:", 10
+    checks). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9c4b.py, generated, the text build on one mission in 4 parallel
+    runs): 242 of 269 caught (8 more do not build); new cases (only the list, the wheel's two steps down, empty strings, picked 0, a refusing focus, a route kept, the combo box's frame); 255 of 269 (14 equivalent, see the file's docstring)
+  - Build: MSVC clean. Tier 1: 482 errors in 80 files, 194 stubs (from 483 / 81 / 196). ret_audit
+    --src: 52 (it now takes a ControlCallback's object in ECX).
+  - Ghidra: C_auto_00814e48 renamed C_ComboBox; names/controls.txt (47; the other classes have no
+    struct: void *this); 0x00658930 made a function; 47 functions in ported.txt. Stats: 8,441 of
+    12,293 functions by hand (75.6 % by size).
+
+  PART 9c-iv-c DONE (2026-11-01): the skill and the item information (src/game/controls.*); 9c-iv
+  is complete.
+  - C_SkillControl (type 0x19, vtable 0x00814ba0, 0x8C; was C_auto_00814ba0; a C_Control with its
+    own focus +0x88): titles "skill_text*" (the name, style 0xb) and "skill_value*" (base + points,
+    style 0x16, margin 1), both id | 1; "barrow up*" (id | 2) is the minus button (routed on PRESS
+    to SKILL_DOWN 0x1000071), "barrow down*" (id | 3) the plus (SKILL_UP 0x1000070); a missing
+    button: no input; both: the titles take input. A point down asks the control its value names
+    (a pool, itself a skill) SKILL_UP, a point up SKILL_DOWN (its value 0: refused); 0 .. 100 (the
+    points down to 0); SET_BASE 0x1000072 (points 0), SET_TOTAL 0x1000073, GET_NUMBER, SET_TEXT the
+    name (shown at the next change); the keys 0xc / 0x4a down, 0xd / 0x4e up (Unknown20, true).
+  - C_ItemInfo (type 0x1c, vtable 0x00814b18, 0x8C): a picture on its own frame (id | 1) and one on
+    "ammo*" (id | 2), hidden, their face group "X_SQUARE.BMP"; a title "text_info*". SET_ITEM
+    0x100007B: the stats (ShowStats 0x00653180, a __thiscall with the definition on the stack:
+    Ghidra had lost it) - the name (style 0x10), "%s : %.2f kg" (text 0xAAA), for sidearms .. LMGs
+    and assault weapons the ammo's rounds (0xAAB), a projectile weapon's or firearm's muzzle speed
+    (0xAAC), a rifle scope's zoom tan(40 deg) / tan(fov / 2) (0xAAE; aim modes below 4); the
+    pictures (SET_INDEX the id, SET_TEXTURE the image): the second a weapon's ammo or a uniform's
+    headgear. SET_ITEM_COUNT 0x100007C / SET_SECOND_COUNT 0x1000082: the pictures active by them
+    ("%d " style 0x12), ITEM_COUNTED 0x2000083 (value its id) to the parent while either is.
+  - Fixes: the parts checked; a pool not found refuses (the original crashes).
+  - Harness: info_test.inc in the text build, run by ControlsTest after ComboTest ("info:", 10
+    checks; C_ItemDef::GetImage and C_ScopeComp's Save / Load faked, the definitions by
+    g_gfItemDefs). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9c4c.py, generated, the text build on one mission in 4 parallel
+    runs): 172 of 184 caught (13 more do not build); new cases (the frame, a route kept, the plus button alone, a count of 1); 179 of 184 (5 equivalent, see the file's docstring)
+  - Build: MSVC clean. Tier 1: 482 errors in 80 files, 194 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: C_auto_00814ba0 renamed C_SkillControl; names/controls.txt (25); 25 functions in
+    ported.txt. Stats: 8,466 of 12,293 functions by hand (75.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

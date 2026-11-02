@@ -38,6 +38,7 @@ struct C_Class_815850_vtbl__stub;
 struct C_Clock;
 struct C_Clock__stub;
 struct C_Clock_vtbl__stub;
+struct C_ComboBox;
 struct C_CommandProcessor;
 struct C_Console;
 struct C_ConsoleBase;
@@ -57,6 +58,7 @@ struct C_DocumentPlace_vtbl__stub;
 struct C_Door;
 struct C_Door__stub;
 struct C_Door_vtbl__stub;
+struct C_EditControl;
 struct C_EquipmentMenu;
 struct C_EquipmentMenuBase;
 struct C_ExplosivePlace;
@@ -144,11 +146,13 @@ struct C_ScriptModule__stub;
 struct C_ScriptModule_vtbl__stub;
 struct C_Script__stub;
 struct C_Script_vtbl__stub;
+struct C_SelectList;
 struct C_ShotManager__stub;
 struct C_ShotManager_vtbl__stub;
 struct C_SightModule;
 struct C_SightModule__stub;
 struct C_SightModule_vtbl__stub;
+struct C_SkillControl;
 struct C_Slider;
 struct C_SoundModule;
 struct C_SoundModule__stub;
@@ -275,15 +279,11 @@ struct C_auto_00813b10;
 struct C_auto_00813b2c;
 struct C_auto_00813b48;
 struct C_auto_00813b68;
-struct C_auto_00813ee0;
-struct C_auto_00814298;
 struct C_auto_00814540;
 struct C_auto_00814760;
 struct C_auto_008147e8;
 struct C_auto_00814980;
 struct C_auto_00814a08;
-struct C_auto_00814ba0;
-struct C_auto_00814e48;
 struct C_auto_00814fe0;
 struct C_auto_00815068;
 struct C_auto_00815540;
@@ -354,6 +354,7 @@ struct vector_S_SoldierStatePtr;
 struct zz_junk_wchar_t;
 // Types Ghidra knows only by name: 1-byte placeholders (pointer math is bytewise).
 struct C_Class_815850 { uint8_t _unknown[1]; };
+struct C_ComboBox_vtbl { uint8_t _unknown[1]; };
 struct C_ControlGroup_vtbl { uint8_t _unknown[1]; };
 struct C_Control_vtbl { uint8_t _unknown[1]; };
 struct C_TextControl_vtbl { uint8_t _unknown[1]; };
@@ -16417,6 +16418,17 @@ struct C_Clock_vtbl__stub {
     void * vf36;
     void * vf37;
 };
+struct C_ComboBox {
+    C_auto_00814e48_vtbl * vtable;
+    uint8_t _pad_0004[4];
+    int m_008;
+    uint8_t _pad_000c[96];
+    uint32_t m_06c;
+    uint8_t _pad_0070[4];
+    int m_074;
+    void * m_078;
+    char m_07c;
+};
 struct C_CommandProcessor {
     C_CommandProcessor_vtbl * vtable;
 };
@@ -16873,6 +16885,13 @@ struct C_Door_vtbl__stub {
     void * empty_function_5b88a0;
     void * vf36;
     void * vf37;
+};
+struct C_EditControl {
+    C_auto_00813ee0_vtbl * vtable;
+    uint8_t _pad_0004[97];
+    char m_065;
+    uint8_t _pad_0066[6];
+    void * m_06c;
 };
 struct C_EquipmentMenu {
     C_EquipmentMenu_vtbl * vtable;
@@ -19465,6 +19484,9 @@ struct C_Script__stub {
 struct C_Script_vtbl__stub {
     void * ExecuteCommand;
 };
+struct C_SelectList {
+    C_auto_00814298_vtbl * vtable;
+};
 struct C_ShotManager__stub {
     C_ShotManager_vtbl__stub * vtable;
 };
@@ -19523,6 +19545,29 @@ struct C_SightModule_vtbl__stub {
     void * vf0d;
     void * Unknown38;
     void * Unknown3C;
+};
+struct C_SkillControl {
+    C_auto_00814ba0_vtbl * vtable;
+    uint8_t _pad_0004[4];
+    int m_008;
+    void * m_00c;
+    uint8_t _pad_0010[72];
+    uint32_t m_058;
+    uint8_t _pad_005c[4];
+    uint32_t m_060;
+    uint8_t m_064;
+    uint8_t _pad_0065[1];
+    uint8_t m_066;
+    uint8_t _pad_0067[1];
+    uint32_t m_068;
+    void * m_06c;
+    void * m_070;
+    void * m_074;
+    void * m_078;
+    void * m_07c;
+    int m_080;
+    int m_084;
+    uint32_t m_088;
 };
 struct C_Slider {
     C_auto_00815288_vtbl * vtable;
@@ -21710,16 +21755,6 @@ struct C_auto_00813b48 {
 struct C_auto_00813b68 {
     C_auto_00813b68_vtbl * vtable;
 };
-struct C_auto_00813ee0 {
-    C_auto_00813ee0_vtbl * vtable;
-    uint8_t _pad_0004[97];
-    char m_065;
-    uint8_t _pad_0066[6];
-    void * m_06c;
-};
-struct C_auto_00814298 {
-    C_auto_00814298_vtbl * vtable;
-};
 struct C_auto_00814540 {
     C_auto_00814540_vtbl * vtable;
     uint8_t _pad_0004[76];
@@ -21831,40 +21866,6 @@ struct C_auto_00814a08 {
     void * m_0a8;
     uint32_t m_0ac;
     uint8_t _pad_00b0[8];
-};
-struct C_auto_00814ba0 {
-    C_auto_00814ba0_vtbl * vtable;
-    uint8_t _pad_0004[4];
-    int m_008;
-    void * m_00c;
-    uint8_t _pad_0010[72];
-    uint32_t m_058;
-    uint8_t _pad_005c[4];
-    uint32_t m_060;
-    uint8_t m_064;
-    uint8_t _pad_0065[1];
-    uint8_t m_066;
-    uint8_t _pad_0067[1];
-    uint32_t m_068;
-    void * m_06c;
-    void * m_070;
-    void * m_074;
-    void * m_078;
-    void * m_07c;
-    int m_080;
-    int m_084;
-    uint32_t m_088;
-};
-struct C_auto_00814e48 {
-    C_auto_00814e48_vtbl * vtable;
-    uint8_t _pad_0004[4];
-    int m_008;
-    uint8_t _pad_000c[96];
-    uint32_t m_06c;
-    uint8_t _pad_0070[4];
-    int m_074;
-    void * m_078;
-    char m_07c;
 };
 struct C_auto_00814fe0 {
     C_auto_00814fe0_vtbl * vtable;

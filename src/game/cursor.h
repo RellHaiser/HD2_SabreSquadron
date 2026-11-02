@@ -20,6 +20,8 @@ public:
     void GetPosition(S_vector *position) const;         // 0x0066a420
     // Its last move in the interface's coordinates (z -1).
     void GetMove(S_vector *move) const;                 // 0x0066a450
+    // Its place on the screen in pixels (shared statics) and its +0x30 (each optional).
+    void GetScreenPosition(float *x, float *y, float *unknown30) const;   // 0x0066a480
     // The milliseconds the cursor has stayed as it is (+0x40: the tooltips' wait, the buttons' repeat).
     int GetStillTime() const;
 };

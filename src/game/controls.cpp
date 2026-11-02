@@ -1,11 +1,15 @@
 #include "game/controls.h"
 
+#include <cctype>
 #include <cmath>
+#include <cstdio>
 #include <cstring>
 
 #include "game/cursor.h"
+#include "game/item_defs.h"
 #include "game/mp_zone.h"
 #include "game/pending.h"
+#include "game/profile.h"
 #include "game/paged_text_box.h"
 #include "game/text_box.h"
 #include "ls3d/i3d.h"
@@ -55,6 +59,11 @@ constexpr int SIDE_PERIOD = 2000;
 constexpr int SIDE_AXIS = 0, SIDE_ALLIED = 1, SIDE_NONE = 2;
 // The mark's title's style.
 constexpr uint32_t MARK_STYLE = 0xB;
+// The edit controls' keys (Backspace, Tab, Enter, Escape); the full-width digits (as ASCII).
+constexpr int KEY_BACKSPACE = 8, KEY_TAB = 9, KEY_RETURN = 0xD, KEY_ESCAPE = 0x1B;
+constexpr int FULLWIDTH_ZERO = 0xFF10, FULLWIDTH_NINE = 0xFF19, FULLWIDTH_TO_ASCII = 0xFEE0;
+// The edit box's text style for its kept number.
+constexpr uint32_t EDIT_NUMBER_STYLE = 0xD;
 
 // A frame's data: the control's id.
 void SetFrameId(I3D_frame *frame, uint32_t id)
@@ -2159,4 +2168,1592 @@ void C_MarkBox::Unmark()
     m_value = 0;
     m_yesNormal->SetOn(false);
     m_emptyNormal->SetOn(true);
+}
+
+// ----- the edit control (vtable 0x00813ee0) -----
+
+namespace {
+
+// _stricmp's: the ASCII letters without their case.
+bool EqualNoCase(const char *a, const char *b)
+{
+    for (;; ++a, ++b) {
+        const int x = std::tolower(static_cast<unsigned char>(*a)), y = std::tolower(static_cast<unsigned char>(*b));
+        if (x != y)
+            return false;
+        if (x == 0)
+            return true;
+    }
+}
+
+// A message posted for the screen: its code, the control (value2).
+void PostForScreen(uint32_t id, C_Control *control)
+{
+    S_ControlMessage message = Message(id);
+    message.value2 = reinterpret_cast<uintptr_t>(control);
+    PostControlMessage(message);
+}
+
+} // namespace
+
+void C_EditControl::MakeBuffer()
+{
+    // (Emptied: the fix, the original's new buffer is not.)
+    m_buffer.assign(static_cast<size_t>(m_maxLength) + 1, '\0');
+}
+
+void C_EditControl::ShowBuffer()
+{
+    // (Its text as is: the original's makes it with C_fstr, a '%' in it read stray arguments.)
+    m_box->SetSelectedText(C_str(m_buffer.data()));
+}
+
+void C_EditControl::Refresh()
+{
+    if (m_box && m_shown)
+        m_box->Render();
+}
+
+void C_EditControl::Tick(int time)
+{
+    if (m_editing && m_box)
+        m_box->TickCaret(time);
+}
+
+bool C_EditControl::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    MakeBuffer();
+    return C_TextControl::Create(frame, root, desc);
+}
+
+bool C_EditControl::Backspace()
+{
+    char *text = m_buffer.data();
+    if (*text == '\0')
+        return true;
+    const int length = static_cast<int>(std::strlen(text));
+    if (g_gameProfile.UsesUnicodeFont()) {
+        // Back over the continuation bytes to the sequence's lead.
+        int start = length - 1;
+        while (start >= 0 && static_cast<uint8_t>(text[start]) >= 0x80 && static_cast<uint8_t>(text[start]) < 0xC0)
+            --start;
+        // (Back to the buffer's start: the fix, broken; the original's reads the byte before it.)
+        if (start < 0)
+            return false;
+        const uint8_t lead = static_cast<uint8_t>(text[start]);
+        bool valid;
+        switch (length - start) {
+        case 1:
+            valid = lead < 0x80;
+            break;
+        case 2:
+            valid = lead >= 0xC0 && lead < 0xE0;
+            break;
+        case 3:
+            valid = lead >= 0xE0 && lead < 0xF0;
+            break;
+        case 4:
+            valid = lead >= 0xF0 && lead <= 0xF7;
+            break;
+        default:
+            valid = false;
+        }
+        if (!valid)
+            return false;
+        text[start] = '\0';
+    } else {
+        text[length - 1] = '\0';
+    }
+    ShowBuffer();
+    return true;
+}
+
+bool C_EditControl::OnChar(int key)
+{
+    if (!m_editing || key == 0)
+        return false;
+    switch (key) {
+    case KEY_BACKSPACE:
+        Backspace();
+        return true;
+    case KEY_TAB:
+        return false;
+    case KEY_RETURN:
+        Notify(CONTROL_NOTIFY_RETURN, 0);
+        OnInput02(0);
+        return true;
+    case KEY_ESCAPE:
+        Notify(CONTROL_NOTIFY_ESCAPE, 0);
+        if (!m_editing)
+            return false;
+        m_box->SetSelectedText(m_savedText);
+        OnInput02(0);
+        return true;
+    }
+    auto code = static_cast<uint32_t>(key);
+    if (code >= FULLWIDTH_ZERO && code <= FULLWIDTH_NINE)
+        code -= FULLWIDTH_TO_ASCII;
+    const size_t length = std::strlen(m_buffer.data());
+    if (code > 0x7F && g_gameProfile.UsesUnicodeFont()) {
+        char bytes[8];   // (the original's 4 for up to 6)
+        const int count = EncodeUtf8(bytes, &code, 6);
+        if (count > 0 && length + static_cast<size_t>(count) < static_cast<size_t>(m_maxLength)) {
+            std::memcpy(m_buffer.data() + length, bytes, static_cast<size_t>(count));
+            m_buffer[length + static_cast<size_t>(count)] = '\0';
+            ShowBuffer();
+        }
+        return true;
+    }
+    const char c = static_cast<char>(code);
+    if (m_forbidden && std::strchr(m_forbidden, c))
+        return true;
+    // (The character as unsigned: the original's isdigit takes it signed.)
+    if (m_digitsOnly && !std::isdigit(static_cast<unsigned char>(c)) && !(length == 0 && c == '-'))
+        return true;
+    if (c == '\0')
+        return false;
+    if (length < static_cast<size_t>(m_maxLength)) {
+        m_buffer[length] = c;
+        m_buffer[length + 1] = '\0';
+        ShowBuffer();
+    }
+    return true;
+}
+
+int C_EditControl::OnLeave(int)
+{
+    Notify(CONTROL_NOTIFY_LEAVE, 0);
+    return CONTROL_NOT_HANDLED;
+}
+
+int C_EditControl::OnClick(int)
+{
+    if (m_editing)
+        return 0;
+    PostForScreen(CONTROL_MSG_START_EDITING, this);
+    return CONTROL_HANDLED;
+}
+
+int C_EditControl::OnInput02(int)
+{
+    if (!m_editing)
+        return 0;
+    PostForScreen(CONTROL_MSG_STOP_EDITING, this);
+    Notify(CONTROL_NOTIFY_02, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_EditControl::OnInput0B(int id)
+{
+    if (!m_editing)
+        return 0;
+    if (m_box->EditRun(-1))
+        Notify(CONTROL_NOTIFY_0B, static_cast<uint32_t>(id));
+    m_editing = false;
+    return CONTROL_HANDLED;
+}
+
+int C_EditControl::BeginEdit(int)
+{
+    if (m_editing)
+        return CONTROL_NOT_HANDLED;
+    m_editing = true;
+    if (m_run < 0 || m_run > m_box->NumRuns() - 1)
+        m_box->SetText(C_str(), 0, 0);
+    if (!m_box->EditRun(m_run))
+        return 0;
+    m_savedText = m_box->GetSelectedText();
+    std::fill(m_buffer.begin(), m_buffer.end(), '\0');
+    std::strncpy(m_buffer.data(), m_savedText.c_str(), static_cast<size_t>(m_maxLength));
+    return CONTROL_HANDLED;
+}
+
+bool C_EditControl::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_TextControl::HandleMessage(message);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_FORBIDDEN:
+        m_forbidden = reinterpret_cast<const char *>(message->value2);
+        return true;
+    case CONTROL_MSG_SET_MAX_LENGTH:
+        if (message->value != 0 && static_cast<int>(message->value) != m_maxLength) {
+            m_maxLength = static_cast<int>(message->value);
+            MakeBuffer();
+        }
+        return true;
+    case CONTROL_MSG_SET_DIGITS_ONLY:
+        m_digitsOnly = message->value != 0;
+        return true;
+    case CONTROL_MSG_IGNORED_74:
+        return true;
+    case CONTROL_MSG_EDIT:
+        OnClick(0);
+        return true;
+    case CONTROL_MSG_GET_TEXT:
+        // (The box's run 0 edited for it, then not: the editing's too, the original's.)
+        m_box->EditRun(0);
+        message->text = m_box->GetSelectedText();
+        m_box->EditRun(-1);
+        return true;
+    case CONTROL_MSG_END_EDIT:
+        if (IsEditing())
+            OnInput02(0);
+        return true;
+    }
+    return C_TextControl::HandleMessage(message);
+}
+
+// ----- the edit box (type 0x1b) -----
+
+bool C_EditBox::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_EditControl::Create(frame, root, desc))
+        return false;
+    m_normalFrame = frame->FindChildFrame("normal*", FIND_FRAMES);
+    m_activeFrame = frame->FindChildFrame("actived*", FIND_FRAMES);
+    if (!m_normalFrame || !m_activeFrame)
+        return false;
+    m_activeFrame->SetPosInline(m_normalFrame->GetPos());   // (not when its place is locked)
+    m_activeFrame->SetOn(false);
+    m_activeFrame->Update();
+    SetFrameId(m_normalFrame, m_id);
+    SetFrameId(m_activeFrame, m_id);
+    if (m_box) {
+        m_run = 0;
+        m_box->AttachTo(m_scene, m_normalFrame);
+    }
+    return true;
+}
+
+int C_EditBox::OnEnter(int)
+{
+    if (m_inactive)
+        return 0;
+    m_activeFrame->SetOn(true);
+    m_normalFrame->SetOn(false);
+    m_activeFrame->Update();
+    m_normalFrame->Update();
+    Notify(CONTROL_NOTIFY_ENTER, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_EditBox::OnLeave(int id)
+{
+    const int result = C_EditControl::OnLeave(id);
+    if (result != 0) {
+        m_normalFrame->SetOn(true);
+        m_activeFrame->SetOn(false);
+        m_normalFrame->Update();
+        m_activeFrame->Update();
+        Notify(CONTROL_NOTIFY_LEAVE, 0);
+    }
+    return result;
+}
+
+int C_EditBox::OnClick(int id)
+{
+    return m_inactive ? 0 : C_EditControl::OnClick(id);
+}
+
+int C_EditBox::OnInput02(int id)
+{
+    if (C_EditControl::OnInput02(id) != CONTROL_HANDLED)
+        return 0;
+    m_box->ClearHover();
+    m_box->SelectHovered();
+    if (m_hasRange)
+        KeepInRange();
+    return CONTROL_HANDLED;
+}
+
+int C_EditBox::OnKeyClick(int id)
+{
+    if (m_inactive || static_cast<uint32_t>(id) != m_id)
+        return 0;
+    return IsEditing() ? OnInput02(id) : OnClick(id);
+}
+
+int C_EditBox::OnInput0B(int id)
+{
+    if (C_EditControl::OnInput0B(id) != CONTROL_HANDLED)
+        return 0;
+    if (m_hasRange)
+        KeepInRange();
+    return CONTROL_HANDLED;
+}
+
+void C_EditBox::KeepInRange()
+{
+    S_ControlMessage message = Message(CONTROL_MSG_GET_TEXT);
+    C_EditControl::HandleMessage(&message);
+    int number = 0;
+    std::sscanf(message.text.c_str(), "%d", &number);
+    if (number >= m_min && number <= m_max)
+        return;
+    message.id = CONTROL_MSG_SET_TEXT;
+    message.value = EDIT_NUMBER_STYLE;
+    message.text = C_fstr("%d", number < m_min ? m_min : m_max);
+    C_EditControl::HandleMessage(&message);
+}
+
+bool C_EditBox::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_EditControl::HandleMessage(message);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_RANGE:
+        m_min = static_cast<int>(message->value);
+        m_max = static_cast<int>(message->value2);
+        m_hasRange = m_min != m_max;
+        return true;
+    case CONTROL_MSG_SET_NUMBER:
+        // (The message turned into SET_TEXT: its style the value; digits only, value2's number.)
+        message->id = CONTROL_MSG_SET_TEXT;
+        if (m_digitsOnly)
+            message->text = C_fstr("%d", static_cast<int>(message->value2));
+        return C_EditControl::HandleMessage(message);
+    case CONTROL_MSG_GET_NUMBER:
+        if (m_digitsOnly) {
+            message->id = CONTROL_MSG_GET_TEXT;
+            C_EditControl::HandleMessage(message);
+            int number = 0;
+            std::sscanf(message->text.c_str(), "%d", &number);
+            message->id = CONTROL_MSG_GET_NUMBER;
+            message->value2 = static_cast<uint32_t>(number);
+        }
+        return true;
+    case CONTROL_MSG_SET_MARGIN:
+        if (m_box)
+            m_box->SetUnknown90(static_cast<uint8_t>(message->value));
+        [[fallthrough]];
+    case CONTROL_MSG_REFRESH:
+        if (m_box)
+            m_box->AttachTo(m_scene, m_normalFrame);
+        return true;
+    }
+    return C_EditControl::HandleMessage(message);
+}
+
+// ----- the selection list (type 0x1a) -----
+
+C_SelectList::~C_SelectList()
+{
+    if (m_cursor)
+        m_cursor->Release();
+}
+
+bool C_SelectList::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_EditControl::Create(frame, root, desc))
+        return false;
+    m_cursor = C_Cursor::Acquire(m_scene);
+    m_frame->SetDir(FACE_BACK, 0.0f);
+    SetFrameId(m_frame, m_id);
+    m_frame->Update();
+    m_selectFrame = frame->FindChildFrame("select*", FIND_FRAMES);
+    if (m_selectFrame) {
+        m_selectFrame->SetDir(FACE_FRONT, 0.0f);
+        SetFrameId(m_selectFrame, m_id);
+        m_selectFrame->SetOn(false);
+        m_selectFrame->LinkTo(root, I3DLINK_KEEP_WORLD);
+        m_selectFrame->Update();
+    }
+    if (!m_box)
+        return false;
+    m_box->AttachTo(m_scene, m_frame);
+    return true;
+}
+
+int C_SelectList::OnLeave(int id)
+{
+    m_box->ClearHover();
+    return C_EditControl::OnLeave(id);
+}
+
+void C_SelectList::PostScroll(bool always)
+{
+    S_ControlMessage count = Message(CONTROL_MSG_SET_COUNT);
+    count.target = m_value;
+    count.value = static_cast<uint32_t>(static_cast<int>(m_box->GetScrollRange()));
+    PostControlMessage(count);
+    if (!always && m_box->GetScrollRange() == 0)
+        return;
+    S_ControlMessage position = Message(CONTROL_MSG_SET_POSITION);
+    position.target = m_value;
+    position.value = static_cast<uint32_t>(m_box->GetScroll());
+    PostControlMessage(position);
+}
+
+void C_SelectList::SelectHoveredLine()
+{
+    m_selected = m_box->SelectHovered();
+    PostScroll(true);
+    UpdateSelectBar();
+}
+
+int C_SelectList::OnClick(int)
+{
+    if (m_editing)
+        return CONTROL_HANDLED;
+    SelectHoveredLine();
+    Notify(CONTROL_NOTIFY_CLICK, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_SelectList::OnPress(int)
+{
+    if (m_editing)
+        return CONTROL_HANDLED;
+    SelectHoveredLine();
+    Notify(CONTROL_NOTIFY_PRESS, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_SelectList::OnInput05(int)
+{
+    if (m_takesInput && !m_editing) {
+        Notify(CONTROL_NOTIFY_05, 0);
+        float x, y;
+        m_cursor->GetScreenPosition(&x, &y, nullptr);
+        m_box->HoverAt(static_cast<int>(x), static_cast<int>(y));
+    }
+    return CONTROL_HANDLED;
+}
+
+void C_SelectList::UpdateSelectBar()
+{
+    if (!m_selectFrame)
+        return;
+    const S_vector4 centre = m_box->GetLineCentre(m_selected);
+    if (centre.y == 0.0f) {
+        m_selectFrame->SetOn(false);
+        m_selectFrame->Update();
+        return;
+    }
+    m_selectFrame->SetPos(S_vector(centre.x, centre.y, m_selectFrame->GetWorldPos().z));
+    m_selectFrame->SetOn(true);
+    m_selectFrame->Update();
+}
+
+bool C_SelectList::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_EditControl::HandleMessage(message);
+    const int runs = m_box->NumRuns();
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_CLEAR: {
+        m_box->Clear();
+        m_box->ClearHover();
+        m_box->SelectHovered();   // (the selected not changed: the original's)
+        S_ControlMessage count = Message(CONTROL_MSG_SET_COUNT);
+        count.target = m_value;
+        PostControlMessage(count);
+        S_ControlMessage position = Message(CONTROL_MSG_SET_POSITION);
+        position.target = m_value;
+        PostControlMessage(position);
+        if (m_selectFrame) {
+            m_selectFrame->SetOn(false);
+            m_selectFrame->Update();
+        }
+        return true;
+    }
+    case CONTROL_MSG_GET_ITEM: {
+        const int index = static_cast<int>(message->value);
+        if (index >= 0 && index <= runs - 1) {
+            m_selected = index;
+            message->text = m_box->GetRunText(index);
+        } else {
+            message->value = static_cast<uint32_t>(-1);
+        }
+        return true;
+    }
+    case CONTROL_MSG_SET_VALUE:
+        m_value = message->value;
+        return true;
+    case CONTROL_MSG_ADD_TEXT:
+        m_box->AddText(message->text, static_cast<uint8_t>(message->value));
+        HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+        return true;
+    case CONTROL_MSG_ADD_TEXT_ID:
+        m_box->AddTextId(static_cast<int>(message->value2), static_cast<uint8_t>(message->value));
+        HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+        return true;
+    case CONTROL_MSG_INSERT_FIRST:
+        m_box->InsertText(message->text, static_cast<uint8_t>(message->value), 0);
+        PostScroll(true);
+        m_selected = 0;
+        UpdateSelectBar();
+        return true;
+    case CONTROL_MSG_EDIT:
+        // The selected line edited.
+        m_run = m_selected;
+        m_box->SelectRun(m_selected);
+        UpdateSelectBar();
+        C_EditControl::OnClick(0);
+        return true;
+    case CONTROL_MSG_REMOVE_SELECTED:
+        m_box->RemoveRun(m_selected);
+        m_selected = m_box->GetSelection();
+        UpdateSelectBar();
+        PostScroll(true);
+        return true;
+    case CONTROL_MSG_PREVIOUS_ITEM:
+    case CONTROL_MSG_NEXT_ITEM:
+        return true;
+    case CONTROL_MSG_SET_POSITION:
+        m_box->ScrollTo(static_cast<int>(message->value));
+        UpdateSelectBar();
+        return true;
+    case CONTROL_MSG_REFRESH:
+        if (m_value != 0)
+            PostScroll(false);
+        return true;
+    case CONTROL_MSG_GET_TEXT:
+        message->value = static_cast<uint32_t>(m_selected);
+        if (m_selected >= 0 && m_selected <= runs - 1)
+            message->text = m_box->GetRunText(m_selected);
+        return true;
+    case CONTROL_MSG_GET_RUNS:
+        message->value = static_cast<uint32_t>(runs);
+        return true;
+    case CONTROL_MSG_SELECT_TEXT:
+        message->value = static_cast<uint32_t>(-1);
+        for (int i = 0; i < runs; ++i) {
+            if (!EqualNoCase(m_box->GetRunText(i).c_str(), message->text.c_str()))
+                continue;
+            m_box->SelectRun(i);
+            m_selected = i;
+            UpdateSelectBar();
+            message->value = static_cast<uint32_t>(i);
+            if (m_value != 0)
+                PostScroll(false);
+            break;
+        }
+        return true;
+    }
+    return C_EditControl::HandleMessage(message);
+}
+
+// ----- the group's shared slots (part 9c-iv-b) -----
+
+int C_ControlGroup::EnterChild(int id)
+{
+    if (id == GROUP_ENTER_UNKNOWN) {
+        if (Unknown20(GROUP_ENTER_UNKNOWN))
+            return CONTROL_NOT_HANDLED;
+    } else if (C_Control *focus = Focus()) {
+        if (focus->OnLeave(id) == 0)
+            return CONTROL_NOT_HANDLED;
+    }
+    const int index = FindChild(static_cast<uint32_t>(id));
+    if (IsChild(index) && m_children[index]->OnEnter(id) != 0) {
+        m_focus = index;
+        return CONTROL_HANDLED;
+    }
+    return 0;
+}
+
+bool C_ControlGroup::FocusUnknown20(int value)
+{
+    C_Control *focus = Focus();
+    return focus && focus->Unknown20(value);
+}
+
+// ----- the scrolled text (type 0xf) -----
+
+namespace {
+
+// The scrolled text's parts' ids' last bits, its bar's page step; its lines' style.
+constexpr uint32_t SCROLLED_LIST = 8, SCROLLED_BAR = 4;
+constexpr uint32_t SCROLLED_PAGE_STEP = 5;
+constexpr uint32_t SCROLLED_LINE_STYLE = 0x13;
+// The combo box's parts' ids' last bits; the header's text style.
+constexpr uint32_t COMBO_BUTTON = 1, COMBO_HEADER = 2;
+constexpr uint32_t COMBO_HEADER_STYLE = 0xC;
+// The chat input's parts' ids' last bits, its prompt, its length, the lines kept.
+constexpr uint32_t CHAT_INPUT = 4, CHAT_LABEL = 8, CHAT_TOGGLE = 0xC;
+constexpr int CHAT_PROMPT_TEXT = 2002;
+constexpr uint32_t CHAT_PROMPT_STYLE = 0xD;
+constexpr uint32_t CHAT_MAX_LENGTH = 100;
+constexpr uint32_t CHAT_LINES = 8;
+
+// A message with a value (and a text).
+S_ControlMessage ValueMessage(uint32_t id, uint32_t value, const C_str &text = C_str())
+{
+    S_ControlMessage message = Message(id);
+    message.value = value;
+    message.text = text;
+    return message;
+}
+
+} // namespace
+
+int C_ScrolledText::FindChild(uint32_t id) const
+{
+    const uint32_t bits = id & CHILD_ID_MASK;
+    if (bits == SCROLLED_LIST)
+        return 0;
+    if (bits > 3 && bits < 8)
+        return 1;
+    return -1;
+}
+
+bool C_ScrolledText::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_Control::Create(frame, root, desc);
+    m_frame->SetData(nullptr);
+    if (I3D_frame *text = frame->FindChildFrame("text*", FIND_FRAMES)) {
+        m_list = new C_SelectList(m_scene, m_id | SCROLLED_LIST, this);
+        m_list->Create(text, root, nullptr);
+        m_children.push_back(m_list);
+    }
+    if (I3D_frame *scroll = frame->FindChildFrame("scroll*", FIND_FRAMES)) {
+        m_bar = new C_ScrollBar(m_scene, m_id | SCROLLED_BAR, this);
+        m_bar->Create(scroll, root, nullptr);
+        m_bar->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_PAGE_STEP, SCROLLED_PAGE_STEP));
+        m_children.push_back(m_bar);
+    }
+    if (m_bar && m_list) {
+        m_bar->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_VALUE, m_id | SCROLLED_LIST));
+        m_list->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_VALUE, m_id | SCROLLED_BAR));
+    }
+    return true;
+}
+
+int C_ScrolledText::OnPress(int id)
+{
+    if (!IsChild(m_focus) || m_focus != FindChild(static_cast<uint32_t>(id)))
+        return 0;
+    const int result = m_children[m_focus]->OnPress(id);
+    if (m_focus == 0)
+        Notify(CONTROL_NOTIFY_PRESS, 0);
+    return result;
+}
+
+int C_ScrolledText::OnWheel(int, int amount)
+{
+    if (!m_bar || amount == 0)
+        return CONTROL_NOT_HANDLED;
+    if (amount > 0) {
+        for (unsigned steps = (static_cast<unsigned>(amount) - 1) / WHEEL_STEP + 1; steps; --steps)
+            m_bar->HandleMessageCopy(Message(CONTROL_MSG_SCROLL_UP));
+    } else {
+        for (unsigned steps = (static_cast<unsigned>(-amount) - 1) / WHEEL_STEP + 1; steps; --steps)
+            m_bar->HandleMessageCopy(Message(CONTROL_MSG_SCROLL_DOWN));
+    }
+    return CONTROL_HANDLED;
+}
+
+bool C_ScrolledText::HandleMessage(S_ControlMessage *message)
+{
+    const int index = FindChild(message->target);
+    if (IsChild(index))
+        return m_children[index]->HandleMessage(message);
+    if (!(message->id & CONTROL_NOTIFY_MASK)) {
+        switch (message->id & CONTROL_MSG_MASK) {
+        case CONTROL_MSG_IGNORE_INPUT:
+        case CONTROL_MSG_ADD_CALLBACK:
+        case CONTROL_MSG_SET_VALUE:
+        case CONTROL_MSG_ADD_TEXT:
+        case CONTROL_MSG_ADD_TEXT_ID:
+        case CONTROL_MSG_SET_RUN_TEXT:
+        case CONTROL_MSG_GET_ITEM:
+        case CONTROL_MSG_INSERT_FIRST:
+        case CONTROL_MSG_EDIT:
+        case CONTROL_MSG_REMOVE_SELECTED:
+        case CONTROL_MSG_CLEAR:
+        case CONTROL_MSG_PREVIOUS_ITEM:
+        case CONTROL_MSG_NEXT_ITEM:
+        case CONTROL_MSG_SET_POSITION:
+        case CONTROL_MSG_REFRESH:
+        case CONTROL_MSG_GET_TEXT:
+        case CONTROL_MSG_SET_MARGIN:
+        case CONTROL_MSG_SELECT_TEXT:
+            // (The list checked: the fix, the original's without it crashes.)
+            if (m_list)
+                m_list->HandleMessage(message);
+            return true;
+        }
+    }
+    C_Control::HandleMessage(message);
+    return true;
+}
+
+void C_ScrolledText::SetStrings(const std::vector<C_str> &strings)
+{
+    if (!m_list)
+        return;
+    for (const C_str &line : strings)
+        m_list->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, SCROLLED_LINE_STYLE, line));
+    m_list->HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+}
+
+void C_ScrolledText::SetInactive(bool inactive)
+{
+    m_inactive = inactive;
+    if (m_bar)
+        m_bar->SetInactive(inactive);
+    if (m_list)
+        m_list->SetInactive(inactive);
+}
+
+// ----- the combo box's header (vtable 0x00814320) -----
+
+bool C_ComboEdit::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_EditControl::Create(frame, root, desc))
+        return false;
+    m_frame->SetDir(FACE_BACK, 0.0f);
+    SetFrameId(m_frame, m_id);
+    m_frame->Update();
+    if (!m_box)
+        return false;
+    m_run = 0;
+    m_box->AttachTo(m_scene, m_frame);
+    return true;
+}
+
+int C_ComboEdit::OnEnter(int)
+{
+    if (m_inactive)
+        return 0;
+    Notify(CONTROL_NOTIFY_ENTER, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_ComboEdit::OnLeave(int)
+{
+    if (!m_box->ClearHover())
+        return 0;
+    Notify(CONTROL_NOTIFY_LEAVE, 0);
+    return C_EditControl::OnLeave(0);
+}
+
+int C_ComboEdit::OnInput02(int)
+{
+    if (C_EditControl::OnInput02(0) != CONTROL_HANDLED)
+        return 0;
+    m_box->ClearHover();
+    m_box->SelectHovered();
+    return CONTROL_HANDLED;
+}
+
+int C_ComboEdit::OnKeyClick(int id)
+{
+    if (m_inactive || static_cast<uint32_t>(id) != m_id)
+        return 0;
+    return IsEditing() ? OnInput02(id) : OnClick(id);
+}
+
+bool C_ComboEdit::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_EditControl::HandleMessage(message);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_EDIT:
+        C_EditControl::OnClick(0);
+        return true;
+    case CONTROL_MSG_SET_MARGIN:
+        if (m_box)
+            m_box->SetUnknown90(static_cast<uint8_t>(message->value));
+        [[fallthrough]];
+    case CONTROL_MSG_REFRESH:
+        if (m_box)
+            m_box->AttachTo(m_scene, m_frame);
+        return true;
+    }
+    return C_EditControl::HandleMessage(message);
+}
+
+// ----- the combo box (type 0x11) -----
+
+int C_ComboBox::FindChild(uint32_t id) const
+{
+    const uint32_t bits = id & CHILD_ID_MASK;
+    if (bits > 3)
+        return 0;
+    if (bits == COMBO_BUTTON)
+        return 1;
+    return bits == COMBO_HEADER ? 2 : -1;
+}
+
+void C_ComboBox::SendTo(C_Control *part, const S_ControlMessage &message)
+{
+    if (part)
+        part->HandleMessageCopy(message);
+}
+
+bool C_ComboBox::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_Control::Create(frame, root, desc);
+    m_frame->SetData(nullptr);
+    if (I3D_frame *list = frame->FindChildFrame("listbox*", FIND_FRAMES | FIND_DUMMIES)) {
+        m_list = new C_ScrolledText(m_scene, m_id, this);
+        m_list->Create(list, root, nullptr);
+        m_list->HandleMessageCopy(Message(CONTROL_MSG_HIDE));
+        m_list->HandleMessageCopy(Route(m_id, CONTROL_NOTIFY_PRESS | CONTROL_MSG_PICK_SELECTED));
+        m_children.push_back(m_list);
+    }
+    if (I3D_frame *button = frame->FindChildFrame("cbdown*", FIND_DUMMIES)) {
+        m_button = new C_Button(m_scene, m_id | COMBO_BUTTON, this);
+        m_button->Create(button, root, nullptr);
+        m_button->HandleMessageCopy(Route(m_id, CONTROL_NOTIFY_PRESS | CONTROL_MSG_TOGGLE_LIST));
+        m_children.push_back(m_button);
+    }
+    if (I3D_frame *header = frame->FindChildFrame("header*", FIND_FRAMES)) {
+        m_header = new C_ComboEdit(m_scene, m_id | COMBO_HEADER, this);
+        m_header->Create(header, root, nullptr);
+        S_ControlMessage takeInput = Message(CONTROL_MSG_TAKE_INPUT);
+        takeInput.target = m_id;
+        m_header->HandleMessageCopy(takeInput);
+        m_header->HandleMessageCopy(Route(m_id, CONTROL_NOTIFY_PRESS | CONTROL_MSG_TOGGLE_LIST));
+        S_ControlMessage callback = ValueMessage(CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0B);
+        callback.value2 = reinterpret_cast<uintptr_t>(this);
+        callback.value3 = reinterpret_cast<uintptr_t>(&C_ComboBox::HeaderEdited);
+        m_header->HandleMessageCopy(callback);
+        m_children.push_back(m_header);
+    }
+    return true;
+}
+
+bool C_ComboBox::HeaderEdited(void *object, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *combo = static_cast<C_ComboBox *>(object);
+    if (combo->m_picked >= 0) {
+        S_ControlMessage get = Message(CONTROL_MSG_GET_TEXT);
+        combo->m_header->HandleMessage(&get);
+        combo->m_pickedText = get.text;
+        S_ControlMessage set = ValueMessage(CONTROL_MSG_SET_RUN_TEXT, SCROLLED_LINE_STYLE, combo->m_pickedText);
+        set.value2 = static_cast<uint32_t>(combo->m_picked);
+        SendTo(combo->m_list, set);
+    }
+    combo->Notify(CONTROL_NOTIFY_0B, 0);
+    return true;
+}
+
+int C_ComboBox::OnLeave(int id)
+{
+    if (C_Control *focus = Focus()) {
+        if (focus->OnLeave(id) == 0)
+            return 0;
+        m_focus = -1;
+    }
+    return m_open ? 0 : CONTROL_HANDLED;
+}
+
+int C_ComboBox::OnInput05(int id)
+{
+    if (!IsChild(FindChild(static_cast<uint32_t>(id))))
+        return OnLeave(id);
+    if (m_focus != FindChild(static_cast<uint32_t>(id))) {
+        OnLeave(id);
+        return OnEnter(id);
+    }
+    return m_children[m_focus]->OnInput05(id);
+}
+
+int C_ComboBox::OnPress(int id)
+{
+    if (IsChild(m_focus) && m_focus == FindChild(static_cast<uint32_t>(id)))
+        return m_children[m_focus]->OnPress(id);
+    // A press outside the box closes the open list.
+    if (m_id != (static_cast<uint32_t>(id) & ~CHILD_ID_MASK) && m_open) {
+        S_ControlMessage toggle = Message(CONTROL_MSG_TOGGLE_LIST);
+        HandleMessage(&toggle);
+    }
+    return 0;
+}
+
+void C_ComboBox::ShowPicked(int index, const C_str &text)
+{
+    m_picked = index;
+    m_pickedText = text;
+    SendTo(m_header, ValueMessage(CONTROL_MSG_SET_TEXT, COMBO_HEADER_STYLE, m_pickedText));
+    SendTo(m_list, Message(CONTROL_MSG_HIDE));
+    m_open = false;
+}
+
+bool C_ComboBox::HandleMessage(S_ControlMessage *message)
+{
+    const int index = FindChild(message->target);
+    if (IsChild(index))
+        return m_children[index]->HandleMessage(message);
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    // (The parts checked: the fix, the original's without them crashes.)
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_ADD_TEXT:
+    case CONTROL_MSG_ADD_TEXT_ID:
+        if (m_list)
+            m_list->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_PICK_INDEX: {
+        S_ControlMessage get = ValueMessage(CONTROL_MSG_GET_ITEM, message->value);
+        if (m_list)
+            m_list->HandleMessage(&get);
+        if (static_cast<int>(message->value) >= 0)
+            ShowPicked(static_cast<int>(get.value), get.text);
+        return true;
+    }
+    case CONTROL_MSG_SET_HEADER_TEXT:
+        message->id = CONTROL_MSG_SET_TEXT;
+        if (m_header)
+            m_header->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_SET_HEADER_TEXT_ID:
+        message->id = CONTROL_MSG_SET_TEXT_ID;
+        [[fallthrough]];
+    case CONTROL_MSG_EDIT:
+        if (m_header)
+            m_header->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_CLEAR:
+        if (m_header)
+            m_header->HandleMessage(message);
+        if (m_list)
+            m_list->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_TOGGLE_LIST:
+        SendTo(m_list, Message(m_open ? CONTROL_MSG_HIDE : CONTROL_MSG_SHOW));
+        m_open = !m_open;
+        return true;
+    case CONTROL_MSG_PICK_SELECTED: {
+        S_ControlMessage get = Message(CONTROL_MSG_GET_TEXT);
+        if (m_list)
+            m_list->HandleMessage(&get);
+        if (static_cast<int>(get.value) >= 0) {
+            ShowPicked(static_cast<int>(get.value), get.text);
+            Notify(CONTROL_NOTIFY_0E, 0);
+        }
+        return true;
+    }
+    case CONTROL_MSG_GET_TEXT:
+        message->value = static_cast<uint32_t>(m_picked);
+        message->text = m_pickedText;
+        return true;
+    }
+    C_Control::HandleMessage(message);
+    return true;
+}
+
+void C_ComboBox::SetStrings(const std::vector<C_str> &strings)
+{
+    if (!m_list)
+        return;
+    if (!strings.empty())
+        SendTo(m_header, ValueMessage(CONTROL_MSG_SET_TEXT, COMBO_HEADER_STYLE, strings[0]));
+    m_list->SetStrings(strings);
+}
+
+void C_ComboBox::SetInactive(bool inactive)
+{
+    m_inactive = inactive;
+    // (The parts checked: the fix, the original's without them crashes.)
+    if (m_button)
+        m_button->SetInactive(inactive);
+    if (m_list)
+        m_list->SetInactive(inactive);
+    if (m_header)
+        m_header->SetInactive(inactive);
+}
+
+// ----- the titled combo box (type 0x28) -----
+
+int C_TitledComboBox::FindChild(uint32_t id) const
+{
+    if (!m_title || !m_combo)
+        return -1;
+    return (id & CHILD_ID_MASK) != 0 ? 1 : 0;
+}
+
+bool C_TitledComboBox::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_ControlGroup::Create(frame, root, desc))
+        return false;
+    m_frame->SetData(nullptr);
+    if (I3D_frame *text = frame->FindChildFrame("text18", FRAME_MASK_VISUAL)) {
+        m_title = new C_TitleControl(m_scene, m_id, this);
+        m_title->Create(text, root, nullptr);
+        m_title->HandleMessageCopy(Message(CONTROL_MSG_TAKE_INPUT));
+        m_children.push_back(m_title);
+    }
+    I3D_frame *combo = frame->FindChildFrame("game difficulty", FRAME_MASK_VISUAL);
+    if (!combo)
+        return false;
+    m_combo = new C_ComboBox(m_scene, m_id, this);
+    m_combo->Create(combo, root, nullptr);
+    m_children.push_back(m_combo);
+    return true;
+}
+
+bool C_TitledComboBox::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_Control::HandleMessage(message);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_DEACTIVATE:
+        if (!m_inactive)
+            SetInactive(true);
+        return true;
+    case CONTROL_MSG_ACTIVATE:
+        if (m_inactive)
+            SetInactive(false);
+        return true;
+    case CONTROL_MSG_SHOW:
+        Show();
+        return true;
+    case CONTROL_MSG_HIDE:
+        Hide();
+        return true;
+    case CONTROL_MSG_SET_TEXT:
+    case CONTROL_MSG_SET_TEXT_ID:
+        // (The parts checked: the fix, the original's without them crashes.)
+        return m_title ? m_title->HandleMessage(message) : true;
+    }
+    return m_combo ? m_combo->HandleMessage(message) : true;
+}
+
+void C_TitledComboBox::SetInactive(bool inactive)
+{
+    m_inactive = inactive;
+    if (m_title)
+        m_title->SetInactive(inactive);
+    if (m_combo)
+        m_combo->SetInactive(inactive);
+}
+
+// ----- the chat input (type 0x21) -----
+
+int C_ChatInput::FindChild(uint32_t id) const
+{
+    const uint32_t bits = id & CHILD_ID_MASK;
+    if (bits == CHAT_INPUT)
+        return 0;
+    if (bits == CHAT_LABEL)
+        return 1;
+    return bits > CHAT_TOGGLE ? 2 : -1;
+}
+
+bool C_ChatInput::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_ControlGroup::Create(frame, root, desc);
+    m_frame->SetData(nullptr);
+    if (I3D_frame *input = frame->FindChildFrame("binput*", FIND_DUMMIES)) {
+        m_input = new C_EditBox(m_scene, m_id | CHAT_INPUT, this);
+        m_input->Create(input, root, nullptr);
+        S_ControlMessage prompt = ValueMessage(CONTROL_MSG_SET_TEXT_ID, CHAT_PROMPT_STYLE);
+        prompt.value2 = CHAT_PROMPT_TEXT;
+        m_input->HandleMessageCopy(prompt);
+        m_input->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_MAX_LENGTH, CHAT_MAX_LENGTH));
+        S_ControlMessage callback = ValueMessage(CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_02);
+        callback.value2 = reinterpret_cast<uintptr_t>(this);
+        callback.value3 = reinterpret_cast<uintptr_t>(&C_ChatInput::LineEntered);
+        m_input->HandleMessageCopy(callback);
+        m_children.push_back(m_input);
+    }
+    if (I3D_frame *text = frame->FindChildFrame("text*", FIND_FRAMES)) {
+        m_label = new C_LabelControl(m_scene, m_id | CHAT_LABEL, this);
+        m_label->Create(text, root, nullptr);
+        m_children.push_back(m_label);
+    }
+    if (I3D_frame *team = frame->FindChildFrame("bTeam", FIND_DUMMIES)) {
+        m_teamToggle = new C_AllToggleButton(m_scene, m_id | CHAT_TOGGLE, this);
+        m_teamToggle->Create(team, root, nullptr);
+        m_teamToggle->HandleMessageCopy(Route(m_id, CONTROL_NOTIFY_CHANGED | CONTROL_MSG_TEAM_TOGGLED));
+        m_children.push_back(m_teamToggle);
+    }
+    return true;
+}
+
+bool C_ChatInput::LineEntered(void *object, void *, C_Control *control, uint32_t, uint32_t)
+{
+    if (!control)
+        return true;
+    auto *chat = static_cast<C_ChatInput *>(object);
+    S_ControlMessage get = Message(CONTROL_MSG_GET_TEXT);
+    control->HandleMessage(&get);
+    const char *text = get.text.c_str();
+    while (static_cast<uint8_t>(*text) < 0x80 && std::isspace(static_cast<unsigned char>(*text)))
+        ++text;
+    if (*text != '\0') {
+        // A command kept; else to the team ("/t") or to all ("/a").
+        C_str line;
+        if (std::strstr(text, "/t") == text || std::strstr(text, "/a") == text)
+            line = C_str(text);
+        else
+            line = C_fstr(chat->m_team ? "/t%s" : "/a%s", text);
+        chat->Notify(CONTROL_NOTIFY_SEND, static_cast<uint32_t>(reinterpret_cast<uintptr_t>(line.c_str())));
+    }
+    S_ControlMessage prompt = ValueMessage(CONTROL_MSG_SET_TEXT_ID, CHAT_PROMPT_STYLE);
+    prompt.value2 = CHAT_PROMPT_TEXT;
+    control->HandleMessageCopy(prompt);
+    S_ControlMessage edit = Message(CONTROL_MSG_EDIT);
+    edit.target = control->GetId();
+    PostControlMessage(edit);
+    return true;
+}
+
+bool C_ChatInput::HandleMessage(S_ControlMessage *message)
+{
+    const int index = FindChild(message->target);
+    if (IsChild(index))
+        return m_children[index]->HandleMessage(message);
+    if (!(message->id & CONTROL_NOTIFY_MASK)) {
+        switch (message->id & CONTROL_MSG_MASK) {
+        case CONTROL_MSG_ADD_TEXT:
+        case CONTROL_MSG_ADD_TEXT_ID:
+        case CONTROL_MSG_INSERT_FIRST:
+        case CONTROL_MSG_CLEAR: {
+            // (The label checked: the fix, the original's without it crashes.)
+            if (!m_label)
+                return true;
+            m_label->HandleMessage(message);
+            // The oldest line removed past 8.
+            S_ControlMessage runs = Message(CONTROL_MSG_GET_RUNS);
+            m_label->HandleMessage(&runs);
+            if (runs.value > CHAT_LINES)
+                m_label->HandleMessageCopy(Message(CONTROL_MSG_REMOVE_RUN));
+            return true;
+        }
+        case CONTROL_MSG_TEAM_TOGGLED: {
+            S_ControlMessage get = Message(CONTROL_MSG_GET_CHECKED);
+            get.target = m_id;
+            if (m_teamToggle)
+                m_teamToggle->HandleMessage(&get);
+            m_team = get.value == 0;
+            return true;
+        }
+        }
+    }
+    return C_ControlGroup::HandleMessage(message);
+}
+
+// ----- the skill (type 0x19) -----
+
+namespace {
+
+// The skill's parts' ids' last bits, its value's limit; its titles' styles.
+constexpr uint32_t SKILL_TITLE = 1, SKILL_MINUS = 2, SKILL_PLUS = 3;
+constexpr int SKILL_MAX = 100;
+constexpr uint32_t SKILL_NAME_STYLE = 0xB, SKILL_VALUE_STYLE = 0x16;
+// The keys (DirectInput codes): minus and the keypad's, equals and the keypad's plus.
+constexpr int KEY_MINUS = 0x0C, KEY_PAD_MINUS = 0x4A, KEY_EQUALS = 0x0D, KEY_PAD_PLUS = 0x4E;
+// The item information's parts' ids' last bits, its picture's face group, its texts' styles.
+constexpr uint32_t INFO_PICTURE = 1, INFO_SECOND = 2;
+constexpr uint32_t INFO_NAME_STYLE = 0x10, INFO_LINE_STYLE = 0x11, INFO_COUNT_STYLE = 0x12;
+// The stats' texts: the weight, the ammo, the muzzle speed, the zoom.
+constexpr int TEXT_WEIGHT = 0xAAA, TEXT_AMMO = 0xAAB, TEXT_MUZZLE_SPEED = 0xAAC, TEXT_ZOOM = 0xAAE;
+// The zoom: tan(40 degrees) over tan(the scope's field of view / 2).
+constexpr double ZOOM_HALF_FOV = 0.6981317202250164;
+// The scope's aim modes with a reticle (below the binoculars').
+constexpr int SCOPE_RETICLES = 4;
+
+} // namespace
+
+int C_SkillControl::FindChild(uint32_t id) const
+{
+    return FindChildByLastBits(m_children, id);
+}
+
+void C_SkillControl::Refresh()
+{
+    if (!m_shown)
+        return;
+    // (The titles checked: the fix, the original's without them crashes.)
+    if (m_nameTitle)
+        m_nameTitle->Refresh();
+    if (m_valueTitle)
+        m_valueTitle->Refresh();
+}
+
+bool C_SkillControl::Unknown20(int key)
+{
+    switch (static_cast<uint8_t>(key)) {
+    case KEY_MINUS:
+    case KEY_PAD_MINUS:
+        PointDown();
+        return true;
+    case KEY_EQUALS:
+    case KEY_PAD_PLUS:
+        PointUp();
+        return true;
+    }
+    return false;
+}
+
+bool C_SkillControl::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_Control::Create(frame, root, desc);
+    if (I3D_frame *text = frame->FindChildFrame("skill_text*", FIND_FRAMES)) {
+        m_nameTitle = new C_TitleControl(m_scene, m_id | SKILL_TITLE, this);
+        m_nameTitle->Create(text, root, nullptr);
+        m_children.push_back(m_nameTitle);
+    }
+    if (I3D_frame *value = frame->FindChildFrame("skill_value*", FIND_FRAMES)) {
+        m_valueTitle = new C_TitleControl(m_scene, m_id | SKILL_TITLE, this);
+        m_valueTitle->Create(value, root, nullptr);
+        S_ControlMessage margin = Message(CONTROL_MSG_SET_MARGIN);
+        margin.value = 1;
+        m_valueTitle->HandleMessageCopy(margin);
+        m_children.push_back(m_valueTitle);
+    }
+    if (I3D_frame *minus = frame->FindChildFrame("barrow up*", FIND_DUMMIES)) {
+        m_minusButton = new C_Button(m_scene, m_id | SKILL_MINUS, this);
+        m_minusButton->Create(minus, root, nullptr);
+        m_minusButton->HandleMessageCopy(Route(m_id, CONTROL_NOTIFY_PRESS | CONTROL_MSG_SKILL_DOWN));
+        m_children.push_back(m_minusButton);
+    } else {
+        m_takesInput = false;
+    }
+    if (I3D_frame *plus = frame->FindChildFrame("barrow down*", FIND_DUMMIES)) {
+        m_plusButton = new C_Button(m_scene, m_id | SKILL_PLUS, this);
+        m_plusButton->Create(plus, root, nullptr);
+        m_plusButton->HandleMessageCopy(Route(m_id, CONTROL_NOTIFY_PRESS | CONTROL_MSG_SKILL_UP));
+        m_children.push_back(m_plusButton);
+    } else {
+        m_takesInput = false;
+    }
+    // (The titles checked: the fix, the original's without them crashes.)
+    if (m_plusButton && m_minusButton) {
+        if (m_nameTitle)
+            m_nameTitle->HandleMessageCopy(Message(CONTROL_MSG_TAKE_INPUT));
+        if (m_valueTitle)
+            m_valueTitle->HandleMessageCopy(Message(CONTROL_MSG_TAKE_INPUT));
+    }
+    return true;
+}
+
+int C_SkillControl::OnEnter(int id)
+{
+    if (m_nameTitle)
+        m_nameTitle->OnEnter(id);
+    if (C_Control *focus = Focus()) {
+        if (focus->OnLeave(id) == 0)
+            return CONTROL_NOT_HANDLED;
+    }
+    m_focus = FindChild(static_cast<uint32_t>(id));
+    if (C_Control *focus = Focus())
+        return focus->OnEnter(id);
+    return CONTROL_HANDLED;
+}
+
+int C_SkillControl::OnLeave(int id)
+{
+    if (m_nameTitle)
+        m_nameTitle->OnLeave(id);
+    if (C_Control *focus = Focus()) {
+        if (focus->OnLeave(id) == 0)
+            return 0;
+        m_focus = -1;
+    }
+    return CONTROL_HANDLED;
+}
+
+int C_SkillControl::OnInput05(int id)
+{
+    if (!IsChild(FindChild(static_cast<uint32_t>(id))))
+        return OnLeave(id);
+    if (m_focus != FindChild(static_cast<uint32_t>(id))) {
+        if (OnLeave(id) == 0)
+            return CONTROL_HANDLED;
+        return OnEnter(id);
+    }
+    return m_children[m_focus]->OnInput05(id);
+}
+
+int C_SkillControl::OnPress(int id)
+{
+    if (m_inactive)
+        return CONTROL_HANDLED;
+    C_Control *focus = Focus();
+    return focus ? focus->OnPress(id) : 0;
+}
+
+int C_SkillControl::OnInput08(int id)
+{
+    if (m_inactive)
+        return CONTROL_HANDLED;
+    C_Control *focus = Focus();
+    return focus ? focus->OnInput08(id) : 0;
+}
+
+bool C_SkillControl::AskPool(uint32_t id)
+{
+    if (m_value == 0)
+        return true;
+    S_ControlMessage ask = Message(id);
+    // (The pool checked: the fix, the original's without it crashes.)
+    C_Control *pool = FindControl(m_value, true);
+    if (pool)
+        pool->HandleMessage(&ask);
+    return ask.value != 0;
+}
+
+bool C_SkillControl::PointDown()
+{
+    if (m_points < 1 || !AskPool(CONTROL_MSG_SKILL_UP))
+        return false;
+    --m_points;
+    Update();
+    return true;
+}
+
+bool C_SkillControl::PointUp()
+{
+    if (m_base + m_points > SKILL_MAX - 1 || !AskPool(CONTROL_MSG_SKILL_DOWN))
+        return false;
+    ++m_points;
+    Update();
+    return true;
+}
+
+void C_SkillControl::Update()
+{
+    char digits[16];
+    std::snprintf(digits, sizeof(digits), "%d", m_points + m_base);
+    if (m_nameTitle) {
+        S_ControlMessage name = Message(CONTROL_MSG_SET_TEXT);
+        name.value = SKILL_NAME_STYLE;
+        name.text = m_name;
+        m_nameTitle->HandleMessageCopy(name);
+    }
+    if (m_valueTitle) {
+        S_ControlMessage value = Message(CONTROL_MSG_SET_TEXT);
+        value.value = SKILL_VALUE_STYLE;
+        value.text = C_str(digits);
+        m_valueTitle->HandleMessageCopy(value);
+    }
+    if (m_minusButton)
+        m_minusButton->HandleMessageCopy(Message(m_points < 1 ? CONTROL_MSG_DEACTIVATE : CONTROL_MSG_ACTIVATE));
+    if (m_plusButton)
+        m_plusButton->HandleMessageCopy(Message(m_points + m_base < SKILL_MAX ? CONTROL_MSG_ACTIVATE : CONTROL_MSG_DEACTIVATE));
+}
+
+bool C_SkillControl::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_VALUE:
+        C_Control::HandleMessage(message);
+        return true;
+    case CONTROL_MSG_SET_TEXT:
+        m_name = message->text;
+        return true;
+    case CONTROL_MSG_SKILL_UP:
+        message->value = PointUp();
+        return true;
+    case CONTROL_MSG_SKILL_DOWN:
+        message->value = PointDown();
+        return true;
+    case CONTROL_MSG_SET_BASE:
+        m_base = static_cast<int>(message->value);
+        m_points = 0;
+        Update();
+        return true;
+    case CONTROL_MSG_SET_TOTAL:
+        m_points = static_cast<int>(message->value) - m_base;
+        if (m_points < 0)
+            m_points = 0;
+        Update();
+        return true;
+    case CONTROL_MSG_GET_NUMBER:
+        message->value = static_cast<uint32_t>(m_base + m_points);
+        return true;
+    }
+    // (The titles checked: the fix, the original's without them crashes.)
+    if (m_nameTitle)
+        m_nameTitle->HandleMessage(message);
+    if (m_valueTitle)
+        m_valueTitle->HandleMessage(message);
+    return true;
+}
+
+void C_SkillControl::SetInactive(bool inactive)
+{
+    m_inactive = inactive;
+    if (m_nameTitle)
+        m_nameTitle->SetInactive(inactive);
+    if (m_valueTitle)
+        m_valueTitle->SetInactive(m_inactive);
+    if (m_plusButton)
+        m_plusButton->SetInactive(m_inactive);
+    if (m_minusButton)
+        m_minusButton->SetInactive(m_inactive);
+}
+
+// ----- the item information (type 0x1c) -----
+
+int C_ItemInfo::FindChild(uint32_t id) const
+{
+    switch (id & CHILD_ID_MASK) {
+    case INFO_PICTURE:
+        return 0;
+    case INFO_SECOND:
+        return 1;
+    }
+    return -1;
+}
+
+void C_ItemInfo::Refresh()
+{
+    if (!m_shown)
+        return;
+    // (The parts checked: the fix, the original's without them crashes.)
+    for (C_Control *part : std::initializer_list<C_Control *>{m_picture, m_secondPicture, m_stats})
+        if (part)
+            part->Refresh();
+}
+
+bool C_ItemInfo::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_ControlGroup::Create(frame, root, desc))
+        return false;
+    S_ControlMessage square = Message(CONTROL_MSG_FIND_FACE_GROUP);
+    square.text = "X_SQUARE.BMP";
+    if (frame) {
+        m_picture = new C_PictureControl(m_scene, m_id | INFO_PICTURE, this);
+        m_picture->Create(frame, root, nullptr);
+        m_picture->HandleMessageCopy(Message(CONTROL_MSG_HIDE));
+        m_picture->HandleMessageCopy(square);
+        m_children.push_back(m_picture);
+    }
+    if (I3D_frame *ammo = frame->FindChildFrame("ammo*", FIND_FRAMES)) {
+        m_secondPicture = new C_PictureControl(m_scene, m_id | INFO_SECOND, this);
+        m_secondPicture->Create(ammo, root, nullptr);
+        m_secondPicture->HandleMessageCopy(Message(CONTROL_MSG_HIDE));
+        m_secondPicture->HandleMessageCopy(square);
+        m_children.push_back(m_secondPicture);
+    }
+    if (I3D_frame *text = frame->FindChildFrame("text_info*", FIND_FRAMES)) {
+        m_stats = new C_TitleControl(m_scene, m_id, this);
+        m_stats->Create(text, root, nullptr);
+        m_children.push_back(m_stats);
+    }
+    return true;
+}
+
+void C_ItemInfo::ShowStats(C_ItemDef *def)
+{
+    if (!m_stats)
+        return;   // (the fix: the original's without its title crashes)
+    auto line = [this](const C_str &text) {
+        S_ControlMessage add = Message(CONTROL_MSG_ADD_TEXT);
+        add.value = INFO_LINE_STYLE;
+        add.text = text;
+        m_stats->HandleMessageCopy(add);
+    };
+    m_stats->HandleMessageCopy(Message(CONTROL_MSG_CLEAR));
+    S_ControlMessage name = Message(CONTROL_MSG_ADD_TEXT_ID);
+    name.value = INFO_NAME_STYLE;
+    name.value2 = static_cast<uint32_t>(def->GetTextId());
+    m_stats->HandleMessageCopy(name);
+    line(C_fstr("%s : %.2f kg", g_texts.Get(TEXT_WEIGHT).c_str(), static_cast<double>(def->GetWeight())));
+    const int behaviour = def->GetBehaviour();
+    if (behaviour < ITEM_BEHAVIOUR_SIDEARM || (behaviour > ITEM_BEHAVIOUR_LMG && behaviour != ITEM_BEHAVIOUR_ASSAULT))
+        return;
+    if (C_ItemDef *ammo = GetItemDef(def->GetAmmoItemId()))
+        line(C_fstr("%s : %d", g_texts.Get(TEXT_AMMO).c_str(), static_cast<int>(ammo->GetAmmoAmount())));
+    const E_ItemComponentKind kind = def->GetComponentKind();
+    if (kind == ICK_PROJECTILE_WEAPON || kind == ICK_FIREARM) {
+        const float speed = static_cast<C_WeaponComp *>(def->GetComponent())->GetMuzzleVelocity();
+        line(C_fstr("%s : %.2f m/s", g_texts.Get(TEXT_MUZZLE_SPEED).c_str(), static_cast<double>(speed)));
+    }
+    const C_ItemComponent *secondary = def->GetSecondaryComponent();
+    if (def->GetBehaviour() == ITEM_BEHAVIOUR_RIFLE && secondary && secondary->GetKind() == ICK_SCOPE) {
+        const auto *scope = static_cast<const C_ScopeComp *>(secondary);
+        if (scope->GetAimMode() < SCOPE_RETICLES) {
+            const auto zoom = static_cast<float>(std::tan(ZOOM_HALF_FOV) / std::tan(scope->GetAimedFovFactor() * 0.5));
+            line(C_fstr("%s : %.2f x", g_texts.Get(TEXT_ZOOM).c_str(), static_cast<double>(zoom)));
+        }
+    }
+}
+
+void C_ItemInfo::UpdateCounts()
+{
+    // (The parts checked: the fix, the original's without them crashes.)
+    if (m_secondPicture)
+        m_secondPicture->HandleMessageCopy(Message(m_secondCount == 0 ? CONTROL_MSG_DEACTIVATE : CONTROL_MSG_ACTIVATE));
+    if (m_picture)
+        m_picture->HandleMessageCopy(Message(m_count == 0 ? CONTROL_MSG_DEACTIVATE : CONTROL_MSG_ACTIVATE));
+    if (m_count + m_secondCount > 0 && m_parent) {
+        S_ControlMessage counted = Message(CONTROL_MSG_ITEM_COUNTED);
+        counted.value = m_id;
+        m_parent->HandleMessageCopy(counted);
+    }
+    S_ControlMessage count = Message(CONTROL_MSG_SET_TEXT);
+    count.value = INFO_COUNT_STYLE;
+    count.text = C_fstr("%d ", m_count);
+    if (m_picture)
+        m_picture->HandleMessageCopy(count);
+    count.text = C_fstr("%d ", m_secondCount);
+    if (m_secondPicture)
+        m_secondPicture->HandleMessageCopy(count);
+}
+
+void C_ItemInfo::ShowPicture(C_PictureControl *picture, int id, C_ItemDef *def)
+{
+    if (!picture)
+        return;
+    S_ControlMessage index = Message(CONTROL_MSG_SET_INDEX);
+    index.value = static_cast<uint32_t>(id);
+    picture->HandleMessageCopy(index);
+    S_ControlMessage texture = Message(CONTROL_MSG_SET_TEXTURE);
+    texture.value2 = reinterpret_cast<uintptr_t>(def->GetImage());
+    picture->HandleMessageCopy(texture);
+}
+
+bool C_ItemInfo::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_ControlGroup::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_ITEM_COUNT:
+        m_count = static_cast<int>(message->value);
+        UpdateCounts();
+        return true;
+    case CONTROL_MSG_SET_SECOND_COUNT:
+        m_secondCount = static_cast<int>(message->value);
+        UpdateCounts();
+        return true;
+    case CONTROL_MSG_ADD_CALLBACK:
+    case CONTROL_MSG_REMOVE_CALLBACK:
+        if (m_picture)
+            m_picture->HandleMessage(message);
+        if (m_secondPicture)
+            m_secondPicture->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_SET_ITEM: {
+        m_item = static_cast<int>(message->value);
+        C_ItemDef *def = GetItemDef(m_item);
+        if (!def)
+            return true;
+        ShowStats(def);
+        ShowPicture(m_picture, m_item, def);
+        // The second picture: a weapon's ammo, a uniform's headgear.
+        if (def->GetRecordType() == ITEM_ANIMATED)
+            m_second = def->GetAmmoItemId();
+        else if (def->GetBehaviour() == ITEM_BEHAVIOUR_UNIFORM)
+            m_second = def->GetHeadgearItemId();
+        else
+            return true;
+        if (C_ItemDef *second = GetItemDef(m_second))
+            ShowPicture(m_secondPicture, m_second, second);
+        return true;
+    }
+    case CONTROL_MSG_REFRESH:
+        for (C_Control *part : std::initializer_list<C_Control *>{m_picture, m_secondPicture, m_stats})
+            if (part)
+                part->HandleMessageCopy(*message);
+        return true;
+    }
+    C_ControlGroup::HandleMessage(message);
+    return true;
 }

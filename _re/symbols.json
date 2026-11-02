@@ -28555,13 +28555,13 @@
  },
  "0064dd60": {
   "module": "control",
-  "name": "C_Control::Unknown24",
-  "proto": "bool __thiscall Unknown24(C_Control *this, int value)"
+  "name": "C_Control::OnChar",
+  "proto": "bool __thiscall OnChar(C_Control *this, int key)"
  },
  "0064dd70": {
   "module": "control",
-  "name": "C_Control::Unknown28",
-  "proto": "bool __thiscall Unknown28(C_Control *this)"
+  "name": "C_Control::IsEditing",
+  "proto": "bool __thiscall IsEditing(C_Control *this)"
  },
  "0064dd80": {
   "module": "control",
@@ -28635,8 +28635,8 @@
  },
  "0064df40": {
   "module": "control",
-  "name": "C_Control::Unknown68",
-  "proto": "int __thiscall Unknown68(C_Control *this, int value)"
+  "name": "C_Control::BeginEdit",
+  "proto": "int __thiscall BeginEdit(C_Control *this, int value)"
  },
  "0064df50": {
   "module": "control",
@@ -28687,8 +28687,29 @@
   "proto": "void __thiscall ~C_TextControl(C_TextControl *this)"
  },
  "0064e510": {
-  "module": "zz_idioms",
-  "name": "get_field_7c_64e510"
+  "module": "controls",
+  "name": "C_EditControl::IsEditing",
+  "proto": "bool __thiscall IsEditing(C_EditControl *this)"
+ },
+ "0064e520": {
+  "module": "controls",
+  "name": "C_EditBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0064e540": {
+  "module": "controls",
+  "name": "C_EditBox::~C_EditBox",
+  "proto": "void __thiscall ~C_EditBox(void *this)"
+ },
+ "0064e6c0": {
+  "module": "controls",
+  "name": "C_EditControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_EditControl *this, uchar flags)"
+ },
+ "0064e6e0": {
+  "module": "controls",
+  "name": "C_EditControl::~C_EditControl",
+  "proto": "void __thiscall ~C_EditControl(C_EditControl *this)"
  },
  "0064f220": {
   "module": "controls",
@@ -28750,9 +28771,80 @@
   "name": "C_SpinControl::SetInactive",
   "proto": "void __thiscall SetInactive(C_SpinControl *this, bool inactive)"
  },
+ "0064fda0": {
+  "module": "controls",
+  "name": "C_SkillControl::Create",
+  "proto": "bool __thiscall Create(C_SkillControl *this, void * frame, void * root, void * desc)"
+ },
  "00650170": {
-  "module": "zz_idioms",
-  "name": "empty_function_650170"
+  "module": "controls",
+  "name": "C_SkillControl::SetStrings",
+  "proto": "void __thiscall SetStrings(C_SkillControl *this, void * strings)"
+ },
+ "00650180": {
+  "module": "controls",
+  "name": "C_SkillControl::FindChild",
+  "proto": "int __thiscall FindChild(C_SkillControl *this, uint id)"
+ },
+ "006501c0": {
+  "module": "controls",
+  "name": "C_SkillControl::PointDown",
+  "proto": "bool __thiscall PointDown(C_SkillControl *this)"
+ },
+ "006502a0": {
+  "module": "controls",
+  "name": "C_SkillControl::PointUp",
+  "proto": "bool __thiscall PointUp(C_SkillControl *this)"
+ },
+ "00650390": {
+  "module": "controls",
+  "name": "C_SkillControl::Update",
+  "proto": "void __thiscall Update(C_SkillControl *this)"
+ },
+ "006505e0": {
+  "module": "controls",
+  "name": "C_SkillControl::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_SkillControl *this, int key)"
+ },
+ "00650670": {
+  "module": "controls",
+  "name": "C_SkillControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_SkillControl *this, void * message)"
+ },
+ "00650810": {
+  "module": "controls",
+  "name": "C_SkillControl::OnEnter",
+  "proto": "int __thiscall OnEnter(C_SkillControl *this, int id)"
+ },
+ "00650890": {
+  "module": "controls",
+  "name": "C_SkillControl::OnLeave",
+  "proto": "int __thiscall OnLeave(C_SkillControl *this, int id)"
+ },
+ "006508f0": {
+  "module": "controls",
+  "name": "C_SkillControl::OnInput05",
+  "proto": "int __thiscall OnInput05(C_SkillControl *this, int id)"
+ },
+ "00650960": {
+  "module": "controls",
+  "name": "C_SkillControl::OnPress",
+  "proto": "int __thiscall OnPress(C_SkillControl *this, int id)"
+ },
+ "006509a0": {
+  "module": "controls",
+  "name": "C_SkillControl::OnInput08",
+  "proto": "int __thiscall OnInput08(C_SkillControl *this, int id)"
+ },
+ "006509e0": {
+  "module": "controls",
+  "name": "C_SkillControl::SetInactive",
+  "proto": "void __thiscall SetInactive(C_SkillControl *this, bool inactive)"
+ },
+ "00650a30": {
+  "module": "controls",
+  "name": "C_SkillControl::Refresh",
+  "proto": "void __thiscall Refresh(C_SkillControl *this)"
  },
  "00650a50": {
   "module": "controls",
@@ -28878,6 +28970,36 @@
   "module": "controls",
   "name": "C_MarkBox::HandleMessage",
   "proto": "bool __thiscall HandleMessage(C_MarkBox *this, void * message)"
+ },
+ "00652a60": {
+  "module": "controls",
+  "name": "C_ItemInfo::Create",
+  "proto": "bool __thiscall Create(C_ControlGroup *this, void * frame, void * root, void * desc)"
+ },
+ "00652dc0": {
+  "module": "controls",
+  "name": "C_ItemInfo::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ControlGroup *this, void * message)"
+ },
+ "00653180": {
+  "module": "controls",
+  "name": "C_ItemInfo::ShowStats",
+  "proto": "void __thiscall ShowStats(C_ControlGroup *this, C_ItemDef * def)"
+ },
+ "00653890": {
+  "module": "controls",
+  "name": "C_ItemInfo::UpdateCounts",
+  "proto": "void __thiscall UpdateCounts(C_ControlGroup *this)"
+ },
+ "00653b00": {
+  "module": "controls",
+  "name": "C_ItemInfo::Refresh",
+  "proto": "void __thiscall Refresh(C_ControlGroup *this)"
+ },
+ "00653b30": {
+  "module": "controls",
+  "name": "C_ItemInfo::FindChild",
+  "proto": "int __thiscall FindChild(C_ControlGroup *this, uint id)"
  },
  "00653b60": {
   "module": "zz_idioms",
@@ -29165,6 +29287,16 @@
   "name": "C_ControlGroup::HandleMessage",
   "proto": "bool __thiscall HandleMessage(C_ControlGroup *this, void * message)"
  },
+ "006571f0": {
+  "module": "controls",
+  "name": "C_ChatInput::LineEntered",
+  "proto": "bool __thiscall LineEntered(C_ControlGroup *this, void * object, void * control, uint notification, uint value)"
+ },
+ "006574d0": {
+  "module": "controls",
+  "name": "C_ChatInput::Create",
+  "proto": "bool __thiscall Create(C_ControlGroup *this, void * frame, void * root, void * desc)"
+ },
  "00657830": {
   "module": "controls",
   "name": "C_AllToggleButton::ScalarDeletingDestructor",
@@ -29185,6 +29317,36 @@
   "name": "C_LabelControl::~C_LabelControl",
   "proto": "void __thiscall ~C_LabelControl(C_LabelControl *this)"
  },
+ "00657af0": {
+  "module": "controls",
+  "name": "C_EditControl::C_EditControl",
+  "proto": "void * __thiscall C_EditControl(C_EditControl *this, void * scene, uint id, void * parent)"
+ },
+ "00657ba0": {
+  "module": "controls",
+  "name": "C_ChatInput::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_ControlGroup *this, int value)"
+ },
+ "00657bd0": {
+  "module": "controls",
+  "name": "C_ChatInput::FindChild",
+  "proto": "int __thiscall FindChild(C_ControlGroup *this, uint id)"
+ },
+ "00657c00": {
+  "module": "controls",
+  "name": "C_ChatInput::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ControlGroup *this, void * message)"
+ },
+ "00657da0": {
+  "module": "controls",
+  "name": "C_ScrolledText::SetInactive",
+  "proto": "void __thiscall SetInactive(C_ControlGroup *this, bool inactive)"
+ },
+ "00657dd0": {
+  "module": "controls",
+  "name": "C_ScrolledText::Create",
+  "proto": "bool __thiscall Create(C_ControlGroup *this, void * frame, void * root, void * desc)"
+ },
  "00658070": {
   "module": "controls",
   "name": "C_ScrollBar::ScalarDeletingDestructor",
@@ -29195,6 +29357,71 @@
   "name": "C_ScrollBar::~C_ScrollBar",
   "proto": "void __thiscall ~C_ScrollBar(void *this)"
  },
+ "006581c0": {
+  "module": "controls",
+  "name": "C_SelectList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_SelectList *this, uchar flags)"
+ },
+ "006581e0": {
+  "module": "controls",
+  "name": "C_SelectList::~C_SelectList",
+  "proto": "void __thiscall ~C_SelectList(C_SelectList *this)"
+ },
+ "00658370": {
+  "module": "controls",
+  "name": "C_ScrolledText::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_ControlGroup *this, int value)"
+ },
+ "006583a0": {
+  "module": "controls",
+  "name": "C_ScrolledText::FindChild",
+  "proto": "int __thiscall FindChild(C_ControlGroup *this, uint id)"
+ },
+ "006583d0": {
+  "module": "controls",
+  "name": "C_ScrolledText::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ControlGroup *this, void * message)"
+ },
+ "00658550": {
+  "module": "controls",
+  "name": "C_ScrolledText::OnEnter",
+  "proto": "int __thiscall OnEnter(C_ControlGroup *this, int id)"
+ },
+ "006585e0": {
+  "module": "controls",
+  "name": "C_ScrolledText::OnLeave",
+  "proto": "int __thiscall OnLeave(C_ControlGroup *this, int id)"
+ },
+ "00658620": {
+  "module": "controls",
+  "name": "C_ScrolledText::OnPress",
+  "proto": "int __thiscall OnPress(C_ControlGroup *this, int id)"
+ },
+ "00658680": {
+  "module": "controls",
+  "name": "C_ScrolledText::OnWheel",
+  "proto": "int __thiscall OnWheel(C_ControlGroup *this, int id, int amount)"
+ },
+ "006587e0": {
+  "module": "controls",
+  "name": "C_ScrolledText::SetStrings",
+  "proto": "void __thiscall SetStrings(C_ControlGroup *this, void * strings)"
+ },
+ "00658930": {
+  "module": "controls",
+  "name": "C_ComboBox::HeaderEdited",
+  "proto": "bool __thiscall HeaderEdited(C_ComboBox *this, void * object, void * control, uint notification, uint value)"
+ },
+ "00658a90": {
+  "module": "controls",
+  "name": "C_ComboBox::Create",
+  "proto": "bool __thiscall Create(C_ComboBox *this, void * frame, void * root, void * desc)"
+ },
+ "00658e50": {
+  "module": "controls",
+  "name": "C_ControlGroup::C_ControlGroup",
+  "proto": "void * __thiscall C_ControlGroup(C_ControlGroup *this, void * scene, uint id, void * parent)"
+ },
  "00658f00": {
   "module": "controls",
   "name": "C_ControlGroup::ScalarDeletingDestructor",
@@ -29204,6 +29431,66 @@
   "module": "controls",
   "name": "C_ControlGroup::~C_ControlGroup",
   "proto": "void __thiscall ~C_ControlGroup(C_ControlGroup *this)"
+ },
+ "006590f0": {
+  "module": "controls",
+  "name": "C_ScrolledText::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ControlGroup *this, uchar flags)"
+ },
+ "00659110": {
+  "module": "controls",
+  "name": "C_ScrolledText::~C_ScrolledText",
+  "proto": "void __thiscall ~C_ScrolledText(C_ControlGroup *this)"
+ },
+ "006592c0": {
+  "module": "controls",
+  "name": "C_ComboEdit::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_EditControl *this, uchar flags)"
+ },
+ "006592e0": {
+  "module": "controls",
+  "name": "C_ComboEdit::~C_ComboEdit",
+  "proto": "void __thiscall ~C_ComboEdit(C_EditControl *this)"
+ },
+ "00659450": {
+  "module": "controls",
+  "name": "C_ComboBox::FindChild",
+  "proto": "int __thiscall FindChild(C_ComboBox *this, uint id)"
+ },
+ "00659480": {
+  "module": "controls",
+  "name": "C_ComboBox::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ComboBox *this, void * message)"
+ },
+ "00659a00": {
+  "module": "controls",
+  "name": "C_ComboBox::SetInactive",
+  "proto": "void __thiscall SetInactive(C_ComboBox *this, bool inactive)"
+ },
+ "00659a30": {
+  "module": "controls",
+  "name": "C_ComboBox::OnEnter",
+  "proto": "int __thiscall OnEnter(C_ComboBox *this, int id)"
+ },
+ "00659ac0": {
+  "module": "controls",
+  "name": "C_ComboBox::OnLeave",
+  "proto": "int __thiscall OnLeave(C_ComboBox *this, int id)"
+ },
+ "00659b10": {
+  "module": "controls",
+  "name": "C_ComboBox::OnInput05",
+  "proto": "int __thiscall OnInput05(C_ComboBox *this, int id)"
+ },
+ "00659b70": {
+  "module": "controls",
+  "name": "C_ComboBox::OnPress",
+  "proto": "int __thiscall OnPress(C_ComboBox *this, int id)"
+ },
+ "00659c40": {
+  "module": "controls",
+  "name": "C_ComboBox::SetStrings",
+  "proto": "void __thiscall SetStrings(C_ComboBox *this, void * strings)"
  },
  "0065a5a0": {
   "module": "zz_idioms",
@@ -29216,6 +29503,121 @@
  "0065ae70": {
   "module": "zz_idioms",
   "name": "vector_at_e196_65ae70"
+ },
+ "0065aec0": {
+  "module": "controls",
+  "name": "C_ComboEdit::Create",
+  "proto": "bool __thiscall Create(C_EditControl *this, void * frame, void * root, void * desc)"
+ },
+ "0065af50": {
+  "module": "controls",
+  "name": "C_ComboEdit::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_EditControl *this, void * message)"
+ },
+ "0065afd0": {
+  "module": "controls",
+  "name": "C_ComboEdit::OnEnter",
+  "proto": "int __thiscall OnEnter(C_EditControl *this, int id)"
+ },
+ "0065aff0": {
+  "module": "controls",
+  "name": "C_ComboEdit::OnLeave",
+  "proto": "int __thiscall OnLeave(C_EditControl *this, int id)"
+ },
+ "0065b020": {
+  "module": "controls",
+  "name": "C_ComboEdit::OnClick",
+  "proto": "int __thiscall OnClick(C_EditControl *this, int id)"
+ },
+ "0065b030": {
+  "module": "controls",
+  "name": "C_ComboEdit::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(C_EditControl *this, int id)"
+ },
+ "0065b070": {
+  "module": "controls",
+  "name": "C_ComboEdit::OnInput02",
+  "proto": "int __thiscall OnInput02(C_EditControl *this, int id)"
+ },
+ "0065b0a0": {
+  "module": "controls",
+  "name": "C_EditBox::Create",
+  "proto": "bool __thiscall Create(void *this, void * frame, void * root, void * desc)"
+ },
+ "0065b1b0": {
+  "module": "controls",
+  "name": "C_EditBox::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "0065b350": {
+  "module": "controls",
+  "name": "C_EditBox::OnEnter",
+  "proto": "int __thiscall OnEnter(void *this, int id)"
+ },
+ "0065b3b0": {
+  "module": "controls",
+  "name": "C_EditBox::OnLeave",
+  "proto": "int __thiscall OnLeave(void *this, int id)"
+ },
+ "0065b410": {
+  "module": "controls",
+  "name": "C_EditBox::OnClick",
+  "proto": "int __thiscall OnClick(void *this, int id)"
+ },
+ "0065b430": {
+  "module": "controls",
+  "name": "C_EditBox::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(void *this, int id)"
+ },
+ "0065b470": {
+  "module": "controls",
+  "name": "C_EditBox::OnInput02",
+  "proto": "int __thiscall OnInput02(void *this, int id)"
+ },
+ "0065b5e0": {
+  "module": "controls",
+  "name": "C_EditBox::OnInput0B",
+  "proto": "int __thiscall OnInput0B(void *this, int id)"
+ },
+ "0065b750": {
+  "module": "controls",
+  "name": "C_SelectList::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_SelectList *this, void * message)"
+ },
+ "0065c040": {
+  "module": "controls",
+  "name": "C_SelectList::Create",
+  "proto": "bool __thiscall Create(C_SelectList *this, void * frame, void * root, void * desc)"
+ },
+ "0065c160": {
+  "module": "controls",
+  "name": "C_SelectList::UpdateSelectBar",
+  "proto": "void __thiscall UpdateSelectBar(C_SelectList *this)"
+ },
+ "0065c240": {
+  "module": "controls",
+  "name": "C_SelectList::OnClick",
+  "proto": "int __thiscall OnClick(C_SelectList *this, int id)"
+ },
+ "0065c440": {
+  "module": "controls",
+  "name": "C_SelectList::OnPress",
+  "proto": "int __thiscall OnPress(C_SelectList *this, int id)"
+ },
+ "0065c630": {
+  "module": "controls",
+  "name": "C_SelectList::OnInput05",
+  "proto": "int __thiscall OnInput05(C_SelectList *this, int id)"
+ },
+ "0065c690": {
+  "module": "controls",
+  "name": "C_SelectList::OnEnter",
+  "proto": "int __thiscall OnEnter(C_SelectList *this, int id)"
+ },
+ "0065c6a0": {
+  "module": "controls",
+  "name": "C_SelectList::OnLeave",
+  "proto": "int __thiscall OnLeave(C_SelectList *this, int id)"
  },
  "0065c6c0": {
   "module": "controls",
@@ -29341,6 +29743,26 @@
   "name": "C_Slider::~C_Slider",
   "proto": "void __thiscall ~C_Slider(C_Slider *this)"
  },
+ "0065efe0": {
+  "module": "controls",
+  "name": "C_ChatInput::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ControlGroup *this, uchar flags)"
+ },
+ "0065f000": {
+  "module": "controls",
+  "name": "C_ChatInput::~C_ChatInput",
+  "proto": "void __thiscall ~C_ChatInput(C_ControlGroup *this)"
+ },
+ "0065f260": {
+  "module": "controls",
+  "name": "C_ComboBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ComboBox *this, uchar flags)"
+ },
+ "0065f280": {
+  "module": "controls",
+  "name": "C_ComboBox::~C_ComboBox",
+  "proto": "void __thiscall ~C_ComboBox(C_ComboBox *this)"
+ },
  "0065f610": {
   "module": "controls",
   "name": "C_ToggleButton::ScalarDeletingDestructor",
@@ -29350,6 +29772,16 @@
   "module": "controls",
   "name": "C_ToggleButton::~C_ToggleButton",
   "proto": "void __thiscall ~C_ToggleButton(void *this)"
+ },
+ "0065f760": {
+  "module": "controls",
+  "name": "C_SkillControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_SkillControl *this, uchar flags)"
+ },
+ "0065f780": {
+  "module": "controls",
+  "name": "C_SkillControl::~C_SkillControl",
+  "proto": "void __thiscall ~C_SkillControl(C_SkillControl *this)"
  },
  "0065f8d0": {
   "module": "controls",
@@ -29421,6 +29853,16 @@
   "name": "C_SpinControl::~C_SpinControl",
   "proto": "void __thiscall ~C_SpinControl(C_SpinControl *this)"
  },
+ "00660c30": {
+  "module": "controls",
+  "name": "C_ItemInfo::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ControlGroup *this, uchar flags)"
+ },
+ "00660c50": {
+  "module": "controls",
+  "name": "C_ItemInfo::~C_ItemInfo",
+  "proto": "void __thiscall ~C_ItemInfo(C_ControlGroup *this)"
+ },
  "00660e00": {
   "module": "controls",
   "name": "C_SideIndicator::ScalarDeletingDestructor",
@@ -29440,6 +29882,36 @@
   "module": "controls",
   "name": "C_MarkBox::~C_MarkBox",
   "proto": "void __thiscall ~C_MarkBox(C_MarkBox *this)"
+ },
+ "00661720": {
+  "module": "controls",
+  "name": "C_TitledComboBox::FindChild",
+  "proto": "int __thiscall FindChild(C_ControlGroup *this, uint id)"
+ },
+ "00661750": {
+  "module": "controls",
+  "name": "C_TitledComboBox::SetInactive",
+  "proto": "void __thiscall SetInactive(C_ControlGroup *this, bool inactive)"
+ },
+ "00661780": {
+  "module": "controls",
+  "name": "C_TitledComboBox::Create",
+  "proto": "bool __thiscall Create(C_ControlGroup *this, void * frame, void * root, void * desc)"
+ },
+ "00661930": {
+  "module": "controls",
+  "name": "C_TitledComboBox::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ControlGroup *this, void * message)"
+ },
+ "006619f0": {
+  "module": "controls",
+  "name": "C_TitledComboBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ControlGroup *this, uchar flags)"
+ },
+ "00661a10": {
+  "module": "controls",
+  "name": "C_TitledComboBox::~C_TitledComboBox",
+  "proto": "void __thiscall ~C_TitledComboBox(C_ControlGroup *this)"
  },
  "00661bc0": {
   "module": "control",
@@ -29513,6 +29985,66 @@
   "module": "controls",
   "name": "C_PagedTextControl::SetInactive",
   "proto": "void __thiscall SetInactive(C_PagedTextControl *this, bool inactive)"
+ },
+ "006624b0": {
+  "module": "controls",
+  "name": "C_EditControl::Refresh",
+  "proto": "void __thiscall Refresh(C_EditControl *this)"
+ },
+ "006624d0": {
+  "module": "controls",
+  "name": "C_EditControl::Create",
+  "proto": "bool __thiscall Create(C_EditControl *this, void * frame, void * root, void * desc)"
+ },
+ "00662500": {
+  "module": "controls",
+  "name": "C_EditControl::Tick",
+  "proto": "void __thiscall Tick(C_EditControl *this, int time)"
+ },
+ "00662520": {
+  "module": "controls",
+  "name": "C_EditControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_EditControl *this, void * message)"
+ },
+ "006626a0": {
+  "module": "controls",
+  "name": "C_EditControl::Backspace",
+  "proto": "bool __thiscall Backspace(C_EditControl *this)"
+ },
+ "006627b0": {
+  "module": "controls",
+  "name": "C_EditControl::OnChar",
+  "proto": "bool __thiscall OnChar(C_EditControl *this, int key)"
+ },
+ "00662a80": {
+  "module": "controls",
+  "name": "C_EditControl::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_EditControl *this, int value)"
+ },
+ "00662a90": {
+  "module": "controls",
+  "name": "C_EditControl::OnLeave",
+  "proto": "int __thiscall OnLeave(C_EditControl *this, int id)"
+ },
+ "00662ab0": {
+  "module": "controls",
+  "name": "C_EditControl::OnClick",
+  "proto": "int __thiscall OnClick(C_EditControl *this, int id)"
+ },
+ "00662ba0": {
+  "module": "controls",
+  "name": "C_EditControl::OnInput02",
+  "proto": "int __thiscall OnInput02(C_EditControl *this, int id)"
+ },
+ "00662ca0": {
+  "module": "controls",
+  "name": "C_EditControl::OnInput0B",
+  "proto": "int __thiscall OnInput0B(C_EditControl *this, int id)"
+ },
+ "00662ce0": {
+  "module": "controls",
+  "name": "C_EditControl::BeginEdit",
+  "proto": "int __thiscall BeginEdit(C_EditControl *this, int value)"
  },
  "00663ad0": {
   "module": "zz_idioms",

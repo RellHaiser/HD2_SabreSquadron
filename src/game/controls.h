@@ -2,8 +2,9 @@
 // text controls (a text box on the control's frame), the button, the text button, the picture, the
 // tooltip, the frame switch, the group (its input passed to the child under the cursor) and the
 // paged text control; part 9c-iii-a: the slider, the scroll bar and the spin control; part 9c-iii-b:
-// the check boxes, the toggle buttons, the side indicator and the mark. Made by the factory
-// (C_Control::CreateChild) by their descriptions' types.
+// the check boxes, the toggle buttons, the side indicator and the mark; part 9c-iv: the edit
+// controls, the scrolled text, the combo boxes, the chat input, the skill and the item information.
+// Made by the factory (C_Control::CreateChild) by their descriptions' types.
 #pragma once
 
 #include "game/control.h"
@@ -17,6 +18,11 @@ class I3D_texture;
 
 // The mark's click (value: its value).
 constexpr uint32_t CONTROL_NOTIFY_0E = 0x400E000;
+// The edit controls' Enter and Escape.
+constexpr uint32_t CONTROL_NOTIFY_RETURN = 0x4016000;
+constexpr uint32_t CONTROL_NOTIFY_ESCAPE = 0x4017000;
+// The chat input's line sent (value: its text's address, valid during the notification).
+constexpr uint32_t CONTROL_NOTIFY_SEND = 0x4015000;
 
 // The text controls' messages (their box's).
 enum : uint32_t {
@@ -78,6 +84,48 @@ enum : uint32_t {
     CONTROL_MSG_GET_SIDE = 0x1000098,
     // The mark's: its title shows the value, two digits.
     CONTROL_MSG_SET_NUMBER = 0x1000078,
+    // The edit controls': the characters refused (value2 a char *), the length (value; 0: kept),
+    // digits only (value), the editing asked for (to the screen, START_EDITING) or stopped
+    // (STOP_EDITING; value2 the control), the text got.
+    CONTROL_MSG_SET_FORBIDDEN = 0x100009B,
+    CONTROL_MSG_SET_MAX_LENGTH = 0x100006E,
+    CONTROL_MSG_SET_DIGITS_ONLY = 0x100006F,
+    CONTROL_MSG_IGNORED_74 = 0x1000074,                 // (nothing)
+    CONTROL_MSG_EDIT = 0x2000016,                       // (the edit control's click)
+    CONTROL_MSG_END_EDIT = 0x20000AB,                   // (while editing: OnInput02)
+    CONTROL_MSG_START_EDITING = 0x20000BF,
+    CONTROL_MSG_STOP_EDITING = 0x20000C0,
+    CONTROL_MSG_GET_TEXT = 0x200002F,
+    // The edit box's: a range (value .. value2; the same: none) its number is kept in on the
+    // editing's end; the number got (value2; digits only).
+    CONTROL_MSG_SET_RANGE = 0x10000A0,
+    CONTROL_MSG_GET_NUMBER = 0x1000079,
+    // The selection list's: a line put first (selected), the selected one removed, a line selected
+    // by its text (no case; value: its index, else -1).
+    CONTROL_MSG_INSERT_FIRST = 0x2000015,
+    CONTROL_MSG_REMOVE_SELECTED = 0x2000017,
+    CONTROL_MSG_SELECT_TEXT = 0x2000076,
+    // The combo box's: a line picked by its index (value), the header's text (the text, the text id:
+    // value2), the list shown or hidden, its selected line picked (CONTROL_NOTIFY_0E).
+    CONTROL_MSG_PICK_INDEX = 0x1000076,
+    CONTROL_MSG_SET_HEADER_TEXT = 0x100007A,
+    CONTROL_MSG_SET_HEADER_TEXT_ID = 0x1000081,
+    CONTROL_MSG_TOGGLE_LIST = 0x200002D,
+    CONTROL_MSG_PICK_SELECTED = 0x200002E,
+    // The chat input's: its team toggle changed (the toggle's route).
+    CONTROL_MSG_TEAM_TOGGLED = 0x200000B,
+    // The skill's: a point up or down (value: done; the pool's too), the base (the points 0), the
+    // total (the points the rest).
+    CONTROL_MSG_SKILL_UP = 0x1000070,
+    CONTROL_MSG_SKILL_DOWN = 0x1000071,
+    CONTROL_MSG_SET_BASE = 0x1000072,
+    CONTROL_MSG_SET_TOTAL = 0x1000073,
+    // The item information's: the item (value), its count and its second's; to the parent when
+    // either count is (value: its id).
+    CONTROL_MSG_SET_ITEM = 0x100007B,
+    CONTROL_MSG_SET_ITEM_COUNT = 0x100007C,
+    CONTROL_MSG_SET_SECOND_COUNT = 0x1000082,
+    CONTROL_MSG_ITEM_COUNTED = 0x2000083,
     // A control to be ticked (posted to target 0 when made, value2 the control: the tooltip, the
     // scroll bar and its arrows).
     CONTROL_MSG_ADD_TICKER = 0x200007A,
@@ -178,6 +226,12 @@ public:
 protected:
     // The focus (the child under the cursor), or null.
     C_Control *Focus() const { return IsChild(m_focus) ? m_children[m_focus] : nullptr; }
+    // The scrolled text's, the combo box's enter (0x00658550, 0x00659a30): id 0xF Unknown20 (true:
+    // not handled), else the focus' leave (not taken: not handled); the child with the id's enter
+    // (taken: the focus, handled; else 0).
+    int EnterChild(int id);
+    // The focus' Unknown20 (the scrolled text's, the chat input's; none: false).
+    bool FocusUnknown20(int value);
 
     int m_focus = -1;                                   // +0x6C
 };
@@ -627,4 +681,362 @@ protected:
     I3D_frame *m_emptyActive = nullptr;                 // +0x80
     I3D_frame *m_emptyNormal = nullptr;                 // +0x84
     uint8_t m_value = 0;                                // +0x88
+};
+
+// An edit control (vtable 0x00813ee0; the base of the edit box and the selection list): a text
+// control whose run `m_run` is typed into. A click asks the screen to start the editing
+// (CONTROL_MSG_START_EDITING), which calls BeginEdit; the typed characters go to a buffer of up to
+// `m_maxLength` bytes, shown as the run; Enter or Escape (the text back) ask the screen to stop it
+// (STOP_EDITING), which calls OnInput0B.
+class C_EditControl : public C_TextControl {            // 0x88 bytes
+public:
+    C_EditControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_TextControl(scene, id, parent) {}
+    ~C_EditControl() override = default;                // 0x0064e6c0 (0x0064e6e0)
+
+    // The shown control's box drawn (no children).
+    void Refresh() override;                            // 0x006624b0
+    // While editing: the box's caret.
+    void Tick(int time) override;                       // 0x00662500
+    // (0x00662a80: Unknown20 false, the base's.)
+    // While editing: the character (8 Backspace, 0xd Enter, 0x1b Escape; full-width digits as
+    // ASCII; above 0x7f with the Unicode font as UTF-8), true when taken.
+    bool OnChar(int key) override;                      // 0x006627b0
+    bool IsEditing() override { return m_editing; }     // 0x0064e510
+    // The buffer made, then the text control's.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006624d0
+    // Its notification, not handled.
+    int OnLeave(int id) override;                       // 0x00662a90
+    // Not editing: START_EDITING posted (handled).
+    int OnClick(int id) override;                       // 0x00662ab0
+    // Editing: STOP_EDITING posted, CONTROL_NOTIFY_02 (handled).
+    int OnInput02(int id) override;                     // 0x00662ba0
+    // Editing: stopped (the run's text changed: CONTROL_NOTIFY_0B with the id).
+    int OnInput0B(int id) override;                     // 0x00662ca0
+    // Not editing: the run edited (none: the text cleared first), its text kept and in the buffer.
+    int BeginEdit(int) override;                        // 0x00662ce0
+    // SET_FORBIDDEN, SET_MAX_LENGTH, SET_DIGITS_ONLY, EDIT (OnClick), GET_TEXT, END_EDIT.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00662520
+
+protected:
+    // The buffer's last character removed (UTF-8: its sequence; a broken one: false), shown.
+    bool Backspace();                                   // 0x006626a0
+    // The buffer shown as the run's text.
+    void ShowBuffer();
+    // A buffer of `m_maxLength` + 1 bytes, empty.
+    void MakeBuffer();
+
+    C_str m_savedText;                                  // +0x70 the run's text before the editing
+    std::vector<char> m_buffer;                         // +0x74 (the original's a char *)
+    const char *m_forbidden = nullptr;                  // +0x78 characters refused (not owned)
+    bool m_editing = false;                             // +0x7C
+    bool m_digitsOnly = false;                          // +0x7D (a '-' first allowed)
+    int m_run = -1;                                     // +0x80 the box's run edited
+    int m_maxLength = 30;                               // +0x84
+};
+
+// An edit box (type 0x1b, vtable 0x00813d48): an edit control on its "normal*" frame, its
+// "actived*" one while the cursor is over it; a number in a range kept when the editing ends.
+class C_EditBox : public C_EditControl {                // 0x9C bytes
+public:
+    C_EditBox(I3D_scene *scene, uint32_t id, C_Control *parent) : C_EditControl(scene, id, parent) {}
+    ~C_EditBox() override = default;                    // 0x0064e520 (0x0064e540)
+
+    // The frames (false: one not found), the box on the normal one (the run 0).
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0065b0a0
+    // The active frame (inactive: not handled).
+    int OnEnter(int id) override;                       // 0x0065b350
+    // The edit control's (not handled); the normal frame, CONTROL_NOTIFY_LEAVE again (the original's).
+    int OnLeave(int id) override;                       // 0x0065b3b0
+    // Not while inactive.
+    int OnClick(int id) override;                       // 0x0065b410
+    // The edit control's; the box's hover cleared and selected; the range kept.
+    int OnInput02(int id) override;                     // 0x0065b470
+    // Its own id, active: the editing stopped (editing) or asked for.
+    int OnKeyClick(int id) override;                    // 0x0065b430
+    // The edit control's; the range kept.
+    int OnInput0B(int id) override;                     // 0x0065b5e0
+    // SET_RANGE, SET_NUMBER (digits only: value2 as "%d"), GET_NUMBER, REFRESH and SET_MARGIN (on
+    // the normal frame).
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0065b1b0
+
+protected:
+    // The text's number (sscanf "%d", none: 0) set to the range's end it is past.
+    void KeepInRange();
+
+    bool m_hasRange = false;                            // +0x88
+    int m_min = 0;                                      // +0x8C
+    int m_max = 0;                                      // +0x90
+    I3D_frame *m_normalFrame = nullptr;                 // +0x94
+    I3D_frame *m_activeFrame = nullptr;                 // +0x98
+};
+
+// A selection list (type 0x1a, vtable 0x00814298; the scrolled text's lines): an edit control whose
+// runs are lines, one selected (its "select*" frame moved to it); the click selects the line under
+// the cursor. Its range and scroll posted to the control its value names (a scroll bar: SET_COUNT,
+// SET_POSITION).
+class C_SelectList : public C_EditControl {             // 0x98 bytes
+public:
+    C_SelectList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_EditControl(scene, id, parent) {}
+    ~C_SelectList() override;                           // 0x006581c0 (0x006581e0): the cursor released
+
+    // The cursor taken; the frame turned to (0, 0, -1), the select frame to (0, 0, 1) (off, linked
+    // to the root); the box placed (false: none).
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0065c040
+    int OnEnter(int) override { return CONTROL_HANDLED; }   // 0x0065c690
+    // The box's hover cleared, the edit control's.
+    int OnLeave(int id) override;                       // 0x0065c6a0
+    // Not editing: the hovered line selected, the scroll posted, notified (CLICK / PRESS).
+    int OnClick(int id) override;                       // 0x0065c240
+    int OnPress(int id) override;                       // 0x0065c440
+    // Taking input, not editing: CONTROL_NOTIFY_05, the line under the cursor hovered.
+    int OnInput05(int id) override;                     // 0x0065c630
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0065b750
+    // The select frame at the selected line's centre (none there: off).
+    virtual void UpdateSelectBar();                     // +0x84 0x0065c160
+
+protected:
+    // The hovered line selected; the range and the scroll posted; the bar moved.
+    void SelectHoveredLine();
+    // SET_COUNT (the box's scroll range) and SET_POSITION (its scroll; `always` false: only with a
+    // range) posted to the control the value names.
+    void PostScroll(bool always);
+
+    I3D_frame *m_selectFrame = nullptr;                 // +0x88
+    C_Cursor *m_cursor = nullptr;                       // +0x8C
+    bool m_unknown90 = true;                            // +0x90 (not read)
+    int m_selected = -1;                                // +0x94
+};
+
+// A scrolled text (type 0xf, vtable 0x008143a8; the combo box's list): a group of a selection list
+// (on "text*", its id | 8: child 0) and a scroll bar (on "scroll*", its id | 4, a page step of 5:
+// child 1), each the other's value (the list's scroll posted to the bar, the bar's to the list).
+class C_ScrolledText : public C_ControlGroup {          // 0x78 bytes
+public:
+    C_ScrolledText(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
+    ~C_ScrolledText() override = default;               // 0x006590f0 (0x00659110)
+
+    // By the id's last 4 bits: 8 the list, 4 .. 7 the bar (and its arrows, its slider).
+    int FindChild(uint32_t id) const override;          // 0x006583a0
+    bool Unknown20(int value) override { return FocusUnknown20(value); }   // 0x00658370
+    // The parts (each optional; its frame's id cleared); true.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00657dd0
+    int OnEnter(int id) override { return EnterChild(id); }   // 0x00658550
+    // (0x006585e0: the group's leave.)
+    // The focus' when it is the child with the id (the list's: CONTROL_NOTIFY_PRESS too).
+    int OnPress(int id) override;                       // 0x00658620
+    // The bar's page up or down per 120 (no bar or none: not handled).
+    int OnWheel(int id, int amount) override;           // 0x00658680
+    // To the child its target names; the text and list messages to the list.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x006583d0
+    // The lines (style 0x13), then a refresh.
+    void SetStrings(const std::vector<C_str> &strings) override;   // 0x006587e0
+    // The parts too (the base's not called).
+    void SetInactive(bool inactive) override;           // 0x00657da0
+
+protected:
+    C_SelectList *m_list = nullptr;                     // +0x70
+    C_ScrollBar *m_bar = nullptr;                       // +0x74
+};
+
+// The combo box's header (vtable 0x00814320): an edit control on its frame turned to (0, 0, -1), the
+// run 0; its click not handled (the combo box's route toggles the list).
+class C_ComboEdit : public C_EditControl {              // 0x88 bytes
+public:
+    C_ComboEdit(I3D_scene *scene, uint32_t id, C_Control *parent) : C_EditControl(scene, id, parent) {}
+    ~C_ComboEdit() override = default;                  // 0x006592c0 (0x006592e0)
+
+    // The box placed on the frame (false: none).
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0065aec0
+    // Notified (inactive: not handled).
+    int OnEnter(int id) override;                       // 0x0065afd0
+    // The box's hover cleared (not: 0): CONTROL_NOTIFY_LEAVE, then the edit control's (twice).
+    int OnLeave(int id) override;                       // 0x0065aff0
+    int OnClick(int) override { return CONTROL_NOT_HANDLED; }   // 0x0065b020
+    // The edit control's; the box's hover cleared and selected.
+    int OnInput02(int id) override;                     // 0x0065b070
+    // Its own id, active: the editing stopped (editing) or asked for (C_EditBox's).
+    int OnKeyClick(int id) override;                    // 0x0065b030
+    // EDIT (the edit control's click), REFRESH and SET_MARGIN (on the frame).
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0065af50
+};
+
+// A combo box (type 0x11, vtable 0x00814e48): a header (C_ComboEdit on "header*", its id | 2), a
+// "cbdown*" button (its id | 1) and a scrolled text list (on "listbox*", its own id; hidden) shown
+// by the button or the header; a pressed line picked into the header (CONTROL_NOTIFY_0E); the
+// header's edit puts its text in the picked line.
+class C_ComboBox : public C_ControlGroup {              // 0x88 bytes
+public:
+    C_ComboBox(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
+    ~C_ComboBox() override = default;                   // 0x0065f260 (0x0065f280)
+
+    // By the id's last 4 bits: 1 the button, 2 the header, above 3 the list.
+    int FindChild(uint32_t id) const override;          // 0x00659450
+    // The parts (each optional; its frame's id cleared); true.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00658a90
+    int OnEnter(int id) override { return EnterChild(id); }   // 0x00659a30
+    // The focus' leave (not taken: 0); then handled unless the list is open.
+    int OnLeave(int id) override;                       // 0x00659ac0
+    // Off the children: the leave; to another: the leave and the enter; else the focus'.
+    int OnInput05(int id) override;                     // 0x00659b10
+    // The focus' when it is the child with the id; else outside the box, open: closed (0).
+    int OnPress(int id) override;                       // 0x00659b70
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00659480
+    // The header the first line's, the list the lines.
+    void SetStrings(const std::vector<C_str> &strings) override;   // 0x00659c40
+    // The parts too (the base's not called).
+    void SetInactive(bool inactive) override;           // 0x00659a00
+
+protected:
+    // The header's edit stopped: its text the picked line's (the original's callback).
+    static bool HeaderEdited(void *object, void *argument, C_Control *control, uint32_t notification,
+                             uint32_t value);           // 0x00658930
+    // A message to a part (none: nothing; the fix, the original's crashes).
+    static void SendTo(C_Control *part, const S_ControlMessage &message);
+    // The picked line shown in the header, the list closed.
+    void ShowPicked(int index, const C_str &text);
+
+    C_Button *m_button = nullptr;                       // +0x70
+    C_ScrolledText *m_list = nullptr;                   // +0x74
+    C_ComboEdit *m_header = nullptr;                    // +0x78
+    bool m_open = false;                                // +0x7C
+    int m_picked = -1;                                  // +0x80
+    C_str m_pickedText;                                 // +0x84
+};
+
+// A titled combo box (type 0x28, vtable 0x00814dc0; the game's difficulty): a title on "text18"
+// (taking input) and a combo box on "game difficulty", both with its id.
+class C_TitledComboBox : public C_ControlGroup {        // 0x78 bytes
+public:
+    C_TitledComboBox(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
+    ~C_TitledComboBox() override = default;             // 0x006619f0 (0x00661a10)
+
+    // Both made: the id's last 4 bits 0 the title, else the combo box (else -1).
+    int FindChild(uint32_t id) const override;          // 0x00661720
+    // The parts (false: no combo box; its frame's id cleared).
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00661780
+    // (DE)ACTIVATE, SHOW, HIDE; the texts to the title; the rest to the combo box.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00661930
+    // The parts too.
+    void SetInactive(bool inactive) override;           // 0x00661750
+
+protected:
+    C_TitleControl *m_title = nullptr;                  // +0x70
+    C_ComboBox *m_combo = nullptr;                      // +0x74
+};
+
+// The chat input (type 0x21, vtable 0x008145c8): an edit box on "binput*" (its id | 4, its prompt
+// text 2002, 100 characters), a label on "text*" (its id | 8; the lines, 8 kept) and the "bTeam"
+// toggle (its id | 0xc: up, to the team). Enter sends the line ("/t" or "/a" put first unless there).
+class C_ChatInput : public C_ControlGroup {             // 0x80 bytes
+public:
+    C_ChatInput(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
+    ~C_ChatInput() override = default;                  // 0x0065efe0 (0x0065f000)
+
+    // By the id's last 4 bits: 4 the edit box, 8 the label, above 0xc the toggle's frames.
+    int FindChild(uint32_t id) const override;          // 0x00657bd0
+    bool Unknown20(int value) override { return FocusUnknown20(value); }   // 0x00657ba0
+    // The parts (each optional; its frame's id cleared); true.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006574d0
+    // To the child its target names; the lines to the label (8 kept); TEAM_TOGGLED.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00657c00
+
+protected:
+    // The editing's stop asked for (Enter): the line sent (CONTROL_NOTIFY_SEND), the prompt back,
+    // the editing started again (the original's callback).
+    static bool LineEntered(void *object, void *argument, C_Control *control, uint32_t notification,
+                            uint32_t value);            // 0x006571f0
+
+    C_LabelControl *m_label = nullptr;                  // +0x70
+    C_EditBox *m_input = nullptr;                       // +0x74
+    C_AllToggleButton *m_teamToggle = nullptr;          // +0x78
+    bool m_team = false;                                // +0x7C to the team only (the toggle up)
+};
+
+// A skill (type 0x19, vtable 0x00814ba0): its name ("skill_text*") and value ("skill_value*", base +
+// points) titles, a minus ("barrow up*", id | 2) and a plus ("barrow down*", id | 3) button; a
+// point taken or given asks the control its value names (a pool: SKILL_DOWN to take, SKILL_UP to
+// give back; refused: the answer's value 0). The value 0 .. 100 (the points down to 0); the -
+// and + keys too.
+class C_SkillControl : public C_Control {               // 0x8C bytes
+public:
+    C_SkillControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
+    ~C_SkillControl() override = default;               // 0x0065f760 (0x0065f780)
+
+    // The child whose id's last 4 bits are `id`'s (the titles share theirs: the name's).
+    int FindChild(uint32_t id) const override;          // 0x00650180
+    // The shown control's titles drawn (not the buttons).
+    void Refresh() override;                            // 0x00650a30
+    // The minus keys (0xc, 0x4a: a point down) and the plus keys (0xd, 0x4e: up): true.
+    bool Unknown20(int key) override;                   // 0x006505e0
+    // The parts (the buttons optional: without one, no input); true.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0064fda0
+    // The name title's enter; the focus' leave (refused: not handled), the child with the id's.
+    int OnEnter(int id) override;                       // 0x00650810
+    int OnLeave(int id) override;                       // 0x00650890
+    int OnInput05(int id) override;                     // 0x006508f0
+    // Inactive: handled; else the focus'.
+    int OnPress(int id) override;                       // 0x00650960
+    int OnInput08(int id) override;                     // 0x006509a0
+    // SET_TEXT (the name, not shown yet), SKILL_UP / SKILL_DOWN (value: done), SET_BASE (the
+    // points 0), SET_TOTAL (the points the rest, negative: 0), GET_NUMBER; the rest to the titles.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00650670
+    void SetStrings(const std::vector<C_str> &) override {}   // 0x00650170
+    // The parts too.
+    void SetInactive(bool inactive) override;           // 0x006509e0
+
+protected:
+    C_Control *Focus() const { return IsChild(m_focus) ? m_children[m_focus] : nullptr; }
+    // A point down (none: false) or up (100: false), unless the pool refuses; shown.
+    bool PointDown();                                   // 0x006501c0
+    bool PointUp();                                     // 0x006502a0
+    // The pool's answer to `id` (no pool: yes).
+    bool AskPool(uint32_t id);
+    // The name and the value shown, the buttons active as far as they go.
+    void Update();                                      // 0x00650390
+
+    C_TitleControl *m_nameTitle = nullptr;              // +0x6C
+    C_TitleControl *m_valueTitle = nullptr;             // +0x70
+    C_Button *m_plusButton = nullptr;                   // +0x74
+    C_Button *m_minusButton = nullptr;                  // +0x78
+    C_str m_name;                                       // +0x7C
+    int m_points = 0;                                   // +0x80
+    int m_base = 0;                                     // +0x84
+    int m_focus = -1;                                   // +0x88
+};
+
+class C_ItemDef;
+
+// An item's information (type 0x1c, vtable 0x00814b18): its picture (on its frame, id | 1), its
+// ammo's or headgear's (on "ammo*", id | 2), each with a count, and its stats (a title on
+// "text_info*": the name, the weight; for guns the ammo, the muzzle speed, a rifle scope's zoom).
+class C_ItemInfo : public C_ControlGroup {              // 0x8C bytes
+public:
+    C_ItemInfo(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
+    ~C_ItemInfo() override = default;                   // 0x00660c30 (0x00660c50)
+
+    // By the id's last 4 bits: 1 the picture, 2 the second.
+    int FindChild(uint32_t id) const override;          // 0x00653b30
+    // The shown control's parts drawn.
+    void Refresh() override;                            // 0x00653b00
+    // The parts (each optional; the pictures hidden, their "X_SQUARE.BMP" face group); false only
+    // when the group's is.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00652a60
+    // SET_ITEM, SET_ITEM_COUNT, SET_SECOND_COUNT; the callbacks to the pictures; REFRESH to all.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00652dc0
+
+protected:
+    // The stats' lines of `def`.
+    void ShowStats(C_ItemDef *def);                     // 0x00653180
+    // The pictures active by their counts, shown; the parent told when either is.
+    void UpdateCounts();                                // 0x00653890
+    // A picture of the item `id`'s (its index the id).
+    static void ShowPicture(C_PictureControl *picture, int id, C_ItemDef *def);
+
+    int m_item = -1;                                    // +0x70
+    int m_count = 0;                                    // +0x74
+    int m_second = -1;                                  // +0x78 the ammo's or the headgear's item
+    int m_secondCount = 0;                              // +0x7C
+    C_PictureControl *m_picture = nullptr;              // +0x80
+    C_PictureControl *m_secondPicture = nullptr;        // +0x84
+    C_TitleControl *m_stats = nullptr;                  // +0x88
 };
