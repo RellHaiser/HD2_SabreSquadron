@@ -32,7 +32,8 @@ void I3D_mirror::Init()
     numFaces = 0;
     vertices = nullptr;
     mirrorFlags = 0;
-    // (No stamp, scene, plane sphere, range or colored vertices: LS3DRF's mirror has none.)
+    // (No stamp, scene, plane sphere or colored vertices: LS3DRF's mirror has none. No range of 100
+    // either: LS3DRF's Init leaves it to Load.)
     faces = S_IBAlloc{};
 }
 

@@ -5,21 +5,19 @@
 // drawn over), then each reflected visual through a copy of its own (VISF_MIRRORED, `data` the
 // original) placed at the original's position reflected through the mirror's plane.
 //
-// LS3DRF's mirror is only its plane, color and geometry (ray tests read them), with no render path.
-// Its object is 0x250 bytes: the fields up to mirrorFlags (+0x240) as here, then `faces` at +0x244;
-// the ones from planeRadius2 to colorVertices stay for the LS3DF layout.
+// LS3DRF's mirror is only its plane, color and geometry (ray tests read them), with no render path:
+// a 0x250-byte object (vtable 0x1003cf18), LS3DF's fields up to mirrorFlags (+0x240), then `faces`
+// at +0x244. (No plane sphere, plane inverse, reflection, scene, copies, stamp or colored vertices,
+// LS3DF's +0x244 - +0x304: LS3DRF has none.)
 #pragma once
 
-#include "core/c_vector.h"
 #include "i3d/vb_manager.h"
 #include "i3d/visual.h"
-
-class I3D_scene;
 
 // I3D_mirror::mirrorFlags.
 enum : uint32_t {
     MIRF_PLANE = 0x00000001,                // the plane and geometry are set (Load, Duplicate, SetPlane)
-    MIRF_REFLECTION_VALID = 0x00000004,     // reflection and the plane's sphere are up to date
+    MIRF_REFLECTION_VALID = 0x00000004,     // LS3DF's reflection and plane sphere are up to date (LS3DRF only clears it)
     MIRF_VISIBLE = 0x00000100,              // (renderer) seen this frame
     MIRF_REFLECTS = 0x00000200,             // ... and its reflection is drawn
 };
@@ -47,23 +45,12 @@ public:
     int numFaces;                           // +0x238
     S_vector4 *vertices;                    // +0x23C 16-byte aligned
     uint32_t mirrorFlags;                   // +0x240 MIRF_*
-    float planeRadius2;                     // +0x244 planeRadius squared
-    uint32_t unknown248[2];                 // +0x248
-    S_vector planeCenter;                   // +0x250 world space
-    float planeRadius;                      // +0x25C the plane's sphere: what it reflects must touch it
-    S_matrix planeInverse;                  // +0x260 world space into the plane's (-1 - 1 within it)
-    S_matrix reflection;                    // +0x2A0 world space reflection through the mirror plane
-    I3D_scene *scene;                       // +0x2E0 (not initialised; nothing sets it)
-    ls3d::C_vector<I3D_visual *> copies;    // +0x2E4 (grow 0x20) LS3DF's mirrored copies (LS3DRF: none)
-    uint16_t stamp;                         // +0x2F4 (not initialised) mirrored lights follow it
-    uint16_t padding2F6;
-    ls3d::S_VBAlloc colorVertices;          // +0x2F8 (not initialised) LS3DF's position and color (LS3DRF: none)
-    ls3d::S_IBAlloc faces;                  // +0x304
+    ls3d::S_IBAlloc faces;                  // +0x244 (LS3DF: +0x304)
 };
-static_assert(sizeof(I3D_mirror) == 0x310, "I3D_mirror layout");
+static_assert(sizeof(I3D_mirror) == 0x250, "I3D_mirror layout");
+static_assert(offsetof(I3D_mirror, color) == 0x220, "I3D_mirror layout");
+static_assert(offsetof(I3D_mirror, range) == 0x230, "I3D_mirror layout");
 static_assert(offsetof(I3D_mirror, numVertices) == 0x234, "I3D_mirror layout");
-static_assert(offsetof(I3D_mirror, planeCenter) == 0x250, "I3D_mirror layout");
-static_assert(offsetof(I3D_mirror, reflection) == 0x2A0, "I3D_mirror layout");
-static_assert(offsetof(I3D_mirror, copies) == 0x2E4, "I3D_mirror layout");
-static_assert(offsetof(I3D_mirror, stamp) == 0x2F4, "I3D_mirror layout");
-static_assert(offsetof(I3D_mirror, faces) == 0x304, "I3D_mirror layout");
+static_assert(offsetof(I3D_mirror, vertices) == 0x23C, "I3D_mirror layout");
+static_assert(offsetof(I3D_mirror, mirrorFlags) == 0x240, "I3D_mirror layout");
+static_assert(offsetof(I3D_mirror, faces) == 0x244, "I3D_mirror layout");
