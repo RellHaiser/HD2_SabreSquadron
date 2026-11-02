@@ -744,14 +744,32 @@ void CompareFrame(int i)
         break;
     case FRAME_LIGHT:
         // (the sector list's data pointer, the colors' fourth dwords and 0x194 - 0x19F: unset)
-        for (size_t off = 0x124; off < 0x25C; off += 4) {
+        for (size_t off = 0x124; off < 0x1F0; off += 4) {
             if (off == 0x13C || off == 0x14C || off == 0x15C || off == 0x1AC || off == 0x1BC || off == 0x1CC ||
                 (off >= 0x194 && off < 0x1A0))
                 continue;
             raw.push_back(off);
         }
-        if (std::memcmp(o + 0x25C, p + 0x25C, 2))
-            Fail("light index", i, 0x25C);
+        // The port's d3dLight (LS3DRF's, +0x1F0) against the original's D3DLIGHT8 from Position
+        // (+0x224) on. The port's vector padding (+0x1FC, +0x20C) and last word (+0x22C) have no
+        // counterpart, nor have the original's type and colors (+0x1F0 - +0x223) and light indices
+        // (+0x258 - +0x25D): all stay as ClearLightInitGaps left them.
+        for (size_t k = 0; k < 0x40; k += 4) {
+            if (k == 0x0C || k == 0x1C || k == 0x3C) {
+                if (Field<uint32_t>(p, 0x1F0 + k))
+                    Fail("light d3dLight padding", i, 0x1F0 + k);
+                continue;
+            }
+            const size_t from = 0x224 + k - (k < 0x10 ? 0 : k < 0x20 ? 4 : 8);
+            if (!SameField(o + from, p + 0x1F0 + k))
+                Fail("light d3dLight", i, 0x1F0 + k);
+        }
+        for (size_t off = 0x1F0; off < 0x224; off += 4) {
+            if (Field<uint32_t>(o, off))
+                Fail("light Direct3D type / colors", i, off);
+        }
+        if (Field<uint32_t>(o, 0x258) || Field<uint16_t>(o, 0x25C))
+            Fail("light index", i, 0x258);
         break;
     case FRAME_SECTOR:
         CompareSector(i, o, static_cast<I3D_sector *>(g_port[i]));
@@ -2366,16 +2384,20 @@ void PatchOrigLightInit()
     PatchNops(0x10021750, storeIndex, sizeof storeIndex);
 }
 
-// The light bytes neither Init sets now (the flags, the Direct3D light's type and colors, and its
-// range up to the light index), cleared in both after a light's first create: from then on both
-// hold the same. A light made again from the free list keeps its own.
+// The light bytes neither Init sets now, cleared in both after a light's first create: the flags,
+// and of the Direct3D light all but the position and direction (the original's type and colors and
+// its range up to the light indices; the port's vector padding and its range to the end). From
+// then on both hold the same. A light made again from the free list keeps its own.
 void ClearLightInitGaps(int i)
 {
-    for (uint8_t *b : {g_orig[i], reinterpret_cast<uint8_t *>(g_port[i])}) {
-        std::memset(b + 0x190, 0, 4);
-        std::memset(b + 0x1F0, 0, 0x34);
-        std::memset(b + 0x23C, 0, 0x22);
-    }
+    uint8_t *const o = g_orig[i];
+    auto *const p = reinterpret_cast<uint8_t *>(g_port[i]);
+    std::memset(o + 0x190, 0, 4);
+    std::memset(o + 0x1F0, 0, 0x34);
+    std::memset(o + 0x23C, 0, 0x22);
+    std::memset(p + 0x190, 0, 4);
+    std::memset(p + 0x1FC, 0, 4);
+    std::memset(p + 0x20C, 0, 0x24);
 }
 
 // LS3DRF's LinkTo, sector SetScene and MatrixChanged and occluder LinkTo, MatrixChanged and Uninit
