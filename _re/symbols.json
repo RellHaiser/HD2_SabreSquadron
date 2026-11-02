@@ -28771,9 +28771,80 @@
   "name": "C_SpinControl::SetInactive",
   "proto": "void __thiscall SetInactive(C_SpinControl *this, bool inactive)"
  },
+ "0064fda0": {
+  "module": "controls",
+  "name": "C_SkillControl::Create",
+  "proto": "bool __thiscall Create(C_SkillControl *this, void * frame, void * root, void * desc)"
+ },
  "00650170": {
-  "module": "zz_idioms",
-  "name": "empty_function_650170"
+  "module": "controls",
+  "name": "C_SkillControl::SetStrings",
+  "proto": "void __thiscall SetStrings(C_SkillControl *this, void * strings)"
+ },
+ "00650180": {
+  "module": "controls",
+  "name": "C_SkillControl::FindChild",
+  "proto": "int __thiscall FindChild(C_SkillControl *this, uint id)"
+ },
+ "006501c0": {
+  "module": "controls",
+  "name": "C_SkillControl::PointDown",
+  "proto": "bool __thiscall PointDown(C_SkillControl *this)"
+ },
+ "006502a0": {
+  "module": "controls",
+  "name": "C_SkillControl::PointUp",
+  "proto": "bool __thiscall PointUp(C_SkillControl *this)"
+ },
+ "00650390": {
+  "module": "controls",
+  "name": "C_SkillControl::Update",
+  "proto": "void __thiscall Update(C_SkillControl *this)"
+ },
+ "006505e0": {
+  "module": "controls",
+  "name": "C_SkillControl::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_SkillControl *this, int key)"
+ },
+ "00650670": {
+  "module": "controls",
+  "name": "C_SkillControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_SkillControl *this, void * message)"
+ },
+ "00650810": {
+  "module": "controls",
+  "name": "C_SkillControl::OnEnter",
+  "proto": "int __thiscall OnEnter(C_SkillControl *this, int id)"
+ },
+ "00650890": {
+  "module": "controls",
+  "name": "C_SkillControl::OnLeave",
+  "proto": "int __thiscall OnLeave(C_SkillControl *this, int id)"
+ },
+ "006508f0": {
+  "module": "controls",
+  "name": "C_SkillControl::OnInput05",
+  "proto": "int __thiscall OnInput05(C_SkillControl *this, int id)"
+ },
+ "00650960": {
+  "module": "controls",
+  "name": "C_SkillControl::OnPress",
+  "proto": "int __thiscall OnPress(C_SkillControl *this, int id)"
+ },
+ "006509a0": {
+  "module": "controls",
+  "name": "C_SkillControl::OnInput08",
+  "proto": "int __thiscall OnInput08(C_SkillControl *this, int id)"
+ },
+ "006509e0": {
+  "module": "controls",
+  "name": "C_SkillControl::SetInactive",
+  "proto": "void __thiscall SetInactive(C_SkillControl *this, bool inactive)"
+ },
+ "00650a30": {
+  "module": "controls",
+  "name": "C_SkillControl::Refresh",
+  "proto": "void __thiscall Refresh(C_SkillControl *this)"
  },
  "00650a50": {
   "module": "controls",
@@ -28899,6 +28970,36 @@
   "module": "controls",
   "name": "C_MarkBox::HandleMessage",
   "proto": "bool __thiscall HandleMessage(C_MarkBox *this, void * message)"
+ },
+ "00652a60": {
+  "module": "controls",
+  "name": "C_ItemInfo::Create",
+  "proto": "bool __thiscall Create(C_ControlGroup *this, void * frame, void * root, void * desc)"
+ },
+ "00652dc0": {
+  "module": "controls",
+  "name": "C_ItemInfo::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ControlGroup *this, void * message)"
+ },
+ "00653180": {
+  "module": "controls",
+  "name": "C_ItemInfo::ShowStats",
+  "proto": "void __thiscall ShowStats(C_ControlGroup *this, C_ItemDef * def)"
+ },
+ "00653890": {
+  "module": "controls",
+  "name": "C_ItemInfo::UpdateCounts",
+  "proto": "void __thiscall UpdateCounts(C_ControlGroup *this)"
+ },
+ "00653b00": {
+  "module": "controls",
+  "name": "C_ItemInfo::Refresh",
+  "proto": "void __thiscall Refresh(C_ControlGroup *this)"
+ },
+ "00653b30": {
+  "module": "controls",
+  "name": "C_ItemInfo::FindChild",
+  "proto": "int __thiscall FindChild(C_ControlGroup *this, uint id)"
  },
  "00653b60": {
   "module": "zz_idioms",
@@ -29672,6 +29773,16 @@
   "name": "C_ToggleButton::~C_ToggleButton",
   "proto": "void __thiscall ~C_ToggleButton(void *this)"
  },
+ "0065f760": {
+  "module": "controls",
+  "name": "C_SkillControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_SkillControl *this, uchar flags)"
+ },
+ "0065f780": {
+  "module": "controls",
+  "name": "C_SkillControl::~C_SkillControl",
+  "proto": "void __thiscall ~C_SkillControl(C_SkillControl *this)"
+ },
  "0065f8d0": {
   "module": "controls",
   "name": "C_Tooltip::ScalarDeletingDestructor",
@@ -29741,6 +29852,16 @@
   "module": "controls",
   "name": "C_SpinControl::~C_SpinControl",
   "proto": "void __thiscall ~C_SpinControl(C_SpinControl *this)"
+ },
+ "00660c30": {
+  "module": "controls",
+  "name": "C_ItemInfo::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ControlGroup *this, uchar flags)"
+ },
+ "00660c50": {
+  "module": "controls",
+  "name": "C_ItemInfo::~C_ItemInfo",
+  "proto": "void __thiscall ~C_ItemInfo(C_ControlGroup *this)"
  },
  "00660e00": {
   "module": "controls",

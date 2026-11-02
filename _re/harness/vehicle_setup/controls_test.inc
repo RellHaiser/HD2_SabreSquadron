@@ -54,6 +54,7 @@ void ScrollTest(I3D_scene *scene, int st);
 void CheckTest(I3D_scene *scene);
 void EditTest(I3D_scene *scene);
 void ComboTest(I3D_scene *scene);
+void InfoTest(I3D_scene *scene);
 
 namespace {
 
@@ -1005,6 +1006,7 @@ void ControlsTest()
     CheckTest(scene);
     EditTest(scene);
     ComboTest(scene);
+    InfoTest(scene);
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
     g_gfLog.clear();
@@ -1023,3 +1025,4 @@ void ControlsTest()
 #include "check_test.inc"
 #include "edit_test.inc"
 #include "combo_test.inc"
+#include "info_test.inc"

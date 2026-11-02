@@ -3,8 +3,8 @@
 // tooltip, the frame switch, the group (its input passed to the child under the cursor) and the
 // paged text control; part 9c-iii-a: the slider, the scroll bar and the spin control; part 9c-iii-b:
 // the check boxes, the toggle buttons, the side indicator and the mark; part 9c-iv: the edit
-// controls, the scrolled text, the combo boxes and the chat input. Made by the factory
-// (C_Control::CreateChild) by their descriptions' types.
+// controls, the scrolled text, the combo boxes, the chat input, the skill and the item information.
+// Made by the factory (C_Control::CreateChild) by their descriptions' types.
 #pragma once
 
 #include "game/control.h"
@@ -114,6 +114,18 @@ enum : uint32_t {
     CONTROL_MSG_PICK_SELECTED = 0x200002E,
     // The chat input's: its team toggle changed (the toggle's route).
     CONTROL_MSG_TEAM_TOGGLED = 0x200000B,
+    // The skill's: a point up or down (value: done; the pool's too), the base (the points 0), the
+    // total (the points the rest).
+    CONTROL_MSG_SKILL_UP = 0x1000070,
+    CONTROL_MSG_SKILL_DOWN = 0x1000071,
+    CONTROL_MSG_SET_BASE = 0x1000072,
+    CONTROL_MSG_SET_TOTAL = 0x1000073,
+    // The item information's: the item (value), its count and its second's; to the parent when
+    // either count is (value: its id).
+    CONTROL_MSG_SET_ITEM = 0x100007B,
+    CONTROL_MSG_SET_ITEM_COUNT = 0x100007C,
+    CONTROL_MSG_SET_SECOND_COUNT = 0x1000082,
+    CONTROL_MSG_ITEM_COUNTED = 0x2000083,
     // A control to be ticked (posted to target 0 when made, value2 the control: the tooltip, the
     // scroll bar and its arrows).
     CONTROL_MSG_ADD_TICKER = 0x200007A,
@@ -938,4 +950,93 @@ protected:
     C_EditBox *m_input = nullptr;                       // +0x74
     C_AllToggleButton *m_teamToggle = nullptr;          // +0x78
     bool m_team = false;                                // +0x7C to the team only (the toggle up)
+};
+
+// A skill (type 0x19, vtable 0x00814ba0): its name ("skill_text*") and value ("skill_value*", base +
+// points) titles, a minus ("barrow up*", id | 2) and a plus ("barrow down*", id | 3) button; a
+// point taken or given asks the control its value names (a pool: SKILL_DOWN to take, SKILL_UP to
+// give back; refused: the answer's value 0). The value 0 .. 100 (the points down to 0); the -
+// and + keys too.
+class C_SkillControl : public C_Control {               // 0x8C bytes
+public:
+    C_SkillControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
+    ~C_SkillControl() override = default;               // 0x0065f760 (0x0065f780)
+
+    // The child whose id's last 4 bits are `id`'s (the titles share theirs: the name's).
+    int FindChild(uint32_t id) const override;          // 0x00650180
+    // The shown control's titles drawn (not the buttons).
+    void Refresh() override;                            // 0x00650a30
+    // The minus keys (0xc, 0x4a: a point down) and the plus keys (0xd, 0x4e: up): true.
+    bool Unknown20(int key) override;                   // 0x006505e0
+    // The parts (the buttons optional: without one, no input); true.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0064fda0
+    // The name title's enter; the focus' leave (refused: not handled), the child with the id's.
+    int OnEnter(int id) override;                       // 0x00650810
+    int OnLeave(int id) override;                       // 0x00650890
+    int OnInput05(int id) override;                     // 0x006508f0
+    // Inactive: handled; else the focus'.
+    int OnPress(int id) override;                       // 0x00650960
+    int OnInput08(int id) override;                     // 0x006509a0
+    // SET_TEXT (the name, not shown yet), SKILL_UP / SKILL_DOWN (value: done), SET_BASE (the
+    // points 0), SET_TOTAL (the points the rest, negative: 0), GET_NUMBER; the rest to the titles.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00650670
+    void SetStrings(const std::vector<C_str> &) override {}   // 0x00650170
+    // The parts too.
+    void SetInactive(bool inactive) override;           // 0x006509e0
+
+protected:
+    C_Control *Focus() const { return IsChild(m_focus) ? m_children[m_focus] : nullptr; }
+    // A point down (none: false) or up (100: false), unless the pool refuses; shown.
+    bool PointDown();                                   // 0x006501c0
+    bool PointUp();                                     // 0x006502a0
+    // The pool's answer to `id` (no pool: yes).
+    bool AskPool(uint32_t id);
+    // The name and the value shown, the buttons active as far as they go.
+    void Update();                                      // 0x00650390
+
+    C_TitleControl *m_nameTitle = nullptr;              // +0x6C
+    C_TitleControl *m_valueTitle = nullptr;             // +0x70
+    C_Button *m_plusButton = nullptr;                   // +0x74
+    C_Button *m_minusButton = nullptr;                  // +0x78
+    C_str m_name;                                       // +0x7C
+    int m_points = 0;                                   // +0x80
+    int m_base = 0;                                     // +0x84
+    int m_focus = -1;                                   // +0x88
+};
+
+class C_ItemDef;
+
+// An item's information (type 0x1c, vtable 0x00814b18): its picture (on its frame, id | 1), its
+// ammo's or headgear's (on "ammo*", id | 2), each with a count, and its stats (a title on
+// "text_info*": the name, the weight; for guns the ammo, the muzzle speed, a rifle scope's zoom).
+class C_ItemInfo : public C_ControlGroup {              // 0x8C bytes
+public:
+    C_ItemInfo(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
+    ~C_ItemInfo() override = default;                   // 0x00660c30 (0x00660c50)
+
+    // By the id's last 4 bits: 1 the picture, 2 the second.
+    int FindChild(uint32_t id) const override;          // 0x00653b30
+    // The shown control's parts drawn.
+    void Refresh() override;                            // 0x00653b00
+    // The parts (each optional; the pictures hidden, their "X_SQUARE.BMP" face group); false only
+    // when the group's is.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00652a60
+    // SET_ITEM, SET_ITEM_COUNT, SET_SECOND_COUNT; the callbacks to the pictures; REFRESH to all.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00652dc0
+
+protected:
+    // The stats' lines of `def`.
+    void ShowStats(C_ItemDef *def);                     // 0x00653180
+    // The pictures active by their counts, shown; the parent told when either is.
+    void UpdateCounts();                                // 0x00653890
+    // A picture of the item `id`'s (its index the id).
+    static void ShowPicture(C_PictureControl *picture, int id, C_ItemDef *def);
+
+    int m_item = -1;                                    // +0x70
+    int m_count = 0;                                    // +0x74
+    int m_second = -1;                                  // +0x78 the ammo's or the headgear's item
+    int m_secondCount = 0;                              // +0x7C
+    C_PictureControl *m_picture = nullptr;              // +0x80
+    C_PictureControl *m_secondPicture = nullptr;        // +0x84
+    C_TitleControl *m_stats = nullptr;                  // +0x88
 };

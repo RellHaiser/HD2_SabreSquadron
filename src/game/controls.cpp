@@ -6,6 +6,7 @@
 #include <cstring>
 
 #include "game/cursor.h"
+#include "game/item_defs.h"
 #include "game/mp_zone.h"
 #include "game/pending.h"
 #include "game/profile.h"
@@ -3328,4 +3329,431 @@ bool C_ChatInput::HandleMessage(S_ControlMessage *message)
         }
     }
     return C_ControlGroup::HandleMessage(message);
+}
+
+// ----- the skill (type 0x19) -----
+
+namespace {
+
+// The skill's parts' ids' last bits, its value's limit; its titles' styles.
+constexpr uint32_t SKILL_TITLE = 1, SKILL_MINUS = 2, SKILL_PLUS = 3;
+constexpr int SKILL_MAX = 100;
+constexpr uint32_t SKILL_NAME_STYLE = 0xB, SKILL_VALUE_STYLE = 0x16;
+// The keys (DirectInput codes): minus and the keypad's, equals and the keypad's plus.
+constexpr int KEY_MINUS = 0x0C, KEY_PAD_MINUS = 0x4A, KEY_EQUALS = 0x0D, KEY_PAD_PLUS = 0x4E;
+// The item information's parts' ids' last bits, its picture's face group, its texts' styles.
+constexpr uint32_t INFO_PICTURE = 1, INFO_SECOND = 2;
+constexpr uint32_t INFO_NAME_STYLE = 0x10, INFO_LINE_STYLE = 0x11, INFO_COUNT_STYLE = 0x12;
+// The stats' texts: the weight, the ammo, the muzzle speed, the zoom.
+constexpr int TEXT_WEIGHT = 0xAAA, TEXT_AMMO = 0xAAB, TEXT_MUZZLE_SPEED = 0xAAC, TEXT_ZOOM = 0xAAE;
+// The zoom: tan(40 degrees) over tan(the scope's field of view / 2).
+constexpr double ZOOM_HALF_FOV = 0.6981317202250164;
+// The scope's aim modes with a reticle (below the binoculars').
+constexpr int SCOPE_RETICLES = 4;
+
+} // namespace
+
+int C_SkillControl::FindChild(uint32_t id) const
+{
+    return FindChildByLastBits(m_children, id);
+}
+
+void C_SkillControl::Refresh()
+{
+    if (!m_shown)
+        return;
+    // (The titles checked: the fix, the original's without them crashes.)
+    if (m_nameTitle)
+        m_nameTitle->Refresh();
+    if (m_valueTitle)
+        m_valueTitle->Refresh();
+}
+
+bool C_SkillControl::Unknown20(int key)
+{
+    switch (static_cast<uint8_t>(key)) {
+    case KEY_MINUS:
+    case KEY_PAD_MINUS:
+        PointDown();
+        return true;
+    case KEY_EQUALS:
+    case KEY_PAD_PLUS:
+        PointUp();
+        return true;
+    }
+    return false;
+}
+
+bool C_SkillControl::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_Control::Create(frame, root, desc);
+    if (I3D_frame *text = frame->FindChildFrame("skill_text*", FIND_FRAMES)) {
+        m_nameTitle = new C_TitleControl(m_scene, m_id | SKILL_TITLE, this);
+        m_nameTitle->Create(text, root, nullptr);
+        m_children.push_back(m_nameTitle);
+    }
+    if (I3D_frame *value = frame->FindChildFrame("skill_value*", FIND_FRAMES)) {
+        m_valueTitle = new C_TitleControl(m_scene, m_id | SKILL_TITLE, this);
+        m_valueTitle->Create(value, root, nullptr);
+        S_ControlMessage margin = Message(CONTROL_MSG_SET_MARGIN);
+        margin.value = 1;
+        m_valueTitle->HandleMessageCopy(margin);
+        m_children.push_back(m_valueTitle);
+    }
+    if (I3D_frame *minus = frame->FindChildFrame("barrow up*", FIND_DUMMIES)) {
+        m_minusButton = new C_Button(m_scene, m_id | SKILL_MINUS, this);
+        m_minusButton->Create(minus, root, nullptr);
+        m_minusButton->HandleMessageCopy(Route(m_id, CONTROL_NOTIFY_PRESS | CONTROL_MSG_SKILL_DOWN));
+        m_children.push_back(m_minusButton);
+    } else {
+        m_takesInput = false;
+    }
+    if (I3D_frame *plus = frame->FindChildFrame("barrow down*", FIND_DUMMIES)) {
+        m_plusButton = new C_Button(m_scene, m_id | SKILL_PLUS, this);
+        m_plusButton->Create(plus, root, nullptr);
+        m_plusButton->HandleMessageCopy(Route(m_id, CONTROL_NOTIFY_PRESS | CONTROL_MSG_SKILL_UP));
+        m_children.push_back(m_plusButton);
+    } else {
+        m_takesInput = false;
+    }
+    // (The titles checked: the fix, the original's without them crashes.)
+    if (m_plusButton && m_minusButton) {
+        if (m_nameTitle)
+            m_nameTitle->HandleMessageCopy(Message(CONTROL_MSG_TAKE_INPUT));
+        if (m_valueTitle)
+            m_valueTitle->HandleMessageCopy(Message(CONTROL_MSG_TAKE_INPUT));
+    }
+    return true;
+}
+
+int C_SkillControl::OnEnter(int id)
+{
+    if (m_nameTitle)
+        m_nameTitle->OnEnter(id);
+    if (C_Control *focus = Focus()) {
+        if (focus->OnLeave(id) == 0)
+            return CONTROL_NOT_HANDLED;
+    }
+    m_focus = FindChild(static_cast<uint32_t>(id));
+    if (C_Control *focus = Focus())
+        return focus->OnEnter(id);
+    return CONTROL_HANDLED;
+}
+
+int C_SkillControl::OnLeave(int id)
+{
+    if (m_nameTitle)
+        m_nameTitle->OnLeave(id);
+    if (C_Control *focus = Focus()) {
+        if (focus->OnLeave(id) == 0)
+            return 0;
+        m_focus = -1;
+    }
+    return CONTROL_HANDLED;
+}
+
+int C_SkillControl::OnInput05(int id)
+{
+    if (!IsChild(FindChild(static_cast<uint32_t>(id))))
+        return OnLeave(id);
+    if (m_focus != FindChild(static_cast<uint32_t>(id))) {
+        if (OnLeave(id) == 0)
+            return CONTROL_HANDLED;
+        return OnEnter(id);
+    }
+    return m_children[m_focus]->OnInput05(id);
+}
+
+int C_SkillControl::OnPress(int id)
+{
+    if (m_inactive)
+        return CONTROL_HANDLED;
+    C_Control *focus = Focus();
+    return focus ? focus->OnPress(id) : 0;
+}
+
+int C_SkillControl::OnInput08(int id)
+{
+    if (m_inactive)
+        return CONTROL_HANDLED;
+    C_Control *focus = Focus();
+    return focus ? focus->OnInput08(id) : 0;
+}
+
+bool C_SkillControl::AskPool(uint32_t id)
+{
+    if (m_value == 0)
+        return true;
+    S_ControlMessage ask = Message(id);
+    // (The pool checked: the fix, the original's without it crashes.)
+    C_Control *pool = FindControl(m_value, true);
+    if (pool)
+        pool->HandleMessage(&ask);
+    return ask.value != 0;
+}
+
+bool C_SkillControl::PointDown()
+{
+    if (m_points < 1 || !AskPool(CONTROL_MSG_SKILL_UP))
+        return false;
+    --m_points;
+    Update();
+    return true;
+}
+
+bool C_SkillControl::PointUp()
+{
+    if (m_base + m_points > SKILL_MAX - 1 || !AskPool(CONTROL_MSG_SKILL_DOWN))
+        return false;
+    ++m_points;
+    Update();
+    return true;
+}
+
+void C_SkillControl::Update()
+{
+    char digits[16];
+    std::snprintf(digits, sizeof(digits), "%d", m_points + m_base);
+    if (m_nameTitle) {
+        S_ControlMessage name = Message(CONTROL_MSG_SET_TEXT);
+        name.value = SKILL_NAME_STYLE;
+        name.text = m_name;
+        m_nameTitle->HandleMessageCopy(name);
+    }
+    if (m_valueTitle) {
+        S_ControlMessage value = Message(CONTROL_MSG_SET_TEXT);
+        value.value = SKILL_VALUE_STYLE;
+        value.text = C_str(digits);
+        m_valueTitle->HandleMessageCopy(value);
+    }
+    if (m_minusButton)
+        m_minusButton->HandleMessageCopy(Message(m_points < 1 ? CONTROL_MSG_DEACTIVATE : CONTROL_MSG_ACTIVATE));
+    if (m_plusButton)
+        m_plusButton->HandleMessageCopy(Message(m_points + m_base < SKILL_MAX ? CONTROL_MSG_ACTIVATE : CONTROL_MSG_DEACTIVATE));
+}
+
+bool C_SkillControl::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_VALUE:
+        C_Control::HandleMessage(message);
+        return true;
+    case CONTROL_MSG_SET_TEXT:
+        m_name = message->text;
+        return true;
+    case CONTROL_MSG_SKILL_UP:
+        message->value = PointUp();
+        return true;
+    case CONTROL_MSG_SKILL_DOWN:
+        message->value = PointDown();
+        return true;
+    case CONTROL_MSG_SET_BASE:
+        m_base = static_cast<int>(message->value);
+        m_points = 0;
+        Update();
+        return true;
+    case CONTROL_MSG_SET_TOTAL:
+        m_points = static_cast<int>(message->value) - m_base;
+        if (m_points < 0)
+            m_points = 0;
+        Update();
+        return true;
+    case CONTROL_MSG_GET_NUMBER:
+        message->value = static_cast<uint32_t>(m_base + m_points);
+        return true;
+    }
+    // (The titles checked: the fix, the original's without them crashes.)
+    if (m_nameTitle)
+        m_nameTitle->HandleMessage(message);
+    if (m_valueTitle)
+        m_valueTitle->HandleMessage(message);
+    return true;
+}
+
+void C_SkillControl::SetInactive(bool inactive)
+{
+    m_inactive = inactive;
+    if (m_nameTitle)
+        m_nameTitle->SetInactive(inactive);
+    if (m_valueTitle)
+        m_valueTitle->SetInactive(m_inactive);
+    if (m_plusButton)
+        m_plusButton->SetInactive(m_inactive);
+    if (m_minusButton)
+        m_minusButton->SetInactive(m_inactive);
+}
+
+// ----- the item information (type 0x1c) -----
+
+int C_ItemInfo::FindChild(uint32_t id) const
+{
+    switch (id & CHILD_ID_MASK) {
+    case INFO_PICTURE:
+        return 0;
+    case INFO_SECOND:
+        return 1;
+    }
+    return -1;
+}
+
+void C_ItemInfo::Refresh()
+{
+    if (!m_shown)
+        return;
+    // (The parts checked: the fix, the original's without them crashes.)
+    for (C_Control *part : std::initializer_list<C_Control *>{m_picture, m_secondPicture, m_stats})
+        if (part)
+            part->Refresh();
+}
+
+bool C_ItemInfo::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_ControlGroup::Create(frame, root, desc))
+        return false;
+    S_ControlMessage square = Message(CONTROL_MSG_FIND_FACE_GROUP);
+    square.text = "X_SQUARE.BMP";
+    if (frame) {
+        m_picture = new C_PictureControl(m_scene, m_id | INFO_PICTURE, this);
+        m_picture->Create(frame, root, nullptr);
+        m_picture->HandleMessageCopy(Message(CONTROL_MSG_HIDE));
+        m_picture->HandleMessageCopy(square);
+        m_children.push_back(m_picture);
+    }
+    if (I3D_frame *ammo = frame->FindChildFrame("ammo*", FIND_FRAMES)) {
+        m_secondPicture = new C_PictureControl(m_scene, m_id | INFO_SECOND, this);
+        m_secondPicture->Create(ammo, root, nullptr);
+        m_secondPicture->HandleMessageCopy(Message(CONTROL_MSG_HIDE));
+        m_secondPicture->HandleMessageCopy(square);
+        m_children.push_back(m_secondPicture);
+    }
+    if (I3D_frame *text = frame->FindChildFrame("text_info*", FIND_FRAMES)) {
+        m_stats = new C_TitleControl(m_scene, m_id, this);
+        m_stats->Create(text, root, nullptr);
+        m_children.push_back(m_stats);
+    }
+    return true;
+}
+
+void C_ItemInfo::ShowStats(C_ItemDef *def)
+{
+    if (!m_stats)
+        return;   // (the fix: the original's without its title crashes)
+    auto line = [this](const C_str &text) {
+        S_ControlMessage add = Message(CONTROL_MSG_ADD_TEXT);
+        add.value = INFO_LINE_STYLE;
+        add.text = text;
+        m_stats->HandleMessageCopy(add);
+    };
+    m_stats->HandleMessageCopy(Message(CONTROL_MSG_CLEAR));
+    S_ControlMessage name = Message(CONTROL_MSG_ADD_TEXT_ID);
+    name.value = INFO_NAME_STYLE;
+    name.value2 = static_cast<uint32_t>(def->GetTextId());
+    m_stats->HandleMessageCopy(name);
+    line(C_fstr("%s : %.2f kg", g_texts.Get(TEXT_WEIGHT).c_str(), static_cast<double>(def->GetWeight())));
+    const int behaviour = def->GetBehaviour();
+    if (behaviour < ITEM_BEHAVIOUR_SIDEARM || (behaviour > ITEM_BEHAVIOUR_LMG && behaviour != ITEM_BEHAVIOUR_ASSAULT))
+        return;
+    if (C_ItemDef *ammo = GetItemDef(def->GetAmmoItemId()))
+        line(C_fstr("%s : %d", g_texts.Get(TEXT_AMMO).c_str(), static_cast<int>(ammo->GetAmmoAmount())));
+    const E_ItemComponentKind kind = def->GetComponentKind();
+    if (kind == ICK_PROJECTILE_WEAPON || kind == ICK_FIREARM) {
+        const float speed = static_cast<C_WeaponComp *>(def->GetComponent())->GetMuzzleVelocity();
+        line(C_fstr("%s : %.2f m/s", g_texts.Get(TEXT_MUZZLE_SPEED).c_str(), static_cast<double>(speed)));
+    }
+    const C_ItemComponent *secondary = def->GetSecondaryComponent();
+    if (def->GetBehaviour() == ITEM_BEHAVIOUR_RIFLE && secondary && secondary->GetKind() == ICK_SCOPE) {
+        const auto *scope = static_cast<const C_ScopeComp *>(secondary);
+        if (scope->GetAimMode() < SCOPE_RETICLES) {
+            const auto zoom = static_cast<float>(std::tan(ZOOM_HALF_FOV) / std::tan(scope->GetAimedFovFactor() * 0.5));
+            line(C_fstr("%s : %.2f x", g_texts.Get(TEXT_ZOOM).c_str(), static_cast<double>(zoom)));
+        }
+    }
+}
+
+void C_ItemInfo::UpdateCounts()
+{
+    // (The parts checked: the fix, the original's without them crashes.)
+    if (m_secondPicture)
+        m_secondPicture->HandleMessageCopy(Message(m_secondCount == 0 ? CONTROL_MSG_DEACTIVATE : CONTROL_MSG_ACTIVATE));
+    if (m_picture)
+        m_picture->HandleMessageCopy(Message(m_count == 0 ? CONTROL_MSG_DEACTIVATE : CONTROL_MSG_ACTIVATE));
+    if (m_count + m_secondCount > 0 && m_parent) {
+        S_ControlMessage counted = Message(CONTROL_MSG_ITEM_COUNTED);
+        counted.value = m_id;
+        m_parent->HandleMessageCopy(counted);
+    }
+    S_ControlMessage count = Message(CONTROL_MSG_SET_TEXT);
+    count.value = INFO_COUNT_STYLE;
+    count.text = C_fstr("%d ", m_count);
+    if (m_picture)
+        m_picture->HandleMessageCopy(count);
+    count.text = C_fstr("%d ", m_secondCount);
+    if (m_secondPicture)
+        m_secondPicture->HandleMessageCopy(count);
+}
+
+void C_ItemInfo::ShowPicture(C_PictureControl *picture, int id, C_ItemDef *def)
+{
+    if (!picture)
+        return;
+    S_ControlMessage index = Message(CONTROL_MSG_SET_INDEX);
+    index.value = static_cast<uint32_t>(id);
+    picture->HandleMessageCopy(index);
+    S_ControlMessage texture = Message(CONTROL_MSG_SET_TEXTURE);
+    texture.value2 = reinterpret_cast<uintptr_t>(def->GetImage());
+    picture->HandleMessageCopy(texture);
+}
+
+bool C_ItemInfo::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_ControlGroup::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_ITEM_COUNT:
+        m_count = static_cast<int>(message->value);
+        UpdateCounts();
+        return true;
+    case CONTROL_MSG_SET_SECOND_COUNT:
+        m_secondCount = static_cast<int>(message->value);
+        UpdateCounts();
+        return true;
+    case CONTROL_MSG_ADD_CALLBACK:
+    case CONTROL_MSG_REMOVE_CALLBACK:
+        if (m_picture)
+            m_picture->HandleMessage(message);
+        if (m_secondPicture)
+            m_secondPicture->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_SET_ITEM: {
+        m_item = static_cast<int>(message->value);
+        C_ItemDef *def = GetItemDef(m_item);
+        if (!def)
+            return true;
+        ShowStats(def);
+        ShowPicture(m_picture, m_item, def);
+        // The second picture: a weapon's ammo, a uniform's headgear.
+        if (def->GetRecordType() == ITEM_ANIMATED)
+            m_second = def->GetAmmoItemId();
+        else if (def->GetBehaviour() == ITEM_BEHAVIOUR_UNIFORM)
+            m_second = def->GetHeadgearItemId();
+        else
+            return true;
+        if (C_ItemDef *second = GetItemDef(m_second))
+            ShowPicture(m_secondPicture, m_second, second);
+        return true;
+    }
+    case CONTROL_MSG_REFRESH:
+        for (C_Control *part : std::initializer_list<C_Control *>{m_picture, m_secondPicture, m_stats})
+            if (part)
+                part->HandleMessageCopy(*message);
+        return true;
+    }
+    C_ControlGroup::HandleMessage(message);
+    return true;
 }

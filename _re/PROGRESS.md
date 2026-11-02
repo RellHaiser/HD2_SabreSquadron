@@ -6533,6 +6533,35 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     struct: void *this); 0x00658930 made a function; 47 functions in ported.txt. Stats: 8,441 of
     12,293 functions by hand (75.6 % by size).
 
+  PART 9c-iv-c DONE (2026-11-01): the skill and the item information (src/game/controls.*); 9c-iv
+  is complete.
+  - C_SkillControl (type 0x19, vtable 0x00814ba0, 0x8C; was C_auto_00814ba0; a C_Control with its
+    own focus +0x88): titles "skill_text*" (the name, style 0xb) and "skill_value*" (base + points,
+    style 0x16, margin 1), both id | 1; "barrow up*" (id | 2) is the minus button (routed on PRESS
+    to SKILL_DOWN 0x1000071), "barrow down*" (id | 3) the plus (SKILL_UP 0x1000070); a missing
+    button: no input; both: the titles take input. A point down asks the control its value names
+    (a pool, itself a skill) SKILL_UP, a point up SKILL_DOWN (its value 0: refused); 0 .. 100 (the
+    points down to 0); SET_BASE 0x1000072 (points 0), SET_TOTAL 0x1000073, GET_NUMBER, SET_TEXT the
+    name (shown at the next change); the keys 0xc / 0x4a down, 0xd / 0x4e up (Unknown20, true).
+  - C_ItemInfo (type 0x1c, vtable 0x00814b18, 0x8C): a picture on its own frame (id | 1) and one on
+    "ammo*" (id | 2), hidden, their face group "X_SQUARE.BMP"; a title "text_info*". SET_ITEM
+    0x100007B: the stats (ShowStats 0x00653180, a __thiscall with the definition on the stack:
+    Ghidra had lost it) - the name (style 0x10), "%s : %.2f kg" (text 0xAAA), for sidearms .. LMGs
+    and assault weapons the ammo's rounds (0xAAB), a projectile weapon's or firearm's muzzle speed
+    (0xAAC), a rifle scope's zoom tan(40 deg) / tan(fov / 2) (0xAAE; aim modes below 4); the
+    pictures (SET_INDEX the id, SET_TEXTURE the image): the second a weapon's ammo or a uniform's
+    headgear. SET_ITEM_COUNT 0x100007C / SET_SECOND_COUNT 0x1000082: the pictures active by them
+    ("%d " style 0x12), ITEM_COUNTED 0x2000083 (value its id) to the parent while either is.
+  - Fixes: the parts checked; a pool not found refuses (the original crashes).
+  - Harness: info_test.inc in the text build, run by ControlsTest after ComboTest ("info:", 10
+    checks; C_ItemDef::GetImage and C_ScopeComp's Save / Load faked, the definitions by
+    g_gfItemDefs). 0 of 22 in both orders.
+  - Mutations (mutations/mutate_9c4c.py, generated, the text build on one mission in 4 parallel
+    runs): 172 of 184 caught (13 more do not build); new cases (the frame, a route kept, the plus button alone, a count of 1); 179 of 184 (5 equivalent, see the file's docstring)
+  - Build: MSVC clean. Tier 1: 482 errors in 80 files, 194 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: C_auto_00814ba0 renamed C_SkillControl; names/controls.txt (25); 25 functions in
+    ported.txt. Stats: 8,466 of 12,293 functions by hand (75.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

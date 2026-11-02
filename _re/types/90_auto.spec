@@ -477,7 +477,7 @@ end
 class C_auto_00814a08 size=0x4 vtable=0x00814a08:67
 end
 
-class C_auto_00814ba0 size=0x8c vtable=0x00814ba0:33
+class C_SkillControl size=0x8c vtable=0x00814ba0:33
   0x008 int m_008
   0x064 int8_t m_064
   0x088 uint32_t m_088
