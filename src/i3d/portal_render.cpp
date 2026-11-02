@@ -627,6 +627,7 @@ void TraverseSectors(I3D_scene *scene)
 
 namespace ls3d::i3d {
 
+// LS3DRF 0x10024610 (from LS3DF 0x10042940)
 // Every portal without a connection paired with the portal of the other side (the same opening
 // in another sector: overlapping boxes, centers within a tenth of the box), else connected to
 // the sector its first vertex is in, else to the primary sector (0x10042940).

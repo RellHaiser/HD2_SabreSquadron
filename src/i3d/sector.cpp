@@ -197,6 +197,7 @@ I3D_RESULT I3D_sector::SetName(const char *newName)
     return I3D_frame::SetName(buffer);
 }
 
+// LS3DRF 0x1002a720 (from LS3DF 0x1004df60)
 I3D_RESULT I3D_sector::Duplicate(I3D_frame *source)
 {
     if (!source)

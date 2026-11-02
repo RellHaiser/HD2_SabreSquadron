@@ -356,7 +356,7 @@ void SetSphereFrame(uint32_t flags, I3D_frame *frame)
 
 }  // namespace
 
-// 0x100115a0
+// LS3DRF 0x1000afa0 (from LS3DF 0x100115a0)
 I3D_frame *I3D_scene::MoveSphere(const S_vector &from, const S_vector &dir, float radius, uint32_t flags,
                                  S_vector4 *outPoint, I3D_frame *frame, I3D_COLLISION_HIT *hitCb)
 {
