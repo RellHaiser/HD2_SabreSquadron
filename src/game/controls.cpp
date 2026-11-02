@@ -1,12 +1,16 @@
 #include "game/controls.h"
 
+#include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <malloc.h>
 
+#include "common/msvc_sort.h"
 #include "game/cursor.h"
 #include "game/item_defs.h"
+#include "game/key_bindings.h"
 #include "game/mp_zone.h"
 #include "game/pending.h"
 #include "game/profile.h"
@@ -3756,4 +3760,1743 @@ bool C_ItemInfo::HandleMessage(S_ControlMessage *message)
     }
     C_ControlGroup::HandleMessage(message);
     return true;
+}
+
+// ----- the list group (type 0xb) and its items (type 6) -----
+
+namespace {
+
+// The navigation keys (DirectInput codes).
+constexpr int KEY_HOME = 0xC7, KEY_UP = 0xC8, KEY_PAGE_UP = 0xC9, KEY_LEFT = 0xCB, KEY_RIGHT = 0xCD, KEY_END = 0xCF,
+              KEY_DOWN = 0xD0, KEY_PAGE_DOWN = 0xD1;
+// The list's scroll directions (Scroll).
+constexpr int SCROLL_NONE = 0, SCROLL_BACK = 1, SCROLL_ON = 2;
+// The enter / leave id the list's focus moves use; the item's unpick id.
+constexpr int FOCUS_MOVE_ID = 0xF;
+constexpr int UNPICK_ID = 1;
+// The selector just in front of its item (a double: the original's).
+constexpr double SELECTOR_DEPTH = 0.1;
+
+} // namespace
+
+C_ListGroup::~C_ListGroup()
+{
+    if (m_origin)
+        _aligned_free(m_origin);
+    delete m_extra;
+    if (m_cursor)
+        m_cursor->Release();
+}
+
+bool C_ListGroup::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_Control::Create(frame, root, desc))
+        return true;
+    m_selector = frame->FindChildFrame("selector*", FIND_FRAMES);
+    if (m_selector)
+        m_selector->SetPosInline(S_vector(0.0f, 0.0f, 0.0f));   // (not when its place is locked)
+    return true;
+}
+
+int C_ListGroup::ScrollRange() const
+{
+    return ItemCount() - m_visible + 1;
+}
+
+void C_ListGroup::PostToValue(uint32_t id, uint32_t value) const
+{
+    if (m_value == 0)
+        return;
+    S_ControlMessage message = Message(id);
+    message.target = m_value;
+    message.value = value;
+    PostControlMessage(message);
+}
+
+bool C_ListGroup::PickItem(C_Control *item)
+{
+    if (m_picked != item) {
+        if (m_picked) {
+            m_picked->OnInput02(UNPICK_ID);
+            m_picked->OnLeave(UNPICK_ID);
+        }
+        m_picked = item;
+    }
+    return true;
+}
+
+bool C_ListGroup::Scroll(int direction)
+{
+    if (direction == SCROLL_ON) {
+        // (Unsigned: without items it scrolls on, the original's.)
+        if (static_cast<uint32_t>(ItemCount() - 1) <= static_cast<uint32_t>(m_last))
+            return false;
+        ++m_first;
+        ++m_last;
+        if (m_downStep != 0.0f) {
+            const S_vector place = m_frame->GetWorldPos();
+            m_frame->SetPos(S_vector(place.x, m_downStep + place.y, place.z));
+            m_frame->Update();
+        }
+        if (m_acrossStep != 0.0f) {
+            const S_vector place = m_frame->GetWorldPos();
+            m_frame->SetPos(S_vector(-m_acrossStep + place.x, place.y, place.z));
+            m_frame->Update();
+        }
+    } else if (direction == SCROLL_BACK) {
+        if (m_first < 1)
+            return false;
+        --m_first;
+        --m_last;
+        if (m_downStep != 0.0f) {
+            const S_vector place = m_frame->GetWorldPos();
+            m_frame->SetPos(S_vector(place.x, -m_downStep + place.y, place.z));
+            m_frame->Update();
+        }
+        if (m_acrossStep != 0.0f) {
+            const S_vector place = m_frame->GetWorldPos();
+            m_frame->SetPos(S_vector(m_acrossStep + place.x, place.y, place.z));
+            m_frame->Update();
+        }
+    }
+    for (int i = 0; i < ItemCount(); ++i) {
+        if (i < m_first || i > m_last)
+            m_children[i]->Hide();
+        else
+            m_children[i]->Show();
+        m_children[i]->HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+    }
+    if (m_selector)
+        m_selector->SetOn(m_selected >= m_first && m_selected <= m_last);
+    return true;
+}
+
+void C_ListGroup::Select(int index)
+{
+    if (!IsChild(index))
+        return;
+    m_selected = index;
+    while (m_selected < m_first)
+        Scroll(SCROLL_BACK);
+    while (m_last < m_selected)
+        Scroll(SCROLL_ON);
+    if (m_selector) {
+        const S_vector place = m_children[index]->GetFrame()->GetPos();
+        m_selector->SetPosInline(S_vector(place.x, place.y, static_cast<float>(place.z - SELECTOR_DEPTH)));
+        m_selector->SetOn(true);
+    }
+    PostToValue(CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(m_first));
+}
+
+bool C_ListGroup::FocusPrevious()
+{
+    int i = m_focus == -1 ? ItemCount() : m_focus;
+    do {
+        if (--i < 0)
+            return false;
+    } while (!IsChild(i) || !m_children[i]->TakesInput());
+    if (C_Control *focus = Focus()) {
+        if (focus->OnLeave(FOCUS_MOVE_ID) == 0)
+            return true;
+    }
+    m_focus = i;
+    m_children[i]->OnEnter(FOCUS_MOVE_ID);
+    return true;
+}
+
+bool C_ListGroup::FocusNext()
+{
+    for (int i = m_focus + 1; i < ItemCount(); ++i) {
+        if (!IsChild(i) || !m_children[i]->TakesInput())
+            continue;
+        if (C_Control *focus = Focus()) {
+            if (focus->OnLeave(FOCUS_MOVE_ID) == 0)
+                return true;
+        }
+        m_focus = i;
+        m_children[i]->OnEnter(FOCUS_MOVE_ID);
+        return true;
+    }
+    return false;
+}
+
+bool C_ListGroup::Unknown20(int key)
+{
+    if (C_Control *focus = Focus()) {
+        if (focus->TakesInput() && focus->Unknown20(key))
+            return true;
+    }
+    switch (static_cast<uint8_t>(key)) {
+    case KEY_HOME:
+        while (Unknown20(KEY_UP)) {
+        }
+        return false;
+    case KEY_UP:
+    case KEY_LEFT:
+        if (m_focus == m_first) {
+            if (!Scroll(SCROLL_BACK))
+                return false;
+            PostToValue(CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(m_first));
+        }
+        return FocusPrevious();
+    case KEY_PAGE_UP:
+        // (True when a step fails, false after all: the original's.)
+        for (int i = 0; i < m_last - m_first; ++i)
+            if (!Unknown20(KEY_UP))
+                return true;
+        return false;
+    case KEY_RIGHT:
+    case KEY_DOWN:
+        if (m_focus == m_last) {
+            if (!Scroll(SCROLL_ON))
+                return false;
+            PostToValue(CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(m_first));
+        }
+        return FocusNext();
+    case KEY_END:
+        while (Unknown20(KEY_DOWN)) {
+        }
+        return false;
+    case KEY_PAGE_DOWN:
+        for (int i = 0; i < m_last - m_first; ++i)
+            if (!Unknown20(KEY_DOWN))
+                return true;
+        return false;
+    }
+    return false;
+}
+
+int C_ListGroup::OnClick(int id)
+{
+    const int result = C_ControlGroup::OnClick(id);
+    if (result != 0)
+        Select(m_focus);
+    return result;
+}
+
+int C_ListGroup::OnPress(int id)
+{
+    const int result = C_ControlGroup::OnPress(id);
+    if (result != 0)
+        Select(m_focus);
+    return result;
+}
+
+int C_ListGroup::OnWheel(int, int amount)
+{
+    if (m_value == 0)
+        return CONTROL_NOT_HANDLED;
+    C_Control *bar = FindControl(m_value, true);
+    if (amount > 0) {
+        for (unsigned steps = (static_cast<unsigned>(amount) - 1) / WHEEL_STEP + 1; steps; --steps)
+            if (bar)
+                bar->HandleMessageCopy(Message(CONTROL_MSG_SCROLL_UP));
+    } else if (amount < 0) {
+        for (unsigned steps = (static_cast<unsigned>(-amount) - 1) / WHEEL_STEP + 1; steps; --steps)
+            if (bar)
+                bar->HandleMessageCopy(Message(CONTROL_MSG_SCROLL_DOWN));
+    }
+    return CONTROL_HANDLED;
+}
+
+void C_ListGroup::Sort()
+{
+    if (!m_sorted)
+        return;
+    const int count = ItemCount();
+    for (int i = 0; i < count - 1; ++i)
+        for (int j = i + 1; j < count; ++j)
+            if (m_children[j]->GetId() < m_children[i]->GetId())
+                std::swap(m_children[i], m_children[j]);
+}
+
+void C_ListGroup::Layout(int)
+{
+    if (!m_origin)
+        return;
+    for (int i = 0; i < ItemCount(); ++i) {
+        I3D_frame *frame = m_children[i]->GetFrame();
+        if (m_downStep != 0.0f)
+            frame->SetPosInline(S_vector(m_origin->x, -(static_cast<float>(i) * m_downStep) + m_origin->y, m_origin->z));
+        if (m_acrossStep != 0.0f)
+            frame->SetPosInline(S_vector(static_cast<float>(i) * m_acrossStep + m_origin->x, m_origin->y, m_origin->z));
+    }
+}
+
+bool C_ListGroup::HandleMessage(S_ControlMessage *message)
+{
+    const int target = FindChild(message->target);
+    if (IsChild(target))
+        return m_children[target]->HandleMessage(message);
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    S_ControlMessage refresh = Message(CONTROL_MSG_REFRESH);
+    refresh.target = m_id;
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_REMOVE_ITEM: {
+        const int index = FindChild(message->value);
+        if (index < 0)
+            return true;
+        C_Control *item = m_children[index];
+        // The screen told of its frame.
+        S_ControlMessage removed = Message(CONTROL_MSG_REMOVE_ITEM);
+        removed.value2 = reinterpret_cast<uintptr_t>(item->GetFrame());
+        PostControlMessage(removed);
+        if (m_picked == item)
+            m_picked = nullptr;
+        delete item;
+        m_children.erase(m_children.begin() + index);
+        while (m_first != 0 && ItemCount() - m_first < m_visible)
+            Scroll(SCROLL_BACK);
+        HandleMessageCopy(refresh);
+        return true;
+    }
+    case CONTROL_MSG_SHOW:
+        Show();
+        PickItem(nullptr);
+        return true;
+    case CONTROL_MSG_HIDE:
+        Hide();
+        PickItem(nullptr);
+        return true;
+    case CONTROL_MSG_CAN_SCROLL_UP:
+        message->value = m_first > 0;
+        return true;
+    case CONTROL_MSG_CAN_SCROLL_DOWN:
+        message->value = m_last < ItemCount() - 1;
+        return true;
+    case CONTROL_MSG_GET_SCROLL_RANGE:
+        message->value = static_cast<uint32_t>(ScrollRange());
+        return true;
+    case CONTROL_MSG_SET_VISIBLE:
+        m_visible = static_cast<int>(message->value);
+        m_last = m_visible - 1;
+        HandleMessageCopy(refresh);
+        return true;
+    case CONTROL_MSG_SET_ACROSS_STEP:
+        m_downStep = 0.0f;
+        m_acrossStep = ValueFloat(message->value2);
+        return true;
+    case CONTROL_MSG_SET_DOWN_STEP:
+        m_acrossStep = 0.0f;
+        m_downStep = ValueFloat(message->value2);
+        return true;
+    case CONTROL_MSG_ADD_ITEM: {
+        auto *desc = reinterpret_cast<S_ControlDesc *>(message->value2);
+        if (!IsChild(FindChild(desc->id))) {
+            CreateChild(m_frame, reinterpret_cast<I3D_frame *>(static_cast<uintptr_t>(message->value)), desc);
+            Sort();
+            HandleMessageCopy(refresh);
+        }
+        delete desc;
+        return true;
+    }
+    case CONTROL_MSG_NEXT_ITEM:
+        Scroll(SCROLL_ON);
+        return true;
+    case CONTROL_MSG_PREVIOUS_ITEM:
+        Scroll(SCROLL_BACK);
+        return true;
+    case CONTROL_MSG_CLEAR:
+        while (!m_children.empty()) {
+            S_ControlMessage removed = Message(CONTROL_MSG_REMOVE_ITEM);
+            removed.value2 = reinterpret_cast<uintptr_t>(m_children.back()->GetFrame());
+            PostControlMessage(removed);
+            delete m_children.back();
+            m_children.pop_back();
+        }
+        m_frame->SetPos(S_vector(0.0f, 0.0f, 0.0f));
+        m_first = 0;
+        m_last = m_visible - 1;
+        HandleMessageCopy(refresh);
+        m_picked = nullptr;
+        return true;
+    case CONTROL_MSG_SET_ORIGIN:
+        m_origin = reinterpret_cast<S_vector *>(message->value2);
+        return true;
+    case CONTROL_MSG_GET_POSITION:
+        message->value = static_cast<uint32_t>(m_first);
+        return true;
+    case CONTROL_MSG_SET_POSITION: {
+        const int position = static_cast<int>(message->value);
+        while (position != m_first) {
+            if (!(position > m_first ? Scroll(SCROLL_ON) : Scroll(SCROLL_BACK)))
+                break;
+        }
+        return true;
+    }
+    case CONTROL_MSG_REFRESH:
+        Layout(0);
+        Scroll(SCROLL_NONE);
+        if (m_value != 0) {
+            PostToValue(CONTROL_MSG_SET_COUNT, static_cast<uint32_t>(ScrollRange()));
+            if (ScrollRange() != 0)
+                PostToValue(CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(m_first));
+        }
+        return true;
+    case CONTROL_MSG_SELECT_INDEX:
+        Select(static_cast<int>(message->value));
+        return true;
+    }
+    C_Control::HandleMessage(message);
+    return true;
+}
+
+int C_ListItem::OnEnter(int)
+{
+    if (!m_picked)
+        m_box->SetHover(0);
+    Notify(CONTROL_NOTIFY_ENTER, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_ListItem::OnLeave(int)
+{
+    if (!m_picked)
+        m_box->ClearHover();
+    Notify(CONTROL_NOTIFY_LEAVE, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_ListItem::OnClick(int id)
+{
+    m_picked = true;
+    // (Its parent taken to be a list group: the original's.)
+    static_cast<C_ListGroup *>(m_parent)->PickItem(this);
+    C_TextButton::OnEnter(id);
+    Notify(CONTROL_NOTIFY_CLICK, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_ListItem::OnInput02(int id)
+{
+    if (id == UNPICK_ID) {
+        m_picked = false;
+        C_TextButton::OnLeave(UNPICK_ID);
+        Notify(CONTROL_NOTIFY_02, 0);
+    }
+    return CONTROL_HANDLED;
+}
+
+int C_ListItem::OnPress(int id)
+{
+    Notify(CONTROL_NOTIFY_PRESS, 0);
+    return OnClick(id);
+}
+
+// ----- the bar (type 0x16) and the upgrade bar (type 0x17) -----
+
+namespace {
+
+constexpr int BAR_AXIS_X = 0, BAR_AXIS_Y = 1, BAR_AXIS_Z = 2;
+// The upgrade bar's text: the value and the suffix, the upgrade (shown from 0.1).
+constexpr uint32_t UPGRADE_TEXT_STYLE = 0x2B, UPGRADE_ADDED_STYLE = 0x2C;
+constexpr float UPGRADE_SHOWN = 0.1f;
+
+} // namespace
+
+C_BarControl::C_BarControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent)
+{
+    m_takesInput = false;
+}
+
+bool C_BarControl::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_Control::Create(frame, root, desc))
+        return false;
+    UpdateBar();
+    return true;
+}
+
+bool C_BarControl::HandleMessage(S_ControlMessage *message)
+{
+    if (!(message->id & CONTROL_NOTIFY_MASK)) {
+        switch (message->id & CONTROL_MSG_MASK) {
+        case CONTROL_MSG_GET_BAR_MIN:
+            message->value2 = FloatValue(m_min);
+            return true;
+        case CONTROL_MSG_GET_BAR_MAX:
+            message->value2 = FloatValue(m_max);
+            return true;
+        case CONTROL_MSG_GET_BAR_VALUE:
+            message->value2 = FloatValue(m_value);
+            return true;
+        case CONTROL_MSG_SET_BAR_MIN:
+            m_min = ValueFloat(message->value2);
+            UpdateBar();
+            return true;
+        case CONTROL_MSG_SET_BAR_MAX:
+            m_max = ValueFloat(message->value2);
+            UpdateBar();
+            return true;
+        case CONTROL_MSG_SET_BAR_VALUE:
+            m_value = ValueFloat(message->value2);
+            UpdateBar();
+            return true;
+        case CONTROL_MSG_SET_BAR_AXIS:
+            m_axis = static_cast<int>(message->value);
+            UpdateBar();
+            return true;
+        }
+    }
+    C_Control::HandleMessage(message);
+    return true;
+}
+
+void C_BarControl::ScaleAlong(I3D_frame *frame, int axis, float fraction)
+{
+    if (axis == BAR_AXIS_X)
+        frame->SetScale(S_vector(fraction, 1.0f, 1.0f));
+    else if (axis == BAR_AXIS_Y)
+        frame->SetScale(S_vector(1.0f, fraction, 1.0f));
+    else if (axis == BAR_AXIS_Z)
+        frame->SetScale(S_vector(1.0f, 1.0f, fraction));
+}
+
+void C_BarControl::UpdateBar()
+{
+    float range = m_max - m_min;
+    if (range <= 0.0f)
+        range = 1.0f;
+    // (The value over the range, not its part above the minimum: the original's.)
+    float fraction = m_value / range;
+    if (fraction < 0.0f || fraction == 0.0f) {
+        m_frame->SetOn(false);
+        m_frame->Update();
+        return;
+    }
+    if (fraction > 1.0f)
+        fraction = 1.0f;
+    m_frame->SetOn(true);
+    ScaleAlong(m_frame, m_axis, fraction);
+    m_frame->Update();
+}
+
+void C_UpgradeBar::Refresh()
+{
+    if (!m_shown)
+        return;
+    // (The titles checked: the fix, the original's without them crashes.)
+    if (m_name)
+        m_name->Refresh();
+    if (m_text)
+        m_text->Refresh();
+}
+
+bool C_UpgradeBar::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_BarControl::Create(frame, root, desc))
+        return false;
+    if (I3D_frame *name = frame->FindChildFrame("name_*", FIND_FRAMES)) {
+        m_name = new C_TitleControl(m_scene, m_id, this);
+        m_name->Create(name, root, nullptr);
+        m_children.push_back(m_name);
+    }
+    if (I3D_frame *text = frame->FindChildFrame("text_*", FIND_FRAMES)) {
+        m_text = new C_TitleControl(m_scene, m_id, this);
+        m_text->Create(text, root, nullptr);
+        m_children.push_back(m_text);
+    }
+    m_valueFrame = frame->FindChildFrame("hlcpct*", FIND_FRAMES);
+    m_upgradeFrame = frame->FindChildFrame("upgrade*", FIND_FRAMES);
+    if (!m_valueFrame || !m_upgradeFrame)
+        return false;
+    UpdateBar();
+    return true;
+}
+
+bool C_UpgradeBar::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_Control::HandleMessage(message);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_TEXT:
+    case CONTROL_MSG_SET_TEXT_ID:
+        // (The title checked: the fix, the original's without it crashes.)
+        if (m_name)
+            m_name->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_GET_BAR_VALUE:
+        if (message->value == 0)
+            message->value2 = FloatValue(m_current);
+        else if (message->value == 1)
+            message->value2 = FloatValue(m_upgrade);
+        return true;
+    case CONTROL_MSG_SET_BAR_VALUE:
+        if (message->value == 0)
+            m_current = ValueFloat(message->value2);
+        else if (message->value == 1)
+            m_upgrade = ValueFloat(message->value2);
+        else if (message->value == 2)
+            m_suffix = reinterpret_cast<const char *>(message->value2);
+        UpdateBar();
+        return true;
+    default:
+        C_BarControl::HandleMessage(message);
+        return true;
+    }
+}
+
+void C_UpgradeBar::UpdateBar()
+{
+    if (m_current == 0.0f && m_upgrade == 0.0f) {
+        if (m_shown)
+            Hide();
+        m_frame->Update();
+        return;
+    }
+    if (!m_shown)
+        Show();
+    float range = m_max - m_min;
+    if (range <= 0.0f)
+        range = 1.0f;
+    // (Over the range, as the bar's; a NaN divided: the original's.)
+    const float value = m_current > m_max ? 1.0f : m_current < m_min ? 0.0f : m_current / range;
+    ScaleAlong(m_valueFrame, m_axis, value);
+    const float sum = m_upgrade + m_current;
+    const float upgraded = sum < m_min || m_upgrade == 0.0f ? 0.0f : sum > m_max ? 1.0f : sum / range;
+    ScaleAlong(m_upgradeFrame, m_axis, upgraded);
+    const float shown = m_current > m_max ? m_max : m_current;
+    const float added = shown + m_upgrade > m_max ? m_max - shown : m_upgrade;
+    if (m_text) {
+        m_text->HandleMessageCopy(Message(CONTROL_MSG_CLEAR));
+        m_text->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, UPGRADE_TEXT_STYLE,
+                                               C_fstr("%.1f ", static_cast<double>(shown))));
+        if (added >= UPGRADE_SHOWN)
+            m_text->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, UPGRADE_ADDED_STYLE,
+                                                   C_fstr("+ %.1f", static_cast<double>(added))));
+        m_text->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, UPGRADE_TEXT_STYLE, m_suffix));
+    }
+    m_frame->Update();
+}
+
+// ----- the hiding list (type 0x23) and the pool list (type 0x26) -----
+
+namespace {
+
+constexpr uint32_t POOL_ENTRY_STYLE = 0xD;
+
+} // namespace
+
+C_HidingList::~C_HidingList()
+{
+    while (!m_hidden.empty()) {
+        delete m_hidden.back();
+        m_hidden.pop_back();
+    }
+}
+
+int C_HidingList::FindHidden(uint32_t id) const
+{
+    for (int i = HiddenCount(); i-- > 0;)
+        if (m_hidden[i]->GetId() == id)
+            return i;
+    return -1;
+}
+
+bool C_HidingList::HandleMessage(S_ControlMessage *message)
+{
+    const int target = FindChild(message->target);
+    if (IsChild(target))
+        return m_children[target]->HandleMessage(message);
+    const int hidden = FindHidden(message->target);
+    if (hidden >= 0)
+        return m_hidden[hidden]->HandleMessage(message);
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_ListGroup::HandleMessage(message);
+        return true;
+    }
+    S_ControlMessage refresh = Message(CONTROL_MSG_REFRESH);
+    refresh.target = m_id;
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_ITEM_COUNTED: {
+        if (IsChild(FindChild(message->value)))
+            return true;
+        const int index = FindHidden(message->value);
+        if (index >= 0) {
+            m_children.push_back(m_hidden[index]);
+            m_hidden.erase(m_hidden.begin() + index);
+            m_children.back()->OnLeave(0);
+        }
+        Sort();
+        if (m_shown)
+            HandleMessageCopy(refresh);
+        return true;
+    }
+    case CONTROL_MSG_HIDE_ITEM: {
+        const int index = FindChild(message->value);
+        if (index < 0)
+            return true;
+        C_Control *item = m_children[index];
+        if (index == m_focus) {
+            item->OnLeave(0);
+            m_focus = -1;
+        }
+        item->Hide();
+        m_hidden.push_back(item);
+        m_children.erase(m_children.begin() + index);
+        // (Unsigned: the original's.)
+        while (m_first != 0 && static_cast<uint32_t>(ItemCount() - m_first) < static_cast<uint32_t>(m_visible))
+            Scroll(SCROLL_BACK);
+        if (m_shown)
+            HandleMessageCopy(refresh);
+        return true;
+    }
+    case CONTROL_MSG_HIDE_ALL:
+        PickItem(nullptr);
+        for (int i = ItemCount(); i-- > 0;)
+            m_children[i]->Hide();
+        m_hidden.insert(m_hidden.end(), m_children.begin(), m_children.end());
+        m_children.clear();
+        while (m_first != 0 && ItemCount() - m_first < m_visible)
+            Scroll(SCROLL_BACK);
+        if (m_shown)
+            HandleMessageCopy(refresh);
+        return true;
+    default:
+        C_ListGroup::HandleMessage(message);
+        return true;
+    }
+}
+
+C_PoolList::C_PoolList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_HidingList(scene, id, parent)
+{
+    m_sorted = false;
+}
+
+int C_PoolList::OnInput08(int id)
+{
+    return m_held ? m_held->OnInput08(id) : 0;
+}
+
+int C_PoolList::OnInput09(int id)
+{
+    if (!m_held)
+        return 0;
+    const int result = m_held->OnInput09(id);
+    m_held = nullptr;
+    return result;
+}
+
+int C_PoolList::OnInput0A(int id)
+{
+    if (!IsChild(m_focus))
+        return 0;
+    m_held = m_children[m_focus];
+    return m_held->OnInput0A(id);
+}
+
+bool C_PoolList::HandleMessage(S_ControlMessage *message)
+{
+    const int target = FindChild(message->target);
+    if (IsChild(target))
+        return m_children[target]->HandleMessage(message);
+    const int hidden = FindHidden(message->target);
+    if (hidden >= 0)
+        return m_hidden[hidden]->HandleMessage(message);
+    const uint32_t code = message->id & CONTROL_MSG_MASK;
+    if ((message->id & CONTROL_NOTIFY_MASK) || (code != CONTROL_MSG_ADD_CURRENT_ENTRY && code != CONTROL_MSG_ADD_ENTRY)) {
+        C_HidingList::HandleMessage(message);
+        return true;
+    }
+    if (message->value2 == 0 || HiddenCount() <= 0)
+        return false;
+    // The first hidden item named, indexed and shown.
+    const uint32_t item = m_hidden.front()->GetId();
+    // (The name read at value2 + 1, unaligned: the original's.)
+    alignas(C_str) unsigned char raw[sizeof(C_str)];
+    std::memcpy(raw, reinterpret_cast<const char *>(message->value2) + 1, sizeof(raw));
+    const C_str &name = *reinterpret_cast<const C_str *>(raw);
+    S_ControlMessage text = ValueMessage(CONTROL_MSG_SET_TEXT, POOL_ENTRY_STYLE, name);
+    text.target = item;
+    HandleMessageCopy(text);
+    S_ControlMessage index = ValueMessage(CONTROL_MSG_SET_INDEX, message->value);
+    index.target = item;
+    HandleMessageCopy(index);
+    HandleMessageCopy(ValueMessage(CONTROL_MSG_ITEM_COUNTED, item));
+    if (code == CONTROL_MSG_ADD_CURRENT_ENTRY)
+        OnInput05(item);
+    return true;
+}
+
+// ----- the server list (type 0x18) and its rows -----
+
+namespace {
+
+constexpr int SERVER_ROWS = 11;
+constexpr uint32_t SERVER_ROW_STEP = 0x3D072B02;        // 0.033: the rows' step down
+constexpr size_t SERVER_RESERVE = 200;
+// The rows' runs (the run, the style).
+constexpr uint32_t ROW_NAME_STYLE = 0x1E, ROW_MAP_STYLE = 0x1F, ROW_TYPE_STYLE = 0x20, ROW_PING_STYLE = 0x21,
+                   ROW_PLAYERS_STYLE = 0x22;
+// A name that is not text in the font: a text in its place.
+constexpr int TEXT_BAD_NAME = 0x7E9;
+constexpr uint32_t ROW_CURRENT_COLOUR = 0xFFFFFFFF;
+// The sort key: the field (the low 3 bits), ascending when the direction bits are 0x40.
+constexpr uint32_t SORT_FIELD = 7, SORT_DIRECTION = 0xC0, SORT_ASCENDING = 0x40;
+enum : uint32_t { SORT_NAME = 1, SORT_MAP = 2, SORT_TYPE = 3, SORT_PING = 4, SORT_PLAYERS = 5 };
+
+// The comparisons (0x006675a0 .. 0x006676f0, fastcall); ties by the ping.
+bool ServerPingLess(const S_ServerEntry *a, const S_ServerEntry *b) { return a->ping < b->ping; }
+bool ServerPingGreater(const S_ServerEntry *a, const S_ServerEntry *b) { return b->ping < a->ping; }
+bool ServerNameLess(const S_ServerEntry *a, const S_ServerEntry *b) { return _stricmp(a->name, b->name) < 0; }
+bool ServerNameGreater(const S_ServerEntry *a, const S_ServerEntry *b) { return _stricmp(a->name, b->name) > 0; }
+// (Descending maps tied ascending by ping: the original's.)
+bool ServerMapLess(const S_ServerEntry *a, const S_ServerEntry *b)
+{
+    const int order = _stricmp(a->map, b->map);
+    return order < 0 || (order == 0 && ServerPingLess(a, b));
+}
+bool ServerMapGreater(const S_ServerEntry *a, const S_ServerEntry *b)
+{
+    const int order = _stricmp(a->map, b->map);
+    return order > 0 || (order == 0 && ServerPingLess(a, b));
+}
+bool ServerTypeLess(const S_ServerEntry *a, const S_ServerEntry *b)
+{
+    return a->gameType < b->gameType || (a->gameType == b->gameType && ServerPingLess(a, b));
+}
+bool ServerTypeGreater(const S_ServerEntry *a, const S_ServerEntry *b)
+{
+    return a->gameType > b->gameType || (a->gameType == b->gameType && ServerPingGreater(a, b));
+}
+bool ServerPlayersLess(const S_ServerEntry *a, const S_ServerEntry *b)
+{
+    if (a->maxPlayers != b->maxPlayers)
+        return a->maxPlayers < b->maxPlayers;
+    if (a->players != b->players)
+        return a->players < b->players;
+    return ServerPingLess(a, b);
+}
+bool ServerPlayersGreater(const S_ServerEntry *a, const S_ServerEntry *b)
+{
+    if (a->maxPlayers != b->maxPlayers)
+        return a->maxPlayers > b->maxPlayers;
+    if (a->players != b->players)
+        return a->players > b->players;
+    return ServerPingGreater(a, b);
+}
+
+} // namespace
+
+C_ServerRow::C_ServerRow(I3D_scene *scene, uint32_t id, C_Control *parent) : C_TextButton(scene, id, parent)
+{
+    m_index = 0;
+}
+
+bool C_ServerRow::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_TextButton::Create(frame, root, desc))
+        return false;
+    m_password = frame->FindChildFrame("xpassword", FIND_FRAMES);
+    m_dedicated = frame->FindChildFrame("xdedicated", FIND_FRAMES);
+    m_voice = frame->FindChildFrame("xvoice", FIND_FRAMES);
+    m_activePassword = frame->FindChildFrame("xpassword01", FIND_FRAMES);
+    m_activeDedicated = frame->FindChildFrame("xdedicated01", FIND_FRAMES);
+    m_activeVoice = frame->FindChildFrame("xvoice01", FIND_FRAMES);
+    if (!m_password || !m_dedicated || !m_voice || !m_activePassword || !m_activeDedicated || !m_activeVoice)
+        return false;
+    I3D_frame *const icons[] = {m_password, m_dedicated, m_voice, m_activePassword, m_activeDedicated, m_activeVoice};
+    for (I3D_frame *icon : icons)
+        icon->SetOn(false);
+    for (I3D_frame *icon : icons)
+        SetFrameId(icon, m_id);
+    m_password->LinkTo(m_normalFrame, 1);
+    m_dedicated->LinkTo(m_normalFrame, 1);
+    m_voice->LinkTo(m_normalFrame, 1);
+    m_activePassword->LinkTo(m_activeFrame, 1);
+    m_activeDedicated->LinkTo(m_activeFrame, 1);
+    m_activeVoice->LinkTo(m_activeFrame, 1);
+    if (m_box) {
+        m_box->SetUnknown90(0);
+        m_box->AttachTo(m_scene, m_normalFrame);
+    }
+    return true;
+}
+
+bool C_ServerRow::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_TextButton::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_ADD_CURRENT_ENTRY:
+        if (m_box)
+            m_box->SetColour(ROW_CURRENT_COLOUR);
+        return true;
+    case CONTROL_MSG_ADD_ENTRY: {
+        auto *entry = reinterpret_cast<S_ServerEntry *>(message->value2);
+        m_index = static_cast<int>(reinterpret_cast<uintptr_t>(entry));
+        // (The box checked: the fix, the original's without one crashes.)
+        if (m_box)
+            m_box->SetColour(0);
+        if (!entry) {
+            if (m_box)
+                m_box->Clear();
+            return true;
+        }
+        SetInactive(entry->versionMajor != g_versionMajor || entry->versionMinor != g_versionMinor);
+        // The name as is, unless it is not text in the font.
+        const auto *name = reinterpret_cast<const uint8_t *>(entry->name);
+        const bool shown = g_gameProfile.UsesUnicodeFont() ? IsLegalUtf8Range(name, name + std::strlen(entry->name))
+                                                           : !HasUtf8Sequences(entry->name);
+        auto run = [this](uint32_t style, uintptr_t index, const C_str &text) {
+            S_ControlMessage set = ValueMessage(CONTROL_MSG_SET_RUN_TEXT, style, text);
+            set.value2 = index;
+            HandleMessageCopy(set);
+        };
+        run(ROW_NAME_STYLE, 0, shown ? C_fstr("%s", entry->name) : g_texts.Get(TEXT_BAD_NAME));
+        run(ROW_MAP_STYLE, 1, C_fstr("%s", entry->map));
+        run(ROW_TYPE_STYLE, 2, g_texts.Get(GetGameTypeTextId(entry->gameType)));
+        run(ROW_PING_STYLE, 3, C_fstr("%d", entry->ping));
+        run(ROW_PLAYERS_STYLE, 4, C_fstr("%d / %d", entry->players, entry->maxPlayers));
+        m_password->SetOn(entry->password);
+        m_activePassword->SetOn(entry->password);
+        m_dedicated->SetOn(entry->dedicated);
+        m_activeDedicated->SetOn(entry->dedicated);
+        m_voice->SetOn(entry->voice);
+        m_activeVoice->SetOn(entry->voice);
+        return true;
+    }
+    case CONTROL_MSG_REMOVE_ITEM:
+        if (m_box)
+            m_box->Clear();
+        m_index = 0;
+        return true;
+    case CONTROL_MSG_GET_ITEM:
+        message->value2 = static_cast<uintptr_t>(m_index);
+        return true;
+    default:
+        C_TextButton::HandleMessage(message);
+        return true;
+    }
+}
+
+bool C_ServerList::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_ListGroup::Create(frame, root, desc);
+    m_frame->SetData(nullptr);
+    m_selectedEntry = nullptr;
+    C_ServerRow *row = nullptr;
+    for (int i = 1; i <= SERVER_ROWS; ++i) {
+        const C_str name = C_fstr("Server%d", i);
+        I3D_frame *rowFrame = frame->FindChildFrame(name.c_str(), FIND_DUMMIES);
+        if (!rowFrame)
+            return false;
+        row = new C_ServerRow(m_scene, static_cast<uint32_t>(i & 0xFF) << 12 | m_id, this);
+        row->Create(rowFrame, root, nullptr);
+        S_ControlMessage clicked = ValueMessage(CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK);
+        clicked.value2 = reinterpret_cast<uintptr_t>(this);
+        clicked.value3 = reinterpret_cast<uintptr_t>(&C_ServerList::RowClicked);
+        row->HandleMessageCopy(clicked);
+        S_ControlMessage notified = ValueMessage(CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_13);
+        notified.value2 = reinterpret_cast<uintptr_t>(this);
+        notified.value3 = reinterpret_cast<uintptr_t>(&C_ServerList::RowNotified);
+        row->HandleMessageCopy(notified);
+        m_children.push_back(row);
+    }
+    m_visible = SERVER_ROWS;
+    S_ControlMessage step = Message(CONTROL_MSG_SET_DOWN_STEP);
+    step.value2 = SERVER_ROW_STEP;
+    HandleMessageCopy(step);
+    // From the last row's place.
+    auto *origin = static_cast<S_vector *>(_aligned_malloc(16, 16));
+    if (origin)
+        *origin = row->GetFrame()->GetPos();
+    S_ControlMessage place = Message(CONTROL_MSG_SET_ORIGIN);
+    place.value2 = reinterpret_cast<uintptr_t>(origin);
+    HandleMessageCopy(place);
+    Layout(0);
+    HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+    if (m_entries.capacity() < SERVER_RESERVE)
+        m_entries.reserve(SERVER_RESERVE);
+    return true;
+}
+
+int C_ServerList::ScrollRange() const
+{
+    return EntryCount() - m_visible + 1;
+}
+
+bool C_ServerList::RowClicked(void *object, void *, C_Control *control, uint32_t, uint32_t)
+{
+    auto *list = static_cast<C_ServerList *>(object);
+    list->m_selectedEntry = static_cast<C_ServerRow *>(control)->GetEntry();
+    list->HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+    list->Notify(CONTROL_NOTIFY_0E, 0);
+    return true;
+}
+
+bool C_ServerList::RowNotified(void *object, void *, C_Control *, uint32_t, uint32_t)
+{
+    static_cast<C_ServerList *>(object)->Notify(CONTROL_NOTIFY_13, 0);
+    return true;
+}
+
+C_ServerList::T_Compare C_ServerList::Comparison() const
+{
+    const bool ascending = (m_sortKey & SORT_DIRECTION) == SORT_ASCENDING;
+    switch (m_sortKey & SORT_FIELD) {
+    case SORT_NAME:
+        return ascending ? ServerNameLess : ServerNameGreater;
+    case SORT_MAP:
+        return ascending ? ServerMapLess : ServerMapGreater;
+    case SORT_TYPE:
+        return ascending ? ServerTypeLess : ServerTypeGreater;
+    case SORT_PING:
+        return ascending ? ServerPingLess : ServerPingGreater;
+    case SORT_PLAYERS:
+        return ascending ? ServerPlayersLess : ServerPlayersGreater;
+    default:
+        return nullptr;
+    }
+}
+
+void C_ServerList::SortEntries(uint32_t key)
+{
+    if (key != 0) {
+        const bool toggle = (key & SORT_DIRECTION) != 0;
+        // (The direction toggled, the bits between dropped: the original's.)
+        if (toggle)
+            m_sortKey = (~m_sortKey & SORT_DIRECTION) | (m_sortKey & SORT_FIELD);
+        if ((key & SORT_FIELD) == 0) {
+            if (toggle)
+                std::reverse(m_entries.begin(), m_entries.end());
+            return;
+        }
+        m_sortKey = (m_sortKey & ~SORT_FIELD) | (key & SORT_FIELD);
+    }
+    if (T_Compare compare = Comparison())
+        msvc6::Sort(m_entries.data(), m_entries.data() + m_entries.size(), compare);
+}
+
+bool C_ServerList::HandleMessage(S_ControlMessage *message)
+{
+    const int target = FindChild(message->target);
+    if (IsChild(target))
+        return m_children[target]->HandleMessage(message);
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    const auto count = static_cast<uint32_t>(m_entries.size());
+    const auto visible = static_cast<uint32_t>(m_visible);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_PREVIOUS_ITEM:
+    case CONTROL_MSG_NEXT_ITEM:
+    case CONTROL_MSG_REMOVE_ITEM:
+        return true;
+    case CONTROL_MSG_GET_SELECTED:
+        message->value2 = reinterpret_cast<uintptr_t>(m_selectedEntry);
+        return true;
+    case CONTROL_MSG_GET_ENTRY_COUNT:
+        message->value = count;
+        return true;
+    case CONTROL_MSG_GET_SORT:
+        message->value = m_sortKey;
+        return true;
+    case CONTROL_MSG_ADD_ITEM: {
+        auto *entry = reinterpret_cast<S_ServerEntry *>(message->value2);
+        if (!entry)
+            return true;
+        m_entries.push_back(entry);
+        // The window kept on the entries (unsigned: the original's).
+        const auto entries = static_cast<uint32_t>(m_entries.size());
+        if (entries < visible) {
+            m_firstEntry = 0;
+            m_lastEntry = static_cast<int>(entries) - 1;
+        } else if (static_cast<uint32_t>(m_firstEntry) > entries - visible) {
+            m_lastEntry = static_cast<int>(entries) - 1;
+            m_firstEntry = m_lastEntry - m_visible + 1;
+        } else {
+            m_lastEntry = m_firstEntry + m_visible - 1;
+        }
+        HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+        return true;
+    }
+    case CONTROL_MSG_CLEAR:
+        m_selectedEntry = nullptr;
+        m_entries.clear();
+        HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+        return true;
+    case CONTROL_MSG_SET_POSITION:
+        if (count > visible) {
+            m_firstEntry = static_cast<int>(message->value);
+            m_lastEntry = m_visible + m_firstEntry - 1;
+        }
+        HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+        return true;
+    case CONTROL_MSG_SORT:
+        SortEntries(message->value);
+        HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+        return true;
+    case CONTROL_MSG_REFRESH:
+        // As many rows shown as there are entries.
+        if (count == 0) {
+            m_first = -1;
+            m_last = -1;
+        } else {
+            m_first = 0;
+            m_last = count < visible ? static_cast<int>(count) - 1 : m_visible - 1;
+        }
+        Scroll(SCROLL_NONE);
+        for (int row = m_first, entry = m_firstEntry; row <= m_last && entry <= m_lastEntry; ++row, ++entry) {
+            if (row < 0 || row > ItemCount() - 1 || entry < 0 || entry > EntryCount() - 1)
+                continue;
+            S_ControlMessage set = Message(CONTROL_MSG_ADD_ENTRY);
+            set.value2 = reinterpret_cast<uintptr_t>(m_entries[entry]);
+            m_children[row]->HandleMessageCopy(set);
+            if (m_entries[entry] == m_selectedEntry)
+                m_children[row]->HandleMessageCopy(Message(CONTROL_MSG_ADD_CURRENT_ENTRY));
+        }
+        if (m_value != 0) {
+            PostToValue(CONTROL_MSG_SET_COUNT, static_cast<uint32_t>(ScrollRange()));
+            if (ScrollRange() != 0)
+                PostToValue(CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(m_firstEntry));
+        }
+        Notify(CONTROL_NOTIFY_CHANGED, 0);
+        return true;
+    default:
+        C_ListGroup::HandleMessage(message);
+        return true;
+    }
+}
+
+// ----- the hot key (type 0xd) and the titled edit box (type 0xe) -----
+
+namespace {
+
+constexpr uint32_t HOT_KEY_EDIT = 1, HOT_KEY_TITLE = 2;
+constexpr uint32_t HOT_KEY_TITLE_STYLE = 0xC, HOT_KEY_KEY_STYLE = 0xD;
+// The poll's argument (0x9A), Escape on the keyboard, the cursor's +0x44 after a binding.
+constexpr int HOT_KEY_POLL = 0x9A;
+constexpr uint16_t DEVICE_KEYBOARD = 1, SCAN_ESCAPE = 1;
+constexpr int HOT_KEY_CURSOR_DELAY = 200;
+// The titled edit box's text at first.
+constexpr uint32_t TITLED_EDIT_STYLE = 0xD, TITLED_EDIT_TEXT = 0x7D2;
+
+C_KeyBindings *KeyBindings()
+{
+    return g_gameProfile.GetPlayerProfile()->GetKeyBindings();
+}
+
+} // namespace
+
+C_HotKeyControl::~C_HotKeyControl()
+{
+    delete m_edit;
+    m_edit = nullptr;
+    delete m_title;
+    m_title = nullptr;
+}
+
+void C_HotKeyControl::Refresh()
+{
+    if (!m_shown)
+        return;
+    m_edit->Refresh();
+    m_title->Refresh();
+}
+
+bool C_HotKeyControl::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_Control::Create(frame, root, desc))
+        return false;
+    if (frame) {
+        m_edit = new C_EditBox(m_scene, m_id | HOT_KEY_EDIT, this);
+        m_edit->Create(frame, root, nullptr);
+    }
+    if (I3D_frame *text = frame->FindChildFrame("hktext*", FIND_FRAMES)) {
+        m_title = new C_TitleControl(m_scene, m_id | HOT_KEY_TITLE, this);
+        m_title->Create(text, root, nullptr);
+        m_title->HandleMessageCopy(Message(CONTROL_MSG_TAKE_INPUT));
+    }
+    return true;
+}
+
+void C_HotKeyControl::Tick(int time)
+{
+    if (!m_edit->IsEditing())
+        return;
+    m_edit->Tick(time);
+    // (A tick first: the click that started the edit not taken for the key.)
+    if (!m_armed) {
+        m_armed = true;
+        return;
+    }
+    const C_Controls::S_Press *press = g_controls.PollPress(HOT_KEY_POLL, true);
+    if (!press)
+        return;
+    if (press->device == DEVICE_KEYBOARD && press->key == SCAN_ESCAPE) {
+        m_armed = false;
+        m_edit->OnInput02(0);
+        PostControlMessage(Message(CONTROL_MSG_HOT_KEY_DONE));
+        return;
+    }
+    if (!KeyBindings()->Bind(m_binding, press->device, press->key, press->direction))
+        return;
+    m_armed = false;
+    Notify(CONTROL_NOTIFY_CHANGED, 0);
+    m_edit->OnInput02(0);
+    PostControlMessage(Message(CONTROL_MSG_HOT_KEY_DONE));
+    // (The cursor checked: the fix, the original's without one crashes.)
+    if (C_Cursor *cursor = C_Cursor::Acquire(nullptr)) {
+        cursor->SetDelay(HOT_KEY_CURSOR_DELAY);
+        cursor->Release();
+    }
+}
+
+bool C_HotKeyControl::Unknown20(int key)
+{
+    if (!m_edit->IsEditing())
+        return false;
+    // (Its low byte: the original's.)
+    if (static_cast<uint8_t>(key) == SCAN_ESCAPE)
+        m_edit->OnInput02(0);
+    return true;
+}
+
+int C_HotKeyControl::OnEnter(int id)
+{
+    m_edit->OnEnter(id);
+    m_title->OnEnter(id);
+    return CONTROL_HANDLED;
+}
+
+int C_HotKeyControl::OnLeave(int id)
+{
+    if (m_edit->IsEditing())
+        return 0;
+    m_edit->OnLeave(id);
+    m_title->OnLeave(id);
+    return CONTROL_HANDLED;
+}
+
+int C_HotKeyControl::OnClick(int id)
+{
+    if (m_edit->IsEditing() || m_edit->OnClick(id) != CONTROL_HANDLED)
+        return 0;
+    PostControlMessage(Message(CONTROL_MSG_HOT_KEY_DONE));
+    return CONTROL_HANDLED;
+}
+
+int C_HotKeyControl::OnInput02(int id)
+{
+    if (m_edit->OnInput02(id) != CONTROL_HANDLED)
+        return 0;
+    PostControlMessage(Message(CONTROL_MSG_HOT_KEY_DONE));
+    return CONTROL_HANDLED;
+}
+
+void C_HotKeyControl::SetInactive(bool inactive)
+{
+    m_inactive = inactive;
+    m_edit->SetInactive(inactive);
+    m_title->SetInactive(inactive);
+}
+
+void C_HotKeyControl::ShowBinding()
+{
+    m_edit->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_TEXT, HOT_KEY_KEY_STYLE, KeyBindings()->GetBindingName(m_binding)));
+}
+
+bool C_HotKeyControl::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_GET_BINDING:
+    case CONTROL_MSG_GET_BINDING2:
+        message->value = static_cast<uint32_t>(m_binding);
+        return true;
+    case CONTROL_MSG_SET_BINDING: {
+        m_binding = static_cast<int>(message->value);
+        S_ControlMessage name = ValueMessage(CONTROL_MSG_SET_TEXT_ID, HOT_KEY_TITLE_STYLE);
+        name.value2 = message->value2;
+        m_title->HandleMessageCopy(name);
+        ShowBinding();
+        return true;
+    }
+    case CONTROL_MSG_REFRESH:
+        m_title->HandleMessageCopy(*message);
+        m_edit->HandleMessageCopy(*message);
+        ShowBinding();
+        return true;
+    default:
+        C_Control::HandleMessage(message);
+        return true;
+    }
+}
+
+void C_TitledEditBox::Tick(int time)
+{
+    if (m_edit->IsEditing())
+        m_edit->Tick(time);
+}
+
+bool C_TitledEditBox::Unknown20(int key)
+{
+    return m_edit->Unknown20(key);
+}
+
+bool C_TitledEditBox::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_Control::Create(frame, root, desc))
+        return false;
+    if (frame) {
+        m_edit = new C_EditBox(m_scene, m_id | HOT_KEY_EDIT, this);
+        m_edit->Create(frame, root, nullptr);
+        S_ControlMessage text = ValueMessage(CONTROL_MSG_SET_TEXT_ID, TITLED_EDIT_STYLE);
+        text.value2 = TITLED_EDIT_TEXT;
+        m_edit->HandleMessageCopy(text);
+    }
+    if (I3D_frame *title = frame->FindChildFrame("text*", FIND_FRAMES)) {
+        m_title = new C_TitleControl(m_scene, m_id | HOT_KEY_TITLE, this);
+        m_title->Create(title, root, nullptr);
+        m_title->HandleMessageCopy(Message(CONTROL_MSG_TAKE_INPUT));
+    }
+    return true;
+}
+
+int C_TitledEditBox::OnLeave(int id)
+{
+    m_edit->OnLeave(id);
+    m_title->OnLeave(id);
+    return CONTROL_HANDLED;
+}
+
+int C_TitledEditBox::OnClick(int id)
+{
+    return m_edit->OnClick(id);
+}
+
+int C_TitledEditBox::OnInput02(int id)
+{
+    return m_edit->OnInput02(id);
+}
+
+int C_TitledEditBox::OnKeyClick(int id)
+{
+    return m_edit->OnKeyClick(id);
+}
+
+bool C_TitledEditBox::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_TEXT:
+    case CONTROL_MSG_SET_TEXT_ID:
+        m_title->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_ADD_CALLBACK:
+    case CONTROL_MSG_SET_MAX_LENGTH:
+    case CONTROL_MSG_SET_DIGITS_ONLY:
+    case CONTROL_MSG_SET_NUMBER:
+    case CONTROL_MSG_GET_NUMBER:
+    case CONTROL_MSG_SET_FORBIDDEN:
+    case CONTROL_MSG_SET_RANGE:
+    case CONTROL_MSG_GET_TEXT:
+        m_edit->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_REFRESH:
+        m_title->HandleMessage(message);
+        m_edit->HandleMessage(message);
+        return true;
+    default:
+        C_Control::HandleMessage(message);
+        return true;
+    }
+}
+
+// ----- the item pictures (type 0x1d), the players' list (type 0x20), the check group (type 0x27) -----
+
+namespace {
+
+constexpr uint32_t PICTURES_COUNT_STYLE = 0x12;
+// The players' list: its list's page step (to its bar, id | 4), the title's id, its columns.
+constexpr uint32_t PLAYERS_BAR = 4, PLAYERS_TITLE = 2, PLAYERS_PAGE_STEP = 5;
+constexpr uint32_t PLAYERS_NAME_STYLE = 0x23, PLAYERS_STAT1_STYLE = 0x24, PLAYERS_STAT3_STYLE = 0x25;
+constexpr uint32_t TEXT_PLAYERS_NAME = 0xA33, TEXT_PLAYERS_STAT1 = 0xA35, TEXT_PLAYERS_STAT3 = 0xA37;
+
+} // namespace
+
+int C_ItemPictures::FindChild(uint32_t id) const
+{
+    switch (id & CHILD_ID_MASK) {
+    case INFO_PICTURE:
+        return 0;
+    case INFO_SECOND:
+        return 1;
+    }
+    return -1;
+}
+
+void C_ItemPictures::Refresh()
+{
+    if (!m_shown)
+        return;
+    // (The second checked: the fix, the original's without it crashes.)
+    m_picture->Refresh();
+    if (m_secondPicture)
+        m_secondPicture->Refresh();
+}
+
+bool C_ItemPictures::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_ControlGroup::Create(frame, root, desc))
+        return false;
+    S_ControlMessage square = Message(CONTROL_MSG_FIND_FACE_GROUP);
+    square.text = "X_SQUARE.BMP";
+    if (frame) {
+        m_picture = new C_PictureControl(m_scene, m_id | INFO_PICTURE, this);
+        m_picture->Create(frame, root, nullptr);
+        m_picture->HandleMessageCopy(Message(CONTROL_MSG_HIDE));
+        m_picture->HandleMessageCopy(square);
+        m_children.push_back(m_picture);
+    }
+    if (I3D_frame *ammo = frame->FindChildFrame("ammo*", FIND_FRAMES)) {
+        m_secondPicture = new C_PictureControl(m_scene, m_id | INFO_SECOND, this);
+        m_secondPicture->Create(ammo, root, nullptr);
+        m_secondPicture->HandleMessageCopy(Message(CONTROL_MSG_HIDE));
+        m_secondPicture->HandleMessageCopy(square);
+        m_children.push_back(m_secondPicture);
+    }
+    return true;
+}
+
+void C_ItemPictures::ShowPicture(C_PictureControl *picture, int id, C_ItemDef *def)
+{
+    picture->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_INDEX, static_cast<uint32_t>(id)));
+    S_ControlMessage texture = Message(CONTROL_MSG_SET_TEXTURE);
+    texture.value2 = reinterpret_cast<uintptr_t>(def->GetImage());
+    picture->HandleMessageCopy(texture);
+}
+
+void C_ItemPictures::UpdateCounts()
+{
+    if (m_count > 0 || m_secondCount > 0)
+        m_parent->HandleMessageCopy(ValueMessage(CONTROL_MSG_ITEM_COUNTED, m_id));
+    // (The second checked: the fix, the original's without it crashes.)
+    if (m_secondPicture) {
+        if (m_secondCount < 0 || m_second < 0) {
+            m_secondPicture->HandleMessageCopy(Message(CONTROL_MSG_HIDE));
+        } else {
+            m_secondPicture->HandleMessageCopy(Message(CONTROL_MSG_SHOW));
+            m_secondPicture->HandleMessageCopy(Message(m_secondCount > 0 ? CONTROL_MSG_ACTIVATE : CONTROL_MSG_DEACTIVATE));
+        }
+    }
+    if (m_count < 0) {
+        m_parent->HandleMessageCopy(ValueMessage(CONTROL_MSG_HIDE_ITEM, m_id));
+        return;
+    }
+    m_picture->HandleMessageCopy(Message(m_count > 0 ? CONTROL_MSG_ACTIVATE : CONTROL_MSG_DEACTIVATE));
+    m_picture->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_TEXT, PICTURES_COUNT_STYLE, C_fstr("%d ", m_count)));
+    if (m_secondPicture)
+        m_secondPicture->HandleMessageCopy(
+            ValueMessage(CONTROL_MSG_SET_TEXT, PICTURES_COUNT_STYLE, C_fstr("%d ", m_secondCount)));
+}
+
+bool C_ItemPictures::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_ControlGroup::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_ITEM_COUNT:
+        m_count = static_cast<int>(message->value);
+        UpdateCounts();
+        return true;
+    case CONTROL_MSG_SET_SECOND_COUNT:
+        m_secondCount = static_cast<int>(message->value);
+        UpdateCounts();
+        return true;
+    case CONTROL_MSG_ADD_CALLBACK:
+    case CONTROL_MSG_REMOVE_CALLBACK:
+        m_picture->HandleMessage(message);
+        if (m_secondPicture)
+            m_secondPicture->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_SET_ITEM: {
+        m_item = static_cast<int>(message->value);
+        C_ItemDef *def = GetItemDef(m_item);
+        if (!def)
+            return true;
+        ShowPicture(m_picture, m_item, def);
+        // The second picture: a weapon's ammo, a uniform's headgear.
+        if (def->GetRecordType() == ITEM_ANIMATED)
+            m_second = def->GetAmmoItemId();
+        else if (def->GetBehaviour() == ITEM_BEHAVIOUR_UNIFORM)
+            m_second = def->GetHeadgearItemId();
+        else
+            return true;
+        C_ItemDef *second = GetItemDef(m_second);
+        if (second && m_secondPicture)
+            ShowPicture(m_secondPicture, m_second, second);
+        return true;
+    }
+    case CONTROL_MSG_REFRESH:
+        m_picture->HandleMessageCopy(*message);
+        if (m_secondPicture)
+            m_secondPicture->HandleMessageCopy(*message);
+        return true;
+    }
+    C_ControlGroup::HandleMessage(message);
+    return true;
+}
+
+int C_PlayerList::FindChild(uint32_t id) const
+{
+    const uint32_t part = id & CHILD_ID_MASK;
+    if (part > 3)
+        return 0;
+    return part == PLAYERS_TITLE ? 2 : -1;
+}
+
+bool C_PlayerList::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_Control::Create(frame, root, desc);
+    m_frame->SetData(nullptr);
+    m_players = new C_ScrolledText(m_scene, m_id, this);
+    m_players->Create(frame, root, nullptr);
+    S_ControlMessage step = ValueMessage(CONTROL_MSG_SET_PAGE_STEP, PLAYERS_PAGE_STEP);
+    step.target = m_id | PLAYERS_BAR;
+    m_players->HandleMessageCopy(step);
+    m_children.push_back(m_players);
+    if (I3D_frame *header = frame->FindChildFrame("header*", FIND_FRAMES)) {
+        m_title = new C_TitleControl(m_scene, m_id | PLAYERS_TITLE, this);
+        m_title->Create(header, root, nullptr);
+        m_children.push_back(m_title);
+    }
+    return true;
+}
+
+int C_PlayerList::OnEnter(int id)
+{
+    if (IsChild(m_focus) && m_children[m_focus]->OnLeave(id) == 0)
+        return CONTROL_NOT_HANDLED;
+    if (IsChild(FindChild(static_cast<uint32_t>(id))) &&
+        m_children[FindChild(static_cast<uint32_t>(id))]->OnEnter(id) != 0) {
+        m_focus = FindChild(static_cast<uint32_t>(id));
+        return CONTROL_HANDLED;
+    }
+    return 0;
+}
+
+int C_PlayerList::OnLeave(int id)
+{
+    if (IsChild(m_focus)) {
+        if (m_children[m_focus]->OnLeave(id) == 0)
+            return 0;
+        m_focus = -1;
+    }
+    return CONTROL_HANDLED;
+}
+
+int C_PlayerList::OnInput05(int id)
+{
+    if (!IsChild(FindChild(static_cast<uint32_t>(id))))
+        return OnLeave(id);
+    if (m_focus == FindChild(static_cast<uint32_t>(id)))
+        return m_children[m_focus]->OnInput05(id);
+    OnLeave(id);
+    return OnEnter(id);
+}
+
+int C_PlayerList::OnPress(int id)
+{
+    if (IsChild(m_focus) && m_focus == FindChild(static_cast<uint32_t>(id)))
+        return m_children[m_focus]->OnPress(id);
+    return 0;
+}
+
+void C_PlayerList::SetInactive(bool inactive)
+{
+    m_players->SetInactive(inactive);
+    m_title->SetInactive(inactive);
+}
+
+bool C_PlayerList::HandleMessage(S_ControlMessage *message)
+{
+    const int target = FindChild(message->target);
+    if (IsChild(target))
+        return m_children[target]->HandleMessage(message);
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SHOW_PLAYERS: {
+        S_NetPlayerState *players = g_netGame.LockPlayers();
+        auto column = [this](uint32_t style, uint32_t textId) {
+            S_ControlMessage name = ValueMessage(CONTROL_MSG_ADD_TEXT_ID, style);
+            name.value2 = textId;
+            m_title->HandleMessageCopy(name);
+        };
+        column(PLAYERS_NAME_STYLE, TEXT_PLAYERS_NAME);
+        column(PLAYERS_STAT1_STYLE, TEXT_PLAYERS_STAT1);
+        column(PLAYERS_STAT3_STYLE, TEXT_PLAYERS_STAT3);
+        for (int i = 0; i < g_netGame.GetPlayerCount(); ++i) {
+            const S_NetPlayerState &player = players[i];
+            if (!player.IsConnected())
+                continue;
+            m_players->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, PLAYERS_NAME_STYLE, C_fstr("%s", player.name)));
+            m_players->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, PLAYERS_STAT1_STYLE, C_fstr("%d", player.stats[1])));
+            m_players->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, PLAYERS_STAT3_STYLE, C_fstr("%d", player.stats[3])));
+        }
+        g_netGame.UnlockPlayers();
+        return true;
+    }
+    case CONTROL_MSG_IGNORED_7E:
+    case CONTROL_MSG_IGNORED_7F:
+        return true;
+    default:
+        C_Control::HandleMessage(message);
+        return true;
+    }
+}
+
+bool C_CheckGroup::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_ControlGroup::Create(frame, root, desc))
+        return false;
+    I3D_frame *text = frame->FindChildFrame("text*", FIND_FRAMES);
+    if (!text)
+        return false;
+    m_box = new C_HighlightCheckBox(m_scene, m_id, this);
+    m_box->Create(text, root, nullptr);
+    m_children.push_back(m_box);
+    return true;
+}
+
+// ----- the movie control (type 0x22) -----
+
+namespace {
+
+// The interface's y (4:3) to the screen's (down).
+constexpr float MOVIE_Y_SCALE = -1.3333334f;
+constexpr int DRIVER_STATE_3 = 3, RENDER_STATE_0 = 0;
+
+} // namespace
+
+C_MovieControl::~C_MovieControl()
+{
+    CloseStream();
+}
+
+void C_MovieControl::CloseStream()
+{
+    if (!m_stream)
+        return;
+    m_stream->Close();
+    m_stream->Release();
+    m_stream = nullptr;
+}
+
+bool C_MovieControl::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    m_stream = nullptr;
+    if (!C_Control::Create(frame, root, desc))
+        return false;
+    m_frame->SetOn(false);
+    m_stream = GetIGraph()->CreateStream();
+    if (!m_stream)
+        return false;
+    FindArea();
+    return true;
+}
+
+bool C_MovieControl::FindArea()
+{
+    if (!m_frame)
+        return false;
+    const I3D_bbox bound = static_cast<I3D_visual *>(m_frame)->GetWorldBound();
+    const auto width = static_cast<float>(GetIGraph()->ScrnX());
+    const auto height = static_cast<float>(GetIGraph()->ScrnY());
+    m_left = bound.min.x * width;
+    m_bottom = bound.min.y * height * MOVIE_Y_SCALE;
+    m_right = width * bound.max.x;
+    m_top = height * bound.max.y * MOVIE_Y_SCALE;
+    m_width = m_right - m_left;
+    m_height = m_bottom - m_top;
+    return true;
+}
+
+void C_MovieControl::FitRect()
+{
+    S_showRect size = {};
+    m_stream->GetVideoSize(&size);
+    const auto videoWidth = static_cast<float>(size.width);
+    const auto videoHeight = static_cast<float>(size.height);
+    S_showRect rect = {};
+    // The area at least as tall as the video's shape: its width; else its height (a NaN: the
+    // height). (Truncated, as __ftol.)
+    if (m_height / m_width >= videoHeight / videoWidth) {
+        rect.x = static_cast<int>(m_left);
+        rect.width = static_cast<int>(m_width);
+        rect.height = static_cast<int>(m_width / videoWidth * videoHeight);
+        rect.y = static_cast<int>(m_top);
+    } else {
+        rect.y = static_cast<int>(m_top);
+        rect.height = static_cast<int>(m_height);
+        rect.width = static_cast<int>(m_height / videoHeight * videoWidth);
+        rect.x = static_cast<int>((m_width - static_cast<float>(rect.width)) * 0.5f + m_left);
+    }
+    m_stream->SetRect(&rect);
+}
+
+void C_MovieControl::Refresh()
+{
+    if (!m_stream->IsPlaying())
+        return;
+    m_stream->UpdateVideo(0);
+    I3D_driver *driver = I3DGetDriver();
+    const bool state3 = driver->GetState(DRIVER_STATE_3) != 0;
+    driver->SetState(DRIVER_STATE_3, 0);
+    const int renderState = GetIGraph()->GetRenderState(RENDER_STATE_0);
+    m_stream->Draw(false);
+    GetIGraph()->SetRenderState(RENDER_STATE_0, renderState);
+    I3DGetDriver()->SetState(DRIVER_STATE_3, state3);
+    const int state = m_stream->GetState();
+    if (state == ISNDSTREAM_STATE_FINISHED || state == -1) {
+        m_stream->Stop();
+        FitRect();
+        m_stream->Play();
+    }
+}
+
+bool C_MovieControl::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_Control::HandleMessage(message);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_CLOSE_MOVIE:
+        m_stream->Stop();
+        m_stream->Close();
+        return true;
+    case CONTROL_MSG_STOP_MOVIE:
+        m_stream->Stop();
+        return true;
+    case CONTROL_MSG_PLAY_MOVIE: {
+        const C_str name = C_fstr("GameMovie\\%s2", message->text.c_str());
+        // (An open failing while another plays: that one kept; else played, the original's.)
+        if (m_stream->Open(name.c_str(), 0) >= 0 || !m_stream->IsPlaying()) {
+            FitRect();
+            m_stream->SetVolume(0.0f);
+            m_stream->Play();
+        }
+        return true;
+    }
+    default:
+        C_Control::HandleMessage(message);
+        return true;
+    }
 }

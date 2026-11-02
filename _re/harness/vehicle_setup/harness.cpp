@@ -8110,6 +8110,8 @@ void SeatTest(const char *path)
 
 // The game profile, the multiplayer settings (the stub game/profile.h).
 C_GameProfile g_gameProfile;
+int g_versionMajor = 1;     // (profile.cpp's)
+int g_versionMinor = 12;
 bool g_coop;
 bool C_GameProfile::IsCooperativeGame() const
 {

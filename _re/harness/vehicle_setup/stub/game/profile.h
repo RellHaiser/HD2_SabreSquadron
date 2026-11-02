@@ -5,6 +5,7 @@
 
 #include "common/c_str.h"
 #include "game/pending.h"                               // S_MultiplayerSettings
+#include "game/key_bindings.h"
 #include "game/soldier.h"
 
 // The detail settings (the spawn point asks for the voice chat; part 8's vertex animations for
@@ -32,8 +33,17 @@ struct S_PlayMode {
     int unknown10 = 0;
 };
 
+// (The hot key control's bindings, part 9c-v-d.)
+class C_PlayerProfile {
+public:
+    C_KeyBindings *GetKeyBindings() { return &m_keyBindings; }
+    C_KeyBindings m_keyBindings;
+};
+
 class C_GameProfile {
 public:
+    C_PlayerProfile *GetPlayerProfile() const { return m_player; }
+    C_PlayerProfile *m_player = nullptr;
     bool IsCooperativeGame() const;
     S_DetailSettings *GetDetailSettings();
     // (The fonts' language, part 9a: fonts_test.inc.)
@@ -47,6 +57,8 @@ public:
     S_PlayMode *m_playMode = nullptr;
 };
 extern C_GameProfile g_gameProfile;
+extern int g_versionMajor;
+extern int g_versionMinor;
 void __stdcall GetGameVersion(int *major, int *minor);
 extern S_MultiplayerSettings *g_mpSettings;             // (a reference into g_gameProfile in the real header)
 

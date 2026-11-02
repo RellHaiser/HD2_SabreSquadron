@@ -21,3 +21,4 @@ __pycache__/
 
 mods/
 _re/tools/__pycache__
+_re/tier1_fixups.json

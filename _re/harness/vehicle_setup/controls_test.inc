@@ -55,6 +55,12 @@ void CheckTest(I3D_scene *scene);
 void EditTest(I3D_scene *scene);
 void ComboTest(I3D_scene *scene);
 void InfoTest(I3D_scene *scene);
+void ListTest(I3D_scene *scene);
+void BarTest(I3D_scene *scene);
+void ServerTest(I3D_scene *scene);
+void HotKeyTest(I3D_scene *scene);
+void GroupsTest(I3D_scene *scene);
+void MovieTest(I3D_scene *scene);
 
 namespace {
 
@@ -1007,6 +1013,12 @@ void ControlsTest()
     EditTest(scene);
     ComboTest(scene);
     InfoTest(scene);
+    ListTest(scene);
+    BarTest(scene);
+    ServerTest(scene);
+    HotKeyTest(scene);
+    GroupsTest(scene);
+    MovieTest(scene);
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
     g_gfLog.clear();
@@ -1026,3 +1038,9 @@ void ControlsTest()
 #include "edit_test.inc"
 #include "combo_test.inc"
 #include "info_test.inc"
+#include "list_test.inc"
+#include "bar_test.inc"
+#include "server_test.inc"
+#include "hotkey_test.inc"
+#include "groups_test.inc"
+#include "movie_test.inc"

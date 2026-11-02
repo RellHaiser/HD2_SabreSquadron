@@ -162,7 +162,8 @@ struct S_NetPlayerState {
     int unknown04;
     char name[0x34];                                    // +0x08
     C_Human *human;                                     // +0x3C
-    uint8_t unknown40[0x68];
+    int stats[9];                                       // +0x40 (the players' list, part 9c-v-d)
+    uint8_t unknown64[0x44];
     uint32_t activityTime;                              // +0xA8
     uint8_t unknownAC[0x18];
     // (The multiplayer zone, part 7d.)
@@ -236,6 +237,14 @@ float RandomFloat(float max);                           // 0x00475190
 class C_Controls {
 public:
     float GetValue(int action, bool pressed);          // 0x006c76a0
+    // (The hot key control's poll, part 9c-v-d: as the real header has it.)
+    struct S_Press {
+        int direction;
+        uint16_t device;
+        uint16_t key;
+        int unknown08;
+    };
+    const S_Press *PollPress(int unknown, bool reread); // 0x006c87f0
 };
 extern C_Controls g_controls;                           // 0x008aeb58
 

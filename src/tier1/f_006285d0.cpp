@@ -3624,13 +3624,13 @@ uint32_t FUN_0062e9f0(void *param_1, ...)
   int iVar1;
   uint32_t *puVar2;
   uint32_t in_EAX;
-  float *pfVar3;
-  uint32_t *puVar4;
+  float *extraout_EAX;
+  uint32_t *puVar3;
   float local_40;
   float local_3c;
   float local_38;
   float local_34;
-  float local_20 [7];
+  uint8_t local_20 [28];
   _this = *(I3D_frame **)((int)param_1 + 0xec);
   if (_this == 0) {
     return in_EAX & 0xffffff00;
@@ -3642,43 +3642,43 @@ uint32_t FUN_0062e9f0(void *param_1, ...)
   local_3c = (_this->m_worldMatrix).m[3][1];
   local_34 = (_this->m_worldMatrix).m[3][3];
   local_38 = 0.0;
-  pfVar3 = (float *)FUN_0066a450(*(void **)((int)param_1 + 0xf4),local_20);
-  local_40 = local_40 + *pfVar3;
-  local_3c += pfVar3[1];
-  local_38 += pfVar3[2];
+  C_Cursor__GetMove(*(C_Cursor **)((int)param_1 + 0xf4),local_20);
+  local_40 = local_40 + *extraout_EAX;
+  local_3c += extraout_EAX[1];
+  local_38 += extraout_EAX[2];
   (**(code **)(**(int **)((int)param_1 + 0xec) + 8))(*(int **)((int)param_1 + 0xec),&local_40);
   (**(code **)(**(int **)((int)param_1 + 0xec) + 0x24))(*(int **)((int)param_1 + 0xec));
   iVar1 = *(int *)((int)param_1 + 0x44);
-  FUN_0066a420(*(void **)((int)param_1 + 0xf4),&local_3c);
-  puVar4 = (uint32_t *)
+  C_Cursor__GetPosition(*(C_Cursor **)((int)param_1 + 0xf4),&local_3c);
+  puVar3 = (uint32_t *)
            (uint32_t)(uint16_t)((uint16_t)(local_3c < 0.28) << 8 | (uint16_t)(local_3c == 0.28) << 0xe);
   if (local_3c < 0.28 == 0 && (local_3c == 0.28) == 0) {
-    puVar4 = (uint32_t *)
+    puVar3 = (uint32_t *)
              (uint32_t)(uint16_t)((uint16_t)(local_3c < 0.46) << 8 | (uint16_t)NAN(local_3c) << 10 |
                            (uint16_t)(local_3c == 0.46) << 0xe);
     if (local_3c < 0.46) {
-      puVar4 = (uint32_t *)
+      puVar3 = (uint32_t *)
                (uint32_t)(uint16_t)((uint16_t)(local_38 < -0.3) << 8 | (uint16_t)NAN(local_38) << 10 |
                              (uint16_t)(local_38 == -0.3) << 0xe);
       if (((local_38 < -0.3) &&
-          (puVar4 = (uint32_t *)
+          (puVar3 = (uint32_t *)
                     (uint32_t)(uint16_t)((uint16_t)(local_38 < -0.68) << 8 |
                                   (uint16_t)(local_38 == -0.68) << 0xe),
           local_38 < -0.68 == 0 && (local_38 == -0.68) == 0)) && (iVar1 == 0)) {
-        puVar4 = C_MainMenu__FUN_0066da30(param_1,*(uint32_t *)(*(int *)((int)param_1 + 0xf4) + 0x34));
-        if ((puVar4 != 0) && ((puVar4[0x18] & 0xff000) == 0x7000)) {
-          puVar2 = (uint32_t *)puVar4[0x17];
-          puVar4 = *(uint32_t **)((int)param_1 + 0x40);
-          if (puVar4 != puVar2) {
-            FUN_00619780((void *)(*(int *)((int)param_1 + 0x1e4) + 0x30),(int)puVar4,(int)puVar2);
+        puVar3 = C_MainMenu__FUN_0066da30(param_1,*(uint32_t *)(*(int *)((int)param_1 + 0xf4) + 0x34));
+        if ((puVar3 != 0) && ((puVar3[0x18] & 0xff000) == 0x7000)) {
+          puVar2 = (uint32_t *)puVar3[0x17];
+          puVar3 = *(uint32_t **)((int)param_1 + 0x40);
+          if (puVar3 != puVar2) {
+            FUN_00619780((void *)(*(int *)((int)param_1 + 0x1e4) + 0x30),(int)puVar3,(int)puVar2);
             *(uint32_t **)((int)param_1 + 0x40) = puVar2;
-            puVar4 = (uint32_t *)FUN_0062c780((int)param_1);
+            puVar3 = (uint32_t *)FUN_0062c780((int)param_1);
           }
         }
       }
     }
   }
-  return CONCAT31((int3)((uint32_t)puVar4 >> 8),1);
+  return CONCAT31((int3)((uint32_t)puVar3 >> 8),1);
 }
 
 
@@ -3699,7 +3699,7 @@ uint32_t FUN_0062eb60(void *param_1, ...)
   }
   bVar6 = *(int *)((int)param_1 + 0x44) != 0;
   *(uint32_t *)((int)param_1 + 0xec) = 0;
-  FUN_0066a420(*(void **)((int)param_1 + 0xf4),&local_20);
+  C_Cursor__GetPosition(*(C_Cursor **)((int)param_1 + 0xf4),&local_20);
   if ((((local_20 <= 0.08) || (0.26 <= local_20)) || (-0.3 <= fStack_1c)) || (fStack_1c <= -0.68)) {
     bVar2 = false;
   }

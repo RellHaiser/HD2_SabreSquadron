@@ -28528,6 +28528,11 @@
   "name": "HasCjkCharacters",
   "proto": "bool __fastcall HasCjkCharacters(ushort * text)"
  },
+ "0064db20": {
+  "module": "controls",
+  "name": "C_HotKeyControl::Create",
+  "proto": "bool __thiscall Create(C_HotKeyControl *this, void * frame, void * root, void * desc)"
+ },
  "0064dce0": {
   "module": "control",
   "name": "C_Control::IsChild",
@@ -28711,10 +28716,110 @@
   "name": "C_EditControl::~C_EditControl",
   "proto": "void __thiscall ~C_EditControl(C_EditControl *this)"
  },
+ "0064e850": {
+  "module": "controls",
+  "name": "C_HotKeyControl::Tick",
+  "proto": "void __thiscall Tick(C_HotKeyControl *this, int time)"
+ },
+ "0064ea90": {
+  "module": "controls",
+  "name": "C_HotKeyControl::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_HotKeyControl *this, int key)"
+ },
+ "0064eac0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_HotKeyControl *this, void * message)"
+ },
+ "0064ed40": {
+  "module": "controls",
+  "name": "C_HotKeyControl::OnEnter",
+  "proto": "int __thiscall OnEnter(C_HotKeyControl *this, int id)"
+ },
+ "0064ed70": {
+  "module": "controls",
+  "name": "C_HotKeyControl::OnLeave",
+  "proto": "int __thiscall OnLeave(C_HotKeyControl *this, int id)"
+ },
+ "0064edb0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::OnInput02",
+  "proto": "int __thiscall OnInput02(C_HotKeyControl *this, int id)"
+ },
+ "0064eea0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::OnPress",
+  "proto": "int __thiscall OnPress(C_HotKeyControl *this, int id)"
+ },
+ "0064eeb0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(C_HotKeyControl *this, int id)"
+ },
+ "0064eec0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::OnClick",
+  "proto": "int __thiscall OnClick(C_HotKeyControl *this, int id)"
+ },
+ "0064efd0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::SetInactive",
+  "proto": "void __thiscall SetInactive(C_HotKeyControl *this, bool inactive)"
+ },
+ "0064f000": {
+  "module": "controls",
+  "name": "C_HotKeyControl::Refresh",
+  "proto": "void __thiscall Refresh(C_HotKeyControl *this)"
+ },
+ "0064f020": {
+  "module": "controls",
+  "name": "C_TitledEditBox::Create",
+  "proto": "bool __thiscall Create(C_HotKeyControl *this, void * frame, void * root, void * desc)"
+ },
  "0064f220": {
   "module": "controls",
   "name": "C_TextControl::C_TextControl",
   "proto": "void * __thiscall C_TextControl(C_TextControl *this, void * scene, uint id, void * parent)"
+ },
+ "0064f2d0": {
+  "module": "controls",
+  "name": "C_TitledEditBox::Tick",
+  "proto": "void __thiscall Tick(C_HotKeyControl *this, int time)"
+ },
+ "0064f2f0": {
+  "module": "controls",
+  "name": "C_TitledEditBox::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_HotKeyControl *this, int key)"
+ },
+ "0064f300": {
+  "module": "controls",
+  "name": "C_TitledEditBox::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_HotKeyControl *this, void * message)"
+ },
+ "0064f430": {
+  "module": "controls",
+  "name": "C_TitledEditBox::OnInput02",
+  "proto": "int __thiscall OnInput02(C_HotKeyControl *this, int id)"
+ },
+ "0064f440": {
+  "module": "controls",
+  "name": "C_TitledEditBox::OnClick",
+  "proto": "int __thiscall OnClick(C_HotKeyControl *this, int id)"
+ },
+ "0064f450": {
+  "module": "controls",
+  "name": "C_TitledEditBox::OnPress",
+  "proto": "int __thiscall OnPress(C_HotKeyControl *this, int id)"
+ },
+ "0064f460": {
+  "module": "controls",
+  "name": "C_TitledEditBox::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(C_HotKeyControl *this, int id)"
+ },
+ "0064f470": {
+  "module": "controls",
+  "name": "C_TitledEditBox::OnLeave",
+  "proto": "int __thiscall OnLeave(C_HotKeyControl *this, int id)"
  },
  "0064f4a0": {
   "module": "controls",
@@ -28896,6 +29001,31 @@
   "name": "C_Tooltip::Tick",
   "proto": "void __thiscall Tick(C_Tooltip *this, int time)"
  },
+ "00651810": {
+  "module": "controls",
+  "name": "C_ItemPictures::Create",
+  "proto": "bool __thiscall Create(C_ControlGroup *this, void * frame, void * root, void * desc)"
+ },
+ "00651af0": {
+  "module": "controls",
+  "name": "C_ItemPictures::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ControlGroup *this, void * message)"
+ },
+ "00651ea0": {
+  "module": "controls",
+  "name": "C_ItemPictures::UpdateCounts",
+  "proto": "void __fastcall UpdateCounts(C_ControlGroup *this)"
+ },
+ "00652190": {
+  "module": "controls",
+  "name": "C_ItemPictures::Refresh",
+  "proto": "void __thiscall Refresh(C_ControlGroup *this)"
+ },
+ "006521c0": {
+  "module": "controls",
+  "name": "C_ItemPictures::FindChild",
+  "proto": "int __thiscall FindChild(C_ControlGroup *this, uint id)"
+ },
  "006521f0": {
   "module": "controls",
   "name": "C_SideIndicator::Create",
@@ -29012,6 +29142,31 @@
  "00653ea0": {
   "module": "zz_idioms",
   "name": "copy4_653ea0"
+ },
+ "00653f70": {
+  "module": "controls",
+  "name": "C_ListItem::OnEnter",
+  "proto": "int __thiscall OnEnter(C_TextButton *this, int id)"
+ },
+ "00653fa0": {
+  "module": "controls",
+  "name": "C_ListItem::OnLeave",
+  "proto": "int __thiscall OnLeave(C_TextButton *this, int id)"
+ },
+ "00653fd0": {
+  "module": "controls",
+  "name": "C_ListItem::OnClick",
+  "proto": "int __thiscall OnClick(C_TextButton *this, int id)"
+ },
+ "00654010": {
+  "module": "controls",
+  "name": "C_ListItem::OnInput02",
+  "proto": "int __thiscall OnInput02(C_TextButton *this, int id)"
+ },
+ "00654040": {
+  "module": "controls",
+  "name": "C_ListItem::OnPress",
+  "proto": "int __thiscall OnPress(C_TextButton *this, int id)"
  },
  "00654060": {
   "module": "controls",
@@ -29196,6 +29351,76 @@
  "00655660": {
   "module": "zz_idioms",
   "name": "vector_clear_655660"
+ },
+ "006556c0": {
+  "module": "controls",
+  "name": "C_ListGroup::FocusPrevious",
+  "proto": "bool __thiscall FocusPrevious(C_ListGroup *this)"
+ },
+ "00655750": {
+  "module": "controls",
+  "name": "C_ListGroup::FocusNext",
+  "proto": "bool __thiscall FocusNext(C_ListGroup *this)"
+ },
+ "006557d0": {
+  "module": "controls",
+  "name": "C_ListGroup::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_ListGroup *this, int key)"
+ },
+ "00655b40": {
+  "module": "controls",
+  "name": "C_ListGroup::Create",
+  "proto": "bool __thiscall Create(C_ListGroup *this, void * frame, void * root, void * desc)"
+ },
+ "00655bc0": {
+  "module": "controls",
+  "name": "C_ListGroup::Sort",
+  "proto": "void __thiscall Sort(C_ListGroup *this)"
+ },
+ "00655c70": {
+  "module": "controls",
+  "name": "C_ListGroup::Layout",
+  "proto": "void __thiscall Layout(C_ListGroup *this, int unused)"
+ },
+ "00655db0": {
+  "module": "controls",
+  "name": "C_ListGroup::OnPress",
+  "proto": "int __thiscall OnPress(C_ListGroup *this, int id)"
+ },
+ "00655de0": {
+  "module": "controls",
+  "name": "C_ListGroup::OnClick",
+  "proto": "int __thiscall OnClick(C_ListGroup *this, int id)"
+ },
+ "00655e10": {
+  "module": "controls",
+  "name": "C_ListGroup::Select",
+  "proto": "void __thiscall Select(C_ListGroup *this, int index)"
+ },
+ "00655fe0": {
+  "module": "controls",
+  "name": "C_ListGroup::OnWheel",
+  "proto": "int __thiscall OnWheel(C_ListGroup *this, int id, int amount)"
+ },
+ "00656130": {
+  "module": "controls",
+  "name": "C_ListGroup::ScrollRange",
+  "proto": "int __thiscall ScrollRange(C_ListGroup *this)"
+ },
+ "00656230": {
+  "module": "controls",
+  "name": "C_ListGroup::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ListGroup *this, void * message)"
+ },
+ "006569f0": {
+  "module": "controls",
+  "name": "C_ListGroup::PickItem",
+  "proto": "bool __thiscall PickItem(C_ListGroup *this, void * item)"
+ },
+ "00656a20": {
+  "module": "controls",
+  "name": "C_ListGroup::Scroll",
+  "proto": "bool __thiscall Scroll(C_ListGroup *this, int direction)"
  },
  "00656dc0": {
   "module": "controls",
@@ -29492,9 +29717,79 @@
   "name": "C_ComboBox::SetStrings",
   "proto": "void __thiscall SetStrings(C_ComboBox *this, void * strings)"
  },
+ "00659d50": {
+  "module": "controls",
+  "name": "C_HidingList::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_HidingList *this, void * message)"
+ },
+ "0065a0c0": {
+  "module": "controls",
+  "name": "C_HidingList::FindHidden",
+  "proto": "int __thiscall FindHidden(C_HidingList *this, uint id)"
+ },
+ "0065a100": {
+  "module": "controls",
+  "name": "C_PoolList::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_HidingList *this, void * message)"
+ },
+ "0065a4d0": {
+  "module": "controls",
+  "name": "C_PoolList::OnInput0A",
+  "proto": "int __thiscall OnInput0A(C_HidingList *this, int id)"
+ },
+ "0065a510": {
+  "module": "controls",
+  "name": "C_PoolList::OnInput08",
+  "proto": "int __thiscall OnInput08(C_HidingList *this, int id)"
+ },
+ "0065a530": {
+  "module": "controls",
+  "name": "C_PoolList::OnInput09",
+  "proto": "int __thiscall OnInput09(C_HidingList *this, int id)"
+ },
  "0065a5a0": {
   "module": "zz_idioms",
   "name": "vector_tidy_65a5a0"
+ },
+ "0065a620": {
+  "module": "controls",
+  "name": "C_PlayerList::Create",
+  "proto": "bool __thiscall Create(C_ComboBox *this, void * frame, void * root, void * desc)"
+ },
+ "0065a850": {
+  "module": "controls",
+  "name": "C_PlayerList::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ComboBox *this, void * message)"
+ },
+ "0065acb0": {
+  "module": "controls",
+  "name": "C_PlayerList::OnEnter",
+  "proto": "int __thiscall OnEnter(C_ComboBox *this, int id)"
+ },
+ "0065ad30": {
+  "module": "controls",
+  "name": "C_PlayerList::OnLeave",
+  "proto": "int __thiscall OnLeave(C_ComboBox *this, int id)"
+ },
+ "0065ad70": {
+  "module": "controls",
+  "name": "C_PlayerList::OnInput05",
+  "proto": "int __thiscall OnInput05(C_ComboBox *this, int id)"
+ },
+ "0065add0": {
+  "module": "controls",
+  "name": "C_PlayerList::OnPress",
+  "proto": "int __thiscall OnPress(C_ComboBox *this, int id)"
+ },
+ "0065ae10": {
+  "module": "controls",
+  "name": "C_PlayerList::FindChild",
+  "proto": "int __thiscall FindChild(C_ComboBox *this, uint id)"
+ },
+ "0065ae30": {
+  "module": "controls",
+  "name": "C_PlayerList::SetInactive",
+  "proto": "void __thiscall SetInactive(C_ComboBox *this, bool inactive)"
  },
  "0065ae60": {
   "module": "zz_idioms",
@@ -29743,6 +30038,46 @@
   "name": "C_Slider::~C_Slider",
   "proto": "void __thiscall ~C_Slider(C_Slider *this)"
  },
+ "0065e760": {
+  "module": "controls",
+  "name": "C_ListGroup::C_ListGroup",
+  "proto": "void __thiscall C_ListGroup(C_ListGroup *this, void * scene, uint id, void * parent)"
+ },
+ "0065e840": {
+  "module": "controls",
+  "name": "C_ListGroup::~C_ListGroup",
+  "proto": "void __thiscall ~C_ListGroup(C_ListGroup *this)"
+ },
+ "0065ea40": {
+  "module": "controls",
+  "name": "C_ListGroup::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ListGroup *this, uchar flags)"
+ },
+ "0065ea60": {
+  "module": "controls",
+  "name": "C_HidingList::C_HidingList",
+  "proto": "void * __thiscall C_HidingList(C_HidingList *this, void * scene, uint id, void * parent)"
+ },
+ "0065eb40": {
+  "module": "controls",
+  "name": "C_HidingList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_HidingList *this, uchar flags)"
+ },
+ "0065eb60": {
+  "module": "controls",
+  "name": "C_HidingList::~C_HidingList",
+  "proto": "void __thiscall ~C_HidingList(C_HidingList *this)"
+ },
+ "0065ee00": {
+  "module": "controls",
+  "name": "C_PoolList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_HidingList *this, uchar flags)"
+ },
+ "0065ee20": {
+  "module": "controls",
+  "name": "C_PoolList::~C_PoolList",
+  "proto": "void __thiscall ~C_PoolList(C_HidingList *this)"
+ },
  "0065efe0": {
   "module": "controls",
   "name": "C_ChatInput::ScalarDeletingDestructor",
@@ -29762,6 +30097,16 @@
   "module": "controls",
   "name": "C_ComboBox::~C_ComboBox",
   "proto": "void __thiscall ~C_ComboBox(C_ComboBox *this)"
+ },
+ "0065f420": {
+  "module": "controls",
+  "name": "C_PlayerList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ComboBox *this, uchar flags)"
+ },
+ "0065f440": {
+  "module": "controls",
+  "name": "C_PlayerList::~C_PlayerList",
+  "proto": "void __thiscall ~C_PlayerList(C_ComboBox *this)"
  },
  "0065f610": {
   "module": "controls",
@@ -29793,6 +30138,31 @@
   "name": "C_Tooltip::~C_Tooltip",
   "proto": "void __thiscall ~C_Tooltip(C_Tooltip *this)"
  },
+ "0065fa40": {
+  "module": "controls",
+  "name": "C_BarControl::C_BarControl",
+  "proto": "void __thiscall C_BarControl(C_BarControl *this, void * scene, uint id, void * parent)"
+ },
+ "0065faf0": {
+  "module": "controls",
+  "name": "C_BarControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_BarControl *this, uchar flags)"
+ },
+ "0065fb10": {
+  "module": "controls",
+  "name": "C_BarControl::~C_BarControl",
+  "proto": "void __thiscall ~C_BarControl(C_BarControl *this)"
+ },
+ "0065fc30": {
+  "module": "controls",
+  "name": "C_UpgradeBar::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_UpgradeBar *this, uchar flags)"
+ },
+ "0065fc50": {
+  "module": "controls",
+  "name": "C_UpgradeBar::~C_UpgradeBar",
+  "proto": "void __thiscall ~C_UpgradeBar(C_UpgradeBar *this)"
+ },
  "0065fd80": {
   "module": "controls",
   "name": "C_PagesControl::ScalarDeletingDestructor",
@@ -29822,6 +30192,16 @@
   "module": "controls",
   "name": "C_TextButton::~C_TextButton",
   "proto": "void __thiscall ~C_TextButton(C_TextButton *this)"
+ },
+ "006601b0": {
+  "module": "controls",
+  "name": "C_ListItem::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_TextButton *this, uchar flags)"
+ },
+ "006601d0": {
+  "module": "controls",
+  "name": "C_ListItem::~C_ListItem",
+  "proto": "void __thiscall ~C_ListItem(C_TextButton *this)"
  },
  "00660310": {
   "module": "controls",
@@ -29853,6 +30233,41 @@
   "name": "C_SpinControl::~C_SpinControl",
   "proto": "void __thiscall ~C_SpinControl(C_SpinControl *this)"
  },
+ "00660770": {
+  "module": "controls",
+  "name": "C_HotKeyControl::SetBinding",
+  "proto": "void __thiscall SetBinding(C_HotKeyControl *this, int binding)"
+ },
+ "00660780": {
+  "module": "controls",
+  "name": "C_HotKeyControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_HotKeyControl *this, uchar flags)"
+ },
+ "006607a0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::~C_HotKeyControl",
+  "proto": "void __thiscall ~C_HotKeyControl(C_HotKeyControl *this)"
+ },
+ "006608f0": {
+  "module": "controls",
+  "name": "C_TitledEditBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_HotKeyControl *this, uchar flags)"
+ },
+ "00660910": {
+  "module": "controls",
+  "name": "C_TitledEditBox::~C_TitledEditBox",
+  "proto": "void __thiscall ~C_TitledEditBox(C_HotKeyControl *this)"
+ },
+ "00660a60": {
+  "module": "controls",
+  "name": "C_ItemPictures::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ControlGroup *this, uchar flags)"
+ },
+ "00660a80": {
+  "module": "controls",
+  "name": "C_ItemPictures::~C_ItemPictures",
+  "proto": "void __thiscall ~C_ItemPictures(C_ControlGroup *this)"
+ },
  "00660c30": {
   "module": "controls",
   "name": "C_ItemInfo::ScalarDeletingDestructor",
@@ -29882,6 +30297,46 @@
   "module": "controls",
   "name": "C_MarkBox::~C_MarkBox",
   "proto": "void __thiscall ~C_MarkBox(C_MarkBox *this)"
+ },
+ "006610c0": {
+  "module": "controls",
+  "name": "C_MovieControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_MovieControl *this, uchar flags)"
+ },
+ "006610e0": {
+  "module": "controls",
+  "name": "C_MovieControl::~C_MovieControl",
+  "proto": "void __thiscall ~C_MovieControl(C_MovieControl *this)"
+ },
+ "00661210": {
+  "module": "controls",
+  "name": "C_ServerList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ServerList *this, uchar flags)"
+ },
+ "00661230": {
+  "module": "controls",
+  "name": "C_ServerList::~C_ServerList",
+  "proto": "void __thiscall ~C_ServerList(C_ServerList *this)"
+ },
+ "006613e0": {
+  "module": "controls",
+  "name": "C_CheckGroup::FindChild",
+  "proto": "int __thiscall FindChild(C_ControlGroup *this, uint id)"
+ },
+ "006613f0": {
+  "module": "controls",
+  "name": "C_CheckGroup::Create",
+  "proto": "bool __thiscall Create(C_ControlGroup *this, void * frame, void * root, void * desc)"
+ },
+ "00661550": {
+  "module": "controls",
+  "name": "C_CheckGroup::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ControlGroup *this, uchar flags)"
+ },
+ "00661570": {
+  "module": "controls",
+  "name": "C_CheckGroup::~C_CheckGroup",
+  "proto": "void __thiscall ~C_CheckGroup(C_ControlGroup *this)"
  },
  "00661720": {
   "module": "controls",
@@ -30045,6 +30500,41 @@
   "module": "controls",
   "name": "C_EditControl::BeginEdit",
   "proto": "int __thiscall BeginEdit(C_EditControl *this, int value)"
+ },
+ "00662e70": {
+  "module": "controls",
+  "name": "C_BarControl::UpdateBar",
+  "proto": "void __thiscall UpdateBar(C_BarControl *this)"
+ },
+ "006630a0": {
+  "module": "controls",
+  "name": "C_BarControl::Create",
+  "proto": "bool __thiscall Create(C_BarControl *this, void * frame, void * root, void * desc)"
+ },
+ "006630e0": {
+  "module": "controls",
+  "name": "C_BarControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_BarControl *this, void * message)"
+ },
+ "006631a0": {
+  "module": "controls",
+  "name": "C_UpgradeBar::UpdateBar",
+  "proto": "void __thiscall UpdateBar(C_UpgradeBar *this)"
+ },
+ "00663700": {
+  "module": "controls",
+  "name": "C_UpgradeBar::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_UpgradeBar *this, void * message)"
+ },
+ "00663880": {
+  "module": "controls",
+  "name": "C_UpgradeBar::Create",
+  "proto": "bool __thiscall Create(C_UpgradeBar *this, void * frame, void * root, void * desc)"
+ },
+ "00663a90": {
+  "module": "controls",
+  "name": "C_UpgradeBar::Refresh",
+  "proto": "void __thiscall Refresh(C_UpgradeBar *this)"
  },
  "00663ad0": {
   "module": "zz_idioms",
@@ -30266,17 +30756,270 @@
   "name": "C_ScrollBar::Tick",
   "proto": "void __thiscall Tick(void *this, int time)"
  },
+ "00665d70": {
+  "module": "controls",
+  "name": "C_ServerRow::Create",
+  "proto": "bool __thiscall Create(C_TextButton *this, void * frame, void * root, void * desc)"
+ },
+ "00665f90": {
+  "module": "controls",
+  "name": "C_ServerRow::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_TextButton *this, void * message)"
+ },
+ "00666630": {
+  "module": "controls",
+  "name": "C_ServerList::RowNotified",
+  "proto": "bool __thiscall RowNotified(C_ServerList *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00666650": {
+  "module": "controls",
+  "name": "C_ServerList::RowClicked",
+  "proto": "bool __thiscall RowClicked(C_ServerList *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006666f0": {
+  "module": "controls",
+  "name": "C_ServerList::Create",
+  "proto": "bool __thiscall Create(C_ServerList *this, void * frame, void * root, void * desc)"
+ },
+ "00666ad0": {
+  "module": "controls",
+  "name": "C_ServerRow::C_ServerRow",
+  "proto": "void __thiscall C_ServerRow(C_TextButton *this, void * scene, uint id, void * parent)"
+ },
+ "00666b80": {
+  "module": "controls",
+  "name": "C_ServerRow::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_TextButton *this, uchar flags)"
+ },
+ "00666ba0": {
+  "module": "controls",
+  "name": "C_ServerRow::~C_ServerRow",
+  "proto": "void __thiscall ~C_ServerRow(C_TextButton *this)"
+ },
+ "00666cf0": {
+  "module": "controls",
+  "name": "C_ServerList::ScrollRange",
+  "proto": "int __thiscall ScrollRange(C_ServerList *this)"
+ },
+ "00666e80": {
+  "module": "controls",
+  "name": "C_ServerList::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ServerList *this, void * message)"
+ },
+ "006675a0": {
+  "module": "controls",
+  "name": "ServerPingLess",
+  "proto": "bool __fastcall ServerPingLess(void * a, void * b)"
+ },
+ "006675b0": {
+  "module": "controls",
+  "name": "ServerPingGreater",
+  "proto": "bool __fastcall ServerPingGreater(void * a, void * b)"
+ },
+ "006675c0": {
+  "module": "controls",
+  "name": "ServerNameLess",
+  "proto": "bool __fastcall ServerNameLess(void * a, void * b)"
+ },
+ "006675e0": {
+  "module": "controls",
+  "name": "ServerNameGreater",
+  "proto": "bool __fastcall ServerNameGreater(void * a, void * b)"
+ },
+ "00667600": {
+  "module": "controls",
+  "name": "ServerMapLess",
+  "proto": "bool __fastcall ServerMapLess(void * a, void * b)"
+ },
+ "00667640": {
+  "module": "controls",
+  "name": "ServerMapGreater",
+  "proto": "bool __fastcall ServerMapGreater(void * a, void * b)"
+ },
+ "00667680": {
+  "module": "controls",
+  "name": "ServerTypeLess",
+  "proto": "bool __fastcall ServerTypeLess(void * a, void * b)"
+ },
+ "006676a0": {
+  "module": "controls",
+  "name": "ServerTypeGreater",
+  "proto": "bool __fastcall ServerTypeGreater(void * a, void * b)"
+ },
+ "006676c0": {
+  "module": "controls",
+  "name": "ServerPlayersLess",
+  "proto": "bool __fastcall ServerPlayersLess(void * a, void * b)"
+ },
+ "006676f0": {
+  "module": "controls",
+  "name": "ServerPlayersGreater",
+  "proto": "bool __fastcall ServerPlayersGreater(void * a, void * b)"
+ },
+ "00667720": {
+  "module": "controls",
+  "name": "C_ServerList::Comparison",
+  "proto": "void * __fastcall Comparison(C_ServerList *this)"
+ },
+ "006677c0": {
+  "module": "controls",
+  "name": "C_ServerList::SortEntries",
+  "proto": "void __thiscall SortEntries(C_ServerList *this, uint key)"
+ },
+ "00667b10": {
+  "module": "controls",
+  "name": "C_ServerList::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_ServerList *this, int key)"
+ },
  "00667b20": {
-  "module": "zz_idioms",
-  "name": "empty_function_667b20"
+  "module": "controls",
+  "name": "C_ServerList::Tick",
+  "proto": "void __thiscall Tick(C_ServerList *this, int time)"
+ },
+ "00667b30": {
+  "module": "controls",
+  "name": "msvc6::Sort",
+  "proto": "void __fastcall Sort(void * first, void * last, void * pred)"
+ },
+ "00667e20": {
+  "module": "controls",
+  "name": "msvc6::SortRuns",
+  "proto": "void __fastcall SortRuns(void * first, void * last, void * pred)"
+ },
+ "00667f40": {
+  "module": "controls",
+  "name": "msvc6::UnguardedPartition",
+  "proto": "void * __fastcall UnguardedPartition(void * first, void * last, void * pivot, void * pred)"
+ },
+ "00667f90": {
+  "module": "controls",
+  "name": "C_MovieControl::FindArea",
+  "proto": "bool __fastcall FindArea(C_MovieControl * control)"
+ },
+ "00668050": {
+  "module": "controls",
+  "name": "C_MovieControl::FitRect",
+  "proto": "void __thiscall FitRect(C_MovieControl *this)"
+ },
+ "00668140": {
+  "module": "controls",
+  "name": "C_MovieControl::Create",
+  "proto": "bool __thiscall Create(C_MovieControl *this, void * frame, void * root, void * desc)"
+ },
+ "006681a0": {
+  "module": "controls",
+  "name": "C_MovieControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_MovieControl *this, void * message)"
+ },
+ "00668300": {
+  "module": "controls",
+  "name": "C_MovieControl::Refresh",
+  "proto": "void __thiscall Refresh(C_MovieControl *this)"
+ },
+ "006683c0": {
+  "module": "controls",
+  "name": "C_MovieControl::CloseStream",
+  "proto": "void __fastcall CloseStream(C_MovieControl * control)"
+ },
+ "0066a2f0": {
+  "module": "cursor",
+  "name": "C_Cursor::HasMoved",
+  "proto": "bool __fastcall HasMoved(C_Cursor * cursor)"
+ },
+ "0066a320": {
+  "module": "cursor",
+  "name": "C_Cursor::GetWheel",
+  "proto": "float __fastcall GetWheel(C_Cursor * cursor)"
+ },
+ "0066a330": {
+  "module": "cursor",
+  "name": "C_Cursor::HasWheel",
+  "proto": "bool __fastcall HasWheel(C_Cursor * cursor)"
+ },
+ "0066a350": {
+  "module": "cursor",
+  "name": "C_Cursor::Matches",
+  "proto": "bool __cdecl Matches(uint buttons, uint state)"
+ },
+ "0066a380": {
+  "module": "cursor",
+  "name": "C_Cursor::WasButtonDown",
+  "proto": "bool __thiscall WasButtonDown(C_Cursor *this, uint buttons)"
+ },
+ "0066a3a0": {
+  "module": "cursor",
+  "name": "C_Cursor::IsButtonDown",
+  "proto": "bool __thiscall IsButtonDown(C_Cursor *this, uint buttons)"
+ },
+ "0066a3c0": {
+  "module": "cursor",
+  "name": "C_Cursor::IsPressed",
+  "proto": "bool __thiscall IsPressed(C_Cursor *this, uint buttons)"
+ },
+ "0066a3f0": {
+  "module": "cursor",
+  "name": "C_Cursor::IsReleased",
+  "proto": "bool __thiscall IsReleased(C_Cursor *this, uint buttons)"
+ },
+ "0066a420": {
+  "module": "cursor",
+  "name": "C_Cursor::GetPosition",
+  "proto": "void __thiscall GetPosition(C_Cursor *this, void * position)"
+ },
+ "0066a450": {
+  "module": "cursor",
+  "name": "C_Cursor::GetMove",
+  "proto": "void __thiscall GetMove(C_Cursor *this, void * move)"
+ },
+ "0066a480": {
+  "module": "cursor",
+  "name": "C_Cursor::GetScreenPosition",
+  "proto": "void __thiscall GetScreenPosition(C_Cursor *this, float * x, float * y, float * buttons)"
+ },
+ "0066a520": {
+  "module": "cursor",
+  "name": "C_Cursor::Update",
+  "proto": "bool __thiscall Update(C_Cursor *this, int time)"
+ },
+ "0066a7b0": {
+  "module": "cursor",
+  "name": "C_Cursor::Reset",
+  "proto": "void __fastcall Reset(C_Cursor * cursor)"
+ },
+ "0066a7e0": {
+  "module": "cursor",
+  "name": "C_Cursor::Init",
+  "proto": "bool __thiscall Init(C_Cursor *this, void * scene)"
+ },
+ "0066a9e0": {
+  "module": "cursor",
+  "name": "C_Cursor::Acquire",
+  "proto": "void * __fastcall Acquire(void * scene)"
+ },
+ "0066aa50": {
+  "module": "cursor",
+  "name": "C_Cursor::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Cursor *this, uchar flags)"
+ },
+ "0066aa80": {
+  "module": "cursor",
+  "name": "C_Cursor::Release",
+  "proto": "void __fastcall Release(C_Cursor * cursor)"
+ },
+ "0066aac0": {
+  "module": "cursor",
+  "name": "C_Cursor::Pick",
+  "proto": "void __thiscall Pick(C_Cursor *this, void * scene, void * frame)"
  },
  "0066ab50": {
-  "module": "zz_idioms",
-  "name": "set_field_44_66ab50"
+  "module": "cursor",
+  "name": "C_Cursor::SetDelay",
+  "proto": "void __thiscall SetDelay(C_Cursor *this, int time)"
  },
  "0066ab60": {
-  "module": "zz_idioms",
-  "name": "set_field_48_66ab60"
+  "module": "cursor",
+  "name": "C_Cursor::SetClicksOff",
+  "proto": "void __thiscall SetClicksOff(C_Cursor *this, bool off)"
  },
  "0066ede0": {
   "module": "game_app",
@@ -40149,6 +40892,18 @@
   "name": "g_vehicleSoundVolume",
   "type": "float"
  },
+ "00840668": {
+  "data": true,
+  "module": "cursor",
+  "name": "g_cursorX",
+  "type": "float"
+ },
+ "0084066c": {
+  "data": true,
+  "module": "cursor",
+  "name": "g_cursorY",
+  "type": "float"
+ },
  "00842570": {
   "data": true,
   "module": "profile",
@@ -40806,6 +41561,12 @@
   "data": true,
   "module": "script",
   "name": "g_junkers88Setup"
+ },
+ "008ae558": {
+  "data": true,
+  "module": "cursor",
+  "name": "g_cursor",
+  "type": "C_Cursor *"
  },
  "008ae8f4": {
   "data": true,

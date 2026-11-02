@@ -439,14 +439,14 @@ class C_ControlGroup size=0x78 vtable=0x00814430:33
   0x074 uint32_t m_074
 end
 
-class C_auto_00814540 size=0x4 vtable=0x00814540:33
+class C_MovieControl size=0x4 vtable=0x00814540:33
 end
 
 class C_MarkBox size=0x89 vtable=0x00814650:33
   0x088 uint8_t m_088
 end
 
-class C_auto_00814760 size=0x8c vtable=0x00814760:34
+class C_UpgradeBar size=0x8c vtable=0x00814760:34
   0x00c void* m_00c
   0x060 uint32_t m_060
   0x065 int8_t m_065
@@ -457,7 +457,7 @@ class C_auto_00814760 size=0x8c vtable=0x00814760:34
   0x088 uint32_t m_088
 end
 
-class C_auto_008147e8 size=0x7c vtable=0x008147e8:67
+class C_BarControl size=0x7c vtable=0x008147e8:67
   0x06c uint32_t m_06c
   0x070 uint32_t m_070
   0x074 uint32_t m_074
@@ -467,14 +467,14 @@ end
 class C_Tooltip size=0x4 vtable=0x008148f8:33
 end
 
-class C_auto_00814980 size=0xb4 vtable=0x00814980:34
+class C_ServerList size=0xb4 vtable=0x00814980:34
   0x06c int m_06c
   0x0a4 uint32_t m_0a4
   0x0ac int m_0ac
   0x0b0 void* m_0b0
 end
 
-class C_auto_00814a08 size=0x4 vtable=0x00814a08:67
+class C_HidingList size=0x4 vtable=0x00814a08:67
 end
 
 class C_SkillControl size=0x8c vtable=0x00814ba0:33
@@ -497,10 +497,10 @@ class C_ComboBox size=0x7d vtable=0x00814e48:33
   0x07c int8_t m_07c
 end
 
-class C_auto_00814fe0 size=0x4 vtable=0x00814fe0:34
+class C_HotKeyControl size=0x4 vtable=0x00814fe0:34
 end
 
-class C_auto_00815068 size=0x4 vtable=0x00815068:67
+class C_ListGroup size=0x4 vtable=0x00815068:67
 end
 
 class C_Slider size=0x4 vtable=0x00815288:33
@@ -544,7 +544,7 @@ end
 class C_auto_00815540 size=0x4 vtable=0x00815540:36
 end
 
-class C_auto_008155d0 size=0x4 vtable=0x008155d0:1
+class C_Cursor size=0x4 vtable=0x008155d0:1
 end
 
 class C_auto_008156b8 size=0x89 vtable=0x008156b8:36

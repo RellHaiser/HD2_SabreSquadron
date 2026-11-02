@@ -2712,11 +2712,11 @@ uint32_t C_GameMenu__FUN_00682210(C_GameMenu *_this, ...)
   float fVar1;
   float fVar2;
   uint32_t in_EAX;
-  float *pfVar3;
+  float *extraout_EAX;
   float local_30;
   float local_2c;
   float local_28;
-  float local_20 [7];
+  uint8_t local_20 [28];
   if (*(int *)(_this->_pad_0138 + 0x88) != -1) {
     this_00 = *(I3D_frame **)(_this->_pad_0138 + 0x7c);
     if ((this_00->m_frameFlags & 0x20) == 0) {
@@ -2724,10 +2724,10 @@ uint32_t C_GameMenu__FUN_00682210(C_GameMenu *_this, ...)
     }
     fVar1 = (this_00->m_worldMatrix).m[3][0];
     fVar2 = (this_00->m_worldMatrix).m[3][1];
-    pfVar3 = (float *)FUN_0066a450(_this->m_0f4,local_20);
-    local_28 = pfVar3[2];
-    local_2c = fVar2 + pfVar3[1];
-    local_30 = fVar1 + *pfVar3;
+    C_Cursor__GetMove(_this->m_0f4,local_20);
+    local_28 = extraout_EAX[2];
+    local_2c = fVar2 + extraout_EAX[1];
+    local_30 = fVar1 + *extraout_EAX;
     (**(code **)(**(int **)(_this->_pad_0138 + 0x7c) + 8))
               (*(int **)(_this->_pad_0138 + 0x7c),&local_30);
     in_EAX = (**(code **)(**(int **)(_this->_pad_0138 + 0x7c) + 0x24))

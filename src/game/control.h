@@ -173,6 +173,8 @@ public:
     // (the notification bits cleared) posted to its target, or handled by the control (-1).
     void Notify(uint32_t notification, uint32_t value);   // 0x0065d270
     uint32_t GetId() const { return m_id; }
+    I3D_frame *GetFrame() const { return m_frame; }
+    int GetIndex() const { return m_index; }
     bool IsInactive() const { return m_inactive; }
     // The control with `id` among this one's descendants (`up`: first up the parents to the top,
     // then down; the ids' top 6 bits must match all the way; none: null).

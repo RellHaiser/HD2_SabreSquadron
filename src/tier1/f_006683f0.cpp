@@ -33,7 +33,7 @@ uint32_t * C_Control__FUN_00668420(C_Control *_this,int *param_1,uint32_t param_
   _this->m_040 = 0;
   _this->m_044 = 0;
   _this->m_048 = 0;
-  _this->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813dd0);
+  _this->vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00813dd0));
   _this->m_054 = 0;
   local_4 = CONCAT31(GH_PIECE(local_4,1,3),2);
   FUN_0065a5c0(&_this->m_004,(uint32_t *)_this->m_008,(uint32_t *)_this->m_00c);
@@ -48,15 +48,15 @@ uint32_t * C_Control__FUN_00668420(C_Control *_this,int *param_1,uint32_t param_
   _this->m_066 = '\x01';
   _this[1].m_00c = 0;
   local_4 = 4;
-  _this->vtable = (C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00815540);
+  _this->vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)((C_Control_vtbl *)&PTR_00815540));
   *(uint8_t *)&_this[1].m_010 = 0;
   _this->m_06c = 0xffffffff;
   _this[1].m_004 = (uint8_t)param_2;
   _this[1]._pad_0005[0] = GH_PIECE(param_2,1,1);
   _this[1]._pad_0005[1] = GH_PIECE(param_2,2,1);
   _this[1]._pad_0005[2] = GH_PIECE(param_2,3,1);
-  pCVar1 = (C_Control_vtbl *)FUN_0066a9e0(param_1);
-  _this[1].vtable = (C_auto_00813dd0_vtbl*)(pCVar1);
+  pCVar1 = C_Cursor__Acquire(param_1);
+  _this[1].vtable = (C_Control_vtbl*)((C_auto_00813dd0_vtbl*)(pCVar1));
   return (uint32_t*)(&_this->vtable);
 }
 
@@ -98,7 +98,7 @@ uint32_t C_auto_00815540__FUN_00668550(C_auto_00815540 *_this, ...)
   _this->vtable = (C_auto_00815540_vtbl *)&PTR_00815540;
   local_4 = 1;
   if (_this->m_070 != 0) {
-    FUN_0066aa80((int)_this->m_070);
+    C_Cursor__Release(_this->m_070);
     _this->m_070 = 0;
   }
   piVar1 = _this->m_07c;
@@ -1087,13 +1087,17 @@ uint32_t C_auto_008156b8__FUN_00669a50(C_auto_008156b8 *_this,int param_1, ...)
 }
 
 
-// 0x00669aa0
+// 0x00669aa0  (tier1 fallback: translated text kept below, needs hand porting)
 uint32_t C_auto_008156b8__FUN_00669aa0(C_auto_008156b8 *_this, ...)
+{
+  return {};
+}
+#if 0
 {
   uint8_t stack0xffffffa8[64];
   void *local_1c;
   I3D_frame *this_00;
-  char cVar1;
+  bool bVar1;
   float local_50;
   float local_4c;
   float local_48;
@@ -1104,9 +1108,9 @@ uint32_t C_auto_008156b8__FUN_00669aa0(C_auto_008156b8 *_this, ...)
   uint32_t uStack_14;
   uStack_14 = 0xffffffff;
   if (_this->m_089 != '\0') {
-    if ((499 < *(int *)((int)_this->m_070 + 0x40)) &&
-       (ExceptionList = &local_1c, cVar1 = FUN_0066a3a0(_this->m_070,0), cVar1 == '\0')) {
-      FUN_0066a420(_this->m_070,&local_50);
+    if ((499 < (int)_this->m_070[0x10].vtable) &&
+       (ExceptionList = &local_1c, bVar1 = C_Cursor__IsButtonDown(_this->m_070,0), !bVar1)) {
+      C_Cursor__GetPosition(_this->m_070,&local_50);
       this_00 = (I3D_frame *)_this->m_050;
       if ((this_00->m_frameFlags & 0x20) == 0) {
         I3D_frame__UpdateWMatrixProc(this_00);
@@ -1143,6 +1147,7 @@ uint32_t C_auto_008156b8__FUN_00669aa0(C_auto_008156b8 *_this, ...)
 }
 
 
+#endif
 // 0x00669bf0
 uint32_t C_auto_008156b8__FUN_00669bf0(C_auto_008156b8 *_this, ...)
 {
@@ -1400,7 +1405,7 @@ uint32_t C_auto_00815918__FUN_0066a100(C_auto_00815918 *_this, ...)
   void *local_1c;
   I3D_frame *this_00;
   int *piVar1;
-  char cVar2;
+  bool bVar2;
   float local_50;
   float local_4c;
   float local_48;
@@ -1413,10 +1418,10 @@ uint32_t C_auto_00815918__FUN_0066a100(C_auto_00815918 *_this, ...)
   uint32_t uStack_14;
   uStack_14 = 0xffffffff;
   if (_this->m_095 != '\0') {
-    if ((499 < *(int *)((int)*(void **)(_this->_pad_0004 + 0x6c) + 0x40)) &&
-       (ExceptionList = &local_1c, cVar2 = FUN_0066a3a0(*(void **)(_this->_pad_0004 + 0x6c),0),
-       cVar2 == '\0')) {
-      FUN_0066a420(*(void **)(_this->_pad_0004 + 0x6c),&local_50);
+    if ((499 < (int)(*(C_Cursor **)(_this->_pad_0004 + 0x6c))[0x10].vtable) &&
+       (ExceptionList = &local_1c,
+       bVar2 = C_Cursor__IsButtonDown(*(C_Cursor **)(_this->_pad_0004 + 0x6c),0), !bVar2)) {
+      C_Cursor__GetPosition(*(C_Cursor **)(_this->_pad_0004 + 0x6c),&local_50);
       this_00 = *(I3D_frame **)(_this->_pad_0004 + 0x4c);
       if ((this_00->m_frameFlags & 0x20) == 0) {
         I3D_frame__UpdateWMatrixProc(this_00);

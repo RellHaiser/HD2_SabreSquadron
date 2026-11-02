@@ -569,6 +569,9 @@ private:
     bool m_unicodeFont = false;                         // +0x30
 };
 extern C_GameProfile g_gameProfile;                     // 0x008aea0c (static init 0x006b4d40)
+// The game's version (the servers' must match it).
+extern int g_versionMajor;                              // 0x00845070
+extern int g_versionMinor;                              // 0x00845074
 
 // The profile's objects as the original code reaches them (the members' addresses).
 extern C_Campaign *&g_campaign;                         // 0x008aea10 (+0x04)

@@ -5223,7 +5223,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     the 21 missions with a Vertanim.bin and AFRICA2 without); the real Vertanim.def / .bin in the
     memory files (Brest's water animations are not in the table: dropped). The stub vertex_anim.h
     forwards to the real one under WORLD_TEST; the profile stub has the detail switches; car_stubs'
-    dtaOpen keeps its flag. Baselines: 0 of 22 in both orders; the item build 0 of 37; the other
+    dtaOpen keeps its flag. Baselines: 22 of 22 in both orders; the item build 0 of 37; the other
     five builds 0 of 37 each.
   - Mutations (mutations/mutate_8a.py, 265 after dropping 30 equivalent and 5 that did not
     compile): the first run caught 233 of 287 run; new cases for 19 (see the
@@ -5261,7 +5261,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     C_Human's sight calls (friend lists, view tests, collision; the stub human.h declares them),
     zeroed C_MeleeTracker memory as meleeTrackers, a RayTest answering by the point aimed at;
     SetIgnoredVolumes' fake keeps its arguments; the stub pending.h takes the real sight.h under
-    WORLD_TEST. Baselines: 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37 each.
+    WORLD_TEST. Baselines: 22 of 22 in both orders; the item build 0 of 37; the other five 0 of 37 each.
   - Mutations (mutations/mutate_8b.py, 402 after dropping 18 equivalent and 12 that did not
     compile): the first run caught 354 of 432 (66 survived); new cases for 49 (see the file's
     docstring). A test of an id past the records wrote out of bounds (random crashes, false
@@ -5309,7 +5309,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     logging fakes of the frames', scene's, driver's and IGraph's slots and of the 8d objects, the
     team, the camera module, the head's water test, the rays and particles. The scene's fake vtable
     grew to 128 slots (its 0x11C..0x134 wrote past it into the sound cache: a crash at exit). The
-    stub pending.h takes the real geffects.h under WORLD_TEST. Baselines: 0 of 22 in both orders;
+    stub pending.h takes the real geffects.h under WORLD_TEST. Baselines: 22 of 22 in both orders;
     the item build 0 of 37; the other five 0 of 37 each.
   - Mutations (mutations/mutate_8c.py): the first run caught 495 of 570 (58 survived,
     17 did not build); 20 equivalent (see the file's docstring), new cases for 38 (the mesh
@@ -5409,7 +5409,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     by the file's end keeps its bytes read. Fixes: the name buffers terminated, the light map cleared,
     Start's name not copied into 256 bytes.
   - Harness: decorators_test.inc ("decorators:", 12 checks), the GEffects test's decorator fakes
-    dropped (Update kept for 8d-iii). Baselines: 0 of 22 in both orders; the item build 0 of 37; the
+    dropped (Update kept for 8d-iii). Baselines: 22 of 22 in both orders; the item build 0 of 37; the
     other five 0 of 37 each.
   - Mutations (mutations/mutate_8d2.py): the first run caught 172 of 209 (33 survived, 4 did not
     build); 11 equivalent, new cases for 21. The second run: all 195 built caught.
@@ -5446,7 +5446,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     Follow (_re/tools/decorator_follow_sim.py, from the asm) gives the tests' refill sequences.
   - Harness: decorators2_test.inc ("decorators2:", 19 checks; its own frame vtable, the ray hook as
     the ground, probes of rings of models for the bend points); the GEffects test sees the
-    decorators' update through the detail flag. Baselines: 0 of 22 in both orders; the item build 0
+    decorators' update through the detail flag. Baselines: 22 of 22 in both orders; the item build 0
     of 37; the other five 0 of 37 each.
   - Mutations (mutations/mutate_8d3.py): the first run caught 477 of 642 (165 survived); 68
     equivalent (see the file's docstring), new cases for 97. The second run 571 of 574, one more
@@ -5480,7 +5480,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Harness: volumetrics_test.inc ("volumetrics:", 19 checks; IGraph's textures, render states,
     world matrix and draws and the driver's states faked, the draws' vertices kept; the clouds
     compared vertex by vertex), S_matrix::SetDir(dir, up) as LS3DF's; the GEffects test's volumetrics
-    fakes dropped. Baselines: 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
+    fakes dropped. Baselines: 22 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
   - Mutations (mutations/mutate_8d4.py): the first run caught 298 of 442 (138 survived, 6 did not
     build); 73 equivalent (see the file's docstring), new cases for 67. The second run 359 of 365, 4
     more cases; the full rerun: all 363 caught.
@@ -5525,7 +5525,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Mutations (mutations/mutate_8e1.py): the first run caught 202 of 300 (71 survived, 27 did not
     build); 37 equivalent (see the file's docstring), new cases for 34 (the zeroed fields, the near
     sector's range, the short directions, the views off the axes, a dive along the view); the full
-    rerun: all 236 caught. Baselines: the world build 0 of 22 in both orders; the item build 0 of 37;
+    rerun: all 236 caught. Baselines: the world build 22 of 22 in both orders; the item build 0 of 37;
     the other five 0 of 37.
   - Build: 200 files clean (MSVC). Tier 1: 537 errors in 94 files, 221 stubs (unchanged). ret_audit --src: 52.
   - Ghidra: names/camera.txt (8e-i's added, SetFov2 / GetFov2 renamed); 45 functions in ported.txt.
@@ -5560,11 +5560,11 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Harness: tactical_test.inc in the camera build ("tactical:", 15 checks): the slide sphere, the
     quaternion's SetDir / Slerp / GetDir, RotateByMatrix, RotateYMatrix and the scene's GetSector
     faked; the GEffects and decorators tests' SetTactical / IsTactical fakes left out of it; the
-    module's stop checked with the real tactical camera. 0 of 22 in both orders.
+    module's stop checked with the real tactical camera. 22 of 22 in both orders.
   - Mutations (mutations/mutate_8e2.py): the first run caught 260 of 299 (25 survived, 14 did not
     build); 9 equivalent (see the file's docstring), new cases for 16 (the hit's point, the
     boundaries of the flight, the click time and the fades, the roll, the members apart from the
-    enemies); the full rerun: all 276 caught. Baselines: the world build 0 of 22 in both orders; the
+    enemies); the full rerun: all 276 caught. Baselines: the world build 22 of 22 in both orders; the
     item build 0 of 37; the other five 0 of 37.
   - Build: 200 files clean (MSVC). Tier 1: 536 errors in 93 files, 220 stubs (537 / 94 / 221 before). ret_audit --src: 52.
   - Ghidra: names/camera.txt (13 added; hud.txt's LookAt dropped); 21 functions in ported.txt.
@@ -5598,12 +5598,12 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Harness: update_test.inc in the camera build ("update:", 8 checks; the mouse, the controls'
     values, PoseGetRoll, the camera's SetWorldDir and PlaceCamera / MoveCamera faked; a C_Actor
     car with its seats' flags); the stubs: C_Human::GetVehicleSeat, S_DetailSettings::invertMouse,
-    C_Controls. The 8e-i load test with +0x26E set. 0 of 22 in both orders.
+    C_Controls. The 8e-i load test with +0x26E set. 22 of 22 in both orders.
   - Mutations (mutations/mutate_8e3.py): the first run caught 218 of 275 (57 survived); 30
     equivalent (see the file's docstring), new cases for 27 (the delays' and lengths' edges, more
     turns and dummy directions, the listener at 0, the car camera's heading 0 and limits without
     input, the shake's last millisecond, the debug camera's pi wrap, the moves' y); the full rerun:
-    all 245 caught. Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the
+    all 245 caught. Baselines: the world build 22 of 22 in both orders; the item build 0 of 37; the
     other five 0 of 37.
   - Build: 200 files clean (MSVC). Tier 1: 536 errors in 93 files, 220 stubs (unchanged). ret_audit --src: 52.
   - Ghidra: names/camera.txt (7 added); 4 functions in ported.txt. Stats: 7,752 of 12,293
@@ -5649,7 +5649,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     equivalent (see the file's docstring), new cases for 36 (the water band's edges on both paths,
     the blend's and shake's last milliseconds, ratios just past 1, the clamps' 1 cm and 0.008
     edges, rolls 0, a non-unit slerp, view 9's move, the fade near the head, the views' old values,
-    larger random rolls, a 1.5 kick); the full rerun: all 414 caught. Baselines: the world build 0 of 22 in both orders; the item build 0 of 37 (its Junkers test and mutate_7h.py renamed to m_gunFov); the other five 0 of 37.
+    larger random rolls, a 1.5 kick); the full rerun: all 414 caught. Baselines: the world build 22 of 22 in both orders; the item build 0 of 37 (its Junkers test and mutate_7h.py renamed to m_gunFov); the other five 0 of 37.
   - Build: 200 files clean (MSVC). Tier 1: 528 errors in 91 files, 217 stubs (was 536 / 93 /
     220). ret_audit --src: 52.
   - Ghidra: names/camera.txt (11 added), car.txt (1); 16 functions in ported.txt. Stats: 7,768 of
@@ -5690,8 +5690,8 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Harness: loader_test.inc in the camera build ("loader:", 10 checks; the text boxes, the scene's,
     the driver's, IGraph's, the camera's and the light's slots faked; the effects module's Update
     through a copy of its vtable, slot 0x14 in g++); the stubs: S_MultiplayerSettings::dedicated,
-    C_NetGame::PrintLoadProgress. 0 of 22 in both orders.
-  - Mutations (mutations/mutate_8f1.py): the first run caught 190 of 197 (7 survived: 3 unused enumerators, dropped; new cases for 4: the two styles without a visual, the driver's state 0x11 at 1, a dedicated server with a scene); the full rerun: all 184 that build caught (10 do not build: duplicate case labels, a declaration). Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
+    C_NetGame::PrintLoadProgress. 22 of 22 in both orders.
+  - Mutations (mutations/mutate_8f1.py): the first run caught 190 of 197 (7 survived: 3 unused enumerators, dropped; new cases for 4: the two styles without a visual, the driver's state 0x11 at 1, a dedicated server with a scene); the full rerun: all 184 that build caught (10 do not build: duplicate case labels, a declaration). Baselines: the world build 22 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
   - Build: 201 files clean (MSVC). Tier 1: 526 errors in 90 files, 216 stubs (was 528 / 91 / 217). ret_audit --src: 52.
   - Ghidra: names/loader_screen.txt (18; 3 moved from game.txt / game_app.txt); 16 functions in
     ported.txt. Stats: 7,784 of 12,293 functions by hand (71.5 % by size).
@@ -5717,7 +5717,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     orders.
   - Mutations (mutations/mutate_8f2.py): the first run caught 49 of 53 (4 survived); 3 equivalent
     (see the file's docstring), a new check for 1 (the stuff stage's 0.3 step); the full rerun:
-    all 50 caught. Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the
+    all 50 caught. Baselines: the world build 22 of 22 in both orders; the item build 0 of 37; the
     other five 0 of 37.
   - Build: 202 files clean (MSVC). Tier 1: 521 errors in 89 files, 214 stubs (was 526 / 90 / 216).
     ret_audit --src: 52.
@@ -5756,12 +5756,12 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     actors module's CreateActor / DestroyActor, the scene's EnumFrames / slots 0xE4 / 0x128 /
     AddFrame, the driver's FindFrame, the tyres, the surfaces and LoadObject faked; the effects
     module, the texture shifting and the lightmap groups real); the 8f-ii tests on the real reader.
-    0 of 22 in both orders.
+    22 of 22 in both orders.
   - Mutations (mutations/mutate_8f3.py): the first run caught 105 of 126 (21 survived); 5
     equivalent (see the file's docstring), new cases for 16 (short entries' first values, the name
     length's edges, the progress inside the object list and before the file's end, the EnumFrames
     callback's result, a destroyed actor's properties, an over-ascended object chunk); the full rerun: all 121 caught.
-    Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0 of
+    Baselines: the world build 22 of 22 in both orders; the item build 0 of 37; the other five 0 of
     37.
   - Build: 202 files clean (MSVC). Tier 1: 518 errors in 88 files, 211 stubs (was 521 / 89 / 214). ret_audit --src: 52.
   - Ghidra: names/mission_loader.txt (16 added: the map code, the texture entry, the comparison);
@@ -5809,12 +5809,12 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     frames, the scene's RemoveFrame / UpdateFrameSector, the driver's CreateFrame / CreateVisual,
     IGraph's LoadTexture faked and logged; the model and sound caches the harness's; the effects
     module's CreateShadow real); the 8f-ii / 8f-iii tests on the real reader (their stand-in
-    objects: user frames whose SetName logs). 0 of 22 in both orders.
+    objects: user frames whose SetName logs). 22 of 22 in both orders.
   - Mutations (mutations/mutate_8f4.py): the first run caught 224 of 243 (18 survived, 1 did not
     build); 4 equivalent (see the file's docstring), new cases for 14 (one vertex and one face, a
     type 1 without a visual type, entries after a hidden, a light's and a sound's chunk, the empty
     model's reference, a loaded sound reported by Open above 0 and at 0, the area before the sector,
-    the first short values, the projector's texture released); the full rerun caught 237 of 243 (the 4 equivalent, M 1015 del not building, and M 910 cmp: the new entry order hid it; an area's entry naming a sector added, caught). Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
+    the first short values, the projector's texture released); the full rerun caught 237 of 243 (the 4 equivalent, M 1015 del not building, and M 910 cmp: the new entry order hid it; an area's entry naming a sector added, caught). Baselines: the world build 22 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
   - Build: 202 files clean (MSVC). Tier 1: 518 errors in 88 files, 211 stubs (unchanged).
     ret_audit --src: 52.
   - Ghidra: names/mission_loader.txt (2 added: the vector copy, the dead reader); 2 functions in
@@ -5877,11 +5877,11 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     (0x0063f230, 0x00641720, its table of Unicode codes 0x00640f60).
   - Harness: fonts_test.inc in the camera build ("fonts:", 12 checks; the profile's language and
     text directory, the version, FontConfig.hxml / the GDI fonts and IGraph faked; the stub
-    profile.h's language methods; car_stubs.cpp's DtaOpenCount). 0 of 22 in both orders.
+    profile.h's language methods; car_stubs.cpp's DtaOpenCount). 22 of 22 in both orders.
   - Mutations (mutations/mutate_9a1.py): the first run caught 77 of 93 (16 survived); 8
     equivalent (see the file's docstring), new cases for 8 (a size of 1, one vertex, the disk
     first, the files closed, a count without entries, the first font freed); the full rerun caught
-    85 of 93 (the 8 equivalent). Baselines: the world build 0 of 22 in both orders; the item build 0
+    85 of 93 (the 8 equivalent). Baselines: the world build 22 of 22 in both orders; the item build 0
     of 37; the other five 0 of 37.
   - Build: 203 files clean (MSVC). Tier 1: 516 errors in 87 files, 209 stubs (518 / 88 / 211
     before). ret_audit --src: 52.
@@ -5910,7 +5910,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     without a resolution skipped (the original compares through null); control characters taken
     as unsigned by isspace.
   - Harness: fonts_test.inc's "xml:" line in the camera build (11 checks); the 9a-i font tests on
-    real FontConfig.hxml files. 0 of 22 in both orders.
+    real FontConfig.hxml files. 22 of 22 in both orders.
   - Mutations (mutations/mutate_9a2.py): the first run caught 108 of 136 (17 survived, 11 pointer
     arithmetics did not build); 7 equivalent (see the file's docstring), new cases for 10 (a
     comment 4 apart, a reload's walk, control characters in a name / before an attribute / in a
@@ -5952,7 +5952,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     build); 16 equivalent (see the file's docstring), new cases for the rest (Reset's fields, the
     grid's edges, code 0, a glyph wider than its cell over a painted texture), Close's temporary
     as a local (the original uses +0x78); the full rerun caught 169 of 187 (the 16 equivalent).
-    Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0
+    Baselines: the world build 22 of 22 in both orders; the item build 0 of 37; the other five 0
     of 37.
   - Build: 204 files clean (MSVC). Tier 1: 514 errors in 86 files, 207 stubs (516 / 87 / 209
     before). ret_audit --src: 52.
@@ -5973,10 +5973,10 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     one dword: the HUD's table's 0x101 / 0x100 / 0x1 now 1, 1 / 0, 1 / 1, 0).
   - Harness: fonts_test.inc's "styles:" line in the camera build (4 checks; the 90 styles by an
     FNV hash of the asm's values; the list left as it was found, the first use only on the first
-    mission). 0 of 22 in both orders.
+    mission). 22 of 22 in both orders.
   - Mutations (mutations/mutate_9a4.py): the first run caught 106 of 113 (7 survived); 5 equivalent
     (see the file's docstring), the end's trimming tested by NumTextStyles (2); the full rerun
-    caught 108 of 113 (the 5 equivalent). Baselines: the world build 0 of 22 in both orders; the
+    caught 108 of 113 (the 5 equivalent). Baselines: the world build 22 of 22 in both orders; the
     item build 0 of 37; the other five 0 of 37.
   - Build: 205 files clean (MSVC). Tier 1: 514 errors in 86 files, 207 stubs (unchanged). ret_audit
     --src: 52.
@@ -6008,11 +6008,11 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     loader tests' raw offsets replaced by the members.
   - Harness: a new text build (build_text.bat / check_text.py: the camera build with TEXT_TEST and
     the real text box; textbox_test.inc, 16 checks; Layout / Render / the visuals' world boxes
-    faked). 0 of 22 in both orders; the camera build 0 of 22 in both orders.
+    faked). 22 of 22 in both orders; the camera build 0 of 22 in both orders.
   - Mutations (mutations/mutate_9b1.py, the text build): the first run's survivors given new cases
     (fractions in the rectangle, the selection's clamps, run 0 and line 0, the depth at the near
     plane); 13 equivalent (see the file's docstring); the full rerun caught 175 of 188 (the 13
-    equivalent). Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the
+    equivalent). Baselines: the world build 22 of 22 in both orders; the item build 0 of 37; the
     other five 0 of 37.
   - Build: 206 files clean (MSVC). Tier 1: 513 errors in 85 files, 206 stubs (514 / 86 / 207
     before; the renamed functions' callers exported again). ret_audit --src: 52 (S_TextRun's 8
@@ -6055,7 +6055,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     was m_scrolls).
   - Harness: textbox_test.inc's "layout:" line in the text build (11 checks; the fonts 2 and 3 fakes
     with their glyphs' aspects, the positioning faked; the 9b-i checks on the real layout); the stub
-    profile's unicode option. 0 of 22 in both orders; the camera build 0 of 22 in both orders.
+    profile's unicode option. 22 of 22 in both orders; the camera build 0 of 22 in both orders.
   - Mutations (mutations/mutate_9b2.py, the text build): the first run caught 169 of 206 (33
     survived, 4 did not build); 17 equivalent (see the file's docstring), new cases for the rest
     (fractions of 0.3 in the roundings, a column of 1 pixel, a tiny font without a column, a break's
@@ -6096,7 +6096,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     2 and 3 the other way).
   - Harness: textbox_test.inc's "position:" line in the text build (10 checks; the positioning fake
     gone: the 9b-i and 9b-ii-a checks on the real one; the fake font's '_' as wide as its size). 0 of
-    22 in both orders; the camera build 0 of 22 in both orders.
+    22 in both orders; the camera build 22 of 22 in both orders.
   - Mutations (mutations/mutate_9b3.py, the text build): the first run caught 115 of 133 (14
     survived, 4 did not build); 6 equivalent (see the file's docstring), new cases for the rest
     (fractions of 0.3 in the roundings, a justified line without room, the caret's size); the full
@@ -6141,13 +6141,13 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     FlushFonts. DrawText named DrawString (windows.h's macro).
   - Harness: textbox_test.inc's "render:" line in the text build (16 checks; IGraph's viewport,
     texture, primitives and screen size, the driver's states and the fake font's quads logged; the
-    render fake gone). 0 of 22 in both orders; the camera build 0 of 22 in both orders.
+    render fake gone). 22 of 22 in both orders; the camera build 0 of 22 in both orders.
   - Mutations (mutations/mutate_9b4.py, the text build): the first run caught 148 of 180; 15
     equivalent (see the file's docstring), new cases for the rest (edges of fractions near 0, the
     screen's size read, an invalid byte inside a text, 6.25 pixels, a limit of 1, every font's
     batching); the full rerun caught 165 of 180 (the 15 equivalent); StepUnknown76 then given its
     value's pointer (the original's second argument; ret_audit), its 10 changed mutations caught.
-    Baselines: the world build 0 of 22 in both orders; the item build 0 of 37; the other five 0 of
+    Baselines: the world build 22 of 22 in both orders; the item build 0 of 37; the other five 0 of
     37.
   - Build: 206 files clean (MSVC). Tier 1: 498 errors in 85 files, 201 stubs (499 / 85 / 202
     before). ret_audit --src: 52.
@@ -6183,11 +6183,11 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - text_box: the background's quad shared (g_textBoxQuad, SetTextBoxQuad with two colours,
     DrawTextBoxQuad); C_TextBox's private members protected.
   - Harness: textbox_test.inc's "pages:" line in the text build (18 checks; LayoutPages faked,
-    logged with the dirty flag; the fans logged with their corners). 0 of 22 in both orders.
+    logged with the dirty flag; the fans logged with their corners). 22 of 22 in both orders.
   - Mutations (mutations/mutate_9b5.py, the text build): the first run caught 102 of 120; 10
     equivalent (see the file's docstring), new cases for the rest (ClipArea's fractions near 0 and
     widths below 0, the layout's dirty flag); 110 of 120 caught. Baselines: the camera and the world
-    builds 0 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
+    builds 22 of 22 in both orders; the item build 0 of 37; the other five 0 of 37.
   - Build: 208 files clean (MSVC). Tier 1: 498 errors in 85 files, 201 stubs (unchanged; the classes' members exported again). ret_audit --src: 52.
   - Ghidra: C_auto_008154a4 / C_auto_008158f8 renamed C_PagedTextBox / C_VideoTextBox (90_auto.spec,
     class_names.json, auto_members.json, tier1_fixups.json; rename_auto_structs.py, apply_members.py);
@@ -6226,8 +6226,8 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Fixes: a joined run right after a page break gets a new line (the original flows it into a
     null line); a failed layout deletes the line being filled (the original leaks it).
   - Harness: textbox_test.inc's "paged:" line in the text build (18 checks, the real layout; the
-    9b-iv-a fake gone, its tests on the real layout). 0 of 22 in both orders; the camera and the
-    world builds 0 of 22 in both orders.
+    9b-iv-a fake gone, its tests on the real layout). 22 of 22 in both orders; the camera and the
+    world builds 22 of 22 in both orders.
   - Mutations (mutations/mutate_9b6.py, the text build): the first run caught 97 of 111; 7
     equivalent (see the file's docstring), new cases for the rest (the measures' rounding at .3, a
     room of exactly 0, the line before a page's first); 104 of 111 caught.
@@ -6256,10 +6256,10 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     funclets); the static / iostream atexit stubs 0x00640510, 0x00641fb0, 0x0064d080,
     0x0064daa0..0x0064db10; the 1.0 / 1.1 font set 0x0063f870 (dropped in 9a; absorbed, its only
     caller ported).
-  - Harness: textbox_test.inc's "utf8:" line in the text build (6 checks). 0 of 22 in both orders;
+  - Harness: textbox_test.inc's "utf8:" line in the text build (6 checks). 22 of 22 in both orders;
     the profile harness 0 failures.
   - Mutations (mutations/mutate_9b7.py, the text build): the first run caught 58 of 59; 1 equivalent
-    (see the file's docstring). Baselines: the camera and the world builds 0 of 22 in both orders;
+    (see the file's docstring). Baselines: the camera and the world builds 22 of 22 in both orders;
     the item build 0 of 37; the other five 0 of 37.
   - Build: 208 files clean (MSVC). Tier 1: 496 errors in 83 files, 199 stubs (497 / 84 / 200
     before). ret_audit --src: 52 (Reattach's two arguments found by it).
@@ -6320,7 +6320,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     callers).
   - Fix: REFRESH's copies sent to the children have their other values 0 (the original's stack).
   - Harness: control_test.inc in the text build ("control:", 14 checks; CameraTest runs ControlTest
-    after TextBoxTest). 0 of 22 in both orders; the camera and the world builds 0 of 22 in both
+    after TextBoxTest). 22 of 22 in both orders; the camera and the world builds 0 of 22 in both
     orders.
   - Mutations (mutations/mutate_9c1.py, the text build): the first run caught 102 of 123; new cases
     (the notifications' value 0, the first id field's 6 bits, a callback without its function);
@@ -6373,7 +6373,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     original's stack).
   - Harness: controls_test.inc in the text build ("controls:", 16 checks; the cursor faked, the
     picture's mesh / materials / textures faked, the boxes' Render logged by subclasses). 0 of 22 in
-    both orders; the camera and the world builds 0 of 22 in both orders; the item build and the other
+    both orders; the camera and the world builds 22 of 22 in both orders; the item build and the other
     five 0 of 37.
   - Mutations (mutations/mutate_9c2.py, the text build): the first run caught 160 of 188; new cases;
     185 of 188 (3 equivalent, see the file's docstring).
@@ -6413,7 +6413,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     crashes), GET_SLIDER without a slider, the spin control's next / previous without items (it
     showed the item past the end).
   - Harness: scroll_test.inc in the text build, run by ControlsTest ("scroll:", 12 checks; the
-    cursor's move faked). 0 of 22 in both orders (no other build compiles the controls).
+    cursor's move faked). 22 of 22 in both orders (no other build compiles the controls).
   - Mutations (mutations/mutate_9c3a.py, generated, the text build on one mission in 4 parallel
     runs): 333 of 407 caught (15 more do not build); new cases; 366 of 407 (41 equivalent, see the file's docstring).
   - Build: MSVC clean. Tier 1: 483 errors in 81 files, 196 stubs (unchanged; six FindControl callers re-exported). ret_audit --src: 52.
@@ -6443,7 +6443,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - C_MarkBox (type 0x1f, vtable 0x00814650, 0x8C; was C_auto_00814650): "yesnormal*" (marked) or
     "emptynormal*" (the four other frames kept off), a title on "text_*" ("00"; SET_NUMBER "%02d").
   - Harness: check_test.inc in the text build, run by ControlsTest after ScrollTest ("check:", 12
-    checks; the zone a C_MPZone-sized buffer). 0 of 22 in both orders.
+    checks; the zone a C_MPZone-sized buffer). 22 of 22 in both orders.
   - Mutations (mutations/mutate_9c3b.py, generated, the text build on one mission in 4 parallel
     runs): 313 of 317 caught (8 more do not build; 9 survived the first run: new cases for the first frame missing and the toggle button's frame; 4 equivalent, see the file's docstring)
   - Build: MSVC clean. Tier 1: 482 errors in 80 files, 195 stubs (from 483 / 81 / 196). ret_audit
@@ -6485,7 +6485,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     C_TextBox::ScrollToLine out of its lines false (SelectRun passes a run's index: the harness
     crashed).
   - Harness: edit_test.inc in the text build, run by ControlsTest after CheckTest ("edit:", 10
-    checks; the cursor's screen place faked). 0 of 22 in both orders.
+    checks; the cursor's screen place faked). 22 of 22 in both orders.
   - Mutations (mutations/mutate_9c4a.py, generated, the text build on one mission in 4 parallel
     runs): 257 of 315 caught (8 more do not build); new cases (the caret, the bar's updates, a real range's values, the first and last lines, UTF-8 leads at their ranges' ends); 294 of 315 (21 equivalent, see the file's docstring)
   - Build: MSVC clean. Tier 1: 483 errors in 81 files, 196 stubs (482 / 80 / 195 before: the stale
@@ -6524,7 +6524,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     address) with "/t" or "/a" put first unless there, the prompt back, EDIT posted to the box.
   - Fixes: the parts checked everywhere (the original's without them crash).
   - Harness: combo_test.inc in the text build, run by ControlsTest after EditTest ("combo:", 10
-    checks). 0 of 22 in both orders.
+    checks). 22 of 22 in both orders.
   - Mutations (mutations/mutate_9c4b.py, generated, the text build on one mission in 4 parallel
     runs): 242 of 269 caught (8 more do not build); new cases (only the list, the wheel's two steps down, empty strings, picked 0, a refusing focus, a route kept, the combo box's frame); 255 of 269 (14 equivalent, see the file's docstring)
   - Build: MSVC clean. Tier 1: 482 errors in 80 files, 194 stubs (from 483 / 81 / 196). ret_audit
@@ -6555,12 +6555,238 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Fixes: the parts checked; a pool not found refuses (the original crashes).
   - Harness: info_test.inc in the text build, run by ControlsTest after ComboTest ("info:", 10
     checks; C_ItemDef::GetImage and C_ScopeComp's Save / Load faked, the definitions by
-    g_gfItemDefs). 0 of 22 in both orders.
+    g_gfItemDefs). 22 of 22 in both orders.
   - Mutations (mutations/mutate_9c4c.py, generated, the text build on one mission in 4 parallel
     runs): 172 of 184 caught (13 more do not build); new cases (the frame, a route kept, the plus button alone, a count of 1); 179 of 184 (5 equivalent, see the file's docstring)
   - Build: MSVC clean. Tier 1: 482 errors in 80 files, 194 stubs (unchanged). ret_audit --src: 52.
   - Ghidra: C_auto_00814ba0 renamed C_SkillControl; names/controls.txt (25); 25 functions in
     ported.txt. Stats: 8,466 of 12,293 functions by hand (75.8 % by size).
+
+  PART 9c-v-a DONE (2026-11-01): the list group and its items (src/game/controls.*).
+  9c-v split by hierarchy (bases: the list group 0xb's ctor 0x0065e760 makes 0x23 and 0x18; 0x26 on
+  0x23 (ctor 0x0065ea60); 0x17 on 0x16 (0x0065fa40); 0x20 on the combo box (0x0065f1b0)): v-a 0xb
+  and its item type 6; v-b 0x16, 0x17 (3 KB), 0x23 and 0x26 (11 KB); v-c 0x18 (12 KB); v-d 0xe,
+  0x1d, 0x20, 0x22, 0x27 (13 KB). The plan's 67 / 101 slots: the vtables read across their
+  neighbours (0xb has 34: +0x84 ScrollRange).
+  - C_ListGroup (type 0xb, vtable 0x00815068, 0xA0; was C_auto_00815068; C_ItemList is taken by the
+    inventory): a group of items laid out from an origin (SET_ORIGIN 0x100006B: an _aligned_malloc'd
+    S_vector, freed with it) by a step down (0x100002A) or across (0x1000029; each sets the other 0),
+    `m_visible` (SET_VISIBLE 0x1000028) shown from `m_first` (Scroll 0x00656a20: the frame moved by the
+    step; the others hidden; the selector on with the selected; unsigned: without items it scrolls on,
+    kept); Select 0x00655e10 (scrolled to, the "selector*" frame in front, SET_POSITION posted to the
+    control its value names); PickItem 0x006569f0 (the old one's input 02 / leave with id 1); the keys
+    Home / Up / PgUp / Left / Right / End / Down / PgDn (0xC7 .. 0xD1; PgUp / PgDn true when a step
+    fails, kept); ADD_ITEM (value the root frame, value2 the description: made by the factory, sorted
+    by id, deleted), REMOVE_ITEM / CLEAR (the screen told of each frame: posted REMOVE_ITEM with
+    value2), CAN_SCROLL_UP / DOWN 0x100000F / 0x1000010, GET_SCROLL_RANGE 0x100001F, SELECT_INDEX
+    0x20000AA, REFRESH (Layout 0x00655c70 - its argument unread -, SET_COUNT / SET_POSITION posted).
+    The cursor (+0x70) and the extra control (+0x78) are the subclasses' (released / deleted here).
+  - C_ListItem (type 6, vtable 0x00814ed0, 0x7C, on the text button): its click picks it (its
+    parent's PickItem), the box's hover while not picked; PRESS then the click.
+  - C_Control::GetFrame added. The harness' CreateChild fake got a hook (g_ctCreateChild).
+  - Harness: list_test.inc in the text build, run by ControlsTest after InfoTest ("list:", 9
+    checks). 22 of 22 in both orders.
+  - Mutations (mutations/mutate_9c5a.py, generated, the text build on one mission in 4 parallel
+    runs): 261 cases, 252 build; all caught but 10 equivalent (listed in its docstring: the origin's free, Create's base failure, FocusNext's bound, Sort's bounds and ties, Layout's zero step and argument, the refresh's target, SET_POSITION's >=, the value test against 1). The first run left 35 (25 killed by a third block in list_test.inc: the frame's updates, the items' refreshes, the selector at the window's edges, the wheel's small turns, removal of the first item, CLEAR's frame and deletions, the posts after REMOVE_ITEM / CLEAR, range 1, the extra control's deletion, the item's leave on unpick).
+  - Build: MSVC clean. Tier 1: 482 errors in 80 files, 194 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: C_auto_00815068 renamed C_ListGroup (its functions attributed to C_auto_00814a08 /
+    00814980 moved to it in auto_members.json); names/controls.txt (23); 23 functions in ported.txt.
+    Stats: 8,489 of 12,293 functions by hand (76.0 % by size).
+
+  PART 9c-v-b DONE (2026-11-02): the bars, the hiding list and the pool list (src/game/controls.*).
+  The four vtables are 34 slots each (0x88 apart); the 67 / 101 of the plan read into the next
+  ones: 0x00814870 (type 0x20) after the bar, 0x00814a90 (type 0x1d) after the hiding list.
+  - C_BarControl (type 0x16, vtable 0x008147e8, 0x7C; was C_auto_008147e8): its frame scaled along
+    an axis (SET_BAR_AXIS 0x1000093: 0 x, 1 y, 2 z; another none) by value / (max - min) (the value
+    over the range, not its part above the minimum: kept; a range not above 0: 1), off at 0 or
+    below, at most 1; min / max / value got and set as floats in value2 (0x100008D .. 0x1000092);
+    not taking input. UpdateBar a new virtual (+0x84 0x00662e70).
+  - C_UpgradeBar (type 0x17, vtable 0x00814760, 0x98; was C_auto_00814760): the bar with titles on
+    "name_*" (the text messages) and "text_*" ("%.1f " of the value, "+ %.1f" of the upgrade from
+    0.1 (style 0x2C), the suffix; style 0x2B), "hlcpct*" scaled by the value and "upgrade*" by
+    value + upgrade (both needed: else Create false); hidden at value and upgrade 0; GET / SET
+    _BAR_VALUE by value (0 the value, 1 the upgrade, 2 the suffix: a char *). The titles checked
+    in Refresh and SET_TEXT (the fix: the original's without them crashes).
+  - C_HidingList (type 0x23, vtable 0x00814a08, 0xB4; was C_auto_00814a08): a list group with its
+    hidden items (+0xA0, owned, still taking their messages): HIDE_ITEM 0x2000084 (the focus left;
+    the scroll back unsigned, kept), HIDE_ALL 0x2000085 (unpicked; signed), ITEM_COUNTED (the item
+    informations' post) shows one again (left, sorted in). FindHidden 0x0065a0c0.
+  - C_PoolList (type 0x26, vtable 0x008144b8, 0xB8): the hiding list unsorted; ADD_ENTRY 0x1000067
+    / ADD_CURRENT_ENTRY 0x1000064 (value an index, value2 an entry whose name, a C_str, is read at
+    + 1, unaligned: kept) fill the first hidden item (SET_TEXT style 0xD, SET_INDEX) and show it
+    (the current one hovered: OnInput05); its focus held from input 0A to 09 (a drag; 08 passed on;
+    none: 0, not CONTROL_NOT_HANDLED).
+  - Harness: bar_test.inc in the text build, run by ControlsTest after ListTest ("bar:", 14
+    checks). 22 of 22 in both orders.
+  - Mutations (mutations/mutate_9c5b.py, generated, the text build on one mission in 4 parallel
+    runs): 191 cases, 179 build; all caught but 9 equivalent (listed in its docstring: the bars'
+    Create when the base fails, the bar's <= 0 and >= 1, the upgrade bar's equalities, FindHidden's
+    -2, the refresh's target, HIDE_ALL's <=). The first run left 18 (9 killed: a value of 1.25,
+    a range of 0.25, the shown upgrade bar's one update, a message to the first hidden item, all
+    hidden from shown items, an entry to a hidden item, a pool with none hidden).
+  - Build: MSVC clean. Tier 1: 478 errors in 79 files, 193 stubs (was 482 / 80 / 194: the layouts
+    refreshed with fetch_types.py after the renames, the factory CreateChild compiles now).
+    ret_audit --src: 52.
+  - Ghidra: the three auto classes renamed; C_PoolList's this C_HidingList (no struct); the
+    neighbours' 15 functions (types 0x20 and 0x1d) moved to C_auto_00814870 / C_auto_00814a90 in
+    auto_members.json and typed C_BarControl / C_HidingList for now (their structs' recovered
+    layouts; 9c-v-d names them); names/controls.txt (24); 24 functions in ported.txt. Stats: 8,513
+    of 12,293 functions by hand (76.2 % by size).
+
+  PART 9c-v-c DONE (2026-11-02): the server list and its rows (src/game/controls.*), the MSVC6 sort
+  (src/common/msvc_sort.h, new).
+  - C_ServerList (type 0x18, vtable 0x00814980, 0xC8; was C_auto_00814980): a list group of 11 rows
+    made on "Server1" .. "Server11" (FIND_DUMMIES; one missing: Create false), laid out 0.033 apart
+    down from the last one's place, showing a window (+0xC0 .. +0xC4) of its entries (+0xA8, not
+    owned, 200 reserved): ADD_ITEM (value2 an entry; the window kept, unsigned), CLEAR, SET_POSITION
+    (only with more entries than rows), REFRESH (as many rows shown as entries; rows past the
+    entries keep their old one: kept; the bar's count and position posted; CHANGED), GET_SELECTED
+    (value2), GET_ENTRY_COUNT 0x10000A2, SORT 0x2000079 / GET_SORT 0x20000AD (the key +0xA4, 0x40 at
+    first: the field 1 name, 2 map, 3 game type, 4 ping, 5 max players then players; 0x40 / 0x80
+    toggle the direction (the bits between dropped); the ties by the ping, descending maps by it
+    ascending: kept; the field 0: reversed), PREVIOUS / NEXT_ITEM and REMOVE_ITEM ignored; no keys
+    (Unknown20 false), no tick. A row's click selects its entry (RowClicked 0x00666650: refreshed,
+    CONTROL_NOTIFY_0E), its notification 13 passed on (0x00666630, made a function).
+  - C_ServerRow (vtable 0x008154b8, 0x90, on the text button): the entry kept as its index (+0x5C);
+    its runs: the name (style 0x1E; not text in the font: text 0x7E9), the map, the game type's text,
+    the ping, "players / max" (0x1F .. 0x22); inactive when the version differs; the password,
+    dedicated and voice icons on its normal and active frames (all six needed); ADD_CURRENT_ENTRY
+    white (the box's colour), REMOVE_ITEM cleared, GET_ITEM. The box checked on ADD_ENTRY (the fix).
+  - S_ServerEntry: the browser's server record, the fields read (its module not ported).
+  - msvc6::Sort: std::sort as MSVC6's STL does it (median of three, unguarded partition, runs of 16,
+    insertion sort), as the order of equals depends on it (0x00667b30, 0x00667e20, 0x00667f40); the
+    ten comparisons 0x006675a0 .. 0x006676f0 made functions (ServerPingLess ..).
+  - g_versionMajor / g_versionMinor out of profile.cpp's anonymous namespace, declared in profile.h;
+    C_Control::GetIndex added. The harness defines the versions (no profile.cpp in it).
+  - Harness: server_test.inc in the text build, run by ControlsTest after BarTest ("server:", 11
+    checks; the sort against std::stable_sort on total orders, and golden orders of 40 and 13
+    entries full of ties, as this sort gives them). 22 of 22 in both orders.
+  - Mutations (mutations/mutate_9c5c.py, generated over the new code and msvc_sort.h, 4 parallel
+    runs): 247 cases, 232 build; all caught but 15 equivalent (listed in its docstring). The first
+    run left 39 (24 killed: the sort's oracle now the input's, the golden tie orders, a partition
+    meeting on the pivot, the capacity 200, a row missing one icon or its button, the box at margin
+    0, the selected cleared by Create, the window after a clear, 11 / 12 entries).
+  - Build: MSVC clean. Tier 1: 478 errors in 79 files, 193 stubs (unchanged; layouts refreshed).
+    ret_audit --src: 52.
+  - Ghidra: C_auto_00814980 renamed C_ServerList; the row's this C_TextButton (no struct); 11
+    functions made; names/controls.txt (29); 29 functions in ported.txt. Stats: 8,531 of 12,293
+    functions by hand (76.4 % by size).
+
+  PART 9c-v-d-i DONE (2026-11-02): the hot key and the titled edit box (src/game/controls.*).
+  9c-v-d split: type 0xe's destructor resets its vtable to 0x00814fe0, the factory's type 0xd (not
+  in the plan's list), so d-i is 0xd and 0xe; d-ii 0x1d, 0x20, 0x22, 0x27.
+  - C_HotKeyControl (type 0xd, vtable 0x00814fe0, 0x7C; was C_auto_00814fe0): an edit box on its
+    frame (id | 1) and a title on "hktext*" (id | 2, taking input), not children (deleted with it);
+    SET_BINDING 0x100003D (the binding; the title's text id value2, style 0xC; the key's name in the
+    edit box, style 0xD; REFRESH again), GET_BINDING 0x100003C / 0x100003E. While editing, a first
+    tick arms it, then C_Controls::PollPress (0x006c87f0, pending: 0x9A, re-read) gives the key:
+    Escape on the keyboard ends the edit, else C_KeyBindings::Bind (the player's; refused: armed
+    still), CHANGED, the edit ended, the cursor's +0x44 200 (0x0066ab50, pending); HOT_KEY_DONE
+    0x20000C2 posted (target 0) then and when a click or input 02 is handled. Unknown20 true while
+    editing (its low byte 1: the edit ended). +0x84 SetBinding a new virtual. Two copies of its
+    destructor (0x006607a0, 0x00660910: the titled edit box's).
+  - C_TitledEditBox (type 0xe, vtable 0x00814f58, on the hot key): the edit box's text 0x7D2 at
+    first (style 0xD), the title on "text*"; its input the edit box's, the text messages the title's,
+    the edit ones (callbacks, max length, digits, number, range, forbidden, text) the edit box's.
+  - The cursor checked after a binding (the fix: Acquire may give null).
+  - Harness: hotkey_test.inc in the text build, run by ControlsTest after ServerTest ("hotkey:", 8
+    checks; the parts replaced by loggers; PollPress, Bind, GetBindingName, SetUnknown44 faked).
+    The stub profile.h has the player's key bindings, the shared stub pending.h the poll. Every
+    harness build still compiles. 22 of 22 in both orders.
+  - Mutations (mutations/mutate_9c5d1.py, generated, 4 parallel runs): 94 cases, 88 build; all
+    caught but 4 equivalent (listed in its docstring) at the first run.
+  - Build: MSVC clean. Tier 1: 478 errors in 79 files, 193 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: C_auto_00814fe0 renamed C_HotKeyControl; the titled edit box's this C_HotKeyControl (no
+    struct); names/controls.txt (26); 26 functions in ported.txt. Stats: 8,557 of 12,293 functions by
+    hand (76.5 % by size).
+
+  PART 9c-v-d-ii DONE (2026-11-02): the item pictures, the players' list, the check group
+  (src/game/controls.*). The movie control (type 0x22, vtable 0x00814540: an IGraph stream on its
+  frame, "GameMovie\\%s2", unnamed stream slots 0x20 / 0x28 / 0x50 and x87 rect sums) left for
+  9c-v-d-iii.
+  - C_ItemPictures (type 0x1d, vtable 0x00814a90, 0x88; the hiding list's items): the item
+    information without its stats (its own code): the pictures (id | 1 on the frame, id | 2 on
+    "ammo*"), SET_ITEM (the ammo's or a uniform's headgear's), the counts as "%d " (style 0x12);
+    UpdateCounts 0x00651ea0: ITEM_COUNTED to the parent when either count is above 0, HIDE_ITEM when
+    the count is below 0 (the texts then not set), the second hidden without its item or with a
+    count below 0, else shown and active from 1. The second picture checked (the fix).
+  - C_PlayerList (type 0x20, vtable 0x00814870, 0x90): on the combo box (its constructor and
+    destructor) but none of its parts: a scrolled text on its frame (its id; SET_PAGE_STEP 5 to the
+    bar), a title on "header*" (id | 2); FindChild: the title's id gives 2, not its index (kept);
+    its own enter / leave / hover / press; SHOW_PLAYERS 0x100007D (the columns' texts 0xA33 / 0xA35
+    / 0xA37, styles 0x23 .. 0x25; each connected player's name, stats[1], stats[3], under the net
+    game's lock); 0x100007E / 0x100007F ignored; the rest the control's, not the combo box's.
+  - C_CheckGroup (type 0x27, vtable 0x008150f0, 0x74): a highlighted check box on "text*" (its id;
+    none: Create false); FindChild: the box for any id.
+  - Harness: groups_test.inc in the text build, run by ControlsTest after HotKeyTest ("groups:",
+    9 checks; the net game's LockPlayers / UnlockPlayers / GetPlayerCount faked there). The shared
+    stub S_NetPlayerState names its stats (same size); every harness build compiles. 22 of 22 in
+    both orders.
+  - Mutations (mutations/mutate_9c5d2.py, generated, 4 parallel runs): 107 cases, 103 build; all
+    caught but 6 equivalent (listed in its docstring). The first run left 9 (3 killed: a count of
+    1 counted and active, the hover's leave refused).
+  - Build: MSVC clean. Tier 1: 478 errors in 79 files, 193 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: the three classes' this their bases' (no structs; the functions 9c-v-b typed with the
+    bar's and the hiding list's structs retyped); auto_members.json and class_names.json name them;
+    names/controls.txt (21); 21 functions in ported.txt. Stats: 8,578 of 12,293 functions by hand
+    (76.6 % by size).
+
+  PART 9c-v-d-iii DONE (2026-11-02): the movie control (src/game/controls.*). Part 9c-v (the big
+  controls) is done.
+  - C_MovieControl (type 0x22, vtable 0x00814540, 0x8C; was C_auto_00814540): Create turns its frame
+    off, makes an IGraph stream (none: false) and FindArea 0x00667f90 maps the frame visual's world
+    bound to pixels (x by ScrnX; y by ScrnY and -4/3: down); FitRect 0x00668050 sets the stream's
+    rectangle: the area's width and the video's shape (GetVideoSize), or (the area flatter than the
+    video) its height, centred across; truncated as __ftol. Refresh, playing: the next picture
+    (UpdateVideo 0), driver state 3 off, render state 0 kept, Draw(false); its state 1 or -1:
+    stopped, fitted, played again. CLOSE_MOVIE 0x20000A0 (stopped, closed), STOP_MOVIE 0x20000A1,
+    PLAY_MOVIE 0x20000A2 ("GameMovie\\<text>2"; an open failing while another plays: nothing,
+    else fitted, volume 0, played: the original's); its stream closed and released when deleted.
+  - ls3d/igraph.h: ISND_stream's slots 0x20 SetRect, 0x24 GetRect, 0x28 GetVideoSize, 0x50 Draw
+    named after the LS3DF port's IShow; S_showRect.
+  - Harness: movie_test.inc in the text build, run by ControlsTest after GroupsTest ("movie:", 5
+    checks; a logging stream; geffects_test.inc's driver and IGraph state fakes). 22 of 22 in both
+    orders.
+  - Mutations (mutations/mutate_9c5d3.py, generated, 4 parallel runs): 71 cases, 67 build; all
+    caught but 3 equivalent (listed in its docstring). The first run left 6 (3 killed: FindArea's
+    result, equal shapes with a fractional edge, the top of a width fit).
+  - Build: MSVC clean. Tier 1: 478 errors in 79 files, 193 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: C_auto_00814540 renamed C_MovieControl; FindArea / CloseStream fastcall with the control
+    as their parameter; names/controls.txt (8); 8 functions in ported.txt. Stats: 8,586 of 12,293
+    functions by hand (76.7 % by size).
+
+  PART 9c-vi-a DONE (2026-11-02): the menus' cursor (src/game/cursor.*, the .cpp new). 9c-vi split:
+  a the cursor, b the screens (0x00815540, 0x00815918, 0x008156b8; 0x008154b8 is 9c-v-c's server
+  row), c the factory CreateChild.
+  - C_Cursor (vtable 0x008155d0, 0x54; was C_auto_008155d0): one shared, counted (Acquire 0x0066a9e0:
+    made with Init 0x0066a7e0, none when it fails; Release 0x0066aa80: the last frees the texture
+    and deletes the shared one, whichever was released). Init: the screen's size, the scene's
+    "CURZOR" frame, the mouse placed at its last place (g_cursorX / g_cursorY 0x00840668 / 0x0084066c,
+    -1 at first: the centre; truncated) and read, the frame placed and off, "x_kursor.tga" (mode
+    0x402). Update 0x0066a520: the buttons, the move and the wheel read; a delay (SetDelay
+    0x0066ab50, the hot key's 200 ms) counted down (false); nothing changed (false); else the place
+    moved and kept on the screen (the move cut by what it lost), the still time reset, the clicks
+    (unless SetClicksOff 0x0066ab60): a release over the control pressed on, a second within 400 ms
+    (the press time, from the last release) a double click; the frame at (x / w, (-1 / h) y 0.75,
+    -1). Pick 0x0066aac0: the id under it, the frame data of what IntersectFrame hits from (x, y,
+    -0.9) along +z (flags 0x140000). The button queries (any button for 0), GetPosition / GetMove
+    (-(y / h) 0.75: the original's other order), GetScreenPosition (the buttons' bits as a float),
+    HasMoved, the wheel.
+  - ls3d/igraph.h: IGraph 0xF4 GetMouseWheel, 0xF8 SetMousePos, 0xFC / 0x100 GetMouseX / Y (the
+    LS3DF port's names). The hot key's SetUnknown44 is SetDelay.
+  - Harness: a standalone one (cursor_test.cpp, build_cursor.bat, check_cursor.py in
+    vehicle_setup: the cursor alone on fake IGraph / scene / frame / image tables; the heap filled,
+    the cursor's deletions counted), 6 checks. The text build keeps its cursor fakes; 22 of 22 in
+    both orders.
+  - Mutations (mutations/mutate_9c6a.py, generated, the cursor harness, 4 parallel runs): 159 cases,
+    155 build; all caught but 25 equivalent (listed in its docstring: Reset's and Init's overlapping
+    fields, the clamps' edges). The first run left 40 (15 killed by the filled heap, the deletion
+    count and edge cases: a delay ending at 0 / 1, a place off 0, a second click at 400 ms).
+  - Build: MSVC clean. Tier 1: 475 errors in 78 files, 192 stubs (was 478 / 79 / 193). ret_audit
+    --src: 52.
+  - Ghidra: C_auto_008155d0 renamed C_Cursor; names/cursor.txt (20 functions, g_cursorX / Y,
+    g_cursor 0x008ae558); 20 functions in ported.txt. Stats: 8,606 of 12,293 functions by hand
+    (76.7 % by size).
 
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`

@@ -2,7 +2,7 @@
 
     python check_text.py MISSIONS_TXT_DIR HARNESS_OUTPUT
 
-MISSIONS_TXT_DIR holds a .txt per mission ("mission NAME"). Per mission: a textbox, a layout, a position, a render, a pages, a paged, a utf8, a control, a controls, a scroll, a check, an edit, a combo and an info line with every check met. Prints "N models, M with differences" (mutfast.py reads it).
+MISSIONS_TXT_DIR holds a .txt per mission ("mission NAME"). Per mission: a textbox, a layout, a position, a render, a pages, a paged, a utf8, a control, a controls, a scroll, a check, an edit, a combo, an info, a list, a bar, a server, a hotkey, a groups and a movie line with every check met. Prints "N models, M with differences" (mutfast.py reads it).
 """
 import glob
 import os
@@ -35,6 +35,14 @@ LINES = {
     "combo": ("cbScrolled cbScrolledInput cbScrolledMsgs cbHeader cbCombo cbComboInput cbComboMsgs cbTitled cbChat "
               "cbChatMsgs").split(),
     "info": "skBase skKeys skPool skInput skMsgs ifBase ifItem ifStats ifCounts ifMsgs".split(),
+    "list": "lsBase lsLayout lsScroll lsSelect lsKeys lsFocus lsMsgs lsAdd lsItem".split(),
+    "bar": ("brBase brScale brMsgs ubBase ubScale ubText ubMsgs hlBase hlHide hlShow hlAll plBase plAdd "
+            "plHeld").split(),
+    "server": ("svRow svRowMsgs svRowName svList svAdd svWindow svSelect svRefresh svSort svSortKeys "
+               "svMsgs").split(),
+    "hotkey": "hkMake hkParts hkTick hkKeys hkMsgs teMake teParts teMsgs".split(),
+    "groups": "ipMake ipItem ipCounts ipMsgs plMake plInput plShow plMsgs cgMake".split(),
+    "movie": "mvMake mvArea mvFit mvDraw mvMsgs".split(),
 }
 
 

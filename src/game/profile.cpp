@@ -42,10 +42,10 @@ const char *const PROFILES_DIRECTORY = "PlayersProfiles";
 // The difficulty of a multiplayer game other than co-op.
 constexpr int MULTIPLAYER_DIFFICULTY = 3;
 
+} // namespace
+
 int g_versionMajor = 1;                                 // 0x00845070
 int g_versionMinor = 12;                                // 0x00845074
-
-} // namespace
 
 void __stdcall GetGameVersion(int *major, int *minor)   // 0x006b6d50
 {

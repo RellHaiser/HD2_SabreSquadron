@@ -7,11 +7,14 @@
 // Made by the factory (C_Control::CreateChild) by their descriptions' types.
 #pragma once
 
+#include <cstddef>
+
 #include "game/control.h"
 
 class C_Cursor;
 class C_PagedTextBox;
 class C_TextBox;
+class ISND_stream;
 struct S_vector;
 class I3D_face_group;
 class I3D_texture;
@@ -126,6 +129,37 @@ enum : uint32_t {
     CONTROL_MSG_SET_ITEM_COUNT = 0x100007C,
     CONTROL_MSG_SET_SECOND_COUNT = 0x1000082,
     CONTROL_MSG_ITEM_COUNTED = 0x2000083,
+    // The list group's: can it scroll up / down (value), its scroll range (value), the items shown
+    // at once (value), an item's step across or down from the last (value2 a float; the other 0),
+    // the first item's place (value2 an S_vector from _aligned_malloc, the list's to free), an
+    // item selected by index (value); ADD_ITEM (value the root frame, value2 an S_ControlDesc *,
+    // the list's to delete), REMOVE_ITEM (value the item's id; posted on with value2 its frame),
+    // PREVIOUS_ITEM / NEXT_ITEM a step up / down, CLEAR, GET_POSITION, SET_POSITION, REFRESH.
+    CONTROL_MSG_CAN_SCROLL_UP = 0x100000F,
+    CONTROL_MSG_CAN_SCROLL_DOWN = 0x1000010,
+    CONTROL_MSG_GET_SCROLL_RANGE = 0x100001F,
+    CONTROL_MSG_SET_VISIBLE = 0x1000028,
+    CONTROL_MSG_SET_ACROSS_STEP = 0x1000029,
+    CONTROL_MSG_SET_DOWN_STEP = 0x100002A,
+    CONTROL_MSG_SET_ORIGIN = 0x100006B,
+    CONTROL_MSG_SELECT_INDEX = 0x20000AA,
+    // The bar's: its minimum, maximum and value (value2 a float, got or set; the upgrade bar's by
+    // value: 0 the value, 1 the upgrade, 2 (set) the suffix text, value2 a char *), the axis it
+    // scales along (value: 0 x, 1 y, 2 z).
+    CONTROL_MSG_GET_BAR_MIN = 0x100008D,
+    CONTROL_MSG_GET_BAR_MAX = 0x100008E,
+    CONTROL_MSG_GET_BAR_VALUE = 0x100008F,
+    CONTROL_MSG_SET_BAR_MIN = 0x1000090,
+    CONTROL_MSG_SET_BAR_MAX = 0x1000091,
+    CONTROL_MSG_SET_BAR_VALUE = 0x1000092,
+    CONTROL_MSG_SET_BAR_AXIS = 0x1000093,
+    // The hiding list's: an item hidden (value its id), all hidden; ITEM_COUNTED shows one again.
+    CONTROL_MSG_HIDE_ITEM = 0x2000084,
+    CONTROL_MSG_HIDE_ALL = 0x2000085,
+    // The pool list's: a hidden item filled and shown (value its index, value2 an entry whose name,
+    // a C_str, is at + 1); the current one also hovered.
+    CONTROL_MSG_ADD_CURRENT_ENTRY = 0x1000064,
+    CONTROL_MSG_ADD_ENTRY = 0x1000067,
     // A control to be ticked (posted to target 0 when made, value2 the control: the tooltip, the
     // scroll bar and its arrows).
     CONTROL_MSG_ADD_TICKER = 0x200007A,
@@ -1039,4 +1073,471 @@ protected:
     C_PictureControl *m_picture = nullptr;              // +0x80
     C_PictureControl *m_secondPicture = nullptr;        // +0x84
     C_TitleControl *m_stats = nullptr;                  // +0x88
+};
+
+class C_ListItem;
+
+// A list group (type 0xb, vtable 0x00815068; the base of types 0x23 and 0x18): a group of items
+// laid out from an origin by a step (down or across), `m_visible` of them shown from `m_first` (the
+// list's frame moved by the step as it scrolls); one selected (its "selector*" frame behind it),
+// one picked (a C_ListItem). Its scroll posted to the control its value names (a scroll bar); the
+// arrow keys, Home / End and the page keys move the focus.
+class C_ListGroup : public C_ControlGroup {             // 0xA0 bytes
+public:
+    C_ListGroup(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
+    ~C_ListGroup() override;                             // 0x0065ea40 (0x0065e840): the origin freed, the extra
+                                                        // control deleted, the cursor released
+
+    // The focus' key (taking input); else the navigation keys (true: moved).
+    bool Unknown20(int key) override;                   // 0x006557d0
+    // The base's; the selector frame at (0, 0, 0); true.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00655b40
+    // The group's; handled: the focus selected.
+    int OnClick(int id) override;                       // 0x00655de0
+    int OnPress(int id) override;                       // 0x00655db0
+    // A page up or down of the scroll bar the value names per 120 (none: not handled).
+    int OnWheel(int id, int amount) override;           // 0x00655fe0
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00656230
+    // The items past the visible ones, + 1.
+    virtual int ScrollRange() const;                    // +0x84 0x00656130
+
+    // The item picked (the previous one's input 02 and leave: deselected).
+    bool PickItem(C_Control *item);                     // 0x006569f0
+
+protected:
+    // A step (1 up, 2 down; 0 none), the items shown or hidden, refreshed; the selector shown with
+    // the selected (false: no step).
+    bool Scroll(int direction);                         // 0x00656a20
+    // The item at the index selected (scrolled to; the selector behind it; the position posted).
+    void Select(int index);                             // 0x00655e10
+    // The focus moved to the previous / next item taking input (false: none; the focus' leave
+    // refused: true, not moved).
+    bool FocusPrevious();                               // 0x006556c0
+    bool FocusNext();                                   // 0x00655750
+    // The items by their ids (when sorted).
+    void Sort();                                        // 0x00655bc0
+    // The items at the origin by the step (the argument not read: the original's, 0).
+    void Layout(int);                                   // 0x00655c70
+    // A message posted to the control the value names (none: nothing).
+    void PostToValue(uint32_t id, uint32_t value) const;
+    int ItemCount() const { return static_cast<int>(m_children.size()); }
+
+    C_Cursor *m_cursor = nullptr;                       // +0x70 (the subclasses')
+    C_Control *m_picked = nullptr;                      // +0x74
+    C_Control *m_extra = nullptr;                       // +0x78 (the subclasses'; deleted with the list)
+    I3D_frame *m_selector = nullptr;                    // +0x7C
+    int m_selected = -1;                                // +0x80
+    bool m_sorted = true;                               // +0x84
+    S_vector *m_origin = nullptr;                       // +0x88 (_aligned_malloc'd, owned)
+    float m_downStep = 0.0f;                            // +0x8C
+    float m_acrossStep = 0.0f;                          // +0x90
+    int m_visible = 0;                                  // +0x94
+    int m_first = 0;                                    // +0x98
+    int m_last = 0;                                     // +0x9C
+};
+
+// An item of a list group (type 6, vtable 0x00814ed0): a text button whose click picks it (its
+// parent a C_ListGroup), its box's hover while not picked.
+class C_ListItem : public C_TextButton {                // 0x7C bytes
+public:
+    C_ListItem(I3D_scene *scene, uint32_t id, C_Control *parent) : C_TextButton(scene, id, parent) {}
+    ~C_ListItem() override = default;                   // 0x006601b0 (0x006601d0)
+
+    // Not picked: the box's hover; notified (handled).
+    int OnEnter(int id) override;                       // 0x00653f70
+    int OnLeave(int id) override;                       // 0x00653fa0
+    // Picked: the parent's pick, the text button's enter, notified.
+    int OnClick(int id) override;                       // 0x00653fd0
+    // Id 1 (the list's unpick): not picked, the text button's leave, CONTROL_NOTIFY_02.
+    int OnInput02(int id) override;                     // 0x00654010
+    // CONTROL_NOTIFY_PRESS, then the click.
+    int OnPress(int id) override;                       // 0x00654040
+
+protected:
+    bool m_picked = false;                              // +0x78
+};
+
+// A bar (type 0x16, vtable 0x008147e8; the base of the upgrade bar): its frame scaled along an axis
+// by its value over its range (max - min; not above 0: 1), off at 0 or below, at most 1; not taking
+// input.
+class C_BarControl : public C_Control {                 // 0x7C bytes
+public:
+    C_BarControl(I3D_scene *scene, uint32_t id, C_Control *parent);
+    ~C_BarControl() override = default;                 // 0x0065fb10 (0x0065faf0)
+
+    // The base's, then placed (false: not made).
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006630a0
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x006630e0
+    // The frame scaled (or off) and updated.
+    virtual void UpdateBar();                           // +0x84 0x00662e70
+
+protected:
+    // A scale of `fraction` along the axis (1 on the others); another axis: none.
+    static void ScaleAlong(I3D_frame *frame, int axis, float fraction);
+
+    float m_value = 0.0f;                               // +0x6C
+    float m_max = 1.0f;                                 // +0x70
+    float m_min = 0.0f;                                 // +0x74
+    int m_axis = 0;                                     // +0x78
+};
+
+// An upgrade bar (type 0x17, vtable 0x00814760; the skills' and the upgrades'): a bar whose
+// "hlcpct*" frame shows the value and "upgrade*" the value with its upgrade; a title on "name_*"
+// (the text messages) and one on "text_*" (the value, the upgrade, the suffix).
+class C_UpgradeBar : public C_BarControl {              // 0x98 bytes
+public:
+    C_UpgradeBar(I3D_scene *scene, uint32_t id, C_Control *parent) : C_BarControl(scene, id, parent) {}
+    ~C_UpgradeBar() override = default;                 // 0x0065fc50 (0x0065fc30)
+
+    // The shown bar's titles.
+    void Refresh() override;                            // 0x00663a90
+    // The bar's; the titles made; both frames found (false: not), placed.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00663880
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00663700
+    // Hidden at value and upgrade 0; else shown, the frames scaled, the text set; the frame updated.
+    void UpdateBar() override;                          // 0x006631a0
+
+protected:
+    C_TitleControl *m_name = nullptr;                   // +0x7C
+    C_TitleControl *m_text = nullptr;                   // +0x80
+    I3D_frame *m_valueFrame = nullptr;                  // +0x84 "hlcpct*"
+    I3D_frame *m_upgradeFrame = nullptr;                // +0x88 "upgrade*"
+    float m_current = 0.0f;                             // +0x8C
+    float m_upgrade = 0.0f;                             // +0x90
+    C_str m_suffix;                                     // +0x94
+};
+
+// A hiding list (type 0x23, vtable 0x00814a08; the base of the pool list): a list group whose items
+// can be hidden (kept, the hidden ones still taking their messages) and shown again (ITEM_COUNTED:
+// the item informations', sorted in).
+class C_HidingList : public C_ListGroup {               // 0xB4 bytes
+public:
+    C_HidingList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ListGroup(scene, id, parent) {}
+    ~C_HidingList() override;                           // 0x0065eb60 (0x0065eb40): the hidden deleted
+
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00659d50
+
+protected:
+    // The hidden item's index by id (the last match; none: -1).
+    int FindHidden(uint32_t id) const;                  // 0x0065a0c0
+    int HiddenCount() const { return static_cast<int>(m_hidden.size()); }
+
+    std::vector<C_Control *> m_hidden;                  // +0xA0 (owned)
+};
+
+// A pool list (type 0x26, vtable 0x008144b8): a hiding list, unsorted, whose hidden items are filled
+// with entries and shown; the focus held from input 0A until input 09 (a drag).
+class C_PoolList : public C_HidingList {                // 0xB8 bytes
+public:
+    C_PoolList(I3D_scene *scene, uint32_t id, C_Control *parent);
+    ~C_PoolList() override = default;                   // 0x0065ee20 (0x0065ee00)
+
+    // The held item's (none: 0).
+    int OnInput08(int id) override;                     // 0x0065a510
+    // The held item's, then none held (none: 0).
+    int OnInput09(int id) override;                     // 0x0065a530
+    // The focus held, its input 0A (none: 0).
+    int OnInput0A(int id) override;                     // 0x0065a4d0
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0065a100
+
+protected:
+    C_Control *m_held = nullptr;                        // +0xB4
+};
+
+// A server found by the browser (its module not ported yet: the fields the server list reads).
+struct S_ServerEntry {
+    char name[0x33];                                    // +0x00
+    char map[0x3D];                                     // +0x33
+    int gameType;                                       // +0x70 (E_MpGameType)
+    uint32_t ping;                                      // +0x74
+    uint32_t maxPlayers;                                // +0x78
+    uint32_t players;                                   // +0x7C
+    bool dedicated;                                     // +0x80
+    uint8_t unknown81;
+    bool password;                                      // +0x82
+    uint8_t unknown83[5];
+    bool voice;                                         // +0x88
+    uint8_t unknown89[3];
+    int versionMinor;                                   // +0x8C
+    int versionMajor;                                   // +0x90
+};
+static_assert(offsetof(S_ServerEntry, gameType) == 0x70 && offsetof(S_ServerEntry, voice) == 0x88 &&
+                  offsetof(S_ServerEntry, versionMajor) == 0x90, "S_ServerEntry layout");
+
+// The server list's messages: the entries' count (value), the sort (value: a key 1..5 in the low 3
+// bits, 0x40 / 0x80 the direction toggled; 0 sorted again) and its key; a row's entry (value2; its
+// own: the current one, in white).
+enum : uint32_t {
+    CONTROL_MSG_GET_ENTRY_COUNT = 0x10000A2,
+    CONTROL_MSG_SORT = 0x2000079,
+    CONTROL_MSG_GET_SORT = 0x20000AD,
+};
+
+// A server row (vtable 0x008154b8; the server list's, on its "Server<n>" frames): a text button whose
+// runs show an entry (name, map, game type, ping, players; inactive when its version differs), with
+// a password, a dedicated and a voice icon on each of its frames. The entry is kept as its index.
+class C_ServerRow : public C_TextButton {               // 0x90 bytes
+public:
+    C_ServerRow(I3D_scene *scene, uint32_t id, C_Control *parent);   // 0x00666ad0
+    ~C_ServerRow() override = default;                  // 0x00666ba0 (0x00666b80)
+
+    // The text button's; the six icons found (false: not), off, given the row's id and linked to
+    // the normal ("x*") or the active frame ("x*01"); the box on the normal frame, no margin.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00665d70
+    // ADD_ENTRY (value2 the entry; none: cleared), ADD_CURRENT_ENTRY (white), REMOVE_ITEM (cleared),
+    // GET_ITEM (value2 the entry); true.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00665f90
+
+    S_ServerEntry *GetEntry() const { return reinterpret_cast<S_ServerEntry *>(static_cast<uintptr_t>(m_index)); }
+
+protected:
+    I3D_frame *m_password = nullptr;                    // +0x78 "xpassword"
+    I3D_frame *m_dedicated = nullptr;                   // +0x7C "xdedicated"
+    I3D_frame *m_voice = nullptr;                       // +0x80 "xvoice"
+    I3D_frame *m_activePassword = nullptr;              // +0x84 "xpassword01"
+    I3D_frame *m_activeDedicated = nullptr;             // +0x88 "xdedicated01"
+    I3D_frame *m_activeVoice = nullptr;                 // +0x8C "xvoice01"
+};
+
+// The server list (type 0x18, vtable 0x00814980): a list group of 11 rows ("Server1" ..
+// "Server11", 0.033 apart) showing a window of its entries (not owned); a row's click selects its
+// entry (CONTROL_NOTIFY_0E), its notification 13 passed on; sorted by a key; no keys, no tick.
+class C_ServerList : public C_ListGroup {               // 0xC8 bytes
+public:
+    C_ServerList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ListGroup(scene, id, parent) {}
+    ~C_ServerList() override = default;                 // 0x00661230 (0x00661210)
+
+    void Tick(int) override {}                          // 0x00667b20
+    bool Unknown20(int) override { return false; }      // 0x00667b10
+    // The list group's (its result dropped); the rows made (false: a frame missing), laid out from
+    // the last one's place.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006666f0
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00666e80
+    // The entries past the rows, + 1.
+    int ScrollRange() const override;                   // 0x00666cf0
+
+protected:
+    // The entries sorted by a key (see CONTROL_MSG_SORT).
+    void SortEntries(uint32_t key);                     // 0x006677c0
+    // The key's comparison (none: null).
+    using T_Compare = bool (*)(const S_ServerEntry *a, const S_ServerEntry *b);
+    T_Compare Comparison() const;                       // 0x00667720
+    int EntryCount() const { return static_cast<int>(m_entries.size()); }
+    // The rows' callbacks: a click selects the row's entry; notification 13 passed on.
+    static bool RowClicked(void *object, void *, C_Control *control, uint32_t, uint32_t);   // 0x00666650
+    static bool RowNotified(void *object, void *, C_Control *, uint32_t, uint32_t);   // 0x00666630
+
+    S_ServerEntry *m_selectedEntry = nullptr;           // +0xA0
+    uint32_t m_sortKey = 0x40;                          // +0xA4
+    std::vector<S_ServerEntry *> m_entries;             // +0xA8
+    uint8_t m_unknownB8 = 0;                            // +0xB8
+    uint32_t m_unknownBC = 0;                           // +0xBC
+    int m_firstEntry = 0;                               // +0xC0 (the first row's)
+    int m_lastEntry = 0;                                // +0xC4 (the original's not set when made)
+};
+
+// The hot key control's messages: its binding (value; GET has two codes), set with its name's text
+// id (value2) for the title; posted (target 0) when an edit ends or a key is bound.
+enum : uint32_t {
+    CONTROL_MSG_GET_BINDING = 0x100003C,
+    CONTROL_MSG_SET_BINDING = 0x100003D,
+    CONTROL_MSG_GET_BINDING2 = 0x100003E,
+    CONTROL_MSG_HOT_KEY_DONE = 0x20000C2,
+};
+
+// A hot key (type 0xd, vtable 0x00814fe0; the base of the titled edit box): an edit box on its frame
+// (id | 1, not a child) showing the binding's key, a title on "hktext*" (id | 2, its name). Clicked,
+// the edit starts; while editing, the next key pressed is bound (Escape: none).
+class C_HotKeyControl : public C_Control {               // 0x7C bytes
+public:
+    C_HotKeyControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
+    ~C_HotKeyControl() override;                         // 0x006607a0 (0x00660780; 0x00660910 a copy): the
+                                                         // edit box and the title deleted
+
+    // The shown control's edit box and title.
+    void Refresh() override;                             // 0x0064f000
+    // While editing: the edit box's tick, then (after a first tick) the key pressed bound (the
+    // binding's, CHANGED; Escape: none), the edit ended, HOT_KEY_DONE posted.
+    void Tick(int time) override;                        // 0x0064e850
+    // While editing: true (its low byte 1, Escape: the edit ended); else false.
+    bool Unknown20(int key) override;                    // 0x0064ea90
+    // The base's (false: not made); the edit box made on the frame (when there is one), the title on
+    // "hktext*" taking input.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0064db20
+    // Both parts' (handled).
+    int OnEnter(int id) override;                        // 0x0064ed40
+    // Not while editing (0); both parts' (handled).
+    int OnLeave(int id) override;                        // 0x0064ed70
+    // Not while editing (0); the edit box's (handled: HOT_KEY_DONE posted).
+    int OnClick(int id) override;                        // 0x0064eec0
+    // The edit box's (handled: HOT_KEY_DONE posted; else 0).
+    int OnInput02(int id) override;                      // 0x0064edb0
+    int OnPress(int) override { return CONTROL_HANDLED; }   // 0x0064eea0
+    // The click.
+    int OnKeyClick(int id) override { return OnClick(id); }   // 0x0064eeb0
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0064eac0
+    // Both parts' too.
+    void SetInactive(bool inactive) override;            // 0x0064efd0
+    // The binding (CONTROL_MSG_SET_BINDING's, without the text).
+    virtual void SetBinding(int binding) { m_binding = binding; }   // +0x84 0x00660770
+
+protected:
+    // The binding's key name in the edit box.
+    void ShowBinding();
+
+    bool m_armed = false;                                // +0x6C (the first editing tick passed)
+    int m_binding = 0;                                   // +0x70 (C_KeyBindings' index)
+    C_TitleControl *m_title = nullptr;                   // +0x74
+    C_EditBox *m_edit = nullptr;                         // +0x78
+};
+
+// A titled edit box (type 0xe, vtable 0x00814f58): the hot key control's parts as a plain edit box
+// (the input its; "text*" the title; its text 0x7D2 at first), the edit messages passed to it.
+class C_TitledEditBox : public C_HotKeyControl {         // 0x7C bytes
+public:
+    C_TitledEditBox(I3D_scene *scene, uint32_t id, C_Control *parent) : C_HotKeyControl(scene, id, parent) {}
+    ~C_TitledEditBox() override = default;               // (0x006608f0)
+
+    // While editing: the edit box's.
+    void Tick(int time) override;                        // 0x0064f2d0
+    bool Unknown20(int key) override;                    // 0x0064f2f0
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0064f020
+    // Both parts' (handled).
+    int OnLeave(int id) override;                        // 0x0064f470
+    // The edit box's.
+    int OnClick(int id) override;                        // 0x0064f440
+    int OnInput02(int id) override;                      // 0x0064f430
+    int OnPress(int) override { return CONTROL_HANDLED; }   // 0x0064f450
+    int OnKeyClick(int id) override;                     // 0x0064f460
+    // The text messages the title's; the edit ones (callbacks, length, digits, number, range,
+    // forbidden, text) the edit box's; REFRESH both.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0064f300
+};
+
+// An item's pictures (type 0x1d, vtable 0x00814a90; the hiding list's items): the item information
+// without its stats: its picture (on its frame, id | 1) and its ammo's or headgear's (on "ammo*",
+// id | 2), their counts as text; the parent told when either count is, or to hide it (a count
+// below 0); the second shown only with its item and a count from 0.
+class C_ItemPictures : public C_ControlGroup {          // 0x88 bytes
+public:
+    C_ItemPictures(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
+    ~C_ItemPictures() override = default;               // (0x00660a60)
+
+    // By the id's last 4 bits: 1 the picture, 2 the second.
+    int FindChild(uint32_t id) const override;          // 0x006521c0
+    // The shown control's pictures drawn.
+    void Refresh() override;                            // 0x00652190
+    // The group's (false: not made); the pictures hidden, their "X_SQUARE.BMP" face group; true.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00651810
+    // SET_ITEM, SET_ITEM_COUNT, SET_SECOND_COUNT; the callbacks to the pictures; REFRESH to both.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00651af0
+
+protected:
+    // The counts shown; the parent told (ITEM_COUNTED: either above 0; HIDE_ITEM: the count below 0).
+    void UpdateCounts();                                // 0x00651ea0
+    // A picture of the item `id`'s (its index the id, its texture the item's image).
+    static void ShowPicture(C_PictureControl *picture, int id, C_ItemDef *def);
+
+    int m_item = -1;                                    // +0x70
+    int m_count = 0;                                    // +0x74
+    int m_second = -1;                                  // +0x78 the ammo's or the headgear's item
+    int m_secondCount = 0;                              // +0x7C
+    C_PictureControl *m_picture = nullptr;              // +0x80
+    C_PictureControl *m_secondPicture = nullptr;        // +0x84
+};
+
+// The players' list (type 0x20, vtable 0x00814870; the network game's): built from the combo box but
+// none of its parts: a scrolled text on its frame (its id; a page step of 5) and a title on
+// "header*" (id | 2). SHOW_PLAYERS fills them: the columns' names, each connected player's name and
+// two of its stats.
+class C_PlayerList : public C_ComboBox {                // 0x90 bytes
+public:
+    C_PlayerList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ComboBox(scene, id, parent) {}
+    ~C_PlayerList() override = default;                 // (0x0065f420: the combo box's)
+
+    // By the id's last 4 bits: above 3 the list; 2: 2 (not the title's index: the original's).
+    int FindChild(uint32_t id) const override;          // 0x0065ae10
+    // The control's (its result dropped), its frame's id cleared; the parts (the title optional).
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0065a620
+    // The focus' leave (not taken: CONTROL_NOT_HANDLED); the child with the id's enter (taken: the
+    // focus, handled; else 0).
+    int OnEnter(int id) override;                       // 0x0065acb0
+    // The focus' leave (not taken: 0; else no focus); handled.
+    int OnLeave(int id) override;                       // 0x0065ad30
+    // Off the children: the leave; another child: the leave and its enter; the focus: its.
+    int OnInput05(int id) override;                     // 0x0065ad70
+    // The focus' when it is the child with the id (else 0).
+    int OnPress(int id) override;                       // 0x0065add0
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0065a850
+    void SetStrings(const std::vector<C_str> &) override {}   // 0x0065ae60
+    // The parts' (not its own).
+    void SetInactive(bool inactive) override;           // 0x0065ae30
+
+protected:
+    C_ScrolledText *m_players = nullptr;                // +0x88
+    C_TitleControl *m_title = nullptr;                  // +0x8C
+};
+
+// A check group (type 0x27, vtable 0x008150f0): a group holding a highlighted check box on "text*"
+// (its id; none: not made).
+class C_CheckGroup : public C_ControlGroup {            // 0x74 bytes
+public:
+    C_CheckGroup(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
+    ~C_CheckGroup() override = default;                 // (0x00661550)
+
+    // The check box (any id; none: -1).
+    int FindChild(uint32_t) const override { return m_box ? 0 : -1; }   // 0x006613e0
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006613f0
+
+protected:
+    C_HighlightCheckBox *m_box = nullptr;               // +0x70
+};
+
+// The players' list's messages: filled; two ignored.
+enum : uint32_t {
+    CONTROL_MSG_SHOW_PLAYERS = 0x100007D,
+    CONTROL_MSG_IGNORED_7E = 0x100007E,
+    CONTROL_MSG_IGNORED_7F = 0x100007F,
+};
+
+// The movie control's messages: stopped and closed, stopped, a movie played ("GameMovie\<text>2").
+enum : uint32_t {
+    CONTROL_MSG_CLOSE_MOVIE = 0x20000A0,
+    CONTROL_MSG_STOP_MOVIE = 0x20000A1,
+    CONTROL_MSG_PLAY_MOVIE = 0x20000A2,
+};
+
+// A movie (type 0x22, vtable 0x00814540): a video stream drawn on the screen over its frame's place
+// (the frame off), fitted to it keeping the video's shape, muted, played again at its end; not taking
+// input.
+class C_MovieControl : public C_Control {               // 0x8C bytes
+public:
+    C_MovieControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) { m_takesInput = false; }
+    ~C_MovieControl() override;                         // 0x006610e0 (0x006610c0): the stream closed, released
+
+    // Playing: the next picture drawn (driver state 3 off, the render state 0 kept); at its end
+    // stopped, fitted again, played again.
+    void Refresh() override;                            // 0x00668300
+    // The control's (false: not made); the frame off, the stream made (none: false), the area found.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00668140
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x006681a0
+
+protected:
+    // The frame visual's world bound on the screen in pixels (its y negated and by 4:3: down; false:
+    // no frame).
+    bool FindArea();                                    // 0x00667f90
+    // The stream's rectangle: the area's width, the video's shape (too tall: the area's height,
+    // centred across).
+    void FitRect();                                     // 0x00668050
+    // The stream closed and released.
+    void CloseStream();                                 // 0x006683c0
+
+    ISND_stream *m_stream = nullptr;                    // +0x6C
+    float m_left = 0.0f;                                // +0x70
+    float m_bottom = 0.0f;                              // +0x74 (the bound's min y)
+    float m_right = 0.0f;                               // +0x78
+    float m_top = 0.0f;                                 // +0x7C (the bound's max y)
+    float m_width = 0.0f;                               // +0x80
+    float m_height = 0.0f;                              // +0x84
+    uint32_t m_unknown88 = 0;                           // +0x88
 };
