@@ -7,6 +7,8 @@
 // Made by the factory (C_Control::CreateChild) by their descriptions' types.
 #pragma once
 
+#include <cstddef>
+
 #include "game/control.h"
 
 class C_Cursor;
@@ -1239,4 +1241,96 @@ public:
 
 protected:
     C_Control *m_held = nullptr;                        // +0xB4
+};
+
+// A server found by the browser (its module not ported yet: the fields the server list reads).
+struct S_ServerEntry {
+    char name[0x33];                                    // +0x00
+    char map[0x3D];                                     // +0x33
+    int gameType;                                       // +0x70 (E_MpGameType)
+    uint32_t ping;                                      // +0x74
+    uint32_t maxPlayers;                                // +0x78
+    uint32_t players;                                   // +0x7C
+    bool dedicated;                                     // +0x80
+    uint8_t unknown81;
+    bool password;                                      // +0x82
+    uint8_t unknown83[5];
+    bool voice;                                         // +0x88
+    uint8_t unknown89[3];
+    int versionMinor;                                   // +0x8C
+    int versionMajor;                                   // +0x90
+};
+static_assert(offsetof(S_ServerEntry, gameType) == 0x70 && offsetof(S_ServerEntry, voice) == 0x88 &&
+                  offsetof(S_ServerEntry, versionMajor) == 0x90, "S_ServerEntry layout");
+
+// The server list's messages: the entries' count (value), the sort (value: a key 1..5 in the low 3
+// bits, 0x40 / 0x80 the direction toggled; 0 sorted again) and its key; a row's entry (value2; its
+// own: the current one, in white).
+enum : uint32_t {
+    CONTROL_MSG_GET_ENTRY_COUNT = 0x10000A2,
+    CONTROL_MSG_SORT = 0x2000079,
+    CONTROL_MSG_GET_SORT = 0x20000AD,
+};
+
+// A server row (vtable 0x008154b8; the server list's, on its "Server<n>" frames): a text button whose
+// runs show an entry (name, map, game type, ping, players; inactive when its version differs), with
+// a password, a dedicated and a voice icon on each of its frames. The entry is kept as its index.
+class C_ServerRow : public C_TextButton {               // 0x90 bytes
+public:
+    C_ServerRow(I3D_scene *scene, uint32_t id, C_Control *parent);   // 0x00666ad0
+    ~C_ServerRow() override = default;                  // 0x00666ba0 (0x00666b80)
+
+    // The text button's; the six icons found (false: not), off, given the row's id and linked to
+    // the normal ("x*") or the active frame ("x*01"); the box on the normal frame, no margin.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00665d70
+    // ADD_ENTRY (value2 the entry; none: cleared), ADD_CURRENT_ENTRY (white), REMOVE_ITEM (cleared),
+    // GET_ITEM (value2 the entry); true.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00665f90
+
+    S_ServerEntry *GetEntry() const { return reinterpret_cast<S_ServerEntry *>(static_cast<uintptr_t>(m_index)); }
+
+protected:
+    I3D_frame *m_password = nullptr;                    // +0x78 "xpassword"
+    I3D_frame *m_dedicated = nullptr;                   // +0x7C "xdedicated"
+    I3D_frame *m_voice = nullptr;                       // +0x80 "xvoice"
+    I3D_frame *m_activePassword = nullptr;              // +0x84 "xpassword01"
+    I3D_frame *m_activeDedicated = nullptr;             // +0x88 "xdedicated01"
+    I3D_frame *m_activeVoice = nullptr;                 // +0x8C "xvoice01"
+};
+
+// The server list (type 0x18, vtable 0x00814980): a list group of 11 rows ("Server1" ..
+// "Server11", 0.033 apart) showing a window of its entries (not owned); a row's click selects its
+// entry (CONTROL_NOTIFY_0E), its notification 13 passed on; sorted by a key; no keys, no tick.
+class C_ServerList : public C_ListGroup {               // 0xC8 bytes
+public:
+    C_ServerList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ListGroup(scene, id, parent) {}
+    ~C_ServerList() override = default;                 // 0x00661230 (0x00661210)
+
+    void Tick(int) override {}                          // 0x00667b20
+    bool Unknown20(int) override { return false; }      // 0x00667b10
+    // The list group's (its result dropped); the rows made (false: a frame missing), laid out from
+    // the last one's place.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006666f0
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00666e80
+    // The entries past the rows, + 1.
+    int ScrollRange() const override;                   // 0x00666cf0
+
+protected:
+    // The entries sorted by a key (see CONTROL_MSG_SORT).
+    void SortEntries(uint32_t key);                     // 0x006677c0
+    // The key's comparison (none: null).
+    using T_Compare = bool (*)(const S_ServerEntry *a, const S_ServerEntry *b);
+    T_Compare Comparison() const;                       // 0x00667720
+    int EntryCount() const { return static_cast<int>(m_entries.size()); }
+    // The rows' callbacks: a click selects the row's entry; notification 13 passed on.
+    static bool RowClicked(void *object, void *, C_Control *control, uint32_t, uint32_t);   // 0x00666650
+    static bool RowNotified(void *object, void *, C_Control *, uint32_t, uint32_t);   // 0x00666630
+
+    S_ServerEntry *m_selectedEntry = nullptr;           // +0xA0
+    uint32_t m_sortKey = 0x40;                          // +0xA4
+    std::vector<S_ServerEntry *> m_entries;             // +0xA8
+    uint8_t m_unknownB8 = 0;                            // +0xB8
+    uint32_t m_unknownBC = 0;                           // +0xBC
+    int m_firstEntry = 0;                               // +0xC0 (the first row's)
+    int m_lastEntry = 0;                                // +0xC4 (the original's not set when made)
 };

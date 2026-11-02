@@ -7,6 +7,7 @@
 #include <cstring>
 #include <malloc.h>
 
+#include "common/msvc_sort.h"
 #include "game/cursor.h"
 #include "game/item_defs.h"
 #include "game/mp_zone.h"
@@ -4517,4 +4518,348 @@ bool C_PoolList::HandleMessage(S_ControlMessage *message)
     if (code == CONTROL_MSG_ADD_CURRENT_ENTRY)
         OnInput05(item);
     return true;
+}
+
+// ----- the server list (type 0x18) and its rows -----
+
+namespace {
+
+constexpr int SERVER_ROWS = 11;
+constexpr uint32_t SERVER_ROW_STEP = 0x3D072B02;        // 0.033: the rows' step down
+constexpr size_t SERVER_RESERVE = 200;
+// The rows' runs (the run, the style).
+constexpr uint32_t ROW_NAME_STYLE = 0x1E, ROW_MAP_STYLE = 0x1F, ROW_TYPE_STYLE = 0x20, ROW_PING_STYLE = 0x21,
+                   ROW_PLAYERS_STYLE = 0x22;
+// A name that is not text in the font: a text in its place.
+constexpr int TEXT_BAD_NAME = 0x7E9;
+constexpr uint32_t ROW_CURRENT_COLOUR = 0xFFFFFFFF;
+// The sort key: the field (the low 3 bits), ascending when the direction bits are 0x40.
+constexpr uint32_t SORT_FIELD = 7, SORT_DIRECTION = 0xC0, SORT_ASCENDING = 0x40;
+enum : uint32_t { SORT_NAME = 1, SORT_MAP = 2, SORT_TYPE = 3, SORT_PING = 4, SORT_PLAYERS = 5 };
+
+// The comparisons (0x006675a0 .. 0x006676f0, fastcall); ties by the ping.
+bool ServerPingLess(const S_ServerEntry *a, const S_ServerEntry *b) { return a->ping < b->ping; }
+bool ServerPingGreater(const S_ServerEntry *a, const S_ServerEntry *b) { return b->ping < a->ping; }
+bool ServerNameLess(const S_ServerEntry *a, const S_ServerEntry *b) { return _stricmp(a->name, b->name) < 0; }
+bool ServerNameGreater(const S_ServerEntry *a, const S_ServerEntry *b) { return _stricmp(a->name, b->name) > 0; }
+// (Descending maps tied ascending by ping: the original's.)
+bool ServerMapLess(const S_ServerEntry *a, const S_ServerEntry *b)
+{
+    const int order = _stricmp(a->map, b->map);
+    return order < 0 || (order == 0 && ServerPingLess(a, b));
+}
+bool ServerMapGreater(const S_ServerEntry *a, const S_ServerEntry *b)
+{
+    const int order = _stricmp(a->map, b->map);
+    return order > 0 || (order == 0 && ServerPingLess(a, b));
+}
+bool ServerTypeLess(const S_ServerEntry *a, const S_ServerEntry *b)
+{
+    return a->gameType < b->gameType || (a->gameType == b->gameType && ServerPingLess(a, b));
+}
+bool ServerTypeGreater(const S_ServerEntry *a, const S_ServerEntry *b)
+{
+    return a->gameType > b->gameType || (a->gameType == b->gameType && ServerPingGreater(a, b));
+}
+bool ServerPlayersLess(const S_ServerEntry *a, const S_ServerEntry *b)
+{
+    if (a->maxPlayers != b->maxPlayers)
+        return a->maxPlayers < b->maxPlayers;
+    if (a->players != b->players)
+        return a->players < b->players;
+    return ServerPingLess(a, b);
+}
+bool ServerPlayersGreater(const S_ServerEntry *a, const S_ServerEntry *b)
+{
+    if (a->maxPlayers != b->maxPlayers)
+        return a->maxPlayers > b->maxPlayers;
+    if (a->players != b->players)
+        return a->players > b->players;
+    return ServerPingGreater(a, b);
+}
+
+} // namespace
+
+C_ServerRow::C_ServerRow(I3D_scene *scene, uint32_t id, C_Control *parent) : C_TextButton(scene, id, parent)
+{
+    m_index = 0;
+}
+
+bool C_ServerRow::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_TextButton::Create(frame, root, desc))
+        return false;
+    m_password = frame->FindChildFrame("xpassword", FIND_FRAMES);
+    m_dedicated = frame->FindChildFrame("xdedicated", FIND_FRAMES);
+    m_voice = frame->FindChildFrame("xvoice", FIND_FRAMES);
+    m_activePassword = frame->FindChildFrame("xpassword01", FIND_FRAMES);
+    m_activeDedicated = frame->FindChildFrame("xdedicated01", FIND_FRAMES);
+    m_activeVoice = frame->FindChildFrame("xvoice01", FIND_FRAMES);
+    if (!m_password || !m_dedicated || !m_voice || !m_activePassword || !m_activeDedicated || !m_activeVoice)
+        return false;
+    I3D_frame *const icons[] = {m_password, m_dedicated, m_voice, m_activePassword, m_activeDedicated, m_activeVoice};
+    for (I3D_frame *icon : icons)
+        icon->SetOn(false);
+    for (I3D_frame *icon : icons)
+        SetFrameId(icon, m_id);
+    m_password->LinkTo(m_normalFrame, 1);
+    m_dedicated->LinkTo(m_normalFrame, 1);
+    m_voice->LinkTo(m_normalFrame, 1);
+    m_activePassword->LinkTo(m_activeFrame, 1);
+    m_activeDedicated->LinkTo(m_activeFrame, 1);
+    m_activeVoice->LinkTo(m_activeFrame, 1);
+    if (m_box) {
+        m_box->SetUnknown90(0);
+        m_box->AttachTo(m_scene, m_normalFrame);
+    }
+    return true;
+}
+
+bool C_ServerRow::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_TextButton::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_ADD_CURRENT_ENTRY:
+        if (m_box)
+            m_box->SetColour(ROW_CURRENT_COLOUR);
+        return true;
+    case CONTROL_MSG_ADD_ENTRY: {
+        auto *entry = reinterpret_cast<S_ServerEntry *>(message->value2);
+        m_index = static_cast<int>(reinterpret_cast<uintptr_t>(entry));
+        // (The box checked: the fix, the original's without one crashes.)
+        if (m_box)
+            m_box->SetColour(0);
+        if (!entry) {
+            if (m_box)
+                m_box->Clear();
+            return true;
+        }
+        SetInactive(entry->versionMajor != g_versionMajor || entry->versionMinor != g_versionMinor);
+        // The name as is, unless it is not text in the font.
+        const auto *name = reinterpret_cast<const uint8_t *>(entry->name);
+        const bool shown = g_gameProfile.UsesUnicodeFont() ? IsLegalUtf8Range(name, name + std::strlen(entry->name))
+                                                           : !HasUtf8Sequences(entry->name);
+        auto run = [this](uint32_t style, uintptr_t index, const C_str &text) {
+            S_ControlMessage set = ValueMessage(CONTROL_MSG_SET_RUN_TEXT, style, text);
+            set.value2 = index;
+            HandleMessageCopy(set);
+        };
+        run(ROW_NAME_STYLE, 0, shown ? C_fstr("%s", entry->name) : g_texts.Get(TEXT_BAD_NAME));
+        run(ROW_MAP_STYLE, 1, C_fstr("%s", entry->map));
+        run(ROW_TYPE_STYLE, 2, g_texts.Get(GetGameTypeTextId(entry->gameType)));
+        run(ROW_PING_STYLE, 3, C_fstr("%d", entry->ping));
+        run(ROW_PLAYERS_STYLE, 4, C_fstr("%d / %d", entry->players, entry->maxPlayers));
+        m_password->SetOn(entry->password);
+        m_activePassword->SetOn(entry->password);
+        m_dedicated->SetOn(entry->dedicated);
+        m_activeDedicated->SetOn(entry->dedicated);
+        m_voice->SetOn(entry->voice);
+        m_activeVoice->SetOn(entry->voice);
+        return true;
+    }
+    case CONTROL_MSG_REMOVE_ITEM:
+        if (m_box)
+            m_box->Clear();
+        m_index = 0;
+        return true;
+    case CONTROL_MSG_GET_ITEM:
+        message->value2 = static_cast<uintptr_t>(m_index);
+        return true;
+    default:
+        C_TextButton::HandleMessage(message);
+        return true;
+    }
+}
+
+bool C_ServerList::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_ListGroup::Create(frame, root, desc);
+    m_frame->SetData(nullptr);
+    m_selectedEntry = nullptr;
+    C_ServerRow *row = nullptr;
+    for (int i = 1; i <= SERVER_ROWS; ++i) {
+        const C_str name = C_fstr("Server%d", i);
+        I3D_frame *rowFrame = frame->FindChildFrame(name.c_str(), FIND_DUMMIES);
+        if (!rowFrame)
+            return false;
+        row = new C_ServerRow(m_scene, static_cast<uint32_t>(i & 0xFF) << 12 | m_id, this);
+        row->Create(rowFrame, root, nullptr);
+        S_ControlMessage clicked = ValueMessage(CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK);
+        clicked.value2 = reinterpret_cast<uintptr_t>(this);
+        clicked.value3 = reinterpret_cast<uintptr_t>(&C_ServerList::RowClicked);
+        row->HandleMessageCopy(clicked);
+        S_ControlMessage notified = ValueMessage(CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_13);
+        notified.value2 = reinterpret_cast<uintptr_t>(this);
+        notified.value3 = reinterpret_cast<uintptr_t>(&C_ServerList::RowNotified);
+        row->HandleMessageCopy(notified);
+        m_children.push_back(row);
+    }
+    m_visible = SERVER_ROWS;
+    S_ControlMessage step = Message(CONTROL_MSG_SET_DOWN_STEP);
+    step.value2 = SERVER_ROW_STEP;
+    HandleMessageCopy(step);
+    // From the last row's place.
+    auto *origin = static_cast<S_vector *>(_aligned_malloc(16, 16));
+    if (origin)
+        *origin = row->GetFrame()->GetPos();
+    S_ControlMessage place = Message(CONTROL_MSG_SET_ORIGIN);
+    place.value2 = reinterpret_cast<uintptr_t>(origin);
+    HandleMessageCopy(place);
+    Layout(0);
+    HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+    if (m_entries.capacity() < SERVER_RESERVE)
+        m_entries.reserve(SERVER_RESERVE);
+    return true;
+}
+
+int C_ServerList::ScrollRange() const
+{
+    return EntryCount() - m_visible + 1;
+}
+
+bool C_ServerList::RowClicked(void *object, void *, C_Control *control, uint32_t, uint32_t)
+{
+    auto *list = static_cast<C_ServerList *>(object);
+    list->m_selectedEntry = static_cast<C_ServerRow *>(control)->GetEntry();
+    list->HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+    list->Notify(CONTROL_NOTIFY_0E, 0);
+    return true;
+}
+
+bool C_ServerList::RowNotified(void *object, void *, C_Control *, uint32_t, uint32_t)
+{
+    static_cast<C_ServerList *>(object)->Notify(CONTROL_NOTIFY_13, 0);
+    return true;
+}
+
+C_ServerList::T_Compare C_ServerList::Comparison() const
+{
+    const bool ascending = (m_sortKey & SORT_DIRECTION) == SORT_ASCENDING;
+    switch (m_sortKey & SORT_FIELD) {
+    case SORT_NAME:
+        return ascending ? ServerNameLess : ServerNameGreater;
+    case SORT_MAP:
+        return ascending ? ServerMapLess : ServerMapGreater;
+    case SORT_TYPE:
+        return ascending ? ServerTypeLess : ServerTypeGreater;
+    case SORT_PING:
+        return ascending ? ServerPingLess : ServerPingGreater;
+    case SORT_PLAYERS:
+        return ascending ? ServerPlayersLess : ServerPlayersGreater;
+    default:
+        return nullptr;
+    }
+}
+
+void C_ServerList::SortEntries(uint32_t key)
+{
+    if (key != 0) {
+        const bool toggle = (key & SORT_DIRECTION) != 0;
+        // (The direction toggled, the bits between dropped: the original's.)
+        if (toggle)
+            m_sortKey = (~m_sortKey & SORT_DIRECTION) | (m_sortKey & SORT_FIELD);
+        if ((key & SORT_FIELD) == 0) {
+            if (toggle)
+                std::reverse(m_entries.begin(), m_entries.end());
+            return;
+        }
+        m_sortKey = (m_sortKey & ~SORT_FIELD) | (key & SORT_FIELD);
+    }
+    if (T_Compare compare = Comparison())
+        msvc6::Sort(m_entries.data(), m_entries.data() + m_entries.size(), compare);
+}
+
+bool C_ServerList::HandleMessage(S_ControlMessage *message)
+{
+    const int target = FindChild(message->target);
+    if (IsChild(target))
+        return m_children[target]->HandleMessage(message);
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    const auto count = static_cast<uint32_t>(m_entries.size());
+    const auto visible = static_cast<uint32_t>(m_visible);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_PREVIOUS_ITEM:
+    case CONTROL_MSG_NEXT_ITEM:
+    case CONTROL_MSG_REMOVE_ITEM:
+        return true;
+    case CONTROL_MSG_GET_SELECTED:
+        message->value2 = reinterpret_cast<uintptr_t>(m_selectedEntry);
+        return true;
+    case CONTROL_MSG_GET_ENTRY_COUNT:
+        message->value = count;
+        return true;
+    case CONTROL_MSG_GET_SORT:
+        message->value = m_sortKey;
+        return true;
+    case CONTROL_MSG_ADD_ITEM: {
+        auto *entry = reinterpret_cast<S_ServerEntry *>(message->value2);
+        if (!entry)
+            return true;
+        m_entries.push_back(entry);
+        // The window kept on the entries (unsigned: the original's).
+        const auto entries = static_cast<uint32_t>(m_entries.size());
+        if (entries < visible) {
+            m_firstEntry = 0;
+            m_lastEntry = static_cast<int>(entries) - 1;
+        } else if (static_cast<uint32_t>(m_firstEntry) > entries - visible) {
+            m_lastEntry = static_cast<int>(entries) - 1;
+            m_firstEntry = m_lastEntry - m_visible + 1;
+        } else {
+            m_lastEntry = m_firstEntry + m_visible - 1;
+        }
+        HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+        return true;
+    }
+    case CONTROL_MSG_CLEAR:
+        m_selectedEntry = nullptr;
+        m_entries.clear();
+        HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+        return true;
+    case CONTROL_MSG_SET_POSITION:
+        if (count > visible) {
+            m_firstEntry = static_cast<int>(message->value);
+            m_lastEntry = m_visible + m_firstEntry - 1;
+        }
+        HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+        return true;
+    case CONTROL_MSG_SORT:
+        SortEntries(message->value);
+        HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+        return true;
+    case CONTROL_MSG_REFRESH:
+        // As many rows shown as there are entries.
+        if (count == 0) {
+            m_first = -1;
+            m_last = -1;
+        } else {
+            m_first = 0;
+            m_last = count < visible ? static_cast<int>(count) - 1 : m_visible - 1;
+        }
+        Scroll(SCROLL_NONE);
+        for (int row = m_first, entry = m_firstEntry; row <= m_last && entry <= m_lastEntry; ++row, ++entry) {
+            if (row < 0 || row > ItemCount() - 1 || entry < 0 || entry > EntryCount() - 1)
+                continue;
+            S_ControlMessage set = Message(CONTROL_MSG_ADD_ENTRY);
+            set.value2 = reinterpret_cast<uintptr_t>(m_entries[entry]);
+            m_children[row]->HandleMessageCopy(set);
+            if (m_entries[entry] == m_selectedEntry)
+                m_children[row]->HandleMessageCopy(Message(CONTROL_MSG_ADD_CURRENT_ENTRY));
+        }
+        if (m_value != 0) {
+            PostToValue(CONTROL_MSG_SET_COUNT, static_cast<uint32_t>(ScrollRange()));
+            if (ScrollRange() != 0)
+                PostToValue(CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(m_firstEntry));
+        }
+        Notify(CONTROL_NOTIFY_CHANGED, 0);
+        return true;
+    default:
+        C_ListGroup::HandleMessage(message);
+        return true;
+    }
 }

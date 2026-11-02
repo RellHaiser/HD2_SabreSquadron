@@ -6633,6 +6633,45 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     layouts; 9c-v-d names them); names/controls.txt (24); 24 functions in ported.txt. Stats: 8,513
     of 12,293 functions by hand (76.2 % by size).
 
+  PART 9c-v-c DONE (2026-11-02): the server list and its rows (src/game/controls.*), the MSVC6 sort
+  (src/common/msvc_sort.h, new).
+  - C_ServerList (type 0x18, vtable 0x00814980, 0xC8; was C_auto_00814980): a list group of 11 rows
+    made on "Server1" .. "Server11" (FIND_DUMMIES; one missing: Create false), laid out 0.033 apart
+    down from the last one's place, showing a window (+0xC0 .. +0xC4) of its entries (+0xA8, not
+    owned, 200 reserved): ADD_ITEM (value2 an entry; the window kept, unsigned), CLEAR, SET_POSITION
+    (only with more entries than rows), REFRESH (as many rows shown as entries; rows past the
+    entries keep their old one: kept; the bar's count and position posted; CHANGED), GET_SELECTED
+    (value2), GET_ENTRY_COUNT 0x10000A2, SORT 0x2000079 / GET_SORT 0x20000AD (the key +0xA4, 0x40 at
+    first: the field 1 name, 2 map, 3 game type, 4 ping, 5 max players then players; 0x40 / 0x80
+    toggle the direction (the bits between dropped); the ties by the ping, descending maps by it
+    ascending: kept; the field 0: reversed), PREVIOUS / NEXT_ITEM and REMOVE_ITEM ignored; no keys
+    (Unknown20 false), no tick. A row's click selects its entry (RowClicked 0x00666650: refreshed,
+    CONTROL_NOTIFY_0E), its notification 13 passed on (0x00666630, made a function).
+  - C_ServerRow (vtable 0x008154b8, 0x90, on the text button): the entry kept as its index (+0x5C);
+    its runs: the name (style 0x1E; not text in the font: text 0x7E9), the map, the game type's text,
+    the ping, "players / max" (0x1F .. 0x22); inactive when the version differs; the password,
+    dedicated and voice icons on its normal and active frames (all six needed); ADD_CURRENT_ENTRY
+    white (the box's colour), REMOVE_ITEM cleared, GET_ITEM. The box checked on ADD_ENTRY (the fix).
+  - S_ServerEntry: the browser's server record, the fields read (its module not ported).
+  - msvc6::Sort: std::sort as MSVC6's STL does it (median of three, unguarded partition, runs of 16,
+    insertion sort), as the order of equals depends on it (0x00667b30, 0x00667e20, 0x00667f40); the
+    ten comparisons 0x006675a0 .. 0x006676f0 made functions (ServerPingLess ..).
+  - g_versionMajor / g_versionMinor out of profile.cpp's anonymous namespace, declared in profile.h;
+    C_Control::GetIndex added. The harness defines the versions (no profile.cpp in it).
+  - Harness: server_test.inc in the text build, run by ControlsTest after BarTest ("server:", 11
+    checks; the sort against std::stable_sort on total orders, and golden orders of 40 and 13
+    entries full of ties, as this sort gives them). 22 of 22 in both orders.
+  - Mutations (mutations/mutate_9c5c.py, generated over the new code and msvc_sort.h, 4 parallel
+    runs): 247 cases, 232 build; all caught but 15 equivalent (listed in its docstring). The first
+    run left 39 (24 killed: the sort's oracle now the input's, the golden tie orders, a partition
+    meeting on the pivot, the capacity 200, a row missing one icon or its button, the box at margin
+    0, the selected cleared by Create, the window after a clear, 11 / 12 entries).
+  - Build: MSVC clean. Tier 1: 478 errors in 79 files, 193 stubs (unchanged; layouts refreshed).
+    ret_audit --src: 52.
+  - Ghidra: C_auto_00814980 renamed C_ServerList; the row's this C_TextButton (no struct); 11
+    functions made; names/controls.txt (29); 29 functions in ported.txt. Stats: 8,531 of 12,293
+    functions by hand (76.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

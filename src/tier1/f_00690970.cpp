@@ -2911,7 +2911,7 @@ uint32_t FUN_00694dd0(void *_this,uint32_t param_1, ...)
       }
       param_1 = uVar4 + 1;
 LAB_00694f09:
-      pvVar5 = C_auto_00814980__C_Control__FindControl((C_auto_00814980*)(this_00),(param_1 & 0xff) << 4 | 0x4101000,true);
+      pvVar5 = C_Control__FindControl(this_00,(param_1 & 0xff) << 4 | 0x4101000,true);
       if (pvVar5 != 0) {
         FUN_00694bc0(_this,_this,(int)pvVar5);
       }
@@ -3111,13 +3111,13 @@ LAB_006953cf:
               }
             }
             else {
-              pvVar5 = C_auto_00814980__C_Control__FindControl
+              pvVar5 = C_Control__FindControl
                                  (param_2,*(uint32_t *)((int)_this + iVar9 * 0x14 + 0x1bc),true);
               pSVar3 = (S_SoldierProfile *)FUN_00694bc0(_this,_this,(int)pvVar5);
             }
           }
           else {
-            pvVar5 = C_auto_00814980__C_Control__FindControl
+            pvVar5 = C_Control__FindControl
                                (param_2,*(uint32_t *)((int)_this + iVar9 * 0x14 + 0x1d0),true);
             FUN_00695d30(_this,param_1,(int)pvVar5);
             *(uint32_t *)((int)_this + 0x1b4) = *(uint32_t *)((int)_this + iVar2 * 4);

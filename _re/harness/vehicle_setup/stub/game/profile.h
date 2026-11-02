@@ -47,6 +47,8 @@ public:
     S_PlayMode *m_playMode = nullptr;
 };
 extern C_GameProfile g_gameProfile;
+extern int g_versionMajor;
+extern int g_versionMinor;
 void __stdcall GetGameVersion(int *major, int *minor);
 extern S_MultiplayerSettings *g_mpSettings;             // (a reference into g_gameProfile in the real header)
 

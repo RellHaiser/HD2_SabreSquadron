@@ -1864,7 +1864,7 @@ uint32_t * C_MainMenu__FUN_0066da30(C_MainMenu *_this,uint32_t param_1, ...)
   if (param_1 != 0) {
     iVar1 = *(int *)(_this->_pad_0104 + 0x40);
     if ((iVar1 != 0) && (param_1 >> 0x1a < (uint32_t)(*(int *)(_this->_pad_0104 + 0x44) - iVar1 >> 2))) {
-      puVar2 = C_auto_00814980__C_Control__FindControl((C_auto_00814980*)(*(C_Control **)(iVar1 + (param_1 >> 0x1a) * 4)),param_1,true);
+      puVar2 = C_Control__FindControl(*(C_Control **)(iVar1 + (param_1 >> 0x1a) * 4),param_1,true);
       return puVar2;
     }
   }

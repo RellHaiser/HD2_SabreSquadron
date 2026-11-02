@@ -64,7 +64,7 @@ uint32_t FUN_00696fb0(uint32_t param_1, ...)
     FUN_00633370(&local_34,-1);
     _this = (C_Control *)*local_2c;
   }
-  piVar2 = C_auto_00814980__C_Control__FindControl((C_auto_00814980*)(_this),param_1,true);
+  piVar2 = C_Control__FindControl(_this,param_1,true);
   if (piVar2 == 0) {
     return 0xffffffff;
   }

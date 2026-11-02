@@ -467,7 +467,7 @@ end
 class C_Tooltip size=0x4 vtable=0x008148f8:33
 end
 
-class C_auto_00814980 size=0xb4 vtable=0x00814980:34
+class C_ServerList size=0xb4 vtable=0x00814980:34
   0x06c int m_06c
   0x0a4 uint32_t m_0a4
   0x0ac int m_0ac
