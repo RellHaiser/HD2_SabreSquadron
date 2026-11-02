@@ -59,24 +59,24 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "App & core",
   "state": "ported",
-  "functions": 449,
-  "bytes": 98054,
+  "functions": 475,
+  "bytes": 101811,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "App & core",
   "state": "pending",
-  "functions": 536,
-  "bytes": 133694,
+  "functions": 519,
+  "bytes": 129273,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "C runtime & library",
   "state": "excluded",
-  "functions": 838,
-  "bytes": 87335,
+  "functions": 843,
+  "bytes": 87381,
   "evidence": "MSVC runtime and libraries outside the game's code range, and exception-unwind funclets"
  },
  {
@@ -107,24 +107,24 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Interface & HUD",
   "state": "pending",
-  "functions": 53,
-  "bytes": 11436,
+  "functions": 52,
+  "bytes": 11348,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "ported",
-  "functions": 648,
-  "bytes": 145144,
+  "functions": 713,
+  "bytes": 161300,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "pending",
-  "functions": 862,
-  "bytes": 326323,
+  "functions": 802,
+  "bytes": 311635,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -267,16 +267,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Weapons & items",
   "state": "ported",
-  "functions": 532,
-  "bytes": 115043,
+  "functions": 546,
+  "bytes": 124616,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Weapons & items",
   "state": "pending",
-  "functions": 39,
-  "bytes": 10274,
+  "functions": 25,
+  "bytes": 701,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {

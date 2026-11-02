@@ -280,21 +280,21 @@ f_006683f0.cpp:215:38: 'void*' is not a pointer-to-object type
     if ((499 < (int)_this->m_070[0x10].vtable) &&
 f_006683f0.cpp:299:18: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     (**(code **)(*uStack_6c + 8))();
-f_0066f120.cpp:1244:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0066f120.cpp:1245:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_0066f120.cpp:1255:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0066f120.cpp:1256:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_0066f120.cpp:1273:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0066f120.cpp:1274:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_0066f120.cpp:2088:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0066f120.cpp:2091:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_0066f120.cpp:2098:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0066f120.cpp:2101:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_0066f120.cpp:2119:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0066f120.cpp:2122:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_0066f120.cpp:2129:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0066f120.cpp:2132:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_0066f120.cpp:2140:47: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0066f120.cpp:2143:47: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
 f_00673040.cpp:57:19: 'IMAGE_DOS_HEADER_00400000' was not declared in this scope; did you mean 'IMAGE_DOS_HEADER'?
     local_10 != &IMAGE_DOS_HEADER_00400000)) {
@@ -874,19 +874,3 @@ f_007888c0.cpp:605:26: invalid operands of types 'int' and 'tier1::C_str_rep*' t
     pCVar18 = -8 - local_4b8.rep;
 f_0079b060.cpp:732:95: expected primary-expression before ')' token
     (local_250 = gh_bitcast<float*>((local_1d0.x * local_1c0 + local_1d0.z * local_1b8 +)
-f_007d0290.cpp:108:25: too few arguments to function
-    (*pIVar4[3].SetName)();
-f_007d0290.cpp:268:56: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    pCStack_f8 = (C_str *)(**(code **)(*DAT_008aed60 + 4))(DAT_008aed60,puVar12,0);
-f_007d0290.cpp:1647:34: too few arguments to function
-    (*pIVar3->vtable->LinkTo)();
-f_007d0290.cpp:1648:35: too few arguments to function
-    (*pIVar3->vtable->Release)();
-f_007d0290.cpp:1733:63: invalid operands of types 'void*' and 'int' to binary 'operator*'
-    (*(I3D_frame **)((int)SStack_454.v.x + local_488 * 4) != 0)) {
-f_007d0290.cpp:1735:76: invalid operands of types 'void*' and 'int' to binary 'operator*'
-    *(I3D_frame **)((int)SStack_454.v.x + local_488 * 4),0);
-f_007d0290.cpp:1816:34: too few arguments to function
-    (*pIVar3->vtable->LinkTo)();
-f_007d0290.cpp:1817:35: too few arguments to function
-    (*pIVar3->vtable->Release)();

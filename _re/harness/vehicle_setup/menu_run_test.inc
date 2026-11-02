@@ -36,10 +36,16 @@ struct {
 } g_mrSndDriver = {g_mrSndVtable};
 extern "C" ISND_driver *ISndGetDriver() { return reinterpret_cast<ISND_driver *>(&g_mrSndDriver); }
 I3D_frame *g_mrClone;
+std::deque<I3D_frame *> g_mrClones;                     // (first, when there are any: menu_soldier_test.inc)
 std::string MrFrameName(const void *frame);
 bool CloneFrameTree(I3D_frame *&copy, I3D_frame *source, I3D_frame *parent)
 {
     GfLog("clone tree %s %d", MrFrameName(source).c_str(), parent != nullptr);
+    if (!g_mrClones.empty()) {
+        copy = g_mrClones.front();
+        g_mrClones.pop_front();
+        return true;
+    }
     copy = g_mrClone;
     return true;
 }

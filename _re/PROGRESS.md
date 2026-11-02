@@ -6993,6 +6993,71 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e: the in-game menu C_GameMenu (vtable 0x00815750; 0x0067b070..0x00688130, 50 KB), the
     menu classes of pending.h moved onto C_MenuState.
 
+  PART 9e PLAN (2026-11-02): the in-game menu C_GameMenu (vtable 0x00815750, 0x5C0 bytes) and what it
+  shares with the equipment screen C_EquipmentMenu (0x00815db0): their base C_EquipmentMenuBase
+  (0x008157d8: C_MenuState's slots and 0x5C..0x70, 0x60 pure; dtor 0x0067f1f0 = C_MenuState's
+  inlined, 0x0067f350), the equipment panel (vtable 0x008157cc: 0x00672a30, 0x006728a0 the allowed
+  containers of a dragged item, 0x0067f3d0; at C_GameMenu +0x4DC: +0x04 the menu soldier, +0x24..
+  its controls, +0x68 the S_SquadSoldier) and the menu soldier. About 63 KB (the base 16 KB in 41
+  functions, the in-game menu's own 47 KB); the equipment screen's own 30 KB is a later part.
+  - 9e-i: the menu soldier (0x007d0200..0x007d3650). 9e-ii: the equipment panel and its item moves
+    (0x00670be0..0x00672820, 0x0067b950..0x0067c150, ...). 9e-iii: the equipment screens'
+    descriptions (0x0066f200, 6.5 KB, and its helpers). 9e-iv..: C_GameMenu (its ctor 0x0067eb40,
+    the mission records at +0x1F0, the slots 0x34..0x84, the save / load screens, ...).
+
+  PART 9e-i DONE (2026-11-02): the equipment menus' soldier (src/game/menu_soldier.h/.cpp,
+  C_MenuSoldier, 0x210 bytes, aligned 16; original 0x007d0200..0x007d3650), and the frames and helpers
+  it shares with the human's equipment models moved out of game/human_equipment.cpp into
+  src/game/equipment_frames.h/.cpp (namespace equipment: the models' offsets, the joints' and the
+  item models' frame names, the holster sets and dummies, Rotation / Rotate / RotateAboutYxX /
+  BacklinkOffset / HolsterJoint, and FindHolsterModel for the list's search).
+  - Setup 0x007d02c0(left, top, right, bottom): at the game camera's position (its matrix's w
+    copied along); its own scene (FRAME_SCENE, the rectangle's viewport, +0x210 zeroed), the
+    ambient light "C_AeMenu1" (0.5, 1000, 1 m up and 5 m behind) and the spot light of the same name
+    (white, 0.9, 50, cone 0.3 / 0.4, 6 m up and behind, along (0, -1, 1)), the camera (1.4 m up, 6 m
+    behind, along (0, -0.08, 0.91) normalised -- the original's normalisation folded --, FOV 0.23,
+    perspective, the rectangle's aspect, 4.2 .. 8.6 m, active); the 9 animations (0x008637d4,
+    g_animationCache; the cache errors' messages dropped); the naked model "mp_Na01".
+  - SetModel 0x007d1bf0: null: the holsters released, the items reset (ResetItems 0x007d3220, which
+    loads and sets the naked model that is removed again: quirk kept), the fields reset, the pose
+    deleted, the model removed. A model: the holsters' item counts kept when one is replaced (the
+    old removed), a new C_HumanWeaponPose attached (no owner), the joints (HW1 as a dummy, d twice,
+    f, u, q), the face again, InitHolsters 0x007d0fe0 (C_HumanEquipment's without the holster pose:
+    the model's file name past its path, extension and the "mp_" of the menu copies; fix: a name
+    shorter than the prefix was read past its end), the counts again (AddToHolsterSlot), the items
+    again; added to the scene, its sector, its reference released, turned to -z at the position, the
+    idle and the pose again, 1000 ms of the animations.
+  - AddItem 0x007d1fc0 (places 1 head, 2 the uniform "mp_<model name>" set as the model, 4 hands, 8
+    backpack, 0x10 long gun, 0x20 one more holster item): cloned from the definition's model (the
+    old released, the "flash" frame dropped from weapons); the hands into the pose (its behaviour)
+    on HW1 at 0 with the pose 3 + carry mode (6: pose 5, 0.02 along x, turned to +y) and the support
+    hand unless carry mode 0 or 2 (fix: an unknown type with a model took a null definition's
+    behaviour); the diving gear (231's: mask on "f" at the head's offset, two parts on "u" / "q", the
+    bottles the backpack); the long gun like the human's on the back, without the tilt. RemoveItem
+    0x007d3080 (the hands: the pose 3 always; holsters: one, or all hidden), PlayIdle 0x007d32a0 /
+    PlayPose 0x007d3310 (stages 0 / 1 and 2 / 3, 800 / 400 ms fades), UpdateAnims 0x007d3390 (the
+    fades' weights, the model's time / 1.4, a random idle every 11 .. 13 s), Tick 0x007d3510 (0.009
+    a tick about the axis), Render 0x007d35d0 (driver states 5 off / 6 on), SetFace 0x007d3360
+    (GetGEffects()->SwitchFaceTexture), the holsters 0x007d0f30 / 0x007d0f80 / 0x007d1a70 (none
+    left: hidden, unlike the human's early return) / 0x007d1b20 / 0x007d1b40.
+  - Fixes: the diving gear's bottles are the backpack model; the original released them with the
+    backpack and kept the pointer (linked again next time, released twice by the menus' 0x00670e40):
+    nulled now (AddItem, RemoveItem).
+  - Fix (part 9e-i, game/equipment_frames.cpp): the human's equipment offsets were a little off
+    since the start (0.17559581 for 0.175592005 ...): the initializers' exact bits now (the
+    soldier's copies 0x0098afa0..c0, set by 0x007d0230 / 0260 / 0290, are the same).
+  - Harness: menu_soldier_test.inc in the factory build (check_menusoldier.py, "menusoldier:", 15
+    checks; build_factory.bat links menu_soldier.cpp and equipment_frames.cpp): menu_run_test.inc's
+    logging objects (their children found by name, a clone queue added to its CloneFrameTree fake),
+    the weapon pose, the holster slots, the diving gear, the animation cache and the face texture
+    (its slot from the member pointer: g++'s vtable has two destructor slots) faked; the long gun's
+    matrix checked against the same steps on a copy. 22 of 22 in both orders (the other factory
+    lines too); the text build 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e1.py (567 cases, 529 build; all caught but 33 equivalent, listed there; the first run left 69 and 8 a partition's MemoryError never ran, new checks caught 36).
+  - Build: MSVC clean. Tier 1: 438 errors in 76 files, 180 stubs (was 446 / 77 / 182). ret_audit --src: 52.
+  - Ghidra: names/menu_soldier.txt (+29; no struct for the soldier: void *); 25 functions in
+    ported.txt. Stats: 8,740 of 12,306 functions by hand (77.7 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

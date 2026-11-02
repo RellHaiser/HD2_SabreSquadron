@@ -965,7 +965,7 @@ uint32_t FUN_00670b50(int param_1,uint32_t param_2,uint32_t param_3,uint32_t par
 uint32_t FUN_00670be0(void *_this,int param_1, ...)
 {
   if (*(void **)((int)_this + 4) != 0) {
-    FUN_007d3510(*(void **)((int)_this + 4),param_1);
+    C_MenuSoldier__Tick(*(void **)((int)_this + 4),param_1);
     return 0;
   }
   return 0;
@@ -975,8 +975,8 @@ uint32_t FUN_00670be0(void *_this,int param_1, ...)
 // 0x00670bf0
 uint32_t FUN_00670bf0(int param_1, ...)
 {
-  if (*(int *)(param_1 + 4) != 0) {
-    FUN_007d35d0(*(int *)(param_1 + 4));
+  if (*(void **)(param_1 + 4) != 0) {
+    C_MenuSoldier__Render(*(void **)(param_1 + 4));
     return 0;
   }
   return 0;
@@ -1070,8 +1070,9 @@ uint32_t FUN_00670c00(int *param_1, ...)
       _this[0x83] = 0;
     }
     *(uint32_t **)(iVar3 + 4) = _this;
-    FUN_007d02c0(_this,(float)uStack_48,(float)(uVar9 & 0xffffffff),(float)(uVar8 & 0xffffffff),
-                 (float)uVar2);
+    C_MenuSoldier__Setup
+              (_this,(float)uStack_48,(float)(uVar9 & 0xffffffff),(float)(uVar8 & 0xffffffff),
+               (float)uVar2);
     (**(code **)(*param_1 + 0x30))(param_1,0);
   }
   return 0;
@@ -1086,7 +1087,7 @@ uint32_t FUN_00670e40(int param_1, ...)
   int *piVar2;
   int iVar3;
   if (*(void **)(param_1 + 4) != 0) {
-    FUN_007d0ee0(*(void **)(param_1 + 4));
+    C_MenuSoldier__Release(*(void **)(param_1 + 4));
   }
   ptr = *(void **)(param_1 + 4);
   if (ptr != 0) {
@@ -1119,10 +1120,10 @@ uint32_t FUN_00670e90(int param_1, ...)
     pSVar2 = C_HumanStore__Get(g_gameProfile.m_humanStore,index);
     pCVar1 = (pSVar2->faceTexture).rep;
     if (pCVar1 != 0) {
-      FUN_007d3360(*(void **)(param_1 + 4),pCVar1->chars);
+      C_MenuSoldier__SetFace(*(void **)(param_1 + 4),pCVar1->chars);
       return 0;
     }
-    FUN_007d3360(*(void **)(param_1 + 4),&DAT_00867a90);
+    C_MenuSoldier__SetFace(*(void **)(param_1 + 4),&DAT_00867a90);
   }
   return 0;
 }
@@ -1134,7 +1135,7 @@ uint32_t FUN_00670ee0(void *_this,uint32_t param_1,int param_2, ...)
   int iVar1;
   if (*(short *)(param_2 + 2) != -1) {
     for (iVar1 = (int)*(short *)(param_2 + 4); iVar1 != 0; iVar1 = iVar1 - 1) {
-      FUN_007d1fc0(*(void **)((int)_this + 4),param_1,(int)*(short *)(param_2 + 2));
+      C_MenuSoldier__AddItem(*(void **)((int)_this + 4),param_1,(int)*(short *)(param_2 + 2));
     }
   }
   return 0;
@@ -1349,7 +1350,8 @@ int FUN_00671360(void *_this,uint32_t param_1,int param_2, ...)
     iVar1 = iVar2;
     if (*(int *)((int)_this + 4) != 0) {
       for (; iVar1 != 0; iVar1 = iVar1 - 1) {
-        FUN_007d3080(*(void **)((int)_this + 4),param_1,(int)*(short *)(param_2 + 2),'\0');
+        C_MenuSoldier__RemoveItem
+                  (*(void **)((int)_this + 4),param_1,(int)*(short *)(param_2 + 2),false);
       }
     }
     return iVar2;
@@ -1385,25 +1387,26 @@ uint32_t FUN_00671410(void *_this,uint32_t *param_1,int param_2,uint32_t *param_
   if (*(int *)((int)_this + 4) != 0) {
     if (local_8.typeId == -1) {
       for (iVar1 = (int)*(short *)(param_3 + 1); iVar1 != 0; iVar1 = iVar1 - 1) {
-        FUN_007d1fc0(*(void **)((int)_this + 4),param_2,(int)*(short *)((int)param_3 + 2));
+        C_MenuSoldier__AddItem(*(void **)((int)_this + 4),param_2,(int)*(short *)((int)param_3 + 2));
       }
     }
     else if (local_8.typeId == *(short *)((int)param_3 + 2)) {
       if (local_8.present < *(short *)(param_3 + 1)) {
         for (iVar1 = (int)*(short *)(param_3 + 1) - (int)local_8.present; iVar1 != 0;
             iVar1 = iVar1 - 1) {
-          FUN_007d1fc0(*(void **)((int)_this + 4),param_2,(int)*(short *)((int)param_3 + 2));
+          C_MenuSoldier__AddItem
+                    (*(void **)((int)_this + 4),param_2,(int)*(short *)((int)param_3 + 2));
         }
       }
     }
     else {
       if (param_2 != 2) {
         for (iVar1 = (int)local_8.present; iVar1 != 0; iVar1 = iVar1 - 1) {
-          FUN_007d3080(*(void **)((int)_this + 4),param_2,(int)local_8.typeId,'\0');
+          C_MenuSoldier__RemoveItem(*(void **)((int)_this + 4),param_2,(int)local_8.typeId,false);
         }
       }
       for (iVar1 = (int)*(short *)(param_3 + 1); iVar1 != 0; iVar1 = iVar1 - 1) {
-        FUN_007d1fc0(*(void **)((int)_this + 4),param_2,(int)*(short *)((int)param_3 + 2));
+        C_MenuSoldier__AddItem(*(void **)((int)_this + 4),param_2,(int)*(short *)((int)param_3 + 2));
       }
     }
   }
@@ -2276,7 +2279,7 @@ uint32_t FUN_006727f0(void *_this,void *param_1, ...)
     S_SquadSoldier__ReturnItemsTo(*(S_SquadSoldier **)((int)_this + 0x68),param_1);
     FUN_00672580(_this);
     if (*(void **)((int)_this + 4) != 0) {
-      FUN_007d3220(*(void **)((int)_this + 4));
+      C_MenuSoldier__ResetItems(*(void **)((int)_this + 4));
     }
   }
   return 0;

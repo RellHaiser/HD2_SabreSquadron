@@ -39167,6 +39167,124 @@
   "name": "BuildPathPoints",
   "proto": "void __fastcall BuildPathPoints(S_vector4 *from, S_vector4 *to, void *path, S_Vector4Array *points)"
  },
+ "007d0200": {
+  "module": "menu_soldier",
+  "name": "MenuSoldier_StaticInit_7d0200"
+ },
+ "007d0230": {
+  "module": "menu_soldier",
+  "name": "InitLongGunOffsetSoldier_7d0230"
+ },
+ "007d0240": {
+  "module": "menu_soldier",
+  "name": "InitLongGunOffsetSoldier_7d0240"
+ },
+ "007d0260": {
+  "module": "menu_soldier",
+  "name": "InitHeadOffsetSoldier_7d0260"
+ },
+ "007d0270": {
+  "module": "menu_soldier",
+  "name": "InitHeadOffsetSoldier_7d0270"
+ },
+ "007d0290": {
+  "module": "menu_soldier",
+  "name": "InitBackpackOffsetSoldier_7d0290"
+ },
+ "007d02a0": {
+  "module": "menu_soldier",
+  "name": "InitBackpackOffsetSoldier_7d02a0"
+ },
+ "007d02c0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::Setup",
+  "proto": "void __thiscall Setup(void *this, float left, float top, float right, float bottom)"
+ },
+ "007d0ee0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::Release",
+  "proto": "void __fastcall Release(void * soldier)"
+ },
+ "007d0f30": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::HideHolsters",
+  "proto": "void __fastcall HideHolsters(void * soldier)"
+ },
+ "007d0f80": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::ReleaseHolsters",
+  "proto": "void __fastcall ReleaseHolsters(void * soldier)"
+ },
+ "007d0fe0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::InitHolsters",
+  "proto": "void __fastcall InitHolsters(void * soldier)"
+ },
+ "007d1a70": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::RemoveFromHolster",
+  "proto": "void __thiscall RemoveFromHolster(void *this, int typeId, int count)"
+ },
+ "007d1b20": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::AddToHolster",
+  "proto": "void __thiscall AddToHolster(void *this, int typeId, int count)"
+ },
+ "007d1b40": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::AddToHolsterSlot",
+  "proto": "void __thiscall AddToHolsterSlot(void *this, int slot, int count)"
+ },
+ "007d1bf0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::SetModel",
+  "proto": "void __thiscall SetModel(void *this, void * model)"
+ },
+ "007d1fc0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::AddItem",
+  "proto": "void __thiscall AddItem(void *this, uint place, int typeId)"
+ },
+ "007d3080": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::RemoveItem",
+  "proto": "void __thiscall RemoveItem(void *this, uint place, int typeId, bool all)"
+ },
+ "007d3220": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::ResetItems",
+  "proto": "void __fastcall ResetItems(void * soldier)"
+ },
+ "007d32a0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::PlayIdle",
+  "proto": "void __thiscall PlayIdle(void *this, int index)"
+ },
+ "007d3310": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::PlayPose",
+  "proto": "void __thiscall PlayPose(void *this, int index)"
+ },
+ "007d3360": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::SetFace",
+  "proto": "void __thiscall SetFace(void *this, char * texture)"
+ },
+ "007d3390": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::UpdateAnims",
+  "proto": "int __thiscall UpdateAnims(void *this, int time)"
+ },
+ "007d3510": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::Tick",
+  "proto": "void __thiscall Tick(void *this, int time)"
+ },
+ "007d35d0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::Render",
+  "proto": "void __fastcall Render(void * soldier)"
+ },
  "007d3680": {
   "module": "item_instances",
   "name": "C_AmmoItem::C_AmmoItem",
@@ -41398,6 +41516,12 @@
   "name": "g_holsterDummies",
   "type": "S_HolsterDummy[25]"
  },
+ "008637d4": {
+  "data": true,
+  "module": "menu_soldier",
+  "name": "g_menuSoldierAnimNames",
+  "type": "char *[9]"
+ },
  "00867a64": {
   "data": true,
   "module": "track",
@@ -42536,6 +42660,24 @@
   "data": true,
   "module": "human",
   "name": "g_longGunModelOffsetCopy",
+  "type": "S_vector"
+ },
+ "0098afa0": {
+  "data": true,
+  "module": "menu_soldier",
+  "name": "g_soldierBackpackModelOffset",
+  "type": "S_vector"
+ },
+ "0098afb0": {
+  "data": true,
+  "module": "menu_soldier",
+  "name": "g_soldierHeadModelOffset",
+  "type": "S_vector"
+ },
+ "0098afc0": {
+  "data": true,
+  "module": "menu_soldier",
+  "name": "g_soldierLongGunModelOffset",
   "type": "S_vector"
  },
  "0098afe0": {

@@ -9,6 +9,7 @@
 #include "common/c_str.h"
 #include "common/chunk.h"
 #include "game/actors_module.h"
+#include "game/equipment_frames.h"
 #include "game/collision.h"
 #include "game/game.h"
 #include "game/human.h"
@@ -24,26 +25,13 @@
 #include "game/world.h"
 #include "ls3d/i3d.h"
 
+using namespace equipment;
+
 namespace {
 
-// Offsets of the models from their joints (set by the static initializers 0x0078cd60,
-// 0x0078cd90 and 0x0078cdc0).
-const S_vector g_longGunModelOffset(0.17559581f, 0.18054318f, -0.13331501f);   // 0x0098ada0
-const S_vector g_headModelOffset(0.016735554f, 0.13834208f, -0.017508307f);   // 0x0098ad90
-const S_vector g_backpackModelOffset(-0.00095325f, 0.15715700f, -0.13235313f);   // 0x0098ad80
-
-// Frames of the human model.
-const char *const HAND_DUMMY1 = "HW1";
+// (The offsets of the models, the joints' and the item models' frames, the holster sets and the
+// frame helpers: game/equipment_frames.h, shared with the menus' soldier.)
 const char *const HAND_DUMMY2 = "HW2";
-const char *const JOINT_C = "c";                        // most holster frames
-const char *const JOINT_D = "d";                        // the back
-const char *const JOINT_F = "f";                        // the head
-const char *const JOINT_O = "o";
-const char *const JOINT_U = "u";
-const char *const JOINT_Q = "q";
-// Frames of the item models.
-const char *const BACKLINK_DUMMY = "backlink";          // where a long gun hangs on the back
-const char *const MAGAZINE_FRAME = "mag1";
 const char *const FIRE_DUMMY = "fire";                  // the special object's light
 const char *const LENS_FLARE_FRAME = "lensf";
 const char *const LIGHT_SMOKE_FRAME = "light_smoke";
@@ -71,128 +59,6 @@ const int LIGHT_TIME = static_cast<int>(1500.0f / 1.4f);
 const char *const HOLSTER_POSE_ANIMATION = "tecko";
 constexpr int HOLSTER_POSE_STAGE = 7;
 I3D_animation_set *g_holsterAnimation = nullptr;       // 0x0098adb0
-
-// Models with the pouches, holsters and grenades of the uniforms.
-const char *const g_holsterSets[] = {                   // 0x0084f7e8
-    "def_holster_set", "en_vyb01", "en_vyb02", "en_vyb03", "ge_vyb01",
-    "it_vyb01", "ja_vyb", "ru_vyb", "us_vyb", "us_vyb2",
-};
-
-enum E_HolsterNation {
-    HOLSTER_NATION_BRITISH = 0,
-    HOLSTER_NATION_GERMAN = 1,
-    HOLSTER_NATION_RUSSIAN = 2,
-    HOLSTER_NATION_JAPANESE = 3,
-    HOLSTER_NATION_ITALIAN = 4,
-    HOLSTER_NATION_AMERICAN = 5,
-    HOLSTER_NATION_CIVILIAN = 6,
-};
-
-// Holster set of each human model.
-struct S_HolsterModel {                                 // 12 bytes
-    const char *model;                                  // file name without path and extension
-    int set;                                            // g_holsterSets index, -1: none
-    int nation;                                         // E_HolsterNation
-};
-
-const S_HolsterModel g_holsterModels[] = {              // 0x0084f810 (byte size at 0x0084fbd0)
-    {"CI01", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI02", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI03", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI04", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI05", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI06", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI07", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI08", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI09", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI10", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI11", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI12", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI13", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI14", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI15", -1, HOLSTER_NATION_CIVILIAN},
-    {"CI16", -1, HOLSTER_NATION_CIVILIAN},
-    {"NA01", -1, HOLSTER_NATION_CIVILIAN},
-    {"EN01", 1, HOLSTER_NATION_BRITISH},
-    {"EN02", 1, HOLSTER_NATION_BRITISH},
-    {"EN03", -1, HOLSTER_NATION_BRITISH},
-    {"EN04", 2, HOLSTER_NATION_BRITISH},
-    {"EN05", -1, HOLSTER_NATION_BRITISH},
-    {"EN06", 3, HOLSTER_NATION_BRITISH},
-    {"EN07", 2, HOLSTER_NATION_BRITISH},
-    {"EN08", 1, HOLSTER_NATION_BRITISH},
-    {"EN09", 1, HOLSTER_NATION_BRITISH},
-    {"EN10", -1, HOLSTER_NATION_BRITISH},
-    {"EN11", -1, HOLSTER_NATION_BRITISH},
-    {"EN12", 1, HOLSTER_NATION_BRITISH},
-    {"EN13", -1, HOLSTER_NATION_BRITISH},
-    {"EN14", -1, HOLSTER_NATION_BRITISH},
-    {"NPC_EN08", 1, HOLSTER_NATION_BRITISH},
-    {"GE01A", 4, HOLSTER_NATION_GERMAN},
-    {"GE01B", 4, HOLSTER_NATION_GERMAN},
-    {"GE02A", 4, HOLSTER_NATION_GERMAN},
-    {"GE02B", 4, HOLSTER_NATION_GERMAN},
-    {"GE02C", 4, HOLSTER_NATION_GERMAN},
-    {"GE02D", 4, HOLSTER_NATION_GERMAN},
-    {"GE03", 4, HOLSTER_NATION_GERMAN},
-    {"GE03B", 4, HOLSTER_NATION_GERMAN},
-    {"GE04", 4, HOLSTER_NATION_GERMAN},
-    {"GE04B", 4, HOLSTER_NATION_GERMAN},
-    {"GE05", 4, HOLSTER_NATION_GERMAN},
-    {"GE05B", 4, HOLSTER_NATION_GERMAN},
-    {"GE06", 4, HOLSTER_NATION_GERMAN},
-    {"GE07", 4, HOLSTER_NATION_GERMAN},
-    {"GE08", -1, HOLSTER_NATION_GERMAN},
-    {"GE09", 4, HOLSTER_NATION_GERMAN},
-    {"GE09B", 4, HOLSTER_NATION_GERMAN},
-    {"GE10", 4, HOLSTER_NATION_GERMAN},
-    {"GE10B", 4, HOLSTER_NATION_GERMAN},
-    {"GE11", 4, HOLSTER_NATION_GERMAN},
-    {"GE13", 4, HOLSTER_NATION_GERMAN},
-    {"GE13B", 4, HOLSTER_NATION_GERMAN},
-    {"GE14", 4, HOLSTER_NATION_GERMAN},
-    {"GE15", 4, HOLSTER_NATION_GERMAN},
-    {"GE21", -1, HOLSTER_NATION_GERMAN},
-    {"GE21b", -1, HOLSTER_NATION_GERMAN},
-    {"GE27", 4, HOLSTER_NATION_GERMAN},
-    {"GE27B", -1, HOLSTER_NATION_GERMAN},
-    {"GE28", -1, HOLSTER_NATION_GERMAN},
-    {"GE28B", -1, HOLSTER_NATION_GERMAN},
-    {"GE31", 4, HOLSTER_NATION_GERMAN},
-    {"GE31B", 4, HOLSTER_NATION_GERMAN},
-    {"GE32", -1, HOLSTER_NATION_GERMAN},
-    {"NPC_GE05b", 4, HOLSTER_NATION_GERMAN},
-    {"NPC_GE10b", 4, HOLSTER_NATION_GERMAN},
-    {"IT01", 5, HOLSTER_NATION_ITALIAN},
-    {"IT02", 5, HOLSTER_NATION_ITALIAN},
-    {"IT03", -1, HOLSTER_NATION_ITALIAN},
-    {"IT04", 5, HOLSTER_NATION_ITALIAN},
-    {"IT05", 5, HOLSTER_NATION_ITALIAN},
-    {"JA01", 6, HOLSTER_NATION_JAPANESE},
-    {"JA02", 6, HOLSTER_NATION_JAPANESE},
-    {"RU01", 7, HOLSTER_NATION_RUSSIAN},
-    {"RU02", 7, HOLSTER_NATION_RUSSIAN},
-    {"US01", 8, HOLSTER_NATION_AMERICAN},
-    {"US02", 8, HOLSTER_NATION_AMERICAN},
-    {"US03", 9, HOLSTER_NATION_AMERICAN},
-    {"US04", 8, HOLSTER_NATION_AMERICAN},
-};
-
-// Frames of the holster sets and the slots whose items they show.
-struct S_HolsterDummy {                                 // 8 bytes
-    int slot;                                           // HOLSTER_SLOT_COUNT ends the table
-    char name[4];
-};
-
-const S_HolsterDummy g_holsterDummies[] = {             // 0x0084fbd8
-    {0, "1"}, {1, "2"}, {2, "41"}, {2, "42"}, {2, "43"}, {3, "51"}, {3, "52"}, {4, "6"},
-    {5, "7"}, {6, "81"}, {6, "82"}, {6, "83"}, {7, "91"}, {7, "92"}, {7, "93"}, {8, "31"},
-    {8, "32"}, {8, "33"}, {9, "aa"}, {10, "bb"}, {11, "cc"}, {12, "dd"}, {13, "ee1"}, {13, "ee2"},
-    {HOLSTER_SLOT_COUNT, ""},
-};
-
-// The holster slot whose frames hang on the back ("d") instead of the belt ("c").
-constexpr int HOLSTER_SLOT_BACK = 4;
 
 // Times the stages are advanced by to pose the holsters (I3D_model::AdvanceStages): the pose
 // stage (HOLSTER_POSE_STAGE) by 100 ms.
@@ -297,63 +163,6 @@ void RestoreTransform(I3D_frame *model, const S_SavedModel &saved)
 {
     model->SetPosInline(saved.pos);
     model->SetRot(saved.rot);
-}
-
-// Matrix of `axis` rotated by `angle`.
-S_matrix Rotation(const S_vector &axis, float angle)
-{
-    S_quat rot;
-    rot.Make(axis, angle);
-    return rot.RotationMatrix();
-}
-
-// Turns a frame by `angle` about `axis` in its own space (the local matrix times the
-// rotation; the scale is kept).
-void Rotate(I3D_frame *frame, const S_vector &axis, float angle)
-{
-    const S_matrix local = frame->GetLocalMatrix();
-    frame->SetLocalMatrix(local * Rotation(axis, angle));
-}
-
-// Turns a frame about the cross product of its y and x axes (its local -z).
-void RotateAboutYxX(I3D_frame *frame, float angle)
-{
-    const S_matrix local = frame->GetLocalMatrix();
-    frame->SetLocalMatrix(local * Rotation(local(1).Cross(local(0)), angle));
-}
-
-// Position that brings a model's "backlink" dummy to its parent joint: minus the dummy's
-// position, through the local matrix of the dummy's parent.
-S_vector BacklinkOffset(I3D_frame *backlink)
-{
-    I3D_frame *parent = backlink->GetParent();
-    return -backlink->GetPos() * parent->GetLocalMatrix();
-}
-
-// Joint of the body that a holster frame hangs on.
-I3D_frame *HolsterJoint(const S_HolsterDummy &dummy, const S_HolsterModel &model, I3D_frame *jointC,
-                        I3D_frame *jointD, I3D_frame *jointO)
-{
-    if (dummy.slot == HOLSTER_SLOT_BACK)
-        return jointD;
-    const char *name = dummy.name;
-    if (_stricmp("EN06", model.model) == 0) {
-        if (_stricmp(name, "1") == 0)
-            return jointO;
-        if (_stricmp(name, "83") == 0 || _stricmp(name, "51") == 0)
-            return jointD;
-        return jointC;
-    }
-    if (_stricmp("US03", model.model) == 0) {
-        if (_stricmp(name, "81") == 0 || _stricmp(name, "82") == 0 || _stricmp(name, "83") == 0)
-            return jointD;
-        return jointC;
-    }
-    if (_stricmp(name, "83") == 0)
-        return jointD;
-    if (_stricmp(name, "42") == 0 && model.nation == HOLSTER_NATION_BRITISH)
-        return jointD;
-    return jointC;
 }
 
 // Link code of a hands or special model.
@@ -537,13 +346,7 @@ void C_HumanEquipment::InitHolsters()
     const std::size_t dot = modelName.find('.');
     if (dot != std::string::npos)
         modelName.erase(dot);
-    const S_HolsterModel *model = nullptr;
-    for (const S_HolsterModel &entry : g_holsterModels) {
-        if (_stricmp(entry.model, modelName.c_str()) == 0) {
-            model = &entry;
-            break;
-        }
-    }
+    const S_HolsterModel *model = FindHolsterModel(modelName.c_str());
     // (A model missing from the list builds the message "HolsterInit chyba - panak '<model>'
     // nenalezen v seznamu. Oznamte skutecnost TS." -- not in the list, tell the team -- that
     // is never shown.)
