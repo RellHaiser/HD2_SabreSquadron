@@ -26,8 +26,8 @@ public:
     // double click), the frame placed; true.
     bool Update(int time);                              // 0x0066a520
     // The id of the control under it: the frame data of what a ray from it (z -0.9, along +z)
-    // hits under `frame` (none: 0).
-    void Pick(I3D_scene *scene, I3D_frame *frame);      // 0x0066aac0
+    // hits under `frame` (none: 0), kept and returned.
+    uint32_t Pick(I3D_scene *scene, I3D_frame *frame);  // 0x0066aac0
 
     // A button held now / in the last update (`buttons` 0: any).
     bool IsButtonDown(uint32_t buttons) const;          // 0x0066a3a0

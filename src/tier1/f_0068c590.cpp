@@ -628,17 +628,17 @@ uint32_t FUN_0068d0f0(void *_this,int *param_1, ...)
 LAB_0068d214:
       bVar1 = FUN_0068c5d0();
       if (!bVar1) {
-        FUN_0066daa0(_this,1,0x7d4,0x2000009,0);
+        C_MenuState__ShowMessageId(_this,1,0x7d4,0x2000009,0);
         return 0;
       }
       iVar2 = (g_gameProfile.m_campaign)->m_current;
       iVar3 = C_Campaign__GetMissionNumber(g_gameProfile.m_campaign,iVar2);
       iVar2 = C_PlayerProfile__GetProgress(g_gameProfile.m_player,iVar2);
       if (iVar3 < iVar2) {
-        FUN_0066daa0(_this,1,0x2534,0x20000c8,0x2000009);
+        C_MenuState__ShowMessageId(_this,1,0x2534,0x20000c8,0x2000009);
         return 0;
       }
-      FUN_0066daa0(_this,1,0x2533,0x20000c8,0x2000009);
+      C_MenuState__ShowMessageId(_this,1,0x2533,0x20000c8,0x2000009);
       return 0;
     }
     local_70 = DAT_008ae5dc;
@@ -781,7 +781,9 @@ uint32_t FUN_0068d5e0(void *param_1, ...)
   uint8_t local_2d;
   int *local_2c;
   C_Screen *local_28;
-  uint32_t auStack_24 [5];
+  uint32_t uStack_24;
+  uint32_t uStack_20;
+  uint32_t uStack_1c;
   int *piStack_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
@@ -869,11 +871,11 @@ uint32_t FUN_0068d5e0(void *param_1, ...)
     (**(code **)*puVar3)(1);
   }
   piStack_10 = 0;
-  auStack_24[0] = 0;
-  auStack_24[1] = 0x2000001;
-  auStack_24[2] = 1;
+  uStack_24 = 0;
+  uStack_20 = 0x2000001;
+  uStack_1c = 1;
   local_4 = 3;
-  FUN_0066cc50(param_1,auStack_24);
+  C_MenuState__HandleMessage(param_1,&uStack_24);
   local_4 = 0xffffffff;
   if ((piStack_10 != 0) && (*piStack_10 = *piStack_10 - 1, *piStack_10 == 0)) {
     tier1_operator_delete(piStack_10);
@@ -1184,7 +1186,7 @@ uint32_t FUN_0068e160(void *_this,int param_1, ...)
   void *local_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
-  piVar2 = C_MainMenu__FUN_0066da30(_this,0x8200000);
+  piVar2 = C_MenuState__FindControl(_this,0x8200000);
   local_10 = 0;
   local_24 = 0;
   local_20 = 0x100009c;

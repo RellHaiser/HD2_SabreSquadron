@@ -55,6 +55,8 @@ public:
     bool m_unicodeFont = false;
     S_HudOption *m_hudOption = nullptr;
     S_PlayMode *m_playMode = nullptr;
+    // (The menus' reset, part 9d-ii-a: menu_test.inc.)
+    void ResetGame();
 };
 extern C_GameProfile g_gameProfile;
 extern int g_versionMajor;

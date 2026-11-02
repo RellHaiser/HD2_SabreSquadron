@@ -783,7 +783,7 @@ uint32_t C_EquipmentMenu__FUN_006740d0(C_EquipmentMenu *_this,int param_1, ...)
     local_b4 = DAT_008ae5e0;
     iVar6 = FUN_00620e90(&local_bc,local_1c,1);
     if (((uint8_t)((int)*(uint32_t *)(**(int **)(iVar6 + 8) + 0x60) >> 0x1a) & 0x3f) != 2) {
-      FUN_0066daa0(_this,1,0x7d4,0x2000007,0);
+      C_MenuState__ShowMessageId((C_MenuState *)_this,1,0x7d4,0x2000007,0);
       return 0;
     }
     local_68 = 0;
@@ -899,12 +899,12 @@ uint32_t C_EquipmentMenu__FUN_006740d0(C_EquipmentMenu *_this,int param_1, ...)
     }
     uVar10 = FUN_00674060();
     if ((char)uVar10 == '\0') {
-      FUN_0066daa0(_this,2,0x7e7,0,0);
+      C_MenuState__ShowMessageId((C_MenuState *)_this,2,0x7e7,0,0);
       return 0;
     }
     uVar10 = FUN_006746f0();
     if ((char)uVar10 == '\0') {
-      FUN_0066daa0(_this,1,0x2531,0x20000c6,0);
+      C_MenuState__ShowMessageId((C_MenuState *)_this,1,0x2531,0x20000c6,0);
       return 0;
     }
     local_30 = 0x20000c6;
@@ -1824,7 +1824,9 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
   uint8_t local_2d;
   int *local_2c;
   C_Screen *local_28;
-  uint32_t auStack_24 [5];
+  uint32_t uStack_24;
+  uint32_t uStack_20;
+  uint32_t uStack_1c;
   int *piStack_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
@@ -1912,11 +1914,11 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
     (**(code **)*puVar3)(1);
   }
   piStack_10 = 0;
-  auStack_24[0] = 0;
-  auStack_24[1] = 0x2000001;
-  auStack_24[2] = 1;
+  uStack_24 = 0;
+  uStack_20 = 0x2000001;
+  uStack_1c = 1;
   local_4 = 3;
-  FUN_0066cc50(_this,auStack_24);
+  C_MenuState__HandleMessage((C_MenuState *)_this,&uStack_24);
   local_4 = 0xffffffff;
   if ((piStack_10 != 0) && (*piStack_10 = *piStack_10 - 1, *piStack_10 == 0)) {
     tier1_operator_delete(piStack_10);

@@ -272,7 +272,9 @@ uint32_t C_VideoState__FUN_00697480(C_VideoState *_this, ...)
   uint8_t local_31;
   int *local_2c;
   C_Screen *local_28;
-  uint32_t auStack_24 [5];
+  uint32_t uStack_24;
+  uint32_t uStack_20;
+  uint32_t uStack_1c;
   int *piStack_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
@@ -382,11 +384,11 @@ uint32_t C_VideoState__FUN_00697480(C_VideoState *_this, ...)
     (**(code **)*puVar3)(1);
   }
   piStack_10 = 0;
-  auStack_24[0] = 0;
-  auStack_24[1] = 0x2000001;
-  auStack_24[2] = 1;
+  uStack_24 = 0;
+  uStack_20 = 0x2000001;
+  uStack_1c = 1;
   local_4 = 5;
-  FUN_0066cc50(_this,auStack_24);
+  C_MenuState__HandleMessage((C_MenuState *)_this,&uStack_24);
   if ((piStack_10 != 0) && (*piStack_10 = *piStack_10 - 1, *piStack_10 == 0)) {
     tier1_operator_delete(piStack_10);
     piStack_10 = extraout_EAX;

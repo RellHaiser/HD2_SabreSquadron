@@ -1008,7 +1008,7 @@ LAB_00678ef7:
          )) {
         tier1_operator_delete(CStack_10.rep);
       }
-      C_EquipmentMenu__FUN_0066da80(_this,2,(int *)&CStack_18,0,0);
+      C_MenuState__ShowMessage((C_MenuState *)_this,2,&CStack_18,0,0);
       if ((CStack_18.rep != 0) &&
          ((CStack_18.rep)->refCount = (CStack_18.rep)->refCount - 1, (CStack_18.rep)->refCount == 0
          )) {
@@ -1168,7 +1168,7 @@ LAB_0067925a:
           }
         }
         local_28 = (**(code **)(*piVar6 + 0x18))();
-        FUN_0066daa0(_this,2,0x2532,0,0);
+        C_MenuState__ShowMessageId((C_MenuState *)_this,2,0x2532,0,0);
       }
     }
     if (*(int *)(ptr + 0x28) != -1) {

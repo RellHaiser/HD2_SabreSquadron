@@ -124,7 +124,9 @@ uint32_t FUN_0068c0d0(void *param_1, ...)
   int local_30;
   uint32_t *local_2c;
   uint32_t local_28;
-  uint32_t auStack_24 [5];
+  uint32_t uStack_24;
+  uint32_t uStack_20;
+  uint32_t uStack_1c;
   int *piStack_10;
   int local_4;
   local_34 = CONCAT31(GH_PIECE(local_34,1,3),GH_PIECE(uStack_44,3,1));
@@ -168,11 +170,11 @@ uint32_t FUN_0068c0d0(void *param_1, ...)
     while( true ) {
       if ((local_30 == 0) || ((uint32_t)((int)local_2c - local_30 >> 2) <= uVar2)) {
         piStack_10 = 0;
-        auStack_24[0] = 0;
-        auStack_24[1] = 0x2000001;
-        auStack_24[2] = 1;
+        uStack_24 = 0;
+        uStack_20 = 0x2000001;
+        uStack_1c = 1;
         local_4 = CONCAT31(GH_PIECE(local_4,1,3),5);
-        FUN_0066cc50(param_1,auStack_24);
+        C_MenuState__HandleMessage(param_1,&uStack_24);
         if ((piStack_10 != 0) && (*piStack_10 = *piStack_10 - 1, *piStack_10 == 0)) {
           tier1_operator_delete(piStack_10);
         }

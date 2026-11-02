@@ -6881,6 +6881,57 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     own); names/screen.txt (28); 28 functions in ported.txt. Stats: 8,635 of 12,293 functions by
     hand (77.0 % by size).
 
+  PART 9d-ii-a DONE (2026-11-02): the menu states' class, the screen stack and the menu's messages
+  (src/game/menu_state.*, game_state.cpp, new). 9d-ii split: a these; b Start 0x0066b010, Stop
+  0x0066b440, HandleInput 0x0066b6e0 (the characters 0x0066b680), the cursor's input 0x0066bc90,
+  Update 0x0066c1a0, Render 0x0066e100, DrawScreens 0x0066e300, the cursor drawn 0x0066ab70, the
+  screens' models 0x0066c2a0 / 0x0066c9c0, the message box made 0x0066c4d0 / 0x0066c8b0, 0x0066b410,
+  0x0066bb80, the menus' frames 0x0066dad0 / 0x0066dcf0 / 0x0066def0 (declared, faked by the harness).
+  - C_GameState (game_state.cpp): its slots (dtor 0x0067ef90, Start / Stop / HandleInput false, Tick /
+    Update / Render nothing, GetTypeId 0x0067ecf0 0) and the state's get / set / commit (0x0067ed00..
+    0x0067ed40; the commit only when pending is not 2), defined nowhere before.
+  - C_MenuState (vtable 0x00815850, 0x1B0, 16-aligned; ctor 0x0067edd0, a real function: Kind0Menu is
+    it alone; dtor 0x0067f080): +0x0C the hovered id (-1), +0x10 the control editing, +0x14 / +0x18 a
+    timer, +0x1C 250, +0x20 the mode, +0x24 the input lock (-1), +0x2C dragging, +0x2D the keyboard
+    off, +0x30 scene, +0x34 camera, +0x38 light, +0x3C click sound, +0x40 S_MenuHint (0xB0: three -1
+    ints, on, has text, a C_TextBox +0x10, its frame +0xAC; Reset 0x0066e480, SetText 0x0066e430,
+    Render 0x0066e450), +0xF0 Start's argument, +0xF4 cursor, +0xF8 the screen under the popup, +0xFC
+    the popup, +0x100 the message box, vectors +0x104 models / +0x118 frames / +0x12C ticked controls /
+    +0x140 screens, +0x160 S_SoundRequest. State 4 (quit) until started; g_menuState 0x008ae5f8 set
+    by the ctor, cleared by the dtor. Slots 0x34 OnMessage / 0x38 BuildScreens pure, 0x3C..0x54 the
+    menus' hooks (0x0067ed60..0x0067edc0), 0x58 DrawScreens; Tick 0x0066c190 = OnTick.
+  - HandleMessage 0x0066cc50: MENU_MSG_DEFER (0x20000000) kept in g_deferredMessages 0x008ae55c (a
+    function static), MENU_MSG_DEFERRED (0x10000000) posts them (0x100, the bit cleared) or drops
+    them (0x200); a target: its screen by the top 6 bits; else by the masked code: open a screen
+    (the top hidden) / a popup (enter id 0x10200000, the top kept under) / back (the last screen:
+    the quit question, screen 4, and the quit kept back; from the question: the kept quit dropped
+    and the question closed; else the top closed, the next opened) / quit (StopAll(true, false),
+    state 4) / close the popup / previous (3) / next (2) / main menu (the game reset, 10), release a
+    frame (value2, its tree), the ticked controls, the box shown (screen 0 pushed) / closed (only
+    when the top's index is 0), CONTROL_MSG_NOTIFY (05: the top's OnInput05 with the id picked on its
+    frame, the leave), the editing (start: the editing one's OnInput0B first, 0 refuses; stop; the
+    keyboard off 0x20000C2: polling and the cursor's clicks); the rest (also 0x2000006) OnMessage.
+    Fixes (commented): the screen index checked for targets, OPEN_POPUP and the box; OPEN_SCREEN of
+    the index equal to the count (the original read past the end); the top of an empty stack.
+    HandleMessages 0x0066ca70 (the queue, the first first); FindControl 0x0066da30; the box's
+    ShowMessage / ShowMessageId / CloseMessage 0x0066da80..0x0066dac0. g_menuScreens 0x008ae5c4 (a
+    std::deque; the statics' init / exit and the deques' helpers 0x0066ae00..0x0066af50,
+    0x0066e4b0..0x0066ed80 in ported.txt: g_controlMessages' too).
+  - C_Cursor::Pick returns the id (EAX; the menu's NOTIFY and 0x0066bc90 use it).
+  - Harness: menu_test.inc in the factory build (menu_state.cpp, game_state.cpp linked; check_menu.py,
+    the "menu:" line, 18 checks; screens and a menu logging, 9d-ii-b's slots, StopAll, ResetGame
+    (the stub profile), SetKeyboardPolling, ReleaseFrameTree (the stub items module) and Pick faked;
+    the fake cursor given room for SetClicksOff's field). cursor_test.cpp checks Pick's result. 22 of
+    22 in both orders (the factory and screens lines too); the text build 22 of 22 in both orders.
+  - Mutations (mutations/mutate_9d2a.py, generated plus by hand): 188 cases, 182 build; all caught but
+    6 equivalent and 1 not observable here (listed in its docstring). The first run left 11 (5
+    caught by new checks: the hint's reset and text index, the ticked controls' first removed).
+  - Build: MSVC clean. Tier 1: 460 errors in 78 files, 189 stubs (was 472 / 78 / 191; the renamed
+    functions' 80 callers exported again). ret_audit --src: 52.
+  - Ghidra: names/menu_state.txt (22 functions, g_menuState; the shared empty slots left to
+    zz_idioms), C_Cursor::Pick returns uint; 48 functions in ported.txt. Stats: 8,683 of 12,293
+    functions by hand (77.2 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

@@ -115,16 +115,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "ported",
-  "functions": 619,
-  "bytes": 134448,
+  "functions": 648,
+  "bytes": 145144,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "pending",
-  "functions": 891,
-  "bytes": 337019,
+  "functions": 862,
+  "bytes": 326323,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {

@@ -90,7 +90,9 @@ uint32_t FUN_00638910(C_MainMenu *param_1, ...)
   void *pvVar1;
   int iVar2;
   int *extraout_EAX;
-  uint32_t local_24 [5];
+  uint32_t local_24;
+  uint32_t local_20;
+  uint32_t local_1c;
   int *local_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
@@ -137,11 +139,11 @@ uint32_t FUN_00638910(C_MainMenu *param_1, ...)
   }
   FUN_0061a7c0(param_1->m_1e4);
   local_10 = 0;
-  local_24[0] = 0x20900000;
-  local_24[1] = 0x2000018;
-  local_24[2] = 0;
+  local_24 = 0x20900000;
+  local_20 = 0x2000018;
+  local_1c = 0;
   local_4 = 0;
-  FUN_0066cc50(param_1,local_24);
+  C_MenuState__HandleMessage((C_MenuState *)param_1,&local_24);
   if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
     tier1_operator_delete(local_10);
     local_10 = extraout_EAX;

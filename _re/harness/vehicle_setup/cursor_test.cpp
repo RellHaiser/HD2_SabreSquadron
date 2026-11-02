@@ -407,14 +407,13 @@ int main()
     I3D_frame *under = NewFrame(0);
     g_scene.hit = NewFrame(0x1C100002);
     g_log.clear();
-    c->Pick(scene, under);
+    const uint32_t picked = c->Pick(scene, under);
     char ray[200];
     std::snprintf(ray, sizeof ray, "ray 0.25 %s %s 0 0 1 %p 1 140000 0 0 0", F(static_cast<float>(-(100.0f / 480.0f) * 0.75)).c_str(),
                   F(-1.0f + 0.1f).c_str(), static_cast<void *>(under));
-    CHECK(pick, LogIs({ray}) && c->m_pickedId == 0x1C100002);
+    CHECK(pick, LogIs({ray}) && c->m_pickedId == 0x1C100002 && picked == 0x1C100002);
     g_scene.hit = nullptr;
-    c->Pick(scene, under);
-    CHECK(pick, c->m_pickedId == 0);
+    CHECK(pick, c->Pick(scene, under) == 0 && c->m_pickedId == 0);
 
     // Released: the texture; the next one new.
     g_log.clear();

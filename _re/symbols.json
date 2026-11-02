@@ -31139,7 +31139,7 @@
  "0066aac0": {
   "module": "cursor",
   "name": "C_Cursor::Pick",
-  "proto": "void __thiscall Pick(C_Cursor *this, void * scene, void * frame)"
+  "proto": "uint __thiscall Pick(C_Cursor *this, void * scene, void * frame)"
  },
  "0066ab50": {
   "module": "cursor",
@@ -31151,6 +31151,11 @@
   "name": "C_Cursor::SetClicksOff",
   "proto": "void __thiscall SetClicksOff(C_Cursor *this, bool off)"
  },
+ "0066c190": {
+  "module": "menu_state",
+  "name": "C_MenuState::Tick",
+  "proto": "void __thiscall Tick(C_MenuState *this, int timeDelta)"
+ },
  "0066c6b0": {
   "module": "screen",
   "name": "C_MessageBox::ScalarDeletingDestructor",
@@ -31160,6 +31165,51 @@
   "module": "screen",
   "name": "C_MessageBox::~C_MessageBox",
   "proto": "void __thiscall ~C_MessageBox(C_Screen *this)"
+ },
+ "0066ca70": {
+  "module": "menu_state",
+  "name": "C_MenuState::HandleMessages",
+  "proto": "void __thiscall HandleMessages(C_MenuState *this)"
+ },
+ "0066cc50": {
+  "module": "menu_state",
+  "name": "C_MenuState::HandleMessage",
+  "proto": "void __thiscall HandleMessage(C_MenuState *this, void * message)"
+ },
+ "0066da30": {
+  "module": "menu_state",
+  "name": "C_MenuState::FindControl",
+  "proto": "void * __thiscall FindControl(C_MenuState *this, uint id)"
+ },
+ "0066da80": {
+  "module": "menu_state",
+  "name": "C_MenuState::ShowMessage",
+  "proto": "void __thiscall ShowMessage(C_MenuState *this, int kind, void * text, uint yesMessage, uint noMessage)"
+ },
+ "0066daa0": {
+  "module": "menu_state",
+  "name": "C_MenuState::ShowMessageId",
+  "proto": "void __thiscall ShowMessageId(C_MenuState *this, int kind, uint textId, uint yesMessage, uint noMessage)"
+ },
+ "0066dac0": {
+  "module": "menu_state",
+  "name": "C_MenuState::CloseMessage",
+  "proto": "void __fastcall CloseMessage(C_MenuState * menu)"
+ },
+ "0066e430": {
+  "module": "menu_state",
+  "name": "S_MenuHint_SetText",
+  "proto": "void __thiscall S_MenuHint_SetText(void * this, void * text, uchar style)"
+ },
+ "0066e450": {
+  "module": "menu_state",
+  "name": "S_MenuHint_Render",
+  "proto": "void __thiscall S_MenuHint_Render(void * this, void * scene)"
+ },
+ "0066e480": {
+  "module": "menu_state",
+  "name": "S_MenuHint_Reset",
+  "proto": "void __fastcall S_MenuHint_Reset(void * hint)"
  },
  "0066ede0": {
   "module": "game_app",
@@ -31289,6 +31339,11 @@
   "name": "C_GameMenu::C_GameMenu",
   "proto": "C_GameMenu * __thiscall C_GameMenu(C_GameMenu *this)"
  },
+ "0067ecf0": {
+  "module": "menu_state",
+  "name": "C_GameState::GetTypeId",
+  "proto": "int __thiscall GetTypeId(C_GameState *this)"
+ },
  "0067ed00": {
   "module": "console",
   "name": "C_GameState::GetState"
@@ -31313,6 +31368,16 @@
   "module": "zz_idioms",
   "name": "empty_function_67ed60"
  },
+ "0067ed70": {
+  "module": "menu_state",
+  "name": "C_MenuState::OnStart",
+  "proto": "bool __thiscall OnStart(C_MenuState *this, void * arg)"
+ },
+ "0067ed80": {
+  "module": "menu_state",
+  "name": "C_MenuState::OnInput",
+  "proto": "bool __thiscall OnInput(C_MenuState *this, float * held, float * pressed)"
+ },
  "0067ed90": {
   "module": "zz_idioms",
   "name": "empty_function_67ed90"
@@ -31320,6 +31385,36 @@
  "0067eda0": {
   "module": "zz_idioms",
   "name": "empty_function_67eda0"
+ },
+ "0067edb0": {
+  "module": "menu_state",
+  "name": "C_MenuState::OnRender",
+  "proto": "bool __thiscall OnRender(C_MenuState *this)"
+ },
+ "0067edc0": {
+  "module": "menu_state",
+  "name": "C_MenuState::OnDrawScreens",
+  "proto": "bool __thiscall OnDrawScreens(C_MenuState *this)"
+ },
+ "0067edd0": {
+  "module": "menu_state",
+  "name": "C_MenuState::C_MenuState",
+  "proto": "void * __thiscall C_MenuState(C_MenuState *this)"
+ },
+ "0067ef30": {
+  "module": "menu_state",
+  "name": "C_GameState::Start",
+  "proto": "bool __thiscall Start(C_GameState *this, void * arg)"
+ },
+ "0067ef40": {
+  "module": "menu_state",
+  "name": "C_GameState::Stop",
+  "proto": "bool __thiscall Stop(C_GameState *this)"
+ },
+ "0067ef50": {
+  "module": "menu_state",
+  "name": "C_GameState::HandleInput",
+  "proto": "bool __thiscall HandleInput(C_GameState *this, float * held, float * pressed)"
  },
  "0067ef60": {
   "module": "zz_idioms",
@@ -31332,6 +31427,21 @@
  "0067ef80": {
   "module": "zz_idioms",
   "name": "empty_function_67ef80"
+ },
+ "0067ef90": {
+  "module": "menu_state",
+  "name": "C_GameState::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_GameState *this, uchar flags)"
+ },
+ "0067f060": {
+  "module": "menu_state",
+  "name": "C_MenuState::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_MenuState *this, uchar flags)"
+ },
+ "0067f080": {
+  "module": "menu_state",
+  "name": "C_MenuState::~C_MenuState",
+  "proto": "void __thiscall ~C_MenuState(C_MenuState *this)"
  },
  "0067f1b0": {
   "module": "zz_idioms",
@@ -41707,6 +41817,12 @@
   "module": "cursor",
   "name": "g_cursor",
   "type": "C_Cursor *"
+ },
+ "008ae5f8": {
+  "data": true,
+  "module": "menu_state",
+  "name": "g_menuState",
+  "type": "void *"
  },
  "008ae8f4": {
   "data": true,

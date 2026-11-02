@@ -176,13 +176,15 @@ uint32_t C_MainMenu__FUN_00621240(C_MainMenu *_this,int param_1, ...)
   uint32_t uStack_60;
   uint32_t uStack_5c;
   uint32_t uStack_58;
-  uint32_t auStack_54 [5];
+  int aiStack_54 [5];
   int *piStack_40;
   uint32_t uStack_3c;
   uint32_t uStack_38;
   uint32_t uStack_34;
   int *piStack_28;
-  uint32_t auStack_24 [5];
+  uint32_t uStack_24;
+  uint32_t uStack_20;
+  uint32_t uStack_1c;
   int *piStack_10;
   uint8_t *puStack_8;
   uint32_t uStack_4;
@@ -196,7 +198,7 @@ uint32_t C_MainMenu__FUN_00621240(C_MainMenu *_this,int param_1, ...)
       uStack_60 = DAT_008ae5dc;
       uStack_58 = DAT_008ae5e4;
       uStack_5c = DAT_008ae5e0;
-      iVar5 = FUN_00620e90(&uStack_64,(int *)auStack_54,1);
+      iVar5 = FUN_00620e90(&uStack_64,aiStack_54,1);
       piVar3 = *(int **)(iVar5 + 8);
       if ((((uint8_t)((int)*(uint32_t *)(*piVar3 + 0x60) >> 0x1a) & 0x3f) == 2) &&
          (*(int *)(_this->_pad_0104 + 0xc4) == 3)) {
@@ -218,22 +220,22 @@ code_r0x006214b9:
     piVar3 = (int *)func_0x006aef40(piVar3);
     if ((char)piVar3 == '\0') goto code_r0x00621433;
     piStack_10 = 0;
-    auStack_24[0] = 0x8200008;
-    auStack_24[1] = 0x2000017;
-    auStack_24[2] = 0;
+    uStack_24 = 0x8200008;
+    uStack_20 = 0x2000017;
+    uStack_1c = 0;
     uStack_4 = 0;
-    FUN_0066cc50(_this,auStack_24);
+    C_MenuState__HandleMessage((C_MenuState *)_this,&uStack_24);
     if ((piStack_10 != 0) && (*piStack_10 = *piStack_10 - 1, *piStack_10 == 0)) {
       tier1_operator_delete(piStack_10);
     }
     piStack_40 = 0;
-    auStack_54[0] = 0x8200008;
-    auStack_54[1] = 0x200002f;
-    auStack_54[2] = 0;
+    aiStack_54[0] = 0x8200008;
+    aiStack_54[1] = 0x200002f;
+    aiStack_54[2] = 0;
     uStack_4 = 1;
-    FUN_0066cc50(_this,auStack_54);
+    C_MenuState__HandleMessage((C_MenuState *)_this,aiStack_54);
     uVar2 = 0xffffffff;
-    if (auStack_54[2] == -1) {
+    if (aiStack_54[2] == -1) {
       pcVar9 = &DAT_00867a90;
       do {
         if (uVar2 == 0) break;
@@ -319,9 +321,12 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
   int *piVar4;
   int iVar5;
   int *extraout_EAX_00;
+  int *extraout_EAX_01;
+  int *extraout_EAX_02;
   uint32_t uVar6;
   C_GameConfig *this_00;
-  int *extraout_EAX_01;
+  int *extraout_EAX_03;
+  int *extraout_EAX_04;
   int iVar7;
   C_str *pCVar8;
   uint32_t uVar9;
@@ -540,7 +545,8 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
   piVar4 = (int *)(param_2[0x18] & 0xfffffff0);
   if ((int *)0x8800000 < piVar4) {
     if (piVar4 == (int *)0x8900000) {
-      piVar4 = (int *)FUN_0066daa0(_this,1,0x7d4,0x2000017,0);
+      C_MenuState__ShowMessageId(_this,1,0x7d4,0x2000017,0);
+      piVar4 = extraout_EAX_04;
     }
     goto LAB_00622ace;
   }
@@ -660,10 +666,12 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
             }
             iVar7 = CreateProfile((char *)((int)abStack_71 + 1));
             if (iVar7 == -1) {
-              param_3 = FUN_0066daa0(_this,2,0x251c,0x20000c3,0x20000c3);
+              C_MenuState__ShowMessageId(_this,2,0x251c,0x20000c3,0x20000c3);
+              param_3 = (int)extraout_EAX_00;
             }
             else if (iVar7 == -2) {
-              param_3 = FUN_0066daa0(_this,2,0x251d,0x20000c3,0x20000c3);
+              C_MenuState__ShowMessageId(_this,2,0x251d,0x20000c3,0x20000c3);
+              param_3 = (int)extraout_EAX_01;
             }
             else {
               pCStack_300 = 0;
@@ -791,7 +799,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               GH_PIECE(local_4,0,1) = 0x13;
               PostControlMessage(&DAT_008ae590,&uStack_554);
               local_4 = CONCAT31(GH_PIECE(local_4,1,3),6);
-              param_3 = (int)extraout_EAX_00;
+              param_3 = (int)extraout_EAX_02;
               if (CStack_540.rep != 0) {
                 param_3 = C_str__ReleaseRep((C_str *)CStack_540.rep);
               }
@@ -939,10 +947,10 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
               }
               iVar7 = C_PlayerProfile__Rename(g_gameProfile.m_player,pcVar12,&cStack_d4);
               if (iVar7 == -1) {
-                FUN_0066daa0(_this,2,0x2526,0x20000c3,0x20000c3);
+                C_MenuState__ShowMessageId(_this,2,0x2526,0x20000c3,0x20000c3);
               }
               else if (iVar7 == -2) {
-                FUN_0066daa0(_this,2,0x2527,0x20000c3,0x20000c3);
+                C_MenuState__ShowMessageId(_this,2,0x2527,0x20000c3,0x20000c3);
               }
               else {
                 pCStack_348 = 0;
@@ -1056,7 +1064,7 @@ uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...
             if ((local_4c8 != 0) &&
                (*local_4c8 = *local_4c8 - 1, piVar4 = local_4c8, *local_4c8 == 0)) {
               tier1_operator_delete(local_4c8);
-              piVar4 = extraout_EAX_01;
+              piVar4 = extraout_EAX_03;
             }
           }
         }

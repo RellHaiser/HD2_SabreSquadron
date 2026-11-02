@@ -168,7 +168,7 @@ bool C_Cursor::Update(int time)
     return true;
 }
 
-void C_Cursor::Pick(I3D_scene *scene, I3D_frame *frame)
+uint32_t C_Cursor::Pick(I3D_scene *scene, I3D_frame *frame)
 {
     S_vector from;
     GetPosition(&from);
@@ -177,6 +177,7 @@ void C_Cursor::Pick(I3D_scene *scene, I3D_frame *frame)
     I3D_collision_info info;
     I3D_frame *hit = scene->IntersectFrame(from, dir, frame, &info, PICK_FLAGS, 0, 0, 0);
     m_pickedId = hit ? static_cast<uint32_t>(reinterpret_cast<uintptr_t>(hit->GetData())) : 0;
+    return m_pickedId;
 }
 
 bool C_Cursor::Matches(uint32_t buttons, uint32_t state)

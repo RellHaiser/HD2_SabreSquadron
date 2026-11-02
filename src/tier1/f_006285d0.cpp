@@ -2034,7 +2034,7 @@ uint32_t FUN_0062c2a0(int param_1, ...)
 uint32_t FUN_0062c5b0(void *_this,uint32_t param_1,uint32_t param_2, ...)
 {
   int *piVar1;
-  piVar1 = C_MainMenu__FUN_0066da30(_this,param_1);
+  piVar1 = C_MenuState__FindControl(_this,param_1);
   if (piVar1 != 0) {
     (**(code **)(*piVar1 + 0x74))(param_2);
   }
@@ -2057,7 +2057,7 @@ uint32_t C_MainMenu__FUN_0062c5d0(C_MainMenu *_this,uint32_t param_1, ...)
   local_10 = 0;
   local_4 = 0;
   local_24 = 0;
-  piVar2 = C_MainMenu__FUN_0066da30(_this,param_1);
+  piVar2 = C_MenuState__FindControl((C_MenuState *)_this,param_1);
   if (piVar2 == 0) {
 LAB_0062c69e:
     if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
@@ -2099,7 +2099,7 @@ uint32_t * C_MainMenu__FUN_0062c6d0(C_MainMenu *_this,uint32_t *param_1,uint32_t
   uint32_t local_4;
   local_10 = 0;
   local_4 = 0;
-  piVar1 = C_MainMenu__FUN_0066da30(_this,param_2);
+  piVar1 = C_MenuState__FindControl((C_MenuState *)_this,param_2);
   if ((piVar1 == 0) || (piVar1[0x15] != 0xe)) {
     *param_1 = 0;
     if (local_10 == 0) {
@@ -3563,6 +3563,7 @@ uint32_t FUN_0062e870(uint32_t param_1,int *param_2, ...)
   uint32_t uVar5;
   I3D_frame *_this;
   uint32_t uVar6;
+  uint32_t extraout_EAX;
   float fStack_4c;
   float fStack_48;
   int *piStack_44;
@@ -3610,8 +3611,9 @@ uint32_t FUN_0062e870(uint32_t param_1,int *param_2, ...)
   if ((iVar2 != 0) && (uVar6 = *(int *)(uVar6 + 8) - iVar2 >> 2, uVar1 < uVar6)) {
     uRam00000040 = uVar1;
     piRam000000ec = piVar3;
-    uVar6 = FUN_0066e430((void *)0x40,(uint32_t *)(*(int *)(iVar2 + uVar1 * 4) + 1),0xd);
+    S_MenuHint_SetText((void *)0x40,(void *)(*(int *)(iVar2 + uVar1 * 4) + 1),'\r');
     uRam0000004c = 1;
+    uVar6 = extraout_EAX;
   }
   return CONCAT31((int3)(uVar6 >> 8),1);
 }
@@ -3622,10 +3624,10 @@ uint32_t FUN_0062e9f0(void *param_1, ...)
 {
   I3D_frame *_this;
   int iVar1;
-  uint32_t *puVar2;
+  void *pvVar2;
   uint32_t in_EAX;
   float *extraout_EAX;
-  uint32_t *puVar3;
+  void *pvVar3;
   float local_40;
   float local_3c;
   float local_38;
@@ -3650,86 +3652,84 @@ uint32_t FUN_0062e9f0(void *param_1, ...)
   (**(code **)(**(int **)((int)param_1 + 0xec) + 0x24))(*(int **)((int)param_1 + 0xec));
   iVar1 = *(int *)((int)param_1 + 0x44);
   C_Cursor__GetPosition(*(C_Cursor **)((int)param_1 + 0xf4),&local_3c);
-  puVar3 = (uint32_t *)
-           (uint32_t)(uint16_t)((uint16_t)(local_3c < 0.28) << 8 | (uint16_t)(local_3c == 0.28) << 0xe);
+  pvVar3 = (void *)(uint32_t)(uint16_t)((uint16_t)(local_3c < 0.28) << 8 | (uint16_t)(local_3c == 0.28) << 0xe
+                                 );
   if (local_3c < 0.28 == 0 && (local_3c == 0.28) == 0) {
-    puVar3 = (uint32_t *)
-             (uint32_t)(uint16_t)((uint16_t)(local_3c < 0.46) << 8 | (uint16_t)NAN(local_3c) << 10 |
-                           (uint16_t)(local_3c == 0.46) << 0xe);
+    pvVar3 = (void *)(uint32_t)(uint16_t)((uint16_t)(local_3c < 0.46) << 8 | (uint16_t)NAN(local_3c) << 10 |
+                                   (uint16_t)(local_3c == 0.46) << 0xe);
     if (local_3c < 0.46) {
-      puVar3 = (uint32_t *)
-               (uint32_t)(uint16_t)((uint16_t)(local_38 < -0.3) << 8 | (uint16_t)NAN(local_38) << 10 |
-                             (uint16_t)(local_38 == -0.3) << 0xe);
+      pvVar3 = (void *)(uint32_t)(uint16_t)((uint16_t)(local_38 < -0.3) << 8 | (uint16_t)NAN(local_38) << 10 |
+                                     (uint16_t)(local_38 == -0.3) << 0xe);
       if (((local_38 < -0.3) &&
-          (puVar3 = (uint32_t *)
-                    (uint32_t)(uint16_t)((uint16_t)(local_38 < -0.68) << 8 |
-                                  (uint16_t)(local_38 == -0.68) << 0xe),
+          (pvVar3 = (void *)(uint32_t)(uint16_t)((uint16_t)(local_38 < -0.68) << 8 |
+                                          (uint16_t)(local_38 == -0.68) << 0xe),
           local_38 < -0.68 == 0 && (local_38 == -0.68) == 0)) && (iVar1 == 0)) {
-        puVar3 = C_MainMenu__FUN_0066da30(param_1,*(uint32_t *)(*(int *)((int)param_1 + 0xf4) + 0x34));
-        if ((puVar3 != 0) && ((puVar3[0x18] & 0xff000) == 0x7000)) {
-          puVar2 = (uint32_t *)puVar3[0x17];
-          puVar3 = *(uint32_t **)((int)param_1 + 0x40);
-          if (puVar3 != puVar2) {
-            FUN_00619780((void *)(*(int *)((int)param_1 + 0x1e4) + 0x30),(int)puVar3,(int)puVar2);
-            *(uint32_t **)((int)param_1 + 0x40) = puVar2;
-            puVar3 = (uint32_t *)FUN_0062c780((int)param_1);
+        pvVar3 = C_MenuState__FindControl(param_1,*(uint32_t *)(*(int *)((int)param_1 + 0xf4) + 0x34));
+        if ((pvVar3 != 0) && ((*(uint32_t *)((int)pvVar3 + 0x60) & 0xff000) == 0x7000)) {
+          pvVar2 = *(void **)((int)pvVar3 + 0x5c);
+          pvVar3 = *(void **)((int)param_1 + 0x40);
+          if (pvVar3 != pvVar2) {
+            FUN_00619780((void *)(*(int *)((int)param_1 + 0x1e4) + 0x30),(int)pvVar3,(int)pvVar2);
+            *(void **)((int)param_1 + 0x40) = pvVar2;
+            pvVar3 = (void *)FUN_0062c780((int)param_1);
           }
         }
       }
     }
   }
-  return CONCAT31((int3)((uint32_t)puVar3 >> 8),1);
+  return CONCAT31((int3)((uint32_t)pvVar3 >> 8),1);
 }
 
 
 // 0x0062eb60
 uint32_t FUN_0062eb60(void *param_1, ...)
 {
-  bool bVar1;
+  uint32_t *puVar1;
   bool bVar2;
-  int iVar3;
-  uint32_t *puVar4;
-  uint32_t uVar5;
-  bool bVar6;
+  bool bVar3;
+  int iVar4;
+  void *pvVar5;
+  uint32_t uVar6;
+  bool bVar7;
   float local_20;
   float fStack_1c;
-  puVar4 = *(uint32_t **)((int)param_1 + 0xec);
-  if (puVar4 != 0) {
-    (**(code **)*puVar4)(puVar4);
+  puVar1 = *(uint32_t **)((int)param_1 + 0xec);
+  if (puVar1 != 0) {
+    (**(code **)*puVar1)(puVar1);
   }
-  bVar6 = *(int *)((int)param_1 + 0x44) != 0;
+  bVar7 = *(int *)((int)param_1 + 0x44) != 0;
   *(uint32_t *)((int)param_1 + 0xec) = 0;
   C_Cursor__GetPosition(*(C_Cursor **)((int)param_1 + 0xf4),&local_20);
   if ((((local_20 <= 0.08) || (0.26 <= local_20)) || (-0.3 <= fStack_1c)) || (fStack_1c <= -0.68)) {
+    bVar3 = false;
+  }
+  else {
+    bVar3 = true;
+  }
+  if (((local_20 <= 0.28) || (0.46 <= local_20)) || ((-0.3 <= fStack_1c || (fStack_1c <= -0.68)))) {
     bVar2 = false;
   }
   else {
     bVar2 = true;
   }
-  if (((local_20 <= 0.28) || (0.46 <= local_20)) || ((-0.3 <= fStack_1c || (fStack_1c <= -0.68)))) {
-    bVar1 = false;
-  }
-  else {
-    bVar1 = true;
-  }
-  if ((!bVar2) || (bVar6)) {
-    if ((bVar1) && (bVar6)) {
+  if ((!bVar3) || (bVar7)) {
+    if ((bVar2) && (bVar7)) {
       FUN_00619930((void *)(*(int *)((int)param_1 + 0x1e4) + 0x30),*(uint32_t *)((int)param_1 + 0x40));
-      iVar3 = FUN_00617d50(*(int *)((int)param_1 + 0x1e4) + 0x30);
-      if (*(int *)(iVar3 + 4) == 0) {
-        iVar3 = 0;
+      iVar4 = FUN_00617d50(*(int *)((int)param_1 + 0x1e4) + 0x30);
+      if (*(int *)(iVar4 + 4) == 0) {
+        iVar4 = 0;
       }
       else {
-        iVar3 = *(int *)(iVar3 + 8) - *(int *)(iVar3 + 4) >> 2;
+        iVar4 = *(int *)(iVar4 + 8) - *(int *)(iVar4 + 4) >> 2;
       }
-      *(int *)((int)param_1 + 0x40) = iVar3 - 1;
-      puVar4 = C_MainMenu__FUN_0066da30(param_1,*(uint32_t *)(*(int *)((int)param_1 + 0xf4) + 0x34));
-      if ((puVar4 != 0) && ((puVar4[0x18] & 0xff000) == 0x7000)) {
-        iVar3 = puVar4[0x17];
-        if (*(int *)((int)param_1 + 0x40) != iVar3) {
+      *(int *)((int)param_1 + 0x40) = iVar4 - 1;
+      pvVar5 = C_MenuState__FindControl(param_1,*(uint32_t *)(*(int *)((int)param_1 + 0xf4) + 0x34));
+      if ((pvVar5 != 0) && ((*(uint32_t *)((int)pvVar5 + 0x60) & 0xff000) == 0x7000)) {
+        iVar4 = *(int *)((int)pvVar5 + 0x5c);
+        if (*(int *)((int)param_1 + 0x40) != iVar4) {
           FUN_00619780((void *)(*(int *)((int)param_1 + 0x1e4) + 0x30),*(int *)((int)param_1 + 0x40)
-                       ,iVar3);
-          *(int *)((int)param_1 + 0x40) = iVar3;
+                       ,iVar4);
+          *(int *)((int)param_1 + 0x40) = iVar4;
           FUN_0062c780((int)param_1);
         }
       }
@@ -3738,10 +3738,10 @@ uint32_t FUN_0062eb60(void *param_1, ...)
   else {
     FUN_00619730((void *)(*(int *)((int)param_1 + 0x1e4) + 0x30),*(uint32_t *)((int)param_1 + 0x40));
   }
-  FUN_0066e480((uint32_t *)((int)param_1 + 0x40));
+  S_MenuHint_Reset((void *)((int)param_1 + 0x40));
   FUN_0062c780((int)param_1);
-  uVar5 = FUN_0062cbf0((int)param_1);
-  return CONCAT31((int3)((uint32_t)uVar5 >> 8),1);
+  uVar6 = FUN_0062cbf0((int)param_1);
+  return CONCAT31((int3)((uint32_t)uVar6 >> 8),1);
 }
 
 

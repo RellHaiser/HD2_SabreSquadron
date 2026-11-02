@@ -180,7 +180,7 @@ C_EquipmentMenuBase * C_EquipmentMenuBase__C_EquipmentMenuBase(C_EquipmentMenuBa
   local_10 = _this->_pad_002e + 0x12;
   C_TextBox__C_TextBox((C_TextBox *)(_this->_pad_002e + 0x22));
   GH_PIECE(local_4,0,1) = 1;
-  FUN_0066e480((uint32_t *)(_this->_pad_002e + 0x12));
+  S_MenuHint_Reset(_this->_pad_002e + 0x12);
   GH_PIECE(local_4,0,1) = 2;
   FUN_006c5280(_this->_pad_002e + 0xd6,&local_18);
   GH_PIECE(local_4,0,1) = 3;
@@ -234,7 +234,7 @@ C_EquipmentMenuBase * C_EquipmentMenuBase__C_EquipmentMenuBase(C_EquipmentMenuBa
   _this->_pad_002e[0xc4] = '\0';
   _this->_pad_002e[0xc5] = '\0';
   DAT_008ae5c2 = 0;
-  DAT_008ae5f8 = _this;
+  g_menuState = _this;
   _this->m_02d = '\0';
   _this->_pad_002e[0xe] = '\0';
   _this->_pad_002e[0xf] = '\0';
@@ -319,7 +319,7 @@ uint32_t C_MainMenu__dtor_C_MainMenu(C_MainMenu *_this, ...)
   _this->_pad_01d4[0xe] = '\0';
   _this->_pad_01d4[0xf] = '\0';
   _this->vtable = (C_MainMenu_vtbl *)&PTR_00815850;
-  DAT_008ae5f8 = 0;
+  g_menuState = 0;
   _this->_pad_0004[0xc] = '\0';
   _this->_pad_0004[0xd] = '\0';
   _this->_pad_0004[0xe] = '\0';
@@ -438,7 +438,7 @@ uint32_t C_Class_815850__C_SquadMenu___C_SquadMenu(C_Class_815850 *_this, ...)
   *(uint32_t *)(_this + 0x1bc) = 0;
   *(uint32_t *)(_this + 0x1c4) = 0;
   *(uint8_t ***)_this = &PTR_00815850;
-  DAT_008ae5f8 = 0;
+  g_menuState = 0;
   *(uint32_t *)(_this + 0x10) = 0;
   local_4 = 0;
   tier1_operator_delete(*(void **)(_this + 0x144));
@@ -620,7 +620,7 @@ uint32_t C_EquipmentMenu__dtor_C_EquipmentMenu(C_EquipmentMenu *_this, ...)
   _this->_pad_023c[0x4b] = '\0';
   _this->m_1d0 = (int)&PTR_008157cc;
   _this->vtable = (C_EquipmentMenu_vtbl *)&PTR_00815850;
-  DAT_008ae5f8 = 0;
+  g_menuState = 0;
   local_4 = 10;
   _this->_pad_0004[0xc] = '\0';
   _this->_pad_0004[0xd] = '\0';
@@ -695,7 +695,7 @@ uint32_t C_Class_815850__C_DebriefingMenu___C_DebriefingMenu(C_Class_815850 *_th
 {
   int local_4;
   *(uint8_t ***)_this = &PTR_00815850;
-  DAT_008ae5f8 = 0;
+  g_menuState = 0;
   *(uint32_t *)(_this + 0x10) = 0;
   local_4 = 0;
   tier1_operator_delete(*(void **)(_this + 0x144));
@@ -752,7 +752,7 @@ uint32_t C_Class_815850__C_OperationEndMenu___C_OperationEndMenu(C_Class_815850 
 {
   int local_4;
   *(uint8_t ***)_this = &PTR_00815850;
-  DAT_008ae5f8 = 0;
+  g_menuState = 0;
   *(uint32_t *)(_this + 0x10) = 0;
   local_4 = 0;
   tier1_operator_delete(*(void **)(_this + 0x144));
@@ -809,7 +809,7 @@ uint32_t C_Class_815850__C_Kind0Menu___C_Kind0Menu(C_Class_815850 *_this, ...)
 {
   int local_4;
   *(uint8_t ***)_this = &PTR_00815850;
-  DAT_008ae5f8 = 0;
+  g_menuState = 0;
   *(uint32_t *)(_this + 0x10) = 0;
   local_4 = 0;
   tier1_operator_delete(*(void **)(_this + 0x144));
@@ -909,7 +909,7 @@ uint32_t * FUN_006c3090(uint32_t *param_1, ...)
   *(uint8_t *)(param_1 + 0x28) = 10;
   param_1[0x2a] = 0;
   pvStack_c = (void *)0x3;
-  FUN_0066e480(param_1);
+  S_MenuHint_Reset(param_1);
   return param_1;
 }
 
@@ -963,7 +963,7 @@ uint32_t C_Class_815850__C_SessionMenu___C_SessionMenu(C_Class_815850 *_this, ..
 {
   int local_4;
   *(uint8_t ***)_this = &PTR_00815850;
-  DAT_008ae5f8 = 0;
+  g_menuState = 0;
   *(uint32_t *)(_this + 0x10) = 0;
   local_4 = 0;
   tier1_operator_delete(*(void **)(_this + 0x144));

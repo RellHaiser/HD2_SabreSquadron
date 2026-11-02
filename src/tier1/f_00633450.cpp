@@ -47,10 +47,11 @@ uint32_t C_MainMenu__FUN_00633490(C_MainMenu *_this,int param_1, ...)
   char cVar2;
   uint3 uVar6;
   uint32_t uVar3;
-  int iVar4;
   uint32_t extraout_EAX;
+  int iVar4;
+  uint32_t extraout_EAX_00;
   C_MainMenu *pCVar5;
-  C_MainMenu *extraout_EAX_00;
+  C_MainMenu *extraout_EAX_01;
   uint32_t uVar7;
   uint32_t *puVar8;
   uchar *puVar9;
@@ -250,7 +251,7 @@ switchD_006334da_caseD_200000b:
       }
       C_NetGame__Close((C_NetGame *)&g_netGame,true);
       DAT_008ae5c2 = 0;
-      return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
+      return CONCAT31((int3)((uint32_t)extraout_EAX_00 >> 8),1);
     }
     uVar3 = FUN_00634f90((int)_this);
     return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
@@ -264,8 +265,8 @@ switchD_006334da_caseD_200000b:
     C_MainMenu__FUN_0062d030(_this);
     cVar2 = FUN_007328d0();
     if (cVar2 != '\0') {
-      uVar3 = FUN_0066daa0(_this,3,0x22ea,0x20000ca,0x20000cb);
-      return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
+      C_MenuState__ShowMessageId((C_MenuState *)_this,3,0x22ea,0x20000ca,0x20000cb);
+      return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
     }
     local_110 = 0x20000c9;
     local_100 = 0;
@@ -517,7 +518,7 @@ switchD_006334da_caseD_200000b:
   }
   if (pCVar5->vtable == 0) {
     tier1_operator_delete(pCVar5);
-    pCVar5 = extraout_EAX_00;
+    pCVar5 = extraout_EAX_01;
   }
 LAB_00633f2b:
   return CONCAT31((int3)((uint32_t)pCVar5 >> 8),1);
@@ -872,9 +873,13 @@ uint32_t FUN_00634b30(void *param_1, ...)
   uint32_t local_c8;
   uint32_t local_c4;
   C_str *local_b8;
-  uint32_t local_b4 [5];
+  uint32_t local_b4;
+  uint32_t local_b0;
+  uint32_t local_ac;
   C_str *local_a0;
-  uint32_t local_9c [5];
+  uint32_t local_9c;
+  uint32_t local_98;
+  uint32_t local_94;
   C_str *local_88;
   uint32_t local_84;
   uint32_t local_80;
@@ -903,11 +908,11 @@ uint32_t FUN_00634b30(void *param_1, ...)
     *(uint32_t *)((int)param_1 + 0x21c) = 0;
     FUN_0061b090(_this,2);
     local_a0 = 0;
-    local_b4[0] = 0;
-    local_b4[1] = 0x2000028;
-    local_b4[2] = 0;
+    local_b4 = 0;
+    local_b0 = 0x2000028;
+    local_ac = 0;
     local_4 = 0;
-    FUN_0066cc50(param_1,local_b4);
+    C_MenuState__HandleMessage(param_1,&local_b4);
     if (local_a0 != 0) {
       C_str__ReleaseRep(local_a0);
     }
@@ -967,11 +972,11 @@ uint32_t FUN_00634b30(void *param_1, ...)
       *(uint32_t *)((int)param_1 + 0x21c) = 0;
       FUN_0061b090(_this,1);
       local_88 = 0;
-      local_9c[0] = 0;
-      local_9c[1] = 0x2000028;
-      local_9c[2] = 0;
+      local_9c = 0;
+      local_98 = 0x2000028;
+      local_94 = 0;
       local_4 = 6;
-      FUN_0066cc50(param_1,local_9c);
+      C_MenuState__HandleMessage(param_1,&local_9c);
       if (local_88 != 0) {
         C_str__ReleaseRep(local_88);
       }
@@ -1516,10 +1521,10 @@ uint32_t FUN_00635b70(uint32_t param_1, ...)
 #if 0
 {
   int iVar1;
-  if (DAT_008ae5f8 != 0) {
-    iVar1 = (**(code **)(*DAT_008ae5f8 + 0x1c))();
+  if (g_menuState != 0) {
+    iVar1 = (**(code **)(*g_menuState + 0x1c))();
     if ((iVar1 == 2) && (DAT_008ae5c2 == '\0')) {
-      FUN_00635990(DAT_008ae5f8,param_1);
+      FUN_00635990(g_menuState,param_1);
     }
   }
   return 0;
@@ -1538,7 +1543,9 @@ uint32_t FUN_00635ba0(void *_this, ...)
   uint32_t uVar5;
   bool bVar6;
   int in_stack_00000010;
-  uint32_t local_2c [5];
+  uint32_t local_2c;
+  uint32_t local_28;
+  uint32_t local_24;
   int *local_18;
   int local_14;
   uint32_t local_8;
@@ -1546,12 +1553,12 @@ uint32_t FUN_00635ba0(void *_this, ...)
   iVar4 = *(int *)((int)_this + 0x1c8);
   if ((((iVar4 == 4) || (iVar4 == 9)) || (iVar4 == 5)) || (iVar4 == 6)) {
     if (iVar4 == 6) {
-      local_2c[0] = 0x20900000;
+      local_2c = 0x20900000;
       local_18 = 0;
-      local_2c[1] = 0x2000018;
-      local_2c[2] = 0;
+      local_28 = 0x2000018;
+      local_24 = 0;
       local_8 = 0;
-      FUN_0066cc50(_this,local_2c);
+      C_MenuState__HandleMessage(_this,&local_2c);
       local_8 = 0xffffffff;
       if ((local_18 != 0) && (*local_18 = *local_18 - 1, *local_18 == 0)) {
         tier1_operator_delete(local_18);
@@ -1563,11 +1570,11 @@ uint32_t FUN_00635ba0(void *_this, ...)
         FUN_00635f10(_this,*(int *)(iVar2 + uVar5 * 4));
       }
       local_18 = 0;
-      local_2c[0] = 0x20900000;
-      local_2c[1] = 0x200002c;
-      local_2c[2] = 0;
+      local_2c = 0x20900000;
+      local_28 = 0x200002c;
+      local_24 = 0;
       local_8 = 1;
-      FUN_0066cc50(_this,local_2c);
+      C_MenuState__HandleMessage(_this,&local_2c);
       if ((local_18 != 0) && (*local_18 = *local_18 - 1, *local_18 == 0)) {
         tier1_operator_delete(local_18);
         local_18 = extraout_EAX;
@@ -1591,11 +1598,11 @@ uint32_t FUN_00635ba0(void *_this, ...)
       }
       if (*(int *)((int)_this + 0x200) == 0) {
         local_18 = 0;
-        local_2c[0] = 0x20900000;
-        local_2c[1] = 0x200002c;
-        local_2c[2] = 0;
+        local_2c = 0x20900000;
+        local_28 = 0x200002c;
+        local_24 = 0;
         local_8 = 2;
-        FUN_0066cc50(_this,local_2c);
+        C_MenuState__HandleMessage(_this,&local_2c);
         local_8 = 0xffffffff;
         if ((local_18 != 0) && (*local_18 = *local_18 - 1, *local_18 == 0)) {
           tier1_operator_delete(local_18);
@@ -1619,16 +1626,16 @@ uint32_t FUN_00635ba0(void *_this, ...)
     }
     puVar3 = DAT_008ae5ac;
     if (1000 < *(int *)((int)_this + 0x204)) {
-      local_2c[0] = 0x20900000;
+      local_2c = 0x20900000;
       local_18 = 0;
-      local_2c[1] = 0x2000079;
-      local_2c[2] = 0;
+      local_28 = 0x2000079;
+      local_24 = 0;
       local_8 = 3;
       if ((DAT_008ae5bc == 0) || (DAT_008ae5ac == DAT_008ae5a8)) {
         FUN_00616100(0x8ae590);
         puVar3 = DAT_008ae5ac;
         DAT_008ae5ac += 6;
-        FUN_006169d0(puVar3,local_2c);
+        FUN_006169d0(puVar3,&local_2c);
       }
       else {
         puVar1 = DAT_008ae5ac + 6;
@@ -1636,7 +1643,7 @@ uint32_t FUN_00635ba0(void *_this, ...)
           bVar6 = DAT_008ae5ac != 0;
           DAT_008ae5ac = puVar1;
           if (bVar6) {
-            FUN_006157d0(puVar3,local_2c);
+            FUN_006157d0(puVar3,&local_2c);
           }
           FUN_00616100(0x8ae590);
         }
@@ -1644,7 +1651,7 @@ uint32_t FUN_00635ba0(void *_this, ...)
           bVar6 = DAT_008ae5ac != 0;
           DAT_008ae5ac = puVar1;
           if (bVar6) {
-            FUN_006157d0(puVar3,local_2c);
+            FUN_006157d0(puVar3,&local_2c);
           }
         }
       }
@@ -1941,16 +1948,18 @@ uint32_t FUN_006364b0(void *param_1, ...)
   uint32_t local_38;
   uint32_t local_34;
   C_str_rep *local_28;
-  uint32_t local_24 [5];
+  uint32_t local_24;
+  uint32_t local_20;
+  uint32_t local_1c;
   int *local_10;
   uint32_t local_4;
   local_10 = 0;
-  local_24[0] = 0x20900000;
-  local_24[1] = 0x10000a2;
-  local_24[2] = 0;
+  local_24 = 0x20900000;
+  local_20 = 0x10000a2;
+  local_1c = 0;
   local_4 = 0;
-  FUN_0066cc50(param_1,local_24);
-  uVar1 = local_24[2];
+  C_MenuState__HandleMessage(param_1,&local_24);
+  uVar1 = local_1c;
   FUN_0061b040(*(int *)((int)param_1 + 0x1e4));
   pCVar2 = C_TextDatabase__GetText(&DAT_008c1368,&local_40,0x22ae);
   local_4 = CONCAT31(GH_PIECE(local_4,1,3),1);
@@ -2004,11 +2013,14 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
 {
   int iVar1;
   uint8_t bVar2;
-  uint32_t uVar3;
+  int iVar3;
   C_str_rep *extraout_EAX;
   int *ptr;
   C_str_rep *extraout_EAX_00;
-  uint32_t local_12c [4];
+  uint32_t local_12c;
+  uint32_t local_128;
+  int local_124;
+  uint32_t local_120;
   uint32_t local_11c;
   C_str local_118;
   uint32_t local_114;
@@ -2063,29 +2075,29 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
   }
   iVar1 = *(int *)(param_2 + 0x60);
   local_118.rep = 0;
-  local_12c[0] = 0x20900000;
-  local_12c[1] = 0x20000ad;
-  local_12c[2] = 0;
+  local_12c = 0x20900000;
+  local_128 = 0x20000ad;
+  local_124 = 0;
   local_4 = 0;
-  FUN_0066cc50(_this,local_12c);
-  uVar3 = local_12c[2];
+  C_MenuState__HandleMessage(_this,&local_12c);
+  iVar3 = local_124;
   local_100 = 0;
   local_114 = 0x20200000;
   local_110 = 0x100006c;
   local_10c = 0;
-  local_12c[0] = 0x20200000;
-  local_12c[1] = 0x100006c;
-  local_12c[3] = local_108;
+  local_12c = 0x20200000;
+  local_128 = 0x100006c;
+  local_120 = local_108;
   GH_PIECE(local_4,0,1) = 1;
-  local_12c[2] = 0;
+  local_124 = 0;
   local_11c = local_104;
   C_str__Assign(&local_118,(uint32_t*)(&local_100));
   GH_PIECE(local_4,0,1) = 0;
   if (local_100 != 0) {
     C_str__ReleaseRep(local_100);
   }
-  FUN_0066cc50(_this,local_12c);
-  bVar2 = (uint8_t)uVar3;
+  C_MenuState__HandleMessage(_this,&local_12c);
+  bVar2 = (uint8_t)iVar3;
   if (iVar1 < 0x20500001) {
     if (iVar1 != 0x20500000) {
       if (iVar1 == 0x20200000) {
@@ -2102,7 +2114,7 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
       else if (iVar1 == 0x20300000) {
         if ((bVar2 & 7) == 1) {
           local_b8 = 0;
-          local_c4 = (uint32_t)(local_12c[2] == 0);
+          local_c4 = (uint32_t)(local_124 == 0);
           local_cc = 0x20200000;
           local_c8 = 0x100006d;
           local_4 = CONCAT31(GH_PIECE(local_4,1,3),3);
@@ -2127,7 +2139,7 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
         if (iVar1 != 0x20400000) goto LAB_006369b3;
         if ((bVar2 & 7) == 2) {
           local_114 = 0x20200000;
-          local_10c = (uint32_t)(local_12c[2] == 0);
+          local_10c = (uint32_t)(local_124 == 0);
           local_100 = 0;
           local_110 = 0x100006d;
           local_4 = CONCAT31(GH_PIECE(local_4,1,3),5);
@@ -2152,7 +2164,7 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
     }
     if ((bVar2 & 7) == 3) {
       local_28 = 0;
-      local_34 = (uint32_t)(local_12c[2] == 0);
+      local_34 = (uint32_t)(local_124 == 0);
       local_3c = 0x20200000;
       local_38 = 0x100006d;
       local_4 = CONCAT31(GH_PIECE(local_4,1,3),7);
@@ -2173,7 +2185,7 @@ uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
   else if (iVar1 == 0x20600000) {
     if ((bVar2 & 7) == 4) {
       local_40 = 0;
-      local_4c = (uint32_t)(local_12c[2] == 0);
+      local_4c = (uint32_t)(local_124 == 0);
       local_54 = 0x20200000;
       local_50 = 0x100006d;
       local_4 = CONCAT31(GH_PIECE(local_4,1,3),9);
@@ -2203,7 +2215,7 @@ LAB_006369b3:
     }
     if ((bVar2 & 7) == 5) {
       local_a0 = 0;
-      local_ac = (uint32_t)(local_12c[2] == 0);
+      local_ac = (uint32_t)(local_124 == 0);
       local_b4 = 0x20200000;
       local_b0 = 0x100006d;
       local_4 = CONCAT31(GH_PIECE(local_4,1,3),0xb);

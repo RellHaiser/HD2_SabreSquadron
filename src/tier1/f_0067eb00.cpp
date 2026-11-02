@@ -41,7 +41,7 @@ C_GameMenu * C_GameMenu__C_GameMenu(C_GameMenu *_this, ...)
   uchar local_15;
   uint32_t local_4;
   local_4 = 0xffffffff;
-  C_GameState__FUN_0067edd0((C_GameState *)_this);
+  C_MenuState__C_MenuState((C_MenuState *)_this);
   _this->_pad_0138[0x78] = '\0';
   _this->_pad_0138[0x79] = '\0';
   _this->_pad_0138[0x7a] = '\0';
@@ -191,72 +191,10 @@ C_GameMenu * C_GameMenu__C_GameMenu(C_GameMenu *_this, ...)
 }
 
 
-// 0x0067ecf0
-uint32_t C_EquipmentMenuBase__FUN_0067ecf0(C_EquipmentMenuBase *_this, ...)
-{
-  return 0;
-}
-
-
-// 0x0067ed00
-int C_GameState__GetState(C_GameState *_this, ...)
-{
-  return _this->m_state;
-}
-
-
-// 0x0067ed10
-uint32_t C_GameState__SetState(C_GameState *_this,int param_1, ...)
-{
-  _this->m_state = param_1;
-  return 0;
-}
-
-
-// 0x0067ed20
-int C_GameState__GetPendingState(C_GameState *_this, ...)
-{
-  return _this->m_pendingState;
-}
-
-
-// 0x0067ed30
-uint32_t C_GameState__SetPendingState(C_GameState *_this,int param_1, ...)
-{
-  _this->m_pendingState = param_1;
-  return 0;
-}
-
-
-// 0x0067ed40
-uint32_t C_GameState__CommitPendingState(C_GameState *_this, ...)
-{
-  if (_this->m_pendingState != 2) {
-    _this->m_state = _this->m_pendingState;
-    _this->m_pendingState = 2;
-  }
-  return 0;
-}
-
-
 // 0x0067ed60
 uint32_t C_EquipmentMenuBase__empty_function_67ed60(C_EquipmentMenuBase *_this, ...)
 {
   return 0;
-}
-
-
-// 0x0067ed70
-uint8_t C_EquipmentMenuBase__FUN_0067ed70(C_EquipmentMenuBase *_this, ...)
-{
-  return 1;
-}
-
-
-// 0x0067ed80
-uint8_t C_EquipmentMenuBase__FUN_0067ed80(C_EquipmentMenuBase *_this, ...)
-{
-  return 1;
 }
 
 
@@ -274,100 +212,10 @@ uint32_t C_EquipmentMenuBase__empty_function_67eda0(C_EquipmentMenuBase *_this, 
 }
 
 
-// 0x0067edb0
-uint8_t C_EquipmentMenuBase__FUN_0067edb0(C_EquipmentMenuBase *_this, ...)
-{
-  return 0;
-}
-
-
-// 0x0067edc0
-uint8_t C_EquipmentMenuBase__FUN_0067edc0(C_EquipmentMenuBase *_this, ...)
-{
-  return 0;
-}
-
-
-// 0x0067edd0
-uint32_t * C_GameState__FUN_0067edd0(C_GameState *_this, ...)
-{
-  uint8_t local_15;
-  uint32_t local_4;
-  _this->vtable = (C_GameState_vtbl *)&PTR_008158ac;
-  _this->m_state = 0;
-  _this->m_pendingState = 2;
-  local_4 = 0;
-  _this[3].vtable = (C_GameState_vtbl *)0xffffffff;
-  _this[4].vtable = 0;
-  _this[4].m_state = 0;
-  _this[4].m_pendingState = 0;
-  C_TextBox__C_TextBox((C_TextBox *)&_this[6].m_pendingState);
-  GH_PIECE(local_4,0,1) = 1;
-  FUN_0066e480(&_this[5].m_state);
-  _this[0x16].vtable = 0;
-  *(uint8_t *)&_this[0x15].m_pendingState = local_15;
-  _this[0x16].m_state = 0;
-  _this[0x16].m_pendingState = 0;
-  _this[0x17].m_pendingState = 0;
-  *(uint8_t *)&_this[0x17].m_state = local_15;
-  _this[0x18].vtable = 0;
-  _this[0x18].m_state = 0;
-  _this[0x19].m_state = 0;
-  *(uint8_t *)&_this[0x19].vtable = local_15;
-  _this[0x19].m_pendingState = 0;
-  _this[0x1a].vtable = 0;
-  _this[0x1b].vtable = 0;
-  *(uint8_t *)&_this[0x1a].m_pendingState = local_15;
-  _this[0x1b].m_state = 0;
-  _this[0x1b].m_pendingState = 0;
-  local_4 = CONCAT31(GH_PIECE(local_4,1,3),6);
-  S_SoundRequest__Init(&_this[0x1d].m_state);
-  _this->vtable = (C_GameState_vtbl *)&PTR_00815850;
-  _this[1].m_state = 0;
-  _this[0x15].vtable = 0;
-  _this[0x15].m_state = 0;
-  _this[1].vtable = (C_GameState_vtbl *)0xffffffff;
-  *(uint8_t *)&_this[1].m_pendingState = 0;
-  _this[2].vtable = 0;
-  _this[2].m_state = 0xfa;
-  *(uint8_t *)&_this[3].m_pendingState = 0;
-  _this[0x14].m_state = 0;
-  _this[3].m_state = 0;
-  _this->m_state = 4;
-  _this[0x14].vtable = 0;
-  DAT_008ae5c2 = 0;
-  DAT_008ae5f8 = _this;
-  *(uint8_t *)((int)&_this[3].m_pendingState + 1) = 0;
-  _this[5].vtable = 0;
-  return (uint32_t*)(&_this->vtable);
-}
-
-
 // 0x0067ef20
 uint32_t C_GameState__FUN_0067ef20(C_GameState *_this, ...)
 {
   _this->vtable = (C_GameState_vtbl *)&PTR_008158ac;
-  return 0;
-}
-
-
-// 0x0067ef30
-uint8_t C_GameState__FUN_0067ef30(C_GameState *_this, ...)
-{
-  return 0;
-}
-
-
-// 0x0067ef40
-uint8_t C_GameState__FUN_0067ef40(C_GameState *_this, ...)
-{
-  return 0;
-}
-
-
-// 0x0067ef50
-uint8_t C_GameState__FUN_0067ef50(C_GameState *_this, ...)
-{
   return 0;
 }
 
@@ -390,17 +238,6 @@ uint32_t C_auto_008158ac__empty_function_67ef70(C_auto_008158ac *_this, ...)
 uint32_t C_auto_008158ac__empty_function_67ef80(C_auto_008158ac *_this, ...)
 {
   return 0;
-}
-
-
-// 0x0067ef90
-uint32_t * C_GameState__FUN_0067ef90(C_GameState *_this,uint8_t param_1, ...)
-{
-  _this->vtable = (C_GameState_vtbl *)&PTR_008158ac;
-  if ((param_1 & 1) != 0) {
-    _aligned_free(_this);
-  }
-  return (uint32_t*)(&_this->vtable);
 }
 
 
@@ -436,100 +273,6 @@ uint32_t FUN_0067efb0(int param_1, ...)
 }
 
 
-// 0x0067f060
-uint32_t * C_MenuState__FUN_0067f060(C_MenuState *_this,uint8_t param_1, ...)
-{
-  C_MenuState__FUN_0067f080(_this);
-  if ((param_1 & 1) != 0) {
-    _aligned_free(_this);
-  }
-  return (uint32_t*)(&_this->vtable);
-}
-
-
-// 0x0067f080
-uint32_t C_MenuState__FUN_0067f080(C_MenuState *_this, ...)
-{
-  int local_4;
-  _this->vtable = (C_MenuState_vtbl *)&PTR_00815850;
-  DAT_008ae5f8 = 0;
-  _this->m_010 = 0;
-  local_4 = 0;
-  tier1_operator_delete(*(void **)(_this->_pad_0138 + 0xc));
-  _this->_pad_0138[0xc] = '\0';
-  _this->_pad_0138[0xd] = '\0';
-  _this->_pad_0138[0xe] = '\0';
-  _this->_pad_0138[0xf] = '\0';
-  _this->_pad_0138[0x10] = '\0';
-  _this->_pad_0138[0x11] = '\0';
-  _this->_pad_0138[0x12] = '\0';
-  _this->_pad_0138[0x13] = '\0';
-  _this->_pad_0138[0x14] = '\0';
-  _this->_pad_0138[0x15] = '\0';
-  _this->_pad_0138[0x16] = '\0';
-  _this->_pad_0138[0x17] = '\0';
-  tier1_operator_delete((void *)_this->m_130);
-  _this->m_130 = 0;
-  _this->m_134 = 0;
-  _this->_pad_0138[0] = '\0';
-  _this->_pad_0138[1] = '\0';
-  _this->_pad_0138[2] = '\0';
-  _this->_pad_0138[3] = '\0';
-  tier1_operator_delete(*(void **)(_this->_pad_0100 + 0x1c));
-  _this->_pad_0100[0x1c] = '\0';
-  _this->_pad_0100[0x1d] = '\0';
-  _this->_pad_0100[0x1e] = '\0';
-  _this->_pad_0100[0x1f] = '\0';
-  _this->_pad_0100[0x20] = '\0';
-  _this->_pad_0100[0x21] = '\0';
-  _this->_pad_0100[0x22] = '\0';
-  _this->_pad_0100[0x23] = '\0';
-  _this->_pad_0100[0x24] = '\0';
-  _this->_pad_0100[0x25] = '\0';
-  _this->_pad_0100[0x26] = '\0';
-  _this->_pad_0100[0x27] = '\0';
-  tier1_operator_delete(*(void **)(_this->_pad_0100 + 8));
-  _this->_pad_0100[8] = '\0';
-  _this->_pad_0100[9] = '\0';
-  _this->_pad_0100[10] = '\0';
-  _this->_pad_0100[0xb] = '\0';
-  _this->_pad_0100[0xc] = '\0';
-  _this->_pad_0100[0xd] = '\0';
-  _this->_pad_0100[0xe] = '\0';
-  _this->_pad_0100[0xf] = '\0';
-  _this->_pad_0100[0x10] = '\0';
-  _this->_pad_0100[0x11] = '\0';
-  _this->_pad_0100[0x12] = '\0';
-  _this->_pad_0100[0x13] = '\0';
-  ((C_TextBox *)(_this->_pad_0040 + 0x10))->vtable =
-       (C_TextBox_vtbl *)&PTR_00810458;
-  GH_PIECE(local_4,0,1) = 3;
-  C_FontManager__Release(*(void **)(_this->_pad_0040 + 0x38));
-  C_TextBox__FreeLayout((C_TextBox *)(_this->_pad_0040 + 0x10));
-  GH_PIECE(local_4,0,1) = 2;
-  vector_tidy_49fcf0((int)(_this->_pad_0040 + 0x68));
-  GH_PIECE(local_4,0,1) = 1;
-  vector_tidy_49fcd0((int)(_this->_pad_0040 + 0x54));
-  local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
-  FUN_004a4a60(*(uint32_t **)(_this->_pad_0040 + 0x44),*(uint32_t **)(_this->_pad_0040 + 0x48));
-  tier1_operator_delete(*(void **)(_this->_pad_0040 + 0x44));
-  _this->_pad_0040[0x44] = '\0';
-  _this->_pad_0040[0x45] = '\0';
-  _this->_pad_0040[0x46] = '\0';
-  _this->_pad_0040[0x47] = '\0';
-  _this->_pad_0040[0x48] = '\0';
-  _this->_pad_0040[0x49] = '\0';
-  _this->_pad_0040[0x4a] = '\0';
-  _this->_pad_0040[0x4b] = '\0';
-  _this->_pad_0040[0x4c] = '\0';
-  _this->_pad_0040[0x4d] = '\0';
-  _this->_pad_0040[0x4e] = '\0';
-  _this->_pad_0040[0x4f] = '\0';
-  _this->vtable = (C_MenuState_vtbl *)&PTR_008158ac;
-  return 0;
-}
-
-
 // 0x0067f1b0
 uint32_t vector_tidy_67f1b0(int param_1, ...)
 {
@@ -557,7 +300,7 @@ uint32_t C_MenuState__FUN_0067f1f0(C_MenuState *_this, ...)
 {
   int local_4;
   _this->vtable = (C_MenuState_vtbl *)&PTR_00815850;
-  DAT_008ae5f8 = 0;
+  g_menuState = 0;
   _this->m_010 = 0;
   local_4 = 0;
   tier1_operator_delete(*(void **)(_this->_pad_0138 + 0xc));
@@ -823,7 +566,7 @@ uint32_t C_GameMenu__FUN_0067f4a0(C_GameMenu *_this, ...)
   local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
   FUN_0067e490((int)(_this->_pad_0138 + 0xb8));
   _this->vtable = (C_GameMenu_vtbl *)&PTR_00815850;
-  DAT_008ae5f8 = 0;
+  g_menuState = 0;
   local_4 = 8;
   _this->m_010 = 0;
   vector_tidy_682bb0((int)(_this->_pad_0138 + 8));
@@ -1160,10 +903,10 @@ LAB_0067fc29:
     }
     break;
   case 0x2000078:
-    FUN_0066daa0(_this,1,0x7d9,0x20000b8,0);
+    C_MenuState__ShowMessageId((C_MenuState *)_this,1,0x7d9,0x20000b8,0);
     break;
   case 0x20000b4:
-    FUN_0066daa0(_this,1,0x7d4,0x20000b5,0);
+    C_MenuState__ShowMessageId((C_MenuState *)_this,1,0x7d4,0x20000b5,0);
     break;
   case 0x20000b5:
     _this->m_004 = 0xf;
@@ -1238,7 +981,9 @@ uint32_t C_GameMenu__FUN_0067fe00(C_GameMenu *_this, ...)
   uint8_t local_31;
   int *local_2c;
   C_Screen *local_28;
-  uint32_t auStack_24 [5];
+  uint32_t uStack_24;
+  uint32_t uStack_20;
+  uint32_t uStack_1c;
   int *piStack_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
@@ -1362,21 +1107,21 @@ uint32_t C_GameMenu__FUN_0067fe00(C_GameMenu *_this, ...)
     (**(code **)*puVar5)(1);
   }
   piStack_10 = 0;
-  auStack_24[0] = 0;
-  auStack_24[1] = 0x2000001;
+  uStack_24 = 0;
+  uStack_20 = 0x2000001;
   if (((uint8_t)g_gameRole & 7) == 7) {
-    auStack_24[2] = 1;
+    uStack_1c = 1;
     local_4 = 7;
   }
   else if (_this->m_0f0 == -2) {
-    auStack_24[2] = 3;
+    uStack_1c = 3;
     local_4 = 5;
   }
   else {
-    auStack_24[2] = 1;
+    uStack_1c = 1;
     local_4 = 6;
   }
-  FUN_0066cc50(_this,auStack_24);
+  C_MenuState__HandleMessage((C_MenuState *)_this,&uStack_24);
   if ((piStack_10 != 0) && (*piStack_10 = *piStack_10 - 1, *piStack_10 == 0)) {
     tier1_operator_delete(piStack_10);
     piStack_10 = extraout_EAX;
@@ -3126,7 +2871,7 @@ uint32_t C_GameMenu__ShowMessage(C_GameMenu *_this,int textId,int unknown, ...)
   uint32_t uVar2;
   int *piVar3;
   if (textId < 1) {
-    FUN_0066dac0((int)_this);
+    C_MenuState__CloseMessage((C_MenuState *)_this);
     DAT_008ae628--;
     return 0;
   }
@@ -3146,7 +2891,7 @@ uint32_t C_GameMenu__ShowMessage(C_GameMenu *_this,int textId,int unknown, ...)
       return 0;
     }
   }
-  FUN_0066daa0(_this,0,textId,0,0);
+  C_MenuState__ShowMessageId((C_MenuState *)_this,0,textId,0,0);
   DAT_008ae628++;
   return 0;
 }

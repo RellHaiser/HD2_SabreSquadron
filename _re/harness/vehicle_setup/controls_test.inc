@@ -21,6 +21,8 @@ struct S_CsCursor {
     S_vector position;
     S_vector move;
     float screenX = 0.0f, screenY = 0.0f;
+    // (Room for the real cursor's fields the inline methods write: SetClicksOff's, part 9d-ii-a.)
+    uint8_t room[0x80] = {};
 } g_csCursor;
 C_Cursor *C_Cursor::Acquire(I3D_scene *scene)
 {
@@ -63,6 +65,7 @@ void GroupsTest(I3D_scene *scene);
 void MovieTest(I3D_scene *scene);
 void FactoryTest(I3D_scene *scene);
 void ScreenTest(I3D_scene *scene);
+void MenuTest(I3D_scene *scene);
 
 namespace {
 
@@ -1024,6 +1027,7 @@ void ControlsTest()
 #ifdef FACTORY_TEST
     FactoryTest(scene);
     ScreenTest(scene);
+    MenuTest(scene);
 #endif
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
@@ -1053,4 +1057,5 @@ void ControlsTest()
 #ifdef FACTORY_TEST
 #include "factory_test.inc"
 #include "screen_test.inc"
+#include "menu_test.inc"
 #endif

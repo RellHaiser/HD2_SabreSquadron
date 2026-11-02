@@ -110,7 +110,9 @@ uint32_t FUN_0068a750(void *param_1, ...)
   uint8_t local_2d;
   int *local_2c;
   C_Screen *local_28;
-  uint32_t auStack_24 [5];
+  uint32_t uStack_24;
+  uint32_t uStack_20;
+  uint32_t uStack_1c;
   int *piStack_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
@@ -191,11 +193,11 @@ uint32_t FUN_0068a750(void *param_1, ...)
     }
   }
   piStack_10 = 0;
-  auStack_24[0] = 0;
-  auStack_24[1] = 0x2000001;
-  auStack_24[2] = 1;
+  uStack_24 = 0;
+  uStack_20 = 0x2000001;
+  uStack_1c = 1;
   local_4 = 3;
-  FUN_0066cc50(param_1,auStack_24);
+  C_MenuState__HandleMessage(param_1,&uStack_24);
   local_4 = 0xffffffff;
   piVar6 = piStack_10;
   if ((piStack_10 != 0) && (*piStack_10 = *piStack_10 - 1, *piStack_10 == 0)) {
@@ -1024,7 +1026,7 @@ LAB_0068bef1:
       local_4 = 5;
       goto LAB_0068bef1;
     }
-    piVar2 = C_MainMenu__FUN_0066da30(_this,0x8200000);
+    piVar2 = C_MenuState__FindControl(_this,0x8200000);
     local_28 = 0;
     local_3c = 0;
     local_38 = 0x200002f;

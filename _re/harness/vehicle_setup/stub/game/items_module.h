@@ -26,3 +26,7 @@ extern C_ItemsModule g_itemsModule;
 class C_chunk;
 bool SaveActorItems(C_Actor *actor, C_chunk &chunk);
 bool LoadActorItems(C_Actor *actor, C_chunk &chunk);
+
+// (The menus' frames, part 9d-ii-a: menu_test.inc fakes it.)
+class I3D_frame;
+void ReleaseFrameTree(I3D_frame *frame);

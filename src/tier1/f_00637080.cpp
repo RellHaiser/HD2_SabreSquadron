@@ -212,7 +212,10 @@ uint32_t FUN_00637510(void *_this,uint32_t param_1,char *param_2, ...)
   C_str_rep *local_48;
   C_str_rep *local_44;
   void *local_40;
-  uint32_t local_3c [4];
+  uint32_t local_3c;
+  uint32_t local_38;
+  uint32_t local_34;
+  uint32_t local_30;
   uint32_t local_2c;
   C_str local_28;
   uint32_t local_24;
@@ -230,11 +233,11 @@ LAB_0063786d:
   uVar4 = *(uint32_t *)(param_2 + 0x60);
   if (uVar4 == 0x38400000) {
     local_28.rep = 0;
-    local_3c[0] = 0x38200000;
-    local_3c[1] = 0x200002f;
-    local_3c[2] = 0;
+    local_3c = 0x38200000;
+    local_38 = 0x200002f;
+    local_34 = 0;
     local_4 = 0;
-    FUN_0066cc50(_this,local_3c);
+    C_MenuState__HandleMessage(_this,&local_3c);
     ptr.rep = local_28.rep;
     local_48 = local_28.rep;
     if (local_28.rep != 0) {
@@ -244,11 +247,11 @@ LAB_0063786d:
     local_24 = 0x38300000;
     local_20 = 0x200002f;
     local_1c = 0;
-    local_3c[0] = 0x38300000;
-    local_3c[3] = local_18;
+    local_3c = 0x38300000;
+    local_30 = local_18;
     GH_PIECE(local_4,0,1) = 2;
-    local_3c[1] = 0x200002f;
-    local_3c[2] = 0;
+    local_38 = 0x200002f;
+    local_34 = 0;
     local_2c = local_14;
     C_str__Assign(&local_28,(uint32_t*)(&local_10));
     GH_PIECE(local_4,0,1) = 1;
@@ -256,7 +259,7 @@ LAB_0063786d:
        (local_10->refCount = local_10->refCount - 1, local_10->refCount == 0)) {
       tier1_operator_delete(local_10);
     }
-    FUN_0066cc50(_this,local_3c);
+    C_MenuState__HandleMessage(_this,&local_3c);
     ptr_00.rep = local_28.rep;
     local_44 = local_28.rep;
     if (local_28.rep != 0) {
@@ -590,7 +593,7 @@ LAB_00637f7c:
         }
         goto LAB_00637fac;
       }
-      piVar4 = C_MainMenu__FUN_0066da30(_this,0x28200000);
+      piVar4 = C_MenuState__FindControl(_this,0x28200000);
       local_28 = 0;
       local_3c = 0;
       local_38 = 0x200002f;
@@ -773,7 +776,7 @@ LAB_006383f3:
   }
   else {
     if (pvVar6 == (void *)0x28300000) {
-      piVar5 = C_MainMenu__FUN_0066da30(_this,0x28200000);
+      piVar5 = C_MenuState__FindControl(_this,0x28200000);
       local_28 = 0;
       local_3c = 0;
       local_38 = 0x200002f;

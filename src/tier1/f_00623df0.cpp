@@ -1704,7 +1704,9 @@ uint32_t C_MainMenu__FUN_006271e0(C_MainMenu *_this, ...)
   uint32_t uStack_50;
   uint32_t uStack_4c;
   uint32_t uStack_48;
-  uint32_t auStack_38 [5];
+  uint32_t uStack_38;
+  uint32_t uStack_34;
+  uint32_t uStack_30;
   int *piStack_24;
   uint32_t uStack_14;
   uStack_14 = 0xffffffff;
@@ -1717,12 +1719,12 @@ uint32_t C_MainMenu__FUN_006271e0(C_MainMenu *_this, ...)
         if (puVar8 != 0) {
           (**(code **)*puVar8)(1);
         }
-        auStack_38[1] = 0x2000001;
+        uStack_34 = 0x2000001;
         piStack_24 = 0;
-        auStack_38[0] = 0;
-        auStack_38[2] = 1;
+        uStack_38 = 0;
+        uStack_30 = 1;
         uStack_14 = 1;
-        FUN_0066cc50(_this,auStack_38);
+        C_MenuState__HandleMessage((C_MenuState *)_this,&uStack_38);
         if ((piStack_24 != 0) && (*piStack_24 = *piStack_24 - 1, *piStack_24 == 0)) {
           tier1_operator_delete(piStack_24);
           piStack_24 = extraout_EAX;
