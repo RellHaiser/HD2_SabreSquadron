@@ -94,6 +94,7 @@ bool EdgeTouchSweepB(const S_vector &p, const S_vector &a, const S_vector &b, fl
     return s * s <= (b - a).Square() && (p - c).Square() <= r2;
 }
 
+// LS3DRF 0x1000b780 (from LS3DF 0x10011da0)
 // 0x10011da0: a visual against the moving sphere.
 void SphereVisual(I3D_visual *vis)
 {

@@ -3,7 +3,6 @@
 
 #include <cmath>
 
-#include "i3d/camera.h"
 #include "i3d/loader.h"
 #include "i3d/mesh.h"
 #include "i3d/render_helpers.h"
@@ -141,7 +140,8 @@ void I3D_billboard::Load()
     dtaRead(g_loadFile, &axis, 5);
 }
 
-// 0x10006230
+// LS3DRF 0x10002710 (from LS3DF 0x10006230): the screen modes face the camera from the frame's
+// position (no render camera); mode 4 without the local rotation.
 void I3D_billboard::ComputeMatrix(const S_vector &camera, S_matrix &out)
 {
     // The inverse matrix: the camera in the frame's space.
@@ -254,7 +254,7 @@ void I3D_billboard::ComputeMatrix(const S_vector &camera, S_matrix &out)
     }
     case BBRDMODE_SCREEN_SCALED:
     case BBRDMODE_SCREEN: {
-        out = g_rc.camera->invViewMatrix;
+        out.SetDir3(camera - GetMatrix()(3));
         if (mode == BBRDMODE_SCREEN_SCALED) {
             const S_vector s = parent ? GetMatrix().GetScale() : scale;
             for (int c = 0; c < 3; ++c) {
@@ -273,9 +273,9 @@ void I3D_billboard::ComputeMatrix(const S_vector &camera, S_matrix &out)
         return;
     }
     case BBRDMODE_SCREEN_LOCAL: {
-        UpdateLMatrix();
-        out = localMatrix * g_rc.camera->invViewMatrix;
+        out.SetDir3(camera - GetMatrix()(3));
         const S_matrix &wm = GetMatrix();
+        // (The rows' w stay as the caller left them: the original's.)
         out(3) = wm(3);
         out.m[3][3] = 1.0f;
         const S_vector d(camera.x - wm.m[3][0], camera.y - wm.m[3][1], camera.z - wm.m[3][2]);
