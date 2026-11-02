@@ -14,6 +14,7 @@
 class C_Cursor;
 class C_PagedTextBox;
 class C_TextBox;
+class ISND_stream;
 struct S_vector;
 class I3D_face_group;
 class I3D_texture;
@@ -1497,4 +1498,46 @@ enum : uint32_t {
     CONTROL_MSG_SHOW_PLAYERS = 0x100007D,
     CONTROL_MSG_IGNORED_7E = 0x100007E,
     CONTROL_MSG_IGNORED_7F = 0x100007F,
+};
+
+// The movie control's messages: stopped and closed, stopped, a movie played ("GameMovie\<text>2").
+enum : uint32_t {
+    CONTROL_MSG_CLOSE_MOVIE = 0x20000A0,
+    CONTROL_MSG_STOP_MOVIE = 0x20000A1,
+    CONTROL_MSG_PLAY_MOVIE = 0x20000A2,
+};
+
+// A movie (type 0x22, vtable 0x00814540): a video stream drawn on the screen over its frame's place
+// (the frame off), fitted to it keeping the video's shape, muted, played again at its end; not taking
+// input.
+class C_MovieControl : public C_Control {               // 0x8C bytes
+public:
+    C_MovieControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) { m_takesInput = false; }
+    ~C_MovieControl() override;                         // 0x006610e0 (0x006610c0): the stream closed, released
+
+    // Playing: the next picture drawn (driver state 3 off, the render state 0 kept); at its end
+    // stopped, fitted again, played again.
+    void Refresh() override;                            // 0x00668300
+    // The control's (false: not made); the frame off, the stream made (none: false), the area found.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00668140
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x006681a0
+
+protected:
+    // The frame visual's world bound on the screen in pixels (its y negated and by 4:3: down; false:
+    // no frame).
+    bool FindArea();                                    // 0x00667f90
+    // The stream's rectangle: the area's width, the video's shape (too tall: the area's height,
+    // centred across).
+    void FitRect();                                     // 0x00668050
+    // The stream closed and released.
+    void CloseStream();                                 // 0x006683c0
+
+    ISND_stream *m_stream = nullptr;                    // +0x6C
+    float m_left = 0.0f;                                // +0x70
+    float m_bottom = 0.0f;                              // +0x74 (the bound's min y)
+    float m_right = 0.0f;                               // +0x78
+    float m_top = 0.0f;                                 // +0x7C (the bound's max y)
+    float m_width = 0.0f;                               // +0x80
+    float m_height = 0.0f;                              // +0x84
+    uint32_t m_unknown88 = 0;                           // +0x88
 };

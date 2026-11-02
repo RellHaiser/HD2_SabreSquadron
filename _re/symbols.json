@@ -30298,6 +30298,16 @@
   "name": "C_MarkBox::~C_MarkBox",
   "proto": "void __thiscall ~C_MarkBox(C_MarkBox *this)"
  },
+ "006610c0": {
+  "module": "controls",
+  "name": "C_MovieControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_MovieControl *this, uchar flags)"
+ },
+ "006610e0": {
+  "module": "controls",
+  "name": "C_MovieControl::~C_MovieControl",
+  "proto": "void __thiscall ~C_MovieControl(C_MovieControl *this)"
+ },
  "00661210": {
   "module": "controls",
   "name": "C_ServerList::ScalarDeletingDestructor",
@@ -30880,6 +30890,36 @@
   "module": "controls",
   "name": "msvc6::UnguardedPartition",
   "proto": "void * __fastcall UnguardedPartition(void * first, void * last, void * pivot, void * pred)"
+ },
+ "00667f90": {
+  "module": "controls",
+  "name": "C_MovieControl::FindArea",
+  "proto": "bool __fastcall FindArea(C_MovieControl *this)"
+ },
+ "00668050": {
+  "module": "controls",
+  "name": "C_MovieControl::FitRect",
+  "proto": "void __thiscall FitRect(C_MovieControl *this)"
+ },
+ "00668140": {
+  "module": "controls",
+  "name": "C_MovieControl::Create",
+  "proto": "bool __thiscall Create(C_MovieControl *this, void * frame, void * root, void * desc)"
+ },
+ "006681a0": {
+  "module": "controls",
+  "name": "C_MovieControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_MovieControl *this, void * message)"
+ },
+ "00668300": {
+  "module": "controls",
+  "name": "C_MovieControl::Refresh",
+  "proto": "void __thiscall Refresh(C_MovieControl *this)"
+ },
+ "006683c0": {
+  "module": "controls",
+  "name": "C_MovieControl::CloseStream",
+  "proto": "void __fastcall CloseStream(C_MovieControl *this)"
  },
  "0066ab50": {
   "module": "zz_idioms",

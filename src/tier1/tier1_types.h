@@ -137,6 +137,8 @@ struct C_Mine;
 struct C_Mine__stub;
 struct C_Mine_vtbl__stub;
 struct C_MissionDef__auto;
+struct C_MovieControl;
+struct C_MovieControl_vtbl;
 struct C_NetMessage;
 struct C_NetMessage__stub;
 struct C_NetMessage_vtbl__stub;
@@ -310,7 +312,6 @@ struct C_auto_00813b10;
 struct C_auto_00813b2c;
 struct C_auto_00813b48;
 struct C_auto_00813b68;
-struct C_auto_00814540;
 struct C_auto_00815540;
 struct C_auto_008155d0;
 struct C_auto_008156b8;
@@ -19472,6 +19473,48 @@ struct C_MissionDef__auto {
     uint8_t _pad_001c[4];
     int m_020;
 };
+struct C_MovieControl {
+    C_MovieControl_vtbl * vtable;
+    uint8_t _pad_0004[76];
+    void * m_050;
+    uint8_t _pad_0054[24];
+    void * m_06c;
+};
+struct C_MovieControl_vtbl {
+    code * vf00;
+    code * vf01;
+    code * vf02;
+    code * vf03;
+    code * vf04;
+    code * vf05;
+    code * vf06;
+    code * empty_function_64dd40;
+    code * vf08;
+    code * vf09;
+    code * vf0a;
+    code * vf0b;
+    code * vf0c;
+    code * vf0d;
+    code * vf0e;
+    code * vf0f;
+    code * vf10;
+    code * vf11;
+    code * vf12;
+    code * vf13;
+    code * vf14;
+    code * vf15;
+    code * vf16;
+    code * vf17;
+    code * vf18;
+    code * vf19;
+    code * vf1a;
+    code * vf1b;
+    code * vf1c;
+    code * vf1d;
+    code * empty_function_65d050;
+    code * vf1f;
+    code * vf20;
+};
 struct C_NetMessage {
     C_NetMessage_vtbl * vtable;
     void * m_004;
@@ -22873,13 +22916,6 @@ struct C_auto_00813b48 {
 };
 struct C_auto_00813b68 {
     C_auto_00813b68_vtbl * vtable;
-};
-struct C_auto_00814540 {
-    C_auto_00814540_vtbl * vtable;
-    uint8_t _pad_0004[76];
-    void * m_050;
-    uint8_t _pad_0054[24];
-    void * m_06c;
 };
 struct C_auto_00815540 {
     C_auto_00815540_vtbl * vtable;

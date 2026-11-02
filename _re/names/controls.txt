@@ -426,3 +426,12 @@
 00661550 C_CheckGroup::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(C_ControlGroup *this, uchar flags)
 006613e0 C_CheckGroup::FindChild | int __thiscall FindChild(C_ControlGroup *this, uint id)
 006613f0 C_CheckGroup::Create | bool __thiscall Create(C_ControlGroup *this, void * frame, void * root, void * desc)
+# Part 9c-v-d-iii: the movie control.
+006610e0 C_MovieControl::~C_MovieControl | void __thiscall ~C_MovieControl(C_MovieControl *this)
+006610c0 C_MovieControl::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(C_MovieControl *this, uchar flags)
+00668300 C_MovieControl::Refresh | void __thiscall Refresh(C_MovieControl *this)
+00668140 C_MovieControl::Create | bool __thiscall Create(C_MovieControl *this, void * frame, void * root, void * desc)
+006681a0 C_MovieControl::HandleMessage | bool __thiscall HandleMessage(C_MovieControl *this, void * message)
+00667f90 C_MovieControl::FindArea | bool __fastcall FindArea(C_MovieControl * control)
+00668050 C_MovieControl::FitRect | void __thiscall FitRect(C_MovieControl *this)
+006683c0 C_MovieControl::CloseStream | void __fastcall CloseStream(C_MovieControl * control)

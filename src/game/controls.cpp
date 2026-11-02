@@ -5376,3 +5376,127 @@ bool C_CheckGroup::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc
     m_children.push_back(m_box);
     return true;
 }
+
+// ----- the movie control (type 0x22) -----
+
+namespace {
+
+// The interface's y (4:3) to the screen's (down).
+constexpr float MOVIE_Y_SCALE = -1.3333334f;
+constexpr int DRIVER_STATE_3 = 3, RENDER_STATE_0 = 0;
+
+} // namespace
+
+C_MovieControl::~C_MovieControl()
+{
+    CloseStream();
+}
+
+void C_MovieControl::CloseStream()
+{
+    if (!m_stream)
+        return;
+    m_stream->Close();
+    m_stream->Release();
+    m_stream = nullptr;
+}
+
+bool C_MovieControl::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    m_stream = nullptr;
+    if (!C_Control::Create(frame, root, desc))
+        return false;
+    m_frame->SetOn(false);
+    m_stream = GetIGraph()->CreateStream();
+    if (!m_stream)
+        return false;
+    FindArea();
+    return true;
+}
+
+bool C_MovieControl::FindArea()
+{
+    if (!m_frame)
+        return false;
+    const I3D_bbox bound = static_cast<I3D_visual *>(m_frame)->GetWorldBound();
+    const auto width = static_cast<float>(GetIGraph()->ScrnX());
+    const auto height = static_cast<float>(GetIGraph()->ScrnY());
+    m_left = bound.min.x * width;
+    m_bottom = bound.min.y * height * MOVIE_Y_SCALE;
+    m_right = width * bound.max.x;
+    m_top = height * bound.max.y * MOVIE_Y_SCALE;
+    m_width = m_right - m_left;
+    m_height = m_bottom - m_top;
+    return true;
+}
+
+void C_MovieControl::FitRect()
+{
+    S_showRect size = {};
+    m_stream->GetVideoSize(&size);
+    const auto videoWidth = static_cast<float>(size.width);
+    const auto videoHeight = static_cast<float>(size.height);
+    S_showRect rect = {};
+    // The area at least as tall as the video's shape: its width; else its height (a NaN: the
+    // height). (Truncated, as __ftol.)
+    if (m_height / m_width >= videoHeight / videoWidth) {
+        rect.x = static_cast<int>(m_left);
+        rect.width = static_cast<int>(m_width);
+        rect.height = static_cast<int>(m_width / videoWidth * videoHeight);
+        rect.y = static_cast<int>(m_top);
+    } else {
+        rect.y = static_cast<int>(m_top);
+        rect.height = static_cast<int>(m_height);
+        rect.width = static_cast<int>(m_height / videoHeight * videoWidth);
+        rect.x = static_cast<int>((m_width - static_cast<float>(rect.width)) * 0.5f + m_left);
+    }
+    m_stream->SetRect(&rect);
+}
+
+void C_MovieControl::Refresh()
+{
+    if (!m_stream->IsPlaying())
+        return;
+    m_stream->UpdateVideo(0);
+    I3D_driver *driver = I3DGetDriver();
+    const bool state3 = driver->GetState(DRIVER_STATE_3) != 0;
+    driver->SetState(DRIVER_STATE_3, 0);
+    const int renderState = GetIGraph()->GetRenderState(RENDER_STATE_0);
+    m_stream->Draw(false);
+    GetIGraph()->SetRenderState(RENDER_STATE_0, renderState);
+    I3DGetDriver()->SetState(DRIVER_STATE_3, state3);
+    const int state = m_stream->GetState();
+    if (state == ISNDSTREAM_STATE_FINISHED || state == -1) {
+        m_stream->Stop();
+        FitRect();
+        m_stream->Play();
+    }
+}
+
+bool C_MovieControl::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK)
+        return C_Control::HandleMessage(message);
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_CLOSE_MOVIE:
+        m_stream->Stop();
+        m_stream->Close();
+        return true;
+    case CONTROL_MSG_STOP_MOVIE:
+        m_stream->Stop();
+        return true;
+    case CONTROL_MSG_PLAY_MOVIE: {
+        const C_str name = C_fstr("GameMovie\\%s2", message->text.c_str());
+        // (An open failing while another plays: that one kept; else played, the original's.)
+        if (m_stream->Open(name.c_str(), 0) >= 0 || !m_stream->IsPlaying()) {
+            FitRect();
+            m_stream->SetVolume(0.0f);
+            m_stream->Play();
+        }
+        return true;
+    }
+    default:
+        C_Control::HandleMessage(message);
+        return true;
+    }
+}

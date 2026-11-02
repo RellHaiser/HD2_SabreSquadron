@@ -180,6 +180,11 @@ public:
     I3DMETHOD(void, SetVolume)(float volume) = 0;                        // 0x14 master volume
 };
 
+// A rectangle of the screen in pixels (LS3DF's IShow).
+struct S_showRect {
+    int x, y, width, height;
+};
+
 // Streamed sound file (music), created by IGraph::CreateStream().
 class ISND_stream {
 public:
@@ -192,9 +197,10 @@ public:
     I3DMETHOD(void, Play)() = 0;                                         // 0x14
     I3DMETHOD(void, Stop)() = 0;                                         // 0x18
     I3D_SLOT(1C);
-    I3D_SLOT(20);
-    I3D_SLOT(24);
-    I3D_SLOT(28);
+    // A video's screen rectangle (0: the whole screen), its picture's size (x, y 0).
+    I3DMETHOD(HRESULT, SetRect)(const S_showRect *rect) = 0;             // 0x20
+    I3DMETHOD(HRESULT, GetRect)(S_showRect *rect) = 0;                   // 0x24
+    I3DMETHOD(HRESULT, GetVideoSize)(S_showRect *size) = 0;              // 0x28
     // 1 once a non-looping stream has played to its end.
     I3DMETHOD(int, GetState)() = 0;                                      // 0x2C
     I3DMETHOD(void, SetPosition)(int position) = 0;                      // 0x30
@@ -207,6 +213,8 @@ public:
     I3DMETHOD(class I3D_texture **, GetVideoTexture)() = 0;            // 0x48
     // Decodes the video's next picture (the injury flash passes 0; inferred).
     I3DMETHOD(void, UpdateVideo)(int unknown) = 0;                       // 0x4C
+    // Draws the video's picture (`keepStates`: the render states left alone).
+    I3DMETHOD(HRESULT, Draw)(bool keepStates) = 0;                       // 0x50
 };
 
 enum : uint32_t {

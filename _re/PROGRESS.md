@@ -6731,6 +6731,30 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     names/controls.txt (21); 21 functions in ported.txt. Stats: 8,578 of 12,293 functions by hand
     (76.6 % by size).
 
+  PART 9c-v-d-iii DONE (2026-11-02): the movie control (src/game/controls.*). Part 9c-v (the big
+  controls) is done.
+  - C_MovieControl (type 0x22, vtable 0x00814540, 0x8C; was C_auto_00814540): Create turns its frame
+    off, makes an IGraph stream (none: false) and FindArea 0x00667f90 maps the frame visual's world
+    bound to pixels (x by ScrnX; y by ScrnY and -4/3: down); FitRect 0x00668050 sets the stream's
+    rectangle: the area's width and the video's shape (GetVideoSize), or (the area flatter than the
+    video) its height, centred across; truncated as __ftol. Refresh, playing: the next picture
+    (UpdateVideo 0), driver state 3 off, render state 0 kept, Draw(false); its state 1 or -1:
+    stopped, fitted, played again. CLOSE_MOVIE 0x20000A0 (stopped, closed), STOP_MOVIE 0x20000A1,
+    PLAY_MOVIE 0x20000A2 ("GameMovie\\<text>2"; an open failing while another plays: nothing,
+    else fitted, volume 0, played: the original's); its stream closed and released when deleted.
+  - ls3d/igraph.h: ISND_stream's slots 0x20 SetRect, 0x24 GetRect, 0x28 GetVideoSize, 0x50 Draw
+    named after the LS3DF port's IShow; S_showRect.
+  - Harness: movie_test.inc in the text build, run by ControlsTest after GroupsTest ("movie:", 5
+    checks; a logging stream; geffects_test.inc's driver and IGraph state fakes). 22 of 22 in both
+    orders.
+  - Mutations (mutations/mutate_9c5d3.py, generated, 4 parallel runs): 71 cases, 67 build; all
+    caught but 3 equivalent (listed in its docstring). The first run left 6 (3 killed: FindArea's
+    result, equal shapes with a fractional edge, the top of a width fit).
+  - Build: MSVC clean. Tier 1: 478 errors in 79 files, 193 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: C_auto_00814540 renamed C_MovieControl; FindArea / CloseStream fastcall with the control
+    as their parameter; names/controls.txt (8); 8 functions in ported.txt. Stats: 8,586 of 12,293
+    functions by hand (76.7 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

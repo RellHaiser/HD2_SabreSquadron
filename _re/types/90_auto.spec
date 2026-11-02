@@ -439,7 +439,7 @@ class C_ControlGroup size=0x78 vtable=0x00814430:33
   0x074 uint32_t m_074
 end
 
-class C_auto_00814540 size=0x4 vtable=0x00814540:33
+class C_MovieControl size=0x4 vtable=0x00814540:33
 end
 
 class C_MarkBox size=0x89 vtable=0x00814650:33
