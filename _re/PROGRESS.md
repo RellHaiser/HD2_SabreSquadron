@@ -6700,6 +6700,37 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     struct); names/controls.txt (26); 26 functions in ported.txt. Stats: 8,557 of 12,293 functions by
     hand (76.5 % by size).
 
+  PART 9c-v-d-ii DONE (2026-11-02): the item pictures, the players' list, the check group
+  (src/game/controls.*). The movie control (type 0x22, vtable 0x00814540: an IGraph stream on its
+  frame, "GameMovie\\%s2", unnamed stream slots 0x20 / 0x28 / 0x50 and x87 rect sums) left for
+  9c-v-d-iii.
+  - C_ItemPictures (type 0x1d, vtable 0x00814a90, 0x88; the hiding list's items): the item
+    information without its stats (its own code): the pictures (id | 1 on the frame, id | 2 on
+    "ammo*"), SET_ITEM (the ammo's or a uniform's headgear's), the counts as "%d " (style 0x12);
+    UpdateCounts 0x00651ea0: ITEM_COUNTED to the parent when either count is above 0, HIDE_ITEM when
+    the count is below 0 (the texts then not set), the second hidden without its item or with a
+    count below 0, else shown and active from 1. The second picture checked (the fix).
+  - C_PlayerList (type 0x20, vtable 0x00814870, 0x90): on the combo box (its constructor and
+    destructor) but none of its parts: a scrolled text on its frame (its id; SET_PAGE_STEP 5 to the
+    bar), a title on "header*" (id | 2); FindChild: the title's id gives 2, not its index (kept);
+    its own enter / leave / hover / press; SHOW_PLAYERS 0x100007D (the columns' texts 0xA33 / 0xA35
+    / 0xA37, styles 0x23 .. 0x25; each connected player's name, stats[1], stats[3], under the net
+    game's lock); 0x100007E / 0x100007F ignored; the rest the control's, not the combo box's.
+  - C_CheckGroup (type 0x27, vtable 0x008150f0, 0x74): a highlighted check box on "text*" (its id;
+    none: Create false); FindChild: the box for any id.
+  - Harness: groups_test.inc in the text build, run by ControlsTest after HotKeyTest ("groups:",
+    9 checks; the net game's LockPlayers / UnlockPlayers / GetPlayerCount faked there). The shared
+    stub S_NetPlayerState names its stats (same size); every harness build compiles. 22 of 22 in
+    both orders.
+  - Mutations (mutations/mutate_9c5d2.py, generated, 4 parallel runs): 107 cases, 103 build; all
+    caught but 6 equivalent (listed in its docstring). The first run left 9 (3 killed: a count of
+    1 counted and active, the hover's leave refused).
+  - Build: MSVC clean. Tier 1: 478 errors in 79 files, 193 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: the three classes' this their bases' (no structs; the functions 9c-v-b typed with the
+    bar's and the hiding list's structs retyped); auto_members.json and class_names.json name them;
+    names/controls.txt (21); 21 functions in ported.txt. Stats: 8,578 of 12,293 functions by hand
+    (76.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

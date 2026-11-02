@@ -5115,3 +5115,264 @@ bool C_TitledEditBox::HandleMessage(S_ControlMessage *message)
         return true;
     }
 }
+
+// ----- the item pictures (type 0x1d), the players' list (type 0x20), the check group (type 0x27) -----
+
+namespace {
+
+constexpr uint32_t PICTURES_COUNT_STYLE = 0x12;
+// The players' list: its list's page step (to its bar, id | 4), the title's id, its columns.
+constexpr uint32_t PLAYERS_BAR = 4, PLAYERS_TITLE = 2, PLAYERS_PAGE_STEP = 5;
+constexpr uint32_t PLAYERS_NAME_STYLE = 0x23, PLAYERS_STAT1_STYLE = 0x24, PLAYERS_STAT3_STYLE = 0x25;
+constexpr uint32_t TEXT_PLAYERS_NAME = 0xA33, TEXT_PLAYERS_STAT1 = 0xA35, TEXT_PLAYERS_STAT3 = 0xA37;
+
+} // namespace
+
+int C_ItemPictures::FindChild(uint32_t id) const
+{
+    switch (id & CHILD_ID_MASK) {
+    case INFO_PICTURE:
+        return 0;
+    case INFO_SECOND:
+        return 1;
+    }
+    return -1;
+}
+
+void C_ItemPictures::Refresh()
+{
+    if (!m_shown)
+        return;
+    // (The second checked: the fix, the original's without it crashes.)
+    m_picture->Refresh();
+    if (m_secondPicture)
+        m_secondPicture->Refresh();
+}
+
+bool C_ItemPictures::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_ControlGroup::Create(frame, root, desc))
+        return false;
+    S_ControlMessage square = Message(CONTROL_MSG_FIND_FACE_GROUP);
+    square.text = "X_SQUARE.BMP";
+    if (frame) {
+        m_picture = new C_PictureControl(m_scene, m_id | INFO_PICTURE, this);
+        m_picture->Create(frame, root, nullptr);
+        m_picture->HandleMessageCopy(Message(CONTROL_MSG_HIDE));
+        m_picture->HandleMessageCopy(square);
+        m_children.push_back(m_picture);
+    }
+    if (I3D_frame *ammo = frame->FindChildFrame("ammo*", FIND_FRAMES)) {
+        m_secondPicture = new C_PictureControl(m_scene, m_id | INFO_SECOND, this);
+        m_secondPicture->Create(ammo, root, nullptr);
+        m_secondPicture->HandleMessageCopy(Message(CONTROL_MSG_HIDE));
+        m_secondPicture->HandleMessageCopy(square);
+        m_children.push_back(m_secondPicture);
+    }
+    return true;
+}
+
+void C_ItemPictures::ShowPicture(C_PictureControl *picture, int id, C_ItemDef *def)
+{
+    picture->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_INDEX, static_cast<uint32_t>(id)));
+    S_ControlMessage texture = Message(CONTROL_MSG_SET_TEXTURE);
+    texture.value2 = reinterpret_cast<uintptr_t>(def->GetImage());
+    picture->HandleMessageCopy(texture);
+}
+
+void C_ItemPictures::UpdateCounts()
+{
+    if (m_count > 0 || m_secondCount > 0)
+        m_parent->HandleMessageCopy(ValueMessage(CONTROL_MSG_ITEM_COUNTED, m_id));
+    // (The second checked: the fix, the original's without it crashes.)
+    if (m_secondPicture) {
+        if (m_secondCount < 0 || m_second < 0) {
+            m_secondPicture->HandleMessageCopy(Message(CONTROL_MSG_HIDE));
+        } else {
+            m_secondPicture->HandleMessageCopy(Message(CONTROL_MSG_SHOW));
+            m_secondPicture->HandleMessageCopy(Message(m_secondCount > 0 ? CONTROL_MSG_ACTIVATE : CONTROL_MSG_DEACTIVATE));
+        }
+    }
+    if (m_count < 0) {
+        m_parent->HandleMessageCopy(ValueMessage(CONTROL_MSG_HIDE_ITEM, m_id));
+        return;
+    }
+    m_picture->HandleMessageCopy(Message(m_count > 0 ? CONTROL_MSG_ACTIVATE : CONTROL_MSG_DEACTIVATE));
+    m_picture->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_TEXT, PICTURES_COUNT_STYLE, C_fstr("%d ", m_count)));
+    if (m_secondPicture)
+        m_secondPicture->HandleMessageCopy(
+            ValueMessage(CONTROL_MSG_SET_TEXT, PICTURES_COUNT_STYLE, C_fstr("%d ", m_secondCount)));
+}
+
+bool C_ItemPictures::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_ControlGroup::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_ITEM_COUNT:
+        m_count = static_cast<int>(message->value);
+        UpdateCounts();
+        return true;
+    case CONTROL_MSG_SET_SECOND_COUNT:
+        m_secondCount = static_cast<int>(message->value);
+        UpdateCounts();
+        return true;
+    case CONTROL_MSG_ADD_CALLBACK:
+    case CONTROL_MSG_REMOVE_CALLBACK:
+        m_picture->HandleMessage(message);
+        if (m_secondPicture)
+            m_secondPicture->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_SET_ITEM: {
+        m_item = static_cast<int>(message->value);
+        C_ItemDef *def = GetItemDef(m_item);
+        if (!def)
+            return true;
+        ShowPicture(m_picture, m_item, def);
+        // The second picture: a weapon's ammo, a uniform's headgear.
+        if (def->GetRecordType() == ITEM_ANIMATED)
+            m_second = def->GetAmmoItemId();
+        else if (def->GetBehaviour() == ITEM_BEHAVIOUR_UNIFORM)
+            m_second = def->GetHeadgearItemId();
+        else
+            return true;
+        C_ItemDef *second = GetItemDef(m_second);
+        if (second && m_secondPicture)
+            ShowPicture(m_secondPicture, m_second, second);
+        return true;
+    }
+    case CONTROL_MSG_REFRESH:
+        m_picture->HandleMessageCopy(*message);
+        if (m_secondPicture)
+            m_secondPicture->HandleMessageCopy(*message);
+        return true;
+    }
+    C_ControlGroup::HandleMessage(message);
+    return true;
+}
+
+int C_PlayerList::FindChild(uint32_t id) const
+{
+    const uint32_t part = id & CHILD_ID_MASK;
+    if (part > 3)
+        return 0;
+    return part == PLAYERS_TITLE ? 2 : -1;
+}
+
+bool C_PlayerList::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    C_Control::Create(frame, root, desc);
+    m_frame->SetData(nullptr);
+    m_players = new C_ScrolledText(m_scene, m_id, this);
+    m_players->Create(frame, root, nullptr);
+    S_ControlMessage step = ValueMessage(CONTROL_MSG_SET_PAGE_STEP, PLAYERS_PAGE_STEP);
+    step.target = m_id | PLAYERS_BAR;
+    m_players->HandleMessageCopy(step);
+    m_children.push_back(m_players);
+    if (I3D_frame *header = frame->FindChildFrame("header*", FIND_FRAMES)) {
+        m_title = new C_TitleControl(m_scene, m_id | PLAYERS_TITLE, this);
+        m_title->Create(header, root, nullptr);
+        m_children.push_back(m_title);
+    }
+    return true;
+}
+
+int C_PlayerList::OnEnter(int id)
+{
+    if (IsChild(m_focus) && m_children[m_focus]->OnLeave(id) == 0)
+        return CONTROL_NOT_HANDLED;
+    if (IsChild(FindChild(static_cast<uint32_t>(id))) &&
+        m_children[FindChild(static_cast<uint32_t>(id))]->OnEnter(id) != 0) {
+        m_focus = FindChild(static_cast<uint32_t>(id));
+        return CONTROL_HANDLED;
+    }
+    return 0;
+}
+
+int C_PlayerList::OnLeave(int id)
+{
+    if (IsChild(m_focus)) {
+        if (m_children[m_focus]->OnLeave(id) == 0)
+            return 0;
+        m_focus = -1;
+    }
+    return CONTROL_HANDLED;
+}
+
+int C_PlayerList::OnInput05(int id)
+{
+    if (!IsChild(FindChild(static_cast<uint32_t>(id))))
+        return OnLeave(id);
+    if (m_focus == FindChild(static_cast<uint32_t>(id)))
+        return m_children[m_focus]->OnInput05(id);
+    OnLeave(id);
+    return OnEnter(id);
+}
+
+int C_PlayerList::OnPress(int id)
+{
+    if (IsChild(m_focus) && m_focus == FindChild(static_cast<uint32_t>(id)))
+        return m_children[m_focus]->OnPress(id);
+    return 0;
+}
+
+void C_PlayerList::SetInactive(bool inactive)
+{
+    m_players->SetInactive(inactive);
+    m_title->SetInactive(inactive);
+}
+
+bool C_PlayerList::HandleMessage(S_ControlMessage *message)
+{
+    const int target = FindChild(message->target);
+    if (IsChild(target))
+        return m_children[target]->HandleMessage(message);
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SHOW_PLAYERS: {
+        S_NetPlayerState *players = g_netGame.LockPlayers();
+        auto column = [this](uint32_t style, uint32_t textId) {
+            S_ControlMessage name = ValueMessage(CONTROL_MSG_ADD_TEXT_ID, style);
+            name.value2 = textId;
+            m_title->HandleMessageCopy(name);
+        };
+        column(PLAYERS_NAME_STYLE, TEXT_PLAYERS_NAME);
+        column(PLAYERS_STAT1_STYLE, TEXT_PLAYERS_STAT1);
+        column(PLAYERS_STAT3_STYLE, TEXT_PLAYERS_STAT3);
+        for (int i = 0; i < g_netGame.GetPlayerCount(); ++i) {
+            const S_NetPlayerState &player = players[i];
+            if (!player.IsConnected())
+                continue;
+            m_players->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, PLAYERS_NAME_STYLE, C_fstr("%s", player.name)));
+            m_players->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, PLAYERS_STAT1_STYLE, C_fstr("%d", player.stats[1])));
+            m_players->HandleMessageCopy(ValueMessage(CONTROL_MSG_ADD_TEXT, PLAYERS_STAT3_STYLE, C_fstr("%d", player.stats[3])));
+        }
+        g_netGame.UnlockPlayers();
+        return true;
+    }
+    case CONTROL_MSG_IGNORED_7E:
+    case CONTROL_MSG_IGNORED_7F:
+        return true;
+    default:
+        C_Control::HandleMessage(message);
+        return true;
+    }
+}
+
+bool C_CheckGroup::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_ControlGroup::Create(frame, root, desc))
+        return false;
+    I3D_frame *text = frame->FindChildFrame("text*", FIND_FRAMES);
+    if (!text)
+        return false;
+    m_box = new C_HighlightCheckBox(m_scene, m_id, this);
+    m_box->Create(text, root, nullptr);
+    m_children.push_back(m_box);
+    return true;
+}

@@ -29001,6 +29001,31 @@
   "name": "C_Tooltip::Tick",
   "proto": "void __thiscall Tick(C_Tooltip *this, int time)"
  },
+ "00651810": {
+  "module": "controls",
+  "name": "C_ItemPictures::Create",
+  "proto": "bool __thiscall Create(C_ControlGroup *this, void * frame, void * root, void * desc)"
+ },
+ "00651af0": {
+  "module": "controls",
+  "name": "C_ItemPictures::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ControlGroup *this, void * message)"
+ },
+ "00651ea0": {
+  "module": "controls",
+  "name": "C_ItemPictures::UpdateCounts",
+  "proto": "void __fastcall UpdateCounts(C_ControlGroup *this)"
+ },
+ "00652190": {
+  "module": "controls",
+  "name": "C_ItemPictures::Refresh",
+  "proto": "void __thiscall Refresh(C_ControlGroup *this)"
+ },
+ "006521c0": {
+  "module": "controls",
+  "name": "C_ItemPictures::FindChild",
+  "proto": "int __thiscall FindChild(C_ControlGroup *this, uint id)"
+ },
  "006521f0": {
   "module": "controls",
   "name": "C_SideIndicator::Create",
@@ -29726,6 +29751,46 @@
   "module": "zz_idioms",
   "name": "vector_tidy_65a5a0"
  },
+ "0065a620": {
+  "module": "controls",
+  "name": "C_PlayerList::Create",
+  "proto": "bool __thiscall Create(C_ComboBox *this, void * frame, void * root, void * desc)"
+ },
+ "0065a850": {
+  "module": "controls",
+  "name": "C_PlayerList::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ComboBox *this, void * message)"
+ },
+ "0065acb0": {
+  "module": "controls",
+  "name": "C_PlayerList::OnEnter",
+  "proto": "int __thiscall OnEnter(C_ComboBox *this, int id)"
+ },
+ "0065ad30": {
+  "module": "controls",
+  "name": "C_PlayerList::OnLeave",
+  "proto": "int __thiscall OnLeave(C_ComboBox *this, int id)"
+ },
+ "0065ad70": {
+  "module": "controls",
+  "name": "C_PlayerList::OnInput05",
+  "proto": "int __thiscall OnInput05(C_ComboBox *this, int id)"
+ },
+ "0065add0": {
+  "module": "controls",
+  "name": "C_PlayerList::OnPress",
+  "proto": "int __thiscall OnPress(C_ComboBox *this, int id)"
+ },
+ "0065ae10": {
+  "module": "controls",
+  "name": "C_PlayerList::FindChild",
+  "proto": "int __thiscall FindChild(C_ComboBox *this, uint id)"
+ },
+ "0065ae30": {
+  "module": "controls",
+  "name": "C_PlayerList::SetInactive",
+  "proto": "void __thiscall SetInactive(C_ComboBox *this, bool inactive)"
+ },
  "0065ae60": {
   "module": "zz_idioms",
   "name": "empty_function_65ae60"
@@ -30033,6 +30098,16 @@
   "name": "C_ComboBox::~C_ComboBox",
   "proto": "void __thiscall ~C_ComboBox(C_ComboBox *this)"
  },
+ "0065f420": {
+  "module": "controls",
+  "name": "C_PlayerList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ComboBox *this, uchar flags)"
+ },
+ "0065f440": {
+  "module": "controls",
+  "name": "C_PlayerList::~C_PlayerList",
+  "proto": "void __thiscall ~C_PlayerList(C_ComboBox *this)"
+ },
  "0065f610": {
   "module": "controls",
   "name": "C_ToggleButton::ScalarDeletingDestructor",
@@ -30183,6 +30258,16 @@
   "name": "C_TitledEditBox::~C_TitledEditBox",
   "proto": "void __thiscall ~C_TitledEditBox(C_HotKeyControl *this)"
  },
+ "00660a60": {
+  "module": "controls",
+  "name": "C_ItemPictures::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ControlGroup *this, uchar flags)"
+ },
+ "00660a80": {
+  "module": "controls",
+  "name": "C_ItemPictures::~C_ItemPictures",
+  "proto": "void __thiscall ~C_ItemPictures(C_ControlGroup *this)"
+ },
  "00660c30": {
   "module": "controls",
   "name": "C_ItemInfo::ScalarDeletingDestructor",
@@ -30222,6 +30307,26 @@
   "module": "controls",
   "name": "C_ServerList::~C_ServerList",
   "proto": "void __thiscall ~C_ServerList(C_ServerList *this)"
+ },
+ "006613e0": {
+  "module": "controls",
+  "name": "C_CheckGroup::FindChild",
+  "proto": "int __thiscall FindChild(C_ControlGroup *this, uint id)"
+ },
+ "006613f0": {
+  "module": "controls",
+  "name": "C_CheckGroup::Create",
+  "proto": "bool __thiscall Create(C_ControlGroup *this, void * frame, void * root, void * desc)"
+ },
+ "00661550": {
+  "module": "controls",
+  "name": "C_CheckGroup::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ControlGroup *this, uchar flags)"
+ },
+ "00661570": {
+  "module": "controls",
+  "name": "C_CheckGroup::~C_CheckGroup",
+  "proto": "void __thiscall ~C_CheckGroup(C_ControlGroup *this)"
  },
  "00661720": {
   "module": "controls",

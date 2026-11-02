@@ -1412,3 +1412,89 @@ public:
     // forbidden, text) the edit box's; REFRESH both.
     bool HandleMessage(S_ControlMessage *message) override;   // 0x0064f300
 };
+
+// An item's pictures (type 0x1d, vtable 0x00814a90; the hiding list's items): the item information
+// without its stats: its picture (on its frame, id | 1) and its ammo's or headgear's (on "ammo*",
+// id | 2), their counts as text; the parent told when either count is, or to hide it (a count
+// below 0); the second shown only with its item and a count from 0.
+class C_ItemPictures : public C_ControlGroup {          // 0x88 bytes
+public:
+    C_ItemPictures(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
+    ~C_ItemPictures() override = default;               // (0x00660a60)
+
+    // By the id's last 4 bits: 1 the picture, 2 the second.
+    int FindChild(uint32_t id) const override;          // 0x006521c0
+    // The shown control's pictures drawn.
+    void Refresh() override;                            // 0x00652190
+    // The group's (false: not made); the pictures hidden, their "X_SQUARE.BMP" face group; true.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00651810
+    // SET_ITEM, SET_ITEM_COUNT, SET_SECOND_COUNT; the callbacks to the pictures; REFRESH to both.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00651af0
+
+protected:
+    // The counts shown; the parent told (ITEM_COUNTED: either above 0; HIDE_ITEM: the count below 0).
+    void UpdateCounts();                                // 0x00651ea0
+    // A picture of the item `id`'s (its index the id, its texture the item's image).
+    static void ShowPicture(C_PictureControl *picture, int id, C_ItemDef *def);
+
+    int m_item = -1;                                    // +0x70
+    int m_count = 0;                                    // +0x74
+    int m_second = -1;                                  // +0x78 the ammo's or the headgear's item
+    int m_secondCount = 0;                              // +0x7C
+    C_PictureControl *m_picture = nullptr;              // +0x80
+    C_PictureControl *m_secondPicture = nullptr;        // +0x84
+};
+
+// The players' list (type 0x20, vtable 0x00814870; the network game's): built from the combo box but
+// none of its parts: a scrolled text on its frame (its id; a page step of 5) and a title on
+// "header*" (id | 2). SHOW_PLAYERS fills them: the columns' names, each connected player's name and
+// two of its stats.
+class C_PlayerList : public C_ComboBox {                // 0x90 bytes
+public:
+    C_PlayerList(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ComboBox(scene, id, parent) {}
+    ~C_PlayerList() override = default;                 // (0x0065f420: the combo box's)
+
+    // By the id's last 4 bits: above 3 the list; 2: 2 (not the title's index: the original's).
+    int FindChild(uint32_t id) const override;          // 0x0065ae10
+    // The control's (its result dropped), its frame's id cleared; the parts (the title optional).
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0065a620
+    // The focus' leave (not taken: CONTROL_NOT_HANDLED); the child with the id's enter (taken: the
+    // focus, handled; else 0).
+    int OnEnter(int id) override;                       // 0x0065acb0
+    // The focus' leave (not taken: 0; else no focus); handled.
+    int OnLeave(int id) override;                       // 0x0065ad30
+    // Off the children: the leave; another child: the leave and its enter; the focus: its.
+    int OnInput05(int id) override;                     // 0x0065ad70
+    // The focus' when it is the child with the id (else 0).
+    int OnPress(int id) override;                       // 0x0065add0
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0065a850
+    void SetStrings(const std::vector<C_str> &) override {}   // 0x0065ae60
+    // The parts' (not its own).
+    void SetInactive(bool inactive) override;           // 0x0065ae30
+
+protected:
+    C_ScrolledText *m_players = nullptr;                // +0x88
+    C_TitleControl *m_title = nullptr;                  // +0x8C
+};
+
+// A check group (type 0x27, vtable 0x008150f0): a group holding a highlighted check box on "text*"
+// (its id; none: not made).
+class C_CheckGroup : public C_ControlGroup {            // 0x74 bytes
+public:
+    C_CheckGroup(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
+    ~C_CheckGroup() override = default;                 // (0x00661550)
+
+    // The check box (any id; none: -1).
+    int FindChild(uint32_t) const override { return m_box ? 0 : -1; }   // 0x006613e0
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x006613f0
+
+protected:
+    C_HighlightCheckBox *m_box = nullptr;               // +0x70
+};
+
+// The players' list's messages: filled; two ignored.
+enum : uint32_t {
+    CONTROL_MSG_SHOW_PLAYERS = 0x100007D,
+    CONTROL_MSG_IGNORED_7E = 0x100007E,
+    CONTROL_MSG_IGNORED_7F = 0x100007F,
+};
