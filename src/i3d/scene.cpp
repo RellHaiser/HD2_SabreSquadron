@@ -94,7 +94,7 @@ int FloatToInt(float f) { return static_cast<int>(f); }   // __ftol: truncation
 // shadows, mirrors or lensFlares vectors to destroy.
 I3D_scene::~I3D_scene() {}
 
-// LS3DRF 0x100258c0 (from LS3DF 0x100462b0): no snow texture to load.
+// LS3DRF 0x100258c0 (from LS3DF 0x100462b0): no snow texture to load and no listener to clear.
 void I3D_scene::Init()
 {
     I3D_frame::Init();
@@ -118,7 +118,6 @@ void I3D_scene::Init()
     areaCount = 0;
     firstArea = nullptr;
     areasChanged = false;
-    listener = nullptr;
     frameFlags |= FRMFLAGS_POS_LOCKED;
     primarySector = MakeSpecialSector(this, "Primary sector", SCTF_PRIMARY);
     backdropSector = MakeSpecialSector(this, "Backdrop sector", SCTF_BACKDROP);
@@ -723,7 +722,7 @@ void I3D_scene::ResetWeather()
     weatherRangeXZ = 25.0f;
     weatherRangeY = 12.0f;
     weatherCount = 1000;
-    weatherParam2CC = 3000;
+    weatherParam298 = 3000;
     // Straight down, tilted 0.2 rad (the original copies a fourth float from past the result).
     const S_vector down = S_vector(0.0f, -1.0f, 0.0f) * RotateZMatrix(0.2f);
     weatherWind = S_vector4{down.x, down.y, down.z, 0.0f};

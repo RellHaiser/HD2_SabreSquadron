@@ -244,7 +244,7 @@ void OrigRemoveSwap(uint8_t *v, void *value)
 
 // The stand-in scenes (zeroed: no camera, no primary sector).
 alignas(16) uint8_t g_origScenes[2][0x450];
-alignas(16) uint8_t g_portScenes[2][0x450];
+alignas(16) uint8_t g_portScenes[2][sizeof(I3D_scene)];
 I3D_scene *PortScene(int k) { return k >= 0 ? reinterpret_cast<I3D_scene *>(g_portScenes[k]) : nullptr; }
 // Their primary sectors (not among the compared frames: no children, out of the rings).
 uint8_t *g_origPrimary[2];

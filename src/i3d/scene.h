@@ -8,6 +8,12 @@
 // its children by ownership; models and emitters it ticks (AddTickFrame). It also keeps the
 // sound listener and its EAX environment (from the camera's sector), an animation stack, fog,
 // the weather particles, the drawn dummy boxes and frames tracked between two sectors.
+//
+// LS3DRF's scene is a 0x420-byte object (vtable 0x1003c588): LS3DF's fields without the shadows
+// and mirrors vectors (LS3DF's +0x138 / +0x148), the listener (+0x28C) and the lens flares
+// (+0x290), with a pad at +0x29C that keeps weatherWind 16-byte aligned. From animStack on the
+// fields sit lower than LS3DF's: by 0x20 up to areasChanged, 0x34 from weatherFlags to
+// weatherParam298, 0x30 from weatherWind on.
 #pragma once
 
 #include "core/c_vector.h"
@@ -20,10 +26,8 @@ class I3D_anim_stack;
 class I3D_animation_set;
 class I3D_area;
 class I3D_camera;
-class I3D_mirror;
 class I3D_occluder;
 class I3D_portal;
-class I3D_shadow;
 class ITexture;
 
 // A frame kept in whichever sector of two reference frames (AddTrackedModel: a human model and
@@ -206,84 +210,97 @@ public:
     void *renderCallback;                   // +0x120 SetRenderCallback
     uint32_t renderCallbackFlags;           // +0x124
     ls3d::C_vector<I3D_frame *> tickFrames; // +0x128 AddTickFrame
-    ls3d::C_vector<I3D_shadow *> shadows;   // +0x138 (nothing joins it: shadows keep no scene)
-    ls3d::C_vector<I3D_frame *> mirrors;    // +0x148 (nothing joins it: mirrors keep no scene)
-    I3D_anim_stack *animStack;              // +0x158 made by SetAnimation
-    I3D_camera *activeCamera;               // +0x15C SetActiveCamera
-    float viewportCenterX;                  // +0x160
-    float viewportCenterY;                  // +0x164
-    uint32_t unknown168[2];                 // +0x168
-    S_matrix screenProjection;              // +0x170 (LS3DF's Render set it; nothing does here)
-    uint32_t unknown1B0[16];                // +0x1B0
-    float viewportHalfWidth;                // +0x1F0
-    float viewportHalfHeight;               // +0x1F4
-    I3D_sector *primarySector;              // +0x1F8 "Primary sector" (SCTF_PRIMARY; its scene is set without the ring)
-    I3D_sector *backdropSector;             // +0x1FC "Backdrop sector" (SCTF_BACKDROP)
-    I3D_sector *omniSector;                 // +0x200 "Omni sector"
-    I3D_sector *nearSector;                 // +0x204 "Near sector"
-    uint32_t unknown208[2];                 // +0x208
-    S_vector backgroundColor;               // +0x210 (0, 0.5, 0.4) the color the renderer clears to
-    float backgroundColorW;
-    ls3d::C_vector<S_trackedModel> trackedModels{4};  // +0x220 (Init: grow 25)
-    I3D_sector *trackedCameraSector;        // +0x230 (LS3DF's Render: the tracked models' camera sector; Init clears it)
-    ls3d::C_vector<I3D_frame *> frames;     // +0x234 the frames it owns (AddFrame)
-    int viewportLeft;                       // +0x244 SetViewport
-    int viewportTop;                        // +0x248
-    int viewportRight;                      // +0x24C
-    int viewportBottom;                     // +0x250
-    float backdropNear;                     // +0x254 the backdrop's range (SetBackdropRange)
-    float backdropFar;                      // +0x258
-    int portalCount;                        // +0x25C the portals of the scene's sectors
-    I3D_portal *firstPortal;                // +0x260 ring (I3D_portal::prev / next)
-    int portalChangesSeen;                  // +0x264 g_portalChanges when UpdateSectors last ran
-    int sectorCount;                        // +0x268
-    I3D_sector *firstSector;                // +0x26C ring (I3D_sector::prevInScene / nextInScene)
-    int sectorChangesSeen;                  // +0x270 g_sectorChanges when UpdateSectors last ran
+    // (No shadows or mirrors vectors, LS3DF's +0x138 / +0x148: LS3DRF has none.)
+    I3D_anim_stack *animStack;              // +0x138 (LS3DF: +0x158) made by SetAnimation
+    I3D_camera *activeCamera;               // +0x13C (LS3DF: +0x15C) SetActiveCamera
+    float viewportCenterX;                  // +0x140 (LS3DF: +0x160)
+    float viewportCenterY;                  // +0x144 (LS3DF: +0x164)
+    uint32_t unknown148[2];                 // +0x148 (LS3DF: +0x168)
+    S_matrix screenProjection;              // +0x150 (LS3DF: +0x170; its Render set it, nothing does here)
+    uint32_t unknown190[16];                // +0x190 (LS3DF: +0x1B0)
+    float viewportHalfWidth;                // +0x1D0 (LS3DF: +0x1F0)
+    float viewportHalfHeight;               // +0x1D4 (LS3DF: +0x1F4)
+    // "Primary sector" (SCTF_PRIMARY; its scene is set without the ring).
+    I3D_sector *primarySector;              // +0x1D8 (LS3DF: +0x1F8)
+    I3D_sector *backdropSector;             // +0x1DC (LS3DF: +0x1FC) "Backdrop sector" (SCTF_BACKDROP)
+    I3D_sector *omniSector;                 // +0x1E0 (LS3DF: +0x200) "Omni sector"
+    I3D_sector *nearSector;                 // +0x1E4 (LS3DF: +0x204) "Near sector"
+    uint32_t unknown1E8[2];                 // +0x1E8 (LS3DF: +0x208)
+    S_vector backgroundColor;               // +0x1F0 (LS3DF: +0x210) (0, 0.5, 0.4) the color the renderer clears to
+    float backgroundColorW;                 // +0x1FC (LS3DF: +0x21C)
+    ls3d::C_vector<S_trackedModel> trackedModels{4};  // +0x200 (LS3DF: +0x220; Init: grow 25)
+    // LS3DF's Render: the tracked models' camera sector; Init clears it.
+    I3D_sector *trackedCameraSector;        // +0x210 (LS3DF: +0x230)
+    ls3d::C_vector<I3D_frame *> frames;     // +0x214 (LS3DF: +0x234) the frames it owns (AddFrame)
+    int viewportLeft;                       // +0x224 (LS3DF: +0x244) SetViewport
+    int viewportTop;                        // +0x228 (LS3DF: +0x248)
+    int viewportRight;                      // +0x22C (LS3DF: +0x24C)
+    int viewportBottom;                     // +0x230 (LS3DF: +0x250)
+    float backdropNear;                     // +0x234 (LS3DF: +0x254) the backdrop's range (SetBackdropRange)
+    float backdropFar;                      // +0x238 (LS3DF: +0x258)
+    int portalCount;                        // +0x23C (LS3DF: +0x25C) the portals of the scene's sectors
+    I3D_portal *firstPortal;                // +0x240 (LS3DF: +0x260) ring (I3D_portal::prev / next)
+    int portalChangesSeen;                  // +0x244 (LS3DF: +0x264) g_portalChanges when UpdateSectors last ran
+    int sectorCount;                        // +0x248 (LS3DF: +0x268)
+    I3D_sector *firstSector;                // +0x24C (LS3DF: +0x26C) ring (I3D_sector::prevInScene / nextInScene)
+    int sectorChangesSeen;                  // +0x250 (LS3DF: +0x270) g_sectorChanges when UpdateSectors last ran
     // The occluder ring: Init's zeros, nothing joins it (no occlusion).
-    int occluderCount;                      // +0x274
-    I3D_occluder *firstOccluder;            // +0x278 ring (I3D_occluder::prevInScene / nextInScene)
-    bool occludersChanged;                  // +0x27C set when one joins
-    bool occluderListsStale;                // +0x27D the sectors' occluder lists need rebuilding
-    uint8_t padding27E[2];
-    int areaCount;                          // +0x280
-    I3D_area *firstArea;                    // +0x284 ring (I3D_area::prevInScene / nextInScene)
-    bool areasChanged;                      // +0x288 set when the ring changes
-    uint8_t padding289[3];
-    void *listener;                         // +0x28C (LS3DF's ISND listener; null, no ISND)
-    // +0x290 LS3DF's lens flares seen (referenced; its Render drew and dropped them). LS3DRF's scene
-    // has none; the field stays for the LS3DF layout.
-    ls3d::C_vector<I3D_frame *> lensFlares;
-    uint32_t weatherFlags;                  // +0x2A0 WEATHER_*
-    ls3d::C_vector<S_vector4> weatherParticles{8};   // +0x2A4 positions (w: height reached; grow 1000 once set)
-    float weatherFallSpeed;                 // +0x2B4 param 5 (ms -> s)
-    float weatherParam6;                    // +0x2B8
-    float weatherParam7;                    // +0x2BC (stored halved)
-    float weatherRangeXZ;                   // +0x2C0 param 8: half the box around the camera
-    float weatherRangeY;                    // +0x2C4 param 9
-    int weatherCount;                       // +0x2C8 param 10 (at most 0x3333)
-    int weatherParam2CC;                    // +0x2CC (3000)
-    S_vector4 weatherWind;                  // +0x2D0 params 11 - 13
-    S_vector4 weatherWindStart;             // +0x2E0
-    S_matrix weatherDirection;              // +0x2F0 (SetDir of the wind)
-    uint32_t weatherColor1;                 // +0x330 param 3
-    uint32_t weatherColor2;                 // +0x334 param 4
-    float weatherRadius;                    // +0x338 the box's half diagonal
-    uint32_t unknown33C;                    // +0x33C
-    S_matrix weatherMatrices[4];            // +0x340
-    ls3d::C_vector<S_dummyBox> drawnDummies{1};  // +0x440 (16-byte aligned blocks)
+    int occluderCount;                      // +0x254 (LS3DF: +0x274)
+    I3D_occluder *firstOccluder;            // +0x258 (LS3DF: +0x278) ring (I3D_occluder::prevInScene / nextInScene)
+    bool occludersChanged;                  // +0x25C (LS3DF: +0x27C) set when one joins
+    bool occluderListsStale;                // +0x25D (LS3DF: +0x27D) the sectors' occluder lists need rebuilding
+    uint8_t padding25E[2];
+    int areaCount;                          // +0x260 (LS3DF: +0x280)
+    I3D_area *firstArea;                    // +0x264 (LS3DF: +0x284) ring (I3D_area::prevInScene / nextInScene)
+    bool areasChanged;                      // +0x268 (LS3DF: +0x288) set when the ring changes
+    uint8_t padding269[3];
+    // (No listener or lens flares, LS3DF's +0x28C / +0x290: LS3DRF has none.)
+    uint32_t weatherFlags;                  // +0x26C (LS3DF: +0x2A0) WEATHER_*
+    // Positions (w: height reached; grow 1000 once set).
+    ls3d::C_vector<S_vector4> weatherParticles{8};   // +0x270 (LS3DF: +0x2A4)
+    float weatherFallSpeed;                 // +0x280 (LS3DF: +0x2B4) param 5 (ms -> s)
+    float weatherParam6;                    // +0x284 (LS3DF: +0x2B8)
+    float weatherParam7;                    // +0x288 (LS3DF: +0x2BC; stored halved)
+    float weatherRangeXZ;                   // +0x28C (LS3DF: +0x2C0) param 8: half the box around the camera
+    float weatherRangeY;                    // +0x290 (LS3DF: +0x2C4) param 9
+    int weatherCount;                       // +0x294 (LS3DF: +0x2C8) param 10 (at most 0x3333)
+    int weatherParam298;                    // +0x298 (LS3DF: +0x2CC; 3000)
+    uint32_t padding29C;                    // +0x29C (LS3DRF's pad: keeps weatherWind 16-byte aligned)
+    S_vector4 weatherWind;                  // +0x2A0 (LS3DF: +0x2D0) params 11 - 13
+    S_vector4 weatherWindStart;             // +0x2B0 (LS3DF: +0x2E0)
+    S_matrix weatherDirection;              // +0x2C0 (LS3DF: +0x2F0; SetDir of the wind)
+    uint32_t weatherColor1;                 // +0x300 (LS3DF: +0x330) param 3
+    uint32_t weatherColor2;                 // +0x304 (LS3DF: +0x334) param 4
+    float weatherRadius;                    // +0x308 (LS3DF: +0x338) the box's half diagonal
+    uint32_t unknown30C;                    // +0x30C (LS3DF: +0x33C)
+    S_matrix weatherMatrices[4];            // +0x310 (LS3DF: +0x340)
+    ls3d::C_vector<S_dummyBox> drawnDummies{1};  // +0x410 (LS3DF: +0x440; 16-byte aligned blocks)
 };
-static_assert(sizeof(I3D_scene) == 0x450, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, activeCamera) == 0x15C, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, screenProjection) == 0x170, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, primarySector) == 0x1F8, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, trackedModels) == 0x220, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, backdropNear) == 0x254, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, firstSector) == 0x26C, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, firstOccluder) == 0x278, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, firstArea) == 0x284, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, weatherFlags) == 0x2A0, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, weatherColor1) == 0x330, "I3D_scene layout");
-static_assert(offsetof(I3D_scene, drawnDummies) == 0x440, "I3D_scene layout");
+static_assert(sizeof(I3D_scene) == 0x420, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, tickFrames) == 0x128, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, animStack) == 0x138, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, activeCamera) == 0x13C, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, screenProjection) == 0x150, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, primarySector) == 0x1D8, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, nearSector) == 0x1E4, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, backgroundColor) == 0x1F0, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, trackedModels) == 0x200, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, trackedCameraSector) == 0x210, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, frames) == 0x214, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, viewportLeft) == 0x224, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, backdropNear) == 0x234, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, portalCount) == 0x23C, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, firstSector) == 0x24C, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, firstOccluder) == 0x258, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, firstArea) == 0x264, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, areasChanged) == 0x268, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, weatherFlags) == 0x26C, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, weatherParticles) == 0x270, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, weatherParam298) == 0x298, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, weatherWind) == 0x2A0, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, weatherColor1) == 0x300, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, weatherMatrices) == 0x310, "I3D_scene layout");
+static_assert(offsetof(I3D_scene, drawnDummies) == 0x410, "I3D_scene layout");
 
 // EnumFrames / FindFrame flags for the special sectors.
 enum : uint32_t {

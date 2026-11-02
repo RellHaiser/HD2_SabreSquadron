@@ -21,7 +21,9 @@
 // The port's code runs on the original's objects: their virtual methods (bounds, meshes, face
 // groups, joints) are the original's; the world matrix and world bound updates and the
 // billboard's facing matrix are forwarded to the original's functions. Each side computes the
-// visuals' cached inverse matrices itself (they are invalidated before each side's query).
+// visuals' cached inverse matrices itself (they are invalidated before each side's query). The
+// scene's special sectors are the exception: the port reads them at its own offsets, where the
+// test puts them for the port's query only (S_portSectors).
 //
 // The port's fixes the test steps around: the original's ray and sphere queries with
 // I3DCOL_SKIP_FRAME keep the previous query's excluded frame, and its sphere queries the previous
@@ -393,6 +395,30 @@ void MakeTextures()
 }
 uint8_t *g_scene;
 uint8_t *g_sectors[6];                      // primary, omni, near, sectors in the primary
+
+// The port's scene keeps the special sectors 0x20 below the original's (LS3DRF's layout): for the
+// port's query they are written there, over 16 bytes of the original's +0x1B0 block (none of its
+// scene or collision functions reads them), and put back after.
+struct S_portSectors {
+    I3D_scene *scene;                       // null: the original's query
+    uint8_t saved[16];
+    explicit S_portSectors(I3D_scene *portScene) : scene(portScene)
+    {
+        if (!scene)
+            return;
+        std::memcpy(saved, &scene->primarySector, sizeof saved);
+        scene->primarySector = Field<I3D_sector *>(g_scene, 0x1F8);
+        scene->backdropSector = Field<I3D_sector *>(g_scene, 0x1FC);
+        scene->omniSector = Field<I3D_sector *>(g_scene, 0x200);
+        scene->nearSector = Field<I3D_sector *>(g_scene, 0x204);
+    }
+    ~S_portSectors()
+    {
+        if (scene)
+            std::memcpy(&scene->primarySector, saved, sizeof saved);
+    }
+};
+static_assert(offsetof(I3D_scene, nearSector) == offsetof(I3D_scene, primarySector) + 12, "the special sectors");
 int g_numSectors;
 std::vector<uint8_t *> g_frames;            // every frame (sectors first)
 std::vector<uint8_t *> g_visuals;           // the visuals among them
@@ -1001,6 +1027,7 @@ void RunQuery()
             if (kind >= 3 && kind <= 5)
                 Orig<void *>(0x100adb08) = nullptr;
         }
+        const S_portSectors view(side ? portScene : nullptr);
         switch (kind) {
         case 0:
             result[side] = side ? portScene->I3D_scene::PickFrame(from, dir, flags, point, normal, cb, user, filter, lod)
