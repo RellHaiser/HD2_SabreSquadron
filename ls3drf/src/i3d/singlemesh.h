@@ -64,25 +64,23 @@ public:
     void __stdcall SetWorldSpace(bool on) override {}
     // 0x90 0x10052300: ComputeBound when a joint moved since the last.
     void __stdcall UpdateLocalBound() override;
-    // 0xAC / 0xB0 0x10051f20 / 0x10051ee0: a level's / every level's skinned buffer refilled
+    // 0xA4 / 0xA8 0x10051f20 / 0x10051ee0: a level's / every level's skinned buffer refilled
     // when next drawn.
     void __stdcall RefreshLevel(int level) override;
     void __stdcall RefreshLevels() override;
 
-    // 0xB4 0x10051f50: a joint's box in its space (< 0: the bind pose's), null when none.
+    // 0xAC 0x10051f50: a joint's box in its space (< 0: the bind pose's), null when none.
     virtual const I3D_bbox *__stdcall GetJointBBox(int joint);
-    // 0xB8 0x100529c0: the joint moving a vertex of a level (null: none, unchecked indices).
+    // 0xB0 0x100529c0: the joint moving a vertex of a level (null: none, unchecked indices).
     virtual I3D_joint *__stdcall GetVertexJoint(int vertex, int level);
-    // 0xBC 0x10052a10: a level's vertex positions skinned (the unskinned ones copied with their
+    // 0xB4 0x10052a10: a level's vertex positions skinned (the unskinned ones copied with their
     // normal's x as w) into a buffer shared by all, valid until the next call; null without
     // level or skin data.
     virtual const S_vector4 *__stdcall SkinnedVertices(int level);
-    // 0xC0 / 0xC4 0x10051fa0 / 0x10051ff0: a level's / every level's skinned buffer freed.
+    // 0xB8 / 0xBC 0x10051fa0 / 0x10051ff0: a level's / every level's skinned buffer freed.
     virtual void __stdcall ReleaseLevel(int level);
     virtual void __stdcall ReleaseLevels();
-    // 0xC8 0x10052fa0 (__thiscall): does nothing (LS3DRF's singlemesh has no SkinLevel slot; the
-    // slot stays for the LS3DF layout).
-    virtual void SkinLevel(int level);
+    // (No SkinLevel, LS3DF's slot 0xC8 0x10052fa0: LS3DRF has none.)
 
     // 0x100527d0: the joints found again among the descendants (up to 64; false when none).
     bool FixJoints();
@@ -122,9 +120,9 @@ public:
     void Uninit() override;                                                    // 0x64 0x10053c20
     // 0x70 0x10054240: the skinned mesh, then the morph data; the bound is the data's.
     void Load() override;
-    // 0x9C 0x10053d00: the mesh; the bound stays the morph data's.
+    // 0x94 0x10053d00: the mesh; the bound stays the morph data's.
     I3D_RESULT __stdcall SetMesh(I3D_mesh *newMesh, uint32_t flags) override;
-    // 0xBC 0x10054210: the level morphed first.
+    // 0xB4 0x10054210: the level morphed first.
     const S_vector4 *__stdcall SkinnedVertices(int level) override;
     // LS3DRF 0x1002cde0 (from LS3DF 0x100541d0): 0x90 is a jmp to I3D_singlemesh's UpdateLocalBound,
     // which the port inherits.

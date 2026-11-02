@@ -94,28 +94,27 @@ public:
 
     // 0x74 0x10046820: a function called while rendering (flags: when); returns the old one.
     virtual void *__stdcall SetRenderCallback(void *function, uint32_t flags);
-    // 0x78 0x10046860: does nothing (LS3DRF's scene has no Render; the slot stays for the layout).
-    virtual I3D_RESULT __stdcall Render(uint32_t flags);
-    // 0x7C 0x10046920: the frame named `name` (the special sectors as the flags ask).
+    // (No Render, LS3DF's slot 0x78 0x10046860: LS3DRF has none.)
+    // 0x78 0x10046920: the frame named `name` (the special sectors as the flags ask).
     virtual I3D_frame *__stdcall FindFrame(const char *frameName, uint32_t flags);
-    // 0x80 0x100469a0: the scene owns the frame (a reference); emitters are ticked.
+    // 0x7C 0x100469a0: the scene owns the frame (a reference); emitters are ticked.
     virtual void __stdcall AddFrame(I3D_frame *frame);
-    virtual I3D_RESULT __stdcall RemoveFrame(I3D_frame *frame);         // 0x84 0x10046b30
-    // 0x88 0x10046c50: the colour of every light of the primary sector.
+    virtual I3D_RESULT __stdcall RemoveFrame(I3D_frame *frame);         // 0x80 0x10046b30
+    // 0x84 0x10046c50: the colour of every light of the primary sector.
     virtual void __stdcall SetLightsColor(const S_vector &color);
-    // 0x8C 0x10046c90: brightness (0 - 1) of the lights on `pos` (in `sector`, null: found);
+    // 0x88 0x10046c90: brightness (0 - 1) of the lights on `pos` (in `sector`, null: found);
     // flags bit 0: lights hidden by geometry do not count (bit 6: the rays skip I3DCOL_SKIP_FLAGGED
     // visuals), `excluded` not tested by the rays.
     virtual float __stdcall GetLightIntensity(const S_vector &pos, I3D_sector *sector, uint32_t flags,
                                               I3D_frame *excluded);
-    virtual void __stdcall SetActiveCamera(I3D_camera *camera);         // 0x90 0x100471a0
-    // 0x94 0x10047250: the ray from the camera through the pixel (x, y).
+    virtual void __stdcall SetActiveCamera(I3D_camera *camera);         // 0x8C 0x100471a0
+    // 0x90 0x10047250: the ray from the camera through the pixel (x, y).
     virtual I3D_RESULT __stdcall UnmapScreenPoint(int x, int y, S_vector4 &origin, S_vector4 &dir);
-    // 0x98 0x100476a0: world points to the screen (x, y in pixels, z, w = 1 / clip w).
+    // 0x94 0x100476a0: world points to the screen (x, y in pixels, z, w = 1 / clip w).
     virtual I3D_RESULT __stdcall TransformPoints(const S_vector4 *points, S_vector4 *out, int count);
-    // 0x9C 0x1004bd90: the frame's bound against the camera's frustum.
+    // 0x98 0x1004bd90: the frame's bound against the camera's frustum.
     virtual bool __stdcall IsFrameVisible(I3D_frame *frame, I3D_camera *camera);
-    // 0xA0 - 0xC4 0x10048b80 - 0x10048e40: the scene's animation stack (as I3D_model's).
+    // 0x9C - 0xC0 0x10048b80 - 0x10048e40: the scene's animation stack (as I3D_model's).
     virtual I3D_RESULT __stdcall SetAnimation(I3D_animation_set *set, int stage, float weight, int mode);
     virtual I3D_animation_set *__stdcall GetAnimation(int stage);
     virtual void __stdcall StopAnimation(int stage);
@@ -126,75 +125,75 @@ public:
     virtual bool __stdcall IsAnimActive(int stage);
     virtual int __stdcall NumTracks();
     virtual void *__stdcall GetTracks();
-    // 0xC8 / 0xCC 0x100477d0 / 0x10047880: frames ticked with the scene (FRMFLAGS_SCENE_SOUND).
+    // 0xC4 / 0xC8 0x100477d0 / 0x10047880: frames ticked with the scene (FRMFLAGS_SCENE_SOUND).
     virtual void __stdcall AddTickFrame(I3D_frame *frame);
     virtual I3D_RESULT __stdcall RemoveTickFrame(I3D_frame *frame);
-    virtual I3D_sector *__stdcall CreateSector();                       // 0xD0 0x100479a0
-    // 0xD4 0x10047c20: the last of `sectors` that holds `pos`, else the primary sector.
+    virtual I3D_sector *__stdcall CreateSector();                       // 0xCC 0x100479a0
+    // 0xD0 0x10047c20: the last of `sectors` that holds `pos`, else the primary sector.
     virtual I3D_sector *__stdcall LocateSectorIn(const S_vector &pos, I3D_sector **sectors, int count);
-    // 0xD8 0x10047b70: the sector holding `pos` (`hint` first) and how deep (InsideDistance).
+    // 0xD4 0x10047b70: the sector holding `pos` (`hint` first) and how deep (InsideDistance).
     virtual I3D_sector *__stdcall LocateSectorDepth(const S_vector &pos, I3D_sector *hint, float *depth);
-    // 0xDC 0x10047af0: the sector holding `pos` (`hint` first), else the primary sector.
+    // 0xD8 0x10047af0: the sector holding `pos` (`hint` first), else the primary sector.
     virtual I3D_sector *__stdcall LocateSector(const S_vector &pos, I3D_sector *hint);
-    virtual I3D_sector *__stdcall GetSector(const S_vector &pos);       // 0xE0 0x10047a90
-    // 0xE4 0x10048270: the backdrop's range (ignored unless both are 0.001+ and differ by 0.01+).
+    virtual I3D_sector *__stdcall GetSector(const S_vector &pos);       // 0xDC 0x10047a90
+    // 0xE0 0x10048270: the backdrop's range (ignored unless both are 0.001+ and differ by 0.01+).
     virtual void __stdcall SetBackdropRange(float nearRange, float farRange);
-    // 0xE8 0x10047cf0: UpdateFrameSector when there is no active camera.
+    // 0xE4 0x10047cf0: UpdateFrameSector when there is no active camera.
     virtual void __stdcall UpdateFrameSectorIdle(I3D_frame *frame, const S_vector &pos, int unused);
-    // 0xEC 0x10047c70: links a moved frame to the sector it is now in.
+    // 0xE8 0x10047c70: links a moved frame to the sector it is now in.
     virtual void __stdcall UpdateFrameSector(I3D_frame *frame, const S_vector &pos);
-    // 0xF0 0x1004be10: the sectors and portals again after any of them changed.
+    // 0xEC 0x1004be10: the sectors and portals again after any of them changed.
     virtual void __stdcall UpdateSectors();
-    // 0xF4 0x10047d20: loads a scene file (the loader) into the primary sector.
+    // 0xF0 0x10047d20: loads a scene file (the loader) into the primary sector.
     virtual I3D_RESULT __stdcall Open(const char *fileName, uint32_t flags, void *loadCallback, void *context);
-    virtual void __stdcall Close();                                     // 0xF8 0x10047db0
-    // 0xFC - 0x114: collision (collision_ray.cpp, collision_sphere.cpp; I3DCOL_* flags).
-    // 0xFC 0x10010c20: the nearest hit of the ray, its point and world normal; every frame tested
+    virtual void __stdcall Close();                                     // 0xF4 0x10047db0
+    // 0xF8 - 0x110: collision (collision_ray.cpp, collision_sphere.cpp; I3DCOL_* flags).
+    // 0xF8 0x10010c20: the nearest hit of the ray, its point and world normal; every frame tested
     // at `lodLevel`.
     virtual I3D_frame *__stdcall PickFrame(const S_vector &from, const S_vector &dir, uint32_t flags,
                                            S_vector4 *outPoint, S_vector4 *outNormal, I3D_COLLISION_HIT *hitCb,
                                            void *user, I3D_COLLISION_FILTER *filter, int lodLevel);
-    // 0x100 0x1000c7a0: the nearest hit of the ray (its length the direction's), its distance and
+    // 0xFC 0x1000c7a0: the nearest hit of the ray (its length the direction's), its distance and
     // world normal; `frame` skipped, excluded or tested at `lodLevel` by the flags.
     virtual I3D_frame *__stdcall TestRay(const S_vector &from, const S_vector &dir, uint32_t flags,
                                          float *outDistance, S_vector4 *outNormal, I3D_COLLISION_HIT *hitCb,
                                          void *user, I3D_COLLISION_FILTER *filter, I3D_frame *frame,
                                          int lodLevel);
-    // 0x104 0x100110f0: the ray against `frame`'s subtree only, the hit's details in `info`.
+    // 0x100 0x100110f0: the ray against `frame`'s subtree only, the hit's details in `info`.
     virtual I3D_frame *__stdcall IntersectFrame(const S_vector &from, const S_vector &dir, I3D_frame *frame,
                                                 I3D_collision_info *info, uint32_t flags, I3D_frame *queryFrame,
                                                 int lodLevel, I3D_COLLISION_HIT *hitCb);
-    // 0x108 0x100115a0: a sphere moving from `from` by `dir` against the sectors' visuals: the
+    // 0x104 0x100115a0: a sphere moving from `from` by `dir` against the sectors' visuals: the
     // contact point of its first touch in `outPoint`.
     virtual I3D_frame *__stdcall MoveSphere(const S_vector &from, const S_vector &dir, float radius, uint32_t flags,
                                             S_vector4 *outPoint, I3D_frame *frame, I3D_COLLISION_HIT *hitCb);
-    // 0x10C 0x100145e0: the same against `root`'s subtree.
+    // 0x108 0x100145e0: the same against `root`'s subtree.
     virtual I3D_frame *__stdcall MoveSphereFrame(const S_vector &from, const S_vector &dir, float radius,
                                                  I3D_frame *root, uint32_t flags, S_vector4 *outPoint,
                                                  I3D_frame *frame, I3D_COLLISION_HIT *hitCb);
-    // 0x110 0x10014940: the same against one visual.
+    // 0x10C 0x10014940: the same against one visual.
     virtual I3D_frame *__stdcall MoveSphereVisual(const S_vector &from, const S_vector &dir, float radius,
                                                   I3D_frame *visual, uint32_t flags, S_vector4 *outPoint);
-    // 0x114 0x10014ed0: when (0 - 1) two moving spheres meet, -1 if they do not.
+    // 0x110 0x10014ed0: when (0 - 1) two moving spheres meet, -1 if they do not.
     virtual float __stdcall SweepSpheres(float radiusA, const S_vector &fromA, const S_vector &toA, float radiusB,
                                          const S_vector &fromB, const S_vector &toB);
-    // 0x118 0x10048330: slot 0x7C of every object / lightmap visual below the primary sector.
+    // 0x114 0x10048330: slot 0x7C of every object / lightmap visual below the primary sector.
     virtual void __stdcall SetWorldSpace(bool value);
-    // 0x11C / 0x120 0x10049820 / 0x1004a100: the weather (E_WeatherParam; floats as bits).
+    // 0x118 / 0x11C 0x10049820 / 0x1004a100: the weather (E_WeatherParam; floats as bits).
     virtual void __stdcall SetWeather(int param, uint32_t value);
     virtual int __stdcall GetWeather(int param);
-    virtual void __stdcall ResetWeather();                              // 0x124 0x10048e60
-    // 0x128 / 0x12C 0x10049690 / 0x10049700: dummies whose boxes are drawn (FRMFLAGS_SCENE_DUMMY).
+    virtual void __stdcall ResetWeather();                              // 0x120 0x10048e60
+    // 0x124 / 0x128 0x10049690 / 0x10049700: dummies whose boxes are drawn (FRMFLAGS_SCENE_DUMMY).
     virtual void __stdcall AddDrawnDummy(I3D_frame *dummy);
     virtual void __stdcall RemoveDrawnDummy(I3D_frame *dummy);
-    virtual int __stdcall NumDrawnDummies();                            // 0x130 0x10049800
-    virtual S_dummyBox *__stdcall GetDrawnDummies();                    // 0x134 0x10049810
-    // 0x138 - 0x144 0x1004be80 - 0x1004c190: models kept in the sector of two of their frames.
+    virtual int __stdcall NumDrawnDummies();                            // 0x12C 0x10049800
+    virtual S_dummyBox *__stdcall GetDrawnDummies();                    // 0x130 0x10049810
+    // 0x134 - 0x140 0x1004be80 - 0x1004c190: models kept in the sector of two of their frames.
     virtual I3D_RESULT __stdcall AddTrackedModel(I3D_frame *model, I3D_frame *refA, I3D_frame *refB);
     virtual I3D_RESULT __stdcall RemoveTrackedModel(I3D_frame *model);
     virtual void __stdcall ClearTrackedModels();
     virtual void __stdcall MarkTrackedModel(I3D_frame *model);
-    // 0x148 0x10048440: the screen rectangle rendered into (pixels).
+    // 0x144 0x10048440: the screen rectangle rendered into (pixels).
     virtual void __stdcall SetViewport(int left, int top, int right, int bottom);
 
 private:

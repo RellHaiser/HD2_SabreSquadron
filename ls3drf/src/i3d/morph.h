@@ -78,7 +78,7 @@ public:
     void Uninit() override;                                                    // 0x64 0x10035730
     // 0x70 0x10035f00: the object, then the morph data; the bound is the data's.
     void Load() override;
-    // 0x9C 0x100358d0: the mesh; the bound stays the morph data's.
+    // 0x94 0x100358d0: the mesh; the bound stays the morph data's.
     I3D_RESULT __stdcall SetMesh(I3D_mesh *newMesh, uint32_t flags) override;
 
     // I3D_visual_morph (0x100357e0 - 0x10035880).

@@ -193,10 +193,6 @@ void *I3D_scene::SetRenderCallback(void *function, uint32_t flags)
     return old;
 }
 
-// LS3DRF's scene has no Render: nothing is drawn. (The slot stays for the LS3DF layout; 0, as a
-// FindFrame through LS3DRF's slot 0x78 would find nothing.)
-I3D_RESULT I3D_scene::Render(uint32_t) { return I3D_OK; }
-
 // LS3DRF 0x10025e20 (from LS3DF 0x10046920)
 I3D_frame *I3D_scene::FindFrame(const char *frameName, uint32_t flags)
 {

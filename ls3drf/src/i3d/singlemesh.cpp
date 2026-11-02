@@ -445,10 +445,6 @@ const S_vector4 *I3D_singlemesh::SkinnedVertices(int levelIndex)
     return s_skinned;
 }
 
-// 0x10052fa0 (LS3DRF's singlemesh has no SkinLevel slot: nothing skinned; the slot stays for the
-// LS3DF layout.)
-void I3D_singlemesh::SkinLevel(int) {}
-
 // 0x10053900
 void I3D_singlemesh::Load()
 {

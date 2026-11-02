@@ -132,7 +132,3 @@ void I3D_lens::Load()
     localBound.bbox.max = S_vector(0.05f, 0.05f, 0.05f);
     localBound.radius = 0.01f;
 }
-
-// 0x100080d0 (LS3DRF's lens has no DrawFlare slot: no flare drawn; the slot stays for the
-// LS3DF layout.)
-void I3D_lens::DrawFlare(bool) {}

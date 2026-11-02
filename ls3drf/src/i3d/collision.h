@@ -1,4 +1,4 @@
-// The scene's collision queries (I3D_scene slots 0xFC - 0x114; 0x1000c7a0 - 0x10015050): rays and
+// The scene's collision queries (I3D_scene slots 0xF8 - 0x110; 0x1000c7a0 - 0x10015050): rays and
 // moving spheres against the frames' visuals (their boxes, then the faces of their mesh level),
 // the skinned meshes against their joints' boxes.
 #pragma once

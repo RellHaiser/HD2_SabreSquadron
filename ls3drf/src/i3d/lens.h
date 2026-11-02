@@ -33,9 +33,7 @@ public:
     void Uninit() override;                                                    // 0x64 0x10007ea0
     // 0x70 0x10009610: the frame, then the elements (with their materials).
     void Load() override;
-    // 0x9C 0x100080d0: draws the lens (pre-transformed sprites, additive, no z); `seen`: it was seen
-    // this frame (the visibility ray runs every testInterval ms), else it fades out.
-    virtual void __stdcall DrawFlare(bool seen);
+    // (No DrawFlare, LS3DF's slot 0x9C 0x100080d0: LS3DRF has none.)
 
     float intensity;                        // +0x1E0 (1) the sprites' alpha
     float sizeScale;                        // +0x1E4 (1)

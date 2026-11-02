@@ -32,15 +32,13 @@ public:
     void Uninit() override;
     // 0x70 0x10033e80: the frame, then the bound, plane, color, range and geometry.
     void Load() override;
-    // 0x9C 0x10033d50: the plane matrix: `matrix` scaled by the box's half size, at its center.
+    // 0x94 0x10033d50: the plane matrix: `matrix` scaled by the box's half size, at its center.
     virtual void __stdcall SetPlane(const I3D_bbox &box, const S_matrix &matrix);
-    // 0xA0 0x100323c0: the color (clamped to 0 - 1); true when unchanged.
+    // 0x98 0x100323c0: the color (clamped to 0 - 1); true when unchanged.
     virtual bool __stdcall SetColor(const S_vector4 &newColor);
-    // 0xA4 0x10032520: the faces (the index memory; `flags` unread); null without faces.
+    // 0x9C 0x10032520: the faces (the index memory; `flags` unread); null without faces.
     virtual I3D_triface *__stdcall LockFaces(uint32_t flags);
-    // 0xA8 / 0xAC 0x10057630 (nothing: 0)
-    virtual int __stdcall Reserved0() { return 0; }
-    virtual int __stdcall Reserved1() { return 0; }
+    // (The vtable ends here: the four entries after it, LS3DF's 0x1009c1e0, are I3D_visual_morph's.)
 
     S_matrix planeMatrix;                   // +0x1E0 the plane in the frame's space (its z the normal)
     S_vector4 color;                        // +0x220 the surface's color (0)
