@@ -5,8 +5,6 @@
 
 #include "i3d/loader.h"
 #include "i3d/mesh.h"
-#include "i3d/render_helpers.h"
-#include "i3d/render_state.h"
 #include "external/rw_data.h"
 
 using namespace ls3d;
@@ -295,32 +293,4 @@ void I3D_billboard::ComputeMatrix(const S_vector &camera, S_matrix &out)
     default:
         return;
     }
-}
-
-// 0x100078e0
-void I3D_billboard::Prepare()
-{
-    if (!mesh)
-        return;
-    if (visualFlags & VISF_MIRRORED) {
-        auto *original = static_cast<I3D_billboard *>(data);
-        axis = original->axis;
-        mode = original->mode;
-        PrepareMirrored();
-        ComputeMatrix(*reinterpret_cast<const S_vector *>(&g_rc.lodPosition), matrix);
-        return;
-    }
-    const float distance2 = LodDistance2();
-    const int levelIndex = SelectLevel(distance2);
-    I3D_mesh_level *level = mesh->levels[levelIndex];
-    if (!level || !level->faceGroups || !level->numVertices)
-        return;
-    ComputeMatrix(*reinterpret_cast<const S_vector *>(&g_rc.lodPosition), matrix);
-    if (!level->renderVertices.vb)
-        level->CreateRenderVB(0x11, &matrix, nullptr);
-    else if (level->flags & MLF_RENDER_STALE)
-        level->FillRenderVB(false, nullptr, nullptr);
-    SetLodFade(levelIndex, level, distance2);
-    // (No device lights chosen: LS3DRF has none.)
-    QueueFaceGroups(level, nullptr);
 }

@@ -27,8 +27,6 @@
 #include "i3d/object.h"
 #include "i3d/occluder.h"
 #include "i3d/projector.h"
-#include "i3d/render_passes.h"
-#include "i3d/render_state.h"
 #include "i3d/scene.h"
 #include "i3d/sector.h"
 #include "i3d/singlemesh.h"

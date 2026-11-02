@@ -1,5 +1,5 @@
 // I3D_scene: the root of a rendered world (FRAME_SCENE; vtable 0x1009b798, 0x450 bytes; methods
-// 0x100462b0 - 0x1004c730, collision 0x1000c7a0 - 0x10015050, the weather in scene_weather.cpp).
+// 0x100462b0 - 0x1004c730, collision 0x1000c7a0 - 0x10015050; no weather update or drawing).
 //
 // A scene owns four special sectors that are never inside another: the primary sector (the space
 // outside every other sector), the backdrop (drawn behind everything with its own projection), the
@@ -94,7 +94,8 @@ public:
 
     // 0x74 0x10046820: a function called while rendering (flags: when); returns the old one.
     virtual void *__stdcall SetRenderCallback(void *function, uint32_t flags);
-    virtual I3D_RESULT __stdcall Render(uint32_t flags);                // 0x78 0x10046860
+    // 0x78 0x10046860: does nothing (LS3DRF's scene has no Render; the slot stays for the layout).
+    virtual I3D_RESULT __stdcall Render(uint32_t flags);
     // 0x7C 0x10046920: the frame named `name` (the special sectors as the flags ask).
     virtual I3D_frame *__stdcall FindFrame(const char *frameName, uint32_t flags);
     // 0x80 0x100469a0: the scene owns the frame (a reference); emitters are ticked.
@@ -196,19 +197,6 @@ public:
     // 0x148 0x10048440: the screen rectangle rendered into (pixels).
     virtual void __stdcall SetViewport(int left, int top, int right, int bottom);
 
-    // The renderer's helpers.
-    // 0x10048520: the listener's EAX environment: `sector`'s, `t` of the way from `previous`'s.
-    void SetSoundEnvironment(I3D_sector *sector, I3D_sector *previous, float t);
-    // 0x100482e0: every sector made ready (MakeReady) and the portals put into world space.
-    void ReadySectors();
-    // 0x1004c1b0: the tracked models' sectors, before rendering from `cameraSector`.
-    void UpdateTrackedModels(I3D_sector *cameraSector);
-    // 0x100484d0: the screen projection (`m` scaled by the viewport's half size).
-    void SetScreenProjection(const S_matrix &m);
-    // The weather (scene_weather.cpp): the particles moved (0x1004a290) and drawn (0x1004b720).
-    void UpdateWeather();
-    void DrawWeather();
-
 private:
     // Weather parameter 10: the particle count; the shared buffers grow to it (0x10049820).
     void SetWeatherCount(int count);
@@ -226,7 +214,7 @@ public:
     float viewportCenterX;                  // +0x160
     float viewportCenterY;                  // +0x164
     uint32_t unknown168[2];                 // +0x168
-    S_matrix screenProjection;              // +0x170 SetScreenProjection
+    S_matrix screenProjection;              // +0x170 (LS3DF's Render set it; nothing does here)
     uint32_t unknown1B0[16];                // +0x1B0
     float viewportHalfWidth;                // +0x1F0
     float viewportHalfHeight;               // +0x1F4
@@ -238,7 +226,7 @@ public:
     S_vector backgroundColor;               // +0x210 (0, 0.5, 0.4) the color the renderer clears to
     float backgroundColorW;
     ls3d::C_vector<S_trackedModel> trackedModels{4};  // +0x220 (Init: grow 25)
-    I3D_sector *trackedCameraSector;        // +0x230 the camera sector the tracked models were put by
+    I3D_sector *trackedCameraSector;        // +0x230 (LS3DF's Render: the tracked models' camera sector; Init clears it)
     ls3d::C_vector<I3D_frame *> frames;     // +0x234 the frames it owns (AddFrame)
     int viewportLeft;                       // +0x244 SetViewport
     int viewportTop;                        // +0x248
@@ -312,15 +300,11 @@ extern int g_sceneCount;                    // 0x100bf324
 extern S_VBAlloc g_weatherVB;               // 0x100bf308
 extern S_IBAlloc g_weatherIB;               // 0x100bf314
 extern int g_weatherCapacity;               // 0x100bf320 particles the buffers hold
-extern int g_weatherDrawn;                  // 0x100bf328 particles in them now
 // The environment of sectors without one (0x100bf290).
 extern I3D_environment g_defaultEnvironment;
 
 // The environment `t` of the way from `a` to `b` (0x1004c730; the integer parameters truncated);
 // `all` false: only the reverb delay (parameter 9).
 void LerpEnvironment(I3D_environment &out, const I3D_environment &a, const I3D_environment &b, float t, bool all);
-// IGraph's fog states through its cache (0x1004c300): on, mode (0 linear, 1 / 2 exponential),
-// start (density) and end, colour.
-void SetFog(int on, int mode, float start, float end, uint32_t color);
 
 }  // namespace ls3d::i3d

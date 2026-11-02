@@ -23,8 +23,6 @@
 
 using namespace ls3d;
 using namespace ls3d::i3d;
-using gfx::g_pGfx;
-using ig::g_rs;
 
 namespace ls3d::i3d {
 
@@ -32,7 +30,6 @@ int g_sceneCount;
 S_VBAlloc g_weatherVB;
 S_IBAlloc g_weatherIB;
 int g_weatherCapacity;
-int g_weatherDrawn;
 I3D_environment g_defaultEnvironment;
 
 }  // namespace ls3d::i3d
@@ -196,7 +193,9 @@ void *I3D_scene::SetRenderCallback(void *function, uint32_t flags)
     return old;
 }
 
-I3D_RESULT I3D_scene::Render(uint32_t flags) { return g_driver->Render(this, flags); }
+// LS3DRF's scene has no Render: nothing is drawn. (The slot stays for the LS3DF layout; 0, as a
+// FindFrame through LS3DRF's slot 0x78 would find nothing.)
+I3D_RESULT I3D_scene::Render(uint32_t) { return I3D_OK; }
 
 // LS3DRF 0x10025e20 (from LS3DF 0x10046920)
 I3D_frame *I3D_scene::FindFrame(const char *frameName, uint32_t flags)
@@ -636,14 +635,6 @@ void I3D_scene::UpdateFrameSector(I3D_frame *frame, const S_vector &pos)
     I3D_sector *s = GetSector(pos);
     if (p != s)
         frame->LinkTo(s, I3DLINK_UPDMATRIX);
-}
-
-void I3D_scene::ReadySectors()
-{
-    EnumFrames(&MakeSectorReady, nullptr, ENUMF_SECTOR, nullptr);
-    I3D_portal *p = firstPortal;
-    for (int n = portalCount; n != 0; --n, p = p->next)
-        p->MatrixChanged();
 }
 
 // LS3DRF 0x10028bb0 (from LS3DF 0x1004be10): the sectors made ready, the portals left as they were.
@@ -1099,38 +1090,6 @@ void I3D_scene::ClearTrackedModels()
 
 void I3D_scene::MarkTrackedModel(I3D_frame *model) { model->frameFlags |= FRMFLAGS_TRACKED_STALE; }
 
-void I3D_scene::UpdateTrackedModels(I3D_sector *cameraSector)
-{
-    const bool cameraMoved = cameraSector != trackedCameraSector;
-    if (cameraMoved)
-        trackedCameraSector = cameraSector;
-    for (S_trackedModel &t : trackedModels) {
-        if (t.frame->frameFlags & FRMFLAGS_TRACKED_STALE) {
-            I3D_sector *old = t.sectorA;
-            const S_matrix &ma = t.refA->GetMatrix();
-            t.sectorA = LocateSectorDepth(*reinterpret_cast<const S_vector *>(ma.m[3]), old, &t.distanceA);
-            ++t.sectorA->refCount;
-            if (old)
-                old->Release();
-            old = t.sectorB;
-            const S_matrix &mb = t.refB->GetMatrix();
-            t.sectorB = LocateSectorDepth(*reinterpret_cast<const S_vector *>(mb.m[3]), old, &t.distanceB);
-            ++t.sectorB->refCount;
-            if (old)
-                old->Release();
-        }
-        if (!cameraMoved && !(t.frame->frameFlags & FRMFLAGS_TRACKED_STALE))
-            continue;
-        t.frame->frameFlags &= ~FRMFLAGS_TRACKED_STALE;
-        if (t.sectorA == cameraSector || t.sectorB == cameraSector)
-            t.frame->LinkTo(cameraSector, I3DLINK_UPDMATRIX);
-        else if (t.distanceA <= t.distanceB)
-            t.frame->LinkTo(t.sectorB, I3DLINK_UPDMATRIX);
-        else
-            t.frame->LinkTo(t.sectorA, I3DLINK_UPDMATRIX);
-    }
-}
-
 // ---------------------------------------------------------------- viewport and sound
 
 // LS3DRF 0x10027540 (from LS3DF 0x10048440)
@@ -1147,18 +1106,6 @@ void I3D_scene::SetViewport(int left, int top, int right, int bottom)
     viewportCenterX = static_cast<float>(left) + hw;
     viewportCenterY = static_cast<float>(top) - hh;
 }
-
-void I3D_scene::SetScreenProjection(const S_matrix &m)
-{
-    screenProjection = m;
-    for (int r = 0; r < 4; ++r) {
-        screenProjection.m[r][0] = viewportHalfWidth * m.m[r][0];
-        screenProjection.m[r][1] = m.m[r][1] * viewportHalfHeight;
-    }
-}
-
-// No ISND listener: nothing to blend (the sectors' SCTF_ENV_CHANGED stay, as with no listener).
-void I3D_scene::SetSoundEnvironment(I3D_sector *, I3D_sector *, float) {}
 
 // ---------------------------------------------------------------- free functions
 
@@ -1217,53 +1164,6 @@ void LerpEnvironment(I3D_environment &out, const I3D_environment &a, const I3D_e
             lf(k);
     }
     li(9);
-}
-
-void SetFog(int on, int mode, float start, float end, uint32_t color)
-{
-    if (g_rs.fog == on) {
-        if (!on)
-            return;
-    } else {
-        g_rs.fog = on;
-        if (on != 1) {
-            g_pGfx->SetRenderState(D3DRS_FOGENABLE, FALSE);
-            return;
-        }
-        g_pGfx->SetRenderState(D3DRS_FOGENABLE, TRUE);
-    }
-    const D3DRENDERSTATETYPE modeState = ig::g_caps & IGCAPS_TABLE_FOG ? D3DRS_FOGTABLEMODE : D3DRS_FOGVERTEXMODE;
-    if (g_rs.fogMode != mode) {
-        g_rs.fogMode = mode;
-        if (mode == 0)
-            g_pGfx->SetRenderState(modeState, D3DFOG_LINEAR);
-        else if (mode == 1)
-            g_pGfx->SetRenderState(modeState, D3DFOG_EXP);
-        else if (mode == 2)
-            g_pGfx->SetRenderState(modeState, D3DFOG_EXP2);
-    }
-    auto bits = [](float f) {
-        DWORD d;
-        std::memcpy(&d, &f, 4);
-        return d;
-    };
-    if (g_rs.fogMode == 0) {
-        if (!IsTinyBits(std::fabs(g_rs.fogEnd - end))) {
-            g_rs.fogEnd = end;
-            g_pGfx->SetRenderState(D3DRS_FOGEND, bits(end));
-        }
-        if (!IsTinyBits(std::fabs(g_rs.fogStart - start))) {
-            g_rs.fogStart = start;
-            g_pGfx->SetRenderState(D3DRS_FOGSTART, bits(start));
-        }
-    } else if (g_rs.fogMode >= 1 && g_rs.fogMode <= 2 && !IsTinyBits(std::fabs(g_rs.fogStart - start))) {
-        g_rs.fogStart = start;
-        g_pGfx->SetRenderState(D3DRS_FOGDENSITY, bits(start));
-    }
-    if (g_rs.fogColor != color) {
-        g_rs.fogColor = color;
-        g_pGfx->SetRenderState(D3DRS_FOGCOLOR, color);
-    }
 }
 
 }  // namespace ls3d::i3d

@@ -4,7 +4,9 @@
 #include <cmath>
 #include <cstring>
 
+#include "core/debug.h"
 #include "external/rw_data.h"
+#include "i3d/i3d_hooks.h"
 #include "i3d/loader.h"
 #include "i3d/scene.h"
 #include "i3d/sector.h"
@@ -178,3 +180,115 @@ void I3D_portal::Load()
     }
     numVertices = stored;
 }
+
+namespace ls3d::i3d {
+
+// LS3DRF 0x10024610 (from LS3DF 0x10042940)
+// Every portal without a connection paired with the portal of the other side (the same opening
+// in another sector: overlapping boxes, centers within a tenth of the box), else connected to
+// the sector its first vertex is in, else to the primary sector (0x10042940).
+void BuildPortals(I3D_scene *scene)
+{
+    I3D_portal *const first = scene->firstPortal;
+    if (!first)
+        return;
+    I3D_portal *p = first;
+    do {
+        if (!p->connectedSector && p->next != first) {
+            for (I3D_portal *q = p->next; q != scene->firstPortal;) {
+                if (q->connectedSector) {
+                    q = q->next;
+                    continue;
+                }
+                // The box of both portals' vertices and each portal's center.
+                const S_vector4 *v = p->worldVertices;
+                S_vector mn(v[0].x, v[0].y, v[0].z), mx = mn, sp = mn;
+                for (int i = 1; i < p->numVertices; ++i) {
+                    if (mn.x > v[i].x)
+                        mn.x = v[i].x;
+                    if (mn.y > v[i].y)
+                        mn.y = v[i].y;
+                    if (mn.z > v[i].z)
+                        mn.z = v[i].z;
+                    if (mx.x < v[i].x)
+                        mx.x = v[i].x;
+                    if (mx.y < v[i].y)
+                        mx.y = v[i].y;
+                    if (mx.z < v[i].z)
+                        mx.z = v[i].z;
+                    sp.x = sp.x + v[i].x;
+                    sp.y = sp.y + v[i].y;
+                    sp.z = sp.z + v[i].z;
+                }
+                const float invP = 1.0f / static_cast<float>(p->numVertices);
+                const S_vector pc(sp.x * invP, sp.y * invP, invP * sp.z);
+                S_vector sq(0.0f, 0.0f, 0.0f);
+                const S_vector4 *w = q->worldVertices;
+                for (int i = 0; i < q->numVertices; ++i) {
+                    if (mn.x > w[i].x)
+                        mn.x = w[i].x;
+                    if (mn.y > w[i].y)
+                        mn.y = w[i].y;
+                    if (mn.z > w[i].z)
+                        mn.z = w[i].z;
+                    if (mx.x < w[i].x)
+                        mx.x = w[i].x;
+                    if (mx.y < w[i].y)
+                        mx.y = w[i].y;
+                    if (mx.z < w[i].z)
+                        mx.z = w[i].z;
+                    sq.x = sq.x + w[i].x;
+                    sq.y = sq.y + w[i].y;
+                    sq.z = sq.z + w[i].z;
+                }
+                const float invQ = 1.0f / static_cast<float>(q->numVertices);
+                const S_vector qc(sq.x * invQ, sq.y * invQ, invQ * sq.z);
+                if (mx.x - mn.x < 0.01f)
+                    mx.x = mn.x + 0.1f;
+                if (mx.y - mn.y < 0.01f)
+                    mx.y = mn.y + 0.1f;
+                if (mx.z - mn.z < 0.01f)
+                    mx.z = mn.z + 0.1f;
+                if (!((mx.x - mn.x) * 0.1f >= std::fabs(qc.x - pc.x)) ||
+                    !((mx.y - mn.y) * 0.1f >= std::fabs(qc.y - pc.y)) ||
+                    !((mx.z - mn.z) * 0.1f >= std::fabs(qc.z - pc.z))) {
+                    q = q->next;
+                    continue;
+                }
+                if (q->owner == p->owner) {
+                    p->portalFlags |= PRTF_IN_PORTAL;
+                    q->portalFlags |= PRTF_IN_PORTAL;
+                    q = q->next;
+                    dbgPrintf("!! Portal in portal (sector \"%s\")", p->owner->name ? p->owner->name : "");
+                    continue;
+                }
+                p->otherSide = q;
+                q->otherSide = p;
+                p->connectedSector = q->owner;
+                q->connectedSector = p->owner;
+                p->owner->incomingPortals.PushBack(q);
+                q->owner->incomingPortals.PushBack(p);
+                q = scene->firstPortal;
+            }
+        }
+        if (!p->connectedSector) {
+            p->otherSide = nullptr;
+            const S_vector4 pos = p->worldVertices[0];
+            I3D_sector *s = scene->firstSector;
+            for (int n = scene->sectorCount; n != 0; --n, s = s->nextInScene) {
+                if (s->IsInside(*reinterpret_cast<const S_vector *>(&pos)) && s != p->owner) {
+                    p->connectedSector = s;
+                    s->incomingPortals.PushBack(p);
+                    break;
+                }
+            }
+            if (!p->connectedSector) {
+                p->connectedSector = scene->primarySector;
+                scene->primarySector->incomingPortals.PushBack(p);
+            }
+        }
+        p = p->next;
+    } while (p != scene->firstPortal);
+}
+
+}  // namespace ls3d::i3d

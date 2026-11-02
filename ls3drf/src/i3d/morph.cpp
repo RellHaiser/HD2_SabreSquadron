@@ -380,18 +380,6 @@ I3D_RESULT I3D_morph::Duplicate(I3D_frame *source)
     return I3D_OK;
 }
 
-// 0x10035c10
-void I3D_morph::Prepare()
-{
-    if (!mesh)
-        return;
-    const int level = SelectLevel(LodDistance2());
-    if (!mesh->levels[level])
-        return;
-    Apply(level, mesh);
-    I3D_object::Prepare();
-}
-
 // 0x10035f00
 void I3D_morph::Load()
 {

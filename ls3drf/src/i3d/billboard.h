@@ -24,8 +24,6 @@ public:
     void Load() override;
     // 0x90 0x10005fa0: the cube around the mesh's sphere (it turns).
     void __stdcall UpdateLocalBound() override;
-    // 0x94 0x100078e0: as I3D_object's with the facing matrix (its render vertices made with it).
-    void Prepare() override;
     // 0x9C 0x100060a0: the mesh, then the bound.
     I3D_RESULT __stdcall SetMesh(I3D_mesh *newMesh, uint32_t flags) override;
 
