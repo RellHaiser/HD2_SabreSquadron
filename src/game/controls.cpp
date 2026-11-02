@@ -1,9 +1,11 @@
 #include "game/controls.h"
 
+#include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <malloc.h>
 
 #include "game/cursor.h"
 #include "game/item_defs.h"
@@ -3756,4 +3758,428 @@ bool C_ItemInfo::HandleMessage(S_ControlMessage *message)
     }
     C_ControlGroup::HandleMessage(message);
     return true;
+}
+
+// ----- the list group (type 0xb) and its items (type 6) -----
+
+namespace {
+
+// The navigation keys (DirectInput codes).
+constexpr int KEY_HOME = 0xC7, KEY_UP = 0xC8, KEY_PAGE_UP = 0xC9, KEY_LEFT = 0xCB, KEY_RIGHT = 0xCD, KEY_END = 0xCF,
+              KEY_DOWN = 0xD0, KEY_PAGE_DOWN = 0xD1;
+// The list's scroll directions (Scroll).
+constexpr int SCROLL_NONE = 0, SCROLL_BACK = 1, SCROLL_ON = 2;
+// The enter / leave id the list's focus moves use; the item's unpick id.
+constexpr int FOCUS_MOVE_ID = 0xF;
+constexpr int UNPICK_ID = 1;
+// The selector just in front of its item (a double: the original's).
+constexpr double SELECTOR_DEPTH = 0.1;
+
+} // namespace
+
+C_ListGroup::~C_ListGroup()
+{
+    if (m_origin)
+        _aligned_free(m_origin);
+    delete m_extra;
+    if (m_cursor)
+        m_cursor->Release();
+}
+
+bool C_ListGroup::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_Control::Create(frame, root, desc))
+        return true;
+    m_selector = frame->FindChildFrame("selector*", FIND_FRAMES);
+    if (m_selector)
+        m_selector->SetPosInline(S_vector(0.0f, 0.0f, 0.0f));   // (not when its place is locked)
+    return true;
+}
+
+int C_ListGroup::ScrollRange() const
+{
+    return ItemCount() - m_visible + 1;
+}
+
+void C_ListGroup::PostToValue(uint32_t id, uint32_t value) const
+{
+    if (m_value == 0)
+        return;
+    S_ControlMessage message = Message(id);
+    message.target = m_value;
+    message.value = value;
+    PostControlMessage(message);
+}
+
+bool C_ListGroup::PickItem(C_Control *item)
+{
+    if (m_picked != item) {
+        if (m_picked) {
+            m_picked->OnInput02(UNPICK_ID);
+            m_picked->OnLeave(UNPICK_ID);
+        }
+        m_picked = item;
+    }
+    return true;
+}
+
+bool C_ListGroup::Scroll(int direction)
+{
+    if (direction == SCROLL_ON) {
+        // (Unsigned: without items it scrolls on, the original's.)
+        if (static_cast<uint32_t>(ItemCount() - 1) <= static_cast<uint32_t>(m_last))
+            return false;
+        ++m_first;
+        ++m_last;
+        if (m_downStep != 0.0f) {
+            const S_vector place = m_frame->GetWorldPos();
+            m_frame->SetPos(S_vector(place.x, m_downStep + place.y, place.z));
+            m_frame->Update();
+        }
+        if (m_acrossStep != 0.0f) {
+            const S_vector place = m_frame->GetWorldPos();
+            m_frame->SetPos(S_vector(-m_acrossStep + place.x, place.y, place.z));
+            m_frame->Update();
+        }
+    } else if (direction == SCROLL_BACK) {
+        if (m_first < 1)
+            return false;
+        --m_first;
+        --m_last;
+        if (m_downStep != 0.0f) {
+            const S_vector place = m_frame->GetWorldPos();
+            m_frame->SetPos(S_vector(place.x, -m_downStep + place.y, place.z));
+            m_frame->Update();
+        }
+        if (m_acrossStep != 0.0f) {
+            const S_vector place = m_frame->GetWorldPos();
+            m_frame->SetPos(S_vector(m_acrossStep + place.x, place.y, place.z));
+            m_frame->Update();
+        }
+    }
+    for (int i = 0; i < ItemCount(); ++i) {
+        if (i < m_first || i > m_last)
+            m_children[i]->Hide();
+        else
+            m_children[i]->Show();
+        m_children[i]->HandleMessageCopy(Message(CONTROL_MSG_REFRESH));
+    }
+    if (m_selector)
+        m_selector->SetOn(m_selected >= m_first && m_selected <= m_last);
+    return true;
+}
+
+void C_ListGroup::Select(int index)
+{
+    if (!IsChild(index))
+        return;
+    m_selected = index;
+    while (m_selected < m_first)
+        Scroll(SCROLL_BACK);
+    while (m_last < m_selected)
+        Scroll(SCROLL_ON);
+    if (m_selector) {
+        const S_vector place = m_children[index]->GetFrame()->GetPos();
+        m_selector->SetPosInline(S_vector(place.x, place.y, static_cast<float>(place.z - SELECTOR_DEPTH)));
+        m_selector->SetOn(true);
+    }
+    PostToValue(CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(m_first));
+}
+
+bool C_ListGroup::FocusPrevious()
+{
+    int i = m_focus == -1 ? ItemCount() : m_focus;
+    do {
+        if (--i < 0)
+            return false;
+    } while (!IsChild(i) || !m_children[i]->TakesInput());
+    if (C_Control *focus = Focus()) {
+        if (focus->OnLeave(FOCUS_MOVE_ID) == 0)
+            return true;
+    }
+    m_focus = i;
+    m_children[i]->OnEnter(FOCUS_MOVE_ID);
+    return true;
+}
+
+bool C_ListGroup::FocusNext()
+{
+    for (int i = m_focus + 1; i < ItemCount(); ++i) {
+        if (!IsChild(i) || !m_children[i]->TakesInput())
+            continue;
+        if (C_Control *focus = Focus()) {
+            if (focus->OnLeave(FOCUS_MOVE_ID) == 0)
+                return true;
+        }
+        m_focus = i;
+        m_children[i]->OnEnter(FOCUS_MOVE_ID);
+        return true;
+    }
+    return false;
+}
+
+bool C_ListGroup::Unknown20(int key)
+{
+    if (C_Control *focus = Focus()) {
+        if (focus->TakesInput() && focus->Unknown20(key))
+            return true;
+    }
+    switch (static_cast<uint8_t>(key)) {
+    case KEY_HOME:
+        while (Unknown20(KEY_UP)) {
+        }
+        return false;
+    case KEY_UP:
+    case KEY_LEFT:
+        if (m_focus == m_first) {
+            if (!Scroll(SCROLL_BACK))
+                return false;
+            PostToValue(CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(m_first));
+        }
+        return FocusPrevious();
+    case KEY_PAGE_UP:
+        // (True when a step fails, false after all: the original's.)
+        for (int i = 0; i < m_last - m_first; ++i)
+            if (!Unknown20(KEY_UP))
+                return true;
+        return false;
+    case KEY_RIGHT:
+    case KEY_DOWN:
+        if (m_focus == m_last) {
+            if (!Scroll(SCROLL_ON))
+                return false;
+            PostToValue(CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(m_first));
+        }
+        return FocusNext();
+    case KEY_END:
+        while (Unknown20(KEY_DOWN)) {
+        }
+        return false;
+    case KEY_PAGE_DOWN:
+        for (int i = 0; i < m_last - m_first; ++i)
+            if (!Unknown20(KEY_DOWN))
+                return true;
+        return false;
+    }
+    return false;
+}
+
+int C_ListGroup::OnClick(int id)
+{
+    const int result = C_ControlGroup::OnClick(id);
+    if (result != 0)
+        Select(m_focus);
+    return result;
+}
+
+int C_ListGroup::OnPress(int id)
+{
+    const int result = C_ControlGroup::OnPress(id);
+    if (result != 0)
+        Select(m_focus);
+    return result;
+}
+
+int C_ListGroup::OnWheel(int, int amount)
+{
+    if (m_value == 0)
+        return CONTROL_NOT_HANDLED;
+    C_Control *bar = FindControl(m_value, true);
+    if (amount > 0) {
+        for (unsigned steps = (static_cast<unsigned>(amount) - 1) / WHEEL_STEP + 1; steps; --steps)
+            if (bar)
+                bar->HandleMessageCopy(Message(CONTROL_MSG_SCROLL_UP));
+    } else if (amount < 0) {
+        for (unsigned steps = (static_cast<unsigned>(-amount) - 1) / WHEEL_STEP + 1; steps; --steps)
+            if (bar)
+                bar->HandleMessageCopy(Message(CONTROL_MSG_SCROLL_DOWN));
+    }
+    return CONTROL_HANDLED;
+}
+
+void C_ListGroup::Sort()
+{
+    if (!m_sorted)
+        return;
+    const int count = ItemCount();
+    for (int i = 0; i < count - 1; ++i)
+        for (int j = i + 1; j < count; ++j)
+            if (m_children[j]->GetId() < m_children[i]->GetId())
+                std::swap(m_children[i], m_children[j]);
+}
+
+void C_ListGroup::Layout(int)
+{
+    if (!m_origin)
+        return;
+    for (int i = 0; i < ItemCount(); ++i) {
+        I3D_frame *frame = m_children[i]->GetFrame();
+        if (m_downStep != 0.0f)
+            frame->SetPosInline(S_vector(m_origin->x, -(static_cast<float>(i) * m_downStep) + m_origin->y, m_origin->z));
+        if (m_acrossStep != 0.0f)
+            frame->SetPosInline(S_vector(static_cast<float>(i) * m_acrossStep + m_origin->x, m_origin->y, m_origin->z));
+    }
+}
+
+bool C_ListGroup::HandleMessage(S_ControlMessage *message)
+{
+    const int target = FindChild(message->target);
+    if (IsChild(target))
+        return m_children[target]->HandleMessage(message);
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    S_ControlMessage refresh = Message(CONTROL_MSG_REFRESH);
+    refresh.target = m_id;
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_REMOVE_ITEM: {
+        const int index = FindChild(message->value);
+        if (index < 0)
+            return true;
+        C_Control *item = m_children[index];
+        // The screen told of its frame.
+        S_ControlMessage removed = Message(CONTROL_MSG_REMOVE_ITEM);
+        removed.value2 = reinterpret_cast<uintptr_t>(item->GetFrame());
+        PostControlMessage(removed);
+        if (m_picked == item)
+            m_picked = nullptr;
+        delete item;
+        m_children.erase(m_children.begin() + index);
+        while (m_first != 0 && ItemCount() - m_first < m_visible)
+            Scroll(SCROLL_BACK);
+        HandleMessageCopy(refresh);
+        return true;
+    }
+    case CONTROL_MSG_SHOW:
+        Show();
+        PickItem(nullptr);
+        return true;
+    case CONTROL_MSG_HIDE:
+        Hide();
+        PickItem(nullptr);
+        return true;
+    case CONTROL_MSG_CAN_SCROLL_UP:
+        message->value = m_first > 0;
+        return true;
+    case CONTROL_MSG_CAN_SCROLL_DOWN:
+        message->value = m_last < ItemCount() - 1;
+        return true;
+    case CONTROL_MSG_GET_SCROLL_RANGE:
+        message->value = static_cast<uint32_t>(ScrollRange());
+        return true;
+    case CONTROL_MSG_SET_VISIBLE:
+        m_visible = static_cast<int>(message->value);
+        m_last = m_visible - 1;
+        HandleMessageCopy(refresh);
+        return true;
+    case CONTROL_MSG_SET_ACROSS_STEP:
+        m_downStep = 0.0f;
+        m_acrossStep = ValueFloat(message->value2);
+        return true;
+    case CONTROL_MSG_SET_DOWN_STEP:
+        m_acrossStep = 0.0f;
+        m_downStep = ValueFloat(message->value2);
+        return true;
+    case CONTROL_MSG_ADD_ITEM: {
+        auto *desc = reinterpret_cast<S_ControlDesc *>(message->value2);
+        if (!IsChild(FindChild(desc->id))) {
+            CreateChild(m_frame, reinterpret_cast<I3D_frame *>(static_cast<uintptr_t>(message->value)), desc);
+            Sort();
+            HandleMessageCopy(refresh);
+        }
+        delete desc;
+        return true;
+    }
+    case CONTROL_MSG_NEXT_ITEM:
+        Scroll(SCROLL_ON);
+        return true;
+    case CONTROL_MSG_PREVIOUS_ITEM:
+        Scroll(SCROLL_BACK);
+        return true;
+    case CONTROL_MSG_CLEAR:
+        while (!m_children.empty()) {
+            S_ControlMessage removed = Message(CONTROL_MSG_REMOVE_ITEM);
+            removed.value2 = reinterpret_cast<uintptr_t>(m_children.back()->GetFrame());
+            PostControlMessage(removed);
+            delete m_children.back();
+            m_children.pop_back();
+        }
+        m_frame->SetPos(S_vector(0.0f, 0.0f, 0.0f));
+        m_first = 0;
+        m_last = m_visible - 1;
+        HandleMessageCopy(refresh);
+        m_picked = nullptr;
+        return true;
+    case CONTROL_MSG_SET_ORIGIN:
+        m_origin = reinterpret_cast<S_vector *>(message->value2);
+        return true;
+    case CONTROL_MSG_GET_POSITION:
+        message->value = static_cast<uint32_t>(m_first);
+        return true;
+    case CONTROL_MSG_SET_POSITION: {
+        const int position = static_cast<int>(message->value);
+        while (position != m_first) {
+            if (!(position > m_first ? Scroll(SCROLL_ON) : Scroll(SCROLL_BACK)))
+                break;
+        }
+        return true;
+    }
+    case CONTROL_MSG_REFRESH:
+        Layout(0);
+        Scroll(SCROLL_NONE);
+        if (m_value != 0) {
+            PostToValue(CONTROL_MSG_SET_COUNT, static_cast<uint32_t>(ScrollRange()));
+            if (ScrollRange() != 0)
+                PostToValue(CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(m_first));
+        }
+        return true;
+    case CONTROL_MSG_SELECT_INDEX:
+        Select(static_cast<int>(message->value));
+        return true;
+    }
+    C_Control::HandleMessage(message);
+    return true;
+}
+
+int C_ListItem::OnEnter(int)
+{
+    if (!m_picked)
+        m_box->SetHover(0);
+    Notify(CONTROL_NOTIFY_ENTER, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_ListItem::OnLeave(int)
+{
+    if (!m_picked)
+        m_box->ClearHover();
+    Notify(CONTROL_NOTIFY_LEAVE, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_ListItem::OnClick(int id)
+{
+    m_picked = true;
+    // (Its parent taken to be a list group: the original's.)
+    static_cast<C_ListGroup *>(m_parent)->PickItem(this);
+    C_TextButton::OnEnter(id);
+    Notify(CONTROL_NOTIFY_CLICK, 0);
+    return CONTROL_HANDLED;
+}
+
+int C_ListItem::OnInput02(int id)
+{
+    if (id == UNPICK_ID) {
+        m_picked = false;
+        C_TextButton::OnLeave(UNPICK_ID);
+        Notify(CONTROL_NOTIFY_02, 0);
+    }
+    return CONTROL_HANDLED;
+}
+
+int C_ListItem::OnPress(int id)
+{
+    Notify(CONTROL_NOTIFY_PRESS, 0);
+    return OnClick(id);
 }

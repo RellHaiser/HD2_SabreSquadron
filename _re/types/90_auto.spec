@@ -500,7 +500,7 @@ end
 class C_auto_00814fe0 size=0x4 vtable=0x00814fe0:34
 end
 
-class C_auto_00815068 size=0x4 vtable=0x00815068:67
+class C_ListGroup size=0x4 vtable=0x00815068:67
 end
 
 class C_Slider size=0x4 vtable=0x00815288:33

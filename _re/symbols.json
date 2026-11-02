@@ -29013,6 +29013,31 @@
   "module": "zz_idioms",
   "name": "copy4_653ea0"
  },
+ "00653f70": {
+  "module": "controls",
+  "name": "C_ListItem::OnEnter",
+  "proto": "int __thiscall OnEnter(C_TextButton *this, int id)"
+ },
+ "00653fa0": {
+  "module": "controls",
+  "name": "C_ListItem::OnLeave",
+  "proto": "int __thiscall OnLeave(C_TextButton *this, int id)"
+ },
+ "00653fd0": {
+  "module": "controls",
+  "name": "C_ListItem::OnClick",
+  "proto": "int __thiscall OnClick(C_TextButton *this, int id)"
+ },
+ "00654010": {
+  "module": "controls",
+  "name": "C_ListItem::OnInput02",
+  "proto": "int __thiscall OnInput02(C_TextButton *this, int id)"
+ },
+ "00654040": {
+  "module": "controls",
+  "name": "C_ListItem::OnPress",
+  "proto": "int __thiscall OnPress(C_TextButton *this, int id)"
+ },
  "00654060": {
   "module": "controls",
   "name": "C_CheckBox::OnEnter",
@@ -29196,6 +29221,76 @@
  "00655660": {
   "module": "zz_idioms",
   "name": "vector_clear_655660"
+ },
+ "006556c0": {
+  "module": "controls",
+  "name": "C_ListGroup::FocusPrevious",
+  "proto": "bool __thiscall FocusPrevious(C_ListGroup *this)"
+ },
+ "00655750": {
+  "module": "controls",
+  "name": "C_ListGroup::FocusNext",
+  "proto": "bool __thiscall FocusNext(C_ListGroup *this)"
+ },
+ "006557d0": {
+  "module": "controls",
+  "name": "C_ListGroup::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_ListGroup *this, int key)"
+ },
+ "00655b40": {
+  "module": "controls",
+  "name": "C_ListGroup::Create",
+  "proto": "bool __thiscall Create(C_ListGroup *this, void * frame, void * root, void * desc)"
+ },
+ "00655bc0": {
+  "module": "controls",
+  "name": "C_ListGroup::Sort",
+  "proto": "void __thiscall Sort(C_ListGroup *this)"
+ },
+ "00655c70": {
+  "module": "controls",
+  "name": "C_ListGroup::Layout",
+  "proto": "void __thiscall Layout(C_ListGroup *this, int unused)"
+ },
+ "00655db0": {
+  "module": "controls",
+  "name": "C_ListGroup::OnPress",
+  "proto": "int __thiscall OnPress(C_ListGroup *this, int id)"
+ },
+ "00655de0": {
+  "module": "controls",
+  "name": "C_ListGroup::OnClick",
+  "proto": "int __thiscall OnClick(C_ListGroup *this, int id)"
+ },
+ "00655e10": {
+  "module": "controls",
+  "name": "C_ListGroup::Select",
+  "proto": "void __thiscall Select(C_ListGroup *this, int index)"
+ },
+ "00655fe0": {
+  "module": "controls",
+  "name": "C_ListGroup::OnWheel",
+  "proto": "int __thiscall OnWheel(C_ListGroup *this, int id, int amount)"
+ },
+ "00656130": {
+  "module": "controls",
+  "name": "C_ListGroup::ScrollRange",
+  "proto": "int __thiscall ScrollRange(C_ListGroup *this)"
+ },
+ "00656230": {
+  "module": "controls",
+  "name": "C_ListGroup::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_ListGroup *this, void * message)"
+ },
+ "006569f0": {
+  "module": "controls",
+  "name": "C_ListGroup::PickItem",
+  "proto": "bool __thiscall PickItem(C_ListGroup *this, void * item)"
+ },
+ "00656a20": {
+  "module": "controls",
+  "name": "C_ListGroup::Scroll",
+  "proto": "bool __thiscall Scroll(C_ListGroup *this, int direction)"
  },
  "00656dc0": {
   "module": "controls",
@@ -29743,6 +29838,16 @@
   "name": "C_Slider::~C_Slider",
   "proto": "void __thiscall ~C_Slider(C_Slider *this)"
  },
+ "0065e840": {
+  "module": "controls",
+  "name": "C_ListGroup::~C_ListGroup",
+  "proto": "void __thiscall ~C_ListGroup(C_ListGroup *this)"
+ },
+ "0065ea40": {
+  "module": "controls",
+  "name": "C_ListGroup::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_ListGroup *this, uchar flags)"
+ },
  "0065efe0": {
   "module": "controls",
   "name": "C_ChatInput::ScalarDeletingDestructor",
@@ -29822,6 +29927,16 @@
   "module": "controls",
   "name": "C_TextButton::~C_TextButton",
   "proto": "void __thiscall ~C_TextButton(C_TextButton *this)"
+ },
+ "006601b0": {
+  "module": "controls",
+  "name": "C_ListItem::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_TextButton *this, uchar flags)"
+ },
+ "006601d0": {
+  "module": "controls",
+  "name": "C_ListItem::~C_ListItem",
+  "proto": "void __thiscall ~C_ListItem(C_TextButton *this)"
  },
  "00660310": {
   "module": "controls",

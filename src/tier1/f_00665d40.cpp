@@ -400,7 +400,7 @@ uint32_t FUN_00666650(void *_this,uint32_t param_1,int param_2, ...)
 
 
 // 0x006666f0
-uint32_t C_auto_00814980__FUN_006666f0(C_auto_00814980 *_this,int *param_1,uint32_t param_2,int param_3, ...)
+uint32_t C_auto_00814980__FUN_006666f0(C_auto_00814980 *_this,int *param_1,void *param_2,int param_3, ...)
 {
   uint8_t stack0xffffffac[64];
   void *pvStack_c;
@@ -434,7 +434,7 @@ uint32_t C_auto_00814980__FUN_006666f0(C_auto_00814980 *_this,int *param_1,uint3
   int *piStack_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
-  C_auto_00814a08__FUN_00655b40((C_auto_00814a08 *)_this,param_1,param_2,param_3);
+  C_ListGroup__Create((C_ListGroup *)_this,param_1,param_2,(void *)param_3);
   *(uint32_t *)(_this->m_050 + 0xec) = 0;
   _this->m_0a0 = 0;
   local_48 = 0;
@@ -545,7 +545,7 @@ uint32_t C_auto_00814980__FUN_006666f0(C_auto_00814980 *_this,int *param_1,uint3
   if ((piStack_18 != 0) && (*piStack_18 = *piStack_18 - 1, *piStack_18 == 0)) {
     tier1_operator_delete(piStack_18);
   }
-  FUN_00655c70((int)_this);
+  C_ListGroup__Layout((C_ListGroup *)_this,0);
   piStack_18 = 0;
   uStack_2c = 0;
   uStack_28 = 0x200002c;
@@ -707,9 +707,9 @@ uint32_t C_auto_00814980__FUN_00666e80(C_auto_00814980 *_this,uint32_t *param_1,
   char cVar2;
   uint32_t uVar3;
   int iVar4;
-  uint3 extraout_var;
-  int *piVar5;
   int *ptr;
+  int *piVar5;
+  uint3 extraout_var_00;
   uint32_t uVar6;
   int *extraout_EAX;
   int *extraout_EAX_00;
@@ -745,6 +745,7 @@ uint32_t C_auto_00814980__FUN_00666e80(C_auto_00814980 *_this,uint32_t *param_1,
   int *piStack_18;
   void *pvStack_14;
   uint32_t uStack_4;
+  uint3 extraout_var;
   uStack_4 = 0xffffffff;
   pCVar1 = _this->vtable;
   uVar3 = (*pCVar1->vf00)(*param_1);
@@ -865,7 +866,8 @@ uint32_t C_auto_00814980__FUN_00666e80(C_auto_00814980 *_this,uint32_t *param_1,
     break;
   default:
 switchD_0066712d_caseD_200001d:
-    ptr = (int *)C_auto_00815068__FUN_00656230((C_auto_00815068 *)_this,param_1);
+    C_ListGroup__HandleMessage((C_ListGroup *)_this,param_1);
+    ptr = (int *)((uint32_t)extraout_var_00 << 8);
     break;
   case 0x200002b:
     if (_this->m_0ac == 0) {
@@ -913,7 +915,7 @@ LAB_006671af:
         _this->m_09c = (_this->m_0b0 - _this->m_0ac >> 2) - 1;
       }
     }
-    FUN_00656a20(_this,0);
+    C_ListGroup__Scroll((C_ListGroup *)_this,0);
     uVar6 = _this->m_098;
     uVar7 = _this->m_0c0;
     if ((int)uVar6 <= _this->m_09c) {

@@ -126,6 +126,20 @@ enum : uint32_t {
     CONTROL_MSG_SET_ITEM_COUNT = 0x100007C,
     CONTROL_MSG_SET_SECOND_COUNT = 0x1000082,
     CONTROL_MSG_ITEM_COUNTED = 0x2000083,
+    // The list group's: can it scroll up / down (value), its scroll range (value), the items shown
+    // at once (value), an item's step across or down from the last (value2 a float; the other 0),
+    // the first item's place (value2 an S_vector from _aligned_malloc, the list's to free), an
+    // item selected by index (value); ADD_ITEM (value the root frame, value2 an S_ControlDesc *,
+    // the list's to delete), REMOVE_ITEM (value the item's id; posted on with value2 its frame),
+    // PREVIOUS_ITEM / NEXT_ITEM a step up / down, CLEAR, GET_POSITION, SET_POSITION, REFRESH.
+    CONTROL_MSG_CAN_SCROLL_UP = 0x100000F,
+    CONTROL_MSG_CAN_SCROLL_DOWN = 0x1000010,
+    CONTROL_MSG_GET_SCROLL_RANGE = 0x100001F,
+    CONTROL_MSG_SET_VISIBLE = 0x1000028,
+    CONTROL_MSG_SET_ACROSS_STEP = 0x1000029,
+    CONTROL_MSG_SET_DOWN_STEP = 0x100002A,
+    CONTROL_MSG_SET_ORIGIN = 0x100006B,
+    CONTROL_MSG_SELECT_INDEX = 0x20000AA,
     // A control to be ticked (posted to target 0 when made, value2 the control: the tooltip, the
     // scroll bar and its arrows).
     CONTROL_MSG_ADD_TICKER = 0x200007A,
@@ -1039,4 +1053,86 @@ protected:
     C_PictureControl *m_picture = nullptr;              // +0x80
     C_PictureControl *m_secondPicture = nullptr;        // +0x84
     C_TitleControl *m_stats = nullptr;                  // +0x88
+};
+
+class C_ListItem;
+
+// A list group (type 0xb, vtable 0x00815068; the base of types 0x23 and 0x18): a group of items
+// laid out from an origin by a step (down or across), `m_visible` of them shown from `m_first` (the
+// list's frame moved by the step as it scrolls); one selected (its "selector*" frame behind it),
+// one picked (a C_ListItem). Its scroll posted to the control its value names (a scroll bar); the
+// arrow keys, Home / End and the page keys move the focus.
+class C_ListGroup : public C_ControlGroup {             // 0xA0 bytes
+public:
+    C_ListGroup(I3D_scene *scene, uint32_t id, C_Control *parent) : C_ControlGroup(scene, id, parent) {}
+    ~C_ListGroup() override;                             // 0x0065ea40 (0x0065e840): the origin freed, the extra
+                                                        // control deleted, the cursor released
+
+    // The focus' key (taking input); else the navigation keys (true: moved).
+    bool Unknown20(int key) override;                   // 0x006557d0
+    // The base's; the selector frame at (0, 0, 0); true.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x00655b40
+    // The group's; handled: the focus selected.
+    int OnClick(int id) override;                       // 0x00655de0
+    int OnPress(int id) override;                       // 0x00655db0
+    // A page up or down of the scroll bar the value names per 120 (none: not handled).
+    int OnWheel(int id, int amount) override;           // 0x00655fe0
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x00656230
+    // The items past the visible ones, + 1.
+    virtual int ScrollRange() const;                    // +0x84 0x00656130
+
+    // The item picked (the previous one's input 02 and leave: deselected).
+    bool PickItem(C_Control *item);                     // 0x006569f0
+
+protected:
+    // A step (1 up, 2 down; 0 none), the items shown or hidden, refreshed; the selector shown with
+    // the selected (false: no step).
+    bool Scroll(int direction);                         // 0x00656a20
+    // The item at the index selected (scrolled to; the selector behind it; the position posted).
+    void Select(int index);                             // 0x00655e10
+    // The focus moved to the previous / next item taking input (false: none; the focus' leave
+    // refused: true, not moved).
+    bool FocusPrevious();                               // 0x006556c0
+    bool FocusNext();                                   // 0x00655750
+    // The items by their ids (when sorted).
+    void Sort();                                        // 0x00655bc0
+    // The items at the origin by the step (the argument not read: the original's, 0).
+    void Layout(int);                                   // 0x00655c70
+    // A message posted to the control the value names (none: nothing).
+    void PostToValue(uint32_t id, uint32_t value) const;
+    int ItemCount() const { return static_cast<int>(m_children.size()); }
+
+    C_Cursor *m_cursor = nullptr;                       // +0x70 (the subclasses')
+    C_Control *m_picked = nullptr;                      // +0x74
+    C_Control *m_extra = nullptr;                       // +0x78 (the subclasses'; deleted with the list)
+    I3D_frame *m_selector = nullptr;                    // +0x7C
+    int m_selected = -1;                                // +0x80
+    bool m_sorted = true;                               // +0x84
+    S_vector *m_origin = nullptr;                       // +0x88 (_aligned_malloc'd, owned)
+    float m_downStep = 0.0f;                            // +0x8C
+    float m_acrossStep = 0.0f;                          // +0x90
+    int m_visible = 0;                                  // +0x94
+    int m_first = 0;                                    // +0x98
+    int m_last = 0;                                     // +0x9C
+};
+
+// An item of a list group (type 6, vtable 0x00814ed0): a text button whose click picks it (its
+// parent a C_ListGroup), its box's hover while not picked.
+class C_ListItem : public C_TextButton {                // 0x7C bytes
+public:
+    C_ListItem(I3D_scene *scene, uint32_t id, C_Control *parent) : C_TextButton(scene, id, parent) {}
+    ~C_ListItem() override = default;                   // 0x006601b0 (0x006601d0)
+
+    // Not picked: the box's hover; notified (handled).
+    int OnEnter(int id) override;                       // 0x00653f70
+    int OnLeave(int id) override;                       // 0x00653fa0
+    // Picked: the parent's pick, the text button's enter, notified.
+    int OnClick(int id) override;                       // 0x00653fd0
+    // Id 1 (the list's unpick): not picked, the text button's leave, CONTROL_NOTIFY_02.
+    int OnInput02(int id) override;                     // 0x00654010
+    // CONTROL_NOTIFY_PRESS, then the click.
+    int OnPress(int id) override;                       // 0x00654040
+
+protected:
+    bool m_picked = false;                              // +0x78
 };

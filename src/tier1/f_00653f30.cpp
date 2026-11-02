@@ -35,61 +35,6 @@ uint32_t FUN_00653f60(...)
 }
 
 
-// 0x00653f70
-uint32_t FUN_00653f70(void *param_1, ...)
-{
-  if (*(char *)((int)param_1 + 0x78) == '\0') {
-    C_TextBox__SetHover(*(C_TextBox **)((int)param_1 + 0x6c),0);
-  }
-  C_Control__Notify(param_1,0x4003000,0);
-  return 1;
-}
-
-
-// 0x00653fa0
-uint32_t FUN_00653fa0(void *param_1, ...)
-{
-  if (*(char *)((int)param_1 + 0x78) == '\0') {
-    C_TextBox__ClearHover(*(C_TextBox **)((int)param_1 + 0x6c));
-  }
-  C_Control__Notify(param_1,0x4004000,0);
-  return 1;
-}
-
-
-// 0x00653fd0
-uint32_t FUN_00653fd0(int *param_1, ...)
-{
-  int in_stack_00000004;
-  *(uint8_t *)(param_1 + 0x1e) = 1;
-  FUN_006569f0((void *)param_1[0x13],param_1);
-  C_TextButton__OnEnter((C_TextButton *)param_1,in_stack_00000004);
-  C_Control__Notify((C_Control *)param_1,0x4001000,0);
-  return 1;
-}
-
-
-// 0x00654010
-uint32_t FUN_00654010(void *_this,int param_1, ...)
-{
-  if (param_1 == 1) {
-    *(uint8_t *)((int)_this + 0x78) = 0;
-    C_TextButton__OnLeave(_this,1);
-    C_Control__Notify(_this,0x4002000,0);
-  }
-  return 1;
-}
-
-
-// 0x00654040
-uint32_t FUN_00654040(void *_this,uint32_t param_1, ...)
-{
-  C_Control__Notify(_this,0x4006000,0);
-  (**(code **)(*(int *)_this + 0x38))(param_1);
-  return 0;
-}
-
-
 // 0x00654850
 uint32_t FUN_00654850(uint32_t *param_1, ...)
 {
