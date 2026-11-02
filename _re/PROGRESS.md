@@ -6788,6 +6788,42 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     g_cursor 0x008ae558); 20 functions in ported.txt. Stats: 8,606 of 12,293 functions by hand
     (76.7 % by size).
 
+  PART 9c-vi-b DONE (2026-11-02): the controls' factory, C_Control::CreateChild 0x0065d470
+  (src/game/control_factory.cpp, new: apart from control.cpp so the text build keeps its fake).
+  9c-vi rescoped: b is the factory; the screens move to part 9d (below), so 9c ends here.
+  - CreateChild: the child frame found by the description's name (a mask: ENUMF_WILDMASK, visuals
+    and dummies, 0x10021); none: false ("ERROR : cannot find frame : %s !!" printed into a local
+    buffer, dropped). The type's control made (types 2..0x28, jump table 0x0065e368; 3 and 0x1b
+    both the edit box; an unknown type: false, "ERROR : cannot create item : %d !!") with the
+    parent's scene, the description's id, the parent; every class's inlined constructor defaults
+    already its members' (checked case by case). Create(child frame, root, description) failing:
+    deleted, still true; else SetStrings (+0x78), HandleMessages (+0x70) on the description's own
+    messages (their answers written back into it), pushed last (0x00663b30).
+  - Harness: a factory build (build_factory.bat, check_factory.py: the text build with
+    FACTORY_TEST, control_factory.cpp linked, control_test.inc's fake left out; factory_test.inc
+    run last by ControlsTest; only its line checked). Every type's class (typeid) found without
+    meeting its Create: the child frame's every engine slot throws, the control the first big
+    allocation since (operator new replaced in that build). 7 checks: the types, unknown types,
+    a frame not found, made (frame, data, type, grandchildren, the parent's other child first),
+    the messages (written back), the strings before the messages and the root passed on (a
+    scrolled text), a failed Create (a button: deleted, the cursor released). 22 of 22 both
+    orders; the text build unchanged, 22 of 22 both orders.
+  - Mutations (mutations/mutate_9c6b.py, generated plus by hand: each case's class swapped with
+    the next, the mask, the arguments, the order, the messages copied, the insertion): 64 cases,
+    all caught. The first run left 1 (the root passed as the child frame: the strings test now
+    links its list's select frame to a root of its own).
+  - The screens (part 9d now, with the menu descriptions 0x00623e30..0x006269b0 and C_GameMenu
+    they need): C_Screen root vtable 0x00815540, subclasses 0x008155d8 (the message box),
+    0x00815918, 0x008156b8. Found so far: ctor 0x00668420 (scene, frame: the cursor acquired at
+    +0x70, the frame +0x74, a byte +0x78, a C_str +0x7C, id -1); Hide 0x00668740; Show(int) +0x84
+    0x00668700; Tick 0x00668a50 (notification 0x4014000, then the focus' Tick); Unknown20
+    0x00668970 (keys 0x1C / 0x39 / 0x9C: the focus' OnClick with its id); HandleMessage 0x006687f0
+    (0x2000016 moves the focus); +0x8C Build 0x00668770; +0x88 0x00668510 (false); dtor
+    0x00668550; 0x00668880, 0x006688f0, 0x006689f0 unreferenced.
+  - Build: MSVC clean. Tier 1: 475 errors in 78 files, 192 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names unchanged (C_Control::CreateChild named in 9c-i); 0x0065d470 in ported.txt.
+    Stats: 8,607 of 12,293 functions by hand (76.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

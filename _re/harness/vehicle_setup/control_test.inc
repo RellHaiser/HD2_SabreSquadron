@@ -13,6 +13,7 @@
 // The factory (part 9c's last) faked: logged.
 // (The factory, part 9c-vi: logged; a test may make the child.)
 void (*g_ctCreateChild)(C_Control *parent, I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) = nullptr;
+#ifndef FACTORY_TEST   // (the factory build: the real one, game/control_factory.cpp)
 bool C_Control::CreateChild(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
 {
     GfLog("child %s %s %s %d", GfName(frame), GfName(root), desc->name.c_str(), desc->type);
@@ -20,6 +21,7 @@ bool C_Control::CreateChild(I3D_frame *frame, I3D_frame *root, const S_ControlDe
         g_ctCreateChild(this, frame, root, desc);
     return true;
 }
+#endif
 
 namespace {
 

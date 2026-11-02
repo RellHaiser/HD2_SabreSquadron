@@ -61,6 +61,7 @@ void ServerTest(I3D_scene *scene);
 void HotKeyTest(I3D_scene *scene);
 void GroupsTest(I3D_scene *scene);
 void MovieTest(I3D_scene *scene);
+void FactoryTest(I3D_scene *scene);
 
 namespace {
 
@@ -1019,6 +1020,9 @@ void ControlsTest()
     HotKeyTest(scene);
     GroupsTest(scene);
     MovieTest(scene);
+#ifdef FACTORY_TEST
+    FactoryTest(scene);
+#endif
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
     g_gfLog.clear();
@@ -1044,3 +1048,6 @@ void ControlsTest()
 #include "hotkey_test.inc"
 #include "groups_test.inc"
 #include "movie_test.inc"
+#ifdef FACTORY_TEST
+#include "factory_test.inc"
+#endif
