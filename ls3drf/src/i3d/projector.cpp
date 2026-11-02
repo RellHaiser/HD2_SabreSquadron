@@ -35,13 +35,8 @@ namespace {
 // The projectors waiting for RenderProjectors (0x100be9bc, grow 0x20).
 C_vector<I3D_projector *> s_pending(0x20);
 
-// Build's walk (0x10045bd0): the projector's sector, world box, flags, sector mask and the next
-// free receiver slot (0x100be9b8, 0x100be9b4, 0x100be990, 0x100be9d0, 0x100be9cc).
-I3D_sector *s_buildSector;
-const I3D_bbox *s_buildBox;
-uint32_t s_buildFlags;
-uint32_t s_buildSectorMask;
-int s_numReceivers;                         // 0x100be9b0
+// How many receivers Rebuild put in proj::g_receivers (0x100be9b0).
+int s_numReceivers;
 
 I3D_sector *FindSector(I3D_frame *f)
 {
@@ -77,51 +72,6 @@ bool Receives(I3D_visual *v)
     }
 }
 
-// 0x10045bd0
-void GatherReceivers(I3D_frame *f)
-{
-    if (!(f->frameFlags & FRMFLAGS_ON))
-        return;
-    const I3D_bbox &fb = f->GetBound().bbox;
-    const I3D_bbox &pb = *s_buildBox;
-    if (pb.max.x < fb.min.x || pb.max.y < fb.min.y || pb.max.z < fb.min.z || fb.max.x < pb.min.x ||
-        fb.max.y < pb.min.y || fb.max.z < pb.min.z)
-        return;
-    switch (f->type) {
-    case FRAME_VISUAL: {
-        auto *v = static_cast<I3D_visual *>(f);
-        if (!Receives(v))
-            break;
-        const I3D_bbox &wb = v->GetWorldBound();
-        if (wb.min.x <= pb.max.x && wb.min.y <= pb.max.y && wb.min.z <= pb.max.z && pb.min.x <= wb.max.x &&
-            pb.min.y <= wb.max.y && pb.min.z <= wb.max.z) {
-            if (s_numReceivers > 0x1ff)
-                return;
-            proj::g_receivers[s_numReceivers++] = v;
-        }
-        break;
-    }
-    case FRAME_SECTOR:
-        if (f != s_buildSector) {
-            if (s_buildFlags & 8)
-                return;
-            if (!(static_cast<uint32_t>(static_cast<I3D_sector *>(f)->environmentId) & s_buildSectorMask))
-                return;
-        }
-        break;
-    case FRAME_MODEL:
-        if (s_buildFlags & 4)
-            return;
-        break;
-    default:
-        break;
-    }
-    if (!(s_buildFlags & 0x10)) {
-        for (I3D_frame *c = f->firstChild; c; c = c->nextSibling)
-            GatherReceivers(c);
-    }
-}
-
 // The vertex color of a fade mode at depth z.
 uint32_t PackColor(uint32_t a, float r, float g, float b)
 {
@@ -141,7 +91,9 @@ float Clamp01(float f)
 
 }  // namespace
 
-// 0x10043730
+// LS3DRF 0x10025240 (from LS3DF 0x10043730): LS3DRF's projector (0x220 bytes) has no projected
+// geometry. Init stops at receiverSum (LS3DRF's +0x218), leaves the vertices, faces, buffers,
+// sector and stamps as they were, and sets no VISF_NO_ZWRITE.
 void I3D_projector::Init()
 {
     I3D_visual::Init();
@@ -161,20 +113,6 @@ void I3D_projector::Init()
     color = S_vector4{1.0f, 1.0f, 1.0f, 0.0f};
     mode = 0;
     receiverSum = 0;
-    vertices = nullptr;
-    vertexCapacity = 0;
-    numVertices = 0;
-    faces = nullptr;
-    faceCapacity = 0;
-    numOpaque = 0;
-    numBlended = 0;
-    blendedCenter = S_vector4{0.0f, 0.0f, 0.0f, 0.0f};
-    numReceivers = 0;
-    sector = nullptr;
-    buildStamp = -1;
-    vb = S_VBAlloc{};
-    ib = S_IBAlloc{};
-    visualFlags |= VISF_NO_ZWRITE;
 }
 
 // LS3DRF 0x10025370 (from LS3DF 0x100438f0)
@@ -426,36 +364,9 @@ void I3D_projector::Rebuild()
         QueueItems();
 }
 
-// 0x10045ab0
-void I3D_projector::Build(uint32_t flags, I3D_frame *root)
-{
-    if (!sector && !(sector = FindSector(this)))
-        return;
-    s_buildSector = sector;
-    buffered = 3;
-    projFlags |= PROJF_BUFFERED;
-    s_numReceivers = 0;
-    s_buildBox = &GetWorldBound();
-    s_buildFlags = flags;
-    s_buildSectorMask = static_cast<uint32_t>(sector->environmentId);
-    if (!root && !(flags & 8)) {
-        I3D_scene *scene = sector->scene;
-        if (!scene) {
-            numVertices = 0;
-            return;
-        }
-        GatherReceivers(scene->primarySector);
-        if (flags & 2)
-            GatherReceivers(scene->omniSector);
-    } else {
-        GatherReceivers(root ? root : sector);
-    }
-    if (s_numReceivers) {
-        BuildGeometry();
-        return;
-    }
-    numVertices = 0;
-}
+// LS3DRF's shared empty stub 0x10011b40 (marked at the scene's SetDir; from LS3DF 0x10045ab0): no
+// projected geometry is built.
+void I3D_projector::Build(uint32_t, I3D_frame *) {}
 
 // 0x100441c0
 void I3D_projector::BuildGeometry()

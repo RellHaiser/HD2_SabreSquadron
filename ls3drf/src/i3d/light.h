@@ -108,9 +108,8 @@ static_assert(offsetof(I3D_light, hardwareIndex) == 0x25C, "I3D_light layout");
 
 namespace ls3d::i3d {
 
-// Every light, by device light index (0x100d13bc; render helper 0x10063c20). Nothing takes a
-// light out: its Uninit leaves it in.
+// The lights by device light index (0x100d13bc), for the render path. Nothing adds one: the light
+// Init, LS3DRF's, does not register (LS3DF's render helper 0x10063c20), so it stays empty.
 extern C_vector<I3D_light *> g_lights;
-int RegisterLight(I3D_light *light);
 
 }  // namespace ls3d::i3d

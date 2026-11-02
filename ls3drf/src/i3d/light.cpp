@@ -13,12 +13,6 @@ namespace ls3d::i3d {
 
 C_vector<I3D_light *> g_lights(0x100);
 
-int RegisterLight(I3D_light *light)
-{
-    g_lights.PushBack(light);
-    return g_lights.Size() - 1;
-}
-
 }  // namespace ls3d::i3d
 
 using namespace ls3d;
@@ -75,6 +69,8 @@ template <float Square(const S_vector &)> static void SetConeCenter(I3D_light &l
     l.coneCenter = S_vector(dir.x * r + w.m[3][0], dir.y * r + w.m[3][1], dir.z * r + w.m[3][2]);
 }
 
+// LS3DRF 0x10016bb0 (from LS3DF 0x10020c80): no Direct3D light and no light list. Of d3dLight only the
+// position and the direction are set (LS3DRF's own block at +0x1f0), and the squares sum y, z, x.
 void I3D_light::Init()
 {
     I3D_frame::Init();
@@ -105,7 +101,7 @@ void I3D_light::Init()
     effectiveAmbientW = 1.0f;
     coneRange = ConeRange(range, coneOuter);
     coneRangeWorld = coneRange * worldScale;
-    SetConeCenter<SquareXYZ>(*this);
+    SetConeCenter<SquareYZX>(*this);
     Update();
     SetConeCosines(*this);
     d3dLight.Position = D3DVECTOR{0.0f, 0.0f, 0.0f};
@@ -119,27 +115,13 @@ void I3D_light::Init()
             return localMatrix.m[2][c];
         }
         S_vector d = localMatrix(2);
-        NormalizeWithSquare(d, SquareXYZ(d));
+        NormalizeWithSquare(d, SquareYZX(d));
         return c == 0 ? d.x : c == 1 ? d.y : d.z;
     };
     d3dLight.Direction.x = localDir(0);
     d3dLight.Direction.y = localDir(1);
+    // LS3DRF 0x10017420: the third GetLocalDir out of line (LS3DF inlines all three).
     d3dLight.Direction.z = localDir(2);
-    d3dLight.Range = range * worldScale;
-    d3dLight.Diffuse = D3DCOLORVALUE{effectiveColor.x, effectiveColor.y, effectiveColor.z, 0.0f};
-    d3dLight.Specular = D3DCOLORVALUE{effectiveSpecular.x, effectiveSpecular.y, effectiveSpecular.z, 0.0f};
-    d3dLight.Ambient = D3DCOLORVALUE{effectiveAmbient.x, effectiveAmbient.y, effectiveAmbient.z, 0.0f};
-    d3dLight.Phi = coneOuter;
-    d3dLight.Attenuation0 = attenuation[0];
-    d3dLight.Type = D3DLIGHT_DIRECTIONAL;
-    d3dLight.Falloff = 1.0f;
-    d3dLight.Theta = coneInner;
-    linkedLight = -1;
-    unknown25A = -1;
-    lightFlags = 5;
-    d3dLight.Attenuation1 = attenuation[1] / worldScale;
-    d3dLight.Attenuation2 = attenuation[2] / (worldScale * worldScale);
-    hardwareIndex = static_cast<int16_t>(RegisterLight(this));
 }
 
 // LS3DRF 0x100175e0 (from LS3DF 0x10021760): the light stays in g_lights, and a mirror copy

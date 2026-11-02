@@ -32,7 +32,10 @@
 // the original's call of 0x10063ca0 out of its Uninit (0x10021765). Its type, color, power, range,
 // attenuation, fog range and cone setters and its Duplicate, LS3DRF's, leave the Direct3D light as
 // it was: the test takes their writes of it out of the original's (0x100217e0 - 0x100223d0,
-// 0x10022cb0).
+// 0x10022cb0). Its Init, LS3DRF's, sets of the Direct3D light only the position and direction and
+// puts the light in no list: the test takes the rest out of the original's (0x1002162f -
+// 0x10021757) before the first create, and clears the bytes neither sets in both after each
+// light's first create.
 //
 // The port's occluder, LS3DRF's, has no occlusion: its MatrixChanged is the frame's (empty) and
 // its Uninit leaves no scene ring. The test points the original's occluder slot 0x68 at the
@@ -2352,6 +2355,33 @@ void PatchOrigLightSetters()
     PatchNops(0x10022e4d, copyLight, sizeof copyLight);                           // Duplicate
 }
 
+// LS3DRF's light Init in the original: of the Direct3D light only the position and direction, no
+// light list. Range's fld / fmul go, then a jump from its fstp over the other stores (+0x1f0 -
+// +0x220, +0x23c - +0x25a, +0x190) and the call of 0x10063c20 to the pop edi; the index store goes.
+void PatchOrigLightInit()
+{
+    static const uint8_t fldRange[] = {0xd9, 0x86, 0x74, 0x01, 0x00, 0x00};         // fld [esi+0x174]
+    static const uint8_t fmulScale[] = {0xd8, 0x8e, 0xfc, 0x00, 0x00, 0x00};        // fmul [esi+0xfc]
+    static const uint8_t fstpRange[] = {0xd9, 0x9e, 0x3c, 0x02, 0x00, 0x00};        // fstp [esi+0x23c]
+    static const uint8_t storeIndex[] = {0x66, 0x89, 0x86, 0x5c, 0x02, 0x00, 0x00}; // mov [esi+0x25c], ax
+    PatchNops(0x1002162f, fldRange, sizeof fldRange);
+    PatchNops(0x10021639, fmulScale, sizeof fmulScale);
+    PatchJump(0x10021651, 0x1002174f, fstpRange, sizeof fstpRange);
+    PatchNops(0x10021750, storeIndex, sizeof storeIndex);
+}
+
+// The light bytes neither Init sets now (the flags, the Direct3D light's type and colors, and its
+// range up to the light index), cleared in both after a light's first create: from then on both
+// hold the same. A light made again from the free list keeps its own.
+void ClearLightInitGaps(int i)
+{
+    for (uint8_t *b : {g_orig[i], reinterpret_cast<uint8_t *>(g_port[i])}) {
+        std::memset(b + 0x190, 0, 4);
+        std::memset(b + 0x1F0, 0, 0x34);
+        std::memset(b + 0x23C, 0, 0x22);
+    }
+}
+
 // LS3DRF's LinkTo, sector SetScene and MatrixChanged and occluder LinkTo, MatrixChanged and Uninit
 // in the original, and the port's portal destructor (`occluder`: one of its occluders).
 void PatchOrigScenePasses(uint8_t *occluder)
@@ -2420,6 +2450,7 @@ int main(int argc, char **argv)
 
     g_portalChanges = Orig<int>(0x100bf350);
     g_sectorChanges = Orig<int>(0x100bf354);
+    PatchOrigLightInit();
     g_rng.seed(seed);
     for (int i = 0; i < kFrames; ++i) {
         g_orig[i] = OrigCreate(TypeOf(i));
@@ -2436,6 +2467,8 @@ int main(int argc, char **argv)
             MakeGeometry(i);
         if (TypeOf(i) == FRAME_OCCLUDER)
             ResetNearPlane(i);
+        if (TypeOf(i) == FRAME_LIGHT)
+            ClearLightInitGaps(i);
     }
     PatchOrigScenePasses(g_orig[7]);
     static const uint8_t unregisterLight[] = {0xe8, 0x36, 0x25, 0x04, 0x00};    // call 0x10063ca0
