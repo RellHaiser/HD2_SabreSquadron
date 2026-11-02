@@ -58,6 +58,7 @@ void InfoTest(I3D_scene *scene);
 void ListTest(I3D_scene *scene);
 void BarTest(I3D_scene *scene);
 void ServerTest(I3D_scene *scene);
+void HotKeyTest(I3D_scene *scene);
 
 namespace {
 
@@ -1013,6 +1014,7 @@ void ControlsTest()
     ListTest(scene);
     BarTest(scene);
     ServerTest(scene);
+    HotKeyTest(scene);
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
     g_gfLog.clear();
@@ -1035,3 +1037,4 @@ void ControlsTest()
 #include "list_test.inc"
 #include "bar_test.inc"
 #include "server_test.inc"
+#include "hotkey_test.inc"

@@ -24,4 +24,6 @@ public:
     void GetScreenPosition(float *x, float *y, float *unknown30) const;   // 0x0066a480
     // The milliseconds the cursor has stayed as it is (+0x40: the tooltips' wait, the buttons' repeat).
     int GetStillTime() const;
+    // The int at +0x44 (the hot key control sets 200 after a binding: a click delay, inferred).
+    void SetUnknown44(int value);                       // 0x0066ab50
 };

@@ -28528,6 +28528,11 @@
   "name": "HasCjkCharacters",
   "proto": "bool __fastcall HasCjkCharacters(ushort * text)"
  },
+ "0064db20": {
+  "module": "controls",
+  "name": "C_HotKeyControl::Create",
+  "proto": "bool __thiscall Create(C_HotKeyControl *this, void * frame, void * root, void * desc)"
+ },
  "0064dce0": {
   "module": "control",
   "name": "C_Control::IsChild",
@@ -28711,10 +28716,110 @@
   "name": "C_EditControl::~C_EditControl",
   "proto": "void __thiscall ~C_EditControl(C_EditControl *this)"
  },
+ "0064e850": {
+  "module": "controls",
+  "name": "C_HotKeyControl::Tick",
+  "proto": "void __thiscall Tick(C_HotKeyControl *this, int time)"
+ },
+ "0064ea90": {
+  "module": "controls",
+  "name": "C_HotKeyControl::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_HotKeyControl *this, int key)"
+ },
+ "0064eac0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_HotKeyControl *this, void * message)"
+ },
+ "0064ed40": {
+  "module": "controls",
+  "name": "C_HotKeyControl::OnEnter",
+  "proto": "int __thiscall OnEnter(C_HotKeyControl *this, int id)"
+ },
+ "0064ed70": {
+  "module": "controls",
+  "name": "C_HotKeyControl::OnLeave",
+  "proto": "int __thiscall OnLeave(C_HotKeyControl *this, int id)"
+ },
+ "0064edb0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::OnInput02",
+  "proto": "int __thiscall OnInput02(C_HotKeyControl *this, int id)"
+ },
+ "0064eea0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::OnPress",
+  "proto": "int __thiscall OnPress(C_HotKeyControl *this, int id)"
+ },
+ "0064eeb0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(C_HotKeyControl *this, int id)"
+ },
+ "0064eec0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::OnClick",
+  "proto": "int __thiscall OnClick(C_HotKeyControl *this, int id)"
+ },
+ "0064efd0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::SetInactive",
+  "proto": "void __thiscall SetInactive(C_HotKeyControl *this, bool inactive)"
+ },
+ "0064f000": {
+  "module": "controls",
+  "name": "C_HotKeyControl::Refresh",
+  "proto": "void __thiscall Refresh(C_HotKeyControl *this)"
+ },
+ "0064f020": {
+  "module": "controls",
+  "name": "C_TitledEditBox::Create",
+  "proto": "bool __thiscall Create(C_HotKeyControl *this, void * frame, void * root, void * desc)"
+ },
  "0064f220": {
   "module": "controls",
   "name": "C_TextControl::C_TextControl",
   "proto": "void * __thiscall C_TextControl(C_TextControl *this, void * scene, uint id, void * parent)"
+ },
+ "0064f2d0": {
+  "module": "controls",
+  "name": "C_TitledEditBox::Tick",
+  "proto": "void __thiscall Tick(C_HotKeyControl *this, int time)"
+ },
+ "0064f2f0": {
+  "module": "controls",
+  "name": "C_TitledEditBox::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_HotKeyControl *this, int key)"
+ },
+ "0064f300": {
+  "module": "controls",
+  "name": "C_TitledEditBox::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_HotKeyControl *this, void * message)"
+ },
+ "0064f430": {
+  "module": "controls",
+  "name": "C_TitledEditBox::OnInput02",
+  "proto": "int __thiscall OnInput02(C_HotKeyControl *this, int id)"
+ },
+ "0064f440": {
+  "module": "controls",
+  "name": "C_TitledEditBox::OnClick",
+  "proto": "int __thiscall OnClick(C_HotKeyControl *this, int id)"
+ },
+ "0064f450": {
+  "module": "controls",
+  "name": "C_TitledEditBox::OnPress",
+  "proto": "int __thiscall OnPress(C_HotKeyControl *this, int id)"
+ },
+ "0064f460": {
+  "module": "controls",
+  "name": "C_TitledEditBox::OnKeyClick",
+  "proto": "int __thiscall OnKeyClick(C_HotKeyControl *this, int id)"
+ },
+ "0064f470": {
+  "module": "controls",
+  "name": "C_TitledEditBox::OnLeave",
+  "proto": "int __thiscall OnLeave(C_HotKeyControl *this, int id)"
  },
  "0064f4a0": {
   "module": "controls",
@@ -30052,6 +30157,31 @@
   "module": "controls",
   "name": "C_SpinControl::~C_SpinControl",
   "proto": "void __thiscall ~C_SpinControl(C_SpinControl *this)"
+ },
+ "00660770": {
+  "module": "controls",
+  "name": "C_HotKeyControl::SetBinding",
+  "proto": "void __thiscall SetBinding(C_HotKeyControl *this, int binding)"
+ },
+ "00660780": {
+  "module": "controls",
+  "name": "C_HotKeyControl::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_HotKeyControl *this, uchar flags)"
+ },
+ "006607a0": {
+  "module": "controls",
+  "name": "C_HotKeyControl::~C_HotKeyControl",
+  "proto": "void __thiscall ~C_HotKeyControl(C_HotKeyControl *this)"
+ },
+ "006608f0": {
+  "module": "controls",
+  "name": "C_TitledEditBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_HotKeyControl *this, uchar flags)"
+ },
+ "00660910": {
+  "module": "controls",
+  "name": "C_TitledEditBox::~C_TitledEditBox",
+  "proto": "void __thiscall ~C_TitledEditBox(C_HotKeyControl *this)"
  },
  "00660c30": {
   "module": "controls",

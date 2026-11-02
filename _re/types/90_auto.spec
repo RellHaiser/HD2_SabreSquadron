@@ -497,7 +497,7 @@ class C_ComboBox size=0x7d vtable=0x00814e48:33
   0x07c int8_t m_07c
 end
 
-class C_auto_00814fe0 size=0x4 vtable=0x00814fe0:34
+class C_HotKeyControl size=0x4 vtable=0x00814fe0:34
 end
 
 class C_ListGroup size=0x4 vtable=0x00815068:67

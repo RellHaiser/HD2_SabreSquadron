@@ -6672,6 +6672,34 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     functions made; names/controls.txt (29); 29 functions in ported.txt. Stats: 8,531 of 12,293
     functions by hand (76.4 % by size).
 
+  PART 9c-v-d-i DONE (2026-11-02): the hot key and the titled edit box (src/game/controls.*).
+  9c-v-d split: type 0xe's destructor resets its vtable to 0x00814fe0, the factory's type 0xd (not
+  in the plan's list), so d-i is 0xd and 0xe; d-ii 0x1d, 0x20, 0x22, 0x27.
+  - C_HotKeyControl (type 0xd, vtable 0x00814fe0, 0x7C; was C_auto_00814fe0): an edit box on its
+    frame (id | 1) and a title on "hktext*" (id | 2, taking input), not children (deleted with it);
+    SET_BINDING 0x100003D (the binding; the title's text id value2, style 0xC; the key's name in the
+    edit box, style 0xD; REFRESH again), GET_BINDING 0x100003C / 0x100003E. While editing, a first
+    tick arms it, then C_Controls::PollPress (0x006c87f0, pending: 0x9A, re-read) gives the key:
+    Escape on the keyboard ends the edit, else C_KeyBindings::Bind (the player's; refused: armed
+    still), CHANGED, the edit ended, the cursor's +0x44 200 (0x0066ab50, pending); HOT_KEY_DONE
+    0x20000C2 posted (target 0) then and when a click or input 02 is handled. Unknown20 true while
+    editing (its low byte 1: the edit ended). +0x84 SetBinding a new virtual. Two copies of its
+    destructor (0x006607a0, 0x00660910: the titled edit box's).
+  - C_TitledEditBox (type 0xe, vtable 0x00814f58, on the hot key): the edit box's text 0x7D2 at
+    first (style 0xD), the title on "text*"; its input the edit box's, the text messages the title's,
+    the edit ones (callbacks, max length, digits, number, range, forbidden, text) the edit box's.
+  - The cursor checked after a binding (the fix: Acquire may give null).
+  - Harness: hotkey_test.inc in the text build, run by ControlsTest after ServerTest ("hotkey:", 8
+    checks; the parts replaced by loggers; PollPress, Bind, GetBindingName, SetUnknown44 faked).
+    The stub profile.h has the player's key bindings, the shared stub pending.h the poll. Every
+    harness build still compiles. 22 of 22 in both orders.
+  - Mutations (mutations/mutate_9c5d1.py, generated, 4 parallel runs): 94 cases, 88 build; all
+    caught but 4 equivalent (listed in its docstring) at the first run.
+  - Build: MSVC clean. Tier 1: 478 errors in 79 files, 193 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: C_auto_00814fe0 renamed C_HotKeyControl; the titled edit box's this C_HotKeyControl (no
+    struct); names/controls.txt (26); 26 functions in ported.txt. Stats: 8,557 of 12,293 functions by
+    hand (76.5 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

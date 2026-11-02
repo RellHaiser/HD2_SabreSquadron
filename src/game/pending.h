@@ -129,6 +129,15 @@ public:
     void ClearKey(int key, float *held, float *pressed);         // 0x006c7510
     // Zeroes the frame's values of the bindings on the same device key as `action`'s.
     void ClearAction(int action, float *held, float *pressed);   // 0x006c73f0
+    // The input pressed now, for a key binding (its record at +0x14, reset first; none: null; the
+    // devices' state re-read when `reread`; `unknown` 0x9A from the hot key control).
+    struct S_Press {
+        int direction;                              // +0x00 axes: 1 + / 2 -
+        uint16_t device;                            // +0x04 E_BindingDevice
+        uint16_t key;                               // +0x06 (keyboard 1: Escape)
+        int unknown08;
+    };
+    const S_Press *PollPress(int unknown, bool reread);   // 0x006c87f0
 };
 extern C_Controls g_controls;                       // 0x008aeb58
 

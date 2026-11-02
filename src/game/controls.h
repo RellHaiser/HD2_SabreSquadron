@@ -1334,3 +1334,81 @@ protected:
     int m_firstEntry = 0;                               // +0xC0 (the first row's)
     int m_lastEntry = 0;                                // +0xC4 (the original's not set when made)
 };
+
+// The hot key control's messages: its binding (value; GET has two codes), set with its name's text
+// id (value2) for the title; posted (target 0) when an edit ends or a key is bound.
+enum : uint32_t {
+    CONTROL_MSG_GET_BINDING = 0x100003C,
+    CONTROL_MSG_SET_BINDING = 0x100003D,
+    CONTROL_MSG_GET_BINDING2 = 0x100003E,
+    CONTROL_MSG_HOT_KEY_DONE = 0x20000C2,
+};
+
+// A hot key (type 0xd, vtable 0x00814fe0; the base of the titled edit box): an edit box on its frame
+// (id | 1, not a child) showing the binding's key, a title on "hktext*" (id | 2, its name). Clicked,
+// the edit starts; while editing, the next key pressed is bound (Escape: none).
+class C_HotKeyControl : public C_Control {               // 0x7C bytes
+public:
+    C_HotKeyControl(I3D_scene *scene, uint32_t id, C_Control *parent) : C_Control(scene, id, parent) {}
+    ~C_HotKeyControl() override;                         // 0x006607a0 (0x00660780; 0x00660910 a copy): the
+                                                         // edit box and the title deleted
+
+    // The shown control's edit box and title.
+    void Refresh() override;                             // 0x0064f000
+    // While editing: the edit box's tick, then (after a first tick) the key pressed bound (the
+    // binding's, CHANGED; Escape: none), the edit ended, HOT_KEY_DONE posted.
+    void Tick(int time) override;                        // 0x0064e850
+    // While editing: true (its low byte 1, Escape: the edit ended); else false.
+    bool Unknown20(int key) override;                    // 0x0064ea90
+    // The base's (false: not made); the edit box made on the frame (when there is one), the title on
+    // "hktext*" taking input.
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0064db20
+    // Both parts' (handled).
+    int OnEnter(int id) override;                        // 0x0064ed40
+    // Not while editing (0); both parts' (handled).
+    int OnLeave(int id) override;                        // 0x0064ed70
+    // Not while editing (0); the edit box's (handled: HOT_KEY_DONE posted).
+    int OnClick(int id) override;                        // 0x0064eec0
+    // The edit box's (handled: HOT_KEY_DONE posted; else 0).
+    int OnInput02(int id) override;                      // 0x0064edb0
+    int OnPress(int) override { return CONTROL_HANDLED; }   // 0x0064eea0
+    // The click.
+    int OnKeyClick(int id) override { return OnClick(id); }   // 0x0064eeb0
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0064eac0
+    // Both parts' too.
+    void SetInactive(bool inactive) override;            // 0x0064efd0
+    // The binding (CONTROL_MSG_SET_BINDING's, without the text).
+    virtual void SetBinding(int binding) { m_binding = binding; }   // +0x84 0x00660770
+
+protected:
+    // The binding's key name in the edit box.
+    void ShowBinding();
+
+    bool m_armed = false;                                // +0x6C (the first editing tick passed)
+    int m_binding = 0;                                   // +0x70 (C_KeyBindings' index)
+    C_TitleControl *m_title = nullptr;                   // +0x74
+    C_EditBox *m_edit = nullptr;                         // +0x78
+};
+
+// A titled edit box (type 0xe, vtable 0x00814f58): the hot key control's parts as a plain edit box
+// (the input its; "text*" the title; its text 0x7D2 at first), the edit messages passed to it.
+class C_TitledEditBox : public C_HotKeyControl {         // 0x7C bytes
+public:
+    C_TitledEditBox(I3D_scene *scene, uint32_t id, C_Control *parent) : C_HotKeyControl(scene, id, parent) {}
+    ~C_TitledEditBox() override = default;               // (0x006608f0)
+
+    // While editing: the edit box's.
+    void Tick(int time) override;                        // 0x0064f2d0
+    bool Unknown20(int key) override;                    // 0x0064f2f0
+    bool Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc) override;   // 0x0064f020
+    // Both parts' (handled).
+    int OnLeave(int id) override;                        // 0x0064f470
+    // The edit box's.
+    int OnClick(int id) override;                        // 0x0064f440
+    int OnInput02(int id) override;                      // 0x0064f430
+    int OnPress(int) override { return CONTROL_HANDLED; }   // 0x0064f450
+    int OnKeyClick(int id) override;                     // 0x0064f460
+    // The text messages the title's; the edit ones (callbacks, length, digits, number, range,
+    // forbidden, text) the edit box's; REFRESH both.
+    bool HandleMessage(S_ControlMessage *message) override;   // 0x0064f300
+};

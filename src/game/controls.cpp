@@ -10,6 +10,7 @@
 #include "common/msvc_sort.h"
 #include "game/cursor.h"
 #include "game/item_defs.h"
+#include "game/key_bindings.h"
 #include "game/mp_zone.h"
 #include "game/pending.h"
 #include "game/profile.h"
@@ -4860,6 +4861,257 @@ bool C_ServerList::HandleMessage(S_ControlMessage *message)
         return true;
     default:
         C_ListGroup::HandleMessage(message);
+        return true;
+    }
+}
+
+// ----- the hot key (type 0xd) and the titled edit box (type 0xe) -----
+
+namespace {
+
+constexpr uint32_t HOT_KEY_EDIT = 1, HOT_KEY_TITLE = 2;
+constexpr uint32_t HOT_KEY_TITLE_STYLE = 0xC, HOT_KEY_KEY_STYLE = 0xD;
+// The poll's argument (0x9A), Escape on the keyboard, the cursor's +0x44 after a binding.
+constexpr int HOT_KEY_POLL = 0x9A;
+constexpr uint16_t DEVICE_KEYBOARD = 1, SCAN_ESCAPE = 1;
+constexpr int HOT_KEY_CURSOR_44 = 200;
+// The titled edit box's text at first.
+constexpr uint32_t TITLED_EDIT_STYLE = 0xD, TITLED_EDIT_TEXT = 0x7D2;
+
+C_KeyBindings *KeyBindings()
+{
+    return g_gameProfile.GetPlayerProfile()->GetKeyBindings();
+}
+
+} // namespace
+
+C_HotKeyControl::~C_HotKeyControl()
+{
+    delete m_edit;
+    m_edit = nullptr;
+    delete m_title;
+    m_title = nullptr;
+}
+
+void C_HotKeyControl::Refresh()
+{
+    if (!m_shown)
+        return;
+    m_edit->Refresh();
+    m_title->Refresh();
+}
+
+bool C_HotKeyControl::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_Control::Create(frame, root, desc))
+        return false;
+    if (frame) {
+        m_edit = new C_EditBox(m_scene, m_id | HOT_KEY_EDIT, this);
+        m_edit->Create(frame, root, nullptr);
+    }
+    if (I3D_frame *text = frame->FindChildFrame("hktext*", FIND_FRAMES)) {
+        m_title = new C_TitleControl(m_scene, m_id | HOT_KEY_TITLE, this);
+        m_title->Create(text, root, nullptr);
+        m_title->HandleMessageCopy(Message(CONTROL_MSG_TAKE_INPUT));
+    }
+    return true;
+}
+
+void C_HotKeyControl::Tick(int time)
+{
+    if (!m_edit->IsEditing())
+        return;
+    m_edit->Tick(time);
+    // (A tick first: the click that started the edit not taken for the key.)
+    if (!m_armed) {
+        m_armed = true;
+        return;
+    }
+    const C_Controls::S_Press *press = g_controls.PollPress(HOT_KEY_POLL, true);
+    if (!press)
+        return;
+    if (press->device == DEVICE_KEYBOARD && press->key == SCAN_ESCAPE) {
+        m_armed = false;
+        m_edit->OnInput02(0);
+        PostControlMessage(Message(CONTROL_MSG_HOT_KEY_DONE));
+        return;
+    }
+    if (!KeyBindings()->Bind(m_binding, press->device, press->key, press->direction))
+        return;
+    m_armed = false;
+    Notify(CONTROL_NOTIFY_CHANGED, 0);
+    m_edit->OnInput02(0);
+    PostControlMessage(Message(CONTROL_MSG_HOT_KEY_DONE));
+    // (The cursor checked: the fix, the original's without one crashes.)
+    if (C_Cursor *cursor = C_Cursor::Acquire(nullptr)) {
+        cursor->SetUnknown44(HOT_KEY_CURSOR_44);
+        cursor->Release();
+    }
+}
+
+bool C_HotKeyControl::Unknown20(int key)
+{
+    if (!m_edit->IsEditing())
+        return false;
+    // (Its low byte: the original's.)
+    if (static_cast<uint8_t>(key) == SCAN_ESCAPE)
+        m_edit->OnInput02(0);
+    return true;
+}
+
+int C_HotKeyControl::OnEnter(int id)
+{
+    m_edit->OnEnter(id);
+    m_title->OnEnter(id);
+    return CONTROL_HANDLED;
+}
+
+int C_HotKeyControl::OnLeave(int id)
+{
+    if (m_edit->IsEditing())
+        return 0;
+    m_edit->OnLeave(id);
+    m_title->OnLeave(id);
+    return CONTROL_HANDLED;
+}
+
+int C_HotKeyControl::OnClick(int id)
+{
+    if (m_edit->IsEditing() || m_edit->OnClick(id) != CONTROL_HANDLED)
+        return 0;
+    PostControlMessage(Message(CONTROL_MSG_HOT_KEY_DONE));
+    return CONTROL_HANDLED;
+}
+
+int C_HotKeyControl::OnInput02(int id)
+{
+    if (m_edit->OnInput02(id) != CONTROL_HANDLED)
+        return 0;
+    PostControlMessage(Message(CONTROL_MSG_HOT_KEY_DONE));
+    return CONTROL_HANDLED;
+}
+
+void C_HotKeyControl::SetInactive(bool inactive)
+{
+    m_inactive = inactive;
+    m_edit->SetInactive(inactive);
+    m_title->SetInactive(inactive);
+}
+
+void C_HotKeyControl::ShowBinding()
+{
+    m_edit->HandleMessageCopy(ValueMessage(CONTROL_MSG_SET_TEXT, HOT_KEY_KEY_STYLE, KeyBindings()->GetBindingName(m_binding)));
+}
+
+bool C_HotKeyControl::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_GET_BINDING:
+    case CONTROL_MSG_GET_BINDING2:
+        message->value = static_cast<uint32_t>(m_binding);
+        return true;
+    case CONTROL_MSG_SET_BINDING: {
+        m_binding = static_cast<int>(message->value);
+        S_ControlMessage name = ValueMessage(CONTROL_MSG_SET_TEXT_ID, HOT_KEY_TITLE_STYLE);
+        name.value2 = message->value2;
+        m_title->HandleMessageCopy(name);
+        ShowBinding();
+        return true;
+    }
+    case CONTROL_MSG_REFRESH:
+        m_title->HandleMessageCopy(*message);
+        m_edit->HandleMessageCopy(*message);
+        ShowBinding();
+        return true;
+    default:
+        C_Control::HandleMessage(message);
+        return true;
+    }
+}
+
+void C_TitledEditBox::Tick(int time)
+{
+    if (m_edit->IsEditing())
+        m_edit->Tick(time);
+}
+
+bool C_TitledEditBox::Unknown20(int key)
+{
+    return m_edit->Unknown20(key);
+}
+
+bool C_TitledEditBox::Create(I3D_frame *frame, I3D_frame *root, const S_ControlDesc *desc)
+{
+    if (!C_Control::Create(frame, root, desc))
+        return false;
+    if (frame) {
+        m_edit = new C_EditBox(m_scene, m_id | HOT_KEY_EDIT, this);
+        m_edit->Create(frame, root, nullptr);
+        S_ControlMessage text = ValueMessage(CONTROL_MSG_SET_TEXT_ID, TITLED_EDIT_STYLE);
+        text.value2 = TITLED_EDIT_TEXT;
+        m_edit->HandleMessageCopy(text);
+    }
+    if (I3D_frame *title = frame->FindChildFrame("text*", FIND_FRAMES)) {
+        m_title = new C_TitleControl(m_scene, m_id | HOT_KEY_TITLE, this);
+        m_title->Create(title, root, nullptr);
+        m_title->HandleMessageCopy(Message(CONTROL_MSG_TAKE_INPUT));
+    }
+    return true;
+}
+
+int C_TitledEditBox::OnLeave(int id)
+{
+    m_edit->OnLeave(id);
+    m_title->OnLeave(id);
+    return CONTROL_HANDLED;
+}
+
+int C_TitledEditBox::OnClick(int id)
+{
+    return m_edit->OnClick(id);
+}
+
+int C_TitledEditBox::OnInput02(int id)
+{
+    return m_edit->OnInput02(id);
+}
+
+int C_TitledEditBox::OnKeyClick(int id)
+{
+    return m_edit->OnKeyClick(id);
+}
+
+bool C_TitledEditBox::HandleMessage(S_ControlMessage *message)
+{
+    if (message->id & CONTROL_NOTIFY_MASK) {
+        C_Control::HandleMessage(message);
+        return true;
+    }
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SET_TEXT:
+    case CONTROL_MSG_SET_TEXT_ID:
+        m_title->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_ADD_CALLBACK:
+    case CONTROL_MSG_SET_MAX_LENGTH:
+    case CONTROL_MSG_SET_DIGITS_ONLY:
+    case CONTROL_MSG_SET_NUMBER:
+    case CONTROL_MSG_GET_NUMBER:
+    case CONTROL_MSG_SET_FORBIDDEN:
+    case CONTROL_MSG_SET_RANGE:
+    case CONTROL_MSG_GET_TEXT:
+        m_edit->HandleMessage(message);
+        return true;
+    case CONTROL_MSG_REFRESH:
+        m_title->HandleMessage(message);
+        m_edit->HandleMessage(message);
+        return true;
+    default:
+        C_Control::HandleMessage(message);
         return true;
     }
 }

@@ -236,6 +236,14 @@ float RandomFloat(float max);                           // 0x00475190
 class C_Controls {
 public:
     float GetValue(int action, bool pressed);          // 0x006c76a0
+    // (The hot key control's poll, part 9c-v-d: as the real header has it.)
+    struct S_Press {
+        int direction;
+        uint16_t device;
+        uint16_t key;
+        int unknown08;
+    };
+    const S_Press *PollPress(int unknown, bool reread); // 0x006c87f0
 };
 extern C_Controls g_controls;                           // 0x008aeb58
 
