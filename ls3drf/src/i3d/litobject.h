@@ -12,7 +12,6 @@
 // (Construct). A set not loaded draws as an object visual.
 #pragma once
 
-#include <cstring>
 
 #include "i3d/lightmap.h"
 #include "i3d/object.h"
@@ -55,22 +54,9 @@ struct S_lightmapUV {
     float u, v;
 };
 
-// One mesh level's lightmaps (0x48 bytes).
+// One mesh level's lightmaps (0x48 bytes). LS3DRF makes none, so it has no Free / Build /
+// SetFaceParts (LS3DF 0x1002a530 / 0x1002aac0 / 0x1002aaa0); the struct stays for the LS3DF layout.
 struct S_lightmapLevel {
-    S_lightmapLevel() { std::memset(this, 0, sizeof *this); }
-    // 0x1002a530 (with operator delete: 0x100289b0)
-    ~S_lightmapLevel() { Free(); }
-    S_lightmapLevel(const S_lightmapLevel &) = delete;
-    S_lightmapLevel &operator=(const S_lightmapLevel &) = delete;
-
-    void Free();
-    // 0x1002aac0: the patches into the atlas (C_lightmap), the vertices' uv into it; unless
-    // `keepFaces`, the faces into the lightmap vertices (each face's corner the vertex of its
-    // patch).
-    bool Build(I3D_mesh_level *level, bool keepFaces, const I3D_frame *owner);
-    // 0x1002aaa0: a face group's faces' patches (kept).
-    void SetFaceParts(uint16_t *faceParts, int faceGroup);
-
     int numVertices;                        // +0x00 the lightmap vertices (vertex colors: the level's)
     S_lightmapUV *uvs;                      // +0x04 in its patch (0 - 1), after Build in the texture
     void *unknown08;                        // +0x08 (freed; nothing sets it)
@@ -99,17 +85,6 @@ struct S_lightmapSet {
     S_lightmapLevel *levels[10];            // +0x10 per mesh level
 };
 static_assert(sizeof(S_lightmapSet) == 0x38, "S_lightmapSet layout");
-
-// The light at a point for the lightmaps (0x10064b90; lightmap_build.cpp): of the light sector's
-// lights that shine into lightmaps (LIGHTMODE_LIGHTMAP), the ambient and the diffuse at `pos`
-// facing `normal` (point and spot lights to their range, with their attenuation and cone; the
-// diffuse doubled), through `material`'s colours (IGraph's default material without MATF_COLORS).
-// With a scene and LMCONS_SHADOWS, a light with LIGHTMODE_LMSHADOW is traced from the point
-// (0.0075 off the surface) through the scene's faces, which tint it (TransmitFilter); above level 0
-// `self` is tested at `level`. When every traced ray ended on a face turned away from it (the point
-// is inside something) `*blocked` is set and the colour is magenta.
-void LightmapLightAt(S_vector &color, const S_vector &pos, const S_vector &normal, const I3D_material *material,
-                     I3D_scene *scene, uint32_t flags, bool *blocked, I3D_frame *self, int level);
 
 }  // namespace ls3d::i3d
 

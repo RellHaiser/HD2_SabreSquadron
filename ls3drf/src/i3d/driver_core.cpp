@@ -7,7 +7,6 @@
 #include <new>
 
 #include "core/debug.h"
-#include "core/enhance.h"
 #include "i3d/area.h"
 #include "i3d/billboard.h"
 #include "i3d/camera.h"
@@ -58,20 +57,6 @@ int g_projectorZBias;
 int g_state37Value;
 // Cleared by Init (0x100aded0).
 int g_driverUnknownADED0;
-
-bool LightmapsTrueColor()
-{
-    if (g_driverStates[DRVSTATE_LM_TRUECOLOR])
-        return true;
-    if (!Enhancements().trueColorLightmaps)
-        return false;
-    static bool s_logged;
-    if (!s_logged) {
-        s_logged = true;
-        EnhancementLog("TrueColorLightmaps: driver state 0x22 (32-bit lightmaps) is off, kept on");
-    }
-    return true;
-}
 
 }  // namespace ls3d::i3d
 

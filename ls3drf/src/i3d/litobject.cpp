@@ -6,9 +6,7 @@
 
 #include <cmath>
 #include <cstring>
-#include <new>
 
-#include "core/debug.h"
 #include "core/fpu.h"
 #include "external/rw_data.h"
 #include "i3d/driver.h"
@@ -16,128 +14,11 @@
 #include "i3d/mesh.h"
 #include "i3d/scene.h"
 #include "i3d/sector.h"
-#include "igraph/igraph.h"
-#include "igraph/igraph_state.h"
-#include "igraph/itexture.h"
 
 using namespace ls3d;
 using namespace ls3d::i3d;
 
-// ---------------------------------------------------------------- S_lightmapLevel
-
-// (The original leaves the pointers freed here as they were, and the part count at -1: its
-// callers delete the level.)
-void S_lightmapLevel::Free()
-{
-    ::operator delete(uvs);
-    uvs = nullptr;
-    ::operator delete(unknown08);
-    unknown08 = nullptr;
-    delete lightmap;
-    lightmap = nullptr;
-    if (faceParts) {
-        for (int i = 0; i < numFaceGroups; ++i)
-            ::operator delete(faceParts[i]);
-        ::operator delete(faceParts);
-    }
-    faceParts = nullptr;
-    for (int i = 0; i < numParts; ++i) {
-        S_lightmapPart &p = parts[i];
-        // (Fix: the original frees only patches wider than 3, so narrower ones' pixels leak.)
-        if (!p.IsUniform()) {
-            ::operator delete(p.pixels);
-            ::operator delete(p.texels);
-        }
-    }
-    numParts = 0;
-    ::operator delete(parts);
-    parts = nullptr;
-    FreeIB(&faces);
-    faces = {};
-    FreeVB(&vertices);
-    vertices = {};
-    ::operator delete(vertexMap);
-    vertexMap = nullptr;
-    ::operator delete(colors);
-    colors = nullptr;
-    textureBytes = 0;
-}
-
-void S_lightmapLevel::SetFaceParts(uint16_t *p, int faceGroup)
-{
-    if (faceGroup < numFaceGroups)
-        faceParts[faceGroup] = p;
-}
-
-bool S_lightmapLevel::Build(I3D_mesh_level *level, bool keepFaces, const I3D_frame *owner)
-{
-    lightmap = new (std::nothrow) C_lightmap;
-    if (!lightmap) {
-        ReportError(I3DERR_OUTOFMEM, kSevFatal);
-        return false;
-    }
-    auto *indices = static_cast<uint16_t *>(::operator new(sizeof(uint16_t) * static_cast<size_t>(numParts)));
-    for (int i = 0; i < numParts; ++i)
-        indices[i] = static_cast<uint16_t>(i);
-    textureBytes = 0;
-    if (!lightmap->Create(indices, parts, numParts, &textureBytes, owner)) {
-        ::operator delete(indices);
-        return false;
-    }
-    ::operator delete(indices);
-    if (!uvs)
-        return false;
-    // Each vertex's uv in its patch to the texture: the patch's texel centers, turned for a
-    // turned patch (u + 2).
-    const ITexture *t = lightmap->texture;
-    const float invWidth = 1.0f / static_cast<float>(t->width);
-    const float invHeight = 1.0f / static_cast<float>(t->height);
-    S_lightmapUV *uv = uvs;
-    for (int i = 0; i < numVertices; ++i, ++uv) {
-        level->LockVertices(0);             // (every vertex; the result is not used)
-        const uint16_t partIndex = vertexMap[i].part;
-        if (partIndex >= numParts)
-            return false;
-        const S_lightmapPart &p = parts[partIndex];
-        const float u0 = uv->u;
-        const float v0 = uv->v;
-        if (!(p.u >= 2.0f)) {
-            uv->u = (static_cast<float>(p.width - 1) * u0 + 0.5f) * invWidth + p.u;
-            uv->v = (static_cast<float>(p.height - 1) * v0 + 0.5f) * invHeight + p.v;
-        } else {
-            uv->u = ((static_cast<float>(p.height - 1) * v0 * invWidth + p.u) - 2.0f) + invWidth * 0.5f;
-            uv->v = (static_cast<float>(p.width - 1) * u0 + 0.5f) * invHeight + p.v;
-        }
-    }
-    if (keepFaces)
-        return true;
-    // The faces: each corner the lightmap vertex of its vertex in the face's patch (0 when none).
-    if (!g_ibManager.Alloc(D3DUSAGE_SOFTWAREPROCESSING, static_cast<uint32_t>(level->NumFaces() * 3), &faces)) {
-        ReportError(I3DERR_OUTOFMEM, kSevFatal);
-        return false;
-    }
-    uint16_t *dst = faces.buffer->Lock(0) + faces.offset;
-    int groupIndex = 0;
-    for (I3D_face_group *fg = level->faceGroups; fg; fg = fg->next, ++groupIndex) {
-        const uint16_t *facePart = faceParts[groupIndex];
-        const int n = fg->numFaces;
-        const uint16_t *tri = reinterpret_cast<const uint16_t *>(fg->Lock(1));
-        for (int f = 0; f < n; ++f, tri += 3, ++facePart) {
-            const uint16_t part = *facePart;
-            for (int c = 0; c < 3; ++c) {
-                uint16_t found = 0;
-                for (uint16_t k = 0; k < numVertices; ++k) {
-                    if (vertexMap[k].vertex == tri[c] && vertexMap[k].part == part) {
-                        found = k;
-                        break;
-                    }
-                }
-                *dst++ = found;
-            }
-        }
-    }
-    return true;
-}
+// (No S_lightmapLevel Free / Build / SetFaceParts: LS3DRF makes no levels.)
 
 // ---------------------------------------------------------------- I3D_lit_object
 
