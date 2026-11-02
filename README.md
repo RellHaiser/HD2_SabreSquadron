@@ -56,6 +56,7 @@ Requirements:
 python build.py          rem the DLL: build\msvc\LS3DRF.dll (+ .pdb)
 python build.py check    rem compile every file, no link (and check the device boundaries)
 python build.py test     rem the tests: compare_*.exe
+python build.py run      rem run the built tests (see Tests)
 python build.py --debug  rem a debug build
 ```
 
@@ -84,6 +85,10 @@ set PATH=%HD2_DIR%;%PATH%
 compare_frame.exe "" 20000 1
 compare_mesh.exe "" 20000 1
 ```
+
+`python build.py test run` builds the tests and runs each with these arguments (20000 operations,
+seed 1; `--ops N`, `--seeds 1,2`), one line per run; the full output goes to
+`%TEMP%\ls3drf_build\logs`. It puts `HD2_DIR` on `PATH` itself.
 
 Each test prints what it covered and ends with "identical" / "0 differ" (exit code 0) or the
 first difference (exit code 1).
