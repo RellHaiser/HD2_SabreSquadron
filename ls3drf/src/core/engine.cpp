@@ -23,7 +23,8 @@ namespace {
 // Performance counter ticks per 16 us (0x100d1590; at least 1; nothing in the engine reads it).
 uint64_t g_perfTicksPer16Us;
 
-// 0x10068cb0
+// LS3DRF 0x10030810 (from LS3DF 0x10068cb0): no sound driver; LS3DRF's driver object is 0x2c bytes,
+// the port's keeps LS3DF's 0x4c.
 void StartEngine()
 {
     ls3d::StartLog();
@@ -36,7 +37,7 @@ void StartEngine()
     ls3d::i3d::g_driver = new I3D_driver;
 }
 
-// 0x10068eb0 (FreeEngineGlobals)
+// LS3DRF 0x100309e0 (from LS3DF 0x10068eb0): FreeEngineGlobals without the sound driver.
 void FreeEngine()
 {
     delete ls3d::i3d::g_driver;

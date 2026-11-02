@@ -277,7 +277,8 @@ void I3D_singlemesh::CopySkin(const I3D_singlemesh &src)
     skin = s;
 }
 
-// 0x10052070
+// LS3DRF 0x1002b700 (from LS3DF 0x10052070): no mirror copies, so a singlemesh or singlemorph source
+// always gives its skin.
 I3D_RESULT I3D_singlemesh::Duplicate(I3D_frame *source)
 {
     if (!source || source == this)
@@ -293,15 +294,11 @@ I3D_RESULT I3D_singlemesh::Duplicate(I3D_frame *source)
     switch (src->GetVisualType()) {
     case FourCC("SNGM"):
     case FourCC("SMMR"):
-        // (This visual's own mirrored flag decides; a mirror's copy takes the mesh only.)
-        if (!(visualFlags & VISF_MIRRORED)) {
-            lightLevel = src->lightLevel;
-            alpha = src->alpha;
-            SetMesh(src->mesh, 0);
-            CopySkin(*static_cast<I3D_singlemesh *>(src));
-            break;
-        }
-        [[fallthrough]];
+        lightLevel = src->lightLevel;
+        alpha = src->alpha;
+        SetMesh(src->mesh, 0);
+        CopySkin(*static_cast<I3D_singlemesh *>(src));
+        break;
     case FourCC("LMAP"):
     case FourCC("BBRD"):
     case FourCC("MRPH"):
@@ -337,12 +334,12 @@ void I3D_singlemesh::UpdateLocalBound()
     visualFlags |= VISF_BOUND_VALID;
 }
 
-// 0x10052330
+// LS3DRF 0x1002b9a0 (from LS3DF 0x10052330): the joints are fixed whatever the flags.
 void I3D_singlemesh::ComputeBound()
 {
     boundStamp = jointChanges;
     ++changeCount;
-    if (!joints && !(visualFlags & VISF_MIRRORED))
+    if (!joints)
         FixJoints();
     if (!mesh) {
         localBound.bbox.Invalidate();
@@ -444,10 +441,11 @@ void I3D_singlemesh::ComputeJointMatrices()
     }
 }
 
-// 0x10052a10
+// LS3DRF 0x1002c070 (from LS3DF 0x10052a10): the joints are fixed whatever the flags; the level's
+// memory, no lock.
 const S_vector4 *I3D_singlemesh::SkinnedVertices(int levelIndex)
 {
-    if (!joints && !(visualFlags & VISF_MIRRORED))
+    if (!joints)
         FixJoints();
     // (Fix: the original reads the mesh unchecked.)
     if (!mesh)
@@ -466,8 +464,7 @@ const S_vector4 *I3D_singlemesh::SkinnedVertices(int levelIndex)
         }
     }
     ComputeJointMatrices();
-    C_VertexBuffer *vb = level->vertices.buffer;
-    const float *v = reinterpret_cast<const float *>(vb->Lock(D3DLOCK_READONLY) + vb->stride * level->vertices.offset);
+    const float *v = reinterpret_cast<const float *>(level->vertices.buffer->data);
     const int numWeighted = skin->numWeighted[levelIndex];
     const uint8_t *vj = skin->vertexJoints[levelIndex];
     S_vector4 *out = s_skinned;
@@ -679,7 +676,8 @@ I3D_RESULT I3D_singlemorph::SetMesh(I3D_mesh *newMesh, uint32_t flags)
     return I3D_OK;
 }
 
-// 0x10053d70
+// LS3DRF 0x1002c9b0 (from LS3DF 0x10053d70): no mirror copies, so a morph, singlemesh or singlemorph
+// source always gives its own data.
 I3D_RESULT I3D_singlemorph::Duplicate(I3D_frame *source)
 {
     if (!source || source == this)
@@ -722,44 +720,32 @@ I3D_RESULT I3D_singlemorph::Duplicate(I3D_frame *source)
         copy->Release();
         return I3D_OK;
     };
-    // (This visual's own mirrored flag decides; a mirror's copy takes the mesh only.)
-    const bool own = !(visualFlags & VISF_MIRRORED);
     bool generic = false;
     switch (src->GetVisualType()) {
-    case FourCC("MRPH"):
-        if (own) {
-            lightLevel = src->lightLevel;
-            alpha = src->alpha;
-            const I3D_RESULT r = copyMorph(*static_cast<I3D_morph *>(src));
-            if (r < 0)
-                return r;
-        } else {
-            generic = true;
-        }
+    case FourCC("MRPH"): {
+        lightLevel = src->lightLevel;
+        alpha = src->alpha;
+        const I3D_RESULT r = copyMorph(*static_cast<I3D_morph *>(src));
+        if (r < 0)
+            return r;
         break;
+    }
     case FourCC("SNGM"):
         // (The skin data without the mesh: the original's.)
-        if (own) {
-            lightLevel = src->lightLevel;
-            alpha = src->alpha;
-            CopySkin(*static_cast<I3D_singlemesh *>(src));
-        } else {
-            generic = true;
-        }
+        lightLevel = src->lightLevel;
+        alpha = src->alpha;
+        CopySkin(*static_cast<I3D_singlemesh *>(src));
         break;
-    case FourCC("SMMR"):
-        if (own) {
-            lightLevel = src->lightLevel;
-            alpha = src->alpha;
-            auto *s = static_cast<I3D_singlemorph *>(src);
-            const I3D_RESULT r = copyMorph(*s);
-            if (r < 0)
-                return r;
-            CopySkin(*s);
-        } else {
-            generic = true;
-        }
+    case FourCC("SMMR"): {
+        lightLevel = src->lightLevel;
+        alpha = src->alpha;
+        auto *s = static_cast<I3D_singlemorph *>(src);
+        const I3D_RESULT r = copyMorph(*s);
+        if (r < 0)
+            return r;
+        CopySkin(*s);
         break;
+    }
     case FourCC("LENS"):
         SetMesh(nullptr, 0);
         break;
