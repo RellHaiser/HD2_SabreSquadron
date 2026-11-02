@@ -126,7 +126,7 @@ void C_morph::Normalize()
     }
 }
 
-// 0x10035100
+// LS3DRF 0x10020a50 (from LS3DF 0x10035100): the level's memory, no lock.
 void C_morph::Apply(int level, I3D_mesh *mesh)
 {
     const uint32_t mask = 1u << level;
@@ -141,8 +141,7 @@ void C_morph::Apply(int level, I3D_mesh *mesh)
     I3D_mesh_level *ml = mesh->GetLevel(level);
     if (!ml)
         return;
-    C_VertexBuffer *vb = ml->vertices.buffer;
-    uint8_t *vertices = vb->Lock(0) + vb->stride * ml->vertices.offset;
+    uint8_t *vertices = ml->vertices.buffer->data;
     const float *w = normalized;
     for (int c = numChannels; c; --c, ++ch, w += numTargets) {
         const float *src = ch->targets;
