@@ -87,7 +87,7 @@ void Check(const char *what, long a, long b)
 // ---------------------------------------------------------------- fake textures and IGraph
 
 constexpr int kTex = 10;
-alignas(16) uint8_t g_textures[2][kTex][sizeof(ITexture)];  // [0] original side, [1] port side
+alignas(16) uint8_t g_textures[2][kTex][0x44];  // [0] original side, [1] port side (an ITexture is 0x44 bytes)
 void *g_textureVtable[32];
 
 ITexture *Tex(int side, int k) { return reinterpret_cast<ITexture *>(g_textures[side][k]); }

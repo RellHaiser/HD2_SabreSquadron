@@ -3,10 +3,10 @@
 Clean C++17 rewrite of `LS3DRF.dll`, the build of the LS3D engine (version 5.59.5, build of
 16 August 2004) that the Hidden & Dangerous 2 / Sabre Squadron dedicated server
 (`HD2DS_SabreSquadron.exe`) loads in place of `LS3DF.dll`. It is the same engine without what a
-server does not need: no sound (ISND), no video (IShow), no input, no window and no Direct3D
-device. What is left is the scene graph (frames, visuals, sectors and portals, lights, models and
-animation), collision queries, the model / scene / animation loaders, the vertex / index buffers,
-textures and image loading, and the math exports.
+server does not need: no sound (ISND), no video (IShow), no input, no window, no Direct3D
+device and no textures. What is left is the scene graph (frames, visuals, sectors and portals,
+lights, models and animation), collision queries, the model / scene / animation loaders, the
+vertex / index buffers and the math exports.
 
 | | |
 |---|---|
@@ -70,11 +70,9 @@ with a seed. They run the original on fake Direct3D objects, so they need no gra
 
 - `compare_buffers`, `compare_mesh` and `compare_material` compare with the original
   `LS3DRF.dll` (from the dedicated server).
-- `compare_frame`, `compare_collision`, `compare_math`, `compare_texture`, `compare_resize`,
-  `compare_s3tc` and `compare_dxerr8` compare with the client's original `LS3DF.dll`, where
-  LS3DRF's code is LS3DF's. Where LS3DRF differs, `compare_frame` and `compare_collision` patch
-  LS3DF.dll in memory to behave as LS3DRF.dll does.
-- `test_enhance` needs no original.
+- `compare_frame`, `compare_collision`, `compare_math` and `compare_dxerr8` compare with the
+  client's original `LS3DF.dll`, where LS3DRF's code is LS3DF's. Where LS3DRF differs,
+  `compare_frame` and `compare_collision` patch LS3DF.dll in memory to behave as LS3DRF.dll does.
 
 The original is found by the test's first argument, else `%HD2_DIR%\<name>.dll`, else the DLL
 search path. The game folder must be on `PATH` in any case (the originals import `rw_data.dll`
@@ -97,7 +95,7 @@ first difference (exit code 1).
 | `src/core` | log and errors, version, CPU detection, engine start-up (`DllMain`), containers |
 | `src/math` | the math exports |
 | `src/i3d` | the scene graph, collision, loaders, buffer managers |
-| `src/igraph` | IGraph, textures, image loading and conversion, the DXT encoder |
+| `src/igraph` | IGraph and the texture flags |
 | `src/gfx` | the render device interface and its null device |
 | `src/platform` | time and the few Win32 calls left |
 | `src/dx` | the Direct3D 8 and DirectInput types the engine's interfaces still name; DXGetErrorString8 |
@@ -112,8 +110,7 @@ The original statically links code it did not write; the port rewrites it from t
 well:
 
 - `DXGetErrorString8` (`dxerr8.lib` of the DirectX 8.1 SDK, © Microsoft): its table of result
-  code names;
-- the S3TC (DXT) encoder library.
+  code names.
 
 `src/dx` declares Direct3D 8 types as Microsoft's SDK did; `src/external` declares the interface
 of `rw_data.dll`.

@@ -1,4 +1,4 @@
-// IGraph: the engine's init block, timer and texture front end
+// IGraph: the engine's init block and timer
 // (IGraph.cpp in the original source tree, 0x100699a0 - 0x10070eb0, vtable 0x1009d840).
 //
 // One object exists (GetIGraph()); it holds nothing but its vtable, all state is file-level. Every
@@ -11,9 +11,6 @@
 #include <windows.h>
 
 #include "core/debug.h"
-#include "dx/d3d8_types.h"
-
-class ITexture;
 
 // IGraph::Init parameters (0x38 bytes, copied to 0x100d1d18).
 struct S_IGraphInit {
@@ -51,36 +48,10 @@ enum : uint32_t {
     IG_TEXTURE_THREAD = 0x00100000,     // (LS3DF) load textures in a background thread; ignored here
 };
 
-// IGraph::GetCaps() bits (0x100d1dac).
-enum : uint32_t {
-    IGCAPS_HW_TNL = 0x001,
-    IGCAPS_TABLE_FOG = 0x004,
-    IGCAPS_DXT = 0x008,                 // at least one DXTn texture format
-    IGCAPS_STENCIL = 0x010,             // the depth buffer has stencil bits
-    IGCAPS_GAMMA = 0x020,               // fullscreen gamma ramp
-    IGCAPS_GAMMA_8BIT = 0x040,          // the driver's ramp holds 8-bit values (GetGammaRamp widens)
-    IGCAPS_HW_VERTEX_SHADERS = 0x080,
-    IGCAPS_BUMPMAP = 0x100,             // D3DFMT_V8U8 textures
-};
-
-// DrawPrimitive kinds and vertex formats.
-enum {
-    IGP_POINTS = 0,                     // (6 too)
-    IGP_LINES = 1,
-    IGP_LINESTRIP = 2,
-    IGP_TRIANGLES = 3,
-    IGP_TRIANGLEFAN = 4,
-    IGP_TRIANGLESTRIP = 5,
-};
-enum {
-    IGV_COLOR_TEX = 0,                  // position, colour, uv (0x18 bytes, vertex shader 0x100d21ac)
-    IGV_TRANSFORMED = 1,                // D3DFVF_XYZRHW | DIFFUSE | SPECULAR | TEX1 (0x20 bytes)
-    IGV_TRANSFORMED_TEX2 = 2,           // D3DFVF_XYZRHW | DIFFUSE | SPECULAR | TEX2 (0x28 bytes)
-};
+// (No GetCaps bits, DrawPrimitive kinds or vertex formats: LS3DRF has none.)
 
 // The vtable is LS3DRF's (0x1003e390, 13 slots): LS3DF's slots 0x00..0x20, SetAppName,
-// SetAppNameF and the two timers. The LS3DF methods the engine itself still calls follow as plain
-// members; the DLL's users cannot reach them.
+// SetAppNameF and the two timers.
 class IGraph {
 public:
     // 0x00 0x1006c2d0: keeps the init block and logs the system (no window, device or input).
@@ -109,22 +80,8 @@ public:
     // `minMs`, reports at most `maxMs` (0: no limit).
     virtual DWORD __stdcall GetTimer(DWORD minMs, DWORD maxMs);
 
-    // 0x1006dec0: size and depth of a .bmp / .tga file; `handle` (if given) keeps the file open
-    // at its start.
-    HRESULT __stdcall GetImageInfo(const char *fileName, uint16_t *width, uint16_t *height,
-                                   uint8_t *bitDepth, uint32_t flags, int *handle);
-    // 0x10069f70: loads a texture (shared with earlier loads of the same files and flags).
-    HRESULT __stdcall LoadTexture(const char *fileName, const char *alphaFileName, uint32_t flags,
-                                  ITexture **out);
-    // 0x10069ee0: an empty texture object.
-    ITexture *__stdcall CreateITexture();
-    // 0x1006a1f0
-    bool __stdcall SetTexture(ITexture *texture, int stage);
-    // 0x1006b5a0: user-memory primitives (IGP_*, IGV_*).
-    HRESULT __stdcall DrawPrimitive(int kind, int count, const void *vertices, int vertexFormat);
-    // 0x10070160: resamples a 24 / 32-bit image (box filter when shrinking and `filter`).
-    bool __stdcall ResizeImage(int srcWidth, int srcHeight, int srcPitch, const uint8_t *src, int dstWidth,
-                               int dstHeight, int dstPitch, uint8_t **dst, int bytesPerPixel, bool filter);
+    // (No GetImageInfo, LoadTexture, CreateITexture, SetTexture, DrawPrimitive or ResizeImage:
+    // LS3DRF has none.)
 
     IGraph();                           // 0x10069a00
     ~IGraph();                          // 0x10069e50
