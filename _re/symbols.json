@@ -31396,6 +31396,146 @@
   "name": "C_MovieState::RenderThunk",
   "proto": "void __thiscall RenderThunk(C_MovieState *this)"
  },
+ "0066f160": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::IsLargeWeapon",
+  "proto": "bool __stdcall IsLargeWeapon(int typeId)"
+ },
+ "0066f1a0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::HasLargeWeapon",
+  "proto": "bool __fastcall HasLargeWeapon(void * panel)"
+ },
+ "00670be0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::TickSoldier",
+  "proto": "void __thiscall TickSoldier(void *this, int time)"
+ },
+ "00670bf0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::RenderSoldier",
+  "proto": "void __fastcall RenderSoldier(void * panel)"
+ },
+ "00670c00": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::CreateSoldier",
+  "proto": "void __thiscall CreateSoldier(void *this, void * area)"
+ },
+ "00670e40": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::DeleteSoldier",
+  "proto": "void __fastcall DeleteSoldier(void * panel)"
+ },
+ "00670e90": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::UpdateFace",
+  "proto": "void __fastcall UpdateFace(void * panel)"
+ },
+ "00670ee0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::AddToSoldier",
+  "proto": "void __thiscall AddToSoldier(void *this, uint place, void * item)"
+ },
+ "00670f20": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::DressSoldier",
+  "proto": "int __fastcall DressSoldier(void * panel)"
+ },
+ "00671010": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::SelectSoldier",
+  "proto": "void __thiscall SelectSoldier(void *this, int index)"
+ },
+ "00671260": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::CountItems",
+  "proto": "int __thiscall CountItems(void *this, uint control, void * item)"
+ },
+ "00671290": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::SlotOfControl",
+  "proto": "uint __stdcall SlotOfControl(uint id)"
+ },
+ "00671360": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::RemoveItem",
+  "proto": "int __thiscall RemoveItem(void *this, uint slot, void * item)"
+ },
+ "006713c0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::RemoveItemAt",
+  "proto": "int __thiscall RemoveItemAt(void *this, uint control, void * item)"
+ },
+ "00671410": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::PutItem",
+  "proto": "void * __thiscall PutItem(void *this, void * out, uint slot, void * item)"
+ },
+ "00671500": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::PutItemChecked",
+  "proto": "void * __thiscall PutItemChecked(void *this, void * out, uint slot, void * item, bool force)"
+ },
+ "006716c0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::PutItemAt",
+  "proto": "void * __thiscall PutItemAt(void *this, void * out, uint control, void * item)"
+ },
+ "006716f0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::DropItem",
+  "proto": "void * __thiscall DropItem(void *this, void * out, void * item, bool force)"
+ },
+ "006719a0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::MoveItem",
+  "proto": "void * __thiscall MoveItem(void *this, void * out, void * item, uint from, uint to)"
+ },
+ "00671ac0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::OnScroll",
+  "proto": "bool __thiscall OnScroll(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00671f60": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::ShowItem",
+  "proto": "void __stdcall ShowItem(uint control, void * item)"
+ },
+ "00672330": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::SetBackpackInactive",
+  "proto": "void __thiscall SetBackpackInactive(void *this, bool inactive)"
+ },
+ "00672580": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::Refresh",
+  "proto": "void __fastcall Refresh(void * panel)"
+ },
+ "00672720": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::ReturnBackpack",
+  "proto": "void __thiscall ReturnBackpack(void *this, void * stock)"
+ },
+ "006727f0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::ReturnItems",
+  "proto": "void __thiscall ReturnItems(void *this, void * stock)"
+ },
+ "00672820": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::FindHighlights",
+  "proto": "void __thiscall FindHighlights(void *this, void * model)"
+ },
+ "006728a0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::ShowAllowed",
+  "proto": "void __thiscall ShowAllowed(void *this, void * item, bool ignoreWeight)"
+ },
+ "00672a30": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::UpdateLoad",
+  "proto": "void __thiscall UpdateLoad(void *this)"
+ },
  "00673cf0": {
   "module": "profile",
   "name": "S_MissionSquad::AddSoldier",
@@ -31545,6 +31685,11 @@
  "0067f1d0": {
   "module": "zz_idioms",
   "name": "vector_tidy_67f1d0"
+ },
+ "0067f3d0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
  },
  "0067fda0": {
   "module": "game",
@@ -32299,6 +32444,11 @@
   "module": "profile",
   "name": "S_SquadSoldier::ClearItems",
   "proto": "void __thiscall ClearItems(S_SquadSoldier *this)"
+ },
+ "006a2bb0": {
+  "module": "equipment_panel",
+  "name": "S_SquadSoldier::GetFreeBeltVolume",
+  "proto": "int __thiscall GetFreeBeltVolume(S_SquadSoldier *this)"
  },
  "006a2bd0": {
   "module": "profile",

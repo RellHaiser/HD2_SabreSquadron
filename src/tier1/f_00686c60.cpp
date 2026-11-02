@@ -45,7 +45,7 @@ uint32_t C_GameMenu__FUN_00686ca0(C_GameMenu *_this,uint32_t param_1,int param_2
   uint32_t uVar4;
   uint32_t local_10;
   short local_c;
-  uint32_t local_6;
+  uint8_t local_6 [6];
   uVar2 = 0xffffffff;
   if (-1 < param_2) {
     this_00 = _this->_pad_0548 + 0x38;
@@ -53,7 +53,7 @@ uint32_t C_GameMenu__FUN_00686ca0(C_GameMenu *_this,uint32_t param_1,int param_2
     local_c = param_3;
     uVar2 = FUN_0067c0d0(this_00,(int)&local_10,'\0');
     if ((char)uVar2 != '\0') {
-      puVar3 = (uint32_t *)FUN_00671500(&_this->m_4dc,&local_6,param_1,&local_10,'\0');
+      puVar3 = C_EquipmentPanel__PutItemChecked(&_this->m_4dc,local_6,param_1,&local_10,false);
       uVar1 = *puVar3;
       GH_PIECE(local_10,2,2) = (short)((uint32_t)uVar1 >> 0x10);
       local_c = *(short *)(puVar3 + 1);
@@ -92,11 +92,10 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
   C_CampaignNode **ppCVar6;
   char *pcVar7;
   uint8_t *ptr;
-  uint32_t uVar8;
   C_str *extraout_EAX_00;
-  int iVar9;
-  int *piVar10;
-  uint32_t uVar11;
+  int iVar8;
+  int *piVar9;
+  uint32_t uVar10;
   int iStack_44;
   uint32_t local_3c;
   uint32_t local_38;
@@ -107,7 +106,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
   C_str *pCStack_10;
   int local_4;
   if (param_2 != 0) {
-    uVar11 = 0;
+    uVar10 = 0;
     local_28 = 0;
     local_3c = 0;
     local_38 = 0x200002f;
@@ -115,8 +114,8 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
     local_4 = 0;
     (**(code **)(*param_2 + 0x6c))(&local_3c);
     iVar2 = local_34;
-    iVar9 = local_34 - 1;
-    if (iVar9 < 0) {
+    iVar8 = local_34 - 1;
+    if (iVar8 < 0) {
       FUN_00687360((int)_this);
       pCStack_10 = 0;
       uStack_24 = 0xc600000;
@@ -135,39 +134,39 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
       GH_PIECE(local_4,0,1) = 2;
       PostControlMessage(&DAT_008ae590,&uStack_24);
       local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
-      uVar11 = extraout_EAX;
+      uVar10 = extraout_EAX;
       if (pCStack_10 != 0) {
-        uVar11 = C_str__ReleaseRep(pCStack_10);
+        uVar10 = C_str__ReleaseRep(pCStack_10);
       }
       local_4 = 0xffffffff;
       if (local_28 != 0) {
-        uVar11 = C_str__ReleaseRep(local_28);
+        uVar10 = C_str__ReleaseRep(local_28);
       }
-      return uVar11 & 0xffffff00;
+      return uVar10 & 0xffffff00;
     }
     iVar1 = *(int *)(_this->_pad_0138 + 0x9c);
     if (iVar1 == 0) {
-      uVar11 = 0x10;
+      uVar10 = 0x10;
     }
     else if (iVar1 == 1) {
-      uVar11 = 0x20;
+      uVar10 = 0x20;
     }
     else if (iVar1 == 2) {
-      uVar11 = 0x40;
+      uVar10 = 0x40;
     }
-    bVar4 = false;
     bVar3 = false;
-    if (iVar9 < 6) {
-      substr = (char *)FUN_0067de90(_this->_pad_0138 + 0x364,iVar9,uVar11 | 2);
-      _this->m_4c4 = iVar9;
-      iVar9 = DAT_008410ac;
-      bVar3 = false;
+    bVar4 = false;
+    if (iVar8 < 6) {
+      substr = (char *)FUN_0067de90(_this->_pad_0138 + 0x364,iVar8,uVar10 | 2);
+      _this->m_4c4 = iVar8;
+      iVar8 = DAT_008410ac;
+      bVar4 = false;
       if (substr != 0) {
         if (((((*(int *)(substr + 0x30) == -1) && (*(int *)(substr + 0x24) == -1)) &&
              (*(int *)(substr + 0x20) == -1)) &&
             ((*(int *)(substr + 0x28) == -1 && (*(int *)(substr + 0x2c) == -1)))) &&
            ((*(int *)(substr + 0x34) < 1 && (*(int *)(substr + 0xa8) < 1)))) {
-          bVar3 = true;
+          bVar4 = true;
         }
         else {
           S_SquadSoldier__SetProfile(_this->m_544,*(int *)(substr + 0x1b4),0);
@@ -185,7 +184,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
           }
           PostControlMessage(&DAT_008ae590,&uStack_24);
           local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
-          bVar3 = bVar4;
+          bVar4 = bVar3;
           if ((pCStack_10 != 0) &&
              (*pCStack_10 = (C_str)(*(int *)pCStack_10 - 1), *(int *)pCStack_10 == 0)) {
             tier1_operator_delete(pCStack_10);
@@ -193,13 +192,13 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
         }
         FUN_006863c0(*(int **)((int)_this->m_544 + 0x3c));
         iVar2 = *(int *)(substr + 0x1b4);
-        iVar9 = iVar2;
+        iVar8 = iVar2;
         if (iVar2 < 0x1e) {
-          iVar9 = DAT_008410ac;
+          iVar8 = DAT_008410ac;
           DAT_008ae634 = iVar2;
         }
       }
-      DAT_008410ac = iVar9;
+      DAT_008410ac = iVar8;
       pCStack_10 = 0;
       uStack_24 = 0xc600000;
       uStack_20 = 0x1000002;
@@ -224,8 +223,8 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
     }
     else {
       iStack_44 = -1;
-      substr = (char *)FUN_0067de40(_this->_pad_0138 + 0x364,0,uVar11 | 2);
-      iVar9 = 1;
+      substr = (char *)FUN_0067de40(_this->_pad_0138 + 0x364,0,uVar10 | 2);
+      iVar8 = 1;
       while (substr != 0) {
         pCVar5 = GetGame();
         ppCVar6 = pCVar5->m_mission[1].m_children.last;
@@ -237,8 +236,8 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
         }
         pcVar7 = strstr((char *)ppCVar6,substr);
         if ((pcVar7 != 0) && (iStack_44 = iStack_44 + 1, iStack_44 == iVar2 - 7)) break;
-        substr = (char *)FUN_0067de40(_this->_pad_0138 + 0x364,iVar9,uVar11 | 2);
-        iVar9++;
+        substr = (char *)FUN_0067de40(_this->_pad_0138 + 0x364,iVar8,uVar10 | 2);
+        iVar8++;
       }
       _this->m_4c4 = -1;
       pCStack_10 = 0;
@@ -264,7 +263,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
       }
     }
     if (substr != 0) {
-      if (!bVar3) {
+      if (!bVar4) {
         FUN_00687360((int)_this);
       }
       ptr = FUN_006876b0(substr);
@@ -275,13 +274,12 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
         C_GameMenu__FUN_00686ca0(_this,4,*(int *)(ptr + 0x24),1);
       }
       if (*(int *)(ptr + 0x28) != -1) {
-        uVar8 = FUN_0066f160(*(int *)(ptr + 0x28));
-        if (((char)uVar8 == '\0') || (uVar8 = FUN_0066f1a0((int)&_this->m_4dc), (char)uVar8 == '\0'))
-        {
+        bVar4 = C_EquipmentPanel__IsLargeWeapon(*(int *)(ptr + 0x28));
+        if ((!bVar4) || (bVar4 = C_EquipmentPanel__HasLargeWeapon(&_this->m_4dc), !bVar4)) {
           C_GameMenu__FUN_00686ca0(_this,0x10,*(int *)(ptr + 0x28),1);
         }
       }
-      iVar9 = 0;
+      iVar8 = 0;
       if (*(int *)(ptr + 0x2c) != -1) {
         C_GameMenu__FUN_00686ca0(_this,2,*(int *)(ptr + 0x2c),1);
       }
@@ -289,26 +287,26 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
         C_GameMenu__FUN_00686ca0(_this,8,*(int *)(ptr + 0x30),1);
       }
       if (0 < *(int *)(ptr + 0x34)) {
-        piVar10 = (int *)(ptr + 0x38);
+        piVar9 = (int *)(ptr + 0x38);
         do {
-          C_GameMenu__FUN_00686ca0(_this,0x20,*piVar10,(short)piVar10[1]);
-          iVar9++;
-          piVar10 += 2;
-        } while (iVar9 < *(int *)(ptr + 0x34));
+          C_GameMenu__FUN_00686ca0(_this,0x20,*piVar9,(short)piVar9[1]);
+          iVar8++;
+          piVar9 += 2;
+        } while (iVar8 < *(int *)(ptr + 0x34));
       }
-      iVar9 = 0;
+      iVar8 = 0;
       if (0 < *(int *)(ptr + 0xa8)) {
-        piVar10 = (int *)(ptr + 0xac);
+        piVar9 = (int *)(ptr + 0xac);
         do {
-          C_GameMenu__FUN_00686ca0(_this,0x40,*piVar10,(short)piVar10[1]);
-          iVar9++;
-          piVar10 += 2;
-        } while (iVar9 < *(int *)(ptr + 0xa8));
+          C_GameMenu__FUN_00686ca0(_this,0x40,*piVar9,(short)piVar9[1]);
+          iVar8++;
+          piVar9 += 2;
+        } while (iVar8 < *(int *)(ptr + 0xa8));
       }
       tier1_operator_delete(ptr);
     }
-    FUN_00672580(&_this->m_4dc);
-    FUN_00670e90((int)&_this->m_4dc);
+    C_EquipmentPanel__Refresh(&_this->m_4dc);
+    C_EquipmentPanel__UpdateFace(&_this->m_4dc);
     FUN_0067c040(_this->_pad_0548 + 0x38);
     if ((local_28 != 0) &&
        (local_28->rep = (C_str_rep *)local_28->rep[-1].chars, local_28->rep == 0)) {
@@ -324,7 +322,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
 // 0x00687360
 uint32_t FUN_00687360(int param_1, ...)
 {
-  FUN_006727f0((void *)(param_1 + 0x4dc),*(void **)(param_1 + 0x5a4));
+  C_EquipmentPanel__ReturnItems((void *)(param_1 + 0x4dc),*(void **)(param_1 + 0x5a4));
   FUN_0067c040((void *)(param_1 + 0x580));
   return 0;
 }

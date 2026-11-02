@@ -516,6 +516,11 @@ bool S_SquadSoldier::IsEmpty() const                    // 0x006a42e0
            hands.typeId == -1 && belt.empty() && backpackContents.empty();
 }
 
+int S_SquadSoldier::GetFreeBeltVolume() const           // 0x006a2bb0
+{
+    return static_cast<int>(BELT_VOLUME - static_cast<float>(load.beltVolume));
+}
+
 int S_SquadSoldier::GetFreeBackpackVolume() const       // 0x006a2bd0
 {
     return load.backpackMaxVolume - load.backpackVolume;

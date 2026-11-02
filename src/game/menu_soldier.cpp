@@ -168,6 +168,16 @@ void C_MenuSoldier::Release()
     }
 }
 
+void C_MenuSoldier::ReleaseDivingGear()
+{
+    for (I3D_frame *&gear : m_divingGear) {
+        if (gear) {
+            gear->Release();
+            gear = nullptr;
+        }
+    }
+}
+
 void C_MenuSoldier::HideHolsters()
 {
     for (S_HolsterSlot &slot : m_holsters) {

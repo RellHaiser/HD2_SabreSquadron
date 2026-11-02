@@ -7058,6 +7058,50 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/menu_soldier.txt (+29; no struct for the soldier: void *); 25 functions in
     ported.txt. Stats: 8,740 of 12,306 functions by hand (77.7 % by size).
 
+  PART 9e-ii-a DONE (2026-11-02): the equipment panel's runtime (src/game/equipment_panel.h/.cpp,
+  C_EquipmentPanel, vtable 0x008157cc, 0xA4 bytes; C_GameMenu +0x4DC). Its description (0x0066f200,
+  which also sets every control id) is 9e-ii-b.
+  - Fields: +0x04 the menu soldier, +0x08 the menu (the controls' callbacks' object: thunks 0x00672fb0..
+    0x00672ff0 call its slots 0x5C / 0x64 / 0x68 / 0x6C / 0x70), +0x0C..+0x18 the weight / overweight /
+    belt / backpack bars, +0x1C / +0x20 the belt's and the backpack's scroll, +0x24 the 8 highlight
+    frames ("sel*"), +0x44..+0x50 the scroll arrows, +0x58..+0x60 the load texts, +0x64 the index,
+    +0x68 the S_SquadSoldier, +0x6C..+0x80 the places' controls (head, uniform, backpack, long gun,
+    hands, drop), +0x84 / +0x94 four belt and four backpack item controls.
+  - SlotOfControl 0x00671290 (the id's kind, bits 12-19: 1 head, 2 uniform, 3 backpack, 4 long gun, 5
+    hands, 7 / 8 the belt and its items 1..4, 9 / 10 the backpack's), CountItems 0x00671260,
+    RemoveItem / RemoveItemAt 0x00671360 / 0x006713c0 (the soldier's items as many), PutItem 0x00671410
+    (the soldier's: the new ones, the more of the same type, or the old ones away first, not the
+    uniform's), PutItemChecked 0x00671500 / PutItemAt 0x006716c0, DropItem 0x006716f0 (the first place
+    it fits: head, uniform, belt, hands (not item 261), backpack, long gun, the backpack's contents; as
+    many as the free weight carries, the rest added back: lost when the belt gives back another type,
+    quirk kept), MoveItem 0x006719a0 (the drop place: given back; the displaced back to the source, then
+    anywhere; the same place: none, the original's count whatever DX held).
+  - OnScroll 0x00671ac0 (the arrows' callback, CONTROL_NOTIFY_06; also called with no control after a
+    change: the scroll kept within the items, the arrows on or off, Refresh), ShowItem 0x00671f60 (the
+    picture and type; the belt's and backpack's items "%d ", ammunition "rounds/count ", none: text
+    0x7D2), SetBackpackInactive 0x00672330, Refresh 0x00672580, ReturnBackpack 0x00672720, ReturnItems
+    0x006727f0, FindHighlights 0x00672820, ShowAllowed 0x006728a0 (slot 1), UpdateLoad 0x00672a30 (slot
+    0: "%s: %3.1f / %d Kg", "%2.1f%%", no backpack: text 0xAA7), HasLargeWeapon / IsLargeWeapon
+    0x0066f1a0 / 0x0066f160.
+  - The soldier: CreateSoldier 0x00670c00 (the visual's world bound to pixels, y flipped by -4/3, the
+    rectangle's top its max y; the visual hidden), DeleteSoldier 0x00670e40 (Release, then the diving
+    gear: C_MenuSoldier::ReleaseDivingGear), Tick / Render 0x00670be0 / 0x00670bf0, UpdateFace 0x00670e90,
+    DressSoldier 0x00670f20 (the belt's and the backpack's the last first), AddToSoldier 0x00670ee0.
+    S_SquadSoldier::GetFreeBeltVolume 0x006a2bb0 added (game/profile_squad.cpp).
+  - Fix: SelectSoldier went on with a negative index's null soldier.
+  - Harness: equipment_panel_test.inc in the factory build (check_equipmentpanel.py,
+    "equipmentpanel:", 16 checks; build_factory.bat links equipment_panel.cpp): the squad soldier's
+    items, the stock, the human store and the containers faked and logged, the control messages read
+    back from the queue, the menu soldier menu_soldier_test.inc's. The stub game/profile.h has the
+    load, the squad's and the stores' declarations now (every build rebuilt clean). 22 of 22 in both
+    orders (the other factory lines too); the text build 22 of 22.
+  - Mutations: mutations/mutate_9e2a.py (410 cases, 359 build; all caught but 29 equivalent, listed there; the first run left 62, new checks caught 33; the baseline builds now start 4 minutes apart: four at once ran cc1plus out of memory).
+  - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (was 438 / 76 / 180). ret_audit --src: 52 (S_SoldierItem, 6 bytes, added to its
+    returned-through-memory types).
+  - Ghidra: names/equipment_panel.txt (+30, void * for the panel). Ghidra crashed during the part
+    (restarted by the user): the 9e-i names were applied again. 30 functions in ported.txt. Stats:
+    8,770 of 12,306 functions by hand (78.0 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

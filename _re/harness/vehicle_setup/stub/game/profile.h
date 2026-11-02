@@ -3,6 +3,8 @@
 // real names.
 #pragma once
 
+#include <vector>
+
 #include "common/c_str.h"
 #include "game/pending.h"                               // S_MultiplayerSettings
 #include "game/key_bindings.h"
@@ -47,6 +49,8 @@ public:
     C_KeyBindings m_keyBindings;
 };
 
+class C_HumanStore;
+struct S_MissionSquad;
 class C_GameProfile {
 public:
     C_PlayerProfile *GetPlayerProfile() const { return m_player; }
@@ -64,6 +68,9 @@ public:
     S_PlayMode *m_playMode = nullptr;
     // (The menus' reset, part 9d-ii-a: menu_test.inc.)
     void ResetGame();
+    // (The equipment panel, part 9e-ii-a.)
+    C_HumanStore *m_humanStore = nullptr;
+    S_MissionSquad *m_missionSquad = nullptr;
 };
 extern C_GameProfile g_gameProfile;
 extern int g_versionMajor;
@@ -75,8 +82,40 @@ extern S_MultiplayerSettings *g_mpSettings;             // (a reference into g_g
 enum : uint8_t {
     SQUAD_SLOT_UNIFORM = 0x02,
 };
+// (The equipment panel, part 9e-ii-a: equipment_panel_test.inc fakes the methods.)
+struct S_SoldierLoad {
+    int capacity = 0;                                   // +0x00 (+0x8C)
+    float weight = 0.0f;                                // +0x04 (+0x90)
+    float backpackMaxWeight = 0.0f;                     // +0x08 (+0x94)
+    int backpackMaxVolume = 0;                          // +0x0C (+0x98)
+    float backpackWeight = 0.0f;                        // +0x10 (+0x9C)
+    int backpackVolume = 0;                             // +0x14 (+0xA0)
+    float beltWeight = 0.0f;                            // +0x18 (+0xA4)
+    int beltVolume = 0;                                 // +0x1C (+0xA8)
+    float GetBeltFill() const;
+    float GetBackpackFill() const;
+    float GetWeightFill() const;
+};
+class C_ItemStock;
 struct S_SquadSoldier : S_SoldierState {
     void SplitStacks();
     void PutItem(S_SoldierItem *displaced, uint8_t slot, const S_SoldierItem &item);
-    uint8_t load[0x20] = {};                            // +0x8C (S_SoldierLoad)
+    void ReturnItemsTo(C_ItemStock *stock);
+    int CountItems(uint8_t slot, const S_SoldierItem &item) const;
+    int RemoveItem(uint8_t slot, S_SoldierItem &item);
+    int GetFreeBeltVolume() const;
+    int GetFreeBackpackVolume() const;
+    float GetFreeWeight() const;
+    S_SoldierLoad load;                                 // +0x8C
+};
+struct S_MissionSquad {
+    std::vector<S_SquadSoldier *> states;               // +0x04
+};
+class C_ItemStock {
+public:
+    void Add(int type, int count);
+};
+class C_HumanStore {
+public:
+    S_SoldierProfile *Get(int index) const;
 };

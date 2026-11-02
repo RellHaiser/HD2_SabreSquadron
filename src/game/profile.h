@@ -135,6 +135,7 @@ struct S_SquadSoldier : S_SoldierState {
     int RemoveItem(uint8_t slot, S_SoldierItem &item);  // 0x006a3e90
     bool IsEmpty() const;                               // 0x006a42e0
     // Free backpack volume and free weight.
+    int GetFreeBeltVolume() const;                      // 0x006a2bb0 (12 less the belt's)
     int GetFreeBackpackVolume() const;                  // 0x006a2bd0
     float GetFreeWeight() const;                        // 0x006a2be0
     // Chunks 0x0B .. 0x17 (0x13: the old load with a float capacity).

@@ -442,17 +442,6 @@ uint32_t FUN_0067f3c0(void *_this, ...)
 }
 
 
-// 0x0067f3d0
-uint32_t * C_auto_008157cc__FUN_0067f3d0(C_auto_008157cc *_this,uint8_t param_1, ...)
-{
-  _this->vtable = (C_auto_008157cc_vtbl *)&PTR_008157cc;
-  if ((param_1 & 1) != 0) {
-    tier1_operator_delete(_this);
-  }
-  return (uint32_t*)(_this);
-}
-
-
 // 0x0067f3f0
 uint32_t FUN_0067f3f0(int param_1, ...)
 {
@@ -690,7 +679,7 @@ uint32_t C_GameMenu__FUN_0067f760(C_GameMenu *_this, ...)
       _this->m_4bc = 0;
     }
   }
-  FUN_00670e40((int)&_this->m_4dc);
+  C_EquipmentPanel__DeleteSoldier(&_this->m_4dc);
   if (*(C_ItemStock **)(_this->_pad_0138 + 0xac) != 0) {
     C_ItemStock__Reset(*(C_ItemStock **)(_this->_pad_0138 + 0xac));
     pCVar1 = *(C_ItemStock **)(_this->_pad_0138 + 0xac);
@@ -1434,7 +1423,7 @@ uint32_t FUN_006802a0(...)
 uint32_t C_GameMenu__FUN_006808d0(C_GameMenu *_this,int param_1, ...)
 {
   if (((uint8_t)g_gameRole & 7) != 7) {
-    FUN_00670be0(&_this->m_4dc,param_1);
+    C_EquipmentPanel__TickSoldier(&_this->m_4dc,param_1);
     FUN_006869a0((int)_this);
     FUN_006802a0();
   }
@@ -2338,58 +2327,64 @@ LAB_00681ec2:
 // 0x00681ee0
 uint32_t C_GameMenu__FUN_00681ee0(C_GameMenu *_this,uint32_t param_1,int param_2, ...)
 {
-  int *this_00;
-  int iVar1;
+  int *panel;
+  bool bVar1;
   uint32_t uVar2;
-  int iVar3;
-  uchar *this_01;
-  uint32_t local_10;
+  uint32_t uVar3;
+  int iVar4;
+  undefined3 extraout_var;
+  int typeId;
+  uchar *this_00;
+  uint16_t local_10;
+  short local_e;
   uint16_t local_c;
-  uint8_t local_8 [8];
-  iVar1 = *(int *)(param_2 + 0x5c);
-  if (-1 < iVar1) {
-    GH_PIECE(local_10,2,2) = (short)iVar1;
+  uint8_t local_8 [2];
+  int local_6;
+  typeId = *(int *)(param_2 + 0x5c);
+  if (-1 < typeId) {
+    local_e = (short)typeId;
     local_c = 1;
-    GH_PIECE(local_10,0,2) = 0xffff;
-    this_00 = &_this->m_4dc;
+    local_10 = 0xffff;
+    panel = &_this->m_4dc;
     if ((*(uint32_t *)(param_2 + 0x60) & 0x3f00000) == 0x200000) {
-      iVar1 = FUN_00671290(*(uint32_t *)(param_2 + 0x60));
-      if (iVar1 == 8) {
-        FUN_00672720(this_00,_this->m_5a4);
-        uVar2 = FUN_0067c040(_this->_pad_0548 + 0x38);
-        return CONCAT31((int3)((uint32_t)uVar2 >> 8),1);
+      uVar2 = C_EquipmentPanel__SlotOfControl(*(uint32_t *)(param_2 + 0x60));
+      if (uVar2 == 8) {
+        C_EquipmentPanel__ReturnBackpack(panel,_this->m_5a4);
+        uVar3 = FUN_0067c040(_this->_pad_0548 + 0x38);
+        return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
       }
-      iVar3 = FUN_006713c0(this_00,*(uint32_t *)(param_2 + 0x60),(int)&local_10);
-      iVar1 = 0;
-      if (iVar3 != 0) {
-        uVar2 = FUN_0067c0a0(_this->_pad_0548 + 0x38,(int)&local_10);
-        return CONCAT31((int3)((uint32_t)uVar2 >> 8),1);
+      iVar4 = C_EquipmentPanel__RemoveItemAt(panel,*(uint32_t *)(param_2 + 0x60),&local_10);
+      typeId = 0;
+      if (iVar4 != 0) {
+        uVar3 = FUN_0067c0a0(_this->_pad_0548 + 0x38,(int)&local_10);
+        return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
       }
     }
     else {
-      uVar2 = FUN_0066f160(iVar1);
-      if ((char)uVar2 != '\0') {
-        iVar1 = FUN_0066f1a0((int)this_00);
-        if ((char)iVar1 != '\0') goto LAB_00682006;
+      bVar1 = C_EquipmentPanel__IsLargeWeapon(typeId);
+      if (bVar1) {
+        bVar1 = C_EquipmentPanel__HasLargeWeapon(panel);
+        typeId = CONCAT31(extraout_var,bVar1);
+        if (bVar1) goto LAB_00682006;
       }
-      this_01 = _this->_pad_0548 + 0x38;
-      uVar2 = FUN_0067c0d0(this_01,(int)&local_10,'\0');
-      if ((char)uVar2 == '\0') {
-        return uVar2;
+      this_00 = _this->_pad_0548 + 0x38;
+      uVar3 = FUN_0067c0d0(this_00,(int)&local_10,'\0');
+      if ((char)uVar3 == '\0') {
+        return uVar3;
       }
-      FUN_006716f0(this_00,(float *)local_8,(float *)&local_10,'\0');
-      iVar1 = GH_PIECE(local_8,2,4);
-      if ((short)GH_PIECE(local_8,2,4) != -1) {
-        if ((short)GH_PIECE(local_8,2,4) == GH_PIECE(local_10,2,2)) {
-          uVar2 = FUN_0067c0a0(this_01,(int)&local_10);
-          return CONCAT31((int3)((uint32_t)uVar2 >> 8),1);
+      C_EquipmentPanel__DropItem(panel,local_8,&local_10,false);
+      typeId = local_6;
+      if ((short)local_6 != -1) {
+        if ((short)local_6 == local_e) {
+          uVar3 = FUN_0067c0a0(this_00,(int)&local_10);
+          return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
         }
-        iVar1 = FUN_0067c0a0(this_01,(int)local_8);
+        typeId = FUN_0067c0a0(this_00,(int)local_8);
       }
     }
   }
 LAB_00682006:
-  return CONCAT31((int3)((uint32_t)iVar1 >> 8),1);
+  return CONCAT31((int3)((uint32_t)typeId >> 8),1);
 }
 
 
@@ -2401,8 +2396,8 @@ uint32_t C_GameMenu__FUN_00682020(C_GameMenu *_this,uint32_t param_1,int *param_
 #if 0
 {
   uint8_t stack0xffffff98[64];
-  int iVar1;
-  uint32_t uVar2;
+  bool bVar1;
+  int iVar2;
   uint32_t visualType;
   I3D_driver *self;
   I3D_frame *pIVar3;
@@ -2415,9 +2410,9 @@ uint32_t C_GameMenu__FUN_00682020(C_GameMenu *_this,uint32_t param_1,int *param_
   local_14 = 0;
   (**(code **)(*param_2 + 0x6c))();
   if (((param_2[0x18] & 0x3f00000U) != 0x300000) ||
-     ((iVar1 = FUN_0067b930(_this->_pad_0548 + 0x38,0x100000a), iVar1 != 0 &&
-      ((uVar2 = FUN_0066f160(0x100000a), (char)uVar2 == '\0' ||
-       (uVar2 = FUN_0066f1a0((int)&_this->m_4dc), (char)uVar2 == '\0')))))) {
+     ((iVar2 = FUN_0067b930(_this->_pad_0548 + 0x38,0x100000a), iVar2 != 0 &&
+      ((bVar1 = C_EquipmentPanel__IsLargeWeapon(0x100000a), !bVar1 ||
+       (bVar1 = C_EquipmentPanel__HasLargeWeapon(&_this->m_4dc), !bVar1)))))) {
     _this->_pad_0138[0x88] = '\n';
     _this->_pad_0138[0x89] = '\0';
     _this->_pad_0138[0x8a] = '\0';
@@ -2551,47 +2546,48 @@ uint32_t C_GameMenu__FUN_00682350(C_GameMenu *_this,int param_1,uint32_t param_2
   int iVar3;
   uint32_t local_10;
   uint16_t local_c;
-  uint8_t local_8 [8];
-  local_10 = *(float *)(_this->_pad_0138 + 0x80);
+  uint8_t local_8 [2];
+  void *local_6;
+  local_10 = *(uint32_t *)(_this->_pad_0138 + 0x80);
   local_c = *(uint16_t *)(_this->_pad_0138 + 0x84);
-  uVar1 = *(uint32_t *)(param_1 + 0x60);
-  if ((uVar1 & 0x3f00000) == 0x200000) {
+  uVar2 = *(uint32_t *)(param_1 + 0x60);
+  if ((uVar2 & 0x3f00000) == 0x200000) {
     if ((param_2 == 0) || ((param_2 & 0x3f00000) != 0x200000)) {
       this_00 = &_this->m_4dc;
-      iVar3 = FUN_00671290(uVar1);
-      if (iVar3 == 8) {
-        FUN_00672720(this_00,_this->m_5a4);
-        uVar2 = FUN_0067c040(_this->_pad_0548 + 0x38);
-        return CONCAT31((int3)((uint32_t)uVar2 >> 8),1);
+      uVar2 = C_EquipmentPanel__SlotOfControl(uVar2);
+      if (uVar2 == 8) {
+        C_EquipmentPanel__ReturnBackpack(this_00,_this->m_5a4);
+        uVar1 = FUN_0067c040(_this->_pad_0548 + 0x38);
+        return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
       }
-      iVar3 = FUN_00671260(this_00,*(uint32_t *)(param_1 + 0x60),(int)&local_10);
+      iVar3 = C_EquipmentPanel__CountItems(this_00,*(uint32_t *)(param_1 + 0x60),&local_10);
       local_c = (uint16_t)iVar3;
-      iVar3 = FUN_006713c0(this_00,*(uint32_t *)(param_1 + 0x60),(int)&local_10);
+      iVar3 = C_EquipmentPanel__RemoveItemAt(this_00,*(uint32_t *)(param_1 + 0x60),&local_10);
       param_2 = 0;
       if (iVar3 != 0) {
-        uVar2 = FUN_0067c0a0(_this->_pad_0548 + 0x38,(int)&local_10);
-        return CONCAT31((int3)((uint32_t)uVar2 >> 8),1);
+        uVar1 = FUN_0067c0a0(_this->_pad_0548 + 0x38,(int)&local_10);
+        return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
       }
     }
     else {
-      param_2 = FUN_006719a0(&_this->m_4dc,(float *)local_8,(float *)&local_10,uVar1,param_2);
-      if (GH_PIECE(local_8,2,2) != -1) {
-        uVar2 = FUN_0067c0a0(_this->_pad_0548 + 0x38,(int)local_8);
-        return CONCAT31((int3)((uint32_t)uVar2 >> 8),1);
+      param_2 = (uint32_t)C_EquipmentPanel__MoveItem(&_this->m_4dc,local_8,&local_10,uVar2,param_2);
+      if ((short)local_6 != -1) {
+        uVar1 = FUN_0067c0a0(_this->_pad_0548 + 0x38,(int)local_8);
+        return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
       }
     }
   }
   else if ((param_2 != 0) && ((param_2 & 0x3f00000) == 0x200000)) {
-    FUN_006716c0((uint32_t *)local_8,param_2,&local_10);
-    if ((short)GH_PIECE(local_8,2,4) == -1) {
+    C_EquipmentPanel__PutItemAt(&_this->m_4dc,local_8,param_2,&local_10);
+    if ((short)local_6 == -1) {
       param_2 = FUN_0067c0d0(_this->_pad_0548 + 0x38,(int)&local_10,'\0');
     }
     else {
-      param_2 = GH_PIECE(local_8,2,4);
-      if ((short)GH_PIECE(local_8,2,4) != GH_PIECE(local_10,2,2)) {
+      param_2 = (uint32_t)local_6;
+      if ((short)local_6 != GH_PIECE(local_10,2,2)) {
         FUN_0067c0d0(_this->_pad_0548 + 0x38,(int)&local_10,'\0');
-        uVar2 = FUN_0067c0a0(_this->_pad_0548 + 0x38,(int)local_8);
-        return CONCAT31((int3)((uint32_t)uVar2 >> 8),1);
+        uVar1 = FUN_0067c0a0(_this->_pad_0548 + 0x38,(int)local_8);
+        return CONCAT31((int3)((uint32_t)uVar1 >> 8),1);
       }
     }
   }
@@ -2739,6 +2735,7 @@ uint32_t C_GameMenu__FUN_00682770(C_GameMenu *_this, ...)
 uint32_t C_GameMenu__FUN_00682790(C_GameMenu *_this, ...)
 {
   int *piVar1;
+  int extraout_EAX;
   int iVar2;
   I3D_driver *pIVar3;
   uint32_t value;
@@ -2752,7 +2749,8 @@ uint32_t C_GameMenu__FUN_00682790(C_GameMenu *_this, ...)
   }
   iVar2 = _this->m_4bc;
   if ((iVar2 == 0) || ((*(uint8_t *)(*(int *)(iVar2 + 0x14) + 0xe0) & 1) == 0)) {
-    iVar2 = FUN_00670bf0((int)&_this->m_4dc);
+    C_EquipmentPanel__RenderSoldier(&_this->m_4dc);
+    iVar2 = extraout_EAX;
     if (_this->m_0fc != 0) {
       iVar2 = (**(code **)(*(int *)_this->m_0fc + 0x88))();
       if ((char)iVar2 != '\0') {

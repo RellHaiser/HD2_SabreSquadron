@@ -68,6 +68,7 @@ void ScreenTest(I3D_scene *scene);
 void MenuTest(I3D_scene *scene);
 void MenuRunTest(I3D_scene *scene);
 void MenuSoldierTest(I3D_scene *scene);
+void EquipmentPanelTest(I3D_scene *scene);
 
 namespace {
 
@@ -1032,6 +1033,7 @@ void ControlsTest()
     MenuTest(scene);
     MenuRunTest(scene);
     MenuSoldierTest(scene);
+    EquipmentPanelTest(scene);
 #endif
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
@@ -1064,4 +1066,5 @@ void ControlsTest()
 #include "menu_test.inc"
 #include "menu_run_test.inc"
 #include "menu_soldier_test.inc"
+#include "equipment_panel_test.inc"
 #endif

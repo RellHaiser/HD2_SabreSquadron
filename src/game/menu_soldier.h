@@ -23,6 +23,7 @@ enum E_MenuSoldierPlace {
     MENU_SOLDIER_BACKPACK = 0x8,
     MENU_SOLDIER_LONG_GUN = 0x10,
     MENU_SOLDIER_HOLSTERS = 0x20,
+    MENU_SOLDIER_BACKPACK_CONTENTS = 0x40,              // (nothing shown)
 };
 
 class alignas(16) C_MenuSoldier {
@@ -43,6 +44,8 @@ public:
     void AddItem(uint32_t place, int typeId);           // 0x007d1fc0
     // The item at a place away (holsters: one of `typeId`, all: every holster hidden).
     void RemoveItem(uint32_t place, int typeId, bool all);   // 0x007d3080
+    // The diving gear's frames released (inline in the menus' 0x00670e40, after Release).
+    void ReleaseDivingGear();
     // Every item away and the naked model again.
     void ResetItems();                                  // 0x007d3220
     // The face texture of the model (kept for the next model).

@@ -2,15 +2,6 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
-// 0x006a2bb0
-int64_t FUN_006a2bb0(...)
-{
-  int64_t lVar1;
-  lVar1 = tier1_ftol();
-  return lVar1;
-}
-
-
 // 0x006a4350
 bool S_SquadSoldier__SaveToFile(S_SquadSoldier *_this,char *fileName, ...)
 {
