@@ -7,7 +7,6 @@
 #include "common/c_str.h"
 #include "game/campaign.h"
 #include "game/controls.h"
-#include "game/cursor.h"
 #include "game/game.h"
 #include "game/game_app.h"
 #include "game/human.h"
@@ -130,16 +129,6 @@ void DeleteSquadSoldier(std::vector<S_SquadSoldier *> &squad, std::size_t index)
 }
 
 } // namespace
-
-// ---- the options handler
-
-C_OptionsHandler::~C_OptionsHandler()
-{
-    if (m_cursor) {
-        m_cursor->Release();
-        m_cursor = nullptr;
-    }
-}
 
 // ---- the mission's objectives
 

@@ -56,15 +56,9 @@ void C_NetGame::CountTeams(int *axis, int *allies, bool pending, bool inGame)
 }
 int C_game::GetRespawnTimeLeft() const { return g_gmRespawnLeft; }
 int C_game::GetRoundTimeLeft() const { return g_gmRoundLeft; }
-// (Part 9e-vii: the messages.) The squad, the options handler (not ported yet: logged, taking them
-// when asked), the app (zeroed memory; its commands logged), the info screen hidden.
+// (Part 9e-vii: the messages.) The squad, the app (zeroed memory; its commands logged), the info
+// screen hidden. (The options handler is options_test.inc's.)
 S_MissionSquad *&g_missionSquad = g_gameProfile.m_missionSquad;
-bool g_gmOptionsTake;
-bool C_OptionsHandler::HandleMessage(S_ControlMessage *message)
-{
-    GfLog("options %x", message->id);
-    return g_gmOptionsTake;
-}
 alignas(16) uint8_t g_gmAppMemory[sizeof(C_GameApp)];
 C_GameApp *GetGameApp() { return reinterpret_cast<C_GameApp *>(g_gmAppMemory); }
 void C_GameApp::PostCommand(int command, intptr_t a, intptr_t b, bool flush)
@@ -204,7 +198,7 @@ void GameMenuTest(I3D_scene *scene)
         g_gmSlots = true;
         g_gfLog.clear();
         bool ok = m.OnStart(nullptr) && m.m_hasPlayerSlotMember && m.m_options && m.m_options->m_menu == &m &&
-                  !m.m_options->m_cursor && m.m_options->m_unknown08 && !m.m_options->m_unknown09 && !m.m_infoScreen;
+                  !m.m_options->m_cursor && m.m_options->m_fillOnOpen && m.m_options->m_screen == 0 && !m.m_infoScreen;
         ok &= MsLogIs({"master 0"}, g_gfLog);
         g_gmSlots = false;
         m.OnStop();
@@ -698,12 +692,11 @@ void GameMenuTest(I3D_scene *scene)
 
         // The options handler's first (taken: nothing more).
         {
-            g_gmOptionsTake = true;
-            message(MENU_MSG_ESCAPE);
-            bool ok = MsLogIs({"options 200000a"}, g_gfLog) && g_controlMessages.empty() && m.GetState() == GAME_STATE_RUNNING;
-            g_gmOptionsTake = false;
+            message(0x200006F);
+            bool ok = MsLogIs({"save options", "hardware option", "keys applied"}, g_gfLog) && g_controlMessages.empty() &&
+                      m.GetState() == GAME_STATE_RUNNING;
             message(0x2000099);
-            ok &= MsLogIs({"options 2000099"}, g_gfLog) && g_controlMessages.empty() && m.GetState() == GAME_STATE_RUNNING;
+            ok &= g_gfLog.empty() && g_controlMessages.empty() && m.GetState() == GAME_STATE_RUNNING;
             // (The code's flag bits masked.)
             message(0x200000A | 0x0C000000);
             ok &= m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
@@ -717,11 +710,11 @@ void GameMenuTest(I3D_scene *scene)
             m.m_infoScreen = new C_InfoScreen();
             g_gmInfoShown = true;
             message(MENU_MSG_ESCAPE);
-            ok &= MsLogIs({"options 200000a", "info show 0"}, g_gfLog) && m.GetState() == GAME_STATE_RUNNING;
+            ok &= MsLogIs({"info show 0"}, g_gfLog) && m.GetState() == GAME_STATE_RUNNING;
             // (Not shown: on to the screens.)
             g_gmInfoShown = false;
             message(MENU_MSG_ESCAPE);
-            ok &= MsLogIs({"options 200000a"}, g_gfLog) && m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
+            ok &= g_gfLog.empty() && m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
             delete m.m_infoScreen;
             m.m_infoScreen = nullptr;
             C_MsScreen one(scene, "gmesc1", 0x04000000), two(scene, "gmesc2", 0x08000000), three(scene, "gmesc3", 0x0C000000);
@@ -774,10 +767,10 @@ void GameMenuTest(I3D_scene *scene)
             squad.states = {a, b};
             m.m_team = 0;
             message(MENU_MSG_ESCAPE);
-            ok &= MsLogIs({"options 200000a", "command 5 1 0 0"}, g_gfLog) && m.m_teamChangePosted &&
+            ok &= MsLogIs({"command 5 1 0 0"}, g_gfLog) && m.m_teamChangePosted &&
                   m.GetState() == GAME_STATE_RUNNING && squad.states.size() == 2;
             message(MENU_MSG_ESCAPE);
-            ok &= MsLogIs({"options 200000a"}, g_gfLog) && m.GetState() == GAME_STATE_RUNNING;
+            ok &= g_gfLog.empty() && m.GetState() == GAME_STATE_RUNNING;
             m.m_team = 1;
             message(MENU_MSG_ESCAPE);
             ok &= squad.states == std::vector<S_SquadSoldier *>({a}) && m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
@@ -791,7 +784,7 @@ void GameMenuTest(I3D_scene *scene)
                 delete s;
             squad.states.clear();
             message(MENU_MSG_ESCAPE);
-            ok &= MsLogIs({"options 200000a"}, g_gfLog) && m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
+            ok &= g_gfLog.empty() && m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
             m.m_teamChangePosted = false;
             WM(r.gmEscapeNet, ok);
         }
@@ -804,21 +797,21 @@ void GameMenuTest(I3D_scene *scene)
             squad.states = {a, b};
             g_mpSettings->sessionType = 1;
             message(0x200006A);
-            ok &= squad.states == std::vector<S_SquadSoldier *>({b}) && MsLogIs({"options 200006a", "command 0 0 0 0"}, g_gfLog) &&
+            ok &= squad.states == std::vector<S_SquadSoldier *>({b}) && MsLogIs({"command 0 0 0 0"}, g_gfLog) &&
                   ScQueue() == "0 200000a 0 0 ; ";
             g_mpSettings->sessionType = 2;
             message(0x200006A);
-            ok &= squad.states.size() == 1 && MsLogIs({"options 200006a", "command 0 0 0 0"}, g_gfLog);
+            ok &= squad.states.size() == 1 && MsLogIs({"command 0 0 0 0"}, g_gfLog);
             g_mpSettings->sessionType = 0;
             message(0x200006A);
-            ok &= MsLogIs({"options 200006a"}, g_gfLog) && ScQueue() == "0 200000a 0 0 ; ";
+            ok &= g_gfLog.empty() && ScQueue() == "0 200000a 0 0 ; ";
             m.m_hasPlayerSlotMember = true;
             g_mpSettings->sessionType = 1;
             message(0x200006A);
-            ok &= MsLogIs({"options 200006a"}, g_gfLog);
+            ok &= g_gfLog.empty();
             m.SetRespawnOnApply(true);
             message(0x200006A);
-            ok &= MsLogIs({"options 200006a", "command 1 0 0 0"}, g_gfLog);
+            ok &= MsLogIs({"command 1 0 0 0"}, g_gfLog);
             m.SetRespawnOnApply(false);
             m.m_hasPlayerSlotMember = false;
             g_mpSettings->sessionType = 0;
@@ -876,10 +869,10 @@ void GameMenuTest(I3D_scene *scene)
                 ok &= m.GetState() == GAME_STATE_MENU_END_MISSION &&
                       reinterpret_cast<C_game *>(gameMemory2)->GetMode() == GAME_MODE_NORMAL;
             }
-            for (uint32_t id : {0x2000079u, 0x20000B3u, 0x20000B9u, 0x20000C4u, 0x20000C7u, 0x200006Bu}) {
+            for (uint32_t id : {0x2000079u, 0x20000B3u, 0x20000B9u, 0x20000C3u, 0x20000C8u, 0x200006Bu}) {
                 message(id);
                 ok &= m.GetState() == GAME_STATE_RUNNING && g_controlMessages.empty() && app->m_pendingCommand == 0 &&
-                      MsLogIs({CmText("options %x", id)}, g_gfLog);
+                      g_gfLog.empty();
             }
             m.SetGame(nullptr);
             one->~C_GameState();

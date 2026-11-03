@@ -5234,6 +5234,7 @@ uint32_t C_ObjectiveIcons__SetIcon(C_ObjectiveIcons *_this = {}, int index = {},
 uint32_t * C_OperationEndMenu__DeletingDestructor(void *_this = {}, uint8_t param_1 = {}, ...);
 uint32_t C_OperationEndMenu__GetTypeId(...);
 bool C_OptionsHandler__HandleMessage(void *_this = {}, void *message = {}, ...);
+bool C_OptionsHandler__RefreshKeyGroups(void *handler = {}, ...);
 uint32_t C_OptionsHandler___C_OptionsHandler(void *handler = {}, ...);
 uint32_t C_PagedTextBox__AddArea(C_PagedTextBox *_this = {}, I3D_scene *scene = {}, I3D_frame *visual = {}, ...);
 uint32_t C_PagedTextBox__AddLineToPage(C_PagedTextBox *_this = {}, void *line = {}, ...);
@@ -9080,7 +9081,6 @@ uint32_t FUN_00620670(uint32_t param_1 = {}, int *param_2 = {}, ...);
 uint32_t FUN_00620780(void *_this = {}, ...);
 uint32_t FUN_006209b0(int param_1 = {}, ...);
 uint32_t FUN_006209c0(void *_this = {}, uint32_t param_1 = {}, int *param_2 = {}, ...);
-uint32_t FUN_00620be0(int param_1 = {}, ...);
 uint32_t FUN_00620dd0(void *_this = {}, uint8_t *param_1 = {}, ...);
 int FUN_00620df0(int param_1 = {}, ...);
 uint8_t * FUN_00620e00(void *_this = {}, uint8_t *param_1 = {}, ...);

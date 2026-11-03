@@ -27381,12 +27381,12 @@
   "name": "XmlAttr_Dtor"
  },
  "0061bf00": {
-  "module": "game_menu",
+  "module": "options_handler",
   "name": "C_OptionsHandler::HandleMessage",
   "proto": "bool __thiscall HandleMessage(void *this, void * message)"
  },
  "0061cfa0": {
-  "module": "game_menu",
+  "module": "options_handler",
   "name": "C_OptionsHandler::~C_OptionsHandler",
   "proto": "void __fastcall ~C_OptionsHandler(void * handler)"
  },
@@ -27403,6 +27403,11 @@
  "00620770": {
   "module": "zz_idioms",
   "name": "get_field_8_620770"
+ },
+ "00620be0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::RefreshKeyGroups",
+  "proto": "bool __fastcall RefreshKeyGroups(void * handler)"
  },
  "00625f60": {
   "module": "screen",

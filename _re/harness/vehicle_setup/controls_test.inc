@@ -73,6 +73,7 @@ void EquipmentDescTest(I3D_scene *scene);
 void StoreListTest(I3D_scene *scene);
 void LoadoutTest(I3D_scene *scene);
 void GameMenuTest(I3D_scene *scene);
+void OptionsTest(I3D_scene *scene);
 
 namespace {
 
@@ -1042,6 +1043,7 @@ void ControlsTest()
     StoreListTest(scene);
     LoadoutTest(scene);
     GameMenuTest(scene);
+    OptionsTest(scene);
 #endif
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
@@ -1079,4 +1081,5 @@ void ControlsTest()
 #include "store_list_test.inc"
 #include "loadout_test.inc"
 #include "game_menu_test.inc"
+#include "options_test.inc"
 #endif

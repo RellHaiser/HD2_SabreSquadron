@@ -7297,6 +7297,34 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e-viii: the options handler 0x0061bf00 (with 0x00620be0) in its own files; then the
     screens, the squad glue and the item slots.
 
+  PART 9e-viii DONE (2026-11-02): the options screen's messages (C_OptionsHandler, src/game/
+  options_handler.h/.cpp; moved out of game_menu.h; the main menu's too).
+  - HandleMessage 0x0061bf00: escape with the options screen (+0x09, its index) on top: 0x20000C4;
+    0x200006F: the player's options saved, the hardware option applied, the key bindings' changes;
+    0x2000071: the first time (+0x08) the controls filled, then the screen opened; 0x20000C4: a
+    function without a key: the OK box 0x2530 (both answers 0x20000C7), else the six pages
+    (0x600000..0xB00000) hidden and 0x600106F (the save) and 0x6001003 (back) posted; 0x20000C7: the
+    keys' page alone, the unbound function's group chosen (0x902000) and its place selected in the
+    group's list (0x900000 | (group + 4) << 12; none at place 0). Else false.
+  - The fill: the gamma control active by IGraph's info flag 2, the gamma, the sound and music
+    volumes, the mouse sensitivity and the voice value as slider positions (truncated), the detail
+    level, the switches (invert mouse 0x804000, unknown3A 0xA02000, the voice chat 0xB04000, the
+    crosshair 0xA03000; quiet), the voice value active with the voice chat; RefreshKeyGroups
+    0x00620be0 (the groups 4..8 refreshed, the group list's choice, its value's second byte, last).
+  - (The original asks a copy of the key bindings for the unbound one; the bindings themselves here.)
+  - Harness: options_test.inc in the factory build (check_options.py, "options:", 8 checks; the
+    player's saving and the key bindings faked, world_modules_test.inc's detail settings with the
+    stub's new fields, IGraph's info; menu_test.inc's menu and screens); game_menu_test.inc now runs
+    with the real handler. 22 of 22 in both orders (the other factory lines too).
+  - Mutations: mutations/mutate_9e8.py (123 cases, 119 build, all caught but 3 equivalent).
+  - Build: MSVC clean. Tier 1: 425 errors in 75 files, 175 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/options_handler.txt (+1, 2 moved from game_menu.txt); 2 functions in ported.txt.
+    Stats: 8,840 of 12,306 functions by hand (78.7 % by size).
+  - Next, 9e-ix: BuildScreens 0x0067fe00 (the main, options and player screens' descriptions, their
+    models and screens; the first opened) with the main screen's builder 0x00680980; then the options
+    screen's builder 0x0061cfc0, the player screen's 0x00682c80 / 0x006838e0, the squad glue and the
+    item slots.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

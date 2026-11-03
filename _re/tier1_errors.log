@@ -142,37 +142,37 @@ f_005ac500.cpp:112:57: request for member '_12_2_' in '"\012ControlsEx - "', whi
     *(uint16_t *)(pcVar9 + 0xb) = "\nControlsEx - "._12_2_;
 f_00616c10.cpp:1999:5: 'empty_function_6e6ba0' was not declared in this scope; did you mean 'empty_function_6e4a10'?
     empty_function_6e6ba0();
-f_0061bec0.cpp:1946:49: 'C_DetailSettings' was not declared in this scope
+f_0061bec0.cpp:1409:49: 'C_DetailSettings' was not declared in this scope
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
-f_0061bec0.cpp:1946:66: expected primary-expression before ')' token
+f_0061bec0.cpp:1409:66: expected primary-expression before ')' token
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
-f_0061bec0.cpp:1950:47: 'C_DetailSettings' was not declared in this scope
+f_0061bec0.cpp:1413:47: 'C_DetailSettings' was not declared in this scope
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
-f_0061bec0.cpp:1950:64: expected primary-expression before ')' token
+f_0061bec0.cpp:1413:64: expected primary-expression before ')' token
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
-f_0061bec0.cpp:1963:64: expected primary-expression before ')' token
+f_0061bec0.cpp:1426:64: expected primary-expression before ')' token
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
-f_0061bec0.cpp:1976:64: expected primary-expression before ')' token
+f_0061bec0.cpp:1439:64: expected primary-expression before ')' token
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
-f_0061bec0.cpp:1989:64: expected primary-expression before ')' token
+f_0061bec0.cpp:1452:64: expected primary-expression before ')' token
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
-f_0061bec0.cpp:2002:64: expected primary-expression before ')' token
+f_0061bec0.cpp:1465:64: expected primary-expression before ')' token
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
-f_0061bec0.cpp:2015:64: expected primary-expression before ')' token
+f_0061bec0.cpp:1478:64: expected primary-expression before ')' token
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
-f_0061bec0.cpp:2028:64: expected primary-expression before ')' token
+f_0061bec0.cpp:1491:64: expected primary-expression before ')' token
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
-f_0061bec0.cpp:2040:64: expected primary-expression before ')' token
+f_0061bec0.cpp:1503:64: expected primary-expression before ')' token
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
-f_0061bec0.cpp:2101:45: 'C_DetailSettings' was not declared in this scope
+f_0061bec0.cpp:1564:45: 'C_DetailSettings' was not declared in this scope
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
-f_0061bec0.cpp:2101:62: expected primary-expression before ')' token
+f_0061bec0.cpp:1564:62: expected primary-expression before ')' token
     pCVar3 = C_GameProfile__GetDetailSettings(C_DetailSettings*)((&g_gameProfile));
-f_0061bec0.cpp:2186:33: 'struct tier1::C_PlayerProfile' has no member named '_pad_0070'
+f_0061bec0.cpp:1649:33: 'struct tier1::C_PlayerProfile' has no member named '_pad_0070'
     (g_gameProfile.m_player)->_pad_0070[1] = param_4;
-f_0061bec0.cpp:2191:33: 'struct tier1::C_PlayerProfile' has no member named '_pad_0070'
+f_0061bec0.cpp:1654:33: 'struct tier1::C_PlayerProfile' has no member named '_pad_0070'
     (g_gameProfile.m_player)->_pad_0070[2] = param_4;
-f_0061bec0.cpp:2196:33: 'struct tier1::C_PlayerProfile' has no member named 'm_crosshair'
+f_0061bec0.cpp:1659:33: 'struct tier1::C_PlayerProfile' has no member named 'm_crosshair'
     (g_gameProfile.m_player)->m_crosshair = param_4;
 f_00620f70.cpp:188:16: 'UNK_00801bd8' was not declared in this scope
     puStack_8 = &UNK_00801bd8;

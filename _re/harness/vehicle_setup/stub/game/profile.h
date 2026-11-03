@@ -18,6 +18,10 @@ struct S_DetailSettings {
     bool voiceChat = false;
     bool switches[8] = {};
     bool invertMouse = false;                           // (the camera module, part 8e-iii)
+    // (The options handler, part 9e-viii: options_test.inc.)
+    float mouseSensitivity = 0, gamma = 0, soundVolume = 0, musicVolume = 0, voiceValue = 0;
+    int level = 0;
+    bool unknown3A = false, crosshair = false;
 };
 enum : int {
     DETAIL_VERTEX_ANIMATION = 1,
@@ -48,6 +52,9 @@ public:
     C_KeyBindings *GetKeyBindings() { return &m_keyBindings; }
     // (The in-game menu, part 9e-v: game_menu_test.inc.)
     void ApplyVolume();
+    // (The options handler, part 9e-viii: options_test.inc.)
+    bool SaveOptions();
+    void ApplyHardwareOption();
     C_KeyBindings m_keyBindings;
 };
 

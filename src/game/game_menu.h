@@ -11,34 +11,13 @@
 #include "game/equipment_menu.h"
 #include "game/equipment_panel.h"
 #include "game/loadout_presets.h"
+#include "game/options_handler.h"
 #include "game/soldier.h"
 #include "game/store_list.h"
 
-class C_Cursor;
 class C_InfoScreen;
 class C_ItemStock;
-class C_MenuState;
 struct S_ControlMessage;
-
-// The options screens' messages (key bindings, graphics, the player's options), the main menu's and
-// the in-game menu's (0x0C bytes; C_GameMenu +0x1EC).
-class C_OptionsHandler {
-public:
-    explicit C_OptionsHandler(C_MenuState *menu) : m_menu(menu) {}
-    C_OptionsHandler(const C_OptionsHandler &) = delete;
-    C_OptionsHandler &operator=(const C_OptionsHandler &) = delete;
-    // The cursor released.
-    ~C_OptionsHandler();                                // 0x0061cfa0 (__fastcall)
-
-    // True: an options screen's message, handled (not ported yet).
-    bool HandleMessage(S_ControlMessage *message);      // 0x0061bf00
-
-private:
-    C_Cursor *m_cursor = nullptr;                       // +0x00
-    C_MenuState *m_menu;                                // +0x04
-    bool m_unknown08 = true;                            // +0x08
-    bool m_unknown09 = false;                           // +0x09
-};
 
 // The menu time (OnTick's sum; nothing reads it) and the in-game menu's message boxes open
 // (ShowMessage's count; nothing reads it).

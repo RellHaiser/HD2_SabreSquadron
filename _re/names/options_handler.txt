@@ -1,0 +1,5 @@
+# Part 9e-viii: the options screen's messages (game/options_handler.cpp). (No Ghidra struct for the
+# handler: void *.)
+0061cfa0 C_OptionsHandler::~C_OptionsHandler | void __fastcall ~C_OptionsHandler(void * handler)
+0061bf00 C_OptionsHandler::HandleMessage | bool __thiscall HandleMessage(void *this, void * message)
+00620be0 C_OptionsHandler::RefreshKeyGroups | bool __fastcall RefreshKeyGroups(void * handler)

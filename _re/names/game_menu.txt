@@ -11,7 +11,6 @@
 00682770 C_GameMenu::OnDrawScreens | bool __thiscall OnDrawScreens(C_GameMenu *this)
 00682aa0 C_GameMenu::ShowMessage | void __thiscall ShowMessage(C_GameMenu *this, int textId, int unused)
 0067fda0 C_MissionDef::AreObjectivesDecided | bool __fastcall AreObjectivesDecided(C_MissionDef * mission)
-0061cfa0 C_OptionsHandler::~C_OptionsHandler | void __fastcall ~C_OptionsHandler(void * handler)
 # Part 9e-vi: the update's helpers and the drawing.
 006869a0 C_GameMenu::UpdateLoadButton | void __fastcall UpdateLoadButton(C_GameMenu * menu)
 006802a0 C_GameMenu::UpdateNetStatus | void UpdateNetStatus(void)
@@ -23,4 +22,3 @@
 0067f850 C_GameMenu::OnMessage | void __thiscall OnMessage(C_GameMenu *this, void * message)
 # Not ported yet (named for the later parts).
 0067fe00 C_GameMenu::BuildScreens | bool __thiscall BuildScreens(C_GameMenu *this)
-0061bf00 C_OptionsHandler::HandleMessage | bool __thiscall HandleMessage(void *this, void * message)
