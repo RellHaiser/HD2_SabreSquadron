@@ -67,7 +67,13 @@ public:
     // The info screen drawn when shown; false.
     bool OnDrawScreens() override;                      // 0x54 0x00682770
 
-    // The item controls' notifications (not ported yet).
+    // The item controls' notifications: an item clicked twice (from the panel: back to the store, the
+    // backpack with its contents; from the store: taken, onto the soldier where it goes, a large
+    // weapon not with another; what it displaced back; the store not having it: false), (not
+    // ported yet), the drag's start (an item of a type the control has: one of it; from the store
+    // the store's when it has one, a large weapon not with another; the places it may go shown, its
+    // visual's copy over it), its move (the copy by the cursor's move), its drop (the copy deleted,
+    // the places hidden; DropItem on the control under the cursor); the hover (not ported yet).
     bool OnItemNotify13(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x5C 0x00681ee0
     bool OnItemNotify60(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x60 0x00686e10
     bool OnItemNotify0A(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x64 0x00682020
@@ -97,6 +103,11 @@ private:
     // information label when the model has one (its id kept). The panel's soldier in the model's
     // "3Dview". True.
     bool BuildPlayerScreen(S_ScreenDesc *desc, I3D_frame *model);   // 0x00682c80
+    // The dragged item dropped on the control `target` (0: none): from the panel onto another
+    // control, back to the store (the backpack with its contents; the place's count), else moved
+    // there (what it displaced back to the store); from the store onto the panel, taken and put
+    // there (what it displaced back, unless of its type).
+    bool DropItem(C_Control *control, uint32_t target);   // 0x00682350
     // The soldiers panel (none without profiles: false): the model's lists' frames made under
     // "soldierspanel" (GB_Soldiers_a, GB_Soldiers_x), "photo03" (the soldiers' pictures' template,
     // in the first) and "selector" (its copy in the second) moved into them, the tables hidden (no

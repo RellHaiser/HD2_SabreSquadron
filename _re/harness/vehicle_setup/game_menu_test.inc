@@ -82,11 +82,7 @@ bool C_NetGame::SendChat(const char *text, bool team)
     GfLog("chat [%s] %d", text, team);
     return true;
 }
-bool C_GameMenu::OnItemNotify13(void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_GameMenu::OnItemNotify60(void *, C_Control *, uint32_t, uint32_t) { return true; }
-bool C_GameMenu::OnItemNotify0A(void *, C_Control *, uint32_t, uint32_t) { return true; }
-bool C_GameMenu::OnItemNotify08(void *, C_Control *, uint32_t, uint32_t) { return true; }
-bool C_GameMenu::OnItemNotify09(void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_GameMenu::OnItemHover(void *, C_Control *, uint32_t, uint32_t) { return true; }
 
 bool g_gmInfoInit = true, g_gmInfoShown;
@@ -147,8 +143,16 @@ struct S_GameMenuResults {
     bool gmPlayerCallbacks = true, gmChat = true, gmSoldiers = true, gmSoldiersNone = true, gmSoldierPicked = true;
     bool gmSide = true, gmEquipment = true, gmEquipmentNone = true, gmItems = true, gmItemsNone = true, gmSkills = true;
     bool gmSoldierTypes = true, gmStorePreset = true, gmTypeEdited = true, gmPresetSaved = true;
-    bool gmTeam = true, gmTakeItems = true, gmShown = true, gmStats = true, gmStocks = true;
+    bool gmTeam = true, gmTakeItems = true, gmShown = true, gmStats = true, gmStocks = true, gmClicked = true;
+    bool gmDragStart = true, gmDragMove = true, gmDrop = true;
 };
+// (Part 9e-xx: the dragged copy the driver makes, logged.)
+I3D_frame *g_gmVisual;
+I3D_frame *__stdcall GmCreateVisual(void *, uint32_t type)
+{
+    GfLog("create visual %u", type);
+    return g_gmVisual;
+}
 // A float's bits (a message's value2).
 uint32_t GmBits(float f)
 {
@@ -259,11 +263,14 @@ struct C_GmMission : C_MissionDef {
 // The base's fields (protected; equipment_menu.h included before): their first values.
 struct C_GmBasePeek : C_EquipmentMenuBase {
     static int WeaponsInfo(const C_EquipmentMenuBase &b) { return b.*&C_GmBasePeek::m_weaponsInfo; }
+    static int &DragType(C_EquipmentMenuBase &b) { return b.*&C_GmBasePeek::m_dragType; }
+    static S_SoldierItem &DragItem(C_EquipmentMenuBase &b) { return b.*&C_GmBasePeek::m_dragItem; }
+    static I3D_frame *&DragVisual(C_EquipmentMenuBase &b) { return b.*&C_GmBasePeek::m_dragVisual; }
     static bool Fresh(const C_EquipmentMenuBase &b)
     {
-        const S_SoldierItem &item = b.*&C_GmBasePeek::m_unknown1B8;
-        return b.*&C_GmBasePeek::m_weaponsInfo == 0 && b.*&C_GmBasePeek::m_unknown1B4 == 0 && item.uid == -1 &&
-               item.typeId == -1 && item.present == 0 && b.*&C_GmBasePeek::m_unknown1C0 == -1;
+        const S_SoldierItem &item = b.*&C_GmBasePeek::m_dragItem;
+        return b.*&C_GmBasePeek::m_weaponsInfo == 0 && b.*&C_GmBasePeek::m_dragVisual == nullptr && item.uid == -1 &&
+               item.typeId == -1 && item.present == 0 && b.*&C_GmBasePeek::m_dragType == -1;
     }
 };
 
@@ -1880,6 +1887,285 @@ void GameMenuTest(I3D_scene *scene)
         allowed = C_str();
     }
 
+    // --- the item slots (part 9e-xx): clicked twice (from the panel: back to the store, the backpack
+    // with its contents; from the store: taken, dropped onto the soldier, what it displaced (or the
+    // item) back; a large weapon not with another; not in the store: false); dragged: its start (a
+    // store's item the store has; one of its type kept, the places shown, the control's visual's
+    // copy over it), its move (by the cursor's), its drop (the copy released, the places hidden, the
+    // item dropped on the control under the cursor); the drop (from the panel: back, else moved;
+    // from the store onto the panel: put, taken; what it displaced back) ---
+    {
+        C_GameMenu m;
+        S_SquadSoldier sq;
+        sq.backpackContents = {EpMake(1, 30, 1)};
+        sq.backpack = EpMake(2, 31, 1);
+        m.m_panel.m_squadSoldier = &sq;
+        for (auto &h : m.m_panel.m_highlights)
+            h = As<I3D_frame>(MsFrame("gmdh"));
+        I3D_frame *const firstHighlight = m.m_panel.m_highlights[0];
+        C_ItemStock stock;
+        m.m_storeList.SetStock(&stock);
+        g_slCounts.clear();
+        g_epRemoved.clear();
+        g_controlMessages.clear();
+        const uint32_t head = 0x0C201000, backpack = 0x0C203000, uniform = 0x0C202000, store = 0x0C301000;
+        const auto clicked = [&](uint32_t id, int type) {
+            C_GmIndexed control(id, 0);
+            control.m_index = type;
+            g_gfLog.clear();
+            return m.OnItemNotify13(&m, &control, CONTROL_NOTIFY_13, 0);
+        };
+        bool okc = clicked(head, -1) && g_gfLog.empty();
+        // (The store's entry of a returned type updated: its count posted.)
+        m.m_storeList.m_entries.resize(500);
+        m.m_storeList.m_entries[31] = 0x0C3F1000;
+        C_SlDef d31(ITEM_STATIC, 0, -1, -1);
+        const std::map<int, C_ItemDef *> defs31 = g_gfItemDefs;
+        g_gfItemDefs[31] = &d31;
+        g_controlMessages.clear();
+        g_epRemoved = {1};
+        okc &= clicked(head, 5) && GmInOrder(Join(g_gfLog), {"remove 1 -1 5 1", "stock add 5 1"});
+        okc &= clicked(head, 5) && logHas("stock add") == 0;
+        okc &= clicked(backpack, 31) && GmInOrder(Join(g_gfLog), {"remove 40 1 30 1", "remove 8 2 31 1"}) && logHas("remove 1 ") == 0 &&
+               GmQueue().find("c3f1000") != std::string::npos;
+        g_gfItemDefs = defs31;
+        // (Type 0 an item too; another screen's control, not the panel's: the store's way.)
+        g_epRemoved = {1};
+        okc &= clicked(head, 0) && MrHas("remove 1 -1 0 1");
+        okc &= !clicked(0x0E201000, 7) && GfLogIs({"stock take 7 1"});
+        // From the store: not there, false; there: taken, dropped (no item type: given back).
+        okc &= !clicked(store, 7) && GfLogIs({"stock take 7 1"});
+        g_slCounts[7] = 1;
+        okc &= clicked(store, 7) && GmInOrder(Join(g_gfLog), {"stock take 7 1", "stock add 7 1"});
+        // (A type the soldier takes: on the head when free, not forced; what it displaced back; its
+        // own type: the item back.)
+        C_SlDef d7(ITEM_STATIC, 0, -1, -1);
+        const std::map<int, C_ItemDef *> keptDefs = g_gfItemDefs;
+        g_gfItemDefs = {{7, &d7}};
+        g_epAllowed[&d7] = 1;
+        sq.head = EpMake(3, 3, 1);
+        g_slCounts[7] = 1;
+        okc &= clicked(store, 7) && logHas("put") == 0 && MrHas("stock add 7 1");
+        sq.head = EpMake(-1, -1, 0);
+        g_slCounts[7] = 1;
+        okc &= clicked(store, 7) && GmInOrder(Join(g_gfLog), {"stock take 7 1", "put 1 -1 7 1"}) && logHas("stock add") == 0;
+        g_slCounts[7] = 1;
+        g_epDisplaced = {EpMake(9, 12, 2)};
+        okc &= clicked(store, 7) && GmInOrder(Join(g_gfLog), {"stock take 7 1", "put 1 -1 7 1", "stock add 12 2"});
+        g_slCounts[7] = 1;
+        g_epDisplaced = {EpMake(9, 7, 4)};
+        okc &= clicked(store, 7) && GmInOrder(Join(g_gfLog), {"put 1 -1 7 1", "stock add 7 1"}) && logHas("stock add 7 4") == 0;
+        g_epDisplaced.clear();
+        g_epAllowed.erase(&d7);
+        g_gfItemDefs = keptDefs;
+        // A large weapon with another: nothing.
+        C_SlDef large(ITEM_ANIMATED, 0, -1, -1);
+        large.m_inventorySize = 2;
+        const std::map<int, C_ItemDef *> oldDefs = g_gfItemDefs;
+        g_gfItemDefs = {{8, &large}};
+        sq.hands = EpMake(3, 8, 1);
+        g_slCounts[8] = 1;
+        okc &= clicked(store, 8) && g_gfLog.empty();
+        // (Not large: taken, the large one there or not.)
+        g_slCounts[9] = 1;
+        okc &= clicked(store, 9) && MrHas("stock take 9 1");
+        sq.hands = EpMake(-1, -1, 0);
+        WM(r.gmClicked, okc);
+
+        // The drag's start.
+        void **const copyVt = new void *[MR_SLOTS];
+        std::copy(g_msFrameVt, g_msFrameVt + MR_SLOTS, copyVt);
+        copyVt[0x4C / 4] = reinterpret_cast<void *>(&MrFake<0x4C, void *>);
+        copyVt[0x04 / 4] = reinterpret_cast<void *>(&MrFake<0x04>);
+        copyVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+        S_MrObj *source = MsFrame("gmds"), *copy = MsFrame("gmdc");
+        source->vtable = copyVt;
+        copy->vtable = copyVt;
+        As<I3D_frame>(source)->m_worldMatrix.m[3][0] = 0.25f;
+        As<I3D_frame>(source)->m_worldMatrix.m[3][1] = -0.5f;
+        As<I3D_frame>(source)->m_worldMatrix.m[3][2] = 0.75f;
+        S_MrWorld world = MrWorld("gmd");
+        m.m_scene = As<I3D_scene>(world.scene);
+        void *const oldVisual = g_driverVtable[0x50 / 4];
+        g_driverVtable[0x50 / 4] = reinterpret_cast<void *>(&GmCreateVisual);
+        g_gmVisual = As<I3D_frame>(copy);
+        const auto start = [&](uint32_t id, int type) {
+            C_GmIndexed control(id, type);
+            control.m_frame = As<I3D_frame>(source);
+            g_gfLog.clear();
+            return m.OnItemNotify0A(&m, &control, CONTROL_NOTIFY_0A, 0);
+        };
+        bool oks = start(store, -1) && C_GmBasePeek::DragType(m) == -1 && GfLogIs({"index 100000a"});
+        g_slCounts[7] = 0;
+        oks &= start(store, 7) && C_GmBasePeek::DragType(m) == -1 && !C_GmBasePeek::DragVisual(m);
+        g_slCounts[7] = 2;
+        oks &= start(store, 7) && C_GmBasePeek::DragType(m) == 7 && C_GmBasePeek::DragItem(m).typeId == 7 && C_GmBasePeek::DragItem(m).present == 1 &&
+               C_GmBasePeek::DragVisual(m) == As<I3D_frame>(copy);
+        oks &= GmInOrder(Join(g_gfLog), {"index 100000a", "gmdh on 0", "gmds 4", "create visual 0", "gmdc 4c gmds",
+                                         "gmdc 38 sector 0", "gmdc c (0 0 1) 0", "gmdc 8 (0.25 -0.5 0.85)", "gmdc on 1",
+                                         "gmdc 24"});
+        // (From the panel: no store check, its places shown ignoring the weight.)
+        C_GmBasePeek::DragType(m) = -1;
+        g_slCounts.clear();
+        oks &= start(head, 9) && C_GmBasePeek::DragType(m) == 9;
+        // (A large weapon from the store with another: nothing.)
+        C_GmBasePeek::DragType(m) = -1;
+        sq.longGun = EpMake(3, 8, 1);
+        g_slCounts[8] = 1;
+        oks &= start(store, 8) && C_GmBasePeek::DragType(m) == -1;
+        g_slCounts[9] = 1;
+        oks &= start(store, 9) && C_GmBasePeek::DragType(m) == 9;
+        C_GmBasePeek::DragType(m) = -1;
+        sq.longGun = EpMake(-1, -1, 0);
+        // (Type 0 dragged too.)
+        oks &= start(head, 0) && C_GmBasePeek::DragType(m) == 0;
+        C_GmBasePeek::DragType(m) = -1;
+        // (The places shown: from the panel the weight ignored, from the store not.)
+        C_SlDef heavy(ITEM_STATIC, 0, -1, -1);
+        heavy.m_weight = 50.0f;
+        g_gfItemDefs = {{10, &heavy}, {8, &large}};
+        g_epAllowed[&heavy] = 1;
+        g_epFreeWeight = 10.0f;
+        oks &= start(head, 10) && firstHighlight->IsOn();
+        g_slCounts[10] = 1;
+        oks &= start(store, 10) && !firstHighlight->IsOn();
+        g_epFreeWeight = 100.0f;
+        C_GmBasePeek::DragType(m) = -1;
+        // (The large weapon's type no more: the store list's update reads only its entries' types.)
+        g_gfItemDefs = oldDefs;
+        // (No visual made: no copy.)
+        g_gmVisual = nullptr;
+        oks &= start(head, 9) && !C_GmBasePeek::DragVisual(m) && logHas("gmdc") == 0;
+        g_gmVisual = As<I3D_frame>(copy);
+        WM(r.gmDragStart, oks);
+
+        // Its move: the copy by the cursor's move (its depth the move's).
+        bool okm = true;
+        m.m_cursor = C_Cursor::Acquire(m.m_scene);
+        C_GmBasePeek::DragVisual(m) = As<I3D_frame>(copy);
+        As<I3D_frame>(copy)->m_worldMatrix.m[3][0] = 0.5f;
+        As<I3D_frame>(copy)->m_worldMatrix.m[3][1] = 0.25f;
+        As<I3D_frame>(copy)->m_worldMatrix.m[3][2] = 0.5f;
+        g_csCursor.move = S_vector(0.125f, -0.25f, -1.0f);
+        C_GmBasePeek::DragType(m) = 9;
+        g_gfLog.clear();
+        okm &= m.OnItemNotify08(&m, nullptr, CONTROL_NOTIFY_08, 0) && GfLogIs({"gmdc 8 (0.625 0 -1)", "gmdc 24"});
+        C_GmBasePeek::DragType(m) = -1;
+        g_gfLog.clear();
+        okm &= m.OnItemNotify08(&m, nullptr, CONTROL_NOTIFY_08, 0) && g_gfLog.empty();
+        g_csCursor.move = S_vector(0.0f, 0.0f, 0.0f);
+        WM(r.gmDragMove, okm);
+
+        // Its drop: the copy released, the places hidden, dropped on what is under the cursor (here
+        // nothing: from the store, nothing more); the drag ended.
+        bool okd = true;
+        C_MsScreen top(m.m_scene, "gmdtop", 0x0C000000);
+        g_menuScreens = {&top};
+        {
+            // (A light type the head takes: its drop hides the places.)
+            C_SlDef light(ITEM_STATIC, 0, -1, -1);
+            g_gfItemDefs = {{11, &light}};
+            g_epAllowed[&light] = 1;
+            C_GmBasePeek::DragType(m) = 11;
+            C_GmBasePeek::DragItem(m) = EpMake(-1, 11, 1);
+            firstHighlight->SetOn(true);
+            C_GmIndexed control(store, 11);
+            okd &= m.OnItemNotify09(&m, &control, CONTROL_NOTIFY_09, 0) && !firstHighlight->IsOn();
+            // (Under the cursor the panel's uniform: put there, taken.)
+            S_MrObj *hit = MsFrame("gmdhit");
+            As<I3D_frame>(hit)->SetData(reinterpret_cast<S_FrameData *>(static_cast<uintptr_t>(uniform)));
+            g_mrRet[{world.scene, 0x104}] = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(hit));
+            g_epAllowed[&light] = 2;
+            g_slCounts[11] = 1;
+            C_GmBasePeek::DragType(m) = 11;
+            C_GmBasePeek::DragItem(m) = EpMake(-1, 11, 1);
+            g_gfLog.clear();
+            okd &= m.OnItemNotify09(&m, &control, CONTROL_NOTIFY_09, 0) &&
+                   GmInOrder(Join(g_gfLog), {"put 2 -1 11 1", "stock take 11 1"});
+            g_mrRet.erase({world.scene, 0x104});
+            g_epAllowed.erase(&light);
+            g_gfItemDefs = oldDefs;
+            g_slCounts.clear();
+        }
+        C_GmBasePeek::DragType(m) = 7;
+        C_GmBasePeek::DragItem(m) = EpMake(4, 7, 1);
+        C_GmBasePeek::DragVisual(m) = As<I3D_frame>(copy);
+        {
+            C_GmIndexed control(store, 7);
+            g_gfLog.clear();
+            okd &= m.OnItemNotify09(&m, &control, CONTROL_NOTIFY_09, 0) && !C_GmBasePeek::DragVisual(m) && C_GmBasePeek::DragType(m) == -1 &&
+                   C_GmBasePeek::DragItem(m).typeId == -1 && C_GmBasePeek::DragItem(m).present == 0 && C_GmBasePeek::DragItem(m).uid == 4 &&
+                   GmInOrder(Join(g_gfLog), {"gmdc 0", "gmdh on 0"}) && logHas("stock") == 0;
+            // No drag: the copy released only.
+            C_GmBasePeek::DragVisual(m) = As<I3D_frame>(copy);
+            g_gfLog.clear();
+            okd &= m.OnItemNotify09(&m, &control, CONTROL_NOTIFY_09, 0) && GfLogIs({"gmdc 0"}) && !C_GmBasePeek::DragVisual(m);
+        }
+        // The drop: from the panel to nowhere (its count back), the backpack, onto another place;
+        // from the store onto a place (taken; what it displaced back unless of the type), to nowhere.
+        const auto drop = [&](uint32_t from, uint32_t target, int type) {
+            C_GmIndexed control(from, type);
+            C_GmBasePeek::DragItem(m) = EpMake(-1, type, 1);
+            g_gfLog.clear();
+            return m.DropItem(&control, target);
+        };
+        g_epCount = 3;
+        g_epRemoved = {3};
+        okd &= drop(head, 0, 5) && GmInOrder(Join(g_gfLog), {"remove 1 -1 5 3", "stock add 5 3"});
+        g_epRemoved = {3};
+        okd &= drop(head, store, 5) && MrHas("stock add 5 3");
+        g_controlMessages.clear();
+        g_gfItemDefs[31] = &d31;
+        okd &= drop(backpack, 0, 31) && MrHas("remove 8 2 31 1") && logHas("remove 1 ") == 0 &&
+               GmQueue().find("c3f1000") != std::string::npos;
+        g_gfItemDefs.erase(31);
+        g_epCount = 1;
+        g_epRemoved = {1};
+        okd &= drop(head, 0, 5) && MrHas("stock add 5 1");
+        g_epRemoved = {0};
+        okd &= drop(head, 0, 5) && logHas("stock add") == 0;
+        g_epRemoved = {1};
+        // (Types the places take.)
+        // (The store's entries sized for the types, as its pages make them.)
+        m.m_storeList.m_entries.resize(500);
+        C_SlDef d5(ITEM_STATIC, 0, -1, -1), d6(ITEM_STATIC, 0, -1, -1);
+        g_gfItemDefs = {{5, &d5}, {6, &d6}};
+        g_epAllowed[&d5] = g_epAllowed[&d6] = 3;
+        okd &= drop(head, uniform, 5) && GmInOrder(Join(g_gfLog), {"remove 1 -1 5 1", "put 2 -1 5 1"}) && logHas("stock") == 0;
+        g_slCounts = {{6, 1}};
+        okd &= drop(store, uniform, 6) && GmInOrder(Join(g_gfLog), {"put 2 -1 6 1", "stock take 6 1"}) && logHas("stock add") == 0;
+        // (What it displaced: of another type back to the store; of its type: nothing taken.)
+        // (None in the stock: taken anyway, not filled.)
+        g_slCounts = {{6, 0}};
+        g_epDisplaced = {EpMake(9, 12, 1)};
+        okd &= drop(store, uniform, 6) && GmInOrder(Join(g_gfLog), {"put 2 -1 6 1", "stock take 6 1", "stock add 12 1"}) &&
+               logHas("stock add 6") == 0;
+        g_epDisplaced = {EpMake(9, 6, 1)};
+        okd &= drop(store, uniform, 6) && MrHas("put 2 -1 6 1") && logHas("stock") == 0;
+        g_epDisplaced.clear();
+        g_epAllowed.erase(&d5);
+        g_epAllowed.erase(&d6);
+        g_gfItemDefs = oldDefs;
+        okd &= drop(store, 0, 6) && g_gfLog.empty();
+        okd &= drop(store, store, 6) && g_gfLog.empty();
+        WM(r.gmDrop, okd);
+        g_menuScreens.clear();
+        m.m_cursor->Release();
+        m.m_cursor = nullptr;
+        g_driverVtable[0x50 / 4] = oldVisual;
+        g_gmVisual = nullptr;
+        g_gfItemDefs = oldDefs;
+        g_slCounts.clear();
+        g_epRemoved.clear();
+        g_epCount = 0;
+        g_controlMessages.clear();
+        m.m_panel.m_squadSoldier = nullptr;
+        for (auto &h : m.m_panel.m_highlights)
+            h = nullptr;
+        m.m_storeList.m_stock = nullptr;
+        C_GmBasePeek::DragVisual(m) = nullptr;
+    }
+
     // --- the stats (part 9e-xix): the profile's at the local player's rank (none: the defaults); the
     // skills' bars (hundredths; health full) and values (per cent, kg, as they are) ---
     {
@@ -2282,12 +2568,14 @@ void GameMenuTest(I3D_scene *scene)
                 "gmMainLocal %d gmMainNet %d gmBuild %d gmBuildNet %d gmPlayer %d gmPlayerCoop %d gmPlayerCallbacks %d "
                 "gmChat %d gmSoldiers %d gmSoldiersNone %d gmSoldierPicked %d gmSide %d gmEquipment %d gmEquipmentNone %d "
                 "gmItems %d gmItemsNone %d gmSkills %d gmSoldierTypes %d gmStorePreset %d gmTypeEdited %d "
-                "gmPresetSaved %d gmTeam %d gmTakeItems %d gmShown %d gmStats %d gmStocks %d\n",
+                "gmPresetSaved %d gmTeam %d gmTakeItems %d gmShown %d gmStats %d gmStocks %d gmClicked %d "
+                "gmDragStart %d gmDragMove %d gmDrop %d\n",
                 r.gmNew, r.gmNewClient, r.gmStart, r.gmStartNet, r.gmStop, r.gmInput, r.gmUpdate, r.gmTick, r.gmDraw,
                 r.gmMessage, r.gmObjectives, r.gmBase, r.gmLoad, r.gmCoop, r.gmNet, r.gmRender, r.gmRenderGame,
                 r.gmRenderEquip, r.gmOptions, r.gmEscape, r.gmEscapeNet, r.gmSquad, r.gmQuestions, r.gmMainLocal,
                 r.gmMainNet, r.gmBuild, r.gmBuildNet, r.gmPlayer, r.gmPlayerCoop, r.gmPlayerCallbacks, r.gmChat, r.gmSoldiers,
                 r.gmSoldiersNone, r.gmSoldierPicked, r.gmSide, r.gmEquipment, r.gmEquipmentNone,
                 r.gmItems, r.gmItemsNone, r.gmSkills, r.gmSoldierTypes, r.gmStorePreset, r.gmTypeEdited,
-                r.gmPresetSaved, r.gmTeam, r.gmTakeItems, r.gmShown, r.gmStats, r.gmStocks);
+                r.gmPresetSaved, r.gmTeam, r.gmTakeItems, r.gmShown, r.gmStats, r.gmStocks, r.gmClicked,
+                r.gmDragStart, r.gmDragMove, r.gmDrop);
 }

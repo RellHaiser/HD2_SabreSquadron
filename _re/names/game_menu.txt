@@ -50,6 +50,12 @@
 # Part 9e-xix: the stats and the stocks.
 006863c0 C_GameMenu::ShowSoldierStats | void __stdcall ShowSoldierStats(int profile)
 00685170 C_GameMenu::SetupStocks | bool __fastcall SetupStocks(C_GameMenu * menu)
+# Part 9e-xx: the item slots' drag and drop.
+00681ee0 C_GameMenu::OnItemNotify13 | bool __thiscall OnItemNotify13(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00682020 C_GameMenu::OnItemNotify0A | bool __thiscall OnItemNotify0A(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00682210 C_GameMenu::OnItemNotify08 | bool __thiscall OnItemNotify08(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+006822b0 C_GameMenu::OnItemNotify09 | bool __thiscall OnItemNotify09(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00682350 C_GameMenu::DropItem | bool __thiscall DropItem(C_GameMenu *this, void * control, uint target)
 # Not ported yet (named for the later parts).
 0072f8b0 C_NetGame::GetLocalPlayerStats
 0072ee60 C_NetGame::SendChat

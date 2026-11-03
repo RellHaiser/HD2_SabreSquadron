@@ -32115,6 +32115,31 @@
   "name": "C_GameMenu::BuildMainScreen",
   "proto": "bool __thiscall BuildMainScreen(C_GameMenu *this, void * desc, void * model)"
  },
+ "00681ee0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnItemNotify13",
+  "proto": "bool __thiscall OnItemNotify13(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00682020": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnItemNotify0A",
+  "proto": "bool __thiscall OnItemNotify0A(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00682210": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnItemNotify08",
+  "proto": "bool __thiscall OnItemNotify08(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006822b0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnItemNotify09",
+  "proto": "bool __thiscall OnItemNotify09(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00682350": {
+  "module": "game_menu",
+  "name": "C_GameMenu::DropItem",
+  "proto": "bool __thiscall DropItem(C_GameMenu *this, void * control, uint target)"
+ },
  "006824f0": {
   "module": "game_menu",
   "name": "C_GameMenu::OnRender",

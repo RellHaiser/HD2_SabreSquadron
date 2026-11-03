@@ -13,6 +13,7 @@
 #include "common/c_str.h"
 #include "game/campaign.h"
 #include "game/controls.h"
+#include "game/cursor.h"
 #include "game/game.h"
 #include "game/game_app.h"
 #include "game/human.h"
@@ -67,6 +68,12 @@ constexpr float SOLDIER_ACROSS_STEP = 0.062f;
 constexpr int CONTROL_BAR = 0x16;
 constexpr uint32_t BAR_AXIS_Z = 2;
 constexpr uint32_t TEXT_SKILLS = 0xA78, TEXT_SKILL_VALUE = 0x7D2;
+// The player screen's controls by their first field: the equipment panel's (2nd), the store's
+// (3rd); the panel's backpack place (SlotOfControl's); the dragged item's copy above its control.
+constexpr uint32_t CONTROL_INDEX_MASK = 0x3F00000;
+constexpr uint32_t PANEL_CONTROLS = 0x200000, STORE_CONTROLS = 0x300000;
+constexpr uint32_t BACKPACK_SLOT = 8;
+constexpr float DRAG_HEIGHT = 0.1f;
 // The skills panel's controls (the player screen's fourth: 0x0C400000; a skill's name, bar and
 // value 1..3 + 3 per skill) and the values' style; the default stats (a profile not found).
 constexpr uint32_t SKILLS_PANEL = 0x0C400000;
@@ -1109,6 +1116,132 @@ bool C_GameMenu::OnPlayerScreenShown(void *menu, void *, C_Control *, uint32_t, 
         return true;
     }
     GetGameApp()->PostCommand(APP_NET_COMMAND_TEAM, g_gameProfile.IsCooperativeGame() ? TEAM_ALLIES : 2, 0, false);
+    return true;
+}
+
+bool C_GameMenu::OnItemNotify13(void *, C_Control *control, uint32_t, uint32_t)
+{
+    const int type = control->GetIndex();
+    if (type < 0)
+        return true;
+    S_SoldierItem item;
+    item.typeId = static_cast<int16_t>(type);
+    item.present = 1;
+    if ((control->GetId() & CONTROL_INDEX_MASK) == PANEL_CONTROLS) {
+        if (C_EquipmentPanel::SlotOfControl(control->GetId()) == BACKPACK_SLOT) {
+            m_panel.ReturnBackpack(m_storeList.GetStock());
+            m_storeList.UpdateAll();
+            return true;
+        }
+        if (m_panel.RemoveItemAt(control->GetId(), item) != 0)
+            m_storeList.AddItem(item);
+        return true;
+    }
+    if (C_EquipmentPanel::IsLargeWeapon(type) && m_panel.HasLargeWeapon())
+        return true;
+    if (!m_storeList.TakeItem(item, false))
+        return false;
+    const S_SoldierItem displaced = m_panel.DropItem(item, false);
+    if (displaced.typeId != -1)
+        m_storeList.AddItem(displaced.typeId == item.typeId ? item : displaced);
+    return true;
+}
+
+bool C_GameMenu::OnItemNotify0A(void *, C_Control *control, uint32_t, uint32_t)
+{
+    S_ControlMessage index;
+    index.id = CONTROL_MSG_GET_INDEX;
+    control->HandleMessage(&index);
+    const auto type = static_cast<int>(index.value);
+    if (type < 0)
+        return true;
+    if ((control->GetId() & CONTROL_INDEX_MASK) == STORE_CONTROLS) {
+        if (m_storeList.GetCount(type) == 0)
+            return true;
+        if (C_EquipmentPanel::IsLargeWeapon(type) && m_panel.HasLargeWeapon())
+            return true;
+    }
+    m_dragType = type;
+    m_dragItem.typeId = static_cast<int16_t>(type);
+    m_dragItem.present = 1;
+    m_panel.ShowAllowed(m_dragItem, (control->GetId() & CONTROL_INDEX_MASK) == PANEL_CONTROLS);
+    // The dragged copy: the control's visual, above it.
+    I3D_frame *frame = control->GetFrame();
+    m_dragVisual = I3DGetDriver()->CreateVisual(frame->GetVisualType());
+    if (!m_dragVisual)
+        return true;
+    m_dragVisual->Duplicate(frame);
+    m_dragVisual->LinkTo(m_scene->GetPrimarySector(), 0);
+    m_dragVisual->SetDir(S_vector(0.0f, 0.0f, 1.0f), 0.0f);
+    const S_vector &at = frame->GetWorldPos();
+    m_dragVisual->SetPos(S_vector(at.x, at.y, at.z + DRAG_HEIGHT));
+    m_dragVisual->SetOn(true);
+    m_dragVisual->Update();
+    return true;
+}
+
+bool C_GameMenu::OnItemNotify08(void *, C_Control *, uint32_t, uint32_t)
+{
+    if (m_dragType == -1)
+        return true;
+    // (Quirk kept: the copy's depth the move's.)
+    const S_vector &at = m_dragVisual->GetWorldPos();
+    S_vector move;
+    m_cursor->GetMove(&move);
+    m_dragVisual->SetPos(S_vector(at.x + move.x, at.y + move.y, move.z));
+    m_dragVisual->Update();
+    return true;
+}
+
+bool C_GameMenu::OnItemNotify09(void *, C_Control *control, uint32_t, uint32_t)
+{
+    if (m_dragVisual)
+        m_dragVisual->Release();
+    m_dragVisual = nullptr;
+    if (m_dragType == -1)
+        return true;
+    S_SoldierItem none;
+    none.typeId = -1;
+    m_panel.ShowAllowed(none, false);
+    I3D_frame *picked = PickFrame();
+    DropItem(control, picked ? static_cast<uint32_t>(reinterpret_cast<uintptr_t>(picked->GetData())) : 0);
+    m_dragItem.typeId = -1;
+    m_dragItem.present = 0;
+    m_dragType = -1;
+    return true;
+}
+
+bool C_GameMenu::DropItem(C_Control *control, uint32_t target)
+{
+    S_SoldierItem item = m_dragItem;
+    const uint32_t from = control->GetId();
+    const bool onPanel = target != 0 && (target & CONTROL_INDEX_MASK) == PANEL_CONTROLS;
+    if ((from & CONTROL_INDEX_MASK) == PANEL_CONTROLS) {
+        if (!onPanel) {
+            if (C_EquipmentPanel::SlotOfControl(from) == BACKPACK_SLOT) {
+                m_panel.ReturnBackpack(m_storeList.GetStock());
+                m_storeList.UpdateAll();
+                return true;
+            }
+            item.present = static_cast<int16_t>(m_panel.CountItems(from, item));
+            if (m_panel.RemoveItemAt(from, item) != 0)
+                m_storeList.AddItem(item);
+            return true;
+        }
+        const S_SoldierItem displaced = m_panel.MoveItem(item, from, target);
+        if (displaced.typeId != -1)
+            m_storeList.AddItem(displaced);
+        return true;
+    }
+    if (onPanel) {
+        const S_SoldierItem displaced = m_panel.PutItemAt(target, item);
+        if (displaced.typeId == -1) {
+            m_storeList.TakeItem(item, false);
+        } else if (displaced.typeId != item.typeId) {
+            m_storeList.TakeItem(item, false);
+            m_storeList.AddItem(displaced);
+        }
+    }
     return true;
 }
 

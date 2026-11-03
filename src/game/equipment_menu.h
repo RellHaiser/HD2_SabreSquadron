@@ -10,6 +10,7 @@
 #include "game/soldier.h"
 
 class C_Control;
+class I3D_frame;
 
 class C_EquipmentMenuBase : public C_MenuState {
 public:
@@ -40,10 +41,11 @@ public:
                               uint32_t value);
 
 protected:
-    // (Not identified yet; set by the derived menus' constructors.) The weapons' information label's
-    // id (the in-game menu's player screen; 0: none).
+    // (Set by the derived menus' constructors.) The weapons' information label's id (the in-game
+    // menu's player screen; 0: none); the item dragged: its visual (a copy of its control's), the
+    // item (one of its type) and its type (-1: none).
     int m_weaponsInfo = 0;                              // +0x1B0
-    int m_unknown1B4 = 0;                               // +0x1B4
-    S_SoldierItem m_unknown1B8;                         // +0x1B8
-    int m_unknown1C0 = -1;                              // +0x1C0
+    I3D_frame *m_dragVisual = nullptr;                  // +0x1B4
+    S_SoldierItem m_dragItem;                           // +0x1B8
+    int m_dragType = -1;                                // +0x1C0
 };

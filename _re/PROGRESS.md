@@ -7591,6 +7591,29 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e-xx: the item slots (OnItemHover 0x00680ea0, OnItemNotify13 / 0A / 08 / 09 / 60 ...), the
     store list's description (0x0067aa70).
 
+  PART 9e-xx DONE (2026-11-03): the in-game menu's item slots' drag and drop (game/game_menu.cpp).
+  - OnItemNotify13 0x00681ee0 (an item clicked twice: the control's index its type; from the panel
+    (the screen's 2nd control): back to the store, the backpack with its contents; from the store:
+    a large weapon not with another, taken (not there: false), dropped onto the soldier, what it
+    displaced (its own type: the item) back), OnItemNotify0A 0x00682020 (the drag's start, from the
+    asm: a type the control has, the store's when from the store (3rd), a large weapon not with
+    another; one of it kept (m_dragType, m_dragItem: the base's m_unknown1C0 / 1B8 renamed), the
+    places it may go shown (ignoring the weight from the panel), the control's visual copied
+    (m_dragVisual, was m_unknown1B4) into the scene's primary sector, turned, 0.1 above it, on),
+    OnItemNotify08 0x00682210 (the copy by the cursor's move; its depth the move's: quirk kept),
+    OnItemNotify09 0x006822b0 (the copy released, the places hidden, DropItem on the control under the
+    cursor (its frame's data), the drag ended), DropItem 0x00682350 (from the panel to elsewhere: back
+    to the store, the backpack with its contents, else the place's count; onto the panel: moved,
+    what it displaced back; from the store onto the panel: put, taken; what it displaced back
+    unless of its type).
+  - Harness: game_menu_test.inc's gmClicked, gmDragStart, gmDragMove, gmDrop (the driver's visual,
+    the copy's vtable, the store's entries). 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e20.py (136, 132 killed, 4 equivalent).
+  - Build: MSVC clean. Tier 1: 399 errors in 72 files (was 400 in 73), 169 stubs (was 170). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+5); 5 functions in ported.txt. Stats: 8,891 of 12,306 functions by hand (79.6 % by size).
+  - Next, 9e-xxi: the hover (OnItemHover 0x00680ea0) and the slot 0x60 (0x00686e10), the remaining
+    helpers (0x006828b0, 0x006861d0, 0x00687390, 0x006876b0), the store list's description.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
