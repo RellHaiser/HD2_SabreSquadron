@@ -11,7 +11,8 @@ import sys
 CHECKS = ("esNew esStart esStop esStore esTake esClicked esDragStart esDragMove esDrop esHover esStats esToggle "
           "esPicked esMessage esChecks esCarried esRequired "
           "esItemsScreen esSelection esStatsPanel esStore2 esSquadList esSquad esEquipmentPanel esBuild "
-          "esPut esReturn esTypePicked esSubstitute esMatch").split()
+          "esPut esReturn esTypePicked esSubstitute esMatch "
+          "esCountOwn esAssign esReplenish esDistribute esAutoEquip").split()
 
 
 def main():

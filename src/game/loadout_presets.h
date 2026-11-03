@@ -81,6 +81,7 @@ public:
     S_LoadoutPreset *GetPreset(int index, uint32_t flags) const;       // 0x0067de40
     S_LoadoutPreset *GetUserPreset(int index, uint32_t flags) const;   // 0x0067de90
     int GetPresetCount() const { return static_cast<int>(m_presets.size()); }
+    const std::vector<S_LoadoutPreset *> &GetPresets() const { return m_presets; }
     int GetUserPresetCount() const { return static_cast<int>(m_userPresets.size()); }
 
 private:

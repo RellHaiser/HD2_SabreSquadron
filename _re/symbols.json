@@ -31862,10 +31862,20 @@
   "name": "C_EquipmentMenu::DropStoreItem",
   "proto": "bool __thiscall DropStoreItem(C_EquipmentMenu *this, int type, int count, bool fill)"
  },
+ "00677aa0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::Replenish",
+  "proto": "void __thiscall Replenish(C_EquipmentMenu *this, int soldier, int round, int extra)"
+ },
  "00678000": {
   "module": "equipment_screen",
   "name": "C_EquipmentMenu::AutoEquip",
   "proto": "bool __thiscall AutoEquip(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006785b0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::DistributeRequired",
+  "proto": "void __thiscall DistributeRequired(C_EquipmentMenu *this)"
  },
  "00678dc0": {
   "module": "equipment_screen",
@@ -31881,6 +31891,11 @@
   "module": "equipment_screen",
   "name": "C_EquipmentMenu::CountCarried",
   "proto": "int __cdecl CountCarried(void * item, int soldier)"
+ },
+ "00679670": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::CountOwn",
+  "proto": "int __stdcall CountOwn(int type, int soldier)"
  },
  "00679790": {
   "module": "equipment_screen",
@@ -31906,6 +31921,11 @@
   "module": "loadout_presets",
   "name": "S_LoadoutPreset::ClearPlaces",
   "proto": "void __fastcall ClearPlaces(void * preset)"
+ },
+ "0067a3f0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::AssignSlots",
+  "proto": "void __thiscall AssignSlots(C_EquipmentMenu *this, void * record, int * assigned, int count)"
  },
  "0067a950": {
   "module": "zz_idioms",

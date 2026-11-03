@@ -7784,6 +7784,37 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9f-v: the automatic equipping (AutoEquip 0x00678000, 0x006785b0, 0x00677aa0, 0x00679670,
     0x0067a3f0).
 
+  PART 9f-v DONE (2026-11-03): the equipment screen's automatic equipping (game/equipment_screen.cpp).
+  Part 9f is done.
+  - AutoEquip 0x00678000 (the menu's call, all none: the soldiers to equip only; the button
+    "RECOMMENDED SELECTION" / "AUTOMATIC REPLENISHMENT", CallAutoEquip): no record, false; the required
+    items given out; each soldier (the last first) his kit's slot; unarmed: his unrequired items back,
+    the slot's head gear, its preset's items (the button's: matched for his uniform's side), filled for
+    the soldiers to equip; no more to equip; the button's: stocked up, then twice more (a pistol on the
+    belt: its ammunition too).
+  - DistributeRequired 0x006785b0 (the essentials' list "<n>x <name>, ", given out round the squad one at
+    a time, filled; the wear, head gear, multiplayer pick-ups and the small weapons from the first
+    soldier; the failing tries counted from the last success: quirk kept, across items; then the
+    uniforms of the slot or its preset), CountOwn 0x00679670 (__stdcall), Replenish 0x00677aa0 (a
+    backpack, the weapons' ammunition 6 / 13 / 22, a pistol's a sixth, medkits by first aid * 0.02 *
+    round among the first 255 types, grenades 1 / 4 / 9 among the first 100, item 9, a head gear not
+    with uniform 0x79; an axis uniform: the axis' items), AssignSlots 0x0067a3f0 (the kits' weights and
+    rifles; the best shot a scoped rifle's, the second a rifle's, the others by 60 less their spare
+    strength, a rifle's 30 less; quirk kept: a later kit meeting the best's or second's condition
+    overrides).
+  - C_LoadoutPresets::GetPresets (the raw list the slots index).
+  - Harness: equipment_screen_test.inc's esCountOwn, esAssign (1500 random squads against a
+    transcription of the original's), esReplenish, esDistribute, esAutoEquip (the logs exact, who the
+    puts went to: the panel test's put fake records it). All factory checks in both orders.
+  - Mutations: mutations/mutate_9f5.py (305 cases, 256 build; all caught but 25 equivalent).
+  - Build: MSVC clean. Tier 1: 374 errors in 69 files, 160 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/equipment_screen.txt (+4); 5 functions in ported.txt, 3 absorbed (0x0067a950,
+    0x0067a980, 0x0067a9b0). Stats: 8,960 of 12,306 functions by hand (80.7 % by size).
+  - Left in the range: 0x006755d0 (the profile's name, the squad menu's callers: part 9g), 0x00672700
+    (unreferenced), the CRT's static initializers.
+  - Next, part 9g: the campaign's screens (the squad menu, the debriefing and the diary, the
+    operation's end, the session menu, the movies).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

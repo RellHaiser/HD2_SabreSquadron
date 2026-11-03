@@ -15,9 +15,12 @@ float g_epFreeWeight = 100.0f;
 int g_epFreeBelt = 12, g_epFreeBackpack = 10;
 float g_epWeightFill, g_epBeltFill, g_epBackpackFill;
 std::string EpItem(const S_SoldierItem &item) { return CmText("%d %d %d", item.uid, item.typeId, item.present); }
+// (Part 9f-v: the soldiers put on, in order.)
+std::vector<const S_SquadSoldier *> g_epPutWho;
 void S_SquadSoldier::PutItem(S_SoldierItem *displaced, uint8_t slot, const S_SoldierItem &item)
 {
     GfLog("put %x %s", slot, EpItem(item).c_str());
+    g_epPutWho.push_back(this);
     S_SoldierItem none;
     *displaced = none;
     if (!g_epDisplaced.empty()) {

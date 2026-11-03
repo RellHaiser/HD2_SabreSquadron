@@ -9186,3 +9186,13 @@
 00679b50
 00679e80
 0067e410
+# part 9f-v: the equipment screen automatic equipping
+00678000
+006785b0
+00679670
+00677aa0
+0067a3f0
+# absorbed: the equipment screen vector helpers
+0067a950
+0067a980
+0067a9b0

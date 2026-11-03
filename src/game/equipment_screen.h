@@ -3,7 +3,8 @@
 // equipment panel, the store, the stats, the soldier types; automatic equipping) and the soldiers
 // picked for the mission (the selection screen). Part 9f-i: the class, its construction, the menu
 // state's slots (starting, stopping) and the item controls' slots; 9f-ii: the messages and the
-// checks before the mission; 9f-iii: the screens' descriptions; 9f-iv: the soldier type picked.
+// checks before the mission; 9f-iii: the screens' descriptions; 9f-iv: the soldier type picked; 9f-v:
+// the automatic equipping.
 #pragma once
 
 #include <cstdint>
@@ -74,8 +75,12 @@ public:
     // the soldier kept (the picture's index). True.
     virtual bool OnSelectionPicked(void *argument, C_Control *control, uint32_t notification, uint32_t value); // 0x78 0x006773a0
 
-    // Part 9f-iv: the automatic equipping (all null / 0: only the soldiers to equip; the button's
-    // callback CallAutoEquip, the original's registers it directly).
+    // The automatic equipping (all null / 0: only the soldiers to equip; the button's callback
+    // CallAutoEquip, the original's registers it directly). No mission record: false. The required
+    // items given out, each soldier (the last first) his kit's slot (AssignSlots); unarmed: his
+    // unrequired items back, the slot's head gear, its preset's items (the button's: matched to his
+    // uniform's side), no more to equip; the button's: replenished (then twice more, with a pistol's
+    // ammunition). The panel, the store. True.
     bool AutoEquip(void *argument, C_Control *control, uint32_t notification, uint32_t value);   // 0x00678000
     static bool CallAutoEquip(void *menu, void *argument, C_Control *control, uint32_t notification,
                               uint32_t value);
@@ -135,6 +140,19 @@ private:
     // items).
     bool FindSubstitute(int &type, int ammo, bool axisOnly);   // 0x00679b50
     S_LoadoutPreset *MatchPreset(const S_LoadoutPreset &preset, bool axisOnly);   // 0x00679e80
+    // The mission's required items listed in the essentials' text and given out round the squad (filled
+    // from nothing; the weapons and wear from the first soldier), then the uniforms (the slot's, else
+    // its preset's) on those without one; the panel, the store.
+    void DistributeRequired();                          // 0x006785b0
+    // How many of a type a squad soldier has (a place one, the belt's and the backpack's their counts).
+    static int CountOwn(int type, int soldierIndex);    // 0x00679670 (__stdcall)
+    // A soldier's stock-up (round 0, 1, 2; `extra` a pistol, -1: none): a backpack, the weapons'
+    // ammunition (6, 13, 22 at most; the pistol's a sixth), medkits by his first aid, grenades (1, 4,
+    // 9), item 9, a head gear (not with uniform 0x79); an axis uniform: the axis' items only.
+    void Replenish(int soldierIndex, int round, int extra);   // 0x00677aa0
+    // The record's kits' slots for the squad's `count` soldiers (`assigned` their slots): the best shot
+    // a scoped rifle's, the second a rifle's, the others the heaviest they carry.
+    void AssignSlots(const S_MissionItems &record, int *assigned, int count);   // 0x0067a3f0
     static void EnsureSquad();                          // 0x00673ca0
     // The equipment panel (as the in-game menu's: the model's "equippanel" its "P_Equipment", the
     // holsters' and backpack's groups, own meshes; the panel's description).

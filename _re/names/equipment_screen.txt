@@ -47,3 +47,8 @@
 00679b50 C_EquipmentMenu::FindSubstitute | bool __thiscall FindSubstitute(C_EquipmentMenu *this, int * type, int ammo, bool axisOnly)
 00679e80 C_EquipmentMenu::MatchPreset | void * __thiscall MatchPreset(C_EquipmentMenu *this, void * preset, bool axisOnly)
 0067e410 S_MissionItems::GetRequiredCount | int __thiscall GetRequiredCount(void * this, int type)
+# Part 9f-v: the automatic equipping.
+006785b0 C_EquipmentMenu::DistributeRequired | void __thiscall DistributeRequired(C_EquipmentMenu *this)
+00679670 C_EquipmentMenu::CountOwn | int __stdcall CountOwn(int type, int soldier)
+00677aa0 C_EquipmentMenu::Replenish | void __thiscall Replenish(C_EquipmentMenu *this, int soldier, int round, int extra)
+0067a3f0 C_EquipmentMenu::AssignSlots | void __thiscall AssignSlots(C_EquipmentMenu *this, void * record, int * assigned, int count)

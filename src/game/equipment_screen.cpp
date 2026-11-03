@@ -1,6 +1,7 @@
 // The campaign's equipment screen (original 0x00673080..0x0067a3f0, 0x0067c570; part 9f-i: the class,
 // its construction, starting and stopping, the item controls' slots and the stats; 9f-ii: the messages
-// and the checks before the mission; 9f-iii: the screens' descriptions; 9f-iv: the soldier type picked).
+// and the checks before the mission; 9f-iii: the screens' descriptions; 9f-iv: the soldier type picked;
+// 9f-v: the automatic equipping).
 #include "game/equipment_screen.h"
 
 #include <algorithm>
@@ -87,6 +88,16 @@ constexpr int PAIRED_ITEMS[] = {0x16, 7, 0x104};
 constexpr int UNMATCHED_BEHAVIOUR = 0x13, RETICLE_MODES = 4, SMALL_BEHAVIOURS = 7, BEHAVIOUR_12 = 12;
 constexpr int PRESET_BELT_TYPES = 13, PRESET_BACKPACK_TYPES = 31;
 constexpr uint32_t TEXT_NOT_AVAILABLE = 0x2532;
+// The automatic equipping: the mission essentials' text (the screen's 9th control) and its styles,
+// "Necessary items for mission:"; the behaviours (the medkits: the first 255 types, the grenades: the
+// first 100), item type 9, the uniform worn bare-headed (0x79); the kits' weapons (a rifle, a
+// scoped one).
+constexpr uint32_t ESSENTIALS_TEXT = 0x04900000, ESSENTIALS_TITLE_STYLE = 2, ESSENTIALS_STYLE = 0xF, TEXT_ESSENTIALS = 0xAA9;
+constexpr int BEHAVIOUR_KITS = ITEM_BEHAVIOUR_MEDKIT, BEHAVIOUR_GRENADE = ITEM_BEHAVIOUR_THROWN,
+              BEHAVIOUR_HEADGEAR = ITEM_BEHAVIOUR_HEADGEAR, BEHAVIOUR_BACKPACK = ITEM_BEHAVIOUR_BACKPACK,
+              BEHAVIOUR_20 = ITEM_BEHAVIOUR_RESPAWNING;
+constexpr int KIT_TYPES = 255, GRENADE_TYPES = 100, SPECIAL_ITEM = 9, BARE_HEAD_UNIFORM = 0x79;
+constexpr int RIFLE = 2, SCOPED = 1;
 
 void Post(uint32_t target, uint32_t id, uint32_t value, uintptr_t value2 = 0, const C_str &text = C_str())
 {
@@ -1263,4 +1274,333 @@ S_LoadoutPreset *C_EquipmentMenu::MatchPreset(const S_LoadoutPreset &preset, boo
     items(preset.belt, preset.beltCount, match->belt, match->beltCount, PRESET_BELT_TYPES);
     items(preset.backpackItems, preset.backpackCount, match->backpackItems, match->backpackCount, PRESET_BACKPACK_TYPES);
     return match;
+}
+
+// ---- the automatic equipping
+
+bool C_EquipmentMenu::AutoEquip(void *argument, C_Control *control, uint32_t notification, uint32_t value)
+{
+    C_Campaign *campaign = g_gameProfile.m_campaign;
+    S_MissionItems *record = m_missionItems.GetMissionRecord(campaign->GetMissionNumber(campaign->GetCurrentIndex()));
+    // The menu's own call (all none): only the soldiers to equip.
+    const bool onlyNew = !argument && !control && notification == 0 && value == 0;
+    if (!record)
+        return false;
+    DistributeRequired();
+    std::vector<S_SquadSoldier *> &squad = g_gameProfile.m_missionSquad->states;
+    int assigned[S_MissionItems::SLOTS] = {};
+    AssignSlots(*record, assigned, static_cast<int>(squad.size()));
+    for (size_t i = squad.size(); i-- > 0;) {
+        S_SquadSoldier *soldier = squad[i];
+        const bool fresh = soldier->autoEquip;
+        if (onlyNew && !fresh)
+            continue;
+        m_panel.SelectSoldier(static_cast<int>(i));
+        const S_MissionItems::S_Slot &slot = record->slots[assigned[i]];
+        S_SquadSoldier *dressed = m_panel.GetSquadSoldier();
+        // Unarmed: the slot's head gear and preset (the full equipping: its match for the uniform's side).
+        if (dressed->hands.typeId == -1 && dressed->longGun.typeId == -1) {
+            ReturnUnrequired(static_cast<int>(i), false);
+            if (slot.b != -1 && slot.b != dressed->head.typeId)
+                PutStoreItem(ITEM_FITS_HEAD, slot.b, 1, fresh);
+            const std::vector<S_LoadoutPreset *> presets = m_presets.GetPresets();
+            if (slot.a >= 0 && static_cast<size_t>(slot.a) < presets.size()) {
+                S_LoadoutPreset *preset = presets[static_cast<size_t>(slot.a)];
+                if (!onlyNew) {
+                    const C_ItemDef *uniform = GetItemDef(dressed->uniform.typeId);
+                    preset = MatchPreset(*preset, uniform && uniform->GetTeam() == ITEM_TEAM_AXIS);
+                }
+                if (preset->head != -1 && slot.b == -1)
+                    PutStoreItem(ITEM_FITS_HEAD, preset->head, 1, fresh);
+                if (preset->hands != -1)
+                    PutStoreItem(ITEM_FITS_HANDS, preset->hands, 1, fresh);
+                if (preset->backpack != -1)
+                    PutStoreItem(ITEM_FITS_BACKPACK, preset->backpack, 1, fresh);
+                if (preset->longGun != -1)
+                    PutStoreItem(ITEM_FITS_LONG_GUN, preset->longGun, 1, fresh);
+                for (int k = 0; k < preset->beltCount; ++k)
+                    PutStoreItem(ITEM_FITS_BELT, preset->belt[k].typeId, static_cast<int16_t>(preset->belt[k].count), fresh);
+                for (int k = 0; k < preset->backpackCount; ++k)
+                    PutStoreItem(ITEM_FITS_BACKPACK_CONTENTS, preset->backpackItems[k].typeId,
+                                 static_cast<int16_t>(preset->backpackItems[k].count), fresh);
+                if (!onlyNew)
+                    delete preset;
+            }
+        }
+        // (Quirk kept: the list's soldier, not the dressed one.)
+        SquadSoldier(static_cast<int>(i))->autoEquip = false;
+        if (!onlyNew)
+            Replenish(static_cast<int>(i), 0, -1);
+    }
+    if (!onlyNew) {
+        // Two more rounds for every soldier: a pistol on his belt gets its ammunition too.
+        for (int round = 1; round <= 2; ++round) {
+            for (int i = 0; i < static_cast<int>(squad.size()); ++i) {
+                m_panel.SelectSoldier(i);
+                int pistol = -1;
+                for (const S_SoldierItem &item : m_panel.GetSquadSoldier()->belt) {
+                    C_ItemDef *def = GetItemDef(item.typeId);
+                    if (def && def->GetBehaviour() == ITEM_BEHAVIOUR_SIDEARM) {
+                        pistol = item.typeId;
+                        break;
+                    }
+                }
+                Replenish(i, round, pistol);
+            }
+        }
+    }
+    m_panel.SelectSoldier(m_soldier);
+    m_panel.Refresh();
+    m_storeList.UpdateAll();
+    return true;
+}
+
+void C_EquipmentMenu::DistributeRequired()
+{
+    C_Campaign *campaign = g_gameProfile.m_campaign;
+    S_MissionItems *record = m_missionItems.GetMissionRecord(campaign->GetMissionNumber(campaign->GetCurrentIndex()));
+    if (!record)
+        return;
+    // The mission essentials' list: "Necessary items for mission:" and each item ("<count>x <name>, ",
+    // the last ". ").
+    Post(ESSENTIALS_TEXT, CONTROL_MSG_CLEAR, 0);
+    if (!record->required.empty())
+        Post(ESSENTIALS_TEXT, CONTROL_MSG_ADD_TEXT_ID, ESSENTIALS_TITLE_STYLE, TEXT_ESSENTIALS);
+    std::vector<S_SquadSoldier *> &squad = g_gameProfile.m_missionSquad->states;
+    const int squadSize = static_cast<int>(squad.size());
+    // The soldier the next one goes to (kept from one item to the next but for the weapons and wear)
+    // and the tries in a row that failed (quirk kept: kept from one item to the next too).
+    int next = 0, failed = 0;
+    for (size_t k = 0; k < record->required.size(); ++k) {
+        std::pair<int, int> &item = record->required[k];
+        // (Quirk kept: the item's definition read unchecked.)
+        C_ItemDef *def = GetItemDef(item.first);
+        if ((def->GetBehaviour() == BEHAVIOUR_UNIFORM || item.first == DIVING_GEAR) && squadSize < item.second)
+            item.second = squadSize;
+        Post(ESSENTIALS_TEXT, CONTROL_MSG_ADD_TEXT, ESSENTIALS_STYLE, 0, C_fstr("%ix ", item.second));
+        Post(ESSENTIALS_TEXT, CONTROL_MSG_ADD_TEXT_ID, ESSENTIALS_STYLE, static_cast<uintptr_t>(def->GetTextId()));
+        Post(ESSENTIALS_TEXT, CONTROL_MSG_ADD_TEXT, ESSENTIALS_STYLE, 0, C_fstr(k + 1 < record->required.size() ? ", " : ". "));
+        int missing = item.second - CountCarried(item, -1);
+        if (missing < 1)
+            continue;
+        const int behaviour = def->GetBehaviour();
+        if (behaviour == BEHAVIOUR_UNIFORM || behaviour == BEHAVIOUR_HEADGEAR || behaviour == BEHAVIOUR_20 ||
+            behaviour < BEHAVIOUR_KITS)
+            next = 0;
+        // One at a time round the squad (filled from nothing), until none missing or a round without one.
+        while (true) {
+            m_panel.SelectSoldier(next);
+            const bool given = DropStoreItem(item.first, 1, true);
+            next = next + 1 < squadSize ? next + 1 : 0;
+            if (given) {
+                failed = 0;
+                if (--missing < 1)
+                    break;
+            } else if (++failed >= squadSize) {
+                break;
+            }
+        }
+    }
+    // The uniforms: the slot's, else its preset's, on a soldier without one.
+    for (size_t i = squad.size(); i-- > 0;) {
+        m_panel.SelectSoldier(static_cast<int>(i));
+        const S_MissionItems::S_Slot &slot = record->slots[i];
+        S_SquadSoldier *dressed = m_panel.GetSquadSoldier();
+        const bool fresh = SquadSoldier(static_cast<int>(i))->autoEquip;
+        if (slot.c != -1) {
+            if (dressed->uniform.typeId == -1)
+                PutStoreItem(ITEM_FITS_UNIFORM, slot.c, 1, fresh);
+        } else if (slot.a != -1) {
+            const std::vector<S_LoadoutPreset *> presets = m_presets.GetPresets();
+            if (slot.a >= 0 && static_cast<size_t>(slot.a) < presets.size() &&
+                presets[static_cast<size_t>(slot.a)]->uniform != -1 && dressed->uniform.typeId == -1)
+                PutStoreItem(ITEM_FITS_UNIFORM, presets[static_cast<size_t>(slot.a)]->uniform, 1, fresh);
+        }
+    }
+    m_panel.SelectSoldier(m_soldier);
+    m_panel.Refresh();
+    m_storeList.UpdateAll();
+}
+
+int C_EquipmentMenu::CountOwn(int type, int soldierIndex)
+{
+    // (Quirk kept: the soldier read unchecked.)
+    const S_SquadSoldier *soldier = SquadSoldier(soldierIndex);
+    int count = 0;
+    for (const S_SoldierItem *place : {&soldier->head, &soldier->uniform, &soldier->backpack, &soldier->longGun, &soldier->hands})
+        count += place->typeId == type;
+    for (const std::vector<S_SoldierItem> *items : {&soldier->belt, &soldier->backpackContents}) {
+        for (const S_SoldierItem &item : *items) {
+            if (item.typeId == type)
+                count += item.present;
+        }
+    }
+    return count;
+}
+
+void C_EquipmentMenu::Replenish(int soldierIndex, int round, int extra)
+{
+    C_ItemStock *stock = m_storeList.GetStock();
+    const int maxAmmo = (round + 6) * round + 6;
+    const int maxGrenades = (round + 2) * round + 1;
+    m_panel.SelectSoldier(soldierIndex);
+    S_SquadSoldier *soldier = m_panel.GetSquadSoldier();
+    // An axis uniform: the axis' items only. (Quirk kept: its definition read unchecked.)
+    bool axis = false;
+    if (soldier->uniform.typeId >= 0 && GetItemDef(soldier->uniform.typeId)->GetTeam() == ITEM_TEAM_AXIS)
+        axis = true;
+    const auto usable = [axis](const C_ItemDef *def) { return !axis || def->GetTeam() == ITEM_TEAM_AXIS; };
+    // The first of a behaviour in the stock he has none of, put at `slot`.
+    const auto first = [&](int behaviour, uint32_t slot) {
+        for (int type = 0; type < MAX_ITEM_TYPES; ++type) {
+            C_ItemDef *def = GetItemDef(type);
+            if (stock->Get(type) > 0 && def && def->GetBehaviour() == behaviour && usable(def) &&
+                CountOwn(type, soldierIndex) == 0 && PutStoreItem(slot, type, 1, false))
+                return true;
+        }
+        return false;
+    };
+    // A weapon's ammunition up to `limit` (what he has counted).
+    const auto ammo = [&](int type, int limit) {
+        // (Quirk kept: the weapon's definition read unchecked.)
+        C_ItemDef *def = GetItemDef(type);
+        if (def->GetBehaviour() > BEHAVIOUR_12 || def->GetAmmoItemId() < 0 || !usable(def))
+            return;
+        const int have = stock->Get(def->GetAmmoItemId());
+        const int own = CountOwn(def->GetAmmoItemId(), soldierIndex);
+        if (have > 0 && own < limit)
+            DropStoreItem(def->GetAmmoItemId(), std::min(have, limit - own), false);
+    };
+    // Every type of a behaviour up to `limit` each.
+    const auto upTo = [&](int types, int behaviour, int limit) {
+        for (int type = 0; type < types; ++type) {
+            C_ItemDef *def = GetItemDef(type);
+            if (stock->Get(type) <= 0 || !def || def->GetBehaviour() != behaviour || !usable(def))
+                continue;
+            const int have = stock->Get(type);
+            const int own = CountOwn(type, soldierIndex);
+            if (own < limit)
+                DropStoreItem(type, std::min(have, limit - own), false);
+        }
+    };
+    if (soldier->backpack.typeId == -1)
+        first(BEHAVIOUR_BACKPACK, ITEM_FITS_BACKPACK);
+    if (soldier->hands.typeId != -1)
+        ammo(soldier->hands.typeId, maxAmmo);
+    if (extra != -1)
+        ammo(extra, maxAmmo / 6);
+    if (soldier->longGun.typeId != -1)
+        ammo(soldier->longGun.typeId, maxAmmo);
+    // (Quirk kept: the profile read unchecked.)
+    const float firstAid = g_gameProfile.m_humanStore->Get(soldier->profileIndex)->stats[STAT_FIRST_AID];
+    upTo(KIT_TYPES, BEHAVIOUR_KITS, static_cast<int>(firstAid * 0.02f * static_cast<float>(round)));
+    upTo(GRENADE_TYPES, BEHAVIOUR_GRENADE, maxGrenades);
+    if (stock->Get(SPECIAL_ITEM) > 0 && GetItemDef(SPECIAL_ITEM) && CountOwn(SPECIAL_ITEM, soldierIndex) < 1)
+        DropStoreItem(SPECIAL_ITEM, 1, false);
+    if (soldier->head.typeId == -1 && soldier->uniform.typeId != BARE_HEAD_UNIFORM)
+        first(BEHAVIOUR_HEADGEAR, ITEM_FITS_HEAD);
+}
+
+void C_EquipmentMenu::AssignSlots(const S_MissionItems &record, int *assigned, int count)
+{
+    // Each slot: its kit's weight, its weapons' kinds (bit 1 a rifle, bit 0 a scoped one), taken.
+    struct S_Kit {
+        float weight = 0.0f;
+        int flags = 0;
+        bool taken = false;
+    } kits[S_MissionItems::SLOTS];
+    const auto weight = [](int type) {
+        const C_ItemDef *def = type != -1 ? GetItemDef(type) : nullptr;
+        return def ? def->GetWeight() : 0.0f;
+    };
+    const auto reticle = [](C_ItemDef *d) {
+        const C_ItemComponent *scope = d->GetSecondaryComponent();
+        return d->GetBehaviour() == ITEM_BEHAVIOUR_RIFLE && scope && scope->GetKind() == ICK_SCOPE &&
+               static_cast<const C_ScopeComp *>(scope)->GetAimMode() < RETICLE_MODES;
+    };
+    const std::vector<S_LoadoutPreset *> presets = m_presets.GetPresets();
+    int scoped = 0;
+    for (int k = 0; k < count; ++k) {
+        const S_MissionItems::S_Slot &slot = record.slots[k];
+        S_Kit &kit = kits[k];
+        if (slot.a < 0 || static_cast<size_t>(slot.a) >= presets.size()) {
+            kit.weight = weight(slot.c);
+            kit.weight += weight(slot.b);
+            continue;
+        }
+        const S_LoadoutPreset *preset = presets[static_cast<size_t>(slot.a)];
+        kit.weight = weight(slot.c != -1 ? slot.c : preset->uniform);
+        kit.weight += weight(slot.b != -1 ? slot.b : preset->head);
+        // The weapons: a rifle (scoped: counted).
+        const auto weapon = [&](int type, bool keep) {
+            C_ItemDef *def = type != -1 ? GetItemDef(type) : nullptr;
+            if (!def)
+                return;
+            kit.weight += def->GetWeight();
+            if (def->GetBehaviour() != ITEM_BEHAVIOUR_RIFLE)
+                return;
+            const int before = keep ? kit.flags : 0;
+            kit.flags = before | RIFLE;
+            if (reticle(def)) {
+                kit.flags = before | RIFLE | SCOPED;
+                ++scoped;
+            }
+        };
+        weapon(preset->hands, false);
+        weapon(preset->longGun, true);
+        kit.weight += weight(preset->backpack);
+        for (int i = 0; i < preset->beltCount; ++i)
+            kit.weight += weight(preset->belt[i].typeId) * static_cast<float>(preset->belt[i].count);
+        for (int i = 0; i < preset->backpackCount; ++i)
+            kit.weight += weight(preset->backpackItems[i].typeId) * static_cast<float>(preset->backpackItems[i].count);
+    }
+    // The two best shots.
+    int best = -1, bestIndex = -1, second = -1, secondIndex = -1;
+    for (int i = 0; i < count; ++i) {
+        // (Quirk kept: the profile read unchecked.)
+        const float shooting = g_gameProfile.m_humanStore->Get(SquadSoldier(i)->profileIndex)->stats[STAT_SHOOTING];
+        if (static_cast<float>(best) < shooting) {
+            second = best;
+            secondIndex = bestIndex;
+            best = static_cast<int>(shooting);
+            bestIndex = i;
+        } else if (static_cast<float>(second) < shooting) {
+            second = static_cast<int>(shooting);
+            secondIndex = i;
+        }
+    }
+    // Each soldier his slot: the best shot a scoped rifle's (a rifle's when none scoped), the second a
+    // rifle's (a scoped one's when two), else the heaviest he carries but a scoped rifle's (60 less his
+    // spare strength; a rifle's 30 less); the first free at worst.
+    for (int s = 0; s < count; ++s) {
+        const float strength = g_gameProfile.m_humanStore->Get(SquadSoldier(s)->profileIndex)->stats[STAT_STRENGTH];
+        int chosen = -1, score = -1;
+        for (int k = 0; k < count; ++k) {
+            const S_Kit &kit = kits[k];
+            if (kit.taken)
+                continue;
+            if (chosen == -1) {
+                score = 0;
+                chosen = k;
+            }
+            const bool fits = kit.weight <= strength;
+            if (s == bestIndex && ((kit.flags & SCOPED) || ((kit.flags & RIFLE) && scoped == 0)) && fits) {
+                score = 100;
+                chosen = k;
+            } else if (s == secondIndex && (kit.flags & RIFLE) && (!(kit.flags & SCOPED) || scoped > 1) && fits) {
+                score = 90;
+                chosen = k;
+            } else if (fits && !(kit.flags & SCOPED)) {
+                int value = static_cast<int>(60.0f - (strength - kit.weight));
+                if (kit.flags & RIFLE)
+                    value -= 30;
+                if (score < value) {
+                    score = value;
+                    chosen = k;
+                }
+            }
+        }
+        kits[chosen].taken = true;
+        assigned[s] = count == 1 ? 0 : chosen;
+    }
 }

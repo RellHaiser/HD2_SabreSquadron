@@ -17,11 +17,6 @@ int C_Campaign::GetMissionNumber(int campaign)
     GfLog("mission number %d", campaign);
     return g_esMission;
 }
-bool C_EquipmentMenu::AutoEquip(void *argument, C_Control *control, uint32_t notification, uint32_t value)
-{
-    GfLog("es auto %d", argument || control || notification || value);
-    return true;
-}
 // (Part 9f-iii: the roster's file, logged.)
 bool C_HumanStore::Load(C_str fileName)
 {
@@ -47,6 +42,7 @@ struct S_EquipmentScreenResults {
     bool esPicked = true, esMessage = true, esChecks = true, esCarried = true, esRequired = true;
     bool esItemsScreen = true, esSelection = true, esStatsPanel = true, esStore2 = true, esSquadList = true, esSquad = true, esEquipmentPanel = true, esBuild = true;
     bool esPut = true, esReturn = true, esTypePicked = true, esSubstitute = true, esMatch = true;
+    bool esCountOwn = true, esAssign = true, esReplenish = true, esDistribute = true, esAutoEquip = true;
 };
 
 // A frame of the screen's model at a world position (its SetPos logged: "<name> 8 (x y z)").
@@ -1352,7 +1348,7 @@ void EquipmentScreenTest(I3D_scene *scene)
             g_controlMessages.clear();
             okb &= m.BuildScreens() && MrHas("esbmi 34 Items selection") && MrHas("esbms 34 SELECTION SCREEN") &&
                    GmInOrder(Join(g_gfLog), {"esbmi 48 equippanel 20", "esbmi 48 table11 1", "esbmi 48 itemselector01 1",
-                                             "esbmi 48 description 1", "es auto 0", "esbms 48 photo03 1", "esbms 48 selector 1"}) &&
+                                             "esbmi 48 description 1", "mission number 0", "esbms 48 photo03 1", "esbms 48 selector 1"}) &&
                    MrHas("add soldier") && squad.states.size() == 4 && m.m_screens.size() == 3 && m.m_screens[1]->GetId() == 1u << 26 &&
                    m.m_screens[2]->GetId() == 2u << 26 && m.m_screens[1]->GetScreenFrame() == As<I3D_frame>(mi) &&
                    !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1] && m.m_popup &&
@@ -2090,6 +2086,551 @@ void EquipmentScreenTest(I3D_scene *scene)
         m.m_storeList.m_stock = nullptr;
     }
 
+    // --- (part 9f-v) the automatic equipping: the own counts, the kits' slots (against a transcription
+    // of the original's, on random squads), the stock-up, the required items given out, the equipping
+    // (the menu's: the soldiers to equip; the button's: all, matched, stocked up). The logs exact: the
+    // stock's takes and adds, the puts, the removals, and who the puts went to ---
+    {
+        C_EquipmentMenu m;
+        C_ItemStock stock;
+        m.m_storeList.SetStock(&stock);
+        m.m_storeList.m_entries.resize(500);
+        for (uint32_t t = 0; t < 120; ++t)
+            m.m_storeList.m_entries[t] = 0x04401000 + (t << 12);
+        alignas(16) static uint8_t profileMemory[4][sizeof(S_SoldierProfile)];
+        std::memset(profileMemory, 0, sizeof profileMemory);
+        S_SoldierProfile *pr[4];
+        for (int i = 0; i < 4; ++i)
+            pr[i] = reinterpret_cast<S_SoldierProfile *>(profileMemory[i]);
+        g_epProfiles = {pr[0], pr[1], pr[2], pr[3]};
+        S_SquadSoldier s0, s1, s2, s3;
+        S_SquadSoldier *const all[4] = {&s0, &s1, &s2, &s3};
+        for (int i = 0; i < 4; ++i) {
+            all[i]->profileIndex = i;
+            all[i]->deployed = true;
+        }
+        std::vector<std::unique_ptr<C_SlDef>> defs;
+        const auto def = [&](int type, E_ItemRecordType record, int behaviour, int ammo = -1, float weight = 0.0f) {
+            defs.push_back(std::make_unique<C_SlDef>(record, behaviour, ammo, -1));
+            defs.back()->m_id = type;
+            defs.back()->m_weight = weight;
+            defs.back()->m_textId = 0x500 + type;
+            g_gfItemDefs[type] = defs.back().get();
+            g_epAllowed[defs.back().get()] = 0xFF;
+            return defs.back().get();
+        };
+        g_gfItemDefs.clear();
+        g_slCounts.clear();
+        g_epDisplaced.clear();
+        g_epRemoved.clear();
+        const auto clear = [](S_SquadSoldier &s) {
+            s.head = s.uniform = s.backpack = s.longGun = s.hands = EpMake(-1, -1, 0);
+            s.belt.clear();
+            s.backpackContents.clear();
+        };
+        // The log's stock and soldier lines, and who the puts went to (the soldiers' indices).
+        const auto ops = [] {
+            std::string s;
+            for (const std::string &l : g_gfLog) {
+                if (l.rfind("stock ", 0) == 0 || l.rfind("put ", 0) == 0 || l.rfind("remove ", 0) == 0)
+                    s += l + "; ";
+            }
+            return s;
+        };
+        const auto who = [&all] {
+            std::string s;
+            for (const S_SquadSoldier *p : g_epPutWho)
+                for (int i = 0; i < 4; ++i)
+                    if (p == all[i])
+                        s += CmText("%d", i);
+            g_epPutWho.clear();
+            return s;
+        };
+        const auto run = [&](const std::function<void()> &f) {
+            g_gfLog.clear();
+            g_epPutWho.clear();
+            g_controlMessages.clear();
+            f();
+            return ops() + "| " + who();
+        };
+        // A queue's panel refreshes' and store updates' messages counted (its texts depend on the loads).
+        const auto refreshes = [](const std::string &q) {
+            size_t a = 0, b = 0;
+            for (size_t at = q.find(" 1000039 "); at != std::string::npos; at = q.find(" 1000039 ", at + 1))
+                ++a;
+            for (size_t at = q.find(" 100007c "); at != std::string::npos; at = q.find(" 100007c ", at + 1))
+                ++b;
+            return CmText("%d %d", static_cast<int>(a), static_cast<int>(b));
+        };
+        // The logs expected (written from the original's flow; the puts' places the fakes').
+        const std::map<std::string, std::string> gold = {
+            {"distribute", "stock take 32 1; put 1 -1 32 1; stock take 33 1; put 1 -1 33 1; stock take 31 1; put 1 -1 31 1; stock take 34 1; put 1 -1 34 1; stock take 37 1; put 1 -1 37 1; stock take 32 1; put 1 -1 32 1; stock take 38 1; put 1 -1 38 1; stock take 33 1; put 1 -1 33 1; stock take 36 1; put 2 -1 36 1; stock take 35 1; put 2 -1 35 1; | 0100010110"},
+            {"distributeCarried", "| "},
+            {"distributeNone", "| "},
+            {"distributePast", "stock take 35 1; put 2 -1 35 1; | 0"},
+            {"distributeShort", "stock take 32 1; put 1 -1 32 1; stock add 32 1; stock take 32 1; stock add 32 1; stock take 32 1; stock take 31 1; put 1 -1 31 1; stock take 31 1; put 1 -1 31 1; stock take 36 1; stock take 35 1; | 001"},
+            {"equipAll", "remove 20 5 34 1; stock add 34 1; remove 20 5 34 1; stock add 34 1; remove 20 5 34 1; stock add 34 1; stock take 40 1; put 1 -1 40 1; stock take 28 1; put 4 -1 28 1; stock take 20 1; put 8 -1 20 1; stock take 26 1; put 1 -1 26 1; stock take 27 1; put 1 -1 27 1; stock take 27 1; put 1 -1 27 1; stock take 42 1; put 4 -1 42 1; stock take 20 1; put 8 -1 20 1; stock take 23 1; put 10 -1 23 1; stock take 22 2; put 20 -1 22 2; stock take 24 1; put 40 -1 24 1; stock take 41 3; put 40 -1 41 3; stock take 20 1; put 8 -1 20 1; stock take 26 1; put 1 -1 26 1; stock take 27 1; put 1 -1 27 1; stock take 25 1; put 1 -1 25 1; stock take 26 4; put 1 -1 26 4; stock take 27 1; put 1 -1 27 1; stock take 29 2; put 1 -1 29 2; stock take 25 1; put 1 -1 25 1; stock take 26 3; put 1 -1 26 3; stock take 27 1; put 1 -1 27 1; stock take 25 2; put 1 -1 25 2; stock take 27 1; put 1 -1 27 1; stock take 29 3; put 1 -1 29 3; stock take 25 2; put 1 -1 25 2; stock take 27 1; put 1 -1 27 1; | 111110000000000000111100111"},
+            {"equipArmed", "| "},
+            {"equipAxis", "remove 20 5 34 1; stock add 34 1; remove 20 5 34 1; stock add 34 1; remove 20 5 34 1; stock add 34 1; stock take 40 1; put 1 -1 40 1; stock take 28 1; put 4 -1 28 1; stock take 20 1; put 8 -1 20 1; stock take 26 1; put 1 -1 26 1; stock take 27 1; put 1 -1 27 1; stock take 27 1; put 1 -1 27 1; stock take 43 1; put 4 -1 43 1; stock take 43 1; put 10 -1 43 1; stock take 22 2; put 20 -1 22 2; stock take 22 1; put 40 -1 22 1; stock take 43 3; put 40 -1 43 1; stock take 20 1; put 8 -1 20 1; stock take 29 2; put 1 -1 29 2; stock take 25 1; put 1 -1 25 1; stock take 26 4; put 1 -1 26 4; stock take 27 1; put 1 -1 27 1; stock take 20 1; put 8 -1 20 1; stock take 29 3; put 1 -1 29 3; stock take 25 2; put 1 -1 25 2; stock take 26 4; put 1 -1 26 4; stock take 27 1; put 1 -1 27 1; | 111110000001111111111"},
+            {"equipNew", "stock take 27 1; put 1 -1 27 1; stock take 21 1; put 4 -1 21 1; stock take 20 1; put 8 -1 20 1; stock take 23 1; put 10 -1 23 1; stock take 22 2; put 20 -1 22 2; stock take 24 1; put 40 -1 24 1; stock take 41 3; put 40 -1 41 3; | 0000000"},
+            {"replenish0", "stock take 0 1; put 8 -1 0 1; stock take 22 6; put 1 -1 22 6; stock take 24 3; put 1 -1 24 3; stock take 26 1; put 1 -1 26 1; stock take 99 1; put 1 -1 99 1; stock take 9 1; put 1 -1 9 1; stock take 27 1; put 1 -1 27 1; | 0000000"},
+            {"replenish1", "stock take 0 1; put 8 -1 0 1; stock take 22 13; put 1 -1 22 13; stock take 29 2; put 1 -1 29 2; stock take 24 3; put 1 -1 24 3; stock take 25 1; put 1 -1 25 1; stock take 26 4; put 1 -1 26 4; stock take 99 4; put 1 -1 99 4; stock take 9 1; put 1 -1 9 1; stock take 27 1; put 1 -1 27 1; | 000000000"},
+            {"replenish2", "stock take 0 1; put 8 -1 0 1; stock take 22 20; put 1 -1 22 20; stock take 29 3; put 1 -1 29 3; stock take 24 3; put 1 -1 24 3; stock take 25 2; put 1 -1 25 2; stock take 26 5; put 1 -1 26 5; stock take 99 5; put 1 -1 99 5; stock take 9 1; put 1 -1 9 1; stock take 27 1; put 1 -1 27 1; | 000000000"},
+            {"replenishAxis", "stock take 26 1; put 1 -1 26 1; stock take 9 1; put 1 -1 9 1; stock take 27 1; put 1 -1 27 1; | 000"},
+            {"replenishBare", "stock take 20 1; put 8 -1 20 1; stock take 0 1; put 1 -1 0 1; stock take 26 1; put 1 -1 26 1; stock take 99 1; put 1 -1 99 1; stock take 9 1; put 1 -1 9 1; | 00000"},
+            {"replenishOther", "stock take 0 1; put 8 -1 0 1; stock take 24 3; put 1 -1 24 3; stock take 26 1; put 1 -1 26 1; stock take 99 1; put 1 -1 99 1; stock take 9 1; put 1 -1 9 1; stock take 27 1; put 1 -1 27 1; | 111111"},
+            {"replenishOwned", "stock take 29 1; put 2 -1 29 1; stock take 24 3; put 2 -1 24 3; stock take 99 4; put 2 -1 99 4; | 000"},
+            {"replenishShort", "stock take 20 1; put 8 -1 20 1; stock take 22 1; put 1 -1 22 1; stock take 25 1; put 1 -1 25 1; stock take 99 1; put 1 -1 99 1; | 0000"},
+            {"distributeWrap", "stock take 32 1; put 1 -1 32 1; stock take 33 1; put 1 -1 33 1; stock take 32 1; put 1 -1 32 1; stock take 35 1; | 010"},
+            {"distributeFailed", "stock take 32 1; put 1 -1 32 1; stock take 32 1; put 1 -1 32 1; stock add 32 1; stock take 32 1; stock add 32 1; stock take 32 1; stock take 33 1; put 1 -1 33 1; stock take 39 1; put 1 -1 39 1; stock add 39 1; stock take 39 1; stock add 39 1; stock take 39 1; stock take 35 1; | 0101"},
+            {"distributeRefresh", "143 47"},
+            {"equipNewRefresh", "117 84"},
+        };
+        const auto check = [&gold](const char *name, const std::string &got) {
+            if (!gold.count(name)) {
+                std::fprintf(stderr, "GOLD %s: %s\n", name, got.c_str());
+                return false;
+            }
+            const bool same = gold.at(name) == got;
+            if (!same)
+                std::fprintf(stderr, "%s differs:\n  %s\n  %s\n", name, got.c_str(), gold.at(name).c_str());
+            return same;
+        };
+
+        // The own counts: a place one, the belt's and the backpack's their counts.
+        bool okc = true;
+        squad.states = {&s0, &s1};
+        s0.head = EpMake(1, 3, 4);
+        s0.uniform = EpMake(2, 3, 1);
+        s0.belt = {EpMake(3, 3, 2), EpMake(4, 4, 1)};
+        s0.backpackContents = {EpMake(5, 3, 5)};
+        s0.hands = s0.longGun = s0.backpack = EpMake(9, 3, 1);
+        okc &= C_EquipmentMenu::CountOwn(3, 0) == 12 && C_EquipmentMenu::CountOwn(4, 0) == 1 &&
+               C_EquipmentMenu::CountOwn(5, 0) == 0 && C_EquipmentMenu::CountOwn(3, 1) == 0;
+        clear(s0);
+        okc &= C_EquipmentMenu::CountOwn(3, 0) == 0 && C_EquipmentMenu::CountOwn(-1, 0) == 5;
+        WM(r.esCountOwn, okc);
+
+        // The kits' slots against a transcription of the original's (0x0067a3f0) on random squads: the
+        // kits' weights and weapons, the shots and strengths.
+        bool oka = true;
+        {
+            C_ScopeComp reticle, sights;
+            reticle.m_aimMode = 2;
+            sights.m_aimMode = 5;
+            // The types: 60.. plain items of weights 0..4.5, 70.. rifles (scoped, sighted, plain), 80..
+            // other weapons.
+            for (int i = 0; i < 10; ++i)
+                def(60 + i, ITEM_STATIC, 0, -1, 0.5f * static_cast<float>(i));
+            for (int i = 0; i < 6; ++i)
+                def(70 + i, ITEM_ANIMATED, 4, -1, 1.0f + static_cast<float>(i))->m_secondaryComponent =
+                    i % 3 == 0 ? &reticle : i % 3 == 1 ? &sights : nullptr;
+            for (int i = 0; i < 4; ++i)
+                def(80 + i, ITEM_ANIMATED, 3, -1, 2.0f * static_cast<float>(i));
+            std::vector<std::unique_ptr<S_LoadoutPreset>> kits;
+            uint32_t seed = 12345;
+            const auto rnd = [&seed](int n) {
+                seed = seed * 1103515245u + 12345u;
+                return static_cast<int>((seed >> 16) % static_cast<uint32_t>(n));
+            };
+            const auto anyType = [&rnd]() {
+                const int k = rnd(4);
+                return k == 0 ? -1 : k == 1 ? 60 + rnd(10) : k == 2 ? 70 + rnd(6) : 80 + rnd(4);
+            };
+            for (int trial = 0; trial < 1500 && oka; ++trial) {
+                const int count = 1 + rnd(4);
+                kits.clear();
+                std::vector<S_LoadoutPreset *> presets;
+                for (int p = 0; p < 4; ++p) {
+                    kits.push_back(std::make_unique<S_LoadoutPreset>());
+                    S_LoadoutPreset &k = *kits.back();
+                    k.head = rnd(2) ? 60 + rnd(10) : -1;
+                    k.uniform = rnd(2) ? 60 + rnd(10) : -1;
+                    k.hands = anyType();
+                    k.longGun = anyType();
+                    k.backpack = rnd(2) ? 60 + rnd(10) : -1;
+                    k.beltCount = rnd(3);
+                    for (int i = 0; i < k.beltCount; ++i)
+                        k.belt[i] = {60 + rnd(10), 1 + rnd(4)};
+                    k.backpackCount = rnd(3);
+                    for (int i = 0; i < k.backpackCount; ++i)
+                        k.backpackItems[i] = {60 + rnd(10), 1 + rnd(4)};
+                    presets.push_back(&k);
+                }
+                m.m_presets.m_presets = presets;
+                S_MissionItems record;
+                for (int k = 0; k < count + 1 && k < 10; ++k)
+                    record.slots[k] = {rnd(6) - 1, rnd(2) ? 60 + rnd(10) : -1, rnd(2) ? 60 + rnd(10) : -1};
+                std::vector<S_SquadSoldier *> sq;
+                for (int i = 0; i < count; ++i) {
+                    pr[i]->stats[STAT_SHOOTING] = static_cast<float>(rnd(5) * 10 + rnd(3));
+                    pr[i]->stats[STAT_STRENGTH] = static_cast<float>(rnd(trial % 2 ? 40 : 200)) * 0.5f;
+                    sq.push_back(all[i]);
+                }
+                squad.states = sq;
+                // The transcription.
+                int want[10];
+                {
+                    float weight[10];
+                    int flags[10];
+                    bool taken[10];
+                    int scoped = 0;
+                    const auto w = [](int type) {
+                        C_ItemDef *d = type >= 0 ? GetItemDef(type) : nullptr;
+                        return d ? d->GetWeight() : 0.0f;
+                    };
+                    const auto isReticle = [](C_ItemDef *d) {
+                        const C_ItemComponent *c = d->GetSecondaryComponent();
+                        return c && c->GetKind() == ICK_SCOPE && static_cast<const C_ScopeComp *>(c)->GetAimMode() < 4;
+                    };
+                    for (int k = 0; k < count; ++k) {
+                        const S_MissionItems::S_Slot &sl = record.slots[k];
+                        taken[k] = false;
+                        weight[k] = 0.0f;
+                        flags[k] = 0;
+                        if (sl.a < 0 || sl.a >= static_cast<int>(presets.size())) {
+                            weight[k] = w(sl.c);
+                            weight[k] = w(sl.b) + weight[k];
+                            continue;
+                        }
+                        const S_LoadoutPreset *p = presets[static_cast<size_t>(sl.a)];
+                        weight[k] = w(sl.c != -1 ? sl.c : p->uniform);
+                        weight[k] = w(sl.b != -1 ? sl.b : p->head) + weight[k];
+                        if (C_ItemDef *d = p->hands >= 0 ? GetItemDef(p->hands) : nullptr) {
+                            weight[k] += d->GetWeight();
+                            if (d->GetBehaviour() == 4) {
+                                flags[k] = 2;
+                                if (isReticle(d)) {
+                                    flags[k] = 3;
+                                    ++scoped;
+                                }
+                            }
+                        }
+                        if (C_ItemDef *d = p->longGun >= 0 ? GetItemDef(p->longGun) : nullptr) {
+                            weight[k] += d->GetWeight();
+                            if (d->GetBehaviour() == 4) {
+                                const int old = flags[k];
+                                flags[k] = old | 2;
+                                if (isReticle(d)) {
+                                    ++scoped;
+                                    flags[k] = old | 3;
+                                }
+                            }
+                        }
+                        weight[k] = w(p->backpack) + weight[k];
+                        for (int i = 0; i < p->beltCount; ++i)
+                            weight[k] = w(p->belt[i].typeId) * static_cast<float>(p->belt[i].count) + weight[k];
+                        for (int i = 0; i < p->backpackCount; ++i)
+                            weight[k] = w(p->backpackItems[i].typeId) * static_cast<float>(p->backpackItems[i].count) + weight[k];
+                    }
+                    int best = -1, second = -1, bestAt = -1, secondAt = -1;
+                    for (int i = 0; i < count; ++i) {
+                        const float sh = pr[i]->stats[STAT_SHOOTING];
+                        if (static_cast<float>(best) < sh) {
+                            second = best;
+                            secondAt = bestAt;
+                            best = static_cast<int>(sh);
+                            bestAt = i;
+                        } else if (static_cast<float>(second) < sh) {
+                            second = static_cast<int>(sh);
+                            secondAt = i;
+                        }
+                    }
+                    for (int s = 0; s < count; ++s) {
+                        const float str = pr[s]->stats[STAT_STRENGTH];
+                        int at = -1, sc = -1;
+                        for (int k = 0; k < count; ++k) {
+                            if (taken[k])
+                                continue;
+                            if (at == -1) {
+                                sc = 0;
+                                at = k;
+                            }
+                            const bool fit = weight[k] < str || weight[k] == str;
+                            if (s == bestAt && ((flags[k] & 1) || ((flags[k] & 2) && scoped == 0)) && fit) {
+                                sc = 100;
+                                at = k;
+                            } else if (s == secondAt && (flags[k] & 2) && (!(flags[k] & 1) || scoped > 1) && fit) {
+                                sc = 90;
+                                at = k;
+                            } else if (fit && !(flags[k] & 1)) {
+                                int v = static_cast<int>(60.0f - (str - weight[k]));
+                                if (flags[k] & 2)
+                                    v -= 30;
+                                if (sc < v) {
+                                    sc = v;
+                                    at = k;
+                                }
+                            }
+                        }
+                        taken[at] = true;
+                        want[s] = count == 1 ? 0 : at;
+                    }
+                }
+                int got[10] = {};
+                m.AssignSlots(record, got, count);
+                for (int s = 0; s < count; ++s)
+                    oka &= got[s] == want[s];
+                if (!oka)
+                    std::fprintf(stderr, "esAssign trial %d differs\n", trial);
+            }
+            m.m_presets.m_presets.clear();
+            // (Exact: a rifle's kit 30 less: 51 - 30 beats a plain kit's 20.)
+            def(76, ITEM_ANIMATED, 4, -1, 31.0f);
+            S_LoadoutPreset rifleKit;
+            rifleKit.longGun = 76;
+            m.m_presets.m_presets = {&rifleKit};
+            S_MissionItems exact;
+            exact.slots[0] = {-1, -1, -1};
+            exact.slots[1] = {0, -1, -1};
+            exact.slots[2] = {-1, -1, -1};
+            squad.states = {&s0, &s1, &s2};
+            const float shots[3] = {10.0f, 90.0f, 80.0f};
+            for (int i = 0; i < 3; ++i) {
+                pr[i]->stats[STAT_SHOOTING] = shots[i];
+                pr[i]->stats[STAT_STRENGTH] = 40.0f;
+            }
+            int got[10] = {};
+            m.AssignSlots(exact, got, 3);
+            oka &= got[0] == 1;
+            m.m_presets.m_presets.clear();
+        }
+        WM(r.esAssign, oka);
+
+        // The stock-up.
+        bool okp = true;
+        squad.states = {&s0, &s1};
+        clear(s0);
+        clear(s1);
+        def(0, ITEM_STATIC, 17);
+        def(20, ITEM_STATIC, 17);
+        def(21, ITEM_ANIMATED, 3, 22);
+        def(22, ITEM_AMMO, 0);
+        def(23, ITEM_ANIMATED, 4, 24);
+        def(24, ITEM_AMMO, 0);
+        def(25, ITEM_STATIC, 13);
+        def(26, ITEM_ANIMATED, 9);
+        def(99, ITEM_ANIMATED, 9);
+        def(100, ITEM_ANIMATED, 9);
+        def(27, ITEM_STATIC, 16);
+        def(28, ITEM_ANIMATED, 2, 29);
+        def(29, ITEM_AMMO, 0);
+        def(9, ITEM_STATIC, 0);
+        def(255, ITEM_STATIC, 13);
+        s0.hands = EpMake(1, 21, 1);
+        s0.longGun = EpMake(2, 23, 1);
+        s1.hands = EpMake(3, 23, 1);
+        pr[0]->stats[STAT_FIRST_AID] = 50.0f;
+        pr[1]->stats[STAT_FIRST_AID] = 50.0f;
+        const auto counts = [] {
+            g_slCounts = {{0, 1}, {20, 1}, {22, 20}, {24, 3}, {25, 5}, {26, 5}, {99, 5}, {100, 5}, {27, 1}, {29, 10}, {9, 1}, {255, 5}};
+        };
+        counts();
+        m.m_panel.SelectSoldier(1);
+        okp &= check("replenish0", run([&] { m.Replenish(0, 0, -1); }));
+        counts();
+        okp &= check("replenish1", run([&] { m.Replenish(0, 1, 28); }));
+        counts();
+        okp &= check("replenish2", run([&] { m.Replenish(0, 2, 28); }));
+        // (Owned: what is short of the limits; a backpack and a head gear none.)
+        s0.backpack = EpMake(4, 20, 1);
+        s0.head = EpMake(5, 27, 1);
+        s0.belt = {EpMake(6, 22, 13), EpMake(7, 26, 4), EpMake(8, 9, 1), EpMake(9, 25, 1), EpMake(10, 29, 1)};
+        counts();
+        okp &= check("replenishOwned", run([&] { m.Replenish(0, 1, 28); }));
+        clear(s0);
+        s0.hands = EpMake(1, 21, 1);
+        // (Short stocks: what there is; none of a kit, nothing taken.)
+        g_slCounts = {{20, 1}, {22, 1}, {24, 1}, {25, 1}, {26, 0}, {99, 1}};
+        okp &= check("replenishShort", run([&] { m.Replenish(0, 1, -1); }));
+        // (Another soldier: his own places.)
+        counts();
+        okp &= check("replenishOther", run([&] { m.Replenish(1, 0, -1); }));
+        // (An axis uniform: the axis' items only; type 0 the uniform.)
+        def(0, ITEM_STATIC, 15)->m_team = 1;
+        g_gfItemDefs[26]->m_team = 1;
+        g_gfItemDefs[23]->m_team = 1;
+        g_gfItemDefs[27]->m_team = 1;
+        s0.uniform = EpMake(11, 0, 1);
+        counts();
+        okp &= check("replenishAxis", run([&] { m.Replenish(0, 0, -1); }));
+        g_gfItemDefs[26]->m_team = 0;
+        g_gfItemDefs[23]->m_team = 0;
+        g_gfItemDefs[27]->m_team = 0;
+        // (Uniform 0x79: no head gear; a weapon whose ammunition is type 0.)
+        def(0x79, ITEM_STATIC, 15);
+        s0.uniform = EpMake(11, 0x79, 1);
+        def(0, ITEM_AMMO, 0);
+        def(21, ITEM_ANIMATED, 3, 0);
+        counts();
+        okp &= check("replenishBare", run([&] { m.Replenish(0, 0, -1); }));
+        def(21, ITEM_ANIMATED, 3, 22);
+        // (A medkit of type 0 counted too.)
+        def(0, ITEM_STATIC, 13);
+        s0.uniform = EpMake(-1, -1, 0);
+        g_slCounts = {{0, 1}};
+        g_gfLog.clear();
+        m.Replenish(0, 1, -1);
+        okp &= MrHas("stock take 0 1");
+        def(0, ITEM_STATIC, 17);
+        clear(s0);
+        clear(s1);
+        WM(r.esReplenish, okp);
+
+        // The required items given out (their list, the rotation, the uniforms).
+        bool okd = true;
+        squad.states = {&s0, &s1};
+        S_MissionItems *rec = m.m_missionItems.m_records[0];
+        g_esMission = 0;
+        def(31, ITEM_STATIC, 15);
+        def(32, ITEM_STATIC, 18);
+        def(33, ITEM_STATIC, 18);
+        def(34, ITEM_STATIC, 0);
+        def(35, ITEM_STATIC, 15);
+        def(36, ITEM_STATIC, 15);
+        def(37, ITEM_STATIC, 16);
+        def(38, ITEM_STATIC, 20);
+        rec->required = {{32, 1}, {33, 1}, {31, 1}, {34, 1}, {37, 1}, {32, 1}, {38, 1}, {33, 1}};
+        rec->slots[0] = {-1, -1, 35};
+        rec->slots[1] = {0, -1, -1};
+        S_LoadoutPreset wear;
+        wear.uniform = 36;
+        m.m_presets.m_presets = {&wear};
+        g_slCounts = {{31, 1}, {32, 2}, {33, 2}, {34, 1}, {35, 1}, {36, 1}, {37, 1}, {38, 1}};
+        m.m_soldier = 1;
+        std::string q;
+        okd &= check("distribute", run([&] { m.DistributeRequired(); }));
+        q = GmQueue();
+        // (The essentials' text's messages exactly.)
+        std::string essentials;
+        for (size_t at = q.find("4900000 "); at != std::string::npos; at = q.find("4900000 ", at + 1))
+            essentials += q.substr(at, q.find("; ", at) + 2 - at);
+        okd &= essentials ==
+               "4900000 2000018 0 0 ; 4900000 1000017 2 aa9 ; 4900000 1000016 f 0 1x ; 4900000 1000017 f 520 ; "
+               "4900000 1000016 f 0 , ; 4900000 1000016 f 0 1x ; 4900000 1000017 f 521 ; 4900000 1000016 f 0 , ; "
+               "4900000 1000016 f 0 1x ; 4900000 1000017 f 51f ; 4900000 1000016 f 0 , ; 4900000 1000016 f 0 1x ; "
+               "4900000 1000017 f 522 ; 4900000 1000016 f 0 , ; 4900000 1000016 f 0 1x ; 4900000 1000017 f 525 ; "
+               "4900000 1000016 f 0 , ; 4900000 1000016 f 0 1x ; 4900000 1000017 f 520 ; 4900000 1000016 f 0 , ; "
+               "4900000 1000016 f 0 1x ; 4900000 1000017 f 526 ; 4900000 1000016 f 0 , ; 4900000 1000016 f 0 1x ; "
+               "4900000 1000017 f 521 ; 4900000 1000016 f 0 . ; ";
+        okd &= check("distributeRefresh", refreshes(q)) && m.m_panel.m_squadSoldier == &s1 &&
+               q.find(" 1000039 ") != std::string::npos && q.rfind(" 100007c ") != std::string::npos &&
+               q.rfind(" 100007c ") > q.rfind(" 1000039 ");
+        // (Counts: missing two of one, three tries failing in a row end it; uniforms capped.)
+        rec->required = {{32, 2}, {31, 5}};
+        g_slCounts = {{32, 1}, {31, 5}};
+        okd &= check("distributeShort", run([&] { m.DistributeRequired(); }));
+        okd &= rec->required[1].second == 2;
+        // (Carried already: none given; the soldiers' own uniforms kept.)
+        s0.uniform = EpMake(1, 31, 1);
+        s1.uniform = EpMake(2, 31, 1);
+        s0.belt = {EpMake(3, 32, 2)};
+        g_slCounts = {{31, 5}, {32, 5}, {35, 1}, {36, 1}};
+        okd &= check("distributeCarried", run([&] { m.DistributeRequired(); }));
+        clear(s0);
+        clear(s1);
+        // (The slot's preset past the presets: none.)
+        rec->required.clear();
+        rec->slots[1] = {1, -1, -1};
+        g_slCounts = {{35, 1}, {36, 1}};
+        okd &= check("distributePast", run([&] { m.DistributeRequired(); }));
+        // (The rotation round the squad: a third plain item to the first again.)
+        rec->slots[1] = S_MissionItems::S_Slot();
+        rec->required = {{32, 1}, {33, 1}, {32, 1}};
+        g_slCounts = {{32, 2}, {33, 1}};
+        okd &= check("distributeWrap", run([&] { m.DistributeRequired(); }));
+        // (The tries failing counted from the last success: two more after one.)
+        rec->required = {{32, 3}, {33, 1}, {39, 2}};
+        def(39, ITEM_STATIC, 18);
+        g_slCounts = {{32, 2}, {33, 1}, {39, 1}};
+        okd &= check("distributeFailed", run([&] { m.DistributeRequired(); }));
+        rec->required.clear();
+        // (No record: nothing.)
+        g_esMission = 9;
+        okd &= check("distributeNone", run([&] { m.DistributeRequired(); })) && g_controlMessages.empty();
+        g_esMission = 0;
+        rec->slots[0] = rec->slots[1] = S_MissionItems::S_Slot();
+        WM(r.esDistribute, okd);
+
+        // The equipping.
+        bool oke = true;
+        // (The kits: the best shot the rifle's (slot 0), the other the pistol's (slot 1).)
+        def(40, ITEM_STATIC, 16);
+        def(41, ITEM_STATIC, 0);
+        S_LoadoutPreset riflePreset, pistolPreset;
+        riflePreset.hands = 21;
+        riflePreset.backpack = 20;
+        riflePreset.longGun = 23;
+        riflePreset.beltCount = 1;
+        riflePreset.belt[0] = {22, 2};
+        riflePreset.backpackCount = 2;
+        riflePreset.backpackItems[0] = {24, 1};
+        riflePreset.backpackItems[1] = {41, 3};
+        pistolPreset.head = 40;
+        pistolPreset.hands = 28;
+        m.m_presets.m_presets = {&riflePreset, &pistolPreset};
+        rec->slots[0] = {0, 27, -1};
+        rec->slots[1] = {1, -1, -1};
+        pr[0]->stats[STAT_SHOOTING] = 20.0f;
+        pr[1]->stats[STAT_SHOOTING] = 80.0f;
+        pr[0]->stats[STAT_STRENGTH] = pr[1]->stats[STAT_STRENGTH] = 40.0f;
+        const auto equipCounts = [] {
+            g_slCounts = {{20, 3}, {21, 3}, {22, 40}, {23, 3}, {24, 9}, {25, 9}, {26, 9}, {27, 9}, {28, 3}, {29, 20}, {40, 3},
+                          {41, 9}};
+        };
+        clear(s0);
+        clear(s1);
+        s1.belt = {EpMake(5, 34, 1)};
+        s0.autoEquip = true;
+        s1.autoEquip = false;
+        m.m_soldier = 0;
+        g_esMission = 9;
+        oke &= !m.AutoEquip(nullptr, nullptr, 0, 0) && s0.autoEquip;
+        g_esMission = 0;
+        equipCounts();
+        oke &= check("equipNew", run([&] { oke &= m.AutoEquip(nullptr, nullptr, 0, 0); })) && !s0.autoEquip;
+        q = GmQueue();
+        oke &= check("equipNewRefresh", refreshes(q)) && m.m_panel.m_squadSoldier == &s0;
+        // (Armed: nothing put, no more to equip all the same.)
+        s0.autoEquip = true;
+        s0.longGun = EpMake(9, 23, 1);
+        equipCounts();
+        oke &= check("equipArmed", run([&] { oke &= m.AutoEquip(nullptr, nullptr, 0, 0); })) && !s0.autoEquip;
+        clear(s0);
+        // The button's: both soldiers matched (the axis' for an axis uniform), then stocked up.
+        C_GmIndexed button(0x04108000, 0);
+        s1.belt = {EpMake(5, 34, 1), EpMake(6, 21, 1), EpMake(7, 28, 1)};
+        equipCounts();
+        g_slCounts.erase(21);
+        def(42, ITEM_ANIMATED, 3, 22);
+        g_slCounts[42] = 3;
+        oke &= check("equipAll", run([&] { oke &= C_EquipmentMenu::CallAutoEquip(&m, nullptr, &button, CONTROL_NOTIFY_CLICK, 0); })) &&
+               m.m_panel.m_squadSoldier == &s0;
+        def(43, ITEM_ANIMATED, 3, 22)->m_team = 1;
+        def(44, ITEM_STATIC, 15)->m_team = 1;
+        s0.uniform = EpMake(8, 44, 1);
+        equipCounts();
+        g_slCounts.erase(21);
+        g_slCounts[42] = 3;
+        g_slCounts[43] = 3;
+        oke &= check("equipAxis", run([&] { oke &= m.AutoEquip(&m, nullptr, 0, 0); }));
+        clear(s0);
+        clear(s1);
+        WM(r.esAutoEquip, oke);
+
+        m.m_presets.m_presets.clear();
+        rec->slots[0] = rec->slots[1] = S_MissionItems::S_Slot();
+        rec->required.clear();
+        squad.states.clear();
+        m.m_panel.m_squadSoldier = nullptr;
+        m.m_storeList.m_stock = nullptr;
+        g_slCounts.clear();
+        g_epProfiles.clear();
+        g_gfItemDefs = oldDefs;
+        for (const auto &d : defs)
+            g_epAllowed.erase(d.get());
+    }
+
     g_gfItemDefs = oldDefs;
     g_gameProfile.m_playMode = oldPlayMode;
     g_gameProfile.m_itemStock18 = old18;
@@ -2102,8 +2643,8 @@ void EquipmentScreenTest(I3D_scene *scene)
     g_controlMessages.clear();
     std::printf("equipmentscreen: esNew %d esStart %d esStop %d esStore %d esTake %d esClicked %d esDragStart %d "
                 "esDragMove %d esDrop %d esHover %d esStats %d esToggle %d esPicked %d esMessage %d esChecks %d "
-                "esCarried %d esRequired %d esItemsScreen %d esSelection %d esStatsPanel %d esStore2 %d esSquadList %d esSquad %d esEquipmentPanel %d esBuild %d esPut %d esReturn %d esTypePicked %d esSubstitute %d esMatch %d\n",
+                "esCarried %d esRequired %d esItemsScreen %d esSelection %d esStatsPanel %d esStore2 %d esSquadList %d esSquad %d esEquipmentPanel %d esBuild %d esPut %d esReturn %d esTypePicked %d esSubstitute %d esMatch %d esCountOwn %d esAssign %d esReplenish %d esDistribute %d esAutoEquip %d\n",
                 r.esNew, r.esStart, r.esStop, r.esStore, r.esTake, r.esClicked, r.esDragStart, r.esDragMove, r.esDrop,
                 r.esHover, r.esStats, r.esToggle, r.esPicked, r.esMessage, r.esChecks,
-                r.esCarried, r.esRequired, r.esItemsScreen, r.esSelection, r.esStatsPanel, r.esStore2, r.esSquadList, r.esSquad, r.esEquipmentPanel, r.esBuild, r.esPut, r.esReturn, r.esTypePicked, r.esSubstitute, r.esMatch);
+                r.esCarried, r.esRequired, r.esItemsScreen, r.esSelection, r.esStatsPanel, r.esStore2, r.esSquadList, r.esSquad, r.esEquipmentPanel, r.esBuild, r.esPut, r.esReturn, r.esTypePicked, r.esSubstitute, r.esMatch, r.esCountOwn, r.esAssign, r.esReplenish, r.esDistribute, r.esAutoEquip);
 }
