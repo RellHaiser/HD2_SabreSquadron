@@ -70,8 +70,8 @@ The tests in [tests/](tests) are differential: each loads an **original** DLL fr
 the game (it is not part of this repository) and compares it with the port on random operations
 with a seed. They run the original on fake Direct3D objects, so they need no graphics hardware.
 
-- `compare_buffers`, `compare_mesh` and `compare_material` compare with the original
-  `LS3DRF.dll` (from the dedicated server).
+- `compare_billboard`, `compare_buffers`, `compare_mesh` and `compare_material` compare with
+  the original `LS3DRF.dll` (from the dedicated server).
 - `compare_frame`, `compare_collision`, `compare_math` and `compare_dxerr8` compare with the
   client's original `LS3DF.dll`, where LS3DRF's code is LS3DF's. Where LS3DRF differs,
   `compare_frame` and `compare_collision` patch LS3DF.dll in memory to behave as LS3DRF.dll does.
