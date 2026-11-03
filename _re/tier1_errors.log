@@ -246,23 +246,23 @@ f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array
     DAT_008acbe8[2] = 0;
 f_006683f0.cpp:150:18: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     (**(code **)(*uStack_6c + 8))();
-f_00673040.cpp:639:31: request for member '_0_4_' in '"equippanel"', which is of non-class type 'const char [11]'
+f_00673040.cpp:131:31: request for member '_0_4_' in '"equippanel"', which is of non-class type 'const char [11]'
     (**(code **)("equippanel"._0_4_ + 8))();
-f_00673040.cpp:1289:34: too few arguments to function
+f_00673040.cpp:781:34: too few arguments to function
     (*pIStack_12c->vtable->SetOn)();
-f_00673040.cpp:1322:33: too few arguments to function
+f_00673040.cpp:814:33: too few arguments to function
     (*pIStack_134->vtable->SetPos)((I3D_frame*)((IImage *)pIStack_134));
-f_00673040.cpp:1331:27: too few arguments to function
+f_00673040.cpp:823:27: too few arguments to function
     (*parent->vtable->SetOn)();
-f_00673040.cpp:1548:53: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00673040.cpp:1040:53: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_b0 = (C_str)(*(int *)pCStack_b0 - 1), *(int *)pCStack_b0 == 0)) {
-f_00673040.cpp:1653:29: request for member '_0_4_' in '"item09"', which is of non-class type 'const char [7]'
+f_00673040.cpp:1145:29: request for member '_0_4_' in '"item09"', which is of non-class type 'const char [7]'
     (**(code **)("item09"._0_4_ + 0x38))("item09",param_2,1);
-f_006778e0.cpp:1503:5: '_param_2' was not declared in this scope; did you mean 'param_2'?
+f_006778e0.cpp:1266:5: '_param_2' was not declared in this scope; did you mean 'param_2'?
     _param_2 = 0;
-f_006778e0.cpp:1506:5: '_param_2' was not declared in this scope; did you mean 'param_2'?
+f_006778e0.cpp:1269:5: '_param_2' was not declared in this scope; did you mean 'param_2'?
     _param_2 = ((int)(this_00->belt).last - (int)pSVar2) / 6;
-f_006778e0.cpp:1508:11: '_param_2' was not declared in this scope; did you mean 'param_2'?
+f_006778e0.cpp:1271:11: '_param_2' was not declared in this scope; did you mean 'param_2'?
     if (0 < _param_2) {
 f_006882f0.cpp:645:49: no matching function for call to '_LARGE_INTEGER::_LARGE_INTEGER(uint64_t)'
     LStack_c.u.HighPart);

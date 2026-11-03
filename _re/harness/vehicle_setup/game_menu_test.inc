@@ -88,7 +88,12 @@ bool C_InfoScreen::Init(I3D_scene *scene)
 void C_InfoScreen::Done() { GfLog("info done"); }
 bool C_InfoScreen::IsShown() const { return g_gmInfoShown; }
 void C_InfoScreen::Render() { GfLog("info render"); }
-void C_ItemStock::Reset() { GfLog("stock reset"); }
+const C_ItemStock *g_gmResetStock;                      // (part 9f-ii: the stock reset last)
+void C_ItemStock::Reset()
+{
+    GfLog("stock reset");
+    g_gmResetStock = this;
+}
 void C_PlayerProfile::ApplyVolume() { GfLog("volume"); }
 float C_SoundModule::SetMasterVolume(float volume)
 {

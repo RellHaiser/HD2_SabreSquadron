@@ -96,6 +96,8 @@ C_str C_GameTexts::Get(int id) const
 {
     if (id == 99999)                                    // (part 9b: a version's format)
         return C_str("Version %d.%02d");
+    if (g_textIds && id == 0x804)                       // (part 9f-ii: a missing item's format)
+        return C_str("text 2052 '%s'");
     if (g_textIds) {
         char text[32];
         std::snprintf(text, sizeof text, "text %d", id);

@@ -360,7 +360,7 @@ uint32_t C_EquipmentMenu__FUN_00678000(C_EquipmentMenu *_this,int *param_1,uint3
   local_4 = 0xffffffff;
   iVar7 = C_Campaign__GetMissionNumber
                     (g_gameProfile.m_campaign,(g_gameProfile.m_campaign)->m_current);
-  iVar7 = FUN_0067e620(_this->_pad_029c + 0x10,iVar7);
+  iVar7 = C_MissionItems__GetMissionRecord(_this->_pad_029c + 0x10,iVar7);
   if ((((param_1 != 0) || (param_2 != 0)) || (param_3 != 0)) ||
      (bVar6 = true, param_1 = (int *)param_4, param_4 != 0)) {
     bVar6 = false;
@@ -632,7 +632,7 @@ uint32_t C_EquipmentMenu__FUN_006785b0(C_EquipmentMenu *_this, ...)
   local_4 = 0xffffffff;
   iVar3 = C_Campaign__GetMissionNumber
                     (g_gameProfile.m_campaign,(g_gameProfile.m_campaign)->m_current);
-  iVar3 = FUN_0067e620(_this->_pad_029c + 0x10,iVar3);
+  iVar3 = C_MissionItems__GetMissionRecord(_this->_pad_029c + 0x10,iVar3);
   local_8c = 0;
   local_84 = 0;
   if (iVar3 == 0) {
@@ -871,7 +871,7 @@ LAB_006786ee:
         tier1_operator_delete(CVar6.rep);
       }
       iVar4 = *(int *)(iVar3 + 0x80);
-      iVar7 = FUN_00679360((int *)(iVar4 + uVar12 * 8),0xffffffff);
+      iVar7 = C_EquipmentMenu__CountCarried((int *)(iVar4 + uVar12 * 8),0xffffffff);
       iVar7 = *(int *)(iVar4 + 4 + uVar12 * 8) - iVar7;
     } while (iVar7 < 1);
     iVar4 = *(int *)(*(int *)(iVar3 + 0x80) + uVar12 * 8);
@@ -958,116 +958,6 @@ LAB_00678ada:
     } while (local_84 < iVar4);
   } while( true );
   return 0;
-}
-
-
-// 0x00678dc0
-uint32_t C_EquipmentMenu__FUN_00678dc0(C_EquipmentMenu *_this, ...)
-{
-  S_SquadSoldier **ppSVar1;
-  int iVar2;
-  uint32_t uVar3;
-  uint32_t uVar4;
-  C_str *pCVar5;
-  char *format;
-  C_str_rep *extraout_EAX;
-  int *piVar6;
-  uint32_t uVar7;
-  char *pcVar8;
-  bool bVar9;
-  C_str CStack_18;
-  C_str CStack_14;
-  C_str CStack_10;
-  uint32_t uStack_4;
-  uStack_4 = 0xffffffff;
-  bVar9 = true;
-  iVar2 = C_Campaign__GetMissionNumber
-                    (g_gameProfile.m_campaign,(g_gameProfile.m_campaign)->m_current);
-  uVar3 = FUN_0067e620(_this->_pad_029c + 0x10,iVar2);
-  DAT_00840d5c = 0xffffffff;
-  uVar7 = 0;
-  uVar4 = uVar3;
-  do {
-    iVar2 = *(int *)(uVar3 + 0x80);
-    if ((iVar2 == 0) || (uVar4 = *(int *)(uVar3 + 0x84) - iVar2 >> 3, uVar4 <= uVar7)) {
-      if (bVar9) {
-        return CONCAT31((int3)(uVar4 >> 8),1);
-      }
-LAB_00678ef5:
-      iVar2 = 0;
-LAB_00678ef7:
-      pCVar5 = C_TextDatabase__GetText(&DAT_008c1368,&CStack_10,*(int *)(iVar2 + 0x14));
-      uStack_4 = 0;
-      pcVar8 = pCVar5->rep->chars;
-      if (pCVar5->rep == 0) {
-        pcVar8 = &DAT_00867a90;
-      }
-      pCVar5 = C_TextDatabase__GetText(&DAT_008c1368,&CStack_14,0x804);
-      uStack_4 = CONCAT31(GH_PIECE(uStack_4,1,3),1);
-      if (pCVar5->rep == 0) {
-        format = &DAT_00867a90;
-      }
-      else {
-        format = pCVar5->rep->chars;
-      }
-      C_fstr_Construct(&CStack_18,format,pcVar8);
-      if ((CStack_14.rep != 0) &&
-         ((CStack_14.rep)->refCount = (CStack_14.rep)->refCount - 1, (CStack_14.rep)->refCount == 0
-         )) {
-        tier1_operator_delete(CStack_14.rep);
-      }
-      uStack_4 = CONCAT31(GH_PIECE(uStack_4,1,3),3);
-      if ((CStack_10.rep != 0) &&
-         ((CStack_10.rep)->refCount = (CStack_10.rep)->refCount - 1, (CStack_10.rep)->refCount == 0
-         )) {
-        tier1_operator_delete(CStack_10.rep);
-      }
-      C_MenuState__ShowMessage((C_MenuState *)_this,2,&CStack_18,0,0);
-      if ((CStack_18.rep != 0) &&
-         ((CStack_18.rep)->refCount = (CStack_18.rep)->refCount - 1, (CStack_18.rep)->refCount == 0
-         )) {
-        tier1_operator_delete(CStack_18.rep);
-        CStack_18.rep = extraout_EAX;
-      }
-      return (uint32_t)CStack_18.rep & 0xffffff00;
-    }
-    iVar2 = *(int *)(iVar2 + uVar7 * 8);
-    if ((iVar2 < 0) || (499 < iVar2)) {
-      piVar6 = 0;
-    }
-    else {
-      piVar6 = (int *)(&DAT_0098b030)[iVar2];
-    }
-    iVar2 = (**(code **)(*piVar6 + 0x10))();
-    if ((iVar2 == 0xf) || (*(int *)(*(int *)(uVar3 + 0x80) + uVar7 * 8) == 0xe7)) {
-      ppSVar1 = ((g_gameProfile.m_missionSquad)->states).first;
-      if (ppSVar1 == (S_SquadSoldier **)0x0) {
-        iVar2 = 0;
-      }
-      else {
-        iVar2 = (int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar1 >> 2;
-      }
-      if (iVar2 < *(int *)(*(int *)(uVar3 + 0x80) + 4 + uVar7 * 8)) {
-        ppSVar1 = ((g_gameProfile.m_missionSquad)->states).first;
-        if (ppSVar1 == (S_SquadSoldier **)0x0) {
-          iVar2 = 0;
-        }
-        else {
-          iVar2 = (int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar1 >> 2;
-        }
-        *(int *)(*(int *)(uVar3 + 0x80) + 4 + uVar7 * 8) = iVar2;
-      }
-    }
-    uVar4 = FUN_00679360((int *)(*(int *)(uVar3 + 0x80) + uVar7 * 8),0xffffffff);
-    bVar9 = uVar4 != 0;
-    if (!bVar9) {
-      iVar2 = *(int *)(*(int *)(uVar3 + 0x80) + uVar7 * 8);
-      if ((iVar2 < 0) || (499 < iVar2)) goto LAB_00678ef5;
-      iVar2 = (&DAT_0098b030)[iVar2];
-      goto LAB_00678ef7;
-    }
-    uVar7++;
-  } while( true );
 }
 
 
@@ -1226,133 +1116,6 @@ LAB_00679348:
 }
 
 
-// 0x00679360
-int FUN_00679360(int *param_1,uint32_t param_2, ...)
-{
-  S_SquadSoldier **ppSVar1;
-  S_SoldierItem *pSVar2;
-  uint32_t uVar3;
-  uint32_t uVar4;
-  int iVar5;
-  int iVar6;
-  S_SquadSoldier *pSVar7;
-  uint32_t uVar8;
-  bool bVar9;
-  int local_c;
-  int local_8;
-  int local_4;
-  iVar6 = *param_1;
-  uVar8 = 0;
-  iVar5 = 0;
-  local_8 = 0;
-  local_c = 0;
-  if ((iVar6 < 0) || (499 < iVar6)) {
-    iVar6 = 0;
-  }
-  else {
-    iVar6 = (&DAT_0098b030)[iVar6];
-  }
-  bVar9 = *(int *)(iVar6 + 0x44) != 1;
-  ppSVar1 = ((g_gameProfile.m_missionSquad)->states).first;
-  if (ppSVar1 == (S_SquadSoldier **)0x0) {
-    local_4 = 0;
-  }
-  else {
-    local_4 = (int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar1 >> 2;
-  }
-  iVar6 = 0;
-  if (0 < local_4) {
-    do {
-      if ((((int)uVar8 < 0) ||
-          (ppSVar1 = ((g_gameProfile.m_missionSquad)->states).first,
-          ppSVar1 == (S_SquadSoldier **)0x0)) ||
-         ((uint32_t)((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar1 >> 2) <= uVar8))
-      {
-        pSVar7 = 0;
-      }
-      else {
-        pSVar7 = ppSVar1[uVar8];
-      }
-      if (pSVar7->deployed != false) {
-        if (((int)(pSVar7->head).typeId == *param_1) &&
-           ((((uVar4 = DAT_00840d5c, bVar9 || (uVar4 = uVar8, DAT_00840d5c == 0xffffffff)) ||
-             (DAT_00840d5c == uVar8)) &&
-            (DAT_00840d5c = uVar4, iVar5 = iVar5 + 1, local_8 = iVar5, uVar8 == param_2)))) {
-          local_c = local_c + (pSVar7->head).present;
-        }
-        if ((((int)(pSVar7->uniform).typeId == *param_1) &&
-            (((uVar4 = DAT_00840d5c, bVar9 || (uVar4 = uVar8, DAT_00840d5c == 0xffffffff)) ||
-             (DAT_00840d5c == uVar8)))) &&
-           (DAT_00840d5c = uVar4, iVar5 = iVar5 + 1, local_8 = iVar5, uVar8 == param_2)) {
-          local_c = local_c + (pSVar7->uniform).present;
-        }
-        if (((int)(pSVar7->backpack).typeId == *param_1) &&
-           ((((uVar4 = DAT_00840d5c, bVar9 || (uVar4 = uVar8, DAT_00840d5c == 0xffffffff)) ||
-             (DAT_00840d5c == uVar8)) &&
-            (DAT_00840d5c = uVar4, iVar5 = iVar5 + 1, local_8 = iVar5, uVar8 == param_2)))) {
-          local_c = local_c + (pSVar7->backpack).present;
-        }
-        if ((((int)(pSVar7->longGun).typeId == *param_1) &&
-            (((uVar4 = DAT_00840d5c, bVar9 || (uVar4 = uVar8, DAT_00840d5c == 0xffffffff)) ||
-             (DAT_00840d5c == uVar8)))) &&
-           (DAT_00840d5c = uVar4, iVar5 = iVar5 + 1, local_8 = iVar5, uVar8 == param_2)) {
-          local_c = local_c + (pSVar7->longGun).present;
-        }
-        if ((((int)(pSVar7->hands).typeId == *param_1) &&
-            (((uVar4 = DAT_00840d5c, bVar9 || (uVar4 = uVar8, DAT_00840d5c == 0xffffffff)) ||
-             (DAT_00840d5c == uVar8)))) &&
-           (DAT_00840d5c = uVar4, local_8 = iVar5 + 1, uVar8 == param_2)) {
-          local_c = local_c + (pSVar7->hands).present;
-        }
-        iVar6 = 0;
-        for (uVar4 = 0;
-            (pSVar2 = (pSVar7->belt).first, pSVar2 != 0 &&
-            (uVar4 < (uint32_t)(((int)(pSVar7->belt).last - (int)pSVar2) / 6))); uVar4 = uVar4 + 1) {
-          if (((int)*(short *)((int)&((pSVar7->belt).first)->typeId + iVar6) == *param_1) &&
-             (((uVar3 = DAT_00840d5c, bVar9 || (uVar3 = uVar8, DAT_00840d5c == 0xffffffff)) ||
-              (DAT_00840d5c == uVar8)))) {
-            DAT_00840d5c = uVar3;
-            iVar5 = (int)*(short *)((int)&((pSVar7->belt).first)->present + iVar6);
-            local_8 += iVar5;
-            if (uVar8 == param_2) {
-              local_c += iVar5;
-            }
-          }
-          iVar6 += 6;
-        }
-        iVar6 = 0;
-        for (uVar4 = 0;
-            (pSVar2 = (pSVar7->backpackContents).first, iVar5 = local_8,
-            pSVar2 != 0 &&
-            (uVar4 < (uint32_t)(((int)(pSVar7->backpackContents).last - (int)pSVar2) / 6)));
-            uVar4 = uVar4 + 1) {
-          if (((int)*(short *)((int)&((pSVar7->backpackContents).first)->typeId + iVar6) == *param_1
-              ) && (((uVar3 = DAT_00840d5c, bVar9 || (uVar3 = uVar8, DAT_00840d5c == 0xffffffff)) ||
-                    (DAT_00840d5c == uVar8)))) {
-            DAT_00840d5c = uVar3;
-            iVar5 = (int)*(short *)((int)&((pSVar7->backpackContents).first)->present + iVar6);
-            local_8 += iVar5;
-            if (uVar8 == param_2) {
-              local_c += iVar5;
-            }
-          }
-          iVar6 += 6;
-        }
-      }
-      uVar8++;
-      iVar6 = local_c;
-    } while ((int)uVar8 < local_4);
-  }
-  if (param_1[1] <= iVar5) {
-    if ((-1 < (int)param_2) && (iVar5 = iVar5 - param_1[1], iVar6 < iVar5)) {
-      return iVar6;
-    }
-    return iVar5;
-  }
-  return 0;
-}
-
-
 // 0x00679670
 uint32_t FUN_00679670(int param_1,uint32_t param_2, ...)
 {
@@ -1433,7 +1196,7 @@ uint32_t C_EquipmentMenu__FUN_00679790(C_EquipmentMenu *_this,uint32_t param_1,c
   int local_4;
   iVar3 = C_Campaign__GetMissionNumber
                     (g_gameProfile.m_campaign,(g_gameProfile.m_campaign)->m_current);
-  this_01 = (void *)FUN_0067e620(_this->_pad_029c + 0x10,iVar3);
+  this_01 = (void *)C_MissionItems__GetMissionRecord(_this->_pad_029c + 0x10,iVar3);
   C_EquipmentPanel__SelectSoldier(&_this->m_1d0,param_1);
   this_00 = (S_SquadSoldier *)_this->m_238;
   local_10.present = 0;
@@ -1449,7 +1212,7 @@ uint32_t C_EquipmentMenu__FUN_00679790(C_EquipmentMenu *_this,uint32_t param_1,c
     if (iVar4 != 0) {
       local_8 = (int)(this_00->head).typeId;
       local_4 = iVar4;
-      iVar3 = FUN_00679360(&local_8,_this->m_580);
+      iVar3 = C_EquipmentMenu__CountCarried(&local_8,_this->m_580);
       if (iVar3 == 0) goto LAB_0067986b;
     }
     local_10.uid = (this_00->head).uid;
@@ -1469,7 +1232,7 @@ LAB_0067986b:
     if (iVar4 != 0) {
       local_8 = (int)(this_00->longGun).typeId;
       local_4 = iVar4;
-      iVar3 = FUN_00679360(&local_8,_this->m_580);
+      iVar3 = C_EquipmentMenu__CountCarried(&local_8,_this->m_580);
       if (iVar3 < 1) goto LAB_006798df;
     }
     local_10.uid = (this_00->longGun).uid;
@@ -1489,7 +1252,7 @@ LAB_006798df:
     if (iVar4 != 0) {
       local_8 = (int)(this_00->hands).typeId;
       local_4 = iVar4;
-      iVar3 = FUN_00679360(&local_8,_this->m_580);
+      iVar3 = C_EquipmentMenu__CountCarried(&local_8,_this->m_580);
       if (iVar3 < 1) goto LAB_00679953;
     }
     local_10.uid = (this_00->hands).uid;
@@ -1528,7 +1291,7 @@ LAB_006799bf:
       else {
         local_8 = (int)*(short *)((int)&((this_00->belt).first)->typeId + iVar3);
         local_4 = iVar5;
-        iVar4 = FUN_00679360(&local_8,_this->m_580);
+        iVar4 = C_EquipmentMenu__CountCarried(&local_8,_this->m_580);
         if (0 < iVar4) goto LAB_006799bf;
         iVar3 += 6;
       }
@@ -1562,7 +1325,7 @@ LAB_00679a81:
       else {
         local_8 = (int)*(short *)((int)&((this_00->backpackContents).first)->typeId + iVar4);
         local_4 = iVar6;
-        iVar5 = FUN_00679360(&local_8,_this->m_580);
+        iVar5 = C_EquipmentMenu__CountCarried(&local_8,_this->m_580);
         if (0 < iVar5) goto LAB_00679a81;
         iVar4 += 6;
       }
@@ -1576,7 +1339,7 @@ LAB_00679a81:
     if (iVar4 != 0) {
       local_8 = (int)(this_00->backpack).typeId;
       local_4 = iVar4;
-      iVar3 = FUN_00679360(&local_8,_this->m_580);
+      iVar3 = C_EquipmentMenu__CountCarried(&local_8,_this->m_580);
       if (iVar3 < 1) {
         return 0;
       }

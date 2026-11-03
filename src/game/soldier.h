@@ -114,6 +114,8 @@ struct S_SoldierState {                                 // 0x8C bytes
     bool spectating = false;                            // +0x08 player controllers
     bool vip = false;                                   // +0x09 objectives games: the VIP (the player
                                                         //       controller's +0x550)
+    bool autoEquip = false;                             // +0x0A the campaign squad's: equipped by the
+                                                        //       equipment screen (added on a kind 1 screen)
     int health = 0;                                     // +0x0C
     S_SoldierProgress progress;                         // +0x10
     int unknown34 = 0;                                  // +0x34 (the squad's new soldiers: -1)

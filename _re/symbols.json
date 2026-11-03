@@ -31726,6 +31726,25 @@
   "name": "S_MissionSquad::AddSoldier",
   "proto": "S_SquadSoldier * __thiscall AddSoldier(S_MissionSquad *this)"
  },
+ "00673e40": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::ProtectionStripItems"
+ },
+ "00674060": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::IsSquadWithinWeight",
+  "proto": "bool __stdcall IsSquadWithinWeight(void)"
+ },
+ "006740d0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_EquipmentMenu *this, void * message)"
+ },
+ "006746f0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::IsSquadArmed",
+  "proto": "bool __stdcall IsSquadArmed(void)"
+ },
  "00674d60": {
   "module": "equipment_screen",
   "name": "C_EquipmentMenu::ShowSoldierStats",
@@ -31787,6 +31806,16 @@
  "00677890": {
   "module": "equipment_screen",
   "name": "C_EquipmentMenu::CallSelectionPicked"
+ },
+ "00678dc0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::HasRequiredItems",
+  "proto": "bool __thiscall HasRequiredItems(C_EquipmentMenu *this)"
+ },
+ "00679360": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::CountCarried",
+  "proto": "int __cdecl CountCarried(void * item, int soldier)"
  },
  "0067a3c0": {
   "module": "loadout_presets",
@@ -31960,6 +31989,11 @@
   "module": "loadout_presets",
   "name": "C_MissionItems::Setup",
   "proto": "void __fastcall Setup(void * items)"
+ },
+ "0067e620": {
+  "module": "equipment_screen",
+  "name": "C_MissionItems::GetMissionRecord",
+  "proto": "void * __thiscall GetMissionRecord(void * this, int mission)"
  },
  "0067e650": {
   "module": "loadout_presets",
@@ -42217,6 +42251,12 @@
   "name": "g_cursorY",
   "type": "float"
  },
+ "00840d5c": {
+  "data": true,
+  "module": "equipment_screen",
+  "name": "g_requiredCarrier",
+  "type": "int"
+ },
  "00842570": {
   "data": true,
   "module": "profile",
@@ -42892,6 +42932,12 @@
   "module": "menu_state",
   "name": "g_menuState",
   "type": "void *"
+ },
+ "008ae61a": {
+  "data": true,
+  "module": "equipment_screen",
+  "name": "g_equipmentStatsShown",
+  "type": "bool"
  },
  "008ae8f4": {
   "data": true,

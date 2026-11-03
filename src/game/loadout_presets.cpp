@@ -219,6 +219,13 @@ void C_MissionItems::Release()
     }
 }
 
+S_MissionItems *C_MissionItems::GetMissionRecord(int mission) const
+{
+    const int index = mission + m_campaign * CAMPAIGN_STRIDE;
+    // (Fix: a negative index none; the original read before the records.)
+    return index >= 0 && index < MAX_RECORDS ? m_records[index] : nullptr;
+}
+
 void C_MissionItems::Setup()
 {
     C_Campaign *campaign = g_gameProfile.m_campaign;
@@ -258,7 +265,7 @@ bool C_MissionItems::Load()
         dtaRead(file, &present, 4);
         if (present == 0) {
             if (record) {
-                record->pairs.clear();
+                record->required.clear();
                 for (S_MissionItems::S_Slot &slot : record->slots)
                     slot = S_MissionItems::S_Slot();
             }
@@ -280,7 +287,7 @@ bool C_MissionItems::Load()
         for (int j = 0; j < pairs; ++j) {
             std::pair<int, int> pair(-1, 0);
             dtaRead(file, &pair, 8);
-            record->pairs.push_back(pair);
+            record->required.push_back(pair);
         }
     }
     dtaClose(file);

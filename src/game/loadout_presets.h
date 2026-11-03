@@ -97,7 +97,8 @@ struct S_MissionItems {
 
     int kind = 4;                                       // +0x00
     S_Slot slots[SLOTS];                                // +0x04
-    std::vector<std::pair<int, int>> pairs;             // +0x7C
+    // The items the mission needs the deployed soldiers to carry: (type, count).
+    std::vector<std::pair<int, int>> required;          // +0x7C
 };
 
 class C_MissionItems {                                  // 0x2AC bytes
@@ -120,6 +121,8 @@ public:
 
     S_MissionItems *GetRecord(int index) const { return m_records[index]; }
     int GetFirstRecord(int campaign, int operation) const { return m_first[operation + campaign * CAMPAIGN_STRIDE]; }
+    // The current campaign's record of a mission (its number; none past the records).
+    S_MissionItems *GetMissionRecord(int mission) const;   // 0x0067e620
 
 private:
     int m_first[MAX_OPERATIONS];                        // +0x000 (-1)

@@ -2,10 +2,12 @@
 // the squad soldiers dressed from the operation's items (the items screen: the squad's list, the
 // equipment panel, the store, the stats, the soldier types; automatic equipping) and the soldiers
 // picked for the mission (the selection screen). Part 9f-i: the class, its construction, the menu
-// state's slots (starting, stopping) and the item controls' slots.
+// state's slots (starting, stopping) and the item controls' slots; 9f-ii: the messages and the
+// checks before the mission.
 #pragma once
 
 #include <cstdint>
+#include <utility>
 
 #include "game/equipment_menu.h"
 #include "game/equipment_panel.h"
@@ -19,6 +21,8 @@ struct S_ControlMessage;
 
 // The stats shown instead of the panel (OnStatsToggle's state).
 extern bool g_equipmentStatsShown;                      // 0x008ae61a
+// The deployed soldier an axis item counts with (CountCarried's; -1: none yet).
+extern int g_requiredCarrier;                           // 0x00840d5c
 
 class C_EquipmentMenu : public C_EquipmentMenuBase {
 public:
@@ -29,7 +33,13 @@ public:
 
     int GetTypeId() const override { return GAME_STATE_TYPE_EQUIPMENT_MENU; }   // 0x1C 0x006c1e20
 
-    // Part 9f-ii.
+    // Escape: on the selection screen closed, else asked whether to go back to the campaign's previous
+    // screen. Continue: every soldier deployed (the first campaign's missions 2 and 15 with more
+    // than one soldier: the selection screen opened instead), the checks; the selection's accept: the
+    // soldier picked deployed alone, the checks. The checks: the required items carried (else their
+    // message), the weights within the soldiers' strength (else the overloaded message), someone
+    // unarmed asked about; then done: no soldier left to equip automatically, the campaign's next
+    // step, the profile's second stock reset.
     void OnMessage(S_ControlMessage *message) override; // 0x34 0x006740d0
     // Part 9f-iii.
     bool BuildScreens() override;                       // 0x38 0x00675c80
@@ -86,6 +96,20 @@ private:
     // not: dropped; the backpack's with its contents; the belt's and the backpack's the last first),
     // their loads.
     void TakeSquadItems();                              // 0x00673730 (__fastcall)
+    // The mission's required items each carried by the deployed soldiers (a uniform or the diving
+    // gear: one per soldier at most, the record changed); one not: its message, false. (No record:
+    // true.)
+    bool HasRequiredItems();                            // 0x00678dc0
+    // No squad soldier over his strength.
+    static bool IsSquadWithinWeight();                  // 0x00674060
+    // Every deployed soldier with a weapon (an animated item) in his hands, on his shoulder, his belt
+    // or his backpack.
+    static bool IsSquadArmed();                         // 0x006746f0
+    // How many of an item type (`item.first`) the deployed soldiers carry (a place counts one, the
+    // belt's and the backpack's items their counts; an axis item only with the soldier it counted with
+    // first, g_requiredCarrier): fewer than `item.second`, 0; else all (`soldier` -1), or the soldier's
+    // own, at most the surplus.
+    static int CountCarried(const std::pair<int, int> &item, int soldier);   // 0x00679360
 
     uint8_t m_unknown1C4[0xC] = {};                     // +0x1C4 (not set by the original)
     C_EquipmentPanel m_panel;                           // +0x1D0

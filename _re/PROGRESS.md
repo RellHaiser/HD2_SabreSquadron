@@ -7720,6 +7720,30 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     Stats: 8,928 of 12,306 functions by hand (80.1 % by size).
   - Next, 9f-ii: the messages (OnMessage 0x006740d0) and the checks before the mission.
 
+  PART 9f-ii DONE (2026-11-03): the equipment screen's messages and the checks before the mission
+  (game/equipment_screen.cpp).
+  - OnMessage 0x006740d0: escape (the selection screen closed, else "ARE YOU SURE?" back to the
+    campaign's previous screen); 0x200000B continue (the first campaign's missions 2 and 15 with more
+    than one soldier: the selection screen; else all deployed); 0x200006A the selection's accept (the
+    pick deployed alone; a negative pick ignored: fixed); 0x20000C1 the checks (the required items,
+    "Some soldier is overloaded", "Some of your soldiers are unarmed" asked); 0x20000C6 done
+    (S_SoldierState +0x0A `autoEquip` cleared, the next step, the profile's second stock reset).
+  - HasRequiredItems 0x00678dc0 (the mission record's `required` items, S_MissionItems' `pairs`
+    renamed; a uniform or the diving gear capped at the squad's size in the record), CountCarried
+    0x00679360 (an axis item with one carrier, g_requiredCarrier 0x00840d5c), IsSquadWithinWeight
+    0x00674060, IsSquadArmed 0x006746f0; C_MissionItems::GetMissionRecord 0x0067e620 (a negative
+    index none: fixed).
+  - Dropped: the copy protection 0x00673e40 (a cracked copy's belt and backpack items stripped; from
+    the twelfth mission back to the previous screen).
+  - Harness: equipment_screen_test.inc's esMessage, esChecks, esCarried, esRequired (17 checks; the
+    weight fill fake per soldier). All factory checks in both orders.
+  - Mutations: mutations/mutate_9f2.py (127 cases, 113 build; all caught but 3 equivalent).
+  - Build: MSVC clean. Tier 1: 383 errors in 71 files, 164 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/equipment_screen.txt (+9); 6 functions in ported.txt, the protection's 1 dropped.
+    Stats: 8,935 of 12,306 functions by hand (80.2 % by size).
+  - Next, 9f-iii: the screens' descriptions (BuildScreens 0x00675c80 and its builders, the store's
+    0x0067c570).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

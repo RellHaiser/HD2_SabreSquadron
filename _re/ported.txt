@@ -9158,3 +9158,12 @@
 006c1d00
 006c1db0
 00677630
+# part 9f-ii: the equipment screen messages, the checks before the mission
+006740d0
+00678dc0
+00674060
+006746f0
+00679360
+0067e620
+# absorbed: the equipment screen copy protection (dropped)
+00673e40

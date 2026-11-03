@@ -1,5 +1,5 @@
 // Part 9f's equipment screen (game/equipment_screen.cpp), in the factory build, run by ControlsTest
-// after OptionsTest: the slots not ported yet stubbed (part 9f-i), the fakes game_menu_test.inc's and
+// after OptionsTest: the slots not ported yet stubbed (parts 9f-i, -ii), the fakes game_menu_test.inc's and
 // its helpers (the queue's text, the logs joined, the controls answering their index). Prints
 // "equipmentscreen:" with 1 per check met.
 #define private public
@@ -9,7 +9,13 @@
 #undef private
 
 // (Not ported yet: logged.)
-void C_EquipmentMenu::OnMessage(S_ControlMessage *message) { GfLog("es message %x", message->id); }
+// (Part 9f-ii: the campaign's mission number; campaign.cpp is not linked.)
+int g_esMission;
+int C_Campaign::GetMissionNumber(int campaign)
+{
+    GfLog("mission number %d", campaign);
+    return g_esMission;
+}
 bool C_EquipmentMenu::BuildScreens()
 {
     GfLog("es build");
@@ -36,7 +42,7 @@ namespace {
 struct S_EquipmentScreenResults {
     bool esNew = true, esStart = true, esStop = true, esStore = true, esTake = true, esClicked = true;
     bool esDragStart = true, esDragMove = true, esDrop = true, esHover = true, esStats = true, esToggle = true;
-    bool esPicked = true;
+    bool esPicked = true, esMessage = true, esChecks = true, esCarried = true, esRequired = true;
 };
 
 // A frame of the screen's model at a world position (its SetPos logged: "<name> 8 (x y z)").
@@ -598,6 +604,305 @@ void EquipmentScreenTest(I3D_scene *scene)
         p0.fullName = p0.customName = p1.fullName = C_str();
     }
 
+    // --- (part 9f-ii) the messages: escape (the selection screen closed, else the question), continue
+    // (the selection screen for the first campaign's missions 2 and 15 with more than one soldier;
+    // else all deployed, the checks), the selection's accept (the pick alone), the checks (the
+    // required items, the weights, the weapons: their messages), done; others nothing ---
+    {
+        C_EquipmentMenu m;
+        bool ok = true;
+        C_MessageBox box(scene, GfFrame(FRAME_DUMMY, "esbox"));
+        m.m_messageBox = &box;
+        S_SquadSoldier a, b;
+        squad.states = {&a, &b};
+        C_SlDef gun(ITEM_ANIMATED, 2, -1, -1), cap(ITEM_STATIC, 0, -1, -1);
+        g_gfItemDefs = {{4, &gun}, {5, &cap}};
+        a.hands = EpMake(1, 4, 1);
+        b.longGun = EpMake(2, 4, 1);
+        const auto message = [&](uint32_t id) {
+            S_ControlMessage msg;
+            msg.id = id;
+            g_controlMessages.clear();
+            g_gfLog.clear();
+            box.m_kind = MESSAGE_BOX_NONE;
+            box.m_yesMessage = box.m_noMessage = 0x1234;
+            m.OnMessage(&msg);
+        };
+        const auto deployed = [&]() { return CmText("%d%d", a.deployed, b.deployed); };
+        // Escape: no screen, nothing; the items screen: the question; the selection screen: closed.
+        g_menuScreens.clear();
+        message(0x200000A);
+        ok &= g_controlMessages.empty() && box.m_kind == MESSAGE_BOX_NONE;
+        C_MsScreen items(scene, "esitems", 0x04000000), selection(scene, "essel", 0x08000000), other(scene, "eso", 0x0C000000);
+        g_menuScreens = {&selection, &items};
+        message(0x200000A | 0x4000);
+        ok &= box.m_kind == MESSAGE_BOX_YES_NO && box.m_yesMessage == 0x2000007 && box.m_noMessage == 0 &&
+              GmQueue().find("1000015 18 7d4 ; ") != std::string::npos;
+        m.CloseMessage();
+        g_menuScreens = {&other};
+        message(0x200000A);
+        ok &= box.m_kind == MESSAGE_BOX_YES_NO;
+        m.CloseMessage();
+        g_menuScreens = {&items, &selection};
+        message(0x200000A);
+        ok &= box.m_kind == MESSAGE_BOX_NONE && GmQueue() == "0 6001005 0 0 ; ";
+        g_menuScreens.clear();
+        // Continue.
+        C_Campaign *campaign = g_gameProfile.m_campaign;
+        for (int mission : {2, 15}) {
+            g_esMission = mission;
+            message(0x200000B);
+            ok &= GmQueue() == "0 2000002 2 0 ; " && deployed() == "00" && MsLogIs({"mission number 0"}, g_gfLog);
+        }
+        for (int mission : {1, 3, 14, 16}) {
+            g_esMission = mission;
+            a.deployed = b.deployed = false;
+            message(0x200000B);
+            ok &= GmQueue() == "0 20000c1 0 0 ; " && deployed() == "11";
+        }
+        g_esMission = 2;
+        campaign->SetCurrentIndex(1);
+        a.deployed = b.deployed = false;
+        message(0x200000B);
+        ok &= GmQueue() == "0 20000c1 0 0 ; " && deployed() == "11" && MsLogIs({"mission number 1"}, g_gfLog);
+        campaign->SetCurrentIndex(0);
+        squad.states = {&a};
+        a.deployed = false;
+        message(0x200000B);
+        ok &= GmQueue() == "0 20000c1 0 0 ; " && a.deployed;
+        squad.states = {&a, &b};
+        // The selection's accept.
+        a.deployed = b.deployed = true;
+        m.m_selected = 1;
+        message(0x200006A);
+        ok &= GmQueue() == "0 20000c1 0 0 ; " && deployed() == "01";
+        m.m_selected = 0;
+        message(0x200006A);
+        ok &= GmQueue() == "0 20000c1 0 0 ; " && deployed() == "10";
+        for (int pick : {2, -1}) {
+            m.m_selected = pick;
+            a.deployed = b.deployed = true;
+            message(0x200006A);
+            ok &= g_controlMessages.empty() && deployed() == "00";
+        }
+        // The checks: all well, done; overloaded; unarmed (asked).
+        a.deployed = b.deployed = true;
+        g_esMission = 0;
+        m.m_missionItems.m_records[0]->required.clear();
+        message(0x20000C1);
+        ok &= GmQueue() == "0 20000c6 0 0 ; " && box.m_kind == MESSAGE_BOX_NONE;
+        g_epWeightFills[&b.load] = 1.0f;
+        message(0x20000C1);
+        ok &= GmQueue() == "0 20000c6 0 0 ; ";
+        g_epWeightFills[&b.load] = 1.001f;
+        message(0x20000C1);
+        ok &= box.m_kind == MESSAGE_BOX_OK && box.m_yesMessage == 0 && box.m_noMessage == 0 &&
+              GmQueue().find("1000015 18 7e7 ; ") != std::string::npos && GmQueue().find("20000c6") == std::string::npos;
+        m.CloseMessage();
+        // (A soldier not deployed counts all the same.)
+        b.deployed = false;
+        message(0x20000C1);
+        ok &= box.m_kind == MESSAGE_BOX_OK;
+        m.CloseMessage();
+        g_epWeightFills.clear();
+        b.deployed = true;
+        b.longGun = EpMake(2, 5, 1);
+        message(0x20000C1);
+        ok &= box.m_kind == MESSAGE_BOX_YES_NO && box.m_yesMessage == 0x20000C6 && box.m_noMessage == 0 &&
+              GmQueue().find("1000015 18 2531 ; ") != std::string::npos;
+        m.CloseMessage();
+        // (Overloaded asked first.)
+        g_epWeightFills[&a.load] = 2.0f;
+        message(0x20000C1);
+        ok &= box.m_kind == MESSAGE_BOX_OK;
+        m.CloseMessage();
+        g_epWeightFills.clear();
+        // (A required item missing: its message, the rest not checked.)
+        m.m_missionItems.m_records[0]->required = {{5, 1}};
+        a.longGun = EpMake(-1, -1, 0);
+        b.longGun = EpMake(-1, -1, 0);
+        b.hands = EpMake(3, 4, 1);
+        const bool oldIds = g_textIds;
+        g_textIds = true;
+        cap.m_textId = 0x77;
+        g_epWeightFills[&a.load] = 2.0f;
+        message(0x20000C1);
+        const std::string q = GmQueue();
+        ok &= box.m_kind == MESSAGE_BOX_OK && box.m_yesMessage == 0 && box.m_noMessage == 0 &&
+              q.find("text 2052 'text 119'") != std::string::npos && q.find("20000c6") == std::string::npos;
+        m.CloseMessage();
+        g_epWeightFills.clear();
+        g_textIds = oldIds;
+        m.m_missionItems.m_records[0]->required.clear();
+        // Done: no soldier to equip, the next step, the second stock reset.
+        a.autoEquip = b.autoEquip = true;
+        message(0x20000C6);
+        g_gmResetStock = nullptr;
+        message(0x20000C6);
+        ok &= GmQueue() == "0 2000008 0 0 ; " && MsLogIs({"stock reset"}, g_gfLog) && g_gmResetStock == &stock1C;
+        a.autoEquip = b.autoEquip = true;
+        message(0x20000C6);
+        ok &= !a.autoEquip && !b.autoEquip;
+        for (uint32_t id : {0x2000001u, 0x2000007u, 0x20000C0u, 0x20000C2u, 0x2000069u, 0x20000C5u}) {
+            message(id);
+            ok &= g_controlMessages.empty() && g_gfLog.empty() && box.m_kind == MESSAGE_BOX_NONE;
+        }
+        m.m_messageBox = nullptr;
+        WM(r.esMessage, ok);
+
+        // The weights and the weapons alone.
+        bool okc = true;
+        okc &= C_EquipmentMenu::IsSquadWithinWeight();
+        g_epWeightFills[&a.load] = 1.5f;
+        okc &= !C_EquipmentMenu::IsSquadWithinWeight();
+        g_epWeightFills[&a.load] = std::nanf("");
+        okc &= C_EquipmentMenu::IsSquadWithinWeight();
+        g_epWeightFills.clear();
+        squad.states.clear();
+        okc &= C_EquipmentMenu::IsSquadWithinWeight() && C_EquipmentMenu::IsSquadArmed();
+        squad.states = {&a, &b};
+        // The weapon's place: the hands, the shoulder, the belt, the backpack; the other items not.
+        a.hands = EpMake(-1, -1, 0);
+        a.deployed = b.deployed = true;
+        b.hands = EpMake(1, 4, 1);
+        okc &= !C_EquipmentMenu::IsSquadArmed();
+        a.deployed = false;
+        okc &= C_EquipmentMenu::IsSquadArmed();
+        a.deployed = true;
+        for (int place = 0; place < 4; ++place) {
+            a.hands = a.longGun = EpMake(-1, -1, 0);
+            a.belt.clear();
+            a.backpackContents.clear();
+            const S_SoldierItem weapon = EpMake(1, 4, 1), other = EpMake(2, 5, 1);
+            if (place == 0)
+                a.hands = weapon;
+            if (place == 1)
+                a.longGun = weapon;
+            if (place == 2)
+                a.belt = {other, weapon, other};
+            if (place == 3)
+                a.backpackContents = {weapon, other};
+            okc &= C_EquipmentMenu::IsSquadArmed();
+            a.hands = a.longGun = other;
+            a.belt = {other};
+            a.backpackContents = {other};
+            okc &= !C_EquipmentMenu::IsSquadArmed();
+        }
+        a.hands = a.longGun = EpMake(-1, -1, 0);
+        a.belt.clear();
+        a.backpackContents.clear();
+        WM(r.esChecks, okc);
+
+        // The items carried: a place one, the belt's and the backpack's their counts; the deployed
+        // only; fewer than asked, 0; all, or a soldier's own at most the surplus; an axis item with its
+        // first carrier only.
+        bool okn = true;
+        C_SlDef axis(ITEM_STATIC, 0, -1, -1);
+        axis.m_team = 1;
+        C_SlDef allied(ITEM_STATIC, 0, -1, -1);
+        g_gfItemDefs = {{6, &allied}, {7, &axis}, {9, &allied}};
+        a.head = EpMake(1, 6, 5);
+        a.belt = {EpMake(2, 6, 3), EpMake(3, 9, 4)};
+        b.uniform = EpMake(4, 6, 2);
+        b.backpackContents = {EpMake(5, 6, 4)};
+        b.hands = EpMake(-1, -1, 0);
+        g_requiredCarrier = -1;
+        // (a: 1 + 3, b: 1 + 4.)
+        okn &= C_EquipmentMenu::CountCarried({6, 9}, -1) == 9 && C_EquipmentMenu::CountCarried({6, 10}, -1) == 0;
+        okn &= C_EquipmentMenu::CountCarried({6, 0}, -1) == 9 && C_EquipmentMenu::CountCarried({9, 4}, -1) == 4;
+        // (Own: a's present counts 5 + 3; surplus 9 - 2.)
+        okn &= C_EquipmentMenu::CountCarried({6, 2}, 0) == 7 && C_EquipmentMenu::CountCarried({6, 7}, 0) == 2 &&
+               C_EquipmentMenu::CountCarried({6, 2}, 1) == 6 && C_EquipmentMenu::CountCarried({6, 9}, 1) == 0 &&
+               C_EquipmentMenu::CountCarried({6, 2}, 5) == 0;
+        b.deployed = false;
+        okn &= C_EquipmentMenu::CountCarried({6, 1}, -1) == 4 && C_EquipmentMenu::CountCarried({6, 1}, 1) == 0;
+        b.deployed = true;
+        // (Every place: the head, the uniform, the backpack, the long gun, the hands.)
+        S_SquadSoldier p;
+        p.deployed = true;
+        p.head = p.uniform = p.backpack = p.longGun = p.hands = EpMake(1, 6, 3);
+        squad.states = {&p};
+        okn &= C_EquipmentMenu::CountCarried({6, 1}, -1) == 5 && C_EquipmentMenu::CountCarried({6, 1}, 0) == 4;
+        squad.states = {&a, &b};
+        // The axis item: the first carrier kept (b's then, after it a's not counted).
+        a.head = EpMake(1, 7, 1);
+        b.uniform = EpMake(4, 7, 1);
+        b.backpackContents = {EpMake(5, 7, 2)};
+        g_requiredCarrier = 1;
+        okn &= C_EquipmentMenu::CountCarried({7, 1}, -1) == 3 && g_requiredCarrier == 1;
+        g_requiredCarrier = -1;
+        okn &= C_EquipmentMenu::CountCarried({7, 1}, -1) == 1 && g_requiredCarrier == 0;
+        okn &= C_EquipmentMenu::CountCarried({7, 1}, -1) == 1;
+        g_requiredCarrier = 0;
+        a.deployed = false;
+        okn &= C_EquipmentMenu::CountCarried({7, 1}, -1) == 0;
+        a.deployed = true;
+        g_requiredCarrier = -1;
+        a.head = EpMake(-1, -1, 0);
+        a.belt.clear();
+        b.uniform = EpMake(-1, -1, 0);
+        b.backpackContents.clear();
+        WM(r.esCarried, okn);
+
+        // The required items: the record's (none: nothing required); a uniform or the diving gear at
+        // most one per soldier (the record changed), the carrier reset first.
+        bool okr = true;
+        C_SlDef uniform(ITEM_STATIC, 15, -1, -1), diving(ITEM_STATIC, 0, -1, -1), plain(ITEM_STATIC, 0, -1, -1);
+        g_gfItemDefs = {{8, &uniform}, {231, &diving}, {10, &plain}, {7, &axis}};
+        S_MissionItems *record = m.m_missionItems.m_records[1];
+        record->required = {{8, 5}, {231, 3}, {10, 3}};
+        a.uniform = EpMake(1, 8, 1);
+        b.uniform = EpMake(2, 8, 1);
+        a.belt = {EpMake(3, 231, 1), EpMake(4, 10, 3)};
+        b.backpack = EpMake(5, 231, 1);
+        g_esMission = 1;
+        m.m_messageBox = &box;
+        box.m_kind = MESSAGE_BOX_NONE;
+        g_requiredCarrier = 5;
+        okr &= m.HasRequiredItems() && box.m_kind == MESSAGE_BOX_NONE &&
+               record->required == std::vector<std::pair<int, int>>({{8, 2}, {231, 2}, {10, 3}}) && g_requiredCarrier == -1;
+        record->required = {{10, 4}};
+        okr &= !m.HasRequiredItems() && box.m_kind == MESSAGE_BOX_OK && record->required[0].second == 4;
+        m.CloseMessage();
+        // (The cap only for those: another's count kept; the first one missing stops.)
+        record->required = {{10, 1}, {7, 1}, {10, 9}};
+        box.m_kind = MESSAGE_BOX_NONE;
+        okr &= !m.HasRequiredItems() && box.m_kind == MESSAGE_BOX_OK;
+        m.CloseMessage();
+        // (An axis item reset before: carried by the second soldier.)
+        b.belt = {EpMake(6, 7, 1)};
+        g_requiredCarrier = 0;
+        record->required = {{7, 1}};
+        okr &= m.HasRequiredItems();
+        b.belt.clear();
+        g_esMission = 5;
+        okr &= m.HasRequiredItems();
+        g_esMission = -1;
+        okr &= m.HasRequiredItems();
+        g_esMission = 200;
+        okr &= m.HasRequiredItems();
+        // (The second campaign's records after the first's thirty.)
+        m.m_missionItems.m_campaign = 1;
+        m.m_missionItems.m_records[31] = record;
+        record->required = {{10, 4}};
+        g_esMission = 1;
+        box.m_kind = MESSAGE_BOX_NONE;
+        okr &= !m.HasRequiredItems() && box.m_kind == MESSAGE_BOX_OK;
+        m.CloseMessage();
+        // (Past the records: none, the campaign's field not read as one.)
+        g_esMission = 90;
+        okr &= m.HasRequiredItems();
+        m.m_missionItems.m_records[31] = nullptr;
+        m.m_missionItems.m_campaign = 0;
+        record->required.clear();
+        m.m_messageBox = nullptr;
+        a.uniform = b.uniform = b.backpack = EpMake(-1, -1, 0);
+        a.belt.clear();
+        squad.states.clear();
+        g_esMission = 0;
+        WM(r.esRequired, okr);
+    }
+
     g_gfItemDefs = oldDefs;
     g_gameProfile.m_playMode = oldPlayMode;
     g_gameProfile.m_itemStock18 = old18;
@@ -609,7 +914,9 @@ void EquipmentScreenTest(I3D_scene *scene)
     g_gfLog.clear();
     g_controlMessages.clear();
     std::printf("equipmentscreen: esNew %d esStart %d esStop %d esStore %d esTake %d esClicked %d esDragStart %d "
-                "esDragMove %d esDrop %d esHover %d esStats %d esToggle %d esPicked %d\n",
+                "esDragMove %d esDrop %d esHover %d esStats %d esToggle %d esPicked %d esMessage %d esChecks %d "
+                "esCarried %d esRequired %d\n",
                 r.esNew, r.esStart, r.esStop, r.esStore, r.esTake, r.esClicked, r.esDragStart, r.esDragMove, r.esDrop,
-                r.esHover, r.esStats, r.esToggle, r.esPicked);
+                r.esHover, r.esStats, r.esToggle, r.esPicked, r.esMessage, r.esChecks,
+                r.esCarried, r.esRequired);
 }

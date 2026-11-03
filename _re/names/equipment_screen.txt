@@ -17,3 +17,13 @@
 00673730 C_EquipmentMenu::TakeSquadItems | void __fastcall TakeSquadItems(C_EquipmentMenu * menu)
 00677880 C_EquipmentMenu::CallStatsToggle
 00677890 C_EquipmentMenu::CallSelectionPicked
+# Part 9f-ii: the messages, the checks before the mission.
+006740d0 C_EquipmentMenu::OnMessage | void __thiscall OnMessage(C_EquipmentMenu *this, void * message)
+00678dc0 C_EquipmentMenu::HasRequiredItems | bool __thiscall HasRequiredItems(C_EquipmentMenu *this)
+00674060 C_EquipmentMenu::IsSquadWithinWeight | bool __stdcall IsSquadWithinWeight(void)
+006746f0 C_EquipmentMenu::IsSquadArmed | bool __stdcall IsSquadArmed(void)
+00679360 C_EquipmentMenu::CountCarried | int __cdecl CountCarried(void * item, int soldier)
+00673e40 C_EquipmentMenu::ProtectionStripItems
+0067e620 C_MissionItems::GetMissionRecord | void * __thiscall GetMissionRecord(void * this, int mission)
+00840d5c g_requiredCarrier @ int
+008ae61a g_equipmentStatsShown @ bool

@@ -1,7 +1,9 @@
 // The campaign's equipment screen (original 0x00673080..0x0067a3f0, 0x0067c570; part 9f-i: the class,
-// its construction, starting and stopping, the item controls' slots and the stats).
+// its construction, starting and stopping, the item controls' slots and the stats; 9f-ii: the messages
+// and the checks before the mission).
 #include "game/equipment_screen.h"
 
+#include <algorithm>
 #include <cstring>
 #include <vector>
 
@@ -11,11 +13,14 @@
 #include "game/cursor.h"
 #include "game/item_defs.h"
 #include "game/items_module.h"
+#include "game/menu_state.h"
+#include "game/pending.h"
 #include "game/profile.h"
 #include "game/screen.h"
 #include "ls3d/i3d.h"
 
 bool g_equipmentStatsShown;                             // 0x008ae61a
+int g_requiredCarrier = -1;                            // 0x00840d5c
 
 namespace {
 
@@ -38,6 +43,25 @@ constexpr uint32_t NAME_TEXT = 0x04201000, SELECTION_TEXT = 0x08100000;
 constexpr uint32_t BUTTON_STYLE = 0xC, TEXT_STATS = 0xAAF, TEXT_PANEL = 0xAB0;
 constexpr uint32_t NAME_STYLE = 0xD, VALUE_STYLE = 0x17, BLANK_STYLE = 0xB, TEXT_BLANK = 0x7D2;
 constexpr int SKILL_ROWS = 7;
+// The screens (their indices: the ids' top 6 bits): the items screen, the selection screen.
+constexpr int SCREEN_INDEX_SHIFT = 26;
+constexpr uint32_t SCREEN_INDEX_MASK = 0x3F;
+constexpr uint32_t SELECTION_SCREEN = 2;
+// The screen's own messages (target 0): continue (the button), the selection's accept, the checks,
+// done (the unarmed question's yes too).
+enum : uint32_t {
+    EQUIPMENT_MSG_CONTINUE = 0x200000B,
+    EQUIPMENT_MSG_SELECTED = 0x200006A,
+    EQUIPMENT_MSG_CHECK = 0x20000C1,
+    EQUIPMENT_MSG_DONE = 0x20000C6,
+};
+// "ARE YOU SURE?", "Some soldier is overloaded, ...", "Some of your soldiers are unarmed. Do you
+// wish to continue?", "At least one player has to have item '%s' in inventory".
+constexpr uint32_t TEXT_BACK_QUESTION = 0x7D4, TEXT_OVERLOADED = 0x7E7, TEXT_UNARMED_QUESTION = 0x2531;
+constexpr int TEXT_ITEM_MISSING = 0x804;
+// The required items' kinds counted once per soldier at most: the uniforms, the diving gear; the
+// items of one carrier: the axis' (their team).
+constexpr int BEHAVIOUR_UNIFORM = ITEM_BEHAVIOUR_UNIFORM, DIVING_GEAR = 231, ITEM_TEAM_AXIS = 1;
 
 void Post(uint32_t target, uint32_t id, uint32_t value, uintptr_t value2 = 0, const C_str &text = C_str())
 {
@@ -396,4 +420,178 @@ bool C_EquipmentMenu::CallSelectionPicked(void *menu, void *argument, C_Control 
                                           uint32_t value)
 {
     return static_cast<C_EquipmentMenu *>(menu)->OnSelectionPicked(argument, control, notification, value);
+}
+
+// ---- the messages
+
+void C_EquipmentMenu::OnMessage(S_ControlMessage *message)
+{
+    std::vector<S_SquadSoldier *> &squad = g_gameProfile.m_missionSquad->states;
+    switch (message->id & CONTROL_MSG_MASK) {
+    case MENU_MSG_ESCAPE:
+        if (g_menuScreens.empty())
+            return;
+        // On the selection screen: closed; else asked whether to go back to the campaign's previous
+        // screen.
+        if ((g_menuScreens.back()->GetId() >> SCREEN_INDEX_SHIFT & SCREEN_INDEX_MASK) != SELECTION_SCREEN) {
+            ShowMessageId(MESSAGE_BOX_YES_NO, TEXT_BACK_QUESTION, MENU_MSG_PREVIOUS, 0);
+            return;
+        }
+        Post(0, CONTROL_NOTIFY_CLICK | MENU_MSG_CLOSE_POPUP, 0);
+        return;
+    case EQUIPMENT_MSG_CONTINUE: {
+        // The first campaign's second and fifteenth missions with more than one soldier: the one to
+        // play picked on the selection screen; else every soldier goes.
+        C_Campaign *campaign = g_gameProfile.m_campaign;
+        const int index = campaign->GetCurrentIndex();
+        const int mission = campaign->GetMissionNumber(index);
+        if (index == 0 && (mission == 2 || mission == 15) && squad.size() > 1) {
+            Post(0, MENU_MSG_OPEN_POPUP, SELECTION_SCREEN);
+            return;
+        }
+        for (S_SquadSoldier *soldier : squad)
+            soldier->deployed = true;
+        Post(0, EQUIPMENT_MSG_CHECK, 0);
+        return;
+    }
+    case EQUIPMENT_MSG_SELECTED: {
+        for (S_SquadSoldier *soldier : squad)
+            soldier->deployed = false;
+        if (m_selected >= static_cast<int>(squad.size()))
+            return;
+        // (Fix: a negative pick ignored; the original wrote through null.)
+        S_SquadSoldier *picked = SquadSoldier(m_selected);
+        if (!picked)
+            return;
+        picked->deployed = true;
+        Post(0, EQUIPMENT_MSG_CHECK, 0);
+        return;
+    }
+    case EQUIPMENT_MSG_CHECK:
+        if (!HasRequiredItems())
+            return;
+        if (!IsSquadWithinWeight()) {
+            ShowMessageId(MESSAGE_BOX_OK, TEXT_OVERLOADED, 0, 0);
+            return;
+        }
+        if (!IsSquadArmed()) {
+            ShowMessageId(MESSAGE_BOX_YES_NO, TEXT_UNARMED_QUESTION, EQUIPMENT_MSG_DONE, 0);
+            return;
+        }
+        Post(0, EQUIPMENT_MSG_DONE, 0);
+        return;
+    case EQUIPMENT_MSG_DONE:
+        for (S_SquadSoldier *soldier : squad)
+            soldier->autoEquip = false;
+        // Dropped: the copy protection (a cracked copy's belt and backpack items of no record type
+        // removed; from the twelfth mission back to the previous screen).
+        Post(0, MENU_MSG_NEXT, 0);
+        g_gameProfile.m_itemStock1C->Reset();
+        return;
+    default:
+        return;
+    }
+}
+
+// ---- the checks before the mission
+
+bool C_EquipmentMenu::IsSquadWithinWeight()
+{
+    for (S_SquadSoldier *soldier : g_gameProfile.m_missionSquad->states) {
+        if (soldier->load.GetWeightFill() > 1.0f)
+            return false;
+    }
+    return true;
+}
+
+bool C_EquipmentMenu::IsSquadArmed()
+{
+    // (Quirk kept: an item's definition read unchecked.)
+    const auto armed = [](const S_SoldierItem &item) {
+        return item.typeId != -1 && GetItemDef(item.typeId)->GetRecordType() == ITEM_ANIMATED;
+    };
+    const auto anyArmed = [&armed](const std::vector<S_SoldierItem> &items) {
+        return std::any_of(items.rbegin(), items.rend(), armed);
+    };
+    const std::vector<S_SquadSoldier *> &squad = g_gameProfile.m_missionSquad->states;
+    for (size_t i = squad.size(); i-- > 0;) {
+        const S_SquadSoldier *soldier = squad[i];
+        if (!soldier->deployed)
+            continue;
+        if (!armed(soldier->hands) && !armed(soldier->longGun) && !anyArmed(soldier->belt) &&
+            !anyArmed(soldier->backpackContents))
+            return false;
+    }
+    return true;
+}
+
+int C_EquipmentMenu::CountCarried(const std::pair<int, int> &item, int soldier)
+{
+    // (Quirk kept: the item's definition read unchecked.)
+    const bool anyCarrier = GetItemDef(item.first)->GetTeam() != ITEM_TEAM_AXIS;
+    int total = 0, own = 0;
+    const std::vector<S_SquadSoldier *> &squad = g_gameProfile.m_missionSquad->states;
+    for (int i = 0; i < static_cast<int>(squad.size()); ++i) {
+        const S_SquadSoldier *carrier = squad[static_cast<size_t>(i)];
+        if (!carrier->deployed)
+            continue;
+        // An axis item counts with its first carrier only (the one kept).
+        const auto counts = [&](const S_SoldierItem &place) {
+            if (place.typeId != item.first)
+                return false;
+            if (!anyCarrier) {
+                if (g_requiredCarrier != -1 && g_requiredCarrier != i)
+                    return false;
+                g_requiredCarrier = i;
+            }
+            return true;
+        };
+        // A place counts once, the belt's and the backpack's items by their counts.
+        for (const S_SoldierItem *place : {&carrier->head, &carrier->uniform, &carrier->backpack, &carrier->longGun,
+                                           &carrier->hands}) {
+            if (counts(*place)) {
+                ++total;
+                if (i == soldier)
+                    own += place->present;
+            }
+        }
+        for (const std::vector<S_SoldierItem> *items : {&carrier->belt, &carrier->backpackContents}) {
+            for (const S_SoldierItem &held : *items) {
+                if (counts(held)) {
+                    total += held.present;
+                    if (i == soldier)
+                        own += held.present;
+                }
+            }
+        }
+    }
+    if (total < item.second)
+        return 0;
+    if (soldier < 0)
+        return total;
+    return std::min(own, total - item.second);
+}
+
+bool C_EquipmentMenu::HasRequiredItems()
+{
+    C_Campaign *campaign = g_gameProfile.m_campaign;
+    S_MissionItems *record = m_missionItems.GetMissionRecord(campaign->GetMissionNumber(campaign->GetCurrentIndex()));
+    g_requiredCarrier = -1;
+    // (Fix: no record, nothing required; the original read it unchecked.)
+    if (!record)
+        return true;
+    const int squadSize = static_cast<int>(g_gameProfile.m_missionSquad->states.size());
+    for (std::pair<int, int> &item : record->required) {
+        // (Quirk kept: the item's definition read unchecked.) A uniform or the diving gear: one per
+        // soldier at most (the record changed).
+        C_ItemDef *def = GetItemDef(item.first);
+        if ((def->GetBehaviour() == BEHAVIOUR_UNIFORM || item.first == DIVING_GEAR) && squadSize < item.second)
+            item.second = squadSize;
+        if (CountCarried(item, -1) == 0) {
+            const C_str name = g_texts.Get(def->GetTextId());
+            ShowMessage(MESSAGE_BOX_OK, C_fstr(g_texts.Get(TEXT_ITEM_MISSING).c_str(), name.c_str()), 0, 0);
+            return false;
+        }
+    }
+    return true;
 }

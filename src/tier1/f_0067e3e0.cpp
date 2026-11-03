@@ -30,16 +30,4 @@ uint32_t FUN_0067e410(void *_this,int param_1, ...)
 }
 
 
-// 0x0067e620
-uint32_t FUN_0067e620(void *_this,int param_1, ...)
-{
-  int iVar1;
-  iVar1 = param_1 + *(int *)((int)_this + 0x2a8) * 0x1e;
-  if (0x77 < iVar1) {
-    return 0;
-  }
-  return *(uint32_t *)((int)_this + iVar1 * 4 + 200);
-}
-
-
 } // namespace tier1

@@ -278,7 +278,7 @@ void LoadoutTest(I3D_scene *)
               m.GetFirstRecord(1, 0) == 30 && m.GetFirstRecord(1, 1) == 32 && m.GetFirstRecord(1, 2) == 32 &&
               m.GetFirstRecord(1, 3) == 35 && m.m_first[34] == -1 && m.m_first[29] == -1 && !m.m_records[29] &&
               m.m_records[30] && m.m_records[34] && !m.m_records[35] && m.m_records[30]->kind == 4 &&
-              m.m_records[30]->slots[9].c == -1 && m.m_records[30]->pairs.empty();
+              m.m_records[30]->slots[9].c == -1 && m.m_records[30]->required.empty();
         m.Release();
         ok &= !m.m_records[30] && !m.m_records[34];
         // Then miss_itm.def into them: 30 absent, the 31st kind 7.
@@ -344,24 +344,24 @@ void LoadoutTest(I3D_scene *)
             g_files["GameData\\miss_itm.def"] = f.bytes;
             C_MissionItems m;
             m.m_records[0] = new S_MissionItems();
-            m.m_records[0]->pairs.push_back({1, 1});
+            m.m_records[0]->required.push_back({1, 1});
             m.m_records[1] = new S_MissionItems();
             m.m_records[1]->kind = 5;
             m.m_records[1]->slots[3].b = 8;
-            m.m_records[1]->pairs.push_back({2, 2});
+            m.m_records[1]->required.push_back({2, 2});
             // (Past the file's records: kept.)
             m.m_records[4] = new S_MissionItems();
-            m.m_records[4]->pairs.push_back({3, 3});
+            m.m_records[4]->required.push_back({3, 3});
             ok &= m.Load();
             const S_MissionItems *a = m.m_records[0], *b = m.m_records[1], *c = m.m_records[2];
             ok &= a->kind == 7 && a->slots[0].a == 1 && a->slots[1].c == 6 && a->slots[2].a == -1 &&
-                  a->pairs == std::vector<std::pair<int, int>>({{1, 1}, {40, 41}});
-            ok &= b->kind == 5 && b->slots[3].b == -1 && b->pairs.empty();
-            ok &= c && c->kind == 9 && c->slots[0].a == -1 && c->pairs == std::vector<std::pair<int, int>>({{50, 51}, {52, 53}});
+                  a->required == std::vector<std::pair<int, int>>({{1, 1}, {40, 41}});
+            ok &= b->kind == 5 && b->slots[3].b == -1 && b->required.empty();
+            ok &= c && c->kind == 9 && c->slots[0].a == -1 && c->required == std::vector<std::pair<int, int>>({{50, 51}, {52, 53}});
             const S_MissionItems *d = m.m_records[3];
             ok &= d && d->kind == 6 && d->slots[0].a == 100 && d->slots[9].c == 129 &&
-                  d->pairs == std::vector<std::pair<int, int>>({{60, 61}});
-            ok &= m.m_records[4]->pairs.size() == 1 && !m.m_records[5];
+                  d->required == std::vector<std::pair<int, int>>({{60, 61}});
+            ok &= m.m_records[4]->required.size() == 1 && !m.m_records[5];
         }
         // Over 120 records: 120 (the rest not read; past the array nothing written).
         {
