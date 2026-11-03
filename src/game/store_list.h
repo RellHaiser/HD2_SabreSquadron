@@ -1,6 +1,7 @@
 // The store's item lists of the in-game menu and the equipment screen (vtable 0x008157c4, 0x38 bytes;
 // C_GameMenu +0x580): a page of the item stock per inventory group (the tabs choose the page shown),
-// each item type's entry showing its count. Original 0x0067b070..0x0067c390 (parts 9e-iii-a and -b).
+// each item type's entry showing its count. Original 0x0067aa70, 0x0067b070..0x0067c390 (parts
+// 9e-iii-a and -b; 9e-xxiv the description).
 #pragma once
 
 #include <cstdint>
@@ -58,7 +59,10 @@ public:
     void SetActive(bool on);                            // 0x0067c390
 
     void SetMenu(C_EquipmentMenuBase *menu) { m_menu = menu; }
-    // The list's description: the group "P_visualstore", its tabs and pages (not ported yet).
+    // The list's description: the group "P_visualstore" (the screen's next control: the list's
+    // indices), its tabs (OnTab; the groups' texts; inactive) and scroll bar (the first page), the
+    // entries (500 more, none yet), a page per group (BuildPage; not the 4th), the highlight
+    // ("selitem08") unlinked at the origin.
     void BuildDescription(S_ScreenDesc *desc, I3D_frame *model);   // 0x0067aa70
     C_ItemStock *GetStock() const { return m_stock; }
 

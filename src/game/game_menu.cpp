@@ -2,12 +2,14 @@
 // 9e-vi: the update's helpers and the drawing; 9e-vii: the messages; 9e-ix: the screens' descriptions;
 // 9e-xiii: the player screen's; 9e-xiv..9e-xvi: its soldiers, equipment, items and skills panels;
 // 9e-xvii: the soldier types and the user presets; 9e-xviii: the squad's team; 9e-xix: the
-// stats and the stocks).
+// stats and the stocks; 9e-xx..9e-xxii: the items' drag and drop, the soldier types picked, the
+// presets matched; 9e-xxiii: the hover's information, the chat's lines, the stats toggle).
 #include "game/game_menu.h"
 
 #include <algorithm>
 #include <cctype>
 #include <climits>
+#include <cmath>
 #include <cstring>
 #include <malloc.h>
 
@@ -34,6 +36,7 @@ int g_gameMenuTime;                                     // 0x008ae62c
 int g_gameMenuMessages;                                 // 0x008ae628
 int g_pickedSoldierA;                                   // 0x008ae634
 int g_pickedSoldierX = 30;                              // 0x008410ac
+bool g_soldierStatsShown;                               // 0x008ae638
 
 namespace {
 
@@ -83,6 +86,19 @@ constexpr int USER_PRESET_LINES = 6;
 constexpr int PAIRED_ITEMS[] = {0x16, 7, 0x104};
 constexpr int UNMATCHED_BEHAVIOUR = 0x13, RETICLE_MODES = 4, SMALL_BEHAVIOURS = 7, BEHAVIOUR_12 = 12;
 constexpr float DRAG_HEIGHT = 0.1f;
+// The item hovered's information (C_ItemInfo::ShowStats' lines again): its name's and its lines'
+// styles, the stats' texts (the weight, the ammo, the muzzle speed, the zoom), the zoom's half field
+// of view (40 degrees) and the scope's aim modes with a reticle.
+constexpr uint32_t HOVER_NAME_STYLE = 0x10, HOVER_LINE_STYLE = 0x11;
+constexpr int TEXT_WEIGHT = 0xAAA, TEXT_AMMO = 0xAAB, TEXT_MUZZLE_SPEED = 0xAAC, TEXT_ZOOM = 0xAAE;
+constexpr double ZOOM_HALF_FOV = 0.6981317202250164;
+constexpr int SCOPE_RETICLES = 4;
+// The chat console (the player screen's 12th control, not co-op) and its lines' style.
+constexpr uint32_t CHAT_CONSOLE = 0x0CC00000, CHAT_LINE_STYLE = 0x26;
+// The stats toggle's: the store's control and the button it names ("CONTINUE", "SHOW SOLDIER
+// STATS"; an older screen's: the 7th control is the presets' rename now).
+constexpr uint32_t STORE_PANEL = 0x0C300000;
+constexpr uint32_t STATS_BUTTON_STYLE = 0xC, TEXT_STATS_CONTINUE = 0x9E1, TEXT_STATS_SHOW = 0x9E2;
 // The skills panel's controls (the player screen's fourth: 0x0C400000; a skill's name, bar and
 // value 1..3 + 3 per skill) and the values' style; the default stats (a profile not found).
 constexpr uint32_t SKILLS_PANEL = 0x0C400000;
@@ -1506,6 +1522,90 @@ bool C_GameMenu::DropItem(C_Control *control, uint32_t target)
             m_storeList.AddItem(displaced);
         }
     }
+    return true;
+}
+
+bool C_GameMenu::OnItemHover(void *, C_Control *control, uint32_t notification, uint32_t)
+{
+    if (!control)
+        return false;
+    // The popup's (sent to it), else the weapons' information label's (posted).
+    C_Screen *const popup = m_popup;
+    if (!popup && m_weaponsInfo == 0)
+        return true;
+    const auto send = [this, popup](uint32_t id, uint32_t value = 0, uintptr_t value2 = 0, const C_str &text = C_str()) {
+        S_ControlMessage message;
+        message.target = popup ? 0 : static_cast<uint32_t>(m_weaponsInfo);
+        message.id = id;
+        message.value = value;
+        message.value2 = value2;
+        message.text = text;
+        if (popup)
+            popup->HandleMessage(&message);
+        else
+            PostControlMessage(message);
+    };
+    if (notification == CONTROL_NOTIFY_LEAVE) {
+        send(CONTROL_MSG_HIDE);
+        return true;
+    }
+    if (notification != CONTROL_NOTIFY_ENTER)
+        return true;
+    if (popup && m_infoScreen && m_infoScreen->IsShown()) {
+        send(CONTROL_MSG_HIDE);
+        return false;
+    }
+    C_ItemDef *def = GetItemDef(control->GetIndex());
+    if (!def)
+        return true;
+    const auto line = [&send](const C_str &text) { send(CONTROL_MSG_ADD_TEXT, HOVER_LINE_STYLE, 0, text); };
+    send(CONTROL_MSG_CLEAR);
+    send(CONTROL_MSG_ADD_TEXT_ID, HOVER_NAME_STYLE, static_cast<uint32_t>(def->GetTextId()));
+    line(C_fstr("%s : %.2f kg", g_texts.Get(TEXT_WEIGHT).c_str(), static_cast<double>(def->GetWeight())));
+    const int behaviour = def->GetBehaviour();
+    if (behaviour >= ITEM_BEHAVIOUR_SIDEARM && (behaviour <= ITEM_BEHAVIOUR_LMG || behaviour == ITEM_BEHAVIOUR_ASSAULT)) {
+        if (C_ItemDef *ammo = GetItemDef(def->GetAmmoItemId()))
+            line(C_fstr("%s : %d", g_texts.Get(TEXT_AMMO).c_str(), static_cast<int>(ammo->GetAmmoAmount())));
+        const E_ItemComponentKind kind = def->GetComponentKind();
+        if (kind == ICK_PROJECTILE_WEAPON || kind == ICK_FIREARM) {
+            const float speed = static_cast<C_WeaponComp *>(def->GetComponent())->GetMuzzleVelocity();
+            line(C_fstr("%s : %.2f m/s", g_texts.Get(TEXT_MUZZLE_SPEED).c_str(), static_cast<double>(speed)));
+        }
+        const C_ItemComponent *secondary = def->GetSecondaryComponent();
+        if (def->GetBehaviour() == ITEM_BEHAVIOUR_RIFLE && secondary && secondary->GetKind() == ICK_SCOPE) {
+            const auto *scope = static_cast<const C_ScopeComp *>(secondary);
+            if (scope->GetAimMode() < SCOPE_RETICLES) {
+                const auto zoom = static_cast<float>(std::tan(ZOOM_HALF_FOV) / std::tan(scope->GetAimedFovFactor() * 0.5));
+                line(C_fstr("%s : %.2f x", g_texts.Get(TEXT_ZOOM).c_str(), static_cast<double>(zoom)));
+            }
+        }
+    }
+    send(CONTROL_MSG_SHOW);
+    return true;
+}
+
+void C_GameMenu::AddChatLine(int, const char *name, const char *text)
+{
+    S_ControlMessage message;
+    message.target = CHAT_CONSOLE;
+    message.id = CONTROL_MSG_ADD_TEXT;
+    message.value = CHAT_LINE_STYLE;
+    message.text = C_fstr("%s: %s", name, text);
+    PostControlMessage(message);
+}
+
+bool C_GameMenu::OnStatsToggle(void *, void *, C_Control *, uint32_t, uint32_t)
+{
+    g_soldierStatsShown = !g_soldierStatsShown;
+    if (g_soldierStatsShown) {
+        Post(SKILLS_PANEL, CONTROL_MSG_SHOW, 0);
+        Post(STORE_PANEL, CONTROL_MSG_HIDE, 0);
+    } else {
+        Post(STORE_PANEL, CONTROL_MSG_SHOW, 0);
+        Post(SKILLS_PANEL, CONTROL_MSG_HIDE, 0);
+    }
+    Post(RENAME_PRESET_BUTTON, CONTROL_MSG_SET_TEXT_ID, STATS_BUTTON_STYLE,
+         g_soldierStatsShown ? TEXT_STATS_CONTINUE : TEXT_STATS_SHOW);
     return true;
 }
 

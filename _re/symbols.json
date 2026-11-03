@@ -32115,6 +32115,11 @@
   "name": "C_GameMenu::BuildMainScreen",
   "proto": "bool __thiscall BuildMainScreen(C_GameMenu *this, void * desc, void * model)"
  },
+ "00680ea0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnItemHover",
+  "proto": "bool __thiscall OnItemHover(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00681ee0": {
   "module": "game_menu",
   "name": "C_GameMenu::OnItemNotify13",
@@ -32159,6 +32164,11 @@
   "module": "game_menu",
   "name": "C_GameMenu::RenderEquipment",
   "proto": "bool __thiscall RenderEquipment(C_GameMenu *this)"
+ },
+ "006828b0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::AddChatLine",
+  "proto": "void __stdcall AddChatLine(int unused, char * name, char * text)"
  },
  "00682a20": {
   "module": "game_menu",
@@ -32257,6 +32267,11 @@
   "module": "game_menu",
   "name": "C_GameMenu::OnGameInfo",
   "proto": "bool __thiscall OnGameInfo(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006861d0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnStatsToggle",
+  "proto": "bool __thiscall OnStatsToggle(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "006863c0": {
   "module": "game_menu",

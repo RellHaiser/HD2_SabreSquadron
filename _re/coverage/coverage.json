@@ -59,16 +59,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "App & core",
   "state": "ported",
-  "functions": 523,
-  "bytes": 129406,
+  "functions": 525,
+  "bytes": 131439,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "App & core",
   "state": "pending",
-  "functions": 522,
-  "bytes": 134962,
+  "functions": 520,
+  "bytes": 132929,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {

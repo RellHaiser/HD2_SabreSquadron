@@ -1163,7 +1163,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
         iVar21 = (**(code **)(**(int **)((int)local_5fc + 0x14) + 0x1c))();
         pCVar18 = local_5fc;
         if (iVar21 == 0xb) {
-          FUN_006828b0(*(uint32_t *)(iVar23 + 100 + *(int *)(iVar19 + 4)),local_5f8,(int *)puVar25
+          C_GameMenu__AddChatLine(*(uint32_t *)(iVar23 + 100 + *(int *)(iVar19 + 4)),(char*)(local_5f8),(char*)((int *)puVar25)
                       );
           piVar16 = (int *)C_NetGame__UnlockPlayers(0x97d070);
           return piVar16;
@@ -1187,7 +1187,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
     if (*(int **)((int)local_5fc + 0x14) != 0) {
       iVar21 = (**(code **)(**(int **)((int)local_5fc + 0x14) + 0x1c))();
       if (iVar21 == 0xb) {
-        piVar16 = (int *)FUN_006828b0(0,"ADMIN",(int *)&local_3d8);
+        piVar16 = (int *)C_GameMenu__AddChatLine(0,"ADMIN",(char*)((int *)&local_3d8));
         return piVar16;
       }
       param_1 = (int *)(**(code **)(**(int **)((int)pCVar18 + 0x14) + 0x1c))();

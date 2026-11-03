@@ -7655,6 +7655,30 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e-xxiii: the hover (OnItemHover 0x00680ea0), the remaining helpers (0x006828b0,
     0x006861d0, 0x00680e00), the store list's description (0x0067aa70).
 
+  PART 9e-xxiii DONE (2026-11-03): the in-game menu's hover, chat lines and stats toggle
+  (game/game_menu.cpp), the store list's description (game/store_list.cpp). Part 9e is done.
+  - OnItemHover 0x00680ea0: no control: false; the popup's (sent to it, target 0; the info screen
+    shown: hidden, false) else the weapons' information label's (posted; none: nothing): left:
+    hidden; entered: cleared, the item's name, weight, a weapon's (behaviours 2-5, 12) ammo rounds,
+    muzzle speed (projectile weapons, firearms) and a rifle scope's zoom (reticle modes 0-3; tan(40
+    degrees) / tan(fov / 2)) as C_ItemInfo::ShowStats' lines (styles 0x10 / 0x11), shown.
+  - AddChatLine 0x006828b0 (__stdcall, C_NetGame's chat received): "<name>: <text>" added to the
+    chat console (0x0CC00000, style 0x26). OnStatsToggle 0x006861d0 (no control registers it: an
+    older screen's): g_soldierStatsShown 0x008ae638 flipped, the skills panel and the store swapped,
+    the 7th control's text "CONTINUE" / "SHOW SOLDIER STATS".
+  - C_StoreList::BuildDescription 0x0067aa70: the group "P_visualstore", its tabs (OnTab, the groups'
+    texts, none for group 4; inactive), its scroll bar (the first page), 500 more empty entries, a
+    page per group (1-3, 5-7), the highlight unlinked at the origin (quirk kept: not checked). (The
+    equipment screen's own copy 0x0067c570 goes with its menu, part 9f.)
+  - Absorbed (only ported callers): 0x00680e00, 0x00685130, 0x006861a0, 0x00686b90, 0x00686bd0.
+    0x0067efb0, 0x0067f1f0, 0x0067f400, 0x00688130 stay (the equipment screen's callers).
+  - Harness: game_menu_test.inc's gmHover, gmChatLine, gmItems (the real description now);
+    store_list_test.inc's slDesc. All factory checks in both orders.
+  - Mutations: mutations/mutate_9e23.py, mutate_9e23b.py (82 of 82 and 45 of 45 killed after the tests added for 3 survivors; none equivalent).
+  - Build: MSVC clean. Tier 1: 394 errors in 71 files, 168 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+3); 4 functions in ported.txt, 5 absorbed. Stats: 8,905 of 12,306 functions, 79.9 % of the bytes.
+  - Next, part 9f: the equipment menu (C_EquipmentMenu; its store list's description 0x0067c570).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

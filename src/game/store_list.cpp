@@ -1,4 +1,4 @@
-// The store's item lists of the equipment menus (original 0x0067b070..0x0067c390).
+// The store's item lists of the equipment menus (original 0x0067aa70, 0x0067b070..0x0067c390).
 #include "game/store_list.h"
 
 #include <cstring>
@@ -11,6 +11,7 @@
 #include "game/items_module.h"
 #include "game/menu_state.h"
 #include "game/profile.h"
+#include "game/screen.h"
 #include "ls3d/i3d.h"
 
 namespace {
@@ -46,6 +47,17 @@ constexpr int TEAM_NONE = 3;
 constexpr int GROUP_UNIFORMS = 6;
 constexpr int BEHAVIOUR_HEADGEAR_ITEM = 16;
 constexpr int FIRST_GROUP = 1;
+// The description's controls: the group, its tabs (their header's and their lines' styles, the
+// groups' texts: none for group 4) and its scroll bar; the pages by their names' and groups.
+constexpr int DESC_TYPE_GROUP = 5, DESC_TYPE_TABS = 0x11, DESC_TYPE_SCROLL_BAR = 8;
+constexpr uint32_t TABS_HEADER_STYLE = 0xC, TAB_STYLE = 0x13;
+constexpr uint32_t TAB_TEXTS[] = {0xA9F, 0xAA0, 0xAA1, 0xAA3, 0xAA4, 0xAA5};
+struct S_StorePage {
+    const char *name;
+    int group;
+};
+constexpr S_StorePage STORE_PAGE_GROUPS[] = {{"GR_SmallWeapons", 1}, {"GR_MiddleWeapons", 2}, {"GR_HeavyWeapons", 3},
+                                             {"GR_Explosives", 5},   {"GR_Dresses", 6},       {"GR_Other", 7}};
 
 uintptr_t FloatValue(float value)
 {
@@ -72,6 +84,31 @@ void Post(uint32_t target, uint32_t id, uint32_t value = 0)
 }
 
 } // namespace
+
+void C_StoreList::BuildDescription(S_ScreenDesc *desc, I3D_frame *model)
+{
+    m_screenIndex = desc->id >> 26;
+    S_ControlDesc *group = desc->AddControl(DESC_TYPE_GROUP, STORE_ANCHOR);
+    m_controlIndex = static_cast<int>(group->id >> 20 & 0x3F);
+    S_ControlDesc *tabs = group->AddChild(DESC_TYPE_TABS, "filter");
+    AddDescMessage(tabs, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0E, reinterpret_cast<uintptr_t>(this),
+                   reinterpret_cast<uintptr_t>(&C_StoreList::OnTab));
+    AddDescMessage(tabs, 0, CONTROL_MSG_SET_HEADER_TEXT_ID, TABS_HEADER_STYLE, TAB_TEXTS[0]);
+    for (uint32_t text : TAB_TEXTS)
+        AddDescMessage(tabs, 0, CONTROL_MSG_ADD_TEXT_ID, TAB_STYLE, text);
+    AddDescMessage(tabs, 0, CONTROL_MSG_DEACTIVATE, 0);
+    AddDescMessage(group->AddChild(DESC_TYPE_SCROLL_BAR, "bscroll"), 0, CONTROL_MSG_SET_VALUE,
+                   BaseId() | STORE_FIRST_PAGE << 12);
+    for (int i = 0; i < MAX_ITEM_TYPES; ++i)
+        m_entries.push_back(0);
+    // (Their results not checked.)
+    for (const S_StorePage &page : STORE_PAGE_GROUPS)
+        BuildPage(group, model, C_fstr(page.name), page.group);
+    // (Quirk kept: the highlight is not checked.)
+    m_highlight = model->FindChildFrame(STORE_HIGHLIGHT, FIND_VISUALS);
+    m_highlight->LinkTo(nullptr, 1);
+    m_highlight->SetPosInline(S_vector(0.0f, 0.0f, 0.0f));
+}
 
 bool C_StoreList::BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name, int group)
 {

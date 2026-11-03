@@ -34,7 +34,7 @@ namespace {
 
 struct S_StoreListResults {
     bool slCount = true, slPage = true, slTab = true, slItem = true, slUpdate = true, slAll = true, slStock = true;
-    bool slAddTake = true, slClear = true, slBuild = true, slBuildNone = true;
+    bool slAddTake = true, slClear = true, slBuild = true, slBuildNone = true, slDesc = true;
 };
 
 // An item type with its ammunition and head gear.
@@ -418,13 +418,79 @@ void StoreListTest(I3D_scene *)
         MsInitVtables();
     }
 
+    // --- the description (part 9e-xxiv): the group "P_visualstore" (the screen's next control; the
+    // list's indices), its tabs (the callback, the header, the groups' texts, inactive), its scroll
+    // bar (the first page), the entries (500 more), the pages (BuildPage per group), the highlight
+    // unlinked at the origin ---
+    {
+        bool ok = true;
+        struct C_SlPaged : C_StoreList {
+            bool BuildPage(S_ControlDesc *parent, I3D_frame *model, C_str name, int group) override
+            {
+                GfLog("page %s %x %s %s %d", parent->name.c_str(), parent->id, MrFrameName(model).c_str(), name.c_str(), group);
+                return group != 2;
+            }
+        };
+        S_MrObj *model = MsFrame("sldm"), *highlight = MsFrame("sldh");
+        g_msChildren[{model, "selitem08"}] = highlight;
+        As<I3D_frame>(highlight)->m_localMatrix(3) = S_vector(1.0f, 2.0f, 3.0f);
+        S_ScreenDesc desc("S", "s", 5u << 26);
+        desc.AddControl(4, "one");
+        desc.AddControl(4, "two");
+        C_SlPaged l;
+        l.m_entries.assign(3, 7);
+        g_gfLog.clear();
+        l.BuildDescription(&desc, As<I3D_frame>(model));
+        const uint32_t id = 3u << 20 | 5u << 26;
+        ok &= l.m_screenIndex == 5 && l.m_controlIndex == 3 && desc.controls.size() == 3;
+        S_ControlDesc *group = desc.controls.back();
+        ok &= group->type == 5 && group->name == "P_visualstore" && group->id == id && group->messages.empty() &&
+              group->children.size() == 2;
+        const auto messages = [](const S_ControlDesc *d) {
+            std::string s;
+            for (const S_ControlMessage &m : d->messages)
+                s += CmText("%x %x %x %x %x %s; ", m.target, m.id, m.value, static_cast<uint32_t>(m.value2),
+                            static_cast<uint32_t>(m.value3), m.text.c_str());
+            return s;
+        };
+        if (group->children.size() == 2) {
+            const S_ControlDesc *tabs = group->children[0], *scroll = group->children[1];
+            ok &= tabs->type == 0x11 && tabs->name == "filter" && tabs->id == (id | 0x1000) && tabs->children.empty();
+            ok &= scroll->type == 8 && scroll->name == "bscroll" && scroll->id == (id | 0x2000) && scroll->children.empty();
+            std::string want = CmText("0 1000007 400e000 %x %x ; 0 1000081 c a9f 0 ; ",
+                                      static_cast<uint32_t>(reinterpret_cast<uintptr_t>(static_cast<C_StoreList *>(&l))),
+                                      static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&C_StoreList::OnTab)));
+            for (int text : {0xa9f, 0xaa0, 0xaa1, 0xaa3, 0xaa4, 0xaa5})
+                want += CmText("0 1000017 13 %x 0 ; ", text);
+            want += "0 1000001 0 0 0 ; ";
+            ok &= messages(tabs) == want;
+            ok &= messages(scroll) == CmText("0 100000b %x 0 0 ; ", id | 0x3000);
+        }
+        ok &= l.m_entries.size() == 503 && l.m_entries[2] == 7 && l.m_entries[3] == 0 && l.m_entries[502] == 0;
+        ok &= MsLogIs({CmText("page P_visualstore %x sldm GR_SmallWeapons 1", id), CmText("page P_visualstore %x sldm GR_MiddleWeapons 2", id),
+                       CmText("page P_visualstore %x sldm GR_HeavyWeapons 3", id), CmText("page P_visualstore %x sldm GR_Explosives 5", id),
+                       CmText("page P_visualstore %x sldm GR_Dresses 6", id), CmText("page P_visualstore %x sldm GR_Other 7", id),
+                       "sldm 48 selitem08 1", "sldh 38 null 1"},
+                      g_gfLog);
+        ok &= l.m_highlight == As<I3D_frame>(highlight) && As<I3D_frame>(highlight)->GetPos().x == 0.0f &&
+              As<I3D_frame>(highlight)->GetPos().y == 0.0f && As<I3D_frame>(highlight)->GetPos().z == 0.0f;
+        // The screen's 34th control: the index's six bits.
+        S_ScreenDesc many("M", "m", 2u << 26);
+        for (int i = 0; i < 33; ++i)
+            many.AddControl(4, "x");
+        C_SlPaged k;
+        k.BuildDescription(&many, As<I3D_frame>(model));
+        ok &= k.m_screenIndex == 2 && k.m_controlIndex == 34;
+        WM(r.slDesc, ok);
+    }
+
     g_gfItemDefs = oldDefs;
     g_slCounts.clear();
     g_msChildren.clear();
     g_controlMessages.clear();
     g_gfLog.clear();
     std::printf("storelist: slCount %d slPage %d slTab %d slItem %d slUpdate %d slAll %d slStock %d slAddTake %d "
-                "slClear %d slBuild %d slBuildNone %d\n",
+                "slClear %d slBuild %d slBuildNone %d slDesc %d\n",
                 r.slCount, r.slPage, r.slTab, r.slItem, r.slUpdate, r.slAll, r.slStock, r.slAddTake, r.slClear,
-                r.slBuild, r.slBuildNone);
+                r.slBuild, r.slBuildNone, r.slDesc);
 }

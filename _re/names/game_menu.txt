@@ -63,6 +63,10 @@
 # Part 9e-xxii: the preset's match.
 006876b0 C_GameMenu::MatchPreset | void * __thiscall MatchPreset(C_GameMenu *this, void * preset)
 00687390 C_GameMenu::FindSubstitute | bool __thiscall FindSubstitute(C_GameMenu *this, int * type, int ammo)
+# Part 9e-xxiii: the item hover, the chat lines, the stats toggle.
+00680ea0 C_GameMenu::OnItemHover | bool __thiscall OnItemHover(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+006828b0 C_GameMenu::AddChatLine | void __stdcall AddChatLine(int unused, char * name, char * text)
+006861d0 C_GameMenu::OnStatsToggle | bool __thiscall OnStatsToggle(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
 # Not ported yet (named for the later parts).
 0072f8b0 C_NetGame::GetLocalPlayerStats
 0072ee60 C_NetGame::SendChat
