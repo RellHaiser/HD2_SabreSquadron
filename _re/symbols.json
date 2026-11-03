@@ -32291,6 +32291,11 @@
   "name": "C_GameMenu::ClearSoldier",
   "proto": "void __fastcall ClearSoldier(C_GameMenu * menu)"
  },
+ "00687390": {
+  "module": "game_menu",
+  "name": "C_GameMenu::FindSubstitute",
+  "proto": "bool __thiscall FindSubstitute(C_GameMenu *this, int * type, int ammo)"
+ },
  "006876b0": {
   "module": "game_menu",
   "name": "C_GameMenu::MatchPreset",

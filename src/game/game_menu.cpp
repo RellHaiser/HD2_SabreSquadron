@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <climits>
 #include <cstring>
 #include <malloc.h>
 
@@ -77,6 +78,10 @@ constexpr uint32_t BACKPACK_SLOT = 8;
 // presets' lines (after the header).
 constexpr uint32_t SAVE_PRESET_BUTTON = 0x0C600000, RENAME_PRESET_BUTTON = 0x0C700000;
 constexpr int USER_PRESET_LINES = 6;
+// The substitutes' scoring: the items whose ids pair up (7, 0x16, 0x104), the behaviour never
+// matched, the scope's kind and its reticles' aim modes (below 4).
+constexpr int PAIRED_ITEMS[] = {0x16, 7, 0x104};
+constexpr int UNMATCHED_BEHAVIOUR = 0x13, RETICLE_MODES = 4, SMALL_BEHAVIOURS = 7, BEHAVIOUR_12 = 12;
 constexpr float DRAG_HEIGHT = 0.1f;
 // The skills panel's controls (the player screen's fourth: 0x0C400000; a skill's name, bar and
 // value 1..3 + 3 per skill) and the values' style; the default stats (a profile not found).
@@ -1229,6 +1234,159 @@ bool C_GameMenu::OnItemNotify60(void *, C_Control *control, uint32_t, uint32_t)
     m_panel.UpdateFace();
     m_storeList.UpdateAll();
     return true;
+}
+
+bool C_GameMenu::FindSubstitute(int &type, int ammo)
+{
+    // (Quirk kept: the type's definition read unchecked.)
+    C_ItemDef *def = type >= 0 && type < STOCK_TYPES ? GetItemDef(type) : nullptr;
+    const int behaviour = def->GetBehaviour();
+    C_ItemStock *stock = m_storeList.GetStock();
+    if (def->GetRecordType() == ITEM_AMMO)
+        return false;
+    const auto paired = [](const C_ItemDef *d) {
+        return std::find(std::begin(PAIRED_ITEMS), std::end(PAIRED_ITEMS), d->GetId()) != std::end(PAIRED_ITEMS);
+    };
+    const auto reticle = [](C_ItemDef *d) {
+        const C_ItemComponent *scope = d->GetSecondaryComponent();
+        return d->GetBehaviour() == 4 && scope && scope->GetKind() == ICK_SCOPE &&
+               static_cast<const C_ScopeComp *>(scope)->GetAimMode() < RETICLE_MODES;
+    };
+    int best = -1, bestScore = INT_MIN;
+    for (int candidate = 0; candidate < STOCK_TYPES; ++candidate) {
+        if (stock->Get(candidate) <= 0)
+            continue;
+        C_ItemDef *other = GetItemDef(candidate);
+        if (!other)
+            continue;
+        int score = candidate == type ? 0x33 : 0;
+        const int otherBehaviour = other->GetBehaviour();
+        if (behaviour == otherBehaviour && behaviour != UNMATCHED_BEHAVIOUR) {
+            score += 100;
+            if (reticle(def) && reticle(other))
+                score += 50;
+            else if (paired(other) && paired(def))
+                score += 60;
+        } else if ((behaviour < SMALL_BEHAVIOURS || behaviour == BEHAVIOUR_12) &&
+                   (otherBehaviour < SMALL_BEHAVIOURS || otherBehaviour == BEHAVIOUR_12)) {
+            switch (otherBehaviour) {
+            case 2:
+                score += 30;
+                break;
+            case 3:
+            case 4:
+                score += 60;
+                break;
+            case 5:
+                score += 50;
+                if (behaviour == BEHAVIOUR_12)
+                    score += 61;
+                break;
+            case BEHAVIOUR_12:
+                score += 50;
+                break;
+            default:
+                score += 10;
+                break;
+            }
+            if (paired(other) && paired(def))
+                score += 110;
+        }
+        if (other->GetBehaviour() <= BEHAVIOUR_12 && other->GetAmmoItemId() >= 0) {
+            const int have = stock->Get(other->GetAmmoItemId());
+            if (ammo > 0) {
+                score += ammo <= have ? 30 : (have - ammo) * 10;
+                if (have == 0)
+                    score -= 100;
+            }
+        }
+        if (score > bestScore && score > 0) {
+            bestScore = score;
+            best = candidate;
+        }
+    }
+    if (type == best)
+        return false;
+    type = best;
+    return best >= 0;
+}
+
+S_LoadoutPreset *C_GameMenu::MatchPreset(const S_LoadoutPreset &preset)
+{
+    auto *match = new S_LoadoutPreset();
+    // Each type's replacement in the belt and the backpack (a swapped weapon's ammunition).
+    int remap[STOCK_TYPES];
+    for (int i = 0; i < STOCK_TYPES; ++i)
+        remap[i] = i;
+    // A place: its substitute, else its own type (none: none).
+    const auto place = [this](int from, int &to, int ammo) {
+        int type = from;
+        if (FindSubstitute(type, ammo))
+            to = type;
+        else if (type >= 0)
+            to = from;
+        return type;
+    };
+    if (preset.head != -1)
+        place(preset.head, match->head, 0);
+    // The weapons: their ammunition in the preset asked (quirk kept: a weapon without a definition
+    // or ammunition keeps the last one's).
+    int ammo = 0, ammoType = -1;
+    const auto weapon = [&](int from, int &to) {
+        if (C_ItemDef *def = from >= 0 && from < STOCK_TYPES ? GetItemDef(from) : nullptr) {
+            if (def->GetAmmoItemId() < 0) {
+                ammo = 0;
+            } else {
+                ammoType = def->GetAmmoItemId();
+                ammo = preset.CountItems(ammoType);
+            }
+        }
+        int type = from;
+        if (!FindSubstitute(type, ammo)) {
+            if (type >= 0)
+                to = from;
+            return;
+        }
+        to = type;
+        if (ammoType >= 0 && type >= 0 && type < STOCK_TYPES && GetItemDef(type))
+            remap[ammoType] = GetItemDef(type)->GetAmmoItemId();
+    };
+    if (preset.hands != -1)
+        weapon(preset.hands, match->hands);
+    if (preset.longGun != -1)
+        weapon(preset.longGun, match->longGun);
+    if (preset.uniform != -1)
+        place(preset.uniform, match->uniform, 0);
+    if (preset.backpack != -1)
+        place(preset.backpack, match->backpack, 0);
+    // The belt's and the backpack's items: merged by type, their own type unless swapped.
+    const auto add = [](S_PresetItem *items, int &n, int max, int type, int count) {
+        if (n >= max)
+            return;
+        for (int i = 0; i < n; ++i) {
+            if (items[i].typeId == type) {
+                items[i].count += count;
+                return;
+            }
+        }
+        items[n].typeId = type;
+        items[n].count = count;
+        ++n;
+    };
+    const auto items = [&](const S_PresetItem *from, int count, S_PresetItem *to, int &n, int max) {
+        for (int i = 0; i < count; ++i) {
+            int type = remap[from[i].typeId];
+            if (type == from[i].typeId && !FindSubstitute(type, 0)) {
+                if (type >= 0)
+                    add(to, n, max, from[i].typeId, from[i].count);
+            } else {
+                add(to, n, max, type, from[i].count);
+            }
+        }
+    };
+    items(preset.belt, preset.beltCount, match->belt, match->beltCount, PRESET_BELT_TYPES);
+    items(preset.backpackItems, preset.backpackCount, match->backpackItems, match->backpackCount, PRESET_BACKPACK_TYPES);
+    return match;
 }
 
 void C_GameMenu::ClearSoldier()

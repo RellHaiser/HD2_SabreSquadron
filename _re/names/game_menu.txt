@@ -60,7 +60,9 @@
 00686e10 C_GameMenu::OnItemNotify60 | bool __thiscall OnItemNotify60(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
 00687360 C_GameMenu::ClearSoldier | void __fastcall ClearSoldier(C_GameMenu * menu)
 00686ca0 C_GameMenu::AddPresetItem | bool __thiscall AddPresetItem(C_GameMenu *this, uint slot, int type, int count)
-# Not ported yet (named for the later parts).
+# Part 9e-xxii: the preset's match.
 006876b0 C_GameMenu::MatchPreset | void * __thiscall MatchPreset(C_GameMenu *this, void * preset)
+00687390 C_GameMenu::FindSubstitute | bool __thiscall FindSubstitute(C_GameMenu *this, int * type, int ammo)
+# Not ported yet (named for the later parts).
 0072f8b0 C_NetGame::GetLocalPlayerStats
 0072ee60 C_NetGame::SendChat

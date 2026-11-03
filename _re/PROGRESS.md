@@ -7634,6 +7634,27 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     (OnItemHover 0x00680ea0), the remaining helpers (0x006828b0, 0x006861d0, 0x00680e00), the store
     list's description.
 
+  PART 9e-xxii DONE (2026-11-03): the in-game menu's preset match (game/game_menu.cpp).
+  - FindSubstitute 0x00687390 (from the asm: its switch's table read): the stock's best item for a
+    type (ammunition: none, false): the same behaviour +100 (behaviour 0x13 never; both scoped with
+    reticles, aim modes 0-3, +50; else both of the ids 7, 0x16, 0x104 +60), else both small
+    (behaviours below 7 or 12) by the candidate's (2 +30, 3 / 4 +60, 5 +50 and +61 more for a 12,
+    12 +50, else +10; paired ids +110); the type itself +51; a weapon's (12 and below) ammunition
+    when asked (+30 enough, else 10 per one short; none -100 more); the first best above 0; the type
+    itself best: false; none: -1.
+  - MatchPreset 0x006876b0: a fresh preset; the places' substitutes (none found: the place's own
+    type if it has one); the weapons' ammunition counted in the preset and their ammunition remapped
+    for the belt and the backpack to the substitute's (quirk kept: a weapon without a definition or
+    ammunition keeps the last one's ammunition type, so a long gun's swap can remap it to none); the
+    belt's and backpack's items their remapped or substituted types (13 / 31 types, merged).
+  - Harness: game_menu_test.inc's gmSubstitute, gmMatch (the pick tests with the real match). 22 of
+    22 in both orders.
+  - Mutations: mutations/mutate_9e22.py (155, 147 killed, 8 equivalent or unreachable).
+  - Build: MSVC clean. Tier 1: 394 errors in 71 files, 168 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+1, 1 moved); 2 functions in ported.txt. Stats: 8,896 of 12,306 functions by hand (79.7 % by size).
+  - Next, 9e-xxiii: the hover (OnItemHover 0x00680ea0), the remaining helpers (0x006828b0,
+    0x006861d0, 0x00680e00), the store list's description (0x0067aa70).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

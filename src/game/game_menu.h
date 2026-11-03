@@ -118,9 +118,18 @@ private:
     // An item of the type (`count` of it) taken from the store and put on the soldier at `slot`
     // (not forced); what that left back to the store. False: not taken, or given back whole.
     bool AddPresetItem(uint32_t slot, int type, int count);   // 0x00686ca0
-    // A copy of the preset with its items the stock lacks swapped for others it has (not ported
-    // yet; the caller deletes it).
+    // A copy of the preset (new: the caller deletes it) its places' items swapped for the stock's
+    // best substitutes (a weapon's ammunition counted in the preset; then the belt's and the
+    // backpack's ammunition of a swapped weapon its substitute's), its belt's and backpack's items
+    // likewise (13 and 31 types at most, merged by type).
     S_LoadoutPreset *MatchPreset(const S_LoadoutPreset &preset);   // 0x006876b0
+    // The stock's best item for `type` (not for ammunition: false): of the same behaviour (+100;
+    // both scoped with reticles +50, both of the ids 7, 0x16, 0x104 +60; not behaviour 0x13), else
+    // of the small behaviours (below 7, or 12; by the candidate's: 2 +30, 3 and 4 +60, 5 +50 (+61
+    // more for a 12), 12 +50, else +10; both of those ids +110), the type itself +51, a weapon's
+    // ammunition in the stock (`ammo` asked: +30 when enough, else 10 per one missing; none -100);
+    // the first best above 0. A different one (or none: -1) put in `type`: true when one.
+    bool FindSubstitute(int &type, int ammo);           // 0x00687390
     // The soldiers panel (none without profiles: false): the model's lists' frames made under
     // "soldierspanel" (GB_Soldiers_a, GB_Soldiers_x), "photo03" (the soldiers' pictures' template,
     // in the first) and "selector" (its copy in the second) moved into them, the tables hidden (no
