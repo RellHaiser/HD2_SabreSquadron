@@ -31852,6 +31852,16 @@
   "module": "equipment_screen",
   "name": "C_EquipmentMenu::CallSelectionPicked"
  },
+ "00677920": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::PutStoreItem",
+  "proto": "bool __thiscall PutStoreItem(C_EquipmentMenu *this, uint slot, int type, int count, bool fill)"
+ },
+ "006779f0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::DropStoreItem",
+  "proto": "bool __thiscall DropStoreItem(C_EquipmentMenu *this, int type, int count, bool fill)"
+ },
  "00678000": {
   "module": "equipment_screen",
   "name": "C_EquipmentMenu::AutoEquip",
@@ -31862,10 +31872,30 @@
   "name": "C_EquipmentMenu::HasRequiredItems",
   "proto": "bool __thiscall HasRequiredItems(C_EquipmentMenu *this)"
  },
+ "00678fe0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnItemNotify60",
+  "proto": "bool __thiscall OnItemNotify60(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00679360": {
   "module": "equipment_screen",
   "name": "C_EquipmentMenu::CountCarried",
   "proto": "int __cdecl CountCarried(void * item, int soldier)"
+ },
+ "00679790": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::ReturnUnrequired",
+  "proto": "void __thiscall ReturnUnrequired(C_EquipmentMenu *this, int soldier, bool withHead)"
+ },
+ "00679b50": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::FindSubstitute",
+  "proto": "bool __thiscall FindSubstitute(C_EquipmentMenu *this, int * type, int ammo, bool axisOnly)"
+ },
+ "00679e80": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::MatchPreset",
+  "proto": "void * __thiscall MatchPreset(C_EquipmentMenu *this, void * preset, bool axisOnly)"
  },
  "0067a3c0": {
   "module": "loadout_presets",
@@ -32024,6 +32054,11 @@
  "0067e3b0": {
   "module": "loadout_presets",
   "name": "uninitialized_fill_n4_67e3b0"
+ },
+ "0067e410": {
+  "module": "equipment_screen",
+  "name": "S_MissionItems::GetRequiredCount",
+  "proto": "int __thiscall GetRequiredCount(void * this, int type)"
  },
  "0067e460": {
   "module": "loadout_presets",

@@ -1,5 +1,5 @@
 // Part 9f's equipment screen (game/equipment_screen.cpp), in the factory build, run by ControlsTest
-// after OptionsTest: the slots not ported yet stubbed (parts 9f-i to -iii), the fakes game_menu_test.inc's and
+// after OptionsTest: the slots not ported yet stubbed (parts 9f-i to -iv), the fakes game_menu_test.inc's and
 // its helpers (the queue's text, the logs joined, the controls answering their index). Prints
 // "equipmentscreen:" with 1 per check met.
 #define private public
@@ -28,11 +28,6 @@ bool C_HumanStore::Load(C_str fileName)
     GfLog("roster load %s", fileName.c_str());
     return true;
 }
-bool C_EquipmentMenu::OnItemNotify60(void *, C_Control *, uint32_t, uint32_t)
-{
-    GfLog("es type");
-    return true;
-}
 
 // The campaign screen's items and kind (private: reached by the explicit instantiation's access).
 template <class Tag, typename Tag::type M> struct S_EsRob {
@@ -51,6 +46,7 @@ struct S_EquipmentScreenResults {
     bool esDragStart = true, esDragMove = true, esDrop = true, esHover = true, esStats = true, esToggle = true;
     bool esPicked = true, esMessage = true, esChecks = true, esCarried = true, esRequired = true;
     bool esItemsScreen = true, esSelection = true, esStatsPanel = true, esStore2 = true, esSquadList = true, esSquad = true, esEquipmentPanel = true, esBuild = true;
+    bool esPut = true, esReturn = true, esTypePicked = true, esSubstitute = true, esMatch = true;
 };
 
 // A frame of the screen's model at a world position (its SetPos logged: "<name> 8 (x y z)").
@@ -1384,6 +1380,716 @@ void EquipmentScreenTest(I3D_scene *scene)
         g_mrMade.erase(FRAME_DUMMY);
     }
 
+    // --- (part 9f-iv) the soldier type picked: the store's items put on the soldier, his unrequired
+    // items back, the presets matched with their substitutes (the in-game menu's tests, the axis
+    // filter's) ---
+    {
+        C_EquipmentMenu m;
+        C_ItemStock stock;
+        m.m_storeList.SetStock(&stock);
+        m.m_storeList.m_entries.resize(500);
+        // (The store's entries of the types: TakeItem answers whether one was updated.)
+        for (uint32_t t = 0; t < 20; ++t)
+            m.m_storeList.m_entries[t] = 0x04401000 + (t << 12);
+        S_SquadSoldier sq;
+        sq.deployed = true;
+        squad.states = {&sq};
+        m.m_panel.m_squadSoldier = &sq;
+        std::vector<std::unique_ptr<C_SlDef>> defs;
+        const auto def = [&](int type, E_ItemRecordType record, int behaviour, int ammo = -1, int id = -1) {
+            defs.push_back(std::make_unique<C_SlDef>(record, behaviour, ammo, -1));
+            defs.back()->m_id = id < 0 ? type : id;
+            g_gfItemDefs[type] = defs.back().get();
+            g_epAllowed[defs.back().get()] = 0xFF;
+            return defs.back().get();
+        };
+        g_gfItemDefs.clear();
+        g_slCounts.clear();
+        g_epDisplaced.clear();
+        g_epRemoved.clear();
+        def(3, ITEM_STATIC, 0);
+        def(4, ITEM_ANIMATED, 2, 8);
+        def(5, ITEM_ANIMATED, 6);
+        def(6, ITEM_STATIC, 15);
+        def(7, ITEM_STATIC, 0);
+        def(8, ITEM_AMMO, 0);
+        def(9, ITEM_STATIC, 0);
+        def(11, ITEM_ANIMATED, 3, 12);
+        def(12, ITEM_AMMO, 0);
+
+        // Put and dropped: not a type, not in the store (unless filled): false; put (what is left back:
+        // of another type true, its own false).
+        bool oku = true;
+        g_gfLog.clear();
+        oku &= !m.PutStoreItem(ITEM_FITS_HEAD, -1, 1, false) && g_gfLog.empty();
+        oku &= !m.PutStoreItem(ITEM_FITS_HEAD, 3, 1, false) && GfLogIs({"stock take 3 1"});
+        g_gfLog.clear();
+        // (Filled: the lacking added first; the fake stock keeps its count.)
+        oku &= !m.PutStoreItem(ITEM_FITS_HEAD, 3, 1, true) && GfLogIs({"stock add 3 1", "stock take 3 1"});
+        g_slCounts = {{3, 1}};
+        g_gfLog.clear();
+        oku &= m.PutStoreItem(ITEM_FITS_HEAD, 3, 1, true) && GmInOrder(Join(g_gfLog), {"stock take 3 1", "put 1 -1 3 1"}) &&
+               !MrHas("stock add 3 1");
+        sq.head = EpMake(-1, -1, 0);
+        g_slCounts = {{9, 3}};
+        g_epDisplaced = {EpMake(5, 7, 1)};
+        g_gfLog.clear();
+        oku &= m.PutStoreItem(ITEM_FITS_BELT, 9, 2, false) && GmInOrder(Join(g_gfLog), {"stock take 9 2", "put 20 -1 9 2", "stock add 7 1"});
+        g_epDisplaced = {EpMake(5, 9, 1)};
+        g_gfLog.clear();
+        oku &= !m.PutStoreItem(ITEM_FITS_BELT, 9, 1, false) && MrHas("stock add 9 1");
+        g_epDisplaced = {EpMake(5, 9, 0)};
+        g_slCounts = {{9, 3}};
+        oku &= m.PutStoreItem(ITEM_FITS_BELT, 9, 1, false);
+        // (Dropped where it goes: the panel's drop.)
+        g_slCounts = {{9, 3}};
+        g_epDisplaced.clear();
+        g_gfLog.clear();
+        oku &= m.DropStoreItem(9, 2, false) && GmInOrder(Join(g_gfLog), {"stock take 9 2", "put "});
+        g_slCounts.clear();
+        g_gfLog.clear();
+        oku &= !m.DropStoreItem(9, 2, false) && GfLogIs({"stock take 9 2"});
+        g_gfLog.clear();
+        oku &= !m.DropStoreItem(9, 2, true) && GfLogIs({"stock add 9 2", "stock take 9 2"});
+        g_epDisplaced = {EpMake(5, 7, 1)};
+        g_slCounts = {{9, 3}};
+        g_gfLog.clear();
+        oku &= m.DropStoreItem(9, 1, false) && MrHas("stock add 7 1");
+        g_epDisplaced = {EpMake(5, 9, 1)};
+        g_slCounts = {{9, 3}};
+        oku &= !m.DropStoreItem(9, 1, false);
+        g_epDisplaced.clear();
+        // (Type 0 an item; a drop's fill forces it past the free weight.)
+        def(0, ITEM_STATIC, 0);
+        g_slCounts = {{0, 1}};
+        g_gfLog.clear();
+        oku &= m.PutStoreItem(ITEM_FITS_BELT, 0, 1, false) && MrHas("stock take 0 1");
+        defs.back()->m_weight = 50.0f;
+        g_epFreeWeight = 10.0f;
+        g_slCounts = {{0, 3}};
+        g_gfLog.clear();
+        m.DropStoreItem(0, 1, false);
+        oku &= !MrHas("put 1 -1 0 1") && !MrHas("put 20 -1 0 1");
+        g_slCounts = {{0, 3}};
+        g_gfLog.clear();
+        m.DropStoreItem(0, 1, true);
+        oku &= MrHas("put 1 -1 0 1") || MrHas("put 20 -1 0 1");
+        g_epFreeWeight = 100.0f;
+        sq.head = sq.uniform = sq.hands = sq.longGun = sq.backpack = EpMake(-1, -1, 0);
+        sq.belt.clear();
+        sq.backpackContents.clear();
+        WM(r.esPut, oku);
+
+        // The unrequired items back (the head's with the flag; the required ones' surplus of the shown
+        // soldier, none: kept).
+        bool okr = true;
+        S_MissionItems *record = m.m_missionItems.m_records[0];
+        g_esMission = 0;
+        record->required = {{8, 1}, {9, 5}};
+        sq.head = EpMake(1, 3, 1);
+        sq.longGun = EpMake(2, 5, 1);
+        sq.hands = EpMake(3, 4, 1);
+        sq.belt = {EpMake(4, 8, 2), EpMake(5, 9, 1)};
+        sq.backpackContents = {EpMake(6, 9, 1), EpMake(7, 7, 1)};
+        sq.backpack = EpMake(8, 7, 1);
+        m.m_soldier = 0;
+        g_gfLog.clear();
+        m.ReturnUnrequired(0, false);
+        // (The belt's first given back twice: the fake leaves it there, its next not looked at.)
+        okr &= MsLogIs({"mission number 0", "remove 10 2 5 1", "stock add 5 1", "remove 4 3 4 1", "stock add 4 1", "remove 20 4 8 1",
+                        "stock add 8 1", "remove 20 4 8 1", "stock add 8 1", "remove 40 7 7 1", "stock add 7 1", "remove 8 8 7 1", "stock add 7 1"},
+                       std::vector<std::string>(MsLogWithout("stock take")));
+        g_gfLog.clear();
+        m.ReturnUnrequired(0, true);
+        okr &= g_gfLog.size() > 1 && g_gfLog[1] == "remove 1 1 3 1";
+        // (None of a place: nothing; the shown soldier's surplus, not the soldier's.)
+        sq.head = sq.longGun = sq.hands = sq.backpack = EpMake(-1, -1, 0);
+        sq.belt = {EpMake(4, 8, 2)};
+        sq.backpackContents.clear();
+        S_SquadSoldier other;
+        other.deployed = true;
+        squad.states = {&sq, &other};
+        m.m_soldier = 1;
+        g_gfLog.clear();
+        m.ReturnUnrequired(0, true);
+        okr &= MsLogIs({"mission number 0"}, g_gfLog) && m.m_panel.m_squadSoldier == &sq;
+        // (No soldier: nothing.)
+        squad.states.clear();
+        g_gfLog.clear();
+        m.ReturnUnrequired(0, true);
+        okr &= MsLogIs({"mission number 0"}, g_gfLog);
+        squad.states = {&sq};
+        m.m_soldier = 0;
+        // (The soldier selected first: the panel's; type 0 given back.)
+        squad.states = {&other, &sq};
+        m.m_soldier = 1;
+        m.m_panel.SelectSoldier(0);
+        sq.head = EpMake(9, 0, 1);
+        g_gfLog.clear();
+        m.ReturnUnrequired(1, true);
+        okr &= m.m_panel.m_squadSoldier == &sq && MrHas("remove 1 9 0 1");
+        sq.head = EpMake(-1, -1, 0);
+        squad.states = {&sq};
+        m.m_soldier = 0;
+        // (No record: all back.)
+        g_esMission = 7;
+        sq.belt = {EpMake(4, 8, 2)};
+        g_gfLog.clear();
+        m.ReturnUnrequired(0, true);
+        okr &= MrHas("remove 20 4 8 2");
+        g_esMission = 0;
+        record->required.clear();
+        WM(r.esReturn, okr);
+
+        // The soldier type picked: none, nothing; the header: his items back, false; a line without a
+        // preset: the panel and the store; a preset: its match's items onto him (not the uniform).
+        bool okt = true;
+        const auto pick = [&](uint32_t value) {
+            C_GmPicked control(value);
+            g_gfLog.clear();
+            return m.OnItemNotify60(nullptr, &control, CONTROL_NOTIFY_0E, 0);
+        };
+        g_gfLog.clear();
+        okt &= m.OnItemNotify60(nullptr, nullptr, 0, 0) && g_gfLog.empty();
+        sq.belt = {EpMake(4, 9, 1)};
+        sq.head = EpMake(2, 3, 1);
+        squad.states = {&other, &sq};
+        m.m_soldier = 1;
+        m.m_panel.SelectSoldier(0);
+        g_controlMessages.clear();
+        okt &= !pick(0) && MrHas("remove 20 4 9 1") && MrHas("stock add 9 1") && MrHas("remove 1 2 3 1") &&
+               m.m_panel.m_squadSoldier == &sq;
+        std::string q = GmQueue();
+        okt &= q.find(" 1000039 ") != std::string::npos && q.rfind(" 100007c ") != std::string::npos && q.rfind(" 100007c ") > q.rfind(" 1000039 ");
+        sq.head = EpMake(-1, -1, 0);
+        m.m_panel.SelectSoldier(0);
+        okt &= pick(1) && m.m_panel.m_squadSoldier == &sq;
+        q = GmQueue();
+        okt &= q.find(" 1000039 ") != std::string::npos && q.rfind(" 100007c ") != std::string::npos && q.rfind(" 100007c ") > q.rfind(" 1000039 ");
+        squad.states = {&sq};
+        m.m_soldier = 0;
+        okt &= !pick(static_cast<uint32_t>(-1)) && g_gfLog.empty();
+        sq.belt.clear();
+        okt &= pick(1) && !MrHas("stock take 3 1");
+        S_LoadoutPreset preset;
+        preset.flags = 5;
+        preset.head = 3;
+        preset.hands = 4;
+        preset.longGun = 5;
+        preset.uniform = 6;
+        preset.backpack = 7;
+        preset.beltCount = 1;
+        preset.belt[0] = {8, 2};
+        preset.backpackCount = 1;
+        preset.backpackItems[0] = {9, 1};
+        S_LoadoutPreset user;
+        user.flags = 4;
+        m.m_presets.m_presets = {&user, &preset};
+        g_slCounts = {{3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 5}, {9, 5}};
+        sq.backpackContents = {EpMake(7, 9, 1)};
+        m.m_panel.SelectSoldier(-1);
+        okt &= pick(1) && MrHas("remove 40 7 9 1") && m.m_panel.m_squadSoldier == &sq;
+        sq.backpackContents.clear();
+        sq.head = sq.uniform = sq.hands = sq.longGun = sq.backpack = EpMake(-1, -1, 0);
+        sq.belt.clear();
+        g_slCounts = {{3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 5}, {9, 5}};
+        okt &= pick(1) && GmInOrder(Join(g_gfLog), {"put 1 -1 3 1", "put 4 -1 4 1", "put 10 -1 5 1", "put 8 -1 7 1",
+                                                    "put 20 -1 8 2", "put 40 -1 9 1"}) &&
+               !MrHas("stock take 6 1");
+        // (Another hands' weapon of another kind: not taken, nor its ammunition; the message.)
+        C_MessageBox box(scene, GfFrame(FRAME_DUMMY, "esbox4"));
+        m.m_messageBox = &box;
+        box.m_kind = MESSAGE_BOX_NONE;
+        preset.belt[0] = {12, 2};
+        g_slCounts = {{11, 1}, {12, 5}};
+        sq.head = sq.longGun = sq.hands = sq.backpack = EpMake(-1, -1, 0);
+        sq.belt.clear();
+        sq.backpackContents.clear();
+        g_controlMessages.clear();
+        okt &= pick(1) && !MrHas("put 4 -1 11 1") && !MrHas("put 20 -1 12 2") && box.m_kind == MESSAGE_BOX_OK &&
+               box.m_yesMessage == 0 && GmQueue().find("1000015 18 2532 ; ") != std::string::npos;
+        m.CloseMessage();
+        // (Of the same kind: taken.)
+        def(11, ITEM_ANIMATED, 2, 12);
+        g_slCounts = {{11, 5}, {12, 5}};
+        box.m_kind = MESSAGE_BOX_NONE;
+        okt &= pick(1) && MrHas("put 4 -1 11 1") && MrHas("put 20 -1 12 2") && box.m_kind == MESSAGE_BOX_NONE;
+        // (Of the same kind, a scope's reticle on one: not taken.)
+        C_ScopeComp scope;
+        scope.m_aimMode = 2;
+        def(13, ITEM_ANIMATED, 4, 12);
+        def(14, ITEM_ANIMATED, 4, 12)->m_secondaryComponent = &scope;
+        preset.hands = 13;
+        g_slCounts = {{14, 5}, {12, 5}};
+        sq.head = sq.hands = sq.longGun = sq.backpack = EpMake(-1, -1, 0);
+        okt &= pick(1) && !MrHas("put 4 -1 14 1");
+        g_gfItemDefs[13]->m_secondaryComponent = &scope;
+        sq.head = sq.hands = sq.longGun = sq.backpack = EpMake(-1, -1, 0);
+        g_slCounts = {{14, 5}, {12, 5}};
+        okt &= pick(1) && MrHas("put 4 -1 14 1");
+        g_gfItemDefs[13]->m_secondaryComponent = nullptr;
+        g_gfItemDefs[14]->m_secondaryComponent = nullptr;
+        preset.hands = 4;
+        // (A preset without hands: none put, its ammunition all the same.)
+        preset.hands = -1;
+        g_slCounts = {{12, 5}};
+        okt &= pick(1) && MrHas("put 20 -1 12 2");
+        m.m_messageBox = nullptr;
+        m.m_presets.m_presets.clear();
+        WM(r.esTypePicked, okt);
+        m.m_panel.m_squadSoldier = nullptr;
+        squad.states.clear();
+        m.m_storeList.m_stock = nullptr;
+        g_slCounts.clear();
+        g_gfItemDefs = oldDefs;
+        for (const auto &d : defs)
+            g_epAllowed.erase(d.get());
+    }
+
+    // --- (part 9f-iv, the in-game menu's test) the substitutes: the stock's best by score (the type itself, the same
+    // behaviour, scoped reticles, paired ids, the small behaviours' table, a weapon's ammunition);
+    // none for ammunition; the type itself best: false. The preset matched: its places swapped (a
+    // weapon's ammunition counted, then swapped in the belt and backpack), its items merged ---
+    {
+        C_EquipmentMenu m;
+        C_ItemStock stock;
+        m.m_storeList.SetStock(&stock);
+        std::vector<std::unique_ptr<C_SlDef>> defs;
+        const std::map<int, C_ItemDef *> keptDefs = g_gfItemDefs;
+        g_gfItemDefs.clear();
+        // A type: its record, behaviour, ammunition, id (its type unless given).
+        const auto def = [&](int type, E_ItemRecordType record, int behaviour, int ammo = -1, int id = -1) {
+            defs.push_back(std::make_unique<C_SlDef>(record, behaviour, ammo, -1));
+            defs.back()->m_id = id < 0 ? type : id;
+            g_gfItemDefs[type] = defs.back().get();
+            return defs.back().get();
+        };
+        C_ScopeComp reticle, ironSights;
+        reticle.m_aimMode = 2;
+        ironSights.m_aimMode = 5;
+        bool axisOnly = false;
+        const auto best = [&](int type, int ammo) {
+            int t = type;
+            const bool found = m.FindSubstitute(t, ammo, axisOnly);
+            return CmText("%d %d", found, t);
+        };
+        bool oks = true;
+        def(1, ITEM_AMMO, 0);
+        g_slCounts = {{1, 1}, {2, 1}};
+        def(2, ITEM_STATIC, 0);
+        oks &= best(1, 0) == "0 1";
+        // The type itself (in the stock) best: false; not there, another of its behaviour.
+        def(3, ITEM_STATIC, 0);
+        g_slCounts = {{2, 1}, {3, 1}};
+        oks &= best(3, 0) == "0 3";
+        g_slCounts = {{2, 1}};
+        oks &= best(3, 0) == "1 2";
+        // None: -1, false.
+        g_slCounts = {};
+        oks &= best(3, 0) == "0 -1";
+        // Behaviour 0x13 never matched; scoped reticles +50 over the same behaviour; paired ids +60.
+        def(4, ITEM_STATIC, 0x13);
+        def(5, ITEM_STATIC, 0x13);
+        g_slCounts = {{5, 1}};
+        oks &= best(4, 0) == "0 -1";
+        C_SlDef *r10 = def(10, ITEM_ANIMATED, 4), *r11 = def(11, ITEM_ANIMATED, 4), *r12 = def(12, ITEM_ANIMATED, 4);
+        r10->m_secondaryComponent = &reticle;
+        r12->m_secondaryComponent = &reticle;
+        r11->m_secondaryComponent = &ironSights;
+        g_slCounts = {{11, 1}, {12, 1}};
+        oks &= best(10, 0) == "1 12";
+        r12->m_secondaryComponent = &ironSights;
+        oks &= best(10, 0) == "1 11";
+        // (Paired: the ids 7, 0x16, 0x104.)
+        def(20, ITEM_ANIMATED, 2, -1, 7);
+        def(21, ITEM_ANIMATED, 2, -1, 0x16);
+        def(22, ITEM_ANIMATED, 2, -1, 99);
+        g_slCounts = {{22, 1}, {21, 1}};
+        oks &= best(20, 0) == "1 21";
+        def(23, ITEM_ANIMATED, 2, -1, 0x104);
+        g_slCounts = {{22, 1}, {23, 1}};
+        oks &= best(20, 0) == "1 23";
+        // The small behaviours: by the candidate's (3 and 4: 60 over 5: 50 over 2: 30 over 1: 10).
+        def(30, ITEM_ANIMATED, 6);
+        def(31, ITEM_ANIMATED, 1);
+        def(32, ITEM_ANIMATED, 2);
+        def(33, ITEM_ANIMATED, 5);
+        def(34, ITEM_ANIMATED, 3);
+        def(35, ITEM_ANIMATED, 4);
+        def(36, ITEM_ANIMATED, 12);
+        def(37, ITEM_ANIMATED, 8);
+        g_slCounts = {{31, 1}};
+        oks &= best(30, 0) == "1 31";
+        g_slCounts = {{31, 1}, {32, 1}};
+        oks &= best(30, 0) == "1 32";
+        g_slCounts = {{31, 1}, {32, 1}, {33, 1}};
+        oks &= best(30, 0) == "1 33";
+        g_slCounts = {{33, 1}, {34, 1}};
+        oks &= best(30, 0) == "1 34";
+        g_slCounts = {{33, 1}, {35, 1}};
+        oks &= best(30, 0) == "1 35";
+        g_slCounts = {{36, 1}, {32, 1}};
+        oks &= best(30, 0) == "1 36";
+        // (Not small: nothing; a 12 asking: its 5 +61 more; a small paired with a small +110.)
+        g_slCounts = {{37, 1}};
+        oks &= best(30, 0) == "0 -1";
+        def(38, ITEM_ANIMATED, 12);
+        g_slCounts = {{33, 1}, {34, 1}};
+        oks &= best(38, 0) == "1 33";
+        def(39, ITEM_ANIMATED, 6, -1, 7);
+        def(40, ITEM_ANIMATED, 1, -1, 0x104);
+        g_slCounts = {{40, 1}, {34, 1}};
+        oks &= best(39, 0) == "1 40";
+        // (Exact: a paired candidate of the same behaviour 160 against a later rival's 160 (small 60,
+        // paired 110, an ammunition short -10); a 12's 5 (111) against an earlier rival's 110.)
+        def(490, ITEM_ANIMATED, 2, -1, 7);
+        def(491, ITEM_ANIMATED, 2, -1, 0x16);
+        def(492, ITEM_ANIMATED, 3, 493, 0x104);
+        def(493, ITEM_AMMO, 0);
+        g_slCounts = {{491, 1}, {492, 1}, {493, 2}};
+        oks &= best(490, 3) == "1 491";
+        def(494, ITEM_ANIMATED, 12, -1, 7);
+        def(495, ITEM_ANIMATED, 1, 497, 0x16);
+        def(496, ITEM_ANIMATED, 5, -1, 99);
+        def(497, ITEM_AMMO, 0);
+        g_slCounts = {{495, 1}, {496, 1}, {497, 2}};
+        oks &= best(494, 3) == "1 496";
+        // (The axis' only: another team's best not taken.)
+        g_slCounts = {{33, 1}, {34, 1}};
+        axisOnly = true;
+        defs.back()->m_team = 1;
+        oks &= best(30, 0) == "0 -1";
+        g_gfItemDefs[33]->m_team = 1;
+        oks &= best(30, 0) == "1 33";
+        g_gfItemDefs[33]->m_team = 0;
+        defs.back()->m_team = 0;
+        axisOnly = false;
+        WM(r.esSubstitute, oks);
+        // A weapon's ammunition: enough +30, short 10 per one, none -100 more.
+        def(50, ITEM_ANIMATED, 4, 60);
+        def(51, ITEM_ANIMATED, 4, 61);
+        def(52, ITEM_ANIMATED, 4, 62);
+        def(60, ITEM_AMMO, 0);
+        def(61, ITEM_AMMO, 0);
+        g_slCounts = {{51, 1}, {52, 1}, {61, 5}};
+        oks &= best(50, 4) == "1 51";
+        g_slCounts = {{51, 1}, {52, 1}, {61, 2}};
+        oks &= best(50, 4) == "1 51";
+        g_slCounts = {{51, 1}, {52, 1}, {61, 0}, {62, 4}};
+        oks &= best(50, 4) == "1 52";
+        // (Neither's ammunition there: both below 0, none.)
+        g_slCounts = {{51, 1}, {52, 1}};
+        oks &= best(50, 4) == "0 -1";
+        // (No ammunition asked: the first of the best.)
+        g_slCounts = {{51, 1}, {52, 1}, {61, 0}};
+        oks &= best(50, 0) == "1 51";
+        // (Above 12 no ammunition counted.)
+        def(53, ITEM_ANIMATED, 13, 61);
+        def(54, ITEM_ANIMATED, 13, 62);
+        g_slCounts = {{54, 1}, {61, 5}};
+        oks &= best(53, 4) == "1 54";
+        WM(r.esSubstitute, oks);
+        // The scores exactly, by ties: the rival's (the lower type) wins a tie, the candidate's
+        // (the higher) a point more. Types 100.. per case (the type asked, the rival, the candidate,
+        // their ammunition).
+        {
+            // A case: the asked type's behaviour (paired: id 7), the rival and the candidate (their
+            // behaviours, paired (id 0x16), scoped with reticles (aim 2), ammunition have / asked).
+            struct S_Side {
+                int behaviour;
+                bool paired, scoped;
+                int ammoHave;                   // -1: no ammunition
+            };
+            int base = 100;
+            const auto tie = [&](int behaviour, bool paired, bool scoped, S_Side rival, S_Side candidate, int asked) {
+                const int t = base, r = base + 1, c = base + 2, ra = base + 3, ca = base + 4;
+                base += 10;
+                def(t, ITEM_ANIMATED, behaviour, -1, paired ? 7 : t);
+                if (scoped)
+                    g_gfItemDefs[t]->m_secondaryComponent = &reticle;
+                g_slCounts.clear();
+                const auto side = [&](int type, int ammoType, const S_Side &s) {
+                    C_SlDef *d = def(type, ITEM_ANIMATED, s.behaviour, s.ammoHave >= 0 ? ammoType : -1, s.paired ? 0x16 : type);
+                    if (s.scoped)
+                        d->m_secondaryComponent = &reticle;
+                    g_slCounts[type] = 1;
+                    if (s.ammoHave >= 0) {
+                        def(ammoType, ITEM_AMMO, 0);
+                        g_slCounts[ammoType] = s.ammoHave;
+                    }
+                };
+                side(r, ra, rival);
+                side(c, ca, candidate);
+                return best(t, asked) == CmText("1 %d", r);
+            };
+            bool okt = true;
+            // Same behaviour +100: the rival a paired small one (10 + 110, 2 short: 100).
+            okt &= tie(6, true, false, {1, true, false, 1}, {6, false, false, -1}, 3);
+            // Paired small +110: a paired 1 (10 + 110 - 20) against the same behaviour (100).
+            okt &= tie(6, true, false, {6, false, false, -1}, {1, true, false, 1}, 3);
+            // Scoped reticles +50 (150): a paired 3 (60 + 110 - 20).
+            okt &= tie(4, true, true, {3, true, false, 1}, {4, false, true, -1}, 3);
+            // Paired same +60 (160): a paired 3, 1 short.
+            okt &= tie(4, true, false, {3, true, false, 2}, {4, true, false, -1}, 3);
+            // The small table by the candidate's: 2 +30, 3 +60, 4 +60, 5 +50, 12 +50, 1 +10 (the rival
+            // the same behaviour, short to match).
+            okt &= tie(6, false, false, {6, false, false, 1}, {2, false, false, -1}, 8);
+            okt &= tie(6, false, false, {6, false, false, 1}, {3, false, false, -1}, 5);
+            okt &= tie(6, false, false, {6, false, false, 1}, {4, false, false, -1}, 5);
+            okt &= tie(6, false, false, {6, false, false, 1}, {5, false, false, -1}, 6);
+            okt &= tie(6, false, false, {6, false, false, 1}, {12, false, false, -1}, 6);
+            okt &= tie(6, false, false, {6, false, false, 1}, {1, false, false, -1}, 10);
+            // The ammunition enough +30 (130): a paired 3, 4 short.
+            okt &= tie(4, true, false, {3, true, false, 1}, {4, false, false, 5}, 5);
+            WM(r.esSubstitute, okt);
+            // A 12 asking: its 5 +61 more (111), the type itself (100 + 51, 4 short) the rival.
+            {
+                const int t = base, x = base + 2, a = base + 3;
+                base += 10;
+                def(t, ITEM_ANIMATED, 12, a);
+                def(a, ITEM_AMMO, 0);
+                def(x, ITEM_ANIMATED, 5);
+                g_slCounts = {{t, 1}, {a, 2}, {x, 1}};
+                okt &= best(t, 6) == CmText("0 %d", t);
+            }
+            // The type itself +51 (131, 2 short) over a later same behaviour with enough (130).
+            {
+                const int x = base, t = base + 2, a = base + 3, xa = base + 4;
+                base += 10;
+                def(x, ITEM_ANIMATED, 4, xa);
+                def(xa, ITEM_AMMO, 0);
+                def(t, ITEM_ANIMATED, 4, a);
+                def(a, ITEM_AMMO, 0);
+                g_slCounts = {{x, 1}, {xa, 4}, {t, 1}, {a, 2}};
+                okt &= best(t, 4) == CmText("0 %d", t);
+            }
+            // Exactly enough: +30 (130 over a paired 3, 5 short: 120).
+            {
+                const int t = base, r = base + 1, c = base + 2, ra = base + 3, ca = base + 4;
+                base += 10;
+                def(t, ITEM_ANIMATED, 4, -1, 7);
+                def(r, ITEM_ANIMATED, 3, ra, 0x16);
+                def(ra, ITEM_AMMO, 0);
+                def(c, ITEM_ANIMATED, 4, ca);
+                def(ca, ITEM_AMMO, 0);
+                g_slCounts = {{r, 1}, {ra, 1}, {c, 1}, {ca, 6}};
+                okt &= best(t, 6) == CmText("1 %d", c);
+            }
+            // None of its ammunition -100 more: a scoped one (150 - 30 - 100: 20) first, tied by a later
+            // small 2 (30, 1 short).
+            {
+                const int t = base, c = base + 1, r = base + 2, ca = base + 3, ra = base + 4;
+                base += 10;
+                def(t, ITEM_ANIMATED, 4)->m_secondaryComponent = &reticle;
+                def(c, ITEM_ANIMATED, 4, ca)->m_secondaryComponent = &reticle;
+                def(ca, ITEM_AMMO, 0);
+                def(r, ITEM_ANIMATED, 2, ra);
+                def(ra, ITEM_AMMO, 0);
+                g_slCounts = {{c, 1}, {ca, 0}, {r, 1}, {ra, 2}};
+                okt &= best(t, 3) == CmText("1 %d", c);
+                // (Aim mode 3 a reticle too.)
+                C_ScopeComp three;
+                three.m_aimMode = 3;
+                g_gfItemDefs[t]->m_secondaryComponent = &three;
+                g_gfItemDefs[c]->m_secondaryComponent = &three;
+                okt &= best(t, 3) == CmText("1 %d", c);
+            }
+            // Ammunition asked only above 0; behaviour 12 counted; an ammunition type 0 counted.
+            {
+                const int t = base, y = base + 1, x = base + 2, xa = base + 3;
+                base += 10;
+                def(t, ITEM_ANIMATED, 12);
+                def(y, ITEM_ANIMATED, 1);
+                def(x, ITEM_ANIMATED, 12, xa);
+                def(xa, ITEM_AMMO, 0);
+                g_slCounts = {{y, 1}, {x, 1}};
+                okt &= best(t, 1) == CmText("1 %d", y) && best(t, 0) == CmText("1 %d", x);
+                def(0, ITEM_AMMO, 0);
+                g_gfItemDefs[x] = defs.back().get();
+                C_SlDef *x0 = def(x, ITEM_ANIMATED, 12, 0);
+                (void)x0;
+                g_slCounts = {{y, 1}, {x, 1}, {0, 0}};
+                okt &= best(t, 1) == CmText("1 %d", y);
+                g_gfItemDefs.erase(0);
+            }
+            // A score of exactly 1 chosen (the type itself: 151, 15 short; not small: its ammunition
+            // no candidate; an id paired with none).
+            {
+                const int t = base, a = base + 3;
+                base += 10;
+                def(t, ITEM_ANIMATED, 8, a, 9999);
+                def(a, ITEM_AMMO, 0);
+                g_slCounts = {{t, 1}, {a, 1}};
+                okt &= best(t, 16) == CmText("0 %d", t);
+            }
+            // Type 0: a candidate, and asked.
+            def(0, ITEM_ANIMATED, 4);
+            {
+                const int t = base;
+                base += 10;
+                def(t, ITEM_ANIMATED, 4);
+                g_slCounts = {{0, 1}};
+                okt &= best(t, 0) == "1 0" && best(0, 0) == "0 0";
+            }
+            g_gfItemDefs.erase(0);
+            // Behaviour 7 not small (as asked or offered).
+            {
+                const int t = base, x = base + 2, t2 = base + 4, x2 = base + 5;
+                base += 10;
+                def(t, ITEM_ANIMATED, 7);
+                def(x, ITEM_ANIMATED, 3);
+                def(t2, ITEM_ANIMATED, 6);
+                def(x2, ITEM_ANIMATED, 7);
+                g_slCounts = {{x, 1}};
+                okt &= best(t, 0) == "0 -1";
+                g_slCounts = {{x2, 1}};
+                okt &= best(t2, 0) == "0 -1";
+            }
+            WM(r.esSubstitute, okt);
+        }
+
+        // The match.
+        bool okm = true;
+        S_LoadoutPreset p;
+        p.head = 3;
+        p.hands = 50;
+        p.longGun = 10;
+        p.uniform = 2;
+        p.backpack = 1;
+        p.beltCount = 3;
+        p.belt[0] = {60, 2};
+        p.belt[1] = {3, 1};
+        p.belt[2] = {60, 1};
+        p.backpackCount = 2;
+        p.backpackItems[0] = {2, 4};
+        p.backpackItems[1] = {1, 1};
+        std::strcpy(p.name, "P");
+        p.flags = LOADOUT_ALLIED;
+        p.textId = 9;
+        p.unknown1b4 = 7;
+        // (Head 3 kept; weapon 50 swapped for 51 (its ammunition 60 for 61); long gun 10 for 12; the
+        // uniform's 2 for 3; the backpack's ammunition none: kept.)
+        r12->m_secondaryComponent = &reticle;
+        g_slCounts = {{3, 1}, {51, 1}, {61, 9}, {12, 1}};
+        S_LoadoutPreset *q = m.MatchPreset(p, false);
+        okm &= q && q->head == 3 && q->hands == 51 && q->longGun == 12 && q->uniform == 3 && q->backpack == 1 &&
+               q->name[0] == 0 && q->flags == 0 && q->textId == -1 && q->unknown1b4 == 0;
+        // (Quirk kept: the long gun without ammunition keeps the weapon's ammunition type, its swap
+        // remapping it to the long gun's none.)
+        okm &= q && q->beltCount == 2 && q->belt[0].typeId == -1 && q->belt[0].count == 3 && q->belt[1].typeId == 3 &&
+               q->belt[1].count == 1 && q->backpackCount == 2 && q->backpackItems[0].typeId == 3 &&
+               q->backpackItems[0].count == 4 && q->backpackItems[1].typeId == 1;
+        delete q;
+        // (Nothing in the stock: the places none, the items dropped but the unswappable ammunition.)
+        g_slCounts = {};
+        q = m.MatchPreset(p, false);
+        okm &= q && q->head == -1 && q->hands == -1 && q->longGun == -1 && q->uniform == -1 && q->backpack == 1 &&
+               q->beltCount == 1 && q->belt[0].typeId == 60 && q->belt[0].count == 3 && q->backpackCount == 1 &&
+               q->backpackItems[0].typeId == 1;
+        delete q;
+        WM(r.esMatch, okm);
+        // The places' ammunition asked 0 (a weapon candidate short of its own would lose); a type 0
+        // kept; the weapons' ammunition counted (its type 0 too: remapped); a weapon without
+        // ammunition asks none; 13 belt types at most; the items' substitutes asked no ammunition.
+        {
+            const int h = 400, w = 401, c = 402, wa = 403;
+            def(h, ITEM_STATIC, 6);
+            def(w, ITEM_ANIMATED, 3, wa);
+            def(wa, ITEM_AMMO, 0);
+            def(c, ITEM_ANIMATED, 1);
+            g_slCounts = {{w, 9}, {wa, 0}, {c, 9}};
+            S_LoadoutPreset places;
+            places.head = places.uniform = places.backpack = h;
+            places.beltCount = 1;
+            places.belt[0] = {h, 1};
+            q = m.MatchPreset(places, false);
+            okm &= q->head == w && q->uniform == w && q->backpack == w && q->beltCount == 1 && q->belt[0].typeId == w;
+            delete q;
+            // (Type 0 kept as a place, a weapon and an item.)
+            def(0, ITEM_ANIMATED, 4);
+            g_slCounts = {{0, 2}};
+            S_LoadoutPreset zero;
+            zero.head = zero.hands = 0;
+            zero.beltCount = 1;
+            zero.belt[0] = {0, 2};
+            q = m.MatchPreset(zero, false);
+            okm &= q->head == 0 && q->hands == 0 && q->beltCount == 1 && q->belt[0].typeId == 0 && q->belt[0].count == 2;
+            delete q;
+            // (The weapon's ammunition counted: 3 of its type 0 in the belt; the substitute's ammunition
+            // there (410 short 0: 130 over 411 none) remaps it.)
+            const int x2 = 410, x1 = 411, a1 = 412, a2 = 413, hw = 414;
+            def(0, ITEM_AMMO, 0);
+            def(hw, ITEM_ANIMATED, 4, 0);
+            def(x2, ITEM_ANIMATED, 4, a2);
+            def(a2, ITEM_AMMO, 0);
+            def(x1, ITEM_ANIMATED, 4, a1);
+            def(a1, ITEM_AMMO, 0);
+            // (409: enough only for 1 of it: ahead of 410 at the count of 1.)
+            def(409, ITEM_ANIMATED, 4, 408);
+            def(408, ITEM_AMMO, 0);
+            g_slCounts = {{409, 1}, {408, 1}, {x1, 1}, {a1, 3}, {x2, 1}, {a2, 0}};
+            S_LoadoutPreset armed;
+            armed.hands = hw;
+            armed.beltCount = 1;
+            armed.belt[0] = {0, 3};
+            q = m.MatchPreset(armed, false);
+            okm &= q->hands == x1 && q->beltCount == 1 && q->belt[0].typeId == a1;
+            delete q;
+            // (Weapon type 0 with ammunition 412: counted, 410 chosen.)
+            def(0, ITEM_ANIMATED, 4, a1);
+            g_slCounts = {{x1, 1}, {a1, 3}, {x2, 1}, {a2, 0}};
+            S_LoadoutPreset zeroWeapon;
+            zeroWeapon.hands = 0;
+            zeroWeapon.beltCount = 1;
+            zeroWeapon.belt[0] = {a1, 3};
+            q = m.MatchPreset(zeroWeapon, false);
+            okm &= q->hands == x1;
+            delete q;
+            g_gfItemDefs.erase(0);
+            // (A long gun without ammunition after a weapon with it: none asked, the first of two ties.)
+            const int lg = 420, k1 = 421, k2 = 422, ka = 423, hh = 424, hha = 425;
+            def(hh, ITEM_ANIMATED, 2, hha);
+            def(hha, ITEM_AMMO, 0);
+            def(lg, ITEM_ANIMATED, 3);
+            def(k1, ITEM_ANIMATED, 3, ka);
+            def(ka, ITEM_AMMO, 0);
+            def(k2, ITEM_ANIMATED, 3);
+            g_slCounts = {{hh, 1}, {hha, 3}, {k1, 1}, {ka, 0}, {k2, 1}};
+            S_LoadoutPreset guns;
+            guns.hands = hh;
+            guns.longGun = lg;
+            guns.beltCount = 1;
+            guns.belt[0] = {hha, 3};
+            q = m.MatchPreset(guns, false);
+            okm &= q->hands == hh && q->longGun == k1;
+            delete q;
+            // (14 ammunition types in the belt: 13 kept.)
+            S_LoadoutPreset full;
+            full.beltCount = 14;
+            for (int i = 0; i < 14; ++i) {
+                def(430 + i, ITEM_AMMO, 0);
+                full.belt[i] = {430 + i, 1};
+            }
+            q = m.MatchPreset(full, false);
+            okm &= q->beltCount == 13 && q->belt[12].typeId == 442;
+            delete q;
+            S_LoadoutPreset packed;
+            packed.backpackCount = 32;
+            for (int i = 0; i < 32; ++i) {
+                def(450 + i, ITEM_AMMO, 0);
+                packed.backpackItems[i] = {450 + i, 1};
+            }
+            q = m.MatchPreset(packed, false);
+            okm &= q->backpackCount == 31 && q->backpackItems[30].typeId == 480;
+            delete q;
+            WM(r.esMatch, okm);
+        }
+        r10->m_secondaryComponent = r11->m_secondaryComponent = r12->m_secondaryComponent = nullptr;
+        g_slCounts.clear();
+        g_gfItemDefs = keptDefs;
+        m.m_storeList.m_stock = nullptr;
+    }
+
     g_gfItemDefs = oldDefs;
     g_gameProfile.m_playMode = oldPlayMode;
     g_gameProfile.m_itemStock18 = old18;
@@ -1396,8 +2102,8 @@ void EquipmentScreenTest(I3D_scene *scene)
     g_controlMessages.clear();
     std::printf("equipmentscreen: esNew %d esStart %d esStop %d esStore %d esTake %d esClicked %d esDragStart %d "
                 "esDragMove %d esDrop %d esHover %d esStats %d esToggle %d esPicked %d esMessage %d esChecks %d "
-                "esCarried %d esRequired %d esItemsScreen %d esSelection %d esStatsPanel %d esStore2 %d esSquadList %d esSquad %d esEquipmentPanel %d esBuild %d\n",
+                "esCarried %d esRequired %d esItemsScreen %d esSelection %d esStatsPanel %d esStore2 %d esSquadList %d esSquad %d esEquipmentPanel %d esBuild %d esPut %d esReturn %d esTypePicked %d esSubstitute %d esMatch %d\n",
                 r.esNew, r.esStart, r.esStop, r.esStore, r.esTake, r.esClicked, r.esDragStart, r.esDragMove, r.esDrop,
                 r.esHover, r.esStats, r.esToggle, r.esPicked, r.esMessage, r.esChecks,
-                r.esCarried, r.esRequired, r.esItemsScreen, r.esSelection, r.esStatsPanel, r.esStore2, r.esSquadList, r.esSquad, r.esEquipmentPanel, r.esBuild);
+                r.esCarried, r.esRequired, r.esItemsScreen, r.esSelection, r.esStatsPanel, r.esStore2, r.esSquadList, r.esSquad, r.esEquipmentPanel, r.esBuild, r.esPut, r.esReturn, r.esTypePicked, r.esSubstitute, r.esMatch);
 }

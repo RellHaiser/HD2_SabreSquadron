@@ -1,9 +1,10 @@
 // The campaign's equipment screen (original 0x00673080..0x0067a3f0, 0x0067c570; part 9f-i: the class,
 // its construction, starting and stopping, the item controls' slots and the stats; 9f-ii: the messages
-// and the checks before the mission; 9f-iii: the screens' descriptions).
+// and the checks before the mission; 9f-iii: the screens' descriptions; 9f-iv: the soldier type picked).
 #include "game/equipment_screen.h"
 
 #include <algorithm>
+#include <climits>
 #include <cstring>
 #include <vector>
 
@@ -12,6 +13,7 @@
 #include "game/controls.h"
 #include "game/cursor.h"
 #include "game/item_defs.h"
+#include "game/items.h"
 #include "game/items_module.h"
 #include "game/menu_state.h"
 #include "game/pending.h"
@@ -78,6 +80,13 @@ constexpr uint32_t CAMPAIGN_PRESETS = LOADOUT_USER | 1;
 // selection screen's.
 constexpr int DEFAULT_SQUAD = 4, SQUAD_LIST_ROWS = 4, SELECTION_PICTURES = 4;
 constexpr float SQUAD_ACROSS_STEP = 0.106f;
+// The substitutes' scoring (the in-game menu's): the items whose ids pair up, the behaviour never
+// matched, the scope's reticles' aim modes, the small behaviours; a preset's belt's and backpack's
+// item types as matched (13 and 31); "Item is not in the list of available items".
+constexpr int PAIRED_ITEMS[] = {0x16, 7, 0x104};
+constexpr int UNMATCHED_BEHAVIOUR = 0x13, RETICLE_MODES = 4, SMALL_BEHAVIOURS = 7, BEHAVIOUR_12 = 12;
+constexpr int PRESET_BELT_TYPES = 13, PRESET_BACKPACK_TYPES = 31;
+constexpr uint32_t TEXT_NOT_AVAILABLE = 0x2532;
 
 void Post(uint32_t target, uint32_t id, uint32_t value, uintptr_t value2 = 0, const C_str &text = C_str())
 {
@@ -948,4 +957,310 @@ bool C_EquipmentMenu::CallAutoEquip(void *menu, void *argument, C_Control *contr
                                     uint32_t value)
 {
     return static_cast<C_EquipmentMenu *>(menu)->AutoEquip(argument, control, notification, value);
+}
+
+// ---- the soldier type picked
+
+bool C_EquipmentMenu::OnItemNotify60(void *, C_Control *control, uint32_t, uint32_t)
+{
+    if (!control)
+        return true;
+    S_ControlMessage picked;
+    picked.id = CONTROL_MSG_GET_TEXT;
+    control->HandleMessage(&picked);
+    const int line = static_cast<int>(picked.value) - 1;
+    // The header: the soldier's items the mission does not need back.
+    if (line == -1) {
+        m_panel.SelectSoldier(m_soldier);
+        ReturnUnrequired(m_soldier, true);
+        m_panel.Refresh();
+        m_panel.SelectSoldier(m_soldier);
+        m_storeList.UpdateAll();
+        return false;
+    }
+    if (line < 0)
+        return false;
+    m_panel.SelectSoldier(m_soldier);
+    if (const S_LoadoutPreset *preset = m_presets.GetPreset(line, CAMPAIGN_PRESETS)) {
+        const int oldHands = preset->hands;
+        ReturnUnrequired(m_soldier, true);
+        S_LoadoutPreset *match = MatchPreset(*preset, false);
+        if (match->head != -1)
+            PutStoreItem(ITEM_FITS_HEAD, match->head, 1, false);
+        // A hands' weapon unlike the preset's (in its kind, the paired ids, a scope's reticle): not
+        // taken, nor its ammunition; the message.
+        int skippedAmmo = -1;
+        if (match->hands != -1) {
+            const auto paired = [](const C_ItemDef *d) {
+                return std::find(std::begin(PAIRED_ITEMS), std::end(PAIRED_ITEMS), d->GetId()) != std::end(PAIRED_ITEMS);
+            };
+            const auto reticle = [](C_ItemDef *d) {
+                const C_ItemComponent *scope = d->GetSecondaryComponent();
+                return d->GetBehaviour() == 4 && scope && scope->GetKind() == ICK_SCOPE &&
+                       static_cast<const C_ScopeComp *>(scope)->GetAimMode() < RETICLE_MODES;
+            };
+            // (Quirk kept: the definitions read unchecked.)
+            C_ItemDef *old = GetItemDef(oldHands), *now = GetItemDef(match->hands);
+            if (oldHands == -1 ||
+                ((old->GetBehaviour() == now->GetBehaviour() || paired(old) || paired(now)) && paired(old) == paired(now) &&
+                 reticle(old) == reticle(now))) {
+                PutStoreItem(ITEM_FITS_HANDS, match->hands, 1, false);
+            } else {
+                skippedAmmo = now->GetAmmoItemId();
+                ShowMessageId(MESSAGE_BOX_OK, TEXT_NOT_AVAILABLE, 0, 0);
+            }
+        }
+        if (match->longGun != -1)
+            PutStoreItem(ITEM_FITS_LONG_GUN, match->longGun, 1, false);
+        if (match->backpack != -1)
+            PutStoreItem(ITEM_FITS_BACKPACK, match->backpack, 1, false);
+        for (int i = 0; i < match->beltCount; ++i) {
+            if (match->belt[i].typeId != skippedAmmo)
+                PutStoreItem(ITEM_FITS_BELT, match->belt[i].typeId, static_cast<int16_t>(match->belt[i].count), false);
+        }
+        for (int i = 0; i < match->backpackCount; ++i) {
+            if (match->backpackItems[i].typeId != skippedAmmo)
+                PutStoreItem(ITEM_FITS_BACKPACK_CONTENTS, match->backpackItems[i].typeId,
+                             static_cast<int16_t>(match->backpackItems[i].count), false);
+        }
+        delete match;
+    }
+    m_panel.Refresh();
+    m_storeList.UpdateAll();
+    return true;
+}
+
+bool C_EquipmentMenu::PutStoreItem(uint32_t slot, int type, int count, bool fill)
+{
+    if (type < 0)
+        return false;
+    S_SoldierItem item;
+    item.typeId = static_cast<int16_t>(type);
+    item.present = static_cast<int16_t>(count);
+    if (!m_storeList.TakeItem(item, fill))
+        return false;
+    const S_SoldierItem left = m_panel.PutItemChecked(slot, item, false);
+    if (left.typeId == -1 || left.present == 0)
+        return true;
+    m_storeList.AddItem(left);
+    return left.typeId != type;
+}
+
+bool C_EquipmentMenu::DropStoreItem(int type, int count, bool fill)
+{
+    S_SoldierItem item;
+    item.typeId = static_cast<int16_t>(type);
+    item.present = static_cast<int16_t>(count);
+    if (!m_storeList.TakeItem(item, fill))
+        return false;
+    const S_SoldierItem left = m_panel.DropItem(item, fill);
+    if (left.typeId == -1 || left.present == 0)
+        return true;
+    m_storeList.AddItem(left);
+    return left.typeId != type;
+}
+
+void C_EquipmentMenu::ReturnUnrequired(int soldierIndex, bool withHead)
+{
+    C_Campaign *campaign = g_gameProfile.m_campaign;
+    const S_MissionItems *record = m_missionItems.GetMissionRecord(campaign->GetMissionNumber(campaign->GetCurrentIndex()));
+    m_panel.SelectSoldier(soldierIndex);
+    S_SquadSoldier *soldier = m_panel.GetSquadSoldier();
+    if (!soldier)
+        return;
+    // (Fix: no record, nothing required; the original read it unchecked.)
+    const auto required = [record](int type) { return record ? record->GetRequiredCount(type) : 0; };
+    // What of an item goes back: all of an item not required, else the shown soldier's surplus of it
+    // (quirk kept: m_soldier's, not the soldier's; none: kept).
+    const auto giveBack = [this, &required](const S_SoldierItem &item, S_SoldierItem &back) {
+        const int count = required(item.typeId);
+        int surplus = 0;
+        if (count != 0) {
+            surplus = CountCarried(std::make_pair(static_cast<int>(item.typeId), count), m_soldier);
+            if (surplus < 1)
+                return false;
+        }
+        back = item;
+        if (surplus != 0)
+            back.present = static_cast<int16_t>(surplus);
+        return true;
+    };
+    const auto place = [&](const S_SoldierItem &item, uint8_t slot) {
+        S_SoldierItem back;
+        if (item.typeId < 0 || !giveBack(item, back))
+            return;
+        soldier->RemoveItem(slot, back);
+        m_storeList.AddItem(back);
+    };
+    // The belt's and the backpack's: an item given back stays at its place for the next one.
+    const auto items = [&](std::vector<S_SoldierItem> &held, uint8_t slot) {
+        size_t at = 0;
+        for (size_t n = held.size(); n > 0; --n) {
+            S_SoldierItem back;
+            if (!giveBack(held[at], back)) {
+                ++at;
+                continue;
+            }
+            soldier->RemoveItem(slot, back);
+            m_storeList.AddItem(back);
+        }
+    };
+    if (withHead)
+        place(soldier->head, SQUAD_SLOT_HEAD);
+    place(soldier->longGun, SQUAD_SLOT_LONG_GUN);
+    place(soldier->hands, SQUAD_SLOT_HANDS);
+    items(soldier->belt, SQUAD_SLOT_BELT);
+    items(soldier->backpackContents, SQUAD_SLOT_BACKPACK_CONTENTS);
+    place(soldier->backpack, SQUAD_SLOT_BACKPACK);
+}
+
+bool C_EquipmentMenu::FindSubstitute(int &type, int ammo, bool axisOnly)
+{
+    // (Quirk kept: the type's definition read unchecked.)
+    C_ItemDef *def = GetItemDef(type);
+    const int behaviour = def->GetBehaviour();
+    C_ItemStock *stock = m_storeList.GetStock();
+    if (def->GetRecordType() == ITEM_AMMO)
+        return false;
+    const auto paired = [](const C_ItemDef *d) {
+        return std::find(std::begin(PAIRED_ITEMS), std::end(PAIRED_ITEMS), d->GetId()) != std::end(PAIRED_ITEMS);
+    };
+    const auto reticle = [](C_ItemDef *d) {
+        const C_ItemComponent *scope = d->GetSecondaryComponent();
+        return d->GetBehaviour() == 4 && scope && scope->GetKind() == ICK_SCOPE &&
+               static_cast<const C_ScopeComp *>(scope)->GetAimMode() < RETICLE_MODES;
+    };
+    int best = -1, bestScore = INT_MIN;
+    for (int candidate = 0; candidate < MAX_ITEM_TYPES; ++candidate) {
+        if (stock->Get(candidate) <= 0)
+            continue;
+        C_ItemDef *other = GetItemDef(candidate);
+        if (!other || (axisOnly && other->GetTeam() != ITEM_TEAM_AXIS))
+            continue;
+        int score = candidate == type ? 0x33 : 0;
+        const int otherBehaviour = other->GetBehaviour();
+        if (behaviour == otherBehaviour && behaviour != UNMATCHED_BEHAVIOUR) {
+            if (reticle(def) && reticle(other))
+                score += 150;
+            else if (paired(other) && paired(def))
+                score += 160;
+            else
+                score += 100;
+        } else if ((behaviour < SMALL_BEHAVIOURS || behaviour == BEHAVIOUR_12) &&
+                   (otherBehaviour < SMALL_BEHAVIOURS || otherBehaviour == BEHAVIOUR_12)) {
+            switch (otherBehaviour) {
+            case 2:
+                score += 30;
+                break;
+            case 3:
+            case 4:
+                score += 60;
+                break;
+            case 5:
+                score += behaviour == BEHAVIOUR_12 ? 111 : 50;
+                break;
+            case BEHAVIOUR_12:
+                score += 50;
+                break;
+            default:
+                score += 10;
+                break;
+            }
+            if (paired(other) && paired(def))
+                score += 110;
+        }
+        if (other->GetBehaviour() <= BEHAVIOUR_12 && other->GetAmmoItemId() >= 0) {
+            const int have = stock->Get(other->GetAmmoItemId());
+            if (ammo > 0) {
+                score += ammo <= have ? 30 : (have - ammo) * 10;
+                if (have == 0)
+                    score -= 100;
+            }
+        }
+        if (score > bestScore && score > 0) {
+            bestScore = score;
+            best = candidate;
+        }
+    }
+    if (type == best)
+        return false;
+    type = best;
+    return best >= 0;
+}
+
+S_LoadoutPreset *C_EquipmentMenu::MatchPreset(const S_LoadoutPreset &preset, bool axisOnly)
+{
+    auto *match = new S_LoadoutPreset();
+    // Each type's replacement in the belt and the backpack (a swapped weapon's ammunition).
+    int remap[MAX_ITEM_TYPES];
+    for (int i = 0; i < MAX_ITEM_TYPES; ++i)
+        remap[i] = i;
+    // A place: its substitute, else its own type (none: none).
+    const auto place = [&](int from, int &to) {
+        int type = from;
+        if (FindSubstitute(type, 0, axisOnly))
+            to = type;
+        else if (type >= 0)
+            to = from;
+    };
+    if (preset.head != -1)
+        place(preset.head, match->head);
+    // The weapons: their ammunition in the preset asked (quirk kept: a weapon without a definition
+    // or ammunition keeps the last one's).
+    int ammo = 0, ammoType = -1;
+    const auto weapon = [&](int from, int &to) {
+        if (C_ItemDef *def = GetItemDef(from)) {
+            if (def->GetAmmoItemId() < 0) {
+                ammo = 0;
+            } else {
+                ammoType = def->GetAmmoItemId();
+                ammo = preset.CountItems(ammoType);
+            }
+        }
+        int type = from;
+        if (!FindSubstitute(type, ammo, axisOnly)) {
+            if (type >= 0)
+                to = from;
+            return;
+        }
+        to = type;
+        if (ammoType >= 0 && type >= 0 && GetItemDef(type))
+            remap[ammoType] = GetItemDef(type)->GetAmmoItemId();
+    };
+    if (preset.hands != -1)
+        weapon(preset.hands, match->hands);
+    if (preset.longGun != -1)
+        weapon(preset.longGun, match->longGun);
+    if (preset.uniform != -1)
+        place(preset.uniform, match->uniform);
+    if (preset.backpack != -1)
+        place(preset.backpack, match->backpack);
+    // The belt's and the backpack's items: merged by type, their own type unless swapped.
+    const auto add = [](S_PresetItem *items, int &n, int max, int type, int count) {
+        if (n >= max)
+            return;
+        for (int i = 0; i < n; ++i) {
+            if (items[i].typeId == type) {
+                items[i].count += count;
+                return;
+            }
+        }
+        items[n].typeId = type;
+        items[n].count = count;
+        ++n;
+    };
+    const auto items = [&](const S_PresetItem *from, int count, S_PresetItem *to, int &n, int max) {
+        for (int i = 0; i < count; ++i) {
+            int type = remap[from[i].typeId];
+            if (type == from[i].typeId && !FindSubstitute(type, 0, axisOnly)) {
+                if (type >= 0)
+                    add(to, n, max, from[i].typeId, from[i].count);
+            } else {
+                add(to, n, max, type, from[i].count);
+            }
+        }
+    };
+    items(preset.belt, preset.beltCount, match->belt, match->beltCount, PRESET_BELT_TYPES);
+    items(preset.backpackItems, preset.backpackCount, match->backpackItems, match->backpackCount, PRESET_BACKPACK_TYPES);
+    return match;
 }

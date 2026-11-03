@@ -219,6 +219,15 @@ void C_MissionItems::Release()
     }
 }
 
+int S_MissionItems::GetRequiredCount(int type) const
+{
+    for (const std::pair<int, int> &item : required) {
+        if (item.first == type)
+            return item.second;
+    }
+    return 0;
+}
+
 S_MissionItems *C_MissionItems::GetMissionRecord(int mission) const
 {
     const int index = mission + m_campaign * CAMPAIGN_STRIDE;

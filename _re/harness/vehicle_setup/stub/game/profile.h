@@ -115,6 +115,11 @@ enum : uint8_t {
     SQUAD_SLOT_UNIFORM = 0x02,
     SQUAD_SLOT_BELT = 0x20,                             // (part 9e-xviii)
     SQUAD_SLOT_BACKPACK_CONTENTS = 0x40,
+    // (Part 9f-iv: the equipment screen's.)
+    SQUAD_SLOT_HEAD = 0x01,
+    SQUAD_SLOT_HANDS = 0x04,
+    SQUAD_SLOT_BACKPACK = 0x08,
+    SQUAD_SLOT_LONG_GUN = 0x10,
 };
 // (The equipment panel, part 9e-ii-a: equipment_panel_test.inc fakes the methods.)
 struct S_SoldierLoad {

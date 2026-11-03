@@ -14,20 +14,4 @@ uint32_t FUN_0067e3e0(...)
 }
 
 
-// 0x0067e410
-uint32_t FUN_0067e410(void *_this,int param_1, ...)
-{
-  uint32_t uVar1;
-  for (uVar1 = 0;
-      (*(int *)((int)_this + 0x80) != 0 &&
-      (uVar1 < (uint32_t)(*(int *)((int)_this + 0x84) - *(int *)((int)_this + 0x80) >> 3)));
-      uVar1 = uVar1 + 1) {
-    if (*(int *)(*(int *)((int)_this + 0x80) + uVar1 * 8) == param_1) {
-      return *(uint32_t *)(*(int *)((int)_this + 0x80) + 4 + uVar1 * 8);
-    }
-  }
-  return 0;
-}
-
-
 } // namespace tier1

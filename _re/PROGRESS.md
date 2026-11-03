@@ -7764,6 +7764,26 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9f-iv: the soldier type picked (OnItemNotify60 0x00678fe0, the preset matched with the axis
     filter), then 9f-v the automatic equipping (AutoEquip 0x00678000).
 
+  PART 9f-iv DONE (2026-11-03): the equipment screen's soldier type picked (game/equipment_screen.cpp).
+  - OnItemNotify60 0x00678fe0 (the soldier types' combo box): the header: the shown soldier's items the
+    mission does not need back (false); a campaign preset (flags 5) of the line - 1: those back, its
+    match's items put on him (not the uniform; a hands' weapon unlike the preset's, in its behaviour,
+    paired ids or a scope's reticle, not taken nor its ammunition: "Item is not in the list of
+    available items"); the panel refreshed, the store updated.
+  - PutStoreItem 0x00677920 / DropStoreItem 0x006779f0 (the in-game menu's AddPresetItem, with the
+    store's fill), ReturnUnrequired 0x00679790 (required items' surplus by CountCarried of the shown
+    soldier: quirk kept; no record: all back, fixed), S_MissionItems::GetRequiredCount 0x0067e410,
+    FindSubstitute 0x00679b50 / MatchPreset 0x00679e80 (the in-game menu's scores, an axis-only
+    filter).
+  - Harness: equipment_screen_test.inc's esPut, esReturn, esTypePicked and the in-game menu's
+    substitute and match tests again (esSubstitute, esMatch; with exact ties for 160 and 111, 31
+    backpack types). The stub profile's squad slots. All factory checks in both orders.
+  - Mutations: mutations/mutate_9f4.py (263 cases, 228 build; all caught but 17 equivalent).
+  - Build: MSVC clean. Tier 1: 374 errors in 69 files, 160 stubs. ret_audit --src: 52.
+  - Ghidra: names/equipment_screen.txt (+7); 7 functions in ported.txt. Stats: 8,952 of 12,306 functions by hand (80.5 % by size).
+  - Next, 9f-v: the automatic equipping (AutoEquip 0x00678000, 0x006785b0, 0x00677aa0, 0x00679670,
+    0x0067a3f0).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

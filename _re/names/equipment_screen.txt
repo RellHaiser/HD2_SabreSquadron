@@ -39,3 +39,11 @@
 00676230 C_EquipmentMenu::BuildSelectionScreen | bool __thiscall BuildSelectionScreen(C_EquipmentMenu *this, void * desc, void * model)
 0067c570 C_StoreList::BuildEquipmentDescription | void __thiscall BuildEquipmentDescription(void * this, void * desc, void * model)
 00678000 C_EquipmentMenu::AutoEquip | bool __thiscall AutoEquip(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+# Part 9f-iv: the soldier type picked.
+00678fe0 C_EquipmentMenu::OnItemNotify60 | bool __thiscall OnItemNotify60(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+00677920 C_EquipmentMenu::PutStoreItem | bool __thiscall PutStoreItem(C_EquipmentMenu *this, uint slot, int type, int count, bool fill)
+006779f0 C_EquipmentMenu::DropStoreItem | bool __thiscall DropStoreItem(C_EquipmentMenu *this, int type, int count, bool fill)
+00679790 C_EquipmentMenu::ReturnUnrequired | void __thiscall ReturnUnrequired(C_EquipmentMenu *this, int soldier, bool withHead)
+00679b50 C_EquipmentMenu::FindSubstitute | bool __thiscall FindSubstitute(C_EquipmentMenu *this, int * type, int ammo, bool axisOnly)
+00679e80 C_EquipmentMenu::MatchPreset | void * __thiscall MatchPreset(C_EquipmentMenu *this, void * preset, bool axisOnly)
+0067e410 S_MissionItems::GetRequiredCount | int __thiscall GetRequiredCount(void * this, int type)

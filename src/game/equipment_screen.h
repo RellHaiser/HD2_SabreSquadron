@@ -3,7 +3,7 @@
 // equipment panel, the store, the stats, the soldier types; automatic equipping) and the soldiers
 // picked for the mission (the selection screen). Part 9f-i: the class, its construction, the menu
 // state's slots (starting, stopping) and the item controls' slots; 9f-ii: the messages and the
-// checks before the mission; 9f-iii: the screens' descriptions.
+// checks before the mission; 9f-iii: the screens' descriptions; 9f-iv: the soldier type picked.
 #pragma once
 
 #include <cstdint>
@@ -53,7 +53,10 @@ public:
 
     // The item controls' notifications: an item clicked twice (from the panel: back to the store, the
     // backpack with its contents, the cursor's input notified as left; from the store: taken, onto
-    // the soldier where it goes, what it displaced back), (part 9f-iv: the soldier type picked), the
+    // the soldier where it goes, what it displaced back), the soldier type picked (the header: his items
+    // the mission does not need back, false; a campaign preset of the line - 1: those back, its match's
+    // items taken onto him (not its uniform; a hands' weapon unlike the preset's not, nor its
+    // ammunition: "Item is not in the list of available items"), the panel, the store), the
     // drag's start (an item of a type the control has: one of it; the places it may go shown, its
     // visual's copy over it), its move, its drop (the copy deleted, the places hidden; DropItem on the
     // control under the cursor); the hover (not the store's items): the popup's text the item's name
@@ -120,6 +123,18 @@ private:
     // The screens' builders: the roster loaded when empty (tables\HumanStore.def); a new squad of the
     // first four profiles.
     static void LoadRoster();                           // 0x00673c30
+    // An item type (`count`) taken from the store (`fill`: as TakeItem) and put at `slot` (not forced),
+    // or dropped where it goes; what is left back. False: not taken, or given back whole.
+    bool PutStoreItem(uint32_t slot, int type, int count, bool fill);   // 0x00677920
+    bool DropStoreItem(int type, int count, bool fill); // 0x006779f0
+    // A squad soldier's items back to the store (the head's with `withHead`; then the long gun, the
+    // hands, the belt's, the backpack's, the backpack): those the mission does not need whole, those
+    // it does the surplus the shown soldier carries (none: kept).
+    void ReturnUnrequired(int soldierIndex, bool withHead);   // 0x00679790
+    // The in-game menu's FindSubstitute and MatchPreset (the same scores; `axisOnly`: only the axis'
+    // items).
+    bool FindSubstitute(int &type, int ammo, bool axisOnly);   // 0x00679b50
+    S_LoadoutPreset *MatchPreset(const S_LoadoutPreset &preset, bool axisOnly);   // 0x00679e80
     static void EnsureSquad();                          // 0x00673ca0
     // The equipment panel (as the in-game menu's: the model's "equippanel" its "P_Equipment", the
     // holsters' and backpack's groups, own meshes; the panel's description).

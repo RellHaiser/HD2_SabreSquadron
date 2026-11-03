@@ -99,6 +99,9 @@ struct S_MissionItems {
     S_Slot slots[SLOTS];                                // +0x04
     // The items the mission needs the deployed soldiers to carry: (type, count).
     std::vector<std::pair<int, int>> required;          // +0x7C
+
+    // The count of an item type required (none: 0).
+    int GetRequiredCount(int type) const;               // 0x0067e410
 };
 
 class C_MissionItems {                                  // 0x2AC bytes

@@ -246,12 +246,6 @@ f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array
     DAT_008acbe8[2] = 0;
 f_006683f0.cpp:150:18: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     (**(code **)(*uStack_6c + 8))();
-f_006778e0.cpp:1266:5: '_param_2' was not declared in this scope; did you mean 'param_2'?
-    _param_2 = 0;
-f_006778e0.cpp:1269:5: '_param_2' was not declared in this scope; did you mean 'param_2'?
-    _param_2 = ((int)(this_00->belt).last - (int)pSVar2) / 6;
-f_006778e0.cpp:1271:11: '_param_2' was not declared in this scope; did you mean 'param_2'?
-    if (0 < _param_2) {
 f_006882f0.cpp:645:49: no matching function for call to '_LARGE_INTEGER::_LARGE_INTEGER(uint64_t)'
     LStack_c.u.HighPart);
 f_006882f0.cpp:1387:40: void value not ignored as it ought to be
