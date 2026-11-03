@@ -33,15 +33,34 @@ The companion port of `rw_data.dll`, the game's data-file layer, is at
 
 > **Not tried with the server yet.** Every one of the original's 722 engine functions (the C
 > runtime and static initialisers left out) has a counterpart in the port, 275 of them ported
-> from LS3DRF's own body. The DLL links with the original's 59 exports. It is not a drop-in
-> replacement yet: the server reads engine objects directly, and only seven classes (the scene,
-> the driver, the light, the mirror, the projector, the emitor and the shadow) have been compared
-> with LS3DRF's layouts field by field.
+> from LS3DRF's own body. The DLL links with the original's 59 exports, and its 26 engine classes
+> have LS3DRF's virtual tables, sizes and field offsets (the server reads and calls engine objects
+> directly); what a few fields mean is still uncertain. Parts of the DLL are verified against the
+> original by the differential tests below; the rest has not run anywhere yet. Use it in a copy of
+> the game folder and keep the original DLL.
 
-- LS3DRF draws nothing and has no render device. The Direct3D 8 declarations the tests' fake
-  devices need live in [tests/d3d8](tests/d3d8).
-- Fields that LS3DRF lacks are kept at their LS3DF offsets until a whole class moves to LS3DRF's
-  layout; each says so in a comment.
+| Part | Verified against the original by |
+|---|---|
+| Math exports (vectors, matrices, quaternions, planes) | `compare_math`: 20,000 rounds, all exact under the game's FPU precision |
+| DXGetErrorString8 | `compare_dxerr8`: 2,067,333 result codes |
+| Frames, lights, cameras, sectors, portals, occluders, areas, models, animation | `compare_frame`: 2 × 20,000 random operations |
+| Collision queries (rays, picking, moving spheres) | `compare_collision`: 2 × 20,000 random queries and scene changes |
+| Materials | `compare_material`: 2 × 20,000 operations |
+| Vertex / index buffer managers | `compare_buffers`: 2 × 20,000 operations |
+| Meshes, mesh levels, face groups | `compare_mesh`: 2 × 20,000 operations |
+| The billboard's facing matrix | `compare_billboard`: 2 × 20,000 operations |
+| The model / scene / animation loaders, the rest of the scene and of the driver | not compared with the original |
+
+LS3DRF draws nothing and has no render device. The Direct3D 8 declarations the tests' fake
+devices need live in [tests/d3d8](tests/d3d8). The tests are described [below](#tests); each
+one's header says what it compares and what it leaves out.
+
+## Using the DLL
+
+`python build.py` makes `build\msvc\LS3DRF.dll` (32-bit, the C runtime linked statically: nothing
+to install). In a **copy** of the game folder, replace `LS3DRF.dll` with it; the dedicated server
+(`HD2DS_SabreSquadron.exe`) loads it. It needs the game's own `rw_data.dll` and nothing else
+outside Windows.
 
 ## Building
 
@@ -56,7 +75,7 @@ Requirements:
 ```bat
 python build.py          rem the DLL: build\msvc\LS3DRF.dll (+ .pdb)
 python build.py check    rem compile every file, no link (and check the device boundaries)
-python build.py test     rem the tests: compare_*.exe
+python build.py test     rem the tests: build\compare_*.exe
 python build.py run      rem run the built tests (see Tests)
 python build.py --debug  rem a debug build
 ```
@@ -83,6 +102,7 @@ and others from it). A DLL that is not the original MSVC 6 build is refused.
 ```bat
 set HD2_DIR=C:\Games\Hidden and Dangerous 2
 set PATH=%HD2_DIR%;%PATH%
+cd build
 compare_frame.exe "" 20000 1
 compare_mesh.exe "" 20000 1
 ```
