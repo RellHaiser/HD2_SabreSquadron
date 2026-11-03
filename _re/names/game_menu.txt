@@ -56,6 +56,11 @@
 00682210 C_GameMenu::OnItemNotify08 | bool __thiscall OnItemNotify08(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
 006822b0 C_GameMenu::OnItemNotify09 | bool __thiscall OnItemNotify09(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
 00682350 C_GameMenu::DropItem | bool __thiscall DropItem(C_GameMenu *this, void * control, uint target)
+# Part 9e-xxi: the soldier type picked.
+00686e10 C_GameMenu::OnItemNotify60 | bool __thiscall OnItemNotify60(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00687360 C_GameMenu::ClearSoldier | void __fastcall ClearSoldier(C_GameMenu * menu)
+00686ca0 C_GameMenu::AddPresetItem | bool __thiscall AddPresetItem(C_GameMenu *this, uint slot, int type, int count)
 # Not ported yet (named for the later parts).
+006876b0 C_GameMenu::MatchPreset | void * __thiscall MatchPreset(C_GameMenu *this, void * preset)
 0072f8b0 C_NetGame::GetLocalPlayerStats
 0072ee60 C_NetGame::SendChat

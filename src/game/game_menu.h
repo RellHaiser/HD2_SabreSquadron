@@ -69,8 +69,13 @@ public:
 
     // The item controls' notifications: an item clicked twice (from the panel: back to the store, the
     // backpack with its contents; from the store: taken, onto the soldier where it goes, a large
-    // weapon not with another; what it displaced back; the store not having it: false), (not
-    // ported yet), the drag's start (an item of a type the control has: one of it; from the store
+    // weapon not with another; what it displaced back; the store not having it: false), a soldier
+    // type picked (the header: the soldier's items back, the presets' buttons off, false; a user
+    // preset of the team (its line - 1 below 6: the edited one; one not empty: its profile the squad
+    // soldier's, picked in its list; the stats; the buttons on), else the map's preset of the line
+    // (the buttons off); its items (as the stock allows: MatchPreset) put on the soldier (the old
+    // ones back first, unless an empty user preset), a large long gun not with another; the panel,
+    // its face, the store refreshed), the drag's start (an item of a type the control has: one of it; from the store
     // the store's when it has one, a large weapon not with another; the places it may go shown, its
     // visual's copy over it), its move (the copy by the cursor's move), its drop (the copy deleted,
     // the places hidden; DropItem on the control under the cursor); the hover (not ported yet).
@@ -108,6 +113,14 @@ private:
     // there (what it displaced back to the store); from the store onto the panel, taken and put
     // there (what it displaced back, unless of its type).
     bool DropItem(C_Control *control, uint32_t target);   // 0x00682350
+    // The squad soldier's items back to the store's stock, the store refreshed.
+    void ClearSoldier();                                // 0x00687360 (__fastcall)
+    // An item of the type (`count` of it) taken from the store and put on the soldier at `slot`
+    // (not forced); what that left back to the store. False: not taken, or given back whole.
+    bool AddPresetItem(uint32_t slot, int type, int count);   // 0x00686ca0
+    // A copy of the preset with its items the stock lacks swapped for others it has (not ported
+    // yet; the caller deletes it).
+    S_LoadoutPreset *MatchPreset(const S_LoadoutPreset &preset);   // 0x006876b0
     // The soldiers panel (none without profiles: false): the model's lists' frames made under
     // "soldierspanel" (GB_Soldiers_a, GB_Soldiers_x), "photo03" (the soldiers' pictures' template,
     // in the first) and "selector" (its copy in the second) moved into them, the tables hidden (no

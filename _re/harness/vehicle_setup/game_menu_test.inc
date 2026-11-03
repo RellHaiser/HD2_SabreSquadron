@@ -82,7 +82,12 @@ bool C_NetGame::SendChat(const char *text, bool team)
     GfLog("chat [%s] %d", text, team);
     return true;
 }
-bool C_GameMenu::OnItemNotify60(void *, C_Control *, uint32_t, uint32_t) { return true; }
+// (Part 9e-xxi: the preset's match a copy, logged.)
+S_LoadoutPreset *C_GameMenu::MatchPreset(const S_LoadoutPreset &preset)
+{
+    GfLog("match %s", preset.name);
+    return new S_LoadoutPreset(preset);
+}
 bool C_GameMenu::OnItemHover(void *, C_Control *, uint32_t, uint32_t) { return true; }
 
 bool g_gmInfoInit = true, g_gmInfoShown;
@@ -144,7 +149,18 @@ struct S_GameMenuResults {
     bool gmSide = true, gmEquipment = true, gmEquipmentNone = true, gmItems = true, gmItemsNone = true, gmSkills = true;
     bool gmSoldierTypes = true, gmStorePreset = true, gmTypeEdited = true, gmPresetSaved = true;
     bool gmTeam = true, gmTakeItems = true, gmShown = true, gmStats = true, gmStocks = true, gmClicked = true;
-    bool gmDragStart = true, gmDragMove = true, gmDrop = true;
+    bool gmDragStart = true, gmDragMove = true, gmDrop = true, gmTypePicked = true, gmPresetItem = true;
+};
+// A control answering CONTROL_MSG_GET_TEXT with its picked line (its value).
+struct C_GmPicked : C_Control {
+    uint32_t line;
+    explicit C_GmPicked(uint32_t l) : C_Control(nullptr, 0x0C500000, nullptr), line(l) {}
+    bool HandleMessage(S_ControlMessage *m) override
+    {
+        if (m->id == CONTROL_MSG_GET_TEXT)
+            m->value = line;
+        return true;
+    }
 };
 // (Part 9e-xx: the dragged copy the driver makes, logged.)
 I3D_frame *g_gmVisual;
@@ -2166,6 +2182,214 @@ void GameMenuTest(I3D_scene *scene)
         C_GmBasePeek::DragVisual(m) = nullptr;
     }
 
+    // --- the soldier type picked (part 9e-xxi): the header: the items back, the buttons off, false;
+    // a user preset (the edited one): its profile and pick (not empty), the stats, the buttons on;
+    // the map's preset of the line: the buttons off; its match's items put on (the old back first,
+    // unless an empty user preset; a large long gun not with another); the panel and the store
+    // refreshed. A preset's item: taken, put (not forced), what was left back ---
+    {
+        alignas(16) static uint8_t pickMission[sizeof(C_MpMissionDef)];
+        std::memset(pickMission, 0, sizeof pickMission);
+        auto &allowed = const_cast<C_str &>(reinterpret_cast<C_MpMissionDef *>(pickMission)->GetPresets());
+        allowed = C_str("Allied gunner, Allied medic");
+        C_game *game = GetGame();
+        C_MissionDef *const oldMission = game->m_mission;
+        game->m_mission = reinterpret_cast<C_MissionDef *>(pickMission);
+        C_GameMenu m;
+        m.m_presets.Clear();
+        S_LoadoutPreset *u0 = m.m_presets.AddUserPreset();
+        std::strcpy(u0->name, "Mine");
+        u0->flags = LOADOUT_ALLIED;
+        u0->unknown1b4 = 33;
+        u0->head = 3;
+        u0->longGun = 8;
+        u0->beltCount = 2;
+        u0->belt[0].typeId = 10;
+        u0->belt[0].count = 2;
+        u0->belt[1].typeId = 11;
+        u0->belt[1].count = 1;
+        u0->backpackCount = 1;
+        u0->backpackItems[0].typeId = 12;
+        u0->backpackItems[0].count = 3;
+        // (Past the counts: not read.)
+        u0->belt[2].typeId = 13;
+        u0->belt[2].count = 1;
+        u0->backpackItems[1].typeId = 14;
+        u0->backpackItems[1].count = 1;
+        S_LoadoutPreset *u1 = m.m_presets.AddUserPreset();
+        std::strcpy(u1->name, "Empty");
+        u1->flags = LOADOUT_ALLIED;
+        u1->unknown1b4 = 4;
+        S_LoadoutPreset *p0 = m.m_presets.AddPreset();
+        std::strcpy(p0->name, "Allied medic");
+        p0->flags = LOADOUT_ALLIED;
+        p0->hands = 5;
+        p0->uniform = 6;
+        p0->backpack = 7;
+        S_LoadoutPreset *p1 = m.m_presets.AddPreset();
+        std::strcpy(p1->name, "Allied sniper");
+        p1->flags = LOADOUT_ALLIED;
+        m.m_team = TEAM_ALLIES;
+        S_SquadSoldier sq;
+        sq.profileIndex = 2;
+        m.m_panel.m_squadSoldier = &sq;
+        for (auto &h : m.m_panel.m_highlights)
+            h = As<I3D_frame>(MsFrame("gmph"));
+        C_ItemStock stock;
+        m.m_storeList.SetStock(&stock);
+        m.m_storeList.m_entries.resize(500);
+        g_slCounts = {{3, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1}, {10, 2}, {11, 1}, {12, 3}, {13, 1}, {14, 1}};
+        // (The types every place takes: the puts show the places; the store's entry of 3 updated.)
+        C_SlDef any(ITEM_STATIC, 0, -1, -1);
+        const std::map<int, C_ItemDef *> pickDefs = g_gfItemDefs;
+        g_gfItemDefs = {{3, &any}, {5, &any}, {6, &any}, {7, &any}, {8, &any}, {10, &any}, {11, &any}, {12, &any},
+                        {13, &any}, {14, &any}};
+        g_epAllowed[&any] = 0x7F;
+        m.m_storeList.m_entries[3] = 0x0C3F3000;
+        // (A soldier: its face set.)
+        auto *pickSoldier = new C_MenuSoldier();
+        MsWorld(*pickSoldier);
+        alignas(16) static uint8_t pickFaces[61][sizeof(S_SoldierProfile)];
+        std::memset(pickFaces, 0, sizeof pickFaces);
+        g_epProfiles.clear();
+        for (auto &face : pickFaces)
+            g_epProfiles.push_back(reinterpret_cast<S_SoldierProfile *>(face));
+        g_epProfiles[33]->faceTexture = "gm_p33.bmp";
+        const auto pick = [&](uint32_t value) {
+            C_GmPicked control(value);
+            g_gfLog.clear();
+            g_controlMessages.clear();
+            return m.OnItemNotify60(&m, &control, CONTROL_NOTIFY_0E, 0);
+        };
+        bool okp = m.OnItemNotify60(&m, nullptr, CONTROL_NOTIFY_0E, 0);
+        // (The panel's refresh posts first.)
+        okp &= !pick(0) && GmInOrder(GmQueue(), {"c600000 1000001 0 0 ; c700000 1000001 0 0 ; "}) && GfLogIs({"return items"});
+        g_pickedSoldierA = 0;
+        g_pickedSoldierX = 30;
+        okp &= pick(1) && m.m_userPreset == 0 && g_pickedSoldierX == 33 && g_pickedSoldierA == 0;
+        okp &= GmInOrder(GmQueue(), {"c103000 20000aa 3 0 ; ", "c600000 1000002 0 0 ; ", "c700000 1000002 0 0 ; "});
+        // (Clearing the soldier returns its items: none to it, the store refreshed first.)
+        okp &= GmInOrder(Join(g_gfLog), {"set profile 33 0", "get stats 33 0", "return items", "match Mine", "stock take 3 1",
+                                         "put 1 -1 3 1", "stock take 8 1", "put 10 -1 8 1", "stock take 10 2", "put 20 -1 10 2",
+                                         "stock take 11 1", "stock take 12 3", "put 40 -1 12 3"}) &&
+               logHas("stock take 13") == 0 && logHas("stock take 14") == 0;
+        // (The face updated: an empty user preset's pick keeps the items (no models reset).)
+        m.m_panel.m_soldier = pickSoldier;
+        sq.profileIndex = 33;
+        okp &= pick(2) && pickSoldier->m_face && std::strcmp(pickSoldier->m_face, "gm_p33.bmp") == 0;
+        {
+            // (No clearing there: the panel's load and the store's entry posted by the pick itself.)
+            const std::string q = GmQueue();
+            okp &= (q.rfind("0 1000092 ", 0) == 0 || q.find("; 0 1000092 ") != std::string::npos) && q.find("c3f3000") != std::string::npos;
+        }
+        m.m_panel.m_soldier = nullptr;
+        {
+            // (The panel refreshed (the load posted), the store's entries updated.)
+            g_controlMessages.clear();
+            pick(1);
+            const std::string q = GmQueue();
+            okp &= (q.rfind("0 1000092 ", 0) == 0 || q.find("; 0 1000092 ") != std::string::npos) && q.find("c3f3000") != std::string::npos;
+            // (Profile 30: the second list's first.)
+            u0->unknown1b4 = 30;
+            g_controlMessages.clear();
+            okp &= pick(1) && g_pickedSoldierX == 30 && GmQueue().find("c103000 20000aa 0 0 ; ") != std::string::npos;
+            u0->unknown1b4 = 33;
+            // (The soldier type's clearing refreshes the store: its entry updated.)
+            g_controlMessages.clear();
+            pick(0);
+            okp &= GmQueue().find("c3f3000") != std::string::npos;
+        }
+        // (A profile of the first list; an empty user preset: no profile, the old items kept.)
+        u0->unknown1b4 = 7;
+        okp &= pick(1) && g_pickedSoldierA == 7 && GmQueue().find("c102000 20000aa 7 0 ; ") != std::string::npos;
+        sq.profileIndex = 9;
+        okp &= pick(2) && m.m_userPreset == 1 && g_pickedSoldierA == 4 && logHas("set profile") == 0 &&
+               MrHas("get stats 9 0") && logHas("return items") == 0 && MrHas("match Empty") &&
+               GmQueue().find("20000aa") == std::string::npos;
+        // (Not empty with a belt item, a backpack item or a backpack only: the old items returned.)
+        for (int kind = 0; kind < 3; ++kind) {
+            u1->beltCount = kind == 0;
+            u1->backpackCount = kind == 1;
+            u1->backpack = kind == 2 ? 7 : -1;
+            okp &= pick(2) && MrHas("return items") && MrHas("set profile 4 0");
+        }
+        u1->beltCount = u1->backpackCount = 0;
+        u1->backpack = -1;
+        // The map's preset of the line: the buttons off, not edited; past them: none.
+        m.m_userPreset = 1;
+        g_slCounts = {{5, 1}, {6, 1}, {7, 1}};
+        m.m_userPreset = 1;
+        okp &= pick(7) && m.m_userPreset == -1 && GmInOrder(Join(g_gfLog), {"return items", "match Allied medic", "put 4 -1 5 1",
+                                                                            "put 2 -1 6 1", "put 8 -1 7 1"});
+        okp &= GmQueue().find("c600000 1000001 0 0 ; ") != std::string::npos;
+        okp &= pick(8) && logHas("match") == 0 && logHas("return items") == 0;
+        // (A large long gun with another: not put.)
+        C_SlDef large(ITEM_ANIMATED, 0, -1, -1);
+        large.m_inventorySize = 2;
+        const std::map<int, C_ItemDef *> keptDefs = pickDefs;
+        g_gfItemDefs = {{8, &large}};
+        sq.hands = EpMake(1, 8, 1);
+        u0->unknown1b4 = 33;
+        okp &= pick(1) && logHas("stock take 8") == 0 && MrHas("stock take 3 1");
+        sq.hands = EpMake(-1, -1, 0);
+        g_gfItemDefs = keptDefs;
+        g_epAllowed.erase(&any);
+        g_epProfiles[33]->faceTexture = C_str();
+        g_epProfiles.clear();
+        m.m_panel.m_soldier = nullptr;
+        WM(r.gmTypePicked, okp);
+
+        // A preset's item.
+        bool oki = !m.AddPresetItem(ITEM_FITS_HEAD, -1, 1);
+        g_slCounts = {{0, 1}};
+        g_gfLog.clear();
+        oki &= m.AddPresetItem(ITEM_FITS_HEAD, 0, 1) && MrHas("stock take 0 1");
+        g_slCounts = {{3, 0}};
+        g_gfLog.clear();
+        oki &= !m.AddPresetItem(ITEM_FITS_HEAD, 3, 1) && GfLogIs({"stock take 3 1"});
+        // (No item type: nothing left.)
+        g_slCounts = {{3, 2}};
+        oki &= m.AddPresetItem(ITEM_FITS_HEAD, 3, 2);
+        C_SlDef d3(ITEM_STATIC, 0, -1, -1);
+        g_gfItemDefs = {{3, &d3}};
+        g_epAllowed[&d3] = 1;
+        g_slCounts = {{3, 2}};
+        g_gfLog.clear();
+        oki &= m.AddPresetItem(ITEM_FITS_HEAD, 3, 2) && GmInOrder(Join(g_gfLog), {"stock take 3 2", "put 1 -1 3 2"}) &&
+               logHas("stock add") == 0;
+        g_slCounts = {{3, 2}};
+        g_epDisplaced = {EpMake(9, 12, 1)};
+        oki &= m.AddPresetItem(ITEM_FITS_HEAD, 3, 2) && MrHas("stock add 12 1");
+        g_slCounts = {{3, 2}};
+        g_epDisplaced = {EpMake(9, 3, 1)};
+        oki &= !m.AddPresetItem(ITEM_FITS_HEAD, 3, 2) && MrHas("stock add 3 1");
+        g_slCounts = {{3, 2}};
+        g_epDisplaced = {EpMake(9, 12, 0)};
+        g_gfLog.clear();
+        oki &= m.AddPresetItem(ITEM_FITS_HEAD, 3, 2) && logHas("stock add") == 0;
+        // (Not forced: the head taken already, left whole.)
+        sq.head = EpMake(1, 4, 1);
+        g_slCounts = {{3, 2}};
+        g_epDisplaced.clear();
+        g_gfLog.clear();
+        oki &= !m.AddPresetItem(ITEM_FITS_HEAD, 3, 2) && logHas("put") == 0 && MrHas("stock add 3 2");
+        sq.head = EpMake(-1, -1, 0);
+        g_epDisplaced.clear();
+        g_epAllowed.erase(&d3);
+        g_gfItemDefs = keptDefs;
+        WM(r.gmPresetItem, oki);
+        m.m_panel.m_squadSoldier = nullptr;
+        for (auto &h : m.m_panel.m_highlights)
+            h = nullptr;
+        m.m_storeList.m_stock = nullptr;
+        g_slCounts.clear();
+        g_controlMessages.clear();
+        g_pickedSoldierA = 0;
+        g_pickedSoldierX = 30;
+        allowed = C_str();
+        game->m_mission = oldMission;
+    }
+
     // --- the stats (part 9e-xix): the profile's at the local player's rank (none: the defaults); the
     // skills' bars (hundredths; health full) and values (per cent, kg, as they are) ---
     {
@@ -2569,7 +2793,7 @@ void GameMenuTest(I3D_scene *scene)
                 "gmChat %d gmSoldiers %d gmSoldiersNone %d gmSoldierPicked %d gmSide %d gmEquipment %d gmEquipmentNone %d "
                 "gmItems %d gmItemsNone %d gmSkills %d gmSoldierTypes %d gmStorePreset %d gmTypeEdited %d "
                 "gmPresetSaved %d gmTeam %d gmTakeItems %d gmShown %d gmStats %d gmStocks %d gmClicked %d "
-                "gmDragStart %d gmDragMove %d gmDrop %d\n",
+                "gmDragStart %d gmDragMove %d gmDrop %d gmTypePicked %d gmPresetItem %d\n",
                 r.gmNew, r.gmNewClient, r.gmStart, r.gmStartNet, r.gmStop, r.gmInput, r.gmUpdate, r.gmTick, r.gmDraw,
                 r.gmMessage, r.gmObjectives, r.gmBase, r.gmLoad, r.gmCoop, r.gmNet, r.gmRender, r.gmRenderGame,
                 r.gmRenderEquip, r.gmOptions, r.gmEscape, r.gmEscapeNet, r.gmSquad, r.gmQuestions, r.gmMainLocal,
@@ -2577,5 +2801,5 @@ void GameMenuTest(I3D_scene *scene)
                 r.gmSoldiersNone, r.gmSoldierPicked, r.gmSide, r.gmEquipment, r.gmEquipmentNone,
                 r.gmItems, r.gmItemsNone, r.gmSkills, r.gmSoldierTypes, r.gmStorePreset, r.gmTypeEdited,
                 r.gmPresetSaved, r.gmTeam, r.gmTakeItems, r.gmShown, r.gmStats, r.gmStocks, r.gmClicked,
-                r.gmDragStart, r.gmDragMove, r.gmDrop);
+                r.gmDragStart, r.gmDragMove, r.gmDrop, r.gmTypePicked, r.gmPresetItem);
 }

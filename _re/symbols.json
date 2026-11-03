@@ -32276,6 +32276,26 @@
   "module": "zz_idioms",
   "name": "vector_tidy_686bb0"
  },
+ "00686ca0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::AddPresetItem",
+  "proto": "bool __thiscall AddPresetItem(C_GameMenu *this, uint slot, int type, int count)"
+ },
+ "00686e10": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnItemNotify60",
+  "proto": "bool __thiscall OnItemNotify60(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00687360": {
+  "module": "game_menu",
+  "name": "C_GameMenu::ClearSoldier",
+  "proto": "void __fastcall ClearSoldier(C_GameMenu * menu)"
+ },
+ "006876b0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::MatchPreset",
+  "proto": "void * __thiscall MatchPreset(C_GameMenu *this, void * preset)"
+ },
  "00687bc0": {
   "module": "game_menu",
   "name": "C_GameMenu::StorePreset",

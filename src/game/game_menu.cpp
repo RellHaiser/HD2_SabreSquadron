@@ -73,6 +73,10 @@ constexpr uint32_t TEXT_SKILLS = 0xA78, TEXT_SKILL_VALUE = 0x7D2;
 constexpr uint32_t CONTROL_INDEX_MASK = 0x3F00000;
 constexpr uint32_t PANEL_CONTROLS = 0x200000, STORE_CONTROLS = 0x300000;
 constexpr uint32_t BACKPACK_SLOT = 8;
+// The presets' save and rename buttons (the screen's 6th and 7th controls); the soldier types' user
+// presets' lines (after the header).
+constexpr uint32_t SAVE_PRESET_BUTTON = 0x0C600000, RENAME_PRESET_BUTTON = 0x0C700000;
+constexpr int USER_PRESET_LINES = 6;
 constexpr float DRAG_HEIGHT = 0.1f;
 // The skills panel's controls (the player screen's fourth: 0x0C400000; a skill's name, bar and
 // value 1..3 + 3 per skill) and the values' style; the default stats (a profile not found).
@@ -1145,6 +1149,108 @@ bool C_GameMenu::OnItemNotify13(void *, C_Control *control, uint32_t, uint32_t)
     if (displaced.typeId != -1)
         m_storeList.AddItem(displaced.typeId == item.typeId ? item : displaced);
     return true;
+}
+
+bool C_GameMenu::OnItemNotify60(void *, C_Control *control, uint32_t, uint32_t)
+{
+    if (!control)
+        return true;
+    S_ControlMessage picked;
+    picked.id = CONTROL_MSG_GET_TEXT;
+    control->HandleMessage(&picked);
+    const int line = static_cast<int>(picked.value) - 1;
+    const auto buttons = [](uint32_t id) {
+        Post(SAVE_PRESET_BUTTON, id, 0);
+        Post(RENAME_PRESET_BUTTON, id, 0);
+    };
+    if (line < 0) {
+        ClearSoldier();
+        buttons(CONTROL_MSG_DEACTIVATE);
+        return false;
+    }
+    const uint32_t flags = TeamLoadouts(m_team);
+    S_LoadoutPreset *preset = nullptr;
+    bool empty = false;
+    if (line < USER_PRESET_LINES) {
+        preset = m_presets.GetUserPreset(line, flags);
+        m_userPreset = line;
+        if (preset) {
+            empty = preset->backpack == -1 && preset->hands == -1 && preset->head == -1 && preset->longGun == -1 &&
+                    preset->uniform == -1 && preset->beltCount < 1 && preset->backpackCount < 1;
+            if (!empty) {
+                const int profile = preset->unknown1b4;
+                m_panel.GetSquadSoldier()->SetProfile(profile, 0);
+                if (profile < SOLDIERS_PER_LIST)
+                    Post(SOLDIERS_LIST_A, CONTROL_MSG_SELECT_INDEX, static_cast<uint32_t>(profile));
+                else
+                    Post(SOLDIERS_LIST_X, CONTROL_MSG_SELECT_INDEX, static_cast<uint32_t>(profile - SOLDIERS_PER_LIST));
+            }
+            ShowSoldierStats(m_panel.GetSquadSoldier()->profileIndex);
+            if (preset->unknown1b4 < SOLDIERS_PER_LIST)
+                g_pickedSoldierA = preset->unknown1b4;
+            else
+                g_pickedSoldierX = preset->unknown1b4;
+        }
+        buttons(CONTROL_MSG_ACTIVATE);
+    } else {
+        // The map's presets (those its list names) after the user presets.
+        int found = -1;
+        for (int i = 0; (preset = m_presets.GetPreset(i, flags)) != nullptr; ++i) {
+            const auto *mission = static_cast<C_MpMissionDef *>(::GetGame()->GetMission());
+            if (std::strstr(mission->GetPresets().c_str(), preset->name) && ++found == line - USER_PRESET_LINES)
+                break;
+        }
+        m_userPreset = -1;
+        buttons(CONTROL_MSG_DEACTIVATE);
+    }
+    if (preset) {
+        if (!empty)
+            ClearSoldier();
+        S_LoadoutPreset *match = MatchPreset(*preset);
+        if (match->head != -1)
+            AddPresetItem(ITEM_FITS_HEAD, match->head, 1);
+        if (match->hands != -1)
+            AddPresetItem(ITEM_FITS_HANDS, match->hands, 1);
+        if (match->longGun != -1 &&
+            (!C_EquipmentPanel::IsLargeWeapon(match->longGun) || !m_panel.HasLargeWeapon()))
+            AddPresetItem(ITEM_FITS_LONG_GUN, match->longGun, 1);
+        if (match->uniform != -1)
+            AddPresetItem(ITEM_FITS_UNIFORM, match->uniform, 1);
+        if (match->backpack != -1)
+            AddPresetItem(ITEM_FITS_BACKPACK, match->backpack, 1);
+        for (int i = 0; i < match->beltCount; ++i)
+            AddPresetItem(ITEM_FITS_BELT, match->belt[i].typeId, static_cast<int16_t>(match->belt[i].count));
+        for (int i = 0; i < match->backpackCount; ++i)
+            AddPresetItem(ITEM_FITS_BACKPACK_CONTENTS, match->backpackItems[i].typeId,
+                          static_cast<int16_t>(match->backpackItems[i].count));
+        delete match;
+    }
+    m_panel.Refresh();
+    m_panel.UpdateFace();
+    m_storeList.UpdateAll();
+    return true;
+}
+
+void C_GameMenu::ClearSoldier()
+{
+    m_panel.ReturnItems(m_storeList.GetStock());
+    m_storeList.UpdateAll();
+}
+
+bool C_GameMenu::AddPresetItem(uint32_t slot, int type, int count)
+{
+    if (type < 0)
+        return false;
+    S_SoldierItem item;
+    item.typeId = static_cast<int16_t>(type);
+    item.present = static_cast<int16_t>(count);
+    if (!m_storeList.TakeItem(item, false))
+        return false;
+    const S_SoldierItem left = m_panel.PutItemChecked(slot, item, false);
+    if (left.typeId == -1 || left.present == 0)
+        return true;
+    m_storeList.AddItem(left);
+    return left.typeId != type;
 }
 
 bool C_GameMenu::OnItemNotify0A(void *, C_Control *control, uint32_t, uint32_t)
