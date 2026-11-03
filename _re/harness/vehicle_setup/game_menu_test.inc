@@ -2871,7 +2871,7 @@ void GameMenuTest(I3D_scene *scene)
             i.itemId = id;
             i.count = count;
             i.ammo = ammo;
-            i.unknownC = false;
+            i.ammunition = false;
             return i;
         };
         items = {item(1, 3, -1), item(2, -1, -1), item(0x26, -1, -1), item(4, -1, 7), item(5, -1, -1), item(6, 2, 2),

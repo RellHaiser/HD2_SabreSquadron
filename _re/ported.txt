@@ -9133,3 +9133,28 @@
 006861a0
 00686b90
 00686bd0
+# part 9f-i: the equipment screen (src/game/equipment_screen.cpp): class, start, stop, item slots, stats
+006c1e20
+006c1e50
+006c1e30
+006739d0
+00673b80
+006731d0
+00673450
+006735f0
+00673690
+00673080
+006755f0
+006773a0
+00677490
+006771e0
+00674d60
+00675c00
+00673730
+00677880
+00677890
+# absorbed: the equipment screen constructor inline ones, the squad vector insert
+006c1d80
+006c1d00
+006c1db0
+00677630

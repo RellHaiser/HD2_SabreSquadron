@@ -31681,10 +31681,65 @@
   "module": "equipment_panel",
   "name": "C_EquipmentMenuBase::CallItemHover"
  },
+ "00673080": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnItemHover",
+  "proto": "bool __thiscall OnItemHover(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006731d0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnItemNotify13",
+  "proto": "bool __thiscall OnItemNotify13(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00673450": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnItemNotify0A",
+  "proto": "bool __thiscall OnItemNotify0A(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006735f0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnItemNotify08",
+  "proto": "bool __thiscall OnItemNotify08(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00673690": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnItemNotify09",
+  "proto": "bool __thiscall OnItemNotify09(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00673730": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::TakeSquadItems",
+  "proto": "void __fastcall TakeSquadItems(C_EquipmentMenu * menu)"
+ },
+ "006739d0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_EquipmentMenu *this, void * arg)"
+ },
+ "00673b80": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_EquipmentMenu *this)"
+ },
  "00673cf0": {
   "module": "profile",
   "name": "S_MissionSquad::AddSoldier",
   "proto": "S_SquadSoldier * __thiscall AddSoldier(S_MissionSquad *this)"
+ },
+ "00674d60": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::ShowSoldierStats",
+  "proto": "void __thiscall ShowSoldierStats(C_EquipmentMenu *this)"
+ },
+ "006755f0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnStatsToggle",
+  "proto": "bool __thiscall OnStatsToggle(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00675c00": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::SetupStore",
+  "proto": "void __fastcall SetupStore(C_EquipmentMenu * menu)"
  },
  "00676010": {
   "module": "screen",
@@ -31706,9 +31761,32 @@
   "name": "AddDescMessage4_676410",
   "proto": "void __cdecl AddDescMessage4_676410(void * desc, uint target, uint id, uint value, uint value2)"
  },
+ "006771e0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::DropItem",
+  "proto": "bool __thiscall DropItem(C_EquipmentMenu *this, void * control, uint target)"
+ },
+ "006773a0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnSelectionPicked",
+  "proto": "bool __thiscall OnSelectionPicked(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00677490": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::OnSoldierPicked",
+  "proto": "bool __thiscall OnSoldierPicked(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00677870": {
   "module": "equipment_panel",
   "name": "C_EquipmentMenuBase::CallItemNotify60"
+ },
+ "00677880": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::CallStatsToggle"
+ },
+ "00677890": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::CallSelectionPicked"
  },
  "0067a3c0": {
   "module": "loadout_presets",

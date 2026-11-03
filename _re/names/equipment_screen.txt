@@ -1,0 +1,19 @@
+# The campaign's equipment screen C_EquipmentMenu (src/game/equipment_screen.cpp; vtable 0x00815db0).
+# Part 9f-i: the class, starting and stopping, the item slots, the stats, the pickers.
+006c1e20 C_EquipmentMenu::GetTypeId | int __thiscall GetTypeId(C_EquipmentMenu *this)
+006739d0 C_EquipmentMenu::OnStart | bool __thiscall OnStart(C_EquipmentMenu *this, void * arg)
+00673b80 C_EquipmentMenu::OnStop | void __thiscall OnStop(C_EquipmentMenu *this)
+006731d0 C_EquipmentMenu::OnItemNotify13 | bool __thiscall OnItemNotify13(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+00673450 C_EquipmentMenu::OnItemNotify0A | bool __thiscall OnItemNotify0A(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+006735f0 C_EquipmentMenu::OnItemNotify08 | bool __thiscall OnItemNotify08(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+00673690 C_EquipmentMenu::OnItemNotify09 | bool __thiscall OnItemNotify09(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+00673080 C_EquipmentMenu::OnItemHover | bool __thiscall OnItemHover(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+006755f0 C_EquipmentMenu::OnStatsToggle | bool __thiscall OnStatsToggle(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+006773a0 C_EquipmentMenu::OnSelectionPicked | bool __thiscall OnSelectionPicked(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+00677490 C_EquipmentMenu::OnSoldierPicked | bool __thiscall OnSoldierPicked(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)
+006771e0 C_EquipmentMenu::DropItem | bool __thiscall DropItem(C_EquipmentMenu *this, void * control, uint target)
+00674d60 C_EquipmentMenu::ShowSoldierStats | void __thiscall ShowSoldierStats(C_EquipmentMenu *this)
+00675c00 C_EquipmentMenu::SetupStore | void __fastcall SetupStore(C_EquipmentMenu * menu)
+00673730 C_EquipmentMenu::TakeSquadItems | void __fastcall TakeSquadItems(C_EquipmentMenu * menu)
+00677880 C_EquipmentMenu::CallStatsToggle
+00677890 C_EquipmentMenu::CallSelectionPicked

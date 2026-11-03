@@ -96,6 +96,8 @@ public:
     S_MissionSquad *m_missionSquad = nullptr;
     // (The in-game menu's stocks, part 9e-xix: game_menu_test.inc.)
     C_ItemStock *m_itemStock18 = nullptr;
+    // (The equipment screen's second stock, part 9f-i: equipment_screen_test.inc.)
+    C_ItemStock *m_itemStock1C = nullptr;
     // (The loadout presets and missions' items, part 9e-iv: loadout_test.inc.)
     C_str GetProfileDirectory();
     C_Campaign *m_campaign = nullptr;

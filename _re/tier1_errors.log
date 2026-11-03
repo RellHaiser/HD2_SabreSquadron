@@ -246,37 +246,17 @@ f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array
     DAT_008acbe8[2] = 0;
 f_006683f0.cpp:150:18: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     (**(code **)(*uStack_6c + 8))();
-f_00673040.cpp:57:19: 'IMAGE_DOS_HEADER_00400000' was not declared in this scope; did you mean 'IMAGE_DOS_HEADER'?
-    local_10 != &IMAGE_DOS_HEADER_00400000)) {
-f_00673040.cpp:71:91: invalid types 'WORD {aka short unsigned int}[int]' for array subscript
-    (*(int *)local_10 = *(int *)local_10 - 1, GH_PIECE(iVar2,0,1) = local_10->e_magic[0],
-f_00673040.cpp:72:49: invalid types 'WORD {aka short unsigned int}[int]' for array subscript
-    GH_PIECE(iVar2,1,1) = local_10->e_magic[1], GH_PIECE(iVar2,2,2) = local_10->e_cblp, iVar2 == 0)) {
-f_00673040.cpp:90:89: invalid types 'WORD {aka short unsigned int}[int]' for array subscript
-    (*(int *)local_10 = *(int *)local_10 - 1, GH_PIECE(iVar3,0,1) = local_10->e_magic[0],
-f_00673040.cpp:91:47: invalid types 'WORD {aka short unsigned int}[int]' for array subscript
-    GH_PIECE(iVar3,1,1) = local_10->e_magic[1], GH_PIECE(iVar3,2,2) = local_10->e_cblp, iVar3 == 0)) {
-f_00673040.cpp:253:33: too few arguments to function
-    (*pIVar1->vtable->Duplicate)();
-f_00673040.cpp:1151:31: request for member '_0_4_' in '"equippanel"', which is of non-class type 'const char [11]'
+f_00673040.cpp:639:31: request for member '_0_4_' in '"equippanel"', which is of non-class type 'const char [11]'
     (**(code **)("equippanel"._0_4_ + 8))();
-f_00673040.cpp:1678:49: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00673040.cpp:1689:49: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00673040.cpp:1699:49: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00673040.cpp:1710:49: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00673040.cpp:2230:34: too few arguments to function
+f_00673040.cpp:1289:34: too few arguments to function
     (*pIStack_12c->vtable->SetOn)();
-f_00673040.cpp:2263:33: too few arguments to function
+f_00673040.cpp:1322:33: too few arguments to function
     (*pIStack_134->vtable->SetPos)((I3D_frame*)((IImage *)pIStack_134));
-f_00673040.cpp:2272:27: too few arguments to function
+f_00673040.cpp:1331:27: too few arguments to function
     (*parent->vtable->SetOn)();
-f_00673040.cpp:2489:53: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00673040.cpp:1548:53: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_b0 = (C_str)(*(int *)pCStack_b0 - 1), *(int *)pCStack_b0 == 0)) {
-f_00673040.cpp:2594:29: request for member '_0_4_' in '"item09"', which is of non-class type 'const char [7]'
+f_00673040.cpp:1653:29: request for member '_0_4_' in '"item09"', which is of non-class type 'const char [7]'
     (**(code **)("item09"._0_4_ + 0x38))("item09",param_2,1);
 f_006778e0.cpp:1503:5: '_param_2' was not declared in this scope; did you mean 'param_2'?
     _param_2 = 0;
@@ -348,8 +328,6 @@ f_006c0a30.cpp:98:30: wrong type argument to bit-complement
     ~C_VideoState__C_VideoState(_this);
 f_006c0a30.cpp:270:20: no matching function for call to 'tier1::C_MainMenu::C_MainMenu(tier1::C_MainMenu*&)'
     ~C_MainMenu(_this);
-f_006c0a30.cpp:551:25: no matching function for call to 'tier1::C_EquipmentMenu::C_EquipmentMenu(tier1::C_EquipmentMenu*&)'
-    ~C_EquipmentMenu(_this);
 f_006c6d40.cpp:646:32: wrong type argument to unary minus
     piVar1 = gh_bitcast<int*>(-gh_bitcast)<float>(piVar1);
 f_006c6d40.cpp:646:44: expected primary-expression before 'float'

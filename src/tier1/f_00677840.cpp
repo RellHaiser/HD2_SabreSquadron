@@ -14,20 +14,4 @@ uint32_t FUN_00677840(...)
 }
 
 
-// 0x00677880
-uint32_t FUN_00677880(int *param_1, ...)
-{
-  (**(code **)(*param_1 + 0x74))();
-  return 0;
-}
-
-
-// 0x00677890
-uint32_t FUN_00677890(int *param_1, ...)
-{
-  (**(code **)(*param_1 + 0x78))();
-  return 0;
-}
-
-
 } // namespace tier1

@@ -104,9 +104,10 @@ struct S_CampaignItem {
     int itemId;
     int count;
     int ammo;                                           // -1: the default
-    // Set on about a third of the shipped entries; an item listed twice has it on the
-    // larger count (item 2: 5 and 25). Meaning not identified.
-    bool unknownC;
+    // The count is of the item's ammunition (the equipment screen's stock gets the rounds;
+    // about a third of the shipped entries: an item listed twice has it on the larger count,
+    // item 2: 5 and 25).
+    bool ammunition;
 };
 
 // A menu screen between the steps (vtable 0x00815b38, type 6; 0x38 bytes).

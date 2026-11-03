@@ -7679,6 +7679,47 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/game_menu.txt (+3); 4 functions in ported.txt, 5 absorbed. Stats: 8,905 of 12,306 functions, 79.9 % of the bytes.
   - Next, part 9f: the equipment menu (C_EquipmentMenu; its store list's description 0x0067c570).
 
+  PART 9f PLAN (2026-11-03): the campaign's equipment screen C_EquipmentMenu (vtable 0x00815db0, 0x590
+  bytes, src/game/equipment_screen.h/.cpp, new; screen kinds 3 and 4): 0x00673080..0x0067a3f0 and its
+  store's description 0x0067c570, about 35 KB (C_EquipmentMenuBase's own code was ported with 9e). The
+  layout: the base's to +0x1C4, +0x1D0 the equipment panel, +0x274 the store list, +0x2AC the missions'
+  items, +0x558 the presets, +0x578 / +0x57C the selection screen's and the squad list's selectors,
+  +0x580 the squad soldier shown, +0x584 the one picked. Two screens: 1 "Items selection" (the squad's
+  list, the panel, the store, the stats, the soldier types, automatic equipping), 2 "SELECTION SCREEN"
+  (the soldier to play in the first campaign's missions 2 and 15). Sub-parts: 9f-i the class, start /
+  stop and the item slots; 9f-ii the messages and the checks before the mission (the required items,
+  the weight, the weapons); 9f-iii the screens' descriptions; 9f-iv the automatic equipping and the
+  soldier type picked (0x00677920..0x0067a3f0, OnItemNotify60). 0x0067cb60 is the main menu's (9h).
+
+  PART 9f-i DONE (2026-11-03): the class, its construction, starting and stopping, the item slots, the
+  stats and the pickers (game/equipment_screen.cpp; C_EquipmentMenu out of pending.h).
+  - Construction (inline in C_GameApp::StartStep): the presets loaded, the missions' items set up;
+    GetTypeId 0x006c1e20 (4); the destructor 0x006c1e50 the members'. S_CampaignItem::unknownC is
+    `ammunition` (OnStart adds the item's rounds instead).
+  - OnStart 0x006739d0: a campaign screen of the equipment kind (3): the profile's first stock reset,
+    the screen's items added. OnStop 0x00673b80: the popup, the panel's soldier, the store's pages.
+    SetupStore 0x00675c00 (kind 3 the first stock, 4 the second; a single mission the first and
+    TakeSquadItems 0x00673730: every soldier's items taken, as the in-game menu's soldier's).
+  - The item slots: OnItemNotify13 0x006731d0 (no large weapon check; from the panel the cursor's
+    input notified: leave, 05), 0A 0x00673450 (no store checks), 08 0x006735f0, 09 0x00673690 with
+    DropItem 0x006771e0 (from the panel: moved onto another place, then back to the store when the
+    cursor is right of the middle), OnItemHover 0x00673080 (the popup's text the item's name; not the
+    store's items).
+  - The new slots 0x74 OnStatsToggle 0x006755f0 (the stats panel or the panel; g_equipmentStatsShown
+    0x008ae61a; ShowSoldierStats 0x00674d60: the profile's name, the bars and values from its float
+    stats; no profile: blank) and 0x78 OnSelectionPicked 0x006773a0; OnSoldierPicked 0x00677490 (the
+    squad list's pictures); thunks 0x00677880 / 0x00677890.
+  - Dropped: the copy protection in OnStart (the window handle's bookkeeping) and OnStop (a random
+    difficulty 4 from the fourth mission).
+  - Harness: equipment_screen_test.inc in the factory build (check_equipmentscreen.py,
+    "equipmentscreen:", 13 checks; the stub profile's second stock). All factory checks in both orders.
+  - Mutations: mutations/mutate_9f1.py (289 cases, 275 build; all caught but 4 equivalent).
+  - Build: MSVC clean. Tier 1: 383 errors in 71 files, 164 stubs. ret_audit --src: 52.
+  - Ghidra: names/equipment_screen.txt (new, 17); 19 functions in ported.txt, 4 absorbed (the inline
+    constructors 0x006c1d80 / 0x006c1d00 / 0x006c1db0, the squad's vector insert 0x00677630).
+    Stats: 8,928 of 12,306 functions by hand (80.1 % by size).
+  - Next, 9f-ii: the messages (OnMessage 0x006740d0) and the checks before the mission.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

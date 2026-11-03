@@ -53,11 +53,7 @@ class C_SquadMenu : public C_GameState {
 public:
     C_SquadMenu();                                  // (inline)
 };
-// The equipment screen (kinds 3 and 4; type 4, vtable 0x00815db0, 0x590 bytes).
-class C_EquipmentMenu : public C_GameState {
-public:
-    C_EquipmentMenu();                              // (inline; base 0x006c1810)
-};
+// The equipment screen (kinds 3 and 4): game/equipment_screen.h.
 // The screen after a mission (kind 5; type 5, vtable 0x00815cf0, 0x290 bytes).
 class C_DebriefingMenu : public C_GameState {
 public:
