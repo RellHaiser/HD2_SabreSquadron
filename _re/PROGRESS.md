@@ -7207,6 +7207,42 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (unchanged). ret_audit --src: 52.
   - Ghidra: names/loadout_presets.txt (+19); 19 functions in ported.txt. Stats: 8,818 of 12,306 functions by hand (78.4 % by size).
 
+  PART 9e-v DONE (2026-11-02): the in-game menu's class and menu state slots (src/game/game_menu.h/.cpp;
+  pending.h's C_GameMenu replaced: game.cpp, game_app.cpp and game_rounds.cpp include it).
+  - C_GameMenu : C_EquipmentMenuBase (vtable 0x00815750, 29 slots; the base's fields +0x1B0..+0x1C0
+    added to equipment_menu.h): the members the constructor 0x0067eb40 makes (the mission items +0x1F0,
+    the presets +0x49C, the equipment panel +0x4DC, the store list +0x580, the game behind +0x5B8; the
+    presets loaded, single player the missions' items set up); the destructor 0x0067f4a0 (0x0067f480)
+    only clears the game. GetTypeId 0x0067f470 (11). OnStart 0x0067f650 (the player team's member in
+    the player slots, the options handler, the master volume 0; the network games an info screen on
+    the menu's scene), OnStop 0x0067f760 (the player's volume, the options handler, the popup, the
+    network game's info screen, the panel's soldier, the two stocks +0x1E4 / +0x1E8 reset and
+    deleted), OnInput 0x00680960 (the game's, without the input; true), OnUpdate 0x006808d0 (the
+    network games: the panel's soldier, the load's button 0x006869a0, the cooperative players
+    0x006802a0; a client the game's update), OnTick 0x00680920 (the menu time 0x008ae62c; the server
+    the game's tick), OnDrawScreens 0x00682770 (the info screen when shown; false), ShowMessage
+    0x00682aa0 (the box unless one is on top, counted at 0x008ae628; below 1 closed).
+    C_MissionDef::AreObjectivesDecided 0x0067fda0 (here). C_OptionsHandler (0x0C bytes, +0x1EC: its
+    cursor, the menu, two flags; destructor 0x0061cfa0; its messages 0x0061bf00 the main menu's too,
+    not ported yet).
+  - Dropped: the copy protection's bookkeeping in OnStart (the game window's handle and a value of it).
+  - Fixes: the stocks' pointers cleared after deleting (the next stop deleted them again); an info
+    screen that could not be made dropped (the original crashed in Init).
+  - Harness: game_menu_test.inc in the factory build (check_gamemenu.py, "gamemenu:", 12 checks; the
+    slots not ported yet, the info screen, the volume, the stocks' reset and the team faked; a game
+    state logging its slots; the stub profile.h's ApplyVolume and C_ItemStock::Reset added). 22 of 22
+    in both orders (the other factory lines too).
+  - Mutations: mutations/mutate_9e5.py (74 cases, 71 build, all caught but 5 equivalent).
+  - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+19, 6 of them for the later parts); 13 functions in ported.txt.
+    Stats: 8,831 of 12,306 functions by hand (78.5 % by size).
+  - Next, 9e-vi: the update's helpers (the load's button 0x006869a0, the cooperative players
+    0x006802a0) and the drawing (OnRender 0x006824f0, 0x006825d0, 0x00682790); then OnMessage
+    0x0067f850 (with the options handler 0x0061bf00), the screens (BuildScreens 0x0067fe00 and its
+    builders 0x00680980, 0x00682c80, 0x006838e0, 0x00684690..0x00685170), the squad glue
+    (0x00685420..0x006863c0) and the item slots (0x00680ea0, 0x00681ee0..0x00682350,
+    0x00686e10..0x00687f50).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

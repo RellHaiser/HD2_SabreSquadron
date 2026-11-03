@@ -35,162 +35,6 @@ uint32_t FUN_0067eb30(...)
 }
 
 
-// 0x0067eb40
-C_GameMenu * C_GameMenu__C_GameMenu(C_GameMenu *_this, ...)
-{
-  uchar local_15;
-  uint32_t local_4;
-  local_4 = 0xffffffff;
-  C_MenuState__C_MenuState((C_MenuState *)_this);
-  _this->_pad_0138[0x78] = '\0';
-  _this->_pad_0138[0x79] = '\0';
-  _this->_pad_0138[0x7a] = '\0';
-  _this->_pad_0138[0x7b] = '\0';
-  _this->_pad_0138[0x7c] = '\0';
-  _this->_pad_0138[0x7d] = '\0';
-  _this->_pad_0138[0x7e] = '\0';
-  _this->_pad_0138[0x7f] = '\0';
-  _this->_pad_0138[0x82] = 0xff;
-  _this->_pad_0138[0x83] = 0xff;
-  _this->_pad_0138[0x84] = '\0';
-  _this->_pad_0138[0x85] = '\0';
-  _this->_pad_0138[0x80] = 0xff;
-  _this->_pad_0138[0x81] = 0xff;
-  _this->_pad_0138[0x88] = 0xff;
-  _this->_pad_0138[0x89] = 0xff;
-  _this->_pad_0138[0x8a] = 0xff;
-  _this->_pad_0138[0x8b] = 0xff;
-  _this->vtable = (C_GameMenu_vtbl *)&PTR_008157d8;
-  local_4 = 0;
-  C_MissionItems__C_MissionItems(_this->_pad_0138 + 0xb8);
-  _this->_pad_0138[0x364] = local_15;
-  _this->_pad_0138[0x368] = '\0';
-  _this->_pad_0138[0x369] = '\0';
-  _this->_pad_0138[0x36a] = '\0';
-  _this->_pad_0138[0x36b] = '\0';
-  _this->_pad_0138[0x36c] = '\0';
-  _this->_pad_0138[0x36d] = '\0';
-  _this->_pad_0138[0x36e] = '\0';
-  _this->_pad_0138[0x36f] = '\0';
-  _this->_pad_0138[0x370] = '\0';
-  _this->_pad_0138[0x371] = '\0';
-  _this->_pad_0138[0x372] = '\0';
-  _this->_pad_0138[0x373] = '\0';
-  _this->_pad_0138[0x378] = '\0';
-  _this->_pad_0138[0x379] = '\0';
-  _this->_pad_0138[0x37a] = '\0';
-  _this->_pad_0138[0x37b] = '\0';
-  _this->_pad_0138[0x374] = local_15;
-  _this->_pad_0138[0x37c] = '\0';
-  _this->_pad_0138[0x37d] = '\0';
-  _this->_pad_0138[0x37e] = '\0';
-  _this->_pad_0138[0x37f] = '\0';
-  _this->_pad_0138[0x380] = '\0';
-  _this->_pad_0138[0x381] = '\0';
-  _this->_pad_0138[0x382] = '\0';
-  _this->_pad_0138[899] = '\0';
-  GH_PIECE(local_4,0,1) = 3;
-  C_LoadoutPresets__Load(_this->_pad_0138 + 0x364);
-  _this->m_4dc = (int)&PTR_008157cc;
-  _this->_pad_04e8[0] = '\0';
-  _this->_pad_04e8[1] = '\0';
-  _this->_pad_04e8[2] = '\0';
-  _this->_pad_04e8[3] = '\0';
-  _this->_pad_04e8[4] = '\0';
-  _this->_pad_04e8[5] = '\0';
-  _this->_pad_04e8[6] = '\0';
-  _this->_pad_04e8[7] = '\0';
-  _this->_pad_04e8[0x58] = 0xff;
-  _this->_pad_04e8[0x59] = 0xff;
-  _this->_pad_04e8[0x5a] = 0xff;
-  _this->_pad_04e8[0x5b] = 0xff;
-  _this->_pad_04e8[0x48] = '\0';
-  _this->_pad_04e8[0x49] = '\0';
-  _this->_pad_04e8[0x4a] = '\0';
-  _this->_pad_04e8[0x4b] = '\0';
-  _this->m_544 = 0;
-  _this->m_4e4 = 0;
-  _this->_pad_04e0[0] = '\0';
-  _this->_pad_04e0[1] = '\0';
-  _this->_pad_04e0[2] = '\0';
-  _this->_pad_04e0[3] = '\0';
-  _this->_pad_0548[0x40] = '\0';
-  _this->_pad_0548[0x41] = '\0';
-  _this->_pad_0548[0x42] = '\0';
-  _this->_pad_0548[0x43] = '\0';
-  _this->_pad_0548[0x3c] = local_15;
-  _this->_pad_0548[0x44] = '\0';
-  _this->_pad_0548[0x45] = '\0';
-  _this->_pad_0548[0x46] = '\0';
-  _this->_pad_0548[0x47] = '\0';
-  _this->_pad_0548[0x48] = '\0';
-  _this->_pad_0548[0x49] = '\0';
-  _this->_pad_0548[0x4a] = '\0';
-  _this->_pad_0548[0x4b] = '\0';
-  *(uint8_t ***)(_this->_pad_0548 + 0x38) = &PTR_008157c4;
-  _this->_pad_0548[0x54] = 0xff;
-  _this->_pad_0548[0x55] = 0xff;
-  _this->_pad_0548[0x56] = 0xff;
-  _this->_pad_0548[0x57] = 0xff;
-  _this->_pad_05a8[0xc] = '\0';
-  _this->_pad_05a8[0xd] = '\0';
-  _this->_pad_05a8[0xe] = '\0';
-  _this->_pad_05a8[0xf] = '\0';
-  _this->_pad_05a8[8] = '\0';
-  _this->_pad_05a8[9] = '\0';
-  _this->_pad_05a8[10] = '\0';
-  _this->_pad_05a8[0xb] = '\0';
-  _this->m_5a4 = 0;
-  _this->_pad_05a8[0] = '\0';
-  _this->_pad_05a8[1] = '\0';
-  _this->_pad_05a8[2] = '\0';
-  _this->_pad_05a8[3] = '\0';
-  _this->vtable = (C_GameMenu_vtbl *)&PTR_00815750;
-  _this->_pad_0138[0x98] = '\0';
-  _this->_pad_0138[0x99] = '\0';
-  _this->_pad_0138[0xa8] = '\0';
-  _this->_pad_0138[0xa4] = 0xff;
-  _this->_pad_0138[0xa5] = 0xff;
-  _this->_pad_0138[0xa6] = 0xff;
-  _this->_pad_0138[0xa7] = 0xff;
-  _this->_pad_04c0[0] = '\0';
-  _this->_pad_04c0[1] = '\0';
-  _this->_pad_04c0[2] = '\0';
-  _this->_pad_04c0[3] = '\0';
-  _this->m_4c4 = -1;
-  _this->_pad_0138[0x9c] = 0xff;
-  _this->_pad_0138[0x9d] = 0xff;
-  _this->_pad_0138[0x9e] = 0xff;
-  _this->_pad_0138[0x9f] = 0xff;
-  _this->_pad_0138[0xa0] = 0xff;
-  _this->_pad_0138[0xa1] = 0xff;
-  _this->_pad_0138[0xa2] = 0xff;
-  _this->_pad_0138[0xa3] = 0xff;
-  _this->m_5b8 = 0;
-  _this->m_4d9 = '\0';
-  _this->m_4da = '\0';
-  _this->_pad_04c8[0x10] = '\0';
-  _this->m_4bc = 0;
-  _this->_pad_0138[0xb4] = '\0';
-  _this->_pad_0138[0xb5] = '\0';
-  _this->_pad_0138[0xb6] = '\0';
-  _this->_pad_0138[0xb7] = '\0';
-  _this->_pad_0138[0xac] = '\0';
-  _this->_pad_0138[0xad] = '\0';
-  _this->_pad_0138[0xae] = '\0';
-  _this->_pad_0138[0xaf] = '\0';
-  _this->_pad_0138[0xb0] = '\0';
-  _this->_pad_0138[0xb1] = '\0';
-  _this->_pad_0138[0xb2] = '\0';
-  _this->_pad_0138[0xb3] = '\0';
-  local_4 = CONCAT31(GH_PIECE(local_4,1,3),6);
-  if (((uint8_t)g_gameRole & 7) == 7) {
-    C_MissionItems__Setup(_this->_pad_0138 + 0xb8);
-  }
-  return _this;
-}
-
-
 // 0x0067ed60
 uint32_t C_EquipmentMenuBase__empty_function_67ed60(C_EquipmentMenuBase *_this, ...)
 {
@@ -424,226 +268,8 @@ uint32_t FUN_0067f400(int param_1, ...)
 }
 
 
-// 0x0067f470
-uint32_t C_GameMenu__FUN_0067f470(C_GameMenu *_this, ...)
-{
-  return 0xb;
-}
-
-
-// 0x0067f480
-uint32_t * C_GameMenu__FUN_0067f480(C_GameMenu *_this,uint8_t param_1, ...)
-{
-  C_GameMenu__FUN_0067f4a0(_this);
-  if ((param_1 & 1) != 0) {
-    _aligned_free(_this);
-  }
-  return (uint32_t*)(&_this->vtable);
-}
-
-
-// 0x0067f4a0
-uint32_t C_GameMenu__FUN_0067f4a0(C_GameMenu *_this, ...)
-{
-  int local_4;
-  _this->vtable = (C_GameMenu_vtbl *)&PTR_00815750;
-  local_4 = 0;
-  _this->m_5b8 = 0;
-  *(uint8_t ***)(_this->_pad_0548 + 0x38) = &PTR_008157c4;
-  tier1_operator_delete(*(void **)(_this->_pad_0548 + 0x40));
-  _this->_pad_0548[0x40] = '\0';
-  _this->_pad_0548[0x41] = '\0';
-  _this->_pad_0548[0x42] = '\0';
-  _this->_pad_0548[0x43] = '\0';
-  _this->_pad_0548[0x44] = '\0';
-  _this->_pad_0548[0x45] = '\0';
-  _this->_pad_0548[0x46] = '\0';
-  _this->_pad_0548[0x47] = '\0';
-  _this->_pad_0548[0x48] = '\0';
-  _this->_pad_0548[0x49] = '\0';
-  _this->_pad_0548[0x4a] = '\0';
-  _this->_pad_0548[0x4b] = '\0';
-  _this->m_4dc = (int)&PTR_008157cc;
-  GH_PIECE(local_4,0,1) = 3;
-  C_LoadoutPresets__Clear(_this->_pad_0138 + 0x364);
-  tier1_operator_delete(*(void **)(_this->_pad_0138 + 0x378));
-  _this->_pad_0138[0x378] = '\0';
-  _this->_pad_0138[0x379] = '\0';
-  _this->_pad_0138[0x37a] = '\0';
-  _this->_pad_0138[0x37b] = '\0';
-  _this->_pad_0138[0x37c] = '\0';
-  _this->_pad_0138[0x37d] = '\0';
-  _this->_pad_0138[0x37e] = '\0';
-  _this->_pad_0138[0x37f] = '\0';
-  _this->_pad_0138[0x380] = '\0';
-  _this->_pad_0138[0x381] = '\0';
-  _this->_pad_0138[0x382] = '\0';
-  _this->_pad_0138[899] = '\0';
-  GH_PIECE(local_4,0,1) = 1;
-  empty_function_67e3a0();
-  tier1_operator_delete(*(void **)(_this->_pad_0138 + 0x368));
-  _this->_pad_0138[0x368] = '\0';
-  _this->_pad_0138[0x369] = '\0';
-  _this->_pad_0138[0x36a] = '\0';
-  _this->_pad_0138[0x36b] = '\0';
-  _this->_pad_0138[0x36c] = '\0';
-  _this->_pad_0138[0x36d] = '\0';
-  _this->_pad_0138[0x36e] = '\0';
-  _this->_pad_0138[0x36f] = '\0';
-  _this->_pad_0138[0x370] = '\0';
-  _this->_pad_0138[0x371] = '\0';
-  _this->_pad_0138[0x372] = '\0';
-  _this->_pad_0138[0x373] = '\0';
-  local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
-  C_MissionItems__Release(_this->_pad_0138 + 0xb8);
-  _this->vtable = (C_GameMenu_vtbl *)&PTR_00815850;
-  g_menuState = 0;
-  local_4 = 8;
-  _this->m_010 = 0;
-  vector_tidy_682bb0((int)(_this->_pad_0138 + 8));
-  GH_PIECE(local_4,0,1) = 7;
-  vector_tidy_663ad0((int)(_this->_pad_0100 + 0x2c));
-  GH_PIECE(local_4,0,1) = 6;
-  vector_tidy_4202d0((int)(_this->_pad_0100 + 0x18));
-  GH_PIECE(local_4,0,1) = 5;
-  empty_function_420560();
-  tier1_operator_delete(*(void **)(_this->_pad_0100 + 8));
-  _this->_pad_0100[8] = '\0';
-  _this->_pad_0100[9] = '\0';
-  _this->_pad_0100[10] = '\0';
-  _this->_pad_0100[0xb] = '\0';
-  _this->_pad_0100[0xc] = '\0';
-  _this->_pad_0100[0xd] = '\0';
-  _this->_pad_0100[0xe] = '\0';
-  _this->_pad_0100[0xf] = '\0';
-  _this->_pad_0100[0x10] = '\0';
-  _this->_pad_0100[0x11] = '\0';
-  _this->_pad_0100[0x12] = '\0';
-  _this->_pad_0100[0x13] = '\0';
-  ((C_TextBox *)(_this->_pad_0040 + 0x10))->vtable =
-       (C_TextBox_vtbl *)&PTR_00810458;
-  GH_PIECE(local_4,0,1) = 0xb;
-  C_FontManager__Release(*(void **)(_this->_pad_0040 + 0x38));
-  C_TextBox__FreeLayout((C_TextBox *)(_this->_pad_0040 + 0x10));
-  GH_PIECE(local_4,0,1) = 10;
-  vector_tidy_49fcf0((int)(_this->_pad_0040 + 0x68));
-  GH_PIECE(local_4,0,1) = 9;
-  vector_tidy_49fcd0((int)(_this->_pad_0040 + 0x54));
-  local_4 = CONCAT31(GH_PIECE(local_4,1,3),4);
-  FUN_004a4a20((int)(_this->_pad_0040 + 0x40));
-  _this->vtable = (C_GameMenu_vtbl *)&PTR_008158ac;
-  return 0;
-}
-
-
-// 0x0067f650
-uint32_t C_GameMenu__FUN_0067f650(C_GameMenu *_this, ...)
-{
-  bool bVar1;
-  IGraph *self;
-  void *pvVar2;
-  uint32_t uVar3;
-  C_Team *this_00;
-  uint32_t *puVar4;
-  int *piVar5;
-  uint32_t uVar6;
-  C_InfoScreen *this_01;
-  uint3 extraout_var;
-  uchar local_5;
-  uVar6 = (uint32_t)DAT_008cb42a;
-  self = GetIGraph();
-  pvVar2 = (*self->vtable->GetHWND)(self);
-  *(void **)(&DAT_008cad40 + uVar6 * 4) = pvVar2;
-  uVar3 = (*(code *)PTR_00a59000)(pvVar2);
-  (&DAT_008caf40)[uVar6] = uVar3;
-  this_00 = C_TeamManager__GetPlayerTeam(&g_teamManager);
-  bVar1 = C_Team__HasMemberInPlayerSlots(this_00);
-  _this->m_4da = bVar1;
-  puVar4 = tier1_operator_new(0xc);
-  if (puVar4 == 0) {
-    puVar4 = 0;
-  }
-  else {
-    *puVar4 = 0;
-    puVar4[1] = _this;
-    *(uint8_t *)(puVar4 + 2) = 1;
-    *(uint8_t *)((int)puVar4 + 9) = 0;
-  }
-  *(uint32_t **)(_this->_pad_0138 + 0xb4) = puVar4;
-  piVar5 = (int *)GetSoundModule();
-  (**(code **)(*piVar5 + 0x84))(0);
-  uVar6 = g_gameRole & 7;
-  if ((char)uVar6 != '\a') {
-    this_01 = tier1_operator_new(0x144);
-    if (this_01 == 0) {
-      this_01 = 0;
-    }
-    else {
-      (this_01->m_hints).first = 0;
-      (this_01->m_hints).alloc = local_5;
-      (this_01->m_hints).last = 0;
-      (this_01->m_hints).end = 0;
-    }
-    _this->m_4bc = (int)this_01;
-    C_InfoScreen__Init(this_01,_this->m_030);
-    uVar6 = (uint32_t)extraout_var << 8;
-  }
-  return CONCAT31((int3)(uVar6 >> 8),1);
-}
-
-
-// 0x0067f760
-uint32_t C_GameMenu__FUN_0067f760(C_GameMenu *_this, ...)
-{
-  int *ptr;
-  void *ptr_00;
-  C_ItemStock *pCVar1;
-  C_PlayerProfile__ApplyVolume(g_gameProfile.m_player);
-  ptr = *(int **)(_this->_pad_0138 + 0xb4);
-  if (ptr != 0) {
-    FUN_0061cfa0(ptr);
-    tier1_operator_delete(ptr);
-    _this->_pad_0138[0xb4] = '\0';
-    _this->_pad_0138[0xb5] = '\0';
-    _this->_pad_0138[0xb6] = '\0';
-    _this->_pad_0138[0xb7] = '\0';
-  }
-  if (_this->m_0fc != 0) {
-    (**(code **)(*(int *)_this->m_0fc + 0x80))(1);
-    _this->m_0fc = 0;
-  }
-  if (((uint8_t)g_gameRole & 7) != 7) {
-    C_InfoScreen__Done((C_InfoScreen *)_this->m_4bc);
-    ptr_00 = (void *)_this->m_4bc;
-    if (ptr_00 != 0) {
-      vector_tidy_49a6e0((int)ptr_00);
-      tier1_operator_delete(ptr_00);
-      _this->m_4bc = 0;
-    }
-  }
-  C_EquipmentPanel__DeleteSoldier(&_this->m_4dc);
-  if (*(C_ItemStock **)(_this->_pad_0138 + 0xac) != 0) {
-    C_ItemStock__Reset(*(C_ItemStock **)(_this->_pad_0138 + 0xac));
-    pCVar1 = *(C_ItemStock **)(_this->_pad_0138 + 0xac);
-    if (pCVar1 != 0) {
-      C_ItemStock__dtor_C_ItemStock(pCVar1);
-      tier1_operator_delete(pCVar1);
-    }
-  }
-  if (*(C_ItemStock **)(_this->_pad_0138 + 0xb0) != 0) {
-    C_ItemStock__Reset(*(C_ItemStock **)(_this->_pad_0138 + 0xb0));
-    pCVar1 = *(C_ItemStock **)(_this->_pad_0138 + 0xb0);
-    if (pCVar1 != 0) {
-      C_ItemStock__dtor_C_ItemStock(pCVar1);
-      tier1_operator_delete(pCVar1);
-    }
-  }
-  return 0;
-}
-
-
 // 0x0067f850
-uint32_t C_GameMenu__FUN_0067f850(C_GameMenu *_this,int param_1, ...)
+uint32_t C_GameMenu__OnMessage(C_GameMenu *_this,void *message, ...)
 {
   vector_S_SquadSoldierPtr *pvVar1;
   C_InfoScreen *this_00;
@@ -652,14 +278,13 @@ uint32_t C_GameMenu__FUN_0067f850(C_GameMenu *_this,int param_1, ...)
   vector_S_SquadSoldierPtr *pvVar4;
   S_MissionSquad *pSVar5;
   bool bVar6;
-  uint32_t uVar7;
-  int iVar8;
-  C_game *pCVar9;
+  int iVar7;
+  C_game *pCVar8;
   int *ptr;
-  C_GameApp *pCVar10;
-  S_SquadSoldier *pSVar11;
+  C_GameApp *pCVar9;
+  S_SquadSoldier *pSVar10;
+  int iVar11;
   int iVar12;
-  int iVar13;
   uint32_t local_74;
   uint32_t local_70;
   uint32_t local_6c;
@@ -679,11 +304,11 @@ uint32_t C_GameMenu__FUN_0067f850(C_GameMenu *_this,int param_1, ...)
   int *local_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
-  uVar7 = FUN_0061bf00(*(void **)(_this->_pad_0138 + 0xb4),param_1);
-  if ((char)uVar7 != '\0') {
+  bVar6 = C_OptionsHandler__HandleMessage(*(void **)(_this->_pad_0138 + 0xb4),message);
+  if (bVar6) {
     return 0;
   }
-  switch(*(uint32_t *)(param_1 + 4) & 0x3000fff) {
+  switch(*(uint32_t *)((int)message + 4) & 0x3000fff) {
   case 0x200000a:
     this_00 = (C_InfoScreen *)_this->m_4bc;
     if ((this_00 != 0) && ((this_00->m_frame->m_frameFlags & 1) != 0)) {
@@ -695,9 +320,9 @@ uint32_t C_GameMenu__FUN_0067f850(C_GameMenu *_this,int param_1, ...)
       local_74 = DAT_008ae5d8;
       local_6c = DAT_008ae5e0;
       local_68 = DAT_008ae5e4;
-      iVar8 = FUN_00620e90(&local_74,local_64,1);
-      if (((**(int **)(iVar8 + 8) != 0) && (_this->m_0f0 != -2)) &&
-         ((uVar2 = *(uint32_t *)(**(int **)(iVar8 + 8) + 0x60), (uVar2 & 0xfc000000) == 0x8000000 ||
+      iVar7 = FUN_00620e90(&local_74,local_64,1);
+      if (((**(int **)(iVar7 + 8) != 0) && (_this->m_0f0 != -2)) &&
+         ((uVar2 = *(uint32_t *)(**(int **)(iVar7 + 8) + 0x60), (uVar2 & 0xfc000000) == 0x8000000 ||
           ((uVar2 & 0xfc000000) == 0xc000000)))) {
         local_28 = 0;
         local_3c = 0;
@@ -710,9 +335,9 @@ uint32_t C_GameMenu__FUN_0067f850(C_GameMenu *_this,int param_1, ...)
       }
     }
     if (((uint8_t)g_gameRole & 7) == 7) {
-      pCVar9 = GetGame();
-      if ((pCVar9->m_mission == 0) ||
-         (bVar6 = C_MissionDef__AreObjectivesDecided(pCVar9->m_mission), !bVar6)) {
+      pCVar8 = GetGame();
+      if ((pCVar8->m_mission == 0) ||
+         (bVar6 = C_MissionDef__AreObjectivesDecided(pCVar8->m_mission), !bVar6)) {
         _this->m_004 = 0xf;
       }
     }
@@ -722,23 +347,23 @@ uint32_t C_GameMenu__FUN_0067f850(C_GameMenu *_this,int param_1, ...)
          (0 < (int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar3 >> 2)) {
         if ((ppSVar3 == (S_SquadSoldier **)0x0) ||
            ((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar3 >> 2 == 0)) {
-          pSVar11 = 0;
+          pSVar10 = 0;
         }
         else {
-          pSVar11 = *ppSVar3;
+          pSVar10 = *ppSVar3;
         }
-        iVar8 = pSVar11->team;
-        if ((*(int *)(_this->_pad_0138 + 0x9c) != -1) && (*(int *)(_this->_pad_0138 + 0x9c) != iVar8))
+        iVar7 = pSVar10->team;
+        if ((*(int *)(_this->_pad_0138 + 0x9c) != -1) && (*(int *)(_this->_pad_0138 + 0x9c) != iVar7))
         {
           if (_this->_pad_0138[0x98] != '\0') {
             return 0;
           }
           bVar6 = false;
-          iVar13 = 0;
-          iVar12 = 5;
+          iVar12 = 0;
+          iVar11 = 5;
           _this->_pad_0138[0x98] = '\x01';
-          pCVar10 = GetGameApp();
-          C_GameApp__PostCommand(pCVar10,iVar12,iVar8,iVar13,bVar6);
+          pCVar9 = GetGameApp();
+          C_GameApp__PostCommand(pCVar9,iVar11,iVar7,iVar12,bVar6);
           return 0;
         }
       }
@@ -753,9 +378,9 @@ uint32_t C_GameMenu__FUN_0067f850(C_GameMenu *_this,int param_1, ...)
         if ((ppSVar3 != (S_SquadSoldier **)0x0) &&
            (1 < (uint32_t)((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar3 >> 2))) {
           pvVar4 = &(g_gameProfile.m_missionSquad)->states;
-          pSVar11 = ((g_gameProfile.m_missionSquad)->states).first[1];
-          if (pSVar11 != 0) {
-            FUN_00633300(pSVar11,1);
+          pSVar10 = ((g_gameProfile.m_missionSquad)->states).first[1];
+          if (pSVar10 != 0) {
+            FUN_00633300(pSVar10,1);
           }
           FUN_00633340(pvVar1,(int)(pvVar4->first + 1));
         }
@@ -764,16 +389,16 @@ uint32_t C_GameMenu__FUN_0067f850(C_GameMenu *_this,int param_1, ...)
     }
     break;
   case 0x200006a:
-    iVar8 = vector_size_e4_633320((int)&(g_gameProfile.m_missionSquad)->states);
-    if ((iVar8 < 3) &&
-       (iVar8 = vector_size_e4_633320((int)&(g_gameProfile.m_missionSquad)->states),
-       pSVar5 = g_gameProfile.m_missionSquad, 1 < iVar8)) {
+    iVar7 = vector_size_e4_633320((int)&(g_gameProfile.m_missionSquad)->states);
+    if ((iVar7 < 3) &&
+       (iVar7 = vector_size_e4_633320((int)&(g_gameProfile.m_missionSquad)->states),
+       pSVar5 = g_gameProfile.m_missionSquad, 1 < iVar7)) {
       pvVar1 = &(g_gameProfile.m_missionSquad)->states;
-      iVar8 = vector_size_e4_633320((int)pvVar1);
-      if (iVar8 != 0) {
-        pSVar11 = *(pSVar5->states).first;
-        if (pSVar11 != 0) {
-          FUN_00633300(pSVar11,1);
+      iVar7 = vector_size_e4_633320((int)pvVar1);
+      if (iVar7 != 0) {
+        pSVar10 = *(pSVar5->states).first;
+        if (pSVar10 != 0) {
+          FUN_00633300(pSVar10,1);
         }
         FUN_00633340(pvVar1,(int)(pSVar5->states).first);
       }
@@ -781,17 +406,17 @@ uint32_t C_GameMenu__FUN_0067f850(C_GameMenu *_this,int param_1, ...)
     if (_this->m_4da == '\0') {
       if (((g_gameProfile.m_mpSettings)->sessionType == 1) ||
          ((g_gameProfile.m_mpSettings)->sessionType == 2)) {
-        iVar8 = 0;
+        iVar7 = 0;
 LAB_0067f932:
         bVar6 = false;
-        iVar13 = 0;
         iVar12 = 0;
-        pCVar10 = GetGameApp();
-        C_GameApp__PostCommand(pCVar10,iVar8,iVar12,iVar13,bVar6);
+        iVar11 = 0;
+        pCVar9 = GetGameApp();
+        C_GameApp__PostCommand(pCVar9,iVar7,iVar11,iVar12,bVar6);
       }
     }
     else if (_this->_pad_0138[0x99] != '\0') {
-      iVar8 = 1;
+      iVar7 = 1;
       goto LAB_0067f932;
     }
     local_40 = 0;
@@ -813,10 +438,10 @@ LAB_0067f932:
       if ((ppSVar3 != (S_SquadSoldier **)0x0) &&
          (1 < (uint32_t)((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar3 >> 2))) {
         pvVar4 = &(g_gameProfile.m_missionSquad)->states;
-        pSVar11 = ((g_gameProfile.m_missionSquad)->states).first[1];
-        if (pSVar11 != 0) {
-          FUN_005aa0f0((uint32_t*)(&pSVar11->name));
-          tier1_operator_delete(pSVar11);
+        pSVar10 = ((g_gameProfile.m_missionSquad)->states).first[1];
+        if (pSVar10 != 0) {
+          FUN_005aa0f0((uint32_t*)(&pSVar10->name));
+          tier1_operator_delete(pSVar10);
         }
         FUN_00633340(pvVar1,(int)(pvVar4->first + 1));
       }
@@ -841,18 +466,18 @@ LAB_0067fc29:
     break;
   case 0x20000b5:
     _this->m_004 = 0xf;
-    pCVar10 = GetGameApp();
-    pCVar10->m_pendingCommand = 1;
+    pCVar9 = GetGameApp();
+    pCVar9->m_pendingCommand = 1;
     break;
   case 0x20000b6:
     _this->m_004 = 0xf;
-    pCVar10 = GetGameApp();
-    pCVar10->m_pendingCommand = 2;
+    pCVar9 = GetGameApp();
+    pCVar9->m_pendingCommand = 2;
     break;
   case 0x20000b7:
     _this->m_004 = 0xf;
-    pCVar10 = GetGameApp();
-    pCVar10->m_pendingCommand = 3;
+    pCVar9 = GetGameApp();
+    pCVar9->m_pendingCommand = 3;
     break;
   case 0x20000b8:
     *(uint32_t *)((int)_this->m_5b8 + 0x1c) = 2;
@@ -864,41 +489,8 @@ LAB_0067fc29:
 }
 
 
-// 0x0067fda0
-bool C_MissionDef__AreObjectivesDecided(C_MissionDef *mission, ...)
-{
-  S_MissionObjective **ppSVar1;
-  uint32_t uVar2;
-  S_MissionObjective **ppSVar3;
-  ppSVar1 = (mission->m_objectives).first;
-  uVar2 = 0;
-  while( true ) {
-    if (ppSVar1 == (S_MissionObjective **)0x0) {
-      return false;
-    }
-    if ((uint32_t)((int)(mission->m_objectives).last - (int)ppSVar1 >> 2) <= uVar2) break;
-    if ((mission->m_objectives).first[uVar2]->status != 4) {
-      ppSVar1 = (mission->m_objectives).first;
-      ppSVar3 = ppSVar1;
-      for (uVar2 = 0;
-          (ppSVar1 != (S_MissionObjective **)0x0 &&
-          (uVar2 < (uint32_t)((int)(mission->m_objectives).last - (int)ppSVar1 >> 2)));
-          uVar2 = uVar2 + 1) {
-        if ((*ppSVar3)->status == 0) {
-          return false;
-        }
-        ppSVar3++;
-      }
-      return true;
-    }
-    uVar2++;
-  }
-  return false;
-}
-
-
 // 0x0067fe00
-uint32_t C_GameMenu__FUN_0067fe00(C_GameMenu *_this, ...)
+uint32_t C_GameMenu__C_GameMenu__BuildScreens(C_GameMenu *_this, ...)
 {
   void *pvVar1;
   uint32_t *puVar2;
@@ -1114,7 +706,7 @@ uint32_t FUN_006801f0(int *param_1,int *param_2, ...)
 
 
 // 0x006802a0  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_006802a0(...)
+uint32_t C_GameMenu__UpdateCoopPlayers(...)
 {
   return {};
 }
@@ -1361,44 +953,6 @@ uint32_t FUN_006802a0(...)
 
 
 #endif
-// 0x006808d0
-uint32_t C_GameMenu__FUN_006808d0(C_GameMenu *_this,int param_1, ...)
-{
-  if (((uint8_t)g_gameRole & 7) != 7) {
-    C_EquipmentPanel__TickSoldier(&_this->m_4dc,param_1);
-    FUN_006869a0((int)_this);
-    FUN_006802a0();
-  }
-  if (((g_gameRole & 2) != 0) && (_this->m_5b8 != 0)) {
-    (**(code **)(*(int *)_this->m_5b8 + 0x14))(param_1);
-  }
-  return 0;
-}
-
-
-// 0x00680920
-uint32_t C_GameMenu__FUN_00680920(C_GameMenu *_this,int param_1, ...)
-{
-  DAT_008ae62c += param_1;
-  if ((((uint8_t)g_gameRole & 1) != 0) && (_this->m_5b8 != 0)) {
-    (**(code **)(*(int *)_this->m_5b8 + 0x10))();
-    return 0;
-  }
-  return 0;
-}
-
-
-// 0x00680960
-uint32_t C_GameMenu__FUN_00680960(C_GameMenu *_this, ...)
-{
-  uint32_t in_EAX;
-  if (_this->m_5b8 != 0) {
-    in_EAX = (**(code **)(*(int *)_this->m_5b8 + 0xc))(0,0);
-  }
-  return CONCAT31((int3)((uint32_t)in_EAX >> 8),1);
-}
-
-
 // 0x00680980
 uint32_t FUN_00680980(void *param_1, ...)
 {
@@ -2548,7 +2102,7 @@ uint32_t C_GameMenu__FUN_00682350(C_GameMenu *_this,int param_1,uint32_t param_2
 
 
 // 0x006824f0
-uint32_t C_GameMenu__FUN_006824f0(C_GameMenu *_this, ...)
+uint32_t C_GameMenu__C_GameMenu__OnRender(C_GameMenu *_this, ...)
 {
   int *piVar1;
   uint32_t uVar2;
@@ -2667,22 +2221,6 @@ uint32_t C_GameMenu__FUN_006825d0(C_GameMenu *_this, ...)
 
 
 #endif
-// 0x00682770
-uint32_t C_GameMenu__FUN_00682770(C_GameMenu *_this, ...)
-{
-  C_InfoScreen *this_00;
-  I3D_frame *in_EAX;
-  I3D_frame *extraout_EAX;
-  this_00 = (C_InfoScreen *)_this->m_4bc;
-  if ((this_00 != 0) &&
-     (in_EAX = this_00->m_frame, (in_EAX->m_frameFlags & 1) != 0)) {
-    C_InfoScreen__Render(this_00);
-    in_EAX = extraout_EAX;
-  }
-  return (uint32_t)in_EAX & 0xffffff00;
-}
-
-
 // 0x00682790
 uint32_t C_GameMenu__FUN_00682790(C_GameMenu *_this, ...)
 {
@@ -2826,39 +2364,6 @@ LAB_00682a5d:
   }
   uVar4 = FUN_0072ee60((char *)in_stack_00000010,local_8);
   return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
-}
-
-
-// 0x00682aa0
-uint32_t C_GameMenu__ShowMessage(C_GameMenu *_this,int textId,int unknown, ...)
-{
-  uint32_t uVar1;
-  uint32_t uVar2;
-  int *piVar3;
-  if (textId < 1) {
-    C_MenuState__CloseMessage((C_MenuState *)_this);
-    DAT_008ae628--;
-    return 0;
-  }
-  if (DAT_008ae5f0 != 0) {
-    piVar3 = (int *)(DAT_008ae5e0 - 4);
-    uVar2 = (int)piVar3 - DAT_008ae5d8 >> 2;
-    if ((int)uVar2 < 0) {
-      uVar1 = -(0x3ff - uVar2 >> 10);
-    }
-    else {
-      uVar1 = uVar2 >> 10;
-    }
-    if (uVar1 != 0) {
-      piVar3 = (int *)(*(int *)(DAT_008ae5e4 + uVar1 * 4) + (uVar2 + uVar1 * -0x400) * 4);
-    }
-    if ((*(int *)(*piVar3 + 0x60) >> 0x1a & 0x3fU) == 0) {
-      return 0;
-    }
-  }
-  C_MenuState__ShowMessageId((C_MenuState *)_this,0,textId,0,0);
-  DAT_008ae628++;
-  return 0;
 }
 
 

@@ -36,7 +36,7 @@ uint32_t FUN_0061bef0(...)
 
 
 // 0x0061bf00
-uint32_t FUN_0061bf00(void *_this,int param_1, ...)
+uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
 {
   C_PlayerProfile *pCVar1;
   IGraph *self;
@@ -577,17 +577,6 @@ LAB_0061cea1:
     uVar6 = CONCAT31((int3)((uint32_t)extraout_EAX_00 >> 8),1);
   }
   return uVar6;
-}
-
-
-// 0x0061cfa0
-uint32_t FUN_0061cfa0(int *param_1, ...)
-{
-  if ((C_Cursor *)*param_1 != 0) {
-    C_Cursor__Release((C_Cursor *)*param_1);
-    *param_1 = 0;
-  }
-  return 0;
 }
 
 

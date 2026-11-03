@@ -13,6 +13,7 @@
 #include "game/console.h"
 #include "game/first_person_view.h"
 #include "game/game_internal.h"
+#include "game/game_menu.h"
 #include "game/human.h"
 #include "game/human_controller.h"
 #include "game/human_movement.h"

@@ -1,12 +1,13 @@
 // The base of the in-game menu (C_GameMenu) and the equipment screen (C_EquipmentMenu): a menu state
 // with an equipment panel, whose item controls call its slots 0x5C..0x70 (vtable 0x008157d8; its
 // destructor is C_MenuState's, inlined: 0x0067f1f0, deleting 0x0067f350). Part 9e-ii-b declares the
-// slots the panel's description needs; the rest of the class is 9e-iii.
+// slots the panel's description needs; part 9e-v its fields (C_GameMenu's constructor).
 #pragma once
 
 #include <cstdint>
 
 #include "game/menu_state.h"
+#include "game/soldier.h"
 
 class C_Control;
 
@@ -35,4 +36,11 @@ public:
                                  uint32_t value);
     static bool CallItemHover(void *menu, void *argument, C_Control *control, uint32_t notification,
                               uint32_t value);
+
+protected:
+    // (Not identified yet; set by the derived menus' constructors.)
+    int m_unknown1B0 = 0;                               // +0x1B0
+    int m_unknown1B4 = 0;                               // +0x1B4
+    S_SoldierItem m_unknown1B8;                         // +0x1B8
+    int m_unknown1C0 = -1;                              // +0x1C0
 };

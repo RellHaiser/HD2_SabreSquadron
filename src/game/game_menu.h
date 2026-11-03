@@ -1,0 +1,123 @@
+// The in-game menu (vtable 0x00815750, 0x5C0 bytes): opened over the game (C_game::OpenGameMenu,
+// which it wraps and keeps running by the network roles), its screens the mission's objectives, the
+// options, saving and loading, and in the network games the equipment and the squad. Part 9e-v:
+// the class, its construction and the menu state's slots (starting, stopping, the input, the
+// update, the tick, the info screen drawn); the messages, the screens and the item slots later.
+#pragma once
+
+#include <cstdint>
+
+#include "game/equipment_menu.h"
+#include "game/equipment_panel.h"
+#include "game/loadout_presets.h"
+#include "game/soldier.h"
+#include "game/store_list.h"
+
+class C_Cursor;
+class C_InfoScreen;
+class C_ItemStock;
+class C_MenuState;
+struct S_ControlMessage;
+
+// The options screens' messages (key bindings, graphics, the player's options), the main menu's and
+// the in-game menu's (0x0C bytes; C_GameMenu +0x1EC).
+class C_OptionsHandler {
+public:
+    explicit C_OptionsHandler(C_MenuState *menu) : m_menu(menu) {}
+    C_OptionsHandler(const C_OptionsHandler &) = delete;
+    C_OptionsHandler &operator=(const C_OptionsHandler &) = delete;
+    // The cursor released.
+    ~C_OptionsHandler();                                // 0x0061cfa0 (__fastcall)
+
+    // True: an options screen's message, handled (not ported yet).
+    bool HandleMessage(S_ControlMessage *message);      // 0x0061bf00
+
+private:
+    C_Cursor *m_cursor = nullptr;                       // +0x00
+    C_MenuState *m_menu;                                // +0x04
+    bool m_unknown08 = true;                            // +0x08
+    bool m_unknown09 = false;                           // +0x09
+};
+
+// The menu time (OnTick's sum; nothing reads it) and the in-game menu's message boxes open
+// (ShowMessage's count; nothing reads it).
+extern int g_gameMenuTime;                              // 0x008ae62c
+extern int g_gameMenuMessages;                          // 0x008ae628
+
+class C_GameMenu : public C_EquipmentMenuBase {
+public:
+    // The presets loaded (the original's presets constructor); single player: the missions' items
+    // set up.
+    C_GameMenu();                                       // 0x0067eb40
+    // (The game behind is not deleted; the members' destructors.)
+    ~C_GameMenu() override;                             // 0x0067f4a0 (0x0067f480)
+
+    int GetTypeId() const override { return GAME_STATE_TYPE_GAME_MENU; }   // 0x1C 0x0067f470
+
+    // The menu's messages (not ported yet) and screens (not ported yet).
+    void OnMessage(S_ControlMessage *message) override; // 0x34 0x0067f850
+    bool BuildScreens() override;                       // 0x38 0x0067fe00
+    // The volume restored, the options handler, the popup and the network game's info screen
+    // deleted, the panel's soldier, the two stocks emptied and deleted.
+    void OnStop() override;                             // 0x3C 0x0067f760
+    // Whether the player's team has a member in the player slots, the options handler, the sound
+    // muted; the network games: the info screen. True.
+    bool OnStart(void *arg) override;                   // 0x40 0x0067f650
+    // The game's input (none). True.
+    bool OnInput(float *held, float *pressed) override; // 0x44 0x00680960
+    // The network games: the panel's soldier, the load's button, the cooperative game's players;
+    // a client: the game's update.
+    void OnUpdate(int timeDelta) override;              // 0x48 0x006808d0
+    // The menu time; the server: the game's tick.
+    void OnTick(int timeDelta) override;                // 0x4C 0x00680920
+    bool OnRender() override;                           // 0x50 0x006824f0 (not ported yet)
+    // The info screen drawn when shown; false.
+    bool OnDrawScreens() override;                      // 0x54 0x00682770
+
+    // The item controls' notifications (not ported yet).
+    bool OnItemNotify13(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x5C 0x00681ee0
+    bool OnItemNotify60(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x60 0x00686e10
+    bool OnItemNotify0A(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x64 0x00682020
+    bool OnItemNotify08(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x68 0x00682210
+    bool OnItemNotify09(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;   // 0x6C 0x006822b0
+    bool OnItemHover(void *argument, C_Control *control, uint32_t notification, uint32_t value) override;      // 0x70 0x00680ea0
+
+    void SetGame(C_GameState *game) { m_game = game; }
+    C_GameState *GetGame() const { return m_game; }
+    // The message box with the text (counted), unless one is on top; `textId` below 1: the box
+    // closed (the count down). (The second argument is not used; the game passes -1.)
+    void ShowMessage(int textId, int unused);           // 0x00682aa0
+    void SetUnknown1D1(bool on) { m_unknown1D1 = on; }
+
+private:
+    // Control 0x0CA00000 on while the squad soldier has a uniform and his load is within his strength
+    // (the network games' OnUpdate; not ported yet).
+    void UpdateLoadButton();                            // 0x006869a0 (__fastcall)
+    // The cooperative game's players (OnUpdate; not ported yet).
+    static void UpdateCoopPlayers();                    // 0x006802a0
+
+    int m_unknown1C4 = 0;                               // +0x1C4 (not set by the original)
+    int m_unknown1C8 = 0;                               // +0x1C8 (not set by the original)
+    int m_unknown1CC = 0;                               // +0x1CC (not set by the original)
+    bool m_unknown1D0 = false;                          // +0x1D0
+    bool m_unknown1D1 = false;                          // +0x1D1
+    int m_unknown1D4 = -1;                              // +0x1D4
+    int m_unknown1D8 = -1;                              // +0x1D8
+    int m_unknown1DC = -1;                              // +0x1DC
+    bool m_loadButtonOn = false;                        // +0x1E0 (UpdateLoadButton's)
+    C_ItemStock *m_stock1E4 = nullptr;                  // +0x1E4
+    C_ItemStock *m_stock1E8 = nullptr;                  // +0x1E8
+    C_OptionsHandler *m_options = nullptr;              // +0x1EC (OnStart .. OnStop)
+    C_MissionItems m_missionItems;                      // +0x1F0
+    C_LoadoutPresets m_presets;                         // +0x49C
+    C_InfoScreen *m_infoScreen = nullptr;               // +0x4BC the network games' (OnStart .. OnStop)
+    int m_unknown4C0 = 0;                               // +0x4C0
+    int m_unknown4C4 = -1;                              // +0x4C4
+    uint8_t m_unknown4C8[0x10] = {};                    // +0x4C8 (not set by the original)
+    bool m_unknown4D8 = false;                          // +0x4D8
+    bool m_unknown4D9 = false;                          // +0x4D9
+    bool m_hasPlayerSlotMember = false;                 // +0x4DA (OnStart's)
+    C_EquipmentPanel m_panel;                           // +0x4DC
+    C_StoreList m_storeList;                            // +0x580
+    C_GameState *m_game = nullptr;                      // +0x5B8 the game behind the menu
+};

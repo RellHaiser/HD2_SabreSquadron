@@ -2458,7 +2458,7 @@ uint32_t FUN_006863c0(int *param_1, ...)
 
 
 // 0x006869a0
-uint32_t FUN_006869a0(int param_1, ...)
+uint32_t C_GameMenu__UpdateWeightMessage(int param_1, ...)
 {
   void *local_c;
   uint32_t *puVar1;

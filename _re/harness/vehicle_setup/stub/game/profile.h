@@ -46,6 +46,8 @@ class C_PlayerProfile {
 public:
     C_Diary *GetDiary();
     C_KeyBindings *GetKeyBindings() { return &m_keyBindings; }
+    // (The in-game menu, part 9e-v: game_menu_test.inc.)
+    void ApplyVolume();
     C_KeyBindings m_keyBindings;
 };
 
@@ -121,6 +123,8 @@ public:
     // (The store list, part 9e-iii-a: store_list_test.inc.)
     int Take(int type, int count);
     int Get(int type) const;
+    // (The in-game menu, part 9e-v: game_menu_test.inc.)
+    void Reset();
 };
 class C_HumanStore {
 public:

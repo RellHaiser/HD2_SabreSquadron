@@ -1359,7 +1359,7 @@ uint32_t C_MainMenu__FUN_00626ad0(C_MainMenu *_this, ...)
   }
   ptr = _this->m_1d0;
   if (ptr != 0) {
-    FUN_0061cfa0(ptr);
+    C_OptionsHandler___C_OptionsHandler(ptr);
     tier1_operator_delete(ptr);
     _this->m_1d0 = 0;
   }
@@ -1446,13 +1446,14 @@ uint32_t C_MainMenu__FUN_00626b30(C_MainMenu *_this, ...)
 uint32_t C_MainMenu__FUN_00626ca0(C_MainMenu *_this,int *param_1, ...)
 {
   uchar *puVar1;
-  uint32_t uVar2;
+  bool bVar2;
   uint32_t uVar3;
-  C_str_rep *pCVar4;
-  C_GameApp *pCVar5;
-  int *piVar6;
-  int iVar7;
-  uint32_t uVar8;
+  uint32_t uVar4;
+  C_str_rep *pCVar5;
+  C_GameApp *pCVar6;
+  int *piVar7;
+  int iVar8;
+  uint32_t uVar9;
   C_str *fileName;
   C_str CStack_11c;
   uint32_t uStack_118;
@@ -1502,43 +1503,43 @@ uint32_t C_MainMenu__FUN_00626ca0(C_MainMenu *_this,int *param_1, ...)
   int aiStack_1c [4];
   int iStack_4;
   iStack_4 = 0xffffffff;
-  uVar2 = C_MainMenu__FUN_00621240(_this,(int)param_1);
-  if ((char)uVar2 != '\0') {
+  uVar3 = C_MainMenu__FUN_00621240(_this,(int)param_1);
+  if ((char)uVar3 != '\0') {
     return 0;
   }
-  uVar2 = C_MainMenu__FUN_00633490(_this,(int)param_1);
-  if ((char)uVar2 != '\0') {
+  uVar3 = C_MainMenu__FUN_00633490(_this,(int)param_1);
+  if ((char)uVar3 != '\0') {
     return 0;
   }
-  uVar2 = C_MainMenu__FUN_00638e00(_this,param_1);
-  if ((char)uVar2 != '\0') {
+  uVar3 = C_MainMenu__FUN_00638e00(_this,param_1);
+  if ((char)uVar3 != '\0') {
     return 0;
   }
-  uVar2 = FUN_0061bf00(_this->m_1d0,(int)param_1);
-  if ((char)uVar2 != '\0') {
+  bVar2 = C_OptionsHandler__HandleMessage(_this->m_1d0,param_1);
+  if (bVar2) {
     return 0;
   }
-  uVar2 = FUN_00632390((int)param_1);
-  if ((char)uVar2 != '\0') {
+  uVar3 = FUN_00632390((int)param_1);
+  if ((char)uVar3 != '\0') {
     return 0;
   }
-  uVar8 = param_1[1] & 0x3000fff;
-  if (uVar8 != 0x200000a) {
-    if (uVar8 == 0x200003a) {
+  uVar9 = param_1[1] & 0x3000fff;
+  if (uVar9 != 0x200000a) {
+    if (uVar9 == 0x200003a) {
       _this->_pad_0004[0] = '\f';
       _this->_pad_0004[1] = '\0';
       _this->_pad_0004[2] = '\0';
       _this->_pad_0004[3] = '\0';
       return 0;
     }
-    if (uVar8 != 0x2000075) {
+    if (uVar9 != 0x2000075) {
       return 0;
     }
     puVar1 = _this->_pad_01e8 + 4;
     if ((*(int *)(_this->_pad_01e8 + 4) == 0) || (*(int *)(*(int *)(_this->_pad_01e8 + 4) + 4) == 0))
     {
-      pCVar5 = GetGameApp();
-      pCVar5->m_pendingCommand = 6;
+      pCVar6 = GetGameApp();
+      pCVar6->m_pendingCommand = 6;
       return 0;
     }
     C_GameProfile__GetProfileDirectory(&g_gameProfile,&CStack_11c);
@@ -1547,33 +1548,33 @@ uint32_t C_MainMenu__FUN_00626ca0(C_MainMenu *_this,int *param_1, ...)
       C_str__Assign(&CStack_11c,(uint32_t *)puVar1);
     }
     else {
-      uVar8 = (CStack_11c.rep)->length;
+      uVar9 = (CStack_11c.rep)->length;
       if (*(int *)puVar1 == 0) {
-        uVar3 = 0;
+        uVar4 = 0;
       }
       else {
-        uVar3 = *(uint32_t *)(*(int *)puVar1 + 4);
+        uVar4 = *(uint32_t *)(*(int *)puVar1 + 4);
       }
-      uStack_94 = uVar8;
-      uStack_48 = uVar3;
-      pCStack_b0 = tier1_operator_new(uVar8 + 9 + uVar3);
+      uStack_94 = uVar9;
+      uStack_48 = uVar4;
+      pCStack_b0 = tier1_operator_new(uVar9 + 9 + uVar4);
       GH_PIECE(iStack_4,0,1) = 1;
       if (pCStack_b0 == 0) {
-        pCVar4 = 0;
+        pCVar5 = 0;
       }
       else {
-        pCVar4 = (C_str_rep *)
+        pCVar5 = (C_str_rep *)
                  C_str__CreateConcatRep
                            (pCStack_b0,(uint32_t *)(CStack_11c.rep)->chars,
-                            (uint32_t *)(*(int *)puVar1 + 8),uVar8,uVar3);
+                            (uint32_t *)(*(int *)puVar1 + 8),uVar9,uVar4);
       }
       iStack_4 = (uint32_t)GH_PIECE(iStack_4,1,3) << 8;
       C_str__ReleaseRep((C_str *)CStack_11c.rep);
-      CStack_11c.rep = pCVar4;
+      CStack_11c.rep = pCVar5;
     }
     fileName = &CStack_11c;
-    pCVar5 = GetGameApp();
-    C_GameApp__RequestLoad(pCVar5,fileName);
+    pCVar6 = GetGameApp();
+    C_GameApp__RequestLoad(pCVar6,fileName);
     iStack_4 = 0xffffffff;
     if (CStack_11c.rep == 0) {
       return 0;
@@ -1582,8 +1583,8 @@ uint32_t C_MainMenu__FUN_00626ca0(C_MainMenu *_this,int *param_1, ...)
     return 0;
   }
   if (DAT_008ae5f0 != 0) {
-    piVar6 = (int *)FUN_00628230(0x8ae5c4);
-    if (((uint8_t)((int)*(uint32_t *)(*piVar6 + 0x60) >> 0x1a) & 0x3f) == 2) {
+    piVar7 = (int *)FUN_00628230(0x8ae5c4);
+    if (((uint8_t)((int)*(uint32_t *)(*piVar7 + 0x60) >> 0x1a) & 0x3f) == 2) {
       FUN_00622af0((int)_this);
       pCStack_e4 = 0;
       uStack_f8 = 0;
@@ -1598,8 +1599,8 @@ uint32_t C_MainMenu__FUN_00626ca0(C_MainMenu *_this,int *param_1, ...)
       C_str__ReleaseRep(pCStack_e4);
       return 0;
     }
-    piVar6 = (int *)FUN_00628230(0x8ae5c4);
-    if (((uint8_t)((int)*(uint32_t *)(*piVar6 + 0x60) >> 0x1a) & 0x3f) == 0xe) {
+    piVar7 = (int *)FUN_00628230(0x8ae5c4);
+    if (((uint8_t)((int)*(uint32_t *)(*piVar7 + 0x60) >> 0x1a) & 0x3f) == 0xe) {
       piStack_cc = 0;
       uStack_e0 = 0;
       uStack_dc = 0x10000200;
@@ -1615,15 +1616,15 @@ uint32_t C_MainMenu__FUN_00626ca0(C_MainMenu *_this,int *param_1, ...)
       uStack_c0 = 0;
       iStack_4 = 4;
       PostControlMessage(&DAT_008ae590,&uStack_c8);
-      piVar6 = piStack_b4;
+      piVar7 = piStack_b4;
       goto LAB_0062719e;
     }
     uStack_104 = DAT_008ae5dc;
     uStack_108 = DAT_008ae5d8;
     uStack_100 = DAT_008ae5e0;
     uStack_fc = DAT_008ae5e4;
-    iVar7 = FUN_00620e90(&uStack_108,aiStack_1c,1);
-    if (((uint8_t)((int)*(uint32_t *)(**(int **)(iVar7 + 8) + 0x60) >> 0x1a) & 0x3f) == 10) {
+    iVar8 = FUN_00620e90(&uStack_108,aiStack_1c,1);
+    if (((uint8_t)((int)*(uint32_t *)(**(int **)(iVar8 + 8) + 0x60) >> 0x1a) & 0x3f) == 10) {
       piStack_98 = 0;
       uStack_ac = 0;
       uStack_a8 = 0x10000200;
@@ -1639,15 +1640,15 @@ uint32_t C_MainMenu__FUN_00626ca0(C_MainMenu *_this,int *param_1, ...)
       uStack_88 = 0;
       iStack_4 = 6;
       PostControlMessage(&DAT_008ae590,&uStack_90);
-      piVar6 = piStack_7c;
+      piVar7 = piStack_7c;
       goto LAB_0062719e;
     }
     uStack_114 = DAT_008ae5dc;
     uStack_118 = DAT_008ae5d8;
     uStack_110 = DAT_008ae5e0;
     uStack_10c = DAT_008ae5e4;
-    iVar7 = FUN_00620e90(&uStack_118,aiStack_2c,1);
-    if (((uint8_t)((int)*(uint32_t *)(**(int **)(iVar7 + 8) + 0x60) >> 0x1a) & 0x3f) == 4) {
+    iVar8 = FUN_00620e90(&uStack_118,aiStack_2c,1);
+    if (((uint8_t)((int)*(uint32_t *)(**(int **)(iVar8 + 8) + 0x60) >> 0x1a) & 0x3f) == 4) {
       piStack_4c = 0;
       uStack_60 = 0;
       uStack_5c = 0x14001200;
@@ -1663,7 +1664,7 @@ uint32_t C_MainMenu__FUN_00626ca0(C_MainMenu *_this,int *param_1, ...)
       uStack_3c = 0;
       iStack_4 = 8;
       PostControlMessage(&DAT_008ae590,&uStack_44);
-      piVar6 = piStack_30;
+      piVar7 = piStack_30;
       goto LAB_0062719e;
     }
   }
@@ -1673,10 +1674,10 @@ uint32_t C_MainMenu__FUN_00626ca0(C_MainMenu *_this,int *param_1, ...)
   uStack_70 = 0;
   iStack_4 = 9;
   PostControlMessage(&DAT_008ae590,&uStack_78);
-  piVar6 = piStack_64;
+  piVar7 = piStack_64;
 LAB_0062719e:
-  if ((piVar6 != 0) && (*piVar6 = *piVar6 - 1, *piVar6 == 0)) {
-    tier1_operator_delete(piVar6);
+  if ((piVar7 != 0) && (*piVar7 = *piVar7 - 1, *piVar7 == 0)) {
+    tier1_operator_delete(piVar7);
   }
   return 0;
 }

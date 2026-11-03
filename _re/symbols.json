@@ -27380,6 +27380,16 @@
   "module": "xml_node",
   "name": "XmlAttr_Dtor"
  },
+ "0061bf00": {
+  "module": "game_menu",
+  "name": "C_OptionsHandler::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "0061cfa0": {
+  "module": "game_menu",
+  "name": "C_OptionsHandler::~C_OptionsHandler",
+  "proto": "void __fastcall ~C_OptionsHandler(void * handler)"
+ },
  "0061da70": {
   "module": "equipment_panel",
   "name": "S_ControlDesc::AddChild",
@@ -31760,7 +31770,7 @@
   "proto": "void __thiscall MissionItemPairs_Insert(void *this, void * where, uint count, void * value)"
  },
  "0067eb40": {
-  "module": "game",
+  "module": "game_menu",
   "name": "C_GameMenu::C_GameMenu",
   "proto": "C_GameMenu * __thiscall C_GameMenu(C_GameMenu *this)"
  },
@@ -31911,15 +31921,80 @@
   "name": "C_EquipmentPanel::ScalarDeletingDestructor",
   "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
  },
+ "0067f470": {
+  "module": "game_menu",
+  "name": "C_GameMenu::GetTypeId",
+  "proto": "int __thiscall GetTypeId(C_GameMenu *this)"
+ },
+ "0067f480": {
+  "module": "game_menu",
+  "name": "C_GameMenu::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_GameMenu *this, uchar flags)"
+ },
+ "0067f4a0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::~C_GameMenu",
+  "proto": "void __thiscall ~C_GameMenu(C_GameMenu *this)"
+ },
+ "0067f650": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_GameMenu *this, void * arg)"
+ },
+ "0067f760": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_GameMenu *this)"
+ },
+ "0067f850": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_GameMenu *this, void * message)"
+ },
  "0067fda0": {
-  "module": "game",
+  "module": "game_menu",
   "name": "C_MissionDef::AreObjectivesDecided",
   "proto": "bool __fastcall AreObjectivesDecided(C_MissionDef * mission)"
  },
+ "0067fe00": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_GameMenu *this)"
+ },
+ "006802a0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::UpdateCoopPlayers",
+  "proto": "void UpdateCoopPlayers(void)"
+ },
+ "006808d0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnUpdate",
+  "proto": "void __thiscall OnUpdate(C_GameMenu *this, int timeDelta)"
+ },
+ "00680920": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnTick",
+  "proto": "void __thiscall OnTick(C_GameMenu *this, int timeDelta)"
+ },
+ "00680960": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnInput",
+  "proto": "bool __thiscall OnInput(C_GameMenu *this, float * held, float * pressed)"
+ },
+ "006824f0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnRender",
+  "proto": "bool __thiscall OnRender(C_GameMenu *this)"
+ },
+ "00682770": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnDrawScreens",
+  "proto": "bool __thiscall OnDrawScreens(C_GameMenu *this)"
+ },
  "00682aa0": {
-  "module": "game",
+  "module": "game_menu",
   "name": "C_GameMenu::ShowMessage",
-  "proto": "void __thiscall ShowMessage(C_GameMenu *this, int textId, int unknown)"
+  "proto": "void __thiscall ShowMessage(C_GameMenu *this, int textId, int unused)"
  },
  "00682bb0": {
   "module": "zz_idioms",
@@ -31928,6 +32003,11 @@
  "006861a0": {
   "module": "zz_idioms",
   "name": "identity_6861a0"
+ },
+ "006869a0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::UpdateLoadButton",
+  "proto": "void __fastcall UpdateLoadButton(C_GameMenu * menu)"
  },
  "00686b90": {
   "module": "zz_idioms",
