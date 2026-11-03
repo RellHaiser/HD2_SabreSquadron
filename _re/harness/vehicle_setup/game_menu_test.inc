@@ -29,7 +29,6 @@ bool GmPanel(const char *panel, const S_ScreenDesc *desc, I3D_frame *model)
 // (Part 9e-xiv: the soldiers panel's. The store's count equipment_panel_test.inc's profiles; the
 // stats logged; the squad soldier's profile set and logged.)
 int C_HumanStore::GetCount() const { return static_cast<int>(g_epProfiles.size()); }
-void C_GameMenu::ShowSoldierStats(int profile) { GfLog("stats %d", profile); }
 bool S_SquadSoldier::SetProfile(int profile, int level)
 {
     GfLog("set profile %d %d", profile, level);
@@ -37,11 +36,6 @@ bool S_SquadSoldier::SetProfile(int profile, int level)
     return true;
 }
 // (Part 9e-xvi: the stocks' setup and the store list's description logged.)
-bool C_GameMenu::SetupStocks()
-{
-    GfLog("setup stocks");
-    return true;
-}
 void C_StoreList::BuildDescription(S_ScreenDesc *desc, I3D_frame *model)
 {
     GfLog("store desc %s %d %s menu %d", desc->name.c_str(), static_cast<int>(desc->controls.size()),
@@ -65,6 +59,21 @@ void S_SquadSoldier::CopyFrom(const S_SquadSoldier &other)
     team = other.team;
 }
 void S_SquadSoldier::UpdateLoad() { GfLog("update load"); }
+// (Part 9e-xix: the soldiers' stats (a profile's from g_gmStats; the call logged), the local
+// player's (its rank 5th), the stocks' counts set (per stock), the items loaded (logged).)
+std::map<int, std::vector<int>> g_gmStats;
+void C_HumanStore::GetStats(int *stats, int index, int level) const
+{
+    GfLog("get stats %d %d", index, level);
+    const auto it = g_gmStats.find(index);
+    if (it != g_gmStats.end())
+        std::copy(it->second.begin(), it->second.end(), stats);
+}
+int g_gmLocalStats[16];
+int *C_NetGame::GetLocalPlayerStats() { return g_gmLocalStats; }
+std::map<const C_ItemStock *, std::map<int, int>> g_gmStockSets;
+void C_ItemStock::Set(int type, int count) { g_gmStockSets[this][type] = count; }
+void C_ItemsModule::EnsureItemsLoaded() { GfLog("items loaded"); }
 // (Part 9e-xvii: the profile's name.)
 C_str g_gmProfileName("Pvt");
 const C_str &C_PlayerProfile::GetProfileName() const { return g_gmProfileName; }
@@ -138,8 +147,15 @@ struct S_GameMenuResults {
     bool gmPlayerCallbacks = true, gmChat = true, gmSoldiers = true, gmSoldiersNone = true, gmSoldierPicked = true;
     bool gmSide = true, gmEquipment = true, gmEquipmentNone = true, gmItems = true, gmItemsNone = true, gmSkills = true;
     bool gmSoldierTypes = true, gmStorePreset = true, gmTypeEdited = true, gmPresetSaved = true;
-    bool gmTeam = true, gmTakeItems = true, gmShown = true;
+    bool gmTeam = true, gmTakeItems = true, gmShown = true, gmStats = true, gmStocks = true;
 };
+// A float's bits (a message's value2).
+uint32_t GmBits(float f)
+{
+    uint32_t bits;
+    std::memcpy(&bits, &f, sizeof bits);
+    return bits;
+}
 // The log's lines as one ("line; ").
 std::string Join(const std::vector<std::string> &log)
 {
@@ -1025,7 +1041,8 @@ void GameMenuTest(I3D_scene *scene)
     {
         bool ok = true;
         g_gameRole = GAME_ROLE_LOCAL;
-        alignas(16) static uint8_t missionMemory[sizeof(C_MissionDef)];
+        // (As big as a network game's mission: part 9e-xix's stocks read its items.)
+        alignas(16) static uint8_t missionMemory[sizeof(C_MpMissionDef)];
         alignas(16) static uint8_t objectiveMemory[sizeof(S_MissionObjective)];
         std::memset(missionMemory, 0, sizeof missionMemory);
         std::memset(objectiveMemory, 0, sizeof objectiveMemory);
@@ -1178,7 +1195,7 @@ void GameMenuTest(I3D_scene *scene)
             g_mrMade[FRAME_MODEL] = {a, o, p, dm};
             g_epProfiles.clear();
             okb &= m.BuildScreens() && MrHas("gmcp 34 PLAYER_SCREEN") && MrHas("gmcp 48 equippanel 20") &&
-                   MrHas("setup stocks") && MrHas("gmcp 48 allitemspanel 20") && MrHas("gmco 48 bvideo setup 20") && m.m_screens[3]->m_inactive == false &&
+                   MrHas("items loaded") && MrHas("gmcp 48 allitemspanel 20") && MrHas("gmco 48 bvideo setup 20") && m.m_screens[3]->m_inactive == false &&
                    m.m_screens.size() == 4 && m.m_screens[3]->GetId() == 3u << 26 && !g_menuScreens.empty() &&
                    g_menuScreens.back() == m.m_screens[coop ? 3 : 1];
             okb &= g_cacheLoads.size() >= 3 &&
@@ -1294,10 +1311,11 @@ void GameMenuTest(I3D_scene *scene)
             okp &= m.m_soldierTypes == 0x0C200000 && C_GmBasePeek::WeaponsInfo(m) == 0x0D200000 && !m.m_popup &&
                    m.m_panel.m_soldier;
             // (No equipment panel: its frames not found; the dummies not made.)
-            okp &= g_gfLog.size() >= 10 && g_gfLog[0] == "gmpm 48 equippanel 20" && g_gfLog[1] == "create 6" &&
-                   g_gfLog[2] == "create 6" && g_gfLog[3] == "setup stocks" && g_gfLog[4] == "gmpm 48 allitemspanel 20" &&
-                   g_gfLog[5] == "gmpm 48 soldier type01 1" && g_gfLog[6] == "gmpm 48 bscroll 20" &&
-                   g_gfLog[7] == "gmpm 48 text_weapons_info 1" && g_gfLog[8] == "gmpm 48 3Dview 1" && MrHas("gmp3d on 0");
+            okp &= g_gfLog.size() >= 11 && g_gfLog[0] == "gmpm 48 equippanel 20" && g_gfLog[1] == "create 6" &&
+                   g_gfLog[2] == "create 6" && g_gfLog[3] == "items loaded" && g_gfLog[4] == "stock reset" &&
+                   g_gfLog[5] == "gmpm 48 allitemspanel 20" && g_gfLog[6] == "gmpm 48 soldier type01 1" &&
+                   g_gfLog[7] == "gmpm 48 bscroll 20" && g_gfLog[8] == "gmpm 48 text_weapons_info 1" &&
+                   g_gfLog[9] == "gmpm 48 3Dview 1" && MrHas("gmp3d on 0");
             // (The soldier types filled: their combo box emptied first.)
             okp &= std::any_of(g_controlMessages.begin(), g_controlMessages.end(), [](const S_ControlMessage &q) {
                 return q.target == 0x0C200000 && q.id == CONTROL_MSG_CLEAR;
@@ -1617,7 +1635,7 @@ void GameMenuTest(I3D_scene *scene)
                 // (Of the unused entries: four.)
                 for (const char *name : {"item10", "item15", "selitem08", "selitem15"})
                     g_msChildren[{im, name}] = MsFrame((std::string("gmiu_") + name).c_str());
-                std::vector<std::string> want = {"setup stocks", "gmim 48 allitemspanel 20", "gmim 48 soldier type01 1",
+                std::vector<std::string> want = {"items loaded", "stock reset", "gmim 48 allitemspanel 20", "gmim 48 soldier type01 1",
                                                  "gmim 48 bscroll 20", "gmip 34 P_visualstore", "gmif 34 filter",
                                                  "gmif 38 gmip 1", "gmib 38 gmip 1"};
                 for (const char *name : {"item10", "item11", "item12", "item13", "item14", "item15", "selitem08", "selitem09",
@@ -1644,7 +1662,7 @@ void GameMenuTest(I3D_scene *scene)
                     C_GameMenu it2;
                     S_ScreenDesc di2("PLAYER_SCREEN", "player_screen", 3u << 26);
                     g_gfLog.clear();
-                    okn &= !it2.BuildItemsPanel(&di2, As<I3D_frame>(im)) && !g_gfLog.empty() && g_gfLog[0] == "setup stocks" &&
+                    okn &= !it2.BuildItemsPanel(&di2, As<I3D_frame>(im)) && !g_gfLog.empty() && g_gfLog[0] == "items loaded" &&
                            logHas("store desc") == 0 && logHas("gmic 34") == 0 && !it2.m_storeList.m_menu;
                     if (missing == std::string("allitemspanel") || missing == std::string("soldier type01"))
                         okn &= logHas("gmip 34") == 0 && logHas("gmim 48 item10") == 0;
@@ -1862,6 +1880,104 @@ void GameMenuTest(I3D_scene *scene)
         allowed = C_str();
     }
 
+    // --- the stats (part 9e-xix): the profile's at the local player's rank (none: the defaults); the
+    // skills' bars (hundredths; health full) and values (per cent, kg, as they are) ---
+    {
+        g_gmStats = {{7, {900, 60, 70, 0, 55, 0, 44, 33, 22}}};
+        g_gmLocalStats[5] = 3;
+        g_controlMessages.clear();
+        g_gfLog.clear();
+        C_GameMenu::ShowSoldierStats(7);
+        const auto row = [](int bar, float fill, const char *text) {
+            return CmText("c4%02x000 1000092 0 %x ; c4%02x000 1000014 17 0 %s; ", bar, GmBits(fill), bar + 1, text);
+        };
+        // (A hundredth of the stat: rounded once, as the original's float product.)
+        const auto pc = [](int n) { return static_cast<float>(n) * 0.01f; };
+        const std::string want = row(2, pc(55), " 55 %") + row(5, pc(60), " 60 Kg") + row(8, 1.0f, "900") + row(0xB, pc(70), " 70") +
+                                 row(0xE, pc(44), " 44 %") + row(0x11, pc(33), " 33 %") + row(0x14, pc(22), " 22 %");
+        const std::string got = GmQueue();
+        if (got != want)
+            std::fprintf(stderr, "gmStats:\n%s\n%s\n", got.c_str(), want.c_str());
+        bool okt = got == want && GfLogIs({"get stats 7 3"});
+        g_gmLocalStats[5] = 0;
+        C_GameMenu::ShowSoldierStats(8);
+        okt &= GmQueue() == row(2, pc(80), " 80 %") + row(5, pc(80), " 80 Kg") + row(8, 1.0f, "800") + row(0xB, pc(80), " 80") +
+                                row(0xE, pc(50), " 50 %") + row(0x11, pc(30), " 30 %") + row(0x14, pc(20), " 20 %");
+        g_gmStats.clear();
+        WM(r.gmStats, okt);
+    }
+
+    // --- the stocks (part 9e-xix): made, every type unset (-1), the profile's reset; the map's items
+    // of a team (known, in range) in the stocks for the others' team: their counts (the list's, else
+    // 1; group 5: 10) and their seconds' (a weapon's ammunition 10 but 0x26's, a uniform's head gear
+    // 1; the list's count), a type with a count kept ---
+    {
+        alignas(16) static uint8_t stockMission[sizeof(C_MpMissionDef)];
+        std::memset(stockMission, 0, sizeof stockMission);
+        auto &items = const_cast<std::vector<S_CampaignItem> &>(reinterpret_cast<C_MpMissionDef *>(stockMission)->GetItems());
+        const auto item = [](int id, int count, int ammo) {
+            S_CampaignItem i;
+            i.itemId = id;
+            i.count = count;
+            i.ammo = ammo;
+            i.unknownC = false;
+            return i;
+        };
+        items = {item(1, 3, -1), item(2, -1, -1), item(0x26, -1, -1), item(4, -1, 7), item(5, -1, -1), item(6, 2, 2),
+                 item(7, 1, 1), item(600, 1, 1), item(-1, 1, 1), item(8, -1, -1), item(0, 2, -1), item(500, 1, -1),
+                 item(11, -1, -1)};
+        C_SlDef d1(ITEM_STATIC, 0, -1, -1), d2(ITEM_ANIMATED, 0, 50, -1), d26(ITEM_ANIMATED, 0, 51, -1);
+        C_SlDef d4(ITEM_STATIC, 15, -1, 60), d5(ITEM_STATIC, 0, -1, -1), d6(ITEM_STATIC, 0, -1, -1), d8(ITEM_STATIC, 0, -1, -1);
+        C_SlDef d0(ITEM_STATIC, 0, -1, -1), d500(ITEM_STATIC, 0, -1, -1), d11(ITEM_STATIC, 0, -1, -1), d9(ITEM_ANIMATED, 0, 0, -1);
+        d0.m_team = d500.m_team = d11.m_team = d9.m_team = 2;
+        d1.m_team = 0;
+        d2.m_team = 1;
+        d26.m_team = d4.m_team = d5.m_team = d8.m_team = 2;
+        d6.m_team = 3;
+        const std::map<int, C_ItemDef *> oldDefs = g_gfItemDefs;
+        g_gfItemDefs = {{1, &d1}, {2, &d2}, {0x26, &d26}, {4, &d4}, {5, &d5}, {6, &d6}, {8, &d8}, {0, &d0}, {500, &d500},
+                        {11, &d11}, {9, &d9}};
+        g_slGroups[&d5] = 5;
+        // (Types 8 and 11 have counts already.)
+        g_slCounts = {{8, 2}, {11, 1}};
+        C_game *game = GetGame();
+        C_MissionDef *const oldMission = game->m_mission;
+        game->m_mission = reinterpret_cast<C_MissionDef *>(stockMission);
+        C_GameMenu m;
+        g_gmStockSets.clear();
+        g_gfLog.clear();
+        bool oks = m.SetupStocks() && m.m_stock1E4 && m.m_stock1E8 && m.m_stock1E4 != m.m_stock1E8 &&
+                   GfLogIs({"items loaded", "stock reset"});
+        std::map<int, int> &first = g_gmStockSets[m.m_stock1E4], &second = g_gmStockSets[m.m_stock1E8];
+        const auto changed = [](const std::map<int, int> &stock) {
+            std::string s;
+            for (const auto &e : stock)
+                if (e.second != -1)
+                    s += CmText("%d:%d ", e.first, e.second);
+            return s;
+        };
+        oks &= first.size() == 500 && second.size() == 500 && first.count(499) && first.count(0) &&
+               changed(first) == "0:2 1:3 4:1 5:10 38:1 60:7 " && changed(second) == "0:2 2:1 4:1 5:10 38:1 50:10 60:7 ";
+        WM(r.gmStocks, oks);
+        // Counts of 0: a weapon's (its ammunition type 0 too).
+        delete m.m_stock1E4;
+        delete m.m_stock1E8;
+        items = {item(9, 0, 0)};
+        g_gmStockSets.clear();
+        oks &= m.SetupStocks() && changed(g_gmStockSets[m.m_stock1E4]) == "0:0 9:0 " &&
+               changed(g_gmStockSets[m.m_stock1E8]) == "0:0 9:0 ";
+        WM(r.gmStocks, oks);
+        delete m.m_stock1E4;
+        delete m.m_stock1E8;
+        m.m_stock1E4 = m.m_stock1E8 = nullptr;
+        g_gmStockSets.clear();
+        g_slCounts.clear();
+        g_slGroups.erase(&d5);
+        g_gfItemDefs = oldDefs;
+        items = std::vector<S_CampaignItem>();
+        game->m_mission = oldMission;
+    }
+
     // --- the squad's team (part 9e-xviii): set (2: nothing): the message box closed; the posted
     // change done: the escape; the same team: no more; not co-op: the marks (another team: no more);
     // the store's list and the soldier types on at the first, else the load's button off and the
@@ -1913,7 +2029,7 @@ void GameMenuTest(I3D_scene *scene)
                              "c101000 100000b c102000 0 ; ", "c102000 1000003 0 0 ; ", "c103000 1000004 0 0 ; ",
                              "c102000 20000aa 5 0 ; ", "c200000 2000018 0 0 ; "}) &&
                q.find("ca00000") == std::string::npos;
-        okt &= GmInOrder(Join(g_gfLog), {"stats 5", "set profile 5 0", "update load"}) && logHas("return items") == 0;
+        okt &= GmInOrder(Join(g_gfLog), {"get stats 5 0", "set profile 5 0", "update load"}) && logHas("return items") == 0;
         g_pickedSoldierA = 0;
         // (No soldier for the rest: returning the items would reset its models.)
         m.m_panel.m_soldier = nullptr;
@@ -1930,7 +2046,7 @@ void GameMenuTest(I3D_scene *scene)
                              "c101000 100000b c103000 0 ; ", "c102000 1000004 0 0 ; ", "c103000 1000003 0 0 ; ",
                              "c103000 20000aa 4 0 ; ", "c200000 2000018 0 0 ; "}) &&
                q.find("c200000 1000002") == std::string::npos &&
-               GmInOrder(Join(g_gfLog), {"return items", "stats 34", "set profile 34 0", "update load"});
+               GmInOrder(Join(g_gfLog), {"return items", "get stats 34 0", "set profile 34 0", "update load"});
         g_pickedSoldierX = 30;
         // The change posted and now the first soldier's: the escape, no more.
         m.m_teamChangePosted = true;
@@ -1954,7 +2070,7 @@ void GameMenuTest(I3D_scene *scene)
         g_gfLog.clear();
         m.SetTeam(3);
         okt &= m.m_team == 3 && first.team == 3 && m.m_storeList.GetStock() == m.m_stock1E4 &&
-               GmQueue().find("c102000 1000004") == std::string::npos && MrHas("stats 0");
+               GmQueue().find("c102000 1000004") == std::string::npos && MrHas("get stats 0 0");
         g_coop = false;
         m.m_panel.m_soldier = nullptr;
         g_epProfiles[5]->faceTexture = C_str();
@@ -2026,7 +2142,7 @@ void GameMenuTest(I3D_scene *scene)
         squad.states = {&first};
         m.m_team = -1;
         first.team = TEAM_ALLIES;
-        oks &= shown() && m.m_panel.m_squadSoldier == &first && m.m_team == TEAM_ALLIES && MrHas("stats 0");
+        oks &= shown() && m.m_panel.m_squadSoldier == &first && m.m_team == TEAM_ALLIES && MrHas("get stats 0 0");
         squad.states.clear();
         m.m_hasPlayerSlotMember = true;
         oks &= shown() && squad.states.size() == 1 && m.m_panel.m_squadSoldier == squad.states[0];
@@ -2076,13 +2192,13 @@ void GameMenuTest(I3D_scene *scene)
         soldier->m_face = "none";
         okp &= pick(-1) && GfLogIs({"index 100000a"}) && g_controlMessages.empty() && g_pickedSoldierA == 3 && face("none") &&
                g_pickedSoldierX == 33 && squad.profileIndex == -1;
-        okp &= pick(0) && GfLogIs({"index 100000a", "stats 0", "set profile 0 0"}) && face("gm_f000.bmp") &&
+        okp &= pick(0) && GfLogIs({"index 100000a", "get stats 0 0", "set profile 0 0"}) && face("gm_f000.bmp") &&
                !g_controlMessages.empty() &&
                g_pickedSoldierA == 0 && g_pickedSoldierX == 33 && squad.profileIndex == 0;
         okp &= pick(29) && g_pickedSoldierA == 29 && g_pickedSoldierX == 33;
         okp &= pick(30) && g_pickedSoldierA == 29 && g_pickedSoldierX == 30 && face("gm_f030.bmp");
         okp &= pick(59) && g_pickedSoldierA == 29 && g_pickedSoldierX == 59 && MrHas("set profile 59 0");
-        okp &= pick(60) && g_pickedSoldierA == 29 && g_pickedSoldierX == 59 && GfLogIs({"index 100000a", "stats 60", "set profile 60 0"}) && face("");
+        okp &= pick(60) && g_pickedSoldierA == 29 && g_pickedSoldierX == 59 && GfLogIs({"index 100000a", "get stats 60 0", "set profile 60 0"}) && face("");
         m.m_panel.m_squadSoldier = nullptr;
         m.m_panel.m_soldier = nullptr;
         g_epProfiles[0]->faceTexture = C_str();
@@ -2166,12 +2282,12 @@ void GameMenuTest(I3D_scene *scene)
                 "gmMainLocal %d gmMainNet %d gmBuild %d gmBuildNet %d gmPlayer %d gmPlayerCoop %d gmPlayerCallbacks %d "
                 "gmChat %d gmSoldiers %d gmSoldiersNone %d gmSoldierPicked %d gmSide %d gmEquipment %d gmEquipmentNone %d "
                 "gmItems %d gmItemsNone %d gmSkills %d gmSoldierTypes %d gmStorePreset %d gmTypeEdited %d "
-                "gmPresetSaved %d gmTeam %d gmTakeItems %d gmShown %d\n",
+                "gmPresetSaved %d gmTeam %d gmTakeItems %d gmShown %d gmStats %d gmStocks %d\n",
                 r.gmNew, r.gmNewClient, r.gmStart, r.gmStartNet, r.gmStop, r.gmInput, r.gmUpdate, r.gmTick, r.gmDraw,
                 r.gmMessage, r.gmObjectives, r.gmBase, r.gmLoad, r.gmCoop, r.gmNet, r.gmRender, r.gmRenderGame,
                 r.gmRenderEquip, r.gmOptions, r.gmEscape, r.gmEscapeNet, r.gmSquad, r.gmQuestions, r.gmMainLocal,
                 r.gmMainNet, r.gmBuild, r.gmBuildNet, r.gmPlayer, r.gmPlayerCoop, r.gmPlayerCallbacks, r.gmChat, r.gmSoldiers,
                 r.gmSoldiersNone, r.gmSoldierPicked, r.gmSide, r.gmEquipment, r.gmEquipmentNone,
                 r.gmItems, r.gmItemsNone, r.gmSkills, r.gmSoldierTypes, r.gmStorePreset, r.gmTypeEdited,
-                r.gmPresetSaved, r.gmTeam, r.gmTakeItems, r.gmShown);
+                r.gmPresetSaved, r.gmTeam, r.gmTakeItems, r.gmShown, r.gmStats, r.gmStocks);
 }

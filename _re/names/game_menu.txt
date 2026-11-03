@@ -47,7 +47,9 @@
 00685550 C_GameMenu::SetTeam | void __thiscall SetTeam(C_GameMenu *this, int team)
 00685ab0 C_GameMenu::ShowTeamSoldiers | void __thiscall ShowTeamSoldiers(C_GameMenu *this, int team)
 00685880 C_GameMenu::TakeSoldierItems | void __fastcall TakeSoldierItems(C_GameMenu * menu)
-# Not ported yet (named for the later parts).
-00685170 C_GameMenu::SetupStocks | bool __fastcall SetupStocks(C_GameMenu * menu)
+# Part 9e-xix: the stats and the stocks.
 006863c0 C_GameMenu::ShowSoldierStats | void __stdcall ShowSoldierStats(int profile)
+00685170 C_GameMenu::SetupStocks | bool __fastcall SetupStocks(C_GameMenu * menu)
+# Not ported yet (named for the later parts).
+0072f8b0 C_NetGame::GetLocalPlayerStats
 0072ee60 C_NetGame::SendChat

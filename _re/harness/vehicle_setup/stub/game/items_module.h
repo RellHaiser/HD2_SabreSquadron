@@ -20,6 +20,8 @@ public:
     // (The seat weapon's item, game/seat_weapon.cpp.)
     C_Item *CreateFreeItem(int typeId);
     void DestroyItem(C_Item *item);
+    // (The in-game menu's stocks, part 9e-xix: game_menu_test.inc.)
+    void EnsureItemsLoaded();
 };
 extern C_ItemsModule g_itemsModule;
 // (Part 7e: the static weapon's store in the saved game.)

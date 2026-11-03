@@ -119,8 +119,11 @@ private:
     // The skills panel "Panel02" (taking no input): per skill its name's title (text 0xA78 + the
     // skill), its bar (along z, empty) and its value's title. True. (The model is not used.)
     static bool BuildSkillsPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x00684df0 (__stdcall)
-    // The two stocks made (every type -1), the profile's stock reset, the mission's store items (not
-    // ported yet).
+    // The two stocks made (every type -1), the profile's stock reset; the map's items (a known type
+    // of a team) in the stocks the team's soldiers take from (the second for the items not of team
+    // 0, the first for those not of team 1), with their counts (the list's, else 1; the
+    // inventory group 5's 10) and their seconds' (a weapon's ammunition, 10; a uniform's head gear,
+    // 1; the list's ammunition count when given), a type not set yet only. True.
     bool SetupStocks();                                 // 0x00685170 (__fastcall)
     // The soldier types' combo box filled: emptied, its header and first line text 500; the user
     // presets of the squad's team, then the presets the map allows (their names in its list;
@@ -158,7 +161,9 @@ private:
     // false; none: no side), the team asked for when it is not the squad's; true.
     static bool OnSide(void *menu, void *argument, C_Control *control, uint32_t notification,
                        uint32_t value);                 // 0x006854e0 (__thiscall)
-    // A profile's stats on the skills panel (not ported yet).
+    // A profile's stats on the skills panel (its skills at the local player's rank; no profile: the
+    // defaults): the bars (a hundredth each; health full) and their values' texts (shooting,
+    // endurance, stealth, first aid, lockpick in per cent, strength in kg, health as it is).
     static void ShowSoldierStats(int profile);          // 0x006863c0 (__stdcall)
     // The squad's team set (2: nothing): the message box closed; the team change posted and now
     // the first soldier's: the escape posted; the same team: nothing more. Not co-op: its side's mark

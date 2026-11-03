@@ -332,6 +332,8 @@ public:
     const C_str &GetMapName() const { return m_mapName; }
     // The map's allowed presets' names (the in-game menu lists the presets found in it).
     const C_str &GetPresets() const { return m_presets; }
+    // The map's allowed items (the in-game menu's stocks).
+    const std::vector<S_CampaignItem> &GetItems() const { return m_items; }
     // The map's AIRCRAFTATACK values (the kinds of the air attacks and the artillery the sides
     // call in; an axis caller gets the second, inferred to be the other side's planes).
     int GetAircraftAttackAxis() const { return m_aircraftAttackAxis; }

@@ -178,6 +178,7 @@ public:
     void SetPlayer(int slot, int connection, const char *name);
     void UpdateVoiceTeam();
     bool SendChat(const char *text, bool team);
+    int *GetLocalPlayerStats();                     // (the in-game menu's stats, part 9e-xix)
     // (The multiplayer zone, part 7d.)
     int GetLocalTeam();
     int GetPlayerCount() const;

@@ -7571,6 +7571,26 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e-xix: the stats (ShowSoldierStats 0x006863c0), the stocks' setup (0x00685170), the item
     slots (0x00680ea0.., 0x00686e10..).
 
+  PART 9e-xix DONE (2026-11-03): the in-game menu's soldier stats and stocks (game/game_menu.cpp).
+  - ShowSoldierStats 0x006863c0: the profile's stats at the local player's rank
+    (C_NetGame::GetLocalPlayerStats 0x0072f8b0, declared; its 6th) over the defaults (800, 80 ...);
+    the skills panel's (0x0C400000) bars (a hundredth, rounded once as the original's float product;
+    health full) and values' texts (style 0x17: shooting, stealth, first aid, lockpick "%3d %%",
+    strength "%3d Kg", health and endurance "%3d").
+  - SetupStocks 0x00685170: the items loaded; two stocks made, every type unset (-1); the profile's
+    stock reset; the map's items (C_MpMissionDef::GetItems added; a known type below 500 of a team)
+    in the second stock unless of team 0 and the first unless of team 1: its count (the list's,
+    else 1; inventory group 5: 10) and its second's (a weapon's ammunition, 10, not for type 0x26; a
+    uniform's head gear, 1; the list's ammunition count), a type with a count kept.
+  - Harness: game_menu_test.inc's gmStats, gmStocks; the fakes for the store's stats, the local
+    player's stats, the stocks' Set, the items' loading (stub headers); the network games' mission as
+    big as a C_MpMissionDef. 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e19.py (104, 98 killed, 6 equivalent).
+  - Build: MSVC clean. Tier 1: 400 errors in 73 files, 170 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+1, 2 moved); 2 functions in ported.txt. Stats: 8,886 of 12,306 functions by hand (79.6 % by size).
+  - Next, 9e-xx: the item slots (OnItemHover 0x00680ea0, OnItemNotify13 / 0A / 08 / 09 / 60 ...), the
+    store list's description (0x0067aa70).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

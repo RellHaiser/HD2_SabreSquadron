@@ -1,7 +1,8 @@
 // The in-game menu (original 0x0067eb40..0x00687f50; part 9e-v: the class and the menu state's slots;
 // 9e-vi: the update's helpers and the drawing; 9e-vii: the messages; 9e-ix: the screens' descriptions;
 // 9e-xiii: the player screen's; 9e-xiv..9e-xvi: its soldiers, equipment, items and skills panels;
-// 9e-xvii: the soldier types and the user presets; 9e-xviii: the squad's team).
+// 9e-xvii: the soldier types and the user presets; 9e-xviii: the squad's team; 9e-xix: the
+// stats and the stocks).
 #include "game/game_menu.h"
 
 #include <algorithm>
@@ -18,6 +19,7 @@
 #include "game/interface.h"
 #include "game/item_defs.h"
 #include "game/items.h"
+#include "game/items_module.h"
 #include "game/pending.h"
 #include "game/profile.h"
 #include "game/screen.h"
@@ -65,6 +67,15 @@ constexpr float SOLDIER_ACROSS_STEP = 0.062f;
 constexpr int CONTROL_BAR = 0x16;
 constexpr uint32_t BAR_AXIS_Z = 2;
 constexpr uint32_t TEXT_SKILLS = 0xA78, TEXT_SKILL_VALUE = 0x7D2;
+// The skills panel's controls (the player screen's fourth: 0x0C400000; a skill's name, bar and
+// value 1..3 + 3 per skill) and the values' style; the default stats (a profile not found).
+constexpr uint32_t SKILLS_PANEL = 0x0C400000;
+constexpr uint32_t SKILL_VALUE_STYLE = 0x17;
+constexpr int DEFAULT_STATS[12] = {800, 80, 80, 80, 80, 80, 50, 30, 20, 50, 0, 80};
+// The stocks: the item types, an unset count, the inventory group counted by ten, the item type a
+// weapon's ammunition is not counted for (0x26), the uniforms' behaviour, the items of no team.
+constexpr int STOCK_TYPES = 500;
+constexpr int STOCK_GROUP_BY_TEN = 5, STOCK_NO_AMMO_TYPE = 0x26, BEHAVIOUR_UNIFORM = 15, ITEM_TEAM_NONE = 3;
 // A user preset's name as the menu writes it (29 characters), its belt's and backpack's item types
 // as the menu stores them (13 and 31: one less than the preset holds).
 constexpr size_t PRESET_NAME_LENGTH = 0x1D;
@@ -898,6 +909,81 @@ bool C_GameMenu::OnSavePreset(void *menu, void *, C_Control *, uint32_t, uint32_
         }
     }
     self->m_presets.SaveUser();
+    return true;
+}
+
+void C_GameMenu::ShowSoldierStats(int profile)
+{
+    int stats[12];
+    std::copy(std::begin(DEFAULT_STATS), std::end(DEFAULT_STATS), stats);
+    g_gameProfile.m_humanStore->GetStats(stats, profile, g_netGame.GetLocalPlayerStats()[PLAYER_RANK]);
+    // A skill's row (1..7): its bar and its value's text.
+    const auto row = [](int skill, float fill, const char *format, int value) {
+        const uint32_t bar = SKILLS_PANEL | static_cast<uint32_t>(3 * skill - 1) << 12;
+        Post(bar, CONTROL_MSG_SET_BAR_VALUE, 0, FloatValue(fill));
+        Post(bar + 0x1000, CONTROL_MSG_SET_TEXT, SKILL_VALUE_STYLE, 0, C_fstr(format, value));
+    };
+    const auto percent = [&stats](int stat) { return static_cast<float>(stats[stat]) * 0.01f; };
+    row(1, percent(4), "%3d %%", stats[4]);
+    row(2, percent(1), "%3d Kg", stats[1]);
+    row(3, 1.0f, "%3d", stats[0]);
+    row(4, percent(2), "%3d", stats[2]);
+    row(5, percent(6), "%3d %%", stats[6]);
+    row(6, percent(7), "%3d %%", stats[7]);
+    row(7, percent(8), "%3d %%", stats[8]);
+}
+
+bool C_GameMenu::SetupStocks()
+{
+    g_itemsModule.EnsureItemsLoaded();
+    m_stock1E4 = new C_ItemStock();
+    m_stock1E8 = new C_ItemStock();
+    for (int type = 0; type < STOCK_TYPES; ++type) {
+        m_stock1E4->Set(type, -1);
+        m_stock1E8->Set(type, -1);
+    }
+    g_gameProfile.m_itemStock18->Reset();
+    // (The original copies the list.)
+    const auto *mission = static_cast<C_MpMissionDef *>(::GetGame()->GetMission());
+    const std::vector<S_CampaignItem> items = mission->GetItems();
+    // A type's count in a stock, unless it has one.
+    const auto add = [](C_ItemStock *stock, int type, int count) {
+        if (stock->Get(type) < 1)
+            stock->Set(type, count);
+    };
+    for (const S_CampaignItem &item : items) {
+        const int type = item.itemId;
+        C_ItemDef *def = type >= 0 && type < STOCK_TYPES ? GetItemDef(type) : nullptr;
+        if (!def || def->GetTeam() == ITEM_TEAM_NONE)
+            continue;
+        const int team = def->GetTeam();
+        int count = 1, second = -1, secondCount = 1;
+        if (def->GetInventoryGroup() == STOCK_GROUP_BY_TEN) {
+            count = 10;
+            secondCount = 0;
+        } else if (def->GetRecordType() == ITEM_ANIMATED && type != STOCK_NO_AMMO_TYPE) {
+            second = def->GetAmmoItemId();
+            secondCount = 10;
+        } else if (def->GetBehaviour() == BEHAVIOUR_UNIFORM) {
+            second = def->GetHeadgearItemId();
+        } else {
+            secondCount = 0;
+        }
+        if (item.count >= 0)
+            count = item.count;
+        if (item.ammo >= 0)
+            secondCount = item.ammo;
+        if (team != 0) {
+            add(m_stock1E8, type, count);
+            if (second >= 0)
+                add(m_stock1E8, second, secondCount);
+        }
+        if (team != 1) {
+            add(m_stock1E4, type, count);
+            if (second >= 0)
+                add(m_stock1E4, second, secondCount);
+        }
+    }
     return true;
 }
 

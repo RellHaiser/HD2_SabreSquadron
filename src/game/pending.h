@@ -234,6 +234,8 @@ public:
     void AddScore(int slot, int points);            // 0x0072f1a0
     // The stats of the player in `slot` (S_NetPlayerState::stats; not locked).
     int *GetPlayerStats(int slot);                  // 0x0072f890
+    // The local player's stats (the slot g_netLocalSlot 0x00982104's).
+    int *GetLocalPlayerStats();                     // 0x0072f8b0
     // Sets the soldier class of the player in `slot` (stats[5]) and prints its change (texts
     // 0x22C4 / 0x22C5 about the local player, 0x22C6 / 0x22C7 about the others, by whether it
     // went down).

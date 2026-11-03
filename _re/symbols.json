@@ -36735,6 +36735,10 @@
   "name": "C_NetGame::GetPlayerStats",
   "proto": "int * __thiscall GetPlayerStats(void *this, int slot)"
  },
+ "0072f8b0": {
+  "module": "game_menu",
+  "name": "C_NetGame::GetLocalPlayerStats"
+ },
  "0072fe90": {
   "module": "player",
   "name": "C_NetGame::SetPlayerClass",

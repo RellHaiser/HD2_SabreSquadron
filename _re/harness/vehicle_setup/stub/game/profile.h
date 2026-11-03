@@ -73,6 +73,7 @@ public:
 class C_Campaign;
 class C_HumanStore;
 struct S_MissionSquad;
+class C_ItemStock;
 class C_GameProfile {
 public:
     C_PlayerProfile *GetPlayerProfile() const { return m_player; }
@@ -93,6 +94,8 @@ public:
     // (The equipment panel, part 9e-ii-a.)
     C_HumanStore *m_humanStore = nullptr;
     S_MissionSquad *m_missionSquad = nullptr;
+    // (The in-game menu's stocks, part 9e-xix: game_menu_test.inc.)
+    C_ItemStock *m_itemStock18 = nullptr;
     // (The loadout presets and missions' items, part 9e-iv: loadout_test.inc.)
     C_str GetProfileDirectory();
     C_Campaign *m_campaign = nullptr;
@@ -155,12 +158,14 @@ public:
     // (The store list, part 9e-iii-a: store_list_test.inc.)
     int Take(int type, int count);
     int Get(int type) const;
-    // (The in-game menu, part 9e-v: game_menu_test.inc.)
+    // (The in-game menu, part 9e-v: game_menu_test.inc; the stocks' setup, 9e-xix.)
     void Reset();
+    void Set(int type, int count);
 };
 class C_HumanStore {
 public:
     S_SoldierProfile *Get(int index) const;
-    // (The in-game menu's soldiers panel, part 9e-xiv: game_menu_test.inc.)
+    // (The in-game menu's soldiers panel, part 9e-xiv: game_menu_test.inc; its stats, 9e-xix.)
     int GetCount() const;
+    void GetStats(int *stats, int index, int level) const;
 };
