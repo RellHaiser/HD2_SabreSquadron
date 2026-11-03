@@ -1,5 +1,5 @@
 // The in-game menu (original 0x0067eb40..0x00687f50; part 9e-v: the class and the menu state's slots;
-// 9e-vi: the update's helpers and the drawing; 9e-vii: the messages).
+// 9e-vi: the update's helpers and the drawing; 9e-vii: the messages; 9e-ix: the screens' descriptions).
 #include "game/game_menu.h"
 
 #include <algorithm>
@@ -30,10 +30,22 @@ namespace {
 constexpr int SCREEN_INDEX_SHIFT = 26;
 constexpr uint32_t SCREEN_INDEX_MASK = 0x3F;
 constexpr uint32_t MESSAGE_BOX_SCREEN = 0;
-// The equipment screen (drawn with the panel's soldier; the others over the game behind).
-constexpr uint32_t EQUIPMENT_SCREEN = 3;
-// Escape from these goes back to the screen before (MENU_MSG_BACK).
-constexpr uint32_t BACK_SCREEN_2 = 2;
+// (game_internal.h's, which needs more of the game than this file does.)
+constexpr int DIFFICULTY_NO_SAVES = 4;
+// The menu's screens (their indices): the main screen (opened first), the options (escape from them
+// goes back) and a network game's player screen (the equipment: drawn with the panel's soldier, the
+// others over the game behind; escape goes back too).
+constexpr uint32_t MAIN_SCREEN = 1;
+constexpr uint32_t OPTIONS_SCREEN = 2;
+constexpr uint32_t PLAYER_SCREEN = 3;
+// The main screen's controls: buttons (style 0xD) and the version's text (style 0x28).
+constexpr int CONTROL_BUTTON = 0x14, CONTROL_TEXT = 0x13;
+constexpr uint32_t BUTTON_STYLE = 0xD, VERSION_STYLE = 0x28;
+constexpr uint32_t TEXT_VERSION = 0x7D6;
+// What the buttons post (the menu's messages with bits 0x04001000).
+constexpr uint32_t CLICK = 0x4001000;
+// The options handler's opening of its screen (options_handler.cpp).
+constexpr uint32_t OPTIONS_MSG_OPEN = 0x2000071;
 
 // The in-game menu's own messages (target 0; posted by its screens' controls).
 enum : uint32_t {
@@ -74,11 +86,6 @@ constexpr int DRIVER_STATE_5 = 5;
 constexpr int DRIVER_STATE_6 = 6;
 // The game's render callback's phases (C_game's).
 constexpr uint32_t GAME_RENDER_PHASES = 6;
-
-bool IsLocalGame()
-{
-    return (g_gameRole & GAME_ROLE_LOCAL) == GAME_ROLE_LOCAL;
-}
 
 void Post(uint32_t target, uint32_t id, uint32_t value, uintptr_t value2 = 0, const C_str &text = C_str())
 {
@@ -126,6 +133,11 @@ void DeleteSquadSoldier(std::vector<S_SquadSoldier *> &squad, std::size_t index)
 {
     delete squad[index];
     squad.erase(squad.begin() + static_cast<std::ptrdiff_t>(index));
+}
+
+bool IsLocalGame()
+{
+    return (g_gameRole & GAME_ROLE_LOCAL) == GAME_ROLE_LOCAL;
 }
 
 } // namespace
@@ -291,7 +303,7 @@ void C_GameMenu::OnMessage(S_ControlMessage *message)
         C_Screen *top = g_menuScreens.empty() ? nullptr : g_menuScreens.back();
         if (top && m_startArg != WARMUP_MENU) {
             const uint32_t index = top->GetId() >> SCREEN_INDEX_SHIFT;
-            if (index == BACK_SCREEN_2 || index == EQUIPMENT_SCREEN) {
+            if (index == OPTIONS_SCREEN || index == PLAYER_SCREEN) {
                 Post(0, MENU_MSG_BACK, 0);
                 return;
             }
@@ -364,16 +376,95 @@ void C_GameMenu::OnMessage(S_ControlMessage *message)
     }
 }
 
+bool C_GameMenu::BuildScreens()
+{
+    S_MenuDesc *menu = new S_MenuDesc();
+    menu->AddScreen("MAIN_INGAME_MENU", "main_ingame");
+    menu->AddScreen("OPTIONS", "options");
+    if (!IsLocalGame())
+        menu->AddScreen("PLAYER_SCREEN", g_gameProfile.IsCooperativeGame() ? "player_screen_2" : "player_screen");
+    for (S_ScreenDesc *desc : menu->screens) {
+        I3D_frame *model = LoadModel(desc->name.c_str(), desc->file.c_str());
+        if (!model)
+            continue;
+        const uint32_t index = desc->id >> SCREEN_ID_SHIFT;
+        if (index == MAIN_SCREEN)
+            BuildMainScreen(desc, model);
+        if (index == OPTIONS_SCREEN)
+            m_options->BuildScreen(desc, model);
+        if (index == PLAYER_SCREEN)
+            BuildPlayerScreen(desc, model);
+        auto *screen = new C_Screen(m_scene, model);
+        // (Quirk kept: a screen not built is leaked.)
+        if (screen->Build(desc)) {
+            screen->HandleMessages(desc->messages);
+            m_screens.push_back(screen);
+        }
+    }
+    delete menu;
+    S_ControlMessage open;
+    open.id = MENU_MSG_OPEN_SCREEN;
+    open.value = !IsLocalGame() && m_startArg == WARMUP_MENU ? PLAYER_SCREEN : MAIN_SCREEN;
+    HandleMessage(&open);
+    return true;
+}
+
+bool C_GameMenu::BuildMainScreen(S_ScreenDesc *desc, I3D_frame *)
+{
+    const auto button = [desc](const char *name, uint32_t textId, uint32_t click, uint32_t value = 0) {
+        S_ControlDesc *control = desc->AddControl(CONTROL_BUTTON, name);
+        AddDescMessage(control, 0, CONTROL_MSG_SET_TEXT_ID, BUTTON_STYLE, textId);
+        AddDescMessage(control, 0, click, value);
+        return control;
+    };
+    if (IsLocalGame()) {
+        // Dropped: the copy protection's message for the missions after the 7th.
+        C_game *game = ::GetGame();
+        S_ControlDesc *control = button("button06", 0x9DB, CLICK | GAME_MENU_MSG_END_MISSION_2);
+        if (!game->GetMission()->IsTutorial())
+            AddDescMessage(control, 0, CONTROL_MSG_HIDE, 0);
+        // Back to the game, or (the objectives decided, not failed) the mission's end.
+        C_MissionDef *mission = game->GetMission();
+        if (mission && mission->AreObjectivesDecided() && !game->IsMissionFailed()) {
+            button("button00", 0x9E1, CLICK | GAME_MENU_MSG_END_MISSION_2);
+        } else {
+            control = button("button00", 0x9CF, CLICK | MENU_MSG_ESCAPE);
+            if (game->IsMissionFailed())
+                AddDescMessage(control, 0, CONTROL_MSG_DEACTIVATE, 0);
+        }
+        button("button01", 0x9D3, CLICK | GAME_MENU_MSG_RESTART_QUESTION);
+        control = button("button02", 0x9D0, CLICK | GAME_MENU_MSG_QUICK_SAVE);
+        if (!game->CanQuickSave())
+            AddDescMessage(control, 0, CONTROL_MSG_DEACTIVATE, 0);
+        control = button("button03", 0x9D1, CLICK | GAME_MENU_MSG_QUICK_LOAD);
+        if (!game->HasQuickSave() || g_gameProfile.GetDifficulty() == DIFFICULTY_NO_SAVES)
+            AddDescMessage(control, 0, CONTROL_MSG_DEACTIVATE, 0);
+        button("button04", 0x9D2, CLICK | OPTIONS_MSG_OPEN);
+        button("button05", 0x9D4, CLICK | GAME_MENU_MSG_QUIT_QUESTION);
+    } else {
+        AddDescMessage(desc->AddControl(CONTROL_BUTTON, "button06"), 0, CONTROL_MSG_HIDE, 0);
+        button("button00", 0x9D5, CLICK | MENU_MSG_ESCAPE);
+        button("button01", 0x9D6, CONTROL_MSG_DEACTIVATE);
+        button("button02", 0x9D7, CONTROL_MSG_DEACTIVATE);
+        button("button03", 0x9D8, CLICK | OPTIONS_MSG_OPEN);
+        button("button04", 0x9D9, CLICK | MENU_MSG_OPEN_SCREEN, PLAYER_SCREEN);
+        button("button05", 0x9DA, CLICK | GAME_MENU_MSG_QUIT_QUESTION);
+    }
+    AddDescMessage(desc->AddControl(CONTROL_TEXT, "text_h&dversion"), 0, CONTROL_MSG_SET_TEXT_ID, VERSION_STYLE,
+                   TEXT_VERSION);
+    return true;
+}
+
 bool C_GameMenu::OnRender()
 {
     C_Screen *top = g_menuScreens.empty() ? nullptr : g_menuScreens.back();
     if (top) {
         const uint32_t index = top->GetId() >> SCREEN_INDEX_SHIFT;
-        if (index == EQUIPMENT_SCREEN)
+        if (index == PLAYER_SCREEN)
             return RenderEquipment();
-        // The message box over the equipment screen.
+        // The message box over the player screen.
         if (index == MESSAGE_BOX_SCREEN && m_underPopup &&
-            (m_underPopup->GetId() >> SCREEN_INDEX_SHIFT) == EQUIPMENT_SCREEN)
+            (m_underPopup->GetId() >> SCREEN_INDEX_SHIFT) == PLAYER_SCREEN)
             return RenderEquipment();
         return RenderGame();
     }

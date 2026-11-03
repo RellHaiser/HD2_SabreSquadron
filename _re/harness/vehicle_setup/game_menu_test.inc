@@ -12,7 +12,29 @@
 #include "game/team.h"
 
 // (Not ported yet: logged.)
-bool C_GameMenu::BuildScreens() { return true; }
+// (Part 9e-ix: the difficulty; the screens' builders not ported yet: logged.)
+int g_gmDifficulty;
+int C_GameProfile::GetDifficulty() const { return g_gmDifficulty; }
+bool g_gmCanQuickSave = true;
+bool C_game::CanQuickSave() const { return g_gmCanQuickSave; }
+// (Their descriptions' names and control counts, their models; the options' made inactive by a
+// screen message.)
+std::string MrFrameName(const void *frame);
+bool C_GameMenu::BuildPlayerScreen(S_ScreenDesc *desc, I3D_frame *model)
+{
+    GfLog("build player %s %d %s", desc->name.c_str(), static_cast<int>(desc->controls.size()),
+          model ? MrFrameName(model).c_str() : "none");
+    return true;
+}
+bool C_OptionsHandler::BuildScreen(S_ScreenDesc *desc, I3D_frame *model)
+{
+    GfLog("build options %s %d %s", desc->name.c_str(), static_cast<int>(desc->controls.size()),
+          model ? MrFrameName(model).c_str() : "none");
+    S_ControlMessage inactive;
+    inactive.id = CONTROL_MSG_DEACTIVATE;
+    desc->messages.push_back(inactive);
+    return true;
+}
 bool C_GameMenu::OnItemNotify13(void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_GameMenu::OnItemNotify60(void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_GameMenu::OnItemNotify0A(void *, C_Control *, uint32_t, uint32_t) { return true; }
@@ -74,6 +96,7 @@ struct S_GameMenuResults {
     bool gmUpdate = true, gmTick = true, gmDraw = true, gmMessage = true, gmObjectives = true, gmBase = true;
     bool gmLoad = true, gmCoop = true, gmNet = true, gmRender = true, gmRenderGame = true, gmRenderEquip = true;
     bool gmOptions = true, gmEscape = true, gmEscapeNet = true, gmSquad = true, gmQuestions = true;
+    bool gmMainLocal = true, gmMainNet = true, gmBuild = true, gmBuildNet = true;
 };
 
 // A uniform of a side (its type's team).
@@ -884,6 +907,182 @@ void GameMenuTest(I3D_scene *scene)
         g_controlMessages.clear();
     }
 
+    // --- the main screen's description (part 9e-ix) ---
+    // Its controls as "<name> <type>: <id> <value> <value2>, ...; ".
+    // The log's lines starting with `prefix`.
+    const auto logHas = [](const char *prefix) {
+        return std::count_if(g_gfLog.begin(), g_gfLog.end(),
+                             [prefix](const std::string &line) { return line.rfind(prefix, 0) == 0; });
+    };
+    const auto describe = [](const S_ScreenDesc &desc) {
+        std::string s;
+        for (const S_ControlDesc *c : desc.controls) {
+            s += CmText("%s %x:", c->name.c_str(), c->type);
+            for (const S_ControlMessage &m : c->messages)
+                s += (m.target ? CmText(" @%x", m.target) : std::string()) +
+                     CmText(" %x %x %x", m.id, m.value, static_cast<uint32_t>(m.value2));
+            s += "; ";
+        }
+        return s;
+    };
+    {
+        bool ok = true;
+        g_gameRole = GAME_ROLE_LOCAL;
+        alignas(16) static uint8_t missionMemory[sizeof(C_MissionDef)];
+        alignas(16) static uint8_t objectiveMemory[sizeof(S_MissionObjective)];
+        std::memset(missionMemory, 0, sizeof missionMemory);
+        std::memset(objectiveMemory, 0, sizeof objectiveMemory);
+        auto *mission = reinterpret_cast<C_GmMission *>(missionMemory);
+        auto *objective = reinterpret_cast<S_MissionObjective *>(objectiveMemory);
+        C_game *game = GetGame();
+        C_MissionDef *const oldMission = game->m_mission;
+        game->m_mission = mission;
+        game->m_hasQuickSave = true;
+        game->m_missionFailed = false;
+        g_gmCanQuickSave = true;
+        g_gmDifficulty = 1;
+        C_GameMenu builder;
+        const auto main = [&]() {
+            S_ScreenDesc desc("MAIN_INGAME_MENU", "main_ingame", 1 << 26);
+            return builder.BuildMainScreen(&desc, nullptr) ? describe(desc) : std::string("false");
+        };
+        const std::string version = "text_h&dversion 13: 1000015 28 7d6; ";
+        const std::string rest = "button01 14: 1000015 d 9d3 60010b4 0 0; button02 14: 1000015 d 9d0 60010b6 0 0; "
+                                 "button03 14: 1000015 d 9d1 60010b7 0 0; button04 14: 1000015 d 9d2 6001071 0 0; "
+                                 "button05 14: 1000015 d 9d4 6001078 0 0; " + version;
+        // No objectives: back to the game; not the tutorial: button 6 hidden.
+        ok &= main() == "button06 14: 1000015 d 9db 60010c6 0 0 1000004 0 0; button00 14: 1000015 d 9cf 600100a 0 0; " + rest;
+        mission->m_unknown2C = true;
+        mission->m_objectives = {objective};
+        objective->status = OBJECTIVE_COMPLETED;
+        ok &= main() == "button06 14: 1000015 d 9db 60010c6 0 0; button00 14: 1000015 d 9e1 60010c6 0 0; " + rest;
+        objective->status = OBJECTIVE_OPEN;
+        ok &= main().find("button00 14: 1000015 d 9cf 600100a 0 0; ") != std::string::npos;
+        // Failed: back to the game, inactive.
+        objective->status = OBJECTIVE_COMPLETED;
+        game->m_missionFailed = true;
+        ok &= main().find("button00 14: 1000015 d 9cf 600100a 0 0 1000001 0 0; ") != std::string::npos;
+        game->m_missionFailed = false;
+        // No quick save possible; none to load; the difficulty without saves.
+        g_gmCanQuickSave = false;
+        game->m_hasQuickSave = false;
+        std::string s = main();
+        ok &= s.find("button02 14: 1000015 d 9d0 60010b6 0 0 1000001 0 0; button03 14: 1000015 d 9d1 60010b7 0 0 1000001 0 0; ") !=
+              std::string::npos;
+        g_gmCanQuickSave = true;
+        game->m_hasQuickSave = true;
+        g_gmDifficulty = 4;
+        s = main();
+        ok &= s.find("button02 14: 1000015 d 9d0 60010b6 0 0; button03 14: 1000015 d 9d1 60010b7 0 0 1000001 0 0; ") !=
+              std::string::npos;
+        g_gmDifficulty = 3;
+        ok &= main().find("button03 14: 1000015 d 9d1 60010b7 0 0; ") != std::string::npos;
+        g_gmDifficulty = 1;
+        mission->m_unknown2C = false;
+        mission->m_objectives = std::vector<S_MissionObjective *>();
+        // No mission: the button 6 test reads it (as the original): with one only.
+        WM(r.gmMainLocal, ok);
+
+        // A network game's: button 6 hidden, back, two inactive, the options, the player screen, the quit.
+        g_gameRole = GAME_ROLE_CLIENT;
+        WM(r.gmMainNet, main() == "button06 14: 1000004 0 0; button00 14: 1000015 d 9d5 600100a 0 0; "
+                                  "button01 14: 1000015 d 9d6 1000001 0 0; button02 14: 1000015 d 9d7 1000001 0 0; "
+                                  "button03 14: 1000015 d 9d8 6001071 0 0; button04 14: 1000015 d 9d9 6001001 3 0; "
+                                  "button05 14: 1000015 d 9da 6001078 0 0; " + version);
+
+        // --- the screens built: their models loaded (named), the builders, the screens made (their
+        // descriptions' messages handled), the first opened; a model not loaded: no screen ---
+        // (menu_run_test.inc's frames made, the cache filling nothing.)
+        void *const oldCreate = g_driverVtable[0x54 / 4];
+        g_driverVtable[0x54 / 4] = reinterpret_cast<void *>(&MrCreateFrame);
+        void (*const oldFill)(I3D_model *) = g_cacheFill;
+        g_cacheFill = [](I3D_model *) {};
+        g_gameRole = GAME_ROLE_LOCAL;
+        {
+            bool okb = true;
+            C_GameMenu m;
+            m.m_options = new C_OptionsHandler(&m);
+            S_MrWorld world = MrWorld("gmb");
+            m.m_scene = As<I3D_scene>(world.scene);
+            C_MsScreen box(m.m_scene, "gmbbox", 0);
+            m.m_screens = {&box};
+            S_MrObj *ma = MrObj("gmma", g_mrModelVt), *mo = MrObj("gmmo", g_mrModelVt);
+            g_mrMade[FRAME_MODEL] = {ma, mo};
+            g_gfLog.clear();
+            g_menuScreens.clear();
+            okb &= m.BuildScreens() && MrHas("gmma 34 MAIN_INGAME_MENU") && MrHas("gmmo 34 OPTIONS") &&
+                   MrHas("build options OPTIONS 0 gmmo") && logHas("build player") == 0 && logHas("build options") == 1 &&
+                   m.m_screens.size() == 3 && m.m_screens[2]->m_inactive && !m.m_screens[1]->m_inactive &&
+                   m.m_screens[1]->m_scene == m.m_scene && m.m_screens[2]->m_scene == m.m_scene &&
+                   m.m_screens[1]->GetId() == 1u << 26 && m.m_screens[2]->GetId() == 2u << 26 &&
+                   m.m_screens[1]->GetScreenFrame() == As<I3D_frame>(ma) && m.m_screens[2]->GetScreenFrame() == As<I3D_frame>(mo) &&
+                   m.m_models.size() == 2 && !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1];
+            // (The main screen's controls made from its description: the version's text among them.)
+            okb &= static_cast<C_ControlGroup *>(m.m_screens[1])->m_children.size() <= 8;
+            for (size_t i = 1; i < m.m_screens.size(); ++i)
+                delete m.m_screens[i];
+            g_menuScreens.clear();
+            // The options' model not loaded: no options screen.
+            C_GameMenu n;
+            n.m_options = new C_OptionsHandler(&n);
+            n.m_scene = m.m_scene;
+            n.m_screens = {&box};
+            S_MrObj *na = MrObj("gmna", g_mrModelVt), *no = MrObj("gmno", g_mrModelVt);
+            g_mrMade[FRAME_MODEL] = {na, no};
+            g_cacheFailName = "options";
+            g_gfLog.clear();
+            // (Single player in the warmup's menu: the main screen first still.)
+            n.m_startArg = reinterpret_cast<void *>(static_cast<intptr_t>(-2));
+            okb &= n.BuildScreens() && logHas("build options") == 0 && n.m_screens.size() == 2 &&
+                   n.m_screens[1]->GetId() == 1u << 26 && !g_menuScreens.empty() && g_menuScreens.back() == n.m_screens[1];
+            n.m_startArg = nullptr;
+            g_cacheFailName.clear();
+            for (size_t i = 1; i < n.m_screens.size(); ++i)
+                delete n.m_screens[i];
+            g_menuScreens.clear();
+            delete m.m_options;
+            delete n.m_options;
+            m.m_options = n.m_options = nullptr;
+            WM(r.gmBuild, okb);
+        }
+
+        // A network game's: the player screen too (co-op: "player_screen_2"); the warmup's menu opens it.
+        g_gameRole = GAME_ROLE_CLIENT;
+        for (bool coop : {false, true}) {
+            bool okb = true;
+            const bool oldCoop = g_coop;
+            g_coop = coop;
+            C_GameMenu m;
+            m.m_options = new C_OptionsHandler(&m);
+            m.m_startArg = coop ? reinterpret_cast<void *>(static_cast<intptr_t>(-2)) : nullptr;
+            S_MrWorld world = MrWorld("gmc");
+            m.m_scene = As<I3D_scene>(world.scene);
+            C_MsScreen box(m.m_scene, "gmcbox", 0);
+            m.m_screens = {&box};
+            S_MrObj *a = MrObj("gmca", g_mrModelVt), *o = MrObj("gmco", g_mrModelVt), *p = MrObj("gmcp", g_mrModelVt);
+            g_mrMade[FRAME_MODEL] = {a, o, p};
+            g_cacheLoads.clear();
+            g_gfLog.clear();
+            g_menuScreens.clear();
+            okb &= m.BuildScreens() && MrHas("gmcp 34 PLAYER_SCREEN") && MrHas("build player PLAYER_SCREEN 0 gmcp") &&
+                   MrHas("build options OPTIONS 0 gmco") && logHas("build") == 2 &&
+                   m.m_screens.size() == 4 && m.m_screens[3]->GetId() == 3u << 26 && !g_menuScreens.empty() &&
+                   g_menuScreens.back() == m.m_screens[coop ? 3 : 1];
+            okb &= !g_cacheLoads.empty() && g_cacheLoads.back() == (coop ? "player_screen_2" : "player_screen");
+            for (size_t i = 1; i < m.m_screens.size(); ++i)
+                delete m.m_screens[i];
+            g_menuScreens.clear();
+            delete m.m_options;
+            m.m_options = nullptr;
+            g_coop = oldCoop;
+            WM(r.gmBuildNet, okb);
+        }
+        g_cacheFill = oldFill;
+        g_driverVtable[0x54 / 4] = oldCreate;
+        g_gameRole = GAME_ROLE_CLIENT;
+        game->m_mission = oldMission;
+    }
+
     // --- the base: C_EquipmentMenuBase's slots true ---
     {
         C_GameMenu m;
@@ -900,8 +1099,10 @@ void GameMenuTest(I3D_scene *scene)
     g_gfLog.clear();
     std::printf("gamemenu: gmNew %d gmNewClient %d gmStart %d gmStartNet %d gmStop %d gmInput %d gmUpdate %d "
                 "gmTick %d gmDraw %d gmMessage %d gmObjectives %d gmBase %d gmLoad %d gmCoop %d gmNet %d gmRender %d "
-                "gmRenderGame %d gmRenderEquip %d gmOptions %d gmEscape %d gmEscapeNet %d gmSquad %d gmQuestions %d\n",
+                "gmRenderGame %d gmRenderEquip %d gmOptions %d gmEscape %d gmEscapeNet %d gmSquad %d gmQuestions %d "
+                "gmMainLocal %d gmMainNet %d gmBuild %d gmBuildNet %d\n",
                 r.gmNew, r.gmNewClient, r.gmStart, r.gmStartNet, r.gmStop, r.gmInput, r.gmUpdate, r.gmTick, r.gmDraw,
                 r.gmMessage, r.gmObjectives, r.gmBase, r.gmLoad, r.gmCoop, r.gmNet, r.gmRender, r.gmRenderGame,
-                r.gmRenderEquip, r.gmOptions, r.gmEscape, r.gmEscapeNet, r.gmSquad, r.gmQuestions);
+                r.gmRenderEquip, r.gmOptions, r.gmEscape, r.gmEscapeNet, r.gmSquad, r.gmQuestions, r.gmMainLocal,
+                r.gmMainNet, r.gmBuild, r.gmBuildNet);
 }

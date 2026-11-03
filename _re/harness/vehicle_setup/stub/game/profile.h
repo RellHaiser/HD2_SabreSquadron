@@ -84,6 +84,8 @@ public:
     // (The loadout presets and missions' items, part 9e-iv: loadout_test.inc.)
     C_str GetProfileDirectory();
     C_Campaign *m_campaign = nullptr;
+    // (The in-game menu's main screen, part 9e-ix: game_menu_test.inc.)
+    int GetDifficulty() const;
 };
 extern C_GameProfile g_gameProfile;
 extern int g_versionMajor;

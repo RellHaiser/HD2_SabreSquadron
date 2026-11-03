@@ -144,6 +144,8 @@ public:
     bool LoadSavedGame(C_chunk &chunk);             // 0x0069c610
     // Quick saving is allowed now (the mission runs; saves left at the difficulty).
     bool CanQuickSave() const;                      // 0x0069c550
+    bool HasQuickSave() const { return m_hasQuickSave; }
+    bool IsMissionFailed() const { return m_missionFailed; }
     // The screen fade of the mission start / end (the scene's render callback).
     void ApplyFade();                               // 0x0069b0e0
     // Opens the in-game menu over this game; returns the state that is now current.

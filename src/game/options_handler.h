@@ -8,7 +8,9 @@
 
 class C_Cursor;
 class C_MenuState;
+class I3D_frame;
 struct S_ControlMessage;
+struct S_ScreenDesc;
 
 class C_OptionsHandler {
 public:
@@ -23,6 +25,8 @@ public:
     // controls filled); leaving: a function without a key asked about, else the pages hidden, the
     // options saved and back; the unbound function's page, group and place shown.
     bool HandleMessage(S_ControlMessage *message);      // 0x0061bf00
+    // The options screen's controls described (its index kept; not ported yet).
+    bool BuildScreen(S_ScreenDesc *desc, I3D_frame *model);   // 0x0061cfc0
 
 private:
     // The controls of the screen's pages from the player's options.

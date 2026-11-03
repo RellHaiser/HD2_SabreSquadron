@@ -23,7 +23,7 @@ enum : uint32_t {
     OPTIONS_MSG_LEAVE = 0x20000C4,
     OPTIONS_MSG_SHOW_UNBOUND = 0x20000C7,
 };
-// What leaving posts: the save and the menu's back, with bit 0x04000000.
+// What leaving posts: the save and the menu's back, with bits 0x04001000.
 constexpr uint32_t LEAVE_SAVE = 0x600106F, LEAVE_BACK = 0x6001003;
 constexpr uint32_t TEXT_UNBOUND_KEY = 0x2530;
 

@@ -20,5 +20,8 @@
 00682790 C_GameMenu::RenderEquipment | bool __thiscall RenderEquipment(C_GameMenu *this)
 # Part 9e-vii: the messages.
 0067f850 C_GameMenu::OnMessage | void __thiscall OnMessage(C_GameMenu *this, void * message)
-# Not ported yet (named for the later parts).
+# Part 9e-ix: the screens' descriptions.
 0067fe00 C_GameMenu::BuildScreens | bool __thiscall BuildScreens(C_GameMenu *this)
+00680980 C_GameMenu::BuildMainScreen | bool __thiscall BuildMainScreen(C_GameMenu *this, void * desc, void * model)
+# Not ported yet (named for the later parts).
+00682c80 C_GameMenu::BuildPlayerScreen | bool __thiscall BuildPlayerScreen(C_GameMenu *this, void * desc, void * model)

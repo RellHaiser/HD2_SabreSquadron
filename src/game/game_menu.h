@@ -3,7 +3,8 @@
 // options, saving and loading, and in the network games the equipment and the squad. Part 9e-v:
 // the class, its construction and the menu state's slots (starting, stopping, the input, the
 // update, the tick, the info screen drawn); 9e-vi: the update's helpers and the drawing; 9e-vii:
-// the menu's messages; the options, the screens and the item slots later.
+// the menu's messages; 9e-ix: the screens' descriptions (the main screen's); the options and player
+// screens' and the item slots later.
 #pragma once
 
 #include <cstdint>
@@ -40,7 +41,9 @@ public:
     // The squad's soldier applied (and the spawn asked for) or dropped, then escape; the quit and
     // restart questions and their answers (the app's commands, the mission ended).
     void OnMessage(S_ControlMessage *message) override; // 0x34 0x0067f850
-    // The menu's screens (not ported yet).
+    // The screens described (the main and options screens; a network game's player screen), their
+    // models loaded (none: no screen), the builders' controls added, the screens made; then the
+    // first opened (the warmup's menu: the player screen). True.
     bool BuildScreens() override;                       // 0x38 0x0067fe00
     // The volume restored, the options handler, the popup and the network game's info screen
     // deleted, the panel's soldier, the two stocks emptied and deleted.
@@ -78,6 +81,12 @@ public:
     void SetRespawnOnApply(bool on) { m_respawnOnApply = on; }
 
 private:
+    // The main screen's buttons (single player: the tutorial's end, back or the mission's end, the
+    // restart, the quick save and load, the options, the quit; a network game: back, the options, the
+    // player screen, the quit) and the version's text. True. (The model is not used.)
+    bool BuildMainScreen(S_ScreenDesc *desc, I3D_frame *model);   // 0x00680980
+    // The player screen's controls (not ported yet).
+    bool BuildPlayerScreen(S_ScreenDesc *desc, I3D_frame *model);   // 0x00682c80
     // Control 0x0CA00000 on while the squad soldier has a uniform and his load is within his
     // strength (posted when it changes).
     void UpdateLoadButton();                            // 0x006869a0 (__fastcall)

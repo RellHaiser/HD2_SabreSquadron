@@ -297,6 +297,8 @@ public:
     void DeactivateObjectives();                        // 0x006b86e0
     // Some objective is active and none is still open (the in-game menu's code: game/game_menu.cpp).
     bool AreObjectivesDecided() const;                  // 0x0067fda0
+    // (+0x2C; the in-game menu shows its button 6 for it.)
+    bool IsTutorial() const { return m_unknown2C; }
 
 protected:
     explicit C_MissionDef(E_CampaignNodeType type);

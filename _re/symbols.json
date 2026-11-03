@@ -27390,6 +27390,11 @@
   "name": "C_OptionsHandler::~C_OptionsHandler",
   "proto": "void __fastcall ~C_OptionsHandler(void * handler)"
  },
+ "0061cfc0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildScreen",
+  "proto": "bool __thiscall BuildScreen(void *this, void * desc, void * model)"
+ },
  "0061da70": {
   "module": "equipment_panel",
   "name": "S_ControlDesc::AddChild",
@@ -31991,6 +31996,11 @@
   "name": "C_GameMenu::OnInput",
   "proto": "bool __thiscall OnInput(C_GameMenu *this, float * held, float * pressed)"
  },
+ "00680980": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildMainScreen",
+  "proto": "bool __thiscall BuildMainScreen(C_GameMenu *this, void * desc, void * model)"
+ },
  "006824f0": {
   "module": "game_menu",
   "name": "C_GameMenu::OnRender",
@@ -32019,6 +32029,11 @@
  "00682bb0": {
   "module": "zz_idioms",
   "name": "vector_tidy_682bb0"
+ },
+ "00682c80": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildPlayerScreen",
+  "proto": "bool __thiscall BuildPlayerScreen(C_GameMenu *this, void * desc, void * model)"
  },
  "006861a0": {
   "module": "zz_idioms",

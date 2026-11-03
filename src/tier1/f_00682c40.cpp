@@ -37,7 +37,7 @@ uint32_t FUN_00682c70(...)
 
 
 // 0x00682c80
-uint32_t C_GameMenu__FUN_00682c80(C_GameMenu *_this,uint32_t *param_1,int *param_2, ...)
+uint32_t C_GameMenu__C_GameMenu__BuildPlayerScreen(C_GameMenu *_this,uint32_t *param_1,int *param_2, ...)
 {
   uint32_t *this_00;
   uint32_t *puVar1;

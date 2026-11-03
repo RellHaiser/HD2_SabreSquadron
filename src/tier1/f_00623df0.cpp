@@ -1768,7 +1768,7 @@ LAB_00627621:
     }
     pvVar3 = *(void **)(puVar9[2] + uVar10 * 4);
     if ((*(uint32_t *)((int)pvVar3 + 0x40) & 0xfc000000) == 0x18000000) {
-      FUN_0061cfc0(_this->m_1d0,pvVar3,frame);
+      C_OptionsHandler__BuildScreen(_this->m_1d0,pvVar3,frame);
     }
     pvVar3 = *(void **)(puVar9[2] + uVar10 * 4);
     if ((*(uint32_t *)((int)pvVar3 + 0x40) & 0xfc000000) == 0x1c000000) {

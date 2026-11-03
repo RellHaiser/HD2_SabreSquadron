@@ -7325,6 +7325,34 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     screen's builder 0x0061cfc0, the player screen's 0x00682c80 / 0x006838e0, the squad glue and the
     item slots.
 
+  PART 9e-ix DONE (2026-11-02): the in-game menu's screens' descriptions (game/game_menu.cpp).
+  - BuildScreens 0x0067fe00: MAIN_INGAME_MENU (main_ingame), OPTIONS (options) and in a network game
+    PLAYER_SCREEN (player_screen, co-op player_screen_2); per description its model loaded (none: no
+    screen), the builder by its index (1 BuildMainScreen, 2 the options handler's BuildScreen
+    0x0061cfc0, 3 BuildPlayerScreen 0x00682c80; both not ported yet), a C_Screen built on it (its
+    description's messages handled; one not built leaked, as the original), the descriptions deleted;
+    then screen 1 opened (a network game's warmup menu, Start(-2): screen 3). True.
+  - BuildMainScreen 0x00680980 (thiscall, the model unused; true): buttons 00..06 (style 0xD) and
+    text_h&dversion (0x7D6, style 0x28). Single player: 06 the tutorial's (0x9DB, end mission 2;
+    hidden but in the tutorial: C_MissionDef::IsTutorial added for +0x2C), 00 back (0x9CF; inactive
+    when failed) or with the objectives decided the mission's end (0x9E1), 01 restart (0x9D3), 02
+    quick save (0x9D0; inactive unless CanQuickSave), 03 quick load (0x9D1; inactive without one or
+    at difficulty 4), 04 options (0x9D2), 05 quit (0x9D4). A network game: 06 hidden, 00 back
+    (0x9D5), 01 / 02 inactive (0x9D6 / 0x9D7), 03 options (0x9D8), 04 the player screen (0x9D9), 05
+    quit (0x9DA). The buttons post the menu's messages with bits 0x04001000.
+  - Dropped: the copy protection's message (0x600D0B8 through 0x00680e00) after the 7th mission.
+  - C_game::HasQuickSave / IsMissionFailed added; the screens' indices named (MAIN_SCREEN,
+    OPTIONS_SCREEN, PLAYER_SCREEN: the player screen is the equipment's).
+  - Harness: game_menu_test.inc's gmMainLocal, gmMainNet, gmBuild, gmBuildNet (27 checks now; the
+    descriptions dumped; menu_run_test.inc's frames and models, the builders faked; the stub profile's
+    GetDifficulty). 22 of 22 in both orders (the other factory lines too).
+  - Mutations: mutations/mutate_9e9.py (101 cases, 92 build, all caught but 1 equivalent).
+  - Build: MSVC clean. Tier 1: 425 errors in 75 files, 175 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+2, 2 for the later parts), names/options_handler.txt (+1 for later);
+    2 functions in ported.txt. Stats: 8,842 of 12,306 functions by hand (78.8 % by size).
+  - Next, 9e-x: the options screen's builder 0x0061cfc0; then the player screen's, the squad glue
+    and the item slots.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
