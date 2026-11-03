@@ -24,6 +24,9 @@ struct S_ControlMessage;
 // (ShowMessage's count; nothing reads it).
 extern int g_gameMenuTime;                              // 0x008ae62c
 extern int g_gameMenuMessages;                          // 0x008ae628
+// The soldiers panel's last profile picked in each list (the first 30 profiles; the next 30).
+extern int g_pickedSoldierA;                            // 0x008ae634
+extern int g_pickedSoldierX;                            // 0x008410ac (30 at first)
 
 class C_GameMenu : public C_EquipmentMenuBase {
 public:
@@ -94,9 +97,15 @@ private:
     // information label when the model has one (its id kept). The panel's soldier in the model's
     // "3Dview". True.
     bool BuildPlayerScreen(S_ScreenDesc *desc, I3D_frame *model);   // 0x00682c80
-    // The player screen's panels (not ported yet): the squad's soldiers, the soldier's equipment,
-    // the store's items, the skills.
+    // The soldiers panel (none without profiles: false): the model's lists' frames made under
+    // "soldierspanel" (GB_Soldiers_a, GB_Soldiers_x), "photo03" (the soldiers' pictures' template,
+    // in the first) and "selector" (its copy in the second) moved into them, the tables hidden (no
+    // photo, selector or list frame: false); the panel's group, its scroll bar and its two hiding
+    // lists of the profiles' pictures (the first 30, then up to 60; their faces, picked:
+    // OnSoldierPicked); not co-op: the allies' and axis' marks (OnSide). The template hidden; true.
     bool BuildSoldiersPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x006838e0
+    // The player screen's panels (not ported yet): the soldier's equipment, the store's items, the
+    // skills.
     bool BuildEquipmentPanel(S_ScreenDesc *desc, I3D_frame *model);  // 0x00684690
     bool BuildItemsPanel(S_ScreenDesc *desc, I3D_frame *model);      // 0x00684b90
     static bool BuildSkillsPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x00684df0 (__stdcall)
@@ -118,6 +127,16 @@ private:
                            uint32_t value);             // 0x006861b0 (__thiscall)
     static bool OnChat(void *menu, void *argument, C_Control *control, uint32_t notification,
                        uint32_t value);                 // 0x00682a20 (__thiscall)
+    // A soldier's picture clicked: its profile (the control's index) kept for its list, its stats
+    // shown, the squad soldier's profile set (level 0), the panel refreshed and its face; true.
+    static bool OnSoldierPicked(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                uint32_t value);        // 0x00685420 (__thiscall)
+    // A side's mark clicked (not co-op; else false): the allies' or the axis' (another control:
+    // false; none: no side), the team asked for when it is not the squad's; true.
+    static bool OnSide(void *menu, void *argument, C_Control *control, uint32_t notification,
+                       uint32_t value);                 // 0x006854e0 (__thiscall)
+    // A profile's stats on the skills panel (not ported yet).
+    static void ShowSoldierStats(int profile);          // 0x006863c0 (__stdcall)
     // Control 0x0CA00000 on while the squad soldier has a uniform and his load is within his
     // strength (posted when it changes).
     void UpdateLoadButton();                            // 0x006869a0 (__fastcall)

@@ -131,6 +131,8 @@ struct S_SquadSoldier : S_SoldierState {
     int GetFreeBeltVolume() const;
     int GetFreeBackpackVolume() const;
     float GetFreeWeight() const;
+    // (The in-game menu's soldiers panel, part 9e-xiv: game_menu_test.inc.)
+    bool SetProfile(int profileIndex, int level);
     S_SoldierLoad load;                                 // +0x8C
 };
 struct S_MissionSquad {
@@ -150,4 +152,6 @@ public:
 class C_HumanStore {
 public:
     S_SoldierProfile *Get(int index) const;
+    // (The in-game menu's soldiers panel, part 9e-xiv: game_menu_test.inc.)
+    int GetCount() const;
 };

@@ -32184,6 +32184,16 @@
   "name": "C_GameMenu::OnPlayerScreenShown",
   "proto": "bool __thiscall OnPlayerScreenShown(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
  },
+ "00685420": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnSoldierPicked",
+  "proto": "bool __thiscall OnSoldierPicked(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006854e0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnSide",
+  "proto": "bool __thiscall OnSide(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00685da0": {
   "module": "game_menu",
   "name": "C_GameMenu::UpdateSoldierTypes",
@@ -32197,6 +32207,11 @@
   "module": "game_menu",
   "name": "C_GameMenu::OnGameInfo",
   "proto": "bool __thiscall OnGameInfo(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006863c0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::ShowSoldierStats",
+  "proto": "void __stdcall ShowSoldierStats(int profile)"
  },
  "006869a0": {
   "module": "game_menu",

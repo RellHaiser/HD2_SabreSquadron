@@ -1,11 +1,12 @@
 // The in-game menu (original 0x0067eb40..0x00687f50; part 9e-v: the class and the menu state's slots;
 // 9e-vi: the update's helpers and the drawing; 9e-vii: the messages; 9e-ix: the screens' descriptions;
-// 9e-xiii: the player screen's).
+// 9e-xiii: the player screen's; 9e-xiv: its soldiers panel).
 #include "game/game_menu.h"
 
 #include <algorithm>
 #include <cctype>
 #include <cstring>
+#include <malloc.h>
 
 #include "common/c_str.h"
 #include "game/campaign.h"
@@ -26,6 +27,8 @@
 
 int g_gameMenuTime;                                     // 0x008ae62c
 int g_gameMenuMessages;                                 // 0x008ae628
+int g_pickedSoldierA;                                   // 0x008ae634
+int g_pickedSoldierX = 30;                              // 0x008410ac
 
 namespace {
 
@@ -49,6 +52,14 @@ constexpr int CONTROL_COMBO = 0x11, CONTROL_LABEL = 0x12, CONTROL_CHAT = 0x21;
 constexpr uint32_t BUTTON_STYLE = 0xD, VERSION_STYLE = 0x28;
 constexpr uint32_t TEXT_STYLE = 0xB, LIST_STYLE = 0xC, LIST_ITEM_STYLE = 0x13;
 constexpr uint32_t TEXT_VERSION = 0x7D6, TEXT_SOLDIER_TYPES = 500;
+// The soldiers panel (the player screen's first control: 0x0C100000): its group, its scroll bar,
+// its two hiding lists (4 pictures shown, 0.062 apart) of 30 profiles each, the soldiers' pictures,
+// the sides' marks (ALLIES_COUNT, AXIS_COUNT: they show the teams' counts too).
+constexpr int CONTROL_GROUP = 5, CONTROL_SCROLL_BAR = 8, CONTROL_HIDING_LIST = 0x23, CONTROL_PICTURE = 4;
+constexpr int CONTROL_MARK = 0x1F;
+constexpr uint32_t SOLDIERS_SCROLL = 0x0C101000, SOLDIERS_LIST_A = 0x0C102000;
+constexpr int SOLDIERS_PER_LIST = 30, SOLDIER_LIST_ROWS = 4;
+constexpr float SOLDIER_ACROSS_STEP = 0.062f;
 // What the buttons post when clicked: their routes (CONTROL_NOTIFY_CLICK | the message).
 constexpr uint32_t CLICK = CONTROL_NOTIFY_CLICK;
 // The options handler's opening of its screen (options_handler.cpp).
@@ -72,6 +83,14 @@ constexpr uint32_t TEXT_QUIT_QUESTION = 0x7D9, TEXT_RESTART_QUESTION = 0x7D4;
 void *const WARMUP_MENU = reinterpret_cast<void *>(static_cast<intptr_t>(-2));
 // The app's command a changed team posts (the team as its argument; inferred).
 constexpr int APP_NET_COMMAND_TEAM = 5;
+
+// A float as a message's value2.
+uintptr_t FloatValue(float value)
+{
+    uint32_t bits;
+    std::memcpy(&bits, &value, sizeof bits);
+    return bits;
+}
 
 // The network games' controls (UpdateLoadButton, UpdateNetStatus).
 constexpr uint32_t LOAD_BUTTON = 0x0CA00000;
@@ -564,6 +583,114 @@ bool C_GameMenu::OnChat(void *, void *, C_Control *, uint32_t, uint32_t value)
     while (static_cast<unsigned char>(*line) < 0x80 && std::isspace(*line))
         ++line;
     g_netGame.SendChat(line, team);
+    return true;
+}
+
+bool C_GameMenu::BuildSoldiersPanel(S_ScreenDesc *desc, I3D_frame *model)
+{
+    C_HumanStore *store = g_gameProfile.m_humanStore;
+    if (store->GetCount() < 1)
+        return false;
+    I3D_frame *area = model->FindChildFrame("soldierspanel", FRAME_MASK_DUMMY);
+    const S_vector zero(0.0f, 0.0f, 0.0f);
+    I3D_frame *frameA = AddFrame(C_fstr("GB_Soldiers_a"), FRAME_DUMMY, area, zero);
+    I3D_frame *frameX = AddFrame(C_fstr("GB_Soldiers_x"), FRAME_DUMMY, area, zero);
+    I3D_frame *photo = model->FindChildFrame("photo03", FRAME_MASK_VISUAL);
+    I3D_frame *selector = model->FindChildFrame("selector", FRAME_MASK_VISUAL);
+    // (Quirk kept: the copy is not checked.)
+    I3D_frame *selector2 = CloneFrame(C_fstr("selector2"), nullptr, selector);
+    for (const char *name : {"table13", "table14", "table15"}) {
+        if (I3D_frame *table = model->FindChildFrame(name, FRAME_MASK_VISUAL))
+            table->SetOn(false);
+    }
+    // (The frames made are kept.)
+    if (!photo || !frameA || !frameX || !selector)
+        return false;
+    selector->LinkTo(frameA, 0);
+    selector2->LinkTo(frameX, 0);
+    photo->LinkTo(frameA, 1);
+    photo->SetOn(true);
+    photo->Update();
+
+    S_ControlDesc *panel = desc->AddControl(CONTROL_GROUP, "soldierspanel");
+    AddDescMessage(panel->AddChild(CONTROL_SCROLL_BAR, "scroll11"), 0, CONTROL_MSG_SET_VALUE, SOLDIERS_LIST_A);
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    // A list: hidden, its scroll bar, 4 shown across from the template's place (the list frees it).
+    const auto list = [&](const char *name) {
+        S_ControlDesc *list = panel->AddChild(CONTROL_HIDING_LIST, name);
+        AddDescMessage(list, 0, CONTROL_MSG_HIDE, 0);
+        AddDescMessage(list, 0, CONTROL_MSG_SET_VALUE, SOLDIERS_SCROLL);
+        AddDescMessage(list, 0, CONTROL_MSG_SET_VISIBLE, SOLDIER_LIST_ROWS);
+        AddDescMessage(list, 0, CONTROL_MSG_SET_ACROSS_STEP, 0, FloatValue(SOLDIER_ACROSS_STEP));
+        auto *origin = static_cast<S_vector4 *>(_aligned_malloc(sizeof(S_vector4), 16));
+        if (origin)
+            std::memcpy(origin, &photo->GetPos(), sizeof(S_vector4));
+        AddDescMessage(list, 0, CONTROL_MSG_SET_ORIGIN, 0, reinterpret_cast<uintptr_t>(origin));
+        return list;
+    };
+    // A profile's picture: the template's copy under the list's frame, its index and face.
+    const auto soldier = [&](S_ControlDesc *list, const char *format, int index, I3D_frame *frame) {
+        const C_str name = C_fstr(format, index);
+        CloneVisual(name, frame, photo);
+        S_ControlDesc *picture = list->AddChild(CONTROL_PICTURE, name.c_str());
+        AddDescMessage(picture, 0, CONTROL_MSG_SET_INDEX, static_cast<uint32_t>(index));
+        AddDescMessage(picture, 0, CONTROL_MSG_SET_TEXTURE, 0, reinterpret_cast<uintptr_t>(store->Get(index)->faceImage));
+        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CLICK, self,
+                       reinterpret_cast<uintptr_t>(&C_GameMenu::OnSoldierPicked));
+    };
+    S_ControlDesc *listA = list("GB_Soldiers_a");
+    for (int i = 0; i < store->GetCount() && i < SOLDIERS_PER_LIST; ++i)
+        soldier(listA, "Soldier_a%02d", i, frameA);
+    AddDescMessage(listA, 0, CONTROL_MSG_REFRESH, 0);
+    S_ControlDesc *listX = list("GB_Soldiers_x");
+    for (int i = SOLDIERS_PER_LIST; i < store->GetCount() && i < 2 * SOLDIERS_PER_LIST; ++i)
+        soldier(listX, "Soldier_x%02d", i, frameX);
+    AddDescMessage(listX, 0, CONTROL_MSG_REFRESH, 0);
+    if (!g_gameProfile.IsCooperativeGame()) {
+        for (const char *side : {"allies", "axis"})
+            AddDescMessage(panel->AddChild(CONTROL_MARK, side), 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0E, self,
+                           reinterpret_cast<uintptr_t>(&C_GameMenu::OnSide));
+    }
+    photo->SetOn(false);
+    photo->Update();
+    return true;
+}
+
+bool C_GameMenu::OnSoldierPicked(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_GameMenu *>(menu);
+    S_ControlMessage index;
+    index.id = CONTROL_MSG_GET_INDEX;
+    control->HandleMessage(&index);
+    const int profile = static_cast<int>(index.value);
+    if (profile >= 0) {
+        if (profile < SOLDIERS_PER_LIST)
+            g_pickedSoldierA = profile;
+        else if (profile < 2 * SOLDIERS_PER_LIST)
+            g_pickedSoldierX = profile;
+        ShowSoldierStats(profile);
+        self->m_panel.GetSquadSoldier()->SetProfile(profile, 0);
+        self->m_panel.Refresh();
+        self->m_panel.UpdateFace();
+    }
+    return true;
+}
+
+bool C_GameMenu::OnSide(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    if (g_gameProfile.IsCooperativeGame())
+        return false;
+    int team = -1;
+    if (control) {
+        if (control->GetId() == ALLIES_COUNT)
+            team = TEAM_ALLIES;
+        else if (control->GetId() == AXIS_COUNT)
+            team = TEAM_AXIS;
+        else
+            return false;
+    }
+    if (team != static_cast<C_GameMenu *>(menu)->m_team && team >= 0)
+        GetGameApp()->PostCommand(APP_NET_COMMAND_TEAM, team, 0, false);
     return true;
 }
 

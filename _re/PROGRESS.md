@@ -7471,6 +7471,30 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     soldier types (0x00685da0) and the callbacks 0x00684fd0, 0x00687dd0, 0x00687f50; then the squad
     glue and the item slots.
 
+  PART 9e-xiv DONE (2026-11-03): the in-game menu's soldiers panel (game/game_menu.cpp).
+  - BuildSoldiersPanel 0x006838e0 (Ghidra's decompile garbled by the aligned frame; read from the asm
+    with a stack-slot annotator): no profiles: false. The lists' frames made (dummies "GB_Soldiers_a"
+    and "GB_Soldiers_x" under the model's "soldierspanel", mask 0x20), "photo03" (the pictures'
+    template) and "selector" (its copy "selector2", not checked) found, table13..15 hidden; no photo,
+    selector or list frame: false (the frames kept). The selectors and the template moved into the
+    lists' frames, the template on. The group "soldierspanel" (0x0C100000): the scroll bar "scroll11"
+    (its list 0x0C102000), the hiding lists GB_Soldiers_a / GB_Soldiers_x (hidden, the scroll bar
+    0x0C101000, 4 shown, 0.062 across, the template's place) of the profiles' pictures (the first 30,
+    then up to 60: "Soldier_a%02d" / "Soldier_x%02d", the template's copies under the lists' frames,
+    their index, face image and click), refreshed; not co-op: the allies' and axis' marks. The
+    template hidden; true.
+  - OnSoldierPicked 0x00685420 (the picture's index kept in g_pickedSoldierA 0x008ae634 / X 0x008410ac,
+    ShowSoldierStats 0x006863c0 declared, the squad soldier's profile, the panel refreshed and its
+    face), OnSide 0x006854e0 (not co-op: the team command when not the squad's team).
+  - Harness: game_menu_test.inc's gmSoldiers, gmSoldiersNone, gmSoldierPicked, gmSide (the store's
+    count and the squad soldier's SetProfile in the stub header). 22 of 22 in both orders (the other
+    factory lines too).
+  - Mutations: mutations/mutate_9e14.py (135, 134 killed, 1 equivalent).
+  - Build: MSVC clean. Tier 1: 408 errors in 74 files, 172 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+3, 1 moved); 3 functions in ported.txt. Stats: 8,873 of 12,306 functions by hand (79.4 % by size).
+  - Next, 9e-xv: the equipment panel (0x00684690), then the items and skills panels, the soldier
+    types and the remaining callbacks, the item slots.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

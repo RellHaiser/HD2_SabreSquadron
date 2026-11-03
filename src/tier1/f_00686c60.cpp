@@ -197,7 +197,7 @@ uint32_t C_GameMenu__FUN_00686e10(C_GameMenu *_this,uint32_t param_1,int *param_
             tier1_operator_delete(pCStack_10);
           }
         }
-        FUN_006863c0(*(int **)((int)_this->m_544 + 0x3c));
+        C_GameMenu__ShowSoldierStats(*(int **)((int)_this->m_544 + 0x3c));
         iVar2 = *(int *)(substr + 0x1b4);
         iVar8 = iVar2;
         if (iVar2 < 0x1e) {

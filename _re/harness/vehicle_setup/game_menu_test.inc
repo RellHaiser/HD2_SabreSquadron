@@ -26,7 +26,16 @@ bool GmPanel(const char *panel, const S_ScreenDesc *desc, I3D_frame *model)
           model ? MrFrameName(model).c_str() : "none");
     return true;
 }
-bool C_GameMenu::BuildSoldiersPanel(S_ScreenDesc *desc, I3D_frame *model) { return GmPanel("soldiers", desc, model); }
+// (Part 9e-xiv: the soldiers panel's. The store's count equipment_panel_test.inc's profiles; the
+// stats logged; the squad soldier's profile set and logged.)
+int C_HumanStore::GetCount() const { return static_cast<int>(g_epProfiles.size()); }
+void C_GameMenu::ShowSoldierStats(int profile) { GfLog("stats %d", profile); }
+bool S_SquadSoldier::SetProfile(int profile, int level)
+{
+    GfLog("set profile %d %d", profile, level);
+    profileIndex = profile;
+    return true;
+}
 bool C_GameMenu::BuildEquipmentPanel(S_ScreenDesc *desc, I3D_frame *model) { return GmPanel("equipment", desc, model); }
 bool C_GameMenu::BuildItemsPanel(S_ScreenDesc *desc, I3D_frame *model) { return GmPanel("items", desc, model); }
 bool C_GameMenu::BuildSkillsPanel(S_ScreenDesc *desc, I3D_frame *model) { return GmPanel("skills", desc, model); }
@@ -101,7 +110,21 @@ struct S_GameMenuResults {
     bool gmLoad = true, gmCoop = true, gmNet = true, gmRender = true, gmRenderGame = true, gmRenderEquip = true;
     bool gmOptions = true, gmEscape = true, gmEscapeNet = true, gmSquad = true, gmQuestions = true;
     bool gmMainLocal = true, gmMainNet = true, gmBuild = true, gmBuildNet = true, gmPlayer = true, gmPlayerCoop = true;
-    bool gmPlayerCallbacks = true, gmChat = true;
+    bool gmPlayerCallbacks = true, gmChat = true, gmSoldiers = true, gmSoldiersNone = true, gmSoldierPicked = true;
+    bool gmSide = true;
+};
+
+// A control answering CONTROL_MSG_GET_INDEX with its index (logged).
+struct C_GmIndexed : C_Control {
+    int index;
+    C_GmIndexed(uint32_t id, int i) : C_Control(nullptr, id, nullptr), index(i) {}
+    bool HandleMessage(S_ControlMessage *m) override
+    {
+        GfLog("index %x", m->id);
+        if (m->id == CONTROL_MSG_GET_INDEX)
+            m->value = static_cast<uint32_t>(index);
+        return true;
+    }
 };
 
 // A uniform of a side (its type's team).
@@ -1081,8 +1104,9 @@ void GameMenuTest(I3D_scene *scene)
             // (Co-op: the player screen's description popup's model.)
             S_MrObj *dm = MrObj("gmcd", g_mrModelVt);
             g_mrMade[FRAME_MODEL] = {a, o, p, dm};
-            okb &= m.BuildScreens() && MrHas("gmcp 34 PLAYER_SCREEN") && MrHas("panel soldiers PLAYER_SCREEN 0 gmcp") &&
-                   MrHas("gmco 48 bvideo setup 20") && logHas("panel ") == 4 && m.m_screens[3]->m_inactive == false &&
+            g_epProfiles.clear();
+            okb &= m.BuildScreens() && MrHas("gmcp 34 PLAYER_SCREEN") && MrHas("panel equipment PLAYER_SCREEN 0 gmcp") &&
+                   MrHas("gmco 48 bvideo setup 20") && logHas("panel ") == 3 && m.m_screens[3]->m_inactive == false &&
                    m.m_screens.size() == 4 && m.m_screens[3]->GetId() == 3u << 26 && !g_menuScreens.empty() &&
                    g_menuScreens.back() == m.m_screens[coop ? 3 : 1];
             okb &= g_cacheLoads.size() >= 3 &&
@@ -1106,6 +1130,8 @@ void GameMenuTest(I3D_scene *scene)
         // (a cooperative game: the version's and the equipment's), accept, back, the chat input, the
         // texts, the game info; the weapons' information label (else co-op: the player status's text
         // and the description popup); the panel's soldier in "3Dview" ---
+        // (No profiles: no soldiers panel.)
+        g_epProfiles.clear();
         const auto playerDescribe = [](const S_ScreenDesc &desc, const C_GameMenu *menu) {
             const std::map<uintptr_t, std::string> functions = {
                 {reinterpret_cast<uintptr_t>(&C_GameMenu::OnPlayerScreenShown), "shown"},
@@ -1193,11 +1219,10 @@ void GameMenuTest(I3D_scene *scene)
             okp &= playerDescribe(desc, &m) == want;
             okp &= m.m_soldierTypes == 0x0C100000 && C_GmBasePeek::WeaponsInfo(m) == 0x0D100000 && !m.m_popup &&
                    m.m_panel.m_soldier;
-            okp &= g_gfLog.size() >= 8 && g_gfLog[0] == "panel soldiers PLAYER_SCREEN 0 gmpm" &&
-                   g_gfLog[1] == "panel equipment PLAYER_SCREEN 0 gmpm" && g_gfLog[2] == "panel items PLAYER_SCREEN 0 gmpm" &&
-                   g_gfLog[3] == "panel skills PLAYER_SCREEN 0 gmpm" && g_gfLog[4] == "soldier types c100000" &&
-                   g_gfLog[5] == "gmpm 48 text_weapons_info 1" && g_gfLog[6] == "gmpm 48 3Dview 1" &&
-                   MrHas("gmp3d on 0");
+            okp &= g_gfLog.size() >= 7 && g_gfLog[0] == "panel equipment PLAYER_SCREEN 0 gmpm" &&
+                   g_gfLog[1] == "panel items PLAYER_SCREEN 0 gmpm" && g_gfLog[2] == "panel skills PLAYER_SCREEN 0 gmpm" &&
+                   g_gfLog[3] == "soldier types c100000" && g_gfLog[4] == "gmpm 48 text_weapons_info 1" &&
+                   g_gfLog[5] == "gmpm 48 3Dview 1" && MrHas("gmp3d on 0");
             delete m.m_panel.m_soldier;
             m.m_panel.m_soldier = nullptr;
             WM(r.gmPlayer, okp);
@@ -1246,6 +1271,161 @@ void GameMenuTest(I3D_scene *scene)
             g_cacheFailName.clear();
             WM(r.gmPlayerCoop, okp);
             g_msChildren.erase({model, "text_weapons_info"});
+
+            // --- the soldiers panel (part 9e-xiv): the lists' frames made under "soldierspanel", the
+            // template and the selectors moved into them, the tables hidden; the panel's group, its
+            // scroll bar, the two lists (the first 30 profiles, the next 30) of the template's copies
+            // (their indices, faces, clicks); not co-op: the sides' marks. The template hidden ---
+            {
+                bool oks = true;
+                g_coop = false;
+                alignas(16) static uint8_t profiles[61][sizeof(S_SoldierProfile)];
+                std::memset(profiles, 0, sizeof profiles);
+                const auto setProfiles = [&](int n) {
+                    g_epProfiles.clear();
+                    for (int i = 0; i < n; ++i) {
+                        auto *p = reinterpret_cast<S_SoldierProfile *>(profiles[i]);
+                        p->faceImage = reinterpret_cast<IImage *>(static_cast<uintptr_t>(0x1000 + i));
+                        g_epProfiles.push_back(p);
+                    }
+                };
+                // A visual copy (its mesh duplicated and updated) for each soldier; a copy for the
+                // selector first.
+                const auto clones = [](int n) {
+                    g_mrClones.clear();
+                    g_mrClones.push_back(As<I3D_frame>(MsFrame("gmssel2")));
+                    for (int i = 0; i < n; ++i) {
+                        S_MrObj *copy = MrObj(CmText("gmsv%d", i).c_str(), g_mrModelVt);
+                        S_MrObj *mesh = MrObj("gmsmesh", g_mrModelVt);
+                        mesh->vtable[0x18 / 4] = reinterpret_cast<void *>(&MrFake<0x18>);
+                        *reinterpret_cast<S_MrObj **>(reinterpret_cast<uint8_t *>(copy) + 0x1E0) = mesh;
+                        g_mrClones.push_back(As<I3D_frame>(copy));
+                    }
+                };
+                S_MrObj *sm = MsFrame("gmsm"), *photo = MsFrame("gmsphoto"), *sel = MsFrame("gmssel");
+                S_MrObj *t13 = MsFrame("gmst13"), *t15 = MsFrame("gmst15");
+                As<I3D_frame>(photo)->m_localMatrix(3) = S_vector(0.25f, -0.5f, 0.75f);
+                As<I3D_frame>(photo)->m_localMatrix.m[3][3] = 2.0f;
+                g_msChildren[{sm, "soldierspanel"}] = MsFrame("gmsarea");
+                g_msChildren[{sm, "photo03"}] = photo;
+                g_msChildren[{sm, "selector"}] = sel;
+                g_msChildren[{sm, "table13"}] = t13;
+                g_msChildren[{sm, "table15"}] = t15;
+                // The panel's description: "<name> <type> <id>: messages {children}" (the callbacks
+                // by name, the origins by their place).
+                std::function<std::string(const S_ControlDesc *, const C_GameMenu *)> panelDescribe;
+                panelDescribe = [&panelDescribe](const S_ControlDesc *c, const C_GameMenu *menu) {
+                    std::string s = CmText("%s %x %x:", c->name.c_str(), c->type, c->id);
+                    for (const S_ControlMessage &m : c->messages) {
+                        if (m.id == CONTROL_MSG_ADD_CALLBACK) {
+                            const char *f = m.value3 == reinterpret_cast<uintptr_t>(&C_GameMenu::OnSoldierPicked) ? "picked"
+                                            : m.value3 == reinterpret_cast<uintptr_t>(&C_GameMenu::OnSide) ? "side"
+                                                                                                           : "?";
+                            s += CmText(" cb %x %s%s", m.value, f, m.value2 == reinterpret_cast<uintptr_t>(menu) ? "" : " other");
+                        } else if (m.id == CONTROL_MSG_SET_ORIGIN) {
+                            const auto *o = reinterpret_cast<const float *>(m.value2);
+                            s += o ? CmText(" origin %g %g %g %g", o[0], o[1], o[2], o[3]) : std::string(" origin none");
+                        } else {
+                            s += CmText(" %x %x %x", m.id, m.value, static_cast<uint32_t>(m.value2));
+                        }
+                        if (m.target)
+                            s += CmText(" @%x", m.target);
+                    }
+                    if (!c->children.empty()) {
+                        s += " {";
+                        for (const S_ControlDesc *child : c->children)
+                            s += " " + panelDescribe(child, menu) + ";";
+                        s += " }";
+                    }
+                    return s;
+                };
+                const std::string listHead = " 1000004 0 0 100000b c101000 0 1000028 4 0 1000029 0 3d7df3b6 origin 0.25 -0.5 0.75 2";
+                const auto picture = [](char list, int i) {
+                    return CmText(" Soldier_%c%02d 4 c10%x%02x0: 1000009 %x 0 1000038 0 %x cb 4001000 picked;", list, i,
+                                  list == 'a' ? 2 : 3, (list == 'a' ? i : i - 30) + 1, i, 0x1000 + i);
+                };
+                const auto build = [&](int n, C_GameMenu &menu, S_ScreenDesc &d) {
+                    setProfiles(n);
+                    clones(n);
+                    g_mrMade[FRAME_DUMMY] = {MsFrame("gmsa"), MsFrame("gmsx")};
+                    menu.m_scene = m.m_scene;
+                    g_gfLog.clear();
+                    return menu.BuildSoldiersPanel(&d, As<I3D_frame>(sm));
+                };
+                C_GameMenu s1;
+                S_ScreenDesc d1("PLAYER_SCREEN", "player_screen", 3u << 26);
+                C_GameMenu s0;
+                S_ScreenDesc d0("PLAYER_SCREEN", "player_screen", 3u << 26);
+                oks &= build(1, s0, d0) && d0.controls.size() == 1 && d0.controls[0]->children[1]->children.size() == 1;
+                oks &= build(2, s1, d1) && d1.controls.size() == 1;
+                std::string want = "soldierspanel 5 c100000: { scroll11 8 c101000: 100000b c102000 0; GB_Soldiers_a 23 c102000:" +
+                                   listHead + " 200002c 0 0 {" + picture('a', 0) + picture('a', 1) + " };" +
+                                   " GB_Soldiers_x 23 c103000:" + listHead + " 200002c 0 0;" +
+                                   " allies 1f c104000: cb 400e000 side; axis 1f c105000: cb 400e000 side; }";
+                const std::string got = d1.controls.empty() ? std::string() : panelDescribe(d1.controls[0], &s1);
+                if (got != want)
+                    std::fprintf(stderr, "gmSoldiers:\n%s\n%s\n", got.c_str(), want.c_str());
+                oks &= got == want;
+                // The frames: the lists' made under the area, the template and the selectors moved,
+                // the tables hidden, the copies named under the lists' frames; the template hidden.
+                oks &= MsLogIs({"gmsm 48 soldierspanel 20", "create 6", "gmsa 38 gmsarea 0", "gmsa 34 GB_Soldiers_a",
+                                "gmsa 8 (0 0 0)", "create 6", "gmsx 38 gmsarea 0", "gmsx 34 GB_Soldiers_x", "gmsx 8 (0 0 0)",
+                                "gmsm 48 photo03 1", "gmsm 48 selector 1", "clone tree gmssel 0", "gmssel2 34 selector2",
+                                "gmssel2 38 null 0", "gmsm 48 table13 1", "gmst13 on 0", "gmsm 48 table14 1", "gmsm 48 table15 1",
+                                "gmst15 on 0", "gmssel 38 gmsa 0", "gmssel2 38 gmsx 0", "gmsphoto 38 gmsa 1",
+                                "gmsphoto on 1", "gmsphoto 24", "clone tree gmsphoto 0", "gmsv0 a0", "gmsmesh 18",
+                                "gmsv0 34 Soldier_a00", "gmsv0 38 gmsa 0", "clone tree gmsphoto 0", "gmsv1 a0", "gmsmesh 18",
+                                "gmsv1 34 Soldier_a01", "gmsv1 38 gmsa 0", "gmsphoto on 0", "gmsphoto 24"},
+                               g_gfLog);
+                WM(r.gmSoldiers, oks);
+                // 33 profiles: 30 in the first list, 3 in the second; 61: 30 in each; co-op: no marks.
+                C_GameMenu s2;
+                S_ScreenDesc d2("PLAYER_SCREEN", "player_screen", 3u << 26);
+                g_coop = true;
+                oks &= build(33, s2, d2) && d2.controls.size() == 1 && d2.controls[0]->children.size() == 3;
+                g_coop = false;
+                if (d2.controls.size() == 1 && d2.controls[0]->children.size() == 3) {
+                    const S_ControlDesc *a = d2.controls[0]->children[1], *x = d2.controls[0]->children[2];
+                    oks &= a->children.size() == 30 && x->children.size() == 3 &&
+                           " " + panelDescribe(a->children[29], &s2) + ";" == picture('a', 29) &&
+                           " " + panelDescribe(x->children[0], &s2) + ";" == picture('x', 30) &&
+                           " " + panelDescribe(x->children[2], &s2) + ";" == picture('x', 32) &&
+                           MrHas("gmsv32 38 gmsx 0") && MrHas("gmsv29 34 Soldier_a29");
+                }
+                C_GameMenu s3;
+                S_ScreenDesc d3("PLAYER_SCREEN", "player_screen", 3u << 26);
+                oks &= build(61, s3, d3) && d3.controls.size() == 1 && d3.controls[0]->children.size() == 5 &&
+                       d3.controls[0]->children[1]->children.size() == 30 && d3.controls[0]->children[2]->children.size() == 30 &&
+                       d3.controls[0]->children[2]->children[29]->name == C_str("Soldier_x59");
+                WM(r.gmSoldiers, oks);
+                // No profiles: false, nothing; no template, selector or list frame: false, the frames
+                // made (no controls).
+                bool okn = true;
+                C_GameMenu s4;
+                S_ScreenDesc d4("PLAYER_SCREEN", "player_screen", 3u << 26);
+                okn &= !build(0, s4, d4) && d4.controls.empty() && g_gfLog.empty();
+                for (const char *missing : {"photo03", "selector"}) {
+                    S_MrObj *const kept = g_msChildren[{sm, missing}];
+                    g_msChildren.erase({sm, missing});
+                    C_GameMenu s5;
+                    S_ScreenDesc d5("PLAYER_SCREEN", "player_screen", 3u << 26);
+                    okn &= !build(2, s5, d5) && d5.controls.empty() && MrHas("gmsx 34 GB_Soldiers_x") &&
+                           logHas("gmsphoto") == 0 && logHas("gmssel 38") == 0;
+                    g_msChildren[{sm, missing}] = kept;
+                }
+                // (A list frame not made: AddFrame links it first, as the original: not tested.)
+                WM(r.gmSoldiersNone, okn);
+                for (S_ScreenDesc *d : {&d0, &d1, &d2, &d3})
+                    for (const S_ControlDesc *panel : d->controls)
+                        for (const S_ControlDesc *list : panel->children)
+                            for (const S_ControlMessage &msg : list->messages)
+                                if (msg.id == CONTROL_MSG_SET_ORIGIN)
+                                    _aligned_free(reinterpret_cast<void *>(msg.value2));
+                g_mrClones.clear();
+                g_mrMade.erase(FRAME_DUMMY);
+                for (const char *name : {"soldierspanel", "photo03", "selector", "table13", "table15"})
+                    g_msChildren.erase({sm, name});
+            }
             GetGame()->m_scene = oldGameScene;
             g_igraphVtable[igraphSlots[0]] = oldIgraph[0];
             g_igraphVtable[igraphSlots[1]] = oldIgraph[1];
@@ -1259,6 +1439,81 @@ void GameMenuTest(I3D_scene *scene)
         g_msFrameVt[0x08 / 4] = oldSetPos;
         g_gameRole = GAME_ROLE_CLIENT;
         game->m_mission = oldMission;
+    }
+
+    // --- the soldiers panel's callbacks (part 9e-xiv): a picture clicked: its index asked, kept for
+    // its list (0 .. 29, 30 .. 59), the stats shown, the squad soldier's profile set (level 0), the
+    // panel refreshed and its face; no index: nothing; true. A side's mark (not co-op): the team asked
+    // for when it is not the squad's (another control: false; none: no team); true ---
+    {
+        bool okp = true;
+        C_GameMenu m;
+        S_SquadSoldier squad;
+        squad.profileIndex = -1;
+        m.m_panel.m_squadSoldier = &squad;
+        // (A soldier on its world: its face set; leaked. The profiles zeroed: no constructor.)
+        auto *soldier = new C_MenuSoldier();
+        MsWorld(*soldier);
+        m.m_panel.m_soldier = soldier;
+        alignas(16) static uint8_t faces[61][sizeof(S_SoldierProfile)];
+        std::memset(faces, 0, sizeof faces);
+        g_epProfiles.clear();
+        for (auto &face : faces)
+            g_epProfiles.push_back(reinterpret_cast<S_SoldierProfile *>(face));
+        g_epProfiles[0]->faceTexture = "gm_f000.bmp";
+        g_epProfiles[30]->faceTexture = "gm_f030.bmp";
+        // (The lists' first picks: 0 and 30.)
+        okp &= g_pickedSoldierA == 0 && g_pickedSoldierX == 30;
+        const auto pick = [&](int index) {
+            C_GmIndexed control(0x0C102100, index);
+            g_gfLog.clear();
+            g_controlMessages.clear();
+            return C_GameMenu::OnSoldierPicked(&m, &m, &control, CONTROL_NOTIFY_CLICK, 0);
+        };
+        g_pickedSoldierA = 3;
+        g_pickedSoldierX = 33;
+        // (The face the soldier keeps.)
+        const auto face = [soldier](const char *texture) { return soldier->m_face && std::strcmp(soldier->m_face, texture) == 0; };
+        soldier->m_face = "none";
+        okp &= pick(-1) && GfLogIs({"index 100000a"}) && g_controlMessages.empty() && g_pickedSoldierA == 3 && face("none") &&
+               g_pickedSoldierX == 33 && squad.profileIndex == -1;
+        okp &= pick(0) && GfLogIs({"index 100000a", "stats 0", "set profile 0 0"}) && face("gm_f000.bmp") &&
+               !g_controlMessages.empty() &&
+               g_pickedSoldierA == 0 && g_pickedSoldierX == 33 && squad.profileIndex == 0;
+        okp &= pick(29) && g_pickedSoldierA == 29 && g_pickedSoldierX == 33;
+        okp &= pick(30) && g_pickedSoldierA == 29 && g_pickedSoldierX == 30 && face("gm_f030.bmp");
+        okp &= pick(59) && g_pickedSoldierA == 29 && g_pickedSoldierX == 59 && MrHas("set profile 59 0");
+        okp &= pick(60) && g_pickedSoldierA == 29 && g_pickedSoldierX == 59 && GfLogIs({"index 100000a", "stats 60", "set profile 60 0"}) && face("");
+        m.m_panel.m_squadSoldier = nullptr;
+        m.m_panel.m_soldier = nullptr;
+        g_epProfiles[0]->faceTexture = C_str();
+        g_epProfiles[30]->faceTexture = C_str();
+        g_epProfiles.clear();
+        g_controlMessages.clear();
+        WM(r.gmSoldierPicked, okp);
+        g_pickedSoldierA = 0;
+        g_pickedSoldierX = 30;
+
+        bool okt = true;
+        const bool oldCoop = g_coop;
+        g_coop = false;
+        m.m_team = 0;
+        const auto side = [&](uint32_t id, bool none = false) {
+            C_GmIndexed control(id, 0);
+            g_gfLog.clear();
+            return C_GameMenu::OnSide(&m, &m, none ? nullptr : &control, CONTROL_NOTIFY_0E, 0);
+        };
+        okt &= side(0x0C104000) && GfLogIs({"command 5 1 0 0"});
+        okt &= side(0x0C105000) && g_gfLog.empty();
+        m.m_team = 1;
+        okt &= side(0x0C105000) && GfLogIs({"command 5 0 0 0"}) && side(0x0C104000) && g_gfLog.empty();
+        okt &= !side(0x0C106000) && g_gfLog.empty() && side(0, true) && g_gfLog.empty();
+        m.m_team = -1;
+        okt &= side(0, true) && g_gfLog.empty();
+        g_coop = true;
+        okt &= !side(0x0C104000) && g_gfLog.empty();
+        g_coop = oldCoop;
+        WM(r.gmSide, okt);
     }
 
     // --- the player screen's callbacks (part 9e-xiii): hidden true; the game info's: the info screen
@@ -1310,9 +1565,10 @@ void GameMenuTest(I3D_scene *scene)
                 "gmTick %d gmDraw %d gmMessage %d gmObjectives %d gmBase %d gmLoad %d gmCoop %d gmNet %d gmRender %d "
                 "gmRenderGame %d gmRenderEquip %d gmOptions %d gmEscape %d gmEscapeNet %d gmSquad %d gmQuestions %d "
                 "gmMainLocal %d gmMainNet %d gmBuild %d gmBuildNet %d gmPlayer %d gmPlayerCoop %d gmPlayerCallbacks %d "
-                "gmChat %d\n",
+                "gmChat %d gmSoldiers %d gmSoldiersNone %d gmSoldierPicked %d gmSide %d\n",
                 r.gmNew, r.gmNewClient, r.gmStart, r.gmStartNet, r.gmStop, r.gmInput, r.gmUpdate, r.gmTick, r.gmDraw,
                 r.gmMessage, r.gmObjectives, r.gmBase, r.gmLoad, r.gmCoop, r.gmNet, r.gmRender, r.gmRenderGame,
                 r.gmRenderEquip, r.gmOptions, r.gmEscape, r.gmEscapeNet, r.gmSquad, r.gmQuestions, r.gmMainLocal,
-                r.gmMainNet, r.gmBuild, r.gmBuildNet, r.gmPlayer, r.gmPlayerCoop, r.gmPlayerCallbacks, r.gmChat);
+                r.gmMainNet, r.gmBuild, r.gmBuildNet, r.gmPlayer, r.gmPlayerCoop, r.gmPlayerCallbacks, r.gmChat, r.gmSoldiers,
+                r.gmSoldiersNone, r.gmSoldierPicked, r.gmSide);
 }

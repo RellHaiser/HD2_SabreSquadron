@@ -113328,6 +113328,29 @@
 }
 ]
 },
+"S_HumanAnimSlot": {
+"size": 12,
+"fields": [
+{
+"offset": 0,
+"size": 4,
+"type": "uint",
+"name": "flags"
+},
+{
+"offset": 4,
+"size": 4,
+"type": "float",
+"name": "time"
+},
+{
+"offset": 8,
+"size": 4,
+"type": "I3D_animation_set *",
+"name": "anim"
+}
+]
+},
 "S_HumanAnimState": {
 "size": 36,
 "fields": [

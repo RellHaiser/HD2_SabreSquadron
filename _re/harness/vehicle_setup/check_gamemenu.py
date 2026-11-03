@@ -1,4 +1,4 @@
-"""Checks the factory build's in-game menu line (harness_factory.exe, FACTORY_TEST; parts 9e-v to 9e-xiii).
+"""Checks the factory build's in-game menu line (harness_factory.exe, FACTORY_TEST; parts 9e-v to 9e-xiv).
 
     python check_gamemenu.py MISSIONS_TXT_DIR HARNESS_OUTPUT
 
@@ -10,7 +10,8 @@ import sys
 
 CHECKS = ("gmNew gmNewClient gmStart gmStartNet gmStop gmInput gmUpdate gmTick gmDraw gmMessage gmObjectives gmBase "
           "gmLoad gmCoop gmNet gmRender gmRenderGame gmRenderEquip gmOptions gmEscape gmEscapeNet gmSquad "
-          "gmQuestions gmMainLocal gmMainNet gmBuild gmBuildNet gmPlayer gmPlayerCoop gmPlayerCallbacks gmChat").split()
+          "gmQuestions gmMainLocal gmMainNet gmBuild gmBuildNet gmPlayer gmPlayerCoop gmPlayerCallbacks gmChat gmSoldiers gmSoldiersNone "
+          "gmSoldierPicked gmSide").split()
 
 
 def main():
