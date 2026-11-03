@@ -88,9 +88,9 @@ def cflags(debug):
 
 # The device seams (docs/render_device.md, sound_device.md, input_device.md, video_device.md): only a
 # backend and the API declarations may name the API's interfaces or include them; the rest of the
-# engine draws through gfx::Device and reads input through input::Device. (The Direct3D 8, sound,
-# video and input backends are cut from this build: their entries now hold for the whole tree. The
-# Direct3D 8 backend lives on in tests/d3d8 for the tests.)
+# engine names no device API. (The Direct3D 8, sound, video and input backends and the render device
+# are cut from this build: their entries now hold for the whole tree. The tests' Direct3D 8
+# declarations live in tests/d3d8.)
 SEAMS = [
     ("the Direct3D 8 backend", ("dx/",),
      re.compile(r'#include "dx/d3d8\.h"|#include "gfx/d3d8/|\bIDirect3D\w*8\b|\bg_pD3D\b|\bg_pDevice\b')),

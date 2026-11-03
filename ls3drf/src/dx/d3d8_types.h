@@ -1,8 +1,8 @@
-// Direct3D 8 types and constants: the vocabulary of the engine's render device (gfx/gfx.h).
+// Direct3D 8 types and constants: the terms the engine's lights and buffers still use.
 //
 // The enumerations, structures, flags and result codes of the Direct3D 8 API, without its COM
-// interfaces (tests/d3d8/d3d8.h): the renderer describes what it draws in these terms whatever backend
-// draws it. Written from the published Direct3D 8 ABI.
+// interfaces (tests/d3d8/d3d8.h): LS3DRF has no render device. Written from the published
+// Direct3D 8 ABI.
 #pragma once
 
 #include <windows.h>

@@ -1,10 +1,10 @@
 // The platform: the operating system services the engine uses besides drawing - time and the mouse
 // cursor.
 //
-// Unlike the devices (gfx), the platform is chosen when the DLL is built: one backend source is
-// compiled in. Nothing needs two platforms in one process, and the engine reads the clock from
-// static initialisers, before any object could be set up. The DLL has no window, message loop,
-// keyboard or thread of its own (LS3DRF.dll imports none of those calls).
+// The platform is chosen when the DLL is built: one backend source is compiled in. Nothing needs two
+// platforms in one process, and the engine reads the clock from static initialisers, before any
+// object could be set up. The DLL has no window, message loop, keyboard or thread of its own
+// (LS3DRF.dll imports none of those calls).
 #pragma once
 
 #include <cstdint>
