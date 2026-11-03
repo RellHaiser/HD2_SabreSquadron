@@ -13,9 +13,13 @@ camera (cameraFPV / CAMERAFPVStatic) is a child of the barrel looking along +Z, 
 the barrel's FPV animation <model>_f<seat>_00.5DS moves it with the barrel (recoil) and returns it
 to the same rest place.
 
-The fix adds a visual "FrontSight<seat>" below the barrel: a base on the receiver's front, a stem and
-a blade whose top edge is on the camera's axis, so the top of the post is at the centre of the
-screen. The camera must also look through the aperture's centre: w_1919Crouch's camera is 0.45 mm
+The fix adds a visual "FrontSight<seat>" below the barrel, modelled on photos of an M1919A4: a
+bracket against the receiver's front face, standing on the jacket, with a slotted screw through its
+rounded top; the sight block above it, split by a clamp slit; a thin blade in a dovetail key on top.
+The blade's top edge is on the camera's axis, so the top of the post is at the centre of the
+screen. The block and blade have the photo's sizes; the bracket is taller than the real one
+(the model's raised rear leaf puts the line of sight 54 mm above the receiver, the real front
+sight's top is about 32 mm above it). The camera must also look through the aperture's centre: w_1919Crouch's camera is 0.45 mm
 from it (left as it is), la_Jeepsas's 2.5 mm above it (a quarter of the window), so that camera is
 moved onto the aperture's centre in the model and in the animation's position keys.
 
@@ -32,53 +36,93 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import hd2_4ds as h                                         # noqa: E402
 import hd2_5ds as a5                                        # noqa: E402
 import render4ds as r                                       # noqa: E402
-from build_halftrack_mg42 import Mesh, index, visual_frame   # noqa: E402
+from build_halftrack_mg42 import Mesh, cross3, index, norm3, visual_frame   # noqa: E402
 
 TEXTURE = 'W_1919FPV.BMP'
 # The leaf's own plain dark-metal patch of the texture (u0, v0, u1, v1).
 UV_RECT = (216 / 256, 28 / 128, 240 / 256, 48 / 128)
 
 # Per model. window: the aperture (upper window of the leaf) x0, x1, y0, y1 in barrel space, its
-# corners checked against the mesh; front: the receiver's front block z0, z1 and its top (the
-# lowest point of its sloping top) where the sight's base sits.
+# corners checked against the mesh; receiver: the z of the receiver's front face and the y of its
+# top there (the lowest point of the sloping top); jacket: the y of the barrel jacket's top just in
+# front of the receiver.
 GUNS = [
     {'model': 'w_1919Crouch', 'file': 'w_1919Crouch.4ds', 'barrel': 'BARREL00_00',
      'camera': 'cameraFPV', 'anim': 'w_1919Crouch_f00_00.5DS', 'sight': 'FrontSight00',
-     'window': (-0.0043, 0.0035, 0.1620, 0.1723), 'front': (0.0020, 0.0351, 0.1123)},
+     'window': (-0.0043, 0.0035, 0.1620, 0.1723), 'receiver': (0.0351, 0.1123), 'jacket': 0.0789},
     {'model': 'la_Jeepsas', 'file': 'la_Jeepsas.ver', 'barrel': 'BARREL01_00',
      'camera': 'CAMERAFPVStatic', 'anim': 'la_Jeepsas_f01_00.5DS', 'sight': 'FrontSight01',
-     'window': (-0.0027, 0.0028, 0.1481, 0.1584), 'front': (-0.0218, 0.0112, 0.0984)},
+     'window': (-0.0027, 0.0028, 0.1481, 0.1584), 'receiver': (0.0112, 0.0984), 'jacket': 0.0700},
 ]
 MOVE_CAMERA = 0.0010        # move a camera onto the aperture's centre when further off than this
 
-# The sight in its frame's space (origin: centred on the camera's x, on the receiver's top, in the
-# middle of its front block): half widths x, y range, half lengths z. The blade's top is y = top.
-BASE = (0.0110, -0.0040, 0.0080, 0.0120)
-STEM = (0.0045, 0.0060, None, 0.0060)       # up to the blade
-BLADE = (0.0016, None, None, 0.0050)        # BLADE_H below the top, up to the top
-BLADE_H = 0.0160
+# The M1919A4's front sight, measured on a side photo (0.275 mm a pixel, scaled by the jacket):
+# a bracket bolted to the receiver's front face, standing on the jacket, its top rounded about the
+# screw; above it the sight block, split by a clamp slit across it, with a thin blade in a dovetail
+# key on top. Sizes in metres; z from the receiver's front face forwards, x from the bore line.
+DEPTH = 0.0115              # bracket and block, front to back
+BLOCK_W = 0.0100            # block, side to side
+BLOCK_H = 0.0247            # block, from the screw's centre to its top
+BRACKET_W = (0.0060, 0.0106)    # bracket, side to side at the bottom / at the screw
+SCREW_R, SCREW_T = 0.00385, 0.0018      # slotted screw heads on both sides of the bracket
+SLIT_Z, SLIT_W, SLIT_D = 0.0061, 0.0006, 0.0120     # clamp slit: z of its middle, width, depth
+BLADE_Z = (0.0022, 0.0110)  # blade, front to back
+BLADE_H = 0.0055            # blade, above the block (its top is on the camera's axis)
+BLADE_T = 0.0015            # blade, side to side
+KEY_H = 0.0008              # dovetail key under the blade, the block's width, above the block
+SINK = 0.0030               # how far the bracket goes into the jacket
 
 
 class UvMesh(Mesh):
-    """Mesh with a planar texture mapping per face into UV_RECT."""
+    """Mesh with a planar texture mapping per vertex (along its normal's main axis) into UV_RECT."""
 
     def __init__(self, extent):
         super().__init__((0.0, 0.0))
         self.extent = extent        # (lo, hi) corners of the whole part, for the mapping
 
-    def quad(self, ps, n):
+    def vert(self, p, n):
         k = max(range(3), key=lambda j: abs(n[j]))
         u_ax, v_ax = [j for j in range(3) if j != k]
         lo, hi = self.extent
-        ids = []
-        for p in ps:
-            s = (p[u_ax] - lo[u_ax]) / (hi[u_ax] - lo[u_ax])
-            t = 1 - (p[v_ax] - lo[v_ax]) / (hi[v_ax] - lo[v_ax])
-            uv = (UV_RECT[0] + s * (UV_RECT[2] - UV_RECT[0]), UV_RECT[1] + t * (UV_RECT[3] - UV_RECT[1]))
-            self.verts.append((tuple(p), tuple(n), uv))
-            ids.append(len(self.verts) - 1)
-        self.tri(ids[0], ids[1], ids[2], n)
-        self.tri(ids[0], ids[2], ids[3], n)
+        s = (p[u_ax] - lo[u_ax]) / (hi[u_ax] - lo[u_ax])
+        t = 1 - (p[v_ax] - lo[v_ax]) / (hi[v_ax] - lo[v_ax])
+        uv = (UV_RECT[0] + s * (UV_RECT[2] - UV_RECT[0]), UV_RECT[1] + t * (UV_RECT[3] - UV_RECT[1]))
+        self.verts.append((tuple(p), tuple(n), uv))
+        return len(self.verts) - 1
+
+    def hexahedron(self, c):
+        """A convex solid from 8 corners: c[0..3] the bottom ring, c[4..7] the top ring above them."""
+        mid = tuple(sum(p[k] for p in c) / 8 for k in range(3))
+        for face in ((0, 1, 2, 3), (4, 5, 6, 7), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)):
+            ps = [c[i] for i in face]
+            n = norm3(cross3([ps[1][k] - ps[0][k] for k in range(3)], [ps[2][k] - ps[0][k] for k in range(3)]))
+            fc = tuple(sum(p[k] for p in ps) / 4 for k in range(3))
+            if sum((fc[k] - mid[k]) * n[k] for k in range(3)) < 0:
+                n = tuple(-v for v in n)
+            self.quad(ps, n)
+
+    def cylinder_x(self, cy, cz, r, x0, x1, seg=12, a0=0.0, a1=360.0, caps=True):
+        """A cylinder (or an arc of one, angles from +z towards +y) along x."""
+        full = a1 - a0 >= 360.0
+        steps = seg if full else max(2, int(seg * (a1 - a0) / 360.0))
+        ang = [math.radians(a0 + (a1 - a0) * i / steps) for i in range(steps + 1)]
+        ring = [(math.sin(t), math.cos(t)) for t in ang]       # (y, z) directions
+        for i in range(steps):
+            (s0, c0), (s1, c1) = ring[i], ring[i + 1]
+            tm = (ang[i] + ang[i + 1]) / 2
+            n = (0.0, math.sin(tm), math.cos(tm))
+            a = self.vert((x0, cy + r * s0, cz + r * c0), (0, s0, c0))
+            b = self.vert((x1, cy + r * s0, cz + r * c0), (0, s0, c0))
+            c = self.vert((x1, cy + r * s1, cz + r * c1), (0, s1, c1))
+            d = self.vert((x0, cy + r * s1, cz + r * c1), (0, s1, c1))
+            self.tri(a, b, c, n)
+            self.tri(a, c, d, n)
+        if caps:
+            for x, nx in ((x0, -1.0), (x1, 1.0)):
+                ctr = self.vert((x, cy, cz), (nx, 0, 0))
+                ids = [self.vert((x, cy + r * s, cz + r * c), (nx, 0, 0)) for s, c in ring]
+                for i in range(steps):
+                    self.tri(ctr, ids[i], ids[i + 1], (nx, 0, 0))
 
     def lod(self, origin, material):
         vb = b''.join(struct.pack('<8f', p[0] - origin[0], p[1] - origin[1], p[2] - origin[2], *n, *uv)
@@ -88,18 +132,38 @@ class UvMesh(Mesh):
         return {'distance': 0.0, 'unk': 0, 'vertices': vb, 'groups': [{'faces': fb, 'material': material}]}
 
 
-def sight_mesh(top):
-    """The base, stem and blade in the sight frame's space; `top` = the blade's top edge."""
-    boxes = [
-        ((-BASE[0], BASE[1], -BASE[3]), (BASE[0], BASE[2], BASE[3])),
-        ((-STEM[0], STEM[1], -STEM[3]), (STEM[0], top - BLADE_H + 0.002, STEM[3])),
-        ((-BLADE[0], top - BLADE_H, -BLADE[3]), (BLADE[0], top, BLADE[3])),
-    ]
-    lo = tuple(min(b[0][k] for b in boxes) for k in range(3))
-    hi = tuple(max(b[1][k] for b in boxes) for k in range(3))
-    mesh = UvMesh((lo, hi))
-    for blo, bhi in boxes:
-        mesh.aabox(blo, bhi)
+def sight_mesh(top, jacket):
+    """The front sight in its frame's space (origin: the bore line's x, the receiver's top, its
+    front face). top: the blade's top edge (on the camera's axis); jacket: the jacket's top."""
+    block_top = top - BLADE_H
+    screw_y = block_top - BLOCK_H
+    zc = DEPTH / 2
+    bottom = jacket - SINK
+    head = BRACKET_W[1] / 2 + SCREW_T
+    mesh = UvMesh(((-head, bottom, 0.0), (head, top, DEPTH)))
+
+    # the bracket: against the receiver's front face, tapering towards the jacket, its top
+    # rounded about the screw
+    wb, wt = BRACKET_W[0] / 2, BRACKET_W[1] / 2
+    z0 = 0.0
+    mesh.hexahedron([(-wb, bottom, z0), (wb, bottom, z0), (wb, bottom, DEPTH), (-wb, bottom, DEPTH),
+                     (-wt, screw_y, z0), (wt, screw_y, z0), (wt, screw_y, DEPTH), (-wt, screw_y, DEPTH)])
+    mesh.cylinder_x(screw_y, zc, DEPTH / 2, -wt, wt, seg=16, a0=0.0, a1=180.0)
+    for side in (-1, 1):
+        x0, x1 = sorted((side * wt, side * (wt + SCREW_T)))
+        mesh.cylinder_x(screw_y, zc, SCREW_R, x0, x1, seg=12)
+
+    # the block, split from the top by the clamp slit
+    bw = BLOCK_W / 2
+    slit_bottom = block_top - SLIT_D
+    s0, s1 = SLIT_Z - SLIT_W / 2, SLIT_Z + SLIT_W / 2
+    mesh.aabox((-bw, screw_y, 0.0), (bw, slit_bottom, DEPTH))
+    mesh.aabox((-bw, slit_bottom, 0.0), (bw, block_top, s0))
+    mesh.aabox((-bw, slit_bottom, s1), (bw, block_top, DEPTH))
+
+    # the dovetail key across the block and the blade on it
+    mesh.aabox((-bw, block_top - 0.001, BLADE_Z[0]), (bw, block_top + KEY_H, BLADE_Z[1]))
+    mesh.aabox((-BLADE_T / 2, block_top + KEY_H - 0.0005, BLADE_Z[0]), (BLADE_T / 2, top, BLADE_Z[1]))
     return mesh
 
 
@@ -153,11 +217,11 @@ def build(src, gun):
     else:
         moved = None
 
-    # The sight frame: centred on the camera's x, on the receiver's front block.
-    z0, z1, ytop = gun['front']
-    origin = (cam['pos'][0], ytop, (z0 + z1) / 2)
+    # The sight frame: on the camera's x, at the receiver's front face and top.
+    zf, ytop = gun['receiver']
+    origin = (cam['pos'][0], ytop, zf)
     top = cam['pos'][1] - ytop                  # the blade's top edge on the camera's axis
-    mesh = sight_mesh(top)
+    mesh = sight_mesh(top, gun['jacket'] - ytop)
     lod = mesh.lod((0.0, 0.0, 0.0), material_of(m, barrel))
     m['frames'].append(visual_frame(gun['sight'], bi + 1, origin, '', lod))
 
@@ -167,7 +231,7 @@ def build(src, gun):
     assert h.dumps(h.loads(data)) == data, 'round trip'
     return m, data, anim_out, {
         'aperture': aperture, 'camera_was_off': off, 'moved': moved, 'camera': cam['pos'],
-        'origin': origin, 'height': top, 'radius': origin[2] - (-0.334),
+        'origin': origin, 'height': top, 'radius': origin[2] + sum(BLADE_Z) / 2 - (-0.334),
         'verts': len(mesh.verts), 'faces': len(mesh.faces)}
 
 
@@ -252,6 +316,21 @@ def main():
             png = os.path.join(out, 'preview_%s%s.png' % (gun['model'], name))
             r.write_png(png, camera_view(m, gun['camera'], zoom=zoom))
             print('  ' + png)
+        png = os.path.join(out, 'preview_%s_outside.png' % gun['model'])
+        r.write_png(png, outside_views(m, gun['sight']))
+        print('  ' + png)
+
+
+def outside_views(m, sight, size=420):
+    """The sight and the receiver's front from the right (as the side photo), the front right
+    and the back right, framed on the sight."""
+    tris, wm = r.triangles(m)
+    c = wm[index(m, sight)][3][:3]
+    box = (c[0] - 0.035, c[1] - 0.045, c[2] - 0.05, c[0] + 0.035, c[1] + 0.065, c[2] + 0.06)
+    near = [t for t in tris if all(min(p[k] for p in t[:3]) <= box[k + 3] and max(p[k] for p in t[:3]) >= box[k]
+                                   for k in range(3))]
+    imgs = [r.render(near, [], v, size, box, sight) for v in ('right', 'iso3', 'iso2')]
+    return [sum((im[y] for im in imgs), []) for y in range(size)]
 
 
 if __name__ == '__main__':
