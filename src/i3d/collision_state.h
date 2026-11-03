@@ -1,5 +1,7 @@
 // The collision query in progress (0x100ad9b0 - 0x100adb08), shared by the ray and the sphere
-// queries (collision_ray.cpp, collision_sphere.cpp).
+// queries (collision_ray.cpp, collision_sphere.cpp). LS3DRF's block is 0x100459f0 - 0x10045b38, each
+// field at LS3DF's address less 0x67fd0 except the head: cbResult 0x10045a00, done 0x10045a04, flags
+// 0x10045a40. Nothing outside the DLL reads it, so the members keep the port's own order.
 #pragma once
 
 #include "i3d/collision.h"
