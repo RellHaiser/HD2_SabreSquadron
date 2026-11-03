@@ -3,7 +3,7 @@
 0066a9e0 C_Cursor::Acquire | void * __fastcall Acquire(void * scene)
 0066aa80 C_Cursor::Release | void __fastcall Release(C_Cursor * cursor)
 0066a520 C_Cursor::Update | bool __thiscall Update(C_Cursor *this, int time)
-0066aac0 C_Cursor::Pick | void __thiscall Pick(C_Cursor *this, void * scene, void * frame)
+0066aac0 C_Cursor::Pick | uint __thiscall Pick(C_Cursor *this, void * scene, void * frame)
 0066a3a0 C_Cursor::IsButtonDown | bool __thiscall IsButtonDown(C_Cursor *this, uint buttons)
 0066a380 C_Cursor::WasButtonDown | bool __thiscall WasButtonDown(C_Cursor *this, uint buttons)
 0066a3c0 C_Cursor::IsPressed | bool __thiscall IsPressed(C_Cursor *this, uint buttons)
@@ -22,3 +22,4 @@
 00840668 g_cursorX @ float
 0084066c g_cursorY @ float
 008ae558 g_cursor @ C_Cursor *
+0066ab70 C_Cursor::Draw | void __fastcall Draw(C_Cursor * cursor)

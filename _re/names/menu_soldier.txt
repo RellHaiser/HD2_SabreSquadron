@@ -1,0 +1,31 @@
+# Part 9e-i: the equipment menus' soldier (game/menu_soldier.cpp).
+# (The soldier has no Ghidra struct: this and the fastcall argument are void *.)
+007d0200 MenuSoldier_StaticInit_7d0200
+007d0230 InitLongGunOffsetSoldier_7d0230
+007d0240 InitLongGunOffsetSoldier_7d0240
+007d0260 InitHeadOffsetSoldier_7d0260
+007d0270 InitHeadOffsetSoldier_7d0270
+007d0290 InitBackpackOffsetSoldier_7d0290
+007d02a0 InitBackpackOffsetSoldier_7d02a0
+007d02c0 C_MenuSoldier::Setup | void __thiscall Setup(void *this, float left, float top, float right, float bottom)
+007d0ee0 C_MenuSoldier::Release | void __fastcall Release(void * soldier)
+007d0f30 C_MenuSoldier::HideHolsters | void __fastcall HideHolsters(void * soldier)
+007d0f80 C_MenuSoldier::ReleaseHolsters | void __fastcall ReleaseHolsters(void * soldier)
+007d0fe0 C_MenuSoldier::InitHolsters | void __fastcall InitHolsters(void * soldier)
+007d1a70 C_MenuSoldier::RemoveFromHolster | void __thiscall RemoveFromHolster(void *this, int typeId, int count)
+007d1b20 C_MenuSoldier::AddToHolster | void __thiscall AddToHolster(void *this, int typeId, int count)
+007d1b40 C_MenuSoldier::AddToHolsterSlot | void __thiscall AddToHolsterSlot(void *this, int slot, int count)
+007d1bf0 C_MenuSoldier::SetModel | void __thiscall SetModel(void *this, void * model)
+007d1fc0 C_MenuSoldier::AddItem | void __thiscall AddItem(void *this, uint place, int typeId)
+007d3080 C_MenuSoldier::RemoveItem | void __thiscall RemoveItem(void *this, uint place, int typeId, bool all)
+007d3220 C_MenuSoldier::ResetItems | void __fastcall ResetItems(void * soldier)
+007d32a0 C_MenuSoldier::PlayIdle | void __thiscall PlayIdle(void *this, int index)
+007d3310 C_MenuSoldier::PlayPose | void __thiscall PlayPose(void *this, int index)
+007d3360 C_MenuSoldier::SetFace | void __thiscall SetFace(void *this, char * texture)
+007d3390 C_MenuSoldier::UpdateAnims | int __thiscall UpdateAnims(void *this, int time)
+007d3510 C_MenuSoldier::Tick | void __thiscall Tick(void *this, int time)
+007d35d0 C_MenuSoldier::Render | void __fastcall Render(void * soldier)
+008637d4 g_menuSoldierAnimNames @ char *[9]
+0098afa0 g_soldierBackpackModelOffset @ S_vector
+0098afb0 g_soldierHeadModelOffset @ S_vector
+0098afc0 g_soldierLongGunModelOffset @ S_vector

@@ -101,7 +101,7 @@ def rets(ins):
     return r
 
 
-BYVAL = r"(const\s+)?(S_vector4|S_quat|S_vector|S_vector2|S_matrix|C_str|S_plane|I3D_bbox)\b"
+BYVAL = r"(const\s+)?(S_vector4|S_quat|S_vector|S_vector2|S_matrix|C_str|S_plane|I3D_bbox|S_SoldierItem)\b"   # (S_SoldierItem: 6 bytes, returned through memory)
 
 
 def psize(p):
@@ -394,7 +394,7 @@ def src_audit(globs):
         n = sum(cpp_psize(p) for p in ps)
         free = "static" in head or not in_class
         ret = re.sub(r"\b(virtual|static|inline|explicit|const|friend)\b", "", head).strip()
-        if re.match(r"(S_vector4|S_vector2|S_vector|S_quat|S_matrix|C_str)\b", ret) and "*" not in ret and "&" not in ret:
+        if re.match(r"(S_vector4|S_vector2|S_vector|S_quat|S_matrix|C_str|S_SoldierItem)\b", ret) and "*" not in ret and "&" not in ret:
             n += 4
         if free and r == {0}:
             continue  # __cdecl / register arguments: nothing to compare

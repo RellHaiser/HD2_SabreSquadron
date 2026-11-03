@@ -126,9 +126,10 @@ public:
     I3DMETHOD(bool, IsKeyDown)(int key) = 0;                             // 0xB0
     I3D_SLOT(B4);                                             // LS3DF: SetKeyMap
     I3D_SLOT(B8);                                             // LS3DF: GetMappedKeys
-    I3D_SLOT(BC);                                             // LS3DF: IsShiftDown
-    I3D_SLOT(C0);                                             // LS3DF: IsCtrlDown
-    I3D_SLOT(C4);                                             // LS3DF: IsAltDown
+    // Either shift / control / alt key held (the LS3DF port's names).
+    I3DMETHOD(bool, IsShiftDown)() = 0;                                  // 0xBC
+    I3DMETHOD(bool, IsCtrlDown)() = 0;                                   // 0xC0
+    I3DMETHOD(bool, IsAltDown)() = 0;                                    // 0xC4
     I3D_SLOT(C8);                                             // LS3DF: GetShiftKeys
     // The character of a key (DirectInput code; the signals panel's digits; the second argument
     // 0, not identified).

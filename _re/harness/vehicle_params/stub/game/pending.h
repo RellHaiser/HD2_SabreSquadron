@@ -118,6 +118,7 @@ struct S_MultiplayerSettings {
     int allowRespawn;                                   // (the spawn point, part 7b)
     int warmup;                                         // (the multiplayer zone, part 7d) s
     bool dedicated;                                     // (the loading screen, part 8f-i)
+    int sessionType;                                    // (the in-game menu's messages, part 9e-vii)
 };
 
 // --- the car's callbacks (game/car_callbacks.cpp; as the real header declares them) --------------
@@ -176,12 +177,15 @@ public:
     void UnlockPlayers();
     void SetPlayer(int slot, int connection, const char *name);
     void UpdateVoiceTeam();
+    bool SendChat(const char *text, bool team);
+    int *GetLocalPlayerStats();                     // (the in-game menu's stats, part 9e-xix)
     // (The multiplayer zone, part 7d.)
     int GetLocalTeam();
     int GetPlayerCount() const;
     void AddScore(int slot, int points);
     void AddTeamScore(int team, float points);
     void PrintLoadProgress(int percent);                // (the loading screen, part 8f-i)
+    void CountTeams(int *axis, int *allies, bool pending, bool inGame);   // (the in-game menu, part 9e-vi)
 };
 extern C_NetGame g_netGame;
 class C_NetMessage;

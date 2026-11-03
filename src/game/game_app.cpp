@@ -10,6 +10,7 @@
 #include "game/console.h"
 #include "game/game.h"
 #include "game/game_internal.h"
+#include "game/game_menu.h"
 #include "game/pending.h"
 #include "game/profile.h"
 #include "game/resource_cache.h"

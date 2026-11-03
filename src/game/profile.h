@@ -135,6 +135,7 @@ struct S_SquadSoldier : S_SoldierState {
     int RemoveItem(uint8_t slot, S_SoldierItem &item);  // 0x006a3e90
     bool IsEmpty() const;                               // 0x006a42e0
     // Free backpack volume and free weight.
+    int GetFreeBeltVolume() const;                      // 0x006a2bb0 (12 less the belt's)
     int GetFreeBackpackVolume() const;                  // 0x006a2bd0
     float GetFreeWeight() const;                        // 0x006a2be0
     // Chunks 0x0B .. 0x17 (0x13: the old load with a float capacity).
@@ -320,8 +321,8 @@ struct C_PlayerOptions {
     bool switches[4][7];                                // +0x1C per level
     bool voiceChat;                                     // +0x38
     bool invertMouse;                                   // +0x39 the controls' +0xB4 (inferred)
-    bool unknown3A;                                     // +0x3A
-    bool crosshair;                                     // +0x3B
+    bool subtitles;                                     // +0x3A (the options' game page)
+    bool crosshair;                                     // +0x3B (the game page's "parental lock" control, text 0x4EF4)
 };
 enum : int {
     DETAIL_HARDWARE = 0,                                // the 3D driver's state 0x2B
@@ -352,6 +353,8 @@ public:
     // The directory name: the name itself, or with the menus' unicode font the "Profile_<n>"
     // directory the name maps to.
     C_str GetName() const;                              // 0x006ae7e0
+    // The profile's own name (GetName's when no other is given; the in-game menu's presets).
+    const C_str &GetProfileName() const { return m_name; }
     // Makes the profile `name` current: its options and profile.sav (false never).
     bool SelectProfile(const char *name);               // 0x006af480
     // Renames the current profile (and its directory, or its name's mapping); 1, or -1 when

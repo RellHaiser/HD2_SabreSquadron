@@ -21,6 +21,8 @@ struct S_CsCursor {
     S_vector position;
     S_vector move;
     float screenX = 0.0f, screenY = 0.0f;
+    // (Room for the real cursor's fields the inline methods write: SetClicksOff's, part 9d-ii-a.)
+    uint8_t room[0x80] = {};
 } g_csCursor;
 C_Cursor *C_Cursor::Acquire(I3D_scene *scene)
 {
@@ -61,6 +63,17 @@ void ServerTest(I3D_scene *scene);
 void HotKeyTest(I3D_scene *scene);
 void GroupsTest(I3D_scene *scene);
 void MovieTest(I3D_scene *scene);
+void FactoryTest(I3D_scene *scene);
+void ScreenTest(I3D_scene *scene);
+void MenuTest(I3D_scene *scene);
+void MenuRunTest(I3D_scene *scene);
+void MenuSoldierTest(I3D_scene *scene);
+void EquipmentPanelTest(I3D_scene *scene);
+void EquipmentDescTest(I3D_scene *scene);
+void StoreListTest(I3D_scene *scene);
+void LoadoutTest(I3D_scene *scene);
+void GameMenuTest(I3D_scene *scene);
+void OptionsTest(I3D_scene *scene);
 
 namespace {
 
@@ -1019,6 +1032,19 @@ void ControlsTest()
     HotKeyTest(scene);
     GroupsTest(scene);
     MovieTest(scene);
+#ifdef FACTORY_TEST
+    FactoryTest(scene);
+    ScreenTest(scene);
+    MenuTest(scene);
+    MenuRunTest(scene);
+    MenuSoldierTest(scene);
+    EquipmentPanelTest(scene);
+    EquipmentDescTest(scene);
+    StoreListTest(scene);
+    LoadoutTest(scene);
+    GameMenuTest(scene);
+    OptionsTest(scene);
+#endif
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
     g_gfLog.clear();
@@ -1044,3 +1070,16 @@ void ControlsTest()
 #include "hotkey_test.inc"
 #include "groups_test.inc"
 #include "movie_test.inc"
+#ifdef FACTORY_TEST
+#include "factory_test.inc"
+#include "screen_test.inc"
+#include "menu_test.inc"
+#include "menu_run_test.inc"
+#include "menu_soldier_test.inc"
+#include "equipment_panel_test.inc"
+#include "equipment_desc_test.inc"
+#include "store_list_test.inc"
+#include "loadout_test.inc"
+#include "game_menu_test.inc"
+#include "options_test.inc"
+#endif

@@ -8,7 +8,7 @@ The harness runs once whatever the models; its "cursor:" line must have every ch
 import re
 import sys
 
-CHECKS = "cuMake cuUpdate cuClamp cuClicks cuQuery cuPick".split()
+CHECKS = "cuMake cuUpdate cuClamp cuClicks cuQuery cuPick cuDraw".split()
 
 
 def main():

@@ -1292,7 +1292,8 @@ public:
     I3D_SLOT(6C);                                             // LS3DF: Slot6C
     I3D_SLOT(70);                                             // LS3DF: Load
     // A function the scene calls while it renders (C_game: GameRenderCallback, flags 6).
-    I3DMETHOD(void, SetRenderCallback)(void *callback, uint32_t flags) = 0;   // 0x74
+    // (The previous callback.)
+    I3DMETHOD(void *, SetRenderCallback)(void *callback, uint32_t flags) = 0;   // 0x74
     I3DMETHOD(void, Render)(uint32_t flags) = 0;              // 0x78
     // Finds a frame by name; typeMask selects frame types (0xCFFFF = all regular types).
     I3DMETHOD(PI3D_frame, FindFrame)(const char *name, uint32_t typeMask) = 0;   // 0x7C

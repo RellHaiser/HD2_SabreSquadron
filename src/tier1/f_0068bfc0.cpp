@@ -111,20 +111,24 @@ uint32_t FUN_0068c0d0(void *param_1, ...)
 }
 #if 0
 {
-  char *pcVar1;
-  int iVar2;
-  int *piVar3;
+  int iVar1;
+  char *pcVar2;
+  int iVar3;
+  char *name;
+  int *frame;
   uint32_t uVar4;
   uint32_t uVar5;
   uint32_t uStack_44;
   int *local_40;
-  C_auto_00815540 *local_3c;
+  C_Screen *local_3c;
   uint8_t **local_38;
   int local_34;
   int local_30;
   uint32_t *local_2c;
   uint32_t local_28;
-  uint32_t auStack_24 [5];
+  uint32_t uStack_24;
+  uint32_t uStack_20;
+  uint32_t uStack_1c;
   int *piStack_10;
   int local_4;
   local_34 = CONCAT31(GH_PIECE(local_34,1,3),GH_PIECE(uStack_44,3,1));
@@ -133,24 +137,13 @@ uint32_t FUN_0068c0d0(void *param_1, ...)
   local_28 = 0;
   local_38 = &PTR_00813ab8;
   local_4 = 0;
-  pcVar1 = FUN_0068c0c0();
-  if (pcVar1 == 0) {
-    local_38 = &PTR_00813ab8;
-    local_4 = 1;
-    while ((local_30 != 0 &&
-           (local_40 = (int *)((int)local_2c - local_30 >> 2), local_40 != 0))) {
-      if ((uint32_t *)local_2c[-1] != 0) {
-        (*(code *)**(uint32_t **)local_2c[-1])(1);
-      }
-      FUN_0068c4f0(&local_34,(int)(local_2c - 1));
-    }
-  }
-  else {
+  pcVar2 = FUN_0068c0c0();
+  if (pcVar2 != 0) {
     if (local_30 == 0) {
-      iVar2 = 0;
+      iVar3 = 0;
     }
     else {
-      iVar2 = (int)local_2c - local_30 >> 2;
+      iVar3 = (int)local_2c - local_30 >> 2;
     }
     local_3c = tier1_operator_new(0x44);
     GH_PIECE(local_4,0,1) = 2;
@@ -158,43 +151,34 @@ uint32_t FUN_0068c0d0(void *param_1, ...)
       local_40 = 0;
     }
     else {
-      local_40 = C_auto_00813abc__FUN_00626000
-                           ((C_auto_00813abc *)local_3c,"Campaign_debrief",pcVar1,
-                            (iVar2 + 1) * 0x4000000);
+      local_40 = S_ScreenDesc__S_ScreenDesc
+                           ((S_ScreenDesc *)local_3c,"Campaign_debrief",pcVar2,
+                            (iVar3 + 1) * 0x4000000);
     }
     local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
     FUN_00628050(&local_34,local_2c,(uint32_t*)(&local_40));
-    uVar4 = 0;
-    while( true ) {
-      if ((local_30 == 0) || ((uint32_t)((int)local_2c - local_30 >> 2) <= uVar4)) {
-        piStack_10 = 0;
-        auStack_24[0] = 0;
-        auStack_24[1] = 0x2000001;
-        auStack_24[2] = 1;
-        local_4 = CONCAT31(GH_PIECE(local_4,1,3),5);
-        FUN_0066cc50(param_1,auStack_24);
-        if ((piStack_10 != 0) && (*piStack_10 = *piStack_10 - 1, *piStack_10 == 0)) {
-          tier1_operator_delete(piStack_10);
-        }
-        local_38 = &PTR_00813ab8;
-        local_4 = 6;
-        while ((local_30 != 0 &&
-               (local_3c = (C_auto_00815540 *)((int)local_2c - local_30 >> 2),
-               local_3c != 0))) {
-          if ((uint32_t *)local_2c[-1] != 0) {
-            (*(code *)**(uint32_t **)local_2c[-1])(1);
-          }
-          FUN_0068c4f0(&local_34,(int)(local_2c - 1));
-        }
-        local_4 = 0xffffffff;
-        uVar5 = vector_tidy_627fd0((int)&local_34);
-        return CONCAT31((int3)((uint32_t)uVar5 >> 8),1);
+    for (uVar4 = 0; (local_30 != 0 && (uVar4 < (uint32_t)((int)local_2c - local_30 >> 2)));
+        uVar4 = uVar4 + 1) {
+      iVar3 = *(int *)(local_30 + uVar4 * 4);
+      iVar1 = *(int *)(iVar3 + 0x38);
+      pcVar2 = (char *)(iVar1 + 8);
+      if (iVar1 == 0) {
+        pcVar2 = &DAT_00867a90;
       }
-      piVar3 = FUN_0066c2a0((int)param_1);
-      if (piVar3 == 0) break;
-      iVar2 = *(int *)(local_30 + uVar4 * 4);
-      if ((*(uint32_t *)(iVar2 + 0x40) & 0xfc000000) == 0x4000000) {
-        FUN_0068c3e0(iVar2,piVar3);
+      iVar3 = *(int *)(iVar3 + 0x3c);
+      name = (char *)(iVar3 + 8);
+      if (iVar3 == 0) {
+        name = &DAT_00867a90;
+      }
+      frame = C_MenuState__LoadModel(param_1,name,pcVar2);
+      if (frame == 0) {
+        local_38 = &PTR_00813ab8;
+        local_4 = 4;
+        goto LAB_0068c2c3;
+      }
+      iVar3 = *(int *)(local_30 + uVar4 * 4);
+      if ((*(uint32_t *)(iVar3 + 0x40) & 0xfc000000) == 0x4000000) {
+        FUN_0068c3e0(iVar3,frame);
       }
       local_3c = tier1_operator_new(0x84);
       GH_PIECE(local_4,0,1) = 3;
@@ -202,29 +186,60 @@ uint32_t FUN_0068c0d0(void *param_1, ...)
         local_40 = 0;
       }
       else {
-        local_40 = C_Control__FUN_00668420((C_Control*)(local_3c),*(int **)((int)param_1 + 0x30),piVar3);
+        local_40 = C_Screen__C_Screen(local_3c,*(void **)((int)param_1 + 0x30),frame);
       }
       local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
       (**(code **)(*local_40 + 0x8c))(*(uint32_t *)(local_30 + uVar4 * 4));
       (**(code **)(*uStack_44 + 0x70))(*(int *)(local_34 + uVar4 * 4) + 4);
       FUN_0066ea50((void *)((int)param_1 + 0x140),*(uint32_t **)((int)param_1 + 0x148),1,(uint32_t*)(&local_40)
                   );
-      uVar4++;
+    }
+    piStack_10 = 0;
+    uStack_24 = 0;
+    uStack_20 = 0x2000001;
+    uStack_1c = 1;
+    local_4 = CONCAT31(GH_PIECE(local_4,1,3),5);
+    C_MenuState__HandleMessage(param_1,&uStack_24);
+    if ((piStack_10 != 0) && (*piStack_10 = *piStack_10 - 1, *piStack_10 == 0)) {
+      tier1_operator_delete(piStack_10);
     }
     local_38 = &PTR_00813ab8;
-    local_4 = 4;
-    while ((local_30 != 0 &&
-           (local_3c = (C_auto_00815540 *)((int)local_2c - local_30 >> 2),
-           local_3c != 0))) {
+    local_4 = 6;
+    while (local_30 != 0) {
+      local_3c = (C_Screen *)((int)local_2c - local_30 >> 2);
+      if (local_3c == 0) break;
       if ((uint32_t *)local_2c[-1] != 0) {
         (*(code *)**(uint32_t **)local_2c[-1])(1);
       }
       FUN_0068c4f0(&local_34,(int)(local_2c - 1));
     }
+    local_4 = 0xffffffff;
+    uVar5 = vector_tidy_627fd0((int)&local_34);
+    return CONCAT31((int3)((uint32_t)uVar5 >> 8),1);
   }
+  local_38 = &PTR_00813ab8;
+  local_4 = 1;
+  while (local_30 != 0) {
+    local_40 = (int *)((int)local_2c - local_30 >> 2);
+    if (local_40 == 0) break;
+    if ((uint32_t *)local_2c[-1] != 0) {
+      (*(code *)**(uint32_t **)local_2c[-1])(1);
+    }
+    FUN_0068c4f0(&local_34,(int)(local_2c - 1));
+  }
+LAB_0068c2fc:
   local_4 = 0xffffffff;
   uVar4 = vector_tidy_627fd0((int)&local_34);
   return uVar4 & 0xffffff00;
+LAB_0068c2c3:
+  if (local_30 == 0) goto LAB_0068c2fc;
+  local_3c = (C_Screen *)((int)local_2c - local_30 >> 2);
+  if (local_3c == 0) goto LAB_0068c2fc;
+  if ((uint32_t *)local_2c[-1] != 0) {
+    (*(code *)**(uint32_t **)local_2c[-1])(1);
+  }
+  FUN_0068c4f0(&local_34,(int)(local_2c - 1));
+  goto LAB_0068c2c3;
 }
 
 
@@ -241,7 +256,7 @@ uint32_t FUN_0068c3e0(uint32_t param_1,int *param_2, ...)
   uint8_t *value2;
   iVar1 = (**(code **)(*param_2 + 0x48))(param_2,"title",1);
   if (iVar1 != 0) {
-    pvVar2 = (void *)FUN_00615360(unaff_ESI,0x13,"title");
+    pvVar2 = (void *)S_ScreenDesc__AddControl(unaff_ESI,0x13,"title");
     ppuVar3 = FUN_0068c000();
     value2 = ppuVar3[3];
     ppuVar3 = FUN_0068c000();
@@ -252,13 +267,13 @@ uint32_t FUN_0068c3e0(uint32_t param_1,int *param_2, ...)
   }
   iVar1 = (**(code **)(*param_2 + 0x48))(param_2,"textbar",1);
   if (iVar1 != 0) {
-    pvVar2 = (void *)FUN_00615360(unaff_ESI,0x13,"textbar");
+    pvVar2 = (void *)S_ScreenDesc__AddControl(unaff_ESI,0x13,"textbar");
     AddDescMessage2(pvVar2,0,0x1000015,0xd,0x7f8);
   }
   iVar1 = (**(code **)(*param_2 + 0x48))(param_2,"text01",1);
   uVar4 = 0;
   if (iVar1 != 0) {
-    pvVar2 = (void *)FUN_00615360(unaff_ESI,0x12,"text01");
+    pvVar2 = (void *)S_ScreenDesc__AddControl(unaff_ESI,0x12,"text01");
     ppuVar3 = FUN_0068c000();
     AddDescMessage2(pvVar2,0,0x1000015,3,(uint32_t)ppuVar3[4]);
     ppuVar3 = FUN_0068c000();

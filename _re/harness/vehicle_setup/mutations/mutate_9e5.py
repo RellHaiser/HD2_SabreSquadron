@@ -1,0 +1,92 @@
+"""Part 9e-v mutations: the in-game menu's class and slots (game/game_menu.cpp).
+
+Run with the factory build: --build build_factory.bat --check check_gamemenu.py (FACTORY_TEST; the
+"gamemenu:" checks in game_menu_test.inc). Generated (deletions, comparison, number, bool and
+negation flips) and by hand (the arguments, the roles, the order).
+
+74 cases, 71 build; the first run left 13, new checks (the panel's soldier ticked and deleted, the
+menu's own message box, a text id of 1, screen index 1 on top) caught 8; all caught but these 5,
+equivalent: P 36 del (the handler's cursor cleared as it is deleted), P 68 del (the destructor's
+game cleared), P 81 / 99 / 107 del (leaks, not seen).
+"""
+import os
+
+ROOT = r"G:\Programming\HD2 Source Port\C++"
+P = os.path.join(ROOT, r"src/game/game_menu.cpp")
+
+MUTATIONS = [
+    (P, 'P 19 num', 'constexpr int SCREEN_INDEX_SHIFT = 26;\n', 'constexpr int SCREEN_INDEX_SHIFT = 27;\n'),
+    (P, 'P 21 num', 'constexpr uint32_t MESSAGE_BOX_SCREEN = 0;\n', 'constexpr uint32_t MESSAGE_BOX_SCREEN = 1;\n'),
+    (P, 'P 25 cmp', '    return (g_gameRole & GAME_ROLE_LOCAL) == GAME_ROLE_LOCAL;\n', '    return (g_gameRole & GAME_ROLE_LOCAL) != GAME_ROLE_LOCAL;\n'),
+    (P, 'P 35 del', '        m_cursor->Release();\n', '\n'),
+    (P, 'P 36 del', '        m_cursor = nullptr;\n', '\n'),
+    (P, 'P 45 cmp', '        if (objective->status == OBJECTIVE_INACTIVE)\n', '        if (objective->status != OBJECTIVE_INACTIVE)\n'),
+    (P, 'P 46 del', '            continue;\n', '\n'),
+    (P, 'P 49 cmp', '            if (other->status == OBJECTIVE_OPEN)\n', '            if (other->status != OBJECTIVE_OPEN)\n'),
+    (P, 'P 50 bool', '                return false;\n', '                return true;\n'),
+    (P, 'P 52 bool', '        return true;\n', '        return false;\n'),
+    (P, 'P 54 bool', '    }\n    return false;\n', '    }\n    return true;\n'),
+    (P, 'P 61 del', '    m_presets.Load();\n', '\n'),
+    (P, 'P 63 del', '        m_missionItems.Setup();\n', '\n'),
+    (P, 'P 68 del', '    m_game = nullptr;\n', '\n'),
+    (P, 'P 74 del', '    m_hasPlayerSlotMember = g_teamManager.GetPlayerTeam()->HasMemberInPlayerSlots();\n', '\n'),
+    (P, 'P 75 del', '    m_options = new C_OptionsHandler(this);\n', '\n'),
+    (P, 'P 76 del', '    GetSoundModule()->SetMasterVolume(0.0f);\n', '\n'),
+    (P, 'P 76 num', '    GetSoundModule()->SetMasterVolume(0.0f);\n', '    GetSoundModule()->SetMasterVolume(0.25f);\n'),
+    (P, 'P 77 not', '    if (!IsLocalGame()) {\n        m_infoScreen = new C_InfoScreen();\n', '    if (IsLocalGame()) {\n        m_infoScreen = new C_InfoScreen();\n'),
+    (P, 'P 78 del', '        m_infoScreen = new C_InfoScreen();\n', '\n'),
+    (P, 'P 80 not', '        if (!m_infoScreen->Init(m_scene)) {\n', '        if (m_infoScreen->Init(m_scene)) {\n'),
+    (P, 'P 81 del', '            delete m_infoScreen;\n', '\n'),
+    (P, 'P 82 del', '            m_infoScreen = nullptr;\n', '\n'),
+    (P, 'P 85 bool', '    }\n    return true;\n', '    }\n    return false;\n'),
+    (P, 'P 90 del', '    g_gameProfile.m_player->ApplyVolume();\n', '\n'),
+    (P, 'P 91 del', '    delete m_options;\n', '\n'),
+    (P, 'P 92 del', '    m_options = nullptr;\n', '\n'),
+    (P, 'P 94 del', '        delete m_popup;\n', '\n'),
+    (P, 'P 95 del', '        m_popup = nullptr;\n', '\n'),
+    (P, 'P 97 cmp', '    if (!IsLocalGame() && m_infoScreen) {\n', '    if (!IsLocalGame() || m_infoScreen) {\n'),
+    (P, 'P 97 not', '    if (!IsLocalGame() && m_infoScreen) {\n', '    if (IsLocalGame() && m_infoScreen) {\n'),
+    (P, 'P 98 del', '        m_infoScreen->Done();\n', '\n'),
+    (P, 'P 99 del', '        delete m_infoScreen;\n        m_infoScreen = nullptr;\n', '\n        m_infoScreen = nullptr;\n'),
+    (P, 'P 100 del', '        m_infoScreen = nullptr;\n    }\n', '\n    }\n'),
+    (P, 'P 102 del', '    m_panel.DeleteSoldier();\n', '\n'),
+    (P, 'P 106 del', '            (*stock)->Reset();\n', '\n'),
+    (P, 'P 107 del', '            delete *stock;\n', '\n'),
+    (P, 'P 108 del', '            *stock = nullptr;\n', '\n'),
+    (P, 'P 116 del', '        m_game->HandleInput(nullptr, nullptr);\n', '\n'),
+    (P, 'P 117 bool', '        m_game->HandleInput(nullptr, nullptr);\n    return true;\n', '        m_game->HandleInput(nullptr, nullptr);\n    return false;\n'),
+    (P, 'P 122 not', '    if (!IsLocalGame()) {\n        m_panel.TickSoldier(timeDelta);\n', '    if (IsLocalGame()) {\n        m_panel.TickSoldier(timeDelta);\n'),
+    (P, 'P 123 del', '        m_panel.TickSoldier(timeDelta);\n', '\n'),
+    (P, 'P 124 del', '        UpdateLoadButton();\n', '\n'),
+    (P, 'P 125 del', '        UpdateCoopPlayers();\n', '\n'),
+    (P, 'P 127 cmp', '    if ((g_gameRole & GAME_ROLE_CLIENT) && m_game)\n', '    if ((g_gameRole & GAME_ROLE_CLIENT) || m_game)\n'),
+    (P, 'P 128 del', '        m_game->Update(timeDelta);\n', '\n'),
+    (P, 'P 133 del', '    g_gameMenuTime += timeDelta;\n', '\n'),
+    (P, 'P 134 cmp', '    if ((g_gameRole & GAME_ROLE_SERVER) && m_game)\n', '    if ((g_gameRole & GAME_ROLE_SERVER) || m_game)\n'),
+    (P, 'P 135 del', '        m_game->Tick(timeDelta);\n', '\n'),
+    (P, 'P 140 cmp', '    if (m_infoScreen && m_infoScreen->IsShown())\n', '    if (m_infoScreen || m_infoScreen->IsShown())\n'),
+    (P, 'P 141 del', '        m_infoScreen->Render();\n', '\n'),
+    (P, 'P 142 bool', '        m_infoScreen->Render();\n    return false;\n', '        m_infoScreen->Render();\n    return true;\n'),
+    (P, 'P 147 cmp', '    if (textId < 1) {\n', '    if (textId <= 1) {\n'),
+    (P, 'P 147 num', '    if (textId < 1) {\n', '    if (textId < 2) {\n'),
+    (P, 'P 148 del', '        CloseMessage();\n', '\n'),
+    (P, 'P 149 del', '        --g_gameMenuMessages;\n', '\n'),
+    (P, 'P 152 not', '    if (!g_menuScreens.empty() &&\n', '    if (g_menuScreens.empty() &&\n'),
+    (P, 'P 153 cmp', '        (g_menuScreens.back()->GetId() >> SCREEN_INDEX_SHIFT & SCREEN_INDEX_MASK) == MESSAGE_BOX_SCREEN)\n', '        (g_menuScreens.back()->GetId() >> SCREEN_INDEX_SHIFT & SCREEN_INDEX_MASK) != MESSAGE_BOX_SCREEN)\n'),
+    (P, 'P 155 del', '    ShowMessageId(0, static_cast<uint32_t>(textId), 0, 0);\n', '\n'),
+    (P, 'P 155 num', '    ShowMessageId(0, static_cast<uint32_t>(textId), 0, 0);\n', '    ShowMessageId(1, static_cast<uint32_t>(textId), 0, 0);\n'),
+    (P, 'P 156 del', '    ++g_gameMenuMessages;\n', '\n'),
+    (P, 'P 127 role0', '    if ((g_gameRole & GAME_ROLE_CLIENT) && m_game)\n', '    if ((g_gameRole & GAME_ROLE_SERVER) && m_game)\n'),
+    (P, 'P 134 role1', '    if ((g_gameRole & GAME_ROLE_SERVER) && m_game)\n        m_game->Tick', '    if ((g_gameRole & GAME_ROLE_CLIENT) && m_game)\n        m_game->Tick'),
+    (P, 'P 135 arg2', 'm_game->Tick(timeDelta)', 'm_game->Tick(0)'),
+    (P, 'P 128 arg3', 'm_game->Update(timeDelta)', 'm_game->Update(0)'),
+    (P, 'P 76 arg4', 'SetMasterVolume(0.0f)', 'SetMasterVolume(1.0f)'),
+    (P, 'P 80 arg5', 'm_infoScreen->Init(m_scene)', 'm_infoScreen->Init(nullptr)'),
+    (P, 'P 75 arg6', 'new C_OptionsHandler(this)', 'new C_OptionsHandler(nullptr)'),
+    (P, 'P 25 role7', '    return (g_gameRole & GAME_ROLE_LOCAL) == GAME_ROLE_LOCAL;', '    return (g_gameRole & GAME_ROLE_LOCAL) != 0;'),
+    (P, 'P 124 order8', '        UpdateLoadButton();\n        UpdateCoopPlayers();\n', '        UpdateCoopPlayers();\n        UpdateLoadButton();\n'),
+    (P, 'P 45 status9', 'if (objective->status == OBJECTIVE_INACTIVE)', 'if (objective->status == OBJECTIVE_OPEN)'),
+    (P, 'P 49 status10', 'if (other->status == OBJECTIVE_OPEN)', 'if (other->status == OBJECTIVE_INACTIVE)'),
+    (P, 'P 153 shift11', 'GetId() >> SCREEN_INDEX_SHIFT & SCREEN_INDEX_MASK', 'GetId() & SCREEN_INDEX_MASK'),
+    (P, 'P 90 order12', '    g_gameProfile.m_player->ApplyVolume();\n    delete m_options;\n', '    delete m_options;\n    g_gameProfile.m_player->ApplyVolume();\n'),
+]

@@ -234,6 +234,8 @@ public:
     void AddScore(int slot, int points);            // 0x0072f1a0
     // The stats of the player in `slot` (S_NetPlayerState::stats; not locked).
     int *GetPlayerStats(int slot);                  // 0x0072f890
+    // The local player's stats (the slot g_netLocalSlot 0x00982104's).
+    int *GetLocalPlayerStats();                     // 0x0072f8b0
     // Sets the soldier class of the player in `slot` (stats[5]) and prints its change (texts
     // 0x22C4 / 0x22C5 about the local player, 0x22C6 / 0x22C7 about the others, by whether it
     // went down).
@@ -266,6 +268,9 @@ public:
     void SetVoiceValue(int value);                  // 0x0072edf0
     // The voice chat transmits to the local player's team ("Set Transmition team").
     void UpdateVoiceTeam();                         // 0x00724940
+    // A chat line (its first 99 characters; `team`: to the local player's team) posted to the app
+    // (command 3) to send. True.
+    bool SendChat(const char *text, bool team);     // 0x0072ee60
 };
 // C_NetGame::Command() commands.
 enum : int {
@@ -556,15 +561,7 @@ void FreeAllFrameData(I3D_scene *scene);            // 0x006e9f20
 // The scene's render callback (the fade, the interface, the debug joints; `phase` 1 / 2).
 int __stdcall GameRenderCallback(int phase, int unknown1, int unknown2);   // 0x006c95b0
 
-// The in-game menu (vtable 0x00815750, 0x5C0 bytes; wraps the game state it was opened over).
-class C_GameMenu : public C_GameState {
-public:
-    C_GameMenu();                                   // 0x0067eb40
-    void SetGame(C_GameState *game);                // +0x5B8
-    C_GameState *GetGame() const;                   // +0x5B8 the game behind the menu
-    void ShowMessage(int textId, int unknown);      // 0x00682aa0 (the game passes -1)
-    void SetUnknown1D1(bool on);                    // byte +0x1D1
-};
+// (The in-game menu, C_GameMenu: game/game_menu.h.)
 // The console commands of a dedicated server (the singleton at 0x0098c0fc).
 class C_CommandProcessor {
 public:

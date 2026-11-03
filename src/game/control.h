@@ -91,6 +91,10 @@ struct S_ControlDesc {                                  // 0x40 bytes, vtable 0x
     S_ControlDesc(const S_ControlDesc &) = delete;
     S_ControlDesc &operator=(const S_ControlDesc &) = delete;
 
+    // A child's description added (after the others; its id this one's with its index + 1 in
+    // bits 12-19, or in bits 4-11 under a child).
+    S_ControlDesc *AddChild(int type, const char *name);   // 0x0061da70
+
     C_str name;                                         // +0x04
     uint32_t id;                                        // +0x08
     int type;                                           // +0x0C

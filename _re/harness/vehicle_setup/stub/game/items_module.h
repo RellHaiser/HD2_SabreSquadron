@@ -20,9 +20,16 @@ public:
     // (The seat weapon's item, game/seat_weapon.cpp.)
     C_Item *CreateFreeItem(int typeId);
     void DestroyItem(C_Item *item);
+    // (The in-game menu's stocks, part 9e-xix: game_menu_test.inc.)
+    void EnsureItemsLoaded();
 };
 extern C_ItemsModule g_itemsModule;
 // (Part 7e: the static weapon's store in the saved game.)
 class C_chunk;
 bool SaveActorItems(C_Actor *actor, C_chunk &chunk);
 bool LoadActorItems(C_Actor *actor, C_chunk &chunk);
+
+// (The menus' frames, part 9d-ii-a: menu_test.inc fakes it.)
+class I3D_frame;
+void ReleaseFrameTree(I3D_frame *frame);
+bool CloneFrameTree(I3D_frame *&copy, I3D_frame *source, I3D_frame *parent);   // (part 9d-ii-b)

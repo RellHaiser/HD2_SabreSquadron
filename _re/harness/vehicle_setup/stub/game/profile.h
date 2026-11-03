@@ -3,6 +3,8 @@
 // real names.
 #pragma once
 
+#include <vector>
+
 #include "common/c_str.h"
 #include "game/pending.h"                               // S_MultiplayerSettings
 #include "game/key_bindings.h"
@@ -13,9 +15,15 @@
 struct S_DetailSettings {
     bool IsVoiceChatEnabled() const { return voiceChat; }
     bool IsEnabled(int option) const { return option >= 0 && option < 8 && switches[option]; }
+    // (The options' video page, part 9e-xi: options_test.inc.)
+    void SetSwitch(int option, bool on);
     bool voiceChat = false;
     bool switches[8] = {};
     bool invertMouse = false;                           // (the camera module, part 8e-iii)
+    // (The options handler, part 9e-viii: options_test.inc.)
+    float mouseSensitivity = 0, gamma = 0, soundVolume = 0, musicVolume = 0, voiceValue = 0;
+    int level = 0;
+    bool subtitles = false, crosshair = false;
 };
 enum : int {
     DETAIL_VERTEX_ANIMATION = 1,
@@ -34,12 +42,38 @@ struct S_PlayMode {
 };
 
 // (The hot key control's bindings, part 9c-v-d.)
+// (The menus' diary texts, part 9d-ii-b: menu_run_test.inc.)
+class C_Diary {
+public:
+    void AddText(int textId);
+};
+
 class C_PlayerProfile {
 public:
+    C_Diary *GetDiary();
     C_KeyBindings *GetKeyBindings() { return &m_keyBindings; }
+    // (The in-game menu, part 9e-v: game_menu_test.inc.)
+    void ApplyVolume();
+    // (The options handler, part 9e-viii: options_test.inc.)
+    C_str GetName() const;
+    // (The in-game menu's presets, part 9e-xvii: game_menu_test.inc.)
+    const C_str &GetProfileName() const;
+    bool SaveOptions();
+    // (The options' pages, part 9e-xi: options_test.inc; the options world_modules_test.inc's.)
+    S_DetailSettings *GetOptions();
+    void SetKeyLayout(int layout);                      // (the keys page, part 9e-xii)
+    void ApplyGamma();
+    void ApplyMusicVolume();
+    void ApplyMouse();
+    void ApplyVoiceValue();
+    void ApplyHardwareOption();
     C_KeyBindings m_keyBindings;
 };
 
+class C_Campaign;
+class C_HumanStore;
+struct S_MissionSquad;
+class C_ItemStock;
 class C_GameProfile {
 public:
     C_PlayerProfile *GetPlayerProfile() const { return m_player; }
@@ -55,6 +89,18 @@ public:
     bool m_unicodeFont = false;
     S_HudOption *m_hudOption = nullptr;
     S_PlayMode *m_playMode = nullptr;
+    // (The menus' reset, part 9d-ii-a: menu_test.inc.)
+    void ResetGame();
+    // (The equipment panel, part 9e-ii-a.)
+    C_HumanStore *m_humanStore = nullptr;
+    S_MissionSquad *m_missionSquad = nullptr;
+    // (The in-game menu's stocks, part 9e-xix: game_menu_test.inc.)
+    C_ItemStock *m_itemStock18 = nullptr;
+    // (The loadout presets and missions' items, part 9e-iv: loadout_test.inc.)
+    C_str GetProfileDirectory();
+    C_Campaign *m_campaign = nullptr;
+    // (The in-game menu's main screen, part 9e-ix: game_menu_test.inc.)
+    int GetDifficulty() const;
 };
 extern C_GameProfile g_gameProfile;
 extern int g_versionMajor;
@@ -65,9 +111,61 @@ extern S_MultiplayerSettings *g_mpSettings;             // (a reference into g_g
 // The squad soldier's slots (S_SquadSoldier::PutItem).
 enum : uint8_t {
     SQUAD_SLOT_UNIFORM = 0x02,
+    SQUAD_SLOT_BELT = 0x20,                             // (part 9e-xviii)
+    SQUAD_SLOT_BACKPACK_CONTENTS = 0x40,
 };
+// (The equipment panel, part 9e-ii-a: equipment_panel_test.inc fakes the methods.)
+struct S_SoldierLoad {
+    int capacity = 0;                                   // +0x00 (+0x8C)
+    float weight = 0.0f;                                // +0x04 (+0x90)
+    float backpackMaxWeight = 0.0f;                     // +0x08 (+0x94)
+    int backpackMaxVolume = 0;                          // +0x0C (+0x98)
+    float backpackWeight = 0.0f;                        // +0x10 (+0x9C)
+    int backpackVolume = 0;                             // +0x14 (+0xA0)
+    float beltWeight = 0.0f;                            // +0x18 (+0xA4)
+    int beltVolume = 0;                                 // +0x1C (+0xA8)
+    float GetBeltFill() const;
+    float GetBackpackFill() const;
+    float GetWeightFill() const;
+};
+class C_ItemStock;
 struct S_SquadSoldier : S_SoldierState {
     void SplitStacks();
     void PutItem(S_SoldierItem *displaced, uint8_t slot, const S_SoldierItem &item);
-    uint8_t load[0x20] = {};                            // +0x8C (S_SoldierLoad)
+    void ReturnItemsTo(C_ItemStock *stock);
+    int CountItems(uint8_t slot, const S_SoldierItem &item) const;
+    int RemoveItem(uint8_t slot, S_SoldierItem &item);
+    int GetFreeBeltVolume() const;
+    int GetFreeBackpackVolume() const;
+    float GetFreeWeight() const;
+    // (The in-game menu's soldiers panel, part 9e-xiv: game_menu_test.inc.)
+    bool SetProfile(int profileIndex, int level);
+    // (The player screen and the squad's team, part 9e-xviii: game_menu_test.inc.)
+    void CopyFrom(const S_SquadSoldier &other);
+    void UpdateLoad();
+    S_SoldierLoad load;                                 // +0x8C
+};
+struct S_MissionSquad {
+    // (The in-game menu's player screen, part 9e-xviii: game_menu_test.inc.)
+    S_SquadSoldier *AddSoldier();
+    std::vector<S_SquadSoldier *> states;               // +0x04
+};
+// (The in-game menu's messages, part 9e-vii: game_menu_test.inc defines it.)
+extern S_MissionSquad *&g_missionSquad;
+class C_ItemStock {
+public:
+    void Add(int type, int count);
+    // (The store list, part 9e-iii-a: store_list_test.inc.)
+    int Take(int type, int count);
+    int Get(int type) const;
+    // (The in-game menu, part 9e-v: game_menu_test.inc; the stocks' setup, 9e-xix.)
+    void Reset();
+    void Set(int type, int count);
+};
+class C_HumanStore {
+public:
+    S_SoldierProfile *Get(int index) const;
+    // (The in-game menu's soldiers panel, part 9e-xiv: game_menu_test.inc; its stats, 9e-xix.)
+    int GetCount() const;
+    void GetStats(int *stats, int index, int level) const;
 };

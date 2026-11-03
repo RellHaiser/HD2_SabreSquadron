@@ -19,6 +19,22 @@ constexpr int DOUBLE_CLICK_TIME = 400;
 constexpr uint32_t PICK_FLAGS = 0x140000;
 constexpr float PICK_DEPTH = 0.1f;
 constexpr uint32_t TEXTURE_MODE = 0x402;
+// The drawn cursor: 30 pixels of a 1024 x 768 screen, scaled to the screen's size; its quad's
+// depth and reciprocal w (the original's constants), white.
+constexpr float DRAWN_SIZE = 30.0f;
+constexpr float DRAWN_Z = 0.0284113996f, DRAWN_RHW = 35.1971397f;
+constexpr uint32_t DRAWN_COLOR = 0xFFFFFFFF;
+// A fan of two triangles.
+constexpr int PRIMITIVE_FAN = 4;
+
+// A pre-transformed vertex (the fonts' and the interface's layout).
+struct S_CursorVertex {
+    float x, y, z, rhw;
+    uint32_t color, specular;
+    float u, v;
+};
+// (Statics of the original's, 0x008ae4d8: the specular words never set.)
+S_CursorVertex g_cursorQuad[4];                         // 0x008ae4d8
 
 } // namespace
 
@@ -168,7 +184,35 @@ bool C_Cursor::Update(int time)
     return true;
 }
 
-void C_Cursor::Pick(I3D_scene *scene, I3D_frame *frame)
+void C_Cursor::Draw() const
+{
+    const float x = g_cursorX, y = g_cursorY;
+    const float width = m_screenWidth * (1.0f / 1024.0f) * DRAWN_SIZE;
+    const float height = m_screenHeight * (1.0f / 768.0f) * DRAWN_SIZE;
+    IGraph *graph = GetIGraph();
+    S_IGraphViewport viewport = {0, 0, graph->ScrnX(), GetIGraph()->ScrnY(), 0.0f, 1.0f};
+    const float right = width + x, bottom = height + y;
+    // The corners (u, v): the place (0, 0), across (0, 1), across and down (1, 1), down (1, 0).
+    const float corners[4][4] = {{x, y, 0.0f, 0.0f}, {right, y, 0.0f, 1.0f}, {right, bottom, 1.0f, 1.0f},
+                                 {x, bottom, 1.0f, 0.0f}};
+    for (int i = 0; i < 4; ++i) {
+        S_CursorVertex &v = g_cursorQuad[i];
+        v.x = corners[i][0];
+        v.y = corners[i][1];
+        v.z = DRAWN_Z;
+        v.rhw = DRAWN_RHW;
+        v.color = DRAWN_COLOR;
+        v.u = corners[i][2];
+        v.v = corners[i][3];
+    }
+    GetIGraph()->BeginScene();
+    GetIGraph()->SetViewport(viewport);
+    GetIGraph()->SetTexture(m_texture, 0);
+    GetIGraph()->DrawPrimitives(PRIMITIVE_FAN, 2, g_cursorQuad, 1);
+    GetIGraph()->EndScene();
+}
+
+uint32_t C_Cursor::Pick(I3D_scene *scene, I3D_frame *frame)
 {
     S_vector from;
     GetPosition(&from);
@@ -177,6 +221,7 @@ void C_Cursor::Pick(I3D_scene *scene, I3D_frame *frame)
     I3D_collision_info info;
     I3D_frame *hit = scene->IntersectFrame(from, dir, frame, &info, PICK_FLAGS, 0, 0, 0);
     m_pickedId = hit ? static_cast<uint32_t>(reinterpret_cast<uintptr_t>(hit->GetData())) : 0;
+    return m_pickedId;
 }
 
 bool C_Cursor::Matches(uint32_t buttons, uint32_t state)

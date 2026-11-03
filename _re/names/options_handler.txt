@@ -1,0 +1,23 @@
+# Part 9e-viii: the options screen's messages (game/options_handler.cpp). (No Ghidra struct for the
+# handler: void *.)
+0061cfa0 C_OptionsHandler::~C_OptionsHandler | void __fastcall ~C_OptionsHandler(void * handler)
+0061bf00 C_OptionsHandler::HandleMessage | bool __thiscall HandleMessage(void *this, void * message)
+00620be0 C_OptionsHandler::RefreshKeyGroups | bool __fastcall RefreshKeyGroups(void * handler)
+# Part 9e-x: the screen's description.
+0061cfc0 C_OptionsHandler::BuildScreen | bool __thiscall BuildScreen(void *this, void * desc, void * model)
+00620530 C_OptionsHandler::OnShown | bool __thiscall OnShown(void *this, void * argument, void * control, uint notification, uint value)
+# Part 9e-xi: the video, sound, game and multiplayer pages, their callbacks.
+0061dc20 C_OptionsHandler::BuildVideoPage | bool __thiscall BuildVideoPage(void *this, void * desc, void * model)
+0061e1a0 C_OptionsHandler::BuildSoundPage | bool __thiscall BuildSoundPage(void *this, void * desc, void * model)
+0061f230 C_OptionsHandler::BuildGamePage | bool __thiscall BuildGamePage(void *this, void * desc, void * model)
+0061f3b0 C_OptionsHandler::BuildMultiplayerPage | bool __thiscall BuildMultiplayerPage(void *this, void * desc, void * model)
+00620300 C_OptionsHandler::OnSlider | bool __thiscall OnSlider(void *this, void * argument, void * control, uint notification, uint value)
+0061fd00 C_OptionsHandler::OnDetail | bool __thiscall OnDetail(void *this, void * argument, void * control, uint notification, uint value)
+006204a0 C_OptionsHandler::OnCheck | bool __thiscall OnCheck(void *this, void * argument, void * control, uint notification, uint value)
+00620780 C_OptionsHandler::OnVoiceChat | bool __thiscall OnVoiceChat(void *this, void * argument, void * control, uint notification, uint value)
+# Part 9e-xii: the controls and keys pages.
+0061e3f0 C_OptionsHandler::BuildControlsPage | bool __thiscall BuildControlsPage(void *this, void * desc, void * model)
+0061f600 C_OptionsHandler::BuildKeyGroup | bool __thiscall BuildKeyGroup(void *this, void * page, void * model, void * name, int group)
+006209c0 C_OptionsHandler::OnKeyGroup | bool __thiscall OnKeyGroup(void *this, void * argument, void * control, uint notification, uint value)
+006209b0 C_OptionsHandler::OnKeyChanged | bool __thiscall OnKeyChanged(void *this, void * argument, void * control, uint notification, uint value)
+0061fcb0 C_OptionsHandler::OnKeyLayout | bool __thiscall OnKeyLayout(void *this, void * argument, void * control, uint notification, uint value)

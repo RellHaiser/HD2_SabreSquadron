@@ -187,7 +187,7 @@ bool C_CampaignScreen::LoadDefinition(C_chunk &chunk)   // 0x006bab50
         } else if (id == CHUNK_DEF_SCREEN_UNKNOWN28) {
             int value = 0;
             ReadValue(chunk, value);
-            m_unknown28.push_back(value);
+            m_diaryTexts.push_back(value);
         }
         chunk.Ascend();
     }
@@ -218,7 +218,7 @@ bool C_CampaignScreen::Load(C_chunk &chunk)             // 0x006bd330
         case CHUNK_SCREEN_UNKNOWN28: {
             int value = 0;
             ReadValue(chunk, value);
-            m_unknown28.push_back(value);
+            m_diaryTexts.push_back(value);
             break;
         }
         default:
@@ -236,7 +236,7 @@ bool C_CampaignScreen::Save(C_chunk &chunk)             // 0x006bd160
     chunk.WriteChunk(CHUNK_SCREEN_BACK_ACROSS, m_backAcross);
     for (const S_CampaignItem &item : m_items)
         chunk.WriteChunk(CHUNK_SCREEN_ITEM, item);
-    for (int value : m_unknown28)
+    for (int value : m_diaryTexts)
         chunk.WriteChunk(CHUNK_SCREEN_UNKNOWN28, value);
     return true;
 }

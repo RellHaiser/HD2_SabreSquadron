@@ -21,6 +21,14 @@ S_ControlDesc::~S_ControlDesc()
     }
 }
 
+S_ControlDesc *S_ControlDesc::AddChild(int type, const char *childName)
+{
+    const uint32_t index = static_cast<uint32_t>(children.size()) + 1 & 0xFF;
+    const uint32_t childId = (id & 0xFF000) == 0 ? index << 12 | id : index << 4 | id;
+    children.push_back(new S_ControlDesc(type, childName, childId));
+    return children.back();
+}
+
 void AddDescMessage(S_ControlDesc *desc, uint32_t target, uint32_t id, uint32_t value)
 {
     S_ControlMessage message;

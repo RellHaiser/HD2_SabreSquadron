@@ -55,18 +55,18 @@ enum : int {
 // (The states are allocated 16-byte aligned.)
 class alignas(16) C_GameState {                     // vtable 0x008158ac
 public:
-    virtual ~C_GameState();
+    virtual ~C_GameState();                         // 0x0067ef90 (the deleting one)
     // Enters the state; `arg` is what it starts with (C_game: the mission's definition,
     // null in multiplayer).
-    virtual bool Start(void *arg);                  // 0x04
-    virtual bool Stop();                            // 0x08
+    virtual bool Start(void *arg);                  // 0x04 (the base: 0x0067ef30, false)
+    virtual bool Stop();                            // 0x08 (0x0067ef40, false)
     // The frame's controls: values held per action and those pressed in this frame
     // (C_Controls; null when there are none).
-    virtual bool HandleInput(float *held, float *pressed);   // 0x0C
-    virtual void Tick(int timeDelta);               // 0x10 fixed server tick (100 ms)
-    virtual void Update(int timeDelta);             // 0x14 per frame
-    virtual void Render();                          // 0x18
-    virtual int GetTypeId() const;                  // 0x1C
+    virtual bool HandleInput(float *held, float *pressed);   // 0x0C (0x0067ef50, false)
+    virtual void Tick(int timeDelta);               // 0x10 fixed server tick (100 ms; 0x0067ef60)
+    virtual void Update(int timeDelta);             // 0x14 per frame (0x0067ef70)
+    virtual void Render();                          // 0x18 (0x0067ef80)
+    virtual int GetTypeId() const;                  // 0x1C (0x0067ecf0, 0)
     virtual int GetState() const;                   // 0x20 0x0067ed00
     virtual void SetState(int state);               // 0x24 0x0067ed10
     virtual int GetPendingState() const;            // 0x28 0x0067ed20

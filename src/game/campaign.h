@@ -131,6 +131,8 @@ public:
     // (C_Campaign::PreviousScreen).
     bool GoesBackAcross() const { return m_backAcross; }
     const std::vector<S_CampaignItem> &GetItems() const { return m_items; }
+    // The texts the screen's menu adds to the diary when it starts (C_MenuState::Start).
+    const std::vector<int> &GetDiaryTexts() const { return m_diaryTexts; }
 
 private:
     friend class C_Campaign;
@@ -139,7 +141,7 @@ private:
     bool m_backAcross = false;                          // +0x14
     bool m_unknown15 = false;                           // +0x15
     std::vector<S_CampaignItem> m_items;                // +0x18
-    std::vector<int> m_unknown28;                       // +0x28 (ints of chunk 0x19; not read)
+    std::vector<int> m_diaryTexts;                      // +0x28 chunk 0x19: text ids the menu adds to the diary
 };
 
 // The mission itself (vtable 0x00815b10, type 7; 0x10 bytes): C_GameApp starts the game.
@@ -293,8 +295,10 @@ public:
     S_MissionObjective *GetObjective(int index) const;
     // Every objective becomes OBJECTIVE_INACTIVE.
     void DeactivateObjectives();                        // 0x006b86e0
-    // Some objective is active and none is still open (the menus' code, not ported).
+    // Some objective is active and none is still open (the in-game menu's code: game/game_menu.cpp).
     bool AreObjectivesDecided() const;                  // 0x0067fda0
+    // (+0x2C; the in-game menu shows its button 6 for it.)
+    bool IsTutorial() const { return m_unknown2C; }
 
 protected:
     explicit C_MissionDef(E_CampaignNodeType type);
@@ -326,6 +330,10 @@ public:
     int GetBalanceAllied() const { return m_balanceAllied; }
     // The map's name (the info screen shows it).
     const C_str &GetMapName() const { return m_mapName; }
+    // The map's allowed presets' names (the in-game menu lists the presets found in it).
+    const C_str &GetPresets() const { return m_presets; }
+    // The map's allowed items (the in-game menu's stocks).
+    const std::vector<S_CampaignItem> &GetItems() const { return m_items; }
     // The map's AIRCRAFTATACK values (the kinds of the air attacks and the artillery the sides
     // call in; an axis caller gets the second, inferred to be the other side's planes).
     int GetAircraftAttackAxis() const { return m_aircraftAttackAxis; }

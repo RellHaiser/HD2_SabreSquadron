@@ -40,20 +40,25 @@ uint32_t C_EquipmentMenu__FUN_00677920(C_EquipmentMenu *_this,uint32_t param_1,i
 {
   uchar *this_00;
   uint32_t uVar1;
-  uint32_t uVar2;
+  bool bVar2;
+  uint3 extraout_var;
   uint32_t *puVar3;
   uint32_t uVar4;
+  uint32_t extraout_EAX;
+  uint3 extraout_var_00;
+  uint3 uVar5;
   uint32_t local_10;
   short local_c;
-  uint32_t local_6;
-  uVar2 = 0xffffffff;
+  uint8_t local_6 [6];
+  uVar5 = 0xffffff;
   if (-1 < param_2) {
     this_00 = _this->_pad_023c + 0x38;
     local_10 = CONCAT22((short)param_2,0xffff);
     local_c = param_3;
-    uVar2 = FUN_0067c0d0(this_00,(int)&local_10,param_4);
-    if ((char)uVar2 != '\0') {
-      puVar3 = (uint32_t *)FUN_00671500(&_this->m_1d0,&local_6,param_1,&local_10,'\0');
+    bVar2 = C_StoreList__TakeItem(this_00,&local_10,(bool)param_4);
+    uVar5 = extraout_var;
+    if (bVar2) {
+      puVar3 = C_EquipmentPanel__PutItemChecked(&_this->m_1d0,local_6,param_1,&local_10,false);
       uVar1 = *puVar3;
       GH_PIECE(local_10,2,2) = (short)((uint32_t)uVar1 >> 0x10);
       local_c = *(short *)(puVar3 + 1);
@@ -61,16 +66,18 @@ uint32_t C_EquipmentMenu__FUN_00677920(C_EquipmentMenu *_this,uint32_t param_1,i
       if ((GH_PIECE(local_10,2,2) != -1) && (local_c != 0)) {
         local_10 = uVar1;
         if (GH_PIECE(local_10,2,2) == param_2) {
-          uVar2 = FUN_0067c0a0(this_00,(int)&local_10);
+          C_StoreList__AddItem(this_00,&local_10);
+          uVar5 = extraout_var_00;
           goto LAB_006779d7;
         }
-        uVar4 = FUN_0067c0a0(this_00,(int)&local_10);
+        C_StoreList__AddItem(this_00,&local_10);
+        uVar4 = extraout_EAX;
       }
       return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
     }
   }
 LAB_006779d7:
-  return uVar2 & 0xffffff00;
+  return (uint32_t)uVar5 << 8;
 }
 
 
@@ -78,33 +85,40 @@ LAB_006779d7:
 uint32_t C_EquipmentMenu__FUN_006779f0(C_EquipmentMenu *_this,int param_1,uint16_t param_2,char param_3, ...)
 {
   uchar *this_00;
-  float fVar1;
-  uint32_t uVar2;
-  float *pfVar3;
+  uint32_t uVar1;
+  bool bVar2;
+  uint3 extraout_var;
+  uint32_t *puVar3;
   uint32_t uVar4;
+  uint32_t extraout_EAX;
+  uint3 extraout_var_00;
+  uint3 uVar5;
   uint32_t local_10;
   short local_c;
-  float local_6;
+  uint8_t local_6 [6];
   this_00 = _this->_pad_023c + 0x38;
   local_c = param_2;
-  local_10 = (float)CONCAT22((uint16_t)param_1,0xffff);
-  uVar2 = FUN_0067c0d0(this_00,(int)&local_10,param_3);
-  if ((char)uVar2 == '\0') {
+  local_10 = CONCAT22((uint16_t)param_1,0xffff);
+  bVar2 = C_StoreList__TakeItem(this_00,&local_10,(bool)param_3);
+  uVar5 = extraout_var;
+  if (!bVar2) {
 LAB_00677a8f:
-    return uVar2 & 0xffffff00;
+    return (uint32_t)uVar5 << 8;
   }
-  pfVar3 = (float *)FUN_006716f0(&_this->m_1d0,&local_6,(float *)&local_10,param_3);
-  fVar1 = *pfVar3;
-  GH_PIECE(local_10,2,2) = (short)((uint32_t)fVar1 >> 0x10);
-  local_c = *(short *)(pfVar3 + 1);
-  uVar4 = CONCAT22((short)((uint32_t)pfVar3 >> 0x10),local_c);
+  puVar3 = C_EquipmentPanel__DropItem(&_this->m_1d0,local_6,&local_10,(bool)param_3);
+  uVar1 = *puVar3;
+  GH_PIECE(local_10,2,2) = (short)((uint32_t)uVar1 >> 0x10);
+  local_c = *(short *)(puVar3 + 1);
+  uVar4 = CONCAT22((short)((uint32_t)puVar3 >> 0x10),local_c);
   if ((GH_PIECE(local_10,2,2) != -1) && (local_c != 0)) {
-    local_10 = fVar1;
+    local_10 = uVar1;
     if (GH_PIECE(local_10,2,2) == param_1) {
-      uVar2 = FUN_0067c0a0(this_00,(int)&local_10);
+      C_StoreList__AddItem(this_00,&local_10);
+      uVar5 = extraout_var_00;
       goto LAB_00677a8f;
     }
-    uVar4 = FUN_0067c0a0(this_00,(int)&local_10);
+    C_StoreList__AddItem(this_00,&local_10);
+    uVar4 = extraout_EAX;
   }
   return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
 }
@@ -132,7 +146,7 @@ uint32_t C_EquipmentMenu__FUN_00677aa0(C_EquipmentMenu *_this,uint32_t param_1,i
   bVar2 = false;
   iVar7 = (param_2 + 6) * param_2 + 6;
   iVar8 = (param_2 + 2) * param_2 + 1;
-  FUN_00671010(&_this->m_1d0,param_1);
+  C_EquipmentPanel__SelectSoldier(&_this->m_1d0,param_1);
   sVar1 = *(short *)(_this->m_238 + 0x54);
   if (-1 < sVar1) {
     iVar3 = (int)sVar1;
@@ -338,9 +352,9 @@ uint32_t C_EquipmentMenu__FUN_00678000(C_EquipmentMenu *_this,int *param_1,uint3
   uint8_t *ptr_00;
   S_SquadSoldier *pSVar11;
   int *piVar12;
-  uint32_t uVar13;
-  S_MissionSquad *pSVar14;
-  uint32_t uVar15;
+  uint32_t extraout_EAX;
+  S_MissionSquad *pSVar13;
+  uint32_t uVar14;
   int local_34 [10];
   uint32_t local_4;
   local_4 = 0xffffffff;
@@ -365,25 +379,25 @@ uint32_t C_EquipmentMenu__FUN_00678000(C_EquipmentMenu *_this,int *param_1,uint3
   }
   C_EquipmentMenu__FUN_0067a3f0(_this,iVar7,(int)local_34,iVar8);
   ppSVar4 = ((g_gameProfile.m_missionSquad)->states).first;
-  pSVar14 = g_gameProfile.m_missionSquad;
+  pSVar13 = g_gameProfile.m_missionSquad;
   if (ppSVar4 != (S_SquadSoldier **)0x0) {
-    uVar15 = (int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar4 >> 2;
-    while (uVar15 != 0) {
-      uVar15--;
-      if ((((int)uVar15 < 0) ||
-          (ppSVar4 = (pSVar14->states).first, ppSVar4 == (S_SquadSoldier **)0x0)) ||
-         ((uint32_t)((int)(pSVar14->states).last - (int)ppSVar4 >> 2) <= uVar15)) {
+    uVar14 = (int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar4 >> 2;
+    while (uVar14 != 0) {
+      uVar14--;
+      if ((((int)uVar14 < 0) ||
+          (ppSVar4 = (pSVar13->states).first, ppSVar4 == (S_SquadSoldier **)0x0)) ||
+         ((uint32_t)((int)(pSVar13->states).last - (int)ppSVar4 >> 2) <= uVar14)) {
         pSVar11 = 0;
       }
       else {
-        pSVar11 = ppSVar4[uVar15];
+        pSVar11 = ppSVar4[uVar14];
       }
       uVar2 = pSVar11->_pad_000a[0];
       if ((!bVar6) || (uVar2 != '\0')) {
-        FUN_00671010(&_this->m_1d0,uVar15);
-        puVar1 = (uint32_t *)(iVar7 + 4 + local_34[uVar15] * 0xc);
+        C_EquipmentPanel__SelectSoldier(&_this->m_1d0,uVar14);
+        puVar1 = (uint32_t *)(iVar7 + 4 + local_34[uVar14] * 0xc);
         if ((*(short *)(_this->m_238 + 0x66) == -1) && (*(short *)(_this->m_238 + 0x60) == -1)) {
-          C_EquipmentMenu__FUN_00679790(_this,uVar15,'\0');
+          C_EquipmentMenu__FUN_00679790(_this,uVar14,'\0');
           uVar5 = puVar1[1];
           if ((uVar5 != 0xffffffff) && ((int)*(short *)(_this->m_238 + 0x4e) != uVar5)) {
             C_EquipmentMenu__FUN_00677920(_this,1,uVar5,1,uVar2);
@@ -467,21 +481,21 @@ LAB_0067824c:
             tier1_operator_delete(ptr);
           }
         }
-        if ((((int)uVar15 < 0) ||
+        if ((((int)uVar14 < 0) ||
             (ppSVar4 = ((g_gameProfile.m_missionSquad)->states).first,
             ppSVar4 == (S_SquadSoldier **)0x0)) ||
-           ((uint32_t)((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar4 >> 2) <= uVar15
+           ((uint32_t)((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar4 >> 2) <= uVar14
            )) {
           pSVar11 = 0;
         }
         else {
-          pSVar11 = ppSVar4[uVar15];
+          pSVar11 = ppSVar4[uVar14];
         }
         pSVar11->_pad_000a[0] = '\0';
-        pSVar14 = g_gameProfile.m_missionSquad;
+        pSVar13 = g_gameProfile.m_missionSquad;
         if (!bVar6) {
-          C_EquipmentMenu__FUN_00677aa0(_this,uVar15,0,(int *)0xffffffff);
-          pSVar14 = g_gameProfile.m_missionSquad;
+          C_EquipmentMenu__FUN_00677aa0(_this,uVar14,0,(int *)0xffffffff);
+          pSVar13 = g_gameProfile.m_missionSquad;
         }
       }
     }
@@ -489,28 +503,28 @@ LAB_0067824c:
   if (!bVar6) {
     param_2 = 0;
     while( true ) {
-      ppSVar4 = (pSVar14->states).first;
+      ppSVar4 = (pSVar13->states).first;
       if (ppSVar4 == (S_SquadSoldier **)0x0) {
         iVar7 = 0;
       }
       else {
-        iVar7 = (int)(pSVar14->states).last - (int)ppSVar4 >> 2;
+        iVar7 = (int)(pSVar13->states).last - (int)ppSVar4 >> 2;
       }
       if (iVar7 <= (int)param_2) break;
       param_1 = (int *)0xffffffff;
-      FUN_00671010(&_this->m_1d0,param_2);
-      uVar15 = 0;
+      C_EquipmentPanel__SelectSoldier(&_this->m_1d0,param_2);
+      uVar14 = 0;
       iVar7 = 0;
 LAB_006783ef:
       iVar8 = _this->m_238;
       if ((*(int *)(iVar8 + 0x70) == 0) ||
-         ((uint32_t)((*(int *)(iVar8 + 0x74) - *(int *)(iVar8 + 0x70)) / 6) <= uVar15))
+         ((uint32_t)((*(int *)(iVar8 + 0x74) - *(int *)(iVar8 + 0x70)) / 6) <= uVar14))
       goto LAB_0067846c;
       iVar8 = (int)*(short *)(*(int *)(iVar8 + 0x70) + 2 + iVar7);
       if ((iVar8 < 0) ||
          ((499 < iVar8 || (piVar12 = (int *)(&DAT_0098b030)[iVar8], piVar12 == 0)))) {
 LAB_0067844e:
-        uVar15++;
+        uVar14++;
         iVar7 += 6;
         goto LAB_006783ef;
       }
@@ -519,36 +533,36 @@ LAB_0067844e:
       }
       iVar8 = (**(code **)(*piVar12 + 0x10))();
       if (iVar8 != 2) goto LAB_0067844e;
-      param_1 = (int *)(int)*(short *)(*(int *)(_this->m_238 + 0x70) + 2 + uVar15 * 6);
+      param_1 = (int *)(int)*(short *)(*(int *)(_this->m_238 + 0x70) + 2 + uVar14 * 6);
 LAB_0067846c:
       C_EquipmentMenu__FUN_00677aa0(_this,param_2,1,param_1);
       param_2++;
-      pSVar14 = g_gameProfile.m_missionSquad;
+      pSVar13 = g_gameProfile.m_missionSquad;
     }
     param_2 = 0;
     while( true ) {
-      ppSVar4 = (pSVar14->states).first;
+      ppSVar4 = (pSVar13->states).first;
       if (ppSVar4 == (S_SquadSoldier **)0x0) {
         iVar7 = 0;
       }
       else {
-        iVar7 = (int)(pSVar14->states).last - (int)ppSVar4 >> 2;
+        iVar7 = (int)(pSVar13->states).last - (int)ppSVar4 >> 2;
       }
       if (iVar7 <= (int)param_2) break;
       param_1 = (int *)0xffffffff;
-      FUN_00671010(&_this->m_1d0,param_2);
-      uVar15 = 0;
+      C_EquipmentPanel__SelectSoldier(&_this->m_1d0,param_2);
+      uVar14 = 0;
       iVar7 = 0;
 LAB_006784c8:
       iVar8 = _this->m_238;
       if ((*(int *)(iVar8 + 0x70) == 0) ||
-         ((uint32_t)((*(int *)(iVar8 + 0x74) - *(int *)(iVar8 + 0x70)) / 6) <= uVar15))
+         ((uint32_t)((*(int *)(iVar8 + 0x74) - *(int *)(iVar8 + 0x70)) / 6) <= uVar14))
       goto LAB_00678545;
       iVar8 = (int)*(short *)(*(int *)(iVar8 + 0x70) + 2 + iVar7);
       if ((iVar8 < 0) ||
          ((499 < iVar8 || (piVar12 = (int *)(&DAT_0098b030)[iVar8], piVar12 == 0)))) {
 LAB_00678527:
-        uVar15++;
+        uVar14++;
         iVar7 += 6;
         goto LAB_006784c8;
       }
@@ -557,17 +571,17 @@ LAB_00678527:
       }
       iVar8 = (**(code **)(*piVar12 + 0x10))();
       if (iVar8 != 2) goto LAB_00678527;
-      param_1 = (int *)(int)*(short *)(*(int *)(_this->m_238 + 0x70) + 2 + uVar15 * 6);
+      param_1 = (int *)(int)*(short *)(*(int *)(_this->m_238 + 0x70) + 2 + uVar14 * 6);
 LAB_00678545:
       C_EquipmentMenu__FUN_00677aa0(_this,param_2,2,param_1);
       param_2++;
-      pSVar14 = g_gameProfile.m_missionSquad;
+      pSVar13 = g_gameProfile.m_missionSquad;
     }
   }
-  FUN_00671010(&_this->m_1d0,_this->m_580);
-  FUN_00672580(&_this->m_1d0);
-  uVar13 = FUN_0067c040(_this->_pad_023c + 0x38);
-  return CONCAT31((int3)((uint32_t)uVar13 >> 8),1);
+  C_EquipmentPanel__SelectSoldier(&_this->m_1d0,_this->m_580);
+  C_EquipmentPanel__Refresh(&_this->m_1d0);
+  C_StoreList__UpdateAll(_this->_pad_023c + 0x38);
+  return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
 }
 
 
@@ -590,7 +604,7 @@ uint32_t C_EquipmentMenu__FUN_006785b0(C_EquipmentMenu *_this, ...)
   uint32_t uVar13;
   C_str_rep *pCVar14;
   uint32_t *puVar15;
-  uint32_t local_8c;
+  int local_8c;
   int local_84;
   C_str CStack_7c;
   C_str CStack_78;
@@ -666,7 +680,7 @@ LAB_006786ee:
             uVar13--;
             pCVar14 = (C_str_rep *)((int)&CVar6.rep[-2].length + 2);
             CStack_74.rep = pCVar14;
-            FUN_00671010(&_this->m_1d0,uVar13);
+            C_EquipmentPanel__SelectSoldier(&_this->m_1d0,uVar13);
             iVar3 = *(int *)((int)&CVar6.rep[-1].length + 1);
             CVar6.rep = pCVar14;
             if (iVar3 == -1) {
@@ -739,9 +753,9 @@ LAB_006786ee:
             }
           } while (uVar13 != 0);
         }
-        FUN_00671010(&_this->m_1d0,_this->m_580);
-        FUN_00672580(&_this->m_1d0);
-        FUN_0067c040(_this->_pad_023c + 0x38);
+        C_EquipmentPanel__SelectSoldier(&_this->m_1d0,_this->m_580);
+        C_EquipmentPanel__Refresh(&_this->m_1d0);
+        C_StoreList__UpdateAll(_this->_pad_023c + 0x38);
         return 0;
       }
       iVar4 = *(int *)(iVar4 + uVar12 * 8);
@@ -903,7 +917,7 @@ LAB_00678ada:
     }
     do {
       while( true ) {
-        FUN_00671010(&_this->m_1d0,local_8c);
+        C_EquipmentPanel__SelectSoldier(&_this->m_1d0,local_8c);
         uVar9 = C_EquipmentMenu__FUN_006779f0(_this,*(int *)(*(int *)(iVar3 + 0x80) + uVar12 * 8),1,'\x01');
         uVar13 = local_70;
         if ((char)uVar9 == '\0') break;
@@ -917,7 +931,7 @@ LAB_00678ada:
         else {
           iVar4 = (int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar1 >> 2;
         }
-        if (iVar4 <= (int)local_8c) {
+        if (iVar4 <= local_8c) {
           local_8c = 0;
         }
         if (iVar7 < 1) goto LAB_006786ee;
@@ -931,7 +945,7 @@ LAB_00678ada:
       else {
         iVar4 = (int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar1 >> 2;
       }
-      if (iVar4 <= (int)local_8c) {
+      if (iVar4 <= local_8c) {
         local_8c = 0;
       }
       ppSVar1 = ((g_gameProfile.m_missionSquad)->states).first;
@@ -1008,7 +1022,7 @@ LAB_00678ef7:
          )) {
         tier1_operator_delete(CStack_10.rep);
       }
-      C_EquipmentMenu__FUN_0066da80(_this,2,(int *)&CStack_18,0,0);
+      C_MenuState__ShowMessage((C_MenuState *)_this,2,&CStack_18,0,0);
       if ((CStack_18.rep != 0) &&
          ((CStack_18.rep)->refCount = (CStack_18.rep)->refCount - 1, (CStack_18.rep)->refCount == 0
          )) {
@@ -1087,11 +1101,11 @@ uint32_t C_EquipmentMenu__FUN_00678fe0(C_EquipmentMenu *_this,uint32_t param_1,i
   iVar3 = local_1c - 1;
   if (iVar3 == -1) {
     piVar7 = &_this->m_1d0;
-    FUN_00671010(piVar7,_this->m_580);
+    C_EquipmentPanel__SelectSoldier(piVar7,_this->m_580);
     C_EquipmentMenu__FUN_00679790(_this,_this->m_580,'\x01');
-    FUN_00672580(piVar7);
-    FUN_00671010(piVar7,_this->m_580);
-    FUN_0067c040(_this->_pad_023c + 0x38);
+    C_EquipmentPanel__Refresh(piVar7);
+    C_EquipmentPanel__SelectSoldier(piVar7,_this->m_580);
+    C_StoreList__UpdateAll(_this->_pad_023c + 0x38);
 LAB_0067908b:
     if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
       tier1_operator_delete(local_10);
@@ -1100,8 +1114,8 @@ LAB_0067908b:
     return (uint32_t)local_10 & 0xffffff00;
   }
   if (iVar3 < 0) goto LAB_0067908b;
-  FUN_00671010(&_this->m_1d0,_this->m_580);
-  pvVar2 = (void *)FUN_0067de40(&_this->m_558,iVar3,5);
+  C_EquipmentPanel__SelectSoldier(&_this->m_1d0,_this->m_580);
+  pvVar2 = C_LoadoutPresets__GetPreset(&_this->m_558,iVar3,5);
   if (pvVar2 != 0) {
     iVar3 = *(int *)((int)pvVar2 + 0x24);
     C_EquipmentMenu__FUN_00679790(_this,_this->m_580,'\x01');
@@ -1168,7 +1182,7 @@ LAB_0067925a:
           }
         }
         local_28 = (**(code **)(*piVar6 + 0x18))();
-        FUN_0066daa0(_this,2,0x2532,0,0);
+        C_MenuState__ShowMessageId((C_MenuState *)_this,2,0x2532,0,0);
       }
     }
     if (*(int *)(ptr + 0x28) != -1) {
@@ -1201,8 +1215,8 @@ LAB_0067925a:
     }
     tier1_operator_delete(ptr);
   }
-  FUN_00672580(&_this->m_1d0);
-  FUN_0067c040(_this->_pad_023c + 0x38);
+  C_EquipmentPanel__Refresh(&_this->m_1d0);
+  C_StoreList__UpdateAll(_this->_pad_023c + 0x38);
   if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
     tier1_operator_delete(local_10);
     local_10 = extraout_EAX_00;
@@ -1420,7 +1434,7 @@ uint32_t C_EquipmentMenu__FUN_00679790(C_EquipmentMenu *_this,uint32_t param_1,c
   iVar3 = C_Campaign__GetMissionNumber
                     (g_gameProfile.m_campaign,(g_gameProfile.m_campaign)->m_current);
   this_01 = (void *)FUN_0067e620(_this->_pad_029c + 0x10,iVar3);
-  FUN_00671010(&_this->m_1d0,param_1);
+  C_EquipmentPanel__SelectSoldier(&_this->m_1d0,param_1);
   this_00 = (S_SquadSoldier *)_this->m_238;
   local_10.present = 0;
   local_10.uid = -1;
@@ -1445,7 +1459,7 @@ uint32_t C_EquipmentMenu__FUN_00679790(C_EquipmentMenu *_this,uint32_t param_1,c
       local_10.present = (short)iVar3;
     }
     S_SquadSoldier__RemoveItem(this_00,'\x01',&local_10);
-    FUN_0067c0a0(_this->_pad_023c + 0x38,(int)&local_10);
+    C_StoreList__AddItem(_this->_pad_023c + 0x38,&local_10);
   }
 LAB_0067986b:
   sVar1 = (this_00->longGun).typeId;
@@ -1465,7 +1479,7 @@ LAB_0067986b:
       local_10.present = (short)iVar3;
     }
     S_SquadSoldier__RemoveItem(this_00,'\x10',&local_10);
-    FUN_0067c0a0(_this->_pad_023c + 0x38,(int)&local_10);
+    C_StoreList__AddItem(_this->_pad_023c + 0x38,&local_10);
   }
 LAB_006798df:
   sVar1 = (this_00->hands).typeId;
@@ -1485,7 +1499,7 @@ LAB_006798df:
       local_10.present = (short)iVar3;
     }
     S_SquadSoldier__RemoveItem(this_00,'\x04',&local_10);
-    FUN_0067c0a0(_this->_pad_023c + 0x38,(int)&local_10);
+    C_StoreList__AddItem(_this->_pad_023c + 0x38,&local_10);
   }
 LAB_00679953:
   pSVar2 = (this_00->belt).first;
@@ -1509,7 +1523,7 @@ LAB_006799bf:
           local_10.present = (short)iVar4;
         }
         S_SquadSoldier__RemoveItem(this_00,' ',&local_10);
-        FUN_0067c0a0(_this->_pad_023c + 0x38,(int)&local_10);
+        C_StoreList__AddItem(_this->_pad_023c + 0x38,&local_10);
       }
       else {
         local_8 = (int)*(short *)((int)&((this_00->belt).first)->typeId + iVar3);
@@ -1543,7 +1557,7 @@ LAB_00679a81:
           local_10.present = (short)iVar5;
         }
         S_SquadSoldier__RemoveItem(this_00,'@',&local_10);
-        FUN_0067c0a0(_this->_pad_023c + 0x38,(int)&local_10);
+        C_StoreList__AddItem(_this->_pad_023c + 0x38,&local_10);
       }
       else {
         local_8 = (int)*(short *)((int)&((this_00->backpackContents).first)->typeId + iVar4);
@@ -1574,7 +1588,7 @@ LAB_00679a81:
       local_10.present = (short)iVar3;
     }
     S_SquadSoldier__RemoveItem(this_00,'\b',&local_10);
-    FUN_0067c0a0(_this->_pad_023c + 0x38,(int)&local_10);
+    C_StoreList__AddItem(_this->_pad_023c + 0x38,&local_10);
   }
   return 0;
 }
@@ -1745,14 +1759,14 @@ uint32_t FUN_00679b50(void *_this,uint32_t *param_1,int param_2,char param_3, ..
 // 0x00679e80
 uint8_t * FUN_00679e80(void *param_1,char param_2, ...)
 {
-  uint8_t *puVar1;
-  uint32_t *puVar2;
-  uint32_t uVar3;
+  uint8_t *preset;
+  uint32_t *puVar1;
+  uint32_t uVar2;
+  int iVar3;
   int iVar4;
-  int iVar5;
+  uint32_t *puVar5;
   uint32_t *puVar6;
-  uint32_t *puVar7;
-  int *piVar8;
+  int *piVar7;
   uint32_t local_7ec;
   uint32_t local_7e8;
   uint8_t *local_7e4;
@@ -1760,275 +1774,252 @@ uint8_t * FUN_00679e80(void *param_1,char param_2, ...)
   uint32_t auStack_7dc [500];
   uint32_t local_4;
   local_4 = 0xffffffff;
-  puVar1 = tier1_operator_new(0x1b8);
+  preset = tier1_operator_new(0x1b8);
   local_4 = 0;
-  if (puVar1 == 0) {
-    puVar1 = 0;
+  if (preset == 0) {
+    preset = 0;
   }
   else {
-    puVar2 = (uint32_t *)(puVar1 + 0x38);
-    iVar5 = 0xe;
+    puVar1 = (uint32_t *)(preset + 0x38);
+    iVar4 = 0xe;
     do {
-      *puVar2 = 0xffffffff;
-      puVar2[1] = 0;
-      puVar2 += 2;
-      iVar5--;
-    } while (iVar5 != 0);
-    local_7e4 = puVar1;
-    vector_constructor_iterator(puVar1 + 0xac,8,0x20,(uint8_t*)(FUN_0067a3c0));
-    FUN_0067a3d0((int)puVar1);
-    *puVar1 = 0;
-    *(uint32_t *)(puVar1 + 0x1ac) = 0;
-    *(uint32_t *)(puVar1 + 0x1b4) = 0;
-    *(uint32_t *)(puVar1 + 0x1b0) = 0xffffffff;
+      *puVar1 = 0xffffffff;
+      puVar1[1] = 0;
+      puVar1 += 2;
+      iVar4--;
+    } while (iVar4 != 0);
+    local_7e4 = preset;
+    vector_constructor_iterator(preset + 0xac,8,0x20,(uint8_t*)(S_PresetItem__Reset));
+    S_LoadoutPreset__ClearPlaces(preset);
+    *preset = 0;
+    *(uint32_t *)(preset + 0x1ac) = 0;
+    *(uint32_t *)(preset + 0x1b4) = 0;
+    *(uint32_t *)(preset + 0x1b0) = 0xffffffff;
   }
-  iVar5 = -1;
+  iVar4 = -1;
   local_7e4 = 0;
   local_4 = 0xffffffff;
-  uVar3 = 0;
+  uVar2 = 0;
   do {
-    auStack_7dc[uVar3] = uVar3;
-    uVar3++;
-  } while ((int)uVar3 < 500);
+    auStack_7dc[uVar2] = uVar2;
+    uVar2++;
+  } while ((int)uVar2 < 500);
   local_7ec = *(uint32_t *)((int)param_1 + 0x20);
   if (local_7ec != 0xffffffff) {
     local_7e8 = 1;
-    uVar3 = FUN_00679b50(local_7e0,&local_7ec,0,param_2);
-    if ((char)uVar3 == '\0') {
+    uVar2 = FUN_00679b50(local_7e0,&local_7ec,0,param_2);
+    if ((char)uVar2 == '\0') {
       if (-1 < (int)local_7ec) {
-        *(uint32_t *)(puVar1 + 0x20) = *(uint32_t *)((int)param_1 + 0x20);
+        *(uint32_t *)(preset + 0x20) = *(uint32_t *)((int)param_1 + 0x20);
       }
     }
     else {
-      *(uint32_t *)(puVar1 + 0x20) = local_7ec;
+      *(uint32_t *)(preset + 0x20) = local_7ec;
     }
   }
   local_7ec = *(uint32_t *)((int)param_1 + 0x24);
   if (local_7ec != 0xffffffff) {
     if (((int)local_7ec < 0) || (499 < (int)local_7ec)) {
-      piVar8 = 0;
+      piVar7 = 0;
     }
     else {
-      piVar8 = (int *)(&DAT_0098b030)[local_7ec];
+      piVar7 = (int *)(&DAT_0098b030)[local_7ec];
     }
     local_7e8 = 1;
-    if (piVar8 != 0) {
-      iVar4 = (**(code **)(*piVar8 + 0x18))();
-      if (iVar4 < 0) {
+    if (piVar7 != 0) {
+      iVar3 = (**(code **)(*piVar7 + 0x18))();
+      if (iVar3 < 0) {
         local_7e4 = 0;
       }
       else {
-        iVar5 = (**(code **)(*piVar8 + 0x18))();
-        local_7e4 = (uint8_t *)FUN_0067d450(param_1,iVar5);
+        iVar4 = (**(code **)(*piVar7 + 0x18))();
+        local_7e4 = (uint8_t *)S_LoadoutPreset__CountItems(param_1,iVar4);
       }
     }
-    uVar3 = FUN_00679b50(local_7e0,&local_7ec,(int)local_7e4,param_2);
-    if ((char)uVar3 == '\0') {
+    uVar2 = FUN_00679b50(local_7e0,&local_7ec,(int)local_7e4,param_2);
+    if ((char)uVar2 == '\0') {
       if (-1 < (int)local_7ec) {
-        *(uint32_t *)(puVar1 + 0x24) = *(uint32_t *)((int)param_1 + 0x24);
+        *(uint32_t *)(preset + 0x24) = *(uint32_t *)((int)param_1 + 0x24);
       }
     }
     else {
-      *(uint32_t *)(puVar1 + 0x24) = local_7ec;
-      if ((((-1 < iVar5) && (-1 < (int)local_7ec)) && ((int)local_7ec < 500)) &&
+      *(uint32_t *)(preset + 0x24) = local_7ec;
+      if ((((-1 < iVar4) && (-1 < (int)local_7ec)) && ((int)local_7ec < 500)) &&
          ((int *)(&DAT_0098b030)[local_7ec] != 0)) {
-        uVar3 = (**(code **)(*(int *)(&DAT_0098b030)[local_7ec] + 0x18))();
-        auStack_7dc[iVar5] = uVar3;
+        uVar2 = (**(code **)(*(int *)(&DAT_0098b030)[local_7ec] + 0x18))();
+        auStack_7dc[iVar4] = uVar2;
       }
     }
   }
   local_7ec = *(uint32_t *)((int)param_1 + 0x28);
   if (local_7ec != 0xffffffff) {
     if (((int)local_7ec < 0) || (499 < (int)local_7ec)) {
-      piVar8 = 0;
+      piVar7 = 0;
     }
     else {
-      piVar8 = (int *)(&DAT_0098b030)[local_7ec];
+      piVar7 = (int *)(&DAT_0098b030)[local_7ec];
     }
     local_7e8 = 1;
-    if (piVar8 != 0) {
-      iVar4 = (**(code **)(*piVar8 + 0x18))();
-      if (iVar4 < 0) {
+    if (piVar7 != 0) {
+      iVar3 = (**(code **)(*piVar7 + 0x18))();
+      if (iVar3 < 0) {
         local_7e4 = 0;
       }
       else {
-        iVar5 = (**(code **)(*piVar8 + 0x18))();
-        local_7e4 = (uint8_t *)FUN_0067d450(param_1,iVar5);
+        iVar4 = (**(code **)(*piVar7 + 0x18))();
+        local_7e4 = (uint8_t *)S_LoadoutPreset__CountItems(param_1,iVar4);
       }
     }
-    uVar3 = FUN_00679b50(local_7e0,&local_7ec,(int)local_7e4,param_2);
-    if ((char)uVar3 == '\0') {
+    uVar2 = FUN_00679b50(local_7e0,&local_7ec,(int)local_7e4,param_2);
+    if ((char)uVar2 == '\0') {
       if (-1 < (int)local_7ec) {
-        *(uint32_t *)(puVar1 + 0x28) = *(uint32_t *)((int)param_1 + 0x28);
+        *(uint32_t *)(preset + 0x28) = *(uint32_t *)((int)param_1 + 0x28);
       }
     }
     else {
-      *(uint32_t *)(puVar1 + 0x28) = local_7ec;
-      if (((-1 < iVar5) && (-1 < (int)local_7ec)) &&
+      *(uint32_t *)(preset + 0x28) = local_7ec;
+      if (((-1 < iVar4) && (-1 < (int)local_7ec)) &&
          (((int)local_7ec < 500 && ((int *)(&DAT_0098b030)[local_7ec] != 0)))) {
-        uVar3 = (**(code **)(*(int *)(&DAT_0098b030)[local_7ec] + 0x18))();
-        auStack_7dc[iVar5] = uVar3;
+        uVar2 = (**(code **)(*(int *)(&DAT_0098b030)[local_7ec] + 0x18))();
+        auStack_7dc[iVar4] = uVar2;
       }
     }
   }
   local_7ec = *(uint32_t *)((int)param_1 + 0x2c);
   if (local_7ec != 0xffffffff) {
     local_7e8 = 1;
-    uVar3 = FUN_00679b50(local_7e0,&local_7ec,0,param_2);
-    if ((char)uVar3 == '\0') {
+    uVar2 = FUN_00679b50(local_7e0,&local_7ec,0,param_2);
+    if ((char)uVar2 == '\0') {
       if (-1 < (int)local_7ec) {
-        *(uint32_t *)(puVar1 + 0x2c) = *(uint32_t *)((int)param_1 + 0x2c);
+        *(uint32_t *)(preset + 0x2c) = *(uint32_t *)((int)param_1 + 0x2c);
       }
     }
     else {
-      *(uint32_t *)(puVar1 + 0x2c) = local_7ec;
+      *(uint32_t *)(preset + 0x2c) = local_7ec;
     }
   }
   local_7ec = *(uint32_t *)((int)param_1 + 0x30);
   if (local_7ec != 0xffffffff) {
     local_7e8 = 1;
-    uVar3 = FUN_00679b50(local_7e0,&local_7ec,0,param_2);
-    if ((char)uVar3 == '\0') {
+    uVar2 = FUN_00679b50(local_7e0,&local_7ec,0,param_2);
+    if ((char)uVar2 == '\0') {
       if (-1 < (int)local_7ec) {
-        *(uint32_t *)(puVar1 + 0x30) = *(uint32_t *)((int)param_1 + 0x30);
+        *(uint32_t *)(preset + 0x30) = *(uint32_t *)((int)param_1 + 0x30);
       }
     }
     else {
-      *(uint32_t *)(puVar1 + 0x30) = local_7ec;
+      *(uint32_t *)(preset + 0x30) = local_7ec;
     }
   }
   local_7e4 = 0;
   if (0 < *(int *)((int)param_1 + 0x34)) {
-    puVar7 = (uint32_t *)((int)param_1 + 0x38);
+    puVar6 = (uint32_t *)((int)param_1 + 0x38);
     do {
-      local_7e8 = puVar7[1];
-      local_7ec = auStack_7dc[*puVar7];
-      if ((local_7ec == *puVar7) &&
-         (uVar3 = FUN_00679b50(local_7e0,&local_7ec,0,param_2), (char)uVar3 == '\0')) {
-        if ((-1 < (int)local_7ec) && (iVar5 = *(int *)(puVar1 + 0x34), iVar5 < 0xd)) {
-          iVar4 = 0;
-          if (0 < iVar5) {
-            puVar6 = (uint32_t *)(puVar1 + 0x38);
+      local_7e8 = puVar6[1];
+      local_7ec = auStack_7dc[*puVar6];
+      if ((local_7ec == *puVar6) &&
+         (uVar2 = FUN_00679b50(local_7e0,&local_7ec,0,param_2), (char)uVar2 == '\0')) {
+        if ((-1 < (int)local_7ec) && (iVar4 = *(int *)(preset + 0x34), iVar4 < 0xd)) {
+          iVar3 = 0;
+          if (0 < iVar4) {
+            puVar5 = (uint32_t *)(preset + 0x38);
             do {
-              if (*puVar6 == *puVar7) {
-                *(uint32_t *)(puVar1 + iVar4 * 8 + 0x3c) =
-                     *(int *)(puVar1 + iVar4 * 8 + 0x3c) + puVar7[1];
+              if (*puVar5 == *puVar6) {
+                *(uint32_t *)(preset + iVar3 * 8 + 0x3c) =
+                     *(int *)(preset + iVar3 * 8 + 0x3c) + puVar6[1];
                 goto LAB_0067a241;
               }
-              iVar4++;
-              puVar6 += 2;
-            } while (iVar4 < iVar5);
+              iVar3++;
+              puVar5 += 2;
+            } while (iVar3 < iVar4);
           }
-          *(uint32_t *)(puVar1 + iVar5 * 8 + 0x38) = *puVar7;
-          *(uint32_t *)(puVar1 + *(int *)(puVar1 + 0x34) * 8 + 0x3c) = puVar7[1];
+          *(uint32_t *)(preset + iVar4 * 8 + 0x38) = *puVar6;
+          *(uint32_t *)(preset + *(int *)(preset + 0x34) * 8 + 0x3c) = puVar6[1];
 LAB_0067a23e:
-          *(int *)(puVar1 + 0x34) = *(int *)(puVar1 + 0x34) + 1;
+          *(int *)(preset + 0x34) = *(int *)(preset + 0x34) + 1;
         }
       }
       else {
-        iVar5 = *(int *)(puVar1 + 0x34);
-        if (iVar5 < 0xd) {
-          iVar4 = 0;
-          if (0 < iVar5) {
-            puVar6 = (uint32_t *)(puVar1 + 0x38);
+        iVar4 = *(int *)(preset + 0x34);
+        if (iVar4 < 0xd) {
+          iVar3 = 0;
+          if (0 < iVar4) {
+            puVar5 = (uint32_t *)(preset + 0x38);
             do {
-              if (*puVar6 == local_7ec) {
-                *(uint32_t *)(puVar1 + iVar4 * 8 + 0x3c) =
-                     *(int *)(puVar1 + iVar4 * 8 + 0x3c) + local_7e8;
+              if (*puVar5 == local_7ec) {
+                *(uint32_t *)(preset + iVar3 * 8 + 0x3c) =
+                     *(int *)(preset + iVar3 * 8 + 0x3c) + local_7e8;
                 goto LAB_0067a241;
               }
-              iVar4++;
-              puVar6 += 2;
-            } while (iVar4 < iVar5);
+              iVar3++;
+              puVar5 += 2;
+            } while (iVar3 < iVar4);
           }
-          *(uint32_t *)(puVar1 + iVar5 * 8 + 0x38) = local_7ec;
-          *(uint32_t *)(puVar1 + *(int *)(puVar1 + 0x34) * 8 + 0x3c) = local_7e8;
+          *(uint32_t *)(preset + iVar4 * 8 + 0x38) = local_7ec;
+          *(uint32_t *)(preset + *(int *)(preset + 0x34) * 8 + 0x3c) = local_7e8;
           goto LAB_0067a23e;
         }
       }
 LAB_0067a241:
       local_7e4 = (uint8_t *)((int)local_7e4 + 1);
-      puVar7 += 2;
+      puVar6 += 2;
     } while ((int)local_7e4 < *(int *)((int)param_1 + 0x34));
   }
   local_7e4 = 0;
   if (0 < *(int *)((int)param_1 + 0xa8)) {
-    puVar7 = (uint32_t *)((int)param_1 + 0xac);
+    puVar6 = (uint32_t *)((int)param_1 + 0xac);
     do {
-      local_7e8 = puVar7[1];
-      local_7ec = auStack_7dc[*puVar7];
-      if ((local_7ec == *puVar7) &&
-         (uVar3 = FUN_00679b50(local_7e0,&local_7ec,0,param_2), (char)uVar3 == '\0')) {
-        if ((-1 < (int)local_7ec) && (iVar5 = *(int *)(puVar1 + 0xa8), iVar5 < 0x1f)) {
-          iVar4 = 0;
-          if (0 < iVar5) {
-            puVar6 = (uint32_t *)(puVar1 + 0xac);
+      local_7e8 = puVar6[1];
+      local_7ec = auStack_7dc[*puVar6];
+      if ((local_7ec == *puVar6) &&
+         (uVar2 = FUN_00679b50(local_7e0,&local_7ec,0,param_2), (char)uVar2 == '\0')) {
+        if ((-1 < (int)local_7ec) && (iVar4 = *(int *)(preset + 0xa8), iVar4 < 0x1f)) {
+          iVar3 = 0;
+          if (0 < iVar4) {
+            puVar5 = (uint32_t *)(preset + 0xac);
             do {
-              if (*puVar6 == *puVar7) {
-                *(uint32_t *)(puVar1 + iVar4 * 8 + 0xb0) =
-                     *(int *)(puVar1 + iVar4 * 8 + 0xb0) + puVar7[1];
+              if (*puVar5 == *puVar6) {
+                *(uint32_t *)(preset + iVar3 * 8 + 0xb0) =
+                     *(int *)(preset + iVar3 * 8 + 0xb0) + puVar6[1];
                 goto LAB_0067a36f;
               }
-              iVar4++;
-              puVar6 += 2;
-            } while (iVar4 < iVar5);
+              iVar3++;
+              puVar5 += 2;
+            } while (iVar3 < iVar4);
           }
-          *(uint32_t *)(puVar1 + iVar5 * 8 + 0xac) = *puVar7;
-          *(uint32_t *)(puVar1 + *(int *)(puVar1 + 0xa8) * 8 + 0xb0) = puVar7[1];
+          *(uint32_t *)(preset + iVar4 * 8 + 0xac) = *puVar6;
+          *(uint32_t *)(preset + *(int *)(preset + 0xa8) * 8 + 0xb0) = puVar6[1];
 LAB_0067a369:
-          *(int *)(puVar1 + 0xa8) = *(int *)(puVar1 + 0xa8) + 1;
+          *(int *)(preset + 0xa8) = *(int *)(preset + 0xa8) + 1;
         }
       }
       else {
-        iVar5 = *(int *)(puVar1 + 0xa8);
-        if (iVar5 < 0x1f) {
-          iVar4 = 0;
-          if (0 < iVar5) {
-            puVar6 = (uint32_t *)(puVar1 + 0xac);
+        iVar4 = *(int *)(preset + 0xa8);
+        if (iVar4 < 0x1f) {
+          iVar3 = 0;
+          if (0 < iVar4) {
+            puVar5 = (uint32_t *)(preset + 0xac);
             do {
-              if (*puVar6 == local_7ec) {
-                *(uint32_t *)(puVar1 + iVar4 * 8 + 0xb0) =
-                     *(int *)(puVar1 + iVar4 * 8 + 0xb0) + local_7e8;
+              if (*puVar5 == local_7ec) {
+                *(uint32_t *)(preset + iVar3 * 8 + 0xb0) =
+                     *(int *)(preset + iVar3 * 8 + 0xb0) + local_7e8;
                 goto LAB_0067a36f;
               }
-              iVar4++;
-              puVar6 += 2;
-            } while (iVar4 < iVar5);
+              iVar3++;
+              puVar5 += 2;
+            } while (iVar3 < iVar4);
           }
-          *(uint32_t *)(puVar1 + iVar5 * 8 + 0xac) = local_7ec;
-          *(uint32_t *)(puVar1 + *(int *)(puVar1 + 0xa8) * 8 + 0xb0) = local_7e8;
+          *(uint32_t *)(preset + iVar4 * 8 + 0xac) = local_7ec;
+          *(uint32_t *)(preset + *(int *)(preset + 0xa8) * 8 + 0xb0) = local_7e8;
           goto LAB_0067a369;
         }
       }
 LAB_0067a36f:
       local_7e4 = (uint8_t *)((int)local_7e4 + 1);
-      puVar7 += 2;
+      puVar6 += 2;
     } while ((int)local_7e4 < *(int *)((int)param_1 + 0xa8));
   }
-  return puVar1;
-}
-
-
-// 0x0067a3c0
-uint32_t FUN_0067a3c0(uint32_t *param_1, ...)
-{
-  *param_1 = 0xffffffff;
-  param_1[1] = 0;
-  return 0;
-}
-
-
-// 0x0067a3d0
-uint32_t FUN_0067a3d0(int param_1, ...)
-{
-  *(uint32_t *)(param_1 + 0x20) = 0xffffffff;
-  *(uint32_t *)(param_1 + 0x24) = 0xffffffff;
-  *(uint32_t *)(param_1 + 0x28) = 0xffffffff;
-  *(uint32_t *)(param_1 + 0x2c) = 0xffffffff;
-  *(uint32_t *)(param_1 + 0x30) = 0xffffffff;
-  *(uint32_t *)(param_1 + 0x34) = 0;
-  *(uint32_t *)(param_1 + 0xa8) = 0;
-  return 0;
+  return preset;
 }
 
 

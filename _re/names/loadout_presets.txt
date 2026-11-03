@@ -1,0 +1,21 @@
+# Part 9e-iv: the equipment menus' loadout presets and mission items (game/loadout_presets.cpp).
+# (No Ghidra structs for them: void *.)
+0067a3c0 S_PresetItem::Reset | void __fastcall Reset(void * item)
+0067a3d0 S_LoadoutPreset::ClearPlaces | void __fastcall ClearPlaces(void * preset)
+0067d450 S_LoadoutPreset::CountItems | int __thiscall CountItems(void *this, int typeId)
+0067d4d0 C_LoadoutPresets::Clear | void __fastcall Clear(void * presets)
+0067d580 C_LoadoutPresets::AddPreset | void __fastcall AddPreset(void * presets)
+0067d770 C_LoadoutPresets::AddUserPreset | void __fastcall AddUserPreset(void * presets)
+0067d960 C_LoadoutPresets::Load | bool __fastcall Load(void * presets)
+0067dc30 C_LoadoutPresets::SaveUser | bool __fastcall SaveUser(void * presets)
+0067def0 C_LoadoutPresets::CreateUserPresets | void __fastcall CreateUserPresets(void * presets)
+0067de40 C_LoadoutPresets::GetPreset | void * __thiscall GetPreset(void *this, int index, uint flags)
+0067de90 C_LoadoutPresets::GetUserPreset | void * __thiscall GetUserPreset(void *this, int index, uint flags)
+0067e460 C_MissionItems::C_MissionItems | void * __fastcall C_MissionItems(void * items)
+0067e490 C_MissionItems::Release | void __fastcall Release(void * items)
+0067e4d0 S_MissionItems::~S_MissionItems | void __fastcall ~S_MissionItems(void * record)
+0067e500 C_MissionItems::Setup | void __fastcall Setup(void * items)
+0067e650 C_MissionItems::Load | bool __fastcall Load(void * items)
+0067e850 MissionItemPairs_Insert | void __thiscall MissionItemPairs_Insert(void *this, void * where, uint count, void * value)
+0067e380 vector_size_e4_67e380
+0067e3b0 uninitialized_fill_n4_67e3b0

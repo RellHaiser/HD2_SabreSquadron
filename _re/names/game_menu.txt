@@ -1,0 +1,68 @@
+# Part 9e-v: the in-game menu's class and menu state slots (game/game_menu.cpp).
+0067eb40 C_GameMenu::C_GameMenu | C_GameMenu * __thiscall C_GameMenu(C_GameMenu *this)
+0067f4a0 C_GameMenu::~C_GameMenu | void __thiscall ~C_GameMenu(C_GameMenu *this)
+0067f480 C_GameMenu::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(C_GameMenu *this, uchar flags)
+0067f470 C_GameMenu::GetTypeId | int __thiscall GetTypeId(C_GameMenu *this)
+0067f650 C_GameMenu::OnStart | bool __thiscall OnStart(C_GameMenu *this, void * arg)
+0067f760 C_GameMenu::OnStop | void __thiscall OnStop(C_GameMenu *this)
+00680960 C_GameMenu::OnInput | bool __thiscall OnInput(C_GameMenu *this, float * held, float * pressed)
+006808d0 C_GameMenu::OnUpdate | void __thiscall OnUpdate(C_GameMenu *this, int timeDelta)
+00680920 C_GameMenu::OnTick | void __thiscall OnTick(C_GameMenu *this, int timeDelta)
+00682770 C_GameMenu::OnDrawScreens | bool __thiscall OnDrawScreens(C_GameMenu *this)
+00682aa0 C_GameMenu::ShowMessage | void __thiscall ShowMessage(C_GameMenu *this, int textId, int unused)
+0067fda0 C_MissionDef::AreObjectivesDecided | bool __fastcall AreObjectivesDecided(C_MissionDef * mission)
+# Part 9e-vi: the update's helpers and the drawing.
+006869a0 C_GameMenu::UpdateLoadButton | void __fastcall UpdateLoadButton(C_GameMenu * menu)
+006802a0 C_GameMenu::UpdateNetStatus | void UpdateNetStatus(void)
+006801f0 CountUniformSides | void __fastcall CountUniformSides(int * axis, int * allies)
+006824f0 C_GameMenu::OnRender | bool __thiscall OnRender(C_GameMenu *this)
+006825d0 C_GameMenu::RenderGame | bool __thiscall RenderGame(C_GameMenu *this)
+00682790 C_GameMenu::RenderEquipment | bool __thiscall RenderEquipment(C_GameMenu *this)
+# Part 9e-vii: the messages.
+0067f850 C_GameMenu::OnMessage | void __thiscall OnMessage(C_GameMenu *this, void * message)
+# Part 9e-ix: the screens' descriptions.
+0067fe00 C_GameMenu::BuildScreens | bool __thiscall BuildScreens(C_GameMenu *this)
+00680980 C_GameMenu::BuildMainScreen | bool __thiscall BuildMainScreen(C_GameMenu *this, void * desc, void * model)
+# Part 9e-xiii: the player screen's description and callbacks.
+00682c80 C_GameMenu::BuildPlayerScreen | bool __thiscall BuildPlayerScreen(C_GameMenu *this, void * desc, void * model)
+00684fc0 C_GameMenu::OnPlayerScreenHidden | bool __thiscall OnPlayerScreenHidden(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+006861b0 C_GameMenu::OnGameInfo | bool __thiscall OnGameInfo(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00682a20 C_GameMenu::OnChat | bool __thiscall OnChat(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+# Part 9e-xiv: the soldiers panel.
+006838e0 C_GameMenu::BuildSoldiersPanel | bool __thiscall BuildSoldiersPanel(C_GameMenu *this, void * desc, void * model)
+00685420 C_GameMenu::OnSoldierPicked | bool __thiscall OnSoldierPicked(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+006854e0 C_GameMenu::OnSide | bool __thiscall OnSide(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+# Part 9e-xv: the equipment panel.
+00684690 C_GameMenu::BuildEquipmentPanel | bool __thiscall BuildEquipmentPanel(C_GameMenu *this, void * desc, void * model)
+# Part 9e-xvi: the items and skills panels.
+00684b90 C_GameMenu::BuildItemsPanel | bool __thiscall BuildItemsPanel(C_GameMenu *this, void * desc, void * model)
+00684df0 C_GameMenu::BuildSkillsPanel | bool __stdcall BuildSkillsPanel(void * desc, void * model)
+# Part 9e-xvii: the soldier types and the user presets.
+00685da0 C_GameMenu::UpdateSoldierTypes | void __fastcall UpdateSoldierTypes(C_GameMenu * menu)
+00687dd0 C_GameMenu::OnSoldierType | bool __thiscall OnSoldierType(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00687f50 C_GameMenu::OnSavePreset | bool __thiscall OnSavePreset(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00687bc0 C_GameMenu::StorePreset | void __thiscall StorePreset(C_GameMenu *this, int index)
+# Part 9e-xviii: the squad's team.
+00684fd0 C_GameMenu::OnPlayerScreenShown | bool __thiscall OnPlayerScreenShown(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00685550 C_GameMenu::SetTeam | void __thiscall SetTeam(C_GameMenu *this, int team)
+00685ab0 C_GameMenu::ShowTeamSoldiers | void __thiscall ShowTeamSoldiers(C_GameMenu *this, int team)
+00685880 C_GameMenu::TakeSoldierItems | void __fastcall TakeSoldierItems(C_GameMenu * menu)
+# Part 9e-xix: the stats and the stocks.
+006863c0 C_GameMenu::ShowSoldierStats | void __stdcall ShowSoldierStats(int profile)
+00685170 C_GameMenu::SetupStocks | bool __fastcall SetupStocks(C_GameMenu * menu)
+# Part 9e-xx: the item slots' drag and drop.
+00681ee0 C_GameMenu::OnItemNotify13 | bool __thiscall OnItemNotify13(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00682020 C_GameMenu::OnItemNotify0A | bool __thiscall OnItemNotify0A(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00682210 C_GameMenu::OnItemNotify08 | bool __thiscall OnItemNotify08(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+006822b0 C_GameMenu::OnItemNotify09 | bool __thiscall OnItemNotify09(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00682350 C_GameMenu::DropItem | bool __thiscall DropItem(C_GameMenu *this, void * control, uint target)
+# Part 9e-xxi: the soldier type picked.
+00686e10 C_GameMenu::OnItemNotify60 | bool __thiscall OnItemNotify60(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00687360 C_GameMenu::ClearSoldier | void __fastcall ClearSoldier(C_GameMenu * menu)
+00686ca0 C_GameMenu::AddPresetItem | bool __thiscall AddPresetItem(C_GameMenu *this, uint slot, int type, int count)
+# Part 9e-xxii: the preset's match.
+006876b0 C_GameMenu::MatchPreset | void * __thiscall MatchPreset(C_GameMenu *this, void * preset)
+00687390 C_GameMenu::FindSubstitute | bool __thiscall FindSubstitute(C_GameMenu *this, int * type, int ammo)
+# Not ported yet (named for the later parts).
+0072f8b0 C_NetGame::GetLocalPlayerStats
+0072ee60 C_NetGame::SendChat

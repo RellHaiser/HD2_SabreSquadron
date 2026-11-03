@@ -107,12 +107,14 @@ LAB_006731b5:
 uint32_t C_EquipmentMenu__FUN_006731d0(C_EquipmentMenu *_this,uint32_t param_1,int param_2, ...)
 {
   int *piVar1;
-  int iVar2;
-  int *piVar3;
+  uint32_t uVar2;
+  int iVar3;
+  int *piVar4;
   int *extraout_EAX;
-  uint32_t uVar4;
+  undefined3 extraout_var;
+  int *extraout_EAX_00;
   bool bVar5;
-  uint16_t *puVar6;
+  uint16_t *item;
   uint16_t local_34;
   short sStack_32;
   uint16_t uStack_30;
@@ -125,41 +127,42 @@ uint32_t C_EquipmentMenu__FUN_006731d0(C_EquipmentMenu *_this,uint32_t param_1,i
   int *local_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
-  piVar3 = *(int **)(param_2 + 0x5c);
-  if ((int)piVar3 < 0) goto LAB_00673430;
-  local_2a = (short)piVar3;
+  piVar4 = *(int **)(param_2 + 0x5c);
+  if ((int)piVar4 < 0) goto LAB_00673430;
+  local_2a = (short)piVar4;
   local_28 = 1;
   local_2c = 0xffff;
   if ((*(uint32_t *)(param_2 + 0x60) & 0x3f00000) != 0x100000) {
-    uVar4 = FUN_0067c0d0(_this->_pad_023c + 0x38,(int)&local_2c,'\0');
-    if ((char)uVar4 == '\0') {
-      return uVar4;
+    bVar5 = C_StoreList__TakeItem(_this->_pad_023c + 0x38,&local_2c,false);
+    if (!bVar5) {
+      return CONCAT31(extraout_var,bVar5);
     }
-    FUN_006716f0(&_this->m_1d0,(float *)&local_34,(float *)&local_2c,'\0');
-    piVar3 = (int *)CONCAT22(uStack_30,sStack_32);
+    C_EquipmentPanel__DropItem(&_this->m_1d0,&local_34,&local_2c,false);
+    piVar4 = (int *)CONCAT22(uStack_30,sStack_32);
     if (sStack_32 != -1) {
       if (sStack_32 == local_2a) {
-        puVar6 = &local_2c;
+        item = &local_2c;
       }
       else {
-        puVar6 = &local_34;
+        item = &local_34;
       }
-      piVar3 = (int *)FUN_0067c0a0(_this->_pad_023c + 0x38,(int)puVar6);
+      C_StoreList__AddItem(_this->_pad_023c + 0x38,item);
+      piVar4 = extraout_EAX_00;
     }
     goto LAB_00673430;
   }
-  iVar2 = FUN_00671290(*(uint32_t *)(param_2 + 0x60));
-  if (iVar2 == 8) {
-    FUN_00672720(&_this->m_1d0,_this->m_298);
-    FUN_0067c040(_this->_pad_023c + 0x38);
+  uVar2 = C_EquipmentPanel__SlotOfControl(*(uint32_t *)(param_2 + 0x60));
+  if (uVar2 == 8) {
+    C_EquipmentPanel__ReturnBackpack(&_this->m_1d0,_this->m_298);
+    C_StoreList__UpdateAll(_this->_pad_023c + 0x38);
   }
   else {
-    iVar2 = FUN_006713c0(&_this->m_1d0,*(uint32_t *)(param_2 + 0x60),(int)&local_2c);
-    if (iVar2 != 0) {
-      FUN_0067c0a0(_this->_pad_023c + 0x38,(int)&local_2c);
+    iVar3 = C_EquipmentPanel__RemoveItemAt(&_this->m_1d0,*(uint32_t *)(param_2 + 0x60),&local_2c);
+    if (iVar3 != 0) {
+      C_StoreList__AddItem(_this->_pad_023c + 0x38,&local_2c);
     }
   }
-  piVar3 = DAT_008ae5ac;
+  piVar4 = DAT_008ae5ac;
   local_10 = 0;
   local_24 = 0;
   local_20 = 0x10000a1;
@@ -167,16 +170,16 @@ uint32_t C_EquipmentMenu__FUN_006731d0(C_EquipmentMenu *_this,uint32_t param_1,i
   local_4 = 0;
   if ((DAT_008ae5bc == 0) || (DAT_008ae5ac == DAT_008ae5a8)) {
     FUN_00616100(0x8ae590);
-    piVar3 = DAT_008ae5ac;
+    piVar4 = DAT_008ae5ac;
     DAT_008ae5ac += 6;
 LAB_006732ed:
-    FUN_006169d0(piVar3,&local_24);
+    FUN_006169d0(piVar4,&local_24);
   }
   else {
     piVar1 = DAT_008ae5ac + 6;
     DAT_008ae5ac = piVar1;
     if (piVar1 != DAT_008ae5a8) goto LAB_006732ed;
-    FUN_006169d0(piVar3,&local_24);
+    FUN_006169d0(piVar4,&local_24);
     FUN_00616100(0x8ae590);
   }
   DAT_008ae5bc++;
@@ -191,35 +194,35 @@ LAB_006732ed:
   local_4 = 1;
   if ((DAT_008ae5bc == 0) || (DAT_008ae5ac == DAT_008ae5a8)) {
     FUN_00616100(0x8ae590);
-    piVar3 = DAT_008ae5ac;
+    piVar4 = DAT_008ae5ac;
     DAT_008ae5ac += 6;
-    piVar3 = (int *)FUN_006169d0(piVar3,&local_24);
+    piVar4 = (int *)FUN_006169d0(piVar4,&local_24);
   }
   else {
-    piVar3 = DAT_008ae5ac + 6;
-    if (piVar3 == DAT_008ae5a8) {
-      DAT_008ae5ac = piVar3;
+    piVar4 = DAT_008ae5ac + 6;
+    if (piVar4 == DAT_008ae5a8) {
+      DAT_008ae5ac = piVar4;
       FUN_006169d0(piVar1,&local_24);
-      piVar3 = (int *)FUN_00616100(0x8ae590);
+      piVar4 = (int *)FUN_00616100(0x8ae590);
     }
     else {
       local_34 = SUB42(DAT_008ae5ac,0);
       sStack_32 = (short)((uint32_t)DAT_008ae5ac >> 0x10);
       bVar5 = DAT_008ae5ac != 0;
       local_4 = 2;
-      DAT_008ae5ac = piVar3;
+      DAT_008ae5ac = piVar4;
       if (bVar5) {
-        piVar3 = (int *)FUN_006157d0(piVar1,&local_24);
+        piVar4 = (int *)FUN_006157d0(piVar1,&local_24);
       }
     }
   }
   DAT_008ae5bc++;
-  if ((local_10 != 0) && (*local_10 = *local_10 - 1, piVar3 = local_10, *local_10 == 0)) {
+  if ((local_10 != 0) && (*local_10 = *local_10 - 1, piVar4 = local_10, *local_10 == 0)) {
     tier1_operator_delete(local_10);
-    piVar3 = extraout_EAX;
+    piVar4 = extraout_EAX;
   }
 LAB_00673430:
-  return CONCAT31((int3)((uint32_t)piVar3 >> 8),1);
+  return CONCAT31((int3)((uint32_t)piVar4 >> 8),1);
 }
 
 
@@ -314,7 +317,7 @@ uint32_t C_EquipmentMenu__FUN_006735f0(C_EquipmentMenu *_this, ...)
 uint32_t C_EquipmentMenu__FUN_00673690(C_EquipmentMenu *_this, ...)
 {
   uint32_t *puVar1;
-  int iVar2;
+  void *pvVar2;
   uint32_t uVar3;
   int unaff_retaddr;
   uint16_t local_6;
@@ -331,12 +334,12 @@ uint32_t C_EquipmentMenu__FUN_00673690(C_EquipmentMenu *_this, ...)
     local_2 = 0;
     local_6 = 0xffff;
     (**(code **)(_this->m_1d0 + 4))(&local_6,0);
-    iVar2 = FUN_0066bb80((int)_this);
-    if (iVar2 == 0) {
+    pvVar2 = C_MenuState__PickFrame((C_MenuState *)_this);
+    if (pvVar2 == 0) {
       uVar3 = 0;
     }
     else {
-      uVar3 = *(uint32_t *)(iVar2 + 0xec);
+      uVar3 = *(uint32_t *)((int)pvVar2 + 0xec);
     }
     uVar3 = C_EquipmentMenu__FUN_006771e0(_this,unaff_retaddr,uVar3);
     *(uint16_t *)((int)&_this->m_1b8 + 2) = 0xffff;
@@ -352,7 +355,7 @@ uint32_t FUN_00673730(int param_1, ...)
 {
   S_SquadSoldier **ppSVar1;
   S_SoldierItem *pSVar2;
-  uint32_t uVar3;
+  bool bVar3;
   uint32_t uVar4;
   S_SquadSoldier *_this;
   int iVar5;
@@ -374,8 +377,8 @@ uint32_t FUN_00673730(int param_1, ...)
       }
       if ((_this->head).typeId != -1) {
         pSVar2 = &_this->head;
-        uVar3 = FUN_0067c0d0((void *)(param_1 + 0x274),(int)pSVar2,'\0');
-        if ((char)uVar3 == '\0') {
+        bVar3 = C_StoreList__TakeItem((void *)(param_1 + 0x274),pSVar2,false);
+        if (!bVar3) {
           pSVar2->uid = -1;
           pSVar2->typeId = -1;
           (_this->head).present = 0;
@@ -383,8 +386,8 @@ uint32_t FUN_00673730(int param_1, ...)
       }
       if ((_this->uniform).typeId != -1) {
         pSVar2 = &_this->uniform;
-        uVar3 = FUN_0067c0d0((void *)(param_1 + 0x274),(int)pSVar2,'\0');
-        if ((char)uVar3 == '\0') {
+        bVar3 = C_StoreList__TakeItem((void *)(param_1 + 0x274),pSVar2,false);
+        if (!bVar3) {
           pSVar2->uid = -1;
           pSVar2->typeId = -1;
           (_this->uniform).present = 0;
@@ -392,8 +395,8 @@ uint32_t FUN_00673730(int param_1, ...)
       }
       if ((_this->longGun).typeId != -1) {
         pSVar2 = &_this->longGun;
-        uVar3 = FUN_0067c0d0((void *)(param_1 + 0x274),(int)pSVar2,'\0');
-        if ((char)uVar3 == '\0') {
+        bVar3 = C_StoreList__TakeItem((void *)(param_1 + 0x274),pSVar2,false);
+        if (!bVar3) {
           pSVar2->uid = -1;
           pSVar2->typeId = -1;
           (_this->longGun).present = 0;
@@ -401,8 +404,8 @@ uint32_t FUN_00673730(int param_1, ...)
       }
       if ((_this->hands).typeId != -1) {
         pSVar2 = &_this->hands;
-        uVar3 = FUN_0067c0d0((void *)(param_1 + 0x274),(int)pSVar2,'\0');
-        if ((char)uVar3 == '\0') {
+        bVar3 = C_StoreList__TakeItem((void *)(param_1 + 0x274),pSVar2,false);
+        if (!bVar3) {
           pSVar2->uid = -1;
           pSVar2->typeId = -1;
           (_this->hands).present = 0;
@@ -413,9 +416,10 @@ uint32_t FUN_00673730(int param_1, ...)
          (local_28 = ((int)(_this->belt).last - (int)pSVar2) / 6, local_28 != 0)) {
         iVar5 = local_28 * 6;
         do {
-          uVar3 = FUN_0067c0d0((void *)(param_1 + 0x274),(int)&(_this->belt).first[-1].uid + iVar5,
-                               '\0');
-          if ((char)uVar3 == '\0') {
+          bVar3 = C_StoreList__TakeItem
+                            ((void *)(param_1 + 0x274),
+                             (void *)((int)&(_this->belt).first[-1].uid + iVar5),false);
+          if (!bVar3) {
             S_SquadSoldier__RemoveItem
                       (_this,' ',(S_SoldierItem *)((int)&(_this->belt).first[-1].uid + iVar5));
           }
@@ -425,8 +429,8 @@ uint32_t FUN_00673730(int param_1, ...)
       }
       if ((_this->backpack).typeId != -1) {
         pSVar2 = &_this->backpack;
-        uVar3 = FUN_0067c0d0((void *)(param_1 + 0x274),(int)pSVar2,'\0');
-        if ((char)uVar3 == '\0') {
+        bVar3 = C_StoreList__TakeItem((void *)(param_1 + 0x274),pSVar2,false);
+        if (!bVar3) {
           pSVar2->uid = -1;
           pSVar2->typeId = -1;
           (_this->backpack).present = 0;
@@ -440,9 +444,10 @@ uint32_t FUN_00673730(int param_1, ...)
          (local_28 = ((int)(_this->backpackContents).last - (int)pSVar2) / 6, local_28 != 0)) {
         iVar5 = local_28 * 6;
         do {
-          uVar3 = FUN_0067c0d0((void *)(param_1 + 0x274),
-                               (int)&(_this->backpackContents).first[-1].uid + iVar5,'\0');
-          if ((char)uVar3 == '\0') {
+          bVar3 = C_StoreList__TakeItem
+                            ((void *)(param_1 + 0x274),
+                             (void *)((int)&(_this->backpackContents).first[-1].uid + iVar5),false);
+          if (!bVar3) {
             S_SquadSoldier__RemoveItem
                       (_this,'@',(S_SoldierItem *)
                                 ((int)&(_this->backpackContents).first[-1].uid + iVar5));
@@ -539,8 +544,8 @@ uint32_t C_EquipmentMenu__FUN_00673b80(C_EquipmentMenu *_this, ...)
     (**(code **)(*(int *)_this->m_0fc + 0x80))(1);
     _this->m_0fc = 0;
   }
-  FUN_00670e40((int)&_this->m_1d0);
-  FUN_0067c150((int)(_this->_pad_023c + 0x38));
+  C_EquipmentPanel__DeleteSoldier(&_this->m_1d0);
+  C_StoreList__ClearPages(_this->_pad_023c + 0x38);
   iVar1 = C_Campaign__GetMissionNumber
                     (g_gameProfile.m_campaign,(g_gameProfile.m_campaign)->m_current);
   if ((2 < iVar1) &&
@@ -783,7 +788,7 @@ uint32_t C_EquipmentMenu__FUN_006740d0(C_EquipmentMenu *_this,int param_1, ...)
     local_b4 = DAT_008ae5e0;
     iVar6 = FUN_00620e90(&local_bc,local_1c,1);
     if (((uint8_t)((int)*(uint32_t *)(**(int **)(iVar6 + 8) + 0x60) >> 0x1a) & 0x3f) != 2) {
-      FUN_0066daa0(_this,1,0x7d4,0x2000007,0);
+      C_MenuState__ShowMessageId((C_MenuState *)_this,1,0x7d4,0x2000007,0);
       return 0;
     }
     local_68 = 0;
@@ -899,12 +904,12 @@ uint32_t C_EquipmentMenu__FUN_006740d0(C_EquipmentMenu *_this,int param_1, ...)
     }
     uVar10 = FUN_00674060();
     if ((char)uVar10 == '\0') {
-      FUN_0066daa0(_this,2,0x7e7,0,0);
+      C_MenuState__ShowMessageId((C_MenuState *)_this,2,0x7e7,0,0);
       return 0;
     }
     uVar10 = FUN_006746f0();
     if ((char)uVar10 == '\0') {
-      FUN_0066daa0(_this,1,0x2531,0x20000c6,0);
+      C_MenuState__ShowMessageId((C_MenuState *)_this,1,0x2531,0x20000c6,0);
       return 0;
     }
     local_30 = 0x20000c6;
@@ -1298,7 +1303,7 @@ uint32_t C_EquipmentMenu__FUN_00674860(C_EquipmentMenu *_this,int param_1,int *p
       (**(code **)(*piVar1 + 0x38))(piVar1,uVar5,1);
     }
     _this->m_1d8 = _this;
-    FUN_0066f200(&_this->m_1d0,param_1,param_2);
+    C_EquipmentPanel__BuildDescription(&_this->m_1d0,(void *)param_1,param_2);
     return 1;
   }
   return 0;
@@ -1672,7 +1677,7 @@ uint32_t C_EquipmentMenu__FUN_006755f0(C_EquipmentMenu *_this, ...)
     }
   }
   else {
-    FUN_00672580(&_this->m_1d0);
+    C_EquipmentPanel__Refresh(&_this->m_1d0);
     local_10 = 0;
     local_24 = 0x4100000;
     local_20 = 0x1000003;
@@ -1734,56 +1739,57 @@ uint32_t C_EquipmentMenu__FUN_006755f0(C_EquipmentMenu *_this, ...)
 // 0x006758f0
 uint32_t C_EquipmentMenu__FUN_006758f0(C_EquipmentMenu *_this,void *param_1,int *param_2, ...)
 {
+  void *this_00;
   void *pvVar1;
+  void *desc;
   int iVar2;
-  void *pvVar3;
-  int *piVar4;
-  pvVar3 = param_1;
-  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bassign to all");
+  int *piVar3;
+  this_00 = param_1;
+  pvVar1 = S_ScreenDesc__AddControl(param_1,0x14,"bassign to all");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,0xab0);
   AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x677880);
-  pvVar1 = (void *)FUN_00615360(param_1,0x13,"text_inventory");
+  pvVar1 = S_ScreenDesc__AddControl(param_1,0x13,"text_inventory");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xaa8);
-  pvVar1 = (void *)FUN_00615360(param_1,0x11,"soldier type");
-  AddDescMessage3(pvVar1,0,0x1000007,0x400e000,(uint32_t)_this,0x677870);
-  AddDescMessage2(pvVar1,0,0x1000081,0xc,500);
-  AddDescMessage2(pvVar1,0,0x1000017,0x13,500);
+  desc = S_ScreenDesc__AddControl(param_1,0x11,"soldier type");
+  AddDescMessage3(desc,0,0x1000007,0x400e000,(uint32_t)_this,0x677870);
+  AddDescMessage2(desc,0,0x1000081,0xc,500);
+  AddDescMessage2(desc,0,0x1000017,0x13,500);
   param_1 = (void *)0x1;
-  iVar2 = FUN_0067de40(&_this->m_558,0,5);
-  while (iVar2 != 0) {
-    AddDescMessage2(pvVar1,0,0x1000017,0x13,*(uint32_t *)(iVar2 + 0x1b0));
-    iVar2 = FUN_0067de40(&_this->m_558,(int)param_1,5);
+  pvVar1 = C_LoadoutPresets__GetPreset(&_this->m_558,0,5);
+  while (pvVar1 != 0) {
+    AddDescMessage2(desc,0,0x1000017,0x13,*(uint32_t *)((int)pvVar1 + 0x1b0));
+    pvVar1 = C_LoadoutPresets__GetPreset(&_this->m_558,(int)param_1,5);
     param_1 = (void *)((int)param_1 + 1);
   }
-  FUN_00615360(pvVar3,0x12,"text_mission essentials");
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x13,"text_screen");
+  S_ScreenDesc__AddControl(this_00,0x12,"text_mission essentials");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x13,"text_screen");
   AddDescMessage2(pvVar1,0,0x1000015,10,(_this->m_020 != 3) + 0xa8d);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x13,"text_military storages");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x13,"text_military storages");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xa93);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x13,"text_team");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x13,"text_team");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xa92);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x14,"baccept and continue");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x14,"baccept and continue");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,(-(uint32_t)(_this->m_020 != 3) & 0x21) + 0xa90);
   AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x678000);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x14,"bauto equip");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x14,"bauto equip");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,0xa8f);
   AddDescMessage1(pvVar1,0,0x600100b,0);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x14,"bback");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x14,"bback");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,0xa91);
   AddDescMessage1(pvVar1,0,0x600100a,0);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x13,"text_h&dversion");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x13,"text_h&dversion");
   AddDescMessage2(pvVar1,0,0x1000015,0x28,0x7d6);
-  pvVar1 = (void *)FUN_00615360(pvVar3,0x13,"text_assortment");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x13,"text_assortment");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xaa6);
   iVar2 = (**(code **)(*param_2 + 0x48))(param_2,"description",1);
   if (iVar2 != 0) {
-    pvVar3 = (void *)FUN_00615360(pvVar3,0x15,"description");
-    AddDescMessage2(pvVar3,0,0x1000015,0xb,0x7d2);
-    _this->m_1b0 = *(uint32_t *)((int)pvVar3 + 8);
+    pvVar1 = S_ScreenDesc__AddControl(this_00,0x15,"description");
+    AddDescMessage2(pvVar1,0,0x1000015,0xb,0x7d2);
+    _this->m_1b0 = *(uint32_t *)((int)pvVar1 + 8);
   }
-  piVar4 = (int *)(**(code **)(*param_2 + 0x48))(param_2,"text_mission essentials",1);
-  if (piVar4 != 0) {
-    (**(code **)(*piVar4 + 0x30))(piVar4,0);
+  piVar3 = (int *)(**(code **)(*param_2 + 0x48))(param_2,"text_mission essentials",1);
+  if (piVar3 != 0) {
+    (**(code **)(*piVar3 + 0x30))(piVar3,0);
   }
   return 1;
 }
@@ -1795,16 +1801,16 @@ uint32_t FUN_00675c00(int param_1, ...)
   if ((g_gameProfile.m_playMode)->singleMission == 0) {
     if (*(int *)(param_1 + 0x20) == 3) {
       C_ItemsModule__EnsureItemsLoaded((C_ItemsModule *)&g_itemsModule);
-      FUN_0067c090((void *)(param_1 + 0x274),g_gameProfile.m_itemStock18);
+      C_StoreList__SetStock((void *)(param_1 + 0x274),g_gameProfile.m_itemStock18);
     }
     if (*(int *)(param_1 + 0x20) == 4) {
       C_ItemsModule__EnsureItemsLoaded((C_ItemsModule *)&g_itemsModule);
-      FUN_0067c090((void *)(param_1 + 0x274),g_gameProfile.m_itemStock1C);
+      C_StoreList__SetStock((void *)(param_1 + 0x274),g_gameProfile.m_itemStock1C);
     }
     return 0;
   }
   C_ItemsModule__EnsureItemsLoaded((C_ItemsModule *)&g_itemsModule);
-  FUN_0067c090((void *)(param_1 + 0x274),g_gameProfile.m_itemStock18);
+  C_StoreList__SetStock((void *)(param_1 + 0x274),g_gameProfile.m_itemStock18);
   FUN_00673730(param_1);
   return 0;
 }
@@ -1813,18 +1819,23 @@ uint32_t FUN_00675c00(int param_1, ...)
 // 0x00675c80
 uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
 {
-  void *pvVar1;
+  int iVar1;
   char cVar2;
   uint32_t *puVar3;
   int iVar4;
-  int *piVar5;
-  C_auto_00815540 *pCVar6;
+  char *name;
+  int *frame;
+  void *pvVar5;
+  C_Screen *pCVar6;
   uint32_t uVar7;
+  char *file;
   uint32_t uVar8;
   uint8_t local_2d;
   int *local_2c;
-  C_auto_00815540 *local_28;
-  uint32_t auStack_24 [5];
+  C_Screen *local_28;
+  uint32_t uStack_24;
+  uint32_t uStack_20;
+  uint32_t uStack_1c;
   int *piStack_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
@@ -1851,8 +1862,8 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
     local_2c = 0;
   }
   else {
-    local_2c = C_auto_00813abc__FUN_00626000
-                         ((C_auto_00813abc *)local_28,"Items selection",
+    local_2c = S_ScreenDesc__S_ScreenDesc
+                         ((S_ScreenDesc *)local_28,"Items selection",
                           "items selection",(iVar4 + 1) * 0x4000000);
   }
   local_4 = 0xffffffff;
@@ -1869,28 +1880,40 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
     local_2c = 0;
   }
   else {
-    local_2c = C_auto_00813abc__FUN_00626000
-                         ((C_auto_00813abc *)local_28,"SELECTION SCREEN",
+    local_2c = S_ScreenDesc__S_ScreenDesc
+                         ((S_ScreenDesc *)local_28,"SELECTION SCREEN",
                           "selection screen",(iVar4 + 1) * 0x4000000);
   }
   local_4 = 0xffffffff;
   FUN_00628050(puVar3 + 1,(uint32_t *)puVar3[3],(uint32_t*)(&local_2c));
-  for (uVar8 = 0; (puVar3[2] != 0 && (uVar8 < (uint32_t)((int)(puVar3[3] - puVar3[2]) >> 2)));
+  for (uVar8 = 0; (iVar4 = puVar3[2], iVar4 != 0 && (uVar8 < (uint32_t)(puVar3[3] - iVar4 >> 2)));
       uVar8 = uVar8 + 1) {
-    piVar5 = FUN_0066c2a0((int)_this);
-    if (piVar5 != 0) {
+    iVar1 = *(int *)(*(int *)(iVar4 + uVar8 * 4) + 0x38);
+    file = (char *)(iVar1 + 8);
+    if (iVar1 == 0) {
+      file = &DAT_00867a90;
+    }
+    iVar4 = *(int *)(*(int *)(iVar4 + uVar8 * 4) + 0x3c);
+    if (iVar4 == 0) {
+      name = &DAT_00867a90;
+    }
+    else {
+      name = (char *)(iVar4 + 8);
+    }
+    frame = C_MenuState__LoadModel((C_MenuState *)_this,name,file);
+    if (frame != 0) {
       if ((*(uint32_t *)(*(int *)(puVar3[2] + uVar8 * 4) + 0x40) & 0xfc000000) == 0x4000000) {
         FUN_00673ca0();
-        C_EquipmentMenu__FUN_00674860(_this,*(int *)(puVar3[2] + uVar8 * 4),piVar5);
-        FUN_006766b0(*(int *)(puVar3[2] + uVar8 * 4),piVar5);
-        FUN_00677010(*(int *)(puVar3[2] + uVar8 * 4),piVar5);
+        C_EquipmentMenu__FUN_00674860(_this,*(int *)(puVar3[2] + uVar8 * 4),frame);
+        FUN_006766b0(*(int *)(puVar3[2] + uVar8 * 4),frame);
+        FUN_00677010(*(int *)(puVar3[2] + uVar8 * 4),frame);
         FUN_006764a0(*(void **)(puVar3[2] + uVar8 * 4));
-        C_EquipmentMenu__FUN_006758f0(_this,*(void **)(puVar3[2] + uVar8 * 4),piVar5);
+        C_EquipmentMenu__FUN_006758f0(_this,*(void **)(puVar3[2] + uVar8 * 4),frame);
         C_EquipmentMenu__FUN_00678000(_this,0,0,0,0);
       }
-      pvVar1 = *(void **)(puVar3[2] + uVar8 * 4);
-      if ((*(uint32_t *)((int)pvVar1 + 0x40) & 0xfc000000) == 0x8000000) {
-        C_EquipmentMenu__FUN_00676230(_this,pvVar1,piVar5);
+      pvVar5 = *(void **)(puVar3[2] + uVar8 * 4);
+      if ((*(uint32_t *)((int)pvVar5 + 0x40) & 0xfc000000) == 0x8000000) {
+        C_EquipmentMenu__FUN_00676230(_this,pvVar5,frame);
       }
       local_28 = tier1_operator_new(0x84);
       local_4 = 2;
@@ -1898,7 +1921,7 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
         local_2c = 0;
       }
       else {
-        local_2c = C_Control__FUN_00668420((C_Control*)(local_28),_this->m_030,piVar5);
+        local_2c = C_Screen__C_Screen(local_28,_this->m_030,frame);
       }
       local_4 = 0xffffffff;
       cVar2 = (**(code **)(*local_2c + 0x8c))(*(uint32_t *)(puVar3[2] + uVar8 * 4));
@@ -1912,19 +1935,20 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
     (**(code **)*puVar3)(1);
   }
   piStack_10 = 0;
-  auStack_24[0] = 0;
-  auStack_24[1] = 0x2000001;
-  auStack_24[2] = 1;
+  uStack_24 = 0;
+  uStack_20 = 0x2000001;
+  uStack_1c = 1;
   local_4 = 3;
-  FUN_0066cc50(_this,auStack_24);
+  C_MenuState__HandleMessage((C_MenuState *)_this,&uStack_24);
   local_4 = 0xffffffff;
   if ((piStack_10 != 0) && (*piStack_10 = *piStack_10 - 1, *piStack_10 == 0)) {
     tier1_operator_delete(piStack_10);
   }
   C_EquipmentMenu__FUN_00674d60(_this);
-  piVar5 = FUN_0066c2a0((int)_this);
+  pvVar5 = C_MenuState__LoadModel((C_MenuState *)_this,"DESCRIPTION","description")
+  ;
   uVar7 = 0;
-  if (piVar5 != 0) {
+  if (pvVar5 != 0) {
     pCVar6 = tier1_operator_new(0x8c);
     local_4 = 4;
     local_28 = pCVar6;
@@ -1932,11 +1956,11 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
       pCVar6 = 0;
     }
     else {
-      C_Control__FUN_00668420((C_Control*)(pCVar6),_this->m_030,piVar5);
+      C_Screen__C_Screen(pCVar6,_this->m_030,pvVar5);
       pCVar6[1].vtable = 0;
       pCVar6[1]._pad_0004[0] = '\0';
       pCVar6[1]._pad_0004[1] = '\0';
-      pCVar6->vtable = (C_auto_00815540_vtbl *)&PTR_008156b8;
+      pCVar6->vtable = (C_Screen_vtbl *)&PTR_008156b8;
     }
     _this->m_0fc = pCVar6;
     local_4 = 0xffffffff;
@@ -1946,108 +1970,16 @@ uint32_t C_EquipmentMenu__FUN_00675c80(C_EquipmentMenu *_this, ...)
 }
 
 
-// 0x00676010
-uint8_t FUN_00676010(void *_this, ...)
-{
-  return *(uint8_t *)((int)_this + 0x88);
-}
-
-
-// 0x00676020
-uint32_t * C_auto_008156b8__FUN_00676020(C_auto_008156b8 *_this,uint8_t param_1, ...)
-{
-  C_auto_008156b8__FUN_00676040(_this);
-  if ((param_1 & 1) != 0) {
-    tier1_operator_delete(_this);
-  }
-  return (uint32_t*)(&_this->vtable);
-}
-
-
-// 0x00676040
-uint32_t C_auto_008156b8__FUN_00676040(C_auto_008156b8 *_this, ...)
-{
-  uchar *this_00;
-  int *piVar1;
-  int iVar2;
-  uint32_t local_4;
-  _this->vtable = (C_auto_008156b8_vtbl *)&PTR_008156b8;
-  local_4 = 0;
-  if ((int *)_this->m_084 != 0) {
-    (**(code **)(*(int *)_this->m_084 + 0x80))(1);
-  }
-  _this->vtable = (C_auto_008156b8_vtbl *)&PTR_00815540;
-  local_4 = 2;
-  if (_this->m_070 != 0) {
-    C_Cursor__Release(_this->m_070);
-    _this->m_070 = 0;
-  }
-  piVar1 = _this->m_07c;
-  if ((piVar1 != 0) && (iVar2 = *piVar1, *piVar1 = iVar2 - 1, iVar2 - 1 == 0)) {
-    tier1_operator_delete(piVar1);
-  }
-  _this->vtable = (C_auto_008156b8_vtbl *)&PTR_00814430;
-  local_4 = 3;
-  this_00 = _this->_pad_0004;
-  while ((_this->m_008 != 0 && ((int)_this->m_00c - _this->m_008 >> 2 != 0))) {
-    piVar1 = *(int **)((int)_this->m_00c - 4);
-    if (piVar1 != 0) {
-      (**(code **)(*piVar1 + 0x80))(1);
-    }
-    empty_function_653c80();
-    _this->m_00c = (void *)((int)_this->m_00c - 4);
-  }
-  iVar2 = *(int *)(_this->_pad_0010 + 0xc);
-  FUN_00615f20(iVar2,*(int *)(_this->_pad_0010 + 0x10));
-  *(int *)(_this->_pad_0010 + 0x10) = iVar2;
-  _this->m_068 = 0;
-  _this->m_050 = 0;
-  _this->m_04c = 0;
-  _this->m_058 = 0;
-  _this->vtable = (C_auto_008156b8_vtbl *)&PTR_00813dd0;
-  local_4 = 6;
-  iVar2 = vector_size_e4_653b60((int)this_00);
-  while (iVar2 != 0) {
-    piVar1 = *(int **)((int)_this->m_00c - 4);
-    if (piVar1 != 0) {
-      (**(code **)(*piVar1 + 0x80))(1);
-    }
-    FUN_00653c50(this_00,(int)_this->m_00c - 4);
-    iVar2 = vector_size_e4_653b60((int)this_00);
-  }
-  FUN_00653b80(_this->_pad_0010 + 8,*(uint32_t **)(_this->_pad_0010 + 0xc),
-               *(uint32_t **)(_this->_pad_0010 + 0x10));
-  _this->m_068 = 0;
-  _this->m_050 = 0;
-  _this->m_04c = 0;
-  _this->m_058 = 0;
-  GH_PIECE(local_4,0,1) = 5;
-  vector_tidy_65a5a0((int)(_this->_pad_0010 + 0x1c));
-  local_4 = CONCAT31(GH_PIECE(local_4,1,3),4);
-  FUN_006159f0((int)(_this->_pad_0010 + 8));
-  local_4 = 0xffffffff;
-  empty_function_653c80();
-  tier1_operator_delete((void *)_this->m_008);
-  _this->m_008 = 0;
-  _this->m_00c = 0;
-  _this->_pad_0010[0] = '\0';
-  _this->_pad_0010[1] = '\0';
-  _this->_pad_0010[2] = '\0';
-  _this->_pad_0010[3] = '\0';
-  return 0;
-}
-
-
 // 0x00676230
 uint32_t C_EquipmentMenu__FUN_00676230(C_EquipmentMenu *_this,void *param_1,int *param_2, ...)
 {
-  char *pcVar1;
-  S_SquadSoldier **ppSVar2;
-  S_SquadSoldier *pSVar3;
-  void *pvVar4;
-  int *piVar5;
-  S_SoldierProfile *pSVar6;
-  uint32_t uVar7;
+  char *name;
+  S_SquadSoldier **ppSVar1;
+  S_SquadSoldier *pSVar2;
+  void *pvVar3;
+  int *piVar4;
+  S_SoldierProfile *pSVar5;
+  uint32_t uVar6;
   int unaff_ESI;
   uint32_t value;
   char *local_10 [4];
@@ -2055,76 +1987,53 @@ uint32_t C_EquipmentMenu__FUN_00676230(C_EquipmentMenu *_this,void *param_1,int 
   local_10[1] = "photo04";
   local_10[2] = "photo05";
   local_10[3] = "photo06";
-  pvVar4 = (void *)FUN_00615360(param_1,0x13,"text_select one soldier");
-  AddDescMessage2(pvVar4,0,0x1000015,0xc,0xab2);
+  pvVar3 = S_ScreenDesc__AddControl(param_1,0x13,"text_select one soldier");
+  AddDescMessage2(pvVar3,0,0x1000015,0xc,0xab2);
   value = 0;
   do {
-    pcVar1 = local_10[value];
-    piVar5 = (int *)(**(code **)(*param_2 + 0x48))(param_2,pcVar1,1);
-    if (piVar5 != 0) {
+    name = local_10[value];
+    piVar4 = (int *)(**(code **)(*param_2 + 0x48))(param_2,name,1);
+    if (piVar4 != 0) {
       if (((((int)value < 0) ||
-           (ppSVar2 = ((g_gameProfile.m_missionSquad)->states).first,
-           ppSVar2 == (S_SquadSoldier **)0x0)) ||
-          ((uint32_t)((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar2 >> 2) <= value))
-         || (pSVar3 = ppSVar2[value], pSVar3 == 0)) {
-        (**(code **)(*piVar5 + 0x30))(piVar5,0);
+           (ppSVar1 = ((g_gameProfile.m_missionSquad)->states).first,
+           ppSVar1 == (S_SquadSoldier **)0x0)) ||
+          ((uint32_t)((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar1 >> 2) <= value))
+         || (pSVar2 = ppSVar1[value], pSVar2 == 0)) {
+        (**(code **)(*piVar4 + 0x30))(piVar4,0);
       }
       else {
-        (**(code **)(*piVar5 + 0x30))(piVar5,1);
-        (**(code **)(*piVar5 + 0xa0))(piVar5);
-        (**(code **)(*(int *)piVar5[0x78] + 0x18))((int *)piVar5[0x78]);
-        pvVar4 = (void *)FUN_00615360(param_1,4,pcVar1);
-        AddDescMessage1(pvVar4,0,0x1000009,value);
-        pSVar6 = C_HumanStore__Get(g_gameProfile.m_humanStore,pSVar3->profileIndex);
-        FUN_00676410((int)pvVar4,0,0x1000038,0,pSVar6->faceImage);
-        AddDescMessage3(pvVar4,0,0x1000007,0x4001000,(uint32_t)_this,0x677890);
+        (**(code **)(*piVar4 + 0x30))(piVar4,1);
+        (**(code **)(*piVar4 + 0xa0))(piVar4);
+        (**(code **)(*(int *)piVar4[0x78] + 0x18))((int *)piVar4[0x78]);
+        pvVar3 = S_ScreenDesc__AddControl(param_1,4,name);
+        AddDescMessage1(pvVar3,0,0x1000009,value);
+        pSVar5 = C_HumanStore__Get(g_gameProfile.m_humanStore,pSVar2->profileIndex);
+        AddDescMessage4_676410(pvVar3,0,0x1000038,0,(uint32_t)pSVar5->faceImage);
+        AddDescMessage3(pvVar3,0,0x1000007,0x4001000,(uint32_t)_this,0x677890);
       }
     }
     value++;
   } while ((int)value < 4);
-  pvVar4 = (void *)FUN_00615360(param_1,0x14,"button01");
-  AddDescMessage2(pvVar4,0,0x1000015,0xd,0x7d1);
-  AddDescMessage1(pvVar4,0,0x600106a,0);
-  AddDescMessage1(pvVar4,0,0x6001005,0);
-  pvVar4 = (void *)FUN_00615360(param_1,0x14,"button00");
-  AddDescMessage2(pvVar4,0,0x1000015,0xd,0x7d8);
-  AddDescMessage1(pvVar4,0,0x6001005,0);
-  uVar7 = (**(code **)(*param_2 + 0x48))(param_2,"selector",1);
-  *(uint32_t *)(unaff_ESI + 0x578) = uVar7;
+  pvVar3 = S_ScreenDesc__AddControl(param_1,0x14,"button01");
+  AddDescMessage2(pvVar3,0,0x1000015,0xd,0x7d1);
+  AddDescMessage1(pvVar3,0,0x600106a,0);
+  AddDescMessage1(pvVar3,0,0x6001005,0);
+  pvVar3 = S_ScreenDesc__AddControl(param_1,0x14,"button00");
+  AddDescMessage2(pvVar3,0,0x1000015,0xd,0x7d8);
+  AddDescMessage1(pvVar3,0,0x6001005,0);
+  uVar6 = (**(code **)(*param_2 + 0x48))(param_2,"selector",1);
+  *(uint32_t *)(unaff_ESI + 0x578) = uVar6;
   return 1;
-}
-
-
-// 0x00676410
-uint32_t FUN_00676410(int param_1,uint32_t param_2,uint32_t param_3,uint32_t param_4,uint32_t param_5, ...)
-{
-  uint32_t local_24;
-  uint32_t local_20;
-  uint32_t local_1c;
-  uint32_t local_18;
-  int *local_10;
-  uint32_t local_4;
-  local_24 = param_2;
-  local_10 = 0;
-  local_20 = param_3;
-  local_1c = param_4;
-  local_18 = param_5;
-  local_4 = 0;
-  FUN_00616250((void *)(param_1 + 0x10),*(uint32_t **)(param_1 + 0x18),1,&local_24);
-  if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
-    tier1_operator_delete(local_10);
-  }
-  return 0;
 }
 
 
 // 0x006764a0
 uint32_t FUN_006764a0(void *param_1, ...)
 {
+  S_ControlDesc *_this;
   void *pvVar1;
-  void *pvVar2;
-  int iVar3;
-  char **ppcVar4;
+  int iVar2;
+  char **ppcVar3;
   char *local_6c [6];
   char *local_54;
   char *local_50;
@@ -2173,25 +2082,25 @@ uint32_t FUN_006764a0(void *param_1, ...)
   local_c = "text_lockpick";
   local_8 = "hlcpct06";
   local_4 = "text_lockpick01";
-  pvVar1 = (void *)FUN_00615360(param_1,5,"Panel02");
-  AddDescMessage1(pvVar1,0,0x1000005,0);
-  AddDescMessage1(pvVar1,0,0x1000004,0);
-  iVar3 = 0;
-  ppcVar4 = local_6c + 1;
+  _this = S_ScreenDesc__AddControl(param_1,5,"Panel02");
+  AddDescMessage1(_this,0,0x1000005,0);
+  AddDescMessage1(_this,0,0x1000004,0);
+  iVar2 = 0;
+  ppcVar3 = local_6c + 1;
   do {
-    pvVar2 = (void *)FUN_0061da70(pvVar1,0x13,ppcVar4[-1]);
-    AddDescMessage1(pvVar2,0,0x2000073,0);
-    AddDescMessage2(pvVar2,0,0x1000015,0xb,iVar3 + 0xa6e);
-    pvVar2 = (void *)FUN_0061da70(pvVar1,0x16,*ppcVar4);
-    AddDescMessage1(pvVar2,0,0x1000093,2);
-    FUN_00670b50((int)pvVar2,0,0x1000092,0,0);
-    pvVar2 = (void *)FUN_0061da70(pvVar1,0x13,ppcVar4[1]);
-    AddDescMessage1(pvVar2,0,0x2000073,0);
-    AddDescMessage2(pvVar2,0,0x1000015,0xb,0x7d2);
-    iVar3++;
-    ppcVar4 += 4;
-  } while (iVar3 < 7);
-  pvVar1 = (void *)FUN_0061da70(pvVar1,0x13,"text_soldier stats");
+    pvVar1 = S_ControlDesc__AddChild(_this,0x13,ppcVar3[-1]);
+    AddDescMessage1(pvVar1,0,0x2000073,0);
+    AddDescMessage2(pvVar1,0,0x1000015,0xb,iVar2 + 0xa6e);
+    pvVar1 = S_ControlDesc__AddChild(_this,0x16,*ppcVar3);
+    AddDescMessage1(pvVar1,0,0x1000093,2);
+    AddDescMessage4_670b50(pvVar1,0,0x1000092,0,0);
+    pvVar1 = S_ControlDesc__AddChild(_this,0x13,ppcVar3[1]);
+    AddDescMessage1(pvVar1,0,0x2000073,0);
+    AddDescMessage2(pvVar1,0,0x1000015,0xb,0x7d2);
+    iVar2++;
+    ppcVar3 += 4;
+  } while (iVar2 < 7);
+  pvVar1 = S_ControlDesc__AddChild(_this,0x13,"text_soldier stats");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xab3);
   return 1;
 }
@@ -2650,8 +2559,8 @@ joined_r0x00676aa7:
   _this = pIStack_13c[1].m_localMatrix.m[3] + 3;
   pIStack_13c[5].m_bound.bbox.min.z = fVar10;
   pIStack_13c[5].m_bound.bbox.minW = 0.0;
-  FUN_00671010(_this,0);
-  FUN_00672580(gh_bitcast<uint32_t*>(_this));
+  C_EquipmentPanel__SelectSoldier(_this,0);
+  C_EquipmentPanel__Refresh(_this);
   return 1;
 }
 
@@ -2718,7 +2627,7 @@ uint32_t FUN_00677010(int param_1,int *param_2, ...)
       (**(code **)(*piVar3 + 0x30))(piVar3,0);
       piVar1[0xa5] = (int)piVar1;
       FUN_0067c570(piVar1 + 0x9d,param_1,param_2);
-      FUN_0067c150((int)(piVar1 + 0x9d));
+      C_StoreList__ClearPages(piVar1 + 0x9d);
       FUN_00675c00((int)piVar1);
       return 1;
     }
@@ -2735,20 +2644,24 @@ uint32_t C_EquipmentMenu__FUN_006771e0(C_EquipmentMenu *_this,int param_1,uint32
   uint16_t uVar1;
   uint16_t uVar2;
   float *extraout_EAX;
-  int iVar3;
-  uint32_t uVar4;
+  uint32_t uVar3;
+  uint32_t extraout_EAX_00;
+  int iVar4;
+  uint32_t extraout_EAX_01;
+  uint32_t extraout_EAX_02;
+  uint3 extraout_var;
   uint32_t local_30;
   uint16_t local_2c;
-  uint8_t local_28 [8];
+  uint8_t local_28 [2];
+  uint32_t local_26;
   uint8_t local_20 [28];
   local_30 = _this->m_1b8;
   local_2c = _this->m_1bc;
   if ((*(uint32_t *)(param_1 + 0x60) & 0x3f00000) == 0x100000) {
     if ((param_2 != 0) && ((param_2 & 0x3f00000) == 0x100000)) {
-      FUN_006719a0(&_this->m_1d0,(float *)local_28,(float *)&local_30,*(uint32_t *)(param_1 + 0x60),
-                   param_2);
-      if (GH_PIECE(local_28,2,2) != -1) {
-        FUN_0067c0a0(_this->_pad_023c + 0x38,(int)local_28);
+      C_EquipmentPanel__MoveItem(&_this->m_1d0,local_28,&local_30,*(uint32_t *)(param_1 + 0x60),param_2);
+      if ((short)local_26 != -1) {
+        C_StoreList__AddItem(_this->_pad_023c + 0x38,local_28);
       }
     }
     C_Cursor__GetPosition(_this->m_0f4,local_20);
@@ -2757,33 +2670,34 @@ uint32_t C_EquipmentMenu__FUN_006771e0(C_EquipmentMenu *_this,int param_1,uint32
     param_2 = (uint32_t)(uint16_t)(uVar1 << 8 | uVar2 << 0xe);
     if (uVar1 == 0 && uVar2 == 0) {
       this_00 = &_this->m_1d0;
-      iVar3 = FUN_00671290(*(uint32_t *)(param_1 + 0x60));
-      if (iVar3 == 8) {
-        FUN_00672720(this_00,_this->m_298);
-        uVar4 = FUN_0067c040(_this->_pad_023c + 0x38);
-        return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
+      uVar3 = C_EquipmentPanel__SlotOfControl(*(uint32_t *)(param_1 + 0x60));
+      if (uVar3 == 8) {
+        C_EquipmentPanel__ReturnBackpack(this_00,_this->m_298);
+        C_StoreList__UpdateAll(_this->_pad_023c + 0x38);
+        return CONCAT31((int3)((uint32_t)extraout_EAX_00 >> 8),1);
       }
-      iVar3 = FUN_00671260(this_00,*(uint32_t *)(param_1 + 0x60),(int)&local_30);
-      local_2c = (uint16_t)iVar3;
-      iVar3 = FUN_006713c0(this_00,*(uint32_t *)(param_1 + 0x60),(int)&local_30);
+      iVar4 = C_EquipmentPanel__CountItems(this_00,*(uint32_t *)(param_1 + 0x60),&local_30);
+      local_2c = (uint16_t)iVar4;
+      iVar4 = C_EquipmentPanel__RemoveItemAt(this_00,*(uint32_t *)(param_1 + 0x60),&local_30);
       param_2 = 0;
-      if (iVar3 != 0) {
-        uVar4 = FUN_0067c0a0(_this->_pad_023c + 0x38,(int)&local_30);
-        return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
+      if (iVar4 != 0) {
+        C_StoreList__AddItem(_this->_pad_023c + 0x38,&local_30);
+        return CONCAT31((int3)((uint32_t)extraout_EAX_01 >> 8),1);
       }
     }
   }
   else if ((param_2 != 0) && ((param_2 & 0x3f00000) == 0x100000)) {
-    FUN_006716c0((uint32_t *)local_28,param_2,&local_30);
-    if ((short)GH_PIECE(local_28,2,4) == -1) {
-      param_2 = FUN_0067c0d0(_this->_pad_023c + 0x38,(int)&local_30,'\0');
+    C_EquipmentPanel__PutItemAt(&_this->m_1d0,local_28,param_2,&local_30);
+    if ((short)local_26 == -1) {
+      C_StoreList__TakeItem(_this->_pad_023c + 0x38,&local_30,false);
+      param_2 = (uint32_t)extraout_var << 8;
     }
     else {
-      param_2 = GH_PIECE(local_28,2,4);
-      if ((short)GH_PIECE(local_28,2,4) != GH_PIECE(local_30,2,2)) {
-        FUN_0067c0d0(_this->_pad_023c + 0x38,(int)&local_30,'\0');
-        uVar4 = FUN_0067c0a0(_this->_pad_023c + 0x38,(int)local_28);
-        return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
+      param_2 = local_26;
+      if ((short)local_26 != GH_PIECE(local_30,2,2)) {
+        C_StoreList__TakeItem(_this->_pad_023c + 0x38,&local_30,false);
+        C_StoreList__AddItem(_this->_pad_023c + 0x38,local_28);
+        return CONCAT31((int3)((uint32_t)extraout_EAX_02 >> 8),1);
       }
     }
   }
@@ -2849,7 +2763,7 @@ uint32_t FUN_00677490(void *_this,uint32_t param_1,int *param_2, ...)
   float local_48;
   float local_44;
   uint32_t uStack_40;
-  uint32_t uStack_3c;
+  int iStack_3c;
   uint32_t uStack_38;
   int *piStack_30;
   uint32_t uStack_2c;
@@ -2870,15 +2784,15 @@ uint32_t FUN_00677490(void *_this,uint32_t param_1,int *param_2, ...)
   }
   local_48 = (pIVar1->m_worldMatrix).m[3][2];
   (**(code **)(**(int **)((int)_this + 0x57c) + 8))(*(int **)((int)_this + 0x57c),&local_50);
-  uStack_3c = 0x100000a;
+  iStack_3c = 0x100000a;
   uStack_2c = 0;
   uStack_40 = 0;
   uStack_38 = 0;
   pvStack_1c = 0;
   (**(code **)(*param_2 + 0x6c))(&uStack_40);
-  *(uint32_t *)((int)_this + 0x580) = uStack_3c;
-  FUN_00671010((uint32_t *)((int)_this + 0x1d0),uStack_3c);
-  FUN_00672580((uint32_t *)((int)_this + 0x1d0));
+  *(int *)((int)_this + 0x580) = iStack_3c;
+  C_EquipmentPanel__SelectSoldier((void *)((int)_this + 0x1d0),iStack_3c);
+  C_EquipmentPanel__Refresh((void *)((int)_this + 0x1d0));
   C_EquipmentMenu__FUN_00674d60(_this);
   if ((piStack_30 != 0) && (*piStack_30 = *piStack_30 - 1, *piStack_30 == 0)) {
     tier1_operator_delete(piStack_30);

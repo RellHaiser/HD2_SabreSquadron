@@ -6788,6 +6788,873 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     g_cursor 0x008ae558); 20 functions in ported.txt. Stats: 8,606 of 12,293 functions by hand
     (76.7 % by size).
 
+  PART 9c-vi-b DONE (2026-11-02): the controls' factory, C_Control::CreateChild 0x0065d470
+  (src/game/control_factory.cpp, new: apart from control.cpp so the text build keeps its fake).
+  9c-vi rescoped: b is the factory; the screens move to part 9d (below), so 9c ends here.
+  - CreateChild: the child frame found by the description's name (a mask: ENUMF_WILDMASK, visuals
+    and dummies, 0x10021); none: false ("ERROR : cannot find frame : %s !!" printed into a local
+    buffer, dropped). The type's control made (types 2..0x28, jump table 0x0065e368; 3 and 0x1b
+    both the edit box; an unknown type: false, "ERROR : cannot create item : %d !!") with the
+    parent's scene, the description's id, the parent; every class's inlined constructor defaults
+    already its members' (checked case by case). Create(child frame, root, description) failing:
+    deleted, still true; else SetStrings (+0x78), HandleMessages (+0x70) on the description's own
+    messages (their answers written back into it), pushed last (0x00663b30).
+  - Harness: a factory build (build_factory.bat, check_factory.py: the text build with
+    FACTORY_TEST, control_factory.cpp linked, control_test.inc's fake left out; factory_test.inc
+    run last by ControlsTest; only its line checked). Every type's class (typeid) found without
+    meeting its Create: the child frame's every engine slot throws, the control the first big
+    allocation since (operator new replaced in that build). 7 checks: the types, unknown types,
+    a frame not found, made (frame, data, type, grandchildren, the parent's other child first),
+    the messages (written back), the strings before the messages and the root passed on (a
+    scrolled text), a failed Create (a button: deleted, the cursor released). 22 of 22 both
+    orders; the text build unchanged, 22 of 22 both orders.
+  - Mutations (mutations/mutate_9c6b.py, generated plus by hand: each case's class swapped with
+    the next, the mask, the arguments, the order, the messages copied, the insertion): 64 cases,
+    all caught. The first run left 1 (the root passed as the child frame: the strings test now
+    links its list's select frame to a root of its own).
+  - The screens (part 9d now, with the menu descriptions 0x00623e30..0x006269b0 and C_GameMenu
+    they need): C_Screen root vtable 0x00815540, subclasses 0x008155d8 (the message box),
+    0x00815918, 0x008156b8. Found so far: ctor 0x00668420 (scene, frame: the cursor acquired at
+    +0x70, the frame +0x74, a byte +0x78, a C_str +0x7C, id -1); Hide 0x00668740; Show(int) +0x84
+    0x00668700; Tick 0x00668a50 (notification 0x4014000, then the focus' Tick); Unknown20
+    0x00668970 (keys 0x1C / 0x39 / 0x9C: the focus' OnClick with its id); HandleMessage 0x006687f0
+    (0x2000016 moves the focus); +0x8C Build 0x00668770; +0x88 0x00668510 (false); dtor
+    0x00668550; 0x00668880, 0x006688f0, 0x006689f0 unreferenced.
+  - Build: MSVC clean. Tier 1: 475 errors in 78 files, 192 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names unchanged (C_Control::CreateChild named in 9c-i); 0x0065d470 in ported.txt.
+    Stats: 8,607 of 12,293 functions by hand (76.8 % by size).
+
+  PART 9d PLAN (2026-11-02): the menu states' base, split: 9d-i the screens (0x00668420..0x006698c0:
+  C_Screen and the message box) and the descriptions they are built from (0x00615360, 0x00625f60,
+  0x00626000..0x00626420); 9d-ii C_MenuState (0x0066ab70..0x0066edb0, 15 KB: Start 0x0066b010,
+  Stop, HandleInput 0x0066b6e0, Update, Render 0x0066e100, the screens' models 0x0066c2a0, the
+  message box 0x0066c4d0, the queue's delivery; split when started). The two screen subclasses in
+  0x006698c0..0x0066a2c0 go with their menus: 0x008156b8 (C_EquipmentMenu's, its dtor 0x00676020)
+  to 9f, 0x00815918 (C_SquadMenu's: the medals, its dtor 0x00691900) to 9g.
+
+  PART 9d-i DONE (2026-11-02): the screens, the message box and their descriptions
+  (src/game/screen.*, new).
+  - S_MenuDesc (vtable 0x00813ab8, 0x14; was C_auto_00813ab8): the screens' descriptions, AddScreen
+    0x00626300 (name, file; its id its index + 1 in the top 6 bits, SCREEN_ID_SHIFT), deleted last
+    first (0x00626400). S_ScreenDesc (0x00813abc, 0x44; was C_auto_00813abc; ctor 0x00626000 (name,
+    file, id), dtor 0x00626170): messages +0x04, strings +0x14, controls +0x24 (+0x34 not used), the
+    model's file +0x38, its frame's name +0x3C, id +0x40; AddControl 0x00615360 (its id the screen's
+    with its index + 1 in bits 20-25, 6 bits: the 64th wraps to 0), AddScreenMessage 0x00625f60
+    (cdecl, the message by value). (0x00625ed0 is AddDescMessage's value2 overload again, value3
+    left unset: tier 1 until its callers.)
+  - C_Screen (vtable 0x00815540, 0x84; was C_auto_00815540; on C_ControlGroup, whose constructor is
+    inlined: its vtable never written): ctor 0x00668420 (scene, the model's frame: no parent, id -1,
+    the cursor acquired at +0x70, the frame +0x74, a C_str +0x7C, a byte +0x80 zeroed; +0x78 not
+    used), dtor 0x00668550 (the cursor released). Hide 0x00668740 (on: off, OnLeave(0), hidden),
+    Tick 0x00668a50 (CONTROL_NOTIFY_SCREEN_TICK 0x4014000 with the time, the focus' Tick),
+    Unknown20 0x00668970 (a key's low byte: the active focus' first; Enter / Space / the keypad's
+    Enter 0x1C / 0x39 / 0x9C the focus' click with its id), HandleMessage 0x006687f0 (target 0 and
+    notifications: C_Control's, not the group's; CONTROL_MSG_EDIT: OnLeave with the focus' index,
+    then the target's enter; the target's child's, none: false), Open +0x84 0x00668700 (off: the
+    enter, on, shown), HasPopup +0x88 0x00668510 (false; the subclasses' a flag: the menu state
+    draws the screen again under the popup), Build +0x8C 0x00668770 (the controls made on the
+    frame, the root the frame too; its name and id taken; true). 0x00668880 / 0x006688f0 (the focus
+    stepped back / on) and 0x006689f0 (the focus set) unreferenced: tier 1.
+  - C_MessageBox (vtable 0x008155d8, 0x90; "confirm", made by the menu state 0x0066c4d0; its dtor
+    0x0066c6d0 the screen's again): kind +0x84 (-1 none, 0 a text, 1 yes / no, 2 ok, 3 yes / no in
+    the second style 0x19), the answers' messages +0x88 / +0x8C. Build 0x00668a90 adds the text
+    (type 0x13, text 2004, style 0x18) and the buttons "byes*" / "bno*" / "bok" (type 0x14, texts
+    2001 / 2000 / 2013, style 0xD; ok hidden; their clicks to OnButton 0x006696a0) to the
+    description it is given. ShowText 0x00668ba0 / ShowTextId 0x00668fd0 (none shown only): the
+    buttons by the kind (0x200000 / 0x300000 / 0x400000 shown or hidden; kinds above 3 left), the
+    text (0x100000), the answers kept, MENU_MSG_MESSAGE_BOX_SHOWN 0x2000096 to target 0; Close
+    0x00669390 (MENU_MSG_MESSAGE_BOX_CLOSED 0x2000097; the answers kept). Unknown20 0x006694b0: none
+    shown or a text alone: taken; Escape: closed, the second answer; else the screen's. OnButton:
+    no control false, none shown true; else closed and by the button's index (bits 20-25) 2 yes and
+    4 ok the first answer, 3 no the second; the answers cleared (0x006694a0).
+  - Harness: screen_test.inc in the factory build (build_factory.bat with screen.cpp, its real
+    factory making the box's text and buttons; check_screen.py: the "screens:" line, 15 checks:
+    the descriptions, the menu's, the screen made / built / opened / hidden / ticked, its keys and
+    messages; the box built, shown (a text, a text id), closed, its keys and buttons). 22 of 22 in
+    both orders; the factory line unchanged.
+  - Mutations (mutations/mutate_9d1.py, generated plus by hand: the ids' fields, the constants, the
+    buttons by kind, the arguments, the order): 216 cases, 212 build; all caught but 1 equivalent (listed in its docstring). The first run (226 cases) left 6: the box's Post given its always-0 value dropped, new checks for a message to child 0, the root (a scrolled text's select frame) and the 64th control's wrap (a screen id without bit 26).
+  - Build: MSVC clean. Tier 1: 472 errors in 78 files, 191 stubs (was 475 / 78 / 192). ret_audit --src: 52.
+  - Ghidra: C_auto_00815540 / C_auto_00813abc / C_auto_00813ab8 renamed C_Screen / S_ScreenDesc /
+    S_MenuDesc (90_auto.spec, class_names.json, auto_members.json, tier1_fixups.json;
+    rename_auto_structs.py, apply_members.py); the box's functions on C_Screen (no struct of its
+    own); names/screen.txt (28); 28 functions in ported.txt. Stats: 8,635 of 12,293 functions by
+    hand (77.0 % by size).
+
+  PART 9d-ii-a DONE (2026-11-02): the menu states' class, the screen stack and the menu's messages
+  (src/game/menu_state.*, game_state.cpp, new). 9d-ii split: a these; b Start 0x0066b010, Stop
+  0x0066b440, HandleInput 0x0066b6e0 (the characters 0x0066b680), the cursor's input 0x0066bc90,
+  Update 0x0066c1a0, Render 0x0066e100, DrawScreens 0x0066e300, the cursor drawn 0x0066ab70, the
+  screens' models 0x0066c2a0 / 0x0066c9c0, the message box made 0x0066c4d0 / 0x0066c8b0, 0x0066b410,
+  0x0066bb80, the menus' frames 0x0066dad0 / 0x0066dcf0 / 0x0066def0 (declared, faked by the harness).
+  - C_GameState (game_state.cpp): its slots (dtor 0x0067ef90, Start / Stop / HandleInput false, Tick /
+    Update / Render nothing, GetTypeId 0x0067ecf0 0) and the state's get / set / commit (0x0067ed00..
+    0x0067ed40; the commit only when pending is not 2), defined nowhere before.
+  - C_MenuState (vtable 0x00815850, 0x1B0, 16-aligned; ctor 0x0067edd0, a real function: Kind0Menu is
+    it alone; dtor 0x0067f080): +0x0C the hovered id (-1), +0x10 the control editing, +0x14 / +0x18 a
+    timer, +0x1C 250, +0x20 the mode, +0x24 the input lock (-1), +0x2C dragging, +0x2D the keyboard
+    off, +0x30 scene, +0x34 camera, +0x38 light, +0x3C click sound, +0x40 S_MenuHint (0xB0: three -1
+    ints, on, has text, a C_TextBox +0x10, its frame +0xAC; Reset 0x0066e480, SetText 0x0066e430,
+    Render 0x0066e450), +0xF0 Start's argument, +0xF4 cursor, +0xF8 the screen under the popup, +0xFC
+    the popup, +0x100 the message box, vectors +0x104 models / +0x118 frames / +0x12C ticked controls /
+    +0x140 screens, +0x160 S_SoundRequest. State 4 (quit) until started; g_menuState 0x008ae5f8 set
+    by the ctor, cleared by the dtor. Slots 0x34 OnMessage / 0x38 BuildScreens pure, 0x3C..0x54 the
+    menus' hooks (0x0067ed60..0x0067edc0), 0x58 DrawScreens; Tick 0x0066c190 = OnTick.
+  - HandleMessage 0x0066cc50: MENU_MSG_DEFER (0x20000000) kept in g_deferredMessages 0x008ae55c (a
+    function static), MENU_MSG_DEFERRED (0x10000000) posts them (0x100, the bit cleared) or drops
+    them (0x200); a target: its screen by the top 6 bits; else by the masked code: open a screen
+    (the top hidden) / a popup (enter id 0x10200000, the top kept under) / back (the last screen:
+    the quit question, screen 4, and the quit kept back; from the question: the kept quit dropped
+    and the question closed; else the top closed, the next opened) / quit (StopAll(true, false),
+    state 4) / close the popup / previous (3) / next (2) / main menu (the game reset, 10), release a
+    frame (value2, its tree), the ticked controls, the box shown (screen 0 pushed) / closed (only
+    when the top's index is 0), CONTROL_MSG_NOTIFY (05: the top's OnInput05 with the id picked on its
+    frame, the leave), the editing (start: the editing one's OnInput0B first, 0 refuses; stop; the
+    keyboard off 0x20000C2: polling and the cursor's clicks); the rest (also 0x2000006) OnMessage.
+    Fixes (commented): the screen index checked for targets, OPEN_POPUP and the box; OPEN_SCREEN of
+    the index equal to the count (the original read past the end); the top of an empty stack.
+    HandleMessages 0x0066ca70 (the queue, the first first); FindControl 0x0066da30; the box's
+    ShowMessage / ShowMessageId / CloseMessage 0x0066da80..0x0066dac0. g_menuScreens 0x008ae5c4 (a
+    std::deque; the statics' init / exit and the deques' helpers 0x0066ae00..0x0066af50,
+    0x0066e4b0..0x0066ed80 in ported.txt: g_controlMessages' too).
+  - C_Cursor::Pick returns the id (EAX; the menu's NOTIFY and 0x0066bc90 use it).
+  - Harness: menu_test.inc in the factory build (menu_state.cpp, game_state.cpp linked; check_menu.py,
+    the "menu:" line, 18 checks; screens and a menu logging, 9d-ii-b's slots, StopAll, ResetGame
+    (the stub profile), SetKeyboardPolling, ReleaseFrameTree (the stub items module) and Pick faked;
+    the fake cursor given room for SetClicksOff's field). cursor_test.cpp checks Pick's result. 22 of
+    22 in both orders (the factory and screens lines too); the text build 22 of 22 in both orders.
+  - Mutations (mutations/mutate_9d2a.py, generated plus by hand): 188 cases, 182 build; all caught but
+    6 equivalent and 1 not observable here (listed in its docstring). The first run left 11 (5
+    caught by new checks: the hint's reset and text index, the ticked controls' first removed).
+  - Build: MSVC clean. Tier 1: 460 errors in 78 files, 189 stubs (was 472 / 78 / 191; the renamed
+    functions' 80 callers exported again). ret_audit --src: 52.
+  - Ghidra: names/menu_state.txt (22 functions, g_menuState; the shared empty slots left to
+    zz_idioms), C_Cursor::Pick returns uint; 48 functions in ported.txt. Stats: 8,683 of 12,293
+    functions by hand (77.2 % by size).
+
+  PART 9d-ii-b DONE (2026-11-02): the menu state's start, stop, input, update and drawing
+  (src/game/menu_state.cpp), C_Cursor::Draw. Part 9d (the menu states' base) is done.
+  - Start 0x0066b010 (true): the mode (a campaign screen's kind; 0: 10 the main menu; -1 / -2: 11
+    in the game); the scene (FRAME_SCENE, its render callback 0x0066e3f0 with phases 4, created as a
+    function in Ghidra: phase 2 draws g_menuState's screens; it also drew an object at 0x008ae5fc,
+    never set, under a flag 0x0084068c, always 1), the whole screen's viewport; the camera
+    "ActivCamera" (along +z from (0.5, -0.375, -15.5), 0.2 .. 20 m, a quarter turn, orthogonal,
+    scale 2); OnStart; LoadScreens 0x0066c8b0 (driver states 0x15 / 0x19 off, 0x11 off in the game,
+    restored: LoadModel 0x0066c2a0 "CURZOR" from "kurzor_menu", CreateMessageBox 0x0066c4d0 "CONFIRM"
+    / "confirm" (its model at (0.5, -0.375, -0.5), the box screens[0], its id 0), BuildScreens); the
+    cursor; the ambient light (type 4, white, 0.9); the click sound "button.wav" (type 3, off, volume
+    1; opened only with a sound device); the music unless after a mission, at an operation's end or
+    in the game (none playing: SetBackgroundMusic(0, 0); track 37: CrossfadeMusic(0, 2000, 0)); the
+    campaign screen's diary texts (C_CampaignScreen +0x28, now m_diaryTexts / GetDiaryTexts) added;
+    the input lock -1, no popup screen, state 1. A flag 0x008ae609 cleared, never read: dropped.
+  - Stop 0x0066b440 (true): OnStop, the stack emptied, the screens deleted (the last first),
+    ReleaseModels 0x0066c9c0 (the frames' trees, then the models, the last first), the ticked
+    controls, the cursor, the camera, the scene (its camera cleared, closed, released), the queue.
+  - HandleInput 0x0066b6e0 (true): keyboard off nothing; OnInput; with a screen: the character typed
+    (unsigned) to the control editing, with the Unicode font ReadTypedChars 0x0066b680 (up to 0x3FF,
+    MultiByteToWideChar; each to the control, one taken: done; the original printed "KEY VALUE ::"
+    to the debugger: dropped); the key pressed's low byte to the top's Unknown20 (none: the held
+    control / alt / shift key, the left if down (IGraph 0xBC / 0xC0 / 0xC4 IsShiftDown / IsCtrlDown /
+    IsAltDown, the LS3DF port's names), else the controls' action 46 as Escape); Escape not taken:
+    the drag ended (OnInput09(0)), MENU_MSG_ESCAPE 0x200000A with the top's id; Ctrl + Alt + Shift +
+    N: MENU_MSG_SECRET_KEY 0x200007D (the menus').
+  - Update 0x0066c1a0: OnUpdate and the sound module's Update twice (quirk kept; the first not in
+    the network game's in-game menu), the timer, the queue; with a screen: CursorInput 0x0066bc90
+    (the lock -1 only; Pick, the cursor's update; changed or another id: keyboard off: a move only;
+    a press (the editing ended away from its control, OnInput0B 1 or nothing), else a release (the
+    drag ended: OnInput09, OnInput05), the double click (OnInput13), the click (the editing's
+    control only; OnKeyClick 1: PlayClick 0x0066b410, not while playing), a move (OnInput05 unless
+    dragging; a button held: OnInput0A once, OnInput08, done), the wheel (OnWheel truncated, then
+    OnInput05 with the id picked again)), the ticks (the control editing, the top, the popup, the
+    ticked controls the last first).
+  - Render 0x0066e100: OnRender's done: the cursor only; else the scene twice under a popup (the
+    screen under it first, driver state 5 cleared for the second) or the popup screen's own popup,
+    else once; the cursor drawn (C_Cursor::Draw 0x0066ab70: a fan of two triangles from the place,
+    30 pixels of 1024 x 768 scaled, z 0.0284114 rhw 35.19714, white). DrawScreens 0x0066e300 (the
+    screen under the popup and the top when on, OnDrawScreens, the popup's popup with none under,
+    the hint; a font batching under 0x008ae608, never set: dropped). PickFrame 0x0066bb80, CloneVisual
+    0x0066dad0 (its own mesh), CloneFrame 0x0066dcf0 (both into the frames), AddFrame 0x0066def0
+    (into the models). Fix: LoadModel released the model it could not load.
+  - Harness: menu_run_test.inc in the factory build (check_menurun.py, "menurun:", 18 checks): the
+    driver's CreateFrame / states and IGraph's screen, keys and characters put in for the test; the
+    scene, sector, camera, light, sound and models objects of logging stdcall slots (a template per
+    slot); the sound module given a module's vtable (its Update logged; the music's field found by
+    its getter); the diary, CloneFrameTree, ISndGetDriver, the cursor's Update / IsPressed /
+    IsReleased / HasMoved / Draw faked; a campaign screen as zeroed memory (campaign.cpp not
+    linked). menu_test.inc's fakes of these slots removed. cursor_test.cpp: cuDraw. 22 of 22 in
+    both orders (the other three lines too); the text build 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9d2b.py (401 cases, 378 build; all caught but 7 equivalent and the
+    box description's leak; the first run left 24, new checks caught 16); mutate_9d2b_draw.py (the
+    cursor harness, 16 cases, all caught).
+  - Build: MSVC clean. Tier 1: 446 errors in 77 files, 182 stubs (was 460 / 78 / 189). ret_audit
+    --src: 52.
+  - Ghidra: names/menu_state.txt (+18), C_Cursor::Draw; 0x0066e3f0 created; 20 functions in
+    ported.txt. Stats: 8,715 of 12,293 functions by hand (77.4 % by size).
+  - Next, 9e: the in-game menu C_GameMenu (vtable 0x00815750; 0x0067b070..0x00688130, 50 KB), the
+    menu classes of pending.h moved onto C_MenuState.
+
+  PART 9e PLAN (2026-11-02): the in-game menu C_GameMenu (vtable 0x00815750, 0x5C0 bytes) and what it
+  shares with the equipment screen C_EquipmentMenu (0x00815db0): their base C_EquipmentMenuBase
+  (0x008157d8: C_MenuState's slots and 0x5C..0x70, 0x60 pure; dtor 0x0067f1f0 = C_MenuState's
+  inlined, 0x0067f350), the equipment panel (vtable 0x008157cc: 0x00672a30, 0x006728a0 the allowed
+  containers of a dragged item, 0x0067f3d0; at C_GameMenu +0x4DC: +0x04 the menu soldier, +0x24..
+  its controls, +0x68 the S_SquadSoldier) and the menu soldier. About 63 KB (the base 16 KB in 41
+  functions, the in-game menu's own 47 KB); the equipment screen's own 30 KB is a later part.
+  - 9e-i: the menu soldier (0x007d0200..0x007d3650). 9e-ii: the equipment panel and its item moves
+    (0x00670be0..0x00672820, 0x0067b950..0x0067c150, ...). 9e-iii: the equipment screens'
+    descriptions (0x0066f200, 6.5 KB, and its helpers). 9e-iv..: C_GameMenu (its ctor 0x0067eb40,
+    the mission records at +0x1F0, the slots 0x34..0x84, the save / load screens, ...).
+
+  PART 9e-i DONE (2026-11-02): the equipment menus' soldier (src/game/menu_soldier.h/.cpp,
+  C_MenuSoldier, 0x210 bytes, aligned 16; original 0x007d0200..0x007d3650), and the frames and helpers
+  it shares with the human's equipment models moved out of game/human_equipment.cpp into
+  src/game/equipment_frames.h/.cpp (namespace equipment: the models' offsets, the joints' and the
+  item models' frame names, the holster sets and dummies, Rotation / Rotate / RotateAboutYxX /
+  BacklinkOffset / HolsterJoint, and FindHolsterModel for the list's search).
+  - Setup 0x007d02c0(left, top, right, bottom): at the game camera's position (its matrix's w
+    copied along); its own scene (FRAME_SCENE, the rectangle's viewport, +0x210 zeroed), the
+    ambient light "C_AeMenu1" (0.5, 1000, 1 m up and 5 m behind) and the spot light of the same name
+    (white, 0.9, 50, cone 0.3 / 0.4, 6 m up and behind, along (0, -1, 1)), the camera (1.4 m up, 6 m
+    behind, along (0, -0.08, 0.91) normalised -- the original's normalisation folded --, FOV 0.23,
+    perspective, the rectangle's aspect, 4.2 .. 8.6 m, active); the 9 animations (0x008637d4,
+    g_animationCache; the cache errors' messages dropped); the naked model "mp_Na01".
+  - SetModel 0x007d1bf0: null: the holsters released, the items reset (ResetItems 0x007d3220, which
+    loads and sets the naked model that is removed again: quirk kept), the fields reset, the pose
+    deleted, the model removed. A model: the holsters' item counts kept when one is replaced (the
+    old removed), a new C_HumanWeaponPose attached (no owner), the joints (HW1 as a dummy, d twice,
+    f, u, q), the face again, InitHolsters 0x007d0fe0 (C_HumanEquipment's without the holster pose:
+    the model's file name past its path, extension and the "mp_" of the menu copies; fix: a name
+    shorter than the prefix was read past its end), the counts again (AddToHolsterSlot), the items
+    again; added to the scene, its sector, its reference released, turned to -z at the position, the
+    idle and the pose again, 1000 ms of the animations.
+  - AddItem 0x007d1fc0 (places 1 head, 2 the uniform "mp_<model name>" set as the model, 4 hands, 8
+    backpack, 0x10 long gun, 0x20 one more holster item): cloned from the definition's model (the
+    old released, the "flash" frame dropped from weapons); the hands into the pose (its behaviour)
+    on HW1 at 0 with the pose 3 + carry mode (6: pose 5, 0.02 along x, turned to +y) and the support
+    hand unless carry mode 0 or 2 (fix: an unknown type with a model took a null definition's
+    behaviour); the diving gear (231's: mask on "f" at the head's offset, two parts on "u" / "q", the
+    bottles the backpack); the long gun like the human's on the back, without the tilt. RemoveItem
+    0x007d3080 (the hands: the pose 3 always; holsters: one, or all hidden), PlayIdle 0x007d32a0 /
+    PlayPose 0x007d3310 (stages 0 / 1 and 2 / 3, 800 / 400 ms fades), UpdateAnims 0x007d3390 (the
+    fades' weights, the model's time / 1.4, a random idle every 11 .. 13 s), Tick 0x007d3510 (0.009
+    a tick about the axis), Render 0x007d35d0 (driver states 5 off / 6 on), SetFace 0x007d3360
+    (GetGEffects()->SwitchFaceTexture), the holsters 0x007d0f30 / 0x007d0f80 / 0x007d1a70 (none
+    left: hidden, unlike the human's early return) / 0x007d1b20 / 0x007d1b40.
+  - Fixes: the diving gear's bottles are the backpack model; the original released them with the
+    backpack and kept the pointer (linked again next time, released twice by the menus' 0x00670e40):
+    nulled now (AddItem, RemoveItem).
+  - Fix (part 9e-i, game/equipment_frames.cpp): the human's equipment offsets were a little off
+    since the start (0.17559581 for 0.175592005 ...): the initializers' exact bits now (the
+    soldier's copies 0x0098afa0..c0, set by 0x007d0230 / 0260 / 0290, are the same).
+  - Harness: menu_soldier_test.inc in the factory build (check_menusoldier.py, "menusoldier:", 15
+    checks; build_factory.bat links menu_soldier.cpp and equipment_frames.cpp): menu_run_test.inc's
+    logging objects (their children found by name, a clone queue added to its CloneFrameTree fake),
+    the weapon pose, the holster slots, the diving gear, the animation cache and the face texture
+    (its slot from the member pointer: g++'s vtable has two destructor slots) faked; the long gun's
+    matrix checked against the same steps on a copy. 22 of 22 in both orders (the other factory
+    lines too); the text build 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e1.py (567 cases, 529 build; all caught but 33 equivalent, listed there; the first run left 69 and 8 a partition's MemoryError never ran, new checks caught 36).
+  - Build: MSVC clean. Tier 1: 438 errors in 76 files, 180 stubs (was 446 / 77 / 182). ret_audit --src: 52.
+  - Ghidra: names/menu_soldier.txt (+29; no struct for the soldier: void *); 25 functions in
+    ported.txt. Stats: 8,740 of 12,306 functions by hand (77.7 % by size).
+
+  PART 9e-ii-a DONE (2026-11-02): the equipment panel's runtime (src/game/equipment_panel.h/.cpp,
+  C_EquipmentPanel, vtable 0x008157cc, 0xA4 bytes; C_GameMenu +0x4DC). Its description (0x0066f200,
+  which also sets every control id) is 9e-ii-b.
+  - Fields: +0x04 the menu soldier, +0x08 the menu (the controls' callbacks' object: thunks 0x00672fb0..
+    0x00672ff0 call its slots 0x5C / 0x64 / 0x68 / 0x6C / 0x70), +0x0C..+0x18 the weight / overweight /
+    belt / backpack bars, +0x1C / +0x20 the belt's and the backpack's scroll, +0x24 the 8 highlight
+    frames ("sel*"), +0x44..+0x50 the scroll arrows, +0x58..+0x60 the load texts, +0x64 the index,
+    +0x68 the S_SquadSoldier, +0x6C..+0x80 the places' controls (head, uniform, backpack, long gun,
+    hands, drop), +0x84 / +0x94 four belt and four backpack item controls.
+  - SlotOfControl 0x00671290 (the id's kind, bits 12-19: 1 head, 2 uniform, 3 backpack, 4 long gun, 5
+    hands, 7 / 8 the belt and its items 1..4, 9 / 10 the backpack's), CountItems 0x00671260,
+    RemoveItem / RemoveItemAt 0x00671360 / 0x006713c0 (the soldier's items as many), PutItem 0x00671410
+    (the soldier's: the new ones, the more of the same type, or the old ones away first, not the
+    uniform's), PutItemChecked 0x00671500 / PutItemAt 0x006716c0, DropItem 0x006716f0 (the first place
+    it fits: head, uniform, belt, hands (not item 261), backpack, long gun, the backpack's contents; as
+    many as the free weight carries, the rest added back: lost when the belt gives back another type,
+    quirk kept), MoveItem 0x006719a0 (the drop place: given back; the displaced back to the source, then
+    anywhere; the same place: none, the original's count whatever DX held).
+  - OnScroll 0x00671ac0 (the arrows' callback, CONTROL_NOTIFY_06; also called with no control after a
+    change: the scroll kept within the items, the arrows on or off, Refresh), ShowItem 0x00671f60 (the
+    picture and type; the belt's and backpack's items "%d ", ammunition "rounds/count ", none: text
+    0x7D2), SetBackpackInactive 0x00672330, Refresh 0x00672580, ReturnBackpack 0x00672720, ReturnItems
+    0x006727f0, FindHighlights 0x00672820, ShowAllowed 0x006728a0 (slot 1), UpdateLoad 0x00672a30 (slot
+    0: "%s: %3.1f / %d Kg", "%2.1f%%", no backpack: text 0xAA7), HasLargeWeapon / IsLargeWeapon
+    0x0066f1a0 / 0x0066f160.
+  - The soldier: CreateSoldier 0x00670c00 (the visual's world bound to pixels, y flipped by -4/3, the
+    rectangle's top its max y; the visual hidden), DeleteSoldier 0x00670e40 (Release, then the diving
+    gear: C_MenuSoldier::ReleaseDivingGear), Tick / Render 0x00670be0 / 0x00670bf0, UpdateFace 0x00670e90,
+    DressSoldier 0x00670f20 (the belt's and the backpack's the last first), AddToSoldier 0x00670ee0.
+    S_SquadSoldier::GetFreeBeltVolume 0x006a2bb0 added (game/profile_squad.cpp).
+  - Fix: SelectSoldier went on with a negative index's null soldier.
+  - Harness: equipment_panel_test.inc in the factory build (check_equipmentpanel.py,
+    "equipmentpanel:", 16 checks; build_factory.bat links equipment_panel.cpp): the squad soldier's
+    items, the stock, the human store and the containers faked and logged, the control messages read
+    back from the queue, the menu soldier menu_soldier_test.inc's. The stub game/profile.h has the
+    load, the squad's and the stores' declarations now (every build rebuilt clean). 22 of 22 in both
+    orders (the other factory lines too); the text build 22 of 22.
+  - Mutations: mutations/mutate_9e2a.py (410 cases, 359 build; all caught but 29 equivalent, listed there; the first run left 62, new checks caught 33; the baseline builds now start 4 minutes apart: four at once ran cc1plus out of memory).
+  - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (was 438 / 76 / 180). ret_audit --src: 52 (S_SoldierItem, 6 bytes, added to its
+    returned-through-memory types).
+  - Ghidra: names/equipment_panel.txt (+30, void * for the panel). Ghidra crashed during the part
+    (restarted by the user): the 9e-i names were applied again. 30 functions in ported.txt. Stats:
+    8,770 of 12,306 functions by hand (78.0 % by size).
+
+  PART 9e-ii-b DONE (2026-11-02): the equipment panel's description (C_EquipmentPanel::
+  BuildDescription 0x0066f200, game/equipment_panel.cpp), S_ControlDesc::AddChild 0x0061da70
+  (game/control.cpp; 16 callers: the child's id the parent's with its index + 1 in bits 12-19, under a
+  child in bits 4-11) and the first of C_EquipmentMenuBase (src/game/equipment_menu.h: the item
+  controls' slots 0x5C..0x70, base answers true, 0x60 pure, and their callbacks for the 5-byte thunks
+  0x00672fb0..0x00672ff0).
+  - The description: the screen's control 5 "P_Equipment" with the places (4 "head", "uniform",
+    "back", "shoulder", "hands": the face group "X_SQUARE.BMP" and, with a menu, its slots as callbacks
+    for CONTROL_NOTIFY_13 / 0A / 08 / 09 (not the uniform's) and ENTER / LEAVE), "drop", the belt's
+    scroll group 5 "scroll13" (bar "hlcpct00" at 0.5, the arrows "barrow_up23" / "barrow_down23" off,
+    their presses OnScroll, caption text 0xA9C, slider hidden), the belt's pane "GB_Holsters" (items
+    "item00".."item03"), the backpack's ("scroll14", "hlcpct01" at 0.8, caption 0xA9D; "GR_BackPack",
+    "item04".."item07"), "text_cpcty", the weight bar "hlcpct02" (0.8), the overweight bar "overload"
+    and the description text (its frame moved under the "P_Equipment" dummy, hidden) when the model
+    has their frames, eight labels (texts 0xA96..0xA9D); then every id (the kinds and children), the
+    squad soldier cleared, FindHighlights. AddDescMessage4_670b50 / _676410 are copies of
+    AddDescMessage (5 arguments).
+  - Harness: equipment_desc_test.inc in the factory build (check_equipmentdesc.py, "equipmentdesc:", 6
+    checks): the description tree dumped and compared with one written from the original's, the
+    callbacks called, the optional frames each way. 22 of 22 in both orders (the other factory lines
+    too).
+  - Mutations: mutations/mutate_9e2b.py (126 cases, 117 build; all caught but 1 equivalent, listed there).
+  - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/equipment_panel.txt (+14); 14 functions in ported.txt. Stats: 8,784 of 12,306 functions by hand (78.2 % by size).
+  - Next, 9e-iii: C_EquipmentMenuBase's own code and the store panel (vtable 0x008157c4 at C_GameMenu
+    +0x580: 0x0067b070, the item stock's lists 0x0067b950..0x0067c150), then C_GameMenu (9e-iv..).
+
+  PART 9e-iii-a DONE (2026-11-02): the store's item lists' runtime (src/game/store_list.h/.cpp,
+  C_StoreList, vtable 0x008157c4, 0x38 bytes; C_GameMenu +0x580). Its pages' descriptions (slot 0
+  0x0067b070) are 9e-iii-b.
+  - Fields: +0x08 the item types' entry controls (a vector, 0: none), +0x18 the page shown, +0x1C -1,
+    +0x20 the menu, +0x24 the C_ItemStock, +0x2C the highlight frame, +0x30 / +0x34 the screen's and
+    the control's index (the list's ids: (control & 0x3F | screen << 6) << 20, the tabs bits 12-19 = 1,
+    the pages' group 2, the pages 3..8).
+  - GetCount 0x0067b930, ShowPage 0x0067b9e0 (the last hidden, the page shown, the group's value it,
+    CONTROL_MSG_REFRESH), OnTab 0x0067b950 (the tabs' callback: the page the tab control answers to
+    0x200002F), OnItem 0x0067bc00 (the items' CONTROL_NOTIFY_ANY callback: the menu's item slots by
+    the notification, the cursor entering puts the highlight 0.1 in front of the control's frame;
+    always true), UpdateType 0x0067bd60 (an entry's count; ammunition: the weapons (animated) that
+    take it, their second count, the last first; head gear (behaviour 16): the uniforms (15) that come
+    with it; the stock asked only for a message), UpdateAll 0x0067c040, UpdateAllIfStock 0x0067c060,
+    SetStock 0x0067c090, AddItem 0x0067c0a0, TakeItem 0x0067c0d0 (fill: what the stock lacks added
+    first), ClearPages 0x0067c150 (CONTROL_MSG_HIDE_ALL to the six pages), SetActive 0x0067c390, the
+    destructor 0x0067f370 / 0x0067f3a0.
+  - Harness: store_list_test.inc in the factory build (check_storelist.py, "storelist:", 9 checks):
+    the stock's counts a map (the stub profile.h's C_ItemStock has Get and Take now), the messages
+    from the queue, the menu equipment_desc_test.inc's. 22 of 22 in both orders (the other factory
+    lines too).
+  - Mutations: mutations/mutate_9e3a.py (95 cases, 86 build; all caught but 1 equivalent, listed there; the first run left 5, new checks caught 4).
+  - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/store_list.txt (+14); 14 functions in ported.txt. Stats: 8,798 of 12,306 functions by hand (78.2 % by size).
+
+  PART 9e-iii-b DONE (2026-11-02): the store lists' pages (C_StoreList::BuildPage, slot 0 0x0067b070,
+  game/store_list.cpp; the name a C_str by value).
+  - A dummy (FRAME_DUMMY) under the model's "P_visualstore" dummy, named the page, a model frame of
+    the model, in the menu's models; the "selitem08" highlight's copy in the menu's frames (the
+    list's highlight the original); the "vi_template" visual linked to it, on. The page's description
+    (0x23, the page's name) under `parent`: the pages' group as its value, CONTROL_MSG_SET_VISIBLE 4,
+    the across step 0.081, its origin (an _aligned_malloc'd copy of the template's local position,
+    w too; the control frees it), hidden; group 1 the page shown first. Per item type of the group (not
+    team 3; group 6 not behaviour 16, the uniforms' head gear) the template's copy with its own meshes
+    (its "ammo" child's too), "frame_<type>" under the dummy, an entry (0x1D) with the type as its item
+    and index and OnItem for every notification, its id in the entries; then the page's
+    CONTROL_MSG_HIDE_ALL and REFRESH, the template off. Without one of the frames or the dummy: false
+    (the dummy leaked, as the original). C_MenuState::GetModels / GetFrames added.
+  - Fix: the original put the previous type's copy into the menu's frames (null first, the last copy
+    never: leaked); each copy now.
+  - Harness: store_list_test.inc's slBuild / slBuildNone (11 checks now; the inventory groups faked,
+    a clone queue, the meshes' slots logged). 22 of 22 in both orders (the other factory lines too).
+  - Mutations: mutations/mutate_9e3b.py (87 cases, 81 build; all caught but 2 equivalent, listed there; the first run left 4, new checks caught 2).
+  - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/store_list.txt (+1). Stats: 8,799 of 12,306 functions by hand (78.3 % by size).
+  - Next, 9e-iv: C_EquipmentMenuBase's own code and C_GameMenu (vtable 0x00815750, 0x5C0 bytes; its
+    constructor 0x0067eb40, the mission records at +0x1F0, the slots 0x34..0x84; 0x0067aa70..
+    0x00688130), in parts.
+
+  PART 9e-iv DONE (2026-11-02): the equipment menus' loadout presets and mission items
+  (src/game/loadout_presets.h/.cpp; C_GameMenu +0x49C and +0x1F0).
+  - S_LoadoutPreset (0x1B8 bytes, read and written whole): a name (0x20), the five places' types
+    (head, uniform, backpack, long gun, hands), 14 belt and 32 backpack (type, count) entries with
+    their counts, the games' flags (LOADOUT_AXIS 0x12, _ALLIED 0x22, _DEATHMATCH 0x42, _USER 4), a text
+    id. ClearPlaces 0x0067a3d0, CountItems 0x0067d450 (the places, the first belt and backpack entry of
+    the type); S_PresetItem::Reset 0x0067a3c0.
+  - C_LoadoutPresets: Clear 0x0067d4d0, AddPreset / AddUserPreset 0x0067d580 / 0x0067d770, Load
+    0x0067d960 (GameData\presets.def: versions 0 / 1 / 2 records of 0x1B0 / 0x1B4 / 0x1B8 bytes; the
+    profile's user_presets.def: at most 24, count / 4 a row into the defaults' rows of six; none:
+    SaveUser, false), SaveUser 0x0067dc30 (version 3, whole records; CREATE_ALWAYS), CreateUserPresets
+    0x0067def0 (Axis_ / Allied_ / Deadmatch_user_preset1..6 with texts 0x1982..0x1993, User_preset1..6),
+    GetPreset / GetUserPreset 0x0067de40 / 0x0067de90 (the nth with all the flags). The game's
+    presets.def: version 2, 65 records, exactly the file's size.
+  - C_MissionItems (0x2AC bytes): the first record of each operation (50, -1; a campaign's from its
+    index * 30) and 120 records (S_MissionItems, 0x8C: a kind 4, ten 12-byte slots of -1, a vector of
+    pairs; 0x0067e850 its insert). Setup 0x0067e500 (a record per mission of the current campaign's
+    operations), Load 0x0067e650 (GameData\miss_itm.def: a header of 0x3C bytes in version 1, else
+    200; per record absent (cleared) or its kind, slots and pairs; the game's file: version 1, 60
+    records, read to its end), Release 0x0067e490.
+  - Fixes: the user presets' rows divided by zero for fewer than four; miss_itm.def's records past
+    120 and slots past ten were read past their arrays.
+  - Harness: loadout_test.inc in the factory build (check_loadout.py, "loadout:", 10 checks): the
+    files car_stubs' memory files, the campaign zeroed memory (its counts faked), the stub profile.h's
+    GetProfileDirectory / m_campaign added, car_stubs' dtaOpenWrite able to fail (g_dtaOpenWriteFails). 22 of 22 in both orders (the other factory lines too).
+  - Mutations: mutations/mutate_9e4.py (158 cases, 145 build, all caught but 19 equivalent).
+  - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/loadout_presets.txt (+19); 19 functions in ported.txt. Stats: 8,818 of 12,306 functions by hand (78.4 % by size).
+
+  PART 9e-v DONE (2026-11-02): the in-game menu's class and menu state slots (src/game/game_menu.h/.cpp;
+  pending.h's C_GameMenu replaced: game.cpp, game_app.cpp and game_rounds.cpp include it).
+  - C_GameMenu : C_EquipmentMenuBase (vtable 0x00815750, 29 slots; the base's fields +0x1B0..+0x1C0
+    added to equipment_menu.h): the members the constructor 0x0067eb40 makes (the mission items +0x1F0,
+    the presets +0x49C, the equipment panel +0x4DC, the store list +0x580, the game behind +0x5B8; the
+    presets loaded, single player the missions' items set up); the destructor 0x0067f4a0 (0x0067f480)
+    only clears the game. GetTypeId 0x0067f470 (11). OnStart 0x0067f650 (the player team's member in
+    the player slots, the options handler, the master volume 0; the network games an info screen on
+    the menu's scene), OnStop 0x0067f760 (the player's volume, the options handler, the popup, the
+    network game's info screen, the panel's soldier, the two stocks +0x1E4 / +0x1E8 reset and
+    deleted), OnInput 0x00680960 (the game's, without the input; true), OnUpdate 0x006808d0 (the
+    network games: the panel's soldier, the load's button 0x006869a0, the cooperative players
+    0x006802a0; a client the game's update), OnTick 0x00680920 (the menu time 0x008ae62c; the server
+    the game's tick), OnDrawScreens 0x00682770 (the info screen when shown; false), ShowMessage
+    0x00682aa0 (the box unless one is on top, counted at 0x008ae628; below 1 closed).
+    C_MissionDef::AreObjectivesDecided 0x0067fda0 (here). C_OptionsHandler (0x0C bytes, +0x1EC: its
+    cursor, the menu, two flags; destructor 0x0061cfa0; its messages 0x0061bf00 the main menu's too,
+    not ported yet).
+  - Dropped: the copy protection's bookkeeping in OnStart (the game window's handle and a value of it).
+  - Fixes: the stocks' pointers cleared after deleting (the next stop deleted them again); an info
+    screen that could not be made dropped (the original crashed in Init).
+  - Harness: game_menu_test.inc in the factory build (check_gamemenu.py, "gamemenu:", 12 checks; the
+    slots not ported yet, the info screen, the volume, the stocks' reset and the team faked; a game
+    state logging its slots; the stub profile.h's ApplyVolume and C_ItemStock::Reset added). 22 of 22
+    in both orders (the other factory lines too).
+  - Mutations: mutations/mutate_9e5.py (74 cases, 71 build, all caught but 5 equivalent).
+  - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+19, 6 of them for the later parts); 13 functions in ported.txt.
+    Stats: 8,831 of 12,306 functions by hand (78.5 % by size).
+  - Next, 9e-vi: the update's helpers (the load's button 0x006869a0, the cooperative players
+    0x006802a0) and the drawing (OnRender 0x006824f0, 0x006825d0, 0x00682790); then OnMessage
+    0x0067f850 (with the options handler 0x0061bf00), the screens (BuildScreens 0x0067fe00 and its
+    builders 0x00680980, 0x00682c80, 0x006838e0, 0x00684690..0x00685170), the squad glue
+    (0x00685420..0x006863c0) and the item slots (0x00680ea0, 0x00681ee0..0x00682350,
+    0x00686e10..0x00687f50).
+
+  PART 9e-vi DONE (2026-11-02): the in-game menu's update helpers and drawing (game/game_menu.cpp).
+  - UpdateLoadButton 0x006869a0: control 0x0CA00000 activated while the panel's squad soldier has a
+    uniform and his load's weight fill is at most 1 (NaN: not; the asm's JP), deactivated otherwise;
+    posted when it changes (+0x1E0).
+  - UpdateNetStatus 0x006802a0 (the network games' OnUpdate): co-op: the list 0x0D300000 cleared,
+    its title (0x56, 0x4F4C), per connected player "<rank> <name>" (0x57; the allied ranks 0x2792 +
+    stat 5, 0..7) and his human's state (0x58; none 0x4F4D, dead 0x4F4E, alive 0x4F4F). Else the
+    allies' and axis' counts (0x0C104000 / 0x0C105000; the deathmatch's by the uniforms' sides,
+    0x006801f0 CountUniformSides, else CountTeams), the occupation's respawn time 0x0C800000 and the
+    round's 0x0C900000 (" %2d:%02d", style 0x2D, run 1).
+  - OnRender 0x006824f0: the top screen index 3 (or the message box over it): RenderEquipment
+    0x00682790 (the menu's scene; the info screen not shown: the panel's soldier, the popup's popup
+    over the top, the driver's state 5 cleared); else RenderGame 0x006825d0 (states 5 / 6 kept, IGraph
+    cleared; the game behind's scene drawn without its render callback (restored, phases 6), then the
+    menu's scene over it, twice under a popup); no screen: the game's scene alone. No game (or not
+    the game's type): false. I3D_scene::SetRenderCallback returns the previous callback (i3d.h).
+  - The original's messages carry stack leftovers as value2 / value3 where it sets none (zero here).
+  - Harness: game_menu_test.inc's gmLoad, gmCoop, gmNet, gmRender, gmRenderGame, gmRenderEquip (18
+    checks now; groups_test.inc's players, the uniforms, the teams' counts and the times faked; the
+    driver's states, IGraph's clear, a game scene's callback; the stubs' C_NetGame::CountTeams and
+    C_Human::GetUniformItem added). 22 of 22 in both orders (the other factory lines and the text
+    build too).
+  - Mutations: mutations/mutate_9e6.py (166 cases, all caught but 3 equivalent).
+  - Build: MSVC clean. Tier 1: 425 errors in 75 files, 175 stubs (429 / 177 before). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+4 new, 2 renamed); 6 functions in ported.txt. Stats: 8,837 of 12,306 functions by hand (78.6 % by size).
+  - Next, 9e-vii: OnMessage 0x0067f850 (the escape, the squad's second soldier, the team change, the
+    questions, the app's commands); then the options handler 0x0061bf00, the screens, the squad glue
+    and the item slots.
+
+  PART 9e-vii DONE (2026-11-02): the in-game menu's messages (C_GameMenu::OnMessage 0x0067f850,
+  game/game_menu.cpp).
+  - The options handler's first (0x0061bf00, 9e-viii). Escape: the info screen shown: hidden; the
+    top screen 2 or 3 (not in the warmup's menu, Start(-2)): MENU_MSG_BACK; single player: back to
+    the game (GAME_STATE_CLOSE_GAME_MENU) unless the objectives are decided; a network game: the
+    squad's first soldier of another team than +0x1D4 (set: -1 none): command 5 with the team, once
+    (+0x1D0; inferred: the team change), else the squad's second of two dropped and back to the game.
+  - 0x200006A: the first of two dropped (the edited soldier kept; inferred); without a player slot
+    member hosting or joining posts command 0, with one after the warmup (+0x1D1, SetUnknown1D1 now
+    SetRespawnOnApply) the respawn; then escape. 0x2000077: the second of two dropped, escape.
+  - The questions: 0x2000078 quit (text 0x7D9, yes 0x20000B8), 0x20000B4 restart (0x7D4, yes 0x20000B5).
+    0x20000B5 / B6 / B7: back to the game with the app's restart / quick save / quick load;
+    0x20000B8: the game's mode GAME_MODE_QUIT (C_game::SetMode added) and GAME_STATE_MENU_END_MISSION;
+    0x20000C5 / C6: GAME_STATE_MENU_END_MISSION.
+  - Harness: game_menu_test.inc's gmOptions, gmEscape, gmEscapeNet, gmSquad, gmQuestions (23 checks
+    now; the options handler, the app and the info screen's Show faked; the stubs' g_missionSquad
+    and S_MultiplayerSettings::sessionType added). 22 of 22 in both orders (the other factory lines
+    too).
+  - Mutations: mutations/mutate_9e7.py (91 cases, 86 build, all caught but 1 equivalent).
+  - Build: MSVC clean. Tier 1: 425 errors in 75 files, 175 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (OnMessage moved to the ported); 1 function in ported.txt. Stats:
+    8,838 of 12,306 functions by hand (78.6 % by size).
+  - Next, 9e-viii: the options handler 0x0061bf00 (with 0x00620be0) in its own files; then the
+    screens, the squad glue and the item slots.
+
+  PART 9e-viii DONE (2026-11-02): the options screen's messages (C_OptionsHandler, src/game/
+  options_handler.h/.cpp; moved out of game_menu.h; the main menu's too).
+  - HandleMessage 0x0061bf00: escape with the options screen (+0x09, its index) on top: 0x20000C4;
+    0x200006F: the player's options saved, the hardware option applied, the key bindings' changes;
+    0x2000071: the first time (+0x08) the controls filled, then the screen opened; 0x20000C4: a
+    function without a key: the OK box 0x2530 (both answers 0x20000C7), else the six pages
+    (0x600000..0xB00000) hidden and 0x600106F (the save) and 0x6001003 (back) posted; 0x20000C7: the
+    keys' page alone, the unbound function's group chosen (0x902000) and its place selected in the
+    group's list (0x900000 | (group + 4) << 12; none at place 0). Else false.
+  - The fill: the gamma control active by IGraph's info flag 2, the gamma, the sound and music
+    volumes, the mouse sensitivity and the voice value as slider positions (truncated), the detail
+    level, the switches (invert mouse 0x804000, unknown3A 0xA02000, the voice chat 0xB04000, the
+    crosshair 0xA03000; quiet), the voice value active with the voice chat; RefreshKeyGroups
+    0x00620be0 (the groups 4..8 refreshed, the group list's choice, its value's second byte, last).
+  - (The original asks a copy of the key bindings for the unbound one; the bindings themselves here.)
+  - Harness: options_test.inc in the factory build (check_options.py, "options:", 8 checks; the
+    player's saving and the key bindings faked, world_modules_test.inc's detail settings with the
+    stub's new fields, IGraph's info; menu_test.inc's menu and screens); game_menu_test.inc now runs
+    with the real handler. 22 of 22 in both orders (the other factory lines too).
+  - Mutations: mutations/mutate_9e8.py (123 cases, 119 build, all caught but 3 equivalent).
+  - Build: MSVC clean. Tier 1: 425 errors in 75 files, 175 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/options_handler.txt (+1, 2 moved from game_menu.txt); 2 functions in ported.txt.
+    Stats: 8,840 of 12,306 functions by hand (78.7 % by size).
+  - Next, 9e-ix: BuildScreens 0x0067fe00 (the main, options and player screens' descriptions, their
+    models and screens; the first opened) with the main screen's builder 0x00680980; then the options
+    screen's builder 0x0061cfc0, the player screen's 0x00682c80 / 0x006838e0, the squad glue and the
+    item slots.
+
+  PART 9e-ix DONE (2026-11-02): the in-game menu's screens' descriptions (game/game_menu.cpp).
+  - BuildScreens 0x0067fe00: MAIN_INGAME_MENU (main_ingame), OPTIONS (options) and in a network game
+    PLAYER_SCREEN (player_screen, co-op player_screen_2); per description its model loaded (none: no
+    screen), the builder by its index (1 BuildMainScreen, 2 the options handler's BuildScreen
+    0x0061cfc0, 3 BuildPlayerScreen 0x00682c80; both not ported yet), a C_Screen built on it (its
+    description's messages handled; one not built leaked, as the original), the descriptions deleted;
+    then screen 1 opened (a network game's warmup menu, Start(-2): screen 3). True.
+  - BuildMainScreen 0x00680980 (thiscall, the model unused; true): buttons 00..06 (style 0xD) and
+    text_h&dversion (0x7D6, style 0x28). Single player: 06 the tutorial's (0x9DB, end mission 2;
+    hidden but in the tutorial: C_MissionDef::IsTutorial added for +0x2C), 00 back (0x9CF; inactive
+    when failed) or with the objectives decided the mission's end (0x9E1), 01 restart (0x9D3), 02
+    quick save (0x9D0; inactive unless CanQuickSave), 03 quick load (0x9D1; inactive without one or
+    at difficulty 4), 04 options (0x9D2), 05 quit (0x9D4). A network game: 06 hidden, 00 back
+    (0x9D5), 01 / 02 inactive (0x9D6 / 0x9D7), 03 options (0x9D8), 04 the player screen (0x9D9), 05
+    quit (0x9DA). The buttons post the menu's messages with bits 0x04001000.
+  - Dropped: the copy protection's message (0x600D0B8 through 0x00680e00) after the 7th mission.
+  - C_game::HasQuickSave / IsMissionFailed added; the screens' indices named (MAIN_SCREEN,
+    OPTIONS_SCREEN, PLAYER_SCREEN: the player screen is the equipment's).
+  - Harness: game_menu_test.inc's gmMainLocal, gmMainNet, gmBuild, gmBuildNet (27 checks now; the
+    descriptions dumped; menu_run_test.inc's frames and models, the builders faked; the stub profile's
+    GetDifficulty). 22 of 22 in both orders (the other factory lines too).
+  - Mutations: mutations/mutate_9e9.py (101 cases, 92 build, all caught but 1 equivalent).
+  - Build: MSVC clean. Tier 1: 425 errors in 75 files, 175 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+2, 2 for the later parts), names/options_handler.txt (+1 for later);
+    2 functions in ported.txt. Stats: 8,842 of 12,306 functions by hand (78.8 % by size).
+  - Next, 9e-x: the options screen's builder 0x0061cfc0; then the player screen's, the squad glue
+    and the item slots.
+
+  PART 9e-x DONE (2026-11-02): the options screen's description (C_OptionsHandler::BuildScreen
+  0x0061cfc0, OnShown 0x00620530; game/options_handler.cpp).
+  - BuildScreen: a dummy "GROptions" under the model (the menu's AddFrame); the pages' buttons
+    ("bvideo setup", "bsound setup", "bcontrols", "bgame setup", "bmultiplayer setup", "bback";
+    dummies) found, "text_min norm max02" put where "text_min norm max" is (visuals); any button
+    missing: false, nothing described; else the buttons moved under the group, the screen's index
+    kept (+0x09), the screen's shown callback (OnShown), text_screen / text_date00 / text_date01 /
+    text_profile00 (0x961..0x964), the group GROptions (type 5) with the buttons (0x965..0x96A;
+    a click shows the page 0x600000 / 0x700000 / 0x800000 / 0xA00000 / 0xB00000, back posts
+    0x20000C4), the five pages (0x0061dc20, 0x0061e1a0, 0x0061e3f0, 0x0061f230, 0x0061f3b0: not
+    ported yet), the version's text. True.
+  - OnShown: the player's name (none: text 0x7E4) on the screen's third control, style 0xC.
+  - The click routes named: the menus' messages "with bits 0x04001000" are CONTROL_NOTIFY_CLICK
+    routes (game_menu.cpp's CLICK).
+  - Harness: options_test.inc's opBuild, opBuildFail, opShown (11 checks now; menu_soldier_test.inc's
+    frames and child lookup, menu_run_test.inc's frame factory; the pages and the player's name
+    faked); game_menu_test.inc's builds run the real BuildScreen (no children found: false).
+    22 of 22 in both orders (the other factory lines too).
+  - Mutations: mutations/mutate_9e10.py (91 cases, 85 build, all caught but 2 equivalent).
+  - Build: MSVC clean. Tier 1: 422 errors in 75 files, 174 stubs (425 / 175 before). ret_audit --src: 52.
+  - Ghidra: names/options_handler.txt (+2, 5 for the pages); 2 functions in ported.txt. Stats:
+    8,844 of 12,306 functions by hand (78.9 % by size).
+  - Next, 9e-xi: the options screen's pages (video 0x0061dc20, sound 0x0061e1a0, controls 0x0061e3f0,
+    game 0x0061f230, multiplayer 0x0061f3b0) and their callbacks (0x006204a0 the check boxes'); then
+    the player screen, the squad glue and the item slots.
+
+  PART 9e-xi DONE (2026-11-02): the options screen's video, sound, game and multiplayer pages and their
+  callbacks (game/options_handler.cpp).
+  - The pages (AddPage): a group hidden, CONTROL_NOTIFY_SHOWN | CONTROL_MSG_HIDE to the other five.
+    Video 0x0061dc20 ("graphics setup"): the model's switches' visuals ("nextdetail", "shadows",
+    "mirrors", "morphing", "dynamic lightning", "light glow", "use high models") renamed GD00..GD06;
+    the titles 0x96B / 0x96C, the gamma's limits and slider (100 positions), the detail list
+    (0x96E..0x971), GD00..GD06 (0x972..0x978; GD03 inactive in a game, GD06 hidden), the
+    modifications' text 0x97E. Sound 0x0061e1a0 ("sound setup"): 0x979 / 0x97A / 0x97C, the limits
+    (the second with margin 1), two sliders. Game 0x0061f230 ("gameoptions"): 0x99D, subtitles
+    (0x99E), the crosshair ("parental lock", 0x4EF4; inactive in a game). Multiplayer 0x0061f3b0
+    ("network settings"): the connection's text and list (the original hides the group again
+    for each), the voice chat (0x981, 0x97F, 0x980, slider, limits), 0x9A9.
+  - Callbacks: OnSlider 0x00620300 (CONTROL_MSG_GET_SLIDER's float: gamma, sound volume with the
+    menu's click, music volume (below 1: 0), mouse sensitivity, voice value; applied), OnDetail
+    0x0061fd00 (the list: the level below 4, the switches' states posted and active at level 3 only,
+    the hardware option; GD00..GD06: the switches), OnCheck 0x006204a0 (invert mouse, subtitles,
+    crosshair; the value's low byte), OnVoiceChat 0x00620780 (its volume active by the whole value).
+  - C_PlayerOptions::unknown3A is the subtitles' switch (renamed); +0x3B, the crosshair, is the game
+    page's "parental lock" control with a later text. C_MenuState::PlayClick public.
+  - Harness: options_test.inc's opVideo, opSound, opGame, opNetwork, opSlider, opDetail, opCheck,
+    opVoice (19 checks now; the descriptions dumped with the callbacks by name, a slider control;
+    the player's Apply* and the switches faked). 22 of 22 in both orders (the other factory lines
+    and the text build too).
+  - Mutations: mutations/mutate_9e11.py (229 cases, 208 build, all caught but 1 equivalent).
+  - Build: MSVC clean. Tier 1: 409 errors in 74 files, 173 stubs (422 / 174 before). ret_audit --src: 52.
+  - Ghidra: names/options_handler.txt (+4, 4 moved); 8 functions in ported.txt. Stats: 8,852 of 12,306 functions by hand (79.0 % by size).
+  - Next, 9e-xii: the controls page 0x0061e3f0 (the key groups' builder 0x0061f600, the callbacks
+    0x006209c0 and 0x0061fcb0); then the player screen, the squad glue and the item slots.
+
+  PART 9e-xii DONE (2026-11-02): the options screen's controls and keys pages (game/options_handler.cpp;
+  the options handler is complete).
+  - BuildControlsPage 0x0061e3f0: the controls page "keysscreen" (0x800000): 0x989, the keys page's
+    button bcontrols01 (0x98A; shows 0x900000), the mouse (0x98B, invert mouse 0x98C with OnCheck,
+    0x98D, its slider, the limits), the joystick's controls hidden (text_joystick setup 0x98F,
+    bcalibrate, force feedback, lock fire). The keys page "keysscreen01" (0x900000; shown, the
+    controls page hidden): text_last save01 (0x993), the groups' list "controls" (0x994..0x998,
+    OnKeyGroup), scroll00 (its value 0x904000); "hkinput" (dummy) and "hktext" (visual) found (else
+    false), the text under the input; five key groups (GR_Movements, GR_Weapons, GR_Other,
+    GR_Selections, GR_Tactical); bdefault* / bback01 (0x999 / 0x99B; OnKeyLayout on a click).
+  - BuildKeyGroup 0x0061f600: a dummy named for the group under "keysscreen01" (the menu's models);
+    "hkinput" under it, on; the group's list (type 0xB: 9 rows visible, scrolled by 0x903000, step
+    0.036; hidden but the first); per binding of the group (a copy of the player's bindings in the
+    original) a copy of "hkinput" ("Control%2d", the menu's frames; the rows 0.036 down) and a key
+    control (CONTROL_MSG_SET_BINDING: its index and text; OnKeyChanged); the first group refreshed;
+    "hkinput" off. False without the frames (the dummy leaked).
+  - Callbacks: OnKeyGroup 0x006209c0 (the chosen group's list shown, the scroll bar's value, refreshed;
+    the others hidden), OnKeyChanged 0x006209b0 (RefreshKeyGroups), OnKeyLayout 0x0061fcb0 (layout 1
+    for bback01's id, else 0; refreshed).
+  - Harness: options_test.inc's opControls, opKeyGroup, opKeys (22 checks now; the bindings' groups by
+    index, menu_run_test.inc's clones, SetKeyLayout faked). 22 of 22 in both orders (the other
+    factory lines too).
+  - Mutations: mutations/mutate_9e12.py (176 cases, 160 build, all caught but 1 equivalent).
+  - Build: MSVC clean. Tier 1: 409 errors in 74 files, 173 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/options_handler.txt (+4, 1 moved); 5 functions in ported.txt. Stats: 8,857 of 12,306 functions by hand (79.1 % by size).
+  - Next, 9e-xiii: the player screen (BuildPlayerScreen 0x00682c80 and its builders 0x006838e0,
+    0x00684690, 0x00684b90, 0x00684df0, its callbacks); then the squad glue and the item slots.
+
+  PART 9e-xiii DONE (2026-11-03): the in-game menu's player screen (game/game_menu.cpp) and the
+  description popup (game/screen.cpp).
+  - BuildPlayerScreen 0x00682c80: the four panels' builders (the soldiers 0x006838e0, the equipment
+    0x00684690, the store's items 0x00684b90, the skills 0x00684df0; not ported yet), the screen's
+    shown / hidden callbacks; "soldier_type" (a combo box: the slot 0x60's callback on its pick,
+    OnSoldierType on 0x400B000, header and line text 500, inactive; its id kept, UpdateSoldierTypes
+    0x00685da0 not ported yet); bsave_preset (OnSavePreset) and brename_preset (the combo box's header
+    edited, id | 2), inactive; a cooperative game: the version's and the equipment's texts, else the
+    warmup's (hidden but in the occupation games) and the time's; baccept (APPLY, inactive), bback
+    (DROP), the chat input "console" (OnChat), text03, the texts; bgame_info (OnGameInfo). Co-op: the
+    player status's text and the description popup (model "DESCRIPTION", the menu's popup, built
+    without a description); else "text_weapons_info" when the model has it (its id kept: the base's
+    m_unknown1B0 renamed m_weaponsInfo). The panel's soldier in "3Dview". m_unknown1DC renamed
+    m_soldierTypes.
+  - Callbacks: OnPlayerScreenHidden 0x00684fc0 (true), OnGameInfo 0x006861b0 (the info screen shown),
+    OnChat 0x00682a20 ("/t" the team's, "/a" all's, skipped with the spaces after; C_NetGame::SendChat
+    0x0072ee60, declared); C_EquipmentMenuBase::CallItemNotify60 0x00677870.
+  - C_DescriptionScreen (vtable 0x008156b8, 0x8C bytes): constructor 0x006838a0, destructor 0x00676040
+    (0x00676020; the text deleted), Refresh 0x00669bf0 (the text's), Tick 0x00669aa0 (shown and the
+    cursor still 500 ms, no button down: the box at the cursor + (0.15, 0.015), its depth kept, on,
+    placed, the text refreshed; else off), HandleMessage 0x00669a50 (show / hide; else the text's),
+    HasPopup 0x00676010, Build 0x006698c0 ("text" a title with the id | 2, "description" off at (0.5,
+    -0.375, -0.5), "description01" off; no name or id taken).
+  - Harness: game_menu_test.inc's gmPlayer, gmPlayerCoop, gmPlayerCallbacks, gmChat (the panels
+    logged; gmBuildNet with the real builder), screen_test.inc's dsNew, dsBuild, dsTick, dsMessages,
+    equipment_desc_test.inc's edCallbacks (the slot 0x60's); check_player.py (the three lines). 22 of
+    22 in both orders (the other factory and text lines too).
+  - Mutations: mutations/mutate_9e13.py (177, all killed).
+  - Build: MSVC clean. Tier 1: 408 errors in 74 files (was 409), 172 stubs (was 173). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+12, 1 moved), screen.txt (+8), equipment_panel.txt (+1); 13 functions
+    in ported.txt. Stats: 8,870 of 12,306 functions by hand (79.3 % by size).
+  - Next, 9e-xiv: the player screen's panels (0x006838e0, 0x00684690, 0x00684b90, 0x00684df0), the
+    soldier types (0x00685da0) and the callbacks 0x00684fd0, 0x00687dd0, 0x00687f50; then the squad
+    glue and the item slots.
+
+  PART 9e-xiv DONE (2026-11-03): the in-game menu's soldiers panel (game/game_menu.cpp).
+  - BuildSoldiersPanel 0x006838e0 (Ghidra's decompile garbled by the aligned frame; read from the asm
+    with a stack-slot annotator): no profiles: false. The lists' frames made (dummies "GB_Soldiers_a"
+    and "GB_Soldiers_x" under the model's "soldierspanel", mask 0x20), "photo03" (the pictures'
+    template) and "selector" (its copy "selector2", not checked) found, table13..15 hidden; no photo,
+    selector or list frame: false (the frames kept). The selectors and the template moved into the
+    lists' frames, the template on. The group "soldierspanel" (0x0C100000): the scroll bar "scroll11"
+    (its list 0x0C102000), the hiding lists GB_Soldiers_a / GB_Soldiers_x (hidden, the scroll bar
+    0x0C101000, 4 shown, 0.062 across, the template's place) of the profiles' pictures (the first 30,
+    then up to 60: "Soldier_a%02d" / "Soldier_x%02d", the template's copies under the lists' frames,
+    their index, face image and click), refreshed; not co-op: the allies' and axis' marks. The
+    template hidden; true.
+  - OnSoldierPicked 0x00685420 (the picture's index kept in g_pickedSoldierA 0x008ae634 / X 0x008410ac,
+    ShowSoldierStats 0x006863c0 declared, the squad soldier's profile, the panel refreshed and its
+    face), OnSide 0x006854e0 (not co-op: the team command when not the squad's team).
+  - Harness: game_menu_test.inc's gmSoldiers, gmSoldiersNone, gmSoldierPicked, gmSide (the store's
+    count and the squad soldier's SetProfile in the stub header). 22 of 22 in both orders (the other
+    factory lines too).
+  - Mutations: mutations/mutate_9e14.py (135, 134 killed, 1 equivalent).
+  - Build: MSVC clean. Tier 1: 408 errors in 74 files, 172 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+3, 1 moved); 3 functions in ported.txt. Stats: 8,873 of 12,306 functions by hand (79.4 % by size).
+  - Next, 9e-xv: the equipment panel (0x00684690), then the items and skills panels, the soldier
+    types and the remaining callbacks, the item slots.
+
+  PART 9e-xv DONE (2026-11-03): the in-game menu's equipment panel (game/game_menu.cpp).
+  - BuildEquipmentPanel 0x00684690 (garbled decompile too; from the asm): the model's dummy
+    "equippanel" (mask 0x20) renamed "P_Equipment", two dummies made (none of the three: false, the
+    made leaked) under it at the origin, "GB_Holsters" and "GR_BackPack", the three kept in the
+    menu's models; the places' visuals (back, head, drop, hands, uniform, shoulder) given meshes of
+    their own (DuplicateMesh, the mesh's slot 0x18); scroll13 / scroll14 moved under the panel and
+    their texts (text_hlstrscap, hlcpct00; text_bkpckcap, hlcpct01) under them (a missing bar:
+    unlinked, as the original); item00..03 / item04..07 (own meshes) under the holsters' / backpack's
+    dummies; the panel's menu set, its description (C_EquipmentPanel::BuildDescription). True.
+  - Harness: game_menu_test.inc's gmEquipment, gmEquipmentNone (the frames' log, the models, the
+    description); the earlier player screen checks with the real builder. 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e15.py (52, all killed).
+  - Build: MSVC clean. Tier 1: 407 errors in 74 files (was 408), 171 stubs (was 172). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (1 moved); 1 function in ported.txt. Stats: 8,874 of 12,306 functions by hand (79.4 % by size).
+  - Next, 9e-xvi: the items and skills panels (0x00684b90, 0x00684df0), then the soldier types and
+    the remaining callbacks, the item slots.
+
+  PART 9e-xvi DONE (2026-11-03): the in-game menu's items and skills panels (game/game_menu.cpp).
+  - BuildItemsPanel 0x00684b90: SetupStocks 0x00685170 (declared); "allitemspanel" (dummy) renamed
+    "P_visualstore", "soldier type01" (renamed "filter") and the dummy "bscroll" (not checked, as the
+    original) moved under it; item10..15 and selitem08..15 hidden; "item08" renamed "vi_template",
+    "item09" under it, off, renamed "ammo", placed (a frame missing: false); the store list's menu
+    set, its description (C_StoreList::BuildDescription 0x0067aa70, declared). True.
+  - BuildSkillsPanel 0x00684df0 (stdcall): the group "Panel02" ignoring input; per skill (shooting,
+    strength, health, endurance, stealth, first aid, lockpick) its name's title (no margin, text
+    0xA78 + the skill), its bar (hlcpct07..; along z, empty) and its value's title (text 0x7D2). True.
+  - Harness: game_menu_test.inc's gmItems, gmItemsNone, gmSkills; the player screen's checks with the
+    skills panel first (the ids one more). 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e16.py (78, 77 killed, 1 equivalent).
+  - Build: MSVC clean. Tier 1: 407 errors in 74 files, 171 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+1, 2 moved), store_list.txt (+1); 2 functions in ported.txt. Stats: 8,876 of 12,306 functions by hand (79.4 % by size).
+  - Next, 9e-xvii: the soldier types (0x00685da0), the screen's shown callback (0x00684fd0), the
+    soldier type's and the preset's callbacks (0x00687dd0, 0x00687f50); then the item slots.
+
+  PART 9e-xvii DONE (2026-11-03): the in-game menu's soldier types and user presets (game/game_menu.cpp).
+  - UpdateSoldierTypes 0x00685da0: the combo box emptied, its header and first line text 500; the user
+    presets of the squad's team (m_team: axis 0x12, allied 0x22, deathmatch 0x42, else 2), then the
+    presets whose names the map's preset list holds (C_MpMissionDef::GetPresets, +0x68; counted in
+    m_mapPresets, was m_unknown4C0); a line its preset's text, else its name (as a format: quirk kept).
+  - StorePreset 0x00687bc0: the user preset (the team's index) gets the squad soldier's profile and
+    places, its belt's and backpack's items counted by type, the last first, 13 / 31 types at most.
+    The preset's places' fields reordered by it (head, hands, long gun, uniform, backpack: 9e-iv's
+    names were inferred).
+  - OnSoldierType 0x00687dd0 (the header's text: empty, edited again; else the edited user preset
+    m_userPreset, was m_unknown4C4, renamed, stored and saved), OnSavePreset 0x00687f50 (stored; named
+    by its text: renamed "<profile name><index + 1>", the list refilled, the header the name; saved).
+    C_PlayerProfile::GetProfileName added (the C_str concatenation 0x00688130 left to tier 1).
+  - Harness: game_menu_test.inc's gmSoldierTypes, gmStorePreset, gmTypeEdited, gmPresetSaved (the
+    stub profile's GetProfileName). 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e17.py (110, 109 killed, 1 equivalent).
+  - Build: MSVC clean. Tier 1: 407 errors in 74 files, 171 stubs (unchanged). ret_audit --src: 51 (was 52).
+  - Ghidra: names/game_menu.txt (+1, 3 moved); 4 functions in ported.txt. Stats: 8,880 of 12,306 functions by hand (79.5 % by size).
+  - Next, 9e-xviii: the player screen's shown callback (0x00684fd0) and the preset's application
+    (0x00685550), the squad glue (0x00685ab0.., the stats 0x006863c0), the item slots.
+
+  PART 9e-xviii DONE (2026-11-03): the in-game menu's squad team (game/game_menu.cpp).
+  - SetTeam 0x00685550 (2: nothing): the message box closed; the team change posted and now the
+    first soldier's: the escape posted; the same team: no more; not co-op: its side's mark checked,
+    the other's not (another team: no more); no team before: the store's list and the soldier types
+    on, else the load's button off and the panel's items back to the store's stock; the pages
+    emptied; the team kept (the squad soldier's too), the stock (the allies' the first, the axis' the
+    second); its soldiers' list, the items taken, the soldier types.
+  - ShowTeamSoldiers 0x00685ab0 (the allies' first list, the axis' second: shown, the scroll bar its,
+    the last pick selected; the profile, the stats, the panel refreshed, its face and dress),
+    TakeSoldierItems 0x00685880 (the places' items the stock has not dropped, the backpack's with its
+    contents, the belt's and the backpack's removed, the last first; the load), OnPlayerScreenShown
+    0x00684fd0 (the squad's soldiers made as needed: one, a second copied from the first for a
+    player slot member; the panel's soldier; its team set, none: asked for: the allies in co-op, else 2).
+  - Harness: game_menu_test.inc's gmTeam, gmTakeItems, gmShown (the stub squad's AddSoldier, CopyFrom,
+    UpdateLoad; the warmup's player screen with a squad). 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e18.py (138, 137 killed, 1 equivalent).
+  - Build: MSVC clean. Tier 1: 400 errors in 73 files (was 407 in 74), 170 stubs (was 171). ret_audit --src: 52 (as before; the count moves with tier 1).
+  - Ghidra: names/game_menu.txt (+3, 1 moved); 4 functions in ported.txt. Stats: 8,884 of 12,306 functions by hand (79.5 % by size).
+  - Next, 9e-xix: the stats (ShowSoldierStats 0x006863c0), the stocks' setup (0x00685170), the item
+    slots (0x00680ea0.., 0x00686e10..).
+
+  PART 9e-xix DONE (2026-11-03): the in-game menu's soldier stats and stocks (game/game_menu.cpp).
+  - ShowSoldierStats 0x006863c0: the profile's stats at the local player's rank
+    (C_NetGame::GetLocalPlayerStats 0x0072f8b0, declared; its 6th) over the defaults (800, 80 ...);
+    the skills panel's (0x0C400000) bars (a hundredth, rounded once as the original's float product;
+    health full) and values' texts (style 0x17: shooting, stealth, first aid, lockpick "%3d %%",
+    strength "%3d Kg", health and endurance "%3d").
+  - SetupStocks 0x00685170: the items loaded; two stocks made, every type unset (-1); the profile's
+    stock reset; the map's items (C_MpMissionDef::GetItems added; a known type below 500 of a team)
+    in the second stock unless of team 0 and the first unless of team 1: its count (the list's,
+    else 1; inventory group 5: 10) and its second's (a weapon's ammunition, 10, not for type 0x26; a
+    uniform's head gear, 1; the list's ammunition count), a type with a count kept.
+  - Harness: game_menu_test.inc's gmStats, gmStocks; the fakes for the store's stats, the local
+    player's stats, the stocks' Set, the items' loading (stub headers); the network games' mission as
+    big as a C_MpMissionDef. 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e19.py (104, 98 killed, 6 equivalent).
+  - Build: MSVC clean. Tier 1: 400 errors in 73 files, 170 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+1, 2 moved); 2 functions in ported.txt. Stats: 8,886 of 12,306 functions by hand (79.6 % by size).
+  - Next, 9e-xx: the item slots (OnItemHover 0x00680ea0, OnItemNotify13 / 0A / 08 / 09 / 60 ...), the
+    store list's description (0x0067aa70).
+
+  PART 9e-xx DONE (2026-11-03): the in-game menu's item slots' drag and drop (game/game_menu.cpp).
+  - OnItemNotify13 0x00681ee0 (an item clicked twice: the control's index its type; from the panel
+    (the screen's 2nd control): back to the store, the backpack with its contents; from the store:
+    a large weapon not with another, taken (not there: false), dropped onto the soldier, what it
+    displaced (its own type: the item) back), OnItemNotify0A 0x00682020 (the drag's start, from the
+    asm: a type the control has, the store's when from the store (3rd), a large weapon not with
+    another; one of it kept (m_dragType, m_dragItem: the base's m_unknown1C0 / 1B8 renamed), the
+    places it may go shown (ignoring the weight from the panel), the control's visual copied
+    (m_dragVisual, was m_unknown1B4) into the scene's primary sector, turned, 0.1 above it, on),
+    OnItemNotify08 0x00682210 (the copy by the cursor's move; its depth the move's: quirk kept),
+    OnItemNotify09 0x006822b0 (the copy released, the places hidden, DropItem on the control under the
+    cursor (its frame's data), the drag ended), DropItem 0x00682350 (from the panel to elsewhere: back
+    to the store, the backpack with its contents, else the place's count; onto the panel: moved,
+    what it displaced back; from the store onto the panel: put, taken; what it displaced back
+    unless of its type).
+  - Harness: game_menu_test.inc's gmClicked, gmDragStart, gmDragMove, gmDrop (the driver's visual,
+    the copy's vtable, the store's entries). 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e20.py (136, 132 killed, 4 equivalent).
+  - Build: MSVC clean. Tier 1: 399 errors in 72 files (was 400 in 73), 169 stubs (was 170). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+5); 5 functions in ported.txt. Stats: 8,891 of 12,306 functions by hand (79.6 % by size).
+  - Next, 9e-xxi: the hover (OnItemHover 0x00680ea0) and the slot 0x60 (0x00686e10), the remaining
+    helpers (0x006828b0, 0x006861d0, 0x00687390, 0x006876b0), the store list's description.
+
+  PART 9e-xxi DONE (2026-11-03): the in-game menu's soldier type picked (game/game_menu.cpp).
+  - OnItemNotify60 0x00686e10 (the soldier types' pick: GET_TEXT's value the line; the header (0):
+    ClearSoldier, the presets' save and rename buttons (0x0C600000, 0x0C700000) off, false; lines
+    1..6 the team's user presets (the edited one; not empty: its profile the squad soldier's, picked
+    in its list; the stats; g_pickedSoldierA / X; the buttons on); later lines the map's presets (by
+    the count of those its list names; not edited, the buttons off); the preset's match
+    (MatchPreset 0x006876b0, declared: the stock's substitutes) put on the soldier through
+    AddPresetItem (the old items back first unless an empty user preset; a large long gun not with
+    another); the panel, its face, the store refreshed).
+  - ClearSoldier 0x00687360 (the items back to the store's stock, the store refreshed), AddPresetItem
+    0x00686ca0 (taken, put not forced, what was left back; false: not taken or given back whole).
+  - Harness: game_menu_test.inc's gmTypePicked, gmPresetItem (MatchPreset a logged copy). 22 of 22
+    in both orders.
+  - Mutations: mutations/mutate_9e21.py (119, 112 killed, 7 equivalent).
+  - Build: MSVC clean. Tier 1: 394 errors in 71 files (was 399 in 72), 168 stubs (was 169). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+4); 3 functions in ported.txt. Stats: 8,894 of 12,306 functions by hand (79.7 % by size).
+  - Next, 9e-xxii: the preset's match (0x006876b0 and its scorer 0x00687390), the hover
+    (OnItemHover 0x00680ea0), the remaining helpers (0x006828b0, 0x006861d0, 0x00680e00), the store
+    list's description.
+
+  PART 9e-xxii DONE (2026-11-03): the in-game menu's preset match (game/game_menu.cpp).
+  - FindSubstitute 0x00687390 (from the asm: its switch's table read): the stock's best item for a
+    type (ammunition: none, false): the same behaviour +100 (behaviour 0x13 never; both scoped with
+    reticles, aim modes 0-3, +50; else both of the ids 7, 0x16, 0x104 +60), else both small
+    (behaviours below 7 or 12) by the candidate's (2 +30, 3 / 4 +60, 5 +50 and +61 more for a 12,
+    12 +50, else +10; paired ids +110); the type itself +51; a weapon's (12 and below) ammunition
+    when asked (+30 enough, else 10 per one short; none -100 more); the first best above 0; the type
+    itself best: false; none: -1.
+  - MatchPreset 0x006876b0: a fresh preset; the places' substitutes (none found: the place's own
+    type if it has one); the weapons' ammunition counted in the preset and their ammunition remapped
+    for the belt and the backpack to the substitute's (quirk kept: a weapon without a definition or
+    ammunition keeps the last one's ammunition type, so a long gun's swap can remap it to none); the
+    belt's and backpack's items their remapped or substituted types (13 / 31 types, merged).
+  - Harness: game_menu_test.inc's gmSubstitute, gmMatch (the pick tests with the real match). 22 of
+    22 in both orders.
+  - Mutations: mutations/mutate_9e22.py (155, 147 killed, 8 equivalent or unreachable).
+  - Build: MSVC clean. Tier 1: 394 errors in 71 files, 168 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+1, 1 moved); 2 functions in ported.txt. Stats: 8,896 of 12,306 functions by hand (79.7 % by size).
+  - Next, 9e-xxiii: the hover (OnItemHover 0x00680ea0), the remaining helpers (0x006828b0,
+    0x006861d0, 0x00680e00), the store list's description (0x0067aa70).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

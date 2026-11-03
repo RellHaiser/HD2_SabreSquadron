@@ -27270,6 +27270,11 @@
   "name": "S_ControlDesc::~S_ControlDesc",
   "proto": "void __thiscall ~S_ControlDesc(S_ControlDesc *this)"
  },
+ "00615360": {
+  "module": "screen",
+  "name": "S_ScreenDesc::AddControl",
+  "proto": "void * __thiscall AddControl(S_ScreenDesc *this, int type, char * name)"
+ },
  "00615a30": {
   "module": "zz_idioms",
   "name": "vector_tidy_615a30"
@@ -27375,14 +27380,144 @@
   "module": "xml_node",
   "name": "XmlAttr_Dtor"
  },
+ "0061bf00": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(void *this, void * message)"
+ },
+ "0061cfa0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::~C_OptionsHandler",
+  "proto": "void __fastcall ~C_OptionsHandler(void * handler)"
+ },
+ "0061cfc0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildScreen",
+  "proto": "bool __thiscall BuildScreen(void *this, void * desc, void * model)"
+ },
+ "0061da70": {
+  "module": "equipment_panel",
+  "name": "S_ControlDesc::AddChild",
+  "proto": "void * __thiscall AddChild(void *this, int type, char * name)"
+ },
+ "0061dc20": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildVideoPage",
+  "proto": "bool __thiscall BuildVideoPage(void *this, void * desc, void * model)"
+ },
  "0061e100": {
   "module": "control",
   "name": "AddDescMessage3",
   "proto": "void __cdecl AddDescMessage3(void * desc, uint target, uint id, uint value, uint value2, uint value3)"
  },
+ "0061e1a0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildSoundPage",
+  "proto": "bool __thiscall BuildSoundPage(void *this, void * desc, void * model)"
+ },
+ "0061e3f0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildControlsPage",
+  "proto": "bool __thiscall BuildControlsPage(void *this, void * desc, void * model)"
+ },
+ "0061f230": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildGamePage",
+  "proto": "bool __thiscall BuildGamePage(void *this, void * desc, void * model)"
+ },
+ "0061f3b0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildMultiplayerPage",
+  "proto": "bool __thiscall BuildMultiplayerPage(void *this, void * desc, void * model)"
+ },
+ "0061f600": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildKeyGroup",
+  "proto": "bool __thiscall BuildKeyGroup(void *this, void * page, void * model, void * name, int group)"
+ },
+ "0061fcb0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnKeyLayout",
+  "proto": "bool __thiscall OnKeyLayout(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0061fd00": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnDetail",
+  "proto": "bool __thiscall OnDetail(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00620300": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnSlider",
+  "proto": "bool __thiscall OnSlider(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006204a0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnCheck",
+  "proto": "bool __thiscall OnCheck(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00620530": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnShown",
+  "proto": "bool __thiscall OnShown(void *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00620770": {
   "module": "zz_idioms",
   "name": "get_field_8_620770"
+ },
+ "00620780": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnVoiceChat",
+  "proto": "bool __thiscall OnVoiceChat(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006209b0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnKeyChanged",
+  "proto": "bool __thiscall OnKeyChanged(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006209c0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnKeyGroup",
+  "proto": "bool __thiscall OnKeyGroup(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00620be0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::RefreshKeyGroups",
+  "proto": "bool __fastcall RefreshKeyGroups(void * handler)"
+ },
+ "00625f60": {
+  "module": "screen",
+  "name": "AddScreenMessage",
+  "proto": "void __cdecl AddScreenMessage(void * desc, uint target, uint id, uint value, uint value2, uint value3)"
+ },
+ "00626000": {
+  "module": "screen",
+  "name": "S_ScreenDesc::S_ScreenDesc",
+  "proto": "void * __thiscall S_ScreenDesc(S_ScreenDesc *this, char * name, char * file, uint id)"
+ },
+ "00626170": {
+  "module": "screen",
+  "name": "S_ScreenDesc::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(S_ScreenDesc *this, uchar flags)"
+ },
+ "00626190": {
+  "module": "screen",
+  "name": "S_ScreenDesc::~S_ScreenDesc",
+  "proto": "void __thiscall ~S_ScreenDesc(S_ScreenDesc *this)"
+ },
+ "00626300": {
+  "module": "screen",
+  "name": "S_MenuDesc::AddScreen",
+  "proto": "void * __thiscall AddScreen(S_MenuDesc *this, char * name, char * file)"
+ },
+ "00626400": {
+  "module": "screen",
+  "name": "S_MenuDesc::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(S_MenuDesc *this, uchar flags)"
+ },
+ "00626420": {
+  "module": "screen",
+  "name": "S_MenuDesc::~S_MenuDesc",
+  "proto": "void __thiscall ~S_MenuDesc(S_MenuDesc *this)"
  },
  "006268c0": {
   "module": "zz_idioms",
@@ -30921,6 +31056,116 @@
   "name": "C_MovieControl::CloseStream",
   "proto": "void __fastcall CloseStream(C_MovieControl * control)"
  },
+ "00668420": {
+  "module": "screen",
+  "name": "C_Screen::C_Screen",
+  "proto": "void * __thiscall C_Screen(C_Screen *this, void * scene, void * frame)"
+ },
+ "00668510": {
+  "module": "screen",
+  "name": "C_Screen::HasPopup",
+  "proto": "bool __thiscall HasPopup(C_Screen *this)"
+ },
+ "00668520": {
+  "module": "screen",
+  "name": "C_Screen::HandleMessages",
+  "proto": "bool __thiscall HandleMessages(C_Screen *this, void * messages)"
+ },
+ "00668530": {
+  "module": "screen",
+  "name": "C_Screen::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Screen *this, uchar flags)"
+ },
+ "00668550": {
+  "module": "screen",
+  "name": "C_Screen::~C_Screen",
+  "proto": "void __thiscall ~C_Screen(C_Screen *this)"
+ },
+ "00668700": {
+  "module": "screen",
+  "name": "C_Screen::Open",
+  "proto": "void __thiscall Open(C_Screen *this, int id)"
+ },
+ "00668740": {
+  "module": "screen",
+  "name": "C_Screen::Hide",
+  "proto": "void __thiscall Hide(C_Screen *this)"
+ },
+ "00668770": {
+  "module": "screen",
+  "name": "C_Screen::Build",
+  "proto": "bool __thiscall Build(C_Screen *this, void * desc)"
+ },
+ "006687f0": {
+  "module": "screen",
+  "name": "C_Screen::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_Screen *this, void * message)"
+ },
+ "00668970": {
+  "module": "screen",
+  "name": "C_Screen::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_Screen *this, int key)"
+ },
+ "00668a50": {
+  "module": "screen",
+  "name": "C_Screen::Tick",
+  "proto": "void __thiscall Tick(C_Screen *this, int time)"
+ },
+ "00668a90": {
+  "module": "screen",
+  "name": "C_MessageBox::Build",
+  "proto": "bool __thiscall Build(C_Screen *this, void * desc)"
+ },
+ "00668ba0": {
+  "module": "screen",
+  "name": "C_MessageBox::ShowText",
+  "proto": "void __thiscall ShowText(C_Screen *this, int kind, void * text, uint yesMessage, uint noMessage)"
+ },
+ "00668fd0": {
+  "module": "screen",
+  "name": "C_MessageBox::ShowTextId",
+  "proto": "void __thiscall ShowTextId(C_Screen *this, int kind, uint textId, uint yesMessage, uint noMessage)"
+ },
+ "00669390": {
+  "module": "screen",
+  "name": "C_MessageBox::Close",
+  "proto": "void __fastcall Close(C_Screen * box)"
+ },
+ "006694a0": {
+  "module": "screen",
+  "name": "C_MessageBox::ClearAnswers",
+  "proto": "void __fastcall ClearAnswers(C_Screen * box)"
+ },
+ "006694b0": {
+  "module": "screen",
+  "name": "C_MessageBox::Unknown20",
+  "proto": "bool __thiscall Unknown20(C_Screen *this, int key)"
+ },
+ "006696a0": {
+  "module": "screen",
+  "name": "C_MessageBox::OnButton",
+  "proto": "bool __thiscall OnButton(C_Screen *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006698c0": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::Build",
+  "proto": "bool __thiscall Build(C_Screen *this, void * desc)"
+ },
+ "00669a50": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_Screen *this, void * message)"
+ },
+ "00669aa0": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::Tick",
+  "proto": "void __thiscall Tick(C_Screen *this, int time)"
+ },
+ "00669bf0": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::Refresh",
+  "proto": "void __thiscall Refresh(C_Screen *this)"
+ },
  "0066a2f0": {
   "module": "cursor",
   "name": "C_Cursor::HasMoved",
@@ -31009,7 +31254,7 @@
  "0066aac0": {
   "module": "cursor",
   "name": "C_Cursor::Pick",
-  "proto": "void __thiscall Pick(C_Cursor *this, void * scene, void * frame)"
+  "proto": "uint __thiscall Pick(C_Cursor *this, void * scene, void * frame)"
  },
  "0066ab50": {
   "module": "cursor",
@@ -31020,6 +31265,161 @@
   "module": "cursor",
   "name": "C_Cursor::SetClicksOff",
   "proto": "void __thiscall SetClicksOff(C_Cursor *this, bool off)"
+ },
+ "0066ab70": {
+  "module": "cursor",
+  "name": "C_Cursor::Draw",
+  "proto": "void __fastcall Draw(C_Cursor * cursor)"
+ },
+ "0066b010": {
+  "module": "menu_state",
+  "name": "C_MenuState::Start",
+  "proto": "bool __thiscall Start(C_MenuState *this, void * arg)"
+ },
+ "0066b410": {
+  "module": "menu_state",
+  "name": "C_MenuState::PlayClick",
+  "proto": "void __fastcall PlayClick(C_MenuState * menu)"
+ },
+ "0066b440": {
+  "module": "menu_state",
+  "name": "C_MenuState::Stop",
+  "proto": "bool __thiscall Stop(C_MenuState *this)"
+ },
+ "0066b680": {
+  "module": "menu_state",
+  "name": "ReadTypedChars",
+  "proto": "bool __fastcall ReadTypedChars(void * out, int size)"
+ },
+ "0066b6e0": {
+  "module": "menu_state",
+  "name": "C_MenuState::HandleInput",
+  "proto": "bool __thiscall HandleInput(C_MenuState *this, float * held, float * pressed)"
+ },
+ "0066bb80": {
+  "module": "menu_state",
+  "name": "C_MenuState::PickFrame",
+  "proto": "void * __thiscall PickFrame(C_MenuState *this)"
+ },
+ "0066bc90": {
+  "module": "menu_state",
+  "name": "C_MenuState::CursorInput",
+  "proto": "void __thiscall CursorInput(C_MenuState *this, int timeDelta)"
+ },
+ "0066c190": {
+  "module": "menu_state",
+  "name": "C_MenuState::Tick",
+  "proto": "void __thiscall Tick(C_MenuState *this, int timeDelta)"
+ },
+ "0066c1a0": {
+  "module": "menu_state",
+  "name": "C_MenuState::Update",
+  "proto": "void __thiscall Update(C_MenuState *this, int timeDelta)"
+ },
+ "0066c2a0": {
+  "module": "menu_state",
+  "name": "C_MenuState::LoadModel",
+  "proto": "void * __thiscall LoadModel(C_MenuState *this, char * name, char * file)"
+ },
+ "0066c4d0": {
+  "module": "menu_state",
+  "name": "C_MenuState::CreateMessageBox",
+  "proto": "bool __thiscall CreateMessageBox(C_MenuState *this, char * name, char * file)"
+ },
+ "0066c6b0": {
+  "module": "screen",
+  "name": "C_MessageBox::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Screen *this, uchar flags)"
+ },
+ "0066c6d0": {
+  "module": "screen",
+  "name": "C_MessageBox::~C_MessageBox",
+  "proto": "void __thiscall ~C_MessageBox(C_Screen *this)"
+ },
+ "0066c8b0": {
+  "module": "menu_state",
+  "name": "C_MenuState::LoadScreens",
+  "proto": "bool __thiscall LoadScreens(C_MenuState *this)"
+ },
+ "0066c9c0": {
+  "module": "menu_state",
+  "name": "C_MenuState::ReleaseModels",
+  "proto": "void __fastcall ReleaseModels(C_MenuState * menu)"
+ },
+ "0066ca70": {
+  "module": "menu_state",
+  "name": "C_MenuState::HandleMessages",
+  "proto": "void __thiscall HandleMessages(C_MenuState *this)"
+ },
+ "0066cc50": {
+  "module": "menu_state",
+  "name": "C_MenuState::HandleMessage",
+  "proto": "void __thiscall HandleMessage(C_MenuState *this, void * message)"
+ },
+ "0066da30": {
+  "module": "menu_state",
+  "name": "C_MenuState::FindControl",
+  "proto": "void * __thiscall FindControl(C_MenuState *this, uint id)"
+ },
+ "0066da80": {
+  "module": "menu_state",
+  "name": "C_MenuState::ShowMessage",
+  "proto": "void __thiscall ShowMessage(C_MenuState *this, int kind, void * text, uint yesMessage, uint noMessage)"
+ },
+ "0066daa0": {
+  "module": "menu_state",
+  "name": "C_MenuState::ShowMessageId",
+  "proto": "void __thiscall ShowMessageId(C_MenuState *this, int kind, uint textId, uint yesMessage, uint noMessage)"
+ },
+ "0066dac0": {
+  "module": "menu_state",
+  "name": "C_MenuState::CloseMessage",
+  "proto": "void __fastcall CloseMessage(C_MenuState * menu)"
+ },
+ "0066dad0": {
+  "module": "menu_state",
+  "name": "C_MenuState::CloneVisual",
+  "proto": "void * __thiscall CloneVisual(C_MenuState *this, void * name, void * parent, void * source)"
+ },
+ "0066dcf0": {
+  "module": "menu_state",
+  "name": "C_MenuState::CloneFrame",
+  "proto": "void * __thiscall CloneFrame(C_MenuState *this, void * name, void * parent, void * source)"
+ },
+ "0066def0": {
+  "module": "menu_state",
+  "name": "C_MenuState::AddFrame",
+  "proto": "void * __thiscall AddFrame(C_MenuState *this, void * name, int type, void * parent, void * pos)"
+ },
+ "0066e100": {
+  "module": "menu_state",
+  "name": "C_MenuState::Render",
+  "proto": "void __thiscall Render(C_MenuState *this)"
+ },
+ "0066e300": {
+  "module": "menu_state",
+  "name": "C_MenuState::DrawScreens",
+  "proto": "void __thiscall DrawScreens(C_MenuState *this)"
+ },
+ "0066e3f0": {
+  "module": "menu_state",
+  "name": "MenuRenderCallback",
+  "proto": "int __stdcall MenuRenderCallback(int phase, int unknown1, int unknown2)"
+ },
+ "0066e430": {
+  "module": "menu_state",
+  "name": "S_MenuHint_SetText",
+  "proto": "void __thiscall S_MenuHint_SetText(void * this, void * text, uchar style)"
+ },
+ "0066e450": {
+  "module": "menu_state",
+  "name": "S_MenuHint_Render",
+  "proto": "void __thiscall S_MenuHint_Render(void * this, void * scene)"
+ },
+ "0066e480": {
+  "module": "menu_state",
+  "name": "S_MenuHint_Reset",
+  "proto": "void __fastcall S_MenuHint_Reset(void * hint)"
  },
  "0066ede0": {
   "module": "game_app",
@@ -31111,10 +31511,214 @@
   "name": "C_MovieState::RenderThunk",
   "proto": "void __thiscall RenderThunk(C_MovieState *this)"
  },
+ "0066f160": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::IsLargeWeapon",
+  "proto": "bool __stdcall IsLargeWeapon(int typeId)"
+ },
+ "0066f1a0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::HasLargeWeapon",
+  "proto": "bool __fastcall HasLargeWeapon(void * panel)"
+ },
+ "0066f200": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::BuildDescription",
+  "proto": "void __thiscall BuildDescription(void *this, void * screen, void * model)"
+ },
+ "00670b50": {
+  "module": "equipment_panel",
+  "name": "AddDescMessage4_670b50",
+  "proto": "void __cdecl AddDescMessage4_670b50(void * desc, uint target, uint id, uint value, uint value2)"
+ },
+ "00670be0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::TickSoldier",
+  "proto": "void __thiscall TickSoldier(void *this, int time)"
+ },
+ "00670bf0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::RenderSoldier",
+  "proto": "void __fastcall RenderSoldier(void * panel)"
+ },
+ "00670c00": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::CreateSoldier",
+  "proto": "void __thiscall CreateSoldier(void *this, void * area)"
+ },
+ "00670e40": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::DeleteSoldier",
+  "proto": "void __fastcall DeleteSoldier(void * panel)"
+ },
+ "00670e90": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::UpdateFace",
+  "proto": "void __fastcall UpdateFace(void * panel)"
+ },
+ "00670ee0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::AddToSoldier",
+  "proto": "void __thiscall AddToSoldier(void *this, uint place, void * item)"
+ },
+ "00670f20": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::DressSoldier",
+  "proto": "int __fastcall DressSoldier(void * panel)"
+ },
+ "00671010": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::SelectSoldier",
+  "proto": "void __thiscall SelectSoldier(void *this, int index)"
+ },
+ "00671260": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::CountItems",
+  "proto": "int __thiscall CountItems(void *this, uint control, void * item)"
+ },
+ "00671290": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::SlotOfControl",
+  "proto": "uint __stdcall SlotOfControl(uint id)"
+ },
+ "00671360": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::RemoveItem",
+  "proto": "int __thiscall RemoveItem(void *this, uint slot, void * item)"
+ },
+ "006713c0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::RemoveItemAt",
+  "proto": "int __thiscall RemoveItemAt(void *this, uint control, void * item)"
+ },
+ "00671410": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::PutItem",
+  "proto": "void * __thiscall PutItem(void *this, void * out, uint slot, void * item)"
+ },
+ "00671500": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::PutItemChecked",
+  "proto": "void * __thiscall PutItemChecked(void *this, void * out, uint slot, void * item, bool force)"
+ },
+ "006716c0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::PutItemAt",
+  "proto": "void * __thiscall PutItemAt(void *this, void * out, uint control, void * item)"
+ },
+ "006716f0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::DropItem",
+  "proto": "void * __thiscall DropItem(void *this, void * out, void * item, bool force)"
+ },
+ "006719a0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::MoveItem",
+  "proto": "void * __thiscall MoveItem(void *this, void * out, void * item, uint from, uint to)"
+ },
+ "00671ac0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::OnScroll",
+  "proto": "bool __thiscall OnScroll(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00671f60": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::ShowItem",
+  "proto": "void __stdcall ShowItem(uint control, void * item)"
+ },
+ "00672330": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::SetBackpackInactive",
+  "proto": "void __thiscall SetBackpackInactive(void *this, bool inactive)"
+ },
+ "00672580": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::Refresh",
+  "proto": "void __fastcall Refresh(void * panel)"
+ },
+ "00672720": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::ReturnBackpack",
+  "proto": "void __thiscall ReturnBackpack(void *this, void * stock)"
+ },
+ "006727f0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::ReturnItems",
+  "proto": "void __thiscall ReturnItems(void *this, void * stock)"
+ },
+ "00672820": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::FindHighlights",
+  "proto": "void __thiscall FindHighlights(void *this, void * model)"
+ },
+ "006728a0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::ShowAllowed",
+  "proto": "void __thiscall ShowAllowed(void *this, void * item, bool ignoreWeight)"
+ },
+ "00672a30": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::UpdateLoad",
+  "proto": "void __thiscall UpdateLoad(void *this)"
+ },
+ "00672fb0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::CallItemNotify13"
+ },
+ "00672fc0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::CallItemNotify0A"
+ },
+ "00672fd0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::CallItemNotify08"
+ },
+ "00672fe0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::CallItemNotify09"
+ },
+ "00672ff0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::CallItemHover"
+ },
  "00673cf0": {
   "module": "profile",
   "name": "S_MissionSquad::AddSoldier",
   "proto": "S_SquadSoldier * __thiscall AddSoldier(S_MissionSquad *this)"
+ },
+ "00676010": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::HasPopup",
+  "proto": "bool __thiscall HasPopup(C_Screen *this)"
+ },
+ "00676020": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Screen *this, uchar flags)"
+ },
+ "00676040": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::~C_DescriptionScreen",
+  "proto": "void __thiscall ~C_DescriptionScreen(C_Screen *this)"
+ },
+ "00676410": {
+  "module": "equipment_panel",
+  "name": "AddDescMessage4_676410",
+  "proto": "void __cdecl AddDescMessage4_676410(void * desc, uint target, uint id, uint value, uint value2)"
+ },
+ "00677870": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::CallItemNotify60"
+ },
+ "0067a3c0": {
+  "module": "loadout_presets",
+  "name": "S_PresetItem::Reset",
+  "proto": "void __fastcall Reset(void * item)"
+ },
+ "0067a3d0": {
+  "module": "loadout_presets",
+  "name": "S_LoadoutPreset::ClearPlaces",
+  "proto": "void __fastcall ClearPlaces(void * preset)"
  },
  "0067a950": {
   "module": "zz_idioms",
@@ -31132,8 +31736,123 @@
   "module": "zz_idioms",
   "name": "construct_copy4_67a9b0"
  },
+ "0067aa70": {
+  "module": "store_list",
+  "name": "C_StoreList::BuildDescription",
+  "proto": "void __thiscall BuildDescription(void *this, void * desc, void * model)"
+ },
+ "0067b070": {
+  "module": "store_list",
+  "name": "C_StoreList::BuildPage",
+  "proto": "bool __thiscall BuildPage(void *this, void * parent, void * model, void * name, int group)"
+ },
+ "0067b930": {
+  "module": "store_list",
+  "name": "C_StoreList::GetCount",
+  "proto": "int __thiscall GetCount(void *this, int typeId)"
+ },
+ "0067b950": {
+  "module": "store_list",
+  "name": "C_StoreList::OnTab",
+  "proto": "bool __thiscall OnTab(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0067b9e0": {
+  "module": "store_list",
+  "name": "C_StoreList::ShowPage",
+  "proto": "void __thiscall ShowPage(void *this, int page)"
+ },
+ "0067bc00": {
+  "module": "store_list",
+  "name": "C_StoreList::OnItem",
+  "proto": "bool __thiscall OnItem(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0067bd60": {
+  "module": "store_list",
+  "name": "C_StoreList::UpdateType",
+  "proto": "bool __thiscall UpdateType(void *this, int typeId)"
+ },
+ "0067c040": {
+  "module": "store_list",
+  "name": "C_StoreList::UpdateAll",
+  "proto": "void __fastcall UpdateAll(void * list)"
+ },
+ "0067c060": {
+  "module": "store_list",
+  "name": "C_StoreList::UpdateAllIfStock",
+  "proto": "bool __fastcall UpdateAllIfStock(void * list)"
+ },
+ "0067c090": {
+  "module": "store_list",
+  "name": "C_StoreList::SetStock",
+  "proto": "void __thiscall SetStock(void *this, void * stock)"
+ },
+ "0067c0a0": {
+  "module": "store_list",
+  "name": "C_StoreList::AddItem",
+  "proto": "void __thiscall AddItem(void *this, void * item)"
+ },
+ "0067c0d0": {
+  "module": "store_list",
+  "name": "C_StoreList::TakeItem",
+  "proto": "bool __thiscall TakeItem(void *this, void * item, bool fill)"
+ },
+ "0067c150": {
+  "module": "store_list",
+  "name": "C_StoreList::ClearPages",
+  "proto": "void __fastcall ClearPages(void * list)"
+ },
+ "0067c390": {
+  "module": "store_list",
+  "name": "C_StoreList::SetActive",
+  "proto": "void __thiscall SetActive(void *this, bool on)"
+ },
+ "0067d450": {
+  "module": "loadout_presets",
+  "name": "S_LoadoutPreset::CountItems",
+  "proto": "int __thiscall CountItems(void *this, int typeId)"
+ },
+ "0067d4d0": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::Clear",
+  "proto": "void __fastcall Clear(void * presets)"
+ },
+ "0067d580": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::AddPreset",
+  "proto": "void __fastcall AddPreset(void * presets)"
+ },
+ "0067d770": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::AddUserPreset",
+  "proto": "void __fastcall AddUserPreset(void * presets)"
+ },
+ "0067d960": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::Load",
+  "proto": "bool __fastcall Load(void * presets)"
+ },
+ "0067dc30": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::SaveUser",
+  "proto": "bool __fastcall SaveUser(void * presets)"
+ },
+ "0067de40": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::GetPreset",
+  "proto": "void * __thiscall GetPreset(void *this, int index, uint flags)"
+ },
+ "0067de90": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::GetUserPreset",
+  "proto": "void * __thiscall GetUserPreset(void *this, int index, uint flags)"
+ },
+ "0067def0": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::CreateUserPresets",
+  "proto": "void __fastcall CreateUserPresets(void * presets)"
+ },
  "0067e380": {
-  "module": "zz_idioms",
+  "module": "loadout_presets",
   "name": "vector_size_e4_67e380"
  },
  "0067e3a0": {
@@ -31141,13 +31860,48 @@
   "name": "empty_function_67e3a0"
  },
  "0067e3b0": {
-  "module": "zz_idioms",
+  "module": "loadout_presets",
   "name": "uninitialized_fill_n4_67e3b0"
  },
+ "0067e460": {
+  "module": "loadout_presets",
+  "name": "C_MissionItems::C_MissionItems",
+  "proto": "void * __fastcall C_MissionItems(void * items)"
+ },
+ "0067e490": {
+  "module": "loadout_presets",
+  "name": "C_MissionItems::Release",
+  "proto": "void __fastcall Release(void * items)"
+ },
+ "0067e4d0": {
+  "module": "loadout_presets",
+  "name": "S_MissionItems::~S_MissionItems",
+  "proto": "void __fastcall ~S_MissionItems(void * record)"
+ },
+ "0067e500": {
+  "module": "loadout_presets",
+  "name": "C_MissionItems::Setup",
+  "proto": "void __fastcall Setup(void * items)"
+ },
+ "0067e650": {
+  "module": "loadout_presets",
+  "name": "C_MissionItems::Load",
+  "proto": "bool __fastcall Load(void * items)"
+ },
+ "0067e850": {
+  "module": "loadout_presets",
+  "name": "MissionItemPairs_Insert",
+  "proto": "void __thiscall MissionItemPairs_Insert(void *this, void * where, uint count, void * value)"
+ },
  "0067eb40": {
-  "module": "game",
+  "module": "game_menu",
   "name": "C_GameMenu::C_GameMenu",
   "proto": "C_GameMenu * __thiscall C_GameMenu(C_GameMenu *this)"
+ },
+ "0067ecf0": {
+  "module": "menu_state",
+  "name": "C_GameState::GetTypeId",
+  "proto": "int __thiscall GetTypeId(C_GameState *this)"
  },
  "0067ed00": {
   "module": "console",
@@ -31173,6 +31927,16 @@
   "module": "zz_idioms",
   "name": "empty_function_67ed60"
  },
+ "0067ed70": {
+  "module": "menu_state",
+  "name": "C_MenuState::OnStart",
+  "proto": "bool __thiscall OnStart(C_MenuState *this, void * arg)"
+ },
+ "0067ed80": {
+  "module": "menu_state",
+  "name": "C_MenuState::OnInput",
+  "proto": "bool __thiscall OnInput(C_MenuState *this, float * held, float * pressed)"
+ },
  "0067ed90": {
   "module": "zz_idioms",
   "name": "empty_function_67ed90"
@@ -31180,6 +31944,36 @@
  "0067eda0": {
   "module": "zz_idioms",
   "name": "empty_function_67eda0"
+ },
+ "0067edb0": {
+  "module": "menu_state",
+  "name": "C_MenuState::OnRender",
+  "proto": "bool __thiscall OnRender(C_MenuState *this)"
+ },
+ "0067edc0": {
+  "module": "menu_state",
+  "name": "C_MenuState::OnDrawScreens",
+  "proto": "bool __thiscall OnDrawScreens(C_MenuState *this)"
+ },
+ "0067edd0": {
+  "module": "menu_state",
+  "name": "C_MenuState::C_MenuState",
+  "proto": "void * __thiscall C_MenuState(C_MenuState *this)"
+ },
+ "0067ef30": {
+  "module": "menu_state",
+  "name": "C_GameState::Start",
+  "proto": "bool __thiscall Start(C_GameState *this, void * arg)"
+ },
+ "0067ef40": {
+  "module": "menu_state",
+  "name": "C_GameState::Stop",
+  "proto": "bool __thiscall Stop(C_GameState *this)"
+ },
+ "0067ef50": {
+  "module": "menu_state",
+  "name": "C_GameState::HandleInput",
+  "proto": "bool __thiscall HandleInput(C_GameState *this, float * held, float * pressed)"
  },
  "0067ef60": {
   "module": "zz_idioms",
@@ -31193,6 +31987,21 @@
   "module": "zz_idioms",
   "name": "empty_function_67ef80"
  },
+ "0067ef90": {
+  "module": "menu_state",
+  "name": "C_GameState::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_GameState *this, uchar flags)"
+ },
+ "0067f060": {
+  "module": "menu_state",
+  "name": "C_MenuState::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_MenuState *this, uchar flags)"
+ },
+ "0067f080": {
+  "module": "menu_state",
+  "name": "C_MenuState::~C_MenuState",
+  "proto": "void __thiscall ~C_MenuState(C_MenuState *this)"
+ },
  "0067f1b0": {
   "module": "zz_idioms",
   "name": "vector_tidy_67f1b0"
@@ -31201,23 +32010,263 @@
   "module": "zz_idioms",
   "name": "vector_tidy_67f1d0"
  },
+ "0067f300": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::OnItemNotify13"
+ },
+ "0067f310": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::OnItemNotify0A"
+ },
+ "0067f320": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::OnItemNotify08"
+ },
+ "0067f330": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::OnItemNotify09"
+ },
+ "0067f340": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::OnItemHover"
+ },
+ "0067f370": {
+  "module": "store_list",
+  "name": "C_StoreList::~C_StoreList",
+  "proto": "void __thiscall ~C_StoreList(void *this)"
+ },
+ "0067f3a0": {
+  "module": "store_list",
+  "name": "C_StoreList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0067f3d0": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentPanel::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0067f470": {
+  "module": "game_menu",
+  "name": "C_GameMenu::GetTypeId",
+  "proto": "int __thiscall GetTypeId(C_GameMenu *this)"
+ },
+ "0067f480": {
+  "module": "game_menu",
+  "name": "C_GameMenu::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_GameMenu *this, uchar flags)"
+ },
+ "0067f4a0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::~C_GameMenu",
+  "proto": "void __thiscall ~C_GameMenu(C_GameMenu *this)"
+ },
+ "0067f650": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_GameMenu *this, void * arg)"
+ },
+ "0067f760": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_GameMenu *this)"
+ },
+ "0067f850": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_GameMenu *this, void * message)"
+ },
  "0067fda0": {
-  "module": "game",
+  "module": "game_menu",
   "name": "C_MissionDef::AreObjectivesDecided",
   "proto": "bool __fastcall AreObjectivesDecided(C_MissionDef * mission)"
  },
+ "0067fe00": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_GameMenu *this)"
+ },
+ "006801f0": {
+  "module": "game_menu",
+  "name": "CountUniformSides",
+  "proto": "void __fastcall CountUniformSides(int * axis, int * allies)"
+ },
+ "006802a0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::UpdateNetStatus",
+  "proto": "void UpdateNetStatus(void)"
+ },
+ "006808d0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnUpdate",
+  "proto": "void __thiscall OnUpdate(C_GameMenu *this, int timeDelta)"
+ },
+ "00680920": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnTick",
+  "proto": "void __thiscall OnTick(C_GameMenu *this, int timeDelta)"
+ },
+ "00680960": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnInput",
+  "proto": "bool __thiscall OnInput(C_GameMenu *this, float * held, float * pressed)"
+ },
+ "00680980": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildMainScreen",
+  "proto": "bool __thiscall BuildMainScreen(C_GameMenu *this, void * desc, void * model)"
+ },
+ "00681ee0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnItemNotify13",
+  "proto": "bool __thiscall OnItemNotify13(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00682020": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnItemNotify0A",
+  "proto": "bool __thiscall OnItemNotify0A(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00682210": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnItemNotify08",
+  "proto": "bool __thiscall OnItemNotify08(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006822b0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnItemNotify09",
+  "proto": "bool __thiscall OnItemNotify09(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00682350": {
+  "module": "game_menu",
+  "name": "C_GameMenu::DropItem",
+  "proto": "bool __thiscall DropItem(C_GameMenu *this, void * control, uint target)"
+ },
+ "006824f0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnRender",
+  "proto": "bool __thiscall OnRender(C_GameMenu *this)"
+ },
+ "006825d0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::RenderGame",
+  "proto": "bool __thiscall RenderGame(C_GameMenu *this)"
+ },
+ "00682770": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnDrawScreens",
+  "proto": "bool __thiscall OnDrawScreens(C_GameMenu *this)"
+ },
+ "00682790": {
+  "module": "game_menu",
+  "name": "C_GameMenu::RenderEquipment",
+  "proto": "bool __thiscall RenderEquipment(C_GameMenu *this)"
+ },
+ "00682a20": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnChat",
+  "proto": "bool __thiscall OnChat(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00682aa0": {
-  "module": "game",
+  "module": "game_menu",
   "name": "C_GameMenu::ShowMessage",
-  "proto": "void __thiscall ShowMessage(C_GameMenu *this, int textId, int unknown)"
+  "proto": "void __thiscall ShowMessage(C_GameMenu *this, int textId, int unused)"
  },
  "00682bb0": {
   "module": "zz_idioms",
   "name": "vector_tidy_682bb0"
  },
+ "00682c80": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildPlayerScreen",
+  "proto": "bool __thiscall BuildPlayerScreen(C_GameMenu *this, void * desc, void * model)"
+ },
+ "006838a0": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::C_DescriptionScreen",
+  "proto": "void * __thiscall C_DescriptionScreen(C_Screen *this, void * scene, void * frame)"
+ },
+ "006838e0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildSoldiersPanel",
+  "proto": "bool __thiscall BuildSoldiersPanel(C_GameMenu *this, void * desc, void * model)"
+ },
+ "00684690": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildEquipmentPanel",
+  "proto": "bool __thiscall BuildEquipmentPanel(C_GameMenu *this, void * desc, void * model)"
+ },
+ "00684b90": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildItemsPanel",
+  "proto": "bool __thiscall BuildItemsPanel(C_GameMenu *this, void * desc, void * model)"
+ },
+ "00684df0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildSkillsPanel",
+  "proto": "bool __stdcall BuildSkillsPanel(void * desc, void * model)"
+ },
+ "00684fc0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnPlayerScreenHidden",
+  "proto": "bool __thiscall OnPlayerScreenHidden(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00684fd0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnPlayerScreenShown",
+  "proto": "bool __thiscall OnPlayerScreenShown(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00685170": {
+  "module": "game_menu",
+  "name": "C_GameMenu::SetupStocks",
+  "proto": "bool __fastcall SetupStocks(C_GameMenu * menu)"
+ },
+ "00685420": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnSoldierPicked",
+  "proto": "bool __thiscall OnSoldierPicked(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006854e0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnSide",
+  "proto": "bool __thiscall OnSide(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00685550": {
+  "module": "game_menu",
+  "name": "C_GameMenu::SetTeam",
+  "proto": "void __thiscall SetTeam(C_GameMenu *this, int team)"
+ },
+ "00685880": {
+  "module": "game_menu",
+  "name": "C_GameMenu::TakeSoldierItems",
+  "proto": "void __fastcall TakeSoldierItems(C_GameMenu * menu)"
+ },
+ "00685ab0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::ShowTeamSoldiers",
+  "proto": "void __thiscall ShowTeamSoldiers(C_GameMenu *this, int team)"
+ },
+ "00685da0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::UpdateSoldierTypes",
+  "proto": "void __fastcall UpdateSoldierTypes(C_GameMenu * menu)"
+ },
  "006861a0": {
   "module": "zz_idioms",
   "name": "identity_6861a0"
+ },
+ "006861b0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnGameInfo",
+  "proto": "bool __thiscall OnGameInfo(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006863c0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::ShowSoldierStats",
+  "proto": "void __stdcall ShowSoldierStats(int profile)"
+ },
+ "006869a0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::UpdateLoadButton",
+  "proto": "void __fastcall UpdateLoadButton(C_GameMenu * menu)"
  },
  "00686b90": {
   "module": "zz_idioms",
@@ -31226,6 +32275,46 @@
  "00686bb0": {
   "module": "zz_idioms",
   "name": "vector_tidy_686bb0"
+ },
+ "00686ca0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::AddPresetItem",
+  "proto": "bool __thiscall AddPresetItem(C_GameMenu *this, uint slot, int type, int count)"
+ },
+ "00686e10": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnItemNotify60",
+  "proto": "bool __thiscall OnItemNotify60(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00687360": {
+  "module": "game_menu",
+  "name": "C_GameMenu::ClearSoldier",
+  "proto": "void __fastcall ClearSoldier(C_GameMenu * menu)"
+ },
+ "00687390": {
+  "module": "game_menu",
+  "name": "C_GameMenu::FindSubstitute",
+  "proto": "bool __thiscall FindSubstitute(C_GameMenu *this, int * type, int ammo)"
+ },
+ "006876b0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::MatchPreset",
+  "proto": "void * __thiscall MatchPreset(C_GameMenu *this, void * preset)"
+ },
+ "00687bc0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::StorePreset",
+  "proto": "void __thiscall StorePreset(C_GameMenu *this, int index)"
+ },
+ "00687dd0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnSoldierType",
+  "proto": "bool __thiscall OnSoldierType(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00687f50": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnSavePreset",
+  "proto": "bool __thiscall OnSavePreset(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "00688330": {
   "module": "game_app",
@@ -31954,6 +33043,11 @@
   "module": "profile",
   "name": "S_SquadSoldier::ClearItems",
   "proto": "void __thiscall ClearItems(S_SquadSoldier *this)"
+ },
+ "006a2bb0": {
+  "module": "equipment_panel",
+  "name": "S_SquadSoldier::GetFreeBeltVolume",
+  "proto": "int __thiscall GetFreeBeltVolume(S_SquadSoldier *this)"
  },
  "006a2bd0": {
   "module": "profile",
@@ -35659,6 +36753,10 @@
   "name": "C_NetGame::SetPlayer",
   "proto": "void __thiscall SetPlayer(C_NetGame * this, int slot, int connection, char * name)"
  },
+ "0072ee60": {
+  "module": "game_menu",
+  "name": "C_NetGame::SendChat"
+ },
  "0072eff0": {
   "module": "game",
   "name": "C_NetGame::GetPlayerHuman",
@@ -35686,6 +36784,10 @@
   "module": "player",
   "name": "C_NetGame::GetPlayerStats",
   "proto": "int * __thiscall GetPlayerStats(void *this, int slot)"
+ },
+ "0072f8b0": {
+  "module": "game_menu",
+  "name": "C_NetGame::GetLocalPlayerStats"
  },
  "0072fe90": {
   "module": "player",
@@ -38822,6 +39924,124 @@
   "name": "BuildPathPoints",
   "proto": "void __fastcall BuildPathPoints(S_vector4 *from, S_vector4 *to, void *path, S_Vector4Array *points)"
  },
+ "007d0200": {
+  "module": "menu_soldier",
+  "name": "MenuSoldier_StaticInit_7d0200"
+ },
+ "007d0230": {
+  "module": "menu_soldier",
+  "name": "InitLongGunOffsetSoldier_7d0230"
+ },
+ "007d0240": {
+  "module": "menu_soldier",
+  "name": "InitLongGunOffsetSoldier_7d0240"
+ },
+ "007d0260": {
+  "module": "menu_soldier",
+  "name": "InitHeadOffsetSoldier_7d0260"
+ },
+ "007d0270": {
+  "module": "menu_soldier",
+  "name": "InitHeadOffsetSoldier_7d0270"
+ },
+ "007d0290": {
+  "module": "menu_soldier",
+  "name": "InitBackpackOffsetSoldier_7d0290"
+ },
+ "007d02a0": {
+  "module": "menu_soldier",
+  "name": "InitBackpackOffsetSoldier_7d02a0"
+ },
+ "007d02c0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::Setup",
+  "proto": "void __thiscall Setup(void *this, float left, float top, float right, float bottom)"
+ },
+ "007d0ee0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::Release",
+  "proto": "void __fastcall Release(void * soldier)"
+ },
+ "007d0f30": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::HideHolsters",
+  "proto": "void __fastcall HideHolsters(void * soldier)"
+ },
+ "007d0f80": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::ReleaseHolsters",
+  "proto": "void __fastcall ReleaseHolsters(void * soldier)"
+ },
+ "007d0fe0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::InitHolsters",
+  "proto": "void __fastcall InitHolsters(void * soldier)"
+ },
+ "007d1a70": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::RemoveFromHolster",
+  "proto": "void __thiscall RemoveFromHolster(void *this, int typeId, int count)"
+ },
+ "007d1b20": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::AddToHolster",
+  "proto": "void __thiscall AddToHolster(void *this, int typeId, int count)"
+ },
+ "007d1b40": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::AddToHolsterSlot",
+  "proto": "void __thiscall AddToHolsterSlot(void *this, int slot, int count)"
+ },
+ "007d1bf0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::SetModel",
+  "proto": "void __thiscall SetModel(void *this, void * model)"
+ },
+ "007d1fc0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::AddItem",
+  "proto": "void __thiscall AddItem(void *this, uint place, int typeId)"
+ },
+ "007d3080": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::RemoveItem",
+  "proto": "void __thiscall RemoveItem(void *this, uint place, int typeId, bool all)"
+ },
+ "007d3220": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::ResetItems",
+  "proto": "void __fastcall ResetItems(void * soldier)"
+ },
+ "007d32a0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::PlayIdle",
+  "proto": "void __thiscall PlayIdle(void *this, int index)"
+ },
+ "007d3310": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::PlayPose",
+  "proto": "void __thiscall PlayPose(void *this, int index)"
+ },
+ "007d3360": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::SetFace",
+  "proto": "void __thiscall SetFace(void *this, char * texture)"
+ },
+ "007d3390": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::UpdateAnims",
+  "proto": "int __thiscall UpdateAnims(void *this, int time)"
+ },
+ "007d3510": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::Tick",
+  "proto": "void __thiscall Tick(void *this, int time)"
+ },
+ "007d35d0": {
+  "module": "menu_soldier",
+  "name": "C_MenuSoldier::Render",
+  "proto": "void __fastcall Render(void * soldier)"
+ },
  "007d3680": {
   "module": "item_instances",
   "name": "C_AmmoItem::C_AmmoItem",
@@ -41053,6 +42273,12 @@
   "name": "g_holsterDummies",
   "type": "S_HolsterDummy[25]"
  },
+ "008637d4": {
+  "data": true,
+  "module": "menu_soldier",
+  "name": "g_menuSoldierAnimNames",
+  "type": "char *[9]"
+ },
  "00867a64": {
   "data": true,
   "module": "track",
@@ -41567,6 +42793,12 @@
   "module": "cursor",
   "name": "g_cursor",
   "type": "C_Cursor *"
+ },
+ "008ae5f8": {
+  "data": true,
+  "module": "menu_state",
+  "name": "g_menuState",
+  "type": "void *"
  },
  "008ae8f4": {
   "data": true,
@@ -42185,6 +43417,24 @@
   "data": true,
   "module": "human",
   "name": "g_longGunModelOffsetCopy",
+  "type": "S_vector"
+ },
+ "0098afa0": {
+  "data": true,
+  "module": "menu_soldier",
+  "name": "g_soldierBackpackModelOffset",
+  "type": "S_vector"
+ },
+ "0098afb0": {
+  "data": true,
+  "module": "menu_soldier",
+  "name": "g_soldierHeadModelOffset",
+  "type": "S_vector"
+ },
+ "0098afc0": {
+  "data": true,
+  "module": "menu_soldier",
+  "name": "g_soldierLongGunModelOffset",
   "type": "S_vector"
  },
  "0098afe0": {

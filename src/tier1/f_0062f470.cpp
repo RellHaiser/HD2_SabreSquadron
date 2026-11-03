@@ -60,35 +60,35 @@ uint32_t C_MainMenu__FUN_0062f4b0(C_MainMenu *_this,void *param_1, ...)
     *local_38 = iVar2;
     local_38++;
   } while ((int)puVar3 < 0x83fd48);
-  FUN_00625f60((int)param_1,0,0x1000007,0x400d000,_this,FUN_006319a0);
-  FUN_00625f60((int)param_1,0,0x1000007,0x4014000,_this,FUN_00631c20);
-  pvVar1 = (void *)FUN_00615360(param_1,0xf,"LB_Players");
+  AddScreenMessage((int)param_1,0,0x1000007,0x400d000,_this,FUN_006319a0);
+  AddScreenMessage((int)param_1,0,0x1000007,0x4014000,_this,FUN_00631c20);
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0xf,"LB_Players");
   AddDescMessage1(pvVar1,0,0x2000073,0);
   AddDescMessage1(pvVar1,0,0x1000005,0);
-  FUN_00615360(param_1,0x13,"text_01");
-  pvVar1 = (void *)FUN_00615360(param_1,0x14,"brefresh status");
+  S_ScreenDesc__AddControl(param_1,0x13,"text_01");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"brefresh status");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,0xa05);
   AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x6319a0);
-  pvVar1 = (void *)FUN_00615360(param_1,0x14,"bjoin game");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bjoin game");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,0xa06);
   AddDescMessage1(pvVar1,0,0x600109b,0);
   AddDescMessage1(pvVar1,0,0x600102a,0);
-  pvVar1 = (void *)FUN_00615360(param_1,0x14,"breturn");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"breturn");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,0xa07);
   AddDescMessage1(pvVar1,0,0x6001003,0);
-  pvVar1 = (void *)FUN_00615360(param_1,0x13,"text_screen");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_screen");
   AddDescMessage2(pvVar1,0,0x1000015,10,0xa08);
-  pvVar1 = (void *)FUN_00615360(param_1,0x13,"text_h&dversion");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_h&dversion");
   AddDescMessage2(pvVar1,0,0x1000015,0x28,0x7d6);
-  pvVar1 = (void *)FUN_00615360(param_1,0x13,"text_team status");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_team status");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xa09);
-  pvVar1 = (void *)FUN_00615360(param_1,0x13,"text_");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_");
   AddDescMessage2(pvVar1,0,0x1000017,DAT_008aca9c,0xa0a);
   AddDescMessage2(pvVar1,0,0x1000017,DAT_008acaa0,0xa21);
   AddDescMessage2(pvVar1,0,0x1000017,DAT_008acaa4,0xa22);
-  pvVar1 = (void *)FUN_00615360(param_1,0x13,"allied");
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"allied");
   AddDescMessage1(pvVar1,0,0x1000099,0);
-  pvVar1 = (void *)FUN_00615360(param_1,0x13,&DAT_00832d10);
+  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x13,&DAT_00832d10);
   AddDescMessage1(pvVar1,0,0x1000099,0);
   return 1;
 }
@@ -181,10 +181,10 @@ uint32_t FUN_0062fa30(int param_1, ...)
   char acStack_40 [52];
   uint32_t uStack_4;
   uStack_4 = 0xffffffff;
-  if ((((DAT_008ae5f8 != 0) &&
-       (ExceptionList = &local_c, iVar5 = (**(code **)(*DAT_008ae5f8 + 0x1c))(),
-       piVar2 = DAT_008ae5f8, iVar5 == 2)) && (DAT_008ae5c2 == '\0')) &&
-     ((piStack_fc = DAT_008ae5f8, DAT_008ae5f0 != 0 &&
+  if ((((g_menuState != 0) &&
+       (ExceptionList = &local_c, iVar5 = (**(code **)(*g_menuState + 0x1c))(),
+       piVar2 = g_menuState, iVar5 == 2)) && (DAT_008ae5c2 == '\0')) &&
+     ((piStack_fc = g_menuState, DAT_008ae5f0 != 0 &&
       (piVar6 = (int *)FUN_00628230(0x8ae5c4), *piVar6 != 0)))) {
     if (DAT_008ae5f0 == 0) {
       iVar5 = 0;
@@ -1313,10 +1313,10 @@ uint32_t FUN_00631c60(uint32_t param_1, ...)
 {
   LPCRITICAL_SECTION lpCriticalSection;
   int iVar1;
-  if (DAT_008ae5f8 != 0) {
-    iVar1 = (**(code **)(*DAT_008ae5f8 + 0x1c))();
+  if (g_menuState != 0) {
+    iVar1 = (**(code **)(*g_menuState + 0x1c))();
     if ((iVar1 == 2) && (DAT_008ae5c2 == '\0')) {
-      lpCriticalSection = (LPCRITICAL_SECTION)(DAT_008ae5f8 + 0x6c);
+      lpCriticalSection = (LPCRITICAL_SECTION)(g_menuState + 0x6c);
       EnterCriticalSection(lpCriticalSection);
       DAT_008acab8 = param_1;
       LeaveCriticalSection(lpCriticalSection);

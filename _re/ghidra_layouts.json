@@ -63145,6 +63145,388 @@
 }
 ]
 },
+"C_Screen": {
+"size": 132,
+"fields": [
+{
+"offset": 0,
+"size": 4,
+"type": "C_Screen_vtbl *",
+"name": "vtable"
+},
+{
+"offset": 4,
+"size": 4,
+"type": "uchar[4]",
+"name": "_pad_0004"
+},
+{
+"offset": 8,
+"size": 4,
+"type": "int",
+"name": "m_008"
+},
+{
+"offset": 12,
+"size": 4,
+"type": "void *",
+"name": "m_00c"
+},
+{
+"offset": 16,
+"size": 48,
+"type": "uchar[48]",
+"name": "_pad_0010"
+},
+{
+"offset": 64,
+"size": 4,
+"type": "uint",
+"name": "m_040"
+},
+{
+"offset": 68,
+"size": 4,
+"type": "uint",
+"name": "m_044"
+},
+{
+"offset": 72,
+"size": 4,
+"type": "uint",
+"name": "m_048"
+},
+{
+"offset": 76,
+"size": 4,
+"type": "uint",
+"name": "m_04c"
+},
+{
+"offset": 80,
+"size": 4,
+"type": "uint",
+"name": "m_050"
+},
+{
+"offset": 84,
+"size": 4,
+"type": "uint",
+"name": "m_054"
+},
+{
+"offset": 88,
+"size": 4,
+"type": "uint",
+"name": "m_058"
+},
+{
+"offset": 92,
+"size": 4,
+"type": "uint",
+"name": "m_05c"
+},
+{
+"offset": 96,
+"size": 4,
+"type": "uint",
+"name": "m_060"
+},
+{
+"offset": 100,
+"size": 1,
+"type": "uchar",
+"name": "m_064"
+},
+{
+"offset": 101,
+"size": 1,
+"type": "uchar",
+"name": "m_065"
+},
+{
+"offset": 102,
+"size": 1,
+"type": "uchar",
+"name": "m_066"
+},
+{
+"offset": 103,
+"size": 1,
+"type": "uchar[1]",
+"name": "_pad_0067"
+},
+{
+"offset": 104,
+"size": 4,
+"type": "void *",
+"name": "m_068"
+},
+{
+"offset": 108,
+"size": 4,
+"type": "uint",
+"name": "m_06c"
+},
+{
+"offset": 112,
+"size": 4,
+"type": "void *",
+"name": "m_070"
+},
+{
+"offset": 116,
+"size": 4,
+"type": "void *",
+"name": "m_074"
+},
+{
+"offset": 120,
+"size": 4,
+"type": "uchar[4]",
+"name": "_pad_0078"
+},
+{
+"offset": 124,
+"size": 4,
+"type": "void *",
+"name": "m_07c"
+},
+{
+"offset": 128,
+"size": 1,
+"type": "uchar",
+"name": "m_080"
+},
+{
+"offset": 129,
+"size": 3,
+"type": "uchar[3]",
+"name": "_pad_0081"
+}
+]
+},
+"C_Screen_vtbl": {
+"size": 144,
+"fields": [
+{
+"offset": 0,
+"size": 4,
+"type": "void *",
+"name": "vf00"
+},
+{
+"offset": 4,
+"size": 4,
+"type": "void *",
+"name": "vf01"
+},
+{
+"offset": 8,
+"size": 4,
+"type": "void *",
+"name": "vf02"
+},
+{
+"offset": 12,
+"size": 4,
+"type": "void *",
+"name": "vf03"
+},
+{
+"offset": 16,
+"size": 4,
+"type": "void *",
+"name": "vf04"
+},
+{
+"offset": 20,
+"size": 4,
+"type": "void *",
+"name": "vf05"
+},
+{
+"offset": 24,
+"size": 4,
+"type": "void *",
+"name": "vf06"
+},
+{
+"offset": 28,
+"size": 4,
+"type": "void *",
+"name": "vf07"
+},
+{
+"offset": 32,
+"size": 4,
+"type": "void *",
+"name": "vf08"
+},
+{
+"offset": 36,
+"size": 4,
+"type": "void *",
+"name": "vf09"
+},
+{
+"offset": 40,
+"size": 4,
+"type": "void *",
+"name": "vf0a"
+},
+{
+"offset": 44,
+"size": 4,
+"type": "void *",
+"name": "vf0b"
+},
+{
+"offset": 48,
+"size": 4,
+"type": "void *",
+"name": "vf0c"
+},
+{
+"offset": 52,
+"size": 4,
+"type": "void *",
+"name": "vf0d"
+},
+{
+"offset": 56,
+"size": 4,
+"type": "void *",
+"name": "vf0e"
+},
+{
+"offset": 60,
+"size": 4,
+"type": "void *",
+"name": "vf0f"
+},
+{
+"offset": 64,
+"size": 4,
+"type": "void *",
+"name": "vf10"
+},
+{
+"offset": 68,
+"size": 4,
+"type": "void *",
+"name": "vf11"
+},
+{
+"offset": 72,
+"size": 4,
+"type": "void *",
+"name": "vf12"
+},
+{
+"offset": 76,
+"size": 4,
+"type": "void *",
+"name": "vf13"
+},
+{
+"offset": 80,
+"size": 4,
+"type": "void *",
+"name": "vf14"
+},
+{
+"offset": 84,
+"size": 4,
+"type": "void *",
+"name": "vf15"
+},
+{
+"offset": 88,
+"size": 4,
+"type": "void *",
+"name": "vf16"
+},
+{
+"offset": 92,
+"size": 4,
+"type": "void *",
+"name": "vf17"
+},
+{
+"offset": 96,
+"size": 4,
+"type": "void *",
+"name": "vf18"
+},
+{
+"offset": 100,
+"size": 4,
+"type": "void *",
+"name": "vf19"
+},
+{
+"offset": 104,
+"size": 4,
+"type": "void *",
+"name": "vf1a"
+},
+{
+"offset": 108,
+"size": 4,
+"type": "void *",
+"name": "vf1b"
+},
+{
+"offset": 112,
+"size": 4,
+"type": "void *",
+"name": "vf1c"
+},
+{
+"offset": 116,
+"size": 4,
+"type": "void *",
+"name": "vf1d"
+},
+{
+"offset": 120,
+"size": 4,
+"type": "void *",
+"name": "empty_function_65d050"
+},
+{
+"offset": 124,
+"size": 4,
+"type": "void *",
+"name": "vf1f"
+},
+{
+"offset": 128,
+"size": 4,
+"type": "void *",
+"name": "vf20"
+},
+{
+"offset": 132,
+"size": 4,
+"type": "void *",
+"name": "vf21"
+},
+{
+"offset": 136,
+"size": 4,
+"type": "void *",
+"name": "vf22"
+},
+{
+"offset": 140,
+"size": 4,
+"type": "void *",
+"name": "vf23"
+}
+]
+},
 "C_Script": {
 "size": 261,
 "fields": [
@@ -93643,50 +94025,6 @@
 }
 ]
 },
-"C_auto_00813ab8": {
-"size": 4,
-"fields": [
-{
-"offset": 0,
-"size": 4,
-"type": "C_auto_00813ab8_vtbl *",
-"name": "vtable"
-}
-]
-},
-"C_auto_00813ab8_vtbl": {
-"size": 4,
-"fields": [
-{
-"offset": 0,
-"size": 4,
-"type": "void *",
-"name": "vf00"
-}
-]
-},
-"C_auto_00813abc": {
-"size": 4,
-"fields": [
-{
-"offset": 0,
-"size": 4,
-"type": "C_auto_00813abc_vtbl *",
-"name": "vtable"
-}
-]
-},
-"C_auto_00813abc_vtbl": {
-"size": 4,
-"fields": [
-{
-"offset": 0,
-"size": 4,
-"type": "void *",
-"name": "vf00"
-}
-]
-},
 "C_auto_00813ac0": {
 "size": 57,
 "fields": [
@@ -94128,388 +94466,6 @@
 "size": 4,
 "type": "void *",
 "name": "vf07"
-}
-]
-},
-"C_auto_00815540": {
-"size": 132,
-"fields": [
-{
-"offset": 0,
-"size": 4,
-"type": "C_auto_00815540_vtbl *",
-"name": "vtable"
-},
-{
-"offset": 4,
-"size": 4,
-"type": "uchar[4]",
-"name": "_pad_0004"
-},
-{
-"offset": 8,
-"size": 4,
-"type": "int",
-"name": "m_008"
-},
-{
-"offset": 12,
-"size": 4,
-"type": "void *",
-"name": "m_00c"
-},
-{
-"offset": 16,
-"size": 48,
-"type": "uchar[48]",
-"name": "_pad_0010"
-},
-{
-"offset": 64,
-"size": 4,
-"type": "uint",
-"name": "m_040"
-},
-{
-"offset": 68,
-"size": 4,
-"type": "uint",
-"name": "m_044"
-},
-{
-"offset": 72,
-"size": 4,
-"type": "uint",
-"name": "m_048"
-},
-{
-"offset": 76,
-"size": 4,
-"type": "uint",
-"name": "m_04c"
-},
-{
-"offset": 80,
-"size": 4,
-"type": "uint",
-"name": "m_050"
-},
-{
-"offset": 84,
-"size": 4,
-"type": "uint",
-"name": "m_054"
-},
-{
-"offset": 88,
-"size": 4,
-"type": "uint",
-"name": "m_058"
-},
-{
-"offset": 92,
-"size": 4,
-"type": "uint",
-"name": "m_05c"
-},
-{
-"offset": 96,
-"size": 4,
-"type": "uint",
-"name": "m_060"
-},
-{
-"offset": 100,
-"size": 1,
-"type": "uchar",
-"name": "m_064"
-},
-{
-"offset": 101,
-"size": 1,
-"type": "uchar",
-"name": "m_065"
-},
-{
-"offset": 102,
-"size": 1,
-"type": "uchar",
-"name": "m_066"
-},
-{
-"offset": 103,
-"size": 1,
-"type": "uchar[1]",
-"name": "_pad_0067"
-},
-{
-"offset": 104,
-"size": 4,
-"type": "void *",
-"name": "m_068"
-},
-{
-"offset": 108,
-"size": 4,
-"type": "uint",
-"name": "m_06c"
-},
-{
-"offset": 112,
-"size": 4,
-"type": "void *",
-"name": "m_070"
-},
-{
-"offset": 116,
-"size": 4,
-"type": "void *",
-"name": "m_074"
-},
-{
-"offset": 120,
-"size": 4,
-"type": "uchar[4]",
-"name": "_pad_0078"
-},
-{
-"offset": 124,
-"size": 4,
-"type": "void *",
-"name": "m_07c"
-},
-{
-"offset": 128,
-"size": 1,
-"type": "uchar",
-"name": "m_080"
-},
-{
-"offset": 129,
-"size": 3,
-"type": "uchar[3]",
-"name": "_pad_0081"
-}
-]
-},
-"C_auto_00815540_vtbl": {
-"size": 144,
-"fields": [
-{
-"offset": 0,
-"size": 4,
-"type": "void *",
-"name": "vf00"
-},
-{
-"offset": 4,
-"size": 4,
-"type": "void *",
-"name": "vf01"
-},
-{
-"offset": 8,
-"size": 4,
-"type": "void *",
-"name": "vf02"
-},
-{
-"offset": 12,
-"size": 4,
-"type": "void *",
-"name": "vf03"
-},
-{
-"offset": 16,
-"size": 4,
-"type": "void *",
-"name": "vf04"
-},
-{
-"offset": 20,
-"size": 4,
-"type": "void *",
-"name": "vf05"
-},
-{
-"offset": 24,
-"size": 4,
-"type": "void *",
-"name": "vf06"
-},
-{
-"offset": 28,
-"size": 4,
-"type": "void *",
-"name": "vf07"
-},
-{
-"offset": 32,
-"size": 4,
-"type": "void *",
-"name": "vf08"
-},
-{
-"offset": 36,
-"size": 4,
-"type": "void *",
-"name": "vf09"
-},
-{
-"offset": 40,
-"size": 4,
-"type": "void *",
-"name": "vf0a"
-},
-{
-"offset": 44,
-"size": 4,
-"type": "void *",
-"name": "vf0b"
-},
-{
-"offset": 48,
-"size": 4,
-"type": "void *",
-"name": "vf0c"
-},
-{
-"offset": 52,
-"size": 4,
-"type": "void *",
-"name": "vf0d"
-},
-{
-"offset": 56,
-"size": 4,
-"type": "void *",
-"name": "vf0e"
-},
-{
-"offset": 60,
-"size": 4,
-"type": "void *",
-"name": "vf0f"
-},
-{
-"offset": 64,
-"size": 4,
-"type": "void *",
-"name": "vf10"
-},
-{
-"offset": 68,
-"size": 4,
-"type": "void *",
-"name": "vf11"
-},
-{
-"offset": 72,
-"size": 4,
-"type": "void *",
-"name": "vf12"
-},
-{
-"offset": 76,
-"size": 4,
-"type": "void *",
-"name": "vf13"
-},
-{
-"offset": 80,
-"size": 4,
-"type": "void *",
-"name": "vf14"
-},
-{
-"offset": 84,
-"size": 4,
-"type": "void *",
-"name": "vf15"
-},
-{
-"offset": 88,
-"size": 4,
-"type": "void *",
-"name": "vf16"
-},
-{
-"offset": 92,
-"size": 4,
-"type": "void *",
-"name": "vf17"
-},
-{
-"offset": 96,
-"size": 4,
-"type": "void *",
-"name": "vf18"
-},
-{
-"offset": 100,
-"size": 4,
-"type": "void *",
-"name": "vf19"
-},
-{
-"offset": 104,
-"size": 4,
-"type": "void *",
-"name": "vf1a"
-},
-{
-"offset": 108,
-"size": 4,
-"type": "void *",
-"name": "vf1b"
-},
-{
-"offset": 112,
-"size": 4,
-"type": "void *",
-"name": "vf1c"
-},
-{
-"offset": 116,
-"size": 4,
-"type": "void *",
-"name": "vf1d"
-},
-{
-"offset": 120,
-"size": 4,
-"type": "void *",
-"name": "empty_function_65d050"
-},
-{
-"offset": 124,
-"size": 4,
-"type": "void *",
-"name": "vf1f"
-},
-{
-"offset": 128,
-"size": 4,
-"type": "void *",
-"name": "vf20"
-},
-{
-"offset": 132,
-"size": 4,
-"type": "void *",
-"name": "vf21"
-},
-{
-"offset": 136,
-"size": 4,
-"type": "void *",
-"name": "vf22"
-},
-{
-"offset": 140,
-"size": 4,
-"type": "void *",
-"name": "vf23"
 }
 ]
 },
@@ -114859,6 +114815,28 @@
 }
 ]
 },
+"S_MenuDesc": {
+"size": 4,
+"fields": [
+{
+"offset": 0,
+"size": 4,
+"type": "S_MenuDesc_vtbl *",
+"name": "vtable"
+}
+]
+},
+"S_MenuDesc_vtbl": {
+"size": 4,
+"fields": [
+{
+"offset": 0,
+"size": 4,
+"type": "void *",
+"name": "vf00"
+}
+]
+},
 "S_MissionObjective": {
 "size": 24,
 "fields": [
@@ -118023,6 +118001,28 @@
 "size": 4,
 "type": "C_str",
 "name": "file"
+}
+]
+},
+"S_ScreenDesc": {
+"size": 4,
+"fields": [
+{
+"offset": 0,
+"size": 4,
+"type": "S_ScreenDesc_vtbl *",
+"name": "vtable"
+}
+]
+},
+"S_ScreenDesc_vtbl": {
+"size": 4,
+"fields": [
+{
+"offset": 0,
+"size": 4,
+"type": "void *",
+"name": "vf00"
 }
 ]
 },
