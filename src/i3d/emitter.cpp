@@ -86,12 +86,10 @@ S_emitorGroup &S_emitorGroup::operator=(const S_emitorGroup &src)
 
 // ---------------------------------------------------------------- I3D_emitor
 
-// (The driver's factory, 0x10019750: the vectors' grow steps. No Init sets firstQuad or the blend
-// factors in LS3DRF; the port starts them here: -1 for the render path, 0 where LS3DRF's block holds
-// whatever the heap left.)
+// (The driver's factory, 0x1000fc90: the groups' vector. No Init sets the blend factors in LS3DRF;
+// the port starts them at 0 where LS3DRF's block holds whatever the heap left.)
 I3D_emitor::I3D_emitor()
-    : groups(nullptr), groupCapacity(0), numGroups(0), groupGrowBy(2), particles(nullptr), particleCapacity(0),
-      numParticles(0), particleGrowBy(1), active(0x20), freeSlots(0x20), firstQuad(-1), srcBlend(0), destBlend(0)
+    : groups(nullptr), groupCapacity(0), numGroups(0), groupGrowBy(2), srcBlend(0), destBlend(0)
 {
 }
 

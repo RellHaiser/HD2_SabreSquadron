@@ -14,10 +14,13 @@
 // vertices each; one shared index buffer of quads): Prepare locks space for the visible particles
 // of the pass, Draw draws them from where Prepare put them. Instead of particles an application can
 // write quads of its own through LockVertices (SetUserVertices). LS3DRF has none of it.
+//
+// LS3DRF's emitor is a 0x2d0-byte object (vtable 0x1003ce38): LS3DF's fields up to fixedGroup, then
+// the emit wait and count, and no particles, particle lists or quad index (LS3DF's +0x208 - +0x23B);
+// everything after sits 0x34 lower, 0x30 from the start velocity on (it is 16-byte aligned).
 #pragma once
 
 #include "core/c_vector.h"
-#include "i3d/vb_manager.h"
 #include "i3d/visual.h"
 
 class I3D_emitor;
@@ -85,39 +88,6 @@ struct S_emitorGroup {
 };
 static_assert(sizeof(S_emitorGroup) == 0x3C, "S_emitorGroup layout");
 
-// A particle (0xD0 bytes, 16-byte aligned).
-struct S_particle {
-    S_vector4 startDir;                     // +0x00 unit; w: whatever the source's was
-    S_vector4 endDir;                       // +0x10 unit (the turns' center)
-    S_vector4 dir;                          // +0x20 where the direction turns to (the end one spread)
-    uint32_t life;                          // +0x30 ms
-    int maxLife;                            // +0x34 the longest life (life + its random part)
-    float rotationSpeed;                    // +0x38 radians per ms
-    float startSpeed;                       // +0x3C units per second
-    float endSpeed;                         // +0x40
-    uint32_t fadeInEnd;                     // +0x44 ms
-    uint32_t fadeOutStart;                  // +0x48 ms
-    float growth;                           // +0x4C scale change per ms
-    S_vector4 position;                     // +0x50 world space
-    S_vector4 prevDir;                      // +0x60 the direction turned from
-    float alpha;                            // +0x70
-    S_vector color;                         // +0x74
-    float scale;                            // +0x80 the quad's size
-    uint32_t age;                           // +0x84 ms
-    float speed;                            // +0x88
-    int turnInterval;                       // +0x8C ms (0: one turn over the life)
-    int turnTime;                           // +0x90 ms since the last turn
-    int group;                              // +0x94 its animation (AddGroup)
-    uint32_t unknown98[2];                  // +0x98
-    float opacity;                          // +0xA0
-    int turnIntervalMin;                    // +0xA4
-    int turnIntervalRandom;                 // +0xA8
-    float turnSpread;                       // +0xAC
-    S_vector4 startColor;                   // +0xB0
-    S_vector4 endColor;                     // +0xC0
-};
-static_assert(sizeof(S_particle) == 0xD0, "S_particle layout");
-
 class I3D_emitor : public I3D_visual {
 public:
     I3D_emitor();
@@ -172,55 +142,50 @@ public:
     int numGroups;                          // +0x1FC
     int groupGrowBy;                        // +0x200 (2)
     int fixedGroup;                         // +0x204 (-1: random)
-    S_particle *particles;                  // +0x208 16-byte aligned slots
-    int particleCapacity;                   // +0x20C
-    int numParticles;                       // +0x210 slots made
-    int particleGrowBy;                     // +0x214 (0x32)
-    ls3d::C_vector<int> active;             // +0x218 (grow 0x32) the live particles' slots
-    ls3d::C_vector<int> freeSlots;          // +0x228 (grow 0x32)
-    int firstQuad;                          // +0x238 where Prepare wrote the quads (-1: nothing written)
-    uint32_t emitTime;                      // +0x23C ms waited for the next particle
-    uint32_t emitWait;                      // +0x240 ms the next particle waits
-    int numEmitted;                         // +0x244 since emitting started
-    uint32_t srcBlend;                      // +0x248 D3DBLEND (EMITF_CUSTOM_BLEND; 5)
-    uint32_t destBlend;                     // +0x24C (6)
-    int intervalMin;                        // +0x250 (100)
-    int intervalRandom;                     // +0x254 (60)
-    int lifeMin;                            // +0x258 (1800)
-    int lifeRandom;                         // +0x25C (600)
-    float startScale;                       // +0x260 (1)
-    float growthA;                          // +0x264 (-0.25)
-    float growthB;                          // +0x268 (0.6)
-    float positionSpread;                   // +0x26C
-    float directionSpread;                  // +0x270
-    float fadeIn;                           // +0x274 (0.5)
-    float fadeOut;                          // +0x278 (0.5)
-    int turnIntervalMin;                    // +0x27C
-    int turnIntervalRandom;                 // +0x280
-    float turnSpread;                       // +0x284 (0.1)
-    uint32_t unknown288[2];                 // +0x288
-    S_vector4 startVelocity;                // +0x290 (0, 2, 0)
-    S_vector4 endVelocity;                  // +0x2A0 (2, 0, 0)
-    int maxEmitted;                         // +0x2B0 (0: no limit)
-    bool startVelocityWorld;                // +0x2B4
-    bool endVelocityWorld;                  // +0x2B5
-    uint8_t padding2B6[2];
-    float rotationMin;                      // +0x2B8 (-0.4 pi per second)
-    float rotationMax;                      // +0x2BC (0.4 pi)
-    int warmUp;                             // +0x2C0
-    uint32_t unknown2C4[3];                 // +0x2C4
-    S_vector4 startColor;                   // +0x2D0 (1, 1, 1)
-    S_vector4 endColor;                     // +0x2E0 (1, 1, 1)
-    float opacity;                          // +0x2F0 (1)
-    uint32_t unknown2F4[3];                 // +0x2F4
+    uint32_t emitTime;                      // +0x208 ms waited for the next particle (LS3DF: +0x23C)
+    uint32_t emitWait;                      // +0x20C ms the next particle waits (LS3DF: +0x240)
+    int numEmitted;                         // +0x210 since emitting started (LS3DF: +0x244)
+    // (No particle slots, live and free lists or quad index, LS3DF's +0x208 - +0x23B: LS3DRF has
+    // none.)
+    uint32_t srcBlend;                      // +0x214 D3DBLEND (EMITF_CUSTOM_BLEND; 5; LS3DF: +0x248)
+    uint32_t destBlend;                     // +0x218 (6) (LS3DF: +0x24C)
+    int intervalMin;                        // +0x21C (100) (LS3DF: +0x250)
+    int intervalRandom;                     // +0x220 (60) (LS3DF: +0x254)
+    int lifeMin;                            // +0x224 (1800) (LS3DF: +0x258)
+    int lifeRandom;                         // +0x228 (600) (LS3DF: +0x25C)
+    float startScale;                       // +0x22C (1) (LS3DF: +0x260)
+    float growthA;                          // +0x230 (-0.25) (LS3DF: +0x264)
+    float growthB;                          // +0x234 (0.6) (LS3DF: +0x268)
+    float positionSpread;                   // +0x238 (LS3DF: +0x26C)
+    float directionSpread;                  // +0x23C (LS3DF: +0x270)
+    float fadeIn;                           // +0x240 (0.5) (LS3DF: +0x274)
+    float fadeOut;                          // +0x244 (0.5) (LS3DF: +0x278)
+    int turnIntervalMin;                    // +0x248 (LS3DF: +0x27C)
+    int turnIntervalRandom;                 // +0x24C (LS3DF: +0x280)
+    float turnSpread;                       // +0x250 (0.1) (LS3DF: +0x284)
+    uint32_t unknown254[3];                 // +0x254 (LS3DF: +0x288, 2 words)
+    S_vector4 startVelocity;                // +0x260 (0, 2, 0) (LS3DF: +0x290)
+    S_vector4 endVelocity;                  // +0x270 (2, 0, 0) (LS3DF: +0x2A0)
+    int maxEmitted;                         // +0x280 (0: no limit) (LS3DF: +0x2B0)
+    bool startVelocityWorld;                // +0x284 (LS3DF: +0x2B4)
+    bool endVelocityWorld;                  // +0x285 (LS3DF: +0x2B5)
+    uint8_t padding286[2];
+    float rotationMin;                      // +0x288 (-0.4 pi per second) (LS3DF: +0x2B8)
+    float rotationMax;                      // +0x28C (0.4 pi) (LS3DF: +0x2BC)
+    int warmUp;                             // +0x290 (LS3DF: +0x2C0)
+    uint32_t unknown294[3];                 // +0x294 (LS3DF: +0x2C4)
+    S_vector4 startColor;                   // +0x2A0 (1, 1, 1) (LS3DF: +0x2D0)
+    S_vector4 endColor;                     // +0x2B0 (1, 1, 1) (LS3DF: +0x2E0)
+    float opacity;                          // +0x2C0 (1) (LS3DF: +0x2F0)
+    uint32_t padding2C4[3];                 // +0x2C4 (LS3DRF's pad to 0x2d0: nothing addresses it)
 
 private:
     void FreeGroups();
 };
-static_assert(sizeof(I3D_emitor) == 0x300, "I3D_emitor layout");
+static_assert(sizeof(I3D_emitor) == 0x2D0, "I3D_emitor layout");
 static_assert(offsetof(I3D_emitor, texture) == 0x1F0, "I3D_emitor layout");
-static_assert(offsetof(I3D_emitor, active) == 0x218, "I3D_emitor layout");
-static_assert(offsetof(I3D_emitor, intervalMin) == 0x250, "I3D_emitor layout");
-static_assert(offsetof(I3D_emitor, startVelocity) == 0x290, "I3D_emitor layout");
-static_assert(offsetof(I3D_emitor, startColor) == 0x2D0, "I3D_emitor layout");
-static_assert(offsetof(I3D_emitor, opacity) == 0x2F0, "I3D_emitor layout");
+static_assert(offsetof(I3D_emitor, fixedGroup) == 0x204, "I3D_emitor layout");
+static_assert(offsetof(I3D_emitor, srcBlend) == 0x214, "I3D_emitor layout");
+static_assert(offsetof(I3D_emitor, startVelocity) == 0x260, "I3D_emitor layout");
+static_assert(offsetof(I3D_emitor, startColor) == 0x2A0, "I3D_emitor layout");
+static_assert(offsetof(I3D_emitor, opacity) == 0x2C0, "I3D_emitor layout");

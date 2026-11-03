@@ -349,8 +349,7 @@ I3D_frame *CreateFrameObject(int type)
 }
 
 // LS3DRF 0x1000fc90 (from LS3DF 0x10019750): types 0 - 9, no shadow visual; the objects are LS3DF's
-// sizes and members except the mirror and the projector, which are LS3DRF's (LS3DRF's emitor is
-// smaller).
+// sizes and members except the mirror, the projector and the emitor, which are LS3DRF's.
 I3D_frame *CreateVisualObject(int index)
 {
     // (Fix: the original reads the free list of any index, past the 16 lists.)
