@@ -59,6 +59,7 @@ public:
     bool SaveOptions();
     // (The options' pages, part 9e-xi: options_test.inc; the options world_modules_test.inc's.)
     S_DetailSettings *GetOptions();
+    void SetKeyLayout(int layout);                      // (the keys page, part 9e-xii)
     void ApplyGamma();
     void ApplyMusicVolume();
     void ApplyMouse();

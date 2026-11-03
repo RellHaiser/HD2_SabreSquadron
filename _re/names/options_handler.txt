@@ -15,5 +15,9 @@
 0061fd00 C_OptionsHandler::OnDetail | bool __thiscall OnDetail(void *this, void * argument, void * control, uint notification, uint value)
 006204a0 C_OptionsHandler::OnCheck | bool __thiscall OnCheck(void *this, void * argument, void * control, uint notification, uint value)
 00620780 C_OptionsHandler::OnVoiceChat | bool __thiscall OnVoiceChat(void *this, void * argument, void * control, uint notification, uint value)
-# Not ported yet.
+# Part 9e-xii: the controls and keys pages.
 0061e3f0 C_OptionsHandler::BuildControlsPage | bool __thiscall BuildControlsPage(void *this, void * desc, void * model)
+0061f600 C_OptionsHandler::BuildKeyGroup | bool __thiscall BuildKeyGroup(void *this, void * page, void * model, void * name, int group)
+006209c0 C_OptionsHandler::OnKeyGroup | bool __thiscall OnKeyGroup(void *this, void * argument, void * control, uint notification, uint value)
+006209b0 C_OptionsHandler::OnKeyChanged | bool __thiscall OnKeyChanged(void *this, void * argument, void * control, uint notification, uint value)
+0061fcb0 C_OptionsHandler::OnKeyLayout | bool __thiscall OnKeyLayout(void *this, void * argument, void * control, uint notification, uint value)

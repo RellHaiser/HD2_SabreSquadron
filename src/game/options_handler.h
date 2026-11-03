@@ -2,10 +2,12 @@
 // +0x1EC): opening it (its controls filled from the player's options the first time), saving the
 // options, leaving it (not with a function without a key: the key bindings' page showing it).
 // Original 0x0061bf00..0x00620e90 (part 9e-viii; 9e-x: the screen's description; 9e-xi: the video,
-// sound, game and multiplayer pages).
+// sound, game and multiplayer pages; 9e-xii: the controls and keys pages).
 #pragma once
 
 #include <cstdint>
+
+#include "common/c_str.h"
 
 class C_Control;
 class C_Cursor;
@@ -50,7 +52,15 @@ private:
     bool BuildVideoPage(S_ScreenDesc *desc, I3D_frame *model);         // 0x0061dc20 (page 0x600000)
     // The sound and music volumes.
     bool BuildSoundPage(S_ScreenDesc *desc, I3D_frame *model);         // 0x0061e1a0 (0x700000)
-    bool BuildControlsPage(S_ScreenDesc *desc, I3D_frame *model);      // 0x0061e3f0 (0x800000; not ported yet)
+    // The controls page (the mouse; the joystick's hidden) and the keys page (0x900000; shown by the
+    // controls page's button): the groups' list, its scroll bar, the five groups' key lists (false
+    // without the "hkinput" dummy or the "hktext" visual: none), the layouts' buttons.
+    bool BuildControlsPage(S_ScreenDesc *desc, I3D_frame *model);      // 0x0061e3f0 (0x800000)
+    // A key group's list under `page`: a dummy named `name` under "keysscreen01" (the menu's model)
+    // holding a copy of "hkinput" per binding of the group (by the bindings' order, 0.036 apart); the
+    // list's bindings (each refreshing the groups when changed); the first group shown. False
+    // without the frames.
+    bool BuildKeyGroup(S_ControlDesc *page, I3D_frame *model, C_str name, int group);   // 0x0061f600
     // The subtitles and the crosshair (inactive in a game).
     bool BuildGamePage(S_ScreenDesc *desc, I3D_frame *model);          // 0x0061f230 (0xA00000)
     // The connection (its group hidden twice: the original's), the voice chat and its volume.
@@ -68,6 +78,15 @@ private:
     // The voice chat (its volume active with it).
     static bool OnVoiceChat(void *handler, void *argument, C_Control *control, uint32_t notification,
                             uint32_t value);            // 0x00620780 (__thiscall)
+    // The groups' list: the chosen group's list shown, the scroll bar's, refreshed; the others hidden.
+    static bool OnKeyGroup(void *handler, void *argument, C_Control *control, uint32_t notification,
+                           uint32_t value);             // 0x006209c0 (__thiscall)
+    // A binding changed: the groups refreshed.
+    static bool OnKeyChanged(void *handler, void *argument, C_Control *control, uint32_t notification,
+                             uint32_t value);           // 0x006209b0 (__thiscall)
+    // The layouts' buttons: the player's key layout (0 the defaults', 1 the other's), the groups refreshed.
+    static bool OnKeyLayout(void *handler, void *argument, C_Control *control, uint32_t notification,
+                            uint32_t value);            // 0x0061fcb0 (__thiscall)
     // A page's group: hidden; when shown, the other pages hidden.
     S_ControlDesc *AddPage(S_ScreenDesc *desc, const char *name, uint32_t page);
     // The id of the options screen's control (the screen's index in the top 6 bits).

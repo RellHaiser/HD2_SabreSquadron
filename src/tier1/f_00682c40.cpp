@@ -37,19 +37,16 @@ uint32_t FUN_00682c70(...)
 
 
 // 0x00682c80
-uint32_t C_GameMenu__C_GameMenu__BuildPlayerScreen(C_GameMenu *_this,uint32_t *param_1,int *param_2, ...)
+bool C_GameMenu__BuildPlayerScreen(C_GameMenu *_this,void *desc,void *model, ...)
 {
-  uint32_t *this_00;
-  uint32_t *puVar1;
+  void *pvVar1;
   bool bVar2;
   uint32_t *puVar3;
   int iVar4;
-  uint32_t *puVar5;
-  uint32_t *puVar6;
+  void *pvVar5;
+  void *pvVar6;
   int *piVar7;
-  uint32_t extraout_EAX;
-  uint32_t uVar8;
-  void *pvVar9;
+  void *pvVar8;
   void *local_44;
   S_ControlDesc *local_40;
   uint8_t local_3c [20];
@@ -58,16 +55,16 @@ uint32_t C_GameMenu__C_GameMenu__BuildPlayerScreen(C_GameMenu *_this,uint32_t *p
   void *pvStack_18;
   C_str *local_10;
   uint32_t local_4;
-  piVar7 = param_2;
-  this_00 = param_1;
+  pvVar5 = model;
+  pvVar6 = desc;
   local_4 = 0xffffffff;
-  FUN_006838e0((int)param_1,param_2);
-  C_GameMenu__FUN_00684690(_this,(int)this_00,piVar7);
-  C_GameMenu__FUN_00684b90(_this,this_00,piVar7);
-  FUN_00684df0(this_00);
+  FUN_006838e0((int)desc,model);
+  C_GameMenu__FUN_00684690(_this,(int)pvVar6,pvVar5);
+  C_GameMenu__FUN_00684b90(_this,pvVar6,pvVar5);
+  FUN_00684df0(pvVar6);
   puVar3 = (uint32_t *)FUN_00614da0(local_3c,0,0x1000007,0x400d000,_this,FUN_00684fd0);
   local_4 = 0;
-  FUN_00615d50(this_00 + 1,(uint32_t *)this_00[3],puVar3);
+  FUN_00615d50((void *)((int)pvVar6 + 4),*(uint32_t **)((int)pvVar6 + 0xc),puVar3);
   local_4 = 0xffffffff;
   if ((local_28 != 0) &&
      (local_28->rep = (C_str_rep *)local_28->rep[-1].chars, local_28->rep == 0)) {
@@ -75,20 +72,20 @@ uint32_t C_GameMenu__C_GameMenu__BuildPlayerScreen(C_GameMenu *_this,uint32_t *p
   }
   puVar3 = (uint32_t *)FUN_00614da0(local_3c,0,0x1000007,0x400c000,_this,FUN_00684fc0);
   local_4 = 1;
-  FUN_00615d50(this_00 + 1,(uint32_t *)this_00[3],puVar3);
+  FUN_00615d50((void *)((int)pvVar6 + 4),*(uint32_t **)((int)pvVar6 + 0xc),puVar3);
   local_4 = 0xffffffff;
   if ((local_28 != 0) &&
      (local_28->rep = (C_str_rep *)local_28->rep[-1].chars, local_28->rep == 0)) {
     tier1_operator_delete(local_28);
   }
-  puVar3 = this_00 + 9;
-  if (this_00[10] == 0) {
+  pvVar5 = (void *)((int)pvVar6 + 0x24);
+  if (*(int *)((int)pvVar6 + 0x28) == 0) {
     iVar4 = 0;
   }
   else {
-    iVar4 = (int)(this_00[0xb] - this_00[10]) >> 2;
+    iVar4 = *(int *)((int)pvVar6 + 0x2c) - *(int *)((int)pvVar6 + 0x28) >> 2;
   }
-  param_1 = (uint32_t *)(iVar4 + 1);
+  desc = (void *)(iVar4 + 1);
   local_40 = tier1_operator_new(0x40);
   local_4 = 2;
   if (local_40 == 0) {
@@ -97,265 +94,265 @@ uint32_t C_GameMenu__C_GameMenu__BuildPlayerScreen(C_GameMenu *_this,uint32_t *p
   else {
     local_44 = S_ControlDesc__S_ControlDesc
                          (local_40,0x11,"soldier type",
-                          ((uint32_t)param_1 & 0x3f) << 0x14 | this_00[0x10]);
+                          ((uint32_t)desc & 0x3f) << 0x14 | *(uint32_t *)((int)pvVar6 + 0x40));
   }
   local_4 = 0xffffffff;
-  FUN_00615f50(puVar3,(uint32_t *)this_00[0xb],(uint32_t*)(&local_44));
-  param_1 = *(uint32_t **)(this_00[0xb] - 4);
-  puVar5 = (uint32_t *)FUN_00614da0(local_3c,0,0x1000007,0x400e000,_this,FUN_00677870);
-  puVar1 = param_1;
+  FUN_00615f50(pvVar5,*(uint32_t **)((int)pvVar6 + 0x2c),(uint32_t*)(&local_44));
+  desc = *(void **)(*(int *)((int)pvVar6 + 0x2c) - 4);
+  puVar3 = (uint32_t *)FUN_00614da0(local_3c,0,0x1000007,0x400e000,_this,FUN_00677870);
+  pvVar1 = desc;
   local_4 = 3;
-  puVar6 = param_1 + 4;
-  FUN_00615d50(puVar6,(uint32_t *)param_1[6],puVar5);
+  pvVar8 = (void *)((int)desc + 0x10);
+  FUN_00615d50(pvVar8,*(uint32_t **)((int)desc + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  puVar5 = (uint32_t *)FUN_00614da0(local_3c,0,0x1000007,0x400b000,_this,FUN_00687dd0);
+  puVar3 = (uint32_t *)FUN_00614da0(local_3c,0,0x1000007,0x400b000,_this,FUN_00687dd0);
   local_4 = 4;
-  FUN_00615d50(puVar6,(uint32_t *)puVar1[6],puVar5);
+  FUN_00615d50(pvVar8,*(uint32_t **)((int)pvVar1 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  puVar5 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000081,0xc,500);
+  puVar3 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000081,0xc,500);
   local_4 = 5;
-  FUN_00615d50(puVar6,(uint32_t *)puVar1[6],puVar5);
+  FUN_00615d50(pvVar8,*(uint32_t **)((int)pvVar1 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  puVar5 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000017,0x13,500);
+  puVar3 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000017,0x13,500);
   local_4 = 6;
-  FUN_00615d50(puVar6,(uint32_t *)puVar1[6],puVar5);
+  FUN_00615d50(pvVar8,*(uint32_t **)((int)pvVar1 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  puVar5 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000001,0);
+  puVar3 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000001,0);
   local_4 = 7;
-  FUN_00615d50(puVar6,(uint32_t *)puVar1[6],puVar5);
+  FUN_00615d50(pvVar8,*(uint32_t **)((int)pvVar1 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  *(uint32_t *)(_this->_pad_0138 + 0xa4) = param_1[2];
+  *(uint32_t *)(_this->_pad_0138 + 0xa4) = *(uint32_t *)((int)desc + 8);
   FUN_00685da0((int)_this);
-  iVar4 = vector_size_e4_615a50((int)puVar3);
+  iVar4 = vector_size_e4_615a50((int)pvVar5);
   local_40 = tier1_operator_new(0x40);
   local_4 = 8;
   if (local_40 == 0) {
-    param_1 = 0;
+    desc = 0;
   }
   else {
-    param_1 = S_ControlDesc__S_ControlDesc
-                        (local_40,0x14,"bsave preset",
-                         (iVar4 + 1U & 0x3f) << 0x14 | this_00[0x10]);
+    desc = S_ControlDesc__S_ControlDesc
+                     (local_40,0x14,"bsave preset",
+                      (iVar4 + 1U & 0x3f) << 0x14 | *(uint32_t *)((int)pvVar6 + 0x40));
   }
   local_4 = 0xffffffff;
-  FUN_00615f50(puVar3,(uint32_t *)this_00[0xb],(uint32_t*)(&param_1));
-  iVar4 = *(int *)(this_00[0xb] - 4);
-  puVar6 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0xb,0x9e3);
-  pvVar9 = (void *)(iVar4 + 0x10);
+  FUN_00615f50(pvVar5,*(uint32_t **)((int)pvVar6 + 0x2c),(uint32_t*)(&desc));
+  iVar4 = *(int *)(*(int *)((int)pvVar6 + 0x2c) - 4);
+  puVar3 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0xb,0x9e3);
+  pvVar8 = (void *)(iVar4 + 0x10);
   local_4 = 9;
-  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar8,*(uint32_t **)(iVar4 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  puVar6 = (uint32_t *)FUN_00614da0(local_3c,0,0x1000007,0x4001000,_this,FUN_00687f50);
+  puVar3 = (uint32_t *)FUN_00614da0(local_3c,0,0x1000007,0x4001000,_this,FUN_00687f50);
   local_4 = 10;
-  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar8,*(uint32_t **)(iVar4 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  puVar6 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000001,0);
+  puVar3 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000001,0);
   local_4 = 0xb;
-  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar8,*(uint32_t **)(iVar4 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  iVar4 = vector_size_e4_615a50((int)puVar3);
+  iVar4 = vector_size_e4_615a50((int)pvVar5);
   local_40 = tier1_operator_new(0x40);
   local_4 = 0xc;
   if (local_40 == 0) {
-    param_1 = 0;
+    desc = 0;
   }
   else {
-    param_1 = S_ControlDesc__S_ControlDesc
-                        (local_40,0x14,"brename preset",
-                         (iVar4 + 1U & 0x3f) << 0x14 | this_00[0x10]);
+    desc = S_ControlDesc__S_ControlDesc
+                     (local_40,0x14,"brename preset",
+                      (iVar4 + 1U & 0x3f) << 0x14 | *(uint32_t *)((int)pvVar6 + 0x40));
   }
   local_4 = 0xffffffff;
-  FUN_00615f50(puVar3,(uint32_t *)this_00[0xb],(uint32_t*)(&param_1));
-  iVar4 = *(int *)(this_00[0xb] - 4);
-  puVar6 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0xb,0x9e4);
-  pvVar9 = (void *)(iVar4 + 0x10);
+  FUN_00615f50(pvVar5,*(uint32_t **)((int)pvVar6 + 0x2c),(uint32_t*)(&desc));
+  iVar4 = *(int *)(*(int *)((int)pvVar6 + 0x2c) - 4);
+  puVar3 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0xb,0x9e4);
+  pvVar8 = (void *)(iVar4 + 0x10);
   local_4 = 0xd;
-  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar8,*(uint32_t **)(iVar4 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  puVar6 = (uint32_t *)FUN_00614dd0(local_3c,*(uint32_t *)(_this->_pad_0138 + 0xa4) | 2,0x6001016,0);
+  puVar3 = (uint32_t *)FUN_00614dd0(local_3c,*(uint32_t *)(_this->_pad_0138 + 0xa4) | 2,0x6001016,0);
   local_4 = 0xe;
-  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar8,*(uint32_t **)(iVar4 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  puVar6 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000001,0);
+  puVar3 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000001,0);
   local_4 = 0xf;
-  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar8,*(uint32_t **)(iVar4 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
   bVar2 = C_GameProfile__IsCooperativeGame(&g_gameProfile);
   if (bVar2) {
-    iVar4 = vector_size_e4_615a50((int)puVar3);
+    iVar4 = vector_size_e4_615a50((int)pvVar5);
     local_40 = tier1_operator_new(0x40);
     local_4 = 0x10;
     if (local_40 == 0) {
-      param_1 = 0;
+      desc = 0;
     }
     else {
-      param_1 = S_ControlDesc__S_ControlDesc
-                          (local_40,0x13,"text_h&dversion",
-                           (iVar4 + 1U & 0x3f) << 0x14 | this_00[0x10]);
+      desc = S_ControlDesc__S_ControlDesc
+                       (local_40,0x13,"text_h&dversion",
+                        (iVar4 + 1U & 0x3f) << 0x14 | *(uint32_t *)((int)pvVar6 + 0x40));
     }
     local_4 = 0xffffffff;
-    FUN_00615f50(puVar3,(uint32_t *)this_00[0xb],(uint32_t*)(&param_1));
-    iVar4 = *(int *)(this_00[0xb] - 4);
-    puVar6 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0x28,0x7d6);
+    FUN_00615f50(pvVar5,*(uint32_t **)((int)pvVar6 + 0x2c),(uint32_t*)(&desc));
+    iVar4 = *(int *)(*(int *)((int)pvVar6 + 0x2c) - 4);
+    puVar3 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0x28,0x7d6);
     local_4 = 0x11;
-    FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar6);
+    FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar3);
     local_4 = 0xffffffff;
     if (local_28 != 0) {
       C_str__ReleaseRep(local_28);
     }
-    iVar4 = vector_size_e4_615a50((int)puVar3);
+    iVar4 = vector_size_e4_615a50((int)pvVar5);
     local_40 = tier1_operator_new(0x40);
     local_4 = 0x12;
     if (local_40 == 0) {
-      param_1 = 0;
+      desc = 0;
     }
     else {
-      param_1 = S_ControlDesc__S_ControlDesc
-                          (local_40,0x13,"text_equipment",
-                           (iVar4 + 1U & 0x3f) << 0x14 | this_00[0x10]);
+      desc = S_ControlDesc__S_ControlDesc
+                       (local_40,0x13,"text_equipment",
+                        (iVar4 + 1U & 0x3f) << 0x14 | *(uint32_t *)((int)pvVar6 + 0x40));
     }
     local_4 = 0xffffffff;
-    FUN_00615f50(puVar3,(uint32_t *)this_00[0xb],(uint32_t*)(&param_1));
-    iVar4 = *(int *)(this_00[0xb] - 4);
-    puVar6 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0xb,0x9e7);
+    FUN_00615f50(pvVar5,*(uint32_t **)((int)pvVar6 + 0x2c),(uint32_t*)(&desc));
+    iVar4 = *(int *)(*(int *)((int)pvVar6 + 0x2c) - 4);
+    puVar3 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0xb,0x9e7);
     local_4 = 0x13;
   }
   else {
-    iVar4 = vector_size_e4_615a50((int)puVar3);
+    iVar4 = vector_size_e4_615a50((int)pvVar5);
     local_40 = tier1_operator_new(0x40);
     local_4 = 0x14;
     if (local_40 == 0) {
-      param_1 = 0;
+      desc = 0;
     }
     else {
-      param_1 = S_ControlDesc__S_ControlDesc
-                          (local_40,0x13,"text_warm up",
-                           (iVar4 + 1U & 0x3f) << 0x14 | this_00[0x10]);
+      desc = S_ControlDesc__S_ControlDesc
+                       (local_40,0x13,"text_warm up",
+                        (iVar4 + 1U & 0x3f) << 0x14 | *(uint32_t *)((int)pvVar6 + 0x40));
     }
     local_4 = 0xffffffff;
-    FUN_00615f50(puVar3,(uint32_t *)this_00[0xb],(uint32_t*)(&param_1));
-    iVar4 = *(int *)(this_00[0xb] - 4);
-    puVar6 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0x2d,0x9e5);
+    FUN_00615f50(pvVar5,*(uint32_t **)((int)pvVar6 + 0x2c),(uint32_t*)(&desc));
+    iVar4 = *(int *)(*(int *)((int)pvVar6 + 0x2c) - 4);
+    puVar3 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0x2d,0x9e5);
     local_4 = 0x15;
-    FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar6);
+    FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar3);
     local_4 = 0xffffffff;
     if (local_28 != 0) {
       C_str__ReleaseRep(local_28);
     }
     if ((g_gameProfile.m_mpSettings)->gameType != 1) {
-      puVar6 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000004,0);
+      puVar3 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000004,0);
       local_4 = 0x16;
-      FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar6);
+      FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar3);
       local_4 = 0xffffffff;
       if (local_28 != 0) {
         C_str__ReleaseRep(local_28);
       }
     }
-    iVar4 = vector_size_e4_615a50((int)puVar3);
+    iVar4 = vector_size_e4_615a50((int)pvVar5);
     local_40 = tier1_operator_new(0x40);
     local_4 = 0x17;
     if (local_40 == 0) {
-      param_1 = 0;
+      desc = 0;
     }
     else {
-      param_1 = S_ControlDesc__S_ControlDesc
-                          (local_40,0x13,"text_etimated time",
-                           (iVar4 + 1U & 0x3f) << 0x14 | this_00[0x10]);
+      desc = S_ControlDesc__S_ControlDesc
+                       (local_40,0x13,"text_etimated time",
+                        (iVar4 + 1U & 0x3f) << 0x14 | *(uint32_t *)((int)pvVar6 + 0x40));
     }
     local_4 = 0xffffffff;
-    FUN_00615f50(puVar3,(uint32_t *)this_00[0xb],(uint32_t*)(&param_1));
-    iVar4 = *(int *)(this_00[0xb] - 4);
-    puVar6 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0x2d,0x9e6);
+    FUN_00615f50(pvVar5,*(uint32_t **)((int)pvVar6 + 0x2c),(uint32_t*)(&desc));
+    iVar4 = *(int *)(*(int *)((int)pvVar6 + 0x2c) - 4);
+    puVar3 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0x2d,0x9e6);
     local_4 = 0x18;
   }
-  FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  iVar4 = vector_size_e4_615a50((int)puVar3);
+  iVar4 = vector_size_e4_615a50((int)pvVar5);
   local_40 = tier1_operator_new(0x40);
   local_4 = 0x19;
   if (local_40 == 0) {
-    param_1 = 0;
+    desc = 0;
   }
   else {
-    param_1 = S_ControlDesc__S_ControlDesc
-                        (local_40,0x14,"baccept",
-                         (iVar4 + 1U & 0x3f) << 0x14 | this_00[0x10]);
+    desc = S_ControlDesc__S_ControlDesc
+                     (local_40,0x14,"baccept",
+                      (iVar4 + 1U & 0x3f) << 0x14 | *(uint32_t *)((int)pvVar6 + 0x40));
   }
   local_4 = 0xffffffff;
-  FUN_00615f50(puVar3,(uint32_t *)this_00[0xb],(uint32_t*)(&param_1));
-  iVar4 = *(int *)(this_00[0xb] - 4);
-  puVar6 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0xd,0x9c9);
-  pvVar9 = (void *)(iVar4 + 0x10);
+  FUN_00615f50(pvVar5,*(uint32_t **)((int)pvVar6 + 0x2c),(uint32_t*)(&desc));
+  iVar4 = *(int *)(*(int *)((int)pvVar6 + 0x2c) - 4);
+  puVar3 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0xd,0x9c9);
+  pvVar8 = (void *)(iVar4 + 0x10);
   local_4 = 0x1a;
-  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar8,*(uint32_t **)(iVar4 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  puVar6 = (uint32_t *)FUN_00614dd0(local_3c,0,0x600106a,0);
+  puVar3 = (uint32_t *)FUN_00614dd0(local_3c,0,0x600106a,0);
   local_4 = 0x1b;
-  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar8,*(uint32_t **)(iVar4 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  puVar6 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000001,0);
+  puVar3 = (uint32_t *)FUN_00614dd0(local_3c,0,0x1000001,0);
   local_4 = 0x1c;
-  FUN_00615d50(pvVar9,*(uint32_t **)(iVar4 + 0x18),puVar6);
+  FUN_00615d50(pvVar8,*(uint32_t **)(iVar4 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  iVar4 = vector_size_e4_615a50((int)puVar3);
+  iVar4 = vector_size_e4_615a50((int)pvVar5);
   local_40 = tier1_operator_new(0x40);
   local_4 = 0x1d;
   if (local_40 == 0) {
-    param_1 = 0;
+    desc = 0;
   }
   else {
-    param_1 = S_ControlDesc__S_ControlDesc
-                        (local_40,0x14,"bback",(iVar4 + 1U & 0x3f) << 0x14 | this_00[0x10])
-    ;
+    desc = S_ControlDesc__S_ControlDesc
+                     (local_40,0x14,"bback",
+                      (iVar4 + 1U & 0x3f) << 0x14 | *(uint32_t *)((int)pvVar6 + 0x40));
   }
   local_4 = 0xffffffff;
-  FUN_00615f50(puVar3,(uint32_t *)this_00[0xb],(uint32_t*)(&param_1));
-  iVar4 = *(int *)(this_00[0xb] - 4);
+  FUN_00615f50(pvVar5,*(uint32_t **)((int)pvVar6 + 0x2c),(uint32_t*)(&desc));
+  iVar4 = *(int *)(*(int *)((int)pvVar6 + 0x2c) - 4);
   puVar3 = (uint32_t *)FUN_00614df0(local_3c,0,0x1000015,0xd,0x9ca);
   local_4 = 0x1e;
   FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar3);
@@ -370,72 +367,69 @@ uint32_t C_GameMenu__C_GameMenu__BuildPlayerScreen(C_GameMenu *_this,uint32_t *p
   if (local_28 != 0) {
     C_str__ReleaseRep(local_28);
   }
-  pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x21,"console");
+  pvVar5 = S_ScreenDesc__AddControl(pvVar6,0x21,"console");
   puVar3 = (uint32_t *)FUN_00614da0(local_24,0,0x1000007,0x4015000,_this,FUN_00682a20);
   local_4 = 0x20;
-  FUN_00615d50((void *)((int)pvVar9 + 0x10),*(uint32_t **)((int)pvVar9 + 0x18),puVar3);
+  FUN_00615d50((void *)((int)pvVar5 + 0x10),*(uint32_t **)((int)pvVar5 + 0x18),puVar3);
   local_4 = 0xffffffff;
   if (local_10 != 0) {
     C_str__ReleaseRep(local_10);
   }
-  S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x12,"text03");
-  pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x13,"text_playerarrangement");
-  AddDescMessage2(pvVar9,0,0x1000015,10,0x9f7);
+  S_ScreenDesc__AddControl(pvVar6,0x12,"text03");
+  pvVar5 = S_ScreenDesc__AddControl(pvVar6,0x13,"text_playerarrangement");
+  AddDescMessage2(pvVar5,0,0x1000015,10,0x9f7);
   bVar2 = C_GameProfile__IsCooperativeGame(&g_gameProfile);
   if (!bVar2) {
-    pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x13,"text_h&dversion");
-    AddDescMessage2(pvVar9,0,0x1000015,0x28,0x7d6);
-    pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x13,"text_equipment");
-    AddDescMessage2(pvVar9,0,0x1000015,0xb,0x9e7);
+    pvVar5 = S_ScreenDesc__AddControl(pvVar6,0x13,"text_h&dversion");
+    AddDescMessage2(pvVar5,0,0x1000015,0x28,0x7d6);
+    pvVar5 = S_ScreenDesc__AddControl(pvVar6,0x13,"text_equipment");
+    AddDescMessage2(pvVar5,0,0x1000015,0xb,0x9e7);
   }
-  pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x13,"text_chat");
-  AddDescMessage2(pvVar9,0,0x1000015,0xb,0x9e8);
-  pvVar9 = S_ScreenDesc__AddControl
-                     ((S_ScreenDesc *)this_00,0x13,"text_selected soldier stats");
-  AddDescMessage2(pvVar9,0,0x1000015,0xb,0x9e9);
-  pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x13,"text_draft");
-  AddDescMessage2(pvVar9,0,0x1000015,0xb,0x9ea);
-  pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x14,"bgame info");
-  AddDescMessage2(pvVar9,0,0x1000015,0xd,0x9cc);
-  AddDescMessage3(pvVar9,0,0x1000007,0x4001000,(uint32_t)_this,0x6861b0);
+  pvVar5 = S_ScreenDesc__AddControl(pvVar6,0x13,"text_chat");
+  AddDescMessage2(pvVar5,0,0x1000015,0xb,0x9e8);
+  pvVar5 = S_ScreenDesc__AddControl(pvVar6,0x13,"text_selected soldier stats");
+  AddDescMessage2(pvVar5,0,0x1000015,0xb,0x9e9);
+  pvVar5 = S_ScreenDesc__AddControl(pvVar6,0x13,"text_draft");
+  AddDescMessage2(pvVar5,0,0x1000015,0xb,0x9ea);
+  pvVar5 = S_ScreenDesc__AddControl(pvVar6,0x14,"bgame info");
+  AddDescMessage2(pvVar5,0,0x1000015,0xd,0x9cc);
+  AddDescMessage3(pvVar5,0,0x1000007,0x4001000,(uint32_t)_this,0x6861b0);
   bVar2 = C_GameProfile__IsCooperativeGame(&g_gameProfile);
-  piVar7 = param_2;
+  piVar7 = model;
   if (bVar2) {
-    pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x13,"text_player status");
-    AddDescMessage2(pvVar9,0,0x1000015,0xb,0x4f4c);
-    pvVar9 = C_MenuState__LoadModel
+    pvVar6 = S_ScreenDesc__AddControl(pvVar6,0x13,"text_player status");
+    AddDescMessage2(pvVar6,0,0x1000015,0xb,0x4f4c);
+    pvVar6 = C_MenuState__LoadModel
                        ((C_MenuState *)_this,"DESCRIPTION","description");
-    piVar7 = param_2;
-    if (pvVar9 != 0) {
-      param_1 = tier1_operator_new(0x8c);
+    piVar7 = model;
+    if (pvVar6 != 0) {
+      desc = tier1_operator_new(0x8c);
       local_4 = 0x21;
-      if ((C_auto_008156b8 *)param_1 == 0) {
+      if (desc == 0) {
         piVar7 = 0;
       }
       else {
-        piVar7 = C_auto_008156b8__FUN_006838a0((C_auto_008156b8 *)param_1,_this->m_030,pvVar9);
+        piVar7 = C_auto_008156b8__FUN_006838a0(desc,_this->m_030,pvVar6);
       }
       _this->m_0fc = piVar7;
       local_4 = 0xffffffff;
       (**(code **)(*piVar7 + 0x8c))(0);
-      piVar7 = param_2;
+      piVar7 = model;
     }
   }
   else {
-    iVar4 = (**(code **)(*param_2 + 0x48))(param_2,"text_weapons info",1);
+    iVar4 = (**(code **)(*(int *)model + 0x48))(model,"text_weapons info",1);
     if (iVar4 != 0) {
-      pvVar9 = S_ScreenDesc__AddControl((S_ScreenDesc *)this_00,0x12,"text_weapons info");
-      AddDescMessage2(pvVar9,0,0x1000015,0xb,0x7d2);
-      *(uint32_t *)(_this->_pad_0138 + 0x78) = *(uint32_t *)((int)pvVar9 + 8);
+      pvVar6 = S_ScreenDesc__AddControl(pvVar6,0x12,"text_weapons info");
+      AddDescMessage2(pvVar6,0,0x1000015,0xb,0x7d2);
+      *(uint32_t *)(_this->_pad_0138 + 0x78) = *(uint32_t *)((int)pvVar6 + 8);
     }
   }
-  pvVar9 = (void *)(**(code **)(*piVar7 + 0x48))(piVar7,"3Dview",1);
-  uVar8 = 0;
-  if (pvVar9 != 0) {
-    C_EquipmentPanel__CreateSoldier(&_this->m_4dc,pvVar9);
-    uVar8 = extraout_EAX;
+  pvVar6 = (void *)(**(code **)(*piVar7 + 0x48))(piVar7,"3Dview",1);
+  if (pvVar6 != 0) {
+    C_EquipmentPanel__CreateSoldier(&_this->m_4dc,pvVar6);
   }
-  return CONCAT31((int3)((uint32_t)uVar8 >> 8),1);
+  return true;
 }
 
 

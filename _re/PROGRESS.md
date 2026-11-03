@@ -7408,6 +7408,34 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e-xii: the controls page 0x0061e3f0 (the key groups' builder 0x0061f600, the callbacks
     0x006209c0 and 0x0061fcb0); then the player screen, the squad glue and the item slots.
 
+  PART 9e-xii DONE (2026-11-02): the options screen's controls and keys pages (game/options_handler.cpp;
+  the options handler is complete).
+  - BuildControlsPage 0x0061e3f0: the controls page "keysscreen" (0x800000): 0x989, the keys page's
+    button bcontrols01 (0x98A; shows 0x900000), the mouse (0x98B, invert mouse 0x98C with OnCheck,
+    0x98D, its slider, the limits), the joystick's controls hidden (text_joystick setup 0x98F,
+    bcalibrate, force feedback, lock fire). The keys page "keysscreen01" (0x900000; shown, the
+    controls page hidden): text_last save01 (0x993), the groups' list "controls" (0x994..0x998,
+    OnKeyGroup), scroll00 (its value 0x904000); "hkinput" (dummy) and "hktext" (visual) found (else
+    false), the text under the input; five key groups (GR_Movements, GR_Weapons, GR_Other,
+    GR_Selections, GR_Tactical); bdefault* / bback01 (0x999 / 0x99B; OnKeyLayout on a click).
+  - BuildKeyGroup 0x0061f600: a dummy named for the group under "keysscreen01" (the menu's models);
+    "hkinput" under it, on; the group's list (type 0xB: 9 rows visible, scrolled by 0x903000, step
+    0.036; hidden but the first); per binding of the group (a copy of the player's bindings in the
+    original) a copy of "hkinput" ("Control%2d", the menu's frames; the rows 0.036 down) and a key
+    control (CONTROL_MSG_SET_BINDING: its index and text; OnKeyChanged); the first group refreshed;
+    "hkinput" off. False without the frames (the dummy leaked).
+  - Callbacks: OnKeyGroup 0x006209c0 (the chosen group's list shown, the scroll bar's value, refreshed;
+    the others hidden), OnKeyChanged 0x006209b0 (RefreshKeyGroups), OnKeyLayout 0x0061fcb0 (layout 1
+    for bback01's id, else 0; refreshed).
+  - Harness: options_test.inc's opControls, opKeyGroup, opKeys (22 checks now; the bindings' groups by
+    index, menu_run_test.inc's clones, SetKeyLayout faked). 22 of 22 in both orders (the other
+    factory lines too).
+  - Mutations: mutations/mutate_9e12.py (176 cases, 160 build, all caught but 1 equivalent).
+  - Build: MSVC clean. Tier 1: 409 errors in 74 files, 173 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/options_handler.txt (+4, 1 moved); 5 functions in ported.txt. Stats: 8,857 of 12,306 functions by hand (79.1 % by size).
+  - Next, 9e-xiii: the player screen (BuildPlayerScreen 0x00682c80 and its builders 0x006838e0,
+    0x00684690, 0x00684b90, 0x00684df0, its callbacks); then the squad glue and the item slots.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

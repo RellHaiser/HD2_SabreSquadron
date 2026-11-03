@@ -1,5 +1,5 @@
 // The options screen's messages (original 0x0061bf00..0x00620e90; part 9e-viii; 9e-x: its description;
-// 9e-xi: the video, sound, game and multiplayer pages).
+// 9e-xi: the video, sound, game and multiplayer pages; 9e-xii: the controls and keys pages).
 #include "game/options_handler.h"
 
 #include "game/control.h"
@@ -7,6 +7,7 @@
 #include "game/controls.h"
 #include "game/cursor.h"
 #include "game/game.h"
+#include "game/items_module.h"
 #include "game/key_bindings.h"
 #include "game/menu_state.h"
 #include "game/profile.h"
@@ -77,6 +78,12 @@ constexpr int DETAIL_MORPHING = 3, DETAIL_HIGH_MODELS = 6, DETAIL_CUSTOM = 3;
 // The video page's controls by their index (after the texts and the gamma): the level list, GD00..
 constexpr uint32_t DETAIL_LIST_INDEX = 5, DETAIL_SWITCHES = 7;
 const uint32_t PAGES_ALL[] = {0x600000, 0x700000, 0x800000, 0x900000, 0xA00000, 0xB00000};
+// The keys page: the layouts' buttons, the key lists' and the bindings' controls, their rows' spacing.
+constexpr uint32_t DEFAULT_LAYOUT_BUTTON = 0x909000, LAYOUT_1_BUTTON = 0x90A000;
+constexpr int CONTROL_KEY_LIST = 0xB, CONTROL_KEY = 0xD;
+constexpr uint32_t KEY_LIST_ROWS = 9;
+constexpr float KEY_ROW_STEP = -0.036f;
+const char *const KEY_GROUPS_NAMES[] = {"GR_Movements", "GR_Weapons", "GR_Other", "GR_Selections", "GR_Tactical"};
 // The "min / norm / max" texts' runs (styles 0x1B..0x1D, texts 0x7EE..0x7F0).
 void AddLimits(S_ControlDesc *text)
 {
@@ -306,6 +313,157 @@ bool C_OptionsHandler::BuildVideoPage(S_ScreenDesc *desc, I3D_frame *model)
     // (The high models' switch hidden.)
     AddDescMessage(detail, 0, CONTROL_MSG_HIDE, 0);
     AddDescMessage(page->AddChild(CONTROL_TEXT, "text_modifications"), 0, CONTROL_MSG_ADD_TEXT_ID, TITLE_STYLE, 0x97E);
+    return true;
+}
+
+bool C_OptionsHandler::BuildControlsPage(S_ScreenDesc *desc, I3D_frame *model)
+{
+    S_ControlDesc *page = AddPage(desc, "keysscreen", 0x800000);
+    AddTitle(page, "text_controls setup", 0x989);
+    S_ControlDesc *keys = page->AddChild(CONTROL_BUTTON, "bcontrols01");
+    AddDescMessage(keys, 0, CONTROL_MSG_SET_TEXT_ID, BUTTON_STYLE, 0x98A);
+    AddDescMessage(keys, Id(KEYS_PAGE), CONTROL_NOTIFY_CLICK | CONTROL_MSG_SHOW, 0);
+    AddTitle(page, "text_mouse setup", 0x98B);
+    S_ControlDesc *invert = page->AddChild(CONTROL_CHECK, "invert mouse");
+    AddDescMessage(invert, 0, CONTROL_MSG_SET_TEXT_ID, CHECK_STYLE, 0x98C);
+    AddCallback(invert, this, &C_OptionsHandler::OnCheck);
+    AddTitle(page, "text_mouse sensitivity", 0x98D);
+    S_ControlDesc *slider = page->AddChild(CONTROL_SLIDER, "scrollbar");
+    AddDescMessage(slider, 0, CONTROL_MSG_SET_COUNT, SLIDER_POSITIONS);
+    AddCallback(slider, this, &C_OptionsHandler::OnSlider);
+    AddLimits(page->AddChild(CONTROL_TEXT, "text_minimal normal maximal"));
+    // The joystick's, hidden.
+    S_ControlDesc *joystick = page->AddChild(CONTROL_TEXT, "text_joystick setup");
+    AddDescMessage(joystick, 0, CONTROL_MSG_SET_TEXT_ID, TITLE_STYLE, 0x98F);
+    AddDescMessage(joystick, 0, CONTROL_MSG_HIDE, 0);
+    const struct {
+        int type;
+        const char *name;
+        uint32_t textId;
+    } hidden[] = {{CONTROL_BUTTON, "bcalibrate", 0x990}, {CONTROL_CHECK, "force feedback", 0x991}, {CONTROL_CHECK, "lock fire", 0x992}};
+    for (const auto &control : hidden) {
+        S_ControlDesc *child = page->AddChild(control.type, control.name);
+        AddDescMessage(child, 0, CONTROL_MSG_SET_TEXT_ID, CHECK_STYLE, control.textId);
+        AddDescMessage(child, 0, CONTROL_MSG_HIDE, 0);
+    }
+
+    // The keys page (hidden; shown: the controls page hidden).
+    S_ControlDesc *bindings = desc->AddControl(CONTROL_GROUP, "keysscreen01");
+    AddDescMessage(bindings, 0, CONTROL_MSG_HIDE, 0);
+    AddDescMessage(bindings, Id(0x800000), CONTROL_NOTIFY_SHOWN | CONTROL_MSG_HIDE, 0);
+    AddTitle(bindings, "text_last save01", 0x993);
+    S_ControlDesc *groups = bindings->AddChild(CONTROL_LIST, "controls");
+    for (uint32_t textId = 0x994; textId <= 0x998; ++textId)
+        AddDescMessage(groups, 0, CONTROL_MSG_ADD_ENTRY, textId);
+    AddCallback(groups, this, &C_OptionsHandler::OnKeyGroup);
+    AddDescMessage(bindings->AddChild(CONTROL_SLIDER, "scroll00"), 0, CONTROL_MSG_SET_VALUE, Id(KEYS_PAGE | FIRST_KEY_GROUP << 12));
+    I3D_frame *input = model->FindChildFrame("hkinput", FRAME_MASK_DUMMY);
+    I3D_frame *text = model->FindChildFrame("hktext", FRAME_MASK_VISUAL);
+    if (!input || !text)
+        return false;
+    text->LinkTo(input, 1);
+    for (int group = 0; group < 5; ++group)
+        BuildKeyGroup(bindings, model, C_str(KEY_GROUPS_NAMES[group]), group);
+    for (const auto &button : {std::make_pair("bdefault*", 0x999u), std::make_pair("bback01", 0x99Bu)}) {
+        S_ControlDesc *layout = bindings->AddChild(CONTROL_BUTTON, button.first);
+        AddDescMessage(layout, 0, CONTROL_MSG_SET_TEXT_ID, CHECK_STYLE, button.second);
+        AddDescMessage(layout, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, reinterpret_cast<uintptr_t>(this),
+                       reinterpret_cast<uintptr_t>(&C_OptionsHandler::OnKeyLayout));
+    }
+    return true;
+}
+
+bool C_OptionsHandler::BuildKeyGroup(S_ControlDesc *page, I3D_frame *model, C_str name, int group)
+{
+    I3D_frame *dummy = I3DGetDriver()->CreateFrame(FRAME_DUMMY);
+    I3D_frame *input = model->FindChildFrame("hkinput", FRAME_MASK_DUMMY);
+    I3D_frame *screen = model->FindChildFrame("keysscreen01", FRAME_MASK_DUMMY);
+    // (The dummy leaked, as the original.)
+    if (!input || !dummy || !screen)
+        return false;
+    dummy->LinkTo(screen, 0);
+    dummy->SetPos(S_vector(0.0f, 0.0f, 0.0f));
+    dummy->SetName(name.c_str());
+    m_menu->GetModels().push_back(dummy);
+    dummy->Update();
+    input->LinkTo(dummy, 1);
+    input->SetOn(true);
+    input->Update();
+    S_ControlDesc *list = page->AddChild(CONTROL_KEY_LIST, name.c_str());
+    AddDescMessage(list, 0, CONTROL_MSG_SET_VISIBLE, KEY_LIST_ROWS);
+    AddDescMessage(list, 0, CONTROL_MSG_SET_VALUE, Id(KEY_GROUP_LIST));
+    const float step = -KEY_ROW_STEP;
+    uint32_t stepBits;
+    std::memcpy(&stepBits, &step, sizeof stepBits);
+    AddDescMessage(list, 0, CONTROL_MSG_SET_DOWN_STEP, 0, stepBits);
+    if (group != 0)
+        AddDescMessage(list, 0, CONTROL_MSG_HIDE, 0);
+    // (The original asks a copy of the bindings.)
+    const C_KeyBindings &bindings = *g_gameProfile.m_player->GetKeyBindings();
+    int row = 0;
+    for (int i = 0; i < bindings.GetCount(); ++i) {
+        int textId = 0, bindingGroup = 0;
+        bindings.GetTextAndGroup(i, &textId, &bindingGroup);
+        if (bindingGroup != group)
+            continue;
+        const C_str rowName = C_fstr("Control%2d", i);
+        I3D_frame *copy = nullptr;
+        CloneFrameTree(copy, input, nullptr);
+        m_menu->GetFrames().push_back(copy);
+        copy->SetName(rowName.c_str());
+        const S_vector &pos = input->GetPos();
+        copy->SetPosInline(S_vector(pos.x, pos.y, static_cast<float>(row) * KEY_ROW_STEP + pos.z));
+        ++row;
+        copy->LinkTo(dummy, 0);
+        copy->SetOn(true);
+        copy->Update();
+        S_ControlDesc *binding = list->AddChild(CONTROL_KEY, rowName.c_str());
+        AddDescMessage(binding, 0, CONTROL_MSG_SET_BINDING, static_cast<uint32_t>(i), static_cast<uintptr_t>(textId));
+        AddCallback(binding, this, &C_OptionsHandler::OnKeyChanged);
+    }
+    if (group == 0)
+        AddDescMessage(list, 0, CONTROL_MSG_REFRESH, 0);
+    input->SetOn(false);
+    input->Update();
+    return true;
+}
+
+bool C_OptionsHandler::OnKeyGroup(void *handler, void *, C_Control *control, uint32_t, uint32_t)
+{
+    const auto *self = static_cast<C_OptionsHandler *>(handler);
+    S_ControlMessage selected;
+    selected.id = CONTROL_MSG_GET_SELECTED;
+    control->HandleMessage(&selected);
+    const int index = static_cast<int>(selected.value);
+    if (index > -1) {
+        for (uint32_t group = FIRST_KEY_GROUP; group < KEY_GROUP_END; ++group) {
+            const uint32_t list = self->Id(KEYS_PAGE | group << 12);
+            if (group == static_cast<uint32_t>(index) + FIRST_KEY_GROUP) {
+                Post(list, CONTROL_MSG_SHOW);
+                Post(self->Id(KEY_GROUP_LIST), CONTROL_MSG_SET_VALUE, list);
+                Post(list, CONTROL_MSG_REFRESH);
+            } else {
+                Post(list, CONTROL_MSG_HIDE);
+            }
+        }
+    }
+    return true;
+}
+
+bool C_OptionsHandler::OnKeyChanged(void *handler, void *, C_Control *, uint32_t, uint32_t)
+{
+    return static_cast<C_OptionsHandler *>(handler)->RefreshKeyGroups();
+}
+
+bool C_OptionsHandler::OnKeyLayout(void *handler, void *, C_Control *control, uint32_t, uint32_t)
+{
+    if (!control)
+        return false;
+    auto *self = static_cast<C_OptionsHandler *>(handler);
+    const uint32_t id = control->GetId();
+    const int layout = id != self->Id(DEFAULT_LAYOUT_BUTTON) && id == self->Id(LAYOUT_1_BUTTON) ? 1 : 0;
+    g_gameProfile.m_player->SetKeyLayout(layout);
+    self->RefreshKeyGroups();
     return true;
 }
 

@@ -1,4 +1,4 @@
-"""Checks the factory build's options line (harness_factory.exe, FACTORY_TEST; parts 9e-viii, 9e-x and 9e-xi).
+"""Checks the factory build's options line (harness_factory.exe, FACTORY_TEST; parts 9e-viii and 9e-x to 9e-xii).
 
     python check_options.py MISSIONS_TXT_DIR HARNESS_OUTPUT
 
@@ -9,7 +9,7 @@ import re
 import sys
 
 CHECKS = ("opNew opEscape opSave opOpen opFill opRefresh opLeave opUnbound opBuild opBuildFail opShown opVideo opSound "
-          "opGame opNetwork opSlider opDetail opCheck opVoice").split()
+          "opGame opNetwork opSlider opDetail opCheck opVoice opControls opKeyGroup opKeys").split()
 
 
 def main():

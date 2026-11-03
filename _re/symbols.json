@@ -27430,6 +27430,16 @@
   "name": "C_OptionsHandler::BuildMultiplayerPage",
   "proto": "bool __thiscall BuildMultiplayerPage(void *this, void * desc, void * model)"
  },
+ "0061f600": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildKeyGroup",
+  "proto": "bool __thiscall BuildKeyGroup(void *this, void * page, void * model, void * name, int group)"
+ },
+ "0061fcb0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnKeyLayout",
+  "proto": "bool __thiscall OnKeyLayout(void *this, void * argument, void * control, uint notification, uint value)"
+ },
  "0061fd00": {
   "module": "options_handler",
   "name": "C_OptionsHandler::OnDetail",
@@ -27458,6 +27468,16 @@
   "module": "options_handler",
   "name": "C_OptionsHandler::OnVoiceChat",
   "proto": "bool __thiscall OnVoiceChat(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006209b0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnKeyChanged",
+  "proto": "bool __thiscall OnKeyChanged(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006209c0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnKeyGroup",
+  "proto": "bool __thiscall OnKeyGroup(void *this, void * argument, void * control, uint notification, uint value)"
  },
  "00620be0": {
   "module": "options_handler",

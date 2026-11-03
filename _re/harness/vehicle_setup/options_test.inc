@@ -15,11 +15,6 @@ int g_opUnbound = -1, g_opText, g_opGroup, g_opPosition;
 C_str g_opName;
 C_str C_PlayerProfile::GetName() const { return g_opName; }
 std::string MrFrameName(const void *frame);
-bool C_OptionsHandler::BuildControlsPage(S_ScreenDesc *desc, I3D_frame *model)
-{
-    GfLog("page controls %d %s", static_cast<int>(desc->controls.size()), MrFrameName(model).c_str());
-    return true;
-}
 // (Part 9e-xi: the player's options, applied: logged; the switches.)
 S_DetailSettings *C_PlayerProfile::GetOptions() { return g_gameProfile.GetDetailSettings(); }
 void C_PlayerProfile::ApplyGamma() { GfLog("apply gamma"); }
@@ -35,12 +30,20 @@ bool C_PlayerProfile::SaveOptions()
 void C_PlayerProfile::ApplyHardwareOption() { GfLog("hardware option"); }
 void C_KeyBindings::ApplyChanged() { GfLog("keys applied"); }
 int C_KeyBindings::FindUnbound() const { return g_opUnbound; }
+// (Part 9e-xii: per binding, when given: the text 0x500 + its index, its group.)
+std::vector<int> g_opBindingGroups;
 void C_KeyBindings::GetTextAndGroup(int index, int *textId, int *group) const
 {
+    if (index >= 0 && index < static_cast<int>(g_opBindingGroups.size())) {
+        *textId = 0x500 + index;
+        *group = g_opBindingGroups[static_cast<size_t>(index)];
+        return;
+    }
     GfLog("text and group %d", index);
     *textId = g_opText;
     *group = g_opGroup;
 }
+void C_PlayerProfile::SetKeyLayout(int layout) { GfLog("layout %d", layout); }
 void C_KeyBindings::GetGroupPosition(int index, int *position) const
 {
     GfLog("group position %d", index);
@@ -53,7 +56,7 @@ struct S_OptionsResults {
     bool opNew = true, opEscape = true, opSave = true, opOpen = true, opFill = true, opRefresh = true, opLeave = true;
     bool opUnbound = true, opBuild = true, opBuildFail = true, opShown = true;
     bool opVideo = true, opSound = true, opGame = true, opNetwork = true, opSlider = true, opDetail = true, opCheck = true;
-    bool opVoice = true;
+    bool opVoice = true, opControls = true, opKeyGroup = true, opKeys = true;
 };
 
 S_IGraphInfo g_opInfo;
@@ -71,6 +74,17 @@ struct C_OpList : C_Control {
     }
 };
 
+// A control answering CONTROL_MSG_GET_SELECTED with its index (logged).
+struct C_OpSelect : C_Control {
+    int index;
+    C_OpSelect(uint32_t id, int i) : C_Control(nullptr, id, nullptr), index(i) {}
+    bool HandleMessage(S_ControlMessage *message) override
+    {
+        GfLog("selected %x", message->id);
+        message->value = static_cast<uint32_t>(index);
+        return true;
+    }
+};
 // A control answering CONTROL_MSG_GET_SLIDER with its position (logged).
 struct C_OpSlider : C_Control {
     float position;
@@ -316,30 +330,31 @@ void OptionsTest(I3D_scene *scene)
         for (int i = 0; i < 6; ++i)
             ok &= MrHas(CmText("opb%d 38 opgroup 1", i));
         // The pages after the buttons, in order (the controls' after the video and sound pages).
-        ok &= logHas("page ") == 1 && MrHas("page controls 7 opmodel") && desc.controls.size() == 10;
-        if (desc.controls.size() == 10) {
-            const char *const pageNames[] = {"graphics setup", "sound setup", "gameoptions", "network settings"};
-            for (int i = 0; i < 4; ++i)
+        ok &= desc.controls.size() == 12;
+        if (desc.controls.size() == 12) {
+            const char *const pageNames[] = {"graphics setup", "sound setup", "keysscreen", "keysscreen01", "gameoptions",
+                                             "network settings"};
+            for (int i = 0; i < 6; ++i)
                 ok &= desc.controls[5 + static_cast<size_t>(i)]->name == pageNames[i];
         }
         ok &= desc.messages.size() == 1 && desc.messages[0].target == 0 && desc.messages[0].id == CONTROL_MSG_ADD_CALLBACK &&
               desc.messages[0].value == CONTROL_NOTIFY_SHOWN && desc.messages[0].value2 == reinterpret_cast<uintptr_t>(&b) &&
               desc.messages[0].value3 == reinterpret_cast<uintptr_t>(&C_OptionsHandler::OnShown);
-        ok &= desc.controls.size() == 10 &&
+        ok &= desc.controls.size() == 12 &&
               describe(std::vector<S_ControlDesc *>(desc.controls.begin(), desc.controls.begin() + 5)) ==
               "text_screen 13 8100000: 1000015 a 961; text_date00 13 8200000: 1000015 b 962; text_date01 13 8300000: 1000015 c 963; "
               "text_profile00 13 8400000: 1000015 b 964; GROptions 5 8500000: {bvideo setup 14 8501000: 1000015 d 965 @8600000 5001003 0 0; "
               "bsound setup 14 8502000: 1000015 d 966 @8700000 5001003 0 0; bcontrols 14 8503000: 1000015 d 967 @8800000 5001003 0 0; "
               "bgame setup 14 8504000: 1000015 d 968 @8a00000 5001003 0 0; bmultiplayer setup 14 8505000: 1000015 d 969 @8b00000 5001003 0 0; "
               "bback 14 8506000: 1000015 d 96a 60010c4 0 0; }; " &&
-              describe({desc.controls.back()}) == "text_h&dversion 13 8a00000: 1000015 28 7d6; ";
+              describe({desc.controls.back()}) == "text_h&dversion 13 8c00000: 1000015 28 7d6; ";
         WM(r.opBuild, ok);
         // Without the second limits text: not placed.
         g_msChildren.erase({model, "text_min norm max02"});
         g_mrMade[FRAME_DUMMY] = {MsFrame("opgroup2")};
         S_ScreenDesc desc2("OPTIONS", "options", 3u << 26);
         g_gfLog.clear();
-        ok = b.BuildScreen(&desc2, As<I3D_frame>(model)) && b.m_screen == 3 && logHas("oplim2 8") == 0 && desc2.controls.size() == 10;
+        ok = b.BuildScreen(&desc2, As<I3D_frame>(model)) && b.m_screen == 3 && logHas("oplim2 8") == 0 && desc2.controls.size() == 12;
         WM(r.opBuild, ok);
 
         // A button missing (any): false, nothing described, nothing moved (the group made all the same).
@@ -541,6 +556,178 @@ void OptionsTest(I3D_scene *scene)
         menu.m_clickSound = nullptr;
         *opts = saved;
     }
+
+    // --- the controls and keys pages (part 9e-xii): the controls page (the joystick's hidden), the
+    // keys page with the groups' list, its scroll bar, a list per key group (its bindings' rows: copies
+    // of "hkinput" under the group's dummy, 0.036 apart), the layouts' buttons ---
+    {
+        C_OptionsHandler k(&menu);
+        k.m_screen = 2;
+        const std::map<uintptr_t, std::string> callbacks = {
+            {reinterpret_cast<uintptr_t>(&C_OptionsHandler::OnSlider), "slider"},
+            {reinterpret_cast<uintptr_t>(&C_OptionsHandler::OnCheck), "check"},
+            {reinterpret_cast<uintptr_t>(&C_OptionsHandler::OnKeyGroup), "keygroup"},
+            {reinterpret_cast<uintptr_t>(&C_OptionsHandler::OnKeyChanged), "keychanged"},
+            {reinterpret_cast<uintptr_t>(&C_OptionsHandler::OnKeyLayout), "layout"}};
+        std::function<std::string(const std::vector<S_ControlDesc *> &)> text = [&](const std::vector<S_ControlDesc *> &cs) {
+            std::string s;
+            for (const S_ControlDesc *c : cs) {
+                s += CmText("%s %x %x:", c->name.c_str(), c->type, c->id);
+                for (const S_ControlMessage &m : c->messages) {
+                    s += m.target ? CmText(" @%x", m.target) : std::string();
+                    if (m.id == CONTROL_MSG_ADD_CALLBACK) {
+                        const auto it = callbacks.find(m.value3);
+                        s += CmText(" cb %x %s %s", m.value, m.value2 == reinterpret_cast<uintptr_t>(&k) ? "h" : "?",
+                                    it == callbacks.end() ? "?" : it->second.c_str());
+                    } else {
+                        s += CmText(" %x %x %x", m.id, m.value, static_cast<uint32_t>(m.value2));
+                    }
+                }
+                if (!c->children.empty())
+                    s += " {" + text(c->children) + "}";
+                s += "; ";
+            }
+            return s;
+        };
+        std::string hides = " 1000004 0 0";
+        for (uint32_t page : {0x600000u, 0x700000u, 0x900000u, 0xA00000u, 0xB00000u})
+            hides += CmText(" @%x 500d004 0 0", 0x08000000 | page);
+        const std::string limits = " 1000017 1b 7ee 1000017 1c 7ef 1000017 1d 7f0";
+        const std::string controlsPage =
+            "keysscreen 5 8100000:" + hides +
+            " {text_controls setup 13 8101000: 1000015 b 989; bcontrols01 14 8102000: 1000015 d 98a @8900000 5001003 0 0; "
+            "text_mouse setup 13 8103000: 1000015 b 98b; invert mouse 24 8104000: 1000015 d 98c cb 4010000 h check; "
+            "text_mouse sensitivity 13 8105000: 1000015 b 98d; scrollbar 8 8106000: 1000020 64 0 cb 4010000 h slider; "
+            "text_minimal normal maximal 13 8107000:" + limits + "; text_joystick setup 13 8108000: 1000015 b 98f 1000004 0 0; "
+            "bcalibrate 14 8109000: 1000015 d 990 1000004 0 0; force feedback 24 810a000: 1000015 d 991 1000004 0 0; "
+            "lock fire 24 810b000: 1000015 d 992 1000004 0 0; }; ";
+        const std::string keysHead =
+            "keysscreen01 5 8200000: 1000004 0 0 @8800000 500d004 0 0 {text_last save01 13 8201000: 1000015 b 993; "
+            "controls 10 8202000: 1000067 994 0 1000067 995 0 1000067 996 0 1000067 997 0 1000067 998 0 cb 4010000 h keygroup; "
+            "scroll00 8 8203000: 100000b 8904000 0; ";
+        const std::string listHead = ": 1000028 9 0 100000b 8903000 0 100002a 0 3d1374bc";
+
+        // The bindings: four, of the groups 0, 1, 0 and 4.
+        C_KeyBindings &bindings = *g_gameProfile.m_player->GetKeyBindings();
+        bindings.m_bindings.resize(4);
+        g_opBindingGroups = {0, 1, 0, 4};
+        S_MrObj *model = MsFrame("opcmodel"), *input = MsFrame("ophk"), *hktext = MsFrame("ophkt"), *screen = MsFrame("opks");
+        As<I3D_frame>(input)->m_localMatrix(3) = S_vector(1.0f, 2.0f, 3.0f);
+        g_msChildren[{model, "hkinput"}] = input;
+        g_msChildren[{model, "hktext"}] = hktext;
+        g_msChildren[{model, "keysscreen01"}] = screen;
+        S_MrObj *dummies[5], *clones[4];
+        for (int i = 0; i < 5; ++i)
+            dummies[i] = MsFrame(CmText("opkg%d", i).c_str());
+        for (int i = 0; i < 4; ++i)
+            clones[i] = MsFrame(CmText("opclone%d", i).c_str());
+        g_mrMade[FRAME_DUMMY] = {dummies[0], dummies[1], dummies[2], dummies[3], dummies[4]};
+        g_mrClones = {As<I3D_frame>(clones[0]), As<I3D_frame>(clones[1]), As<I3D_frame>(clones[2]), As<I3D_frame>(clones[3])};
+        menu.m_models.clear();
+        menu.m_frames.clear();
+        S_ScreenDesc desc("OPTIONS", "options", 2u << 26);
+        g_gfLog.clear();
+        bool ok = k.BuildControlsPage(&desc, As<I3D_frame>(model)) && desc.controls.size() == 2;
+        ok &= text({desc.controls[0]}) == controlsPage;
+        ok &= text({desc.controls[1]}) ==
+              keysHead + "GR_Movements b 8204000" + listHead +
+                  " 200002c 0 0 {Control 0 d 8204010: 100003d 0 500 cb 4010000 h keychanged; "
+                  "Control 2 d 8204020: 100003d 2 502 cb 4010000 h keychanged; }; "
+                  "GR_Weapons b 8205000" + listHead + " 1000004 0 0 {Control 1 d 8205010: 100003d 1 501 cb 4010000 h keychanged; }; "
+                  "GR_Other b 8206000" + listHead + " 1000004 0 0; GR_Selections b 8207000" + listHead + " 1000004 0 0; "
+                  "GR_Tactical b 8208000" + listHead + " 1000004 0 0 {Control 3 d 8208010: 100003d 3 503 cb 4010000 h keychanged; }; "
+                  "bdefault* 14 8209000: 1000015 d 999 cb 4001000 h layout; bback01 14 820a000: 1000015 d 99b cb 4001000 h layout; }; ";
+        // The frames: the text under the input; per group its dummy under the keys screen (named, placed,
+        // the menu's), the input under it (on) for the rows' copies (named, 0.036 apart, under the dummy).
+        ok &= MrHas("ophkt 38 ophk 1") && MrHas("opkg0 38 opks 0") && MrHas("opkg0 34 GR_Movements") && MrHas("opkg0 8 (0 0 0)") &&
+              MrHas("opkg4 34 GR_Tactical") && MrHas("ophk 38 opkg4 1") && MrHas("ophk on 1") && MrHas("ophk on 0") &&
+              logHas("clone tree ophk 0") == 4 && MrHas("opclone0 34 Control 0") && MrHas("opclone1 34 Control 2") &&
+              MrHas("opclone1 38 opkg0 0") && MrHas("opclone1 on 1") && MrHas("opclone3 38 opkg4 0") &&
+              MrHas("opcmodel 48 hkinput 20") && logHas("opcmodel 48 hkinput 1") == 0 && MrHas("opcmodel 48 hktext 1") &&
+              MrHas("opcmodel 48 keysscreen01 20") &&
+              logHas("opkg0 24") == 1 && logHas("opkg4 24") == 1 && logHas("ophk 24") == 10 && logHas("opclone2 24") == 1;
+        ok &= menu.m_models.size() == 5 && menu.m_frames.size() == 4 && menu.m_models[0] == As<I3D_frame>(dummies[0]) &&
+              menu.m_frames[1] == As<I3D_frame>(clones[1]);
+        const S_vector &p0 = As<I3D_frame>(clones[0])->m_localMatrix(3), &p1 = As<I3D_frame>(clones[1])->m_localMatrix(3),
+                       &p2 = As<I3D_frame>(clones[2])->m_localMatrix(3);
+        ok &= p0.x == 1.0f && p0.y == 2.0f && p0.z == 3.0f && p1.z == 1.0f * -0.036f + 3.0f && p2.z == 3.0f;
+        WM(r.opControls, ok);
+
+        // Without "hktext": false after the keys page's head (no groups, no buttons).
+        g_msChildren.erase({model, "hktext"});
+        S_ScreenDesc noText("OPTIONS", "options", 2u << 26);
+        g_gfLog.clear();
+        ok = !k.BuildControlsPage(&noText, As<I3D_frame>(model)) && noText.controls.size() == 2 &&
+             noText.controls[1]->children.size() == 3 && logHas("clone tree") == 0;
+        g_msChildren[{model, "hktext"}] = hktext;
+        // A group without its keys screen: false, nothing described (its dummy made all the same).
+        g_msChildren.erase({model, "keysscreen01"});
+        g_mrMade[FRAME_DUMMY] = {MsFrame("opkgx")};
+        S_ControlDesc page(5, "page", 0x08200000);
+        g_gfLog.clear();
+        ok &= !k.BuildKeyGroup(&page, As<I3D_frame>(model), C_str("GR_X"), 1) && page.children.empty() && g_mrMade[FRAME_DUMMY].empty();
+        g_msChildren[{model, "keysscreen01"}] = screen;
+        // Without the input: false too.
+        g_msChildren.erase({model, "hkinput"});
+        g_mrMade[FRAME_DUMMY] = {MsFrame("opkgy")};
+        ok &= !k.BuildKeyGroup(&page, As<I3D_frame>(model), C_str("GR_Y"), 1) && page.children.empty();
+        g_msChildren[{model, "hkinput"}] = input;
+        // All there: true (a group without bindings: its list alone).
+        g_mrMade[FRAME_DUMMY] = {MsFrame("opkgz")};
+        ok &= k.BuildKeyGroup(&page, As<I3D_frame>(model), C_str("GR_Z"), 3) && page.children.size() == 1 &&
+              page.children[0]->children.empty();
+        WM(r.opKeyGroup, ok);
+        g_msChildren.clear();
+        g_mrClones.clear();
+        g_opBindingGroups.clear();
+        bindings.m_bindings.clear();
+        menu.m_models.clear();
+        menu.m_frames.clear();
+    }
+
+    // --- the keys' callbacks: the groups' list (the chosen group's list shown, the scroll bar's,
+    // refreshed; the others hidden; none chosen: nothing); a binding changed: refreshed; the layouts ---
+    {
+        C_OptionsHandler k(&menu);
+        k.m_screen = 2;
+        C_OpSelect chosen(0x08902000, 2), none(0x08902000, -1);
+        g_controlMessages.clear();
+        g_gfLog.clear();
+        bool ok = C_OptionsHandler::OnKeyGroup(&k, nullptr, &chosen, CONTROL_NOTIFY_CHANGED, 0) && MsLogIs({"selected 1000069"}, g_gfLog) &&
+                  ScQueue() == "8904000 1000004 0 0 ; 8905000 1000004 0 0 ; 8906000 1000003 0 0 ; 8903000 100000b 8906000 0 ; "
+                               "8906000 200002c 0 0 ; 8907000 1000004 0 0 ; 8908000 1000004 0 0 ; ";
+        ok &= C_OptionsHandler::OnKeyGroup(&k, nullptr, &none, 0, 0) && g_controlMessages.empty();
+        // (No group list among the menu's screens: the refresh false.)
+        ok &= !C_OptionsHandler::OnKeyChanged(&k, nullptr, nullptr, 0, 0);
+        // With one: refreshed (five posts), true.
+        C_MsScreen *screens[3];
+        for (int i = 0; i < 3; ++i)
+            screens[i] = new C_MsScreen(scene, CmText("opks%d", i).c_str(), static_cast<uint32_t>(i) << 26);
+        menu.m_screens.assign(screens, screens + 3);
+        auto *list = new C_OpList(0x08903000);
+        screens[2]->m_children.push_back(list);
+        g_opChosen = 5;
+        g_controlMessages.clear();
+        ok &= C_OptionsHandler::OnKeyChanged(&k, nullptr, nullptr, 0, 0) && g_controlMessages.size() == 5;
+        g_controlMessages.clear();
+        const auto layout = [&](uint32_t id) {
+            C_OpSelect control(0x08000000 | id, 0);
+            g_gfLog.clear();
+            return C_OptionsHandler::OnKeyLayout(&k, nullptr, &control, CONTROL_NOTIFY_CLICK, 0);
+        };
+        ok &= layout(0x909000) && MsLogIs({"layout 0", "list asked 100000c"}, g_gfLog) && layout(0x90A000) &&
+              MsLogIs({"layout 1", "list asked 100000c"}, g_gfLog) && layout(0x90B000) &&
+              MsLogIs({"layout 0", "list asked 100000c"}, g_gfLog) && !C_OptionsHandler::OnKeyLayout(&k, nullptr, nullptr, 0, 0);
+        // (The layout's refresh: the groups' five posts each time.)
+        ok &= g_controlMessages.size() == 15;
+        g_controlMessages.clear();
+        screens[2]->m_children.clear();
+        delete list;
+        menu.m_screens.clear();
+        for (C_MsScreen *sc : screens)
+            delete sc;
+        WM(r.opKeys, ok);
+    }
     g_msFrameVt[0x08 / 4] = oldSetPos;
     g_driverVtable[0x54 / 4] = oldCreate;
 
@@ -552,8 +739,8 @@ void OptionsTest(I3D_scene *scene)
     g_controlMessages.clear();
     std::printf("options: opNew %d opEscape %d opSave %d opOpen %d opFill %d opRefresh %d opLeave %d opUnbound %d "
                 "opBuild %d opBuildFail %d opShown %d opVideo %d opSound %d opGame %d opNetwork %d opSlider %d opDetail %d "
-                "opCheck %d opVoice %d\n",
+                "opCheck %d opVoice %d opControls %d opKeyGroup %d opKeys %d\n",
                 r.opNew, r.opEscape, r.opSave, r.opOpen, r.opFill, r.opRefresh, r.opLeave, r.opUnbound, r.opBuild,
                 r.opBuildFail, r.opShown, r.opVideo, r.opSound, r.opGame, r.opNetwork, r.opSlider, r.opDetail, r.opCheck,
-                r.opVoice);
+                r.opVoice, r.opControls, r.opKeyGroup, r.opKeys);
 }
