@@ -731,7 +731,7 @@ bool C_GameMenu::BuildEquipmentPanel(S_ScreenDesc *desc, I3D_frame *model)
         auto *visual = static_cast<I3D_object_visual *>(panel->FindChildFrame(name, FRAME_MASK_VISUAL));
         if (visual) {
             visual->DuplicateMesh();
-            visual->GetVisualMesh()->Unknown18();
+            visual->GetVisualMesh()->DuplicateMaterials();
         }
         return visual;
     };

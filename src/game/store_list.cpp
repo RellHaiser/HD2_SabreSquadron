@@ -59,7 +59,7 @@ void OwnMesh(I3D_frame *frame)
 {
     auto *visual = static_cast<I3D_object_visual *>(frame);
     visual->DuplicateMesh();
-    visual->GetVisualMesh()->Unknown18();
+    visual->GetVisualMesh()->DuplicateMaterials();
 }
 
 void Post(uint32_t target, uint32_t id, uint32_t value = 0)
