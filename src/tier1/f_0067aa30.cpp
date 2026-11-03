@@ -36,7 +36,7 @@ uint32_t FUN_0067aa60(...)
 
 
 // 0x0067aa70
-uint32_t FUN_0067aa70(void *_this,int param_1,int *param_2, ...)
+uint32_t C_StoreList__BuildDescription(void *_this,void *desc,void *model, ...)
 {
   uint8_t stack0xffffff88[64];
   S_ControlDesc *this_00;
@@ -60,12 +60,12 @@ uint32_t FUN_0067aa70(void *_this,int param_1,int *param_2, ...)
   C_str *local_24;
   uint32_t local_14;
   local_14 = 0xffffffff;
-  *(uint32_t *)((int)_this + 0x30) = *(uint32_t *)(param_1 + 0x40) >> 0x1a;
-  if (*(int *)(param_1 + 0x28) == 0) {
+  *(uint32_t *)((int)_this + 0x30) = *(uint32_t *)((int)desc + 0x40) >> 0x1a;
+  if (*(int *)((int)desc + 0x28) == 0) {
     iVar4 = 0;
   }
   else {
-    iVar4 = *(int *)(param_1 + 0x2c) - *(int *)(param_1 + 0x28) >> 2;
+    iVar4 = *(int *)((int)desc + 0x2c) - *(int *)((int)desc + 0x28) >> 2;
   }
   local_54[0] = tier1_operator_new(0x40);
   local_14 = 0;
@@ -75,11 +75,11 @@ uint32_t FUN_0067aa70(void *_this,int param_1,int *param_2, ...)
   else {
     local_58 = S_ControlDesc__S_ControlDesc
                          (local_54[0],5,"P_visualstore",
-                          (iVar4 + 1U & 0x3f) << 0x14 | *(uint32_t *)(param_1 + 0x40));
+                          (iVar4 + 1U & 0x3f) << 0x14 | *(uint32_t *)((int)desc + 0x40));
   }
   local_14 = 0xffffffff;
-  FUN_00615f50((void *)(param_1 + 0x24),*(uint32_t **)(param_1 + 0x2c),(uint32_t*)(&local_58));
-  this_00 = *(S_ControlDesc **)(*(int *)(param_1 + 0x2c) - 4);
+  FUN_00615f50((void *)((int)desc + 0x24),*(uint32_t **)((int)desc + 0x2c),(uint32_t*)(&local_58));
+  this_00 = *(S_ControlDesc **)(*(int *)((int)desc + 0x2c) - 4);
   *(uint32_t *)((int)_this + 0x34) = (uint32_t)this_00[2].vtable >> 0x14 & 0x3f;
   if (this_00[0xd].vtable == 0) {
     iVar4 = 0;
@@ -219,7 +219,7 @@ uint32_t FUN_0067aa70(void *_this,int param_1,int *param_2, ...)
   uStack_b4 = 0x67afc1;
   C_fstr_Construct(&CStack_a8,"GR_Explosives");
   uStack_b4 = 0x67afd0;
-  piVar3 = param_2;
+  pvVar2 = model;
   (*(code *)**(uint32_t **)_this)();
   uStack_b4 = 6;
   puStack_94 = (uint8_t *)&CStack_b8;
@@ -230,8 +230,8 @@ uint32_t FUN_0067aa70(void *_this,int param_1,int *param_2, ...)
   uStack_c4 = 7;
   puStack_a4 = (uint8_t *)&CStack_c8;
   C_fstr_Construct(&CStack_c8,"GR_Other");
-  (*(code *)**(uint32_t **)_this)(piVar3,param_2);
-  piVar3 = (int *)(**(code **)(*param_2 + 0x48))(param_2,"selitem08",1);
+  (*(code *)**(uint32_t **)_this)(pvVar2,model);
+  piVar3 = (int *)(**(code **)(*(int *)model + 0x48))(model,"selitem08",1);
   *(int **)((int)_this + 0x2c) = piVar3;
   (**(code **)(*piVar3 + 0x38))(piVar3,0,1);
   CStack_c8.rep = 0;

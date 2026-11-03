@@ -7512,6 +7512,23 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e-xvi: the items and skills panels (0x00684b90, 0x00684df0), then the soldier types and
     the remaining callbacks, the item slots.
 
+  PART 9e-xvi DONE (2026-11-03): the in-game menu's items and skills panels (game/game_menu.cpp).
+  - BuildItemsPanel 0x00684b90: SetupStocks 0x00685170 (declared); "allitemspanel" (dummy) renamed
+    "P_visualstore", "soldier type01" (renamed "filter") and the dummy "bscroll" (not checked, as the
+    original) moved under it; item10..15 and selitem08..15 hidden; "item08" renamed "vi_template",
+    "item09" under it, off, renamed "ammo", placed (a frame missing: false); the store list's menu
+    set, its description (C_StoreList::BuildDescription 0x0067aa70, declared). True.
+  - BuildSkillsPanel 0x00684df0 (stdcall): the group "Panel02" ignoring input; per skill (shooting,
+    strength, health, endurance, stealth, first aid, lockpick) its name's title (no margin, text
+    0xA78 + the skill), its bar (hlcpct07..; along z, empty) and its value's title (text 0x7D2). True.
+  - Harness: game_menu_test.inc's gmItems, gmItemsNone, gmSkills; the player screen's checks with the
+    skills panel first (the ids one more). 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e16.py (78, 77 killed, 1 equivalent).
+  - Build: MSVC clean. Tier 1: 407 errors in 74 files, 171 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+1, 2 moved), store_list.txt (+1); 2 functions in ported.txt. Stats: 8,876 of 12,306 functions by hand (79.4 % by size).
+  - Next, 9e-xvii: the soldier types (0x00685da0), the screen's shown callback (0x00684fd0), the
+    soldier type's and the preset's callbacks (0x00687dd0, 0x00687f50); then the item slots.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

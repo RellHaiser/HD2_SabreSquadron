@@ -110,9 +110,18 @@ private:
     // texts under the panel, the holsters' and backpack's items (own meshes) under their groups; the
     // panel's description (the menu its). True.
     bool BuildEquipmentPanel(S_ScreenDesc *desc, I3D_frame *model);  // 0x00684690
-    // The player screen's panels (not ported yet): the store's items, the skills.
+    // The store's items panel: the stocks set up; the model's dummy "allitemspanel" renamed
+    // "P_visualstore", "soldier type01" (the filter, renamed) and the dummy "bscroll" (not checked)
+    // moved under it, the visuals item10..15 and selitem08..15 hidden; "item08" (renamed
+    // "vi_template") and "item09" (under it, off, renamed "ammo") (a frame missing: false); the store
+    // list's description (the menu its). True.
     bool BuildItemsPanel(S_ScreenDesc *desc, I3D_frame *model);      // 0x00684b90
+    // The skills panel "Panel02" (taking no input): per skill its name's title (text 0xA78 + the
+    // skill), its bar (along z, empty) and its value's title. True. (The model is not used.)
     static bool BuildSkillsPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x00684df0 (__stdcall)
+    // The two stocks made (every type -1), the profile's stock reset, the mission's store items (not
+    // ported yet).
+    bool SetupStocks();                                 // 0x00685170 (__fastcall)
     // The soldier types' combo box filled (not ported yet).
     void UpdateSoldierTypes();                          // 0x00685da0 (__fastcall)
     // The player screen's callbacks: shown (not ported yet), hidden (true), the soldier type picked

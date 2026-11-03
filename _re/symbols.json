@@ -31736,6 +31736,11 @@
   "module": "zz_idioms",
   "name": "construct_copy4_67a9b0"
  },
+ "0067aa70": {
+  "module": "store_list",
+  "name": "C_StoreList::BuildDescription",
+  "proto": "void __thiscall BuildDescription(void *this, void * desc, void * model)"
+ },
  "0067b070": {
   "module": "store_list",
   "name": "C_StoreList::BuildPage",
@@ -32183,6 +32188,11 @@
   "module": "game_menu",
   "name": "C_GameMenu::OnPlayerScreenShown",
   "proto": "bool __thiscall OnPlayerScreenShown(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00685170": {
+  "module": "game_menu",
+  "name": "C_GameMenu::SetupStocks",
+  "proto": "bool __fastcall SetupStocks(C_GameMenu * menu)"
  },
  "00685420": {
   "module": "game_menu",

@@ -16,3 +16,5 @@
 0067c390 C_StoreList::SetActive | void __thiscall SetActive(void *this, bool on)
 # Part 9e-iii-b: the pages.
 0067b070 C_StoreList::BuildPage | bool __thiscall BuildPage(void *this, void * parent, void * model, void * name, int group)
+# Not ported yet (named for the later parts).
+0067aa70 C_StoreList::BuildDescription | void __thiscall BuildDescription(void *this, void * desc, void * model)

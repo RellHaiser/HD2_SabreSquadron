@@ -14,6 +14,7 @@ class C_EquipmentMenuBase;
 class C_ItemStock;
 class I3D_frame;
 struct S_ControlDesc;
+struct S_ScreenDesc;
 
 class C_StoreList {
 public:
@@ -57,6 +58,8 @@ public:
     void SetActive(bool on);                            // 0x0067c390
 
     void SetMenu(C_EquipmentMenuBase *menu) { m_menu = menu; }
+    // The list's description: the group "P_visualstore", its tabs and pages (not ported yet).
+    void BuildDescription(S_ScreenDesc *desc, I3D_frame *model);   // 0x0067aa70
     C_ItemStock *GetStock() const { return m_stock; }
 
 private:

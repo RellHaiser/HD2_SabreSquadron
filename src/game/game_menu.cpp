@@ -1,6 +1,6 @@
 // The in-game menu (original 0x0067eb40..0x00687f50; part 9e-v: the class and the menu state's slots;
 // 9e-vi: the update's helpers and the drawing; 9e-vii: the messages; 9e-ix: the screens' descriptions;
-// 9e-xiii: the player screen's; 9e-xiv, 9e-xv: its soldiers and equipment panels).
+// 9e-xiii: the player screen's; 9e-xiv..9e-xvi: its soldiers, equipment, items and skills panels).
 #include "game/game_menu.h"
 
 #include <algorithm>
@@ -60,6 +60,10 @@ constexpr int CONTROL_MARK = 0x1F;
 constexpr uint32_t SOLDIERS_SCROLL = 0x0C101000, SOLDIERS_LIST_A = 0x0C102000;
 constexpr int SOLDIERS_PER_LIST = 30, SOLDIER_LIST_ROWS = 4;
 constexpr float SOLDIER_ACROSS_STEP = 0.062f;
+// The skills panel: the bars (along z) and the skills' names' texts (0xA78 + the skill), the values'.
+constexpr int CONTROL_BAR = 0x16;
+constexpr uint32_t BAR_AXIS_Z = 2;
+constexpr uint32_t TEXT_SKILLS = 0xA78, TEXT_SKILL_VALUE = 0x7D2;
 // What the buttons post when clicked: their routes (CONTROL_NOTIFY_CLICK | the message).
 constexpr uint32_t CLICK = CONTROL_NOTIFY_CLICK;
 // The options handler's opening of its screen (options_handler.cpp).
@@ -709,6 +713,63 @@ bool C_GameMenu::BuildEquipmentPanel(S_ScreenDesc *desc, I3D_frame *model)
     }
     m_panel.SetMenu(this);
     m_panel.BuildDescription(desc, model);
+    return true;
+}
+
+bool C_GameMenu::BuildItemsPanel(S_ScreenDesc *desc, I3D_frame *model)
+{
+    SetupStocks();
+    I3D_frame *panel = model->FindChildFrame("allitemspanel", FRAME_MASK_DUMMY);
+    I3D_frame *filter = model->FindChildFrame("soldier type01", FRAME_MASK_VISUAL);
+    I3D_frame *scroll = model->FindChildFrame("bscroll", FRAME_MASK_DUMMY);
+    if (!panel || !filter)
+        return false;
+    panel->SetName("P_visualstore");
+    filter->SetName("filter");
+    filter->LinkTo(panel, 1);
+    // (Quirk kept: the scroll's dummy is not checked.)
+    scroll->LinkTo(panel, 1);
+    for (const char *name : {"item10", "item11", "item12", "item13", "item14", "item15", "selitem08", "selitem09",
+                             "selitem10", "selitem11", "selitem12", "selitem13", "selitem14", "selitem15"}) {
+        if (I3D_frame *frame = model->FindChildFrame(name, FRAME_MASK_VISUAL))
+            frame->SetOn(false);
+    }
+    // The store's entries' template and its count's text.
+    I3D_frame *entry = model->FindChildFrame("item08", FRAME_MASK_VISUAL);
+    I3D_frame *count = model->FindChildFrame("item09", FRAME_MASK_VISUAL);
+    if (!entry || !count)
+        return false;
+    entry->SetName("vi_template");
+    count->LinkTo(entry, 1);
+    count->SetOn(false);
+    count->SetName("ammo");
+    count->Update();
+    m_storeList.SetMenu(this);
+    m_storeList.BuildDescription(desc, model);
+    return true;
+}
+
+bool C_GameMenu::BuildSkillsPanel(S_ScreenDesc *desc, I3D_frame *)
+{
+    // The skills' rows: their names' and values' titles, their bars (a skill's name is not used).
+    static const char *const SKILLS[][3] = {
+        {"text_shooting", "hlcpct07", "text_shooting01"},     {"text_strenght", "hlcpct08", "text_strenght01"},
+        {"text_health", "hlcpct09", "text_health01"},         {"text_endurance", "hlcpct03", "text_endurance01"},
+        {"text_stealth", "hlcpct04", "text_stealth01"},       {"text_first aid", "hlcpct05", "text_first aid01"},
+        {"text_lockpick", "hlcpct06", "text_lockpick01"}};
+    S_ControlDesc *panel = desc->AddControl(CONTROL_GROUP, "Panel02");
+    AddDescMessage(panel, 0, CONTROL_MSG_IGNORE_INPUT, 0);
+    for (int i = 0; i < 7; ++i) {
+        S_ControlDesc *name = panel->AddChild(CONTROL_TEXT, SKILLS[i][0]);
+        AddDescMessage(name, 0, CONTROL_MSG_SET_MARGIN, 0);
+        AddDescMessage(name, 0, CONTROL_MSG_SET_TEXT_ID, TEXT_STYLE, TEXT_SKILLS + static_cast<uint32_t>(i));
+        S_ControlDesc *bar = panel->AddChild(CONTROL_BAR, SKILLS[i][1]);
+        AddDescMessage(bar, 0, CONTROL_MSG_SET_BAR_AXIS, BAR_AXIS_Z);
+        AddDescMessage(bar, 0, CONTROL_MSG_SET_BAR_VALUE, 0, 0);
+        S_ControlDesc *value = panel->AddChild(CONTROL_TEXT, SKILLS[i][2]);
+        AddDescMessage(value, 0, CONTROL_MSG_SET_MARGIN, 0);
+        AddDescMessage(value, 0, CONTROL_MSG_SET_TEXT_ID, TEXT_STYLE, TEXT_SKILL_VALUE);
+    }
     return true;
 }
 

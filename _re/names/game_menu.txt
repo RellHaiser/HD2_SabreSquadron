@@ -34,10 +34,12 @@
 006854e0 C_GameMenu::OnSide | bool __thiscall OnSide(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
 # Part 9e-xv: the equipment panel.
 00684690 C_GameMenu::BuildEquipmentPanel | bool __thiscall BuildEquipmentPanel(C_GameMenu *this, void * desc, void * model)
-# Not ported yet (named for the later parts).
-006863c0 C_GameMenu::ShowSoldierStats | void __stdcall ShowSoldierStats(int profile)
+# Part 9e-xvi: the items and skills panels.
 00684b90 C_GameMenu::BuildItemsPanel | bool __thiscall BuildItemsPanel(C_GameMenu *this, void * desc, void * model)
 00684df0 C_GameMenu::BuildSkillsPanel | bool __stdcall BuildSkillsPanel(void * desc, void * model)
+# Not ported yet (named for the later parts).
+00685170 C_GameMenu::SetupStocks | bool __fastcall SetupStocks(C_GameMenu * menu)
+006863c0 C_GameMenu::ShowSoldierStats | void __stdcall ShowSoldierStats(int profile)
 00685da0 C_GameMenu::UpdateSoldierTypes | void __fastcall UpdateSoldierTypes(C_GameMenu * menu)
 00684fd0 C_GameMenu::OnPlayerScreenShown | bool __thiscall OnPlayerScreenShown(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
 00687dd0 C_GameMenu::OnSoldierType | bool __thiscall OnSoldierType(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
