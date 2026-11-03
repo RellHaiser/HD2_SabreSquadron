@@ -251,7 +251,7 @@ void C_PlayerOptions::SetDefaults()                     // 0x006b3740
     invertMouse = false;
     voiceChat = false;
     crosshair = true;
-    unknown3A = true;
+    subtitles = true;
 }
 
 bool C_PlayerOptions::IsEnabled(int option) const      // 0x006b3700
@@ -279,7 +279,7 @@ void C_PlayerOptions::Save(C_chunk &chunk) const       // 0x006b3850
         chunk.Write(levelSwitches, 7);
     chunk.Write(&voiceChat, 1);
     chunk.Write(&invertMouse, 1);
-    chunk.Write(&unknown3A, 1);
+    chunk.Write(&subtitles, 1);
     chunk.Write(&crosshair, 1);
     chunk.Ascend();
 }
@@ -302,7 +302,7 @@ void C_PlayerOptions::Load(C_chunk &chunk)             // 0x006b3a70
             chunk.Read(levelSwitches, 7);
         chunk.Read(&voiceChat, 1);
         chunk.Read(&invertMouse, 1);
-        chunk.Read(&unknown3A, 1);
+        chunk.Read(&subtitles, 1);
         chunk.Read(&crosshair, 1);
     }
     chunk.Ascend();

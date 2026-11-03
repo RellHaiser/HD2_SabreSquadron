@@ -15,13 +15,15 @@
 struct S_DetailSettings {
     bool IsVoiceChatEnabled() const { return voiceChat; }
     bool IsEnabled(int option) const { return option >= 0 && option < 8 && switches[option]; }
+    // (The options' video page, part 9e-xi: options_test.inc.)
+    void SetSwitch(int option, bool on);
     bool voiceChat = false;
     bool switches[8] = {};
     bool invertMouse = false;                           // (the camera module, part 8e-iii)
     // (The options handler, part 9e-viii: options_test.inc.)
     float mouseSensitivity = 0, gamma = 0, soundVolume = 0, musicVolume = 0, voiceValue = 0;
     int level = 0;
-    bool unknown3A = false, crosshair = false;
+    bool subtitles = false, crosshair = false;
 };
 enum : int {
     DETAIL_VERTEX_ANIMATION = 1,
@@ -55,6 +57,12 @@ public:
     // (The options handler, part 9e-viii: options_test.inc.)
     C_str GetName() const;
     bool SaveOptions();
+    // (The options' pages, part 9e-xi: options_test.inc; the options world_modules_test.inc's.)
+    S_DetailSettings *GetOptions();
+    void ApplyGamma();
+    void ApplyMusicVolume();
+    void ApplyMouse();
+    void ApplyVoiceValue();
     void ApplyHardwareOption();
     C_KeyBindings m_keyBindings;
 };

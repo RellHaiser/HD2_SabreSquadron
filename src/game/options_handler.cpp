@@ -1,16 +1,20 @@
-// The options screen's messages (original 0x0061bf00..0x00620e90; part 9e-viii; 9e-x: its description).
+// The options screen's messages (original 0x0061bf00..0x00620e90; part 9e-viii; 9e-x: its description;
+// 9e-xi: the video, sound, game and multiplayer pages).
 #include "game/options_handler.h"
 
 #include "game/control.h"
 #include "common/c_str.h"
 #include "game/controls.h"
 #include "game/cursor.h"
+#include "game/game.h"
 #include "game/key_bindings.h"
 #include "game/menu_state.h"
 #include "game/profile.h"
 #include "game/screen.h"
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
+
+#include <cstring>
 
 namespace {
 
@@ -40,8 +44,8 @@ constexpr uint32_t INVERT_MOUSE = 0x804000;
 constexpr uint32_t MOUSE_SENSITIVITY = 0x806000;
 constexpr uint32_t KEY_GROUPS = 0x902000;               // the groups' choice
 constexpr uint32_t KEY_GROUP_LIST = 0x903000;
-constexpr uint32_t OPTION_A02 = 0xA02000;               // (C_PlayerOptions::unknown3A)
-constexpr uint32_t CROSSHAIR = 0xA03000;
+constexpr uint32_t SUBTITLES = 0xA02000;
+constexpr uint32_t CROSSHAIR = 0xA03000;                // (the "parental lock" control)
 constexpr uint32_t VOICE_CHAT = 0xB04000;
 constexpr uint32_t VOICE_VALUE = 0xB06000;
 // The key bindings' groups' lists: KEYS_PAGE | group << 12, groups 4 .. 8.
@@ -62,6 +66,45 @@ struct S_PageButton {
     uint32_t textId;
     uint32_t page;
 };
+// The pages' controls' types and texts' styles.
+constexpr int CONTROL_SLIDER = 8, CONTROL_LIST = 0x10, CONTROL_CHECK = 0x24;
+constexpr uint32_t TITLE_STYLE = 0xB, CHECK_STYLE = 0xD;
+constexpr uint32_t SLIDER_POSITIONS = 100;
+// The detail switches' frames (renamed GD00..GD06) and texts; the detail levels' texts.
+const char *const DETAIL_FRAMES[7] = {"nextdetail", "shadows", "mirrors", "morphing", "dynamic lightning",
+                                      "light glow", "use high models"};
+constexpr int DETAIL_MORPHING = 3, DETAIL_HIGH_MODELS = 6, DETAIL_CUSTOM = 3;
+// The video page's controls by their index (after the texts and the gamma): the level list, GD00..
+constexpr uint32_t DETAIL_LIST_INDEX = 5, DETAIL_SWITCHES = 7;
+const uint32_t PAGES_ALL[] = {0x600000, 0x700000, 0x800000, 0x900000, 0xA00000, 0xB00000};
+// The "min / norm / max" texts' runs (styles 0x1B..0x1D, texts 0x7EE..0x7F0).
+void AddLimits(S_ControlDesc *text)
+{
+    AddDescMessage(text, 0, CONTROL_MSG_ADD_TEXT_ID, 0x1B, 0x7EE);
+    AddDescMessage(text, 0, CONTROL_MSG_ADD_TEXT_ID, 0x1C, 0x7EF);
+    AddDescMessage(text, 0, CONTROL_MSG_ADD_TEXT_ID, 0x1D, 0x7F0);
+}
+void AddTitle(S_ControlDesc *group, const char *name, uint32_t textId)
+{
+    AddDescMessage(group->AddChild(CONTROL_TEXT, name), 0, CONTROL_MSG_SET_TEXT_ID, TITLE_STYLE, textId);
+}
+void AddCallback(S_ControlDesc *control, void *handler, ControlCallback callback)
+{
+    AddDescMessage(control, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CHANGED, reinterpret_cast<uintptr_t>(handler),
+                   reinterpret_cast<uintptr_t>(callback));
+}
+// A slider's position (the control's CONTROL_MSG_GET_SLIDER: a float in value2).
+float SliderPosition(C_Control *control)
+{
+    S_ControlMessage message;
+    message.id = CONTROL_MSG_GET_SLIDER;
+    control->HandleMessage(&message);
+    const uint32_t bits = static_cast<uint32_t>(message.value2);
+    float position;
+    std::memcpy(&position, &bits, sizeof position);
+    return position;
+}
+
 const S_PageButton PAGE_BUTTONS[] = {
     {"bvideo setup", 0x965, 0x600000}, {"bsound setup", 0x966, 0x700000}, {"bcontrols", 0x967, 0x800000},
     {"bgame setup", 0x968, 0xA00000}, {"bmultiplayer setup", 0x969, 0xB00000}, {"bback", 0x96A, 0},
@@ -152,7 +195,7 @@ void C_OptionsHandler::Fill()
          static_cast<uint32_t>(static_cast<int>(options->mouseSensitivity)));
     Post(Id(DETAIL_LEVEL), CONTROL_MSG_SET_CHECKED, static_cast<uint32_t>(options->level));
     Post(Id(INVERT_MOUSE), CONTROL_MSG_SET_CHECKED_QUIET, options->invertMouse);
-    Post(Id(OPTION_A02), CONTROL_MSG_SET_CHECKED_QUIET, options->unknown3A);
+    Post(Id(SUBTITLES), CONTROL_MSG_SET_CHECKED_QUIET, options->subtitles);
     Post(Id(VOICE_CHAT), CONTROL_MSG_SET_CHECKED_QUIET, options->voiceChat);
     Post(Id(VOICE_VALUE), CONTROL_MSG_SET_POSITION, static_cast<uint32_t>(static_cast<int>(options->voiceValue)));
     Post(Id(CROSSHAIR), CONTROL_MSG_SET_CHECKED_QUIET, options->crosshair);
@@ -220,6 +263,193 @@ bool C_OptionsHandler::OnShown(void *handler, void *, C_Control *, uint32_t, uin
         message.text = name;
     }
     PostControlMessage(message);
+    return true;
+}
+
+S_ControlDesc *C_OptionsHandler::AddPage(S_ScreenDesc *desc, const char *name, uint32_t page)
+{
+    S_ControlDesc *group = desc->AddControl(CONTROL_GROUP, name);
+    AddDescMessage(group, 0, CONTROL_MSG_HIDE, 0);
+    for (uint32_t other : PAGES_ALL) {
+        if (other != page)
+            AddDescMessage(group, Id(other), CONTROL_NOTIFY_SHOWN | CONTROL_MSG_HIDE, 0);
+    }
+    return group;
+}
+
+bool C_OptionsHandler::BuildVideoPage(S_ScreenDesc *desc, I3D_frame *model)
+{
+    for (int i = 0; i < 7; ++i) {
+        if (I3D_frame *frame = model->FindChildFrame(DETAIL_FRAMES[i], FRAME_MASK_VISUAL))
+            frame->SetName(C_fstr("GD%02d", i).c_str());
+    }
+    S_ControlDesc *page = AddPage(desc, "graphics setup", 0x600000);
+    AddTitle(page, "text_graphics setup", 0x96B);
+    AddTitle(page, "text_gama correction", 0x96C);
+    AddLimits(page->AddChild(CONTROL_TEXT, "text_min norm max02"));
+    S_ControlDesc *gamma = page->AddChild(CONTROL_SLIDER, "scrollbar03");
+    AddDescMessage(gamma, 0, CONTROL_MSG_SET_COUNT, SLIDER_POSITIONS);
+    AddCallback(gamma, this, &C_OptionsHandler::OnSlider);
+    S_ControlDesc *levels = page->AddChild(CONTROL_LIST, "geometry detail");
+    for (uint32_t textId = 0x96E; textId <= 0x971; ++textId)
+        AddDescMessage(levels, 0, CONTROL_MSG_ADD_ENTRY, textId);
+    AddCallback(levels, this, &C_OptionsHandler::OnDetail);
+    S_ControlDesc *detail = nullptr;
+    for (int i = 0; i < 7; ++i) {
+        detail = page->AddChild(CONTROL_CHECK, C_fstr("GD%02d", i).c_str());
+        AddDescMessage(detail, 0, CONTROL_MSG_SET_TEXT_ID, CHECK_STYLE, 0x972 + static_cast<uint32_t>(i));
+        AddCallback(detail, this, &C_OptionsHandler::OnDetail);
+        // The morphing not switched in a game.
+        if (i == DETAIL_MORPHING && GetGame())
+            AddDescMessage(detail, 0, CONTROL_MSG_DEACTIVATE, 0);
+    }
+    // (The high models' switch hidden.)
+    AddDescMessage(detail, 0, CONTROL_MSG_HIDE, 0);
+    AddDescMessage(page->AddChild(CONTROL_TEXT, "text_modifications"), 0, CONTROL_MSG_ADD_TEXT_ID, TITLE_STYLE, 0x97E);
+    return true;
+}
+
+bool C_OptionsHandler::BuildSoundPage(S_ScreenDesc *desc, I3D_frame *)
+{
+    S_ControlDesc *page = AddPage(desc, "sound setup", 0x700000);
+    AddTitle(page, "text_sound setup", 0x979);
+    AddTitle(page, "text_sound volume", 0x97A);
+    AddLimits(page->AddChild(CONTROL_TEXT, "text_min norm max"));
+    AddTitle(page, "text_music volume", 0x97C);
+    S_ControlDesc *limits = page->AddChild(CONTROL_TEXT, "text_min norm max01");
+    AddDescMessage(limits, 0, CONTROL_MSG_SET_MARGIN, 1);
+    AddLimits(limits);
+    for (const char *name : {"scrollbar01", "scrollbar02"}) {
+        S_ControlDesc *slider = page->AddChild(CONTROL_SLIDER, name);
+        AddDescMessage(slider, 0, CONTROL_MSG_SET_COUNT, SLIDER_POSITIONS);
+        AddCallback(slider, this, &C_OptionsHandler::OnSlider);
+    }
+    return true;
+}
+
+bool C_OptionsHandler::BuildGamePage(S_ScreenDesc *desc, I3D_frame *)
+{
+    S_ControlDesc *page = AddPage(desc, "gameoptions", 0xA00000);
+    AddTitle(page, "text_game options", 0x99D);
+    S_ControlDesc *subtitles = page->AddChild(CONTROL_CHECK, "subtitles");
+    AddDescMessage(subtitles, 0, CONTROL_MSG_SET_TEXT_ID, CHECK_STYLE, 0x99E);
+    AddCallback(subtitles, this, &C_OptionsHandler::OnCheck);
+    // (The crosshair's: the "parental lock" control with a text of its own.)
+    S_ControlDesc *crosshair = page->AddChild(CONTROL_CHECK, "parental lock");
+    AddDescMessage(crosshair, 0, CONTROL_MSG_SET_TEXT_ID, CHECK_STYLE, 0x4EF4);
+    AddCallback(crosshair, this, &C_OptionsHandler::OnCheck);
+    if (GetGame())
+        AddDescMessage(crosshair, 0, CONTROL_MSG_DEACTIVATE, 0);
+    return true;
+}
+
+bool C_OptionsHandler::BuildMultiplayerPage(S_ScreenDesc *desc, I3D_frame *)
+{
+    S_ControlDesc *page = AddPage(desc, "network settings", 0xB00000);
+    // (Quirk kept: the connection's controls added, the group hidden again for each.)
+    page->AddChild(CONTROL_TEXT, "text_connection rate");
+    AddDescMessage(page, 0, CONTROL_MSG_HIDE, 0);
+    page->AddChild(CONTROL_LIST, "connection");
+    AddDescMessage(page, 0, CONTROL_MSG_HIDE, 0);
+    AddTitle(page, "text_voice-chat settings", 0x981);
+    S_ControlDesc *voice = page->AddChild(CONTROL_CHECK, "enable voice-chat");
+    AddDescMessage(voice, 0, CONTROL_MSG_SET_TEXT_ID, CHECK_STYLE, 0x97F);
+    AddCallback(voice, this, &C_OptionsHandler::OnVoiceChat);
+    AddTitle(page, "text_voice-chat volume", 0x980);
+    S_ControlDesc *slider = page->AddChild(CONTROL_SLIDER, "scrollbar04");
+    AddDescMessage(slider, 0, CONTROL_MSG_SET_COUNT, SLIDER_POSITIONS);
+    AddCallback(slider, this, &C_OptionsHandler::OnSlider);
+    S_ControlDesc *limits = page->AddChild(CONTROL_TEXT, "text_min norm max020");
+    AddDescMessage(limits, 0, CONTROL_MSG_SET_MARGIN, 1);
+    AddLimits(limits);
+    AddTitle(page, "text_network setup", 0x9A9);
+    return true;
+}
+
+bool C_OptionsHandler::OnSlider(void *handler, void *, C_Control *control, uint32_t, uint32_t)
+{
+    if (!control)
+        return false;
+    const auto *self = static_cast<C_OptionsHandler *>(handler);
+    float position = SliderPosition(control);
+    C_PlayerProfile *player = g_gameProfile.m_player;
+    auto *options = player->GetOptions();
+    const uint32_t id = control->GetId();
+    if (id == self->Id(GAMMA)) {
+        options->gamma = position;
+        player->ApplyGamma();
+    } else if (id == self->Id(SOUND_VOLUME)) {
+        options->soundVolume = position;
+        player->ApplyVolume();
+        self->m_menu->PlayClick();
+    } else if (id == self->Id(MUSIC_VOLUME)) {
+        // (Not below 1: off; NaN kept.)
+        if (position < 1.0f)
+            position = 0.0f;
+        options->musicVolume = position;
+        player->ApplyMusicVolume();
+    } else if (id == self->Id(MOUSE_SENSITIVITY)) {
+        options->mouseSensitivity = position;
+        player->ApplyMouse();
+    } else if (id == self->Id(VOICE_VALUE)) {
+        options->voiceValue = position;
+        player->ApplyVoiceValue();
+    } else {
+        return false;
+    }
+    return true;
+}
+
+bool C_OptionsHandler::OnDetail(void *handler, void *, C_Control *control, uint32_t, uint32_t value)
+{
+    if (!control)
+        return false;
+    const auto *self = static_cast<C_OptionsHandler *>(handler);
+    auto *options = g_gameProfile.GetDetailSettings();
+    const uint32_t index = control->GetId() >> 12 & 0xFF;
+    if (index == DETAIL_LIST_INDEX) {
+        if (value < 4)
+            options->level = static_cast<int>(value);
+        for (uint32_t i = 0; i < 7; ++i)
+            Post(self->Id(0x600000 | (DETAIL_SWITCHES - 1 + i) << 12), CONTROL_MSG_SET_CHECKED_QUIET,
+                 options->IsEnabled(static_cast<int>(i)));
+        // The switches settable at the custom level only.
+        const uint32_t activity = options->level == DETAIL_CUSTOM ? CONTROL_MSG_ACTIVATE : CONTROL_MSG_DEACTIVATE;
+        for (uint32_t i = 0; i < 7; ++i)
+            Post(self->Id(0x600000 | (DETAIL_SWITCHES - 1 + i) << 12), activity);
+        g_gameProfile.m_player->ApplyHardwareOption();
+    } else if (index > DETAIL_LIST_INDEX && index < DETAIL_LIST_INDEX + 8) {
+        options->SetSwitch(static_cast<int>(index - DETAIL_LIST_INDEX - 1), static_cast<uint8_t>(value) != 0);
+    }
+    return true;
+}
+
+bool C_OptionsHandler::OnCheck(void *handler, void *, C_Control *control, uint32_t, uint32_t value)
+{
+    if (!control)
+        return false;
+    const auto *self = static_cast<C_OptionsHandler *>(handler);
+    C_PlayerProfile *player = g_gameProfile.m_player;
+    const uint32_t id = control->GetId();
+    if (id == self->Id(INVERT_MOUSE)) {
+        player->GetOptions()->invertMouse = static_cast<uint8_t>(value) != 0;
+        player->ApplyMouse();
+    } else if (id == self->Id(SUBTITLES)) {
+        player->GetOptions()->subtitles = static_cast<uint8_t>(value) != 0;
+    } else if (id == self->Id(CROSSHAIR)) {
+        player->GetOptions()->crosshair = static_cast<uint8_t>(value) != 0;
+    } else {
+        return false;
+    }
+    return true;
+}
+
+bool C_OptionsHandler::OnVoiceChat(void *handler, void *, C_Control *, uint32_t, uint32_t value)
+{
+    const auto *self = static_cast<C_OptionsHandler *>(handler);
+    // (The switch the value's low byte; its volume by the whole value.)
+    g_gameProfile.GetDetailSettings()->voiceChat = static_cast<uint8_t>(value) != 0;
+    Post(self->Id(VOICE_VALUE), value ? CONTROL_MSG_ACTIVATE : CONTROL_MSG_DEACTIVATE);
     return true;
 }
 

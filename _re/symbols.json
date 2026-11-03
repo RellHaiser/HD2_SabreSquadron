@@ -27430,6 +27430,21 @@
   "name": "C_OptionsHandler::BuildMultiplayerPage",
   "proto": "bool __thiscall BuildMultiplayerPage(void *this, void * desc, void * model)"
  },
+ "0061fd00": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnDetail",
+  "proto": "bool __thiscall OnDetail(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00620300": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnSlider",
+  "proto": "bool __thiscall OnSlider(void *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006204a0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnCheck",
+  "proto": "bool __thiscall OnCheck(void *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00620530": {
   "module": "options_handler",
   "name": "C_OptionsHandler::OnShown",
@@ -27438,6 +27453,11 @@
  "00620770": {
   "module": "zz_idioms",
   "name": "get_field_8_620770"
+ },
+ "00620780": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnVoiceChat",
+  "proto": "bool __thiscall OnVoiceChat(void *this, void * argument, void * control, uint notification, uint value)"
  },
  "00620be0": {
   "module": "options_handler",

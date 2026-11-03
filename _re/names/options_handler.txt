@@ -6,9 +6,14 @@
 # Part 9e-x: the screen's description.
 0061cfc0 C_OptionsHandler::BuildScreen | bool __thiscall BuildScreen(void *this, void * desc, void * model)
 00620530 C_OptionsHandler::OnShown | bool __thiscall OnShown(void *this, void * argument, void * control, uint notification, uint value)
-# Not ported yet.
+# Part 9e-xi: the video, sound, game and multiplayer pages, their callbacks.
 0061dc20 C_OptionsHandler::BuildVideoPage | bool __thiscall BuildVideoPage(void *this, void * desc, void * model)
 0061e1a0 C_OptionsHandler::BuildSoundPage | bool __thiscall BuildSoundPage(void *this, void * desc, void * model)
-0061e3f0 C_OptionsHandler::BuildControlsPage | bool __thiscall BuildControlsPage(void *this, void * desc, void * model)
 0061f230 C_OptionsHandler::BuildGamePage | bool __thiscall BuildGamePage(void *this, void * desc, void * model)
 0061f3b0 C_OptionsHandler::BuildMultiplayerPage | bool __thiscall BuildMultiplayerPage(void *this, void * desc, void * model)
+00620300 C_OptionsHandler::OnSlider | bool __thiscall OnSlider(void *this, void * argument, void * control, uint notification, uint value)
+0061fd00 C_OptionsHandler::OnDetail | bool __thiscall OnDetail(void *this, void * argument, void * control, uint notification, uint value)
+006204a0 C_OptionsHandler::OnCheck | bool __thiscall OnCheck(void *this, void * argument, void * control, uint notification, uint value)
+00620780 C_OptionsHandler::OnVoiceChat | bool __thiscall OnVoiceChat(void *this, void * argument, void * control, uint notification, uint value)
+# Not ported yet.
+0061e3f0 C_OptionsHandler::BuildControlsPage | bool __thiscall BuildControlsPage(void *this, void * desc, void * model)

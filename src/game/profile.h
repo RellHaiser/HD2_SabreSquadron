@@ -321,8 +321,8 @@ struct C_PlayerOptions {
     bool switches[4][7];                                // +0x1C per level
     bool voiceChat;                                     // +0x38
     bool invertMouse;                                   // +0x39 the controls' +0xB4 (inferred)
-    bool unknown3A;                                     // +0x3A
-    bool crosshair;                                     // +0x3B
+    bool subtitles;                                     // +0x3A (the options' game page)
+    bool crosshair;                                     // +0x3B (the game page's "parental lock" control, text 0x4EF4)
 };
 enum : int {
     DETAIL_HARDWARE = 0,                                // the 3D driver's state 0x2B

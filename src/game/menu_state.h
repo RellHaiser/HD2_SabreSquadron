@@ -155,6 +155,8 @@ public:
     I3D_frame *CloneFrame(const C_str &name, I3D_frame *parent, I3D_frame *source);    // 0x0066dcf0
     I3D_frame *AddFrame(const C_str &name, int type, I3D_frame *parent, const S_vector &pos);   // 0x0066def0
 
+    // The click sound played (not while it plays; the options' sound slider too).
+    void PlayClick();                                   // 0x0066b410 (__fastcall)
     // The menus' models and frames (the store lists add theirs, part 9e-iii-b).
     std::vector<I3D_frame *> &GetModels() { return m_models; }
     std::vector<I3D_frame *> &GetFrames() { return m_frames; }
@@ -169,8 +171,6 @@ protected:
     bool LoadScreens();                                 // 0x0066c8b0
     // The frames (their trees) and the models released, the last first.
     void ReleaseModels();                               // 0x0066c9c0 (__fastcall)
-    // The click sound played (not while it plays).
-    void PlayClick();                                   // 0x0066b410 (__fastcall)
     // The cursor's input to the top screen (Update; the input lock -1 only).
     void CursorInput(int timeDelta);                    // 0x0066bc90
 

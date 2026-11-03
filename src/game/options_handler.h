@@ -1,7 +1,8 @@
 // The options screen's messages, the main menu's and the in-game menu's (0x0C bytes; C_GameMenu
 // +0x1EC): opening it (its controls filled from the player's options the first time), saving the
 // options, leaving it (not with a function without a key: the key bindings' page showing it).
-// Original 0x0061bf00..0x00620e90 (part 9e-viii; 9e-x: the screen's description).
+// Original 0x0061bf00..0x00620e90 (part 9e-viii; 9e-x: the screen's description; 9e-xi: the video,
+// sound, game and multiplayer pages).
 #pragma once
 
 #include <cstdint>
@@ -10,6 +11,7 @@ class C_Control;
 class C_Cursor;
 class C_MenuState;
 class I3D_frame;
+struct S_ControlDesc;
 struct S_ControlMessage;
 struct S_ScreenDesc;
 
@@ -42,12 +44,32 @@ private:
     // The key bindings' groups refreshed, the one the group list chooses last; false without the
     // list.
     bool RefreshKeyGroups();                            // 0x00620be0 (__fastcall)
-    // The pages' controls (not ported yet).
+    // The pages: each a group (hidden; shown, the others hidden) of its texts and controls. True.
+    // The video page: the model's detail switches' frames named GD00..GD06 first; the gamma, the
+    // detail level, the switches (the morphing's inactive in a game; the high models' hidden).
     bool BuildVideoPage(S_ScreenDesc *desc, I3D_frame *model);         // 0x0061dc20 (page 0x600000)
+    // The sound and music volumes.
     bool BuildSoundPage(S_ScreenDesc *desc, I3D_frame *model);         // 0x0061e1a0 (0x700000)
-    bool BuildControlsPage(S_ScreenDesc *desc, I3D_frame *model);      // 0x0061e3f0 (0x800000)
+    bool BuildControlsPage(S_ScreenDesc *desc, I3D_frame *model);      // 0x0061e3f0 (0x800000; not ported yet)
+    // The subtitles and the crosshair (inactive in a game).
     bool BuildGamePage(S_ScreenDesc *desc, I3D_frame *model);          // 0x0061f230 (0xA00000)
+    // The connection (its group hidden twice: the original's), the voice chat and its volume.
     bool BuildMultiplayerPage(S_ScreenDesc *desc, I3D_frame *model);   // 0x0061f3b0 (0xB00000)
+    // The pages' callbacks (their controls' CONTROL_NOTIFY_CHANGED; false: not theirs). The sliders:
+    // the gamma, the volumes (the sound's with a click; the music's below 1 off), the mouse, the voice.
+    static bool OnSlider(void *handler, void *argument, C_Control *control, uint32_t notification,
+                         uint32_t value);               // 0x00620300 (__thiscall)
+    // The detail level (the switches shown by it, active at level 3 only) and the switches.
+    static bool OnDetail(void *handler, void *argument, C_Control *control, uint32_t notification,
+                         uint32_t value);               // 0x0061fd00 (__thiscall)
+    // The check boxes: the mouse's inversion, the subtitles, the crosshair.
+    static bool OnCheck(void *handler, void *argument, C_Control *control, uint32_t notification,
+                        uint32_t value);                // 0x006204a0 (__thiscall)
+    // The voice chat (its volume active with it).
+    static bool OnVoiceChat(void *handler, void *argument, C_Control *control, uint32_t notification,
+                            uint32_t value);            // 0x00620780 (__thiscall)
+    // A page's group: hidden; when shown, the other pages hidden.
+    S_ControlDesc *AddPage(S_ScreenDesc *desc, const char *name, uint32_t page);
     // The id of the options screen's control (the screen's index in the top 6 bits).
     uint32_t Id(uint32_t control) const { return static_cast<uint32_t>(m_screen) << 26 | control; }
 

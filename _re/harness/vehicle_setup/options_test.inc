@@ -15,31 +15,18 @@ int g_opUnbound = -1, g_opText, g_opGroup, g_opPosition;
 C_str g_opName;
 C_str C_PlayerProfile::GetName() const { return g_opName; }
 std::string MrFrameName(const void *frame);
-bool C_OptionsHandler::BuildVideoPage(S_ScreenDesc *desc, I3D_frame *model)
+bool C_OptionsHandler::BuildControlsPage(S_ScreenDesc *desc, I3D_frame *model)
 {
-    GfLog("page video %d %s", static_cast<int>(desc->controls.size()), MrFrameName(model).c_str());
+    GfLog("page controls %d %s", static_cast<int>(desc->controls.size()), MrFrameName(model).c_str());
     return true;
 }
-bool C_OptionsHandler::BuildSoundPage(S_ScreenDesc *, I3D_frame *)
-{
-    GfLog("page sound");
-    return true;
-}
-bool C_OptionsHandler::BuildControlsPage(S_ScreenDesc *, I3D_frame *)
-{
-    GfLog("page controls");
-    return true;
-}
-bool C_OptionsHandler::BuildGamePage(S_ScreenDesc *, I3D_frame *)
-{
-    GfLog("page game");
-    return true;
-}
-bool C_OptionsHandler::BuildMultiplayerPage(S_ScreenDesc *, I3D_frame *)
-{
-    GfLog("page multiplayer");
-    return true;
-}
+// (Part 9e-xi: the player's options, applied: logged; the switches.)
+S_DetailSettings *C_PlayerProfile::GetOptions() { return g_gameProfile.GetDetailSettings(); }
+void C_PlayerProfile::ApplyGamma() { GfLog("apply gamma"); }
+void C_PlayerProfile::ApplyMusicVolume() { GfLog("apply music"); }
+void C_PlayerProfile::ApplyMouse() { GfLog("apply mouse"); }
+void C_PlayerProfile::ApplyVoiceValue() { GfLog("apply voice"); }
+void S_DetailSettings::SetSwitch(int option, bool on) { GfLog("switch %d %d", option, on); }
 bool C_PlayerProfile::SaveOptions()
 {
     GfLog("save options");
@@ -65,6 +52,8 @@ namespace {
 struct S_OptionsResults {
     bool opNew = true, opEscape = true, opSave = true, opOpen = true, opFill = true, opRefresh = true, opLeave = true;
     bool opUnbound = true, opBuild = true, opBuildFail = true, opShown = true;
+    bool opVideo = true, opSound = true, opGame = true, opNetwork = true, opSlider = true, opDetail = true, opCheck = true;
+    bool opVoice = true;
 };
 
 S_IGraphInfo g_opInfo;
@@ -78,6 +67,20 @@ struct C_OpList : C_Control {
     {
         GfLog("list asked %x", message->id);
         message->value = g_opChosen << 12;
+        return true;
+    }
+};
+
+// A control answering CONTROL_MSG_GET_SLIDER with its position (logged).
+struct C_OpSlider : C_Control {
+    float position;
+    C_OpSlider(uint32_t id, float p) : C_Control(nullptr, id, nullptr), position(p) {}
+    bool HandleMessage(S_ControlMessage *message) override
+    {
+        GfLog("asked %x", message->id);
+        uint32_t bits;
+        std::memcpy(&bits, &position, sizeof bits);
+        message->value2 = bits;
         return true;
     }
 };
@@ -152,7 +155,7 @@ void OptionsTest(I3D_scene *scene)
         options->voiceValue = 7.99f;
         options->level = 2;
         options->invertMouse = true;
-        options->unknown3A = false;
+        options->subtitles = false;
         options->voiceChat = true;
         options->crosshair = false;
         g_opInfo.flags = 2;
@@ -169,7 +172,7 @@ void OptionsTest(I3D_scene *scene)
         bool ok = true;
         h.m_fillOnOpen = true;
         options->invertMouse = false;
-        options->unknown3A = true;
+        options->subtitles = true;
         options->voiceChat = false;
         options->crosshair = true;
         g_opInfo.flags = 0xFD;
@@ -312,28 +315,31 @@ void OptionsTest(I3D_scene *scene)
               MrHas("oplim2 8 (2 0 -1.5)") && menu.m_models.size() == 1;
         for (int i = 0; i < 6; ++i)
             ok &= MrHas(CmText("opb%d 38 opgroup 1", i));
-        // The pages after the buttons, in order (the video page's with the group's 5 controls).
-        std::vector<std::string> pages;
-        for (const std::string &line : g_gfLog)
-            if (line.rfind("page ", 0) == 0)
-                pages.push_back(line);
-        ok &= pages == std::vector<std::string>({"page video 5 opmodel", "page sound", "page controls", "page game", "page multiplayer"});
+        // The pages after the buttons, in order (the controls' after the video and sound pages).
+        ok &= logHas("page ") == 1 && MrHas("page controls 7 opmodel") && desc.controls.size() == 10;
+        if (desc.controls.size() == 10) {
+            const char *const pageNames[] = {"graphics setup", "sound setup", "gameoptions", "network settings"};
+            for (int i = 0; i < 4; ++i)
+                ok &= desc.controls[5 + static_cast<size_t>(i)]->name == pageNames[i];
+        }
         ok &= desc.messages.size() == 1 && desc.messages[0].target == 0 && desc.messages[0].id == CONTROL_MSG_ADD_CALLBACK &&
               desc.messages[0].value == CONTROL_NOTIFY_SHOWN && desc.messages[0].value2 == reinterpret_cast<uintptr_t>(&b) &&
               desc.messages[0].value3 == reinterpret_cast<uintptr_t>(&C_OptionsHandler::OnShown);
-        ok &= describe(desc.controls) ==
+        ok &= desc.controls.size() == 10 &&
+              describe(std::vector<S_ControlDesc *>(desc.controls.begin(), desc.controls.begin() + 5)) ==
               "text_screen 13 8100000: 1000015 a 961; text_date00 13 8200000: 1000015 b 962; text_date01 13 8300000: 1000015 c 963; "
               "text_profile00 13 8400000: 1000015 b 964; GROptions 5 8500000: {bvideo setup 14 8501000: 1000015 d 965 @8600000 5001003 0 0; "
               "bsound setup 14 8502000: 1000015 d 966 @8700000 5001003 0 0; bcontrols 14 8503000: 1000015 d 967 @8800000 5001003 0 0; "
               "bgame setup 14 8504000: 1000015 d 968 @8a00000 5001003 0 0; bmultiplayer setup 14 8505000: 1000015 d 969 @8b00000 5001003 0 0; "
-              "bback 14 8506000: 1000015 d 96a 60010c4 0 0; }; text_h&dversion 13 8600000: 1000015 28 7d6; ";
+              "bback 14 8506000: 1000015 d 96a 60010c4 0 0; }; " &&
+              describe({desc.controls.back()}) == "text_h&dversion 13 8a00000: 1000015 28 7d6; ";
         WM(r.opBuild, ok);
         // Without the second limits text: not placed.
         g_msChildren.erase({model, "text_min norm max02"});
         g_mrMade[FRAME_DUMMY] = {MsFrame("opgroup2")};
         S_ScreenDesc desc2("OPTIONS", "options", 3u << 26);
         g_gfLog.clear();
-        ok = b.BuildScreen(&desc2, As<I3D_frame>(model)) && b.m_screen == 3 && logHas("oplim2 8") == 0 && desc2.controls.size() == 6;
+        ok = b.BuildScreen(&desc2, As<I3D_frame>(model)) && b.m_screen == 3 && logHas("oplim2 8") == 0 && desc2.controls.size() == 10;
         WM(r.opBuild, ok);
 
         // A button missing (any): false, nothing described, nothing moved (the group made all the same).
@@ -370,6 +376,171 @@ void OptionsTest(I3D_scene *scene)
         ok &= C_OptionsHandler::OnShown(&s, nullptr, nullptr, 0, 0) && ScQueue() == "8300000 1000015 c 7e4 ; ";
         WM(r.opShown, ok);
     }
+
+    // --- the pages (part 9e-xi), each on its own description: the group (hidden; when shown, the
+    // other pages hidden), its texts and controls with their callbacks (by name: h the handler) ---
+    {
+        C_OptionsHandler p(&menu);
+        p.m_screen = 2;
+        const std::map<uintptr_t, std::string> callbacks = {
+            {reinterpret_cast<uintptr_t>(&C_OptionsHandler::OnSlider), "slider"},
+            {reinterpret_cast<uintptr_t>(&C_OptionsHandler::OnDetail), "detail"},
+            {reinterpret_cast<uintptr_t>(&C_OptionsHandler::OnCheck), "check"},
+            {reinterpret_cast<uintptr_t>(&C_OptionsHandler::OnVoiceChat), "voice"}};
+        std::function<std::string(const std::vector<S_ControlDesc *> &)> pageText = [&](const std::vector<S_ControlDesc *> &cs) {
+            std::string s;
+            for (const S_ControlDesc *c : cs) {
+                s += CmText("%s %x %x:", c->name.c_str(), c->type, c->id);
+                for (const S_ControlMessage &m : c->messages) {
+                    if (m.id == CONTROL_MSG_ADD_CALLBACK) {
+                        const auto it = callbacks.find(m.value3);
+                        s += (m.target ? CmText(" @%x", m.target) : std::string()) +
+                             CmText(" cb %x %s %s", m.value, m.value2 == reinterpret_cast<uintptr_t>(&p) ? "h" : "?",
+                                    it == callbacks.end() ? "?" : it->second.c_str());
+                    } else {
+                        s += (m.target ? CmText(" @%x", m.target) : std::string()) +
+                             CmText(" %x %x %x", m.id, m.value, static_cast<uint32_t>(m.value2));
+                    }
+                }
+                if (!c->children.empty())
+                    s += " {" + pageText(c->children) + "}";
+                s += "; ";
+            }
+            return s;
+        };
+        const auto hides = [](std::initializer_list<uint32_t> pages) {
+            std::string s = " 1000004 0 0";
+            for (uint32_t page : pages)
+                s += CmText(" @%x 500d004 0 0", 0x08000000 | page);
+            return s;
+        };
+        const std::string limits = " 1000017 1b 7ee 1000017 1c 7ef 1000017 1d 7f0";
+
+        // The video page: the switches' frames named first (those found).
+        S_MrObj *model = MsFrame("opvmodel"), *nd = MsFrame("opnd"), *mo = MsFrame("opmo");
+        g_msChildren[{model, "nextdetail"}] = nd;
+        g_msChildren[{model, "morphing"}] = mo;
+        S_ScreenDesc video("OPTIONS", "options", 2u << 26);
+        g_gfLog.clear();
+        bool ok = p.BuildVideoPage(&video, As<I3D_frame>(model)) && MrHas("opnd 34 GD00") && MrHas("opmo 34 GD03") &&
+                  logHas("opnd 34") == 1 && logHas("opvmodel 48") == 7;
+        for (const char *name : {"nextdetail", "shadows", "mirrors", "morphing", "dynamic lightning", "light glow", "use high models"})
+            ok &= MrHas(CmText("opvmodel 48 %s 1", name));
+        ok &= pageText(video.controls) ==
+              "graphics setup 5 8100000:" + hides({0x700000, 0x800000, 0x900000, 0xA00000, 0xB00000}) +
+                  " {text_graphics setup 13 8101000: 1000015 b 96b; text_gama correction 13 8102000: 1000015 b 96c; "
+                  "text_min norm max02 13 8103000:" + limits + "; scrollbar03 8 8104000: 1000020 64 0 cb 4010000 h slider; "
+                  "geometry detail 10 8105000: 1000067 96e 0 1000067 96f 0 1000067 970 0 1000067 971 0 cb 4010000 h detail; "
+                  "GD00 24 8106000: 1000015 d 972 cb 4010000 h detail; GD01 24 8107000: 1000015 d 973 cb 4010000 h detail; "
+                  "GD02 24 8108000: 1000015 d 974 cb 4010000 h detail; GD03 24 8109000: 1000015 d 975 cb 4010000 h detail 1000001 0 0; "
+                  "GD04 24 810a000: 1000015 d 976 cb 4010000 h detail; GD05 24 810b000: 1000015 d 977 cb 4010000 h detail; "
+                  "GD06 24 810c000: 1000015 d 978 cb 4010000 h detail 1000004 0 0; "
+                  "text_modifications 13 810d000: 1000017 b 97e; }; ";
+        g_msChildren.clear();
+        WM(r.opVideo, ok);
+
+        S_ScreenDesc sound("OPTIONS", "options", 2u << 26);
+        WM(r.opSound, p.BuildSoundPage(&sound, nullptr) &&
+                          pageText(sound.controls) ==
+                              "sound setup 5 8100000:" + hides({0x600000, 0x800000, 0x900000, 0xA00000, 0xB00000}) +
+                                  " {text_sound setup 13 8101000: 1000015 b 979; text_sound volume 13 8102000: 1000015 b 97a; "
+                                  "text_min norm max 13 8103000:" + limits + "; text_music volume 13 8104000: 1000015 b 97c; "
+                                  "text_min norm max01 13 8105000: 2000073 1 0" + limits + "; "
+                                  "scrollbar01 8 8106000: 1000020 64 0 cb 4010000 h slider; "
+                                  "scrollbar02 8 8107000: 1000020 64 0 cb 4010000 h slider; }; ");
+
+        S_ScreenDesc game("OPTIONS", "options", 2u << 26);
+        WM(r.opGame, p.BuildGamePage(&game, nullptr) &&
+                         pageText(game.controls) ==
+                             "gameoptions 5 8100000:" + hides({0x600000, 0x700000, 0x800000, 0x900000, 0xB00000}) +
+                                 " {text_game options 13 8101000: 1000015 b 99d; subtitles 24 8102000: 1000015 d 99e cb 4010000 h check; "
+                                 "parental lock 24 8103000: 1000015 d 4ef4 cb 4010000 h check 1000001 0 0; }; ");
+
+        S_ScreenDesc network("OPTIONS", "options", 2u << 26);
+        WM(r.opNetwork, p.BuildMultiplayerPage(&network, nullptr) &&
+                            pageText(network.controls) ==
+                                "network settings 5 8100000:" + hides({0x600000, 0x700000, 0x800000, 0x900000, 0xA00000}) +
+                                    " 1000004 0 0 1000004 0 0 {text_connection rate 13 8101000:; connection 10 8102000:; "
+                                    "text_voice-chat settings 13 8103000: 1000015 b 981; "
+                                    "enable voice-chat 24 8104000: 1000015 d 97f cb 4010000 h voice; "
+                                    "text_voice-chat volume 13 8105000: 1000015 b 980; scrollbar04 8 8106000: 1000020 64 0 cb 4010000 h slider; "
+                                    "text_min norm max020 13 8107000: 2000073 1 0" + limits + "; "
+                                    "text_network setup 13 8108000: 1000015 b 9a9; }; ");
+    }
+
+    // --- the pages' callbacks: the sliders' positions (asked) into the options (applied), the detail
+    // level and switches, the check boxes, the voice chat; not theirs: false ---
+    {
+        C_OptionsHandler h(&menu);
+        h.m_screen = 2;
+        auto *opts = g_gameProfile.GetDetailSettings();
+        const auto saved = *opts;
+        menu.m_clickSound = As<I3D_sound>(MrObj("opclick", g_mrSoundVt));
+        const auto slide = [&](uint32_t id, float position) {
+            C_OpSlider slider(0x08000000 | id, position);
+            g_gfLog.clear();
+            return C_OptionsHandler::OnSlider(&h, nullptr, &slider, CONTROL_NOTIFY_CHANGED, 0);
+        };
+        bool ok = slide(0x604000, 33.5f) && opts->gamma == 33.5f && MsLogIs({"asked 1000022", "apply gamma"}, g_gfLog);
+        ok &= slide(0x706000, 61.25f) && opts->soundVolume == 61.25f &&
+              MsLogIs({"asked 1000022", "volume", "opclick 78 0", "opclick on 1"}, g_gfLog);
+        ok &= slide(0x707000, 0.5f) && opts->musicVolume == 0.0f && MsLogIs({"asked 1000022", "apply music"}, g_gfLog);
+        ok &= slide(0x707000, 1.0f) && opts->musicVolume == 1.0f && slide(0x707000, std::nanf("")) && std::isnan(opts->musicVolume);
+        ok &= slide(0x806000, 12.0f) && opts->mouseSensitivity == 12.0f && MsLogIs({"asked 1000022", "apply mouse"}, g_gfLog);
+        ok &= slide(0xB06000, 7.0f) && opts->voiceValue == 7.0f && MsLogIs({"asked 1000022", "apply voice"}, g_gfLog);
+        ok &= !slide(0x605000, 3.0f) && MsLogIs({"asked 1000022"}, g_gfLog) && !slide(0x04706000, 3.0f);
+        ok &= !C_OptionsHandler::OnSlider(&h, nullptr, nullptr, 0, 0);
+        WM(r.opSlider, ok);
+
+        // The detail level: kept below 4; the switches' states (by the level), active at level 3.
+        const auto detail = [&](uint32_t id, uint32_t value) {
+            C_OpSlider control(0x08000000 | id, 0.0f);
+            g_gfLog.clear();
+            g_controlMessages.clear();
+            return C_OptionsHandler::OnDetail(&h, nullptr, &control, CONTROL_NOTIFY_CHANGED, value);
+        };
+        for (int i = 0; i < 8; ++i)
+            opts->switches[i] = i % 2 == 0;
+        ok = detail(0x605000, 2) && opts->level == 2 && MsLogIs({"hardware option"}, g_gfLog);
+        std::string want;
+        for (uint32_t i = 0; i < 7; ++i)
+            want += CmText("%x 1000076 %x 0 ; ", 0x08606000 + (i << 12), i % 2 == 0);
+        for (uint32_t i = 0; i < 7; ++i)
+            want += CmText("%x 1000001 0 0 ; ", 0x08606000 + (i << 12));
+        ok &= ScQueue() == want;
+        ok &= detail(0x605000, 4) && opts->level == 2 && detail(0x605000, 3) && opts->level == 3 &&
+              ScQueue().find("8606000 1000002 0 0 ; ") != std::string::npos;
+        ok &= detail(0x606000, 1) && MsLogIs({"switch 0 1"}, g_gfLog) && g_controlMessages.empty();
+        ok &= detail(0x60C000, 0x100) && MsLogIs({"switch 6 0"}, g_gfLog);
+        ok &= detail(0x60D000, 1) && g_gfLog.empty() && detail(0x604000, 1) && g_gfLog.empty();
+        // (The index's whole byte: 0x15 neither the list nor a switch.)
+        ok &= detail(0x615000, 1) && g_gfLog.empty() && g_controlMessages.empty() && opts->level == 3;
+        ok &= !C_OptionsHandler::OnDetail(&h, nullptr, nullptr, 0, 0);
+        WM(r.opDetail, ok);
+
+        // The check boxes (the value's low byte).
+        const auto check = [&](uint32_t id, uint32_t value) {
+            C_OpSlider control(0x08000000 | id, 0.0f);
+            g_gfLog.clear();
+            return C_OptionsHandler::OnCheck(&h, nullptr, &control, CONTROL_NOTIFY_CHANGED, value);
+        };
+        opts->invertMouse = opts->subtitles = opts->crosshair = false;
+        ok = check(0x804000, 1) && opts->invertMouse && MsLogIs({"apply mouse"}, g_gfLog);
+        ok &= check(0xA02000, 0x101) && opts->subtitles && g_gfLog.empty() && check(0xA02000, 0x100) && !opts->subtitles;
+        ok &= check(0xA03000, 1) && opts->crosshair && check(0xA03000, 0x100) && !opts->crosshair;
+        ok &= !check(0xA04000, 1) && !check(0x04804000, 1) && !C_OptionsHandler::OnCheck(&h, nullptr, nullptr, 0, 1);
+        WM(r.opCheck, ok);
+
+        // The voice chat (its low byte), its volume active by the whole value.
+        g_controlMessages.clear();
+        ok = C_OptionsHandler::OnVoiceChat(&h, nullptr, nullptr, 0, 1) && opts->voiceChat && ScQueue() == "8b06000 1000002 0 0 ; ";
+        ok &= C_OptionsHandler::OnVoiceChat(&h, nullptr, nullptr, 0, 0x100) && !opts->voiceChat &&
+              ScQueue() == "8b06000 1000002 0 0 ; ";
+        ok &= C_OptionsHandler::OnVoiceChat(&h, nullptr, nullptr, 0, 0) && !opts->voiceChat && ScQueue() == "8b06000 1000001 0 0 ; ";
+        WM(r.opVoice, ok);
+        menu.m_clickSound = nullptr;
+        *opts = saved;
+    }
     g_msFrameVt[0x08 / 4] = oldSetPos;
     g_driverVtable[0x54 / 4] = oldCreate;
 
@@ -380,7 +551,9 @@ void OptionsTest(I3D_scene *scene)
     g_gfLog.clear();
     g_controlMessages.clear();
     std::printf("options: opNew %d opEscape %d opSave %d opOpen %d opFill %d opRefresh %d opLeave %d opUnbound %d "
-                "opBuild %d opBuildFail %d opShown %d\n",
+                "opBuild %d opBuildFail %d opShown %d opVideo %d opSound %d opGame %d opNetwork %d opSlider %d opDetail %d "
+                "opCheck %d opVoice %d\n",
                 r.opNew, r.opEscape, r.opSave, r.opOpen, r.opFill, r.opRefresh, r.opLeave, r.opUnbound, r.opBuild,
-                r.opBuildFail, r.opShown);
+                r.opBuildFail, r.opShown, r.opVideo, r.opSound, r.opGame, r.opNetwork, r.opSlider, r.opDetail, r.opCheck,
+                r.opVoice);
 }

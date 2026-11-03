@@ -7379,6 +7379,35 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     game 0x0061f230, multiplayer 0x0061f3b0) and their callbacks (0x006204a0 the check boxes'); then
     the player screen, the squad glue and the item slots.
 
+  PART 9e-xi DONE (2026-11-02): the options screen's video, sound, game and multiplayer pages and their
+  callbacks (game/options_handler.cpp).
+  - The pages (AddPage): a group hidden, CONTROL_NOTIFY_SHOWN | CONTROL_MSG_HIDE to the other five.
+    Video 0x0061dc20 ("graphics setup"): the model's switches' visuals ("nextdetail", "shadows",
+    "mirrors", "morphing", "dynamic lightning", "light glow", "use high models") renamed GD00..GD06;
+    the titles 0x96B / 0x96C, the gamma's limits and slider (100 positions), the detail list
+    (0x96E..0x971), GD00..GD06 (0x972..0x978; GD03 inactive in a game, GD06 hidden), the
+    modifications' text 0x97E. Sound 0x0061e1a0 ("sound setup"): 0x979 / 0x97A / 0x97C, the limits
+    (the second with margin 1), two sliders. Game 0x0061f230 ("gameoptions"): 0x99D, subtitles
+    (0x99E), the crosshair ("parental lock", 0x4EF4; inactive in a game). Multiplayer 0x0061f3b0
+    ("network settings"): the connection's text and list (the original hides the group again
+    for each), the voice chat (0x981, 0x97F, 0x980, slider, limits), 0x9A9.
+  - Callbacks: OnSlider 0x00620300 (CONTROL_MSG_GET_SLIDER's float: gamma, sound volume with the
+    menu's click, music volume (below 1: 0), mouse sensitivity, voice value; applied), OnDetail
+    0x0061fd00 (the list: the level below 4, the switches' states posted and active at level 3 only,
+    the hardware option; GD00..GD06: the switches), OnCheck 0x006204a0 (invert mouse, subtitles,
+    crosshair; the value's low byte), OnVoiceChat 0x00620780 (its volume active by the whole value).
+  - C_PlayerOptions::unknown3A is the subtitles' switch (renamed); +0x3B, the crosshair, is the game
+    page's "parental lock" control with a later text. C_MenuState::PlayClick public.
+  - Harness: options_test.inc's opVideo, opSound, opGame, opNetwork, opSlider, opDetail, opCheck,
+    opVoice (19 checks now; the descriptions dumped with the callbacks by name, a slider control;
+    the player's Apply* and the switches faked). 22 of 22 in both orders (the other factory lines
+    and the text build too).
+  - Mutations: mutations/mutate_9e11.py (229 cases, 208 build, all caught but 1 equivalent).
+  - Build: MSVC clean. Tier 1: 409 errors in 74 files, 173 stubs (422 / 174 before). ret_audit --src: 52.
+  - Ghidra: names/options_handler.txt (+4, 4 moved); 8 functions in ported.txt. Stats: 8,852 of 12,306 functions by hand (79.0 % by size).
+  - Next, 9e-xii: the controls page 0x0061e3f0 (the key groups' builder 0x0061f600, the callbacks
+    0x006209c0 and 0x0061fcb0); then the player screen, the squad glue and the item slots.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
