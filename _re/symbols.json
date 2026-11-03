@@ -32204,6 +32204,21 @@
   "name": "C_GameMenu::OnSide",
   "proto": "bool __thiscall OnSide(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
  },
+ "00685550": {
+  "module": "game_menu",
+  "name": "C_GameMenu::SetTeam",
+  "proto": "void __thiscall SetTeam(C_GameMenu *this, int team)"
+ },
+ "00685880": {
+  "module": "game_menu",
+  "name": "C_GameMenu::TakeSoldierItems",
+  "proto": "void __fastcall TakeSoldierItems(C_GameMenu * menu)"
+ },
+ "00685ab0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::ShowTeamSoldiers",
+  "proto": "void __thiscall ShowTeamSoldiers(C_GameMenu *this, int team)"
+ },
  "00685da0": {
   "module": "game_menu",
   "name": "C_GameMenu::UpdateSoldierTypes",

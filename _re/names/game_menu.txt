@@ -42,8 +42,12 @@
 00687dd0 C_GameMenu::OnSoldierType | bool __thiscall OnSoldierType(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
 00687f50 C_GameMenu::OnSavePreset | bool __thiscall OnSavePreset(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
 00687bc0 C_GameMenu::StorePreset | void __thiscall StorePreset(C_GameMenu *this, int index)
+# Part 9e-xviii: the squad's team.
+00684fd0 C_GameMenu::OnPlayerScreenShown | bool __thiscall OnPlayerScreenShown(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00685550 C_GameMenu::SetTeam | void __thiscall SetTeam(C_GameMenu *this, int team)
+00685ab0 C_GameMenu::ShowTeamSoldiers | void __thiscall ShowTeamSoldiers(C_GameMenu *this, int team)
+00685880 C_GameMenu::TakeSoldierItems | void __fastcall TakeSoldierItems(C_GameMenu * menu)
 # Not ported yet (named for the later parts).
 00685170 C_GameMenu::SetupStocks | bool __fastcall SetupStocks(C_GameMenu * menu)
 006863c0 C_GameMenu::ShowSoldierStats | void __stdcall ShowSoldierStats(int profile)
-00684fd0 C_GameMenu::OnPlayerScreenShown | bool __thiscall OnPlayerScreenShown(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
 0072ee60 C_NetGame::SendChat

@@ -1368,7 +1368,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
             }
             else if (iVar21 == 0xb) {
               pCVar18 = GetGameApp();
-              FUN_00685550(pCVar18->m_state,uVar15);
+              C_GameMenu__SetTeam((C_GameMenu*)(pCVar18->m_state),uVar15);
             }
           }
         }
@@ -1421,7 +1421,7 @@ LAB_007291be:
         GetGame();
         ShowGameMenuMessage(iVar21);
       }
-      piVar16 = (int *)FUN_00685550(*(void **)((int)local_5fc + 0x14),uVar15);
+      piVar16 = (int *)C_GameMenu__SetTeam(*(void **)((int)local_5fc + 0x14),uVar15);
       return piVar16;
     }
     break;

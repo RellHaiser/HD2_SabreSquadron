@@ -1,7 +1,7 @@
 // The in-game menu (original 0x0067eb40..0x00687f50; part 9e-v: the class and the menu state's slots;
 // 9e-vi: the update's helpers and the drawing; 9e-vii: the messages; 9e-ix: the screens' descriptions;
 // 9e-xiii: the player screen's; 9e-xiv..9e-xvi: its soldiers, equipment, items and skills panels;
-// 9e-xvii: the soldier types and the user presets).
+// 9e-xvii: the soldier types and the user presets; 9e-xviii: the squad's team).
 #include "game/game_menu.h"
 
 #include <algorithm>
@@ -58,7 +58,7 @@ constexpr uint32_t TEXT_VERSION = 0x7D6, TEXT_SOLDIER_TYPES = 500;
 // the sides' marks (ALLIES_COUNT, AXIS_COUNT: they show the teams' counts too).
 constexpr int CONTROL_GROUP = 5, CONTROL_SCROLL_BAR = 8, CONTROL_HIDING_LIST = 0x23, CONTROL_PICTURE = 4;
 constexpr int CONTROL_MARK = 0x1F;
-constexpr uint32_t SOLDIERS_SCROLL = 0x0C101000, SOLDIERS_LIST_A = 0x0C102000;
+constexpr uint32_t SOLDIERS_SCROLL = 0x0C101000, SOLDIERS_LIST_A = 0x0C102000, SOLDIERS_LIST_X = 0x0C103000;
 constexpr int SOLDIERS_PER_LIST = 30, SOLDIER_LIST_ROWS = 4;
 constexpr float SOLDIER_ACROSS_STEP = 0.062f;
 // The skills panel: the bars (along z) and the skills' names' texts (0xA78 + the skill), the values'.
@@ -898,6 +898,131 @@ bool C_GameMenu::OnSavePreset(void *menu, void *, C_Control *, uint32_t, uint32_
         }
     }
     self->m_presets.SaveUser();
+    return true;
+}
+
+void C_GameMenu::SetTeam(int team)
+{
+    if (team == 2)
+        return;
+    ShowMessage(-1, -1);
+    // (Quirk kept: the first soldier read unchecked.)
+    S_MissionSquad *squad = g_gameProfile.m_missionSquad;
+    if (m_teamChangePosted) {
+        S_SquadSoldier *first = squad->states.empty() ? nullptr : squad->states[0];
+        if (team == first->team) {
+            m_teamChangePosted = false;
+            Post(0, MENU_MSG_ESCAPE, 0);
+        }
+    }
+    if (team == m_team)
+        return;
+    if (!g_gameProfile.IsCooperativeGame()) {
+        if (team == TEAM_ALLIES) {
+            Post(ALLIES_COUNT, CONTROL_MSG_SET_CHECKED, 1);
+            Post(AXIS_COUNT, CONTROL_MSG_SET_CHECKED, 0);
+        } else if (team == TEAM_AXIS) {
+            Post(AXIS_COUNT, CONTROL_MSG_SET_CHECKED, 1);
+            Post(ALLIES_COUNT, CONTROL_MSG_SET_CHECKED, 0);
+        } else {
+            return;
+        }
+    }
+    if (m_team < 0) {
+        m_storeList.SetActive(true);
+        Post(static_cast<uint32_t>(m_soldierTypes), CONTROL_MSG_ACTIVATE, 0);
+    } else {
+        Post(LOAD_BUTTON, CONTROL_MSG_DEACTIVATE, 0);
+        m_panel.ReturnItems(m_storeList.GetStock());
+    }
+    m_storeList.ClearPages();
+    m_team = team;
+    m_panel.GetSquadSoldier()->team = team;
+    if (m_team == TEAM_ALLIES)
+        m_storeList.SetStock(m_stock1E4);
+    else if (m_team == TEAM_AXIS)
+        m_storeList.SetStock(m_stock1E8);
+    ShowTeamSoldiers(m_team);
+    TakeSoldierItems();
+    UpdateSoldierTypes();
+}
+
+void C_GameMenu::ShowTeamSoldiers(int team)
+{
+    int profile = 0;
+    if (team == TEAM_ALLIES) {
+        Post(SOLDIERS_SCROLL, CONTROL_MSG_SET_VALUE, SOLDIERS_LIST_A);
+        Post(SOLDIERS_LIST_A, CONTROL_MSG_SHOW, 0);
+        Post(SOLDIERS_LIST_X, CONTROL_MSG_HIDE, 0);
+        Post(SOLDIERS_LIST_A, CONTROL_MSG_SELECT_INDEX, static_cast<uint32_t>(g_pickedSoldierA));
+        profile = g_pickedSoldierA;
+    } else if (team == TEAM_AXIS) {
+        Post(SOLDIERS_SCROLL, CONTROL_MSG_SET_VALUE, SOLDIERS_LIST_X);
+        Post(SOLDIERS_LIST_A, CONTROL_MSG_HIDE, 0);
+        Post(SOLDIERS_LIST_X, CONTROL_MSG_SHOW, 0);
+        Post(SOLDIERS_LIST_X, CONTROL_MSG_SELECT_INDEX, static_cast<uint32_t>(g_pickedSoldierX - SOLDIERS_PER_LIST));
+        profile = g_pickedSoldierX;
+    }
+    ShowSoldierStats(profile);
+    m_panel.GetSquadSoldier()->SetProfile(profile, 0);
+    m_panel.Refresh();
+    m_panel.UpdateFace();
+    m_panel.DressSoldier();
+}
+
+void C_GameMenu::TakeSoldierItems()
+{
+    S_SquadSoldier *soldier = m_panel.GetSquadSoldier();
+    // A place's item the stock has not: dropped.
+    const auto take = [this](S_SoldierItem &item) {
+        if (item.typeId == -1 || m_storeList.TakeItem(item, false))
+            return true;
+        item.uid = -1;
+        item.typeId = -1;
+        item.present = 0;
+        return false;
+    };
+    const auto takeAll = [this, soldier](std::vector<S_SoldierItem> &items, uint8_t slot) {
+        for (size_t i = items.size(); i-- > 0;) {
+            if (!m_storeList.TakeItem(items[i], false))
+                soldier->RemoveItem(slot, items[i]);
+        }
+    };
+    take(soldier->head);
+    take(soldier->uniform);
+    take(soldier->longGun);
+    take(soldier->hands);
+    takeAll(soldier->belt, SQUAD_SLOT_BELT);
+    if (!take(soldier->backpack))
+        soldier->backpackContents.clear();
+    takeAll(soldier->backpackContents, SQUAD_SLOT_BACKPACK_CONTENTS);
+    soldier->UpdateLoad();
+}
+
+bool C_GameMenu::OnPlayerScreenShown(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_GameMenu *>(menu);
+    S_MissionSquad *squad = g_gameProfile.m_missionSquad;
+    if (squad->states.empty()) {
+        squad->AddSoldier();
+        self->m_panel.SelectSoldier(0);
+    } else if (!self->m_hasPlayerSlotMember) {
+        self->m_panel.SelectSoldier(0);
+    } else {
+        // A player slot member edits a second soldier, at first the first's copy.
+        if (squad->states.size() == 1) {
+            squad->AddSoldier();
+            if (squad->states.size() == 2)
+                squad->states[1]->CopyFrom(*squad->states[0]);
+        }
+        self->m_panel.SelectSoldier(1);
+    }
+    const int team = self->m_panel.GetSquadSoldier()->team;
+    if (team >= 0) {
+        self->SetTeam(team);
+        return true;
+    }
+    GetGameApp()->PostCommand(APP_NET_COMMAND_TEAM, g_gameProfile.IsCooperativeGame() ? TEAM_ALLIES : 2, 0, false);
     return true;
 }
 

@@ -108,6 +108,8 @@ extern S_MultiplayerSettings *g_mpSettings;             // (a reference into g_g
 // The squad soldier's slots (S_SquadSoldier::PutItem).
 enum : uint8_t {
     SQUAD_SLOT_UNIFORM = 0x02,
+    SQUAD_SLOT_BELT = 0x20,                             // (part 9e-xviii)
+    SQUAD_SLOT_BACKPACK_CONTENTS = 0x40,
 };
 // (The equipment panel, part 9e-ii-a: equipment_panel_test.inc fakes the methods.)
 struct S_SoldierLoad {
@@ -135,9 +137,14 @@ struct S_SquadSoldier : S_SoldierState {
     float GetFreeWeight() const;
     // (The in-game menu's soldiers panel, part 9e-xiv: game_menu_test.inc.)
     bool SetProfile(int profileIndex, int level);
+    // (The player screen and the squad's team, part 9e-xviii: game_menu_test.inc.)
+    void CopyFrom(const S_SquadSoldier &other);
+    void UpdateLoad();
     S_SoldierLoad load;                                 // +0x8C
 };
 struct S_MissionSquad {
+    // (The in-game menu's player screen, part 9e-xviii: game_menu_test.inc.)
+    S_SquadSoldier *AddSoldier();
     std::vector<S_SquadSoldier *> states;               // +0x04
 };
 // (The in-game menu's messages, part 9e-vii: game_menu_test.inc defines it.)

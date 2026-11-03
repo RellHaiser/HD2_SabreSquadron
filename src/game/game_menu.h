@@ -129,7 +129,9 @@ private:
     // The squad soldier's profile and places kept in the user preset (the team's): its belt's and
     // backpack's items counted by type, the last first (13 and 31 types at most).
     void StorePreset(int index);                        // 0x00687bc0
-    // The player screen's callbacks: shown (not ported yet), hidden (true), the soldier type's
+    // The player screen's callbacks: shown (the squad's soldiers made as the slots need: one, a
+    // second as a copy of the first for a player slot member; the panel's soldier the first or the
+    // second; its team set, none: asked for, the allies in co-op, else 2), hidden (true), the soldier type's
     // header edited (the user preset renamed, stored and saved; an empty name: edited again), the
     // preset saved (stored; a preset named by its text renamed "<the profile's name><its number>",
     // the list refilled, its header the name; the presets saved), the game info's click (the info
@@ -158,6 +160,21 @@ private:
                        uint32_t value);                 // 0x006854e0 (__thiscall)
     // A profile's stats on the skills panel (not ported yet).
     static void ShowSoldierStats(int profile);          // 0x006863c0 (__stdcall)
+    // The squad's team set (2: nothing): the message box closed; the team change posted and now
+    // the first soldier's: the escape posted; the same team: nothing more. Not co-op: its side's mark
+    // checked, the other's not (another team: nothing more). No team before: the store's list on,
+    // the soldier types on; else the load's button off, the panel's items back to the store's
+    // stock. The store's pages emptied; the team kept (the panel's soldier's too), its stock the
+    // store's (the allies' the first, the axis' the second); its soldiers' list, the store's items
+    // taken, the soldier types.
+    void SetTeam(int team);                             // 0x00685550
+    // The team's soldiers' list shown (the allies' first list, the axis' second; the scroll bar
+    // its, its last pick selected) and its last pick the squad soldier's profile (another team:
+    // the first profile), its stats, the panel refreshed, its face and dress.
+    void ShowTeamSoldiers(int team);                    // 0x00685ab0
+    // The squad soldier's items taken from the store's stock (those it has not: dropped; the
+    // backpack's with its contents; the belt's and the backpack's the last first), its load.
+    void TakeSoldierItems();                            // 0x00685880 (__fastcall)
     // Control 0x0CA00000 on while the squad soldier has a uniform and his load is within his
     // strength (posted when it changes).
     void UpdateLoadButton();                            // 0x006869a0 (__fastcall)

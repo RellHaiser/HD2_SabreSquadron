@@ -47,10 +47,27 @@ void C_StoreList::BuildDescription(S_ScreenDesc *desc, I3D_frame *model)
     GfLog("store desc %s %d %s menu %d", desc->name.c_str(), static_cast<int>(desc->controls.size()),
           model ? MrFrameName(model).c_str() : "none", m_menu != nullptr);
 }
+// (Part 9e-xviii: the squad's new soldiers (kept for deletion), the copies and the loads logged.)
+std::vector<std::unique_ptr<S_SquadSoldier>> g_gmAdded;
+S_SquadSoldier *S_MissionSquad::AddSoldier()
+{
+    GfLog("add soldier");
+    g_gmAdded.push_back(std::make_unique<S_SquadSoldier>());
+    g_gmAdded.back()->profileIndex = -1;
+    g_gmAdded.back()->team = -1;
+    states.push_back(g_gmAdded.back().get());
+    return states.back();
+}
+void S_SquadSoldier::CopyFrom(const S_SquadSoldier &other)
+{
+    GfLog("copy from %d", other.profileIndex);
+    profileIndex = other.profileIndex;
+    team = other.team;
+}
+void S_SquadSoldier::UpdateLoad() { GfLog("update load"); }
 // (Part 9e-xvii: the profile's name.)
 C_str g_gmProfileName("Pvt");
 const C_str &C_PlayerProfile::GetProfileName() const { return g_gmProfileName; }
-bool C_GameMenu::OnPlayerScreenShown(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_NetGame::SendChat(const char *text, bool team)
 {
     GfLog("chat [%s] %d", text, team);
@@ -121,7 +138,28 @@ struct S_GameMenuResults {
     bool gmPlayerCallbacks = true, gmChat = true, gmSoldiers = true, gmSoldiersNone = true, gmSoldierPicked = true;
     bool gmSide = true, gmEquipment = true, gmEquipmentNone = true, gmItems = true, gmItemsNone = true, gmSkills = true;
     bool gmSoldierTypes = true, gmStorePreset = true, gmTypeEdited = true, gmPresetSaved = true;
+    bool gmTeam = true, gmTakeItems = true, gmShown = true;
 };
+// The log's lines as one ("line; ").
+std::string Join(const std::vector<std::string> &log)
+{
+    std::string s;
+    for (const std::string &line : log)
+        s += line + "; ";
+    return s;
+}
+// Whether the queue's lines (GmQueue's) hold `lines` in their order.
+bool GmInOrder(const std::string &queue, const std::vector<std::string> &lines)
+{
+    size_t at = 0;
+    for (const std::string &line : lines) {
+        at = queue.find(line, at);
+        if (at == std::string::npos)
+            return false;
+        at += line.size();
+    }
+    return true;
+}
 
 // A control answering CONTROL_MSG_GET_TEXT with its text.
 struct C_GmTexted : C_Control {
@@ -1114,6 +1152,10 @@ void GameMenuTest(I3D_scene *scene)
 
         // A network game's: the player screen too (co-op: "player_screen_2"); the warmup's menu opens it.
         g_gameRole = GAME_ROLE_CLIENT;
+        // (Part 9e-xviii: the player screen shown on its opening: a squad.)
+        S_MissionSquad netSquad;
+        S_MissionSquad *const oldNetSquad = g_gameProfile.m_missionSquad;
+        g_gameProfile.m_missionSquad = &netSquad;
         for (bool coop : {false, true}) {
             bool okb = true;
             const bool oldCoop = g_coop;
@@ -1652,6 +1694,8 @@ void GameMenuTest(I3D_scene *scene)
             g_mpSettings->gameType = oldType;
         }
 
+        g_gameProfile.m_missionSquad = oldNetSquad;
+        g_gmAdded.clear();
         g_cacheFill = oldFill;
         g_driverVtable[0x54 / 4] = oldCreate;
         g_mrModelVt[0x48 / 4] = oldFind;
@@ -1818,6 +1862,184 @@ void GameMenuTest(I3D_scene *scene)
         allowed = C_str();
     }
 
+    // --- the squad's team (part 9e-xviii): set (2: nothing): the message box closed; the posted
+    // change done: the escape; the same team: no more; not co-op: the marks (another team: no more);
+    // the store's list and the soldier types on at the first, else the load's button off and the
+    // items returned; the pages emptied, the team kept, its stock, its soldiers' list, the items
+    // taken, the types. The list: shown, its scroll bar, its pick; the profile, the panel. The items:
+    // those the stock has not dropped (the backpack's contents with it), the load ---
+    {
+        S_MissionSquad squad;
+        S_MissionSquad *const oldSquad = g_gameProfile.m_missionSquad;
+        g_gameProfile.m_missionSquad = &squad;
+        S_SquadSoldier first;
+        first.profileIndex = -1;
+        first.team = -1;
+        squad.states = {&first};
+        C_GameMenu m;
+        m.m_presets.Clear();
+        m.m_soldierTypes = 0x0C200000;
+        m.m_panel.m_squadSoldier = &first;
+        m.m_stock1E4 = new C_ItemStock();
+        m.m_stock1E8 = new C_ItemStock();
+        const bool oldCoop = g_coop;
+        g_coop = false;
+        g_slCounts.clear();
+        g_controlMessages.clear();
+        g_gfLog.clear();
+        g_gameMenuMessages = 3;
+        m.SetTeam(2);
+        bool okt = GmQueue().empty() && g_gfLog.empty() && g_gameMenuMessages == 3 && m.m_team == -1;
+        // (The panel's soldier: dressed (a head of no item type: its type kept) and its face set; the
+        // profiles zeroed: no constructor.)
+        auto *dressed = new C_MenuSoldier();
+        MsWorld(*dressed);
+        m.m_panel.m_soldier = dressed;
+        alignas(16) static uint8_t teamFaces[61][sizeof(S_SoldierProfile)];
+        std::memset(teamFaces, 0, sizeof teamFaces);
+        g_epProfiles.clear();
+        for (auto &face : teamFaces)
+            g_epProfiles.push_back(reinterpret_cast<S_SoldierProfile *>(face));
+        g_epProfiles[5]->faceTexture = "gm_t05.bmp";
+        g_epProfiles[34]->faceTexture = "gm_t34.bmp";
+        first.head = EpMake(1, 499, 1);
+        g_pickedSoldierA = 5;
+        m.SetTeam(TEAM_ALLIES);
+        std::string q = GmQueue();
+        okt &= g_gameMenuMessages == 2 && m.m_team == TEAM_ALLIES && first.team == TEAM_ALLIES &&
+               m.m_storeList.GetStock() == m.m_stock1E4 && dressed->m_face && std::strcmp(dressed->m_face, "gm_t05.bmp") == 0 &&
+               dressed->m_headTypeId == 499 && q.find(" 1000092 ") != std::string::npos && q.find(" 2000085 ") != std::string::npos;
+        okt &= GmInOrder(q, {"c104000 100006d 1 0 ; ", "c105000 100006d 0 0 ; ", "1000002 0 0 ; ", "c200000 1000002 0 0 ; ",
+                             "c101000 100000b c102000 0 ; ", "c102000 1000003 0 0 ; ", "c103000 1000004 0 0 ; ",
+                             "c102000 20000aa 5 0 ; ", "c200000 2000018 0 0 ; "}) &&
+               q.find("ca00000") == std::string::npos;
+        okt &= GmInOrder(Join(g_gfLog), {"stats 5", "set profile 5 0", "update load"}) && logHas("return items") == 0;
+        g_pickedSoldierA = 0;
+        // (No soldier for the rest: returning the items would reset its models.)
+        m.m_panel.m_soldier = nullptr;
+        // The same team: the box closed only.
+        g_gfLog.clear();
+        m.SetTeam(TEAM_ALLIES);
+        okt &= GmQueue().empty() && g_gfLog.empty() && g_gameMenuMessages == 1;
+        // The other: the marks, the load's button off, the items returned, the axis' list.
+        g_pickedSoldierX = 34;
+        m.SetTeam(TEAM_AXIS);
+        q = GmQueue();
+        okt &= m.m_team == TEAM_AXIS && first.team == TEAM_AXIS && m.m_storeList.GetStock() == m.m_stock1E8 &&
+               GmInOrder(q, {"c105000 100006d 1 0 ; ", "c104000 100006d 0 0 ; ", "ca00000 1000001 0 0 ; ",
+                             "c101000 100000b c103000 0 ; ", "c102000 1000004 0 0 ; ", "c103000 1000003 0 0 ; ",
+                             "c103000 20000aa 4 0 ; ", "c200000 2000018 0 0 ; "}) &&
+               q.find("c200000 1000002") == std::string::npos &&
+               GmInOrder(Join(g_gfLog), {"return items", "stats 34", "set profile 34 0", "update load"});
+        g_pickedSoldierX = 30;
+        // The change posted and now the first soldier's: the escape, no more.
+        m.m_teamChangePosted = true;
+        g_gfLog.clear();
+        m.SetTeam(TEAM_AXIS);
+        okt &= !m.m_teamChangePosted && GmQueue() == "0 200000a 0 0 ; " && g_gfLog.empty();
+        m.m_teamChangePosted = true;
+        first.team = TEAM_ALLIES;
+        m.SetTeam(TEAM_AXIS);
+        okt &= m.m_teamChangePosted && GmQueue().empty();
+        first.team = TEAM_AXIS;
+        m.m_teamChangePosted = false;
+        // Another team (not co-op): nothing more.
+        m.SetTeam(3);
+        okt &= GmQueue().empty() && g_gfLog.empty() && m.m_team == TEAM_AXIS;
+        // Co-op: no marks.
+        g_coop = true;
+        m.SetTeam(TEAM_ALLIES);
+        q = GmQueue();
+        okt &= m.m_team == TEAM_ALLIES && q.find("100006d") == std::string::npos && q.find("ca00000 1000001") != std::string::npos;
+        g_gfLog.clear();
+        m.SetTeam(3);
+        okt &= m.m_team == 3 && first.team == 3 && m.m_storeList.GetStock() == m.m_stock1E4 &&
+               GmQueue().find("c102000 1000004") == std::string::npos && MrHas("stats 0");
+        g_coop = false;
+        m.m_panel.m_soldier = nullptr;
+        g_epProfiles[5]->faceTexture = C_str();
+        g_epProfiles[34]->faceTexture = C_str();
+        g_epProfiles.clear();
+        first.head = EpMake(-1, -1, 0);
+        WM(r.gmTeam, okt);
+
+        // The items taken.
+        bool oki = true;
+        S_SquadSoldier sq;
+        sq.head = EpMake(1, 3, 1);
+        sq.uniform = EpMake(2, 4, 1);
+        sq.hands = EpMake(3, 6, 1);
+        sq.longGun = EpMake(9, 5, 1);
+        sq.belt = {EpMake(4, 7, 1), EpMake(5, 8, 1)};
+        sq.backpack = EpMake(6, 9, 1);
+        sq.backpackContents = {EpMake(7, 10, 1)};
+        g_slCounts = {{3, 1}, {5, 1}, {6, 2}, {7, 1}, {10, 1}};
+        m.m_panel.m_squadSoldier = &sq;
+        m.m_storeList.SetStock(m.m_stock1E4);
+        g_epRemoved.clear();
+        g_gfLog.clear();
+        m.TakeSoldierItems();
+        oki &= MsLogIs({"stock take 3 1", "stock take 4 1", "stock take 5 1", "stock take 6 1", "stock take 8 1", "remove 20 5 8 1",
+                        "stock take 7 1", "stock take 9 1", "update load"},
+                       g_gfLog) &&
+               sq.head.typeId == 3 && sq.uniform.typeId == -1 && sq.uniform.uid == -1 && sq.uniform.present == 0 &&
+               sq.hands.typeId == 6 && sq.longGun.typeId == 5 && sq.backpack.typeId == -1 && sq.backpack.uid == -1 &&
+               sq.backpack.present == 0 && sq.backpackContents.empty();
+        // The backpack kept: its contents taken (the last first; those not: removed).
+        sq.backpack = EpMake(6, 9, 1);
+        sq.backpackContents = {EpMake(7, 10, 1), EpMake(8, 11, 1)};
+        sq.belt.clear();
+        sq.head = sq.uniform = sq.hands = sq.longGun = EpMake(-1, -1, 0);
+        g_slCounts = {{9, 1}, {10, 1}};
+        g_gfLog.clear();
+        m.TakeSoldierItems();
+        oki &= MsLogIs({"stock take 9 1", "stock take 11 1", "remove 40 8 11 1", "stock take 10 1", "update load"}, g_gfLog) &&
+               sq.backpack.typeId == 9 && sq.backpackContents.size() == 2;
+        WM(r.gmTakeItems, oki);
+        m.m_panel.m_squadSoldier = &first;
+
+        // The shown callback: the squad's soldiers, the panel's soldier, the team (none: asked for).
+        bool oks = true;
+        const auto shown = [&]() {
+            g_gfLog.clear();
+            return C_GameMenu::OnPlayerScreenShown(&m, &m, nullptr, CONTROL_NOTIFY_SHOWN, 0);
+        };
+        squad.states.clear();
+        m.m_hasPlayerSlotMember = false;
+        oks &= shown() && squad.states.size() == 1 && m.m_panel.m_squadSoldier == squad.states[0] &&
+               GfLogIs({"add soldier", "command 5 2 0 0"});
+        g_coop = true;
+        oks &= shown() && squad.states.size() == 1 && GfLogIs({"command 5 1 0 0"});
+        g_coop = false;
+        m.m_hasPlayerSlotMember = true;
+        squad.states = {&first};
+        first.profileIndex = 12;
+        first.team = TEAM_AXIS;
+        m.m_team = TEAM_AXIS;
+        oks &= shown() && squad.states.size() == 2 && m.m_panel.m_squadSoldier == squad.states[1] &&
+               squad.states[1]->team == TEAM_AXIS && squad.states[1]->profileIndex == 12 &&
+               GfLogIs({"add soldier", "copy from 12"}) && GmQueue().find("100006d") == std::string::npos;
+        oks &= shown() && squad.states.size() == 2 && m.m_panel.m_squadSoldier == squad.states[1] && g_gfLog.empty();
+        squad.states.push_back(&first);
+        oks &= shown() && squad.states.size() == 3 && m.m_panel.m_squadSoldier == squad.states[1];
+        m.m_hasPlayerSlotMember = false;
+        squad.states = {&first};
+        m.m_team = -1;
+        first.team = TEAM_ALLIES;
+        oks &= shown() && m.m_panel.m_squadSoldier == &first && m.m_team == TEAM_ALLIES && MrHas("stats 0");
+        squad.states.clear();
+        m.m_hasPlayerSlotMember = true;
+        oks &= shown() && squad.states.size() == 1 && m.m_panel.m_squadSoldier == squad.states[0];
+        WM(r.gmShown, oks);
+        g_controlMessages.clear();
+        m.m_panel.m_squadSoldier = nullptr;
+        g_coop = oldCoop;
+        g_slCounts.clear();
+        g_gmAdded.clear();
+        g_gameMenuMessages = 0;
+        g_gameProfile.m_missionSquad = oldSquad;
+    }
+
     // --- the soldiers panel's callbacks (part 9e-xiv): a picture clicked: its index asked, kept for
     // its list (0 .. 29, 30 .. 59), the stats shown, the squad soldier's profile set (level 0), the
     // panel refreshed and its face; no index: nothing; true. A side's mark (not co-op): the team asked
@@ -1944,12 +2166,12 @@ void GameMenuTest(I3D_scene *scene)
                 "gmMainLocal %d gmMainNet %d gmBuild %d gmBuildNet %d gmPlayer %d gmPlayerCoop %d gmPlayerCallbacks %d "
                 "gmChat %d gmSoldiers %d gmSoldiersNone %d gmSoldierPicked %d gmSide %d gmEquipment %d gmEquipmentNone %d "
                 "gmItems %d gmItemsNone %d gmSkills %d gmSoldierTypes %d gmStorePreset %d gmTypeEdited %d "
-                "gmPresetSaved %d\n",
+                "gmPresetSaved %d gmTeam %d gmTakeItems %d gmShown %d\n",
                 r.gmNew, r.gmNewClient, r.gmStart, r.gmStartNet, r.gmStop, r.gmInput, r.gmUpdate, r.gmTick, r.gmDraw,
                 r.gmMessage, r.gmObjectives, r.gmBase, r.gmLoad, r.gmCoop, r.gmNet, r.gmRender, r.gmRenderGame,
                 r.gmRenderEquip, r.gmOptions, r.gmEscape, r.gmEscapeNet, r.gmSquad, r.gmQuestions, r.gmMainLocal,
                 r.gmMainNet, r.gmBuild, r.gmBuildNet, r.gmPlayer, r.gmPlayerCoop, r.gmPlayerCallbacks, r.gmChat, r.gmSoldiers,
                 r.gmSoldiersNone, r.gmSoldierPicked, r.gmSide, r.gmEquipment, r.gmEquipmentNone,
                 r.gmItems, r.gmItemsNone, r.gmSkills, r.gmSoldierTypes, r.gmStorePreset, r.gmTypeEdited,
-                r.gmPresetSaved);
+                r.gmPresetSaved, r.gmTeam, r.gmTakeItems, r.gmShown);
 }

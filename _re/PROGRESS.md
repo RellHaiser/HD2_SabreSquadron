@@ -7550,6 +7550,27 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e-xviii: the player screen's shown callback (0x00684fd0) and the preset's application
     (0x00685550), the squad glue (0x00685ab0.., the stats 0x006863c0), the item slots.
 
+  PART 9e-xviii DONE (2026-11-03): the in-game menu's squad team (game/game_menu.cpp).
+  - SetTeam 0x00685550 (2: nothing): the message box closed; the team change posted and now the
+    first soldier's: the escape posted; the same team: no more; not co-op: its side's mark checked,
+    the other's not (another team: no more); no team before: the store's list and the soldier types
+    on, else the load's button off and the panel's items back to the store's stock; the pages
+    emptied; the team kept (the squad soldier's too), the stock (the allies' the first, the axis' the
+    second); its soldiers' list, the items taken, the soldier types.
+  - ShowTeamSoldiers 0x00685ab0 (the allies' first list, the axis' second: shown, the scroll bar its,
+    the last pick selected; the profile, the stats, the panel refreshed, its face and dress),
+    TakeSoldierItems 0x00685880 (the places' items the stock has not dropped, the backpack's with its
+    contents, the belt's and the backpack's removed, the last first; the load), OnPlayerScreenShown
+    0x00684fd0 (the squad's soldiers made as needed: one, a second copied from the first for a
+    player slot member; the panel's soldier; its team set, none: asked for: the allies in co-op, else 2).
+  - Harness: game_menu_test.inc's gmTeam, gmTakeItems, gmShown (the stub squad's AddSoldier, CopyFrom,
+    UpdateLoad; the warmup's player screen with a squad). 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e18.py (138, 137 killed, 1 equivalent).
+  - Build: MSVC clean. Tier 1: 400 errors in 73 files (was 407 in 74), 170 stubs (was 171). ret_audit --src: 52 (as before; the count moves with tier 1).
+  - Ghidra: names/game_menu.txt (+3, 1 moved); 4 functions in ported.txt. Stats: 8,884 of 12,306 functions by hand (79.5 % by size).
+  - Next, 9e-xix: the stats (ShowSoldierStats 0x006863c0), the stocks' setup (0x00685170), the item
+    slots (0x00680ea0.., 0x00686e10..).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
