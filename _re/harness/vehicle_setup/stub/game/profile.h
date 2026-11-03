@@ -170,4 +170,6 @@ public:
     // (The in-game menu's soldiers panel, part 9e-xiv: game_menu_test.inc; its stats, 9e-xix.)
     int GetCount() const;
     void GetStats(int *stats, int index, int level) const;
+    // (The equipment screen's roster, part 9f-iii: equipment_screen_test.inc.)
+    bool Load(C_str fileName);
 };

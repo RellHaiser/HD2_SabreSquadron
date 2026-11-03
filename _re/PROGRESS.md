@@ -7744,6 +7744,26 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9f-iii: the screens' descriptions (BuildScreens 0x00675c80 and its builders, the store's
     0x0067c570).
 
+  PART 9f-iii DONE (2026-11-03): the equipment screen's screens' descriptions (game/equipment_screen.cpp).
+  - BuildScreens 0x00675c80: "Items selection" (EnsureSquad 0x00673ca0: four soldiers of the first
+    profiles in a new squad, LoadRoster 0x00673c30 tables\HumanStore.def when empty; the builders; the
+    soldiers to equip equipped, AutoEquip of part 9f-iv) and "SELECTION SCREEN"; the first opened, the
+    stats, the popup "DESCRIPTION".
+  - BuildEquipmentPanel 0x00674860 (the in-game menu's, the same asm), BuildSquadList 0x006766b0 (the
+    dead soldiers out of the squad; a picture per soldier 0.106 apart, OnSoldierPicked), BuildStore
+    0x00677010 (C_StoreList::BuildEquipmentDescription 0x0067c570: the description's body shared with
+    the in-game menu's, Describe; "scroll01", "itemselector", the tabs active), BuildStatsPanel
+    0x006764a0 (hidden; texts 0xA6E..), BuildItemsScreen 0x006758f0 (the stats toggle, the soldier
+    types, "RECOMMENDED SELECTION" / "AUTOMATIC REPLENISHMENT" the automatic equipping, "CONTINUE",
+    "BACK", the description label m_weaponsInfo), BuildSelectionScreen 0x00676230.
+  - Harness: equipment_screen_test.inc's 8 more checks (the descriptions dumped with their targets, the
+    frames' logs; the stub roster's Load). All factory checks in both orders.
+  - Mutations: mutations/mutate_9f3.py (289 cases, 261 build; all caught but 5 equivalent).
+  - Build: MSVC clean. Tier 1: 377 errors in 70 files, 161 stubs. ret_audit --src: 52.
+  - Ghidra: names/equipment_screen.txt (+11); 10 functions in ported.txt. Stats: 8,945 of 12,306 functions by hand (80.4 % by size).
+  - Next, 9f-iv: the soldier type picked (OnItemNotify60 0x00678fe0, the preset matched with the axis
+    filter), then 9f-v the automatic equipping (AutoEquip 0x00678000).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

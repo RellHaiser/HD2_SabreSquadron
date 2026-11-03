@@ -3,7 +3,7 @@
 // equipment panel, the store, the stats, the soldier types; automatic equipping) and the soldiers
 // picked for the mission (the selection screen). Part 9f-i: the class, its construction, the menu
 // state's slots (starting, stopping) and the item controls' slots; 9f-ii: the messages and the
-// checks before the mission.
+// checks before the mission; 9f-iii: the screens' descriptions.
 #pragma once
 
 #include <cstdint>
@@ -41,7 +41,9 @@ public:
     // unarmed asked about; then done: no soldier left to equip automatically, the campaign's next
     // step, the profile's second stock reset.
     void OnMessage(S_ControlMessage *message) override; // 0x34 0x006740d0
-    // Part 9f-iii.
+    // The items screen (its squad first: four soldiers in a new one; the equipment panel, the squad's
+    // list, the store, the stats panel, the buttons and texts; the soldiers to equip equipped) and
+    // the selection screen described, made; the first opened, the stats, the item's popup. True.
     bool BuildScreens() override;                       // 0x38 0x00675c80
     // The popup deleted, the panel's soldier, the store's pages emptied.
     void OnStop() override;                             // 0x3C 0x00673b80
@@ -69,6 +71,11 @@ public:
     // the soldier kept (the picture's index). True.
     virtual bool OnSelectionPicked(void *argument, C_Control *control, uint32_t notification, uint32_t value); // 0x78 0x006773a0
 
+    // Part 9f-iv: the automatic equipping (all null / 0: only the soldiers to equip; the button's
+    // callback CallAutoEquip, the original's registers it directly).
+    bool AutoEquip(void *argument, C_Control *control, uint32_t notification, uint32_t value);   // 0x00678000
+    static bool CallAutoEquip(void *menu, void *argument, C_Control *control, uint32_t notification,
+                              uint32_t value);
     // The controls' callbacks for the slots 0x74 and 0x78 (thunks 0x00677880, 0x00677890).
     static bool CallStatsToggle(void *menu, void *argument, C_Control *control, uint32_t notification,
                                 uint32_t value);
@@ -110,6 +117,33 @@ private:
     // first, g_requiredCarrier): fewer than `item.second`, 0; else all (`soldier` -1), or the soldier's
     // own, at most the surplus.
     static int CountCarried(const std::pair<int, int> &item, int soldier);   // 0x00679360
+    // The screens' builders: the roster loaded when empty (tables\HumanStore.def); a new squad of the
+    // first four profiles.
+    static void LoadRoster();                           // 0x00673c30
+    static void EnsureSquad();                          // 0x00673ca0
+    // The equipment panel (as the in-game menu's: the model's "equippanel" its "P_Equipment", the
+    // holsters' and backpack's groups, own meshes; the panel's description).
+    bool BuildEquipmentPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x00674860
+    // The squad's list: the tables and pictures off, the group "GB_Soldiers" (a dummy of the model) with
+    // the template "photo03"; the name's text, the list (4 shown, 0.106 apart); the dead soldiers out of
+    // the squad; a picture per soldier (the template's copy, its index, face, OnSoldierPicked); the
+    // selector; the first soldier shown. False without the template.
+    bool BuildSquadList(S_ScreenDesc *desc, I3D_frame *model);        // 0x006766b0
+    // The store: the model's "itemselector01" off; its dummy "P_visualstore" over the filter and the
+    // scroll bar, the entries' template "vi_template" with its count ("ammo") and information texts
+    // (off); the list's description, its pages emptied, the stock (SetupStore). False without the
+    // frames.
+    bool BuildStore(S_ScreenDesc *desc, I3D_frame *model);            // 0x00677010
+    // The stats panel "Panel02" (hidden, taking no input): per skill its name's title, its bar and
+    // its value's title; "Soldier stats :". True.
+    static bool BuildStatsPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x006764a0 (__stdcall)
+    // The items screen's controls: the stats button, the soldier types (the campaign's presets), the
+    // texts, the automatic equipping, continue and back; the description label (its id kept) when the
+    // model has one; the mission essentials' frame off. True.
+    bool BuildItemsScreen(S_ScreenDesc *desc, I3D_frame *model);      // 0x006758f0
+    // The selection screen: its title, a picture per squad soldier (four at most; the others off), yes
+    // (the pick accepted) and cancel; the selector. True.
+    bool BuildSelectionScreen(S_ScreenDesc *desc, I3D_frame *model);  // 0x00676230
 
     uint8_t m_unknown1C4[0xC] = {};                     // +0x1C4 (not set by the original)
     C_EquipmentPanel m_panel;                           // +0x1D0

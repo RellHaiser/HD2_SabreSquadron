@@ -1,5 +1,5 @@
 // Part 9f's equipment screen (game/equipment_screen.cpp), in the factory build, run by ControlsTest
-// after OptionsTest: the slots not ported yet stubbed (parts 9f-i, -ii), the fakes game_menu_test.inc's and
+// after OptionsTest: the slots not ported yet stubbed (parts 9f-i to -iii), the fakes game_menu_test.inc's and
 // its helpers (the queue's text, the logs joined, the controls answering their index). Prints
 // "equipmentscreen:" with 1 per check met.
 #define private public
@@ -7,6 +7,7 @@
 #include "game/equipment_screen.h"
 #undef protected
 #undef private
+#include <functional>
 
 // (Not ported yet: logged.)
 // (Part 9f-ii: the campaign's mission number; campaign.cpp is not linked.)
@@ -16,9 +17,15 @@ int C_Campaign::GetMissionNumber(int campaign)
     GfLog("mission number %d", campaign);
     return g_esMission;
 }
-bool C_EquipmentMenu::BuildScreens()
+bool C_EquipmentMenu::AutoEquip(void *argument, C_Control *control, uint32_t notification, uint32_t value)
 {
-    GfLog("es build");
+    GfLog("es auto %d", argument || control || notification || value);
+    return true;
+}
+// (Part 9f-iii: the roster's file, logged.)
+bool C_HumanStore::Load(C_str fileName)
+{
+    GfLog("roster load %s", fileName.c_str());
     return true;
 }
 bool C_EquipmentMenu::OnItemNotify60(void *, C_Control *, uint32_t, uint32_t)
@@ -43,6 +50,7 @@ struct S_EquipmentScreenResults {
     bool esNew = true, esStart = true, esStop = true, esStore = true, esTake = true, esClicked = true;
     bool esDragStart = true, esDragMove = true, esDrop = true, esHover = true, esStats = true, esToggle = true;
     bool esPicked = true, esMessage = true, esChecks = true, esCarried = true, esRequired = true;
+    bool esItemsScreen = true, esSelection = true, esStatsPanel = true, esStore2 = true, esSquadList = true, esSquad = true, esEquipmentPanel = true, esBuild = true;
 };
 
 // A frame of the screen's model at a world position (its SetPos logged: "<name> 8 (x y z)").
@@ -901,6 +909,479 @@ void EquipmentScreenTest(I3D_scene *scene)
         squad.states.clear();
         g_esMission = 0;
         WM(r.esRequired, okr);
+        g_gfItemDefs = oldDefs;
+    }
+
+    // --- (part 9f-iii) the screens' descriptions: each builder's controls (dumped) and frames (logged) ---
+    {
+        void *const oldFind = g_mrModelVt[0x48 / 4], *const oldSetPos = g_msFrameVt[0x08 / 4];
+        g_mrModelVt[0x48 / 4] = reinterpret_cast<void *>(&MsFind);
+        g_msFrameVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+        void *const oldCreate = g_driverVtable[0x54 / 4];
+        g_driverVtable[0x54 / 4] = reinterpret_cast<void *>(&MrCreateFrame);
+        void (*const oldFill)(I3D_model *) = g_cacheFill;
+        g_cacheFill = [](I3D_model *) {};
+        // A frame logging its own mesh made ("<name> a0", "<name>.mesh 18").
+        void **const ownVt = new void *[MR_SLOTS];
+        std::copy(g_msFrameVt, g_msFrameVt + MR_SLOTS, ownVt);
+        ownVt[0xA0 / 4] = reinterpret_cast<void *>(&MrFake<0xA0>);
+        const auto visual = [&](const char *name) {
+            S_MrObj *v = MsFrame(name);
+            v->vtable = ownVt;
+            S_MrObj *mesh = MrObj((std::string(name) + ".mesh").c_str(), g_mrModelVt);
+            mesh->vtable = new void *[MR_SLOTS];
+            std::copy(g_mrModelVt, g_mrModelVt + MR_SLOTS, mesh->vtable);
+            mesh->vtable[0x18 / 4] = reinterpret_cast<void *>(&MrFake<0x18>);
+            *reinterpret_cast<S_MrObj **>(reinterpret_cast<uint8_t *>(v) + 0x1E0) = mesh;
+            return v;
+        };
+        const auto msg = [](uint32_t id, uint32_t value, uintptr_t value2 = 0, uintptr_t value3 = 0) {
+            return CmText(" %x/%x/%x/%x", id, value, static_cast<uint32_t>(value2), static_cast<uint32_t>(value3));
+        };
+        std::function<std::string(const S_ControlDesc *)> dump = [&](const S_ControlDesc *c) {
+            std::string s = CmText("[%s %x %x:", c->name.c_str(), c->type, c->id);
+            for (const S_ControlMessage &m : c->messages)
+                s += msg(m.id, m.value, m.value2, m.value3) + (m.target ? CmText("@%x", m.target) : std::string());
+            for (const S_ControlDesc *k : c->children)
+                s += dump(k);
+            return s + "]";
+        };
+        const auto dumpAll = [&](const S_ScreenDesc &d) {
+            std::string s;
+            for (const S_ControlDesc *c : d.controls)
+                s += dump(c);
+            return s;
+        };
+        const auto fn = [](auto f) { return reinterpret_cast<uintptr_t>(f); };
+        const uint32_t D = 1u << 26;
+
+        // The items screen's controls (the equipment kind; the other kind's texts; no description).
+        bool okt = true;
+        {
+            C_EquipmentMenu m;
+            m.m_mode = 3;
+            S_LoadoutPreset preset;
+            preset.flags = 5;
+            preset.textId = 0x1234;
+            S_LoadoutPreset other;
+            other.flags = 4;
+            m.m_presets.m_presets.push_back(&preset);
+            m.m_presets.m_presets.push_back(&other);
+            S_MrObj *model = MsFrame("esim"), *essentials = MsFrame("esime");
+            g_msChildren[{model, "description"}] = MsFrame("esimd");
+            g_msChildren[{model, "text_mission essentials"}] = essentials;
+            S_ScreenDesc d("Items selection", "items selection", D);
+            g_gfLog.clear();
+            okt &= m.BuildItemsScreen(&d, As<I3D_frame>(model));
+            const uintptr_t self = reinterpret_cast<uintptr_t>(&m);
+            const auto c = [&](const char *name, int type, int index) { return CmText("[%s %x %x:", name, type, D | index << 20); };
+            const std::string want =
+                c("bassign to all", 0x14, 1) + msg(0x1000015, 0xD, 0xAB0) + msg(0x1000007, 0x4001000, self, fn(&C_EquipmentMenu::CallStatsToggle)) + "]" +
+                c("text_inventory", 0x13, 2) + msg(0x1000015, 0xB, 0xAA8) + "]" +
+                c("soldier type", 0x11, 3) + msg(0x1000007, 0x400E000, self, fn(&C_EquipmentMenuBase::CallItemNotify60)) +
+                msg(0x1000081, 0xC, 500) + msg(0x1000017, 0x13, 500) + msg(0x1000017, 0x13, 0x1234) + "]" +
+                c("text_mission essentials", 0x12, 4) + "]" + c("text_screen", 0x13, 5) + msg(0x1000015, 0xA, 0xA8D) + "]" +
+                c("text_military storages", 0x13, 6) + msg(0x1000015, 0xB, 0xA93) + "]" +
+                c("text_team", 0x13, 7) + msg(0x1000015, 0xB, 0xA92) + "]" +
+                c("baccept and continue", 0x14, 8) + msg(0x1000015, 0xD, 0xA90) + msg(0x1000007, 0x4001000, self, fn(&C_EquipmentMenu::CallAutoEquip)) + "]" +
+                c("bauto equip", 0x14, 9) + msg(0x1000015, 0xD, 0xA8F) + msg(0x600100B, 0) + "]" +
+                c("bback", 0x14, 10) + msg(0x1000015, 0xD, 0xA91) + msg(0x600100A, 0) + "]" +
+                c("text_h&dversion", 0x13, 11) + msg(0x1000015, 0x28, 0x7D6) + "]" +
+                c("text_assortment", 0x13, 12) + msg(0x1000015, 0xB, 0xAA6) + "]" +
+                c("description", 0x15, 13) + msg(0x1000015, 0xB, 0x7D2) + "]";
+            okt &= dumpAll(d) == want && C_GmBasePeek::WeaponsInfo(m) == static_cast<int>(D | 13 << 20) &&
+                   MsLogIs({"esim 48 description 1", "esim 48 text_mission essentials 1", "esime on 0"}, g_gfLog);
+            // The other kind; no description, no essentials.
+            m.m_mode = 4;
+            C_GmBasePeek::SetWeaponsInfo(m, 0);
+            g_msChildren.erase({model, "description"});
+            g_msChildren.erase({model, "text_mission essentials"});
+            S_ScreenDesc d2("Items selection", "items selection", D);
+            okt &= m.BuildItemsScreen(&d2, As<I3D_frame>(model)) && d2.controls.size() == 12 && C_GmBasePeek::WeaponsInfo(m) == 0;
+            const std::string got = dumpAll(d2);
+            okt &= got.find("[text_screen 13 4500000: 1000015/a/a8e/0]") != std::string::npos &&
+                   got.find("[baccept and continue 14 4800000: 1000015/d/ab1/0") != std::string::npos;
+            m.m_presets.m_presets.clear();
+        }
+        WM(r.esItemsScreen, okt);
+
+        // The selection screen: its title, a picture per squad soldier (own meshes; past the squad's off,
+        // missing ones skipped), yes and cancel; the selector.
+        bool oks = true;
+        {
+            C_EquipmentMenu m;
+            S_MrObj *model = MsFrame("essm"), *selector = MsFrame("esss");
+            S_MrObj *p3 = visual("esp3"), *p4 = visual("esp4"), *p5 = visual("esp5");
+            g_msChildren[{model, "photo03"}] = p3;
+            g_msChildren[{model, "photo04"}] = p4;
+            g_msChildren[{model, "photo05"}] = p5;
+            g_msChildren[{model, "selector"}] = selector;
+            alignas(16) static uint8_t profiles[2][sizeof(S_SoldierProfile)];
+            std::memset(profiles, 0, sizeof profiles);
+            auto *f0 = reinterpret_cast<S_SoldierProfile *>(profiles[0]), *f1 = reinterpret_cast<S_SoldierProfile *>(profiles[1]);
+            f0->faceImage = reinterpret_cast<IImage *>(0x1110);
+            f1->faceImage = reinterpret_cast<IImage *>(0x2220);
+            g_epProfiles = {f1, f0};
+            S_SquadSoldier a, b;
+            a.profileIndex = 1;
+            b.profileIndex = 0;
+            squad.states = {&a, &b};
+            S_ScreenDesc d("SELECTION SCREEN", "selection screen", 2u << 26);
+            g_gfLog.clear();
+            oks &= m.BuildSelectionScreen(&d, As<I3D_frame>(model)) && m.m_selector == As<I3D_frame>(selector);
+            const uintptr_t self = reinterpret_cast<uintptr_t>(&m);
+            const uint32_t S = 2u << 26;
+            const auto c = [&](const char *name, int type, int index) { return CmText("[%s %x %x:", name, type, S | index << 20); };
+            const std::string want =
+                c("text_select one soldier", 0x13, 1) + msg(0x1000015, 0xC, 0xAB2) + "]" +
+                c("photo03", 4, 2) + msg(0x1000009, 0) + msg(0x1000038, 0, 0x1110) + msg(0x1000007, 0x4001000, self, fn(&C_EquipmentMenu::CallSelectionPicked)) + "]" +
+                c("photo04", 4, 3) + msg(0x1000009, 1) + msg(0x1000038, 0, 0x2220) + msg(0x1000007, 0x4001000, self, fn(&C_EquipmentMenu::CallSelectionPicked)) + "]" +
+                c("button01", 0x14, 4) + msg(0x1000015, 0xD, 0x7D1) + msg(0x600106A, 0) + msg(0x6001005, 0) + "]" +
+                c("button00", 0x14, 5) + msg(0x1000015, 0xD, 0x7D8) + msg(0x6001005, 0) + "]";
+            oks &= dumpAll(d) == want &&
+                   MsLogIs({"essm 48 photo03 1", "esp3 on 1", "esp3 a0", "esp3.mesh 18", "essm 48 photo04 1", "esp4 on 1", "esp4 a0",
+                            "esp4.mesh 18", "essm 48 photo05 1", "esp5 on 0", "essm 48 photo06 1", "essm 48 selector 1"},
+                           g_gfLog);
+            squad.states.clear();
+            g_epProfiles.clear();
+        }
+        WM(r.esSelection, oks);
+
+        // The stats panel: hidden, taking no input; per skill its name (0xA6E + the skill), bar, value;
+        // "Soldier stats :".
+        bool okp = true;
+        {
+            S_ScreenDesc d("Items selection", "items selection", D);
+            okp &= C_EquipmentMenu::BuildStatsPanel(&d, nullptr) && d.controls.size() == 1;
+            const char *const rows[][3] = {{"text_shooting", "hlcpct07", "text_shooting01"},
+                                           {"text_strenght", "hlcpct08", "text_strenght01"},
+                                           {"text_health", "hlcpct09", "text_health01"},
+                                           {"text_endurance", "hlcpct03", "text_endurance01"},
+                                           {"text_stealth", "hlcpct04", "text_stealth01"},
+                                           {"text_first aid", "hlcpct05", "text_first aid01"},
+                                           {"text_lockpick", "hlcpct06", "text_lockpick01"}};
+            std::string want = CmText("[Panel02 5 %x:", D | 1 << 20) + msg(0x1000005, 0) + msg(0x1000004, 0);
+            for (uint32_t i = 0; i < 7; ++i) {
+                want += CmText("[%s 13 %x:", rows[i][0], D | 1 << 20 | (3 * i + 1) << 12) + msg(0x2000073, 0) + msg(0x1000015, 0xB, 0xA6E + i) + "]";
+                want += CmText("[%s 16 %x:", rows[i][1], D | 1 << 20 | (3 * i + 2) << 12) + msg(0x1000093, 2) + msg(0x1000092, 0) + "]";
+                want += CmText("[%s 13 %x:", rows[i][2], D | 1 << 20 | (3 * i + 3) << 12) + msg(0x2000073, 0) + msg(0x1000015, 0xB, 0x7D2) + "]";
+            }
+            want += CmText("[text_soldier stats 13 %x:", D | 1 << 20 | 22 << 12) + msg(0x1000015, 0xB, 0xAB3) + "]]";
+            okp &= dumpAll(d) == want;
+        }
+        WM(r.esStatsPanel, okp);
+
+        // The store: the selector off, its dummy over the filter and the scroll bar, the template with
+        // its count and information texts; the list's description (the equipment screen's), its pages
+        // emptied, the stock. A frame missing: false.
+        bool okr = true;
+        {
+            S_MrObj *model = MsFrame("estm"), *sel = MsFrame("estsel"), *filter = MsFrame("estf"), *scroll = MsFrame("ests");
+            S_MrObj *entry = MsFrame("este"), *count = MsFrame("estc"), *info = MsFrame("esti"), *hl = MsFrame("esthl");
+            for (const auto &child : std::vector<std::pair<const char *, S_MrObj *>>{
+                     {"itemselector01", sel}, {"filter", filter}, {"scroll01", scroll}, {"item08", entry}, {"item09", count},
+                     {"text_info00", info}, {"itemselector", hl}})
+                g_msChildren[{model, child.first}] = child.second;
+            C_EquipmentMenu m;
+            m.m_mode = 3;
+            playMode.singleMission = 0;
+            S_MrObj *panel = MsFrame("estp");
+            g_mrMade[FRAME_DUMMY] = {panel};
+            S_ScreenDesc d("Items selection", "items selection", D);
+            g_gfLog.clear();
+            g_controlMessages.clear();
+            okr &= m.BuildStore(&d, As<I3D_frame>(model));
+            std::vector<std::string> want = {"estm 48 itemselector01 1", "estsel on 0", "create 6", "estm 48 filter 1",
+                                             "estm 48 scroll01 1", "estp 38 estm 0", "estp 8 (0 0 0)", "estp 34 P_visualstore",
+                                             "estf 38 estp 1", "ests 38 estp 1", "estm 48 item08 1", "estm 48 item09 1",
+                                             "estm 48 text_info00 1", "este 34 vi_template", "esti 38 este 1", "estc 38 este 1",
+                                             "estc 34 ammo", "esti on 0", "estc on 0"};
+            for (int page = 0; page < 6; ++page)
+                for (const char *line : {"create 6", "estm 48 P_visualstore 20", "estm 48 selitem08 1", "estm 48 selitem08 1",
+                                         "estm 48 vi_template 1"})
+                    want.push_back(line);
+            for (const char *line : {"estm 48 itemselector 1", "esthl 38 null 1", "items loaded"})
+                want.push_back(line);
+            okr &= MsLogIs(want, g_gfLog) && m.m_models == std::vector<I3D_frame *>({As<I3D_frame>(panel)}) &&
+                   m.m_storeList.m_menu == &m && m.m_storeList.m_stock == &stock18 && m.m_storeList.m_highlight == As<I3D_frame>(hl) &&
+                   d.controls.size() == 1;
+            // (The equipment screen's description: the tabs active, its scroll bar.)
+            const std::string desc = dumpAll(d);
+            okr &= desc.find("[P_visualstore 5 4100000:") == 0 && desc.find("1000001/") == std::string::npos &&
+                   desc.find("[scroll01 8 ") != std::string::npos && desc.find("bscroll") == std::string::npos;
+            // (The pages emptied: their lists hidden.)
+            okr &= GmQueue().find("4103000 2000085") != std::string::npos;
+            // A frame missing: false (the selector looked up first).
+            for (const char *missing : {"filter", "scroll01", "item08", "item09", "text_info00"}) {
+                S_MrObj *const kept = g_msChildren[{model, missing}];
+                g_msChildren.erase({model, missing});
+                C_EquipmentMenu m2;
+                g_mrMade[FRAME_DUMMY] = {MsFrame("estp2")};
+                S_ScreenDesc d2("Items selection", "items selection", D);
+                g_gfLog.clear();
+                okr &= !m2.BuildStore(&d2, As<I3D_frame>(model)) && d2.controls.empty() && !m2.m_storeList.m_menu &&
+                       !MrHas("items loaded") && !MrHas("estc 34 ammo");
+                g_msChildren[{model, missing}] = kept;
+            }
+            C_EquipmentMenu m3;
+            g_mrMade[FRAME_DUMMY].clear();
+            S_ScreenDesc d3("Items selection", "items selection", D);
+            okr &= !m3.BuildStore(&d3, As<I3D_frame>(model)) && m3.m_models.empty();
+            g_controlMessages.clear();
+        }
+        WM(r.esStore2, okr);
+
+        // The squad's list: the tables and pictures off, the group's dummy with the template; the name's
+        // text, the list; the dead out of the squad; a picture per soldier (the template's copy across);
+        // the selector; the first soldier shown.
+        bool okl = true;
+        {
+            S_MrObj *model = MsFrame("eslm"), *photo = MsFrame("eslp"), *selector = MsFrame("esls");
+            g_msChildren[{model, "photo03"}] = photo;
+            g_msChildren[{model, "table13"}] = MsFrame("eslt13");
+            g_msChildren[{model, "selector"}] = selector;
+            As<I3D_frame>(photo)->m_localMatrix.m[3][0] = 0.25f;
+            As<I3D_frame>(photo)->m_localMatrix.m[3][1] = -0.5f;
+            As<I3D_frame>(photo)->m_localMatrix.m[3][2] = 1.5f;
+            alignas(16) static uint8_t profiles[3][sizeof(S_SoldierProfile)];
+            std::memset(profiles, 0, sizeof profiles);
+            auto *f0 = reinterpret_cast<S_SoldierProfile *>(profiles[0]), *f1 = reinterpret_cast<S_SoldierProfile *>(profiles[1]),
+                 *f2 = reinterpret_cast<S_SoldierProfile *>(profiles[2]);
+            f0->faceImage = reinterpret_cast<IImage *>(0x100);
+            f1->dead = true;
+            f2->faceImage = reinterpret_cast<IImage *>(0x300);
+            g_epProfiles = {f0, f1, f2};
+            auto *a = new S_SquadSoldier(), *b = new S_SquadSoldier(), *c = new S_SquadSoldier();
+            a->profileIndex = 2;
+            b->profileIndex = 1;
+            c->profileIndex = 0;
+            auto *dead = new S_SquadSoldier();
+            dead->profileIndex = 1;
+            squad.states = {dead, a, b, c};
+            S_MrObj *list = MsFrame("esll");
+            g_mrMade[FRAME_DUMMY] = {list};
+            S_MrObj *c0 = visual("eslc0"), *c1 = visual("eslc1");
+            g_mrClones = {As<I3D_frame>(c0), As<I3D_frame>(c1)};
+            C_EquipmentMenu m;
+            m.m_soldier = 3;
+            S_ScreenDesc d("Items selection", "items selection", D);
+            g_gfLog.clear();
+            g_controlMessages.clear();
+            okl &= m.BuildSquadList(&d, As<I3D_frame>(model));
+            okl &= GmQueue().find(" 1000039 ") != std::string::npos;
+            std::vector<std::string> want;
+            for (const char *name : {"table11", "table13", "table14", "table15", "photo03", "photo04", "photo05", "photo06", "photo07"}) {
+                want.push_back(CmText("eslm 48 %s 1", name));
+                if (name == std::string("table13"))
+                    want.push_back("eslt13 on 0");
+                if (name == std::string("photo03"))
+                    want.push_back("eslp on 0");
+            }
+            for (const char *line : {"create 6", "eslm 48 photo03 1", "esll 38 eslm 0", "esll 8 (0 0 0)", "esll 34 GB_Soldiers",
+                                     "eslp 38 esll 1", "eslp on 1", "esll on 1", "eslp 24", "esll 24"})
+                want.push_back(line);
+            for (int i = 0; i < 2; ++i) {
+                const std::string n = CmText("eslc%d", i);
+                for (const std::string &line : {std::string("clone tree eslp 0"), n + " a0", n + ".mesh 18", n + CmText(" 34 Soldier%02d", i),
+                                                n + " 38 esll 0", n + " on 1", n + " 24"})
+                    want.push_back(line);
+            }
+            for (const char *line : {"eslp on 0", "eslp 24", "eslm 48 selector 1"})
+                want.push_back(line);
+            okl &= g_gfLog.size() >= want.size() &&
+                   MsLogIs(want, std::vector<std::string>(g_gfLog.begin(), g_gfLog.begin() + static_cast<long>(want.size())));
+            okl &= squad.states == std::vector<S_SquadSoldier *>({a, c}) && m.m_soldierSelector == As<I3D_frame>(selector) &&
+                   m.m_soldier == 0 && m.m_panel.m_soldierIndex == 0 && m.m_panel.m_squadSoldier == a &&
+                   m.m_frames == std::vector<I3D_frame *>({As<I3D_frame>(c0), As<I3D_frame>(c1)}) &&
+                   m.m_models == std::vector<I3D_frame *>({As<I3D_frame>(list)});
+            // (The copies across from the template: 0.106 apart.)
+            const auto pos = [](S_MrObj *o) { return As<I3D_frame>(o)->m_localMatrix.m[3]; };
+            okl &= pos(c0)[0] == 0.25f && pos(c0)[1] == -0.5f && pos(c0)[2] == 1.5f && pos(c1)[0] == 1.0f * 0.106f + 0.25f &&
+                   pos(c1)[1] == -0.5f && pos(c1)[2] == 1.5f;
+            const uintptr_t self = reinterpret_cast<uintptr_t>(&m);
+            const uint32_t G = D | 2 << 20;
+            const std::string wantDesc =
+                CmText("[name- capacity 13 %x:", D | 1 << 20) + msg(0x1000015, 0xB, 0x7D2) + "]" + CmText("[GB_Soldiers b %x:", G) +
+                msg(0x1000028, 4) + msg(0x1000029, 0, GmBits(0.106f)) + msg(0x200002C, 0) +
+                CmText("[Soldier00 4 %x:", G | 1 << 12) + msg(0x1000009, 0) + msg(0x1000038, 0, 0x300) +
+                msg(0x1000007, 0x4001000, self, fn(&C_EquipmentMenu::OnSoldierPicked)) + "]" + CmText("[Soldier01 4 %x:", G | 2 << 12) +
+                msg(0x1000009, 1) + msg(0x1000038, 0, 0x100) + msg(0x1000007, 0x4001000, self, fn(&C_EquipmentMenu::OnSoldierPicked)) + "]]";
+            okl &= dumpAll(d) == wantDesc;
+            for (S_SquadSoldier *s : squad.states)
+                delete s;
+            squad.states.clear();
+            m.m_panel.m_squadSoldier = nullptr;
+            m.m_frames.clear();
+            m.m_models.clear();
+            // No template, or no dummy made: false (nothing described).
+            C_EquipmentMenu n;
+            g_msChildren.erase({model, "photo03"});
+            g_mrMade[FRAME_DUMMY] = {MsFrame("esll2")};
+            S_ScreenDesc d2("Items selection", "items selection", D);
+            okl &= !n.BuildSquadList(&d2, As<I3D_frame>(model)) && d2.controls.empty();
+            g_msChildren[{model, "photo03"}] = photo;
+            g_mrMade[FRAME_DUMMY].clear();
+            okl &= !n.BuildSquadList(&d2, As<I3D_frame>(model)) && d2.controls.empty() && n.m_models.empty();
+            g_epProfiles.clear();
+            g_mrClones.clear();
+        }
+        WM(r.esSquadList, okl);
+
+        // The roster (loaded when empty) and a new squad (four soldiers, the first profiles).
+        bool okq = true;
+        {
+            g_gfLog.clear();
+            C_EquipmentMenu::EnsureSquad();
+            okq &= MsLogIs({"roster load tables\\HumanStore.def", "add soldier", "set profile 0 0", "add soldier",
+                            "set profile 1 0", "add soldier", "set profile 2 0", "add soldier", "set profile 3 0"},
+                           g_gfLog) &&
+                   squad.states.size() == 4;
+            g_gfLog.clear();
+            C_EquipmentMenu::EnsureSquad();
+            okq &= g_gfLog.empty() && squad.states.size() == 4;
+            squad.states.clear();
+            alignas(16) static uint8_t profile[sizeof(S_SoldierProfile)];
+            g_epProfiles = {reinterpret_cast<S_SoldierProfile *>(profile)};
+            g_gfLog.clear();
+            C_EquipmentMenu::EnsureSquad();
+            okq &= !MrHas("roster load tables\\HumanStore.def") && MrHas("set profile 3 0");
+            squad.states.clear();
+            g_epProfiles.clear();
+        }
+        WM(r.esSquad, okq);
+
+        // The equipment panel: the in-game menu's (its frames, as its test's; the panel's description with
+        // the menu); not found, or a dummy not made: false.
+        bool oke = true;
+        {
+            S_MrObj *em = MsFrame("esem"), *panel = MsFrame("eseq");
+            C_EquipmentMenu m0;
+            S_ScreenDesc d0("Items selection", "items selection", D);
+            g_mrMade[FRAME_DUMMY] = {MsFrame("eseh0"), MsFrame("eseb0")};
+            g_gfLog.clear();
+            oke &= !m0.BuildEquipmentPanel(&d0, As<I3D_frame>(em)) && d0.controls.empty() && m0.m_models.empty() &&
+                   GfLogIs({"esem 48 equippanel 20", "create 6", "create 6"});
+            g_msChildren[{em, "equippanel"}] = panel;
+            for (int made = 0; made < 2; ++made) {
+                C_EquipmentMenu m3;
+                S_ScreenDesc d3("Items selection", "items selection", D);
+                g_mrMade[FRAME_DUMMY] = {MsFrame("eseh3")};
+                if (made == 0)
+                    g_mrMade[FRAME_DUMMY].clear();
+                g_gfLog.clear();
+                oke &= !m3.BuildEquipmentPanel(&d3, As<I3D_frame>(em)) && m3.m_models.empty() && d3.controls.empty() &&
+                       !MrHas("eseq 34 P_Equipment");
+            }
+            const auto own = [&](const char *name, const char *frame) {
+                S_MrObj *v = MrObj(frame, g_mrModelVt);
+                S_MrObj *mesh = MrObj("esemesh", g_mrModelVt);
+                mesh->vtable = new void *[MR_SLOTS];
+                std::copy(g_mrModelVt, g_mrModelVt + MR_SLOTS, mesh->vtable);
+                mesh->vtable[0x18 / 4] = reinterpret_cast<void *>(&MrFake<0x18>);
+                *reinterpret_cast<S_MrObj **>(reinterpret_cast<uint8_t *>(v) + 0x1E0) = mesh;
+                g_msChildren[{panel, name}] = v;
+            };
+            // (No "drop", no "item02".)
+            for (const char *name : {"back", "head", "hands", "uniform", "shoulder", "item00", "item01", "item03", "item04",
+                                     "item05", "item06", "item07"})
+                own(name, (std::string("esev_") + name).c_str());
+            g_msChildren[{panel, "scroll13"}] = MsFrame("eses13");
+            g_msChildren[{panel, "text_hlstrscap"}] = MsFrame("eset13");
+            g_msChildren[{panel, "hlcpct00"}] = MsFrame("eseh00");
+            // (No "scroll14": its texts unlinked.)
+            g_msChildren[{panel, "text_bkpckcap"}] = MsFrame("eset14");
+            g_msChildren[{panel, "hlcpct01"}] = MsFrame("eseh01");
+            C_EquipmentMenu m;
+            S_MrObj *holsters = MsFrame("eseh"), *backpack = MsFrame("eseb");
+            g_mrMade[FRAME_DUMMY] = {holsters, backpack};
+            S_ScreenDesc d("Items selection", "items selection", D);
+            g_gfLog.clear();
+            oke &= m.BuildEquipmentPanel(&d, As<I3D_frame>(em));
+            std::vector<std::string> want = {"esem 48 equippanel 20", "create 6", "create 6", "eseq 34 P_Equipment",
+                                             "eseh 38 eseq 0", "eseh 8 (0 0 0)", "eseh 34 GB_Holsters", "eseb 38 eseq 0",
+                                             "eseb 8 (0 0 0)", "eseb 34 GR_BackPack"};
+            const auto visual = [&](const char *name, const char *parent = nullptr) {
+                want.push_back(CmText("eseq 48 %s 1", name));
+                if (std::string(name) == "drop" || std::string(name) == "item02")
+                    return;
+                want.push_back(CmText("esev_%s a0", name));
+                want.push_back("esemesh 18");
+                if (parent)
+                    want.push_back(CmText("esev_%s 38 %s 1", name, parent));
+            };
+            for (const char *name : {"back", "head", "drop", "hands", "uniform", "shoulder"})
+                visual(name);
+            for (const char *line : {"eseq 48 scroll13 1", "eses13 38 eseq 1", "eseq 48 text_hlstrscap 1",
+                                     "eset13 38 eses13 1", "eseq 48 hlcpct00 1", "eseh00 38 eses13 1"})
+                want.push_back(line);
+            for (const char *name : {"item00", "item01", "item02", "item03"})
+                visual(name, "eseh");
+            for (const char *line : {"eseq 48 scroll14 1", "eseq 48 text_bkpckcap 1", "eset14 38 null 1",
+                                     "eseq 48 hlcpct01 1", "eseh01 38 null 1"})
+                want.push_back(line);
+            for (const char *name : {"item04", "item05", "item06", "item07"})
+                visual(name, "eseb");
+            oke &= g_gfLog.size() > want.size() &&
+                   MsLogIs(want, std::vector<std::string>(g_gfLog.begin(), g_gfLog.begin() + static_cast<long>(want.size())));
+            oke &= m.m_models == std::vector<I3D_frame *>({As<I3D_frame>(panel), As<I3D_frame>(holsters), As<I3D_frame>(backpack)}) &&
+                   m.m_panel.m_menu == &m && !d.controls.empty() && d.controls[0]->name == C_str("P_Equipment");
+            g_mrMade[FRAME_DUMMY].clear();
+        }
+        WM(r.esEquipmentPanel, oke);
+
+        // The screens built: the two models (the items screen's builders, the soldiers to equip equipped
+        // on their own; the selection screen's), the screens made, the first opened, the stats; the
+        // popup (none loaded here).
+        bool okb = true;
+        {
+            C_EquipmentMenu m;
+            S_MrWorld world = MrWorld("esb");
+            m.m_scene = As<I3D_scene>(world.scene);
+            m.m_mode = 3;
+            C_MsScreen box(m.m_scene, "esbbox", 0);
+            m.m_screens = {&box};
+            S_MrObj *mi = MrObj("esbmi", g_mrModelVt), *ms = MrObj("esbms", g_mrModelVt);
+            g_msChildren[{mi, "itemselector01"}] = MsFrame("esbsel");
+            g_msChildren[{mi, "Panel02"}] = MsFrame("esbp02");
+            S_MrObj *pop = MrObj("esbpop", g_mrModelVt);
+            g_mrMade[FRAME_MODEL] = {mi, ms, pop};
+            // (The popup's model: its frames none.)
+            alignas(16) static uint8_t profile[4][sizeof(S_SoldierProfile)];
+            std::memset(profile, 0, sizeof profile);
+            g_epProfiles = {reinterpret_cast<S_SoldierProfile *>(profile[0]), reinterpret_cast<S_SoldierProfile *>(profile[1]),
+                            reinterpret_cast<S_SoldierProfile *>(profile[2]), reinterpret_cast<S_SoldierProfile *>(profile[3])};
+            squad.states.clear();
+            g_menuScreens.clear();
+            g_gfLog.clear();
+            g_controlMessages.clear();
+            okb &= m.BuildScreens() && MrHas("esbmi 34 Items selection") && MrHas("esbms 34 SELECTION SCREEN") &&
+                   GmInOrder(Join(g_gfLog), {"esbmi 48 equippanel 20", "esbmi 48 table11 1", "esbmi 48 itemselector01 1",
+                                             "esbmi 48 description 1", "es auto 0", "esbms 48 photo03 1", "esbms 48 selector 1"}) &&
+                   MrHas("add soldier") && squad.states.size() == 4 && m.m_screens.size() == 3 && m.m_screens[1]->GetId() == 1u << 26 &&
+                   m.m_screens[2]->GetId() == 2u << 26 && m.m_screens[1]->GetScreenFrame() == As<I3D_frame>(mi) &&
+                   !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1] && m.m_popup &&
+                   m.m_popup->GetScreenFrame() == As<I3D_frame>(pop) && MrHas("esbpop 48 text 1");
+            // (The items screen's controls: the stats panel among them.)
+            okb &= static_cast<C_ControlGroup *>(m.m_screens[1])->m_children.size() == 1;
+            delete m.m_popup;
+            m.m_popup = nullptr;
+            okb &= GmQueue().find("4201000 1000014") != std::string::npos;
+            for (size_t i = 1; i < m.m_screens.size(); ++i)
+                delete m.m_screens[i];
+            m.m_screens.clear();
+            g_menuScreens.clear();
+            g_mrMade.erase(FRAME_MODEL);
+            squad.states.clear();
+            g_epProfiles.clear();
+            m.m_panel.m_squadSoldier = nullptr;
+        }
+        WM(r.esBuild, okb);
+
+        g_cacheFill = oldFill;
+        g_driverVtable[0x54 / 4] = oldCreate;
+        g_mrModelVt[0x48 / 4] = oldFind;
+        g_msFrameVt[0x08 / 4] = oldSetPos;
+        g_mrMade.erase(FRAME_DUMMY);
     }
 
     g_gfItemDefs = oldDefs;
@@ -915,8 +1396,8 @@ void EquipmentScreenTest(I3D_scene *scene)
     g_controlMessages.clear();
     std::printf("equipmentscreen: esNew %d esStart %d esStop %d esStore %d esTake %d esClicked %d esDragStart %d "
                 "esDragMove %d esDrop %d esHover %d esStats %d esToggle %d esPicked %d esMessage %d esChecks %d "
-                "esCarried %d esRequired %d\n",
+                "esCarried %d esRequired %d esItemsScreen %d esSelection %d esStatsPanel %d esStore2 %d esSquadList %d esSquad %d esEquipmentPanel %d esBuild %d\n",
                 r.esNew, r.esStart, r.esStop, r.esStore, r.esTake, r.esClicked, r.esDragStart, r.esDragMove, r.esDrop,
                 r.esHover, r.esStats, r.esToggle, r.esPicked, r.esMessage, r.esChecks,
-                r.esCarried, r.esRequired);
+                r.esCarried, r.esRequired, r.esItemsScreen, r.esSelection, r.esStatsPanel, r.esStore2, r.esSquadList, r.esSquad, r.esEquipmentPanel, r.esBuild);
 }

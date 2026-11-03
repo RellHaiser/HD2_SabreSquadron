@@ -27,3 +27,15 @@
 0067e620 C_MissionItems::GetMissionRecord | void * __thiscall GetMissionRecord(void * this, int mission)
 00840d5c g_requiredCarrier @ int
 008ae61a g_equipmentStatsShown @ bool
+# Part 9f-iii: the screens' descriptions.
+00675c80 C_EquipmentMenu::BuildScreens | bool __thiscall BuildScreens(C_EquipmentMenu *this)
+00673c30 C_EquipmentMenu::LoadRoster | void __stdcall LoadRoster(void)
+00673ca0 C_EquipmentMenu::EnsureSquad | void __stdcall EnsureSquad(void)
+00674860 C_EquipmentMenu::BuildEquipmentPanel | bool __thiscall BuildEquipmentPanel(C_EquipmentMenu *this, void * desc, void * model)
+006766b0 C_EquipmentMenu::BuildSquadList | bool __thiscall BuildSquadList(C_EquipmentMenu *this, void * desc, void * model)
+00677010 C_EquipmentMenu::BuildStore | bool __thiscall BuildStore(C_EquipmentMenu *this, void * desc, void * model)
+006764a0 C_EquipmentMenu::BuildStatsPanel | bool __stdcall BuildStatsPanel(void * desc, void * model)
+006758f0 C_EquipmentMenu::BuildItemsScreen | bool __thiscall BuildItemsScreen(C_EquipmentMenu *this, void * desc, void * model)
+00676230 C_EquipmentMenu::BuildSelectionScreen | bool __thiscall BuildSelectionScreen(C_EquipmentMenu *this, void * desc, void * model)
+0067c570 C_StoreList::BuildEquipmentDescription | void __thiscall BuildEquipmentDescription(void * this, void * desc, void * model)
+00678000 C_EquipmentMenu::AutoEquip | bool __thiscall AutoEquip(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)

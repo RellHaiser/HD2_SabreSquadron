@@ -336,7 +336,7 @@ uint32_t C_EquipmentMenu__FUN_00677aa0(C_EquipmentMenu *_this,uint32_t param_1,i
 
 
 // 0x00678000
-uint32_t C_EquipmentMenu__FUN_00678000(C_EquipmentMenu *_this,int *param_1,uint32_t param_2,int param_3,int param_4, ...)
+uint32_t C_EquipmentMenu__C_EquipmentMenu__AutoEquip(C_EquipmentMenu *_this,int *param_1,uint32_t param_2,int param_3,int param_4, ...)
 {
   uint32_t *puVar1;
   uchar uVar2;

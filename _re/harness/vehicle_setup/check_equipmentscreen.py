@@ -9,7 +9,8 @@ import re
 import sys
 
 CHECKS = ("esNew esStart esStop esStore esTake esClicked esDragStart esDragMove esDrop esHover esStats esToggle "
-          "esPicked esMessage esChecks esCarried esRequired").split()
+          "esPicked esMessage esChecks esCarried esRequired "
+          "esItemsScreen esSelection esStatsPanel esStore2 esSquadList esSquad esEquipmentPanel esBuild").split()
 
 
 def main():

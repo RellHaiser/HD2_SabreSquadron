@@ -395,8 +395,6 @@ struct T_test2_SetPos { uint8_t _unknown[1]; };
 struct TryBlockMapEntry { uint8_t _unknown[1]; };
 struct UnwindMapEntry { uint8_t _unknown[1]; };
 typedef code _func_C_CameraModule_vtbl__SetFov2;
-typedef code _func_I3D_frame_vtbl__Release;
-typedef code _func_I3D_frame_vtbl__SetPos;
 struct _union_1226 { uint8_t _unknown[1]; };
 struct _union_2683 { uint8_t _unknown[1]; };
 struct action { uint8_t _unknown[1]; };

@@ -87,6 +87,17 @@ void Post(uint32_t target, uint32_t id, uint32_t value = 0)
 
 void C_StoreList::BuildDescription(S_ScreenDesc *desc, I3D_frame *model)
 {
+    Describe(desc, model, "bscroll", STORE_HIGHLIGHT, true);
+}
+
+void C_StoreList::BuildEquipmentDescription(S_ScreenDesc *desc, I3D_frame *model)
+{
+    Describe(desc, model, "scroll01", "itemselector", false);
+}
+
+void C_StoreList::Describe(S_ScreenDesc *desc, I3D_frame *model, const char *scrollBar, const char *highlight,
+                           bool inactive)
+{
     m_screenIndex = desc->id >> 26;
     S_ControlDesc *group = desc->AddControl(DESC_TYPE_GROUP, STORE_ANCHOR);
     m_controlIndex = static_cast<int>(group->id >> 20 & 0x3F);
@@ -96,8 +107,9 @@ void C_StoreList::BuildDescription(S_ScreenDesc *desc, I3D_frame *model)
     AddDescMessage(tabs, 0, CONTROL_MSG_SET_HEADER_TEXT_ID, TABS_HEADER_STYLE, TAB_TEXTS[0]);
     for (uint32_t text : TAB_TEXTS)
         AddDescMessage(tabs, 0, CONTROL_MSG_ADD_TEXT_ID, TAB_STYLE, text);
-    AddDescMessage(tabs, 0, CONTROL_MSG_DEACTIVATE, 0);
-    AddDescMessage(group->AddChild(DESC_TYPE_SCROLL_BAR, "bscroll"), 0, CONTROL_MSG_SET_VALUE,
+    if (inactive)
+        AddDescMessage(tabs, 0, CONTROL_MSG_DEACTIVATE, 0);
+    AddDescMessage(group->AddChild(DESC_TYPE_SCROLL_BAR, scrollBar), 0, CONTROL_MSG_SET_VALUE,
                    BaseId() | STORE_FIRST_PAGE << 12);
     for (int i = 0; i < MAX_ITEM_TYPES; ++i)
         m_entries.push_back(0);
@@ -105,7 +117,7 @@ void C_StoreList::BuildDescription(S_ScreenDesc *desc, I3D_frame *model)
     for (const S_StorePage &page : STORE_PAGE_GROUPS)
         BuildPage(group, model, C_fstr(page.name), page.group);
     // (Quirk kept: the highlight is not checked.)
-    m_highlight = model->FindChildFrame(STORE_HIGHLIGHT, FIND_VISUALS);
+    m_highlight = model->FindChildFrame(highlight, FIND_VISUALS);
     m_highlight->LinkTo(nullptr, 1);
     m_highlight->SetPosInline(S_vector(0.0f, 0.0f, 0.0f));
 }

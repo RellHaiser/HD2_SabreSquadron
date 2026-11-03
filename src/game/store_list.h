@@ -64,9 +64,14 @@ public:
     // entries (500 more, none yet), a page per group (BuildPage; not the 4th), the highlight
     // ("selitem08") unlinked at the origin.
     void BuildDescription(S_ScreenDesc *desc, I3D_frame *model);   // 0x0067aa70
+    // The equipment screen's copy: its scroll bar "scroll01", its highlight "itemselector", the tabs
+    // active.
+    void BuildEquipmentDescription(S_ScreenDesc *desc, I3D_frame *model);   // 0x0067c570
     C_ItemStock *GetStock() const { return m_stock; }
 
 private:
+    // The descriptions' body: the scroll bar's and the highlight's frames, the tabs inactive or not.
+    void Describe(S_ScreenDesc *desc, I3D_frame *model, const char *scrollBar, const char *highlight, bool inactive);
     // The list's controls: the screen's control m_controlIndex of screen m_screenIndex.
     uint32_t BaseId() const { return (static_cast<uint32_t>(m_controlIndex) & 0x3F | m_screenIndex << 6) << 20; }
 

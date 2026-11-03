@@ -9167,3 +9167,14 @@
 0067e620
 # absorbed: the equipment screen copy protection (dropped)
 00673e40
+# part 9f-iii: the equipment screen descriptions
+00675c80
+00673c30
+00673ca0
+00674860
+006766b0
+00677010
+006764a0
+006758f0
+00676230
+0067c570

@@ -31721,6 +31721,16 @@
   "name": "C_EquipmentMenu::OnStop",
   "proto": "void __thiscall OnStop(C_EquipmentMenu *this)"
  },
+ "00673c30": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::LoadRoster",
+  "proto": "void __stdcall LoadRoster(void)"
+ },
+ "00673ca0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::EnsureSquad",
+  "proto": "void __stdcall EnsureSquad(void)"
+ },
  "00673cf0": {
   "module": "profile",
   "name": "S_MissionSquad::AddSoldier",
@@ -31745,6 +31755,11 @@
   "name": "C_EquipmentMenu::IsSquadArmed",
   "proto": "bool __stdcall IsSquadArmed(void)"
  },
+ "00674860": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildEquipmentPanel",
+  "proto": "bool __thiscall BuildEquipmentPanel(C_EquipmentMenu *this, void * desc, void * model)"
+ },
  "00674d60": {
   "module": "equipment_screen",
   "name": "C_EquipmentMenu::ShowSoldierStats",
@@ -31755,10 +31770,20 @@
   "name": "C_EquipmentMenu::OnStatsToggle",
   "proto": "bool __thiscall OnStatsToggle(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
  },
+ "006758f0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildItemsScreen",
+  "proto": "bool __thiscall BuildItemsScreen(C_EquipmentMenu *this, void * desc, void * model)"
+ },
  "00675c00": {
   "module": "equipment_screen",
   "name": "C_EquipmentMenu::SetupStore",
   "proto": "void __fastcall SetupStore(C_EquipmentMenu * menu)"
+ },
+ "00675c80": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_EquipmentMenu *this)"
  },
  "00676010": {
   "module": "screen",
@@ -31775,10 +31800,30 @@
   "name": "C_DescriptionScreen::~C_DescriptionScreen",
   "proto": "void __thiscall ~C_DescriptionScreen(C_Screen *this)"
  },
+ "00676230": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildSelectionScreen",
+  "proto": "bool __thiscall BuildSelectionScreen(C_EquipmentMenu *this, void * desc, void * model)"
+ },
  "00676410": {
   "module": "equipment_panel",
   "name": "AddDescMessage4_676410",
   "proto": "void __cdecl AddDescMessage4_676410(void * desc, uint target, uint id, uint value, uint value2)"
+ },
+ "006764a0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildStatsPanel",
+  "proto": "bool __stdcall BuildStatsPanel(void * desc, void * model)"
+ },
+ "006766b0": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildSquadList",
+  "proto": "bool __thiscall BuildSquadList(C_EquipmentMenu *this, void * desc, void * model)"
+ },
+ "00677010": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::BuildStore",
+  "proto": "bool __thiscall BuildStore(C_EquipmentMenu *this, void * desc, void * model)"
  },
  "006771e0": {
   "module": "equipment_screen",
@@ -31806,6 +31851,11 @@
  "00677890": {
   "module": "equipment_screen",
   "name": "C_EquipmentMenu::CallSelectionPicked"
+ },
+ "00678000": {
+  "module": "equipment_screen",
+  "name": "C_EquipmentMenu::AutoEquip",
+  "proto": "bool __thiscall AutoEquip(C_EquipmentMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "00678dc0": {
   "module": "equipment_screen",
@@ -31912,6 +31962,11 @@
   "module": "store_list",
   "name": "C_StoreList::SetActive",
   "proto": "void __thiscall SetActive(void *this, bool on)"
+ },
+ "0067c570": {
+  "module": "equipment_screen",
+  "name": "C_StoreList::BuildEquipmentDescription",
+  "proto": "void __thiscall BuildEquipmentDescription(void * this, void * desc, void * model)"
  },
  "0067d450": {
   "module": "loadout_presets",
