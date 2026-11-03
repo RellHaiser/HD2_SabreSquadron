@@ -302,15 +302,15 @@ f_00673040.cpp:1699:49: no matching function for call to 'tier1::C_str::C_str(in
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
 f_00673040.cpp:1710:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00673040.cpp:2321:34: too few arguments to function
+f_00673040.cpp:2322:34: too few arguments to function
     (*pIStack_12c->vtable->SetOn)();
-f_00673040.cpp:2354:33: too few arguments to function
+f_00673040.cpp:2355:33: too few arguments to function
     (*pIStack_134->vtable->SetPos)((I3D_frame*)((IImage *)pIStack_134));
-f_00673040.cpp:2363:27: too few arguments to function
+f_00673040.cpp:2364:27: too few arguments to function
     (*parent->vtable->SetOn)();
-f_00673040.cpp:2580:53: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00673040.cpp:2581:53: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_b0 = (C_str)(*(int *)pCStack_b0 - 1), *(int *)pCStack_b0 == 0)) {
-f_00673040.cpp:2685:29: request for member '_0_4_' in '"item09"', which is of non-class type 'const char [7]'
+f_00673040.cpp:2686:29: request for member '_0_4_' in '"item09"', which is of non-class type 'const char [7]'
     (**(code **)("item09"._0_4_ + 0x38))("item09",param_2,1);
 f_006778e0.cpp:1503:5: '_param_2' was not declared in this scope; did you mean 'param_2'?
     _param_2 = 0;

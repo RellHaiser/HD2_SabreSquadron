@@ -7178,6 +7178,35 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     constructor 0x0067eb40, the mission records at +0x1F0, the slots 0x34..0x84; 0x0067aa70..
     0x00688130), in parts.
 
+  PART 9e-iv DONE (2026-11-02): the equipment menus' loadout presets and mission items
+  (src/game/loadout_presets.h/.cpp; C_GameMenu +0x49C and +0x1F0).
+  - S_LoadoutPreset (0x1B8 bytes, read and written whole): a name (0x20), the five places' types
+    (head, uniform, backpack, long gun, hands), 14 belt and 32 backpack (type, count) entries with
+    their counts, the games' flags (LOADOUT_AXIS 0x12, _ALLIED 0x22, _DEATHMATCH 0x42, _USER 4), a text
+    id. ClearPlaces 0x0067a3d0, CountItems 0x0067d450 (the places, the first belt and backpack entry of
+    the type); S_PresetItem::Reset 0x0067a3c0.
+  - C_LoadoutPresets: Clear 0x0067d4d0, AddPreset / AddUserPreset 0x0067d580 / 0x0067d770, Load
+    0x0067d960 (GameData\presets.def: versions 0 / 1 / 2 records of 0x1B0 / 0x1B4 / 0x1B8 bytes; the
+    profile's user_presets.def: at most 24, count / 4 a row into the defaults' rows of six; none:
+    SaveUser, false), SaveUser 0x0067dc30 (version 3, whole records; CREATE_ALWAYS), CreateUserPresets
+    0x0067def0 (Axis_ / Allied_ / Deadmatch_user_preset1..6 with texts 0x1982..0x1993, User_preset1..6),
+    GetPreset / GetUserPreset 0x0067de40 / 0x0067de90 (the nth with all the flags). The game's
+    presets.def: version 2, 65 records, exactly the file's size.
+  - C_MissionItems (0x2AC bytes): the first record of each operation (50, -1; a campaign's from its
+    index * 30) and 120 records (S_MissionItems, 0x8C: a kind 4, ten 12-byte slots of -1, a vector of
+    pairs; 0x0067e850 its insert). Setup 0x0067e500 (a record per mission of the current campaign's
+    operations), Load 0x0067e650 (GameData\miss_itm.def: a header of 0x3C bytes in version 1, else
+    200; per record absent (cleared) or its kind, slots and pairs; the game's file: version 1, 60
+    records, read to its end), Release 0x0067e490.
+  - Fixes: the user presets' rows divided by zero for fewer than four; miss_itm.def's records past
+    120 and slots past ten were read past their arrays.
+  - Harness: loadout_test.inc in the factory build (check_loadout.py, "loadout:", 10 checks): the
+    files car_stubs' memory files, the campaign zeroed memory (its counts faked), the stub profile.h's
+    GetProfileDirectory / m_campaign added, car_stubs' dtaOpenWrite able to fail (g_dtaOpenWriteFails). 22 of 22 in both orders (the other factory lines too).
+  - Mutations: mutations/mutate_9e4.py (158 cases, 145 build, all caught but 19 equivalent).
+  - Build: MSVC clean. Tier 1: 429 errors in 75 files, 177 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/loadout_presets.txt (+19); 19 functions in ported.txt. Stats: 8,818 of 12,306 functions by hand (78.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

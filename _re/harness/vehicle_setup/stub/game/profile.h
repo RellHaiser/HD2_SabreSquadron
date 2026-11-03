@@ -49,6 +49,7 @@ public:
     C_KeyBindings m_keyBindings;
 };
 
+class C_Campaign;
 class C_HumanStore;
 struct S_MissionSquad;
 class C_GameProfile {
@@ -71,6 +72,9 @@ public:
     // (The equipment panel, part 9e-ii-a.)
     C_HumanStore *m_humanStore = nullptr;
     S_MissionSquad *m_missionSquad = nullptr;
+    // (The loadout presets and missions' items, part 9e-iv: loadout_test.inc.)
+    C_str GetProfileDirectory();
+    C_Campaign *m_campaign = nullptr;
 };
 extern C_GameProfile g_gameProfile;
 extern int g_versionMajor;

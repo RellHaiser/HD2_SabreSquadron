@@ -71,6 +71,7 @@ void MenuSoldierTest(I3D_scene *scene);
 void EquipmentPanelTest(I3D_scene *scene);
 void EquipmentDescTest(I3D_scene *scene);
 void StoreListTest(I3D_scene *scene);
+void LoadoutTest(I3D_scene *scene);
 
 namespace {
 
@@ -1038,6 +1039,7 @@ void ControlsTest()
     EquipmentPanelTest(scene);
     EquipmentDescTest(scene);
     StoreListTest(scene);
+    LoadoutTest(scene);
 #endif
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
@@ -1073,4 +1075,5 @@ void ControlsTest()
 #include "equipment_panel_test.inc"
 #include "equipment_desc_test.inc"
 #include "store_list_test.inc"
+#include "loadout_test.inc"
 #endif

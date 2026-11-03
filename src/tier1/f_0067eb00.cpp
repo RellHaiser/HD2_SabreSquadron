@@ -62,7 +62,7 @@ C_GameMenu * C_GameMenu__C_GameMenu(C_GameMenu *_this, ...)
   _this->_pad_0138[0x8b] = 0xff;
   _this->vtable = (C_GameMenu_vtbl *)&PTR_008157d8;
   local_4 = 0;
-  FUN_0067e460((uint32_t *)(_this->_pad_0138 + 0xb8));
+  C_MissionItems__C_MissionItems(_this->_pad_0138 + 0xb8);
   _this->_pad_0138[0x364] = local_15;
   _this->_pad_0138[0x368] = '\0';
   _this->_pad_0138[0x369] = '\0';
@@ -90,7 +90,7 @@ C_GameMenu * C_GameMenu__C_GameMenu(C_GameMenu *_this, ...)
   _this->_pad_0138[0x382] = '\0';
   _this->_pad_0138[899] = '\0';
   GH_PIECE(local_4,0,1) = 3;
-  FUN_0067d960((int)(_this->_pad_0138 + 0x364));
+  C_LoadoutPresets__Load(_this->_pad_0138 + 0x364);
   _this->m_4dc = (int)&PTR_008157cc;
   _this->_pad_04e8[0] = '\0';
   _this->_pad_04e8[1] = '\0';
@@ -185,7 +185,7 @@ C_GameMenu * C_GameMenu__C_GameMenu(C_GameMenu *_this, ...)
   _this->_pad_0138[0xb3] = '\0';
   local_4 = CONCAT31(GH_PIECE(local_4,1,3),6);
   if (((uint8_t)g_gameRole & 7) == 7) {
-    FUN_0067e500((int)(_this->_pad_0138 + 0xb8));
+    C_MissionItems__Setup(_this->_pad_0138 + 0xb8);
   }
   return _this;
 }
@@ -387,16 +387,16 @@ uint32_t FUN_0067f3c0(void *_this, ...)
 // 0x0067f3f0
 uint32_t FUN_0067f3f0(int param_1, ...)
 {
-  void *ptr;
+  void *record;
   int iVar1;
   uint32_t *puVar2;
   puVar2 = (uint32_t *)(param_1 + 200);
   iVar1 = 0x78;
   do {
-    ptr = (void *)*puVar2;
-    if (ptr != 0) {
-      FUN_0067e4d0((int)ptr);
-      tier1_operator_delete(ptr);
+    record = (void *)*puVar2;
+    if (record != 0) {
+      S_MissionItems___S_MissionItems(record);
+      tier1_operator_delete(record);
       *puVar2 = 0;
     }
     puVar2++;
@@ -411,7 +411,7 @@ uint32_t FUN_0067f400(int param_1, ...)
 {
   uint32_t local_4;
   local_4 = 1;
-  FUN_0067d4d0(param_1);
+  C_LoadoutPresets__Clear((void *)param_1);
   tier1_operator_delete(*(void **)(param_1 + 0x14));
   *(uint32_t *)(param_1 + 0x14) = 0;
   *(uint32_t *)(param_1 + 0x18) = 0;
@@ -465,7 +465,7 @@ uint32_t C_GameMenu__FUN_0067f4a0(C_GameMenu *_this, ...)
   _this->_pad_0548[0x4b] = '\0';
   _this->m_4dc = (int)&PTR_008157cc;
   GH_PIECE(local_4,0,1) = 3;
-  FUN_0067d4d0((int)(_this->_pad_0138 + 0x364));
+  C_LoadoutPresets__Clear(_this->_pad_0138 + 0x364);
   tier1_operator_delete(*(void **)(_this->_pad_0138 + 0x378));
   _this->_pad_0138[0x378] = '\0';
   _this->_pad_0138[0x379] = '\0';
@@ -495,7 +495,7 @@ uint32_t C_GameMenu__FUN_0067f4a0(C_GameMenu *_this, ...)
   _this->_pad_0138[0x372] = '\0';
   _this->_pad_0138[0x373] = '\0';
   local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
-  FUN_0067e490((int)(_this->_pad_0138 + 0xb8));
+  C_MissionItems__Release(_this->_pad_0138 + 0xb8);
   _this->vtable = (C_GameMenu_vtbl *)&PTR_00815850;
   g_menuState = 0;
   local_4 = 8;

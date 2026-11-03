@@ -1976,7 +1976,7 @@ uint32_t FUN_00685ab0(void *_this,int param_1, ...)
 uint32_t FUN_00685da0(int param_1, ...)
 {
   int iVar1;
-  int iVar2;
+  void *pvVar2;
   char *pcVar3;
   C_game *pCVar4;
   C_CampaignNode **ppCVar5;
@@ -2043,11 +2043,11 @@ uint32_t FUN_00685da0(int param_1, ...)
   }
   uVar8 |= 2;
   local_44 = uVar8;
-  iVar2 = FUN_0067de90((void *)(param_1 + 0x49c),0,uVar8);
+  pvVar2 = C_LoadoutPresets__GetUserPreset((void *)(param_1 + 0x49c),0,uVar8);
   iVar1 = 1;
-  while (iVar2 != 0) {
-    if (*(int *)(iVar2 + 0x1b0) == -1) {
-      pcVar3 = (char *)identity_6861a0(iVar2);
+  while (pvVar2 != 0) {
+    if (*(int *)((int)pvVar2 + 0x1b0) == -1) {
+      pcVar3 = (char *)identity_6861a0(pvVar2);
       C_fstr_Construct(&local_40,pcVar3);
       local_24 = *(uint32_t *)(param_1 + 0x1dc);
       local_10.rep = 0;
@@ -2070,7 +2070,7 @@ uint32_t FUN_00685da0(int param_1, ...)
       local_38 = 0x1000017;
       local_34 = 0x13;
       local_4 = 3;
-      local_30 = *(int *)(iVar2 + 0x1b0);
+      local_30 = *(int *)((int)pvVar2 + 0x1b0);
       PostControlMessage(&DAT_008ae590,&local_3c);
       CVar7.rep = local_28;
     }
@@ -2080,13 +2080,13 @@ uint32_t FUN_00685da0(int param_1, ...)
        (C_str_rep *)(CVar7.rep)->refCount == 0)) {
       tier1_operator_delete(CVar7.rep);
     }
-    iVar2 = FUN_0067de90((void *)(param_1 + 0x49c),iVar1,local_44);
+    pvVar2 = C_LoadoutPresets__GetUserPreset((void *)(param_1 + 0x49c),iVar1,local_44);
     uVar8 = local_44;
     iVar1++;
   }
   *(uint32_t *)(param_1 + 0x4c0) = 0;
   local_40.rep = (C_str_rep *)0x1;
-  pcVar3 = (char *)FUN_0067de40((void *)(param_1 + 0x49c),0,uVar8);
+  pcVar3 = C_LoadoutPresets__GetPreset((void *)(param_1 + 0x49c),0,uVar8);
   while (pcVar3 != 0) {
     pCVar4 = GetGame();
     ppCVar5 = pCVar4->m_mission[1].m_children.last;
@@ -2139,7 +2139,7 @@ uint32_t FUN_00685da0(int param_1, ...)
     }
     CVar7.rep = local_40.rep;
     local_40.rep = (C_str_rep *)((int)&(local_40.rep)->refCount + 1);
-    pcVar3 = (char *)FUN_0067de40((void *)(param_1 + 0x49c),(int)CVar7.rep,uVar8);
+    pcVar3 = C_LoadoutPresets__GetPreset((void *)(param_1 + 0x49c),(int)CVar7.rep,uVar8);
   }
   return 0;
 }

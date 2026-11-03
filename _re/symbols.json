@@ -31581,6 +31581,16 @@
   "name": "AddDescMessage4_676410",
   "proto": "void __cdecl AddDescMessage4_676410(void * desc, uint target, uint id, uint value, uint value2)"
  },
+ "0067a3c0": {
+  "module": "loadout_presets",
+  "name": "S_PresetItem::Reset",
+  "proto": "void __fastcall Reset(void * item)"
+ },
+ "0067a3d0": {
+  "module": "loadout_presets",
+  "name": "S_LoadoutPreset::ClearPlaces",
+  "proto": "void __fastcall ClearPlaces(void * preset)"
+ },
  "0067a950": {
   "module": "zz_idioms",
   "name": "vector_at_e8_67a950"
@@ -31662,8 +31672,53 @@
   "name": "C_StoreList::SetActive",
   "proto": "void __thiscall SetActive(void *this, bool on)"
  },
+ "0067d450": {
+  "module": "loadout_presets",
+  "name": "S_LoadoutPreset::CountItems",
+  "proto": "int __thiscall CountItems(void *this, int typeId)"
+ },
+ "0067d4d0": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::Clear",
+  "proto": "void __fastcall Clear(void * presets)"
+ },
+ "0067d580": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::AddPreset",
+  "proto": "void __fastcall AddPreset(void * presets)"
+ },
+ "0067d770": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::AddUserPreset",
+  "proto": "void __fastcall AddUserPreset(void * presets)"
+ },
+ "0067d960": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::Load",
+  "proto": "bool __fastcall Load(void * presets)"
+ },
+ "0067dc30": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::SaveUser",
+  "proto": "bool __fastcall SaveUser(void * presets)"
+ },
+ "0067de40": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::GetPreset",
+  "proto": "void * __thiscall GetPreset(void *this, int index, uint flags)"
+ },
+ "0067de90": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::GetUserPreset",
+  "proto": "void * __thiscall GetUserPreset(void *this, int index, uint flags)"
+ },
+ "0067def0": {
+  "module": "loadout_presets",
+  "name": "C_LoadoutPresets::CreateUserPresets",
+  "proto": "void __fastcall CreateUserPresets(void * presets)"
+ },
  "0067e380": {
-  "module": "zz_idioms",
+  "module": "loadout_presets",
   "name": "vector_size_e4_67e380"
  },
  "0067e3a0": {
@@ -31671,8 +31726,38 @@
   "name": "empty_function_67e3a0"
  },
  "0067e3b0": {
-  "module": "zz_idioms",
+  "module": "loadout_presets",
   "name": "uninitialized_fill_n4_67e3b0"
+ },
+ "0067e460": {
+  "module": "loadout_presets",
+  "name": "C_MissionItems::C_MissionItems",
+  "proto": "void * __fastcall C_MissionItems(void * items)"
+ },
+ "0067e490": {
+  "module": "loadout_presets",
+  "name": "C_MissionItems::Release",
+  "proto": "void __fastcall Release(void * items)"
+ },
+ "0067e4d0": {
+  "module": "loadout_presets",
+  "name": "S_MissionItems::~S_MissionItems",
+  "proto": "void __fastcall ~S_MissionItems(void * record)"
+ },
+ "0067e500": {
+  "module": "loadout_presets",
+  "name": "C_MissionItems::Setup",
+  "proto": "void __fastcall Setup(void * items)"
+ },
+ "0067e650": {
+  "module": "loadout_presets",
+  "name": "C_MissionItems::Load",
+  "proto": "bool __fastcall Load(void * items)"
+ },
+ "0067e850": {
+  "module": "loadout_presets",
+  "name": "MissionItemPairs_Insert",
+  "proto": "void __thiscall MissionItemPairs_Insert(void *this, void * where, uint count, void * value)"
  },
  "0067eb40": {
   "module": "game",

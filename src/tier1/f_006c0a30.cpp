@@ -543,7 +543,7 @@ uint8_t * FUN_006c1db0(uint8_t *param_1, ...)
   *(uint32_t *)(param_1 + 0x18) = 0;
   *(uint32_t *)(param_1 + 0x1c) = 0;
   local_4 = 1;
-  FUN_0067d960((int)param_1);
+  C_LoadoutPresets__Load(param_1);
   return param_1;
 }
 
@@ -584,7 +584,7 @@ uint32_t C_EquipmentMenu__dtor_C_EquipmentMenu(C_EquipmentMenu *_this, ...)
   _this->m_1b4 = 0;
   GH_PIECE(local_4,0,1) = 5;
   GH_PIECE(local_4,1,3) = 0;
-  FUN_0067d4d0((int)&_this->m_558);
+  C_LoadoutPresets__Clear(&_this->m_558);
   GH_PIECE(local_4,0,1) = 4;
   empty_function_67e3a0();
   tier1_operator_delete(*(void **)(_this->_pad_0564 + 8));
@@ -603,7 +603,7 @@ uint32_t C_EquipmentMenu__dtor_C_EquipmentMenu(C_EquipmentMenu *_this, ...)
   GH_PIECE(local_4,0,1) = 3;
   vector_tidy_67a960((int)&_this->m_558);
   local_4 = CONCAT31(GH_PIECE(local_4,1,3),2);
-  FUN_0067e490((int)(_this->_pad_029c + 0x10));
+  C_MissionItems__Release(_this->_pad_029c + 0x10);
   *(uint8_t ***)(_this->_pad_023c + 0x38) = &PTR_008157c4;
   tier1_operator_delete(*(void **)(_this->_pad_023c + 0x40));
   _this->_pad_023c[0x40] = '\0';

@@ -1739,56 +1739,57 @@ uint32_t C_EquipmentMenu__FUN_006755f0(C_EquipmentMenu *_this, ...)
 // 0x006758f0
 uint32_t C_EquipmentMenu__FUN_006758f0(C_EquipmentMenu *_this,void *param_1,int *param_2, ...)
 {
+  void *this_00;
   void *pvVar1;
+  void *desc;
   int iVar2;
-  void *pvVar3;
-  int *piVar4;
-  pvVar3 = param_1;
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bassign to all");
+  int *piVar3;
+  this_00 = param_1;
+  pvVar1 = S_ScreenDesc__AddControl(param_1,0x14,"bassign to all");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,0xab0);
   AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x677880);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_inventory");
+  pvVar1 = S_ScreenDesc__AddControl(param_1,0x13,"text_inventory");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xaa8);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x11,"soldier type");
-  AddDescMessage3(pvVar1,0,0x1000007,0x400e000,(uint32_t)_this,0x677870);
-  AddDescMessage2(pvVar1,0,0x1000081,0xc,500);
-  AddDescMessage2(pvVar1,0,0x1000017,0x13,500);
+  desc = S_ScreenDesc__AddControl(param_1,0x11,"soldier type");
+  AddDescMessage3(desc,0,0x1000007,0x400e000,(uint32_t)_this,0x677870);
+  AddDescMessage2(desc,0,0x1000081,0xc,500);
+  AddDescMessage2(desc,0,0x1000017,0x13,500);
   param_1 = (void *)0x1;
-  iVar2 = FUN_0067de40(&_this->m_558,0,5);
-  while (iVar2 != 0) {
-    AddDescMessage2(pvVar1,0,0x1000017,0x13,*(uint32_t *)(iVar2 + 0x1b0));
-    iVar2 = FUN_0067de40(&_this->m_558,(int)param_1,5);
+  pvVar1 = C_LoadoutPresets__GetPreset(&_this->m_558,0,5);
+  while (pvVar1 != 0) {
+    AddDescMessage2(desc,0,0x1000017,0x13,*(uint32_t *)((int)pvVar1 + 0x1b0));
+    pvVar1 = C_LoadoutPresets__GetPreset(&_this->m_558,(int)param_1,5);
     param_1 = (void *)((int)param_1 + 1);
   }
-  S_ScreenDesc__AddControl(pvVar3,0x12,"text_mission essentials");
-  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x13,"text_screen");
+  S_ScreenDesc__AddControl(this_00,0x12,"text_mission essentials");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x13,"text_screen");
   AddDescMessage2(pvVar1,0,0x1000015,10,(_this->m_020 != 3) + 0xa8d);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x13,"text_military storages");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x13,"text_military storages");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xa93);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x13,"text_team");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x13,"text_team");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xa92);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x14,"baccept and continue");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x14,"baccept and continue");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,(-(uint32_t)(_this->m_020 != 3) & 0x21) + 0xa90);
   AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x678000);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x14,"bauto equip");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x14,"bauto equip");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,0xa8f);
   AddDescMessage1(pvVar1,0,0x600100b,0);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x14,"bback");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x14,"bback");
   AddDescMessage2(pvVar1,0,0x1000015,0xd,0xa91);
   AddDescMessage1(pvVar1,0,0x600100a,0);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x13,"text_h&dversion");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x13,"text_h&dversion");
   AddDescMessage2(pvVar1,0,0x1000015,0x28,0x7d6);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(pvVar3,0x13,"text_assortment");
+  pvVar1 = S_ScreenDesc__AddControl(this_00,0x13,"text_assortment");
   AddDescMessage2(pvVar1,0,0x1000015,0xb,0xaa6);
   iVar2 = (**(code **)(*param_2 + 0x48))(param_2,"description",1);
   if (iVar2 != 0) {
-    pvVar3 = (void *)S_ScreenDesc__AddControl(pvVar3,0x15,"description");
-    AddDescMessage2(pvVar3,0,0x1000015,0xb,0x7d2);
-    _this->m_1b0 = *(uint32_t *)((int)pvVar3 + 8);
+    pvVar1 = S_ScreenDesc__AddControl(this_00,0x15,"description");
+    AddDescMessage2(pvVar1,0,0x1000015,0xb,0x7d2);
+    _this->m_1b0 = *(uint32_t *)((int)pvVar1 + 8);
   }
-  piVar4 = (int *)(**(code **)(*param_2 + 0x48))(param_2,"text_mission essentials",1);
-  if (piVar4 != 0) {
-    (**(code **)(*piVar4 + 0x30))(piVar4,0);
+  piVar3 = (int *)(**(code **)(*param_2 + 0x48))(param_2,"text_mission essentials",1);
+  if (piVar3 != 0) {
+    (**(code **)(*piVar3 + 0x30))(piVar3,0);
   }
   return 1;
 }

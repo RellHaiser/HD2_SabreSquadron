@@ -145,8 +145,11 @@ int __stdcall dtaOpen(const char *fileName, bool archivesFirst)
     g_handles[g_nextHandle] = {fileName, 0};
     return g_nextHandle++;
 }
+bool g_dtaOpenWriteFails;                              // dtaOpenWrite fails (part 9e-iv's test)
 int __stdcall dtaOpenWrite(const char *fileName, int)
 {
+    if (g_dtaOpenWriteFails)
+        return -1;
     g_files[fileName].clear();
     g_handles[g_nextHandle] = {fileName, 0};
     return g_nextHandle++;
