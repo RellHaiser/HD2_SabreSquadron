@@ -7353,6 +7353,32 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e-x: the options screen's builder 0x0061cfc0; then the player screen's, the squad glue
     and the item slots.
 
+  PART 9e-x DONE (2026-11-02): the options screen's description (C_OptionsHandler::BuildScreen
+  0x0061cfc0, OnShown 0x00620530; game/options_handler.cpp).
+  - BuildScreen: a dummy "GROptions" under the model (the menu's AddFrame); the pages' buttons
+    ("bvideo setup", "bsound setup", "bcontrols", "bgame setup", "bmultiplayer setup", "bback";
+    dummies) found, "text_min norm max02" put where "text_min norm max" is (visuals); any button
+    missing: false, nothing described; else the buttons moved under the group, the screen's index
+    kept (+0x09), the screen's shown callback (OnShown), text_screen / text_date00 / text_date01 /
+    text_profile00 (0x961..0x964), the group GROptions (type 5) with the buttons (0x965..0x96A;
+    a click shows the page 0x600000 / 0x700000 / 0x800000 / 0xA00000 / 0xB00000, back posts
+    0x20000C4), the five pages (0x0061dc20, 0x0061e1a0, 0x0061e3f0, 0x0061f230, 0x0061f3b0: not
+    ported yet), the version's text. True.
+  - OnShown: the player's name (none: text 0x7E4) on the screen's third control, style 0xC.
+  - The click routes named: the menus' messages "with bits 0x04001000" are CONTROL_NOTIFY_CLICK
+    routes (game_menu.cpp's CLICK).
+  - Harness: options_test.inc's opBuild, opBuildFail, opShown (11 checks now; menu_soldier_test.inc's
+    frames and child lookup, menu_run_test.inc's frame factory; the pages and the player's name
+    faked); game_menu_test.inc's builds run the real BuildScreen (no children found: false).
+    22 of 22 in both orders (the other factory lines too).
+  - Mutations: mutations/mutate_9e10.py (91 cases, 85 build, all caught but 2 equivalent).
+  - Build: MSVC clean. Tier 1: 422 errors in 75 files, 174 stubs (425 / 175 before). ret_audit --src: 52.
+  - Ghidra: names/options_handler.txt (+2, 5 for the pages); 2 functions in ported.txt. Stats:
+    8,844 of 12,306 functions by hand (78.9 % by size).
+  - Next, 9e-xi: the options screen's pages (video 0x0061dc20, sound 0x0061e1a0, controls 0x0061e3f0,
+    game 0x0061f230, multiplayer 0x0061f3b0) and their callbacks (0x006204a0 the check boxes'); then
+    the player screen, the squad glue and the item slots.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

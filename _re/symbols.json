@@ -27400,10 +27400,40 @@
   "name": "S_ControlDesc::AddChild",
   "proto": "void * __thiscall AddChild(void *this, int type, char * name)"
  },
+ "0061dc20": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildVideoPage",
+  "proto": "bool __thiscall BuildVideoPage(void *this, void * desc, void * model)"
+ },
  "0061e100": {
   "module": "control",
   "name": "AddDescMessage3",
   "proto": "void __cdecl AddDescMessage3(void * desc, uint target, uint id, uint value, uint value2, uint value3)"
+ },
+ "0061e1a0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildSoundPage",
+  "proto": "bool __thiscall BuildSoundPage(void *this, void * desc, void * model)"
+ },
+ "0061e3f0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildControlsPage",
+  "proto": "bool __thiscall BuildControlsPage(void *this, void * desc, void * model)"
+ },
+ "0061f230": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildGamePage",
+  "proto": "bool __thiscall BuildGamePage(void *this, void * desc, void * model)"
+ },
+ "0061f3b0": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::BuildMultiplayerPage",
+  "proto": "bool __thiscall BuildMultiplayerPage(void *this, void * desc, void * model)"
+ },
+ "00620530": {
+  "module": "options_handler",
+  "name": "C_OptionsHandler::OnShown",
+  "proto": "bool __thiscall OnShown(void *this, void * argument, void * control, uint notification, uint value)"
  },
  "00620770": {
   "module": "zz_idioms",

@@ -1,4 +1,4 @@
-"""Checks the factory build's options line (harness_factory.exe, FACTORY_TEST; part 9e-viii).
+"""Checks the factory build's options line (harness_factory.exe, FACTORY_TEST; parts 9e-viii and 9e-x).
 
     python check_options.py MISSIONS_TXT_DIR HARNESS_OUTPUT
 
@@ -8,7 +8,7 @@ lines are not checked (check_text.py's). Prints "N models, M with differences" (
 import re
 import sys
 
-CHECKS = "opNew opEscape opSave opOpen opFill opRefresh opLeave opUnbound".split()
+CHECKS = "opNew opEscape opSave opOpen opFill opRefresh opLeave opUnbound opBuild opBuildFail opShown".split()
 
 
 def main():

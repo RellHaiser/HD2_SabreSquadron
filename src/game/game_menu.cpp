@@ -42,8 +42,8 @@ constexpr uint32_t PLAYER_SCREEN = 3;
 constexpr int CONTROL_BUTTON = 0x14, CONTROL_TEXT = 0x13;
 constexpr uint32_t BUTTON_STYLE = 0xD, VERSION_STYLE = 0x28;
 constexpr uint32_t TEXT_VERSION = 0x7D6;
-// What the buttons post (the menu's messages with bits 0x04001000).
-constexpr uint32_t CLICK = 0x4001000;
+// What the buttons post when clicked: their routes (CONTROL_NOTIFY_CLICK | the message).
+constexpr uint32_t CLICK = CONTROL_NOTIFY_CLICK;
 // The options handler's opening of its screen (options_handler.cpp).
 constexpr uint32_t OPTIONS_MSG_OPEN = 0x2000071;
 

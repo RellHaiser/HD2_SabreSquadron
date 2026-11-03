@@ -17,18 +17,12 @@ int g_gmDifficulty;
 int C_GameProfile::GetDifficulty() const { return g_gmDifficulty; }
 bool g_gmCanQuickSave = true;
 bool C_game::CanQuickSave() const { return g_gmCanQuickSave; }
-// (Their descriptions' names and control counts, their models; the options' made inactive by a
-// screen message.)
+// (Its description's name and control count, its model; the screen made inactive by a screen
+// message.)
 std::string MrFrameName(const void *frame);
 bool C_GameMenu::BuildPlayerScreen(S_ScreenDesc *desc, I3D_frame *model)
 {
     GfLog("build player %s %d %s", desc->name.c_str(), static_cast<int>(desc->controls.size()),
-          model ? MrFrameName(model).c_str() : "none");
-    return true;
-}
-bool C_OptionsHandler::BuildScreen(S_ScreenDesc *desc, I3D_frame *model)
-{
-    GfLog("build options %s %d %s", desc->name.c_str(), static_cast<int>(desc->controls.size()),
           model ? MrFrameName(model).c_str() : "none");
     S_ControlMessage inactive;
     inactive.id = CONTROL_MSG_DEACTIVATE;
@@ -993,6 +987,11 @@ void GameMenuTest(I3D_scene *scene)
         // --- the screens built: their models loaded (named), the builders, the screens made (their
         // descriptions' messages handled), the first opened; a model not loaded: no screen ---
         // (menu_run_test.inc's frames made, the cache filling nothing.)
+        // (The options' builder: the models' children looked up (none), the group's frames
+        // menu_soldier_test.inc's.)
+        void *const oldFind = g_mrModelVt[0x48 / 4], *const oldSetPos = g_msFrameVt[0x08 / 4];
+        g_mrModelVt[0x48 / 4] = reinterpret_cast<void *>(&MsFind);
+        g_msFrameVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
         void *const oldCreate = g_driverVtable[0x54 / 4];
         g_driverVtable[0x54 / 4] = reinterpret_cast<void *>(&MrCreateFrame);
         void (*const oldFill)(I3D_model *) = g_cacheFill;
@@ -1008,15 +1007,16 @@ void GameMenuTest(I3D_scene *scene)
             m.m_screens = {&box};
             S_MrObj *ma = MrObj("gmma", g_mrModelVt), *mo = MrObj("gmmo", g_mrModelVt);
             g_mrMade[FRAME_MODEL] = {ma, mo};
+            g_mrMade[FRAME_DUMMY] = {MsFrame("gmgroup")};
             g_gfLog.clear();
             g_menuScreens.clear();
             okb &= m.BuildScreens() && MrHas("gmma 34 MAIN_INGAME_MENU") && MrHas("gmmo 34 OPTIONS") &&
-                   MrHas("build options OPTIONS 0 gmmo") && logHas("build player") == 0 && logHas("build options") == 1 &&
-                   m.m_screens.size() == 3 && m.m_screens[2]->m_inactive && !m.m_screens[1]->m_inactive &&
+                   MrHas("gmmo 48 bvideo setup 20") && MrHas("gmgroup 34 GROptions") && logHas("build player") == 0 &&
+                   m.m_screens.size() == 3 && !m.m_screens[1]->m_inactive && !m.m_screens[2]->m_inactive &&
                    m.m_screens[1]->m_scene == m.m_scene && m.m_screens[2]->m_scene == m.m_scene &&
                    m.m_screens[1]->GetId() == 1u << 26 && m.m_screens[2]->GetId() == 2u << 26 &&
                    m.m_screens[1]->GetScreenFrame() == As<I3D_frame>(ma) && m.m_screens[2]->GetScreenFrame() == As<I3D_frame>(mo) &&
-                   m.m_models.size() == 2 && !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1];
+                   m.m_models.size() == 3 && !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1];
             // (The main screen's controls made from its description: the version's text among them.)
             okb &= static_cast<C_ControlGroup *>(m.m_screens[1])->m_children.size() <= 8;
             for (size_t i = 1; i < m.m_screens.size(); ++i)
@@ -1029,11 +1029,12 @@ void GameMenuTest(I3D_scene *scene)
             n.m_screens = {&box};
             S_MrObj *na = MrObj("gmna", g_mrModelVt), *no = MrObj("gmno", g_mrModelVt);
             g_mrMade[FRAME_MODEL] = {na, no};
+            g_mrMade[FRAME_DUMMY] = {MsFrame("gmngroup")};
             g_cacheFailName = "options";
             g_gfLog.clear();
             // (Single player in the warmup's menu: the main screen first still.)
             n.m_startArg = reinterpret_cast<void *>(static_cast<intptr_t>(-2));
-            okb &= n.BuildScreens() && logHas("build options") == 0 && n.m_screens.size() == 2 &&
+            okb &= n.BuildScreens() && logHas("gmno 48") == 0 && n.m_screens.size() == 2 &&
                    n.m_screens[1]->GetId() == 1u << 26 && !g_menuScreens.empty() && g_menuScreens.back() == n.m_screens[1];
             n.m_startArg = nullptr;
             g_cacheFailName.clear();
@@ -1061,11 +1062,12 @@ void GameMenuTest(I3D_scene *scene)
             m.m_screens = {&box};
             S_MrObj *a = MrObj("gmca", g_mrModelVt), *o = MrObj("gmco", g_mrModelVt), *p = MrObj("gmcp", g_mrModelVt);
             g_mrMade[FRAME_MODEL] = {a, o, p};
+            g_mrMade[FRAME_DUMMY] = {MsFrame("gmcgroup")};
             g_cacheLoads.clear();
             g_gfLog.clear();
             g_menuScreens.clear();
             okb &= m.BuildScreens() && MrHas("gmcp 34 PLAYER_SCREEN") && MrHas("build player PLAYER_SCREEN 0 gmcp") &&
-                   MrHas("build options OPTIONS 0 gmco") && logHas("build") == 2 &&
+                   MrHas("gmco 48 bvideo setup 20") && logHas("build") == 1 && m.m_screens[3]->m_inactive &&
                    m.m_screens.size() == 4 && m.m_screens[3]->GetId() == 3u << 26 && !g_menuScreens.empty() &&
                    g_menuScreens.back() == m.m_screens[coop ? 3 : 1];
             okb &= !g_cacheLoads.empty() && g_cacheLoads.back() == (coop ? "player_screen_2" : "player_screen");
@@ -1079,6 +1081,8 @@ void GameMenuTest(I3D_scene *scene)
         }
         g_cacheFill = oldFill;
         g_driverVtable[0x54 / 4] = oldCreate;
+        g_mrModelVt[0x48 / 4] = oldFind;
+        g_msFrameVt[0x08 / 4] = oldSetPos;
         g_gameRole = GAME_ROLE_CLIENT;
         game->m_mission = oldMission;
     }

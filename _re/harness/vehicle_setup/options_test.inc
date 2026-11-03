@@ -2,6 +2,8 @@
 // after GameMenuTest: a menu_test.inc menu (its screens' controls), the player's saving and key
 // bindings logging fakes, world_modules_test.inc's detail settings, IGraph's info. Prints "options:"
 // with 1 per check met.
+#include <functional>
+
 #define private public
 #include "game/options_handler.h"
 #undef private
@@ -9,6 +11,35 @@
 // The player's options saved and applied; the key bindings' unbound function, its text, group and
 // place in it.
 int g_opUnbound = -1, g_opText, g_opGroup, g_opPosition;
+// (Part 9e-x: the player's name; the pages' builders not ported yet: logged.)
+C_str g_opName;
+C_str C_PlayerProfile::GetName() const { return g_opName; }
+std::string MrFrameName(const void *frame);
+bool C_OptionsHandler::BuildVideoPage(S_ScreenDesc *desc, I3D_frame *model)
+{
+    GfLog("page video %d %s", static_cast<int>(desc->controls.size()), MrFrameName(model).c_str());
+    return true;
+}
+bool C_OptionsHandler::BuildSoundPage(S_ScreenDesc *, I3D_frame *)
+{
+    GfLog("page sound");
+    return true;
+}
+bool C_OptionsHandler::BuildControlsPage(S_ScreenDesc *, I3D_frame *)
+{
+    GfLog("page controls");
+    return true;
+}
+bool C_OptionsHandler::BuildGamePage(S_ScreenDesc *, I3D_frame *)
+{
+    GfLog("page game");
+    return true;
+}
+bool C_OptionsHandler::BuildMultiplayerPage(S_ScreenDesc *, I3D_frame *)
+{
+    GfLog("page multiplayer");
+    return true;
+}
 bool C_PlayerProfile::SaveOptions()
 {
     GfLog("save options");
@@ -33,7 +64,7 @@ namespace {
 
 struct S_OptionsResults {
     bool opNew = true, opEscape = true, opSave = true, opOpen = true, opFill = true, opRefresh = true, opLeave = true;
-    bool opUnbound = true;
+    bool opUnbound = true, opBuild = true, opBuildFail = true, opShown = true;
 };
 
 S_IGraphInfo g_opInfo;
@@ -234,12 +265,122 @@ void OptionsTest(I3D_scene *scene)
         WM(r.opUnbound, ok);
     }
 
+    // --- the screen described (part 9e-x): the group's dummy frame under the model, the pages' buttons
+    // found (dummies) and moved under it, the second limits text where the first is; the screen's
+    // index kept, the shown callback, the texts, the group's buttons (their pages shown on a click;
+    // back: leaving), the pages, the version ---
+    // The log's lines starting with `prefix`.
+    const auto logHas = [](const char *prefix) {
+        return std::count_if(g_gfLog.begin(), g_gfLog.end(),
+                             [prefix](const std::string &line) { return line.rfind(prefix, 0) == 0; });
+    };
+    void *const oldCreate = g_driverVtable[0x54 / 4];
+    g_driverVtable[0x54 / 4] = reinterpret_cast<void *>(&MrCreateFrame);
+    void *const oldSetPos = g_msFrameVt[0x08 / 4];
+    g_msFrameVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+    // Its controls as "<name> <type> <id>: [@target] <id> <value> <value2>, ...{children}; ".
+    std::function<std::string(const std::vector<S_ControlDesc *> &)> describe = [&](const std::vector<S_ControlDesc *> &cs) {
+        std::string s;
+        for (const S_ControlDesc *c : cs) {
+            s += CmText("%s %x %x:", c->name.c_str(), c->type, c->id);
+            for (const S_ControlMessage &m : c->messages)
+                s += (m.target ? CmText(" @%x", m.target) : std::string()) + CmText(" %x %x %x", m.id, m.value, static_cast<uint32_t>(m.value2));
+            if (!c->children.empty())
+                s += " {" + describe(c->children) + "}";
+            s += "; ";
+        }
+        return s;
+    };
+    const char *const buttonNames[] = {"bvideo setup", "bsound setup", "bcontrols", "bgame setup", "bmultiplayer setup", "bback"};
+    {
+        bool ok = true;
+        S_MrObj *model = MsFrame("opmodel"), *group = MsFrame("opgroup"), *lim = MsFrame("oplim"), *lim2 = MsFrame("oplim2");
+        As<I3D_frame>(lim)->m_worldMatrix.m[3][0] = 2.0f;
+        As<I3D_frame>(lim)->m_worldMatrix.m[3][2] = -1.5f;
+        for (int i = 0; i < 6; ++i)
+            g_msChildren[{model, buttonNames[i]}] = MsFrame(CmText("opb%d", i).c_str());
+        g_msChildren[{model, "text_min norm max"}] = lim;
+        g_msChildren[{model, "text_min norm max02"}] = lim2;
+        g_mrMade[FRAME_DUMMY] = {group};
+        C_OptionsHandler b(&menu);
+        S_ScreenDesc desc("OPTIONS", "options", 2u << 26);
+        menu.m_models.clear();
+        g_gfLog.clear();
+        ok &= b.BuildScreen(&desc, As<I3D_frame>(model)) && b.m_screen == 2;
+        ok &= MrHas("opgroup 38 opmodel 0") && MrHas("opgroup 34 GROptions") && MrHas("opgroup 8 (0 0 0)") &&
+              MrHas("opmodel 48 bvideo setup 20") && MrHas("opmodel 48 text_min norm max 1") && MrHas("opmodel 48 text_min norm max02 1") &&
+              MrHas("oplim2 8 (2 0 -1.5)") && menu.m_models.size() == 1;
+        for (int i = 0; i < 6; ++i)
+            ok &= MrHas(CmText("opb%d 38 opgroup 1", i));
+        // The pages after the buttons, in order (the video page's with the group's 5 controls).
+        std::vector<std::string> pages;
+        for (const std::string &line : g_gfLog)
+            if (line.rfind("page ", 0) == 0)
+                pages.push_back(line);
+        ok &= pages == std::vector<std::string>({"page video 5 opmodel", "page sound", "page controls", "page game", "page multiplayer"});
+        ok &= desc.messages.size() == 1 && desc.messages[0].target == 0 && desc.messages[0].id == CONTROL_MSG_ADD_CALLBACK &&
+              desc.messages[0].value == CONTROL_NOTIFY_SHOWN && desc.messages[0].value2 == reinterpret_cast<uintptr_t>(&b) &&
+              desc.messages[0].value3 == reinterpret_cast<uintptr_t>(&C_OptionsHandler::OnShown);
+        ok &= describe(desc.controls) ==
+              "text_screen 13 8100000: 1000015 a 961; text_date00 13 8200000: 1000015 b 962; text_date01 13 8300000: 1000015 c 963; "
+              "text_profile00 13 8400000: 1000015 b 964; GROptions 5 8500000: {bvideo setup 14 8501000: 1000015 d 965 @8600000 5001003 0 0; "
+              "bsound setup 14 8502000: 1000015 d 966 @8700000 5001003 0 0; bcontrols 14 8503000: 1000015 d 967 @8800000 5001003 0 0; "
+              "bgame setup 14 8504000: 1000015 d 968 @8a00000 5001003 0 0; bmultiplayer setup 14 8505000: 1000015 d 969 @8b00000 5001003 0 0; "
+              "bback 14 8506000: 1000015 d 96a 60010c4 0 0; }; text_h&dversion 13 8600000: 1000015 28 7d6; ";
+        WM(r.opBuild, ok);
+        // Without the second limits text: not placed.
+        g_msChildren.erase({model, "text_min norm max02"});
+        g_mrMade[FRAME_DUMMY] = {MsFrame("opgroup2")};
+        S_ScreenDesc desc2("OPTIONS", "options", 3u << 26);
+        g_gfLog.clear();
+        ok = b.BuildScreen(&desc2, As<I3D_frame>(model)) && b.m_screen == 3 && logHas("oplim2 8") == 0 && desc2.controls.size() == 6;
+        WM(r.opBuild, ok);
+
+        // A button missing (any): false, nothing described, nothing moved (the group made all the same).
+        for (int missing = 0; missing < 6; ++missing) {
+            S_MrObj *const kept = g_msChildren[{model, buttonNames[missing]}];
+            g_msChildren.erase({model, buttonNames[missing]});
+            g_mrMade[FRAME_DUMMY] = {MsFrame(CmText("opgroupm%d", missing).c_str())};
+            C_OptionsHandler f(&menu);
+            S_ScreenDesc d("OPTIONS", "options", 2u << 26);
+            g_gfLog.clear();
+            bool okf = !f.BuildScreen(&d, As<I3D_frame>(model)) && f.m_screen == 0 && d.controls.empty() && d.messages.empty() &&
+                       logHas("page") == 0 && MrHas(CmText("opgroupm%d 34 GROptions", missing));
+            for (int i = 0; i < 6; ++i)
+                okf &= logHas(CmText("opb%d 38", i).c_str()) == 0;
+            g_msChildren[{model, buttonNames[missing]}] = kept;
+            WM(r.opBuildFail, okf);
+        }
+        g_msChildren.clear();
+        menu.m_models.clear();
+    }
+
+    // --- shown: the player's name on the third control (style 0xC); none: its text 0x7E4 ---
+    {
+        bool ok = true;
+        C_OptionsHandler s(&menu);
+        s.m_screen = 2;
+        g_controlMessages.clear();
+        g_opName = C_str("Kowalski");
+        ok &= C_OptionsHandler::OnShown(&s, nullptr, nullptr, CONTROL_NOTIFY_SHOWN, 0) &&
+              ScQueue() == "8300000 1000014 c 0 Kowalski; ";
+        g_opName = C_str();
+        ok &= C_OptionsHandler::OnShown(&s, nullptr, nullptr, CONTROL_NOTIFY_SHOWN, 0) && ScQueue() == "8300000 1000015 c 7e4 ; ";
+        g_opName = C_str("");
+        ok &= C_OptionsHandler::OnShown(&s, nullptr, nullptr, 0, 0) && ScQueue() == "8300000 1000015 c 7e4 ; ";
+        WM(r.opShown, ok);
+    }
+    g_msFrameVt[0x08 / 4] = oldSetPos;
+    g_driverVtable[0x54 / 4] = oldCreate;
+
     *options = oldOptions;
     g_opInfo.flags = 0;
     g_igraphVtable[0x04 / 4] = oldInfo;
     g_gameProfile.m_player = oldPlayer;
     g_gfLog.clear();
     g_controlMessages.clear();
-    std::printf("options: opNew %d opEscape %d opSave %d opOpen %d opFill %d opRefresh %d opLeave %d opUnbound %d\n",
-                r.opNew, r.opEscape, r.opSave, r.opOpen, r.opFill, r.opRefresh, r.opLeave, r.opUnbound);
+    std::printf("options: opNew %d opEscape %d opSave %d opOpen %d opFill %d opRefresh %d opLeave %d opUnbound %d "
+                "opBuild %d opBuildFail %d opShown %d\n",
+                r.opNew, r.opEscape, r.opSave, r.opOpen, r.opFill, r.opRefresh, r.opLeave, r.opUnbound, r.opBuild,
+                r.opBuildFail, r.opShown);
 }

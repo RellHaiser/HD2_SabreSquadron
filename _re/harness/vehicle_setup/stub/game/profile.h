@@ -53,6 +53,7 @@ public:
     // (The in-game menu, part 9e-v: game_menu_test.inc.)
     void ApplyVolume();
     // (The options handler, part 9e-viii: options_test.inc.)
+    C_str GetName() const;
     bool SaveOptions();
     void ApplyHardwareOption();
     C_KeyBindings m_keyBindings;

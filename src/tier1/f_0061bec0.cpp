@@ -35,366 +35,8 @@ uint32_t FUN_0061bef0(...)
 }
 
 
-// 0x0061cfc0
-bool C_OptionsHandler__BuildScreen(void *_this,void *desc,void *model, ...)
-{
-  C_str *pCVar1;
-  S_ControlDesc *pSVar2;
-  uint32_t *puVar3;
-  int iVar4;
-  uint32_t uVar5;
-  void *pvVar6;
-  void *pvVar7;
-  int *unaff_EDI;
-  void *pvVar8;
-  S_ControlDesc *pSStack_b0;
-  void *pvStack_ac;
-  int *piStack_a8;
-  S_ControlDesc *pSStack_a4;
-  int *piVar9;
-  S_ControlDesc *pSVar10;
-  int iStack_84;
-  I3D_frame *pIStack_80;
-  void *local_7c;
-  int iStack_78;
-  int iStack_74;
-  int iStack_70;
-  C_str local_6c;
-  int *piStack_68;
-  int *piStack_64;
-  uint32_t local_60;
-  uint32_t local_5c;
-  uint32_t local_58;
-  uint32_t local_14;
-  local_14 = 0xffffffff;
-  local_60 = 0;
-  local_5c = 0;
-  local_58 = 0;
-  local_7c = _this;
-  pCVar1 = C_fstr_Construct(&local_6c,"GROptions");
-  local_14 = 0;
-  pSStack_a4 = (S_ControlDesc *)0x61d02f;
-  pSVar2 = C_MenuState__AddFrame(*(C_MenuState **)((int)_this + 4),pCVar1,6,model,&local_60);
-  local_14 = 0xffffffff;
-  if ((local_6c.rep != 0) &&
-     ((local_6c.rep)->refCount = (int)((C_str_rep *)(local_6c.rep)->refCount)[-1].chars,
-     (C_str_rep *)(local_6c.rep)->refCount == 0)) {
-    tier1_operator_delete(local_6c.rep);
-  }
-  if (pSVar2 == 0) {
-    return false;
-  }
-  iStack_70 = (**(code **)(*(int *)model + 0x48))();
-  pSStack_a4 = (S_ControlDesc *)"bsound setup";
-  piStack_a8 = model;
-  pvStack_ac = (void *)0x61d07b;
-  (**(code **)(*(int *)model + 0x48))();
-  pvStack_ac = (void *)0x20;
-  pSStack_b0 = (S_ControlDesc *)"bcontrols";
-  (**(code **)(*(int *)model + 0x48))(model);
-  pSStack_a4 = (S_ControlDesc *)
-               (**(code **)(*(int *)model + 0x48))(model,"bgame setup",0x20);
-  pvStack_ac = (void *)(**(code **)(*(int *)model + 0x48))(model,"bmultiplayer setup",0x20)
-  ;
-  (**(code **)(*(int *)model + 0x48))(model,"bback",0x20);
-  (**(code **)(*(int *)model + 0x48))(model,"text_min norm max",1);
-  piStack_68 = (int *)(**(code **)(*(int *)model + 0x48))(model,"text_min norm max02",1);
-  if ((pIStack_80 != 0) && (piStack_68 != 0)) {
-    if ((pIStack_80->m_frameFlags & 0x20) == 0) {
-      I3D_frame__UpdateWMatrixProc(pIStack_80);
-    }
-    (**(code **)(*piStack_68 + 8))();
-  }
-  if (piStack_64 == 0) {
-    return false;
-  }
-  if (iStack_84 == 0) {
-    return false;
-  }
-  if (iStack_78 == 0) {
-    return false;
-  }
-  if (iStack_74 == 0) {
-    return false;
-  }
-  if (iStack_70 == 0) {
-    return false;
-  }
-  if (local_6c.rep == 0) {
-    return false;
-  }
-  pCVar1 = (C_str *)0x1;
-  pSVar10 = pSVar2;
-  (**(code **)(*piStack_64 + 0x38))();
-  piVar9 = (int *)0x1;
-  pvStack_ac = (void *)0x61d16f;
-  piStack_a8 = unaff_EDI;
-  pSStack_a4 = pSVar2;
-  (**(code **)(*unaff_EDI + 0x38))();
-  pvStack_ac = (void *)0x1;
-  pSStack_b0 = pSVar2;
-  (**(code **)(*unaff_EDI + 0x38))(unaff_EDI);
-  (*pSVar10->vtable[0xe].vf00)(pSVar10,pSVar2,1);
-  pvVar8 = (void *)0x1;
-  (**(code **)(*piVar9 + 0x38))(piVar9,pSVar2);
-  (**(code **)(*piStack_a8 + 0x38))(piStack_a8,pSVar2,1);
-  *(uint8_t *)((int)pvVar8 + 9) = (uint8_t)((uint32_t)*(uint32_t *)((int)desc + 0x40) >> 0x1a);
-  puVar3 = (uint32_t *)FUN_00614da0(&piStack_a8,0,0x1000007,0x400d000,pvVar8,FUN_00620530);
-  local_5c = 1;
-  FUN_00615d50((void *)((int)desc + 4),*(uint32_t **)((int)desc + 0xc),puVar3);
-  local_5c = 0xffffffff;
-  if ((pCVar1 != 0) &&
-     (pCVar1->rep = (C_str_rep *)pCVar1->rep[-1].chars, pCVar1->rep == 0)) {
-    tier1_operator_delete(pCVar1);
-  }
-  if (*(int *)((int)desc + 0x28) == 0) {
-    iVar4 = 0;
-  }
-  else {
-    iVar4 = *(int *)((int)desc + 0x2c) - *(int *)((int)desc + 0x28) >> 2;
-  }
-  pvStack_ac = (void *)(iVar4 + 1);
-  pSVar2 = tier1_operator_new(0x40);
-  local_5c = 2;
-  if (pSVar2 == 0) {
-    pSStack_b0 = 0;
-  }
-  else {
-    pSStack_b0 = S_ControlDesc__S_ControlDesc
-                           (pSVar2,0x13,"text_screen",
-                            ((uint32_t)pvStack_ac & 0x3f) << 0x14 | *(uint32_t *)((int)desc + 0x40));
-  }
-  local_5c = 0xffffffff;
-  FUN_00615f50((void *)((int)desc + 0x24),*(uint32_t **)((int)desc + 0x2c),(uint32_t*)(&pSStack_b0));
-  iVar4 = *(int *)(*(int *)((int)desc + 0x2c) - 4);
-  puVar3 = (uint32_t *)FUN_00614df0(&piStack_a8,0,0x1000015,10,0x961);
-  local_5c = 3;
-  FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar3);
-  local_5c = 0xffffffff;
-  if ((pCVar1 != 0) &&
-     (pCVar1->rep = (C_str_rep *)pCVar1->rep[-1].chars, pCVar1->rep == 0)) {
-    tier1_operator_delete(pCVar1);
-  }
-  if (*(int *)((int)desc + 0x28) == 0) {
-    iVar4 = 0;
-  }
-  else {
-    iVar4 = *(int *)((int)desc + 0x2c) - *(int *)((int)desc + 0x28) >> 2;
-  }
-  pvStack_ac = (void *)(iVar4 + 1);
-  pSVar2 = tier1_operator_new(0x40);
-  local_5c = 4;
-  if (pSVar2 == 0) {
-    pSStack_b0 = 0;
-  }
-  else {
-    pSStack_b0 = S_ControlDesc__S_ControlDesc
-                           (pSVar2,0x13,"text_date00",
-                            ((uint32_t)pvStack_ac & 0x3f) << 0x14 | *(uint32_t *)((int)desc + 0x40));
-  }
-  local_5c = 0xffffffff;
-  FUN_00615f50((void *)((int)desc + 0x24),*(uint32_t **)((int)desc + 0x2c),(uint32_t*)(&pSStack_b0));
-  iVar4 = *(int *)(*(int *)((int)desc + 0x2c) - 4);
-  puVar3 = (uint32_t *)FUN_00614df0(&piStack_a8,0,0x1000015,0xb,0x962);
-  local_5c = 5;
-  FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar3);
-  local_5c = 0xffffffff;
-  if ((pCVar1 != 0) &&
-     (pCVar1->rep = (C_str_rep *)pCVar1->rep[-1].chars, pCVar1->rep == 0)) {
-    tier1_operator_delete(pCVar1);
-  }
-  if (*(int *)((int)desc + 0x28) == 0) {
-    iVar4 = 0;
-  }
-  else {
-    iVar4 = *(int *)((int)desc + 0x2c) - *(int *)((int)desc + 0x28) >> 2;
-  }
-  pvStack_ac = (void *)(iVar4 + 1);
-  pSVar2 = tier1_operator_new(0x40);
-  local_5c = 6;
-  if (pSVar2 == 0) {
-    pSStack_b0 = 0;
-  }
-  else {
-    pSStack_b0 = S_ControlDesc__S_ControlDesc
-                           (pSVar2,0x13,"text_date01",
-                            ((uint32_t)pvStack_ac & 0x3f) << 0x14 | *(uint32_t *)((int)desc + 0x40));
-  }
-  local_5c = 0xffffffff;
-  FUN_00615f50((void *)((int)desc + 0x24),*(uint32_t **)((int)desc + 0x2c),(uint32_t*)(&pSStack_b0));
-  iVar4 = *(int *)(*(int *)((int)desc + 0x2c) - 4);
-  puVar3 = (uint32_t *)FUN_00614df0(&piStack_a8,0,0x1000015,0xc,0x963);
-  local_5c = 7;
-  FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar3);
-  local_5c = 0xffffffff;
-  if ((pCVar1 != 0) &&
-     (pCVar1->rep = (C_str_rep *)pCVar1->rep[-1].chars, pCVar1->rep == 0)) {
-    tier1_operator_delete(pCVar1);
-  }
-  if (*(int *)((int)desc + 0x28) == 0) {
-    iVar4 = 0;
-  }
-  else {
-    iVar4 = *(int *)((int)desc + 0x2c) - *(int *)((int)desc + 0x28) >> 2;
-  }
-  pvStack_ac = (void *)(iVar4 + 1);
-  pSVar2 = tier1_operator_new(0x40);
-  local_5c = 8;
-  if (pSVar2 == 0) {
-    pSStack_b0 = 0;
-  }
-  else {
-    pSStack_b0 = S_ControlDesc__S_ControlDesc
-                           (pSVar2,0x13,"text_profile00",
-                            ((uint32_t)pvStack_ac & 0x3f) << 0x14 | *(uint32_t *)((int)desc + 0x40));
-  }
-  local_5c = 0xffffffff;
-  FUN_00615f50((void *)((int)desc + 0x24),*(uint32_t **)((int)desc + 0x2c),(uint32_t*)(&pSStack_b0));
-  iVar4 = *(int *)(*(int *)((int)desc + 0x2c) - 4);
-  puVar3 = (uint32_t *)FUN_00614df0(&piStack_a8,0,0x1000015,0xb,0x964);
-  local_5c = 9;
-  FUN_00615d50((void *)(iVar4 + 0x10),*(uint32_t **)(iVar4 + 0x18),puVar3);
-  local_5c = 0xffffffff;
-  if (pCVar1 != 0) {
-    C_str__ReleaseRep(pCVar1);
-  }
-  iVar4 = vector_size_e4_615a50((int)desc + 0x24);
-  pvStack_ac = (void *)(iVar4 + 1);
-  pSVar2 = tier1_operator_new(0x40);
-  local_5c = 10;
-  if (pSVar2 == 0) {
-    pSStack_b0 = 0;
-  }
-  else {
-    pSStack_b0 = S_ControlDesc__S_ControlDesc
-                           (pSVar2,5,"GROptions",
-                            ((uint32_t)pvStack_ac & 0x3f) << 0x14 | *(uint32_t *)((int)desc + 0x40));
-  }
-  local_5c = 0xffffffff;
-  FUN_00615f50((void *)((int)desc + 0x24),*(uint32_t **)((int)desc + 0x2c),(uint32_t*)(&pSStack_b0));
-  pSVar2 = *(S_ControlDesc **)(*(int *)((int)desc + 0x2c) - 4);
-  iVar4 = vector_size_e4_615a50((int)(pSVar2 + 0xc));
-  uVar5 = iVar4 + 1;
-  if (((uint32_t)pSVar2[2].vtable & 0xff000) == 0) {
-    pSStack_b0 = tier1_operator_new(0x40);
-    local_5c = 0xc;
-    if (pSStack_b0 != 0) {
-      uVar5 = (uVar5 & 0xff) << 0xc;
-      goto LAB_0061d5f7;
-    }
-LAB_0061d636:
-    pvStack_ac = 0;
-  }
-  else {
-    pSStack_b0 = tier1_operator_new(0x40);
-    local_5c = 0xb;
-    if (pSStack_b0 == 0) goto LAB_0061d636;
-    uVar5 = (uVar5 & 0xff) << 4;
-LAB_0061d5f7:
-    pvStack_ac = S_ControlDesc__S_ControlDesc
-                           (pSStack_b0,0x14,"bvideo setup",uVar5 | (uint32_t)pSVar2[2].vtable);
-  }
-  local_5c = 0xffffffff;
-  FUN_00615f50(pSVar2 + 0xc,(uint32_t*)(pSVar2[0xe].vtable),(uint32_t*)(&pvStack_ac));
-  pvVar6 = pSVar2[0xe].vtable[-1].vf00;
-  puVar3 = (uint32_t *)FUN_00614df0(&piStack_a8,0,0x1000015,0xd,0x965);
-  local_5c = 0xd;
-  pvVar7 = (void *)((int)pvVar6 + 0x10);
-  FUN_00615d50(pvVar7,*(uint32_t **)((int)pvVar6 + 0x18),puVar3);
-  local_5c = 0xffffffff;
-  if (pCVar1 != 0) {
-    C_str__ReleaseRep(pCVar1);
-  }
-  puVar3 = (uint32_t *)
-           FUN_00614dd0(&piStack_a8,(uint32_t)*(uint8_t *)((int)pvVar8 + 9) << 0x1a | 0x600000,0x5001003,0)
-  ;
-  local_5c = 0xe;
-  FUN_00615d50(pvVar7,*(uint32_t **)((int)pvVar7 + 8),puVar3);
-  local_5c = 0xffffffff;
-  if (pCVar1 != 0) {
-    C_str__ReleaseRep(pCVar1);
-  }
-  iVar4 = vector_size_e4_615a50((int)(pSVar2 + 0xc));
-  uVar5 = iVar4 + 1;
-  if (((uint32_t)pSVar2[2].vtable & 0xff000) == 0) {
-    pSStack_b0 = tier1_operator_new(0x40);
-    local_5c = 0x10;
-    if (pSStack_b0 == 0) goto LAB_0061d787;
-    uVar5 = (uVar5 & 0xff) << 0xc;
-  }
-  else {
-    pSStack_b0 = tier1_operator_new(0x40);
-    local_5c = 0xf;
-    if (pSStack_b0 == 0) {
-LAB_0061d787:
-      pvStack_ac = 0;
-      goto LAB_0061d789;
-    }
-    uVar5 = (uVar5 & 0xff) << 4;
-  }
-  pvStack_ac = S_ControlDesc__S_ControlDesc
-                         (pSStack_b0,0x14,"bsound setup",uVar5 | (uint32_t)pSVar2[2].vtable);
-LAB_0061d789:
-  local_5c = 0xffffffff;
-  FUN_00615f50(pSVar2 + 0xc,(uint32_t*)(pSVar2[0xe].vtable),(uint32_t*)(&pvStack_ac));
-  pvVar6 = pSVar2[0xe].vtable[-1].vf00;
-  puVar3 = (uint32_t *)FUN_00614df0(&piStack_a8,0,0x1000015,0xd,0x966);
-  local_5c = 0x11;
-  pvVar7 = (void *)((int)pvVar6 + 0x10);
-  FUN_00615d50(pvVar7,*(uint32_t **)((int)pvVar6 + 0x18),puVar3);
-  local_5c = 0xffffffff;
-  if (pCVar1 != 0) {
-    C_str__ReleaseRep(pCVar1);
-  }
-  puVar3 = (uint32_t *)
-           FUN_00614dd0(&piStack_a8,(uint32_t)*(uint8_t *)((int)pvVar8 + 9) << 0x1a | 0x700000,0x5001003,0)
-  ;
-  local_5c = 0x12;
-  FUN_00615d50(pvVar7,*(uint32_t **)((int)pvVar7 + 8),puVar3);
-  local_5c = 0xffffffff;
-  if (pCVar1 != 0) {
-    C_str__ReleaseRep(pCVar1);
-  }
-  pvVar6 = S_ControlDesc__AddChild(pSVar2,0x14,"bcontrols");
-  puVar3 = (uint32_t *)FUN_00614df0(&piStack_a8,0,0x1000015,0xd,0x967);
-  local_5c = 0x13;
-  pvVar7 = (void *)((int)pvVar6 + 0x10);
-  FUN_00615d50(pvVar7,*(uint32_t **)((int)pvVar6 + 0x18),puVar3);
-  local_5c = 0xffffffff;
-  if (pCVar1 != 0) {
-    C_str__ReleaseRep(pCVar1);
-  }
-  puVar3 = (uint32_t *)
-           FUN_00614dd0(&pIStack_80,(uint32_t)*(uint8_t *)((int)pvVar8 + 9) << 0x1a | 0x800000,0x5001003,0)
-  ;
-  local_5c = 0x14;
-  FUN_00615d50(pvVar7,*(uint32_t **)((int)pvVar7 + 8),puVar3);
-  local_5c = 0xffffffff;
-  if (local_6c.rep != 0) {
-    C_str__ReleaseRep((C_str *)local_6c.rep);
-  }
-  pvVar7 = S_ControlDesc__AddChild(pSVar2,0x14,"bgame setup");
-  AddDescMessage2(pvVar7,0,0x1000015,0xd,0x968);
-  AddDescMessage1(pvVar7,(uint32_t)*(uint8_t *)((int)pvVar8 + 9) << 0x1a | 0xa00000,0x5001003,0);
-  pvVar7 = S_ControlDesc__AddChild(pSVar2,0x14,"bmultiplayer setup");
-  AddDescMessage2(pvVar7,0,0x1000015,0xd,0x969);
-  AddDescMessage1(pvVar7,(uint32_t)*(uint8_t *)((int)pvVar8 + 9) << 0x1a | 0xb00000,0x5001003,0);
-  pvVar7 = S_ControlDesc__AddChild(pSVar2,0x14,"bback");
-  AddDescMessage2(pvVar7,0,0x1000015,0xd,0x96a);
-  AddDescMessage1(pvVar7,0,0x60010c4,0);
-  FUN_0061dc20(pvVar8,desc,model);
-  FUN_0061e1a0(pvVar8,desc);
-  FUN_0061e3f0(pvVar8,desc,model);
-  FUN_0061f230(pvVar8,desc);
-  FUN_0061f3b0(pvVar8,desc);
-  pvVar8 = S_ScreenDesc__AddControl(desc,0x13,"text_h&dversion");
-  AddDescMessage2(pvVar8,0,0x1000015,0x28,0x7d6);
-  return true;
-}
-
-
 // 0x0061dc20
-uint32_t FUN_0061dc20(void *_this,uint32_t param_1,int *param_2, ...)
+uint32_t C_OptionsHandler__BuildVideoPage(void *_this,uint32_t param_1,int *param_2, ...)
 {
   int *piVar1;
   S_ControlDesc *this_00;
@@ -488,7 +130,7 @@ uint32_t FUN_0061dc20(void *_this,uint32_t param_1,int *param_2, ...)
 
 
 // 0x0061e1a0
-uint32_t FUN_0061e1a0(void *_this,void *param_1, ...)
+uint32_t C_OptionsHandler__BuildSoundPage(void *_this,void *param_1, ...)
 {
   S_ControlDesc *this_00;
   void *pvVar1;
@@ -526,7 +168,7 @@ uint32_t FUN_0061e1a0(void *_this,void *param_1, ...)
 
 
 // 0x0061e3f0
-uint32_t FUN_0061e3f0(void *_this,void *param_1,int *param_2, ...)
+uint32_t C_OptionsHandler__BuildControlsPage(void *_this,void *param_1,int *param_2, ...)
 {
   uint8_t stack0xffffffa0[64];
   S_ControlDesc *this_00;
@@ -997,7 +639,7 @@ uint32_t FUN_0061e3f0(void *_this,void *param_1,int *param_2, ...)
 
 
 // 0x0061f230
-uint32_t FUN_0061f230(void *_this,void *param_1, ...)
+uint32_t C_OptionsHandler__BuildGamePage(void *_this,void *param_1, ...)
 {
   S_ControlDesc *this_00;
   void *pvVar1;
@@ -1030,7 +672,7 @@ uint32_t FUN_0061f230(void *_this,void *param_1, ...)
 
 
 // 0x0061f3b0
-uint32_t FUN_0061f3b0(void *_this,void *param_1, ...)
+uint32_t C_OptionsHandler__BuildMultiplayerPage(void *_this,void *param_1, ...)
 {
   S_ControlDesc *this_00;
   void *pvVar1;
@@ -1648,95 +1290,34 @@ LAB_00620484:
 }
 
 
-// 0x006204a0  (tier1 fallback: translated text kept below, needs hand porting)
+// 0x006204a0
 uint32_t FUN_006204a0(void *_this,uint32_t param_1,int param_2,uint32_t param_3,bool param_4, ...)
-{
-  return {};
-}
-#if 0
 {
   uint32_t uVar1;
   C_PlayerProfile *pCVar2;
   uint32_t uVar3;
-  uint32_t uVar4;
+  uint32_t extraout_EAX;
   pCVar2 = g_gameProfile.m_player;
   uVar3 = 0;
   if (param_2 != 0) {
     uVar1 = *(uint32_t *)(param_2 + 0x60);
     uVar3 = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a;
     if (uVar1 == (uVar3 | 0x804000)) {
-      (g_gameProfile.m_player)->_pad_0070[1] = param_4;
-      uVar4 = C_PlayerProfile__ApplyMouse((int)g_gameProfile.m_player);
-      return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
+      ((g_gameProfile.m_player)->m_options).invertMouse = param_4;
+      C_PlayerProfile__ApplyMouse(g_gameProfile.m_player);
+      return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
     }
     if (uVar1 == (uVar3 | 0xa02000)) {
-      (g_gameProfile.m_player)->_pad_0070[2] = param_4;
+      ((g_gameProfile.m_player)->m_options).unknown3A = param_4;
       return CONCAT31((int3)((uint32_t)pCVar2 >> 8),1);
     }
     uVar3 |= 0xa03000;
     if (uVar1 == uVar3) {
-      (g_gameProfile.m_player)->m_crosshair = param_4;
+      ((g_gameProfile.m_player)->m_options).crosshair = param_4;
       return CONCAT31((int3)(uVar3 >> 8),1);
     }
   }
   return uVar3;
-}
-
-
-#endif
-// 0x00620530
-uint32_t FUN_00620530(int param_1, ...)
-{
-  void *local_c;
-  C_str_rep *ptr;
-  int iVar1;
-  C_str_rep *extraout_EAX;
-  C_str_rep *pCVar2;
-  C_str_rep *extraout_EAX_00;
-  uint32_t local_24 [5];
-  C_str_rep *local_10;
-  uint32_t local_4;
-  ptr = ((g_gameProfile.m_player)->m_name).rep;
-  if ((ptr == 0) ||
-     (ExceptionList = &local_c, ptr->refCount = ptr->refCount + 1, ptr->length == 0)) {
-    local_10 = 0;
-    local_24[1] = 0x1000015;
-    local_24[0] = (uint32_t)*(uint8_t *)(param_1 + 9) << 0x1a | 0x300000;
-    local_24[2] = 0xc;
-    local_24[3] = 0x7e4;
-    local_4 = 1;
-  }
-  else {
-    ptr->refCount = ptr->refCount + 1;
-    local_24[0] = (uint32_t)*(uint8_t *)(param_1 + 9) << 0x1a | 0x300000;
-    ptr->refCount = ptr->refCount + 1;
-    local_4 = 0;
-    local_24[2] = 0xc;
-    local_24[1] = 0x1000014;
-    iVar1 = ptr->refCount - 1;
-    ptr->refCount = iVar1;
-    local_10 = ptr;
-    if (iVar1 == 0) {
-      tier1_operator_delete(ptr);
-    }
-    local_4 = CONCAT31(GH_PIECE(local_4,1,3),2);
-  }
-  PostControlMessage(&DAT_008ae590,local_24);
-  pCVar2 = local_10;
-  if ((local_10 != 0) &&
-     (local_10->refCount = local_10->refCount - 1, local_10->refCount == 0)) {
-    tier1_operator_delete(local_10);
-    pCVar2 = extraout_EAX;
-  }
-  if (ptr != 0) {
-    pCVar2 = (C_str_rep *)(ptr->refCount - 1);
-    ptr->refCount = (int)pCVar2;
-    if (pCVar2 == 0) {
-      tier1_operator_delete(ptr);
-      pCVar2 = extraout_EAX_00;
-    }
-  }
-  return CONCAT31((int3)((uint32_t)pCVar2 >> 8),1);
 }
 
 
