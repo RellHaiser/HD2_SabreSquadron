@@ -31146,6 +31146,26 @@
   "name": "C_MessageBox::OnButton",
   "proto": "bool __thiscall OnButton(C_Screen *this, void * argument, void * control, uint notification, uint value)"
  },
+ "006698c0": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::Build",
+  "proto": "bool __thiscall Build(C_Screen *this, void * desc)"
+ },
+ "00669a50": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_Screen *this, void * message)"
+ },
+ "00669aa0": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::Tick",
+  "proto": "void __thiscall Tick(C_Screen *this, int time)"
+ },
+ "00669bf0": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::Refresh",
+  "proto": "void __thiscall Refresh(C_Screen *this)"
+ },
  "0066a2f0": {
   "module": "cursor",
   "name": "C_Cursor::HasMoved",
@@ -31666,10 +31686,29 @@
   "name": "S_MissionSquad::AddSoldier",
   "proto": "S_SquadSoldier * __thiscall AddSoldier(S_MissionSquad *this)"
  },
+ "00676010": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::HasPopup",
+  "proto": "bool __thiscall HasPopup(C_Screen *this)"
+ },
+ "00676020": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Screen *this, uchar flags)"
+ },
+ "00676040": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::~C_DescriptionScreen",
+  "proto": "void __thiscall ~C_DescriptionScreen(C_Screen *this)"
+ },
  "00676410": {
   "module": "equipment_panel",
   "name": "AddDescMessage4_676410",
   "proto": "void __cdecl AddDescMessage4_676410(void * desc, uint target, uint id, uint value, uint value2)"
+ },
+ "00677870": {
+  "module": "equipment_panel",
+  "name": "C_EquipmentMenuBase::CallItemNotify60"
  },
  "0067a3c0": {
   "module": "loadout_presets",
@@ -32091,6 +32130,11 @@
   "name": "C_GameMenu::RenderEquipment",
   "proto": "bool __thiscall RenderEquipment(C_GameMenu *this)"
  },
+ "00682a20": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnChat",
+  "proto": "bool __thiscall OnChat(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00682aa0": {
   "module": "game_menu",
   "name": "C_GameMenu::ShowMessage",
@@ -32105,9 +32149,54 @@
   "name": "C_GameMenu::BuildPlayerScreen",
   "proto": "bool __thiscall BuildPlayerScreen(C_GameMenu *this, void * desc, void * model)"
  },
+ "006838a0": {
+  "module": "screen",
+  "name": "C_DescriptionScreen::C_DescriptionScreen",
+  "proto": "void * __thiscall C_DescriptionScreen(C_Screen *this, void * scene, void * frame)"
+ },
+ "006838e0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildSoldiersPanel",
+  "proto": "bool __thiscall BuildSoldiersPanel(C_GameMenu *this, void * desc, void * model)"
+ },
+ "00684690": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildEquipmentPanel",
+  "proto": "bool __thiscall BuildEquipmentPanel(C_GameMenu *this, void * desc, void * model)"
+ },
+ "00684b90": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildItemsPanel",
+  "proto": "bool __thiscall BuildItemsPanel(C_GameMenu *this, void * desc, void * model)"
+ },
+ "00684df0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::BuildSkillsPanel",
+  "proto": "bool __stdcall BuildSkillsPanel(void * desc, void * model)"
+ },
+ "00684fc0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnPlayerScreenHidden",
+  "proto": "bool __thiscall OnPlayerScreenHidden(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00684fd0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnPlayerScreenShown",
+  "proto": "bool __thiscall OnPlayerScreenShown(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00685da0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::UpdateSoldierTypes",
+  "proto": "void __fastcall UpdateSoldierTypes(C_GameMenu * menu)"
+ },
  "006861a0": {
   "module": "zz_idioms",
   "name": "identity_6861a0"
+ },
+ "006861b0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnGameInfo",
+  "proto": "bool __thiscall OnGameInfo(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "006869a0": {
   "module": "game_menu",
@@ -32121,6 +32210,16 @@
  "00686bb0": {
   "module": "zz_idioms",
   "name": "vector_tidy_686bb0"
+ },
+ "00687dd0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnSoldierType",
+  "proto": "bool __thiscall OnSoldierType(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00687f50": {
+  "module": "game_menu",
+  "name": "C_GameMenu::OnSavePreset",
+  "proto": "bool __thiscall OnSavePreset(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "00688330": {
   "module": "game_app",
@@ -36558,6 +36657,10 @@
   "module": "objective_actors",
   "name": "C_NetGame::SetPlayer",
   "proto": "void __thiscall SetPlayer(C_NetGame * this, int slot, int connection, char * name)"
+ },
+ "0072ee60": {
+  "module": "game_menu",
+  "name": "C_NetGame::SendChat"
  },
  "0072eff0": {
   "module": "game",

@@ -7436,6 +7436,41 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e-xiii: the player screen (BuildPlayerScreen 0x00682c80 and its builders 0x006838e0,
     0x00684690, 0x00684b90, 0x00684df0, its callbacks); then the squad glue and the item slots.
 
+  PART 9e-xiii DONE (2026-11-03): the in-game menu's player screen (game/game_menu.cpp) and the
+  description popup (game/screen.cpp).
+  - BuildPlayerScreen 0x00682c80: the four panels' builders (the soldiers 0x006838e0, the equipment
+    0x00684690, the store's items 0x00684b90, the skills 0x00684df0; not ported yet), the screen's
+    shown / hidden callbacks; "soldier_type" (a combo box: the slot 0x60's callback on its pick,
+    OnSoldierType on 0x400B000, header and line text 500, inactive; its id kept, UpdateSoldierTypes
+    0x00685da0 not ported yet); bsave_preset (OnSavePreset) and brename_preset (the combo box's header
+    edited, id | 2), inactive; a cooperative game: the version's and the equipment's texts, else the
+    warmup's (hidden but in the occupation games) and the time's; baccept (APPLY, inactive), bback
+    (DROP), the chat input "console" (OnChat), text03, the texts; bgame_info (OnGameInfo). Co-op: the
+    player status's text and the description popup (model "DESCRIPTION", the menu's popup, built
+    without a description); else "text_weapons_info" when the model has it (its id kept: the base's
+    m_unknown1B0 renamed m_weaponsInfo). The panel's soldier in "3Dview". m_unknown1DC renamed
+    m_soldierTypes.
+  - Callbacks: OnPlayerScreenHidden 0x00684fc0 (true), OnGameInfo 0x006861b0 (the info screen shown),
+    OnChat 0x00682a20 ("/t" the team's, "/a" all's, skipped with the spaces after; C_NetGame::SendChat
+    0x0072ee60, declared); C_EquipmentMenuBase::CallItemNotify60 0x00677870.
+  - C_DescriptionScreen (vtable 0x008156b8, 0x8C bytes): constructor 0x006838a0, destructor 0x00676040
+    (0x00676020; the text deleted), Refresh 0x00669bf0 (the text's), Tick 0x00669aa0 (shown and the
+    cursor still 500 ms, no button down: the box at the cursor + (0.15, 0.015), its depth kept, on,
+    placed, the text refreshed; else off), HandleMessage 0x00669a50 (show / hide; else the text's),
+    HasPopup 0x00676010, Build 0x006698c0 ("text" a title with the id | 2, "description" off at (0.5,
+    -0.375, -0.5), "description01" off; no name or id taken).
+  - Harness: game_menu_test.inc's gmPlayer, gmPlayerCoop, gmPlayerCallbacks, gmChat (the panels
+    logged; gmBuildNet with the real builder), screen_test.inc's dsNew, dsBuild, dsTick, dsMessages,
+    equipment_desc_test.inc's edCallbacks (the slot 0x60's); check_player.py (the three lines). 22 of
+    22 in both orders (the other factory and text lines too).
+  - Mutations: mutations/mutate_9e13.py (177, all killed).
+  - Build: MSVC clean. Tier 1: 408 errors in 74 files (was 409), 172 stubs (was 173). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+12, 1 moved), screen.txt (+8), equipment_panel.txt (+1); 13 functions
+    in ported.txt. Stats: 8,870 of 12,306 functions by hand (79.3 % by size).
+  - Next, 9e-xiv: the player screen's panels (0x006838e0, 0x00684690, 0x00684b90, 0x00684df0), the
+    soldier types (0x00685da0) and the callbacks 0x00684fd0, 0x00687dd0, 0x00687f50; then the squad
+    glue and the item slots.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

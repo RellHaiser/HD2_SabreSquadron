@@ -25,7 +25,9 @@ public:
     virtual bool OnItemHover(void *, C_Control *, uint32_t, uint32_t) { return true; }      // 0x70 0x0067f340
 
     // The controls' callbacks: the slots above on the menu (the callbacks' object; thunks 0x00672fb0,
-    // 0x00672fc0, 0x00672fd0, 0x00672fe0, 0x00672ff0).
+    // 0x00672fc0, 0x00672fd0, 0x00672fe0, 0x00672ff0; 0x00677870 the slot 0x60's).
+    static bool CallItemNotify60(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                 uint32_t value);
     static bool CallItemNotify13(void *menu, void *argument, C_Control *control, uint32_t notification,
                                  uint32_t value);
     static bool CallItemNotify0A(void *menu, void *argument, C_Control *control, uint32_t notification,
@@ -38,8 +40,9 @@ public:
                               uint32_t value);
 
 protected:
-    // (Not identified yet; set by the derived menus' constructors.)
-    int m_unknown1B0 = 0;                               // +0x1B0
+    // (Not identified yet; set by the derived menus' constructors.) The weapons' information label's
+    // id (the in-game menu's player screen; 0: none).
+    int m_weaponsInfo = 0;                              // +0x1B0
     int m_unknown1B4 = 0;                               // +0x1B4
     S_SoldierItem m_unknown1B8;                         // +0x1B8
     int m_unknown1C0 = -1;                              // +0x1C0

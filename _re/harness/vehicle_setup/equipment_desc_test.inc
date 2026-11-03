@@ -253,6 +253,12 @@ void EquipmentDescTest(I3D_scene *)
         p.m_squadSoldier = nullptr;
         ok &= !reinterpret_cast<ControlCallback>(arrow.value3)(reinterpret_cast<void *>(arrow.value2), nullptr, nullptr,
                                                                arrow.value, 0);
+        // (Part 9e-xiii: the slot 0x60's, the in-game menu's soldier types' callback.)
+        g_gfLog.clear();
+        ok &= !C_EquipmentMenuBase::CallItemNotify60(&menu, &menu, &control, CONTROL_NOTIFY_0E, 5);
+        menu.answer = true;
+        ok &= C_EquipmentMenuBase::CallItemNotify60(&menu, nullptr, &control, CONTROL_NOTIFY_0E, 6) &&
+              MsLogIs({"n60 1 8301000 400e000 5", "n60 0 8301000 400e000 6"}, g_gfLog);
         WM(r.edCallbacks, ok);
     }
 

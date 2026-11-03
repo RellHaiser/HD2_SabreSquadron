@@ -40,6 +40,7 @@
 00672fd0 C_EquipmentMenuBase::CallItemNotify08
 00672fe0 C_EquipmentMenuBase::CallItemNotify09
 00672ff0 C_EquipmentMenuBase::CallItemHover
+00677870 C_EquipmentMenuBase::CallItemNotify60
 0067f300 C_EquipmentMenuBase::OnItemNotify13
 0067f310 C_EquipmentMenuBase::OnItemNotify0A
 0067f320 C_EquipmentMenuBase::OnItemNotify08

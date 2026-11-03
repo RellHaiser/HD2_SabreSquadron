@@ -1,4 +1,4 @@
-"""Checks the factory build's screens line (harness_factory.exe, FACTORY_TEST; part 9d-i).
+"""Checks the factory build's screens line (harness_factory.exe, FACTORY_TEST; parts 9d-i and 9e-xiii).
 
     python check_screen.py MISSIONS_TXT_DIR HARNESS_OUTPUT
 
@@ -9,7 +9,7 @@ import re
 import sys
 
 CHECKS = ("scDescs scMenuDesc scNew scBuild scOpen scHide scTick scKeys scMessages mbBuild mbShow mbShowId mbClose "
-          "mbKeys mbButtons").split()
+          "mbKeys mbButtons dsNew dsBuild dsTick dsMessages").split()
 
 
 def main():

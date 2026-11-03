@@ -1350,37 +1350,6 @@ uint32_t FUN_006828b0(uint32_t param_1,uint32_t param_2,int *param_3, ...)
 }
 
 
-// 0x00682a20
-uint32_t FUN_00682a20(...)
-{
-  uint8_t bVar1;
-  uint8_t *pbVar2;
-  int iVar3;
-  uint32_t uVar4;
-  uint8_t *in_stack_00000010;
-  char local_8;
-  local_8 = '\0';
-  pbVar2 = (uint8_t *)strstr((char *)in_stack_00000010,&DAT_00840510);
-  if (pbVar2 == in_stack_00000010) {
-    local_8 = '\x01';
-  }
-  else {
-    pbVar2 = (uint8_t *)strstr((char *)in_stack_00000010,&DAT_0084050c);
-    if (pbVar2 != in_stack_00000010) goto LAB_00682a5d;
-    local_8 = '\0';
-  }
-  in_stack_00000010 += 2;
-LAB_00682a5d:
-  bVar1 = *in_stack_00000010;
-  while ((bVar1 < 0x80 && (iVar3 = isspace((int)(char)bVar1), iVar3 != 0))) {
-    bVar1 = in_stack_00000010[1];
-    in_stack_00000010++;
-  }
-  uVar4 = FUN_0072ee60((char *)in_stack_00000010,local_8);
-  return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
-}
-
-
 // 0x00682bb0
 uint32_t vector_tidy_682bb0(int param_1, ...)
 {

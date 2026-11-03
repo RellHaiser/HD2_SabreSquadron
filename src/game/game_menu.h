@@ -3,8 +3,8 @@
 // options, saving and loading, and in the network games the equipment and the squad. Part 9e-v:
 // the class, its construction and the menu state's slots (starting, stopping, the input, the
 // update, the tick, the info screen drawn); 9e-vi: the update's helpers and the drawing; 9e-vii:
-// the menu's messages; 9e-ix: the screens' descriptions (the main screen's); the options and player
-// screens' and the item slots later.
+// the menu's messages; 9e-ix: the screens' descriptions (the main screen's); 9e-xiii: the player
+// screen's (its panels and the item slots later).
 #pragma once
 
 #include <cstdint>
@@ -85,8 +85,39 @@ private:
     // restart, the quick save and load, the options, the quit; a network game: back, the options, the
     // player screen, the quit) and the version's text. True. (The model is not used.)
     bool BuildMainScreen(S_ScreenDesc *desc, I3D_frame *model);   // 0x00680980
-    // The player screen's controls (not ported yet).
+    // The player screen's controls: the panels (the soldiers, the equipment, the store's items, the
+    // skills), the screen's shown / hidden callbacks; the soldier types' combo box (its id kept, its
+    // items filled), the presets' save and rename buttons, the warmup's and the time's texts (a
+    // cooperative game: the version's and the equipment's), accept and back, the chat input, the
+    // texts; the game info's button (the info screen shown). A cooperative game: the player status's
+    // text and the description popup (the menu's popup, its model "DESCRIPTION"); else the weapons'
+    // information label when the model has one (its id kept). The panel's soldier in the model's
+    // "3Dview". True.
     bool BuildPlayerScreen(S_ScreenDesc *desc, I3D_frame *model);   // 0x00682c80
+    // The player screen's panels (not ported yet): the squad's soldiers, the soldier's equipment,
+    // the store's items, the skills.
+    bool BuildSoldiersPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x006838e0
+    bool BuildEquipmentPanel(S_ScreenDesc *desc, I3D_frame *model);  // 0x00684690
+    bool BuildItemsPanel(S_ScreenDesc *desc, I3D_frame *model);      // 0x00684b90
+    static bool BuildSkillsPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x00684df0 (__stdcall)
+    // The soldier types' combo box filled (not ported yet).
+    void UpdateSoldierTypes();                          // 0x00685da0 (__fastcall)
+    // The player screen's callbacks: shown (not ported yet), hidden (true), the soldier type picked
+    // and the preset saved (not ported yet), the game info's click (the info screen shown; true),
+    // the chat input's line sent ("/t": to the team, "/a": to all, either skipped with the spaces
+    // after; the net game's chat; true).
+    static bool OnPlayerScreenShown(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                    uint32_t value);    // 0x00684fd0 (__thiscall)
+    static bool OnPlayerScreenHidden(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                     uint32_t value);   // 0x00684fc0
+    static bool OnSoldierType(void *menu, void *argument, C_Control *control, uint32_t notification,
+                              uint32_t value);          // 0x00687dd0 (__thiscall)
+    static bool OnSavePreset(void *menu, void *argument, C_Control *control, uint32_t notification,
+                             uint32_t value);           // 0x00687f50 (__thiscall)
+    static bool OnGameInfo(void *menu, void *argument, C_Control *control, uint32_t notification,
+                           uint32_t value);             // 0x006861b0 (__thiscall)
+    static bool OnChat(void *menu, void *argument, C_Control *control, uint32_t notification,
+                       uint32_t value);                 // 0x00682a20 (__thiscall)
     // Control 0x0CA00000 on while the squad soldier has a uniform and his load is within his
     // strength (posted when it changes).
     void UpdateLoadButton();                            // 0x006869a0 (__fastcall)
@@ -107,7 +138,7 @@ private:
     bool m_respawnOnApply = false;                      // +0x1D1 (SetRespawnOnApply)
     int m_team = -1;                                    // +0x1D4 the squad's team to keep (-1: none; inferred)
     int m_unknown1D8 = -1;                              // +0x1D8
-    int m_unknown1DC = -1;                              // +0x1DC
+    int m_soldierTypes = -1;                            // +0x1DC the soldier types' combo box's id
     bool m_loadButtonOn = false;                        // +0x1E0 (UpdateLoadButton's)
     C_ItemStock *m_stock1E4 = nullptr;                  // +0x1E4
     C_ItemStock *m_stock1E8 = nullptr;                  // +0x1E8

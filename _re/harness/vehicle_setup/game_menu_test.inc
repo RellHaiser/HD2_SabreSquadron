@@ -17,16 +17,26 @@ int g_gmDifficulty;
 int C_GameProfile::GetDifficulty() const { return g_gmDifficulty; }
 bool g_gmCanQuickSave = true;
 bool C_game::CanQuickSave() const { return g_gmCanQuickSave; }
-// (Its description's name and control count, its model; the screen made inactive by a screen
-// message.)
+// (Part 9e-xiii: the player screen's panels: their description's name and control count, their
+// model; the soldier types' combo box's id; the callbacks true; the chat line and its team.)
 std::string MrFrameName(const void *frame);
-bool C_GameMenu::BuildPlayerScreen(S_ScreenDesc *desc, I3D_frame *model)
+bool GmPanel(const char *panel, const S_ScreenDesc *desc, I3D_frame *model)
 {
-    GfLog("build player %s %d %s", desc->name.c_str(), static_cast<int>(desc->controls.size()),
+    GfLog("panel %s %s %d %s", panel, desc->name.c_str(), static_cast<int>(desc->controls.size()),
           model ? MrFrameName(model).c_str() : "none");
-    S_ControlMessage inactive;
-    inactive.id = CONTROL_MSG_DEACTIVATE;
-    desc->messages.push_back(inactive);
+    return true;
+}
+bool C_GameMenu::BuildSoldiersPanel(S_ScreenDesc *desc, I3D_frame *model) { return GmPanel("soldiers", desc, model); }
+bool C_GameMenu::BuildEquipmentPanel(S_ScreenDesc *desc, I3D_frame *model) { return GmPanel("equipment", desc, model); }
+bool C_GameMenu::BuildItemsPanel(S_ScreenDesc *desc, I3D_frame *model) { return GmPanel("items", desc, model); }
+bool C_GameMenu::BuildSkillsPanel(S_ScreenDesc *desc, I3D_frame *model) { return GmPanel("skills", desc, model); }
+void C_GameMenu::UpdateSoldierTypes() { GfLog("soldier types %x", static_cast<uint32_t>(m_soldierTypes)); }
+bool C_GameMenu::OnPlayerScreenShown(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
+bool C_GameMenu::OnSoldierType(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
+bool C_GameMenu::OnSavePreset(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
+bool C_NetGame::SendChat(const char *text, bool team)
+{
+    GfLog("chat [%s] %d", text, team);
     return true;
 }
 bool C_GameMenu::OnItemNotify13(void *, C_Control *, uint32_t, uint32_t) { return true; }
@@ -90,7 +100,8 @@ struct S_GameMenuResults {
     bool gmUpdate = true, gmTick = true, gmDraw = true, gmMessage = true, gmObjectives = true, gmBase = true;
     bool gmLoad = true, gmCoop = true, gmNet = true, gmRender = true, gmRenderGame = true, gmRenderEquip = true;
     bool gmOptions = true, gmEscape = true, gmEscapeNet = true, gmSquad = true, gmQuestions = true;
-    bool gmMainLocal = true, gmMainNet = true, gmBuild = true, gmBuildNet = true;
+    bool gmMainLocal = true, gmMainNet = true, gmBuild = true, gmBuildNet = true, gmPlayer = true, gmPlayerCoop = true;
+    bool gmPlayerCallbacks = true, gmChat = true;
 };
 
 // A uniform of a side (its type's team).
@@ -140,10 +151,11 @@ struct C_GmMission : C_MissionDef {
 
 // The base's fields (protected; equipment_menu.h included before): their first values.
 struct C_GmBasePeek : C_EquipmentMenuBase {
+    static int WeaponsInfo(const C_EquipmentMenuBase &b) { return b.*&C_GmBasePeek::m_weaponsInfo; }
     static bool Fresh(const C_EquipmentMenuBase &b)
     {
         const S_SoldierItem &item = b.*&C_GmBasePeek::m_unknown1B8;
-        return b.*&C_GmBasePeek::m_unknown1B0 == 0 && b.*&C_GmBasePeek::m_unknown1B4 == 0 && item.uid == -1 &&
+        return b.*&C_GmBasePeek::m_weaponsInfo == 0 && b.*&C_GmBasePeek::m_unknown1B4 == 0 && item.uid == -1 &&
                item.typeId == -1 && item.present == 0 && b.*&C_GmBasePeek::m_unknown1C0 == -1;
     }
 };
@@ -186,7 +198,7 @@ void GameMenuTest(I3D_scene *scene)
                         m->m_missionItems.m_records[1] && !m->m_missionItems.m_records[2]);
         WM(r.gmNew, C_GmBasePeek::Fresh(*m) &&
                         !m->m_teamChangePosted && !m->m_respawnOnApply && m->m_team == -1 && m->m_unknown1D8 == -1 &&
-                        m->m_unknown1DC == -1 && !m->m_loadButtonOn && !m->m_stock1E4 && !m->m_stock1E8 &&
+                        m->m_soldierTypes == -1 && !m->m_loadButtonOn && !m->m_stock1E4 && !m->m_stock1E8 &&
                         !m->m_options && !m->m_infoScreen && m->m_unknown4C0 == 0 && m->m_unknown4C4 == -1 &&
                         !m->m_unknown4D8 && !m->m_unknown4D9 && !m->m_hasPlayerSlotMember && !m->GetGame());
         m->SetRespawnOnApply(true);
@@ -1066,11 +1078,20 @@ void GameMenuTest(I3D_scene *scene)
             g_cacheLoads.clear();
             g_gfLog.clear();
             g_menuScreens.clear();
-            okb &= m.BuildScreens() && MrHas("gmcp 34 PLAYER_SCREEN") && MrHas("build player PLAYER_SCREEN 0 gmcp") &&
-                   MrHas("gmco 48 bvideo setup 20") && logHas("build") == 1 && m.m_screens[3]->m_inactive &&
+            // (Co-op: the player screen's description popup's model.)
+            S_MrObj *dm = MrObj("gmcd", g_mrModelVt);
+            g_mrMade[FRAME_MODEL] = {a, o, p, dm};
+            okb &= m.BuildScreens() && MrHas("gmcp 34 PLAYER_SCREEN") && MrHas("panel soldiers PLAYER_SCREEN 0 gmcp") &&
+                   MrHas("gmco 48 bvideo setup 20") && logHas("panel ") == 4 && m.m_screens[3]->m_inactive == false &&
                    m.m_screens.size() == 4 && m.m_screens[3]->GetId() == 3u << 26 && !g_menuScreens.empty() &&
                    g_menuScreens.back() == m.m_screens[coop ? 3 : 1];
-            okb &= !g_cacheLoads.empty() && g_cacheLoads.back() == (coop ? "player_screen_2" : "player_screen");
+            okb &= g_cacheLoads.size() >= 3 &&
+                   g_cacheLoads[coop ? g_cacheLoads.size() - 2 : g_cacheLoads.size() - 1] ==
+                       (coop ? "player_screen_2" : "player_screen") &&
+                   (!coop || (g_cacheLoads.back() == "description" && m.m_popup &&
+                              m.m_popup->GetScreenFrame() == As<I3D_frame>(dm)));
+            delete m.m_popup;
+            m.m_popup = nullptr;
             for (size_t i = 1; i < m.m_screens.size(); ++i)
                 delete m.m_screens[i];
             g_menuScreens.clear();
@@ -1079,12 +1100,196 @@ void GameMenuTest(I3D_scene *scene)
             g_coop = oldCoop;
             WM(r.gmBuildNet, okb);
         }
+
+        // --- the player screen's description (part 9e-xiii): the panels, the screen's callbacks, the
+        // soldier types (their id kept, filled), the presets' buttons, the warmup's and the time's texts
+        // (a cooperative game: the version's and the equipment's), accept, back, the chat input, the
+        // texts, the game info; the weapons' information label (else co-op: the player status's text
+        // and the description popup); the panel's soldier in "3Dview" ---
+        const auto playerDescribe = [](const S_ScreenDesc &desc, const C_GameMenu *menu) {
+            const std::map<uintptr_t, std::string> functions = {
+                {reinterpret_cast<uintptr_t>(&C_GameMenu::OnPlayerScreenShown), "shown"},
+                {reinterpret_cast<uintptr_t>(&C_GameMenu::OnPlayerScreenHidden), "hidden"},
+                {reinterpret_cast<uintptr_t>(&C_EquipmentMenuBase::CallItemNotify60), "notify60"},
+                {reinterpret_cast<uintptr_t>(&C_GameMenu::OnSoldierType), "type"},
+                {reinterpret_cast<uintptr_t>(&C_GameMenu::OnSavePreset), "save"},
+                {reinterpret_cast<uintptr_t>(&C_GameMenu::OnChat), "chat"},
+                {reinterpret_cast<uintptr_t>(&C_GameMenu::OnGameInfo), "info"}};
+            const auto message = [&](const S_ControlMessage &m) {
+                if (m.id == CONTROL_MSG_ADD_CALLBACK && !m.target) {
+                    const auto it = functions.find(m.value3);
+                    return CmText(" cb %x %s%s", m.value, it == functions.end() ? "?" : it->second.c_str(),
+                                  m.value2 == reinterpret_cast<uintptr_t>(menu) ? "" : " other");
+                }
+                return (m.target ? CmText(" @%x", m.target) : std::string()) +
+                       CmText(" %x %x %x", m.id, m.value, static_cast<uint32_t>(m.value2));
+            };
+            std::string s;
+            for (const S_ControlMessage &m : desc.messages)
+                s += message(m);
+            s += "; ";
+            for (const S_ControlDesc *c : desc.controls) {
+                s += CmText("%s %x %x:", c->name.c_str(), c->type, c->id);
+                for (const S_ControlMessage &m : c->messages)
+                    s += message(m);
+                s += "; ";
+            }
+            return s;
+        };
+        {
+            bool okp = true;
+            const bool oldCoop = g_coop;
+            const int oldType = g_mpSettings->gameType;
+            g_coop = false;
+            g_mpSettings->gameType = MP_GAME_OBJECTIVES;
+            // The model's frames: the weapons' information label and the soldier's area (the bound
+            // 0.25 .. 0.75, -0.6 .. -0.15; menu_run_test.inc's IGraph, no game scene: the soldier made).
+            const int igraphSlots[] = {0x18 / 4, 0x1C / 4};
+            void *oldIgraph[2] = {g_igraphVtable[igraphSlots[0]], g_igraphVtable[igraphSlots[1]]};
+            g_igraphVtable[0x18 / 4] = reinterpret_cast<void *>(&MrScrnX);
+            g_igraphVtable[0x1C / 4] = reinterpret_cast<void *>(&MrScrnY);
+            I3D_scene *const oldGameScene = GetGame()->m_scene;
+            GetGame()->m_scene = nullptr;
+            S_MrObj *model = MsFrame("gmpm"), *area = MsFrame("gmp3d");
+            auto *bound = reinterpret_cast<float *>(reinterpret_cast<uint8_t *>(area) + 0x170);
+            bound[0] = 0.25f;
+            bound[1] = -0.6f;
+            bound[4] = 0.75f;
+            bound[5] = -0.15f;
+            reinterpret_cast<uint32_t *>(reinterpret_cast<uint8_t *>(area) + 0x1D0)[0] = 0x40000;
+            g_msChildren[{model, "text_weapons_info"}] = MsFrame("gmpw");
+            g_msChildren[{model, "3Dview"}] = area;
+            const std::string head = " cb 400d000 shown cb 400c000 hidden; "
+                                     "soldier_type 11 c100000: cb 400e000 notify60 cb 400b000 type 1000081 c 1f4 "
+                                     "1000017 13 1f4 1000001 0 0; "
+                                     "bsave_preset 14 c200000: 1000015 b 9e3 cb 4001000 save 1000001 0 0; "
+                                     "brename_preset 14 c300000: 1000015 b 9e4 @c100002 6001016 0 0 1000001 0 0; ";
+            const auto accept = [](int i) {
+                return CmText("baccept 14 c%x00000: 1000015 d 9c9 600106a 0 0 1000001 0 0; "
+                              "bback 14 c%x00000: 1000015 d 9ca 6001077 0 0; console 21 c%x00000: cb 4015000 chat; "
+                              "text03 12 c%x00000:; text_playerarrangement 13 c%x00000: 1000015 a 9f7; ",
+                              i, i + 1, i + 2, i + 3, i + 4);
+            };
+            const std::string texts = "text_chat 13 c%x00000: 1000015 b 9e8; "
+                                      "text_selected_soldier_stats 13 c%x00000: 1000015 b 9e9; "
+                                      "text_draft 13 c%x00000: 1000015 b 9ea; bgame_info 14 c%x00000: 1000015 d 9cc cb "
+                                      "4001000 info; ";
+            const std::string version = "text_h&dversion 13 c%x00000: 1000015 28 7d6; "
+                                        "text_equipment 13 c%x00000: 1000015 b 9e7; ";
+            C_GameMenu m;
+            S_MrWorld world = MrWorld("gmp");
+            // (Nothing to make: the soldier's Setup stops at once.)
+            g_mrMade.clear();
+            m.m_scene = As<I3D_scene>(world.scene);
+            S_ScreenDesc desc("PLAYER_SCREEN", "player_screen", 3u << 26);
+            g_gfLog.clear();
+            okp &= m.BuildPlayerScreen(&desc, As<I3D_frame>(model));
+            std::string want = head + "text_warm_up 13 c400000: 1000015 2d 9e5 1000004 0 0; "
+                               "text_etimated_time 13 c500000: 1000015 2d 9e6; " + accept(6) +
+                               CmText(version.c_str(), 0xB, 0xC) + CmText(texts.c_str(), 0xD, 0xE, 0xF, 0x10) +
+                               "text_weapons_info 12 d100000: 1000015 b 7d2; ";
+            // (The ids of the 16th and 17th: 0xD000000 and 0xD100000.)
+            want.replace(want.find("c1000000"), 8, "d000000");
+            okp &= playerDescribe(desc, &m) == want;
+            okp &= m.m_soldierTypes == 0x0C100000 && C_GmBasePeek::WeaponsInfo(m) == 0x0D100000 && !m.m_popup &&
+                   m.m_panel.m_soldier;
+            okp &= g_gfLog.size() >= 8 && g_gfLog[0] == "panel soldiers PLAYER_SCREEN 0 gmpm" &&
+                   g_gfLog[1] == "panel equipment PLAYER_SCREEN 0 gmpm" && g_gfLog[2] == "panel items PLAYER_SCREEN 0 gmpm" &&
+                   g_gfLog[3] == "panel skills PLAYER_SCREEN 0 gmpm" && g_gfLog[4] == "soldier types c100000" &&
+                   g_gfLog[5] == "gmpm 48 text_weapons_info 1" && g_gfLog[6] == "gmpm 48 3Dview 1" &&
+                   MrHas("gmp3d on 0");
+            delete m.m_panel.m_soldier;
+            m.m_panel.m_soldier = nullptr;
+            WM(r.gmPlayer, okp);
+            // The occupation games: the warmup's text shown; no label, no area: none.
+            g_mpSettings->gameType = MP_GAME_OCCUPATION;
+            g_msChildren.erase({model, "text_weapons_info"});
+            g_msChildren.erase({model, "3Dview"});
+            C_GameMenu n;
+            n.m_scene = m.m_scene;
+            S_ScreenDesc desc2("PLAYER_SCREEN", "player_screen", 3u << 26);
+            okp &= n.BuildPlayerScreen(&desc2, As<I3D_frame>(model));
+            want = playerDescribe(desc2, &n);
+            okp &= want.find("text_warm_up 13 c400000: 1000015 2d 9e5; text_etimated") != std::string::npos &&
+                   want.find("text_weapons_info") == std::string::npos && C_GmBasePeek::WeaponsInfo(n) == 0 && !n.m_panel.m_soldier;
+            WM(r.gmPlayer, okp);
+
+            // A cooperative game: the version's and the equipment's texts first, no warmup or time;
+            // the player status's text; the description popup on its model (none loaded: none).
+            okp = true;
+            g_coop = true;
+            g_mpSettings->gameType = MP_GAME_COOPERATIVE;
+            g_msChildren[{model, "text_weapons_info"}] = MsFrame("gmpw2");
+            S_MrObj *popupModel = MrObj("gmpd", g_mrModelVt);
+            g_mrMade[FRAME_MODEL] = {popupModel};
+            C_GameMenu c;
+            c.m_scene = m.m_scene;
+            S_ScreenDesc desc3("PLAYER_SCREEN", "player_screen_2", 3u << 26);
+            g_cacheLoads.clear();
+            g_gfLog.clear();
+            okp &= c.BuildPlayerScreen(&desc3, As<I3D_frame>(model));
+            want = head + CmText(version.c_str(), 4, 5) + accept(6) + CmText(texts.c_str(), 0xB, 0xC, 0xD, 0xE) +
+                   "text_player_status 13 cf00000: 1000015 b 4f4c; ";
+            okp &= playerDescribe(desc3, &c) == want;
+            okp &= C_GmBasePeek::WeaponsInfo(c) == 0 && logHas("gmpm 48 text_weapons_info") == 0 && MrHas("gmpm 48 3Dview 1") &&
+                   g_cacheLoads.size() == 1 && g_cacheLoads[0] == "description" && c.m_popup &&
+                   typeid(*c.m_popup) == typeid(C_DescriptionScreen) && c.m_popup->GetScreenFrame() == As<I3D_frame>(popupModel) &&
+                   c.m_popup->m_scene == c.m_scene && MrHas("gmpd 48 description01 1");
+            delete c.m_popup;
+            c.m_popup = nullptr;
+            C_GameMenu c2;
+            c2.m_scene = m.m_scene;
+            S_ScreenDesc desc4("PLAYER_SCREEN", "player_screen_2", 3u << 26);
+            g_mrMade[FRAME_MODEL] = {MrObj("gmpd2", g_mrModelVt)};
+            g_cacheFailName = "description";
+            okp &= c2.BuildPlayerScreen(&desc4, As<I3D_frame>(model)) && !c2.m_popup;
+            g_cacheFailName.clear();
+            WM(r.gmPlayerCoop, okp);
+            g_msChildren.erase({model, "text_weapons_info"});
+            GetGame()->m_scene = oldGameScene;
+            g_igraphVtable[igraphSlots[0]] = oldIgraph[0];
+            g_igraphVtable[igraphSlots[1]] = oldIgraph[1];
+            g_coop = oldCoop;
+            g_mpSettings->gameType = oldType;
+        }
+
         g_cacheFill = oldFill;
         g_driverVtable[0x54 / 4] = oldCreate;
         g_mrModelVt[0x48 / 4] = oldFind;
         g_msFrameVt[0x08 / 4] = oldSetPos;
         g_gameRole = GAME_ROLE_CLIENT;
         game->m_mission = oldMission;
+    }
+
+    // --- the player screen's callbacks (part 9e-xiii): hidden true; the game info's: the info screen
+    // shown, true; the chat line sent ("/t": the team's, "/a": all; either skipped with the spaces after,
+    // not past a byte from 0x80; the net game's), true ---
+    {
+        C_GameMenu m;
+        alignas(16) static uint8_t infoMemory[64];
+        m.m_infoScreen = reinterpret_cast<C_InfoScreen *>(infoMemory);
+        g_gfLog.clear();
+        WM(r.gmPlayerCallbacks, C_GameMenu::OnPlayerScreenHidden(&m, nullptr, nullptr, 0, 0) && g_gfLog.empty() &&
+                                    C_GameMenu::OnGameInfo(&m, nullptr, nullptr, CONTROL_NOTIFY_CLICK, 0) &&
+                                    GfLogIs({"info show 1"}));
+        m.m_infoScreen = nullptr;
+        bool okc = true;
+        const auto chat = [](const char *line) {
+            g_gfLog.clear();
+            const bool sent = C_GameMenu::OnChat(nullptr, nullptr, nullptr, CONTROL_NOTIFY_SEND,
+                                                 static_cast<uint32_t>(reinterpret_cast<uintptr_t>(line)));
+            return sent && g_gfLog.size() == 1 ? g_gfLog[0] : std::string("none");
+        };
+        okc &= chat("/t  \t hello /a") == "chat [hello /a] 1";
+        okc &= chat("/aall") == "chat [all] 0";
+        okc &= chat("/a/t x") == "chat [/t x] 0";
+        okc &= chat(" x /t") == "chat [x /t] 0";
+        okc &= chat("x/t") == "chat [x/t] 0";
+        okc &= chat("/T up") == "chat [/T up] 0";
+        okc &= chat("/t\xE9 x") == "chat [\xE9 x] 1";
+        okc &= chat("/t") == "chat [] 1";
+        okc &= chat("\n\v\f\r plain") == "chat [plain] 0";
+        WM(r.gmChat, okc);
     }
 
     // --- the base: C_EquipmentMenuBase's slots true ---
@@ -1104,9 +1309,10 @@ void GameMenuTest(I3D_scene *scene)
     std::printf("gamemenu: gmNew %d gmNewClient %d gmStart %d gmStartNet %d gmStop %d gmInput %d gmUpdate %d "
                 "gmTick %d gmDraw %d gmMessage %d gmObjectives %d gmBase %d gmLoad %d gmCoop %d gmNet %d gmRender %d "
                 "gmRenderGame %d gmRenderEquip %d gmOptions %d gmEscape %d gmEscapeNet %d gmSquad %d gmQuestions %d "
-                "gmMainLocal %d gmMainNet %d gmBuild %d gmBuildNet %d\n",
+                "gmMainLocal %d gmMainNet %d gmBuild %d gmBuildNet %d gmPlayer %d gmPlayerCoop %d gmPlayerCallbacks %d "
+                "gmChat %d\n",
                 r.gmNew, r.gmNewClient, r.gmStart, r.gmStartNet, r.gmStop, r.gmInput, r.gmUpdate, r.gmTick, r.gmDraw,
                 r.gmMessage, r.gmObjectives, r.gmBase, r.gmLoad, r.gmCoop, r.gmNet, r.gmRender, r.gmRenderGame,
                 r.gmRenderEquip, r.gmOptions, r.gmEscape, r.gmEscapeNet, r.gmSquad, r.gmQuestions, r.gmMainLocal,
-                r.gmMainNet, r.gmBuild, r.gmBuildNet);
+                r.gmMainNet, r.gmBuild, r.gmBuildNet, r.gmPlayer, r.gmPlayerCoop, r.gmPlayerCallbacks, r.gmChat);
 }

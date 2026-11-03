@@ -14,14 +14,6 @@ uint32_t FUN_00677840(...)
 }
 
 
-// 0x00677870
-uint32_t FUN_00677870(int *param_1, ...)
-{
-  (**(code **)(*param_1 + 0x60))();
-  return 0;
-}
-
-
 // 0x00677880
 uint32_t FUN_00677880(int *param_1, ...)
 {

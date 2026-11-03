@@ -892,14 +892,13 @@ LAB_00687d9f:
 
 
 // 0x00687dd0
-uint32_t FUN_00687dd0(void *_this,uint32_t param_1,int *param_2, ...)
+bool C_GameMenu__OnSoldierType(C_GameMenu *_this,void *argument,void *control,uint32_t notification,uint32_t value, ...)
 {
   uint8_t *puStack_8;
   int *ptr;
   uint32_t uVar1;
   char *_Dest;
   int iVar2;
-  int *extraout_EAX;
   uint32_t local_3c;
   uint32_t local_38;
   uint32_t local_34;
@@ -915,11 +914,11 @@ uint32_t FUN_00687dd0(void *_this,uint32_t param_1,int *param_2, ...)
   local_38 = 0x200002f;
   local_34 = 0;
   local_4 = 0;
-  (**(code **)(*param_2 + 0x6c))(&local_3c);
+  (**(code **)(*(int *)control + 0x6c))(&local_3c);
   ptr = piStack_2c;
   if ((piStack_2c == 0) || (piStack_2c[1] == 0)) {
     piStack_14 = 0;
-    local_28 = *(uint32_t *)((int)_this + 0x1dc) | 2;
+    local_28 = *(uint32_t *)(_this->_pad_0138 + 0xa4) | 2;
     uStack_24 = 0x2000016;
     uStack_20 = 0;
     puStack_8 = (uint8_t *)CONCAT31(GH_PIECE(puStack_8,1,3),1);
@@ -932,8 +931,8 @@ uint32_t FUN_00687dd0(void *_this,uint32_t param_1,int *param_2, ...)
   else {
     *piStack_2c = *piStack_2c + 1;
     puStack_8 = (uint8_t *)CONCAT31(GH_PIECE(puStack_8,1,3),2);
-    if (-1 < *(int *)((int)_this + 0x4c4)) {
-      iVar2 = *(int *)((int)_this + 0x1d4);
+    if (-1 < _this->m_4c4) {
+      iVar2 = *(int *)(_this->_pad_0138 + 0x9c);
       uVar1 = 0;
       if (iVar2 == 0) {
         uVar1 = 0x10;
@@ -944,8 +943,7 @@ uint32_t FUN_00687dd0(void *_this,uint32_t param_1,int *param_2, ...)
       else if (iVar2 == 2) {
         uVar1 = 0x40;
       }
-      _Dest = C_LoadoutPresets__GetUserPreset
-                        ((void *)((int)_this + 0x49c),*(int *)((int)_this + 0x4c4),uVar1 | 2);
+      _Dest = C_LoadoutPresets__GetUserPreset(_this->_pad_0138 + 0x364,_this->m_4c4,uVar1 | 2);
       if (_Dest != 0) {
         strncpy(_Dest,(char *)(ptr + 2),0x1d);
         _Dest[0x1d] = '\0';
@@ -953,8 +951,8 @@ uint32_t FUN_00687dd0(void *_this,uint32_t param_1,int *param_2, ...)
         _Dest[0x1b1] = -1;
         _Dest[0x1b2] = -1;
         _Dest[0x1b3] = -1;
-        FUN_00687bc0(_this,*(int *)((int)_this + 0x4c4));
-        C_LoadoutPresets__SaveUser((void *)((int)_this + 0x49c));
+        FUN_00687bc0(_this,_this->m_4c4);
+        C_LoadoutPresets__SaveUser(_this->_pad_0138 + 0x364);
       }
     }
     iVar2 = *ptr - 1;
@@ -966,21 +964,19 @@ uint32_t FUN_00687dd0(void *_this,uint32_t param_1,int *param_2, ...)
 LAB_00687f15:
   if ((piStack_2c != 0) && (*piStack_2c = *piStack_2c - 1, *piStack_2c == 0)) {
     tier1_operator_delete(piStack_2c);
-    piStack_2c = extraout_EAX;
   }
-  return CONCAT31((int3)((uint32_t)piStack_2c >> 8),1);
+  return true;
 }
 
 
 // 0x00687f50
-uint32_t FUN_00687f50(void *param_1, ...)
+bool C_GameMenu__OnSavePreset(C_GameMenu *_this,void *argument,void *control,uint32_t notification,uint32_t value, ...)
 {
   int iVar1;
   uint32_t uVar2;
   char *_Dest;
   C_str *pCVar3;
   int *_Source;
-  undefined3 extraout_var;
   int *local_2c;
   C_str local_28;
   uint32_t local_24;
@@ -989,9 +985,9 @@ uint32_t FUN_00687f50(void *param_1, ...)
   int *local_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
-  if (-1 < *(int *)((int)param_1 + 0x4c4)) {
-    FUN_00687bc0(param_1,*(int *)((int)param_1 + 0x4c4));
-    iVar1 = *(int *)((int)param_1 + 0x1d4);
+  if (-1 < _this->m_4c4) {
+    FUN_00687bc0(_this,_this->m_4c4);
+    iVar1 = *(int *)(_this->_pad_0138 + 0x9c);
     uVar2 = 0;
     if (iVar1 == 0) {
       uVar2 = 0x10;
@@ -1002,10 +998,9 @@ uint32_t FUN_00687f50(void *param_1, ...)
     else if (iVar1 == 2) {
       uVar2 = 0x40;
     }
-    _Dest = C_LoadoutPresets__GetUserPreset
-                      ((void *)((int)param_1 + 0x49c),*(int *)((int)param_1 + 0x4c4),uVar2 | 2);
+    _Dest = C_LoadoutPresets__GetUserPreset(_this->_pad_0138 + 0x364,_this->m_4c4,uVar2 | 2);
     if ((_Dest != 0) && (*(int *)(_Dest + 0x1b0) != -1)) {
-      pCVar3 = C_fstr_Construct(&local_28,&DAT_00832d40,*(int *)((int)param_1 + 0x4c4) + 1);
+      pCVar3 = C_fstr_Construct(&local_28,&DAT_00832d40,_this->m_4c4 + 1);
       local_4 = 0;
       FUN_00688130(g_gameProfile.m_player,(uint32_t*)(&local_2c),(int *)pCVar3);
       local_4 = CONCAT31(GH_PIECE(local_4,1,3),2);
@@ -1026,11 +1021,11 @@ uint32_t FUN_00687f50(void *param_1, ...)
       }
       strncpy(_Dest,(char *)_Source,0x1d);
       _Dest[0x1d] = '\0';
-      FUN_00685da0((int)param_1);
+      C_GameMenu__UpdateSoldierTypes(_this);
       if (local_2c != 0) {
         *local_2c = *local_2c + 1;
       }
-      local_24 = *(uint32_t *)((int)param_1 + 0x1dc);
+      local_24 = *(uint32_t *)(_this->_pad_0138 + 0xa4);
       local_20 = 0x100007a;
       local_1c = 0xc;
       if (local_2c != 0) {
@@ -1052,8 +1047,8 @@ uint32_t FUN_00687f50(void *param_1, ...)
       }
     }
   }
-  C_LoadoutPresets__SaveUser((void *)((int)param_1 + 0x49c));
-  return CONCAT31(extraout_var,1);
+  C_LoadoutPresets__SaveUser(_this->_pad_0138 + 0x364);
+  return true;
 }
 
 

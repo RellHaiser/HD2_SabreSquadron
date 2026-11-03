@@ -266,6 +266,9 @@ public:
     void SetVoiceValue(int value);                  // 0x0072edf0
     // The voice chat transmits to the local player's team ("Set Transmition team").
     void UpdateVoiceTeam();                         // 0x00724940
+    // A chat line (its first 99 characters; `team`: to the local player's team) posted to the app
+    // (command 3) to send. True.
+    bool SendChat(const char *text, bool team);     // 0x0072ee60
 };
 // C_NetGame::Command() commands.
 enum : int {

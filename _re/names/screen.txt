@@ -27,3 +27,12 @@
 00668a90 C_MessageBox::Build | bool __thiscall Build(C_Screen *this, void * desc)
 0066c6d0 C_MessageBox::~C_MessageBox | void __thiscall ~C_MessageBox(C_Screen *this)
 0066c6b0 C_MessageBox::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(C_Screen *this, uchar flags)
+# Part 9e-xiii: the description popup.
+006838a0 C_DescriptionScreen::C_DescriptionScreen | void * __thiscall C_DescriptionScreen(C_Screen *this, void * scene, void * frame)
+00676040 C_DescriptionScreen::~C_DescriptionScreen | void __thiscall ~C_DescriptionScreen(C_Screen *this)
+00676020 C_DescriptionScreen::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(C_Screen *this, uchar flags)
+00669bf0 C_DescriptionScreen::Refresh | void __thiscall Refresh(C_Screen *this)
+00669aa0 C_DescriptionScreen::Tick | void __thiscall Tick(C_Screen *this, int time)
+00669a50 C_DescriptionScreen::HandleMessage | bool __thiscall HandleMessage(C_Screen *this, void * message)
+00676010 C_DescriptionScreen::HasPopup | bool __thiscall HasPopup(C_Screen *this)
+006698c0 C_DescriptionScreen::Build | bool __thiscall Build(C_Screen *this, void * desc)

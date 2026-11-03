@@ -23,5 +23,18 @@
 # Part 9e-ix: the screens' descriptions.
 0067fe00 C_GameMenu::BuildScreens | bool __thiscall BuildScreens(C_GameMenu *this)
 00680980 C_GameMenu::BuildMainScreen | bool __thiscall BuildMainScreen(C_GameMenu *this, void * desc, void * model)
-# Not ported yet (named for the later parts).
+# Part 9e-xiii: the player screen's description and callbacks.
 00682c80 C_GameMenu::BuildPlayerScreen | bool __thiscall BuildPlayerScreen(C_GameMenu *this, void * desc, void * model)
+00684fc0 C_GameMenu::OnPlayerScreenHidden | bool __thiscall OnPlayerScreenHidden(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+006861b0 C_GameMenu::OnGameInfo | bool __thiscall OnGameInfo(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00682a20 C_GameMenu::OnChat | bool __thiscall OnChat(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+# Not ported yet (named for the later parts).
+006838e0 C_GameMenu::BuildSoldiersPanel | bool __thiscall BuildSoldiersPanel(C_GameMenu *this, void * desc, void * model)
+00684690 C_GameMenu::BuildEquipmentPanel | bool __thiscall BuildEquipmentPanel(C_GameMenu *this, void * desc, void * model)
+00684b90 C_GameMenu::BuildItemsPanel | bool __thiscall BuildItemsPanel(C_GameMenu *this, void * desc, void * model)
+00684df0 C_GameMenu::BuildSkillsPanel | bool __stdcall BuildSkillsPanel(void * desc, void * model)
+00685da0 C_GameMenu::UpdateSoldierTypes | void __fastcall UpdateSoldierTypes(C_GameMenu * menu)
+00684fd0 C_GameMenu::OnPlayerScreenShown | bool __thiscall OnPlayerScreenShown(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00687dd0 C_GameMenu::OnSoldierType | bool __thiscall OnSoldierType(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+00687f50 C_GameMenu::OnSavePreset | bool __thiscall OnSavePreset(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
+0072ee60 C_NetGame::SendChat

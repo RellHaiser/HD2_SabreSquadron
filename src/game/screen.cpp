@@ -1,5 +1,6 @@
 #include "game/screen.h"
 
+#include "game/controls.h"
 #include "game/cursor.h"
 #include "ls3d/i3d.h"
 
@@ -284,5 +285,81 @@ bool C_MessageBox::OnButton(void *object, void *, C_Control *control, uint32_t, 
         break;
     }
     box->ClearAnswers();
+    return true;
+}
+
+// --- the description popup ---------------------------------------------------------------------------
+
+namespace {
+
+// The cursor's still time before the box is shown, its place from the cursor.
+constexpr int DESCRIPTION_DELAY = 500;
+constexpr float DESCRIPTION_OFFSET_X = 0.15f, DESCRIPTION_OFFSET_Y = 0.015f;
+
+} // namespace
+
+C_DescriptionScreen::~C_DescriptionScreen()
+{
+    delete m_text;
+}
+
+void C_DescriptionScreen::Refresh()
+{
+    m_text->Refresh();
+}
+
+void C_DescriptionScreen::Tick(int)
+{
+    if (!m_shown)
+        return;
+    if (m_cursor->GetStillTime() >= DESCRIPTION_DELAY && !m_cursor->IsButtonDown(0)) {
+        S_vector pos;
+        m_cursor->GetPosition(&pos);
+        pos.z = m_frame->GetWorldPos().z;
+        pos.x += DESCRIPTION_OFFSET_X;
+        m_boxShown = true;
+        pos.y += DESCRIPTION_OFFSET_Y;
+        m_frame->SetOn(true);
+        m_frame->SetPos(pos);
+        m_frame->Update();
+        S_ControlMessage refresh;
+        refresh.id = CONTROL_MSG_REFRESH;
+        m_text->HandleMessage(&refresh);
+        return;
+    }
+    if (m_boxShown || m_frame->IsOn()) {
+        m_boxShown = false;
+        m_frame->SetOn(false);
+    }
+}
+
+bool C_DescriptionScreen::HandleMessage(S_ControlMessage *message)
+{
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SHOW:
+        m_shown = true;
+        return true;
+    case CONTROL_MSG_HIDE:
+        m_shown = false;
+        m_boxShown = false;
+        return true;
+    default:
+        return m_text->HandleMessage(message);
+    }
+}
+
+bool C_DescriptionScreen::Build(const S_ScreenDesc *)
+{
+    if (I3D_frame *frame = m_screenFrame->FindChildFrame("text", FRAME_MASK_VISUAL)) {
+        m_text = new C_TitleControl(m_scene, m_id | 2, this);
+        m_text->Create(frame, m_screenFrame, nullptr);
+    }
+    m_frame = m_screenFrame->FindChildFrame("description", FRAME_MASK_VISUAL);
+    if (m_frame) {
+        m_frame->SetOn(false);
+        m_frame->SetPos(S_vector(0.5f, -0.375f, -0.5f));
+    }
+    if (I3D_frame *frame = m_screenFrame->FindChildFrame("description01", FRAME_MASK_VISUAL))
+        frame->SetOn(false);
     return true;
 }

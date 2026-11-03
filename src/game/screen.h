@@ -93,6 +93,38 @@ protected:
     bool m_80 = false;                                  // +0x80 (zeroed; not read by the screens)
 };
 
+class C_TitleControl;
+
+// The description popup (the cooperative game's player screen's, its model "DESCRIPTION"): shown,
+// a text box that follows the cursor once it has stayed still for half a second (its button up);
+// the menu state draws it over the top screen (HasPopup). Its controls are not described.
+class C_DescriptionScreen : public C_Screen {           // 0x8C bytes, vtable 0x008156b8
+public:
+    C_DescriptionScreen(I3D_scene *scene, I3D_frame *frame) : C_Screen(scene, frame) {}   // 0x006838a0
+    // The text deleted.
+    ~C_DescriptionScreen() override;                    // 0x00676040 (0x00676020)
+
+    // The text's.
+    void Refresh() override;                            // +0x18 0x00669bf0
+    // Shown and the cursor still (500 ms, button 0 up): the box on at the cursor (+0.15, +0.015;
+    // its own depth kept), placed, the text refreshed; else the box off (when it was shown or on).
+    // (Not the screen's: no tick notification.)
+    void Tick(int time) override;                       // +0x1C 0x00669aa0
+    // CONTROL_MSG_SHOW / HIDE: shown / hidden (the box with it); the others the text's.
+    bool HandleMessage(S_ControlMessage *message) override;   // +0x6C 0x00669a50
+    // The box shown.
+    bool HasPopup() const override { return m_boxShown; }     // +0x88 0x00676010
+    // The model's "text" (a title, the screen's id | 2) made, its "description" box off at (0.5,
+    // -0.375, -0.5), "description01" off; true. (The description is not read: the screen gets no name
+    // or id.)
+    bool Build(const S_ScreenDesc *desc) override;      // +0x8C 0x006698c0
+
+private:
+    C_TitleControl *m_text = nullptr;                   // +0x84
+    bool m_boxShown = false;                            // +0x88
+    bool m_shown = false;                               // +0x89
+};
+
 // The screens' notification on every tick (value: the time).
 constexpr uint32_t CONTROL_NOTIFY_SCREEN_TICK = 0x4014000;
 

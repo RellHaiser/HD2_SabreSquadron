@@ -269,6 +269,12 @@ bool C_EquipmentMenuBase::CallItemNotify13(void *menu, void *argument, C_Control
     return static_cast<C_EquipmentMenuBase *>(menu)->OnItemNotify13(argument, control, notification, value);
 }
 
+bool C_EquipmentMenuBase::CallItemNotify60(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                           uint32_t value)
+{
+    return static_cast<C_EquipmentMenuBase *>(menu)->OnItemNotify60(argument, control, notification, value);
+}
+
 bool C_EquipmentMenuBase::CallItemNotify0A(void *menu, void *argument, C_Control *control, uint32_t notification,
                                            uint32_t value)
 {

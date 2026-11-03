@@ -177,6 +177,7 @@ public:
     void UnlockPlayers();
     void SetPlayer(int slot, int connection, const char *name);
     void UpdateVoiceTeam();
+    bool SendChat(const char *text, bool team);
     // (The multiplayer zone, part 7d.)
     int GetLocalTeam();
     int GetPlayerCount() const;

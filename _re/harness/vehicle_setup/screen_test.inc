@@ -13,7 +13,20 @@ namespace {
 struct S_ScreenResults {
     bool scDescs = true, scMenuDesc = true, scNew = true, scBuild = true, scOpen = true, scHide = true, scTick = true;
     bool scKeys = true, scMessages = true, mbBuild = true, mbShow = true, mbShowId = true, mbClose = true, mbKeys = true;
-    bool mbButtons = true;
+    bool mbButtons = true, dsNew = true, dsBuild = true, dsTick = true, dsMessages = true;
+};
+
+// The description popup's text logging (part 9e-xiii): its refresh, messages (returning their id's
+// low bit) and deletion.
+struct C_DsTitle : C_TitleControl {
+    C_DsTitle() : C_TitleControl(nullptr, 0, nullptr) {}
+    ~C_DsTitle() override { GfLog("dstitle deleted"); }
+    void Refresh() override { GfLog("dstitle refresh"); }
+    bool HandleMessage(S_ControlMessage *message) override
+    {
+        GfLog("dstitle message %x %x", message->target, message->id);
+        return (message->id & 1) != 0;
+    }
 };
 
 // The queue as text ("target id value value2 text; ") and emptied.
@@ -534,10 +547,131 @@ void ScreenTest(I3D_scene *scene)
     WM(r.mbButtons, g_csCursor.refs == refs - 1);
     for (I3D_frame *f : {boxText, yes, no, ok})
         f->SetData(nullptr);
+
+    // --- the description popup (part 9e-xiii): made (none shown); built from its model's frames (the
+    // text a title with the screen's id | 2; the box off at its place, its second off; the description
+    // not read: no name or id; without the frames: nothing made); deleted: the text ---
+    {
+        I3D_frame *model = GfFrame(FRAME_DUMMY, "DESCRIPTION");
+        I3D_frame *text = GfVisual("text", I3DVISUAL_OBJECT, model);
+        I3D_frame *frame = GfVisual("description", I3DVISUAL_OBJECT, model);
+        I3D_frame *frame1 = GfVisual("description01", I3DVISUAL_OBJECT, model);
+        // (Dummies of the names: not found.)
+        I3D_frame *other = GfFrame(FRAME_DUMMY, "DESCRIPTION2");
+        GfFrame(FRAME_DUMMY, "text", other);
+        GfFrame(FRAME_DUMMY, "description", other);
+        I3D_frame *other1 = GfFrame(FRAME_DUMMY, "description01", other);
+        frame->m_frameFlags |= 1;
+        frame1->m_frameFlags |= 1;
+        other1->m_frameFlags |= 1;
+        const int refs0 = g_csCursor.refs;
+        g_gfLog.clear();
+        auto *d = new C_DescriptionScreen(scene, model);
+        WM(r.dsNew, !d->m_text && !d->m_boxShown && !d->m_shown && !d->HasPopup() && d->m_screenFrame == model &&
+                        d->m_scene == scene && d->m_id == 0xFFFFFFFF && g_csCursor.refs == refs0 + 1 &&
+                        GfLogIs({"cursor acquire 1"}));
+        d->m_id = 0x0C000000;
+        g_gfLog.clear();
+        WM(r.dsBuild, d->Build(nullptr) && d->m_text && typeid(*d->m_text) == typeid(C_TitleControl) &&
+                          d->m_text->m_frame == text && d->m_text->m_id == 0x0C000002 && d->m_text->m_parent == d &&
+                          d->m_text->m_scene == scene && d->m_frame == frame && !frame->IsOn() && !frame1->IsOn() &&
+                          d->m_id == 0x0C000000 && d->m_name.IsEmpty() && d->m_children.empty());
+        const S_vector &pos = frame->GetPos();
+        WM(r.dsBuild, pos.x == 0.5f && pos.y == -0.375f && pos.z == -0.5f);
+        WM(r.dsBuild, g_gfLog.size() > 3 && g_gfLog[0] == "find DESCRIPTION text 1" &&
+                          std::count(g_gfLog.begin(), g_gfLog.end(), "find DESCRIPTION description 1") == 1 &&
+                          std::count(g_gfLog.begin(), g_gfLog.end(), "on description 0") == 1 &&
+                          g_gfLog[g_gfLog.size() - 2] == "find DESCRIPTION description01 1" &&
+                          g_gfLog.back() == "on description01 0");
+        auto *e = new C_DescriptionScreen(scene, other);
+        g_gfLog.clear();
+        WM(r.dsBuild, e->Build(nullptr) && !e->m_text && !e->m_frame && other1->IsOn() &&
+                          GfLogIs({"find DESCRIPTION2 text 1", "find DESCRIPTION2 description 1",
+                                   "find DESCRIPTION2 description01 1"}));
+        delete e;
+        // The text replaced by a logging one; deleted with the screen.
+        text->SetData(nullptr);
+        delete d->m_text;
+        d->m_text = new C_DsTitle();
+
+        // --- ticked: not shown, nothing (the box left on); shown, the cursor still 500 ms (its button
+        // up): the box on at the cursor + (0.15, 0.015) at its own depth, placed, the text refreshed;
+        // the cursor moving or its button down: the box off (when shown or on) ---
+        bool ok = true;
+        frame->m_frameFlags |= 1;
+        g_csCursor.still = 900;
+        g_csCursor.buttons = 0;
+        g_csCursor.position = S_vector(0.25f, -0.5f, -1.0f);
+        g_gfLog.clear();
+        d->Tick(10);
+        ok &= g_gfLog.empty() && frame->IsOn() && !d->HasPopup();
+        frame->m_frameFlags &= ~1u;
+        S_ControlMessage show = CtMessage(0, CONTROL_MSG_SHOW | 0x100000);
+        ok &= d->HandleMessage(&show) && d->m_shown && !d->m_boxShown;
+        GfPlace(frame, S_vector(0.5f, -0.375f, -0.75f));
+        g_csCursor.still = 500;
+        g_gfLog.clear();
+        d->Tick(10);
+        const S_vector &at = frame->GetPos();
+        ok &= d->HasPopup() && frame->IsOn() && at.x == 0.25f + 0.15f && at.y == -0.5f + 0.015f && at.z == -0.75f;
+        ok &= GfLogIs({"on description 1", "setpos description 0.4000 -0.4850 -0.7500", "update description",
+                       "dstitle message 0 200002c"});
+        WM(r.dsTick, ok);
+        g_csCursor.still = 499;
+        g_gfLog.clear();
+        d->Tick(10);
+        ok &= !d->HasPopup() && !frame->IsOn() && GfLogIs({"on description 0"});
+        g_gfLog.clear();
+        d->Tick(10);
+        ok &= g_gfLog.empty();
+        // The box on, not shown by the popup: off.
+        frame->m_frameFlags |= 1;
+        d->Tick(10);
+        ok &= !frame->IsOn() && GfLogIs({"on description 0"});
+        // Shown by the popup, the box off: off again.
+        d->m_boxShown = true;
+        g_csCursor.still = 600;
+        g_csCursor.buttons = 1;
+        g_gfLog.clear();
+        d->Tick(10);
+        ok &= !d->HasPopup() && GfLogIs({"on description 0"});
+        // (Any button down.)
+        g_csCursor.buttons = 2;
+        g_gfLog.clear();
+        d->Tick(10);
+        ok &= !d->HasPopup() && g_gfLog.empty();
+        frame->m_frameFlags |= 1;
+        g_csCursor.buttons = 0;
+        WM(r.dsTick, ok);
+
+        // --- the messages: show and hide (the box's state too), true; the others the text's (its
+        // answer); refreshed: the text's ---
+        ok = true;
+        S_ControlMessage hide = CtMessage(0, CONTROL_MSG_HIDE | 0x4000);
+        g_gfLog.clear();
+        ok &= d->HandleMessage(&hide) && !d->m_shown && !d->HasPopup() && g_gfLog.empty() && frame->IsOn();
+        d->m_boxShown = true;
+        ok &= d->HandleMessage(&show) && d->m_shown && d->HasPopup() && g_gfLog.empty();
+        S_ControlMessage other2 = CtMessage(0x0C100000, CONTROL_MSG_SET_TEXT_ID);
+        ok &= d->HandleMessage(&other2) && GfLogIs({"dstitle message c100000 1000015"});
+        other2.id = CONTROL_MSG_REFRESH;
+        g_gfLog.clear();
+        ok &= !d->HandleMessage(&other2) && GfLogIs({"dstitle message c100000 200002c"});
+        g_gfLog.clear();
+        d->Refresh();
+        ok &= GfLogIs({"dstitle refresh"});
+        WM(r.dsMessages, ok);
+        g_gfLog.clear();
+        delete d;
+        WM(r.dsNew, g_csCursor.refs == refs0 && GfLogIs({"dstitle deleted", "cursor release"}));
+        g_csCursor.still = 0;
+        g_csCursor.position = S_vector(0.0f, 0.0f, 0.0f);
+    }
     g_gfLog.clear();
     g_controlMessages.clear();
     std::printf("screens: scDescs %d scMenuDesc %d scNew %d scBuild %d scOpen %d scHide %d scTick %d scKeys %d scMessages %d "
-                "mbBuild %d mbShow %d mbShowId %d mbClose %d mbKeys %d mbButtons %d\n",
+                "mbBuild %d mbShow %d mbShowId %d mbClose %d mbKeys %d mbButtons %d dsNew %d dsBuild %d dsTick %d "
+                "dsMessages %d\n",
                 r.scDescs, r.scMenuDesc, r.scNew, r.scBuild, r.scOpen, r.scHide, r.scTick, r.scKeys, r.scMessages, r.mbBuild,
-                r.mbShow, r.mbShowId, r.mbClose, r.mbKeys, r.mbButtons);
+                r.mbShow, r.mbShowId, r.mbClose, r.mbKeys, r.mbButtons, r.dsNew, r.dsBuild, r.dsTick, r.dsMessages);
 }
