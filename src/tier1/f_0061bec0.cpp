@@ -36,26 +36,23 @@ uint32_t FUN_0061bef0(...)
 
 
 // 0x0061bf00
-uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
+bool C_OptionsHandler__HandleMessage(void *_this,void *message, ...)
 {
-  C_PlayerProfile *pCVar1;
+  uint32_t *puVar1;
+  uint32_t *puVar2;
+  C_PlayerProfile *pCVar3;
   IGraph *self;
-  S_IGraphInfo *pSVar2;
-  C_PlayerOptions *pCVar3;
-  uint32_t extraout_EAX;
-  int *piVar4;
-  int iVar5;
-  uint32_t extraout_EAX_00;
-  uint32_t extraout_EAX_01;
-  int *ptr;
-  int *extraout_EAX_02;
-  uint32_t uVar6;
+  S_IGraphInfo *pSVar4;
+  uint32_t uVar5;
+  C_PlayerOptions *pCVar6;
+  int *piVar7;
+  int iVar8;
   C_str *this_00;
-  bool bVar7;
-  int64_t lVar8;
+  bool bVar9;
+  int64_t lVar10;
   int local_34c;
-  int *local_348;
-  int *local_344;
+  uint32_t *local_348;
+  uint32_t *local_344;
   uint32_t local_340;
   uint32_t local_33c;
   uint32_t local_338;
@@ -135,43 +132,39 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
   int *local_20;
   int local_1c [4];
   uint32_t local_4;
-  pCVar1 = g_gameProfile.m_player;
+  pCVar3 = g_gameProfile.m_player;
   local_4 = 0xffffffff;
-  uVar6 = *(uint32_t *)(param_1 + 4) & 0x3000fff;
-  piVar4 = (int *)(uVar6 + 0xfdfffff6);
-  switch(uVar6) {
+  switch(*(uint32_t *)((int)message + 4) & 0x3000fff) {
   case 0x200000a:
-    piVar4 = 0;
     if (DAT_008ae5f0 != 0) {
       local_33c = DAT_008ae5dc;
       local_340 = DAT_008ae5d8;
       local_338 = DAT_008ae5e0;
       local_334 = DAT_008ae5e4;
-      iVar5 = FUN_00620e90(&local_340,local_1c,1);
-      piVar4 = *(int **)(iVar5 + 8);
-      if (*piVar4 != 0) {
+      iVar8 = FUN_00620e90(&local_340,local_1c,1);
+      if (**(int **)(iVar8 + 8) != 0) {
         if (DAT_008ae5f0 == 0) {
-          iVar5 = 0;
+          iVar8 = 0;
         }
         else {
           local_340 = DAT_008ae5d8;
           local_33c = DAT_008ae5dc;
           local_334 = DAT_008ae5e4;
           local_338 = DAT_008ae5e0;
-          iVar5 = FUN_00620e90(&local_340,local_1c,1);
-          iVar5 = **(int **)(iVar5 + 8);
+          iVar8 = FUN_00620e90(&local_340,local_1c,1);
+          iVar8 = **(int **)(iVar8 + 8);
         }
-        piVar4 = (int *)(*(int *)(iVar5 + 0x60) >> 0x1a & 0x3f);
-        if ((char)piVar4 == *(char *)((int)_this + 9)) {
+        if (((uint8_t)((int)*(uint32_t *)(iVar8 + 0x60) >> 0x1a) & 0x3f) == *(uint8_t *)((int)_this + 9))
+        {
           local_2d8 = 0;
           local_2ec = 0;
           local_2e8 = 0x20000c4;
           local_2e4 = 0;
           local_4 = 0xf;
           PostControlMessage(&DAT_008ae590,&local_2ec);
-          ptr = local_2d8;
           if (local_2d8 != 0) {
             *local_2d8 = *local_2d8 - 1;
+            piVar7 = local_2d8;
             goto LAB_0061ce94;
           }
           goto LAB_0061cea1;
@@ -179,24 +172,24 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
       }
     }
   default:
-    uVar6 = (uint32_t)piVar4 & 0xffffff00;
+    bVar9 = false;
     break;
   case 0x200006f:
     C_PlayerProfile__SaveOptions(g_gameProfile.m_player);
     C_PlayerProfile__ApplyHardwareOption(g_gameProfile.m_player);
     C_KeyBindings__ApplyChanged(&(g_gameProfile.m_player)->m_keyBindings);
-    return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
+    return true;
   case 0x2000071:
     if (*(char *)((int)_this + 8) != '\0') {
       self = GetIGraph();
-      pSVar2 = (*self->vtable->GetInfo)(self);
-      uVar6 = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x604000;
-      if ((gh_bitcast<uint8_t>(pSVar2[0x2c]) & 2) == 0) {
+      pSVar4 = (*self->vtable->GetInfo)(self);
+      uVar5 = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x604000;
+      if ((gh_bitcast<uint8_t>(pSVar4[0x2c]) & 2) == 0) {
         pCStack_68 = 0;
         auStack_7c[1] = 0x1000001;
         auStack_7c[2] = 0;
         local_4 = 1;
-        auStack_7c[0] = uVar6;
+        auStack_7c[0] = uVar5;
         PostControlMessage(&DAT_008ae590,auStack_7c);
         this_00 = pCStack_68;
       }
@@ -205,7 +198,7 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
         auStack_2d4[1] = 0x1000002;
         auStack_2d4[2] = 0;
         local_4 = 0;
-        auStack_2d4[0] = uVar6;
+        auStack_2d4[0] = uVar5;
         PostControlMessage(&DAT_008ae590,auStack_2d4);
         this_00 = pCStack_2c0;
       }
@@ -214,8 +207,8 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
         C_str__ReleaseRep(this_00);
       }
       C_GameProfile__GetDetailSettings(&g_gameProfile);
-      lVar8 = tier1_ftol();
-      auStack_2a4[2] = (uint32_t)lVar8;
+      lVar10 = tier1_ftol();
+      auStack_2a4[2] = (uint32_t)lVar10;
       pCStack_290 = 0;
       auStack_2a4[0] = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x604000;
       auStack_2a4[1] = 0x200002b;
@@ -226,8 +219,8 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
         C_str__ReleaseRep(pCStack_290);
       }
       C_GameProfile__GetDetailSettings(&g_gameProfile);
-      lVar8 = tier1_ftol();
-      auStack_154[2] = (uint32_t)lVar8;
+      lVar10 = tier1_ftol();
+      auStack_154[2] = (uint32_t)lVar10;
       pCStack_140 = 0;
       auStack_154[1] = 0x200002b;
       auStack_154[0] = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x706000;
@@ -238,8 +231,8 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
         C_str__ReleaseRep(pCStack_140);
       }
       C_GameProfile__GetDetailSettings(&g_gameProfile);
-      lVar8 = tier1_ftol();
-      auStack_274[2] = (uint32_t)lVar8;
+      lVar10 = tier1_ftol();
+      auStack_274[2] = (uint32_t)lVar10;
       pCStack_260 = 0;
       auStack_274[1] = 0x200002b;
       auStack_274[0] = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x707000;
@@ -250,8 +243,8 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
         C_str__ReleaseRep(pCStack_260);
       }
       C_GameProfile__GetDetailSettings(&g_gameProfile);
-      lVar8 = tier1_ftol();
-      auStack_ac[2] = (uint32_t)lVar8;
+      lVar10 = tier1_ftol();
+      auStack_ac[2] = (uint32_t)lVar10;
       pCStack_98 = 0;
       auStack_ac[1] = 0x200002b;
       auStack_ac[0] = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x806000;
@@ -261,8 +254,8 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
       if (pCStack_98 != 0) {
         C_str__ReleaseRep(pCStack_98);
       }
-      pCVar3 = C_GameProfile__GetDetailSettings(&g_gameProfile);
-      auStack_244[2] = pCVar3->level;
+      pCVar6 = C_GameProfile__GetDetailSettings(&g_gameProfile);
+      auStack_244[2] = pCVar6->level;
       pCStack_230 = 0;
       auStack_244[0] = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x605000;
       auStack_244[1] = 0x100006d;
@@ -272,10 +265,10 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
       if (pCStack_230 != 0) {
         C_str__ReleaseRep(pCStack_230);
       }
-      pCVar3 = C_GameProfile__GetDetailSettings(&g_gameProfile);
+      pCVar6 = C_GameProfile__GetDetailSettings(&g_gameProfile);
       pCStack_110 = 0;
-      local_34c = CONCAT31(GH_PIECE(local_34c,1,3),pCVar3->invertMouse);
-      auStack_124[2] = (uint32_t)pCVar3->invertMouse;
+      local_34c = CONCAT31(GH_PIECE(local_34c,1,3),pCVar6->invertMouse);
+      auStack_124[2] = (uint32_t)pCVar6->invertMouse;
       auStack_124[1] = 0x1000076;
       auStack_124[0] = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x804000;
       local_4 = 7;
@@ -284,10 +277,10 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
       if (pCStack_110 != 0) {
         C_str__ReleaseRep(pCStack_110);
       }
-      pCVar3 = C_GameProfile__GetDetailSettings(&g_gameProfile);
+      pCVar6 = C_GameProfile__GetDetailSettings(&g_gameProfile);
       pCStack_200 = 0;
-      local_34c = CONCAT31(GH_PIECE(local_34c,1,3),pCVar3->unknown3A);
-      auStack_214[2] = (uint32_t)pCVar3->unknown3A;
+      local_34c = CONCAT31(GH_PIECE(local_34c,1,3),pCVar6->unknown3A);
+      auStack_214[2] = (uint32_t)pCVar6->unknown3A;
       auStack_214[1] = 0x1000076;
       auStack_214[0] = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0xa02000;
       local_4 = 8;
@@ -296,10 +289,10 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
       if (pCStack_200 != 0) {
         C_str__ReleaseRep(pCStack_200);
       }
-      pCVar3 = C_GameProfile__GetDetailSettings(&g_gameProfile);
+      pCVar6 = C_GameProfile__GetDetailSettings(&g_gameProfile);
       piStack_38 = 0;
-      local_34c = CONCAT31(GH_PIECE(local_34c,1,3),pCVar3->voiceChat);
-      auStack_4c[2] = (uint32_t)pCVar3->voiceChat;
+      local_34c = CONCAT31(GH_PIECE(local_34c,1,3),pCVar6->voiceChat);
+      auStack_4c[2] = (uint32_t)pCVar6->voiceChat;
       auStack_4c[1] = 0x1000076;
       auStack_4c[0] = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0xb04000;
       local_4 = 9;
@@ -309,8 +302,8 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
         tier1_operator_delete(piStack_38);
       }
       C_GameProfile__GetDetailSettings(&g_gameProfile);
-      lVar8 = tier1_ftol();
-      auStack_1e4[2] = (uint32_t)lVar8;
+      lVar10 = tier1_ftol();
+      auStack_1e4[2] = (uint32_t)lVar10;
       piStack_1d0 = 0;
       auStack_1e4[1] = 0x200002b;
       auStack_1e4[0] = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0xb06000;
@@ -320,10 +313,10 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
       if ((piStack_1d0 != 0) && (*piStack_1d0 = *piStack_1d0 - 1, *piStack_1d0 == 0)) {
         tier1_operator_delete(piStack_1d0);
       }
-      pCVar3 = C_GameProfile__GetDetailSettings(&g_gameProfile);
-      local_34c = CONCAT31(GH_PIECE(local_34c,1,3),pCVar3->crosshair);
+      pCVar6 = C_GameProfile__GetDetailSettings(&g_gameProfile);
+      local_34c = CONCAT31(GH_PIECE(local_34c,1,3),pCVar6->crosshair);
       auStack_304[0] = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0xa03000;
-      auStack_304[2] = (uint32_t)pCVar3->crosshair;
+      auStack_304[2] = (uint32_t)pCVar6->crosshair;
       piStack_2f0 = 0;
       auStack_304[1] = 0x1000076;
       local_4 = 0xb;
@@ -332,29 +325,29 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
       if ((piStack_2f0 != 0) && (*piStack_2f0 = *piStack_2f0 - 1, *piStack_2f0 == 0)) {
         tier1_operator_delete(piStack_2f0);
       }
-      pCVar3 = C_GameProfile__GetDetailSettings(&g_gameProfile);
-      uVar6 = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0xb06000;
-      if (pCVar3->voiceChat == false) {
+      pCVar6 = C_GameProfile__GetDetailSettings(&g_gameProfile);
+      uVar5 = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0xb06000;
+      if (pCVar6->voiceChat == false) {
         piStack_e0 = 0;
         auStack_f4[1] = 0x1000001;
         auStack_f4[2] = 0;
         local_4 = 0xd;
-        auStack_f4[0] = uVar6;
+        auStack_f4[0] = uVar5;
         PostControlMessage(&DAT_008ae590,auStack_f4);
-        piVar4 = piStack_e0;
+        piVar7 = piStack_e0;
       }
       else {
         piStack_1a0 = 0;
         auStack_1b4[1] = 0x1000002;
         auStack_1b4[2] = 0;
         local_4 = 0xc;
-        auStack_1b4[0] = uVar6;
+        auStack_1b4[0] = uVar5;
         PostControlMessage(&DAT_008ae590,auStack_1b4);
-        piVar4 = piStack_1a0;
+        piVar7 = piStack_1a0;
       }
       local_4 = 0xffffffff;
-      if ((piVar4 != 0) && (*piVar4 = *piVar4 - 1, *piVar4 == 0)) {
-        tier1_operator_delete(piVar4);
+      if ((piVar7 != 0) && (*piVar7 = *piVar7 - 1, *piVar7 == 0)) {
+        tier1_operator_delete(piVar7);
       }
       FUN_00620be0((int)_this);
       *(uint8_t *)((int)_this + 8) = 0;
@@ -365,21 +358,20 @@ uint32_t C_OptionsHandler__HandleMessage(void *_this,int param_1, ...)
     local_180 = 0x2000001;
     local_4 = 0xe;
     PostControlMessage(&DAT_008ae590,&local_184);
-    ptr = local_170;
     if (local_170 != 0) {
       *local_170 = *local_170 - 1;
+      piVar7 = local_170;
 LAB_0061ce94:
-      if (*ptr == 0) {
-        tier1_operator_delete(ptr);
-        ptr = extraout_EAX_02;
+      if (*piVar7 == 0) {
+        tier1_operator_delete(piVar7);
       }
     }
     goto LAB_0061cea1;
   case 0x20000c4:
-    iVar5 = C_KeyBindings__FindUnbound(&(g_gameProfile.m_player)->m_keyBindings);
-    if (iVar5 != -1) {
+    iVar8 = C_KeyBindings__FindUnbound(&(g_gameProfile.m_player)->m_keyBindings);
+    if (iVar8 != -1) {
       C_MenuState__ShowMessageId(*(C_MenuState **)((int)_this + 4),2,0x2530,0x20000c7,0x20000c7);
-      return CONCAT31((int3)((uint32_t)extraout_EAX_01 >> 8),1);
+      return true;
     }
     local_13c[0] = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x600000;
     local_128 = 0;
@@ -444,7 +436,7 @@ LAB_0061ce94:
     if ((local_c8 != 0) && (*local_c8 = *local_c8 - 1, *local_c8 == 0)) {
       tier1_operator_delete(local_c8);
     }
-    piVar4 = DAT_008ae5ac;
+    puVar2 = DAT_008ae5ac;
     local_330 = 0;
     local_31c = 0;
     local_32c = 0x6001003;
@@ -452,49 +444,49 @@ LAB_0061ce94:
     local_4 = 0x20;
     if ((DAT_008ae5bc == 0) || (DAT_008ae5ac == DAT_008ae5a8)) {
       FUN_00616100(0x8ae590);
-      piVar4 = DAT_008ae5ac;
+      puVar2 = DAT_008ae5ac;
       DAT_008ae5ac += 6;
-      ptr = (int *)FUN_006169d0(piVar4,&local_330);
+      FUN_006169d0(puVar2,&local_330);
     }
     else {
-      ptr = DAT_008ae5ac + 6;
+      puVar1 = DAT_008ae5ac + 6;
       local_348 = DAT_008ae5ac;
       local_344 = DAT_008ae5ac;
       GH_PIECE(local_4,1,3) = 0;
-      if (ptr == DAT_008ae5a8) {
-        bVar7 = DAT_008ae5ac != 0;
+      if (puVar1 == DAT_008ae5a8) {
+        bVar9 = DAT_008ae5ac != 0;
         GH_PIECE(local_4,0,1) = 0x21;
-        DAT_008ae5ac = ptr;
-        if (bVar7) {
-          FUN_006157d0(piVar4,&local_330);
+        DAT_008ae5ac = puVar1;
+        if (bVar9) {
+          FUN_006157d0(puVar2,&local_330);
         }
         local_4 = CONCAT31(GH_PIECE(local_4,1,3),0x20);
-        ptr = (int *)FUN_00616100(0x8ae590);
+        FUN_00616100(0x8ae590);
       }
       else {
-        bVar7 = DAT_008ae5ac != 0;
+        bVar9 = DAT_008ae5ac != 0;
         local_4 = 0x22;
-        DAT_008ae5ac = ptr;
-        if (bVar7) {
-          ptr = (int *)FUN_006157d0(piVar4,&local_330);
+        DAT_008ae5ac = puVar1;
+        if (bVar9) {
+          FUN_006157d0(puVar2,&local_330);
         }
       }
     }
     DAT_008ae5bc++;
     if (local_31c != 0) {
       *local_31c = *local_31c - 1;
-      ptr = local_31c;
+      piVar7 = local_31c;
       goto LAB_0061ce94;
     }
 LAB_0061cea1:
-    uVar6 = CONCAT31((int3)((uint32_t)ptr >> 8),1);
+    bVar9 = true;
     break;
   case 0x20000c7:
     FUN_00620e00(&local_318,(uint8_t *)&(g_gameProfile.m_player)->m_keyBindings);
-    local_318.m_mode = (pCVar1->m_keyBindings).m_mode;
+    local_318.m_mode = (pCVar3->m_keyBindings).m_mode;
     local_4 = 0x10;
-    iVar5 = C_KeyBindings__FindUnbound(&local_318);
-    C_KeyBindings__GetTextAndGroup(&local_318,iVar5,(int *)&local_344,&local_34c);
+    iVar8 = C_KeyBindings__FindUnbound(&local_318);
+    C_KeyBindings__GetTextAndGroup(&local_318,iVar8,(int *)&local_344,&local_34c);
     local_2bc[0] = (uint32_t)*(uint8_t *)((int)_this + 9) << 0x1a | 0x600000;
     local_2a8 = 0;
     local_2bc[1] = 0x1000004;
@@ -559,7 +551,7 @@ LAB_0061cea1:
     if ((local_188 != 0) && (*local_188 = *local_188 - 1, *local_188 == 0)) {
       tier1_operator_delete(local_188);
     }
-    C_KeyBindings__GetGroupPosition(&local_318,iVar5,(int *)&local_348);
+    C_KeyBindings__GetGroupPosition(&local_318,iVar8,(int *)&local_348);
     if (0 < (int)local_348) {
       local_16c[2] = (int)local_348 - 1;
       local_158 = 0;
@@ -574,9 +566,9 @@ LAB_0061cea1:
     }
     local_4 = 0xffffffff;
     C_KeyBindings__dtor_C_KeyBindings(&local_318);
-    uVar6 = CONCAT31((int3)((uint32_t)extraout_EAX_00 >> 8),1);
+    bVar9 = true;
   }
-  return uVar6;
+  return bVar9;
 }
 
 

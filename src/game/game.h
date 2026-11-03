@@ -240,6 +240,7 @@ public:
     int GetSpectatedSlot() const { return m_spectatedSlot; }
     int GetRoundState() const { return m_roundState; }
     int GetMode() const { return m_mode; }          // E_GameMode
+    void SetMode(int mode) { m_mode = mode; }       // (the in-game menu's quit)
     // Co-op with shared lives: the respawns used.
     int GetTeamLivesUsed() const { return m_teamLivesUsed; }
     // The campaign mission's number across the campaigns (-1: not a campaign mission).

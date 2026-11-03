@@ -118,6 +118,7 @@ struct S_MultiplayerSettings {
     int allowRespawn;                                   // (the spawn point, part 7b)
     int warmup;                                         // (the multiplayer zone, part 7d) s
     bool dedicated;                                     // (the loading screen, part 8f-i)
+    int sessionType;                                    // (the in-game menu's messages, part 9e-vii)
 };
 
 // --- the car's callbacks (game/car_callbacks.cpp; as the real header declares them) --------------

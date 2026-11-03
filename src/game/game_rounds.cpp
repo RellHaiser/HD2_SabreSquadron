@@ -908,7 +908,7 @@ void C_game::OnWarmupFinished()                     // 0x00699bd0
             // (The original opens a second menu over this game and drops it.)
             OpenGameMenu(-2);
         }
-        static_cast<C_GameMenu *>(app->m_state)->SetUnknown1D1(true);
+        static_cast<C_GameMenu *>(app->m_state)->SetRespawnOnApply(true);
     }
     Print("Warmup finished");
 }

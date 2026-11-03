@@ -117,6 +117,8 @@ struct S_SquadSoldier : S_SoldierState {
 struct S_MissionSquad {
     std::vector<S_SquadSoldier *> states;               // +0x04
 };
+// (The in-game menu's messages, part 9e-vii: game_menu_test.inc defines it.)
+extern S_MissionSquad *&g_missionSquad;
 class C_ItemStock {
 public:
     void Add(int type, int count);

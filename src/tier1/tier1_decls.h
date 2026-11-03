@@ -5233,7 +5233,7 @@ bool C_ObjectiveIcons__Init(C_ObjectiveIcons *_this = {}, I3D_scene *scene = {},
 uint32_t C_ObjectiveIcons__SetIcon(C_ObjectiveIcons *_this = {}, int index = {}, int state = {}, ...);
 uint32_t * C_OperationEndMenu__DeletingDestructor(void *_this = {}, uint8_t param_1 = {}, ...);
 uint32_t C_OperationEndMenu__GetTypeId(...);
-uint32_t C_OptionsHandler__HandleMessage(void *_this = {}, int param_1 = {}, ...);
+bool C_OptionsHandler__HandleMessage(void *_this = {}, void *message = {}, ...);
 uint32_t C_OptionsHandler___C_OptionsHandler(void *handler = {}, ...);
 uint32_t C_PagedTextBox__AddArea(C_PagedTextBox *_this = {}, I3D_scene *scene = {}, I3D_frame *visual = {}, ...);
 uint32_t C_PagedTextBox__AddLineToPage(C_PagedTextBox *_this = {}, void *line = {}, ...);

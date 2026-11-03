@@ -19,7 +19,8 @@
 006824f0 C_GameMenu::OnRender | bool __thiscall OnRender(C_GameMenu *this)
 006825d0 C_GameMenu::RenderGame | bool __thiscall RenderGame(C_GameMenu *this)
 00682790 C_GameMenu::RenderEquipment | bool __thiscall RenderEquipment(C_GameMenu *this)
-# Not ported yet (named for the later parts).
+# Part 9e-vii: the messages.
 0067f850 C_GameMenu::OnMessage | void __thiscall OnMessage(C_GameMenu *this, void * message)
+# Not ported yet (named for the later parts).
 0067fe00 C_GameMenu::BuildScreens | bool __thiscall BuildScreens(C_GameMenu *this)
 0061bf00 C_OptionsHandler::HandleMessage | bool __thiscall HandleMessage(void *this, void * message)

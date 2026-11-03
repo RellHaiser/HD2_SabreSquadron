@@ -2,8 +2,8 @@
 // which it wraps and keeps running by the network roles), its screens the mission's objectives, the
 // options, saving and loading, and in the network games the equipment and the squad. Part 9e-v:
 // the class, its construction and the menu state's slots (starting, stopping, the input, the
-// update, the tick, the info screen drawn); 9e-vi: the update's helpers and the drawing; the
-// messages, the screens and the item slots later.
+// update, the tick, the info screen drawn); 9e-vi: the update's helpers and the drawing; 9e-vii:
+// the menu's messages; the options, the screens and the item slots later.
 #pragma once
 
 #include <cstdint>
@@ -55,8 +55,13 @@ public:
 
     int GetTypeId() const override { return GAME_STATE_TYPE_GAME_MENU; }   // 0x1C 0x0067f470
 
-    // The menu's messages (not ported yet) and screens (not ported yet).
+    // The options handler's first. Escape: the info screen hidden, else back from the screens 2 /
+    // 3 (not in the warmup's menu), else back to the game (single player: not with the objectives
+    // decided; a network game: the team changed first, else the squad's edited soldier dropped).
+    // The squad's soldier applied (and the spawn asked for) or dropped, then escape; the quit and
+    // restart questions and their answers (the app's commands, the mission ended).
     void OnMessage(S_ControlMessage *message) override; // 0x34 0x0067f850
+    // The menu's screens (not ported yet).
     bool BuildScreens() override;                       // 0x38 0x0067fe00
     // The volume restored, the options handler, the popup and the network game's info screen
     // deleted, the panel's soldier, the two stocks emptied and deleted.
@@ -90,7 +95,8 @@ public:
     // The message box with the text (counted), unless one is on top; `textId` below 1: the box
     // closed (the count down). (The second argument is not used; the game passes -1.)
     void ShowMessage(int textId, int unused);           // 0x00682aa0
-    void SetUnknown1D1(bool on) { m_unknown1D1 = on; }
+    // The warmup ended without a uniform: applying the squad's soldier asks for the spawn.
+    void SetRespawnOnApply(bool on) { m_respawnOnApply = on; }
 
 private:
     // Control 0x0CA00000 on while the squad soldier has a uniform and his load is within his
@@ -109,9 +115,9 @@ private:
     int m_unknown1C4 = 0;                               // +0x1C4 (not set by the original)
     int m_unknown1C8 = 0;                               // +0x1C8 (not set by the original)
     int m_unknown1CC = 0;                               // +0x1CC (not set by the original)
-    bool m_unknown1D0 = false;                          // +0x1D0
-    bool m_unknown1D1 = false;                          // +0x1D1
-    int m_unknown1D4 = -1;                              // +0x1D4
+    bool m_teamChangePosted = false;                    // +0x1D0 (OnMessage's escape)
+    bool m_respawnOnApply = false;                      // +0x1D1 (SetRespawnOnApply)
+    int m_team = -1;                                    // +0x1D4 the squad's team to keep (-1: none; inferred)
     int m_unknown1D8 = -1;                              // +0x1D8
     int m_unknown1DC = -1;                              // +0x1DC
     bool m_loadButtonOn = false;                        // +0x1E0 (UpdateLoadButton's)

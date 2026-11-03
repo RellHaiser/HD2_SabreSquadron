@@ -7,11 +7,11 @@
 #include "game/game_menu.h"
 #undef protected
 #undef private
+#include "game/game_app.h"
 #include "game/interface.h"
 #include "game/team.h"
 
 // (Not ported yet: logged.)
-void C_GameMenu::OnMessage(S_ControlMessage *m) { GfLog("gm message %x", m->id); }
 bool C_GameMenu::BuildScreens() { return true; }
 bool C_GameMenu::OnItemNotify13(void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_GameMenu::OnItemNotify60(void *, C_Control *, uint32_t, uint32_t) { return true; }
@@ -56,6 +56,22 @@ void C_NetGame::CountTeams(int *axis, int *allies, bool pending, bool inGame)
 }
 int C_game::GetRespawnTimeLeft() const { return g_gmRespawnLeft; }
 int C_game::GetRoundTimeLeft() const { return g_gmRoundLeft; }
+// (Part 9e-vii: the messages.) The squad, the options handler (not ported yet: logged, taking them
+// when asked), the app (zeroed memory; its commands logged), the info screen hidden.
+S_MissionSquad *&g_missionSquad = g_gameProfile.m_missionSquad;
+bool g_gmOptionsTake;
+bool C_OptionsHandler::HandleMessage(S_ControlMessage *message)
+{
+    GfLog("options %x", message->id);
+    return g_gmOptionsTake;
+}
+alignas(16) uint8_t g_gmAppMemory[sizeof(C_GameApp)];
+C_GameApp *GetGameApp() { return reinterpret_cast<C_GameApp *>(g_gmAppMemory); }
+void C_GameApp::PostCommand(int command, intptr_t a, intptr_t b, bool flush)
+{
+    GfLog("command %d %d %d %d", command, static_cast<int>(a), static_cast<int>(b), flush);
+}
+void C_InfoScreen::Show(bool show) { GfLog("info show %d", show); }
 
 namespace {
 
@@ -63,6 +79,7 @@ struct S_GameMenuResults {
     bool gmNew = true, gmNewClient = true, gmStart = true, gmStartNet = true, gmStop = true, gmInput = true;
     bool gmUpdate = true, gmTick = true, gmDraw = true, gmMessage = true, gmObjectives = true, gmBase = true;
     bool gmLoad = true, gmCoop = true, gmNet = true, gmRender = true, gmRenderGame = true, gmRenderEquip = true;
+    bool gmOptions = true, gmEscape = true, gmEscapeNet = true, gmSquad = true, gmQuestions = true;
 };
 
 // A uniform of a side (its type's team).
@@ -157,14 +174,14 @@ void GameMenuTest(I3D_scene *scene)
                         m->m_presets.GetUserPresetCount() == 24 && m->m_missionItems.m_records[0] &&
                         m->m_missionItems.m_records[1] && !m->m_missionItems.m_records[2]);
         WM(r.gmNew, C_GmBasePeek::Fresh(*m) &&
-                        !m->m_unknown1D0 && !m->m_unknown1D1 && m->m_unknown1D4 == -1 && m->m_unknown1D8 == -1 &&
+                        !m->m_teamChangePosted && !m->m_respawnOnApply && m->m_team == -1 && m->m_unknown1D8 == -1 &&
                         m->m_unknown1DC == -1 && !m->m_loadButtonOn && !m->m_stock1E4 && !m->m_stock1E8 &&
                         !m->m_options && !m->m_infoScreen && m->m_unknown4C0 == 0 && m->m_unknown4C4 == -1 &&
                         !m->m_unknown4D8 && !m->m_unknown4D9 && !m->m_hasPlayerSlotMember && !m->GetGame());
-        m->SetUnknown1D1(true);
+        m->SetRespawnOnApply(true);
         C_GmGame game;
         m->SetGame(&game);
-        WM(r.gmNew, m->m_unknown1D1 && m->GetGame() == &game);
+        WM(r.gmNew, m->m_respawnOnApply && m->GetGame() == &game);
         // Deleted: the game behind kept, the menu state's cleared.
         g_gfLog.clear();
         delete m;
@@ -657,6 +674,223 @@ void GameMenuTest(I3D_scene *scene)
         g_igraphVtable[0x64 / 4] = oldClear;
     }
 
+    // --- the messages (part 9e-vii) ---
+    {
+        S_MissionSquad squad;
+        S_MissionSquad *const oldSquad = g_gameProfile.m_missionSquad;
+        g_gameProfile.m_missionSquad = &squad;
+        g_gameRole = GAME_ROLE_CLIENT;
+        C_GameMenu m;
+        m.m_options = new C_OptionsHandler(&m);
+        const auto message = [&](uint32_t id) {
+            S_ControlMessage msg;
+            msg.id = id;
+            g_gfLog.clear();
+            g_controlMessages.clear();
+            m.SetState(GAME_STATE_RUNNING);
+            m.OnMessage(&msg);
+        };
+        const auto soldier = [](int team) {
+            auto *s = new S_SquadSoldier();
+            s->team = team;
+            return s;
+        };
+
+        // The options handler's first (taken: nothing more).
+        {
+            g_gmOptionsTake = true;
+            message(MENU_MSG_ESCAPE);
+            bool ok = MsLogIs({"options 200000a"}, g_gfLog) && g_controlMessages.empty() && m.GetState() == GAME_STATE_RUNNING;
+            g_gmOptionsTake = false;
+            message(0x2000099);
+            ok &= MsLogIs({"options 2000099"}, g_gfLog) && g_controlMessages.empty() && m.GetState() == GAME_STATE_RUNNING;
+            // (The code's flag bits masked.)
+            message(0x200000A | 0x0C000000);
+            ok &= m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
+            WM(r.gmOptions, ok);
+        }
+
+        // Escape: the info screen shown hidden; screens 2 / 3 back (not in the warmup's menu); single
+        // player: closed unless the objectives are decided.
+        {
+            bool ok = true;
+            m.m_infoScreen = new C_InfoScreen();
+            g_gmInfoShown = true;
+            message(MENU_MSG_ESCAPE);
+            ok &= MsLogIs({"options 200000a", "info show 0"}, g_gfLog) && m.GetState() == GAME_STATE_RUNNING;
+            // (Not shown: on to the screens.)
+            g_gmInfoShown = false;
+            message(MENU_MSG_ESCAPE);
+            ok &= MsLogIs({"options 200000a"}, g_gfLog) && m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
+            delete m.m_infoScreen;
+            m.m_infoScreen = nullptr;
+            C_MsScreen one(scene, "gmesc1", 0x04000000), two(scene, "gmesc2", 0x08000000), three(scene, "gmesc3", 0x0C000000);
+            for (C_MsScreen *s : {&two, &three}) {
+                g_menuScreens = {s};
+                message(MENU_MSG_ESCAPE);
+                ok &= ScQueue() == "0 2000003 0 0 ; " && m.GetState() == GAME_STATE_RUNNING;
+            }
+            g_menuScreens = {&one};
+            message(MENU_MSG_ESCAPE);
+            ok &= g_controlMessages.empty() && m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
+            m.m_startArg = reinterpret_cast<void *>(static_cast<intptr_t>(-2));
+            g_menuScreens = {&two};
+            message(MENU_MSG_ESCAPE);
+            ok &= g_controlMessages.empty() && m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
+            m.m_startArg = nullptr;
+            g_menuScreens.clear();
+            // Single player: no mission, undecided: closed; decided: kept open.
+            g_gameRole = GAME_ROLE_LOCAL;
+            C_MissionDef *const oldMission = GetGame()->m_mission;
+            GetGame()->m_mission = nullptr;
+            message(MENU_MSG_ESCAPE);
+            ok &= m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
+            alignas(16) static uint8_t missionMemory[sizeof(C_MissionDef)];
+            alignas(16) static uint8_t objectiveMemory[sizeof(S_MissionObjective)];
+            std::memset(missionMemory, 0, sizeof missionMemory);
+            std::memset(objectiveMemory, 0, sizeof objectiveMemory);
+            auto *mission = reinterpret_cast<C_GmMission *>(missionMemory);
+            auto *objective = reinterpret_cast<S_MissionObjective *>(objectiveMemory);
+            mission->m_objectives = {objective};
+            GetGame()->m_mission = mission;
+            objective->status = OBJECTIVE_OPEN;
+            message(MENU_MSG_ESCAPE);
+            ok &= m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
+            objective->status = OBJECTIVE_COMPLETED;
+            message(MENU_MSG_ESCAPE);
+            ok &= m.GetState() == GAME_STATE_RUNNING;
+            mission->m_objectives = std::vector<S_MissionObjective *>();
+            GetGame()->m_mission = oldMission;
+            g_gameRole = GAME_ROLE_CLIENT;
+            WM(r.gmEscape, ok);
+        }
+
+        // Escape in a network game: the team changed (posted once, kept open); else the edited soldier
+        // (the second of two) dropped, closed.
+        {
+            bool ok = true;
+            // (The first's team asked: the edited one's another.)
+            S_SquadSoldier *a = soldier(1), *b = soldier(0);
+            squad.states = {a, b};
+            m.m_team = 0;
+            message(MENU_MSG_ESCAPE);
+            ok &= MsLogIs({"options 200000a", "command 5 1 0 0"}, g_gfLog) && m.m_teamChangePosted &&
+                  m.GetState() == GAME_STATE_RUNNING && squad.states.size() == 2;
+            message(MENU_MSG_ESCAPE);
+            ok &= MsLogIs({"options 200000a"}, g_gfLog) && m.GetState() == GAME_STATE_RUNNING;
+            m.m_team = 1;
+            message(MENU_MSG_ESCAPE);
+            ok &= squad.states == std::vector<S_SquadSoldier *>({a}) && m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
+            m.m_team = -1;
+            S_SquadSoldier *c = soldier(0), *d = soldier(0);
+            squad.states.push_back(c);
+            squad.states.push_back(d);
+            message(MENU_MSG_ESCAPE);
+            ok &= squad.states.size() == 3 && m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
+            for (S_SquadSoldier *s : squad.states)
+                delete s;
+            squad.states.clear();
+            message(MENU_MSG_ESCAPE);
+            ok &= MsLogIs({"options 200000a"}, g_gfLog) && m.GetState() == GAME_STATE_CLOSE_GAME_MENU;
+            m.m_teamChangePosted = false;
+            WM(r.gmEscapeNet, ok);
+        }
+
+        // The edited soldier applied (the first of two dropped; no player slot member: hosting or
+        // joining asks for command 0; else after the warmup the spawn) or dropped; then escape.
+        {
+            bool ok = true;
+            S_SquadSoldier *a = soldier(0), *b = soldier(1);
+            squad.states = {a, b};
+            g_mpSettings->sessionType = 1;
+            message(0x200006A);
+            ok &= squad.states == std::vector<S_SquadSoldier *>({b}) && MsLogIs({"options 200006a", "command 0 0 0 0"}, g_gfLog) &&
+                  ScQueue() == "0 200000a 0 0 ; ";
+            g_mpSettings->sessionType = 2;
+            message(0x200006A);
+            ok &= squad.states.size() == 1 && MsLogIs({"options 200006a", "command 0 0 0 0"}, g_gfLog);
+            g_mpSettings->sessionType = 0;
+            message(0x200006A);
+            ok &= MsLogIs({"options 200006a"}, g_gfLog) && ScQueue() == "0 200000a 0 0 ; ";
+            m.m_hasPlayerSlotMember = true;
+            g_mpSettings->sessionType = 1;
+            message(0x200006A);
+            ok &= MsLogIs({"options 200006a"}, g_gfLog);
+            m.SetRespawnOnApply(true);
+            message(0x200006A);
+            ok &= MsLogIs({"options 200006a", "command 1 0 0 0"}, g_gfLog);
+            m.SetRespawnOnApply(false);
+            m.m_hasPlayerSlotMember = false;
+            g_mpSettings->sessionType = 0;
+            S_SquadSoldier *c = soldier(0);
+            squad.states.push_back(c);
+            message(0x2000077);
+            ok &= squad.states == std::vector<S_SquadSoldier *>({b}) && ScQueue() == "0 200000a 0 0 ; ";
+            message(0x2000077);
+            ok &= squad.states.size() == 1 && ScQueue() == "0 200000a 0 0 ; ";
+            // Three: neither drops one.
+            S_SquadSoldier *e = soldier(0), *f = soldier(0);
+            squad.states = {b, e, f};
+            message(0x200006A);
+            message(0x2000077);
+            ok &= squad.states.size() == 3;
+            for (S_SquadSoldier *s : squad.states)
+                delete s;
+            squad.states.clear();
+            WM(r.gmSquad, ok);
+        }
+
+        // The questions (yes: their answers); the app's commands; the quit (the game's mode) and the
+        // mission's end; others nothing.
+        {
+            bool ok = true;
+            C_MessageBox box(scene, GfFrame(FRAME_DUMMY, "gmqbox"));
+            m.m_messageBox = &box;
+            message(0x2000078);
+            ok &= box.m_kind == MESSAGE_BOX_YES_NO && box.m_yesMessage == 0x20000B8 && box.m_noMessage == 0 &&
+                  ScQueue().find("100000 1000015 18 7d9 ; ") != std::string::npos;
+            m.CloseMessage();
+            message(0x20000B4);
+            ok &= box.m_kind == MESSAGE_BOX_YES_NO && box.m_yesMessage == 0x20000B5 && box.m_noMessage == 0 &&
+                  ScQueue().find("100000 1000015 18 7d4 ; ") != std::string::npos;
+            m.CloseMessage();
+            m.m_messageBox = nullptr;
+            g_controlMessages.clear();
+            C_GameApp *app = GetGameApp();
+            const uint32_t commands[] = {0x20000B5, 0x20000B6, 0x20000B7};
+            for (int i = 0; i < 3; ++i) {
+                app->m_pendingCommand = 0;
+                message(commands[i]);
+                ok &= m.GetState() == GAME_STATE_CLOSE_GAME_MENU && app->m_pendingCommand == i + 1;
+            }
+            app->m_pendingCommand = 0;
+            alignas(16) static uint8_t gameMemory2[sizeof(C_game)];
+            std::memset(gameMemory2, 0, sizeof gameMemory2);
+            C_GameState *one = new (gameMemory2) C_GmGameOne();
+            m.SetGame(one);
+            message(0x20000B8);
+            ok &= m.GetState() == GAME_STATE_MENU_END_MISSION && reinterpret_cast<C_game *>(gameMemory2)->GetMode() == GAME_MODE_QUIT;
+            reinterpret_cast<C_game *>(gameMemory2)->SetMode(GAME_MODE_NORMAL);
+            for (uint32_t id : {0x20000C5u, 0x20000C6u}) {
+                message(id);
+                ok &= m.GetState() == GAME_STATE_MENU_END_MISSION &&
+                      reinterpret_cast<C_game *>(gameMemory2)->GetMode() == GAME_MODE_NORMAL;
+            }
+            for (uint32_t id : {0x2000079u, 0x20000B3u, 0x20000B9u, 0x20000C4u, 0x20000C7u, 0x200006Bu}) {
+                message(id);
+                ok &= m.GetState() == GAME_STATE_RUNNING && g_controlMessages.empty() && app->m_pendingCommand == 0 &&
+                      MsLogIs({CmText("options %x", id)}, g_gfLog);
+            }
+            m.SetGame(nullptr);
+            one->~C_GameState();
+            WM(r.gmQuestions, ok);
+        }
+        delete m.m_options;
+        m.m_options = nullptr;
+        g_gameProfile.m_missionSquad = oldSquad;
+        g_controlMessages.clear();
+    }
+
     // --- the base: C_EquipmentMenuBase's slots true ---
     {
         C_GameMenu m;
@@ -673,8 +907,8 @@ void GameMenuTest(I3D_scene *scene)
     g_gfLog.clear();
     std::printf("gamemenu: gmNew %d gmNewClient %d gmStart %d gmStartNet %d gmStop %d gmInput %d gmUpdate %d "
                 "gmTick %d gmDraw %d gmMessage %d gmObjectives %d gmBase %d gmLoad %d gmCoop %d gmNet %d gmRender %d "
-                "gmRenderGame %d gmRenderEquip %d\n",
+                "gmRenderGame %d gmRenderEquip %d gmOptions %d gmEscape %d gmEscapeNet %d gmSquad %d gmQuestions %d\n",
                 r.gmNew, r.gmNewClient, r.gmStart, r.gmStartNet, r.gmStop, r.gmInput, r.gmUpdate, r.gmTick, r.gmDraw,
                 r.gmMessage, r.gmObjectives, r.gmBase, r.gmLoad, r.gmCoop, r.gmNet, r.gmRender, r.gmRenderGame,
-                r.gmRenderEquip);
+                r.gmRenderEquip, r.gmOptions, r.gmEscape, r.gmEscapeNet, r.gmSquad, r.gmQuestions);
 }

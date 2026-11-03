@@ -1,5 +1,5 @@
 // The in-game menu (original 0x0067eb40..0x00687f50; part 9e-v: the class and the menu state's slots;
-// 9e-vi: the update's helpers and the drawing).
+// 9e-vi: the update's helpers and the drawing; 9e-vii: the messages).
 #include "game/game_menu.h"
 
 #include <algorithm>
@@ -9,6 +9,7 @@
 #include "game/controls.h"
 #include "game/cursor.h"
 #include "game/game.h"
+#include "game/game_app.h"
 #include "game/human.h"
 #include "game/interface.h"
 #include "game/item_defs.h"
@@ -32,6 +33,27 @@ constexpr uint32_t SCREEN_INDEX_MASK = 0x3F;
 constexpr uint32_t MESSAGE_BOX_SCREEN = 0;
 // The equipment screen (drawn with the panel's soldier; the others over the game behind).
 constexpr uint32_t EQUIPMENT_SCREEN = 3;
+// Escape from these goes back to the screen before (MENU_MSG_BACK).
+constexpr uint32_t BACK_SCREEN_2 = 2;
+
+// The in-game menu's own messages (target 0; posted by its screens' controls).
+enum : uint32_t {
+    GAME_MENU_MSG_APPLY_SOLDIER = 0x200006A,            // the squad's edited soldier kept (inferred)
+    GAME_MENU_MSG_DROP_SOLDIER = 0x2000077,             // the squad's edited soldier dropped (inferred)
+    GAME_MENU_MSG_QUIT_QUESTION = 0x2000078,
+    GAME_MENU_MSG_RESTART_QUESTION = 0x20000B4,
+    GAME_MENU_MSG_RESTART = 0x20000B5,
+    GAME_MENU_MSG_QUICK_SAVE = 0x20000B6,
+    GAME_MENU_MSG_QUICK_LOAD = 0x20000B7,
+    GAME_MENU_MSG_QUIT = 0x20000B8,                     // the mission ends into the main menu
+    GAME_MENU_MSG_END_MISSION = 0x20000C5,
+    GAME_MENU_MSG_END_MISSION_2 = 0x20000C6,
+};
+constexpr uint32_t TEXT_QUIT_QUESTION = 0x7D9, TEXT_RESTART_QUESTION = 0x7D4;
+// The warmup's menu (C_game's OpenGameMenu(-2)).
+void *const WARMUP_MENU = reinterpret_cast<void *>(static_cast<intptr_t>(-2));
+// The app's command a changed team posts (the team as its argument; inferred).
+constexpr int APP_NET_COMMAND_TEAM = 5;
 
 // The network games' controls (UpdateLoadButton, UpdateNetStatus).
 constexpr uint32_t LOAD_BUTTON = 0x0CA00000;
@@ -97,6 +119,14 @@ void CountUniformSides(int *axis, int *allies)          // 0x006801f0 (__fastcal
             ++*axis;
     }
     g_netGame.UnlockPlayers();
+}
+
+// The squad's soldier at `index` deleted (a network game's squad of two: the soldier and his edited
+// copy).
+void DeleteSquadSoldier(std::vector<S_SquadSoldier *> &squad, std::size_t index)
+{
+    delete squad[index];
+    squad.erase(squad.begin() + static_cast<std::ptrdiff_t>(index));
 }
 
 } // namespace
@@ -256,6 +286,93 @@ void C_GameMenu::UpdateNetStatus()
     if (g_mpSettings->gameType == MP_GAME_OCCUPATION)
         Post(RESPAWN_TIME, CONTROL_MSG_SET_RUN_TEXT, TIME_STYLE, TIME_RUN, FormatTime(::GetGame()->GetRespawnTimeLeft()));
     Post(ROUND_TIME, CONTROL_MSG_SET_RUN_TEXT, TIME_STYLE, TIME_RUN, FormatTime(::GetGame()->GetRoundTimeLeft()));
+}
+
+void C_GameMenu::OnMessage(S_ControlMessage *message)
+{
+    if (m_options->HandleMessage(message))
+        return;
+    std::vector<S_SquadSoldier *> &squad = g_missionSquad->states;
+    switch (message->id & CONTROL_MSG_MASK) {
+    case MENU_MSG_ESCAPE: {
+        if (m_infoScreen && m_infoScreen->IsShown()) {
+            m_infoScreen->Show(false);
+            return;
+        }
+        C_Screen *top = g_menuScreens.empty() ? nullptr : g_menuScreens.back();
+        if (top && m_startArg != WARMUP_MENU) {
+            const uint32_t index = top->GetId() >> SCREEN_INDEX_SHIFT;
+            if (index == BACK_SCREEN_2 || index == EQUIPMENT_SCREEN) {
+                Post(0, MENU_MSG_BACK, 0);
+                return;
+            }
+        }
+        if (IsLocalGame()) {
+            C_MissionDef *mission = ::GetGame()->GetMission();
+            if (!mission || !mission->AreObjectivesDecided())
+                m_state = GAME_STATE_CLOSE_GAME_MENU;
+            return;
+        }
+        if (!squad.empty()) {
+            const int team = squad[0]->team;
+            if (m_team != -1 && m_team != team) {
+                if (m_teamChangePosted)
+                    return;
+                m_teamChangePosted = true;
+                GetGameApp()->PostCommand(APP_NET_COMMAND_TEAM, team, 0, false);
+                return;
+            }
+        }
+        if (squad.size() == 2)
+            DeleteSquadSoldier(squad, 1);
+        m_state = GAME_STATE_CLOSE_GAME_MENU;
+        return;
+    }
+    case GAME_MENU_MSG_APPLY_SOLDIER:
+        if (squad.size() == 2)
+            DeleteSquadSoldier(squad, 0);
+        if (!m_hasPlayerSlotMember) {
+            if (g_mpSettings->sessionType == 1 || g_mpSettings->sessionType == 2)
+                GetGameApp()->PostCommand(APP_NET_COMMAND_0, 0, 0, false);
+        } else if (m_respawnOnApply) {
+            GetGameApp()->PostCommand(APP_NET_COMMAND_RESPAWN, 0, 0, false);
+        }
+        Post(0, MENU_MSG_ESCAPE, 0);
+        return;
+    case GAME_MENU_MSG_DROP_SOLDIER:
+        if (squad.size() == 2)
+            DeleteSquadSoldier(squad, 1);
+        Post(0, MENU_MSG_ESCAPE, 0);
+        return;
+    case GAME_MENU_MSG_QUIT_QUESTION:
+        ShowMessageId(MESSAGE_BOX_YES_NO, TEXT_QUIT_QUESTION, GAME_MENU_MSG_QUIT, 0);
+        return;
+    case GAME_MENU_MSG_RESTART_QUESTION:
+        ShowMessageId(MESSAGE_BOX_YES_NO, TEXT_RESTART_QUESTION, GAME_MENU_MSG_RESTART, 0);
+        return;
+    case GAME_MENU_MSG_RESTART:
+        m_state = GAME_STATE_CLOSE_GAME_MENU;
+        GetGameApp()->m_pendingCommand = APP_COMMAND_RESTART;
+        return;
+    case GAME_MENU_MSG_QUICK_SAVE:
+        m_state = GAME_STATE_CLOSE_GAME_MENU;
+        GetGameApp()->m_pendingCommand = APP_COMMAND_QUICK_SAVE;
+        return;
+    case GAME_MENU_MSG_QUICK_LOAD:
+        m_state = GAME_STATE_CLOSE_GAME_MENU;
+        GetGameApp()->m_pendingCommand = APP_COMMAND_QUICK_LOAD;
+        return;
+    case GAME_MENU_MSG_QUIT:
+        static_cast<C_game *>(m_game)->SetMode(GAME_MODE_QUIT);
+        m_state = GAME_STATE_MENU_END_MISSION;
+        return;
+    case GAME_MENU_MSG_END_MISSION:
+    case GAME_MENU_MSG_END_MISSION_2:
+        m_state = GAME_STATE_MENU_END_MISSION;
+        return;
+    default:
+        return;
+    }
 }
 
 bool C_GameMenu::OnRender()

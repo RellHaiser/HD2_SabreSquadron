@@ -7272,6 +7272,31 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     questions, the app's commands); then the options handler 0x0061bf00, the screens, the squad glue
     and the item slots.
 
+  PART 9e-vii DONE (2026-11-02): the in-game menu's messages (C_GameMenu::OnMessage 0x0067f850,
+  game/game_menu.cpp).
+  - The options handler's first (0x0061bf00, 9e-viii). Escape: the info screen shown: hidden; the
+    top screen 2 or 3 (not in the warmup's menu, Start(-2)): MENU_MSG_BACK; single player: back to
+    the game (GAME_STATE_CLOSE_GAME_MENU) unless the objectives are decided; a network game: the
+    squad's first soldier of another team than +0x1D4 (set: -1 none): command 5 with the team, once
+    (+0x1D0; inferred: the team change), else the squad's second of two dropped and back to the game.
+  - 0x200006A: the first of two dropped (the edited soldier kept; inferred); without a player slot
+    member hosting or joining posts command 0, with one after the warmup (+0x1D1, SetUnknown1D1 now
+    SetRespawnOnApply) the respawn; then escape. 0x2000077: the second of two dropped, escape.
+  - The questions: 0x2000078 quit (text 0x7D9, yes 0x20000B8), 0x20000B4 restart (0x7D4, yes 0x20000B5).
+    0x20000B5 / B6 / B7: back to the game with the app's restart / quick save / quick load;
+    0x20000B8: the game's mode GAME_MODE_QUIT (C_game::SetMode added) and GAME_STATE_MENU_END_MISSION;
+    0x20000C5 / C6: GAME_STATE_MENU_END_MISSION.
+  - Harness: game_menu_test.inc's gmOptions, gmEscape, gmEscapeNet, gmSquad, gmQuestions (23 checks
+    now; the options handler, the app and the info screen's Show faked; the stubs' g_missionSquad
+    and S_MultiplayerSettings::sessionType added). 22 of 22 in both orders (the other factory lines
+    too).
+  - Mutations: mutations/mutate_9e7.py (91 cases, 86 build, all caught but 1 equivalent).
+  - Build: MSVC clean. Tier 1: 425 errors in 75 files, 175 stubs (unchanged). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (OnMessage moved to the ported); 1 function in ported.txt. Stats:
+    8,838 of 12,306 functions by hand (78.6 % by size).
+  - Next, 9e-viii: the options handler 0x0061bf00 (with 0x00620be0) in its own files; then the
+    screens, the squad glue and the item slots.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
