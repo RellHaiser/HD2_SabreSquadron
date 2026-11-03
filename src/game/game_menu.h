@@ -104,9 +104,13 @@ private:
     // lists of the profiles' pictures (the first 30, then up to 60; their faces, picked:
     // OnSoldierPicked); not co-op: the allies' and axis' marks (OnSide). The template hidden; true.
     bool BuildSoldiersPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x006838e0
-    // The player screen's panels (not ported yet): the soldier's equipment, the store's items, the
-    // skills.
+    // The equipment panel (the model's dummy "equippanel" renamed "P_Equipment"; none, or a group's
+    // dummy not made: false): the holsters' and backpack's groups (dummies under it, kept in the
+    // models), the soldier's places' visuals given meshes of their own, the scroll bars and their
+    // texts under the panel, the holsters' and backpack's items (own meshes) under their groups; the
+    // panel's description (the menu its). True.
     bool BuildEquipmentPanel(S_ScreenDesc *desc, I3D_frame *model);  // 0x00684690
+    // The player screen's panels (not ported yet): the store's items, the skills.
     bool BuildItemsPanel(S_ScreenDesc *desc, I3D_frame *model);      // 0x00684b90
     static bool BuildSkillsPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x00684df0 (__stdcall)
     // The soldier types' combo box filled (not ported yet).

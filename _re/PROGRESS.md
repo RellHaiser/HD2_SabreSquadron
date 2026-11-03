@@ -7495,6 +7495,23 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e-xv: the equipment panel (0x00684690), then the items and skills panels, the soldier
     types and the remaining callbacks, the item slots.
 
+  PART 9e-xv DONE (2026-11-03): the in-game menu's equipment panel (game/game_menu.cpp).
+  - BuildEquipmentPanel 0x00684690 (garbled decompile too; from the asm): the model's dummy
+    "equippanel" (mask 0x20) renamed "P_Equipment", two dummies made (none of the three: false, the
+    made leaked) under it at the origin, "GB_Holsters" and "GR_BackPack", the three kept in the
+    menu's models; the places' visuals (back, head, drop, hands, uniform, shoulder) given meshes of
+    their own (DuplicateMesh, the mesh's slot 0x18); scroll13 / scroll14 moved under the panel and
+    their texts (text_hlstrscap, hlcpct00; text_bkpckcap, hlcpct01) under them (a missing bar:
+    unlinked, as the original); item00..03 / item04..07 (own meshes) under the holsters' / backpack's
+    dummies; the panel's menu set, its description (C_EquipmentPanel::BuildDescription). True.
+  - Harness: game_menu_test.inc's gmEquipment, gmEquipmentNone (the frames' log, the models, the
+    description); the earlier player screen checks with the real builder. 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e15.py (52, all killed).
+  - Build: MSVC clean. Tier 1: 407 errors in 74 files (was 408), 171 stubs (was 172). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (1 moved); 1 function in ported.txt. Stats: 8,874 of 12,306 functions by hand (79.4 % by size).
+  - Next, 9e-xvi: the items and skills panels (0x00684b90, 0x00684df0), then the soldier types and
+    the remaining callbacks, the item slots.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

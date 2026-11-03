@@ -1,6 +1,6 @@
 // The in-game menu (original 0x0067eb40..0x00687f50; part 9e-v: the class and the menu state's slots;
 // 9e-vi: the update's helpers and the drawing; 9e-vii: the messages; 9e-ix: the screens' descriptions;
-// 9e-xiii: the player screen's; 9e-xiv: its soldiers panel).
+// 9e-xiii: the player screen's; 9e-xiv, 9e-xv: its soldiers and equipment panels).
 #include "game/game_menu.h"
 
 #include <algorithm>
@@ -653,6 +653,62 @@ bool C_GameMenu::BuildSoldiersPanel(S_ScreenDesc *desc, I3D_frame *model)
     }
     photo->SetOn(false);
     photo->Update();
+    return true;
+}
+
+bool C_GameMenu::BuildEquipmentPanel(S_ScreenDesc *desc, I3D_frame *model)
+{
+    I3D_frame *panel = model->FindChildFrame("equippanel", FRAME_MASK_DUMMY);
+    I3D_frame *holsters = I3DGetDriver()->CreateFrame(FRAME_DUMMY);
+    I3D_frame *backpack = I3DGetDriver()->CreateFrame(FRAME_DUMMY);
+    // (The frames made are leaked without the panel's.)
+    if (!panel || !holsters || !backpack)
+        return false;
+    panel->SetName("P_Equipment");
+    const auto group = [panel](I3D_frame *frame, const char *name) {
+        frame->LinkTo(panel, 0);
+        frame->SetPos(S_vector(0.0f, 0.0f, 0.0f));
+        frame->SetName(name);
+    };
+    group(holsters, "GB_Holsters");
+    group(backpack, "GR_BackPack");
+    for (I3D_frame *frame : {panel, holsters, backpack})
+        m_models.push_back(frame);
+    // The visuals the soldier's items are shown on get meshes of their own; the slots' visuals moved
+    // under their groups, the scroll bars' and their texts' under the panel.
+    const auto own = [panel](const char *name) {
+        auto *visual = static_cast<I3D_object_visual *>(panel->FindChildFrame(name, FRAME_MASK_VISUAL));
+        if (visual) {
+            visual->DuplicateMesh();
+            visual->GetVisualMesh()->Unknown18();
+        }
+        return visual;
+    };
+    const auto move = [panel](const char *name, I3D_frame *parent) {
+        I3D_frame *frame = panel->FindChildFrame(name, FRAME_MASK_VISUAL);
+        if (frame)
+            frame->LinkTo(parent, 1);
+        return frame;
+    };
+    for (const char *name : {"back", "head", "drop", "hands", "uniform", "shoulder"})
+        own(name);
+    // (Quirk kept: the texts are moved under a missing scroll bar too, unlinked.)
+    I3D_frame *scroll = move("scroll13", panel);
+    move("text_hlstrscap", scroll);
+    move("hlcpct00", scroll);
+    for (const char *name : {"item00", "item01", "item02", "item03"}) {
+        if (I3D_frame *item = own(name))
+            item->LinkTo(holsters, 1);
+    }
+    scroll = move("scroll14", panel);
+    move("text_bkpckcap", scroll);
+    move("hlcpct01", scroll);
+    for (const char *name : {"item04", "item05", "item06", "item07"}) {
+        if (I3D_frame *item = own(name))
+            item->LinkTo(backpack, 1);
+    }
+    m_panel.SetMenu(this);
+    m_panel.BuildDescription(desc, model);
     return true;
 }
 

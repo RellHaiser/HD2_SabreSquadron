@@ -36,7 +36,6 @@ bool S_SquadSoldier::SetProfile(int profile, int level)
     profileIndex = profile;
     return true;
 }
-bool C_GameMenu::BuildEquipmentPanel(S_ScreenDesc *desc, I3D_frame *model) { return GmPanel("equipment", desc, model); }
 bool C_GameMenu::BuildItemsPanel(S_ScreenDesc *desc, I3D_frame *model) { return GmPanel("items", desc, model); }
 bool C_GameMenu::BuildSkillsPanel(S_ScreenDesc *desc, I3D_frame *model) { return GmPanel("skills", desc, model); }
 void C_GameMenu::UpdateSoldierTypes() { GfLog("soldier types %x", static_cast<uint32_t>(m_soldierTypes)); }
@@ -111,7 +110,7 @@ struct S_GameMenuResults {
     bool gmOptions = true, gmEscape = true, gmEscapeNet = true, gmSquad = true, gmQuestions = true;
     bool gmMainLocal = true, gmMainNet = true, gmBuild = true, gmBuildNet = true, gmPlayer = true, gmPlayerCoop = true;
     bool gmPlayerCallbacks = true, gmChat = true, gmSoldiers = true, gmSoldiersNone = true, gmSoldierPicked = true;
-    bool gmSide = true;
+    bool gmSide = true, gmEquipment = true, gmEquipmentNone = true;
 };
 
 // A control answering CONTROL_MSG_GET_INDEX with its index (logged).
@@ -1105,8 +1104,8 @@ void GameMenuTest(I3D_scene *scene)
             S_MrObj *dm = MrObj("gmcd", g_mrModelVt);
             g_mrMade[FRAME_MODEL] = {a, o, p, dm};
             g_epProfiles.clear();
-            okb &= m.BuildScreens() && MrHas("gmcp 34 PLAYER_SCREEN") && MrHas("panel equipment PLAYER_SCREEN 0 gmcp") &&
-                   MrHas("gmco 48 bvideo setup 20") && logHas("panel ") == 3 && m.m_screens[3]->m_inactive == false &&
+            okb &= m.BuildScreens() && MrHas("gmcp 34 PLAYER_SCREEN") && MrHas("gmcp 48 equippanel 20") &&
+                   MrHas("panel items PLAYER_SCREEN 0 gmcp") && MrHas("gmco 48 bvideo setup 20") && logHas("panel ") == 2 && m.m_screens[3]->m_inactive == false &&
                    m.m_screens.size() == 4 && m.m_screens[3]->GetId() == 3u << 26 && !g_menuScreens.empty() &&
                    g_menuScreens.back() == m.m_screens[coop ? 3 : 1];
             okb &= g_cacheLoads.size() >= 3 &&
@@ -1219,10 +1218,11 @@ void GameMenuTest(I3D_scene *scene)
             okp &= playerDescribe(desc, &m) == want;
             okp &= m.m_soldierTypes == 0x0C100000 && C_GmBasePeek::WeaponsInfo(m) == 0x0D100000 && !m.m_popup &&
                    m.m_panel.m_soldier;
-            okp &= g_gfLog.size() >= 7 && g_gfLog[0] == "panel equipment PLAYER_SCREEN 0 gmpm" &&
-                   g_gfLog[1] == "panel items PLAYER_SCREEN 0 gmpm" && g_gfLog[2] == "panel skills PLAYER_SCREEN 0 gmpm" &&
-                   g_gfLog[3] == "soldier types c100000" && g_gfLog[4] == "gmpm 48 text_weapons_info 1" &&
-                   g_gfLog[5] == "gmpm 48 3Dview 1" && MrHas("gmp3d on 0");
+            // (No equipment panel: its frames not found; the dummies not made.)
+            okp &= g_gfLog.size() >= 9 && g_gfLog[0] == "gmpm 48 equippanel 20" && g_gfLog[1] == "create 6" &&
+                   g_gfLog[2] == "create 6" && g_gfLog[3] == "panel items PLAYER_SCREEN 0 gmpm" &&
+                   g_gfLog[4] == "panel skills PLAYER_SCREEN 0 gmpm" && g_gfLog[5] == "soldier types c100000" &&
+                   g_gfLog[6] == "gmpm 48 text_weapons_info 1" && g_gfLog[7] == "gmpm 48 3Dview 1" && MrHas("gmp3d on 0");
             delete m.m_panel.m_soldier;
             m.m_panel.m_soldier = nullptr;
             WM(r.gmPlayer, okp);
@@ -1426,6 +1426,100 @@ void GameMenuTest(I3D_scene *scene)
                 for (const char *name : {"soldierspanel", "photo03", "selector", "table13", "table15"})
                     g_msChildren.erase({sm, name});
             }
+
+            // --- the equipment panel (part 9e-xv): "equippanel" renamed, the holsters' and backpack's
+            // dummies made under it (kept in the models), the places' visuals given meshes of their own,
+            // the scroll bars and their texts moved (under a missing bar: unlinked), the items (own
+            // meshes) under their groups; the panel's description with the menu. Not found, or a dummy
+            // not made: false ---
+            {
+                bool oke = true;
+                S_MrObj *em = MsFrame("gmem"), *panel = MsFrame("gmeq");
+                g_msChildren[{em, "equippanel"}] = panel;
+                // A visual with a mesh of its own (its copy and update logged).
+                const auto visual = [&](const char *name, const char *frame) {
+                    S_MrObj *v = MrObj(frame, g_mrModelVt);
+                    S_MrObj *mesh = MrObj("gmemesh", g_mrModelVt);
+                    mesh->vtable[0x18 / 4] = reinterpret_cast<void *>(&MrFake<0x18>);
+                    *reinterpret_cast<S_MrObj **>(reinterpret_cast<uint8_t *>(v) + 0x1E0) = mesh;
+                    g_msChildren[{panel, name}] = v;
+                };
+                // (No "drop", no "item02".)
+                for (const char *name : {"back", "head", "hands", "uniform", "shoulder", "item00", "item01", "item03", "item04",
+                                         "item05", "item06", "item07"})
+                    visual(name, (std::string("gmev_") + name).c_str());
+                g_msChildren[{panel, "scroll13"}] = MsFrame("gmes13");
+                g_msChildren[{panel, "text_hlstrscap"}] = MsFrame("gmet13");
+                g_msChildren[{panel, "hlcpct00"}] = MsFrame("gmeh00");
+                // (No "scroll14": its texts unlinked.)
+                g_msChildren[{panel, "text_bkpckcap"}] = MsFrame("gmet14");
+                g_msChildren[{panel, "hlcpct01"}] = MsFrame("gmeh01");
+                C_GameMenu e;
+                e.m_scene = m.m_scene;
+                S_MrObj *holsters = MsFrame("gmeh"), *backpack = MsFrame("gmeb");
+                g_mrMade[FRAME_DUMMY] = {holsters, backpack};
+                S_ScreenDesc de("PLAYER_SCREEN", "player_screen", 3u << 26);
+                g_gfLog.clear();
+                oke &= e.BuildEquipmentPanel(&de, As<I3D_frame>(em));
+                std::vector<std::string> want = {"gmem 48 equippanel 20", "create 6", "create 6", "gmeq 34 P_Equipment",
+                                                 "gmeh 38 gmeq 0", "gmeh 8 (0 0 0)", "gmeh 34 GB_Holsters", "gmeb 38 gmeq 0",
+                                                 "gmeb 8 (0 0 0)", "gmeb 34 GR_BackPack"};
+                const auto own = [&](const char *name, const char *parent = nullptr) {
+                    want.push_back(CmText("gmeq 48 %s 1", name));
+                    if (std::string(name) == "drop" || std::string(name) == "item02")
+                        return;
+                    want.push_back(CmText("gmev_%s a0", name));
+                    want.push_back("gmemesh 18");
+                    if (parent)
+                        want.push_back(CmText("gmev_%s 38 %s 1", name, parent));
+                };
+                for (const char *name : {"back", "head", "drop", "hands", "uniform", "shoulder"})
+                    own(name);
+                for (const char *line : {"gmeq 48 scroll13 1", "gmes13 38 gmeq 1", "gmeq 48 text_hlstrscap 1",
+                                         "gmet13 38 gmes13 1", "gmeq 48 hlcpct00 1", "gmeh00 38 gmes13 1"})
+                    want.push_back(line);
+                for (const char *name : {"item00", "item01", "item02", "item03"})
+                    own(name, "gmeh");
+                for (const char *line : {"gmeq 48 scroll14 1", "gmeq 48 text_bkpckcap 1", "gmet14 38 null 1",
+                                         "gmeq 48 hlcpct01 1", "gmeh01 38 null 1"})
+                    want.push_back(line);
+                for (const char *name : {"item04", "item05", "item06", "item07"})
+                    own(name, "gmeb");
+                // (Then the panel's description: the model's frames looked up.)
+                oke &= g_gfLog.size() > want.size() &&
+                       MsLogIs(want, std::vector<std::string>(g_gfLog.begin(), g_gfLog.begin() + static_cast<long>(want.size())));
+                oke &= e.m_models == std::vector<I3D_frame *>({As<I3D_frame>(panel), As<I3D_frame>(holsters), As<I3D_frame>(backpack)}) &&
+                       e.m_panel.m_menu == &e && !de.controls.empty() && de.controls[0]->name == C_str("P_Equipment");
+                // (The places' callbacks the menu's: it is set first.)
+                oke &= !de.controls.empty() && !de.controls[0]->children.empty() &&
+                       std::any_of(de.controls[0]->children[0]->messages.begin(), de.controls[0]->children[0]->messages.end(),
+                                   [&e](const S_ControlMessage &msg) {
+                                       return msg.id == CONTROL_MSG_ADD_CALLBACK && msg.value2 == reinterpret_cast<uintptr_t>(&e);
+                                   });
+                WM(r.gmEquipment, oke);
+                // Not found: false, the dummies made (leaked); a dummy not made: false.
+                bool okn = true;
+                g_msChildren.erase({em, "equippanel"});
+                C_GameMenu e2;
+                S_ScreenDesc de2("PLAYER_SCREEN", "player_screen", 3u << 26);
+                g_mrMade[FRAME_DUMMY] = {MsFrame("gmeh2"), MsFrame("gmeb2")};
+                g_gfLog.clear();
+                okn &= !e2.BuildEquipmentPanel(&de2, As<I3D_frame>(em)) && e2.m_models.empty() && de2.controls.empty() &&
+                       GfLogIs({"gmem 48 equippanel 20", "create 6", "create 6"}) && !e2.m_panel.m_menu;
+                g_msChildren[{em, "equippanel"}] = panel;
+                for (int made = 0; made < 2; ++made) {
+                    C_GameMenu e3;
+                    S_ScreenDesc de3("PLAYER_SCREEN", "player_screen", 3u << 26);
+                    g_mrMade[FRAME_DUMMY] = {MsFrame("gmeh3")};
+                    if (made == 0)
+                        g_mrMade[FRAME_DUMMY].clear();
+                    g_gfLog.clear();
+                    okn &= !e3.BuildEquipmentPanel(&de3, As<I3D_frame>(em)) && e3.m_models.empty() && de3.controls.empty() &&
+                           logHas("gmeq") == 0;
+                }
+                WM(r.gmEquipmentNone, okn);
+                g_mrMade.erase(FRAME_DUMMY);
+            }
             GetGame()->m_scene = oldGameScene;
             g_igraphVtable[igraphSlots[0]] = oldIgraph[0];
             g_igraphVtable[igraphSlots[1]] = oldIgraph[1];
@@ -1565,10 +1659,10 @@ void GameMenuTest(I3D_scene *scene)
                 "gmTick %d gmDraw %d gmMessage %d gmObjectives %d gmBase %d gmLoad %d gmCoop %d gmNet %d gmRender %d "
                 "gmRenderGame %d gmRenderEquip %d gmOptions %d gmEscape %d gmEscapeNet %d gmSquad %d gmQuestions %d "
                 "gmMainLocal %d gmMainNet %d gmBuild %d gmBuildNet %d gmPlayer %d gmPlayerCoop %d gmPlayerCallbacks %d "
-                "gmChat %d gmSoldiers %d gmSoldiersNone %d gmSoldierPicked %d gmSide %d\n",
+                "gmChat %d gmSoldiers %d gmSoldiersNone %d gmSoldierPicked %d gmSide %d gmEquipment %d gmEquipmentNone %d\n",
                 r.gmNew, r.gmNewClient, r.gmStart, r.gmStartNet, r.gmStop, r.gmInput, r.gmUpdate, r.gmTick, r.gmDraw,
                 r.gmMessage, r.gmObjectives, r.gmBase, r.gmLoad, r.gmCoop, r.gmNet, r.gmRender, r.gmRenderGame,
                 r.gmRenderEquip, r.gmOptions, r.gmEscape, r.gmEscapeNet, r.gmSquad, r.gmQuestions, r.gmMainLocal,
                 r.gmMainNet, r.gmBuild, r.gmBuildNet, r.gmPlayer, r.gmPlayerCoop, r.gmPlayerCallbacks, r.gmChat, r.gmSoldiers,
-                r.gmSoldiersNone, r.gmSoldierPicked, r.gmSide);
+                r.gmSoldiersNone, r.gmSoldierPicked, r.gmSide, r.gmEquipment, r.gmEquipmentNone);
 }
