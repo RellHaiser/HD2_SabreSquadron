@@ -1,8 +1,8 @@
 // Direct3D 8 API declarations (the interfaces in vtable order; the types are in d3d8_types.h).
 //
 // The Windows SDK no longer ships the Direct3D 8 headers; d3d8.dll still exports Direct3DCreate8
-// and implements these interfaces. Written from the published Direct3D 8 ABI. Only the Direct3D 8
-// backend (tests/d3d8) and the tests' fake devices use the interfaces.
+// and implements these interfaces. Written from the published Direct3D 8 ABI. Only the tests' fake
+// devices use the interfaces.
 #pragma once
 
 #include <windows.h>

@@ -38,8 +38,8 @@ The companion port of `rw_data.dll`, the game's data-file layer, is at
 > the driver, the light, the mirror, the projector, the emitor and the shadow) have been compared
 > with LS3DRF's layouts field by field.
 
-- `src/gfx` keeps the render device interface with a null device: LS3DRF draws nothing. The
-  Direct3D 8 backend lives only in [tests/d3d8](tests/d3d8), for the tests.
+- LS3DRF draws nothing and has no render device. The Direct3D 8 declarations the tests' fake
+  devices need live in [tests/d3d8](tests/d3d8).
 - Fields that LS3DRF lacks are kept at their LS3DF offsets until a whole class moves to LS3DRF's
   layout; each says so in a comment.
 
@@ -102,7 +102,6 @@ first difference (exit code 1).
 | `src/math` | the math exports |
 | `src/i3d` | the scene graph, collision, loaders, buffer managers |
 | `src/igraph` | IGraph and the texture flags |
-| `src/gfx` | the render device interface and its null device |
 | `src/platform` | time and the few Win32 calls left |
 | `src/dx` | the Direct3D 8 and DirectInput types the engine's interfaces still name; DXGetErrorString8 |
 | `src/external` | the interface of `rw_data.dll` |
