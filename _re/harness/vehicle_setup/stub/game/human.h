@@ -65,6 +65,8 @@ public:
     }
     int GetPeriodicLink() const { return periodicLink; }
     bool IsDead() const { return health < 1; }
+    // (The in-game menu, part 9e-vi: game_menu_test.inc.)
+    class C_Item *GetUniformItem() const;
     bool IsAlive() const { return health > 0; }
     // (The multiplayer zone, part 7d.)
     int GetHealth() const { return health; }

@@ -2,7 +2,8 @@
 // which it wraps and keeps running by the network roles), its screens the mission's objectives, the
 // options, saving and loading, and in the network games the equipment and the squad. Part 9e-v:
 // the class, its construction and the menu state's slots (starting, stopping, the input, the
-// update, the tick, the info screen drawn); the messages, the screens and the item slots later.
+// update, the tick, the info screen drawn); 9e-vi: the update's helpers and the drawing; the
+// messages, the screens and the item slots later.
 #pragma once
 
 #include <cstdint>
@@ -65,12 +66,14 @@ public:
     bool OnStart(void *arg) override;                   // 0x40 0x0067f650
     // The game's input (none). True.
     bool OnInput(float *held, float *pressed) override; // 0x44 0x00680960
-    // The network games: the panel's soldier, the load's button, the cooperative game's players;
-    // a client: the game's update.
+    // The network games: the panel's soldier, the load's button, the game's status; a client: the
+    // game's update.
     void OnUpdate(int timeDelta) override;              // 0x48 0x006808d0
     // The menu time; the server: the game's tick.
     void OnTick(int timeDelta) override;                // 0x4C 0x00680920
-    bool OnRender() override;                           // 0x50 0x006824f0 (not ported yet)
+    // By the top screen: the equipment screen's (index 3, or the message box over it) or the game's
+    // behind the menu; no screen: the game's scene alone (the game behind; else false).
+    bool OnRender() override;                           // 0x50 0x006824f0
     // The info screen drawn when shown; false.
     bool OnDrawScreens() override;                      // 0x54 0x00682770
 
@@ -90,11 +93,18 @@ public:
     void SetUnknown1D1(bool on) { m_unknown1D1 = on; }
 
 private:
-    // Control 0x0CA00000 on while the squad soldier has a uniform and his load is within his strength
-    // (the network games' OnUpdate; not ported yet).
+    // Control 0x0CA00000 on while the squad soldier has a uniform and his load is within his
+    // strength (posted when it changes).
     void UpdateLoadButton();                            // 0x006869a0 (__fastcall)
-    // The cooperative game's players (OnUpdate; not ported yet).
-    static void UpdateCoopPlayers();                    // 0x006802a0
+    // The network game's status: the cooperative game's players (their ranks and names, their
+    // humans' states); else the teams' players, the respawn's (occupation) and the round's time.
+    static void UpdateNetStatus();                      // 0x006802a0
+    // The game behind (without its render callback; the game's states 5 / 6 cleared / set), then
+    // the menu's scene (under a popup twice: the screen under it, then the top); true. No game: false.
+    bool RenderGame();                                  // 0x006825d0
+    // The menu's scene, then (the info screen not shown) the panel's soldier and the popup's popup over
+    // the top; true.
+    bool RenderEquipment();                             // 0x00682790
 
     int m_unknown1C4 = 0;                               // +0x1C4 (not set by the original)
     int m_unknown1C8 = 0;                               // +0x1C8 (not set by the original)

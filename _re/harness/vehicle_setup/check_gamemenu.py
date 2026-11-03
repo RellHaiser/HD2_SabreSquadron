@@ -1,4 +1,4 @@
-"""Checks the factory build's in-game menu line (harness_factory.exe, FACTORY_TEST; part 9e-v).
+"""Checks the factory build's in-game menu line (harness_factory.exe, FACTORY_TEST; parts 9e-v and 9e-vi).
 
     python check_gamemenu.py MISSIONS_TXT_DIR HARNESS_OUTPUT
 
@@ -8,7 +8,8 @@ lines are not checked (check_text.py's). Prints "N models, M with differences" (
 import re
 import sys
 
-CHECKS = "gmNew gmNewClient gmStart gmStartNet gmStop gmInput gmUpdate gmTick gmDraw gmMessage gmObjectives gmBase".split()
+CHECKS = ("gmNew gmNewClient gmStart gmStartNet gmStop gmInput gmUpdate gmTick gmDraw gmMessage gmObjectives gmBase "
+          "gmLoad gmCoop gmNet gmRender gmRenderGame gmRenderEquip").split()
 
 
 def main():

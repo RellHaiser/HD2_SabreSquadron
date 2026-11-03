@@ -318,16 +318,8 @@ f_006778e0.cpp:1506:5: '_param_2' was not declared in this scope; did you mean '
     _param_2 = ((int)(this_00->belt).last - (int)pSVar2) / 6;
 f_006778e0.cpp:1508:11: '_param_2' was not declared in this scope; did you mean 'param_2'?
     if (0 < _param_2) {
-f_0067eb00.cpp:886:49: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_88 = (C_str)(*(int *)local_88 - 1), *(int *)local_88 == 0)) {
-f_0067eb00.cpp:897:49: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_88 = (C_str)(*(int *)local_88 - 1), *(int *)local_88 == 0)) {
-f_0067eb00.cpp:1927:35: too few arguments to function
+f_0067eb00.cpp:1646:35: too few arguments to function
     (*pIVar3->vtable->Duplicate)();
-f_0067eb00.cpp:2157:33: void value not ignored as it ought to be
-    uVar2 = (*self->vtable->Clear)(self,0,1.0,3);
-f_0067eb00.cpp:2204:38: void value not ignored as it ought to be
-    uVar3 = (*pIVar1->vtable->SetState)(pIVar1,6,0);
 f_00682c40.cpp:1005:31: request for member '_0_4_' in '"equippanel"', which is of non-class type 'const char [11]'
     (**(code **)("equippanel"._0_4_ + 8))();
 f_00682c40.cpp:1878:49: no matching function for call to 'tier1::C_str::C_str(int)'

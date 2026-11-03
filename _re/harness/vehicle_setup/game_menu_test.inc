@@ -13,15 +13,12 @@
 // (Not ported yet: logged.)
 void C_GameMenu::OnMessage(S_ControlMessage *m) { GfLog("gm message %x", m->id); }
 bool C_GameMenu::BuildScreens() { return true; }
-bool C_GameMenu::OnRender() { return false; }
 bool C_GameMenu::OnItemNotify13(void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_GameMenu::OnItemNotify60(void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_GameMenu::OnItemNotify0A(void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_GameMenu::OnItemNotify08(void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_GameMenu::OnItemNotify09(void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_GameMenu::OnItemHover(void *, C_Control *, uint32_t, uint32_t) { return true; }
-void C_GameMenu::UpdateLoadButton() { GfLog("weight"); }
-void C_GameMenu::UpdateCoopPlayers() { GfLog("coop"); }
 
 bool g_gmInfoInit = true, g_gmInfoShown;
 I3D_scene *g_gmInfoScene;
@@ -43,13 +40,59 @@ float C_SoundModule::SetMasterVolume(float volume)
 }
 bool g_gmSlots;
 bool C_Team::HasMemberInPlayerSlots() const { return g_gmSlots; }
+// (Part 9e-vi: the network status.) The humans' uniforms, the teams' counts, the times left.
+std::map<const C_Human *, C_Item *> g_gmUniforms;
+C_Item *C_Human::GetUniformItem() const
+{
+    const auto it = g_gmUniforms.find(this);
+    return it == g_gmUniforms.end() ? nullptr : it->second;
+}
+int g_gmAxis, g_gmAllies, g_gmRespawnLeft, g_gmRoundLeft;
+void C_NetGame::CountTeams(int *axis, int *allies, bool pending, bool inGame)
+{
+    GfLog("count teams %d %d", pending, inGame);
+    *axis = g_gmAxis;
+    *allies = g_gmAllies;
+}
+int C_game::GetRespawnTimeLeft() const { return g_gmRespawnLeft; }
+int C_game::GetRoundTimeLeft() const { return g_gmRoundLeft; }
 
 namespace {
 
 struct S_GameMenuResults {
     bool gmNew = true, gmNewClient = true, gmStart = true, gmStartNet = true, gmStop = true, gmInput = true;
     bool gmUpdate = true, gmTick = true, gmDraw = true, gmMessage = true, gmObjectives = true, gmBase = true;
+    bool gmLoad = true, gmCoop = true, gmNet = true, gmRender = true, gmRenderGame = true, gmRenderEquip = true;
 };
+
+// A uniform of a side (its type's team).
+struct C_GmDef : C_SlDef {
+    explicit C_GmDef(int team) : C_SlDef(ITEM_STATIC, 0, -1, -1) { m_team = team; }
+};
+struct C_GmItem : C_Item {
+    explicit C_GmItem(C_ItemDef *def) : C_Item(static_cast<E_ItemKind>(0)) { m_def = def; }
+    int Fire(C_Actor *, const S_vector &, const S_vector &, uint32_t) override { return 0; }
+    int FireSecondary(C_Actor *, const S_vector &, const S_vector &, uint8_t) override { return 0; }
+};
+
+// A game state of the game's type, its scene where C_game keeps it.
+struct C_GmGameOne : C_GameState {
+    int GetTypeId() const override { return GAME_STATE_TYPE_GAME; }
+};
+// The game scene's callback: the one set logged, the previous returned (first 0x1234).
+void *g_gmCallback = reinterpret_cast<void *>(0x1234);
+void *__stdcall GmSetRenderCallback(void *, void *callback, uint32_t flags)
+{
+    GfLog("gscene callback %x %x", static_cast<uint32_t>(reinterpret_cast<uintptr_t>(callback)), flags);
+    void *const old = g_gmCallback;
+    g_gmCallback = callback;
+    return old;
+}
+uint32_t __stdcall GmClear(void *, uint32_t color, float z, uint32_t flags)
+{
+    GfLog("clear %u %g %u", color, z, flags);
+    return 0;
+}
 
 // The game behind the menu: its slots logged.
 struct C_GmGame : C_GameState {
@@ -216,20 +259,28 @@ void GameMenuTest(I3D_scene *scene)
         bool ok = true;
         C_GmGame game;
         const uint32_t roles[] = {GAME_ROLE_LOCAL, GAME_ROLE_CLIENT, GAME_ROLE_SERVER, GAME_ROLE_SERVER | GAME_ROLE_CLIENT};
+        // (The objectives game: the teams counted.)
+        const int oldType = g_mpSettings->gameType;
+        g_mpSettings->gameType = MP_GAME_OBJECTIVES;
         const std::vector<std::vector<std::string>> want = {
-            {"game update 7"}, {"weight", "coop", "game update 7"}, {"weight", "coop"}, {"weight", "coop", "game update 7"}};
+            {"game update 7"}, {"count teams 0 0", "game update 7"}, {"count teams 0 0"}, {"count teams 0 0", "game update 7"}};
         for (int i = 0; i < 4; ++i) {
             g_gameRole = GAME_ROLE_CLIENT;
             C_GameMenu m;
             g_gameRole = roles[i];
             m.SetGame(&game);
             g_gfLog.clear();
+            g_controlMessages.clear();
             m.OnUpdate(7);
-            ok &= MsLogIs(want[static_cast<size_t>(i)], g_gfLog);
+            // (The network games: the status posted, the round's time last.)
+            ok &= MsLogIs(want[static_cast<size_t>(i)], g_gfLog) &&
+                  (i == 0 ? g_controlMessages.empty() : g_controlMessages.back().target == 0x0C900000);
             m.SetGame(nullptr);
             g_gfLog.clear();
+            g_controlMessages.clear();
             m.OnUpdate(7);
-            ok &= g_gfLog.size() == (i == 0 ? 0u : 2u);
+            ok &= g_gfLog.size() == (i == 0 ? 0u : 1u) && g_controlMessages.empty() == (i == 0);
+            g_controlMessages.clear();
         }
         // The panel's soldier ticked (the network games), then deleted by the stop.
         g_gameRole = GAME_ROLE_CLIENT;
@@ -239,8 +290,9 @@ void GameMenuTest(I3D_scene *scene)
         m.m_panel.m_soldier = soldier;
         g_gfLog.clear();
         m.OnUpdate(9);
-        ok &= std::find(g_gfLog.begin(), g_gfLog.end(), "ss 20 9") != g_gfLog.end() && g_gfLog.size() >= 2 &&
-              g_gfLog[g_gfLog.size() - 2] == "weight" && g_gfLog.back() == "coop";
+        ok &= std::find(g_gfLog.begin(), g_gfLog.end(), "ss 20 9") != g_gfLog.end();
+        g_controlMessages.clear();
+        g_mpSettings->gameType = oldType;
         // (As equipment_panel_test.inc deletes it.)
         delete soldier->m_pose;
         soldier->m_pose = nullptr;
@@ -356,6 +408,255 @@ void GameMenuTest(I3D_scene *scene)
         WM(r.gmObjectives, ok);
     }
 
+    // --- the load's button: on (posted once) with a uniform and the load within the strength (1 too);
+    // else off (posted once; NaN, no uniform, no soldier) ---
+    {
+        bool ok = true;
+        C_GameMenu m;
+        S_SquadSoldier s;
+        s.uniform.typeId = 21;
+        g_controlMessages.clear();
+        const auto run = [&](float fill) {
+            g_epWeightFill = fill;
+            m.UpdateLoadButton();
+            return ScQueue();
+        };
+        ok &= run(0.5f).empty() && !m.m_loadButtonOn;
+        m.m_panel.m_squadSoldier = &s;
+        ok &= run(0.5f) == "ca00000 1000002 0 0 ; " && m.m_loadButtonOn && run(1.0f).empty();
+        ok &= run(1.01f) == "ca00000 1000001 0 0 ; " && !m.m_loadButtonOn && run(2.0f).empty();
+        ok &= run(1.0f) == "ca00000 1000002 0 0 ; " && run(std::nanf("")) == "ca00000 1000001 0 0 ; ";
+        ok &= run(0.0f) == "ca00000 1000002 0 0 ; ";
+        s.uniform.typeId = -1;
+        ok &= run(0.0f) == "ca00000 1000001 0 0 ; ";
+        s.uniform.typeId = 21;
+        ok &= run(0.0f) == "ca00000 1000002 0 0 ; ";
+        m.m_panel.m_squadSoldier = nullptr;
+        ok &= run(0.0f) == "ca00000 1000001 0 0 ; " && run(0.0f).empty();
+        g_epWeightFill = 0.0f;
+        WM(r.gmLoad, ok);
+    }
+
+    // --- the co-op game's status: the list cleared, its title, per connected player its rank (0 .. 7)
+    // and name, its human's state (none, dead, alive) ---
+    {
+        bool ok = true;
+        const bool oldCoop = g_coop, oldTextIds = g_textIds;
+        g_coop = true;
+        g_textIds = true;
+        C_Human dead, alive;
+        dead.health = 0;
+        alive.health = 5;
+        S_NetPlayerState *p = g_grPlayers;
+        for (int i = 0; i < 5; ++i)
+            p[i] = S_NetPlayerState();
+        std::strcpy(p[0].name, "ann");
+        p[0].stats[5] = 9;
+        std::strcpy(p[2].name, "bob");
+        p[2].stats[5] = -2;
+        p[2].human = &dead;
+        std::strcpy(p[3].name, "cy");
+        p[3].stats[5] = 3;
+        p[3].human = &alive;
+        std::strcpy(p[4].name, "dee");
+        g_grPlayerCount = 4;
+        g_controlMessages.clear();
+        g_gfLog.clear();
+        C_GameMenu::UpdateNetStatus();
+        ok &= MsLogIs({"lock", "unlock"}, g_gfLog);
+        ok &= ScQueue() == "d300000 2000018 0 0 ; d300000 1000017 56 4f4c ; "
+                           "d300000 1000016 57 0 text 10137 ann; d300000 1000017 58 4f4d ; "
+                           "d300000 1000016 57 0 text 10130 bob; d300000 1000017 58 4f4e ; "
+                           "d300000 1000016 57 0 text 10133 cy; d300000 1000017 58 4f4f ; ";
+        g_grPlayerCount = 0;
+        for (int i = 0; i < 5; ++i)
+            p[i] = S_NetPlayerState();
+        g_coop = oldCoop;
+        g_textIds = oldTextIds;
+        WM(r.gmCoop, ok);
+    }
+
+    // --- the other games' status: the teams' counts (the deathmatch's by the uniforms' sides), the
+    // occupation's respawn time, the round's time (" m:ss") ---
+    {
+        bool ok = true;
+        const int oldType = g_mpSettings->gameType;
+        g_gmAxis = 3;
+        g_gmAllies = 4;
+        g_gmRespawnLeft = 65999;
+        g_gmRoundLeft = 600000;
+        g_mpSettings->gameType = MP_GAME_OCCUPATION;
+        g_controlMessages.clear();
+        g_gfLog.clear();
+        C_GameMenu::UpdateNetStatus();
+        ok &= MsLogIs({"count teams 0 0"}, g_gfLog) &&
+              ScQueue() == "c104000 1000078 4 0 ; c105000 1000078 3 0 ; c800000 1000018 2d 1   1:05; "
+                           "c900000 1000018 2d 1  10:00; ";
+        g_mpSettings->gameType = MP_GAME_OBJECTIVES;
+        g_gmRoundLeft = 59000;
+        C_GameMenu::UpdateNetStatus();
+        ok &= ScQueue() == "c104000 1000078 4 0 ; c105000 1000078 3 0 ; c900000 1000018 2d 1   0:59; ";
+        // The deathmatch: the players with a human wearing a uniform of side 0 (allied) or 1 (axis).
+        C_GmDef allied(0), axis(1), all(2);
+        C_GmItem u0(&allied), u1(&axis), u2(&allied), u3(&all), u4(&axis);
+        C_Human h[5];
+        g_gmUniforms = {{&h[0], &u0}, {&h[1], &u1}, {&h[2], &u2}, {&h[3], &u3}, {&h[4], &u4}};
+        S_NetPlayerState *p = g_grPlayers;
+        for (int i = 0; i < 7; ++i) {
+            p[i] = S_NetPlayerState();
+            p[i].human = i < 5 ? &h[i] : nullptr;
+        }
+        // (Past the count: not counted.)
+        p[6].human = &h[0];
+        g_grPlayerCount = 6;
+        g_mpSettings->gameType = MP_GAME_DEATHMATCH;
+        g_gfLog.clear();
+        C_GameMenu::UpdateNetStatus();
+        ok &= MsLogIs({"lock", "unlock"}, g_gfLog) &&
+              ScQueue() == "c104000 1000078 2 0 ; c105000 1000078 2 0 ; c900000 1000018 2d 1   0:59; ";
+        g_grPlayerCount = 0;
+        for (int i = 0; i < 7; ++i)
+            p[i] = S_NetPlayerState();
+        g_gmUniforms.clear();
+        g_mpSettings->gameType = oldType;
+        WM(r.gmNet, ok);
+    }
+
+    // --- drawn: by the top screen (the equipment's, index 3, or the message box over it: the equipment's
+    // drawing; else the game's); no screen: the game's scene (the game's type; else false) ---
+    {
+        const int slots[] = {0x1C / 4, 0x18 / 4};
+        void *oldDriver[2] = {g_driverVtable[slots[0]], g_driverVtable[slots[1]]};
+        void *const oldClear = g_igraphVtable[0x64 / 4];
+        g_driverVtable[0x1C / 4] = reinterpret_cast<void *>(&MrGetState);
+        g_driverVtable[0x18 / 4] = reinterpret_cast<void *>(&MrSetState);
+        g_igraphVtable[0x64 / 4] = reinterpret_cast<void *>(&GmClear);
+        g_mrStates[5] = 3;
+        g_mrStates[6] = 4;
+        g_gameRole = GAME_ROLE_CLIENT;
+        C_GameMenu m;
+        S_MrWorld world = MrWorld("gm");
+        m.m_scene = As<I3D_scene>(world.scene);
+        alignas(16) static uint8_t gameMemory[sizeof(C_game)];
+        std::memset(gameMemory, 0, sizeof gameMemory);
+        C_GameState *one = new (gameMemory) C_GmGameOne();
+        static void *gameSceneVt[MR_SLOTS];
+        std::copy(std::begin(g_mrSceneVt), std::end(g_mrSceneVt), gameSceneVt);
+        gameSceneVt[0x74 / 4] = reinterpret_cast<void *>(&GmSetRenderCallback);
+        reinterpret_cast<C_game *>(gameMemory)->m_scene = As<I3D_scene>(MrObj("gscene", gameSceneVt));
+        C_GmGame other;
+        C_MrScreen game(m.m_scene, "ggame", 0x04000000), two(m.m_scene, "gtwo", 0x08000000),
+            equip(m.m_scene, "gequip", 0x0C000000), box(m.m_scene, "gbox", 0x00000000);
+        const std::vector<std::string> gameDraw = {"clear 0 1 3", "gscene callback 0 0", "gscene 78 0", "gscene callback 1234 6",
+                                                   "state 5 0", "state 6 1", "scene 78 0", "state 5 3", "state 6 4"};
+        const std::vector<std::string> equipDraw = {"scene 78 0"};
+        {
+            bool ok = true;
+            m.SetGame(one);
+            const auto draws = [&](std::initializer_list<C_Screen *> screens, const std::vector<std::string> &want) {
+                g_menuScreens = screens;
+                g_gfLog.clear();
+                return m.OnRender() && MsLogIs(want, g_gfLog);
+            };
+            ok &= draws({&game}, gameDraw) && draws({&two}, gameDraw) && draws({&equip}, equipDraw) &&
+                  draws({&box}, gameDraw);
+            m.m_underPopup = &equip;
+            ok &= draws({&box}, equipDraw);
+            m.m_underPopup = &two;
+            const std::vector<std::string> underDraw = {
+                "clear 0 1 3", "gscene callback 0 0", "gscene 78 0", "gscene callback 1234 6", "state 5 0", "state 6 1",
+                "gbox on 0", "gtwo on 1", "scene 78 0", "gbox on 1", "gtwo on 0", "scene 78 0", "gtwo on 1",
+                "state 5 3", "state 6 4"};
+            ok &= draws({&box}, underDraw);
+            m.m_underPopup = nullptr;
+            // No screen: the game's scene alone; another state or none: false.
+            ok &= draws({}, {"gscene 78 0"});
+            m.SetGame(&other);
+            g_gfLog.clear();
+            ok &= !m.OnRender() && g_gfLog.empty();
+            m.SetGame(nullptr);
+            ok &= !m.OnRender() && g_gfLog.empty();
+            WM(r.gmRender, ok);
+        }
+
+        // The game's drawing: no game (or not the game's type): the clear, false; no scene of the menu's.
+        {
+            bool ok = true;
+            g_menuScreens = {&game};
+            g_gfLog.clear();
+            ok &= !m.RenderGame() && MsLogIs({"clear 0 1 3"}, g_gfLog);
+            m.SetGame(&other);
+            g_gfLog.clear();
+            ok &= !m.RenderGame() && MsLogIs({"clear 0 1 3"}, g_gfLog);
+            m.SetGame(one);
+            I3D_scene *const scene = m.m_scene;
+            m.m_scene = nullptr;
+            g_gfLog.clear();
+            ok &= m.RenderGame() && MsLogIs({"clear 0 1 3", "gscene callback 0 0", "gscene 78 0", "gscene callback 1234 6",
+                                             "state 5 0", "state 6 1", "state 5 3", "state 6 4"},
+                                            g_gfLog);
+            m.m_scene = scene;
+            // (Under a popup without a top: the scene once.)
+            m.m_underPopup = &two;
+            g_menuScreens.clear();
+            g_gfLog.clear();
+            ok &= m.RenderGame() && MsLogIs(gameDraw, g_gfLog);
+            m.m_underPopup = nullptr;
+            WM(r.gmRenderGame, ok);
+        }
+
+        // The equipment's drawing: the scene; the info screen shown: no more; the popup's own popup over
+        // the top (driver state 5 cleared); no scene: none drawn.
+        {
+            bool ok = true;
+            C_MrScreen pop(m.m_scene, "gpop", 0x10000000);
+            g_menuScreens = {&equip};
+            m.m_popup = &pop;
+            g_gfLog.clear();
+            ok &= m.RenderEquipment() && MsLogIs(equipDraw, g_gfLog);
+            pop.popup = true;
+            g_gfLog.clear();
+            ok &= m.RenderEquipment() && MsLogIs({"scene 78 0", "state 5 0", "gequip on 0", "gpop on 1", "scene 78 0",
+                                                  "state 5 3", "gequip on 1", "gpop on 0"},
+                                                 g_gfLog);
+            m.m_infoScreen = new C_InfoScreen();
+            g_gmInfoShown = true;
+            g_gfLog.clear();
+            ok &= m.RenderEquipment() && MsLogIs(equipDraw, g_gfLog);
+            g_gmInfoShown = false;
+            g_gfLog.clear();
+            ok &= m.RenderEquipment() && g_gfLog.size() == 8;
+            // The panel's soldier drawn.
+            C_MenuSoldier *soldier = new C_MenuSoldier();
+            MsWorld(*soldier);
+            m.m_panel.m_soldier = soldier;
+            g_gfLog.clear();
+            ok &= m.RenderEquipment() && g_gfLog.size() > 8 && MrHas("ss 78 0");
+            delete soldier->m_pose;
+            soldier->m_pose = nullptr;
+            soldier->m_model = nullptr;
+            for (auto &anim : soldier->m_anims)
+                anim = nullptr;
+            m.m_panel.DeleteSoldier();
+            delete m.m_infoScreen;
+            m.m_infoScreen = nullptr;
+            pop.popup = false;
+            I3D_scene *const scene = m.m_scene;
+            m.m_scene = nullptr;
+            g_gfLog.clear();
+            ok &= m.RenderEquipment() && g_gfLog.empty();
+            m.m_scene = scene;
+            m.m_popup = nullptr;
+            WM(r.gmRenderEquip, ok);
+        }
+        g_menuScreens.clear();
+        m.SetGame(nullptr);
+        one->~C_GameState();
+        g_driverVtable[slots[0]] = oldDriver[0];
+        g_driverVtable[slots[1]] = oldDriver[1];
+        g_igraphVtable[0x64 / 4] = oldClear;
+    }
+
     // --- the base: C_EquipmentMenuBase's slots true ---
     {
         C_GameMenu m;
@@ -371,7 +672,9 @@ void GameMenuTest(I3D_scene *scene)
     g_files = oldFiles;
     g_gfLog.clear();
     std::printf("gamemenu: gmNew %d gmNewClient %d gmStart %d gmStartNet %d gmStop %d gmInput %d gmUpdate %d "
-                "gmTick %d gmDraw %d gmMessage %d gmObjectives %d gmBase %d\n",
+                "gmTick %d gmDraw %d gmMessage %d gmObjectives %d gmBase %d gmLoad %d gmCoop %d gmNet %d gmRender %d "
+                "gmRenderGame %d gmRenderEquip %d\n",
                 r.gmNew, r.gmNewClient, r.gmStart, r.gmStartNet, r.gmStop, r.gmInput, r.gmUpdate, r.gmTick, r.gmDraw,
-                r.gmMessage, r.gmObjectives, r.gmBase);
+                r.gmMessage, r.gmObjectives, r.gmBase, r.gmLoad, r.gmCoop, r.gmNet, r.gmRender, r.gmRenderGame,
+                r.gmRenderEquip);
 }

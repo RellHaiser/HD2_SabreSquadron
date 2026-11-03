@@ -182,6 +182,7 @@ public:
     void AddScore(int slot, int points);
     void AddTeamScore(int team, float points);
     void PrintLoadProgress(int percent);                // (the loading screen, part 8f-i)
+    void CountTeams(int *axis, int *allies, bool pending, bool inGame);   // (the in-game menu, part 9e-vi)
 };
 extern C_NetGame g_netGame;
 class C_NetMessage;

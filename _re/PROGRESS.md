@@ -7243,6 +7243,35 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     (0x00685420..0x006863c0) and the item slots (0x00680ea0, 0x00681ee0..0x00682350,
     0x00686e10..0x00687f50).
 
+  PART 9e-vi DONE (2026-11-02): the in-game menu's update helpers and drawing (game/game_menu.cpp).
+  - UpdateLoadButton 0x006869a0: control 0x0CA00000 activated while the panel's squad soldier has a
+    uniform and his load's weight fill is at most 1 (NaN: not; the asm's JP), deactivated otherwise;
+    posted when it changes (+0x1E0).
+  - UpdateNetStatus 0x006802a0 (the network games' OnUpdate): co-op: the list 0x0D300000 cleared,
+    its title (0x56, 0x4F4C), per connected player "<rank> <name>" (0x57; the allied ranks 0x2792 +
+    stat 5, 0..7) and his human's state (0x58; none 0x4F4D, dead 0x4F4E, alive 0x4F4F). Else the
+    allies' and axis' counts (0x0C104000 / 0x0C105000; the deathmatch's by the uniforms' sides,
+    0x006801f0 CountUniformSides, else CountTeams), the occupation's respawn time 0x0C800000 and the
+    round's 0x0C900000 (" %2d:%02d", style 0x2D, run 1).
+  - OnRender 0x006824f0: the top screen index 3 (or the message box over it): RenderEquipment
+    0x00682790 (the menu's scene; the info screen not shown: the panel's soldier, the popup's popup
+    over the top, the driver's state 5 cleared); else RenderGame 0x006825d0 (states 5 / 6 kept, IGraph
+    cleared; the game behind's scene drawn without its render callback (restored, phases 6), then the
+    menu's scene over it, twice under a popup); no screen: the game's scene alone. No game (or not
+    the game's type): false. I3D_scene::SetRenderCallback returns the previous callback (i3d.h).
+  - The original's messages carry stack leftovers as value2 / value3 where it sets none (zero here).
+  - Harness: game_menu_test.inc's gmLoad, gmCoop, gmNet, gmRender, gmRenderGame, gmRenderEquip (18
+    checks now; groups_test.inc's players, the uniforms, the teams' counts and the times faked; the
+    driver's states, IGraph's clear, a game scene's callback; the stubs' C_NetGame::CountTeams and
+    C_Human::GetUniformItem added). 22 of 22 in both orders (the other factory lines and the text
+    build too).
+  - Mutations: mutations/mutate_9e6.py (166 cases, all caught but 3 equivalent).
+  - Build: MSVC clean. Tier 1: 425 errors in 75 files, 175 stubs (429 / 177 before). ret_audit --src: 52.
+  - Ghidra: names/game_menu.txt (+4 new, 2 renamed); 6 functions in ported.txt. Stats: 8,837 of 12,306 functions by hand (78.6 % by size).
+  - Next, 9e-vii: OnMessage 0x0067f850 (the escape, the squad's second soldier, the team change, the
+    questions, the app's commands); then the options handler 0x0061bf00, the screens, the squad glue
+    and the item slots.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

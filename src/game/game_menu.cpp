@@ -1,14 +1,25 @@
-// The in-game menu (original 0x0067eb40..0x00687f50; part 9e-v: the class and the menu state's slots).
+// The in-game menu (original 0x0067eb40..0x00687f50; part 9e-v: the class and the menu state's slots;
+// 9e-vi: the update's helpers and the drawing).
 #include "game/game_menu.h"
 
+#include <algorithm>
+
+#include "common/c_str.h"
 #include "game/campaign.h"
+#include "game/controls.h"
 #include "game/cursor.h"
+#include "game/game.h"
+#include "game/human.h"
 #include "game/interface.h"
+#include "game/item_defs.h"
+#include "game/items.h"
 #include "game/pending.h"
 #include "game/profile.h"
 #include "game/screen.h"
 #include "game/sound_module.h"
 #include "game/team.h"
+#include "ls3d/i3d.h"
+#include "ls3d/igraph.h"
 
 int g_gameMenuTime;                                     // 0x008ae62c
 int g_gameMenuMessages;                                 // 0x008ae628
@@ -19,10 +30,73 @@ namespace {
 constexpr int SCREEN_INDEX_SHIFT = 26;
 constexpr uint32_t SCREEN_INDEX_MASK = 0x3F;
 constexpr uint32_t MESSAGE_BOX_SCREEN = 0;
+// The equipment screen (drawn with the panel's soldier; the others over the game behind).
+constexpr uint32_t EQUIPMENT_SCREEN = 3;
+
+// The network games' controls (UpdateLoadButton, UpdateNetStatus).
+constexpr uint32_t LOAD_BUTTON = 0x0CA00000;
+constexpr uint32_t COOP_PLAYERS = 0x0D300000;           // a list: a row per player
+constexpr uint32_t ALLIES_COUNT = 0x0C104000;
+constexpr uint32_t AXIS_COUNT = 0x0C105000;
+constexpr uint32_t RESPAWN_TIME = 0x0C800000;
+constexpr uint32_t ROUND_TIME = 0x0C900000;
+// The co-op list's styles and texts (its title; a player without a human, dead, alive).
+constexpr uint32_t COOP_TITLE_STYLE = 0x56, COOP_NAME_STYLE = 0x57, COOP_STATE_STYLE = 0x58;
+constexpr uint32_t TEXT_COOP_TITLE = 0x4F4C, TEXT_COOP_NO_HUMAN = 0x4F4D, TEXT_COOP_DEAD = 0x4F4E,
+                   TEXT_COOP_ALIVE = 0x4F4F;
+constexpr int TEXT_RANKS = 0x2792;                      // the allied ranks (eight)
+constexpr int PLAYER_RANK = 5;                          // S_NetPlayerState::stats
+constexpr int MAX_RANK = 7;
+constexpr uint32_t TIME_STYLE = 0x2D, TIME_RUN = 1;
+// The I3D driver's states the game's drawing changes.
+constexpr int DRIVER_STATE_5 = 5;
+constexpr int DRIVER_STATE_6 = 6;
+// The game's render callback's phases (C_game's).
+constexpr uint32_t GAME_RENDER_PHASES = 6;
 
 bool IsLocalGame()
 {
     return (g_gameRole & GAME_ROLE_LOCAL) == GAME_ROLE_LOCAL;
+}
+
+void Post(uint32_t target, uint32_t id, uint32_t value, uintptr_t value2 = 0, const C_str &text = C_str())
+{
+    S_ControlMessage message;
+    message.target = target;
+    message.id = id;
+    message.value = value;
+    message.value2 = value2;
+    message.text = text;
+    PostControlMessage(message);
+}
+
+// " m:ss" of a time in ms.
+C_str FormatTime(int ms)
+{
+    const int seconds = ms / 1000;
+    return C_fstr(" %2d:%02d", seconds / 60, seconds % 60);
+}
+
+// The deathmatch's players with a human by their uniforms' sides (0 allied, 1 axis).
+void CountUniformSides(int *axis, int *allies)          // 0x006801f0 (__fastcall)
+{
+    *axis = 0;
+    *allies = 0;
+    S_NetPlayerState *players = g_netGame.LockPlayers();
+    for (int i = 0; i < g_netGame.GetPlayerCount(); ++i) {
+        C_Human *human = players[i].human;
+        if (!human)
+            continue;
+        const C_Item *uniform = human->GetUniformItem();
+        if (!uniform)
+            continue;
+        const int side = uniform->GetDef()->GetTeam();
+        if (side == 0)
+            ++*allies;
+        else if (side == 1)
+            ++*axis;
+    }
+    g_netGame.UnlockPlayers();
 }
 
 } // namespace
@@ -122,7 +196,7 @@ void C_GameMenu::OnUpdate(int timeDelta)
     if (!IsLocalGame()) {
         m_panel.TickSoldier(timeDelta);
         UpdateLoadButton();
-        UpdateCoopPlayers();
+        UpdateNetStatus();
     }
     if ((g_gameRole & GAME_ROLE_CLIENT) && m_game)
         m_game->Update(timeDelta);
@@ -133,6 +207,128 @@ void C_GameMenu::OnTick(int timeDelta)
     g_gameMenuTime += timeDelta;
     if ((g_gameRole & GAME_ROLE_SERVER) && m_game)
         m_game->Tick(timeDelta);
+}
+
+void C_GameMenu::UpdateLoadButton()
+{
+    const S_SquadSoldier *soldier = m_panel.GetSquadSoldier();
+    // (Not over: NaN neither.)
+    if (soldier && soldier->uniform.typeId != -1 && soldier->load.GetWeightFill() <= 1.0f) {
+        if (!m_loadButtonOn) {
+            m_loadButtonOn = true;
+            Post(LOAD_BUTTON, CONTROL_MSG_ACTIVATE, 0);
+        }
+    } else if (m_loadButtonOn) {
+        m_loadButtonOn = false;
+        Post(LOAD_BUTTON, CONTROL_MSG_DEACTIVATE, 0);
+    }
+}
+
+void C_GameMenu::UpdateNetStatus()
+{
+    // (The original's messages carry stack leftovers as their value2 / value3 where it sets none.)
+    if (g_gameProfile.IsCooperativeGame()) {
+        S_NetPlayerState *players = g_netGame.LockPlayers();
+        Post(COOP_PLAYERS, CONTROL_MSG_CLEAR, 0);
+        Post(COOP_PLAYERS, CONTROL_MSG_ADD_TEXT_ID, COOP_TITLE_STYLE, TEXT_COOP_TITLE);
+        for (int i = 0; i < g_netGame.GetPlayerCount(); ++i) {
+            const S_NetPlayerState &player = players[i];
+            if (!player.IsConnected())
+                continue;
+            const int rank = std::min(std::max(player.stats[PLAYER_RANK], 0), MAX_RANK);
+            const C_str name = C_fstr("%s %s", g_texts.Get(TEXT_RANKS + rank).c_str(), player.name);
+            Post(COOP_PLAYERS, CONTROL_MSG_ADD_TEXT, COOP_NAME_STYLE, 0, name);
+            const uint32_t state = !player.human           ? TEXT_COOP_NO_HUMAN
+                                   : player.human->IsDead() ? TEXT_COOP_DEAD
+                                                            : TEXT_COOP_ALIVE;
+            Post(COOP_PLAYERS, CONTROL_MSG_ADD_TEXT_ID, COOP_STATE_STYLE, state);
+        }
+        g_netGame.UnlockPlayers();
+        return;
+    }
+    int axis = 0, allies = 0;
+    if (g_mpSettings->gameType == MP_GAME_DEATHMATCH)
+        CountUniformSides(&axis, &allies);
+    else
+        g_netGame.CountTeams(&axis, &allies, false, false);
+    Post(ALLIES_COUNT, CONTROL_MSG_SET_NUMBER, static_cast<uint32_t>(allies));
+    Post(AXIS_COUNT, CONTROL_MSG_SET_NUMBER, static_cast<uint32_t>(axis));
+    if (g_mpSettings->gameType == MP_GAME_OCCUPATION)
+        Post(RESPAWN_TIME, CONTROL_MSG_SET_RUN_TEXT, TIME_STYLE, TIME_RUN, FormatTime(::GetGame()->GetRespawnTimeLeft()));
+    Post(ROUND_TIME, CONTROL_MSG_SET_RUN_TEXT, TIME_STYLE, TIME_RUN, FormatTime(::GetGame()->GetRoundTimeLeft()));
+}
+
+bool C_GameMenu::OnRender()
+{
+    C_Screen *top = g_menuScreens.empty() ? nullptr : g_menuScreens.back();
+    if (top) {
+        const uint32_t index = top->GetId() >> SCREEN_INDEX_SHIFT;
+        if (index == EQUIPMENT_SCREEN)
+            return RenderEquipment();
+        // The message box over the equipment screen.
+        if (index == MESSAGE_BOX_SCREEN && m_underPopup &&
+            (m_underPopup->GetId() >> SCREEN_INDEX_SHIFT) == EQUIPMENT_SCREEN)
+            return RenderEquipment();
+        return RenderGame();
+    }
+    if (m_game && m_game->GetTypeId() == GAME_STATE_TYPE_GAME) {
+        static_cast<C_game *>(m_game)->GetScene()->Render(0);
+        return true;
+    }
+    return false;
+}
+
+bool C_GameMenu::RenderGame()
+{
+    const int state5 = I3DGetDriver()->GetState(DRIVER_STATE_5);
+    const int state6 = I3DGetDriver()->GetState(DRIVER_STATE_6);
+    GetIGraph()->Clear(0, 1.0f, 3);
+    if (!m_game || m_game->GetTypeId() != GAME_STATE_TYPE_GAME)
+        return false;
+    // The game's scene without its callback (the interface).
+    I3D_scene *scene = static_cast<C_game *>(m_game)->GetScene();
+    void *callback = scene->SetRenderCallback(nullptr, 0);
+    scene->Render(0);
+    scene->SetRenderCallback(callback, GAME_RENDER_PHASES);
+    I3DGetDriver()->SetState(DRIVER_STATE_5, 0);
+    I3DGetDriver()->SetState(DRIVER_STATE_6, 1);
+    C_Screen *top = g_menuScreens.empty() ? nullptr : g_menuScreens.back();
+    if (m_underPopup && top) {
+        top->GetScreenFrame()->SetOn(false);
+        m_underPopup->GetScreenFrame()->SetOn(true);
+        m_scene->Render(0);
+        top->GetScreenFrame()->SetOn(true);
+        m_underPopup->GetScreenFrame()->SetOn(false);
+        m_scene->Render(0);
+        m_underPopup->GetScreenFrame()->SetOn(true);
+    } else if (m_scene) {
+        m_scene->Render(0);
+    }
+    I3DGetDriver()->SetState(DRIVER_STATE_5, state5);
+    I3DGetDriver()->SetState(DRIVER_STATE_6, state6);
+    return true;
+}
+
+bool C_GameMenu::RenderEquipment()
+{
+    if (m_scene)
+        m_scene->Render(0);
+    if (m_infoScreen && m_infoScreen->IsShown())
+        return true;
+    m_panel.RenderSoldier();
+    if (m_popup && m_popup->HasPopup()) {
+        // (Quirk kept: the top read unchecked when the stack is empty.)
+        C_Screen *top = g_menuScreens.empty() ? nullptr : g_menuScreens.back();
+        const int state5 = I3DGetDriver()->GetState(DRIVER_STATE_5);
+        I3DGetDriver()->SetState(DRIVER_STATE_5, 0);
+        top->GetScreenFrame()->SetOn(false);
+        m_popup->GetScreenFrame()->SetOn(true);
+        m_scene->Render(0);
+        I3DGetDriver()->SetState(DRIVER_STATE_5, state5);
+        top->GetScreenFrame()->SetOn(true);
+        m_popup->GetScreenFrame()->SetOn(false);
+    }
+    return true;
 }
 
 bool C_GameMenu::OnDrawScreens()
