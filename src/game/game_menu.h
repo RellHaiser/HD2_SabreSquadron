@@ -122,10 +122,18 @@ private:
     // The two stocks made (every type -1), the profile's stock reset, the mission's store items (not
     // ported yet).
     bool SetupStocks();                                 // 0x00685170 (__fastcall)
-    // The soldier types' combo box filled (not ported yet).
+    // The soldier types' combo box filled: emptied, its header and first line text 500; the user
+    // presets of the squad's team, then the presets the map allows (their names in its list;
+    // counted); a preset's line its name's text, else its name.
     void UpdateSoldierTypes();                          // 0x00685da0 (__fastcall)
-    // The player screen's callbacks: shown (not ported yet), hidden (true), the soldier type picked
-    // and the preset saved (not ported yet), the game info's click (the info screen shown; true),
+    // The squad soldier's profile and places kept in the user preset (the team's): its belt's and
+    // backpack's items counted by type, the last first (13 and 31 types at most).
+    void StorePreset(int index);                        // 0x00687bc0
+    // The player screen's callbacks: shown (not ported yet), hidden (true), the soldier type's
+    // header edited (the user preset renamed, stored and saved; an empty name: edited again), the
+    // preset saved (stored; a preset named by its text renamed "<the profile's name><its number>",
+    // the list refilled, its header the name; the presets saved), the game info's click (the info
+    // screen shown; true),
     // the chat input's line sent ("/t": to the team, "/a": to all, either skipped with the spaces
     // after; the net game's chat; true).
     static bool OnPlayerScreenShown(void *menu, void *argument, C_Control *control, uint32_t notification,
@@ -178,8 +186,8 @@ private:
     C_MissionItems m_missionItems;                      // +0x1F0
     C_LoadoutPresets m_presets;                         // +0x49C
     C_InfoScreen *m_infoScreen = nullptr;               // +0x4BC the network games' (OnStart .. OnStop)
-    int m_unknown4C0 = 0;                               // +0x4C0
-    int m_unknown4C4 = -1;                              // +0x4C4
+    int m_mapPresets = 0;                               // +0x4C0 the map's presets listed (UpdateSoldierTypes)
+    int m_userPreset = -1;                              // +0x4C4 the user preset edited (-1: none)
     uint8_t m_unknown4C8[0x10] = {};                    // +0x4C8 (not set by the original)
     bool m_unknown4D8 = false;                          // +0x4D8
     bool m_unknown4D9 = false;                          // +0x4D9

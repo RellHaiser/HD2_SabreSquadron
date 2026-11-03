@@ -353,6 +353,8 @@ public:
     // The directory name: the name itself, or with the menus' unicode font the "Profile_<n>"
     // directory the name maps to.
     C_str GetName() const;                              // 0x006ae7e0
+    // The profile's own name (GetName's when no other is given; the in-game menu's presets).
+    const C_str &GetProfileName() const { return m_name; }
     // Makes the profile `name` current: its options and profile.sav (false never).
     bool SelectProfile(const char *name);               // 0x006af480
     // Renames the current profile (and its directory, or its name's mapping); 1, or -1 when

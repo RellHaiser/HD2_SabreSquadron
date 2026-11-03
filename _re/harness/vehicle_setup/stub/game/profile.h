@@ -56,6 +56,8 @@ public:
     void ApplyVolume();
     // (The options handler, part 9e-viii: options_test.inc.)
     C_str GetName() const;
+    // (The in-game menu's presets, part 9e-xvii: game_menu_test.inc.)
+    const C_str &GetProfileName() const;
     bool SaveOptions();
     // (The options' pages, part 9e-xi: options_test.inc; the options world_modules_test.inc's.)
     S_DetailSettings *GetOptions();

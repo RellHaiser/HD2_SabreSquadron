@@ -33,12 +33,13 @@ struct S_LoadoutPreset {
     int CountItems(int typeId) const;                   // 0x0067d450
 
     char name[NAME_SIZE] = {};                          // +0x00
-    // The places' item types: head, uniform, backpack, long gun, hands (-1: none).
+    // The places' item types: head, hands, long gun, uniform, backpack (-1: none; the order the
+    // in-game menu's StorePreset fills them in from the squad soldier's places).
     int head = -1;                                      // +0x20
-    int uniform = -1;                                   // +0x24
-    int backpack = -1;                                  // +0x28
-    int longGun = -1;                                   // +0x2C
-    int hands = -1;                                     // +0x30
+    int hands = -1;                                     // +0x24
+    int longGun = -1;                                   // +0x28
+    int uniform = -1;                                   // +0x2C
+    int backpack = -1;                                  // +0x30
     int beltCount = 0;                                  // +0x34
     S_PresetItem belt[BELT_ITEMS];                      // +0x38
     int backpackCount = 0;                              // +0xA8

@@ -47,10 +47,10 @@ void C_StoreList::BuildDescription(S_ScreenDesc *desc, I3D_frame *model)
     GfLog("store desc %s %d %s menu %d", desc->name.c_str(), static_cast<int>(desc->controls.size()),
           model ? MrFrameName(model).c_str() : "none", m_menu != nullptr);
 }
-void C_GameMenu::UpdateSoldierTypes() { GfLog("soldier types %x", static_cast<uint32_t>(m_soldierTypes)); }
+// (Part 9e-xvii: the profile's name.)
+C_str g_gmProfileName("Pvt");
+const C_str &C_PlayerProfile::GetProfileName() const { return g_gmProfileName; }
 bool C_GameMenu::OnPlayerScreenShown(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
-bool C_GameMenu::OnSoldierType(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
-bool C_GameMenu::OnSavePreset(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_NetGame::SendChat(const char *text, bool team)
 {
     GfLog("chat [%s] %d", text, team);
@@ -120,7 +120,29 @@ struct S_GameMenuResults {
     bool gmMainLocal = true, gmMainNet = true, gmBuild = true, gmBuildNet = true, gmPlayer = true, gmPlayerCoop = true;
     bool gmPlayerCallbacks = true, gmChat = true, gmSoldiers = true, gmSoldiersNone = true, gmSoldierPicked = true;
     bool gmSide = true, gmEquipment = true, gmEquipmentNone = true, gmItems = true, gmItemsNone = true, gmSkills = true;
+    bool gmSoldierTypes = true, gmStorePreset = true, gmTypeEdited = true, gmPresetSaved = true;
 };
+
+// A control answering CONTROL_MSG_GET_TEXT with its text.
+struct C_GmTexted : C_Control {
+    C_str text;
+    explicit C_GmTexted(const char *t) : C_Control(nullptr, 0x0C200002, nullptr), text(t) {}
+    bool HandleMessage(S_ControlMessage *m) override
+    {
+        if (m->id == CONTROL_MSG_GET_TEXT)
+            m->text = text;
+        return true;
+    }
+};
+// The queue as "target id value value2 text; " (emptied).
+std::string GmQueue()
+{
+    std::string s;
+    for (const S_ControlMessage &m : g_controlMessages)
+        s += CmText("%x %x %x %x %s; ", m.target, m.id, m.value, static_cast<uint32_t>(m.value2), m.text.c_str());
+    g_controlMessages.clear();
+    return s;
+}
 
 // A control answering CONTROL_MSG_GET_INDEX with its index (logged).
 struct C_GmIndexed : C_Control {
@@ -230,7 +252,7 @@ void GameMenuTest(I3D_scene *scene)
         WM(r.gmNew, C_GmBasePeek::Fresh(*m) &&
                         !m->m_teamChangePosted && !m->m_respawnOnApply && m->m_team == -1 && m->m_unknown1D8 == -1 &&
                         m->m_soldierTypes == -1 && !m->m_loadButtonOn && !m->m_stock1E4 && !m->m_stock1E8 &&
-                        !m->m_options && !m->m_infoScreen && m->m_unknown4C0 == 0 && m->m_unknown4C4 == -1 &&
+                        !m->m_options && !m->m_infoScreen && m->m_mapPresets == 0 && m->m_userPreset == -1 &&
                         !m->m_unknown4D8 && !m->m_unknown4D9 && !m->m_hasPlayerSlotMember && !m->GetGame());
         m->SetRespawnOnApply(true);
         C_GmGame game;
@@ -1230,11 +1252,15 @@ void GameMenuTest(I3D_scene *scene)
             okp &= m.m_soldierTypes == 0x0C200000 && C_GmBasePeek::WeaponsInfo(m) == 0x0D200000 && !m.m_popup &&
                    m.m_panel.m_soldier;
             // (No equipment panel: its frames not found; the dummies not made.)
-            okp &= g_gfLog.size() >= 11 && g_gfLog[0] == "gmpm 48 equippanel 20" && g_gfLog[1] == "create 6" &&
+            okp &= g_gfLog.size() >= 10 && g_gfLog[0] == "gmpm 48 equippanel 20" && g_gfLog[1] == "create 6" &&
                    g_gfLog[2] == "create 6" && g_gfLog[3] == "setup stocks" && g_gfLog[4] == "gmpm 48 allitemspanel 20" &&
                    g_gfLog[5] == "gmpm 48 soldier type01 1" && g_gfLog[6] == "gmpm 48 bscroll 20" &&
-                   g_gfLog[7] == "soldier types c200000" && g_gfLog[8] == "gmpm 48 text_weapons_info 1" &&
-                   g_gfLog[9] == "gmpm 48 3Dview 1" && MrHas("gmp3d on 0");
+                   g_gfLog[7] == "gmpm 48 text_weapons_info 1" && g_gfLog[8] == "gmpm 48 3Dview 1" && MrHas("gmp3d on 0");
+            // (The soldier types filled: their combo box emptied first.)
+            okp &= std::any_of(g_controlMessages.begin(), g_controlMessages.end(), [](const S_ControlMessage &q) {
+                return q.target == 0x0C200000 && q.id == CONTROL_MSG_CLEAR;
+            });
+            g_controlMessages.clear();
             delete m.m_panel.m_soldier;
             m.m_panel.m_soldier = nullptr;
             WM(r.gmPlayer, okp);
@@ -1634,6 +1660,164 @@ void GameMenuTest(I3D_scene *scene)
         game->m_mission = oldMission;
     }
 
+    // --- the soldier types (part 9e-xvii): emptied, the header and the first line text 500; the
+    // squad team's user presets, then the presets the map lists (counted); their texts, else their
+    // names. The user preset stored: the squad soldier's profile and places, its belt and backpack
+    // items by type (the last first; 13 and 31 types at most). The header edited: the preset
+    // renamed (29 characters), stored, saved; empty: edited again. Saved: stored; a preset named by
+    // its text renamed for the profile and its number, the types refilled, the header the name; the
+    // presets saved ---
+    {
+        alignas(16) static uint8_t missionMemory[sizeof(C_MpMissionDef)];
+        std::memset(missionMemory, 0, sizeof missionMemory);
+        // (Its field by its accessor: the harness's layout.)
+        auto &allowed = const_cast<C_str &>(reinterpret_cast<C_MpMissionDef *>(missionMemory)->GetPresets());
+        allowed = C_str("Allied gunner, Allied medic, Axis gunner");
+        C_game *game = GetGame();
+        C_MissionDef *const oldMission = game->m_mission;
+        game->m_mission = reinterpret_cast<C_MissionDef *>(missionMemory);
+        C_GameMenu m;
+        m.m_presets.Clear();
+        const auto preset = [](S_LoadoutPreset *p, const char *name, uint32_t flags, int textId) {
+            std::strncpy(p->name, name, sizeof p->name - 1);
+            p->flags = flags;
+            p->textId = textId;
+            return p;
+        };
+        S_LoadoutPreset *u0 = preset(m.m_presets.AddUserPreset(), "Allied_user_preset1", LOADOUT_ALLIED, 0x1988);
+        preset(m.m_presets.AddUserPreset(), "Axis_user_preset1", LOADOUT_AXIS, 0x1982);
+        S_LoadoutPreset *u2 = preset(m.m_presets.AddUserPreset(), "Mine", LOADOUT_ALLIED, -1);
+        preset(m.m_presets.AddUserPreset(), "Deathmatch1", LOADOUT_DEATHMATCH, 0x198E);
+        preset(m.m_presets.AddUserPreset(), "Nogame", 0, 0x1999);
+        preset(m.m_presets.AddPreset(), "Allied gunner", LOADOUT_ALLIED, -1);
+        preset(m.m_presets.AddPreset(), "Allied medic", LOADOUT_ALLIED, 0x2000);
+        preset(m.m_presets.AddPreset(), "Allied sniper", LOADOUT_ALLIED, -1);
+        preset(m.m_presets.AddPreset(), "Axis gunner", LOADOUT_AXIS, 0x2001);
+        m.m_soldierTypes = 0x0C200000;
+        m.m_team = TEAM_ALLIES;
+        m.m_mapPresets = 9;
+        g_controlMessages.clear();
+        m.UpdateSoldierTypes();
+        const std::string head = "c200000 2000018 0 0 ; c200000 1000081 c 1f4 ; c200000 1000017 13 1f4 ; ";
+        bool okt = GmQueue() == head + "c200000 1000017 13 1988 ; c200000 1000016 13 0 Mine; "
+                                       "c200000 1000016 13 0 Allied gunner; c200000 1000017 13 2000 ; " &&
+                   m.m_mapPresets == 2;
+        m.m_team = TEAM_AXIS;
+        m.UpdateSoldierTypes();
+        okt &= GmQueue() == head + "c200000 1000017 13 1982 ; c200000 1000017 13 2001 ; " && m.m_mapPresets == 1;
+        // No team: every game's (the flags 2: not the one of no game).
+        m.m_team = -1;
+        m.UpdateSoldierTypes();
+        const std::string all = GmQueue();
+        okt &= m.m_mapPresets == 3 && all.find("13 1999") == std::string::npos && all.find("13 198e") != std::string::npos;
+        m.m_team = 2;
+        m.UpdateSoldierTypes();
+        okt &= GmQueue() == head + "c200000 1000017 13 198e ; " && m.m_mapPresets == 0;
+        WM(r.gmSoldierTypes, okt);
+
+        // Stored.
+        bool oks = true;
+        S_SquadSoldier squad;
+        squad.profileIndex = 7;
+        squad.head = EpMake(1, 0, 1);
+        squad.uniform = EpMake(2, 4, 1);
+        squad.backpack = EpMake(3, 5, 1);
+        squad.longGun = EpMake(4, 6, 1);
+        squad.belt = {EpMake(5, 10, 2), EpMake(6, 11, 1), EpMake(7, 10, 3)};
+        squad.backpackContents = {EpMake(8, 20, 4)};
+        m.m_panel.m_squadSoldier = &squad;
+        m.m_team = TEAM_ALLIES;
+        u2->head = u2->hands = 99;
+        u2->beltCount = 5;
+        u2->backpackCount = 9;
+        m.StorePreset(1);
+        oks &= u2->unknown1b4 == 7 && u2->head == 0 && u2->uniform == 4 && u2->backpack == 5 && u2->longGun == 6 &&
+               u2->hands == -1 && u2->beltCount == 2 && u2->belt[0].typeId == 10 && u2->belt[0].count == 5 &&
+               u2->belt[1].typeId == 11 && u2->belt[1].count == 1 && u2->backpackCount == 1 &&
+               u2->backpackItems[0].typeId == 20 && u2->backpackItems[0].count == 4;
+        // (Full: 13 belt types, 31 backpack types; the last first.)
+        squad.belt.clear();
+        squad.backpackContents.clear();
+        for (int i = 0; i < 15; ++i)
+            squad.belt.push_back(EpMake(i, 100 + i, 1));
+        for (int i = 0; i < 33; ++i)
+            squad.backpackContents.push_back(EpMake(i, 200 + i, 2));
+        squad.hands = EpMake(9, 8, 1);
+        m.StorePreset(1);
+        oks &= u2->beltCount == 13 && u2->belt[0].typeId == 114 && u2->belt[12].typeId == 102 && u2->hands == 8 &&
+               u2->backpackCount == 31 && u2->backpackItems[0].typeId == 232 && u2->backpackItems[30].typeId == 202 &&
+               u2->backpackItems[30].count == 2;
+        // (Another team's index: none; the axis': its first.)
+        const S_LoadoutPreset kept = *u0;
+        m.StorePreset(2);
+        oks &= std::memcmp(&kept, u0, sizeof kept) == 0 && u0->unknown1b4 == 0;
+        S_LoadoutPreset *axis = m.m_presets.GetUserPreset(0, LOADOUT_AXIS);
+        m.m_team = TEAM_AXIS;
+        m.StorePreset(0);
+        m.m_team = TEAM_ALLIES;
+        oks &= axis && axis->unknown1b4 == 7 && axis->hands == 8 && std::memcmp(&kept, u0, sizeof kept) == 0;
+        WM(r.gmStorePreset, oks);
+        squad.belt.clear();
+        squad.backpackContents.clear();
+        squad.hands = EpMake(-1, -1, 0);
+
+        // The header edited.
+        bool oke = true;
+        g_files.erase("prof\\user_presets.def");
+        const auto edited = [&](const char *text) {
+            C_GmTexted control(text);
+            g_controlMessages.clear();
+            return C_GameMenu::OnSoldierType(&m, &m, &control, CONTROL_NOTIFY_0B, 0);
+        };
+        oke &= edited("") && GmQueue() == "c200002 2000016 0 0 ; " && !g_files.count("prof\\user_presets.def");
+        m.m_userPreset = -1;
+        oke &= edited("Scout") && GmQueue().empty() && !g_files.count("prof\\user_presets.def");
+        m.m_userPreset = 0;
+        u0->unknown1b4 = 0;
+        std::memset(u0->name, 'X', sizeof u0->name - 1);
+        oke &= edited("A very long preset name of forty chars") && GmQueue().empty() &&
+               std::string(u0->name) == "A very long preset name of fo" && u0->textId == -1 && u0->unknown1b4 == 7 &&
+               g_files.count("prof\\user_presets.def");
+        // (Saved after it is stored: the file's first preset has the profile.)
+        const std::vector<uint8_t> &saved = g_files["prof\\user_presets.def"];
+        oke &= saved.size() >= 8 + sizeof(S_LoadoutPreset) &&
+               reinterpret_cast<const S_LoadoutPreset *>(saved.data() + 8)->unknown1b4 == 7;
+        g_files.erase("prof\\user_presets.def");
+        m.m_userPreset = 5;
+        oke &= edited("Scout") && !g_files.count("prof\\user_presets.def");
+        WM(r.gmTypeEdited, oke);
+
+        // Saved.
+        bool okv = true;
+        m.m_userPreset = -1;
+        okv &= C_GameMenu::OnSavePreset(&m, &m, nullptr, CONTROL_NOTIFY_CLICK, 0) && GmQueue().empty() &&
+               g_files.count("prof\\user_presets.def");
+        g_files.erase("prof\\user_presets.def");
+        u0->textId = 0x1988;
+        std::memset(u0->name, 'X', sizeof u0->name - 1);
+        u0->unknown1b4 = 0;
+        m.m_userPreset = 0;
+        okv &= C_GameMenu::OnSavePreset(&m, &m, nullptr, CONTROL_NOTIFY_CLICK, 0) && std::string(u0->name) == "Pvt1" &&
+               u0->name[29] == 0 && u0->textId == -1 && u0->unknown1b4 == 7 && g_files.count("prof\\user_presets.def") &&
+               GmQueue() == head + "c200000 1000016 13 0 Pvt1; c200000 1000016 13 0 Mine; "
+                                   "c200000 1000016 13 0 Allied gunner; c200000 1000017 13 2000 ; "
+                                   "c200000 100007a c 0 Pvt1; ";
+        // Named already: stored, not renamed; the second (index 1 of the team's).
+        m.m_userPreset = 1;
+        u2->unknown1b4 = 0;
+        okv &= C_GameMenu::OnSavePreset(&m, &m, nullptr, CONTROL_NOTIFY_CLICK, 0) && std::string(u2->name) == "Mine" &&
+               u2->unknown1b4 == 7 && GmQueue().empty();
+        // (Its number in the name: the preset's index + 1.)
+        u2->textId = 0x1989;
+        okv &= C_GameMenu::OnSavePreset(&m, &m, nullptr, CONTROL_NOTIFY_CLICK, 0) && std::string(u2->name) == "Pvt2";
+        g_controlMessages.clear();
+        WM(r.gmPresetSaved, okv);
+        m.m_panel.m_squadSoldier = nullptr;
+        g_files.erase("prof\\user_presets.def");
+        game->m_mission = oldMission;
+        allowed = C_str();
+    }
+
     // --- the soldiers panel's callbacks (part 9e-xiv): a picture clicked: its index asked, kept for
     // its list (0 .. 29, 30 .. 59), the stats shown, the squad soldier's profile set (level 0), the
     // panel refreshed and its face; no index: nothing; true. A side's mark (not co-op): the team asked
@@ -1759,11 +1943,13 @@ void GameMenuTest(I3D_scene *scene)
                 "gmRenderGame %d gmRenderEquip %d gmOptions %d gmEscape %d gmEscapeNet %d gmSquad %d gmQuestions %d "
                 "gmMainLocal %d gmMainNet %d gmBuild %d gmBuildNet %d gmPlayer %d gmPlayerCoop %d gmPlayerCallbacks %d "
                 "gmChat %d gmSoldiers %d gmSoldiersNone %d gmSoldierPicked %d gmSide %d gmEquipment %d gmEquipmentNone %d "
-                "gmItems %d gmItemsNone %d gmSkills %d\n",
+                "gmItems %d gmItemsNone %d gmSkills %d gmSoldierTypes %d gmStorePreset %d gmTypeEdited %d "
+                "gmPresetSaved %d\n",
                 r.gmNew, r.gmNewClient, r.gmStart, r.gmStartNet, r.gmStop, r.gmInput, r.gmUpdate, r.gmTick, r.gmDraw,
                 r.gmMessage, r.gmObjectives, r.gmBase, r.gmLoad, r.gmCoop, r.gmNet, r.gmRender, r.gmRenderGame,
                 r.gmRenderEquip, r.gmOptions, r.gmEscape, r.gmEscapeNet, r.gmSquad, r.gmQuestions, r.gmMainLocal,
                 r.gmMainNet, r.gmBuild, r.gmBuildNet, r.gmPlayer, r.gmPlayerCoop, r.gmPlayerCallbacks, r.gmChat, r.gmSoldiers,
                 r.gmSoldiersNone, r.gmSoldierPicked, r.gmSide, r.gmEquipment, r.gmEquipmentNone,
-                r.gmItems, r.gmItemsNone, r.gmSkills);
+                r.gmItems, r.gmItemsNone, r.gmSkills, r.gmSoldierTypes, r.gmStorePreset, r.gmTypeEdited,
+                r.gmPresetSaved);
 }

@@ -1,6 +1,7 @@
 // The in-game menu (original 0x0067eb40..0x00687f50; part 9e-v: the class and the menu state's slots;
 // 9e-vi: the update's helpers and the drawing; 9e-vii: the messages; 9e-ix: the screens' descriptions;
-// 9e-xiii: the player screen's; 9e-xiv..9e-xvi: its soldiers, equipment, items and skills panels).
+// 9e-xiii: the player screen's; 9e-xiv..9e-xvi: its soldiers, equipment, items and skills panels;
+// 9e-xvii: the soldier types and the user presets).
 #include "game/game_menu.h"
 
 #include <algorithm>
@@ -64,6 +65,10 @@ constexpr float SOLDIER_ACROSS_STEP = 0.062f;
 constexpr int CONTROL_BAR = 0x16;
 constexpr uint32_t BAR_AXIS_Z = 2;
 constexpr uint32_t TEXT_SKILLS = 0xA78, TEXT_SKILL_VALUE = 0x7D2;
+// A user preset's name as the menu writes it (29 characters), its belt's and backpack's item types
+// as the menu stores them (13 and 31: one less than the preset holds).
+constexpr size_t PRESET_NAME_LENGTH = 0x1D;
+constexpr int PRESET_BELT_TYPES = 13, PRESET_BACKPACK_TYPES = 31;
 // What the buttons post when clicked: their routes (CONTROL_NOTIFY_CLICK | the message).
 constexpr uint32_t CLICK = CONTROL_NOTIFY_CLICK;
 // The options handler's opening of its screen (options_handler.cpp).
@@ -87,6 +92,21 @@ constexpr uint32_t TEXT_QUIT_QUESTION = 0x7D9, TEXT_RESTART_QUESTION = 0x7D4;
 void *const WARMUP_MENU = reinterpret_cast<void *>(static_cast<intptr_t>(-2));
 // The app's command a changed team posts (the team as its argument; inferred).
 constexpr int APP_NET_COMMAND_TEAM = 5;
+
+// The presets of a squad's team (its loadouts' flags: the axis', the allied, the deathmatch's).
+uint32_t TeamLoadouts(int team)
+{
+    switch (team) {
+    case TEAM_AXIS:
+        return LOADOUT_AXIS;
+    case TEAM_ALLIES:
+        return LOADOUT_ALLIED;
+    case 2:
+        return LOADOUT_DEATHMATCH;
+    default:
+        return 2;
+    }
+}
 
 // A float as a message's value2.
 uintptr_t FloatValue(float value)
@@ -770,6 +790,114 @@ bool C_GameMenu::BuildSkillsPanel(S_ScreenDesc *desc, I3D_frame *)
         AddDescMessage(value, 0, CONTROL_MSG_SET_MARGIN, 0);
         AddDescMessage(value, 0, CONTROL_MSG_SET_TEXT_ID, TEXT_STYLE, TEXT_SKILL_VALUE);
     }
+    return true;
+}
+
+void C_GameMenu::UpdateSoldierTypes()
+{
+    const uint32_t flags = TeamLoadouts(m_team);
+    const auto types = static_cast<uint32_t>(m_soldierTypes);
+    Post(types, CONTROL_MSG_CLEAR, 0);
+    Post(types, CONTROL_MSG_SET_HEADER_TEXT_ID, LIST_STYLE, TEXT_SOLDIER_TYPES);
+    Post(types, CONTROL_MSG_ADD_TEXT_ID, LIST_ITEM_STYLE, TEXT_SOLDIER_TYPES);
+    // (Quirk kept: a name is the line's format.)
+    const auto add = [types](const S_LoadoutPreset *preset) {
+        if (preset->textId == -1)
+            Post(types, CONTROL_MSG_ADD_TEXT, LIST_ITEM_STYLE, 0, C_fstr(preset->name));
+        else
+            Post(types, CONTROL_MSG_ADD_TEXT_ID, LIST_ITEM_STYLE, static_cast<uintptr_t>(preset->textId));
+    };
+    for (int i = 0; S_LoadoutPreset *preset = m_presets.GetUserPreset(i, flags); ++i)
+        add(preset);
+    m_mapPresets = 0;
+    for (int i = 0; S_LoadoutPreset *preset = m_presets.GetPreset(i, flags); ++i) {
+        const auto *mission = static_cast<C_MpMissionDef *>(::GetGame()->GetMission());
+        if (!std::strstr(mission->GetPresets().c_str(), preset->name))
+            continue;
+        add(preset);
+        ++m_mapPresets;
+    }
+}
+
+void C_GameMenu::StorePreset(int index)
+{
+    S_LoadoutPreset *preset = m_presets.GetUserPreset(index, TeamLoadouts(m_team));
+    if (!preset)
+        return;
+    const S_SquadSoldier *soldier = m_panel.GetSquadSoldier();
+    preset->unknown1b4 = soldier->profileIndex;
+    preset->ClearPlaces();
+    const auto place = [](int &to, const S_SoldierItem &item) {
+        if (item.typeId >= 0)
+            to = item.typeId;
+    };
+    place(preset->head, soldier->head);
+    place(preset->longGun, soldier->longGun);
+    place(preset->hands, soldier->hands);
+    place(preset->uniform, soldier->uniform);
+    // The items counted by type (the last first; full: the others dropped).
+    const auto count = [](S_PresetItem *items, int &n, int max, const std::vector<S_SoldierItem> &from) {
+        for (auto it = from.rbegin(); it != from.rend(); ++it) {
+            if (n >= max)
+                continue;
+            int i = 0;
+            while (i < n && items[i].typeId != it->typeId)
+                ++i;
+            if (i < n) {
+                items[i].count += it->present;
+            } else {
+                items[n].typeId = it->typeId;
+                items[n].count = it->present;
+                ++n;
+            }
+        }
+    };
+    count(preset->belt, preset->beltCount, PRESET_BELT_TYPES, soldier->belt);
+    place(preset->backpack, soldier->backpack);
+    count(preset->backpackItems, preset->backpackCount, PRESET_BACKPACK_TYPES, soldier->backpackContents);
+}
+
+bool C_GameMenu::OnSoldierType(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_GameMenu *>(menu);
+    S_ControlMessage text;
+    text.id = CONTROL_MSG_GET_TEXT;
+    control->HandleMessage(&text);
+    if (text.text.IsEmpty()) {
+        Post(static_cast<uint32_t>(self->m_soldierTypes) | 2, CONTROL_MSG_EDIT, 0);
+        return true;
+    }
+    if (self->m_userPreset >= 0) {
+        S_LoadoutPreset *preset = self->m_presets.GetUserPreset(self->m_userPreset, TeamLoadouts(self->m_team));
+        if (preset) {
+            std::strncpy(preset->name, text.text.c_str(), PRESET_NAME_LENGTH);
+            preset->name[PRESET_NAME_LENGTH] = 0;
+            preset->textId = -1;
+            self->StorePreset(self->m_userPreset);
+            self->m_presets.SaveUser();
+        }
+    }
+    return true;
+}
+
+bool C_GameMenu::OnSavePreset(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_GameMenu *>(menu);
+    if (self->m_userPreset >= 0) {
+        self->StorePreset(self->m_userPreset);
+        S_LoadoutPreset *preset = self->m_presets.GetUserPreset(self->m_userPreset, TeamLoadouts(self->m_team));
+        // A preset named by its text gets the profile's name and its number.
+        if (preset && preset->textId != -1) {
+            C_str name = g_gameProfile.m_player->GetProfileName();
+            name += C_fstr("%d", self->m_userPreset + 1);
+            preset->textId = -1;
+            std::strncpy(preset->name, name.c_str(), PRESET_NAME_LENGTH);
+            preset->name[PRESET_NAME_LENGTH] = 0;
+            self->UpdateSoldierTypes();
+            Post(static_cast<uint32_t>(self->m_soldierTypes), CONTROL_MSG_SET_HEADER_TEXT, LIST_STYLE, 0, name);
+        }
+    }
+    self->m_presets.SaveUser();
     return true;
 }
 

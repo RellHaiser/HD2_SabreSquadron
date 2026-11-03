@@ -32236,6 +32236,11 @@
   "module": "zz_idioms",
   "name": "vector_tidy_686bb0"
  },
+ "00687bc0": {
+  "module": "game_menu",
+  "name": "C_GameMenu::StorePreset",
+  "proto": "void __thiscall StorePreset(C_GameMenu *this, int index)"
+ },
  "00687dd0": {
   "module": "game_menu",
   "name": "C_GameMenu::OnSoldierType",

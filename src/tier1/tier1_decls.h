@@ -3107,6 +3107,7 @@ void * C_GameMenu__ScalarDeletingDestructor(C_GameMenu *_this = {}, uchar flags 
 bool C_GameMenu__SetupStocks(C_GameMenu *menu = {}, ...);
 uint32_t C_GameMenu__ShowMessage(C_GameMenu *_this = {}, int textId = {}, int unused = {}, ...);
 uint32_t C_GameMenu__ShowSoldierStats(int profile = {}, ...);
+uint32_t C_GameMenu__StorePreset(C_GameMenu *_this = {}, int index = {}, ...);
 uint32_t C_GameMenu__UpdateLoadButton(C_GameMenu *menu = {}, ...);
 uint32_t C_GameMenu__UpdateNetStatus(C_GameMenu *_this = {}, ...);
 uint32_t C_GameMenu__UpdateSoldierTypes(C_GameMenu *menu = {}, ...);
@@ -9475,7 +9476,6 @@ uint32_t FUN_00686c90(...);
 uint32_t FUN_00687360(int param_1 = {}, ...);
 uint32_t FUN_00687390(void *_this = {}, uint32_t *param_1 = {}, int param_2 = {}, ...);
 uint8_t * FUN_006876b0(void *param_1 = {}, ...);
-uint32_t FUN_00687bc0(void *_this = {}, int param_1 = {}, ...);
 uint32_t * FUN_00688130(void *_this = {}, uint32_t *param_1 = {}, int *param_2 = {}, ...);
 uint32_t FUN_00688250(...);
 uint32_t FUN_00688280(...);

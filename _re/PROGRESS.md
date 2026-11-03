@@ -7529,6 +7529,27 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, 9e-xvii: the soldier types (0x00685da0), the screen's shown callback (0x00684fd0), the
     soldier type's and the preset's callbacks (0x00687dd0, 0x00687f50); then the item slots.
 
+  PART 9e-xvii DONE (2026-11-03): the in-game menu's soldier types and user presets (game/game_menu.cpp).
+  - UpdateSoldierTypes 0x00685da0: the combo box emptied, its header and first line text 500; the user
+    presets of the squad's team (m_team: axis 0x12, allied 0x22, deathmatch 0x42, else 2), then the
+    presets whose names the map's preset list holds (C_MpMissionDef::GetPresets, +0x68; counted in
+    m_mapPresets, was m_unknown4C0); a line its preset's text, else its name (as a format: quirk kept).
+  - StorePreset 0x00687bc0: the user preset (the team's index) gets the squad soldier's profile and
+    places, its belt's and backpack's items counted by type, the last first, 13 / 31 types at most.
+    The preset's places' fields reordered by it (head, hands, long gun, uniform, backpack: 9e-iv's
+    names were inferred).
+  - OnSoldierType 0x00687dd0 (the header's text: empty, edited again; else the edited user preset
+    m_userPreset, was m_unknown4C4, renamed, stored and saved), OnSavePreset 0x00687f50 (stored; named
+    by its text: renamed "<profile name><index + 1>", the list refilled, the header the name; saved).
+    C_PlayerProfile::GetProfileName added (the C_str concatenation 0x00688130 left to tier 1).
+  - Harness: game_menu_test.inc's gmSoldierTypes, gmStorePreset, gmTypeEdited, gmPresetSaved (the
+    stub profile's GetProfileName). 22 of 22 in both orders.
+  - Mutations: mutations/mutate_9e17.py (110, 109 killed, 1 equivalent).
+  - Build: MSVC clean. Tier 1: 407 errors in 74 files, 171 stubs (unchanged). ret_audit --src: 51 (was 52).
+  - Ghidra: names/game_menu.txt (+1, 3 moved); 4 functions in ported.txt. Stats: 8,880 of 12,306 functions by hand (79.5 % by size).
+  - Next, 9e-xviii: the player screen's shown callback (0x00684fd0) and the preset's application
+    (0x00685550), the squad glue (0x00685ab0.., the stats 0x006863c0), the item slots.
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
