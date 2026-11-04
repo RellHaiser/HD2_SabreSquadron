@@ -86,3 +86,7 @@
 00615820 C_MainMenu::OnCinematicsShown | bool __thiscall OnCinematicsShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
 00615450 C_MainMenu::OnMoviePlay | bool __thiscall OnMoviePlay(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
 00615470 C_MainMenu::OnMoviePick | bool __thiscall OnMoviePick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+# Part 9h-x: the password screen.
+00637a40 C_MainMenu::OnPasswordInput | bool __thiscall OnPasswordInput(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00637c10 C_MainMenu::OnServerPassword | bool __thiscall OnServerPassword(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00637fd0 C_MainMenu::OnParentalLockCode | bool __thiscall OnParentalLockCode(C_MainMenu *this, void * argument, void * control, uint notification, uint value)

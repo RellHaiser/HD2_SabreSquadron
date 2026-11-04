@@ -109,6 +109,9 @@ class C_ItemStock;
 class C_GameConfig {
 public:
     void SetLastProfile(C_str name);
+    bool IsParentLockSet() const;                       // (the password screen, part 9h-x)
+    bool SetParentLock(C_str code);
+    bool ClearParentLock(C_str code);
 };
 class C_GameProfile {
 public:

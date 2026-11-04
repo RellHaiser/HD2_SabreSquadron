@@ -8318,6 +8318,25 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 319 errors in 59 files, 132 stubs. ret_audit --src: 52.
   - Stats: 9,189 of 12,306 functions by hand (83.9 % by size).
 
+  PART 9h-x DONE (2026-11-04): the main menu's password screen (game/main_menu.cpp).
+  - DescribePasswordScreen 0x00637890: the model placed as the quit question's (0.5, -0.375, -0.5); the
+    question 0x7D3, the box "binput" (forbidden " \t>-\"", 0x7D2 in style 0xE; Return / Escape), "byes*" /
+    "bno*" (0x7D1 / 0x7D0), "binput01" / "binput02" hidden; every callback is OnPasswordInput 0x00637a40,
+    which jumps on m_step: 7 (the browser asking a server's password) OnServerPassword 0x00637c10, else
+    OnParentalLockCode 0x00637fd0.
+  - OnServerPassword: Return / yes with a password: g_mpSettings->password, g_sessionPasswordSet, the
+    connection's state 0 (m_connectState +0x1F4, named), the popup replaced by the connect screen (13);
+    Escape / no: the kept messages dropped (1), the popup closed. m_step back to 0, except yes with no password
+    (checked in the asm). OnParentalLockCode: Return / yes: the lock cleared with the code (when set) or set,
+    the options' check box 0x18A03000 (SET_CHECKED_QUIET) as the lock is, the kept messages posted, closed;
+    Escape / no: the check box, the kept messages dropped (0 by Escape, 1 by no), closed. Fix (both): yes with
+    no box finds no text (the original uses FindControl's result unchecked).
+  - Harness: pwDescribe, pwServer, pwLock (a C_GameConfig parental lock in the stub); the build test's
+    password screen real (its model placed). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h10.py: 89: 84 killed, 5 not building.
+  - Build: MSVC clean. Tier 1: 317 errors in 58 files, 131 stubs. ret_audit --src: 52.
+  - Stats: 9,193 of 12,306 functions by hand (83.9 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

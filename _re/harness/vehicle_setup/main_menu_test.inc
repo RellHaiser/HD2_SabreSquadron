@@ -146,6 +146,33 @@ bool C_MovieList::IsSeen(int index) const
     GfLog("seen %d", index);
     return index < static_cast<int>(g_ciMovies.size()) && g_ciMovies[static_cast<size_t>(index)].seen;
 }
+// (Part 9h-x: the parental lock: set or not, its code logged.)
+bool g_pwLocked;
+bool C_GameConfig::IsParentLockSet() const { return g_pwLocked; }
+bool C_GameConfig::SetParentLock(C_str code)
+{
+    GfLog("lock set %s", code.c_str());
+    g_pwLocked = true;
+    return true;
+}
+bool C_GameConfig::ClearParentLock(C_str code)
+{
+    GfLog("lock clear %s", code.c_str());
+    g_pwLocked = std::string(code.c_str()) != "1234";
+    return !g_pwLocked;
+}
+// The password box: its text asked (logged).
+struct C_PwBox : C_Control {
+    C_PwBox(uint32_t id, C_Control *parent) : C_Control(nullptr, id, parent) {}
+    const char *text = "";
+    bool HandleMessage(S_ControlMessage *m) override
+    {
+        GfLog("box %x %x", m->target, m->id);
+        if (m->id == CONTROL_MSG_GET_TEXT)
+            m->text = C_str(text);
+        return true;
+    }
+};
 bool C_PlayerProfile::Save()
 {
     GfLog("save profile");
@@ -169,7 +196,6 @@ bool C_PlayerProfile::GetLastSaveText(C_str *mode, C_str *mission, C_str *date) 
     }
 MM_DESCRIBE(DescribeBrowserScreen, "browser")
 MM_DESCRIBE(DescribeCreateServerScreen, "create")
-MM_DESCRIBE(DescribePasswordScreen, "password")
 MM_DESCRIBE(DescribeFiltersScreen, "filters")
 MM_DESCRIBE(DescribeGameInfoScreen, "gameinfo")
 MM_DESCRIBE(DescribeConnectScreen, "connect")
@@ -222,7 +248,8 @@ struct S_MainMenuResults {
          spShown = true, spHover = true, spClick = true,
          mpLists = true, mpDescribe = true, mpSaveSlot = true, mpPick = true,
          mxCampaign = true, mxSingle = true, mxMessages = true, mxSecret = true, mxStart = true, mxOperation = true,
-         ciDescribe = true, ciShown = true, ciPick = true;
+         ciDescribe = true, ciShown = true, ciPick = true,
+         pwDescribe = true, pwServer = true, pwLock = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -241,7 +268,7 @@ void MainMenuTest(I3D_scene *scene)
     {
         bool ok = true;
         C_MainMenu m;
-        ok &= m.unknown1F4 == 5 && m.m_mission == -1 && m.m_progress == -1 && !m.m_mpSettings && !m.m_options;
+        ok &= m.m_connectState == 5 && m.m_mission == -1 && m.m_progress == -1 && !m.m_mpSettings && !m.m_options;
         ok &= m.OnStart(nullptr) && m.m_mpSettings && m.m_options && m.m_options->m_menu == &m &&
               m.m_mpSettings->m_listKind == 1 && m.m_mpSettings->m_filter.maxPing == -1;
         ok &= CsQueue() == "4300000 1000014 c 0 '1.2.2026'; " && MsLogIs({"date 0"}, g_gfLog);
@@ -1437,6 +1464,147 @@ void MainMenuTest(I3D_scene *scene)
         g_ciMovies.clear();
     }
 
+    // --- (part 9h-x) the password screen: its description; a server's password; the parental lock's code ---
+    {
+        C_MainMenu m;
+        const auto Is = [](const std::string &got, const std::string &want) {
+            if (got != want)
+                std::printf("PASSWORD %s\nPASSWORD expected %s\n", got.c_str(), want.c_str());
+            return got == want;
+        };
+        g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnPasswordInput)] = "input";
+        {
+            // The model placed; the controls.
+            bool ok = true;
+            S_MrObj *model = MsFrame("pwmodel");
+            void *const oldSetPos = g_msFrameVt[0x08 / 4];
+            g_msFrameVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+            S_ScreenDesc d("PASSWORD", "password", 10u << 26);
+            g_gfLog.clear();
+            ok &= m.DescribePasswordScreen(&d, As<I3D_frame>(model)) && MsLogIs({"pwmodel 8 (0.5 -0.375 -0.5)"}, g_gfLog);
+            g_msFrameVt[0x08 / 4] = oldSetPos;
+            ok &= d.messages.empty() && d.controls.size() == 6;
+            if (d.controls.size() == 6) {
+                const S_ControlDesc *box = d.controls[1];
+                ok &= box->messages.size() == 4 &&
+                      std::string(reinterpret_cast<const char *>(box->messages[0].value2)) == " \t>-\"";
+                std::string tree = CsTree(box);
+                const std::string hex = CmText("100009b 0 %x", static_cast<uint32_t>(box->messages[0].value2));
+                if (tree.find(hex) != std::string::npos)
+                    tree.replace(tree.find(hex), hex.size(), "100009b 0 CHARS");
+                ok &= Is(CsTree(d.controls[0]), "13 text 28100000: 0 1000015 c 7d3;") &&
+                      Is(tree, "3 binput 28200000: 0 100009b 0 CHARS 0 1000015 e 7d2 0 1000007 4016000 self input"
+                               " 0 1000007 4017000 self input;") &&
+                      Is(CsTree(d.controls[2]), "14 byes* 28300000: 0 1000015 d 7d1 0 1000007 4001000 self input;") &&
+                      Is(CsTree(d.controls[3]), "14 bno* 28400000: 0 1000015 d 7d0 0 1000007 4001000 self input;") &&
+                      Is(CsTree(d.controls[4]), "3 binput01 28500000: 0 1000004 0 0;") &&
+                      Is(CsTree(d.controls[5]), "3 binput02 28600000: 0 1000004 0 0;");
+            }
+            WM(r.pwDescribe, ok);
+        }
+        // The screens: the password's (10) with its box.
+        C_MsScreen screen(nullptr, "pwscreen", 10u << 26);
+        C_PwBox *box = new C_PwBox(0x28200000, &screen);
+        screen.m_children.push_back(box);
+        m.m_screens.assign(11, nullptr);
+        m.m_screens[10] = &screen;
+        C_PwBox yes(0x28300000, nullptr), no(0x28400000, nullptr), other(0x28500000, nullptr);
+        const auto call = [&](C_Control *control, uint32_t notification) {
+            g_gfLog.clear();
+            return C_MainMenu::OnPasswordInput(&m, nullptr, control, notification, 0);
+        };
+        {
+            // A server's password (step 7): typed / yes: kept, connecting; empty: nothing; Escape / no: dropped, closed.
+            bool ok = true;
+            const C_str oldPassword = g_mpSettings->password;
+            const bool oldSet = g_sessionPasswordSet;
+            const auto reset = [&] {
+                m.m_step = 7;
+                m.m_connectState = 5;
+                g_sessionPasswordSet = false;
+                g_mpSettings->password = "old";
+            };
+            reset();
+            box->text = "secret";
+            ok &= call(box, CONTROL_NOTIFY_RETURN) && m.m_step == 0 && m.m_connectState == 0 && g_sessionPasswordSet &&
+                  std::string(g_mpSettings->password.c_str()) == "secret" && MsLogIs({"box 0 200002f"}, g_gfLog) &&
+                  Is(CsQueue(), "0 2000005 0 0; 0 2000002 d 0; ");
+            reset();
+            box->text = "";
+            ok &= call(box, CONTROL_NOTIFY_RETURN) && m.m_step == 0 && m.m_connectState == 5 && !g_sessionPasswordSet &&
+                  std::string(g_mpSettings->password.c_str()) == "old" && Is(CsQueue(), "");
+            reset();
+            ok &= call(box, CONTROL_NOTIFY_ESCAPE) && m.m_step == 0 && g_gfLog.empty() &&
+                  Is(CsQueue(), "0 10000200 1 0; 0 2000005 0 0; ");
+            reset();
+            ok &= call(box, CONTROL_NOTIFY_CLICK) && m.m_step == 0 && g_gfLog.empty() && Is(CsQueue(), "");
+            reset();
+            box->text = "pw2";
+            ok &= call(&yes, CONTROL_NOTIFY_CLICK) && m.m_step == 0 && m.m_connectState == 0 && g_sessionPasswordSet &&
+                  std::string(g_mpSettings->password.c_str()) == "pw2" && MsLogIs({"box 0 200002f"}, g_gfLog) &&
+                  Is(CsQueue(), "0 2000005 0 0; 0 2000002 d 0; ");
+            reset();
+            box->text = "";
+            ok &= call(&yes, CONTROL_NOTIFY_CLICK) && m.m_step == 7 && m.m_connectState == 5 && Is(CsQueue(), "");
+            reset();
+            ok &= call(&no, CONTROL_NOTIFY_CLICK) && m.m_step == 0 && Is(CsQueue(), "0 10000200 1 0; 0 2000005 0 0; ");
+            reset();
+            ok &= !call(&other, CONTROL_NOTIFY_CLICK) && m.m_step == 7 && !call(nullptr, CONTROL_NOTIFY_CLICK) &&
+                  m.m_step == 7 && Is(CsQueue(), "");
+            g_mpSettings->password = oldPassword;
+            g_sessionPasswordSet = oldSet;
+            WM(r.pwServer, ok);
+        }
+        {
+            // The parental lock (another step): typed / yes: set or cleared, the check box, the kept messages posted,
+            // closed; Escape / no: the check box, dropped (0 / 1), closed.
+            bool ok = true;
+            C_GameConfig config;
+            C_GameConfig *const oldConfig = g_gameProfile.m_config;
+            g_gameProfile.m_config = &config;
+            const std::string applied = "0 10000100 0 0; 0 2000005 0 0; ";
+            m.m_step = 3;
+            g_pwLocked = false;
+            box->text = "1234";
+            ok &= call(box, CONTROL_NOTIFY_RETURN) && m.m_step == 0 && g_pwLocked &&
+                  MsLogIs({"box 0 200002f", "lock set 1234"}, g_gfLog) && Is(CsQueue(), "18a03000 1000076 1 0; " + applied);
+            m.m_step = 3;
+            box->text = "999";
+            ok &= call(&yes, CONTROL_NOTIFY_CLICK) && m.m_step == 0 && g_pwLocked &&
+                  MsLogIs({"box 0 200002f", "lock clear 999"}, g_gfLog) && Is(CsQueue(), "18a03000 1000076 1 0; " + applied);
+            m.m_step = 3;
+            box->text = "1234";
+            ok &= call(box, CONTROL_NOTIFY_RETURN) && m.m_step == 0 && !g_pwLocked &&
+                  MsLogIs({"box 0 200002f", "lock clear 1234"}, g_gfLog) && Is(CsQueue(), "18a03000 1000076 0 0; " + applied);
+            m.m_step = 3;
+            ok &= call(box, CONTROL_NOTIFY_ESCAPE) && m.m_step == 0 && g_gfLog.empty() &&
+                  Is(CsQueue(), "18a03000 1000076 0 0; 0 10000200 0 0; 0 2000005 0 0; ");
+            m.m_step = 3;
+            g_pwLocked = true;
+            ok &= call(&no, CONTROL_NOTIFY_CLICK) && m.m_step == 0 && g_gfLog.empty() &&
+                  Is(CsQueue(), "18a03000 1000076 1 0; 0 10000200 1 0; 0 2000005 0 0; ");
+            m.m_step = 3;
+            ok &= call(box, CONTROL_NOTIFY_CLICK) && m.m_step == 0 && Is(CsQueue(), "");
+            m.m_step = 3;
+            ok &= !call(&other, CONTROL_NOTIFY_CLICK) && m.m_step == 3 && !call(nullptr, CONTROL_NOTIFY_CLICK) &&
+                  m.m_step == 3 && Is(CsQueue(), "");
+            // No box: an empty code.
+            m.m_screens[10] = nullptr;
+            m.m_screens.resize(10);
+            g_pwLocked = false;
+            ok &= call(&yes, CONTROL_NOTIFY_CLICK) && MsLogIs({"lock set "}, g_gfLog) &&
+                  Is(CsQueue(), "18a03000 1000076 1 0; " + applied);
+            m.m_step = 7;
+            ok &= call(&yes, CONTROL_NOTIFY_CLICK) && m.m_step == 7 && Is(CsQueue(), "");
+            g_gameProfile.m_config = oldConfig;
+            g_pwLocked = false;
+            WM(r.pwLock, ok);
+        }
+        m.m_screens.clear();
+        m.m_step = 0;
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -1468,7 +1636,7 @@ void MainMenuTest(I3D_scene *scene)
                                                         "multiplayer menu", "create server", "password", "server filters",
                                                         "gameinfo", "confirm", "password"});
         const std::string log = Join(g_gfLog);
-        ok &= GmInOrder(log, {"scan", "describe browser 20000000", "describe create 24000000", "describe password 28000000",
+        ok &= GmInOrder(log, {"scan", "describe browser 20000000", "describe create 24000000",
                               "describe filters 2c000000", "describe gameinfo 30000000", "describe connect 34000000",
                               "describe addserver 38000000"}) &&
               log.find("describe ", log.find("describe addserver") + 1) == std::string::npos;
@@ -1477,7 +1645,9 @@ void MainMenuTest(I3D_scene *scene)
               m.m_screens[4]->GetScreenFrame() == As<I3D_frame>(models[3]) &&
               !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1];
         // The quit question's model moved.
-        ok &= log.find("mmm04 8 (0.5 -0.375 -0.5)") != std::string::npos && log.find(" 8 (0.5") == log.rfind(" 8 (0.5") &&
+        // (And the password screen's, part 9h-x.)
+        ok &= log.find("mmm04 8 (0.5 -0.375 -0.5)") != std::string::npos && log.find("mmm10 8 (0.5 -0.375 -0.5)") != std::string::npos &&
+              log.find(" 8 (0.5", log.find(" 8 (0.5", log.find(" 8 (0.5") + 1) + 1) == std::string::npos &&
               log.find("mmgro 34 GROptions") != std::string::npos && log.find("mmgci 34 GB_Cinematics") != std::string::npos;
         // A model not found: its screen skipped.
         for (size_t i = 1; i < m.m_screens.size(); ++i)
@@ -1513,10 +1683,11 @@ void MainMenuTest(I3D_scene *scene)
     std::printf("mainmenu: mmStart %d mmStop %d mmUpdate %d mmDrain %d mmMessage %d mmEscape %d mmSelect %d mmBuild %d mmDescribe %d mmMainShown %d pfDescribe %d pfRefresh %d pfShown %d pfList %d "
                 "pfDifficulty %d pfMessage %d pfButtons %d pfEscape %d pfCreate %d pfRename %d "
                 "spShown %d spHover %d spClick %d mpLists %d mpDescribe %d mpSaveSlot %d mpPick %d mxCampaign %d mxSingle %d"
-                " mxMessages %d mxSecret %d mxStart %d mxOperation %d ciDescribe %d ciShown %d ciPick %d\n",
+                " mxMessages %d mxSecret %d mxStart %d mxOperation %d ciDescribe %d ciShown %d ciPick %d"
+                " pwDescribe %d pwServer %d pwLock %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
                 r.mpSaveSlot, r.mpPick, r.mxCampaign, r.mxSingle, r.mxMessages, r.mxSecret, r.mxStart, r.mxOperation,
-                r.ciDescribe, r.ciShown, r.ciPick);
+                r.ciDescribe, r.ciShown, r.ciPick, r.pwDescribe, r.pwServer, r.pwLock);
 }

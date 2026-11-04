@@ -27895,6 +27895,21 @@
   "name": "C_MainMenu::DescribePasswordScreen",
   "proto": "bool __thiscall DescribePasswordScreen(C_MainMenu *this, void * desc, void * model)"
  },
+ "00637a40": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnPasswordInput",
+  "proto": "bool __thiscall OnPasswordInput(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00637c10": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerPassword",
+  "proto": "bool __thiscall OnServerPassword(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00637fd0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnParentalLockCode",
+  "proto": "bool __thiscall OnParentalLockCode(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00638660": {
   "module": "main_menu",
   "name": "C_MainMenu::DescribeFiltersScreen",

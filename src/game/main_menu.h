@@ -174,7 +174,24 @@ protected:
                             uint32_t value);            // 0x00615470
     bool DescribeBrowserScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00634050
     bool DescribeCreateServerScreen(S_ScreenDesc *desc, I3D_frame *model);  // 0x00628610
+    // The password screen (over the browser: a server's password; over the options: the parental lock's code):
+    // the model placed as the quit question's; the question, the box (no blanks, '>', '-', '"'; Return and
+    // Escape: OnPasswordInput), yes and no (the same), the two other boxes hidden. True.
     bool DescribePasswordScreen(S_ScreenDesc *desc, I3D_frame *model);      // 0x00637890
+    // The box's and the buttons' callback: a server's password while m_step is 7, else the parental lock's.
+    static bool OnPasswordInput(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                uint32_t value);        // 0x00637a40
+    // A server's password (none: false; another control: false): Return in the box / yes: a password typed
+    // kept (g_mpSettings, g_sessionPasswordSet), the connection started (the popup replaced by the connect
+    // screen); Escape / no: the kept messages dropped, the popup closed. The step ended (yes with no password:
+    // not). True.
+    static bool OnServerPassword(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                 uint32_t value);       // 0x00637c10
+    // The parental lock's code (none / another control: false): Return in the box / yes: the lock cleared with
+    // the code (when set) or set with it, the options' check box as the lock is, the kept messages posted,
+    // the popup closed; Escape / no: the check box, the kept messages dropped, closed. The step ended. True.
+    static bool OnParentalLockCode(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                   uint32_t value);     // 0x00637fd0
     bool DescribeFiltersScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00638660
     bool DescribeGameInfoScreen(S_ScreenDesc *desc, I3D_frame *model);      // 0x0062f4b0
     bool DescribeConnectScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00632150
@@ -215,7 +232,7 @@ protected:
     C_str m_movie;                                      // +0x1E8
     C_str m_saveName;                                   // +0x1EC the saved game picked
     bool unknown1F0 = false;                            // +0x1F0
-    int unknown1F4 = 5;                                 // +0x1F4
+    int m_connectState = 5;                             // +0x1F4 the connect screen's state (0: starting)
     bool m_singleMissions = false;                      // +0x1F8 the missions screen shows the single missions
     int unknown1FC = 0;                                 // +0x1FC
     int unknown200 = 0;                                 // +0x200

@@ -184,10 +184,6 @@ f_00633450.cpp:1777:3: '_local_8' was not declared in this scope; did you mean '
     _local_8 = CONCAT31(uStack_7,1);
 f_00633450.cpp:63:76: invalid 'static_cast' from type 'unsigned char*' to type 'uint64_t' {aka 'long long unsigned int'}
     int *local_220;
-f_00637080.cpp:861:54: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    DAT_008ae5ac = (C_str_rep *)((int)&DAT_008ae5ac[2].length + 2);
-f_00637080.cpp:865:35: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
-    param_3 = (int)&DAT_008ae5ac[2].length + 2;
 f_00638620.cpp:182:47: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
 f_00638620.cpp:199:47: no matching function for call to 'tier1::C_str::C_str(int)'

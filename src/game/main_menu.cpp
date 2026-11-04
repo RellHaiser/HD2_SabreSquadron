@@ -17,6 +17,7 @@
 #include "game/pending.h"
 #include "game/profile.h"
 #include "game/screen.h"
+#include "game/session_menu.h"
 #include "game/text_style.h"
 #include "ls3d/i3d.h"
 
@@ -1329,5 +1330,153 @@ bool C_MainMenu::OnMoviePick(void *menu, void *, C_Control *control, uint32_t, u
     PostTo(CINEMATICS_PLAY, CONTROL_MSG_ACTIVATE, 0);
     PostTo(CINEMATICS_MOVIE, CONTROL_MSG_CLOSE_MOVIE, 0);
     PostText(CINEMATICS_MOVIE, CONTROL_MSG_PLAY_MOVIE, 0, self->m_movie);
+    return true;
+}
+
+// ---- the password screen (part 9h-x) ----------------------------------------------------------------------
+
+namespace {
+
+constexpr int CONTROL_EDIT_BOX = 3;
+// The password screen's controls (screen 10's): the box, yes, no.
+constexpr uint32_t PASSWORD_SCREEN = static_cast<uint32_t>(MAIN_SCREEN_PASSWORD) << SCREEN_INDEX_SHIFT;
+constexpr uint32_t PASSWORD_INPUT = PASSWORD_SCREEN | 0x200000, PASSWORD_YES = PASSWORD_SCREEN | 0x300000,
+                   PASSWORD_NO = PASSWORD_SCREEN | 0x400000;
+// The step the browser sets while a server's password is asked (else: the parental lock's code).
+constexpr int STEP_SERVER_PASSWORD = 7;
+// The characters a password may not have.
+const char *const PASSWORD_FORBIDDEN_CHARS = " \t>-\"";
+// The options screen's parental lock check box.
+constexpr uint32_t OPTIONS_PARENTAL_LOCK = 0x18A03000;
+// The texts: the question, the box's, yes, no; the box's style.
+constexpr uint32_t TEXT_PASSWORD_QUESTION = 0x7D3, TEXT_PASSWORD_BOX = 0x7D2, TEXT_YES = 0x7D1, TEXT_NO = 0x7D0;
+constexpr uint32_t STYLE_PASSWORD_QUESTION = 0xC, STYLE_PASSWORD_BOX = 0xE;
+// The connect screen opened over the browser; the connection's first state.
+constexpr uint32_t CONNECT_POPUP = MAIN_SCREEN_CONNECT;
+constexpr int CONNECT_START = 0;
+
+// A control's text (GET_TEXT asked of it).
+C_str ControlText(C_Control *control)
+{
+    S_ControlMessage ask;
+    ask.id = CONTROL_MSG_GET_TEXT;
+    control->HandleMessage(&ask);
+    return ask.text;
+}
+
+} // namespace
+
+bool C_MainMenu::DescribePasswordScreen(S_ScreenDesc *desc, I3D_frame *model)
+{
+    model->SetPos(QUIT_MODEL_POS);
+    AddText(desc, "text", STYLE_PASSWORD_QUESTION, TEXT_PASSWORD_QUESTION);
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    S_ControlDesc *input = desc->AddControl(CONTROL_EDIT_BOX, "binput");
+    AddDescMessage(input, 0, CONTROL_MSG_SET_FORBIDDEN, 0, reinterpret_cast<uintptr_t>(PASSWORD_FORBIDDEN_CHARS));
+    AddDescMessage(input, 0, CONTROL_MSG_SET_TEXT_ID, STYLE_PASSWORD_BOX, TEXT_PASSWORD_BOX);
+    AddDescMessage(input, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_RETURN, self, Callback(&OnPasswordInput));
+    AddDescMessage(input, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_ESCAPE, self, Callback(&OnPasswordInput));
+    AddDescMessage(AddButton(desc, "byes*", TEXT_YES), 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self,
+                   Callback(&OnPasswordInput));
+    AddDescMessage(AddButton(desc, "bno*", TEXT_NO), 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self,
+                   Callback(&OnPasswordInput));
+    AddDescMessage(desc->AddControl(CONTROL_EDIT_BOX, "binput01"), 0, CONTROL_MSG_HIDE, 0);
+    AddDescMessage(desc->AddControl(CONTROL_EDIT_BOX, "binput02"), 0, CONTROL_MSG_HIDE, 0);
+    return true;
+}
+
+bool C_MainMenu::OnPasswordInput(void *menu, void *argument, C_Control *control, uint32_t notification, uint32_t value)
+{
+    if (static_cast<C_MainMenu *>(menu)->m_step == STEP_SERVER_PASSWORD)
+        return OnServerPassword(menu, argument, control, notification, value);
+    return OnParentalLockCode(menu, argument, control, notification, value);
+}
+
+bool C_MainMenu::OnServerPassword(void *menu, void *, C_Control *control, uint32_t notification, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if (!control)
+        return false;
+    // The password typed (none: nothing): kept, the connection started over the browser.
+    const auto connect = [self](const C_str &password) {
+        if (password.IsEmpty())
+            return false;
+        g_mpSettings->password = password;
+        g_sessionPasswordSet = true;
+        self->m_connectState = CONNECT_START;
+        Post(MENU_MSG_CLOSE_POPUP, 0);
+        Post(MENU_MSG_OPEN_POPUP, CONNECT_POPUP);
+        return true;
+    };
+    switch (control->GetId()) {
+    case PASSWORD_INPUT:
+        if (notification == CONTROL_NOTIFY_RETURN) {
+            connect(ControlText(control));
+        } else if (notification == CONTROL_NOTIFY_ESCAPE) {
+            Post(MENU_MSG_DEFERRED | MENU_DEFERRED_DROP, 1);
+            Post(MENU_MSG_CLOSE_POPUP, 0);
+        }
+        self->m_step = 0;
+        return true;
+    case PASSWORD_YES: {
+        // (Fix: no box: no password; the original uses it unchecked.)
+        C_Control *input = self->FindControl(PASSWORD_INPUT);
+        if (input && connect(ControlText(input)))
+            self->m_step = 0;
+        return true;
+    }
+    case PASSWORD_NO:
+        Post(MENU_MSG_DEFERRED | MENU_DEFERRED_DROP, 1);
+        Post(MENU_MSG_CLOSE_POPUP, 0);
+        self->m_step = 0;
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool C_MainMenu::OnParentalLockCode(void *menu, void *, C_Control *control, uint32_t notification, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if (!control)
+        return false;
+    C_GameConfig *config = g_gameProfile.m_config;
+    // The code typed: the lock cleared with it (set: the code must match) or set; the options' check box,
+    // the kept messages posted, the popup closed.
+    const auto apply = [config](const C_str &code) {
+        if (config->IsParentLockSet())
+            config->ClearParentLock(code);
+        else
+            config->SetParentLock(code);
+        PostTo(OPTIONS_PARENTAL_LOCK, CONTROL_MSG_SET_CHECKED_QUIET, config->IsParentLockSet());
+        Post(MENU_MSG_DEFERRED | MENU_DEFERRED_POST, 0);
+        Post(MENU_MSG_CLOSE_POPUP, 0);
+    };
+    // Cancelled: the check box as the lock is, the kept messages dropped (count: 0 by Escape, 1 by no).
+    const auto cancel = [config](uint32_t count) {
+        PostTo(OPTIONS_PARENTAL_LOCK, CONTROL_MSG_SET_CHECKED_QUIET, config->IsParentLockSet());
+        Post(MENU_MSG_DEFERRED | MENU_DEFERRED_DROP, count);
+        Post(MENU_MSG_CLOSE_POPUP, 0);
+    };
+    switch (control->GetId()) {
+    case PASSWORD_INPUT:
+        if (notification == CONTROL_NOTIFY_RETURN)
+            apply(ControlText(control));
+        else if (notification == CONTROL_NOTIFY_ESCAPE)
+            cancel(0);
+        break;
+    case PASSWORD_YES: {
+        // (Fix: no box: an empty code; the original uses it unchecked.)
+        C_Control *input = self->FindControl(PASSWORD_INPUT);
+        apply(input ? ControlText(input) : C_str(""));
+        break;
+    }
+    case PASSWORD_NO:
+        cancel(1);
+        break;
+    default:
+        return false;
+    }
+    self->m_step = 0;
     return true;
 }
