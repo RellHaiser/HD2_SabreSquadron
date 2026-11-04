@@ -120,7 +120,39 @@ protected:
     // ---- the screens' further descriptions (by kind; later sub-parts) ----
     // The profile screen: the profiles found (ScanProfiles) as the list's lines (its second control). True.
     bool DescribeProfileScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00621210
+    // The missions screen: "video" off, "screen_shot" given its own mesh; the groups GB_Campaign and
+    // GB_SingleMission made under the model (none: false); the texts, the picture, the description, load / exit,
+    // the scroll bar; the templates blong and bshort under GB_Campaign (the campaigns' list), blong under
+    // GB_SingleMission (the single missions'); load the last save (off), the version. True.
     bool DescribeMissionsScreen(S_ScreenDesc *desc, I3D_frame *model);      // 0x006392b0
+    // The campaigns' list (a hiding list GB_Campaign): each campaign's operations (copies of the operation
+    // template "Campaign%02d", numbered from the first campaign's missions' count for the second) and their
+    // missions (copies of the mission template "Mission%02d", numbered through), picked: OnMissionPick.
+    void DescribeCampaignList(S_ScreenDesc *desc, I3D_frame *group, I3D_frame *operationTemplate,
+                              I3D_frame *missionTemplate);   // 0x00639b40
+    // The single missions' list (GB_SingleMission): every campaign's missions but the first campaign's first,
+    // copies of the template "SMMission%02d", picked: OnMissionPick.
+    void DescribeSingleList(S_ScreenDesc *desc, I3D_frame *group, I3D_frame *missionTemplate);   // 0x0063a1a0
+    // A mission's line picked (none: false): the mission (its index through the campaigns) kept, its save slot
+    // shown; load on, its picture, the description: the heading, the mission's texts (its text id 0x1194 on:
+    // the title, the lines after it up to six more found), carnage's note. True.
+    static bool OnMissionPick(void *menu, void *argument, C_Control *control, uint32_t notification,
+                              uint32_t value);          // 0x0063b310
+    // The play mode's save slot: its file the saved game picked; "load the last save" on only when the slot's
+    // mission is `mission` (another mode: nothing).
+    void ShowSaveSlot(int mission);                     // 0x0063b0f0
+    // The campaign's missions shown (the campaign started, played before): no save picked, the title by play
+    // mode, the campaigns' list scrolled; the progress the player's in the campaign; its operations' lines
+    // and their missions' up to the one after the progress.
+    void ShowCampaignMissions();                        // 0x0063a670 (__fastcall)
+    // The single missions shown: no save picked, the title (mode 0 / carnage), their list scrolled; every
+    // campaign's missions (the first's first not) up to the player's best progress there (every one: the
+    // secret key's 100).
+    void ShowSingleMissions();                          // 0x0063ab60 (__fastcall)
+    // An operation's line picked (none: false; no line posts it): its index kept, an operation picked; load
+    // on, the description cleared, the operation's name as the picture. True.
+    static bool OnOperationPick(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                uint32_t value);        // 0x0063af20
     bool DescribeCinematicsScreen(S_ScreenDesc *desc, I3D_frame *model);         // 0x00614140
     bool DescribeBrowserScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00634050
     bool DescribeCreateServerScreen(S_ScreenDesc *desc, I3D_frame *model);  // 0x00628610
@@ -143,6 +175,12 @@ protected:
     static void AddProfileLine(const char *name, int context);    // 0x00621110 (__fastcall)
     static void PostProfileLine(const char *name, int context);   // 0x00620fb0 (__fastcall)
     bool OnNetworkMessage(S_ControlMessage *message);   // 0x00633490
+    // The missions' messages: a mission started (none picked: nothing): a single mission set up in its
+    // campaign, else the save before it loaded (not the campaigns' first missions), the campaign advanced;
+    // the state ended. The single-mission flag / the play mode set (value). The campaign started: played
+    // before, its missions shown; else the roster loaded when empty (failing: false), the next step. The
+    // single missions opened. The secret key on the single missions: all of them shown or not. A popup
+    // opened: taken. True; others false.
     bool OnMissionsMessage(S_ControlMessage *message);  // 0x00638e00
     bool OnConnectMessage(S_ControlMessage *message);   // 0x00632390
     // The profile screen's pick: the profile named m_profileName (none: no player) made current, the
@@ -160,13 +198,13 @@ protected:
     C_str m_saveName;                                   // +0x1EC the saved game picked
     bool unknown1F0 = false;                            // +0x1F0
     int unknown1F4 = 5;                                 // +0x1F4
-    bool unknown1F8 = false;                            // +0x1F8 (the missions screen's)
+    bool m_singleMissions = false;                      // +0x1F8 the missions screen shows the single missions
     int unknown1FC = 0;                                 // +0x1FC
     int unknown200 = 0;                                 // +0x200
     int unknown204 = 0;                                 // +0x204
-    int unknown208 = -1;                                // +0x208 (the missions screen's pick)
-    int unknown20C = -1;                                // +0x20C
-    bool unknown210 = false;                            // +0x210
+    int m_mission = -1;                                 // +0x208 the missions screen's pick (through the campaigns)
+    int m_progress = -1;                                // +0x20C the missions shown up to (100: all)
+    bool m_operationPicked = false;                     // +0x210 an operation's line picked (a mission's clears it)
     bool unknown212 = false;                            // +0x212
     C_str m_profileName;                                // +0x213 the profile picked (unaligned in the original)
     int unknown218 = 0;                                 // +0x218

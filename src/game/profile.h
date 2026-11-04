@@ -415,6 +415,9 @@ public:
     // Chunk 1000 with the diary (chunk 0x15B3).
     bool SaveGame(C_chunk &chunk);                      // 0x006b4570
     bool LoadGame(C_chunk &chunk);                      // 0x006b4720
+    // A play mode's save slot (SAVE_SLOT_*): its mission (-1: none) and file (the main menu's missions screen).
+    int GetSaveSlotMission(int slot) const { return m_saveSlots[slot].mission; }
+    const C_str &GetSaveSlotFile(int slot) const { return m_saveSlots[slot].file; }
 
 private:
     struct S_SaveSlotInfo {

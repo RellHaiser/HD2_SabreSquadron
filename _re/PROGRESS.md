@@ -8277,6 +8277,29 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 327 errors in 60 files, 134 stubs. ret_audit --src: 52.
   - Stats: 9,175 of 12,306 functions by hand (83.5 % by size).
 
+  PART 9h-viii DONE (2026-11-04): the main menu's missions screen (game/main_menu.cpp; planned as 9h-viii and
+  9h-ix, done as one: the code shares its constants and tests).
+  - DescribeMissionsScreen 0x006392b0 ("video" off, "screen_shot" its own mesh, the groups GB_Campaign and
+    GB_SingleMission, the templates blong / bshort; fix: missing templates return false, the original uses
+    them unchecked), DescribeCampaignList 0x00639b40 (operations "Campaign%02d" and missions "Mission%02d"
+    through both campaigns), DescribeSingleList 0x0063a1a0 ("SMMission%02d", the first campaign's first mission
+    left out), OnMissionPick 0x0063b310 (the description from the mission's text id 0x1194 on, up to six
+    lines after it, carnage's note), ShowSaveSlot 0x0063b0f0 (the play mode's save slot; "load the last save"
+    on only for its own mission).
+  - OnMissionsMessage 0x00638e00: start a mission (a single mission set up in its campaign; else the save before
+    it loaded, except for each campaign's first mission; advanced; state 2), the single-mission flag / play
+    mode (0x2000031 / 0x2000070), start the campaign (0x2000033: played before, its missions; else the roster
+    loaded when empty, MENU_MSG_NEXT), the single missions (0x2000074), the secret key (Ctrl+Alt+Shift+N on the
+    single missions: every mission shown, m_progress 100, or back to the best progress). OPEN_POPUP (0x2000002)
+    is taken too (jump table checked). ShowCampaignMissions 0x0063a670 (operations' lines and their missions up
+    to the one after the progress), ShowSingleMissions 0x0063ab60, OnOperationPick 0x0063af20 (a callback no
+    line registers). Fields named: m_singleMissions +0x1F8, m_progress +0x20C, m_operationPicked +0x210.
+  - Harness: mpLists, mpDescribe, mpSaveSlot, mpPick, mxCampaign, mxSingle, mxMessages, mxSecret, mxStart,
+    mxOperation; the fake OnMissionsMessage dropped. All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h8.py: 315: 277 killed, 32 not building, 6 equivalent (the unreachable null-group check, values never read, a boundary the enclosing if excludes)
+  - Build: MSVC clean. Tier 1: 319 errors in 59 files, 132 stubs. ret_audit --src: 52.
+  - Stats: 9,184 of 12,306 functions by hand (83.7 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

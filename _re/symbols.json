@@ -27894,6 +27894,41 @@
   "name": "C_MainMenu::DescribeMissionsScreen",
   "proto": "bool __thiscall DescribeMissionsScreen(C_MainMenu *this, void * desc, void * model)"
  },
+ "00639b40": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeCampaignList",
+  "proto": "void __thiscall DescribeCampaignList(C_MainMenu *this, void * desc, void * group, void * operationTemplate, void * missionTemplate)"
+ },
+ "0063a1a0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeSingleList",
+  "proto": "void __thiscall DescribeSingleList(C_MainMenu *this, void * desc, void * group, void * missionTemplate)"
+ },
+ "0063a670": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowCampaignMissions",
+  "proto": "void __fastcall ShowCampaignMissions(C_MainMenu *this)"
+ },
+ "0063ab60": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowSingleMissions",
+  "proto": "void __fastcall ShowSingleMissions(C_MainMenu *this)"
+ },
+ "0063af20": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnOperationPick",
+  "proto": "bool __thiscall OnOperationPick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0063b0f0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowSaveSlot",
+  "proto": "void __thiscall ShowSaveSlot(C_MainMenu *this, int mission)"
+ },
+ "0063b310": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMissionPick",
+  "proto": "bool __thiscall OnMissionPick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "0063b7f0": {
   "module": "main_menu",
   "name": "C_MainMenu::OnSingleplayerShown",

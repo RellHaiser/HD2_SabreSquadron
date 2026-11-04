@@ -36,6 +36,8 @@ struct S_HudOption {
 };
 // (The play modes, part 9g-ix: as the real header.)
 enum E_PlayMode { PLAY_MODE_CAMPAIGN = 1, PLAY_MODE_LONE_WOLF = 2, PLAY_MODE_CARNAGE = 3 };
+// (The save slots, part 9h-viii: as the real header.)
+enum { SAVE_SLOT_CAMPAIGN = 0, SAVE_SLOT_LONE_WOLF = 1, SAVE_SLOT_CARNAGE = 2, SAVE_SLOT_SINGLE_MISSION = 3, SAVE_SLOT_SINGLE_CARNAGE = 4 };
 struct S_PlayMode {
     int singleMission = 0;
     int mode = 0;
@@ -63,12 +65,16 @@ public:
     // (The debriefing, part 9g-v.)
     bool SetProgress(int campaign, int mission);
     int GetProgress(int campaign) const;
+    bool HasProgress(int campaign) const;               // (the missions' messages, part 9h-ix)
+    int GetBestProgress(int campaign) const;
     // (The in-game menu, part 9e-v: game_menu_test.inc.)
     void ApplyVolume();
     // (The options handler, part 9e-viii: options_test.inc.)
     C_str GetName() const;
     // (The main menu, part 9h-iv: main_menu_test.inc.)
     bool GetLastSaveText(C_str *mode, C_str *mission, C_str *date) const;
+    int GetSaveSlotMission(int slot) const;             // (the missions screen, part 9h-viii)
+    const C_str &GetSaveSlotFile(int slot) const;
     bool Save();                                        // (the profile screen, part 9h-v)
     int Rename(const char *oldName, const char *newName);   // (its buttons, part 9h-vi)
     // (The in-game menu's presets, part 9e-xvii: game_menu_test.inc.)

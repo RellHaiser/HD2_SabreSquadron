@@ -27,16 +27,12 @@ bool C_GameProfile::SelectPlayer(const char *name)
 }
 // The screens' handlers: each logs and answers its own flag.
 bool g_mmTakes[4];
-// (Part 9h-v: the profile screen's handler is real; its own fakes are its delete and list.)
+// (Part 9h-v: the profile screen's handler is real; its own fakes are its delete and list. Part 9h-ix: the
+// missions' handler real too.)
 bool C_MainMenu::OnNetworkMessage(S_ControlMessage *m)
 {
     GfLog("network message %x", m->id);
     return g_mmTakes[1];
-}
-bool C_MainMenu::OnMissionsMessage(S_ControlMessage *m)
-{
-    GfLog("missions message %x", m->id);
-    return g_mmTakes[2];
 }
 bool C_MainMenu::OnConnectMessage(S_ControlMessage *m)
 {
@@ -84,6 +80,52 @@ int C_PlayerProfile::Rename(const char *oldName, const char *newName)
     return g_mmRename;
 }
 void C_GameConfig::SetLastProfile(C_str name) { GfLog("last profile %s", name.c_str()); }
+// (Part 9h-viii: the campaigns' missions (operations: loadout_test.inc's g_lpMissions), their texts and pictures;
+// the save slots.)
+extern int g_textEmptyFrom;                             // (car_stubs.cpp)
+std::vector<int> g_mmMissionCounts;
+int g_mmMissionText = 0;
+int C_Campaign::CountMissions(int campaign) { return g_mmMissionCounts[static_cast<size_t>(campaign)]; }
+int C_Campaign::GetOperationId(int campaign, int operation) { return 0x700 + 0x10 * campaign + operation; }
+int C_Campaign::GetMissionId(int campaign, int missionNumber) { return 0x800 + 0x10 * campaign + missionNumber; }
+const C_str &C_Campaign::GetMissionImage(int campaign, int missionNumber)
+{
+    static C_str image;
+    image = CmText("img%d_%d", campaign, missionNumber).c_str();
+    return image;
+}
+int C_Campaign::GetMissionText(int campaign, int missionNumber, int index)
+{
+    GfLog("mission text %d %d %d", campaign, missionNumber, index);
+    return g_mmMissionText;
+}
+int g_mmSlotMissions[5] = {-1, -1, -1, -1, -1};
+C_str g_mmSlotFiles[5];
+int C_PlayerProfile::GetSaveSlotMission(int slot) const { return g_mmSlotMissions[slot]; }
+const C_str &C_PlayerProfile::GetSaveSlotFile(int slot) const { return g_mmSlotFiles[slot]; }
+// A mission's line: its index.
+struct C_MpLine : C_Control {
+    C_MpLine(uint32_t id, int index) : C_Control(nullptr, id, nullptr) { m_index = index; }
+};
+// (Part 9h-ix: the player's progress, the operations' names.)
+bool g_mxHasProgress;
+std::vector<int> g_mxBest;
+bool C_PlayerProfile::HasProgress(int campaign) const
+{
+    GfLog("has progress %d", campaign);
+    return g_mxHasProgress;
+}
+int C_PlayerProfile::GetBestProgress(int campaign) const
+{
+    GfLog("best %d", campaign);
+    return g_mxBest[static_cast<size_t>(campaign)];
+}
+const C_str &C_Campaign::GetOperationName(int campaign, int operation)
+{
+    static C_str name;
+    name = CmText("op%d_%d", campaign, operation).c_str();
+    return name;
+}
 bool C_PlayerProfile::Save()
 {
     GfLog("save profile");
@@ -105,7 +147,6 @@ bool C_PlayerProfile::GetLastSaveText(C_str *mode, C_str *mission, C_str *date) 
         GfLog("describe %s %x", N, desc->id);                                                                     \
         return true;                                                                                              \
     }
-MM_DESCRIBE(DescribeMissionsScreen, "missions")
 MM_DESCRIBE(DescribeCinematicsScreen, "cinematics")
 MM_DESCRIBE(DescribeBrowserScreen, "browser")
 MM_DESCRIBE(DescribeCreateServerScreen, "create")
@@ -159,7 +200,9 @@ struct S_MainMenuResults {
          mmSelect = true, mmBuild = true, mmDescribe = true, mmMainShown = true, pfDescribe = true, pfRefresh = true,
          pfShown = true, pfList = true, pfDifficulty = true, pfMessage = true,
          pfButtons = true, pfEscape = true, pfCreate = true, pfRename = true,
-         spShown = true, spHover = true, spClick = true;
+         spShown = true, spHover = true, spClick = true,
+         mpLists = true, mpDescribe = true, mpSaveSlot = true, mpPick = true,
+         mxCampaign = true, mxSingle = true, mxMessages = true, mxSecret = true, mxStart = true, mxOperation = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -178,7 +221,7 @@ void MainMenuTest(I3D_scene *scene)
     {
         bool ok = true;
         C_MainMenu m;
-        ok &= m.unknown1F4 == 5 && m.unknown208 == -1 && m.unknown20C == -1 && !m.m_mpSettings && !m.m_options;
+        ok &= m.unknown1F4 == 5 && m.m_mission == -1 && m.m_progress == -1 && !m.m_mpSettings && !m.m_options;
         ok &= m.OnStart(nullptr) && m.m_mpSettings && m.m_options && m.m_options->m_menu == &m &&
               m.m_mpSettings->m_listKind == 1 && m.m_mpSettings->m_filter.maxPing == -1;
         ok &= CsQueue() == "4300000 1000014 c 0 '1.2.2026'; " && MsLogIs({"date 0"}, g_gfLog);
@@ -247,16 +290,18 @@ void MainMenuTest(I3D_scene *scene)
             m.OnMessage(&message);
         };
         send(0x2000099);
-        // (The profile screen's handler, real, takes none of these.)
-        ok &= MsLogIs({"network message 2000099", "missions message 2000099", "connect message 2000099"}, g_gfLog) &&
-              CsQueue() == "";
+        // (The profile screen's and the missions' handlers, real, take none of these.)
+        ok &= MsLogIs({"network message 2000099", "connect message 2000099"}, g_gfLog) && CsQueue() == "";
         const int state = m.m_state;
-        for (int k = 1; k < 4; ++k) {
+        for (int k : {1, 3}) {
             g_mmTakes[k] = true;
             send(MAIN_MSG_PLAY_MOVIE);
-            ok &= g_gfLog.size() == static_cast<size_t>(k) && m.m_state == state;
+            ok &= g_gfLog.size() == static_cast<size_t>(k == 1 ? 1 : 2) && m.m_state == state;
             g_mmTakes[k] = false;
         }
+        // (The missions' handler taking one: the rest not asked.)
+        send(MENU_MSG_OPEN_POPUP);
+        ok &= MsLogIs({"network message 2000002"}, g_gfLog) && CsQueue() == "";
         // The movie; the saved game (none: the load command alone).
         send(0x4000000 | MAIN_MSG_PLAY_MOVIE);
         ok &= m.m_state == GAME_STATE_PLAY_AVI;
@@ -264,11 +309,11 @@ void MainMenuTest(I3D_scene *scene)
         C_GameApp *app = GetGameApp();
         app->m_pendingCommand = 0;
         send(MAIN_MSG_LOAD_GAME);
-        ok &= app->m_pendingCommand == APP_COMMAND_LOAD_FROM_MENU && g_gfLog.size() == 3;
+        ok &= app->m_pendingCommand == APP_COMMAND_LOAD_FROM_MENU && g_gfLog.size() == 2;
         app->m_pendingCommand = 0;
         m.m_saveName = "save7.sav";
         send(MAIN_MSG_LOAD_GAME);
-        ok &= app->m_pendingCommand == 0 && g_gfLog.size() == 4 && g_gfLog[3] == "request load prof\\save7.sav";
+        ok &= app->m_pendingCommand == 0 && g_gfLog.size() == 3 && g_gfLog[2] == "request load prof\\save7.sav";
         m.m_saveName = "";
         send(MAIN_MSG_LOAD_GAME);
         ok &= app->m_pendingCommand == APP_COMMAND_LOAD_FROM_MENU;
@@ -292,7 +337,7 @@ void MainMenuTest(I3D_scene *scene)
         };
         ok &= escape(-1) == "0 2000003 0 0; ";
         // (Top 0: the options handler's screen index before its screen is built: it takes Escape.)
-        ok &= escape(0).find("20000c4") != std::string::npos && g_gfLog.size() == 2;
+        ok &= escape(0).find("20000c4") != std::string::npos && g_gfLog.size() == 1;
         for (int top : {1, 3, 5, 6, 7, 8, 9, 11, 12, 13, 15})
             ok &= escape(top) == "0 2000003 0 0; ";
         ok &= escape(14) == "0 10000200 1 0; 0 2000005 0 0; " && escape(10) == "0 10000200 1 0; 0 2000005 0 0; ";
@@ -798,6 +843,444 @@ void MainMenuTest(I3D_scene *scene)
         g_gameProfile.m_campaign = oldCampaign;
     }
 
+    // --- (part 9h-viii) the missions screen: its lists, its description, a save slot shown, a mission picked ---
+    {
+        C_MainMenu m;
+        alignas(16) static uint8_t mpCampaignMemory[sizeof(C_Campaign)];
+        std::memset(mpCampaignMemory, 0, sizeof mpCampaignMemory);
+        C_Campaign *const oldCampaign = g_gameProfile.m_campaign;
+        auto *campaign = reinterpret_cast<C_Campaign *>(mpCampaignMemory);   // (its vector zeroed: empty)
+        campaign->m_campaigns = {nullptr, nullptr};
+        g_gameProfile.m_campaign = campaign;
+        S_PlayMode playMode;
+        S_PlayMode *const oldPlayMode = g_gameProfile.m_playMode;
+        g_gameProfile.m_playMode = &playMode;
+        const std::vector<int> oldOperations = g_lpMissions;
+        g_lpMissions = {2, 1};
+        g_mmMissionCounts = {3, 3};
+        g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnMissionPick)] = "pick";
+        const auto clones = [](int n) {
+            g_mrClones.clear();
+            for (int i = 0; i < n; ++i)
+                g_mrClones.push_back(As<I3D_frame>(MsFrame(strdup(CmText("mpc%d", i).c_str()))));
+        };
+        {
+            bool ok = true;
+            S_MrObj *group = MsFrame("mpgroup"), *opT = MsFrame("mpop"), *misT = MsFrame("mpmis");
+            As<I3D_frame>(opT)->m_localMatrix(3) = S_vector(0.5f, -0.25f, 0.125f);
+            S_ScreenDesc d("SINGLE MISSION 2", "single mission 2", 5u << 26);
+            clones(16);
+            g_gfLog.clear();
+            m.DescribeCampaignList(&d, As<I3D_frame>(group), As<I3D_frame>(opT), As<I3D_frame>(misT));
+            // (The origin: a copy of the operation template's place, shown as ORIGIN.)
+            const auto masked = [](const S_ControlDesc *list, const S_vector &want, bool &good) {
+                std::string tree = CsTree(list);
+                const auto *origin = reinterpret_cast<const S_vector *>(list->messages[3].value2);
+                good &= origin && origin->x == want.x && origin->y == want.y && origin->z == want.z;
+                const std::string hex = CmText("100006b 0 %x", static_cast<uint32_t>(list->messages[3].value2));
+                const size_t at = tree.find(hex);
+                if (at != std::string::npos)
+                    tree.replace(at, hex.size(), "100006b 0 ORIGIN");
+                return tree;
+            };
+            ok &= d.controls.size() == 1 &&
+                  masked(d.controls[0], S_vector(0.5f, -0.25f, 0.125f), ok) ==
+                    "23 GB_Campaign 14100000: 0 100000b 14600000 0 0 1000028 11 0 0 100002a 0 3d03126f 0 100006b 0 ORIGIN 0 200002c"
+                    " 0 0 { 6 Campaign00 14101000: 0 1000015 d 700 0 1000005 0 0; 6 Mission00 14102000: 0 1000015 c 800 0 1000009 0"
+                    " 0 0 1000007 4001000 self pick; 6 Mission01 14103000: 0 1000015 c 801 0 1000009 1 0 0 1000007 4001000 self pic"
+                    "k; 6 Campaign01 14104000: 0 1000015 d 701 0 1000005 0 0; 6 Mission02 14105000: 0 1000015 c 802 0 1000009 2 0 0"
+                    " 1000007 4001000 self pick; 6 Campaign03 14106000: 0 1000015 d 710 0 1000005 0 0; 6 Mission03 14107000: 0 1000"
+                    "015 c 810 0 1000009 3 0 0 1000007 4001000 self pick; 6 Mission04 14108000: 0 1000015 c 811 0 1000009 4 0 0 100"
+                    "0007 4001000 self pick; 6 Campaign04 14109000: 0 1000015 d 711 0 1000005 0 0; 6 Mission05 1410a000: 0 1000015 "
+                    "c 812 0 1000009 5 0 0 1000007 4001000 self pick; };";
+            // Each line a copy of its template under the group; operations by campaign, missions numbered through.
+            ok &= GmInOrder(Join(g_gfLog), {"operations 0", "clone tree mpop 0", "mpc0 34 Campaign00", "mpc0 38 mpgroup 0",
+                                            "missions 0 0", "clone tree mpmis 0", "mpc1 34 Mission00", "mpc2 34 Mission01",
+                                            "clone tree mpop 0", "mpc3 34 Campaign01", "missions 0 1", "mpc4 34 Mission02",
+                                            "operations 1", "mpc5 34 Campaign03", "missions 1 0", "mpc6 34 Mission03",
+                                            "mpc7 34 Mission04", "mpc8 34 Campaign04", "missions 1 1", "mpc9 34 Mission05"});
+            clones(16);
+            g_gfLog.clear();
+            m.DescribeSingleList(&d, As<I3D_frame>(group), As<I3D_frame>(misT));
+            As<I3D_frame>(misT)->m_localMatrix(3) = S_vector(0.0f, 1.0f, 2.0f);
+            ok &= d.controls.size() == 2 &&
+                  masked(d.controls[1], S_vector(0.0f, 0.0f, 0.0f), ok) ==
+                    "23 GB_SingleMission 14200000: 0 100000b 14600000 0 0 1000028 11 0 0 100002a 0 3d03126f 0 100006b 0 ORIGIN 0 20"
+                    "0002c 0 0 { 6 SMMission01 14201000: 0 1000015 c 801 0 1000009 1 0 0 1000007 4001000 self pick; 6 SMMission02 1"
+                    "4202000: 0 1000015 c 802 0 1000009 2 0 0 1000007 4001000 self pick; 6 SMMission03 14203000: 0 1000015 c 810 0 "
+                    "1000009 3 0 0 1000007 4001000 self pick; 6 SMMission04 14204000: 0 1000015 c 811 0 1000009 4 0 0 1000007 40010"
+                    "00 self pick; 6 SMMission05 14205000: 0 1000015 c 812 0 1000009 5 0 0 1000007 4001000 self pick; };" &&
+                  GmInOrder(Join(g_gfLog), {"clone tree mpmis 0", "mpc0 34 SMMission01", "mpc4 34 SMMission05"});
+            m.m_frames.clear();
+            WM(r.mpLists, ok);
+        }
+        {
+            // The description: the frames ("video" off; "screen_shot"'s own mesh; the templates off; the groups made),
+            // the controls, the lists between them.
+            bool ok = true;
+            S_MrObj *model = MsFrame("mpmodel"), *video = MsFrame("mpvideo"), *opT = MsFrame("mpdop"), *misT = MsFrame("mpdmis");
+            S_MrObj *shot = MrObj("mpshot", g_mrModelVt);
+            void *const oldDuplicate = g_mrModelVt[0xA0 / 4], *const oldSetPos = g_msFrameVt[0x08 / 4];
+            g_mrModelVt[0xA0 / 4] = reinterpret_cast<void *>(&MrFake<0xA0>);
+            g_msFrameVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+            S_MrObj *mesh = MrObj("mpshotmesh", g_mrModelVt);
+            mesh->vtable[0x18 / 4] = reinterpret_cast<void *>(&MrFake<0x18>);
+            *reinterpret_cast<S_MrObj **>(reinterpret_cast<uint8_t *>(shot) + 0x1E0) = mesh;
+            g_msChildren[{model, "video"}] = video;
+            g_msChildren[{model, "screen_shot"}] = shot;
+            g_msChildren[{model, "blong"}] = opT;
+            g_msChildren[{model, "bshort"}] = misT;
+            S_MrObj *gc = MsFrame("mpgc"), *gs = MsFrame("mpgs");
+            g_mrMade[FRAME_DUMMY] = {gc, gs};
+            clones(16);
+            S_ScreenDesc d("SINGLE MISSION 2", "single mission 2", 5u << 26);
+            g_gfLog.clear();
+            ok &= m.DescribeMissionsScreen(&d, As<I3D_frame>(model));
+            std::string names;
+            for (const S_ControlDesc *c : d.controls)
+                names += CmText("%x %s %x|", c->type, c->name.c_str(), c->id);
+            ok &= names == "13 text_screen 14100000|4 screen_shot 14200000|12 text00 14300000|14 bload mission 14400000|"
+                           "14 bexit 14500000|8 scroll00 14600000|23 GB_Campaign 14700000|23 GB_SingleMission 14800000|"
+                           "13 text_list of profiles 14900000|13 text_h&dversion 14a00000|14 bload lastsave 14b00000|"
+                           "14 bexit01 14c00000|";
+            ok &= d.controls.size() == 12 && CsTree(d.controls[0]) == "13 text_screen 14100000: 0 1000015 a 8cb;" &&
+                  CsTree(d.controls[1]) == "4 screen_shot 14200000:;" && CsTree(d.controls[2]) == "12 text00 14300000: 0 2000073 0 0;" &&
+                  CsTree(d.controls[3]) == "14 bload mission 14400000: 0 1000015 d 935 0 1000001 0 0 0 600101e 0 0;" &&
+                  CsTree(d.controls[4]) == "14 bexit 14500000: 0 1000015 d 8d0 0 6001003 0 0;" &&
+                  CsTree(d.controls[5]) == "8 scroll00 14600000:;" &&
+                  CsTree(d.controls[8]) == "13 text_list of profiles 14900000: 0 1000015 b 8d2;" &&
+                  CsTree(d.controls[9]) == "13 text_h&dversion 14a00000: 0 1000015 28 7d6;" &&
+                  CsTree(d.controls[10]) == "14 bload lastsave 14b00000: 0 1000015 d 839 0 1000001 0 0 0 6001075 0 0;" &&
+                  CsTree(d.controls[11]) == "14 bexit01 14c00000: 0 1000015 d 8d0 0 1000004 0 0;";
+            ok &= GmInOrder(Join(g_gfLog), {"mpvideo on 0", "mpshot a0", "mpshotmesh 18", "mpgc 38 mpmodel 0", "mpgc 34 GB_Campaign",
+                                            "mpgs 38 mpmodel 0", "mpgs 34 GB_SingleMission", "mpdop 24", "mpdop on 0",
+                                            "mpdmis 24", "mpdmis on 0", "mpgc 24", "mpgs 24", "mpdop 38 mpgc 1",
+                                            "mpdmis 38 mpgc 1", "mpc0 34 Campaign00", "mpdop 38 mpgs 1", "SMMission01"}) &&
+                  GmInOrder(Join(g_gfLog), {"mpgc 8 (0 0 0)"}) && GmInOrder(Join(g_gfLog), {"mpgs 8 (0 0 0)"});
+            // No templates: false (nothing described).
+            g_msChildren.erase({model, "bshort"});
+            g_mrMade[FRAME_DUMMY] = {MsFrame("mpgc2"), MsFrame("mpgs2")};
+            S_ScreenDesc d2("SINGLE MISSION 2", "single mission 2", 5u << 26);
+            ok &= !m.DescribeMissionsScreen(&d2, As<I3D_frame>(model)) && d2.controls.empty();
+            g_mrMade.erase(FRAME_DUMMY);
+            g_mrModelVt[0xA0 / 4] = oldDuplicate;
+            g_msFrameVt[0x08 / 4] = oldSetPos;
+            m.m_frames.clear();
+            m.m_models.clear();
+            WM(r.mpDescribe, ok);
+        }
+        {
+            // The play mode's save slot: its file picked; "load the last save" on for its own mission only.
+            bool ok = true;
+            for (int i = 0; i < 5; ++i) {
+                g_mmSlotMissions[i] = 10 + i;
+                g_mmSlotFiles[i] = CmText("slot%d.sav", i).c_str();
+            }
+            const int singles[] = {0, 0, 0, 1, 1};
+            const int modes[] = {1, 2, 3, 0, 3};
+            for (int i = 0; i < 5; ++i) {
+                playMode.singleMission = singles[i];
+                playMode.mode = modes[i];
+                m.ShowSaveSlot(10 + i);
+                ok &= m.m_saveName == CmText("slot%d.sav", i).c_str() && CsQueue() == "14b00000 1000002 0 0; ";
+                m.ShowSaveSlot(11 + i);
+                ok &= m.m_saveName == CmText("slot%d.sav", i).c_str() && CsQueue() == "14b00000 1000001 0 0; ";
+            }
+            g_mmSlotMissions[0] = -1;
+            playMode.singleMission = 0;
+            playMode.mode = 1;
+            m.ShowSaveSlot(-1);
+            ok &= CsQueue() == "14b00000 1000001 0 0; ";
+            // Another mode: the name emptied, nothing posted; another single mission flag: off.
+            m.m_saveName = "x";
+            playMode.mode = 0;
+            m.ShowSaveSlot(10);
+            ok &= m.m_saveName.IsEmpty() && CsQueue() == "";
+            playMode.singleMission = 1;
+            playMode.mode = 1;
+            m.m_saveName = "x";
+            m.ShowSaveSlot(10);
+            ok &= m.m_saveName.IsEmpty() && CsQueue() == "";
+            playMode.singleMission = 2;
+            m.ShowSaveSlot(10);
+            ok &= m.m_saveName.IsEmpty() && CsQueue() == "14b00000 1000001 0 0; ";
+            WM(r.mpSaveSlot, ok);
+        }
+        {
+            // A mission picked: kept, its slot, load on, its picture, its description (from its text 0x1194 on).
+            bool ok = true;
+            const auto PickIs = [](const std::string &expected) {
+                const std::string queue = CsQueue();
+                if (queue != expected)
+                    std::printf("MPPICK %s\nMPPICK expected %s\n",queue.c_str(), expected.c_str());
+                return queue == expected;
+            };
+            playMode.singleMission = 0;
+            playMode.mode = 3;
+            g_mmSlotMissions[2] = 4;
+            C_MpLine line(0x14700005, 4), second(0x14700007, 1);
+            g_mmMissionCounts = {3, 4};
+            m.m_operationPicked = true;
+            g_mmMissionText = 0x1193;
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnMissionPick(&m, nullptr, &line, CONTROL_NOTIFY_CLICK, 0) && m.m_mission == 4 && !m.m_operationPicked &&
+                  MsLogIs({"mission text 1 1 1"}, g_gfLog) &&
+                  PickIs("14b00000 1000002 0 0; 14400000 1000002 0 0; 14300000 2000018 0 0; 14200000 100003a 0 0 'img1_1'; ");
+            g_mmMissionText = 0x1200;
+            g_textEmptyFrom = 0x1206;
+            const std::string head = "14b00000 1000001 0 0; 14400000 1000002 0 0; 14300000 2000018 0 0; 14200000 100003a 0 0 'img0_1'; "
+                                     "14300000 1000017 2 8d7; 14300000 1000017 d 1201; 14300000 1000017 2 1202; "
+                                     "14300000 1000017 2 7d2; 14300000 1000017 3 1203; 14300000 1000017 2 7d2; ";
+            ok &= C_MainMenu::OnMissionPick(&m, nullptr, &second, CONTROL_NOTIFY_CLICK, 0) && m.m_mission == 1 &&
+                  PickIs(head + "14300000 1000017 2 1204; 14300000 1000017 2 1205; 14300000 1000017 2 189c; ");
+            playMode.mode = 1;
+            g_textEmptyFrom = 0x1300;
+            ok &= C_MainMenu::OnMissionPick(&m, nullptr, &second, CONTROL_NOTIFY_CLICK, 0) &&
+                  PickIs(head +
+                                   "14300000 1000017 2 1204; 14300000 1000017 2 1205; 14300000 1000017 2 1206; "
+                                   "14300000 1000017 2 1207; 14300000 1000017 2 1208; 14300000 1000017 2 1209; ");
+            // The second campaign's first mission (at the first's count); a text id of 0x1194 described.
+            C_MpLine third(0x14700009, 3);
+            g_mmMissionText = 0x1194;
+            g_textEmptyFrom = 0x1198;
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnMissionPick(&m, nullptr, &third, CONTROL_NOTIFY_CLICK, 0) && m.m_mission == 3 &&
+                  MsLogIs({"mission text 1 0 1"}, g_gfLog) &&
+                  PickIs("14b00000 1000001 0 0; 14400000 1000002 0 0; 14300000 2000018 0 0; 14200000 100003a 0 0 'img1_0'; "
+                         "14300000 1000017 2 8d7; 14300000 1000017 d 1195; 14300000 1000017 2 1196; "
+                         "14300000 1000017 2 7d2; 14300000 1000017 3 1197; 14300000 1000017 2 7d2; ");
+            g_mmMissionCounts = {3, 3};
+            g_textEmptyFrom = 0;
+            ok &= !C_MainMenu::OnMissionPick(&m, nullptr, nullptr, CONTROL_NOTIFY_CLICK, 0) && PickIs("");
+            WM(r.mpPick, ok);
+        }
+        g_lpMissions = oldOperations;
+        std::vector<C_CampaignRoot *>().swap(campaign->m_campaigns);
+        g_gameProfile.m_playMode = oldPlayMode;
+        g_gameProfile.m_campaign = oldCampaign;
+    }
+
+    // --- (part 9h-ix) the missions' messages; the campaign's and the single missions' lists shown; an operation ---
+    {
+        C_MainMenu m;
+        alignas(16) static uint8_t mxCampaignMemory[sizeof(C_Campaign)];
+        std::memset(mxCampaignMemory, 0, sizeof mxCampaignMemory);
+        C_Campaign *const oldCampaign = g_gameProfile.m_campaign;
+        auto *campaign = reinterpret_cast<C_Campaign *>(mxCampaignMemory);   // (its vector zeroed: empty)
+        campaign->m_campaigns = {nullptr, nullptr};
+        g_gameProfile.m_campaign = campaign;
+        S_PlayMode playMode;
+        S_PlayMode *const oldPlayMode = g_gameProfile.m_playMode;
+        g_gameProfile.m_playMode = &playMode;
+        static C_HumanStore store;
+        C_HumanStore *const oldStore = g_gameProfile.m_humanStore;
+        g_gameProfile.m_humanStore = &store;
+        const std::vector<int> oldOperations = g_lpMissions;
+        g_lpMissions = {2, 1};
+        g_mmMissionCounts = {3, 3};
+        const int oldSession = g_mpSettings->sessionType, oldProgress = g_dbProgress;
+        const std::string reset = "14700000 2000085 0 0; 14800000 2000085 0 0; ";
+        const std::string tail = "14200000 1000039 0 0; 14300000 2000018 0 0; 14400000 1000001 0 0; 14b00000 1000001 0 0; ";
+        {
+            // The campaign's: its operations' lines and their missions' up to the one after the progress.
+            bool ok = true;
+            playMode.mode = 1;
+            campaign->SetCurrentIndex(0);
+            g_dbProgress = 0;
+            m.m_saveName = "x";
+            g_gfLog.clear();
+            m.ShowCampaignMissions();
+            ok &= m.m_saveName.IsEmpty() && m.m_progress == 0 &&
+                  MsLogIs({"progress 0", "operations 0", "missions 0 0"}, g_gfLog) &&
+                  CsQueue() == "14100000 1000015 a 8d3; " + reset + "14600000 100000b 14700000 0; " + tail +
+                                   "14700000 2000083 14701000 0; 14700000 2000083 14702000 0; 14700000 2000083 14703000 0; ";
+            // The second campaign's lines after the first's (3 missions, 2 operations); all shown; no title.
+            playMode.mode = 0;
+            campaign->SetCurrentIndex(1);
+            g_dbProgress = 5;
+            g_gfLog.clear();
+            m.ShowCampaignMissions();
+            ok &= m.m_progress == 5 &&
+                  MsLogIs({"progress 1", "operations 1", "operations 0", "missions 1 0", "missions 1 1"}, g_gfLog) &&
+                  CsQueue() == "14100000 1000015 a 0; " + reset + "14600000 100000b 14700000 0; " + tail +
+                                   "14700000 2000083 14706000 0; 14700000 2000083 14707000 0; 14700000 2000083 14708000 0; "
+                                   "14700000 2000083 14709000 0; 14700000 2000083 1470a000 0; ";
+            for (int mode : {2, 3}) {
+                playMode.mode = mode;
+                m.ShowCampaignMissions();
+                ok &= CsQueue().rfind(CmText("14100000 1000015 a %x; ", 0x8D2 + mode), 0) == 0;
+            }
+            g_dbProgress = 1;
+            campaign->SetCurrentIndex(0);
+            m.ShowCampaignMissions();
+            const std::string queue = CsQueue();
+            ok &= queue.substr(queue.find("14700000 2000083")) ==
+                  "14700000 2000083 14701000 0; 14700000 2000083 14702000 0; 14700000 2000083 14703000 0; "
+                  "14700000 2000083 14704000 0; 14700000 2000083 14705000 0; ";
+            // A place past 127 (its byte kept).
+            g_mmMissionCounts = {200, 3};
+            campaign->SetCurrentIndex(1);
+            g_dbProgress = 5;
+            m.ShowCampaignMissions();
+            ok &= CsQueue().find("14700000 2000083 147cb000 0; ") != std::string::npos;
+            g_mmMissionCounts = {3, 3};
+            WM(r.mxCampaign, ok);
+        }
+        {
+            // The single missions: every campaign's (the first's first not) up to the best progress there.
+            bool ok = true;
+            playMode.mode = 0;
+            m.m_progress = -1;
+            g_mxBest = {1, 0};
+            m.m_saveName = "x";
+            g_gfLog.clear();
+            m.ShowSingleMissions();
+            ok &= m.m_saveName.IsEmpty() && m.m_progress == 0 && MsLogIs({"best 0", "best 1"}, g_gfLog) &&
+                  CsQueue() == "14100000 1000015 a 8cb; " + reset + "14600000 100000b 14800000 0; " + tail +
+                                   "14800000 2000083 14801000 0; 14800000 2000083 14803000 0; ";
+            playMode.mode = 3;
+            m.m_progress = 100;
+            g_gfLog.clear();
+            m.ShowSingleMissions();
+            ok &= m.m_progress == 100 && g_gfLog.empty() &&
+                  CsQueue() == "14100000 1000015 a 8d6; " + reset + "14600000 100000b 14800000 0; " + tail +
+                                   "14800000 2000083 14801000 0; 14800000 2000083 14802000 0; 14800000 2000083 14803000 0; "
+                                   "14800000 2000083 14804000 0; 14800000 2000083 14805000 0; ";
+            playMode.mode = 1;
+            m.m_progress = -1;
+            g_mxBest = {-1, -1};
+            m.ShowSingleMissions();
+            ok &= CsQueue() == "14100000 1000015 a 0; " + reset + "14600000 100000b 14800000 0; " + tail;
+            WM(r.mxSingle, ok);
+        }
+        S_ControlMessage message;
+        const auto send = [&](uint32_t id, uint32_t value) {
+            message.id = id;
+            message.value = value;
+            g_gfLog.clear();
+            return m.OnMissionsMessage(&message);
+        };
+        {
+            // The flags; a popup taken; others not; the campaign started (played: its missions; else the
+            // roster, the next step); the single missions opened.
+            bool ok = true;
+            g_mpSettings->sessionType = 2;
+            ok &= send(0x4000000 | 0x2000031, 1) && playMode.singleMission == 1 && g_mpSettings->sessionType == 0;
+            g_mpSettings->sessionType = 2;
+            ok &= send(0x2000070, 3) && playMode.mode == 3 && g_mpSettings->sessionType == 0;
+            ok &= send(MENU_MSG_OPEN_POPUP, 4) && !send(0x2000099, 0) && !send(0x2000032, 0) && g_gfLog.empty() &&
+                  CsQueue() == "";
+            campaign->SetCurrentIndex(1);
+            playMode.mode = 1;
+            g_dbProgress = 0;
+            m.ShowCampaignMissions();
+            const std::string campaignQueue = CsQueue();
+            m.m_singleMissions = true;
+            g_mpSettings->sessionType = 2;
+            g_mxHasProgress = true;
+            ok &= send(0x2000033, 0) && !m.m_singleMissions && g_mpSettings->sessionType == 0 &&
+                  MsLogIs({"reset game", "has progress 1", "progress 1", "operations 1", "operations 0", "missions 1 0"},
+                          g_gfLog) &&
+                  CsQueue() == campaignQueue + "0 2000001 5 0; ";
+            g_mxHasProgress = false;
+            const std::vector<S_SoldierProfile *> oldProfiles = g_epProfiles;
+            g_epProfiles.clear();
+            ok &= send(0x2000033, 0) &&
+                  MsLogIs({"reset game", "has progress 1", "roster load tables\\HumanStore.def", "advance"}, g_gfLog) &&
+                  CsQueue() == "0 2000008 0 0; ";
+            g_esRosterLoads = false;
+            ok &= !send(0x2000033, 0) && MsLogIs({"reset game", "has progress 1", "roster load tables\\HumanStore.def"},
+                                                 g_gfLog) && CsQueue() == "";
+            g_esRosterLoads = true;
+            g_epProfiles = {nullptr};
+            ok &= send(0x2000033, 0) && MsLogIs({"reset game", "has progress 1", "advance"}, g_gfLog) &&
+                  CsQueue() == "0 2000008 0 0; ";
+            g_epProfiles = oldProfiles;
+            playMode.mode = 0;
+            m.m_progress = -1;
+            g_mxBest = {2, 0};
+            m.ShowSingleMissions();
+            const std::string singleQueue = CsQueue();
+            ok &= send(0x2000074, 0) && m.m_singleMissions && MsLogIs({"best 0", "best 1"}, g_gfLog) &&
+                  CsQueue() == singleQueue + "0 2000001 5 0; ";
+            WM(r.mxMessages, ok);
+        }
+        {
+            // The secret key: on the missions screen showing the single missions, all of them shown / not.
+            bool ok = true;
+            C_MsScreen missions(nullptr, "mxscreen", 5u << 26 | 0x12), other(nullptr, "mxother", 3u << 26);
+            g_menuScreens = {&other, &missions};
+            m.m_singleMissions = true;
+            m.m_progress = 0;
+            ok &= send(MENU_MSG_SECRET_KEY, 0) && m.m_progress == 100 && g_gfLog.empty() &&
+                  CsQueue().find("14800000 2000083 14805000 0; ") != std::string::npos;
+            ok &= send(MENU_MSG_SECRET_KEY, 0) && m.m_progress == 0 && MsLogIs({"best 0", "best 1"}, g_gfLog) &&
+                  CsQueue().find("14800000 2000083 14805000 0; ") == std::string::npos;
+            m.m_progress = 100;
+            ok &= send(MENU_MSG_SECRET_KEY, 0) && m.m_progress == 0;   // (-1, then the best progress)
+            CsQueue();
+            m.m_progress = 7;
+            m.m_singleMissions = false;
+            ok &= send(MENU_MSG_SECRET_KEY, 0) && m.m_progress == 7 && CsQueue() == "";
+            m.m_singleMissions = true;
+            g_menuScreens = {&missions, &other};
+            ok &= send(MENU_MSG_SECRET_KEY, 0) && m.m_progress == 7 && CsQueue() == "";
+            g_menuScreens.clear();
+            ok &= send(MENU_MSG_SECRET_KEY, 0) && m.m_progress == 7 && CsQueue() == "" && g_gfLog.empty();
+            WM(r.mxSecret, ok);
+        }
+        {
+            // A mission started: none picked: nothing; a single mission (its campaign by the first's count);
+            // the campaign: its first missions begun, the others' saves before them loaded; advanced.
+            bool ok = true;
+            const auto start = [&](int single, int mission, const std::vector<std::string> &log) {
+                playMode.singleMission = single;
+                m.m_mission = mission;
+                m.m_state = 0;
+                g_mpSettings->sessionType = 2;
+                return send(0x2000000 | 0x1E, 0) && m.m_state == GAME_STATE_ENDED && g_mpSettings->sessionType == 0 &&
+                       MsLogIs(log, g_gfLog) && CsQueue() == "";
+            };
+            g_mmMissionCounts = {3, 4};
+            m.m_mission = -1;
+            m.m_state = 0;
+            ok &= send(0x200001E, 0) && m.m_state == 0 && g_gfLog.empty();
+            ok &= start(1, 4, {"reset game", "single 1 1"}) && campaign->GetCurrentIndex() == 1;
+            ok &= start(1, 2, {"reset game", "single 0 2"}) && campaign->GetCurrentIndex() == 0;
+            ok &= start(1, 3, {"reset game", "single 1 0"}) && campaign->GetCurrentIndex() == 1;
+            campaign->SetCurrentIndex(0);
+            ok &= start(0, 0, {"reset game", "advance"}) && start(2, 3, {"reset game", "advance"});
+            ok &= start(0, 2, {"reset game", "load save0_1 0", "advance"}) && campaign->GetCurrentIndex() == 0;
+            campaign->SetCurrentIndex(1);
+            ok &= start(0, 5, {"reset game", "load save1_1 0", "advance"}) &&
+                  start(0, 4, {"reset game", "load save1_0 0", "advance"}) &&
+                  start(0, 1, {"reset game", "load save1_0 0", "advance"});
+            g_mmMissionCounts = {3, 3};
+            WM(r.mxStart, ok);
+        }
+        {
+            // An operation's line picked: its index, an operation picked; load on, the description cleared, its
+            // name the picture.
+            bool ok = true;
+            campaign->SetCurrentIndex(1);
+            C_MpLine line(0x14700003, 1);
+            m.m_operationPicked = false;
+            m.m_mission = -1;
+            ok &= C_MainMenu::OnOperationPick(&m, nullptr, &line, CONTROL_NOTIFY_CLICK, 0) && m.m_operationPicked &&
+                  m.m_mission == 1 && CsQueue() == "14400000 1000002 0 0; 14300000 2000018 0 0; 14200000 100003a 0 0 'op1_1'; ";
+            ok &= !C_MainMenu::OnOperationPick(&m, nullptr, nullptr, CONTROL_NOTIFY_CLICK, 0) && CsQueue() == "";
+            WM(r.mxOperation, ok);
+        }
+        g_dbProgress = oldProgress;
+        g_mpSettings->sessionType = oldSession;
+        g_lpMissions = oldOperations;
+        g_gameProfile.m_humanStore = oldStore;
+        std::vector<C_CampaignRoot *>().swap(campaign->m_campaigns);
+        g_gameProfile.m_playMode = oldPlayMode;
+        g_gameProfile.m_campaign = oldCampaign;
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -817,8 +1300,9 @@ void MainMenuTest(I3D_scene *scene)
             models.push_back(MrObj(strdup(CmText("mmm%02d", i).c_str()), g_mrModelVt));
         m.m_screens = {&box};
         g_mrMade[FRAME_MODEL] = std::deque<S_MrObj *>(models.begin(), models.end());
-        // (The options screen's: its group's frame; the real handler finds no buttons.)
-        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgro")};
+        // (The missions screen's two groups (no templates: not described further); the options screen's group frame:
+        // the real handler finds no buttons.)
+        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc"), MsFrame("mmgs"), MsFrame("mmgro")};
         g_cacheLoads.clear();
         g_menuScreens.clear();
         g_gfLog.clear();
@@ -828,7 +1312,7 @@ void MainMenuTest(I3D_scene *scene)
                                                         "multiplayer menu", "create server", "password", "server filters",
                                                         "gameinfo", "confirm", "password"});
         const std::string log = Join(g_gfLog);
-        ok &= GmInOrder(log, {"scan", "describe missions 14000000", "describe cinematics 1c000000",
+        ok &= GmInOrder(log, {"scan", "describe cinematics 1c000000",
                               "describe browser 20000000", "describe create 24000000", "describe password 28000000",
                               "describe filters 2c000000", "describe gameinfo 30000000", "describe connect 34000000",
                               "describe addserver 38000000"}) &&
@@ -846,7 +1330,7 @@ void MainMenuTest(I3D_scene *scene)
         m.m_screens = {&box};
         m.m_models.clear();
         g_mrMade[FRAME_MODEL] = std::deque<S_MrObj *>(models.begin(), models.end());
-        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgro2")};
+        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc2"), MsFrame("mmgs2"), MsFrame("mmgro2")};
         g_cacheFailName = "change_profile";
         g_menuScreens.clear();
         g_gfLog.clear();
@@ -873,8 +1357,10 @@ void MainMenuTest(I3D_scene *scene)
     g_controlMessages.clear();
     std::printf("mainmenu: mmStart %d mmStop %d mmUpdate %d mmDrain %d mmMessage %d mmEscape %d mmSelect %d mmBuild %d mmDescribe %d mmMainShown %d pfDescribe %d pfRefresh %d pfShown %d pfList %d "
                 "pfDifficulty %d pfMessage %d pfButtons %d pfEscape %d pfCreate %d pfRename %d "
-                "spShown %d spHover %d spClick %d\n",
+                "spShown %d spHover %d spClick %d mpLists %d mpDescribe %d mpSaveSlot %d mpPick %d mxCampaign %d mxSingle %d"
+                " mxMessages %d mxSecret %d mxStart %d mxOperation %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
-                r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick);
+                r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
+                r.mpSaveSlot, r.mpPick, r.mxCampaign, r.mxSingle, r.mxMessages, r.mxSecret, r.mxStart, r.mxOperation);
 }

@@ -198,22 +198,6 @@ f_00638620.cpp:219:47: no matching function for call to 'tier1::C_str::C_str(int
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
 f_00638620.cpp:229:47: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00638dc0.cpp:1028:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00638dc0.cpp:1038:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00638dc0.cpp:1049:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00638dc0.cpp:1105:55: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00638dc0.cpp:1223:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00638dc0.cpp:1233:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00638dc0.cpp:1244:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00638dc0.cpp:1284:53: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
 f_00696f70.cpp:565:105: cannot convert 'char**' to 'uint32_t*' {aka 'unsigned int*'}

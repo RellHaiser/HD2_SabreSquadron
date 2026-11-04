@@ -73,3 +73,11 @@
 00620fb0 C_MainMenu::PostProfileLine | void __fastcall PostProfileLine(char * name, int context)
 006aef40 DeleteProfile | bool __stdcall DeleteProfile(char * name)
 # Part 9h-vii: the single-player screen.
+# Part 9h-viii: the missions screen (description, lists, pick; its messages and lists shown).
+00639b40 C_MainMenu::DescribeCampaignList | void __thiscall DescribeCampaignList(C_MainMenu *this, void * desc, void * group, void * operationTemplate, void * missionTemplate)
+0063a1a0 C_MainMenu::DescribeSingleList | void __thiscall DescribeSingleList(C_MainMenu *this, void * desc, void * group, void * missionTemplate)
+0063b310 C_MainMenu::OnMissionPick | bool __thiscall OnMissionPick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+0063b0f0 C_MainMenu::ShowSaveSlot | void __thiscall ShowSaveSlot(C_MainMenu *this, int mission)
+0063a670 C_MainMenu::ShowCampaignMissions | void __fastcall ShowCampaignMissions(C_MainMenu *this)
+0063ab60 C_MainMenu::ShowSingleMissions | void __fastcall ShowSingleMissions(C_MainMenu *this)
+0063af20 C_MainMenu::OnOperationPick | bool __thiscall OnOperationPick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
