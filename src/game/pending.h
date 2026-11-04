@@ -22,25 +22,7 @@
 // destructors. The roles of the campaign screens are inferred from where the shipped
 // campaigns put them.
 
-// The video player of a campaign video node (type 7, vtable 0x00815bfc, 0x7C bytes): Start
-// takes the C_CampaignVideo.
-class C_VideoState : public C_GameState {
-public:
-    C_VideoState();                                 // 0x006c3330 (also inline)
-};
-// The logos, the intro, the game's movies and the menu's (type 10, vtable 0x00815bc8,
-// 0x84 bytes).
-class C_MovieState : public C_VideoState {
-public:
-    C_MovieState();                                 // (inline)
-    // Plays `fileName`; `sequence` says what follows it (C_GameApp: 0 back to the state it
-    // was opened over, 1 .. 3 the next logo / the intro, 4 the main menu, 5 the first logo,
-    // 6 the application ends). Returns false.
-    bool Play(const char *fileName, int sequence);  // 0x0066ede0
-    int GetSequence() const;                        // +0x7C
-    C_GameState *GetReturnState() const;            // +0x80
-    void SetReturnState(C_GameState *state);
-};
+// The video player C_VideoState / C_MovieState: game/video_state.h.
 // The main menu (type 2, vtable 0x00815e30, 0x240 bytes; also the network session's menus).
 class C_MainMenu : public C_GameState {
 public:
@@ -48,16 +30,16 @@ public:
     // The movie the menu asks for (empty: the credits).
     const C_str &GetMovie() const;                  // C_str +0x1E8
 };
-// The squad screen (campaign screen kinds 1 and 2; type 3, vtable 0x00815d50, 0x2B0 bytes).
-class C_SquadMenu : public C_GameState {
-public:
-    C_SquadMenu();                                  // (inline)
-};
 // The equipment screen (kinds 3 and 4): game/equipment_screen.h.
 // The screen after a mission (kind 5; type 5, vtable 0x00815cf0, 0x290 bytes).
 class C_DebriefingMenu : public C_GameState {
 public:
     C_DebriefingMenu();                             // (inline)
+};
+// The squad screen (campaign screen kinds 1 and 2; type 3, vtable 0x00815d50, 0x2B0 bytes).
+class C_SquadMenu : public C_GameState {
+public:
+    C_SquadMenu();                                  // (inline)
 };
 // Campaign screen kind 0 (none in the shipped campaigns; type 9, vtable 0x00815c30, 0x1B0
 // bytes).

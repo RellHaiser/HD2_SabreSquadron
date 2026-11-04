@@ -181,6 +181,34 @@ public:
     I3DMETHOD(bool, IsInitialized)() = 0;                                // 0x0C
     I3D_SLOT(10);
     I3DMETHOD(void, SetVolume)(float volume) = 0;                        // 0x14 master volume
+    I3D_SLOT(18);
+    I3D_SLOT(1C);
+    // A sound buffer (the video player's voices; null: none).
+    I3DMETHOD(class ISND_sound *, CreateSound)() = 0;                    // 0x20
+    I3D_SLOT(24);
+    // A player of sound buffers (the video player's voices).
+    I3DMETHOD(class ISND_source *, CreateSource)() = 0;                  // 0x28
+};
+
+// A sound buffer of the sound driver (ISND_driver::CreateSound; names inferred from the video player).
+class ISND_sound {
+public:
+    I3DMETHOD(uint32_t, Release)() = 0;                                  // 0x00
+    // A sound file loaded (0 on success).
+    I3DMETHOD(HRESULT, Open)(const char *fileName, uint32_t flags) = 0;  // 0x04
+};
+// A player of the sound driver's buffers (ISND_driver::CreateSource; names inferred).
+class ISND_source {
+public:
+    I3DMETHOD(uint32_t, Release)() = 0;                                  // 0x00
+    I3DMETHOD(void, SetSound)(ISND_sound *sound) = 0;                    // 0x04
+    I3DMETHOD(void, Stop)() = 0;                                         // 0x08
+    I3DMETHOD(void, Play)(int unknown, int unknown2) = 0;                // 0x0C
+    I3D_SLOT(10);
+    I3D_SLOT(14);
+    I3D_SLOT(18);
+    I3D_SLOT(1C);
+    I3DMETHOD(void, SetVolume)(float volume) = 0;                        // 0x20
 };
 
 // A rectangle of the screen in pixels (LS3DF's IShow).

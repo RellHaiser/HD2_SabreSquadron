@@ -32567,6 +32567,21 @@
   "name": "C_VideoState::Stop",
   "proto": "bool __thiscall Stop(C_VideoState *this)"
  },
+ "00688900": {
+  "module": "campaign_screens",
+  "name": "S_Subtitle::~S_Subtitle",
+  "proto": "void __fastcall ~S_Subtitle(void * this)"
+ },
+ "00688920": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::MakeSubtitleBox",
+  "proto": "void __thiscall MakeSubtitleBox(C_VideoState *this, int width, int height)"
+ },
+ "00688ab0": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::MakeCreditsBox",
+  "proto": "void __thiscall MakeCreditsBox(C_VideoState *this, int width, int height)"
+ },
  "00688cb0": {
   "module": "text_box",
   "name": "C_VideoTextBox::UpdateScrollRange",
@@ -32581,6 +32596,11 @@
   "module": "text_box",
   "name": "C_VideoTextBox::~C_VideoTextBox",
   "proto": "void __thiscall ~C_VideoTextBox(C_VideoTextBox *this)"
+ },
+ "00688da0": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::FitVideo",
+  "proto": "void __thiscall FitVideo(C_VideoState *this, int width, int height)"
  },
  "00688ea0": {
   "module": "game_app",
@@ -32597,6 +32617,30 @@
   "name": "C_VideoState::Render",
   "proto": "void __thiscall Render(C_VideoState *this)"
  },
+ "006892e0": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::OpenStream",
+  "proto": "void __thiscall OpenStream(C_VideoState *this, char * file)"
+ },
+ "006893e0": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::LoadScript",
+  "proto": "void __thiscall LoadScript(C_VideoState *this, char * file)"
+ },
+ "00689630": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::ParseCredits",
+  "proto": "void __fastcall ParseCredits(C_VideoState *this)"
+ },
+ "00689c60": {
+  "module": "campaign_screens",
+  "name": "C_VideoState::ParseSubtitles",
+  "proto": "void __fastcall ParseSubtitles(C_VideoState *this)"
+ },
+ "0068a150": {
+  "module": "campaign_screens",
+  "name": "vector_insert_subtitle_68a150"
+ },
  "0068a2f0": {
   "module": "zz_idioms",
   "name": "vector_size_e4_68a2f0"
@@ -32604,6 +32648,10 @@
  "0068a310": {
   "module": "zz_idioms",
   "name": "empty_function_68a310"
+ },
+ "0068a320": {
+  "module": "campaign_screens",
+  "name": "vector_insert_voice_68a320"
  },
  "0068a4c0": {
   "module": "zz_idioms",
@@ -42527,6 +42575,12 @@
   "name": "g_requiredCarrier",
   "type": "int"
  },
+ "008415a0": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_creditsIntros",
+  "type": "char *[2]"
+ },
  "00841670": {
   "data": true,
   "module": "campaign_screens",
@@ -43220,6 +43274,18 @@
   "module": "equipment_screen",
   "name": "g_equipmentStatsShown",
   "type": "bool"
+ },
+ "008ae644": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_creditsStyles",
+  "type": "int[14]"
+ },
+ "008ae680": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_creditsIntro",
+  "type": "int"
  },
  "008ae8f4": {
   "data": true,

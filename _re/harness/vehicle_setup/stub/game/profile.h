@@ -52,6 +52,8 @@ class C_PlayerProfile {
 public:
     C_Diary *GetDiary();
     C_KeyBindings *GetKeyBindings() { return &m_keyBindings; }
+    // (The video player, part 9g-iv: campaign_screens_test.inc.)
+    void SetMovieSeen(const char *file, bool seen);
     // (The in-game menu, part 9e-v: game_menu_test.inc.)
     void ApplyVolume();
     // (The options handler, part 9e-viii: options_test.inc.)

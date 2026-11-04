@@ -11,6 +11,7 @@
 #include "game/equipment_screen.h"
 #include "game/operation_end.h"
 #include "game/session_menu.h"
+#include "game/video_state.h"
 #include "game/game.h"
 #include "game/game_internal.h"
 #include "game/game_menu.h"

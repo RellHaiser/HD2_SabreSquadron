@@ -5,6 +5,8 @@
 #define protected public
 #include "game/operation_end.h"
 #include "game/session_menu.h"
+#include "game/video_state.h"
+#include "game/video_text_box.h"
 #undef protected
 #undef private
 
@@ -42,7 +44,129 @@ bool C_HumanStore::Reload()
     return true;
 }
 
+// (Part 9g-iv: the video player's. campaign.cpp, game_texts.cpp, the sound module's music and the
+// profile's movies are not linked: faked, logged.)
+C_CampaignNode::~C_CampaignNode() {}
+C_CampaignVideo::~C_CampaignVideo() { GfLog("video gone"); }
+bool C_CampaignVideo::LoadDefinition(C_chunk &) { return false; }
+bool C_CampaignVideo::Load(C_chunk &) { return false; }
+bool C_CampaignVideo::Save(C_chunk &) { return false; }
+// The scripts by path: their lines (id, text) added by Load (none: false).
+std::map<std::string, std::vector<std::pair<int, std::string>>> g_vsScripts;
+template <class Tag, typename Tag::type M> struct S_VsRob {
+    friend typename Tag::type VsGet(Tag) { return M; }
+};
+struct S_VsTextsTag {
+    using type = std::vector<S_GameText> C_GameTexts::*;
+    friend type VsGet(S_VsTextsTag);
+};
+template struct S_VsRob<S_VsTextsTag, &C_GameTexts::m_texts>;
+struct S_VsFileTag {
+    using type = C_str C_CampaignVideo::*;
+    friend type VsGet(S_VsFileTag);
+};
+template struct S_VsRob<S_VsFileTag, &C_CampaignVideo::m_fileName>;
+struct S_VsBriefingTag {
+    using type = bool C_CampaignVideo::*;
+    friend type VsGet(S_VsBriefingTag);
+};
+template struct S_VsRob<S_VsBriefingTag, &C_CampaignVideo::m_briefing>;
+void C_GameTexts::Clear()
+{
+    GfLog("texts clear");
+    (this->*VsGet(S_VsTextsTag())).clear();
+}
+bool C_GameTexts::Add(int id, const char *text, bool unknown8)
+{
+    S_GameText t;
+    t.id = id;
+    t.text = text;
+    t.unknown8 = unknown8;
+    (this->*VsGet(S_VsTextsTag())).push_back(t);
+    return true;
+}
+bool C_GameTexts::Load(const char *fileName)
+{
+    GfLog("texts load %s", fileName);
+    const auto it = g_vsScripts.find(fileName);
+    if (it == g_vsScripts.end())
+        return false;
+    for (const auto &line : it->second)
+        Add(line.first, line.second.c_str(), false);
+    return true;
+}
+float g_vsMusicPosition = 0;
+void C_SoundModule::FadeBackgroundMusic(float volume, int time) { GfLog("fade %g %d", volume, time); }
+int C_SoundModule::GetBackgroundMusicPosition() const { return static_cast<int>(g_vsMusicPosition); }
+void C_PlayerProfile::SetMovieSeen(const char *file, bool seen) { GfLog("seen %s %d", file, seen); }
+std::set<std::string> g_vsFiles;
+bool FileExists(const char *path)
+{
+    GfLog("exists %s", path);
+    return g_vsFiles.count(path) != 0;
+}
+const char *GetGameDirectory() { return "G:\\Game"; }
+
 namespace {
+
+// (Part 9g-iv.) The video player's engine objects: the stream's rectangle and size, its position; the
+// driver's buffers and player, IGraph's stream and screen; a box's private fields; a box logging its
+// render; a state of a type.
+S_showRect g_vsVideoSize;
+int g_vsPosition, g_vsW = 800, g_vsH = 600;
+S_MrObj *g_vsStream, *g_vsSource;
+std::deque<S_MrObj *> g_vsSounds;
+uint32_t __stdcall VsSetRect(void *self, const S_showRect *r)
+{
+    GfLog("%s 20 %d %d %d %d", MrName(self).c_str(), r->x, r->y, r->width, r->height);
+    return 0;
+}
+uint32_t __stdcall VsVideoSize(void *self, S_showRect *out)
+{
+    GfLog("%s 28", MrName(self).c_str());
+    *out = g_vsVideoSize;
+    return 0;
+}
+uint32_t __stdcall VsPosition(void *self, int *position)
+{
+    GfLog("%s 38", MrName(self).c_str());
+    *position = g_vsPosition;
+    return 0;
+}
+void *__stdcall VsCreateSound(void *)
+{
+    if (g_vsSounds.empty())
+        return nullptr;
+    S_MrObj *o = g_vsSounds.front();
+    g_vsSounds.pop_front();
+    return o;
+}
+void *__stdcall VsCreateSource(void *) { return g_vsSource; }
+void *__stdcall VsCreateStream(void *) { return g_vsStream; }
+int __stdcall VsScrnX(void *) { return g_vsW; }
+int __stdcall VsScrnY(void *) { return g_vsH; }
+struct S_VsBoxPeek : C_TextBox {
+    using C_TextBox::m_left;
+    using C_TextBox::m_top;
+    using C_TextBox::m_right;
+    using C_TextBox::m_bottom;
+    using C_TextBox::m_width;
+    using C_TextBox::m_height;
+    using C_TextBox::m_depth;
+    using C_TextBox::m_runs;
+    using C_TextBox::m_lines;
+    using C_TextBox::m_scroll;
+    using C_TextBox::m_colour;
+};
+struct C_VsLogBox : C_TextBox {
+    void Render() override { GfLog("box render"); }
+    ~C_VsLogBox() override { GfLog("box gone"); }
+};
+struct C_VsState : C_GameState {
+    explicit C_VsState(int t) : type(t) {}
+    int GetTypeId() const override { return type; }
+    int type;
+};
 
 // A control's callbacks counted.
 struct S_CsPeek : C_Control {
@@ -53,6 +177,8 @@ struct S_CampaignScreensResults {
     bool oeTable = true, oeDescribe = true, oeBuild = true, oeInput = true, oeSlots = true;
     bool smStart = true, smMessage = true, smConsole = true, smPassword = true, smBuild = true, smTick = true;
     bool smJoin = true, smNotify = true;
+    bool vsCredits = true, vsMovie = true, vsFit = true, vsUpdate = true, vsScroll = true, vsRender = true, vsInput = true;
+    bool vsMovieState = true;
 };
 
 // A message's values ("target id value value2[ value3][ 'text']"; value2 / value3 by name when known).
@@ -647,13 +773,640 @@ void CampaignScreensTest(I3D_scene *)
     settings->sessionType = oldSessionType;
     g_csNames.clear();
     g_controlMessages.clear();
+    // ===== part 9g-iv: the video player =====
+    {
+        // The engine's objects: the stream, the voices' player and buffers (logging), the driver's and
+        // IGraph's slots, the sound module's vtable (its update logged) and its music's field.
+        static void *streamVt[MR_SLOTS], *sourceVt[MR_SLOTS], *soundVt[MR_SLOTS], *driverVt[16];
+        streamVt[0x04 / 4] = reinterpret_cast<void *>(&MrFake<0x04>);
+        streamVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08>);
+        streamVt[0x0C / 4] = reinterpret_cast<void *>(&MrFake<0x0C, const char *, uint32_t>);
+        streamVt[0x10 / 4] = reinterpret_cast<void *>(&MrFake<0x10>);
+        streamVt[0x14 / 4] = reinterpret_cast<void *>(&MrFake<0x14>);
+        streamVt[0x18 / 4] = reinterpret_cast<void *>(&MrFake<0x18>);
+        streamVt[0x20 / 4] = reinterpret_cast<void *>(&VsSetRect);
+        streamVt[0x28 / 4] = reinterpret_cast<void *>(&VsVideoSize);
+        streamVt[0x2C / 4] = reinterpret_cast<void *>(&MrFake<0x2C>);
+        streamVt[0x38 / 4] = reinterpret_cast<void *>(&VsPosition);
+        streamVt[0x3C / 4] = reinterpret_cast<void *>(&MrFake<0x3C, float>);
+        streamVt[0x50 / 4] = reinterpret_cast<void *>(&MrFake<0x50, bool>);
+        sourceVt[0x00 / 4] = reinterpret_cast<void *>(&MrFake<0x00>);
+        sourceVt[0x04 / 4] = reinterpret_cast<void *>(&MrFake<0x04, void *>);
+        sourceVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08>);
+        sourceVt[0x0C / 4] = reinterpret_cast<void *>(&MrFake<0x0C, int, int>);
+        sourceVt[0x20 / 4] = reinterpret_cast<void *>(&MrFake<0x20, float>);
+        soundVt[0x00 / 4] = reinterpret_cast<void *>(&MrFake<0x00>);
+        soundVt[0x04 / 4] = reinterpret_cast<void *>(&MrFake<0x04, const char *, uint32_t>);
+        std::copy(g_mrSndVtable, g_mrSndVtable + 8, driverVt);
+        driverVt[0x14 / 4] = reinterpret_cast<void *>(&MrFake<0x14, float>);
+        driverVt[0x20 / 4] = reinterpret_cast<void *>(&VsCreateSound);
+        driverVt[0x28 / 4] = reinterpret_cast<void *>(&VsCreateSource);
+        void **const oldDriverVt = g_mrSndDriver.vtable;
+        g_mrSndDriver.vtable = driverVt;
+        g_mrNames[&g_mrSndDriver] = "snd";
+        IGraph *graph = GetIGraph();
+        g_mrNames[graph] = "graph";
+        const int slots[] = {0x18, 0x1C, 0x38, 0x64, 0x68, 0x6C, 0x70, 0x74, 0x78, 0xA0};
+        void *oldGraph[10];
+        for (int i = 0; i < 10; ++i)
+            oldGraph[i] = g_igraphVtable[slots[i] / 4];
+        g_igraphVtable[0x18 / 4] = reinterpret_cast<void *>(&VsScrnX);
+        g_igraphVtable[0x1C / 4] = reinterpret_cast<void *>(&VsScrnY);
+        g_igraphVtable[0x38 / 4] = reinterpret_cast<void *>(&VsCreateStream);
+        g_igraphVtable[0x64 / 4] = reinterpret_cast<void *>(&MrFake<0x64, uint32_t, float, uint32_t>);
+        g_igraphVtable[0x68 / 4] = reinterpret_cast<void *>(&MrFake<0x68>);
+        g_igraphVtable[0x6C / 4] = reinterpret_cast<void *>(&MrFake<0x6C>);
+        g_igraphVtable[0x70 / 4] = reinterpret_cast<void *>(&MrFake<0x70>);
+        g_igraphVtable[0x74 / 4] = reinterpret_cast<void *>(&MrFake<0x74, int, int>);
+        g_igraphVtable[0x78 / 4] = reinterpret_cast<void *>(&MrFake<0x78, int>);
+        g_igraphVtable[0xA0 / 4] = reinterpret_cast<void *>(&MrFake<0xA0>);
+        C_MrSound moduleVt;
+        void *const oldSoundVt = *reinterpret_cast<void **>(g_soundModuleMemory);
+        *reinterpret_cast<void **>(g_soundModuleMemory) = *reinterpret_cast<void **>(&moduleVt);
+        int musicOffset = -1;
+        {
+            alignas(16) uint8_t probe[sizeof g_soundModuleMemory] = {};
+            for (int off = 4; off < 0x100 && musicOffset < 0; off += 4) {
+                std::memset(probe, 0, sizeof probe);
+                *reinterpret_cast<int *>(probe + off) = 12345;
+                if (reinterpret_cast<C_SoundModule *>(probe)->GetBackgroundMusic() == 12345)
+                    musicOffset = off;
+            }
+        }
+        int &music = *reinterpret_cast<int *>(g_soundModuleMemory + (musicOffset < 0 ? 0x100 : musicOffset));
+        const int oldMusic = music;
+        C_PlayerProfile player;
+        C_PlayerProfile *const oldPlayer = g_gameProfile.m_player;
+        g_gameProfile.m_player = &player;
+        S_DetailSettings *const details = g_gameProfile.GetDetailSettings();
+        const S_DetailSettings oldDetails = *details;
+        details->soundVolume = 50.0f;
+        const std::string oldLanguage = g_foLanguage;
+        g_foLanguage = "English";
+        const bool oldUnicode = g_gameProfile.m_unicodeFont;
+        g_gameProfile.m_unicodeFont = false;
+        const auto node = [](const char *file, bool briefing) {
+            auto *video = new C_CampaignVideo();
+            video->*VsGet(S_VsFileTag()) = file;
+            video->*VsGet(S_VsBriefingTag()) = briefing;
+            return video;
+        };
+        const auto rectOf = [](C_TextBox *box) {
+            const S_VsBoxPeek *b = static_cast<S_VsBoxPeek *>(box);
+            return CmText("%g %g %g %g %g %g %g", b->m_left, b->m_top, b->m_right, b->m_bottom, b->m_width, b->m_height,
+                          b->m_depth);
+        };
+        const auto runs = [](C_TextBox *box) {
+            std::string s;
+            const S_VsBoxPeek *b = static_cast<S_VsBoxPeek *>(box);
+            for (const S_TextRun &run : b->m_runs)
+                s += CmText("%s|%d; ", run.text.c_str(), run.style);
+            return s;
+        };
+        const auto newStream = [&](const char *name) {
+            S_MrObj *o = MrObj(name, streamVt);
+            g_vsStream = o;
+            return o;
+        };
+        const auto newSource = [&](const char *name) {
+            S_MrObj *o = MrObj(name, sourceVt);
+            g_vsSource = o;
+            return o;
+        };
+        const auto newSound = [&](const char *name) {
+            S_MrObj *o = MrObj(name, soundVt);
+            g_vsSounds.push_back(o);
+            return o;
+        };
+        const std::string dir = "G:\\Game\\text\\English\\subtitles\\";
+
+        // --- the credits: the music saved and 37 crossfaded to, their box, styles and script; no stream ---
+        {
+            bool ok = true;
+            C_VideoState v;
+            C_CampaignVideo *video = node("credits.bik", false);
+            music = 5;
+            g_vsMusicPosition = 1234;
+            g_vsW = 800;
+            g_vsH = 600;
+            g_vsFiles = {dir + "credits.txt"};
+            g_vsScripts[dir + "credits.txt"] = {
+                {1, "<TI>Title"}, {2, "<NA>Name"}, {3, "<SM>small"}, {4, "<SM><C_1>a<C_2>b<C_3>c"}, {5, "<TICZ>t"},
+                {6, "<NACZ>n"}, {7, "<SMCZ>s"}, {8, "<SMCZ><C_1>x<C_2>y<C_3>z"}, {9, "<EL>el"}, {10, "<ES>es"},
+                {11, "<SPEED>100"}, {12, "<XX>none"}, {13, "no tag"}, {14, "<>empty"}, {15, "<T>t"}, {16, "<TI>100%"},
+                {17, "<SM><C_1>only one"}, {18, "<SPEED>x"}, {19, "><TI>skipped"}, {20, "<SM>p<C_2>q<C_3>r"}};
+            v.m_time = 5;
+            g_gfLog.clear();
+            ok &= v.Start(video) && v.m_state == GAME_STATE_RUNNING && v.m_credits && v.m_scrolling && !v.m_outro2 &&
+                  !v.m_dataDiskOutro && !v.m_stream && !v.m_voicePlayer && v.m_time == 0 && v.m_musicTrack == 5 &&
+                  v.m_musicPosition == 1234 && v.m_textStyle == 8 && v.m_video == video;
+            ok &= MsLogIs({"crossfade 37 2000 0", "exists " + dir + "credits.txt", "texts load " + dir + "credits.txt",
+                           "texts clear"}, g_gfLog);
+            ok &= dynamic_cast<C_VideoTextBox *>(v.m_box) && rectOf(v.m_box) == "16 588 784 12 768 576 0.764" &&
+                  static_cast<S_VsBoxPeek *>(v.m_box)->m_scroll == -546 && v.m_scroll == -546.875f &&
+                  v.m_scrollSpeed == static_cast<float>(800) * 0.0009765625f * 100.0f * 0.001f;
+            std::string want;
+            const char *texts[] = {"Title", "Name", "small", "a", "b", "c", "t", "n", "s", "x", "y", "z", "el", "es", "100%", "<C_1>only one", "p<C_2>q<C_3>r"};
+            const int styles[] = {0, 1, 2, 11, 12, 13, 5, 6, 7, 8, 9, 10, 3, 4, 0, 2, 2};
+            for (int i = 0; i < 17; ++i)
+                want += CmText("%s|%d; ", texts[i], g_creditsStyles[styles[i]]);
+            ok &= runs(v.m_box) == want;
+            for (int i = 0; i < CREDITS_STYLES; ++i) {
+                const S_TextStyleDesc *style = GetTextStyle(g_creditsStyles[i]);
+                ok &= style && style->color == 0xFFFFFFFF && style->align == 2 && style->valign == 1 && style->y == -1.0f;
+            }
+            // (Every style as the table has it: the font, the size, the column, joined, the flags.)
+            const int fonts[14] = {2, 3, 3, 3, 3, 5, 6, 6, 6, 6, 6, 3, 3, 3};
+            const float sizes[14] = {0.06f, 0.04f, 0.022f, 0.04f, 0.025f, 0.06f, 0.04f, 0.022f, 0.022f, 0.022f, 0.022f, 0.022f, 0.022f, 0.022f};
+            const float xs[14] = {-1, -1, -1, -1, -1, -1, -1, -1, 0.25f, 0.5f, 0.75f, 0.25f, 0.5f, 0.75f};
+            const uint32_t flags[14] = {0, 0, 0, 0, 0, 0, 0, 0, 0x18, 0x10, 0x10, 0x18, 0x10, 0x10};
+            for (int i = 0; i < CREDITS_STYLES; ++i) {
+                const S_TextStyleDesc *style = GetTextStyle(g_creditsStyles[i]);
+                ok &= style->font == fonts[i] && style->size == sizes[i] && style->x == xs[i] &&
+                      style->joins == (i >= 8 ? 1 : 0) && style->flags30 == flags[i] && style->width == 0.0f &&
+                      style->below == 0.0f && style->above == 0.0f && style->unknown20 == 0 && !style->wraps;
+            }
+            const S_TextStyleDesc *s0 = GetTextStyle(g_creditsStyles[0]), *s9 = GetTextStyle(g_creditsStyles[9]),
+                                  *s11 = GetTextStyle(g_creditsStyles[11]), *s4 = GetTextStyle(g_creditsStyles[4]);
+            ok &= s0->font == 2 && s0->size == 0.06f && s0->x == -1.0f && !s0->joins && s0->flags30 == 0 && s9->font == 6 &&
+                  s9->x == 0.5f && s9->joins && s9->flags30 == 0x10 && s11->font == 3 && s11->x == 0.25f &&
+                  s11->flags30 == 0x18 && s4->size == 0.025f;
+            // Stopped: the screen cleared three times, the movie seen, the music back, the styles released.
+            g_gfLog.clear();
+            const int style0 = g_creditsStyles[0];
+            ok &= v.Stop() && !v.m_box &&
+                  MsLogIs({"graph 64 0 1 3", "graph 70", "graph 64 0 1 3", "graph 70", "graph 64 0 1 3", "graph 70",
+                           "seen credits.bik 1", "crossfade 5 2000 1234"}, g_gfLog) &&
+                  !GetTextStyle(style0) && g_creditsStyles[0] == -1 && g_creditsStyles[13] == -1;
+            // The music 37 already: not crossfaded; the unicode font's style.
+            music = 37;
+            g_vsMusicPosition = -1;
+            g_gameProfile.m_unicodeFont = true;
+            g_vsFiles.clear();
+            g_gfLog.clear();
+            ok &= v.Start(video) && MsLogIs({"exists " + dir + "credits.txt", "texts clear"}, g_gfLog) &&
+                  v.m_textStyle == 0x1A && v.m_box && runs(v.m_box) == "";
+            g_gameProfile.m_unicodeFont = false;
+            delete v.m_box;
+            v.m_box = new C_VsLogBox();
+            g_gfLog.clear();
+            ok &= v.Stop() && MsLogIs({"graph 64 0 1 3", "graph 70", "graph 64 0 1 3", "graph 70", "graph 64 0 1 3",
+                                       "graph 70", "seen credits.bik 1", "fade 1 2000", "box gone"}, g_gfLog);
+            v.m_musicTrack = -1;
+            v.m_musicPosition = 5;
+            g_gfLog.clear();
+            ok &= v.Stop() && MrHas("fade 1 2000") && !MrHas("crossfade -1 2000 5");
+            // (Not at the name's start: not the credits.)
+            C_CampaignVideo *not1 = node("Xcredits.bik", false), *not2 = node("XD_Outro.bik", false), *not3 = node("Outro1.bik", false);
+            for (C_CampaignVideo *n : {not1, not2, not3}) {
+                newStream("nst");
+                newSource("nsrc");
+                v.Start(n);
+                ok &= !v.m_credits && !v.m_dataDiskOutro && !v.m_outro2;
+                v.Stop();
+                delete n;
+            }
+            v.m_scrolling = false;
+            delete video;
+            WM(r.vsCredits, ok);
+        }
+
+        // --- a movie: the voices' player, the stream opened and fitted, the music faded, the script's
+        // subtitles (their box) and voices, the volume, played ---
+        {
+            bool ok = true;
+            C_VideoState v;
+            C_CampaignVideo *video = node("Brief1.bik", true);
+            S_MrObj *stream = newStream("stream");
+            S_MrObj *source = newSource("src");
+            S_MrObj *s1 = newSound("v1");
+            S_MrObj *s2 = newSound("v2");
+            newSound("v9");
+            g_mrRet[{stream, 0x08}] = 1;
+            g_mrRet[{s1, 0x04}] = 0x80000001u;
+            g_vsVideoSize = {0, 0, 640, 480};
+            details->subtitles = true;
+            music = 3;
+            g_vsMusicPosition = 77;
+            g_vsFiles = {dir + "Brief1.txt"};
+            g_vsScripts[dir + "Brief1.txt"] = {{1, "<10,20>Hello"}, {2, "S<5>v1.wav"}, {3, "<30,40>Bye"}, {4, "S<7>v2.wav"},
+                                                 {5, "<5 20>no comma"}, {6, "S no time"}, {7, "plain"}, {8, "x,y>z"}};
+            g_gfLog.clear();
+            ok &= v.Start(video) && v.m_state == GAME_STATE_RUNNING && v.m_stream == As<ISND_stream>(stream) &&
+                  v.m_voicePlayer == As<ISND_source>(source) && !v.m_credits && !v.m_scrolling && v.m_musicTrack == -1;
+            ok &= MsLogIs({"stream c GameMovie\\Brief1.bik 400", "fade 0.05 2000", "stream 8", "stream 28",
+                           "stream 20 5 4 790 592", "exists " + dir + "Brief1.txt", "texts load " + dir + "Brief1.txt",
+                           "v1 4 Sounds\\v1.wav 0", "v1 4 sounds_DATADISK\\v1.wav 0", "v2 4 Sounds\\v2.wav 0",
+                           "v9 0", "texts clear", "stream 3c 0.55", "stream 14"}, g_gfLog);
+            ok &= v.m_subtitles.size() == 2 && v.m_subtitles[0].start == 10 && v.m_subtitles[0].end == 20 &&
+                  v.m_subtitles[0].text == "Hello" && v.m_subtitles[1].start == 30 && v.m_subtitles[1].text == "Bye" &&
+                  v.m_voices.size() == 2 && v.m_voices[0].time == 5 && v.m_voices[0].sound == As<ISND_sound>(s1) &&
+                  v.m_voices[1].time == 7 && v.m_voices[1].sound == As<ISND_sound>(s2) && g_vsSounds.empty();
+            ok &= v.m_box && !dynamic_cast<C_VideoTextBox *>(v.m_box) && rectOf(v.m_box) == "100 588 700 492 600 96 0.764";
+            // Stopped: the stream closed and released, the player stopped and released, the voices released.
+            g_gfLog.clear();
+            ok &= v.Stop() && !v.m_stream && !v.m_voicePlayer && v.m_voices.empty() && v.m_subtitles.empty() && !v.m_box &&
+                  MsLogIs({"graph 64 0 1 3", "graph 70", "graph 64 0 1 3", "graph 70", "graph 64 0 1 3", "graph 70",
+                           "fade 1 2000", "stream 10", "stream 4", "src 8", "src 0", "v2 0", "v1 0"}, g_gfLog);
+            delete video;
+            // Not a briefing: 1.1 %; the movie seen. The subtitles off: none (the voices kept), no box.
+            video = node("Movie.bik", false);
+            stream = newStream("stream2");
+            source = newSource("src2");
+            S_MrObj *s3 = newSound("v3");
+            g_mrRet[{stream, 0x08}] = 1;
+            details->subtitles = false;
+            g_vsFiles = {dir + "Movie.txt"};
+            g_vsScripts[dir + "Movie.txt"] = {{1, "<10,20>Hello"}, {2, "S<5>v3.wav"}};
+            g_gfLog.clear();
+            ok &= v.Start(video) && GmInOrder(Join(g_gfLog), {"fade 0.011 2000", "v3 4 Sounds\\v3.wav 0", "stream2 14"}) &&
+                  v.m_subtitles.empty() && v.m_voices.size() == 1 && !v.m_box && v.m_voices[0].sound == As<ISND_sound>(s3);
+            g_gfLog.clear();
+            ok &= v.Stop() && MrHas("seen Movie.bik 1") && MrHas("v3 0");
+            delete video;
+            // Not opened: no script, no box, not played.
+            video = node("Missing.bik", false);
+            stream = newStream("stream3");
+            newSource("src3");
+            g_mrRet[{stream, 0x08}] = 0;
+            g_gfLog.clear();
+            ok &= v.Start(video) && MsLogIs({"stream3 c GameMovie\\Missing.bik 400", "fade 0.011 2000", "stream3 8"}, g_gfLog) &&
+                  !v.m_box && v.m_state == GAME_STATE_RUNNING;
+            v.Stop();
+            delete video;
+            video = node("a.b.bik", false);
+            stream = newStream("stream6");
+            newSource("src6");
+            g_mrRet[{stream, 0x08}] = 1;
+            g_gfLog.clear();
+            ok &= v.Start(video) && MrHas("exists " + dir + "a.b.txt");
+            v.Stop();
+            delete video;
+            // No script file: nothing loaded; a name without an extension kept whole.
+            video = node("NoExt", false);
+            stream = newStream("stream4");
+            newSource("src4");
+            g_mrRet[{stream, 0x08}] = 1;
+            g_vsFiles.clear();
+            g_gfLog.clear();
+            ok &= v.Start(video) && MrHas("exists " + dir + "NoExt.txt") && !MrHas("texts load " + dir + "NoExt.txt") &&
+                  MrHas("texts clear");
+            v.Stop();
+            delete video;
+            // A voice's buffer not made: none (fixed: the original released it).
+            video = node("Movie.bik", false);
+            stream = newStream("stream5");
+            newSource("src5");
+            g_mrRet[{stream, 0x08}] = 1;
+            g_vsFiles = {dir + "Movie.txt"};
+            g_gfLog.clear();
+            ok &= v.Start(video) && v.m_voices.empty();
+            v.Stop();
+            delete video;
+            WM(r.vsMovie, ok);
+        }
+
+        // --- the stream's rectangle: the movie's shape, 5 pixels in from the nearer edges ---
+        {
+            bool ok = true;
+            C_VideoState v;
+            S_MrObj *stream = newStream("fit");
+            v.m_stream = As<ISND_stream>(stream);
+            const auto fit = [&](int vw, int vh, int w, int h) {
+                g_vsVideoSize = {0, 0, vw, vh};
+                g_gfLog.clear();
+                v.FitVideo(w, h);
+                return g_gfLog.size() == 2 ? g_gfLog[1] : std::string("?");
+            };
+            ok &= fit(640, 480, 800, 600) == "fit 20 5 4 790 592";
+            ok &= fit(400, 600, 800, 600) == "fit 20 203 5 393 590";
+            ok &= fit(1280, 720, 1024, 768) == "fit 20 5 99 1014 570";
+            ok &= fit(320, 480, 640, 480) == "fit 20 163 5 313 470";
+            ok &= fit(100, 100, 300, 300) == "fit 20 5 5 290 290";
+            ok &= fit(1000, 700, 800, 600) == "fit 20 5 23 790 553" && fit(800, 601, 800, 600) == "fit 20 7 5 785 590";
+            v.m_credits = true;
+            const auto intro = [&](int turn) {
+                g_creditsIntro = turn;
+                g_gfLog.clear();
+                v.OpenStream("credits.bik");
+                return g_gfLog.size() == 1 ? g_gfLog[0] : std::string("?");
+            };
+            ok &= intro(0) == "fit c GameMovie\\IntroAlps.bik 400" && g_creditsIntro == 1;
+            ok &= intro(1) == "fit c GameMovie\\IntroBurma.bik 400" && g_creditsIntro == 2;
+            ok &= intro(2) == "fit c GameMovie\\IntroAlps.bik 400" && g_creditsIntro == 1;
+            ok &= intro(5) == "fit c GameMovie\\IntroBurma.bik 400" && g_creditsIntro == 2;
+            v.m_credits = false;
+            g_creditsIntro = 0;
+            v.m_stream = nullptr;
+            WM(r.vsFit, ok);
+        }
+
+        // --- updated: the sound module; the stream's end and position; the subtitles; the voices ---
+        {
+            bool ok = true;
+            C_VideoState v;
+            C_CampaignVideo *video = node("Brief2.bik", true);
+            v.m_video = video;
+            S_MrObj *stream = newStream("ust");
+            S_MrObj *source = newSource("usrc");
+            S_MrObj *sound = newSound("us1");
+            g_vsSounds.clear();
+            v.m_stream = As<ISND_stream>(stream);
+            v.m_voicePlayer = As<ISND_source>(source);
+            v.m_state = GAME_STATE_RUNNING;
+            v.m_box = new C_TextBox();
+            v.m_subtitles = {{10, 20, C_str("Hello")}, {15, 25, C_str("Over")}, {40, 50, C_str("Late")}};
+            v.m_voices = {{5, As<ISND_sound>(sound)}};
+            g_mrRet[{stream, 0x2C}] = 0;
+            const auto update = [&](int position, int dt) {
+                g_vsPosition = position;
+                g_gfLog.clear();
+                v.Update(dt);
+            };
+            // 0.4 s: nothing shown, no voice.
+            update(400, 16);
+            ok &= MsLogIs({"sound update 16", "ust 2c", "ust 38"}, g_gfLog) && v.m_time == 400 && v.m_subtitle == -1 &&
+                  v.m_box->NumRuns() == 0 && v.m_nextVoice == 0;
+            // 0.6 s: the voice (the driver's volume the options').
+            update(600, 16);
+            ok &= MsLogIs({"sound update 16", "ust 2c", "ust 38", "snd 14 0.5", "usrc 4 us1", "usrc 20 1", "usrc c 0 0"}, g_gfLog) &&
+                  v.m_nextVoice == 1;
+            update(700, 16);
+            ok &= g_gfLog.size() == 3;
+            v.m_nextVoice = 0;
+            update(500, 16);
+            ok &= v.m_nextVoice == 0;
+            update(503, 16);
+            ok &= v.m_nextVoice == 1;
+            // 1.2 s: the first; 1.6 s: kept (shown already); 2.1 s: gone, the second; 2.6 s: none.
+            update(1200, 16);
+            ok &= v.m_subtitle == 0 && v.m_box->GetRunText(0) == "Hello" && v.m_box->NumRuns() == 1;
+            update(1600, 16);
+            ok &= v.m_subtitle == 0 && v.m_box->GetRunText(0) == "Hello";
+            update(2100, 16);
+            ok &= v.m_subtitle == 1 && v.m_box->GetRunText(0) == "Over" && v.m_box->NumRuns() == 1;
+            update(2500, 16);
+            ok &= v.m_subtitle == 1;
+            update(2600, 16);
+            ok &= v.m_subtitle == -1 && v.m_box->NumRuns() == 0;
+            // (Its edges: not shown at its start or end exactly.)
+            update(4000, 16);
+            ok &= v.m_subtitle == -1;
+            update(4001, 16);
+            ok &= v.m_subtitle == 2;
+            update(5000, 16);
+            ok &= v.m_subtitle == 2;
+            update(5001, 16);
+            ok &= v.m_subtitle == -1;
+            // Both of a time: the last shown.
+            v.m_subtitles = {{10, 30, C_str("A")}, {10, 30, C_str("B")}};
+            update(1500, 16);
+            ok &= v.m_subtitle == 1 && v.m_box->GetRunText(0) == "B";
+            // The stream lost (-1): stopped, the screen cleared, ended; its position still read.
+            g_mrRet[{stream, 0x2C}] = static_cast<uint32_t>(-1);
+            update(1600, 16);
+            ok &= GmInOrder(Join(g_gfLog), {"ust 2c", "ust 18", "graph 64 0 1 3", "graph 70", "ust 38"}) &&
+                  v.m_state == GAME_STATE_ENDED;
+            // Finished, a briefing: "Press space to continue ..." waited for (the rest not done).
+            v.m_state = GAME_STATE_RUNNING;
+            g_mrRet[{stream, 0x2C}] = 1;
+            v.m_nextVoice = 0;
+            v.m_box->AddText(C_str("extra"), 0);
+            update(3000, 16);
+            ok &= MsLogIs({"sound update 16", "ust 2c"}, g_gfLog) && v.m_ending && v.m_box->NumRuns() == 1 &&
+                  v.m_box->GetRunText(0) == g_texts.Get(0x7F8) && v.m_nextVoice == 0 && v.m_time == 1600 &&
+                  v.m_state == GAME_STATE_RUNNING;
+            // Waiting: the stream no more polled, the subtitles left; the voices still played.
+            update(3100, 16);
+            ok &= MsLogIs({"sound update 16", "snd 14 0.5", "usrc 4 us1", "usrc 20 1", "usrc c 0 0"}, g_gfLog) &&
+                  v.m_box->NumRuns() == 1;
+            // No box: nothing waited for.
+            v.m_ending = false;
+            delete v.m_box;
+            v.m_box = nullptr;
+            update(3200, 16);
+            ok &= MsLogIs({"sound update 16", "ust 2c"}, g_gfLog) && !v.m_ending;
+            // Finished, not a briefing: ended.
+            video->*VsGet(S_VsBriefingTag()) = false;
+            update(3300, 16);
+            ok &= GmInOrder(Join(g_gfLog), {"ust 2c", "ust 18", "graph 70", "ust 38"}) && v.m_state == GAME_STATE_ENDED;
+            // D_Outro finished: its end reached (not ended), its position read.
+            v.m_state = GAME_STATE_RUNNING;
+            v.m_dataDiskOutro = true;
+            update(3400, 16);
+            ok &= MsLogIs({"sound update 16", "ust 2c", "ust 38"}, g_gfLog) && v.m_ending && v.m_state == GAME_STATE_RUNNING;
+            // No player: no voice.
+            v.m_voicePlayer = nullptr;
+            v.m_nextVoice = 0;
+            update(3500, 16);
+            ok &= v.m_nextVoice == 0 && MsLogIs({"sound update 16"}, g_gfLog);
+            v.m_stream = nullptr;
+            v.m_voices.clear();
+            delete video;
+            WM(r.vsUpdate, ok);
+        }
+
+        // --- the credits' scroll: by the time; their end (the last line gone): 3 s more; D_Outro's fade
+        // out over 1 s, ended after 1.2 s ---
+        {
+            bool ok = true;
+            C_VideoState v;
+            v.m_state = GAME_STATE_RUNNING;
+            v.m_scrolling = true;
+            v.m_credits = true;
+            g_creditsIntro = 7;
+            v.MakeCreditsBox(800, 600);
+            ok &= v.m_scrollSpeed == static_cast<float>(800) * 0.0009765625f * 50.0f * 0.001f && g_creditsIntro == 7;
+            auto *box = static_cast<S_VsBoxPeek *>(v.m_box);
+            g_gfLog.clear();
+            v.Update(100);
+            const float scrolled = static_cast<float>(100) * v.m_scrollSpeed + -546.875f;
+            ok &= v.m_scroll == scrolled && box->m_scroll == static_cast<int>(scrolled) && MsLogIs({"sound update 100"}, g_gfLog);
+            // (No lines: finished at once.) 3 s counted.
+            ok &= v.m_fadeTime == 100 && v.m_state == GAME_STATE_RUNNING;
+            v.Update(2899);
+            ok &= v.m_fadeTime == 2999 && v.m_state == GAME_STATE_RUNNING;
+            v.Update(1);
+            ok &= v.m_fadeTime == 3000 && v.m_state == GAME_STATE_ENDED;
+            // Lines left: not counted.
+            v.m_state = GAME_STATE_RUNNING;
+            v.m_fadeTime = 0;
+            box->m_lines.push_back(nullptr);
+            v.m_scroll = -546.875f;
+            v.Update(50);
+            ok &= v.m_fadeTime == 0 && box->m_scroll == static_cast<int>(static_cast<float>(50) * v.m_scrollSpeed + -546.875f);
+            box->m_lines.clear();
+            // D_Outro: its fade once its end is reached (the colour's alpha from 255 down).
+            v.m_credits = false;
+            v.m_dataDiskOutro = true;
+            v.Update(500);
+            ok &= v.m_fadeTime == 0 && box->m_colour == 0;
+            v.m_ending = true;
+            v.Update(500);
+            ok &= v.m_fadeTime == 500 && box->m_colour == 0x80FFFFFFu && v.m_state == GAME_STATE_RUNNING;
+            v.Update(250);
+            ok &= v.m_fadeTime == 750 && box->m_colour == 0x40FFFFFFu;
+            v.Update(250);
+            ok &= v.m_fadeTime == 1000 && box->m_colour == 0x00FFFFFFu && v.m_state == GAME_STATE_RUNNING;
+            v.Update(199);
+            ok &= box->m_colour == 0x00FFFFFFu && v.m_state == GAME_STATE_RUNNING;
+            v.Update(1);
+            ok &= v.m_fadeTime == 1200 && v.m_state == GAME_STATE_ENDED;
+            for (int &style : g_creditsStyles) {
+                ReleaseTextStyle(style);
+                style = -1;
+            }
+            WM(r.vsScroll, ok);
+        }
+
+        // --- drawn: the screen cleared, the stream's picture, the box (render state 0 on), the state back ---
+        {
+            bool ok = true;
+            C_VideoState v;
+            S_MrObj *stream = newStream("rst");
+            g_mrRet[{graph, 0x78}] = 7;
+            g_gfLog.clear();
+            v.Render();
+            ok &= MsLogIs({"graph 78 0", "graph 64 0 1 3", "graph 74 0 7"}, g_gfLog);
+            v.m_stream = As<ISND_stream>(stream);
+            v.m_box = new C_VsLogBox();
+            g_gfLog.clear();
+            v.Render();
+            ok &= MsLogIs({"graph 78 0", "graph 64 0 1 3", "graph 68", "rst 50 0", "graph 6c", "graph 74 0 1", "graph 68",
+                           "box render", "graph 6c", "graph 74 0 7"}, g_gfLog);
+            delete v.m_box;
+            v.m_box = nullptr;
+            v.m_stream = nullptr;
+            g_mrRet.erase({graph, 0x78});
+            WM(r.vsRender, ok);
+        }
+
+        // --- the keys: Escape (Space once the end is reached): the stream stopped, cleared, ended ---
+        {
+            bool ok = true;
+            C_VideoState v;
+            S_MrObj *stream = newStream("kst");
+            const auto key = [&](int k) {
+                v.m_state = GAME_STATE_RUNNING;
+                g_mrRet[{graph, 0xA0}] = static_cast<uint32_t>(k);
+                g_gfLog.clear();
+                float held[4] = {}, pressed[4] = {};
+                return v.HandleInput(held, pressed);
+            };
+            v.m_stream = As<ISND_stream>(stream);
+            ok &= key(1) && MsLogIs({"graph a0", "kst 18", "graph 64 0 1 3", "graph 70"}, g_gfLog) && v.m_state == GAME_STATE_ENDED;
+            ok &= key(0x39) && MsLogIs({"graph a0"}, g_gfLog) && v.m_state == GAME_STATE_RUNNING;
+            ok &= key(0x1C) && MsLogIs({"graph a0"}, g_gfLog) && v.m_state == GAME_STATE_RUNNING;
+            v.m_ending = true;
+            ok &= key(0x39) && MsLogIs({"graph a0", "kst 18", "graph 64 0 1 3", "graph 70"}, g_gfLog) && v.m_state == GAME_STATE_ENDED;
+            ok &= key(0x1C) && v.m_state == GAME_STATE_RUNNING;
+            v.m_stream = nullptr;
+            ok &= key(1) && MsLogIs({"graph a0", "graph 64 0 1 3", "graph 70"}, g_gfLog) && v.m_state == GAME_STATE_ENDED;
+            g_mrRet.erase({graph, 0xA0});
+            ok &= v.GetTypeId() == 7;
+            WM(r.vsInput, ok);
+        }
+
+        // --- the movie state: played (its node, the sequence), ended: finished; stopped: the node deleted;
+        // Outro2 over the main menu: its music saved ---
+        {
+            bool ok = true;
+            C_MovieState m;
+            S_MrObj *stream = newStream("mst");
+            newSource("msrc");
+            g_mrRet[{stream, 0x08}] = 0;
+            g_gfLog.clear();
+            ok &= !m.Play("Logo1.bik", 3) && m.GetSequence() == 3 && m.m_video && std::string(m.m_video->GetFileName()) == "Logo1.bik" &&
+                  !m.m_video->IsBriefing() && m.m_state == GAME_STATE_RUNNING && m.GetTypeId() == 10 &&
+                  MrHas("mst c GameMovie\\Logo1.bik 400");
+            g_mrRet[{graph, 0xA0}] = 1;
+            float held[4] = {}, pressed[4] = {};
+            ok &= m.HandleInput(held, pressed) && m.m_state == GAME_STATE_MOVIE_FINISHED;
+            m.m_state = GAME_STATE_RUNNING;
+            g_mrRet[{graph, 0xA0}] = 0;
+            ok &= m.HandleInput(held, pressed) && m.m_state == GAME_STATE_RUNNING;
+            g_mrRet[{stream, 0x2C}] = static_cast<uint32_t>(-1);
+            m.Update(10);
+            ok &= m.m_state == GAME_STATE_MOVIE_FINISHED;
+            m.m_state = GAME_STATE_RUNNING;
+            g_mrRet[{stream, 0x2C}] = 0;
+            m.Update(10);
+            ok &= m.m_state == GAME_STATE_RUNNING;
+            g_gfLog.clear();
+            ok &= m.Stop() && !m.m_video && MrHas("seen Logo1.bik 1") && MrHas("video gone");
+            // Outro2 over the main menu: its music saved, 37; over another state: not saved.
+            C_VsState menu(GAME_STATE_TYPE_MAIN_MENU), other(GAME_STATE_TYPE_SQUAD_MENU);
+            m.SetReturnState(&menu);
+            music = 9;
+            g_vsMusicPosition = 55;
+            stream = newStream("ost");
+            newSource("osrc");
+            g_mrRet[{stream, 0x08}] = 0;
+            g_gfLog.clear();
+            m.Play("Outro2.bik", 0);
+            ok &= m.m_outro2 && m.m_musicTrack == 9 && m.m_musicPosition == 55 && MrHas("crossfade 37 2000 0") &&
+                  !MrHas("fade 0.011 2000") && m.GetReturnState() == &menu;
+            m.Stop();
+            m.m_musicTrack = m.m_musicPosition = -1;
+            m.SetReturnState(&other);
+            stream = newStream("ost2");
+            newSource("osrc2");
+            g_mrRet[{stream, 0x08}] = 0;
+            m.Play("Outro2.bik", 0);
+            ok &= m.m_musicTrack == -1;
+            m.Stop();
+            // A video state's Outro2 (not a movie state): not saved.
+            C_VideoState v;
+            C_CampaignVideo *video = node("Outro2.bik", false);
+            stream = newStream("ost3");
+            newSource("osrc3");
+            g_mrRet[{stream, 0x08}] = 0;
+            v.Start(video);
+            ok &= v.m_musicTrack == -1 && v.m_outro2;
+            v.Stop();
+            delete video;
+            // D_Outro: scrolled with the credits' box, its script parsed as the credits'.
+            video = node("D_Outro.bik", false);
+            stream = newStream("dst");
+            newSource("dsrc");
+            g_mrRet[{stream, 0x08}] = 1;
+            g_vsFiles = {dir + "D_Outro.txt"};
+            g_vsScripts[dir + "D_Outro.txt"] = {{1, "<TI>The end"}, {2, "<1,2>not a subtitle"}};
+            details->subtitles = true;
+            g_gfLog.clear();
+            ok &= v.Start(video) && v.m_dataDiskOutro && v.m_scrolling && dynamic_cast<C_VideoTextBox *>(v.m_box) &&
+                  runs(v.m_box) == CmText("The end|%d; ", g_creditsStyles[0]) && v.m_subtitles.empty() &&
+                  GmInOrder(Join(g_gfLog), {"dst 20", "texts load", "dst 3c 0.55", "dst 14"});
+            v.Stop();
+            delete video;
+            WM(r.vsMovieState, ok);
+        }
+
+        g_vsScripts.clear();
+        g_vsFiles.clear();
+        g_vsSounds.clear();
+        g_mrRet.clear();
+        g_gameProfile.m_unicodeFont = oldUnicode;
+        g_foLanguage = oldLanguage;
+        *details = oldDetails;
+        g_gameProfile.m_player = oldPlayer;
+        music = oldMusic;
+        *reinterpret_cast<void **>(g_soundModuleMemory) = oldSoundVt;
+        for (int i = 0; i < 10; ++i)
+            g_igraphVtable[slots[i] / 4] = oldGraph[i];
+        g_mrSndDriver.vtable = oldDriverVt;
+        g_mrNames.erase(&g_mrSndDriver);
+        g_mrNames.erase(graph);
+    }
     g_driverVtable[0x54 / 4] = oldCreate;
     g_mrModelVt[0x48 / 4] = oldFind;
     g_gameProfile.m_campaign = oldCampaign;
     g_gfLog.clear();
     g_controlMessages.clear();
     std::printf("campaignscreens: oeTable %d oeDescribe %d oeBuild %d oeInput %d oeSlots %d smStart %d smMessage %d "
-                "smConsole %d smPassword %d smBuild %d smTick %d smJoin %d smNotify %d\n", r.oeTable, r.oeDescribe,
+                "smConsole %d smPassword %d smBuild %d smTick %d smJoin %d smNotify %d vsCredits %d vsMovie %d vsFit %d "
+                "vsUpdate %d vsScroll %d vsRender %d vsInput %d vsMovieState %d\n", r.oeTable, r.oeDescribe,
                 r.oeBuild, r.oeInput, r.oeSlots, r.smStart, r.smMessage, r.smConsole, r.smPassword, r.smBuild, r.smTick,
-                r.smJoin, r.smNotify);
+                r.smJoin, r.smNotify, r.vsCredits, r.vsMovie, r.vsFit, r.vsUpdate, r.vsScroll, r.vsRender, r.vsInput,
+                r.vsMovieState);
 }

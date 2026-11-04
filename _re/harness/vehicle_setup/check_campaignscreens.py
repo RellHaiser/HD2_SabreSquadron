@@ -9,7 +9,8 @@ import re
 import sys
 
 CHECKS = ("oeTable oeDescribe oeBuild oeInput oeSlots "
-          "smStart smMessage smConsole smPassword smBuild smTick smJoin smNotify").split()
+          "smStart smMessage smConsole smPassword smBuild smTick smJoin smNotify "
+          "vsCredits vsMovie vsFit vsUpdate vsScroll vsRender vsInput vsMovieState").split()
 
 
 def main():

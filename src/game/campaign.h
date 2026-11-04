@@ -89,9 +89,11 @@ public:
     bool Save(C_chunk &chunk) override;                 // 0x006bcc30
 
     const char *GetFileName() const { return m_fileName; }
+    bool IsBriefing() const { return m_briefing; }
 
 private:
     friend class C_Campaign;
+    friend class C_MovieState;                          // (Play's node)
 
     C_str m_fileName;                                   // +0x10 e.g. "BriefArctic1a.bik"
     C_str m_title;                                      // +0x14 "Briefing Arktida 1A"

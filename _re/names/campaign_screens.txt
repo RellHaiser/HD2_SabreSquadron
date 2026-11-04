@@ -41,3 +41,17 @@
 006e57d0 vector_insert_text_6e57d0
 006e5ad0 S_GameText::CopyConstruct_6e5ad0
 00688130 C_str::Append_688130
+# Part 9g-iv: the video player C_VideoState / C_MovieState (src/game/video_state.cpp; the rest in game_app.txt).
+00688900 S_Subtitle::~S_Subtitle | void __fastcall ~S_Subtitle(void * this)
+00688920 C_VideoState::MakeSubtitleBox | void __thiscall MakeSubtitleBox(C_VideoState *this, int width, int height)
+00688ab0 C_VideoState::MakeCreditsBox | void __thiscall MakeCreditsBox(C_VideoState *this, int width, int height)
+00688da0 C_VideoState::FitVideo | void __thiscall FitVideo(C_VideoState *this, int width, int height)
+006892e0 C_VideoState::OpenStream | void __thiscall OpenStream(C_VideoState *this, char * file)
+006893e0 C_VideoState::LoadScript | void __thiscall LoadScript(C_VideoState *this, char * file)
+00689630 C_VideoState::ParseCredits | void __fastcall ParseCredits(C_VideoState *this)
+00689c60 C_VideoState::ParseSubtitles | void __fastcall ParseSubtitles(C_VideoState *this)
+0068a150 vector_insert_subtitle_68a150
+0068a320 vector_insert_voice_68a320
+008ae644 g_creditsStyles @ int[14]
+008ae680 g_creditsIntro @ int
+008415a0 g_creditsIntros @ char *[2]

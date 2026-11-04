@@ -7871,6 +7871,36 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/campaign_screens.txt (+14; hud.txt's C_TextDatabase::Find / GetText renamed); 16
     functions in ported.txt. Stats: 9,002 of 12,306 functions by hand (81.0 % by size).
 
+  PART 9g-iv DONE (2026-11-03): the video player (game/video_state.h/.cpp, new; C_VideoState and
+  C_MovieState out of pending.h).
+  - C_VideoState: Start 0x00688330 (the credits: the music saved, track 37, their box and script, no
+    stream; a movie: the voices' player, the stream GameMovie\.. (0x400), "Outro2" over the main menu
+    its music saved, else faded to 5 % for a briefing, 1.1 %; opened: FitVideo 0x00688da0, "D_Outro"
+    scrolled, else the subtitles' box when there are some; the volume 110 % of the options', played),
+    Stop 0x00688750, HandleInput 0x00688ea0 (Escape; Space once the end is reached), Update 0x00688f00
+    (the stream's end: a briefing waits with "Press space to continue ...", D_Outro fades out over 1 s and
+    ends after 1.2 s, others end; the credits' 3 s after their last line; the subtitles by tenths of a
+    second, the last of a time shown; the voices), Render 0x00689240, OpenStream 0x006892e0,
+    MakeSubtitleBox 0x00688920, MakeCreditsBox 0x00688ab0 (14 styles, the table 0x008412c8), LoadScript
+    0x006893e0 (text\<language>\subtitles\<movie>.txt into its own C_GameTexts), ParseSubtitles
+    0x00689c60 ("S<time>file" voices from Sounds\ or sounds_DATADISK\, "<start,end>text" with the
+    options' subtitles), ParseCredits 0x00689630 (the tags TI NA SM (three columns) EL ES, the Czech
+    TICZ NACZ SMCZ, SPEED). C_MovieState: Play 0x0066ede0 (a node of its own), Stop, HandleInput, Update
+    (ended: GAME_STATE_MOVIE_FINISHED), GetTypeId; the destructors and the constructor 0x006c3330.
+  - ISND_driver's CreateSound 0x20 / CreateSource 0x28, ISND_sound and ISND_source (names inferred).
+  - Fixes: the credits' styles start at -1 (the original's at 0: the first movie's stop released style
+    0); a voice's missing buffer skipped (the original released it); the credits' lines are not formats.
+    Dropped: the copy protection, the start time 0x008ae67c (read nowhere).
+  - Quirks kept: Start resets no state of a previous movie of the same state (the end reached, the next
+    voice, the scroll, the fade).
+  - Harness: campaign_screens_test.inc's vsCredits, vsMovie, vsFit, vsUpdate, vsScroll, vsRender, vsInput,
+    vsMovieState (the stream, the voices' objects, IGraph's slots faked and logged; campaign.cpp's video
+    node and game_texts.cpp's loading faked). All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g4.py (431 cases, 391 build; all caught but 22 equivalent).
+  - Build: MSVC clean. Tier 1: 364 errors in 66 files, 153 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+13); 37 functions in ported.txt (the STL helpers absorbed).
+    Stats: 9,039 of 12,306 functions by hand (81.2 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
