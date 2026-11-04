@@ -49,6 +49,7 @@ public:
     // (The debriefing, part 9g-v: campaign_screens_test.inc.)
     void CommitCurrent();
     void ClearCurrent();
+    const std::vector<int> &GetTexts() const;   // (the diary, part 9g-vi)
 };
 
 class C_PlayerProfile {

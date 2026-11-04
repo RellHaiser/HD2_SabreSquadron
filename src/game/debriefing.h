@@ -7,6 +7,7 @@
 
 #include "game/menu_state.h"
 
+class C_Control;
 class I3D_frame;
 struct S_ScreenDesc;
 struct S_SoldierProfile;
@@ -54,13 +55,31 @@ protected:
     // 140 %).
     static void StoreProgress();                        // 0x0068c5f0
 
-    // The screens (part 9g-vi).
+    // The debriefing's screen: its "death" frame off, the titles, the soldiers' panel, their scroll
+    // bar, the buttons (saving and going on: a won campaign mission; retrying; the diary: the
+    // campaign's; the main menu). True. (Part 9g-vi.)
     bool DescribeDebriefing(S_ScreenDesc *desc, I3D_frame *model);   // 0x0068edc0
-    void DescribeDebriefing2(S_ScreenDesc *desc, I3D_frame *model);  // 0x0068f6c0
+    // The diary's screen: its two pages' frames under "multi_page", the texts' control, the page
+    // buttons, the exit; the diary's texts (headings in their style, the others after a blank line).
+    // True. (Part 9g-vi.)
     bool DescribeDiary(S_ScreenDesc *desc, I3D_frame *model);        // 0x0068d8b0
-    bool ShowSoldier(int *unknown);                     // 0x0068f9f0
+    // The diary's page buttons and the debriefing's diary button: two pages back, on (as far as there
+    // are pages), from the start (no control), the page break's (no page yet); the buttons (in)active.
+    // True. (Part 9g-vi.)
+    static bool OnDiaryPage(void *menu, void *argument, C_Control *control, uint32_t notification,
+                            uint32_t value);            // 0x0068e160
+    // The mission won: the operation's end's kind; a tutorial; every required objective neither open nor
+    // critically failed and someone of the squad alive. (Part 9g-vi.)
+    bool IsMissionWon() const;                          // 0x0068f8f0
 
-    int m_unknown1B0 = -1;                              // +0x1B0
+    // The soldiers' panel, the soldier shown, the scroll (part 9g-vii).
+    void DescribeSoldiers(S_ScreenDesc *desc, I3D_frame *model);     // 0x0068e3e0
+    void DescribeDebriefing2(S_ScreenDesc *desc, I3D_frame *model);  // 0x0068f6c0
+    bool ShowSoldier(int *unknown);                     // 0x0068f9f0
+    static bool OnSoldierScroll(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                uint32_t value);        // 0x0068ff70
+
+    int m_diaryPage = -1;                               // +0x1B0 the diary's left page (-1: none yet)
     int m_unknown1B4 = -1;                              // +0x1B4
     uint8_t m_unknown1B8[0xD8] = {};                    // +0x1B8
 };

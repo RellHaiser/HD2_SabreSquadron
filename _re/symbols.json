@@ -32829,6 +32829,30 @@
   "name": "C_DebriefingMenu::BuildScreens",
   "proto": "bool __thiscall BuildScreens(C_MenuState *this)"
  },
+ "0068d8b0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::DescribeDiary",
+  "proto": "bool __thiscall DescribeDiary(C_MenuState *this, void * desc, void * model)"
+ },
+ "0068e160": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::OnDiaryPage",
+  "proto": "bool __thiscall OnDiaryPage(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0068edc0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::DescribeDebriefing",
+  "proto": "bool __thiscall DescribeDebriefing(C_MenuState *this, void * desc, void * model)"
+ },
+ "0068f670": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::IsCopyRefused_68f670"
+ },
+ "0068f8f0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::IsMissionWon",
+  "proto": "bool __fastcall IsMissionWon(C_MenuState *this)"
+ },
  "006987d0": {
   "module": "game",
   "name": "GetGame",

@@ -7925,6 +7925,25 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 364 errors in 66 files, 153 stubs. ret_audit --src: 52.
   - Ghidra: names/campaign_screens.txt (+10); 12 functions in ported.txt. Stats: 9,051 of 12,306 functions by hand (81.4 % by size).
 
+  PART 9g-vi DONE (2026-11-03): the debriefing's diary and screen (game/debriefing_screens.cpp, new).
+  - DescribeDiary 0x0068d8b0 (an aligned frame, from the asm: the pages' frames text_02 / text_01 under
+    a "multi_page" frame, "DIARY", the multi page text's two areas, the page buttons and their callback,
+    "BACK"; the diary's texts: ids under 1000 and 16010 .. 16019 as headings (style 4), the others after
+    a blank line (style 5); the refresh), OnDiaryPage 0x0068e160 (two pages back, on as far as there are
+    pages, from the start without a control, the page break's left page for the first showing; the
+    buttons (in)active), DescribeDebriefing 0x0068edc0 ("death" off, "MISSION DEBRIEFING" / "CAMPAIGN
+    DEBRIEFING", the statuses, the soldiers' scroll bar (the squad's size, its callback), "SAVE AND
+    CONTINUE" (a won campaign mission), "RETRY" (the restart / a single mission's replay; none in kind
+    6), "SHOW DIARY" (the campaign's: its page and screen), "EXIT TO MAIN MENU"), IsMissionWon 0x0068f8f0
+    (kind 6; a tutorial; the required objectives neither open nor critically failed, someone alive).
+  - C_DebriefingMenu +0x1B0 is the diary's page (m_diaryPage). Dropped: the copy protection 0x0068f670
+    (from the sixteenth mission a cracked copy could not save and go on).
+  - Harness: dbDiary, dbDiaryPage, dbWon, dbScreen (the soldiers' panel and scroll, part 9g-vii, faked).
+    All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g6.py (159 cases, 142 build; all caught but 3 equivalent).
+  - Build: MSVC clean. Tier 1: 364 errors in 66 files, 153 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+5); 5 functions in ported.txt. Stats: 9,056 of 12,306 functions by hand (81.5 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

@@ -66,3 +66,9 @@
 0068d0f0 C_DebriefingMenu::OnMessage | void __thiscall OnMessage(C_MenuState *this, void * message)
 0068d5e0 C_DebriefingMenu::BuildScreens | bool __thiscall BuildScreens(C_MenuState *this)
 008423c8 g_rankExperience @ int[7]
+# Part 9g-vi: the debriefing's diary and screen (src/game/debriefing_screens.cpp).
+0068d8b0 C_DebriefingMenu::DescribeDiary | bool __thiscall DescribeDiary(C_MenuState *this, void * desc, void * model)
+0068e160 C_DebriefingMenu::OnDiaryPage | bool __thiscall OnDiaryPage(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+0068edc0 C_DebriefingMenu::DescribeDebriefing | bool __thiscall DescribeDebriefing(C_MenuState *this, void * desc, void * model)
+0068f8f0 C_DebriefingMenu::IsMissionWon | bool __fastcall IsMissionWon(C_MenuState *this)
+0068f670 C_DebriefingMenu::IsCopyRefused_68f670

@@ -151,17 +151,17 @@ bool S_SoldierProfile::HasUnknown28(int value) const
 {
     return std::find(unknown28.begin(), unknown28.end(), value) != unknown28.end();
 }
-bool C_DebriefingMenu::DescribeDebriefing(S_ScreenDesc *desc, I3D_frame *)
+void C_DebriefingMenu::DescribeSoldiers(S_ScreenDesc *desc, I3D_frame *) { GfLog("describe soldiers %x", desc->id); }
+bool C_DebriefingMenu::OnSoldierScroll(void *, void *, C_Control *, uint32_t, uint32_t)
 {
-    GfLog("describe debriefing %x", desc->id);
+    GfLog("soldier scroll");
     return true;
 }
+std::vector<int> g_diaryTexts;
+const std::vector<int> &C_Diary::GetTexts() const { return g_diaryTexts; }
+C_MissionDef *g_dbMission;
+C_MissionDef *C_Campaign::GetCurrentMission() { return g_dbMission; }
 void C_DebriefingMenu::DescribeDebriefing2(S_ScreenDesc *desc, I3D_frame *) { GfLog("68f6c0 %x", desc->id); }
-bool C_DebriefingMenu::DescribeDiary(S_ScreenDesc *desc, I3D_frame *)
-{
-    GfLog("describe diary %x", desc->id);
-    return true;
-}
 bool C_DebriefingMenu::ShowSoldier(int *unknown)
 {
     GfLog("show soldier %d", unknown != nullptr);
@@ -229,6 +229,41 @@ struct C_VsState : C_GameState {
     int type;
 };
 
+// (Part 9g-vi.) The diary's pages control: its count and page break, the messages asked for logged; the
+// mission's fields; frames logging their LinkTo and Update.
+struct C_DbPages : C_MsScreen {
+    C_DbPages(I3D_scene *scene, const char *n, uint32_t id) : C_MsScreen(scene, n, id) {}
+    int count = 0, pageBreak = 0;
+    std::string log;
+    bool HandleMessage(S_ControlMessage *m) override
+    {
+        if (m->id == CONTROL_MSG_GET_PAGES) {
+            log += "pages ";
+            m->value = static_cast<uint32_t>(count);
+        } else if (m->id == CONTROL_MSG_GET_PAGE_BREAK) {
+            log += "break ";
+            m->value = static_cast<uint32_t>(pageBreak);
+        }
+        return true;
+    }
+};
+struct C_DbMission : C_MissionDef {
+    using C_MissionDef::m_objectives;
+    using C_MissionDef::m_unknown2C;
+};
+void **DbPageVt()
+{
+    static void **vt = nullptr;
+    if (!vt) {
+        vt = new void *[MR_SLOTS];
+        std::copy(g_msFrameVt, g_msFrameVt + MR_SLOTS, vt);
+        vt[0x38 / 4] = reinterpret_cast<void *>(&MrFake<0x38, void *, uint32_t>);
+        vt[0x24 / 4] = reinterpret_cast<void *>(&MrFake<0x24>);
+        vt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+    }
+    return vt;
+}
+
 // A control's callbacks counted.
 struct S_CsPeek : C_Control {
     static size_t Callbacks(C_Control *control) { return static_cast<S_CsPeek *>(control)->m_callbacks.size(); }
@@ -241,6 +276,7 @@ struct S_CampaignScreensResults {
     bool vsCredits = true, vsMovie = true, vsFit = true, vsUpdate = true, vsScroll = true, vsRender = true, vsInput = true;
     bool vsMovieState = true;
     bool dbMedal = true, dbResults = true, dbStore = true, dbStart = true, dbMessage = true, dbBuild = true;
+    bool dbDiary = true, dbDiaryPage = true, dbWon = true, dbScreen = true;
 };
 
 // A message's values ("target id value value2[ value3][ 'text']"; value2 / value3 by name when known).
@@ -1890,13 +1926,21 @@ void CampaignScreensTest(I3D_scene *)
             m.m_screens = {&box};
             S_MrObj *debriefing = MrObj("dbbd", g_mrModelVt), *diary = MrObj("dbbdi", g_mrModelVt);
             g_mrMade[FRAME_MODEL] = {debriefing, diary};
+            S_MrObj *right = MsFrame("dbbr"), *left = MsFrame("dbbl");
+            right->vtable = DbPageVt();
+            left->vtable = DbPageVt();
+            g_msChildren[{diary, "text_02"}] = right;
+            g_msChildren[{diary, "text_01"}] = left;
+            S_MrObj *madePages = MsFrame("dbbp");
+            madePages->vtable = DbPageVt();
+            g_mrMade[FRAME_DUMMY] = {madePages};
             playMode.singleMission = 0;
             g_cacheLoads.clear();
             g_menuScreens.clear();
             g_gfLog.clear();
             ok &= m.BuildScreens() && g_cacheLoads == std::vector<std::string>({"debriefing", "diary"}) &&
-                  GmInOrder(Join(g_gfLog), {"dbbd 34 debriefing", "describe debriefing 4000000", "68f6c0 4000000", "dbbdi 34 DIARY",
-                                            "describe diary 8000000", "show soldier 0"}) &&
+                  GmInOrder(Join(g_gfLog), {"dbbd 34 debriefing", "dbbd 48 death 1", "describe soldiers 4000000", "68f6c0 4000000",
+                                            "dbbdi 34 DIARY", "dbbdi 48 text_02 1", "dbbr 38 dbbp 1", "show soldier 0"}) &&
                   m.m_screens.size() == 3 && m.m_screens[1]->GetScreenFrame() == As<I3D_frame>(debriefing) &&
                   !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1];
             for (size_t i = 1; i < m.m_screens.size(); ++i)
@@ -1910,7 +1954,10 @@ void CampaignScreensTest(I3D_scene *)
             g_cacheLoads.clear();
             g_gfLog.clear();
             ok &= m.BuildScreens() && g_cacheLoads == std::vector<std::string>({"debriefing"}) && m.m_screens.size() == 2 &&
-                  !MrHas("describe diary 8000000");
+                  !MrHas("dbbs 48 text_02 1");
+            g_msChildren.erase({diary, "text_02"});
+            g_msChildren.erase({diary, "text_01"});
+            g_mrMade.erase(FRAME_DUMMY);
             for (size_t i = 1; i < m.m_screens.size(); ++i)
                 delete m.m_screens[i];
             m.m_screens.clear();
@@ -1929,6 +1976,242 @@ void CampaignScreensTest(I3D_scene *)
         g_gameProfile.m_playMode = oldPlayMode;
         g_controlMessages.clear();
     }
+    // ===== part 9g-vi: the debriefing's diary and screen =====
+    {
+        S_PlayMode playMode;
+        S_PlayMode *const oldPlayMode = g_gameProfile.m_playMode;
+        g_gameProfile.m_playMode = &playMode;
+        S_MissionSquad squad;
+        S_MissionSquad *const oldSquad = g_gameProfile.m_missionSquad;
+        g_gameProfile.m_missionSquad = &squad;
+        alignas(16) static uint8_t storeMemory[64];
+        C_HumanStore *const oldStore = g_gameProfile.m_humanStore;
+        g_gameProfile.m_humanStore = reinterpret_cast<C_HumanStore *>(storeMemory);
+        C_PlayerProfile player;
+        C_PlayerProfile *const oldPlayer = g_gameProfile.m_player;
+        g_gameProfile.m_player = &player;
+        const std::vector<S_SoldierProfile *> oldProfiles = g_epProfiles;
+
+        // --- the diary's screen: its pages' frames under "multi_page", the controls, the diary's texts ---
+        {
+            bool ok = true;
+            C_DebriefingMenu m;
+            g_csNames[reinterpret_cast<uintptr_t>(&m)] = "menu";
+            g_csNames[reinterpret_cast<uintptr_t>(&C_DebriefingMenu::OnDiaryPage)] = "page";
+            void **const pageVt = DbPageVt();
+            S_MrObj *model = MrObj("dym", g_mrModelVt);
+            S_MrObj *right = MsFrame("dyr"), *left = MsFrame("dyl");
+            right->vtable = pageVt;
+            left->vtable = pageVt;
+            g_msChildren[{model, "text_02"}] = right;
+            g_msChildren[{model, "text_01"}] = left;
+            S_MrObj *pages = MsFrame("dyp");
+            pages->vtable = pageVt;
+            g_mrMade[FRAME_DUMMY] = {pages};
+            g_diaryTexts = {5, 1500, 16010, 16019, 16020, 999, 1000, 16009};
+            S_ScreenDesc desc("DIARY", "diary", 2u << SCREEN_ID_SHIFT);
+            g_gfLog.clear();
+            g_controlMessages.clear();
+            ok &= m.DescribeDiary(&desc, As<I3D_frame>(model));
+            ok &= GmInOrder(Join(g_gfLog), {"dym 48 text_02 1", "dym 48 text_01 1", "create 6", "dyp 8 (0 0 0)", "dyr 38 dyp 1",
+                                            "dyl 38 dyp 1", "dyr 24", "dyl 24"});
+            ok &= CsDesc(desc) ==
+                  "13 text_screen 8100000: 0 1000015 a ac1; 25 multi_page 8200000: 0 100009d 0 0 'text_02' 0 100009d 0 0 "
+                  "'text_01'; 14 bprevious page 8300000: 0 1000015 d ac5 0 1000007 4001000 menu page; 14 bnext page 8400000: 0 "
+                  "1000015 d ac6 0 1000007 4001000 menu page; 14 bexit 8500000: 0 1000015 d ac7 0 6001003 0 0; 13 "
+                  "text_h&dversion 8600000: 0 1000015 28 7d6; ";
+            ok &= CsQueue() == "8200000 1000017 4 5; 8200000 1000017 2 7d2; 8200000 1000017 5 5dc; 8200000 1000017 4 3e8a; "
+                               "8200000 1000017 4 3e93; 8200000 1000017 2 7d2; 8200000 1000017 5 3e94; 8200000 1000017 4 3e7; "
+                               "8200000 1000017 2 7d2; 8200000 1000017 5 3e8; 8200000 1000017 2 7d2; 8200000 1000017 5 3e89; "
+                               "8200000 200002c 0 0; ";
+            g_msChildren.erase({model, "text_02"});
+            g_msChildren.erase({model, "text_01"});
+            g_mrMade.erase(FRAME_DUMMY);
+            g_diaryTexts.clear();
+            g_csNames.erase(reinterpret_cast<uintptr_t>(&m));
+            WM(r.dbDiary, ok);
+        }
+
+        // --- the diary's pages: back, on, from the start, the page break's; the buttons ---
+        {
+            bool ok = true;
+            C_DebriefingMenu m;
+            C_DbPages pagesScreen(nullptr, "dbpages", 0x08200000);
+            C_MsScreen box(nullptr, "dbbox", 0), one(nullptr, "dbone", 0x04000000), previous(nullptr, "dbprev", 0x08300000),
+                next(nullptr, "dbnext", 0x08400000), other(nullptr, "dbother", 0x04B00000);
+            m.m_screens = {&box, &one, &pagesScreen};
+            const auto turn = [&](C_Control *control, int page, int count, int pageBreak = 0) {
+                m.m_diaryPage = page;
+                pagesScreen.count = count;
+                pagesScreen.pageBreak = pageBreak;
+                g_controlMessages.clear();
+                g_gfLog.clear();
+                const bool done = C_DebriefingMenu::OnDiaryPage(&m, nullptr, control, CONTROL_NOTIFY_CLICK, 0);
+                return done ? CmText("%d: ", m.m_diaryPage) + CsQueue() : std::string("false");
+            };
+            ok &= turn(nullptr, 6, 10) == "0: 8200000 1000067 0 0; 8300000 1000001 0 0; 8400000 1000002 0 0; ";
+            ok &= turn(&previous, 4, 10) == "2: 8200000 1000067 2 0; 8300000 1000002 0 0; 8400000 1000002 0 0; ";
+            ok &= turn(&previous, 2, 10) == "0: 8200000 1000067 0 0; 8300000 1000001 0 0; 8400000 1000002 0 0; ";
+            ok &= turn(&previous, 1, 10) == "1: 8200000 1000067 1 0; 8300000 1000002 0 0; 8400000 1000002 0 0; ";
+            ok &= turn(&next, 2, 6) == "4: 8200000 1000067 4 0; 8300000 1000002 0 0; 8400000 1000001 0 0; ";
+            ok &= turn(&next, 4, 6) == "6: 8200000 1000067 6 0; 8300000 1000002 0 0; 8400000 1000001 0 0; ";
+            ok &= turn(&next, 5, 6) == "5: 8200000 1000067 5 0; 8300000 1000002 0 0; 8400000 1000001 0 0; ";
+            ok &= turn(&next, 0, 3) == "2: 8200000 1000067 2 0; 8300000 1000002 0 0; 8400000 1000001 0 0; ";
+            ok &= turn(&next, 0, 2) == "2: 8200000 1000067 2 0; 8300000 1000002 0 0; 8400000 1000001 0 0; ";
+            ok &= turn(&next, 0, 1) == "0: 8200000 1000067 0 0; 8300000 1000001 0 0; 8400000 1000001 0 0; ";
+            ok &= turn(&next, 0, 5) == "2: 8200000 1000067 2 0; 8300000 1000002 0 0; 8400000 1000002 0 0; ";
+            // Another control: no page yet, the page break's (its left page; none: 0); a page kept.
+            ok &= turn(&other, -1, 10, 5) == "4: 8200000 1000067 4 0; 8300000 1000002 0 0; 8400000 1000002 0 0; ";
+            ok &= turn(&other, -1, 10, 6) == "6: 8200000 1000067 6 0; 8300000 1000002 0 0; 8400000 1000002 0 0; ";
+            ok &= turn(&other, -1, 10, -3) == "0: 8200000 1000067 0 0; 8300000 1000001 0 0; 8400000 1000002 0 0; ";
+            ok &= turn(&other, -1, 10, 1) == "0: 8200000 1000067 0 0; 8300000 1000001 0 0; 8400000 1000002 0 0; ";
+            ok &= turn(&other, 3, 10, 6) == "3: 8200000 1000067 3 0; 8300000 1000002 0 0; 8400000 1000002 0 0; ";
+            ok &= turn(&other, 0, 10, 4) == "0: 8200000 1000067 0 0; 8300000 1000001 0 0; 8400000 1000002 0 0; ";
+            ok &= turn(&other, -1, 10, 3) == "2: 8200000 1000067 2 0; 8300000 1000002 0 0; 8400000 1000002 0 0; ";
+            ok &= turn(&other, -1, 10, 4) == "4: 8200000 1000067 4 0; 8300000 1000002 0 0; 8400000 1000002 0 0; ";
+            ok &= pagesScreen.log == "pages pages pages pages pages pages pages pages pages pages pages pages break pages break "
+                                     "pages break pages break pages pages pages break pages break ";
+            m.m_screens.clear();
+            WM(r.dbDiaryPage, ok);
+        }
+
+        // --- the mission won: the operation's end's kind; a tutorial; the required objectives neither open nor
+        // critically failed, someone alive ---
+        {
+            bool ok = true;
+            C_DebriefingMenu m;
+            alignas(16) static uint8_t missionMemory[sizeof(C_MissionDef)];
+            std::memset(static_cast<void *>(missionMemory), 0, sizeof missionMemory);
+            auto *mission = reinterpret_cast<C_DbMission *>(missionMemory);
+            alignas(16) static uint8_t objectiveMemory[3][sizeof(S_MissionObjective)];
+            std::memset(static_cast<void *>(objectiveMemory), 0, sizeof objectiveMemory);
+            S_MissionObjective *o[3];
+            for (int i = 0; i < 3; ++i)
+                o[i] = reinterpret_cast<S_MissionObjective *>(objectiveMemory[i]);
+            alignas(16) static uint8_t profileMemory[2][sizeof(S_SoldierProfile)];
+            std::memset(static_cast<void *>(profileMemory), 0, sizeof profileMemory);
+            auto *alive = reinterpret_cast<S_SoldierProfile *>(profileMemory[0]);
+            auto *dead = reinterpret_cast<S_SoldierProfile *>(profileMemory[1]);
+            dead->dead = true;
+            g_epProfiles = {alive, dead};
+            S_SquadSoldier s0, s1;
+            s0.profileIndex = 0;
+            s1.profileIndex = 1;
+            m.m_mode = 5;
+            g_dbMission = nullptr;
+            ok &= !m.IsMissionWon();
+            m.m_mode = 6;
+            ok &= m.IsMissionWon();
+            m.m_mode = 5;
+            g_dbMission = mission;
+            squad.states = {&s1, &s0};
+            ok &= m.IsMissionWon();
+            squad.states = {&s0, &s1};
+            ok &= m.IsMissionWon();
+            squad.states = {&s1, &s0};
+            mission->m_objectives = {o[0], o[1], o[2]};
+            const auto won = [&](int a, bool ba, int b, bool bb, int c, bool bc) {
+                o[0]->status = a;
+                o[0]->bonus = ba;
+                o[1]->status = b;
+                o[1]->bonus = bb;
+                o[2]->status = c;
+                o[2]->bonus = bc;
+                return m.IsMissionWon();
+            };
+            ok &= won(1, false, 2, false, 4, false) && !won(0, false, 1, false, 1, false) && !won(1, false, 3, false, 1, false);
+            ok &= won(0, true, 3, true, 1, false) && won(2, false, 2, false, 2, false) && !won(1, false, 1, false, 0, false);
+            // Nobody alive: lost; a tutorial: won.
+            squad.states = {&s1};
+            ok &= !won(1, false, 1, false, 1, false);
+            squad.states.clear();
+            ok &= !won(1, false, 1, false, 1, false);
+            mission->m_unknown2C = true;
+            ok &= won(0, false, 0, false, 0, false);
+            mission->m_unknown2C = false;
+            mission->m_objectives = std::vector<S_MissionObjective *>();
+            g_dbMission = nullptr;
+            g_epProfiles.clear();
+            WM(r.dbWon, ok);
+        }
+
+        // --- the debriefing's screen: its "death" frame off, the titles, the soldiers' panel, the scroll bar, the
+        // buttons by the mission's result and the play mode ---
+        {
+            bool ok = true;
+            C_DebriefingMenu m;
+            g_csNames[reinterpret_cast<uintptr_t>(&m)] = "menu";
+            g_csNames[reinterpret_cast<uintptr_t>(&C_DebriefingMenu::OnDiaryPage)] = "page";
+            g_csNames[reinterpret_cast<uintptr_t>(&C_DebriefingMenu::OnSoldierScroll)] = "scroll";
+            S_MrObj *model = MrObj("dbm", g_mrModelVt);
+            static void **deathVt = nullptr;
+            if (!deathVt) {
+                deathVt = new void *[MR_SLOTS];
+                std::copy(g_msFrameVt, g_msFrameVt + MR_SLOTS, deathVt);
+                deathVt[0x30 / 4] = reinterpret_cast<void *>(&MrFake<0x30, bool>);
+            }
+            S_MrObj *death = MsFrame("dbdeath");
+            death->vtable = deathVt;
+            g_msChildren[{model, "death"}] = death;
+            S_SquadSoldier s0, s1;
+            squad.states = {&s0, &s1};
+            bool described = true;
+            const auto describe = [&](int mode, bool campaign, bool won) {
+                m.m_mode = mode;
+                playMode.singleMission = campaign ? 0 : 1;
+                g_dbMission = nullptr;
+                alignas(16) static uint8_t missionMemory[sizeof(C_MissionDef)];
+                std::memset(static_cast<void *>(missionMemory), 0, sizeof missionMemory);
+                auto *mission = reinterpret_cast<C_DbMission *>(missionMemory);
+                mission->m_unknown2C = won;
+                g_dbMission = won ? mission : nullptr;
+                S_ScreenDesc desc("debriefing", "debriefing", 1u << SCREEN_ID_SHIFT);
+                g_gfLog.clear();
+                described &= m.DescribeDebriefing(&desc, As<I3D_frame>(model));
+                g_dbMission = nullptr;
+                return CsDesc(desc);
+            };
+            const std::string head = "13 text_screen 4100000: 0 1000015 a abf; 13 text_mission status 4200000: 0 1000015 c 7da; "
+                                     "13 text_status 4300000: 0 1000015 b ac8; 13 text_team status 4400000: 0 1000015 b ac9; "
+                                     "12 text_objectives 4500000:; 8 scroll00 4600000: 0 1000020 2 0 0 1000007 4010000 menu scroll; ";
+            const std::string tail = "14 bload 4900000: 0 1000015 d ac3 0 1000007 4001000 menu page 0 6001001 2 0; 14 bexit to main "
+                                     "menu 4a00000: 0 1000015 d ac4 0 600100a 0 0; 13 text_h&dversion 4b00000: 0 1000015 28 7d6; ";
+            std::string got = describe(5, true, true);
+            ok &= MsLogIs({"dbm 48 death 1", "dbdeath 30 0", "describe soldiers 4000000"}, g_gfLog);
+            ok &= got == head + "14 bsave and continue 4700000: 0 1000015 d ac2 0 6001034 0 0; 14 bretry immediately 4800000: 0 "
+                                "1000015 d acc 0 6001075 0 0; " + tail;
+            if (got != head + "14 bsave and continue 4700000: 0 1000015 d ac2 0 6001034 0 0; 14 bretry immediately 4800000: 0 "
+                               "1000015 d acc 0 6001075 0 0; " + tail)
+                std::fprintf(stderr, "DBDESC %s\n", got.c_str());
+            // Not won: saving inactive.
+            ok &= describe(5, true, false) == head + "14 bsave and continue 4700000: 0 1000015 d ac2 0 6001034 0 0 0 1000001 0 0; "
+                                                    "14 bretry immediately 4800000: 0 1000015 d acc 0 6001075 0 0; " + tail;
+            // A single mission: saving and the diary inactive, the replay.
+            std::string single = tail;
+            single.replace(single.find("0 6001001 2 0;"), std::strlen("0 6001001 2 0;"), "0 6001001 2 0 0 1000001 0 0;");
+            ok &= describe(5, false, true) == head + "14 bsave and continue 4700000: 0 1000015 d ac2 0 6001034 0 0 0 1000001 0 0; "
+                                                    "14 bretry immediately 4800000: 0 1000015 d acc 0 600107c 0 0; " + single;
+            // The operation's end's kind: its title, won (saving active), no retry.
+            std::string end = head;
+            end.replace(end.find("a abf;"), std::strlen("a abf;"), "a ac0;");
+            ok &= describe(6, true, false) == end + "14 bsave and continue 4700000: 0 1000015 d ac2 0 6001034 0 0; 14 bretry "
+                                                   "immediately 4800000: 0 1000015 d acc 0 1000001 0 0; " + tail;
+            // No "death" frame: nothing off.
+            g_msChildren.erase({model, "death"});
+            describe(5, true, true);
+            ok &= MsLogIs({"dbm 48 death 1", "describe soldiers 4000000"}, g_gfLog);
+            squad.states.clear();
+            g_csNames.clear();
+            WM(r.dbScreen, ok && described);
+        }
+
+        g_epProfiles = oldProfiles;
+        g_gameProfile.m_player = oldPlayer;
+        g_gameProfile.m_humanStore = oldStore;
+        g_gameProfile.m_missionSquad = oldSquad;
+        g_gameProfile.m_playMode = oldPlayMode;
+        g_controlMessages.clear();
+    }
     g_driverVtable[0x54 / 4] = oldCreate;
     g_mrModelVt[0x48 / 4] = oldFind;
     g_gameProfile.m_campaign = oldCampaign;
@@ -1937,8 +2220,9 @@ void CampaignScreensTest(I3D_scene *)
     std::printf("campaignscreens: oeTable %d oeDescribe %d oeBuild %d oeInput %d oeSlots %d smStart %d smMessage %d "
                 "smConsole %d smPassword %d smBuild %d smTick %d smJoin %d smNotify %d vsCredits %d vsMovie %d vsFit %d "
                 "vsUpdate %d vsScroll %d vsRender %d vsInput %d vsMovieState %d dbMedal %d dbResults %d dbStore %d dbStart %d "
-                "dbMessage %d dbBuild %d\n", r.oeTable, r.oeDescribe,
+                "dbMessage %d dbBuild %d dbDiary %d dbDiaryPage %d dbWon %d dbScreen %d\n", r.oeTable, r.oeDescribe,
                 r.oeBuild, r.oeInput, r.oeSlots, r.smStart, r.smMessage, r.smConsole, r.smPassword, r.smBuild, r.smTick,
                 r.smJoin, r.smNotify, r.vsCredits, r.vsMovie, r.vsFit, r.vsUpdate, r.vsScroll, r.vsRender, r.vsInput,
-                r.vsMovieState, r.dbMedal, r.dbResults, r.dbStore, r.dbStart, r.dbMessage, r.dbBuild);
+                r.vsMovieState, r.dbMedal, r.dbResults, r.dbStore, r.dbStart, r.dbMessage, r.dbBuild, r.dbDiary, r.dbDiaryPage, r.dbWon,
+                r.dbScreen);
 }
