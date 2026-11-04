@@ -31765,6 +31765,11 @@
   "name": "C_EquipmentMenu::ShowSoldierStats",
   "proto": "void __thiscall ShowSoldierStats(C_EquipmentMenu *this)"
  },
+ "006755d0": {
+  "module": "campaign_screens",
+  "name": "GetProfileName",
+  "proto": "void * __fastcall GetProfileName(void * profile)"
+ },
  "006755f0": {
   "module": "equipment_screen",
   "name": "C_EquipmentMenu::OnStatsToggle",
@@ -32897,6 +32902,61 @@
   "module": "campaign_screens",
   "name": "C_DebriefingMenu::ShowRank",
   "proto": "void __thiscall ShowRank(C_MenuState *this, void * profile, void * soldier)"
+ },
+ "00690ba0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::IsOneSoldier",
+  "proto": "bool __cdecl IsOneSoldier(void)"
+ },
+ "00690be0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_MenuState *this, void * arg)"
+ },
+ "00690ec0": {
+  "module": "campaign_screens",
+  "name": "S_SquadSlot::HasControl",
+  "proto": "bool __thiscall HasControl(void * this, uint id)"
+ },
+ "00690ef0": {
+  "module": "campaign_screens",
+  "name": "S_SquadSlot::SetSoldier",
+  "proto": "void __thiscall SetSoldier(void * this, int profile, bool locked)"
+ },
+ "006910d0": {
+  "module": "campaign_screens",
+  "name": "S_SquadSlot::ShowTexts",
+  "proto": "void __thiscall ShowTexts(void * this)"
+ },
+ "00691310": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_MenuState *this, void * message)"
+ },
+ "00693a50": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_MenuState *this)"
+ },
+ "00694dd0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::SelectFreeSoldier",
+  "proto": "void __thiscall SelectFreeSoldier(C_MenuState *this, int index)"
+ },
+ "006956a0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::IsInSlots",
+  "proto": "bool __thiscall IsInSlots(C_MenuState *this, int profile)"
+ },
+ "00695dc0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::FirstFreeSpeechSet",
+  "proto": "int __cdecl FirstFreeSpeechSet(void)"
+ },
+ "00695e20": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::SyncSquad",
+  "proto": "bool __thiscall SyncSquad(C_MenuState *this)"
  },
  "006987d0": {
   "module": "game",
@@ -42696,6 +42756,12 @@
   "module": "campaign_screens",
   "name": "g_operationEnds",
   "type": "uint[120]"
+ },
+ "00841cb8": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_operationMedalSoldiers",
+  "type": "int[80]"
  },
  "008423c8": {
   "data": true,

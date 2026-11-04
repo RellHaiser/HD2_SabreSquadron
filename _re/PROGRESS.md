@@ -7982,6 +7982,30 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/campaign_screens.txt (+6); 6 functions in ported.txt. Stats: 9,065 of 12,306 functions by hand (81.7 % by size).
   - The debriefing (0x0068c520..0x00690be0) is done. Next: the squad menu (0x00690be0..0x00697090).
 
+  PART 9g-ix DONE (2026-11-04): the squad screen's class, slots and squad (game/squad_menu.h/.cpp).
+  - C_SquadMenu (vtable 0x00815d50, 0x2B0 bytes; kinds 1 and 2; out of pending.h): +0x1B0 the slot
+    picked, +0x1B4 the roster soldier picked, +0x1B8 the roster's (else a slot's), the slots S_SquadSlot
+    (+0x1C8 x4, 0x14 bytes: locked, the roster soldier, the picture's, name's and rank's ids).
+  - OnStart 0x00690be0 (tables\HumanStore.def when the roster is empty; a campaign's kind 2 screen: the
+    operation's soldiers of g_operationMedalSoldiers 0x00841cb8 given the Defence Medal (6), the squad's
+    items back), OnStop 0x00693a50 (the description popup deleted), OnMessage 0x00691310 (Escape: the
+    selection screen closed, else "ARE YOU SURE?" back; 0x200006A: the selected slot's soldier swapped
+    into the first, the squad kept, the next step; 0x2000072: SelectFreeSoldier), IsOneSoldier
+    0x00690ba0 (lone wolf; the first campaign's missions 2 and 15 on their own), IsInSlots 0x006956a0,
+    FirstFreeSpeechSet 0x00695dc0, SyncSquad 0x00695e20 (those of no slot freed, the slots' given one (a
+    freed one, else new; autoEquip on kind 1), ordered as the slots, the freed deleted, speech sets),
+    SelectFreeSoldier 0x00694dd0 (the first free from the index, at most the 30th, else the last before
+    it: its roster control 0x4101000 | (index + 1) << 4 on the top screen), the slot's SetSoldier
+    0x00690ef0, ShowTexts 0x006910d0, HasControl 0x00690ec0; GetProfileName 0x006755d0.
+  - Dropped: the copy protection in OnStop. Fixed: SelectFreeSoldier with no screen shown (the original
+    looked the control up from null).
+  - Harness: sqSlot, sqOneSoldier, sqStart, sqSlots, sqSync, sqMessage, sqSelect (C_HumanStore::Get's
+    fake bounds-checked like the real one; the roster's load can fail). All 14 factory checkers in both
+    orders.
+  - Mutations: mutations/mutate_9g9.py (196: all killed but 15, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 356 errors in 65 files, 151 stubs. ret_audit --src: 54 (+2: SyncSquad and OnSoldierControl are callbacks with four stack arguments; SyncSquad fixed here, OnSoldierControl's signature in 9g-x).
+  - Ghidra: names/campaign_screens.txt (+13); 12 functions in ported.txt. Stats: 9,077 of 12,306 functions by hand (81.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

@@ -6,6 +6,7 @@
 #include "game/operation_end.h"
 #include "game/debriefing.h"
 #include "game/session_menu.h"
+#include "game/squad_menu.h"
 #include "game/video_state.h"
 #include "game/video_text_box.h"
 #undef protected
@@ -161,6 +162,22 @@ const std::vector<int> &C_Diary::GetTexts() const { return g_diaryTexts; }
 C_MissionDef *g_dbMission;
 C_MissionDef *C_Campaign::GetCurrentMission() { return g_dbMission; }
 
+// (Part 9g-ix: the squad screen's. The squad's states found, logged; the screens and the soldier's
+// control (later parts) faked, logged.)
+S_SquadSoldier *C_GameProfile::FindSoldierState(int profileIndex)
+{
+    GfLog("find state %d", profileIndex);
+    for (S_SquadSoldier *s : m_missionSquad->states)
+        if (s && s->profileIndex == profileIndex)
+            return s;
+    return nullptr;
+}
+bool C_SquadMenu::BuildScreens() { return true; }
+bool C_SquadMenu::OnSoldierControl(void *argument, C_Control *control)
+{
+    GfLog("soldier control %d %x", argument == this, control->GetId());
+    return true;
+}
 namespace {
 
 // (Part 9g-iv.) The video player's engine objects: the stream's rectangle and size, its position; the
@@ -256,6 +273,11 @@ struct C_DbScroll : C_MsScreen {
         return true;
     }
 };
+// (Part 9g-ix.) The squad screen's popup: its deletion logged.
+struct C_SqPopup : C_MsScreen {
+    C_SqPopup() : C_MsScreen(nullptr, "sqpopup", 0x0C000000) {}
+    ~C_SqPopup() override { GfLog("sqpopup deleted"); }
+};
 struct C_DbMission : C_MissionDef {
     using C_MissionDef::m_objectives;
     using C_MissionDef::m_unknown2C;
@@ -287,6 +309,7 @@ struct S_CampaignScreensResults {
     bool dbMedal = true, dbResults = true, dbStore = true, dbStart = true, dbMessage = true, dbBuild = true;
     bool dbDiary = true, dbDiaryPage = true, dbWon = true, dbScreen = true, dbPanel = true, dbObjectives = true, dbResult = true;
     bool dbShow = true, dbSkills = true, dbRank = true, dbMedals = true, dbScroll = true;
+    bool sqSlot = true, sqOneSoldier = true, sqStart = true, sqSlots = true, sqSync = true, sqMessage = true, sqSelect = true;
 };
 
 // A message's values ("target id value value2[ value3][ 'text']"; value2 / value3 by name when known).
@@ -2616,6 +2639,408 @@ void CampaignScreensTest(I3D_scene *)
         g_gameProfile.m_playMode = oldPlayMode;
         g_controlMessages.clear();
     }
+    // ===== part 9g-ix: the squad screen =====
+    {
+        S_PlayMode playMode;
+        S_PlayMode *const oldPlayMode = g_gameProfile.m_playMode;
+        g_gameProfile.m_playMode = &playMode;
+        S_MissionSquad squad;
+        S_MissionSquad *const oldSquad = g_gameProfile.m_missionSquad;
+        g_gameProfile.m_missionSquad = &squad;
+        alignas(16) static uint8_t sqStoreMemory[64];
+        C_HumanStore *const oldStore = g_gameProfile.m_humanStore;
+        g_gameProfile.m_humanStore = reinterpret_cast<C_HumanStore *>(sqStoreMemory);
+        const std::vector<S_SoldierProfile *> oldProfiles = g_epProfiles;
+        // Profiles in zeroed memory (their constructor is not linked).
+        alignas(16) static uint8_t sqProfileMemory[36][sizeof(S_SoldierProfile)];
+        std::memset(static_cast<void *>(sqProfileMemory), 0, sizeof sqProfileMemory);
+        S_SoldierProfile *p[36];
+        for (int i = 0; i < 36; ++i)
+            p[i] = reinterpret_cast<S_SoldierProfile *>(sqProfileMemory[i]);
+        const auto roster = [&](int count) { g_epProfiles.assign(p, p + count); };
+        const auto soldier = [](int profileIndex, int speechSet) {
+            auto *s = new S_SquadSoldier();
+            s->profileIndex = profileIndex;
+            s->speechSet = speechSet;
+            return s;
+        };
+        const auto clearSquad = [&]() {
+            for (S_SquadSoldier *s : squad.states)
+                delete s;
+            squad.states.clear();
+        };
+
+        // --- a slot: the soldier put in (his face, the index, his name and rank), none (blanks); its controls ---
+        {
+            bool ok = true;
+            roster(2);
+            p[0]->fullName = C_str("Al Smith");
+            p[0]->unknown24 = 2;
+            p[0]->faceImage = reinterpret_cast<IImage *>(0x1234);
+            p[1]->fullName = C_str("Bob Jones");
+            p[1]->customName = C_str("Bo");
+            p[1]->unknown24 = 5;
+            S_SquadSlot slot;
+            ok &= slot.locked && slot.profile == -1 && slot.picture == 0xFFFFFFFF && slot.name == 0xFFFFFFFF &&
+                  slot.rank == 0xFFFFFFFF;
+            slot.picture = 0x4201000;
+            slot.name = 0x4202000;
+            slot.rank = 0x4203000;
+            g_controlMessages.clear();
+            slot.SetSoldier(0, false);
+            ok &= !slot.locked && slot.profile == 0 &&
+                  CsQueue() == "4201000 1000038 0 1234; 4201000 1000009 0 0; 4202000 1000014 c 0 'Al Smith'; "
+                               "4203000 1000015 2 2794; ";
+            slot.SetSoldier(1, true);
+            ok &= slot.locked && slot.profile == 1 &&
+                  CsQueue() == "4201000 1000038 0 0; 4201000 1000009 1 0; 4202000 1000014 c 0 'Bo'; 4203000 1000015 2 2797; ";
+            slot.SetSoldier(-1, false);
+            ok &= !slot.locked && slot.profile == -1 &&
+                  CsQueue() == "4201000 1000038 0 0; 4201000 1000009 ffffffff 0; 4202000 1000015 b 7d2; 4203000 1000015 b 7d2; ";
+            slot.profile = 0;
+            slot.ShowTexts();
+            ok &= CsQueue() == "4202000 1000014 c 0 'Al Smith'; 4203000 1000015 2 2794; ";
+            slot.profile = 7;
+            slot.ShowTexts();
+            ok &= CsQueue() == "4202000 1000015 b 7d2; 4203000 1000015 b 7d2; ";
+            ok &= slot.HasControl(0x4201000) && slot.HasControl(0x4202000) && slot.HasControl(0x4203000) &&
+                  !slot.HasControl(0x4204000) && !slot.HasControl(0);
+            ok &= &GetProfileName(p[0]) == &p[0]->fullName && &GetProfileName(p[1]) == &p[1]->customName;
+            p[0]->faceImage = nullptr;
+            WM(r.sqSlot, ok);
+        }
+
+        // --- one soldier: the lone wolf mode, the first campaign's missions 2 and 15 on their own ---
+        {
+            bool ok = true;
+            const auto one = [&](int mode, int single, int current, int mission) {
+                playMode.mode = mode;
+                playMode.singleMission = single;
+                campaign->m_current = current;
+                g_esMission = mission;
+                g_gfLog.clear();
+                return C_SquadMenu::IsOneSoldier();
+            };
+            ok &= one(PLAY_MODE_LONE_WOLF, 0, 1, 3) && g_gfLog.empty();
+            ok &= !one(PLAY_MODE_CAMPAIGN, 0, 0, 2) && g_gfLog.empty();
+            ok &= one(PLAY_MODE_CAMPAIGN, 1, 0, 2) && MsLogIs({"mission number 0"}, g_gfLog);
+            ok &= one(PLAY_MODE_CARNAGE, 1, 0, 15) && !one(PLAY_MODE_CAMPAIGN, 1, 0, 3) && !one(PLAY_MODE_CAMPAIGN, 1, 1, 2) &&
+                  !one(PLAY_MODE_CAMPAIGN, 1, 0, 14) && !one(PLAY_MODE_CAMPAIGN, 2, 0, 2);
+            playMode = S_PlayMode();
+            g_esMission = 0;
+            WM(r.sqOneSoldier, ok);
+        }
+
+        // --- started: the roster loaded when empty (failing: false); a campaign's kind 2 screen: the operation's
+        // soldiers given the Defence Medal, the squad's items back ---
+        {
+            bool ok = true;
+            C_SquadMenu m;
+            ok &= m.GetTypeId() == 3 && m.m_selectedSlot == 0 && m.m_selectedSoldier == -1 && m.m_rosterSelected &&
+                  m.m_unknown1BC == 0 && m.m_unknown1C0 == 0 && m.m_unknown1C4 == 0 && m.m_slots[3].locked &&
+                  m.m_slots[3].profile == -1 && m.m_slots[3].rank == 0xFFFFFFFF;
+            const auto start = [&](int mode) {
+                m.m_mode = mode;
+                g_gfLog.clear();
+                return m.OnStart(nullptr);
+            };
+            g_epProfiles.clear();
+            ok &= start(1) && MsLogIs({"roster load tables\\HumanStore.def"}, g_gfLog);
+            g_esRosterLoads = false;
+            ok &= !start(2) && MsLogIs({"roster load tables\\HumanStore.def"}, g_gfLog);
+            g_esRosterLoads = true;
+            roster(30);
+            p[9]->dead = true;
+            p[11]->unknown28 = {6};
+            p[16]->unknown28 = {3};
+            squad.states = {soldier(3, 1), soldier(4, 2)};
+            campaign->m_current = 1;
+            g_csOperation = 2;
+            ok &= start(2) && MsLogIs({"operation index 1", "return all 3", "return all 4"}, g_gfLog);
+            for (int i = 0; i < 30; ++i) {
+                std::vector<int> want;
+                if (i == 7 || i == 11 || i == 17)
+                    want = {6};
+                else if (i == 16)
+                    want = {3, 6};
+                ok &= p[i]->unknown28 == want;
+            }
+            // (The kind 1 screen, a single mission: neither.)
+            ok &= start(1) && g_gfLog.empty() && p[7]->unknown28.size() == 1;
+            playMode.singleMission = 1;
+            ok &= start(2) && g_gfLog.empty();
+            playMode.singleMission = 0;
+            // (The operations without soldiers; the last's.)
+            g_csOperation = 0;
+            ok &= start(2) && MsLogIs({"operation index 1", "return all 3", "return all 4"}, g_gfLog);
+            g_csOperation = 7;
+            ok &= start(2) && p[1]->unknown28 == std::vector<int>({6}) && p[26]->unknown28 == std::vector<int>({6}) &&
+                  p[27]->unknown28 == std::vector<int>({6}) && p[28]->unknown28.empty() && p[0]->unknown28.empty();
+            g_csOperation = 3;
+            ok &= start(2) && p[22]->unknown28 == std::vector<int>({6}) && p[2]->unknown28 == std::vector<int>({6}) &&
+                  p[23]->unknown28.empty();
+            // (Operations 4 .. 6.)
+            for (int op = 4; op <= 6; ++op) {
+                g_csOperation = op;
+                ok &= start(2);
+            }
+            for (int i : {4, 10, 23, 24, 28, 29, 3, 6, 13, 21, 25, 14, 15, 18, 20})
+                ok &= p[i]->unknown28 == std::vector<int>({6});
+            ok &= p[0]->unknown28.empty() && p[9]->unknown28.empty() && p[30]->unknown28.empty();
+            for (int i = 0; i < 36; ++i)
+                p[i]->unknown28.clear();
+            p[9]->dead = false;
+            // (The table, as the binary's.)
+            ok &= g_operationMedalSoldiers[3][5] == 22 && g_operationMedalSoldiers[3][6] == -1 && g_operationMedalSoldiers[4][5] == 29 &&
+                  g_operationMedalSoldiers[0][0] == -1 && g_operationMedalSoldiers[6][4] == -1 && g_operationMedalSoldiers[5][0] == 3;
+            clearSquad();
+            // Stopped: the popup deleted.
+            m.m_popup = new C_SqPopup();
+            g_gfLog.clear();
+            m.OnStop();
+            ok &= m.m_popup == nullptr && !g_gfLog.empty() && g_gfLog[0] == "sqpopup deleted";
+            m.OnStop();
+            ok &= m.m_popup == nullptr;
+            WM(r.sqStart, ok);
+        }
+
+        // --- the slots: a roster soldier in one; the first speech set free ---
+        {
+            bool ok = true;
+            C_SquadMenu m;
+            m.m_slots[0].profile = 4;
+            m.m_slots[2].profile = 0;
+            ok &= m.IsInSlots(4) && m.IsInSlots(0) && m.IsInSlots(-1) && !m.IsInSlots(1);
+            m.m_slots[1].profile = 1;
+            m.m_slots[3].profile = 9;
+            ok &= !m.IsInSlots(-1) && m.IsInSlots(9) && m.IsInSlots(1) && !m.IsInSlots(2);
+            ok &= C_SquadMenu::FirstFreeSpeechSet() == 1;
+            squad.states = {soldier(0, 1), soldier(1, 3), nullptr, soldier(2, 0)};
+            ok &= C_SquadMenu::FirstFreeSpeechSet() == 2;
+            squad.states[3]->speechSet = 2;
+            ok &= C_SquadMenu::FirstFreeSpeechSet() == 4;
+            delete squad.states[3];
+            squad.states[3] = soldier(5, 4);
+            ok &= C_SquadMenu::FirstFreeSpeechSet() == 2;
+            squad.states.push_back(soldier(6, 2));
+            ok &= C_SquadMenu::FirstFreeSpeechSet() == -1;
+            squad.states.erase(squad.states.begin() + 2);
+            clearSquad();
+            WM(r.sqSlots, ok);
+        }
+
+        // --- the squad kept to the slots: freed, given (a freed one, a new one), ordered, deleted, speech sets ---
+        {
+            bool ok = true;
+            C_SquadMenu m;
+            m.m_mode = 1;
+            roster(12);
+            S_SquadSoldier *a = soldier(5, 2), *b = soldier(1, -1), *c = soldier(7, 1);
+            squad.states = {a, b, c};
+            const int slots1[4] = {1, 9, 5, -1};
+            for (int i = 0; i < 4; ++i)
+                m.m_slots[i].profile = slots1[i];
+            g_gfLog.clear();
+            ok &= C_SquadMenu::SyncSquad(&m, nullptr, nullptr, 0, 0) && squad.states == std::vector<S_SquadSoldier *>({b, c, a}) && b->profileIndex == 1 &&
+                  c->profileIndex == 9 && a->profileIndex == 5 && c->autoEquip && !b->autoEquip && !a->autoEquip &&
+                  b->speechSet == 3 && c->speechSet == 1 && a->speechSet == 2 &&
+                  MsLogIs({"find state 1", "find state 9", "set profile 9 0", "find state 5"}, g_gfLog);
+            // All freed but one reused (the last first; not equipped on a kind 2 screen), the others deleted.
+            m.m_mode = 2;
+            const int slots2[4] = {2, -1, 3, -1};
+            for (int i = 0; i < 4; ++i)
+                m.m_slots[i].profile = slots2[i];
+            c->autoEquip = true;
+            g_gfLog.clear();
+            ok &= C_SquadMenu::SyncSquad(&m, nullptr, nullptr, 0, 0) && squad.states == std::vector<S_SquadSoldier *>({a}) && a->profileIndex == 2 && !a->autoEquip &&
+                  a->speechSet == 2 && MsLogIs({"find state 2", "set profile 2 0"}, g_gfLog);
+            // A new one; the order kept.
+            const int slots3[4] = {2, 4, 6, 8};
+            for (int i = 0; i < 4; ++i)
+                m.m_slots[i].profile = slots3[i];
+            m.m_mode = 1;
+            const size_t added = g_gmAdded.size();
+            g_gfLog.clear();
+            ok &= C_SquadMenu::SyncSquad(&m, nullptr, nullptr, 0, 0) && squad.states.size() == 4 && squad.states[0] == a && g_gmAdded.size() == added + 3 &&
+                  squad.states[1]->profileIndex == 4 && squad.states[2]->profileIndex == 6 && squad.states[3]->profileIndex == 8 &&
+                  squad.states[3]->autoEquip && squad.states[1]->speechSet == 0 &&
+                  MsLogIs({"find state 2", "find state 4", "add soldier", "set profile 4 0", "find state 6", "add soldier",
+                           "set profile 6 0", "find state 8", "add soldier", "set profile 8 0"}, g_gfLog);
+            // Reordered: the slots' order (the fourth slot's swapped in from behind).
+            const int slots4[4] = {8, 2, 6, 4};
+            for (int i = 0; i < 4; ++i)
+                m.m_slots[i].profile = slots4[i];
+            S_SquadSoldier *n4 = squad.states[1], *n6 = squad.states[2], *n8 = squad.states[3];
+            ok &= C_SquadMenu::SyncSquad(&m, nullptr, nullptr, 0, 0) && squad.states == std::vector<S_SquadSoldier *>({n8, a, n6, n4});
+            // A null soldier kept; a negative slot ends the slots (those after it still keep their soldiers).
+            const int slots5[4] = {6, -1, 8, 2};
+            for (int i = 0; i < 4; ++i)
+                m.m_slots[i].profile = slots5[i];
+            squad.states = {n8, nullptr, n6};
+            g_gfLog.clear();
+            ok &= C_SquadMenu::SyncSquad(&m, nullptr, nullptr, 0, 0) && squad.states == std::vector<S_SquadSoldier *>({n6, nullptr, n8}) && n8->profileIndex == 8 &&
+                  MsLogIs({"find state 6"}, g_gfLog);
+            squad.states.clear();
+            delete a;
+            // Roster soldier 0: in a slot (a freed soldier at the squad's start reused), not in one (freed, deleted);
+            // ordered.
+            const auto slots = [&](int s0, int s1) {
+                m.m_slots[0].profile = s0;
+                m.m_slots[1].profile = s1;
+                m.m_slots[2].profile = -1;
+                m.m_slots[3].profile = -1;
+            };
+            S_SquadSoldier *z = soldier(3, 1);
+            squad.states = {z};
+            slots(0, -1);
+            ok &= C_SquadMenu::SyncSquad(&m, nullptr, nullptr, 0, 0) && squad.states == std::vector<S_SquadSoldier *>({z}) &&
+                  z->profileIndex == 0;
+            S_SquadSoldier *u = soldier(2, 2);
+            squad.states = {z, u};
+            slots(2, -1);
+            ok &= C_SquadMenu::SyncSquad(&m, nullptr, nullptr, 0, 0) && squad.states == std::vector<S_SquadSoldier *>({u});
+            z = soldier(0, 1);
+            squad.states = {u, z};
+            slots(0, 2);
+            ok &= C_SquadMenu::SyncSquad(&m, nullptr, nullptr, 0, 0) && squad.states == std::vector<S_SquadSoldier *>({z, u});
+            clearSquad();
+            // (Roster soldier 0's squad soldier not reused for another slot; a freed one at the start deleted.)
+            z = soldier(0, 1);
+            squad.states = {z};
+            slots(0, 5);
+            ok &= C_SquadMenu::SyncSquad(&m, nullptr, nullptr, 0, 0) && squad.states.size() == 2 && squad.states[0] == z &&
+                  z->profileIndex == 0 && squad.states[1]->profileIndex == 5;
+            squad.states.clear();
+            squad.states = {soldier(3, 1)};
+            slots(-1, -1);
+            ok &= C_SquadMenu::SyncSquad(&m, nullptr, nullptr, 0, 0) && squad.states.empty();
+            WM(r.sqSync, ok);
+        }
+
+        // --- the messages: Escape (the selection screen closed; the question), continue (the selected slot's
+        // soldier first, the squad kept, the next step), a free soldier selected ---
+        {
+            bool ok = true;
+            C_SquadMenu m;
+            m.m_mode = 2;
+            S_ControlMessage message;
+            const auto send = [&](uint32_t id, uint32_t value = 0) {
+                message.id = id;
+                message.value = value;
+                g_gfLog.clear();
+                g_controlMessages.clear();
+                m.OnMessage(&message);
+                return CsQueue();
+            };
+            C_MsScreen squadScreen(nullptr, "sqsquad", 0x04000000), selection(nullptr, "sqselection", 0x08000000);
+            m.m_messageBox = nullptr;
+            g_menuScreens.clear();
+            ok &= send(MENU_MSG_ESCAPE) == "" && g_gfLog.empty();
+            g_menuScreens = {&squadScreen, &selection};
+            ok &= send(CONTROL_NOTIFY_CLICK | MENU_MSG_ESCAPE) == "0 6001005 0 0; " && g_gfLog.empty();
+            {
+                C_MessageBox box(nullptr, GfFrame(FRAME_DUMMY, "sqmsgbox"));
+                m.m_messageBox = &box;
+                g_menuScreens = {&selection, &squadScreen};
+                const std::string q = send(MENU_MSG_ESCAPE);
+                ok &= box.GetKind() == 1 && box.m_yesMessage == MENU_MSG_PREVIOUS && box.m_noMessage == 0 &&
+                      q.find("100000 1000015 18 7d4") != std::string::npos && q.find("6001005") == std::string::npos;
+                m.CloseMessage();
+                m.m_messageBox = nullptr;
+            }
+            // Continue: slot 2's soldier into the first.
+            roster(10);
+            const uint32_t pictures[4] = {0x4111000, 0x4112000, 0x4113000, 0x4114000};
+            for (int i = 0; i < 4; ++i) {
+                m.m_slots[i].picture = pictures[i];
+                m.m_slots[i].name = pictures[i] + 0x100;
+                m.m_slots[i].rank = pictures[i] + 0x200;
+            }
+            m.m_slots[0].profile = 0;
+            m.m_slots[0].locked = true;
+            m.m_slots[1].profile = 5;
+            m.m_slots[1].locked = true;
+            m.m_slots[2].profile = 3;
+            m.m_slots[2].locked = false;
+            m.m_slots[3].profile = -1;
+            squad.states = {soldier(0, 1), soldier(5, 2), soldier(3, 3)};
+            m.m_selectedSlot = 2;
+            std::string q = send(0x200006A);
+            ok &= m.m_slots[0].profile == 3 && !m.m_slots[0].locked && m.m_slots[2].profile == 0 && m.m_slots[2].locked &&
+                  m.m_slots[1].profile == 5 && squad.states.size() == 3 && squad.states[0]->profileIndex == 3 &&
+                  squad.states[1]->profileIndex == 5 && squad.states[2]->profileIndex == 0;
+            ok &= q.find("4111000 1000009 3 0; ") == 21 && q.find("4113000 1000009 0 0; ") != std::string::npos &&
+                  q.find("4113000 1000009 0 0; ") > q.find("4111000 1000009 3 0; ") && q.size() > 15 &&
+                  q.substr(q.size() - 15) == "0 2000008 0 0; ";
+            // The first selected: itself; out of the slots: nothing.
+            m.m_selectedSlot = 0;
+            q = send(0x200006A);
+            ok &= m.m_slots[0].profile == 3 && !m.m_slots[0].locked && q.substr(q.size() - 15) == "0 2000008 0 0; ";
+            m.m_selectedSlot = 4;
+            ok &= send(0x200006A) == "" && g_gfLog.empty();
+            m.m_selectedSlot = -1;
+            ok &= send(0x200006A) == "" && g_gfLog.empty();
+            ok &= send(0x2000071) == "" && g_gfLog.empty();
+            // A free soldier selected (the 5th: the 4th in a slot).
+            C_MsScreen roster4(nullptr, "sqroster", 0x4101050);
+            g_menuScreens = {&roster4};
+            ok &= send(0x2000072, 3) == "" && MsLogIs({"soldier control 1 4101050"}, g_gfLog);
+            clearSquad();
+            g_menuScreens.clear();
+            WM(r.sqMessage, ok);
+        }
+
+        // --- a free soldier selected: the first from the index (at most the 30th), else the last before it ---
+        {
+            bool ok = true;
+            C_SquadMenu m;
+            C_MsScreen top(nullptr, "sqtop", 0);
+            const auto select = [&](int index, uint32_t id) {
+                top.m_id = id;
+                g_menuScreens = {&top};
+                g_gfLog.clear();
+                m.SelectFreeSoldier(index);
+                return g_gfLog.empty() ? std::string("none") : g_gfLog[0];
+            };
+            roster(5);
+            m.m_slots[0].profile = 1;
+            m.m_slots[1].profile = 2;
+            ok &= select(-1, 0x4101000) == "none" && select(1, 0x4101040) == "soldier control 1 4101040";
+            ok &= select(0, 0x4101010) == "soldier control 1 4101010" && select(4, 0x4101050) == "soldier control 1 4101050";
+            ok &= select(5, 0x4101050) == "soldier control 1 4101050" && select(1, 0x4101030) == "none";
+            m.m_slots[0].profile = 3;
+            m.m_slots[1].profile = 4;
+            ok &= select(3, 0x4101030) == "soldier control 1 4101030" && select(9, 0x4101090) == "soldier control 1 4101090";
+            // (Back to the first.)
+            roster(3);
+            m.m_slots[0].profile = 1;
+            m.m_slots[1].profile = 2;
+            ok &= select(3, 0x4101010) == "soldier control 1 4101010" && select(2, 0x4101010) == "soldier control 1 4101010";
+            roster(2);
+            m.m_slots[0].profile = 0;
+            m.m_slots[1].profile = 1;
+            ok &= select(0, 0x4101010) == "none" && select(2, 0x4101010) == "none" && select(1, 0x4101020) == "none";
+            roster(35);
+            m.m_slots[0].profile = -1;
+            m.m_slots[1].profile = -1;
+            ok &= select(31, 0x41011F0) == "soldier control 1 41011f0" && select(29, 0x41011E0) == "soldier control 1 41011e0" &&
+                  select(30, 0x41011E0) == "soldier control 1 41011e0";
+            m.m_slots[2].profile = 29;
+            ok &= select(29, 0x41011D0) == "soldier control 1 41011d0" && select(29, 0x41011E0) == "none";
+            g_menuScreens.clear();
+            g_gfLog.clear();
+            m.SelectFreeSoldier(4);
+            ok &= g_gfLog.empty();
+            g_menuScreens.clear();
+            WM(r.sqSelect, ok);
+        }
+
+        g_epProfiles = oldProfiles;
+        g_gameProfile.m_humanStore = oldStore;
+        g_gameProfile.m_missionSquad = oldSquad;
+        g_gameProfile.m_playMode = oldPlayMode;
+        g_controlMessages.clear();
+    }
     g_driverVtable[0x54 / 4] = oldCreate;
     g_mrModelVt[0x48 / 4] = oldFind;
     g_gameProfile.m_campaign = oldCampaign;
@@ -2625,10 +3050,12 @@ void CampaignScreensTest(I3D_scene *)
                 "smConsole %d smPassword %d smBuild %d smTick %d smJoin %d smNotify %d vsCredits %d vsMovie %d vsFit %d "
                 "vsUpdate %d vsScroll %d vsRender %d vsInput %d vsMovieState %d dbMedal %d dbResults %d dbStore %d dbStart %d "
                 "dbMessage %d dbBuild %d dbDiary %d dbDiaryPage %d dbWon %d dbScreen %d dbPanel %d dbObjectives %d dbResult %d dbShow %d dbSkills %d "
-                "dbRank %d dbMedals %d dbScroll %d\n", r.oeTable, r.oeDescribe,
+                "dbRank %d dbMedals %d dbScroll %d sqSlot %d sqOneSoldier %d sqStart %d sqSlots %d sqSync %d "
+                "sqMessage %d sqSelect %d\n", r.oeTable, r.oeDescribe,
                 r.oeBuild, r.oeInput, r.oeSlots, r.smStart, r.smMessage, r.smConsole, r.smPassword, r.smBuild, r.smTick,
                 r.smJoin, r.smNotify, r.vsCredits, r.vsMovie, r.vsFit, r.vsUpdate, r.vsScroll, r.vsRender, r.vsInput,
                 r.vsMovieState, r.dbMedal, r.dbResults, r.dbStore, r.dbStart, r.dbMessage, r.dbBuild, r.dbDiary, r.dbDiaryPage, r.dbWon,
                 r.dbScreen, r.dbPanel, r.dbObjectives, r.dbResult, r.dbShow, r.dbSkills,
-                r.dbRank, r.dbMedals, r.dbScroll);
+                r.dbRank, r.dbMedals, r.dbScroll, r.sqSlot, r.sqOneSoldier, r.sqStart, r.sqSlots, r.sqSync,
+                r.sqMessage, r.sqSelect);
 }

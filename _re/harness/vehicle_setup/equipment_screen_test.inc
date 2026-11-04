@@ -18,10 +18,11 @@ int C_Campaign::GetMissionNumber(int campaign)
     return g_esMission;
 }
 // (Part 9f-iii: the roster's file, logged.)
+bool g_esRosterLoads = true;
 bool C_HumanStore::Load(C_str fileName)
 {
     GfLog("roster load %s", fileName.c_str());
-    return true;
+    return g_esRosterLoads;
 }
 
 // The campaign screen's items and kind (private: reached by the explicit instantiation's access).

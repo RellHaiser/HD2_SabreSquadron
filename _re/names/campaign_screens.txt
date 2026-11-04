@@ -83,3 +83,17 @@
 00690430 C_DebriefingMenu::SetBar | void __cdecl SetBar(uint bar, float maximum, float value, float gain)
 006907b0 C_DebriefingMenu::ShowRank | void __thiscall ShowRank(C_MenuState *this, void * profile, void * soldier)
 00690020 C_DebriefingMenu::ShowMedals | void __thiscall ShowMedals(C_MenuState *this, void * profile, void * soldier)
+# Part 9g-ix: the squad screen C_SquadMenu (src/game/squad_menu.cpp; vtable 0x00815d50).
+00690ba0 C_SquadMenu::IsOneSoldier | bool __cdecl IsOneSoldier(void)
+00690be0 C_SquadMenu::OnStart | bool __thiscall OnStart(C_MenuState *this, void * arg)
+00691310 C_SquadMenu::OnMessage | void __thiscall OnMessage(C_MenuState *this, void * message)
+00693a50 C_SquadMenu::OnStop | void __thiscall OnStop(C_MenuState *this)
+006956a0 C_SquadMenu::IsInSlots | bool __thiscall IsInSlots(C_MenuState *this, int profile)
+00695dc0 C_SquadMenu::FirstFreeSpeechSet | int __cdecl FirstFreeSpeechSet(void)
+00695e20 C_SquadMenu::SyncSquad | bool __thiscall SyncSquad(C_MenuState *this)
+00694dd0 C_SquadMenu::SelectFreeSoldier | void __thiscall SelectFreeSoldier(C_MenuState *this, int index)
+00690ef0 S_SquadSlot::SetSoldier | void __thiscall SetSoldier(void * this, int profile, bool locked)
+006910d0 S_SquadSlot::ShowTexts | void __thiscall ShowTexts(void * this)
+00690ec0 S_SquadSlot::HasControl | bool __thiscall HasControl(void * this, uint id)
+006755d0 GetProfileName | void * __fastcall GetProfileName(void * profile)
+00841cb8 g_operationMedalSoldiers @ int[80]

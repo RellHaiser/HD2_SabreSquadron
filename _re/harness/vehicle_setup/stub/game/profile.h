@@ -34,6 +34,8 @@ enum : int {
 struct S_HudOption {
     bool shown = false;
 };
+// (The play modes, part 9g-ix: as the real header.)
+enum E_PlayMode { PLAY_MODE_CAMPAIGN = 1, PLAY_MODE_LONE_WOLF = 2, PLAY_MODE_CARNAGE = 3 };
 struct S_PlayMode {
     int singleMission = 0;
     int mode = 0;
@@ -114,6 +116,8 @@ public:
     int GetDifficulty() const;
     // (The debriefing, part 9g-v: campaign_screens_test.inc.)
     C_str GetSaveFileName(int a, int b);
+    // (The squad screen, part 9g-ix.)
+    struct S_SquadSoldier *FindSoldierState(int profileIndex);
 };
 extern C_GameProfile g_gameProfile;
 // (The debriefing's soldier, part 9g-viii: as the real header.)

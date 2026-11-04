@@ -35,16 +35,4 @@ uint32_t FUN_00673070(...)
 }
 
 
-// 0x006755d0
-int FUN_006755d0(int param_1, ...)
-{
-  int iVar1;
-  iVar1 = param_1 + 0x14;
-  if ((*(int *)(param_1 + 0x14) == 0) || (*(int *)(*(int *)(param_1 + 0x14) + 4) == 0)) {
-    iVar1 = param_1 + 0xc;
-  }
-  return iVar1;
-}
-
-
 } // namespace tier1

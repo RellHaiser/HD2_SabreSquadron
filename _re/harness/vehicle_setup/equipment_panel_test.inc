@@ -57,7 +57,10 @@ float S_SoldierLoad::GetBeltFill() const { return g_epBeltFill; }
 float S_SoldierLoad::GetBackpackFill() const { return g_epBackpackFill; }
 void C_ItemStock::Add(int type, int count) { GfLog("stock add %d %d", type, count); }
 std::vector<S_SoldierProfile *> g_epProfiles;
-S_SoldierProfile *C_HumanStore::Get(int index) const { return g_epProfiles[static_cast<size_t>(index)]; }
+S_SoldierProfile *C_HumanStore::Get(int index) const
+{
+    return index >= 0 && static_cast<size_t>(index) < g_epProfiles.size() ? g_epProfiles[static_cast<size_t>(index)] : nullptr;
+}
 // The item types' containers.
 std::map<const C_ItemDef *, uint32_t> g_epAllowed;
 uint32_t C_ItemDef::GetAllowedContainers()

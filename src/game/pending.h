@@ -32,11 +32,7 @@ public:
 };
 // The equipment screen (kinds 3 and 4): game/equipment_screen.h. The debriefing (kind 5):
 // game/debriefing.h.
-// The squad screen (campaign screen kinds 1 and 2; type 3, vtable 0x00815d50, 0x2B0 bytes).
-class C_SquadMenu : public C_GameState {
-public:
-    C_SquadMenu();                                  // (inline)
-};
+// The squad screen (kinds 1 and 2): game/squad_menu.h.
 // Campaign screen kind 0 (none in the shipped campaigns; type 9, vtable 0x00815c30, 0x1B0
 // bytes).
 class C_Kind0Menu : public C_GameState {
