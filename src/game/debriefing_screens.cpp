@@ -1,11 +1,14 @@
 // The debriefing's screens (game/debriefing.h): part 9g-vi the diary; 9g-vii the debriefing's.
 #include "game/debriefing.h"
 
+#include <cstring>
+
 #include "game/campaign.h"
 #include "game/controls.h"
 #include "game/pending.h"
 #include "game/profile.h"
 #include "game/screen.h"
+#include "game/sound_module.h"
 #include "ls3d/i3d.h"
 #include "ls3d/math.h"
 
@@ -186,4 +189,149 @@ bool C_DebriefingMenu::DescribeDebriefing(S_ScreenDesc *desc, I3D_frame *model)
                    CONTROL_NOTIFY_CLICK | MENU_MSG_ESCAPE, 0);
     text(CONTROL_TEXT, "text_h&dversion", VERSION_STYLE, TEXT_VERSION);
     return true;
+}
+
+// ---------------------------------------------------------------------------
+// Part 9g-vii: the soldiers' panel
+
+namespace {
+
+// The medals (S_SoldierProfile::unknown28's ids 0 .. 11): their two frames' names (_a, _b).
+const char *const MEDALS[DEBRIEF_MEDALS] = {"DSO",           "DCM",           "MILIT_MEDAL",    "GSM_AFRICA",
+                                            "GSM",           "WAR_MEDAL",     "DEFENCE_MEDAL",  "MILITARY_CROSS",
+                                            "VICTORIA_CROSS", "GERM_FRANCE_STAR", "AFRICA_STAR", "BURMA_STAR"};
+// The ranks (S_SoldierProfile::unknown24, 0 .. 7): their badges.
+const char *const RANKS[DEBRIEF_RANKS] = {"rank_private",           "rank_corporal",   "rank_sergeant", "rank_StaffSergeant",
+                                          "rank_second_lieutenant", "rank_lieutenant", "rank_captain",  "rank_major"};
+// The skills' bars: their suffixes (the strength's in kg).
+const char *const SKILL_BARS[7][2] = {{"hlcpctcr00", " %"}, {"hlcpctcr01", " Kg"}, {"hlcpctcr02", ""}, {"hlcpctcr03", ""},
+                                      {"hlcpctcr04", " %"}, {"hlcpctcr05", " %"}, {"hlcpctcr06", " %"}};
+constexpr int CONTROL_PICTURE = 4, CONTROL_GROUP = 5, CONTROL_SKILL_BAR = 0x17;
+// "Soldier stats :"-like titles: the soldier's stats, the selected soldier's, the decorations, the new one;
+// the skills' names (0xA6E + the skill).
+constexpr uint32_t TEXT_SOLDIER_STATS = 0xACD, TEXT_SELECTED_STATS = 0xAD2, TEXT_DECORATIONS = 0xAD3,
+                   TEXT_NEW_DECORATION = 0xAD4, TEXT_SKILLS = 0xA6E;
+constexpr uint32_t BAR_AXIS_Z = 2;
+
+uintptr_t FloatValue(float value)
+{
+    uint32_t bits;
+    std::memcpy(&bits, &value, sizeof bits);
+    return bits;
+}
+
+}   // namespace
+
+void C_DebriefingMenu::DescribeSoldiers(S_ScreenDesc *desc, I3D_frame *model)
+{
+    S_ControlDesc *panel = desc->AddControl(CONTROL_GROUP, "panel_soldier00");
+    AddDescMessage(panel->AddChild(CONTROL_PICTURE, "soldier00"), 0, CONTROL_MSG_SET_TEXTURE, 0, 0);
+    panel->AddChild(CONTROL_TEXT, "text_name00");
+    AddDescMessage(panel->AddChild(CONTROL_TEXT, "text_soldierstats00"), 0, CONTROL_MSG_SET_TEXT_ID, STATUS_STYLE,
+                   TEXT_SOLDIER_STATS);
+    panel->AddChild(CONTROL_TEXT, "text_new medal");
+    AddDescMessage(panel->AddChild(CONTROL_TEXT, "text_selected soldier stats"), 0, CONTROL_MSG_SET_TEXT_ID, STATUS_STYLE,
+                   TEXT_SELECTED_STATS);
+    AddDescMessage(panel->AddChild(CONTROL_TEXT, "text_decorations"), 0, CONTROL_MSG_SET_TEXT_ID, STATUS_STYLE,
+                   TEXT_DECORATIONS);
+    AddDescMessage(panel->AddChild(CONTROL_TEXT, "text_new decoration"), 0, CONTROL_MSG_SET_TEXT_ID, STATUS_STYLE,
+                   TEXT_NEW_DECORATION);
+    for (int i = 0; i < 7; ++i) {
+        S_ControlDesc *bar = panel->AddChild(CONTROL_SKILL_BAR, SKILL_BARS[i][0]);
+        AddDescMessage(bar, 0, CONTROL_MSG_SET_BAR_AXIS, BAR_AXIS_Z);
+        AddDescMessage(bar, 0, CONTROL_MSG_SET_TEXT_ID, STATUS_STYLE, TEXT_SKILLS + static_cast<uint32_t>(i));
+        AddDescMessage(bar, 0, CONTROL_MSG_SET_BAR_VALUE, 0, FloatValue(0.5f));
+        AddDescMessage(bar, 0, CONTROL_MSG_SET_BAR_VALUE, 1, FloatValue(0.7f));
+        AddDescMessage(bar, 0, CONTROL_MSG_SET_BAR_VALUE, 2, reinterpret_cast<uintptr_t>(SKILL_BARS[i][1]));
+    }
+    // The model's frames the soldier shown uses.
+    for (int i = 0; i < DEBRIEF_MEDALS; ++i) {
+        m_medalFrames[i][0] = model->FindChildFrame(C_fstr("%s_a", MEDALS[i]), FRAME_MASK_VISUAL);
+        m_medalFrames[i][1] = model->FindChildFrame(C_fstr("%s_b", MEDALS[i]), FRAME_MASK_VISUAL);
+    }
+    for (int i = 0; i < DEBRIEF_MEDALS; ++i)
+        m_medalSlots[i] = model->FindChildFrame(C_fstr("medal%02d", i + 1), FRAME_MASK_DUMMY);
+    m_newMedalSlot = model->FindChildFrame("new_medal", FRAME_MASK_DUMMY);
+    for (int i = 0; i < DEBRIEF_RANKS; ++i)
+        m_rankFrames[i] = model->FindChildFrame(RANKS[i], FRAME_MASK_VISUAL);
+    m_rankSlot = model->FindChildFrame("soldier_rank", FRAME_MASK_DUMMY);
+    m_deathFrame = model->FindChildFrame("death", FRAME_MASK_VISUAL);
+}
+
+namespace {
+
+// The objectives' text (the debriefing's "text_objectives") and the mission's status.
+constexpr uint32_t OBJECTIVES_TEXT = 0x4500000, MISSION_STATUS_TEXT = 0x4200000;
+// "Tasks: ", "Recommendation:", "ACCOMPLISHED", "FAILED"; the lines' styles (the marks', the texts').
+constexpr uint32_t TEXT_TASKS = 0xACF, TEXT_RECOMMENDATION = 0xAD0, TEXT_ACCOMPLISHED = 0x7DA, TEXT_FAILED = 0x7DC;
+constexpr uint32_t MARK_STYLE = 0x55, OBJECTIVE_STYLE = 0x29, GAP_STYLE = 0xB;
+// The music after the mission: won, lost.
+constexpr int MUSIC_WON = 1, MUSIC_LOST = 2;
+
+void PostText(uint32_t target, uint32_t style, const char *text)
+{
+    S_ControlMessage message;
+    message.target = target;
+    message.id = CONTROL_MSG_ADD_TEXT;
+    message.value = style;
+    message.text = C_fstr("%s", text);
+    PostControlMessage(message);
+}
+
+}   // namespace
+
+bool C_DebriefingMenu::ListObjectives()
+{
+    C_MissionDef *mission = g_gameProfile.m_campaign->GetCurrentMission();
+    if (!mission)
+        return false;
+    // The completed ones under "Tasks: " ("= "), the others but the inactive under "Recommendation:"
+    // ("! ", a blank line between).
+    bool listed = false, headed = false;
+    for (int i = 0; i < mission->GetObjectiveCount(); ++i) {
+        const S_MissionObjective *objective = mission->GetObjective(i);
+        if (objective->status != OBJECTIVE_COMPLETED)
+            continue;
+        if (!headed) {
+            Post(OBJECTIVES_TEXT, CONTROL_MSG_ADD_TEXT_ID, OBJECTIVE_STYLE, TEXT_TASKS);
+            headed = true;
+        }
+        PostText(OBJECTIVES_TEXT, MARK_STYLE, "=");
+        PostText(OBJECTIVES_TEXT, OBJECTIVE_STYLE, " ");
+        Post(OBJECTIVES_TEXT, CONTROL_MSG_ADD_TEXT_ID, OBJECTIVE_STYLE, static_cast<uint32_t>(objective->GetId()));
+        listed = true;
+    }
+    headed = false;
+    for (int i = 0; i < mission->GetObjectiveCount(); ++i) {
+        const S_MissionObjective *objective = mission->GetObjective(i);
+        if (objective->status == OBJECTIVE_COMPLETED || objective->status == OBJECTIVE_INACTIVE)
+            continue;
+        if (!headed) {
+            if (listed)
+                PostText(OBJECTIVES_TEXT, GAP_STYLE, " ");
+            Post(OBJECTIVES_TEXT, CONTROL_MSG_ADD_TEXT_ID, OBJECTIVE_STYLE, TEXT_RECOMMENDATION);
+            headed = true;
+        }
+        PostText(OBJECTIVES_TEXT, MARK_STYLE, "!");
+        PostText(OBJECTIVES_TEXT, OBJECTIVE_STYLE, " ");
+        Post(OBJECTIVES_TEXT, CONTROL_MSG_ADD_TEXT_ID, OBJECTIVE_STYLE, static_cast<uint32_t>(objective->GetId()));
+    }
+    // Won: a tutorial, or someone of the squad alive (the last first).
+    if (mission->IsTutorial())
+        return true;
+    const std::vector<S_SquadSoldier *> &states = g_gameProfile.m_missionSquad->states;
+    for (size_t i = states.size(); i-- > 0;)
+        if (!g_gameProfile.m_humanStore->Get(states[i]->profileIndex)->dead)
+            return true;
+    return false;
+}
+
+void C_DebriefingMenu::ShowMissionResult(S_ScreenDesc *, I3D_frame *)
+{
+    Post(OBJECTIVES_TEXT, CONTROL_MSG_CLEAR, 0);
+    // (The original's copy protection is left out: "FAILED" for a cracked copy from the sixteenth mission.)
+    const bool won = m_mode == KIND_OPERATION_END_SCREEN || ListObjectives();
+    Post(MISSION_STATUS_TEXT, CONTROL_MSG_SET_TEXT_ID, MISSION_STATUS_STYLE, won ? TEXT_ACCOMPLISHED : TEXT_FAILED);
+    GetSoundModule()->SetBackgroundMusic(won ? MUSIC_WON : MUSIC_LOST, 0);
+    GetSoundModule()->FadeBackgroundMusic(1.0f, 2000);
 }

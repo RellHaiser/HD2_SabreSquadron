@@ -13,6 +13,8 @@ struct S_ScreenDesc;
 struct S_SoldierProfile;
 struct S_SquadSoldier;
 
+// The medals (S_SoldierProfile::unknown28's ids) and the ranks (unknown24) the debriefing shows.
+constexpr int DEBRIEF_MEDALS = 12, DEBRIEF_RANKS = 8;
 // The experience a rank needs (more than it: the next rank; ranks 0 .. 7).
 extern const int g_rankExperience[7];                   // 0x008423c8
 
@@ -72,14 +74,28 @@ protected:
     // critically failed and someone of the squad alive. (Part 9g-vi.)
     bool IsMissionWon() const;                          // 0x0068f8f0
 
-    // The soldiers' panel, the soldier shown, the scroll (part 9g-vii).
+    // The soldiers' panel: its picture, name, titles, the skills' 7 bars (their suffixes); the model's
+    // medals' frames, their places, the new medal's, the ranks' badges, the rank's place, "death"
+    // (part 9g-vii).
     void DescribeSoldiers(S_ScreenDesc *desc, I3D_frame *model);     // 0x0068e3e0
-    void DescribeDebriefing2(S_ScreenDesc *desc, I3D_frame *model);  // 0x0068f6c0
+    // The mission's result: the objectives listed, "ACCOMPLISHED" (the operation's end's kind, or won) or
+    // "FAILED", the won's or the lost's music (faded in). (The arguments are not read.)
+    void ShowMissionResult(S_ScreenDesc *desc, I3D_frame *model);    // 0x0068f6c0
+    // The objectives into the debriefing's text: the completed under "Tasks: ", the others (not the
+    // inactive) under "Recommendation:". Won: a tutorial, or someone of the squad alive.
+    static bool ListObjectives();                       // 0x0068f080
     bool ShowSoldier(int *unknown);                     // 0x0068f9f0
     static bool OnSoldierScroll(void *menu, void *argument, C_Control *control, uint32_t notification,
                                 uint32_t value);        // 0x0068ff70
 
     int m_diaryPage = -1;                               // +0x1B0 the diary's left page (-1: none yet)
     int m_unknown1B4 = -1;                              // +0x1B4
-    uint8_t m_unknown1B8[0xD8] = {};                    // +0x1B8
+    I3D_frame *m_medalFrames[DEBRIEF_MEDALS][2] = {};   // +0x1B8 the medals' two frames ("DSO_a", "DSO_b", ..)
+    I3D_frame *m_medalSlots[DEBRIEF_MEDALS] = {};       // +0x218 "medal01" .. "medal12" (the places)
+    I3D_frame *m_rankFrames[DEBRIEF_RANKS] = {};        // +0x248 "rank_private" .. "rank_major"
+    uint8_t m_unknown268[0x10] = {};                    // +0x268
+    I3D_frame *m_newMedalSlot = nullptr;                // +0x278 "new_medal"
+    I3D_frame *m_rankSlot = nullptr;                    // +0x27C "soldier_rank"
+    I3D_frame *m_deathFrame = nullptr;                  // +0x280 "death"
+    uint8_t m_unknown284[0xC] = {};                     // +0x284
 };

@@ -32839,14 +32839,29 @@
   "name": "C_DebriefingMenu::OnDiaryPage",
   "proto": "bool __thiscall OnDiaryPage(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
  },
+ "0068e3e0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::DescribeSoldiers",
+  "proto": "void __thiscall DescribeSoldiers(C_MenuState *this, void * desc, void * model)"
+ },
  "0068edc0": {
   "module": "campaign_screens",
   "name": "C_DebriefingMenu::DescribeDebriefing",
   "proto": "bool __thiscall DescribeDebriefing(C_MenuState *this, void * desc, void * model)"
  },
+ "0068f080": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ListObjectives",
+  "proto": "bool __cdecl ListObjectives(void)"
+ },
  "0068f670": {
   "module": "campaign_screens",
   "name": "C_DebriefingMenu::IsCopyRefused_68f670"
+ },
+ "0068f6c0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ShowMissionResult",
+  "proto": "void __thiscall ShowMissionResult(C_MenuState *this, void * desc, void * model)"
  },
  "0068f8f0": {
   "module": "campaign_screens",

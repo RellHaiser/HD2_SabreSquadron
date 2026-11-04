@@ -151,7 +151,6 @@ bool S_SoldierProfile::HasUnknown28(int value) const
 {
     return std::find(unknown28.begin(), unknown28.end(), value) != unknown28.end();
 }
-void C_DebriefingMenu::DescribeSoldiers(S_ScreenDesc *desc, I3D_frame *) { GfLog("describe soldiers %x", desc->id); }
 bool C_DebriefingMenu::OnSoldierScroll(void *, void *, C_Control *, uint32_t, uint32_t)
 {
     GfLog("soldier scroll");
@@ -161,7 +160,6 @@ std::vector<int> g_diaryTexts;
 const std::vector<int> &C_Diary::GetTexts() const { return g_diaryTexts; }
 C_MissionDef *g_dbMission;
 C_MissionDef *C_Campaign::GetCurrentMission() { return g_dbMission; }
-void C_DebriefingMenu::DescribeDebriefing2(S_ScreenDesc *desc, I3D_frame *) { GfLog("68f6c0 %x", desc->id); }
 bool C_DebriefingMenu::ShowSoldier(int *unknown)
 {
     GfLog("show soldier %d", unknown != nullptr);
@@ -247,6 +245,9 @@ struct C_DbPages : C_MsScreen {
         return true;
     }
 };
+struct C_DbObjective : C_CampaignNode {
+    using C_CampaignNode::m_id;
+};
 struct C_DbMission : C_MissionDef {
     using C_MissionDef::m_objectives;
     using C_MissionDef::m_unknown2C;
@@ -276,7 +277,7 @@ struct S_CampaignScreensResults {
     bool vsCredits = true, vsMovie = true, vsFit = true, vsUpdate = true, vsScroll = true, vsRender = true, vsInput = true;
     bool vsMovieState = true;
     bool dbMedal = true, dbResults = true, dbStore = true, dbStart = true, dbMessage = true, dbBuild = true;
-    bool dbDiary = true, dbDiaryPage = true, dbWon = true, dbScreen = true;
+    bool dbDiary = true, dbDiaryPage = true, dbWon = true, dbScreen = true, dbPanel = true, dbObjectives = true, dbResult = true;
 };
 
 // A message's values ("target id value value2[ value3][ 'text']"; value2 / value3 by name when known).
@@ -287,6 +288,8 @@ std::string CsMessage(const S_ControlMessage &m)
         const auto it = g_csNames.find(v);
         return it != g_csNames.end() ? it->second : CmText("%x", static_cast<uint32_t>(v));
     };
+    if (m.id == CONTROL_MSG_SET_BAR_VALUE && m.value == 2 && m.value2)
+        return CmText("%x %x %x '", m.target, m.id, m.value) + reinterpret_cast<const char *>(m.value2) + "'";
     std::string s = CmText("%x %x %x ", m.target, m.id, m.value) + value(m.value2);
     if (m.value3)
         s += " " + value(m.value3);
@@ -305,6 +308,20 @@ std::string CsDesc(const S_ScreenDesc &desc)
         s += "; ";
     }
     return s;
+}
+// A control description and its children ("type name id: messages { children }").
+std::string CsTree(const S_ControlDesc *c)
+{
+    std::string s = CmText("%x %s %x:", c->type, c->name.c_str(), c->id);
+    for (const S_ControlMessage &m : c->messages)
+        s += " " + CsMessage(m);
+    if (!c->children.empty()) {
+        s += " {";
+        for (const S_ControlDesc *child : c->children)
+            s += " " + CsTree(child);
+        s += " }";
+    }
+    return s + ";";
 }
 // The queue's messages (emptied).
 std::string CsQueue()
@@ -1939,7 +1956,7 @@ void CampaignScreensTest(I3D_scene *)
             g_menuScreens.clear();
             g_gfLog.clear();
             ok &= m.BuildScreens() && g_cacheLoads == std::vector<std::string>({"debriefing", "diary"}) &&
-                  GmInOrder(Join(g_gfLog), {"dbbd 34 debriefing", "dbbd 48 death 1", "describe soldiers 4000000", "68f6c0 4000000",
+                  GmInOrder(Join(g_gfLog), {"dbbd 34 debriefing", "dbbd 48 death 1", "dbbd 48 DSO_a 1", "dbbd 48 soldier_rank 20", "music 2 0", "fade 1 2000",
                                             "dbbdi 34 DIARY", "dbbdi 48 text_02 1", "dbbr 38 dbbp 1", "show soldier 0"}) &&
                   m.m_screens.size() == 3 && m.m_screens[1]->GetScreenFrame() == As<I3D_frame>(debriefing) &&
                   !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1];
@@ -2173,36 +2190,185 @@ void CampaignScreensTest(I3D_scene *)
             };
             const std::string head = "13 text_screen 4100000: 0 1000015 a abf; 13 text_mission status 4200000: 0 1000015 c 7da; "
                                      "13 text_status 4300000: 0 1000015 b ac8; 13 text_team status 4400000: 0 1000015 b ac9; "
-                                     "12 text_objectives 4500000:; 8 scroll00 4600000: 0 1000020 2 0 0 1000007 4010000 menu scroll; ";
-            const std::string tail = "14 bload 4900000: 0 1000015 d ac3 0 1000007 4001000 menu page 0 6001001 2 0; 14 bexit to main "
-                                     "menu 4a00000: 0 1000015 d ac4 0 600100a 0 0; 13 text_h&dversion 4b00000: 0 1000015 28 7d6; ";
+                                     "12 text_objectives 4500000:; 5 panel_soldier00 4600000:; 8 scroll00 4700000: 0 1000020 2 0 0 1000007 4010000 menu "
+                                     "scroll; ";
+            const std::string tail = "14 bload 4a00000: 0 1000015 d ac3 0 1000007 4001000 menu page 0 6001001 2 0; 14 bexit to main "
+                                     "menu 4b00000: 0 1000015 d ac4 0 600100a 0 0; 13 text_h&dversion 4c00000: 0 1000015 28 7d6; ";
             std::string got = describe(5, true, true);
-            ok &= MsLogIs({"dbm 48 death 1", "dbdeath 30 0", "describe soldiers 4000000"}, g_gfLog);
-            ok &= got == head + "14 bsave and continue 4700000: 0 1000015 d ac2 0 6001034 0 0; 14 bretry immediately 4800000: 0 "
+            ok &= g_gfLog.size() > 3 && g_gfLog[0] == "dbm 48 death 1" && g_gfLog[1] == "dbdeath 30 0" && g_gfLog[2] == "dbm 48 DSO_a 1";
+            ok &= got == head + "14 bsave and continue 4800000: 0 1000015 d ac2 0 6001034 0 0; 14 bretry immediately 4900000: 0 "
                                 "1000015 d acc 0 6001075 0 0; " + tail;
-            if (got != head + "14 bsave and continue 4700000: 0 1000015 d ac2 0 6001034 0 0; 14 bretry immediately 4800000: 0 "
+            if (got != head + "14 bsave and continue 4800000: 0 1000015 d ac2 0 6001034 0 0; 14 bretry immediately 4900000: 0 "
                                "1000015 d acc 0 6001075 0 0; " + tail)
                 std::fprintf(stderr, "DBDESC %s\n", got.c_str());
             // Not won: saving inactive.
-            ok &= describe(5, true, false) == head + "14 bsave and continue 4700000: 0 1000015 d ac2 0 6001034 0 0 0 1000001 0 0; "
-                                                    "14 bretry immediately 4800000: 0 1000015 d acc 0 6001075 0 0; " + tail;
+            ok &= describe(5, true, false) == head + "14 bsave and continue 4800000: 0 1000015 d ac2 0 6001034 0 0 0 1000001 0 0; "
+                                                    "14 bretry immediately 4900000: 0 1000015 d acc 0 6001075 0 0; " + tail;
             // A single mission: saving and the diary inactive, the replay.
             std::string single = tail;
             single.replace(single.find("0 6001001 2 0;"), std::strlen("0 6001001 2 0;"), "0 6001001 2 0 0 1000001 0 0;");
-            ok &= describe(5, false, true) == head + "14 bsave and continue 4700000: 0 1000015 d ac2 0 6001034 0 0 0 1000001 0 0; "
-                                                    "14 bretry immediately 4800000: 0 1000015 d acc 0 600107c 0 0; " + single;
+            ok &= describe(5, false, true) == head + "14 bsave and continue 4800000: 0 1000015 d ac2 0 6001034 0 0 0 1000001 0 0; "
+                                                    "14 bretry immediately 4900000: 0 1000015 d acc 0 600107c 0 0; " + single;
             // The operation's end's kind: its title, won (saving active), no retry.
             std::string end = head;
             end.replace(end.find("a abf;"), std::strlen("a abf;"), "a ac0;");
-            ok &= describe(6, true, false) == end + "14 bsave and continue 4700000: 0 1000015 d ac2 0 6001034 0 0; 14 bretry "
-                                                   "immediately 4800000: 0 1000015 d acc 0 1000001 0 0; " + tail;
+            ok &= describe(6, true, false) == end + "14 bsave and continue 4800000: 0 1000015 d ac2 0 6001034 0 0; 14 bretry "
+                                                   "immediately 4900000: 0 1000015 d acc 0 1000001 0 0; " + tail;
             // No "death" frame: nothing off.
             g_msChildren.erase({model, "death"});
             describe(5, true, true);
-            ok &= MsLogIs({"dbm 48 death 1", "describe soldiers 4000000"}, g_gfLog);
+            ok &= g_gfLog.size() > 2 && g_gfLog[0] == "dbm 48 death 1" && g_gfLog[1] == "dbm 48 DSO_a 1";
             squad.states.clear();
             g_csNames.clear();
             WM(r.dbScreen, ok && described);
+        }
+
+        // --- the soldiers' panel: its picture, name, titles and skills' bars; the model's medals, places,
+        // ranks and the death frame kept ---
+        {
+            bool ok = true;
+            C_DebriefingMenu m;
+            S_MrObj *model = MrObj("dpm", g_mrModelVt);
+            S_MrObj *dsoA = MsFrame("dsoA"), *burmaB = MsFrame("burmaB"), *slot5 = MsFrame("slot5"), *major = MsFrame("major"),
+                    *fresh = MsFrame("fresh"), *rank = MsFrame("rankslot"), *death = MsFrame("deathv");
+            g_msChildren[{model, "DSO_a"}] = dsoA;
+            g_msChildren[{model, "BURMA_STAR_b"}] = burmaB;
+            g_msChildren[{model, "medal05"}] = slot5;
+            g_msChildren[{model, "rank_major"}] = major;
+            g_msChildren[{model, "new_medal"}] = fresh;
+            g_msChildren[{model, "soldier_rank"}] = rank;
+            g_msChildren[{model, "death"}] = death;
+            S_ScreenDesc desc("debriefing", "debriefing", 1u << SCREEN_ID_SHIFT);
+            g_gfLog.clear();
+            m.DescribeSoldiers(&desc, As<I3D_frame>(model));
+            ok &= desc.controls.size() == 1;
+            const std::string tree = desc.controls.empty() ? "" : CsTree(desc.controls[0]);
+            const std::string half = "3f000000", seven = "3f333333";
+            std::string bars;
+            const char *suffixes[7] = {" %", " Kg", "", "", " %", " %", " %"};
+            for (int i = 0; i < 7; ++i)
+                bars += CmText(" 17 hlcpctcr0%d 41%02x000: 0 1000093 2 0 0 1000015 b %x 0 1000092 0 %s 0 1000092 1 %s 0 1000092 2 '%s';", i,
+                               8 + i, 0xA6E + i, half.c_str(), seven.c_str(), suffixes[i]);
+            const std::string want = "5 panel_soldier00 4100000: { 4 soldier00 4101000: 0 1000038 0 0; 13 text_name00 4102000:; 13 "
+                                     "text_soldierstats00 4103000: 0 1000015 b acd; 13 text_new medal 4104000:; 13 text_selected "
+                                     "soldier stats 4105000: 0 1000015 b ad2; 13 text_decorations 4106000: 0 1000015 b ad3; 13 "
+                                     "text_new decoration 4107000: 0 1000015 b ad4;" + bars + " };";
+            ok &= tree == want;
+            if (tree != want)
+                std::fprintf(stderr, "DBPANEL\n%s\n%s\n", tree.c_str(), want.c_str());
+            ok &= m.m_medalFrames[0][0] == As<I3D_frame>(dsoA) && !m.m_medalFrames[0][1] && m.m_medalFrames[11][1] == As<I3D_frame>(burmaB) &&
+                  !m.m_medalFrames[11][0] && m.m_medalSlots[4] == As<I3D_frame>(slot5) && !m.m_medalSlots[0] &&
+                  m.m_rankFrames[7] == As<I3D_frame>(major) && !m.m_rankFrames[0] && m.m_newMedalSlot == As<I3D_frame>(fresh) &&
+                  m.m_rankSlot == As<I3D_frame>(rank) && m.m_deathFrame == As<I3D_frame>(death);
+            // The frames looked for: the medals' pairs (visuals), the places (dummies), the ranks, the rest.
+            std::vector<std::string> wantLog;
+            const char *medals[12] = {"DSO", "DCM", "MILIT_MEDAL", "GSM_AFRICA", "GSM", "WAR_MEDAL", "DEFENCE_MEDAL",
+                                      "MILITARY_CROSS", "VICTORIA_CROSS", "GERM_FRANCE_STAR", "AFRICA_STAR", "BURMA_STAR"};
+            for (const char *medal : medals) {
+                wantLog.push_back(CmText("dpm 48 %s_a 1", medal));
+                wantLog.push_back(CmText("dpm 48 %s_b 1", medal));
+            }
+            for (int i = 1; i <= 12; ++i)
+                wantLog.push_back(CmText("dpm 48 medal%02d 20", i));
+            wantLog.push_back("dpm 48 new_medal 20");
+            for (const char *r8 : {"rank_private", "rank_corporal", "rank_sergeant", "rank_StaffSergeant", "rank_second_lieutenant",
+                                   "rank_lieutenant", "rank_captain", "rank_major"})
+                wantLog.push_back(CmText("dpm 48 %s 1", r8));
+            wantLog.push_back("dpm 48 soldier_rank 20");
+            wantLog.push_back("dpm 48 death 1");
+            ok &= MsLogIs(wantLog, g_gfLog);
+            for (const char *name : {"DSO_a", "BURMA_STAR_b", "medal05", "rank_major", "new_medal", "soldier_rank", "death"})
+                g_msChildren.erase({model, name});
+            WM(r.dbPanel, ok);
+        }
+
+        // --- the objectives listed (the completed under "Tasks: ", the others but the inactive under
+        // "Recommendation:"); won: a tutorial, someone alive ---
+        {
+            bool ok = true;
+            alignas(16) static uint8_t missionMemory[sizeof(C_MissionDef)];
+            std::memset(static_cast<void *>(missionMemory), 0, sizeof missionMemory);
+            auto *mission = reinterpret_cast<C_DbMission *>(missionMemory);
+            alignas(16) static uint8_t objectiveMemory[4][sizeof(S_MissionObjective)];
+            std::memset(static_cast<void *>(objectiveMemory), 0, sizeof objectiveMemory);
+            S_MissionObjective *o[4];
+            for (int i = 0; i < 4; ++i)
+                o[i] = reinterpret_cast<S_MissionObjective *>(objectiveMemory[i]);
+            alignas(16) static uint8_t profileMemory[2][sizeof(S_SoldierProfile)];
+            std::memset(static_cast<void *>(profileMemory), 0, sizeof profileMemory);
+            auto *alive = reinterpret_cast<S_SoldierProfile *>(profileMemory[0]);
+            auto *dead = reinterpret_cast<S_SoldierProfile *>(profileMemory[1]);
+            dead->dead = true;
+            g_epProfiles = {alive, dead};
+            S_SquadSoldier s0, s1;
+            s0.profileIndex = 0;
+            s1.profileIndex = 1;
+            const auto list = [&](std::initializer_list<int> statuses) {
+                std::vector<S_MissionObjective *> objectives;
+                int i = 0;
+                for (int status : statuses) {
+                    o[i]->status = status;
+                    static_cast<C_DbObjective *>(static_cast<C_CampaignNode *>(o[i]))->m_id = 100 + i;
+                    objectives.push_back(o[i]);
+                    ++i;
+                }
+                mission->m_objectives = objectives;
+                g_controlMessages.clear();
+                const bool won = C_DebriefingMenu::ListObjectives();
+                return CmText("%d ", won) + CsQueue();
+            };
+            g_dbMission = nullptr;
+            ok &= list({}) == "0 ";
+            g_dbMission = mission;
+            squad.states = {&s0, &s1};
+            ok &= list({}) == "1 ";
+            const std::string done0 = "4500000 1000017 29 acf; 4500000 1000016 55 0 '='; 4500000 1000016 29 0 ' '; 4500000 1000017 29 64; ";
+            ok &= list({1}) == "1 " + done0;
+            ok &= list({1, 4, 1}) == "1 " + done0 + "4500000 1000016 55 0 '='; 4500000 1000016 29 0 ' '; 4500000 1000017 29 66; ";
+            ok &= list({0, 1, 2, 3}) == "1 4500000 1000017 29 acf; 4500000 1000016 55 0 '='; 4500000 1000016 29 0 ' '; "
+                                        "4500000 1000017 29 65; 4500000 1000016 b 0 ' '; 4500000 1000017 29 ad0; 4500000 1000016 55 "
+                                        "0 '!'; 4500000 1000016 29 0 ' '; 4500000 1000017 29 64; 4500000 1000016 55 0 '!'; 4500000 "
+                                        "1000016 29 0 ' '; 4500000 1000017 29 66; 4500000 1000016 55 0 '!'; 4500000 1000016 29 0 ' '; "
+                                        "4500000 1000017 29 67; ";
+            ok &= list({4, 2}) == "1 4500000 1000017 29 ad0; 4500000 1000016 55 0 '!'; 4500000 1000016 29 0 ' '; 4500000 1000017 29 65; ";
+            // Nobody alive: lost (the objectives listed all the same); a tutorial: won.
+            squad.states = {&s1};
+            ok &= list({1}) == "0 " + done0;
+            squad.states = {&s1, &s0};
+            ok &= list({}) == "1 ";
+            squad.states = {&s0, &s1};
+            ok &= list({}) == "1 ";
+            squad.states.clear();
+            mission->m_unknown2C = true;
+            ok &= list({}) == "1 ";
+            mission->m_unknown2C = false;
+            ok &= list({}) == "0 ";
+            // The result: the text cleared, the status, the music (won, lost; the operation's end's kind
+            // won without a list).
+            C_DebriefingMenu m;
+            m.m_mode = 5;
+            squad.states = {&s0};
+            mission->m_objectives = std::vector<S_MissionObjective *>();
+            g_controlMessages.clear();
+            g_gfLog.clear();
+            m.ShowMissionResult(nullptr, nullptr);
+            bool result = CsQueue() == "4500000 2000018 0 0; 4200000 1000015 c 7da; " && MsLogIs({"music 1 0", "fade 1 2000"}, g_gfLog);
+            squad.states = {&s1};
+            g_gfLog.clear();
+            m.ShowMissionResult(nullptr, nullptr);
+            result &= CsQueue() == "4500000 2000018 0 0; 4200000 1000015 c 7dc; " && MsLogIs({"music 2 0", "fade 1 2000"}, g_gfLog);
+            m.m_mode = 6;
+            mission->m_objectives = {o[0]};
+            o[0]->status = 1;
+            g_gfLog.clear();
+            m.ShowMissionResult(nullptr, nullptr);
+            result &= CsQueue() == "4500000 2000018 0 0; 4200000 1000015 c 7da; " && MsLogIs({"music 1 0", "fade 1 2000"}, g_gfLog);
+            mission->m_objectives = std::vector<S_MissionObjective *>();
+            squad.states.clear();
+            g_dbMission = nullptr;
+            g_epProfiles.clear();
+            WM(r.dbObjectives, ok);
+            WM(r.dbResult, result);
         }
 
         g_epProfiles = oldProfiles;
@@ -2220,9 +2386,9 @@ void CampaignScreensTest(I3D_scene *)
     std::printf("campaignscreens: oeTable %d oeDescribe %d oeBuild %d oeInput %d oeSlots %d smStart %d smMessage %d "
                 "smConsole %d smPassword %d smBuild %d smTick %d smJoin %d smNotify %d vsCredits %d vsMovie %d vsFit %d "
                 "vsUpdate %d vsScroll %d vsRender %d vsInput %d vsMovieState %d dbMedal %d dbResults %d dbStore %d dbStart %d "
-                "dbMessage %d dbBuild %d dbDiary %d dbDiaryPage %d dbWon %d dbScreen %d\n", r.oeTable, r.oeDescribe,
+                "dbMessage %d dbBuild %d dbDiary %d dbDiaryPage %d dbWon %d dbScreen %d dbPanel %d dbObjectives %d dbResult %d\n", r.oeTable, r.oeDescribe,
                 r.oeBuild, r.oeInput, r.oeSlots, r.smStart, r.smMessage, r.smConsole, r.smPassword, r.smBuild, r.smTick,
                 r.smJoin, r.smNotify, r.vsCredits, r.vsMovie, r.vsFit, r.vsUpdate, r.vsScroll, r.vsRender, r.vsInput,
                 r.vsMovieState, r.dbMedal, r.dbResults, r.dbStore, r.dbStart, r.dbMessage, r.dbBuild, r.dbDiary, r.dbDiaryPage, r.dbWon,
-                r.dbScreen);
+                r.dbScreen, r.dbPanel, r.dbObjectives, r.dbResult);
 }

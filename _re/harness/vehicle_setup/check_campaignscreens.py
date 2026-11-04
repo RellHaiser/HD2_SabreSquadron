@@ -12,7 +12,7 @@ CHECKS = ("oeTable oeDescribe oeBuild oeInput oeSlots "
           "smStart smMessage smConsole smPassword smBuild smTick smJoin smNotify "
           "vsCredits vsMovie vsFit vsUpdate vsScroll vsRender vsInput vsMovieState "
           "dbMedal dbResults dbStore dbStart dbMessage dbBuild "
-          "dbDiary dbDiaryPage dbWon dbScreen").split()
+          "dbDiary dbDiaryPage dbWon dbScreen dbPanel dbObjectives dbResult").split()
 
 
 def main():

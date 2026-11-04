@@ -163,7 +163,7 @@ bool C_DebriefingMenu::BuildScreens()
             continue;
         if ((desc->id & 0xFC000000) == DEBRIEFING_SCREEN << SCREEN_SHIFT) {
             DescribeDebriefing(desc, model);
-            DescribeDebriefing2(desc, model);
+            ShowMissionResult(desc, model);
         }
         if ((desc->id & 0xFC000000) == DIARY_SCREEN << SCREEN_SHIFT)
             DescribeDiary(desc, model);

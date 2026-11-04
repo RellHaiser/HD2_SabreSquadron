@@ -7944,6 +7944,27 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 364 errors in 66 files, 153 stubs. ret_audit --src: 52.
   - Ghidra: names/campaign_screens.txt (+5); 5 functions in ported.txt. Stats: 9,056 of 12,306 functions by hand (81.5 % by size).
 
+  PART 9g-vii DONE (2026-11-03): the debriefing's soldiers' panel and the mission's result
+  (game/debriefing_screens.cpp).
+  - DescribeSoldiers 0x0068e3e0 ("panel_soldier00": the picture, the name, the titles 0xACD / 0xAD2 /
+    0xAD3 / 0xAD4, the skills' 7 bars hlcpctcr00 .. 06 (their names 0xA6E + the skill, 50 % / 70 %, the
+    suffixes " %", " Kg"); the model's frames: the medals' pairs DSO_a / DSO_b .. BURMA_STAR_b, their
+    places medal01 .. medal12, new_medal, the ranks' badges rank_private .. rank_major, soldier_rank,
+    death), ListObjectives 0x0068f080 (the completed under "Tasks: " ("="), the others but the inactive
+    under "Recommendation:" ("!"); won: a tutorial or someone alive, not the objectives),
+    ShowMissionResult 0x0068f6c0 (the list, "ACCOMPLISHED" / "FAILED", the music 1 or 2 faded in; its
+    arguments unread).
+  - The medals' ids are the frames' order (0 DSO, 1 DCM, 2 MILIT_MEDAL, 3 GSM_AFRICA, 4 GSM, 5 WAR_MEDAL,
+    6 DEFENCE_MEDAL, 7 MILITARY_CROSS, 8 VICTORIA_CROSS (one living holder), 9 GERM_FRANCE_STAR, 10
+    AFRICA_STAR, 11 BURMA_STAR): S_SoldierProfile +0x28 holds them, +0x24 is the rank (0 private ..
+    7 major). C_DebriefingMenu +0x1B8 .. +0x283 the frames.
+  - Dropped: the copy protection ("FAILED" for a cracked copy).
+  - Harness: dbPanel, dbObjectives, dbResult (the panel's tree; the bars' suffixes printed as texts).
+    All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g7.py (113 cases, 103 build; all caught but 1 equivalent).
+  - Build: MSVC clean. Tier 1: 364 errors in 66 files, 153 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+3); 3 functions in ported.txt. Stats: 9,059 of 12,306 functions by hand (81.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
