@@ -46,6 +46,9 @@ struct S_PlayMode {
 class C_Diary {
 public:
     void AddText(int textId);
+    // (The debriefing, part 9g-v: campaign_screens_test.inc.)
+    void CommitCurrent();
+    void ClearCurrent();
 };
 
 class C_PlayerProfile {
@@ -54,6 +57,9 @@ public:
     C_KeyBindings *GetKeyBindings() { return &m_keyBindings; }
     // (The video player, part 9g-iv: campaign_screens_test.inc.)
     void SetMovieSeen(const char *file, bool seen);
+    // (The debriefing, part 9g-v.)
+    bool SetProgress(int campaign, int mission);
+    int GetProgress(int campaign) const;
     // (The in-game menu, part 9e-v: game_menu_test.inc.)
     void ApplyVolume();
     // (The options handler, part 9e-viii: options_test.inc.)
@@ -105,6 +111,8 @@ public:
     C_Campaign *m_campaign = nullptr;
     // (The in-game menu's main screen, part 9e-ix: game_menu_test.inc.)
     int GetDifficulty() const;
+    // (The debriefing, part 9g-v: campaign_screens_test.inc.)
+    C_str GetSaveFileName(int a, int b);
 };
 extern C_GameProfile g_gameProfile;
 extern int g_versionMajor;
@@ -142,6 +150,7 @@ struct S_SquadSoldier : S_SoldierState {
     void SplitStacks();
     void PutItem(S_SoldierItem *displaced, uint8_t slot, const S_SoldierItem &item);
     void ReturnItemsTo(C_ItemStock *stock);
+    void ReturnItems();                                 // (the debriefing, part 9g-v)
     int CountItems(uint8_t slot, const S_SoldierItem &item) const;
     int RemoveItem(uint8_t slot, S_SoldierItem &item);
     int GetFreeBeltVolume() const;

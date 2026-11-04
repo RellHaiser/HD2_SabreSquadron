@@ -4,11 +4,13 @@
 #define private public
 #define protected public
 #include "game/operation_end.h"
+#include "game/debriefing.h"
 #include "game/session_menu.h"
 #include "game/video_state.h"
 #include "game/video_text_box.h"
 #undef protected
 #undef private
+#include <array>
 
 // (campaign.cpp is not linked: the operation index set by the test, logged.)
 int g_csOperation;
@@ -107,6 +109,65 @@ bool FileExists(const char *path)
 }
 const char *GetGameDirectory() { return "G:\\Game"; }
 
+// (Part 9g-v: the debriefing's. The diary, the profiles' progress and medals, the saved games and the
+// campaign's steps are not linked: faked, logged; the screens' builders (9g-vi) logged.)
+void C_Diary::CommitCurrent() { GfLog("diary commit"); }
+void C_Diary::ClearCurrent() { GfLog("diary clear"); }
+void S_SquadSoldier::ReturnItems() { GfLog("return all %d", profileIndex); }
+int g_dbProgress;
+bool C_PlayerProfile::SetProgress(int campaign, int mission)
+{
+    GfLog("set progress %d %d", campaign, mission);
+    return true;
+}
+int C_PlayerProfile::GetProgress(int campaign) const
+{
+    GfLog("progress %d", campaign);
+    return g_dbProgress;
+}
+C_str C_GameProfile::GetSaveFileName(int a, int b) { return C_fstr("save%d_%d", a, b); }
+bool g_dbLoaded = true, g_dbAdvanced = true;
+bool C_GameApp::SaveGame(const C_str &fileName, bool inGame)
+{
+    GfLog("save %s %d", fileName.c_str(), inGame);
+    return true;
+}
+bool C_GameApp::LoadGame(const C_str &fileName, bool inGame)
+{
+    GfLog("load %s %d", fileName.c_str(), inGame);
+    return g_dbLoaded;
+}
+bool C_Campaign::AdvanceToMission()
+{
+    GfLog("advance");
+    return g_dbAdvanced;
+}
+bool C_Campaign::SetupSingleMission(int campaign, int missionNumber)
+{
+    GfLog("single %d %d", campaign, missionNumber);
+    return true;
+}
+bool S_SoldierProfile::HasUnknown28(int value) const
+{
+    return std::find(unknown28.begin(), unknown28.end(), value) != unknown28.end();
+}
+bool C_DebriefingMenu::DescribeDebriefing(S_ScreenDesc *desc, I3D_frame *)
+{
+    GfLog("describe debriefing %x", desc->id);
+    return true;
+}
+void C_DebriefingMenu::DescribeDebriefing2(S_ScreenDesc *desc, I3D_frame *) { GfLog("68f6c0 %x", desc->id); }
+bool C_DebriefingMenu::DescribeDiary(S_ScreenDesc *desc, I3D_frame *)
+{
+    GfLog("describe diary %x", desc->id);
+    return true;
+}
+bool C_DebriefingMenu::ShowSoldier(int *unknown)
+{
+    GfLog("show soldier %d", unknown != nullptr);
+    return true;
+}
+
 namespace {
 
 // (Part 9g-iv.) The video player's engine objects: the stream's rectangle and size, its position; the
@@ -179,6 +240,7 @@ struct S_CampaignScreensResults {
     bool smJoin = true, smNotify = true;
     bool vsCredits = true, vsMovie = true, vsFit = true, vsUpdate = true, vsScroll = true, vsRender = true, vsInput = true;
     bool vsMovieState = true;
+    bool dbMedal = true, dbResults = true, dbStore = true, dbStart = true, dbMessage = true, dbBuild = true;
 };
 
 // A message's values ("target id value value2[ value3][ 'text']"; value2 / value3 by name when known).
@@ -1398,6 +1460,475 @@ void CampaignScreensTest(I3D_scene *)
         g_mrNames.erase(&g_mrSndDriver);
         g_mrNames.erase(graph);
     }
+    // ===== part 9g-v: the debriefing =====
+    {
+        S_PlayMode playMode;
+        S_PlayMode *const oldPlayMode = g_gameProfile.m_playMode;
+        g_gameProfile.m_playMode = &playMode;
+        S_MissionSquad squad;
+        S_MissionSquad *const oldSquad = g_gameProfile.m_missionSquad;
+        g_gameProfile.m_missionSquad = &squad;
+        alignas(16) static uint8_t storeMemory[64];
+        C_HumanStore *const oldStore = g_gameProfile.m_humanStore;
+        g_gameProfile.m_humanStore = reinterpret_cast<C_HumanStore *>(storeMemory);
+        C_PlayerProfile player;
+        C_PlayerProfile *const oldPlayer = g_gameProfile.m_player;
+        g_gameProfile.m_player = &player;
+        const std::vector<S_SoldierProfile *> oldProfiles = g_epProfiles;
+        // Profiles in zeroed memory (their constructor is not linked): a rank, medals, the counts.
+        alignas(16) static uint8_t profileMemory[8][sizeof(S_SoldierProfile)];
+        int made = 0;
+        const auto profile = [&](int rank, std::vector<int> medals, int missions3C, int missions40, bool dead) {
+            auto *p = reinterpret_cast<S_SoldierProfile *>(profileMemory[made++]);
+            std::memset(static_cast<void *>(p), 0, sizeof(S_SoldierProfile));
+            p->unknown24 = rank;
+            for (int m : medals)
+                p->unknown28.push_back(m);
+            p->unknown3C = missions3C;
+            p->unknown40 = missions40;
+            p->dead = dead;
+            return p;
+        };
+        const auto soldier = [](int profileIndex, int experience) {
+            auto *s = new S_SquadSoldier();
+            s->profileIndex = profileIndex;
+            s->progress.experience = experience;
+            s->unknown34 = -1;
+            s->unknown38 = -1;
+            return s;
+        };
+        const auto clearSquad = [&]() {
+            for (S_SquadSoldier *s : squad.states)
+                delete s;
+            squad.states.clear();
+        };
+
+        // --- the medal due ---
+        {
+            bool ok = true;
+            const auto medal = [&](int current, int operation, S_SoldierProfile *p, int experience,
+                                   std::vector<S_SoldierProfile *> roster = {}) {
+                campaign->m_current = current;
+                g_csOperation = operation;
+                g_epProfiles = roster;
+                S_SquadSoldier s;
+                s.unknown38 = -1;
+                s.progress.experience = experience;
+                C_DebriefingMenu::AwardMedal(p, &s);
+                return s.unknown38;
+            };
+            made = 0;
+            // The first campaign's operations: 5 and 6 medal 9; 4 medal 11; 2 medal 10, then 3 by the missions
+            // and the rank.
+            ok &= medal(0, 5, profile(0, {}, 0, 0, false), 0) == 9 && medal(0, 6, profile(0, {}, 0, 0, false), 0) == 9;
+            ok &= medal(1, 5, profile(0, {}, 0, 0, false), 0) == -1 && medal(0, 5, profile(0, {9}, 0, 0, false), 0) == -1;
+            ok &= medal(0, 4, profile(0, {}, 0, 0, false), 0) == 11 && medal(0, 4, profile(0, {11}, 0, 0, false), 0) == -1;
+            made = 0;
+            ok &= medal(0, 2, profile(0, {}, 0, 0, false), 0) == 10;
+            ok &= medal(0, 2, profile(3, {10}, 0, 2, false), 0) == 3 && medal(0, 2, profile(2, {10}, 0, 2, false), 0) == 5;
+            ok &= medal(0, 2, profile(2, {10}, 0, 3, false), 0) == 3 && medal(0, 2, profile(1, {10}, 0, 3, false), 0) == 5;
+            made = 0;
+            ok &= medal(0, 2, profile(1, {10}, 0, 4, false), 0) == 3 && medal(0, 2, profile(0, {10}, 0, 4, false), 0) == 5;
+            ok &= medal(0, 2, profile(0, {10}, 0, 5, false), 0) == 3 && medal(0, 2, profile(9, {10}, 0, 6, false), 0) == -1;
+            ok &= medal(0, 2, profile(9, {10, 3}, 0, 2, false), 0) == 5 && medal(0, 2, profile(0, {10}, 9, 9, false), 0) == -1;
+            // (A dead soldier: none of the operations'.)
+            made = 0;
+            ok &= medal(0, 5, profile(0, {}, 0, 0, true), 0) == -1;
+            // The experience: more than 14999 medal 8 (none holding it), then 7 (more than 11999), 2, 0, 1.
+            ok &= medal(1, 0, profile(0, {}, 0, 0, false), 15000) == 7 && medal(1, 0, profile(0, {7}, 0, 0, false), 15000) == 2;
+            ok &= medal(1, 0, profile(0, {7, 2, 0, 1}, 0, 0, false), 15000) == 8;
+            made = 0;
+            S_SoldierProfile *holder = profile(0, {8}, 0, 0, false), *deadHolder = profile(0, {8}, 0, 0, true);
+            ok &= medal(1, 0, profile(0, {7, 2, 0, 1}, 0, 0, false), 15000, {holder}) == -1;
+            ok &= medal(1, 0, profile(0, {7, 2, 0, 1}, 0, 0, false), 15000, {deadHolder}) == 8;
+            ok &= medal(1, 0, profile(0, {}, 0, 0, true), 15000, {holder}) == 8 && medal(1, 0, profile(0, {}, 0, 0, true), 15000, {deadHolder}) == -1;
+            S_SoldierProfile *nonHolder = profile(0, {7}, 0, 0, false);
+            ok &= medal(1, 0, profile(0, {7, 2, 0, 1}, 0, 0, false), 15000, {nonHolder, nullptr}) == 8;
+            made = 0;
+            ok &= medal(1, 0, profile(3, {5}, 0, 1, false), 0) == -1;
+            ok &= medal(1, 0, profile(0, {7, 2, 0, 1}, 0, 0, false), 14999) == -1;
+            made = 0;
+            ok &= medal(1, 0, profile(0, {}, 0, 0, false), 12000) == 7 && medal(1, 0, profile(0, {}, 0, 0, false), 11999) == 2;
+            ok &= medal(1, 0, profile(0, {}, 0, 0, false), 11000) == 2 && medal(1, 0, profile(0, {}, 0, 0, false), 10999) == 0;
+            ok &= medal(1, 0, profile(0, {}, 0, 0, false), 10000) == 0 && medal(1, 0, profile(0, {}, 0, 0, false), 9999) == 1;
+            made = 0;
+            ok &= medal(1, 0, profile(0, {}, 0, 0, false), 9000) == 1 && medal(1, 0, profile(0, {}, 0, 0, false), 8999) == -1;
+            // (A dead soldier: only medal 8.)
+            ok &= medal(1, 0, profile(0, {}, 0, 0, true), 12000) == -1;
+            // The missions (+0x40) by the rank: medal 5; the missions (+0x3C) by the rank: medal 4 (not in
+            // operation 2; over 5).
+            ok &= medal(1, 0, profile(3, {}, 0, 1, false), 0) == 5 && medal(1, 0, profile(2, {}, 0, 1, false), 0) == -1;
+            made = 0;
+            ok &= medal(1, 0, profile(2, {}, 0, 2, false), 0) == 5 && medal(1, 0, profile(1, {}, 0, 3, false), 0) == 5;
+            ok &= medal(1, 0, profile(0, {}, 0, 4, false), 0) == 5 && medal(1, 0, profile(9, {}, 0, 5, false), 0) == -1;
+            ok &= medal(1, 0, profile(3, {}, 5, 0, false), 0) == 4 && medal(1, 0, profile(2, {}, 5, 0, false), 0) == -1;
+            made = 0;
+            ok &= medal(1, 0, profile(2, {}, 6, 0, false), 0) == 4 && medal(1, 0, profile(1, {}, 7, 0, false), 0) == 4;
+            ok &= medal(1, 0, profile(0, {}, 8, 0, false), 0) == 4 && medal(1, 0, profile(9, {}, 9, 0, false), 0) == -1;
+            ok &= medal(1, 2, profile(3, {}, 5, 0, false), 0) == -1 && medal(1, 0, profile(3, {4}, 5, 0, false), 0) == -1;
+            made = 0;
+            ok &= medal(1, 0, profile(3, {}, 5, 1, false), 0) == 4 && medal(1, 0, profile(3, {4}, 5, 1, false), 0) == 5;
+            ok &= medal(1, 0, profile(3, {5}, 5, 1, false), 0) == 4 && medal(1, 0, profile(3, {}, 8, 1, false), 9000) == 1;
+            ok &= medal(1, 0, profile(0, {1}, 0, 4, false), 9000) == 5;
+            // (The medal 8 set, then overridden by 5 or 4.)
+            made = 0;
+            ok &= medal(1, 0, profile(0, {7, 2, 0, 1}, 8, 4, false), 15000) == 4;
+            g_epProfiles.clear();
+            WM(r.dbMedal, ok);
+        }
+
+        // --- the results: a dead soldier's items back; the experience, the missions; a promotion due (not
+        // past rank 7); the medal (from the second mission) ---
+        {
+            bool ok = true;
+            made = 0;
+            S_SoldierProfile *p0 = profile(0, {}, 3, 4, false), *p1 = profile(2, {}, 0, 0, true), *p2 = profile(7, {}, 0, 0, false);
+            S_SoldierProfile *p3 = profile(1, {}, 0, 0, false);
+            p0->unknown38 = 6000;
+            p2->unknown38 = 900000;
+            p3->unknown38 = 20000;
+            g_epProfiles = {p0, p1, p2, p3};
+            squad.states = {soldier(0, 4001), soldier(1, 100), soldier(2, 5), soldier(3, 5000)};
+            campaign->m_current = 1;
+            g_csOperation = 0;
+            g_esMission = 0;
+            g_gfLog.clear();
+            C_DebriefingMenu::ApplyResults();
+            ok &= MsLogIs({"mission number 1", "return all 1"}, g_gfLog);
+            ok &= p0->unknown38 == 10001 && p0->unknown3C == 4 && p0->unknown40 == 5 && squad.states[0]->unknown34 == 1;
+            ok &= p1->unknown38 == 100 && squad.states[1]->unknown34 == -1 && p2->unknown38 == 900005 &&
+                  squad.states[2]->unknown34 == -1 && p3->unknown38 == 25000 && squad.states[3]->unknown34 == -1;
+            ok &= squad.states[0]->unknown38 == -1 && squad.states[3]->unknown38 == -1;
+            // (At 10000 exactly: none; past the next rank's too: one rank.)
+            p0->unknown38 = 5999;
+            p3->unknown38 = 20001;
+            squad.states[0]->unknown34 = -1;
+            g_esMission = 1;
+            C_DebriefingMenu::ApplyResults();
+            ok &= p0->unknown38 == 10000 && squad.states[0]->unknown34 == -1 && squad.states[3]->unknown34 == 2;
+            // The second mission on: the medals (rank 7, 2 missions: medal 5).
+            ok &= squad.states[0]->unknown38 == -1 && squad.states[1]->unknown38 == -1 && squad.states[2]->unknown38 == 5 &&
+                  squad.states[3]->unknown38 == -1;
+            clearSquad();
+            g_epProfiles.clear();
+            WM(r.dbResults, ok);
+        }
+
+        // --- kept: the promotions and medals given, the progress added (capped at 100), the dead off the
+        // squad, the living's average to the roster's living (by a random 60 .. 140 %) ---
+        {
+            bool ok = true;
+            made = 0;
+            S_SoldierProfile *p0 = profile(1, {3}, 0, 0, false), *p1 = profile(2, {}, 0, 0, true), *p2 = profile(4, {}, 0, 0, false);
+            S_SoldierProfile *p3 = profile(0, {}, 0, 0, false), *p4 = profile(0, {}, 0, 0, true);
+            g_epProfiles = {p0, p1, p2, p3, p4};
+            for (S_SoldierProfile *p : g_epProfiles) {
+                for (int k = 0; k < 9; ++k)
+                    p->stats[k] = 10.0f * static_cast<float>(k) + 3.25f;
+                p->unknown38 = 500;
+            }
+            p2->stats[1] = 99.5f;
+            p2->stats[6] = 99.9375f;
+            S_SquadSoldier *s0 = soldier(0, 3000), *s1 = soldier(1, 1000), *s2 = soldier(2, 2001);
+            const float gains[9] = {1.5f, 2.25f, 0.75f, 0.5f, 1.25f, 9.0f, 0.125f, 2.0f, 2.5f};
+            for (S_SquadSoldier *s : {s0, s1, s2}) {
+                S_SoldierProgress &p = s->progress;
+                p.unknown00 = gains[0];
+                p.unknown04 = gains[1] * static_cast<float>(s->profileIndex + 1);
+                p.endurance = gains[2];
+                p.morale = gains[3];
+                p.shooting = gains[4];
+                p.stealth = gains[6];
+                p.firstAid = gains[7];
+                p.lockpick = gains[8];
+            }
+            s0->unknown34 = 2;
+            s0->unknown38 = 7;
+            s2->unknown38 = 1;
+            squad.states = {s0, s1, s2};
+            // The original's arithmetic transcribed (the same random numbers).
+            std::vector<std::array<float, 9>> want;
+            std::vector<int> wantExperience;
+            for (S_SoldierProfile *p : g_epProfiles) {
+                std::array<float, 9> st;
+                for (int k = 0; k < 9; ++k)
+                    st[static_cast<size_t>(k)] = p->stats[k];
+                want.push_back(st);
+                wantExperience.push_back(p->unknown38);
+            }
+            float sum[9] = {};
+            int living = 0, sumExperience = 0;
+            for (S_SquadSoldier *s : {s0, s1, s2}) {
+                const size_t i = static_cast<size_t>(s->profileIndex);
+                const S_SoldierProgress &p = s->progress;
+                const float add[9] = {p.unknown00, p.unknown04, p.endurance, p.morale, p.shooting, 0.0f, p.stealth, p.firstAid, p.lockpick};
+                for (int k = 0; k < 9; ++k)
+                    if (k != 5)
+                        want[i][static_cast<size_t>(k)] += add[k];
+                for (int k : {1, 2, 3, 4, 6, 7, 8})
+                    if (want[i][static_cast<size_t>(k)] > 100.0f)
+                        want[i][static_cast<size_t>(k)] = 100.0f;
+                if (!g_epProfiles[i]->dead) {
+                    ++living;
+                    sumExperience += p.experience;
+                    for (int k = 1; k < 9; ++k)
+                        if (k != 5)
+                            sum[k] += add[k];
+                }
+            }
+            const float share = 1.0f / static_cast<float>(living);
+            for (int k = 1; k < 9; ++k)
+                sum[k] *= share;
+            sumExperience /= living;
+            std::srand(4321);
+            std::vector<int> randoms;
+            for (int i = 0; i < 5 * 9; ++i)
+                randoms.push_back(std::rand());
+            size_t next = 0;
+            for (size_t i = 0; i < g_epProfiles.size(); ++i) {
+                if (g_epProfiles[i]->dead)
+                    continue;
+                const auto factor = [&]() {
+                    const float f = static_cast<float>(randoms[next++]) * 3.051851e-05f * 0.8f;
+                    return static_cast<float>(static_cast<double>(f) + 0.6);
+                };
+                wantExperience[i] = static_cast<int>(factor() * static_cast<float>(sumExperience) + static_cast<float>(wantExperience[i]));
+                for (int k : {0, 1, 2, 3, 4, 6, 7, 8})
+                    want[i][static_cast<size_t>(k)] = factor() * sum[k] + want[i][static_cast<size_t>(k)];
+                for (int k : {1, 2, 3, 4, 6, 7, 8})
+                    if (want[i][static_cast<size_t>(k)] > 100.0f)
+                        want[i][static_cast<size_t>(k)] = 100.0f;
+            }
+            std::srand(4321);
+            C_DebriefingMenu::StoreProgress();
+            ok &= p0->unknown24 == 2 && p0->unknown28 == std::vector<int>({3, 7}) && p2->unknown28 == std::vector<int>({1}) &&
+                  p1->unknown28.empty() && s0->unknown34 == -1 && s0->unknown38 == -1 && s2->unknown38 == -1;
+            ok &= squad.states == std::vector<S_SquadSoldier *>({s0, s2});
+            for (size_t i = 0; i < g_epProfiles.size(); ++i) {
+                ok &= g_epProfiles[i]->unknown38 == wantExperience[i];
+                for (int k = 0; k < 9; ++k)
+                    ok &= g_epProfiles[i]->stats[k] == want[i][static_cast<size_t>(k)];
+            }
+            ok &= p2->stats[1] == 100.0f && p2->stats[6] == 100.0f && p1->stats[5] == 53.25f && p0->stats[5] == 53.25f &&
+                  p2->unknown24 == 4 && p1->unknown24 == 2;
+            // (The roster's first 30 only.)
+            {
+                alignas(16) static uint8_t bigMemory[31][sizeof(S_SoldierProfile)];
+                std::memset(static_cast<void *>(bigMemory), 0, sizeof bigMemory);
+                std::vector<S_SoldierProfile *> big;
+                for (auto &memory : bigMemory)
+                    big.push_back(reinterpret_cast<S_SoldierProfile *>(memory));
+                const std::vector<S_SoldierProfile *> kept = g_epProfiles;
+                g_epProfiles = big;
+                squad.states = {soldier(0, 1000)};
+                C_DebriefingMenu::StoreProgress();
+                ok &= big[29]->unknown38 > 0 && big[30]->unknown38 == 0 && big[30]->stats[1] == 0.0f;
+                clearSquad();
+                g_epProfiles = kept;
+            }
+            // (No living soldier: no averages.)
+            p0->dead = true;
+            p2->dead = true;
+            const float before = p3->stats[2];
+            squad.states = {soldier(0, 10)};
+            C_DebriefingMenu::StoreProgress();
+            ok &= squad.states.empty() && p3->stats[2] == before;
+            clearSquad();
+            g_epProfiles.clear();
+            WM(r.dbStore, ok);
+        }
+
+        // --- started: the campaign's diary kept (its results for the debriefing kind), a single mission's dropped ---
+        {
+            bool ok = true;
+            C_DebriefingMenu m;
+            playMode.singleMission = 0;
+            m.m_mode = 5;
+            g_gfLog.clear();
+            ok &= m.OnStart(nullptr) && MsLogIs({"diary commit", "mission number 1"}, g_gfLog);
+            m.m_mode = 6;
+            g_gfLog.clear();
+            ok &= m.OnStart(nullptr) && MsLogIs({"diary commit"}, g_gfLog);
+            playMode.singleMission = 1;
+            m.m_mode = 5;
+            g_gfLog.clear();
+            ok &= m.OnStart(nullptr) && MsLogIs({"diary clear"}, g_gfLog) && !C_DebriefingMenu::IsCampaign();
+            playMode.singleMission = 0;
+            ok &= C_DebriefingMenu::IsCampaign() && m.GetTypeId() == 5;
+            g_gfLog.clear();
+            m.OnStop();
+            ok &= g_gfLog.empty();
+            WM(r.dbStart, ok);
+        }
+
+        // --- the messages: Escape (the diary closed; the campaign's save question; a single mission's), the
+        // continue and the save and quit (the results kept, the game saved), the restart, the replay ---
+        {
+            bool ok = true;
+            C_DebriefingMenu m;
+            m.m_state = GAME_STATE_RUNNING;
+            S_ControlMessage message;
+            const auto send = [&](uint32_t id) {
+                message.id = id;
+                g_gfLog.clear();
+                g_controlMessages.clear();
+                m.OnMessage(&message);
+                return CsQueue();
+            };
+            C_MsScreen debriefing(nullptr, "dbd", 0x04000000), diary(nullptr, "dbdiary", 0x08000000);
+            m.m_messageBox = nullptr;
+            playMode.singleMission = 0;
+            campaign->m_current = 1;
+            g_esMission = 4;
+            g_dbProgress = 4;
+            // The diary on top: closed.
+            g_menuScreens = {&debriefing, &diary};
+            ok &= send(MENU_MSG_ESCAPE) == "0 2000003 0 0; " && g_gfLog.empty();
+            // The debriefing on top, none, a null top: the campaign's question (the mission played before:
+            // overwrite).
+            g_menuScreens = {&debriefing};
+            ok &= send(MENU_MSG_ESCAPE) == "" && MsLogIs({"mission number 1", "progress 1"}, g_gfLog);
+            g_menuScreens.clear();
+            g_dbProgress = 5;
+            send(CONTROL_NOTIFY_CLICK | MENU_MSG_ESCAPE);
+            ok &= MsLogIs({"mission number 1", "progress 1"}, g_gfLog);
+            g_menuScreens = {nullptr};
+            send(MENU_MSG_ESCAPE);
+            ok &= MsLogIs({"mission number 1", "progress 1"}, g_gfLog);
+            g_menuScreens.clear();
+            // (A single mission: "ARE YOU SURE?".)
+            playMode.singleMission = 1;
+            ok &= send(MENU_MSG_ESCAPE) == "" && g_gfLog.empty();
+            ok &= send(0x2000034) == "" && g_gfLog.empty() && send(0x20000C8) == "" && g_gfLog.empty();
+            playMode.singleMission = 0;
+            // Continue: the results kept (the debriefing's kind; a mission), the game saved, the next step.
+            m.m_mode = 5;
+            made = 0;
+            g_epProfiles = {profile(0, {}, 0, 0, false)};
+            squad.states = {soldier(0, 7)};
+            ok &= send(0x2000034) == "0 2000008 1 0; " &&
+                  MsLogIs({"mission number 1", "set progress 1 4", "save save1_4 0"}, g_gfLog) && g_epProfiles[0]->stats[1] != 0.0f;
+            ok &= send(0x20000C8) == "0 2000009 0 0; " && MsLogIs({"mission number 1", "set progress 1 4", "save save1_4 0"}, g_gfLog);
+            // (No mission, not the debriefing's kind: only the step.)
+            g_esMission = -1;
+            ok &= send(0x2000034) == "0 2000008 1 0; " && MsLogIs({"mission number 1"}, g_gfLog);
+            g_esMission = 4;
+            m.m_mode = 6;
+            ok &= send(0x20000C8) == "0 2000009 0 0; " && MsLogIs({"mission number 1"}, g_gfLog);
+            campaign->m_current = -1;
+            m.m_mode = 5;
+            ok &= send(0x2000034) == "0 2000008 1 0; " && MsLogIs({"mission number -1"}, g_gfLog);
+            campaign->m_current = 1;
+            // Restart: the save before the mission loaded, the mission's step; the first: the game reset.
+            m.m_state = GAME_STATE_RUNNING;
+            ok &= send(0x2000075) == "" && MsLogIs({"mission number 1", "load save1_3 0", "advance"}, g_gfLog) &&
+                  m.m_state == GAME_STATE_ENDED;
+            m.m_state = GAME_STATE_RUNNING;
+            g_dbLoaded = false;
+            ok &= send(0x2000075) == "" && MsLogIs({"mission number 1", "load save1_3 0"}, g_gfLog) && m.m_state == GAME_STATE_RUNNING;
+            g_dbLoaded = true;
+            g_dbAdvanced = false;
+            send(0x2000075);
+            ok &= m.m_state == GAME_STATE_RUNNING;
+            g_esMission = 1;
+            g_dbAdvanced = true;
+            m.m_state = GAME_STATE_RUNNING;
+            send(0x2000075);
+            ok &= MsLogIs({"mission number 1", "load save1_0 0", "advance"}, g_gfLog) && m.m_state == GAME_STATE_ENDED;
+            g_dbAdvanced = false;
+            m.m_state = GAME_STATE_RUNNING;
+            g_esMission = 0;
+            send(0x2000075);
+            ok &= MsLogIs({"mission number 1", "reset game", "advance"}, g_gfLog) && m.m_state == GAME_STATE_RUNNING;
+            g_dbAdvanced = true;
+            send(0x2000075);
+            ok &= m.m_state == GAME_STATE_ENDED;
+            // Replay: the game reset, the single mission set up, ended.
+            m.m_state = GAME_STATE_RUNNING;
+            g_esMission = 6;
+            ok &= send(0x200007C) == "" && MsLogIs({"mission number 1", "reset game", "single 1 6"}, g_gfLog) &&
+                  m.m_state == GAME_STATE_ENDED;
+            m.m_state = GAME_STATE_RUNNING;
+            ok &= send(0x200000B) == "" && g_gfLog.empty() && m.m_state == GAME_STATE_RUNNING;
+            {
+                C_MessageBox box(nullptr, GfFrame(FRAME_DUMMY, "dbmsgbox"));
+                m.m_messageBox = &box;
+                const auto question = [&]() {
+                    m.CloseMessage();
+                    const std::string q = send(MENU_MSG_ESCAPE);
+                    return CmText("%d %x %x ", box.GetKind(), box.m_yesMessage, box.m_noMessage) +
+                           (q.find("100000 1000015 18 ") != std::string::npos ? q.substr(q.find("100000 1000015 18 ") + 18, 4) : "?");
+                };
+                g_menuScreens.clear();
+                playMode.singleMission = 1;
+                const std::string q1 = question();
+                ok &= q1 == "1 2000009 0 7d4;";
+                playMode.singleMission = 0;
+                g_esMission = 4;
+                g_dbProgress = 4;
+                const std::string q2 = question();
+                ok &= q2 == "1 20000c8 2000009 2533";
+                g_dbProgress = 5;
+                ok &= question() == "1 20000c8 2000009 2534";
+                m.m_messageBox = nullptr;
+            }
+            clearSquad();
+            g_epProfiles.clear();
+            g_esMission = 0;
+            WM(r.dbMessage, ok);
+        }
+
+        // --- built: the debriefing (its builders), the campaign's diary, the first opened, the soldier shown ---
+        {
+            bool ok = true;
+            void (*const oldFill)(I3D_model *) = g_cacheFill;
+            g_cacheFill = [](I3D_model *) {};
+            C_DebriefingMenu m;
+            S_MrWorld world = MrWorld("dbb");
+            m.m_scene = As<I3D_scene>(world.scene);
+            C_MsScreen box(m.m_scene, "dbbbox", 0);
+            m.m_screens = {&box};
+            S_MrObj *debriefing = MrObj("dbbd", g_mrModelVt), *diary = MrObj("dbbdi", g_mrModelVt);
+            g_mrMade[FRAME_MODEL] = {debriefing, diary};
+            playMode.singleMission = 0;
+            g_cacheLoads.clear();
+            g_menuScreens.clear();
+            g_gfLog.clear();
+            ok &= m.BuildScreens() && g_cacheLoads == std::vector<std::string>({"debriefing", "diary"}) &&
+                  GmInOrder(Join(g_gfLog), {"dbbd 34 debriefing", "describe debriefing 4000000", "68f6c0 4000000", "dbbdi 34 DIARY",
+                                            "describe diary 8000000", "show soldier 0"}) &&
+                  m.m_screens.size() == 3 && m.m_screens[1]->GetScreenFrame() == As<I3D_frame>(debriefing) &&
+                  !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1];
+            for (size_t i = 1; i < m.m_screens.size(); ++i)
+                delete m.m_screens[i];
+            m.m_screens = {&box};
+            m.m_models.clear();
+            g_menuScreens.clear();
+            // A single mission: no diary.
+            playMode.singleMission = 1;
+            g_mrMade[FRAME_MODEL] = {MrObj("dbbs", g_mrModelVt)};
+            g_cacheLoads.clear();
+            g_gfLog.clear();
+            ok &= m.BuildScreens() && g_cacheLoads == std::vector<std::string>({"debriefing"}) && m.m_screens.size() == 2 &&
+                  !MrHas("describe diary 8000000");
+            for (size_t i = 1; i < m.m_screens.size(); ++i)
+                delete m.m_screens[i];
+            m.m_screens.clear();
+            m.m_models.clear();
+            g_menuScreens.clear();
+            g_mrMade.erase(FRAME_MODEL);
+            g_cacheFill = oldFill;
+            playMode.singleMission = 0;
+            WM(r.dbBuild, ok);
+        }
+
+        g_epProfiles = oldProfiles;
+        g_gameProfile.m_player = oldPlayer;
+        g_gameProfile.m_humanStore = oldStore;
+        g_gameProfile.m_missionSquad = oldSquad;
+        g_gameProfile.m_playMode = oldPlayMode;
+        g_controlMessages.clear();
+    }
     g_driverVtable[0x54 / 4] = oldCreate;
     g_mrModelVt[0x48 / 4] = oldFind;
     g_gameProfile.m_campaign = oldCampaign;
@@ -1405,8 +1936,9 @@ void CampaignScreensTest(I3D_scene *)
     g_controlMessages.clear();
     std::printf("campaignscreens: oeTable %d oeDescribe %d oeBuild %d oeInput %d oeSlots %d smStart %d smMessage %d "
                 "smConsole %d smPassword %d smBuild %d smTick %d smJoin %d smNotify %d vsCredits %d vsMovie %d vsFit %d "
-                "vsUpdate %d vsScroll %d vsRender %d vsInput %d vsMovieState %d\n", r.oeTable, r.oeDescribe,
+                "vsUpdate %d vsScroll %d vsRender %d vsInput %d vsMovieState %d dbMedal %d dbResults %d dbStore %d dbStart %d "
+                "dbMessage %d dbBuild %d\n", r.oeTable, r.oeDescribe,
                 r.oeBuild, r.oeInput, r.oeSlots, r.smStart, r.smMessage, r.smConsole, r.smPassword, r.smBuild, r.smTick,
                 r.smJoin, r.smNotify, r.vsCredits, r.vsMovie, r.vsFit, r.vsUpdate, r.vsScroll, r.vsRender, r.vsInput,
-                r.vsMovieState);
+                r.vsMovieState, r.dbMedal, r.dbResults, r.dbStore, r.dbStart, r.dbMessage, r.dbBuild);
 }

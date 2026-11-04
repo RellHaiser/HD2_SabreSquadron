@@ -32784,9 +32784,50 @@
   "module": "campaign_screens",
   "name": "vector_erase4_68c4f0"
  },
+ "0068c5d0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::IsCampaign",
+  "proto": "bool __cdecl IsCampaign(void)"
+ },
+ "0068c5f0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::StoreProgress",
+  "proto": "void __cdecl StoreProgress(void)"
+ },
+ "0068cb80": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::FindMedal8",
+  "proto": "void __fastcall FindMedal8(bool * alive, bool * dead)"
+ },
+ "0068cbf0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::AwardMedal",
+  "proto": "void __fastcall AwardMedal(void * profile, void * soldier)"
+ },
+ "0068ce60": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ApplyResults",
+  "proto": "void __cdecl ApplyResults(void)"
+ },
+ "0068cfe0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_MenuState *this, void * arg)"
+ },
  "0068d0e0": {
-  "module": "zz_idioms",
-  "name": "empty_function_68d0e0"
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_MenuState *this)"
+ },
+ "0068d0f0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_MenuState *this, void * message)"
+ },
+ "0068d5e0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_MenuState *this)"
  },
  "006987d0": {
   "module": "game",
@@ -42586,6 +42627,12 @@
   "module": "campaign_screens",
   "name": "g_operationEnds",
   "type": "uint[120]"
+ },
+ "008423c8": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_rankExperience",
+  "type": "int[7]"
  },
  "00842570": {
   "data": true,

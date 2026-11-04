@@ -7901,6 +7901,30 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/campaign_screens.txt (+13); 37 functions in ported.txt (the STL helpers absorbed).
     Stats: 9,039 of 12,306 functions by hand (81.2 % by size).
 
+  PART 9g-v DONE (2026-11-03): the debriefing's start, messages and results (game/debriefing.h/.cpp,
+  new; C_DebriefingMenu out of pending.h).
+  - C_DebriefingMenu (vtable 0x00815cf0): OnStart 0x0068cfe0 (the campaign's diary entry kept, the
+    results applied for kind 5; a single mission's entry dropped), OnMessage 0x0068d0f0 (Escape: the
+    diary closed, else the campaign's "Do you want to save the game?" / "Overwrite current saved game?"
+    (the mission played before), a single mission's "ARE YOU SURE?"; 0x2000034 continue and 0x20000C8
+    save and quit: the results kept, the progress, the game saved; 0x2000075 the mission again from the
+    save before it; 0x200007C a single mission again), BuildScreens 0x0068d5e0 ("debriefing", the
+    campaign's "DIARY"), IsCampaign 0x0068c5d0.
+  - The results: ApplyResults 0x0068ce60 (a dead soldier's items back, the experience and the missions
+    counted, the promotion due by g_rankExperience 0x008423c8), AwardMedal 0x0068cbf0 (the first
+    campaign's operations' medals 9, 11, 10, 3; the experience's 8 (one living holder), 7, 2, 0, 1; the
+    missions' 5 and 4 by the rank), FindMedal8 0x0068cb80, StoreProgress 0x0068c5f0 (the promotions and
+    medals given, the progress into the profiles capped at 100, the dead off the squad, the living's
+    average to the roster's first 30 by a random 60 .. 140 %; the factor rounded as the FPU's float).
+  - Dropped: the copy protection (OnStart's, ApplyResults' two checks: the promotions and medals given,
+    the progress kept).
+  - Harness: campaign_screens_test.inc's dbMedal, dbResults, dbStore (the original's arithmetic
+    transcribed with the same random numbers), dbStart, dbMessage (a real message box's questions),
+    dbBuild (the screens' builders faked). All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g5.py (262 cases, 233 build; all caught but 15 equivalent).
+  - Build: MSVC clean. Tier 1: 364 errors in 66 files, 153 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+10); 12 functions in ported.txt. Stats: 9,051 of 12,306 functions by hand (81.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

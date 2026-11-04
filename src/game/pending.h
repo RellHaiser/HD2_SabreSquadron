@@ -30,12 +30,8 @@ public:
     // The movie the menu asks for (empty: the credits).
     const C_str &GetMovie() const;                  // C_str +0x1E8
 };
-// The equipment screen (kinds 3 and 4): game/equipment_screen.h.
-// The screen after a mission (kind 5; type 5, vtable 0x00815cf0, 0x290 bytes).
-class C_DebriefingMenu : public C_GameState {
-public:
-    C_DebriefingMenu();                             // (inline)
-};
+// The equipment screen (kinds 3 and 4): game/equipment_screen.h. The debriefing (kind 5):
+// game/debriefing.h.
 // The squad screen (campaign screen kinds 1 and 2; type 3, vtable 0x00815d50, 0x2B0 bytes).
 class C_SquadMenu : public C_GameState {
 public:

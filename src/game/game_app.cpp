@@ -8,6 +8,7 @@
 #include "common/chunk.h"
 #include "game/campaign.h"
 #include "game/console.h"
+#include "game/debriefing.h"
 #include "game/equipment_screen.h"
 #include "game/operation_end.h"
 #include "game/session_menu.h"

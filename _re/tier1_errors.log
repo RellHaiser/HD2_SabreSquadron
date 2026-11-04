@@ -244,19 +244,19 @@ f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array
     DAT_008acbe8[2] = 0;
 f_006683f0.cpp:150:18: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     (**(code **)(*uStack_6c + 8))();
-f_0068c590.cpp:2536:55: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0068c590.cpp:1668:55: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_24 = (C_str)(*(int *)pCStack_24 - 1), *(int *)pCStack_24 == 0)) {
-f_0068c590.cpp:2548:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0068c590.cpp:1680:51: no matching function for call to 'tier1::C_str::C_str(int)'
     *pCStack_24 = (C_str)(*(int *)pCStack_24 - 1);
-f_0068c590.cpp:2582:55: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0068c590.cpp:1714:55: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_24 = (C_str)(*(int *)pCStack_24 - 1), *(int *)pCStack_24 == 0)) {
-f_0068c590.cpp:2593:55: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0068c590.cpp:1725:55: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_24 = (C_str)(*(int *)pCStack_24 - 1), *(int *)pCStack_24 == 0)) {
-f_0068c590.cpp:2604:55: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0068c590.cpp:1736:55: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_24 = (C_str)(*(int *)pCStack_24 - 1), *(int *)pCStack_24 == 0)) {
-f_0068c590.cpp:2615:55: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0068c590.cpp:1747:55: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_24 = (C_str)(*(int *)pCStack_24 - 1), *(int *)pCStack_24 == 0)) {
-f_0068c590.cpp:2627:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_0068c590.cpp:1759:51: no matching function for call to 'tier1::C_str::C_str(int)'
     *pCStack_24 = (C_str)(*(int *)pCStack_24 - 1);
 f_00690970.cpp:953:15: 'GetSoldierProfile' was not declared in this scope; did you mean 'S_SoldierProfile'?
     iVar1 = GetSoldierProfile(g_gameProfile.m_humanStore,*puVar4);

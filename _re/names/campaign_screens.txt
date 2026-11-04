@@ -55,3 +55,14 @@
 008ae644 g_creditsStyles @ int[14]
 008ae680 g_creditsIntro @ int
 008415a0 g_creditsIntros @ char *[2]
+# Part 9g-v: the debriefing C_DebriefingMenu (src/game/debriefing.cpp; vtable 0x00815cf0).
+0068c5d0 C_DebriefingMenu::IsCampaign | bool __cdecl IsCampaign(void)
+0068c5f0 C_DebriefingMenu::StoreProgress | void __cdecl StoreProgress(void)
+0068cb80 C_DebriefingMenu::FindMedal8 | void __fastcall FindMedal8(bool * alive, bool * dead)
+0068cbf0 C_DebriefingMenu::AwardMedal | void __fastcall AwardMedal(void * profile, void * soldier)
+0068ce60 C_DebriefingMenu::ApplyResults | void __cdecl ApplyResults(void)
+0068cfe0 C_DebriefingMenu::OnStart | bool __thiscall OnStart(C_MenuState *this, void * arg)
+0068d0e0 C_DebriefingMenu::OnStop | void __thiscall OnStop(C_MenuState *this)
+0068d0f0 C_DebriefingMenu::OnMessage | void __thiscall OnMessage(C_MenuState *this, void * message)
+0068d5e0 C_DebriefingMenu::BuildScreens | bool __thiscall BuildScreens(C_MenuState *this)
+008423c8 g_rankExperience @ int[7]
