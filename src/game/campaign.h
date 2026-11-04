@@ -341,7 +341,7 @@ public:
     // call in; an axis caller gets the second, inferred to be the other side's planes).
     int GetAircraftAttackAxis() const { return m_aircraftAttackAxis; }
     int GetAircraftAttackAllied() const { return m_aircraftAttackAllied; }
-    // The map's value 4 (not in the shipped mpmaplist: 0): 1 makes the occupation zones be
+    // The map's mode="FRONTLINE" (C_MpMap::frontline; none in the shipped mpmaplist): 1 makes the occupation zones be
     // taken in their numbers' order.
     int GetUnknown60() const { return m_unknown60; }
     // The briefing's text id of a cooperative map (the loading screen's "briefing").

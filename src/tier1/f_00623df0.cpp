@@ -1056,7 +1056,7 @@ uint32_t C_MainMenu__FUN_006264c0(C_MainMenu *_this, ...)
     puVar4[9] = 0;
     GH_PIECE(local_8,0,1) = 2;
     GH_PIECE(local_8,1,3) = 0;
-    FUN_00626740((uint8_t *)(puVar4 + 0xc));
+    C_MpGameSetup__C_MpGameSetup((uint8_t *)(puVar4 + 0xc));
     local_8 = CONCAT31(GH_PIECE(local_8,1,3),3);
     FUN_00626710(puVar4 + 0xe5);
     *(uint8_t *)(puVar4 + 0xe9) = 0;
@@ -1136,127 +1136,9 @@ uint32_t FUN_00626710(uint32_t *param_1, ...)
 }
 
 
-// 0x00626740
-uint8_t * FUN_00626740(uint8_t *param_1, ...)
-{
-  uint8_t local_11;
-  uint32_t local_4;
-  *(uint32_t *)(param_1 + 1) = 0;
-  *(uint32_t *)(param_1 + 5) = 0;
-  *(uint32_t *)(param_1 + 0x20) = 0;
-  param_1[0x1c] = local_11;
-  *(uint32_t *)(param_1 + 0x24) = 0;
-  *(uint32_t *)(param_1 + 0x28) = 0;
-  *(uint32_t *)(param_1 + 0x34) = 0;
-  param_1[0x30] = local_11;
-  *(uint32_t *)(param_1 + 0x38) = 0;
-  *(uint32_t *)(param_1 + 0x3c) = 0;
-  *(uint32_t *)(param_1 + 0x48) = 0;
-  param_1[0x44] = local_11;
-  *(uint32_t *)(param_1 + 0x4c) = 0;
-  *(uint32_t *)(param_1 + 0x50) = 0;
-  *(uint32_t *)(param_1 + 0x5c) = 0;
-  param_1[0x58] = local_11;
-  *(uint32_t *)(param_1 + 0x60) = 0;
-  *(uint32_t *)(param_1 + 100) = 0;
-  local_4 = 5;
-  eh_vector_constructor_iterator(param_1 + 0x70,0x50,5,FUN_006268e0,FUN_00626930);
-  *(uint32_t *)(param_1 + 0x360) = 0;
-  *param_1 = 0;
-  *(uint32_t *)(param_1 + 0x6c) = 0;
-  return param_1;
-}
-
-
-// 0x006267f0
-uint32_t FUN_006267f0(int param_1, ...)
-{
-  int *piVar1;
-  int iVar2;
-  uint32_t local_4;
-  local_4 = 6;
-  FUN_00617b80(param_1);
-  local_4 = CONCAT31(GH_PIECE(local_4,1,3),5);
-  eh_vector_destructor_iterator((void *)(param_1 + 0x70),0x50,5,FUN_00626930);
-  tier1_operator_delete(*(void **)(param_1 + 0x5c));
-  *(uint32_t *)(param_1 + 0x5c) = 0;
-  *(uint32_t *)(param_1 + 0x60) = 0;
-  *(uint32_t *)(param_1 + 100) = 0;
-  tier1_operator_delete(*(void **)(param_1 + 0x48));
-  *(uint32_t *)(param_1 + 0x48) = 0;
-  *(uint32_t *)(param_1 + 0x4c) = 0;
-  *(uint32_t *)(param_1 + 0x50) = 0;
-  tier1_operator_delete(*(void **)(param_1 + 0x34));
-  *(uint32_t *)(param_1 + 0x34) = 0;
-  *(uint32_t *)(param_1 + 0x38) = 0;
-  *(uint32_t *)(param_1 + 0x3c) = 0;
-  tier1_operator_delete(*(void **)(param_1 + 0x20));
-  *(uint32_t *)(param_1 + 0x20) = 0;
-  *(uint32_t *)(param_1 + 0x24) = 0;
-  *(uint32_t *)(param_1 + 0x28) = 0;
-  piVar1 = *(int **)(param_1 + 5);
-  if ((piVar1 != 0) && (iVar2 = *piVar1, *piVar1 = iVar2 - 1, iVar2 - 1 == 0)) {
-    tier1_operator_delete(piVar1);
-  }
-  piVar1 = *(int **)(param_1 + 1);
-  if ((piVar1 != 0) && (iVar2 = *piVar1, *piVar1 = iVar2 - 1, iVar2 - 1 == 0)) {
-    tier1_operator_delete(piVar1);
-  }
-  return 0;
-}
-
-
 // 0x006268c0
 uint32_t vector_tidy_6268c0(int param_1, ...)
 {
-  tier1_operator_delete(*(void **)(param_1 + 4));
-  *(uint32_t *)(param_1 + 4) = 0;
-  *(uint32_t *)(param_1 + 8) = 0;
-  *(uint32_t *)(param_1 + 0xc) = 0;
-  return 0;
-}
-
-
-// 0x006268e0
-uint32_t FUN_006268e0(uint8_t *param_1, ...)
-{
-  uint8_t local_1;
-  local_1 = (uint8_t)((uint32_t)param_1 >> 0x18);
-  *param_1 = local_1;
-  *(uint32_t *)(param_1 + 4) = 0;
-  *(uint32_t *)(param_1 + 8) = 0;
-  *(uint32_t *)(param_1 + 0xc) = 0;
-  param_1[0x14] = local_1;
-  *(uint32_t *)(param_1 + 0x18) = 0;
-  *(uint32_t *)(param_1 + 0x1c) = 0;
-  *(uint32_t *)(param_1 + 0x20) = 0;
-  param_1[0x28] = local_1;
-  *(uint32_t *)(param_1 + 0x2c) = 0;
-  *(uint32_t *)(param_1 + 0x30) = 0;
-  *(uint32_t *)(param_1 + 0x34) = 0;
-  param_1[0x3c] = local_1;
-  *(uint32_t *)(param_1 + 0x40) = 0;
-  *(uint32_t *)(param_1 + 0x44) = 0;
-  *(uint32_t *)(param_1 + 0x48) = 0;
-  return 0;
-}
-
-
-// 0x00626930
-uint32_t FUN_00626930(int param_1, ...)
-{
-  tier1_operator_delete(*(void **)(param_1 + 0x40));
-  *(uint32_t *)(param_1 + 0x40) = 0;
-  *(uint32_t *)(param_1 + 0x44) = 0;
-  *(uint32_t *)(param_1 + 0x48) = 0;
-  tier1_operator_delete(*(void **)(param_1 + 0x2c));
-  *(uint32_t *)(param_1 + 0x2c) = 0;
-  *(uint32_t *)(param_1 + 0x30) = 0;
-  *(uint32_t *)(param_1 + 0x34) = 0;
-  tier1_operator_delete(*(void **)(param_1 + 0x18));
-  *(uint32_t *)(param_1 + 0x18) = 0;
-  *(uint32_t *)(param_1 + 0x1c) = 0;
-  *(uint32_t *)(param_1 + 0x20) = 0;
   tier1_operator_delete(*(void **)(param_1 + 4));
   *(uint32_t *)(param_1 + 4) = 0;
   *(uint32_t *)(param_1 + 8) = 0;
@@ -1286,9 +1168,9 @@ uint32_t C_auto_00813ac0__FUN_006269b0(C_auto_00813ac0 *_this, ...)
   local_4 = 2;
   FUN_0061af70((int)_this);
   GH_PIECE(local_4,0,1) = 9;
-  FUN_00617b80((int)(_this->_pad_0004 + 0x2c));
+  C_MpGameSetup__Clear((int)(_this->_pad_0004 + 0x2c));
   GH_PIECE(local_4,0,1) = 8;
-  eh_vector_destructor_iterator(_this[2]._pad_0004 + 0x2a,0x50,5,FUN_00626930);
+  eh_vector_destructor_iterator(_this[2]._pad_0004 + 0x2a,0x50,5,S_MpRotation___S_MpRotation);
   GH_PIECE(local_4,0,1) = 7;
   vector_tidy_628030((int)(_this[2]._pad_0004 + 0x12));
   GH_PIECE(local_4,0,1) = 6;

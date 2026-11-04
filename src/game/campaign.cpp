@@ -1360,12 +1360,12 @@ bool C_Campaign::SetupMultiplayerMission()              // 0x006b8a20
         // (The fourth int of each item is stack garbage in the original.)
         m_mpMission.m_items.push_back(S_CampaignItem{entry.itemId, entry.count, entry.ammo, false});
     }
-    m_mpMission.m_aircraftAttackAxis = map->GetValue(0);
-    m_mpMission.m_aircraftAttackAllied = map->GetValue(1);
-    m_mpMission.m_balanceAxis = map->GetValue(2);
-    m_mpMission.m_balanceAllied = map->GetValue(3);
-    m_mpMission.m_unknown60 = map->GetValue(4);
-    m_mpMission.m_briefingText = map->GetValue(5);
+    m_mpMission.m_aircraftAttackAxis = map->aircraftAxis;
+    m_mpMission.m_aircraftAttackAllied = map->aircraftAllied;
+    m_mpMission.m_balanceAxis = map->balancedAxis;
+    m_mpMission.m_balanceAllied = map->balancedAllied;
+    m_mpMission.m_unknown60 = map->frontline;
+    m_mpMission.m_briefingText = map->description;
     m_mpMission.m_presets = map->GetPresets();
     m_mpMission.Reset();
     return true;

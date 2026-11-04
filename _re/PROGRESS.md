@@ -8121,6 +8121,40 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/campaign_screens.txt (+5); 5 functions in ported.txt. Stats: 9,113 of 12,306 functions by hand (82.4 % by size).
   - Part 9g is done (9g-i .. 9g-xvi).
 
+  PART 9h-i DONE (2026-11-04): the multiplayer game's set-up (game/mp_game_setup.h/.cpp, new; C_MpMap out of
+  pending.h). 9h (the main menu, 0x00611200..0x0063c740: about 350 functions not ported) is split by area as it
+  goes: the set-up and its file first, then the menu's class, its screens one by one.
+  - C_MpGameSetup (0x364 bytes; the main menu's multiplayer settings +0x30, the dedicated server's 0x006acc50):
+    the map list's maps by game type (deathmatch, teamplay, hd2multiplayer, cooperative: E_MpGameType's
+    order), five rotations of them, each type's rules (S_MpGameRules: S_MultiplayerSettings +0x228..+0x27C),
+    the server's name, password and port. LoadMapList 0x006189f0 (from the asm: Ghidra lost the containers'
+    calls; mpmaplist.txt, else GameData\mpmaplist.txt: GAMESTYLE, MAP (name and dir, else " UNKNOWN " for both;
+    mode FRONTLINE, desc), OBJECTIVE, AIRCRAFTATACK, BALANCED, ALLOWEDITEMS (version 0.1: its ITEMs,
+    0x006186e0; below 1e-8: the ids in the text, spaces at the end repeating the last), ALLOWEDPRESETS,
+    ZONEGRAPH; any other element ends the list, so does an ITEM of another version's ALLOWEDITEMS, met by the
+    list's walk; then the defaults: the rules, "H&D 2 SERVER" (0x7E9), port 11001), Clear 0x00617b80,
+    FindMap 0x00617cc0 (case ignored, the last first), Load 0x00618130 / Save 0x00617df0 (chunk 0x44D: the
+    rotations 0x1B6 (index 0x1B5, the lists 0x1A4 / 0x1A6 / 0x1A8 / 0x1B2 of names 0x4D2, found in the list:
+    S_MpRotation::Load 0x00617610 / Save 0x006172f0), the options 0x1B7, the rules 0x1B8 (older: 0x1AA /
+    0x1AE / 0x1B0 / 0x1B4, the rules' first 13 / 14 / 17 ints, 0x1AD), 0x1AB, 0x1AC, 0x1AF), the inline
+    constructors 0x00626740 / 0x006268e0, the destructors 0x006267f0 / 0x00626930; C_MpMap (0x48 bytes:
+    its strings unaligned at +0x01 / +0x05): AddObjective 0x006acbd0, the destructor 0x0061b470.
+  - Fixes: OBJECTIVE / AIRCRAFTATACK / BALANCED / ALLOWEDITEMS / ALLOWEDPRESETS before any MAP do nothing (the
+    original writes through a null map), a GAMESTYLE without a type ends the list (the original compares
+    null), a rotation index out of 0 .. 4 skips the rotation (the original writes out of bounds).
+  - Harness (_re/harness/mp_setup, new; 32-bit MinGW, stdio rw_data): 32 checks. Every MPSetings.sav on H:
+    (14 profiles) loaded and saved again with its install's mpmaplist.txt (the loose file, read before the
+    archives'): chunk 0x44D byte-identical (three name maps their list lacks: added to it, as the original
+    drops them too); six lists read and compared with check_dump.py's own reading (maps, objectives, items,
+    presets, the default rules); crafted cases (make_edge.py): the older chunks, the options, rotations
+    (twice, out of range, a list not known, a broken one ending the load), the elements that end the list,
+    no list, GameData\, another root, the list read again. Sabre Squadron's own list taken from its archives
+    with the ported rw_data.dll (scratchpad dtaextract.cpp).
+  - Mutations: mutations/mutate_9h1.py with the harness's own runner (mutate.py: only the mutated file rebuilt,
+    the checks in parallel): 266: 220 killed, 19 not building, 27 equivalent.
+  - Build: MSVC clean. Tier 1: 341 errors in 63 files, 141 stubs. ret_audit --src: 52.
+  - Ghidra: names/main_menu.txt (new, +15); 15 functions and 4 vector helpers in ported.txt. Stats: 9,132 of 12,306 functions by hand (82.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

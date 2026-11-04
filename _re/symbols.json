@@ -27304,6 +27304,51 @@
   "module": "zz_idioms",
   "name": "construct_copy4_616b00"
  },
+ "006172f0": {
+  "module": "main_menu",
+  "name": "S_MpRotation::Save",
+  "proto": "void __thiscall Save(void *this, void * chunk)"
+ },
+ "00617610": {
+  "module": "main_menu",
+  "name": "S_MpRotation::Load",
+  "proto": "void __thiscall Load(void *this, void * chunk, void * setup)"
+ },
+ "00617b00": {
+  "module": "main_menu",
+  "name": "S_MpRotation::Clear",
+  "proto": "void __fastcall Clear(void * rotation)"
+ },
+ "00617b80": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::Clear",
+  "proto": "void __fastcall Clear(void * setup)"
+ },
+ "00617cc0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::FindMap",
+  "proto": "void * __thiscall FindMap(void *this, int type, void * name)"
+ },
+ "00617df0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::Save",
+  "proto": "void __thiscall Save(void *this, void * chunk)"
+ },
+ "00618130": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::Load",
+  "proto": "void __thiscall Load(void *this, void * chunk)"
+ },
+ "006186e0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::LoadItems",
+  "proto": "void __stdcall LoadItems(void * node, void * map)"
+ },
+ "006189f0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::LoadMapList",
+  "proto": "void __fastcall LoadMapList(void * setup)"
+ },
  "00619720": {
   "module": "zz_idioms",
   "name": "set_field_18_619720"
@@ -27335,6 +27380,11 @@
  "0061b450": {
   "module": "xml_node",
   "name": "XmlAttrs_Ctor"
+ },
+ "0061b470": {
+  "module": "main_menu",
+  "name": "C_MpMap::~C_MpMap",
+  "proto": "void __fastcall ~C_MpMap(void * map)"
  },
  "0061b4f0": {
   "module": "zz_idioms",
@@ -27519,9 +27569,29 @@
   "name": "S_MenuDesc::~S_MenuDesc",
   "proto": "void __thiscall ~S_MenuDesc(S_MenuDesc *this)"
  },
+ "00626740": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::C_MpGameSetup",
+  "proto": "void * __fastcall C_MpGameSetup(void * setup)"
+ },
+ "006267f0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::~C_MpGameSetup",
+  "proto": "void __fastcall ~C_MpGameSetup(void * setup)"
+ },
  "006268c0": {
   "module": "zz_idioms",
   "name": "vector_tidy_6268c0"
+ },
+ "006268e0": {
+  "module": "main_menu",
+  "name": "S_MpRotation::S_MpRotation",
+  "proto": "void * __fastcall S_MpRotation(void * rotation)"
+ },
+ "00626930": {
+  "module": "main_menu",
+  "name": "S_MpRotation::~S_MpRotation",
+  "proto": "void __fastcall ~S_MpRotation(void * rotation)"
  },
  "00627fd0": {
   "module": "zz_idioms",
@@ -34220,6 +34290,11 @@
   "module": "loader_screen",
   "name": "GetGameTypeTextId",
   "proto": "int __cdecl GetGameTypeTextId(int gameType)"
+ },
+ "006acbd0": {
+  "module": "main_menu",
+  "name": "C_MpMap::AddObjective",
+  "proto": "int __thiscall AddObjective(void *this, void * objective)"
  },
  "006ad780": {
   "module": "game",

@@ -140,7 +140,7 @@ f_005ac500.cpp:111:55: request for member '_8_4_' in '"\012ControlsEx - "', whic
     *(uint32_t *)(pcVar9 + 7) = "\nControlsEx - "._8_4_;
 f_005ac500.cpp:112:57: request for member '_12_2_' in '"\012ControlsEx - "', which is of non-class type 'const char [15]'
     *(uint16_t *)(pcVar9 + 0xb) = "\nControlsEx - "._12_2_;
-f_00616c10.cpp:1999:5: 'empty_function_6e6ba0' was not declared in this scope; did you mean 'empty_function_6e4a10'?
+f_00616c10.cpp:422:5: 'empty_function_6e6ba0' was not declared in this scope; did you mean 'empty_function_6e4a10'?
     empty_function_6e6ba0();
 f_00620f70.cpp:188:16: 'UNK_00801bd8' was not declared in this scope
     puStack_8 = &UNK_00801bd8;

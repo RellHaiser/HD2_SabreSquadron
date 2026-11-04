@@ -1,0 +1,17 @@
+# Part 9h: the main menu (src/game/main_menu.*) and what it owns.
+# Part 9h-i: the multiplayer game's set-up (src/game/mp_game_setup.cpp).
+00626740 C_MpGameSetup::C_MpGameSetup | void * __fastcall C_MpGameSetup(void * setup)
+006267f0 C_MpGameSetup::~C_MpGameSetup | void __fastcall ~C_MpGameSetup(void * setup)
+00617b80 C_MpGameSetup::Clear | void __fastcall Clear(void * setup)
+006189f0 C_MpGameSetup::LoadMapList | void __fastcall LoadMapList(void * setup)
+006186e0 C_MpGameSetup::LoadItems | void __stdcall LoadItems(void * node, void * map)
+00617cc0 C_MpGameSetup::FindMap | void * __thiscall FindMap(void *this, int type, void * name)
+00618130 C_MpGameSetup::Load | void __thiscall Load(void *this, void * chunk)
+00617df0 C_MpGameSetup::Save | void __thiscall Save(void *this, void * chunk)
+006268e0 S_MpRotation::S_MpRotation | void * __fastcall S_MpRotation(void * rotation)
+00626930 S_MpRotation::~S_MpRotation | void __fastcall ~S_MpRotation(void * rotation)
+00617b00 S_MpRotation::Clear | void __fastcall Clear(void * rotation)
+00617610 S_MpRotation::Load | void __thiscall Load(void *this, void * chunk, void * setup)
+006172f0 S_MpRotation::Save | void __thiscall Save(void *this, void * chunk)
+0061b470 C_MpMap::~C_MpMap | void __fastcall ~C_MpMap(void * map)
+006acbd0 C_MpMap::AddObjective | int __thiscall AddObjective(void *this, void * objective)

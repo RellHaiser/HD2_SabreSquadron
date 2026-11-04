@@ -34,17 +34,6 @@ int GetGameTypeTextId(int gameType, ...)
 }
 
 
-// 0x006acbd0
-int FUN_006acbd0(void *_this,uint32_t *param_1, ...)
-{
-  FUN_006ae220((void *)((int)_this + 0x24),*(uint32_t **)((int)_this + 0x2c),1,param_1);
-  if (*(int *)((int)_this + 0x28) == 0) {
-    return 0;
-  }
-  return (*(int *)((int)_this + 0x2c) - *(int *)((int)_this + 0x28)) / 0x18;
-}
-
-
 // 0x006acc10
 uint32_t FUN_006acc10(int param_1, ...)
 {
@@ -94,14 +83,14 @@ uint32_t FUN_006acc50(int param_1, ...)
     *(uint32_t *)(puVar1 + 0x60) = 0;
     *(uint32_t *)(puVar1 + 100) = 0;
     local_4 = 6;
-    eh_vector_constructor_iterator(puVar1 + 0x70,0x50,5,FUN_006268e0,FUN_00626930);
+    eh_vector_constructor_iterator(puVar1 + 0x70,0x50,5,S_MpRotation__S_MpRotation,S_MpRotation___S_MpRotation);
     *(uint32_t *)(puVar1 + 0x360) = 0;
     *puVar1 = 0;
     *(uint32_t *)(puVar1 + 0x6c) = 0;
   }
   local_4 = 0xffffffff;
   *(uint8_t **)(param_1 + 0x294) = puVar1;
-  FUN_006189f0(puVar1);
+  C_MpGameSetup__LoadMapList(puVar1);
   return 0;
 }
 
@@ -112,7 +101,7 @@ uint32_t FUN_006acd30(int param_1, ...)
   void *ptr;
   ptr = *(void **)(param_1 + 0x294);
   if (ptr != 0) {
-    FUN_006267f0((int)ptr);
+    C_MpGameSetup___C_MpGameSetup((int)ptr);
     tier1_operator_delete(ptr);
   }
   *(uint32_t *)(param_1 + 0x294) = 0;
@@ -149,7 +138,7 @@ uint32_t FUN_006acd60(void *_this,uint8_t *param_1, ...)
   if (uVar4 != *(uint32_t *)((int)_this + 0x290)) {
     ptr = *(void **)(uVar4 * 4 + *(int *)((int)_this + 0x284));
     if (ptr != 0) {
-      FUN_0061b470((int)ptr);
+      C_MpMap__dtor_C_MpMap((int)ptr);
       tier1_operator_delete(ptr);
     }
     puVar1 = *(uint32_t **)((int)_this + 0x288);
@@ -480,7 +469,7 @@ uint32_t FUN_006ad560(int param_1, ...)
          (*(int *)(param_1 + 0x288) - *(int *)(param_1 + 0x284) >> 2 != 0))) {
     pvVar1 = *(void **)(*(int *)(param_1 + 0x288) - 4);
     if (pvVar1 != 0) {
-      FUN_0061b470((int)pvVar1);
+      C_MpMap__dtor_C_MpMap((int)pvVar1);
       tier1_operator_delete(pvVar1);
     }
     *(int *)(param_1 + 0x288) = *(int *)(param_1 + 0x288) - 4;
@@ -488,7 +477,7 @@ uint32_t FUN_006ad560(int param_1, ...)
   pvVar1 = *(void **)(param_1 + 0x294);
   *(uint32_t *)(param_1 + 0x290) = 0xffffffff;
   if (pvVar1 != 0) {
-    FUN_006267f0((int)pvVar1);
+    C_MpGameSetup___C_MpGameSetup((int)pvVar1);
     tier1_operator_delete(pvVar1);
     *(uint32_t *)(param_1 + 0x294) = 0;
   }
@@ -553,7 +542,7 @@ uint32_t FUN_006ad600(int param_1, ...)
       iVar1--;
       ptr = *(void **)(*(int *)(param_1 + 0x284) + iVar1 * 4);
       if (ptr != 0) {
-        FUN_0061b470((int)ptr);
+        C_MpMap__dtor_C_MpMap((int)ptr);
         tier1_operator_delete(ptr);
       }
     }

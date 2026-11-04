@@ -281,35 +281,8 @@ enum E_MpGameType : int {
     MP_GAME_OBJECTIVES = 2,                         // attackers and defenders
     MP_GAME_COOPERATIVE = 3,
 };
-// A map of the session's list (the settings' +0x280 vector).
-// A map list entry's OBJECTIVE (0x18 bytes; parser 0x006189f0) and ITEM (0x0C bytes).
-struct S_MpMapObjective {
-    int axisText;                                   // axis_text
-    int alliedText;                                 // allied_text
-    int points;                                     // value
-    int type;                                       // type="VIP": 1, else -1
-    int team;                                       // side: AXIS 0, ALLIED (or none) 1
-    int vipUniform;                                 // vip_uniform_id
-};
-struct S_MpMapItem {
-    int itemId;
-    int count;
-    int ammo;
-};
-// A map of the multiplayer map list (GAMEDATA\mpmaplist.txt; packed: the strings at +0x01 /
-// +0x05).
-class C_MpMap {
-public:
-    const char *GetName() const;                    // C_str +0x01
-    const char *GetDirectory() const;               // C_str +0x05 (the mission's directory)
-    // The six ints at +0x0C .. +0x20: AIRCRAFTATACK axis / allied, BALANCED axis / allied,
-    // two not identified.
-    int GetValue(int index) const;
-    const std::vector<S_MpMapObjective> &GetObjectives() const;   // +0x24
-    const std::vector<S_MpMapItem> &GetItems() const;              // +0x34
-    // The allowed presets (C_str +0x44).
-    const char *GetPresets() const;
-};
+// A map of the session's list (the settings' +0x280 vector), its objectives and items: game/mp_game_setup.h.
+#include "game/mp_game_setup.h"
 // S_MultiplayerSettings::sessionType (the session menu's console: 2 creates the server, 1 connects).
 enum : int { SESSION_NONE = 0, SESSION_JOINING = 1, SESSION_HOSTING = 2 };
 // Settings of the network game session (the object 0x008aea30 points to; the names are those
