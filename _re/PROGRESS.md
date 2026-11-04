@@ -8102,6 +8102,25 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 342 errors in 64 files, 142 stubs. ret_audit --src: 52.
   - Ghidra: names/campaign_screens.txt (+2); 2 functions in ported.txt. Stats: 9,108 of 12,306 functions by hand (82.3 % by size).
 
+  PART 9g-xvi DONE (2026-11-04): the squad screen's stats, medals and name; its tick and hiding
+  (game/squad_menu.cpp).
+  - ShowStats 0x00696140 (the stats' rows: bars and "%3.0f %%" / "%3.0f Kg" / "%3.0f" values, health's bar
+    full; the biography's text S_SoldierProfile +0x44; the name's box active with GetProfileName; nobody:
+    all emptied, the box inactive), ShowMedals 0x00696a30 (from the asm: up to six held: their first
+    frames in places 7 .. 12; more: the oldest as ribbons (second frames) in places 1 .., the last six's
+    first frames in 7 .. 12; a fix: without medal frames, nothing), OnNameEdited 0x00696c90 (the box's
+    text the soldier's own name, his slots' texts, the stats), OnScreenTick 0x00696d60 ("CONTINUE"
+    active only with the first slot taken), OnScreenHidden 0x00696ef0 (SaveCustomNames).
+  - The squad screen (0x00690ba0 .. 0x00696f00) is done; only CRT static initializers remain in 9g's range.
+  - Harness: sqShowStats, sqShowMedals, sqNameEdited, sqTickHide; the earlier tests now read ShowStats' own
+    biography message (the tests' profiles carry 0x7000 + their index) instead of a fake's log. The 9g-xii
+    case of ShowStats clearing the selection is gone: the real ShowStats keeps it, so OnSoldierControl's
+    second check can no longer be observed. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g16.py (117: all killed but 3, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 341 errors in 63 files, 141 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+5); 5 functions in ported.txt. Stats: 9,113 of 12,306 functions by hand (82.4 % by size).
+  - Part 9g is done (9g-i .. 9g-xvi).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

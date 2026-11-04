@@ -3,8 +3,8 @@
 // player's), their stats and medals, the selection screen. Part 9g-ix: the class, the slots, starting,
 // stopping, the messages, the squad kept to the slots; 9g-x: building the screens, the selection screen;
 // 9g-xi: the roster and the medals; 9g-xii: the stats, the places, the buttons, a soldier picked; 9g-xiii: a
-// soldier assigned or detached; 9g-xiv: the dragging; 9g-xv: the automatic selection; 9g-xvi: the stats shown,
-// the screen's callbacks.
+// soldier assigned or detached; 9g-xiv: the dragging; 9g-xv: the automatic selection; 9g-xvi: the stats and
+// medals shown, the name edited, the screen's tick and hiding.
 #pragma once
 
 #include <cstdint>
@@ -185,12 +185,22 @@ protected:
     // A candidate kept among the best five (`ids` and `scores` of `count`): appended while fewer, else in
     // place of the worst of those scoring less (none: dropped).
     static void KeepBest(int *ids, int *scores, int *count, int id, int score);   // 0x006956d0 (__fastcall)
-    // (Part 9g-xvi.) The selected soldier's stats shown.
+    // The selected soldier's stats: the rows' bars and values (shooting %, strength Kg, health (its bar
+    // full), endurance, stealth %, first aid %, lockpick %), his biography's text (S_SoldierProfile +0x44),
+    // his name in its box (active); his medals. Nobody: all emptied, the box inactive.
     void ShowStats();                                   // 0x00696140 (__fastcall)
+    // His medals: all frames off; up to six held: their first frames in the last six places; more: the
+    // oldest as their second frames (ribbons) in the first places, the last six's first frames in the last
+    // six. (No profile: off only.)
+    void ShowMedals(const S_SoldierProfile *profile);   // 0x00696a30
+    // The squad screen's tick: "CONTINUE" active only with the first slot taken. True.
     static bool OnScreenTick(void *menu, void *argument, C_Control *control, uint32_t notification,
                              uint32_t value);           // 0x00696d60
+    // Hidden: the names the player gave kept (C_HumanStore::SaveCustomNames). True.
     static bool OnScreenHidden(void *menu, void *argument, C_Control *control, uint32_t notification,
                                uint32_t value);         // 0x00696ef0
+    // The name's box (Return): its text the selected soldier's own name, his slots' texts, his stats again.
+    // True.
     static bool OnNameEdited(void *menu, void *argument, C_Control *control, uint32_t notification,
                              uint32_t value);           // 0x00696c90
     // The info button: the stats' panel hidden and the other shown (or back), the button's and the title's

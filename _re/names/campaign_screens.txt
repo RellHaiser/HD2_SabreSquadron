@@ -128,3 +128,9 @@
 # Part 9g-xv: the automatic selection (src/game/squad_menu.cpp).
 00695740 C_SquadMenu::OnAutoSelect | bool __thiscall OnAutoSelect(C_MenuState *this, void * argument, void * control, uint notification, uint value)
 006956d0 C_SquadMenu::KeepBest | void __fastcall KeepBest(int * ids, int * scores, int * count, int id, int score)
+# Part 9g-xvi: the selected soldier's stats, medals and name; the screen's tick and hiding (src/game/squad_menu.cpp).
+00696140 C_SquadMenu::ShowStats | void __thiscall ShowStats(C_MenuState *this)
+00696a30 C_SquadMenu::ShowMedals | void __thiscall ShowMedals(C_MenuState *this, void * profile)
+00696c90 C_SquadMenu::OnNameEdited | bool __thiscall OnNameEdited(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00696d60 C_SquadMenu::OnScreenTick | bool __thiscall OnScreenTick(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00696ef0 C_SquadMenu::OnScreenHidden | bool __thiscall OnScreenHidden(C_MenuState *this, void * argument, void * control, uint notification, uint value)

@@ -199,6 +199,8 @@ public:
 class C_HumanStore {
 public:
     S_SoldierProfile *Get(int index) const;
+    // (The squad screen's names, part 9g-xvi.)
+    bool SaveCustomNames();
     // (The in-game menu's soldiers panel, part 9e-xiv: game_menu_test.inc; its stats, 9e-xix.)
     int GetCount() const;
     void GetStats(int *stats, int index, int level) const;

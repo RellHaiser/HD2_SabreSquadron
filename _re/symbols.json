@@ -33113,6 +33113,31 @@
   "name": "C_SquadMenu::SyncSquad",
   "proto": "bool __thiscall SyncSquad(C_MenuState *this)"
  },
+ "00696140": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::ShowStats",
+  "proto": "void __thiscall ShowStats(C_MenuState *this)"
+ },
+ "00696a30": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::ShowMedals",
+  "proto": "void __thiscall ShowMedals(C_MenuState *this, void * profile)"
+ },
+ "00696c90": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnNameEdited",
+  "proto": "bool __thiscall OnNameEdited(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00696d60": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnScreenTick",
+  "proto": "bool __thiscall OnScreenTick(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00696ef0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnScreenHidden",
+  "proto": "bool __thiscall OnScreenHidden(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
  "006987d0": {
   "module": "game",
   "name": "GetGame",

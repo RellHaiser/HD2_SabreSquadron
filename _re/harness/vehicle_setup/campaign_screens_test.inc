@@ -172,13 +172,17 @@ S_SquadSoldier *C_GameProfile::FindSoldierState(int profileIndex)
             return s;
     return nullptr;
 }
-// (Part 9g-xii: the stats shown, logged; clearing the selection when asked.)
-bool g_sqStatsClear;
-void C_SquadMenu::ShowStats()
+// (Part 9g-xvi: the names the player gives, logged.)
+void S_SoldierProfile::SetCustomName(const C_str &name)
 {
-    GfLog("show stats %d", m_selectedSoldier);
-    if (g_sqStatsClear)
-        m_selectedSoldier = -1;
+    const auto it = std::find(g_epProfiles.begin(), g_epProfiles.end(), this);
+    GfLog("custom name %d %s", it == g_epProfiles.end() ? -1 : static_cast<int>(it - g_epProfiles.begin()), name.c_str());
+    customName = name;
+}
+bool C_HumanStore::SaveCustomNames()
+{
+    GfLog("save names");
+    return true;
 }
 // (Part 9g-x: the squad screen's parts, later parts', logged.)
 #define SQ_DESCRIBE(F, T, TEXT) \
@@ -188,9 +192,6 @@ void C_SquadMenu::ShowStats()
         return T(1); \
     }
 #undef SQ_DESCRIBE
-bool C_SquadMenu::OnScreenTick(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
-bool C_SquadMenu::OnScreenHidden(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
-bool C_SquadMenu::OnNameEdited(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
 namespace {
 
 // (Part 9g-iv.) The video player's engine objects: the stream's rectangle and size, its position; the
@@ -331,6 +332,7 @@ struct S_CampaignScreensResults {
     bool sqRoster = true, sqMedals = true, sqBuildSelect = true;
     bool sqStats = true, sqSelected = true, sqButtons = true, sqInfo = true, sqControl = true, sqAssign = true;
     bool sqDragStart = true, sqDragMove = true, sqDrop = true, sqNotify13 = true, sqKeepBest = true, sqAutoSelect = true;
+    bool sqShowStats = true, sqShowMedals = true, sqNameEdited = true, sqTickHide = true;
 };
 
 // A message's values ("target id value value2[ value3][ 'text']"; value2 / value3 by name when known).
@@ -406,6 +408,51 @@ struct C_SqPicture : C_Control {
 // (Part 9g-xii.) A screen with an index (a soldier's picture found by its id).
 struct C_SqTop : C_MsScreen {
     C_SqTop(const char *n, uint32_t id, int index) : C_MsScreen(nullptr, n, id) { m_index = index; }
+};
+// (Part 9g-xvi.) The soldier ShowStats showed last (his biography's text id 0x7000 + his index, the tests'
+// profiles'): -2 nobody, -1 not shown since the last reset; the queue without ShowStats' messages.
+int g_sqShown = -1;
+void SqReset() { g_sqShown = -1; }
+void SqNote()
+{
+    for (const S_ControlMessage &msg : g_controlMessages)
+        if (msg.target == 0x4301000 && msg.id == CONTROL_MSG_SET_TEXT_ID)
+            g_sqShown = msg.value2 >= 0x7000 && msg.value2 < 0x7100 ? static_cast<int>(msg.value2 - 0x7000) : -2;
+}
+int SqShown()
+{
+    SqNote();
+    return g_sqShown;
+}
+bool SqStatsTarget(uint32_t target) { return target >= 0x4200000 && target < 0x4600000; }
+std::string SqQueue()
+{
+    SqNote();
+    std::string s;
+    for (const S_ControlMessage &msg : g_controlMessages)
+        if (!SqStatsTarget(msg.target))
+            s += CsMessage(msg) + "; ";
+    g_controlMessages.clear();
+    return s;
+}
+std::string SqQueueAll()
+{
+    SqNote();
+    return CsQueue();
+}
+// A name's edit box: its text asked (counted).
+struct C_SqName : C_Control {
+    explicit C_SqName(const char *t) : C_Control(nullptr, 0x4500000, nullptr), text(t) {}
+    const char *text;
+    int asked = 0;
+    bool HandleMessage(S_ControlMessage *m) override
+    {
+        if (m->id == CONTROL_MSG_GET_TEXT) {
+            ++asked;
+            m->text = C_str(text);
+        }
+        return true;
+    }
 };
 struct C_CsScreen : C_MsScreen {
     C_CsScreen(I3D_scene *scene, const char *n, uint32_t id) : C_MsScreen(scene, n, id) {}
@@ -2699,7 +2746,11 @@ void CampaignScreensTest(I3D_scene *)
         S_SoldierProfile *p[36];
         for (int i = 0; i < 36; ++i)
             p[i] = reinterpret_cast<S_SoldierProfile *>(sqProfileMemory[i]);
-        const auto roster = [&](int count) { g_epProfiles.assign(p, p + count); };
+        const auto roster = [&](int count) {
+            g_epProfiles.assign(p, p + count);
+            for (int i = 0; i < count; ++i)
+                p[i]->unknown44 = 0x7000 + i;
+        };
         const auto soldier = [](int profileIndex, int speechSet) {
             auto *s = new S_SquadSoldier();
             s->profileIndex = profileIndex;
@@ -3026,7 +3077,12 @@ void CampaignScreensTest(I3D_scene *)
             // A free soldier selected (the 5th: the 4th in a slot).
             C_SqTop roster4("sqroster", 0x4101050, 9);
             g_menuScreens = {&roster4};
-            ok &= send(0x2000072, 3) == "4900000 1000015 c a61; " && MsLogIs({"show stats 9"}, g_gfLog);
+            g_controlMessages.clear();
+            SqReset();
+            message.id = 0x2000072;
+            message.value = 3;
+            m.OnMessage(&message);
+            ok &= SqShown() == 9 && SqQueue() == "4900000 1000015 c a61; ";
             clearSquad();
             g_menuScreens.clear();
             WM(r.sqMessage, ok);
@@ -3040,9 +3096,10 @@ void CampaignScreensTest(I3D_scene *)
             const auto select = [&](int index, uint32_t id) {
                 top.m_id = id;
                 g_menuScreens = {&top};
-                g_gfLog.clear();
+                g_controlMessages.clear();
+                SqReset();
                 m.SelectFreeSoldier(index);
-                return g_gfLog.empty() ? std::string("none") : g_gfLog[0];
+                return SqShown() == -1 ? std::string("none") : std::string("show stats 9");
             };
             roster(5);
             m.m_slots[0].profile = 1;
@@ -3383,7 +3440,9 @@ void CampaignScreensTest(I3D_scene *)
             g_cacheLoads.clear();
             g_menuScreens.clear();
             g_gfLog.clear();
-            ok &= m.BuildScreens() && MrHas("show stats 0") && !MrHas("show stats 1") &&
+            g_controlMessages.clear();
+            SqReset();
+            ok &= m.BuildScreens() && SqShown() == 0 &&
                   m.m_screens.size() == 2;
             for (size_t i = 1; i < m.m_screens.size(); ++i)
                 delete m.m_screens[i];
@@ -3753,23 +3812,20 @@ void CampaignScreensTest(I3D_scene *)
             const auto pick = [&](C_Control *c) {
                 g_gfLog.clear();
                 g_controlMessages.clear();
+                SqReset();
                 return C_SquadMenu::OnSoldierControl(&m, &m, c, CONTROL_NOTIFY_CLICK, 0);
             };
             ok &= !pick(nullptr) && m.m_selectedSoldier == -1 && g_gfLog.empty();
             // (No selector: not placed.)
             m.m_rosterSelected = false;
-            ok &= pick(&roster) && m.m_selectedSoldier == 5 && m.m_rosterSelected && MsLogIs({"show stats 5"}, g_gfLog) &&
-                  CsQueue() == "4900000 1000015 c a61; ";
+            ok &= pick(&roster) && m.m_selectedSoldier == 5 && m.m_rosterSelected && SqShown() == 5 &&
+                  SqQueue() == "4900000 1000015 c a61; ";
             m.m_rosterSelector = selector;
             ok &= pick(&slot) && m.m_selectedSoldier == 2 && !m.m_rosterSelected &&
-                  MsLogIs({"show stats 2", "link sqcsel sqcpicture 0", "on sqcsel 1", "update sqcsel"}, g_gfLog) &&
-                  CsQueue() == "4900000 1000015 c a62; " && selector->GetParent() == pictureFrame && selector->GetPos().x == 0.0f &&
+                  SqShown() == 2 && MsLogIs({"link sqcsel sqcpicture 0", "on sqcsel 1", "update sqcsel"}, g_gfLog) &&
+                  SqQueue() == "4900000 1000015 c a62; " && selector->GetParent() == pictureFrame && selector->GetPos().x == 0.0f &&
                   selector->GetPos().y == 0.0f && selector->GetPos().z == -0.1f && selector->IsOn();
-            ok &= !pick(&other) && m.m_selectedSoldier == -1 && MsLogIs({"show stats 4"}, g_gfLog) && CsQueue() == "";
-            // (The stats' clearing the selection: none.)
-            g_sqStatsClear = true;
-            ok &= !pick(&roster) && m.m_selectedSoldier == -1 && MsLogIs({"show stats 5"}, g_gfLog) && CsQueue() == "";
-            g_sqStatsClear = false;
+            ok &= !pick(&other) && m.m_selectedSoldier == -1 && SqShown() == 4 && SqQueue() == "";
             // The selector placed: true (none: true).
             ok &= C_SquadMenu::PlaceRosterSelector(&m, nullptr, &roster, 0, 0);
             m.m_rosterSelector = nullptr;
@@ -3808,6 +3864,7 @@ void CampaignScreensTest(I3D_scene *)
             };
             // Only the queue's own messages (not the slots' pictures and texts).
             const auto queue = [&]() {
+                SqNote();
                 std::string s;
                 for (const S_ControlMessage &msg : g_controlMessages)
                     if (msg.target == 0x4101000 || msg.target == 0 || msg.target == 0x4900000)
@@ -3822,6 +3879,7 @@ void CampaignScreensTest(I3D_scene *)
                 m.m_rosterSelected = roster;
                 g_gfLog.clear();
                 g_controlMessages.clear();
+                SqReset();
                 return C_SquadMenu::OnAssign(&m, &m, control, CONTROL_NOTIFY_CLICK, 0);
             };
             playMode.mode = PLAY_MODE_CAMPAIGN;
@@ -3845,13 +3903,13 @@ void CampaignScreensTest(I3D_scene *)
             C_SqPicture slot1(nullptr, 3);
             S_CsPeek::SetId(&slot1, 0x4806000);
             ok &= assign(2, false, &slot1) && queue() == "4101000 2000083 4101030 0; " && slots() == "1 3! -1 -1 " &&
-                  m.m_selectedSoldier == 3 && MsLogIs({"show stats 3"}, g_gfLog);
+                  m.m_selectedSoldier == 3 && SqShown() == 3;
             // (The last: the one before's picture picked.)
             set({1, 2, -1, -1}, {true, true, true, true});
             C_SqPicture slot0(nullptr, 1);
             S_CsPeek::SetId(&slot0, 0x4803000);
             ok &= assign(2, false, &slot0) && queue() == "4101000 2000083 4101030 0; 4900000 1000015 c a62; " &&
-                  slots() == "1 -1 -1 -1 " && m.m_selectedSoldier == 1 && MsLogIs({"show stats 1"}, g_gfLog);
+                  slots() == "1 -1 -1 -1 " && m.m_selectedSoldier == 1 && SqShown() == 1;
             // (The first: a free roster soldier.)
             ok &= assign(1, false, &button) && queue() == "4101000 2000083 4101020 0; 0 2000072 0 0; " && slots() == "-1 -1 -1 -1 ";
             // (The first slot empty; the fourth's soldier roster soldier 0.)
@@ -3869,11 +3927,11 @@ void CampaignScreensTest(I3D_scene *)
             m.m_rosterSelector = selector;
             set({1, 2, 4, 3}, {true, true, true, true});
             ok &= assign(2, false, &slot1b) && slots() == "1 4 3 -1 " && m.m_selectedSoldier == 4 && selector->GetParent() == slotFrame &&
-                  MsLogIs({"link sqasel sqaslot 0", "on sqasel 1", "update sqasel", "show stats 4"}, g_gfLog);
+                  MsLogIs({"link sqasel sqaslot 0", "on sqasel 1", "update sqasel"}, g_gfLog) && SqShown() == 4;
             m.m_rosterSelector = nullptr;
             selector->LinkTo(nullptr, 0);
             set({1, 2, 0, -1}, {true, true, true, true});
-            ok &= assign(2, false, &slot1) && slots() == "1 0 -1 -1 " && m.m_selectedSoldier == 0 && MsLogIs({"show stats 0"}, g_gfLog);
+            ok &= assign(2, false, &slot1) && slots() == "1 0 -1 -1 " && m.m_selectedSoldier == 0 && SqShown() == 0;
             // (Staying, or not in a slot: nothing.)
             set({1, 2, -1, -1}, {false, true, true, true});
             ok &= assign(1, false, &button) && queue() == "" && slots() == "1! 2 -1 -1 ";
@@ -3926,8 +3984,11 @@ void CampaignScreensTest(I3D_scene *)
             };
             // The queue without the slots' pictures' and texts' own messages.
             const auto queue = [&]() {
+                SqNote();
                 std::string s;
                 for (const S_ControlMessage &msg : g_controlMessages) {
+                    if (SqStatsTarget(msg.target))
+                        continue;
                     const bool slotOwn = msg.target >= 0x4800000 && msg.target < 0x4900000 &&
                                          (msg.id == CONTROL_MSG_SET_TEXTURE || msg.id == CONTROL_MSG_SET_INDEX ||
                                           msg.id == CONTROL_MSG_SET_TEXT || msg.id == CONTROL_MSG_SET_TEXT_ID);
@@ -3969,6 +4030,7 @@ void CampaignScreensTest(I3D_scene *)
             const auto start = [&](C_Control *c) {
                 g_gfLog.clear();
                 g_controlMessages.clear();
+                SqReset();
                 return C_SquadMenu::OnDragStart(&m, &m, c, CONTROL_NOTIFY_0A, 0);
             };
             set({1, 2, 5, -1}, {true, true, true, true});
@@ -3980,7 +4042,7 @@ void CampaignScreensTest(I3D_scene *)
             ok &= start(&rosterPic) && m.m_dragged == As<I3D_frame>(copy) && m.m_rosterSelected && queue() == "4101040 1000004 0 0; " &&
                   GmInOrder(Join(g_gfLog), {"sqds 4", "create visual 0", "sqdc 4c sqds", "sqdc 38 sector 0", "sqdc c (0 0 1) 0",
                                             "sqdc 8 (0.25 -0.5 0.85)", "sqdc on 1", "sqdc 24"}) &&
-                  !MrHas("show stats 3");
+                  SqShown() == -1;
             // (From the slots' half: to be detached; a slot's from the roster's half: to be assigned.)
             cursor(0.75f, 0);
             ok &= start(&rosterPic) && !m.m_rosterSelected && queue() == "4900000 1000015 c a62; 4101040 1000004 0 0; ";
@@ -3991,7 +4053,7 @@ void CampaignScreensTest(I3D_scene *)
             ok &= start(&slotPic) && m.m_rosterSelected && queue() == "4809000 1000004 0 0; ";
             // (Another's picture: picked first; not a soldier's: none.)
             m.m_selectedSoldier = 1;
-            ok &= start(&rosterPic) && m.m_selectedSoldier == 3 && MrHas("show stats 3");
+            ok &= start(&rosterPic) && m.m_selectedSoldier == 3 && SqShown() == 3;
             m.m_selectedSoldier = -1;
             ok &= !start(&otherPic) && m.m_selectedSoldier == -1 && queue() == "";
             // (A staying slot's soldier: not dragged.)
@@ -4297,12 +4359,13 @@ void CampaignScreensTest(I3D_scene *)
                     std::srand(seed);
                     g_gfLog.clear();
                     g_controlMessages.clear();
+                    SqReset();
                     g_menuScreens = {&top};
                     ok &= C_SquadMenu::OnAutoSelect(&m, &m, nullptr, CONTROL_NOTIFY_CLICK, 0) && slots() == want;
                     g_menuScreens.clear();
                     // (The first free roster soldier selected: soldier 0 when free.)
                     const bool zeroTaken = std::find(taken.begin(), taken.end(), 0) != taken.end();
-                    ok &= zeroTaken || MrHas("show stats 9");
+                    ok &= zeroTaken || SqShown() == 9;
                     for (const S_ControlMessage &msg : g_controlMessages)
                         ok &= msg.target != 0 || msg.id != CONTROL_MSG_SET_TEXTURE;
                     for (int i = 0; i < 12; ++i)
@@ -4321,8 +4384,10 @@ void CampaignScreensTest(I3D_scene *)
                 m.m_slots[0].profile = 5;
                 g_menuScreens = {&top};
                 g_gfLog.clear();
+                g_controlMessages.clear();
+                SqReset();
                 ok &= C_SquadMenu::OnAutoSelect(&m, &m, nullptr, CONTROL_NOTIFY_CLICK, 0) && slots() == "5 -1 -1 -1 " &&
-                      MrHas("show stats 9");
+                      SqShown() == 9;
                 g_menuScreens.clear();
                 playMode.mode = PLAY_MODE_CAMPAIGN;
                 // The fourth slot's score as the original rounds it: (0.5 - 3 * 0.1) * 10 is 1, not 2.
@@ -4383,6 +4448,121 @@ void CampaignScreensTest(I3D_scene *)
             WM(r.sqAutoSelect, ok);
         }
 
+
+        // --- (part 9g-xvi) the selected soldier's stats (nobody: emptied, the name's box inactive), his medals
+        // (up to six: their first frames in the last six places; more: the oldest as ribbons in the first
+        // places), his name edited (his slots' texts, the stats again), the screen's tick (continuing with the
+        // first slot taken) and hiding (the names kept) ---
+        {
+            bool ok = true;
+            C_SquadMenu m;
+            roster(8);
+            p[3]->stats[4] = 55.0f;
+            p[3]->stats[1] = 30.0f;
+            p[3]->stats[0] = 80.0f;
+            p[3]->stats[2] = 12.0f;
+            p[3]->stats[6] = 7.0f;
+            p[3]->stats[7] = 66.0f;
+            p[3]->stats[8] = 99.0f;
+            p[3]->fullName = C_str("Joe Bloggs");
+            p[3]->unknown28.clear();
+            m.m_selectedSoldier = -1;
+            g_controlMessages.clear();
+            m.ShowStats();
+            ok &= SqQueueAll() == "4202000 1000092 0 0; 4203000 1000015 b 7d2; 4205000 1000092 0 0; 4206000 1000015 b 7d2; "
+                                  "4208000 1000092 0 0; 4209000 1000015 b 7d2; 420b000 1000092 0 0; 420c000 1000015 b 7d2; "
+                                  "420e000 1000092 0 0; 420f000 1000015 b 7d2; 4211000 1000092 0 0; 4212000 1000015 b 7d2; "
+                                  "4214000 1000092 0 0; 4215000 1000015 b 7d2; 4301000 1000015 1 7d2; 4500000 1000001 0 0; "
+                                  "4500000 1000015 c 7d2; ";
+            m.m_selectedSoldier = 3;
+            m.ShowStats();
+            const auto bits = [](float f) { return CmText("%x", static_cast<uint32_t>(GmBits(f))); };
+            ok &= SqQueueAll() == "4202000 1000092 0 " + bits(55.0f * 0.01f) + "; 4203000 1000014 17 0 ' 55 %'; 4205000 1000092 0 " +
+                                      bits(30.0f * 0.01f) + "; 4206000 1000014 17 0 ' 30 Kg'; 4208000 1000092 0 3f800000; "
+                                      "4209000 1000014 17 0 ' 80'; 420b000 1000092 0 " + bits(12.0f * 0.01f) +
+                                      "; 420c000 1000014 17 0 ' 12'; 420e000 1000092 0 " + bits(7.0f * 0.01f) +
+                                      "; 420f000 1000014 17 0 '  7 %'; 4211000 1000092 0 " + bits(66.0f * 0.01f) +
+                                      "; 4212000 1000014 17 0 ' 66 %'; 4214000 1000092 0 " + bits(99.0f * 0.01f) +
+                                      "; 4215000 1000014 17 0 ' 99 %'; 4301000 1000015 1 7003; 4500000 1000002 0 0; "
+                                      "4500000 1000014 c 0 'Joe Bloggs'; ";
+            WM(r.sqShowStats, ok);
+
+            // The medals.
+            std::vector<S_MrObj *> frames;
+            for (int i = 0; i < 12; ++i) {
+                for (int k = 0; k < 2; ++k) {
+                    frames.push_back(MsFrame(CmText("sqsm%d%c", i, k ? 'b' : 'a').c_str()));
+                    m.m_medalFrames[i][k] = As<I3D_frame>(frames.back());
+                }
+                m.m_medalSlots[i] = As<I3D_frame>(MsFrame(CmText("sqsp%d", i).c_str()));
+            }
+            const auto medals = [&](std::vector<int> held) {
+                p[3]->unknown28 = held;
+                g_gfLog.clear();
+                m.ShowMedals(p[3]);
+                return std::vector<std::string>(g_gfLog.begin() + std::min<size_t>(24, g_gfLog.size()), g_gfLog.end());
+            };
+            std::vector<std::string> hides;
+            for (int i = 11; i >= 0; --i) {
+                hides.push_back(CmText("sqsm%da on 0", i));
+                hides.push_back(CmText("sqsm%db on 0", i));
+            }
+            As<I3D_frame>(frames[6])->m_localMatrix(3) = S_vector(1.0f, 2.0f, 3.0f);
+            ok &= medals({3, 7}) == std::vector<std::string>({"sqsm3a 38 sqsp6 1", "sqsm3a on 1", "sqsm3b on 0", "sqsm3b 24",
+                                                               "sqsm3a 24", "sqsm7a 38 sqsp7 1", "sqsm7a on 1", "sqsm7b on 0",
+                                                               "sqsm7b 24", "sqsm7a 24"}) &&
+                  std::vector<std::string>(g_gfLog.begin(), g_gfLog.begin() + 24) == hides;
+            ok &= As<I3D_frame>(frames[6])->GetPos().x == 0.0f && As<I3D_frame>(frames[6])->GetPos().y == 0.0f &&
+                  As<I3D_frame>(frames[6])->GetPos().z == 0.0f;
+            As<I3D_frame>(frames[1])->m_localMatrix(3) = S_vector(1.0f, 2.0f, 3.0f);
+            const std::vector<std::string> many = medals({0, 1, 2, 4, 5, 6, 8, 9});
+            ok &= many.size() == 40 && many[0] == "sqsm0b 38 sqsp0 1" && many[1] == "sqsm0b on 1" && many[2] == "sqsm0a on 0" &&
+                  many[3] == "sqsm0b 24" && many[4] == "sqsm0a 24" && many[13] == "sqsm2b 24" && many[14] == "sqsm2a 24" &&
+                  As<I3D_frame>(frames[1])->GetPos().x == 0.0f && As<I3D_frame>(frames[1])->GetPos().z == 0.0f &&
+                  many[5] == "sqsm1b 38 sqsp1 1" && many[10] == "sqsm2a 38 sqsp6 1" && many[11] == "sqsm2a on 1" &&
+                  many[12] == "sqsm2b on 0" && many[35] == "sqsm9a 38 sqsp11 1";
+            ok &= medals({0, 1, 2, 4, 5, 6}).size() == 30 && medals({0, 1, 2, 4, 5, 6})[25] == "sqsm6a 38 sqsp11 1";
+            g_gfLog.clear();
+            m.ShowMedals(nullptr);
+            ok &= g_gfLog == hides;
+            // (The stats show the medals too.)
+            p[3]->unknown28 = {4};
+            m.m_selectedSoldier = 3;
+            g_gfLog.clear();
+            m.ShowStats();
+            ok &= MrHas("sqsm4a 38 sqsp6 1") && MrHas("sqsm0a on 0");
+            g_controlMessages.clear();
+            p[3]->unknown28.clear();
+            WM(r.sqShowMedals, ok);
+
+            // The name edited.
+            C_SqName edit("Ace");
+            m.m_slots[0].profile = 1;
+            m.m_slots[2].profile = 3;
+            m.m_slots[2].name = 0x4809000;
+            m.m_slots[2].rank = 0x480A000;
+            m.m_selectedSoldier = 3;
+            g_controlMessages.clear();
+            g_gfLog.clear();
+            ok &= C_SquadMenu::OnNameEdited(&m, &m, &edit, CONTROL_NOTIFY_RETURN, 0) && edit.asked == 1 &&
+                  p[3]->customName == C_str("Ace") && MrHas("custom name 3 Ace");
+            const std::string q = SqQueueAll();
+            ok &= q.find("4809000 1000014 c 0 'Ace'") != std::string::npos && q.find("4500000 1000014 c 0 'Ace'") != std::string::npos &&
+                  q.find("4809000") < q.find("4202000");
+            p[3]->customName = C_str();
+            WM(r.sqNameEdited, ok);
+
+            // The screen's tick and hiding.
+            m.m_slots[0].profile = -1;
+            g_controlMessages.clear();
+            ok &= C_SquadMenu::OnScreenTick(&m, nullptr, nullptr, CONTROL_NOTIFY_SCREEN_TICK, 10) && SqQueueAll() == "4b00000 1000001 0 0; ";
+            m.m_slots[0].profile = 0;
+            ok &= C_SquadMenu::OnScreenTick(&m, nullptr, nullptr, CONTROL_NOTIFY_SCREEN_TICK, 10) && SqQueueAll() == "4b00000 1000002 0 0; ";
+            g_gfLog.clear();
+            ok &= C_SquadMenu::OnScreenHidden(&m, nullptr, nullptr, CONTROL_NOTIFY_HIDDEN, 0) && MsLogIs({"save names"}, g_gfLog);
+            WM(r.sqTickHide, ok);
+        }
+
         g_epProfiles = oldProfiles;
         g_gameProfile.m_humanStore = oldStore;
         g_gameProfile.m_missionSquad = oldSquad;
@@ -4401,7 +4581,7 @@ void CampaignScreensTest(I3D_scene *)
                 "dbRank %d dbMedals %d dbScroll %d sqSlot %d sqOneSoldier %d sqStart %d sqSlots %d sqSync %d "
                 "sqMessage %d sqSelect %d sqDead %d sqFill %d sqSelection %d sqShown %d sqSquadScreen %d sqBuild %d sqRoster %d sqMedals %d sqBuildSelect %d sqStats %d "
                 "sqSelected %d sqButtons %d sqInfo %d sqControl %d sqAssign %d sqDragStart %d sqDragMove %d sqDrop %d "
-                "sqNotify13 %d sqKeepBest %d sqAutoSelect %d\n", r.oeTable, r.oeDescribe,
+                "sqNotify13 %d sqKeepBest %d sqAutoSelect %d sqShowStats %d sqShowMedals %d sqNameEdited %d sqTickHide %d\n", r.oeTable, r.oeDescribe,
                 r.oeBuild, r.oeInput, r.oeSlots, r.smStart, r.smMessage, r.smConsole, r.smPassword, r.smBuild, r.smTick,
                 r.smJoin, r.smNotify, r.vsCredits, r.vsMovie, r.vsFit, r.vsUpdate, r.vsScroll, r.vsRender, r.vsInput,
                 r.vsMovieState, r.dbMedal, r.dbResults, r.dbStore, r.dbStart, r.dbMessage, r.dbBuild, r.dbDiary, r.dbDiaryPage, r.dbWon,
@@ -4409,5 +4589,5 @@ void CampaignScreensTest(I3D_scene *)
                 r.dbRank, r.dbMedals, r.dbScroll, r.sqSlot, r.sqOneSoldier, r.sqStart, r.sqSlots, r.sqSync,
                 r.sqMessage, r.sqSelect, r.sqDead, r.sqFill, r.sqSelection, r.sqShown, r.sqSquadScreen, r.sqBuild, r.sqRoster, r.sqMedals, r.sqBuildSelect, r.sqStats, r.sqSelected,
                 r.sqButtons, r.sqInfo, r.sqControl, r.sqAssign, r.sqDragStart, r.sqDragMove, r.sqDrop, r.sqNotify13,
-                r.sqKeepBest, r.sqAutoSelect);
+                r.sqKeepBest, r.sqAutoSelect, r.sqShowStats, r.sqShowMedals, r.sqNameEdited, r.sqTickHide);
 }

@@ -1198,3 +1198,148 @@ bool C_SquadMenu::OnAutoSelect(void *menu, void *, C_Control *, uint32_t, uint32
     self->SelectFreeSoldier(0);
     return true;
 }
+
+// ---------------------------------------------------------------------------
+// Part 9g-xvi: the selected soldier's stats, medals and name; the screen's tick and hiding
+
+namespace {
+
+// The stats' panel's rows (their bars' and values' ids: the row's 3rd and 4th controls); the other panel's
+// text; the name's edit box, the continue button.
+constexpr uint32_t STATS_ROW_STEP = 0x3000, STATS_FIRST_BAR = 0x4202000, STATS_FIRST_VALUE = 0x4203000;
+constexpr uint32_t INFO_TEXT = 0x4301000, NAME_EDIT = 0x4500000, CONTINUE_BUTTON = 0x4B00000;
+constexpr uint32_t VALUE_STYLE = 0x17, INFO_STYLE = 1, NAME_STYLE_EDIT = 0xC;
+// The medals' places: the first six for the oldest ribbons, the last six for the medals shown.
+constexpr int MEDAL_RIBBON_PLACES = 6;
+
+void PostBar(uint32_t bar, float value)
+{
+    S_ControlMessage message;
+    message.target = bar;
+    message.id = CONTROL_MSG_SET_BAR_VALUE;
+    message.value2 = FloatValue(value);
+    PostControlMessage(message);
+}
+
+void PostText(uint32_t target, uint32_t style, const C_str &text)
+{
+    S_ControlMessage message;
+    message.target = target;
+    message.id = CONTROL_MSG_SET_TEXT;
+    message.value = style;
+    message.text = text;
+    PostControlMessage(message);
+}
+
+// A frame put in a place (its position its parent's), shown.
+void PlaceFrame(I3D_frame *frame, I3D_frame *place)
+{
+    frame->LinkTo(place, 1);
+    frame->SetPosInline(S_vector(0.0f, 0.0f, 0.0f));
+    frame->SetOn(true);
+}
+
+}   // namespace
+
+void C_SquadMenu::ShowStats()
+{
+    const S_SoldierProfile *profile = g_gameProfile.m_humanStore->Get(m_selectedSoldier);
+    if (!profile) {
+        // Nobody: the bars and values emptied, the text, the name's box inactive and blank.
+        for (uint32_t i = 0; i < 7; ++i) {
+            PostBar(STATS_FIRST_BAR + i * STATS_ROW_STEP, 0.0f);
+            Post(STATS_FIRST_VALUE + i * STATS_ROW_STEP, CONTROL_MSG_SET_TEXT_ID, SKILL_STYLE, TEXT_BLANK);
+        }
+        Post(INFO_TEXT, CONTROL_MSG_SET_TEXT_ID, INFO_STYLE, TEXT_BLANK);
+        Post(NAME_EDIT, CONTROL_MSG_DEACTIVATE, 0);
+        Post(NAME_EDIT, CONTROL_MSG_SET_TEXT_ID, NAME_STYLE_EDIT, TEXT_BLANK);
+    } else {
+        // The rows: shooting, strength (Kg), health (its bar full), endurance, stealth, first aid, lockpick.
+        const float *stats = profile->stats;
+        const auto row = [](uint32_t i, float bar, const C_str &value) {
+            PostBar(STATS_FIRST_BAR + i * STATS_ROW_STEP, bar);
+            PostText(STATS_FIRST_VALUE + i * STATS_ROW_STEP, VALUE_STYLE, value);
+        };
+        row(0, stats[4] * 0.01f, C_fstr("%3.0f %%", static_cast<double>(stats[4])));
+        row(1, stats[1] * 0.01f, C_fstr("%3.0f Kg", static_cast<double>(stats[1])));
+        row(2, 1.0f, C_fstr("%3.0f", static_cast<double>(stats[0])));
+        row(3, stats[2] * 0.01f, C_fstr("%3.0f", static_cast<double>(stats[2])));
+        row(4, stats[6] * 0.01f, C_fstr("%3.0f %%", static_cast<double>(stats[6])));
+        row(5, stats[7] * 0.01f, C_fstr("%3.0f %%", static_cast<double>(stats[7])));
+        row(6, stats[8] * 0.01f, C_fstr("%3.0f %%", static_cast<double>(stats[8])));
+        // His biography's text, his name (editable).
+        Post(INFO_TEXT, CONTROL_MSG_SET_TEXT_ID, INFO_STYLE, static_cast<uintptr_t>(profile->unknown44));
+        Post(NAME_EDIT, CONTROL_MSG_ACTIVATE, 0);
+        PostText(NAME_EDIT, NAME_STYLE_EDIT, GetProfileName(profile));
+    }
+    ShowMedals(profile);
+}
+
+void C_SquadMenu::ShowMedals(const S_SoldierProfile *profile)
+{
+    // (Fix: no medals' frames (their panel not made): nothing; the original reads them unchecked.)
+    if (!m_medalFrames[0][0])
+        return;
+    for (int i = SQUAD_MEDALS; i-- > 0;) {
+        m_medalFrames[i][0]->SetOn(false);
+        m_medalFrames[i][1]->SetOn(false);
+    }
+    if (!profile)
+        return;
+    const std::vector<int> &medals = profile->unknown28;
+    if (medals.size() <= MEDAL_RIBBON_PLACES) {
+        // Up to six: each medal's first frame in the last six places.
+        for (size_t i = 0; i < medals.size(); ++i) {
+            I3D_frame *const *pair = m_medalFrames[medals[i]];
+            PlaceFrame(pair[0], m_medalSlots[MEDAL_RIBBON_PLACES + i]);
+            pair[1]->SetOn(false);
+            pair[1]->Update();
+            pair[0]->Update();
+        }
+        return;
+    }
+    // More: the oldest as their second frames (ribbons) in the first places, the last six's first frames in
+    // the last six.
+    size_t shown = 0;
+    for (size_t i = 0; i < medals.size(); ++i) {
+        I3D_frame *const *pair = m_medalFrames[medals[i]];
+        if (medals.size() - i > MEDAL_RIBBON_PLACES) {
+            PlaceFrame(pair[1], m_medalSlots[i]);
+            pair[0]->SetOn(false);
+        } else {
+            PlaceFrame(pair[0], m_medalSlots[MEDAL_RIBBON_PLACES + shown++]);
+            pair[1]->SetOn(false);
+        }
+        pair[1]->Update();
+        pair[0]->Update();
+    }
+}
+
+bool C_SquadMenu::OnNameEdited(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_SquadMenu *>(menu);
+    // The box's text the selected soldier's own name; his slots' texts and his stats again.
+    S_ControlMessage text;
+    text.id = CONTROL_MSG_GET_TEXT;
+    control->HandleMessage(&text);
+    g_gameProfile.m_humanStore->Get(self->m_selectedSoldier)->SetCustomName(text.text);
+    for (int i = 4; i-- > 0;)
+        if (self->m_slots[i].profile == self->m_selectedSoldier)
+            self->m_slots[i].ShowTexts();
+    self->ShowStats();
+    return true;
+}
+
+bool C_SquadMenu::OnScreenTick(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    // Continuing only with the first slot taken.
+    Post(CONTINUE_BUTTON, static_cast<C_SquadMenu *>(menu)->m_slots[0].profile == -1 ? CONTROL_MSG_DEACTIVATE : CONTROL_MSG_ACTIVATE, 0);
+    return true;
+}
+
+bool C_SquadMenu::OnScreenHidden(void *, void *, C_Control *, uint32_t, uint32_t)
+{
+    // The names the player gave kept.
+    g_gameProfile.m_humanStore->SaveCustomNames();
+    return true;
+}

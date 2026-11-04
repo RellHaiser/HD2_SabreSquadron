@@ -242,8 +242,6 @@ f_00638dc0.cpp:2144:13: invalid type argument of unary '*' (have 'uint32_t' {aka
     *DAT_008ae5b0 = (int)pvVar3;
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_00690970.cpp:461:43: could not convert '(tier1::C_str_rep*)(& piStack_14)' from 'tier1::C_str_rep*' to 'tier1::C_str'
-    S_SoldierProfile__SetCustomName(this_00,(C_str_rep *)&piStack_14);
 f_00696f70.cpp:565:105: cannot convert 'char**' to 'uint32_t*' {aka 'unsigned int*'}
     uninitialized_copy4_42a730((uint32_t*)(ppcVar4),gh_bitcast<uint32_t*>(_this[2].m_014),ppcStack_a4 + 1);
 f_00696f70.cpp:575:84: cannot convert 'char**' to 'uint32_t*' {aka 'unsigned int*'}
