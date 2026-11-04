@@ -8060,6 +8060,19 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 345 errors in 64 files, 145 stubs. ret_audit --src: 52.
   - Ghidra: names/campaign_screens.txt (+8); 7 functions in ported.txt. Stats: 9,101 of 12,306 functions by hand (82.1 % by size).
 
+  PART 9g-xiii DONE (2026-11-04): a soldier assigned or detached (game/squad_menu.cpp).
+  - OnAssign 0x00694f30 (the assign / detach button's, the drop's: one soldier: the first slot only; a
+    slot's soldier detached, the slots after moved up, the next selected; a roster soldier into the first
+    empty slot, or replacing the fourth's unless he stays; his roster picture hidden / shown with the
+    hiding list's HIDE_ITEM / ITEM_COUNTED; the next free roster soldier selected; a quirk kept: the one
+    soldier mode shows the fourth slot's picture).
+  - S_SquadSlot +0x00 renamed `removable` (was `locked`: the drags and OnAssign move only a slot whose
+    byte is set; FillSlots clears it for a kind 1 screen's deployed soldiers).
+  - Harness: sqAssign. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g13.py (80: all killed but 4, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 344 errors in 64 files, 144 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+1); 1 function in ported.txt. Stats: 9,102 of 12,306 functions by hand (82.2 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

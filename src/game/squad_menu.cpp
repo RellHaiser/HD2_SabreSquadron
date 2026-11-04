@@ -71,10 +71,10 @@ const C_str &GetProfileName(const S_SoldierProfile *profile)
 
 // ---- the slots -----------------------------------------------------------------
 
-void S_SquadSlot::SetSoldier(int soldier, bool lock)
+void S_SquadSlot::SetSoldier(int soldier, bool canRemove)
 {
     profile = soldier;
-    locked = lock;
+    removable = canRemove;
     IImage *face = soldier >= 0 ? g_gameProfile.m_humanStore->Get(soldier)->faceImage : nullptr;
     Post(picture, CONTROL_MSG_SET_TEXTURE, 0, reinterpret_cast<uintptr_t>(face));
     Post(picture, CONTROL_MSG_SET_INDEX, static_cast<uint32_t>(soldier));
@@ -172,10 +172,10 @@ void C_SquadMenu::OnMessage(S_ControlMessage *message)
         if (selected > 3 || selected < 0)
             return;
         // The selected slot's soldier into the first slot, the first's into it.
-        const bool locked = m_slots[0].locked;
+        const bool removable = m_slots[0].removable;
         const int profile = m_slots[0].profile;
-        m_slots[0].SetSoldier(m_slots[selected].profile, m_slots[selected].locked);
-        m_slots[m_selectedSlot].SetSoldier(profile, locked);
+        m_slots[0].SetSoldier(m_slots[selected].profile, m_slots[selected].removable);
+        m_slots[m_selectedSlot].SetSoldier(profile, removable);
         SyncSquad(this, nullptr, nullptr, 0, 0);
         Post(0, MENU_MSG_NEXT, 0);
         return;
@@ -390,7 +390,7 @@ void C_SquadMenu::FillSlots()
         const int profile = squad[i]->profileIndex;
         if (profile < 0)
             continue;
-        // His roster control hidden, the slot his (locked unless a kind 1 screen's soldier not deployed).
+        // His roster control hidden, the slot his (removable but a kind 1 screen's deployed soldier).
         Post(ROSTER_CONTROLS, CONTROL_MSG_HIDE_ITEM, ROSTER_CONTROLS | (static_cast<uint32_t>(profile + 1) & 0xFF) << 4);
         m_slots[i].SetSoldier(profile, m_mode != KIND_PICK || !squad[i]->deployed);
     }
@@ -840,5 +840,87 @@ bool C_SquadMenu::PlaceRosterSelector(void *menu, void *, C_Control *control, ui
     selector->SetPosInline(S_vector(0.0f, 0.0f, SELECTOR_DEPTH));
     selector->SetOn(true);
     selector->Update();
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// Part 9g-xiii: a soldier assigned or detached
+
+namespace {
+
+// A roster soldier's picture in the roster's list, shown again (the hiding list's message).
+constexpr uint32_t CONTROL_MSG_SHOW_ITEM = CONTROL_MSG_ITEM_COUNTED;
+
+uint32_t RosterPicture(int profile) { return ROSTER_CONTROLS | (static_cast<uint32_t>(profile + 1) & 0xFF) << 4; }
+
+}   // namespace
+
+bool C_SquadMenu::OnAssign(void *menu, void *argument, C_Control *control, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_SquadMenu *>(menu);
+    const int selected = self->m_selectedSoldier;
+    if (selected == -1)
+        return false;
+    if (g_gameProfile.m_humanStore->Get(selected)->dead)
+        return true;
+    S_SquadSlot *slots = self->m_slots;
+    if (IsOneSoldier()) {
+        // One soldier: the first slot only.
+        if (!self->m_rosterSelected) {
+            if (selected != slots[0].profile || !slots[0].removable)
+                return true;
+            slots[0].SetSoldier(-1, true);
+            Post(ROSTER_CONTROLS, CONTROL_MSG_SHOW_ITEM, RosterPicture(selected));
+            Post(0, SQUAD_MSG_SELECT_FREE, 0);
+        } else if (slots[0].profile < 0) {
+            slots[0].SetSoldier(selected, true);
+            Post(ROSTER_CONTROLS, CONTROL_MSG_HIDE_ITEM, RosterPicture(selected));
+            Post(0, SQUAD_MSG_SELECT_FREE, static_cast<uint32_t>(selected));
+        } else {
+            // (Quirk kept: the fourth slot's soldier's picture shown, not the first's.)
+            Post(ROSTER_CONTROLS, CONTROL_MSG_SHOW_ITEM, RosterPicture(slots[3].profile));
+        }
+        return true;
+    }
+    if (!self->m_rosterSelected) {
+        // A slot's soldier detached: his roster picture back, the slots after it moved up; the slot's new
+        // soldier selected, else the one before's (the first: a free roster soldier).
+        for (int i = 0; i < 4; ++i) {
+            if (selected != slots[i].profile || !slots[i].removable)
+                continue;
+            Post(ROSTER_CONTROLS, CONTROL_MSG_SHOW_ITEM, RosterPicture(selected));
+            for (int j = i; j < 3; ++j)
+                slots[j].SetSoldier(slots[j + 1].profile, slots[j + 1].removable);
+            slots[3].SetSoldier(-1, true);
+            if (slots[i].profile >= 0) {
+                PlaceRosterSelector(self, argument, control->FindControl(slots[i].picture, true), 0, 0);
+                self->m_selectedSoldier = slots[i].profile;
+                self->ShowStats();
+            } else if (i < 1) {
+                Post(0, SQUAD_MSG_SELECT_FREE, 0);
+            } else {
+                OnSoldierControl(self, self, control->FindControl(slots[i - 1].picture, true), 0, 0);
+            }
+            break;
+        }
+        return true;
+    }
+    // A roster soldier assigned: his roster picture hidden, into the first empty slot (all taken: the fourth,
+    // unless its soldier stays; that one's picture back); the next free roster soldier selected.
+    Post(ROSTER_CONTROLS, CONTROL_MSG_HIDE_ITEM, RosterPicture(selected));
+    int next = selected;
+    int target = 0;
+    while (target < 3 && slots[target].profile >= 0)
+        ++target;
+    if (target == 3 && slots[3].profile >= 0) {
+        if (!slots[3].removable) {
+            Post(ROSTER_CONTROLS, CONTROL_MSG_SHOW_ITEM, RosterPicture(selected));
+            return true;
+        }
+        Post(ROSTER_CONTROLS, CONTROL_MSG_SHOW_ITEM, RosterPicture(slots[3].profile));
+        next = slots[3].profile;
+    }
+    slots[target].SetSoldier(selected, true);
+    Post(0, SQUAD_MSG_SELECT_FREE, static_cast<uint32_t>(next));
     return true;
 }

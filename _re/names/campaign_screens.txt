@@ -118,3 +118,5 @@
 00694bc0 C_SquadMenu::OnSoldierControl | bool __thiscall OnSoldierControl(C_MenuState *this, void * argument, void * control, uint notification, uint value)
 00695d30 C_SquadMenu::PlaceRosterSelector | bool __thiscall PlaceRosterSelector(C_MenuState *this, void * argument, void * control, uint notification, uint value)
 008ae692 g_squadInfoShown @ bool
+# Part 9g-xiii: a soldier assigned or detached (src/game/squad_menu.cpp).
+00694f30 C_SquadMenu::OnAssign | bool __thiscall OnAssign(C_MenuState *this, void * argument, void * control, uint notification, uint value)

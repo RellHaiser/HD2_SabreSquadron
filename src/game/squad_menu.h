@@ -2,8 +2,8 @@
 // soldiers of the roster picked for the operation into the squad's four slots (the first the
 // player's), their stats and medals, the selection screen. Part 9g-ix: the class, the slots, starting,
 // stopping, the messages, the squad kept to the slots; 9g-x: building the screens, the selection screen;
-// 9g-xi: the roster and the medals; 9g-xii: the stats, the places, the buttons, a soldier picked; 9g-xiii and
-// on: the dragging, the buttons' actions, the stats shown.
+// 9g-xi: the roster and the medals; 9g-xii: the stats, the places, the buttons, a soldier picked; 9g-xiii: a
+// soldier assigned or detached; 9g-xiv and on: the dragging, accepting, the stats shown.
 #pragma once
 
 #include <cstdint>
@@ -28,16 +28,16 @@ const C_str &GetProfileName(const S_SoldierProfile *profile);   // 0x006755d0 (_
 
 // One of the squad's places on the screen: the roster soldier in it, his picture, name and rank.
 struct S_SquadSlot {                                    // 0x14 bytes
-    // The soldier `profile` (negative: none) put in, locked or not: his face, the picture's index, the
+    // The soldier `profile` (negative: none) put in, removable or not: his face, the picture's index, the
     // texts.
-    void SetSoldier(int profile, bool locked);          // 0x00690ef0
+    void SetSoldier(int profile, bool removable);       // 0x00690ef0
     // His name (style 0xC) and his rank's (style 2); no such soldier: both blank (style 0xB); a
     // negative index of an existing one: nothing.
     void ShowTexts() const;                             // 0x006910d0 (__fastcall)
     // `id` one of the slot's controls.
     bool HasControl(uint32_t id) const;                 // 0x00690ec0
 
-    bool locked = true;                                 // +0x00 (not to be changed by the player)
+    bool removable = true;                              // +0x00 the player may detach or replace him
     int profile = -1;                                   // +0x04 the roster soldier (-1: none)
     uint32_t picture = 0xFFFFFFFF;                      // +0x08 the controls' ids
     uint32_t name = 0xFFFFFFFF;                         // +0x0C
@@ -96,8 +96,8 @@ protected:
 
     // A campaign's dead squad soldiers (the last first): their items back, deleted.
     static void RemoveDeadSoldiers();                   // 0x00694810
-    // The squad's soldiers into the slots in turn: their roster controls hidden, locked (a kind 1
-    // screen's not deployed soldier: not).
+    // The squad's soldiers into the slots in turn: their roster controls hidden, removable only on a kind 2
+    // screen or when not deployed.
     void FillSlots();                                   // 0x00695b90 (__fastcall)
     // The squad screen: the roster, the stats, the panel, the medals; its tick and hidden callbacks; the
     // selected soldier's name (an edit box, inactive; Return: renamed), his info button, the stats' title;
@@ -156,10 +156,15 @@ protected:
     // back (Escape); the screen's title (the operation's squad, the squad picked), the version, the draft's
     // text. True.
     bool DescribeButtons(S_ScreenDesc *desc, I3D_frame *model);      // 0x00693880
-    // (Part 9g-xiv.) The selected soldier's stats shown; the buttons' actions.
-    void ShowStats();                                   // 0x00696140 (__fastcall)
+    // The assign / detach button (and a drop): nobody selected: false; a dead soldier: nothing. One soldier:
+    // the first slot only. A slot's soldier picked: detached (his roster picture back; the slots after his
+    // moved up), the slot's new soldier selected, else the one before's (the first slot: a free roster
+    // soldier). A roster soldier: into the first empty slot (his picture hidden; all taken: the fourth's
+    // soldier replaced, his picture back, unless he stays), the next free roster soldier selected. True.
     static bool OnAssign(void *menu, void *argument, C_Control *control, uint32_t notification,
                          uint32_t value);               // 0x00694f30
+    // (Part 9g-xv.) The selected soldier's stats shown.
+    void ShowStats();                                   // 0x00696140 (__fastcall)
     static bool OnAccept(void *menu, void *argument, C_Control *control, uint32_t notification,
                          uint32_t value);               // 0x00695740
     static bool OnScreenTick(void *menu, void *argument, C_Control *control, uint32_t notification,

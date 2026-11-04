@@ -33053,6 +33053,11 @@
   "name": "C_SquadMenu::SelectFreeSoldier",
   "proto": "void __thiscall SelectFreeSoldier(C_MenuState *this, int index)"
  },
+ "00694f30": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnAssign",
+  "proto": "bool __thiscall OnAssign(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
  "006956a0": {
   "module": "campaign_screens",
   "name": "C_SquadMenu::IsInSlots",

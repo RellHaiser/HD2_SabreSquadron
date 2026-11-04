@@ -6489,6 +6489,7 @@ int C_SquadMenu__FirstFreeSpeechSet(...);
 uint32_t C_SquadMenu__GetTypeId(...);
 bool C_SquadMenu__IsInSlots(void *_this = {}, int profile = {}, ...);
 bool C_SquadMenu__IsOneSoldier(...);
+bool C_SquadMenu__OnAssign(void *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
 bool C_SquadMenu__OnMedalHover(void *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
 uint32_t C_SquadMenu__OnMessage(void *_this = {}, void *message = {}, ...);
 bool C_SquadMenu__OnSelectionPicked(void *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
@@ -9523,7 +9524,6 @@ uint32_t FUN_00693ae0(void *_this = {}, uint32_t param_1 = {}, int param_2 = {},
 uint32_t FUN_00693e50(int param_1 = {}, ...);
 uint32_t FUN_00693f00(void *_this = {}, uint32_t param_1 = {}, void *param_2 = {}, ...);
 uint32_t FUN_006945c0(void *_this = {}, uint32_t param_1 = {}, void *param_2 = {}, ...);
-uint32_t FUN_00694f30(void *_this = {}, uint32_t param_1 = {}, void *param_2 = {}, ...);
 uint32_t FUN_006956d0(int param_1 = {}, int param_2 = {}, int *param_3 = {}, uint32_t param_4 = {}, int param_5 = {}, ...);
 uint32_t FUN_00695740(void *param_1 = {}, ...);
 uint32_t FUN_00696140(void *param_1 = {}, ...);

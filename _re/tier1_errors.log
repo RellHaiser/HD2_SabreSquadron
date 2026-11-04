@@ -244,11 +244,9 @@ f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array
     DAT_008acbe8[2] = 0;
 f_00690970.cpp:128:33: too few arguments to function
     (*pIVar3->vtable->Duplicate)();
-f_00690970.cpp:670:21: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    *DAT_008ae5b0 = (int)pvVar5;
-f_00690970.cpp:1024:11: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_00690970.cpp:736:11: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     *DAT_008ae5b0 = (int)pvVar7;
-f_00690970.cpp:1492:43: could not convert '(tier1::C_str_rep*)(& piStack_14)' from 'tier1::C_str_rep*' to 'tier1::C_str'
+f_00690970.cpp:1204:43: could not convert '(tier1::C_str_rep*)(& piStack_14)' from 'tier1::C_str_rep*' to 'tier1::C_str'
     S_SoldierProfile__SetCustomName(this_00,(C_str_rep *)&piStack_14);
 f_00696f70.cpp:565:105: cannot convert 'char**' to 'uint32_t*' {aka 'unsigned int*'}
     uninitialized_copy4_42a730((uint32_t*)(ppcVar4),gh_bitcast<uint32_t*>(_this[2].m_014),ppcStack_a4 + 1);
