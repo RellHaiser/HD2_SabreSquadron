@@ -143,6 +143,48 @@ struct S_NetPlayerState {
     // No human, or its (player / remote) controller watches.
     bool IsSpectating() const;                      // 0x00725e90
 };
+struct S_ServerEntry;
+// A server's status (the net module's answer to QueryServerStatus; read by the main menu's game info screen,
+// part 9h-xii): its players, its rules, the teams' scores.
+struct S_StatusPlayer {                                 // 0x5C bytes
+    int unknown00;
+    int kills;                                          // +0x04
+    int unknown08;
+    int points;                                         // +0x0C
+    uint8_t unknown10[0x14];
+    int team;                                           // +0x24 (0, 1, 2: its mark)
+    char name[0x34];                                    // +0x28 (empty: no player)
+};
+struct S_ServerStatus {
+    int unknown00;
+    // (An MSVC 6 std::vector<S_StatusPlayer>: its first, last and end.)
+    S_StatusPlayer *playersBegin;                       // +0x04
+    S_StatusPlayer *playersEnd;                         // +0x08
+    S_StatusPlayer *playersCapacity;                    // +0x0C
+    int unknown10;
+    int fragLimit;                                      // +0x14
+    int roundLimit;                                     // +0x18
+    int roundCount;                                     // +0x1C
+    int preparationTime;                                // +0x20
+    int respawnTime;                                    // +0x24
+    int allowRespawn;                                   // +0x28
+    int friendlyFire;                                   // +0x2C
+    int autoTeamBalance;                                // +0x30
+    int thirdPersonView;                                // +0x34
+    int spawnProtectionTime;                            // +0x38
+    int unknown3C;
+    int unknown40;
+    int allowVehicles;                                  // +0x44
+    int difficulty;                                     // +0x48 (1 .. 4)
+    int lives;                                          // +0x4C
+    int allowCrosshair;                                 // +0x50
+    int unknown54;
+    int teamLives;                                      // +0x58
+    int inverseDamage;                                  // +0x5C
+    int axisScore;                                      // +0x60
+    int alliedScore;                                    // +0x64
+};
+
 class C_NetGame {
 public:
     C_BitStream *CreateMessage(int channel, int delivery);      // 0x0072c280
@@ -212,6 +254,8 @@ public:
     void Process(int timeDelta, bool unknown);      // 0x0072c9a0
     // Ends the session (`now` false: at the next frame).
     void Close(bool now);                           // 0x0072e8b0
+    // A server's status asked for on a thread of its own; `callback` gets it there (part 9h-xii).
+    int QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *status), S_ServerEntry *server);   // 0x007240d0
     // Administration commands (NET_COMMAND_*; `unknown` is passed as 0).
     bool Command(int command, const char *arg, int unknown);   // 0x0072d680
     // State of the connection to the server (NET_CONNECTION_LOST: nothing heard for 600 ms).

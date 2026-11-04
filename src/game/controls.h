@@ -1247,13 +1247,15 @@ protected:
 // A server found by the browser (its module not ported yet: the fields the server list reads).
 struct S_ServerEntry {
     char name[0x33];                                    // +0x00
-    char map[0x3D];                                     // +0x33
+    char map[0x35];                                     // +0x33
+    uint32_t address;                                   // +0x68 (shown top byte first; part 9h-xii)
+    int port;                                           // +0x6C
     int gameType;                                       // +0x70 (E_MpGameType)
     uint32_t ping;                                      // +0x74
     uint32_t maxPlayers;                                // +0x78
     uint32_t players;                                   // +0x7C
     bool dedicated;                                     // +0x80
-    uint8_t unknown81;
+    bool internet;                                      // +0x81 (the game info's "Internet Server")
     bool password;                                      // +0x82
     uint8_t unknown83[5];
     bool voice;                                         // +0x88
@@ -1262,6 +1264,7 @@ struct S_ServerEntry {
     int versionMajor;                                   // +0x90
 };
 static_assert(offsetof(S_ServerEntry, gameType) == 0x70 && offsetof(S_ServerEntry, voice) == 0x88 &&
+                  offsetof(S_ServerEntry, address) == 0x68 && offsetof(S_ServerEntry, internet) == 0x81 &&
                   offsetof(S_ServerEntry, versionMajor) == 0x90, "S_ServerEntry layout");
 
 // The server list's messages: the entries' count (value), the sort (value: a key 1..5 in the low 3

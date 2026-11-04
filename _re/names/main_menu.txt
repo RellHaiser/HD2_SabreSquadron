@@ -95,3 +95,10 @@
 00638910 C_MainMenu::OnFiltersAccept | bool __thiscall OnFiltersAccept(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
 0062c5b0 C_MainMenu::SendToControl | void __thiscall SendToControl(C_MainMenu *this, uint id, void * message)
 0062c5d0 C_MainMenu::GetControlValue | int __thiscall GetControlValue(C_MainMenu *this, uint id)
+# Part 9h-xii: the game info screen.
+006319a0 C_MainMenu::OnGameInfoRefresh | bool __thiscall OnGameInfoRefresh(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00631c60 C_MainMenu::OnGameInfoStatus | void __fastcall OnGameInfoStatus(void * status)
+00631c20 C_MainMenu::OnGameInfoTick | bool __thiscall OnGameInfoTick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+0062fa30 C_MainMenu::ShowGameInfo | void __stdcall ShowGameInfo(void * status)
+0062f9f0 FormatAddress | void * __fastcall FormatAddress(void * result, uint address)
+008acab8 g_gameInfoStatus @ void *

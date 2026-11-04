@@ -1,0 +1,9 @@
+3102 functions in 487 files, 12942 declarations, 1115 globals, 0 stale files removed
+re-applied 15358 saved patches
+round 0: 310 errors in 56/487 files
+round 1: 310 errors in 56/487 files
+round 2: 310 errors in 56/487 files
+round 3: 310 errors in 56/487 files
+round 4: 310 errors in 56/487 files
+round 5: 310 errors in 56/487 files
+done; 128 functions fell back to stubs

@@ -20,6 +20,7 @@ class I3D_frame;
 struct S_MenuDesc;
 struct S_ScreenDesc;
 struct S_ServerEntry;
+struct S_ServerStatus;
 
 // The main menu's screens (the ids' top 6 bits; index 0 is the message box).
 enum : uint32_t {
@@ -47,6 +48,8 @@ enum : uint32_t {
 // The game info screen's text styles (made by its description, released when the menu stops).
 constexpr int GAME_INFO_STYLES = 12;
 extern int g_gameInfoStyles[GAME_INFO_STYLES];      // 0x008aca88
+// The server status the game info screen shows next (its query's thread sets it under the menu's lock).
+extern S_ServerStatus *g_gameInfoStatus;            // 0x008acab8
 
 class C_MainMenu : public C_MenuState {
 public:
@@ -209,7 +212,23 @@ protected:
     // titled edit boxes: their number (GET_NUMBER's value2); titled combo boxes: GET_TEXT's value; another
     // kind or none: -1.
     int GetControlValue(uint32_t id);                   // 0x0062c5d0
+    // The game info screen (the model unused): its twelve styles made (g_gameInfoStyles); shown and "brefresh
+    // status": OnGameInfoRefresh, the tick: OnGameInfoTick; the players' box, the status text, join (the
+    // browser's join messages), return, the texts, the players' header, the teams' scores. True.
     bool DescribeGameInfoScreen(S_ScreenDesc *desc, I3D_frame *model);      // 0x0062f4b0
+    // No server picked: false. The boxes emptied, "Reading Data from server ...", the axis' score hidden in a
+    // cooperative game; the server's status asked for (OnGameInfoStatus). True.
+    static bool OnGameInfoRefresh(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                  uint32_t value);      // 0x006319a0
+    // The query's answer (its thread): kept for the tick while the main menu runs and no password was asked.
+    static void __fastcall OnGameInfoStatus(S_ServerStatus *status);   // 0x00631c60
+    // The screen's tick: a status kept shown (ShowGameInfo), then dropped. True.
+    static bool OnGameInfoTick(void *menu, void *argument, C_Control *control, uint32_t notification,
+                               uint32_t value);         // 0x00631c20
+    // On the game info screen with a server picked: the players (the last first: a team's mark, name,
+    // kills, points), the teams' scores, the server's lines (name, address, ping, players, its flags) and
+    // its rules (the cooperative ones too).
+    static void ShowGameInfo(const S_ServerStatus *status);   // 0x0062fa30 (__stdcall)
     bool DescribeConnectScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00632150
     bool DescribeAddServerScreen(S_ScreenDesc *desc, I3D_frame *model);     // 0x006370c0
 
@@ -259,5 +278,5 @@ protected:
     bool unknown212 = false;                            // +0x212
     C_str m_profileName;                                // +0x213 the profile picked (unaligned in the original)
     int unknown218 = 0;                                 // +0x218
-    int unknown21C = 0;                                 // +0x21C (the browser's)
+    S_ServerEntry *m_server = nullptr;                  // +0x21C the browser's server picked
 };

@@ -27866,6 +27866,31 @@
   "name": "C_MainMenu::ReleaseGameInfoStyles",
   "proto": "void __cdecl ReleaseGameInfoStyles(void)"
  },
+ "0062f9f0": {
+  "module": "main_menu",
+  "name": "FormatAddress",
+  "proto": "void * __fastcall FormatAddress(void * result, uint address)"
+ },
+ "0062fa30": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowGameInfo",
+  "proto": "void __stdcall ShowGameInfo(void * status)"
+ },
+ "006319a0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnGameInfoRefresh",
+  "proto": "bool __thiscall OnGameInfoRefresh(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00631c20": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnGameInfoTick",
+  "proto": "bool __thiscall OnGameInfoTick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00631c60": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnGameInfoStatus",
+  "proto": "void __fastcall OnGameInfoStatus(void * status)"
+ },
  "00632150": {
   "module": "main_menu",
   "name": "C_MainMenu::DescribeConnectScreen",
@@ -44043,6 +44068,12 @@
   "module": "main_menu",
   "name": "g_gameInfoStyles",
   "type": "int[12]"
+ },
+ "008acab8": {
+  "data": true,
+  "module": "main_menu",
+  "name": "g_gameInfoStatus",
+  "type": "void *"
  },
  "008ae558": {
   "data": true,

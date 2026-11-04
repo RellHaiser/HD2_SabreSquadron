@@ -173,8 +173,49 @@ struct S_NetPlayerState {
     // (The multiplayer zone, part 7d.)
     bool IsConnected() const { return name[0] != 0; }
 };
+// (The main menu's game info screen, part 9h-xii: the real ones' layout.)
+struct S_ServerEntry;
+struct S_StatusPlayer {
+    int unknown00;
+    int kills;
+    int unknown08;
+    int points;
+    uint8_t unknown10[0x14];
+    int team;
+    char name[0x34];
+};
+struct S_ServerStatus {
+    int unknown00;
+    S_StatusPlayer *playersBegin;
+    S_StatusPlayer *playersEnd;
+    S_StatusPlayer *playersCapacity;
+    int unknown10;
+    int fragLimit;
+    int roundLimit;
+    int roundCount;
+    int preparationTime;
+    int respawnTime;
+    int allowRespawn;
+    int friendlyFire;
+    int autoTeamBalance;
+    int thirdPersonView;
+    int spawnProtectionTime;
+    int unknown3C;
+    int unknown40;
+    int allowVehicles;
+    int difficulty;
+    int lives;
+    int allowCrosshair;
+    int unknown54;
+    int teamLives;
+    int inverseDamage;
+    int axisScore;
+    int alliedScore;
+};
+
 class C_NetGame {
 public:
+    int QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *status), S_ServerEntry *server);
     C_Human *GetLocalHuman();
     void Close(bool now);                           // (the main menu, part 9h-iv)
     S_NetPlayerState *LockPlayers();

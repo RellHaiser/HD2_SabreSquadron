@@ -22,6 +22,7 @@
 #include "ls3d/i3d.h"
 
 int g_gameInfoStyles[GAME_INFO_STYLES] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+S_ServerStatus *g_gameInfoStatus;
 
 namespace {
 
@@ -1628,4 +1629,233 @@ bool C_MainMenu::OnFiltersAccept(void *menu, void *, C_Control *, uint32_t, uint
     self->HandleMessage(&clear);
     self->m_step = STEP_REFRESH_SERVERS;
     return true;
+}
+
+// ---- the game info screen (part 9h-xii) -------------------------------------------------------------------
+
+namespace {
+
+constexpr int CONTROL_SCROLLED_BOX = 0xF;
+// The game info screen's controls (screen 12's): the players, the status text, the teams' scores.
+constexpr uint32_t GAME_INFO_SCREEN = static_cast<uint32_t>(MAIN_SCREEN_GAME_INFO) << SCREEN_INDEX_SHIFT;
+constexpr uint32_t GAME_INFO_PLAYERS = GAME_INFO_SCREEN | 0x100000, GAME_INFO_TEXT = GAME_INFO_SCREEN | 0x200000,
+                   GAME_INFO_ALLIED = GAME_INFO_SCREEN | 0xA00000, GAME_INFO_AXIS = GAME_INFO_SCREEN | 0xB00000;
+// The join button's messages (the browser's handler's: OnNetworkMessage).
+constexpr uint32_t MAIN_MSG_9B = 0x200009B, MAIN_MSG_JOIN_SERVER = 0x200002A;
+// The cooperative game type (no axis team).
+constexpr int GAME_TYPE_COOPERATIVE = 3;
+// The styles' uses (g_gameInfoStyles): a team mark (white / the other), the players' columns (name, kills,
+// points), the header's columns, the status's labels and values, the scores' labels and values.
+enum {
+    STYLE_INFO_MARK = 0, STYLE_INFO_MARK_OTHER, STYLE_INFO_NAME, STYLE_INFO_KILLS, STYLE_INFO_POINTS,
+    STYLE_INFO_HEAD_NAME, STYLE_INFO_HEAD_KILLS, STYLE_INFO_HEAD_POINTS, STYLE_INFO_LABEL, STYLE_INFO_VALUE,
+    STYLE_INFO_SCORE_LABEL, STYLE_INFO_SCORE
+};
+const S_TextStyleDesc GAME_INFO_STYLE_DESCS[GAME_INFO_STYLES] = {
+    {4, 0xFFFFFFFF, 0.02f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0, 1, 1, 1, 1, 0x98},
+    {4, 0x00000000, 0.02f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0, 1, 1, 1, 1, 0x98},
+    {2, 0xFF000000, 0.04f, 0.18f, 0.06f, -1.0f, 0.0f, 0.0f, 0, 1, 1, 1, 0, 0x10},
+    {2, 0xFF000000, 0.04f, 0.05f, 0.65f, -1.0f, 0.0f, 0.0f, 0, 1, 1, 1, 0, 0x10},
+    {2, 0xFF000000, 0.04f, 0.05f, 0.98f, -1.0f, 0.0f, 0.0f, 0, 3, 1, 1, 0, 0x10},
+    {3, 0xFF000000, 0.02f, 0.18f, 0.0f, -1.0f, 0.0f, 0.0f, 0, 1, 1, 1, 0, 0x10},
+    {3, 0xFF000000, 0.02f, 0.05f, 0.65f, -1.0f, 0.0f, 0.0f, 0, 1, 1, 1, 0, 0x10},
+    {3, 0xFF000000, 0.02f, 0.05f, 0.98f, -1.0f, 0.0f, 0.0f, 0, 3, 1, 1, 0, 0x10},
+    {3, 0xFF000000, 0.019f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0, 1, 1, 1, 1, 0x18},
+    {3, 0xFF000000, 0.019f, 0.0f, 0.65f, -1.0f, 0.0f, 0.0f, 0, 1, 1, 1, 1, 0x10},
+    {2, 0xFF000000, 0.04f, 0.18f, 0.02f, -1.0f, 0.0f, 0.0f, 0, 1, 2, 1, 0, 0x18},
+    {2, 0xFF000000, 0.04f, 0.05f, 0.98f, -1.0f, 0.0f, 0.0f, 0, 3, 2, 1, 0, 0x10},
+};
+// The texts: the header's columns, the scores' labels; the status's labels; yes / no; a server name the font
+// cannot show; difficulty's names (from 0x5015, by 1 .. 4).
+constexpr uint32_t TEXT_INFO_PLAYER = 0xA0A, TEXT_INFO_KILLS = 0xA21, TEXT_INFO_POINTS = 0xA22,
+                   TEXT_INFO_ALLIES = 0xA3C, TEXT_INFO_AXIS = 0xA3D;
+constexpr uint32_t TEXT_YES_WORD = 0x7FD, TEXT_NO_WORD = 0x7FE, TEXT_SERVER_NAME_UNSHOWN = 0x7E9;
+constexpr uint32_t TEXT_DIFFICULTY_BASE = 0x5014;
+const char *const READING_SERVER = "Reading Data from server ...";
+
+void AddInfoText(uint32_t target, int style, const C_str &text)
+{
+    PostText(target, CONTROL_MSG_ADD_TEXT, static_cast<uint32_t>(g_gameInfoStyles[style]), text);
+}
+
+void AddInfoTextId(uint32_t target, int style, uint32_t text)
+{
+    PostTo(target, CONTROL_MSG_ADD_TEXT_ID, static_cast<uint32_t>(g_gameInfoStyles[style]), text);
+}
+
+// The address as a.b.c.d (its top byte first).
+C_str FormatAddress(uint32_t address)
+{
+    return C_fstr("%d.%d.%d.%d", address >> 24, address >> 16 & 0xFF, address >> 8 & 0xFF, address & 0xFF);
+}
+
+// A status line: its label, its value (a number / yes or no / a text id).
+void AddStatusNumber(uint32_t label, int value)
+{
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_LABEL, label);
+    AddInfoText(GAME_INFO_TEXT, STYLE_INFO_VALUE, C_fstr("%d", value));
+}
+
+void AddStatusYesNo(uint32_t label, bool value)
+{
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_LABEL, label);
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_VALUE, value ? TEXT_YES_WORD : TEXT_NO_WORD);
+}
+
+} // namespace
+
+bool C_MainMenu::DescribeGameInfoScreen(S_ScreenDesc *desc, I3D_frame *)
+{
+    for (int i = 0; i < GAME_INFO_STYLES; ++i)
+        g_gameInfoStyles[i] = CreateTextStyle(GAME_INFO_STYLE_DESCS[i]);
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    AddScreenMessage(desc, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_SHOWN, self, Callback(&OnGameInfoRefresh));
+    AddScreenMessage(desc, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_SCREEN_TICK, self, Callback(&OnGameInfoTick));
+    S_ControlDesc *players = desc->AddControl(CONTROL_SCROLLED_BOX, "LB_Players");
+    AddDescMessage(players, 0, CONTROL_MSG_SET_MARGIN, 0);
+    AddDescMessage(players, 0, CONTROL_MSG_IGNORE_INPUT, 0);
+    desc->AddControl(CONTROL_TEXT, "text_01");
+    AddDescMessage(AddButton(desc, "brefresh status", 0xA05), 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self,
+                   Callback(&OnGameInfoRefresh));
+    S_ControlDesc *join = AddButton(desc, "bjoin game", 0xA06);
+    AddDescMessage(join, 0, FROM_SCREEN | MAIN_MSG_9B, 0);
+    AddDescMessage(join, 0, FROM_SCREEN | MAIN_MSG_JOIN_SERVER, 0);
+    AddMenuButton(desc, "breturn", 0xA07, MENU_MSG_BACK, 0);
+    AddText(desc, "text_screen", STYLE_TITLE, 0xA08);
+    AddText(desc, "text_h&dversion", STYLE_VERSION, TEXT_VERSION);
+    AddText(desc, "text_team status", STYLE_LABEL, 0xA09);
+    S_ControlDesc *header = desc->AddControl(CONTROL_TEXT, "text_");
+    AddDescMessage(header, 0, CONTROL_MSG_ADD_TEXT_ID, static_cast<uint32_t>(g_gameInfoStyles[STYLE_INFO_HEAD_NAME]),
+                   TEXT_INFO_PLAYER);
+    AddDescMessage(header, 0, CONTROL_MSG_ADD_TEXT_ID, static_cast<uint32_t>(g_gameInfoStyles[STYLE_INFO_HEAD_KILLS]),
+                   TEXT_INFO_KILLS);
+    AddDescMessage(header, 0, CONTROL_MSG_ADD_TEXT_ID, static_cast<uint32_t>(g_gameInfoStyles[STYLE_INFO_HEAD_POINTS]),
+                   TEXT_INFO_POINTS);
+    AddDescMessage(desc->AddControl(CONTROL_TEXT, "allied"), 0, CONTROL_MSG_FACE_FRONT, 0);
+    AddDescMessage(desc->AddControl(CONTROL_TEXT, "axis"), 0, CONTROL_MSG_FACE_FRONT, 0);
+    return true;
+}
+
+bool C_MainMenu::OnGameInfoRefresh(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    S_ServerEntry *server = self->m_server;
+    if (!server)
+        return false;
+    PostTo(GAME_INFO_PLAYERS, CONTROL_MSG_CLEAR, 0);
+    PostTo(GAME_INFO_TEXT, CONTROL_MSG_CLEAR_TEXT, 0);
+    AddInfoText(GAME_INFO_TEXT, STYLE_INFO_LABEL, C_str(READING_SERVER));
+    // A cooperative game has no axis.
+    PostTo(GAME_INFO_AXIS, server->gameType == GAME_TYPE_COOPERATIVE ? CONTROL_MSG_HIDE : CONTROL_MSG_SHOW, 0);
+    g_gameInfoStatus = nullptr;
+    g_netGame.QueryServerStatus(&OnGameInfoStatus, server);
+    return true;
+}
+
+void __fastcall C_MainMenu::OnGameInfoStatus(S_ServerStatus *status)
+{
+    // (The query's thread: kept only while the main menu runs and no password was asked.)
+    if (!g_menuState || g_menuState->GetTypeId() != GAME_STATE_TYPE_MAIN_MENU || g_sessionPasswordSet)
+        return;
+    auto *menu = static_cast<C_MainMenu *>(g_menuState);
+    EnterCriticalSection(&menu->m_foundLock);
+    g_gameInfoStatus = status;
+    LeaveCriticalSection(&menu->m_foundLock);
+}
+
+bool C_MainMenu::OnGameInfoTick(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    EnterCriticalSection(&self->m_foundLock);
+    if (g_gameInfoStatus) {
+        ShowGameInfo(g_gameInfoStatus);
+        g_gameInfoStatus = nullptr;
+    }
+    LeaveCriticalSection(&self->m_foundLock);
+    return true;
+}
+
+void C_MainMenu::ShowGameInfo(const S_ServerStatus *status)
+{
+    // Only on the game info screen of the main menu, a server picked, no password asked.
+    if (!g_menuState || g_menuState->GetTypeId() != GAME_STATE_TYPE_MAIN_MENU || g_sessionPasswordSet ||
+        g_menuScreens.empty() || !g_menuScreens.back())
+        return;
+    if ((g_menuScreens.back()->GetId() & SCREEN_KIND_MASK) != GAME_INFO_SCREEN)
+        return;
+    const S_ServerEntry *server = static_cast<C_MainMenu *>(g_menuState)->m_server;
+    if (!server)
+        return;
+    // The players (the last first): the team's mark, the name, the kills, the points.
+    PostTo(GAME_INFO_PLAYERS, CONTROL_MSG_CLEAR, 0);
+    if (status->playersBegin) {
+        for (const S_StatusPlayer *player = status->playersEnd; player != status->playersBegin;) {
+            --player;
+            if (!player->name[0])
+                continue;
+            if (player->team == 0)
+                AddInfoText(GAME_INFO_PLAYERS, STYLE_INFO_MARK, C_str("!"));
+            else if (player->team == 1)
+                AddInfoText(GAME_INFO_PLAYERS, STYLE_INFO_MARK, C_str("="));
+            else if (player->team == 2)
+                AddInfoText(GAME_INFO_PLAYERS, STYLE_INFO_MARK_OTHER, C_str("="));
+            AddInfoText(GAME_INFO_PLAYERS, STYLE_INFO_NAME, C_str(player->name));
+            AddInfoText(GAME_INFO_PLAYERS, STYLE_INFO_KILLS, C_fstr("%d", player->kills));
+            AddInfoText(GAME_INFO_PLAYERS, STYLE_INFO_POINTS, C_fstr("%d", player->points));
+        }
+    }
+    // The teams' scores (a cooperative game: the allies' only).
+    PostTo(GAME_INFO_TEXT, CONTROL_MSG_CLEAR_TEXT, 0);
+    PostTo(GAME_INFO_ALLIED, CONTROL_MSG_CLEAR, 0);
+    PostTo(GAME_INFO_AXIS, CONTROL_MSG_CLEAR, 0);
+    AddInfoTextId(GAME_INFO_ALLIED, STYLE_INFO_SCORE_LABEL, TEXT_INFO_ALLIES);
+    AddInfoText(GAME_INFO_ALLIED, STYLE_INFO_SCORE, C_fstr("%d", status->alliedScore));
+    if (server->gameType != GAME_TYPE_COOPERATIVE) {
+        AddInfoTextId(GAME_INFO_AXIS, STYLE_INFO_SCORE_LABEL, TEXT_INFO_AXIS);
+        AddInfoText(GAME_INFO_AXIS, STYLE_INFO_SCORE, C_fstr("%d", status->axisScore));
+    }
+    // The server: its name (one the font cannot show: a stand-in), address, ping, players, its flags.
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_LABEL, 0xA0B);
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_LABEL, TEXT_EMPTY);
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_LABEL, 0xA0C);
+    if (!g_gameProfile.UsesUnicodeFont() && HasUtf8Sequences(server->name))
+        AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_VALUE, TEXT_SERVER_NAME_UNSHOWN);
+    else
+        AddInfoText(GAME_INFO_TEXT, STYLE_INFO_VALUE, C_str(server->name));
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_LABEL, 0xA0D);
+    AddInfoText(GAME_INFO_TEXT, STYLE_INFO_VALUE, FormatAddress(server->address));
+    AddStatusNumber(0xA0E, static_cast<int>(server->ping));
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_LABEL, 0xA0F);
+    AddInfoText(GAME_INFO_TEXT, STYLE_INFO_VALUE, C_fstr("%d / %d", server->players, server->maxPlayers));
+    AddStatusYesNo(0xA10, server->dedicated);
+    AddStatusYesNo(0xA12, server->internet);
+    AddStatusYesNo(0xA11, server->password);
+    // The rules: the game type (cooperative: difficulty, team lives, lives), the map, the limits and flags.
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_LABEL, TEXT_EMPTY);
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_LABEL, 0xA14);
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_LABEL, TEXT_EMPTY);
+    const auto gameTypeText = static_cast<uint32_t>(GetGameTypeTextId(server->gameType));
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_LABEL, 0xA15);
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_VALUE, gameTypeText);
+    if (server->gameType == GAME_TYPE_COOPERATIVE) {
+        AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_LABEL, 0x501E);
+        AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_VALUE, static_cast<uint32_t>(status->difficulty) + TEXT_DIFFICULTY_BASE);
+        AddStatusYesNo(0x501F, status->teamLives != 0);
+        AddStatusNumber(0x5020, status->lives);
+    }
+    AddInfoTextId(GAME_INFO_TEXT, STYLE_INFO_LABEL, 0xA16);
+    AddInfoText(GAME_INFO_TEXT, STYLE_INFO_VALUE, C_str(server->map));
+    AddStatusNumber(0xA17, status->fragLimit);
+    AddStatusNumber(0xA18, status->roundLimit);
+    AddStatusNumber(0xA19, status->roundCount);
+    AddStatusNumber(0xA1A, status->preparationTime);
+    AddStatusNumber(0xA1B, status->respawnTime);
+    AddStatusYesNo(0xA1C, status->allowRespawn != 0);
+    AddStatusYesNo(0xA1D, status->friendlyFire != 0);
+    AddStatusNumber(0x5023, status->inverseDamage);
+    AddStatusYesNo(0xA1E, status->autoTeamBalance != 0);
+    AddStatusYesNo(0xA1F, status->thirdPersonView != 0);
+    AddStatusNumber(0xA20, status->spawnProtectionTime);
+    AddStatusYesNo(0x5021, status->allowCrosshair != 0);
+    AddStatusYesNo(0x5022, status->allowVehicles != 0);
 }

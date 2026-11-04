@@ -8359,6 +8359,32 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 312 errors in 57 files, 130 stubs. ret_audit --src: 52.
   - Stats: 9,198 of 12,306 functions by hand (84.0 % by size).
 
+  PART 9h-xii DONE (2026-11-04): the main menu's game info screen (game/main_menu.cpp).
+  - DescribeGameInfoScreen 0x0062f4b0 (RET 8, the model unused): the twelve styles of the table at 0x0083fad8
+    made into g_gameInfoStyles (released by OnStop); shown and "brefresh status": OnGameInfoRefresh, the
+    screen's tick (CONTROL_NOTIFY_SCREEN_TICK): OnGameInfoTick; "LB_Players", "text_01", "bjoin game" (posts
+    0x600109B and 0x600102A: the browser's OnNetworkMessage, later), "breturn", the texts, the players' header
+    ("text_": player 0xA0A, kills 0xA21, points 0xA22), "allied" / "axis" faced front.
+  - OnGameInfoRefresh 0x006319a0 (m_server +0x21C, named: the browser's server picked; none: false): the boxes
+    emptied, "Reading Data from server ...", the axis' score hidden in a cooperative game (type 3), the status
+    asked for: C_NetGame::QueryServerStatus 0x007240d0 (declared; a thread's callback). OnGameInfoStatus
+    0x00631c60 (__fastcall, the status in ECX): kept in g_gameInfoStatus 0x008acab8 under m_foundLock while
+    the main menu runs and no password was asked. OnGameInfoTick 0x00631c20: a status kept shown, dropped.
+    ShowGameInfo 0x0062fa30 (__stdcall, 8 KB of posts): only on the game info screen with a server picked;
+    the players (the last first: "!" team 0, "=" team 1 / 2 in another style; name, kills, points), the
+    scores, the server's lines (name: 0x7E9 when the font cannot show it, the address a.b.c.d (0x0062f9f0),
+    ping, players "%d / %d", dedicated / internet / password yes-no), the rules (cooperative: difficulty
+    0x5014 + n, team lives, lives), the map and the limits and flags (labels from TEXTY / TEXTY_DD).
+  - S_ServerStatus / S_StatusPlayer (pending.h; the players an MSVC 6 vector's three pointers), S_ServerEntry's
+    address +0x68, port +0x6C, internet +0x81 (its map shrinks to 0x35).
+  - Harness: giDescribe (each style checked against the table, exactly twelve made), giRefresh, giShow,
+    giStatus; the build test's game info screen real, its styles given back between its two builds (else
+    the 90-style list fills over the missions and TextBoxTest crashes). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h12.py: 175: 160 killed, 11 not building, 4 equivalent here (the lock, one
+    thread).
+  - Build: MSVC clean. Tier 1: 310 errors in 56 files, 128 stubs. ret_audit --src: 52.
+  - Stats: 9,204 of 12,306 functions by hand (84.2 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

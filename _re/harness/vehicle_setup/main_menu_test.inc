@@ -191,6 +191,14 @@ struct C_FlControl : C_Control {
         return true;
     }
 };
+// (Part 9h-xii: the server status asked for: logged, its callback kept.)
+void(__fastcall *g_giCallback)(S_ServerStatus *);
+int C_NetGame::QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *), S_ServerEntry *server)
+{
+    GfLog("query %s", server->name);
+    g_giCallback = callback;
+    return 1;
+}
 bool C_PlayerProfile::Save()
 {
     GfLog("save profile");
@@ -214,7 +222,6 @@ bool C_PlayerProfile::GetLastSaveText(C_str *mode, C_str *mission, C_str *date) 
     }
 MM_DESCRIBE(DescribeBrowserScreen, "browser")
 MM_DESCRIBE(DescribeCreateServerScreen, "create")
-MM_DESCRIBE(DescribeGameInfoScreen, "gameinfo")
 MM_DESCRIBE(DescribeConnectScreen, "connect")
 MM_DESCRIBE(DescribeAddServerScreen, "addserver")
 
@@ -267,7 +274,8 @@ struct S_MainMenuResults {
          mxCampaign = true, mxSingle = true, mxMessages = true, mxSecret = true, mxStart = true, mxOperation = true,
          ciDescribe = true, ciShown = true, ciPick = true,
          pwDescribe = true, pwServer = true, pwLock = true,
-         flDescribe = true, flShown = true, flAccept = true, flHelpers = true;
+         flDescribe = true, flShown = true, flAccept = true, flHelpers = true,
+         giDescribe = true, giRefresh = true, giShow = true, giStatus = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -1785,6 +1793,264 @@ void MainMenuTest(I3D_scene *scene)
         m.m_step = 0;
     }
 
+    // --- (part 9h-xii) the game info screen: its description; refreshed; the status kept and shown ---
+    {
+        C_MainMenu m;
+        const auto Is = [](const std::string &got, const std::string &want) {
+            if (got != want)
+                std::printf("GAMEINFO %s\nGAMEINFO expected %s\n", got.c_str(), want.c_str());
+            return got == want;
+        };
+        g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnGameInfoRefresh)] = "refresh";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnGameInfoTick)] = "tick";
+        const int *const st = g_gameInfoStyles;
+        {
+            // The styles made; the controls.
+            bool ok = true;
+            for (int &style : g_gameInfoStyles)
+                style = -1;
+            const auto used = [] {
+                int n = 0;
+                for (int i = 0; i < NumTextStyles(); ++i)
+                    n += GetTextStyle(i) != nullptr;
+                return n;
+            };
+            const int before = used();
+            S_ScreenDesc d("gameinfo", "gameinfo", 12u << 26);
+            ok &= m.DescribeGameInfoScreen(&d, nullptr) && used() == before + 12 && d.messages.size() == 2 &&
+                  Is(CsMessage(d.messages[0]), "0 1000007 400d000 self refresh") &&
+                  Is(CsMessage(d.messages[1]), "0 1000007 4014000 self tick");
+            // Each style as the original's table has it (font, colour, size, width, x, y, align, valign, joins,
+            // wraps, flags).
+            const struct {
+                int font;
+                uint32_t color;
+                float size, width, x;
+                int align, valign;
+                uint8_t joins, wraps;
+                uint32_t flags;
+            } want[12] = {{4, 0xFFFFFFFF, 0.02f, 0.0f, 0.0f, 1, 1, 1, 1, 0x98}, {4, 0, 0.02f, 0.0f, 0.0f, 1, 1, 1, 1, 0x98},
+                          {2, 0xFF000000, 0.04f, 0.18f, 0.06f, 1, 1, 1, 0, 0x10},
+                          {2, 0xFF000000, 0.04f, 0.05f, 0.65f, 1, 1, 1, 0, 0x10},
+                          {2, 0xFF000000, 0.04f, 0.05f, 0.98f, 3, 1, 1, 0, 0x10},
+                          {3, 0xFF000000, 0.02f, 0.18f, 0.0f, 1, 1, 1, 0, 0x10},
+                          {3, 0xFF000000, 0.02f, 0.05f, 0.65f, 1, 1, 1, 0, 0x10},
+                          {3, 0xFF000000, 0.02f, 0.05f, 0.98f, 3, 1, 1, 0, 0x10},
+                          {3, 0xFF000000, 0.019f, 0.0f, 0.0f, 1, 1, 1, 1, 0x18},
+                          {3, 0xFF000000, 0.019f, 0.0f, 0.65f, 1, 1, 1, 1, 0x10},
+                          {2, 0xFF000000, 0.04f, 0.18f, 0.02f, 1, 2, 1, 0, 0x18},
+                          {2, 0xFF000000, 0.04f, 0.05f, 0.98f, 3, 2, 1, 0, 0x10}};
+            for (int i = 0; i < 12; ++i) {
+                const S_TextStyleDesc *style = st[i] >= 0 ? GetTextStyle(st[i]) : nullptr;
+                ok &= style && (i == 0 || st[i] != st[i - 1]) && style->font == want[i].font &&
+                      style->color == want[i].color && style->size == want[i].size && style->width == want[i].width &&
+                      style->x == want[i].x && style->y == -1.0f && style->below == 0.0f && style->above == 0.0f &&
+                      style->unknown20 == 0 && style->align == want[i].align && style->valign == want[i].valign &&
+                      style->joins == want[i].joins && style->wraps == want[i].wraps && style->flags30 == want[i].flags;
+            }
+            std::string names;
+            for (const S_ControlDesc *c : d.controls)
+                names += CmText("%x %s %x|", c->type, c->name.c_str(), c->id);
+            ok &= Is(names, "f LB_Players 30100000|13 text_01 30200000|14 brefresh status 30300000|14 bjoin game 30400000|"
+                            "14 breturn 30500000|13 text_screen 30600000|13 text_h&dversion 30700000|"
+                            "13 text_team status 30800000|13 text_ 30900000|13 allied 30a00000|13 axis 30b00000|");
+            if (d.controls.size() == 11) {
+                ok &= Is(CsTree(d.controls[0]), "f LB_Players 30100000: 0 2000073 0 0 0 1000005 0 0;") &&
+                      Is(CsTree(d.controls[1]), "13 text_01 30200000:;") &&
+                      Is(CsTree(d.controls[2]), "14 brefresh status 30300000: 0 1000015 d a05 0 1000007 4001000 self refresh;") &&
+                      Is(CsTree(d.controls[3]), "14 bjoin game 30400000: 0 1000015 d a06 0 600109b 0 0 0 600102a 0 0;") &&
+                      Is(CsTree(d.controls[4]), "14 breturn 30500000: 0 1000015 d a07 0 6001003 0 0;") &&
+                      Is(CsTree(d.controls[5]), "13 text_screen 30600000: 0 1000015 a a08;") &&
+                      Is(CsTree(d.controls[6]), "13 text_h&dversion 30700000: 0 1000015 28 7d6;") &&
+                      Is(CsTree(d.controls[7]), "13 text_team status 30800000: 0 1000015 b a09;") &&
+                      Is(CsTree(d.controls[8]), CmText("13 text_ 30900000: 0 1000017 %x a0a 0 1000017 %x a21 0 1000017 %x a22;",
+                                                       st[5], st[6], st[7])) &&
+                      Is(CsTree(d.controls[9]), "13 allied 30a00000: 0 1000099 0 0;") &&
+                      Is(CsTree(d.controls[10]), "13 axis 30b00000: 0 1000099 0 0;");
+            }
+            WM(r.giDescribe, ok);
+        }
+        S_ServerEntry server = {};
+        std::strcpy(server.name, "Srv");
+        std::strcpy(server.map, "Maps");
+        server.address = 0x0A000102;
+        server.ping = 42;
+        server.players = 3;
+        server.maxPlayers = 8;
+        server.dedicated = true;
+        server.internet = false;
+        server.password = true;
+        server.gameType = 1;
+        const auto text = [&](uint32_t target, int style, const char *t) {
+            return CmText("%x 1000016 %x 0 '%s'; ", target, st[style], t);
+        };
+        const auto id = [&](uint32_t target, int style, uint32_t t) { return CmText("%x 1000017 %x %x; ", target, st[style], t); };
+        {
+            // Refreshed: none picked: false; the boxes emptied, reading, the axis' score shown or hidden, asked.
+            bool ok = true;
+            m.m_server = nullptr;
+            g_gfLog.clear();
+            ok &= !C_MainMenu::OnGameInfoRefresh(&m, nullptr, nullptr, 0, 0) && g_gfLog.empty() && Is(CsQueue(), "");
+            m.m_server = &server;
+            g_gameInfoStatus = reinterpret_cast<S_ServerStatus *>(&server);
+            g_giCallback = nullptr;
+            const std::string head = "30100000 2000018 0 0; 30200000 1000077 0 0; " +
+                                     text(0x30200000, 8, "Reading Data from server ...");
+            ok &= C_MainMenu::OnGameInfoRefresh(&m, nullptr, nullptr, 0, 0) && !g_gameInfoStatus &&
+                  g_giCallback == &C_MainMenu::OnGameInfoStatus && MsLogIs({"query Srv"}, g_gfLog) &&
+                  Is(CsQueue(), head + "30b00000 1000003 0 0; ");
+            server.gameType = 3;
+            ok &= C_MainMenu::OnGameInfoRefresh(&m, nullptr, nullptr, 0, 0) && Is(CsQueue(), head + "30b00000 1000004 0 0; ");
+            server.gameType = 1;
+            WM(r.giRefresh, ok);
+        }
+        S_StatusPlayer players[5] = {};
+        const struct {
+            int team;
+            const char *name;
+            int kills, points;
+        } given[5] = {{0, "Ann", 5, 7}, {1, "Dee", 1, 6}, {0, "", 9, 9}, {2, "Bob", 0, 12}, {5, "C", 2, 3}};
+        for (int i = 0; i < 5; ++i) {
+            players[i].team = given[i].team;
+            std::strcpy(players[i].name, given[i].name);
+            players[i].kills = given[i].kills;
+            players[i].points = given[i].points;
+        }
+        S_ServerStatus status = {};
+        status.playersBegin = players;
+        status.playersEnd = players + 5;
+        const int numbers[] = {10, 11, 12, 13, 14, 15};
+        status.fragLimit = numbers[0];
+        status.roundLimit = numbers[1];
+        status.roundCount = numbers[2];
+        status.preparationTime = numbers[3];
+        status.respawnTime = numbers[4];
+        status.spawnProtectionTime = numbers[5];
+        status.allowRespawn = 1;
+        status.friendlyFire = 0;
+        status.autoTeamBalance = 1;
+        status.thirdPersonView = 0;
+        status.allowVehicles = 1;
+        status.allowCrosshair = 0;
+        status.inverseDamage = 33;
+        status.difficulty = 2;
+        status.lives = 4;
+        status.teamLives = 1;
+        status.axisScore = 70;
+        status.alliedScore = 80;
+        C_MsScreen info(nullptr, "giscreen", 12u << 26 | 0x5), other(nullptr, "giother", 8u << 26);
+        C_MenuState *const oldState = g_menuState;
+        const bool oldSet = g_sessionPasswordSet;
+        g_sessionPasswordSet = false;
+        const auto shown = [&] {
+            std::string q = "30100000 2000018 0 0; ";
+            q += text(0x30100000, 2, "C") + text(0x30100000, 3, "2") + text(0x30100000, 4, "3");
+            q += text(0x30100000, 1, "=") + text(0x30100000, 2, "Bob") + text(0x30100000, 3, "0") + text(0x30100000, 4, "12");
+            q += text(0x30100000, 0, "=") + text(0x30100000, 2, "Dee") + text(0x30100000, 3, "1") + text(0x30100000, 4, "6");
+            q += text(0x30100000, 0, "!") + text(0x30100000, 2, "Ann") + text(0x30100000, 3, "5") + text(0x30100000, 4, "7");
+            q += "30200000 1000077 0 0; 30a00000 2000018 0 0; 30b00000 2000018 0 0; ";
+            q += id(0x30a00000, 10, 0xA3C) + text(0x30a00000, 11, "80");
+            if (server.gameType != 3)
+                q += id(0x30b00000, 10, 0xA3D) + text(0x30b00000, 11, "70");
+            const uint32_t T = 0x30200000;
+            q += id(T, 8, 0xA0B) + id(T, 8, 0x7D2) + id(T, 8, 0xA0C) + text(T, 9, "Srv") + id(T, 8, 0xA0D) + text(T, 9, "10.0.1.2");
+            q += id(T, 8, 0xA0E) + text(T, 9, "42") + id(T, 8, 0xA0F) + text(T, 9, "3 / 8");
+            q += id(T, 8, 0xA10) + id(T, 9, 0x7FD) + id(T, 8, 0xA12) + id(T, 9, 0x7FE) + id(T, 8, 0xA11) + id(T, 9, 0x7FD);
+            q += id(T, 8, 0x7D2) + id(T, 8, 0xA14) + id(T, 8, 0x7D2) + id(T, 8, 0xA15) +
+                 id(T, 9, static_cast<uint32_t>(7000 + server.gameType));
+            if (server.gameType == 3)
+                q += id(T, 8, 0x501E) + id(T, 9, 0x5016) + id(T, 8, 0x501F) + id(T, 9, 0x7FD) + id(T, 8, 0x5020) + text(T, 9, "4");
+            q += id(T, 8, 0xA16) + text(T, 9, "Maps");
+            q += id(T, 8, 0xA17) + text(T, 9, "10") + id(T, 8, 0xA18) + text(T, 9, "11") + id(T, 8, 0xA19) + text(T, 9, "12");
+            q += id(T, 8, 0xA1A) + text(T, 9, "13") + id(T, 8, 0xA1B) + text(T, 9, "14");
+            q += id(T, 8, 0xA1C) + id(T, 9, 0x7FD) + id(T, 8, 0xA1D) + id(T, 9, 0x7FE) + id(T, 8, 0x5023) + text(T, 9, "33");
+            q += id(T, 8, 0xA1E) + id(T, 9, 0x7FD) + id(T, 8, 0xA1F) + id(T, 9, 0x7FE) + id(T, 8, 0xA20) + text(T, 9, "15");
+            q += id(T, 8, 0x5021) + id(T, 9, 0x7FE) + id(T, 8, 0x5022) + id(T, 9, 0x7FD);
+            return q;
+        };
+        {
+            // Shown: only on the main menu's game info screen with a server picked and no password asked.
+            bool ok = true;
+            g_menuState = &m;
+            g_menuScreens = {&other, &info};
+            C_MainMenu::ShowGameInfo(&status);
+            ok &= Is(CsQueue(), shown());
+            server.gameType = 3;
+            C_MainMenu::ShowGameInfo(&status);
+            ok &= Is(CsQueue(), shown());
+            server.gameType = 1;
+            // A name the font cannot show.
+            std::strcpy(server.name, "S\xC3\xA9");
+            C_MainMenu::ShowGameInfo(&status);
+            const std::string q = CsQueue();
+            ok &= q.find(id(0x30200000, 9, 0x7E9)) != std::string::npos && q.find("S\xC3\xA9") == std::string::npos;
+            g_gameProfile.m_unicodeFont = true;
+            C_MainMenu::ShowGameInfo(&status);
+            ok &= CsQueue().find(text(0x30200000, 9, "S\xC3\xA9")) != std::string::npos;
+            g_gameProfile.m_unicodeFont = false;
+            std::strcpy(server.name, "Srv");
+            // Not: no server; a password asked; another screen on top; no screens; another state; no state.
+            m.m_server = nullptr;
+            C_MainMenu::ShowGameInfo(&status);
+            m.m_server = &server;
+            g_sessionPasswordSet = true;
+            C_MainMenu::ShowGameInfo(&status);
+            g_sessionPasswordSet = false;
+            g_menuScreens = {&info, &other};
+            C_MainMenu::ShowGameInfo(&status);
+            g_menuScreens.clear();
+            C_MainMenu::ShowGameInfo(&status);
+            g_menuScreens = {&other, &info};
+            C_GameState plain;
+            g_menuState = reinterpret_cast<C_MenuState *>(&plain);
+            C_MainMenu::ShowGameInfo(&status);
+            g_menuState = nullptr;
+            C_MainMenu::ShowGameInfo(&status);
+            ok &= Is(CsQueue(), "");
+            // No players: their box only emptied.
+            g_menuState = &m;
+            status.playersBegin = status.playersEnd = nullptr;
+            C_MainMenu::ShowGameInfo(&status);
+            ok &= CsQueue().rfind("30100000 2000018 0 0; 30200000 1000077 0 0; ", 0) == 0;
+            status.playersBegin = players;
+            status.playersEnd = players + 5;
+            WM(r.giShow, ok);
+        }
+        {
+            // The status kept (the main menu, no password asked) and shown at the tick, then dropped.
+            bool ok = true;
+            InitializeCriticalSection(&m.m_foundLock);
+            g_gameInfoStatus = nullptr;
+            C_MainMenu::OnGameInfoStatus(&status);
+            ok &= g_gameInfoStatus == &status;
+            ok &= C_MainMenu::OnGameInfoTick(&m, nullptr, nullptr, 0, 0) && !g_gameInfoStatus && Is(CsQueue(), shown());
+            ok &= C_MainMenu::OnGameInfoTick(&m, nullptr, nullptr, 0, 0) && Is(CsQueue(), "");
+            g_sessionPasswordSet = true;
+            C_MainMenu::OnGameInfoStatus(&status);
+            ok &= !g_gameInfoStatus;
+            g_sessionPasswordSet = false;
+            C_GameState plain;
+            g_menuState = reinterpret_cast<C_MenuState *>(&plain);
+            C_MainMenu::OnGameInfoStatus(&status);
+            ok &= !g_gameInfoStatus;
+            g_menuState = nullptr;
+            C_MainMenu::OnGameInfoStatus(&status);
+            ok &= !g_gameInfoStatus;
+            DeleteCriticalSection(&m.m_foundLock);
+            WM(r.giStatus, ok);
+        }
+        g_menuScreens.clear();
+        g_menuState = oldState;
+        g_sessionPasswordSet = oldSet;
+        g_gameInfoStatus = nullptr;
+        m.m_server = nullptr;
+        for (int &style : g_gameInfoStyles) {
+            ReleaseTextStyle(style);
+            style = -1;
+        }
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -1817,7 +2083,7 @@ void MainMenuTest(I3D_scene *scene)
                                                         "gameinfo", "confirm", "password"});
         const std::string log = Join(g_gfLog);
         ok &= GmInOrder(log, {"scan", "describe browser 20000000", "describe create 24000000",
-                              "describe gameinfo 30000000", "describe connect 34000000",
+                              "describe connect 34000000",
                               "describe addserver 38000000"}) &&
               log.find("describe ", log.find("describe addserver") + 1) == std::string::npos;
         ok &= m.m_screens.size() == 15 && S_CsPeek::Callbacks(m.m_screens[1]) == 1 && S_CsPeek::Callbacks(m.m_screens[2]) == 1 &&
@@ -1829,6 +2095,11 @@ void MainMenuTest(I3D_scene *scene)
         ok &= log.find("mmm04 8 (0.5 -0.375 -0.5)") != std::string::npos && log.find("mmm10 8 (0.5 -0.375 -0.5)") != std::string::npos &&
               log.find(" 8 (0.5", log.find(" 8 (0.5", log.find(" 8 (0.5") + 1) + 1) == std::string::npos &&
               log.find("mmgro 34 GROptions") != std::string::npos && log.find("mmgci 34 GB_Cinematics") != std::string::npos;
+        // (The game info screen's styles of this build given back: the next build makes its own.)
+        for (int &style : g_gameInfoStyles) {
+            ReleaseTextStyle(style);
+            style = -1;
+        }
         // A model not found: its screen skipped.
         for (size_t i = 1; i < m.m_screens.size(); ++i)
             delete m.m_screens[i];
@@ -1865,11 +2136,12 @@ void MainMenuTest(I3D_scene *scene)
                 "spShown %d spHover %d spClick %d mpLists %d mpDescribe %d mpSaveSlot %d mpPick %d mxCampaign %d mxSingle %d"
                 " mxMessages %d mxSecret %d mxStart %d mxOperation %d ciDescribe %d ciShown %d ciPick %d"
                 " pwDescribe %d pwServer %d pwLock %d flDescribe %d flShown %d"
-                " flAccept %d flHelpers %d\n",
+                " flAccept %d flHelpers %d giDescribe %d giRefresh %d giShow %d giStatus %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
                 r.mpSaveSlot, r.mpPick, r.mxCampaign, r.mxSingle, r.mxMessages, r.mxSecret, r.mxStart, r.mxOperation,
                 r.ciDescribe, r.ciShown, r.ciPick, r.pwDescribe, r.pwServer, r.pwLock,
-                r.flDescribe, r.flShown, r.flAccept, r.flHelpers);
+                r.flDescribe, r.flShown, r.flAccept, r.flHelpers,
+                r.giDescribe, r.giRefresh, r.giShow, r.giStatus);
 }
