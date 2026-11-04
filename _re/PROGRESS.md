@@ -8210,6 +8210,27 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     11 functions in ported.txt (absorb not run: it would take the unported handlers whose only callers are
     ported). Stats: 9,161 of 12,306 functions by hand (82.8 % by size).
 
+  PART 9h-iv DONE (2026-11-04): the main menu's screens' description and the main screen shown
+  (game/main_menu.cpp).
+  - Describe 0x00623e30 (8 KB, from the decompile checked against the asm's calls: 53 controls, 104 messages;
+    the decompile hid 0x00625ea0's forbidden-characters message and 0x00625ed0's frames): the main screen
+    (texts, resume, profile, single player, LAN / Internet games, cinematics (screen 7: so 7 is the
+    cinematics, not saved games), options, credits, exit), the profile screen (the name's box: no
+    ./\*?|<>:" characters, 17 at most but in Japanese; the profiles' list, the four difficulties,
+    create / rename / delete, back), the single-player screen (the side switch's frames ss1 .. ss6, ss8,
+    ss7; the modes' nine buttons, each called on the cursor's entering and the click), the quit question
+    (yes posts the kept quit, no drops it, ok hidden); the ten other screens empty.
+  - OnMainShown 0x006276a0 (from the asm where Ghidra garbled the last save's lines): the saved game picked
+    cleared, the network game closed, the profile's name picked; none: "none", no save, resume off, "create
+    a profile", the modes off; else the name (posted twice, as the original), the last save's mode, mission
+    and date (none: "no save", resume off), "change profile", the modes on.
+  - Harness: mmDescribe (the whole description as the original's, English and Japanese), mmMainShown; the
+    build test with the real description (15 screens, their callbacks). The screens' other callbacks faked.
+  - Mutations: mutations/mutate_9h4.py: 170: 159 killed, 11 not building, none surviving.
+  - Build: MSVC clean. Tier 1: 338 errors in 61 files, 139 stubs. ret_audit --src: 52.
+  - Ghidra: names/main_menu.txt (+7 callbacks; 0x00614140 is DescribeCinematicsScreen). Stats: 9,163 of
+    12,306 functions by hand (83.1 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

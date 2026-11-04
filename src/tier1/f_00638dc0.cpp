@@ -1743,7 +1743,7 @@ LAB_0063b7d7:
 
 
 // 0x0063b7f0
-uint32_t FUN_0063b7f0(int param_1, ...)
+uint32_t C_MainMenu__OnSingleplayerShown(int param_1, ...)
 {
   char cVar1;
   int *ptr;
@@ -1843,7 +1843,7 @@ uint32_t FUN_0063b7f0(int param_1, ...)
 
 
 // 0x0063b9a0  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_0063b9a0(uint32_t param_1,int param_2,int param_3, ...)
+uint32_t C_MainMenu__OnSingleplayerButton(uint32_t param_1,int param_2,int param_3, ...)
 {
   return {};
 }

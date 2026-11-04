@@ -308,7 +308,7 @@ bool C_MainMenu__OnProfileMessage(C_MainMenu *_this,void *message, ...)
 
 #endif
 // 0x006214d0  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_006214d0(void *_this,uint32_t param_1,int *param_2,int param_3, ...)
+uint32_t C_MainMenu__OnProfileButton(void *_this,uint32_t param_1,int *param_2,int param_3, ...)
 {
   return {};
 }
@@ -1275,7 +1275,7 @@ LAB_00622ace:
 
 #endif
 // 0x00622b50  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_00622b50(void *_this,uint32_t param_1,int *param_2, ...)
+uint32_t C_MainMenu__OnDifficulty(void *_this,uint32_t param_1,int *param_2, ...)
 {
   return {};
 }
@@ -1825,7 +1825,7 @@ switchD_00623036_default:
 
 #endif
 // 0x006237e0
-uint32_t FUN_006237e0(int param_1, ...)
+uint32_t C_MainMenu__OnProfileShown(int param_1, ...)
 {
   int *extraout_EAX;
   uint32_t local_3c;
@@ -1968,7 +1968,7 @@ uint32_t FUN_006237e0(int param_1, ...)
 
 
 // 0x00623b40
-uint32_t FUN_00623b40(void *_this,uint32_t param_1,int *param_2,int param_3, ...)
+uint32_t C_MainMenu__OnProfileList(void *_this,uint32_t param_1,int *param_2,int param_3, ...)
 {
   void *pvVar2;
   uint32_t *puVar1;

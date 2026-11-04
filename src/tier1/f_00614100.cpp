@@ -36,7 +36,7 @@ uint32_t FUN_00614130(...)
 
 
 // 0x00614140
-uint32_t C_MainMenu__DescribeSavesScreen(void *param_1,int *param_2, ...)
+uint32_t C_MainMenu__DescribeCinematicsScreen(void *param_1,int *param_2, ...)
 {
   uint8_t stack0xffffff54[64];
   uint8_t stack0xffffff10[64];

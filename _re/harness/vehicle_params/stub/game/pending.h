@@ -176,6 +176,7 @@ struct S_NetPlayerState {
 class C_NetGame {
 public:
     C_Human *GetLocalHuman();
+    void Close(bool now);                           // (the main menu, part 9h-iv)
     S_NetPlayerState *LockPlayers();
     void UnlockPlayers();
     void SetPlayer(int slot, int connection, const char *name);

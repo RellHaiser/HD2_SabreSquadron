@@ -29,7 +29,7 @@ enum : uint32_t {
     MAIN_SCREEN_QUIT = 4,                           // "CONFIRM" (the quit question, QUIT_SCREEN)
     MAIN_SCREEN_MISSIONS = 5,                       // "SINGLE MISSION 2" (the campaign's missions)
     MAIN_SCREEN_OPTIONS = 6,                        // "OPTIONS"
-    MAIN_SCREEN_SAVES = 7,                          // "SINGLE MISSION 2" (the saved games)
+    MAIN_SCREEN_CINEMATICS = 7,                     // "SINGLE MISSION 2" (the cinematics)
     MAIN_SCREEN_BROWSER = 8,                        // "multiplayer menu"
     MAIN_SCREEN_CREATE_SERVER = 9,                  // "create server"
     MAIN_SCREEN_PASSWORD = 10,                      // "PASSWORD"
@@ -86,13 +86,34 @@ protected:
     // The servers the browser's thread found (under the lock), from the last: those in neither of the
     // settings' lists deleted, all taken off.
     void DrainFoundServers();                           // 0x00636400 (__fastcall)
-    // The menu's screens' descriptions (owned by the caller).
+    // The menu's screens' descriptions (owned by the caller): the main screen (its texts, the buttons: resume,
+    // the profile, single player, the LAN / Internet games, the cinematics, the options, the credits, exit),
+    // the profile screen (the name's box: no ./\*?|<>:" characters, 17 at most but in Japanese; the profiles'
+    // list, the difficulties, create / rename / delete, back), the single-player screen (the side switch's
+    // frames ss1 .. ss8, the modes' buttons), the quit question (yes, no, ok hidden); the other screens
+    // empty (their kinds' functions describe them).
     S_MenuDesc *Describe();                             // 0x00623e30
+
+    // ---- the screens' callbacks (later sub-parts but OnMainShown) ----
+    static bool OnMainShown(void *menu, void *argument, C_Control *control, uint32_t notification,
+                            uint32_t value);            // 0x006276a0
+    static bool OnProfileShown(void *menu, void *argument, C_Control *control, uint32_t notification,
+                               uint32_t value);         // 0x006237e0
+    static bool OnProfileButton(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                uint32_t value);        // 0x006214d0
+    static bool OnProfileList(void *menu, void *argument, C_Control *control, uint32_t notification,
+                              uint32_t value);          // 0x00623b40
+    static bool OnDifficulty(void *menu, void *argument, C_Control *control, uint32_t notification,
+                             uint32_t value);           // 0x00622b50
+    static bool OnSingleplayerShown(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                    uint32_t value);    // 0x0063b7f0
+    static bool OnSingleplayerButton(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                     uint32_t value);   // 0x0063b9a0
 
     // ---- the screens' further descriptions (by kind; later sub-parts) ----
     bool DescribeProfileScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00621210
     bool DescribeMissionsScreen(S_ScreenDesc *desc, I3D_frame *model);      // 0x006392b0
-    bool DescribeSavesScreen(S_ScreenDesc *desc, I3D_frame *model);         // 0x00614140
+    bool DescribeCinematicsScreen(S_ScreenDesc *desc, I3D_frame *model);         // 0x00614140
     bool DescribeBrowserScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00634050
     bool DescribeCreateServerScreen(S_ScreenDesc *desc, I3D_frame *model);  // 0x00628610
     bool DescribePasswordScreen(S_ScreenDesc *desc, I3D_frame *model);      // 0x00637890

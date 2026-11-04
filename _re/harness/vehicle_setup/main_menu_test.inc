@@ -47,19 +47,26 @@ bool C_MainMenu::OnConnectMessage(S_ControlMessage *m)
     GfLog("connect message %x", m->id);
     return g_mmTakes[3];
 }
-// The description: the screens' names (each AddScreen's id its index + 1).
-std::vector<std::string> g_mmScreens;
-S_MenuDesc *C_MainMenu::Describe()
+// (Part 9h-iv: the screens' callbacks of later sub-parts, faked; the network game's close and the last save,
+// logged.)
+#define MM_CALLBACK(F)                                                                                                bool C_MainMenu::F(void *, void *, C_Control *, uint32_t, uint32_t)                                               {                                                                                                                     GfLog(#F);                                                                                                        return true;                                                                                                  }
+MM_CALLBACK(OnProfileShown)
+MM_CALLBACK(OnProfileButton)
+MM_CALLBACK(OnProfileList)
+MM_CALLBACK(OnDifficulty)
+MM_CALLBACK(OnSingleplayerShown)
+MM_CALLBACK(OnSingleplayerButton)
+void C_NetGame::Close(bool now) { GfLog("net close %d", now); }
+bool g_mmHasSave = true;
+bool C_PlayerProfile::GetLastSaveText(C_str *mode, C_str *mission, C_str *date) const
 {
-    GfLog("describe");
-    auto *menu = new S_MenuDesc();
-    for (const std::string &name : g_mmScreens)
-        menu->AddScreen(name.c_str(), name.c_str());
-    // (The first screen gets a callback of its own, made by the screen's messages.)
-    if (!menu->screens.empty())
-        AddScreenMessage(menu->screens[0], 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_SHOWN, reinterpret_cast<uintptr_t>(this),
-                         reinterpret_cast<uintptr_t>(&C_MainMenu::SelectProfile));
-    return menu;
+    GfLog("last save");
+    if (!g_mmHasSave)
+        return false;
+    *mode = "Campaign";
+    *mission = "Mission 3";
+    *date = "1.1.2026";
+    return true;
 }
 #define MM_DESCRIBE(F, N)                                                                                         \
     bool C_MainMenu::F(S_ScreenDesc *desc, I3D_frame *)                                                           \
@@ -69,7 +76,7 @@ S_MenuDesc *C_MainMenu::Describe()
     }
 MM_DESCRIBE(DescribeProfileScreen, "profile")
 MM_DESCRIBE(DescribeMissionsScreen, "missions")
-MM_DESCRIBE(DescribeSavesScreen, "saves")
+MM_DESCRIBE(DescribeCinematicsScreen, "cinematics")
 MM_DESCRIBE(DescribeBrowserScreen, "browser")
 MM_DESCRIBE(DescribeCreateServerScreen, "create")
 MM_DESCRIBE(DescribePasswordScreen, "password")
@@ -88,7 +95,7 @@ void MmDeleteHook(void *p)
 
 struct S_MainMenuResults {
     bool mmStart = true, mmStop = true, mmUpdate = true, mmDrain = true, mmMessage = true, mmEscape = true,
-         mmSelect = true, mmBuild = true;
+         mmSelect = true, mmBuild = true, mmDescribe = true, mmMainShown = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -250,6 +257,108 @@ void MainMenuTest(I3D_scene *scene)
         m.OnStop();
     }
 
+    // --- (part 9h-iv) described: the main, profile, single-player and quit screens; the others empty ---
+    {
+        bool ok = true;
+        C_MainMenu m;
+        g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnMainShown)] = "mainShown";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnProfileShown)] = "profileShown";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnProfileButton)] = "profileButton";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnProfileList)] = "profileList";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnDifficulty)] = "difficulty";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnSingleplayerShown)] = "singleShown";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnSingleplayerButton)] = "singleButton";
+        // (The messages carrying a string (the forbidden characters, the frames): the string.)
+        const auto message = [](const S_ControlMessage &msg) {
+            if (msg.id == CONTROL_MSG_SET_FORBIDDEN || msg.id == CONTROL_MSG_ADD_FRAME)
+                return CmText("%x %x %x '%s'", msg.target, msg.id, msg.value, reinterpret_cast<const char *>(msg.value2));
+            return CsMessage(msg);
+        };
+        const auto dump = [&]() {
+            S_MenuDesc *menu = m.Describe();
+            std::string s;
+            for (const S_ScreenDesc *d : menu->screens) {
+                s += CmText("[%s|%s|%x]", d->name.c_str(), d->file.c_str(), d->id);
+                for (const S_ControlMessage &msg : d->messages)
+                    s += " " + message(msg);
+                for (const S_ControlDesc *c : d->controls) {
+                    s += CmText(" %x %s %x:", c->type, c->name.c_str(), c->id);
+                    for (const S_ControlMessage &msg : c->messages)
+                        s += " " + message(msg);
+                    s += c->children.empty() ? ";" : " (children);";
+                }
+                s += "\n";
+            }
+            delete menu;
+            return s;
+        };
+        // (As the original's, read from its asm: the screens, their callbacks, the controls' types, names, ids
+        // and messages in order.)
+        const std::string want =
+            "[MAIN MENU|main_menu|4000000] 0 1000007 400d000 self mainShown 13 text_screen 4100000: 0 1000015 a 835; 13 text_date00 4200000: 0 1000015 b 836; 13 text_date01 4300000: 0 1000015 c 7d2; 13 text_profile00 4400000: 0 1000015 b 837; 13 text_profile01 4500000: 0 1000015 c 7d2; 13 text_last save00 4600000: 0 1000015 b 838; 13 text_last save01 4700000: 0 1000015 c 7d2; 14 bresume game 4800000: 0 1000015 d 839 0 6001075 0 0; 14 bchange profile 4900000: 0 1000015 d 83a 0 6001001 2 0; 14 bsingleplayer 4a00000: 0 1000015 d 83b 0 6001001 3 0; 14 bmultiplayerlan 4b00000: 0 1000015 d 843 0 6001099 0 0; 14 bmultiplayernet 4c00000: 0 1000015 d 844 0 600109a 0 0; 14 bcinematics 4d00000: 0 1000015 d 83d 0 6001001 7 0; 14 boptions 4e00000: 0 1000015 d 83e 0 6001071 0 0; 14 bcredits 4f00000: 0 1000015 d 83f 0 600103a 0 0; 14 bexit 5000000: 0 1000015 d 840 0 6001003 4000000 0; 13 text_h&dversion 5100000: 0 1000015 28 7d6;\n"
+            "[CHANGE PROFIL|change_profile|8000000] 0 1000007 400d000 self profileShown 1b bcurrent profile 8100000: 0 1000015 d 7d2 0 100009b 0 './\\*?|<>:\"' 0 100006e 11 0 0 1000007 4016000 self profileButton 0 1000007 4017000 self profileButton; f LB_Profile* 8200000: 0 1000007 4001000 self profileList 0 1000007 4013000 self profileList; 14 beasy-* 8300000: 0 1000015 d 86d 0 1000007 4001000 self difficulty; 14 bnormal-* 8400000: 0 1000015 d 86e 0 1000007 4001000 self difficulty; 14 bhard-* 8500000: 0 1000015 d 86f 0 1000007 4001000 self difficulty; 14 bvery hard-* 8600000: 0 1000015 d 870 0 1000007 4001000 self difficulty; 14 bcreate profile 8700000: 0 1000015 d 868 0 1000007 4001000 self profileButton; 14 brename profile 8800000: 0 1000015 d 86a 0 1000007 4001000 self profileButton; 14 Bdelete profile 8900000: 0 1000015 d 86b 0 1000007 4001000 self profileButton; 14 bback 8a00000: 0 1000015 d 86c 0 6001003 0 0; 13 text_h&dversion 8b00000: 0 1000015 28 7d6; 13 text_current profile and save 8c00000: 0 1000015 b 88f; 13 text_date and time 8d00000:; 13 text_list of profiles 8e00000: 0 1000015 b 890; 13 text01 8f00000:; 13 text_screen 9000000: 0 1000015 a 867; 13 text_difficulty 9100000: 0 1000015 b 891;\n"
+            "[SINGLEPLAYER|singleplayer|c000000] 0 1000007 400d000 self singleShown 13 text_screen c100000: 0 1000015 a 899; c single side c200000: 0 1000032 0 'ss1' 0 1000032 0 'ss2' 0 1000032 0 'ss3' 0 1000032 0 'ss4' 0 1000032 0 'ss5' 0 1000032 0 'ss6' 0 1000032 0 'ss8' 0 1000032 0 'ss7'; 13 text00 c300000:; 14 bcampaign c400000: 0 1000015 d 89a 0 1000007 4003000 self singleButton 0 1000007 4001000 self singleButton; 14 blone wolf c500000: 0 1000015 d 89b 0 1000007 4003000 self singleButton 0 1000007 4001000 self singleButton; 14 carnage c600000: 0 1000015 d 89c 0 1000007 4003000 self singleButton 0 1000007 4001000 self singleButton; 14 bsingle mission c700000: 0 1000015 d 89d 0 1000007 4003000 self singleButton 0 1000007 4001000 self singleButton; 14 bsingle mission- carnage c800000: 0 1000015 d 89e 0 1000007 4003000 self singleButton 0 1000007 4001000 self singleButton; 14 bcampaign01 c900000: 0 1000015 d 89a 0 1000007 4003000 self singleButton 0 1000007 4001000 self singleButton; 14 blone wolf01 ca00000: 0 1000015 d 89b 0 1000007 4003000 self singleButton 0 1000007 4001000 self singleButton; 14 carnage01 cb00000: 0 1000015 d 89c 0 1000007 4003000 self singleButton 0 1000007 4001000 self singleButton; 14 bback cc00000: 0 1000015 d 8a0 0 1000007 4003000 self singleButton 0 1000007 4001000 self singleButton; 13 text_h&dversion cd00000: 0 1000015 28 7d6; 13 text_HD2original ce00000: 0 1000015 d 4fb0; 13 text_HD2datadisk cf00000: 0 1000015 d 4fb1;\n"
+            "[CONFIRM|confirm|10000000] 13 text 10100000: 0 1000015 c 7d4; 14 byes* 10200000: 0 1000015 d 7d1 0 14001100 0 0 0 6001005 0 0; 14 bno* 10300000: 0 1000015 d 7d0 0 14001200 1 0 0 6001005 0 0; 14 bok 10400000: 0 1000004 0 0;\n"
+            "[SINGLE MISSION 2|single mission 2|14000000]\n"
+            "[OPTIONS|options|18000000]\n"
+            "[SINGLE MISSION 2|single mission 2|1c000000]\n"
+            "[multiplayer menu|multiplayer menu|20000000]\n"
+            "[create server|create server|24000000]\n"
+            "[PASSWORD|password|28000000]\n"
+            "[Server Filters|server filters|2c000000]\n"
+            "[Game info|gameinfo|30000000]\n"
+            "[MP Connect console|confirm|34000000]\n"
+            "[ADD SERVER|password|38000000]\n";
+        g_foLanguage = "English";
+        const std::string english = dump();
+        g_foLanguage = "japan";
+        const std::string japanese = dump();
+        g_foLanguage = "English";
+        // (In Japanese the name's box has no length limit.)
+        std::string wantJapanese = want;
+        const size_t limit = wantJapanese.find(" 0 100006e 11 0");
+        wantJapanese.erase(limit, std::strlen(" 0 100006e 11 0"));
+        ok &= english == want && japanese == wantJapanese && limit != std::string::npos;
+        WM(r.mmDescribe, ok);
+    }
+
+    // --- (part 9h-iv) the main screen shown: no profile: all off; a profile: its name, its last save (or none),
+    // the buttons on ---
+    {
+        bool ok = true;
+        C_MainMenu m;
+        const C_str oldName = g_gmProfileName;
+        const auto shown = [&]() {
+            g_gfLog.clear();
+            g_controlMessages.clear();
+            m.m_saveName = "save1";
+            return C_MainMenu::OnMainShown(&m, nullptr, nullptr, CONTROL_NOTIFY_SHOWN, 0);
+        };
+        std::string modes;
+        for (uint32_t id = 0x4A00000; id <= 0x4F00000; id += 0x100000)
+            modes += CmText("%x 1000001 0 0; ", id);
+        g_gmProfileName = "";
+        ok &= shown() && m.m_saveName.IsEmpty() && m.m_profileName.IsEmpty() &&
+              MsLogIs({"net close 1"}, g_gfLog) &&
+              CsQueue() == "4500000 1000015 c 7e4; 4700000 1000015 c 7e5; 4800000 1000001 0 0; 4900000 1000015 d 845; " + modes;
+        std::string on;
+        for (uint32_t id = 0x4A00000; id <= 0x4F00000; id += 0x100000)
+            on += CmText("%x 1000002 0 0; ", id);
+        g_gmProfileName = "Pvt";
+        g_mmHasSave = true;
+        ok &= shown() && m.m_profileName == "Pvt" && MsLogIs({"net close 1", "last save"}, g_gfLog) &&
+              CsQueue() == "4500000 1000014 c 0 'Pvt'; 4500000 1000014 c 0 'Pvt'; 4700000 2000018 0 0; "
+                           "4700000 1000016 7 0 'Campaign'; 4700000 1000016 7 0 'Mission 3'; 4700000 1000016 7 0 '1.1.2026'; "
+                           "4800000 1000002 0 0; 4900000 1000015 d 83a; " + on;
+        g_mmHasSave = false;
+        ok &= shown() && CsQueue() == "4500000 1000014 c 0 'Pvt'; 4500000 1000014 c 0 'Pvt'; 4700000 2000018 0 0; "
+                                      "4700000 1000015 c 7e5; 4800000 1000001 0 0; 4900000 1000015 d 83a; " + on;
+        g_mmHasSave = true;
+        g_gmProfileName = oldName;
+        WM(r.mmMainShown, ok);
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -265,11 +374,8 @@ void MainMenuTest(I3D_scene *scene)
         m.m_scene = As<I3D_scene>(world.scene);
         C_MsScreen box(m.m_scene, "mmbbox", 0);
         std::vector<S_MrObj *> models;
-        g_mmScreens.clear();
-        for (int i = 1; i <= 15; ++i) {
-            g_mmScreens.push_back(CmText("mms%02d", i));
+        for (int i = 1; i <= 14; ++i)
             models.push_back(MrObj(strdup(CmText("mmm%02d", i).c_str()), g_mrModelVt));
-        }
         m.m_screens = {&box};
         g_mrMade[FRAME_MODEL] = std::deque<S_MrObj *>(models.begin(), models.end());
         // (The options screen's: its group's frame; the real handler finds no buttons.)
@@ -277,14 +383,19 @@ void MainMenuTest(I3D_scene *scene)
         g_cacheLoads.clear();
         g_menuScreens.clear();
         g_gfLog.clear();
-        ok &= m.BuildScreens() && g_cacheLoads.size() == 15 && g_cacheLoads[0] == "mms01" && g_cacheLoads[14] == "mms15";
+        ok &= m.BuildScreens() &&
+              g_cacheLoads == std::vector<std::string>({"main_menu", "change_profile", "singleplayer", "confirm",
+                                                        "single mission 2", "options", "single mission 2",
+                                                        "multiplayer menu", "create server", "password", "server filters",
+                                                        "gameinfo", "confirm", "password"});
         const std::string log = Join(g_gfLog);
-        ok &= GmInOrder(log, {"describe", "describe profile 8000000", "describe missions 14000000", "describe saves 1c000000",
+        ok &= GmInOrder(log, {"describe profile 8000000", "describe missions 14000000", "describe cinematics 1c000000",
                               "describe browser 20000000", "describe create 24000000", "describe password 28000000",
                               "describe filters 2c000000", "describe gameinfo 30000000", "describe connect 34000000",
                               "describe addserver 38000000"}) &&
               log.find("describe ", log.find("describe addserver") + 1) == std::string::npos;
-        ok &= m.m_screens.size() == 16 && S_CsPeek::Callbacks(m.m_screens[1]) == 1 && S_CsPeek::Callbacks(m.m_screens[2]) == 0 &&
+        ok &= m.m_screens.size() == 15 && S_CsPeek::Callbacks(m.m_screens[1]) == 1 && S_CsPeek::Callbacks(m.m_screens[2]) == 1 &&
+              S_CsPeek::Callbacks(m.m_screens[3]) == 1 && S_CsPeek::Callbacks(m.m_screens[4]) == 0 &&
               m.m_screens[4]->GetScreenFrame() == As<I3D_frame>(models[3]) &&
               !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1];
         // The quit question's model moved.
@@ -295,12 +406,12 @@ void MainMenuTest(I3D_scene *scene)
             delete m.m_screens[i];
         m.m_screens = {&box};
         m.m_models.clear();
-        g_mmScreens = {"mms01", "mms02"};
-        g_mrMade[FRAME_MODEL] = std::deque<S_MrObj *>(models.begin(), models.begin() + 2);
-        g_cacheFailName = "mms02";
+        g_mrMade[FRAME_MODEL] = std::deque<S_MrObj *>(models.begin(), models.end());
+        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgro2")};
+        g_cacheFailName = "change_profile";
         g_menuScreens.clear();
         g_gfLog.clear();
-        ok &= m.BuildScreens() && m.m_screens.size() == 2 && Join(g_gfLog).find("describe profile") == std::string::npos;
+        ok &= m.BuildScreens() && m.m_screens.size() == 14 && Join(g_gfLog).find("describe profile") == std::string::npos;
         g_cacheFailName.clear();
         for (size_t i = 1; i < m.m_screens.size(); ++i)
             delete m.m_screens[i];
@@ -321,6 +432,7 @@ void MainMenuTest(I3D_scene *scene)
     g_mrModelVt[0x48 / 4] = oldFind;
     g_gfLog.clear();
     g_controlMessages.clear();
-    std::printf("mainmenu: mmStart %d mmStop %d mmUpdate %d mmDrain %d mmMessage %d mmEscape %d mmSelect %d mmBuild %d\n",
-                r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild);
+    std::printf("mainmenu: mmStart %d mmStop %d mmUpdate %d mmDrain %d mmMessage %d mmEscape %d mmSelect %d mmBuild %d mmDescribe %d mmMainShown %d\n",
+                r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
+                r.mmMainShown);
 }

@@ -67,6 +67,8 @@ public:
     void ApplyVolume();
     // (The options handler, part 9e-viii: options_test.inc.)
     C_str GetName() const;
+    // (The main menu, part 9h-iv: main_menu_test.inc.)
+    bool GetLastSaveText(C_str *mode, C_str *mission, C_str *date) const;
     // (The in-game menu's presets, part 9e-xvii: game_menu_test.inc.)
     const C_str &GetProfileName() const;
     bool SaveOptions();

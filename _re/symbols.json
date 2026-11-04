@@ -27242,8 +27242,8 @@
  },
  "00614140": {
   "module": "main_menu",
-  "name": "C_MainMenu::DescribeSavesScreen",
-  "proto": "bool __thiscall DescribeSavesScreen(C_MainMenu *this, void * desc, void * model)"
+  "name": "C_MainMenu::DescribeCinematicsScreen",
+  "proto": "bool __thiscall DescribeCinematicsScreen(C_MainMenu *this, void * desc, void * model)"
  },
  "00614e80": {
   "module": "control",
@@ -27624,10 +27624,30 @@
   "name": "C_MainMenu::OnProfileMessage",
   "proto": "bool __thiscall OnProfileMessage(C_MainMenu *this, void * message)"
  },
+ "006214d0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnProfileButton",
+  "proto": "bool __thiscall OnProfileButton(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00622af0": {
   "module": "main_menu",
   "name": "C_MainMenu::SelectProfile",
   "proto": "bool __thiscall SelectProfile(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00622b50": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnDifficulty",
+  "proto": "bool __thiscall OnDifficulty(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006237e0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnProfileShown",
+  "proto": "bool __thiscall OnProfileShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00623b40": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnProfileList",
+  "proto": "bool __thiscall OnProfileList(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "00623e30": {
   "module": "main_menu",
@@ -27732,6 +27752,11 @@
   "module": "main_menu",
   "name": "C_MainMenu::BuildScreens",
   "proto": "bool __thiscall BuildScreens(C_MainMenu *this)"
+ },
+ "006276a0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMainShown",
+  "proto": "bool __thiscall OnMainShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "00627fd0": {
   "module": "zz_idioms",
@@ -27853,6 +27878,16 @@
   "module": "main_menu",
   "name": "C_MainMenu::DescribeMissionsScreen",
   "proto": "bool __thiscall DescribeMissionsScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "0063b7f0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnSingleplayerShown",
+  "proto": "bool __thiscall OnSingleplayerShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0063b9a0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnSingleplayerButton",
+  "proto": "bool __thiscall OnSingleplayerButton(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "0063c2f0": {
   "module": "gdi_font",
