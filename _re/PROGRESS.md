@@ -8087,6 +8087,21 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 343 errors in 64 files, 143 stubs. ret_audit --src: 52.
   - Ghidra: names/campaign_screens.txt (+4); 4 functions in ported.txt. Stats: 9,106 of 12,306 functions by hand (82.3 % by size).
 
+  PART 9g-xv DONE (2026-11-04): the squad screen's automatic selection (game/squad_menu.cpp).
+  - OnAutoSelect 0x00695740 (was "OnAccept": the button showing "AUTOMATIC SELECTION", 0xA5E, on the frame
+    "baccept and continue"; "bauto assign" shows "CONTINUE" 0xA5D: the model's names are swapped with the
+    texts. One soldier: a living free one of the first 30 at random. Else each slot from the first empty one
+    on (the slots after refilled): one of the five best living free ones at random, the first and third by
+    stat 4, the second by stat 7, the fourth by (stat 1 - stat 4 * 0.1f) * 10 (float, truncated); then the
+    first free roster soldier selected), KeepBest 0x006956d0 (the best five kept).
+  - The texts renamed after TEXTY.txt: "ADD" / "REMOVE" 0xA61 / 0xA62, "TEAM MEMBER SELECTION" 0xA5B (kind 2)
+    and "REPLENISH TEAM" 0xA5C (kind 1).
+  - Harness: sqKeepBest, sqAutoSelect (the picks predicted from srand over permuted stats). All 14 factory
+    checkers in both orders.
+  - Mutations: mutations/mutate_9g15.py (68: all killed but 3, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 342 errors in 64 files, 142 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+2); 2 functions in ported.txt. Stats: 9,108 of 12,306 functions by hand (82.3 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

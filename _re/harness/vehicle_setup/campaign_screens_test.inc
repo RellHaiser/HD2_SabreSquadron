@@ -180,7 +180,6 @@ void C_SquadMenu::ShowStats()
     if (g_sqStatsClear)
         m_selectedSoldier = -1;
 }
-bool C_SquadMenu::OnAccept(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
 // (Part 9g-x: the squad screen's parts, later parts', logged.)
 #define SQ_DESCRIBE(F, T, TEXT) \
     T C_SquadMenu::F(S_ScreenDesc *desc, I3D_frame *model) \
@@ -331,7 +330,7 @@ struct S_CampaignScreensResults {
     bool sqDead = true, sqFill = true, sqSelection = true, sqShown = true, sqSquadScreen = true, sqBuild = true;
     bool sqRoster = true, sqMedals = true, sqBuildSelect = true;
     bool sqStats = true, sqSelected = true, sqButtons = true, sqInfo = true, sqControl = true, sqAssign = true;
-    bool sqDragStart = true, sqDragMove = true, sqDrop = true, sqNotify13 = true;
+    bool sqDragStart = true, sqDragMove = true, sqDrop = true, sqNotify13 = true, sqKeepBest = true, sqAutoSelect = true;
 };
 
 // A message's values ("target id value value2[ value3][ 'text']"; value2 / value3 by name when known).
@@ -3625,7 +3624,7 @@ void CampaignScreensTest(I3D_scene *)
             g_csNames[fn(&C_SquadMenu::OnDrop)] = "drop";
             g_csNames[fn(&C_SquadMenu::OnSoldierNotify13)] = "cancel";
             g_csNames[fn(&C_SquadMenu::OnAssign)] = "assign";
-            g_csNames[fn(&C_SquadMenu::OnAccept)] = "accept";
+            g_csNames[fn(&C_SquadMenu::OnAutoSelect)] = "accept";
             g_csNames[fn(&C_SquadMenu::SyncSquad)] = "sync";
             S_ScreenDesc d("team members selection", "team members selection", 1u << 26);
             ok &= m.DescribeStats(&d, nullptr) && d.controls.size() == 1;
@@ -4137,6 +4136,253 @@ void CampaignScreensTest(I3D_scene *)
             g_controlMessages.clear();
         }
 
+
+        // --- (part 9g-xv) the automatic selection: the best five kept (the worst of those below replaced); each
+        // empty slot from the first filled with one of the five best living free soldiers (by the slot's
+        // stat) at random; one soldier: a living free one of the first 30 at random; then a free soldier
+        // selected ---
+        {
+            bool ok = true;
+            int ids[5] = {}, scores[5] = {}, count = 0;
+            for (int i = 0; i < 5; ++i)
+                C_SquadMenu::KeepBest(ids, scores, &count, i, 10 * (i + 1));
+            ok &= count == 5 && ids[4] == 4 && scores[0] == 10;
+            C_SquadMenu::KeepBest(ids, scores, &count, 7, 35);
+            ok &= count == 5 && ids[0] == 7 && scores[0] == 35;
+            C_SquadMenu::KeepBest(ids, scores, &count, 8, 5);
+            ok &= ids[0] == 7 && ids[1] == 1 && scores[1] == 20;
+            C_SquadMenu::KeepBest(ids, scores, &count, 9, 30);
+            ok &= ids[1] == 9 && scores[1] == 30 && ids[2] == 2;
+            C_SquadMenu::KeepBest(ids, scores, &count, 6, 40);
+            ok &= ids[1] == 6 && ids[2] == 2;
+            C_SquadMenu::KeepBest(ids, scores, &count, 11, 30);
+            ok &= ids[2] == 2 && ids[3] == 3 && ids[4] == 4;
+            WM(r.sqKeepBest, ok);
+
+            C_SquadMenu m;
+            roster(30);
+            for (int i = 0; i < 30; ++i) {
+                p[i]->dead = true;
+                for (float &st : p[i]->stats)
+                    st = 0.0f;
+            }
+            const int alive[] = {2, 4, 6, 8, 10, 12, 14};
+            for (int i : alive) {
+                p[i]->dead = false;
+                p[i]->stats[4] = static_cast<float>(10 + i);
+                p[i]->stats[7] = static_cast<float>(50 - i);
+                p[i]->stats[1] = static_cast<float>(20 + i);
+            }
+            for (int i = 0; i < 4; ++i)
+                m.m_slots[i].picture = 0x4803000 + static_cast<uint32_t>(3 * i) * 0x1000;
+            const auto slots = [&]() {
+                std::string s;
+                for (const S_SquadSlot &slot : m.m_slots)
+                    s += CmText("%d%s ", slot.profile, slot.removable ? "" : "!");
+                return s;
+            };
+            const auto run = [&](unsigned seed) {
+                std::srand(seed);
+                g_gfLog.clear();
+                g_controlMessages.clear();
+                C_SqTop top("sqauto", 0, 0);
+                g_menuScreens = {&top};
+                const bool done = C_SquadMenu::OnAutoSelect(&m, &m, nullptr, CONTROL_NOTIFY_CLICK, 0);
+                g_menuScreens.clear();
+                return done;
+            };
+            // The expected picks: the same random numbers on the same candidates.
+            const auto best = [&](std::vector<std::pair<int, int>> scored) {
+                int ids2[5] = {}, scores2[5] = {}, n = 0;
+                for (const auto &c : scored)
+                    C_SquadMenu::KeepBest(ids2, scores2, &n, c.first, c.second);
+                return std::vector<int>(ids2, ids2 + n);
+            };
+            playMode.mode = PLAY_MODE_CAMPAIGN;
+            playMode.singleMission = 0;
+            for (S_SquadSlot &slot : m.m_slots) {
+                slot.profile = -1;
+                slot.removable = false;
+            }
+            m.m_slots[0].profile = 4;
+            m.m_slots[0].removable = true;
+            std::srand(17);
+            // Slot 1 by stat 7 (the lower the index the better), slot 2 by stat 4, slot 3 by stat 1 less a tenth of stat 4.
+            std::vector<std::pair<int, int>> s1, s2, s3;
+            for (int i : alive)
+                if (i != 4)
+                    s1.push_back({i, 50 - i});
+            const std::vector<int> c1 = best(s1);
+            const int pick1 = c1[static_cast<size_t>(std::rand() % static_cast<int>(c1.size()))];
+            for (int i : alive)
+                if (i != 4 && i != pick1)
+                    s2.push_back({i, 10 + i});
+            const std::vector<int> c2 = best(s2);
+            const int pick2 = c2[static_cast<size_t>(std::rand() % static_cast<int>(c2.size()))];
+            for (int i : alive)
+                if (i != 4 && i != pick1 && i != pick2)
+                    s3.push_back({i, static_cast<int>((static_cast<float>(20 + i) - static_cast<float>(10 + i) * 0.1f) * 10.0f)});
+            const std::vector<int> c3 = best(s3);
+            const int pick3 = c3[static_cast<size_t>(std::rand() % static_cast<int>(c3.size()))];
+            ok &= run(17) && slots() == CmText("4 %d %d %d ", pick1, pick2, pick3) && pick1 != pick2 && pick2 != pick3 &&
+                  c1.size() == 5 && std::find(c1.begin(), c1.end(), 14) == c1.end();
+            const std::string want = CmText("4101000 2000084 %x 0; ", 0x4101000 | (pick1 + 1) << 4) + "";
+            ok &= CsQueue().find(want) == 0;
+            // (The first slot empty: from it, by stat 4; the slots after it refilled; nobody free: left.)
+            for (int i = 0; i < 4; ++i)
+                m.m_slots[i].profile = -1;
+            ok &= run(3) && m.m_slots[0].profile >= 0 && m.m_slots[3].profile >= 0;
+            for (int i : alive)
+                p[i]->dead = true;
+            p[2]->dead = false;
+            for (int i = 0; i < 4; ++i)
+                m.m_slots[i].profile = -1;
+            ok &= run(5) && slots() == "2 -1 -1 -1 " && CsQueue().find("4101000 2000084 4101030 0; ") == 0;
+            // (Rounding: (stat 1 - stat 4 / 10) * 10 truncated.)
+            p[2]->stats[1] = 2.25f;
+            p[2]->stats[4] = 0.5f;
+            p[3]->dead = false;
+            p[3]->stats[1] = 2.2f;
+            p[3]->stats[4] = 0.0f;
+            for (int i = 0; i < 4; ++i)
+                m.m_slots[i].profile = 7;
+            m.m_slots[3].profile = -1;
+            p[7]->dead = false;
+            ok &= run(9) && (m.m_slots[3].profile == 2 || m.m_slots[3].profile == 3);
+            p[7]->dead = true;
+            p[3]->dead = true;
+            WM(r.sqAutoSelect, ok);
+            {
+                for (int i = 0; i < 30; ++i) {
+                    p[i]->dead = i > 11;
+                    p[i]->stats[4] = static_cast<float>((i * 7) % 13) + 0.75f;
+                    p[i]->stats[7] = static_cast<float>((i * 5) % 11) + 0.25f;
+                    p[i]->stats[1] = static_cast<float>((i * 3) % 17) + 0.5f;
+                    p[i]->stats[2] = static_cast<float>((i * 11) % 7);
+                    p[i]->stats[3] = static_cast<float>((i * 2) % 9);
+                    p[i]->stats[5] = static_cast<float>((i * 13) % 5);
+                    p[i]->stats[6] = static_cast<float>((i * 17) % 19);
+                    p[i]->stats[8] = static_cast<float>((i * 19) % 23);
+                }
+                p[3]->dead = true;
+                const auto score = [&](int slot, int i) {
+                    const float *st = p[i]->stats;
+                    if (slot == 0 || slot == 2)
+                        return static_cast<int>(st[4]);
+                    if (slot == 1)
+                        return static_cast<int>(st[7]);
+                    return static_cast<int>((st[1] - st[4] * 0.1f) * 10.0f);
+                };
+                C_SqTop top("sqautotop", 0x4101010, 9);
+                for (unsigned seed = 1; seed <= 8; ++seed) {
+                    for (int i = 0; i < 4; ++i) {
+                        m.m_slots[i].profile = -1;
+                        m.m_slots[i].removable = true;
+                    }
+                    m.m_slots[0].profile = seed % 3 == 0 ? 0 : seed % 2 ? 5 : -1;
+                    // The prediction.
+                    std::vector<int> taken = {m.m_slots[0].profile};
+                    std::srand(seed);
+                    int fin[4] = {m.m_slots[0].profile, -1, -1, -1};
+                    for (int slot = m.m_slots[0].profile >= 0 ? 1 : 0; slot < 4; ++slot) {
+                        int ids2[5] = {}, scores2[5] = {}, n = 0;
+                        for (int i = 0; i < 30; ++i)
+                            if (!p[i]->dead && std::find(taken.begin(), taken.end(), i) == taken.end())
+                                C_SquadMenu::KeepBest(ids2, scores2, &n, i, score(slot, i));
+                        const int pick = ids2[std::rand() % n];
+                        taken.push_back(pick);
+                        fin[slot] = pick;
+                    }
+                    const std::string want = CmText("%d %d %d %d ", fin[0], fin[1], fin[2], fin[3]);
+                    std::srand(seed);
+                    g_gfLog.clear();
+                    g_controlMessages.clear();
+                    g_menuScreens = {&top};
+                    ok &= C_SquadMenu::OnAutoSelect(&m, &m, nullptr, CONTROL_NOTIFY_CLICK, 0) && slots() == want;
+                    g_menuScreens.clear();
+                    // (The first free roster soldier selected: soldier 0 when free.)
+                    const bool zeroTaken = std::find(taken.begin(), taken.end(), 0) != taken.end();
+                    ok &= zeroTaken || MrHas("show stats 9");
+                    for (const S_ControlMessage &msg : g_controlMessages)
+                        ok &= msg.target != 0 || msg.id != CONTROL_MSG_SET_TEXTURE;
+                    for (int i = 0; i < 12; ++i)
+                        ok &= !m.m_medalFrames[i][0] && !m.m_medalFrames[i][1];
+                }
+                // Roster soldier 0 the only one free: taken.
+                for (int i = 0; i < 30; ++i)
+                    p[i]->dead = i != 0;
+                for (int i = 0; i < 4; ++i)
+                    m.m_slots[i].profile = -1;
+                ok &= C_SquadMenu::OnAutoSelect(&m, &m, nullptr, CONTROL_NOTIFY_CLICK, 0) && slots() == "0 -1 -1 -1 ";
+                // One soldier: roster soldier 0 in the first slot: kept; another's: the free soldier 0 selected after.
+                playMode.mode = PLAY_MODE_LONE_WOLF;
+                p[1]->dead = false;
+                ok &= C_SquadMenu::OnAutoSelect(&m, &m, nullptr, CONTROL_NOTIFY_CLICK, 0) && slots() == "0 -1 -1 -1 ";
+                m.m_slots[0].profile = 5;
+                g_menuScreens = {&top};
+                g_gfLog.clear();
+                ok &= C_SquadMenu::OnAutoSelect(&m, &m, nullptr, CONTROL_NOTIFY_CLICK, 0) && slots() == "5 -1 -1 -1 " &&
+                      MrHas("show stats 9");
+                g_menuScreens.clear();
+                playMode.mode = PLAY_MODE_CAMPAIGN;
+                // The fourth slot's score as the original rounds it: (0.5 - 3 * 0.1) * 10 is 1, not 2.
+                for (int i = 0; i < 30; ++i) {
+                    p[i]->dead = i < 10 || i > 15;
+                    for (float &st : p[i]->stats)
+                        st = 0.0f;
+                }
+                for (int i = 10; i < 14; ++i)
+                    p[i]->stats[1] = 5.0f;
+                p[14]->stats[1] = 0.5f;
+                p[14]->stats[4] = 3.0f;
+                p[15]->stats[1] = 0.2f;
+                for (unsigned seed = 1; seed <= 20; ++seed) {
+                    for (int i = 0; i < 3; ++i)
+                        m.m_slots[i].profile = 7 + i;
+                    m.m_slots[3].profile = -1;
+                    // Candidates 10 .. 13 and 15 (14 the worst).
+                    const int keep[5] = {10, 11, 12, 13, 15};
+                    int ids2[5] = {10, 11, 12, 13, 14};
+                    ids2[4] = keep[4];
+                    std::srand(seed);
+                    const int want = ids2[std::rand() % 5];
+                    std::srand(seed);
+                    ok &= C_SquadMenu::OnAutoSelect(&m, &m, nullptr, CONTROL_NOTIFY_CLICK, 0) && m.m_slots[3].profile == want;
+                }
+                for (int i = 0; i < 30; ++i) {
+                    p[i]->dead = true;
+                    for (float &st : p[i]->stats)
+                        st = 0.0f;
+                }
+                g_controlMessages.clear();
+            }
+            WM(r.sqAutoSelect, ok);
+
+            // One soldier: a living free one at random (the first slot taken: none).
+            playMode.mode = PLAY_MODE_LONE_WOLF;
+            for (int i = 0; i < 4; ++i)
+                m.m_slots[i].profile = -1;
+            p[2]->dead = false;
+            p[9]->dead = false;
+            std::srand(11);
+            int expected = -1;
+            for (;;) {
+                const int r2 = std::rand() % 30;
+                if (!p[r2]->dead) {
+                    expected = r2;
+                    break;
+                }
+            }
+            ok &= run(11) && m.m_slots[0].profile == expected && m.m_slots[0].removable &&
+                  CsQueue().find(CmText("4101000 2000084 %x 0; ", 0x4101000 | (expected + 1) << 4)) == 0;
+            ok &= run(11) && m.m_slots[0].profile == expected && CsQueue().find("4101000 2000084") == std::string::npos;
+            playMode.mode = PLAY_MODE_CAMPAIGN;
+            for (int i = 0; i < 30; ++i)
+                p[i]->dead = false;
+            g_controlMessages.clear();
+            WM(r.sqAutoSelect, ok);
+        }
+
         g_epProfiles = oldProfiles;
         g_gameProfile.m_humanStore = oldStore;
         g_gameProfile.m_missionSquad = oldSquad;
@@ -4155,12 +4401,13 @@ void CampaignScreensTest(I3D_scene *)
                 "dbRank %d dbMedals %d dbScroll %d sqSlot %d sqOneSoldier %d sqStart %d sqSlots %d sqSync %d "
                 "sqMessage %d sqSelect %d sqDead %d sqFill %d sqSelection %d sqShown %d sqSquadScreen %d sqBuild %d sqRoster %d sqMedals %d sqBuildSelect %d sqStats %d "
                 "sqSelected %d sqButtons %d sqInfo %d sqControl %d sqAssign %d sqDragStart %d sqDragMove %d sqDrop %d "
-                "sqNotify13 %d\n", r.oeTable, r.oeDescribe,
+                "sqNotify13 %d sqKeepBest %d sqAutoSelect %d\n", r.oeTable, r.oeDescribe,
                 r.oeBuild, r.oeInput, r.oeSlots, r.smStart, r.smMessage, r.smConsole, r.smPassword, r.smBuild, r.smTick,
                 r.smJoin, r.smNotify, r.vsCredits, r.vsMovie, r.vsFit, r.vsUpdate, r.vsScroll, r.vsRender, r.vsInput,
                 r.vsMovieState, r.dbMedal, r.dbResults, r.dbStore, r.dbStart, r.dbMessage, r.dbBuild, r.dbDiary, r.dbDiaryPage, r.dbWon,
                 r.dbScreen, r.dbPanel, r.dbObjectives, r.dbResult, r.dbShow, r.dbSkills,
                 r.dbRank, r.dbMedals, r.dbScroll, r.sqSlot, r.sqOneSoldier, r.sqStart, r.sqSlots, r.sqSync,
                 r.sqMessage, r.sqSelect, r.sqDead, r.sqFill, r.sqSelection, r.sqShown, r.sqSquadScreen, r.sqBuild, r.sqRoster, r.sqMedals, r.sqBuildSelect, r.sqStats, r.sqSelected,
-                r.sqButtons, r.sqInfo, r.sqControl, r.sqAssign, r.sqDragStart, r.sqDragMove, r.sqDrop, r.sqNotify13);
+                r.sqButtons, r.sqInfo, r.sqControl, r.sqAssign, r.sqDragStart, r.sqDragMove, r.sqDrop, r.sqNotify13,
+                r.sqKeepBest, r.sqAutoSelect);
 }

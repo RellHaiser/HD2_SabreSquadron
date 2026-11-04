@@ -1,6 +1,7 @@
 // The campaign's squad screen (game/squad_menu.h, part 9g-ix).
 #include "game/squad_menu.h"
 
+#include <cstdlib>
 #include <cstring>
 #include <malloc.h>
 #include <utility>
@@ -659,13 +660,13 @@ constexpr uint32_t STATS_PANEL = 0x4200000, INFO_PANEL = 0x4300000, INFO_BUTTON 
                    SELECTED_PANEL = 0x4800000, ASSIGN_BUTTON = 0x4900000;
 // The controls' second index field (bits 20-25): the roster's group, the selected soldiers'.
 constexpr uint32_t CONTROL_INDEX_MASK = 0x3F00000, ROSTER_GROUP_INDEX = 0x100000, SELECTED_GROUP_INDEX = 0x800000;
-// The skills' names (0xA6E + the skill), the bars' axis; "Selected soldier info" / "Soldier stats", the stats'
-// titles; "Assign" / "Detach"; "Accept and continue", "Auto assign", "Back", the screen's titles (the
-// operation's squad, the squad picked), the draft's.
+// The skills' names (0xA6E + the skill), the bars' axis; "SOLDIER STATISTICS" / "Soldier info:" (the info
+// button's and the title's, the other panel shown); "ADD" / "REMOVE"; "AUTOMATIC SELECTION", "CONTINUE",
+// "BACK", the screen's titles ("TEAM MEMBER SELECTION", "REPLENISH TEAM"), the draft's ("Soldier selection:").
 constexpr uint32_t TEXT_SKILLS = 0xA6E, BAR_AXIS_Z = 2;
 constexpr uint32_t TEXT_STATS_INFO = 0xA6A, TEXT_INFO_TITLE = 0xA6C;
-constexpr uint32_t TEXT_ASSIGN = 0xA61, TEXT_DETACH = 0xA62, TEXT_ACCEPT = 0xA5E, TEXT_AUTO_ASSIGN = 0xA5D, TEXT_BACK = 0xA5F,
-                   TEXT_OPERATION_SQUAD = 0xA5B, TEXT_PICK_SQUAD = 0xA5C, TEXT_VERSION = 0x7D6, TEXT_DRAFT = 0xA63;
+constexpr uint32_t TEXT_ASSIGN = 0xA61, TEXT_DETACH = 0xA62, TEXT_AUTO_SELECT = 0xA5E, TEXT_CONTINUE = 0xA5D, TEXT_BACK = 0xA5F,
+                   TEXT_TEAM_SELECTION = 0xA5B, TEXT_REPLENISH = 0xA5C, TEXT_VERSION = 0x7D6, TEXT_DRAFT = 0xA63;
 constexpr uint32_t SKILL_STYLE = 0xB, ASSIGN_STYLE = 0xC, TITLE_STYLE = 0xA, VERSION_STYLE = 0x28;
 // The selector over a picked picture, before it.
 constexpr float SELECTOR_DEPTH = -0.1f;
@@ -762,12 +763,14 @@ bool C_SquadMenu::DescribeButtons(S_ScreenDesc *desc, I3D_frame *)
     S_ControlDesc *assign = desc->AddControl(CONTROL_BUTTON, "bassign - detach");
     AddDescMessage(assign, 0, CONTROL_MSG_SET_TEXT_ID, BUTTON_STYLE, TEXT_ASSIGN);
     AddDescMessage(assign, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self, Callback(&C_SquadMenu::OnAssign));
-    S_ControlDesc *accept = desc->AddControl(CONTROL_BUTTON, "baccept and continue");
-    AddDescMessage(accept, 0, CONTROL_MSG_SET_TEXT_ID, BUTTON_STYLE, TEXT_ACCEPT);
-    AddDescMessage(accept, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self, Callback(&C_SquadMenu::OnAccept));
-    // The first operation (but the lone wolf's): the selection screen; else the squad kept, the next step.
+    // (The model's frames' names swapped with their buttons': "baccept and continue" selects automatically.)
+    S_ControlDesc *autoSelect = desc->AddControl(CONTROL_BUTTON, "baccept and continue");
+    AddDescMessage(autoSelect, 0, CONTROL_MSG_SET_TEXT_ID, BUTTON_STYLE, TEXT_AUTO_SELECT);
+    AddDescMessage(autoSelect, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self, Callback(&C_SquadMenu::OnAutoSelect));
+    // Continue: the first operation (but the lone wolf's): the selection screen; else the squad kept, the
+    // next step.
     S_ControlDesc *autoAssign = desc->AddControl(CONTROL_BUTTON, "bauto assign");
-    AddDescMessage(autoAssign, 0, CONTROL_MSG_SET_TEXT_ID, BUTTON_STYLE, TEXT_AUTO_ASSIGN);
+    AddDescMessage(autoAssign, 0, CONTROL_MSG_SET_TEXT_ID, BUTTON_STYLE, TEXT_CONTINUE);
     C_Campaign *campaign = g_gameProfile.m_campaign;
     if (campaign->GetCurrentIndex() == 0 && campaign->GetOperationIndex(0) == 0 &&
         g_gameProfile.m_playMode->mode != PLAY_MODE_LONE_WOLF) {
@@ -780,7 +783,7 @@ bool C_SquadMenu::DescribeButtons(S_ScreenDesc *desc, I3D_frame *)
     AddDescMessage(back, 0, CONTROL_MSG_SET_TEXT_ID, BUTTON_STYLE, TEXT_BACK);
     AddDescMessage(back, 0, CONTROL_NOTIFY_CLICK | MENU_MSG_ESCAPE, 0);
     AddDescMessage(desc->AddControl(CONTROL_TEXT, "text_screen"), 0, CONTROL_MSG_SET_TEXT_ID, TITLE_STYLE,
-                   m_mode == KIND_OPERATION ? TEXT_OPERATION_SQUAD : TEXT_PICK_SQUAD);
+                   m_mode == KIND_OPERATION ? TEXT_TEAM_SELECTION : TEXT_REPLENISH);
     AddDescMessage(desc->AddControl(CONTROL_TEXT, "text_h&dversion"), 0, CONTROL_MSG_SET_TEXT_ID, VERSION_STYLE, TEXT_VERSION);
     AddDescMessage(desc->AddControl(CONTROL_TEXT, "text_military service draft"), 0, CONTROL_MSG_SET_TEXT_ID, SKILL_STYLE,
                    TEXT_DRAFT);
@@ -1110,5 +1113,88 @@ bool C_SquadMenu::OnSoldierNotify13(void *menu, void *argument, C_Control *contr
     OnAssign(menu, argument, control, notification, value);
     Post(0, CONTROL_MSG_NOTIFY, CONTROL_NOTIFY_05);
     self->m_selectedSoldier = -1;
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// Part 9g-xv: the automatic selection
+
+namespace {
+
+// The candidates kept for a slot: the best five.
+constexpr int AUTO_CANDIDATES = 5;
+
+}   // namespace
+
+void C_SquadMenu::KeepBest(int *ids, int *scores, int *count, int id, int score)
+{
+    if (*count < AUTO_CANDIDATES) {
+        ids[*count] = id;
+        scores[*count] = score;
+        ++*count;
+        return;
+    }
+    // Full: the worst of those scoring less replaced.
+    int worst = -1, worstScore = -1;
+    for (int i = 0; i < *count; ++i) {
+        if (scores[i] < score && (worst < 0 || scores[i] < worstScore)) {
+            worstScore = scores[i];
+            worst = i;
+        }
+    }
+    if (worst >= 0) {
+        scores[worst] = score;
+        ids[worst] = id;
+    }
+}
+
+bool C_SquadMenu::OnAutoSelect(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_SquadMenu *>(menu);
+    C_HumanStore *store = g_gameProfile.m_humanStore;
+    S_SquadSlot *slots = self->m_slots;
+    if (IsOneSoldier()) {
+        // One soldier: a living one of the first 30 at random. (Quirk kept: the roster not checked.)
+        if (slots[0].profile < 0) {
+            int pick;
+            do {
+                do
+                    pick = std::rand() % ROSTER_LIMIT;
+                while (store->Get(pick)->dead);
+            } while (self->IsInSlots(pick));
+            Post(ROSTER_CONTROLS, CONTROL_MSG_HIDE_ITEM, RosterPicture(pick));
+            slots[0].SetSoldier(pick, true);
+        }
+        self->SelectFreeSoldier(0);
+        return true;
+    }
+    // Each empty slot from the first: one of the five best of the living free roster soldiers at random
+    // (the first and third slots by stat 4, the second by stat 7, the fourth by stat 1 less a tenth of
+    // stat 4). (Quirk kept: the first 30 roster soldiers read unchecked.)
+    int slot = 0;
+    while (slot < 4 && slots[slot].profile > -1)
+        ++slot;
+    for (; slot < 4; ++slot) {
+        int ids[AUTO_CANDIDATES], scores[AUTO_CANDIDATES], count = 0;
+        for (int i = 0; i < ROSTER_LIMIT; ++i) {
+            const S_SoldierProfile *profile = store->Get(i);
+            if (profile->dead || self->IsInSlots(i))
+                continue;
+            int score;
+            if (slot == 0 || slot == 2)
+                score = static_cast<int>(profile->stats[4]);
+            else if (slot == 1)
+                score = static_cast<int>(profile->stats[7]);
+            else
+                score = static_cast<int>((profile->stats[1] - profile->stats[4] * 0.1f) * 10.0f);
+            KeepBest(ids, scores, &count, i, score);
+        }
+        if (count <= 0)
+            continue;
+        const int pick = ids[std::rand() % count];
+        Post(ROSTER_CONTROLS, CONTROL_MSG_HIDE_ITEM, RosterPicture(pick));
+        slots[slot].SetSoldier(pick, true);
+    }
+    self->SelectFreeSoldier(0);
     return true;
 }

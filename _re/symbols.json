@@ -33083,6 +33083,16 @@
   "name": "C_SquadMenu::IsInSlots",
   "proto": "bool __thiscall IsInSlots(C_MenuState *this, int profile)"
  },
+ "006956d0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::KeepBest",
+  "proto": "void __fastcall KeepBest(int * ids, int * scores, int * count, int id, int score)"
+ },
+ "00695740": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnAutoSelect",
+  "proto": "bool __thiscall OnAutoSelect(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00695b90": {
   "module": "campaign_screens",
   "name": "C_SquadMenu::FillSlots",

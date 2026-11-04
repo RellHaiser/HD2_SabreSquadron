@@ -125,3 +125,6 @@
 00693e50 C_SquadMenu::OnDragMove | bool __thiscall OnDragMove(C_MenuState *this, void * argument, void * control, uint notification, uint value)
 00693f00 C_SquadMenu::OnDrop | bool __thiscall OnDrop(C_MenuState *this, void * argument, void * control, uint notification, uint value)
 006945c0 C_SquadMenu::OnSoldierNotify13 | bool __thiscall OnSoldierNotify13(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+# Part 9g-xv: the automatic selection (src/game/squad_menu.cpp).
+00695740 C_SquadMenu::OnAutoSelect | bool __thiscall OnAutoSelect(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+006956d0 C_SquadMenu::KeepBest | void __fastcall KeepBest(int * ids, int * scores, int * count, int id, int score)

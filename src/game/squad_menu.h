@@ -3,7 +3,8 @@
 // player's), their stats and medals, the selection screen. Part 9g-ix: the class, the slots, starting,
 // stopping, the messages, the squad kept to the slots; 9g-x: building the screens, the selection screen;
 // 9g-xi: the roster and the medals; 9g-xii: the stats, the places, the buttons, a soldier picked; 9g-xiii: a
-// soldier assigned or detached; 9g-xiv: the dragging; 9g-xv: accepting, the stats shown, the screen's callbacks.
+// soldier assigned or detached; 9g-xiv: the dragging; 9g-xv: the automatic selection; 9g-xvi: the stats shown,
+// the screen's callbacks.
 #pragma once
 
 #include <cstdint>
@@ -162,10 +163,11 @@ protected:
     // texts and picture (its controls' ids the slot's; no soldier; picked: OnSoldierControl; dragged and
     // dropped). No frame made: false.
     bool DescribeSelected(S_ScreenDesc *desc, I3D_frame *model);     // 0x00693560
-    // The buttons: assign / detach (OnAssign), accept and continue (OnAccept), auto assign (the first
-    // operation, not the lone wolf's: the selection screen opened; else the squad kept, the next step),
-    // back (Escape); the screen's title (the operation's squad, the squad picked), the version, the draft's
-    // text. True.
+    // The buttons (their frames' names not their texts'): "ADD" / "REMOVE" (OnAssign), "AUTOMATIC SELECTION"
+    // on "baccept and continue" (OnAutoSelect), "CONTINUE" on "bauto assign" (the first operation, not the
+    // lone wolf's: the selection screen opened; else the squad kept, the next step), "BACK" (Escape); the
+    // screen's title ("TEAM MEMBER SELECTION", a kind 1 screen's "REPLENISH TEAM"), the version, the
+    // draft's text. True.
     bool DescribeButtons(S_ScreenDesc *desc, I3D_frame *model);      // 0x00693880
     // The assign / detach button (and a drop): nobody selected: false; a dead soldier: nothing. One soldier:
     // the first slot only. A slot's soldier picked: detached (his roster picture back; the slots after his
@@ -174,10 +176,17 @@ protected:
     // soldier replaced, his picture back, unless he stays), the next free roster soldier selected. True.
     static bool OnAssign(void *menu, void *argument, C_Control *control, uint32_t notification,
                          uint32_t value);               // 0x00694f30
-    // (Part 9g-xv.) The selected soldier's stats shown.
+    // The automatic selection: one soldier: a living free one of the first 30 roster soldiers at random (the
+    // first slot taken: none). Else each slot from the first empty one on: one of the five best living free
+    // ones (the first and third slots by stat 4, the second by stat 7, the fourth by stat 1 less a tenth of
+    // stat 4) at random, his roster picture hidden. Then the first free roster soldier selected. True.
+    static bool OnAutoSelect(void *menu, void *argument, C_Control *control, uint32_t notification,
+                             uint32_t value);           // 0x00695740
+    // A candidate kept among the best five (`ids` and `scores` of `count`): appended while fewer, else in
+    // place of the worst of those scoring less (none: dropped).
+    static void KeepBest(int *ids, int *scores, int *count, int id, int score);   // 0x006956d0 (__fastcall)
+    // (Part 9g-xvi.) The selected soldier's stats shown.
     void ShowStats();                                   // 0x00696140 (__fastcall)
-    static bool OnAccept(void *menu, void *argument, C_Control *control, uint32_t notification,
-                         uint32_t value);               // 0x00695740
     static bool OnScreenTick(void *menu, void *argument, C_Control *control, uint32_t notification,
                              uint32_t value);           // 0x00696d60
     static bool OnScreenHidden(void *menu, void *argument, C_Control *control, uint32_t notification,
