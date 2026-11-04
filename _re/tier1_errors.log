@@ -202,8 +202,6 @@ f_00633450.cpp:1163:49: no matching function for call to 'tier1::C_str::C_str(in
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
 f_00633450.cpp:1175:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:1512:26: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    iVar1 = (**(code **)(*g_menuState + 0x1c))();
 f_00633450.cpp:1777:3: '_local_8' was not declared in this scope; did you mean 'local_8'?
     _local_8 = CONCAT31(uStack_7,1);
 f_00633450.cpp:63:76: invalid 'static_cast' from type 'unsigned char*' to type 'uint64_t' {aka 'long long unsigned int'}
@@ -250,8 +248,6 @@ f_006882f0.cpp:645:49: no matching function for call to '_LARGE_INTEGER::_LARGE_
     LStack_c.u.HighPart);
 f_006882f0.cpp:1387:40: void value not ignored as it ought to be
     iVar13 = (*self->vtable[1].Close)(self);
-f_0068bfc0.cpp:189:20: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    (**(code **)(*uStack_44 + 0x70))(*(int *)(local_34 + uVar4 * 4) + 4);
 f_0068c590.cpp:2536:55: no matching function for call to 'tier1::C_str::C_str(int)'
     (*pCStack_24 = (C_str)(*(int *)pCStack_24 - 1), *(int *)pCStack_24 == 0)) {
 f_0068c590.cpp:2548:51: no matching function for call to 'tier1::C_str::C_str(int)'
@@ -416,16 +412,6 @@ f_006e2db0.cpp:845:16: invalid type argument of unary '*' (have 'uint32_t' {aka 
     iVar2 = (*DAT_008bf120)();
 f_006e2db0.cpp:848:10: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     (*DAT_008bf124)();
-f_006e4f40.cpp:302:3: '_param_3' was not declared in this scope; did you mean 'param_3'?
-    _param_3 = 0;
-f_006e4f40.cpp:527:52: expected primary-expression before '*' token
-    C_str__Assign(pCVar2 - 3,pCVar3 (uint32_t*)(-) 3);
-f_006e4f40.cpp:527:53: expected primary-expression before ')' token
-    C_str__Assign(pCVar2 - 3,pCVar3 (uint32_t*)(-) 3);
-f_006e4f40.cpp:527:53: 'pCVar3' cannot be used as a function
-    C_str__Assign(pCVar2 - 3,pCVar3 (uint32_t*)(-) 3);
-f_006e4f40.cpp:527:56: expected primary-expression before ')' token
-    C_str__Assign(pCVar2 - 3,pCVar3 (uint32_t*)(-) 3);
 f_006e7280.cpp:49:11: 'LocalDescriptorTableRegister' was not declared in this scope
     uVar1 = LocalDescriptorTableRegister();
 f_006e7280.cpp:52:23: void value not ignored as it ought to be
@@ -494,19 +480,19 @@ f_00721f30.cpp:96:11: invalid type argument of unary '*' (have 'uint32_t' {aka '
     if (*DAT_0097b9f0 < '0') break;
 f_00721f30.cpp:97:14: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     } while (*DAT_0097b9f0 < ':');
-f_00722a40.cpp:152:36: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
-    piVar5 = (int *)CoCreateInstance((IID *)&DAT_008190a8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819058,_this);
-f_00722a40.cpp:210:36: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:158:36: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+    piVar5 = (int *)CoCreateInstance((IID *)&DAT_008190a8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819058,
+f_00722a40.cpp:226:36: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     piVar6 = (int *)CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,
-f_00722a40.cpp:642:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:670:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,param_2);
-f_00722a40.cpp:644:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:672:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,param_1);
-f_00722a40.cpp:648:69: 'struct tier1::_union_1226' has no member named 'S_un_b'
+f_00722a40.cpp:676:69: 'struct tier1::_union_1226' has no member named 'S_un_b'
     pcVar2 = inet_ntoa((in_addr)((_union_1226 *)(iStack_c + 0x68))->S_un_b);
-f_00722a40.cpp:907:30: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:935:30: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     HVar2 = CoCreateInstance((IID *)&DAT_008190b8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819068,ppv);
-f_00722a40.cpp:1315:5: expected primary-expression before '}' token
+f_00722a40.cpp:1357:5: expected primary-expression before '}' token
     }
 f_00724aa0.cpp:274:28: cannot convert 'const char*' to 'wchar_t*' in assignment
     pwStack_94 = "2hostname" + 1;

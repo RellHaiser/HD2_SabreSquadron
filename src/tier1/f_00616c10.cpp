@@ -1912,7 +1912,7 @@ LAB_006192f2:
     ppvVar15++;
     puVar10++;
   }
-  pCVar9 = C_TextDatabase__GetText(&DAT_008c1368,&CStack_1d8,0x7e9);
+  pCVar9 = C_GameTexts__Get(&DAT_008c1368,&CStack_1d8,0x7e9);
   puVar7 = local_1e8;
   pCVar14 = pCVar9->rep;
   if (pCVar14 != 0) {

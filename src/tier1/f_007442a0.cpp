@@ -177,7 +177,7 @@ uint32_t C_ConsoleState__FUN_007443d0(C_ConsoleState *_this, ...)
     _this->_pad_000d[0x202] = '\0';
   }
   if (*(int *)(_this->_pad_000d + 0x1ff) == 8) {
-    get_field_5044_7244c0(0x97d070);
+    C_NetGame__GetJoinStatus((C_NetGame *)&g_netGame);
   }
   return 0;
 }
@@ -213,7 +213,7 @@ uint32_t C_ConsoleState__FUN_00744490(C_ConsoleState *_this, ...)
   local_98 = 0x60000fae;
   local_c = 100;
   local_a = 2000;
-  FUN_00722b60(&g_netGame,local_168);
+  C_NetGame__Host((C_NetGame *)&g_netGame,local_168);
   (*_this->vtable->SetState)(9);
   return 0;
 }
@@ -226,7 +226,7 @@ uint32_t C_ConsoleState__FUN_00744540(C_ConsoleState *_this, ...)
     (*_this->vtable->SetState)(8);
     return 0;
   }
-  FUN_007240f0(&g_netGame,(LPVOID *)(g_gameProfile.m_mpSettings)->_pad_017c);
+  C_NetGame__Connect((C_NetGame *)&g_netGame,(LPVOID *)(g_gameProfile.m_mpSettings)->_pad_017c);
   return 0;
 }
 

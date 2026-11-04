@@ -414,7 +414,7 @@ uint8_t * FUN_00725ed0(int *param_1, ...)
       iVar1 = 1;
     }
   }
-  pCVar2 = C_TextDatabase__GetText
+  pCVar2 = C_GameTexts__Get
                      (&DAT_008c1368,&local_4,(-(uint32_t)(iVar1 != 1) & 10) + 0x2792 + param_1[0x15]);
   pcVar4 = pCVar2->rep->chars;
   if (pCVar2->rep == 0) {

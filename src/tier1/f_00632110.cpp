@@ -488,11 +488,12 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
          (uint32_t)((g_gameProfile.m_mpSettings)->dedicated != false) * 4 + 3;
     return CONCAT31((int3)((uint32_t)local_14 >> 8),1);
   case 0x1:
-    iVar3 = FUN_007240f0(&g_netGame,(LPVOID *)(g_gameProfile.m_mpSettings)->_pad_017c);
+    iVar3 = C_NetGame__Connect((C_NetGame *)&g_netGame,
+                               (LPVOID *)(g_gameProfile.m_mpSettings)->_pad_017c);
     *(uint32_t *)((int)_this + 500) = 2;
     return CONCAT31((int3)((uint32_t)iVar3 >> 8),1);
   case 0x2:
-    iVar3 = get_field_5044_7244c0(0x97d070);
+    iVar3 = C_NetGame__GetJoinStatus((C_NetGame *)&g_netGame);
     piVar5 = (int *)(iVar3 - 1);
     switch(gh_switch(piVar5)) {
     case 0:
@@ -656,7 +657,7 @@ uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,
     local_348 = 0x1114b097;
     local_2c0 = 100;
     local_2be = 2000;
-    piVar5 = FUN_00722b60(&g_netGame,local_41c);
+    piVar5 = C_NetGame__Host((C_NetGame *)&g_netGame,local_41c);
     if (-1 < (int)piVar5) {
       local_270 = 0;
       local_284 = 0x34100000;

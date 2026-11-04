@@ -155,6 +155,8 @@ struct S_SquadSoldier : S_SoldierState {
 struct S_MissionSquad {
     // (The in-game menu's player screen, part 9e-xviii: game_menu_test.inc.)
     S_SquadSoldier *AddSoldier();
+    // (The session menu, part 9g-ii: campaign_screens_test.inc.)
+    void Clear();
     std::vector<S_SquadSoldier *> states;               // +0x04
 };
 // (The in-game menu's messages, part 9e-vii: game_menu_test.inc defines it.)
@@ -177,4 +179,6 @@ public:
     void GetStats(int *stats, int index, int level) const;
     // (The equipment screen's roster, part 9f-iii: equipment_screen_test.inc.)
     bool Load(C_str fileName);
+    // (The session menu, part 9g-ii: campaign_screens_test.inc.)
+    bool Reload();
 };

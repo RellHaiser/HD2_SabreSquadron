@@ -17,12 +17,10 @@ extern I3D_scene *g_carScene;
 #include "common/c_str.h"
 #include "game/camera_module.h"                       // C_CameraFrameKeeper (the real header)
 
-// The game's texts (C_Car's name).
-class C_GameTexts {
-public:
-    C_str Get(int id) const;
-};
-extern C_GameTexts g_texts;
+// The game's texts (C_Car's name; the real header since part 9g-iii, its Get faked by the builds that do
+// not link game/game_texts.cpp).
+#include "game/game_texts.h"
+int ShowMessage(const char *text, const char *title, unsigned int flags);   // (the texts' loading, part 9g-iii)
 int GetGameTypeTextId(int gameType);                    // (the loading screen, part 8f-i)
 
 // --- the car's seats (game/car_seats.cpp; as the real header declares them) ---------------------
@@ -119,7 +117,12 @@ struct S_MultiplayerSettings {
     int warmup;                                         // (the multiplayer zone, part 7d) s
     bool dedicated;                                     // (the loading screen, part 8f-i)
     int sessionType;                                    // (the in-game menu's messages, part 9e-vii)
+    // (The session menu, part 9g-ii.)
+    char sessionName[0x168];
+    uint8_t unknown17C[0x9C];
+    C_str password;
 };
+enum : int { SESSION_NONE = 0, SESSION_JOINING = 1, SESSION_HOSTING = 2 };
 
 // --- the car's callbacks (game/car_callbacks.cpp; as the real header declares them) --------------
 #ifdef WORLD_TEST
@@ -186,8 +189,24 @@ public:
     void AddTeamScore(int team, float points);
     void PrintLoadProgress(int percent);                // (the loading screen, part 8f-i)
     void CountTeams(int *axis, int *allies, bool pending, bool inGame);   // (the in-game menu, part 9e-vi)
+    // (The session menu, part 9g-ii: campaign_screens_test.inc.)
+    int Host(const struct S_NetSessionDesc &desc, bool unknown);
+    int Connect(void *address);
+    int GetJoinStatus() const;
 };
 extern C_NetGame g_netGame;
+enum : int {
+    NET_JOIN_CONNECTED = 1, NET_JOIN_FULL = 3, NET_JOIN_BAD_PASSWORD = 4, NET_JOIN_BAD_CD_KEY = 5,
+    NET_JOIN_BAD_VERSION = 7,
+};
+struct S_NetSessionDesc {                               // (as the real header)
+    char name[200];
+    uint32_t application[4];
+    uint8_t unknownD8[0x84];
+    int16_t unknown15C;
+    int16_t unknown15E;
+    uint8_t unknown160[8];
+};
 class C_NetMessage;
 struct S_SoldierState;
 void NetWriteSoldierState(C_NetMessage *msg, const S_SoldierState &state, bool unknown);

@@ -138,7 +138,7 @@ bool C_CommandProcessor__Execute(C_CommandProcessor *_this,char *command, ...)
   do {
     iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_28,"maxclients");
     if (iVar7 != 2) {
-      pCVar18 = C_TextDatabase__GetText(&DAT_008c1368,&local_20,0x582);
+      pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_20,0x582);
       local_8 = 1;
       if (pCVar18->rep == 0) {
         pcVar19 = &DAT_00867a90;
@@ -329,7 +329,7 @@ LAB_0074298e:
           }
           break;
         }
-        pCVar18 = C_TextDatabase__GetText(&DAT_008c1368,&local_40,0x585);
+        pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_40,0x585);
         local_8 = 9;
         if (pCVar18->rep == 0) {
           pcVar19 = &DAT_00867a90;
@@ -366,7 +366,7 @@ LAB_0074298e:
           }
           break;
         }
-        pCVar18 = C_TextDatabase__GetText(&DAT_008c1368,&local_88,0x585);
+        pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_88,0x585);
         local_8 = 0xb;
         if (pCVar18->rep == 0) {
           pcVar19 = &DAT_00867a90;
@@ -577,7 +577,7 @@ LAB_00742c7d:
         if (((iVar7 == 2) && (0x28 < (int)local_14)) && ((int)local_14 < 0x2c)) {
           iVar7 = ReadConsoleToken(&command,(char *)local_290,(int *)&local_14,0);
           if (((int)uVar21 < 0x16) && (iVar7 != 1)) {
-            pCVar18 = C_TextDatabase__GetText(&DAT_008c1368,&local_8c,0x583);
+            pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_8c,0x583);
             local_8 = 4;
             if (pCVar18->rep == 0) {
               pcVar19 = &DAT_00867a90;
@@ -706,7 +706,7 @@ LAB_00742c7d:
       if (iVar7 != 0) {
         pCVar18 = C_fstr_Construct(&local_80,"password: ");
         local_8 = 0xf;
-        piVar10 = FUN_00688130(pCVar18,(uint32_t*)(&local_60),(int *)&pSVar5->password);
+        piVar10 = C_str__Append_688130(pCVar18,(uint32_t*)(&local_60),(int *)&pSVar5->password);
         local_8 = CONCAT31(GH_PIECE(local_8,1,3),0x10);
         if (*piVar10 == 0) {
           pcVar19 = &DAT_00867a90;
@@ -779,7 +779,7 @@ LAB_00743663:
       iVar7 = ReadConsoleToken(&command,(char *)local_290,(int *)&local_14,"maxclients");
       if (iVar7 != 2) {
         iVar7 = FUN_006acb60((g_gameProfile.m_mpSettings)->unknown178);
-        pCVar18 = C_TextDatabase__GetText(&DAT_008c1368,&local_30,iVar7);
+        pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_30,iVar7);
         local_8 = 0xd;
         if (pCVar18->rep == 0) {
           pcVar19 = &DAT_00867a90;
@@ -1168,7 +1168,7 @@ LAB_00743c53:
         if (pSVar17->status != 1) {
           puVar24 = (uint16_t*)(&DAT_0083cde4);
         }
-        pCVar18 = C_TextDatabase__GetText(&DAT_008c1368,&local_2c,pSVar17[1].m_type);
+        pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_2c,pSVar17[1].m_type);
         local_8 = 0x1a;
         if (pCVar18->rep == 0) {
           pcVar19 = &DAT_00867a90;
@@ -1228,7 +1228,7 @@ uint32_t FUN_007440d0(int *param_1, ...)
   local_4 = (FILE *)0xffffffff;
   file = fopen((char *)param_1,&DAT_00846058);
   if (file == 0) {
-    pCVar2 = C_TextDatabase__GetText(&DAT_008c1368,&local_74,0x586);
+    pCVar2 = C_GameTexts__Get(&DAT_008c1368,&local_74,0x586);
     if (pCVar2->rep == 0) {
       pcVar3 = &DAT_00867a90;
     }

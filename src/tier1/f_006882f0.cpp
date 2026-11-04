@@ -866,7 +866,7 @@ uint32_t C_VideoState__FUN_006893e0(C_VideoState *_this,uint8_t *param_1, ...)
   bVar2 = FileExists(this_00->chars);
   if (bVar2) {
     if (this_00->refCount == 1) {
-      FUN_006e50c0(_this->_pad_0028,(int*)(this_00->chars));
+      C_GameTexts__Load(_this->_pad_0028,this_00->chars);
     }
     else {
       pCVar8 = tier1_operator_new(this_00->length + 9);
@@ -887,7 +887,7 @@ uint32_t C_VideoState__FUN_006893e0(C_VideoState *_this,uint8_t *param_1, ...)
         pCVar8->chars[uVar1] = '\0';
       }
       C_str__ReleaseRep((C_str *)this_00);
-      FUN_006e50c0(_this->_pad_0028,(int*)(pCVar8->chars));
+      C_GameTexts__Load(_this->_pad_0028,pCVar8->chars);
       this_00 = pCVar8;
     }
   }
@@ -968,7 +968,7 @@ uint32_t FUN_00689630(int param_1, ...)
     }
     local_50 = iVar15;
     if (iVar14 <= local_58) {
-      FUN_006e5050(param_1 + 0x28);
+      C_GameTexts__Clear(param_1 + 0x28);
       if ((piVar4 != 0) && (iVar15 = *piVar4, *piVar4 = iVar15 - 1, iVar15 - 1 == 0)) {
         tier1_operator_delete(piVar4);
       }
@@ -1350,7 +1350,7 @@ uint32_t FUN_00689c60(int param_1, ...)
       iVar13 = (*(int *)(local_1c + 0x30) - *(int *)(local_1c + 0x2c)) / 0xc;
     }
     if (iVar13 <= local_20) {
-      FUN_006e5050(local_1c + 0x28);
+      C_GameTexts__Clear(local_1c + 0x28);
       local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
       if (local_34.rep != 0) {
         C_str__ReleaseRep((C_str *)local_34.rep);

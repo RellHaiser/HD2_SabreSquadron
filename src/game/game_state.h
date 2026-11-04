@@ -16,8 +16,8 @@ enum E_GameStateValue : int {
     GAME_STATE_QUIT = 4,                            // the game ends (fatal load errors, the console closed)
     GAME_STATE_STARTING = 5,                        // C_game: the mission fades in
     GAME_STATE_ENDING = 6,                          // C_game: the mission fades out
-    GAME_STATE_JOIN_SESSION = 7,                    // the session menu, joining
-    GAME_STATE_HOST_SESSION = 8,                    // the session menu, hosting
+    GAME_STATE_HOST_SESSION = 7,                    // the session menu, hosting (session type 2)
+    GAME_STATE_JOIN_SESSION = 8,                    // the session menu, joining (session type 1)
     GAME_STATE_NEXT_MAP = 9,                        // multiplayer: load the session's next map
     GAME_STATE_MAIN_MENU = 10,
     GAME_STATE_LOBBY = 11,                          // multiplayer: back to the session menu

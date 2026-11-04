@@ -180,6 +180,7 @@ public:
     I3D_frame *GetFrame() const { return m_frame; }
     int GetIndex() const { return m_index; }
     bool IsInactive() const { return m_inactive; }
+    bool IsShown() const { return m_shown; }
     // The control with `id` among this one's descendants (`up`: first up the parents to the top,
     // then down; the ids' top 6 bits must match all the way; none: null).
     C_Control *FindControl(uint32_t id, bool up);       // 0x0065cae0

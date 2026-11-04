@@ -59,21 +59,11 @@ class C_DebriefingMenu : public C_GameState {
 public:
     C_DebriefingMenu();                             // (inline)
 };
-// The screen at the end of an operation (kind 6; type 14, vtable 0x00815c90, 0x1B0 bytes).
-class C_OperationEndMenu : public C_GameState {
-public:
-    C_OperationEndMenu();                           // (inline)
-};
 // Campaign screen kind 0 (none in the shipped campaigns; type 9, vtable 0x00815c30, 0x1B0
 // bytes).
 class C_Kind0Menu : public C_GameState {
 public:
     C_Kind0Menu();                                  // (inline)
-};
-// Joining / hosting a network session (type 8, vtable 0x00815e98, 0x1D0 bytes).
-class C_SessionMenu : public C_GameState {
-public:
-    C_SessionMenu();                                // (inline)
 };
 // The console (type 12, vtable 0x008165a8, 0x214 bytes): the command line's "-cmd" / "-c".
 class C_ConsoleState : public C_GameState {
@@ -257,6 +247,13 @@ public:
     bool Command(int command, const char *arg, int unknown);   // 0x0072d680
     // State of the connection to the server (NET_CONNECTION_LOST: nothing heard for 600 ms).
     int GetConnectionState();                       // 0x00731ac0
+    // The server made (the session closed first; the name and DirectPlay's fields of `desc`; `unknown`:
+    // the session menu passes true): < 0 failed.
+    int Host(const struct S_NetSessionDesc &desc, bool unknown);   // 0x00722b60
+    // A client connecting to the server at `address` (S_MultiplayerSettings +0x17C).
+    int Connect(void *address);                     // 0x007240f0
+    // The client's joining (+0x5044; NET_JOIN_*).
+    int GetJoinStatus() const;                      // 0x007244c0
     // Server: the keep-alive check of the member at +0x4D0 (message 0x17 after 15 s).
     void UpdateWatchmeleeTracker(int timeDelta);             // 0x0072e0a0
     // The voice chat value the player options give ((int)(option * 0.01)) to the voice
@@ -278,6 +275,22 @@ enum : int {
     NET_CONNECTION_LOST = 9,
 };
 extern C_NetGame g_netGame;                         // 0x0097d070
+// C_NetGame::GetJoinStatus(): the client's joining (0 and 2, 6: still on its way).
+enum : int {
+    NET_JOIN_CONNECTED = 1, NET_JOIN_FULL = 3, NET_JOIN_BAD_PASSWORD = 4, NET_JOIN_BAD_CD_KEY = 5,
+    NET_JOIN_BAD_VERSION = 7,
+};
+// The session a server makes (C_NetGame::Host; S_MultiplayerSettings::sessionName's 0x168 bytes, the
+// DirectPlay fields set by the caller).
+struct S_NetSessionDesc {                               // 0x168 bytes
+    char name[200];                                     // +0x00
+    uint32_t application[4];                            // +0xC8 DirectPlay's application GUID
+    uint8_t unknownD8[0x84];
+    int16_t unknown15C;                                 // +0x15C (100)
+    int16_t unknown15E;                                 // +0x15E (2000)
+    uint8_t unknown160[8];
+};
+static_assert(sizeof(S_NetSessionDesc) == 0x168, "S_NetSessionDesc");
 // Lowest corner of the level's frames (grown by the net game's level scan, 0x0072d9c0); bodies
 // that fall 5 m below it die.
 extern float g_levelMinY;                           // 0x0097ca34
@@ -323,13 +336,15 @@ public:
     // The allowed presets (C_str +0x44).
     const char *GetPresets() const;
 };
+// S_MultiplayerSettings::sessionType (the session menu's console: 2 creates the server, 1 connects).
+enum : int { SESSION_NONE = 0, SESSION_JOINING = 1, SESSION_HOSTING = 2 };
 // Settings of the network game session (the object 0x008aea30 points to; the names are those
 // of the server's config file, 0x006ad200).
 struct S_MultiplayerSettings {
     S_MultiplayerSettings();                        // (inline in C_GameProfile's constructor)
     virtual ~S_MultiplayerSettings();               // 0x006b50a0 (0x006b50c0)
 
-    int sessionType;                                // +0x004 0 none, 1 hosting, 2 joining
+    int sessionType;                                // +0x004 SESSION_*: 0 none, 1 joining, 2 hosting
     char sessionName[0x168];                        // +0x008
     bool dedicated;                                 // +0x170 the host plays no part: the scene is not drawn
                                                     //        and the console takes commands
@@ -477,15 +492,8 @@ void NetReadSoldierState(C_NetMessage *msg, S_SoldierState &state, bool unknown)
 
 // The player's options (C_PlayerOptions, the detail switches): game/profile.h.
 
-// The game's texts (all_txt).
-class C_GameTexts {
-public:
-    // Text `id`; "__undefined index <id> in all_txt __" if there is none.
-    C_str Get(int id) const;                        // 0x006e5380
-    // Adds the texts of a text file.
-    void Load(const char *fileName);                // 0x006e50c0
-};
-extern C_GameTexts g_texts;                         // 0x008c1368
+// The game's texts (all_txt, g_texts): game/game_texts.h.
+#include "game/game_texts.h"
 
 // The console's commands (the table at 0x00844530, 0x18 bytes each: name, kind, value kind,
 // enabled, ..., value).

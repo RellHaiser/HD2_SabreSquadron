@@ -72,7 +72,7 @@ uint32_t FUN_00722a80(char param_1, ...)
 
 
 // 0x00722b60  (tier1 fallback: translated text kept below, needs hand porting)
-int * FUN_00722b60(void *_this,char *param_1, ...)
+int * C_NetGame__Host(C_NetGame *_this,char *param_1, ...)
 {
   return {};
 }
@@ -140,10 +140,16 @@ int * FUN_00722b60(void *_this,char *param_1, ...)
     pcVar3++;
   } while (cVar2 != '\0');
   iVar9 = (g_gameProfile.m_mpSettings)->port;
-  *(uint32_t *)((int)_this + 0x4e68) = 0;
-  *(int *)((int)_this + 0x4e6c) = iVar9;
-  *(uint32_t *)((int)_this + 0x448) = 0;
-  *(uint8_t *)((int)_this + 8) = 0;
+  _this->_pad_0000[0x4e68] = '\0';
+  _this->_pad_0000[0x4e69] = '\0';
+  _this->_pad_0000[0x4e6a] = '\0';
+  _this->_pad_0000[0x4e6b] = '\0';
+  *(int *)(_this->_pad_0000 + 0x4e6c) = iVar9;
+  _this->_pad_0000[0x448] = '\0';
+  _this->_pad_0000[0x449] = '\0';
+  _this->_pad_0000[0x44a] = '\0';
+  _this->_pad_0000[1099] = '\0';
+  _this->_pad_0000[8] = '\0';
   CoInitialize((LPVOID)0x0);
   local_4f0 = 0;
   cVar2 = FUN_00724b20();
@@ -151,61 +157,71 @@ int * FUN_00722b60(void *_this,char *param_1, ...)
     return (int *)0xffffffff;
   }
   pIVar4 = GetIGraph();
-  (*pIVar4->vtable->SetFlags)(pIVar4,*(uint32_t *)((int)_this + 0x4dfc) & 0xffffffdf);
+  (*pIVar4->vtable->SetFlags)(pIVar4,*(uint32_t *)(_this->_pad_0000 + 0x4dfc) & 0xffffffdf);
   ppiStack_518 = (int **)0x722c1e;
-  piVar5 = (int *)CoCreateInstance((IID *)&DAT_008190a8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819058,_this);
+  piVar5 = (int *)CoCreateInstance((IID *)&DAT_008190a8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819058,
+                                   (LPVOID *)_this);
   if ((int)piVar5 < 0) {
     if (local_4f0 != 0) {
       (**(code **)(*local_4f0 + 8))();
       local_4f0 = 0;
     }
-    if (*(int **)_this != 0) {
-      (**(code **)(**(int **)_this + 8))();
-      *(uint32_t *)_this = 0;
+    if (*(int **)_this->_pad_0000 != 0) {
+      (**(code **)(**(int **)_this->_pad_0000 + 8))();
+      _this->_pad_0000[0] = '\0';
+      _this->_pad_0000[1] = '\0';
+      _this->_pad_0000[2] = '\0';
+      _this->_pad_0000[3] = '\0';
     }
-    *(int **)((int)_this + 0x504c) = piVar5;
-    *(char **)((int)_this + 0x5050) = "DirectX 8 not installed. Can't create server";
+    *(int **)(_this->_pad_0000 + 0x504c) = piVar5;
+    *(char **)(_this->_pad_0000 + 0x5050) = "DirectX 8 not installed. Can't create server";
     return piVar5;
   }
-  piVar5 = *(int **)_this;
+  piVar5 = *(int **)_this->_pad_0000;
   piVar6 = (int *)(**(code **)(*piVar5 + 0xc))();
   if ((int)piVar6 < 0) {
     if (unaff_EDI != 0) {
       ppiStack_518 = (int **)0x722c89;
       (*unaff_EDI->vtable->SetFlags)(unaff_EDI,(uint32_t)piVar5);
     }
-    if (*(int **)_this != 0) {
+    if (*(int **)_this->_pad_0000 != 0) {
       ppiStack_518 = (int **)0x722c9a;
-      (**(code **)(**(int **)_this + 8))();
-      *(uint32_t *)_this = 0;
+      (**(code **)(**(int **)_this->_pad_0000 + 8))();
+      _this->_pad_0000[0] = '\0';
+      _this->_pad_0000[1] = '\0';
+      _this->_pad_0000[2] = '\0';
+      _this->_pad_0000[3] = '\0';
     }
-    *(int **)((int)_this + 0x504c) = piVar6;
-    *(char **)((int)_this + 0x5050) = "Can't initialize server";
+    *(int **)(_this->_pad_0000 + 0x504c) = piVar6;
+    *(char **)(_this->_pad_0000 + 0x5050) = "Can't initialize server";
     return piVar6;
   }
   ppiStack_518 = &local_4f0;
   puStack_51c = (uint8_t*)(&stack0xfffffb0c);
   local_4f0 = 0;
-  (**(code **)(**(int **)_this + 0x10))();
+  (**(code **)(**(int **)_this->_pad_0000 + 0x10))();
   puStack_534 = (uint8_t *)0x722ceb;
   ptr = tier1_operator_new((uint32_t)piVar5);
   puStack_534 = (uint8_t*)(&stack0xfffffaf4);
-  piVar5 = *(int **)_this;
+  piVar5 = *(int **)_this->_pad_0000;
   piStack_538 = (int *)&stack0xfffffaf0;
   piStack_540 = 0;
   piStack_544 = (int *)(param_1 + 200);
   pvStack_53c = ptr;
   puStack_534 = (uint8_t *)(**(code **)(*piVar5 + 0x10))();
   if ((ptr == 0) || ((int)puStack_534 < 0)) {
-    (**(code **)(**(int **)_this + 0x14))();
-    (**(code **)(**(int **)_this + 0x5c))(*(int **)_this,0);
-    piVar6 = *(int **)_this;
+    (**(code **)(**(int **)_this->_pad_0000 + 0x14))();
+    (**(code **)(**(int **)_this->_pad_0000 + 0x5c))(*(int **)_this->_pad_0000,0);
+    piVar6 = *(int **)_this->_pad_0000;
     if (piVar6 != 0) {
       (**(code **)(*piVar6 + 8))(piVar6);
-      *(uint32_t *)_this = 0;
+      _this->_pad_0000[0] = '\0';
+      _this->_pad_0000[1] = '\0';
+      _this->_pad_0000[2] = '\0';
+      _this->_pad_0000[3] = '\0';
     }
-    *(int **)((int)_this + 0x504c) = piVar5;
-    *(char **)((int)_this + 0x5050) = "Enumeration of devices failed.";
+    *(int **)(_this->_pad_0000 + 0x504c) = piVar5;
+    *(char **)(_this->_pad_0000 + 0x5050) = "Enumeration of devices failed.";
     return piVar5;
   }
   puStack_51c = *(uint8_t **)((int)ptr + 4);
@@ -218,12 +234,15 @@ int * FUN_00722b60(void *_this,char *param_1, ...)
       (**(code **)(*piStack_538 + 8))();
       piStack_538 = 0;
     }
-    if (*(int **)_this != 0) {
-      (**(code **)(**(int **)_this + 8))();
-      *(uint32_t *)_this = 0;
+    if (*(int **)_this->_pad_0000 != 0) {
+      (**(code **)(**(int **)_this->_pad_0000 + 8))();
+      _this->_pad_0000[0] = '\0';
+      _this->_pad_0000[1] = '\0';
+      _this->_pad_0000[2] = '\0';
+      _this->_pad_0000[3] = '\0';
     }
-    *(int **)((int)_this + 0x504c) = piVar6;
-    *(char **)((int)_this + 0x5050) = "Can't create address object";
+    *(int **)(_this->_pad_0000 + 0x504c) = piVar6;
+    *(char **)(_this->_pad_0000 + 0x5050) = "Can't create address object";
     return piVar6;
   }
   piVar6 = (int *)(**(code **)(*piStack_538 + 0x34))();
@@ -232,12 +251,15 @@ int * FUN_00722b60(void *_this,char *param_1, ...)
       (**(code **)(*piStack_540 + 8))();
       piStack_540 = 0;
     }
-    if (*(int **)_this != 0) {
-      (**(code **)(**(int **)_this + 8))();
-      *(uint32_t *)_this = 0;
+    if (*(int **)_this->_pad_0000 != 0) {
+      (**(code **)(**(int **)_this->_pad_0000 + 8))();
+      _this->_pad_0000[0] = '\0';
+      _this->_pad_0000[1] = '\0';
+      _this->_pad_0000[2] = '\0';
+      _this->_pad_0000[3] = '\0';
     }
-    *(int **)((int)_this + 0x504c) = piVar6;
-    *(char **)((int)_this + 0x5050) = "Can't set self address";
+    *(int **)(_this->_pad_0000 + 0x504c) = piVar6;
+    *(char **)(_this->_pad_0000 + 0x5050) = "Can't set self address";
     return piVar6;
   }
   (**(code **)(*piStack_540 + 0x50))(piStack_540);
@@ -275,7 +297,7 @@ int * FUN_00722b60(void *_this,char *param_1, ...)
   uStack_4e0 = 0;
   ppiStack_518 = (int **)0x0;
   puStack_51c = (uint8_t *)0x14;
-  (**(code **)(**(int **)_this + 0x74))(*(int **)_this,&puStack_51c,0);
+  (**(code **)(**(int **)_this->_pad_0000 + 0x74))(*(int **)_this->_pad_0000,&puStack_51c,0);
   sprintf(acStack_464,"Creating H&D2 Server v%d.%02d",g_versionMajor,g_versionMinor);
   pcVar3 = acStack_464;
   this_00 = GetGameApp();
@@ -283,20 +305,23 @@ int * FUN_00722b60(void *_this,char *param_1, ...)
   iVar9 = 0;
   piVar16 = 0;
   g_gameRole = (uint32_t)((g_gameProfile.m_mpSettings)->dedicated == false) * 2 + 1;
-  piVar5 = (int *)(**(code **)(**(int **)_this + 0x34))
-                            (*(int **)_this,&stack0xfffffaec,&stack0xfffffaac,1,0,0,0,0);
+  piVar5 = (int *)(**(code **)(**(int **)_this->_pad_0000 + 0x34))
+                            (*(int **)_this->_pad_0000,&stack0xfffffaec,&stack0xfffffaac,1,0,0,0,0);
   if ((int)piVar5 < 0) {
     if (piVar16 != 0) {
       (**(code **)(*piVar16 + 8))(piVar16);
     }
-    piVar6 = *(int **)_this;
+    piVar6 = *(int **)_this->_pad_0000;
     if (piVar6 != 0) {
       (**(code **)(*piVar6 + 8))(piVar6);
-      *(uint32_t *)_this = 0;
+      _this->_pad_0000[0] = '\0';
+      _this->_pad_0000[1] = '\0';
+      _this->_pad_0000[2] = '\0';
+      _this->_pad_0000[3] = '\0';
     }
     g_gameRole = 7;
-    *(int **)((int)_this + 0x504c) = piVar5;
-    *(char **)((int)_this + 0x5050) = "Server__Host failed";
+    *(int **)(_this->_pad_0000 + 0x504c) = piVar5;
+    *(char **)(_this->_pad_0000 + 0x5050) = "C_NetGame__Host failed";
     return piVar5;
   }
   if (cStack_7c != '\0') {
@@ -312,20 +337,20 @@ int * FUN_00722b60(void *_this,char *param_1, ...)
     pcVar14++;
   } while (cVar2 != '\0');
   uVar10 = ~uVar10 - 1;
-  uVar7 = FUN_00409bf0((void *)((int)_this + 0x501c),uVar10,'\x01');
+  uVar7 = FUN_00409bf0(_this->_pad_0000 + 0x501c,uVar10,'\x01');
   if ((char)uVar7 != '\0') {
-    pcVar14 = *(char **)((int)_this + 0x5020);
+    pcVar14 = *(char **)(_this->_pad_0000 + 0x5020);
     memcpy(pcVar14, pcVar3, uVar10);
     pcVar3 += uVar10;
     pcVar14 += uVar10;
     uVar11 = 0;
     uVar11 = 0;
-    *(uint32_t *)((int)_this + 0x5024) = uVar10;
-    *(uint8_t *)(uVar10 + *(int *)((int)_this + 0x5020)) = 0;
+    *(uint32_t *)(_this->_pad_0000 + 0x5024) = uVar10;
+    *(uint8_t *)(uVar10 + *(int *)(_this->_pad_0000 + 0x5020)) = 0;
   }
   DAT_00982104 = -(uint32_t)((g_gameProfile.m_mpSettings)->dedicated != false);
   if ((g_gameProfile.m_mpSettings)->dedicated == false) {
-    EnterCriticalSection((LPCRITICAL_SECTION)((int)_this + 0x418));
+    EnterCriticalSection((LPCRITICAL_SECTION)(_this->_pad_0000 + 0x418));
     pCVar1 = ((g_gameProfile.m_player)->m_name).rep;
     if (pCVar1 == 0) {
       pcVar3 = &DAT_00867a90;
@@ -333,9 +358,9 @@ int * FUN_00722b60(void *_this,char *param_1, ...)
     else {
       pcVar3 = pCVar1->chars;
     }
-    strncpy((char *)(*(int *)((int)_this + 0x1e0) + 8),pcVar3,0x32);
-    *(uint8_t *)(*(int *)((int)_this + 0x1e0) + 0xa2) = 1;
-    LeaveCriticalSection((LPCRITICAL_SECTION)((int)_this + 0x418));
+    strncpy((char *)(*(int *)(_this->_pad_0000 + 0x1e0) + 8),pcVar3,0x32);
+    *(uint8_t *)(*(int *)(_this->_pad_0000 + 0x1e0) + 0xa2) = 1;
+    LeaveCriticalSection((LPCRITICAL_SECTION)(_this->_pad_0000 + 0x418));
   }
   else {
     pIVar4 = GetIGraph();
@@ -348,9 +373,12 @@ int * FUN_00722b60(void *_this,char *param_1, ...)
   if (piVar16 != 0) {
     (**(code **)(*piVar16 + 8))(piVar16);
   }
-  *(uint32_t *)((int)_this + 0x5044) = 1;
+  _this->_pad_0000[0x5044] = '\x01';
+  _this->_pad_0000[0x5045] = '\0';
+  _this->_pad_0000[0x5046] = '\0';
+  _this->_pad_0000[0x5047] = '\0';
   if ((g_gameProfile.m_mpSettings)->unknown178 != 0) {
-    FUN_00724520(_this);
+    FUN_00724520((uint32_t *)_this);
     if ((g_gameRole & 2) != 0) {
       pCVar8 = C_GameProfile__GetDetailSettings(&g_gameProfile);
       if (pCVar8->voiceChat != false) {
@@ -362,7 +390,7 @@ int * FUN_00722b60(void *_this,char *param_1, ...)
     FUN_00723d20((int)_this);
   }
   FUN_007233d0((int)_this);
-  FUN_00746c10((void *)((int)_this + 0x33c),iVar9 + 1);
+  FUN_00746c10(_this->_pad_0000 + 0x33c,iVar9 + 1);
   return piVar5;
 }
 
@@ -1081,9 +1109,8 @@ uint32_t FUN_007240d0(void *_this,uint32_t param_1,LPVOID *param_2, ...)
 
 
 // 0x007240f0
-int FUN_007240f0(void *_this,LPVOID *param_1, ...)
+int C_NetGame__Connect(C_NetGame *_this,LPVOID *param_1, ...)
 {
-  void *this_00;
   LPVOID pvVar1;
   C_str_rep *pCVar2;
   char cVar3;
@@ -1098,7 +1125,8 @@ int FUN_007240f0(void *_this,LPVOID *param_1, ...)
   uint32_t unaff_EBP;
   uint32_t unaff_ESI;
   LPVOID *ppvVar9;
-  C_auto_00816684 **ppCVar10;
+  uchar *puVar10;
+  C_auto_00816684 **ppCVar11;
   int *piStack_148;
   int *piStack_144;
   uint32_t uStack_140;
@@ -1124,21 +1152,24 @@ int FUN_007240f0(void *_this,LPVOID *param_1, ...)
   cVar3 = FUN_00724b20();
   if (cVar3 == '\0') {
     self = GetIGraph();
-    (*self->vtable->SetFlags)(self,*(uint32_t *)((int)_this + 0x4dfc) & 0xffffffdf);
+    (*self->vtable->SetFlags)(self,*(uint32_t *)(_this->_pad_0000 + 0x4dfc) & 0xffffffdf);
     ppvVar9 = param_1;
-    puVar5 = (uint32_t *)((int)_this + 0x4e00);
+    puVar10 = _this->_pad_0000 + 0x4e00;
     for (iVar4 = 0x27; iVar4 != 0; iVar4 = iVar4 - 1) {
-      *puVar5 = *ppvVar9;
+      *(LPVOID *)puVar10 = *ppvVar9;
       ppvVar9++;
-      puVar5++;
+      puVar10 += 4;
     }
     uVar8 = extraout_var;
     if ((g_gameProfile.m_mpSettings)->unknown174 == 1) {
-      *(uint32_t *)((int)_this + 0x5044) = 0;
+      _this->_pad_0000[0x5044] = '\0';
+      _this->_pad_0000[0x5045] = '\0';
+      _this->_pad_0000[0x5046] = '\0';
+      _this->_pad_0000[0x5047] = '\0';
       FUN_007316f0(_this,(int)param_1);
       FUN_007317a0(_this);
-      if ((*(int *)((int)_this + 0x5044) == 8) ||
-         (uVar8 = extraout_var_00, *(int *)((int)_this + 0x5044) == 5)) {
+      if ((*(int *)(_this->_pad_0000 + 0x5044) == 8) ||
+         (uVar8 = extraout_var_00, *(int *)(_this->_pad_0000 + 0x5044) == 5)) {
         return 0;
       }
     }
@@ -1147,9 +1178,9 @@ int FUN_007240f0(void *_this,LPVOID *param_1, ...)
     }
     FUN_00732730((int *)CONCAT22(uVar8,*(uint16_t *)(param_1 + 0x1b)),'\x01');
     pvVar1 = param_1[0x1b];
-    this_00 = (void *)((int)_this + 0x33c);
-    FUN_00746c10(this_00,-1);
-    *(LPVOID *)((int)_this + 0x338) = param_1[0x1a];
+    puVar10 = _this->_pad_0000 + 0x33c;
+    FUN_00746c10(puVar10,-1);
+    *(LPVOID *)(_this->_pad_0000 + 0x338) = param_1[0x1a];
     apCStack_130[2] = tier1_operator_new(0x50);
     uStack_4 = 0;
     if (apCStack_130[2] == 0) {
@@ -1157,18 +1188,25 @@ int FUN_007240f0(void *_this,LPVOID *param_1, ...)
     }
     else {
       puVar5 = C_auto_00816684__FUN_00746180
-                         (apCStack_130[2],0,*(uint32_t *)((int)_this + 0x338),(int)_this + 0x34c);
+                         (apCStack_130[2],0,*(uint32_t *)(_this->_pad_0000 + 0x338),
+                          _this->_pad_0000 + 0x34c);
     }
-    *(uint32_t **)((int)_this + 0x334) = puVar5;
+    *(uint32_t **)(_this->_pad_0000 + 0x334) = puVar5;
     puVar5[4] = (int)pvVar1 + 1;
     uStack_4 = 0xffffffff;
-    FUN_00746fb0(this_00,*(int *)((int)_this + 0x334));
-    FUN_00747260(this_00,'\x01');
+    FUN_00746fb0(puVar10,*(int *)(_this->_pad_0000 + 0x334));
+    FUN_00747260(puVar10,'\x01');
     FUN_00723e00((int)_this);
-    (**(code **)(**(int **)((int)_this + 4) + 0x18))(*(int **)((int)_this + 4),0,0x8000);
-    *(uint32_t *)((int)_this + 0x448) = 0;
-    *(uint8_t *)((int)_this + 8) = 0;
-    *(uint32_t *)((int)_this + 0x5048) = 0;
+    (**(code **)(**(int **)(_this->_pad_0000 + 4) + 0x18))(*(int **)(_this->_pad_0000 + 4),0,0x8000);
+    _this->_pad_0000[0x448] = '\0';
+    _this->_pad_0000[0x449] = '\0';
+    _this->_pad_0000[0x44a] = '\0';
+    _this->_pad_0000[1099] = '\0';
+    _this->_pad_0000[8] = '\0';
+    _this->_pad_0000[0x5048] = '\0';
+    _this->_pad_0000[0x5049] = '\0';
+    _this->_pad_0000[0x504a] = '\0';
+    _this->_pad_0000[0x504b] = '\0';
     pCVar2 = ((g_gameProfile.m_player)->m_name).rep;
     if (g_gameProfile.m_unicodeFont == false) {
       if (pCVar2 == 0) {
@@ -1185,19 +1223,19 @@ int FUN_007240f0(void *_this,LPVOID *param_1, ...)
     else {
       FUN_00724b80(aWStack_7c,pCVar2->chars,0xffffffff);
     }
-    ppCVar10 = apCStack_130;
+    ppCVar11 = apCStack_130;
     for (iVar4 = 6; iVar4 != 0; iVar4 = iVar4 - 1) {
-      *ppCVar10 = 0;
-      ppCVar10++;
+      *ppCVar11 = 0;
+      ppCVar11++;
     }
     apCStack_130[2] = (C_auto_00816684 *)aWStack_7c;
     apCStack_130[0] = (C_auto_00816684 *)0x18;
     apCStack_130[1] = (C_auto_00816684 *)0x1;
-    iVar4 = (**(code **)(**(int **)((int)_this + 4) + 0x2c))
-                      (*(int **)((int)_this + 4),apCStack_130,0,0,0x80000000);
+    iVar4 = (**(code **)(**(int **)(_this->_pad_0000 + 4) + 0x2c))
+                      (*(int **)(_this->_pad_0000 + 4),apCStack_130,0,0,0x80000000);
     if (iVar4 < 0) {
-      *(int *)((int)_this + 0x504c) = iVar4;
-      *(char **)((int)_this + 0x5050) = "SetClientInfo failed";
+      *(int *)(_this->_pad_0000 + 0x504c) = iVar4;
+      *(char **)(_this->_pad_0000 + 0x5050) = "SetClientInfo failed";
     }
     else {
       puVar5 = auStack_10c;
@@ -1243,11 +1281,15 @@ int FUN_007240f0(void *_this,LPVOID *param_1, ...)
       apCStack_130[0] = (C_auto_00816684 *)0xfa0;
       uStack_13c = 0;
       uStack_140 = 0x14;
-      (**(code **)(**(int **)((int)_this + 4) + 0x44))(*(int **)((int)_this + 4),&uStack_140,0);
-      iVar4 = (**(code **)(**(int **)((int)_this + 4) + 0x1c))
-                        (*(int **)((int)_this + 4),auStack_118,unaff_EBP,unaff_ESI,0,0,auStack_d0,
-                         0x54,0,&uStack_138,0);
-      *(uint32_t *)((int)_this + 0x5044) = 2;
+      (**(code **)(**(int **)(_this->_pad_0000 + 4) + 0x44))
+                (*(int **)(_this->_pad_0000 + 4),&uStack_140,0);
+      iVar4 = (**(code **)(**(int **)(_this->_pad_0000 + 4) + 0x1c))
+                        (*(int **)(_this->_pad_0000 + 4),auStack_118,unaff_EBP,unaff_ESI,0,0,
+                         auStack_d0,0x54,0,&uStack_138,0);
+      _this->_pad_0000[0x5044] = '\x02';
+      _this->_pad_0000[0x5045] = '\0';
+      _this->_pad_0000[0x5046] = '\0';
+      _this->_pad_0000[0x5047] = '\0';
       if (piStack_148 != 0) {
         (**(code **)(*piStack_148 + 8))(piStack_148);
         piStack_148 = 0;
@@ -1257,8 +1299,8 @@ int FUN_007240f0(void *_this,LPVOID *param_1, ...)
       }
       if ((iVar4 != -0x7ffffff6) && (iVar4 < 0)) {
         g_gameRole = 7;
-        *(int *)((int)_this + 0x504c) = iVar4;
-        *(char **)((int)_this + 0x5050) = "Connect failed";
+        *(int *)(_this->_pad_0000 + 0x504c) = iVar4;
+        *(char **)(_this->_pad_0000 + 0x5050) = "Connect failed";
       }
     }
   }
@@ -1270,9 +1312,9 @@ int FUN_007240f0(void *_this,LPVOID *param_1, ...)
 
 
 // 0x007244c0
-uint32_t get_field_5044_7244c0(int param_1, ...)
+uint32_t C_NetGame__GetJoinStatus(C_NetGame *_this, ...)
 {
-  return *(uint32_t *)(param_1 + 0x5044);
+  return *(uint32_t *)(_this->_pad_0000 + 0x5044);
 }
 
 

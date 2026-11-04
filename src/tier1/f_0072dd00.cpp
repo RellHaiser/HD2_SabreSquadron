@@ -76,7 +76,7 @@ uint32_t FUN_0072ddb0(void *_this,uint32_t param_1,uint32_t param_2, ...)
   *(uint32_t *)((int)_this + 0x10) = param_2;
   *(uint32_t *)((int)_this + 8) = 0;
   *(uint8_t *)((int)_this + 4) = 0;
-  C_TextDatabase__GetText(&DAT_008c1368,&local_34,0x22e2);
+  C_GameTexts__Get(&DAT_008c1368,&local_34,0x22e2);
   local_14 = 0;
   color = &local_30;
   local_30.x = 50.0;
@@ -107,10 +107,10 @@ uint32_t FUN_0072de90(char param_1, ...)
   local_14 = 0xffffffff;
   bVar1 = param_1 == '\0';
   if (bVar1) {
-    C_TextDatabase__GetText(&DAT_008c1368,&local_38,0x22e4);
+    C_GameTexts__Get(&DAT_008c1368,&local_38,0x22e4);
   }
   else {
-    C_TextDatabase__GetText(&DAT_008c1368,&local_34,0x22e3);
+    C_GameTexts__Get(&DAT_008c1368,&local_34,0x22e3);
   }
   local_14 = (uint32_t)bVar1;
   color = &local_30;

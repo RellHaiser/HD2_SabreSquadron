@@ -7815,6 +7815,62 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Next, part 9g: the campaign's screens (the squad menu, the debriefing and the diary, the
     operation's end, the session menu, the movies).
 
+  PART 9g PLAN (2026-11-03): the campaign's screens (0x00688130..0x00697090), by class:
+  9g-i the operation's end C_OperationEndMenu (vtable 0x00815c90); 9g-ii the network session's menu
+  C_SessionMenu (0x00815e98); 9g-iii the game's texts C_GameTexts (0x006e4f80..0x006e5b00, outside the
+  range: the video player embeds one); 9g-iv the video player C_VideoState / C_MovieState (0x00815bfc /
+  0x00815bc8; the subtitles, the credits, the voices); then the debriefing and the diary (0x00815cf0,
+  0x0068c520..0x00690be0) and the squad menu (0x00815d50, 0x00690be0..0x00697090), split when started.
+
+  PART 9g-i DONE (2026-11-03): the operation's end (game/operation_end.h/.cpp, new; out of pending.h).
+  - C_OperationEndMenu: the table 0x00841670 (S_OperationEnd: the model "f_s_arctic" .., the colour, the
+    title's style, "CAMPAIGN COMPLETED", the operation's history 17750 ..; ten rows per campaign, the
+    first row the default), GetOperationEnd 0x0068c000, BuildScreens 0x0068c0d0 ("Campaign_debrief"; no
+    model: false; the screen kept whatever its build), DescribeScreen 0x0068c3e0 (title, textbar "Press
+    space to continue ...", text01), OnInput 0x0068c070 (Escape or Space: cleared, flipped, ended), the
+    empty slots; GetTypeId 0x006c2160 and the destructors 0x006c2170 / 0x006c2190.
+  - Harness: campaign_screens_test.inc (new; "campaignscreens:", check_campaignscreens.py): oeTable,
+    oeDescribe, oeBuild, oeInput, oeSlots. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g1.py (94 cases, 88 build; all caught but 2 equivalent).
+
+  PART 9g-ii DONE (2026-11-03): the network session's menu (game/session_menu.h/.cpp, new; out of
+  pending.h).
+  - C_SessionMenu: OnStart 0x0068a680 (the console's text style), OnStop 0x0068a720, BuildScreens
+    0x0068a750 ("MP Connect console" on "confirm", "PASSWORD"), DescribeConsole 0x0068ac80 (the box at
+    (0.5, -0.375, -0.5), its tick and hidden callbacks, "Exit Game" quitting), DescribePassword 0x0068b010,
+    OnMessage 0x0068aa00 (Escape on the console: the game quit; on the password: the kept messages
+    dropped; 0x2000069: GAME_STATE_NEXT_MAP), OnConsoleTick 0x0068b1c0 (the console's steps: the squad
+    emptied, the roster again; hosting: "Creating server ...", C_NetGame::Host 0x00722b60 with the
+    session's name and DirectPlay's fields (and a second argument, true: ret_audit); joining: Connect 0x007240f0, GetJoinStatus 0x007244c0 polled
+    (connected, full, the password wrong: the password screen after 500 ms, the CD key, the version);
+    the waits), OnPasswordNotify 0x0068bce0 (the password kept, g_sessionPasswordSet 0x008ae5c2).
+  - Fixed names: the session type 2 hosts, 1 joins (the console's texts); GAME_STATE_HOST_SESSION is 7,
+    GAME_STATE_JOIN_SESSION 8 (swapped before), SESSION_* constants. Fix: OK without an input read none.
+  - Harness: the stub pending.h's settings and net game; smStart, smMessage, smConsole, smPassword,
+    smBuild, smTick, smJoin, smNotify. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g2.py (292 cases, 281 build; all caught but 3 equivalent).
+  - Build: MSVC clean. Tier 1: 367 errors in 67 files, 156 stubs (after 9g-iii). ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (new); 9g-i 12 and 9g-ii 14 in ported.txt. Stats: 9,002 of 12,306 functions by hand (81.0 % by size; after 9g-iii).
+
+  PART 9g-iii DONE (2026-11-03): the game's texts (game/game_texts.h/.cpp, new; C_GameTexts and g_texts
+  0x008c1368 out of pending.h).
+  - C_GameTexts (the table of S_GameText {text, id, a flag}, sorted by id): Clear 0x006e5050, Load
+    0x006e50c0 (dtaOpen, the whole file; the UTF-8 mark skipped; UTF-16's FF FE refused with "Trying add
+    file <..>; Unicode format detected, not supporting now." then "..; FAILED"), Find 0x006e5330 (the last
+    of the id), Get 0x006e5380 ("__undefined index <id> in all_txt __"), Has 0x006e53e0, Add 0x006e5430
+    (-1 and ids already there refused; the original's append-and-shift is upper_bound), Parse 0x006e56f0 /
+    ParseLine 0x006e5610 (sscanf's %d, the text between the first and the last quote); the vector's
+    helpers absorbed. C_str's append copy 0x00688130 absorbed (C_str::operator+=).
+  - Fixes: the file closed whatever its handle (the original closed handle 0 only); the marks' bytes not
+    read past a one- or two-byte file.
+  - Harness: game_texts_test.cpp (new; build_texts.bat, check_gametexts.py: the archives' calls faked
+    over files in memory): gtAdd (2000 random ids against a map), gtFind, gtGet, gtParse, gtLoad, gtBom,
+    gtClear. The vehicle stub pending.h takes the real header. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g3.py (89 cases, 86 build; all caught).
+  - Build: MSVC clean. Tier 1: 367 errors in 67 files, 156 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+14; hud.txt's C_TextDatabase::Find / GetText renamed); 16
+    functions in ported.txt. Stats: 9,002 of 12,306 functions by hand (81.0 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

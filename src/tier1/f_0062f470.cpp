@@ -183,7 +183,7 @@ uint32_t FUN_0062fa30(int param_1, ...)
   uStack_4 = 0xffffffff;
   if ((((g_menuState != 0) &&
        (ExceptionList = &local_c, iVar5 = (**(code **)(*g_menuState + 0x1c))(),
-       piVar2 = g_menuState, iVar5 == 2)) && (DAT_008ae5c2 == '\0')) &&
+       piVar2 = g_menuState, iVar5 == 2)) && (g_sessionPasswordSet == '\0')) &&
      ((piStack_fc = g_menuState, DAT_008ae5f0 != 0 &&
       (piVar6 = (int *)FUN_00628230(0x8ae5c4), *piVar6 != 0)))) {
     if (DAT_008ae5f0 == 0) {
@@ -1315,7 +1315,7 @@ uint32_t FUN_00631c60(uint32_t param_1, ...)
   int iVar1;
   if (g_menuState != 0) {
     iVar1 = (**(code **)(*g_menuState + 0x1c))();
-    if ((iVar1 == 2) && (DAT_008ae5c2 == '\0')) {
+    if ((iVar1 == 2) && (g_sessionPasswordSet == '\0')) {
       lpCriticalSection = (LPCRITICAL_SECTION)(g_menuState + 0x6c);
       EnterCriticalSection(lpCriticalSection);
       DAT_008acab8 = param_1;

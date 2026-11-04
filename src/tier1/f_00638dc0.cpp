@@ -1703,7 +1703,7 @@ uint32_t FUN_0063b310(void *_this,uint32_t param_1,int param_2, ...)
     iVar6 = 0;
     do {
       textId++;
-      pCVar3 = C_TextDatabase__GetText(&DAT_008c1368,&local_2c,(int)textId);
+      pCVar3 = C_GameTexts__Get(&DAT_008c1368,&local_2c,(int)textId);
       if (pCVar3->rep == 0) {
         uVar7 = 0;
       }

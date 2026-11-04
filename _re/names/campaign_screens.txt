@@ -1,0 +1,43 @@
+# The campaign's screens (part 9g).
+# Part 9g-i: the operation's end C_OperationEndMenu (src/game/operation_end.cpp; vtable 0x00815c90).
+0068c000 C_OperationEndMenu::GetOperationEnd | void * __cdecl GetOperationEnd(void)
+0068c040 C_OperationEndMenu::OnStart | bool __thiscall OnStart(C_MenuState *this, void * arg)
+0068c050 C_OperationEndMenu::OnStop | void __thiscall OnStop(C_MenuState *this)
+0068c060 C_OperationEndMenu::OnMessage | void __thiscall OnMessage(C_MenuState *this, void * message)
+0068c070 C_OperationEndMenu::OnInput | bool __thiscall OnInput(C_MenuState *this, float * held, float * pressed)
+0068c0c0 C_OperationEndMenu::GetModelFile | char * __cdecl GetModelFile(void)
+0068c0d0 C_OperationEndMenu::BuildScreens | bool __thiscall BuildScreens(C_MenuState *this)
+0068c3e0 C_OperationEndMenu::DescribeScreen | bool __thiscall DescribeScreen(C_MenuState *this, void * desc, void * model)
+0068c4f0 vector_erase4_68c4f0
+00841670 g_operationEnds @ uint[120]
+# Part 9g-ii: the session menu C_SessionMenu (src/game/session_menu.cpp; vtable 0x00815e98).
+0068a680 C_SessionMenu::OnStart | bool __thiscall OnStart(C_MenuState *this, void * arg)
+0068a720 C_SessionMenu::OnStop | void __thiscall OnStop(C_MenuState *this)
+0068a730 C_SessionMenu::OnUpdate | void __thiscall OnUpdate(C_MenuState *this, int timeDelta)
+0068a740 C_SessionMenu::OnRender | bool __thiscall OnRender(C_MenuState *this)
+0068a750 C_SessionMenu::BuildScreens | bool __thiscall BuildScreens(C_MenuState *this)
+0068aa00 C_SessionMenu::OnMessage | void __thiscall OnMessage(C_MenuState *this, void * message)
+0068ac80 C_SessionMenu::DescribeConsole | bool __thiscall DescribeConsole(C_MenuState *this, void * desc, void * model)
+0068b010 C_SessionMenu::DescribePassword | bool __thiscall DescribePassword(C_MenuState *this, void * desc, void * model)
+0068b1b0 C_SessionMenu::OnConsoleHidden | bool __thiscall OnConsoleHidden(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+0068b1c0 C_SessionMenu::OnConsoleTick | bool __thiscall OnConsoleTick(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+0068bce0 C_SessionMenu::OnPasswordNotify | bool __thiscall OnPasswordNotify(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00722b60 C_NetGame::Host
+007240f0 C_NetGame::Connect
+007244c0 C_NetGame::GetJoinStatus
+008ae5c2 g_sessionPasswordSet @ bool
+# Part 9g-iii: the game's texts C_GameTexts (src/game/game_texts.cpp; g_texts) and a C_str append.
+006e4f80 C_GameTexts::C_GameTexts | void __fastcall C_GameTexts(void * this)
+006e4fc0 C_GameTexts::~C_GameTexts | void __fastcall ~C_GameTexts(void * this)
+006e5050 C_GameTexts::Clear | void __fastcall Clear(void * this)
+006e50c0 C_GameTexts::Load | bool __thiscall Load(void * this, char * fileName)
+006e53e0 C_GameTexts::Has
+006e5430 C_GameTexts::Add | bool __thiscall Add(void * this, int id, char * text, bool unknown8)
+006e55f0 S_GameText::~S_GameText
+006e5610 C_GameTexts::ParseLine | void __thiscall ParseLine(void * this, char * line)
+006e56d0 C_GameTexts::LineLength | int __fastcall LineLength(char * begin, char * end)
+006e56f0 C_GameTexts::Parse | void __thiscall Parse(void * this, char * data, int size)
+006e5790 C_GameTexts::FreeTexts | void __fastcall FreeTexts(void * this)
+006e57d0 vector_insert_text_6e57d0
+006e5ad0 S_GameText::CopyConstruct_6e5ad0
+00688130 C_str::Append_688130

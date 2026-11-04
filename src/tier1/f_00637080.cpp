@@ -515,7 +515,7 @@ LAB_00637fac:
             }
             local_10 = 0;
             (pSVar1->password).rep = local_28;
-            DAT_008ae5c2 = 1;
+            g_sessionPasswordSet = 1;
             *(uint32_t *)((int)_this + 500) = 0;
             local_24 = 0;
             local_20 = 0x2000005;
@@ -610,7 +610,7 @@ LAB_00637f7c:
           }
           local_10 = 0;
           (pSVar1->password).rep = local_28;
-          DAT_008ae5c2 = 1;
+          g_sessionPasswordSet = 1;
           *(uint32_t *)((int)_this + 500) = 0;
           local_24 = 0;
           local_20 = 0x2000005;

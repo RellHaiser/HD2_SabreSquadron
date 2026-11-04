@@ -250,7 +250,7 @@ switchD_006334da_caseD_200000b:
         return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
       }
       C_NetGame__Close((C_NetGame *)&g_netGame,true);
-      DAT_008ae5c2 = 0;
+      g_sessionPasswordSet = 0;
       return CONCAT31((int3)((uint32_t)extraout_EAX_00 >> 8),1);
     }
     uVar3 = FUN_00634f90((int)_this);
@@ -293,7 +293,7 @@ switchD_006334da_caseD_200000b:
       uVar3 = FUN_00637a60((int)_this);
       return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
     }
-    DAT_008ae5c2 = 1;
+    g_sessionPasswordSet = 1;
     _this->_pad_01e8[0xc] = '\0';
     _this->_pad_01e8[0xd] = '\0';
     _this->_pad_01e8[0xe] = '\0';
@@ -1514,17 +1514,13 @@ uint32_t FUN_00635990(void *_this,uint32_t param_1, ...)
 }
 
 
-// 0x00635b70  (tier1 fallback: translated text kept below, needs hand porting)
+// 0x00635b70
 uint32_t FUN_00635b70(uint32_t param_1, ...)
-{
-  return {};
-}
-#if 0
 {
   int iVar1;
   if (g_menuState != 0) {
-    iVar1 = (**(code **)(*g_menuState + 0x1c))();
-    if ((iVar1 == 2) && (DAT_008ae5c2 == '\0')) {
+    iVar1 = (**(code **)(*(int *)g_menuState + 0x1c))();
+    if ((iVar1 == 2) && (g_sessionPasswordSet == false)) {
       FUN_00635990(g_menuState,param_1);
     }
   }
@@ -1532,7 +1528,6 @@ uint32_t FUN_00635b70(uint32_t param_1, ...)
 }
 
 
-#endif
 // 0x00635ba0
 uint32_t FUN_00635ba0(void *_this, ...)
 {
@@ -1962,7 +1957,7 @@ uint32_t FUN_006364b0(void *param_1, ...)
   C_MenuState__HandleMessage(param_1,&local_24);
   uVar1 = local_1c;
   FUN_0061b040(*(int *)((int)param_1 + 0x1e4));
-  pCVar2 = C_TextDatabase__GetText(&DAT_008c1368,&local_40,0x22ae);
+  pCVar2 = C_GameTexts__Get(&DAT_008c1368,&local_40,0x22ae);
   local_4 = CONCAT31(GH_PIECE(local_4,1,3),1);
   if (pCVar2->rep == 0) {
     pcVar3 = &DAT_00867a90;

@@ -9,6 +9,8 @@
 #include "game/campaign.h"
 #include "game/console.h"
 #include "game/equipment_screen.h"
+#include "game/operation_end.h"
+#include "game/session_menu.h"
 #include "game/game.h"
 #include "game/game_internal.h"
 #include "game/game_menu.h"
@@ -377,15 +379,15 @@ bool C_GameApp::UpdateClient(int timeDelta)             // 0x006c2410
         g_netGame.Close(true);
         return EndClientUpdate(false);
 
-    case GAME_STATE_JOIN_SESSION:
-    case GAME_STATE_HOST_SESSION: {
-        const bool join = m_state->GetState() == GAME_STATE_JOIN_SESSION;
+    case GAME_STATE_HOST_SESSION:
+    case GAME_STATE_JOIN_SESSION: {
+        const bool host = m_state->GetState() == GAME_STATE_HOST_SESSION;
         m_state->Stop();
         delete m_state;
         auto *menu = new C_SessionMenu();
         menu->Start(nullptr);
         m_state = menu;
-        g_mpSettings->sessionType = join ? 2 : 1;
+        g_mpSettings->sessionType = host ? SESSION_HOSTING : SESSION_JOINING;
         break;
     }
 

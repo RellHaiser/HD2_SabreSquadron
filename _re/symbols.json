@@ -32553,6 +32553,10 @@
   "name": "C_GameMenu::OnSavePreset",
   "proto": "bool __thiscall OnSavePreset(C_GameMenu *this, void * argument, void * control, uint notification, uint value)"
  },
+ "00688130": {
+  "module": "campaign_screens",
+  "name": "C_str::Append_688130"
+ },
  "00688330": {
   "module": "game_app",
   "name": "C_VideoState::Start",
@@ -32633,17 +32637,104 @@
   "module": "zz_idioms",
   "name": "construct_copy4_68a5c0"
  },
+ "0068a680": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_MenuState *this, void * arg)"
+ },
+ "0068a720": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_MenuState *this)"
+ },
  "0068a730": {
-  "module": "zz_idioms",
-  "name": "empty_function_68a730"
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnUpdate",
+  "proto": "void __thiscall OnUpdate(C_MenuState *this, int timeDelta)"
+ },
+ "0068a740": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnRender",
+  "proto": "bool __thiscall OnRender(C_MenuState *this)"
+ },
+ "0068a750": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_MenuState *this)"
+ },
+ "0068aa00": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_MenuState *this, void * message)"
+ },
+ "0068ac80": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::DescribeConsole",
+  "proto": "bool __thiscall DescribeConsole(C_MenuState *this, void * desc, void * model)"
+ },
+ "0068b010": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::DescribePassword",
+  "proto": "bool __thiscall DescribePassword(C_MenuState *this, void * desc, void * model)"
+ },
+ "0068b1b0": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnConsoleHidden",
+  "proto": "bool __thiscall OnConsoleHidden(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0068b1c0": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnConsoleTick",
+  "proto": "bool __thiscall OnConsoleTick(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0068bce0": {
+  "module": "campaign_screens",
+  "name": "C_SessionMenu::OnPasswordNotify",
+  "proto": "bool __thiscall OnPasswordNotify(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0068c000": {
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::GetOperationEnd",
+  "proto": "void * __cdecl GetOperationEnd(void)"
+ },
+ "0068c040": {
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_MenuState *this, void * arg)"
  },
  "0068c050": {
-  "module": "zz_idioms",
-  "name": "empty_function_68c050"
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_MenuState *this)"
  },
  "0068c060": {
-  "module": "zz_idioms",
-  "name": "empty_function_68c060"
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_MenuState *this, void * message)"
+ },
+ "0068c070": {
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::OnInput",
+  "proto": "bool __thiscall OnInput(C_MenuState *this, float * held, float * pressed)"
+ },
+ "0068c0c0": {
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::GetModelFile",
+  "proto": "char * __cdecl GetModelFile(void)"
+ },
+ "0068c0d0": {
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_MenuState *this)"
+ },
+ "0068c3e0": {
+  "module": "campaign_screens",
+  "name": "C_OperationEndMenu::DescribeScreen",
+  "proto": "bool __thiscall DescribeScreen(C_MenuState *this, void * desc, void * model)"
+ },
+ "0068c4f0": {
+  "module": "campaign_screens",
+  "name": "vector_erase4_68c4f0"
  },
  "0068d0e0": {
   "module": "zz_idioms",
@@ -36083,15 +36174,76 @@
   "name": "RadixSortPairs",
   "proto": "void __fastcall RadixSortPairs(uchar *pairs, uint32_t count)"
  },
+ "006e4f80": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::C_GameTexts",
+  "proto": "void __fastcall C_GameTexts(void * this)"
+ },
+ "006e4fc0": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::~C_GameTexts",
+  "proto": "void __fastcall ~C_GameTexts(void * this)"
+ },
+ "006e5050": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::Clear",
+  "proto": "void __fastcall Clear(void * this)"
+ },
+ "006e50c0": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::Load",
+  "proto": "bool __thiscall Load(void * this, char * fileName)"
+ },
  "006e5330": {
   "module": "hud",
-  "name": "C_TextDatabase::Find",
-  "proto": "int __thiscall Find(void *this, int textId)"
+  "name": "C_GameTexts::Find",
+  "proto": "int __thiscall Find(void *this, int id)"
  },
  "006e5380": {
   "module": "hud",
-  "name": "C_TextDatabase::GetText",
-  "proto": "C_str * __thiscall GetText(void *this, C_str * out, int textId)"
+  "name": "C_GameTexts::Get",
+  "proto": "C_str * __thiscall Get(void *this, C_str * out, int id)"
+ },
+ "006e53e0": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::Has"
+ },
+ "006e5430": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::Add",
+  "proto": "bool __thiscall Add(void * this, int id, char * text, bool unknown8)"
+ },
+ "006e55f0": {
+  "module": "campaign_screens",
+  "name": "S_GameText::~S_GameText"
+ },
+ "006e5610": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::ParseLine",
+  "proto": "void __thiscall ParseLine(void * this, char * line)"
+ },
+ "006e56d0": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::LineLength",
+  "proto": "int __fastcall LineLength(char * begin, char * end)"
+ },
+ "006e56f0": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::Parse",
+  "proto": "void __thiscall Parse(void * this, char * data, int size)"
+ },
+ "006e5790": {
+  "module": "campaign_screens",
+  "name": "C_GameTexts::FreeTexts",
+  "proto": "void __fastcall FreeTexts(void * this)"
+ },
+ "006e57d0": {
+  "module": "campaign_screens",
+  "name": "vector_insert_text_6e57d0"
+ },
+ "006e5ad0": {
+  "module": "campaign_screens",
+  "name": "S_GameText::CopyConstruct_6e5ad0"
  },
  "006e5df0": {
   "module": "xml_node",
@@ -36874,9 +37026,17 @@
   "module": "zz_idioms",
   "name": "empty_function_721f40"
  },
+ "00722b60": {
+  "module": "campaign_screens",
+  "name": "C_NetGame::Host"
+ },
+ "007240f0": {
+  "module": "campaign_screens",
+  "name": "C_NetGame::Connect"
+ },
  "007244c0": {
-  "module": "zz_idioms",
-  "name": "get_field_5044_7244c0"
+  "module": "campaign_screens",
+  "name": "C_NetGame::GetJoinStatus"
  },
  "00724940": {
   "module": "game",
@@ -42367,6 +42527,12 @@
   "name": "g_requiredCarrier",
   "type": "int"
  },
+ "00841670": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_operationEnds",
+  "type": "uint[120]"
+ },
  "00842570": {
   "data": true,
   "module": "profile",
@@ -43036,6 +43202,12 @@
   "module": "cursor",
   "name": "g_cursor",
   "type": "C_Cursor *"
+ },
+ "008ae5c2": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_sessionPasswordSet",
+  "type": "bool"
  },
  "008ae5f8": {
   "data": true,

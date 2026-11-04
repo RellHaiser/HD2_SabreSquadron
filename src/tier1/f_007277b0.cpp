@@ -836,7 +836,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
         C_BitStream__ReadString(param_2,(char *)&local_5a8,0x32);
         uVar15 = C_BitStream__ReadBits(param_2,2);
         uVar14 = C_BitStream__ReadBits(param_2,5);
-        pCVar17 = C_TextDatabase__GetText
+        pCVar17 = C_GameTexts__Get
                             (&DAT_008c1368,&CStack_56c,(-(uint32_t)(uVar15 != 1) & 10) + 0x27a6 + uVar14
                             );
         if (pCVar17->rep == 0) {
@@ -975,7 +975,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
         uVar14 = FUN_0072f060(&g_netGame,uVar15);
         iVar21 = FUN_0072efa0(&g_netGame,uVar14);
         if (iVar21 != 0) {
-          pCVar17 = C_TextDatabase__GetText(&DAT_008c1368,&local_568,0x22cb);
+          pCVar17 = C_GameTexts__Get(&DAT_008c1368,&local_568,0x22cb);
           local_14 = 8;
           if (pCVar17->rep == 0) {
             pcVar11 = &DAT_00867a90;
@@ -1261,7 +1261,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
   case 0x9:
     param_1 = (int *)C_BitStream__ReadString(param_2,(char *)&local_5a8,0x32);
     if ((g_gameRole & 1) == 0) {
-      pCVar17 = C_TextDatabase__GetText(&DAT_008c1368,&local_570,0x22ca);
+      pCVar17 = C_GameTexts__Get(&DAT_008c1368,&local_570,0x22ca);
       local_14 = 3;
       if (pCVar17->rep == 0) {
         pcVar11 = &DAT_00867a90;
@@ -1903,7 +1903,7 @@ uint32_t C_GameApp__SendGameMessage(C_GameApp *_this,int type,int to,int a,int b
         uVar7 = FUN_0072f060(&g_netGame,(int)values);
         iVar5 = FUN_0072efa0(&g_netGame,uVar7);
         if (iVar5 != 0) {
-          pCVar8 = C_TextDatabase__GetText(&DAT_008c1368,&local_d4,0x22cb);
+          pCVar8 = C_GameTexts__Get(&DAT_008c1368,&local_d4,0x22cb);
           local_14 = 5;
           if (pCVar8->rep == 0) {
             pcVar9 = &DAT_00867a90;
@@ -2057,7 +2057,7 @@ uint32_t C_GameApp__SendGameMessage(C_GameApp *_this,int type,int to,int a,int b
         break;
       case 9:
         C_BitStream__WriteString((C_BitStream *)this_00,(char *)values);
-        pCVar8 = C_TextDatabase__GetText(&DAT_008c1368,&local_e4,0x22ca);
+        pCVar8 = C_GameTexts__Get(&DAT_008c1368,&local_e4,0x22ca);
         local_14 = 3;
         if (pCVar8->rep == 0) {
           pcVar9 = &DAT_00867a90;
