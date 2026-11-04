@@ -46,8 +46,6 @@ bool C_MainMenu::OnConnectMessage(S_ControlMessage *m)
 // (Part 9h-iv: the screens' callbacks of later sub-parts, faked; the network game's close and the last save,
 // logged.)
 #define MM_CALLBACK(F)                                                                                                bool C_MainMenu::F(void *, void *, C_Control *, uint32_t, uint32_t)                                               {                                                                                                                     GfLog(#F);                                                                                                        return true;                                                                                                  }
-MM_CALLBACK(OnSingleplayerShown)
-MM_CALLBACK(OnSingleplayerButton)
 void C_NetGame::Close(bool now) { GfLog("net close %d", now); }
 bool g_mmHasSave = true;
 // (Part 9h-v: the profiles found, the deletes, the difficulty, the save.)
@@ -160,7 +158,8 @@ struct S_MainMenuResults {
     bool mmStart = true, mmStop = true, mmUpdate = true, mmDrain = true, mmMessage = true, mmEscape = true,
          mmSelect = true, mmBuild = true, mmDescribe = true, mmMainShown = true, pfDescribe = true, pfRefresh = true,
          pfShown = true, pfList = true, pfDifficulty = true, pfMessage = true,
-         pfButtons = true, pfEscape = true, pfCreate = true, pfRename = true;
+         pfButtons = true, pfEscape = true, pfCreate = true, pfRename = true,
+         spShown = true, spHover = true, spClick = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -726,6 +725,79 @@ void MainMenuTest(I3D_scene *scene)
         m.OnStop();
     }
 
+    // --- (part 9h-vii) the single-player screen: shown; a mode hovered (its side, its text); clicked (started) ---
+    {
+        C_MainMenu m;
+        alignas(16) static uint8_t spCampaignMemory[sizeof(C_Campaign)];
+        std::memset(spCampaignMemory, 0, sizeof spCampaignMemory);
+        C_Campaign *const oldCampaign = g_gameProfile.m_campaign;
+        auto *campaign = reinterpret_cast<C_Campaign *>(spCampaignMemory);
+        g_gameProfile.m_campaign = campaign;
+        S_PlayMode playMode;
+        S_PlayMode *const oldPlayMode = g_gameProfile.m_playMode;
+        g_gameProfile.m_playMode = &playMode;
+        const int oldSession = g_mpSettings->sessionType;
+        g_controlMessages.clear();
+        {
+            bool ok = true;
+            m.m_saveName = "save2";
+            ok &= C_MainMenu::OnSingleplayerShown(&m, nullptr, nullptr, CONTROL_NOTIFY_SHOWN, 0) && m.m_saveName.IsEmpty() &&
+                  CsQueue() == "c700000 1000002 0 0; c800000 1000002 0 0; ";
+            WM(r.spShown, ok);
+        }
+        const uint32_t buttons[] = {0xC400000, 0xC500000, 0xC600000, 0xC700000, 0xC800000, 0xC900000, 0xCA00000, 0xCB00000};
+        const uint32_t texts[] = {0x8A3, 0x8A4, 0x8A5, 0x8A6, 0x8A7, 0x8A3, 0x8A4, 0x8A5};
+        {
+            bool ok = true;
+            for (int i = 0; i < 8; ++i) {
+                C_PfLine button(buttons[i] | 2, "");
+                ok &= C_MainMenu::OnSingleplayerButton(&m, nullptr, &button, CONTROL_NOTIFY_ENTER, 0) &&
+                      CsQueue() == CmText("c300000 2000018 0 0; c200000 2000019 %d 0; c300000 1000017 2 8a2; c300000 1000017 2 7d2; "
+                                          "c300000 1000017 3 %x; ", i, texts[i]);
+            }
+            C_PfLine back(0xCC00000, ""), other(0xCD00000, "");
+            ok &= C_MainMenu::OnSingleplayerButton(&m, nullptr, &back, CONTROL_NOTIFY_ENTER, 0) &&
+                  CsQueue() == "c300000 2000018 0 0; c200000 200001a 0 0; ";
+            ok &= !C_MainMenu::OnSingleplayerButton(&m, nullptr, &other, CONTROL_NOTIFY_ENTER, 0) &&
+                  CsQueue() == "c300000 2000018 0 0; ";
+            ok &= !C_MainMenu::OnSingleplayerButton(&m, nullptr, nullptr, CONTROL_NOTIFY_ENTER, 0) && CsQueue() == "";
+            ok &= !C_MainMenu::OnSingleplayerButton(&m, nullptr, &back, CONTROL_NOTIFY_13, 0) &&
+                  CsQueue() == "c300000 2000018 0 0; " && g_mpSettings->sessionType == oldSession;
+            WM(r.spHover, ok);
+        }
+        {
+            bool ok = true;
+            // Each mode: the campaign (or a single mission), the play mode; what is posted.
+            const int campaigns[] = {0, 0, 0, -1, -1, 1, 1, 1};
+            const int modes[] = {1, 2, 3, 0, 3, 1, 2, 3};
+            for (int i = 0; i < 8; ++i) {
+                C_PfLine button(buttons[i], "");
+                g_mpSettings->sessionType = 2;
+                campaign->m_current = 7;
+                playMode.singleMission = 5;
+                playMode.mode = 9;
+                ok &= C_MainMenu::OnSingleplayerButton(&m, nullptr, &button, CONTROL_NOTIFY_CLICK, 0) &&
+                      g_mpSettings->sessionType == 0 && playMode.mode == modes[i];
+                if (campaigns[i] >= 0)
+                    ok &= campaign->m_current == campaigns[i] && playMode.singleMission == 0 &&
+                          CsQueue() == "c300000 2000018 0 0; c200000 200001a 0 0; 0 6001033 0 0; ";
+                else
+                    ok &= campaign->m_current == 7 && playMode.singleMission == 1 &&
+                          CsQueue() == "c300000 2000018 0 0; c200000 200001a 0 0; 0 6001074 0 0; ";
+            }
+            C_PfLine back(0xCC00000, ""), other(0xC300000, "");
+            ok &= C_MainMenu::OnSingleplayerButton(&m, nullptr, &back, CONTROL_NOTIFY_CLICK, 0) &&
+                  CsQueue() == "c300000 2000018 0 0; c200000 200001a 0 0; 0 2000003 0 0; ";
+            g_mpSettings->sessionType = 2;
+            ok &= !C_MainMenu::OnSingleplayerButton(&m, nullptr, &other, CONTROL_NOTIFY_CLICK, 0) &&
+                  CsQueue() == "c300000 2000018 0 0; c200000 200001a 0 0; " && g_mpSettings->sessionType == 0;
+            WM(r.spClick, ok);
+        }
+        g_mpSettings->sessionType = oldSession;
+        g_gameProfile.m_playMode = oldPlayMode;
+        g_gameProfile.m_campaign = oldCampaign;
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -800,8 +872,9 @@ void MainMenuTest(I3D_scene *scene)
     g_gfLog.clear();
     g_controlMessages.clear();
     std::printf("mainmenu: mmStart %d mmStop %d mmUpdate %d mmDrain %d mmMessage %d mmEscape %d mmSelect %d mmBuild %d mmDescribe %d mmMainShown %d pfDescribe %d pfRefresh %d pfShown %d pfList %d "
-                "pfDifficulty %d pfMessage %d pfButtons %d pfEscape %d pfCreate %d pfRename %d\n",
+                "pfDifficulty %d pfMessage %d pfButtons %d pfEscape %d pfCreate %d pfRename %d "
+                "spShown %d spHover %d spClick %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
-                r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename);
+                r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick);
 }

@@ -214,8 +214,6 @@ f_00638dc0.cpp:1244:47: no matching function for call to 'tier1::C_str::C_str(in
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
 f_00638dc0.cpp:1284:53: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00638dc0.cpp:2131:13: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    *DAT_008ae5b0 = (int)pvVar3;
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
 f_00696f70.cpp:565:105: cannot convert 'char**' to 'uint32_t*' {aka 'unsigned int*'}

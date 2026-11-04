@@ -8264,6 +8264,19 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 328 errors in 60 files, 135 stubs. ret_audit --src: 52.
   - Stats: 9,172 of 12,306 functions by hand (83.4 % by size).
 
+  PART 9h-vii DONE (2026-11-04): the main menu's single-player screen (game/main_menu.cpp).
+  - OnSingleplayerShown 0x0063b7f0 (the saved game picked cleared, the single missions' buttons on),
+    OnSingleplayerButton 0x0063b9a0 (the description emptied; the cursor over a mode: its side's frame
+    (0 .. 7), the heading 0x8A2, a blank, its text (0x8A3 campaign, 0x8A4 lone wolf, 0x8A5 carnage, 0x8A6 /
+    0x8A7 the single missions); over back: no side; a click: no side, no network session, back, or the mode:
+    the first / second campaign (current index) in play mode 1 / 2 / 3 started (0x6001033), or the single
+    missions (0x6001074) normal (mode 0) or carnage (3)). 0x0063c2a0 is std::deque's map allocation
+    (inlined PostControlMessage): in ported.txt.
+  - Harness: spShown, spHover, spClick. All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h7.py: 68: all killed but 2 not building and 1 equivalent (a comment).
+  - Build: MSVC clean. Tier 1: 327 errors in 60 files, 134 stubs. ret_audit --src: 52.
+  - Stats: 9,175 of 12,306 functions by hand (83.5 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

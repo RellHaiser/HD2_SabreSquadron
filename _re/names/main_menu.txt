@@ -72,3 +72,4 @@
 00621110 C_MainMenu::AddProfileLine | void __fastcall AddProfileLine(char * name, int context)
 00620fb0 C_MainMenu::PostProfileLine | void __fastcall PostProfileLine(char * name, int context)
 006aef40 DeleteProfile | bool __stdcall DeleteProfile(char * name)
+# Part 9h-vii: the single-player screen.

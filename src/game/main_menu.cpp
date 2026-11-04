@@ -7,6 +7,7 @@
 #include <cstring>
 
 #include "common/os_files.h"
+#include "game/campaign.h"
 #include "game/control.h"
 #include "game/controls.h"
 #include "game/game_app.h"
@@ -722,6 +723,101 @@ bool C_MainMenu::OnProfileButton(void *menu, void *, C_Control *control, uint32_
             self->RefreshProfile();
             self->m_step = 0;
         }
+    }
+    return true;
+}
+
+// ---- the single-player screen (part 9h-vii) ---------------------------------------------------------------
+
+namespace {
+
+// The single-player screen's controls (screen 3): the side switch, the description text, the mode buttons.
+constexpr uint32_t SINGLE_SIDE = 0xC200000, SINGLE_TEXT = 0xC300000, SINGLE_MISSION = 0xC700000,
+                   SINGLE_MISSION_CARNAGE = 0xC800000, SINGLE_BACK = 0xCC00000;
+// The description's lines' styles: the heading's and the mode's.
+constexpr uint32_t STYLE_MODE_HEADING = 2, STYLE_MODE_TEXT = 3;
+constexpr uint32_t TEXT_MODE_HEADING = 0x8A2;
+// What a mode's button starts (the menu's messages with the main screen's bits): a campaign, the single
+// missions.
+constexpr uint32_t MAIN_MSG_START_CAMPAIGN = 0x2000033, MAIN_MSG_SINGLE_MISSIONS = 0x2000074;
+
+// A mode's button: its side's frame and text; what it starts (the campaign; the single missions: -1 none) and
+// in which play mode.
+struct S_SingleMode {
+    uint32_t button;
+    int frame;
+    uint32_t text;
+    int campaign;                                       // (-1: a single mission)
+    int playMode;
+};
+const S_SingleMode SINGLE_MODES[] = {
+    {0xC400000, 0, 0x8A3, 0, PLAY_MODE_CAMPAIGN},       // "bcampaign"
+    {0xC500000, 1, 0x8A4, 0, PLAY_MODE_LONE_WOLF},      // "blone wolf"
+    {0xC600000, 2, 0x8A5, 0, PLAY_MODE_CARNAGE},        // "carnage"
+    {0xC700000, 3, 0x8A6, -1, 0},                       // "bsingle mission"
+    {0xC800000, 4, 0x8A7, -1, PLAY_MODE_CARNAGE},       // "bsingle mission- carnage"
+    {0xC900000, 5, 0x8A3, 1, PLAY_MODE_CAMPAIGN},       // "bcampaign01" (the second campaign's)
+    {0xCA00000, 6, 0x8A4, 1, PLAY_MODE_LONE_WOLF},      // "blone wolf01"
+    {0xCB00000, 7, 0x8A5, 1, PLAY_MODE_CARNAGE},        // "carnage01"
+};
+
+} // namespace
+
+bool C_MainMenu::OnSingleplayerShown(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    self->m_saveName = C_str("");
+    PostTo(SINGLE_MISSION, CONTROL_MSG_ACTIVATE, 0);
+    PostTo(SINGLE_MISSION_CARNAGE, CONTROL_MSG_ACTIVATE, 0);
+    return true;
+}
+
+bool C_MainMenu::OnSingleplayerButton(void *, void *, C_Control *control, uint32_t notification, uint32_t)
+{
+    if (!control)
+        return false;
+    PostTo(SINGLE_TEXT, CONTROL_MSG_CLEAR, 0);
+    const uint32_t id = control->GetId() & CONTROL_ID_CHILD_MASK;
+    const S_SingleMode *mode = nullptr;
+    for (const S_SingleMode &known : SINGLE_MODES)
+        if (known.button == id)
+            mode = &known;
+
+    if (notification == CONTROL_NOTIFY_ENTER) {
+        // The cursor over a mode: its side shown, its description; over back: no side.
+        if (id == SINGLE_BACK) {
+            PostTo(SINGLE_SIDE, CONTROL_MSG_HIDE_FRAME, 0);
+            return true;
+        }
+        if (!mode)
+            return false;
+        PostTo(SINGLE_SIDE, CONTROL_MSG_SELECT_FRAME, static_cast<uint32_t>(mode->frame));
+        PostTo(SINGLE_TEXT, CONTROL_MSG_ADD_TEXT_ID, STYLE_MODE_HEADING, TEXT_MODE_HEADING);
+        PostTo(SINGLE_TEXT, CONTROL_MSG_ADD_TEXT_ID, STYLE_MODE_HEADING, TEXT_EMPTY);
+        PostTo(SINGLE_TEXT, CONTROL_MSG_ADD_TEXT_ID, STYLE_MODE_TEXT, mode->text);
+        return true;
+    }
+    if (notification != CONTROL_NOTIFY_CLICK)
+        return false;
+
+    // A click: the mode started (not a network game).
+    PostTo(SINGLE_SIDE, CONTROL_MSG_HIDE_FRAME, 0);
+    g_mpSettings->sessionType = SESSION_NONE;
+    if (id == SINGLE_BACK) {
+        Post(MENU_MSG_BACK, 0);
+        return true;
+    }
+    if (!mode)
+        return false;
+    if (mode->campaign >= 0) {
+        g_gameProfile.m_campaign->SetCurrentIndex(mode->campaign);
+        g_gameProfile.m_playMode->singleMission = 0;
+        g_gameProfile.m_playMode->mode = mode->playMode;
+        Post(FROM_SCREEN | MAIN_MSG_START_CAMPAIGN, 0);
+    } else {
+        g_gameProfile.m_playMode->singleMission = 1;
+        g_gameProfile.m_playMode->mode = mode->playMode;
+        Post(FROM_SCREEN | MAIN_MSG_SINGLE_MISSIONS, 0);
     }
     return true;
 }
