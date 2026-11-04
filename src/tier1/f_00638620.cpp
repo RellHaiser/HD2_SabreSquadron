@@ -36,7 +36,7 @@ uint32_t FUN_00638650(...)
 
 
 // 0x00638660
-uint32_t C_MainMenu__FUN_00638660(C_MainMenu *_this,void *param_1, ...)
+uint32_t C_MainMenu__C_MainMenu__DescribeFiltersScreen(C_MainMenu *_this,void *param_1, ...)
 {
   void *pvVar1;
   uint32_t value;

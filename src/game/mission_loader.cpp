@@ -499,7 +499,7 @@ enum : uint16_t {
     SOUND_OUT_VOLUME = 0x4063,
     SOUND_CONE = 0x4064,
     SOUND_RANGE = 0x4065,                               // three values (the fourth 0)
-    SOUND_LOOP = 0x4066,
+    SOUND_CHUNK_LOOP = 0x4066,
     SOUND_ON = 0x4067,
     SOUND_RANGE_4 = 0x4068,
     SOUND_FILE = 0x0010,
@@ -890,7 +890,7 @@ bool C_MissionLoader::LoadObject(C_chunk &chunk)
                     chunk.Read(values, sizeof(float) * 4);
                     sound->SetRange(values[0], values[1], values[2], values[3]);
                     break;
-                case SOUND_LOOP:
+                case SOUND_CHUNK_LOOP:
                     sound->SetLoop(true);
                     break;
                 case SOUND_ON:

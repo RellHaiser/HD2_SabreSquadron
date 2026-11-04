@@ -27240,6 +27240,11 @@
   "module": "simple_actors",
   "name": "StaticInit_614090"
  },
+ "00614140": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeSavesScreen",
+  "proto": "bool __thiscall DescribeSavesScreen(C_MainMenu *this, void * desc, void * model)"
+ },
  "00614e80": {
   "module": "control",
   "name": "AddDescMessage1",
@@ -27609,6 +27614,26 @@
   "name": "C_OptionsHandler::RefreshKeyGroups",
   "proto": "bool __fastcall RefreshKeyGroups(void * handler)"
  },
+ "00621210": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeProfileScreen",
+  "proto": "bool __thiscall DescribeProfileScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00621240": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnProfileMessage",
+  "proto": "bool __thiscall OnProfileMessage(C_MainMenu *this, void * message)"
+ },
+ "00622af0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::SelectProfile",
+  "proto": "bool __thiscall SelectProfile(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00623e30": {
+  "module": "main_menu",
+  "name": "C_MainMenu::Describe",
+  "proto": "void * __thiscall Describe(C_MainMenu *this)"
+ },
  "00625f60": {
   "module": "screen",
   "name": "AddScreenMessage",
@@ -27643,6 +27668,11 @@
   "module": "screen",
   "name": "S_MenuDesc::~S_MenuDesc",
   "proto": "void __thiscall ~S_MenuDesc(S_MenuDesc *this)"
+ },
+ "006264c0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnStart",
+  "proto": "bool __thiscall OnStart(C_MainMenu *this, void * arg)"
  },
  "00626710": {
   "module": "main_menu",
@@ -27682,6 +27712,26 @@
   "module": "main_menu",
   "name": "C_MpMenuSettings::~C_MpMenuSettings",
   "proto": "void __thiscall ~C_MpMenuSettings(void *this)"
+ },
+ "00626ad0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnStop",
+  "proto": "void __thiscall OnStop(C_MainMenu *this)"
+ },
+ "00626b30": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnUpdate",
+  "proto": "void __thiscall OnUpdate(C_MainMenu *this, int timeDelta)"
+ },
+ "00626ca0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(C_MainMenu *this, void * message)"
+ },
+ "006271e0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_MainMenu *this)"
  },
  "00627fd0": {
   "module": "zz_idioms",
@@ -27731,13 +27781,78 @@
   "module": "zz_idioms",
   "name": "construct_copy4_628550"
  },
+ "00628610": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeCreateServerScreen",
+  "proto": "bool __thiscall DescribeCreateServerScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "0062f4b0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeGameInfoScreen",
+  "proto": "bool __thiscall DescribeGameInfoScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "0062f740": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ReleaseGameInfoStyles",
+  "proto": "void __cdecl ReleaseGameInfoStyles(void)"
+ },
+ "00632150": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeConnectScreen",
+  "proto": "bool __thiscall DescribeConnectScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00632390": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnConnectMessage",
+  "proto": "bool __thiscall OnConnectMessage(C_MainMenu *this, void * message)"
+ },
  "00633320": {
   "module": "zz_idioms",
   "name": "vector_size_e4_633320"
  },
+ "00633490": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnNetworkMessage",
+  "proto": "bool __thiscall OnNetworkMessage(C_MainMenu *this, void * message)"
+ },
+ "00634050": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeBrowserScreen",
+  "proto": "bool __thiscall DescribeBrowserScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00636400": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DrainFoundServers",
+  "proto": "void __fastcall DrainFoundServers(C_MainMenu *this)"
+ },
+ "006370c0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeAddServerScreen",
+  "proto": "bool __thiscall DescribeAddServerScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00637890": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribePasswordScreen",
+  "proto": "bool __thiscall DescribePasswordScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00638660": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeFiltersScreen",
+  "proto": "bool __thiscall DescribeFiltersScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00638e00": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMissionsMessage",
+  "proto": "bool __thiscall OnMissionsMessage(C_MainMenu *this, void * message)"
+ },
  "006392a0": {
   "module": "zz_idioms",
   "name": "get_field_10_6392a0"
+ },
+ "006392b0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeMissionsScreen",
+  "proto": "bool __thiscall DescribeMissionsScreen(C_MainMenu *this, void * desc, void * model)"
  },
  "0063c2f0": {
   "module": "gdi_font",
@@ -43777,6 +43892,12 @@
   "data": true,
   "module": "script",
   "name": "g_junkers88Setup"
+ },
+ "008aca88": {
+  "data": true,
+  "module": "main_menu",
+  "name": "g_gameInfoStyles",
+  "type": "int[12]"
  },
  "008ae558": {
   "data": true,

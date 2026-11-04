@@ -36,7 +36,7 @@ uint32_t FUN_00632140(...)
 
 
 // 0x00632150
-uint32_t C_MainMenu__FUN_00632150(C_MainMenu *_this,void *param_1,int *param_2, ...)
+uint32_t C_MainMenu__C_MainMenu__DescribeConnectScreen(C_MainMenu *_this,void *param_1,int *param_2, ...)
 {
   void *pvVar1;
   int iVar2;
@@ -130,95 +130,85 @@ LAB_0063233e:
 }
 
 
-// 0x00632390  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_00632390(int param_1, ...)
-{
-  return {};
-}
-#if 0
+// 0x00632390
+bool C_MainMenu__OnConnectMessage(C_MainMenu *_this,void *message, ...)
 {
   uint32_t *puVar1;
   uint32_t *puVar2;
-  uint32_t uVar3;
-  int in_ECX;
-  bool bVar4;
-  uint32_t uStack_4c;
-  uint32_t uStack_48;
-  uint32_t *puStack_44;
-  uint32_t uStack_40;
-  uint32_t uStack_3c;
-  uint32_t uStack_38;
-  uint32_t uStack_34;
-  int *piStack_28;
-  uint32_t uStack_24;
-  uint32_t uStack_20;
-  uint32_t uStack_1c;
-  int *piStack_10;
-  uint8_t *puStack_8;
-  uint32_t uStack_4;
-  uStack_4 = 0xffffffff;
-  puStack_8 = &UNK_008038b0;
-  if (((*(uint32_t *)(param_1 + 4) & 0x3000fff) == 0x200000a) && (param_1 = 0, DAT_008ae5f0 != 0)) {
-    uStack_48 = DAT_008ae5dc;
-    uStack_4c = DAT_008ae5d8;
-    puStack_44 = DAT_008ae5e0;
-    uStack_40 = DAT_008ae5e4;
-    FUN_00633370(&uStack_4c,-1);
-    param_1 = *puStack_44;
-    if (((uint8_t)((int)*(uint32_t *)(param_1 + 0x60) >> 0x1a) & 0x3f) == 0xd) {
-      piStack_10 = 0;
-      uStack_24 = 0;
-      uStack_20 = 0x2000005;
-      uStack_1c = 0;
-      uStack_4 = 0;
-      PostControlMessage(&DAT_008ae590,&uStack_24);
-      if ((piStack_10 != 0) && (*piStack_10 = *piStack_10 - 1, *piStack_10 == 0)) {
-        tier1_operator_delete(piStack_10);
+  bool bVar3;
+  uint32_t local_4c;
+  uint32_t local_48;
+  int *local_44;
+  uint32_t local_40;
+  uint32_t local_3c;
+  uint32_t local_38;
+  uint32_t local_34;
+  int *local_28;
+  uint32_t local_24;
+  uint32_t local_20;
+  uint32_t local_1c;
+  int *local_10;
+  uint32_t local_4;
+  local_4 = 0xffffffff;
+  if (((*(uint32_t *)((int)message + 4) & 0x3000fff) == 0x200000a) && (DAT_008ae5f0 != 0)) {
+    local_48 = DAT_008ae5dc;
+    local_4c = DAT_008ae5d8;
+    local_44 = DAT_008ae5e0;
+    local_40 = DAT_008ae5e4;
+    FUN_00633370(&local_4c,-1);
+    if (((uint8_t)((int)*(uint32_t *)(*local_44 + 0x60) >> 0x1a) & 0x3f) == 0xd) {
+      local_10 = 0;
+      local_24 = 0;
+      local_20 = 0x2000005;
+      local_1c = 0;
+      local_4 = 0;
+      PostControlMessage(&DAT_008ae590,&local_24);
+      if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
+        tier1_operator_delete(local_10);
       }
       puVar2 = DAT_008ae5ac;
-      uStack_3c = 0;
-      piStack_28 = 0;
-      uStack_38 = 0x2000028;
-      uStack_34 = 0;
-      uStack_4 = 1;
+      local_3c = 0;
+      local_28 = 0;
+      local_38 = 0x2000028;
+      local_34 = 0;
+      local_4 = 1;
       if ((DAT_008ae5bc == 0) || (DAT_008ae5ac == DAT_008ae5a8)) {
         FUN_00616100(0x8ae590);
         puVar2 = DAT_008ae5ac;
         DAT_008ae5ac += 6;
-        FUN_006169d0(puVar2,&uStack_3c);
+        FUN_006169d0(puVar2,&local_3c);
       }
       else {
         puVar1 = DAT_008ae5ac + 6;
         if (puVar1 == DAT_008ae5a8) {
-          bVar4 = DAT_008ae5ac != 0;
+          bVar3 = DAT_008ae5ac != 0;
           DAT_008ae5ac = puVar1;
-          if (bVar4) {
-            FUN_006157d0(puVar2,&uStack_3c);
+          if (bVar3) {
+            FUN_006157d0(puVar2,&local_3c);
           }
           FUN_00616100(0x8ae590);
         }
         else {
-          bVar4 = DAT_008ae5ac != 0;
+          bVar3 = DAT_008ae5ac != 0;
           DAT_008ae5ac = puVar1;
-          if (bVar4) {
-            FUN_006157d0(puVar2,&uStack_3c);
+          if (bVar3) {
+            FUN_006157d0(puVar2,&local_3c);
           }
         }
       }
-      uStack_4 = 0xffffffff;
+      local_4 = 0xffffffff;
       DAT_008ae5bc++;
-      if ((piStack_28 != 0) && (*piStack_28 = *piStack_28 - 1, *piStack_28 == 0)) {
-        tier1_operator_delete(piStack_28);
+      if ((local_28 != 0) && (*local_28 = *local_28 - 1, *local_28 == 0)) {
+        tier1_operator_delete(local_28);
       }
-      uVar3 = FUN_0062cbf0(in_ECX);
-      return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
+      FUN_0062cbf0((int)_this);
+      return true;
     }
   }
-  return param_1 & 0xffffff00;
+  return false;
 }
 
 
-#endif
 // 0x00632560
 uint32_t FUN_00632560(void *_this,uint32_t param_1,int param_2,uint32_t param_3,int param_4, ...)
 {

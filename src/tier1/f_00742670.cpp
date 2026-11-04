@@ -66,7 +66,7 @@ bool C_CommandProcessor__Execute(C_CommandProcessor *_this,char *command, ...)
   IGraph *pIVar12;
   HWND pHVar13;
   ulong uVar14;
-  uint8_t *puVar15;
+  uint32_t *puVar15;
   C_game *pCVar16;
   S_MissionObjective *pSVar17;
   C_str *pCVar18;
@@ -77,13 +77,12 @@ bool C_CommandProcessor__Execute(C_CommandProcessor *_this,char *command, ...)
   uint32_t uVar23;
   uint16_t *puVar24;
   char *pcVar25;
-  uint32_t *puVar26;
-  int *piVar27;
-  C_Console *pCVar28;
-  bool bVar29;
-  int iVar30;
+  int *piVar26;
+  C_Console *pCVar27;
+  bool bVar28;
+  int iVar29;
   int b;
-  int iVar31;
+  int iVar30;
   char local_db0;
   uint32_t uStack_daf;
   char local_3b0 [288];
@@ -141,7 +140,7 @@ bool C_CommandProcessor__Execute(C_CommandProcessor *_this,char *command, ...)
       pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_20,0x582);
       local_8 = 1;
       if (pCVar18->rep == 0) {
-        pcVar19 = &DAT_00867a90;
+        pcVar19 = (char *)&DAT_00867a90;
       }
       else {
         pcVar19 = pCVar18->rep->chars;
@@ -185,7 +184,7 @@ bool C_CommandProcessor__Execute(C_CommandProcessor *_this,char *command, ...)
                                    "maxclients" + local_28 * 0x204,local_14);
         local_8 = 2;
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -247,14 +246,14 @@ LAB_00742ab3:
           if ((g_gameProfile.m_mpSettings)->gameType == 3) goto LAB_00742ab3;
         }
 LAB_0074298e:
-        bVar29 = false;
+        bVar28 = false;
         b = 0;
-        iVar31 = 0;
         iVar30 = 0;
+        iVar29 = 0;
         iVar7 = 0x12;
         *(uint32_t *)((g_gameProfile.m_mpSettings)->_pad_021c + local_28 * 4 + 0xc) = local_14;
         pCVar20 = GetGameApp();
-        C_GameApp__SendGameMessage(pCVar20,iVar7,iVar30,iVar31,b,bVar29);
+        C_GameApp__SendGameMessage(pCVar20,iVar7,iVar29,iVar30,b,bVar28);
         break;
       }
       if (((uint8_t)g_gameRole & 7) == 7) goto LAB_0074298e;
@@ -277,7 +276,7 @@ LAB_0074298e:
             pCVar18 = C_fstr_Construct(&local_90,"Map %s doesn't exist!",local_290);
             local_8 = 7;
             if (pCVar18->rep == 0) {
-              pcVar19 = &DAT_00867a90;
+              pcVar19 = (char *)&DAT_00867a90;
             }
             else {
               pcVar19 = pCVar18->rep->chars;
@@ -298,7 +297,7 @@ LAB_0074298e:
                (uVar21 < (uint32_t)((int)((g_gameProfile.m_mpSettings)->maps).last - (int)ppvVar2 >> 2))
                )) {
           if (*(int *)((int)ppvVar2[uVar21] + 1) == 0) {
-            pcVar19 = &DAT_00867a90;
+            pcVar19 = (char *)&DAT_00867a90;
             pCVar20 = GetGameApp();
             C_GameApp__PrintMessage(pCVar20,pcVar19);
             uVar21++;
@@ -332,7 +331,7 @@ LAB_0074298e:
         pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_40,0x585);
         local_8 = 9;
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -347,7 +346,7 @@ LAB_0074298e:
                                    (g_gameProfile.m_mpSettings)->gameType * 0x204);
         local_8 = 8;
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -369,7 +368,7 @@ LAB_0074298e:
         pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_88,0x585);
         local_8 = 0xb;
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -384,7 +383,7 @@ LAB_0074298e:
                                    (g_gameProfile.m_mpSettings)->unknown174 * 0x204);
         local_8 = 10;
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -407,7 +406,7 @@ LAB_00742c7d:
                                    (g_gameProfile.m_mpSettings)->sessionName);
         local_8 = 0xc;
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -429,14 +428,14 @@ LAB_00742c7d:
       }
       break;
     case 0x21:
-      local_db0 = DAT_00867a90;
+      local_db0 = (char)DAT_00867a90;
       pcVar19 = "Console keywords:";
-      puVar26 = &uStack_daf;
-      memset(puVar26, 0, 0x27f * sizeof(*puVar26));
-      puVar26 += 0x27f;
+      puVar15 = &uStack_daf;
+      memset(puVar15, 0, 0x27f * sizeof(*puVar15));
+      puVar15 += 0x27f;
       iVar7 = 0;
-      *(uint16_t *)puVar26 = 0;
-      *(uint8_t *)((int)puVar26 + 2) = 0;
+      *(uint16_t *)puVar15 = 0;
+      *(uint8_t *)((int)puVar15 + 2) = 0;
       pCVar20 = GetGameApp();
       C_GameApp__PrintMessage(pCVar20,pcVar19);
       local_18 = 0;
@@ -446,12 +445,12 @@ LAB_00742c7d:
           uVar21 = 0xffffffff;
           piVar10 = local_1c - 0x80;
           do {
-            piVar27 = piVar10;
+            piVar26 = piVar10;
             if (uVar21 == 0) break;
             uVar21--;
-            piVar27 = (int *)((int)piVar10 + 1);
+            piVar26 = (int *)((int)piVar10 + 1);
             iVar7 = *piVar10;
-            piVar10 = piVar27;
+            piVar10 = piVar26;
           } while ((char)iVar7 != '\0');
           uVar21 = ~uVar21;
           iVar7 = -1;
@@ -464,7 +463,7 @@ LAB_00742c7d:
             cVar6 = *pcVar19;
             pcVar19 = pcVar25;
           } while (cVar6 != '\0');
-          pcVar19 = (char *)((int)piVar27 - uVar21);
+          pcVar19 = (char *)((int)piVar26 - uVar21);
           pcVar25--;
           memcpy(pcVar25, pcVar19, uVar21);
           pcVar19 += uVar21;
@@ -482,12 +481,12 @@ LAB_00742c7d:
             pcVar19 = pcVar25;
           } while (cVar6 != '\0');
           uVar21 = (uint32_t)local_18 & 0x80000003;
-          bVar29 = uVar21 == 0;
+          bVar28 = uVar21 == 0;
           *(uint16_t *)(pcVar25 - 1) = DAT_008399d4;
           if ((int)uVar21 < 0) {
-            bVar29 = (uVar21 - 1 | 0xfffffffc) == 0xffffffff;
+            bVar28 = (uVar21 - 1 | 0xfffffffc) == 0xffffffff;
           }
-          if ((bVar29) && (0x846894 < (int)local_1c)) {
+          if ((bVar28) && (0x846894 < (int)local_1c)) {
             pcVar19 = &local_db0;
             pCVar20 = GetGameApp();
             C_GameApp__PrintMessage(pCVar20,pcVar19);
@@ -539,7 +538,7 @@ LAB_00742c7d:
                                    (uint32_t)((g_gameProfile.m_mpSettings)->dedicated != false));
         local_8 = 0x11;
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -580,7 +579,7 @@ LAB_00742c7d:
             pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_8c,0x583);
             local_8 = 4;
             if (pCVar18->rep == 0) {
-              pcVar19 = &DAT_00867a90;
+              pcVar19 = (char *)&DAT_00867a90;
             }
             else {
               pcVar19 = pCVar18->rep->chars;
@@ -626,7 +625,7 @@ LAB_00742c7d:
           pCVar18 = C_fstr_Construct(&local_7c,"%d. %s",uVar21,iVar7 + 8 + (int)local_1c);
           local_8 = 5;
           if (pCVar18->rep == 0) {
-            pcVar19 = &DAT_00867a90;
+            pcVar19 = (char *)&DAT_00867a90;
           }
           else {
             pcVar19 = pCVar18->rep->chars;
@@ -686,7 +685,7 @@ LAB_00742c7d:
                                    *(uint32_t *)((g_gameProfile.m_mpSettings)->_pad_017c + 0x6c));
         local_8 = 0x12;
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -709,7 +708,7 @@ LAB_00742c7d:
         piVar10 = C_str__Append_688130(pCVar18,(uint32_t*)(&local_60),(int *)&pSVar5->password);
         local_8 = CONCAT31(GH_PIECE(local_8,1,3),0x10);
         if (*piVar10 == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = (char *)(*piVar10 + 8);
@@ -734,8 +733,8 @@ LAB_00742c7d:
         pbVar22++;
       } while (bVar1 != 0);
 LAB_00743663:
-      pCVar28 = (C_Console *)(~uVar21 - 1);
-      local_20.rep = (C_str_rep *)pCVar28;
+      pCVar27 = (C_Console *)(~uVar21 - 1);
+      local_20.rep = (C_str_rep *)pCVar27;
       local_18 = pCVar18;
       pCVar11 = tier1_operator_new(~uVar21 + 8);
       if (pCVar11 == 0) {
@@ -743,20 +742,20 @@ LAB_00743663:
       }
       else {
         pCVar11->refCount = 1;
-        pCVar11->length = (uint32_t)pCVar28;
+        pCVar11->length = (uint32_t)pCVar27;
         pbVar22 = local_290;
         pcVar19 = pCVar11->chars;
-        for (uVar21 = (uint32_t)pCVar28 >> 2; uVar21 != 0; uVar21 = uVar21 - 1) {
+        for (uVar21 = (uint32_t)pCVar27 >> 2; uVar21 != 0; uVar21 = uVar21 - 1) {
           *(uint32_t *)pcVar19 = *(uint32_t *)pbVar22;
           pbVar22 += 4;
           pcVar19 += 4;
         }
-        for (uVar21 = (uint32_t)pCVar28 & 3; uVar21 != 0; uVar21 = uVar21 - 1) {
+        for (uVar21 = (uint32_t)pCVar27 & 3; uVar21 != 0; uVar21 = uVar21 - 1) {
           *pcVar19 = *pbVar22;
           pbVar22++;
           pcVar19++;
         }
-        pCVar11->chars[(int)pCVar28] = '\0';
+        pCVar11->chars[(int)pCVar27] = '\0';
         pCVar18 = local_18;
       }
       ptr = pCVar18->rep;
@@ -782,7 +781,7 @@ LAB_00743663:
         pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_30,iVar7);
         local_8 = 0xd;
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -790,7 +789,7 @@ LAB_00743663:
         pCVar18 = C_fstr_Construct(&local_58,"voicechat %s",pcVar19);
         local_8 = CONCAT31(GH_PIECE(local_8,1,3),0xe);
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -850,20 +849,20 @@ LAB_00743663:
       set_field_18_619720(pCVar18,0);
       iVar7 = FUN_00617da0((int)pCVar18);
       if (*(int *)(iVar7 + 4) != 0) {
-        iVar30 = *(int *)(iVar7 + 8) - *(int *)(iVar7 + 4) >> 2;
-        while (iVar30 != 0) {
-          iVar30--;
-          iVar31 = *(int *)(*(int *)(*(int *)(iVar7 + 4) + iVar30 * 4) + 1);
-          if (iVar31 == 0) {
-            puVar15 = &DAT_00867a90;
+        iVar29 = *(int *)(iVar7 + 8) - *(int *)(iVar7 + 4) >> 2;
+        while (iVar29 != 0) {
+          iVar29--;
+          iVar30 = *(int *)(*(int *)(*(int *)(iVar7 + 4) + iVar29 * 4) + 1);
+          if (iVar30 == 0) {
+            puVar15 = (uint32_t*)(&DAT_00867a90);
           }
           else {
-            puVar15 = (uint8_t *)(iVar31 + 8);
+            puVar15 = (uint32_t *)(iVar30 + 8);
           }
           pCVar18 = C_fstr_Construct(&local_3c,&DAT_00832cfc,puVar15);
           local_8 = 0x13;
           if (pCVar18->rep == 0) {
-            pcVar19 = &DAT_00867a90;
+            pcVar19 = (char *)&DAT_00867a90;
           }
           else {
             pcVar19 = pCVar18->rep->chars;
@@ -878,7 +877,7 @@ LAB_00743663:
           }
         }
       }
-      pcVar19 = &DAT_00867a90;
+      pcVar19 = (char *)&DAT_00867a90;
       pCVar20 = GetGameApp();
       C_GameApp__PrintMessage(pCVar20,pcVar19);
       pcVar19 = "Occupation maps:";
@@ -888,20 +887,20 @@ LAB_00743663:
       set_field_18_619720(local_18,1);
       iVar7 = FUN_00617da0((int)pCVar18);
       if (*(int *)(iVar7 + 4) != 0) {
-        iVar30 = *(int *)(iVar7 + 8) - *(int *)(iVar7 + 4) >> 2;
-        while (iVar30 != 0) {
-          iVar30--;
-          iVar31 = *(int *)(*(int *)(*(int *)(iVar7 + 4) + iVar30 * 4) + 1);
-          if (iVar31 == 0) {
-            puVar15 = &DAT_00867a90;
+        iVar29 = *(int *)(iVar7 + 8) - *(int *)(iVar7 + 4) >> 2;
+        while (iVar29 != 0) {
+          iVar29--;
+          iVar30 = *(int *)(*(int *)(*(int *)(iVar7 + 4) + iVar29 * 4) + 1);
+          if (iVar30 == 0) {
+            puVar15 = (uint32_t*)(&DAT_00867a90);
           }
           else {
-            puVar15 = (uint8_t *)(iVar31 + 8);
+            puVar15 = (uint32_t *)(iVar30 + 8);
           }
           pCVar18 = C_fstr_Construct(&local_44,&DAT_00832cfc,puVar15);
           local_8 = 0x14;
           if (pCVar18->rep == 0) {
-            pcVar19 = &DAT_00867a90;
+            pcVar19 = (char *)&DAT_00867a90;
           }
           else {
             pcVar19 = pCVar18->rep->chars;
@@ -916,7 +915,7 @@ LAB_00743663:
           }
         }
       }
-      pcVar19 = &DAT_00867a90;
+      pcVar19 = (char *)&DAT_00867a90;
       pCVar20 = GetGameApp();
       C_GameApp__PrintMessage(pCVar20,pcVar19);
       pcVar19 = "Objectives maps:";
@@ -926,20 +925,20 @@ LAB_00743663:
       set_field_18_619720(local_18,2);
       iVar7 = FUN_00617da0((int)pCVar18);
       if (*(int *)(iVar7 + 4) != 0) {
-        iVar30 = *(int *)(iVar7 + 8) - *(int *)(iVar7 + 4) >> 2;
-        while (iVar30 != 0) {
-          iVar30--;
-          iVar31 = *(int *)(*(int *)(*(int *)(iVar7 + 4) + iVar30 * 4) + 1);
-          if (iVar31 == 0) {
-            puVar15 = &DAT_00867a90;
+        iVar29 = *(int *)(iVar7 + 8) - *(int *)(iVar7 + 4) >> 2;
+        while (iVar29 != 0) {
+          iVar29--;
+          iVar30 = *(int *)(*(int *)(*(int *)(iVar7 + 4) + iVar29 * 4) + 1);
+          if (iVar30 == 0) {
+            puVar15 = (uint32_t*)(&DAT_00867a90);
           }
           else {
-            puVar15 = (uint8_t *)(iVar31 + 8);
+            puVar15 = (uint32_t *)(iVar30 + 8);
           }
           pCVar18 = C_fstr_Construct(&local_4c,&DAT_00832cfc,puVar15);
           local_8 = 0x15;
           if (pCVar18->rep == 0) {
-            pcVar19 = &DAT_00867a90;
+            pcVar19 = (char *)&DAT_00867a90;
           }
           else {
             pcVar19 = pCVar18->rep->chars;
@@ -954,7 +953,7 @@ LAB_00743663:
           }
         }
       }
-      pcVar19 = &DAT_00867a90;
+      pcVar19 = (char *)&DAT_00867a90;
       pCVar20 = GetGameApp();
       C_GameApp__PrintMessage(pCVar20,pcVar19);
       pcVar19 = "Cooperative maps:";
@@ -964,20 +963,20 @@ LAB_00743663:
       set_field_18_619720(local_18,3);
       iVar7 = FUN_00617da0((int)pCVar18);
       if (*(int *)(iVar7 + 4) != 0) {
-        iVar30 = *(int *)(iVar7 + 8) - *(int *)(iVar7 + 4) >> 2;
-        while (iVar30 != 0) {
-          iVar30--;
-          iVar31 = *(int *)(*(int *)(*(int *)(iVar7 + 4) + iVar30 * 4) + 1);
-          if (iVar31 == 0) {
-            puVar15 = &DAT_00867a90;
+        iVar29 = *(int *)(iVar7 + 8) - *(int *)(iVar7 + 4) >> 2;
+        while (iVar29 != 0) {
+          iVar29--;
+          iVar30 = *(int *)(*(int *)(*(int *)(iVar7 + 4) + iVar29 * 4) + 1);
+          if (iVar30 == 0) {
+            puVar15 = (uint32_t*)(&DAT_00867a90);
           }
           else {
-            puVar15 = (uint8_t *)(iVar31 + 8);
+            puVar15 = (uint32_t *)(iVar30 + 8);
           }
           pCVar18 = C_fstr_Construct(&local_54,&DAT_00832cfc,puVar15);
           local_8 = 0x16;
           if (pCVar18->rep == 0) {
-            pcVar19 = &DAT_00867a90;
+            pcVar19 = (char *)&DAT_00867a90;
           }
           else {
             pcVar19 = pCVar18->rep->chars;
@@ -1015,10 +1014,10 @@ LAB_00743663:
         strncpy(pcVar19,(char *)local_290,0x80);
         iVar7 = 7;
 LAB_00743c53:
-        bVar29 = false;
-        iVar30 = 0;
+        bVar28 = false;
+        iVar29 = 0;
         pCVar20 = GetGameApp();
-        C_GameApp__PostCommand(pCVar20,iVar7,(int)pcVar19,iVar30,bVar29);
+        C_GameApp__PostCommand(pCVar20,iVar7,(int)pcVar19,iVar29,bVar28);
       }
       break;
     case 0x33:
@@ -1039,7 +1038,7 @@ LAB_00743c53:
         pCVar18 = C_fstr_Construct(&local_5c,"maxping:  %d",DAT_009820d4);
         local_8 = 0x17;
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -1057,7 +1056,7 @@ LAB_00743c53:
         pCVar18 = C_fstr_Construct(&local_64,"maxfreq:  %d",DAT_009820d8);
         local_8 = 0x18;
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -1099,14 +1098,14 @@ LAB_00743c53:
           cVar6 = *pcVar19;
           pcVar19++;
         } while (cVar6 != '\0');
-        bVar29 = false;
-        iVar31 = 0;
-        command = command + (~uVar21 - 1);
+        bVar28 = false;
         iVar30 = 0;
+        command = command + (~uVar21 - 1);
+        iVar29 = 0;
         iVar7 = 4;
         pcVar19 = pcVar8;
         pCVar20 = GetGameApp();
-        C_GameApp__SendGameMessage(pCVar20,iVar7,iVar30,(int)pcVar19,iVar31,bVar29);
+        C_GameApp__SendGameMessage(pCVar20,iVar7,iVar29,(int)pcVar19,iVar30,bVar28);
         if ((g_gameRole & 2) == 0) {
           sprintf(local_3b0,"ADMIN: %s",pcVar8);
           if (DAT_0098c100 == 0) {
@@ -1131,7 +1130,7 @@ LAB_00743c53:
         pCVar18 = C_fstr_Construct(&local_6c,"maxinactivity:  %d",DAT_009820dc / 1000);
         local_8 = 0x19;
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -1171,7 +1170,7 @@ LAB_00743c53:
         pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_2c,pSVar17[1].m_type);
         local_8 = 0x1a;
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -1179,7 +1178,7 @@ LAB_00743c53:
         pCVar18 = C_fstr_Construct(&local_74,"%s - %s",puVar24,pcVar19);
         local_8 = CONCAT31(GH_PIECE(local_8,1,3),0x1b);
         if (pCVar18->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+          pcVar19 = (char *)&DAT_00867a90;
         }
         else {
           pcVar19 = pCVar18->rep->chars;
@@ -1230,7 +1229,7 @@ uint32_t FUN_007440d0(int *param_1, ...)
   if (file == 0) {
     pCVar2 = C_GameTexts__Get(&DAT_008c1368,&local_74,0x586);
     if (pCVar2->rep == 0) {
-      pcVar3 = &DAT_00867a90;
+      pcVar3 = (char *)&DAT_00867a90;
     }
     else {
       pcVar3 = pCVar2->rep->chars;
@@ -1239,7 +1238,7 @@ uint32_t FUN_007440d0(int *param_1, ...)
     pCVar2 = C_fstr_Construct((C_str *)&param_1,"%s %s",pcVar3,piVar1);
     local_4 = (FILE *)CONCAT31(GH_PIECE(local_4,1,3),1);
     if (pCVar2->rep == 0) {
-      pcVar3 = &DAT_00867a90;
+      pcVar3 = (char *)&DAT_00867a90;
     }
     else {
       pcVar3 = pCVar2->rep->chars;

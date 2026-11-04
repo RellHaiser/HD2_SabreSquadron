@@ -42,7 +42,7 @@ uint32_t FUN_00628600(...)
 
 
 // 0x00628610
-uint32_t C_MainMenu__FUN_00628610(C_MainMenu *_this,int *param_1,int *param_2, ...)
+uint32_t C_MainMenu__C_MainMenu__DescribeCreateServerScreen(C_MainMenu *_this,int *param_1,int *param_2, ...)
 {
   uint8_t stack0xffffffa8[64];
   int *piVar1;

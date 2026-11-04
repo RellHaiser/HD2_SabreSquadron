@@ -36,7 +36,7 @@ uint32_t FUN_006370b0(...)
 
 
 // 0x006370c0
-uint32_t FUN_006370c0(void *param_1,int *param_2, ...)
+uint32_t C_MainMenu__DescribeAddServerScreen(void *param_1,int *param_2, ...)
 {
   uint8_t stack0xffffff74[64];
   void *pvStack_1c;
@@ -359,7 +359,7 @@ LAB_0063786d:
 
 
 // 0x00637890
-uint32_t C_MainMenu__FUN_00637890(C_MainMenu *_this,void *param_1,int *param_2, ...)
+uint32_t C_MainMenu__C_MainMenu__DescribePasswordScreen(C_MainMenu *_this,void *param_1,int *param_2, ...)
 {
   void *pvVar1;
   uint32_t local_20;

@@ -35,105 +35,92 @@ uint32_t FUN_00638df0(...)
 }
 
 
-// 0x00638e00  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t C_MainMenu__FUN_00638e00(C_MainMenu *_this,int *param_1, ...)
-{
-  return {};
-}
-#if 0
+// 0x00638e00
+bool C_MainMenu__OnMissionsMessage(C_MainMenu *_this,void *message, ...)
 {
   uint8_t stack0xffffff98[64];
+  void *local_c;
   int iVar1;
   bool bVar2;
   int *piVar3;
-  uint32_t uVar4;
-  uint32_t extraout_EAX;
   C_HumanStore *this_00;
-  undefined3 extraout_var;
-  int iVar5;
-  undefined3 extraout_var_00;
-  C_GameApp *pCVar6;
-  uint3 extraout_var_01;
-  C_str *pCVar7;
+  int iVar4;
+  C_GameApp *pCVar5;
+  C_str *pCVar6;
   C_str fileName;
-  C_str CStack_58;
-  uint32_t uStack_54;
-  uint32_t uStack_50;
-  uint32_t uStack_4c;
-  int *piStack_40;
-  uint32_t uStack_3c;
-  uint32_t uStack_38;
-  uint32_t uStack_34;
-  int *piStack_28;
-  uint32_t uStack_24;
-  uint32_t uStack_20;
-  uint32_t uStack_1c;
-  int *piStack_10;
-  uint8_t *puStack_8;
-  uint32_t uStack_4;
-  uStack_4 = 0xffffffff;
-  puStack_8 = &UNK_00804150;
-  piVar3 = (int *)((param_1[1] & 0x3000fffU) + 0xfdfffffe);
-  switch(param_1[1] & 0x3000fffU) {
+  C_str local_58;
+  uint32_t local_54;
+  uint32_t local_50;
+  uint32_t local_4c;
+  int *local_40;
+  uint32_t local_3c;
+  uint32_t local_38;
+  uint32_t local_34;
+  int *local_28;
+  uint32_t local_24;
+  uint32_t local_20;
+  uint32_t local_1c;
+  int *local_10;
+  uint32_t local_4;
+  local_4 = 0xffffffff;
+  switch(*(uint32_t *)((int)message + 4) & 0x3000fff) {
   case 0x2000002:
     break;
   default:
-LAB_006391ea:
-    return (uint32_t)piVar3 & 0xffffff00;
+    return false;
   case 0x200001e:
     if (*(int *)(_this->_pad_01e8 + 0x20) != -1) {
       (g_gameProfile.m_mpSettings)->sessionType = 0;
       C_GameProfile__ResetGame(&g_gameProfile);
-      iVar5 = C_Campaign__CountMissions(g_gameProfile.m_campaign,0);
+      iVar4 = C_Campaign__CountMissions(g_gameProfile.m_campaign,0);
       iVar1 = *(int *)(_this->_pad_01e8 + 0x20);
       if ((g_gameProfile.m_playMode)->singleMission == 1) {
-        if (iVar1 < iVar5) {
+        if (iVar1 < iVar4) {
           (g_gameProfile.m_campaign)->m_current = 0;
-          iVar5 = *(int *)(_this->_pad_01e8 + 0x20);
+          iVar4 = *(int *)(_this->_pad_01e8 + 0x20);
         }
         else {
           (g_gameProfile.m_campaign)->m_current = 1;
-          iVar5 = *(int *)(_this->_pad_01e8 + 0x20) - iVar5;
+          iVar4 = *(int *)(_this->_pad_01e8 + 0x20) - iVar4;
         }
         C_Campaign__SetupSingleMission
-                  (g_gameProfile.m_campaign,(g_gameProfile.m_campaign)->m_current,iVar5);
+                  (g_gameProfile.m_campaign,(g_gameProfile.m_campaign)->m_current,iVar4);
         _this->_pad_0004[0] = '\x02';
         _this->_pad_0004[1] = '\0';
         _this->_pad_0004[2] = '\0';
         _this->_pad_0004[3] = '\0';
-        return CONCAT31(extraout_var_00,1);
+        return true;
       }
-      if ((iVar1 != 0) && (iVar1 != iVar5)) {
-        if (iVar1 < iVar5) {
+      if ((iVar1 != 0) && (iVar1 != iVar4)) {
+        if (iVar1 < iVar4) {
           C_GameProfile__GetSaveFileName
-                    (&g_gameProfile,(C_str *)&param_1,(g_gameProfile.m_campaign)->m_current,
+                    (&g_gameProfile,(C_str *)&message,(g_gameProfile.m_campaign)->m_current,
                      iVar1 - 1);
-          pCVar7 = (C_str *)&param_1;
+          pCVar6 = (C_str *)&message;
           bVar2 = false;
-          uStack_4 = 4;
-          pCVar6 = GetGameApp();
-          C_GameApp__LoadGame(pCVar6,pCVar7,bVar2);
-          CStack_58.rep = (C_str_rep *)param_1;
+          local_4 = 4;
+          pCVar5 = GetGameApp();
+          C_GameApp__LoadGame(pCVar5,pCVar6,bVar2);
+          local_58.rep = message;
         }
         else {
           C_GameProfile__GetSaveFileName
-                    (&g_gameProfile,&CStack_58,(g_gameProfile.m_campaign)->m_current,
-                     (iVar1 - iVar5) - 1);
-          pCVar7 = &CStack_58;
+                    (&g_gameProfile,&local_58,(g_gameProfile.m_campaign)->m_current,
+                     (iVar1 - iVar4) - 1);
+          pCVar6 = &local_58;
           bVar2 = false;
-          uStack_4 = 5;
-          pCVar6 = GetGameApp();
-          C_GameApp__LoadGame(pCVar6,pCVar7,bVar2);
+          local_4 = 5;
+          pCVar5 = GetGameApp();
+          C_GameApp__LoadGame(pCVar5,pCVar6,bVar2);
         }
-        uStack_4 = 0xffffffff;
-        if ((CStack_58.rep != 0) &&
-           ((CStack_58.rep)->refCount = (CStack_58.rep)->refCount - 1,
-           (CStack_58.rep)->refCount == 0)) {
-          tier1_operator_delete(CStack_58.rep);
+        local_4 = 0xffffffff;
+        if ((local_58.rep != 0) &&
+           ((local_58.rep)->refCount = (local_58.rep)->refCount - 1, (local_58.rep)->refCount == 0)
+           ) {
+          tier1_operator_delete(local_58.rep);
         }
       }
       C_Campaign__AdvanceToMission(g_gameProfile.m_campaign);
-      piVar3 = (int *)((uint32_t)extraout_var_01 << 8);
       _this->_pad_0004[0] = '\x02';
       _this->_pad_0004[1] = '\0';
       _this->_pad_0004[2] = '\0';
@@ -142,9 +129,8 @@ LAB_006391ea:
     break;
   case 0x2000031:
     (g_gameProfile.m_mpSettings)->sessionType = 0;
-    iVar1 = param_1[2];
-    (g_gameProfile.m_playMode)->singleMission = iVar1;
-    return CONCAT31((int3)((uint32_t)iVar1 >> 8),1);
+    (g_gameProfile.m_playMode)->singleMission = *(int *)((int)message + 8);
+    return true;
   case 0x2000033:
     _this->_pad_01e8[0x10] = '\0';
     (g_gameProfile.m_mpSettings)->sessionType = 0;
@@ -153,76 +139,72 @@ LAB_006391ea:
                       (g_gameProfile.m_player,(g_gameProfile.m_campaign)->m_current);
     if (bVar2) {
       FUN_0063a670((int)_this);
-      piStack_28 = 0;
-      uStack_3c = 0;
-      uStack_38 = 0x2000001;
-      uStack_34 = 5;
-      uStack_4 = 1;
-      PostControlMessage(&DAT_008ae590,&uStack_3c);
-      piVar3 = piStack_28;
+      local_28 = 0;
+      local_3c = 0;
+      local_38 = 0x2000001;
+      local_34 = 5;
+      local_4 = 1;
+      PostControlMessage(&DAT_008ae590,&local_3c);
+      piVar3 = local_28;
     }
     else {
       fileName.rep = (C_str_rep *)((g_gameProfile.m_humanStore)->m_profiles).first;
       if ((fileName.rep == 0) ||
-         (param_1 = (int *)((int)((g_gameProfile.m_humanStore)->m_profiles).last - (int)fileName.rep
-                           >> 2), param_1 == 0)) {
-        param_1 = (int *)&stack0xffffff98;
+         (message = (void *)((int)((g_gameProfile.m_humanStore)->m_profiles).last -
+                             (int)fileName.rep >> 2), message == 0)) {
+        message = &stack0xffffff98;
         C_fstr_Construct((C_str *)&stack0xffffff98,"tables\\HumanStore.def");
-        uStack_4 = 0xffffffff;
+        local_4 = 0xffffffff;
         this_00 = (C_HumanStore *)get_field_10_6392a0(0x8aea0c);
         bVar2 = C_HumanStore__Load(this_00,fileName);
-        piVar3 = (int *)CONCAT31(extraout_var,bVar2);
-        if (!bVar2) goto LAB_006391ea;
+        if (!bVar2) {
+          return false;
+        }
       }
       C_Campaign__AdvanceToMission(g_gameProfile.m_campaign);
-      piStack_10 = 0;
-      uStack_24 = 0;
-      uStack_20 = 0x2000008;
-      uStack_1c = 0;
-      uStack_4 = 3;
-      PostControlMessage(&DAT_008ae590,&uStack_24);
-      piVar3 = piStack_10;
+      local_10 = 0;
+      local_24 = 0;
+      local_20 = 0x2000008;
+      local_1c = 0;
+      local_4 = 3;
+      PostControlMessage(&DAT_008ae590,&local_24);
+      piVar3 = local_10;
     }
     goto LAB_00638fb5;
   case 0x2000070:
     (g_gameProfile.m_mpSettings)->sessionType = 0;
-    iVar1 = param_1[2];
-    (g_gameProfile.m_playMode)->mode = iVar1;
-    return CONCAT31((int3)((uint32_t)iVar1 >> 8),1);
+    (g_gameProfile.m_playMode)->mode = *(int *)((int)message + 8);
+    return true;
   case 0x2000074:
     _this->_pad_01e8[0x10] = '\x01';
     FUN_0063ab60((int)_this);
-    uStack_50 = 0x2000001;
-    piStack_40 = 0;
-    uStack_54 = 0;
-    uStack_4c = 5;
-    uStack_4 = 0;
-    PostControlMessage(&DAT_008ae590,&uStack_54);
-    piVar3 = piStack_40;
+    local_50 = 0x2000001;
+    local_40 = 0;
+    local_54 = 0;
+    local_4c = 5;
+    local_4 = 0;
+    PostControlMessage(&DAT_008ae590,&local_54);
+    piVar3 = local_40;
 LAB_00638fb5:
     if ((piVar3 != 0) && (*piVar3 = *piVar3 - 1, *piVar3 == 0)) {
       tier1_operator_delete(piVar3);
-      return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
+      return true;
     }
     break;
   case 0x200007d:
-    piVar3 = (int *)CONCAT31((int3)((uint32_t)piVar3 >> 8),_this->_pad_01e8[0x10]);
-    if (_this->_pad_01e8[0x10] != '\0') {
-      piVar3 = (int *)FUN_00628230(0x8ae5c4);
-      piVar3 = (int *)(*(uint32_t *)(*piVar3 + 0x60) & 0xfc000000);
-      if (piVar3 == (int *)0x14000000) {
-        *(uint32_t *)(_this->_pad_01e8 + 0x24) =
-             (-(uint32_t)(*(int *)(_this->_pad_01e8 + 0x24) != 100) & 0x65) - 1;
-        uVar4 = FUN_0063ab60((int)_this);
-        return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
-      }
+    if ((_this->_pad_01e8[0x10] != '\0') &&
+       (ExceptionList = &local_c, piVar3 = (int *)FUN_00628230(0x8ae5c4),
+       (*(uint32_t *)(*piVar3 + 0x60) & 0xfc000000) == 0x14000000)) {
+      *(uint32_t *)(_this->_pad_01e8 + 0x24) =
+           (-(uint32_t)(*(int *)(_this->_pad_01e8 + 0x24) != 100) & 0x65) - 1;
+      FUN_0063ab60((int)_this);
+      return true;
     }
   }
-  return CONCAT31((int3)((uint32_t)piVar3 >> 8),1);
+  return true;
 }
 
 
-#endif
 // 0x006392a0
 uint32_t get_field_10_6392a0(int param_1, ...)
 {
@@ -231,7 +213,7 @@ uint32_t get_field_10_6392a0(int param_1, ...)
 
 
 // 0x006392b0
-uint32_t FUN_006392b0(void *param_1,int *param_2, ...)
+uint32_t C_MainMenu__DescribeMissionsScreen(void *param_1,int *param_2, ...)
 {
   uint8_t stack0xffffff60[64];
   uint8_t stack0xffffff20[64];
@@ -1549,7 +1531,7 @@ uint32_t FUN_0063b310(void *_this,uint32_t param_1,int param_2, ...)
   int missionNumber;
   int iVar6;
   uint32_t uVar7;
-  uint8_t *textId;
+  uint8_t *id;
   uint32_t uVar8;
   C_str_rep *local_30;
   C_str local_2c;
@@ -1676,13 +1658,13 @@ uint32_t FUN_0063b310(void *_this,uint32_t param_1,int param_2, ...)
        ((local_10.rep)->refCount = (local_10.rep)->refCount - 1, (local_10.rep)->refCount == 0)) {
       tier1_operator_delete(local_10.rep);
     }
-    textId = (uint8_t *)((int)&pCVar4->refCount + 2);
+    id = (uint8_t *)((int)&pCVar4->refCount + 2);
     local_10.rep = 0;
     local_20 = 0x1000017;
     local_1c = 3;
     local_4 = CONCAT31(GH_PIECE(local_4,1,3),10);
     local_24 = uVar8;
-    local_18 = (C_str_rep *)textId;
+    local_18 = (C_str_rep *)id;
     PostControlMessage(&DAT_008ae590,&local_24);
     if ((local_10.rep != 0) &&
        ((local_10.rep)->refCount = (local_10.rep)->refCount - 1, (local_10.rep)->refCount == 0)) {
@@ -1702,8 +1684,8 @@ uint32_t FUN_0063b310(void *_this,uint32_t param_1,int param_2, ...)
     }
     iVar6 = 0;
     do {
-      textId++;
-      pCVar3 = C_GameTexts__Get(&DAT_008c1368,&local_2c,(int)textId);
+      id++;
+      pCVar3 = C_GameTexts__Get(&DAT_008c1368,&local_2c,(int)id);
       if (pCVar3->rep == 0) {
         uVar7 = 0;
       }
@@ -1721,7 +1703,7 @@ uint32_t FUN_0063b310(void *_this,uint32_t param_1,int param_2, ...)
       local_1c = 2;
       GH_PIECE(local_4,0,1) = 0xc;
       local_24 = uVar8;
-      local_18 = (C_str_rep *)textId;
+      local_18 = (C_str_rep *)id;
       PostControlMessage(&DAT_008ae590,&local_24);
       GH_PIECE(local_4,0,1) = 0;
       if ((local_10.rep != 0) &&

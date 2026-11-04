@@ -36,7 +36,7 @@ uint32_t FUN_00633480(...)
 
 
 // 0x00633490  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t C_MainMenu__FUN_00633490(C_MainMenu *_this,int param_1, ...)
+uint32_t C_MainMenu__C_MainMenu__OnNetworkMessage(C_MainMenu *_this,int param_1, ...)
 {
   return {};
 }
@@ -239,7 +239,7 @@ uint32_t C_MainMenu__FUN_00633490(C_MainMenu *_this,int param_1, ...)
 switchD_006334da_caseD_200000b:
     return (uint32_t)pCVar5 & 0xffffff00;
   case 0x2000027:
-    C_MainMenu__FUN_00636400(_this);
+    C_MainMenu__DrainFoundServers(_this);
     uVar3 = FUN_00724040(&g_netGame,FUN_00635b70);
     return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
   case 0x2000028:
@@ -315,7 +315,7 @@ switchD_006334da_caseD_200000b:
     _this->_pad_0004[3] = '\0';
     return CONCAT31(uVar6,1);
   case 0x2000098:
-    C_MainMenu__FUN_00636400(_this);
+    C_MainMenu__DrainFoundServers(_this);
     iVar4 = C_MpMenuSettings__GetList(_this->m_1e4,0);
     uVar3 = FUN_00724090(&g_netGame,FUN_00635b70,iVar4);
     return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
@@ -527,7 +527,7 @@ LAB_00633f2b:
 
 #endif
 // 0x00634050
-uint32_t C_MainMenu__FUN_00634050(C_MainMenu *_this,void *param_1,int *param_2, ...)
+uint32_t C_MainMenu__C_MainMenu__DescribeBrowserScreen(C_MainMenu *_this,void *param_1,int *param_2, ...)
 {
   void *pvVar1;
   AddScreenMessage((int)param_1,0,0x1000007,0x4014000,_this,FUN_00635ba0);
@@ -1193,8 +1193,12 @@ uint32_t FUN_00634f90(int param_1, ...)
 
 
 #endif
-// 0x00635360
+// 0x00635360  (tier1 fallback: translated text kept below, needs hand porting)
 uint32_t FUN_00635360(int param_1, ...)
+{
+  return {};
+}
+#if 0
 {
   S_MultiplayerSettings *extraout_EAX;
   S_MultiplayerSettings *pSVar1;
@@ -1210,7 +1214,7 @@ uint32_t FUN_00635360(int param_1, ...)
   if (pSVar1 == 0) {
     *(uint32_t *)(param_1 + 0x200) = 0;
     *(uint32_t *)(param_1 + 0x21c) = 0;
-    C_MainMenu__FUN_00636400((C_MainMenu *)param_1);
+    C_MainMenu__C_MainMenu::DrainFoundServers((C_MainMenu *)param_1);
     C_MpMenuSettings__ClearServers(*(int *)(param_1 + 0x1e4));
     local_10 = 0;
     local_24 = 0x20e00000;
@@ -1334,6 +1338,7 @@ uint32_t FUN_00635360(int param_1, ...)
 }
 
 
+#endif
 // 0x006356d0
 uint32_t FUN_006356d0(...)
 {
@@ -1910,26 +1915,6 @@ uint32_t FUN_00636280(int param_1, ...)
 }
 
 
-// 0x00636400
-uint32_t C_MainMenu__FUN_00636400(C_MainMenu *_this, ...)
-{
-  uint32_t uVar1;
-  EnterCriticalSection((LPCRITICAL_SECTION)(_this->_pad_0104 + 0xac));
-  while ((*(int *)(_this->_pad_01d4 + 4) != 0 &&
-         (*(int *)(_this->_pad_01d4 + 8) - *(int *)(_this->_pad_01d4 + 4) >> 2 != 0))) {
-    uVar1 = C_MpMenuSettings__IsInFirstList(_this->m_1e4,*(int *)(*(int *)(_this->_pad_01d4 + 8) - 4));
-    if (((char)uVar1 == '\0') &&
-       (uVar1 = C_MpMenuSettings__IsInSecondList(_this->m_1e4,*(int *)(*(int *)(_this->_pad_01d4 + 8) - 4)),
-       (char)uVar1 == '\0')) {
-      tier1_operator_delete(*(void **)(*(int *)(_this->_pad_01d4 + 8) - 4));
-    }
-    *(int *)(_this->_pad_01d4 + 8) = *(int *)(_this->_pad_01d4 + 8) - 4;
-  }
-  LeaveCriticalSection((LPCRITICAL_SECTION)(_this->_pad_0104 + 0xac));
-  return 0;
-}
-
-
 // 0x006364b0
 uint32_t FUN_006364b0(void *param_1, ...)
 {
@@ -1956,11 +1941,11 @@ uint32_t FUN_006364b0(void *param_1, ...)
   local_4 = 0;
   C_MenuState__HandleMessage(param_1,&local_24);
   uVar1 = local_1c;
-  C_MpMenuSettings__CountServers(*(int *)((int)param_1 + 0x1e4));
+  C_MpMenuSettings__CountServers(*(void **)((int)param_1 + 0x1e4));
   pCVar2 = C_GameTexts__Get(&DAT_008c1368,&local_40,0x22ae);
   local_4 = CONCAT31(GH_PIECE(local_4,1,3),1);
   if (pCVar2->rep == 0) {
-    pcVar3 = &DAT_00867a90;
+    pcVar3 = (char *)&DAT_00867a90;
   }
   else {
     pcVar3 = pCVar2->rep->chars;

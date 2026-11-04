@@ -8180,6 +8180,36 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/main_menu.txt (+18; LoadFile / SaveFile take the name by value); 18 functions in ported.txt.
     Stats: 9,150 of 12,306 functions by hand (82.8 % by size).
 
+  PART 9h-iii DONE (2026-11-04): the main menu's class, start, stop, update, messages and building
+  (game/main_menu.h/.cpp, new; C_MainMenu out of pending.h).
+  - C_MainMenu (vtable 0x00815e30, 0x240 bytes): +0x1B0 the lock of the servers the browser's thread finds
+    (+0x1D4), +0x1D0 the options handler, +0x1E4 C_MpMenuSettings, +0x1E8 the movie, +0x1EC the saved game
+    picked, +0x213 the profile picked (unaligned), the others named when their screens are ported. Its 14
+    screens (the ids' top bits): 1 MAIN MENU, 2 CHANGE PROFIL, 3 SINGLEPLAYER, 4 CONFIRM (the quit question),
+    5 / 7 SINGLE MISSION 2 (the missions; the saved games), 6 OPTIONS, 8 multiplayer menu (the browser),
+    9 create server, 10 PASSWORD, 11 Server Filters, 12 Game info, 13 MP Connect console, 14 ADD SERVER.
+  - OnStart 0x006264c0 (the lock, the settings, the options handler, the date on 0x4300000; dropped: the
+    copy protection's value), OnStop 0x00626ad0 (the found servers dropped, the settings and the handler
+    deleted, the game info's 12 styles released 0x0062f740, the lock), OnUpdate 0x00626b30, OnMessage
+    0x00626ca0 (the profile, network, missions, options and connection handlers in turn; Escape by the top
+    screen: the profile picked made current (SelectProfile 0x00622af0, a button's callback too), the
+    password / add-server popups closed, the quit question's own ids, else back; 0x200003A the movie;
+    0x2000075 the saved game loaded), BuildScreens 0x006271e0 (each screen described by its kind's function,
+    the quit question's model at (0.5, -0.375, -0.5)), DrainFoundServers 0x00636400 (Ghidra had dropped its
+    delete of the servers in neither list), the destructor 0x006c19a0 / 0x006c1980, GetTypeId 0x006c1970.
+  - Ghidra: 0x00621240, 0x00632390, 0x00638e00 were empty 1-byte functions over code never disassembled:
+    deleted and created again (654 and 455 bytes; 0x00638e00 a switch whose table Ghidra does not follow).
+    The index rebuilt; 69 decompiles still calling C_TextDatabase::GetText (C_GameTexts::Get) re-exported.
+  - Harness: main_menu_test.inc (new; check_mainmenu.py): mmStart, mmStop, mmUpdate, mmDrain (the deletes seen
+    through a hook in factory_test.inc's operator delete), mmMessage, mmEscape, mmSelect, mmBuild; the screens'
+    handlers and describers faked. All 15 factory checkers in both orders. mission_loader.cpp's local
+    SOUND_LOOP renamed (pending.h now reaches sound_module.h's).
+  - Mutations: mutations/mutate_9h3.py: 100: 90 killed, 10 equivalent.
+  - Build: MSVC clean. Tier 1: 338 errors in 61 files, 139 stubs. ret_audit --src: 52.
+  - Ghidra: names/main_menu.txt (+24: the class's, the describers' and handlers' to come, g_gameInfoStyles);
+    11 functions in ported.txt (absorb not run: it would take the unported handlers whose only callers are
+    ported). Stats: 9,161 of 12,306 functions by hand (82.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

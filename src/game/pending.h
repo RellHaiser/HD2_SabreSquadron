@@ -23,13 +23,8 @@
 // campaigns put them.
 
 // The video player C_VideoState / C_MovieState: game/video_state.h.
-// The main menu (type 2, vtable 0x00815e30, 0x240 bytes; also the network session's menus).
-class C_MainMenu : public C_GameState {
-public:
-    C_MainMenu();                                   // (inline)
-    // The movie the menu asks for (empty: the credits).
-    const C_str &GetMovie() const;                  // C_str +0x1E8
-};
+// The main menu (type 2): game/main_menu.h.
+#include "game/main_menu.h"
 // The equipment screen (kinds 3 and 4): game/equipment_screen.h. The debriefing (kind 5):
 // game/debriefing.h.
 // The squad screen (kinds 1 and 2): game/squad_menu.h.

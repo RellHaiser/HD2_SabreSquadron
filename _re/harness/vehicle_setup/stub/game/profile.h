@@ -118,6 +118,8 @@ public:
     C_str GetSaveFileName(int a, int b);
     // (The squad screen, part 9g-ix.)
     struct S_SquadSoldier *FindSoldierState(int profileIndex);
+    // (The main menu, part 9h-iii: main_menu_test.inc.)
+    bool SelectPlayer(const char *name);
 };
 extern C_GameProfile g_gameProfile;
 // (The debriefing's soldier, part 9g-viii: as the real header.)

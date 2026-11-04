@@ -36,7 +36,7 @@ uint32_t FUN_0062f4a0(...)
 
 
 // 0x0062f4b0
-uint32_t C_MainMenu__FUN_0062f4b0(C_MainMenu *_this,void *param_1, ...)
+uint32_t C_MainMenu__C_MainMenu__DescribeGameInfoScreen(C_MainMenu *_this,void *param_1, ...)
 {
   void *pvVar1;
   int iVar2;
@@ -45,7 +45,7 @@ uint32_t C_MainMenu__FUN_0062f4b0(C_MainMenu *_this,void *param_1, ...)
   uint32_t *puVar5;
   int *local_38;
   uint32_t local_34 [13];
-  local_38 = &DAT_008aca88;
+  local_38 = (int*)(&g_gameInfoStyles);
   puVar3 = &DAT_0083fad8;
   do {
     puVar4 = puVar3;
@@ -91,20 +91,6 @@ uint32_t C_MainMenu__FUN_0062f4b0(C_MainMenu *_this,void *param_1, ...)
   pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x13,&DAT_00832d10);
   AddDescMessage1(pvVar1,0,0x1000099,0);
   return 1;
-}
-
-
-// 0x0062f740
-uint32_t FUN_0062f740(...)
-{
-  int *piVar1;
-  piVar1 = &DAT_008aca88;
-  do {
-    ReleaseTextStyle(*piVar1);
-    *piVar1 = -1;
-    piVar1++;
-  } while ((int)piVar1 < 0x8acab8);
-  return 0;
 }
 
 
@@ -226,7 +212,7 @@ uint32_t FUN_0062fa30(int param_1, ...)
               uStack_4 = 5;
               uStack_80 = 0x30100000;
               uStack_7c = 0x1000016;
-              uStack_78 = DAT_008aca88;
+              uStack_78 = g_gameInfoStyles;
               C_str__Assign(&CStack_6c,(uint32_t*)(&CStack_11c));
               uStack_4 = 0xffffffff;
               if (CStack_11c.rep != 0) {
@@ -248,7 +234,7 @@ LAB_0062fd8c:
                 uStack_4 = 2;
                 uStack_c8 = 0x30100000;
                 uStack_c4 = 0x1000016;
-                uStack_c0 = DAT_008aca88;
+                uStack_c0 = g_gameInfoStyles;
                 C_str__Assign(&CStack_b4,(uint32_t*)(&CStack_104));
                 uStack_4 = 0xffffffff;
                 if (CStack_104.rep != 0) {
