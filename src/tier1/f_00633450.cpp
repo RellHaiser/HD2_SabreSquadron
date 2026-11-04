@@ -261,7 +261,7 @@ switchD_006334da_caseD_200000b:
     piVar1 = _this->m_1e4;
     _this->_pad_01e8[0x2a] = '\0';
     _this->_pad_01e8[8] = '\0';
-    FUN_0061a7c0(piVar1);
+    C_MpMenuSettings__Save(piVar1);
     C_MainMenu__FUN_0062d030(_this);
     cVar2 = FUN_007328d0();
     if (cVar2 != '\0') {
@@ -316,11 +316,11 @@ switchD_006334da_caseD_200000b:
     return CONCAT31(uVar6,1);
   case 0x2000098:
     C_MainMenu__FUN_00636400(_this);
-    iVar4 = FUN_0061b100(_this->m_1e4,0);
+    iVar4 = C_MpMenuSettings__GetList(_this->m_1e4,0);
     uVar3 = FUN_00724090(&g_netGame,FUN_00635b70,iVar4);
     return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
   case 0x2000099:
-    FUN_0061a750(_this->m_1e4);
+    C_MpMenuSettings__Load(_this->m_1e4);
     (g_gameProfile.m_mpSettings)->unknown174 = 0;
     _this->_pad_0104[0xc4] = '\0';
     _this->_pad_0104[0xc5] = '\0';
@@ -400,7 +400,7 @@ switchD_006334da_caseD_200000b:
     break;
   case 0x200009a:
     FUN_0061a0f0((int)_this->m_1e4);
-    FUN_0061a750(_this->m_1e4);
+    C_MpMenuSettings__Load(_this->m_1e4);
     (g_gameProfile.m_mpSettings)->unknown174 = 1;
     _this->_pad_0104[0xc4] = '\x06';
     _this->_pad_0104[0xc5] = '\0';
@@ -773,13 +773,13 @@ uint32_t FUN_00634950(int param_1, ...)
         puVar7++;
       }
     }
-    this_00 = (void *)FUN_0061b100(*(void **)(param_1 + 0x1e4),2);
+    this_00 = (void *)C_MpMenuSettings__GetList(*(void **)(param_1 + 0x1e4),2);
     piVar2 = (int *)FUN_00636e00(this_00,*(uint32_t **)((int)this_00 + 8),1,(uint32_t*)(&local_28));
   }
   else {
     piVar2 = (int *)(iVar5 - 2);
     if (piVar2 == 0) {
-      iVar3 = FUN_0061b100(*(void **)(param_1 + 0x1e4),0);
+      iVar3 = C_MpMenuSettings__GetList(*(void **)(param_1 + 0x1e4),0);
       iVar5 = *(int *)(iVar3 + 4);
       if ((iVar5 != 0) && (iVar6 = *(int *)(iVar3 + 8) - iVar5 >> 2, iVar6 != 0)) {
 LAB_006349c3:
@@ -907,7 +907,7 @@ uint32_t FUN_00634b30(void *param_1, ...)
   _this = *(void **)((int)param_1 + 0x1e4);
   if (*(int *)((int)_this + 4) == 1) {
     *(uint32_t *)((int)param_1 + 0x21c) = 0;
-    FUN_0061b090(_this,2);
+    C_MpMenuSettings__SetListKind(_this,2);
     local_a0 = 0;
     local_b4 = 0;
     local_b0 = 0x2000028;
@@ -971,7 +971,7 @@ uint32_t FUN_00634b30(void *param_1, ...)
     pvVar1 = (void *)(*(int *)((int)_this + 4) - 2);
     if (pvVar1 == 0) {
       *(uint32_t *)((int)param_1 + 0x21c) = 0;
-      FUN_0061b090(_this,1);
+      C_MpMenuSettings__SetListKind(_this,1);
       local_88 = 0;
       local_9c = 0;
       local_98 = 0x2000028;
@@ -1211,7 +1211,7 @@ uint32_t FUN_00635360(int param_1, ...)
     *(uint32_t *)(param_1 + 0x200) = 0;
     *(uint32_t *)(param_1 + 0x21c) = 0;
     C_MainMenu__FUN_00636400((C_MainMenu *)param_1);
-    FUN_0061b0b0(*(int *)(param_1 + 0x1e4));
+    C_MpMenuSettings__ClearServers(*(int *)(param_1 + 0x1e4));
     local_10 = 0;
     local_24 = 0x20e00000;
     local_20 = 0x1000001;
@@ -1412,13 +1412,13 @@ LAB_0063574b:
     if ((g_gameProfile.m_mpSettings)->unknown174 == 0) {
       uVar4 = 0;
       while( true ) {
-        iVar3 = FUN_0061b100(*(void **)((int)param_1 + 0x1e4),0);
+        iVar3 = C_MpMenuSettings__GetList(*(void **)((int)param_1 + 0x1e4),0);
         if ((*(int *)(iVar3 + 4) == 0) ||
            ((uint32_t)(*(int *)(iVar3 + 8) - *(int *)(iVar3 + 4) >> 2) <= uVar4)) break;
-        iVar3 = FUN_0061b100(*(void **)((int)param_1 + 0x1e4),0);
+        iVar3 = C_MpMenuSettings__GetList(*(void **)((int)param_1 + 0x1e4),0);
         if (*(int *)(*(int *)(*(int *)(iVar3 + 4) + uVar4 * 4) + 0x68) ==
             *(int *)((int)local_30 + 0x68)) {
-          uVar4 = FUN_0061b000(*(void **)((int)param_1 + 0x1e4),(int)local_30);
+          uVar4 = C_MpMenuSettings__IsInFirstList(*(void **)((int)param_1 + 0x1e4),(int)local_30);
           if ((char)uVar4 == '\0') {
             tier1_operator_delete(local_30);
           }
@@ -1429,15 +1429,15 @@ LAB_0063574b:
     }
     if (*(int *)((int)param_1 + 0x1c8) == 5) {
       *(uint32_t *)((int)param_1 + 0x200) = 0;
-      uVar4 = FUN_0061b000(*(void **)((int)param_1 + 0x1e4),(int)local_30);
+      uVar4 = C_MpMenuSettings__IsInFirstList(*(void **)((int)param_1 + 0x1e4),(int)local_30);
       if ((char)uVar4 == '\0') {
-        _this = (void *)FUN_0061b100(*(void **)((int)param_1 + 0x1e4),0);
+        _this = (void *)C_MpMenuSettings__GetList(*(void **)((int)param_1 + 0x1e4),0);
         FUN_00636e00(_this,*(uint32_t **)((int)_this + 8),1,(uint32_t*)(&local_30));
         FUN_00635f10(param_1,(int)local_30);
       }
     }
     else {
-      uVar4 = FUN_0061b000(*(void **)((int)param_1 + 0x1e4),(int)local_30);
+      uVar4 = C_MpMenuSettings__IsInFirstList(*(void **)((int)param_1 + 0x1e4),(int)local_30);
       if ((char)uVar4 != '\0') {
         bVar5 = true;
       }
@@ -1559,7 +1559,7 @@ uint32_t FUN_00635ba0(void *_this, ...)
       if ((local_18 != 0) && (*local_18 = *local_18 - 1, *local_18 == 0)) {
         tier1_operator_delete(local_18);
       }
-      iVar4 = FUN_0061b100(*(void **)((int)_this + 0x1e4),0);
+      iVar4 = C_MpMenuSettings__GetList(*(void **)((int)_this + 0x1e4),0);
       for (uVar5 = 0;
           (iVar2 = *(int *)(iVar4 + 4), iVar2 != 0 &&
           (uVar5 < (uint32_t)(*(int *)(iVar4 + 8) - iVar2 >> 2))); uVar5 = uVar5 + 1) {
@@ -1579,7 +1579,7 @@ uint32_t FUN_00635ba0(void *_this, ...)
       return CONCAT31((int3)((uint32_t)local_18 >> 8),1);
     }
     if (iVar4 == 9) {
-      iVar4 = FUN_0061b100(*(void **)((int)_this + 0x1e4),0);
+      iVar4 = C_MpMenuSettings__GetList(*(void **)((int)_this + 0x1e4),0);
       local_14 = iVar4;
       for (uVar5 = 0;
           (iVar2 = *(int *)(iVar4 + 4), iVar2 != 0 &&
@@ -1917,9 +1917,9 @@ uint32_t C_MainMenu__FUN_00636400(C_MainMenu *_this, ...)
   EnterCriticalSection((LPCRITICAL_SECTION)(_this->_pad_0104 + 0xac));
   while ((*(int *)(_this->_pad_01d4 + 4) != 0 &&
          (*(int *)(_this->_pad_01d4 + 8) - *(int *)(_this->_pad_01d4 + 4) >> 2 != 0))) {
-    uVar1 = FUN_0061b000(_this->m_1e4,*(int *)(*(int *)(_this->_pad_01d4 + 8) - 4));
+    uVar1 = C_MpMenuSettings__IsInFirstList(_this->m_1e4,*(int *)(*(int *)(_this->_pad_01d4 + 8) - 4));
     if (((char)uVar1 == '\0') &&
-       (uVar1 = FUN_0061afc0(_this->m_1e4,*(int *)(*(int *)(_this->_pad_01d4 + 8) - 4)),
+       (uVar1 = C_MpMenuSettings__IsInSecondList(_this->m_1e4,*(int *)(*(int *)(_this->_pad_01d4 + 8) - 4)),
        (char)uVar1 == '\0')) {
       tier1_operator_delete(*(void **)(*(int *)(_this->_pad_01d4 + 8) - 4));
     }
@@ -1956,7 +1956,7 @@ uint32_t FUN_006364b0(void *param_1, ...)
   local_4 = 0;
   C_MenuState__HandleMessage(param_1,&local_24);
   uVar1 = local_1c;
-  FUN_0061b040(*(int *)((int)param_1 + 0x1e4));
+  C_MpMenuSettings__CountServers(*(int *)((int)param_1 + 0x1e4));
   pCVar2 = C_GameTexts__Get(&DAT_008c1368,&local_40,0x22ae);
   local_4 = CONCAT31(GH_PIECE(local_4,1,3),1);
   if (pCVar2->rep == 0) {

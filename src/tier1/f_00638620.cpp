@@ -137,7 +137,7 @@ uint32_t FUN_00638910(C_MainMenu *param_1, ...)
     *(bool *)((int)pvVar1 + 0x3a1) = iVar2 != 0;
     *(uint8_t *)((int)pvVar1 + 0x3a2) = 1;
   }
-  FUN_0061a7c0(param_1->m_1e4);
+  C_MpMenuSettings__Save(param_1->m_1e4);
   local_10 = 0;
   local_24 = 0x20900000;
   local_20 = 0x2000018;

@@ -27304,6 +27304,21 @@
   "module": "zz_idioms",
   "name": "construct_copy4_616b00"
  },
+ "00616c50": {
+  "module": "main_menu",
+  "name": "S_ServerFilter::Reset",
+  "proto": "void __fastcall Reset(void * filter)"
+ },
+ "00616c80": {
+  "module": "main_menu",
+  "name": "S_ServerFilter::Save",
+  "proto": "bool __thiscall Save(void *this, void * chunk)"
+ },
+ "00616f10": {
+  "module": "main_menu",
+  "name": "S_ServerFilter::Load",
+  "proto": "bool __thiscall Load(void *this, void * chunk)"
+ },
  "006172f0": {
   "module": "main_menu",
   "name": "S_MpRotation::Save",
@@ -27352,6 +27367,66 @@
  "00619720": {
   "module": "zz_idioms",
   "name": "set_field_18_619720"
+ },
+ "0061a730": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::Reset",
+  "proto": "void __fastcall Reset(void * settings)"
+ },
+ "0061a750": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::Load",
+  "proto": "void __fastcall Load(void * settings)"
+ },
+ "0061a7c0": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::Save",
+  "proto": "void __fastcall Save(void * settings)"
+ },
+ "0061a830": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::LoadFile",
+  "proto": "void __thiscall LoadFile(void *this, void * player)"
+ },
+ "0061abe0": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::SaveFile",
+  "proto": "void __thiscall SaveFile(void *this, void * player)"
+ },
+ "0061af70": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::ClearAll",
+  "proto": "void __fastcall ClearAll(void * settings)"
+ },
+ "0061afc0": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::IsInSecondList",
+  "proto": "bool __thiscall IsInSecondList(void *this, void * server)"
+ },
+ "0061b000": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::IsInFirstList",
+  "proto": "bool __thiscall IsInFirstList(void *this, void * server)"
+ },
+ "0061b040": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::CountServers",
+  "proto": "void __fastcall CountServers(void * settings)"
+ },
+ "0061b090": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::SetListKind",
+  "proto": "void __thiscall SetListKind(void *this, int kind)"
+ },
+ "0061b0b0": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::ClearServers",
+  "proto": "void __fastcall ClearServers(void * settings)"
+ },
+ "0061b100": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::GetList",
+  "proto": "void * __thiscall GetList(void *this, int kind)"
  },
  "0061b120": {
   "module": "zz_idioms",
@@ -27569,6 +27644,11 @@
   "name": "S_MenuDesc::~S_MenuDesc",
   "proto": "void __thiscall ~S_MenuDesc(S_MenuDesc *this)"
  },
+ "00626710": {
+  "module": "main_menu",
+  "name": "S_ServerFilter::S_ServerFilter",
+  "proto": "void * __fastcall S_ServerFilter(void * filter)"
+ },
  "00626740": {
   "module": "main_menu",
   "name": "C_MpGameSetup::C_MpGameSetup",
@@ -27592,6 +27672,16 @@
   "module": "main_menu",
   "name": "S_MpRotation::~S_MpRotation",
   "proto": "void __fastcall ~S_MpRotation(void * rotation)"
+ },
+ "00626990": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "006269b0": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::~C_MpMenuSettings",
+  "proto": "void __thiscall ~C_MpMenuSettings(void *this)"
  },
  "00627fd0": {
   "module": "zz_idioms",

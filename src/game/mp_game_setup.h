@@ -157,3 +157,71 @@ private:
     // The ITEMs among the element's (ALLOWEDITEMS version 0.1) appended to the map's items.
     static void LoadItems(C_XmlNode *node, C_MpMap *map);   // 0x006186e0 (ECX unused)
 };
+
+struct S_ServerEntry;
+
+// The server browser's filter (0x12 bytes; applied to its first list only).
+struct S_ServerFilter {
+    // Nothing filtered.
+    void Reset();                                   // 0x00616c50 (__fastcall)
+    // The inner chunk 0x4B0 (the caller has entered the outer one): its version 0x514 (0x42, else false),
+    // then 0x4B3 (all), the older 0x4B1 (`sameVersion` cleared), 0x4B2. The inner chunk left.
+    bool Load(C_chunk &chunk);                      // 0x00616f10
+    // Chunk 0x4B0: the version (0x514), 0x4B3, 0x4B2.
+    bool Save(C_chunk &chunk) const;                // 0x00616c80
+
+    int maxPing = -1;                               // +0x00 (not above 0: none)
+    int gameType = -1;                              // +0x04 (-1: any)
+    bool hideUnreachable = false;                   // +0x08 a ping above 9998
+    bool dedicatedOnly = false;                     // +0x09
+    bool hideEmpty = false;                         // +0x0A
+    bool hideFull = false;                          // +0x0B
+    bool noPassword = false;                        // +0x0C
+    bool sameVersion = false;                       // +0x0D
+    bool changed = false;                           // +0x0E (set by the filter screen; saved)
+    uint8_t unknown0F = 0;
+    uint8_t unknown10 = 0;                          // +0x10 (chunk 0x4B2)
+    uint8_t unknown11 = 0;                          // +0x11
+};
+
+// The main menu's multiplayer settings (vtable 0x00813ac0, 0x3A8 bytes; its +0x1E4): the server browser's
+// two lists, its filter, the game's set-up; the profile's MPSetings.sav.
+class C_MpMenuSettings {
+public:
+    // (Inline in the menu's OnStart: its list 1, the set-up and the filter as read by Reset.)
+    C_MpMenuSettings();
+    virtual ~C_MpMenuSettings();                    // 0x006269b0 (0x00626990)
+    C_MpMenuSettings(const C_MpMenuSettings &) = delete;
+    C_MpMenuSettings &operator=(const C_MpMenuSettings &) = delete;
+
+    // The map list read again and the set-up's defaults, nothing filtered.
+    void Reset();                                   // 0x0061a730 (__fastcall)
+    // The player's MPSetings.sav loaded (none: Reset), saved.
+    void Load();                                    // 0x0061a750 (__fastcall)
+    void Save();                                    // 0x0061a7c0 (__fastcall)
+    // PlayersProfiles\<player>\MPSetings.sav: its chunks 0x44D (the set-up) and 0x4B0 (the filter); no file:
+    // Reset.
+    void LoadFile(C_str player);                    // 0x0061a830 (__fastcall, the name by value)
+    // A root 0x4E6 holding 0x44D and 0x4B0.
+    void SaveFile(C_str player);                    // 0x0061abe0 (__fastcall, the name by value)
+
+    // The list shown (1 or 2; another: nothing).
+    void SetListKind(int kind);                     // 0x0061b090
+    // List `kind` (0: the one shown; 2: the second, any other the first).
+    std::vector<S_ServerEntry *> &GetList(int kind);   // 0x0061b100
+    // The first list's servers deleted, the list emptied.
+    void ClearServers();                            // 0x0061b0b0 (__fastcall)
+    // The first list's count and the players on its servers.
+    void CountServers();                            // 0x0061b040 (__fastcall)
+    // `server` in the first list / the second.
+    bool IsInFirstList(const S_ServerEntry *server) const;    // 0x0061b000
+    bool IsInSecondList(const S_ServerEntry *server) const;   // 0x0061afc0
+
+    int m_listKind = 1;                             // +0x004 (1 or 2)
+    std::vector<S_ServerEntry *> m_servers;         // +0x008 the first list (owned)
+    std::vector<S_ServerEntry *> m_servers2;        // +0x018 the second (not deleted here)
+    int m_serverCount = 0;                          // +0x028 (CountServers; not initialised by the original)
+    int m_playerCount = 0;                          // +0x02C
+    C_MpGameSetup m_setup;                          // +0x030
+    S_ServerFilter m_filter;                        // +0x394 (its inline constructor 0x00626710)
+};

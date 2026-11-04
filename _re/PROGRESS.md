@@ -8155,6 +8155,31 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 341 errors in 63 files, 141 stubs. ret_audit --src: 52.
   - Ghidra: names/main_menu.txt (new, +15); 15 functions and 4 vector helpers in ported.txt. Stats: 9,132 of 12,306 functions by hand (82.6 % by size).
 
+  PART 9h-ii DONE (2026-11-04): the main menu's multiplayer settings and the server browser's filter
+  (game/mp_game_setup.h/.cpp).
+  - C_MpMenuSettings (vtable 0x00813ac0, 0x3A8 bytes; the main menu's +0x1E4, made in its OnStart): the
+    browser's two server lists (+0x08, owned; +0x18; the kind shown +0x04: 1 or 2, SetListKind 0x0061b090,
+    GetList 0x0061b100), CountServers 0x0061b040 (the first list's servers and players), ClearServers
+    0x0061b0b0, IsInFirstList 0x0061b000 / IsInSecondList 0x0061afc0 (the menu's 0x00636400 deletes the
+    servers its thread found that are in neither: Ghidra had dropped that delete), the set-up (+0x30), the
+    filter (+0x394). Reset 0x0061a730 (the map list read again, nothing filtered), Load / Save 0x0061a750 /
+    0x0061a7c0 (the player's name) of PlayersProfiles\<player>\MPSetings.sav (sic): LoadFile 0x0061a830
+    (0x44D the set-up, 0x4B0 the filter; no file: Reset), SaveFile 0x0061abe0 (0x4E6 { 0x44D, 0x4B0 }); the
+    destructor 0x006269b0 (0x0061af70: the first list's servers deleted, the set-up cleared).
+  - S_ServerFilter (0x12 bytes; the browser's first list only, from the tier-1 filter 0x00633450's code):
+    the maximum ping, the game type (-1 any), unreachable (a ping above 9998), dedicated only, empty, full,
+    with a password, another version, a changed flag, two bytes (0x4B2) not identified. Reset 0x00616c50,
+    Load 0x00616f10 (an inner 0x4B0: version 0x514 = 0x42, then 0x4B3, the older 0x4B1 (no version flag),
+    0x4B2), Save 0x00616c80, the inline constructor 0x00626710.
+  - Harness (_re/harness/mp_setup; stubs of game/profile.h and game/controls.h): 54 checks. The 14 profiles'
+    whole MPSetings.sav loaded through the player's name and saved byte-identical; crafted filters (0x4B3
+    then the older 0x4B1, another version, no version, another inner chunk, the set-up after the filter),
+    each also saved and read back, then a player without a file (the defaults); the lists.
+  - Mutations: mutations/mutate_9h2.py: 142: 119 killed, 9 not building, 14 equivalent.
+  - Build: MSVC clean. Tier 1: 341 errors in 63 files, 141 stubs. ret_audit --src: 52.
+  - Ghidra: names/main_menu.txt (+18; LoadFile / SaveFile take the name by value); 18 functions in ported.txt.
+    Stats: 9,150 of 12,306 functions by hand (82.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

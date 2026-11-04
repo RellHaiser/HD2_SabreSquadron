@@ -1058,12 +1058,12 @@ uint32_t C_MainMenu__FUN_006264c0(C_MainMenu *_this, ...)
     GH_PIECE(local_8,1,3) = 0;
     C_MpGameSetup__C_MpGameSetup((uint8_t *)(puVar4 + 0xc));
     local_8 = CONCAT31(GH_PIECE(local_8,1,3),3);
-    FUN_00626710(puVar4 + 0xe5);
+    S_ServerFilter__S_ServerFilter(puVar4 + 0xe5);
     *(uint8_t *)(puVar4 + 0xe9) = 0;
     *(uint8_t *)((int)puVar4 + 0x3a5) = 0;
     *puVar4 = &PTR_00813ac0;
     puVar4[1] = 1;
-    FUN_0061a730((int)puVar4);
+    C_MpMenuSettings__Reset((int)puVar4);
   }
   local_8 = 0xffffffff;
   _this->m_1e4 = puVar4;
@@ -1120,22 +1120,6 @@ LAB_006266cc:
 }
 
 
-// 0x00626710
-uint32_t FUN_00626710(uint32_t *param_1, ...)
-{
-  *param_1 = 0xffffffff;
-  param_1[1] = 0xffffffff;
-  *(uint8_t *)(param_1 + 2) = 0;
-  *(uint8_t *)((int)param_1 + 9) = 0;
-  *(uint8_t *)((int)param_1 + 10) = 0;
-  *(uint8_t *)((int)param_1 + 0xb) = 0;
-  *(uint8_t *)(param_1 + 3) = 0;
-  *(uint8_t *)((int)param_1 + 0xd) = 0;
-  *(uint8_t *)((int)param_1 + 0xe) = 0;
-  return 0;
-}
-
-
 // 0x006268c0
 uint32_t vector_tidy_6268c0(int param_1, ...)
 {
@@ -1143,89 +1127,6 @@ uint32_t vector_tidy_6268c0(int param_1, ...)
   *(uint32_t *)(param_1 + 4) = 0;
   *(uint32_t *)(param_1 + 8) = 0;
   *(uint32_t *)(param_1 + 0xc) = 0;
-  return 0;
-}
-
-
-// 0x00626990
-uint32_t * C_auto_00813ac0__FUN_00626990(C_auto_00813ac0 *_this,uint8_t param_1, ...)
-{
-  C_auto_00813ac0__FUN_006269b0(_this);
-  if ((param_1 & 1) != 0) {
-    tier1_operator_delete(_this);
-  }
-  return (uint32_t*)(&_this->vtable);
-}
-
-
-// 0x006269b0
-uint32_t C_auto_00813ac0__FUN_006269b0(C_auto_00813ac0 *_this, ...)
-{
-  int *piVar1;
-  int iVar2;
-  uint32_t local_4;
-  _this->vtable = (C_auto_00813ac0_vtbl *)&PTR_00813ac0;
-  local_4 = 2;
-  FUN_0061af70((int)_this);
-  GH_PIECE(local_4,0,1) = 9;
-  C_MpGameSetup__Clear((int)(_this->_pad_0004 + 0x2c));
-  GH_PIECE(local_4,0,1) = 8;
-  eh_vector_destructor_iterator(_this[2]._pad_0004 + 0x2a,0x50,5,S_MpRotation___S_MpRotation);
-  GH_PIECE(local_4,0,1) = 7;
-  vector_tidy_628030((int)(_this[2]._pad_0004 + 0x12));
-  GH_PIECE(local_4,0,1) = 6;
-  vector_tidy_628030((int)((int)&_this[2].vtable + 2));
-  GH_PIECE(local_4,0,1) = 5;
-  vector_tidy_628030((int)(_this[1]._pad_0004 + 0x23));
-  local_4 = CONCAT31(GH_PIECE(local_4,1,3),4);
-  empty_function_61b740();
-  tier1_operator_delete(*(void **)(_this[1]._pad_0004 + 0x13));
-  _this[1]._pad_0004[0x13] = '\0';
-  _this[1]._pad_0004[0x14] = '\0';
-  _this[1]._pad_0004[0x15] = '\0';
-  _this[1]._pad_0004[0x16] = '\0';
-  _this[1]._pad_0004[0x17] = '\0';
-  _this[1]._pad_0004[0x18] = '\0';
-  _this[1]._pad_0004[0x19] = '\0';
-  _this[1]._pad_0004[0x1a] = '\0';
-  _this[1]._pad_0004[0x1b] = '\0';
-  _this[1]._pad_0004[0x1c] = '\0';
-  _this[1]._pad_0004[0x1d] = '\0';
-  _this[1]._pad_0004[0x1e] = '\0';
-  piVar1 = _this->m_035;
-  if ((piVar1 != 0) && (iVar2 = *piVar1, *piVar1 = iVar2 - 1, iVar2 - 1 == 0)) {
-    tier1_operator_delete(piVar1);
-  }
-  piVar1 = _this->m_031;
-  if ((piVar1 != 0) && (iVar2 = *piVar1, *piVar1 = iVar2 - 1, iVar2 - 1 == 0)) {
-    tier1_operator_delete(piVar1);
-  }
-  tier1_operator_delete(*(void **)(_this->_pad_0004 + 0x18));
-  _this->_pad_0004[0x18] = '\0';
-  _this->_pad_0004[0x19] = '\0';
-  _this->_pad_0004[0x1a] = '\0';
-  _this->_pad_0004[0x1b] = '\0';
-  _this->_pad_0004[0x1c] = '\0';
-  _this->_pad_0004[0x1d] = '\0';
-  _this->_pad_0004[0x1e] = '\0';
-  _this->_pad_0004[0x1f] = '\0';
-  _this->_pad_0004[0x20] = '\0';
-  _this->_pad_0004[0x21] = '\0';
-  _this->_pad_0004[0x22] = '\0';
-  _this->_pad_0004[0x23] = '\0';
-  tier1_operator_delete(*(void **)(_this->_pad_0004 + 8));
-  _this->_pad_0004[8] = '\0';
-  _this->_pad_0004[9] = '\0';
-  _this->_pad_0004[10] = '\0';
-  _this->_pad_0004[0xb] = '\0';
-  _this->_pad_0004[0xc] = '\0';
-  _this->_pad_0004[0xd] = '\0';
-  _this->_pad_0004[0xe] = '\0';
-  _this->_pad_0004[0xf] = '\0';
-  _this->_pad_0004[0x10] = '\0';
-  _this->_pad_0004[0x11] = '\0';
-  _this->_pad_0004[0x12] = '\0';
-  _this->_pad_0004[0x13] = '\0';
   return 0;
 }
 

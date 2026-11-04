@@ -10,9 +10,16 @@
 #include <vector>
 
 #include "common/chunk.h"
+#include "game/controls.h"
 #include "game/game_texts.h"
 #include "game/mp_game_setup.h"
+#include "game/profile.h"
 #include "ls3d/rw_data.h"
+
+// --- the player: only the name ----------------------------------------------------------------------
+C_GameProfile g_gameProfile;
+static C_str s_playerName;
+C_str C_PlayerProfile::GetName() const { return s_playerName; }
 
 // --- the texts: only the server's default name ------------------------------------------------------
 C_GameTexts g_texts;
@@ -79,6 +86,13 @@ static void Dump(const C_MpGameSetup &setup)
         }
 }
 
+static void PrintFilter(const char *title, const S_ServerFilter &f)
+{
+    std::printf("%s %d %d %d %d %d %d %d %d %d %d %d\n", title, f.maxPing, f.gameType, f.hideUnreachable,
+                f.dedicatedOnly, f.hideEmpty, f.hideFull, f.noPassword, f.sameVersion, f.changed, f.unknown10,
+                f.unknown11);
+}
+
 int main(int argc, char **argv)
 {
     if (argc >= 2 && std::strcmp(argv[1], "dump") == 0) {
@@ -122,6 +136,54 @@ int main(int argc, char **argv)
         Dump(setup);
         return 0;
     }
-    std::printf("usage: harness dump | roundtrip IN OUT\n");
+    if (argc >= 4 && std::strcmp(argv[1], "settings") == 0) {
+        // PlayersProfiles\IN\MPSetings.sav loaded (Load: the player's name), saved as OUT's (its directory made
+        // by the caller); the filter and the set-up printed.
+        C_PlayerProfile player;
+        g_gameProfile.m_player = &player;
+        s_playerName = argv[2];
+        C_MpMenuSettings settings;
+        settings.Load();
+        s_playerName = argv[3];
+        settings.Save();
+        PrintFilter("filter", settings.m_filter);
+        Dump(settings.m_setup);
+        // The saved file read again (the same filter), then a player without one (the defaults).
+        C_MpMenuSettings reloaded;
+        reloaded.LoadFile(C_str(argv[3]));
+        PrintFilter("reloaded", reloaded.m_filter);
+        settings.LoadFile(C_str("Nobody"));
+        PrintFilter("missing", settings.m_filter);
+        return 0;
+    }
+    if (argc >= 2 && std::strcmp(argv[1], "lists") == 0) {
+        // The server lists: which one each kind gives, the kinds kept, the counts, membership, clearing.
+        C_MpMenuSettings settings;
+        S_ServerEntry *a = new S_ServerEntry(), *b = new S_ServerEntry(), *c = new S_ServerEntry();
+        a->players = 3;
+        b->players = 4;
+        c->players = 100;
+        settings.m_servers = {a, b};
+        settings.m_servers2 = {c};
+        std::printf("kind %d", settings.m_listKind);
+        for (int kind = -1; kind <= 3; ++kind)
+            std::printf(" %d:%d", kind, &settings.GetList(kind) == &settings.m_servers2 ? 2 : 1);
+        for (int kind : {0, 2, 3, 1, -1, 2}) {
+            settings.SetListKind(kind);
+            std::printf(" set%d:%d,%d", kind, settings.m_listKind, &settings.GetList(0) == &settings.m_servers2 ? 2 : 1);
+        }
+        settings.CountServers();
+        std::printf("\ncount %d players %d in %d%d%d %d%d%d\n", settings.m_serverCount, settings.m_playerCount,
+                    settings.IsInFirstList(a), settings.IsInFirstList(b), settings.IsInFirstList(c),
+                    settings.IsInSecondList(a), settings.IsInSecondList(b), settings.IsInSecondList(c));
+        settings.ClearServers();
+        settings.CountServers();
+        std::printf("cleared %d %d %d %d\n", static_cast<int>(settings.m_servers.size()),
+                    static_cast<int>(settings.m_servers2.size()), settings.m_serverCount, settings.m_playerCount);
+        settings.m_servers2.clear();
+        delete c;
+        return 0;
+    }
+    std::printf("usage: harness dump | roundtrip IN OUT | settings IN OUT | lists\n");
     return 2;
 }

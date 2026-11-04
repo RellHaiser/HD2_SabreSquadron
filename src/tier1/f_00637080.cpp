@@ -310,7 +310,7 @@ LAB_0063786d:
       } while (cVar1 != '\0');
       *(int *)(param_2 + 0x8c) = g_versionMinor;
       *(int *)(param_2 + 0x90) = g_versionMajor;
-      this_00 = (void *)FUN_0061b100(*(void **)((int)_this + 0x1e4),0);
+      this_00 = (void *)C_MpMenuSettings__GetList(*(void **)((int)_this + 0x1e4),0);
       FUN_00636e00(this_00,*(uint32_t **)((int)this_00 + 8),1,(uint32_t*)(&param_2));
       FUN_00635f10(_this,(int)param_2);
     }

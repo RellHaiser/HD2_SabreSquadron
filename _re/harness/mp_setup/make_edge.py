@@ -167,6 +167,32 @@ def main():
     expected("edge2.txt", "loaded 1 name 'H&D 2 SERVER' password '' port 2222 options 73 74 75 72 71", rules2,
              {4: [["Dm2", "Dm1"], [], [], ["Coop1"]]})
 
+    # The filter (part 9h-ii): files of a root 0x4E6 holding only 0x4B0, and the filter line each gives.
+    def filt(ping, gtype, flags, u10=0, u11=0):
+        return ints([ping, gtype]) + bytes(flags), bytes([u10, u11])
+    all_a, _ = filt(80, 3, [1, 0, 1, 0, 1, 1, 0])
+    old, _ = filt(50, 2, [1, 1, 0, 1, 0, 1])                # +0x08..+0x0C, then +0x0E
+    cases = [
+        # 0x4B3 (sameVersion set), then the older 0x4B1 (clears it), 0x4B2, a chunk not known.
+        (chunk(0x4B0, chunk(0x514, ints([0x42])) + chunk(0x4B3, all_a) + chunk(0x4B1, old) +
+               chunk(0x4B2, bytes([5, 6])) + chunk(0x4B9, ints([1]))),
+         "filter 50 2 1 1 0 1 0 0 1 5 6"),
+        (chunk(0x4B0, chunk(0x514, ints([0x42])) + chunk(0x4B3, all_a)), "filter 80 3 1 0 1 0 1 1 0 0 0"),
+        # Another version, no version first, another inner chunk: nothing read.
+        (chunk(0x4B0, chunk(0x514, ints([0x41])) + chunk(0x4B3, all_a)), "filter -1 -1 0 0 0 0 0 0 0 0 0"),
+        (chunk(0x4B0, chunk(0x4B3, all_a)), "filter -1 -1 0 0 0 0 0 0 0 0 0"),
+        (chunk(0x4B1, chunk(0x514, ints([0x42])) + chunk(0x4B3, all_a)), "filter -1 -1 0 0 0 0 0 0 0 0 0"),
+    ]
+    # The set-up after the filter: read (the filter's load leaves its inner chunk).
+    after = chunk(0x44D, chunk(0x1AF, ints([4321])))
+    cases.append((chunk(0x4B0, chunk(0x514, ints([0x42])) + chunk(0x4B3, all_a)),
+                  "filter 80 3 1 0 1 0 1 1 0 0 0"))
+    for k, (inner, line) in enumerate(cases):
+        os.makedirs(os.path.join(out, "filter%d" % k), exist_ok=True)
+        tail = after if k == len(cases) - 1 else b""
+        open(os.path.join(out, "filter%d" % k, "MPSetings.sav"), "wb").write(chunk(0x4E6, chunk(0x4B0, inner) + tail))
+    open(os.path.join(out, "filters.txt"), "w", newline="\n").write("\n".join(line for _, line in cases) + "\n")
+
     # The elements that end the list: each list has a map, the element, then a map not read.
     terms = ['<GAMESTYLE type="Deathmatch">', "<GAMESTYLE>", '<BALANCED allied="1"/>', '<BALANCED axis="1"/>',
              "<OTHER/>", '<ITEM item_id="1"/>']

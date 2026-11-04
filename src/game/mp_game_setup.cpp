@@ -9,7 +9,9 @@
 #include <cstring>
 
 #include "common/chunk.h"
+#include "game/controls.h"
 #include "game/game_texts.h"
+#include "game/profile.h"
 #include "game/xml_node.h"
 
 namespace {
@@ -62,6 +64,20 @@ constexpr uint16_t ROTATION_CHUNKS[MP_GAME_TYPES] = {0x1A4, 0x1A6, 0x1A8, 0x1B2}
 constexpr uint16_t CHUNK_MAP_NAME = 0x4D2;
 // The first two lists read at most this much of a name chunk (the original's buffers).
 constexpr int MAX_NAME_READ = 999;
+
+// MPSetings.sav (sic) and its chunks.
+const char *const SETTINGS_FILE = "%s\\%s\\MPSetings.sav";
+const char *const PROFILES_DIRECTORY = "PlayersProfiles";
+enum : uint16_t {
+    CHUNK_SETTINGS = 0x4E6,                         // the root
+    CHUNK_SETUP = 0x44D,
+    CHUNK_FILTER = 0x4B0,                           // twice: the root's child, then the filter's own
+    CHUNK_FILTER_OLD = 0x4B1,                       // all but sameVersion (older)
+    CHUNK_FILTER_UNKNOWN = 0x4B2,
+    CHUNK_FILTER_ALL = 0x4B3,
+    CHUNK_FILTER_VERSION = 0x514,
+};
+constexpr int FILTER_VERSION = 0x42;
 
 // The rest of the current chunk as text (at most 999 characters, C_chunk 0x00415d00), the chunk left.
 C_str ReadRemainingString(C_chunk &chunk)
@@ -396,4 +412,211 @@ void C_MpGameSetup::Save(C_chunk &chunk) const
     chunk.WriteStringChunk(CHUNK_SERVER_NAME, serverName.c_str());
     chunk.WriteStringChunk(CHUNK_PASSWORD, password.c_str());
     chunk.WriteChunk(CHUNK_PORT, port);
+}
+
+// ---- the server browser's filter (part 9h-ii) ------------------------------------------------------------
+
+void S_ServerFilter::Reset()
+{
+    maxPing = -1;
+    gameType = -1;
+    hideUnreachable = false;
+    dedicatedOnly = false;
+    hideEmpty = false;
+    hideFull = false;
+    noPassword = false;
+    sameVersion = false;
+    changed = false;
+    unknown10 = 0;
+    unknown11 = 0;
+}
+
+bool S_ServerFilter::Load(C_chunk &chunk)
+{
+    // (The original's id before the first chunk read is not initialised; a child not read keeps the last.)
+    uint16_t id = 0;
+    bool loaded = false;
+    chunk.Descend(id);
+    if (id == CHUNK_FILTER && chunk.IsOpen()) {
+        chunk.Descend(id);
+        if (id == CHUNK_FILTER_VERSION) {
+            int version = 0;
+            chunk.Read(version);
+            chunk.Ascend();
+            if (version == FILTER_VERSION) {
+                while (!chunk.AtEnd()) {
+                    chunk.Descend(id);
+                    switch (id) {
+                    case CHUNK_FILTER_OLD:
+                        chunk.Read(maxPing);
+                        chunk.Read(gameType);
+                        chunk.Read(hideUnreachable);
+                        chunk.Read(dedicatedOnly);
+                        chunk.Read(hideEmpty);
+                        chunk.Read(hideFull);
+                        chunk.Read(noPassword);
+                        chunk.Read(changed);
+                        sameVersion = false;
+                        break;
+                    case CHUNK_FILTER_UNKNOWN:
+                        chunk.Read(unknown10);
+                        chunk.Read(unknown11);
+                        break;
+                    case CHUNK_FILTER_ALL:
+                        chunk.Read(maxPing);
+                        chunk.Read(gameType);
+                        chunk.Read(hideUnreachable);
+                        chunk.Read(dedicatedOnly);
+                        chunk.Read(hideEmpty);
+                        chunk.Read(hideFull);
+                        chunk.Read(noPassword);
+                        chunk.Read(sameVersion);
+                        chunk.Read(changed);
+                        break;
+                    default:
+                        break;
+                    }
+                    chunk.Ascend();
+                }
+                loaded = true;
+            }
+        }
+    }
+    chunk.Ascend();
+    return loaded;
+}
+
+bool S_ServerFilter::Save(C_chunk &chunk) const
+{
+    chunk.Begin(CHUNK_FILTER);
+    chunk.WriteChunk(CHUNK_FILTER_VERSION, FILTER_VERSION);
+    chunk.Begin(CHUNK_FILTER_ALL);
+    chunk.Write(maxPing);
+    chunk.Write(gameType);
+    chunk.Write(hideUnreachable);
+    chunk.Write(dedicatedOnly);
+    chunk.Write(hideEmpty);
+    chunk.Write(hideFull);
+    chunk.Write(noPassword);
+    chunk.Write(sameVersion);
+    chunk.Write(changed);
+    chunk.Ascend();
+    chunk.Begin(CHUNK_FILTER_UNKNOWN);
+    chunk.Write(unknown10);
+    chunk.Write(unknown11);
+    chunk.Ascend();
+    chunk.Ascend();
+    return true;
+}
+
+// ---- the main menu's multiplayer settings (part 9h-ii) ----------------------------------------------------
+
+C_MpMenuSettings::C_MpMenuSettings()
+{
+    Reset();
+}
+
+C_MpMenuSettings::~C_MpMenuSettings()
+{
+    // (0x0061af70: the first list's servers deleted, the set-up cleared.)
+    ClearServers();
+    m_setup.Clear();
+}
+
+void C_MpMenuSettings::Reset()
+{
+    m_setup.LoadMapList();
+    m_filter.Reset();
+}
+
+void C_MpMenuSettings::Load()
+{
+    LoadFile(g_gameProfile.GetPlayerProfile()->GetName());
+}
+
+void C_MpMenuSettings::Save()
+{
+    SaveFile(g_gameProfile.GetPlayerProfile()->GetName());
+}
+
+void C_MpMenuSettings::LoadFile(C_str player)
+{
+    C_chunk chunk;
+    if (!chunk.Open(C_fstr(SETTINGS_FILE, PROFILES_DIRECTORY, player.c_str()).c_str(), false)) {
+        Reset();
+        return;
+    }
+    // (The root's id is not checked.)
+    uint16_t id = 0;
+    chunk.Descend(id);
+    while (!chunk.AtEnd()) {
+        chunk.Descend(id);
+        if (id == CHUNK_SETUP)
+            m_setup.Load(chunk);
+        else if (id == CHUNK_FILTER)
+            m_filter.Load(chunk);
+        chunk.Ascend();
+    }
+    chunk.Ascend();
+    chunk.Close();
+}
+
+void C_MpMenuSettings::SaveFile(C_str player)
+{
+    C_chunk chunk;
+    if (!chunk.Open(C_fstr(SETTINGS_FILE, PROFILES_DIRECTORY, player.c_str()).c_str(), true))
+        return;
+    chunk.Begin(CHUNK_SETTINGS);
+    chunk.Begin(CHUNK_SETUP);
+    m_setup.Save(chunk);
+    chunk.Ascend();
+    chunk.Begin(CHUNK_FILTER);
+    m_filter.Save(chunk);
+    chunk.Ascend();
+    chunk.Ascend();
+    chunk.Close();
+}
+
+void C_MpMenuSettings::SetListKind(int kind)
+{
+    if (kind > 0 && kind < 3)
+        m_listKind = kind;
+}
+
+std::vector<S_ServerEntry *> &C_MpMenuSettings::GetList(int kind)
+{
+    if (kind == 0)
+        kind = m_listKind;
+    return kind == 1 || kind != 2 ? m_servers : m_servers2;
+}
+
+void C_MpMenuSettings::ClearServers()
+{
+    for (std::size_t i = m_servers.size(); i-- > 0;)
+        delete m_servers[i];
+    m_servers.clear();
+}
+
+void C_MpMenuSettings::CountServers()
+{
+    m_playerCount = 0;
+    m_serverCount = static_cast<int>(m_servers.size());
+    for (std::size_t i = m_servers.size(); i-- > 0;)
+        m_playerCount += static_cast<int>(m_servers[i]->players);
+}
+
+bool C_MpMenuSettings::IsInFirstList(const S_ServerEntry *server) const
+{
+    for (std::size_t i = m_servers.size(); i-- > 0;)
+        if (m_servers[i] == server)
+            return true;
+    return false;
+}
+
+bool C_MpMenuSettings::IsInSecondList(const S_ServerEntry *server) const
+{
+    for (std::size_t i = m_servers2.size(); i-- > 0;)
+        if (m_servers2[i] == server)
+            return true;
+    return false;
 }

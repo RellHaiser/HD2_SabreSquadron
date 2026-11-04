@@ -1902,7 +1902,7 @@ LAB_0062b80d:
 // 0x0062c290
 uint8_t FUN_0062c290(int param_1, ...)
 {
-  FUN_0061a7c0(*(int **)(param_1 + 0x1e4));
+  C_MpMenuSettings__Save(*(int **)(param_1 + 0x1e4));
   return 1;
 }
 
@@ -1925,7 +1925,7 @@ uint32_t FUN_0062c2a0(int param_1, ...)
   int *local_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
-  FUN_0061a750(*(int **)(param_1 + 0x1e4));
+  C_MpMenuSettings__Load(*(int **)(param_1 + 0x1e4));
   iVar1 = *(int *)(param_1 + 0x1e4);
   local_40 = *(C_str **)(iVar1 + 0x31);
   if (local_40 != 0) {
