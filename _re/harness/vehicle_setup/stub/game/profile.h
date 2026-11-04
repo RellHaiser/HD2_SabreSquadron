@@ -56,8 +56,17 @@ public:
     const std::vector<int> &GetTexts() const;   // (the diary, part 9g-vi)
 };
 
+// (The cinematics screen, part 9h-ix: main_menu_test.inc.)
+class C_MovieList {
+public:
+    int GetCount() const;
+    bool Get(int index, int *textId, C_str *file) const;
+    bool IsSeen(int index) const;
+};
+
 class C_PlayerProfile {
 public:
+    C_MovieList &GetMovies() { return m_movies; }
     C_Diary *GetDiary();
     C_KeyBindings *GetKeyBindings() { return &m_keyBindings; }
     // (The video player, part 9g-iv: campaign_screens_test.inc.)
@@ -89,6 +98,7 @@ public:
     void ApplyVoiceValue();
     void ApplyHardwareOption();
     C_KeyBindings m_keyBindings;
+    C_MovieList m_movies;
 };
 
 class C_Campaign;

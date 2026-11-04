@@ -126,6 +126,26 @@ const C_str &C_Campaign::GetOperationName(int campaign, int operation)
     name = CmText("op%d_%d", campaign, operation).c_str();
     return name;
 }
+// (Part 9h-ix: the movies: their texts, files and seen flags; Get logged.)
+struct S_CiMovie {
+    int text;
+    const char *file;
+    bool seen;
+};
+std::vector<S_CiMovie> g_ciMovies;
+int C_MovieList::GetCount() const { return static_cast<int>(g_ciMovies.size()); }
+bool C_MovieList::Get(int index, int *textId, C_str *file) const
+{
+    GfLog("movie %d", index);
+    *textId = g_ciMovies[static_cast<size_t>(index)].text;
+    *file = g_ciMovies[static_cast<size_t>(index)].file;
+    return true;
+}
+bool C_MovieList::IsSeen(int index) const
+{
+    GfLog("seen %d", index);
+    return index < static_cast<int>(g_ciMovies.size()) && g_ciMovies[static_cast<size_t>(index)].seen;
+}
 bool C_PlayerProfile::Save()
 {
     GfLog("save profile");
@@ -147,7 +167,6 @@ bool C_PlayerProfile::GetLastSaveText(C_str *mode, C_str *mission, C_str *date) 
         GfLog("describe %s %x", N, desc->id);                                                                     \
         return true;                                                                                              \
     }
-MM_DESCRIBE(DescribeCinematicsScreen, "cinematics")
 MM_DESCRIBE(DescribeBrowserScreen, "browser")
 MM_DESCRIBE(DescribeCreateServerScreen, "create")
 MM_DESCRIBE(DescribePasswordScreen, "password")
@@ -202,7 +221,8 @@ struct S_MainMenuResults {
          pfButtons = true, pfEscape = true, pfCreate = true, pfRename = true,
          spShown = true, spHover = true, spClick = true,
          mpLists = true, mpDescribe = true, mpSaveSlot = true, mpPick = true,
-         mxCampaign = true, mxSingle = true, mxMessages = true, mxSecret = true, mxStart = true, mxOperation = true;
+         mxCampaign = true, mxSingle = true, mxMessages = true, mxSecret = true, mxStart = true, mxOperation = true,
+         ciDescribe = true, ciShown = true, ciPick = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -1281,6 +1301,142 @@ void MainMenuTest(I3D_scene *scene)
         g_gameProfile.m_campaign = oldCampaign;
     }
 
+    // --- (part 9h-ix) the cinematics screen: its description, hidden, shown, a movie picked, played ---
+    {
+        C_MainMenu m;
+        const auto Is = [](const std::string &got, const std::string &want) {
+            if (got != want)
+                std::printf("CINEMA %s\nCINEMA expected %s\n", got.c_str(), want.c_str());
+            return got == want;
+        };
+        g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnCinematicsHidden)] = "hidden";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnCinematicsShown)] = "shown";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnMoviePlay)] = "play";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnMoviePick)] = "movie";
+        g_ciMovies = {{0x900, "a.bik", true}, {0x901, "b.bik", false}, {0x902, "c.bik", true}};
+        {
+            // The frames; the controls; the movies' lines.
+            bool ok = true;
+            S_MrObj *model = MsFrame("cimodel"), *video = MsFrame("civideo"), *text = MsFrame("citext"),
+                    *lineT = MsFrame("ciline"), *shortT = MsFrame("cishort");
+            As<I3D_frame>(lineT)->m_localMatrix(3) = S_vector(0.25f, -0.5f, 0.75f);
+            S_MrObj *shot = MrObj("cishot", g_mrModelVt);
+            void *const oldDuplicate = g_mrModelVt[0xA0 / 4], *const oldSetPos = g_msFrameVt[0x08 / 4];
+            g_mrModelVt[0xA0 / 4] = reinterpret_cast<void *>(&MrFake<0xA0>);
+            g_msFrameVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+            S_MrObj *mesh = MrObj("cishotmesh", g_mrModelVt);
+            mesh->vtable[0x18 / 4] = reinterpret_cast<void *>(&MrFake<0x18>);
+            *reinterpret_cast<S_MrObj **>(reinterpret_cast<uint8_t *>(shot) + 0x1E0) = mesh;
+            g_msChildren[{model, "video"}] = video;
+            g_msChildren[{model, "text00"}] = text;
+            g_msChildren[{model, "screen_shot"}] = shot;
+            g_msChildren[{model, "blong"}] = lineT;
+            g_msChildren[{model, "bshort"}] = shortT;
+            g_mrMade[FRAME_DUMMY] = {MsFrame("cigroup")};
+            g_mrClones.clear();
+            for (int i = 0; i < 3; ++i)
+                g_mrClones.push_back(As<I3D_frame>(MsFrame(strdup(CmText("cic%d", i).c_str()))));
+            S_ScreenDesc d("SINGLE MISSION 2", "single mission 2", 7u << 26);
+            g_gfLog.clear();
+            ok &= m.DescribeCinematicsScreen(&d, As<I3D_frame>(model));
+            ok &= d.messages.size() == 2 && Is(CsMessage(d.messages[0]), "0 1000007 400c000 self hidden") &&
+                  Is(CsMessage(d.messages[1]), "0 1000007 400d000 self shown");
+            std::string names;
+            for (const S_ControlDesc *c : d.controls)
+                names += CmText("%x %s %x|", c->type, c->name.c_str(), c->id);
+            ok &= Is(names, "13 text_screen 1c100000|4 screen_shot 1c200000|22 video 1c300000|14 bexit01 1c400000|"
+                            "14 bexit 1c500000|8 scroll00 1c600000|23 GB_Cinematics 1c700000|"
+                            "13 text_list of profiles 1c800000|13 text_h&dversion 1c900000|14 bload lastsave 1ca00000|"
+                            "14 bload mission 1cb00000|");
+            if (d.controls.size() == 11) {
+                ok &= Is(CsTree(d.controls[0]), "13 text_screen 1c100000: 0 1000015 a 83d;") &&
+                      Is(CsTree(d.controls[1]), "4 screen_shot 1c200000:;") && Is(CsTree(d.controls[2]), "22 video 1c300000:;") &&
+                      Is(CsTree(d.controls[3]), "14 bexit01 1c400000: 0 1000015 d 8d8 0 1000001 0 0 0 1000007 4001000 self play;") &&
+                      Is(CsTree(d.controls[4]), "14 bexit 1c500000: 0 1000015 d 8d0 0 6001003 0 0;") &&
+                      Is(CsTree(d.controls[5]), "8 scroll00 1c600000: 0 100000b 1c700000 0;") &&
+                      Is(CsTree(d.controls[7]), "13 text_list of profiles 1c800000: 0 1000015 b 9f;") &&
+                      Is(CsTree(d.controls[8]), "13 text_h&dversion 1c900000: 0 1000015 28 7d6;") &&
+                      Is(CsTree(d.controls[9]), "14 bload lastsave 1ca00000: 0 1000014 d 0 'Load Last save' 0 1000004 0 0;") &&
+                      Is(CsTree(d.controls[10]), "14 bload mission 1cb00000: 0 1000015 d 8d0 0 1000004 0 0;");
+                // The list: its scroll, rows, step, origin (blong's place); a line per movie.
+                const S_ControlDesc *list = d.controls[6];
+                const auto *origin = list->messages.size() > 3 ? reinterpret_cast<const S_vector *>(list->messages[3].value2) : nullptr;
+                ok &= origin && origin->x == 0.25f && origin->y == -0.5f && origin->z == 0.75f;
+                std::string tree = CsTree(list);
+                if (origin) {
+                    const std::string hex = CmText("100006b 0 %x", static_cast<uint32_t>(list->messages[3].value2));
+                    const size_t at = tree.find(hex);
+                    if (at != std::string::npos)
+                        tree.replace(at, hex.size(), "100006b 0 ORIGIN");
+                }
+                ok &= Is(tree, "23 GB_Cinematics 1c700000: 0 100000b 1c600000 0 0 1000028 11 0 0 100002a 0 3d03126f 0 100006b 0 ORIGIN"
+                               " 0 200002c 0 0 { 6 Anim00 1c701000: 0 1000015 c 900 0 1000009 0 0 0 1000007 4001000 self movie;"
+                               " 6 Anim01 1c702000: 0 1000015 c 901 0 1000009 1 0 0 1000007 4001000 self movie;"
+                               " 6 Anim02 1c703000: 0 1000015 c 902 0 1000009 2 0 0 1000007 4001000 self movie; };");
+            } else {
+                ok = false;
+            }
+            const std::string log = Join(g_gfLog);
+            ok &= GmInOrder(log, {"civideo on 0", "citext on 0", "cishot a0", "cishotmesh 18", "cigroup 38 cimodel 0",
+                                  "cigroup 34 GB_Cinematics", "ciline 24", "ciline on 0", "cishort 24", "cishort on 0",
+                                  "cigroup 24", "ciline 38 cigroup 1", "movie 0", "clone tree ciline 0", "cic0 34 Anim00", "movie 1",
+                                  "cic1 34 Anim01", "movie 2", "cic2 34 Anim02"}) &&
+                  GmInOrder(log, {"cigroup 8 (0 0 0)"});
+            if (!ok)
+                std::printf("CINEMA log %s\n", log.c_str());
+            // No templates: false (nothing described).
+            g_msChildren.erase({model, "bshort"});
+            g_mrMade[FRAME_DUMMY] = {MsFrame("cigroup2")};
+            S_ScreenDesc d2("SINGLE MISSION 2", "single mission 2", 7u << 26);
+            ok &= !m.DescribeCinematicsScreen(&d2, As<I3D_frame>(model)) && d2.controls.empty();
+            g_msChildren.erase({model, "blong"});
+            g_msChildren[{model, "bshort"}] = shortT;
+            g_mrMade[FRAME_DUMMY] = {MsFrame("cigroup3")};
+            S_ScreenDesc d3("SINGLE MISSION 2", "single mission 2", 7u << 26);
+            ok &= !m.DescribeCinematicsScreen(&d3, As<I3D_frame>(model)) && d3.controls.empty();
+            g_mrMade.erase(FRAME_DUMMY);
+            g_mrModelVt[0xA0 / 4] = oldDuplicate;
+            g_msFrameVt[0x08 / 4] = oldSetPos;
+            m.m_frames.clear();
+            m.m_models.clear();
+            WM(r.ciDescribe, ok);
+        }
+        {
+            // Hidden: the movie closed, none picked; shown: the seen movies' lines only.
+            bool ok = true;
+            m.m_movie = "x.bik";
+            ok &= C_MainMenu::OnCinematicsHidden(&m, nullptr, nullptr, 0, 0) && m.m_movie.IsEmpty() &&
+                  Is(CsQueue(), "1c300000 20000a0 0 0; ");
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnCinematicsShown(&m, nullptr, nullptr, 0, 0) && MsLogIs({"seen 0", "seen 1", "seen 2"}, g_gfLog) &&
+                  Is(CsQueue(), "1c700000 2000085 0 0; 1c700000 2000083 1c701000 0; 1c700000 2000083 1c703000 0; ");
+            g_ciMovies[1].seen = true;
+            g_ciMovies[0].seen = false;
+            ok &= C_MainMenu::OnCinematicsShown(&m, nullptr, nullptr, 0, 0) &&
+                  Is(CsQueue(), "1c700000 2000085 0 0; 1c700000 2000083 1c702000 0; 1c700000 2000083 1c703000 0; ");
+            WM(r.ciShown, ok);
+        }
+        {
+            // A movie picked: its file kept, play on, the movie closed, the file played; play: the movie state.
+            bool ok = true;
+            C_MpLine line(0x1c702000, 1);
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnMoviePick(&m, nullptr, &line, CONTROL_NOTIFY_CLICK, 0) && m.m_movie == "b.bik" &&
+                  MsLogIs({"movie 1"}, g_gfLog) &&
+                  Is(CsQueue(), "1c400000 1000002 0 0; 1c300000 20000a0 0 0; 1c300000 20000a2 0 0 'b.bik'; ");
+            ok &= !C_MainMenu::OnMoviePick(&m, nullptr, nullptr, CONTROL_NOTIFY_CLICK, 0) && m.m_movie == "b.bik" &&
+                  CsQueue() == "";
+            m.m_state = 0;
+            ok &= !C_MainMenu::OnMoviePlay(&m, nullptr, nullptr, CONTROL_NOTIFY_CLICK, 0) && m.m_state == 0;
+            ok &= C_MainMenu::OnMoviePlay(&m, nullptr, &line, CONTROL_NOTIFY_CLICK, 0) && m.m_state == GAME_STATE_PLAY_AVI &&
+                  CsQueue() == "";
+            m.m_state = 0;
+            WM(r.ciPick, ok);
+        }
+        g_ciMovies.clear();
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -1302,7 +1458,7 @@ void MainMenuTest(I3D_scene *scene)
         g_mrMade[FRAME_MODEL] = std::deque<S_MrObj *>(models.begin(), models.end());
         // (The missions screen's two groups (no templates: not described further); the options screen's group frame:
         // the real handler finds no buttons.)
-        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc"), MsFrame("mmgs"), MsFrame("mmgro")};
+        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc"), MsFrame("mmgs"), MsFrame("mmgro"), MsFrame("mmgci")};
         g_cacheLoads.clear();
         g_menuScreens.clear();
         g_gfLog.clear();
@@ -1312,8 +1468,7 @@ void MainMenuTest(I3D_scene *scene)
                                                         "multiplayer menu", "create server", "password", "server filters",
                                                         "gameinfo", "confirm", "password"});
         const std::string log = Join(g_gfLog);
-        ok &= GmInOrder(log, {"scan", "describe cinematics 1c000000",
-                              "describe browser 20000000", "describe create 24000000", "describe password 28000000",
+        ok &= GmInOrder(log, {"scan", "describe browser 20000000", "describe create 24000000", "describe password 28000000",
                               "describe filters 2c000000", "describe gameinfo 30000000", "describe connect 34000000",
                               "describe addserver 38000000"}) &&
               log.find("describe ", log.find("describe addserver") + 1) == std::string::npos;
@@ -1323,14 +1478,14 @@ void MainMenuTest(I3D_scene *scene)
               !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1];
         // The quit question's model moved.
         ok &= log.find("mmm04 8 (0.5 -0.375 -0.5)") != std::string::npos && log.find(" 8 (0.5") == log.rfind(" 8 (0.5") &&
-              log.find("mmgro 34 GROptions") != std::string::npos;
+              log.find("mmgro 34 GROptions") != std::string::npos && log.find("mmgci 34 GB_Cinematics") != std::string::npos;
         // A model not found: its screen skipped.
         for (size_t i = 1; i < m.m_screens.size(); ++i)
             delete m.m_screens[i];
         m.m_screens = {&box};
         m.m_models.clear();
         g_mrMade[FRAME_MODEL] = std::deque<S_MrObj *>(models.begin(), models.end());
-        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc2"), MsFrame("mmgs2"), MsFrame("mmgro2")};
+        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc2"), MsFrame("mmgs2"), MsFrame("mmgro2"), MsFrame("mmgci2")};
         g_cacheFailName = "change_profile";
         g_menuScreens.clear();
         g_gfLog.clear();
@@ -1358,9 +1513,10 @@ void MainMenuTest(I3D_scene *scene)
     std::printf("mainmenu: mmStart %d mmStop %d mmUpdate %d mmDrain %d mmMessage %d mmEscape %d mmSelect %d mmBuild %d mmDescribe %d mmMainShown %d pfDescribe %d pfRefresh %d pfShown %d pfList %d "
                 "pfDifficulty %d pfMessage %d pfButtons %d pfEscape %d pfCreate %d pfRename %d "
                 "spShown %d spHover %d spClick %d mpLists %d mpDescribe %d mpSaveSlot %d mpPick %d mxCampaign %d mxSingle %d"
-                " mxMessages %d mxSecret %d mxStart %d mxOperation %d\n",
+                " mxMessages %d mxSecret %d mxStart %d mxOperation %d ciDescribe %d ciShown %d ciPick %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
-                r.mpSaveSlot, r.mpPick, r.mxCampaign, r.mxSingle, r.mxMessages, r.mxSecret, r.mxStart, r.mxOperation);
+                r.mpSaveSlot, r.mpPick, r.mxCampaign, r.mxSingle, r.mxMessages, r.mxSecret, r.mxStart, r.mxOperation,
+                r.ciDescribe, r.ciShown, r.ciPick);
 }

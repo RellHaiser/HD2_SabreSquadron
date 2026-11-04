@@ -8300,6 +8300,24 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 319 errors in 59 files, 132 stubs. ret_audit --src: 52.
   - Stats: 9,184 of 12,306 functions by hand (83.7 % by size).
 
+  PART 9h-ix DONE (2026-11-04): the main menu's cinematics screen (game/main_menu.cpp).
+  - DescribeCinematicsScreen 0x00614140 (an AND ESP,-16 frame: the decompile garbles its locals; the template,
+    group and CloneFrame arguments read from the asm): "video" / "text00" off, "screen_shot" its own mesh, the
+    group GB_Cinematics, blong / bshort off (fix: missing templates return false, the original uses them
+    unchecked); hidden / shown callbacks; title 0x83D, picture, the movie control (type 0x22), play "bexit01"
+    (0x8D8, off), back, the scroll bar, the movies' list (AddMissionList now takes the scroll bar's id): a line
+    "Anim%02d" per movie with its text (style 0xC), the label 0x9F, the version, "Load Last save" and load
+    hidden.
+  - OnCinematicsHidden 0x00615660 (the movie closed, m_movie emptied), OnCinematicsShown 0x00615820 (the seen
+    movies' lines only), OnMoviePlay 0x00615450 (GAME_STATE_PLAY_AVI), OnMoviePick 0x00615470 (m_movie the
+    file; play on; the movie closed and the file played).
+  - Harness: ciDescribe, ciShown, ciPick (a C_MovieList stub in stub/game/profile.h); the build test's
+    cinematics screen real (its group mmgci). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h9.py: 96: 83 killed, 10 not building, 3 equivalent (the unreachable
+    null-group check, a text id Get always sets).
+  - Build: MSVC clean. Tier 1: 319 errors in 59 files, 132 stubs. ret_audit --src: 52.
+  - Stats: 9,189 of 12,306 functions by hand (83.9 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

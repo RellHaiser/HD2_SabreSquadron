@@ -153,7 +153,25 @@ protected:
     // on, the description cleared, the operation's name as the picture. True.
     static bool OnOperationPick(void *menu, void *argument, C_Control *control, uint32_t notification,
                                 uint32_t value);        // 0x0063af20
+    // The cinematics screen: "video" and "text00" off, "screen_shot" its own mesh; the group GB_Cinematics made
+    // under the model (none: false), the templates blong and bshort off (fix: missing: false); hidden:
+    // OnCinematicsHidden, shown: OnCinematicsShown; the title, the picture, the movie, play (off; OnMoviePlay),
+    // back, the scroll bar, the movies' list (a line per movie: copies of blong "Anim%02d", its text, picked:
+    // OnMoviePick), the list's label, the version; load the last save and load hidden. True.
     bool DescribeCinematicsScreen(S_ScreenDesc *desc, I3D_frame *model);         // 0x00614140
+    // The cinematics screen hidden: the movie closed, none picked. True.
+    static bool OnCinematicsHidden(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                   uint32_t value);     // 0x00615660
+    // Shown: the movies' lines hidden but those of the movies seen. True.
+    static bool OnCinematicsShown(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                  uint32_t value);      // 0x00615820
+    // Play (none: false): the movie picked played over the menu (GAME_STATE_PLAY_AVI). True.
+    static bool OnMoviePlay(void *menu, void *argument, C_Control *control, uint32_t notification,
+                            uint32_t value);            // 0x00615450
+    // A movie's line picked (none: false): its file kept (m_movie), play on, the movie closed and the file
+    // played in the screen's movie control. True.
+    static bool OnMoviePick(void *menu, void *argument, C_Control *control, uint32_t notification,
+                            uint32_t value);            // 0x00615470
     bool DescribeBrowserScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00634050
     bool DescribeCreateServerScreen(S_ScreenDesc *desc, I3D_frame *model);  // 0x00628610
     bool DescribePasswordScreen(S_ScreenDesc *desc, I3D_frame *model);      // 0x00637890

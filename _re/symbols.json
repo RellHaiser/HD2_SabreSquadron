@@ -27280,6 +27280,26 @@
   "name": "S_ScreenDesc::AddControl",
   "proto": "void * __thiscall AddControl(S_ScreenDesc *this, int type, char * name)"
  },
+ "00615450": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMoviePlay",
+  "proto": "bool __thiscall OnMoviePlay(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00615470": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMoviePick",
+  "proto": "bool __thiscall OnMoviePick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00615660": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnCinematicsHidden",
+  "proto": "bool __thiscall OnCinematicsHidden(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00615820": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnCinematicsShown",
+  "proto": "bool __thiscall OnCinematicsShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00615a30": {
   "module": "zz_idioms",
   "name": "vector_tidy_615a30"

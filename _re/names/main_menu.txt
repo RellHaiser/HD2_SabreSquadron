@@ -81,3 +81,8 @@
 0063a670 C_MainMenu::ShowCampaignMissions | void __fastcall ShowCampaignMissions(C_MainMenu *this)
 0063ab60 C_MainMenu::ShowSingleMissions | void __fastcall ShowSingleMissions(C_MainMenu *this)
 0063af20 C_MainMenu::OnOperationPick | bool __thiscall OnOperationPick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+# Part 9h-ix: the cinematics screen.
+00615660 C_MainMenu::OnCinematicsHidden | bool __thiscall OnCinematicsHidden(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00615820 C_MainMenu::OnCinematicsShown | bool __thiscall OnCinematicsShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00615450 C_MainMenu::OnMoviePlay | bool __thiscall OnMoviePlay(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00615470 C_MainMenu::OnMoviePick | bool __thiscall OnMoviePick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)

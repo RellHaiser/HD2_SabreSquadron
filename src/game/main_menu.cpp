@@ -848,11 +848,12 @@ uintptr_t FloatBits(float value)
     return bits;
 }
 
-// A mission list: a hiding list scrolled, its rows, its step, the lines' origin the template's place.
-S_ControlDesc *AddMissionList(S_ScreenDesc *desc, const char *name, I3D_frame *lineTemplate)
+// A mission list: a hiding list scrolled (by `scroll`), its rows, its step, the lines' origin the template's
+// place. (The cinematics screen's list too.)
+S_ControlDesc *AddMissionList(S_ScreenDesc *desc, const char *name, uint32_t scroll, I3D_frame *lineTemplate)
 {
     S_ControlDesc *list = desc->AddControl(CONTROL_HIDING_LIST, name);
-    AddDescMessage(list, 0, CONTROL_MSG_SET_VALUE, MISSION_LIST_SCROLL);
+    AddDescMessage(list, 0, CONTROL_MSG_SET_VALUE, scroll);
     AddDescMessage(list, 0, CONTROL_MSG_SET_VISIBLE, MISSION_LIST_ROWS);
     AddDescMessage(list, 0, CONTROL_MSG_SET_DOWN_STEP, 0, FloatBits(MISSION_LIST_STEP));
     // (The list frees it.)
@@ -914,7 +915,7 @@ bool C_MainMenu::DescribeMissionsScreen(S_ScreenDesc *desc, I3D_frame *model)
 void C_MainMenu::DescribeCampaignList(S_ScreenDesc *desc, I3D_frame *group, I3D_frame *operationTemplate,
                                       I3D_frame *missionTemplate)
 {
-    S_ControlDesc *list = AddMissionList(desc, "GB_Campaign", operationTemplate);
+    S_ControlDesc *list = AddMissionList(desc, "GB_Campaign", MISSION_LIST_SCROLL, operationTemplate);
     const auto self = reinterpret_cast<uintptr_t>(this);
     C_Campaign *campaign = g_gameProfile.m_campaign;
     int index = 0;
@@ -945,7 +946,7 @@ void C_MainMenu::DescribeCampaignList(S_ScreenDesc *desc, I3D_frame *group, I3D_
 
 void C_MainMenu::DescribeSingleList(S_ScreenDesc *desc, I3D_frame *group, I3D_frame *missionTemplate)
 {
-    S_ControlDesc *list = AddMissionList(desc, "GB_SingleMission", missionTemplate);
+    S_ControlDesc *list = AddMissionList(desc, "GB_SingleMission", MISSION_LIST_SCROLL, missionTemplate);
     const auto self = reinterpret_cast<uintptr_t>(this);
     C_Campaign *campaign = g_gameProfile.m_campaign;
     for (int c = 0; c < campaign->GetCount(); ++c) {
@@ -1214,5 +1215,119 @@ bool C_MainMenu::OnOperationPick(void *menu, void *, C_Control *control, uint32_
     PostTo(base | MISSIONS_LOAD, CONTROL_MSG_ACTIVATE, 0);
     PostTo(base | MISSIONS_TEXT, CONTROL_MSG_CLEAR, 0);
     PostText(base | MISSIONS_PICTURE, CONTROL_MSG_LOAD_TEXTURE, 0, name);
+    return true;
+}
+
+// ---- the cinematics screen (part 9h-ix) ---------------------------------------------------------------------
+
+namespace {
+
+constexpr int CONTROL_MOVIE = 0x22;
+// The cinematics screen's controls (absolute; by their order in its description: screen 7's).
+constexpr uint32_t CINEMATICS_SCREEN = static_cast<uint32_t>(MAIN_SCREEN_CINEMATICS) << SCREEN_INDEX_SHIFT;
+constexpr uint32_t CINEMATICS_MOVIE = CINEMATICS_SCREEN | 0x300000, CINEMATICS_PLAY = CINEMATICS_SCREEN | 0x400000,
+                   CINEMATICS_SCROLL = CINEMATICS_SCREEN | 0x600000, CINEMATICS_LIST = CINEMATICS_SCREEN | 0x700000;
+// The title, play, the list's label; the lines' style.
+constexpr uint32_t TEXT_CINEMATICS_TITLE = 0x83D, TEXT_PLAY = 0x8D8, TEXT_MOVIES_LABEL = 0x9F;
+constexpr uint32_t STYLE_MOVIE = 0xC;
+
+} // namespace
+
+bool C_MainMenu::DescribeCinematicsScreen(S_ScreenDesc *desc, I3D_frame *model)
+{
+    if (I3D_frame *video = model->FindChildFrame("video", FRAME_MASK_VISUAL))
+        video->SetOn(false);
+    if (I3D_frame *text = model->FindChildFrame("text00", FRAME_MASK_VISUAL))
+        text->SetOn(false);
+    if (auto *shot = static_cast<I3D_object_visual *>(model->FindChildFrame("screen_shot", FRAME_MASK_VISUAL))) {
+        shot->DuplicateMesh();
+        shot->GetVisualMesh()->Unknown18();
+    }
+    I3D_frame *lineTemplate = model->FindChildFrame("blong", FRAME_MASK_DUMMY);
+    I3D_frame *shortTemplate = model->FindChildFrame("bshort", FRAME_MASK_DUMMY);
+    I3D_frame *group = AddFrame(C_str("GB_Cinematics"), FRAME_DUMMY, model, S_vector(0.0f, 0.0f, 0.0f));
+    if (!group)
+        return false;
+    // Fix: no templates: false (the original uses them unchecked).
+    if (!lineTemplate || !shortTemplate)
+        return false;
+    lineTemplate->Update();
+    lineTemplate->SetOn(false);
+    shortTemplate->Update();
+    shortTemplate->SetOn(false);
+    group->Update();
+    lineTemplate->LinkTo(group, 1);
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    AddScreenMessage(desc, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_HIDDEN, self, Callback(&OnCinematicsHidden));
+    AddScreenMessage(desc, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_SHOWN, self, Callback(&OnCinematicsShown));
+
+    AddText(desc, "text_screen", STYLE_TITLE, TEXT_CINEMATICS_TITLE);
+    desc->AddControl(CONTROL_PICTURE, "screen_shot");
+    desc->AddControl(CONTROL_MOVIE, "video");
+    S_ControlDesc *play = AddButton(desc, "bexit01", TEXT_PLAY);
+    AddDescMessage(play, 0, CONTROL_MSG_DEACTIVATE, 0);
+    AddDescMessage(play, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self, Callback(&OnMoviePlay));
+    AddMenuButton(desc, "bexit", 0x8D0, MENU_MSG_BACK, 0);
+    AddDescMessage(desc->AddControl(CONTROL_SCROLL_BAR, "scroll00"), 0, CONTROL_MSG_SET_VALUE, CINEMATICS_LIST);
+    // The movies' list: a line per movie (copies of the template "Anim%02d"), its text, picked: OnMoviePick.
+    S_ControlDesc *list = AddMissionList(desc, "GB_Cinematics", CINEMATICS_SCROLL, lineTemplate);
+    C_MovieList &movies = g_gameProfile.GetPlayerProfile()->GetMovies();
+    for (int i = 0; i < movies.GetCount(); ++i) {
+        const C_fstr name("Anim%02d", i);
+        int text = 0;
+        C_str file;
+        movies.Get(i, &text, &file);
+        CloneFrame(name, group, lineTemplate);
+        S_ControlDesc *line = list->AddChild(CONTROL_LIST_ITEM, name.c_str());
+        AddDescMessage(line, 0, CONTROL_MSG_SET_TEXT_ID, STYLE_MOVIE, static_cast<uintptr_t>(text));
+        AddDescMessage(line, 0, CONTROL_MSG_SET_INDEX, static_cast<uint32_t>(i));
+        AddDescMessage(line, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self, Callback(&OnMoviePick));
+    }
+    AddDescMessage(list, 0, CONTROL_MSG_REFRESH, 0);
+    AddText(desc, "text_list of profiles", STYLE_LABEL, TEXT_MOVIES_LABEL);
+    AddText(desc, "text_h&dversion", STYLE_VERSION, TEXT_VERSION);
+    S_ControlDesc *last = desc->AddControl(CONTROL_BUTTON, "bload lastsave");
+    AddDescMessage(last, 0, CONTROL_MSG_SET_TEXT, STYLE_BUTTON, C_str("Load Last save"));
+    AddDescMessage(last, 0, CONTROL_MSG_HIDE, 0);
+    AddDescMessage(AddButton(desc, "bload mission", 0x8D0), 0, CONTROL_MSG_HIDE, 0);
+    return true;
+}
+
+bool C_MainMenu::OnCinematicsHidden(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    PostTo(CINEMATICS_MOVIE, CONTROL_MSG_CLOSE_MOVIE, 0);
+    static_cast<C_MainMenu *>(menu)->m_movie = C_str("");
+    return true;
+}
+
+bool C_MainMenu::OnCinematicsShown(void *, void *, C_Control *, uint32_t, uint32_t)
+{
+    PostTo(CINEMATICS_LIST, CONTROL_MSG_HIDE_ALL, 0);
+    const C_MovieList &movies = g_gameProfile.GetPlayerProfile()->GetMovies();
+    for (int i = 0; i < movies.GetCount(); ++i) {
+        if (movies.IsSeen(i))
+            PostTo(CINEMATICS_LIST, CONTROL_MSG_ITEM_COUNTED, LineId(CINEMATICS_LIST, i + 1));
+    }
+    return true;
+}
+
+bool C_MainMenu::OnMoviePlay(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    if (!control)
+        return false;
+    static_cast<C_MainMenu *>(menu)->m_state = GAME_STATE_PLAY_AVI;
+    return true;
+}
+
+bool C_MainMenu::OnMoviePick(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if (!control)
+        return false;
+    int text = 0;
+    g_gameProfile.GetPlayerProfile()->GetMovies().Get(control->GetIndex(), &text, &self->m_movie);
+    PostTo(CINEMATICS_PLAY, CONTROL_MSG_ACTIVATE, 0);
+    PostTo(CINEMATICS_MOVIE, CONTROL_MSG_CLOSE_MOVIE, 0);
+    PostText(CINEMATICS_MOVIE, CONTROL_MSG_PLAY_MOVIE, 0, self->m_movie);
     return true;
 }

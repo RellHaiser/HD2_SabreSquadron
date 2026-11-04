@@ -4560,7 +4560,7 @@ uint32_t C_MainMenu__C_MainMenu__OnNetworkMessage(C_MainMenu *_this = {}, int pa
 C_MainMenu * C_MainMenu__DeletingDestructor(C_MainMenu *_this = {}, uint32_t flags = {}, ...);
 uint32_t C_MainMenu__DescribeAddServerScreen(void *param_1 = {}, int *param_2 = {}, ...);
 uint32_t C_MainMenu__DescribeCampaignList(C_MainMenu *_this = {}, void *desc = {}, void *group = {}, void *operationTemplate = {}, void *missionTemplate = {}, ...);
-uint32_t C_MainMenu__DescribeCinematicsScreen(void *param_1 = {}, int *param_2 = {}, ...);
+bool C_MainMenu__DescribeCinematicsScreen(C_MainMenu *_this = {}, void *desc = {}, void *model = {}, ...);
 bool C_MainMenu__DescribeMissionsScreen(C_MainMenu *_this = {}, void *desc = {}, void *model = {}, ...);
 bool C_MainMenu__DescribeProfileScreen(C_MainMenu *_this = {}, void *desc = {}, void *model = {}, ...);
 uint32_t C_MainMenu__DescribeSingleList(C_MainMenu *_this = {}, void *desc = {}, void *group = {}, void *missionTemplate = {}, ...);
@@ -4573,12 +4573,16 @@ uint32_t * C_MainMenu__FUN_0062c6d0(C_MainMenu *_this = {}, uint32_t *param_1 = 
 uint32_t C_MainMenu__FUN_0062d030(C_MainMenu *_this = {}, ...);
 uint32_t C_MainMenu__FUN_00634580(C_MainMenu *_this = {}, int param_1 = {}, int *param_2 = {}, ...);
 int C_MainMenu__GetTypeId(C_MainMenu *_this = {}, ...);
+bool C_MainMenu__OnCinematicsHidden(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
+bool C_MainMenu__OnCinematicsShown(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
 bool C_MainMenu__OnConnectMessage(C_MainMenu *_this = {}, void *message = {}, ...);
 bool C_MainMenu__OnDifficulty(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
 bool C_MainMenu__OnMainShown(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
 uint32_t C_MainMenu__OnMessage(C_MainMenu *_this = {}, void *message = {}, ...);
 bool C_MainMenu__OnMissionPick(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
 bool C_MainMenu__OnMissionsMessage(C_MainMenu *_this = {}, void *message = {}, ...);
+bool C_MainMenu__OnMoviePick(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
+bool C_MainMenu__OnMoviePlay(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
 bool C_MainMenu__OnOperationPick(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
 bool C_MainMenu__OnProfileButton(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
 bool C_MainMenu__OnProfileList(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
@@ -9054,11 +9058,7 @@ uint32_t FUN_00614df0(void *_this = {}, uint32_t param_1 = {}, uint32_t param_2 
 uint32_t FUN_00614e20(void *_this = {}, uint32_t param_1 = {}, uint32_t param_2 = {}, uint32_t param_3 = {}, uint32_t param_4 = {}, ...);
 uint32_t FUN_00614e50(void *_this = {}, uint32_t param_1 = {}, uint32_t param_2 = {}, uint32_t param_3 = {}, uint32_t param_4 = {}, ...);
 uint32_t FUN_00615190(int param_1 = {}, ...);
-uint32_t FUN_00615450(void *_this = {}, uint32_t param_1 = {}, int param_2 = {}, ...);
-uint32_t FUN_00615470(void *_this = {}, uint32_t param_1 = {}, int param_2 = {}, ...);
-uint32_t FUN_00615660(int param_1 = {}, ...);
 uint32_t FUN_006157d0(void *_this = {}, uint32_t *param_1 = {}, ...);
-uint32_t FUN_00615820(...);
 uint32_t FUN_006159f0(int param_1 = {}, ...);
 int FUN_00615a70(int param_1 = {}, ...);
 int FUN_00615d50(void *_this = {}, uint32_t *param_1 = {}, uint32_t *param_2 = {}, ...);
