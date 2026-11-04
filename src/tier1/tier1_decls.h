@@ -4584,7 +4584,7 @@ bool C_MainMenu__OnDifficulty(C_MainMenu *_this = {}, void *argument = {}, void 
 bool C_MainMenu__OnMainShown(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
 uint32_t C_MainMenu__OnMessage(C_MainMenu *_this = {}, void *message = {}, ...);
 bool C_MainMenu__OnMissionsMessage(C_MainMenu *_this = {}, void *message = {}, ...);
-uint32_t C_MainMenu__OnProfileButton(void *_this = {}, uint32_t param_1 = {}, int *param_2 = {}, int param_3 = {}, ...);
+bool C_MainMenu__OnProfileButton(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
 bool C_MainMenu__OnProfileList(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);
 bool C_MainMenu__OnProfileMessage(C_MainMenu *_this = {}, void *message = {}, ...);
 bool C_MainMenu__OnProfileShown(C_MainMenu *_this = {}, void *argument = {}, void *control = {}, uint32_t notification = {}, uint32_t value = {}, ...);

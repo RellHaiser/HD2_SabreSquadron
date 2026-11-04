@@ -70,6 +70,7 @@ public:
     // (The main menu, part 9h-iv: main_menu_test.inc.)
     bool GetLastSaveText(C_str *mode, C_str *mission, C_str *date) const;
     bool Save();                                        // (the profile screen, part 9h-v)
+    int Rename(const char *oldName, const char *newName);   // (its buttons, part 9h-vi)
     // (The in-game menu's presets, part 9e-xvii: game_menu_test.inc.)
     const C_str &GetProfileName() const;
     bool SaveOptions();
@@ -88,8 +89,14 @@ class C_Campaign;
 class C_HumanStore;
 struct S_MissionSquad;
 class C_ItemStock;
+// (The main menu's profile screen, part 9h-vi: main_menu_test.inc.)
+class C_GameConfig {
+public:
+    void SetLastProfile(C_str name);
+};
 class C_GameProfile {
 public:
+    C_GameConfig *m_config = nullptr;                   // (part 9h-vi)
     C_PlayerProfile *GetPlayerProfile() const { return m_player; }
     C_PlayerProfile *m_player = nullptr;
     bool IsCooperativeGame() const;
@@ -141,6 +148,7 @@ void __stdcall GetGameVersion(int *major, int *minor);
 // (The main menu's profile screen, part 9h-v: main_menu_test.inc.)
 void ScanProfiles(void (*callback)(const char *name, int context), int context);
 bool DeleteProfile(const char *name);
+int CreateProfile(const char *name);
 extern S_MultiplayerSettings *g_mpSettings;             // (a reference into g_gameProfile in the real header)
 
 // The squad soldier's slots (S_SquadSoldier::PutItem).

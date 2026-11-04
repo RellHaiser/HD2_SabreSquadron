@@ -142,12 +142,6 @@ f_005ac500.cpp:112:57: request for member '_12_2_' in '"\012ControlsEx - "', whi
     *(uint16_t *)(pcVar9 + 0xb) = "\nControlsEx - "._12_2_;
 f_00616c10.cpp:115:5: 'empty_function_6e6ba0' was not declared in this scope; did you mean 'empty_function_6e4a10'?
     empty_function_6e6ba0();
-f_00620f70.cpp:905:31: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    if ((local_d8 != 0) && (*local_d8 = *local_d8 - 1, *local_d8 == 0)) {
-f_00620f70.cpp:905:43: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    if ((local_d8 != 0) && (*local_d8 = *local_d8 - 1, *local_d8 == 0)) {
-f_00620f70.cpp:905:58: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
-    if ((local_d8 != 0) && (*local_d8 = *local_d8 - 1, *local_d8 == 0)) {
 f_006285d0.cpp:1145:33: invalid operands of types 'tier1::C_str_rep*' and 'unsigned int' to binary 'operator&'
     CStack_94.rep = CStack_94.rep & 0xffffff00;
 f_006285d0.cpp:1175:33: invalid operands of types 'tier1::C_str_rep*' and 'unsigned int' to binary 'operator&'

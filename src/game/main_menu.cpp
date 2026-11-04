@@ -3,6 +3,7 @@
 // 0x00622af0, 0x006c1970 .. 0x006c1a90).
 #include "game/main_menu.h"
 
+#include <cctype>
 #include <cstring>
 
 #include "common/os_files.h"
@@ -587,4 +588,140 @@ bool C_MainMenu::OnProfileMessage(S_ControlMessage *message)
     default:
         return false;
     }
+}
+
+// ---- the profile screen's buttons (part 9h-vi) ------------------------------------------------------------
+
+namespace {
+
+// The profile screen's steps: a new profile's name typed, a profile's new name typed.
+constexpr int STEP_NEW_NAME = 1, STEP_RENAME = 2;
+// The questions: delete the profile; the name taken / not valid, creating and renaming.
+constexpr uint32_t TEXT_DELETE_PROFILE = 0x7D4, TEXT_CREATE_EXISTS = 0x251C, TEXT_CREATE_FAILED = 0x251D,
+                   TEXT_RENAME_EXISTS = 0x2526, TEXT_RENAME_FAILED = 0x2527;
+constexpr int MESSAGE_KIND_QUESTION = 1, MESSAGE_KIND_INFO = 2;
+// The name typed (the original's buffer).
+constexpr int TYPED_NAME_SIZE = 100;
+
+// The name box's text without its trailing spaces (ASCII ones).
+void TypedName(C_Control *box, char (&name)[TYPED_NAME_SIZE])
+{
+    const C_str text = AskText(box);
+    // Fix: at most 99 characters (the original copies the text whole; the box's limit is 17, none in Japanese).
+    std::memset(name, 0, sizeof name);
+    std::strncpy(name, text.c_str(), sizeof name - 1);
+    size_t length = std::strlen(name);
+    while (length > 0 && static_cast<unsigned char>(name[length - 1]) < 0x80 && std::isspace(name[length - 1]))
+        name[--length] = '\0';
+}
+
+} // namespace
+
+bool C_MainMenu::OnProfileButton(void *menu, void *, C_Control *control, uint32_t notification, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    // (Fix: no control: nothing; the original reads it.)
+    if (!control)
+        return true;
+    switch (control->GetId() & CONTROL_ID_CHILD_MASK) {
+    case PROFILE_DELETE:
+        self->ShowMessageId(MESSAGE_KIND_QUESTION, TEXT_DELETE_PROFILE, CONTROL_MSG_REMOVE_SELECTED, 0);
+        return true;
+    case PROFILE_RENAME:
+        // The name box edited, the rest off.
+        PostTo(PROFILE_NAME, CONTROL_MSG_ACTIVATE, 0);
+        PostTo(PROFILE_NAME, CONTROL_MSG_EDIT, 0);
+        PostTo(PROFILE_LIST, CONTROL_MSG_DEACTIVATE, 0);
+        for (uint32_t id = PROFILE_CREATE; id <= PROFILE_BACK; id += PROFILE_CONTROL_STEP)
+            PostTo(id, CONTROL_MSG_DEACTIVATE, 0);
+        self->m_step = STEP_RENAME;
+        return true;
+    case PROFILE_CREATE:
+        // The name box emptied and edited, the rest off, no difficulty white.
+        PostTo(PROFILE_NAME, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON, TEXT_EMPTY);
+        PostTo(PROFILE_NAME, CONTROL_MSG_ACTIVATE, 0);
+        PostTo(PROFILE_NAME, CONTROL_MSG_EDIT, 0);
+        PostTo(PROFILE_LIST, CONTROL_MSG_DEACTIVATE, 0);
+        for (uint32_t id = PROFILE_CREATE; id <= PROFILE_BACK; id += PROFILE_CONTROL_STEP)
+            PostTo(id, CONTROL_MSG_DEACTIVATE, 0);
+        for (uint32_t id = PROFILE_FIRST_DIFFICULTY; id <= PROFILE_LAST_DIFFICULTY; id += PROFILE_CONTROL_STEP)
+            PostTo(id, CONTROL_MSG_WHITE_TEXT, 0);
+        self->m_step = STEP_NEW_NAME;
+        return true;
+    case PROFILE_NAME:
+        break;
+    default:
+        return true;
+    }
+
+    if (notification == CONTROL_NOTIFY_ESCAPE) {
+        // The typing given up: the screen as it was (the step kept, as the original).
+        self->RefreshProfile();
+        PostTo(PROFILE_NAME, CONTROL_MSG_DEACTIVATE, 0);
+        PostTo(PROFILE_LIST, CONTROL_MSG_ACTIVATE, 0);
+        PostTo(PROFILE_CREATE, CONTROL_MSG_ACTIVATE, 0);
+        if (!self->m_profileName.IsEmpty()) {
+            PostTo(PROFILE_RENAME, CONTROL_MSG_ACTIVATE, 0);
+            PostTo(PROFILE_DELETE, CONTROL_MSG_ACTIVATE, 0);
+        }
+        PostTo(PROFILE_BACK, CONTROL_MSG_ACTIVATE, 0);
+        return true;
+    }
+    if (notification != CONTROL_NOTIFY_RETURN)
+        return true;
+
+    char name[TYPED_NAME_SIZE];
+    if (self->m_step == STEP_NEW_NAME) {
+        TypedName(control, name);
+        const int result = CreateProfile(name);
+        if (result == -1) {
+            self->ShowMessageId(MESSAGE_KIND_INFO, TEXT_CREATE_EXISTS, MAIN_MSG_EDIT_NAME, MAIN_MSG_EDIT_NAME);
+        } else if (result == -2) {
+            self->ShowMessageId(MESSAGE_KIND_INFO, TEXT_CREATE_FAILED, MAIN_MSG_EDIT_NAME, MAIN_MSG_EDIT_NAME);
+        } else {
+            // Made: its difficulty to pick, the list read again with it selected.
+            PostTo(PROFILE_NAME, CONTROL_MSG_DEACTIVATE, 0);
+            PostTo(PROFILE_LIST, CONTROL_MSG_CLEAR, 0);
+            for (uint32_t id = PROFILE_FIRST_DIFFICULTY; id <= PROFILE_LAST_DIFFICULTY; id += PROFILE_CONTROL_STEP)
+                PostTo(id, CONTROL_MSG_ACTIVATE, 0);
+            self->m_profileName = C_str(name);
+            SelectProfile(self, nullptr, nullptr, 0, 0);
+            g_gameProfile.GetPlayerProfile()->Save();
+            ScanProfiles(&PostProfileLine, 0);
+            self->m_step = STEP_PICK_DIFFICULTY;
+            PostText(PROFILE_NAME, CONTROL_MSG_SET_TEXT, STYLE_BUTTON, self->m_profileName);
+            PostText(PROFILE_LIST, CONTROL_MSG_SELECT_TEXT, 0, self->m_profileName);
+        }
+    }
+    if (self->m_step == STEP_RENAME) {
+        TypedName(control, name);
+        if (name[0] == '\0') {
+            // Nothing typed: the name as it was.
+            self->RefreshProfile();
+            PostTo(PROFILE_NAME, CONTROL_MSG_DEACTIVATE, 0);
+            PostText(PROFILE_NAME, CONTROL_MSG_SET_TEXT, STYLE_BUTTON, self->m_profileName);
+            PostTo(PROFILE_LIST, CONTROL_MSG_ACTIVATE, 0);
+            for (uint32_t id = PROFILE_CREATE; id <= PROFILE_BACK; id += PROFILE_CONTROL_STEP)
+                PostTo(id, CONTROL_MSG_ACTIVATE, 0);
+            return true;
+        }
+        const int result = g_gameProfile.GetPlayerProfile()->Rename(self->m_profileName.c_str(), name);
+        if (result == -1) {
+            self->ShowMessageId(MESSAGE_KIND_INFO, TEXT_RENAME_EXISTS, MAIN_MSG_EDIT_NAME, MAIN_MSG_EDIT_NAME);
+        } else if (result == -2) {
+            self->ShowMessageId(MESSAGE_KIND_INFO, TEXT_RENAME_FAILED, MAIN_MSG_EDIT_NAME, MAIN_MSG_EDIT_NAME);
+        } else {
+            PostTo(PROFILE_NAME, CONTROL_MSG_DEACTIVATE, 0);
+            PostTo(PROFILE_LIST, CONTROL_MSG_CLEAR, 0);
+            PostTo(PROFILE_LIST, CONTROL_MSG_ACTIVATE, 0);
+            for (uint32_t id = PROFILE_CREATE; id <= PROFILE_BACK; id += PROFILE_CONTROL_STEP)
+                PostTo(id, CONTROL_MSG_ACTIVATE, 0);
+            self->m_profileName = C_str(name);
+            ScanProfiles(&PostProfileLine, 0);
+            g_gameProfile.m_config->SetLastProfile(self->m_profileName);
+            self->RefreshProfile();
+            self->m_step = 0;
+        }
+    }
+    return true;
 }

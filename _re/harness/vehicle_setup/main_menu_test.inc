@@ -46,7 +46,6 @@ bool C_MainMenu::OnConnectMessage(S_ControlMessage *m)
 // (Part 9h-iv: the screens' callbacks of later sub-parts, faked; the network game's close and the last save,
 // logged.)
 #define MM_CALLBACK(F)                                                                                                bool C_MainMenu::F(void *, void *, C_Control *, uint32_t, uint32_t)                                               {                                                                                                                     GfLog(#F);                                                                                                        return true;                                                                                                  }
-MM_CALLBACK(OnProfileButton)
 MM_CALLBACK(OnSingleplayerShown)
 MM_CALLBACK(OnSingleplayerButton)
 void C_NetGame::Close(bool now) { GfLog("net close %d", now); }
@@ -70,6 +69,23 @@ void C_GameProfile::SetDifficulty(int difficulty)
     GfLog("set difficulty %d", difficulty);
     g_gmDifficulty = difficulty;
 }
+// (Part 9h-vi: making and renaming a profile, the last one kept.)
+int g_mmCreate = 0, g_mmRename = 0;
+int CreateProfile(const char *name)
+{
+    // (Bytes above 0x7F logged as <hex>: the runners read the output as UTF-8.)
+    std::string shown;
+    for (const char *p = name; *p; ++p)
+        shown += static_cast<unsigned char>(*p) < 0x80 ? std::string(1, *p) : CmText("<%02x>", static_cast<unsigned char>(*p));
+    GfLog("create '%s'", shown.c_str());
+    return g_mmCreate;
+}
+int C_PlayerProfile::Rename(const char *oldName, const char *newName)
+{
+    GfLog("rename '%s' '%s'", oldName, newName);
+    return g_mmRename;
+}
+void C_GameConfig::SetLastProfile(C_str name) { GfLog("last profile %s", name.c_str()); }
 bool C_PlayerProfile::Save()
 {
     GfLog("save profile");
@@ -143,7 +159,8 @@ struct C_PfScreen : C_MsScreen {
 struct S_MainMenuResults {
     bool mmStart = true, mmStop = true, mmUpdate = true, mmDrain = true, mmMessage = true, mmEscape = true,
          mmSelect = true, mmBuild = true, mmDescribe = true, mmMainShown = true, pfDescribe = true, pfRefresh = true,
-         pfShown = true, pfList = true, pfDifficulty = true, pfMessage = true;
+         pfShown = true, pfList = true, pfDifficulty = true, pfMessage = true,
+         pfButtons = true, pfEscape = true, pfCreate = true, pfRename = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -576,6 +593,134 @@ void MainMenuTest(I3D_scene *scene)
             g_menuScreens.clear();
             WM(r.pfMessage, ok);
         }
+        // (Part 9h-vi.) The buttons: delete (asked), rename and create (the name box edited); the box's Escape and
+        // Return (a new profile made, a profile renamed; the questions when they fail).
+        {
+            C_MessageBox box(nullptr, GfFrame(FRAME_DUMMY, "pfmbox"));
+            m.m_messageBox = &box;
+            C_GameConfig config;
+            C_GameConfig *const oldConfig = g_gameProfile.m_config;
+            g_gameProfile.m_config = &config;
+            C_PfLine nameBox(0x8100000, ""), rename(0x8800000, ""), create(0x8700000, ""), del(0x8900000, ""),
+                back(0x8A00000, ""), easy(0x8300000, "");
+            const auto press = [&](C_Control *c, uint32_t notification) {
+                g_gfLog.clear();
+                return C_MainMenu::OnProfileButton(&m, nullptr, c, notification, 0);
+            };
+            // The question shown: its kind and text; closed again.
+            const auto asked = [&](int kind, uint32_t text) {
+                const std::string q = CsQueue();
+                const bool shown = box.GetKind() == kind && q.find(CmText("100000 1000015 ")) != std::string::npos &&
+                                   q.find(CmText(" %x;", text)) != std::string::npos;
+                box.Close();
+                CsQueue();
+                return shown;
+            };
+            std::string off, on;
+            for (uint32_t id = 0x8700000; id <= 0x8A00000; id += 0x100000) {
+                off += CmText("%x 1000001 0 0; ", id);
+                on += CmText("%x 1000002 0 0; ", id);
+            }
+            {
+                bool ok = true;
+                m.m_step = 0;
+                ok &= press(&del, CONTROL_NOTIFY_CLICK) && asked(1, 0x7D4) && m.m_step == 0;
+                // Its answers: yes deletes (CONTROL_MSG_REMOVE_SELECTED), no (Escape) nothing.
+                ok &= press(&del, CONTROL_NOTIFY_CLICK) && box.GetKind() == 1;
+                CsQueue();
+                box.Unknown20(1);
+                const std::string escaped = CsQueue();
+                ok &= escaped.find("0 1 ") == std::string::npos && escaped.find(" 2000017") == std::string::npos &&
+                      box.GetKind() == -1;
+                ok &= press(&rename, CONTROL_NOTIFY_CLICK) && m.m_step == 2 &&
+                      CsQueue() == "8100000 1000002 0 0; 8100000 2000016 0 0; 8200000 1000001 0 0; " + off;
+                ok &= press(&create, CONTROL_NOTIFY_CLICK) && m.m_step == 1 &&
+                      CsQueue() == "8100000 1000015 d 7d2; 8100000 1000002 0 0; 8100000 2000016 0 0; 8200000 1000001 0 0; " + off +
+                                   "8300000 2000076 0 0; 8400000 2000076 0 0; 8500000 2000076 0 0; 8600000 2000076 0 0; ";
+                ok &= press(&back, CONTROL_NOTIFY_CLICK) && press(&easy, CONTROL_NOTIFY_CLICK) && press(nullptr, CONTROL_NOTIFY_CLICK) &&
+                      CsQueue() == "" && g_gfLog.empty() && m.m_step == 1;
+                // The box's other notifications: nothing.
+                ok &= press(&nameBox, CONTROL_NOTIFY_CLICK) && CsQueue() == "" && g_gfLog.empty();
+                WM(r.pfButtons, ok);
+            }
+            {
+                bool ok = true;
+                g_gmDifficulty = 2;
+                m.m_profileName = "Alpha";
+                ok &= press(&nameBox, CONTROL_NOTIFY_ESCAPE) && m.m_step == 1 &&
+                      CsQueue() == refreshed("Alpha", 2) + "8100000 1000001 0 0; 8200000 1000002 0 0; " + on;
+                m.m_profileName = "";
+                ok &= press(&nameBox, CONTROL_NOTIFY_ESCAPE) &&
+                      CsQueue() == refreshed(nullptr, 0) + "8100000 1000001 0 0; 8200000 1000002 0 0; 8700000 1000002 0 0; "
+                                                           "8a00000 1000002 0 0; ";
+                WM(r.pfEscape, ok);
+            }
+            {
+                bool ok = true;
+                // Typed with spaces after (cut) and before (kept); a character above 0x7F stops the cut.
+                nameBox.text = "  New One \t ";
+                m.m_step = 1;
+                g_mmCreate = -1;
+                ok &= press(&nameBox, CONTROL_NOTIFY_RETURN) && MsLogIs({"line 0 200002f 0", "create '  New One'"}, g_gfLog) &&
+                      asked(2, 0x251C) && m.m_step == 1;
+                g_mmCreate = -2;
+                ok &= press(&nameBox, CONTROL_NOTIFY_RETURN) && asked(2, 0x251D) && m.m_step == 1;
+                // (A UTF-8 e acute: its last byte above 0x7F; the output stays UTF-8.)
+                nameBox.text = "Abc\xC3\xA9 ";
+                ok &= press(&nameBox, CONTROL_NOTIFY_RETURN) && MsLogIs({"line 0 200002f 0", "create 'Abc<c3><a9>'"}, g_gfLog) &&
+                      asked(2, 0x251D);
+                nameBox.text = "  New One \t ";
+                g_mmCreate = 0;
+                g_mmProfiles = {"Zed", "  New One"};
+                ok &= press(&nameBox, CONTROL_NOTIFY_RETURN) && m.m_step == 3 && m.m_profileName == "  New One" &&
+                      MsLogIs({"line 0 200002f 0", "create '  New One'", "select player   New One", "reset game", "save profile",
+                               "scan"}, g_gfLog) &&
+                      CsQueue() == "8100000 1000001 0 0; 8200000 2000018 0 0; 8300000 1000002 0 0; 8400000 1000002 0 0; "
+                                   "8500000 1000002 0 0; 8600000 1000002 0 0; 8200000 1000016 13 0 'Zed'; "
+                                   "8200000 1000016 13 0 '  New One'; 8100000 1000014 d 0 '  New One'; "
+                                   "8200000 2000076 0 0 '  New One'; ";
+                // Return in another step: nothing.
+                m.m_step = 0;
+                ok &= press(&nameBox, CONTROL_NOTIFY_RETURN) && g_gfLog.empty() && CsQueue() == "";
+                WM(r.pfCreate, ok);
+            }
+            {
+                bool ok = true;
+                m.m_profileName = "Alpha";
+                m.m_step = 2;
+                g_gmDifficulty = 1;
+                // Nothing typed: the name as it was (still renaming).
+                nameBox.text = " \t ";
+                ok &= press(&nameBox, CONTROL_NOTIFY_RETURN) && m.m_step == 2 && MsLogIs({"line 0 200002f 0"}, g_gfLog) &&
+                      CsQueue() == refreshed("Alpha", 1) + "8100000 1000001 0 0; 8100000 1000014 d 0 'Alpha'; "
+                                                           "8200000 1000002 0 0; " + on;
+                nameBox.text = "Renamed ";
+                g_mmRename = -1;
+                ok &= press(&nameBox, CONTROL_NOTIFY_RETURN) && MsLogIs({"line 0 200002f 0", "rename 'Alpha' 'Renamed'"}, g_gfLog) &&
+                      asked(2, 0x2526) && m.m_step == 2 && m.m_profileName == "Alpha";
+                g_mmRename = -2;
+                ok &= press(&nameBox, CONTROL_NOTIFY_RETURN) && asked(2, 0x2527) && m.m_step == 2;
+                g_mmRename = 0;
+                // A name of one character.
+                nameBox.text = "Z";
+                g_mmProfiles.clear();
+                ok &= press(&nameBox, CONTROL_NOTIFY_RETURN) && m.m_step == 0 && m.m_profileName == "Z" &&
+                      MsLogIs({"line 0 200002f 0", "rename 'Alpha' 'Z'", "scan", "last profile Z"}, g_gfLog);
+                CsQueue();
+                m.m_step = 2;
+                m.m_profileName = "Alpha";
+                nameBox.text = "Renamed ";
+                g_mmProfiles = {"Renamed"};
+                ok &= press(&nameBox, CONTROL_NOTIFY_RETURN) && m.m_step == 0 && m.m_profileName == "Renamed" &&
+                      MsLogIs({"line 0 200002f 0", "rename 'Alpha' 'Renamed'", "scan", "last profile Renamed"}, g_gfLog) &&
+                      CsQueue() == "8100000 1000001 0 0; 8200000 2000018 0 0; 8200000 1000002 0 0; " + on +
+                                   "8200000 1000016 13 0 'Renamed'; " + refreshed("Renamed", 1);
+                WM(r.pfRename, ok);
+            }
+            g_mmProfiles.clear();
+            g_gameProfile.m_config = oldConfig;
+            m.m_messageBox = nullptr;
+        }
         g_gmDifficulty = oldDifficulty;
         m.m_mpSettings->m_servers.clear();
         m.OnStop();
@@ -655,7 +800,8 @@ void MainMenuTest(I3D_scene *scene)
     g_gfLog.clear();
     g_controlMessages.clear();
     std::printf("mainmenu: mmStart %d mmStop %d mmUpdate %d mmDrain %d mmMessage %d mmEscape %d mmSelect %d mmBuild %d mmDescribe %d mmMainShown %d pfDescribe %d pfRefresh %d pfShown %d pfList %d "
-                "pfDifficulty %d pfMessage %d\n",
+                "pfDifficulty %d pfMessage %d pfButtons %d pfEscape %d pfCreate %d pfRename %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
-                r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage);
+                r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
+                r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename);
 }

@@ -8248,6 +8248,22 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/main_menu.txt (+4); 8 functions in ported.txt. Stats: 9,171 of 12,306 functions by hand
     (83.3 % by size).
 
+  PART 9h-vi DONE (2026-11-04): the main menu's profile screen's buttons (game/main_menu.cpp).
+  - OnProfileButton 0x006214d0 (5.6 KB; the decompile checked against the asm's posts and calls): delete asks
+    (0x7D4; yes posts CONTROL_MSG_REMOVE_SELECTED, 9h-v's); rename / create put the name box in edit (step 2 /
+    1; create empties it, no difficulty white), the rest off; the box's Escape: the screen as it was (the step
+    kept, as the original); its Return: the name typed (its trailing ASCII spaces cut; fix: at most 99
+    characters, the original copies it into 100 bytes whole and the box has no limit in Japanese): creating:
+    CreateProfile (-1 / -2: questions 0x251C / 0x251D, 0x20000C3 back to the box), made: current, saved, the
+    list read again, its difficulty to pick (step 3); renaming: nothing typed: as it was; Rename (-1 / -2:
+    0x2526 / 0x2527), renamed: the list read again, the last profile kept, step 0.
+  - Harness: pfButtons (the delete question's answers through the message box), pfEscape, pfCreate, pfRename
+    (the profile code faked: CreateProfile, Rename, SetLastProfile). The fakes log bytes above 0x7F as <hex>:
+    the mutation runner reads the output as UTF-8 (a raw 0xE9 crashed it).
+  - Mutations: mutations/mutate_9h6.py: 131: all killed but 3 not building and 10 equivalent.
+  - Build: MSVC clean. Tier 1: 328 errors in 60 files, 135 stubs. ret_audit --src: 52.
+  - Stats: 9,172 of 12,306 functions by hand (83.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
