@@ -151,20 +151,15 @@ bool S_SoldierProfile::HasUnknown28(int value) const
 {
     return std::find(unknown28.begin(), unknown28.end(), value) != unknown28.end();
 }
-bool C_DebriefingMenu::OnSoldierScroll(void *, void *, C_Control *, uint32_t, uint32_t)
-{
-    GfLog("soldier scroll");
-    return true;
-}
+// (Part 9g-viii: the ranks' and medals' texts, profile_roster.cpp's.)
+S_RankName g_rankNames[8] = {{0x27A6, 0x2792, C_str(), C_str()}, {0x27A7, 0x2793, C_str(), C_str()}, {0x27A8, 0x2794, C_str(), C_str()},
+                             {0x27A9, 0x2795, C_str(), C_str()}, {0x27AA, 0x2796, C_str(), C_str()}, {0x27AB, 0x2797, C_str(), C_str()},
+                             {0x27AC, 0x2798, C_str(), C_str()}, {0x27AD, 0x2799, C_str(), C_str()}};
+int g_rosterTexts[24];
 std::vector<int> g_diaryTexts;
 const std::vector<int> &C_Diary::GetTexts() const { return g_diaryTexts; }
 C_MissionDef *g_dbMission;
 C_MissionDef *C_Campaign::GetCurrentMission() { return g_dbMission; }
-bool C_DebriefingMenu::ShowSoldier(int *unknown)
-{
-    GfLog("show soldier %d", unknown != nullptr);
-    return true;
-}
 
 namespace {
 
@@ -248,6 +243,19 @@ struct C_DbPages : C_MsScreen {
 struct C_DbObjective : C_CampaignNode {
     using C_CampaignNode::m_id;
 };
+// (Part 9g-viii.) The soldiers' scroll bar: its value, the times asked.
+struct C_DbScroll : C_MsScreen {
+    C_DbScroll(I3D_scene *scene, const char *n, uint32_t id) : C_MsScreen(scene, n, id) {}
+    int value = 0, asked = 0;
+    bool HandleMessage(S_ControlMessage *m) override
+    {
+        if (m->id == CONTROL_MSG_GET_BAR_VALUE) {
+            ++asked;
+            m->value = static_cast<uint32_t>(value);
+        }
+        return true;
+    }
+};
 struct C_DbMission : C_MissionDef {
     using C_MissionDef::m_objectives;
     using C_MissionDef::m_unknown2C;
@@ -278,6 +286,7 @@ struct S_CampaignScreensResults {
     bool vsMovieState = true;
     bool dbMedal = true, dbResults = true, dbStore = true, dbStart = true, dbMessage = true, dbBuild = true;
     bool dbDiary = true, dbDiaryPage = true, dbWon = true, dbScreen = true, dbPanel = true, dbObjectives = true, dbResult = true;
+    bool dbShow = true, dbSkills = true, dbRank = true, dbMedals = true, dbScroll = true;
 };
 
 // A message's values ("target id value value2[ value3][ 'text']"; value2 / value3 by name when known).
@@ -1957,7 +1966,7 @@ void CampaignScreensTest(I3D_scene *)
             g_gfLog.clear();
             ok &= m.BuildScreens() && g_cacheLoads == std::vector<std::string>({"debriefing", "diary"}) &&
                   GmInOrder(Join(g_gfLog), {"dbbd 34 debriefing", "dbbd 48 death 1", "dbbd 48 DSO_a 1", "dbbd 48 soldier_rank 20", "music 2 0", "fade 1 2000",
-                                            "dbbdi 34 DIARY", "dbbdi 48 text_02 1", "dbbr 38 dbbp 1", "show soldier 0"}) &&
+                                            "dbbdi 34 DIARY", "dbbdi 48 text_02 1", "dbbr 38 dbbp 1"}) &&
                   m.m_screens.size() == 3 && m.m_screens[1]->GetScreenFrame() == As<I3D_frame>(debriefing) &&
                   !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1];
             for (size_t i = 1; i < m.m_screens.size(); ++i)
@@ -2371,6 +2380,235 @@ void CampaignScreensTest(I3D_scene *)
             WM(r.dbResult, result);
         }
 
+        // ===== part 9g-viii: the soldier shown =====
+        {
+            static void **frameVt = nullptr;
+            if (!frameVt) {
+                frameVt = new void *[MR_SLOTS];
+                std::copy(g_msFrameVt, g_msFrameVt + MR_SLOTS, frameVt);
+                frameVt[0x30 / 4] = reinterpret_cast<void *>(&MrFake<0x30, bool>);
+                frameVt[0x38 / 4] = reinterpret_cast<void *>(&MrFake<0x38, void *, uint32_t>);
+            }
+            const auto frame = [](const std::string &name) {
+                S_MrObj *o = MsFrame(name.c_str());
+                o->vtable = frameVt;
+                return As<I3D_frame>(o);
+            };
+            C_DebriefingMenu m;
+            for (int i = 0; i < DEBRIEF_MEDALS; ++i) {
+                m.m_medalFrames[i][0] = frame(CmText("m%da", i));
+                m.m_medalFrames[i][1] = frame(CmText("m%db", i));
+                m.m_medalSlots[i] = frame(CmText("slot%d", i));
+            }
+            for (int i = 0; i < DEBRIEF_RANKS; ++i)
+                m.m_rankFrames[i] = frame(CmText("rank%d", i));
+            m.m_newMedalSlot = frame("newslot");
+            m.m_rankSlot = frame("rslot");
+            m.m_deathFrame = frame("dsdeath");
+            for (int i = 0; i < 24; ++i)
+                g_rosterTexts[i] = 0x2774 + i;
+            alignas(16) static uint8_t profileMemory[3][sizeof(S_SoldierProfile)];
+            std::memset(static_cast<void *>(profileMemory), 0, sizeof profileMemory);
+            S_SoldierProfile *p[3];
+            for (int i = 0; i < 3; ++i) {
+                p[i] = reinterpret_cast<S_SoldierProfile *>(profileMemory[i]);
+                for (int k = 0; k < 9; ++k)
+                    p[i]->stats[k] = 10.0f * static_cast<float>(k) + 1.5f + static_cast<float>(i);
+            }
+            p[0]->unknown24 = 2;
+            p[0]->unknown28.push_back(3);
+            p[0]->unknown28.push_back(7);
+            p[0]->customName = C_str("Joe");
+            p[0]->fullName = C_str("Joseph Bloggs");
+            p[0]->faceImage = reinterpret_cast<IImage *>(0x1234);
+            p[1]->dead = true;
+            p[1]->unknown24 = 4;
+            p[1]->fullName = C_str("Dead Man");
+            p[2]->unknown24 = 2;
+            p[2]->fullName = C_str("Sam");
+            g_epProfiles = {p[0], p[1], p[2]};
+            S_SquadSoldier s[3];
+            for (int i = 0; i < 3; ++i) {
+                s[i].profileIndex = i;
+                s[i].unknown34 = -1;
+                s[i].unknown38 = -1;
+                s[i].progress.experience = 1000 + i;
+                s[i].progress.unknown00 = 0.25f;
+                s[i].progress.unknown04 = 0.5f;
+                s[i].progress.endurance = 0.75f;
+                s[i].progress.shooting = 1.25f;
+                s[i].progress.stealth = 1.5f;
+                s[i].progress.firstAid = 1.75f;
+                s[i].progress.lockpick = 2.25f;
+            }
+            s[2].unknown34 = 3;
+            s[2].unknown38 = 5;
+            squad.states = {&s[0], &s[1], &s[2]};
+            const auto hex = [](float f) {
+                uint32_t bits;
+                std::memcpy(&bits, &f, sizeof bits);
+                return CmText("%x", bits);
+            };
+            const auto skills = [&](const S_SoldierProfile *pr, const S_SquadSoldier &sd) {
+                std::string q;
+                const auto bar = [&](uint32_t id, float maximum, float value, float gain) {
+                    q += CmText("%x 1000091 0 ", id) + hex(maximum) + "; " + CmText("%x 1000092 0 ", id) + hex(value) + "; " +
+                         CmText("%x 1000092 1 ", id) + hex(gain) + "; ";
+                };
+                bar(0x4608000, 100.0f, pr->stats[4], sd.progress.shooting);
+                bar(0x4609000, 100.0f, pr->stats[1], sd.progress.unknown04);
+                bar(0x460A000, sd.progress.unknown00 + pr->stats[0], pr->stats[0], sd.progress.unknown00);
+                bar(0x460B000, 100.0f, pr->stats[2], sd.progress.endurance);
+                bar(0x460C000, 100.0f, pr->stats[6], sd.progress.stealth);
+                bar(0x460D000, 100.0f, pr->stats[7], sd.progress.firstAid);
+                bar(0x460E000, 100.0f, pr->stats[8], sd.progress.lockpick);
+                return q;
+            };
+
+            // --- the soldier shown: the death frame, the face, the name, the rank or the promotion, the
+            // debugging line, the skills, the badge, the medals ---
+            {
+                bool ok = true;
+                g_controlMessages.clear();
+                g_gfLog.clear();
+                m.ShowSoldier(0);
+                const std::string q0 = CsQueue();
+                ok &= m.m_shownSoldier == 0 && g_gfLog.size() > 1 && g_gfLog[0] == "dsdeath 30 0";
+                const std::string head0 = "4601000 1000038 0 1234; 4602000 1000014 c 0 'Joe'; 4603000 2000018 0 0; 4603000 1000017 b "
+                                          "2794; 4603000 1000017 b ace; 4603000 1000017 b 7d2; 4603000 1000016 b 0 'Debug Experience "
+                                          ":: 1000'; ";
+                ok &= q0 == head0 + skills(p[0], s[0]) + "4604000 2000018 0 0; 4607000 1000004 0 0; ";
+                ok &= MrHas("rank2 38 rslot 1") && MrHas("m3b 38 slot0 1") && MrHas("m7b 38 slot1 1");
+                // The dead: the frame on, the full name, "Killed in action".
+                g_gfLog.clear();
+                m.ShowSoldier(1);
+                const std::string q1 = CsQueue();
+                ok &= m.m_shownSoldier == 1 && g_gfLog[0] == "dsdeath 30 1" &&
+                      q1.find("4602000 1000014 c 0 'Dead Man'; 4603000 2000018 0 0; 4603000 1000017 b 2796; 4603000 1000017 b acd; "
+                              "4603000 1000017 b 7d2; 4603000 1000016 b 0 'Debug Experience :: 1001'; ") != std::string::npos;
+                // Promoted: "Promoted to " the new rank (the badge his); the new medal.
+                g_gfLog.clear();
+                m.ShowSoldier(2);
+                const std::string q2 = CsQueue();
+                ok &= q2.find("4603000 2000018 0 0; 4603000 1000017 b 7d2; 4603000 1000017 2b ad1; 4603000 1000017 2b 2795; 4603000 "
+                              "1000017 b 7d2; 4603000 1000016 b 0 'Debug Experience :: 1002'; ") != std::string::npos &&
+                      MrHas("rank3 38 rslot 1") && MrHas("m5a 38 newslot 1");
+                // Past the squad: nothing.
+                g_gfLog.clear();
+                m.ShowSoldier(3);
+                ok &= m.m_shownSoldier == 2 && g_gfLog.empty() && CsQueue() == "";
+                // (No death frame: none switched.)
+                I3D_frame *const death = m.m_deathFrame;
+                m.m_deathFrame = nullptr;
+                g_gfLog.clear();
+                m.ShowSoldier(0);
+                ok &= !MrHas("dsdeath 30 0");
+                m.m_deathFrame = death;
+                g_controlMessages.clear();
+                WM(r.dbShow, ok);
+            }
+
+            // --- the skills' bars (the 3rd's maximum its stat and the gain); none: hidden ---
+            {
+                bool ok = true;
+                g_controlMessages.clear();
+                C_DebriefingMenu::ShowSkills(p[1], &s[1]);
+                ok &= CsQueue() == skills(p[1], s[1]);
+                C_DebriefingMenu::ShowSkills(nullptr, &s[1]);
+                std::string hidden;
+                for (int i = 0; i < 7; ++i)
+                    hidden += CmText("%x 1000004 0 0; ", 0x4608000 + i * 0x1000);
+                ok &= CsQueue() == hidden;
+                C_DebriefingMenu::ShowSkills(p[1], nullptr);
+                ok &= CsQueue() == hidden;
+                WM(r.dbSkills, ok);
+            }
+
+            // --- the rank's badge: the rank's, a higher promotion's; the badges hidden first ---
+            {
+                bool ok = true;
+                std::vector<std::string> hides;
+                for (int i = 7; i >= 0; --i)
+                    hides.push_back(CmText("rank%d 30 0", i));
+                const auto rank = [&](const S_SoldierProfile *pr, const S_SquadSoldier *sd) {
+                    g_gfLog.clear();
+                    m.ShowRank(pr, sd);
+                    return std::vector<std::string>(g_gfLog.begin() + std::min<size_t>(8, g_gfLog.size()), g_gfLog.end());
+                };
+                // (Placed: its position its place's, the frame changed.)
+                m.m_rankFrames[2]->m_localMatrix.m[3][0] = 1.0f;
+                m.m_rankFrames[2]->m_localMatrix.m[3][2] = 3.0f;
+                m.m_rankFrames[2]->m_frameFlags = 0x120;
+                ok &= rank(p[0], &s[0]) == std::vector<std::string>({"rank2 38 rslot 1", "rank2 30 1"}) &&
+                      m.m_rankFrames[2]->GetPos() == S_vector(0.0f, 0.0f, 0.0f) && m.m_rankFrames[2]->m_frameFlags == 0x40000000 &&
+                      std::vector<std::string>(g_gfLog.begin(), g_gfLog.begin() + 8) == hides;
+                ok &= rank(p[2], &s[2]) == std::vector<std::string>({"rank3 38 rslot 1", "rank3 30 1"});
+                s[2].unknown34 = 2;
+                ok &= rank(p[2], &s[2]).empty();
+                s[2].unknown34 = 1;
+                ok &= rank(p[2], &s[2]).empty();
+                s[2].unknown34 = 3;
+                p[0]->unknown24 = 8;
+                ok &= rank(p[0], &s[0]).empty();
+                p[0]->unknown24 = 2;
+                ok &= rank(nullptr, &s[0]).empty() && g_gfLog.size() == 8 && rank(p[0], nullptr).empty();
+                // (A missing badge: neither hidden nor placed.)
+                I3D_frame *const two = m.m_rankFrames[2];
+                m.m_rankFrames[2] = nullptr;
+                ok &= rank(p[0], &s[0]).empty() && g_gfLog.size() == 7;
+                m.m_rankFrames[2] = two;
+                WM(r.dbRank, ok);
+            }
+
+            // --- the medals: the held ones' second frames in the places in turn, the new one's first frame
+            // and texts; no profile: all hidden ---
+            {
+                bool ok = true;
+                const auto medals = [&](const S_SoldierProfile *pr, const S_SquadSoldier *sd) {
+                    g_gfLog.clear();
+                    g_controlMessages.clear();
+                    m.ShowMedals(pr, sd);
+                    return std::vector<std::string>(g_gfLog.begin() + std::min<size_t>(24, g_gfLog.size()), g_gfLog.end());
+                };
+                std::vector<std::string> hides;
+                for (int i = 11; i >= 0; --i) {
+                    hides.push_back(CmText("m%da 30 0", i));
+                    hides.push_back(CmText("m%db 30 0", i));
+                }
+                ok &= medals(p[0], &s[0]) == std::vector<std::string>({"m3b 38 slot0 1", "m3b 30 1", "m3a 30 0", "m7b 38 slot1 1",
+                                                                         "m7b 30 1", "m7a 30 0"}) &&
+                      std::vector<std::string>(g_gfLog.begin(), g_gfLog.begin() + 24) == hides &&
+                      CsQueue() == "4604000 2000018 0 0; 4607000 1000004 0 0; ";
+                p[2]->unknown28 = {11};
+                ok &= medals(p[2], &s[2]) == std::vector<std::string>({"m11b 38 slot0 1", "m11b 30 1", "m11a 30 0", "m5a 38 newslot 1",
+                                                                         "m5a 30 1", "m5b 30 0"}) &&
+                      CsQueue() == "4604000 2000018 0 0; 4604000 1000017 2 7d2; 4604000 1000017 2 277e; 4604000 1000017 2 7d2; "
+                                   "4604000 1000017 3 277f; 4607000 1000003 0 0; ";
+                ok &= medals(nullptr, &s[2]).empty() && g_gfLog.size() == 24 && CsQueue() == "";
+                WM(r.dbMedals, ok);
+            }
+
+            // --- the scroll bar: its soldier shown (not the one shown already); no control: false ---
+            {
+                bool ok = true;
+                C_DbScroll bar(nullptr, "dbscroll", 0x04700000);
+                ok &= !C_DebriefingMenu::OnSoldierScroll(&m, nullptr, nullptr, CONTROL_NOTIFY_CHANGED, 0);
+                m.m_shownSoldier = 0;
+                bar.value = 2;
+                g_controlMessages.clear();
+                ok &= C_DebriefingMenu::OnSoldierScroll(&m, nullptr, &bar, CONTROL_NOTIFY_CHANGED, 0) && m.m_shownSoldier == 2 &&
+                      CsQueue().find("'Sam'") != std::string::npos;
+                ok &= C_DebriefingMenu::OnSoldierScroll(&m, nullptr, &bar, CONTROL_NOTIFY_CHANGED, 0) && CsQueue() == "";
+                bar.value = 1;
+                ok &= C_DebriefingMenu::OnSoldierScroll(&m, nullptr, &bar, CONTROL_NOTIFY_CHANGED, 0) && m.m_shownSoldier == 1 &&
+                      bar.asked == 3;
+                g_controlMessages.clear();
+                WM(r.dbScroll, ok);
+            }
+            squad.states.clear();
+            g_epProfiles.clear();
+        }
+
         g_epProfiles = oldProfiles;
         g_gameProfile.m_player = oldPlayer;
         g_gameProfile.m_humanStore = oldStore;
@@ -2386,9 +2624,11 @@ void CampaignScreensTest(I3D_scene *)
     std::printf("campaignscreens: oeTable %d oeDescribe %d oeBuild %d oeInput %d oeSlots %d smStart %d smMessage %d "
                 "smConsole %d smPassword %d smBuild %d smTick %d smJoin %d smNotify %d vsCredits %d vsMovie %d vsFit %d "
                 "vsUpdate %d vsScroll %d vsRender %d vsInput %d vsMovieState %d dbMedal %d dbResults %d dbStore %d dbStart %d "
-                "dbMessage %d dbBuild %d dbDiary %d dbDiaryPage %d dbWon %d dbScreen %d dbPanel %d dbObjectives %d dbResult %d\n", r.oeTable, r.oeDescribe,
+                "dbMessage %d dbBuild %d dbDiary %d dbDiaryPage %d dbWon %d dbScreen %d dbPanel %d dbObjectives %d dbResult %d dbShow %d dbSkills %d "
+                "dbRank %d dbMedals %d dbScroll %d\n", r.oeTable, r.oeDescribe,
                 r.oeBuild, r.oeInput, r.oeSlots, r.smStart, r.smMessage, r.smConsole, r.smPassword, r.smBuild, r.smTick,
                 r.smJoin, r.smNotify, r.vsCredits, r.vsMovie, r.vsFit, r.vsUpdate, r.vsScroll, r.vsRender, r.vsInput,
                 r.vsMovieState, r.dbMedal, r.dbResults, r.dbStore, r.dbStart, r.dbMessage, r.dbBuild, r.dbDiary, r.dbDiaryPage, r.dbWon,
-                r.dbScreen, r.dbPanel, r.dbObjectives, r.dbResult);
+                r.dbScreen, r.dbPanel, r.dbObjectives, r.dbResult, r.dbShow, r.dbSkills,
+                r.dbRank, r.dbMedals, r.dbScroll);
 }

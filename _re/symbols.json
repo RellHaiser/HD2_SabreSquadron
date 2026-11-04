@@ -32868,6 +32868,36 @@
   "name": "C_DebriefingMenu::IsMissionWon",
   "proto": "bool __fastcall IsMissionWon(C_MenuState *this)"
  },
+ "0068f9f0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ShowSoldier",
+  "proto": "void __thiscall ShowSoldier(C_MenuState *this, int index)"
+ },
+ "0068ff70": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::OnSoldierScroll",
+  "proto": "bool __thiscall OnSoldierScroll(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00690020": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ShowMedals",
+  "proto": "void __thiscall ShowMedals(C_MenuState *this, void * profile, void * soldier)"
+ },
+ "00690430": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::SetBar",
+  "proto": "void __cdecl SetBar(uint bar, float maximum, float value, float gain)"
+ },
+ "006905d0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ShowSkills",
+  "proto": "void __cdecl ShowSkills(void * profile, void * soldier)"
+ },
+ "006907b0": {
+  "module": "campaign_screens",
+  "name": "C_DebriefingMenu::ShowRank",
+  "proto": "void __thiscall ShowRank(C_MenuState *this, void * profile, void * soldier)"
+ },
  "006987d0": {
   "module": "game",
   "name": "GetGame",

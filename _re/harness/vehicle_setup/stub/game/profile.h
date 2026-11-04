@@ -116,6 +116,15 @@ public:
     C_str GetSaveFileName(int a, int b);
 };
 extern C_GameProfile g_gameProfile;
+// (The debriefing's soldier, part 9g-viii: as the real header.)
+struct S_RankName {
+    int textId;
+    int textId2;
+    C_str name;
+    C_str name2;
+};
+extern S_RankName g_rankNames[8];
+extern int g_rosterTexts[24];
 extern int g_versionMajor;
 extern int g_versionMinor;
 void __stdcall GetGameVersion(int *major, int *minor);

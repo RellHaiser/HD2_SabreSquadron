@@ -32,7 +32,8 @@ struct S_RankName {
     C_str name2;                                        // +0x0C
 };
 extern S_RankName g_rankNames[8];                       // 0x008ae960 (static init 0x0069f9b0)
-// 24 text ids (0x2774..0x278B) a menu uses (0x00690020; meaning not identified).
+// The medals' names and descriptions (two text ids each, 0x2774..0x278B; the debriefing's ShowMedals
+// 0x00690020).
 extern int g_rosterTexts[24];                           // 0x008ae900 (static init 0x0069fb00)
 
 // The soldiers the campaign knows (tables\HumanStore.def; C_GameProfile +0x10; 0x10 bytes).

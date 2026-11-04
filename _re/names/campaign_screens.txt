@@ -76,3 +76,10 @@
 0068e3e0 C_DebriefingMenu::DescribeSoldiers | void __thiscall DescribeSoldiers(C_MenuState *this, void * desc, void * model)
 0068f080 C_DebriefingMenu::ListObjectives | bool __cdecl ListObjectives(void)
 0068f6c0 C_DebriefingMenu::ShowMissionResult | void __thiscall ShowMissionResult(C_MenuState *this, void * desc, void * model)
+# Part 9g-viii: the debriefing's soldier shown (src/game/debriefing_screens.cpp).
+0068f9f0 C_DebriefingMenu::ShowSoldier | void __thiscall ShowSoldier(C_MenuState *this, int index)
+0068ff70 C_DebriefingMenu::OnSoldierScroll | bool __thiscall OnSoldierScroll(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+006905d0 C_DebriefingMenu::ShowSkills | void __cdecl ShowSkills(void * profile, void * soldier)
+00690430 C_DebriefingMenu::SetBar | void __cdecl SetBar(uint bar, float maximum, float value, float gain)
+006907b0 C_DebriefingMenu::ShowRank | void __thiscall ShowRank(C_MenuState *this, void * profile, void * soldier)
+00690020 C_DebriefingMenu::ShowMedals | void __thiscall ShowMedals(C_MenuState *this, void * profile, void * soldier)

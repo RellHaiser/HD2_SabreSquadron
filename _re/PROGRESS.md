@@ -7965,6 +7965,23 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 364 errors in 66 files, 153 stubs. ret_audit --src: 52.
   - Ghidra: names/campaign_screens.txt (+3); 3 functions in ported.txt. Stats: 9,059 of 12,306 functions by hand (81.6 % by size).
 
+  PART 9g-viii DONE (2026-11-03): the debriefing's soldier shown (game/debriefing_screens.cpp).
+  - ShowSoldier 0x0068f9f0 (past the squad: nothing; C_DebriefingMenu +0x1B4 the one shown; the death
+    frame, the face, the custom name or the full one, the rank's name or "Promoted to " the new one,
+    "Killed in action" / "No new information", the shipped game's own "Debug Experience :: %d" line),
+    ShowSkills 0x006905d0 (7 bars: shooting, stat 1, stat 0 (its maximum the stat and the gain),
+    endurance, stealth, first aid, lockpick; the mission's gain as the upgrade; no soldier: hidden),
+    SetBar 0x00690430, ShowRank 0x006907b0 (an aligned frame: the badge of the rank, or of a higher
+    promotion, in its place), ShowMedals 0x00690020 (an aligned frame, from the asm: the held medals'
+    second frames in the places in turn, the new one's first frame, its name and description from
+    g_rosterTexts 0x008ae900, the medals' texts), OnSoldierScroll 0x0068ff70 (the scroll bar's value).
+  - Harness: dbShow, dbSkills, dbRank, dbMedals, dbScroll (logging frames for the badges, medals and
+    places). All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g8.py (140 cases, 133 build; all caught but 1 equivalent).
+  - Build: MSVC clean. Tier 1: 357 errors in 65 files, 152 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+6); 6 functions in ported.txt. Stats: 9,065 of 12,306 functions by hand (81.7 % by size).
+  - The debriefing (0x0068c520..0x00690be0) is done. Next: the squad menu (0x00690be0..0x00697090).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

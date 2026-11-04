@@ -84,12 +84,25 @@ protected:
     // The objectives into the debriefing's text: the completed under "Tasks: ", the others (not the
     // inactive) under "Recommendation:". Won: a tutorial, or someone of the squad alive.
     static bool ListObjectives();                       // 0x0068f080
-    bool ShowSoldier(int *unknown);                     // 0x0068f9f0
+    // The squad's soldier `index` shown (past the squad: nothing): his face, name (his own or the full
+    // one), the death frame, the rank or the promotion, the shipped game's debugging line with his
+    // experience, the skills, the rank's badge, the medals (part 9g-viii).
+    void ShowSoldier(int index);                        // 0x0068f9f0
+    // The skills' bars: the shooting, the 2nd, the 1st (its maximum the stat and the gain), the
+    // endurance, the stealth, the first aid, the lockpick; the mission's gain as the upgrade (no soldier:
+    // hidden).
+    static void ShowSkills(const S_SoldierProfile *profile, const S_SquadSoldier *soldier);   // 0x006905d0
+    // The rank's badge in its place (a promotion's when higher).
+    void ShowRank(const S_SoldierProfile *profile, const S_SquadSoldier *soldier);            // 0x006907b0
+    // The medals held in their places, the new one's frame, name and description.
+    void ShowMedals(const S_SoldierProfile *profile, const S_SquadSoldier *soldier);          // 0x00690020
+    // The soldiers' scroll bar moved: its soldier shown (another than the one shown). Without a control:
+    // false.
     static bool OnSoldierScroll(void *menu, void *argument, C_Control *control, uint32_t notification,
                                 uint32_t value);        // 0x0068ff70
 
     int m_diaryPage = -1;                               // +0x1B0 the diary's left page (-1: none yet)
-    int m_unknown1B4 = -1;                              // +0x1B4
+    int m_shownSoldier = -1;                            // +0x1B4 the squad's soldier shown
     I3D_frame *m_medalFrames[DEBRIEF_MEDALS][2] = {};   // +0x1B8 the medals' two frames ("DSO_a", "DSO_b", ..)
     I3D_frame *m_medalSlots[DEBRIEF_MEDALS] = {};       // +0x218 "medal01" .. "medal12" (the places)
     I3D_frame *m_rankFrames[DEBRIEF_RANKS] = {};        // +0x248 "rank_private" .. "rank_major"

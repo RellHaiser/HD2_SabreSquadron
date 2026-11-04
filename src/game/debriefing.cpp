@@ -179,7 +179,7 @@ bool C_DebriefingMenu::BuildScreens()
     open.id = MENU_MSG_OPEN_SCREEN;
     open.value = DEBRIEFING_SCREEN;
     HandleMessage(&open);
-    ShowSoldier(nullptr);
+    ShowSoldier(0);
     return true;
 }
 

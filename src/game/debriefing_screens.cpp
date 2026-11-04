@@ -335,3 +335,167 @@ void C_DebriefingMenu::ShowMissionResult(S_ScreenDesc *, I3D_frame *)
     GetSoundModule()->SetBackgroundMusic(won ? MUSIC_WON : MUSIC_LOST, 0);
     GetSoundModule()->FadeBackgroundMusic(1.0f, 2000);
 }
+
+// ---------------------------------------------------------------------------
+// Part 9g-viii: the soldier shown
+
+namespace {
+
+// The panel's controls: the face, the name, the stats' text, the new medal's text, the new decoration's
+// title; the skills' bars (hlcpctcr00 ..).
+constexpr uint32_t PANEL_FACE = 0x4601000, PANEL_NAME = 0x4602000, PANEL_STATS = 0x4603000, PANEL_NEW_MEDAL = 0x4604000,
+                   PANEL_NEW_DECORATION = 0x4607000, PANEL_FIRST_BAR = 0x4608000;
+constexpr int PANEL_BARS = 7;
+// "Promoted to ", "Killed in action", "No new information"; the styles (the name's, the lines', the
+// promotion's, the medal's name and description).
+constexpr uint32_t TEXT_PROMOTED = 0xAD1, TEXT_KILLED = 0xACD, TEXT_NO_NEWS = 0xACE;
+constexpr uint32_t NAME_STYLE = 0xC, LINE_STYLE = 0xB, PROMOTION_STYLE = 0x2B, MEDAL_NAME_STYLE = 2, MEDAL_STYLE = 3;
+
+void PostFloat(uint32_t target, uint32_t id, uint32_t value, float value2)
+{
+    S_ControlMessage message;
+    message.target = target;
+    message.id = id;
+    message.value = value;
+    message.value2 = FloatValue(value2);
+    PostControlMessage(message);
+}
+
+// A skill's bar: its maximum, the value, the mission's gain (the upgrade).
+void SetBar(uint32_t bar, float maximum, float value, float gain)
+{
+    PostFloat(bar, CONTROL_MSG_SET_BAR_MAX, 0, maximum);
+    PostFloat(bar, CONTROL_MSG_SET_BAR_VALUE, 0, value);
+    PostFloat(bar, CONTROL_MSG_SET_BAR_VALUE, 1, gain);
+}
+
+// A frame put in a place (its position its parent's), shown.
+void Place(I3D_frame *frame, I3D_frame *place)
+{
+    frame->LinkTo(place, 1);
+    frame->SetPosInline(S_vector(0.0f, 0.0f, 0.0f));
+    frame->SetOn(true);
+}
+
+}   // namespace
+
+void C_DebriefingMenu::ShowSoldier(int index)
+{
+    std::vector<S_SquadSoldier *> &states = g_gameProfile.m_missionSquad->states;
+    if (index >= static_cast<int>(states.size()))
+        return;
+    m_shownSoldier = index;
+    S_SquadSoldier *soldier = index >= 0 ? states[static_cast<size_t>(index)] : nullptr;
+    S_SoldierProfile *profile = g_gameProfile.m_humanStore->Get(soldier->profileIndex);
+    const C_str name = profile->customName.IsEmpty() ? profile->fullName : profile->customName;
+    const bool dead = profile->dead;
+    if (m_deathFrame)
+        m_deathFrame->SetOn(dead);
+    Post(PANEL_FACE, CONTROL_MSG_SET_TEXTURE, 0, reinterpret_cast<uintptr_t>(profile->faceImage));
+    {
+        S_ControlMessage message;
+        message.target = PANEL_NAME;
+        message.id = CONTROL_MSG_SET_TEXT;
+        message.value = NAME_STYLE;
+        message.text = name;
+        PostControlMessage(message);
+    }
+    Post(PANEL_STATS, CONTROL_MSG_CLEAR, 0);
+    if (!dead && soldier->unknown34 != -1) {
+        // Promoted: "Promoted to " the rank.
+        Post(PANEL_STATS, CONTROL_MSG_ADD_TEXT_ID, LINE_STYLE, TEXT_BLANK);
+        Post(PANEL_STATS, CONTROL_MSG_ADD_TEXT_ID, PROMOTION_STYLE, TEXT_PROMOTED);
+        Post(PANEL_STATS, CONTROL_MSG_ADD_TEXT_ID, PROMOTION_STYLE, static_cast<uint32_t>(g_rankNames[soldier->unknown34].textId2));
+    } else {
+        Post(PANEL_STATS, CONTROL_MSG_ADD_TEXT_ID, LINE_STYLE, static_cast<uint32_t>(g_rankNames[profile->unknown24].textId2));
+        Post(PANEL_STATS, CONTROL_MSG_ADD_TEXT_ID, LINE_STYLE, dead ? TEXT_KILLED : TEXT_NO_NEWS);
+    }
+    // (The shipped game's own debugging line, kept.)
+    Post(PANEL_STATS, CONTROL_MSG_ADD_TEXT_ID, LINE_STYLE, TEXT_BLANK);
+    PostText(PANEL_STATS, LINE_STYLE, C_fstr("Debug Experience :: %d", soldier->progress.experience));
+    ShowSkills(profile, soldier);
+    ShowRank(profile, soldier);
+    ShowMedals(profile, soldier);
+}
+
+void C_DebriefingMenu::ShowSkills(const S_SoldierProfile *profile, const S_SquadSoldier *soldier)
+{
+    if (!profile || !soldier) {
+        for (int i = 0; i < PANEL_BARS; ++i)
+            Post(PANEL_FIRST_BAR + static_cast<uint32_t>(i) * 0x1000, CONTROL_MSG_HIDE, 0);
+        return;
+    }
+    const S_SoldierProgress &p = soldier->progress;
+    const float *stats = profile->stats;
+    SetBar(PANEL_FIRST_BAR + 0x0000, 100.0f, stats[4], p.shooting);
+    SetBar(PANEL_FIRST_BAR + 0x1000, 100.0f, stats[1], p.unknown04);
+    SetBar(PANEL_FIRST_BAR + 0x2000, p.unknown00 + stats[0], stats[0], p.unknown00);
+    SetBar(PANEL_FIRST_BAR + 0x3000, 100.0f, stats[2], p.endurance);
+    SetBar(PANEL_FIRST_BAR + 0x4000, 100.0f, stats[6], p.stealth);
+    SetBar(PANEL_FIRST_BAR + 0x5000, 100.0f, stats[7], p.firstAid);
+    SetBar(PANEL_FIRST_BAR + 0x6000, 100.0f, stats[8], p.lockpick);
+}
+
+void C_DebriefingMenu::ShowRank(const S_SoldierProfile *profile, const S_SquadSoldier *soldier)
+{
+    for (int i = DEBRIEF_RANKS; i-- > 0;)
+        if (m_rankFrames[i])
+            m_rankFrames[i]->SetOn(false);
+    if (!profile || !soldier)
+        return;
+    // The rank, or the promotion's (a higher one).
+    int rank = soldier->unknown34;
+    if (rank == -1) {
+        rank = profile->unknown24;
+        if (rank >= DEBRIEF_RANKS)
+            return;
+    } else if (profile->unknown24 >= rank) {
+        return;
+    }
+    if (m_rankFrames[rank])
+        Place(m_rankFrames[rank], m_rankSlot);
+}
+
+void C_DebriefingMenu::ShowMedals(const S_SoldierProfile *profile, const S_SquadSoldier *soldier)
+{
+    for (int i = DEBRIEF_MEDALS; i-- > 0;) {
+        m_medalFrames[i][0]->SetOn(false);
+        m_medalFrames[i][1]->SetOn(false);
+    }
+    if (!profile)
+        return;
+    // The medals held (their second frames) in the places in turn.
+    for (size_t i = 0; i < profile->unknown28.size(); ++i) {
+        const int medal = profile->unknown28[i];
+        Place(m_medalFrames[medal][1], m_medalSlots[i]);
+        m_medalFrames[medal][0]->SetOn(false);
+    }
+    // The new one (its first frame), its name and description.
+    const int medal = soldier->unknown38;
+    if (medal == -1) {
+        Post(PANEL_NEW_MEDAL, CONTROL_MSG_CLEAR, 0);
+        Post(PANEL_NEW_DECORATION, CONTROL_MSG_HIDE, 0);
+        return;
+    }
+    Place(m_medalFrames[medal][0], m_newMedalSlot);
+    m_medalFrames[medal][1]->SetOn(false);
+    Post(PANEL_NEW_MEDAL, CONTROL_MSG_CLEAR, 0);
+    Post(PANEL_NEW_MEDAL, CONTROL_MSG_ADD_TEXT_ID, MEDAL_NAME_STYLE, TEXT_BLANK);
+    Post(PANEL_NEW_MEDAL, CONTROL_MSG_ADD_TEXT_ID, MEDAL_NAME_STYLE, static_cast<uint32_t>(g_rosterTexts[medal * 2]));
+    Post(PANEL_NEW_MEDAL, CONTROL_MSG_ADD_TEXT_ID, MEDAL_NAME_STYLE, TEXT_BLANK);
+    Post(PANEL_NEW_MEDAL, CONTROL_MSG_ADD_TEXT_ID, MEDAL_STYLE, static_cast<uint32_t>(g_rosterTexts[medal * 2 + 1]));
+    Post(PANEL_NEW_DECORATION, CONTROL_MSG_SHOW, 0);
+}
+
+bool C_DebriefingMenu::OnSoldierScroll(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_DebriefingMenu *>(menu);
+    if (!control)
+        return false;
+    S_ControlMessage get;
+    get.id = CONTROL_MSG_GET_BAR_VALUE;
+    control->HandleMessage(&get);
+    if (self->m_shownSoldier != static_cast<int>(get.value))
+        self->ShowSoldier(static_cast<int>(get.value));
+    return true;
+}
