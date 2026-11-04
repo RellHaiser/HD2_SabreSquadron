@@ -27614,6 +27614,16 @@
   "name": "C_OptionsHandler::RefreshKeyGroups",
   "proto": "bool __fastcall RefreshKeyGroups(void * handler)"
  },
+ "00620fb0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::PostProfileLine",
+  "proto": "void __fastcall PostProfileLine(char * name, int context)"
+ },
+ "00621110": {
+  "module": "main_menu",
+  "name": "C_MainMenu::AddProfileLine",
+  "proto": "void __fastcall AddProfileLine(char * name, int context)"
+ },
  "00621210": {
   "module": "main_menu",
   "name": "C_MainMenu::DescribeProfileScreen",
@@ -27638,6 +27648,11 @@
   "module": "main_menu",
   "name": "C_MainMenu::OnDifficulty",
   "proto": "bool __thiscall OnDifficulty(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00622ed0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::RefreshProfile",
+  "proto": "void __fastcall RefreshProfile(C_MainMenu *this)"
  },
  "006237e0": {
   "module": "main_menu",
@@ -34579,6 +34594,11 @@
   "module": "profile",
   "name": "RenameProfileName",
   "proto": "bool __fastcall RenameProfileName(char * oldName, char * newName)"
+ },
+ "006aef40": {
+  "module": "main_menu",
+  "name": "DeleteProfile",
+  "proto": "bool __stdcall DeleteProfile(char * name)"
  },
  "006aefe0": {
   "module": "profile",

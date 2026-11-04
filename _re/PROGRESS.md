@@ -8231,6 +8231,23 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Ghidra: names/main_menu.txt (+7 callbacks; 0x00614140 is DescribeCinematicsScreen). Stats: 9,163 of
     12,306 functions by hand (83.1 % by size).
 
+  PART 9h-v DONE (2026-11-04): the main menu's profile screen but its buttons (game/main_menu.cpp).
+  - DescribeProfileScreen 0x00621210 (ScanProfiles: each profile a line of the list's description,
+    AddProfileLine 0x00621110; PostProfileLine 0x00620fb0 posts them for 9h-vi), RefreshProfile 0x00622ed0
+    (no profile: no name, no difficulty white, rename / delete off; else the name, its line selected, its
+    difficulty's button white, rename / delete on), OnProfileShown 0x006237e0, OnProfileList 0x00623b40
+    (a click: the line's profile made current; a double click (13) on the current one: back), OnDifficulty
+    0x00622b50 (only while picking a new profile's difficulty, m_step 3 (+0x1C8, the browser's too): the
+    difficulty 1 .. 4 set, its button white, the profile saved), OnProfileMessage 0x00621240 (Escape taken
+    while picking; CONTROL_MSG_REMOVE_SELECTED: the profile deleted, DeleteProfile 0x006aef40 (declared, not
+    ported), its line removed, the next picked; 0x20000C3: the name's box edited).
+  - Harness: pfDescribe, pfRefresh, pfShown, pfList, pfDifficulty, pfMessage (main_menu_test.inc; the scan,
+    the delete, the difficulty and the profile's save faked). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h5.py: 125: all killed but 5 not building and 2 equivalent.
+  - Build: MSVC clean. Tier 1: 331 errors in 61 files, 136 stubs. ret_audit --src: 52.
+  - Ghidra: names/main_menu.txt (+4); 8 functions in ported.txt. Stats: 9,171 of 12,306 functions by hand
+    (83.3 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

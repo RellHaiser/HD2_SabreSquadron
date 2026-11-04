@@ -69,6 +69,7 @@ public:
     C_str GetName() const;
     // (The main menu, part 9h-iv: main_menu_test.inc.)
     bool GetLastSaveText(C_str *mode, C_str *mission, C_str *date) const;
+    bool Save();                                        // (the profile screen, part 9h-v)
     // (The in-game menu's presets, part 9e-xvii: game_menu_test.inc.)
     const C_str &GetProfileName() const;
     bool SaveOptions();
@@ -116,6 +117,7 @@ public:
     C_Campaign *m_campaign = nullptr;
     // (The in-game menu's main screen, part 9e-ix: game_menu_test.inc.)
     int GetDifficulty() const;
+    void SetDifficulty(int difficulty);    // (the main menu's profile screen, part 9h-v)
     // (The debriefing, part 9g-v: campaign_screens_test.inc.)
     C_str GetSaveFileName(int a, int b);
     // (The squad screen, part 9g-ix.)
@@ -136,6 +138,9 @@ extern int g_rosterTexts[24];
 extern int g_versionMajor;
 extern int g_versionMinor;
 void __stdcall GetGameVersion(int *major, int *minor);
+// (The main menu's profile screen, part 9h-v: main_menu_test.inc.)
+void ScanProfiles(void (*callback)(const char *name, int context), int context);
+bool DeleteProfile(const char *name);
 extern S_MultiplayerSettings *g_mpSettings;             // (a reference into g_gameProfile in the real header)
 
 // The squad soldier's slots (S_SquadSoldier::PutItem).

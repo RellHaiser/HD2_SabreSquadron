@@ -142,26 +142,12 @@ f_005ac500.cpp:112:57: request for member '_12_2_' in '"\012ControlsEx - "', whi
     *(uint16_t *)(pcVar9 + 0xb) = "\nControlsEx - "._12_2_;
 f_00616c10.cpp:115:5: 'empty_function_6e6ba0' was not declared in this scope; did you mean 'empty_function_6e4a10'?
     empty_function_6e6ba0();
-f_00620f70.cpp:216:13: 'FUN_006aef40' was not declared in this scope; did you mean 'FUN_006ae640'?
-    cVar2 = FUN_006aef40(pcVar4);
-f_00620f70.cpp:1172:31: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_00620f70.cpp:905:31: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     if ((local_d8 != 0) && (*local_d8 = *local_d8 - 1, *local_d8 == 0)) {
-f_00620f70.cpp:1172:43: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_00620f70.cpp:905:43: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     if ((local_d8 != 0) && (*local_d8 = *local_d8 - 1, *local_d8 == 0)) {
-f_00620f70.cpp:1172:58: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_00620f70.cpp:905:58: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     if ((local_d8 != 0) && (*local_d8 = *local_d8 - 1, *local_d8 == 0)) {
-f_00620f70.cpp:1347:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00620f70.cpp:1357:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00620f70.cpp:1367:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00620f70.cpp:1379:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00620f70.cpp:1549:51: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_194 = (C_str)(*(int *)local_194 - 1), *(int *)local_194 == 0)) {
-f_00620f70.cpp:1559:51: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_194 = (C_str)(*(int *)local_194 - 1), *(int *)local_194 == 0)) {
 f_006285d0.cpp:1145:33: invalid operands of types 'tier1::C_str_rep*' and 'unsigned int' to binary 'operator&'
     CStack_94.rep = CStack_94.rep & 0xffffff00;
 f_006285d0.cpp:1175:33: invalid operands of types 'tier1::C_str_rep*' and 'unsigned int' to binary 'operator&'

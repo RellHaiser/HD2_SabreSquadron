@@ -8,7 +8,8 @@ not checked (check_text.py's). Prints "N models, M with differences" (mutfast.py
 import re
 import sys
 
-CHECKS = "mmStart mmStop mmUpdate mmDrain mmMessage mmEscape mmSelect mmBuild mmDescribe mmMainShown".split()
+CHECKS = ("mmStart mmStop mmUpdate mmDrain mmMessage mmEscape mmSelect mmBuild mmDescribe mmMainShown "
+          "pfDescribe pfRefresh pfShown pfList pfDifficulty pfMessage").split()
 
 
 def main():

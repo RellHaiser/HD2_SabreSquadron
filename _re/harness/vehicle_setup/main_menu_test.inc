@@ -27,11 +27,7 @@ bool C_GameProfile::SelectPlayer(const char *name)
 }
 // The screens' handlers: each logs and answers its own flag.
 bool g_mmTakes[4];
-bool C_MainMenu::OnProfileMessage(S_ControlMessage *m)
-{
-    GfLog("profile message %x", m->id);
-    return g_mmTakes[0];
-}
+// (Part 9h-v: the profile screen's handler is real; its own fakes are its delete and list.)
 bool C_MainMenu::OnNetworkMessage(S_ControlMessage *m)
 {
     GfLog("network message %x", m->id);
@@ -50,14 +46,35 @@ bool C_MainMenu::OnConnectMessage(S_ControlMessage *m)
 // (Part 9h-iv: the screens' callbacks of later sub-parts, faked; the network game's close and the last save,
 // logged.)
 #define MM_CALLBACK(F)                                                                                                bool C_MainMenu::F(void *, void *, C_Control *, uint32_t, uint32_t)                                               {                                                                                                                     GfLog(#F);                                                                                                        return true;                                                                                                  }
-MM_CALLBACK(OnProfileShown)
 MM_CALLBACK(OnProfileButton)
-MM_CALLBACK(OnProfileList)
-MM_CALLBACK(OnDifficulty)
 MM_CALLBACK(OnSingleplayerShown)
 MM_CALLBACK(OnSingleplayerButton)
 void C_NetGame::Close(bool now) { GfLog("net close %d", now); }
 bool g_mmHasSave = true;
+// (Part 9h-v: the profiles found, the deletes, the difficulty, the save.)
+std::vector<std::string> g_mmProfiles;
+bool g_mmDeletes = true;
+void ScanProfiles(void (*callback)(const char *name, int context), int context)
+{
+    GfLog("scan");
+    for (const std::string &name : g_mmProfiles)
+        callback(name.c_str(), context);
+}
+bool DeleteProfile(const char *name)
+{
+    GfLog("delete %s", name);
+    return g_mmDeletes;
+}
+void C_GameProfile::SetDifficulty(int difficulty)
+{
+    GfLog("set difficulty %d", difficulty);
+    g_gmDifficulty = difficulty;
+}
+bool C_PlayerProfile::Save()
+{
+    GfLog("save profile");
+    return true;
+}
 bool C_PlayerProfile::GetLastSaveText(C_str *mode, C_str *mission, C_str *date) const
 {
     GfLog("last save");
@@ -74,7 +91,6 @@ bool C_PlayerProfile::GetLastSaveText(C_str *mode, C_str *mission, C_str *date) 
         GfLog("describe %s %x", N, desc->id);                                                                     \
         return true;                                                                                              \
     }
-MM_DESCRIBE(DescribeProfileScreen, "profile")
 MM_DESCRIBE(DescribeMissionsScreen, "missions")
 MM_DESCRIBE(DescribeCinematicsScreen, "cinematics")
 MM_DESCRIBE(DescribeBrowserScreen, "browser")
@@ -93,9 +109,41 @@ void MmDeleteHook(void *p)
         g_mmDeleted.push_back(p);
 }
 
+// (Part 9h-v.) A control answering CONTROL_MSG_GET_TEXT with its text and value; the messages logged.
+struct C_PfLine : C_Control {
+    C_PfLine(uint32_t id, const char *t) : C_Control(nullptr, id, nullptr), text(t) {}
+    C_str text;
+    uint32_t value = 0;
+    bool HandleMessage(S_ControlMessage *m) override
+    {
+        GfLog("line %x %x %x", m->target, m->id, m->value);
+        if (m->id == CONTROL_MSG_GET_TEXT) {
+            m->text = text;
+            m->value = value;
+        }
+        return true;
+    }
+};
+// The profile screen as a screen: the same answers (the menu's HandleMessage routes the list's messages to it).
+struct C_PfScreen : C_MsScreen {
+    C_PfScreen(I3D_scene *scene) : C_MsScreen(scene, "pfscreen", 2u << 26) {}
+    C_str text;
+    uint32_t value = 0;
+    bool HandleMessage(S_ControlMessage *m) override
+    {
+        GfLog("pfscreen %x %x %x", m->target, m->id, m->value);
+        if (m->id == CONTROL_MSG_GET_TEXT) {
+            m->text = text;
+            m->value = value;
+        }
+        return true;
+    }
+};
+
 struct S_MainMenuResults {
     bool mmStart = true, mmStop = true, mmUpdate = true, mmDrain = true, mmMessage = true, mmEscape = true,
-         mmSelect = true, mmBuild = true, mmDescribe = true, mmMainShown = true;
+         mmSelect = true, mmBuild = true, mmDescribe = true, mmMainShown = true, pfDescribe = true, pfRefresh = true,
+         pfShown = true, pfList = true, pfDifficulty = true, pfMessage = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -183,13 +231,14 @@ void MainMenuTest(I3D_scene *scene)
             m.OnMessage(&message);
         };
         send(0x2000099);
-        ok &= MsLogIs({"profile message 2000099", "network message 2000099", "missions message 2000099",
-                       "connect message 2000099"}, g_gfLog) && CsQueue() == "";
+        // (The profile screen's handler, real, takes none of these.)
+        ok &= MsLogIs({"network message 2000099", "missions message 2000099", "connect message 2000099"}, g_gfLog) &&
+              CsQueue() == "";
         const int state = m.m_state;
-        for (int k = 0; k < 4; ++k) {
+        for (int k = 1; k < 4; ++k) {
             g_mmTakes[k] = true;
             send(MAIN_MSG_PLAY_MOVIE);
-            ok &= g_gfLog.size() == static_cast<size_t>(k + 1) && m.m_state == state;
+            ok &= g_gfLog.size() == static_cast<size_t>(k) && m.m_state == state;
             g_mmTakes[k] = false;
         }
         // The movie; the saved game (none: the load command alone).
@@ -199,11 +248,11 @@ void MainMenuTest(I3D_scene *scene)
         C_GameApp *app = GetGameApp();
         app->m_pendingCommand = 0;
         send(MAIN_MSG_LOAD_GAME);
-        ok &= app->m_pendingCommand == APP_COMMAND_LOAD_FROM_MENU && g_gfLog.size() == 4;
+        ok &= app->m_pendingCommand == APP_COMMAND_LOAD_FROM_MENU && g_gfLog.size() == 3;
         app->m_pendingCommand = 0;
         m.m_saveName = "save7.sav";
         send(MAIN_MSG_LOAD_GAME);
-        ok &= app->m_pendingCommand == 0 && g_gfLog.size() == 5 && g_gfLog[4] == "request load prof\\save7.sav";
+        ok &= app->m_pendingCommand == 0 && g_gfLog.size() == 4 && g_gfLog[3] == "request load prof\\save7.sav";
         m.m_saveName = "";
         send(MAIN_MSG_LOAD_GAME);
         ok &= app->m_pendingCommand == APP_COMMAND_LOAD_FROM_MENU;
@@ -227,7 +276,7 @@ void MainMenuTest(I3D_scene *scene)
         };
         ok &= escape(-1) == "0 2000003 0 0; ";
         // (Top 0: the options handler's screen index before its screen is built: it takes Escape.)
-        ok &= escape(0).find("20000c4") != std::string::npos && g_gfLog.size() == 3;
+        ok &= escape(0).find("20000c4") != std::string::npos && g_gfLog.size() == 2;
         for (int top : {1, 3, 5, 6, 7, 8, 9, 11, 12, 13, 15})
             ok &= escape(top) == "0 2000003 0 0; ";
         ok &= escape(14) == "0 10000200 1 0; 0 2000005 0 0; " && escape(10) == "0 10000200 1 0; 0 2000005 0 0; ";
@@ -359,6 +408,179 @@ void MainMenuTest(I3D_scene *scene)
         WM(r.mmMainShown, ok);
     }
 
+    // --- (part 9h-v) the profile screen: its description, refresh, shown, list, difficulty, messages ---
+    {
+        C_MainMenu m;
+        m.OnStart(nullptr);
+        CsQueue();
+        const int oldDifficulty = g_gmDifficulty;
+        // The refresh's messages: no profile; a profile of difficulty d (0: none white).
+        const auto refreshed = [](const char *name, int d) {
+            if (!name)
+                return std::string("8100000 1000015 d 7d2; 8300000 2000076 0 0; 8400000 2000076 0 0; 8500000 2000076 0 0; "
+                                   "8600000 2000076 0 0; 8800000 1000001 0 0; 8900000 1000001 0 0; ");
+            std::string q = CmText("8100000 1000014 d 0 '%s'; 8200000 2000076 0 0 '%s'; ", name, name);
+            if (d >= 1 && d <= 4)
+                for (int i = 1; i <= 4; ++i)
+                    q += CmText("%x 2000076 %d 0; ", 0x8200000 + i * 0x100000, i == d ? 1 : 0);
+            return q + "8800000 1000002 0 0; 8900000 1000002 0 0; ";
+        };
+        {
+            bool ok = true;
+            S_ScreenDesc desc("CHANGE PROFIL", "change_profile", 2u << 26);
+            desc.AddControl(0x1B, "bcurrent profile");
+            S_ControlDesc *list = desc.AddControl(0xF, "LB_Profile*");
+            g_mmProfiles = {"Alpha", "Bravo"};
+            g_gfLog.clear();
+            ok &= m.DescribeProfileScreen(&desc, nullptr) && MsLogIs({"scan"}, g_gfLog) &&
+                  CsTree(list) == "f LB_Profile* 8200000: 0 1000016 13 0 'Alpha' 0 1000016 13 0 'Bravo';" &&
+                  desc.controls[0]->messages.empty();
+            g_mmProfiles.clear();
+            ok &= m.DescribeProfileScreen(&desc, nullptr) && list->messages.size() == 2;
+            C_MainMenu::PostProfileLine("Charlie", 7);
+            ok &= CsQueue() == "8200000 1000016 13 0 'Charlie'; ";
+            WM(r.pfDescribe, ok);
+        }
+        {
+            bool ok = true;
+            m.m_profileName = "";
+            m.RefreshProfile();
+            ok &= CsQueue() == refreshed(nullptr, 0);
+            m.m_profileName = "Bravo";
+            for (int d = 0; d <= 5; ++d) {
+                g_gmDifficulty = d;
+                m.RefreshProfile();
+                ok &= CsQueue() == refreshed("Bravo", d);
+            }
+            WM(r.pfRefresh, ok);
+        }
+        {
+            bool ok = true;
+            g_gmDifficulty = 2;
+            m.m_profileName = "";
+            ok &= C_MainMenu::OnProfileShown(&m, nullptr, nullptr, CONTROL_NOTIFY_SHOWN, 0) &&
+                  CsQueue() == refreshed(nullptr, 0) + "8100000 1000001 0 0; 8200000 200002c 0 0; 8300000 1000001 0 0; "
+                                                       "8400000 1000001 0 0; 8500000 1000001 0 0; 8600000 1000001 0 0; "
+                                                       "8700000 1000002 0 0; 8800000 1000001 0 0; 8900000 1000001 0 0; "
+                                                       "8a00000 1000002 0 0; ";
+            m.m_profileName = "Alpha";
+            ok &= C_MainMenu::OnProfileShown(&m, nullptr, nullptr, CONTROL_NOTIFY_SHOWN, 0) &&
+                  CsQueue() == refreshed("Alpha", 2) + "8100000 1000001 0 0; 8200000 200002c 0 0; 8300000 1000001 0 0; "
+                                                       "8400000 1000001 0 0; 8500000 1000001 0 0; 8600000 1000001 0 0; "
+                                                       "8700000 1000002 0 0; 8800000 1000002 0 0; 8900000 1000002 0 0; "
+                                                       "8a00000 1000002 0 0; ";
+            WM(r.pfShown, ok);
+        }
+        {
+            bool ok = true;
+            C_PfLine line(0x8200003, "Bravo"), other(0x8300000, "Bravo");
+            m.m_profileName = "Alpha";
+            g_gfLog.clear();
+            // Another control, none: false.
+            ok &= !C_MainMenu::OnProfileList(&m, nullptr, &other, CONTROL_NOTIFY_CLICK, 0) &&
+                  !C_MainMenu::OnProfileList(&m, nullptr, nullptr, CONTROL_NOTIFY_CLICK, 0) && g_gfLog.empty();
+            // A click: the line's profile current.
+            ok &= C_MainMenu::OnProfileList(&m, nullptr, &line, CONTROL_NOTIFY_CLICK, 0) && m.m_profileName == "Bravo" &&
+                  MsLogIs({"line 0 200002f 0", "select player Bravo", "reset game"}, g_gfLog) &&
+                  CsQueue() == refreshed("Bravo", 2);
+            // A click on no line: nothing.
+            line.text = "";
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnProfileList(&m, nullptr, &line, CONTROL_NOTIFY_CLICK, 0) && m.m_profileName == "Bravo" &&
+                  MsLogIs({"line 0 200002f 0"}, g_gfLog) && CsQueue() == "";
+            // The double click on the current one: back; on another: nothing.
+            line.text = "Bravo";
+            ok &= C_MainMenu::OnProfileList(&m, nullptr, &line, CONTROL_NOTIFY_13, 0) && CsQueue() == "0 2000003 0 0; ";
+            line.text = "bravo";
+            ok &= C_MainMenu::OnProfileList(&m, nullptr, &line, CONTROL_NOTIFY_13, 0) && CsQueue() == "";
+            line.text = "";
+            ok &= C_MainMenu::OnProfileList(&m, nullptr, &line, CONTROL_NOTIFY_13, 0) && CsQueue() == "";
+            m.m_profileName = "";
+            line.text = "x";
+            ok &= C_MainMenu::OnProfileList(&m, nullptr, &line, CONTROL_NOTIFY_13, 0) && CsQueue() == "";
+            // Another notification: taken, not asked.
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnProfileList(&m, nullptr, &line, CONTROL_NOTIFY_ENTER, 0) && g_gfLog.empty() && CsQueue() == "";
+            WM(r.pfList, ok);
+        }
+        {
+            bool ok = true;
+            C_PfLine hard(0x8500000, ""), create(0x8700000, "");
+            const std::string posts = "8200000 1000002 0 0; 8300000 1000001 0 0; 8400000 1000001 0 0; 8500000 1000001 0 0; "
+                                      "8600000 1000001 0 0; 8700000 1000002 0 0; 8800000 1000002 0 0; 8900000 1000002 0 0; "
+                                      "8a00000 1000002 0 0; ";
+            m.m_step = 0;
+            g_gfLog.clear();
+            ok &= !C_MainMenu::OnDifficulty(&m, nullptr, &hard, CONTROL_NOTIFY_CLICK, 0) && CsQueue() == "" && g_gfLog.empty();
+            m.m_step = 3;
+            ok &= !C_MainMenu::OnDifficulty(&m, nullptr, nullptr, CONTROL_NOTIFY_CLICK, 0) && CsQueue() == posts && m.m_step == 3;
+            ok &= !C_MainMenu::OnDifficulty(&m, nullptr, &create, CONTROL_NOTIFY_CLICK, 0) && CsQueue() == posts &&
+                  m.m_step == 3 && g_gfLog.empty();
+            ok &= C_MainMenu::OnDifficulty(&m, nullptr, &hard, CONTROL_NOTIFY_CLICK, 0) && CsQueue() == posts &&
+                  m.m_step == 0 && MsLogIs({"set difficulty 3", "line 0 2000076 1", "save profile"}, g_gfLog);
+            for (int d = 1; d <= 4; ++d) {
+                C_PfLine button(0x8200000 + d * 0x100000, "");
+                m.m_step = 3;
+                g_gfLog.clear();
+                ok &= C_MainMenu::OnDifficulty(&m, nullptr, &button, CONTROL_NOTIFY_CLICK, 0) && g_gmDifficulty == d;
+                CsQueue();
+            }
+            WM(r.pfDifficulty, ok);
+        }
+        {
+            bool ok = true;
+            S_MrWorld world = MrWorld("pfm");
+            m.m_scene = As<I3D_scene>(world.scene);
+            C_MsScreen box(m.m_scene, "pfbox", 0), main(m.m_scene, "pfmain", 1u << 26), quit(m.m_scene, "pfquit", 4u << 26);
+            C_PfScreen screen(m.m_scene);
+            m.m_screens = {&box, &main, &screen};
+            S_ControlMessage message;
+            const auto send = [&](uint32_t id) {
+                message.id = id;
+                g_gfLog.clear();
+                return m.OnProfileMessage(&message);
+            };
+            // Escape: taken only on the profile screen while a difficulty is picked.
+            g_menuScreens = {&main, &screen};
+            m.m_step = 3;
+            ok &= send(MENU_MSG_ESCAPE) && send(0x4000000 | MENU_MSG_ESCAPE);
+            m.m_step = 0;
+            ok &= !send(MENU_MSG_ESCAPE);
+            m.m_step = 3;
+            g_menuScreens = {&main, &quit};
+            ok &= !send(MENU_MSG_ESCAPE);
+            g_menuScreens.clear();
+            ok &= !send(MENU_MSG_ESCAPE);
+            m.m_step = 0;
+            // The deletion: no profile; failing; deleted (the next line picked; none).
+            m.m_profileName = "";
+            ok &= send(CONTROL_MSG_REMOVE_SELECTED) && g_gfLog.empty() && CsQueue() == "";
+            m.m_profileName = "Alpha";
+            g_mmDeletes = false;
+            ok &= send(CONTROL_MSG_REMOVE_SELECTED) && MsLogIs({"delete Alpha"}, g_gfLog) && CsQueue() == "" &&
+                  m.m_profileName == "Alpha";
+            g_mmDeletes = true;
+            screen.text = "Bravo";
+            screen.value = 1;
+            ok &= send(CONTROL_MSG_REMOVE_SELECTED) && m.m_profileName == "Bravo" &&
+                  MsLogIs({"delete Alpha", "pfscreen 8200008 2000017 0", "pfscreen 8200008 200002f 0", "select player Bravo",
+                           "reset game"}, g_gfLog) && CsQueue() == refreshed("Bravo", 4);
+            screen.value = 0xFFFFFFFF;
+            ok &= send(CONTROL_MSG_REMOVE_SELECTED) && m.m_profileName.IsEmpty() &&
+                  MsLogIs({"delete Bravo", "pfscreen 8200008 2000017 0", "pfscreen 8200008 200002f 0", "select player (null)"},
+                          g_gfLog) && CsQueue() == refreshed(nullptr, 0);
+            // The name's box edited.
+            ok &= send(0x20000C3) && CsQueue() == "8100000 2000016 0 0; ";
+            ok &= !send(0x2000099) && !send(MAIN_MSG_PLAY_MOVIE) && CsQueue() == "";
+            m.m_screens.clear();
+            g_menuScreens.clear();
+            WM(r.pfMessage, ok);
+        }
+        g_gmDifficulty = oldDifficulty;
+        m.m_mpSettings->m_servers.clear();
+        m.OnStop();
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -389,7 +611,7 @@ void MainMenuTest(I3D_scene *scene)
                                                         "multiplayer menu", "create server", "password", "server filters",
                                                         "gameinfo", "confirm", "password"});
         const std::string log = Join(g_gfLog);
-        ok &= GmInOrder(log, {"describe profile 8000000", "describe missions 14000000", "describe cinematics 1c000000",
+        ok &= GmInOrder(log, {"scan", "describe missions 14000000", "describe cinematics 1c000000",
                               "describe browser 20000000", "describe create 24000000", "describe password 28000000",
                               "describe filters 2c000000", "describe gameinfo 30000000", "describe connect 34000000",
                               "describe addserver 38000000"}) &&
@@ -411,7 +633,7 @@ void MainMenuTest(I3D_scene *scene)
         g_cacheFailName = "change_profile";
         g_menuScreens.clear();
         g_gfLog.clear();
-        ok &= m.BuildScreens() && m.m_screens.size() == 14 && Join(g_gfLog).find("describe profile") == std::string::npos;
+        ok &= m.BuildScreens() && m.m_screens.size() == 14 && Join(g_gfLog).find("scan") == std::string::npos;
         g_cacheFailName.clear();
         for (size_t i = 1; i < m.m_screens.size(); ++i)
             delete m.m_screens[i];
@@ -432,7 +654,8 @@ void MainMenuTest(I3D_scene *scene)
     g_mrModelVt[0x48 / 4] = oldFind;
     g_gfLog.clear();
     g_controlMessages.clear();
-    std::printf("mainmenu: mmStart %d mmStop %d mmUpdate %d mmDrain %d mmMessage %d mmEscape %d mmSelect %d mmBuild %d mmDescribe %d mmMainShown %d\n",
+    std::printf("mainmenu: mmStart %d mmStop %d mmUpdate %d mmDrain %d mmMessage %d mmEscape %d mmSelect %d mmBuild %d mmDescribe %d mmMainShown %d pfDescribe %d pfRefresh %d pfShown %d pfList %d "
+                "pfDifficulty %d pfMessage %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
-                r.mmMainShown);
+                r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage);
 }

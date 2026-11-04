@@ -67,3 +67,8 @@
 00622b50 C_MainMenu::OnDifficulty | bool __thiscall OnDifficulty(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
 0063b7f0 C_MainMenu::OnSingleplayerShown | bool __thiscall OnSingleplayerShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
 0063b9a0 C_MainMenu::OnSingleplayerButton | bool __thiscall OnSingleplayerButton(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+# Part 9h-v: the profile screen (but its buttons, 9h-vi).
+00622ed0 C_MainMenu::RefreshProfile | void __fastcall RefreshProfile(C_MainMenu *this)
+00621110 C_MainMenu::AddProfileLine | void __fastcall AddProfileLine(char * name, int context)
+00620fb0 C_MainMenu::PostProfileLine | void __fastcall PostProfileLine(char * name, int context)
+006aef40 DeleteProfile | bool __stdcall DeleteProfile(char * name)

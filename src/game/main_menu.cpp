@@ -3,6 +3,8 @@
 // 0x00622af0, 0x006c1970 .. 0x006c1a90).
 #include "game/main_menu.h"
 
+#include <cstring>
+
 #include "common/os_files.h"
 #include "game/control.h"
 #include "game/controls.h"
@@ -415,4 +417,174 @@ bool C_MainMenu::OnMainShown(void *menu, void *, C_Control *, uint32_t, uint32_t
     for (uint32_t id = MAIN_FIRST_MODE; id <= MAIN_LAST_MODE; id += MAIN_CONTROL_STEP)
         PostTo(id, CONTROL_MSG_ACTIVATE, 0);
     return true;
+}
+
+// ---- the profile screen (part 9h-v) -----------------------------------------------------------------------
+
+namespace {
+
+// The profile screen's controls (screen 2).
+constexpr uint32_t PROFILE_NAME = 0x8100000, PROFILE_LIST = 0x8200000, PROFILE_FIRST_DIFFICULTY = 0x8300000,
+                   PROFILE_LAST_DIFFICULTY = 0x8600000, PROFILE_CREATE = 0x8700000, PROFILE_RENAME = 0x8800000,
+                   PROFILE_DELETE = 0x8900000, PROFILE_BACK = 0x8A00000;
+constexpr uint32_t PROFILE_CONTROL_STEP = 0x100000;
+// The list's selected line (its child 8) and the list's own id bits.
+constexpr uint32_t PROFILE_LIST_SELECTED = 0x8200008;
+constexpr uint32_t CONTROL_ID_CHILD_MASK = 0xFFFFFFF0;
+// The profile screen's step while a new profile's difficulty is picked.
+constexpr int STEP_PICK_DIFFICULTY = 3;
+// The list's lines' style.
+constexpr uint32_t STYLE_PROFILE_LINE = 0x13;
+// The name's box edited (posted by the box).
+constexpr uint32_t MAIN_MSG_EDIT_NAME = 0x20000C3;
+// GET_TEXT's answer when no line is selected.
+constexpr uint32_t NO_LINE = 0xFFFFFFFF;
+
+// The name of the list's selected line (its answer to CONTROL_MSG_GET_TEXT).
+C_str AskText(C_Control *control)
+{
+    S_ControlMessage ask;
+    ask.id = CONTROL_MSG_GET_TEXT;
+    control->HandleMessage(&ask);
+    return ask.text;
+}
+
+} // namespace
+
+bool C_MainMenu::DescribeProfileScreen(S_ScreenDesc *desc, I3D_frame *)
+{
+    ScanProfiles(&AddProfileLine, static_cast<int>(reinterpret_cast<uintptr_t>(desc->controls[1])));
+    return true;
+}
+
+void C_MainMenu::AddProfileLine(const char *name, int context)
+{
+    // (The original formats the name, as C_fstr's format.)
+    S_ControlMessage line;
+    line.id = CONTROL_MSG_ADD_TEXT;
+    line.value = STYLE_PROFILE_LINE;
+    line.text = C_str(name);
+    reinterpret_cast<S_ControlDesc *>(static_cast<uintptr_t>(context))->messages.push_back(line);
+}
+
+void C_MainMenu::PostProfileLine(const char *name, int)
+{
+    // (As AddProfileLine: the name formatted in the original.)
+    PostText(PROFILE_LIST, CONTROL_MSG_ADD_TEXT, STYLE_PROFILE_LINE, C_str(name));
+}
+
+void C_MainMenu::RefreshProfile()
+{
+    if (m_profileName.IsEmpty()) {
+        PostTo(PROFILE_NAME, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON, TEXT_EMPTY);
+        for (uint32_t id = PROFILE_FIRST_DIFFICULTY; id <= PROFILE_LAST_DIFFICULTY; id += PROFILE_CONTROL_STEP)
+            PostTo(id, CONTROL_MSG_WHITE_TEXT, 0);
+        PostTo(PROFILE_RENAME, CONTROL_MSG_DEACTIVATE, 0);
+        PostTo(PROFILE_DELETE, CONTROL_MSG_DEACTIVATE, 0);
+        return;
+    }
+    PostText(PROFILE_NAME, CONTROL_MSG_SET_TEXT, STYLE_BUTTON, m_profileName);
+    PostText(PROFILE_LIST, CONTROL_MSG_SELECT_TEXT, 0, m_profileName);
+    const int difficulty = g_gameProfile.GetDifficulty();
+    if (difficulty >= 1 && difficulty <= 4) {
+        for (int i = 1; i <= 4; ++i)
+            PostTo(PROFILE_FIRST_DIFFICULTY + static_cast<uint32_t>(i - 1) * PROFILE_CONTROL_STEP, CONTROL_MSG_WHITE_TEXT,
+                   i == difficulty ? 1 : 0);
+    }
+    PostTo(PROFILE_RENAME, CONTROL_MSG_ACTIVATE, 0);
+    PostTo(PROFILE_DELETE, CONTROL_MSG_ACTIVATE, 0);
+}
+
+bool C_MainMenu::OnProfileShown(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    self->RefreshProfile();
+    PostTo(PROFILE_NAME, CONTROL_MSG_DEACTIVATE, 0);
+    PostTo(PROFILE_LIST, CONTROL_MSG_REFRESH, 0);
+    for (uint32_t id = PROFILE_FIRST_DIFFICULTY; id <= PROFILE_LAST_DIFFICULTY; id += PROFILE_CONTROL_STEP)
+        PostTo(id, CONTROL_MSG_DEACTIVATE, 0);
+    PostTo(PROFILE_CREATE, CONTROL_MSG_ACTIVATE, 0);
+    const uint32_t picked = self->m_profileName.IsEmpty() ? CONTROL_MSG_DEACTIVATE : CONTROL_MSG_ACTIVATE;
+    PostTo(PROFILE_RENAME, picked, 0);
+    PostTo(PROFILE_DELETE, picked, 0);
+    PostTo(PROFILE_BACK, CONTROL_MSG_ACTIVATE, 0);
+    return true;
+}
+
+bool C_MainMenu::OnProfileList(void *menu, void *, C_Control *control, uint32_t notification, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if (!control || (control->GetId() & CONTROL_ID_CHILD_MASK) != PROFILE_LIST)
+        return false;
+    if (notification == CONTROL_NOTIFY_CLICK) {
+        const C_str name = AskText(control);
+        if (!name.IsEmpty()) {
+            self->m_profileName = name;
+            SelectProfile(self, nullptr, nullptr, 0, 0);
+            self->RefreshProfile();
+        }
+    } else if (notification == CONTROL_NOTIFY_13) {
+        // The current profile's line again: back.
+        const C_str name = AskText(control);
+        if (!name.IsEmpty() && std::strcmp(self->m_profileName.c_str(), name.c_str()) == 0)
+            Post(MENU_MSG_BACK, 0);
+    }
+    return true;
+}
+
+bool C_MainMenu::OnDifficulty(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if (self->m_step != STEP_PICK_DIFFICULTY)
+        return false;
+    PostTo(PROFILE_LIST, CONTROL_MSG_ACTIVATE, 0);
+    for (uint32_t id = PROFILE_FIRST_DIFFICULTY; id <= PROFILE_LAST_DIFFICULTY; id += PROFILE_CONTROL_STEP)
+        PostTo(id, CONTROL_MSG_DEACTIVATE, 0);
+    for (uint32_t id = PROFILE_CREATE; id <= PROFILE_BACK; id += PROFILE_CONTROL_STEP)
+        PostTo(id, CONTROL_MSG_ACTIVATE, 0);
+    if (!control)
+        return false;
+    const uint32_t id = control->GetId();
+    if (id < PROFILE_FIRST_DIFFICULTY || id > PROFILE_LAST_DIFFICULTY || (id - PROFILE_FIRST_DIFFICULTY) % PROFILE_CONTROL_STEP)
+        return false;
+    g_gameProfile.SetDifficulty(static_cast<int>((id - PROFILE_FIRST_DIFFICULTY) / PROFILE_CONTROL_STEP) + 1);
+    S_ControlMessage white;
+    white.id = CONTROL_MSG_WHITE_TEXT;
+    white.value = 1;
+    control->HandleMessage(&white);
+    self->m_step = 0;
+    g_gameProfile.GetPlayerProfile()->Save();
+    return true;
+}
+
+bool C_MainMenu::OnProfileMessage(S_ControlMessage *message)
+{
+    switch (message->id & CONTROL_MSG_MASK) {
+    case MENU_MSG_ESCAPE:
+        // (Picking a difficulty: Escape taken.)
+        return !g_menuScreens.empty() &&
+               (g_menuScreens.back()->GetId() >> SCREEN_INDEX_SHIFT & SCREEN_INDEX_MASK) == MAIN_SCREEN_PROFILE &&
+               m_step == STEP_PICK_DIFFICULTY;
+    case CONTROL_MSG_REMOVE_SELECTED: {
+        if (m_profileName.IsEmpty() || !DeleteProfile(m_profileName.c_str()))
+            return true;
+        S_ControlMessage remove;
+        remove.target = PROFILE_LIST_SELECTED;
+        remove.id = CONTROL_MSG_REMOVE_SELECTED;
+        HandleMessage(&remove);
+        S_ControlMessage ask;
+        ask.target = PROFILE_LIST_SELECTED;
+        ask.id = CONTROL_MSG_GET_TEXT;
+        HandleMessage(&ask);
+        m_profileName = ask.value == NO_LINE ? C_str("") : ask.text;
+        SelectProfile(this, nullptr, nullptr, 0, 0);
+        RefreshProfile();
+        return true;
+    }
+    case MAIN_MSG_EDIT_NAME:
+        PostTo(PROFILE_NAME, CONTROL_MSG_EDIT, 0);
+        return true;
+    default:
+        return false;
+    }
 }

@@ -456,6 +456,9 @@ extern std::map<std::string, std::string> g_profileDirectories;   // 0x008ae9e8 
 int CreateProfile(const char *name);                    // 0x006ae8e0
 // The directory of a name, null if none.
 const char *FindProfileDirectory(const char *name);     // 0x006aefe0
+// The profile `name` deleted (its directory, read-only files too; its name forgotten). True when the directory
+// was removed (an empty name: whether PlayersProfiles itself was). (Not ported yet.)
+bool DeleteProfile(const char *name);                   // 0x006aef40 (__stdcall)
 // Finds the profiles in PlayersProfiles (the name map anew) and calls `callback` with each
 // directory name (__fastcall in the original).
 void ScanProfiles(void (*callback)(const char *name, int context), int context);   // 0x006af200

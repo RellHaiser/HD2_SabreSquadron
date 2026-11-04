@@ -97,12 +97,19 @@ protected:
     // ---- the screens' callbacks (later sub-parts but OnMainShown) ----
     static bool OnMainShown(void *menu, void *argument, C_Control *control, uint32_t notification,
                             uint32_t value);            // 0x006276a0
+    // The profile screen shown: refreshed; the name's box, the list's refresh, the difficulties off; create on,
+    // rename / delete only with a profile picked; back on. True.
     static bool OnProfileShown(void *menu, void *argument, C_Control *control, uint32_t notification,
                                uint32_t value);         // 0x006237e0
     static bool OnProfileButton(void *menu, void *argument, C_Control *control, uint32_t notification,
                                 uint32_t value);        // 0x006214d0
+    // The profiles' list (another control: false): a click: its profile (a name) made current, refreshed; a
+    // double click (13) on the current one: back. True.
     static bool OnProfileList(void *menu, void *argument, C_Control *control, uint32_t notification,
                               uint32_t value);          // 0x00623b40
+    // A difficulty picked while creating a profile (else false): the list on, the difficulties off, the
+    // buttons on; the difficulty set (easy 1 .. very hard 4; another control: false), its button white, the
+    // step ended, the player's profile saved. True.
     static bool OnDifficulty(void *menu, void *argument, C_Control *control, uint32_t notification,
                              uint32_t value);           // 0x00622b50
     static bool OnSingleplayerShown(void *menu, void *argument, C_Control *control, uint32_t notification,
@@ -111,6 +118,7 @@ protected:
                                      uint32_t value);   // 0x0063b9a0
 
     // ---- the screens' further descriptions (by kind; later sub-parts) ----
+    // The profile screen: the profiles found (ScanProfiles) as the list's lines (its second control). True.
     bool DescribeProfileScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00621210
     bool DescribeMissionsScreen(S_ScreenDesc *desc, I3D_frame *model);      // 0x006392b0
     bool DescribeCinematicsScreen(S_ScreenDesc *desc, I3D_frame *model);         // 0x00614140
@@ -123,7 +131,17 @@ protected:
     bool DescribeAddServerScreen(S_ScreenDesc *desc, I3D_frame *model);     // 0x006370c0
 
     // ---- the screens' message handlers (true: taken; later sub-parts) ----
+    // The profile screen's messages: Escape while a difficulty is picked: taken. CONTROL_MSG_REMOVE_SELECTED (the
+    // deletion confirmed): the profile picked deleted (failing: nothing), its line removed, the line now selected
+    // picked (none: no name), made current, refreshed. 0x20000C3: the name's box edited. True; others false.
     bool OnProfileMessage(S_ControlMessage *message);   // 0x00621240
+    // The profile screen's controls by the profile picked: none: no name, no difficulty white, rename and delete
+    // off; else its name, its line selected, its difficulty's button white, rename and delete on.
+    void RefreshProfile();                              // 0x00622ed0 (__fastcall)
+    // ScanProfiles' callbacks: a profile's line added to the list's description (`context`) / posted to the
+    // list (part 9h-vi's).
+    static void AddProfileLine(const char *name, int context);    // 0x00621110 (__fastcall)
+    static void PostProfileLine(const char *name, int context);   // 0x00620fb0 (__fastcall)
     bool OnNetworkMessage(S_ControlMessage *message);   // 0x00633490
     bool OnMissionsMessage(S_ControlMessage *message);  // 0x00638e00
     bool OnConnectMessage(S_ControlMessage *message);   // 0x00632390
@@ -133,7 +151,8 @@ protected:
                               uint32_t value);          // 0x00622af0
 
     CRITICAL_SECTION m_foundLock;                       // +0x1B0 (OnStart .. OnStop)
-    int unknown1C8 = 0;                                 // +0x1C8 (the browser's)
+    // The step of a screen's dialog (the profile screen's: 3 picking a difficulty; the browser's too).
+    int m_step = 0;                                     // +0x1C8
     C_OptionsHandler *m_options = nullptr;              // +0x1D0
     std::vector<S_ServerEntry *> m_foundServers;        // +0x1D4 (the browser's thread's)
     C_MpMenuSettings *m_mpSettings = nullptr;           // +0x1E4
