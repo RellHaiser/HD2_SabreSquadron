@@ -242,31 +242,25 @@ f_00638dc0.cpp:2144:13: invalid type argument of unary '*' (have 'uint32_t' {aka
     *DAT_008ae5b0 = (int)pvVar3;
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_00690970.cpp:247:42: too few arguments to function
-    (*pIStack_17c->vtable[1].Duplicate)();
-f_00690970.cpp:318:24: request for member '_0_4_' in '"death"', which is of non-class type 'const char [6]'
-    (**(code **)("death"._0_4_ + 0x38))();
-f_00690970.cpp:704:35: too few arguments to function
-    (*pIStack_148->vtable->LinkTo)(pIStack_148,(I3D_frame*)(param_2));
-f_00690970.cpp:1032:38: too few arguments to function
+f_00690970.cpp:186:38: too few arguments to function
     (*apIStack_6c[0]->vtable->LinkTo)(apIStack_6c[0]);
-f_00690970.cpp:1228:33: too few arguments to function
+f_00690970.cpp:382:33: too few arguments to function
     (*pIVar3->vtable->Duplicate)();
-f_00690970.cpp:1691:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00690970.cpp:845:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00690970.cpp:1702:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00690970.cpp:856:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00690970.cpp:1722:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00690970.cpp:876:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00690970.cpp:1733:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00690970.cpp:887:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00690970.cpp:1745:47: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00690970.cpp:899:47: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00690970.cpp:1951:21: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_00690970.cpp:1105:21: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     *DAT_008ae5b0 = (int)pvVar5;
-f_00690970.cpp:2305:11: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_00690970.cpp:1459:11: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     *DAT_008ae5b0 = (int)pvVar7;
-f_00690970.cpp:2797:43: could not convert '(tier1::C_str_rep*)(& piStack_14)' from 'tier1::C_str_rep*' to 'tier1::C_str'
+f_00690970.cpp:1951:43: could not convert '(tier1::C_str_rep*)(& piStack_14)' from 'tier1::C_str_rep*' to 'tier1::C_str'
     S_SoldierProfile__SetCustomName(this_00,(C_str_rep *)&piStack_14);
 f_00696f70.cpp:565:105: cannot convert 'char**' to 'uint32_t*' {aka 'unsigned int*'}
     uninitialized_copy4_42a730((uint32_t*)(ppcVar4),gh_bitcast<uint32_t*>(_this[2].m_014),ppcStack_a4 + 1);

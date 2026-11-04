@@ -7,11 +7,11 @@ bool and negation flips; the lines unique in the file) and by hand (the constant
 The V (squad_menu.cpp) mutations ran with check_campaignscreens.py, the C and H (screen.cpp/.h) ones with
 check_screen.py.
 
-202 mutations: all killed but 6.
+202 mutations: all killed but 3, equivalent (3 more killed by part 9g-xi's test).
 - Equivalent: V 354 del (the menu's description leaked), V 379 del (the dead soldier leaked), C 427 del
   (m_medal set again right after).
 - V 360 del / num / arg9 (BuildScreens' SelectFreeSoldier(0)): the roster's list is only built by part
-  9g-xi's DescribeRoster; killed by its build test (mutations/mutate_9g11.py's docstring).
+  9g-xi's DescribeRoster; killed by its build test, sqBuildSelect (rerun after 9g-xi).
 """
 import os
 

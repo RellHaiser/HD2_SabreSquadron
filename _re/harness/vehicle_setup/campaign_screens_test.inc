@@ -184,16 +184,15 @@ bool C_SquadMenu::OnSoldierControl(void *menu, void *argument, C_Control *contro
         GfLog(TEXT " %d %s", desc != nullptr, MrFrameName(model).c_str()); \
         return T(1); \
     }
-SQ_DESCRIBE(DescribeRoster, bool, "describe roster")
 SQ_DESCRIBE(DescribeStats, bool, "describe stats")
 SQ_DESCRIBE(DescribePanel, bool, "describe panel")
 SQ_DESCRIBE(DescribeSelected, bool, "describe selected")
 SQ_DESCRIBE(DescribeButtons, bool, "describe buttons")
 #undef SQ_DESCRIBE
-void C_SquadMenu::DescribeMedals(S_ScreenDesc *desc, I3D_frame *model)
-{
-    GfLog("describe medals %d %s", desc != nullptr, MrFrameName(model).c_str());
-}
+bool C_SquadMenu::OnDragStart(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
+bool C_SquadMenu::OnDragMove(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
+bool C_SquadMenu::OnDrop(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
+bool C_SquadMenu::OnDragCancel(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_SquadMenu::OnScreenTick(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_SquadMenu::OnScreenHidden(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_SquadMenu::OnNameEdited(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
@@ -316,6 +315,9 @@ void **DbPageVt()
 }
 
 // A control's callbacks counted.
+struct S_SqPeek : C_Control {
+    static std::vector<C_Control *> &Children(C_Control *c) { return static_cast<S_SqPeek *>(c)->m_children; }
+};
 struct S_CsPeek : C_Control {
     static size_t Callbacks(C_Control *control) { return static_cast<S_CsPeek *>(control)->m_callbacks.size(); }
 };
@@ -331,6 +333,7 @@ struct S_CampaignScreensResults {
     bool dbShow = true, dbSkills = true, dbRank = true, dbMedals = true, dbScroll = true;
     bool sqSlot = true, sqOneSoldier = true, sqStart = true, sqSlots = true, sqSync = true, sqMessage = true, sqSelect = true;
     bool sqDead = true, sqFill = true, sqSelection = true, sqShown = true, sqSquadScreen = true, sqBuild = true;
+    bool sqRoster = true, sqMedals = true, sqBuildSelect = true;
 };
 
 // A message's values ("target id value value2[ value3][ 'text']"; value2 / value3 by name when known).
@@ -388,7 +391,11 @@ std::string CsQueue()
 // A screen shown or not; answering the text asked for with its own.
 // (Part 9g-x.) A slot's picture on the selection screen: its frame, its index (asked: counted).
 struct C_SqPicture : C_Control {
-    C_SqPicture(I3D_frame *frame, int i) : C_Control(nullptr, 0x8300000, nullptr), index(i) { m_frame = frame; }
+    C_SqPicture(I3D_frame *frame, int i) : C_Control(nullptr, 0x8300000, nullptr), index(i)
+    {
+        m_frame = frame;
+        m_index = i;
+    }
     int index, asked = 0;
     bool HandleMessage(S_ControlMessage *m) override
     {
@@ -2771,7 +2778,7 @@ void CampaignScreensTest(I3D_scene *)
             bool ok = true;
             C_SquadMenu m;
             ok &= m.GetTypeId() == 3 && m.m_selectedSlot == 0 && m.m_selectedSoldier == -1 && m.m_rosterSelected &&
-                  m.m_unknown1BC == 0 && m.m_unknown1C0 == 0 && !m.m_selector && m.m_slots[3].locked &&
+                  m.m_unknown1BC == 0 && !m.m_rosterSelector && !m.m_selector && m.m_slots[3].locked &&
                   m.m_slots[3].profile == -1 && m.m_slots[3].rank == 0xFFFFFFFF;
             const auto start = [&](int mode) {
                 m.m_mode = mode;
@@ -3227,9 +3234,9 @@ void CampaignScreensTest(I3D_scene *)
             ok &= CsDesc(d) == "3 bnamexx 4100000: 0 1000015 c 7d2 0 2000073 1 0 0 100006e 11 0 0 1000007 4016000 self edited "
                                "0 1000001 0 0; 14 bselected soldier info 4200000: 0 1000015 d a69 0 1000007 4001000 self info; "
                                "13 text_selected soldier stats 4300000: 0 1000015 b a6b; ";
-            ok &= MsLogIs({"describe roster 1 sqtm", "describe stats 1 sqtm", "describe panel 1 sqtm", "describe medals 1 sqtm",
-                           "describe selected 1 sqtm", "describe buttons 1 sqtm"},
-                          g_gfLog);
+            ok &= GmInOrder(Join(g_gfLog), {"sqtm 48 photo03 1", "sqtm 48 selector 1", "describe stats 1 sqtm",
+                                            "describe panel 1 sqtm", "create 6", "describe selected 1 sqtm",
+                                            "describe buttons 1 sqtm"});
             WM(r.sqSquadScreen, ok);
         }
 
@@ -3270,7 +3277,7 @@ void CampaignScreensTest(I3D_scene *)
             g_csOperation = 0;
             ok &= build({squadModel, selection, description}) &&
                   g_cacheLoads == std::vector<std::string>({"team members selection", "selection screen", "description"}) &&
-                  GmInOrder(Join(g_gfLog), {"return all 1", "describe roster 1 sqbt", "describe buttons 1 sqbt", "sqbs 48 photo03 1",
+                  GmInOrder(Join(g_gfLog), {"return all 1", "sqbt 48 panel01 20", "describe buttons 1 sqbt", "sqbs 48 photo03 1",
                                             "sqbs 48 selector 1", "sqbd 48 description01 1", "sqbd 48 description 1"}) &&
                   m.m_screens.size() == 3 && m.m_screens[1]->GetScreenFrame() == As<I3D_frame>(squadModel) &&
                   m.m_screens[2]->GetScreenFrame() == As<I3D_frame>(selection) && !g_menuScreens.empty() &&
@@ -3298,6 +3305,301 @@ void CampaignScreensTest(I3D_scene *)
             WM(r.sqBuild, ok);
         }
 
+
+        // --- (part 9g-xi) built with the roster: its list made, BuildScreens' first free soldier's picture picked ---
+        {
+            bool ok = true;
+            void (*const oldFill)(I3D_model *) = g_cacheFill;
+            g_cacheFill = [](I3D_model *) {};
+            void *const oldSetPos = g_msFrameVt[0x08 / 4];
+            g_msFrameVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+            C_SquadMenu m;
+            S_MrWorld world = MrWorld("sqbr");
+            m.m_scene = As<I3D_scene>(world.scene);
+            C_MsScreen box(m.m_scene, "sqbrbox", 0);
+            m.m_screens = {&box};
+            S_MrObj *squadModel = MrObj("sqbrt", g_mrModelVt), *description = MrObj("sqbrd", g_mrModelVt);
+            S_MrObj *panel = MsFrame("sqbrpanel"), *dead = MsFrame("sqbrdead"), *living = MsFrame("sqbrliving");
+            S_MrObj *scroll = MsFrame("sqbrscroll"), *death = MsFrame("sqbrdeath"), *selector = MsFrame("sqbrsel");
+            S_MrObj *list = MsFrame("sqbrlist");
+            std::vector<S_MrObj *> copies;
+            g_mrClones.clear();
+            void **const ownVt = new void *[MR_SLOTS];
+            std::copy(g_msFrameVt, g_msFrameVt + MR_SLOTS, ownVt);
+            ownVt[0xA0 / 4] = reinterpret_cast<void *>(&MrFake<0xA0>);
+            // The copies' mesh: a level of one face group (no material), its own copy made, updated.
+            static void *meshVt[16];
+            meshVt[0x04 / 4] = reinterpret_cast<void *>(&F_CsGetLevel);
+            meshVt[0x18 / 4] = reinterpret_cast<void *>(&MrFake<0x18>);
+            static S_CsGroup group;
+            group.material = nullptr;
+            static S_CsLevel level;
+            level.groups = &group;
+            static S_CsMesh mesh;
+            mesh.vtable = meshVt;
+            mesh.level = &level;
+            for (int i = 0; i < 3; ++i) {
+                S_MrObj *copy = MsFrame(CmText("sqbrv%d", i).c_str());
+                copy->vtable = ownVt;
+                I3D_frame *v = As<I3D_frame>(copy);
+                WmField<uint32_t>(v, 0x1D0) |= VISFLAGS_WBOUND_VALID;
+                I3D_bbox box;
+                box.min = S_vector(0.25f, -0.5f, 0.0f);
+                box.max = S_vector(0.75f, -0.125f, 0.0f);
+                box.minW = box.maxW = 0.0f;
+                WmField<I3D_bbox>(v, 0x170) = box;
+                *reinterpret_cast<S_CsMesh **>(reinterpret_cast<uint8_t *>(copy) + 0x1E0) = &mesh;
+                copies.push_back(copy);
+                g_mrClones.push_back(As<I3D_frame>(copy));
+            }
+            const std::vector<std::pair<std::string, S_MrObj *>> children = {
+                {"panel01", panel}, {"photo03", dead}, {"photo04", living}, {"scroll00", scroll}, {"death", death},
+                {"selector", selector}, {"Panel01", panel}, {"GB_Soldiers", list}, {"Soldier00", copies[0]},
+                {"Soldier01", copies[1]}, {"Soldier02", copies[2]}};
+            for (const auto &c : children)
+                g_msChildren[{squadModel, c.first}] = c.second;
+            // (The controls' frames under their parents'.)
+            const std::vector<std::pair<std::pair<S_MrObj *, std::string>, S_MrObj *>> nested = {
+                {{panel, "GB_Soldiers"}, list}, {{panel, "scroll00"}, scroll}, {{list, "Soldier00"}, copies[0]},
+                {{list, "Soldier01"}, copies[1]}, {{list, "Soldier02"}, copies[2]}};
+            for (const auto &c : nested)
+                g_msChildren[c.first] = c.second;
+            roster(3);
+            m.m_slots[0].profile = -1;
+            g_mrMade[FRAME_MODEL] = {squadModel, description};
+            g_mrMade[FRAME_DUMMY] = {list};
+            playMode.singleMission = 0;
+            playMode.mode = PLAY_MODE_CAMPAIGN;
+            g_csOperation = 1;
+            g_cacheLoads.clear();
+            g_menuScreens.clear();
+            g_gfLog.clear();
+            ok &= m.BuildScreens() && MrHas("soldier control 1 4101010") && !MrHas("soldier control 1 4101020") &&
+                  m.m_screens.size() == 2;
+            for (size_t i = 1; i < m.m_screens.size(); ++i)
+                delete m.m_screens[i];
+            m.m_screens.clear();
+            delete m.m_popup;
+            m.m_popup = nullptr;
+            m.m_models.clear();
+            g_menuScreens.clear();
+            for (const auto &c : children)
+                g_msChildren.erase({squadModel, c.first});
+            for (const auto &c : nested)
+                g_msChildren.erase(c.first);
+            g_mrMade.erase(FRAME_MODEL);
+            g_mrMade.erase(FRAME_DUMMY);
+            g_mrClones.clear();
+            g_csOperation = 0;
+            g_msFrameVt[0x08 / 4] = oldSetPos;
+            g_cacheFill = oldFill;
+            WM(r.sqBuildSelect, ok);
+        }
+        void *const sqOldSetPos = g_msFrameVt[0x08 / 4];
+        g_msFrameVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+        // --- (part 9g-xi) the roster: the pictures' templates off; one soldier: the tables and members dimmed; the
+        // list's frame under "panel01" (the dead's template, the death frame on it, moved in), the selector off at
+        // the origin; the panel's group, the list (its scroll bar's id, 5 shown, across, the template's origin) of
+        // the roster's first 30 (the dead's template copied for the dead, the living's for the others: their
+        // indexes, faces, clicks; the living's drag and drop), the scroll bar (the list's id); the template off.
+        // A frame missing: false ---
+        {
+            bool ok = true;
+            C_SquadMenu m;
+            S_MrWorld world = MrWorld("sqr");
+            m.m_scene = As<I3D_scene>(world.scene);
+            roster(32);
+            for (int i = 0; i < 32; ++i)
+                p[i]->faceImage = reinterpret_cast<IImage *>(static_cast<uintptr_t>(0x1000 + i));
+            p[1]->dead = true;
+            void **const alphaVt = new void *[MR_SLOTS];
+            std::copy(g_msFrameVt, g_msFrameVt + MR_SLOTS, alphaVt);
+            alphaVt[0xA8 / 4] = reinterpret_cast<void *>(&MrFake<0xA8, float>);
+            S_MrObj *model = MsFrame("sqrm"), *panel = MsFrame("sqrpanel"), *dead = MsFrame("sqrdead"), *living = MsFrame("sqrliving");
+            S_MrObj *scroll = MsFrame("sqrscroll"), *death = MsFrame("sqrdeath"), *selector = MsFrame("sqrsel");
+            S_MrObj *t19 = MsFrame("sqrt19"), *m02 = MsFrame("sqrm02"), *p06 = MsFrame("sqrp06");
+            t19->vtable = alphaVt;
+            m02->vtable = alphaVt;
+            As<I3D_frame>(dead)->m_localMatrix(3) = S_vector(0.25f, -0.5f, 0.75f);
+            As<I3D_frame>(dead)->m_localMatrix.m[3][3] = 2.0f;
+            const std::vector<std::pair<const char *, S_MrObj *>> children = {
+                {"panel01", panel}, {"photo03", dead}, {"photo04", living}, {"photo06", p06}, {"scroll00", scroll},
+                {"death", death}, {"selector", selector}, {"table19", t19}, {"member02", m02}};
+            for (const auto &c : children)
+                g_msChildren[{model, c.first}] = c.second;
+            const auto clones = [](int n) {
+                g_mrClones.clear();
+                for (int i = 0; i < n; ++i) {
+                    S_MrObj *copy = MrObj(CmText("sqrv%d", i).c_str(), g_mrModelVt);
+                    S_MrObj *mesh = MrObj("sqrmesh", g_mrModelVt);
+                    mesh->vtable[0x18 / 4] = reinterpret_cast<void *>(&MrFake<0x18>);
+                    *reinterpret_cast<S_MrObj **>(reinterpret_cast<uint8_t *>(copy) + 0x1E0) = mesh;
+                    g_mrClones.push_back(As<I3D_frame>(copy));
+                }
+            };
+            S_MrObj *listFrame = MsFrame("sqrlist");
+            const auto build = [&](S_ScreenDesc &d) {
+                clones(30);
+                g_mrMade[FRAME_DUMMY] = {listFrame};
+                g_gfLog.clear();
+                return m.DescribeRoster(&d, As<I3D_frame>(model));
+            };
+            const auto fn = [](auto f) { return reinterpret_cast<uintptr_t>(f); };
+            g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+            g_csNames[fn(&C_SquadMenu::OnSoldierControl)] = "control";
+            g_csNames[fn(&C_SquadMenu::OnDragStart)] = "start";
+            g_csNames[fn(&C_SquadMenu::OnDragMove)] = "move";
+            g_csNames[fn(&C_SquadMenu::OnDrop)] = "drop";
+            g_csNames[fn(&C_SquadMenu::OnDragCancel)] = "cancel";
+            playMode.mode = PLAY_MODE_CAMPAIGN;
+            playMode.singleMission = 0;
+            S_ScreenDesc d("team members selection", "team members selection", 1u << 26);
+            As<I3D_frame>(selector)->m_localMatrix(3) = S_vector(1.0f, 2.0f, 3.0f);
+            ok &= build(d) && d.controls.size() == 1 && m.m_rosterSelector == As<I3D_frame>(selector) &&
+                  As<I3D_frame>(selector)->GetPos().x == 0.0f && As<I3D_frame>(selector)->GetPos().y == 0.0f &&
+                  As<I3D_frame>(selector)->GetPos().z == 0.0f &&
+                  m.m_models.size() == 1 && m.m_models[0] == As<I3D_frame>(listFrame);
+            const S_ControlDesc *group = d.controls.empty() ? nullptr : d.controls[0];
+            ok &= group && group->name == C_str("Panel01") && group->type == 5 && group->id == 0x4100000 && group->children.size() == 2;
+            if (group && group->children.size() == 2) {
+                const S_ControlDesc *list = group->children[0], *bar = group->children[1];
+                ok &= list->name == C_str("GB_Soldiers") && list->type == 0x23 && list->id == 0x4101000 &&
+                      list->children.size() == 30 && bar->name == C_str("scroll00") && bar->type == 8 && bar->id == 0x4102000;
+                ok &= list->messages.size() == 5 && CsMessage(list->messages[0]) == "0 100000b 4102000 0" &&
+                      CsMessage(list->messages[1]) == "0 1000028 5 0" && CsMessage(list->messages[2]) == "0 1000029 0 3db367a1" &&
+                      list->messages[3].id == 0x100006B && list->messages[3].target == 0 && list->messages[3].value == 0 &&
+                      CsMessage(list->messages[4]) == "0 200002c 0 0";
+                const auto *o = reinterpret_cast<const float *>(list->messages[3].value2);
+                ok &= o && o[0] == 0.25f && o[1] == -0.5f && o[2] == 0.75f && o[3] == 2.0f;
+                ok &= bar->messages.size() == 1 && CsMessage(bar->messages[0]) == "0 100000b 4101000 0";
+                if (list->children.size() == 30) {
+                    ok &= CsTree(list->children[0]) == "4 Soldier00 4101010: 0 1000009 0 0 0 1000038 0 1000 0 1000007 4001000 self control "
+                                                       "0 1000007 400a000 self start 0 1000007 4008000 self move "
+                                                       "0 1000007 4009000 self drop 0 1000007 4013000 self cancel;";
+                    ok &= CsTree(list->children[1]) == "4 Soldier01 4101020: 0 1000009 1 0 0 1000038 0 1001 0 1000007 4001000 self control;";
+                    ok &= CsTree(list->children[29]).rfind("4 Soldier29 41011e0: 0 1000009 1d 0 0 1000038 0 101d ", 0) == 0;
+                }
+            }
+            ok &= MsLogIs({"sqrm 48 photo03 1", "sqrdead on 0", "sqrm 48 photo04 1", "sqrliving on 0", "sqrm 48 photo05 1",
+                           "sqrm 48 photo06 1", "sqrp06 on 0", "sqrm 48 photo07 1", "sqrm 48 panel01 20", "sqrm 48 photo03 1",
+                           "sqrm 48 photo04 1", "sqrm 48 scroll00 1", "sqrm 48 death 1", "create 6", "sqrm 48 selector 1",
+                           "sqrsel on 0", "sqrlist 38 sqrpanel 0", "sqrlist 8 (0 0 0)", "sqrlist 34 GB_Soldiers",
+                           "sqrdeath 38 sqrdead 1", "sqrdead 38 sqrlist 1", "sqrdead on 1", "sqrlist on 1", "sqrdead 24",
+                           "sqrlist 24", "clone tree sqrliving 0", "sqrv0 a0", "sqrmesh 18", "sqrv0 34 Soldier00",
+                           "sqrv0 38 sqrlist 0", "clone tree sqrdead 0", "sqrv1 a0", "sqrmesh 18", "sqrv1 34 Soldier01",
+                           "sqrv1 38 sqrlist 0"},
+                          std::vector<std::string>(g_gfLog.begin(), g_gfLog.begin() + std::min<size_t>(35, g_gfLog.size())));
+            ok &= g_gfLog.size() > 2 && g_gfLog[g_gfLog.size() - 2] == "sqrdead on 0" && g_gfLog.back() == "sqrdead 24";
+            WM(r.sqRoster, ok);
+            for (S_ControlDesc *c : d.controls)
+                delete c;
+            d.controls.clear();
+            m.m_models.clear();
+            // One soldier: the tables and members dimmed.
+            playMode.mode = PLAY_MODE_LONE_WOLF;
+            S_ScreenDesc d2("team members selection", "team members selection", 1u << 26);
+            ok &= build(d2) && MrHas("sqrt19 a8 0.5") && MrHas("sqrm02 a8 0.5") && MrHas("sqrm 48 table21 1") &&
+                  MrHas("sqrm 48 member03 1");
+            playMode.mode = PLAY_MODE_CAMPAIGN;
+            m.m_models.clear();
+            // A frame missing: false, no controls.
+            for (const char *missing : {"selector", "photo03", "scroll00"}) {
+                S_MrObj *const kept = g_msChildren[{model, missing}];
+                g_msChildren.erase({model, missing});
+                S_ScreenDesc d3("team members selection", "team members selection", 1u << 26);
+                ok &= !build(d3) && d3.controls.empty() && !MrHas("sqrlist 34 GB_Soldiers");
+                g_msChildren[{model, missing}] = kept;
+            }
+            for (const auto &c : children)
+                g_msChildren.erase({model, c.first});
+            g_mrClones.clear();
+            p[1]->dead = false;
+            for (int i = 0; i < 32; ++i)
+                p[i]->faceImage = nullptr;
+            WM(r.sqRoster, ok);
+        }
+
+        // --- (part 9g-xi) the medals: their panel's frame under the model (at the origin, named, kept), the
+        // group; each medal's two frames under it, their pictures (the medal's index, hovered: the popup), its
+        // place. Hovered: the popup shown with the medal's first frame copied; left: hidden; no popup or
+        // control: nothing ---
+        {
+            bool ok = true;
+            C_SquadMenu m;
+            S_MrObj *model = MsFrame("sqmm");
+            const char *const kMedals[12] = {"DSO", "DCM", "MILIT_MEDAL", "GSM_AFRICA", "GSM", "WAR_MEDAL", "DEFENCE_MEDAL",
+                                             "MILITARY_CROSS", "VICTORIA_CROSS", "GERM_FRANCE_STAR", "AFRICA_STAR", "BURMA_STAR"};
+            const auto medalName = [&](int i, int k) { return std::string(kMedals[i]) + (k ? "_b" : "_a"); };
+            std::vector<S_MrObj *> frames, slotFrames;
+            for (int i = 0; i < 12; ++i) {
+                for (int k = 0; k < 2; ++k) {
+                    std::string name = medalName(i, k);
+                    frames.push_back(MsFrame(("sqm" + name).c_str()));
+                    g_msChildren[{model, name}] = frames.back();
+                }
+                slotFrames.push_back(MsFrame(CmText("sqmslot%d", i).c_str()));
+                g_msChildren[{model, CmText("medal%02d", i + 1)}] = slotFrames.back();
+            }
+            S_MrObj *panelFrame = MsFrame("sqmpanel");
+            g_mrMade[FRAME_DUMMY] = {panelFrame};
+            g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+            g_csNames[reinterpret_cast<uintptr_t>(&C_SquadMenu::OnMedalHover)] = "hover";
+            S_ScreenDesc d("team members selection", "team members selection", 1u << 26);
+            g_gfLog.clear();
+            m.DescribeMedals(&d, As<I3D_frame>(model));
+            ok &= d.controls.size() == 1 && m.m_models.size() == 1 && m.m_models[0] == As<I3D_frame>(panelFrame);
+            if (d.controls.size() == 1) {
+                const S_ControlDesc *g = d.controls[0];
+                ok &= g->name == C_str("medals_panel") && g->type == 5 && g->id == 0x4100000 && g->children.size() == 24;
+                if (g->children.size() == 24) {
+                    ok &= CsTree(g->children[0]) == "4 DSO_a 4101000: 0 1000009 0 0 0 1000007 4003000 self hover 0 1000007 4004000 self hover;";
+                    ok &= CsTree(g->children[1]) == "4 DSO_b 4102000: 0 1000009 0 0 0 1000007 4003000 self hover 0 1000007 4004000 self hover;";
+                    ok &= CsTree(g->children[23]).rfind("4 BURMA_STAR_b 4118000: 0 1000009 b 0 ", 0) == 0;
+                }
+            }
+            for (int i = 0; i < 12; ++i)
+                ok &= m.m_medalFrames[i][0] == As<I3D_frame>(frames[static_cast<size_t>(2 * i)]) &&
+                      m.m_medalFrames[i][1] == As<I3D_frame>(frames[static_cast<size_t>(2 * i + 1)]) &&
+                      m.m_medalSlots[i] == As<I3D_frame>(slotFrames[static_cast<size_t>(i)]);
+            ok &= g_gfLog.size() > 8 && g_gfLog[0] == "create 6" && g_gfLog[1] == "sqmpanel 38 sqmm 0" &&
+                  g_gfLog[2] == "sqmpanel 8 (0 0 0)" && g_gfLog[3] == "sqmpanel 34 medals_panel" && g_gfLog[4] == "sqmm 48 DSO_a 1" &&
+                  g_gfLog[5] == "sqmDSO_a 38 sqmpanel 1" && g_gfLog[6] == "sqmm 48 DSO_b 1" && g_gfLog[7] == "sqmDSO_b 38 sqmpanel 1" &&
+                  g_gfLog[8] == "sqmm 48 medal01 20" && g_gfLog.back() == "sqmm 48 medal12 20";
+            for (S_ControlDesc *c : d.controls)
+                delete c;
+            d.controls.clear();
+            m.m_models.clear();
+            WM(r.sqMedals, ok);
+
+            // Hovered.
+            C_MsScreen popup(nullptr, "sqmpopup", 0x0C000000);
+            C_SqPicture medal(As<I3D_frame>(frames[6]), 3);
+            S_MrObj *copy = MsFrame("sqmcopy");
+            g_mrClones = {As<I3D_frame>(copy)};
+            g_gfLog.clear();
+            ok &= C_SquadMenu::OnMedalHover(&m, nullptr, &medal, CONTROL_NOTIFY_ENTER, 0) && g_gfLog.empty();
+            m.m_popup = &popup;
+            ok &= C_SquadMenu::OnMedalHover(&m, nullptr, nullptr, CONTROL_NOTIFY_ENTER, 0) && g_gfLog.empty();
+            ok &= C_SquadMenu::OnMedalHover(&m, nullptr, &medal, CONTROL_NOTIFY_ENTER, 0);
+            ok &= g_gfLog.size() >= 3 && g_gfLog.front() == "sqmpopup message 0 1000003 0" &&
+                  std::count(g_gfLog.begin(), g_gfLog.end(), std::string("clone tree sqmGSM_AFRICA_a 0")) == 1 &&
+                  g_gfLog.back() == "sqmpopup message 0 1000033 3";
+            g_gfLog.clear();
+            ok &= C_SquadMenu::OnMedalHover(&m, nullptr, &medal, CONTROL_NOTIFY_LEAVE, 0) &&
+                  MsLogIs({"sqmpopup message 0 1000004 0"}, g_gfLog);
+            g_gfLog.clear();
+            ok &= C_SquadMenu::OnMedalHover(&m, nullptr, &medal, CONTROL_NOTIFY_CLICK, 0) && g_gfLog.empty();
+            m.m_popup = nullptr;
+            g_mrClones.clear();
+            for (int i = 0; i < 12; ++i) {
+                g_msChildren.erase({model, medalName(i, 0)});
+                g_msChildren.erase({model, medalName(i, 1)});
+                g_msChildren.erase({model, CmText("medal%02d", i + 1)});
+            }
+            WM(r.sqMedals, ok);
+        }
+        g_msFrameVt[0x08 / 4] = sqOldSetPos;
+
         g_epProfiles = oldProfiles;
         g_gameProfile.m_humanStore = oldStore;
         g_gameProfile.m_missionSquad = oldSquad;
@@ -3314,11 +3616,11 @@ void CampaignScreensTest(I3D_scene *)
                 "vsUpdate %d vsScroll %d vsRender %d vsInput %d vsMovieState %d dbMedal %d dbResults %d dbStore %d dbStart %d "
                 "dbMessage %d dbBuild %d dbDiary %d dbDiaryPage %d dbWon %d dbScreen %d dbPanel %d dbObjectives %d dbResult %d dbShow %d dbSkills %d "
                 "dbRank %d dbMedals %d dbScroll %d sqSlot %d sqOneSoldier %d sqStart %d sqSlots %d sqSync %d "
-                "sqMessage %d sqSelect %d sqDead %d sqFill %d sqSelection %d sqShown %d sqSquadScreen %d sqBuild %d\n", r.oeTable, r.oeDescribe,
+                "sqMessage %d sqSelect %d sqDead %d sqFill %d sqSelection %d sqShown %d sqSquadScreen %d sqBuild %d sqRoster %d sqMedals %d sqBuildSelect %d\n", r.oeTable, r.oeDescribe,
                 r.oeBuild, r.oeInput, r.oeSlots, r.smStart, r.smMessage, r.smConsole, r.smPassword, r.smBuild, r.smTick,
                 r.smJoin, r.smNotify, r.vsCredits, r.vsMovie, r.vsFit, r.vsUpdate, r.vsScroll, r.vsRender, r.vsInput,
                 r.vsMovieState, r.dbMedal, r.dbResults, r.dbStore, r.dbStart, r.dbMessage, r.dbBuild, r.dbDiary, r.dbDiaryPage, r.dbWon,
                 r.dbScreen, r.dbPanel, r.dbObjectives, r.dbResult, r.dbShow, r.dbSkills,
                 r.dbRank, r.dbMedals, r.dbScroll, r.sqSlot, r.sqOneSoldier, r.sqStart, r.sqSlots, r.sqSync,
-                r.sqMessage, r.sqSelect, r.sqDead, r.sqFill, r.sqSelection, r.sqShown, r.sqSquadScreen, r.sqBuild);
+                r.sqMessage, r.sqSelect, r.sqDead, r.sqFill, r.sqSelection, r.sqShown, r.sqSquadScreen, r.sqBuild, r.sqRoster, r.sqMedals, r.sqBuildSelect);
 }

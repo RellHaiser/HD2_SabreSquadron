@@ -1,6 +1,8 @@
 // The campaign's squad screen (game/squad_menu.h, part 9g-ix).
 #include "game/squad_menu.h"
 
+#include <cstring>
+#include <malloc.h>
 #include <utility>
 #include <vector>
 
@@ -475,6 +477,169 @@ bool C_SquadMenu::OnSelectionShown(void *menu, void *, C_Control *, uint32_t, ui
         else
             Post(picture, CONTROL_MSG_SET_TEXTURE, 0,
                  reinterpret_cast<uintptr_t>(g_gameProfile.m_humanStore->Get(profile)->faceImage));
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// Part 9g-xi: the roster and the medals
+
+namespace {
+
+constexpr int CONTROL_GROUP = 5, CONTROL_SCROLL_BAR = 8, CONTROL_HIDING_LIST = 0x23;
+// The roster's list: its scroll bar's id, 5 shown, across by 0.0876; the scroll bar's list.
+constexpr uint32_t ROSTER_SCROLL = 0x4102000;
+constexpr uint32_t ROSTER_ROWS = 5;
+constexpr float ROSTER_ACROSS_STEP = 0.0876f;
+// The one soldier missions' tables and members dimmed (half opaque).
+constexpr float DIMMED_ALPHA = 0.5f;
+
+// A float as a message's value2.
+uintptr_t FloatValue(float value)
+{
+    uint32_t bits;
+    std::memcpy(&bits, &value, sizeof bits);
+    return bits;
+}
+// The medals' frames (their ids' order): the place's and the held ones'.
+const char *const MEDAL_FRAMES[SQUAD_MEDALS][2] = {
+    {"DSO_a", "DSO_b"},
+    {"DCM_a", "DCM_b"},
+    {"MILIT_MEDAL_a", "MILIT_MEDAL_b"},
+    {"GSM_AFRICA_a", "GSM_AFRICA_b"},
+    {"GSM_a", "GSM_b"},
+    {"WAR_MEDAL_a", "WAR_MEDAL_b"},
+    {"DEFENCE_MEDAL_a", "DEFENCE_MEDAL_b"},
+    {"MILITARY_CROSS_a", "MILITARY_CROSS_b"},
+    {"VICTORIA_CROSS_a", "VICTORIA_CROSS_b"},
+    {"GERM_FRANCE_STAR_a", "GERM_FRANCE_STAR_b"},
+    {"AFRICA_STAR_a", "AFRICA_STAR_b"},
+    {"BURMA_STAR_a", "BURMA_STAR_b"},
+};
+
+}   // namespace
+
+bool C_SquadMenu::DescribeRoster(S_ScreenDesc *desc, I3D_frame *model)
+{
+    for (const char *name : {"photo03", "photo04", "photo05", "photo06", "photo07"}) {
+        if (I3D_frame *frame = model->FindChildFrame(name, FRAME_MASK_VISUAL))
+            frame->SetOn(false);
+    }
+    // One soldier: the other places dimmed.
+    if (IsOneSoldier()) {
+        for (const char *name : {"table19", "table20", "table21", "member01", "member02", "member03"}) {
+            if (I3D_frame *frame = model->FindChildFrame(name, FRAME_MASK_VISUAL))
+                static_cast<I3D_object_visual *>(frame)->SetAlpha(DIMMED_ALPHA);
+        }
+    }
+    I3D_frame *panel = model->FindChildFrame("panel01", FRAME_MASK_DUMMY);
+    // The pictures: the dead's (with the "death" frame on it) and the living's.
+    I3D_frame *deadPhoto = model->FindChildFrame("photo03", FRAME_MASK_VISUAL);
+    I3D_frame *photo = model->FindChildFrame("photo04", FRAME_MASK_VISUAL);
+    I3D_frame *scroll = model->FindChildFrame("scroll00", FRAME_MASK_VISUAL);
+    I3D_frame *death = model->FindChildFrame("death", FRAME_MASK_VISUAL);
+    I3D_frame *list = I3DGetDriver()->CreateFrame(FRAME_DUMMY);
+    m_rosterSelector = model->FindChildFrame("selector", FRAME_MASK_VISUAL);
+    // (The frame made is leaked without the others; the panel, the living's picture and the death frame are
+    // not checked.)
+    if (!m_rosterSelector || !deadPhoto || !list || !scroll)
+        return false;
+    m_rosterSelector->SetOn(false);
+    m_rosterSelector->SetPosInline(S_vector(0.0f, 0.0f, 0.0f));
+    list->LinkTo(panel, 0);
+    list->SetPos(S_vector(0.0f, 0.0f, 0.0f));
+    list->SetName("GB_Soldiers");
+    m_models.push_back(list);
+    death->LinkTo(deadPhoto, 1);
+    deadPhoto->LinkTo(list, 1);
+    deadPhoto->SetOn(true);
+    list->SetOn(true);
+    deadPhoto->Update();
+    list->Update();
+
+    S_ControlDesc *group = desc->AddControl(CONTROL_GROUP, "Panel01");
+    S_ControlDesc *soldiers = group->AddChild(CONTROL_HIDING_LIST, "GB_Soldiers");
+    AddDescMessage(soldiers, 0, CONTROL_MSG_SET_VALUE, ROSTER_SCROLL);
+    AddDescMessage(soldiers, 0, CONTROL_MSG_SET_VISIBLE, ROSTER_ROWS);
+    AddDescMessage(soldiers, 0, CONTROL_MSG_SET_ACROSS_STEP, 0, FloatValue(ROSTER_ACROSS_STEP));
+    // (The list frees it.)
+    auto *origin = static_cast<S_vector4 *>(_aligned_malloc(sizeof(S_vector4), 16));
+    if (origin)
+        std::memcpy(origin, &deadPhoto->GetPos(), sizeof(S_vector4));
+    AddDescMessage(soldiers, 0, CONTROL_MSG_SET_ORIGIN, 0, reinterpret_cast<uintptr_t>(origin));
+    // A roster soldier's picture (the first 30): the template's copy under the list's frame, his index, face,
+    // click; the living's dragged and dropped too.
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    C_HumanStore *store = g_gameProfile.m_humanStore;
+    for (int i = 0; i < store->GetCount() && i < ROSTER_LIMIT; ++i) {
+        const C_str name = C_fstr("Soldier%02d", i);
+        CloneVisual(name, list, store->Get(i)->dead ? deadPhoto : photo);
+        S_ControlDesc *picture = soldiers->AddChild(CONTROL_PICTURE, name.c_str());
+        AddDescMessage(picture, 0, CONTROL_MSG_SET_INDEX, static_cast<uint32_t>(i));
+        AddDescMessage(picture, 0, CONTROL_MSG_SET_TEXTURE, 0, reinterpret_cast<uintptr_t>(store->Get(i)->faceImage));
+        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self, Callback(&C_SquadMenu::OnSoldierControl));
+        if (store->Get(i)->dead)
+            continue;
+        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0A, self, Callback(&C_SquadMenu::OnDragStart));
+        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_08, self, Callback(&C_SquadMenu::OnDragMove));
+        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_09, self, Callback(&C_SquadMenu::OnDrop));
+        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_13, self, Callback(&C_SquadMenu::OnDragCancel));
+    }
+    AddDescMessage(soldiers, 0, CONTROL_MSG_REFRESH, 0);
+    AddDescMessage(group->AddChild(CONTROL_SCROLL_BAR, "scroll00"), 0, CONTROL_MSG_SET_VALUE, ROSTER_CONTROLS);
+    deadPhoto->SetOn(false);
+    deadPhoto->Update();
+    return true;
+}
+
+void C_SquadMenu::DescribeMedals(S_ScreenDesc *desc, I3D_frame *model)
+{
+    I3D_frame *panel = I3DGetDriver()->CreateFrame(FRAME_DUMMY);
+    if (!panel)
+        return;
+    panel->LinkTo(model, 0);
+    panel->SetPos(S_vector(0.0f, 0.0f, 0.0f));
+    panel->SetName("medals_panel");
+    m_models.push_back(panel);
+    S_ControlDesc *group = desc->AddControl(CONTROL_GROUP, "medals_panel");
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    // Each medal's two frames under the panel, their pictures (the medal's index; hovered: the popup); its
+    // place (medal01 ..).
+    for (int i = 0; i < SQUAD_MEDALS; ++i) {
+        for (int k = 0; k < 2; ++k) {
+            // (Quirk kept: the frames are not checked.)
+            I3D_frame *frame = model->FindChildFrame(MEDAL_FRAMES[i][k], FRAME_MASK_VISUAL);
+            m_medalFrames[i][k] = frame;
+            frame->LinkTo(panel, 1);
+            S_ControlDesc *picture = group->AddChild(CONTROL_PICTURE, MEDAL_FRAMES[i][k]);
+            AddDescMessage(picture, 0, CONTROL_MSG_SET_INDEX, static_cast<uint32_t>(i));
+            AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_ENTER, self, Callback(&C_SquadMenu::OnMedalHover));
+            AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_LEAVE, self, Callback(&C_SquadMenu::OnMedalHover));
+        }
+        m_medalSlots[i] = model->FindChildFrame(C_fstr("medal%02d", i + 1), FRAME_MASK_DUMMY);
+    }
+}
+
+bool C_SquadMenu::OnMedalHover(void *menu, void *, C_Control *control, uint32_t notification, uint32_t)
+{
+    auto *self = static_cast<C_SquadMenu *>(menu);
+    if (!self->m_popup || !control)
+        return true;
+    if (notification == CONTROL_NOTIFY_ENTER) {
+        S_ControlMessage show;
+        show.id = CONTROL_MSG_SHOW;
+        self->m_popup->HandleMessage(&show);
+        // The medal's first frame copied for the popup.
+        const int medal = control->GetIndex();
+        S_ControlMessage medalShown;
+        medalShown.id = MEDAL_POPUP_MSG_SHOW;
+        medalShown.value = static_cast<uint32_t>(medal);
+        medalShown.value2 = reinterpret_cast<uintptr_t>(self->CloneFrame(C_fstr("Medal"), nullptr, self->m_medalFrames[medal][0]));
+        self->m_popup->HandleMessage(&medalShown);
+    } else if (notification == CONTROL_NOTIFY_LEAVE) {
+        S_ControlMessage hide;
+        hide.id = CONTROL_MSG_HIDE;
+        self->m_popup->HandleMessage(&hide);
     }
     return true;
 }

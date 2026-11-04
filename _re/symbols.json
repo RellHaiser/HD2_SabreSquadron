@@ -32933,6 +32933,11 @@
   "name": "C_SquadMenu::OnStart",
   "proto": "bool __thiscall OnStart(C_MenuState *this, void * arg)"
  },
+ "00690d50": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnMedalHover",
+  "proto": "bool __thiscall OnMedalHover(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00690ec0": {
   "module": "campaign_screens",
   "name": "S_SquadSlot::HasControl",
@@ -32992,6 +32997,16 @@
   "module": "campaign_screens",
   "name": "C_SquadMenu::DescribeSquadScreen",
   "proto": "bool __thiscall DescribeSquadScreen(C_MenuState *this, void * desc, void * model)"
+ },
+ "00692100": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeRoster",
+  "proto": "bool __thiscall DescribeRoster(C_MenuState *this, void * desc, void * model)"
+ },
+ "00692c40": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeMedals",
+  "proto": "void __thiscall DescribeMedals(C_MenuState *this, void * desc, void * model)"
  },
  "00693a50": {
   "module": "campaign_screens",

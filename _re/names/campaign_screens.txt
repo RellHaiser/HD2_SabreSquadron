@@ -105,3 +105,7 @@
 00691b30 C_SquadMenu::DescribeSelectionScreen | bool __thiscall DescribeSelectionScreen(C_MenuState *this, void * desc, void * model)
 00691cc0 C_SquadMenu::OnSelectionPicked | bool __thiscall OnSelectionPicked(C_MenuState *this, void * argument, void * control, uint notification, uint value)
 00691db0 C_SquadMenu::OnSelectionShown | bool __thiscall OnSelectionShown(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+# Part 9g-xi: the squad screen's roster and medals (src/game/squad_menu.cpp).
+00692100 C_SquadMenu::DescribeRoster | bool __thiscall DescribeRoster(C_MenuState *this, void * desc, void * model)
+00692c40 C_SquadMenu::DescribeMedals | void __thiscall DescribeMedals(C_MenuState *this, void * desc, void * model)
+00690d50 C_SquadMenu::OnMedalHover | bool __thiscall OnMedalHover(C_MenuState *this, void * argument, void * control, uint notification, uint value)

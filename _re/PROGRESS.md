@@ -8027,6 +8027,24 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 354 errors in 64 files, 149 stubs. ret_audit --src: 52.
   - Ghidra: names/campaign_screens.txt (+7), names/screen.txt (+7); 14 functions in ported.txt. Stats: 9,091 of 12,306 functions by hand (81.9 % by size).
 
+  PART 9g-xi DONE (2026-11-04): the squad screen's roster and medals (game/squad_menu.cpp).
+  - DescribeRoster 0x00692100 (from the asm, an aligned frame: the templates photo03 .. 07 off; one
+    soldier: table19 .. 21 and member01 .. 03 half opaque; the list's frame "GB_Soldiers" under "panel01"
+    with the dead's template (photo03, the "death" frame on it); C_SquadMenu +0x1C0 the roster's selector;
+    the group "Panel01": the hiding list (its scroll bar 0x4102000, 5 shown, across by 0.0876, the
+    template's origin) of the roster's first 30 (the dead's or the living's template copied: index, face,
+    OnSoldierControl; the living's drag and drop callbacks), the scroll bar (the list's id)),
+    DescribeMedals 0x00692c40 (from the asm: "medals_panel" under the model, the medals' frames DSO_a / DSO_b
+    .. under it (+0x218), their pictures with OnMedalHover, their places medal01 .. 12 (+0x278)),
+    OnMedalHover 0x00690d50 (entered: the popup shown, a "Medal" copy of the first frame sent with
+    MEDAL_POPUP_MSG_SHOW; left: hidden).
+  - Harness: sqRoster, sqMedals, sqBuildSelect (BuildScreens with the roster's list built: the picture
+    copies with a mesh level, so 9g-x's first selection is observed; mutate_9g10's V 360 killed). All 14
+    factory checkers in both orders.
+  - Mutations: mutations/mutate_9g11.py (130: all killed but 1, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 351 errors in 64 files, 147 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+3); 3 functions in ported.txt. Stats: 9,094 of 12,306 functions by hand (82.0 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

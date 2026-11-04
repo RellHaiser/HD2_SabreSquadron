@@ -2,7 +2,7 @@
 // soldiers of the roster picked for the operation into the squad's four slots (the first the
 // player's), their stats and medals, the selection screen. Part 9g-ix: the class, the slots, starting,
 // stopping, the messages, the squad kept to the slots; 9g-x: building the screens, the selection screen;
-// 9g-xi and on: the squad screen's parts.
+// 9g-xi: the roster and the medals; 9g-xii and on: the squad screen's other parts.
 #pragma once
 
 #include <cstdint>
@@ -17,6 +17,8 @@ struct S_SoldierProfile;
 // The soldiers each operation of the first campaign gives the Defence Medal (medal 6) on its squad
 // screen of kind 2 (roster indexes; a negative one ends them).
 extern const int g_operationMedalSoldiers[8][10];      // 0x00841cb8
+// The medals the squad screen shows (S_SoldierProfile::unknown28's ids).
+constexpr int SQUAD_MEDALS = 12;
 
 // A soldier's shown name: his own (the player's), else the full one.
 const C_str &GetProfileName(const S_SoldierProfile *profile);   // 0x006755d0 (__fastcall)
@@ -105,12 +107,37 @@ protected:
     static bool OnSelectionShown(void *menu, void *argument, C_Control *control, uint32_t notification,
                                  uint32_t value);       // 0x00691db0
 
-    // (Parts 9g-xi .. 9g-xiii.) The squad screen's roster, stats, panel, medals, selected soldier and
-    // buttons; its callbacks.
+    // The roster: the pictures' templates (photo03 .. 07) off; one soldier: the other places (table19 .. 21,
+    // member01 .. 03) half opaque; the list's frame "GB_Soldiers" under "panel01" (the dead's template, with
+    // the "death" frame on it, moved in), the selector off at the origin; the group "Panel01": the list (its
+    // scroll bar, 5 shown, across by 0.0876 from the template's place) of the roster's first 30 (a copy of
+    // the dead's template or the living's, photo04: the index, the face, picked: OnSoldierControl; the
+    // living's dragged and dropped), the scroll bar "scroll00"; the template off. A frame missing (the
+    // selector, the dead's template, the scroll bar; the list's not made): false.
     bool DescribeRoster(S_ScreenDesc *desc, I3D_frame *model);       // 0x00692100
+    // The medals: their panel's frame "medals_panel" under the model (kept with the models), the group;
+    // each medal's two frames (DSO_a, DSO_b, ..: not checked) under it, their pictures (the medal's index;
+    // hovered: OnMedalHover), its place ("medal01" ..). (No frame made: nothing.)
+    void DescribeMedals(S_ScreenDesc *desc, I3D_frame *model);       // 0x00692c40
+    // A medal's picture hovered: the popup shown with a copy of the medal's first frame ("Medal"), its name
+    // and description; left: hidden. (No popup, no control: nothing.) True.
+    static bool OnMedalHover(void *menu, void *argument, C_Control *control, uint32_t notification,
+                             uint32_t value);           // 0x00690d50
+    // (Part 9g-xii.) A soldier's picture dragged (its copy following the cursor), dropped on a slot, the
+    // drag ended.
+    static bool OnDragStart(void *menu, void *argument, C_Control *control, uint32_t notification,
+                            uint32_t value);            // 0x00693ae0
+    static bool OnDragMove(void *menu, void *argument, C_Control *control, uint32_t notification,
+                           uint32_t value);             // 0x00693e50
+    static bool OnDrop(void *menu, void *argument, C_Control *control, uint32_t notification,
+                       uint32_t value);                 // 0x00693f00
+    static bool OnDragCancel(void *menu, void *argument, C_Control *control, uint32_t notification,
+                             uint32_t value);           // 0x006945c0
+
+    // (Parts 9g-xii .. 9g-xiii.) The squad screen's stats, panel, selected soldier and buttons; its
+    // callbacks.
     bool DescribeStats(S_ScreenDesc *desc, I3D_frame *model);        // 0x00693320
     bool DescribePanel(S_ScreenDesc *desc, I3D_frame *model);        // 0x006934f0
-    void DescribeMedals(S_ScreenDesc *desc, I3D_frame *model);       // 0x00692c40
     bool DescribeSelected(S_ScreenDesc *desc, I3D_frame *model);     // 0x00693560
     bool DescribeButtons(S_ScreenDesc *desc, I3D_frame *model);      // 0x00693880
     static bool OnScreenTick(void *menu, void *argument, C_Control *control, uint32_t notification,
@@ -126,8 +153,10 @@ protected:
     int m_selectedSoldier = -1;                         // +0x1B4 the roster soldier picked (-1: none)
     bool m_rosterSelected = true;                       // +0x1B8 the roster's (else a slot's)
     int m_unknown1BC = 0;                               // +0x1BC
-    int m_unknown1C0 = 0;                               // +0x1C0
+    I3D_frame *m_rosterSelector = nullptr;              // +0x1C0 the roster's selector
     I3D_frame *m_selector = nullptr;                    // +0x1C4 the selection screen's (over the slot picked)
     S_SquadSlot m_slots[4];                             // +0x1C8
-    uint8_t m_unknown218[0x98] = {};                    // +0x218
+    I3D_frame *m_medalFrames[SQUAD_MEDALS][2] = {};     // +0x218 the medals' frames (DSO_a, DSO_b, ..)
+    I3D_frame *m_medalSlots[SQUAD_MEDALS] = {};         // +0x278 their places (medal01 ..)
+    uint8_t m_unknown2A8[8] = {};                       // +0x2A8
 };
