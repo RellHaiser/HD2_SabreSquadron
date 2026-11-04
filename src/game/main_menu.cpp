@@ -1859,3 +1859,253 @@ void C_MainMenu::ShowGameInfo(const S_ServerStatus *status)
     AddStatusYesNo(0x5021, status->allowCrosshair != 0);
     AddStatusYesNo(0x5022, status->allowVehicles != 0);
 }
+
+// ---- the create server screen's description (part 9h-xiii) -----------------------------------------------
+
+namespace {
+
+constexpr int CONTROL_CONTROL_GROUP = 5, CONTROL_COMBO_BOX = 0x11, CONTROL_POOL_LIST = 0x26;
+// The create server screen's controls (screen 9's; their order below): the maps panel's scroll bars and lists.
+constexpr uint32_t CREATE_SCROLL_MAPS = 0x24301000, CREATE_FIRST_MAP_LIST = 0x24302000,
+                   CREATE_SCROLL_PICKED = 0x24306000, CREATE_PICKED_LIST = 0x24307000;
+constexpr uint32_t CREATE_SCROLL_OPTIONS = 0x24600000, CREATE_OPTIONS_LIST = 0x24700000;
+// The start button's message (OnNetworkMessage's).
+constexpr uint32_t MAIN_MSG_START_SERVER = 0x2000029;
+// Notifications: a combo box's pick, a map line's drag (started, moved, dropped) and double click.
+constexpr uint32_t CONTROL_NOTIFY_PICKED = 0x400E000;
+// The styles: a combo box's items.
+constexpr uint32_t STYLE_COMBO_ITEM = 0x13;
+// The map lists: the lines shown, their step; the picked list's lines (pooled).
+constexpr uint32_t MAP_LIST_ROWS = 0xB, PICKED_MAP_LINES = 50;
+constexpr float MAP_LIST_STEP = 0.0336f;
+// The options list: the lines shown, their step.
+constexpr uint32_t OPTIONS_LIST_ROWS = 7;
+constexpr float OPTIONS_LIST_STEP = 0.04f;
+// The voice chat's codecs (GetVoiceCodecTextId 0 .. 7).
+constexpr int VOICE_CODECS = 8;
+// The map list presets' texts (in order, then their label), the list's label.
+constexpr uint32_t TEXT_PRESET_FIRST = 0x4EE8, PRESETS = 5;
+
+// A map list's scrolling: its scroll bar, its rows, its step, shown or hidden, the lines from the template's
+// place.
+void DescribeMapListScroll(S_ControlDesc *list, uint32_t scroll, uint32_t shown, I3D_frame *lineTemplate)
+{
+    AddDescMessage(list, 0, CONTROL_MSG_SET_VALUE, scroll);
+    AddDescMessage(list, 0, CONTROL_MSG_SET_VISIBLE, MAP_LIST_ROWS);
+    AddDescMessage(list, 0, CONTROL_MSG_SET_DOWN_STEP, 0, FloatBits(MAP_LIST_STEP));
+    AddDescMessage(list, 0, shown, 0);
+    auto *origin = static_cast<S_vector4 *>(_aligned_malloc(sizeof(S_vector4), 16));
+    if (origin)
+        std::memcpy(origin, &lineTemplate->GetPos(), sizeof(S_vector4));
+    AddDescMessage(list, 0, CONTROL_MSG_SET_ORIGIN, 0, reinterpret_cast<uintptr_t>(origin));
+}
+
+} // namespace
+
+void C_MainMenu::AddMapLineCallbacks(S_ControlDesc *line, uintptr_t self)
+{
+    AddDescMessage(line, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_13, self, Callback(&OnMapLineDoubleClick));
+    AddDescMessage(line, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0A, self, Callback(&OnMapLineDragStart));
+    AddDescMessage(line, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_08, self, Callback(&OnMapLineDragMove));
+    AddDescMessage(line, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_09, self, Callback(&OnMapLineDrop));
+}
+
+bool C_MainMenu::DescribeCreateServerScreen(S_ScreenDesc *desc, I3D_frame *model)
+{
+    m_startable = false;
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    AddScreenMessage(desc, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_SHOWN, self, Callback(&OnCreateServerShown));
+    AddScreenMessage(desc, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_HIDDEN, self, Callback(&OnCreateServerHidden));
+    S_ControlDesc *host = desc->AddControl(CONTROL_EDIT_BOX, "bhostname");
+    AddDescMessage(host, 0, CONTROL_MSG_SET_TEXT, STYLE_BUTTON, m_mpSettings->m_setup.serverName);
+    AddDescMessage(host, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0B, self, Callback(&OnHostNameChanged));
+    S_ControlDesc *style = desc->AddControl(CONTROL_SPIN, "style");
+    AddDescMessage(style, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CHANGED, self, Callback(&OnServerStyleChanged));
+    for (int type = 0; type < MP_GAME_TYPES; ++type)
+        AddDescMessage(style, 0, CONTROL_MSG_ADD_ITEM, static_cast<uint32_t>(GetGameTypeTextId(type)));
+    // (Each panel's result unchecked: one not described leaves the controls after it their places.)
+    DescribeMapsPanel(desc, model);
+    DescribeOptionsPanel(desc, model);
+    S_ControlDesc *voice = desc->AddControl(CONTROL_SPIN, "voice chat");
+    AddDescMessage(voice, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CHANGED, self, Callback(&OnServerOptionChanged));
+    for (int codec = 0; codec < VOICE_CODECS; ++codec)
+        AddDescMessage(voice, 0, CONTROL_MSG_ADD_ITEM, static_cast<uint32_t>(GetVoiceCodecTextId(codec)));
+    S_ControlDesc *start = AddButton(desc, "bstart", 0x935);
+    AddDescMessage(start, 0, CONTROL_MSG_DEACTIVATE, 0);
+    AddDescMessage(start, 0, FROM_SCREEN | MAIN_MSG_START_SERVER, 0);
+    AddMenuButton(desc, "bback", 0x936, MENU_MSG_BACK, 0);
+    AddText(desc, "text_screen", STYLE_TITLE, 0x92F);
+    AddText(desc, "text_hostname and style", STYLE_LABEL, 0x930);
+    AddText(desc, "text_available maps checklist", STYLE_LABEL, 0x932);
+    AddText(desc, "text_server options", STYLE_LABEL, 0x933);
+    AddText(desc, "text_voice chat", STYLE_LABEL, 0x947);
+    AddText(desc, "text_h&dversion", STYLE_VERSION, TEXT_VERSION);
+    AddText(desc, "text_server type", STYLE_LABEL, 0x94C);
+    S_ControlDesc *preset = desc->AddControl(CONTROL_COMBO_BOX, "maplist preset");
+    AddDescMessage(preset, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_PICKED, self, Callback(&OnMapPresetPicked));
+    AddDescMessage(preset, 0, CONTROL_MSG_SET_HEADER_TEXT_ID, STYLE_VALUE, 500);
+    for (uint32_t i = 0; i < PRESETS; ++i)
+        AddDescMessage(preset, 0, CONTROL_MSG_ADD_TEXT_ID, STYLE_COMBO_ITEM, TEXT_PRESET_FIRST + i);
+    AddText(desc, "text_maplist preset", STYLE_LABEL, 0x4EED);
+    AddText(desc, "text_maplist", STYLE_LABEL, 0x4EEE);
+    return true;
+}
+
+bool C_MainMenu::DescribeMapsPanel(S_ScreenDesc *desc, I3D_frame *model)
+{
+    I3D_frame *panel = AddFrame(C_str("MP_MAPS_PANEL"), FRAME_DUMMY, model, S_vector(0.0f, 0.0f, 0.0f));
+    if (!panel)
+        return false;
+    // The groups of the four game types' lines and of the picked ones.
+    I3D_frame *groups[MP_GAME_TYPES];
+    const char *const groupNames[MP_GAME_TYPES] = {"gr_mp_deathmatch", "gr_mp_zonegame", "gr_mp_hiddenmaps", "gr_mp_coopmaps"};
+    for (int i = 0; i < MP_GAME_TYPES; ++i)
+        groups[i] = AddFrame(C_str(groupNames[i]), FRAME_DUMMY, panel, S_vector(0.0f, 0.0f, 0.0f));
+    I3D_frame *picked = AddFrame(C_str("gr_mp_sel_list"), FRAME_DUMMY, panel, S_vector(0.0f, 0.0f, 0.0f));
+    I3D_frame *lineTemplate = model->FindChildFrame("bmap_A", FRAME_MASK_DUMMY);
+    I3D_frame *pickedTemplate = model->FindChildFrame("bmap_B", FRAME_MASK_DUMMY);
+    I3D_frame *mapsScroll = model->FindChildFrame("scroll00", FRAME_MASK_VISUAL);
+    I3D_frame *pickedScroll = model->FindChildFrame("scroll13", FRAME_MASK_VISUAL);
+    if (!mapsScroll || !pickedScroll || !lineTemplate || !pickedTemplate || !groups[0] || !groups[1] || !groups[2] ||
+        !groups[3] || !picked)
+        return false;
+    mapsScroll->LinkTo(panel, 1);
+    mapsScroll->Update();
+    pickedScroll->LinkTo(panel, 1);
+    pickedScroll->Update();
+    lineTemplate->SetOn(false);
+    lineTemplate->Update();
+    pickedTemplate->SetOn(false);
+    pickedTemplate->Update();
+    C_MpGameSetup &setup = m_mpSettings->m_setup;
+    S_ControlDesc *group = desc->AddControl(CONTROL_CONTROL_GROUP, "MP_MAPS_PANEL");
+    AddDescMessage(group->AddChild(CONTROL_SCROLL_BAR, "scroll00"), 0, CONTROL_MSG_SET_VALUE, CREATE_FIRST_MAP_LIST);
+    // Each game type's maps under its group (the line template moved there).
+    for (int i = 0; i < MP_GAME_TYPES; ++i) {
+        lineTemplate->LinkTo(groups[i], 1);
+        DescribeMapList(group, setup.maps[i], groups[i], lineTemplate);
+    }
+    AddDescMessage(group->AddChild(CONTROL_SCROLL_BAR, "scroll13"), 0, CONTROL_MSG_SET_VALUE, CREATE_PICKED_LIST);
+    pickedTemplate->LinkTo(picked, 1);
+    DescribePickedMapList(group, setup.maps[MP_GAME_TYPES - 1], picked, pickedTemplate);
+    return true;
+}
+
+void C_MainMenu::DescribeMapList(S_ControlDesc *panel, const S_MpMapGroup &maps, I3D_frame *group, I3D_frame *lineTemplate)
+{
+    S_ControlDesc *list = panel->AddChild(CONTROL_HIDING_LIST, group->GetShortName());
+    DescribeMapListScroll(list, CREATE_SCROLL_MAPS, CONTROL_MSG_HIDE, lineTemplate);
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    for (size_t i = 0; i < maps.maps.size(); ++i) {
+        const C_fstr name("MPMap%02d", static_cast<int>(i));
+        CloneFrame(name, group, lineTemplate);
+        S_ControlDesc *line = list->AddChild(CONTROL_BUTTON, name.c_str());
+        AddMapLineCallbacks(line, self);
+        AddDescMessage(line, 0, CONTROL_MSG_SET_TEXT, STYLE_BUTTON, C_str(maps.maps[i]->GetName()));
+        AddDescMessage(line, 0, CONTROL_MSG_SET_INDEX, static_cast<uint32_t>(i));
+    }
+    AddDescMessage(list, 0, CONTROL_MSG_REFRESH, 0);
+}
+
+void C_MainMenu::DescribePickedMapList(S_ControlDesc *panel, const S_MpMapGroup &, I3D_frame *group, I3D_frame *lineTemplate)
+{
+    S_ControlDesc *list = panel->AddChild(CONTROL_POOL_LIST, group->GetShortName());
+    DescribeMapListScroll(list, CREATE_SCROLL_PICKED, CONTROL_MSG_SHOW, lineTemplate);
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    for (uint32_t i = 0; i < PICKED_MAP_LINES; ++i) {
+        const C_fstr name("MPMap%02d", static_cast<int>(i));
+        CloneFrame(name, group, lineTemplate);
+        AddMapLineCallbacks(list->AddChild(CONTROL_BUTTON, name.c_str()), self);
+    }
+    AddDescMessage(list, 0, CONTROL_MSG_HIDE_ALL, 0);
+    AddDescMessage(list, 0, CONTROL_MSG_REFRESH, 0);
+}
+
+bool C_MainMenu::DescribeOptionsPanel(S_ScreenDesc *desc, I3D_frame *model)
+{
+    I3D_frame *group = AddFrame(C_str("gr_setings"), FRAME_DUMMY, model, S_vector(0.0f, 0.0f, 0.0f));
+    I3D_frame *yesNoTemplate = model->FindChildFrame("yes_no_tmpl", FRAME_MASK_DUMMY);
+    I3D_frame *numberTemplate = model->FindChildFrame("bshort00", FRAME_MASK_DUMMY);
+    I3D_frame *inputTemplate = model->FindChildFrame("binput", FRAME_MASK_DUMMY);
+    I3D_frame *comboTemplate = model->FindChildFrame("combo_tmpl", FRAME_MASK_DUMMY);
+    if (!group || !yesNoTemplate || !numberTemplate || !inputTemplate || !comboTemplate)
+        return false;
+    yesNoTemplate->SetOn(false);
+    numberTemplate->SetOn(false);
+    inputTemplate->SetOn(false);
+    comboTemplate->SetOn(false);
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    // The server's kind: internet, dedicated (unchecked; changes: OnServerOptionChanged).
+    for (const auto &check : {std::make_pair("internet server", 0x94Du), std::make_pair("dedicated server", 0x94Eu)}) {
+        S_ControlDesc *box = desc->AddControl(CONTROL_HIGHLIGHT_CHECK, check.first);
+        AddDescMessage(box, 0, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON, check.second);
+        AddDescMessage(box, 0, CONTROL_MSG_SET_CHECKED, 0);
+        AddDescMessage(box, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CHANGED, self, Callback(&OnServerOptionChanged));
+    }
+    AddDescMessage(desc->AddControl(CONTROL_SCROLL_BAR, "scroll01"), 0, CONTROL_MSG_SET_VALUE, CREATE_OPTIONS_LIST);
+    S_ControlDesc *list = desc->AddControl(CONTROL_HIDING_LIST, "gr_setings");
+    AddDescMessage(list, 0, CONTROL_MSG_SET_VALUE, CREATE_SCROLL_OPTIONS);
+    AddDescMessage(list, 0, CONTROL_MSG_SET_VISIBLE, OPTIONS_LIST_ROWS);
+    AddDescMessage(list, 0, CONTROL_MSG_SET_DOWN_STEP, 0, FloatBits(OPTIONS_LIST_STEP));
+    auto *origin = static_cast<S_vector4 *>(_aligned_malloc(sizeof(S_vector4), 16));
+    if (origin)
+        std::memcpy(origin, &numberTemplate->GetPos(), sizeof(S_vector4));
+    AddDescMessage(list, 0, CONTROL_MSG_SET_ORIGIN, 0, reinterpret_cast<uintptr_t>(origin));
+
+    // A row: a copy of its template under the group, its line in the list, its label.
+    const auto row = [&](int type, const char *name, I3D_frame *lineTemplate, uint32_t text) {
+        CloneFrame(C_str(name), group, lineTemplate);
+        S_ControlDesc *line = list->AddChild(type, name);
+        AddDescMessage(line, 0, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON, text);
+        return line;
+    };
+    // A number: digits only, its default, its range and length; edited: OnServerOptionChanged.
+    const auto number = [&](const char *name, uint32_t text, uint32_t value, int min, uint32_t max, uint32_t length) {
+        S_ControlDesc *line = row(CONTROL_TITLED_EDIT, name, numberTemplate, text);
+        AddDescMessage(line, 0, CONTROL_MSG_SET_DIGITS_ONLY, 1);
+        AddDescMessage(line, 0, CONTROL_MSG_SET_NUMBER, STYLE_BUTTON, value);
+        AddDescMessage(line, 0, CONTROL_MSG_SET_RANGE, static_cast<uint32_t>(min), max);
+        AddDescMessage(line, 0, CONTROL_MSG_SET_MAX_LENGTH, length);
+        AddDescMessage(line, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0B, self, Callback(&OnServerOptionChanged));
+    };
+    // A yes / no pair.
+    const auto yesNo = [&](const char *name, uint32_t text) {
+        S_ControlDesc *line = row(CONTROL_CHECK_GROUP, name, yesNoTemplate, text);
+        AddDescMessage(line, 0, CONTROL_MSG_FACE_FRONT, 0);
+        AddDescMessage(line, 0, CONTROL_MSG_SET_MARGIN, 0);
+        AddDescMessage(line, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CHANGED, self, Callback(&OnServerOptionChanged));
+    };
+    S_ControlDesc *difficulty = row(CONTROL_TITLED_COMBO, "coop difficulty", comboTemplate, 0x4EF2);
+    AddDescMessage(difficulty, 0, CONTROL_MSG_SET_HEADER_TEXT_ID, STYLE_VALUE, 0x4EFE);
+    for (uint32_t text = 0x4EFC; text <= 0x4EFF; ++text)
+        AddDescMessage(difficulty, 0, CONTROL_MSG_ADD_TEXT_ID, STYLE_COMBO_ITEM, text);
+    AddDescMessage(difficulty, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_PICKED, self, Callback(&OnServerOptionChanged));
+    number("player num", 0x93C, 32, 2, 32, 3);
+    yesNo("Team Respawn", 0x4EF3);
+    number("Respawn Num", 0x4EF5, 555, -1, 99, 3);
+    number("Frag Limit", 0x93D, 500, 0, 999, 4);
+    number("Round Limit", 0x93E, 10, 1, 99, 3);
+    number("Round Count", 0x93F, 5, 1, 999, 4);
+    number("WarmUp Time", 0x940, 10, 0, 99, 3);
+    yesNo("Allow respawn", 0x942);
+    number("Respawn Time", 0x941, 20, 5, 99, 3);
+    number("Spawn Protection", 0x948, 5, 0, 15, 3);
+    number("Self Damage", 0x949, 100, 0, 999, 4);
+    yesNo("Friendly Fire", 0x943);
+    yesNo("Auto Team Balence", 0x944);
+    yesNo("3person view", 0x945);
+    yesNo("yn_crosshair", 0x4EF4);
+    // The password (no blanks, '>', '-', '"'); the port.
+    CloneFrame(C_str("bpassword"), group, inputTemplate);
+    S_ControlDesc *password = list->AddChild(CONTROL_TITLED_EDIT, "bpassword");
+    AddDescMessage(password, 0, CONTROL_MSG_SET_FORBIDDEN, 0, reinterpret_cast<uintptr_t>(PASSWORD_FORBIDDEN_CHARS));
+    AddDescMessage(password, 0, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON, 0x946);
+    AddDescMessage(password, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0B, self, Callback(&OnServerOptionChanged));
+    S_ControlDesc *port = row(CONTROL_TITLED_EDIT, "bport", inputTemplate, 0x94A);
+    AddDescMessage(port, 0, CONTROL_MSG_SET_DIGITS_ONLY, 1);
+    AddDescMessage(port, 0, CONTROL_MSG_SET_RANGE, 0x400, 0xFFFA);
+    AddDescMessage(port, 0, CONTROL_MSG_SET_MAX_LENGTH, 5);
+    AddDescMessage(port, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0B, self, Callback(&OnServerOptionChanged));
+    AddDescMessage(list, 0, CONTROL_MSG_REFRESH, 0);
+    return true;
+}

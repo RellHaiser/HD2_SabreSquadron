@@ -21,6 +21,7 @@ struct S_MenuDesc;
 struct S_ScreenDesc;
 struct S_ServerEntry;
 struct S_ServerStatus;
+struct S_MpMapGroup;
 
 // The main menu's screens (the ids' top 6 bits; index 0 is the message box).
 enum : uint32_t {
@@ -176,7 +177,50 @@ protected:
     static bool OnMoviePick(void *menu, void *argument, C_Control *control, uint32_t notification,
                             uint32_t value);            // 0x00615470
     bool DescribeBrowserScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00634050
+    // The create server screen: shown / hidden: OnCreateServerShown / OnCreateServerHidden; the host's name
+    // (OnHostNameChanged), the game type (OnServerStyleChanged), the maps panel, the options panel, the voice
+    // chat's codec, start (off; MAIN_MSG_START_SERVER), back, the texts, the map list presets
+    // (OnMapPresetPicked). Not startable yet. True.
     bool DescribeCreateServerScreen(S_ScreenDesc *desc, I3D_frame *model);  // 0x00628610
+    // The maps panel: its groups (one per game type, the picked maps'), the templates bmap_A / bmap_B and the
+    // scroll bars moved there; each game type's maps (DescribeMapList), the picked ones. A frame missing: false.
+    bool DescribeMapsPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x00628f80
+    // A game type's maps: a hiding list (the group's name; hidden) of a line per map ("MPMap%02d": its name,
+    // its index; dragged and double-clicked: the map line callbacks).
+    void DescribeMapList(S_ControlDesc *panel, const S_MpMapGroup &maps, I3D_frame *group,
+                         I3D_frame *lineTemplate);   // 0x00629bc0
+    // The picked maps: a pool list (shown) of 50 lines, all hidden. (`maps` unused: DescribeMapList's signature; the
+    // original passes the cooperative maps.)
+    void DescribePickedMapList(S_ControlDesc *panel, const S_MpMapGroup &maps, I3D_frame *group,
+                               I3D_frame *lineTemplate);   // 0x00629740
+    // (The two lists' helper: a map line's callbacks: double click, drag started, moved, dropped.)
+    static void AddMapLineCallbacks(S_ControlDesc *line, uintptr_t self);
+    // The options panel: the internet / dedicated check boxes, its scroll bar, its list of rows (copies of the
+    // templates yes_no_tmpl, bshort00, binput, combo_tmpl under gr_setings): the cooperative difficulty, the
+    // numbers (players, lives, limits, times), the yes / no rules, the password, the port. A frame missing:
+    // false.
+    bool DescribeOptionsPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x0062a060
+    // (The create server screen's callbacks: a later sub-part.)
+    static bool OnCreateServerShown(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                    uint32_t value);    // 0x0062c2a0
+    static bool OnCreateServerHidden(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                     uint32_t value);   // 0x0062c290
+    static bool OnHostNameChanged(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                  uint32_t value);      // 0x0062ca80
+    static bool OnServerStyleChanged(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                     uint32_t value);   // 0x0062cd50
+    static bool OnServerOptionChanged(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                      uint32_t value);  // 0x0062d490
+    static bool OnMapPresetPicked(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                  uint32_t value);      // 0x0062c970
+    static bool OnMapLineDoubleClick(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                     uint32_t value);   // 0x0062ca10
+    static bool OnMapLineDragStart(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                   uint32_t value);     // 0x0062e870
+    static bool OnMapLineDragMove(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                  uint32_t value);      // 0x0062e9f0
+    static bool OnMapLineDrop(void *menu, void *argument, C_Control *control, uint32_t notification,
+                              uint32_t value);          // 0x0062eb60
     // The password screen (over the browser: a server's password; over the options: the parental lock's code):
     // the model placed as the quit question's; the question, the box (no blanks, '>', '-', '"'; Return and
     // Escape: OnPasswordInput), yes and no (the same), the two other boxes hidden. True.
@@ -275,7 +319,7 @@ protected:
     int m_mission = -1;                                 // +0x208 the missions screen's pick (through the campaigns)
     int m_progress = -1;                                // +0x20C the missions shown up to (100: all)
     bool m_operationPicked = false;                     // +0x210 an operation's line picked (a mission's clears it)
-    bool unknown212 = false;                            // +0x212
+    bool m_startable = false;                           // +0x212 the create server screen's start allowed
     C_str m_profileName;                                // +0x213 the profile picked (unaligned in the original)
     int unknown218 = 0;                                 // +0x218
     S_ServerEntry *m_server = nullptr;                  // +0x21C the browser's server picked

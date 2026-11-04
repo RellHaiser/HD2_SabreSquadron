@@ -199,6 +199,18 @@ int C_NetGame::QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *), S
     g_giCallback = callback;
     return 1;
 }
+// (Part 9h-xiii: the create server screen's callbacks (a later sub-part's); the codecs' texts.)
+MM_CALLBACK(OnCreateServerShown)
+MM_CALLBACK(OnCreateServerHidden)
+MM_CALLBACK(OnHostNameChanged)
+MM_CALLBACK(OnServerStyleChanged)
+MM_CALLBACK(OnServerOptionChanged)
+MM_CALLBACK(OnMapPresetPicked)
+MM_CALLBACK(OnMapLineDoubleClick)
+MM_CALLBACK(OnMapLineDragStart)
+MM_CALLBACK(OnMapLineDragMove)
+MM_CALLBACK(OnMapLineDrop)
+int GetVoiceCodecTextId(int codec) { return 0xB40 + codec; }
 bool C_PlayerProfile::Save()
 {
     GfLog("save profile");
@@ -221,7 +233,6 @@ bool C_PlayerProfile::GetLastSaveText(C_str *mode, C_str *mission, C_str *date) 
         return true;                                                                                              \
     }
 MM_DESCRIBE(DescribeBrowserScreen, "browser")
-MM_DESCRIBE(DescribeCreateServerScreen, "create")
 MM_DESCRIBE(DescribeConnectScreen, "connect")
 MM_DESCRIBE(DescribeAddServerScreen, "addserver")
 
@@ -275,7 +286,8 @@ struct S_MainMenuResults {
          ciDescribe = true, ciShown = true, ciPick = true,
          pwDescribe = true, pwServer = true, pwLock = true,
          flDescribe = true, flShown = true, flAccept = true, flHelpers = true,
-         giDescribe = true, giRefresh = true, giShow = true, giStatus = true;
+         giDescribe = true, giRefresh = true, giShow = true, giStatus = true,
+         csDescribe = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -2051,6 +2063,275 @@ void MainMenuTest(I3D_scene *scene)
         }
     }
 
+    // --- (part 9h-xiii) the create server screen's description: the maps panel, the options panel ---
+    {
+        C_MainMenu m;
+        g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+        const char *const callbacks[][2] = {
+            {"OnCreateServerShown", "shown"}, {"OnCreateServerHidden", "hidden"}, {"OnHostNameChanged", "host"},
+            {"OnServerStyleChanged", "style"}, {"OnServerOptionChanged", "option"}, {"OnMapPresetPicked", "preset"},
+            {"OnMapLineDoubleClick", "double"}, {"OnMapLineDragStart", "drag"}, {"OnMapLineDragMove", "move"},
+            {"OnMapLineDrop", "drop"}};
+        const ControlCallback functions[] = {
+            &C_MainMenu::OnCreateServerShown, &C_MainMenu::OnCreateServerHidden, &C_MainMenu::OnHostNameChanged,
+            &C_MainMenu::OnServerStyleChanged, &C_MainMenu::OnServerOptionChanged, &C_MainMenu::OnMapPresetPicked,
+            &C_MainMenu::OnMapLineDoubleClick, &C_MainMenu::OnMapLineDragStart, &C_MainMenu::OnMapLineDragMove,
+            &C_MainMenu::OnMapLineDrop};
+        for (int i = 0; i < 10; ++i)
+            g_csNames[reinterpret_cast<uintptr_t>(functions[i])] = callbacks[i][1];
+        C_MpMenuSettings settings;
+        m.m_mpSettings = &settings;
+        settings.m_setup.serverName = "Host";
+        for (auto &group : settings.m_setup.maps) {
+            for (C_MpMap *map : group.maps)
+                delete map;
+            group.maps.clear();
+        }
+        settings.m_setup.maps[0].maps = {new C_MpMap(C_str("dm1"), C_str("d1")), new C_MpMap(C_str("dm2"), C_str("d2"))};
+        settings.m_setup.maps[3].maps = {new C_MpMap(C_str("coop1"), C_str("c1"))};
+        S_MrObj *model = MsFrame("csmodel");
+        const char *const children[][2] = {{"bmap_A", "csmapa"},     {"bmap_B", "csmapb"},     {"scroll00", "cssc0"},
+                                           {"scroll13", "cssc13"},   {"yes_no_tmpl", "csyn"},  {"bshort00", "csnum"},
+                                           {"binput", "csinput"},    {"combo_tmpl", "cscombo"}};
+        std::map<std::string, S_MrObj *> frames;
+        for (const auto &child : children) {
+            frames[child[0]] = MsFrame(child[1]);
+            g_msChildren[{model, child[0]}] = frames[child[0]];
+        }
+        As<I3D_frame>(frames["bmap_A"])->m_localMatrix(3) = S_vector(0.5f, 0.25f, 0.0f);
+        As<I3D_frame>(frames["bmap_B"])->m_localMatrix(3) = S_vector(0.75f, 0.25f, 0.0f);
+        As<I3D_frame>(frames["bshort00"])->m_localMatrix(3) = S_vector(0.125f, -0.5f, 0.0f);
+        void *const oldSetPos = g_msFrameVt[0x08 / 4];
+        g_msFrameVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+        const auto Is = [](const std::string &got, const std::string &want) {
+            if (got != want)
+                std::printf("CREATE %s\nCREATE expected %s\n", got.c_str(), want.c_str());
+            return got == want;
+        };
+        // A tree with its origins and the password's characters shown as words (their values checked apart).
+        const auto masked = [](std::string tree) {
+            for (const char *key : {"100006b 0 ", "100009b 0 "}) {
+                for (size_t at = tree.find(key); at != std::string::npos; at = tree.find(key, at + 1)) {
+                    const size_t from = at + std::strlen(key), to = tree.find(' ', from);
+                    tree.replace(from, to - from, key[5] == '6' ? "ORIGIN" : "CHARS");
+                }
+            }
+            return tree;
+        };
+        const auto origin = [](const S_ControlDesc *list, float x, float y) {
+            for (const S_ControlMessage &message : list->messages)
+                if (message.id == CONTROL_MSG_SET_ORIGIN) {
+                    const auto *v = reinterpret_cast<const S_vector *>(message.value2);
+                    return v && v->x == x && v->y == y && v->z == 0.0f;
+                }
+            return false;
+        };
+        // The dummies made: the panel, the groups (named: their lists take the names), the options' group.
+        const auto dummies = [] {
+            const char *const names[] = {"cspanel",        "gr_mp_deathmatch", "gr_mp_zonegame", "gr_mp_hiddenmaps",
+                                         "gr_mp_coopmaps", "gr_mp_sel_list",   "gr_setings"};
+            g_mrMade[FRAME_DUMMY].clear();
+            for (const char *name : names) {
+                S_MrObj *frame = MsFrame(name);
+                As<I3D_frame>(frame)->m_name = name;
+                As<I3D_frame>(frame)->m_nameOffset = 0;
+                g_mrMade[FRAME_DUMMY].push_back(frame);
+            }
+            g_mrClones.clear();
+            for (int i = 0; i < 80; ++i)
+                g_mrClones.push_back(As<I3D_frame>(MsFrame(strdup(CmText("csc%d", i).c_str()))));
+        };
+        const std::string cb4 = "0 1000007 4013000 self double 0 1000007 400a000 self drag 0 1000007 4008000 self move"
+                                " 0 1000007 4009000 self drop";
+        const auto mapList = [&](const char *name, uint32_t id, const std::vector<const char *> &maps) {
+            std::string t = CmText("23 %s %x: 0 100000b 24301000 0 0 1000028 b 0 0 100002a 0 3d09a027 0 1000004 0 0 0 100006b 0 "
+                                   "ORIGIN 0 200002c 0 0", name, id);
+            if (!maps.empty()) {
+                t += " {";
+                for (size_t i = 0; i < maps.size(); ++i)
+                    t += CmText(" 14 MPMap%02d %x: %s 0 1000014 d 0 '%s' 0 1000009 %x 0;", static_cast<int>(i),
+                                id + 0x10 * static_cast<uint32_t>(i + 1), cb4.c_str(), maps[i], static_cast<uint32_t>(i));
+                t += " }";
+            }
+            return t + ";";
+        };
+        std::string picked = "26 gr_mp_sel_list 24307000: 0 100000b 24306000 0 0 1000028 b 0 0 100002a 0 3d09a027 0 1000003 0 0 0"
+                             " 100006b 0 ORIGIN 0 2000085 0 0 0 200002c 0 0 {";
+        for (int i = 0; i < 50; ++i)
+            picked += CmText(" 14 MPMap%02d %x: %s;", i, 0x24307010 + 0x10 * i, cb4.c_str());
+        picked += " };";
+        const std::string panel = "5 MP_MAPS_PANEL 24300000: { 8 scroll00 24301000: 0 100000b 24302000 0; " +
+                                  mapList("gr_mp_deathmatch", 0x24302000, {"dm1", "dm2"}) + " " +
+                                  mapList("gr_mp_zonegame", 0x24303000, {}) + " " + mapList("gr_mp_hiddenmaps", 0x24304000, {}) +
+                                  " " + mapList("gr_mp_coopmaps", 0x24305000, {"coop1"}) +
+                                  " 8 scroll13 24306000: 0 100000b 24307000 0; " + picked + " };";
+        const auto number = [](const char *name, uint32_t id, uint32_t text, uint32_t value, uint32_t min, uint32_t max,
+                               uint32_t length) {
+            return CmText(" e %s %x: 0 1000015 d %x 0 100006f 1 0 0 1000078 d %x 0 10000a0 %x %x 0 100006e %x 0 0 1000007 400b000"
+                          " self option;", name, id, text, value, min, max, length);
+        };
+        const auto yesNo = [](const char *name, uint32_t id, uint32_t text) {
+            return CmText(" 27 %s %x: 0 1000015 d %x 0 1000099 0 0 0 2000073 0 0 0 1000007 4010000 self option;", name, id, text);
+        };
+        const std::string options =
+            "23 gr_setings 24700000: 0 100000b 24600000 0 0 1000028 7 0 0 100002a 0 3d23d70a 0 100006b 0 ORIGIN 0 200002c 0 0 {"
+            " 28 coop difficulty 24701000: 0 1000015 d 4ef2 0 1000081 c 4efe 0 1000017 13 4efc 0 1000017 13 4efd 0 1000017 13"
+            " 4efe 0 1000017 13 4eff 0 1000007 400e000 self option;" +
+            number("player num", 0x24702000, 0x93C, 0x20, 2, 0x20, 3) + yesNo("Team Respawn", 0x24703000, 0x4EF3) +
+            number("Respawn Num", 0x24704000, 0x4EF5, 0x22B, 0xFFFFFFFF, 0x63, 3) +
+            number("Frag Limit", 0x24705000, 0x93D, 0x1F4, 0, 0x3E7, 4) + number("Round Limit", 0x24706000, 0x93E, 0xA, 1, 0x63, 3) +
+            number("Round Count", 0x24707000, 0x93F, 5, 1, 0x3E7, 4) + number("WarmUp Time", 0x24708000, 0x940, 0xA, 0, 0x63, 3) +
+            yesNo("Allow respawn", 0x24709000, 0x942) + number("Respawn Time", 0x2470a000, 0x941, 0x14, 5, 0x63, 3) +
+            number("Spawn Protection", 0x2470b000, 0x948, 5, 0, 0xF, 3) +
+            number("Self Damage", 0x2470c000, 0x949, 0x64, 0, 0x3E7, 4) + yesNo("Friendly Fire", 0x2470d000, 0x943) +
+            yesNo("Auto Team Balence", 0x2470e000, 0x944) + yesNo("3person view", 0x2470f000, 0x945) +
+            yesNo("yn_crosshair", 0x24710000, 0x4EF4) +
+            " e bpassword 24711000: 0 100009b 0 CHARS 0 1000015 d 946 0 1000007 400b000 self option;"
+            " e bport 24712000: 0 1000015 d 94a 0 100006f 1 0 0 10000a0 400 fffa 0 100006e 5 0 0 1000007 400b000 self option; };";
+        // The screen's own controls after the panels, from `first` (their ids by their places).
+        const auto tail = [](uint32_t first) {
+            const char *const trees[] = {
+                "10 voice chat %x: 0 1000007 4010000 self option 0 1000067 b40 0 0 1000067 b41 0 0 1000067 b42 0 0 1000067 b43 0"
+                " 0 1000067 b44 0 0 1000067 b45 0 0 1000067 b46 0 0 1000067 b47 0;",
+                "14 bstart %x: 0 1000015 d 935 0 1000001 0 0 0 6001029 0 0;", "14 bback %x: 0 1000015 d 936 0 6001003 0 0;",
+                "13 text_screen %x: 0 1000015 a 92f;", "13 text_hostname and style %x: 0 1000015 b 930;",
+                "13 text_available maps checklist %x: 0 1000015 b 932;", "13 text_server options %x: 0 1000015 b 933;",
+                "13 text_voice chat %x: 0 1000015 b 947;", "13 text_h&dversion %x: 0 1000015 28 7d6;",
+                "13 text_server type %x: 0 1000015 b 94c;",
+                "11 maplist preset %x: 0 1000007 400e000 self preset 0 1000081 c 1f4 0 1000017 13 4ee8 0 1000017 13 4ee9"
+                " 0 1000017 13 4eea 0 1000017 13 4eeb 0 1000017 13 4eec;",
+                "13 text_maplist preset %x: 0 1000015 b 4eed;", "13 text_maplist %x: 0 1000015 b 4eee;"};
+            std::vector<std::string> out;
+            for (size_t i = 0; i < 13; ++i)
+                out.push_back(CmText(trees[i], first + 0x100000 * static_cast<uint32_t>(i)));
+            return out;
+        };
+        const std::string head0 = "3 bhostname 24100000: 0 1000014 d 0 'Host' 0 1000007 400b000 self host;";
+        const std::string head1 = "10 style 24200000: 0 1000007 4010000 self style 0 1000067 1b58 0 0 1000067 1b59 0 0 1000067 1b5a 0"
+                                  " 0 1000067 1b5b 0;";
+        const auto checks = [](uint32_t first) {
+            return std::vector<std::string>{
+                CmText("24 internet server %x: 0 1000015 d 94d 0 100006d 0 0 0 1000007 4010000 self option;", first),
+                CmText("24 dedicated server %x: 0 1000015 d 94e 0 100006d 0 0 0 1000007 4010000 self option;", first + 0x100000),
+                CmText("8 scroll01 %x: 0 100000b 24700000 0;", first + 0x200000)};
+        };
+        const auto trees = [&](const S_ScreenDesc &d) {
+            std::vector<std::string> out;
+            for (const S_ControlDesc *c : d.controls)
+                out.push_back(masked(CsTree(c)));
+            return out;
+        };
+        const auto joined = [](const std::vector<std::string> &v) {
+            std::string s;
+            for (const std::string &x : v)
+                s += x + "\n";
+            return s;
+        };
+        {
+            // All there: the controls, the panels' lists and rows, the frames made, moved and copied.
+            bool ok = true;
+            dummies();
+            m.m_startable = true;
+            S_ScreenDesc d("create server", "create server", 9u << 26);
+            g_gfLog.clear();
+            ok &= m.DescribeCreateServerScreen(&d, As<I3D_frame>(model)) && !m.m_startable && d.messages.size() == 2 &&
+                  Is(CsMessage(d.messages[0]), "0 1000007 400d000 self shown") &&
+                  Is(CsMessage(d.messages[1]), "0 1000007 400c000 self hidden");
+            std::vector<std::string> want = {head0, head1, panel};
+            for (const std::string &x : checks(0x24400000))
+                want.push_back(x);
+            want.push_back(options);
+            for (const std::string &x : tail(0x24800000))
+                want.push_back(x);
+            ok &= Is(joined(trees(d)), joined(want));
+            if (d.controls.size() == 20) {
+                const S_ControlDesc *mapsPanel = d.controls[2];
+                ok &= mapsPanel->children.size() == 7 && origin(mapsPanel->children[1], 0.5f, 0.25f) &&
+                      origin(mapsPanel->children[4], 0.5f, 0.25f) && origin(mapsPanel->children[6], 0.75f, 0.25f) &&
+                      origin(d.controls[6], 0.125f, -0.5f) && d.controls[6]->children.size() == 18 &&
+                      std::string(reinterpret_cast<const char *>(d.controls[6]->children[16]->messages[0].value2)) == " \t>-\"";
+            } else {
+                ok = false;
+            }
+            const std::string log = Join(g_gfLog);
+            ok &= GmInOrder(log, {"cspanel 38 csmodel 0", "gr_mp_deathmatch 38 cspanel 0", "gr_mp_sel_list 38 cspanel 0",
+                                  "csmodel 48 bmap_A 20", "csmodel 48 bmap_B 20", "csmodel 48 scroll00 1", "csmodel 48 scroll13 1",
+                                  "cssc0 38 cspanel 1", "cssc0 24", "cssc13 38 cspanel 1", "cssc13 24", "csmapa on 0", "csmapa 24",
+                                  "csmapb on 0", "csmapb 24", "csmapa 38 gr_mp_deathmatch 1", "clone tree csmapa 0",
+                                  "csc0 34 MPMap00", "csc0 38 gr_mp_deathmatch 0", "csmapa 38 gr_mp_zonegame 1",
+                                  "csmapa 38 gr_mp_hiddenmaps 1", "csmapa 38 gr_mp_coopmaps 1", "csc2 38 gr_mp_coopmaps 0",
+                                  "csmapb 38 gr_mp_sel_list 1", "clone tree csmapb 0", "csc52 38 gr_mp_sel_list 0",
+                                  "gr_setings 38 csmodel 0", "csmodel 48 yes_no_tmpl 20", "csmodel 48 bshort00 20",
+                                  "csmodel 48 binput 20", "csmodel 48 combo_tmpl 20", "csyn on 0", "csnum on 0", "csinput on 0",
+                                  "cscombo on 0", "clone tree cscombo 0", "csc53 34 coop difficulty",
+                                  "clone tree csnum 0", "csc54 34 player num", "clone tree csyn 0", "csc55 34 Team Respawn",
+                                  "clone tree csinput 0", "csc69 34 bpassword", "clone tree csinput 0", "csc70 34 bport"});
+            // The frames made at the origin.
+            for (const char *frame : {"cspanel", "gr_mp_deathmatch", "gr_mp_zonegame", "gr_mp_hiddenmaps", "gr_mp_coopmaps",
+                                      "gr_mp_sel_list", "gr_setings"})
+                ok &= GmInOrder(log, {CmText("%s 8 (0 0 0)", frame)});
+            // Each panel alone: true.
+            dummies();
+            S_ScreenDesc d5("create server", "create server", 9u << 26);
+            ok &= m.DescribeMapsPanel(&d5, As<I3D_frame>(model)) && d5.controls.size() == 1;
+            dummies();
+            S_ScreenDesc d6("create server", "create server", 9u << 26);
+            ok &= m.DescribeOptionsPanel(&d6, As<I3D_frame>(model)) && d6.controls.size() == 4;
+            WM(r.csDescribe, ok);
+        }
+        {
+            // A template missing: its panel not described (false), the controls after it take its places.
+            bool ok = true;
+            dummies();
+            g_msChildren.erase({model, "bmap_B"});
+            S_ScreenDesc d("create server", "create server", 9u << 26);
+            ok &= m.DescribeMapsPanel(&d, As<I3D_frame>(model)) == false && d.controls.empty();
+            dummies();
+            S_ScreenDesc d2("create server", "create server", 9u << 26);
+            ok &= m.DescribeCreateServerScreen(&d2, As<I3D_frame>(model));
+            std::vector<std::string> want = {head0, head1};
+            for (const std::string &x : checks(0x24300000))
+                want.push_back(x);
+            want.push_back("23 gr_setings 24600000: 0 100000b 24600000 0 0 1000028 7 0 0 100002a 0 3d23d70a 0 100006b 0 ORIGIN"
+                           " 0 200002c 0 0 {" + options.substr(options.find(" 28 coop difficulty 24701000")));
+            ok &= trees(d2).size() == 19;
+            g_msChildren[{model, "bmap_B"}] = frames["bmap_B"];
+            g_msChildren.erase({model, "combo_tmpl"});
+            dummies();
+            S_ScreenDesc d3("create server", "create server", 9u << 26);
+            ok &= m.DescribeOptionsPanel(&d3, As<I3D_frame>(model)) == false && d3.controls.empty();
+            dummies();
+            S_ScreenDesc d4("create server", "create server", 9u << 26);
+            ok &= m.DescribeCreateServerScreen(&d4, As<I3D_frame>(model));
+            want = {head0, head1, panel};
+            for (const std::string &x : tail(0x24400000))
+                want.push_back(x);
+            ok &= Is(joined(trees(d4)), joined(want));
+            g_msChildren[{model, "combo_tmpl"}] = frames["combo_tmpl"];
+            // Each other frame missing alone: false.
+            for (const char *missing : {"scroll00", "scroll13", "bmap_A"}) {
+                g_msChildren.erase({model, missing});
+                dummies();
+                S_ScreenDesc d7("create server", "create server", 9u << 26);
+                ok &= !m.DescribeMapsPanel(&d7, As<I3D_frame>(model)) && d7.controls.empty();
+                g_msChildren[{model, missing}] = frames[missing];
+            }
+            for (const char *missing : {"yes_no_tmpl", "bshort00", "binput"}) {
+                g_msChildren.erase({model, missing});
+                dummies();
+                S_ScreenDesc d8("create server", "create server", 9u << 26);
+                ok &= !m.DescribeOptionsPanel(&d8, As<I3D_frame>(model)) && d8.controls.empty();
+                g_msChildren[{model, missing}] = frames[missing];
+            }
+            WM(r.csDescribe, ok);
+        }
+        g_msFrameVt[0x08 / 4] = oldSetPos;
+        g_mrMade.erase(FRAME_DUMMY);
+        m.m_frames.clear();
+        m.m_models.clear();
+        m.m_mpSettings = nullptr;
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -2072,7 +2353,10 @@ void MainMenuTest(I3D_scene *scene)
         g_mrMade[FRAME_MODEL] = std::deque<S_MrObj *>(models.begin(), models.end());
         // (The missions screen's two groups (no templates: not described further); the options screen's group frame:
         // the real handler finds no buttons.)
-        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc"), MsFrame("mmgs"), MsFrame("mmgro"), MsFrame("mmgci")};
+        // (And the create server screen's seven: its panels' groups (no templates: not described further).)
+        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc"), MsFrame("mmgs"), MsFrame("mmgro"), MsFrame("mmgci"),  MsFrame("mmcs1"),
+                                 MsFrame("mmcs2"), MsFrame("mmcs3"), MsFrame("mmcs4"), MsFrame("mmcs5"),   MsFrame("mmcs6"),
+                                 MsFrame("mmcs7")};
         g_cacheLoads.clear();
         g_menuScreens.clear();
         g_gfLog.clear();
@@ -2082,7 +2366,7 @@ void MainMenuTest(I3D_scene *scene)
                                                         "multiplayer menu", "create server", "password", "server filters",
                                                         "gameinfo", "confirm", "password"});
         const std::string log = Join(g_gfLog);
-        ok &= GmInOrder(log, {"scan", "describe browser 20000000", "describe create 24000000",
+        ok &= GmInOrder(log, {"scan", "describe browser 20000000",
                               "describe connect 34000000",
                               "describe addserver 38000000"}) &&
               log.find("describe ", log.find("describe addserver") + 1) == std::string::npos;
@@ -2106,7 +2390,9 @@ void MainMenuTest(I3D_scene *scene)
         m.m_screens = {&box};
         m.m_models.clear();
         g_mrMade[FRAME_MODEL] = std::deque<S_MrObj *>(models.begin(), models.end());
-        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc2"), MsFrame("mmgs2"), MsFrame("mmgro2"), MsFrame("mmgci2")};
+        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc2"), MsFrame("mmgs2"), MsFrame("mmgro2"), MsFrame("mmgci2"), MsFrame("mmcs8"),
+                                 MsFrame("mmcs9"), MsFrame("mmcs10"), MsFrame("mmcs11"), MsFrame("mmcs12"), MsFrame("mmcs13"),
+                                 MsFrame("mmcs14")};
         g_cacheFailName = "change_profile";
         g_menuScreens.clear();
         g_gfLog.clear();
@@ -2136,12 +2422,14 @@ void MainMenuTest(I3D_scene *scene)
                 "spShown %d spHover %d spClick %d mpLists %d mpDescribe %d mpSaveSlot %d mpPick %d mxCampaign %d mxSingle %d"
                 " mxMessages %d mxSecret %d mxStart %d mxOperation %d ciDescribe %d ciShown %d ciPick %d"
                 " pwDescribe %d pwServer %d pwLock %d flDescribe %d flShown %d"
-                " flAccept %d flHelpers %d giDescribe %d giRefresh %d giShow %d giStatus %d\n",
+                " flAccept %d flHelpers %d giDescribe %d giRefresh %d giShow %d giStatus %d"
+                " csDescribe %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
                 r.mpSaveSlot, r.mpPick, r.mxCampaign, r.mxSingle, r.mxMessages, r.mxSecret, r.mxStart, r.mxOperation,
                 r.ciDescribe, r.ciShown, r.ciPick, r.pwDescribe, r.pwServer, r.pwLock,
                 r.flDescribe, r.flShown, r.flAccept, r.flHelpers,
-                r.giDescribe, r.giRefresh, r.giShow, r.giStatus);
+                r.giDescribe, r.giRefresh, r.giShow, r.giStatus,
+                r.csDescribe);
 }

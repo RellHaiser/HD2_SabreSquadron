@@ -22,6 +22,7 @@ extern I3D_scene *g_carScene;
 #include "game/game_texts.h"
 int ShowMessage(const char *text, const char *title, unsigned int flags);   // (the texts' loading, part 9g-iii)
 int GetGameTypeTextId(int gameType);                    // (the loading screen, part 8f-i)
+int GetVoiceCodecTextId(int codec);                     // (the main menu's create server screen, part 9h-xiii)
 
 // --- the car's seats (game/car_seats.cpp; as the real header declares them) ---------------------
 class C_Actor;

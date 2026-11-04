@@ -15,10 +15,10 @@ uint32_t FUN_006acb10(...)
 
 
 // 0x006acb60
-uint32_t FUN_006acb60(int param_1, ...)
+int GetVoiceCodecTextId(int codec, ...)
 {
-  if ((-1 < param_1) && (param_1 < 8)) {
-    return *(uint32_t *)(&DAT_008429d4 + param_1 * 4);
+  if ((-1 < codec) && (codec < 8)) {
+    return *(int *)(&DAT_008429d4 + codec * 4);
   }
   return DAT_008429f4;
 }

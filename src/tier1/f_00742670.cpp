@@ -777,7 +777,7 @@ LAB_00743663:
     case 0x2f:
       iVar7 = ReadConsoleToken(&command,(char *)local_290,(int *)&local_14,"maxclients");
       if (iVar7 != 2) {
-        iVar7 = FUN_006acb60((g_gameProfile.m_mpSettings)->unknown178);
+        iVar7 = GetVoiceCodecTextId((g_gameProfile.m_mpSettings)->unknown178);
         pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_30,iVar7);
         local_8 = 0xd;
         if (pCVar18->rep == 0) {

@@ -8385,6 +8385,34 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 310 errors in 56 files, 128 stubs. ret_audit --src: 52.
   - Stats: 9,204 of 12,306 functions by hand (84.2 % by size).
 
+  PART 9h-xiii DONE (2026-11-04): the main menu's create server screen's description (game/main_menu.cpp).
+  - DescribeCreateServerScreen 0x00628610: not startable (m_startable +0x212, named); shown / hidden callbacks;
+    "bhostname" (the setup's server name; OnHostNameChanged on notification 0x0B), "style" (the game types;
+    OnServerStyleChanged), the maps panel, the options panel (their results unchecked: a panel not described
+    leaves the controls after it their places), "voice chat" (GetVoiceCodecTextId 0x006acb60, declared:
+    0xB40 + n), "bstart" (off; 0x6001029, OnNetworkMessage's start), "bback", seven texts, "maplist preset"
+    (a combo box: header 500, IN ORDER and CUSTOM 1 .. 4; OnMapPresetPicked on 0x400E000), two labels.
+  - DescribeMapsPanel 0x00628f80 and DescribeOptionsPanel 0x0062a060 (AND ESP,-16 frames: ported from the asm with
+    the new _re/tools/slots.py, a stack-slot annotator). The maps panel: MP_MAPS_PANEL and its groups
+    (gr_mp_deathmatch / zonegame / hiddenmaps / coopmaps / sel_list), bmap_A / bmap_B and two scroll bars moved
+    under it; DescribeMapList 0x00629bc0 (a hiding list named as its group, a line "MPMap%02d" per map of
+    C_MpGameSetup::maps[type]: its name, its index, the four map line callbacks) per game type,
+    DescribePickedMapList 0x00629740 (a pool list of 50 lines; RET 0x10: a second argument unused, the original
+    passes the cooperative maps). The options panel: "internet server" / "dedicated server" (their SET_CHECKED
+    a byte 0 over a slot's garbage: the check box reads the low byte), "scroll01", "gr_setings" (rows: copies of
+    yes_no_tmpl, bshort00, binput, combo_tmpl): cooperative difficulty, players, team lives, lives (-1 ..
+    99), point / round limits, round count, preparation / respawn / spawn protection times, inverse damage
+    ("Self Damage"), the yes / no rules, the password (forbidden " \t>-\""), the port (1024 .. 65530).
+  - The create server screen's callbacks (shown 0x0062c2a0, hidden 0x0062c290, host 0x0062ca80, style 0x0062cd50,
+    options 0x0062d490, preset 0x0062c970, the map lines' double click 0x0062ca10, drag 0x0062e870 / 0x0062e9f0 /
+    0x0062eb60) are declared for later sub-parts (faked in the harness).
+  - Harness: csDescribe (every tree, the origins, the frames made / moved / copied, each frame missing alone);
+    the build test's create server screen real (seven more dummies). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h13.py: 251: 226 killed, 23 not building, 2 equivalent (unreachable null
+    checks).
+  - Build: MSVC clean. Tier 1: 308 errors in 56 files, 127 stubs. ret_audit --src: 52.
+  - Stats: 9,209 of 12,306 functions by hand (84.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

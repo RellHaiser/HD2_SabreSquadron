@@ -102,3 +102,9 @@
 0062fa30 C_MainMenu::ShowGameInfo | void __stdcall ShowGameInfo(void * status)
 0062f9f0 FormatAddress | void * __fastcall FormatAddress(void * result, uint address)
 008acab8 g_gameInfoStatus @ void *
+# Part 9h-xiii: the create server screen's description.
+00628f80 C_MainMenu::DescribeMapsPanel | bool __thiscall DescribeMapsPanel(C_MainMenu *this, void * desc, void * model)
+00629bc0 C_MainMenu::DescribeMapList | void __thiscall DescribeMapList(C_MainMenu *this, void * panel, void * maps, void * group, void * lineTemplate)
+00629740 C_MainMenu::DescribePickedMapList | void __thiscall DescribePickedMapList(C_MainMenu *this, void * panel, void * maps, void * group, void * lineTemplate)
+0062a060 C_MainMenu::DescribeOptionsPanel | bool __thiscall DescribeOptionsPanel(C_MainMenu *this, void * desc, void * model)
+006acb60 GetVoiceCodecTextId | int __stdcall GetVoiceCodecTextId(int codec)

@@ -535,6 +535,8 @@ class I3D_scene;
 
 // The text id of a network game type (-1 .. 3; others: "unknown"; the menus' code).
 int GetGameTypeTextId(int gameType);                // 0x006acb80
+// The voice chat codec's text (0 .. 7: 0xB40 + n; another: 0xB48 "UNKNOWN CODEC").
+int GetVoiceCodecTextId(int codec);                 // 0x006acb60
 
 // The loading screen (C_LoaderScreen, g_loaderScreen): game/loader_screen.h.
 #include "game/loader_screen.h"

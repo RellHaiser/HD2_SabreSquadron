@@ -27846,6 +27846,26 @@
   "name": "C_MainMenu::DescribeCreateServerScreen",
   "proto": "bool __thiscall DescribeCreateServerScreen(C_MainMenu *this, void * desc, void * model)"
  },
+ "00628f80": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeMapsPanel",
+  "proto": "bool __thiscall DescribeMapsPanel(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00629740": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribePickedMapList",
+  "proto": "void __thiscall DescribePickedMapList(C_MainMenu *this, void * panel, void * maps, void * group, void * lineTemplate)"
+ },
+ "00629bc0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeMapList",
+  "proto": "void __thiscall DescribeMapList(C_MainMenu *this, void * panel, void * maps, void * group, void * lineTemplate)"
+ },
+ "0062a060": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeOptionsPanel",
+  "proto": "bool __thiscall DescribeOptionsPanel(C_MainMenu *this, void * desc, void * model)"
+ },
  "0062c5b0": {
   "module": "main_menu",
   "name": "C_MainMenu::SendToControl",
@@ -34655,6 +34675,11 @@
  "006ac750": {
   "module": "zz_idioms",
   "name": "empty_function_6ac750"
+ },
+ "006acb60": {
+  "module": "main_menu",
+  "name": "GetVoiceCodecTextId",
+  "proto": "int __stdcall GetVoiceCodecTextId(int codec)"
  },
  "006acb80": {
   "module": "loader_screen",
