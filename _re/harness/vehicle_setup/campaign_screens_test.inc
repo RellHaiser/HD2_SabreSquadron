@@ -172,12 +172,32 @@ S_SquadSoldier *C_GameProfile::FindSoldierState(int profileIndex)
             return s;
     return nullptr;
 }
-bool C_SquadMenu::BuildScreens() { return true; }
-bool C_SquadMenu::OnSoldierControl(void *argument, C_Control *control)
+bool C_SquadMenu::OnSoldierControl(void *menu, void *argument, C_Control *control, uint32_t, uint32_t)
 {
-    GfLog("soldier control %d %x", argument == this, control->GetId());
+    GfLog("soldier control %d %x", argument == menu, control->GetId());
     return true;
 }
+// (Part 9g-x: the squad screen's parts, later parts', logged.)
+#define SQ_DESCRIBE(F, T, TEXT) \
+    T C_SquadMenu::F(S_ScreenDesc *desc, I3D_frame *model) \
+    { \
+        GfLog(TEXT " %d %s", desc != nullptr, MrFrameName(model).c_str()); \
+        return T(1); \
+    }
+SQ_DESCRIBE(DescribeRoster, bool, "describe roster")
+SQ_DESCRIBE(DescribeStats, bool, "describe stats")
+SQ_DESCRIBE(DescribePanel, bool, "describe panel")
+SQ_DESCRIBE(DescribeSelected, bool, "describe selected")
+SQ_DESCRIBE(DescribeButtons, bool, "describe buttons")
+#undef SQ_DESCRIBE
+void C_SquadMenu::DescribeMedals(S_ScreenDesc *desc, I3D_frame *model)
+{
+    GfLog("describe medals %d %s", desc != nullptr, MrFrameName(model).c_str());
+}
+bool C_SquadMenu::OnScreenTick(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
+bool C_SquadMenu::OnScreenHidden(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
+bool C_SquadMenu::OnNameEdited(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
+bool C_SquadMenu::OnSoldierInfo(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
 namespace {
 
 // (Part 9g-iv.) The video player's engine objects: the stream's rectangle and size, its position; the
@@ -310,6 +330,7 @@ struct S_CampaignScreensResults {
     bool dbDiary = true, dbDiaryPage = true, dbWon = true, dbScreen = true, dbPanel = true, dbObjectives = true, dbResult = true;
     bool dbShow = true, dbSkills = true, dbRank = true, dbMedals = true, dbScroll = true;
     bool sqSlot = true, sqOneSoldier = true, sqStart = true, sqSlots = true, sqSync = true, sqMessage = true, sqSelect = true;
+    bool sqDead = true, sqFill = true, sqSelection = true, sqShown = true, sqSquadScreen = true, sqBuild = true;
 };
 
 // A message's values ("target id value value2[ value3][ 'text']"; value2 / value3 by name when known).
@@ -365,6 +386,19 @@ std::string CsQueue()
     return s;
 }
 // A screen shown or not; answering the text asked for with its own.
+// (Part 9g-x.) A slot's picture on the selection screen: its frame, its index (asked: counted).
+struct C_SqPicture : C_Control {
+    C_SqPicture(I3D_frame *frame, int i) : C_Control(nullptr, 0x8300000, nullptr), index(i) { m_frame = frame; }
+    int index, asked = 0;
+    bool HandleMessage(S_ControlMessage *m) override
+    {
+        if (m->id == CONTROL_MSG_GET_INDEX) {
+            ++asked;
+            m->value = static_cast<uint32_t>(index);
+        }
+        return true;
+    }
+};
 struct C_CsScreen : C_MsScreen {
     C_CsScreen(I3D_scene *scene, const char *n, uint32_t id) : C_MsScreen(scene, n, id) {}
     void SetShown(bool shown) { m_shown = shown; }
@@ -2737,7 +2771,7 @@ void CampaignScreensTest(I3D_scene *)
             bool ok = true;
             C_SquadMenu m;
             ok &= m.GetTypeId() == 3 && m.m_selectedSlot == 0 && m.m_selectedSoldier == -1 && m.m_rosterSelected &&
-                  m.m_unknown1BC == 0 && m.m_unknown1C0 == 0 && m.m_unknown1C4 == 0 && m.m_slots[3].locked &&
+                  m.m_unknown1BC == 0 && m.m_unknown1C0 == 0 && !m.m_selector && m.m_slots[3].locked &&
                   m.m_slots[3].profile == -1 && m.m_slots[3].rank == 0xFFFFFFFF;
             const auto start = [&](int mode) {
                 m.m_mode = mode;
@@ -3035,6 +3069,235 @@ void CampaignScreensTest(I3D_scene *)
             WM(r.sqSelect, ok);
         }
 
+
+        // --- (part 9g-x) the dead taken off the squad (a campaign's; their items back), the slots filled ---
+        {
+            bool ok = true;
+            roster(6);
+            p[2]->dead = true;
+            p[4]->dead = true;
+            S_SquadSoldier *a = soldier(1, 1), *b = soldier(2, 2), *c = soldier(-1, 3), *d = soldier(4, 4), *e = soldier(5, 1);
+            squad.states = {a, b, c, d, e};
+            playMode.singleMission = 1;
+            g_gfLog.clear();
+            C_SquadMenu::RemoveDeadSoldiers();
+            ok &= squad.states.size() == 5 && g_gfLog.empty();
+            playMode.singleMission = 0;
+            C_SquadMenu::RemoveDeadSoldiers();
+            ok &= squad.states == std::vector<S_SquadSoldier *>({a, c, e}) && MsLogIs({"return all 4", "return all 2"}, g_gfLog);
+            // (Roster soldier 0 dead.)
+            p[0]->dead = true;
+            S_SquadSoldier *f = soldier(0, 1);
+            squad.states.push_back(f);
+            g_gfLog.clear();
+            C_SquadMenu::RemoveDeadSoldiers();
+            ok &= squad.states == std::vector<S_SquadSoldier *>({a, c, e}) && MsLogIs({"return all 0"}, g_gfLog);
+            p[0]->dead = false;
+            p[2]->dead = false;
+            p[4]->dead = false;
+            WM(r.sqDead, ok);
+
+            // The slots: the squad's soldiers in turn (their roster controls hidden), locked but a kind 1
+            // screen's not deployed.
+            C_SquadMenu m;
+            for (int i = 0; i < 4; ++i) {
+                m.m_slots[i].picture = 0x4111000 + static_cast<uint32_t>(i) * 0x1000;
+                m.m_slots[i].name = 0x4121000 + static_cast<uint32_t>(i) * 0x1000;
+                m.m_slots[i].rank = 0x4131000 + static_cast<uint32_t>(i) * 0x1000;
+            }
+            a->deployed = true;
+            m.m_mode = 1;
+            g_controlMessages.clear();
+            m.FillSlots();
+            std::string q = CsQueue();
+            ok &= m.m_slots[0].profile == 1 && !m.m_slots[0].locked && m.m_slots[1].profile == -1 && m.m_slots[1].locked &&
+                  m.m_slots[2].profile == 5 && m.m_slots[2].locked && m.m_slots[3].profile == -1;
+            ok &= q.find("4101000 2000084 4101020 0; 4111000 1000038 0 0; 4111000 1000009 1 0; ") == 0 &&
+                  q.find("4101000 2000084 4101060 0; 4113000 1000038 0 0; 4113000 1000009 5 0; ") != std::string::npos &&
+                  q.find("4112000") == std::string::npos;
+            m.m_mode = 2;
+            m.m_slots[2].locked = false;
+            m.FillSlots();
+            ok &= m.m_slots[2].locked && m.m_slots[0].locked;
+            // (Roster soldier 0.)
+            c->profileIndex = 0;
+            m.FillSlots();
+            ok &= m.m_slots[1].profile == 0;
+            g_controlMessages.clear();
+            clearSquad();
+            WM(r.sqFill, ok);
+        }
+
+        // --- (part 9g-x) the selection screen: its shown callback, title, the slots' pictures (own meshes, their
+        // indexes, picked: selected; missing ones skipped), yes (continue) and cancel; the selector. Picked: the
+        // selector moved over it (its own depth), the slot selected. Shown: the slots' faces, an empty one's
+        // picture hidden ---
+        {
+            bool ok = true;
+            C_SquadMenu m;
+            void **const ownVt = new void *[MR_SLOTS];
+            std::copy(g_msFrameVt, g_msFrameVt + MR_SLOTS, ownVt);
+            ownVt[0xA0 / 4] = reinterpret_cast<void *>(&MrFake<0xA0>);
+            const auto visual = [&](const char *name) {
+                S_MrObj *v = MsFrame(name);
+                v->vtable = ownVt;
+                S_MrObj *mesh = MrObj((std::string(name) + ".mesh").c_str(), g_mrModelVt);
+                mesh->vtable = new void *[MR_SLOTS];
+                std::copy(g_mrModelVt, g_mrModelVt + MR_SLOTS, mesh->vtable);
+                mesh->vtable[0x18 / 4] = reinterpret_cast<void *>(&MrFake<0x18>);
+                *reinterpret_cast<S_MrObj **>(reinterpret_cast<uint8_t *>(v) + 0x1E0) = mesh;
+                return v;
+            };
+            S_MrObj *model = MsFrame("sqsm"), *selector = MsFrame("sqss");
+            S_MrObj *p3 = visual("sqp3"), *p4 = visual("sqp4"), *p6 = visual("sqp6");
+            g_msChildren[{model, "photo03"}] = p3;
+            g_msChildren[{model, "photo04"}] = p4;
+            g_msChildren[{model, "photo06"}] = p6;
+            g_msChildren[{model, "selector"}] = selector;
+            g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+            g_csNames[reinterpret_cast<uintptr_t>(&C_SquadMenu::OnSelectionPicked)] = "picked";
+            g_csNames[reinterpret_cast<uintptr_t>(&C_SquadMenu::OnSelectionShown)] = "shown";
+            S_ScreenDesc d("SELECTION SCREEN", "selection screen", 2u << 26);
+            g_gfLog.clear();
+            ok &= m.DescribeSelectionScreen(&d, As<I3D_frame>(model)) && m.m_selector == As<I3D_frame>(selector);
+            ok &= d.messages.size() == 1 && CsMessage(d.messages[0]) == "0 1000007 400d000 self shown";
+            ok &= CsDesc(d) == "13 text_select one soldier 8100000: 0 1000015 c ab2; "
+                               "4 photo03 8200000: 0 1000009 0 0 0 1000007 4001000 self picked; "
+                               "4 photo04 8300000: 0 1000009 1 0 0 1000007 4001000 self picked; "
+                               "4 photo06 8400000: 0 1000009 3 0 0 1000007 4001000 self picked; "
+                               "14 button01 8500000: 0 1000015 d 7d1 0 600106a 0 0 0 6001005 0 0; "
+                               "14 button00 8600000: 0 1000015 d 7d8 0 6001005 0 0; ";
+            ok &= MsLogIs({"sqsm 48 photo03 1", "sqp3 on 1", "sqp3 a0", "sqp3.mesh 18", "sqsm 48 photo04 1", "sqp4 on 1", "sqp4 a0",
+                           "sqp4.mesh 18", "sqsm 48 photo05 1", "sqsm 48 photo06 1", "sqp6 on 1", "sqp6 a0", "sqp6.mesh 18",
+                           "sqsm 48 selector 1"},
+                          g_gfLog);
+            g_msChildren.erase({model, "photo03"});
+            g_msChildren.erase({model, "photo04"});
+            g_msChildren.erase({model, "photo06"});
+            g_msChildren.erase({model, "selector"});
+            WM(r.sqSelection, ok);
+
+            // Picked: the selector over the picture (its own depth), the picture's index the slot selected.
+            I3D_frame *gfSelector = GfFrame(FRAME_DUMMY, "sqselector");
+            I3D_frame *gfPicture = GfVisual("sqpicture", I3DVISUAL_OBJECT);
+            GfPlace(gfSelector, S_vector(9.0f, 9.0f, -0.25f));
+            GfPlace(gfPicture, S_vector(0.5f, -0.125f, -0.75f));
+            C_SqPicture picture(gfPicture, 2);
+            m.m_selector = gfSelector;
+            m.m_selectedSlot = 0;
+            g_gfLog.clear();
+            ok &= C_SquadMenu::OnSelectionPicked(&m, nullptr, &picture, CONTROL_NOTIFY_CLICK, 0) && m.m_selectedSlot == 2 &&
+                  picture.asked == 1 && GfLogIs({"setpos sqselector 0.5000 -0.1250 -0.2500"});
+            picture.index = 3;
+            ok &= C_SquadMenu::OnSelectionPicked(&m, nullptr, &picture, CONTROL_NOTIFY_CLICK, 0) && m.m_selectedSlot == 3;
+            WM(r.sqSelection, ok);
+
+            // Shown: the faces; empty slots' pictures hidden.
+            roster(3);
+            p[0]->faceImage = reinterpret_cast<IImage *>(0x5550);
+            p[2]->faceImage = reinterpret_cast<IImage *>(0x7770);
+            m.m_slots[0].profile = 2;
+            m.m_slots[1].profile = -1;
+            m.m_slots[2].profile = 0;
+            m.m_slots[3].profile = -1;
+            g_controlMessages.clear();
+            ok &= C_SquadMenu::OnSelectionShown(&m, nullptr, nullptr, CONTROL_NOTIFY_SHOWN, 0) &&
+                  CsQueue() == "8200000 1000038 0 7770; 8300000 1000004 0 0; 8400000 1000038 0 5550; 8500000 1000004 0 0; ";
+            p[0]->faceImage = nullptr;
+            p[2]->faceImage = nullptr;
+            WM(r.sqShown, ok);
+        }
+
+        // --- (part 9g-x) the squad screen: its builders (later parts'), the tick and hidden callbacks, the
+        // name's edit box (inactive), the soldier's info button, the stats' title ---
+        {
+            bool ok = true;
+            C_SquadMenu m;
+            g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+            g_csNames[reinterpret_cast<uintptr_t>(&C_SquadMenu::OnScreenTick)] = "tick";
+            g_csNames[reinterpret_cast<uintptr_t>(&C_SquadMenu::OnScreenHidden)] = "hidden";
+            g_csNames[reinterpret_cast<uintptr_t>(&C_SquadMenu::OnNameEdited)] = "edited";
+            g_csNames[reinterpret_cast<uintptr_t>(&C_SquadMenu::OnSoldierInfo)] = "info";
+            S_ScreenDesc d("team members selection", "team members selection", 1u << 26);
+            S_MrObj *model = MsFrame("sqtm");
+            g_gfLog.clear();
+            ok &= m.DescribeSquadScreen(&d, As<I3D_frame>(model));
+            ok &= d.messages.size() == 2 && CsMessage(d.messages[0]) == "0 1000007 4014000 self tick" &&
+                  CsMessage(d.messages[1]) == "0 1000007 400c000 self hidden";
+            ok &= CsDesc(d) == "3 bnamexx 4100000: 0 1000015 c 7d2 0 2000073 1 0 0 100006e 11 0 0 1000007 4016000 self edited "
+                               "0 1000001 0 0; 14 bselected soldier info 4200000: 0 1000015 d a69 0 1000007 4001000 self info; "
+                               "13 text_selected soldier stats 4300000: 0 1000015 b a6b; ";
+            ok &= MsLogIs({"describe roster 1 sqtm", "describe stats 1 sqtm", "describe panel 1 sqtm", "describe medals 1 sqtm",
+                           "describe selected 1 sqtm", "describe buttons 1 sqtm"},
+                          g_gfLog);
+            WM(r.sqSquadScreen, ok);
+        }
+
+        // --- (part 9g-x) built: the squad screen, the selection screen (the first operation, not the lone wolf),
+        // the dead taken off, the squad's opened, the slots filled, a free soldier selected, the medal popup ---
+        {
+            bool ok = true;
+            void (*const oldFill)(I3D_model *) = g_cacheFill;
+            g_cacheFill = [](I3D_model *) {};
+            C_SquadMenu m;
+            S_MrWorld world = MrWorld("sqb");
+            m.m_scene = As<I3D_scene>(world.scene);
+            C_MsScreen box(m.m_scene, "sqbbox", 0);
+            S_MrObj *squadModel = MrObj("sqbt", g_mrModelVt), *selection = MrObj("sqbs", g_mrModelVt),
+                    *description = MrObj("sqbd", g_mrModelVt);
+            const auto build = [&](std::vector<S_MrObj *> models) {
+                m.m_screens = {&box};
+                g_mrMade[FRAME_MODEL] = std::deque<S_MrObj *>(models.begin(), models.end());
+                g_cacheLoads.clear();
+                g_menuScreens.clear();
+                g_gfLog.clear();
+                return m.BuildScreens();
+            };
+            const auto clear = [&]() {
+                for (size_t i = 1; i < m.m_screens.size(); ++i)
+                    delete m.m_screens[i];
+                m.m_screens.clear();
+                delete m.m_popup;
+                m.m_popup = nullptr;
+                m.m_models.clear();
+                g_menuScreens.clear();
+            };
+            roster(3);
+            p[1]->dead = true;
+            squad.states = {soldier(1, 1), soldier(2, 2)};
+            playMode.singleMission = 0;
+            playMode.mode = PLAY_MODE_CAMPAIGN;
+            g_csOperation = 0;
+            ok &= build({squadModel, selection, description}) &&
+                  g_cacheLoads == std::vector<std::string>({"team members selection", "selection screen", "description"}) &&
+                  GmInOrder(Join(g_gfLog), {"return all 1", "describe roster 1 sqbt", "describe buttons 1 sqbt", "sqbs 48 photo03 1",
+                                            "sqbs 48 selector 1", "sqbd 48 description01 1", "sqbd 48 description 1"}) &&
+                  m.m_screens.size() == 3 && m.m_screens[1]->GetScreenFrame() == As<I3D_frame>(squadModel) &&
+                  m.m_screens[2]->GetScreenFrame() == As<I3D_frame>(selection) && !g_menuScreens.empty() &&
+                  g_menuScreens.back() == m.m_screens[1] && m.m_popup && typeid(*m.m_popup) == typeid(C_MedalDescriptionScreen) &&
+                  m.m_popup->GetScreenFrame() == As<I3D_frame>(description);
+            // The screens' own callbacks: the squad screen's tick and hidden, the selection screen's shown.
+            ok &= m.m_screens.size() == 3 && S_CsPeek::Callbacks(m.m_screens[1]) == 2 && S_CsPeek::Callbacks(m.m_screens[2]) == 1;
+            ok &= squad.states.size() == 1 && m.m_slots[0].profile == 2 && m.m_slots[1].profile == -1;
+            clear();
+            // Another operation; the lone wolf: no selection screen.
+            g_csOperation = 2;
+            ok &= build({squadModel, description}) &&
+                  g_cacheLoads == std::vector<std::string>({"team members selection", "description"}) && m.m_screens.size() == 2;
+            clear();
+            g_csOperation = 0;
+            playMode.mode = PLAY_MODE_LONE_WOLF;
+            ok &= build({squadModel, description}) &&
+                  g_cacheLoads == std::vector<std::string>({"team members selection", "description"}) && m.m_screens.size() == 2;
+            clear();
+            playMode.mode = PLAY_MODE_CAMPAIGN;
+            p[1]->dead = false;
+            clearSquad();
+            g_mrMade.erase(FRAME_MODEL);
+            g_cacheFill = oldFill;
+            WM(r.sqBuild, ok);
+        }
+
         g_epProfiles = oldProfiles;
         g_gameProfile.m_humanStore = oldStore;
         g_gameProfile.m_missionSquad = oldSquad;
@@ -3051,11 +3314,11 @@ void CampaignScreensTest(I3D_scene *)
                 "vsUpdate %d vsScroll %d vsRender %d vsInput %d vsMovieState %d dbMedal %d dbResults %d dbStore %d dbStart %d "
                 "dbMessage %d dbBuild %d dbDiary %d dbDiaryPage %d dbWon %d dbScreen %d dbPanel %d dbObjectives %d dbResult %d dbShow %d dbSkills %d "
                 "dbRank %d dbMedals %d dbScroll %d sqSlot %d sqOneSoldier %d sqStart %d sqSlots %d sqSync %d "
-                "sqMessage %d sqSelect %d\n", r.oeTable, r.oeDescribe,
+                "sqMessage %d sqSelect %d sqDead %d sqFill %d sqSelection %d sqShown %d sqSquadScreen %d sqBuild %d\n", r.oeTable, r.oeDescribe,
                 r.oeBuild, r.oeInput, r.oeSlots, r.smStart, r.smMessage, r.smConsole, r.smPassword, r.smBuild, r.smTick,
                 r.smJoin, r.smNotify, r.vsCredits, r.vsMovie, r.vsFit, r.vsUpdate, r.vsScroll, r.vsRender, r.vsInput,
                 r.vsMovieState, r.dbMedal, r.dbResults, r.dbStore, r.dbStart, r.dbMessage, r.dbBuild, r.dbDiary, r.dbDiaryPage, r.dbWon,
                 r.dbScreen, r.dbPanel, r.dbObjectives, r.dbResult, r.dbShow, r.dbSkills,
                 r.dbRank, r.dbMedals, r.dbScroll, r.sqSlot, r.sqOneSoldier, r.sqStart, r.sqSlots, r.sqSync,
-                r.sqMessage, r.sqSelect);
+                r.sqMessage, r.sqSelect, r.sqDead, r.sqFill, r.sqSelection, r.sqShown, r.sqSquadScreen, r.sqBuild);
 }

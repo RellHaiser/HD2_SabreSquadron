@@ -363,3 +363,116 @@ bool C_DescriptionScreen::Build(const S_ScreenDesc *)
         frame->SetOn(false);
     return true;
 }
+
+// ---- the squad screen's medal popup (part 9g-x) -------------------------------------------------
+
+namespace {
+
+// The medals' names and descriptions (two text ids each, g_rosterTexts'); their style.
+constexpr uint32_t MEDAL_TEXTS = 0x2774, MEDAL_TEXT_STYLE = 3;
+
+}   // namespace
+
+C_MedalDescriptionScreen::~C_MedalDescriptionScreen()
+{
+    delete m_name;
+    delete m_description;
+}
+
+void C_MedalDescriptionScreen::Refresh()
+{
+    m_name->Refresh();
+    m_description->Refresh();
+}
+
+void C_MedalDescriptionScreen::Tick(int)
+{
+    if (!m_shown)
+        return;
+    if (m_cursor->GetStillTime() >= DESCRIPTION_DELAY && !m_cursor->IsButtonDown(0)) {
+        S_vector pos;
+        m_cursor->GetPosition(&pos);
+        pos.z = m_frame->GetWorldPos().z;
+        pos.x += DESCRIPTION_OFFSET_X;
+        m_boxShown = true;
+        pos.y += DESCRIPTION_OFFSET_Y;
+        m_frame->SetOn(true);
+        m_frame->SetPos(pos);
+        m_frame->Update();
+        S_ControlMessage refresh;
+        refresh.id = CONTROL_MSG_REFRESH;
+        m_name->HandleMessage(&refresh);
+        m_description->HandleMessage(&refresh);
+        return;
+    }
+    if (m_boxShown || m_frame->IsOn()) {
+        m_boxShown = false;
+        m_frame->SetOn(false);
+    }
+}
+
+bool C_MedalDescriptionScreen::HandleMessage(S_ControlMessage *message)
+{
+    switch (message->id & CONTROL_MSG_MASK) {
+    case CONTROL_MSG_SHOW:
+        m_shown = true;
+        return true;
+    case CONTROL_MSG_HIDE:
+        m_shown = false;
+        m_boxShown = false;
+        return true;
+    case MEDAL_POPUP_MSG_SHOW: {
+        if (m_medal) {
+            m_medal->LinkTo(nullptr, 0);
+            m_medal = nullptr;
+            S_ControlMessage clear;
+            clear.id = CONTROL_MSG_CLEAR_TEXT;
+            m_name->HandleMessage(&clear);
+            S_ControlMessage clear2;
+            clear2.id = CONTROL_MSG_CLEAR_TEXT;
+            m_description->HandleMessage(&clear2);
+        }
+        m_medal = reinterpret_cast<I3D_frame *>(message->value2);
+        if (m_medal) {
+            m_medal->LinkTo(m_place, 1);
+            m_medal->SetPosInline(S_vector(0.0f, 0.0f, 0.0f));
+            m_medal->SetOn(true);
+            m_medal->Update();
+        }
+        S_ControlMessage name;
+        name.id = CONTROL_MSG_SET_TEXT_ID;
+        name.value = MEDAL_TEXT_STYLE;
+        name.value2 = MEDAL_TEXTS + message->value * 2;
+        m_name->HandleMessage(&name);
+        S_ControlMessage description;
+        description.id = CONTROL_MSG_SET_TEXT_ID;
+        description.value = MEDAL_TEXT_STYLE;
+        description.value2 = MEDAL_TEXTS + message->value * 2 + 1;
+        m_description->HandleMessage(&description);
+        return true;
+    }
+    default:
+        return true;
+    }
+}
+
+bool C_MedalDescriptionScreen::Build(const S_ScreenDesc *)
+{
+    m_frame = m_screenFrame->FindChildFrame("description01", FRAME_MASK_VISUAL);
+    if (m_frame) {
+        m_frame->SetOn(false);
+        m_frame->SetPos(S_vector(0.5f, -0.375f, -0.5f));
+        if (I3D_frame *frame = m_screenFrame->FindChildFrame("text01", FRAME_MASK_VISUAL)) {
+            m_name = new C_TitleControl(m_scene, m_id | 2, this);
+            m_name->Create(frame, m_screenFrame, nullptr);
+        }
+        if (I3D_frame *frame = m_screenFrame->FindChildFrame("text02", FRAME_MASK_VISUAL)) {
+            m_description = new C_TitleControl(m_scene, m_id | 2, this);
+            m_description->Create(frame, m_screenFrame, nullptr);
+        }
+        m_place = m_screenFrame->FindChildFrame("new_medal", FRAME_MASK_DUMMY);
+    }
+    if (I3D_frame *frame = m_screenFrame->FindChildFrame("description", FRAME_MASK_VISUAL))
+        frame->SetOn(false);
+    return true;
+}

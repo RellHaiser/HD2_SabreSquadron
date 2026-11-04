@@ -36,3 +36,11 @@
 00669a50 C_DescriptionScreen::HandleMessage | bool __thiscall HandleMessage(C_Screen *this, void * message)
 00676010 C_DescriptionScreen::HasPopup | bool __thiscall HasPopup(C_Screen *this)
 006698c0 C_DescriptionScreen::Build | bool __thiscall Build(C_Screen *this, void * desc)
+# Part 9g-x: the squad screen's medal popup C_MedalDescriptionScreen (src/game/screen.cpp; vtable 0x00815918).
+00691920 C_MedalDescriptionScreen::~C_MedalDescriptionScreen | void __thiscall ~C_MedalDescriptionScreen(C_Screen *this)
+00691900 C_MedalDescriptionScreen::ScalarDeletingDestructor | void * __thiscall ScalarDeletingDestructor(C_Screen *this, uchar flags)
+0066a2a0 C_MedalDescriptionScreen::Refresh | void __thiscall Refresh(C_Screen *this)
+0066a100 C_MedalDescriptionScreen::Tick | void __thiscall Tick(C_Screen *this, int time)
+00669e90 C_MedalDescriptionScreen::HandleMessage | bool __thiscall HandleMessage(C_Screen *this, void * message)
+006918f0 C_MedalDescriptionScreen::HasPopup | bool __thiscall HasPopup(C_Screen *this)
+00669c00 C_MedalDescriptionScreen::Build | bool __thiscall Build(C_Screen *this, void * desc)

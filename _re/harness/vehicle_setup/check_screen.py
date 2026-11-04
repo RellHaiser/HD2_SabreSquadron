@@ -9,7 +9,7 @@ import re
 import sys
 
 CHECKS = ("scDescs scMenuDesc scNew scBuild scOpen scHide scTick scKeys scMessages mbBuild mbShow mbShowId mbClose "
-          "mbKeys mbButtons dsNew dsBuild dsTick dsMessages").split()
+          "mbKeys mbButtons dsNew dsBuild dsTick dsMessages msNew msBuild msTick msMessages").split()
 
 
 def main():

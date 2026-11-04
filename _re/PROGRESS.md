@@ -8006,6 +8006,27 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 356 errors in 65 files, 151 stubs. ret_audit --src: 54 (+2: SyncSquad and OnSoldierControl are callbacks with four stack arguments; SyncSquad fixed here, OnSoldierControl's signature in 9g-x).
   - Ghidra: names/campaign_screens.txt (+13); 12 functions in ported.txt. Stats: 9,077 of 12,306 functions by hand (81.8 % by size).
 
+  PART 9g-x DONE (2026-11-04): the squad screen's screens and its medal popup (game/squad_menu.cpp,
+  game/screen.h/.cpp).
+  - BuildScreens 0x00691570 ("team members selection"; the first operation but the lone wolf's: "SELECTION
+    SCREEN"; the dead taken off first, the squad screen opened, the slots filled, the first free soldier
+    selected, the medal popup on "DESCRIPTION"), RemoveDeadSoldiers 0x00694810 (a campaign's: their items
+    back), FillSlots 0x00695b90 (the squad's soldiers into the slots in turn, their roster controls hidden,
+    locked but a kind 1 screen's not deployed), DescribeSquadScreen 0x00691fa0 (the later parts' builders,
+    the tick and hidden callbacks, the name's edit box "bnamexx", "bselected soldier info", the stats'
+    title), DescribeSelectionScreen 0x00691b30 (the slots' pictures photo03 .. 06, yes: continue, cancel;
+    C_SquadMenu +0x1C4 the selector), OnSelectionPicked 0x00691cc0, OnSelectionShown 0x00691db0.
+  - C_MedalDescriptionScreen (vtable 0x00815918, 0x98 bytes; C_DescriptionScreen's twin): Build 0x00669c00
+    ("description01" the box, "text01" / "text02", the "new_medal" place), HandleMessage 0x00669e90 (show,
+    hide, MEDAL_POPUP_MSG_SHOW 0x1000033: the medal's frame placed, its name and description from
+    0x2774 + 2 * medal), Tick 0x0066a100, Refresh 0x0066a2a0, HasPopup 0x006918f0, the destructor 0x00691920.
+  - OnSoldierControl (0x00694bc0) declared a callback (four stack arguments; ported in 9g-xii).
+  - Harness: sqDead, sqFill, sqSelection, sqShown, sqSquadScreen, sqBuild; screens: msNew, msBuild, msTick,
+    msMessages. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g10.py (202: all killed but 6: 3 equivalent, 3 on BuildScreens' first selection killed in 9g-xi; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 354 errors in 64 files, 149 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+7), names/screen.txt (+7); 14 functions in ported.txt. Stats: 9,091 of 12,306 functions by hand (81.9 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

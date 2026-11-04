@@ -97,3 +97,11 @@
 00690ec0 S_SquadSlot::HasControl | bool __thiscall HasControl(void * this, uint id)
 006755d0 GetProfileName | void * __fastcall GetProfileName(void * profile)
 00841cb8 g_operationMedalSoldiers @ int[80]
+# Part 9g-x: the squad screen's screens (src/game/squad_menu.cpp).
+00691570 C_SquadMenu::BuildScreens | bool __thiscall BuildScreens(C_MenuState *this)
+00694810 C_SquadMenu::RemoveDeadSoldiers | void __cdecl RemoveDeadSoldiers(void)
+00695b90 C_SquadMenu::FillSlots | void __thiscall FillSlots(C_MenuState *this)
+00691fa0 C_SquadMenu::DescribeSquadScreen | bool __thiscall DescribeSquadScreen(C_MenuState *this, void * desc, void * model)
+00691b30 C_SquadMenu::DescribeSelectionScreen | bool __thiscall DescribeSelectionScreen(C_MenuState *this, void * desc, void * model)
+00691cc0 C_SquadMenu::OnSelectionPicked | bool __thiscall OnSelectionPicked(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00691db0 C_SquadMenu::OnSelectionShown | bool __thiscall OnSelectionShown(C_MenuState *this, void * argument, void * control, uint notification, uint value)

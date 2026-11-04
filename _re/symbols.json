@@ -31166,6 +31166,26 @@
   "name": "C_DescriptionScreen::Refresh",
   "proto": "void __thiscall Refresh(C_Screen *this)"
  },
+ "00669c00": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::Build",
+  "proto": "bool __thiscall Build(C_Screen *this, void * desc)"
+ },
+ "00669e90": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::HandleMessage",
+  "proto": "bool __thiscall HandleMessage(C_Screen *this, void * message)"
+ },
+ "0066a100": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::Tick",
+  "proto": "void __thiscall Tick(C_Screen *this, int time)"
+ },
+ "0066a2a0": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::Refresh",
+  "proto": "void __thiscall Refresh(C_Screen *this)"
+ },
  "0066a2f0": {
   "module": "cursor",
   "name": "C_Cursor::HasMoved",
@@ -32933,10 +32953,55 @@
   "name": "C_SquadMenu::OnMessage",
   "proto": "void __thiscall OnMessage(C_MenuState *this, void * message)"
  },
+ "00691570": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(C_MenuState *this)"
+ },
+ "006918f0": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::HasPopup",
+  "proto": "bool __thiscall HasPopup(C_Screen *this)"
+ },
+ "00691900": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(C_Screen *this, uchar flags)"
+ },
+ "00691920": {
+  "module": "screen",
+  "name": "C_MedalDescriptionScreen::~C_MedalDescriptionScreen",
+  "proto": "void __thiscall ~C_MedalDescriptionScreen(C_Screen *this)"
+ },
+ "00691b30": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeSelectionScreen",
+  "proto": "bool __thiscall DescribeSelectionScreen(C_MenuState *this, void * desc, void * model)"
+ },
+ "00691cc0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnSelectionPicked",
+  "proto": "bool __thiscall OnSelectionPicked(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00691db0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnSelectionShown",
+  "proto": "bool __thiscall OnSelectionShown(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00691fa0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeSquadScreen",
+  "proto": "bool __thiscall DescribeSquadScreen(C_MenuState *this, void * desc, void * model)"
+ },
  "00693a50": {
   "module": "campaign_screens",
   "name": "C_SquadMenu::OnStop",
   "proto": "void __thiscall OnStop(C_MenuState *this)"
+ },
+ "00694810": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::RemoveDeadSoldiers",
+  "proto": "void __cdecl RemoveDeadSoldiers(void)"
  },
  "00694dd0": {
   "module": "campaign_screens",
@@ -32947,6 +33012,11 @@
   "module": "campaign_screens",
   "name": "C_SquadMenu::IsInSlots",
   "proto": "bool __thiscall IsInSlots(C_MenuState *this, int profile)"
+ },
+ "00695b90": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::FillSlots",
+  "proto": "void __thiscall FillSlots(C_MenuState *this)"
  },
  "00695dc0": {
   "module": "campaign_screens",
