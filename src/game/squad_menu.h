@@ -3,7 +3,7 @@
 // player's), their stats and medals, the selection screen. Part 9g-ix: the class, the slots, starting,
 // stopping, the messages, the squad kept to the slots; 9g-x: building the screens, the selection screen;
 // 9g-xi: the roster and the medals; 9g-xii: the stats, the places, the buttons, a soldier picked; 9g-xiii: a
-// soldier assigned or detached; 9g-xiv and on: the dragging, accepting, the stats shown.
+// soldier assigned or detached; 9g-xiv: the dragging; 9g-xv: accepting, the stats shown, the screen's callbacks.
 #pragma once
 
 #include <cstdint>
@@ -130,16 +130,27 @@ protected:
     // and description; left: hidden. (No popup, no control: nothing.) True.
     static bool OnMedalHover(void *menu, void *argument, C_Control *control, uint32_t notification,
                              uint32_t value);           // 0x00690d50
-    // (Part 9g-xii.) A soldier's picture dragged (its copy following the cursor), dropped on a slot, the
-    // drag ended.
+    // A soldier's picture dragged (CONTROL_NOTIFY_0A): another's picked first (failing: none selected,
+    // false); a staying slot's soldier: none selected, false; from the slots' half (x > 0.5): to be detached,
+    // from the roster's: to be assigned (the assign button's text); a copy of the picture above it (its own
+    // visual, in the scene's primary sector), the picture hidden. True.
     static bool OnDragStart(void *menu, void *argument, C_Control *control, uint32_t notification,
                             uint32_t value);            // 0x00693ae0
+    // Moved (CONTROL_NOTIFY_08): the copy by the cursor's move (none selected: false).
     static bool OnDragMove(void *menu, void *argument, C_Control *control, uint32_t notification,
                            uint32_t value);             // 0x00693e50
+    // Dropped (CONTROL_NOTIFY_09): the copy released. On the slots' half: a roster soldier onto a removable
+    // slot's soldier replaces him; a slot's soldier swaps places with the slot under the cursor (its
+    // picture clicked; none, itself: shown again). Else assigned (a roster soldier; back on the roster's
+    // half: shown again) or detached (a slot's soldier, unless he stays: shown again, false); the cursor's
+    // notification 05. (None selected: false.)
     static bool OnDrop(void *menu, void *argument, C_Control *control, uint32_t notification,
                        uint32_t value);                 // 0x00693f00
-    static bool OnDragCancel(void *menu, void *argument, C_Control *control, uint32_t notification,
-                             uint32_t value);           // 0x006945c0
+    // CONTROL_NOTIFY_13 (as the equipment screen's items' 13): assigned or detached by OnAssign, the
+    // notification 05; a staying slot's soldier on the slots' half: shown again, false. (None selected:
+    // false.)
+    static bool OnSoldierNotify13(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                  uint32_t value);      // 0x006945c0
 
     // The stats' panel "Panel02" (taking no input): the skills' rows (their names 0xA6E + the skill, bars
     // hlcpct00 .. 06, values). True.
@@ -181,7 +192,7 @@ protected:
     int m_selectedSlot = 0;                             // +0x1B0 the slot picked (0 .. 3)
     int m_selectedSoldier = -1;                         // +0x1B4 the roster soldier picked (-1: none)
     bool m_rosterSelected = true;                       // +0x1B8 the roster's (else a slot's)
-    int m_unknown1BC = 0;                               // +0x1BC
+    I3D_frame *m_dragged = nullptr;                     // +0x1BC the dragged picture's copy
     I3D_frame *m_rosterSelector = nullptr;              // +0x1C0 the roster's selector
     I3D_frame *m_selector = nullptr;                    // +0x1C4 the selection screen's (over the slot picked)
     S_SquadSlot m_slots[4];                             // +0x1C8

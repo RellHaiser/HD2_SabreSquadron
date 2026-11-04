@@ -8,6 +8,7 @@
 
 #include "game/campaign.h"
 #include "game/controls.h"
+#include "game/cursor.h"
 #include "game/pending.h"
 #include "game/profile.h"
 #include "game/screen.h"
@@ -583,7 +584,7 @@ bool C_SquadMenu::DescribeRoster(S_ScreenDesc *desc, I3D_frame *model)
         AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0A, self, Callback(&C_SquadMenu::OnDragStart));
         AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_08, self, Callback(&C_SquadMenu::OnDragMove));
         AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_09, self, Callback(&C_SquadMenu::OnDrop));
-        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_13, self, Callback(&C_SquadMenu::OnDragCancel));
+        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_13, self, Callback(&C_SquadMenu::OnSoldierNotify13));
     }
     AddDescMessage(soldiers, 0, CONTROL_MSG_REFRESH, 0);
     AddDescMessage(group->AddChild(CONTROL_SCROLL_BAR, "scroll00"), 0, CONTROL_MSG_SET_VALUE, ROSTER_CONTROLS);
@@ -750,7 +751,7 @@ bool C_SquadMenu::DescribeSelected(S_ScreenDesc *desc, I3D_frame *model)
         AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0A, self, Callback(&C_SquadMenu::OnDragStart));
         AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_08, self, Callback(&C_SquadMenu::OnDragMove));
         AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_09, self, Callback(&C_SquadMenu::OnDrop));
-        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_13, self, Callback(&C_SquadMenu::OnDragCancel));
+        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_13, self, Callback(&C_SquadMenu::OnSoldierNotify13));
     }
     return true;
 }
@@ -922,5 +923,192 @@ bool C_SquadMenu::OnAssign(void *menu, void *argument, C_Control *control, uint3
     }
     slots[target].SetSoldier(selected, true);
     Post(0, SQUAD_MSG_SELECT_FREE, static_cast<uint32_t>(next));
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// Part 9g-xiv: a soldier's picture dragged and dropped
+
+namespace {
+
+// The screen's halves: the roster's (the left), the slots' (the right).
+constexpr float SCREEN_MIDDLE = 0.5f;
+// The dragged copy above its picture.
+constexpr float DRAG_HEIGHT = 0.1f;
+
+// The slot of a picture (its id), from the last; -1: none.
+int SlotOfPicture(const S_SquadSlot *slots, uint32_t id)
+{
+    for (int i = 4; i-- > 0;)
+        if (slots[i].picture == id)
+            return i;
+    return -1;
+}
+
+// The slot one of whose controls is `id`, from the last; -1: none.
+int SlotOfControl(const S_SquadSlot *slots, uint32_t id)
+{
+    for (int i = 4; i-- > 0;)
+        if (slots[i].HasControl(id))
+            return i;
+    return -1;
+}
+
+float CursorX(C_Cursor *cursor)
+{
+    S_vector pos;
+    cursor->GetPosition(&pos);
+    return pos.x;
+}
+
+}   // namespace
+
+bool C_SquadMenu::OnDragStart(void *menu, void *argument, C_Control *control, uint32_t notification, uint32_t value)
+{
+    auto *self = static_cast<C_SquadMenu *>(menu);
+    if (!control)
+        return false;
+    // Another soldier's picture: picked first.
+    if (self->m_selectedSoldier == -1 || control->GetIndex() != self->m_selectedSoldier) {
+        if (!OnSoldierControl(menu, argument, control, notification, value)) {
+            self->m_selectedSoldier = -1;
+            return false;
+        }
+    }
+    // A slot's soldier who stays: not dragged.
+    const int slot = SlotOfPicture(self->m_slots, control->GetId());
+    if (slot >= 0 && !self->m_slots[slot].removable) {
+        self->m_selectedSoldier = -1;
+        return false;
+    }
+    // Dragged from the slots' half: to be detached; from the roster's: assigned.
+    if (self->m_rosterSelected) {
+        if (CursorX(self->m_cursor) > SCREEN_MIDDLE) {
+            self->m_rosterSelected = false;
+            Post(ASSIGN_BUTTON, CONTROL_MSG_SET_TEXT_ID, ASSIGN_STYLE, TEXT_DETACH);
+        }
+    } else if (CursorX(self->m_cursor) < SCREEN_MIDDLE) {
+        self->m_rosterSelected = true;
+        Post(ASSIGN_BUTTON, CONTROL_MSG_SET_TEXT_ID, ASSIGN_STYLE, TEXT_ASSIGN);
+    }
+    // The dragged copy above the picture; the picture hidden.
+    I3D_frame *frame = control->GetFrame();
+    self->m_dragged = I3DGetDriver()->CreateVisual(frame->GetVisualType());
+    if (!self->m_dragged)
+        return true;
+    self->m_dragged->Duplicate(frame);
+    self->m_dragged->LinkTo(self->m_scene->GetPrimarySector(), 0);
+    self->m_dragged->SetDir(S_vector(0.0f, 0.0f, 1.0f), 0.0f);
+    const S_vector &at = frame->GetWorldPos();
+    self->m_dragged->SetPos(S_vector(at.x, at.y, at.z + DRAG_HEIGHT));
+    self->m_dragged->SetOn(true);
+    self->m_dragged->Update();
+    Post(control->GetId(), CONTROL_MSG_HIDE, 0);
+    return true;
+}
+
+bool C_SquadMenu::OnDragMove(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_SquadMenu *>(menu);
+    if (self->m_selectedSoldier < 0)
+        return false;
+    // (Quirk kept: the copy's depth the move's.)
+    const S_vector &at = self->m_dragged->GetWorldPos();
+    S_vector move;
+    self->m_cursor->GetMove(&move);
+    self->m_dragged->SetPos(S_vector(at.x + move.x, at.y + move.y, move.z));
+    self->m_dragged->Update();
+    return true;
+}
+
+bool C_SquadMenu::OnDrop(void *menu, void *argument, C_Control *control, uint32_t notification, uint32_t value)
+{
+    auto *self = static_cast<C_SquadMenu *>(menu);
+    if (self->m_selectedSoldier < 0)
+        return false;
+    if (self->m_dragged)
+        self->m_dragged->Release();
+    self->m_dragged = nullptr;
+    S_SquadSlot *slots = self->m_slots;
+    const int selected = self->m_selectedSoldier;
+    // Shown again: the picture dragged.
+    const auto showBack = [control]() { Post(control->GetId(), CONTROL_MSG_SHOW, 0); };
+    if (CursorX(self->m_cursor) > SCREEN_MIDDLE) {
+        // On the slots' half: onto the slot under the cursor.
+        const uint32_t hovered = self->m_cursor->GetHoveredId();
+        if (!self->m_rosterSelected) {
+            // A slot's soldier: the two slots swapped, the new slot's picture clicked.
+            int from = -1;
+            for (int i = 4; i-- > 0;) {
+                if (slots[i].profile == selected) {
+                    from = i;
+                    break;
+                }
+            }
+            const int to = SlotOfControl(slots, hovered);
+            if (from < 0 || to < 0 || from == to) {
+                showBack();
+                return true;
+            }
+            const bool fromRemovable = slots[from].removable;
+            slots[from].SetSoldier(slots[to].profile, slots[to].removable);
+            slots[to].SetSoldier(selected, fromRemovable);
+            self->m_selectedSoldier = -1;
+            Post(slots[to].picture, CONTROL_MSG_NOTIFY, CONTROL_NOTIFY_CLICK);
+            Post(0, CONTROL_MSG_NOTIFY, CONTROL_NOTIFY_05);
+            return true;
+        }
+        // A roster soldier onto a slot's soldier who may go: replaced.
+        const int to = SlotOfControl(slots, hovered);
+        if (to >= 0 && slots[to].profile != -1 && slots[to].removable) {
+            Post(ROSTER_CONTROLS, CONTROL_MSG_HIDE_ITEM, RosterPicture(selected));
+            Post(ROSTER_CONTROLS, CONTROL_MSG_SHOW_ITEM, RosterPicture(slots[to].profile));
+            Post(0, SQUAD_MSG_SELECT_FREE, static_cast<uint32_t>(selected));
+            slots[to].SetSoldier(selected, true);
+            self->m_selectedSoldier = -1;
+            Post(0, CONTROL_MSG_NOTIFY, CONTROL_NOTIFY_05);
+            return true;
+        }
+    } else if (self->m_rosterSelected) {
+        // A roster soldier back on the roster's half: his picture shown again.
+        if (CursorX(self->m_cursor) < SCREEN_MIDDLE) {
+            showBack();
+            return true;
+        }
+    } else {
+        // A slot's soldier who stays: his picture shown again.
+        const int slot = SlotOfPicture(slots, control->GetId());
+        if (slot >= 0 && !slots[slot].removable) {
+            showBack();
+            return false;
+        }
+    }
+    // Assigned (a roster soldier) or detached (a slot's, dropped on the roster's half).
+    if (self->m_rosterSelected || !(CursorX(self->m_cursor) > SCREEN_MIDDLE)) {
+        OnAssign(menu, argument, control, notification, value);
+        self->m_selectedSoldier = -1;
+        Post(0, CONTROL_MSG_NOTIFY, CONTROL_NOTIFY_05);
+        return true;
+    }
+    showBack();
+    return true;
+}
+
+bool C_SquadMenu::OnSoldierNotify13(void *menu, void *argument, C_Control *control, uint32_t notification, uint32_t value)
+{
+    auto *self = static_cast<C_SquadMenu *>(menu);
+    if (self->m_selectedSoldier == -1)
+        return false;
+    // On the slots' half, a slot's soldier who stays: his picture shown again.
+    if (CursorX(self->m_cursor) > SCREEN_MIDDLE) {
+        const int slot = SlotOfPicture(self->m_slots, control->GetId());
+        if (slot >= 0 && !self->m_slots[slot].removable) {
+            Post(control->GetId(), CONTROL_MSG_SHOW, 0);
+            return false;
+        }
+    }
+    OnAssign(menu, argument, control, notification, value);
+    Post(0, CONTROL_MSG_NOTIFY, CONTROL_NOTIFY_05);
+    self->m_selectedSoldier = -1;
     return true;
 }

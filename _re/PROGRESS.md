@@ -8073,6 +8073,20 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 344 errors in 64 files, 144 stubs. ret_audit --src: 52.
   - Ghidra: names/campaign_screens.txt (+1); 1 function in ported.txt. Stats: 9,102 of 12,306 functions by hand (82.2 % by size).
 
+  PART 9g-xiv DONE (2026-11-04): a soldier's picture dragged and dropped (game/squad_menu.cpp).
+  - OnDragStart 0x00693ae0 (CONTROL_NOTIFY_0A: another's picture picked first; a staying slot's soldier
+    not dragged; the screen's half (x 0.5) sets assign / remove; the copy C_SquadMenu +0x1BC above the
+    picture, in the primary sector; the picture hidden), OnDragMove 0x00693e50 (08: by the cursor's move,
+    its depth the move's, as the equipment screen's), OnDrop 0x00693f00 (09, from the asm: on the slots'
+    half a roster soldier replaces a removable slot's soldier, a slot's soldier swaps places with the
+    hovered slot (C_Cursor +0x34) and its new picture is clicked; else OnAssign, or the picture shown
+    again), OnSoldierNotify13 0x006945c0 (13: OnAssign, unless a staying slot's soldier on the slots'
+    half).
+  - Harness: sqDragStart, sqDragMove, sqDrop, sqNotify13. All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g14.py (134: all killed but 12, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 343 errors in 64 files, 143 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+4); 4 functions in ported.txt. Stats: 9,106 of 12,306 functions by hand (82.3 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

@@ -120,3 +120,8 @@
 008ae692 g_squadInfoShown @ bool
 # Part 9g-xiii: a soldier assigned or detached (src/game/squad_menu.cpp).
 00694f30 C_SquadMenu::OnAssign | bool __thiscall OnAssign(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+# Part 9g-xiv: a soldier's picture dragged and dropped (src/game/squad_menu.cpp).
+00693ae0 C_SquadMenu::OnDragStart | bool __thiscall OnDragStart(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00693e50 C_SquadMenu::OnDragMove | bool __thiscall OnDragMove(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00693f00 C_SquadMenu::OnDrop | bool __thiscall OnDrop(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+006945c0 C_SquadMenu::OnSoldierNotify13 | bool __thiscall OnSoldierNotify13(C_MenuState *this, void * argument, void * control, uint notification, uint value)

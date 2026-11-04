@@ -189,10 +189,6 @@ bool C_SquadMenu::OnAccept(void *, void *, C_Control *, uint32_t, uint32_t) { re
         return T(1); \
     }
 #undef SQ_DESCRIBE
-bool C_SquadMenu::OnDragStart(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
-bool C_SquadMenu::OnDragMove(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
-bool C_SquadMenu::OnDrop(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
-bool C_SquadMenu::OnDragCancel(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_SquadMenu::OnScreenTick(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_SquadMenu::OnScreenHidden(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
 bool C_SquadMenu::OnNameEdited(void *, void *, C_Control *, uint32_t, uint32_t) { return true; }
@@ -335,6 +331,7 @@ struct S_CampaignScreensResults {
     bool sqDead = true, sqFill = true, sqSelection = true, sqShown = true, sqSquadScreen = true, sqBuild = true;
     bool sqRoster = true, sqMedals = true, sqBuildSelect = true;
     bool sqStats = true, sqSelected = true, sqButtons = true, sqInfo = true, sqControl = true, sqAssign = true;
+    bool sqDragStart = true, sqDragMove = true, sqDrop = true, sqNotify13 = true;
 };
 
 // A message's values ("target id value value2[ value3][ 'text']"; value2 / value3 by name when known).
@@ -2783,7 +2780,7 @@ void CampaignScreensTest(I3D_scene *)
             bool ok = true;
             C_SquadMenu m;
             ok &= m.GetTypeId() == 3 && m.m_selectedSlot == 0 && m.m_selectedSoldier == -1 && m.m_rosterSelected &&
-                  m.m_unknown1BC == 0 && !m.m_rosterSelector && !m.m_selector && m.m_slots[3].removable &&
+                  !m.m_dragged && !m.m_rosterSelector && !m.m_selector && m.m_slots[3].removable &&
                   m.m_slots[3].profile == -1 && m.m_slots[3].rank == 0xFFFFFFFF;
             const auto start = [&](int mode) {
                 m.m_mode = mode;
@@ -3463,7 +3460,7 @@ void CampaignScreensTest(I3D_scene *)
             g_csNames[fn(&C_SquadMenu::OnDragStart)] = "start";
             g_csNames[fn(&C_SquadMenu::OnDragMove)] = "move";
             g_csNames[fn(&C_SquadMenu::OnDrop)] = "drop";
-            g_csNames[fn(&C_SquadMenu::OnDragCancel)] = "cancel";
+            g_csNames[fn(&C_SquadMenu::OnSoldierNotify13)] = "cancel";
             playMode.mode = PLAY_MODE_CAMPAIGN;
             playMode.singleMission = 0;
             S_ScreenDesc d("team members selection", "team members selection", 1u << 26);
@@ -3626,7 +3623,7 @@ void CampaignScreensTest(I3D_scene *)
             g_csNames[fn(&C_SquadMenu::OnDragStart)] = "start";
             g_csNames[fn(&C_SquadMenu::OnDragMove)] = "move";
             g_csNames[fn(&C_SquadMenu::OnDrop)] = "drop";
-            g_csNames[fn(&C_SquadMenu::OnDragCancel)] = "cancel";
+            g_csNames[fn(&C_SquadMenu::OnSoldierNotify13)] = "cancel";
             g_csNames[fn(&C_SquadMenu::OnAssign)] = "assign";
             g_csNames[fn(&C_SquadMenu::OnAccept)] = "accept";
             g_csNames[fn(&C_SquadMenu::SyncSquad)] = "sync";
@@ -3902,6 +3899,244 @@ void CampaignScreensTest(I3D_scene *)
             WM(r.sqAssign, ok);
         }
 
+
+        // --- (part 9g-xiv) a picture dragged: picked first (another's), a staying slot's soldier not; the
+        // assign / detach mode by the screen's half; the copy above it, the picture hidden; moved by the cursor;
+        // dropped: on the slots' half onto a slot (a roster soldier replacing its removable soldier; a slot's
+        // swapped), else assigned / detached (the picture shown again where nothing changes) ---
+        {
+            bool ok = true;
+            C_SquadMenu m;
+            roster(8);
+            for (int i = 0; i < 4; ++i) {
+                m.m_slots[i].picture = 0x4803000 + static_cast<uint32_t>(3 * i) * 0x1000;
+                m.m_slots[i].name = m.m_slots[i].picture - 0x2000;
+                m.m_slots[i].rank = m.m_slots[i].picture - 0x1000;
+            }
+            const auto set = [&](std::array<int, 4> profiles, std::array<bool, 4> removable) {
+                for (int i = 0; i < 4; ++i) {
+                    m.m_slots[i].profile = profiles[static_cast<size_t>(i)];
+                    m.m_slots[i].removable = removable[static_cast<size_t>(i)];
+                }
+            };
+            const auto slots = [&]() {
+                std::string s;
+                for (const S_SquadSlot &slot : m.m_slots)
+                    s += CmText("%d%s ", slot.profile, slot.removable ? "" : "!");
+                return s;
+            };
+            // The queue without the slots' pictures' and texts' own messages.
+            const auto queue = [&]() {
+                std::string s;
+                for (const S_ControlMessage &msg : g_controlMessages) {
+                    const bool slotOwn = msg.target >= 0x4800000 && msg.target < 0x4900000 &&
+                                         (msg.id == CONTROL_MSG_SET_TEXTURE || msg.id == CONTROL_MSG_SET_INDEX ||
+                                          msg.id == CONTROL_MSG_SET_TEXT || msg.id == CONTROL_MSG_SET_TEXT_ID);
+                    if (!slotOwn)
+                        s += CsMessage(msg) + "; ";
+                }
+                g_controlMessages.clear();
+                return s;
+            };
+            m.m_cursor = C_Cursor::Acquire(nullptr);
+            const auto cursor = [&](float x, uint32_t hovered) {
+                g_csCursor.position = S_vector(x, 0.0f, 0.0f);
+                std::memcpy(g_csCursor.room + 8, &hovered, sizeof hovered);
+            };
+            void **const copyVt = new void *[MR_SLOTS];
+            std::copy(g_msFrameVt, g_msFrameVt + MR_SLOTS, copyVt);
+            copyVt[0x4C / 4] = reinterpret_cast<void *>(&MrFake<0x4C, void *>);
+            copyVt[0x04 / 4] = reinterpret_cast<void *>(&MrFake<0x04>);
+            copyVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+            copyVt[0x0C / 4] = reinterpret_cast<void *>(&MrFake<0x0C, const S_vector *, float>);
+            S_MrObj *source = MsFrame("sqds"), *copy = MsFrame("sqdc");
+            source->vtable = copyVt;
+            copy->vtable = copyVt;
+            As<I3D_frame>(source)->m_worldMatrix.m[3][0] = 0.25f;
+            As<I3D_frame>(source)->m_worldMatrix.m[3][1] = -0.5f;
+            As<I3D_frame>(source)->m_worldMatrix.m[3][2] = 0.75f;
+            As<I3D_frame>(source)->m_frameFlags |= 0x20;
+            S_MrWorld world = MrWorld("sqd");
+            m.m_scene = As<I3D_scene>(world.scene);
+            void *const oldVisual = g_driverVtable[0x50 / 4];
+            g_driverVtable[0x50 / 4] = reinterpret_cast<void *>(&GmCreateVisual);
+            g_gmVisual = As<I3D_frame>(copy);
+            C_SqPicture rosterPic(As<I3D_frame>(source), 3);
+            S_CsPeek::SetId(&rosterPic, 0x4101040);
+            C_SqPicture slotPic(As<I3D_frame>(source), 5);
+            S_CsPeek::SetId(&slotPic, 0x4809000);
+            C_SqPicture otherPic(As<I3D_frame>(source), 6);
+            S_CsPeek::SetId(&otherPic, 0x4201000);
+            const auto start = [&](C_Control *c) {
+                g_gfLog.clear();
+                g_controlMessages.clear();
+                return C_SquadMenu::OnDragStart(&m, &m, c, CONTROL_NOTIFY_0A, 0);
+            };
+            set({1, 2, 5, -1}, {true, true, true, true});
+            ok &= !start(nullptr);
+            // The roster's picture, selected, on the roster's half: dragged to be assigned.
+            m.m_selectedSoldier = 3;
+            m.m_rosterSelected = true;
+            cursor(0.25f, 0);
+            ok &= start(&rosterPic) && m.m_dragged == As<I3D_frame>(copy) && m.m_rosterSelected && queue() == "4101040 1000004 0 0; " &&
+                  GmInOrder(Join(g_gfLog), {"sqds 4", "create visual 0", "sqdc 4c sqds", "sqdc 38 sector 0", "sqdc c (0 0 1) 0",
+                                            "sqdc 8 (0.25 -0.5 0.85)", "sqdc on 1", "sqdc 24"}) &&
+                  !MrHas("show stats 3");
+            // (From the slots' half: to be detached; a slot's from the roster's half: to be assigned.)
+            cursor(0.75f, 0);
+            ok &= start(&rosterPic) && !m.m_rosterSelected && queue() == "4900000 1000015 c a62; 4101040 1000004 0 0; ";
+            cursor(0.25f, 0);
+            m.m_selectedSoldier = 5;
+            ok &= start(&slotPic) && m.m_rosterSelected && queue() == "4900000 1000015 c a61; 4809000 1000004 0 0; ";
+            cursor(0.5f, 0);
+            ok &= start(&slotPic) && m.m_rosterSelected && queue() == "4809000 1000004 0 0; ";
+            // (Another's picture: picked first; not a soldier's: none.)
+            m.m_selectedSoldier = 1;
+            ok &= start(&rosterPic) && m.m_selectedSoldier == 3 && MrHas("show stats 3");
+            m.m_selectedSoldier = -1;
+            ok &= !start(&otherPic) && m.m_selectedSoldier == -1 && queue() == "";
+            // (A staying slot's soldier: not dragged.)
+            m.m_slots[2].removable = false;
+            m.m_selectedSoldier = 5;
+            ok &= !start(&slotPic) && m.m_selectedSoldier == -1 && queue() == "" && !MrHas("create visual 0");
+            m.m_slots[2].removable = true;
+            // (No visual made: the picture not hidden.)
+            g_gmVisual = nullptr;
+            m.m_selectedSoldier = 3;
+            ok &= start(&rosterPic) && !m.m_dragged && queue() == "";
+            g_gmVisual = As<I3D_frame>(copy);
+            C_SqPicture emptyPic(As<I3D_frame>(source), -1);
+            S_CsPeek::SetId(&emptyPic, 0x480C000);
+            m.m_selectedSoldier = -1;
+            ok &= !start(&emptyPic) && m.m_selectedSoldier == -1 && !MrHas("create visual 0");
+            m.m_rosterSelected = false;
+            m.m_selectedSoldier = 5;
+            cursor(0.5f, 0);
+            ok &= start(&slotPic) && !m.m_rosterSelected && queue() == "4809000 1000004 0 0; ";
+            C_SqPicture slot0Pic(As<I3D_frame>(source), 1);
+            S_CsPeek::SetId(&slot0Pic, 0x4803000);
+            m.m_slots[0].removable = false;
+            m.m_selectedSoldier = 1;
+            ok &= !start(&slot0Pic) && m.m_selectedSoldier == -1 && queue() == "";
+            m.m_slots[0].removable = true;
+            WM(r.sqDragStart, ok);
+
+            // Moved: by the cursor's move (its depth the move's).
+            m.m_dragged = As<I3D_frame>(copy);
+            As<I3D_frame>(copy)->m_worldMatrix.m[3][0] = 0.5f;
+            As<I3D_frame>(copy)->m_worldMatrix.m[3][1] = 0.25f;
+            As<I3D_frame>(copy)->m_worldMatrix.m[3][2] = 0.5f;
+            As<I3D_frame>(copy)->m_frameFlags |= 0x20;
+            g_csCursor.move = S_vector(0.125f, -0.25f, -1.0f);
+            m.m_selectedSoldier = 3;
+            g_gfLog.clear();
+            ok &= C_SquadMenu::OnDragMove(&m, nullptr, &rosterPic, CONTROL_NOTIFY_08, 0) && GfLogIs({"sqdc 8 (0.625 0 -1)", "sqdc 24"});
+            m.m_selectedSoldier = 0;
+            g_gfLog.clear();
+            ok &= C_SquadMenu::OnDragMove(&m, nullptr, &rosterPic, CONTROL_NOTIFY_08, 0) && GfLogIs({"sqdc 8 (0.625 0 -1)", "sqdc 24"});
+            m.m_selectedSoldier = -1;
+            g_gfLog.clear();
+            ok &= !C_SquadMenu::OnDragMove(&m, nullptr, &rosterPic, CONTROL_NOTIFY_08, 0) && g_gfLog.empty();
+            g_csCursor.move = S_vector(0.0f, 0.0f, 0.0f);
+            WM(r.sqDragMove, ok);
+
+            // Dropped.
+            const auto drop = [&](int selected, bool roster, C_Control *c, float x, uint32_t hovered) {
+                m.m_selectedSoldier = selected;
+                m.m_rosterSelected = roster;
+                m.m_dragged = nullptr;
+                cursor(x, hovered);
+                g_gfLog.clear();
+                g_controlMessages.clear();
+                return C_SquadMenu::OnDrop(&m, &m, c, CONTROL_NOTIFY_09, 0);
+            };
+            ok &= !drop(-1, true, &rosterPic, 0.75f, 0) && queue() == "";
+            // (The copy released.)
+            m.m_selectedSoldier = 3;
+            m.m_dragged = As<I3D_frame>(copy);
+            cursor(0.25f, 0);
+            g_gfLog.clear();
+            ok &= C_SquadMenu::OnDrop(&m, &m, &rosterPic, CONTROL_NOTIFY_09, 0) && !m.m_dragged && MrHas("sqdc 0") &&
+                  queue() == "4101040 1000003 0 0; ";
+            // A roster soldier onto a slot's (its name): replaced.
+            set({1, 2, 5, -1}, {true, true, true, true});
+            ok &= drop(3, true, &rosterPic, 0.75f, m.m_slots[2].name) &&
+                  queue() == "4101000 2000084 4101040 0; 4101000 2000083 4101060 0; 0 2000072 3 0; 0 10000a1 4005000 0; " &&
+                  slots() == "1 2 3 -1 " && m.m_selectedSoldier == -1;
+            // (Onto a staying one, an empty one, nothing: assigned as by the button.)
+            set({1, 2, 5, -1}, {true, true, false, true});
+            ok &= drop(4, true, &rosterPic, 0.75f, m.m_slots[2].picture) &&
+                  queue() == "4101000 2000084 4101050 0; 0 2000072 4 0; 0 10000a1 4005000 0; " && slots() == "1 2 5! 4 " &&
+                  m.m_selectedSoldier == -1;
+            set({1, 2, -1, -1}, {true, true, true, true});
+            ok &= drop(4, true, &rosterPic, 0.75f, 0) && slots() == "1 2 4 -1 ";
+            // (On the roster's half: shown again; the middle: assigned.)
+            ok &= drop(4, true, &rosterPic, 0.25f, 0) && queue() == "4101040 1000003 0 0; " && slots() == "1 2 4 -1 " &&
+                  m.m_selectedSoldier == 4;
+            ok &= drop(6, true, &rosterPic, 0.5f, 0) && slots() == "1 2 4 6 ";
+            // A slot's soldier onto another slot: swapped, the new place clicked.
+            set({1, 2, 5, -1}, {false, true, true, true});
+            ok &= drop(5, false, &slotPic, 0.75f, m.m_slots[0].rank) && slots() == "5 2 1! -1 " &&
+                  queue() == "4803000 10000a1 4001000 0; 0 10000a1 4005000 0; " && m.m_selectedSoldier == -1;
+            // (Onto itself, nothing: shown again.)
+            set({1, 2, 5, -1}, {true, true, true, true});
+            ok &= drop(5, false, &slotPic, 0.75f, m.m_slots[2].picture) && queue() == "4809000 1000003 0 0; " && slots() == "1 2 5 -1 ";
+            ok &= drop(5, false, &slotPic, 0.75f, 0x4101010) && queue() == "4809000 1000003 0 0; ";
+            ok &= drop(7, false, &slotPic, 0.75f, m.m_slots[0].picture) && queue() == "4809000 1000003 0 0; ";
+            // (On the roster's half: detached; a staying one shown again, false.)
+            ok &= drop(5, false, &slotPic, 0.25f, 0) && slots() == "1 2 -1 -1 " &&
+                  queue() == "4101000 2000083 4101060 0; 0 10000a1 4005000 0; " && m.m_selectedSoldier == -1;
+            set({1, 2, 5, -1}, {true, true, false, true});
+            ok &= !drop(5, false, &slotPic, 0.25f, 0) && queue() == "4809000 1000003 0 0; " && slots() == "1 2 5! -1 ";
+            set({0, 2, -1, -1}, {true, true, true, true});
+            ok &= drop(0, false, &slot0Pic, 0.75f, m.m_slots[1].picture) && slots() == "2 0 -1 -1 " &&
+                  queue() == "4806000 10000a1 4001000 0; 0 10000a1 4005000 0; ";
+            set({1, 2, -1, -1}, {true, true, true, true});
+            ok &= drop(4, true, &rosterPic, 0.75f, m.m_slots[0].name) && slots() == "4 2 -1 -1 " &&
+                  queue() == "4101000 2000084 4101050 0; 4101000 2000083 4101020 0; 0 2000072 4 0; 0 10000a1 4005000 0; ";
+            set({1, 2, -1, -1}, {false, true, true, true});
+            ok &= !drop(1, false, &slot0Pic, 0.25f, 0) && queue() == "4803000 1000003 0 0; " && slots() == "1! 2 -1 -1 ";
+            set({1, 2, 5, -1}, {true, true, true, true});
+            ok &= drop(5, false, &slotPic, 0.5f, 0) && slots() == "1 2 -1 -1 " && queue().find("4101000 2000083 4101060 0; ") == 0;
+            set({1, 2, 5, -1}, {true, true, false, true});
+            ok &= drop(5, false, &slotPic, 0.75f, m.m_slots[0].picture) && slots() == "5! 2 1 -1 ";
+            WM(r.sqDrop, ok);
+
+            // Notification 0x13: assigned / detached (a staying slot's soldier on the slots' half: shown again,
+            // false).
+            const auto n13 = [&](int selected, bool roster, C_Control *c, float x) {
+                m.m_selectedSoldier = selected;
+                m.m_rosterSelected = roster;
+                cursor(x, 0);
+                g_gfLog.clear();
+                g_controlMessages.clear();
+                return C_SquadMenu::OnSoldierNotify13(&m, &m, c, 0x4013000, 0);
+            };
+            set({1, 2, 5, -1}, {true, true, false, true});
+            ok &= !n13(-1, true, &rosterPic, 0.25f) && queue() == "";
+            ok &= !n13(5, false, &slotPic, 0.75f) && queue() == "4809000 1000003 0 0; " && m.m_selectedSoldier == 5;
+            ok &= n13(5, false, &slotPic, 0.25f) && queue() == "0 10000a1 4005000 0; " && m.m_selectedSoldier == -1 && slots() == "1 2 5! -1 ";
+            m.m_slots[2].removable = true;
+            ok &= n13(5, false, &slotPic, 0.75f) && slots() == "1 2 -1 -1 " && m.m_selectedSoldier == -1;
+            set({1, 2, -1, -1}, {false, true, true, true});
+            ok &= !n13(1, false, &slot0Pic, 0.75f) && queue() == "4803000 1000003 0 0; ";
+            set({1, 2, 5, -1}, {true, true, false, true});
+            ok &= n13(5, false, &slotPic, 0.5f) && queue() == "0 10000a1 4005000 0; " && m.m_selectedSoldier == -1;
+            set({1, 2, -1, -1}, {true, true, true, true});
+            ok &= n13(3, true, &rosterPic, 0.75f) && slots() == "1 2 3 -1 " &&
+                  queue() == "4101000 2000084 4101040 0; 0 2000072 3 0; 0 10000a1 4005000 0; ";
+            WM(r.sqNotify13, ok);
+
+            m.m_dragged = nullptr;
+            m.m_cursor = nullptr;
+            --g_csCursor.refs;
+            g_csCursor.position = S_vector(0.0f, 0.0f, 0.0f);
+            std::memset(g_csCursor.room + 8, 0, 4);
+            g_driverVtable[0x50 / 4] = oldVisual;
+            g_gmVisual = nullptr;
+            g_controlMessages.clear();
+        }
+
         g_epProfiles = oldProfiles;
         g_gameProfile.m_humanStore = oldStore;
         g_gameProfile.m_missionSquad = oldSquad;
@@ -3919,12 +4154,13 @@ void CampaignScreensTest(I3D_scene *)
                 "dbMessage %d dbBuild %d dbDiary %d dbDiaryPage %d dbWon %d dbScreen %d dbPanel %d dbObjectives %d dbResult %d dbShow %d dbSkills %d "
                 "dbRank %d dbMedals %d dbScroll %d sqSlot %d sqOneSoldier %d sqStart %d sqSlots %d sqSync %d "
                 "sqMessage %d sqSelect %d sqDead %d sqFill %d sqSelection %d sqShown %d sqSquadScreen %d sqBuild %d sqRoster %d sqMedals %d sqBuildSelect %d sqStats %d "
-                "sqSelected %d sqButtons %d sqInfo %d sqControl %d sqAssign %d\n", r.oeTable, r.oeDescribe,
+                "sqSelected %d sqButtons %d sqInfo %d sqControl %d sqAssign %d sqDragStart %d sqDragMove %d sqDrop %d "
+                "sqNotify13 %d\n", r.oeTable, r.oeDescribe,
                 r.oeBuild, r.oeInput, r.oeSlots, r.smStart, r.smMessage, r.smConsole, r.smPassword, r.smBuild, r.smTick,
                 r.smJoin, r.smNotify, r.vsCredits, r.vsMovie, r.vsFit, r.vsUpdate, r.vsScroll, r.vsRender, r.vsInput,
                 r.vsMovieState, r.dbMedal, r.dbResults, r.dbStore, r.dbStart, r.dbMessage, r.dbBuild, r.dbDiary, r.dbDiaryPage, r.dbWon,
                 r.dbScreen, r.dbPanel, r.dbObjectives, r.dbResult, r.dbShow, r.dbSkills,
                 r.dbRank, r.dbMedals, r.dbScroll, r.sqSlot, r.sqOneSoldier, r.sqStart, r.sqSlots, r.sqSync,
                 r.sqMessage, r.sqSelect, r.sqDead, r.sqFill, r.sqSelection, r.sqShown, r.sqSquadScreen, r.sqBuild, r.sqRoster, r.sqMedals, r.sqBuildSelect, r.sqStats, r.sqSelected,
-                r.sqButtons, r.sqInfo, r.sqControl, r.sqAssign);
+                r.sqButtons, r.sqInfo, r.sqControl, r.sqAssign, r.sqDragStart, r.sqDragMove, r.sqDrop, r.sqNotify13);
 }

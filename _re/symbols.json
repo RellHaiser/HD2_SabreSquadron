@@ -33033,6 +33033,26 @@
   "name": "C_SquadMenu::OnStop",
   "proto": "void __thiscall OnStop(C_MenuState *this)"
  },
+ "00693ae0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnDragStart",
+  "proto": "bool __thiscall OnDragStart(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00693e50": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnDragMove",
+  "proto": "bool __thiscall OnDragMove(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00693f00": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnDrop",
+  "proto": "bool __thiscall OnDrop(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006945c0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnSoldierNotify13",
+  "proto": "bool __thiscall OnSoldierNotify13(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00694810": {
   "module": "campaign_screens",
   "name": "C_SquadMenu::RemoveDeadSoldiers",
