@@ -643,3 +643,202 @@ bool C_SquadMenu::OnMedalHover(void *menu, void *, C_Control *control, uint32_t 
     }
     return true;
 }
+
+// ---------------------------------------------------------------------------
+// Part 9g-xii: the squad screen's stats, panel, places and buttons
+
+bool g_squadInfoShown = false;
+
+namespace {
+
+constexpr int CONTROL_SKILL_BAR = 0x16, CONTROL_INFO_TEXT = 0x1A;
+// The squad screen's top controls (their ids): the stats' panel, the other panel, the info button, the stats'
+// title, the selected soldiers' places, the assign button.
+constexpr uint32_t STATS_PANEL = 0x4200000, INFO_PANEL = 0x4300000, INFO_BUTTON = 0x4600000, STATS_TITLE = 0x4700000,
+                   SELECTED_PANEL = 0x4800000, ASSIGN_BUTTON = 0x4900000;
+// The controls' second index field (bits 20-25): the roster's group, the selected soldiers'.
+constexpr uint32_t CONTROL_INDEX_MASK = 0x3F00000, ROSTER_GROUP_INDEX = 0x100000, SELECTED_GROUP_INDEX = 0x800000;
+// The skills' names (0xA6E + the skill), the bars' axis; "Selected soldier info" / "Soldier stats", the stats'
+// titles; "Assign" / "Detach"; "Accept and continue", "Auto assign", "Back", the screen's titles (the
+// operation's squad, the squad picked), the draft's.
+constexpr uint32_t TEXT_SKILLS = 0xA6E, BAR_AXIS_Z = 2;
+constexpr uint32_t TEXT_STATS_INFO = 0xA6A, TEXT_INFO_TITLE = 0xA6C;
+constexpr uint32_t TEXT_ASSIGN = 0xA61, TEXT_DETACH = 0xA62, TEXT_ACCEPT = 0xA5E, TEXT_AUTO_ASSIGN = 0xA5D, TEXT_BACK = 0xA5F,
+                   TEXT_OPERATION_SQUAD = 0xA5B, TEXT_PICK_SQUAD = 0xA5C, TEXT_VERSION = 0x7D6, TEXT_DRAFT = 0xA63;
+constexpr uint32_t SKILL_STYLE = 0xB, ASSIGN_STYLE = 0xC, TITLE_STYLE = 0xA, VERSION_STYLE = 0x28;
+// The selector over a picked picture, before it.
+constexpr float SELECTOR_DEPTH = -0.1f;
+
+}   // namespace
+
+bool C_SquadMenu::DescribeStats(S_ScreenDesc *desc, I3D_frame *)
+{
+    // The skills' rows: their names' and values' texts, their bars.
+    static const char *const SKILLS[][3] = {
+        {"text_shooting", "hlcpct00", "text_shooting01"},     {"text_strenght", "hlcpct01", "text_strenght01"},
+        {"text_health", "hlcpct02", "text_health01"},         {"text_endurance", "hlcpct03", "text_endurance01"},
+        {"text_stealth", "hlcpct04", "text_stealth01"},       {"text_first aid", "hlcpct05", "text_first aid01"},
+        {"text_lockpick", "hlcpct06", "text_lockpick01"}};
+    S_ControlDesc *panel = desc->AddControl(CONTROL_GROUP, "Panel02");
+    AddDescMessage(panel, 0, CONTROL_MSG_IGNORE_INPUT, 0);
+    for (int i = 0; i < 7; ++i) {
+        S_ControlDesc *name = panel->AddChild(CONTROL_TEXT, SKILLS[i][0]);
+        AddDescMessage(name, 0, CONTROL_MSG_SET_MARGIN, 0);
+        AddDescMessage(name, 0, CONTROL_MSG_SET_TEXT_ID, SKILL_STYLE, TEXT_SKILLS + static_cast<uint32_t>(i));
+        S_ControlDesc *bar = panel->AddChild(CONTROL_SKILL_BAR, SKILLS[i][1]);
+        AddDescMessage(bar, 0, CONTROL_MSG_SET_BAR_AXIS, BAR_AXIS_Z);
+        AddDescMessage(bar, 0, CONTROL_MSG_SET_BAR_VALUE, 0, 0);
+        S_ControlDesc *value = panel->AddChild(CONTROL_TEXT, SKILLS[i][2]);
+        AddDescMessage(value, 0, CONTROL_MSG_SET_MARGIN, 0);
+        AddDescMessage(value, 0, CONTROL_MSG_SET_TEXT_ID, SKILL_STYLE, TEXT_BLANK);
+    }
+    return true;
+}
+
+bool C_SquadMenu::DescribePanel(S_ScreenDesc *desc, I3D_frame *)
+{
+    S_ControlDesc *panel = desc->AddControl(CONTROL_GROUP, "Panel03");
+    AddDescMessage(panel, 0, CONTROL_MSG_IGNORE_INPUT, 0);
+    AddDescMessage(panel, 0, CONTROL_MSG_HIDE, 0);
+    S_ControlDesc *text = panel->AddChild(CONTROL_INFO_TEXT, "text_05");
+    AddDescMessage(text, 0, CONTROL_MSG_SET_MARGIN, 1);
+    AddDescMessage(text, 0, CONTROL_MSG_IGNORE_INPUT, 0);
+    return true;
+}
+
+bool C_SquadMenu::DescribeSelected(S_ScreenDesc *desc, I3D_frame *model)
+{
+    // The slots' name, rank and picture.
+    static const char *const PLACES[4][3] = {{"text_name00", "text_team member00", "member00"},
+                                            {"text_name01", "text_team member01", "photo00"},
+                                            {"text_name02", "text_team member02", "photo01"},
+                                            {"text_name03", "text_team member03", "photo02"}};
+    I3D_frame *panel = I3DGetDriver()->CreateFrame(FRAME_DUMMY);
+    if (!panel)
+        return false;
+    panel->LinkTo(model, 0);
+    panel->SetPos(S_vector(0.0f, 0.0f, 0.0f));
+    panel->SetName("P_SelectedSol");
+    m_models.push_back(panel);
+    // Their frames under the panel's (the picture its own mesh).
+    for (const auto &place : PLACES) {
+        for (int k = 0; k < 3; ++k) {
+            if (k == 2) {
+                if (I3D_frame *picture = model->FindChildFrame(place[2], FRAME_MASK_VISUAL))
+                    OwnMesh(picture);
+            }
+            if (I3D_frame *frame = model->FindChildFrame(place[k], FRAME_MASK_VISUAL))
+                frame->LinkTo(panel, 1);
+        }
+    }
+    S_ControlDesc *group = desc->AddControl(CONTROL_GROUP, "P_SelectedSol");
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    for (int i = 0; i < 4; ++i) {
+        S_SquadSlot &slot = m_slots[i];
+        slot.profile = -1;
+        S_ControlDesc *name = group->AddChild(CONTROL_TEXT, PLACES[i][0]);
+        AddDescMessage(name, 0, CONTROL_MSG_SET_TEXT_ID, SKILL_STYLE, TEXT_BLANK);
+        slot.name = name->id;
+        S_ControlDesc *rank = group->AddChild(CONTROL_TEXT, PLACES[i][1]);
+        AddDescMessage(rank, 0, CONTROL_MSG_SET_TEXT_ID, SKILL_STYLE, TEXT_BLANK);
+        slot.rank = rank->id;
+        S_ControlDesc *picture = group->AddChild(CONTROL_PICTURE, PLACES[i][2]);
+        slot.picture = picture->id;
+        AddDescMessage(picture, 0, CONTROL_MSG_SET_INDEX, 0xFFFFFFFF);
+        AddDescMessage(picture, 0, CONTROL_MSG_SET_TEXTURE, 0, 0);
+        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self, Callback(&C_SquadMenu::OnSoldierControl));
+        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_0A, self, Callback(&C_SquadMenu::OnDragStart));
+        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_08, self, Callback(&C_SquadMenu::OnDragMove));
+        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_09, self, Callback(&C_SquadMenu::OnDrop));
+        AddDescMessage(picture, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_13, self, Callback(&C_SquadMenu::OnDragCancel));
+    }
+    return true;
+}
+
+bool C_SquadMenu::DescribeButtons(S_ScreenDesc *desc, I3D_frame *)
+{
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    S_ControlDesc *assign = desc->AddControl(CONTROL_BUTTON, "bassign - detach");
+    AddDescMessage(assign, 0, CONTROL_MSG_SET_TEXT_ID, BUTTON_STYLE, TEXT_ASSIGN);
+    AddDescMessage(assign, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self, Callback(&C_SquadMenu::OnAssign));
+    S_ControlDesc *accept = desc->AddControl(CONTROL_BUTTON, "baccept and continue");
+    AddDescMessage(accept, 0, CONTROL_MSG_SET_TEXT_ID, BUTTON_STYLE, TEXT_ACCEPT);
+    AddDescMessage(accept, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self, Callback(&C_SquadMenu::OnAccept));
+    // The first operation (but the lone wolf's): the selection screen; else the squad kept, the next step.
+    S_ControlDesc *autoAssign = desc->AddControl(CONTROL_BUTTON, "bauto assign");
+    AddDescMessage(autoAssign, 0, CONTROL_MSG_SET_TEXT_ID, BUTTON_STYLE, TEXT_AUTO_ASSIGN);
+    C_Campaign *campaign = g_gameProfile.m_campaign;
+    if (campaign->GetCurrentIndex() == 0 && campaign->GetOperationIndex(0) == 0 &&
+        g_gameProfile.m_playMode->mode != PLAY_MODE_LONE_WOLF) {
+        AddDescMessage(autoAssign, 0, CONTROL_NOTIFY_CLICK | MENU_MSG_OPEN_POPUP, SELECTION_SCREEN);
+    } else {
+        AddDescMessage(autoAssign, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self, Callback(&C_SquadMenu::SyncSquad));
+        AddDescMessage(autoAssign, 0, CONTROL_NOTIFY_CLICK | MENU_MSG_NEXT, 0);
+    }
+    S_ControlDesc *back = desc->AddControl(CONTROL_BUTTON, "bback");
+    AddDescMessage(back, 0, CONTROL_MSG_SET_TEXT_ID, BUTTON_STYLE, TEXT_BACK);
+    AddDescMessage(back, 0, CONTROL_NOTIFY_CLICK | MENU_MSG_ESCAPE, 0);
+    AddDescMessage(desc->AddControl(CONTROL_TEXT, "text_screen"), 0, CONTROL_MSG_SET_TEXT_ID, TITLE_STYLE,
+                   m_mode == KIND_OPERATION ? TEXT_OPERATION_SQUAD : TEXT_PICK_SQUAD);
+    AddDescMessage(desc->AddControl(CONTROL_TEXT, "text_h&dversion"), 0, CONTROL_MSG_SET_TEXT_ID, VERSION_STYLE, TEXT_VERSION);
+    AddDescMessage(desc->AddControl(CONTROL_TEXT, "text_military service draft"), 0, CONTROL_MSG_SET_TEXT_ID, SKILL_STYLE,
+                   TEXT_DRAFT);
+    return true;
+}
+
+bool C_SquadMenu::OnSoldierInfo(void *, void *, C_Control *, uint32_t, uint32_t)
+{
+    // The stats or the other panel, the button's and the title's texts.
+    if (!g_squadInfoShown) {
+        Post(STATS_PANEL, CONTROL_MSG_HIDE, 0);
+        Post(INFO_PANEL, CONTROL_MSG_SHOW, 0);
+        Post(INFO_BUTTON, CONTROL_MSG_SET_TEXT_ID, ASSIGN_STYLE, TEXT_STATS_INFO);
+        Post(STATS_TITLE, CONTROL_MSG_SET_TEXT_ID, SKILL_STYLE, TEXT_INFO_TITLE);
+    } else {
+        Post(STATS_PANEL, CONTROL_MSG_SHOW, 0);
+        Post(INFO_PANEL, CONTROL_MSG_HIDE, 0);
+        Post(INFO_BUTTON, CONTROL_MSG_SET_TEXT_ID, ASSIGN_STYLE, TEXT_SOLDIER_INFO);
+        Post(STATS_TITLE, CONTROL_MSG_SET_TEXT_ID, SKILL_STYLE, TEXT_SOLDIER_STATS);
+    }
+    g_squadInfoShown = !g_squadInfoShown;
+    return true;
+}
+
+bool C_SquadMenu::OnSoldierControl(void *menu, void *argument, C_Control *control, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_SquadMenu *>(menu);
+    self->m_selectedSoldier = control ? control->GetIndex() : -1;
+    if (self->m_selectedSoldier == -1)
+        return false;
+    self->ShowStats();
+    if (self->m_selectedSoldier == -1)
+        return false;
+    // The roster's picture: "Assign"; a slot's: "Detach"; another: none selected.
+    switch (control->GetId() & CONTROL_INDEX_MASK) {
+    case ROSTER_GROUP_INDEX:
+        self->m_rosterSelected = true;
+        Post(ASSIGN_BUTTON, CONTROL_MSG_SET_TEXT_ID, ASSIGN_STYLE, TEXT_ASSIGN);
+        break;
+    case SELECTED_GROUP_INDEX:
+        self->m_rosterSelected = false;
+        Post(ASSIGN_BUTTON, CONTROL_MSG_SET_TEXT_ID, ASSIGN_STYLE, TEXT_DETACH);
+        break;
+    default:
+        self->m_selectedSoldier = -1;
+        return false;
+    }
+    PlaceRosterSelector(self, argument, control, 0, 0);
+    return true;
+}
+
+bool C_SquadMenu::PlaceRosterSelector(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    I3D_frame *selector = static_cast<C_SquadMenu *>(menu)->m_rosterSelector;
+    if (!selector)
+        return true;
+    selector->LinkTo(control->GetFrame(), 0);
+    selector->SetPosInline(S_vector(0.0f, 0.0f, SELECTOR_DEPTH));
+    selector->SetOn(true);
+    selector->Update();
+    return true;
+}

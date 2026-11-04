@@ -33008,6 +33008,26 @@
   "name": "C_SquadMenu::DescribeMedals",
   "proto": "void __thiscall DescribeMedals(C_MenuState *this, void * desc, void * model)"
  },
+ "00693320": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeStats",
+  "proto": "bool __thiscall DescribeStats(C_MenuState *this, void * desc, void * model)"
+ },
+ "006934f0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribePanel",
+  "proto": "bool __thiscall DescribePanel(C_MenuState *this, void * desc, void * model)"
+ },
+ "00693560": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeSelected",
+  "proto": "bool __thiscall DescribeSelected(C_MenuState *this, void * desc, void * model)"
+ },
+ "00693880": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::DescribeButtons",
+  "proto": "bool __thiscall DescribeButtons(C_MenuState *this, void * desc, void * model)"
+ },
  "00693a50": {
   "module": "campaign_screens",
   "name": "C_SquadMenu::OnStop",
@@ -33017,6 +33037,16 @@
   "module": "campaign_screens",
   "name": "C_SquadMenu::RemoveDeadSoldiers",
   "proto": "void __cdecl RemoveDeadSoldiers(void)"
+ },
+ "00694930": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnSoldierInfo",
+  "proto": "bool __thiscall OnSoldierInfo(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00694bc0": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::OnSoldierControl",
+  "proto": "bool __thiscall OnSoldierControl(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
  },
  "00694dd0": {
   "module": "campaign_screens",
@@ -33032,6 +33062,11 @@
   "module": "campaign_screens",
   "name": "C_SquadMenu::FillSlots",
   "proto": "void __thiscall FillSlots(C_MenuState *this)"
+ },
+ "00695d30": {
+  "module": "campaign_screens",
+  "name": "C_SquadMenu::PlaceRosterSelector",
+  "proto": "bool __thiscall PlaceRosterSelector(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
  },
  "00695dc0": {
   "module": "campaign_screens",
@@ -43553,6 +43588,12 @@
   "module": "campaign_screens",
   "name": "g_creditsIntro",
   "type": "int"
+ },
+ "008ae692": {
+  "data": true,
+  "module": "campaign_screens",
+  "name": "g_squadInfoShown",
+  "type": "bool"
  },
  "008ae8f4": {
   "data": true,

@@ -2,7 +2,8 @@
 // soldiers of the roster picked for the operation into the squad's four slots (the first the
 // player's), their stats and medals, the selection screen. Part 9g-ix: the class, the slots, starting,
 // stopping, the messages, the squad kept to the slots; 9g-x: building the screens, the selection screen;
-// 9g-xi: the roster and the medals; 9g-xii and on: the squad screen's other parts.
+// 9g-xi: the roster and the medals; 9g-xii: the stats, the places, the buttons, a soldier picked; 9g-xiii and
+// on: the dragging, the buttons' actions, the stats shown.
 #pragma once
 
 #include <cstdint>
@@ -20,6 +21,8 @@ extern const int g_operationMedalSoldiers[8][10];      // 0x00841cb8
 // The medals the squad screen shows (S_SoldierProfile::unknown28's ids).
 constexpr int SQUAD_MEDALS = 12;
 
+// The squad screen's other panel shown instead of the stats (the info button's; not reset with the screen).
+extern bool g_squadInfoShown;                          // 0x008ae692
 // A soldier's shown name: his own (the player's), else the full one.
 const C_str &GetProfileName(const S_SoldierProfile *profile);   // 0x006755d0 (__fastcall)
 
@@ -82,10 +85,14 @@ protected:
     // The first roster soldier from `index` on (at most the 30th) of no slot selected, else the last
     // before it (its control on the top screen); a negative `index`: nothing.
     void SelectFreeSoldier(int index);                  // 0x00694dd0
-    // A soldier's control picked (the roster's or a slot's): selected, his stats shown, the title.
-    // (Part 9g-xii.)
+    // A soldier's picture picked: his index selected (none: false), his stats shown; the roster's: "Assign", a
+    // slot's: "Detach" (the assign button's text), the roster's selector over it; another control's: none
+    // selected, false.
     static bool OnSoldierControl(void *menu, void *argument, C_Control *control, uint32_t notification,
                                  uint32_t value);       // 0x00694bc0
+    // The roster's selector (if any) on the control's frame, just before it, shown. True.
+    static bool PlaceRosterSelector(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                    uint32_t value);    // 0x00695d30
 
     // A campaign's dead squad soldiers (the last first): their items back, deleted.
     static void RemoveDeadSoldiers();                   // 0x00694810
@@ -134,18 +141,35 @@ protected:
     static bool OnDragCancel(void *menu, void *argument, C_Control *control, uint32_t notification,
                              uint32_t value);           // 0x006945c0
 
-    // (Parts 9g-xii .. 9g-xiii.) The squad screen's stats, panel, selected soldier and buttons; its
-    // callbacks.
+    // The stats' panel "Panel02" (taking no input): the skills' rows (their names 0xA6E + the skill, bars
+    // hlcpct00 .. 06, values). True.
     bool DescribeStats(S_ScreenDesc *desc, I3D_frame *model);        // 0x00693320
+    // The other panel "Panel03" (hidden, taking no input; its text "text_05"). True.
     bool DescribePanel(S_ScreenDesc *desc, I3D_frame *model);        // 0x006934f0
+    // The selected soldiers' places: their frames (each slot's name, rank and picture; the pictures' own
+    // meshes) under a frame "P_SelectedSol" of the model's (kept with the models); the group: each slot's
+    // texts and picture (its controls' ids the slot's; no soldier; picked: OnSoldierControl; dragged and
+    // dropped). No frame made: false.
     bool DescribeSelected(S_ScreenDesc *desc, I3D_frame *model);     // 0x00693560
+    // The buttons: assign / detach (OnAssign), accept and continue (OnAccept), auto assign (the first
+    // operation, not the lone wolf's: the selection screen opened; else the squad kept, the next step),
+    // back (Escape); the screen's title (the operation's squad, the squad picked), the version, the draft's
+    // text. True.
     bool DescribeButtons(S_ScreenDesc *desc, I3D_frame *model);      // 0x00693880
+    // (Part 9g-xiv.) The selected soldier's stats shown; the buttons' actions.
+    void ShowStats();                                   // 0x00696140 (__fastcall)
+    static bool OnAssign(void *menu, void *argument, C_Control *control, uint32_t notification,
+                         uint32_t value);               // 0x00694f30
+    static bool OnAccept(void *menu, void *argument, C_Control *control, uint32_t notification,
+                         uint32_t value);               // 0x00695740
     static bool OnScreenTick(void *menu, void *argument, C_Control *control, uint32_t notification,
                              uint32_t value);           // 0x00696d60
     static bool OnScreenHidden(void *menu, void *argument, C_Control *control, uint32_t notification,
                                uint32_t value);         // 0x00696ef0
     static bool OnNameEdited(void *menu, void *argument, C_Control *control, uint32_t notification,
                              uint32_t value);           // 0x00696c90
+    // The info button: the stats' panel hidden and the other shown (or back), the button's and the title's
+    // texts; g_squadInfoShown toggled. True.
     static bool OnSoldierInfo(void *menu, void *argument, C_Control *control, uint32_t notification,
                               uint32_t value);          // 0x00694930
 

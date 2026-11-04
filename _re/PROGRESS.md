@@ -8045,6 +8045,21 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 351 errors in 64 files, 147 stubs. ret_audit --src: 52.
   - Ghidra: names/campaign_screens.txt (+3); 3 functions in ported.txt. Stats: 9,094 of 12,306 functions by hand (82.0 % by size).
 
+  PART 9g-xii DONE (2026-11-04): the squad screen's stats, panel, places, buttons and a soldier picked
+  (game/squad_menu.cpp).
+  - DescribeStats 0x00693320 ("Panel02": the skills' rows, bars hlcpct00 .. 06), DescribePanel 0x006934f0
+    ("Panel03", hidden), DescribeSelected 0x00693560 (from the asm: the slots' frames under "P_SelectedSol",
+    the pictures' own meshes; the slots' controls' ids), DescribeButtons 0x00693880 (assign / detach,
+    accept, auto assign: the first operation's opens the selection screen, else SyncSquad and the next
+    step; back; the titles), OnSoldierInfo 0x00694930 (the stats or the other panel; g_squadInfoShown
+    0x008ae692), OnSoldierControl 0x00694bc0 (the index selected, ShowStats, "Assign" / "Detach", the
+    selector), PlaceRosterSelector 0x00695d30 (a callback too: four stack arguments).
+  - Harness: sqStats, sqSelected, sqButtons, sqInfo, sqControl; the earlier selection tests now see the
+    real OnSoldierControl (ShowStats faked). All 14 factory checkers in both orders.
+  - Mutations: mutations/mutate_9g12.py (198: all killed but 2, equivalent; recorded in its docstring).
+  - Build: MSVC clean. Tier 1: 345 errors in 64 files, 145 stubs. ret_audit --src: 52.
+  - Ghidra: names/campaign_screens.txt (+8); 7 functions in ported.txt. Stats: 9,101 of 12,306 functions by hand (82.1 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

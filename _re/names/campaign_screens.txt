@@ -109,3 +109,12 @@
 00692100 C_SquadMenu::DescribeRoster | bool __thiscall DescribeRoster(C_MenuState *this, void * desc, void * model)
 00692c40 C_SquadMenu::DescribeMedals | void __thiscall DescribeMedals(C_MenuState *this, void * desc, void * model)
 00690d50 C_SquadMenu::OnMedalHover | bool __thiscall OnMedalHover(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+# Part 9g-xii: the squad screen's stats, panel, places, buttons and a soldier picked (src/game/squad_menu.cpp).
+00693320 C_SquadMenu::DescribeStats | bool __thiscall DescribeStats(C_MenuState *this, void * desc, void * model)
+006934f0 C_SquadMenu::DescribePanel | bool __thiscall DescribePanel(C_MenuState *this, void * desc, void * model)
+00693560 C_SquadMenu::DescribeSelected | bool __thiscall DescribeSelected(C_MenuState *this, void * desc, void * model)
+00693880 C_SquadMenu::DescribeButtons | bool __thiscall DescribeButtons(C_MenuState *this, void * desc, void * model)
+00694930 C_SquadMenu::OnSoldierInfo | bool __thiscall OnSoldierInfo(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00694bc0 C_SquadMenu::OnSoldierControl | bool __thiscall OnSoldierControl(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+00695d30 C_SquadMenu::PlaceRosterSelector | bool __thiscall PlaceRosterSelector(C_MenuState *this, void * argument, void * control, uint notification, uint value)
+008ae692 g_squadInfoShown @ bool
