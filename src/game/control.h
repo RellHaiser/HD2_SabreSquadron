@@ -179,6 +179,7 @@ public:
     uint32_t GetId() const { return m_id; }
     I3D_frame *GetFrame() const { return m_frame; }
     int GetIndex() const { return m_index; }
+    int GetType() const { return m_type; }
     bool IsInactive() const { return m_inactive; }
     bool IsShown() const { return m_shown; }
     // The control with `id` among this one's descendants (`up`: first up the parents to the top,

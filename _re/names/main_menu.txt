@@ -90,3 +90,8 @@
 00637a40 C_MainMenu::OnPasswordInput | bool __thiscall OnPasswordInput(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
 00637c10 C_MainMenu::OnServerPassword | bool __thiscall OnServerPassword(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
 00637fd0 C_MainMenu::OnParentalLockCode | bool __thiscall OnParentalLockCode(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+# Part 9h-xi: the filters screen; the menu's control helpers.
+00638aa0 C_MainMenu::OnFiltersShown | bool __thiscall OnFiltersShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00638910 C_MainMenu::OnFiltersAccept | bool __thiscall OnFiltersAccept(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+0062c5b0 C_MainMenu::SendToControl | void __thiscall SendToControl(C_MainMenu *this, uint id, void * message)
+0062c5d0 C_MainMenu::GetControlValue | int __thiscall GetControlValue(C_MainMenu *this, uint id)

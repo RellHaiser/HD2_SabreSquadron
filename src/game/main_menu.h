@@ -192,7 +192,23 @@ protected:
     // the popup closed; Escape / no: the check box, the kept messages dropped, closed. The step ended. True.
     static bool OnParentalLockCode(void *menu, void *argument, C_Control *control, uint32_t notification,
                                    uint32_t value);     // 0x00637fd0
+    // The filters screen (the model unused): shown: OnFiltersShown; the game types (any, 0 .. 3), the ping
+    // box (digits, 0 .. 9999), six check boxes (responding, dedicated, not empty, not full, no password, the
+    // current version), accept (back; OnFiltersAccept), back, the texts. True.
     bool DescribeFiltersScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00638660
+    // Shown: the controls set from m_mpSettings' filter (no ping filter: 9999). True.
+    static bool OnFiltersShown(void *menu, void *argument, C_Control *control, uint32_t notification,
+                               uint32_t value);         // 0x00638aa0
+    // Accept: the filter set from the controls (a change marks it changed), saved; the browser's server list
+    // cleared, the browser's step 6 (the servers asked for again). True.
+    static bool OnFiltersAccept(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                uint32_t value);        // 0x00638910
+    // A copy of `message` handled by the control `id` (none: nothing).
+    void SendToControl(uint32_t id, const S_ControlMessage &message);   // 0x0062c5b0
+    // The control `id`'s value: check boxes, spin controls, check groups: their state (GET_CHECKED's value);
+    // titled edit boxes: their number (GET_NUMBER's value2); titled combo boxes: GET_TEXT's value; another
+    // kind or none: -1.
+    int GetControlValue(uint32_t id);                   // 0x0062c5d0
     bool DescribeGameInfoScreen(S_ScreenDesc *desc, I3D_frame *model);      // 0x0062f4b0
     bool DescribeConnectScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00632150
     bool DescribeAddServerScreen(S_ScreenDesc *desc, I3D_frame *model);     // 0x006370c0

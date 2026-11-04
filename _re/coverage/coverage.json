@@ -11,16 +11,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "AI & controllers",
   "state": "ported",
-  "functions": 1278,
-  "bytes": 446968,
+  "functions": 1281,
+  "bytes": 447475,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "AI & controllers",
   "state": "pending",
-  "functions": 311,
-  "bytes": 96165,
+  "functions": 308,
+  "bytes": 95658,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -115,16 +115,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "ported",
-  "functions": 987,
-  "bytes": 290095,
+  "functions": 1029,
+  "bytes": 336843,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "pending",
-  "functions": 460,
-  "bytes": 130652,
+  "functions": 418,
+  "bytes": 83904,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -155,16 +155,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Network",
   "state": "ported",
-  "functions": 25,
-  "bytes": 2157,
+  "functions": 28,
+  "bytes": 3910,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Network",
   "state": "pending",
-  "functions": 778,
-  "bytes": 109710,
+  "functions": 775,
+  "bytes": 107957,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {

@@ -8337,6 +8337,28 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 317 errors in 58 files, 131 stubs. ret_audit --src: 52.
   - Stats: 9,193 of 12,306 functions by hand (83.9 % by size).
 
+  PART 9h-xi DONE (2026-11-04): the main menu's filters screen (game/main_menu.cpp).
+  - DescribeFiltersScreen 0x00638660 (RET 8: the model unused): shown OnFiltersShown; "scan style" (a spin
+    control: GetGameTypeTextId -1 .. 3), "bshort00" (titled edit box 0x9FB, range 0 .. 9999, digits only), six
+    highlight check boxes ("responding only" 0xA00, "dedicated only", "that are not empty", "that are not full",
+    "without password" 0xA04, "current version" 0xA13; the names have spaces, Ghidra's labels show '_'),
+    "baccept" (back, OnFiltersAccept), "bback", the title 0x9F7, the version, two labels.
+  - OnFiltersShown 0x00638aa0: the controls from m_mpSettings->m_filter (game type + 1 selected; the ping as
+    SET_NUMBER value2, none (not above 0) shown as 9999; the six flags SET_CHECKED). OnFiltersAccept 0x00638910:
+    each value differing kept and the filter marked changed; m_mpSettings->Save(); the browser's server list
+    (0x20900000) cleared through the menu's HandleMessage; m_step 6.
+  - The menu's helpers: SendToControl 0x0062c5b0 (a copy to the control found), GetControlValue 0x0062c5d0
+    (check boxes / highlight check boxes / check groups / spin controls: GET_CHECKED's value; titled edit
+    boxes: GET_NUMBER's value2 (checked in the asm); titled combo boxes: GET_TEXT's value; else -1).
+    C_Control::GetType() added (m_type, +0x54).
+  - Tier 1: the helpers' callers' decompiles (0x0062d030, 0x0062d490, 0x0066da30) re-exported: the stale
+    C_MainMenu::FUN_0062c5d0 became C_MainMenu::C_MainMenu::GetControlValue (+20 errors) until then.
+  - Harness: flDescribe, flShown, flAccept, flHelpers; the build test's filters screen real (the old check for
+    "scan" now matches the exact log line, not "scan style"). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h11.py: 81: 70 killed, 11 not building.
+  - Build: MSVC clean. Tier 1: 312 errors in 57 files, 130 stubs. ret_audit --src: 52.
+  - Stats: 9,198 of 12,306 functions by hand (84.0 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

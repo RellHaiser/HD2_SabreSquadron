@@ -146,19 +146,19 @@ f_006285d0.cpp:1145:33: invalid operands of types 'tier1::C_str_rep*' and 'unsig
     CStack_94.rep = CStack_94.rep & 0xffffff00;
 f_006285d0.cpp:1175:33: invalid operands of types 'tier1::C_str_rep*' and 'unsigned int' to binary 'operator&'
     CStack_94.rep = CStack_94.rep & 0xffffff00;
-f_006285d0.cpp:3372:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:3311:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_006285d0.cpp:3382:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:3321:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_006285d0.cpp:3392:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:3331:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_006285d0.cpp:3402:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:3341:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_006285d0.cpp:3412:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:3351:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_006285d0.cpp:3422:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:3361:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_006285d0.cpp:3432:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:3371:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
 f_0062f470.cpp:167:56: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     (ExceptionList = &local_c, iVar5 = (**(code **)(*g_menuState + 0x1c))(),
@@ -184,16 +184,6 @@ f_00633450.cpp:1777:3: '_local_8' was not declared in this scope; did you mean '
     _local_8 = CONCAT31(uStack_7,1);
 f_00633450.cpp:63:76: invalid 'static_cast' from type 'unsigned char*' to type 'uint64_t' {aka 'long long unsigned int'}
     int *local_220;
-f_00638620.cpp:182:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00638620.cpp:199:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00638620.cpp:209:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00638620.cpp:219:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_00638620.cpp:229:47: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
 f_00696f70.cpp:565:105: cannot convert 'char**' to 'uint32_t*' {aka 'unsigned int*'}

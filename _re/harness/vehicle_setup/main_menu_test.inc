@@ -173,6 +173,24 @@ struct C_PwBox : C_Control {
         return true;
     }
 };
+extern std::map<std::string, std::vector<uint8_t>> g_files;   // (car_stubs.cpp)
+// (Part 9h-xi: a filter screen's control: its kind, its value; its messages logged.)
+struct C_FlControl : C_Control {
+    C_FlControl(uint32_t id, C_Control *parent, int type, int v) : C_Control(nullptr, id, parent), value(v)
+    {
+        m_type = type;
+    }
+    int value;
+    bool HandleMessage(S_ControlMessage *m) override
+    {
+        GfLog("fl %x %x %x %x", m_id, m->id, m->value, static_cast<uint32_t>(m->value2));
+        if (m->id == CONTROL_MSG_GET_CHECKED || m->id == CONTROL_MSG_GET_TEXT)
+            m->value = static_cast<uint32_t>(value);
+        else if (m->id == CONTROL_MSG_GET_NUMBER)
+            m->value2 = static_cast<uintptr_t>(value);
+        return true;
+    }
+};
 bool C_PlayerProfile::Save()
 {
     GfLog("save profile");
@@ -196,7 +214,6 @@ bool C_PlayerProfile::GetLastSaveText(C_str *mode, C_str *mission, C_str *date) 
     }
 MM_DESCRIBE(DescribeBrowserScreen, "browser")
 MM_DESCRIBE(DescribeCreateServerScreen, "create")
-MM_DESCRIBE(DescribeFiltersScreen, "filters")
 MM_DESCRIBE(DescribeGameInfoScreen, "gameinfo")
 MM_DESCRIBE(DescribeConnectScreen, "connect")
 MM_DESCRIBE(DescribeAddServerScreen, "addserver")
@@ -249,7 +266,8 @@ struct S_MainMenuResults {
          mpLists = true, mpDescribe = true, mpSaveSlot = true, mpPick = true,
          mxCampaign = true, mxSingle = true, mxMessages = true, mxSecret = true, mxStart = true, mxOperation = true,
          ciDescribe = true, ciShown = true, ciPick = true,
-         pwDescribe = true, pwServer = true, pwLock = true;
+         pwDescribe = true, pwServer = true, pwLock = true,
+         flDescribe = true, flShown = true, flAccept = true, flHelpers = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -1605,6 +1623,168 @@ void MainMenuTest(I3D_scene *scene)
         m.m_step = 0;
     }
 
+    // --- (part 9h-xi) the filters screen: its description; shown; accepted; the menu's control helpers ---
+    {
+        C_MainMenu m;
+        const auto Is = [](const std::string &got, const std::string &want) {
+            if (got != want)
+                std::printf("FILTERS %s\nFILTERS expected %s\n", got.c_str(), want.c_str());
+            return got == want;
+        };
+        g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnFiltersShown)] = "shown";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnFiltersAccept)] = "accept";
+        {
+            bool ok = true;
+            S_ScreenDesc d("Server Filters", "server filters", 11u << 26);
+            ok &= m.DescribeFiltersScreen(&d, nullptr) && d.messages.size() == 1 &&
+                  Is(CsMessage(d.messages[0]), "0 1000007 400d000 self shown");
+            std::string names;
+            for (const S_ControlDesc *c : d.controls)
+                names += CmText("%x %s %x|", c->type, c->name.c_str(), c->id);
+            ok &= Is(names, "10 scan style 2c100000|e bshort00 2c200000|24 responding only 2c300000|24 dedicated only 2c400000|"
+                            "24 that are not empty 2c500000|24 that are not full 2c600000|24 without password 2c700000|"
+                            "24 current version 2c800000|14 baccept 2c900000|14 bback 2ca00000|13 text_screen 2cb00000|"
+                            "13 text_h&dversion 2cc00000|13 text_scan style 2cd00000|13 text_show servers 2ce00000|");
+            if (d.controls.size() == 14) {
+                ok &= Is(CsTree(d.controls[0]), "10 scan style 2c100000: 0 1000067 1b57 0 0 1000067 1b58 0 0 1000067 1b59 0"
+                                                " 0 1000067 1b5a 0 0 1000067 1b5b 0;") &&
+                      Is(CsTree(d.controls[1]), "e bshort00 2c200000: 0 1000015 d 9fb 0 10000a0 0 270f 0 100006f 1 0;");
+                const uint32_t texts[] = {0xA00, 0xA01, 0xA02, 0xA03, 0xA04, 0xA13};
+                for (int i = 0; i < 6; ++i)
+                    ok &= Is(CsTree(d.controls[2 + i]),
+                             CmText("24 %s %x: 0 1000015 d %x;", d.controls[2 + i]->name.c_str(), 0x2c300000 + 0x100000 * i, texts[i]));
+                ok &= Is(CsTree(d.controls[8]), "14 baccept 2c900000: 0 1000015 d 9fc 0 6001003 0 0 0 1000007 4001000 self accept;") &&
+                      Is(CsTree(d.controls[9]), "14 bback 2ca00000: 0 1000015 d 9fd 0 6001003 0 0;") &&
+                      Is(CsTree(d.controls[10]), "13 text_screen 2cb00000: 0 1000015 a 9f7;") &&
+                      Is(CsTree(d.controls[11]), "13 text_h&dversion 2cc00000: 0 1000015 28 7d6;") &&
+                      Is(CsTree(d.controls[12]), "13 text_scan style 2cd00000: 0 1000015 b 9fa;") &&
+                      Is(CsTree(d.controls[13]), "13 text_show servers 2ce00000: 0 1000015 b 9f8;");
+            }
+            WM(r.flDescribe, ok);
+        }
+        // The filters screen (11) with its controls; the browser (8) logging.
+        C_MsScreen filters(nullptr, "flscreen", 11u << 26), browser(nullptr, "flbrowser", 8u << 26);
+        std::vector<C_FlControl *> controls;
+        const int kinds[] = {0x10, 0xE, 0x24, 9, 0x27, 0x24, 0x24, 0x24};
+        for (int i = 0; i < 8; ++i) {
+            controls.push_back(new C_FlControl(0x2c100000 + 0x100000 * static_cast<uint32_t>(i), &filters, kinds[i], 0));
+            filters.m_children.push_back(controls.back());
+        }
+        m.m_screens.assign(12, nullptr);
+        m.m_screens[8] = &browser;
+        m.m_screens[11] = &filters;
+        C_MpMenuSettings settings;
+        m.m_mpSettings = &settings;
+        S_ServerFilter &filter = settings.m_filter;
+        {
+            // Shown: the controls set from the filter (no ping filter: 9999).
+            bool ok = true;
+            filter.gameType = 2;
+            filter.maxPing = 0;
+            filter.hideUnreachable = true;
+            filter.dedicatedOnly = false;
+            filter.hideEmpty = true;
+            filter.hideFull = false;
+            filter.noPassword = true;
+            filter.sameVersion = true;
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnFiltersShown(&m, nullptr, nullptr, 0, 0) &&
+                  MsLogIs({"fl 2c100000 100006d 3 0", "fl 2c200000 1000078 d 270f", "fl 2c300000 100006d 1 0",
+                           "fl 2c400000 100006d 0 0", "fl 2c500000 100006d 1 0", "fl 2c600000 100006d 0 0",
+                           "fl 2c700000 100006d 1 0", "fl 2c800000 100006d 1 0"}, g_gfLog);
+            filter.maxPing = 250;
+            filter.gameType = -1;
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnFiltersShown(&m, nullptr, nullptr, 0, 0) && g_gfLog.size() == 8 &&
+                  g_gfLog[0] == "fl 2c100000 100006d 0 0" && g_gfLog[1] == "fl 2c200000 1000078 d fa";
+            filter.maxPing = 1;
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnFiltersShown(&m, nullptr, nullptr, 0, 0) && g_gfLog[1] == "fl 2c200000 1000078 d 1";
+            WM(r.flShown, ok);
+        }
+        {
+            // Accept: each control's value kept (a change marks the filter changed); saved; the browser's list
+            // cleared, its step 6.
+            bool ok = true;
+            const int values[] = {3, 400, 0, 1, 1, 0, 1, 1};
+            for (int i = 0; i < 8; ++i)
+                controls[static_cast<size_t>(i)]->value = values[i];
+            filter.gameType = 2;
+            filter.maxPing = 400;
+            filter.hideUnreachable = false;
+            filter.dedicatedOnly = true;
+            filter.hideEmpty = true;
+            filter.hideFull = false;
+            filter.noPassword = true;
+            filter.sameVersion = true;
+            filter.changed = false;
+            m.m_step = 0;
+            g_files.clear();
+            g_gfLog.clear();
+            const auto saved = [] {
+                for (const auto &f : g_files)
+                    if (f.first.find("MPSetings.sav") != std::string::npos)
+                        return true;
+                return false;
+            };
+            ok &= C_MainMenu::OnFiltersAccept(&m, nullptr, nullptr, 0, 0) && !filter.changed && m.m_step == 6 && saved() &&
+                  MsLogIs({"fl 2c100000 100006c 0 0", "fl 2c200000 1000079 0 0", "fl 2c300000 100006c 0 0",
+                           "fl 2c400000 100006c 0 0", "fl 2c500000 100006c 0 0", "fl 2c600000 100006c 0 0",
+                           "fl 2c700000 100006c 0 0", "fl 2c800000 100006c 0 0", "flbrowser message 20900000 2000018 0"},
+                          g_gfLog);
+            // Each one changed alone: kept, changed.
+            for (int i = 0; i < 8; ++i) {
+                filter.changed = false;
+                const int old = controls[static_cast<size_t>(i)]->value;
+                controls[static_cast<size_t>(i)]->value = i == 0 ? 1 : i == 1 ? 25 : old ? 0 : 1;
+                ok &= C_MainMenu::OnFiltersAccept(&m, nullptr, nullptr, 0, 0) && filter.changed;
+                filter.changed = false;
+                ok &= C_MainMenu::OnFiltersAccept(&m, nullptr, nullptr, 0, 0) && !filter.changed;
+                controls[static_cast<size_t>(i)]->value = old;
+                C_MainMenu::OnFiltersAccept(&m, nullptr, nullptr, 0, 0);
+            }
+            ok &= filter.gameType == 2 && filter.maxPing == 400 && !filter.hideUnreachable && filter.dedicatedOnly &&
+                  filter.hideEmpty && !filter.hideFull && filter.noPassword && filter.sameVersion;
+            controls[0]->value = 0;
+            controls[1]->value = 9;
+            controls[2]->value = 5;
+            ok &= C_MainMenu::OnFiltersAccept(&m, nullptr, nullptr, 0, 0) && filter.gameType == -1 && filter.maxPing == 9 &&
+                  filter.hideUnreachable;
+            g_files.clear();
+            WM(r.flAccept, ok);
+        }
+        {
+            // The helpers: a control's value by its kind (none / another kind: -1); a copy sent (none: nothing).
+            bool ok = true;
+            C_FlControl *combo = new C_FlControl(0x2cf00000, &filters, 0x28, 77);
+            C_FlControl *other = new C_FlControl(0x2c050000, &filters, 0x14, 5);
+            filters.m_children.push_back(combo);
+            filters.m_children.push_back(other);
+            controls[1]->value = 321;
+            controls[3]->value = 1;
+            controls[4]->value = 4;
+            g_gfLog.clear();
+            ok &= m.GetControlValue(0x2c200000) == 321 && m.GetControlValue(0x2c400000) == 1 &&
+                  m.GetControlValue(0x2c500000) == 4 && m.GetControlValue(0x2cf00000) == 77 &&
+                  m.GetControlValue(0x2c050000) == -1 && m.GetControlValue(0x2c0a0000) == -1 && m.GetControlValue(0) == -1 &&
+                  MsLogIs({"fl 2c200000 1000079 0 0", "fl 2c400000 100006c 0 0", "fl 2c500000 100006c 0 0",
+                           "fl 2cf00000 200002f 0 0"}, g_gfLog);
+            S_ControlMessage message;
+            message.id = 0x1234;
+            message.value = 7;
+            message.value2 = 8;
+            g_gfLog.clear();
+            m.SendToControl(0x2cf00000, message);
+            m.SendToControl(0x2c0a0000, message);
+            ok &= MsLogIs({"fl 2cf00000 1234 7 8"}, g_gfLog);
+            WM(r.flHelpers, ok);
+        }
+        m.m_mpSettings = nullptr;
+        m.m_screens.clear();
+        m.m_step = 0;
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -1637,7 +1817,7 @@ void MainMenuTest(I3D_scene *scene)
                                                         "gameinfo", "confirm", "password"});
         const std::string log = Join(g_gfLog);
         ok &= GmInOrder(log, {"scan", "describe browser 20000000", "describe create 24000000",
-                              "describe filters 2c000000", "describe gameinfo 30000000", "describe connect 34000000",
+                              "describe gameinfo 30000000", "describe connect 34000000",
                               "describe addserver 38000000"}) &&
               log.find("describe ", log.find("describe addserver") + 1) == std::string::npos;
         ok &= m.m_screens.size() == 15 && S_CsPeek::Callbacks(m.m_screens[1]) == 1 && S_CsPeek::Callbacks(m.m_screens[2]) == 1 &&
@@ -1659,7 +1839,7 @@ void MainMenuTest(I3D_scene *scene)
         g_cacheFailName = "change_profile";
         g_menuScreens.clear();
         g_gfLog.clear();
-        ok &= m.BuildScreens() && m.m_screens.size() == 14 && Join(g_gfLog).find("scan") == std::string::npos;
+        ok &= m.BuildScreens() && m.m_screens.size() == 14 && std::find(g_gfLog.begin(), g_gfLog.end(), "scan") == g_gfLog.end();
         g_cacheFailName.clear();
         for (size_t i = 1; i < m.m_screens.size(); ++i)
             delete m.m_screens[i];
@@ -1684,10 +1864,12 @@ void MainMenuTest(I3D_scene *scene)
                 "pfDifficulty %d pfMessage %d pfButtons %d pfEscape %d pfCreate %d pfRename %d "
                 "spShown %d spHover %d spClick %d mpLists %d mpDescribe %d mpSaveSlot %d mpPick %d mxCampaign %d mxSingle %d"
                 " mxMessages %d mxSecret %d mxStart %d mxOperation %d ciDescribe %d ciShown %d ciPick %d"
-                " pwDescribe %d pwServer %d pwLock %d\n",
+                " pwDescribe %d pwServer %d pwLock %d flDescribe %d flShown %d"
+                " flAccept %d flHelpers %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
                 r.mpSaveSlot, r.mpPick, r.mxCampaign, r.mxSingle, r.mxMessages, r.mxSecret, r.mxStart, r.mxOperation,
-                r.ciDescribe, r.ciShown, r.ciPick, r.pwDescribe, r.pwServer, r.pwLock);
+                r.ciDescribe, r.ciShown, r.ciPick, r.pwDescribe, r.pwServer, r.pwLock,
+                r.flDescribe, r.flShown, r.flAccept, r.flHelpers);
 }

@@ -27846,6 +27846,16 @@
   "name": "C_MainMenu::DescribeCreateServerScreen",
   "proto": "bool __thiscall DescribeCreateServerScreen(C_MainMenu *this, void * desc, void * model)"
  },
+ "0062c5b0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::SendToControl",
+  "proto": "void __thiscall SendToControl(C_MainMenu *this, uint id, void * message)"
+ },
+ "0062c5d0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::GetControlValue",
+  "proto": "int __thiscall GetControlValue(C_MainMenu *this, uint id)"
+ },
  "0062f4b0": {
   "module": "main_menu",
   "name": "C_MainMenu::DescribeGameInfoScreen",
@@ -27914,6 +27924,16 @@
   "module": "main_menu",
   "name": "C_MainMenu::DescribeFiltersScreen",
   "proto": "bool __thiscall DescribeFiltersScreen(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00638910": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnFiltersAccept",
+  "proto": "bool __thiscall OnFiltersAccept(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00638aa0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnFiltersShown",
+  "proto": "bool __thiscall OnFiltersShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "00638e00": {
   "module": "main_menu",

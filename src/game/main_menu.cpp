@@ -1480,3 +1480,152 @@ bool C_MainMenu::OnParentalLockCode(void *menu, void *, C_Control *control, uint
     self->m_step = 0;
     return true;
 }
+
+// ---- the filters screen (part 9h-xi) ----------------------------------------------------------------------
+
+namespace {
+
+// The controls' kinds GetControlValue asks: check boxes, spin controls, highlight check boxes, check groups
+// (their state / pick), titled edit boxes (their number), titled combo boxes (their text's value).
+constexpr int CONTROL_CHECK_BOX = 9, CONTROL_TITLED_EDIT = 0xE, CONTROL_SPIN = 0x10, CONTROL_HIGHLIGHT_CHECK = 0x24,
+              CONTROL_CHECK_GROUP = 0x27, CONTROL_TITLED_COMBO = 0x28;
+// The filters screen's controls (screen 11's): the game type, the ping, the six check boxes.
+constexpr uint32_t FILTERS_SCREEN = static_cast<uint32_t>(MAIN_SCREEN_FILTERS) << SCREEN_INDEX_SHIFT;
+constexpr uint32_t FILTERS_GAME_TYPE = FILTERS_SCREEN | 0x100000, FILTERS_PING = FILTERS_SCREEN | 0x200000,
+                   FILTERS_FIRST_CHECK = FILTERS_SCREEN | 0x300000;
+constexpr uint32_t CONTROL_INDEX_STEP = 0x100000;
+// The game types listed (-1: any .. 3).
+constexpr int FIRST_GAME_TYPE = -1, GAME_TYPE_END = 4;
+// The ping box's range, its style; no ping filter shown as the most.
+constexpr uint32_t PING_MAX = 9999, STYLE_PING = 0xD;
+// The browser's server list (cleared on accept); the browser's step then (refresh).
+constexpr uint32_t BROWSER_SERVER_LIST = 0x20900000;
+constexpr int STEP_REFRESH_SERVERS = 6;
+
+// The six check boxes (in order) and their filter flags.
+bool S_ServerFilter::*const FILTER_CHECKS[] = {&S_ServerFilter::hideUnreachable, &S_ServerFilter::dedicatedOnly,
+                                               &S_ServerFilter::hideEmpty,       &S_ServerFilter::hideFull,
+                                               &S_ServerFilter::noPassword,      &S_ServerFilter::sameVersion};
+const struct {
+    const char *name;
+    uint32_t text;
+} FILTER_CHECK_NAMES[] = {{"responding only", 0xA00}, {"dedicated only", 0xA01},   {"that are not empty", 0xA02},
+                          {"that are not full", 0xA03}, {"without password", 0xA04}, {"current version", 0xA13}};
+
+S_ControlMessage FilterMessage(uint32_t id, uint32_t value, uintptr_t value2 = 0)
+{
+    S_ControlMessage message;
+    message.id = id;
+    message.value = value;
+    message.value2 = value2;
+    return message;
+}
+
+} // namespace
+
+void C_MainMenu::SendToControl(uint32_t id, const S_ControlMessage &message)
+{
+    if (C_Control *control = FindControl(id))
+        control->HandleMessageCopy(message);
+}
+
+int C_MainMenu::GetControlValue(uint32_t id)
+{
+    C_Control *control = FindControl(id);
+    if (!control)
+        return -1;
+    S_ControlMessage ask;
+    switch (control->GetType()) {
+    case CONTROL_CHECK_BOX:
+    case CONTROL_HIGHLIGHT_CHECK:
+    case CONTROL_CHECK_GROUP:
+    case CONTROL_SPIN:
+        ask.id = CONTROL_MSG_GET_CHECKED;
+        break;
+    case CONTROL_TITLED_EDIT:
+        ask.id = CONTROL_MSG_GET_NUMBER;
+        control->HandleMessage(&ask);
+        return static_cast<int>(ask.value2);
+    case CONTROL_TITLED_COMBO:
+        ask.id = CONTROL_MSG_GET_TEXT;
+        break;
+    default:
+        return -1;
+    }
+    control->HandleMessage(&ask);
+    return static_cast<int>(ask.value);
+}
+
+bool C_MainMenu::DescribeFiltersScreen(S_ScreenDesc *desc, I3D_frame *)
+{
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    AddScreenMessage(desc, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_SHOWN, self, Callback(&OnFiltersShown));
+    S_ControlDesc *types = desc->AddControl(CONTROL_SPIN, "scan style");
+    for (int type = FIRST_GAME_TYPE; type < GAME_TYPE_END; ++type)
+        AddDescMessage(types, 0, CONTROL_MSG_ADD_ITEM, static_cast<uint32_t>(GetGameTypeTextId(type)));
+    S_ControlDesc *ping = desc->AddControl(CONTROL_TITLED_EDIT, "bshort00");
+    AddDescMessage(ping, 0, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON, 0x9FB);
+    AddDescMessage(ping, 0, CONTROL_MSG_SET_RANGE, 0, PING_MAX);
+    AddDescMessage(ping, 0, CONTROL_MSG_SET_DIGITS_ONLY, 1);
+    for (const auto &check : FILTER_CHECK_NAMES)
+        AddDescMessage(desc->AddControl(CONTROL_HIGHLIGHT_CHECK, check.name), 0, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON,
+                       check.text);
+    S_ControlDesc *accept = AddButton(desc, "baccept", 0x9FC);
+    AddDescMessage(accept, 0, FROM_SCREEN | MENU_MSG_BACK, 0);
+    AddDescMessage(accept, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self, Callback(&OnFiltersAccept));
+    AddMenuButton(desc, "bback", 0x9FD, MENU_MSG_BACK, 0);
+    AddText(desc, "text_screen", STYLE_TITLE, 0x9F7);
+    AddText(desc, "text_h&dversion", STYLE_VERSION, TEXT_VERSION);
+    AddText(desc, "text_scan style", STYLE_LABEL, 0x9FA);
+    AddText(desc, "text_show servers", STYLE_LABEL, 0x9F8);
+    return true;
+}
+
+bool C_MainMenu::OnFiltersShown(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    const S_ServerFilter &filter = self->m_mpSettings->m_filter;
+    self->SendToControl(FILTERS_GAME_TYPE, FilterMessage(CONTROL_MSG_SELECT_ITEM, static_cast<uint32_t>(filter.gameType + 1)));
+    self->SendToControl(FILTERS_PING, FilterMessage(CONTROL_MSG_SET_NUMBER, STYLE_PING,
+                                                   static_cast<uintptr_t>(filter.maxPing < 1 ? PING_MAX : filter.maxPing)));
+    uint32_t id = FILTERS_FIRST_CHECK;
+    for (bool S_ServerFilter::*check : FILTER_CHECKS) {
+        self->SendToControl(id, FilterMessage(CONTROL_MSG_SET_CHECKED, filter.*check));
+        id += CONTROL_INDEX_STEP;
+    }
+    return true;
+}
+
+bool C_MainMenu::OnFiltersAccept(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    S_ServerFilter &filter = self->m_mpSettings->m_filter;
+    // Each value changed: kept, the filter marked changed.
+    const int type = self->GetControlValue(FILTERS_GAME_TYPE);
+    if (type != filter.gameType + 1) {
+        filter.changed = true;
+        filter.gameType = type - 1;
+    }
+    const int ping = self->GetControlValue(FILTERS_PING);
+    if (ping != filter.maxPing) {
+        filter.maxPing = ping;
+        filter.changed = true;
+    }
+    uint32_t id = FILTERS_FIRST_CHECK;
+    for (bool S_ServerFilter::*check : FILTER_CHECKS) {
+        const bool on = self->GetControlValue(id) != 0;
+        if (on != filter.*check) {
+            filter.*check = on;
+            filter.changed = true;
+        }
+        id += CONTROL_INDEX_STEP;
+    }
+    self->m_mpSettings->Save();
+    // The browser's list emptied, its servers asked for again.
+    S_ControlMessage clear;
+    clear.target = BROWSER_SERVER_LIST;
+    clear.id = CONTROL_MSG_CLEAR;
+    self->HandleMessage(&clear);
+    self->m_step = STEP_REFRESH_SERVERS;
+    return true;
+}
