@@ -8413,6 +8413,27 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 308 errors in 56 files, 127 stubs. ret_audit --src: 52.
   - Stats: 9,209 of 12,306 functions by hand (84.6 % by size).
 
+  PART 9h-xiv DONE (2026-11-04): the create server screen's callbacks: shown, hidden, the host, the preset, start
+  (game/main_menu.cpp, game/mp_game_setup.cpp).
+  - OnCreateServerShown 0x0062c2a0 (the settings loaded; the host's name, the game type, internet (the session's
+    listing kind == 1), dedicated, the password and the port (SET_NUMBER: the text / value2), the voice codec,
+    the rotation), OnCreateServerHidden 0x0062c290 (saved), OnHostNameChanged 0x0062ca80 (notification 0x0B:
+    the box's text the server's name, none: the name shown again), OnMapPresetPicked 0x0062c970 (GET_TEXT's
+    value: the rotation set up), ShowPickedMaps 0x0062c780 (the current group's maps into the picked pool list;
+    the menu's hint fields (m_unknown00, m_on) hold a map line's drag: the dragged one current; nothing dragged:
+    the posts wrapped in CONTROL_MSG_NOTIFY leave / 0x05), RefreshStartButton 0x0062cbf0 (m_startable: maps and a
+    name).
+  - C_MpGameSetup: GetCurrentGroup 0x00617d50 (the rotation's group of the game type, another type: the last),
+    SetGameType 0x00619720, SelectRotation 0x00619af0 (0 .. 4; the first, "in order", every map of the list).
+    Fields named: gameType +0x18, voiceCodec +0x10, dedicated +0x15, rotation +0x6C. The stub's
+    S_MultiplayerSettings gains unknown174 (the listing kind). The mp_setup harness: 54 of 54.
+  - Harness: csSetup, csShown (through a saved MPSetings.sav: Load's own), csStart, csPicked, csHost.
+    All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h14.py (both files): 63: 51 killed, 11 not building, 1 equivalent (a Clear
+    whose lists are replaced right after).
+  - Build: MSVC clean. Tier 1: 308 errors in 56 files, 127 stubs. ret_audit --src: 52.
+  - Stats: 9,218 of 12,306 functions by hand (84.7 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

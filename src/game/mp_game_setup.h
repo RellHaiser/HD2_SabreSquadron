@@ -138,17 +138,23 @@ public:
     // The rotations (0x1B6: their index 0x1B5, the maps), the options (0x1B7), the rules (0x1B8), the
     // name (0x1AB), the password (0x1AC), the port (0x1AF).
     void Save(C_chunk &chunk) const;                // 0x00617df0
+    // The rotation set up's maps of the game type set up (0 .. 2; another: 3). (Part 9h-xiv.)
+    S_MpMapGroup &GetCurrentGroup();                // 0x00617d50 (__fastcall)
+    const S_MpMapGroup &GetCurrentGroup() const { return const_cast<C_MpGameSetup *>(this)->GetCurrentGroup(); }
+    void SetGameType(int type) { gameType = type; } // 0x00619720
+    // A rotation set up (0 .. 4; another: nothing); the first ("in order") made every map of the list.
+    void SelectRotation(int index);                 // 0x00619af0
 
     bool loaded = false;                            // +0x000 the map list was read
     C_str serverName;                               // +0x001 (unaligned in the original)
     C_str password;                                 // +0x005
     int port = 0;                                   // +0x00C
-    int unknown10 = 0;                              // +0x010 (saved in 0x1B7)
+    int voiceCodec = 0;                             // +0x010 the voice chat's codec (saved in 0x1B7)
     uint8_t unknown14 = 0;                          // +0x014
-    uint8_t unknown15 = 0;                          // +0x015
-    int unknown18 = 0;                              // +0x018
+    bool dedicated = false;                         // +0x015 a dedicated server
+    int gameType = 0;                               // +0x018 the game type set up
     S_MpMapGroup maps[MP_GAME_TYPES];               // +0x01C the list's (owned)
-    int unknown6C = 0;                              // +0x06C (saved in 0x1B7; the older 0x1AD: 0)
+    int rotation = 0;                               // +0x06C the rotation set up (saved in 0x1B7; the older 0x1AD: 0)
     S_MpRotation rotations[MP_ROTATIONS];           // +0x070
     S_MpGameRules rules[MP_GAME_TYPES] = {};        // +0x200
     int unknown360 = 0;                             // +0x360

@@ -27369,6 +27369,11 @@
   "name": "C_MpGameSetup::FindMap",
   "proto": "void * __thiscall FindMap(void *this, int type, void * name)"
  },
+ "00617d50": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::GetCurrentGroup",
+  "proto": "void * __fastcall GetCurrentGroup(void *this)"
+ },
  "00617df0": {
   "module": "main_menu",
   "name": "C_MpGameSetup::Save",
@@ -27390,8 +27395,14 @@
   "proto": "void __fastcall LoadMapList(void * setup)"
  },
  "00619720": {
-  "module": "zz_idioms",
-  "name": "set_field_18_619720"
+  "module": "main_menu",
+  "name": "C_MpGameSetup::SetGameType",
+  "proto": "void __thiscall SetGameType(void *this, int type)"
+ },
+ "00619af0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::SelectRotation",
+  "proto": "void __thiscall SelectRotation(void *this, int index)"
  },
  "0061a730": {
   "module": "main_menu",
@@ -27866,6 +27877,16 @@
   "name": "C_MainMenu::DescribeOptionsPanel",
   "proto": "bool __thiscall DescribeOptionsPanel(C_MainMenu *this, void * desc, void * model)"
  },
+ "0062c290": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnCreateServerHidden",
+  "proto": "bool __thiscall OnCreateServerHidden(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062c2a0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnCreateServerShown",
+  "proto": "bool __thiscall OnCreateServerShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "0062c5b0": {
   "module": "main_menu",
   "name": "C_MainMenu::SendToControl",
@@ -27875,6 +27896,26 @@
   "module": "main_menu",
   "name": "C_MainMenu::GetControlValue",
   "proto": "int __thiscall GetControlValue(C_MainMenu *this, uint id)"
+ },
+ "0062c780": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowPickedMaps",
+  "proto": "void __fastcall ShowPickedMaps(C_MainMenu *this)"
+ },
+ "0062c970": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMapPresetPicked",
+  "proto": "bool __thiscall OnMapPresetPicked(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062ca80": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnHostNameChanged",
+  "proto": "bool __thiscall OnHostNameChanged(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062cbf0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::RefreshStartButton",
+  "proto": "void __fastcall RefreshStartButton(C_MainMenu *this)"
  },
  "0062f4b0": {
   "module": "main_menu",

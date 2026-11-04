@@ -54,8 +54,8 @@ bool __stdcall dtaClose(int h)
 static void Dump(const C_MpGameSetup &setup)
 {
     std::printf("loaded %d name '%s' password '%s' port %d options %d %d %d %d %d\n", setup.loaded,
-                setup.serverName.c_str(), setup.password.c_str(), setup.port, setup.unknown10, setup.unknown14,
-                setup.unknown15, setup.unknown18, setup.unknown6C);
+                setup.serverName.c_str(), setup.password.c_str(), setup.port, setup.voiceCodec, setup.unknown14,
+                setup.dedicated, setup.gameType, setup.rotation);
     for (int type = 0; type < MP_GAME_TYPES; ++type) {
         std::printf("type %d: %d maps\n", type, static_cast<int>(setup.maps[type].maps.size()));
         for (const C_MpMap *map : setup.maps[type].maps) {

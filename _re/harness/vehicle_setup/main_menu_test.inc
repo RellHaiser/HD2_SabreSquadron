@@ -200,12 +200,8 @@ int C_NetGame::QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *), S
     return 1;
 }
 // (Part 9h-xiii: the create server screen's callbacks (a later sub-part's); the codecs' texts.)
-MM_CALLBACK(OnCreateServerShown)
-MM_CALLBACK(OnCreateServerHidden)
-MM_CALLBACK(OnHostNameChanged)
 MM_CALLBACK(OnServerStyleChanged)
 MM_CALLBACK(OnServerOptionChanged)
-MM_CALLBACK(OnMapPresetPicked)
 MM_CALLBACK(OnMapLineDoubleClick)
 MM_CALLBACK(OnMapLineDragStart)
 MM_CALLBACK(OnMapLineDragMove)
@@ -287,7 +283,7 @@ struct S_MainMenuResults {
          pwDescribe = true, pwServer = true, pwLock = true,
          flDescribe = true, flShown = true, flAccept = true, flHelpers = true,
          giDescribe = true, giRefresh = true, giShow = true, giStatus = true,
-         csDescribe = true;
+         csDescribe = true, csSetup = true, csShown = true, csStart = true, csPicked = true, csHost = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -2332,6 +2328,183 @@ void MainMenuTest(I3D_scene *scene)
         m.m_mpSettings = nullptr;
     }
 
+    // --- (part 9h-xiv) the create server screen: shown, hidden, the host, a preset, the picked maps, start ---
+    {
+        C_MainMenu m;
+        const auto Is = [](const std::string &got, const std::string &want) {
+            if (got != want)
+                std::printf("CSCALL %s\nCSCALL expected %s\n", got.c_str(), want.c_str());
+            return got == want;
+        };
+        C_MpMenuSettings settings;
+        m.m_mpSettings = &settings;
+        C_MpGameSetup &setup = settings.m_setup;
+        for (auto &group : setup.maps) {
+            for (C_MpMap *map : group.maps)
+                delete map;
+            group.maps.clear();
+        }
+        C_MpMap a(C_str("ma"), C_str("da")), b(C_str("mb"), C_str("db")), c(C_str("mc"), C_str("dc"));
+        setup.maps[0].maps = {&a, &b};
+        setup.maps[1].maps = {&c};
+        setup.maps[3].maps = {&b, &a, &c};
+        {
+            // The setup: the current group by rotation and game type (another type: the last); a rotation picked
+            // (out of range: nothing; the first: every map in the list's order).
+            bool ok = true;
+            setup.rotation = 2;
+            for (int type : {0, 1, 2, 3, 7}) {
+                setup.gameType = type;
+                ok &= &setup.GetCurrentGroup() == &setup.rotations[2].types[type > 3 ? 3 : type];
+            }
+            const C_MpGameSetup &constSetup = setup;
+            ok &= &constSetup.GetCurrentGroup() == &setup.rotations[2].types[3];
+            setup.SetGameType(1);
+            ok &= setup.gameType == 1;
+            setup.rotations[0].types[0].maps = {&c};
+            setup.rotations[0].types[2].maps = {&c};
+            setup.SelectRotation(-1);
+            setup.SelectRotation(5);
+            ok &= setup.rotation == 2;
+            setup.SelectRotation(4);
+            ok &= setup.rotation == 4 && setup.rotations[0].types[0].maps == std::vector<C_MpMap *>({&c});
+            setup.SelectRotation(0);
+            ok &= setup.rotation == 0;
+            for (int type = 0; type < 4; ++type)
+                ok &= setup.rotations[0].types[type].maps == setup.maps[type].maps;
+            WM(r.csSetup, ok);
+        }
+        {
+            // Shown: the settings loaded (the saved ones back); every control set. Hidden: saved.
+            bool ok = true;
+            setup.serverName = "Srv";
+            setup.gameType = 2;
+            setup.dedicated = true;
+            setup.password = "pw";
+            setup.port = 1234;
+            setup.voiceCodec = 3;
+            setup.rotation = 4;
+            g_files.clear();
+            settings.Save();
+            setup.serverName = "Other";
+            setup.gameType = 0;
+            setup.port = 1;
+            const int oldListing = g_mpSettings->unknown174;
+            g_mpSettings->unknown174 = 1;
+            CsQueue();
+            ok &= C_MainMenu::OnCreateServerShown(&m, nullptr, nullptr, 0, 0) &&
+                  Is(CsQueue(), "24100000 1000014 d 0 'Srv'; 24200000 100006d 2 0; 24400000 1000076 1 0; 24500000 1000076 1 0;"
+                                " 24711000 1000078 d 0 'pw'; 24712000 1000078 d 4d2; 24800000 100006d 3 0; 25200000 1000076 4 0; ");
+            g_mpSettings->unknown174 = 2;
+            setup.dedicated = false;
+            settings.Save();
+            ok &= C_MainMenu::OnCreateServerShown(&m, nullptr, nullptr, 0, 0) &&
+                  CsQueue().find("24400000 1000076 0 0; 24500000 1000076 0 0;") != std::string::npos;
+            g_mpSettings->unknown174 = oldListing;
+            g_files.clear();
+            setup.port = 4321;
+            ok &= C_MainMenu::OnCreateServerHidden(&m, nullptr, nullptr, 0, 0);
+            setup.port = 1;
+            settings.Load();
+            ok &= setup.port == 4321 && CsQueue() == "";
+            WM(r.csShown, ok);
+        }
+        {
+            // Start: on with maps in the current group and a name; else off.
+            bool ok = true;
+            setup.rotation = 1;
+            setup.gameType = 0;
+            setup.rotations[1].types[0].maps = {&a};
+            setup.serverName = "Srv";
+            m.m_startable = false;
+            m.RefreshStartButton();
+            ok &= m.m_startable && Is(CsQueue(), "24900000 1000002 0 0; ");
+            setup.serverName = "";
+            m.RefreshStartButton();
+            ok &= !m.m_startable && Is(CsQueue(), "24900000 1000001 0 0; ");
+            setup.serverName = "Srv";
+            setup.rotations[1].types[0].maps.clear();
+            m.RefreshStartButton();
+            ok &= !m.m_startable && Is(CsQueue(), "24900000 1000001 0 0; ");
+            WM(r.csStart, ok);
+        }
+        {
+            // The picked list: hidden, the current group's maps (the dragged one current), wrapped in notifications
+            // when nothing is dragged.
+            bool ok = true;
+            setup.rotations[1].types[0].maps = {&b, &a, &c};
+            m.m_hint.m_on = false;
+            m.m_hint.m_unknown00 = 1;
+            const auto entries = [&](int current) {
+                std::string q = "24307000 2000085 0 0; ";
+                const C_MpMap *const list[] = {&b, &a, &c};
+                for (int i = 0; i < 3; ++i)
+                    q += CmText("24307000 %x %x %x; ", i == current ? 0x1000064 : 0x1000067, i,
+                                static_cast<uint32_t>(reinterpret_cast<uintptr_t>(list[i])));
+                return q;
+            };
+            m.ShowPickedMaps();
+            ok &= Is(CsQueue(), "0 10000a1 4004000 0; " + entries(-1) + "0 10000a1 4005000 0; ");
+            m.m_hint.m_on = true;
+            m.ShowPickedMaps();
+            ok &= Is(CsQueue(), entries(1));
+            m.m_hint.m_on = false;
+            WM(r.csPicked, ok);
+        }
+        {
+            // The host edited (0x0B): its text the name (none: shown again); start refreshed. A preset picked.
+            bool ok = true;
+            C_PwBox host(0x24100000, nullptr);
+            host.text = "New";
+            setup.rotations[1].types[0].maps = {&a};
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnHostNameChanged(&m, nullptr, &host, CONTROL_NOTIFY_0B, 0) &&
+                  std::string(setup.serverName.c_str()) == "New" && MsLogIs({"box 0 200002f"}, g_gfLog) &&
+                  Is(CsQueue(), "24900000 1000002 0 0; ");
+            host.text = "";
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnHostNameChanged(&m, nullptr, &host, CONTROL_NOTIFY_0B, 0) &&
+                  std::string(setup.serverName.c_str()) == "New" && MsLogIs({"box 0 200002f", "box 0 1000014"}, g_gfLog) &&
+                  Is(CsQueue(), "24900000 1000002 0 0; ");
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnHostNameChanged(&m, nullptr, &host, CONTROL_NOTIFY_CLICK, 0) && g_gfLog.empty() &&
+                  CsQueue() == "";
+            // (The text restored: the name, in the button's style.)
+            struct C_CsHostLog : C_Control {
+                C_CsHostLog() : C_Control(nullptr, 0x24100000, nullptr) {}
+                std::string seen;
+                bool HandleMessage(S_ControlMessage *message) override
+                {
+                    if (message->id == CONTROL_MSG_SET_TEXT)
+                        seen = CmText("%x %s", message->value, message->text.c_str());
+                    return true;
+                }
+            } logged;
+            C_MainMenu::OnHostNameChanged(&m, nullptr, &logged, CONTROL_NOTIFY_0B, 0);
+            ok &= logged.seen == "d New";
+            CsQueue();
+            // A preset picked: that rotation; the picked maps; start.
+            C_MsScreen screen(nullptr, "csscreen", 9u << 26);
+            C_FlControl preset(0x25200000, &screen, 0x11, 0);
+            setup.rotation = 1;
+            ok &= C_MainMenu::OnMapPresetPicked(&m, nullptr, &preset, 0x400E000, 0) && setup.rotation == 0;
+            std::string q = CsQueue();
+            ok &= q.find("24307000 2000085 0 0; ") != std::string::npos && q.find("24900000 1000002 0 0; ") != std::string::npos;
+            preset.value = 3;
+            setup.rotations[3].types[0].maps.clear();
+            ok &= C_MainMenu::OnMapPresetPicked(&m, nullptr, &preset, 0x400E000, 0) && setup.rotation == 3;
+            q = CsQueue();
+            ok &= q.find("24900000 1000001 0 0; ") != std::string::npos;
+            ok &= C_MainMenu::OnMapPresetPicked(&m, nullptr, nullptr, 0x400E000, 0) && setup.rotation == 3 && CsQueue() == "";
+            WM(r.csHost, ok);
+        }
+        for (S_MpRotation &rotation : setup.rotations)
+            rotation.Clear();
+        for (auto &group : setup.maps)
+            group.maps.clear();
+        m.m_mpSettings = nullptr;
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -2423,7 +2596,7 @@ void MainMenuTest(I3D_scene *scene)
                 " mxMessages %d mxSecret %d mxStart %d mxOperation %d ciDescribe %d ciShown %d ciPick %d"
                 " pwDescribe %d pwServer %d pwLock %d flDescribe %d flShown %d"
                 " flAccept %d flHelpers %d giDescribe %d giRefresh %d giShow %d giStatus %d"
-                " csDescribe %d\n",
+                " csDescribe %d csSetup %d csShown %d csStart %d csPicked %d csHost %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
@@ -2431,5 +2604,5 @@ void MainMenuTest(I3D_scene *scene)
                 r.ciDescribe, r.ciShown, r.ciPick, r.pwDescribe, r.pwServer, r.pwLock,
                 r.flDescribe, r.flShown, r.flAccept, r.flHelpers,
                 r.giDescribe, r.giRefresh, r.giShow, r.giStatus,
-                r.csDescribe);
+                r.csDescribe, r.csSetup, r.csShown, r.csStart, r.csPicked, r.csHost);
 }

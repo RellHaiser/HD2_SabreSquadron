@@ -846,7 +846,7 @@ LAB_00743663:
       local_18 = pCVar18;
       pCVar20 = GetGameApp();
       C_GameApp__PrintMessage(pCVar20,pcVar19);
-      set_field_18_619720(pCVar18,0);
+      C_MpGameSetup__SetGameType(pCVar18,0);
       iVar7 = FUN_00617da0((int)pCVar18);
       if (*(int *)(iVar7 + 4) != 0) {
         iVar29 = *(int *)(iVar7 + 8) - *(int *)(iVar7 + 4) >> 2;
@@ -884,7 +884,7 @@ LAB_00743663:
       pCVar20 = GetGameApp();
       C_GameApp__PrintMessage(pCVar20,pcVar19);
       pCVar18 = local_18;
-      set_field_18_619720(local_18,1);
+      C_MpGameSetup__SetGameType(local_18,1);
       iVar7 = FUN_00617da0((int)pCVar18);
       if (*(int *)(iVar7 + 4) != 0) {
         iVar29 = *(int *)(iVar7 + 8) - *(int *)(iVar7 + 4) >> 2;
@@ -922,7 +922,7 @@ LAB_00743663:
       pCVar20 = GetGameApp();
       C_GameApp__PrintMessage(pCVar20,pcVar19);
       pCVar18 = local_18;
-      set_field_18_619720(local_18,2);
+      C_MpGameSetup__SetGameType(local_18,2);
       iVar7 = FUN_00617da0((int)pCVar18);
       if (*(int *)(iVar7 + 4) != 0) {
         iVar29 = *(int *)(iVar7 + 8) - *(int *)(iVar7 + 4) >> 2;
@@ -960,7 +960,7 @@ LAB_00743663:
       pCVar20 = GetGameApp();
       C_GameApp__PrintMessage(pCVar20,pcVar19);
       pCVar18 = local_18;
-      set_field_18_619720(local_18,3);
+      C_MpGameSetup__SetGameType(local_18,3);
       iVar7 = FUN_00617da0((int)pCVar18);
       if (*(int *)(iVar7 + 4) != 0) {
         iVar29 = *(int *)(iVar7 + 8) - *(int *)(iVar7 + 4) >> 2;

@@ -201,7 +201,7 @@ bool C_MainMenu__OnConnectMessage(C_MainMenu *_this,void *message, ...)
       if ((local_28 != 0) && (*local_28 = *local_28 - 1, *local_28 == 0)) {
         tier1_operator_delete(local_28);
       }
-      FUN_0062cbf0((int)_this);
+      C_MainMenu__RefreshStartButton();
       return true;
     }
   }

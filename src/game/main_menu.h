@@ -193,6 +193,11 @@ protected:
     // original passes the cooperative maps.)
     void DescribePickedMapList(S_ControlDesc *panel, const S_MpMapGroup &maps, I3D_frame *group,
                                I3D_frame *lineTemplate);   // 0x00629740
+    // The picked list: the current group's maps (the one dragged, by the hint's index, current), wrapped in
+    // leave / 0x05 notifications when nothing is dragged.
+    void ShowPickedMaps();                              // 0x0062c780 (__fastcall)
+    // Startable: the current group has maps and the server a name; start on or off.
+    void RefreshStartButton();                          // 0x0062cbf0 (__fastcall)
     // (The two lists' helper: a map line's callbacks: double click, drag started, moved, dropped.)
     static void AddMapLineCallbacks(S_ControlDesc *line, uintptr_t self);
     // The options panel: the internet / dedicated check boxes, its scroll bar, its list of rows (copies of the
@@ -201,16 +206,22 @@ protected:
     // false.
     bool DescribeOptionsPanel(S_ScreenDesc *desc, I3D_frame *model);   // 0x0062a060
     // (The create server screen's callbacks: a later sub-part.)
+    // Shown (part 9h-xiv): the settings loaded; the host's name, the game type, internet (the session's listing
+    // kind 1), dedicated, the password, the port, the voice codec, the rotation shown. True.
     static bool OnCreateServerShown(void *menu, void *argument, C_Control *control, uint32_t notification,
                                     uint32_t value);    // 0x0062c2a0
+    // Hidden: the settings saved. True.
     static bool OnCreateServerHidden(void *menu, void *argument, C_Control *control, uint32_t notification,
                                      uint32_t value);   // 0x0062c290
+    // The host's box edited (notification 0x0B): its text the server's name (none: the name shown again);
+    // start refreshed. True.
     static bool OnHostNameChanged(void *menu, void *argument, C_Control *control, uint32_t notification,
                                   uint32_t value);      // 0x0062ca80
     static bool OnServerStyleChanged(void *menu, void *argument, C_Control *control, uint32_t notification,
                                      uint32_t value);   // 0x0062cd50
     static bool OnServerOptionChanged(void *menu, void *argument, C_Control *control, uint32_t notification,
                                       uint32_t value);  // 0x0062d490
+    // A preset picked (none: nothing): that rotation set up, the picked maps shown, start refreshed. True.
     static bool OnMapPresetPicked(void *menu, void *argument, C_Control *control, uint32_t notification,
                                   uint32_t value);      // 0x0062c970
     static bool OnMapLineDoubleClick(void *menu, void *argument, C_Control *control, uint32_t notification,

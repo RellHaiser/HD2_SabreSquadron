@@ -108,3 +108,13 @@
 00629740 C_MainMenu::DescribePickedMapList | void __thiscall DescribePickedMapList(C_MainMenu *this, void * panel, void * maps, void * group, void * lineTemplate)
 0062a060 C_MainMenu::DescribeOptionsPanel | bool __thiscall DescribeOptionsPanel(C_MainMenu *this, void * desc, void * model)
 006acb60 GetVoiceCodecTextId | int __stdcall GetVoiceCodecTextId(int codec)
+# Part 9h-xiv: the create server screen's callbacks (shown, hidden, the host, the preset, start); the setup's.
+0062c2a0 C_MainMenu::OnCreateServerShown | bool __thiscall OnCreateServerShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+0062c290 C_MainMenu::OnCreateServerHidden | bool __thiscall OnCreateServerHidden(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+0062ca80 C_MainMenu::OnHostNameChanged | bool __thiscall OnHostNameChanged(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+0062c970 C_MainMenu::OnMapPresetPicked | bool __thiscall OnMapPresetPicked(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+0062c780 C_MainMenu::ShowPickedMaps | void __fastcall ShowPickedMaps(C_MainMenu *this)
+0062cbf0 C_MainMenu::RefreshStartButton | void __fastcall RefreshStartButton(C_MainMenu *this)
+00617d50 C_MpGameSetup::GetCurrentGroup | void * __fastcall GetCurrentGroup(void *this)
+00619720 C_MpGameSetup::SetGameType | void __thiscall SetGameType(void *this, int type)
+00619af0 C_MpGameSetup::SelectRotation | void __thiscall SelectRotation(void *this, int index)

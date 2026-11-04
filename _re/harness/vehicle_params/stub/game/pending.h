@@ -118,6 +118,7 @@ struct S_MultiplayerSettings {
     int warmup;                                         // (the multiplayer zone, part 7d) s
     bool dedicated;                                     // (the loading screen, part 8f-i)
     int sessionType;                                    // (the in-game menu's messages, part 9e-vii)
+    int unknown174;                                     // (the session listing kind: the create server screen, part 9h-xiv)
     // (The session menu, part 9g-ii.)
     char sessionName[0x168];
     uint8_t unknown17C[0x9C];

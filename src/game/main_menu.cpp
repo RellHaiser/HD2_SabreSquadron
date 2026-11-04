@@ -2109,3 +2109,99 @@ bool C_MainMenu::DescribeOptionsPanel(S_ScreenDesc *desc, I3D_frame *model)
     AddDescMessage(list, 0, CONTROL_MSG_REFRESH, 0);
     return true;
 }
+
+// ---- the create server screen's callbacks: shown, hidden, the host, the preset, start (part 9h-xiv) --------
+
+namespace {
+
+// The create server screen's controls: the host, the style, the check boxes, the start button, the password and
+// the port rows, the voice chat, the presets.
+constexpr uint32_t CREATE_HOST = 0x24100000, CREATE_STYLE = 0x24200000, CREATE_INTERNET = 0x24400000,
+                   CREATE_DEDICATED = 0x24500000, CREATE_PASSWORD = 0x24711000, CREATE_PORT = 0x24712000,
+                   CREATE_VOICE = 0x24800000, CREATE_START = 0x24900000, CREATE_PRESET = 0x25200000;
+// The session's listing kind: internet.
+constexpr int LISTING_INTERNET = 1;
+
+} // namespace
+
+bool C_MainMenu::OnCreateServerShown(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    self->m_mpSettings->Load();
+    const C_MpGameSetup &setup = self->m_mpSettings->m_setup;
+    PostText(CREATE_HOST, CONTROL_MSG_SET_TEXT, STYLE_BUTTON, setup.serverName);
+    PostTo(CREATE_STYLE, CONTROL_MSG_SELECT_ITEM, static_cast<uint32_t>(setup.gameType));
+    PostTo(CREATE_INTERNET, CONTROL_MSG_SET_CHECKED_QUIET, g_mpSettings->unknown174 == LISTING_INTERNET);
+    PostTo(CREATE_DEDICATED, CONTROL_MSG_SET_CHECKED_QUIET, setup.dedicated);
+    PostText(CREATE_PASSWORD, CONTROL_MSG_SET_NUMBER, STYLE_BUTTON, setup.password);
+    PostTo(CREATE_PORT, CONTROL_MSG_SET_NUMBER, STYLE_BUTTON, static_cast<uintptr_t>(setup.port));
+    PostTo(CREATE_VOICE, CONTROL_MSG_SELECT_ITEM, static_cast<uint32_t>(setup.voiceCodec));
+    PostTo(CREATE_PRESET, CONTROL_MSG_PICK_INDEX, static_cast<uint32_t>(setup.rotation));
+    return true;
+}
+
+bool C_MainMenu::OnCreateServerHidden(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    static_cast<C_MainMenu *>(menu)->m_mpSettings->Save();
+    // (The original returns what was left in AL; the notification drops it.)
+    return true;
+}
+
+bool C_MainMenu::OnHostNameChanged(void *menu, void *, C_Control *control, uint32_t notification, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if (notification == CONTROL_NOTIFY_0B) {
+        C_str &name = self->m_mpSettings->m_setup.serverName;
+        const C_str typed = ControlText(control);
+        if (typed.IsEmpty()) {
+            // None: the name kept, shown again.
+            S_ControlMessage restore;
+            restore.id = CONTROL_MSG_SET_TEXT;
+            restore.value = STYLE_BUTTON;
+            restore.text = name;
+            control->HandleMessage(&restore);
+        } else {
+            name = typed;
+        }
+        self->RefreshStartButton();
+    }
+    return true;
+}
+
+bool C_MainMenu::OnMapPresetPicked(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if (control) {
+        S_ControlMessage ask;
+        ask.id = CONTROL_MSG_GET_TEXT;
+        control->HandleMessage(&ask);
+        self->m_mpSettings->m_setup.SelectRotation(static_cast<int>(ask.value));
+        self->ShowPickedMaps();
+        self->RefreshStartButton();
+    }
+    return true;
+}
+
+void C_MainMenu::ShowPickedMaps()
+{
+    // (The menu's hint fields hold a map line's drag: its index, dragging.)
+    uint32_t current = 0xFFFFFFFF;
+    if (!m_hint.m_on)
+        Post(CONTROL_MSG_NOTIFY, CONTROL_NOTIFY_LEAVE);
+    else
+        current = static_cast<uint32_t>(m_hint.m_unknown00);
+    PostTo(CREATE_PICKED_LIST, CONTROL_MSG_HIDE_ALL, 0);
+    const std::vector<C_MpMap *> maps = m_mpSettings->m_setup.GetCurrentGroup().maps;
+    for (uint32_t i = 0; i < maps.size(); ++i)
+        PostTo(CREATE_PICKED_LIST, i != current ? CONTROL_MSG_ADD_ENTRY : CONTROL_MSG_ADD_CURRENT_ENTRY, i,
+               reinterpret_cast<uintptr_t>(maps[i]));
+    if (!m_hint.m_on)
+        Post(CONTROL_MSG_NOTIFY, CONTROL_NOTIFY_05);
+}
+
+void C_MainMenu::RefreshStartButton()
+{
+    const C_MpGameSetup &setup = m_mpSettings->m_setup;
+    m_startable = !setup.GetCurrentGroup().maps.empty() && !setup.serverName.IsEmpty();
+    PostTo(CREATE_START, m_startable ? CONTROL_MSG_ACTIVATE : CONTROL_MSG_DEACTIVATE, 0);
+}

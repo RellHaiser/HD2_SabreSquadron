@@ -140,21 +140,21 @@ f_005ac500.cpp:111:55: request for member '_8_4_' in '"\012ControlsEx - "', whic
     *(uint32_t *)(pcVar9 + 7) = "\nControlsEx - "._8_4_;
 f_005ac500.cpp:112:57: request for member '_12_2_' in '"\012ControlsEx - "', which is of non-class type 'const char [15]'
     *(uint16_t *)(pcVar9 + 0xb) = "\nControlsEx - "._12_2_;
-f_00616c10.cpp:115:5: 'empty_function_6e6ba0' was not declared in this scope; did you mean 'empty_function_6e4a10'?
+f_00616c10.cpp:97:5: 'empty_function_6e6ba0' was not declared in this scope; did you mean 'empty_function_6e4a10'?
     empty_function_6e6ba0();
-f_006285d0.cpp:1482:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:1119:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_006285d0.cpp:1492:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:1129:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_006285d0.cpp:1502:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:1139:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_006285d0.cpp:1512:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:1149:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_006285d0.cpp:1522:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:1159:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_006285d0.cpp:1532:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:1169:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
-f_006285d0.cpp:1542:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_006285d0.cpp:1179:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_28 = (C_str)(*(int *)local_28 - 1), *(int *)local_28 == 0)) {
 f_00633450.cpp:209:49: base operand of '->' is not a pointer
     DAT_008ae5ac = (C_MainMenu *)(DAT_008ae5ac->_pad_0004 + 0x14);

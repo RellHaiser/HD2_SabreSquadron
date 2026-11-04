@@ -35,24 +35,6 @@ uint32_t FUN_00616c40(...)
 }
 
 
-// 0x00617d50
-int FUN_00617d50(int param_1, ...)
-{
-  int iVar1;
-  iVar1 = *(int *)(param_1 + 0x18);
-  if (iVar1 == 0) {
-    return *(int *)(param_1 + 0x6c) * 0x50 + 0x70 + param_1;
-  }
-  if (iVar1 == 1) {
-    return *(int *)(param_1 + 0x6c) * 0x50 + 0x84 + param_1;
-  }
-  if (iVar1 == 2) {
-    return *(int *)(param_1 + 0x6c) * 0x50 + 0x98 + param_1;
-  }
-  return *(int *)(param_1 + 0x6c) * 0x50 + 0xac + param_1;
-}
-
-
 // 0x00617da0
 int FUN_00617da0(int param_1, ...)
 {
@@ -146,24 +128,16 @@ uint32_t C_XmlNode__dtor_C_XmlNode(uint32_t *param_1, ...)
 
 
 #endif
-// 0x00619720
-uint32_t set_field_18_619720(void *_this,uint32_t param_1, ...)
-{
-  *(uint32_t *)((int)_this + 0x18) = param_1;
-  return 0;
-}
-
-
 // 0x00619730
 uint32_t FUN_00619730(void *_this,uint32_t param_1, ...)
 {
   uint32_t *puVar1;
-  int iVar2;
+  void *pvVar2;
   uint32_t *puVar3;
   int iVar4;
-  iVar2 = FUN_00617d50((int)_this);
-  if (((-1 < (int)param_1) && (iVar4 = *(int *)(iVar2 + 4), iVar4 != 0)) &&
-     (puVar1 = *(uint32_t **)(iVar2 + 8), param_1 < (uint32_t)((int)puVar1 - iVar4 >> 2))) {
+  pvVar2 = C_MpGameSetup__GetCurrentGroup(_this);
+  if (((-1 < (int)param_1) && (iVar4 = *(int *)((int)pvVar2 + 4), iVar4 != 0)) &&
+     (puVar1 = *(uint32_t **)((int)pvVar2 + 8), param_1 < (uint32_t)((int)puVar1 - iVar4 >> 2))) {
     iVar4 = iVar4 + param_1 * 4;
     puVar3 = (uint32_t *)(iVar4 + 4);
     if (puVar3 != puVar1) {
@@ -173,7 +147,7 @@ uint32_t FUN_00619730(void *_this,uint32_t param_1, ...)
         puVar3++;
       } while (puVar3 != puVar1);
     }
-    *(int *)(iVar2 + 8) = *(int *)(iVar2 + 8) - 4;
+    *(int *)((int)pvVar2 + 8) = *(int *)((int)pvVar2 + 8) - 4;
   }
   return 0;
 }
@@ -183,7 +157,7 @@ uint32_t FUN_00619730(void *_this,uint32_t param_1, ...)
 uint32_t FUN_00619780(void *_this,int param_1,int param_2, ...)
 {
   int iVar1;
-  int iVar2;
+  void *pvVar2;
   int iVar3;
   uint32_t *puVar4;
   uint32_t *puVar5;
@@ -191,11 +165,11 @@ uint32_t FUN_00619780(void *_this,int param_1,int param_2, ...)
   int *piVar7;
   uint32_t uVar8;
   int *piVar9;
-  iVar2 = FUN_00617d50((int)_this);
+  pvVar2 = C_MpGameSetup__GetCurrentGroup(_this);
   iVar3 = param_1 * 4;
-  param_1 = *(int *)(iVar3 + *(int *)(iVar2 + 4));
-  puVar5 = *(uint32_t **)(iVar2 + 8);
-  iVar3 = *(int *)(iVar2 + 4) + iVar3;
+  param_1 = *(int *)(iVar3 + *(int *)((int)pvVar2 + 4));
+  puVar5 = *(uint32_t **)((int)pvVar2 + 8);
+  iVar3 = *(int *)((int)pvVar2 + 4) + iVar3;
   puVar4 = (uint32_t *)(iVar3 + 4);
   if (puVar4 != puVar5) {
     iVar3 = iVar3 - (int)puVar4;
@@ -204,30 +178,30 @@ uint32_t FUN_00619780(void *_this,int param_1,int param_2, ...)
       puVar4++;
     } while (puVar4 != puVar5);
   }
-  iVar3 = *(int *)(iVar2 + 4);
-  iVar1 = *(int *)(iVar2 + 8);
+  iVar3 = *(int *)((int)pvVar2 + 4);
+  iVar1 = *(int *)((int)pvVar2 + 8);
   piVar6 = (int *)(iVar3 + param_2 * 4);
   puVar4 = (uint32_t *)(iVar1 - 4);
-  *(uint32_t **)(iVar2 + 8) = puVar4;
-  if (*(int *)(iVar2 + 0xc) - (int)puVar4 >> 2 != 0) {
+  *(uint32_t **)((int)pvVar2 + 8) = puVar4;
+  if (*(int *)((int)pvVar2 + 0xc) - (int)puVar4 >> 2 != 0) {
     if ((int)puVar4 - (int)piVar6 >> 2 == 0) {
       uninitialized_copy4_61bcf0(piVar6,puVar4,piVar6 + 1);
       uninitialized_fill_n4_61bd20
-                (*(uint32_t **)(iVar2 + 8),
-                 1 - ((int)*(uint32_t **)(iVar2 + 8) - (int)piVar6 >> 2),&param_1);
-      piVar7 = *(int **)(iVar2 + 8);
+                (*(uint32_t **)((int)pvVar2 + 8),
+                 1 - ((int)*(uint32_t **)((int)pvVar2 + 8) - (int)piVar6 >> 2),&param_1);
+      piVar7 = *(int **)((int)pvVar2 + 8);
       if (piVar6 != piVar7) {
         do {
           *piVar6 = param_1;
           piVar6++;
         } while (piVar6 != piVar7);
-        *(int *)(iVar2 + 8) = *(int *)(iVar2 + 8) + 4;
+        *(int *)((int)pvVar2 + 8) = *(int *)((int)pvVar2 + 8) + 4;
         return 0;
       }
     }
     else {
       uninitialized_copy4_61bcf0((uint32_t *)(iVar1 - 8),puVar4,puVar4);
-      piVar9 = *(int **)(iVar2 + 8);
+      piVar9 = *(int **)((int)pvVar2 + 8);
       piVar7 = piVar9 - 1;
       while (piVar6 != piVar7) {
         piVar7--;
@@ -239,7 +213,7 @@ uint32_t FUN_00619780(void *_this,int param_1,int param_2, ...)
         *piVar6 = param_1;
       }
     }
-    *(int *)(iVar2 + 8) = *(int *)(iVar2 + 8) + 4;
+    *(int *)((int)pvVar2 + 8) = *(int *)((int)pvVar2 + 8) + 4;
     return 0;
   }
   if ((iVar3 == 0) || (uVar8 = (int)puVar4 - iVar3 >> 2, uVar8 < 2)) {
@@ -257,15 +231,16 @@ uint32_t FUN_00619780(void *_this,int param_1,int param_2, ...)
     iVar3 = 0;
   }
   puVar4 = tier1_operator_new(iVar3 * 4);
-  puVar5 = (uint32_t *)uninitialized_copy4_61bcf0(*(uint32_t **)(iVar2 + 4),piVar6,puVar4);
+  puVar5 = (uint32_t *)uninitialized_copy4_61bcf0(*(uint32_t **)((int)pvVar2 + 4),piVar6,puVar4)
+  ;
   uninitialized_fill_n4_61bd20(puVar5,1,&param_1);
-  uninitialized_copy4_61bcf0(piVar6,*(uint32_t **)(iVar2 + 8),puVar5 + 1);
+  uninitialized_copy4_61bcf0(piVar6,*(uint32_t **)((int)pvVar2 + 8),puVar5 + 1);
   empty_function_61b740();
-  tier1_operator_delete(*(void **)(iVar2 + 4));
-  *(uint32_t **)(iVar2 + 0xc) = puVar4 + param_2;
-  iVar3 = vector_size_e4_61b160(iVar2);
-  *(uint32_t **)(iVar2 + 8) = puVar4 + iVar3 + 1;
-  *(uint32_t **)(iVar2 + 4) = puVar4;
+  tier1_operator_delete(*(void **)((int)pvVar2 + 4));
+  *(uint32_t **)((int)pvVar2 + 0xc) = puVar4 + param_2;
+  iVar3 = vector_size_e4_61b160((int)pvVar2);
+  *(uint32_t **)((int)pvVar2 + 8) = puVar4 + iVar3 + 1;
+  *(uint32_t **)((int)pvVar2 + 4) = puVar4;
   return 0;
 }
 
@@ -275,22 +250,22 @@ uint32_t FUN_00619930(void *_this,uint32_t param_1, ...)
 {
   uint32_t *puVar1;
   int iVar2;
-  int iVar3;
+  void *pvVar3;
   int iVar4;
   uint32_t *puVar5;
-  int extraout_ECX;
+  void *this_00;
   uint32_t uVar6;
   uint32_t *puVar7;
   uint32_t *puVar8;
   uint32_t *puVar9;
   iVar2 = FUN_00617da0((int)_this);
-  iVar3 = FUN_00617d50(extraout_ECX);
+  pvVar3 = C_MpGameSetup__GetCurrentGroup(this_00);
   if (((-1 < (int)param_1) && (iVar4 = *(int *)(iVar2 + 4), iVar4 != 0)) &&
      (param_1 < (uint32_t)(*(int *)(iVar2 + 8) - iVar4 >> 2))) {
-    puVar9 = *(uint32_t **)(iVar3 + 8);
+    puVar9 = *(uint32_t **)((int)pvVar3 + 8);
     puVar1 = (uint32_t *)(iVar4 + param_1 * 4);
-    if (*(int *)(iVar3 + 0xc) - (int)puVar9 >> 2 == 0) {
-      iVar2 = *(int *)(iVar3 + 4);
+    if (*(int *)((int)pvVar3 + 0xc) - (int)puVar9 >> 2 == 0) {
+      iVar2 = *(int *)((int)pvVar3 + 4);
       if ((iVar2 == 0) || (uVar6 = (int)puVar9 - iVar2 >> 2, uVar6 < 2)) {
         uVar6 = 1;
       }
@@ -307,78 +282,34 @@ uint32_t FUN_00619930(void *_this,uint32_t param_1, ...)
       }
       puVar5 = tier1_operator_new(iVar4 * 4);
       puVar7 = puVar5;
-      for (puVar8 = *(uint32_t **)(iVar3 + 4); puVar8 != puVar9; puVar8 = puVar8 + 1) {
+      for (puVar8 = *(uint32_t **)((int)pvVar3 + 4); puVar8 != puVar9; puVar8 = puVar8 + 1) {
         construct_copy4_61be10(puVar7,puVar8);
         puVar7++;
       }
       uninitialized_fill_n4_61bd20(puVar7,1,puVar1);
-      uninitialized_copy4_61bcf0(puVar9,*(uint32_t **)(iVar3 + 8),puVar7 + 1);
+      uninitialized_copy4_61bcf0(puVar9,*(uint32_t **)((int)pvVar3 + 8),puVar7 + 1);
       empty_function_61b740();
-      tier1_operator_delete(*(void **)(iVar3 + 4));
-      *(uint32_t **)(iVar3 + 0xc) = puVar5 + iVar2;
-      iVar2 = vector_size_e4_61b160(iVar3);
-      *(uint32_t **)(iVar3 + 4) = puVar5;
-      *(uint32_t **)(iVar3 + 8) = puVar5 + iVar2 + 1;
+      tier1_operator_delete(*(void **)((int)pvVar3 + 4));
+      *(uint32_t **)((int)pvVar3 + 0xc) = puVar5 + iVar2;
+      iVar2 = vector_size_e4_61b160((int)pvVar3);
+      *(uint32_t **)((int)pvVar3 + 4) = puVar5;
+      *(uint32_t **)((int)pvVar3 + 8) = puVar5 + iVar2 + 1;
       return 0;
     }
     uninitialized_copy4_61bcf0(puVar9,puVar9,puVar9 + 1);
     uninitialized_fill_n4_61bd20
-              (*(uint32_t **)(iVar3 + 8),1 - ((int)*(uint32_t **)(iVar3 + 8) - (int)puVar9 >> 2)
-               ,puVar1);
-    puVar8 = *(uint32_t **)(iVar3 + 8);
+              (*(uint32_t **)((int)pvVar3 + 8),
+               1 - ((int)*(uint32_t **)((int)pvVar3 + 8) - (int)puVar9 >> 2),puVar1);
+    puVar8 = *(uint32_t **)((int)pvVar3 + 8);
     if (puVar9 != puVar8) {
       do {
         *puVar9 = *puVar1;
         puVar9++;
       } while (puVar9 != puVar8);
-      *(int *)(iVar3 + 8) = *(int *)(iVar3 + 8) + 4;
+      *(int *)((int)pvVar3 + 8) = *(int *)((int)pvVar3 + 8) + 4;
       return 0;
     }
-    *(int *)(iVar3 + 8) = *(int *)(iVar3 + 8) + 4;
-  }
-  return 0;
-}
-
-
-// 0x00619af0
-uint32_t FUN_00619af0(void *_this,int param_1, ...)
-{
-  void *this_00;
-  int iVar1;
-  uint32_t uVar2;
-  if (((-1 < param_1) && (param_1 < 5)) && (*(int *)((int)_this + 0x6c) = param_1, param_1 == 0)) {
-    this_00 = (void *)((int)_this + 0x70);
-    S_MpRotation__Clear((int)this_00);
-    FUN_0061b710(this_00,*(uint32_t **)((int)_this + 0x74),*(uint32_t **)((int)_this + 0x78));
-    for (uVar2 = 0;
-        (iVar1 = *(int *)((int)_this + 0x20), iVar1 != 0 &&
-        (uVar2 < (uint32_t)(*(int *)((int)_this + 0x24) - iVar1 >> 2))); uVar2 = uVar2 + 1) {
-      FUN_0061b500(this_00,*(uint32_t **)((int)_this + 0x78),1,(uint32_t *)(iVar1 + uVar2 * 4));
-    }
-    FUN_0061b710((void *)((int)_this + 0x84),*(uint32_t **)((int)_this + 0x88),
-                 *(uint32_t **)((int)_this + 0x8c));
-    for (uVar2 = 0;
-        (iVar1 = *(int *)((int)_this + 0x34), iVar1 != 0 &&
-        (uVar2 < (uint32_t)(*(int *)((int)_this + 0x38) - iVar1 >> 2))); uVar2 = uVar2 + 1) {
-      FUN_0061b500((void *)((int)_this + 0x84),*(uint32_t **)((int)_this + 0x8c),1,
-                   (uint32_t *)(iVar1 + uVar2 * 4));
-    }
-    FUN_0061b710((void *)((int)_this + 0x98),*(uint32_t **)((int)_this + 0x9c),
-                 *(uint32_t **)((int)_this + 0xa0));
-    for (uVar2 = 0;
-        (iVar1 = *(int *)((int)_this + 0x48), iVar1 != 0 &&
-        (uVar2 < (uint32_t)(*(int *)((int)_this + 0x4c) - iVar1 >> 2))); uVar2 = uVar2 + 1) {
-      FUN_0061b500((void *)((int)_this + 0x98),*(uint32_t **)((int)_this + 0xa0),1,
-                   (uint32_t *)(iVar1 + uVar2 * 4));
-    }
-    FUN_0061b710((void *)((int)_this + 0xac),*(uint32_t **)((int)_this + 0xb0),
-                 *(uint32_t **)((int)_this + 0xb4));
-    for (uVar2 = 0;
-        (iVar1 = *(int *)((int)_this + 0x5c), iVar1 != 0 &&
-        (uVar2 < (uint32_t)(*(int *)((int)_this + 0x60) - iVar1 >> 2))); uVar2 = uVar2 + 1) {
-      FUN_0061b500((void *)((int)_this + 0xac),*(uint32_t **)((int)_this + 0xb4),1,
-                   (uint32_t *)(iVar1 + uVar2 * 4));
-    }
+    *(int *)((int)pvVar3 + 8) = *(int *)((int)pvVar3 + 8) + 4;
   }
   return 0;
 }

@@ -160,8 +160,8 @@ C_MpGameSetup::~C_MpGameSetup()
 
 void C_MpGameSetup::Clear()
 {
-    for (S_MpRotation &rotation : rotations)
-        rotation.Clear();
+    for (S_MpRotation &each : rotations)
+        each.Clear();
     for (S_MpMapGroup &group : maps) {
         for (std::size_t i = group.maps.size(); i-- > 0;)
             delete group.maps[i];
@@ -305,10 +305,10 @@ void C_MpGameSetup::LoadMapList()
     serverName = g_texts.Get(TEXT_SERVER_NAME);
     password = C_str("");
     port = DEFAULT_PORT;
-    unknown18 = 0;
-    unknown10 = 0;
+    gameType = 0;
+    voiceCodec = 0;
     unknown14 = 0;
-    unknown15 = 0;
+    dedicated = 0;
     loaded = true;
 }
 
@@ -331,11 +331,11 @@ void C_MpGameSetup::Load(C_chunk &chunk)
             password = ReadRemainingString(chunk);
             break;
         case CHUNK_OPTIONS_OLD:
-            unknown6C = 0;
-            chunk.Read(unknown18);
-            chunk.Read(unknown10);
+            rotation = 0;
+            chunk.Read(gameType);
+            chunk.Read(voiceCodec);
             chunk.Read(unknown14);
-            chunk.Read(unknown15);
+            chunk.Read(dedicated);
             chunk.Ascend();
             break;
         case CHUNK_RULES_14:
@@ -371,11 +371,11 @@ void C_MpGameSetup::Load(C_chunk &chunk)
             chunk.Ascend();
             break;
         case CHUNK_OPTIONS:
-            chunk.Read(unknown6C);
-            chunk.Read(unknown18);
-            chunk.Read(unknown10);
+            chunk.Read(rotation);
+            chunk.Read(gameType);
+            chunk.Read(voiceCodec);
             chunk.Read(unknown14);
-            chunk.Read(unknown15);
+            chunk.Read(dedicated);
             chunk.Ascend();
             break;
         case CHUNK_RULES:
@@ -399,11 +399,11 @@ void C_MpGameSetup::Save(C_chunk &chunk) const
         chunk.Ascend();
     }
     chunk.Begin(CHUNK_OPTIONS);
-    chunk.Write(unknown6C);
-    chunk.Write(unknown18);
-    chunk.Write(unknown10);
+    chunk.Write(rotation);
+    chunk.Write(gameType);
+    chunk.Write(voiceCodec);
     chunk.Write(unknown14);
-    chunk.Write(unknown15);
+    chunk.Write(dedicated);
     chunk.Ascend();
     chunk.Begin(CHUNK_RULES);
     for (const S_MpGameRules &rule : rules)
@@ -619,4 +619,29 @@ bool C_MpMenuSettings::IsInSecondList(const S_ServerEntry *server) const
         if (m_servers2[i] == server)
             return true;
     return false;
+}
+
+S_MpMapGroup &C_MpGameSetup::GetCurrentGroup()
+{
+    S_MpRotation &current = rotations[rotation];
+    switch (gameType) {
+    case 0: return current.types[0];
+    case 1: return current.types[1];
+    case 2: return current.types[2];
+    default: return current.types[3];
+    }
+}
+
+void C_MpGameSetup::SelectRotation(int index)
+{
+    if (index < 0 || index >= MP_ROTATIONS)
+        return;
+    rotation = index;
+    if (index != 0)
+        return;
+    // The first rotation: each game type's maps, in the list's order.
+    S_MpRotation &first = rotations[0];
+    first.Clear();
+    for (int type = 0; type < MP_GAME_TYPES; ++type)
+        first.types[type].maps = maps[type].maps;
 }
