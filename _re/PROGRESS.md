@@ -8490,6 +8490,29 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 301 errors in 55 files. ret_audit --src: 52.
   - Stats: 9,235 of 12,306 functions by hand (85.0 % by size).
 
+  PART 9h-xviii DONE (2026-11-04): the main menu's connect screen (game/main_menu.cpp).
+  - DescribeConnectScreen 0x00632150: the model placed as the quit question's; the screen's tick OnConnectTick,
+    hidden OnConnectHidden 0x00632270 (the console cleared, no wait); "text", "byes*" / "bno*" hidden, "bok" (0x7D8;
+    it posts Escape); g_connectStyle 0x0083fdd0 made (the style table at 0x0083fdd4; never released).
+  - OnConnectTick 0x00632560 (two jump tables, read from the asm; the session menu's console's twin): another
+    screen's or hidden: false; waiting (m_connectWait +0x1FC, named); m_connectState: 0 start (the squad
+    cleared, the roster reloaded, the console cleared; hosting: wait 1500, the dedicated server's host (7) or the
+    server's (3); joining: connect (1); else an error, failed), 1 connect (the settings' server), 2 joining
+    (connected: done; 0 / 2 / others: still; full, bad password (no password step here, unlike the session
+    menu), bad CD key, 6 (0x22E9), bad version, 8 (0x1CD4): their lines, failed: wait 2500, 6), 3 host
+    (C_NetGame::Host with the session's name block and the menu's +0x1F0), 7 the dedicated server
+    (C_NetGame::HostDedicated 0x00722a80, declared), 4 hosted (0x2000069 to the network handler), 8 (the menu
+    quits), 5 / 6 nothing.
+  - OnConnectMessage 0x00632390: Escape (MENU_MSG_ESCAPE is 0x200000A) with the connect screen on top: the popup
+    closed, 0x2000028 posted, start refreshed; taken.
+  - Harness: cnDescribe, cnHidden, cnTick (every state and join status), cnMessage; the fake OnConnectMessage
+    dropped (the chain and Escape tests now see the real one: Escape on the connect screen cancels); the build
+    test's connect screen real (its model placed; its style given back). All 15 factory checkers in both
+    orders.
+  - Mutations: mutations/mutate_9h18.py: 109: 100 killed, 6 not building, 3 equivalent.
+  - Build: MSVC clean. Tier 1: 301 errors in 55 files. ret_audit --src: 52.
+  - Stats: 9,239 of 12,306 functions by hand (85.1 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

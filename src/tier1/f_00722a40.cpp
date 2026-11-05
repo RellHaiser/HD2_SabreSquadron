@@ -38,12 +38,11 @@ uint32_t FUN_00722a70(...)
 
 
 // 0x00722a80
-uint32_t FUN_00722a80(char param_1, ...)
+bool C_NetGame__HostDedicated(C_NetGame *_this,bool unknown, ...)
 {
   int *piVar1;
   BOOL BVar2;
   C_GameApp *pCVar3;
-  uint32_t uVar4;
   _PROCESS_INFORMATION local_188;
   char local_178 [52];
   _STARTUPINFOA local_144;
@@ -52,7 +51,7 @@ uint32_t FUN_00722a80(char param_1, ...)
   if ((g_gameProfile.m_mpSettings)->unknown174 == 1) {
     piVar1 = (int *)(g_gameProfile.m_mpSettings)->port;
   }
-  if (param_1 != '\0') {
+  if (unknown) {
     FUN_00732730(piVar1,'\x01');
   }
   sprintf(local_178,"XDServer_%5d.txt",(g_gameProfile.m_mpSettings)->port);
@@ -63,11 +62,11 @@ uint32_t FUN_00722a80(char param_1, ...)
                          (LPSECURITY_ATTRIBUTES)0x0,0,0,(LPVOID)0x0,(LPCSTR)0x0,&local_144,
                          &local_188);
   if (BVar2 == 0) {
-    return 0;
+    return false;
   }
   pCVar3 = GetGameApp();
-  uVar4 = (*pCVar3->m_state->vtable->SetPendingState)(4);
-  return CONCAT31((int3)((uint32_t)uVar4 >> 8),1);
+  (*pCVar3->m_state->vtable->SetPendingState)(4);
+  return true;
 }
 
 
@@ -353,7 +352,7 @@ int * C_NetGame__Host(C_NetGame *_this,char *param_1, ...)
     EnterCriticalSection((LPCRITICAL_SECTION)(_this->_pad_0000 + 0x418));
     pCVar1 = ((g_gameProfile.m_player)->m_name).rep;
     if (pCVar1 == 0) {
-      pcVar3 = &DAT_00867a90;
+      pcVar3 = (char *)&DAT_00867a90;
     }
     else {
       pcVar3 = pCVar1->chars;
@@ -1210,7 +1209,7 @@ int C_NetGame__Connect(C_NetGame *_this,LPVOID *param_1, ...)
     pCVar2 = ((g_gameProfile.m_player)->m_name).rep;
     if (g_gameProfile.m_unicodeFont == false) {
       if (pCVar2 == 0) {
-        pcVar6 = &DAT_00867a90;
+        pcVar6 = (char *)&DAT_00867a90;
       }
       else {
         pcVar6 = pCVar2->chars;
@@ -1218,7 +1217,7 @@ int C_NetGame__Connect(C_NetGame *_this,LPVOID *param_1, ...)
       FUN_00724ad0(aWStack_7c,pcVar6,0xffffffff);
     }
     else if (pCVar2 == 0) {
-      FUN_00724b80(aWStack_7c,&DAT_00867a90,0xffffffff);
+      FUN_00724b80(aWStack_7c,(LPCSTR)&DAT_00867a90,0xffffffff);
     }
     else {
       FUN_00724b80(aWStack_7c,pCVar2->chars,0xffffffff);
@@ -1253,7 +1252,7 @@ int C_NetGame__Connect(C_NetGame *_this,LPVOID *param_1, ...)
       FUN_00723700(param_1,&piStack_148);
       pCVar2 = ((g_gameProfile.m_mpSettings)->password).rep;
       if (pCVar2 == 0) {
-        pcVar6 = &DAT_00867a90;
+        pcVar6 = (char *)&DAT_00867a90;
       }
       else {
         pcVar6 = pCVar2->chars;
@@ -1264,7 +1263,7 @@ int C_NetGame__Connect(C_NetGame *_this,LPVOID *param_1, ...)
       iStack_ac = g_versionMinor;
       pCVar2 = ((g_gameProfile.m_player)->m_name).rep;
       if (pCVar2 == 0) {
-        pcVar6 = &DAT_00867a90;
+        pcVar6 = (char *)&DAT_00867a90;
       }
       else {
         pcVar6 = pCVar2->chars;

@@ -242,6 +242,7 @@ public:
     // (The session menu, part 9g-ii: campaign_screens_test.inc.)
     int Host(const struct S_NetSessionDesc &desc, bool unknown);
     int Connect(void *address);
+    bool HostDedicated(bool unknown);                // (the main menu's connect screen, part 9h-xviii)
     int GetJoinStatus() const;
 };
 extern C_NetGame g_netGame;

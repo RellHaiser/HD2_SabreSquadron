@@ -348,19 +348,19 @@ f_00721f30.cpp:96:11: invalid type argument of unary '*' (have 'uint32_t' {aka '
     if (*DAT_0097b9f0 < '0') break;
 f_00721f30.cpp:97:14: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     } while (*DAT_0097b9f0 < ':');
-f_00722a40.cpp:158:36: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:157:36: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     piVar5 = (int *)CoCreateInstance((IID *)&DAT_008190a8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819058,
-f_00722a40.cpp:226:36: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:225:36: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     piVar6 = (int *)CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,
-f_00722a40.cpp:670:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:669:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,param_2);
-f_00722a40.cpp:672:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:671:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,param_1);
-f_00722a40.cpp:676:69: 'struct tier1::_union_1226' has no member named 'S_un_b'
+f_00722a40.cpp:675:69: 'struct tier1::_union_1226' has no member named 'S_un_b'
     pcVar2 = inet_ntoa((in_addr)((_union_1226 *)(iStack_c + 0x68))->S_un_b);
-f_00722a40.cpp:935:30: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:934:30: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     HVar2 = CoCreateInstance((IID *)&DAT_008190b8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819068,ppv);
-f_00722a40.cpp:1357:5: expected primary-expression before '}' token
+f_00722a40.cpp:1356:5: expected primary-expression before '}' token
     }
 f_00724aa0.cpp:274:28: cannot convert 'const char*' to 'wchar_t*' in assignment
     pwStack_94 = "2hostname" + 1;

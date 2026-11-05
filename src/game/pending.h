@@ -265,6 +265,8 @@ public:
     int Host(const struct S_NetSessionDesc &desc, bool unknown);   // 0x00722b60
     // A client connecting to the server at `address` (S_MultiplayerSettings +0x17C).
     int Connect(void *address);                     // 0x007240f0
+    // A dedicated server made (the main menu's connect screen; `unknown` its +0x1F0): false failed.
+    bool HostDedicated(bool unknown);               // 0x00722a80
     // The client's joining (+0x5044; NET_JOIN_*).
     int GetJoinStatus() const;                      // 0x007244c0
     // Server: the keep-alive check of the member at +0x4D0 (message 0x17 after 15 s).

@@ -137,3 +137,8 @@
 # Part 9h-xvii: the hosted session set up from the create server screen.
 0062d030 C_MainMenu::SetUpHostedSession | void __thiscall SetUpHostedSession(C_MainMenu *this)
 006ad600 S_MultiplayerSettings::Reset | void __fastcall Reset(void *this)
+# Part 9h-xviii: the connect screen.
+00632270 C_MainMenu::OnConnectHidden | bool __thiscall OnConnectHidden(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00632560 C_MainMenu::OnConnectTick | bool __thiscall OnConnectTick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00722a80 C_NetGame::HostDedicated | bool __thiscall HostDedicated(void *this, bool unknown)
+0083fdd0 g_connectStyle @ int

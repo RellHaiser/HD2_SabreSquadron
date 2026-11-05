@@ -2549,3 +2549,168 @@ void C_MainMenu::SetUpHostedSession()
     for (const C_MpMap *map : m_mpSettings->m_setup.GetCurrentGroup().maps)
         session->maps.push_back(new C_MpMap(*map));
 }
+
+// ---- the connect screen (part 9h-xviii) -------------------------------------------------------------------
+
+namespace {
+
+// The connect screen's console text; its style's description.
+constexpr uint32_t CONNECT_TEXT = static_cast<uint32_t>(MAIN_SCREEN_CONNECT) << SCREEN_INDEX_SHIFT | 0x100000;
+const S_TextStyleDesc CONNECT_STYLE_DESC = {2, 0xFF000000, 0.035f, 0.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0, 1, 3, 0, 1, 0};
+// (Its OK posts Escape: OnConnectMessage cancels.) The network handler's messages when it ends.
+constexpr uint32_t MAIN_MSG_28 = 0x2000028, MAIN_MSG_SERVER_STARTED = 0x2000069;
+// The connection's states (m_connectState): start, connect, joining, host, hosted, done, failed, the dedicated
+// server's host, hosted.
+enum : int {
+    CONNECT_STATE_START = 0, CONNECT_STATE_CONNECT = 1, CONNECT_STATE_JOINING = 2, CONNECT_STATE_HOST = 3,
+    CONNECT_STATE_HOSTED = 4, CONNECT_STATE_DONE = 5, CONNECT_STATE_FAILED = 6, CONNECT_STATE_HOST_DEDICATED = 7,
+    CONNECT_STATE_DEDICATED_HOSTED = 8
+};
+// The waits (ms): a step, an error, the host's start, a failure shown.
+constexpr int CONNECT_WAIT_STEP = 300, CONNECT_WAIT_ERROR = 1000, CONNECT_WAIT_HOST = 1500, CONNECT_WAIT_FAILED = 2500;
+// The lines (the session menu's console's).
+constexpr uint32_t TEXT_CREATING_SERVER = 0x91B, TEXT_CREATING_CLIENT = 0x91C, TEXT_CONNECTING = 0x91D,
+                   TEXT_CONNECT_ERROR = 0x91E, TEXT_CONNECTION_LOST = 0x91F, TEXT_HOST_FAILED = 0x920,
+                   TEXT_CONNECT_ESCAPE = 0x921, TEXT_SERVER_CREATED = 0x922, TEXT_CONNECTED = 0x923,
+                   TEXT_LOADING = 0x924, TEXT_SERVER_FULL = 0x925, TEXT_FULL_ESCAPE = 0x926, TEXT_BAD_PASSWORD = 0x927,
+                   TEXT_REFUSED_ESCAPE = 0x928, TEXT_BAD_CD_KEY = 0x929, TEXT_BAD_VERSION = 0x92A,
+                   TEXT_JOIN_REFUSED_6 = 0x22E9, TEXT_JOIN_REFUSED_8 = 0x1CD4, TEXT_CONNECT_OK = 0x7D8;
+// DirectPlay's application and the session's two fields (the session menu's).
+constexpr uint32_t CONNECT_APPLICATION_GUID[4] = {0xEBFE7BA0, 0x11D2628D, 0x60000FAE, 0x1114B097};
+constexpr int16_t CONNECT_SESSION_15C = 100, CONNECT_SESSION_15E = 2000;
+
+void AddConnectLine(uint32_t text)
+{
+    PostTo(CONNECT_TEXT, CONTROL_MSG_ADD_TEXT_ID, static_cast<uint32_t>(g_connectStyle), text);
+}
+
+} // namespace
+
+int g_connectStyle = -1;
+
+bool C_MainMenu::DescribeConnectScreen(S_ScreenDesc *desc, I3D_frame *model)
+{
+    model->SetPos(QUIT_MODEL_POS);
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    AddScreenMessage(desc, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_SCREEN_TICK, self, Callback(&OnConnectTick));
+    AddScreenMessage(desc, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_HIDDEN, self, Callback(&OnConnectHidden));
+    desc->AddControl(CONTROL_LABEL, "text");
+    AddDescMessage(desc->AddControl(CONTROL_BUTTON, "byes*"), 0, CONTROL_MSG_HIDE, 0);
+    AddDescMessage(desc->AddControl(CONTROL_BUTTON, "bno*"), 0, CONTROL_MSG_HIDE, 0);
+    AddDescMessage(AddButton(desc, "bok", TEXT_CONNECT_OK), 0, FROM_SCREEN | MENU_MSG_ESCAPE, 0);
+    g_connectStyle = CreateTextStyle(CONNECT_STYLE_DESC);
+    return true;
+}
+
+bool C_MainMenu::OnConnectHidden(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    PostTo(CONNECT_TEXT, CONTROL_MSG_CLEAR, 0);
+    static_cast<C_MainMenu *>(menu)->m_connectWait = 0;
+    return true;
+}
+
+bool C_MainMenu::OnConnectTick(void *menu, void *, C_Control *control, uint32_t, uint32_t value)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if ((control->GetId() >> SCREEN_INDEX_SHIFT & SCREEN_INDEX_MASK) != MAIN_SCREEN_CONNECT || !control->IsShown())
+        return false;
+    if (self->m_connectWait > 0) {
+        self->m_connectWait -= static_cast<int>(value);
+        return true;
+    }
+    S_MultiplayerSettings *settings = g_mpSettings;
+    // A failure: its two lines, shown a while before the escape.
+    const auto fail = [self](uint32_t first, uint32_t second) {
+        AddConnectLine(first);
+        AddConnectLine(second);
+        self->m_connectWait = CONNECT_WAIT_FAILED;
+        self->m_connectState = CONNECT_STATE_FAILED;
+        return true;
+    };
+    switch (self->m_connectState) {
+    case CONNECT_STATE_START:
+        g_gameProfile.m_missionSquad->Clear();
+        g_gameProfile.m_humanStore->Reload();
+        PostTo(CONNECT_TEXT, CONTROL_MSG_CLEAR, 0);
+        if (settings->sessionType == SESSION_HOSTING) {
+            AddConnectLine(TEXT_CREATING_SERVER);
+            self->m_connectWait = CONNECT_WAIT_HOST;
+            self->m_connectState = settings->dedicated ? CONNECT_STATE_HOST_DEDICATED : CONNECT_STATE_HOST;
+        } else if (settings->sessionType == SESSION_JOINING) {
+            AddConnectLine(TEXT_CREATING_CLIENT);
+            AddConnectLine(TEXT_CONNECTING);
+            self->m_connectWait = CONNECT_WAIT_STEP;
+            self->m_connectState = CONNECT_STATE_CONNECT;
+        } else {
+            AddConnectLine(TEXT_CONNECT_ERROR);
+            AddConnectLine(TEXT_CONNECTION_LOST);
+            self->m_connectWait = CONNECT_WAIT_ERROR;
+            self->m_connectState = CONNECT_STATE_FAILED;
+        }
+        return true;
+    case CONNECT_STATE_CONNECT:
+        g_netGame.Connect(settings->unknown17C);
+        self->m_connectState = CONNECT_STATE_JOINING;
+        return true;
+    case CONNECT_STATE_JOINING:
+        switch (g_netGame.GetJoinStatus()) {
+        case NET_JOIN_CONNECTED:
+            AddConnectLine(TEXT_CONNECTED);
+            AddConnectLine(TEXT_LOADING);
+            self->m_connectWait = CONNECT_WAIT_STEP;
+            self->m_connectState = CONNECT_STATE_DONE;
+            return true;
+        case NET_JOIN_FULL: return fail(TEXT_SERVER_FULL, TEXT_FULL_ESCAPE);
+        case NET_JOIN_BAD_PASSWORD: return fail(TEXT_BAD_PASSWORD, TEXT_REFUSED_ESCAPE);
+        case NET_JOIN_BAD_CD_KEY: return fail(TEXT_BAD_CD_KEY, TEXT_REFUSED_ESCAPE);
+        case 6: return fail(TEXT_JOIN_REFUSED_6, TEXT_REFUSED_ESCAPE);
+        case NET_JOIN_BAD_VERSION: return fail(TEXT_BAD_VERSION, TEXT_REFUSED_ESCAPE);
+        case 8: return fail(TEXT_JOIN_REFUSED_8, TEXT_REFUSED_ESCAPE);
+        default: return true;
+        }
+    case CONNECT_STATE_HOST: {
+        S_NetSessionDesc desc;
+        static_assert(sizeof desc == sizeof settings->sessionName, "the session's name");
+        std::memcpy(&desc, settings->sessionName, sizeof desc);
+        std::memcpy(desc.application, CONNECT_APPLICATION_GUID, sizeof desc.application);
+        desc.unknown15C = CONNECT_SESSION_15C;
+        desc.unknown15E = CONNECT_SESSION_15E;
+        if (g_netGame.Host(desc, self->unknown1F0) < 0)
+            return fail(TEXT_HOST_FAILED, TEXT_CONNECT_ESCAPE);
+        AddConnectLine(TEXT_SERVER_CREATED);
+        self->m_connectWait = CONNECT_WAIT_STEP;
+        self->m_connectState = CONNECT_STATE_HOSTED;
+        return true;
+    }
+    case CONNECT_STATE_HOST_DEDICATED:
+        if (!g_netGame.HostDedicated(self->unknown1F0))
+            return fail(TEXT_HOST_FAILED, TEXT_CONNECT_ESCAPE);
+        AddConnectLine(TEXT_SERVER_CREATED);
+        self->m_connectState = CONNECT_STATE_DEDICATED_HOSTED;
+        self->m_connectWait = CONNECT_WAIT_STEP;
+        return true;
+    case CONNECT_STATE_HOSTED:
+        Post(MAIN_MSG_SERVER_STARTED, 0);
+        self->m_connectState = CONNECT_STATE_DONE;
+        return true;
+    case CONNECT_STATE_DEDICATED_HOSTED:
+        Post(MENU_MSG_QUIT, 0);
+        self->m_connectState = CONNECT_STATE_DONE;
+        return true;
+    default:
+        return true;
+    }
+}
+
+bool C_MainMenu::OnConnectMessage(S_ControlMessage *message)
+{
+    if ((message->id & CONTROL_MSG_MASK) != MENU_MSG_ESCAPE || g_menuScreens.empty())
+        return false;
+    // (Cancelled on the connect screen: closed, the network handler told, the create server screen's start.)
+    if ((g_menuScreens.back()->GetId() >> SCREEN_INDEX_SHIFT & SCREEN_INDEX_MASK) != MAIN_SCREEN_CONNECT)
+        return false;
+    Post(MENU_MSG_CLOSE_POPUP, 0);
+    Post(MAIN_MSG_28, 0);
+    RefreshStartButton();
+    return true;
+}

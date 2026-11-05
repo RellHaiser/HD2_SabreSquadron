@@ -28032,10 +28032,20 @@
   "name": "C_MainMenu::DescribeConnectScreen",
   "proto": "bool __thiscall DescribeConnectScreen(C_MainMenu *this, void * desc, void * model)"
  },
+ "00632270": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnConnectHidden",
+  "proto": "bool __thiscall OnConnectHidden(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00632390": {
   "module": "main_menu",
   "name": "C_MainMenu::OnConnectMessage",
   "proto": "bool __thiscall OnConnectMessage(C_MainMenu *this, void * message)"
+ },
+ "00632560": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnConnectTick",
+  "proto": "bool __thiscall OnConnectTick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "00633320": {
   "module": "zz_idioms",
@@ -38020,6 +38030,11 @@
   "module": "zz_idioms",
   "name": "empty_function_721f40"
  },
+ "00722a80": {
+  "module": "main_menu",
+  "name": "C_NetGame::HostDedicated",
+  "proto": "bool __thiscall HostDedicated(void *this, bool unknown)"
+ },
  "00722b60": {
   "module": "campaign_screens",
   "name": "C_NetGame::Host"
@@ -43502,6 +43517,12 @@
   "module": "vehicle",
   "name": "g_vehicleSoundVolume",
   "type": "float"
+ },
+ "0083fdd0": {
+  "data": true,
+  "module": "main_menu",
+  "name": "g_connectStyle",
+  "type": "int"
  },
  "00840668": {
   "data": true,

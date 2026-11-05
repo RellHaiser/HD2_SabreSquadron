@@ -51,6 +51,8 @@ constexpr int GAME_INFO_STYLES = 12;
 extern int g_gameInfoStyles[GAME_INFO_STYLES];      // 0x008aca88
 // The server status the game info screen shows next (its query's thread sets it under the menu's lock).
 extern S_ServerStatus *g_gameInfoStatus;            // 0x008acab8
+// The connect screen's console style (made by its description; never released).
+extern int g_connectStyle;                          // 0x0083fdd0
 
 class C_MainMenu : public C_MenuState {
 public:
@@ -309,7 +311,18 @@ protected:
     // kills, points), the teams' scores, the server's lines (name, address, ping, players, its flags) and
     // its rules (the cooperative ones too).
     static void ShowGameInfo(const S_ServerStatus *status);   // 0x0062fa30 (__stdcall)
+    // The connect screen (part 9h-xviii): the model placed as the quit question's; its tick: OnConnectTick,
+    // hidden: OnConnectHidden; the console text, yes / no hidden, OK (cancel: OnConnectMessage); its style. True.
     bool DescribeConnectScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00632150
+    // Hidden: the console emptied, no wait. True.
+    static bool OnConnectHidden(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                uint32_t value);        // 0x00632270
+    // The screen's tick (another screen's, hidden: false): waiting (the tick's time off); else the connection's
+    // state: start (the squad and roster cleared; hosting: the dedicated server's or the server's host; joining:
+    // connect; else an error), connect, joining (connected: done; refused: its lines, failed), host / host the
+    // dedicated server (failed: its lines), hosted (the network handler's start / the menu quits). True.
+    static bool OnConnectTick(void *menu, void *argument, C_Control *control, uint32_t notification,
+                              uint32_t value);          // 0x00632560
     bool DescribeAddServerScreen(S_ScreenDesc *desc, I3D_frame *model);     // 0x006370c0
 
     // ---- the screens' message handlers (true: taken; later sub-parts) ----
@@ -332,6 +345,8 @@ protected:
     // single missions opened. The secret key on the single missions: all of them shown or not. A popup
     // opened: taken. True; others false.
     bool OnMissionsMessage(S_ControlMessage *message);  // 0x00638e00
+    // Escape (its OK's too) on the connect screen (the top): closed, 0x2000028 posted, start refreshed.
+    // True; others false.
     bool OnConnectMessage(S_ControlMessage *message);   // 0x00632390
     // The profile screen's pick: the profile named m_profileName (none: no player) made current, the
     // options to be filled again, the game reset. True. (A button's callback; OnMessage calls it too.)
@@ -349,7 +364,7 @@ protected:
     bool unknown1F0 = false;                            // +0x1F0
     int m_connectState = 5;                             // +0x1F4 the connect screen's state (0: starting)
     bool m_singleMissions = false;                      // +0x1F8 the missions screen shows the single missions
-    int unknown1FC = 0;                                 // +0x1FC
+    int m_connectWait = 0;                              // +0x1FC the connect screen's wait (ms)
     int unknown200 = 0;                                 // +0x200
     int unknown204 = 0;                                 // +0x204
     int m_mission = -1;                                 // +0x208 the missions screen's pick (through the campaigns)

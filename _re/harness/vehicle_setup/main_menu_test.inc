@@ -34,10 +34,12 @@ bool C_MainMenu::OnNetworkMessage(S_ControlMessage *m)
     GfLog("network message %x", m->id);
     return g_mmTakes[1];
 }
-bool C_MainMenu::OnConnectMessage(S_ControlMessage *m)
+// (Part 9h-xviii: the connect screen's dedicated server: logged, its result.)
+bool g_cnDedicated = true;
+bool C_NetGame::HostDedicated(bool unknown)
 {
-    GfLog("connect message %x", m->id);
-    return g_mmTakes[3];
+    GfLog("net dedicated %d", unknown);
+    return g_cnDedicated;
 }
 // (Part 9h-iv: the screens' callbacks of later sub-parts, faked; the network game's close and the last save,
 // logged.)
@@ -241,7 +243,6 @@ bool C_PlayerProfile::GetLastSaveText(C_str *mode, C_str *mission, C_str *date) 
         return true;                                                                                              \
     }
 MM_DESCRIBE(DescribeBrowserScreen, "browser")
-MM_DESCRIBE(DescribeConnectScreen, "connect")
 MM_DESCRIBE(DescribeAddServerScreen, "addserver")
 
 // The found servers' deletes: a global operator delete that notes the watched addresses.
@@ -298,7 +299,7 @@ struct S_MainMenuResults {
          csDescribe = true, csSetup = true, csShown = true, csStart = true, csPicked = true, csHost = true,
          csRules = true, csMapList = true, csOptions = true, csStyle = true, csOption = true,
          csMoves = true, csDouble = true, csDragStart = true, csDragMove = true, csDrop = true,
-         hsSession = true;
+         hsSession = true, cnDescribe = true, cnHidden = true, cnTick = true, cnMessage = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -387,14 +388,13 @@ void MainMenuTest(I3D_scene *scene)
         };
         send(0x2000099);
         // (The profile screen's and the missions' handlers, real, take none of these.)
-        ok &= MsLogIs({"network message 2000099", "connect message 2000099"}, g_gfLog) && CsQueue() == "";
+        // (Part 9h-xviii: the connect handler real too.)
+        ok &= MsLogIs({"network message 2000099"}, g_gfLog) && CsQueue() == "";
         const int state = m.m_state;
-        for (int k : {1, 3}) {
-            g_mmTakes[k] = true;
-            send(MAIN_MSG_PLAY_MOVIE);
-            ok &= g_gfLog.size() == static_cast<size_t>(k == 1 ? 1 : 2) && m.m_state == state;
-            g_mmTakes[k] = false;
-        }
+        g_mmTakes[1] = true;
+        send(MAIN_MSG_PLAY_MOVIE);
+        ok &= g_gfLog.size() == 1 && m.m_state == state;
+        g_mmTakes[1] = false;
         // (The missions' handler taking one: the rest not asked.)
         send(MENU_MSG_OPEN_POPUP);
         ok &= MsLogIs({"network message 2000002"}, g_gfLog) && CsQueue() == "";
@@ -405,11 +405,11 @@ void MainMenuTest(I3D_scene *scene)
         C_GameApp *app = GetGameApp();
         app->m_pendingCommand = 0;
         send(MAIN_MSG_LOAD_GAME);
-        ok &= app->m_pendingCommand == APP_COMMAND_LOAD_FROM_MENU && g_gfLog.size() == 2;
+        ok &= app->m_pendingCommand == APP_COMMAND_LOAD_FROM_MENU && g_gfLog.size() == 1;
         app->m_pendingCommand = 0;
         m.m_saveName = "save7.sav";
         send(MAIN_MSG_LOAD_GAME);
-        ok &= app->m_pendingCommand == 0 && g_gfLog.size() == 3 && g_gfLog[2] == "request load prof\\save7.sav";
+        ok &= app->m_pendingCommand == 0 && g_gfLog.size() == 2 && g_gfLog[1] == "request load prof\\save7.sav";
         m.m_saveName = "";
         send(MAIN_MSG_LOAD_GAME);
         ok &= app->m_pendingCommand == APP_COMMAND_LOAD_FROM_MENU;
@@ -434,7 +434,9 @@ void MainMenuTest(I3D_scene *scene)
         ok &= escape(-1) == "0 2000003 0 0; ";
         // (Top 0: the options handler's screen index before its screen is built: it takes Escape.)
         ok &= escape(0).find("20000c4") != std::string::npos && g_gfLog.size() == 1;
-        for (int top : {1, 3, 5, 6, 7, 8, 9, 11, 12, 13, 15})
+        // (Part 9h-xviii: Escape on the connect screen cancels it.)
+        ok &= escape(13) == "0 2000005 0 0; 0 2000028 0 0; 24900000 1000001 0 0; ";
+        for (int top : {1, 3, 5, 6, 7, 8, 9, 11, 12, 15})
             ok &= escape(top) == "0 2000003 0 0; ";
         ok &= escape(14) == "0 10000200 1 0; 0 2000005 0 0; " && escape(10) == "0 10000200 1 0; 0 2000005 0 0; ";
         ok &= escape(4) == "0 14001200 1 0; 0 6001005 0 0; ";
@@ -3084,6 +3086,176 @@ void MainMenuTest(I3D_scene *scene)
         WM(r.hsSession, ok);
     }
 
+    // --- (part 9h-xviii) the connect screen: its description, hidden, its tick's states; OK ---
+    {
+        C_MainMenu m;
+        const auto Is = [](const std::string &got, const std::string &want) {
+            if (got != want)
+                std::printf("CONNECT %s\nCONNECT expected %s\n", got.c_str(), want.c_str());
+            return got == want;
+        };
+        g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnConnectTick)] = "tick";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnConnectHidden)] = "hidden";
+        {
+            // The model placed; the callbacks; the controls; the console's style.
+            bool ok = true;
+            S_MrObj *model = MsFrame("cnmodel");
+            void *const oldSetPos = g_msFrameVt[0x08 / 4];
+            g_msFrameVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+            S_ScreenDesc d("MP Connect console", "confirm", 13u << 26);
+            g_gfLog.clear();
+            g_connectStyle = -1;
+            ok &= m.DescribeConnectScreen(&d, As<I3D_frame>(model)) && MsLogIs({"cnmodel 8 (0.5 -0.375 -0.5)"}, g_gfLog);
+            g_msFrameVt[0x08 / 4] = oldSetPos;
+            ok &= d.messages.size() == 2 && Is(CsMessage(d.messages[0]), "0 1000007 4014000 self tick") &&
+                  Is(CsMessage(d.messages[1]), "0 1000007 400c000 self hidden") && d.controls.size() == 4;
+            if (d.controls.size() == 4)
+                ok &= Is(CsTree(d.controls[0]), "12 text 34100000:;") && Is(CsTree(d.controls[1]), "14 byes* 34200000: 0 1000004 0 0;") &&
+                      Is(CsTree(d.controls[2]), "14 bno* 34300000: 0 1000004 0 0;") &&
+                      Is(CsTree(d.controls[3]), "14 bok 34400000: 0 1000015 d 7d8 0 600100a 0 0;");
+            const S_TextStyleDesc *style = g_connectStyle >= 0 ? GetTextStyle(g_connectStyle) : nullptr;
+            ok &= style && style->font == 2 && style->color == 0xFF000000 && style->size == 0.035f && style->width == 0.0f &&
+                  style->x == -1.0f && style->y == -1.0f && style->align == 1 && style->valign == 3 && style->joins == 0 &&
+                  style->wraps == 1 && style->flags30 == 0;
+            WM(r.cnDescribe, ok);
+        }
+        const int s = g_connectStyle;
+        const auto line = [&](uint32_t text) { return CmText("34100000 1000017 %x %x; ", static_cast<uint32_t>(s), text); };
+        {
+            // Hidden: the console emptied, no wait.
+            bool ok = true;
+            m.m_connectWait = 77;
+            ok &= C_MainMenu::OnConnectHidden(&m, nullptr, nullptr, 0, 0) && m.m_connectWait == 0 &&
+                  Is(CsQueue(), "34100000 2000018 0 0; ");
+            WM(r.cnHidden, ok);
+        }
+        {
+            // The tick: another screen's or hidden: false; waiting; then each state.
+            bool ok = true;
+            struct C_CnConsole : C_Control {
+                C_CnConsole(uint32_t id, bool shown) : C_Control(nullptr, id, nullptr) { m_shown = shown; }
+            } console(0x34000000, true), other(0x30000000, true), hidden(0x34000000, false);
+            S_MultiplayerSettings *settings = g_mpSettings;
+            const int oldType = settings->sessionType;
+            const bool oldDedicated = settings->dedicated;
+            const auto tick = [&](int state, uint32_t value = 50) {
+                m.m_connectState = state;
+                g_gfLog.clear();
+                return C_MainMenu::OnConnectTick(&m, nullptr, &console, CONTROL_NOTIFY_SCREEN_TICK, value);
+            };
+            m.m_connectState = 0;
+            ok &= !C_MainMenu::OnConnectTick(&m, nullptr, &other, 0, 0) && !C_MainMenu::OnConnectTick(&m, nullptr, &hidden, 0, 0);
+            m.m_connectWait = 120;
+            ok &= tick(0, 50) && m.m_connectWait == 70 && m.m_connectState == 0 && CsQueue() == "";
+            ok &= tick(0, 70) && m.m_connectWait == 0 && m.m_connectState == 0;
+            m.m_connectWait = 1;
+            ok &= tick(0, 50) && m.m_connectWait == -49 && m.m_connectState == 0 && CsQueue() == "";
+            m.m_connectWait = 0;
+            ok &= tick(0, 70) && m.m_connectState != 0;
+            CsQueue();
+            // Start: hosting (a dedicated server's / a server's), joining, else an error.
+            settings->sessionType = 2;
+            settings->dedicated = false;
+            m.m_connectWait = 0;
+            ok &= tick(0) && m.m_connectState == 3 && m.m_connectWait == 1500 && MsLogIs({"squad clear", "roster reload"}, g_gfLog) &&
+                  Is(CsQueue(), "34100000 2000018 0 0; " + line(0x91B));
+            settings->dedicated = true;
+            m.m_connectWait = 0;
+            ok &= tick(0) && m.m_connectState == 7 && m.m_connectWait == 1500;
+            CsQueue();
+            settings->sessionType = 1;
+            m.m_connectWait = 0;
+            ok &= tick(0) && m.m_connectState == 1 && m.m_connectWait == 300 &&
+                  Is(CsQueue(), "34100000 2000018 0 0; " + line(0x91C) + line(0x91D));
+            settings->sessionType = 0;
+            m.m_connectWait = 0;
+            ok &= tick(0) && m.m_connectState == 6 && m.m_connectWait == 1000 &&
+                  Is(CsQueue(), "34100000 2000018 0 0; " + line(0x91E) + line(0x91F));
+            // Connect: to the settings' server; joining.
+            m.m_connectWait = 0;
+            ok &= tick(1) && m.m_connectState == 2 && MsLogIs({CmText("net connect %d", static_cast<int>(offsetof(S_MultiplayerSettings, unknown17C)))}, g_gfLog) && CsQueue() == "";
+            // Joining: connected; still on its way; refused (each).
+            const int oldJoin = g_csJoin;
+            g_csJoin = 1;
+            ok &= tick(2) && m.m_connectState == 5 && m.m_connectWait == 300 && Is(CsQueue(), line(0x923) + line(0x924));
+            for (int status : {0, 2, 9}) {
+                g_csJoin = status;
+                m.m_connectWait = 0;
+                ok &= tick(2) && m.m_connectState == 2 && m.m_connectWait == 0 && CsQueue() == "";
+            }
+            const std::pair<int, uint32_t> refusals[] = {{3, 0x925}, {4, 0x927}, {5, 0x929}, {6, 0x22E9}, {7, 0x92A}, {8, 0x1CD4}};
+            for (const auto &refusal : refusals) {
+                g_csJoin = refusal.first;
+                m.m_connectWait = 0;
+                ok &= tick(2) && m.m_connectState == 6 && m.m_connectWait == 2500 &&
+                      Is(CsQueue(), line(refusal.second) + line(refusal.first == 3 ? 0x926 : 0x928));
+            }
+            g_csJoin = oldJoin;
+            // Host: the session's name, DirectPlay's fields, the menu's +0x1F0; made / failed.
+            std::memset(settings->sessionName, 0, sizeof settings->sessionName);
+            std::strcpy(settings->sessionName, "Srv");
+            const int oldHost = g_csHost;
+            g_csHost = 0;
+            m.unknown1F0 = true;
+            m.m_connectWait = 0;
+            ok &= tick(3) && m.m_connectState == 4 && m.m_connectWait == 300 &&
+                  MsLogIs({"net host 1 Srv ebfe7ba0 11d2628d 60000fae 1114b097 100 2000 0 0"}, g_gfLog) &&
+                  Is(CsQueue(), line(0x922));
+            g_csHost = -1;
+            m.m_connectWait = 0;
+            ok &= tick(3) && m.m_connectState == 6 && m.m_connectWait == 2500 && Is(CsQueue(), line(0x920) + line(0x921));
+            g_csHost = oldHost;
+            // The dedicated server: made / failed.
+            g_cnDedicated = true;
+            m.m_connectWait = 0;
+            ok &= tick(7) && m.m_connectState == 8 && m.m_connectWait == 300 && MsLogIs({"net dedicated 1"}, g_gfLog) &&
+                  Is(CsQueue(), line(0x922));
+            g_cnDedicated = false;
+            m.unknown1F0 = false;
+            m.m_connectWait = 0;
+            ok &= tick(7) && m.m_connectState == 6 && m.m_connectWait == 2500 && MsLogIs({"net dedicated 0"}, g_gfLog) &&
+                  Is(CsQueue(), line(0x920) + line(0x921));
+            // Hosted: the network handler's start / the menu quits; done. Done, failed: nothing.
+            m.m_connectWait = 0;
+            ok &= tick(4) && m.m_connectState == 5 && Is(CsQueue(), "0 2000069 0 0; ");
+            ok &= tick(8) && m.m_connectState == 5 && Is(CsQueue(), "0 2000004 0 0; ");
+            for (int state : {5, 6, 9, -1})
+                ok &= tick(state) && m.m_connectState == state && CsQueue() == "" && g_gfLog.empty();
+            settings->sessionType = oldType;
+            settings->dedicated = oldDedicated;
+            WM(r.cnTick, ok);
+        }
+        {
+            // OK on the connect screen: closed, 0x2000028, start; another screen, no screens, another message: not taken.
+            bool ok = true;
+            C_MpMenuSettings settings;
+            m.m_mpSettings = &settings;
+            for (auto &group : settings.m_setup.maps) {
+                for (C_MpMap *map : group.maps)
+                    delete map;
+                group.maps.clear();
+            }
+            C_MsScreen connect(nullptr, "cnscreen", 13u << 26), other(nullptr, "cnother", 8u << 26);
+            S_ControlMessage message;
+            message.id = 0x4000000 | 0x200000A;
+            g_menuScreens = {&other, &connect};
+            ok &= m.OnConnectMessage(&message) && Is(CsQueue(), "0 2000005 0 0; 0 2000028 0 0; 24900000 1000001 0 0; ");
+            g_menuScreens = {&connect, &other};
+            ok &= !m.OnConnectMessage(&message) && CsQueue() == "";
+            g_menuScreens.clear();
+            ok &= !m.OnConnectMessage(&message) && CsQueue() == "";
+            g_menuScreens = {&other, &connect};
+            message.id = 0x2000003;
+            ok &= !m.OnConnectMessage(&message) && CsQueue() == "";
+            g_menuScreens.clear();
+            m.m_mpSettings = nullptr;
+            WM(r.cnMessage, ok);
+        }
+        ReleaseTextStyle(g_connectStyle);
+        g_connectStyle = -1;
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -3119,7 +3291,6 @@ void MainMenuTest(I3D_scene *scene)
                                                         "gameinfo", "confirm", "password"});
         const std::string log = Join(g_gfLog);
         ok &= GmInOrder(log, {"scan", "describe browser 20000000",
-                              "describe connect 34000000",
                               "describe addserver 38000000"}) &&
               log.find("describe ", log.find("describe addserver") + 1) == std::string::npos;
         ok &= m.m_screens.size() == 15 && S_CsPeek::Callbacks(m.m_screens[1]) == 1 && S_CsPeek::Callbacks(m.m_screens[2]) == 1 &&
@@ -3127,11 +3298,13 @@ void MainMenuTest(I3D_scene *scene)
               m.m_screens[4]->GetScreenFrame() == As<I3D_frame>(models[3]) &&
               !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1];
         // The quit question's model moved.
-        // (And the password screen's, part 9h-x.)
+        // (And the password screen's, part 9h-x, and the connect screen's, part 9h-xviii.)
         ok &= log.find("mmm04 8 (0.5 -0.375 -0.5)") != std::string::npos && log.find("mmm10 8 (0.5 -0.375 -0.5)") != std::string::npos &&
-              log.find(" 8 (0.5", log.find(" 8 (0.5", log.find(" 8 (0.5") + 1) + 1) == std::string::npos &&
+              log.find("mmm13 8 (0.5 -0.375 -0.5)") != std::string::npos &&
+              log.find(" 8 (0.5", log.find(" 8 (0.5", log.find(" 8 (0.5", log.find(" 8 (0.5") + 1) + 1) + 1) == std::string::npos &&
               log.find("mmgro 34 GROptions") != std::string::npos && log.find("mmgci 34 GB_Cinematics") != std::string::npos;
-        // (The game info screen's styles of this build given back: the next build makes its own.)
+        // (The game info screen's styles and the connect screen's of this build given back: the next build makes its own.)
+        ReleaseTextStyle(g_connectStyle);
         for (int &style : g_gameInfoStyles) {
             ReleaseTextStyle(style);
             style = -1;
@@ -3161,6 +3334,8 @@ void MainMenuTest(I3D_scene *scene)
         g_mrModelVt[0x08 / 4] = oldModelSetPos;
         g_msFrameVt[0x08 / 4] = oldFrameSetPos;
         m.OnStop();
+        ReleaseTextStyle(g_connectStyle);
+        g_connectStyle = -1;
         WM(r.mmBuild, ok);
     }
 
@@ -3178,7 +3353,7 @@ void MainMenuTest(I3D_scene *scene)
                 " csDescribe %d csSetup %d csShown %d csStart %d csPicked %d csHost %d"
                 " csRules %d csMapList %d csOptions %d csStyle %d csOption %d"
                 " csMoves %d csDouble %d csDragStart %d csDragMove %d csDrop %d"
-                " hsSession %d\n",
+                " hsSession %d cnDescribe %d cnHidden %d cnTick %d cnMessage %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
@@ -3189,5 +3364,5 @@ void MainMenuTest(I3D_scene *scene)
                 r.csDescribe, r.csSetup, r.csShown, r.csStart, r.csPicked, r.csHost,
                 r.csRules, r.csMapList, r.csOptions, r.csStyle, r.csOption,
                 r.csMoves, r.csDouble, r.csDragStart, r.csDragMove, r.csDrop,
-                r.hsSession);
+                r.hsSession, r.cnDescribe, r.cnHidden, r.cnTick, r.cnMessage);
 }
