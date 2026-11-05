@@ -140,7 +140,7 @@ int FUN_00726470(uint32_t *param_1,uint32_t param_2,uint32_t param_3,int param_4
       else {
         FUN_00724b30(local_148,(LPCWSTR)local_14[2],0x32);
       }
-      param_4 = FUN_00724c20(puVar9,local_148,1);
+      param_4 = C_NetGame__FindFreeNameNumber((C_NetGame *)puVar9,local_148,1);
       iVar17 = puVar9[0x78];
       pcVar19 = local_148;
       do {
@@ -252,7 +252,7 @@ int FUN_00726470(uint32_t *param_1,uint32_t param_2,uint32_t param_3,int param_4
       }
       *(uint32_t *)(iVar17 + 0x6c + puVar9[0x78]) = 0;
     }
-    FUN_00731990(&g_netGame,*(int *)(iVar17 + 0x70 + puVar9[0x78]));
+    C_NetGame__DropKeyQuery((C_NetGame *)&g_netGame,*(int *)(iVar17 + 0x70 + puVar9[0x78]));
     *(uint32_t *)(iVar17 + 0x70 + puVar9[0x78]) = 0xffffffff;
 LAB_00727179:
     LeaveCriticalSection((LPCRITICAL_SECTION)(puVar9 + 0x106));
@@ -482,7 +482,7 @@ LAB_00726cf1:
     param_3 &= 0xffffff;
     C_NetGame__LockPlayers((C_NetGame *)puVar9);
     local_28 += 0x20;
-    local_20 = (uint8_t *)FUN_00724c20(puVar9,(char *)local_28,1);
+    local_20 = (uint8_t *)C_NetGame__FindFreeNameNumber((C_NetGame *)puVar9,(char *)local_28,1);
     C_NetGame__UnlockPlayers((C_NetGame *)puVar9);
     if (1 < (int)local_20) {
       pCVar11 = C_fstr_Construct(&local_4c,&DAT_0084494c,local_20);

@@ -8870,6 +8870,32 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 278 errors in 51 of 375 files. ret_audit --src: 52.
   - Stats: 10,008 of 12,306 functions by hand or absorbed (87.3 % by size).
 
+  PART 10d-iii DONE (2026-11-05): the LAN search, the GameSpy reporting and the CD-key checks
+  (net/net_search.cpp, net/gamespy.h, new). The plan's 10d-iii is split: the DirectPlay side (Host, Connect, the
+  address objects, EnumHosts and the pings, the voice, TakeBandwidth, the status serialisation 0x00726010..
+  0x007263c0) is 10d-iv; the game messages (0x00726470..0x0072c280) 10d-v and -vi; 0x00731af0..0x00733000 10d-vii.
+  - The LAN search: StartSearch (GameSpy's browser for the settings' listing 1, else DirectPlay's EnumHosts, whose
+    second argument is the original's scratch slot), StartLanSearch (ServerBrowserNew "hd2" / "sK8pQ9", the twelve
+    keys, the role 0x12), PollSearch, SearchServers, OnBrowserCallback / AddBrowserServer (an S_ServerEntry for
+    C_MainMenu::OnServerFound, now public; Fix: the names copied within their fields).
+  - The reporting: StartReporting (qr2 on the port + 3, gcd 0x2EE, the key socket), AnswerQueries (qr2_think,
+    gcd_think locked, the key checks), the qr2 callbacks ReportServerKey / PlayerKey / TeamKey / KeyList / Count
+    and the empty ReportError 0x00723cf0 (made a function in Ghidra). The SDK's entry points are declared in
+    net/gamespy.h under their GameSpy names (port in 10f) and named in Ghidra.
+  - The CD keys (S_KeyQuery, 0xB8: the server's hundred at +0x55C, the client's at +0x4D40; KEY_*): the key socket
+    on the port + 2 (OpenKeyServer), the packets XORed with 0xA0 and checksummed (Receive / SendKeyPacket),
+    ProcessKeyQueries ("c:<name>" challenged with RandomName(8) 0x0097d048, "r:<response>:<name>" to
+    gcd_authenticate_user, the verdicts m / e / u every 200 ms, 15 s expiries; Fix: the names within their room),
+    OnKeyChecked (g_netGame's checks, as the original's absolute address), StartKeyQuery / RunKeyQuery (the join
+    status 5 bad, 6 in use (NET_JOIN_KEY_IN_USE), 8 timed out), DropKeyQuery, FindFreeNameNumber ("%s%i").
+    C_NetGame's +0x4E4 is m_serverBrowser, +0x4EC / +0x4F0 the search's and status's callbacks, +0x4D3C m_keySocket,
+    +0x4DF8 m_reporting.
+  - Harness: net/netsearch_tests.inc (with build_game.bat: GameSpy faked; a loopback key exchange with the server on
+    a thread; ports by the process id; 319 checks with 10d-i/-ii's). Mutations: mutations/mutate_10d3.py: 371: 280 killed, 40 not building, 51 equivalent or unobserved (locks, buffer sizes, millisecond boundaries, one-past-the-end bounds).
+    Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 268 errors in 51 of 375 files. ret_audit --src: 52.
+  - Stats: 10,032 of 12,306 functions by hand or absorbed (87.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

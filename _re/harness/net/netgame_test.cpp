@@ -24,13 +24,16 @@
 #include "game/human_controller.h"
 #include "game/item_defs.h"
 #include "game/items.h"
+#include "game/main_menu.h"
 #include "game/module.h"
+#include "game/mp_game_setup.h"
 #include "game/pending.h"
 #include "game/perf_timer.h"
 #include "game/profile.h"
 #include "ls3d/i3d.h"
 #include "ls3d/igraph.h"
 #include "net/dplay8.h"
+#include "net/gamespy.h"
 #include "net/net_channel.h"
 #include "net/net_game.h"
 #include "net/net_object.h"
@@ -182,7 +185,11 @@ void *g_graphVtable[64] = {nullptr, nullptr, reinterpret_cast<void *>(&FakeSetFl
 void *g_graphObject = g_graphVtable;
 extern "C" IGraph *GetIGraph() { return reinterpret_cast<IGraph *>(&g_graphObject); }
 
-void S_ServerEntry::Reset() { Log("server entry reset"); }
+void S_ServerEntry::Reset()
+{
+    std::memset(this, 0xEE, sizeof *this);
+    Log("server entry reset");
+}
 
 // The game around the players (part 10d-ii): the humans' controller types and teams by human (the player's and
 // team 0 unless set), the actors by index, the ranks sent, the round time, the prints.
@@ -233,7 +240,107 @@ void C_GameApp::PrintMessage(const char *text) { Log("app print %s", text); }
 
 // The other sub-parts' C_NetGame members.
 void C_NetGame::StopReporting(int *, bool) { Log("stop reporting"); }
-void C_NetGame::AnswerQueries() { Log("answer queries"); }
+int C_NetGame::EnumHosts(S_ServerEntry *server, int)
+{
+    Log("enum hosts %d", server ? 1 : 0);
+    return 0;
+}
+
+// The GameSpy SDK (part 10f): its calls recorded; a browser's server is a key -> value map; gcd's check answers
+// g_gcdAuthenticated / g_gcdMessage at once.
+struct S_SbServer {
+    std::map<std::string, std::string> values;
+    uint32_t ping = 0, address = 0;
+};
+struct S_Qr2Buffer {
+    std::vector<std::string> added;
+};
+struct S_Qr2KeyBuffer {
+    std::vector<int> keys;
+};
+void qr2_register_key(int key, const char *name) { Log("qr2 key %d %s", key, name); }
+Qr2ServerKeyCallback g_serverKey;
+Qr2PlayerKeyCallback g_playerKey;
+Qr2TeamKeyCallback g_teamKey;
+Qr2KeyListCallback g_keyList;
+Qr2CountCallback g_count;
+Qr2AddErrorCallback g_addError;
+int qr2_init(void *record, const char *ip, int basePort, const char *gameName, const char *secretKey, int isPublic,
+             int natNegotiate, Qr2ServerKeyCallback serverKey, Qr2PlayerKeyCallback playerKey,
+             Qr2TeamKeyCallback teamKey, Qr2KeyListCallback keyList, Qr2CountCallback count,
+             Qr2AddErrorCallback addError, void *userData)
+{
+    Log("qr2 init %d %d %d %s %s %d %d %d", record != nullptr, ip != nullptr, basePort, gameName, secretKey, isPublic,
+        natNegotiate, userData != nullptr);
+    g_serverKey = serverKey;
+    g_playerKey = playerKey;
+    g_teamKey = teamKey;
+    g_keyList = keyList;
+    g_count = count;
+    g_addError = addError;
+    return 0;
+}
+void qr2_think(void *record) { Log("qr2 think %d", record != nullptr); }
+void qr2_buffer_add(S_Qr2Buffer *buffer, const char *value) { buffer->added.push_back(value); }
+void qr2_buffer_add_int(S_Qr2Buffer *buffer, int value) { buffer->added.push_back("#" + std::to_string(value)); }
+void qr2_keybuffer_add(S_Qr2KeyBuffer *keys, int key) { keys->keys.push_back(key); }
+int gcd_init(void *record, int gameId)
+{
+    Log("gcd init %d %d", record != nullptr, gameId);
+    return 0;
+}
+void gcd_think() { Log("gcd think"); }
+int g_gcdAuthenticated = 1;
+char g_gcdMessage[32] = "";
+void gcd_authenticate_user(int gameId, int localId, uint32_t address, const char *challenge, const char *response,
+                           GcdAuthCallback callback, void *instance)
+{
+    Log("gcd check %d %d %08x %s %s", gameId, localId, address, challenge, response);
+    callback(gameId, localId, g_gcdAuthenticated, g_gcdMessage, instance);
+}
+void gcd_disconnect_user(int gameId, int localId) { Log("gcd drop %d %d", gameId, localId); }
+void gcd_compute_response(const char *cdKey, const char *challenge, char *response)
+{
+    std::sprintf(response, "%s+%s", cdKey, challenge);
+}
+S_ServerBrowser *g_browser = reinterpret_cast<S_ServerBrowser *>(0x5B);
+S_ServerBrowser *ServerBrowserNew(const char *queryForGame, const char *queryFromGame, const char *queryFromKey,
+                                  int queryFromVersion, int maxUpdates, int queryVersion,
+                                  ServerBrowserCallback callback, void *instance)
+{
+    Log("sb new %s %s %s %d %d %d %d %d", queryForGame, queryFromGame, queryFromKey, queryFromVersion, maxUpdates,
+        queryVersion, callback == OnBrowserCallback, instance != nullptr);
+    return g_browser;
+}
+void ServerBrowserUpdate(S_ServerBrowser *browser, int async, int disconnectOnComplete, const uint8_t *fields,
+                         int fieldCount, const char *filter)
+{
+    std::string list;
+    for (int i = 0; i < fieldCount; ++i)
+        list += " " + std::to_string(fields[i]);
+    Log("sb update %d %d %d%s %d", browser == g_browser, async, disconnectOnComplete, list.c_str(), filter != nullptr);
+}
+void ServerBrowserThink(S_ServerBrowser *browser) { Log("sb think %d", browser == g_browser); }
+void ServerBrowserClear(S_ServerBrowser *browser) { Log("sb clear %d", browser == g_browser); }
+const char *SBServerGetStringValue(S_SbServer *server, const char *key, const char *fallback)
+{
+    auto it = server->values.find(key);
+    return it == server->values.end() ? fallback : it->second.c_str();
+}
+int SBServerGetIntValue(S_SbServer *server, const char *key, int fallback)
+{
+    auto it = server->values.find(key);
+    return it == server->values.end() ? fallback : std::atoi(it->second.c_str());
+}
+uint32_t SBServerGetPing(S_SbServer *server) { return server->ping; }
+uint32_t SBServerGetPublicInetAddress(S_SbServer *server) { return server->address; }
+
+// The main menu's news of a server (the entries kept), the CD key, the current map.
+std::vector<S_ServerEntry *> g_foundServers;
+void __fastcall C_MainMenu::OnServerFound(S_ServerEntry *server) { g_foundServers.push_back(server); }
+const char *GetCDKey() { return "KEY"; }
+C_MpMap *g_currentMap;
+C_MpMap *S_MultiplayerSettings::GetCurrentMap() { return g_currentMap; }
 void C_NetGame::StopVoiceClient() { Log("stop voice client"); }
 void C_NetGame::StopVoiceServer() { Log("stop voice server"); }
 void C_NetGame::DeleteReplication() { Log("delete replication"); }
@@ -369,12 +476,14 @@ struct T_Client : IDirectPlay8Client {
 
 #include "netgame_tests.inc"
 #include "netplayers_tests.inc"
+#include "netsearch_tests.inc"
 
 int main()
 {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
     RunNetGameTests();
     RunNetPlayersTests();
+    RunNetSearchTests();
     std::printf("netgame: %d checks, %d failures\n", checks, failures);
     return failures != 0;
 }

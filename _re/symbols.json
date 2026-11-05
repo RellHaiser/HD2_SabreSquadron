@@ -38320,10 +38320,70 @@
   "module": "campaign_screens",
   "name": "C_NetGame::Host"
  },
+ "00723190": {
+  "module": "net_search",
+  "name": "OnBrowserCallback",
+  "proto": "void __fastcall OnBrowserCallback(void * browser, int reason, void * server, void * instance)"
+ },
+ "007231b0": {
+  "module": "net_search",
+  "name": "AddBrowserServer",
+  "proto": "void __cdecl AddBrowserServer(void * server)"
+ },
  "00723610": {
   "module": "main_menu",
   "name": "C_NetGame::PollSearch",
   "proto": "void __fastcall PollSearch(void *this)"
+ },
+ "00723620": {
+  "module": "net_search",
+  "name": "C_NetGame::StartLanSearch",
+  "proto": "int __fastcall StartLanSearch(void * net)"
+ },
+ "007237d0": {
+  "module": "net_search",
+  "name": "ReportServerKey",
+  "proto": "void __fastcall ReportServerKey(int key, void * buffer, void * userData)"
+ },
+ "00723a40": {
+  "module": "net_search",
+  "name": "ReportPlayerKey",
+  "proto": "void __fastcall ReportPlayerKey(int key, int index, void * buffer, void * userData)"
+ },
+ "00723b70": {
+  "module": "net_search",
+  "name": "ReportTeamKey",
+  "proto": "void __fastcall ReportTeamKey(int key, int index, void * buffer, void * userData)"
+ },
+ "00723bb0": {
+  "module": "net_search",
+  "name": "ReportKeyList",
+  "proto": "void __fastcall ReportKeyList(int keyType, void * keys, void * userData)"
+ },
+ "00723cc0": {
+  "module": "net_search",
+  "name": "ReportCount",
+  "proto": "int __fastcall ReportCount(int keyType, void * userData)"
+ },
+ "00723cf0": {
+  "module": "net_search",
+  "name": "ReportError",
+  "proto": "void __fastcall ReportError(int error, char * message, void * userData)"
+ },
+ "00723d20": {
+  "module": "net_search",
+  "name": "C_NetGame::StartReporting",
+  "proto": "void __fastcall StartReporting(void * net)"
+ },
+ "00723dc0": {
+  "module": "net_search",
+  "name": "C_NetGame::AnswerQueries",
+  "proto": "void __fastcall AnswerQueries(void * net)"
+ },
+ "00724010": {
+  "module": "net_search",
+  "name": "C_NetGame::StartSearch",
+  "proto": "int __fastcall StartSearch(void * net)"
  },
  "00724040": {
   "module": "main_menu",
@@ -38352,6 +38412,11 @@
   "module": "game",
   "name": "C_NetGame::UpdateVoiceTeam",
   "proto": "void __fastcall UpdateVoiceTeam(C_NetGame * net)"
+ },
+ "00724c20": {
+  "module": "net_search",
+  "name": "C_NetGame::FindFreeNameNumber",
+  "proto": "int __thiscall FindFreeNameNumber(void *this, char * name, int number)"
  },
  "00725080": {
   "module": "zz_idioms",
@@ -38778,6 +38843,51 @@
   "name": "C_NetGame::FlipSessionParity",
   "proto": "void __fastcall FlipSessionParity(C_NetGame * net)"
  },
+ "00730f00": {
+  "module": "net_search",
+  "name": "C_NetGame::OpenKeyServer",
+  "proto": "void __fastcall OpenKeyServer(void * net)"
+ },
+ "00730fa0": {
+  "module": "net_search",
+  "name": "C_NetGame::ReceiveKeyPacket",
+  "proto": "bool __thiscall ReceiveKeyPacket(void *this, char * data, int * size, uint * address, uint * port)"
+ },
+ "007310e0": {
+  "module": "net_search",
+  "name": "C_NetGame::SendKeyPacket",
+  "proto": "void __thiscall SendKeyPacket(void *this, char * data, int size, uint address, ushort port)"
+ },
+ "007311b0": {
+  "module": "net_search",
+  "name": "RandomName",
+  "proto": "char * __fastcall RandomName(int length)"
+ },
+ "007311f0": {
+  "module": "net_search",
+  "name": "OnKeyChecked",
+  "proto": "void __fastcall OnKeyChecked(int gameId, int localId, int authenticated, char * message, void * instance)"
+ },
+ "00731250": {
+  "module": "net_search",
+  "name": "C_NetGame::ProcessKeyQueries",
+  "proto": "void __fastcall ProcessKeyQueries(void * net)"
+ },
+ "007316f0": {
+  "module": "net_search",
+  "name": "C_NetGame::StartKeyQuery",
+  "proto": "void __thiscall StartKeyQuery(void *this, void * server)"
+ },
+ "007317a0": {
+  "module": "net_search",
+  "name": "C_NetGame::RunKeyQuery",
+  "proto": "bool __fastcall RunKeyQuery(void * net)"
+ },
+ "00731990": {
+  "module": "net_search",
+  "name": "C_NetGame::DropKeyQuery",
+  "proto": "void __thiscall DropKeyQuery(void *this, int index)"
+ },
  "007319e0": {
   "module": "game",
   "name": "C_NetGame::ResetReplication",
@@ -38822,17 +38932,85 @@
   "module": "zz_idioms",
   "name": "empty_function_732c10"
  },
+ "00732e30": {
+  "module": "net_search",
+  "name": "S_KeyQuery::Clear",
+  "proto": "void __fastcall Clear(void * query)"
+ },
  "00732f80": {
   "module": "zz_idioms",
   "name": "get_first_field_732f80"
+ },
+ "00733af0": {
+  "module": "net_search",
+  "name": "gcd_compute_response",
+  "proto": "void __fastcall gcd_compute_response(char * cdKey, char * challenge, char * response)"
+ },
+ "00733cb0": {
+  "module": "net_search",
+  "name": "gcd_init",
+  "proto": "int __fastcall gcd_init(void * record, int gameId)"
+ },
+ "00733d80": {
+  "module": "net_search",
+  "name": "gcd_authenticate_user"
+ },
+ "00733f40": {
+  "module": "net_search",
+  "name": "gcd_disconnect_user",
+  "proto": "void __fastcall gcd_disconnect_user(int gameId, int localId)"
+ },
+ "00734040": {
+  "module": "net_search",
+  "name": "gcd_think"
  },
  "007350a0": {
   "module": "app",
   "name": "ValidateCDKey"
  },
+ "00738500": {
+  "module": "net_search",
+  "name": "qr2_init"
+ },
+ "007385d0": {
+  "module": "net_search",
+  "name": "qr2_think",
+  "proto": "void __fastcall qr2_think(void * record)"
+ },
+ "007387d0": {
+  "module": "net_search",
+  "name": "qr2_keybuffer_add",
+  "proto": "void __fastcall qr2_keybuffer_add(void * keys, int key)"
+ },
+ "00738800": {
+  "module": "net_search",
+  "name": "qr2_buffer_add_int",
+  "proto": "void __fastcall qr2_buffer_add_int(void * buffer, int value)"
+ },
+ "00738830": {
+  "module": "net_search",
+  "name": "qr2_buffer_add",
+  "proto": "void __fastcall qr2_buffer_add(void * buffer, char * value)"
+ },
+ "00739750": {
+  "module": "net_search",
+  "name": "qr2_register_key",
+  "proto": "void __fastcall qr2_register_key(int key, char * name)"
+ },
+ "0073a3f0": {
+  "module": "net_search",
+  "name": "SBServerGetStringValue",
+  "proto": "char * __fastcall SBServerGetStringValue(void * server, char * key, char * fallback)"
+ },
+ "0073a420": {
+  "module": "net_search",
+  "name": "SBServerGetIntValue",
+  "proto": "int __fastcall SBServerGetIntValue(void * server, char * key, int fallback)"
+ },
  "0073a6a0": {
-  "module": "zz_idioms",
-  "name": "get_first_field_73a6a0"
+  "module": "net_search",
+  "name": "SBServerGetPublicInetAddress",
+  "proto": "uint __fastcall SBServerGetPublicInetAddress(void * server)"
  },
  "0073a6c0": {
   "module": "zz_idioms",
@@ -38843,12 +39021,31 @@
   "name": "get_field_20_73a730"
  },
  "0073aa10": {
-  "module": "zz_idioms",
-  "name": "get_field_1c_73aa10"
+  "module": "net_search",
+  "name": "SBServerGetPing",
+  "proto": "uint __fastcall SBServerGetPing(void * server)"
  },
  "0073ab40": {
   "module": "zz_idioms",
   "name": "get_field_14_73ab40"
+ },
+ "0073ab70": {
+  "module": "net_search",
+  "name": "ServerBrowserNew"
+ },
+ "0073af00": {
+  "module": "net_search",
+  "name": "ServerBrowserUpdate"
+ },
+ "0073b240": {
+  "module": "net_search",
+  "name": "ServerBrowserThink",
+  "proto": "void __fastcall ServerBrowserThink(void * browser)"
+ },
+ "0073b280": {
+  "module": "net_search",
+  "name": "ServerBrowserClear",
+  "proto": "void __fastcall ServerBrowserClear(void * browser)"
  },
  "0073cf60": {
   "module": "net_players",

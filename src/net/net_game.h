@@ -143,6 +143,32 @@ void PrintVoteResult(bool passed);                  // 0x0072de90
 // A vote asked through the game app (command 10).
 void PostVote(int kind, int arg);                   // 0x0072dd50
 
+// A CD-key check over the key socket (0xB8 bytes): the server keeps one for each player asking (C_NetGame +0x55C,
+// a hundred), the client one for itself (+0x4D40). The packets (XORed with 0xA0, a checksum after): the client's
+// "c:<name>", the server's "c:<challenge>" every 200 ms, the client's "r:<response>:<name>", the server's verdict
+// 'm' (good), 'e' (bad), 'u' (in use).
+struct S_KeyQuery {
+    char challenge[0x20] = {};                      // +0x00 the server's (8 random letters)
+    char response[0x4C] = {};                       // +0x20 the client's answer (gcd_compute_response)
+    uint32_t address = 0;                           // +0x6C the other side's
+    int port = 0;                                   // +0x70
+    int answered = 0;                               // +0x74 the server: the response came
+    char name[0x34] = {};                           // +0x78 the player's (made unique)
+    int state = 0;                                  // +0xAC KEY_*
+    int expiry = 0;                                 // +0xB0 ms (the perf clock)
+    int lastSend = 0;                               // +0xB4
+};
+enum : int {
+    KEY_FREE = 0,
+    KEY_CHALLENGED = 1,                             // the server sends its challenge; the client its response
+    KEY_ASKING = 2,                                 // the client asks
+    KEY_CHECKING = 3,                               // the server: GameSpy checks the response
+    KEY_GOOD = 4,
+    KEY_BAD = 5,
+    KEY_IN_USE = 6,
+    KEY_KEPT = 7,                                   // (never set by the game: kept past the expiry)
+};
+
 // A received or queued datagram (the queues' nodes, 0x18 bytes).
 struct S_NetQueued {
     int time;                                       // +0x08 clock()
@@ -274,6 +300,34 @@ public:
     void PollSearch();                              // 0x00723610 (__fastcall)
     // The LAN searched / the servers listed pinged (`callback` gets each answering; part 9h-xxi).
     void SearchServers(void(__fastcall *callback)(S_ServerEntry *server));   // 0x00724040
+    // The search started: GameSpy's LAN browser (the settings' listing 1), else DirectPlay's EnumHosts. 0.
+    int StartSearch();                              // 0x00724010 (__fastcall)
+    // GameSpy's LAN browser made (or cleared) and asked for the servers' keys; the role 0x12. 1.
+    int StartLanSearch();                           // 0x00723620 (__fastcall)
+    // DirectPlay's hosts enumerated (`server` null: the LAN's broadcast; part 10d-iv; `unused`: 0, its stack slot
+    // the original's scratch).
+    int EnumHosts(S_ServerEntry *server, int unused);   // 0x00723e80
+    // The server's GameSpy reporting (qr2 on the port + 3, the CD keys' gcd) and its key socket started.
+    void StartReporting();                          // 0x00723d20 (__fastcall)
+    // The key socket (UDP, the port + 2) opened, the hundred checks cleared.
+    void OpenKeyServer();                           // 0x00730f00 (__fastcall)
+    // A key packet waiting (none: false): its data (unXORed; `size` in: the room, out: the length without the
+    // checksum), the sender's address and port.
+    bool ReceiveKeyPacket(char *data, int *size, uint32_t *address, uint32_t *port);   // 0x00730fa0
+    // `data` (`size` bytes, 508 at most) XORed with 0xA0, its checksum after, to `address`:`port`.
+    void SendKeyPacket(const char *data, int size, uint32_t address, uint16_t port);   // 0x007310e0
+    // The server's key checks: the expired dropped, the due packets sent, one received ("c": a new or refreshed
+    // check; "r": the response handed to GameSpy).
+    void ProcessKeyQueries();                       // 0x00731250 (__fastcall)
+    // A client's check of its CD key with the server `server` begun (its key socket, the port + 2).
+    void StartKeyQuery(const S_ServerEntry *server);   // 0x007316f0
+    // ... run until the server's verdict: true good; bad / in use / 15 s: the join status 5 / 6 / 8, false.
+    bool RunKeyQuery();                             // 0x007317a0 (__fastcall)
+    // The server's check in `index` dropped (GameSpy told).
+    void DropKeyQuery(int index);                   // 0x00731990
+    // The lowest number from `number` that makes `name` (n >= 2: "<name><n>") no player's (the players locked by
+    // the caller).
+    int FindFreeNameNumber(const char *name, int number);   // 0x00724c20
     void PingServers(void(__fastcall *callback)(S_ServerEntry *server), std::vector<S_ServerEntry *> &servers);   // 0x00724090
     // Windows XP's firewall keeps `port` closed (the main menu asks to open it; part 9h-xxi).
     bool FirewallBlocks(uint16_t port);             // 0x007328d0
@@ -342,11 +396,15 @@ public:
     int m_teamWins[3] = {};                         // +0x458
     S_NetStats m_teamStats[3];                      // +0x464
     S_NetVote m_vote;                               // +0x4D0
-    int m_unknown4E4 = 0;
-    uint8_t m_unknown4E8[0x4D3C - 0x4E8] = {};       // (+0x4F4 a vector freed by the destructor, +0x4E00 ...)
-    uintptr_t m_searchSocket = static_cast<uintptr_t>(-1);   // +0x4D3C the LAN search's socket
-    uint8_t m_unknown4D40[0xB8] = {};
-    bool m_unknown4DF8 = false;                     // +0x4DF8
+    struct S_ServerBrowser *m_serverBrowser = nullptr;   // +0x4E4 the LAN search's (GameSpy)
+    uint8_t m_unknown4E8[4] = {};
+    void(__fastcall *m_searchCallback)(S_ServerEntry *server) = nullptr;   // +0x4EC each server found
+    void(__fastcall *m_statusCallback)(S_ServerStatus *status) = nullptr;  // +0x4F0 a server's status
+    uint8_t m_unknown4F4[0x55C - 0x4F4] = {};       // (+0x4F4 a vector freed by the destructor)
+    S_KeyQuery m_keyQueries[100];                   // +0x55C the server's CD-key checks
+    uintptr_t m_keySocket = static_cast<uintptr_t>(-1);   // +0x4D3C the CD keys' socket
+    S_KeyQuery m_keyClient;                         // +0x4D40 the client's own check
+    bool m_reporting = false;                       // +0x4DF8 the server reports to GameSpy (AnswerQueries)
     uint32_t m_graphFlags = 0;                      // +0x4DFC IGraph's flags, put back by Close
     uint8_t m_unknown4E00[0xA0] = {};
     float m_levelMin[4] = {};                       // +0x4EA0 (Command 3; w: unset)
@@ -390,10 +448,10 @@ enum : int {
     NET_CONNECTION_LOST = 9,
 };
 extern C_NetGame g_netGame;                         // 0x0097d070
-// C_NetGame::GetJoinStatus(): the client's joining (0 and 2, 6: still on its way).
+// C_NetGame::GetJoinStatus(): the client's joining (0 and 2: still on its way).
 enum : int {
     NET_JOIN_CONNECTED = 1, NET_JOIN_JOINING = 2, NET_JOIN_FULL = 3, NET_JOIN_BAD_PASSWORD = 4, NET_JOIN_BAD_CD_KEY = 5,
-    NET_JOIN_BAD_VERSION = 7, NET_JOIN_TIMED_OUT = 8,
+    NET_JOIN_KEY_IN_USE = 6, NET_JOIN_BAD_VERSION = 7, NET_JOIN_TIMED_OUT = 8,
 };
 // The message types the streams carry besides the modules' (5 bits).
 enum : uint32_t {
@@ -402,6 +460,23 @@ enum : uint32_t {
 };
 // The votable server commands' names (0x204 bytes each: "maxclients", ...).
 extern char g_votableCommands[][0x204];             // 0x00846088
+// The random name RandomName makes (32 letters at most).
+extern char g_randomName[33];                       // 0x0097d048
+// `length` (32 at most) random lowercase letters.
+const char *RandomName(int length);                 // 0x007311b0 (__fastcall)
+// The GameSpy browser's news: a server added or updated becomes an entry for the main menu.
+void OnBrowserCallback(struct S_ServerBrowser *browser, int reason, struct S_SbServer *server, void *instance);   // 0x00723190
+void AddBrowserServer(struct S_SbServer *server);   // 0x007231b0
+// The server's GameSpy reporting: its keys, the players', the teams', which keys, their counts, the errors.
+void ReportServerKey(int key, struct S_Qr2Buffer *buffer, void *userData);    // 0x007237d0
+void ReportPlayerKey(int key, int index, struct S_Qr2Buffer *buffer, void *userData);   // 0x00723a40
+void ReportTeamKey(int key, int index, struct S_Qr2Buffer *buffer, void *userData);     // 0x00723b70
+void ReportKeyList(int keyType, struct S_Qr2KeyBuffer *keys, void *userData);   // 0x00723bb0
+int ReportCount(int keyType, void *userData);       // 0x00723cc0
+void ReportError(int error, char *message, void *userData);   // 0x00723cf0 (nothing)
+// A CD key checked by GameSpy: the check's state (good, in use: a message "C...", bad).
+void OnKeyChecked(int gameId, int localId, int authenticated, char *message, void *instance);   // 0x007311f0
+
 // The thread of a server status query (Close waits for it).
 extern void *g_netQueryThread;                      // 0x009820f8
 // The text a closed session's +0x502C string becomes.

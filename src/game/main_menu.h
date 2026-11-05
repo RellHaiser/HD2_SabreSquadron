@@ -58,6 +58,9 @@ extern int g_netPollTime;                           // 0x0083fe08
 
 class C_MainMenu : public C_MenuState {
 public:
+    // The searches' and pings' answers (the net thread's): kept while the main menu runs and no password was
+    // asked.
+    static void __fastcall OnServerFound(S_ServerEntry *server);   // 0x00635b70
     // (Inline in C_GameApp::StartStep and the state changes.)
     C_MainMenu() = default;
     // (The options handler and the settings are deleted by OnStop.)
@@ -204,9 +207,6 @@ protected:
     void AddServerLine(S_ServerEntry *server, int unused = 0);   // 0x00635f10
     // A server found kept (under the lock).
     void AddFoundServer(S_ServerEntry *server);         // 0x00635990
-    // The searches' and pings' answers (the net thread's): kept while the main menu runs and no password was
-    // asked.
-    static void __fastcall OnServerFound(S_ServerEntry *server);   // 0x00635b70
     // The servers found taken (the last first; LAN games: one an address, the others dropped unless listed):
     // searching, the new ones listed; pinging, the listed ones answering shown again.
     void ListFoundServers();                            // 0x00635710 (__fastcall)

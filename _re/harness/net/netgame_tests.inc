@@ -84,7 +84,7 @@ void TestNetGameConstruction()
     g_gameRole = 0;
     net->Init();
     CHECK(g_gameRole == GAME_ROLE_LOCAL && net->m_sendPeriod == 50 && net->m_sendTime == 0 && net->m_unknown5060 &&
-          net->m_locksMade && net->m_joinStatus == 0 && net->m_searchSocket == static_cast<uintptr_t>(-1) &&
+          net->m_locksMade && net->m_joinStatus == 0 && net->m_keySocket == static_cast<uintptr_t>(-1) &&
           net->m_maxPing == 0 && net->m_unknown5068 == 50 && net->m_maxInactivity == 300000 &&
           net->m_packetCallback == TransportCallback && net->m_replication == nullptr);
     CHECK(net->m_players.size() == 32 && net->m_players[5].team == 2 && net->m_players[5].pendingTeam == 2 &&
@@ -201,9 +201,11 @@ void TestQueues()
     g_log.clear();
     g_gameRole = GAME_ROLE_SERVER;
     g_testMp.unknown174 = 1;
+    net.m_reporting = true;
     net.QueueReceived(w.Data(), w.ByteSize(), 0);
     net.ReceiveMessages(0, true);
-    CHECK(Logged("answer queries") && Logged("server command 1234 85") && Logged("call28 3 102") && net.m_received.empty());
+    CHECK(Logged("qr2 think 0") && Logged("gcd think") && Logged("server command 1234 85") && Logged("call28 3 102") && net.m_received.empty());
+    net.m_reporting = false;
     g_testMp.unknown174 = 0;
     // A client's received queue: not read.
     g_gameRole = GAME_ROLE_CLIENT;
@@ -854,10 +856,10 @@ void TestResets()
     net->m_unknown503C = 5;
     net->m_sendTime = 9;
     net->m_unknown448 = 3;
-    net->m_unknown4E4 = 3;
+    net->m_serverBrowser = reinterpret_cast<S_ServerBrowser *>(3);
     net->m_joinStatus = 4;
-    net->m_unknown4DF8 = true;
-    net->m_searchSocket = 5;
+    net->m_reporting = true;
+    net->m_keySocket = 5;
     net->m_replication = reinterpret_cast<C_NetReplication *>(1);
     net->m_maxPing = 9;
     net->m_unknown5068 = 1;
@@ -866,8 +868,8 @@ void TestResets()
     net->m_unknown8 = true;
     net->Init();
     CHECK(net->m_unknown4EE0 == nullptr && net->m_unknown503C == 0 && net->m_sendTime == 0 && net->m_unknown448 == 0 &&
-          net->m_unknown4E4 == 0 && net->m_joinStatus == 0 && !net->m_unknown4DF8 &&
-          net->m_searchSocket == static_cast<uintptr_t>(-1) && net->m_replication == nullptr && net->m_maxPing == 0 &&
+          net->m_serverBrowser == nullptr && net->m_joinStatus == 0 && !net->m_reporting &&
+          net->m_keySocket == static_cast<uintptr_t>(-1) && net->m_replication == nullptr && net->m_maxPing == 0 &&
           net->m_unknown5068 == 50 && net->m_voiceServer == nullptr && net->m_voiceClient == nullptr && !net->m_unknown8);
     // Shut down: the voice server deleted, the +0x4EE0 object destroyed.
     struct T_Unknown : C_NetUnknownObject {
@@ -889,12 +891,12 @@ void TestResets()
     WSADATA wsa;
     WSAStartup(0x202, &wsa);
     const SOCKET search = socket(AF_INET, SOCK_DGRAM, 0);
-    net->m_searchSocket = search;
+    net->m_keySocket = search;
     HANDLE thread = CreateEventA(nullptr, TRUE, TRUE, nullptr);
     g_netQueryThread = thread;
     C_NetConnection *staleLink = reinterpret_cast<C_NetConnection *>(8);
     net->m_serverLink = staleLink;
-    net->m_unknown4DF8 = true;
+    net->m_reporting = true;
     C_NetSocket socket;
     net->m_transport->m_connections.push_back(new C_NetConnection(9, 0, &socket));
     net->m_transport->m_running = true;
@@ -909,11 +911,11 @@ void TestResets()
     net->Close(true);
     int type = 0;
     int length = sizeof type;
-    CHECK(net->m_searchSocket == static_cast<uintptr_t>(-1) &&
+    CHECK(net->m_keySocket == static_cast<uintptr_t>(-1) &&
           getsockopt(search, SOL_SOCKET, SO_TYPE, reinterpret_cast<char *>(&type), &length) != 0);
     DWORD flags;
     CHECK(g_netQueryThread == nullptr && !GetHandleInformation(thread, &flags));
-    CHECK(net->m_serverLink == nullptr && !net->m_unknown4DF8 && net->m_transport->m_connections.empty() && !net->m_transport->m_running &&
+    CHECK(net->m_serverLink == nullptr && !net->m_reporting && net->m_transport->m_connections.empty() && !net->m_transport->m_running &&
           net->m_messages[1].BitPosition() == 0u && g_netPool.m_buffers.items.size() == buffers);
     // A received message's buffer given back too.
     C_GrowingBitStream w;

@@ -14,12 +14,4 @@ uint32_t FUN_00732e00(...)
 }
 
 
-// 0x00732e30
-uint32_t FUN_00732e30(int param_1, ...)
-{
-  *(uint32_t *)(param_1 + 0xac) = 0;
-  return 0;
-}
-
-
 } // namespace tier1

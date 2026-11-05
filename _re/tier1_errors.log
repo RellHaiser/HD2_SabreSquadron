@@ -326,17 +326,17 @@ f_00722a40.cpp:157:36: invalid initialization of reference of type 'const IID&' 
     piVar5 = (int *)CoCreateInstance((IID *)&DAT_008190a8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819058,
 f_00722a40.cpp:225:36: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     piVar6 = (int *)CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,
-f_00722a40.cpp:670:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:488:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,param_2);
-f_00722a40.cpp:672:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:490:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,param_1);
-f_00722a40.cpp:676:69: 'struct tier1::_union_1226' has no member named 'S_un_b'
+f_00722a40.cpp:494:69: 'struct tier1::_union_1226' has no member named 'S_un_b'
     pcVar2 = inet_ntoa((in_addr)((_union_1226 *)(iStack_c + 0x68))->S_un_b);
-f_00722a40.cpp:935:30: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:520:30: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     HVar2 = CoCreateInstance((IID *)&DAT_008190b8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819068,ppv);
-f_00722a40.cpp:1358:5: expected primary-expression before '}' token
+f_00722a40.cpp:921:5: expected primary-expression before '}' token
     }
-f_00724aa0.cpp:276:28: cannot convert 'const char*' to 'wchar_t*' in assignment
+f_00724aa0.cpp:239:28: cannot convert 'const char*' to 'wchar_t*' in assignment
     pwStack_94 = "2hostname" + 1;
 f_007277b0.cpp:620:21: base operand of '->' is not a pointer
     (*DAT_0098c0fc->vtable->empty_function_744210)();
@@ -374,163 +374,143 @@ f_007277b0.cpp:63:76: invalid 'static_cast' from type 'tier1::C_MenuState*' to t
     uint32_t FUN_00727850(void *param_1,int *param_2,char param_3, ...)
 f_007277b0.cpp:63:76: invalid 'static_cast' from type 'unsigned int*' to type 'uint64_t' {aka 'long long unsigned int'}
     uint32_t FUN_00727850(void *param_1,int *param_2,char param_3, ...)
-f_0072e190.cpp:41:62: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
-    uVar1 = htons((short)(g_gameProfile.m_mpSettings)->port + 2);
-f_0072e190.cpp:43:39: no match for 'operator>>' (operand types are 'tier1::u_short' and 'int')
-    local_1a0.sa_data[1] = (char)(uVar1 >> 8);
-f_0072e190.cpp:96:52: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
-    uVar1 = ntohs(GH_PIECE(local_31c.sa_data,0,2));
-f_0072e190.cpp:99:46: no match for 'operator>>' (operand types are 'tier1::u_short' and 'int')
-    return CONCAT31((uint3)(uint8_t)(uVar1 >> 8),1);
-f_0072e190.cpp:159:17: cannot convert 'tier1::u_short' to 'u_short' {aka 'short unsigned int'}
-    uVar1 = htons((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_sho
-f_0072e190.cpp:161:39: no match for 'operator>>' (operand types are 'tier1::u_short' and 'int')
-    local_210.sa_data[1] = (char)(uVar1 >> 8);
-f_0072e190.cpp:249:39: no matching function for call to 'tier1::u_short::u_short(int&)'
-    uVar17 = (u_short)piVar13[-0xf];
-f_0072e190.cpp:264:37: no matching function for call to 'tier1::u_short::u_short(int&)'
-    uVar17 = (u_short)piVar13[-0xf];
-f_0072e190.cpp:596:62: no matching function for call to 'tier1::u_short::u_short(uint32_t&)'
-    uVar14 = (u_short)*(uint32_t *)((int)param_1 + 0x4db0);
-f_0072e190.cpp:617:62: no matching function for call to 'tier1::u_short::u_short(uint32_t&)'
-    uVar14 = (u_short)*(uint32_t *)((int)param_1 + 0x4db0);
-f_0072e190.cpp:702:21: base operand of '->' is not a pointer
+f_0072e190.cpp:43:21: base operand of '->' is not a pointer
     (*DAT_0098c100->vtable->Create)();
-f_0072e190.cpp:719:23: base operand of '->' is not a pointer
+f_0072e190.cpp:60:23: base operand of '->' is not a pointer
     (*DAT_0098c100->vtable->Create)();
-f_0072e190.cpp:746:23: base operand of '->' is not a pointer
+f_0072e190.cpp:87:23: base operand of '->' is not a pointer
     (*DAT_0098c100->vtable->Create)();
-f_0072e190.cpp:791:21: base operand of '->' is not a pointer
+f_0072e190.cpp:132:21: base operand of '->' is not a pointer
     (*DAT_0098c100->vtable->Create)();
-f_0072e190.cpp:904:25: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
+f_0072e190.cpp:245:25: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
     uVar2 = htons(0x3a9a);
-f_0072e190.cpp:906:41: no match for 'operator>>' (operand types are 'tier1::u_short' and 'int')
+f_0072e190.cpp:247:41: no match for 'operator>>' (operand types are 'tier1::u_short' and 'int')
     sStack_10.sa_data[1] = (char)(uVar2 >> 8);
-f_0072e190.cpp:952:31: cannot convert 'const char*' to 'HKEY' {aka 'HKEY__*'}
+f_0072e190.cpp:293:31: cannot convert 'const char*' to 'HKEY' {aka 'HKEY__*'}
     pHVar1 = (HKEY)FUN_006ed880("Software\\Illusion Softworks\\Hidden & Dangerous 2",1);
-f_0072e190.cpp:1021:31: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:362:31: 'struct tier1::_union_2683' has no member named 'n2'
     uStack_4c = (int)&_Stack_30.n2.n3 + 4;
-f_0072e190.cpp:1028:24: 'struct tier1::_union_2683' has no member named 'decVal'
+f_0072e190.cpp:369:24: 'struct tier1::_union_2683' has no member named 'decVal'
     if ((int *)_Stack_30.decVal.Hi32 != 0) {
-f_0072e190.cpp:1030:16: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
+f_0072e190.cpp:371:16: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
     local_38 = (uint8_t  [4])0x0;
-f_0072e190.cpp:1032:35: 'struct tier1::_union_2683' has no member named 'decVal'
+f_0072e190.cpp:373:35: 'struct tier1::_union_2683' has no member named 'decVal'
     piStack_58 = (int *)_Stack_30.decVal.Hi32;
-f_0072e190.cpp:1033:36: 'struct tier1::_union_2683' has no member named 'decVal'
+f_0072e190.cpp:374:36: 'struct tier1::_union_2683' has no member named 'decVal'
     (**(code **)(*(int *)_Stack_30.decVal.Hi32 + 0x1c))();
-f_0072e190.cpp:1034:21: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
+f_0072e190.cpp:375:21: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
     if (local_38 != (uint8_t  [4])0x0) {
-f_0072e190.cpp:1042:48: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:383:48: 'struct tier1::_union_2683' has no member named 'n2'
     VariantInit((VARIANTARG *)&a_Stack_20[0].n2);
-f_0072e190.cpp:1048:24: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:389:24: 'struct tier1::_union_2683' has no member named 'n2'
     if ((_Stack_30.n2.vt == 0xd) &&
-f_0072e190.cpp:1068:47: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:409:47: 'struct tier1::_union_2683' has no member named 'n2'
     VariantClear((VARIANTARG *)&_Stack_30.n2);
-f_0072e190.cpp:1115:28: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
+f_0072e190.cpp:456:28: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
     local_38 = (uint8_t  [4])((uint32_t)local_38 & 0xffffff00);
-f_0072e190.cpp:1197:48: 'VARIANTARG' {aka 'struct tagVARIANT'} has no member named 'n1'
+f_0072e190.cpp:538:48: 'VARIANTARG' {aka 'struct tagVARIANT'} has no member named 'n1'
     puStack_40 = (uint8_t *)((int)&aVStack_20[0].n1 + 4);
-f_0072e190.cpp:1198:17: 'VARIANTARG' {aka 'struct tagVARIANT'} has no member named 'n1'
+f_0072e190.cpp:539:17: 'VARIANTARG' {aka 'struct tagVARIANT'} has no member named 'n1'
     aVStack_20[0].n1.decVal.Hi32 = 0;
-f_0072e190.cpp:1221:61: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:562:61: 'struct tier1::_union_2683' has no member named 'n2'
     if (((uint32_t)&(((_union_2683 *)auStack_30)->n2).n3 & 0x500) == 0) {
-f_0072e190.cpp:1244:66: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:585:66: 'struct tier1::_union_2683' has no member named 'n2'
     VariantClear((VARIANTARG *)&((_union_2683 *)auStack_30)->n2);
-f_0072e190.cpp:1246:59: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:587:59: 'struct tier1::_union_2683' has no member named 'n2'
     (&(((_union_2683 *)auStack_30)->n2).n3,1,(_union_2683 *)auStack_30);
-f_0072e190.cpp:1292:22: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_0072e190.cpp:633:22: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     CoCreateInstance((IID *)&DAT_008451dc,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008451ec,local_a8);
-f_0072e190.cpp:1354:22: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_0072e190.cpp:695:22: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     CoCreateInstance((IID *)&DAT_008451dc,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008451ec,&local_a0);
 f_00732e40.cpp:225:48: cannot convert 'uint8_t*' {aka 'unsigned char*'} to 'int (__attribute__((cdecl)) *)(const void*, const void*)'
     qsort((void *)param_1[5],*param_1,param_1[2],param_2);
-f_00733700.cpp:375:23: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
+f_00733700.cpp:376:23: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
     uVar1 = htons(0x74d6);
-f_00733700.cpp:2359:17: cannot convert 'tier1::u_long' to 'u_long' {aka 'long unsigned int'}
+f_00733700.cpp:2361:17: cannot convert 'tier1::u_long' to 'u_long' {aka 'long unsigned int'}
     uVar3 = ntohl((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u
-f_00733700.cpp:2500:33: could not convert '27900' from 'int' to 'tier1::u_short'
+f_00733700.cpp:2502:33: could not convert '27900' from 'int' to 'tier1::u_short'
     iVar4 = FUN_007388d0(pcVar2,0x6cfc,(hostent *)(puVar5 + 0x31),0);
-f_00733700.cpp:2531:35: no matching function for call to 'tier1::u_short::u_short(uint32_t&)'
+f_00733700.cpp:2533:35: no matching function for call to 'tier1::u_short::u_short(uint32_t&)'
     FUN_007388d0(param_2,(u_short)uVar5,&local_10,0);
-f_00733700.cpp:2532:29: no match for 'operator=' (operand types are 'tier1::u_long' and 'u_long' {aka 'long unsigned int'})
+f_00733700.cpp:2534:29: no match for 'operator=' (operand types are 'tier1::u_long' and 'u_long' {aka 'long unsigned int'})
     uVar2 = htonl(0x7f000001);
-f_00733700.cpp:2533:85: no match for 'operator==' (operand types are 'uint32_t' {aka 'unsigned int'} and 'tier1::u_long')
+f_00733700.cpp:2535:85: no match for 'operator==' (operand types are 'uint32_t' {aka 'unsigned int'} and 'tier1::u_long')
     if (CONCAT22(GH_PIECE(local_10.h_aliases,2,2),GH_PIECE(local_10.h_aliases,0,2)) == uVar2) {
-f_00733700.cpp:2550:48: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
+f_00733700.cpp:2552:48: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
     uVar1 = ntohs(GH_PIECE(local_10.h_name,2,2));
-f_00733700.cpp:2772:17: cannot convert 'tier1::u_short' to 'u_short' {aka 'short unsigned int'}
+f_00733700.cpp:2774:17: cannot convert 'tier1::u_short' to 'u_short' {aka 'short unsigned int'}
     uVar1 = htons((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_sho
-f_00733700.cpp:2794:37: expected primary-expression before '*' token
+f_00733700.cpp:2796:37: expected primary-expression before '*' token
     phVar3 = gethostbyname(hostent*)((param_1));
-f_00733700.cpp:2794:38: expected primary-expression before ')' token
+f_00733700.cpp:2796:38: expected primary-expression before ')' token
     phVar3 = gethostbyname(hostent*)((param_1));
-f_00733700.cpp:3179:28: no matching function for call to 'tier1::u_short::u_short(int&)'
+f_00733700.cpp:3181:28: no matching function for call to 'tier1::u_short::u_short(int&)'
     uVar2 = htons((u_short)local_10c);
-f_00733700.cpp:3349:13: cannot convert 'tier1::u_long' to 'u_long' {aka 'long unsigned int'}
+f_00733700.cpp:3351:13: cannot convert 'tier1::u_long' to 'u_long' {aka 'long unsigned int'}
     ntohl((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((
-f_00733700.cpp:3412:43: 'struct tier1::_union_1226' has no member named 'S_un_b'
+f_00733700.cpp:3414:43: 'struct tier1::_union_1226' has no member named 'S_un_b'
     pcVar1 = inet_ntoa((in_addr)p_Var3->S_un_b);
-f_00733700.cpp:3506:5: '_local_4' was not declared in this scope; did you mean 'local_4'?
+f_00733700.cpp:3508:5: '_local_4' was not declared in this scope; did you mean 'local_4'?
     _local_4 = CONCAT31(uStack_3,(char)uVar3);
-f_00733700.cpp:3839:36: request for member '_0_4_' in '"\\status\\"', which is of non-class type 'const char [9]'
-    local_100 = (char)"\\status\\"._0_4_;
-f_00733700.cpp:3840:36: request for member '_0_4_' in '"\\status\\"', which is of non-class type 'const char [9]'
-    cStack_ff = SUB41("\\status\\"._0_4_,1);
 f_00733700.cpp:3841:36: request for member '_0_4_' in '"\\status\\"', which is of non-class type 'const char [9]'
+    local_100 = (char)"\\status\\"._0_4_;
+f_00733700.cpp:3842:36: request for member '_0_4_' in '"\\status\\"', which is of non-class type 'const char [9]'
+    cStack_ff = SUB41("\\status\\"._0_4_,1);
+f_00733700.cpp:3843:36: request for member '_0_4_' in '"\\status\\"', which is of non-class type 'const char [9]'
     cStack_fe = SUB41("\\status\\"._0_4_,2);
-f_00733700.cpp:3842:56: request for member '_4_4_' in '"\\status\\"', which is of non-class type 'const char [9]'
+f_00733700.cpp:3844:56: request for member '_4_4_' in '"\\status\\"', which is of non-class type 'const char [9]'
     GH_PIECE(DStack_fd,1,3) = (undefined3)"\\status\\"._4_4_;
-f_00733700.cpp:3843:69: request for member '_0_4_' in '"\\status\\"', which is of non-class type 'const char [9]'
+f_00733700.cpp:3845:69: request for member '_0_4_' in '"\\status\\"', which is of non-class type 'const char [9]'
     DStack_fd = CONCAT31(GH_PIECE(DStack_fd,1,3),SUB41("\\status\\"._0_4_,3));
-f_00733700.cpp:3844:36: request for member '_4_4_' in '"\\status\\"', which is of non-class type 'const char [9]'
+f_00733700.cpp:3846:36: request for member '_4_4_' in '"\\status\\"', which is of non-class type 'const char [9]'
     cStack_f9 = SUB41("\\status\\"._4_4_,3);
-f_00733700.cpp:3848:43: request for member '_0_4_' in '"\\basic\\\\info\\"', which is of non-class type 'const char [14]'
-    local_100 = (char)"\\basic\\\\info\\"._0_4_;
-f_00733700.cpp:3849:43: request for member '_0_4_' in '"\\basic\\\\info\\"', which is of non-class type 'const char [14]'
-    cStack_ff = SUB41("\\basic\\\\info\\"._0_4_,1);
 f_00733700.cpp:3850:43: request for member '_0_4_' in '"\\basic\\\\info\\"', which is of non-class type 'const char [14]'
+    local_100 = (char)"\\basic\\\\info\\"._0_4_;
+f_00733700.cpp:3851:43: request for member '_0_4_' in '"\\basic\\\\info\\"', which is of non-class type 'const char [14]'
+    cStack_ff = SUB41("\\basic\\\\info\\"._0_4_,1);
+f_00733700.cpp:3852:43: request for member '_0_4_' in '"\\basic\\\\info\\"', which is of non-class type 'const char [14]'
     cStack_fe = SUB41("\\basic\\\\info\\"._0_4_,2);
-f_00733700.cpp:3851:63: request for member '_4_4_' in '"\\basic\\\\info\\"', which is of non-class type 'const char [14]'
+f_00733700.cpp:3853:63: request for member '_4_4_' in '"\\basic\\\\info\\"', which is of non-class type 'const char [14]'
     GH_PIECE(DStack_fd,1,3) = (undefined3)"\\basic\\\\info\\"._4_4_;
-f_00733700.cpp:3852:76: request for member '_0_4_' in '"\\basic\\\\info\\"', which is of non-class type 'const char [14]'
+f_00733700.cpp:3854:76: request for member '_0_4_' in '"\\basic\\\\info\\"', which is of non-class type 'const char [14]'
     DStack_fd = CONCAT31(GH_PIECE(DStack_fd,1,3),SUB41("\\basic\\\\info\\"._0_4_,3));
-f_00733700.cpp:3853:43: request for member '_4_4_' in '"\\basic\\\\info\\"', which is of non-class type 'const char [14]'
+f_00733700.cpp:3855:43: request for member '_4_4_' in '"\\basic\\\\info\\"', which is of non-class type 'const char [14]'
     cStack_f9 = SUB41("\\basic\\\\info\\"._4_4_,3);
-f_00733700.cpp:4112:25: 'ThreadLocalStoragePointer' was not declared in this scope
+f_00733700.cpp:4114:25: 'ThreadLocalStoragePointer' was not declared in this scope
     iVar1 = *(int *)((int)ThreadLocalStoragePointer + _tls_index * 4);
-f_00733700.cpp:4112:53: '_tls_index' was not declared in this scope
+f_00733700.cpp:4114:53: '_tls_index' was not declared in this scope
     iVar1 = *(int *)((int)ThreadLocalStoragePointer + _tls_index * 4);
-f_00733700.cpp:4126:25: 'ThreadLocalStoragePointer' was not declared in this scope
+f_00733700.cpp:4128:25: 'ThreadLocalStoragePointer' was not declared in this scope
     iVar1 = *(int *)((int)ThreadLocalStoragePointer + _tls_index * 4);
-f_00733700.cpp:4126:53: '_tls_index' was not declared in this scope
+f_00733700.cpp:4128:53: '_tls_index' was not declared in this scope
     iVar1 = *(int *)((int)ThreadLocalStoragePointer + _tls_index * 4);
-f_00733700.cpp:4336:11: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_00733700.cpp:4338:11: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     cVar1 = *DAT_00982dd8;
-f_00733700.cpp:4341:15: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_00733700.cpp:4343:15: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     cVar1 = *DAT_00982dd8;
-f_00733700.cpp:4347:7: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_00733700.cpp:4349:7: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     if (*DAT_00982dd8 != '\0') {
-f_00733700.cpp:4348:5: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_00733700.cpp:4350:5: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     *DAT_00982dd8 = '\0';
-f_00733700.cpp:4397:19: cannot convert 'tier1::u_short' to 'u_short' {aka 'short unsigned int'}
+f_00733700.cpp:4399:19: cannot convert 'tier1::u_short' to 'u_short' {aka 'short unsigned int'}
     uVar3 = ntohs((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_sho
-f_00733700.cpp:4419:15: no match for 'operator!=' (operand types are 'tier1::u_short' and 'int')
+f_00733700.cpp:4421:15: no match for 'operator!=' (operand types are 'tier1::u_short' and 'int')
     if (uVar3 != 0) {
-f_00733700.cpp:4720:64: could not convert '0' from 'int' to 'tier1::u_long'
+f_00733700.cpp:4724:64: could not convert '0' from 'int' to 'tier1::u_long'
     FUN_0073adf0(param_1,param_2,param_3,param_4,param_5,param_6,0,0);
-f_00733700.cpp:4912:19: cannot convert 'tier1::u_long' to 'u_long' {aka 'long unsigned int'}
+f_00733700.cpp:4920:19: cannot convert 'tier1::u_long' to 'u_long' {aka 'long unsigned int'}
     uVar3 = htonl((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u
-f_00733700.cpp:4920:32: no matching function for call to 'tier1::u_short::u_short(int&)'
+f_00733700.cpp:4928:32: no matching function for call to 'tier1::u_short::u_short(int&)'
     local_300 = htons((u_short)local_308);
-f_00733700.cpp:4969:35: expected primary-expression before '*' token
+f_00733700.cpp:4977:35: expected primary-expression before '*' token
     phVar4 = gethostbyname(hostent*)((local_80));
-f_00733700.cpp:4969:36: expected primary-expression before ')' token
+f_00733700.cpp:4977:36: expected primary-expression before ')' token
     phVar4 = gethostbyname(hostent*)((local_80));
-f_00733700.cpp:5272:38: could not convert '2' from 'int' to 'tier1::u_long'
+f_00733700.cpp:5280:38: could not convert '2' from 'int' to 'tier1::u_long'
     iVar1 = FUN_0073b4a0(param_1,0,0,2,0);
-f_00733700.cpp:5818:17: cannot convert 'tier1::u_short' to 'u_short' {aka 'short unsigned int'}
+f_00733700.cpp:5826:17: cannot convert 'tier1::u_short' to 'u_short' {aka 'short unsigned int'}
     ntohs((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_s
-f_00733700.cpp:5874:26: cannot convert 'tier1::u_short' to 'u_short' {aka 'short unsigned int'}
+f_00733700.cpp:5882:26: cannot convert 'tier1::u_short' to 'u_short' {aka 'short unsigned int'}
     while (uVar1 = ntohs((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)
 f_00733700.cpp:63:35: invalid 'static_cast' from type 'tier1::u_short' to type 'uint64_t' {aka 'long long unsigned int'}
     pcVar9 = pcVar8;

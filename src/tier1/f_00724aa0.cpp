@@ -103,43 +103,6 @@ uint32_t FUN_00724bd0(LPSTR param_1,LPCWSTR param_2,int param_3, ...)
 }
 
 
-// 0x00724c20
-int FUN_00724c20(void *_this,char *param_1,int param_2, ...)
-{
-  char cVar1;
-  char *pcVar2;
-  int iVar3;
-  int iVar4;
-  int iVar5;
-  char local_3e8 [1000];
-  if (param_2 < 2) {
-    pcVar2 = param_1;
-    do {
-      cVar1 = *pcVar2;
-      pcVar2[(int)(local_3e8 + -(int)param_1)] = cVar1;
-      pcVar2++;
-    } while (cVar1 != '\0');
-  }
-  else {
-    sprintf(local_3e8,&DAT_00844ce8,param_1,param_2);
-  }
-  if ((*(int *)((int)_this + 0x1e0) != 0) &&
-     (iVar5 = (*(int *)((int)_this + 0x1e4) - *(int *)((int)_this + 0x1e0)) / 0xc4, iVar5 != 0)) {
-    iVar4 = iVar5 * 0xc4;
-    do {
-      iVar5--;
-      iVar3 = _stricmp(local_3e8,(char *)(iVar4 - 0xbc + *(int *)((int)_this + 0x1e0)));
-      if (iVar3 == 0) {
-        iVar5 = FUN_00724c20(_this,param_1,param_2 + 1);
-        return iVar5;
-      }
-      iVar4 -= 0xc4;
-    } while (iVar5 != 0);
-  }
-  return param_2;
-}
-
-
 // 0x00724d30
 uint32_t FUN_00724d30(void *_this,int *param_1, ...)
 {

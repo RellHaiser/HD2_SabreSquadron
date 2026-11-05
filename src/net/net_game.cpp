@@ -181,13 +181,13 @@ void C_NetGame::Init()
     m_sendTime = 0;
     m_unknown5060 = true;
     m_unknown448 = 0;
-    m_unknown4E4 = 0;
+    m_serverBrowser = nullptr;
     m_playersLock.Init();
     m_queueLock.Init();
     m_locksMade = true;
     m_joinStatus = 0;
-    m_unknown4DF8 = false;
-    m_searchSocket = static_cast<uintptr_t>(-1);
+    m_reporting = false;
+    m_keySocket = static_cast<uintptr_t>(-1);
     m_replication = nullptr;
     m_maxPing = 0;
     m_unknown5068 = 50;
@@ -240,9 +240,9 @@ void C_NetGame::Close(bool now)
         StopVoiceClient();
         StopVoiceServer();
     }
-    if (m_searchSocket != static_cast<uintptr_t>(-1)) {
-        closesocket(m_searchSocket);
-        m_searchSocket = static_cast<uintptr_t>(-1);
+    if (m_keySocket != static_cast<uintptr_t>(-1)) {
+        closesocket(m_keySocket);
+        m_keySocket = static_cast<uintptr_t>(-1);
     }
     if (g_netQueryThread) {
         WaitForSingleObject(g_netQueryThread, 0);
@@ -265,7 +265,7 @@ void C_NetGame::Close(bool now)
             m_client = nullptr;
         }
     }
-    m_unknown4DF8 = false;
+    m_reporting = false;
     m_joinStatus = 0;
     g_gameRole = GAME_ROLE_LOCAL;
     if (m_replication)
