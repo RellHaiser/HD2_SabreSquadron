@@ -1,7 +1,8 @@
 """Part 9h-xix mutations: the main menu's browser: its description, list and sorting
 (game/main_menu.cpp).
 
-Result: 151: 139 killed, 12 not building, none surviving.
+Result: 151: 139 killed (1 after a second run: DescribeServerList's true checked), 12 not building, none
+surviving.
 
 Run with the factory build: --build build_factory.bat --check check_mainmenu.py (FACTORY_TEST; the
 "mainmenu:" checks). Generated (deletions, comparison, number, bool and negation flips; the lines

@@ -29,9 +29,7 @@ bool C_GameProfile::SelectPlayer(const char *name)
 bool g_mmTakes[4];
 // (Part 9h-v: the profile screen's handler is real; its own fakes are its delete and list. Part 9h-ix: the
 // missions' handler real too.)
-// (Part 9h-xxi: the network handler real; the server list's file, the searches and the firewall logged.)
-void C_MpMenuSettings::LoadServerList() { GfLog("load server list"); }
-void C_MpMenuSettings::SaveServerList() { GfLog("save server list"); }
+// (Part 9h-xxi: the network handler real; the searches and the firewall logged.)
 void C_NetGame::SearchServers(void(__fastcall *callback)(S_ServerEntry *))
 {
     GfLog("search %d", callback == &C_MainMenu::OnServerFound);
@@ -335,7 +333,8 @@ struct S_MainMenuResults {
          bwDescribe = true, bwList = true, bwShown = true, bwSort = true, bwPicked = true, bwJoin = true, bwCount = true,
          bxLine = true, bxFound = true, bxList = true, bxTick = true, bxRestore = true, bxRefresh = true,
          bxFavorite = true, bxFavorites = true,
-         nmLan = true, nmInternet = true, nmLeave = true, nmStart = true, nmJoin = true, nmSearch = true, nmEscape = true;
+         nmLan = true, nmInternet = true, nmLeave = true, nmStart = true, nmJoin = true, nmSearch = true, nmEscape = true,
+         slFile = true, slOdd = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -3394,6 +3393,14 @@ void MainMenuTest(I3D_scene *scene)
             ok &= !m.DescribeServerList(&d, As<I3D_frame>(model)) && d.controls.empty();
             ok &= m.DescribeBrowserScreen(&d, As<I3D_frame>(model)) && d.controls.size() == 21 &&
                   d.controls[7]->name == "brestore list" && d.controls[7]->id == 0x20800000;
+            g_msChildren[{model, "sever00"}] = row;
+            // (With its row: true.)
+            g_mrMade[FRAME_DUMMY] = {MsFrame("bwgroup3")};
+            g_mrClones.clear();
+            for (int i = 1; i < 12; ++i)
+                g_mrClones.push_back(As<I3D_frame>(MsFrame(strdup(CmText("bwd%d", i).c_str()))));
+            S_ScreenDesc d3("multiplayer menu", "multiplayer menu", 8u << 26);
+            ok &= m.DescribeServerList(&d3, As<I3D_frame>(model)) && d3.controls.size() == 2;
             g_mrMade.erase(FRAME_DUMMY);
             m.m_frames.clear();
             m.m_models.clear();
@@ -3600,6 +3607,11 @@ void MainMenuTest(I3D_scene *scene)
             ok &= dropped();
             f.maxPing = 0;
             ok &= posted();
+            f.maxPing = 1;
+            s.ping = 2;
+            ok &= dropped();
+            s.ping = 1;
+            ok &= posted();
             f = none;
             f.gameType = 2;
             ok &= dropped();
@@ -3709,6 +3721,23 @@ void MainMenuTest(I3D_scene *scene)
             m.ListFoundServers();
             ok &= settings.m_servers.size() == 3 && settings.m_servers[2] == &twin2 && Is(CsQueue(), line(&twin2));
             settings.m_servers.clear();
+            // The favourites shown: their addresses checked, the new ones added to them.
+            S_ServerEntry five = entry(5, 5), six = entry(6, 6);
+            auto *twin5 = new S_ServerEntry(entry(5, 1));
+            g_mmWatch = {twin5};
+            g_mmDeleted.clear();
+            settings.m_listKind = 2;
+            settings.m_servers2 = {&five};
+            g_mpSettings->unknown174 = 0;
+            m.m_foundServers = {&six, twin5};
+            m.ListFoundServers();
+            ok &= g_mmDeleted == std::vector<void *>({twin5}) &&
+                  settings.m_servers2 == std::vector<S_ServerEntry *>({&five, &six}) && settings.m_servers.empty() &&
+                  Is(CsQueue(), line(&six));
+            g_mmWatch.clear();
+            g_mmDeleted.clear();
+            settings.m_servers2.clear();
+            settings.m_listKind = 1;
             m.m_step = 0;
             WM(r.bxList, ok);
         }
@@ -3717,6 +3746,30 @@ void MainMenuTest(I3D_scene *scene)
             // after 15 s quiet; sorted every second; the network polled every 10 ms.
             bool ok = true;
             S_ServerEntry a = entry(1, 100), b = entry(2, 9999), c = entry(3, 50);
+            // (The poll's time at first.)
+            ok &= g_netPollTime == 15;
+            // The favourites shown: theirs (again, the reachable ones).
+            S_ServerEntry f1 = entry(7, 10);
+            settings.m_listKind = 2;
+            settings.m_servers = {&a};
+            settings.m_servers2 = {&f1};
+            m.m_step = 6;
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 0) && Is(CsQueue(), line(&f1));
+            m.m_step = 9;
+            m.m_searchTime = 5;
+            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 0) && f1.listed && !a.listed &&
+                  Is(CsQueue(), line(&f1));
+            settings.m_listKind = 1;
+            settings.m_servers2.clear();
+            // Pinging: the servers found listed (a listed one answering: shown again).
+            m.m_step = 4;
+            m.m_searchTime = 0;
+            m.m_sortTime = 0;
+            g_mpSettings->unknown174 = 1;
+            m.m_foundServers = {&a};
+            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 0) && m.m_foundServers.empty() &&
+                  Is(CsQueue(), "20900000 200002c 0 0; ");
             settings.m_servers = {&a, &b, &c};
             g_gfLog.clear();
             g_netPollTime = 5;
@@ -3762,8 +3815,8 @@ void MainMenuTest(I3D_scene *scene)
                                 "20900000 2000079 0 0; ");
             m.m_step = 5;
             m.m_searchTime = 15000;
-            m.m_sortTime = 998;
-            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 1) && m.m_step == 0 && m.m_sortTime == 999 &&
+            m.m_sortTime = 999;
+            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 1) && m.m_step == 0 && m.m_sortTime == 1000 &&
                   Is(CsQueue(), "0 2000028 0 0; 20900000 2000079 0 0; 20b00000 1000015 d 917; ");
             settings.m_servers.clear();
             g_netPollTime = 15;
@@ -3867,6 +3920,14 @@ void MainMenuTest(I3D_scene *scene)
             m.m_server = &s;
             ok &= C_MainMenu::OnFavoriteToggle(&m, nullptr, nullptr, 0, 0) && m.m_step == 6 && m.m_server == &s &&
                   settings.m_servers2.size() == 1 && Is(CsQueue(), "21600000 1000001 0 0; ");
+            // Twice: the last removed.
+            auto *twice = new S_ServerEntry(entry(9, 9));
+            settings.m_servers2 = {twice, &other, twice};
+            m.m_server = twice;
+            ok &= C_MainMenu::OnFavoriteToggle(&m, nullptr, nullptr, 0, 0) &&
+                  settings.m_servers2 == std::vector<S_ServerEntry *>({twice, &other}) && Is(CsQueue(), "21600000 1000001 0 0; ");
+            settings.m_servers2 = {&other};
+            m.m_server = &s;
             m.m_step = 0;
             settings.m_listKind = 0;
             ok &= C_MainMenu::OnFavoriteToggle(&m, nullptr, nullptr, 0, 0) && m.m_step == 0 && CsQueue() == "" &&
@@ -3946,14 +4007,20 @@ void MainMenuTest(I3D_scene *scene)
             bool ok = true;
             session->unknown174 = 1;
             m.m_step = 4;
-            ok &= send(0x4000000 | 0x2000099) && session->unknown174 == 0 && m.m_step == 5 &&
+            g_files.clear();
+            settings.m_filter.maxPing = 5;
+            ok &= send(0x4000000 | 0x2000099) && settings.m_filter.maxPing == -1 && session->unknown174 == 0 && m.m_step == 5 &&
                   Is(CsQueue(), "20e00000 1000001 0 0; 21000000 1000001 0 0; 21600000 1000001 0 0; 20900000 2000018 0 0; "
                                 "20a00000 1000001 0 0; 20b00000 1000015 d 918; 0 2000027 0 0; 20100000 1000015 a 910; "
                                 "20a00000 1000001 0 0; 21300000 1000004 0 0; 20c00000 1000001 0 0; 21700000 1000001 0 0; "
                                 "21600000 1000001 0 0; 0 2000001 8 0; ");
             WM(r.nmLan, ok);
-            ok = send(0x200009A) && session->unknown174 == 1 && m.m_step == 6 &&
-                 !g_gfLog.empty() && g_gfLog[0] == "load server list" &&
+            // (Part 9h-xxii: the server list read: no file, both lists emptied.)
+            settings.m_servers = {new S_ServerEntry()};
+            g_files.clear();
+            settings.m_filter.maxPing = 5;
+            ok = send(0x200009A) && session->unknown174 == 1 && m.m_step == 6 && settings.m_servers.empty() &&
+                 settings.m_filter.maxPing == -1 &&
                  Is(CsQueue(), "20100000 1000015 a 911; 20a00000 1000002 0 0; 21300000 1000003 0 0; 20c00000 1000002 0 0; "
                                "21700000 1000002 0 0; 21600000 1000001 0 0; 0 2000001 8 0; ");
             m.m_step = 0;
@@ -3966,9 +4033,11 @@ void MainMenuTest(I3D_scene *scene)
             ok &= send(0x2000069) && m.m_state == GAME_STATE_NEXT_MAP && CsQueue() == "";
             m.m_state = state;
             session->unknown174 = 1;
-            ok &= send(0x200009B) && MsLogIs({"save server list"}, g_gfLog);
+            g_files.clear();
+            ok &= send(0x200009B) && g_files.size() == 1;
+            g_files.clear();
             session->unknown174 = 0;
-            ok &= send(0x200009B) && g_gfLog.empty() && CsQueue() == "";
+            ok &= send(0x200009B) && g_files.empty() && CsQueue() == "";
             WM(r.nmLeave, ok);
         }
         {
@@ -3983,8 +4052,11 @@ void MainMenuTest(I3D_scene *scene)
             m.m_startable = true;
             m.m_openFirewall = true;
             g_nmFirewall = false;
+            g_files.clear();
             ok &= send(0x2000029) && !m.m_startable && !m.m_openFirewall && session->sessionType == 2 &&
-                  GmInOrder(Join(g_gfLog), {"session reset", "firewall 65535"}) && Is(CsQueue(), "0 20000c9 0 0; ");
+                  GmInOrder(Join(g_gfLog), {"session reset", "firewall 65535"}) && Is(CsQueue(), "0 20000c9 0 0; ") &&
+                  g_files.size() == 1 && g_files.begin()->first.find("MPSetings.sav") != std::string::npos;
+            g_files.clear();
             m.m_startable = true;
             g_nmFirewall = true;
             ok &= send(0x2000029) && !m.m_startable && GmInOrder(Join(g_gfLog), {"firewall 65535"}) && CsQueue() == "";
@@ -4037,7 +4109,17 @@ void MainMenuTest(I3D_scene *scene)
             ok &= send(0x2000027) && m.m_foundServers.empty() && g_mmDeleted.size() == 1 && MsLogIs({"search 1"}, g_gfLog);
             S_ServerEntry a = {}, b = {};
             settings.m_servers = {&a, &b};
-            ok &= send(0x2000098) && MsLogIs({"ping servers 1 2"}, g_gfLog);
+            auto *found2 = new S_ServerEntry();
+            g_mmWatch = {found2};
+            g_mmDeleted.clear();
+            m.m_foundServers = {found2};
+            ok &= send(0x2000098) && MsLogIs({"ping servers 1 2"}, g_gfLog) && g_mmDeleted.size() == 1 &&
+                  m.m_foundServers.empty();
+            settings.m_listKind = 2;
+            settings.m_servers2 = {&a};
+            ok &= send(0x2000098) && MsLogIs({"ping servers 1 1"}, g_gfLog);
+            settings.m_listKind = 1;
+            settings.m_servers2.clear();
             settings.m_servers.clear();
             g_deleteHook = nullptr;
             g_mmWatch.clear();
@@ -4077,6 +4159,220 @@ void MainMenuTest(I3D_scene *scene)
         DeleteCriticalSection(&m.m_foundLock);
         g_gfLog.clear();
         CsQueue();
+    }
+
+    // --- (part 9h-xxii) the server list's file: written, read back (the old servers deleted), its odd chunks ---
+    {
+        C_MpMenuSettings settings;
+        for (auto &group : settings.m_setup.maps) {
+            for (C_MpMap *map : group.maps)
+                delete map;
+            group.maps.clear();
+        }
+        const auto entry = [](const char *name, uint32_t address) {
+            auto *server = new S_ServerEntry();
+            std::strcpy(server->name, name);
+            std::strcpy(server->map, "Map");
+            server->address = address;
+            server->port = 1000 + static_cast<int>(address);
+            server->gameType = 2;
+            server->ping = 77;
+            server->maxPlayers = 8;
+            server->players = 3;
+            server->dedicated = true;
+            server->internet = true;
+            server->password = address & 1;
+            server->unknown84 = 0x1234;
+            server->voice = true;
+            server->versionMinor = 5;
+            server->versionMajor = 6;
+            server->listed = true;
+            server->unknown94 = 0x5678;
+            return server;
+        };
+        // (Equal but for the bytes past the strings' ends: a read leaves the reset's there.)
+        const auto equal = [](const S_ServerEntry *a, const S_ServerEntry *b) {
+            S_ServerEntry x = *a, y = *b;
+            for (S_ServerEntry *e : {&x, &y}) {
+                std::memset(e->name + std::strlen(e->name), 0, sizeof e->name - std::strlen(e->name));
+                std::memset(e->map + std::strlen(e->map), 0, sizeof e->map - std::strlen(e->map));
+            }
+            return std::memcmp(&x, &y, sizeof x) == 0;
+        };
+        const auto same = [&](const std::vector<S_ServerEntry *> &a, const std::vector<S_ServerEntry> &b) {
+            if (a.size() != b.size())
+                return false;
+            for (size_t i = 0; i < a.size(); ++i) {
+                if (!equal(a[i], &b[i]))
+                    return false;
+            }
+            return true;
+        };
+        const auto clearLists = [&]() {
+            for (auto *list : {&settings.m_servers, &settings.m_servers2}) {
+                for (S_ServerEntry *server : *list)
+                    delete server;
+                list->clear();
+            }
+        };
+        {
+            // Written and read back: both lists, every field; the old servers deleted.
+            bool ok = true;
+            std::vector<S_ServerEntry *> found = {entry("One", 1), entry("Two", 2)}, favorites = {entry("Fav", 3)};
+            settings.m_servers = found;
+            settings.m_servers2 = favorites;
+            g_files.clear();
+            settings.SaveServerList();
+            ok &= g_files.size() == 1 && g_files.begin()->first.find("ServerList.bin") != std::string::npos;
+            if (!g_files.empty()) {
+                const std::vector<uint8_t> &bytes = g_files.begin()->second;
+                const auto count = [&](uint8_t lo, uint8_t hi) {
+                    int n = 0;
+                    for (size_t i = 0; i + 1 < bytes.size(); ++i)
+                        n += bytes[i] == lo && bytes[i + 1] == hi;
+                    return n;
+                };
+                ok &= count(0xD0, 0x07) == 3 && count(0x8D, 0x02) == 2 && count(0x96, 0x02) == 3;
+            }
+            const std::vector<S_ServerEntry> foundCopy = {*found[0], *found[1]}, favoriteCopy = {*favorites[0]};
+            g_mmWatch = {found[0], found[1], favorites[0]};
+            g_mmDeleted.clear();
+            g_deleteHook = &MmDeleteHook;
+            settings.LoadServerList();
+            g_deleteHook = nullptr;
+            ok &= g_mmDeleted.size() == 3 && same(settings.m_servers, foundCopy) && same(settings.m_servers2, favoriteCopy);
+            g_mmWatch.clear();
+            g_mmDeleted.clear();
+            // Empty lists written; read: empty.
+            clearLists();
+            settings.SaveServerList();
+            settings.m_servers = {entry("Old", 9)};
+            settings.LoadServerList();
+            ok &= settings.m_servers.empty() && settings.m_servers2.empty();
+            // No file: both lists emptied.
+            g_files.clear();
+            settings.m_servers = {entry("Old", 9)};
+            settings.m_servers2 = {entry("Old2", 8)};
+            settings.LoadServerList();
+            ok &= settings.m_servers.empty() && settings.m_servers2.empty();
+            WM(r.slFile, ok);
+        }
+        {
+            // Odd files: another root (nothing); a long name cut; the skipped chunks; an unknown chunk ends its list.
+            bool ok = true;
+            const auto write = [&](const std::function<void(C_chunk &)> &body) {
+                g_files.clear();
+                C_chunk chunk;
+                chunk.Open("PlayersProfiles\\ServerList.bin", true);
+                body(chunk);
+                chunk.Close();
+            };
+            S_ServerEntry *a = entry("A", 1), *b = entry("B", 2);
+            std::memset(b->name, 'x', sizeof b->name - 1);
+            write([&](C_chunk &chunk) {
+                chunk.Begin(0x28B);
+                chunk.Begin(0x291);
+                chunk.Begin(0x296);
+                ok &= a->Save(chunk);
+                chunk.Ascend();
+                chunk.Ascend();
+                chunk.Ascend();
+            });
+            settings.LoadServerList();
+            ok &= settings.m_servers.empty() && settings.m_servers2.empty();
+            write([&](C_chunk &chunk) {
+                chunk.Begin(0x28A);
+                chunk.Begin(0x291);
+                chunk.WriteChunk(0x28D, 2);
+                chunk.Begin(0x28F);
+                chunk.Write(7);
+                chunk.Ascend();
+                chunk.Begin(0x296);
+                a->Save(chunk);
+                chunk.Ascend();
+                chunk.Begin(0x294);
+                chunk.Ascend();
+                chunk.Begin(0x296);
+                b->Save(chunk);
+                chunk.Ascend();
+                chunk.Begin(0x123);
+                chunk.Ascend();
+                chunk.Begin(0x296);
+                a->Save(chunk);
+                chunk.Ascend();
+                chunk.Ascend();
+                chunk.Begin(0x299);
+                chunk.Ascend();
+                chunk.Begin(0x295);
+                chunk.Begin(0x294);
+                chunk.Ascend();
+                chunk.Begin(0x296);
+                b->Save(chunk);
+                chunk.Ascend();
+                chunk.Begin(0x28F);
+                chunk.Ascend();
+                chunk.Begin(0x296);
+                a->Save(chunk);
+                chunk.Ascend();
+                chunk.Ascend();
+                chunk.Ascend();
+            });
+            settings.LoadServerList();
+            const std::string cut(0x31, 'x');
+            ok &= settings.m_servers.size() == 2 && settings.m_servers2.size() == 1 &&
+                  std::string(settings.m_servers[0]->name) == "A" && settings.m_servers[0]->unknown94 == 0x5678 &&
+                  std::string(settings.m_servers[1]->name) == cut && std::string(settings.m_servers[1]->map) == "Map" &&
+                  settings.m_servers[1]->versionMajor == 6 && std::string(settings.m_servers2[0]->name) == cut;
+            // An entry's other chunks skipped.
+            write([&](C_chunk &chunk) {
+                chunk.Begin(0x28A);
+                chunk.Begin(0x295);
+                chunk.Begin(0x296);
+                chunk.Begin(0x7D1);
+                chunk.Write(5);
+                chunk.Ascend();
+                a->Save(chunk);
+                chunk.Ascend();
+                chunk.Ascend();
+                chunk.Ascend();
+            });
+            settings.LoadServerList();
+            ok &= settings.m_servers.empty() && settings.m_servers2.size() == 1 &&
+                  equal(settings.m_servers2[0], a);
+            // An entry without its chunk: reset.
+            write([&](C_chunk &chunk) {
+                chunk.Begin(0x28A);
+                chunk.Begin(0x291);
+                chunk.Begin(0x296);
+                chunk.Begin(0x7D1);
+                chunk.Ascend();
+                chunk.Ascend();
+                chunk.Ascend();
+                chunk.Ascend();
+            });
+            settings.LoadServerList();
+            ok &= settings.m_servers.size() == 1 && settings.m_servers[0]->ping == 9999 &&
+                  settings.m_servers[0]->gameType == 4 && std::string(settings.m_servers[0]->map) == " ??? ";
+            // An entry read alone: true.
+            write([&](C_chunk &chunk) {
+                chunk.Begin(0x296);
+                a->Save(chunk);
+                chunk.Ascend();
+            });
+            {
+                C_chunk chunk;
+                uint16_t id = 0;
+                S_ServerEntry alone = {};
+                ok &= chunk.Open("PlayersProfiles\\ServerList.bin", false) && chunk.Descend(id) && id == 0x296 &&
+                      alone.Load(chunk) && alone.port == a->port && std::string(alone.name) == "A";
+                chunk.Close();
+            }
+            delete a;
+            delete b;
+            clearLists();
+            g_files.clear();
+            WM(r.slOdd, ok);
+        }
     }
 
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
@@ -4178,7 +4474,7 @@ void MainMenuTest(I3D_scene *scene)
                 " hsSession %d cnDescribe %d cnHidden %d cnTick %d cnMessage %d"
                 " bwDescribe %d bwList %d bwShown %d bwSort %d bwPicked %d bwJoin %d bwCount %d"
                 " bxLine %d bxFound %d bxList %d bxTick %d bxRestore %d bxRefresh %d bxFavorite %d bxFavorites %d"
-                " nmLan %d nmInternet %d nmLeave %d nmStart %d nmJoin %d nmSearch %d nmEscape %d\n",
+                " nmLan %d nmInternet %d nmLeave %d nmStart %d nmJoin %d nmSearch %d nmEscape %d slFile %d slOdd %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
@@ -4192,5 +4488,5 @@ void MainMenuTest(I3D_scene *scene)
                 r.hsSession, r.cnDescribe, r.cnHidden, r.cnTick, r.cnMessage,
                 r.bwDescribe, r.bwList, r.bwShown, r.bwSort, r.bwPicked, r.bwJoin, r.bwCount,
                 r.bxLine, r.bxFound, r.bxList, r.bxTick, r.bxRestore, r.bxRefresh, r.bxFavorite, r.bxFavorites,
-                r.nmLan, r.nmInternet, r.nmLeave, r.nmStart, r.nmJoin, r.nmSearch, r.nmEscape);
+                r.nmLan, r.nmInternet, r.nmLeave, r.nmStart, r.nmJoin, r.nmSearch, r.nmEscape, r.slFile, r.slOdd);
 }

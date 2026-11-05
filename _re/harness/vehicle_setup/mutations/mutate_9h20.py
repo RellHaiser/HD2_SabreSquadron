@@ -1,7 +1,10 @@
 """Part 9h-xx mutations: the main menu's browser: its searches, the servers found, the favourites
 (game/main_menu.cpp, game/mp_game_setup.cpp).
 
-Result: 217: 201 killed, 16 not building, none surviving.
+Result: 217: 194 killed (9 after a second run: the favourites shown, a ping filter of 1, the servers found
+listed by the tick, sorting at 1000, the poll's first time, a favourite twice), 16 not building, 7 equivalent:
+the lock's Enter / Leave (one thread), the LAN check's loop to size() (reads past the end, unseen), the
+notification passed to the search buttons' callbacks (unused).
 
 Run with the factory build: --build build_factory.bat --check check_mainmenu.py (FACTORY_TEST; the
 "mainmenu:" checks). Generated (deletions, comparison, number, bool and negation flips; the lines

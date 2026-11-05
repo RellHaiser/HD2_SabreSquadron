@@ -38186,6 +38186,16 @@
   "name": "S_ServerEntry::Reset",
   "proto": "void __fastcall Reset(void *this)"
  },
+ "007253f0": {
+  "module": "main_menu",
+  "name": "S_ServerEntry::Save",
+  "proto": "bool __thiscall Save(void *this, void * chunk)"
+ },
+ "00725660": {
+  "module": "main_menu",
+  "name": "S_ServerEntry::Load",
+  "proto": "bool __thiscall Load(void *this, void * chunk)"
+ },
  "00725e90": {
   "module": "hud",
   "name": "S_NetPlayerState::IsSpectating",

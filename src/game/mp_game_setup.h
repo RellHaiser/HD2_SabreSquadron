@@ -233,7 +233,7 @@ public:
     // The servers of the list shown not answered yet (S_ServerEntry::Reset; part 9h-xx).
     void ResetServers();                            // 0x00619ca0 (__fastcall)
     // PlayersProfiles\ServerList.bin: the two lists (the Internet's servers and the favourites) read (the old
-    // ones deleted) / written (part 9h-xxii).
+    // ones deleted; another root: nothing more; a list's unknown chunk ends it) / written (part 9h-xxii).
     void LoadServerList();                          // 0x0061a0f0 (__fastcall)
     void SaveServerList();                          // 0x00619d00 (__fastcall)
     // The first list's count and the players on its servers.

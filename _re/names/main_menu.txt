@@ -172,3 +172,6 @@
 007328d0 C_NetGame::FirewallBlocks | bool __thiscall FirewallBlocks(void *this, ushort port)
 0061a0f0 C_MpMenuSettings::LoadServerList | void __fastcall LoadServerList(void *this)
 00619d00 C_MpMenuSettings::SaveServerList | void __fastcall SaveServerList(void *this)
+# Part 9h-xxii: the server list's file.
+007253f0 S_ServerEntry::Save | bool __thiscall Save(void *this, void * chunk)
+00725660 S_ServerEntry::Load | bool __thiscall Load(void *this, void * chunk)

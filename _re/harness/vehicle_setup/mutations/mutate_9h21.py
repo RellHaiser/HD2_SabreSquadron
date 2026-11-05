@@ -1,7 +1,10 @@
 """Part 9h-xxi mutations: the main menu's network handler and the join's password
 (game/main_menu.cpp).
 
-Result: 108: 105 killed, 3 not building, none surviving.
+Result: 108: 99 killed (5 after a second run: the settings read and saved, the servers found dropped before a
+ping, the favourites pinged), 3 not building, 6 equivalent: the firewall question's kind and call (the
+harness menu has no message box), the notification passed to the search callbacks (unused), the
+static_assert.
 
 Run with the factory build: --build build_factory.bat --check check_mainmenu.py (FACTORY_TEST; the
 "mainmenu:" checks). Generated (deletions, comparison, number, bool and negation flips; the lines

@@ -8527,7 +8527,8 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     flipped (which sorts).
   - Harness: bwDescribe, bwList, bwShown, bwSort, bwPicked, bwJoin, bwCount (a screen forwarding to its controls);
     the build test's browser real (its group frame). All 15 factory checkers in both orders.
-  - Mutations: mutations/mutate_9h19.py: 151: 139 killed, 12 not building.
+  - Mutations: mutations/mutate_9h19.py: 151: 139 killed, 12 not building (corrected in 9h-xxii: 1 had
+    survived, killed by a new check).
   - Build: MSVC clean. Tier 1: 303 errors in 55 files (+2: OnNetworkMessage's copy calls the ported callbacks; part
     9h-xxi ports it). ret_audit --src: 52.
   - Stats: 9,246 of 12,306 functions by hand (85.2 % by size).
@@ -8547,7 +8548,8 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     (copied to / removed from the favourites), OnFavorites 0x00634b30 (the two lists switched).
   - Harness: bxLine, bxFound, bxList, bxTick, bxRestore, bxRefresh, bxFavorite, bxFavorites. All 15 factory checkers
     in both orders; mp_setup 54 of 54.
-  - Mutations: mutations/mutate_9h20.py: 217: 201 killed, 16 not building.
+  - Mutations: mutations/mutate_9h20.py: 217: 194 killed, 16 not building, 7 equivalent (corrected in
+    9h-xxii: 16 had survived; 9 killed by new checks).
   - Build: MSVC clean. Tier 1: 295 errors in 55 files. ret_audit --src: 52.
   - Stats: 9,257 of 12,306 functions by hand (85.3 % by size).
 
@@ -8563,9 +8565,23 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     closed), Escape on the browser.
   - Harness: nmLan, nmInternet, nmLeave, nmStart, nmJoin, nmSearch, nmEscape; the fake handler dropped (the chain and
     Escape tests adjusted: Escape on the browser now goes back). All 15 factory checkers in both orders.
-  - Mutations: mutations/mutate_9h21.py: 108: 105 killed, 3 not building.
+  - Mutations: mutations/mutate_9h21.py: 108: 99 killed, 3 not building, 6 equivalent (corrected in 9h-xxii:
+    11 had survived; 5 killed by new checks).
   - Build: MSVC clean. Tier 1: 292 errors in 55 files. ret_audit --src: 52.
   - Stats: 9,259 of 12,306 functions by hand (85.4 % by size).
+
+  PART 9h-xxii DONE (2026-11-04): the server list's file (game/mp_game_setup.cpp).
+  - C_MpMenuSettings::LoadServerList 0x0061a0f0 / SaveServerList 0x00619d00: PlayersProfiles\ServerList.bin (one
+    for all players): root 0x28A, the Internet's list 0x291 and the favourites 0x295, each a count 0x28D and servers
+    0x296; loading deletes both lists first; 0x294 (and 0x28F in the first list) skipped, another chunk ends its list.
+  - S_ServerEntry::Save 0x007253f0 / Load 0x00725660 (the net module's): chunk 2000, the name and map with their
+    lengths (read 0x32 at most), the fields (+0x84 and +0x94 now ints: the entry is all saved).
+  - Harness: slFile, slOdd (written / read back, every field; odd files built with C_chunk).
+  - Mutation counts of 9h-xix .. xxi corrected (a grep counted "0 of 1 models fail []" as killed); new checks killed
+    1 + 9 + 5 of their survivors, the rest equivalent (see each mutate file).
+  - Mutations: mutations/mutate_9h22.py: 99: 80 killed, 7 not building, 12 equivalent.
+  - Build: MSVC clean. mp_setup 54 of 54. Tier 1: 292 errors in 55 files. ret_audit --src: 52.
+  - Stats: 9,263 of 12,306 functions by hand (85.5 % by size).
 
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`

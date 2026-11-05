@@ -12,7 +12,7 @@ CHECKS = ("mmStart mmStop mmUpdate mmDrain mmMessage mmEscape mmSelect mmBuild m
           "pfDescribe pfRefresh pfShown pfList pfDifficulty pfMessage pfButtons pfEscape pfCreate pfRename spShown spHover spClick mpLists mpDescribe mpSaveSlot mpPick mxCampaign mxSingle mxMessages mxSecret mxStart mxOperation ciDescribe ciShown ciPick pwDescribe pwServer pwLock flDescribe flShown flAccept flHelpers giDescribe giRefresh giShow giStatus csDescribe csSetup csShown csStart csPicked csHost csRules csMapList csOptions csStyle csOption csMoves csDouble csDragStart csDragMove csDrop hsSession cnDescribe cnHidden cnTick cnMessage "
           "bwDescribe bwList bwShown bwSort bwPicked bwJoin bwCount "
           "bxLine bxFound bxList bxTick bxRestore bxRefresh bxFavorite bxFavorites "
-          "nmLan nmInternet nmLeave nmStart nmJoin nmSearch nmEscape").split()
+          "nmLan nmInternet nmLeave nmStart nmJoin nmSearch nmEscape slFile slOdd").split()
 
 
 def main():

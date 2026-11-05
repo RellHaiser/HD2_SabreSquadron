@@ -709,3 +709,159 @@ void C_MpGameSetup::MoveMap(int from, int to)
     group.erase(group.begin() + from);
     group.insert(group.begin() + to, map);
 }
+
+// ---- the server list's file (part 9h-xxii) ----------------------------------------------------------------
+
+namespace {
+
+// PlayersProfiles\ServerList.bin: the root, its two lists (the Internet's servers, the favourites), a list's count,
+// its servers; two chunks skipped.
+const char *const SERVER_LIST_FILE = "%s\\ServerList.bin";
+enum : uint16_t {
+    CHUNK_SERVER_LIST = 0x28A, CHUNK_SERVER_COUNT = 0x28D, CHUNK_SERVER_28F = 0x28F, CHUNK_FOUND_SERVERS = 0x291,
+    CHUNK_SERVER_294 = 0x294, CHUNK_FAVORITE_SERVERS = 0x295, CHUNK_SERVER = 0x296
+};
+// A server's own chunk (the net module's); its strings' longest read.
+constexpr uint16_t CHUNK_SERVER_ENTRY = 2000;
+constexpr int SERVER_STRING_SIZE = 0x32;
+
+void DeleteServers(std::vector<S_ServerEntry *> &list)
+{
+    for (std::size_t i = list.size(); i-- > 0;)
+        delete list[i];
+    list.clear();
+}
+
+// A list's chunks (the caller leaves the list): its count (room made), its servers (each reset, then read); 0x294 (and
+// in the Internet's list 0x28F) skipped; any other ends the list.
+void LoadServers(C_chunk &chunk, std::vector<S_ServerEntry *> &list, bool found)
+{
+    while (chunk.HasMore()) {
+        uint16_t id = 0;
+        chunk.Descend(id);
+        if (id == CHUNK_SERVER_COUNT) {
+            int count = 0;
+            chunk.Read(count);
+            chunk.Ascend();
+            if (count > 0)
+                list.reserve(static_cast<std::size_t>(count));
+        } else if (id == CHUNK_SERVER) {
+            // (Fix: the original's name and address were not initialised before the read.)
+            auto *server = new S_ServerEntry();
+            server->Reset();
+            server->Load(chunk);
+            list.push_back(server);
+            chunk.Ascend();
+        } else if (id == CHUNK_SERVER_294 || (found && id == CHUNK_SERVER_28F)) {
+            chunk.Ascend();
+        } else {
+            chunk.Ascend();
+            return;
+        }
+    }
+}
+
+void SaveServers(C_chunk &chunk, uint16_t id, const std::vector<S_ServerEntry *> &list)
+{
+    chunk.Begin(id);
+    chunk.WriteChunk(CHUNK_SERVER_COUNT, static_cast<int>(list.size()));
+    for (const S_ServerEntry *server : list) {
+        chunk.Begin(CHUNK_SERVER);
+        server->Save(chunk);
+        chunk.Ascend();
+    }
+    chunk.Ascend();
+}
+
+} // namespace
+
+void C_MpMenuSettings::LoadServerList()
+{
+    DeleteServers(m_servers);
+    DeleteServers(m_servers2);
+    C_chunk chunk;
+    uint16_t id = 0;
+    if (chunk.Open(C_fstr(SERVER_LIST_FILE, PROFILES_DIRECTORY).c_str(), false))
+        chunk.Descend(id);
+    if (id != CHUNK_SERVER_LIST) {
+        chunk.Close();
+        return;
+    }
+    while (chunk.HasMore()) {
+        chunk.Descend(id);
+        if (id == CHUNK_FOUND_SERVERS)
+            LoadServers(chunk, m_servers, true);
+        else if (id == CHUNK_FAVORITE_SERVERS)
+            LoadServers(chunk, m_servers2, false);
+        chunk.Ascend();
+    }
+    chunk.Ascend();
+    chunk.Close();
+}
+
+void C_MpMenuSettings::SaveServerList()
+{
+    C_chunk chunk;
+    if (!chunk.Open(C_fstr(SERVER_LIST_FILE, PROFILES_DIRECTORY).c_str(), true)) {
+        chunk.Close();
+        return;
+    }
+    chunk.Begin(CHUNK_SERVER_LIST);
+    SaveServers(chunk, CHUNK_FOUND_SERVERS, m_servers);
+    SaveServers(chunk, CHUNK_FAVORITE_SERVERS, m_servers2);
+    chunk.Ascend();
+    chunk.Close();
+}
+
+bool S_ServerEntry::Save(C_chunk &chunk) const
+{
+    chunk.Begin(CHUNK_SERVER_ENTRY);
+    chunk.WriteSizedString(name);
+    chunk.WriteSizedString(map);
+    chunk.Write(address);
+    chunk.Write(port);
+    chunk.Write(gameType);
+    chunk.Write(ping);
+    chunk.Write(maxPlayers);
+    chunk.Write(players);
+    chunk.Write(dedicated);
+    chunk.Write(internet);
+    chunk.Write(password);
+    chunk.Write(unknown84);
+    chunk.Write(voice);
+    chunk.Write(versionMinor);
+    chunk.Write(versionMajor);
+    chunk.Write(listed);
+    chunk.Write(unknown94);
+    chunk.Ascend();
+    return true;
+}
+
+bool S_ServerEntry::Load(C_chunk &chunk)
+{
+    while (chunk.HasMore()) {
+        uint16_t id = 0;
+        chunk.Descend(id);
+        if (id == CHUNK_SERVER_ENTRY) {
+            chunk.ReadSizedString(name, SERVER_STRING_SIZE);
+            chunk.ReadSizedString(map, SERVER_STRING_SIZE);
+            chunk.Read(address);
+            chunk.Read(port);
+            chunk.Read(gameType);
+            chunk.Read(ping);
+            chunk.Read(maxPlayers);
+            chunk.Read(players);
+            chunk.Read(dedicated);
+            chunk.Read(internet);
+            chunk.Read(password);
+            chunk.Read(unknown84);
+            chunk.Read(voice);
+            chunk.Read(versionMinor);
+            chunk.Read(versionMajor);
+            chunk.Read(listed);
+            chunk.Read(unknown94);
+        }
+        chunk.Ascend();
+    }
+    return true;
+}
