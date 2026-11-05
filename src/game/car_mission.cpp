@@ -87,7 +87,7 @@ void C_Car::StartMission(bool server)                   // 0x004d16a0
         C_NetProperty *property = m_netObject->GetProperty(1);
         property->SetField(2, 0x3b);
         property->GetTrack().SetValue(m_position);
-        property->GetDirTrack().SetValue(m_direction, 0.0f);
+        property->GetDirTrack().SetDirection(m_direction, 0.0f);
         if (IsNetServer()) {
             g_netReplication->SetUnknownC4(0);
             g_netReplication->SetUnknownC8(1);
@@ -275,7 +275,7 @@ void C_Car::RestartMission(bool server)                 // 0x004dd0d0
     if (!IsLocalGame()) {
         C_NetProperty *property = m_netObject->GetProperty(1);
         property->GetTrack().SetValue(m_position);
-        property->GetDirTrack().SetValue(m_direction, 0.0f);
+        property->GetDirTrack().SetDirection(m_direction, 0.0f);
         m_stateChanged = true;
     }
     m_lastAttacker = -1;

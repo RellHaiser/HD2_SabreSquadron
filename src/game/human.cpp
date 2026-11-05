@@ -993,7 +993,7 @@ void C_Human::Respawn(const S_vector4 &pos, const S_vector4 &dir, S_SoldierState
     // The replicated position jumps to the spawn point.
     C_NetTrack &track = g_netReplication->FindObject(m_netId, true)->GetProperty(1)->GetTrack();
     track.SetValue(pos);
-    track.SetTarget(pos);
+    track.SetNetValue(pos);
     track.SetRate(S_vector(0.0f, 0.0f, 0.0f));
     if (state)
         Setup(*state, m_role, m_group, stats, m_netId);

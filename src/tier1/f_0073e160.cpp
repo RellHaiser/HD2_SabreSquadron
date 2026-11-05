@@ -376,7 +376,7 @@ uint32_t C_auto_00816448__FUN_0073e890(C_auto_00816448 *_this,void *param_1,uint
       GH_PIECE(iVar1,1,1) = _this->_pad_0039[0];
       GH_PIECE(iVar1,2,1) = _this->_pad_0039[1];
       GH_PIECE(iVar1,3,1) = _this->_pad_0039[2];
-      if (((iVar1 != 0) && (_this->m_040 != '\0')) && (DAT_00982f94 != '\0')) {
+      if (((iVar1 != 0) && (_this->m_040 != '\0')) && (g_netServerSide != '\0')) {
         C_auto_00816448__FUN_0073e970(_this,(int)piVar3,param_1,1);
       }
       piVar3 = (int *)(*(code *)_this->m_064)(0);

@@ -52,6 +52,11 @@ struct alignas(16) S_NetQuantization {
     // Component i from `from` over `span` in steps of `step`: bits[i] = floor(log2(span / step)) +
     // 1, scale[i] = that many bits' mask / span. (Fastcall: this, span; RET 0xC.)
     void Setup(const S_vector4 &span, const S_vector4 &from, const S_vector4 &step, int unknown);   // 0x0073dbb0
+    // (Part 10a.) Whether the three components of `v` lie in the ranges [offset, offset + range40]
+    // (__thiscall); whether each is smaller in magnitude than its step (all three: a change too
+    // small to send).
+    bool Contains(const float *v) const;                     // 0x0073dd30
+    bool WithinSteps(const float *v) const;                  // 0x0073dda0
 
     float deadZone[4];                                       // +0x00 the step: smaller magnitudes are sent / read back as 0
     float min[4];                                            // +0x10 (y: the lowest y sent)
@@ -81,8 +86,18 @@ public:
     void ReadDirection(struct S_vector &dir, int playerIndex);          // 0x0073db70
     // Up to three floats, each quantised to the ranges and bit counts the player
     // entry holds (bit i of `mask` selects component i).
-    void WriteQuantized(const float *values, const S_NetPlayer *player, uint8_t mask);   // 0x0073d810
-    void ReadQuantized(float *values, const S_NetPlayer *player, uint32_t mask);         // 0x0073d900
+    // Returns whether any of the three components (whatever the mask) exceeds its step. The
+    // `player` entries start with their quantisation; the net tracks pass one directly.
+    bool WriteQuantized(const float *values, const S_NetQuantization *q, uint8_t mask);  // 0x0073d810
+    void ReadQuantized(float *values, const S_NetQuantization *q, uint32_t mask);        // 0x0073d900
+    bool WriteQuantized(const float *values, const S_NetPlayer *player, uint8_t mask)
+    {
+        return WriteQuantized(values, reinterpret_cast<const S_NetQuantization *>(player), mask);
+    }
+    void ReadQuantized(float *values, const S_NetPlayer *player, uint32_t mask)
+    {
+        ReadQuantized(values, reinterpret_cast<const S_NetQuantization *>(player), mask);
+    }
     // A position quantised with the sender's settings (mask 7).
     void WritePosition(const struct S_vector &pos);
     void ReadPosition(struct S_vector &pos);

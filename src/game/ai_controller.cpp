@@ -184,7 +184,7 @@ void C_AIController::UpdateNetwork(int frameTime)
     // (In a vehicle the vehicle sends the position.)
     if (!InVehicleSeat(m_human->m_vehicle))
         property->GetTrack().SetValue(pos);
-    property->GetDirTrack().SetValue(view, 0.0f);
+    property->GetDirTrack().SetDirection(view, 0.0f);
     // The rate: the walk's direction at the human's speed.
     S_vector rate = m_human->GetMovement()->GetVelocity();
     rate.Normalize();

@@ -7296,16 +7296,40 @@ const S_FakeKeeper &Keeper(const C_CameraFrameKeeper *k)
 }
 
 // The car's net object and its property 1 (the tracks of the place), and the replication.
-struct S_FakeTrack {
+// (Part 10a: the tracks are real classes now; these log what is set and answer what the replay reads. The
+// out-of-line members not linked here are stubbed below.)
+struct S_FakeTrack : C_NetPositionTrack {
     std::vector<S_vector4> values;
     std::vector<S_vector> rates;
     S_vector4 current = {}, rate = {};                  // what the replay reads
+    void SetValue(const S_vector4 &value) override { values.push_back(value); }
+    void SetRate(const S_vector4 &r) override { rates.push_back(S_vector(r.x, r.y, r.z)); }
+    const S_vector4 &GetCurrent() override { return current; }
+    const S_vector4 &GetRate() override { return rate; }
 };
-struct S_FakeDirTrack {
+struct S_FakeDirTrack : C_NetDirTrack {
     std::vector<std::pair<S_vector4, float>> values;
     S_vector4 current = {}, target = {};
     float angle = 0.0f;
+    void SetDirection(const S_vector4 &dir, float a) override { values.emplace_back(dir, a); }
+    const S_vector4 &GetCurrent() override { return current; }
+    const S_vector4 &GetTarget() override { return target; }
+    float GetAngle() override { return angle; }
 };
+void C_NetQuantized::SetReadQuantizations(S_NetQuantization *, S_NetQuantization *, S_NetQuantization *) {}
+void C_NetQuantized::SetWriteQuantizations(S_NetQuantization *, S_NetQuantization *, S_NetQuantization *) {}
+C_NetTrack::C_NetTrack() {}
+void C_NetTrack::Update(float) {}
+void C_NetTrack::SetValue(const S_vector4 &) {}
+void C_NetTrack::SetRate(const S_vector4 &) {}
+const S_vector4 &C_NetTrack::GetRate() { return m_rate; }
+void C_NetTrack::Write(C_NetMessage *, bool, S_vector4 *) {}
+void C_NetTrack::Read(C_NetMessage *) {}
+C_NetDirTrack::C_NetDirTrack() {}
+void C_NetDirTrack::Update(float) {}
+void C_NetDirTrack::EndWrite(C_NetMessage *) {}
+void C_NetDirTrack::EndRead(C_NetMessage *) {}
+void C_NetDirTrack::SetDirection(const S_vector4 &, float) {}
 struct S_FakeProperty {
     std::vector<std::pair<int, int>> fields;
     S_FakeTrack track;
@@ -7377,30 +7401,6 @@ void C_NetProperty::SetFlags(uint32_t flags)
     reinterpret_cast<S_FakeProperty *>(this)->flags = flags;
     reinterpret_cast<S_FakeProperty *>(this)->flagSets.push_back(flags);
 }
-void C_NetTrack::SetRate(const S_vector &rate)
-{
-    reinterpret_cast<S_FakeTrack *>(this)->rates.push_back(rate);
-}
-const S_vector4 &C_NetTrack::GetCurrent()
-{
-    return reinterpret_cast<S_FakeTrack *>(this)->current;
-}
-const S_vector4 &C_NetTrack::GetRate()
-{
-    return reinterpret_cast<S_FakeTrack *>(this)->rate;
-}
-const S_vector4 &C_NetDirTrack::GetValue()
-{
-    return reinterpret_cast<S_FakeDirTrack *>(this)->current;
-}
-const S_vector4 &C_NetDirTrack::GetTarget()
-{
-    return reinterpret_cast<S_FakeDirTrack *>(this)->target;
-}
-float C_NetDirTrack::GetAngle()
-{
-    return reinterpret_cast<S_FakeDirTrack *>(this)->angle;
-}
 S_FakeNet &Net(C_NetObject *o)
 {
     return *reinterpret_cast<S_FakeNet *>(o);
@@ -7441,25 +7441,17 @@ void C_NetObject::SetUnknown40(bool value)
 {
     Net(this).unknown40 = value;
 }
-C_NetTrack &C_NetProperty::GetTrack()
+C_NetPositionTrack &C_NetProperty::GetTrack()
 {
-    return *reinterpret_cast<C_NetTrack *>(&reinterpret_cast<S_FakeProperty *>(this)->track);
+    return reinterpret_cast<S_FakeProperty *>(this)->track;
 }
 C_NetDirTrack &C_NetProperty::GetDirTrack()
 {
-    return *reinterpret_cast<C_NetDirTrack *>(&reinterpret_cast<S_FakeProperty *>(this)->dir);
+    return reinterpret_cast<S_FakeProperty *>(this)->dir;
 }
 void C_NetProperty::SetField(int field, int value)
 {
     reinterpret_cast<S_FakeProperty *>(this)->fields.emplace_back(field, value);
-}
-void C_NetTrack::SetValue(const S_vector4 &value)
-{
-    reinterpret_cast<S_FakeTrack *>(this)->values.push_back(value);
-}
-void C_NetDirTrack::SetValue(const S_vector4 &dir, float angle)
-{
-    reinterpret_cast<S_FakeDirTrack *>(this)->values.emplace_back(dir, angle);
 }
 std::vector<std::pair<int, bool>> g_netFinds;
 std::vector<C_NetObject *> g_netRemoved;

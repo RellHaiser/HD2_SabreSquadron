@@ -72,7 +72,7 @@ void C_RemoteController::Update(int frameTime)
     const bool seated = InVehicleSeat(m_human->m_vehicle);
     // (In a vehicle the vehicle replicates the position.)
     const S_vector4 pos = seated ? m_human->GetPosition4() : property->GetTrack().GetCurrent();
-    const S_vector4 dir = property->GetDirTrack().GetValue();
+    const S_vector4 dir = property->GetDirTrack().GetCurrent();
     const S_vector4 velocity = property->GetTrack().GetRate();
     SetViewDir(dir);
     S_vector flat(dir.x, 0.0f, dir.z);

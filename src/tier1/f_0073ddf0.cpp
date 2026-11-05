@@ -29,9 +29,9 @@ uint32_t * C_auto_0081641c__FUN_0073de20(C_auto_0081641c *_this,uint32_t param_1
   _this->m_010 = 0;
   _this->m_004 = 0;
   _this->m_01c = param_1;
-  C_auto_008164e0__FUN_00740770((C_auto_008164e0 *)&_this->m_030);
+  C_auto_008164e0__C_NetPositionTrack__C_NetPositionTrack((C_auto_008164e0 *)&_this->m_030);
   local_4 = 0;
-  C_auto_00816530__FUN_007407e0((C_auto_00816530 *)&_this->m_0c0);
+  C_auto_00816530__C_NetDirTrack__C_NetDirTrack((C_auto_00816530 *)&_this->m_0c0);
   _this->m_020 = 0;
   _this->vtable = (C_auto_0081641c_vtbl *)&PTR_0081641c;
   _this->m_020 = 7;
@@ -87,9 +87,9 @@ uint32_t C_auto_0081641c__FUN_0073df00(C_auto_0081641c *_this, ...)
   uint32_t local_4;
   _this->vtable = (C_auto_0081641c_vtbl *)&PTR_0081641c;
   local_4 = 0;
-  FUN_007409e0(&_this->m_0c0);
+  C_NetDirTrack___C_NetDirTrack(&_this->m_0c0);
   local_4 = 0xffffffff;
-  C_auto_008164e0__FUN_007407b0((C_auto_008164e0 *)&_this->m_030);
+  C_auto_008164e0__C_NetPositionTrack___C_NetPositionTrack((C_auto_008164e0 *)&_this->m_030);
   return 0;
 }
 

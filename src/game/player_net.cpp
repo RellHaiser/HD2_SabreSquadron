@@ -200,7 +200,7 @@ void C_PlayerController::UpdateRemote(int frameTime)
     const bool seated = InVehicleSeat(m_human->m_vehicle);
     // (In a vehicle the vehicle replicates the position.)
     const S_vector4 pos = seated ? m_human->GetPosition4() : property->GetTrack().GetCurrent();
-    const S_vector4 dir = property->GetDirTrack().GetValue();
+    const S_vector4 dir = property->GetDirTrack().GetCurrent();
     const S_vector4 velocity = property->GetTrack().GetRate();
     SetViewDir(dir);
     S_vector flat(dir.x, 0.0f, dir.z);
@@ -291,7 +291,7 @@ void C_PlayerController::TickLocal(int timeDelta)
             // (In a vehicle the vehicle replicates the position.)
             if (!InVehicleSeat(m_human->m_vehicle))
                 property->GetTrack().SetValue(pos);
-            property->GetDirTrack().SetValue(ToVector4(view, 0.0f), 0.0f);   // (w: a stale local in the original)
+            property->GetDirTrack().SetDirection(ToVector4(view, 0.0f), 0.0f);   // (w: a stale local in the original)
             // The rate: the walk's direction at the human's speed.
             S_vector rate = m_human->GetMovement()->GetVelocity();
             NormalizeBy(rate, (rate.y * rate.y + rate.z * rate.z) + rate.x * rate.x);

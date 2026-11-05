@@ -421,7 +421,7 @@ void C_Car::ReadState(C_BitStream *msg)                 // 0x004de270
     m_frame->Update();
     C_NetProperty *property = m_netObject->GetProperty(1);
     property->GetTrack().SetValue(m_position);
-    property->GetDirTrack().SetValue(m_direction, angle);
+    property->GetDirTrack().SetDirection(m_direction, angle);
     ReadStore(msg, true);
     m_vehicle.m_unknown610 = BitsFloat(msg->ReadBits(32));
     if (msg->ReadBits(1)) {
@@ -452,7 +452,7 @@ void C_Car::UpdateNetwork(int time)                     // 0x004d3380
         S_vector4 axis = {};
         float angle;
         m_frame->GetRot().Inverse(reinterpret_cast<S_vector &>(axis), angle);
-        property->GetDirTrack().SetValue(axis, angle);
+        property->GetDirTrack().SetDirection(axis, angle);
         property->GetTrack().SetRate(XYZ(m_vehicle.m_velocity));
         m_netObject->Tick(static_cast<float>(time) * 0.001f);
         if (m_vehiclesAllowed) {
@@ -484,7 +484,7 @@ void C_Car::UpdateNetwork(int time)                     // 0x004d3380
     const S_vector4 &target = property->GetDirTrack().GetTarget();
     if (!(SquareXYZ(XYZ(target)) < 1e-16f)) {
         m_position = property->GetTrack().GetCurrent();
-        m_direction = property->GetDirTrack().GetValue();
+        m_direction = property->GetDirTrack().GetCurrent();
         m_frame->SetPosInline(XYZ(m_position));
         S_quat rot;
         rot.Make(XYZ(m_direction), property->GetDirTrack().GetAngle());

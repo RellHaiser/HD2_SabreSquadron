@@ -138,12 +138,6 @@ namespace {
 static_assert(offsetof(S_NetQuantization, bits) == 0x50, "S_NetQuantization layout");
 static_assert(offsetof(S_NetQuantization, scale) == 0x60, "S_NetQuantization layout");
 
-// The player entries start with their quantisation.
-const S_NetQuantization &Quantization(const S_NetPlayer *player)
-{
-    return *reinterpret_cast<const S_NetQuantization *>(player);
-}
-
 uint32_t Quantize(const S_NetQuantization &q, int i, float value)
 {
     return static_cast<uint32_t>(static_cast<int>((value - q.offset[i]) * q.scale[i]));
@@ -156,9 +150,9 @@ float Dequantize(const S_NetQuantization &q, int i, uint32_t raw)
 
 } // namespace
 
-void C_NetMessage::WriteQuantized(const float *values, const S_NetPlayer *player, uint8_t mask)
+bool C_NetMessage::WriteQuantized(const float *values, const S_NetQuantization *quantization, uint8_t mask)
 {
-    const S_NetQuantization &q = Quantization(player);
+    const S_NetQuantization &q = *quantization;
     if (mask & 1)
         WriteBits(Quantize(q, 0, values[0]), q.bits[0]);
     if (mask & 2) {
@@ -173,13 +167,15 @@ void C_NetMessage::WriteQuantized(const float *values, const S_NetPlayer *player
     }
     if (mask & 4)
         WriteBits(Quantize(q, 2, values[2]), q.bits[2]);
-    // (The original also returns whether any component lies outside its dead
-    // zone; no caller uses it.)
+    // Whether any component lies outside its dead zone (all three read, whatever the mask: the
+    // callers pass three).
+    return std::fabs(values[0]) > q.deadZone[0] || std::fabs(values[1]) > q.deadZone[1] ||
+           std::fabs(values[2]) > q.deadZone[2];
 }
 
-void C_NetMessage::ReadQuantized(float *values, const S_NetPlayer *player, uint32_t mask)
+void C_NetMessage::ReadQuantized(float *values, const S_NetQuantization *quantization, uint32_t mask)
 {
-    const S_NetQuantization &q = Quantization(player);
+    const S_NetQuantization &q = *quantization;
     values[0] = (mask & 1) ? Dequantize(q, 0, ReadBits(q.bits[0])) : 0.0f;
     values[1] = (mask & 2) && ReadBits(1) ? Dequantize(q, 1, ReadBits(q.bits[1])) : 0.0f;
     values[2] = (mask & 4) ? Dequantize(q, 2, ReadBits(q.bits[2])) : 0.0f;
@@ -213,6 +209,17 @@ void S_NetQuantization::Setup(const S_vector4 &span, const S_vector4 &from, cons
         scale[i] = static_cast<float>(static_cast<double>(bits[i] > 0 ? BitMask(bits[i]) : 0u) / spans[i]);
 }
 
+bool S_NetQuantization::Contains(const float *v) const
+{
+    return offset[0] <= v[0] && v[0] <= range40[0] + offset[0] && offset[1] <= v[1] && v[1] <= range40[1] + offset[1] &&
+           offset[2] <= v[2] && v[2] <= range40[2] + offset[2];
+}
+
+bool S_NetQuantization::WithinSteps(const float *v) const
+{
+    return std::fabs(v[0]) < deadZone[0] && std::fabs(v[1]) < deadZone[1] && std::fabs(v[2]) < deadZone[2];
+}
+
 void C_NetMessage::WritePosition(const S_vector &pos)
 {
     WriteQuantized(&pos.x, GetSender(-1), 7);
@@ -227,7 +234,7 @@ void C_NetMessage::ReadPosition(S_vector &pos)
 
 void C_NetMessage::WriteDirection(const S_vector &dir, int playerIndex)
 {
-    const float heading[1] = {std::atan2(dir.z, dir.x)};
+    const float heading[3] = {std::atan2(dir.z, dir.x), 0.0f, 0.0f};   // (the result reads all three)
     WriteQuantized(heading, GetRecipient(playerIndex), 1);
 }
 
@@ -240,7 +247,7 @@ void C_NetMessage::ReadDirection(S_vector &dir, int playerIndex)
 
 void C_NetMessage::WriteDirection3D(const S_vector &dir, int playerIndex)
 {
-    const float angles[2] = {std::atan2(dir.z, dir.x), std::asin(dir.y)};   // heading, pitch
+    const float angles[3] = {std::atan2(dir.z, dir.x), std::asin(dir.y), 0.0f};   // heading, pitch
     WriteQuantized(angles, GetRecipient(playerIndex), 3);
 }
 

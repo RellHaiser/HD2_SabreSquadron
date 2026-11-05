@@ -53,23 +53,10 @@ public:
 struct S_vector4;
 struct S_vector;
 struct S_NetQuantization;
-class C_NetTrack {
-public:
-    void SetValue(const S_vector4 &value);
-    void SetRate(const S_vector &rate);
-    const S_vector4 &GetCurrent();
-    const S_vector4 &GetRate();
-};
-class C_NetDirTrack {
-public:
-    const S_vector4 &GetValue();
-    const S_vector4 &GetTarget();
-    void SetValue(const S_vector4 &dir, float angle);
-    float GetAngle();
-};
+#include "net/net_track.h"
 class C_NetProperty {
 public:
-    C_NetTrack &GetTrack();
+    C_NetPositionTrack &GetTrack();
     C_NetDirTrack &GetDirTrack();
     void SetField(int field, int value);
     uint32_t GetFlags() const;

@@ -417,32 +417,11 @@ extern int g_netMaxFreq;                            // 0x009820d8
 extern int g_netMaxPing;                            // 0x009820d4
 extern int g_netMaxInactivity;                      // 0x009820dc
 // Replication of actors to the clients (the object 0x0097d084 points to).
-class C_NetTrack {                                  // value interpolated on the clients
-public:
-    virtual void SetValue(const struct S_vector4 &value);   // vtable +0x1C
-    virtual void SetTarget(const struct S_vector4 &value);  // vtable +0x20
-    virtual void SetRate(const S_vector &rate);     // vtable +0x24
-    // The value the copies replay (the player's and the remote controllers; not identified
-    // how it differs from GetValue).
-    virtual const struct S_vector4 &GetCurrent();   // vtable +0x28
-    virtual const struct S_vector4 &GetValue();     // vtable +0x2C
-    // The rate SetRate gave (the velocity the copies replay).
-    virtual const struct S_vector4 &GetRate();      // vtable +0x34
-};
-// A direction sent with a replicated position (C_NetProperty +0xC0).
-class C_NetDirTrack {
-public:
-    // The value the copies replay (the car: its rotation's axis; the controllers: the view).
-    virtual const struct S_vector4 &GetValue();     // vtable +0x28
-    // (The car's replay waits for one set; inferred: the value last received.)
-    virtual const struct S_vector4 &GetTarget();    // vtable +0x2C
-    // A value and an angle (the car: its rotation's axis and angle; the others pass 0).
-    virtual void SetValue(const struct S_vector4 &dir, float angle);   // vtable +0x50
-    virtual float GetAngle();                       // vtable +0x58 (the replayed angle)
-};
+// The replicated values (C_NetTrack, C_NetDirTrack): net/net_track.h.
+#include "net/net_track.h"
 class C_NetProperty {
 public:
-    C_NetTrack &GetTrack();                         // this + 0x30
+    C_NetPositionTrack &GetTrack();                 // this + 0x30
     C_NetDirTrack &GetDirTrack();                   // this + 0xC0
     // Sets 6-bit field `field` of the word at +0x20 to `value` and hands the word to both tracks
     // (their vtable +0x14; the car's StartMission sets field 2 to 0x3B; not identified).

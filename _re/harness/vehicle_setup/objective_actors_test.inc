@@ -124,17 +124,20 @@ S_NetPlayer *C_NetMessage::GetSender(int playerIndex) const
 {
     return playerIndex == -1 ? reinterpret_cast<S_NetPlayer *>(&g_obSender) : nullptr;
 }
-void C_NetMessage::WriteQuantized(const float *values, const S_NetPlayer *player, uint8_t mask)
+bool C_NetMessage::WriteQuantized(const float *values, const S_NetQuantization *q, uint8_t mask)
 {
+    const auto *player = reinterpret_cast<const S_NetPlayer *>(q);
     auto *s = reinterpret_cast<S_FakeStream *>(this);
     for (int i = 0; i < 3; ++i) {
         uint32_t bits;
         std::memcpy(&bits, &values[i], 4);
         s->bits.emplace_back(bits, player == reinterpret_cast<S_NetPlayer *>(&g_obSender) && mask == 7 ? -11 : -13);
     }
+    return false;
 }
-void C_NetMessage::ReadQuantized(float *values, const S_NetPlayer *player, uint32_t mask)
+void C_NetMessage::ReadQuantized(float *values, const S_NetQuantization *q, uint32_t mask)
 {
+    const auto *player = reinterpret_cast<const S_NetPlayer *>(q);
     for (int i = 0; i < 3; ++i) {
         if (g_readPos >= g_readBits.size() || g_readBits[g_readPos].second != -11 ||
             player != reinterpret_cast<S_NetPlayer *>(&g_obSender) || mask != 7) {

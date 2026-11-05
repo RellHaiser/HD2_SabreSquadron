@@ -589,7 +589,7 @@ uint32_t FUN_007233d0(int param_1, ...)
   FUN_0073ed40((void *)(iVar1 + 0x30),0x3b);
   *(uint32_t *)(*(int *)(param_1 + 0x14) + 0x4c) = DAT_00982104;
   FUN_0073fa30(*(void **)(param_1 + 0x14),0x3d0f5c29);
-  DAT_00982f94 = (uint8_t)g_gameRole & 1;
+  g_netServerSide = (uint8_t)g_gameRole & 1;
   ExceptionList = gh_bitcast<void*>(local_40.w);
   return 0;
 }

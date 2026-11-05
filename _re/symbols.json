@@ -11187,6 +11187,16 @@
   "name": "SeatWeaponSendMessage",
   "proto": "bool __fastcall SeatWeaponSendMessage(int kind, S_vector4 *pos, S_vector4 *dir, int barrel, int seat, C_Car *car)"
  },
+ "004c1360": {
+  "module": "net_replication",
+  "name": "C_NetQuantized::SetReadQuantizations",
+  "proto": "void __thiscall SetReadQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "004c1390": {
+  "module": "net_replication",
+  "name": "C_NetQuantized::SetWriteQuantizations",
+  "proto": "void __thiscall SetWriteQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
  "004c1400": {
   "module": "zz_idioms",
   "name": "empty_function_4c1400"
@@ -38720,6 +38730,16 @@
   "name": "S_NetQuantization::Setup",
   "proto": "void __fastcall Setup(S_NetQuantization *q, S_vector4 *span, S_vector4 *from, S_vector4 *step, int unknown)"
  },
+ "0073dd30": {
+  "module": "net_replication",
+  "name": "S_NetQuantization::Contains",
+  "proto": "bool __thiscall Contains(void *this, float * v)"
+ },
+ "0073dda0": {
+  "module": "net_replication",
+  "name": "S_NetQuantization::WithinSteps",
+  "proto": "bool __thiscall WithinSteps(void *this, float * v)"
+ },
  "0073e0e0": {
   "module": "car",
   "name": "C_NetProperty::SetFlags",
@@ -38816,41 +38836,204 @@
   "module": "zz_idioms",
   "name": "construct_copy4_73fb00"
  },
+ "0073fbe0": {
+  "module": "net_replication",
+  "name": "C_NetTrack::C_NetTrack",
+  "proto": "void * __thiscall C_NetTrack(void *this)"
+ },
+ "0073fc10": {
+  "module": "net_replication",
+  "name": "C_NetTrack::SetFlags",
+  "proto": "void __thiscall SetFlags(void *this, uint flags)"
+ },
+ "0073fc20": {
+  "module": "net_replication",
+  "name": "C_NetTrack::SetLag",
+  "proto": "void __thiscall SetLag(void *this, float lag)"
+ },
+ "0073fc30": {
+  "module": "net_replication",
+  "name": "C_NetTrack::SetValue",
+  "proto": "void __thiscall SetValue(void *this, float * value)"
+ },
+ "0073fca0": {
+  "module": "net_replication",
+  "name": "C_NetTrack::SetNetValue",
+  "proto": "void __thiscall SetNetValue(void *this, float * value)"
+ },
+ "0073fcc0": {
+  "module": "net_replication",
+  "name": "C_NetTrack::SetRate",
+  "proto": "void __thiscall SetRate(void *this, float * rate)"
+ },
+ "0073fd60": {
+  "module": "net_replication",
+  "name": "C_NetTrack::GetCurrent",
+  "proto": "float * __thiscall GetCurrent(void *this)"
+ },
+ "0073fd70": {
+  "module": "net_replication",
+  "name": "C_NetTrack::GetTarget",
+  "proto": "float * __thiscall GetTarget(void *this)"
+ },
+ "0073fd80": {
+  "module": "net_replication",
+  "name": "C_NetTrack::GetNetValue",
+  "proto": "float * __thiscall GetNetValue(void *this)"
+ },
+ "0073fd90": {
+  "module": "net_replication",
+  "name": "C_NetTrack::GetRate",
+  "proto": "float * __thiscall GetRate(void *this)"
+ },
  "0073fdd0": {
-  "module": "zz_idioms",
-  "name": "empty_function_73fdd0"
+  "module": "net_replication",
+  "name": "C_NetTrack::BeginWrite",
+  "proto": "void __thiscall BeginWrite(void *this, void * stream)"
  },
  "0073fde0": {
-  "module": "zz_idioms",
-  "name": "empty_function_73fde0"
+  "module": "net_replication",
+  "name": "C_NetTrack::BeginRead",
+  "proto": "void __thiscall BeginRead(void *this, void * stream)"
  },
  "0073fdf0": {
-  "module": "zz_idioms",
-  "name": "empty_function_73fdf0"
+  "module": "net_replication",
+  "name": "C_NetTrack::EndWrite",
+  "proto": "void __thiscall EndWrite(void *this, void * stream)"
  },
  "0073fe00": {
-  "module": "zz_idioms",
-  "name": "empty_function_73fe00"
+  "module": "net_replication",
+  "name": "C_NetTrack::EndRead",
+  "proto": "void __thiscall EndRead(void *this, void * stream)"
  },
  "0073fe10": {
-  "module": "zz_idioms",
-  "name": "empty_function_73fe10"
+  "module": "net_replication",
+  "name": "C_NetTrack::Refresh",
+  "proto": "void __thiscall Refresh(void *this)"
+ },
+ "0073fe20": {
+  "module": "net_replication",
+  "name": "C_NetTrack::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0073fe40": {
+  "module": "net_replication",
+  "name": "C_NetTrack::~C_NetTrack",
+  "proto": "void __thiscall ~C_NetTrack(void *this)"
+ },
+ "0073fe50": {
+  "module": "net_replication",
+  "name": "C_NetTrack::Reset",
+  "proto": "void __fastcall Reset(void * track)"
+ },
+ "0073fee0": {
+  "module": "net_replication",
+  "name": "C_NetTrack::Write",
+  "proto": "void __thiscall Write(void *this, void * stream, bool delta, float * lastSent)"
+ },
+ "007401e0": {
+  "module": "net_replication",
+  "name": "C_NetTrack::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "00740580": {
+  "module": "net_replication",
+  "name": "C_NetTrack::Update",
+  "proto": "void __thiscall Update(void *this, float seconds)"
+ },
+ "00740770": {
+  "module": "net_replication",
+  "name": "C_NetPositionTrack::C_NetPositionTrack",
+  "proto": "void * __thiscall C_NetPositionTrack(void *this)"
+ },
+ "00740790": {
+  "module": "net_replication",
+  "name": "C_NetPositionTrack::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "007407b0": {
+  "module": "net_replication",
+  "name": "C_NetPositionTrack::~C_NetPositionTrack",
+  "proto": "void __thiscall ~C_NetPositionTrack(void *this)"
  },
  "007407d0": {
   "module": "zz_idioms",
   "name": "empty_function_7407d0"
  },
+ "007407e0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::C_NetDirTrack",
+  "proto": "void * __thiscall C_NetDirTrack(void *this)"
+ },
  "007409a0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7409a0"
+  "module": "net_replication",
+  "name": "C_NetDirTrack::SetReadQuantizations",
+  "proto": "void __thiscall SetReadQuantizations(void *this, void * value, void * delta, void * rate)"
  },
  "007409b0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7409b0"
+  "module": "net_replication",
+  "name": "C_NetDirTrack::SetWriteQuantizations",
+  "proto": "void __thiscall SetWriteQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "007409c0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "007409e0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::~C_NetDirTrack",
+  "proto": "void __thiscall ~C_NetDirTrack(void *this)"
+ },
+ "007409f0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::SetDirection",
+  "proto": "void __thiscall SetDirection(void *this, float * dir, float angle)"
+ },
+ "00740a90": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::SetAngle",
+  "proto": "void __thiscall SetAngle(void *this, float angle)"
+ },
+ "00740aa0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::GetCurrent",
+  "proto": "float * __thiscall GetCurrent(void *this)"
+ },
+ "00740ab0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::GetAngle",
+  "proto": "float __thiscall GetAngle(void *this)"
+ },
+ "00740ac0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::Reset",
+  "proto": "void __fastcall Reset(void * track)"
  },
  "00740b00": {
-  "module": "zz_idioms",
-  "name": "empty_function_740b00"
+  "module": "net_replication",
+  "name": "C_NetDirTrack::BeginWrite",
+  "proto": "void __thiscall BeginWrite(void *this, void * stream)"
+ },
+ "00740b10": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::EndWrite",
+  "proto": "void __thiscall EndWrite(void *this, void * stream)"
+ },
+ "00740b70": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::EndRead",
+  "proto": "void __thiscall EndRead(void *this, void * stream)"
+ },
+ "00741010": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::Update",
+  "proto": "void __thiscall Update(void *this, float seconds)"
+ },
+ "007414c0": {
+  "module": "net_replication",
+  "name": "C_NetDirTrack::SetFlags",
+  "proto": "void __thiscall SetFlags(void *this, uint flags)"
  },
  "00742850": {
   "module": "game",
@@ -44801,6 +44984,36 @@
   "data": true,
   "module": "net_bitstream",
   "name": "g_netPlayerCount"
+ },
+ "00982e10": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netAngleRateQuantization",
+  "type": "S_NetQuantization"
+ },
+ "00982e90": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netAngleDeltaQuantization",
+  "type": "S_NetQuantization"
+ },
+ "00982f10": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netAngleQuantization",
+  "type": "S_NetQuantization"
+ },
+ "00982f90": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netUpdatePeriod",
+  "type": "float"
+ },
+ "00982f94": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netServerSide",
+  "type": "bool"
  },
  "009831e8": {
   "data": true,

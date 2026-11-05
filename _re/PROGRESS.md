@@ -8685,6 +8685,50 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 291 errors in 54 of 405 files. ret_audit --src: 52.
   - Stats: 9,586 of 12,306 functions by hand or absorbed (86.0 % by size).
 
+  PART 10 PLAN (2026-11-05): the network module (0x00720000..0x0074a200, ~146 KB left). The game's own
+  replication runs over DirectPlay8 (C_NetGame, 0x5080 bytes); the server browser's master-server code is the
+  GameSpy SDK. Bottom-up:
+  10a the replicated values' tracks (0x0073fbe0..0x00741530, 6 KB): the track base (vtable 0x00816490: a value
+    interpolated towards the one received, its rate, the quantised delta sent per player), the position track
+    (0x008164e0) and the direction track (0x00816530: yaw / pitch angles, the turn sign);
+  10b the replicated objects (0x0073dd30..0x0073fbe0 and 0x00741530..0x00741700, 9 KB): their base (vtable
+    0x00816438, the two quantisation triples), C_NetProperty (0x0081641c, 0x580 bytes: a position and a direction
+    track, the last values sent to each of 32 players), C_NetObject (0x00816448: its properties, message queues and
+    state handlers), C_NetReplication (0x0081646c: the objects, the local one, the view-cone filter 0x00816594),
+    C_NetObjectMessage (0x00810630), S_PerfTimer;
+  10c the transport under C_NetGame (0x00745300..0x0074a200, 16 KB: Winsock and threads, the classes of vtables
+    0x008165f0 .. 0x008166dc; split when started);
+  10d.. C_NetGame (0x00720000..0x00733000, 69 KB: the DirectPlay8 interfaces declared by hand (the MSVC SDK has no
+    dplay8.h), init / host / connect, the session queries, the messages, the players / teams / scores, the
+    commands, the voice (0x00816598), the firewall and the CD key; split by subject when started);
+  10x the dedicated server's console: C_CommandProcessor (0x007426a0..0x007442e0: Execute 6 KB) and C_ConsoleState
+    (0x007442e0..0x00745300).
+  The GameSpy SDK (0x00733000..0x0073d260, 29 KB: the master-server list, the query / report protocol) is
+  third-party code whose servers are gone: stubbed (no servers found), documented, not ported line by line.
+
+  PART 10a DONE (2026-11-05): the replicated values' tracks (net/net_track.*, new).
+  - C_NetQuantized (vtable 0x00816438): the base of the net values, objects and messages: the read and write
+    quantisation triples (value, delta, rate; SetReadQuantizations 0x004c1360 / SetWriteQuantizations 0x004c1390 store
+    the non-null ones), Update, Refresh.
+  - C_NetTrack (vtable 0x00816490, 0x90 bytes): current / target / net value / rate / rate sent / step, the speed, the
+    lag, the flags (NET_TRACK_*: the components, keep current 0x1000, delta 0x2000, derive the rate 0x4000, send the
+    rate 0x8000, extrapolate 0x10000, move the target 0x20000), the snap distance; Reset 0x0073fe50, Update 0x00740580,
+    Write 0x0073fee0 (per player: nothing, a delta or the value; the server forwards the net value), Read 0x007401e0,
+    the setters / getters 0x0073fc10..0x0073fd90. C_NetPositionTrack (0x008164e0). C_NetDirTrack (0x00816530, 0xC0
+    bytes): yaw / pitch / angle, the direction vector, the turn sign (2 bits after the value), fixed quantisations
+    (g_netAngle*Quantization 0x00982f10 / e90 / e10), SetDirection 0x007409f0, Update 0x00741010 (the short way round;
+    beyond 0.785 rad the yaw moves at the rate's x, as the original), EndRead 0x00740b70 (the rate, at most 8).
+  - g_netUpdatePeriod 0x00982f90 (0.1), g_netServerSide 0x00982f94. S_NetQuantization::Contains 0x0073dd30 /
+    WithinSteps 0x0073dda0; C_NetMessage::WriteQuantized now returns its result (any component above its step), as
+    the tracks use it, and takes a quantisation directly (the player overloads kept).
+  - pending.h's track declarations replaced; the call sites renamed by slot: the direction track's SetValue(dir,
+    angle) is SetDirection, its GetValue (slot +0x28) GetCurrent; human.cpp's SetTarget (+0x20) is SetNetValue,
+    human_controller's GetValue (+0x2C) GetTarget.
+  - Harness: _re/harness/net (new, MinGW: net_test.cpp, build.bat). Mutations: mutations/mutate_10a.py (the
+    scratchpad's mutnet.py builds the harness in parallel trees): 312: 236 killed, 16 not building, 60 equivalent.
+  - Build: MSVC clean. Tier 1: 291 errors in 54 of 405 files. ret_audit --src: 52.
+  - Stats: 9,629 of 12,306 functions by hand or absorbed (86.2 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
