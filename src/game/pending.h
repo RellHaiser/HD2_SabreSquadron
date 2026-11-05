@@ -258,6 +258,8 @@ public:
     int QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *status), S_ServerEntry *server);   // 0x007240d0
     // A server pinged (`callback`, the net thread's, gets it when it answers; part 9h-xix).
     void PingServer(void(__fastcall *callback)(S_ServerEntry *server), S_ServerEntry *server);   // 0x00724070
+    // The search's answers read (its socket polled; the browser's tick, every 10 ms; part 9h-xx).
+    void PollSearch();                              // 0x00723610 (__fastcall)
     // Administration commands (NET_COMMAND_*; `unknown` is passed as 0).
     bool Command(int command, const char *arg, int unknown);   // 0x0072d680
     // State of the connection to the server (NET_CONNECTION_LOST: nothing heard for 600 ms).

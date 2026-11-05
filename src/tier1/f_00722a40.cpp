@@ -410,12 +410,12 @@ uint32_t FUN_007231b0(uint32_t *param_1, ...)
 {
   char cVar1;
   void *pvVar2;
+  char *server;
   char *pcVar3;
-  char *pcVar4;
-  uint32_t uVar5;
-  int iVar6;
+  uint32_t uVar4;
+  int iVar5;
   char *buffer;
-  char *pcVar7;
+  char *pcVar6;
   char *format;
   char local_34 [40];
   uint32_t local_4;
@@ -423,100 +423,100 @@ uint32_t FUN_007231b0(uint32_t *param_1, ...)
   pvVar2 = tier1_operator_new(0x9c);
   local_4 = 0;
   if (pvVar2 == 0) {
-    pcVar3 = 0;
+    server = 0;
   }
   else {
-    pcVar3 = (char *)FUN_007252b0((int)pvVar2);
+    server = (char *)FUN_007252b0((int)pvVar2);
   }
   local_4 = 0xffffffff;
-  pcVar3[0] = '\0';
-  pcVar3[1] = '\0';
-  pcVar3[2] = '\0';
-  pcVar3[3] = '\0';
-  pcVar4 = (char *)FUN_0073a3f0((int)param_1,"hostname","(NO HOST)");
-  pcVar7 = pcVar3;
+  server[0] = '\0';
+  server[1] = '\0';
+  server[2] = '\0';
+  server[3] = '\0';
+  pcVar3 = (char *)FUN_0073a3f0((int)param_1,"hostname","(NO HOST)");
+  pcVar6 = server;
   do {
-    cVar1 = *pcVar4;
-    pcVar4++;
-    *pcVar7 = cVar1;
-    pcVar7++;
+    cVar1 = *pcVar3;
+    pcVar3++;
+    *pcVar6 = cVar1;
+    pcVar6++;
   } while (cVar1 != '\0');
-  pcVar4 = (char *)FUN_0073a3f0((int)param_1,"mapname","(NO MAP)");
-  pcVar7 = pcVar3 + 0x33;
+  pcVar3 = (char *)FUN_0073a3f0((int)param_1,"mapname","(NO MAP)");
+  pcVar6 = server + 0x33;
   do {
-    cVar1 = *pcVar4;
-    pcVar4++;
-    *pcVar7 = cVar1;
-    pcVar7++;
+    cVar1 = *pcVar3;
+    pcVar3++;
+    *pcVar6 = cVar1;
+    pcVar6++;
   } while (cVar1 != '\0');
-  uVar5 = FUN_0073a420((int)param_1,"numplayers",0);
-  *(uint32_t *)(pcVar3 + 0x7c) = uVar5;
-  uVar5 = FUN_0073a420((int)param_1,"maxplayers",0);
-  *(uint32_t *)(pcVar3 + 0x78) = uVar5;
-  uVar5 = FUN_0073a420((int)param_1,"hostport",0);
-  *(uint32_t *)(pcVar3 + 0x6c) = uVar5;
-  uVar5 = get_field_1c_73aa10((int)param_1);
-  *(uint32_t *)(pcVar3 + 0x74) = uVar5;
-  uVar5 = get_first_field_73a6a0(param_1);
-  *(uint32_t *)(pcVar3 + 0x68) = uVar5;
-  pcVar4 = (char *)FUN_0073a3f0((int)param_1,"gametype","(NO TYPE)");
-  pcVar7 = local_34;
+  uVar4 = FUN_0073a420((int)param_1,"numplayers",0);
+  *(uint32_t *)(server + 0x7c) = uVar4;
+  uVar4 = FUN_0073a420((int)param_1,"maxplayers",0);
+  *(uint32_t *)(server + 0x78) = uVar4;
+  uVar4 = FUN_0073a420((int)param_1,"hostport",0);
+  *(uint32_t *)(server + 0x6c) = uVar4;
+  uVar4 = get_field_1c_73aa10((int)param_1);
+  *(uint32_t *)(server + 0x74) = uVar4;
+  uVar4 = get_first_field_73a6a0(param_1);
+  *(uint32_t *)(server + 0x68) = uVar4;
+  pcVar3 = (char *)FUN_0073a3f0((int)param_1,"gametype","(NO TYPE)");
+  pcVar6 = local_34;
   do {
-    cVar1 = *pcVar4;
-    pcVar4++;
-    *pcVar7 = cVar1;
-    pcVar7++;
+    cVar1 = *pcVar3;
+    pcVar3++;
+    *pcVar6 = cVar1;
+    pcVar6++;
   } while (cVar1 != '\0');
-  iVar6 = _stricmp(local_34,"occupation");
-  if (iVar6 == 0) {
-    pcVar3[0x70] = '\x01';
-    pcVar3[0x71] = '\0';
-    pcVar3[0x72] = '\0';
-    pcVar3[0x73] = '\0';
+  iVar5 = _stricmp(local_34,"occupation");
+  if (iVar5 == 0) {
+    server[0x70] = '\x01';
+    server[0x71] = '\0';
+    server[0x72] = '\0';
+    server[0x73] = '\0';
   }
   else {
-    iVar6 = _stricmp(local_34,"objectives");
-    if (iVar6 == 0) {
-      pcVar3[0x70] = '\x02';
-      pcVar3[0x71] = '\0';
-      pcVar3[0x72] = '\0';
-      pcVar3[0x73] = '\0';
+    iVar5 = _stricmp(local_34,"objectives");
+    if (iVar5 == 0) {
+      server[0x70] = '\x02';
+      server[0x71] = '\0';
+      server[0x72] = '\0';
+      server[0x73] = '\0';
     }
     else {
-      iVar6 = _stricmp(local_34,"cooperative");
-      if (iVar6 == 0) {
-        pcVar3[0x70] = '\x03';
-        pcVar3[0x71] = '\0';
-        pcVar3[0x72] = '\0';
-        pcVar3[0x73] = '\0';
+      iVar5 = _stricmp(local_34,"cooperative");
+      if (iVar5 == 0) {
+        server[0x70] = '\x03';
+        server[0x71] = '\0';
+        server[0x72] = '\0';
+        server[0x73] = '\0';
       }
       else {
-        pcVar3[0x70] = '\0';
-        pcVar3[0x71] = '\0';
-        pcVar3[0x72] = '\0';
-        pcVar3[0x73] = '\0';
+        server[0x70] = '\0';
+        server[0x71] = '\0';
+        server[0x72] = '\0';
+        server[0x73] = '\0';
       }
     }
   }
-  pcVar3[0x84] = -1;
-  pcVar3[0x85] = -1;
-  pcVar3[0x86] = -1;
-  pcVar3[0x87] = -1;
-  iVar6 = FUN_0073a420((int)param_1,"password",0);
-  pcVar3[0x82] = iVar6 != 0;
-  iVar6 = FUN_0073a420((int)param_1,"isdedicated",0);
-  pcVar3[0x80] = iVar6 != 0;
-  pcVar3[0x81] = '\x01';
-  iVar6 = FUN_0073a420((int)param_1,"voicechat",0);
-  pcVar3[0x88] = iVar6 != 0;
-  uVar5 = FUN_0073a420((int)param_1,"expansion",1);
-  *(uint32_t *)(pcVar3 + 0x94) = uVar5;
-  pcVar7 = pcVar3 + 0x8c;
-  pcVar4 = pcVar3 + 0x90;
+  server[0x84] = -1;
+  server[0x85] = -1;
+  server[0x86] = -1;
+  server[0x87] = -1;
+  iVar5 = FUN_0073a420((int)param_1,"password",0);
+  server[0x82] = iVar5 != 0;
+  iVar5 = FUN_0073a420((int)param_1,"isdedicated",0);
+  server[0x80] = iVar5 != 0;
+  server[0x81] = '\x01';
+  iVar5 = FUN_0073a420((int)param_1,"voicechat",0);
+  server[0x88] = iVar5 != 0;
+  uVar4 = FUN_0073a420((int)param_1,"expansion",1);
+  *(uint32_t *)(server + 0x94) = uVar4;
+  pcVar6 = server + 0x8c;
+  pcVar3 = server + 0x90;
   format = "%d.%d";
   buffer = (char *)FUN_0073a3f0((int)param_1,"gamever",&DAT_00844af8);
-  sscanf(buffer,format,pcVar4,pcVar7);
-  FUN_00635b70(pcVar3);
+  sscanf(buffer,format,pcVar3,pcVar6);
+  C_MainMenu__OnServerFound(server);
   return 0;
 }
 
@@ -607,10 +607,11 @@ uint32_t FUN_007235f0(int param_1, ...)
 
 
 // 0x00723610
-uint32_t FUN_00723610(int param_1, ...)
+uint32_t C_NetGame__PollSearch(...)
 {
-  if (*(int **)(param_1 + 0x4e4) != 0) {
-    FUN_0073b240(*(int **)(param_1 + 0x4e4));
+  int in_ECX;
+  if (*(int **)(in_ECX + 0x4e4) != 0) {
+    FUN_0073b240(*(int **)(in_ECX + 0x4e4));
     return 0;
   }
   return 0;

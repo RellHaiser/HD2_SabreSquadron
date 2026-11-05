@@ -2897,3 +2897,292 @@ bool C_MainMenu::OnServerCountChanged(void *menu, void *, C_Control *, uint32_t,
                     online.c_str()));
     return true;
 }
+
+// ---- the browser's searches, the servers found, the favourites (part 9h-xx) -------------------------------
+
+namespace {
+
+// The browser's states (m_step): idle; pinging the list ("REFRESH LIST"), only the reachable ones listed;
+// searching the LAN ("UPDATE LIST"); the list shown again.
+enum : int {
+    BROWSER_IDLE = 0, BROWSER_PINGING = 4, BROWSER_SEARCHING = 5, BROWSER_RELIST = 6, BROWSER_PINGING_REACHABLE = 9
+};
+// The browser's other controls.
+constexpr uint32_t BROWSER_RESTORE = BROWSER_SCREEN | 0xA00000, BROWSER_REFRESH = BROWSER_SCREEN | 0xB00000,
+                   BROWSER_FILTERS = BROWSER_SCREEN | 0xD00000, BROWSER_FAVORITES = BROWSER_SCREEN | 0x1700000;
+// The buttons' texts: "REFRESH LIST" / its "STOP", "UPDATE LIST" / its "STOP"; the favourites' (the list's
+// switch, add / remove).
+constexpr uint32_t TEXT_RESTORE = 0x915, TEXT_STOP_RESTORE = 0x916, TEXT_REFRESH = 0x917, TEXT_STOP_REFRESH = 0x918,
+                   TEXT_FAVORITES = 0x4E84, TEXT_ALL_SERVERS = 0x4E85, TEXT_ADD_FAVORITE = 0x4E86,
+                   TEXT_REMOVE_FAVORITE = 0x4E87;
+// The network handler's: the LAN searched, the list pinged.
+constexpr uint32_t MAIN_MSG_SEARCH_LAN = 0x2000027, MAIN_MSG_PING_LIST = 0x2000098;
+// A search's length, the list sorted again every, the network polled every (ms).
+constexpr int SEARCH_TIME = 15000, SORT_TIME = 1000, NET_POLL_TIME = 10;
+// A ping not answered.
+constexpr uint32_t PING_NONE = 9999;
+// The settings' lists: the servers found, the favourites.
+constexpr int SERVER_LIST_FOUND = 1, SERVER_LIST_FAVORITES = 2;
+// LAN games (g_mpSettings->unknown174).
+constexpr int LISTING_LAN = 0;
+
+} // namespace
+
+int g_netPollTime = 15;
+
+void C_MainMenu::AddServerLine(S_ServerEntry *server, int)
+{
+    const C_MpMenuSettings *settings = m_mpSettings;
+    // (Only the servers found are filtered, not the favourites.)
+    if (settings->m_listKind == SERVER_LIST_FOUND) {
+        const S_ServerFilter &filter = settings->m_filter;
+        if (filter.hideUnreachable && server->ping >= PING_NONE)
+            return;
+        if (filter.maxPing > 0 && static_cast<uint32_t>(filter.maxPing) < server->ping)
+            return;
+        if (filter.gameType != -1 && server->gameType != filter.gameType)
+            return;
+        if (filter.hideEmpty && server->players == 0)
+            return;
+        if (filter.hideFull && server->players == server->maxPlayers)
+            return;
+        if (filter.dedicatedOnly && !server->dedicated)
+            return;
+        if (filter.noPassword && server->password)
+            return;
+        if (filter.sameVersion && (server->versionMajor != g_versionMajor || server->versionMinor != g_versionMinor))
+            return;
+    }
+    PostTo(BROWSER_LIST, CONTROL_MSG_ADD_ENTRY, 0, reinterpret_cast<uintptr_t>(server));
+}
+
+void C_MainMenu::AddFoundServer(S_ServerEntry *server)
+{
+    EnterCriticalSection(&m_foundLock);
+    m_foundServers.push_back(server);
+    LeaveCriticalSection(&m_foundLock);
+}
+
+void __fastcall C_MainMenu::OnServerFound(S_ServerEntry *server)
+{
+    // (The net thread's: kept only while the main menu runs and no password was asked.)
+    if (g_menuState && g_menuState->GetTypeId() == GAME_STATE_TYPE_MAIN_MENU && !g_sessionPasswordSet)
+        static_cast<C_MainMenu *>(g_menuState)->AddFoundServer(server);
+}
+
+void C_MainMenu::ListFoundServers()
+{
+    EnterCriticalSection(&m_foundLock);
+    bool refresh = false;
+    while (!m_foundServers.empty()) {
+        S_ServerEntry *server = m_foundServers.back();
+        m_foundServers.pop_back();
+        // A LAN's answers: one server an address (another answer dropped, unless listed).
+        if (g_mpSettings->unknown174 == LISTING_LAN) {
+            const std::vector<S_ServerEntry *> &list = m_mpSettings->GetList(0);
+            bool known = false;
+            for (size_t i = 0; i < list.size(); ++i) {
+                if (list[i]->address == server->address) {
+                    known = true;
+                    break;
+                }
+            }
+            if (known) {
+                if (!m_mpSettings->IsInFirstList(server))
+                    delete server;
+                continue;
+            }
+        }
+        if (m_step == BROWSER_SEARCHING) {
+            // Searching: a new server listed (the search's time again).
+            m_searchTime = 0;
+            if (!m_mpSettings->IsInFirstList(server)) {
+                m_mpSettings->GetList(0).push_back(server);
+                AddServerLine(server);
+            }
+        } else if (m_mpSettings->IsInFirstList(server)) {
+            // Pinging: a listed server answered (its line shown again).
+            refresh = true;
+        }
+    }
+    LeaveCriticalSection(&m_foundLock);
+    if (refresh)
+        PostTo(BROWSER_LIST, CONTROL_MSG_REFRESH, 0);
+}
+
+bool C_MainMenu::OnBrowserTick(void *menu, void *, C_Control *, uint32_t, uint32_t value)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    const int step = self->m_step;
+    if (step != BROWSER_PINGING && step != BROWSER_PINGING_REACHABLE && step != BROWSER_SEARCHING &&
+        step != BROWSER_RELIST)
+        return true;
+    S_ControlMessage message;
+    message.target = BROWSER_LIST;
+    if (step == BROWSER_RELIST) {
+        // The list shown again: its lines (filtered) from the list shown.
+        message.id = CONTROL_MSG_CLEAR;
+        self->HandleMessage(&message);
+        const std::vector<S_ServerEntry *> &list = self->m_mpSettings->GetList(0);
+        for (size_t i = 0; i < list.size(); ++i)
+            self->AddServerLine(list[i]);
+        S_ControlMessage refresh;
+        refresh.target = BROWSER_LIST;
+        refresh.id = CONTROL_MSG_REFRESH;
+        self->HandleMessage(&refresh);
+        self->m_step = BROWSER_IDLE;
+        return true;
+    }
+    if (step == BROWSER_PINGING_REACHABLE) {
+        // The servers answering listed (once each; the search's time again).
+        const std::vector<S_ServerEntry *> &list = self->m_mpSettings->GetList(0);
+        for (size_t i = 0; i < list.size(); ++i) {
+            if (list[i]->ping < PING_NONE && !list[i]->listed) {
+                self->m_searchTime = 0;
+                list[i]->listed = true;
+                self->AddServerLine(list[i]);
+            }
+        }
+        if (self->m_searchTime == 0) {
+            message.id = CONTROL_MSG_REFRESH;
+            self->HandleMessage(&message);
+        }
+    } else {
+        self->ListFoundServers();
+    }
+    const auto time = static_cast<int>(value);
+    self->m_searchTime += time;
+    self->m_sortTime += time;
+    // Nothing new for a while: the search stopped (its button's).
+    if (self->m_searchTime > SEARCH_TIME) {
+        if (self->m_step == BROWSER_PINGING || self->m_step == BROWSER_PINGING_REACHABLE)
+            OnRestoreList(menu, nullptr, nullptr, 0, 0);
+        else if (self->m_step == BROWSER_SEARCHING)
+            OnRefreshList(menu, nullptr, nullptr, 0, 0);
+    }
+    if (self->m_sortTime > SORT_TIME) {
+        PostTo(BROWSER_LIST, CONTROL_MSG_SORT, 0);
+        self->m_sortTime = 0;
+    }
+    g_netPollTime += time;
+    if (g_netPollTime > NET_POLL_TIME) {
+        g_netGame.PollSearch();
+        g_netPollTime = 0;
+    }
+    return true;
+}
+
+bool C_MainMenu::OnRestoreList(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if (self->m_step == BROWSER_IDLE) {
+        // Started: the list's servers not answered yet, nothing picked; with the unreachable ones hidden the
+        // list emptied (each listed when it answers); the buttons off, "STOP"; the list pinged.
+        self->m_searchTime = 0;
+        self->m_mpSettings->ResetServers();
+        self->m_server = nullptr;
+        if (!self->m_mpSettings->m_filter.hideUnreachable) {
+            self->m_step = BROWSER_PINGING;
+        } else {
+            PostTo(BROWSER_LIST, CONTROL_MSG_CLEAR, 0);
+            self->m_step = BROWSER_PINGING_REACHABLE;
+        }
+        PostTo(BROWSER_JOIN, CONTROL_MSG_DEACTIVATE, 0);
+        PostTo(BROWSER_GAME_INFO, CONTROL_MSG_DEACTIVATE, 0);
+        PostTo(BROWSER_FAVORITE, CONTROL_MSG_DEACTIVATE, 0);
+        PostTo(BROWSER_LIST, CONTROL_MSG_REFRESH, 0);
+        PostTo(BROWSER_REFRESH, CONTROL_MSG_DEACTIVATE, 0);
+        PostTo(BROWSER_RESTORE, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON, TEXT_STOP_RESTORE);
+        Post(MAIN_MSG_PING_LIST, 0);
+    } else if (self->m_step == BROWSER_PINGING || self->m_step == BROWSER_PINGING_REACHABLE) {
+        // Stopped: sorted again, its text back, the LAN's button on (the servers found shown).
+        Post(MAIN_MSG_28, 0);
+        PostTo(BROWSER_LIST, CONTROL_MSG_SORT, 0);
+        PostTo(BROWSER_RESTORE, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON, TEXT_RESTORE);
+        if (self->m_mpSettings->m_listKind == SERVER_LIST_FOUND)
+            PostTo(BROWSER_REFRESH, CONTROL_MSG_ACTIVATE, 0);
+        self->m_step = BROWSER_IDLE;
+    }
+    return true;
+}
+
+bool C_MainMenu::OnRefreshList(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if (self->m_step == BROWSER_IDLE) {
+        // Started: nothing picked, the servers found and listed dropped; the buttons off, the list emptied,
+        // "STOP"; the LAN searched.
+        self->m_searchTime = 0;
+        self->m_server = nullptr;
+        self->DrainFoundServers();
+        self->m_mpSettings->ClearServers();
+        PostTo(BROWSER_JOIN, CONTROL_MSG_DEACTIVATE, 0);
+        PostTo(BROWSER_GAME_INFO, CONTROL_MSG_DEACTIVATE, 0);
+        PostTo(BROWSER_FAVORITE, CONTROL_MSG_DEACTIVATE, 0);
+        PostTo(BROWSER_LIST, CONTROL_MSG_CLEAR, 0);
+        PostTo(BROWSER_RESTORE, CONTROL_MSG_DEACTIVATE, 0);
+        PostTo(BROWSER_REFRESH, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON, TEXT_STOP_REFRESH);
+        Post(MAIN_MSG_SEARCH_LAN, 0);
+        self->m_step = BROWSER_SEARCHING;
+    } else if (self->m_step == BROWSER_SEARCHING) {
+        // Stopped: sorted again, its text back; listing the Internet's: the ping's button on.
+        Post(MAIN_MSG_28, 0);
+        PostTo(BROWSER_LIST, CONTROL_MSG_SORT, 0);
+        PostTo(BROWSER_REFRESH, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON, TEXT_REFRESH);
+        if (g_mpSettings->unknown174 == LISTING_INTERNET)
+            PostTo(BROWSER_RESTORE, CONTROL_MSG_ACTIVATE, 0);
+        self->m_step = BROWSER_IDLE;
+    }
+    return true;
+}
+
+bool C_MainMenu::OnFavoriteToggle(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if (!self->m_server)
+        return false;
+    C_MpMenuSettings *settings = self->m_mpSettings;
+    if (settings->m_listKind == SERVER_LIST_FOUND) {
+        // The servers found: a copy of the server picked added to the favourites.
+        settings->GetList(SERVER_LIST_FAVORITES).push_back(new S_ServerEntry(*self->m_server));
+    } else if (settings->m_listKind == SERVER_LIST_FAVORITES) {
+        // The favourites: the server picked removed (the last copy), deleted; the button off, the list again.
+        std::vector<S_ServerEntry *> &list = settings->GetList(0);
+        for (size_t i = list.size(); i-- > 0;) {
+            if (list[i] == self->m_server) {
+                self->m_server = nullptr;
+                delete list[i];
+                list.erase(list.begin() + static_cast<std::ptrdiff_t>(i));
+                break;
+            }
+        }
+        PostTo(BROWSER_FAVORITE, CONTROL_MSG_DEACTIVATE, 0);
+        self->m_step = BROWSER_RELIST;
+    }
+    return true;
+}
+
+bool C_MainMenu::OnFavorites(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    C_MpMenuSettings *settings = self->m_mpSettings;
+    const int kind = settings->m_listKind;
+    if (kind != SERVER_LIST_FOUND && kind != SERVER_LIST_FAVORITES)
+        return true;
+    // The other list shown: nothing picked, the searches stopped; the search buttons on with the servers found
+    // (off with the favourites), the favourite button off, the texts switched; the list again.
+    const bool favorites = kind == SERVER_LIST_FOUND;
+    self->m_server = nullptr;
+    settings->SetListKind(favorites ? SERVER_LIST_FAVORITES : SERVER_LIST_FOUND);
+    S_ControlMessage stop;
+    stop.id = MAIN_MSG_28;
+    self->HandleMessage(&stop);
+    const uint32_t buttons = favorites ? CONTROL_MSG_DEACTIVATE : CONTROL_MSG_ACTIVATE;
+    PostTo(BROWSER_REFRESH, buttons, 0);
+    PostTo(BROWSER_FILTERS, buttons, 0);
+    PostTo(BROWSER_FAVORITE, CONTROL_MSG_DEACTIVATE, 0);
+    PostTo(BROWSER_FAVORITES, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON, favorites ? TEXT_ALL_SERVERS : TEXT_FAVORITES);
+    PostTo(BROWSER_FAVORITE, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON, favorites ? TEXT_REMOVE_FAVORITE : TEXT_ADD_FAVORITE);
+    self->m_step = BROWSER_RELIST;
+    return true;
+}

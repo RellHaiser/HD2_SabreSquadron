@@ -156,3 +156,12 @@
 00634950 C_MainMenu::OnFavoriteToggle | bool __thiscall OnFavoriteToggle(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
 00634b30 C_MainMenu::OnFavorites | bool __thiscall OnFavorites(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
 00724070 C_NetGame::PingServer | void __thiscall PingServer(void *this, void * callback, void * server)
+# Part 9h-xx: the browser's searches, the servers found, the favourites.
+00635f10 C_MainMenu::AddServerLine | void __thiscall AddServerLine(C_MainMenu *this, void * server, int unused)
+00635990 C_MainMenu::AddFoundServer | void __thiscall AddFoundServer(C_MainMenu *this, void * server)
+00635b70 C_MainMenu::OnServerFound | void __fastcall OnServerFound(void * server)
+00635710 C_MainMenu::ListFoundServers | void __fastcall ListFoundServers(C_MainMenu *this)
+00619ca0 C_MpMenuSettings::ResetServers | void __fastcall ResetServers(void *this)
+007252c0 S_ServerEntry::Reset | void __fastcall Reset(void *this)
+00723610 C_NetGame::PollSearch | void __fastcall PollSearch(void *this)
+0083fe08 g_netPollTime @ int

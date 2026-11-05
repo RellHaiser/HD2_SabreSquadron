@@ -1246,6 +1246,10 @@ protected:
 
 // A server found by the browser (its module not ported yet: the fields the server list reads).
 struct S_ServerEntry {
+    // Not answered yet: the map " ??? ", no players, no flags, game type 4, ping 9999, not listed (the net
+    // module's; part 9h-xx).
+    void Reset();                                       // 0x007252c0 (__fastcall)
+
     char name[0x33];                                    // +0x00
     char map[0x35];                                     // +0x33
     uint32_t address;                                   // +0x68 (shown top byte first; part 9h-xii)
@@ -1262,10 +1266,14 @@ struct S_ServerEntry {
     uint8_t unknown89[3];
     int versionMinor;                                   // +0x8C
     int versionMajor;                                   // +0x90
+    uint8_t unknown94[4];
+    bool listed;                                        // +0x98 the browser's list shows it (pinging)
+    uint8_t unknown99[3];
 };
 static_assert(offsetof(S_ServerEntry, gameType) == 0x70 && offsetof(S_ServerEntry, voice) == 0x88 &&
                   offsetof(S_ServerEntry, address) == 0x68 && offsetof(S_ServerEntry, internet) == 0x81 &&
-                  offsetof(S_ServerEntry, versionMajor) == 0x90, "S_ServerEntry layout");
+                  offsetof(S_ServerEntry, versionMajor) == 0x90 && offsetof(S_ServerEntry, listed) == 0x98 &&
+                  sizeof(S_ServerEntry) == 0x9C, "S_ServerEntry layout");
 
 // The server list's messages: the entries' count (value), the sort (value: a key 1..5 in the low 3
 // bits, 0x40 / 0x80 the direction toggled; 0 sorted again) and its key; a row's entry (value2; its

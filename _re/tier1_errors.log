@@ -146,24 +146,8 @@ f_00633450.cpp:202:49: base operand of '->' is not a pointer
     DAT_008ae5ac = (C_MainMenu *)(DAT_008ae5ac->_pad_0004 + 0x14);
 f_00633450.cpp:206:43: base operand of '->' is not a pointer
     pCVar1 = (C_MainMenu *)(DAT_008ae5ac->_pad_0004 + 0x14);
-f_00633450.cpp:944:49: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:956:49: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:966:49: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:978:49: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:989:51: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:1100:49: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:1110:49: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:1122:49: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:1133:51: no matching function for call to 'tier1::C_str::C_str(int)'
-    (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
+f_00633450.cpp:233:29: 'OnServerFound' was not declared in this scope
+    FUN_00724040(&g_netGame,OnServerFound);
 f_00633450.cpp:63:76: invalid 'static_cast' from type 'unsigned char*' to type 'uint64_t' {aka 'long long unsigned int'}
     uint32_t local_204;
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
@@ -356,15 +340,15 @@ f_00722a40.cpp:157:36: invalid initialization of reference of type 'const IID&' 
     piVar5 = (int *)CoCreateInstance((IID *)&DAT_008190a8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819058,
 f_00722a40.cpp:225:36: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     piVar6 = (int *)CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,
-f_00722a40.cpp:669:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:670:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,param_2);
-f_00722a40.cpp:671:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:672:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,param_1);
-f_00722a40.cpp:675:69: 'struct tier1::_union_1226' has no member named 'S_un_b'
+f_00722a40.cpp:676:69: 'struct tier1::_union_1226' has no member named 'S_un_b'
     pcVar2 = inet_ntoa((in_addr)((_union_1226 *)(iStack_c + 0x68))->S_un_b);
-f_00722a40.cpp:934:30: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_00722a40.cpp:935:30: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     HVar2 = CoCreateInstance((IID *)&DAT_008190b8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819068,ppv);
-f_00722a40.cpp:1356:5: expected primary-expression before '}' token
+f_00722a40.cpp:1357:5: expected primary-expression before '}' token
     }
 f_00724aa0.cpp:274:28: cannot convert 'const char*' to 'wchar_t*' in assignment
     pwStack_94 = "2hostname" + 1;

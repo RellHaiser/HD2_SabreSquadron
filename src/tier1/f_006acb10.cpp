@@ -500,7 +500,7 @@ uint32_t S_MultiplayerSettings__Reset(...)
   *(uint32_t *)(in_ECX + 0x178) = 0;
   *(uint32_t *)(in_ECX + 0x174) = 0;
   *(uint8_t *)(in_ECX + 0x170) = 0;
-  FUN_007252c0(in_ECX + 0x17c);
+  S_ServerEntry__Reset((void *)(in_ECX + 0x17c));
   puVar2 = (uint32_t *)(in_ECX + 8);
   memset(puVar2, 0, 0x5a * sizeof(*puVar2));
   puVar2 += 0x5a;

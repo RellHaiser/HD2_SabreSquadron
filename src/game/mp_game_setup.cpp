@@ -597,6 +597,27 @@ void C_MpMenuSettings::ClearServers()
     m_servers.clear();
 }
 
+void C_MpMenuSettings::ResetServers()
+{
+    std::vector<S_ServerEntry *> &list = m_listKind == 1 ? m_servers : m_servers2;
+    for (std::size_t i = list.size(); i-- > 0;)
+        list[i]->Reset();
+}
+
+void S_ServerEntry::Reset()
+{
+    std::strcpy(map, " ??? ");
+    maxPlayers = 0;
+    players = 0;
+    dedicated = false;
+    internet = false;
+    password = false;
+    voice = false;
+    listed = false;
+    gameType = 4;
+    ping = 9999;
+}
+
 void C_MpMenuSettings::CountServers()
 {
     m_playerCount = 0;

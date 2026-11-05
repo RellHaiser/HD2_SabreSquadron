@@ -230,6 +230,8 @@ public:
     std::vector<S_ServerEntry *> &GetList(int kind);   // 0x0061b100
     // The first list's servers deleted, the list emptied.
     void ClearServers();                            // 0x0061b0b0 (__fastcall)
+    // The servers of the list shown not answered yet (S_ServerEntry::Reset; part 9h-xx).
+    void ResetServers();                            // 0x00619ca0 (__fastcall)
     // The first list's count and the players on its servers.
     void CountServers();                            // 0x0061b040 (__fastcall)
     // `server` in the first list / the second.

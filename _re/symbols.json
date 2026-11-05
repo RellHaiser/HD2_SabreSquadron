@@ -27429,6 +27429,11 @@
   "name": "C_MpGameSetup::SelectRotation",
   "proto": "void __thiscall SelectRotation(void *this, int index)"
  },
+ "00619ca0": {
+  "module": "main_menu",
+  "name": "C_MpMenuSettings::ResetServers",
+  "proto": "void __fastcall ResetServers(void *this)"
+ },
  "0061a730": {
   "module": "main_menu",
   "name": "C_MpMenuSettings::Reset",
@@ -28091,15 +28096,35 @@
   "name": "C_MainMenu::OnBrowserShown",
   "proto": "bool __thiscall OnBrowserShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
  },
+ "00635710": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ListFoundServers",
+  "proto": "void __fastcall ListFoundServers(C_MainMenu *this)"
+ },
  "00635980": {
   "module": "main_menu",
   "name": "C_MainMenu::IgnoreServer",
   "proto": "void __fastcall IgnoreServer(void * server)"
  },
+ "00635990": {
+  "module": "main_menu",
+  "name": "C_MainMenu::AddFoundServer",
+  "proto": "void __thiscall AddFoundServer(C_MainMenu *this, void * server)"
+ },
+ "00635b70": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerFound",
+  "proto": "void __fastcall OnServerFound(void * server)"
+ },
  "00635ba0": {
   "module": "main_menu",
   "name": "C_MainMenu::OnBrowserTick",
   "proto": "bool __thiscall OnBrowserTick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00635f10": {
+  "module": "main_menu",
+  "name": "C_MainMenu::AddServerLine",
+  "proto": "void __thiscall AddServerLine(C_MainMenu *this, void * server, int unused)"
  },
  "006360c0": {
   "module": "main_menu",
@@ -38099,6 +38124,11 @@
   "module": "campaign_screens",
   "name": "C_NetGame::Host"
  },
+ "00723610": {
+  "module": "main_menu",
+  "name": "C_NetGame::PollSearch",
+  "proto": "void __fastcall PollSearch(void *this)"
+ },
  "00724070": {
   "module": "main_menu",
   "name": "C_NetGame::PingServer",
@@ -38125,6 +38155,11 @@
   "module": "game",
   "name": "OtherTeam",
   "proto": "int __fastcall OtherTeam(int team)"
+ },
+ "007252c0": {
+  "module": "main_menu",
+  "name": "S_ServerEntry::Reset",
+  "proto": "void __fastcall Reset(void *this)"
  },
  "00725e90": {
   "module": "hud",
@@ -43587,6 +43622,12 @@
   "data": true,
   "module": "main_menu",
   "name": "g_connectStyle",
+  "type": "int"
+ },
+ "0083fe08": {
+  "data": true,
+  "module": "main_menu",
+  "name": "g_netPollTime",
   "type": "int"
  },
  "00840668": {

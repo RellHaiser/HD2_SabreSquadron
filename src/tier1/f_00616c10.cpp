@@ -88,31 +88,6 @@ uint32_t C_XmlNode__dtor_C_XmlNode(uint32_t *param_1, ...)
 
 
 #endif
-// 0x00619ca0
-uint32_t FUN_00619ca0(int param_1, ...)
-{
-  int iVar1;
-  if (*(int *)(param_1 + 4) == 1) {
-    if ((*(int *)(param_1 + 0xc) != 0) &&
-       (iVar1 = *(int *)(param_1 + 0x10) - *(int *)(param_1 + 0xc) >> 2, iVar1 != 0)) {
-      do {
-        iVar1--;
-        FUN_007252c0(*(int *)(*(int *)(param_1 + 0xc) + iVar1 * 4));
-      } while (iVar1 != 0);
-      return 0;
-    }
-  }
-  else if (*(int *)(param_1 + 0x1c) != 0) {
-    iVar1 = *(int *)(param_1 + 0x20) - *(int *)(param_1 + 0x1c) >> 2;
-    while (iVar1 != 0) {
-      iVar1--;
-      FUN_007252c0(*(int *)(*(int *)(param_1 + 0x1c) + iVar1 * 4));
-    }
-  }
-  return 0;
-}
-
-
 // 0x00619d00
 uint32_t FUN_00619d00(int param_1, ...)
 {

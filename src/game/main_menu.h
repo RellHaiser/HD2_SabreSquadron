@@ -53,6 +53,8 @@ extern int g_gameInfoStyles[GAME_INFO_STYLES];      // 0x008aca88
 extern S_ServerStatus *g_gameInfoStatus;            // 0x008acab8
 // The connect screen's console style (made by its description; never released).
 extern int g_connectStyle;                          // 0x0083fdd0
+// The browser's time since the network was last polled (ms; part 9h-xx).
+extern int g_netPollTime;                           // 0x0083fe08
 
 class C_MainMenu : public C_MenuState {
 public:
@@ -191,9 +193,23 @@ protected:
     // Shown: no single mission. True.
     static bool OnBrowserShown(void *menu, void *argument, C_Control *control, uint32_t notification,
                                uint32_t value);         // 0x006356d0
-    // The screen's tick (part 9h-xx).
+    // The screen's tick (part 9h-xx; other states: nothing): the list shown again (emptied, its lines from the
+    // list shown, idle; no more); pinging the reachable ones: those answering listed once; else the servers
+    // found listed (ListFoundServers). A search with no answer for 15 s stopped (its button's), the list
+    // sorted every second, the network polled every 10 ms. True.
     static bool OnBrowserTick(void *menu, void *argument, C_Control *control, uint32_t notification,
                               uint32_t value);          // 0x00635ba0
+    // A server's line added (the servers found filtered: unreachable, the ping, the game type, empty, full,
+    // dedicated, a password, the version).
+    void AddServerLine(S_ServerEntry *server, int unused = 0);   // 0x00635f10
+    // A server found kept (under the lock).
+    void AddFoundServer(S_ServerEntry *server);         // 0x00635990
+    // The searches' and pings' answers (the net thread's): kept while the main menu runs and no password was
+    // asked.
+    static void __fastcall OnServerFound(S_ServerEntry *server);   // 0x00635b70
+    // The servers found taken (the last first; LAN games: one an address, the others dropped unless listed):
+    // searching, the new ones listed; pinging, the listed ones answering shown again.
+    void ListFoundServers();                            // 0x00635710 (__fastcall)
     // The arrows (the direction toggled) or a header (its key; already the key: the arrows flipped). No
     // control, another: false.
     static bool OnServerSort(void *menu, void *argument, C_Control *control, uint32_t notification,
@@ -210,8 +226,13 @@ protected:
     // The online line: the list's entries / the first list's servers, their players. True.
     static bool OnServerCountChanged(void *menu, void *argument, C_Control *control, uint32_t notification,
                                      uint32_t value);   // 0x006364b0
-    // The browser's buttons (part 9h-xx): restore the list, refresh it, a favourite added / removed, the
-    // favourites.
+    // The browser's buttons (part 9h-xx). "REFRESH LIST": idle: the list shown pinged (its servers not answered
+    // yet; with the unreachable ones hidden, emptied), the buttons off, "STOP"; pinging: stopped (sorted, its
+    // text, the LAN's button on with the servers found). "UPDATE LIST": idle: the LAN searched (the servers
+    // dropped, the list emptied); searching: stopped (likewise; the ping's button on with Internet games). A
+    // favourite (none picked: false): the servers found: copied to the favourites; the favourites: removed,
+    // the list again. The favourites: the other list shown (the searches stopped, the buttons, the texts), the
+    // list again. True.
     static bool OnRestoreList(void *menu, void *argument, C_Control *control, uint32_t notification,
                               uint32_t value);          // 0x00634f90
     static bool OnRefreshList(void *menu, void *argument, C_Control *control, uint32_t notification,
@@ -406,8 +427,8 @@ protected:
     int m_connectState = 5;                             // +0x1F4 the connect screen's state (0: starting)
     bool m_singleMissions = false;                      // +0x1F8 the missions screen shows the single missions
     int m_connectWait = 0;                              // +0x1FC the connect screen's wait (ms)
-    int unknown200 = 0;                                 // +0x200
-    int unknown204 = 0;                                 // +0x204
+    int m_searchTime = 0;                               // +0x200 the browser's search: since the last answer (ms)
+    int m_sortTime = 0;                                 // +0x204 the browser's list: since sorted (ms)
     int m_mission = -1;                                 // +0x208 the missions screen's pick (through the campaigns)
     int m_progress = -1;                                // +0x20C the missions shown up to (100: all)
     bool m_operationPicked = false;                     // +0x210 an operation's line picked (a mission's clears it)

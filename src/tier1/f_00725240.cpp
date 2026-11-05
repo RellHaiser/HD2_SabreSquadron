@@ -43,32 +43,8 @@ uint32_t FUN_00725290(uint32_t *param_1, ...)
 // 0x007252b0
 int FUN_007252b0(int param_1, ...)
 {
-  FUN_007252c0(param_1);
+  S_ServerEntry__Reset((void *)param_1);
   return param_1;
-}
-
-
-// 0x007252c0
-uint32_t FUN_007252c0(int param_1, ...)
-{
-  char cVar1;
-  char *pcVar2;
-  pcVar2 = &DAT_0083ff4c;
-  do {
-    cVar1 = *pcVar2;
-    pcVar2[param_1 - 0x83ff19] = cVar1;
-    pcVar2++;
-  } while (cVar1 != '\0');
-  *(uint32_t *)(param_1 + 0x78) = 0;
-  *(uint32_t *)(param_1 + 0x7c) = 0;
-  *(uint8_t *)(param_1 + 0x80) = 0;
-  *(uint8_t *)(param_1 + 0x81) = 0;
-  *(uint8_t *)(param_1 + 0x82) = 0;
-  *(uint8_t *)(param_1 + 0x88) = 0;
-  *(uint8_t *)(param_1 + 0x98) = 0;
-  *(uint32_t *)(param_1 + 0x70) = 4;
-  *(uint32_t *)(param_1 + 0x74) = 9999;
-  return 0;
 }
 
 

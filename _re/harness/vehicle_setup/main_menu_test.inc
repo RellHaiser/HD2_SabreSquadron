@@ -201,13 +201,9 @@ int C_NetGame::QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *), S
     g_giCallback = callback;
     return 1;
 }
-// (Part 9h-xix: the browser's later callbacks: logged; a ping: logged, its callback kept; a control answering every
-// message with its values, logged.)
-MM_CALLBACK(OnBrowserTick)
-MM_CALLBACK(OnRestoreList)
-MM_CALLBACK(OnRefreshList)
-MM_CALLBACK(OnFavoriteToggle)
-MM_CALLBACK(OnFavorites)
+// (Part 9h-xix: a ping: logged, its callback kept; a control answering every message with its values, logged. Part
+// 9h-xx: the search's poll logged.)
+void C_NetGame::PollSearch() { GfLog("net poll"); }
 void(__fastcall *g_bwPing)(S_ServerEntry *);
 void C_NetGame::PingServer(void(__fastcall *callback)(S_ServerEntry *), S_ServerEntry *server)
 {
@@ -324,7 +320,9 @@ struct S_MainMenuResults {
          csRules = true, csMapList = true, csOptions = true, csStyle = true, csOption = true,
          csMoves = true, csDouble = true, csDragStart = true, csDragMove = true, csDrop = true,
          hsSession = true, cnDescribe = true, cnHidden = true, cnTick = true, cnMessage = true,
-         bwDescribe = true, bwList = true, bwShown = true, bwSort = true, bwPicked = true, bwJoin = true, bwCount = true;
+         bwDescribe = true, bwList = true, bwShown = true, bwSort = true, bwPicked = true, bwJoin = true, bwCount = true,
+         bxLine = true, bxFound = true, bxList = true, bxTick = true, bxRestore = true, bxRefresh = true,
+         bxFavorite = true, bxFavorites = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -3507,6 +3505,400 @@ void MainMenuTest(I3D_scene *scene)
         g_gfLog.clear();
     }
 
+    // --- (part 9h-xx) the browser's servers: their lines (filtered), found, listed; the tick; the searches; the
+    // favourites ---
+    {
+        C_MainMenu m;
+        const auto Is = [](const std::string &got, const std::string &want) {
+            if (got != want)
+                std::printf("BROWSER2 %s\nBROWSER2 expected %s\n", got.c_str(), want.c_str());
+            return got == want;
+        };
+        InitializeCriticalSection(&m.m_foundLock);
+        // (The servers' addresses printed, not names; the deletes watched.)
+        const auto oldNames = g_csNames;
+        g_csNames.clear();
+        g_deleteHook = &MmDeleteHook;
+        C_MpMenuSettings settings;
+        for (auto &group : settings.m_setup.maps) {
+            for (C_MpMap *map : group.maps)
+                delete map;
+            group.maps.clear();
+        }
+        m.m_mpSettings = &settings;
+        struct C_BxScreen : C_MsScreen {
+            C_BxScreen() : C_MsScreen(nullptr, "bxscreen", 8u << 26) {}
+            bool HandleMessage(S_ControlMessage *message) override
+            {
+                if (C_Control *control = FindControl(message->target, false))
+                    return control->HandleMessage(message);
+                return C_MsScreen::HandleMessage(message);
+            }
+        } browser;
+        C_BwControl list(0x20900000, &browser, 0);
+        browser.m_children = {&list};
+        m.m_screens.assign(9, nullptr);
+        m.m_screens[8] = &browser;
+        const int oldListing = g_mpSettings->unknown174;
+        const auto line = [](const S_ServerEntry *server) {
+            return CmText("20900000 1000067 0 %x; ", static_cast<uint32_t>(reinterpret_cast<uintptr_t>(server)));
+        };
+        const auto entry = [](uint32_t address, uint32_t ping) {
+            S_ServerEntry server = {};
+            server.address = address;
+            server.ping = ping;
+            server.maxPlayers = 8;
+            server.players = 4;
+            server.gameType = 1;
+            server.dedicated = true;
+            server.versionMajor = g_versionMajor;
+            server.versionMinor = g_versionMinor;
+            return server;
+        };
+        CsQueue();
+        {
+            // A line: the servers found filtered (each filter alone), the favourites not.
+            bool ok = true;
+            S_ServerEntry s = entry(1, 100);
+            S_ServerFilter &f = settings.m_filter;
+            const S_ServerFilter none = f;
+            const auto posted = [&]() {
+                m.AddServerLine(&s);
+                return CsQueue() == line(&s);
+            };
+            const auto dropped = [&]() {
+                m.AddServerLine(&s);
+                return CsQueue() == "";
+            };
+            ok &= posted();
+            f.hideUnreachable = true;
+            s.ping = 9999;
+            ok &= dropped();
+            s.ping = 9998;
+            ok &= posted();
+            f = none;
+            s.ping = 9999;
+            ok &= posted();
+            f.maxPing = 100;
+            s.ping = 100;
+            ok &= posted();
+            s.ping = 101;
+            ok &= dropped();
+            f.maxPing = 0;
+            ok &= posted();
+            f = none;
+            f.gameType = 2;
+            ok &= dropped();
+            f.gameType = 1;
+            ok &= posted();
+            f = none;
+            f.hideEmpty = true;
+            ok &= posted();
+            s.players = 0;
+            ok &= dropped();
+            f = none;
+            f.hideFull = true;
+            s.players = 8;
+            ok &= dropped();
+            s.players = 7;
+            ok &= posted();
+            f = none;
+            f.dedicatedOnly = true;
+            ok &= posted();
+            s.dedicated = false;
+            ok &= dropped();
+            f = none;
+            f.noPassword = true;
+            ok &= posted();
+            s.password = true;
+            ok &= dropped();
+            f = none;
+            f.sameVersion = true;
+            ok &= posted();
+            s.versionMajor = g_versionMajor + 1;
+            ok &= dropped();
+            s.versionMajor = g_versionMajor;
+            s.versionMinor = g_versionMinor + 1;
+            ok &= dropped();
+            // The favourites: everything filtered, still listed.
+            f.hideUnreachable = f.hideEmpty = f.dedicatedOnly = f.noPassword = true;
+            f.maxPing = 1;
+            f.gameType = 3;
+            s.players = 0;
+            s.ping = 9999;
+            settings.m_listKind = 2;
+            ok &= posted();
+            settings.m_listKind = 1;
+            f = none;
+            WM(r.bxLine, ok);
+        }
+        {
+            // Found (the net thread's): kept while the main menu runs and no password was asked.
+            bool ok = true;
+            C_MenuState *const oldState = g_menuState;
+            const bool oldSet = g_sessionPasswordSet;
+            S_ServerEntry s = {};
+            g_menuState = &m;
+            g_sessionPasswordSet = false;
+            C_MainMenu::OnServerFound(&s);
+            ok &= m.m_foundServers.size() == 1 && m.m_foundServers[0] == &s;
+            g_sessionPasswordSet = true;
+            C_MainMenu::OnServerFound(&s);
+            g_sessionPasswordSet = false;
+            C_GameState plain;
+            g_menuState = reinterpret_cast<C_MenuState *>(&plain);
+            C_MainMenu::OnServerFound(&s);
+            g_menuState = nullptr;
+            C_MainMenu::OnServerFound(&s);
+            ok &= m.m_foundServers.size() == 1;
+            m.AddFoundServer(&s);
+            ok &= m.m_foundServers.size() == 2 && CsQueue() == "";
+            m.m_foundServers.clear();
+            g_menuState = oldState;
+            g_sessionPasswordSet = oldSet;
+            WM(r.bxFound, ok);
+        }
+        {
+            // Listed: searching a LAN (an address's other answers dropped unless listed; the new ones listed);
+            // pinging (a listed one answering: the list shown again).
+            bool ok = true;
+            S_ServerEntry known = entry(1, 10), fresh = entry(2, 20), stranger = entry(3, 30);
+            auto *twin = new S_ServerEntry(entry(1, 40));
+            g_mmWatch = {twin};
+            g_mmDeleted.clear();
+            settings.m_servers = {&known};
+            g_mpSettings->unknown174 = 0;
+            m.m_step = 5;
+            m.m_searchTime = 500;
+            m.m_foundServers = {twin, &fresh, &known};
+            m.ListFoundServers();
+            ok &= m.m_foundServers.empty() && g_mmDeleted == std::vector<void *>({twin}) &&
+                  settings.m_servers == std::vector<S_ServerEntry *>({&known, &fresh}) && m.m_searchTime == 0 &&
+                  Is(CsQueue(), line(&fresh));
+            g_mmWatch.clear();
+            g_mmDeleted.clear();
+            // Internet games: no address check; pinging: listed ones answering.
+            g_mpSettings->unknown174 = 1;
+            m.m_step = 4;
+            m.m_searchTime = 500;
+            m.m_foundServers = {&stranger, &fresh};
+            m.ListFoundServers();
+            ok &= m.m_foundServers.empty() && m.m_searchTime == 500 && settings.m_servers.size() == 2 &&
+                  Is(CsQueue(), "20900000 200002c 0 0; ");
+            m.m_foundServers = {&stranger};
+            m.ListFoundServers();
+            ok &= CsQueue() == "";
+            // Searching the Internet's: a listed one not again; an address twice (not LAN) listed.
+            m.m_step = 5;
+            S_ServerEntry twin2 = entry(1, 50);
+            m.m_foundServers = {&known, &twin2};
+            m.ListFoundServers();
+            ok &= settings.m_servers.size() == 3 && settings.m_servers[2] == &twin2 && Is(CsQueue(), line(&twin2));
+            settings.m_servers.clear();
+            m.m_step = 0;
+            WM(r.bxList, ok);
+        }
+        {
+            // The tick: other states nothing; the list again; the reachable ones listed once; the searches stopped
+            // after 15 s quiet; sorted every second; the network polled every 10 ms.
+            bool ok = true;
+            S_ServerEntry a = entry(1, 100), b = entry(2, 9999), c = entry(3, 50);
+            settings.m_servers = {&a, &b, &c};
+            g_gfLog.clear();
+            g_netPollTime = 5;
+            m.m_step = 0;
+            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 30) && CsQueue() == "" && g_gfLog.empty() &&
+                  g_netPollTime == 5;
+            m.m_step = 6;
+            m.m_searchTime = 3;
+            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 30) && m.m_step == 0 && m.m_searchTime == 3 &&
+                  Is(CsQueue(), line(&a) + line(&b) + line(&c)) && MsLogIs({"bw 20900000 2000018", "bw 20900000 200002c"}, g_gfLog) &&
+                  g_netPollTime == 5;
+            // Pinging the reachable: a listed (c already), the search's time again, the list refreshed.
+            c.listed = true;
+            m.m_step = 9;
+            m.m_searchTime = 700;
+            m.m_sortTime = 0;
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 4) && a.listed && !b.listed && m.m_step == 9 &&
+                  m.m_searchTime == 4 && m.m_sortTime == 4 && g_netPollTime == 9 && Is(CsQueue(), line(&a)) &&
+                  MsLogIs({"bw 20900000 200002c"}, g_gfLog);
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 2) && m.m_searchTime == 6 && CsQueue() == "" &&
+                  MsLogIs({"net poll"}, g_gfLog) && g_netPollTime == 0;
+            // Nothing new with some time: no refresh.
+            b.ping = 10;
+            b.listed = true;
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 10) && m.m_searchTime == 16 && CsQueue() == "" &&
+                  g_gfLog.empty() && g_netPollTime == 10;
+            // 15 s quiet: stopped (pinging: its button's; searching: the LAN's); sorted every second.
+            g_mpSettings->unknown174 = 0;
+            m.m_searchTime = 14990;
+            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 10) && m.m_searchTime == 15000 && m.m_step == 9 &&
+                  CsQueue() == "";
+            g_netPollTime = 0;
+            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 1) && m.m_step == 0 &&
+                  Is(CsQueue(), "0 2000028 0 0; 20900000 2000079 0 0; 20a00000 1000015 d 915; 20b00000 1000002 0 0; ");
+            m.m_step = 4;
+            m.m_searchTime = 15000;
+            m.m_sortTime = 1000;
+            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 1) && m.m_step == 0 && m.m_sortTime == 0 &&
+                  Is(CsQueue(), "0 2000028 0 0; 20900000 2000079 0 0; 20a00000 1000015 d 915; 20b00000 1000002 0 0; "
+                                "20900000 2000079 0 0; ");
+            m.m_step = 5;
+            m.m_searchTime = 15000;
+            m.m_sortTime = 998;
+            ok &= C_MainMenu::OnBrowserTick(&m, nullptr, nullptr, 0, 1) && m.m_step == 0 && m.m_sortTime == 999 &&
+                  Is(CsQueue(), "0 2000028 0 0; 20900000 2000079 0 0; 20b00000 1000015 d 917; ");
+            settings.m_servers.clear();
+            g_netPollTime = 15;
+            WM(r.bxTick, ok);
+        }
+        {
+            // "REFRESH LIST": started (the list's servers reset; the unreachable hidden: emptied), stopped.
+            bool ok = true;
+            S_ServerEntry a = entry(1, 100), s = entry(2, 20);
+            std::strcpy(a.map, "Map");
+            a.listed = true;
+            settings.m_servers = {&a};
+            m.m_server = &s;
+            m.m_step = 0;
+            m.m_searchTime = 77;
+            const std::string start = "20e00000 1000001 0 0; 21000000 1000001 0 0; 21600000 1000001 0 0; 20900000 200002c 0 0; "
+                                      "20b00000 1000001 0 0; 20a00000 1000015 d 916; 0 2000098 0 0; ";
+            ok &= C_MainMenu::OnRestoreList(&m, nullptr, nullptr, 0, 0) && m.m_step == 4 && !m.m_server &&
+                  m.m_searchTime == 0 && Is(CsQueue(), start) && !a.listed && a.ping == 9999 && a.gameType == 4 &&
+                  a.players == 0 && a.maxPlayers == 0 && !a.dedicated && std::strcmp(a.map, " ??? ") == 0 &&
+                  a.address == 1;
+            ok &= C_MainMenu::OnRestoreList(&m, nullptr, nullptr, 0, 0) && m.m_step == 0 &&
+                  Is(CsQueue(), "0 2000028 0 0; 20900000 2000079 0 0; 20a00000 1000015 d 915; 20b00000 1000002 0 0; ");
+            settings.m_filter.hideUnreachable = true;
+            ok &= C_MainMenu::OnRestoreList(&m, nullptr, nullptr, 0, 0) && m.m_step == 9 &&
+                  Is(CsQueue(), "20900000 2000018 0 0; " + start);
+            settings.m_listKind = 2;
+            ok &= C_MainMenu::OnRestoreList(&m, nullptr, nullptr, 0, 0) && m.m_step == 0 &&
+                  Is(CsQueue(), "0 2000028 0 0; 20900000 2000079 0 0; 20a00000 1000015 d 915; ");
+            settings.m_filter.hideUnreachable = false;
+            // The favourites' servers reset with them shown.
+            S_ServerEntry f = entry(5, 5);
+            settings.m_servers2 = {&f};
+            a.ping = 1;
+            ok &= C_MainMenu::OnRestoreList(&m, nullptr, nullptr, 0, 0) && f.ping == 9999 && a.ping == 1;
+            CsQueue();
+            m.m_step = 5;
+            ok &= C_MainMenu::OnRestoreList(&m, nullptr, nullptr, 0, 0) && m.m_step == 5 && CsQueue() == "";
+            settings.m_listKind = 1;
+            settings.m_servers.clear();
+            settings.m_servers2.clear();
+            m.m_step = 0;
+            WM(r.bxRestore, ok);
+        }
+        {
+            // "UPDATE LIST": started (the servers found and listed dropped), stopped (Internet games: the ping's on).
+            bool ok = true;
+            auto *found = new S_ServerEntry(entry(1, 1)), *listed = new S_ServerEntry(entry(2, 2));
+            S_ServerEntry s = entry(3, 3);
+            g_mmWatch = {found, listed};
+            g_mmDeleted.clear();
+            m.m_foundServers = {found};
+            settings.m_servers = {listed};
+            m.m_server = &s;
+            m.m_searchTime = 9;
+            ok &= C_MainMenu::OnRefreshList(&m, nullptr, nullptr, 0, 0) && m.m_step == 5 && !m.m_server &&
+                  m.m_searchTime == 0 && m.m_foundServers.empty() && settings.m_servers.empty() &&
+                  g_mmDeleted == std::vector<void *>({found, listed}) &&
+                  Is(CsQueue(), "20e00000 1000001 0 0; 21000000 1000001 0 0; 21600000 1000001 0 0; 20900000 2000018 0 0; "
+                                "20a00000 1000001 0 0; 20b00000 1000015 d 918; 0 2000027 0 0; ");
+            g_mmWatch.clear();
+            g_mmDeleted.clear();
+            g_mpSettings->unknown174 = 1;
+            ok &= C_MainMenu::OnRefreshList(&m, nullptr, nullptr, 0, 0) && m.m_step == 0 &&
+                  Is(CsQueue(), "0 2000028 0 0; 20900000 2000079 0 0; 20b00000 1000015 d 917; 20a00000 1000002 0 0; ");
+            m.m_step = 5;
+            g_mpSettings->unknown174 = 2;
+            ok &= C_MainMenu::OnRefreshList(&m, nullptr, nullptr, 0, 0) && m.m_step == 0 &&
+                  Is(CsQueue(), "0 2000028 0 0; 20900000 2000079 0 0; 20b00000 1000015 d 917; ");
+            m.m_step = 4;
+            ok &= C_MainMenu::OnRefreshList(&m, nullptr, nullptr, 0, 0) && m.m_step == 4 && CsQueue() == "";
+            m.m_step = 0;
+            WM(r.bxRefresh, ok);
+        }
+        {
+            // A favourite: none picked: false; the servers found: copied; the favourites: removed, the list again.
+            bool ok = true;
+            m.m_server = nullptr;
+            ok &= !C_MainMenu::OnFavoriteToggle(&m, nullptr, nullptr, 0, 0) && CsQueue() == "";
+            S_ServerEntry s = entry(7, 70);
+            std::strcpy(s.name, "Fav");
+            s.listed = true;
+            m.m_server = &s;
+            ok &= C_MainMenu::OnFavoriteToggle(&m, nullptr, nullptr, 0, 0) && m.m_step == 0 && CsQueue() == "" &&
+                  settings.m_servers2.size() == 1 && settings.m_servers2[0] != &s &&
+                  std::memcmp(settings.m_servers2[0], &s, sizeof s) == 0 && settings.m_servers.empty();
+            S_ServerEntry *copy = settings.m_servers2[0];
+            S_ServerEntry other = entry(8, 80);
+            settings.m_servers2.push_back(&other);
+            settings.m_listKind = 2;
+            g_mmWatch = {copy};
+            g_mmDeleted.clear();
+            m.m_server = copy;
+            ok &= C_MainMenu::OnFavoriteToggle(&m, nullptr, nullptr, 0, 0) && m.m_step == 6 && !m.m_server &&
+                  g_mmDeleted == std::vector<void *>({copy}) &&
+                  settings.m_servers2 == std::vector<S_ServerEntry *>({&other}) && Is(CsQueue(), "21600000 1000001 0 0; ");
+            g_mmWatch.clear();
+            g_mmDeleted.clear();
+            // Not among them: nothing removed (still picked).
+            m.m_step = 0;
+            m.m_server = &s;
+            ok &= C_MainMenu::OnFavoriteToggle(&m, nullptr, nullptr, 0, 0) && m.m_step == 6 && m.m_server == &s &&
+                  settings.m_servers2.size() == 1 && Is(CsQueue(), "21600000 1000001 0 0; ");
+            m.m_step = 0;
+            settings.m_listKind = 0;
+            ok &= C_MainMenu::OnFavoriteToggle(&m, nullptr, nullptr, 0, 0) && m.m_step == 0 && CsQueue() == "" &&
+                  settings.m_servers2.size() == 1;
+            settings.m_listKind = 1;
+            settings.m_servers2.clear();
+            WM(r.bxFavorite, ok);
+        }
+        {
+            // The favourites shown / the servers found again: nothing picked, the searches stopped, the buttons, the
+            // texts, the list again; another kind: nothing.
+            bool ok = true;
+            S_ServerEntry s = entry(1, 1);
+            m.m_server = &s;
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnFavorites(&m, nullptr, nullptr, 0, 0) && settings.m_listKind == 2 && !m.m_server &&
+                  m.m_step == 6 && std::find(g_gfLog.begin(), g_gfLog.end(), "network message 2000028") != g_gfLog.end() &&
+                  Is(CsQueue(), "20b00000 1000001 0 0; 20d00000 1000001 0 0; 21600000 1000001 0 0; 21700000 1000015 d 4e85; "
+                                "21600000 1000015 d 4e87; ");
+            m.m_server = &s;
+            m.m_step = 0;
+            ok &= C_MainMenu::OnFavorites(&m, nullptr, nullptr, 0, 0) && settings.m_listKind == 1 && !m.m_server &&
+                  m.m_step == 6 &&
+                  Is(CsQueue(), "20b00000 1000002 0 0; 20d00000 1000002 0 0; 21600000 1000001 0 0; 21700000 1000015 d 4e84; "
+                                "21600000 1000015 d 4e86; ");
+            m.m_server = &s;
+            m.m_step = 0;
+            settings.m_listKind = 3;
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnFavorites(&m, nullptr, nullptr, 0, 0) && settings.m_listKind == 3 && m.m_server == &s &&
+                  m.m_step == 0 && CsQueue() == "" && g_gfLog.empty();
+            settings.m_listKind = 1;
+            m.m_server = nullptr;
+            WM(r.bxFavorites, ok);
+        }
+        g_mpSettings->unknown174 = oldListing;
+        m.m_mpSettings = nullptr;
+        browser.m_children.clear();
+        m.m_screens.clear();
+        DeleteCriticalSection(&m.m_foundLock);
+        g_deleteHook = nullptr;
+        g_csNames = oldNames;
+        g_gfLog.clear();
+        CsQueue();
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -3604,7 +3996,8 @@ void MainMenuTest(I3D_scene *scene)
                 " csRules %d csMapList %d csOptions %d csStyle %d csOption %d"
                 " csMoves %d csDouble %d csDragStart %d csDragMove %d csDrop %d"
                 " hsSession %d cnDescribe %d cnHidden %d cnTick %d cnMessage %d"
-                " bwDescribe %d bwList %d bwShown %d bwSort %d bwPicked %d bwJoin %d bwCount %d\n",
+                " bwDescribe %d bwList %d bwShown %d bwSort %d bwPicked %d bwJoin %d bwCount %d"
+                " bxLine %d bxFound %d bxList %d bxTick %d bxRestore %d bxRefresh %d bxFavorite %d bxFavorites %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
@@ -3616,5 +4009,6 @@ void MainMenuTest(I3D_scene *scene)
                 r.csRules, r.csMapList, r.csOptions, r.csStyle, r.csOption,
                 r.csMoves, r.csDouble, r.csDragStart, r.csDragMove, r.csDrop,
                 r.hsSession, r.cnDescribe, r.cnHidden, r.cnTick, r.cnMessage,
-                r.bwDescribe, r.bwList, r.bwShown, r.bwSort, r.bwPicked, r.bwJoin, r.bwCount);
+                r.bwDescribe, r.bwList, r.bwShown, r.bwSort, r.bwPicked, r.bwJoin, r.bwCount,
+                r.bxLine, r.bxFound, r.bxList, r.bxTick, r.bxRestore, r.bxRefresh, r.bxFavorite, r.bxFavorites);
 }

@@ -8532,6 +8532,25 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     9h-xxi ports it). ret_audit --src: 52.
   - Stats: 9,246 of 12,306 functions by hand (85.2 % by size).
 
+  PART 9h-xx DONE (2026-11-04): the main menu's browser: its searches, the servers found, the favourites
+  (game/main_menu.cpp, game/mp_game_setup.cpp).
+  - OnBrowserTick 0x00635ba0 (states in m_step: 4 pinging the list, 9 pinging with the unreachable hidden, 5 searching
+    the LAN, 6 the list shown again): 6: emptied, every line again, idle; 9: the servers answering listed once
+    (S_ServerEntry::listed +0x98: the entry is 0x9C bytes); 4 / 5: ListFoundServers 0x00635710; 15 s without an
+    answer (m_searchTime +0x200) stops the search, sorted every second (m_sortTime +0x204), the network polled every
+    10 ms (g_netPollTime 0x0083fe08, C_NetGame::PollSearch 0x00723610 declared).
+  - AddServerLine 0x00635f10 (the found list filtered by S_ServerFilter), AddFoundServer 0x00635990, OnServerFound
+    0x00635b70 (the net thread's callback), ListFoundServers (LAN: one server an address).
+  - OnRestoreList 0x00634f90 ("REFRESH LIST" / "STOP": the list's servers reset (C_MpMenuSettings::ResetServers
+    0x00619ca0, S_ServerEntry::Reset 0x007252c0 from the net module), MAIN_MSG_PING_LIST 0x2000098), OnRefreshList
+    0x00635360 ("UPDATE LIST" / "STOP": the LAN searched, MAIN_MSG_SEARCH_LAN 0x2000027), OnFavoriteToggle 0x00634950
+    (copied to / removed from the favourites), OnFavorites 0x00634b30 (the two lists switched).
+  - Harness: bxLine, bxFound, bxList, bxTick, bxRestore, bxRefresh, bxFavorite, bxFavorites. All 15 factory checkers
+    in both orders; mp_setup 54 of 54.
+  - Mutations: mutations/mutate_9h20.py: 217: 201 killed, 16 not building.
+  - Build: MSVC clean. Tier 1: 295 errors in 55 files. ret_audit --src: 52.
+  - Stats: 9,257 of 12,306 functions by hand (85.3 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
