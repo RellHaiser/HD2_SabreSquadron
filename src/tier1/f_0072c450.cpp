@@ -71,7 +71,7 @@ uint32_t FUN_0072c540(void *_this,uint32_t *param_1,uint32_t param_2,int param_3
   uint32_t uVar5;
   uint32_t *puVar6;
   int *piVar7;
-  puVar2 = FUN_00749a70(&DAT_00983150,param_2);
+  puVar2 = C_NetPool__AllocBuffer(&g_netPool,param_2);
   lVar3 = clock();
   puVar6 = puVar2;
   for (uVar5 = param_2 >> 2; uVar5 != 0; uVar5 = uVar5 - 1) {
@@ -117,7 +117,7 @@ uint32_t FUN_0072c600(void *_this,uint32_t *param_1,uint32_t param_2,int param_3
   uint32_t uVar5;
   uint32_t *puVar6;
   int *piVar7;
-  puVar2 = FUN_00749a70(&DAT_00983150,param_2);
+  puVar2 = C_NetPool__AllocBuffer(&g_netPool,param_2);
   lVar3 = clock();
   puVar6 = puVar2;
   for (uVar5 = param_2 >> 2; uVar5 != 0; uVar5 = uVar5 - 1) {
@@ -169,10 +169,10 @@ uint32_t FUN_0072c730(uint32_t param_1,uint32_t *param_2,uint32_t param_3,int pa
 uint32_t C_NetGame__ReceiveMessages(void *_this,uint32_t param_1,char param_2, ...)
 {
   int iVar1;
-  int iVar2;
-  uint8_t *puVar3;
-  C_game *pCVar4;
-  uint32_t uVar5;
+  int size;
+  void *buffer;
+  C_game *pCVar2;
+  uint32_t uVar3;
   C_GrowingBitStream *this_00;
   void *this_01;
   int local_98;
@@ -201,20 +201,20 @@ uint32_t C_NetGame__ReceiveMessages(void *_this,uint32_t param_1,char param_2, .
     }
     iVar1 = **(int **)((int)this_01 + 4);
     local_1c = *(uint32_t *)(iVar1 + 8);
-    uVar5 = *(uint32_t *)(iVar1 + 0xc);
-    iVar2 = *(int *)(iVar1 + 0x10);
-    puVar3 = *(uint8_t **)(iVar1 + 0x14);
+    uVar3 = *(uint32_t *)(iVar1 + 0xc);
+    size = *(int *)(iVar1 + 0x10);
+    buffer = *(void **)(iVar1 + 0x14);
     FUN_0072d5f0(this_01,&local_98,(int *)**(int **)((int)this_01 + 4));
     LeaveCriticalSection((LPCRITICAL_SECTION)((int)_this + 0x430));
-    if ((uVar5 & 0x20) == 0) {
+    if ((uVar3 & 0x20) == 0) {
       C_NetMessage__C_NetMessage((C_NetMessage *)local_94);
-      local_94[0].m_010 = (void *)(iVar2 * 8);
+      local_94[0].m_010 = (void *)(size * 8);
       local_4 = 1;
-      local_94[0].m_004 = puVar3;
+      local_94[0].m_004 = buffer;
       if ((void *)(local_94[0].m_008 * 0x20 + local_94[0].m_00c) < local_94[0].m_010) {
         do {
-          uVar5 = FUN_0072c480(local_94,param_2 == '\0');
-          if ((char)uVar5 == '\0') break;
+          uVar3 = FUN_0072c480(local_94,param_2 == '\0');
+          if ((char)uVar3 == '\0') break;
         } while ((void *)(local_94[0].m_008 * 0x20 + local_94[0].m_00c) < local_94[0].m_010);
       }
       local_94[0].vtable = (C_GrowingBitStream_vtbl *)&PTR_00816378;
@@ -224,21 +224,21 @@ LAB_0072c927:
       C_GrowingBitStream__dtor_C_GrowingBitStream(this_00);
     }
     else {
-      pCVar4 = GetGame();
-      if ((((pCVar4 != 0) && (*(int *)((int)_this + 0x14) != 0)) &&
-          (puVar3 != 0)) && (iVar2 != 0)) {
+      pCVar2 = GetGame();
+      if ((((pCVar2 != 0) && (*(int *)((int)_this + 0x14) != 0)) &&
+          (buffer != 0)) && (size != 0)) {
         C_NetMessage__C_NetMessage((C_NetMessage *)local_58);
-        local_58[0].m_010 = (void *)(iVar2 * 8);
+        local_58[0].m_010 = (void *)(size * 8);
         local_4 = 0;
-        local_58[0].m_004 = puVar3;
+        local_58[0].m_004 = buffer;
         (**(code **)(**(int **)((int)_this + 0x14) + 0x18))
-                  (local_58,1,CONCAT31((uint3)(uVar5 >> 9),(char)(uVar5 >> 1)) & 0xffffff01);
+                  (local_58,1,CONCAT31((uint3)(uVar3 >> 9),(char)(uVar3 >> 1)) & 0xffffff01);
         local_58[0].vtable = (C_GrowingBitStream_vtbl *)&PTR_00816378;
         this_00 = local_58;
         goto LAB_0072c927;
       }
     }
-    FUN_00749b20(&DAT_00983150,puVar3,iVar2);
+    C_NetPool__FreeBuffer(&g_netPool,buffer,size);
   } while( true );
   return 0;
 }

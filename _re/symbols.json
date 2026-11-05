@@ -39413,21 +39413,190 @@
   "module": "console",
   "name": "std_list_charptr_ConstructValue"
  },
+ "00745330": {
+  "module": "net_replication",
+  "name": "C_NetChannel::C_NetChannel",
+  "proto": "void * __thiscall C_NetChannel(void *this)"
+ },
  "007453c0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7453c0"
+  "module": "net_replication",
+  "name": "C_NetChannel::WriteAck",
+  "proto": "void __thiscall WriteAck(void *this, void * stream)"
  },
  "007453d0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7453d0"
+  "module": "net_replication",
+  "name": "C_NetChannel::ReadAck",
+  "proto": "void __thiscall ReadAck(void *this, void * stream)"
  },
  "007453e0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7453e0"
+  "module": "net_replication",
+  "name": "C_NetChannel::Resend",
+  "proto": "void __thiscall Resend(void *this)"
  },
  "007453f0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7453f0"
+  "module": "net_replication",
+  "name": "C_NetChannel::Acknowledge",
+  "proto": "void __thiscall Acknowledge(void *this)"
+ },
+ "00745400": {
+  "module": "net_replication",
+  "name": "C_NetChannel::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00745420": {
+  "module": "net_replication",
+  "name": "C_NetChannel::~C_NetChannel",
+  "proto": "void __thiscall ~C_NetChannel(void *this)"
+ },
+ "00745520": {
+  "module": "net_replication",
+  "name": "UnwrapSequence",
+  "proto": "void __cdecl UnwrapSequence(uint * seq, uint reference)"
+ },
+ "00745590": {
+  "module": "net_replication",
+  "name": "C_NetChannel::Send",
+  "proto": "void __thiscall Send(void *this, void * packet)"
+ },
+ "007455f0": {
+  "module": "net_replication",
+  "name": "C_NetChannel::PopReceived",
+  "proto": "void * __thiscall PopReceived(void *this)"
+ },
+ "00745630": {
+  "module": "net_replication",
+  "name": "C_NetChannel::PopOutgoing",
+  "proto": "void * __thiscall PopOutgoing(void *this)"
+ },
+ "00745670": {
+  "module": "net_replication",
+  "name": "C_NetChannel::Receive",
+  "proto": "void __thiscall Receive(void *this, void * packet)"
+ },
+ "007457b0": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::C_NetReliableChannel",
+  "proto": "void * __thiscall C_NetReliableChannel(void *this)"
+ },
+ "00745850": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00745870": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::~C_NetReliableChannel",
+  "proto": "void __thiscall ~C_NetReliableChannel(void *this)"
+ },
+ "00745980": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::Send",
+  "proto": "void __thiscall Send(void *this, void * packet)"
+ },
+ "00745a00": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::Receive",
+  "proto": "void __thiscall Receive(void *this, void * packet)"
+ },
+ "00745ab0": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::WriteAck",
+  "proto": "void __thiscall WriteAck(void *this, void * stream)"
+ },
+ "00745ae0": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::ReadAck",
+  "proto": "void __thiscall ReadAck(void *this, void * stream)"
+ },
+ "00745b30": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::Resend",
+  "proto": "void __thiscall Resend(void *this)"
+ },
+ "00745c20": {
+  "module": "net_replication",
+  "name": "C_NetReliableChannel::Acknowledge",
+  "proto": "void __thiscall Acknowledge(void *this)"
+ },
+ "00745d30": {
+  "module": "net_replication",
+  "name": "C_NetOrderedChannel::C_NetOrderedChannel",
+  "proto": "void * __fastcall C_NetOrderedChannel(void * channel)"
+ },
+ "00745d50": {
+  "module": "net_replication",
+  "name": "C_NetOrderedChannel::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00745d70": {
+  "module": "net_replication",
+  "name": "C_NetOrderedChannel::~C_NetOrderedChannel",
+  "proto": "void __fastcall ~C_NetOrderedChannel(void * channel)"
+ },
+ "00745d80": {
+  "module": "net_replication",
+  "name": "C_NetOrderedChannel::PopReceived",
+  "proto": "void * __thiscall PopReceived(void *this)"
+ },
+ "00745e10": {
+  "module": "net_replication",
+  "name": "C_NetRefCounted::AddRef",
+  "proto": "void __thiscall AddRef(void *this)"
+ },
+ "00745e20": {
+  "module": "net_replication",
+  "name": "C_NetRefCounted::Release",
+  "proto": "void __thiscall Release(void *this)"
+ },
+ "00745e40": {
+  "module": "net_replication",
+  "name": "C_NetPacket::C_NetPacket",
+  "proto": "void * __fastcall C_NetPacket(void * packet)"
+ },
+ "00745e90": {
+  "module": "net_replication",
+  "name": "C_NetRefCounted::~C_NetRefCounted",
+  "proto": "void __thiscall ~C_NetRefCounted(void *this)"
+ },
+ "00745ea0": {
+  "module": "net_replication",
+  "name": "C_NetRefCounted::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00745ec0": {
+  "module": "net_replication",
+  "name": "C_NetPacket::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00745ee0": {
+  "module": "net_replication",
+  "name": "C_NetPacket::~C_NetPacket",
+  "proto": "void __thiscall ~C_NetPacket(void *this)"
+ },
+ "00745f30": {
+  "module": "net_replication",
+  "name": "C_NetPacket::Clear",
+  "proto": "void __thiscall Clear(void *this)"
+ },
+ "00745f50": {
+  "module": "net_replication",
+  "name": "C_NetPacket::FreeData",
+  "proto": "void __thiscall FreeData(void *this)"
+ },
+ "00745f70": {
+  "module": "net_replication",
+  "name": "C_NetPacket::Release",
+  "proto": "void __thiscall Release(void *this)"
+ },
+ "00745fa0": {
+  "module": "net_replication",
+  "name": "C_NetPacket::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "00746050": {
+  "module": "net_replication",
+  "name": "C_NetPacket::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
  },
  "00747360": {
   "module": "zz_idioms",
@@ -39449,21 +39618,120 @@
   "module": "zz_idioms",
   "name": "construct_copy4_7473f0"
  },
+ "00747430": {
+  "module": "net_replication",
+  "name": "C_NetHeader::C_NetHeader",
+  "proto": "void * __thiscall C_NetHeader(void *this)"
+ },
  "00747450": {
-  "module": "zz_idioms",
-  "name": "empty_function_747450"
+  "module": "net_replication",
+  "name": "C_NetHeader::WriteBody",
+  "proto": "void __thiscall WriteBody(void *this, void * stream)"
  },
  "00747460": {
-  "module": "zz_idioms",
-  "name": "empty_function_747460"
+  "module": "net_replication",
+  "name": "C_NetHeader::ReadBody",
+  "proto": "void __thiscall ReadBody(void *this, void * stream)"
+ },
+ "00747470": {
+  "module": "net_replication",
+  "name": "C_NetHeader::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00747490": {
+  "module": "net_replication",
+  "name": "C_NetHeader::~C_NetHeader",
+  "proto": "void __thiscall ~C_NetHeader(void *this)"
+ },
+ "007474a0": {
+  "module": "net_replication",
+  "name": "C_NetHeader::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "007474d0": {
+  "module": "net_replication",
+  "name": "C_NetHeader::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "00747500": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::C_NetPacketList",
+  "proto": "void * __thiscall C_NetPacketList(void *this)"
+ },
+ "00747570": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00747590": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::~C_NetPacketList",
+  "proto": "void __thiscall ~C_NetPacketList(void *this)"
+ },
+ "00747660": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::WriteBody",
+  "proto": "void __thiscall WriteBody(void *this, void * stream)"
+ },
+ "007476a0": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::ReadBody",
+  "proto": "void __thiscall ReadBody(void *this, void * stream)"
+ },
+ "00747720": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::Add",
+  "proto": "void __thiscall Add(void *this, void * packet)"
+ },
+ "00747770": {
+  "module": "net_replication",
+  "name": "C_NetPacketList::Pop",
+  "proto": "void * __fastcall Pop(void * list)"
+ },
+ "007477b0": {
+  "module": "net_replication",
+  "name": "C_NetPing::C_NetPing",
+  "proto": "void * __fastcall C_NetPing(void * ping)"
+ },
+ "007477d0": {
+  "module": "net_replication",
+  "name": "C_NetPing::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "007477f0": {
+  "module": "net_replication",
+  "name": "C_NetPing::~C_NetPing",
+  "proto": "void __thiscall ~C_NetPing(void *this)"
+ },
+ "00747800": {
+  "module": "net_replication",
+  "name": "C_NetPing::WriteBody",
+  "proto": "void __thiscall WriteBody(void *this, void * stream)"
+ },
+ "00747850": {
+  "module": "net_replication",
+  "name": "C_NetPing::ReadBody",
+  "proto": "void __thiscall ReadBody(void *this, void * stream)"
+ },
+ "007478c0": {
+  "module": "net_replication",
+  "name": "C_NetEmptyMessage::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "007478e0": {
+  "module": "net_replication",
+  "name": "C_NetEmptyMessage::~C_NetEmptyMessage",
+  "proto": "void __thiscall ~C_NetEmptyMessage(void *this)"
  },
  "007478f0": {
-  "module": "zz_idioms",
-  "name": "empty_function_7478f0"
+  "module": "net_replication",
+  "name": "C_NetEmptyMessage::WriteBody",
+  "proto": "void __thiscall WriteBody(void *this, void * stream)"
  },
  "00747900": {
-  "module": "zz_idioms",
-  "name": "empty_function_747900"
+  "module": "net_replication",
+  "name": "C_NetEmptyMessage::ReadBody",
+  "proto": "void __thiscall ReadBody(void *this, void * stream)"
  },
  "007487e0": {
   "module": "zz_idioms",
@@ -39480,6 +39748,56 @@
  "00748dc0": {
   "module": "car",
   "name": "GetPerfTimeMs"
+ },
+ "00749830": {
+  "module": "net_replication",
+  "name": "C_NetPool::C_NetPool",
+  "proto": "void * __thiscall C_NetPool(void *this)"
+ },
+ "00749970": {
+  "module": "net_replication",
+  "name": "C_NetPool::~C_NetPool",
+  "proto": "void __thiscall ~C_NetPool(void *this)"
+ },
+ "00749a70": {
+  "module": "net_replication",
+  "name": "C_NetPool::AllocBuffer",
+  "proto": "void * __thiscall AllocBuffer(void *this, uint size)"
+ },
+ "00749b20": {
+  "module": "net_replication",
+  "name": "C_NetPool::FreeBuffer",
+  "proto": "void __thiscall FreeBuffer(void *this, void * buffer, int size)"
+ },
+ "00749b80": {
+  "module": "net_replication",
+  "name": "C_NetPool::AllocPacket",
+  "proto": "void * __fastcall AllocPacket(void * pool)"
+ },
+ "00749bd0": {
+  "module": "net_replication",
+  "name": "C_NetPool::FreePacket",
+  "proto": "void __thiscall FreePacket(void *this, void * packet)"
+ },
+ "00749c10": {
+  "module": "net_replication",
+  "name": "S_NetFreeList::~S_NetFreeList",
+  "proto": "void __thiscall ~S_NetFreeList(void *this)"
+ },
+ "00749c80": {
+  "module": "net_replication",
+  "name": "S_NetFreeList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00749d00": {
+  "module": "net_replication",
+  "name": "S_NetPacketFreeList::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00749d90": {
+  "module": "net_replication",
+  "name": "C_NetPool::GrowPackets",
+  "proto": "void __fastcall GrowPackets(void * list)"
  },
  "0074a1c0": {
   "module": "movement",
@@ -45292,6 +45610,12 @@
   "module": "net_replication",
   "name": "g_netServerSide",
   "type": "bool"
+ },
+ "00983150": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netPool",
+  "type": "int"
  },
  "009831e8": {
   "data": true,

@@ -18,6 +18,10 @@ public:
     uint32_t ReadBits(int bitCount);                         // 0x0073d3d0
     void WriteString(const char *text);                      // 0x0073d440
     void ReadString(char *buffer, int bufferSize);           // 0x0073d470
+    // (Part 10c.) `count` bytes copied at the byte the bit position falls in (the net packets' data, inline in their
+    // Write / Read; the position is byte-aligned there), the position moved past them. Writing reserves the room.
+    void WriteRawBytes(const void *bytes, uint32_t count);
+    void ReadRawBytes(void *bytes, uint32_t count);
 
     // False once more bits were consumed/produced than the buffer holds.
     bool IsValid() const { return BitPosition() <= m_capacityBits; }   // (the base Reserve)

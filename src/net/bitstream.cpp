@@ -1,6 +1,7 @@
 #include "net/bitstream.h"
 
 #include <cmath>
+#include <cstring>
 #include <cstddef>
 #include <cstdlib>
 
@@ -75,6 +76,23 @@ void C_BitStream::ReadString(char *buffer, int bufferSize)
             break;
     }
     buffer[bufferSize - 1] = '\0';
+}
+
+void C_BitStream::WriteRawBytes(const void *bytes, uint32_t count)
+{
+    Reserve(count * 8);
+    std::memcpy(reinterpret_cast<uint8_t *>(m_data) + m_wordIndex * 4 + (m_bitIndex >> 3), bytes, count);
+    const uint32_t bit = m_bitIndex + (count & 3) * 8;
+    m_bitIndex = bit & 0x1F;
+    m_wordIndex += (bit >> 5) + (count >> 2);
+}
+
+void C_BitStream::ReadRawBytes(void *bytes, uint32_t count)
+{
+    std::memcpy(bytes, reinterpret_cast<const uint8_t *>(m_data) + m_wordIndex * 4 + (m_bitIndex >> 3), count);
+    const uint32_t bit = m_bitIndex + (count & 3) * 8;
+    m_bitIndex = bit & 0x1F;
+    m_wordIndex += (bit >> 5) + (count >> 2);
 }
 
 C_GrowingBitStream::~C_GrowingBitStream()

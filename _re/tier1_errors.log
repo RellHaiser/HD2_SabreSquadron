@@ -394,53 +394,53 @@ f_0072e190.cpp:2696:62: no matching function for call to 'tier1::u_short::u_shor
     uVar14 = (u_short)*(uint32_t *)((int)param_1 + 0x4db0);
 f_0072e190.cpp:2717:62: no matching function for call to 'tier1::u_short::u_short(uint32_t&)'
     uVar14 = (u_short)*(uint32_t *)((int)param_1 + 0x4db0);
-f_0072e190.cpp:2865:21: base operand of '->' is not a pointer
+f_0072e190.cpp:2864:21: base operand of '->' is not a pointer
     (*DAT_0098c100->vtable->Create)();
-f_0072e190.cpp:2882:23: base operand of '->' is not a pointer
+f_0072e190.cpp:2881:23: base operand of '->' is not a pointer
     (*DAT_0098c100->vtable->Create)();
-f_0072e190.cpp:2909:23: base operand of '->' is not a pointer
+f_0072e190.cpp:2908:23: base operand of '->' is not a pointer
     (*DAT_0098c100->vtable->Create)();
-f_0072e190.cpp:2954:21: base operand of '->' is not a pointer
+f_0072e190.cpp:2953:21: base operand of '->' is not a pointer
     (*DAT_0098c100->vtable->Create)();
-f_0072e190.cpp:3067:25: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
+f_0072e190.cpp:3066:25: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
     uVar2 = htons(0x3a9a);
-f_0072e190.cpp:3069:41: no match for 'operator>>' (operand types are 'tier1::u_short' and 'int')
+f_0072e190.cpp:3068:41: no match for 'operator>>' (operand types are 'tier1::u_short' and 'int')
     sStack_10.sa_data[1] = (char)(uVar2 >> 8);
-f_0072e190.cpp:3115:31: cannot convert 'const char*' to 'HKEY' {aka 'HKEY__*'}
+f_0072e190.cpp:3114:31: cannot convert 'const char*' to 'HKEY' {aka 'HKEY__*'}
     pHVar1 = (HKEY)FUN_006ed880("Software\\Illusion Softworks\\Hidden & Dangerous 2",1);
-f_0072e190.cpp:3184:31: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:3183:31: 'struct tier1::_union_2683' has no member named 'n2'
     uStack_4c = (int)&_Stack_30.n2.n3 + 4;
-f_0072e190.cpp:3191:24: 'struct tier1::_union_2683' has no member named 'decVal'
+f_0072e190.cpp:3190:24: 'struct tier1::_union_2683' has no member named 'decVal'
     if ((int *)_Stack_30.decVal.Hi32 != 0) {
-f_0072e190.cpp:3193:16: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
+f_0072e190.cpp:3192:16: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
     local_38 = (uint8_t  [4])0x0;
-f_0072e190.cpp:3195:35: 'struct tier1::_union_2683' has no member named 'decVal'
+f_0072e190.cpp:3194:35: 'struct tier1::_union_2683' has no member named 'decVal'
     piStack_58 = (int *)_Stack_30.decVal.Hi32;
-f_0072e190.cpp:3196:36: 'struct tier1::_union_2683' has no member named 'decVal'
+f_0072e190.cpp:3195:36: 'struct tier1::_union_2683' has no member named 'decVal'
     (**(code **)(*(int *)_Stack_30.decVal.Hi32 + 0x1c))();
-f_0072e190.cpp:3197:21: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
+f_0072e190.cpp:3196:21: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
     if (local_38 != (uint8_t  [4])0x0) {
-f_0072e190.cpp:3205:48: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:3204:48: 'struct tier1::_union_2683' has no member named 'n2'
     VariantInit((VARIANTARG *)&a_Stack_20[0].n2);
-f_0072e190.cpp:3211:24: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:3210:24: 'struct tier1::_union_2683' has no member named 'n2'
     if ((_Stack_30.n2.vt == 0xd) &&
-f_0072e190.cpp:3231:47: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:3230:47: 'struct tier1::_union_2683' has no member named 'n2'
     VariantClear((VARIANTARG *)&_Stack_30.n2);
-f_0072e190.cpp:3278:28: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
+f_0072e190.cpp:3277:28: ISO C++ forbids casting to an array type 'uint8_t [4]' {aka 'unsigned char [4]'}
     local_38 = (uint8_t  [4])((uint32_t)local_38 & 0xffffff00);
-f_0072e190.cpp:3360:48: 'VARIANTARG' {aka 'struct tagVARIANT'} has no member named 'n1'
+f_0072e190.cpp:3359:48: 'VARIANTARG' {aka 'struct tagVARIANT'} has no member named 'n1'
     puStack_40 = (uint8_t *)((int)&aVStack_20[0].n1 + 4);
-f_0072e190.cpp:3361:17: 'VARIANTARG' {aka 'struct tagVARIANT'} has no member named 'n1'
+f_0072e190.cpp:3360:17: 'VARIANTARG' {aka 'struct tagVARIANT'} has no member named 'n1'
     aVStack_20[0].n1.decVal.Hi32 = 0;
-f_0072e190.cpp:3384:61: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:3383:61: 'struct tier1::_union_2683' has no member named 'n2'
     if (((uint32_t)&(((_union_2683 *)auStack_30)->n2).n3 & 0x500) == 0) {
-f_0072e190.cpp:3407:66: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:3406:66: 'struct tier1::_union_2683' has no member named 'n2'
     VariantClear((VARIANTARG *)&((_union_2683 *)auStack_30)->n2);
-f_0072e190.cpp:3409:59: 'struct tier1::_union_2683' has no member named 'n2'
+f_0072e190.cpp:3408:59: 'struct tier1::_union_2683' has no member named 'n2'
     (&(((_union_2683 *)auStack_30)->n2).n3,1,(_union_2683 *)auStack_30);
-f_0072e190.cpp:3455:22: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_0072e190.cpp:3454:22: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     CoCreateInstance((IID *)&DAT_008451dc,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008451ec,local_a8);
-f_0072e190.cpp:3517:22: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
+f_0072e190.cpp:3516:22: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     CoCreateInstance((IID *)&DAT_008451dc,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008451ec,&local_a0);
 f_00732e40.cpp:225:48: cannot convert 'uint8_t*' {aka 'unsigned char*'} to 'int (__attribute__((cdecl)) *)(const void*, const void*)'
     qsort((void *)param_1[5],*param_1,param_1[2],param_2);

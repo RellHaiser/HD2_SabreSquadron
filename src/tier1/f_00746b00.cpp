@@ -196,9 +196,9 @@ uint32_t FUN_00746e70(void *param_1, ...)
       *(int *)((int)param_1 + 0xd0) = (int)lVar1;
       C_BitStream__C_BitStream(&CStack_20,local_3c,local_38);
       uStack_4 = 0;
-      C_auto_00816688__FUN_00747430(&CStack_2c);
+      C_auto_00816688__C_NetHeader__C_NetHeader(&CStack_2c);
       uStack_4 = CONCAT31(GH_PIECE(uStack_4,1,3),1);
-      C_auto_00816688__FUN_007474a0(&CStack_2c,&CStack_20);
+      C_auto_00816688__C_NetHeader__Read(&CStack_2c,&CStack_20);
       EnterCriticalSection((LPCRITICAL_SECTION)((int)param_1 + 0xb4));
       this_00 = (void *)FUN_00746d60(param_1,CStack_2c.m_008);
       if (this_00 != 0) {
@@ -211,7 +211,7 @@ uint32_t FUN_00746e70(void *param_1, ...)
       FUN_007484d0(_this);
       FUN_00747ea0(_this,(SOCKET *)&local_3c,&local_38,&local_30,&local_34);
       uStack_4 &= 0xffffff00;
-      C_auto_00816688__FUN_00747490(&CStack_2c);
+      C_auto_00816688__C_NetHeader___C_NetHeader(&CStack_2c);
       uStack_4 = 0xffffffff;
       CStack_20.vtable = (C_BitStream_vtbl *)&PTR_0081640c;
     } while (local_3c != 0);

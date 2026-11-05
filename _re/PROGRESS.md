@@ -8762,6 +8762,27 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 288 errors in 53 of 398 files. ret_audit --src: 52.
   - Stats: 9,717 of 12,306 functions by hand or absorbed (86.4 % by size).
 
+  PART 10c PLAN (2026-11-05): the transport is the game's own UDP protocol (not DirectPlay; that is for the voice and
+  the session enumeration, part 10d on): 10c-i the packets, pools, channels and transport messages; 10c-ii the socket
+  (0x00747910..0x00748e80: Winsock, a send thread, fragmentation into 500-byte pieces with a 24-bit checksum and an
+  XOR key, reassembly with std::sort); 10c-iii the connections and their manager (0x00746180..0x00747400: a
+  connection's three channels, its ping every 2 s, the receive thread, the lookup by id / address).
+  PART 10c-i DONE (2026-11-05): the transport's packets, pools, channels and messages (net/net_channel.*, new).
+  - C_NetRefCounted (0x00816678), C_NetPacket (0x0081665c, 0x20 bytes: the channel / late flags, the size, the kind,
+    the 23-bit sequence number, the last bit, the data; Write / Read copy the data byte for byte: C_BitStream::
+    WriteRawBytes / ReadRawBytes, new, the original's inline copy), C_NetPool (g_netPool 0x00983150: 1000-byte
+    buffers, bigger ones malloc'ed, and packets, 16 made at a time, locked).
+  - C_NetChannel (0x008165f0: numbers, the outgoing and incoming lists, a packet up to 9 older than the newest
+    marked late), C_NetReliableChannel (0x00816614: held until acknowledged, sent again after 200 ms doubling to 5 s,
+    7 a call; the 23-bit acknowledgement of the in-order run; repeats dropped), C_NetOrderedChannel (0x00816638:
+    hands them on in order); UnwrapSequence 0x00745520 (23-bit numbers widened around a reference).
+  - The transport messages: C_NetHeader (0x00816688: type, connection id), C_NetPacketList (type 1), C_NetPing
+    (type 2: the echo gives the round trip), C_NetEmptyMessage.
+  - Harness: net (net_channel_test.inc). Mutations: mutations/mutate_10c1.py: 232: 186 killed, 22 not building,
+    24 equivalent. Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 288 errors in 53 of 389 files. ret_audit --src: 52.
+  - Stats: 9,805 of 12,306 functions by hand or absorbed (86.5 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

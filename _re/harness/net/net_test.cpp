@@ -15,6 +15,8 @@
 #include "net/bitstream.h"
 #include "net/net_track.h"
 #include "net/net_object.h"
+#include "net/net_channel.h"
+#include "game/perf_timer.h"
 #undef private
 #include <windows.h>
 #undef protected
@@ -650,6 +652,7 @@ void TestQuantizationTests()
 }
 
 #include "net_object_test.inc"
+#include "net_channel_test.inc"
 
 // ---- the direction track -------------------------------------------------------------------------------------------
 
@@ -1028,6 +1031,15 @@ int main()
     TestReplicationWrite();
     TestReplicationRead();
     TestOwnership();
+    InitPerfTime();
+    TestUnwrap();
+    TestRefCounted();
+    TestPool();
+    TestPacket();
+    TestChannel();
+    TestReliable();
+    TestOrdered();
+    TestMessages();
     std::printf("net: %d checks, %d failures\n", checks, failures);
     return failures != 0;
 }
