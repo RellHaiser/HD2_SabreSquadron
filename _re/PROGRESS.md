@@ -8765,7 +8765,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   PART 10c PLAN (2026-11-05): the transport is the game's own UDP protocol (not DirectPlay; that is for the voice and
   the session enumeration, part 10d on): 10c-i the packets, pools, channels and transport messages; 10c-ii the socket
   (0x00747910..0x00748e80: Winsock, a send thread, fragmentation into 500-byte pieces with a 24-bit checksum and an
-  XOR key, reassembly with std::sort); 10c-iii the connections and their manager (0x00746180..0x00747400: a
+  XOR key, reassembly with std::sort) and the connections and their manager (0x00746180..0x00747400: a
   connection's three channels, its ping every 2 s, the receive thread, the lookup by id / address).
   PART 10c-i DONE (2026-11-05): the transport's packets, pools, channels and messages (net/net_channel.*, new).
   - C_NetRefCounted (0x00816678), C_NetPacket (0x0081665c, 0x20 bytes: the channel / late flags, the size, the kind,
@@ -8782,6 +8782,27 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     24 equivalent. Factory checkers clean.
   - Build: MSVC clean. Tier 1: 288 errors in 53 of 389 files. ret_audit --src: 52.
   - Stats: 9,805 of 12,306 functions by hand or absorbed (86.5 % by size).
+
+  PART 10c-ii DONE (2026-11-05): the transport's socket, connections and manager (net/net_socket.*,
+  net/net_transport.*, new); part 10c complete.
+  - C_NetSocket (0x94 bytes): Winsock UDP (Open / Close; a send thread fed by QueueSend), datagrams sealed (Seal /
+    Unseal: a 24-bit checksum of the dwords after a 3-byte header, the dwords XORed with key 0x1742BDCD plus the size
+    x 0x800), messages of 500 bytes or more sent as fragments (index, message number, the last mark) queued one per
+    millisecond (FlushDelayed, g_netLastFragmentTime 0x00983100) and reassembled (sorted with the MSVC6 std::sort,
+    common/msvc_sort.h; expired after 20 s), the bytes counters, the local address. Fix: the send thread's events
+    made before the thread (the original made them after starting it).
+  - C_NetConnection (0x00816684, 0x50 bytes): the three channels, Send / Receive, pings every 2 s (the round trip),
+    Flush (resends, gathers the packets with the acknowledgements into g_netSendStream 0x009830e8), HandleDatagram
+    (packets to the game's callback, fastcall (connection, data, size, kind, flags); a late plain packet dropped;
+    pings echoed), packets of another session dropped. The packet's +0x18 is that session bit (was "last").
+  - C_NetTransport (0xDC bytes, C_NetGame +0x33C): the connections (by id / address), the socket, the receive
+    thread (Tick: pings, a flush every 500 ms; ReceiveAll), Start / Stop.
+  - Harness: net (net_socket_test.inc, net_transport_test.inc: real loopback exchanges, fragments, pings, sessions,
+    the threads). Mutations: mutations/mutate_10c2.py (socket): 247: 181 killed, 22 not building, 44 equivalent;
+    mutate_10c3.py (connections): 225: 151 killed, 21 not building, 53 equivalent (locks and thread plumbing mostly).
+    Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 278 errors in 51 of 383 files. ret_audit --src: 52.
+  - Stats: 9,889 of 12,306 functions by hand or absorbed (86.7 % by size).
 
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`

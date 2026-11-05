@@ -334,9 +334,9 @@ f_00722a40.cpp:676:69: 'struct tier1::_union_1226' has no member named 'S_un_b'
     pcVar2 = inet_ntoa((in_addr)((_union_1226 *)(iStack_c + 0x68))->S_un_b);
 f_00722a40.cpp:935:30: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     HVar2 = CoCreateInstance((IID *)&DAT_008190b8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819068,ppv);
-f_00722a40.cpp:1357:5: expected primary-expression before '}' token
+f_00722a40.cpp:1358:5: expected primary-expression before '}' token
     }
-f_00724aa0.cpp:274:28: cannot convert 'const char*' to 'wchar_t*' in assignment
+f_00724aa0.cpp:276:28: cannot convert 'const char*' to 'wchar_t*' in assignment
     pwStack_94 = "2hostname" + 1;
 f_007277b0.cpp:621:21: base operand of '->' is not a pointer
     (*DAT_0098c0fc->vtable->empty_function_744210)();
@@ -546,26 +546,6 @@ f_00742670.cpp:1117:27: base operand of '->' is not a pointer
     (*DAT_0098c100->vtable->Create)();
 f_007442a0.cpp:100:36: void value not ignored as it ought to be
     uVar2 = (*self->vtable->SetFlags)(self,uVar1 & 0xffffffdf);
-f_00746130.cpp:35:5: 'C_GrowingBitStream__C_GrowingBitStream___C_GrowingBitStream' was not declared in this scope; did you mean 'C_GrowingBitStream__dtor_C_GrowingBitStream'?
-    C_GrowingBitStream__C_GrowingBitStream___C_GrowingBitStream((C_GrowingBitStream *)&DAT_009830e8);
-f_00747910.cpp:121:13: no match for 'operator=' (operand types are 'tier1::u_short' and 'int')
-    uVar1 = 0;
-f_00747910.cpp:124:28: no matching function for call to 'tier1::u_short::u_short(int&)'
-    uVar1 = htons((u_short)param_1);
-f_00747910.cpp:327:17: cannot convert 'tier1::u_short' to 'u_short' {aka 'short unsigned int'}
-    uVar1 = htons((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_sho
-f_00747910.cpp:658:50: no match for 'operator=' (operand types are 'tier1::u_short' and 'u_short' {aka 'short unsigned int'})
-    uVar1 = ntohs(GH_PIECE(local_31c.sa_data,0,2));
-f_00747910.cpp:777:64: no matching function for call to 'tier1::u_short::u_short(uint32_t&)'
-    FUN_00747e60(param_1,local_20[2],local_14,local_8,(u_short)local_4);
-f_00747910.cpp:835:35: expected primary-expression before '*' token
-    phVar3 = gethostbyname(hostent*)((local_1e0));
-f_00747910.cpp:835:36: expected primary-expression before ')' token
-    phVar3 = gethostbyname(hostent*)((local_1e0));
-f_00747910.cpp:838:76: 'struct tier1::_union_1226' has no member named 'S_un_b'
-    pcVar4 = inet_ntoa((in_addr)((_union_1226 *)*phVar3->h_addr_list)->S_un_b);
-f_00747910.cpp:846:23: cannot convert 'tier1::u_long' to 'u_long' {aka 'long unsigned int'}
-    uVar5 = ntohl((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u_long)((u
 f_007888c0.cpp:253:19: base operand of '->' is not a pointer
     (*DAT_0098a6d0->vtable[1].SetHierarchyAlpha)(DAT_0098a6d0,alpha);
 f_007888c0.cpp:400:59: base operand of '->' is not a pointer

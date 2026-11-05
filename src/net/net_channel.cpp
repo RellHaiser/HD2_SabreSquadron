@@ -36,7 +36,7 @@ void C_NetPacket::Clear()
     m_kind = 0;
     m_size = 0;
     m_data = nullptr;
-    m_last = 0;
+    m_session = 0;
     m_refs = 0;
 }
 
@@ -52,7 +52,7 @@ void C_NetPacket::Write(C_BitStream *stream)
     stream->WriteBits(static_cast<uint32_t>(m_size), 16);
     stream->WriteBits(m_kind, 6);
     stream->WriteBits(m_sequence, 23);
-    stream->WriteBits(m_last, 1);
+    stream->WriteBits(m_session, 1);
     stream->WriteRawBytes(m_data, static_cast<uint32_t>(m_size));
 }
 
@@ -62,7 +62,7 @@ void C_NetPacket::Read(C_BitStream *stream)
     m_size = static_cast<int16_t>(stream->ReadBits(16));
     m_kind = stream->ReadBits(6);
     m_sequence = stream->ReadBits(23);
-    m_last = stream->ReadBits(1);
+    m_session = stream->ReadBits(1);
     m_data = g_netPool.AllocBuffer(static_cast<size_t>(m_size));
     stream->ReadRawBytes(m_data, static_cast<uint32_t>(m_size));
 }

@@ -143,12 +143,14 @@ int FUN_00724c20(void *_this,char *param_1,int param_2, ...)
 // 0x00724d30
 uint32_t FUN_00724d30(void *_this,int *param_1, ...)
 {
-  int iVar1;
-  uint32_t uVar2;
+  void *pvVar1;
+  int iVar2;
+  uint32_t id;
   int iVar3;
   int *piVar4;
-  int local_78 [4];
-  uint32_t local_68;
+  int local_78 [3];
+  uint8_t local_6c [4];
+  uint8_t local_68 [4];
   int local_64;
   int local_60;
   uint32_t local_5c;
@@ -158,7 +160,7 @@ uint32_t FUN_00724d30(void *_this,int *param_1, ...)
   int iStack_14;
   int iStack_c;
   FUN_00725e00(local_78);
-  uVar2 = 1;
+  id = 1;
   if ((DAT_0097c8bc & 1) == 0) {
     DAT_0097c8bc |= 1;
     FUN_00725e00((uint32_t *)&DAT_0097c8a0);
@@ -168,7 +170,7 @@ uint32_t FUN_00724d30(void *_this,int *param_1, ...)
   piVar4 = local_78;
   memset(piVar4, 0, 7 * sizeof(*piVar4));
   piVar4 += 7;
-  iVar1 = 0;
+  iVar2 = 0;
   local_78[0] = 0;
   if (((uint8_t)g_gameRole & 1) == 0) {
     (**(code **)(**(int **)((int)_this + 4) + 0x50))(*(int **)((int)_this + 4),&local_5c,0);
@@ -185,57 +187,57 @@ uint32_t FUN_00724d30(void *_this,int *param_1, ...)
   }
   else {
     EnterCriticalSection((LPCRITICAL_SECTION)((int)_this + 0x418));
-    FUN_00746e40((int)_this + 0x33c);
+    C_NetTransport__Lock((void *)((int)_this + 0x33c));
     if ((*(int *)((int)_this + 0x1e0) == 0) ||
        ((uint32_t)((*(int *)((int)_this + 0x1e4) - *(int *)((int)_this + 0x1e0)) / 0xc4) < 2)) {
       local_78[0] = -1;
     }
     else {
       iVar3 = 0xc4;
-      iVar1 = local_78[1];
+      iVar2 = local_78[1];
       for (; (*(int *)((int)_this + 0x1e0) != 0 &&
-             (uVar2 < (uint32_t)((*(int *)((int)_this + 0x1e4) - *(int *)((int)_this + 0x1e0)) / 0xc4)));
-          uVar2 = uVar2 + 1) {
+             (id < (uint32_t)((*(int *)((int)_this + 0x1e4) - *(int *)((int)_this + 0x1e0)) / 0xc4)));
+          id = id + 1) {
         if (*(int *)(*(int *)((int)_this + 0x1e0) + iVar3) != 0) {
-          iVar1 = FUN_00746d60((void *)((int)_this + 0x33c),uVar2);
+          pvVar1 = C_NetTransport__FindById((void *)((int)_this + 0x33c),id);
           (**(code **)(**(int **)_this + 0x80))
                     (*(int **)_this,*(uint32_t *)(*(int *)((int)_this + 0x1e0) + iVar3),&local_5c,0)
           ;
-          if (iVar1 == 0) {
+          if (pvVar1 == 0) {
             local_78[0] = iStack_58;
           }
           else {
-            local_78[0] = *(int *)(iVar1 + 0x4c);
+            local_78[0] = *(int *)((int)pvVar1 + 0x4c);
           }
-          iVar1 = iStack_4c + iStack_44;
+          iVar2 = iStack_4c + iStack_44;
           local_78[2] = iStack_14 + iStack_c;
-          local_78[1] = iVar1;
+          local_78[1] = iVar2;
         }
         iVar3 += 0xc4;
       }
-      local_78[1] = iVar1 - DAT_0097c8a4;
+      local_78[1] = iVar2 - DAT_0097c8a4;
       iVar3 = local_78[2] - DAT_0097c8a8;
       DAT_0097c8a8 = local_78[2];
-      DAT_0097c8a4 = iVar1;
+      DAT_0097c8a4 = iVar2;
       local_78[2] = iVar3;
     }
-    FUN_00746e60((int)_this + 0x33c);
+    C_NetTransport__Unlock((void *)((int)_this + 0x33c));
     LeaveCriticalSection((LPCRITICAL_SECTION)((int)_this + 0x418));
   }
-  iVar1 = *(int *)((int)_this + 0x14);
-  if (iVar1 == 0) {
+  iVar2 = *(int *)((int)_this + 0x14);
+  if (iVar2 == 0) {
     local_60 = 0;
     local_64 = 0;
   }
   else {
-    local_64 = *(int *)(iVar1 + 0xd0) >> 3;
-    local_60 = *(int *)(iVar1 + 0xcc) >> 3;
-    *(uint32_t *)(iVar1 + 0xd0) = 0;
-    *(uint32_t *)(iVar1 + 0xcc) = 0;
+    local_64 = *(int *)(iVar2 + 0xd0) >> 3;
+    local_60 = *(int *)(iVar2 + 0xcc) >> 3;
+    *(uint32_t *)(iVar2 + 0xd0) = 0;
+    *(uint32_t *)(iVar2 + 0xcc) = 0;
   }
-  FUN_007486e0((void *)((int)_this + 0x34c),&local_68,local_78 + 3);
+  C_NetSocket__TakeCounters((void *)((int)_this + 0x34c),local_68,local_6c);
   piVar4 = local_78;
-  for (iVar1 = 7; iVar1 != 0; iVar1 = iVar1 - 1) {
+  for (iVar2 = 7; iVar2 != 0; iVar2 = iVar2 - 1) {
     *param_1 = *piVar4;
     piVar4++;
     param_1++;

@@ -201,8 +201,8 @@ uint32_t FUN_00722550(void *param_1,uint32_t param_2,uint32_t param_3,int param_
     tier1_operator_delete(*(void **)(param_4 + 8));
     break;
   case 0xffff0016:
-    if (*(int *)((int)param_1 + 0x334) != 0) {
-      FUN_00747180((void *)((int)param_1 + 0x33c),*(int *)((int)param_1 + 0x334));
+    if (*(void **)((int)param_1 + 0x334) != 0) {
+      C_NetTransport__Remove((void *)((int)param_1 + 0x33c),*(void **)((int)param_1 + 0x334));
       if (*(uint32_t **)((int)param_1 + 0x334) != 0) {
         (**(code **)**(uint32_t **)((int)param_1 + 0x334))(1);
       }

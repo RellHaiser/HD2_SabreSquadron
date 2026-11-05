@@ -296,7 +296,7 @@ uint32_t C_NetGame__Process(C_NetGame *_this,int timeDelta,bool unknown, ...)
         _this->_pad_0000[0x5046] = '\0';
         _this->_pad_0000[0x5047] = '\0';
       }
-      FUN_00747260(_this->_pad_0000 + 0x33c,'\x01');
+      C_NetTransport__FlushAll(_this->_pad_0000 + 0x33c,true);
     }
     FUN_0072cde0((int *)_this);
     puVar6 = _this->_pad_0000 + 0x214;
@@ -441,7 +441,7 @@ uint32_t C_NetGame__Process(C_NetGame *_this,int timeDelta,bool unknown, ...)
         }
       }
       if ((*(int *)_this->_pad_0000 != 0) || (*(int *)(_this->_pad_0000 + 4) != 0)) {
-        FUN_00747260(_this->_pad_0000 + 0x33c,'\0');
+        C_NetTransport__FlushAll(_this->_pad_0000 + 0x33c,false);
       }
     }
   }
@@ -452,100 +452,101 @@ uint32_t C_NetGame__Process(C_NetGame *_this,int timeDelta,bool unknown, ...)
 // 0x0072cde0
 uint32_t FUN_0072cde0(int *param_1, ...)
 {
-  char cVar1;
-  uint32_t uVar2;
-  void *pvVar3;
-  DWORD DVar4;
-  int iVar5;
-  int iVar6;
-  uint32_t uVar7;
-  int64_t lVar8;
+  int iVar1;
+  char cVar2;
+  uint32_t uVar3;
+  void *pvVar4;
+  DWORD DVar5;
+  void *pvVar6;
+  int iVar7;
+  uint32_t uVar8;
+  int64_t lVar9;
   if ((DAT_0097ca20 & 1) == 0) {
     DAT_0097ca20 |= 1;
     S_PerfTimer__S_PerfTimerWithPeriod(&DAT_0097ca14,3000);
     atexit(&DAT_0072d110);
   }
   _DAT_0097ca1c = 1;
-  uVar2 = S_PerfTimer__Fire((int *)&DAT_0097ca14);
-  if ((((((char)uVar2 != '\0') && (g_gameRole != 7)) && (g_gameRole != 0x12)) &&
+  uVar3 = S_PerfTimer__Fire((int *)&DAT_0097ca14);
+  if ((((((char)uVar3 != '\0') && (g_gameRole != 7)) && (g_gameRole != 0x12)) &&
       (((g_gameRole & 1) != 0 || (param_1[1] != 0)))) &&
      (((g_gameRole & 1) == 0 || (*param_1 != 0)))) {
     C_NetGame__LockPlayers((int)param_1);
     if ((g_gameRole & 1) == 0) {
-      FUN_00746d60(param_1 + 0xcf,DAT_00982104);
-      pvVar3 = (void *)param_1[0xcd];
-      if (pvVar3 != 0) {
-        FUN_00746ac0(pvVar3,*(int *)((int)pvVar3 + 0x4c) + 200);
-        iVar6 = 0;
-        for (uVar7 = 0;
-            (param_1[0x78] != 0 && (uVar7 < (uint32_t)((param_1[0x79] - param_1[0x78]) / 0xc4)));
-            uVar7 = uVar7 + 1) {
-          if ((*(int *)(iVar6 + 0x3c + param_1[0x78]) != 0) &&
-             (*(char *)(iVar6 + param_1[0x78] + 8) != '\0')) {
-            if (uVar7 == DAT_00982104) {
-              pvVar3 = (void *)(param_1[5] + 0x30);
+      C_NetTransport__FindById(param_1 + 0xcf,DAT_00982104);
+      pvVar4 = (void *)param_1[0xcd];
+      if (pvVar4 != 0) {
+        C_NetConnection__SetResendTime(pvVar4,*(int *)((int)pvVar4 + 0x4c) + 200);
+        iVar7 = 0;
+        for (uVar8 = 0;
+            (param_1[0x78] != 0 && (uVar8 < (uint32_t)((param_1[0x79] - param_1[0x78]) / 0xc4)));
+            uVar8 = uVar8 + 1) {
+          if ((*(int *)(iVar7 + 0x3c + param_1[0x78]) != 0) &&
+             (*(char *)(iVar7 + param_1[0x78] + 8) != '\0')) {
+            if (uVar8 == DAT_00982104) {
+              pvVar4 = (void *)(param_1[5] + 0x30);
             }
             else {
-              pvVar3 = C_auto_0081646c__C_NetReplication__FindObject
-                                 ((C_auto_0081646c *)param_1[5],uVar7,false);
+              pvVar4 = C_auto_0081646c__C_NetReplication__FindObject
+                                 ((C_auto_0081646c *)param_1[5],uVar8,false);
             }
-            if (pvVar3 != 0) {
-              C_NetObject__SetLag(pvVar3,(float)((*(int *)(param_1[0xcd] + 0x4c) >> 1) + 5 +
-                                                *(int *)(iVar6 + 0x50 + param_1[0x78])) * 0.001);
+            if (pvVar4 != 0) {
+              C_NetObject__SetLag(pvVar4,(float)((*(int *)(param_1[0xcd] + 0x4c) >> 1) + 5 +
+                                                *(int *)(iVar7 + 0x50 + param_1[0x78])) * 0.001);
             }
           }
-          iVar6 += 0xc4;
+          iVar7 += 0xc4;
         }
       }
     }
     else {
-      FUN_00746e40((int)(param_1 + 0xcf));
-      DVar4 = timeGetTime();
-      iVar6 = 0;
-      for (uVar7 = 0;
-          (param_1[0x78] != 0 && (uVar7 < (uint32_t)((param_1[0x79] - param_1[0x78]) / 0xc4)));
-          uVar7 = uVar7 + 1) {
-        iVar5 = *(int *)(iVar6 + 0x6c + param_1[0x78]);
-        if (iVar5 != 0) {
-          lVar8 = GetPerfTimeMs();
-          if (5000 < (int)lVar8 - *(int *)(iVar5 + 0x40)) {
+      C_NetTransport__Lock(param_1 + 0xcf);
+      DVar5 = timeGetTime();
+      iVar7 = 0;
+      for (uVar8 = 0;
+          (param_1[0x78] != 0 && (uVar8 < (uint32_t)((param_1[0x79] - param_1[0x78]) / 0xc4)));
+          uVar8 = uVar8 + 1) {
+        iVar1 = *(int *)(iVar7 + 0x6c + param_1[0x78]);
+        if (iVar1 != 0) {
+          lVar9 = GetPerfTimeMs();
+          if (5000 < (int)lVar9 - *(int *)(iVar1 + 0x40)) {
             (**(code **)(*(int *)*param_1 + 0x60))
-                      ((int *)*param_1,*(uint32_t *)(iVar6 + param_1[0x78]),0,0,0);
+                      ((int *)*param_1,*(uint32_t *)(iVar7 + param_1[0x78]),0,0,0);
           }
         }
-        if ((*(int *)(iVar6 + 0x3c + param_1[0x78]) != 0) &&
-           (*(char *)(iVar6 + param_1[0x78] + 8) != '\0')) {
-          iVar5 = FUN_00746d60(param_1 + 0xcf,uVar7);
-          if (iVar5 != 0) {
-            pvVar3 = *(void **)(iVar6 + 0x6c + param_1[0x78]);
-            if (pvVar3 != 0) {
-              FUN_00746ac0(pvVar3,*(int *)(iVar5 + 0x4c) + 200);
+        if ((*(int *)(iVar7 + 0x3c + param_1[0x78]) != 0) &&
+           (*(char *)(iVar7 + param_1[0x78] + 8) != '\0')) {
+          pvVar4 = C_NetTransport__FindById(param_1 + 0xcf,uVar8);
+          if (pvVar4 != 0) {
+            pvVar6 = *(void **)(iVar7 + 0x6c + param_1[0x78]);
+            if (pvVar6 != 0) {
+              C_NetConnection__SetResendTime(pvVar6,*(int *)((int)pvVar4 + 0x4c) + 200);
             }
-            pvVar3 = C_auto_0081646c__C_NetReplication__FindObject
-                               ((C_auto_0081646c *)param_1[5],uVar7,false);
-            if (pvVar3 != 0) {
-              C_NetObject__SetLag(pvVar3,(float)((*(int *)(iVar5 + 0x4c) >> 1) + 5) * 0.001);
-              if ((param_1[0x1419] != 0) && (param_1[0x1419] < *(int *)(iVar5 + 0x4c))) {
-                *(int *)(iVar6 + 0xa4 + param_1[0x78]) = *(int *)(iVar6 + 0xa4 + param_1[0x78]) + 1;
+            pvVar6 = C_auto_0081646c__C_NetReplication__FindObject
+                               ((C_auto_0081646c *)param_1[5],uVar8,false);
+            if (pvVar6 != 0) {
+              C_NetObject__SetLag(pvVar6,(float)((*(int *)((int)pvVar4 + 0x4c) >> 1) + 5) * 0.001);
+              if ((param_1[0x1419] != 0) && (param_1[0x1419] < *(int *)((int)pvVar4 + 0x4c))) {
+                *(int *)(iVar7 + 0xa4 + param_1[0x78]) = *(int *)(iVar7 + 0xa4 + param_1[0x78]) + 1;
               }
-              if (2 < *(int *)(iVar6 + 0xa4 + param_1[0x78])) {
-                FUN_0072f6c0(param_1,uVar7,2);
+              if (2 < *(int *)(iVar7 + 0xa4 + param_1[0x78])) {
+                FUN_0072f6c0(param_1,uVar8,2);
               }
               if (((param_1[0x141b] != 0) &&
-                  (param_1[0x141b] <= (int)(DVar4 - *(int *)(iVar6 + 0xa8 + param_1[0x78])))) &&
-                 (iVar5 = *(int *)(iVar6 + param_1[0x78] + 0x3c), iVar5 != 0)) {
-                cVar1 = (**(code **)(**(int **)(iVar5 + 0xb0) + 100))();
-                if (cVar1 == '\0') {
-                  *(DWORD *)(iVar6 + 0xa8 + param_1[0x78]) = DVar4;
-                  FUN_0072f6c0(param_1,uVar7,3);
+                  (param_1[0x141b] <= (int)(DVar5 - *(int *)(iVar7 + 0xa8 + param_1[0x78])))) &&
+                 (iVar1 = *(int *)(iVar7 + param_1[0x78] + 0x3c), iVar1 != 0)) {
+                cVar2 = (**(code **)(**(int **)(iVar1 + 0xb0) + 100))();
+                if (cVar2 == '\0') {
+                  *(DWORD *)(iVar7 + 0xa8 + param_1[0x78]) = DVar5;
+                  FUN_0072f6c0(param_1,uVar8,3);
                 }
               }
             }
           }
         }
-        iVar6 += 0xc4;
+        iVar7 += 0xc4;
       }
-      FUN_00746e60((int)(param_1 + 0xcf));
+      C_NetTransport__Unlock(param_1 + 0xcf);
     }
     C_NetGame__UnlockPlayers((int)param_1);
   }
@@ -711,7 +712,7 @@ uint32_t FUN_0072d4b0(void *_this,uint32_t param_1,uint32_t *param_2,uint32_t pa
         this_00 = *(void **)(*(int *)((int)_this + 0x1e0) + 0x6c + iVar1);
         if ((this_00 != 0) && (*(int *)(*(int *)((int)_this + 0x1e0) + iVar1 + 0x74) == 2))
         {
-          FUN_00746300(this_00,param_2,param_3,(int)param_4 >> 5,param_4 & 3);
+          C_NetConnection__Send(this_00,param_2,param_3,(int)param_4 >> 5,param_4 & 3);
         }
       }
       iVar1 += 0xc4;
@@ -720,7 +721,8 @@ uint32_t FUN_0072d4b0(void *_this,uint32_t param_1,uint32_t *param_2,uint32_t pa
     return 0;
   }
   if (*(void **)((int)_this + 0x334) != 0) {
-    FUN_00746300(*(void **)((int)_this + 0x334),param_2,param_3,(int)param_4 >> 5,param_4 & 3);
+    C_NetConnection__Send
+              (*(void **)((int)_this + 0x334),param_2,param_3,(int)param_4 >> 5,param_4 & 3);
   }
   return 0;
 }

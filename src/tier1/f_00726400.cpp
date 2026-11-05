@@ -44,15 +44,15 @@ int FUN_00726470(uint32_t *param_1,uint32_t param_2,uint32_t param_3,int param_4
   C_game *pCVar6;
   void *pvVar7;
   C_MpMap *pCVar8;
-  int iVar9;
+  uint32_t *puVar9;
   uint32_t *puVar10;
-  uint32_t *puVar11;
-  C_str *pCVar12;
-  int iVar13;
-  DWORD DVar14;
+  C_str *pCVar11;
+  int iVar12;
+  DWORD DVar13;
   C_GameApp *_this;
-  char cVar15;
-  uint32_t uVar16;
+  char cVar14;
+  uint32_t uVar15;
+  int iVar16;
   int iVar17;
   uint8_t *pbVar18;
   char *pcVar19;
@@ -98,15 +98,15 @@ int FUN_00726470(uint32_t *param_1,uint32_t param_2,uint32_t param_3,int param_4
   uint32_t local_18;
   uint32_t *local_14;
   int local_8;
-  iVar9 = param_4;
-  puVar10 = param_1;
+  iVar17 = param_4;
+  puVar9 = param_1;
   local_8 = 0xffffffff;
   switch(param_3) {
   case 0xffff0007:
     local_18 = 0;
-    iVar17 = (**(code **)(*(int *)*param_1 + 0x24))
+    iVar16 = (**(code **)(*(int *)*param_1 + 0x24))
                        ((int *)*param_1,*(uint32_t *)(param_4 + 4),0,&local_18,0);
-    if ((-1 < iVar17) || (iVar17 == -0x7fea7f00)) {
+    if ((-1 < iVar16) || (iVar16 == -0x7fea7f00)) {
       local_14 = tier1_operator_new(local_18);
       puVar21 = local_14;
       for (uVar20 = local_18 >> 2; uVar20 != 0; uVar20 = uVar20 - 1) {
@@ -118,19 +118,19 @@ int FUN_00726470(uint32_t *param_1,uint32_t param_2,uint32_t param_3,int param_4
         puVar21 = (uint32_t *)((int)puVar21 + 1);
       }
       *local_14 = 0x18;
-      iVar9 = (**(code **)(*(int *)*puVar10 + 0x24))
-                        ((int *)*puVar10,*(uint32_t *)(param_4 + 4),local_14,&local_18,0);
-      if (iVar9 < 0) {
-        puVar10[0x1413] = iVar9;
-        puVar10[0x1414] = "DPserver->GetClientInfo failed (2)";
-        return iVar9;
+      iVar17 = (**(code **)(*(int *)*puVar9 + 0x24))
+                         ((int *)*puVar9,*(uint32_t *)(param_4 + 4),local_14,&local_18,0);
+      if (iVar17 < 0) {
+        puVar9[0x1413] = iVar17;
+        puVar9[0x1414] = "DPserver->GetClientInfo failed (2)";
+        return iVar17;
       }
-      local_1c = (LPCRITICAL_SECTION)(puVar10 + 0x106);
-      iVar9 = *(int *)(param_4 + 8);
-      local_20 = (uint8_t *)iVar9;
+      local_1c = (LPCRITICAL_SECTION)(puVar9 + 0x106);
+      iVar17 = *(int *)(param_4 + 8);
+      local_20 = (uint8_t *)iVar17;
       EnterCriticalSection(local_1c);
-      uVar20 = (iVar9 * 0x30 + (int)local_20) * 4;
-      *(uint32_t *)(uVar20 + puVar10[0x78]) = *(uint32_t *)(param_4 + 4);
+      uVar20 = (iVar17 * 0x30 + (int)local_20) * 4;
+      *(uint32_t *)(uVar20 + puVar9[0x78]) = *(uint32_t *)(param_4 + 4);
       param_3 = uVar20;
       if ((g_gameProfile.m_unicodeFont != false) ||
          (bVar25 = HasCjkCharacters((uint16_t *)local_14[2]), bVar25)) {
@@ -140,19 +140,19 @@ int FUN_00726470(uint32_t *param_1,uint32_t param_2,uint32_t param_3,int param_4
       else {
         FUN_00724b30(local_148,(LPCWSTR)local_14[2],0x32);
       }
-      param_4 = FUN_00724c20(puVar10,local_148,1);
-      iVar9 = puVar10[0x78];
+      param_4 = FUN_00724c20(puVar9,local_148,1);
+      iVar17 = puVar9[0x78];
       pcVar19 = local_148;
       do {
-        cVar15 = *pcVar19;
-        pcVar19[(uVar20 + 8 + iVar9) - (int)local_148] = cVar15;
+        cVar14 = *pcVar19;
+        pcVar19[(uVar20 + 8 + iVar17) - (int)local_148] = cVar14;
         pcVar19++;
-      } while (cVar15 != '\0');
+      } while (cVar14 != '\0');
       if (1 < param_4) {
-        pCVar12 = C_fstr_Construct(&local_50,&DAT_0084494c,param_4);
-        pcVar19 = pCVar12->rep->chars;
-        if (pCVar12->rep == 0) {
-          pcVar19 = &DAT_00867a90;
+        pCVar11 = C_fstr_Construct(&local_50,&DAT_0084494c,param_4);
+        pcVar19 = pCVar11->rep->chars;
+        if (pCVar11->rep == 0) {
+          pcVar19 = (char *)&DAT_00867a90;
         }
         uVar20 = 0xffffffff;
         do {
@@ -160,73 +160,73 @@ int FUN_00726470(uint32_t *param_1,uint32_t param_2,uint32_t param_3,int param_4
           if (uVar20 == 0) break;
           uVar20--;
           pcVar24 = pcVar19 + 1;
-          cVar15 = *pcVar19;
+          cVar14 = *pcVar19;
           pcVar19 = pcVar24;
-        } while (cVar15 != '\0');
+        } while (cVar14 != '\0');
         uVar20 = ~uVar20;
-        iVar9 = -1;
-        pcVar19 = (char *)(param_3 + 8 + puVar10[0x78]);
+        iVar17 = -1;
+        pcVar19 = (char *)(param_3 + 8 + puVar9[0x78]);
         do {
           pcVar23 = pcVar19;
-          if (iVar9 == 0) break;
-          iVar9--;
+          if (iVar17 == 0) break;
+          iVar17--;
           pcVar23 = pcVar19 + 1;
-          cVar15 = *pcVar19;
+          cVar14 = *pcVar19;
           pcVar19 = pcVar23;
-        } while (cVar15 != '\0');
+        } while (cVar14 != '\0');
         pcVar19 = pcVar24 + -uVar20;
         pcVar24 = pcVar23 - 1;
         memcpy(pcVar24, pcVar19, uVar20);
         pcVar19 += uVar20;
         pcVar24 += uVar20;
-        uVar16 = 0;
+        uVar15 = 0;
         uVar20 = 0;
-        puVar10 = param_1;
+        puVar9 = param_1;
         uVar20 = param_3;
         if ((local_50.rep != 0) &&
            ((local_50.rep)->refCount = (local_50.rep)->refCount - 1, (local_50.rep)->refCount == 0)
            ) {
           tier1_operator_delete(local_50.rep);
-          puVar10 = param_1;
+          puVar9 = param_1;
           uVar20 = param_3;
         }
       }
       tier1_operator_delete(local_14);
-      param_1 = (uint32_t *)puVar10[0x78];
-      DVar14 = timeGetTime();
-      *(DWORD *)(uVar20 + 0xa8 + (int)param_1) = DVar14;
-      *(uint8_t *)(uVar20 + 0xa1 + puVar10[0x78]) = 0;
+      param_1 = (uint32_t *)puVar9[0x78];
+      DVar13 = timeGetTime();
+      *(DWORD *)(uVar20 + 0xa8 + (int)param_1) = DVar13;
+      *(uint8_t *)(uVar20 + 0xa1 + puVar9[0x78]) = 0;
       param_1 = tier1_operator_new(0x50);
       local_8 = 2;
       if ((C_auto_00816684 *)param_1 == 0) {
-        puVar21 = 0;
+        pvVar7 = 0;
       }
       else {
-        puVar21 = C_auto_00816684__FUN_00746180
-                            ((C_auto_00816684 *)param_1,local_20,
-                             *(uint32_t *)(uVar20 + 4 + puVar10[0x78]),puVar10 + 0xd3);
+        pvVar7 = C_auto_00816684__C_NetConnection__C_NetConnection
+                           ((C_auto_00816684 *)param_1,(int)local_20,
+                            *(uint32_t *)(uVar20 + 4 + puVar9[0x78]),puVar9 + 0xd3);
       }
       local_8 = 0xffffffff;
-      *(uint32_t **)(param_3 + 0x6c + puVar10[0x78]) = puVar21;
-      puVar21 = (uint32_t *)(param_3 + 0x40 + puVar10[0x78]);
+      *(void **)(param_3 + 0x6c + puVar9[0x78]) = pvVar7;
+      puVar21 = (uint32_t *)(param_3 + 0x40 + puVar9[0x78]);
       memset(puVar21, 0, 9 * sizeof(*puVar21));
       puVar21 += 9;
-      iVar9 = 0;
+      iVar17 = 0;
       LeaveCriticalSection(local_1c);
-      FUN_00746fb0(puVar10 + 0xcf,*(int *)(param_3 + 0x6c + puVar10[0x78]));
+      C_NetTransport__Add(puVar9 + 0xcf,*(void **)(param_3 + 0x6c + puVar9[0x78]));
       return 0;
     }
-    if (iVar17 != -0x7fea7be0) {
-      puVar10[0x1413] = iVar17;
-      puVar10[0x1414] = "DPserver->GetClientInfo failed (1)";
-      return iVar17;
+    if (iVar16 != -0x7fea7be0) {
+      puVar9[0x1413] = iVar16;
+      puVar9[0x1414] = "DPserver->GetClientInfo failed (1)";
+      return iVar16;
     }
     if (((uint8_t)g_gameRole & 2) != 0) {
       FUN_00725e10(local_20c);
-      local_20c[0] = *(uint32_t *)(iVar9 + 4);
-      EnterCriticalSection((LPCRITICAL_SECTION)(puVar10 + 0x106));
-      FUN_00727300(puVar10 + 0x77,(uint32_t *)puVar10[0x79],1,local_20c);
-      LeaveCriticalSection((LPCRITICAL_SECTION)(puVar10 + 0x106));
+      local_20c[0] = *(uint32_t *)(iVar17 + 4);
+      EnterCriticalSection((LPCRITICAL_SECTION)(puVar9 + 0x106));
+      FUN_00727300(puVar9 + 0x77,(uint32_t *)puVar9[0x79],1,local_20c);
+      LeaveCriticalSection((LPCRITICAL_SECTION)(puVar9 + 0x106));
       return 0;
     }
     break;
@@ -236,43 +236,42 @@ int FUN_00726470(uint32_t *param_1,uint32_t param_2,uint32_t param_3,int param_4
     param_1 = 0;
     param_4 = 0;
     while( true ) {
-      if ((puVar10[0x78] == 0) ||
-         ((uint32_t *)((int)(puVar10[0x79] - puVar10[0x78]) / 0xc4) <= param_1))
-      goto LAB_00727179;
-      if (*(uint32_t *)(param_4 + puVar10[0x78]) == param_3) break;
+      if ((puVar9[0x78] == 0) ||
+         ((uint32_t *)((int)(puVar9[0x79] - puVar9[0x78]) / 0xc4) <= param_1)) goto LAB_00727179;
+      if (*(uint32_t *)(param_4 + puVar9[0x78]) == param_3) break;
       param_1 = (uint32_t *)((int)param_1 + 1);
       param_4 += 0xc4;
     }
     iVar17 = (int)param_1 * 0xc4;
-    iVar9 = *(int *)(iVar17 + 0x6c + puVar10[0x78]);
-    if (iVar9 != 0) {
-      FUN_00747180(&DAT_0097d3ac,iVar9);
-      puVar21 = *(uint32_t **)(iVar17 + 0x6c + puVar10[0x78]);
+    pvVar7 = *(void **)(iVar17 + 0x6c + puVar9[0x78]);
+    if (pvVar7 != 0) {
+      C_NetTransport__Remove(&DAT_0097d3ac,pvVar7);
+      puVar21 = *(uint32_t **)(iVar17 + 0x6c + puVar9[0x78]);
       if (puVar21 != 0) {
         (**(code **)*puVar21)(1);
       }
-      *(uint32_t *)(iVar17 + 0x6c + puVar10[0x78]) = 0;
+      *(uint32_t *)(iVar17 + 0x6c + puVar9[0x78]) = 0;
     }
-    FUN_00731990(&g_netGame,*(int *)(iVar17 + 0x70 + puVar10[0x78]));
-    *(uint32_t *)(iVar17 + 0x70 + puVar10[0x78]) = 0xffffffff;
+    FUN_00731990(&g_netGame,*(int *)(iVar17 + 0x70 + puVar9[0x78]));
+    *(uint32_t *)(iVar17 + 0x70 + puVar9[0x78]) = 0xffffffff;
 LAB_00727179:
-    LeaveCriticalSection((LPCRITICAL_SECTION)(puVar10 + 0x106));
+    LeaveCriticalSection((LPCRITICAL_SECTION)(puVar9 + 0x106));
     pCVar6 = GetGame();
     if (pCVar6 != 0) {
-      if (puVar10[0x78] == 0) {
-        puVar10 = 0;
+      if (puVar9[0x78] == 0) {
+        puVar9 = 0;
       }
       else {
-        puVar10 = (uint32_t *)((int)(puVar10[0x79] - puVar10[0x78]) / 0xc4);
+        puVar9 = (uint32_t *)((int)(puVar9[0x79] - puVar9[0x78]) / 0xc4);
       }
-      if (param_1 != puVar10) {
+      if (param_1 != puVar9) {
         bVar25 = false;
-        iVar13 = 0;
-        iVar17 = 0;
-        iVar9 = 2;
+        iVar12 = 0;
+        iVar16 = 0;
+        iVar17 = 2;
         uVar20 = param_3;
         _this = GetGameApp();
-        C_GameApp__SendGameMessage(_this,iVar9,iVar17,uVar20,iVar13,bVar25);
+        C_GameApp__SendGameMessage(_this,iVar17,iVar16,uVar20,iVar12,bVar25);
         return 0;
       }
     }
@@ -282,7 +281,7 @@ LAB_00727179:
     if ((pCVar6 != 0) && (pCVar6 = GetGame(), 99 < pCVar6->m_missionTime)) {
       pvVar7 = tier1_operator_new(1000);
       C_GrowingBitStream__C_GrowingBitStream(&local_40);
-      iVar9 = param_4;
+      iVar17 = param_4;
       local_40.m_010 = (void *)0x1f40;
       local_8 = 0;
       fVar4 = (long double)log2((long double)2.0);
@@ -295,7 +294,7 @@ LAB_00727179:
       pCVar8 = S_MultiplayerSettings__GetCurrentMap(g_gameProfile.m_mpSettings);
       pCVar3 = (pCVar8->m_name).rep;
       if (pCVar3 == 0) {
-        pcVar19 = &DAT_00867a90;
+        pcVar19 = (char *)&DAT_00867a90;
       }
       else {
         pcVar19 = pCVar3->chars;
@@ -303,17 +302,17 @@ LAB_00727179:
       C_BitStream__WriteString((C_BitStream *)&local_40,pcVar19);
       C_BitStream__WriteBits((C_BitStream *)&local_40,g_versionMinor,8);
       C_BitStream__WriteBits((C_BitStream *)&local_40,g_versionMajor,8);
-      iVar17 = (g_gameProfile.m_mpSettings)->gameType;
+      iVar16 = (g_gameProfile.m_mpSettings)->gameType;
       log2((long double)4.0);
       lVar26 = tier1_ftol();
-      C_BitStream__WriteBits((C_BitStream *)&local_40,iVar17,(int)lVar26);
+      C_BitStream__WriteBits((C_BitStream *)&local_40,iVar16,(int)lVar26);
       param_4 = CONCAT31(GH_PIECE(param_4,1,3),(g_gameProfile.m_mpSettings)->dedicated);
       C_BitStream__WriteBits
                 ((C_BitStream *)&local_40,(uint32_t)(g_gameProfile.m_mpSettings)->dedicated,1);
       C_BitStream__WriteBits((C_BitStream *)&local_40,(g_gameProfile.m_mpSettings)->maxClients,6);
-      puVar10 = param_1;
-      iVar17 = FUN_00730410((int)param_1);
-      C_BitStream__WriteBits((C_BitStream *)&local_40,iVar17,6);
+      puVar9 = param_1;
+      iVar16 = FUN_00730410((int)param_1);
+      C_BitStream__WriteBits((C_BitStream *)&local_40,iVar16,6);
       pCVar3 = ((g_gameProfile.m_mpSettings)->password).rep;
       if (pCVar3 == 0) {
         uVar20 = 0;
@@ -323,30 +322,30 @@ LAB_00727179:
       }
       C_BitStream__WriteBits((C_BitStream *)&local_40,(uint32_t)(uVar20 != 0),1);
       if ((g_gameProfile.m_mpSettings)->unknown174 == 1) {
-        iVar17 = (g_gameProfile.m_mpSettings)->port;
+        iVar16 = (g_gameProfile.m_mpSettings)->port;
       }
       else {
-        iVar17 = 0x7b4f;
+        iVar16 = 0x7b4f;
       }
-      C_BitStream__WriteBits((C_BitStream *)&local_40,iVar17,0x10);
+      C_BitStream__WriteBits((C_BitStream *)&local_40,iVar16,0x10);
       C_BitStream__WriteBits
                 ((C_BitStream *)&local_40,(uint32_t)((g_gameProfile.m_mpSettings)->unknown178 != 0),1);
       C_BitStream__WriteBits((C_BitStream *)&local_40,2,2);
-      if (**(int **)(iVar9 + 0xc) == 1) {
+      if (**(int **)(iVar17 + 0xc) == 1) {
         FUN_007272c0(local_b8,(uint8_t *)((int)&param_1 + 3));
         GH_PIECE(local_8,0,1) = 1;
-        FUN_00730be0(puVar10,local_b8);
+        FUN_00730be0(puVar9,local_b8);
         FUN_007263c0(local_b8,&local_40);
         local_8 = (uint32_t)GH_PIECE(local_8,1,3) << 8;
         vector_tidy_7272e0((int)local_b8);
       }
       uVar20 = local_40.m_008 * 0x20 + local_40.m_00c;
-      *(void **)(iVar9 + 0x18) = local_40.m_004;
-      iVar17 = (int)uVar20 >> 3;
+      *(void **)(iVar17 + 0x18) = local_40.m_004;
+      iVar16 = (int)uVar20 >> 3;
       if ((uVar20 & 7) != 0) {
-        iVar17++;
+        iVar16++;
       }
-      *(int *)(iVar9 + 0x1c) = iVar17 + 1;
+      *(int *)(iVar17 + 0x1c) = iVar16 + 1;
       local_8 = 0xffffffff;
       C_GrowingBitStream__dtor_C_GrowingBitStream(&local_40);
       return 0;
@@ -356,36 +355,36 @@ LAB_00727179:
     pbVar18 = *(uint8_t **)(param_4 + 4);
     local_28 = pbVar18;
     local_24 = tier1_operator_new(1);
-    puVar10 = param_1;
-    *(uint8_t **)(iVar9 + 0xc) = local_24;
-    *(uint32_t *)(iVar9 + 0x10) = 1;
+    puVar9 = param_1;
+    *(uint8_t **)(iVar17 + 0xc) = local_24;
+    *(uint32_t *)(iVar17 + 0x10) = 1;
     pSVar5 = g_gameProfile.m_mpSettings;
-    if ((((pbVar18 == 0) || (*(int *)(iVar9 + 8) != 0x54)) ||
+    if ((((pbVar18 == 0) || (*(int *)(iVar17 + 8) != 0x54)) ||
         (*(int *)(pbVar18 + 0x14) != g_versionMajor)) ||
        ((*(int *)(pbVar18 + 0x18) != g_versionMinor || (*(int *)(pbVar18 + 0x1c) == 1)))) {
       *local_24 = 7;
       return -1;
     }
-    iVar9 = FUN_00730410((int)param_1);
-    if (pSVar5->maxClients <= iVar9) {
+    iVar17 = FUN_00730410((int)param_1);
+    if (pSVar5->maxClients <= iVar17) {
       *local_24 = 3;
       return -1;
     }
-    local_1c = (LPCRITICAL_SECTION)(puVar10 + 0x106);
+    local_1c = (LPCRITICAL_SECTION)(puVar9 + 0x106);
     EnterCriticalSection(local_1c);
     pCVar3 = ((g_gameProfile.m_mpSettings)->password).rep;
     if ((pCVar3 != 0) && (pCVar3->length != 0)) {
       pcVar19 = pCVar3->chars;
       pbVar18 = local_28;
       if (pCVar3 == 0) {
-        pcVar19 = &DAT_00867a90;
+        pcVar19 = (char *)&DAT_00867a90;
       }
       do {
         bVar1 = *pcVar19;
         bVar25 = bVar1 < *pbVar18;
         if (bVar1 != *pbVar18) {
 LAB_00726866:
-          iVar9 = (1 - (uint32_t)bVar25) - (uint32_t)(bVar25 != 0);
+          iVar17 = (1 - (uint32_t)bVar25) - (uint32_t)(bVar25 != 0);
           goto LAB_0072686b;
         }
         if (bVar1 == 0) break;
@@ -395,10 +394,10 @@ LAB_00726866:
         pcVar19 += 2;
         pbVar18 += 2;
       } while (bVar1 != 0);
-      iVar9 = 0;
+      iVar17 = 0;
 LAB_0072686b:
-      puVar10 = param_1;
-      if (iVar9 != 0) {
+      puVar9 = param_1;
+      if (iVar17 != 0) {
         LeaveCriticalSection(local_1c);
         *local_24 = 4;
         return -1;
@@ -409,7 +408,7 @@ LAB_0072686b:
     local_114 = 0xffffffff;
     param_3 = 0;
     while( true ) {
-      if ((puVar10[0x78] == 0) || ((uint32_t)((int)(param_1[0x79] - puVar10[0x78]) / 0xc4) <= uVar20))
+      if ((puVar9[0x78] == 0) || ((uint32_t)((int)(param_1[0x79] - puVar9[0x78]) / 0xc4) <= uVar20))
       goto LAB_00726a41;
       if ((*(int *)(param_3 + param_1[0x78]) == 0) &&
          (*(char *)(param_3 + param_1[0x78] + 0xa2) == '\0')) break;
@@ -421,11 +420,11 @@ LAB_0072686b:
     param_3 = (int)&local_114 - (int)puVar21;
     *puVar21 = 0xffffffff;
     puVar21[1] = local_110;
-    puVar10 = puVar21 + 2;
+    puVar9 = puVar21 + 2;
     do {
-      *(uint8_t *)puVar10 = *(uint8_t *)(param_3 + (int)puVar10);
-      puVar10 = (uint32_t *)((int)puVar10 + 1);
-    } while ((uint32_t)((-8 - (int)puVar21) + (int)puVar10) < 0x33);
+      *(uint8_t *)puVar9 = *(uint8_t *)(param_3 + (int)puVar9);
+      puVar9 = (uint32_t *)((int)puVar9 + 1);
+    } while ((uint32_t)((-8 - (int)puVar21) + (int)puVar9) < 0x33);
     puVar21[0xf] = local_d8;
     FUN_00749fa0(puVar21 + 0x10,local_d4);
     puVar21[0x19] = local_b0;
@@ -435,12 +434,12 @@ LAB_0072686b:
     puVar21[0x1d] = local_a0;
     puVar21[0x1e] = local_9c;
     puVar21[0x1f] = local_98;
-    puVar10 = puVar21 + 0x20;
+    puVar9 = puVar21 + 0x20;
     do {
-      puVar11 = (uint32_t *)((int)puVar10 + 1);
-      *(uint8_t *)puVar10 = *(uint8_t *)((int)puVar10 + param_3);
-      puVar10 = puVar11;
-    } while ((uint32_t)((-0x80 - (int)puVar21) + (int)puVar11) < 0x21);
+      puVar10 = (uint32_t *)((int)puVar9 + 1);
+      *(uint8_t *)puVar9 = *(uint8_t *)((int)puVar9 + param_3);
+      puVar9 = puVar10;
+    } while ((uint32_t)((-0x80 - (int)puVar21) + (int)puVar10) < 0x21);
     *(uint8_t *)((int)puVar21 + 0xa1) = local_73;
     *(uint8_t *)((int)puVar21 + 0xa2) = local_72;
     puVar21[0x29] = local_70;
@@ -466,14 +465,14 @@ LAB_00726a41:
       }
       FUN_00727300(param_1 + 0x77,(uint32_t *)param_1[0x79],1,&local_114);
     }
-    puVar10 = param_1;
+    puVar9 = param_1;
     param_3 = param_1[0x78];
     puVar21 = (uint32_t *)(local_18 * 0xc4);
     local_14 = puVar21;
     uVar20 = FUN_00725190(*(int **)(param_4 + 0x1c));
     *(uint32_t *)((int)puVar21 + 4 + param_3) = uVar20;
     if ((g_gameProfile.m_mpSettings)->unknown174 != 1) {
-      *(uint32_t *)((int)puVar21 + 0x70 + puVar10[0x78]) = 0xffffffff;
+      *(uint32_t *)((int)puVar21 + 0x70 + puVar9[0x78]) = 0xffffffff;
 LAB_00726cf1:
       LeaveCriticalSection(local_1c);
       *(uint32_t *)(param_4 + 0x18) = local_18;
@@ -481,15 +480,15 @@ LAB_00726cf1:
       return 0;
     }
     param_3 &= 0xffffff;
-    C_NetGame__LockPlayers((int)puVar10);
+    C_NetGame__LockPlayers((int)puVar9);
     local_28 += 0x20;
-    local_20 = (uint8_t *)FUN_00724c20(puVar10,(char *)local_28,1);
-    C_NetGame__UnlockPlayers((int)puVar10);
+    local_20 = (uint8_t *)FUN_00724c20(puVar9,(char *)local_28,1);
+    C_NetGame__UnlockPlayers((int)puVar9);
     if (1 < (int)local_20) {
-      pCVar12 = C_fstr_Construct(&local_4c,&DAT_0084494c,local_20);
-      pcVar19 = pCVar12->rep->chars;
-      if (pCVar12->rep == 0) {
-        pcVar19 = &DAT_00867a90;
+      pCVar11 = C_fstr_Construct(&local_4c,&DAT_0084494c,local_20);
+      pcVar19 = pCVar11->rep->chars;
+      if (pCVar11->rep == 0) {
+        pcVar19 = (char *)&DAT_00867a90;
       }
       uVar20 = 0xffffffff;
       do {
@@ -497,16 +496,16 @@ LAB_00726cf1:
         if (uVar20 == 0) break;
         uVar20--;
         pcVar24 = pcVar19 + 1;
-        cVar15 = *pcVar19;
+        cVar14 = *pcVar19;
         pcVar19 = pcVar24;
-      } while (cVar15 != '\0');
+      } while (cVar14 != '\0');
       uVar20 = ~uVar20;
-      iVar9 = -1;
+      iVar17 = -1;
       pbVar18 = local_28;
       do {
         pbVar22 = pbVar18;
-        if (iVar9 == 0) break;
-        iVar9--;
+        if (iVar17 == 0) break;
+        iVar17--;
         pbVar22 = pbVar18 + 1;
         bVar1 = *pbVar18;
         pbVar18 = pbVar22;
@@ -516,32 +515,32 @@ LAB_00726cf1:
       memcpy(pbVar18, pcVar19, uVar20);
       pcVar19 += uVar20;
       pbVar18 += uVar20;
-      uVar16 = 0;
+      uVar15 = 0;
       uVar20 = 0;
-      puVar10 = param_1;
+      puVar9 = param_1;
       puVar21 = local_14;
       if ((local_4c.rep != 0) &&
          ((local_4c.rep)->refCount = (local_4c.rep)->refCount - 1, (local_4c.rep)->refCount == 0))
       {
         tier1_operator_delete(local_4c.rep);
-        puVar10 = param_1;
+        puVar9 = param_1;
         puVar21 = local_14;
       }
     }
-    iVar17 = 0;
-    local_20 = (uint8_t *)(puVar10 + 0x175);
-    iVar9 = *(int *)((int)puVar21 + 4 + puVar10[0x78]);
-    local_48 = (double)CONCAT44(iVar9,(uint32_t)local_48);
+    iVar16 = 0;
+    local_20 = (uint8_t *)(puVar9 + 0x175);
+    iVar17 = *(int *)((int)puVar21 + 4 + puVar9[0x78]);
+    local_48 = (double)CONCAT44(iVar17,(uint32_t)local_48);
     do {
       pbVar18 = local_20;
       pbVar22 = local_28;
-      if (*(int *)(local_20 - 0xc) == iVar9) {
+      if (*(int *)(local_20 - 0xc) == iVar17) {
         do {
           bVar1 = *pbVar18;
           bVar25 = bVar1 < *pbVar22;
           if (bVar1 != *pbVar22) {
 LAB_00726bfc:
-            iVar13 = (1 - (uint32_t)bVar25) - (uint32_t)(bVar25 != 0);
+            iVar12 = (1 - (uint32_t)bVar25) - (uint32_t)(bVar25 != 0);
             goto LAB_00726c01;
           }
           if (bVar1 == 0) break;
@@ -551,31 +550,31 @@ LAB_00726bfc:
           pbVar18 += 2;
           pbVar22 += 2;
         } while (bVar1 != 0);
-        iVar13 = 0;
+        iVar12 = 0;
 LAB_00726c01:
-        if (iVar13 == 0) {
-          if (param_1[iVar17 * 0x2e + 0x182] == 4) {
-            param_1[iVar17 * 0x2e + 0x182] = 7;
-            *(int *)((int)local_14 + 0x70 + param_1[0x78]) = iVar17;
-            cVar15 = '\x01';
+        if (iVar12 == 0) {
+          if (param_1[iVar16 * 0x2e + 0x182] == 4) {
+            param_1[iVar16 * 0x2e + 0x182] = 7;
+            *(int *)((int)local_14 + 0x70 + param_1[0x78]) = iVar16;
+            cVar14 = '\x01';
           }
           else {
-            cVar15 = GH_PIECE(param_3,3,1);
+            cVar14 = GH_PIECE(param_3,3,1);
           }
-          if (param_1[iVar17 * 0x2e + 0x182] == 6) {
+          if (param_1[iVar16 * 0x2e + 0x182] == 6) {
             *(uint32_t *)((int)local_14 + param_1[0x78]) = 0;
             *(uint8_t *)((int)local_14 + 8 + param_1[0x78]) = 0;
             *local_24 = 6;
             LeaveCriticalSection(local_1c);
             return -1;
           }
-          if (cVar15 != '\0') goto LAB_00726cf1;
+          if (cVar14 != '\0') goto LAB_00726cf1;
           goto LAB_00726ca0;
         }
       }
-      iVar17++;
+      iVar16++;
       local_20 += 0xb8;
-      if (99 < iVar17) {
+      if (99 < iVar16) {
 LAB_00726ca0:
         *(uint32_t *)((int)local_14 + param_1[0x78]) = 0;
         *(uint8_t *)((int)local_14 + 8 + param_1[0x78]) = 0;
@@ -588,14 +587,14 @@ LAB_00726ca0:
     local_1c = (LPCRITICAL_SECTION)(param_1 + 0x106);
     EnterCriticalSection(local_1c);
     iVar17 = *(int *)(param_4 + 4) * 0xc4;
-    *(uint32_t *)(iVar17 + puVar10[0x78]) = 0;
-    *(uint8_t *)(iVar17 + 8 + puVar10[0x78]) = 0;
-    iVar9 = *(int *)(iVar17 + 0x6c + puVar10[0x78]);
-    if (iVar9 != 0) {
-      FUN_00747180(puVar10 + 0xcf,iVar9);
-      puVar10 = *(uint32_t **)(iVar17 + 0x6c + puVar10[0x78]);
-      if (puVar10 != 0) {
-        (**(code **)*puVar10)(1);
+    *(uint32_t *)(iVar17 + puVar9[0x78]) = 0;
+    *(uint8_t *)(iVar17 + 8 + puVar9[0x78]) = 0;
+    pvVar7 = *(void **)(iVar17 + 0x6c + puVar9[0x78]);
+    if (pvVar7 != 0) {
+      C_NetTransport__Remove(puVar9 + 0xcf,pvVar7);
+      puVar9 = *(uint32_t **)(iVar17 + 0x6c + puVar9[0x78]);
+      if (puVar9 != 0) {
+        (**(code **)*puVar9)(1);
       }
     }
     LeaveCriticalSection(local_1c);

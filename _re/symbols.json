@@ -39598,6 +39598,166 @@
   "name": "C_NetPacket::Read",
   "proto": "void __thiscall Read(void *this, void * stream)"
  },
+ "00746180": {
+  "module": "net_replication",
+  "name": "C_NetConnection::C_NetConnection",
+  "proto": "void * __thiscall C_NetConnection(void *this, int id, uint address, void * socket)"
+ },
+ "00746280": {
+  "module": "net_replication",
+  "name": "C_NetConnection::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "007462a0": {
+  "module": "net_replication",
+  "name": "C_NetConnection::~C_NetConnection",
+  "proto": "void __thiscall ~C_NetConnection(void *this)"
+ },
+ "00746300": {
+  "module": "net_replication",
+  "name": "C_NetConnection::Send",
+  "proto": "void * __thiscall Send(void *this, void * data, int size, int kind, int channel)"
+ },
+ "00746380": {
+  "module": "net_replication",
+  "name": "C_NetConnection::Receive",
+  "proto": "bool __thiscall Receive(void *this, void * data, void * size, void * kind, void * flags)"
+ },
+ "007463e0": {
+  "module": "net_replication",
+  "name": "C_NetConnection::Resend",
+  "proto": "void __thiscall Resend(void *this, void * packet)"
+ },
+ "00746410": {
+  "module": "net_replication",
+  "name": "C_NetConnection::PopReceived",
+  "proto": "void * __fastcall PopReceived(void * connection)"
+ },
+ "00746460": {
+  "module": "net_replication",
+  "name": "C_NetConnection::SendPing",
+  "proto": "void __fastcall SendPing(void * connection)"
+ },
+ "00746550": {
+  "module": "net_replication",
+  "name": "C_NetConnection::PingIfDue",
+  "proto": "void __fastcall PingIfDue(void * connection)"
+ },
+ "00746580": {
+  "module": "net_replication",
+  "name": "C_NetConnection::Flush",
+  "proto": "void __thiscall Flush(void *this, bool force)"
+ },
+ "007465d0": {
+  "module": "net_replication",
+  "name": "C_NetConnection::HandleDatagram",
+  "proto": "void __thiscall HandleDatagram(void *this, uint type, void * data, int size, void * callback)"
+ },
+ "007467f0": {
+  "module": "net_replication",
+  "name": "C_NetConnection::ReadPackets",
+  "proto": "void __thiscall ReadPackets(void *this, void * data, int size)"
+ },
+ "007468f0": {
+  "module": "net_replication",
+  "name": "C_NetConnection::Gather",
+  "proto": "void __thiscall Gather(void *this, void * data, void * size, bool force)"
+ },
+ "00746a50": {
+  "module": "net_replication",
+  "name": "C_NetConnection::ResendAll",
+  "proto": "void __fastcall ResendAll(void * connection)"
+ },
+ "00746a90": {
+  "module": "net_replication",
+  "name": "C_NetConnection::AcknowledgeAll",
+  "proto": "void __fastcall AcknowledgeAll(void * connection)"
+ },
+ "00746ac0": {
+  "module": "net_replication",
+  "name": "C_NetConnection::SetResendTime",
+  "proto": "void __thiscall SetResendTime(void *this, int ms)"
+ },
+ "00746b30": {
+  "module": "net_replication",
+  "name": "ReceiveThreadEntry",
+  "proto": "uint __stdcall ReceiveThreadEntry(void * transport)"
+ },
+ "00746b40": {
+  "module": "net_replication",
+  "name": "C_NetTransport::C_NetTransport",
+  "proto": "void * __fastcall C_NetTransport(void * transport)"
+ },
+ "00746bb0": {
+  "module": "net_replication",
+  "name": "C_NetTransport::~C_NetTransport",
+  "proto": "void __fastcall ~C_NetTransport(void * transport)"
+ },
+ "00746c10": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Start",
+  "proto": "void __thiscall Start(void *this, int port)"
+ },
+ "00746ca0": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Stop",
+  "proto": "void __fastcall Stop(void * transport)"
+ },
+ "00746cf0": {
+  "module": "net_replication",
+  "name": "C_NetTransport::DeleteConnections",
+  "proto": "void __fastcall DeleteConnections(void * transport)"
+ },
+ "00746d60": {
+  "module": "net_replication",
+  "name": "C_NetTransport::FindById",
+  "proto": "void * __thiscall FindById(void *this, int id)"
+ },
+ "00746dc0": {
+  "module": "net_replication",
+  "name": "C_NetTransport::FindByAddress",
+  "proto": "void * __thiscall FindByAddress(void *this, uint address, int port)"
+ },
+ "00746e40": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Lock",
+  "proto": "void * __fastcall Lock(void * transport)"
+ },
+ "00746e60": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Unlock",
+  "proto": "void __fastcall Unlock(void * transport)"
+ },
+ "00746e70": {
+  "module": "net_replication",
+  "name": "C_NetTransport::ReceiveAll",
+  "proto": "void __fastcall ReceiveAll(void * transport)"
+ },
+ "00746fb0": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Add",
+  "proto": "void __thiscall Add(void *this, void * connection)"
+ },
+ "00747180": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Remove",
+  "proto": "void __thiscall Remove(void *this, void * connection)"
+ },
+ "00747200": {
+  "module": "net_replication",
+  "name": "C_NetTransport::Tick",
+  "proto": "void __fastcall Tick(void * transport)"
+ },
+ "00747260": {
+  "module": "net_replication",
+  "name": "C_NetTransport::FlushAll",
+  "proto": "void __thiscall FlushAll(void *this, bool force)"
+ },
+ "00747310": {
+  "module": "net_replication",
+  "name": "C_NetTransport::ReceiveThread",
+  "proto": "void __fastcall ReceiveThread(void * transport)"
+ },
  "00747360": {
   "module": "zz_idioms",
   "name": "vector_tidy_747360"
@@ -39732,6 +39892,111 @@
   "module": "net_replication",
   "name": "C_NetEmptyMessage::ReadBody",
   "proto": "void __thiscall ReadBody(void *this, void * stream)"
+ },
+ "00747940": {
+  "module": "net_replication",
+  "name": "C_NetSocket::C_NetSocket",
+  "proto": "void * __fastcall C_NetSocket(void * socket)"
+ },
+ "00747a10": {
+  "module": "net_replication",
+  "name": "C_NetSocket::~C_NetSocket",
+  "proto": "void __fastcall ~C_NetSocket(void * socket)"
+ },
+ "00747af0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Open",
+  "proto": "void __thiscall Open(void *this, int port)"
+ },
+ "00747bb0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Close",
+  "proto": "void __fastcall Close(void * socket)"
+ },
+ "00747c00": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Seal",
+  "proto": "void __thiscall Seal(void *this, void * buffer, int size)"
+ },
+ "00747c60": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Unseal",
+  "proto": "bool __thiscall Unseal(void *this, void * buffer, int size)"
+ },
+ "00747cc0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Send",
+  "proto": "void __thiscall Send(void *this, void * data, int size, uint address, int port)"
+ },
+ "00747e60": {
+  "module": "net_replication",
+  "name": "C_NetSocket::SendRaw",
+  "proto": "void __thiscall SendRaw(void *this, void * data, int size, uint address, int port)"
+ },
+ "00747ea0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Receive",
+  "proto": "void __thiscall Receive(void *this, void * data, void * size, void * address, void * port)"
+ },
+ "007480f0": {
+  "module": "net_replication",
+  "name": "FragmentLess",
+  "proto": "bool __fastcall FragmentLess(void * a, void * b)"
+ },
+ "00748110": {
+  "module": "net_replication",
+  "name": "C_NetSocket::FindComplete",
+  "proto": "bool __thiscall FindComplete(void *this, void * first, void * count)"
+ },
+ "00748230": {
+  "module": "net_replication",
+  "name": "C_NetSocket::Reassemble",
+  "proto": "bool __thiscall Reassemble(void *this, void * data, void * size)"
+ },
+ "007483b0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::ReceiveRaw",
+  "proto": "void __thiscall ReceiveRaw(void *this, void * data, void * size, void * address, void * port)"
+ },
+ "007484d0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::FlushDelayed",
+  "proto": "void __fastcall FlushDelayed(void * socket)"
+ },
+ "00748550": {
+  "module": "net_replication",
+  "name": "C_NetSocket::QueueSend",
+  "proto": "void __thiscall QueueSend(void *this, void * data, int size, uint address, int port)"
+ },
+ "007485e0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::SendQueued",
+  "proto": "void __fastcall SendQueued(void * socket)"
+ },
+ "00748680": {
+  "module": "net_replication",
+  "name": "C_NetSocket::SendThread",
+  "proto": "void __fastcall SendThread(void * socket)"
+ },
+ "007486e0": {
+  "module": "net_replication",
+  "name": "C_NetSocket::TakeCounters",
+  "proto": "void __thiscall TakeCounters(void *this, void * received, void * sent)"
+ },
+ "00748700": {
+  "module": "net_replication",
+  "name": "C_NetSocket::LookupLocalAddress",
+  "proto": "void __fastcall LookupLocalAddress(void * socket)"
+ },
+ "00748790": {
+  "module": "net_replication",
+  "name": "C_NetSocket::GetLocalAddress",
+  "proto": "uint __fastcall GetLocalAddress(void * socket)"
+ },
+ "007487d0": {
+  "module": "net_replication",
+  "name": "SendThreadEntry",
+  "proto": "uint __stdcall SendThreadEntry(void * socket)"
  },
  "007487e0": {
   "module": "zz_idioms",
@@ -45610,6 +45875,18 @@
   "module": "net_replication",
   "name": "g_netServerSide",
   "type": "bool"
+ },
+ "009830e8": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netSendStream",
+  "type": "int"
+ },
+ "00983100": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netLastFragmentTime",
+  "type": "int"
  },
  "00983150": {
   "data": true,

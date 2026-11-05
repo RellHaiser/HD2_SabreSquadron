@@ -29,7 +29,7 @@ enum : uint32_t {
 };
 
 // A packet (vtable 0x0081665c, 0x20 bytes; from the pool): its header (the channel 2 bits, the size 16, the kind 6,
-// the sequence number 23, the last-of-message bit) and its data (a pool buffer of `size` bytes).
+// the sequence number 23, the session bit) and its data (a pool buffer of `size` bytes).
 class C_NetPacket : public C_NetRefCounted {
 public:
     C_NetPacket() { Clear(); }                                    // 0x00745e40 (__fastcall)
@@ -47,7 +47,7 @@ public:
     int m_size;                                                   // +0x0C bytes
     uint32_t m_kind;                                              // +0x10
     uint32_t m_sequence;                                          // +0x14
-    uint32_t m_last;                                              // +0x18
+    uint32_t m_session;                                           // +0x18 the connection's session (1 bit)
     void *m_data;                                                 // +0x1C
 };
 

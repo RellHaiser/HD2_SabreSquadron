@@ -389,7 +389,7 @@ int * C_NetGame__Host(C_NetGame *_this,char *param_1, ...)
     FUN_00723d20((int)_this);
   }
   FUN_007233d0((int)_this);
-  FUN_00746c10(_this->_pad_0000 + 0x33c,iVar9 + 1);
+  C_NetTransport__Start(_this->_pad_0000 + 0x33c,iVar9 + 1);
   return piVar5;
 }
 
@@ -1116,7 +1116,7 @@ int C_NetGame__Connect(C_NetGame *_this,LPVOID *param_1, ...)
   char cVar3;
   int iVar4;
   IGraph *self;
-  uint32_t *puVar5;
+  void *pvVar5;
   char *pcVar6;
   uint16_t extraout_var;
   uint16_t extraout_var_00;
@@ -1127,6 +1127,7 @@ int C_NetGame__Connect(C_NetGame *_this,LPVOID *param_1, ...)
   LPVOID *ppvVar9;
   uchar *puVar10;
   C_auto_00816684 **ppCVar11;
+  uint32_t *puVar12;
   int *piStack_148;
   int *piStack_144;
   uint32_t uStack_140;
@@ -1179,23 +1180,23 @@ int C_NetGame__Connect(C_NetGame *_this,LPVOID *param_1, ...)
     FUN_00732730((int *)CONCAT22(uVar8,*(uint16_t *)(param_1 + 0x1b)),'\x01');
     pvVar1 = param_1[0x1b];
     puVar10 = _this->_pad_0000 + 0x33c;
-    FUN_00746c10(puVar10,-1);
+    C_NetTransport__Start(puVar10,-1);
     *(LPVOID *)(_this->_pad_0000 + 0x338) = param_1[0x1a];
     apCStack_130[2] = tier1_operator_new(0x50);
     uStack_4 = 0;
     if (apCStack_130[2] == 0) {
-      puVar5 = 0;
+      pvVar5 = 0;
     }
     else {
-      puVar5 = C_auto_00816684__FUN_00746180
+      pvVar5 = C_auto_00816684__C_NetConnection__C_NetConnection
                          (apCStack_130[2],0,*(uint32_t *)(_this->_pad_0000 + 0x338),
                           _this->_pad_0000 + 0x34c);
     }
-    *(uint32_t **)(_this->_pad_0000 + 0x334) = puVar5;
-    puVar5[4] = (int)pvVar1 + 1;
+    *(void **)(_this->_pad_0000 + 0x334) = pvVar5;
+    *(int *)((int)pvVar5 + 0x10) = (int)pvVar1 + 1;
     uStack_4 = 0xffffffff;
-    FUN_00746fb0(puVar10,*(int *)(_this->_pad_0000 + 0x334));
-    FUN_00747260(puVar10,'\x01');
+    C_NetTransport__Add(puVar10,*(void **)(_this->_pad_0000 + 0x334));
+    C_NetTransport__FlushAll(puVar10,true);
     FUN_00723e00((int)_this);
     (**(code **)(**(int **)(_this->_pad_0000 + 4) + 0x18))(*(int **)(_this->_pad_0000 + 4),0,0x8000);
     _this->_pad_0000[0x448] = '\0';
@@ -1238,9 +1239,9 @@ int C_NetGame__Connect(C_NetGame *_this,LPVOID *param_1, ...)
       *(char **)(_this->_pad_0000 + 0x5050) = "SetClientInfo failed";
     }
     else {
-      puVar5 = auStack_10c;
-      memset(puVar5, 0, 0x12 * sizeof(*puVar5));
-      puVar5 += 0x12;
+      puVar12 = auStack_10c;
+      memset(puVar12, 0, 0x12 * sizeof(*puVar12));
+      puVar12 += 0x12;
       iVar4 = 0;
       uStack_f0 = 0x11d4cfa0;
       uStack_ec = 0x50001d9e;

@@ -26,6 +26,8 @@ public:
     // False once more bits were consumed/produced than the buffer holds.
     bool IsValid() const { return BitPosition() <= m_capacityBits; }   // (the base Reserve)
     uint32_t BitPosition() const { return m_wordIndex * 32 + m_bitIndex; }
+    // (Part 10c-iii.) Back to the start (the transport's send stream, reused for each datagram).
+    void ResetPosition() { m_wordIndex = 0; m_bitIndex = 0; }
     const uint32_t *Data() const { return m_data; }
 
 protected:

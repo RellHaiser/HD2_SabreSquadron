@@ -100,13 +100,13 @@ void TestPool()
     p->m_size = 8;
     p->m_kind = 3;
     p->m_flags = 2;
-    p->m_last = 1;
+    p->m_session = 1;
     p->m_data = g_netPool.AllocBuffer(8);
     void *data = p->m_data;
     const int before = g_netPool.m_buffers.count;
     p->Release();
     CHECK(g_netPool.m_packets.count == packets && g_netPool.m_buffers.count == before + 1 && p->m_data == nullptr &&
-          p->m_size == 0 && p->m_kind == 0 && p->m_flags == 0 && p->m_last == 0 && p->m_refs == 0);
+          p->m_size == 0 && p->m_kind == 0 && p->m_flags == 0 && p->m_session == 0 && p->m_refs == 0);
     CHECK(g_netPool.AllocBuffer(8) == data && g_netPool.AllocPacket() == p);
     g_netPool.FreeBuffer(data, 8);
     g_netPool.FreePacket(p);
@@ -152,7 +152,7 @@ void TestPacket()
     C_NetPacket *p = MakePacket(7, 0x5A, 0x2B);
     p->m_flags = 2;
     p->m_sequence = 0x123456;
-    p->m_last = 1;
+    p->m_session = 1;
     static_cast<uint8_t *>(p->m_data)[6] = 0x77;
     C_NetMessage msg;
     p->Write(&msg);
@@ -164,7 +164,7 @@ void TestPacket()
     Rewind(msg);
     C_NetPacket *q = g_netPool.AllocPacket();
     q->Read(&msg);
-    CHECK(q->m_flags == 2 && q->m_size == 7 && q->m_kind == 0x2B && q->m_sequence == 0x123456 && q->m_last == 1 && q->m_data);
+    CHECK(q->m_flags == 2 && q->m_size == 7 && q->m_kind == 0x2B && q->m_sequence == 0x123456 && q->m_session == 1 && q->m_data);
     CHECK(std::memcmp(q->m_data, p->m_data, 7) == 0 && msg.BitPosition() == 48u + 56u);
     // Sizes multiple of four and none. (The size is read signed: a negative one would copy past the stream, as in
     // the original.)

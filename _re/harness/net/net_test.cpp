@@ -2,6 +2,8 @@
 // (net/net_object.cpp, part 10b: net_object_test.inc). MinGW, float math as the game's (SSE); run net_test.exe
 // ("net: N checks, 0 failures"). Mutations: mutations/mutate_10a.py, mutate_10b.py with the scratchpad's mutnet.py
 // (it builds this harness).
+#include <winsock2.h>
+
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -16,6 +18,8 @@
 #include "net/net_track.h"
 #include "net/net_object.h"
 #include "net/net_channel.h"
+#include "net/net_socket.h"
+#include "net/net_transport.h"
 #include "game/perf_timer.h"
 #undef private
 #include <windows.h>
@@ -653,6 +657,8 @@ void TestQuantizationTests()
 
 #include "net_object_test.inc"
 #include "net_channel_test.inc"
+#include "net_socket_test.inc"
+#include "net_transport_test.inc"
 
 // ---- the direction track -------------------------------------------------------------------------------------------
 
@@ -1040,6 +1046,13 @@ int main()
     TestReliable();
     TestOrdered();
     TestMessages();
+    TestSeal();
+    TestReassembly();
+    TestLoopback();
+    TestConnection();
+    TestTransportBasics();
+    TestTransportLoopback();
+    TestTransportThread();
     std::printf("net: %d checks, %d failures\n", checks, failures);
     return failures != 0;
 }
