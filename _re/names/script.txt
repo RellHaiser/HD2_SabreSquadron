@@ -125,7 +125,6 @@
 006059b0 C_StaticWeapon::SetState
 006df540 S_Explosion::Execute
 006e9ea0 SetFrameData
-00730970 IsNetPlayerConnected
 
 # --- data
 008693e0 g_scriptModuleRestarting @

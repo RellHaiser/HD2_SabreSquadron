@@ -168,39 +168,11 @@ uint32_t FUN_00631ce0(void *_this,uint32_t *param_1,uint32_t param_2,uint32_t *p
 }
 
 
-// 0x00631ff0
-void * FUN_00631ff0(int param_1,void *param_2,int param_3, ...)
-{
-  int iVar1;
-  uint8_t *puVar2;
-  int iVar3;
-  void *_this;
-  iVar1 = *(int *)(param_1 + 8);
-  _this = param_2;
-  if (param_3 != iVar1) {
-    iVar3 = param_3 - (int)param_2;
-    do {
-      FUN_00749fa0(_this,(uint32_t *)((int)_this + iVar3));
-      *(uint32_t *)((int)_this + 0x24) = *(uint32_t *)((int)_this + iVar3 + 0x24);
-      puVar2 = (uint8_t *)((int)_this + 0x28);
-      do {
-        *puVar2 = puVar2[((int)_this + iVar3) - (int)_this];
-        puVar2++;
-      } while (puVar2 + (-0x28 - (int)_this) < (uint8_t *)0x32);
-      _this = (void *)((int)_this + 0x5c);
-    } while ((int)_this + iVar3 != iVar1);
-  }
-  *(void **)(param_1 + 8) = _this;
-  return param_2;
-  return 0;
-}
-
-
 // 0x00632060
 void * FUN_00632060(void *_this,uint32_t *param_1, ...)
 {
   uint8_t *puVar1;
-  FUN_00749fa0(_this,param_1);
+  CopyNetStats(_this,param_1);
   *(uint32_t *)((int)_this + 0x24) = param_1[9];
   puVar1 = (uint8_t *)((int)_this + 0x28);
   do {

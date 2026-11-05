@@ -165,6 +165,7 @@ public:
     bool IsBinocularsView() const;                   // 0x0069a7b0
     void ShowBinocularsView(bool show);                   // 0x0069a7a0
     void Print(const char *format, ...);            // 0x0069c2b0 (empty in the release build; cdecl)
+    void PrintColored(const S_vector &color, const char *format, ...);   // 0x0069c2a0 (empty too)
     // A message line (printf format) in `color` (0..255 components): the HUD on clients,
     // the console otherwise.
     void PrintMessage(const S_vector &color, const char *format, ...);   // 0x0069c240
@@ -246,6 +247,13 @@ public:
     void SetMode(int mode) { m_mode = mode; }       // (the in-game menu's quit)
     // Co-op with shared lives: the respawns used.
     int GetTeamLivesUsed() const { return m_teamLivesUsed; }
+    void SetTeamLivesUsed(int used) { m_teamLivesUsed = used; }   // (a client: the server's scores message)
+    // A client: the mission's clock and the game time set from the server's (the scores message).
+    void SetMissionClock(uint32_t time)
+    {
+        m_missionTime = time;
+        m_time = time;
+    }
     // The campaign mission's number across the campaigns (-1: not a campaign mission).
     int GetCampaignMissionNumber() const { return m_campaignMissionNumber; }
 

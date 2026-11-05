@@ -186,7 +186,6 @@
 00499770 C_InfoScreen::AddMissionName | void __thiscall AddMissionName(C_InfoScreen *this)
 004997b0 C_InfoScreen::AddRoundTime | void __thiscall AddRoundTime(C_InfoScreen *this)
 004998c0 C_InfoScreen::AddLimits | void __thiscall AddLimits(C_InfoScreen *this)
-00725e90 S_NetPlayerState::IsSpectating | bool __thiscall IsSpectating(S_NetPlayerState *this)
 00499af0 InsertPlayerPtr | S_NetPlayerState ** __thiscall InsertPlayerPtr(void *this, S_NetPlayerState ** where, S_NetPlayerState ** value)
 00499cd0 InsertPlayerPtrs | void __thiscall InsertPlayerPtrs(void *this, S_NetPlayerState ** where, uint count, S_NetPlayerState ** value)
 00499f40 SortPlayers | void __fastcall SortPlayers(S_NetPlayerState ** first, S_NetPlayerState ** last, void * less, int unused)

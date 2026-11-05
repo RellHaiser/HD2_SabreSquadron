@@ -68,5 +68,4 @@
 006828b0 C_GameMenu::AddChatLine | void __stdcall AddChatLine(int unused, char * name, char * text)
 006861d0 C_GameMenu::OnStatsToggle | bool __thiscall OnStatsToggle(C_GameMenu *this, void * argument, void * control, uint notification, uint value)
 # Not ported yet (named for the later parts).
-0072f8b0 C_NetGame::GetLocalPlayerStats
 0072ee60 C_NetGame::SendChat

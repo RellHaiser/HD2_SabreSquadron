@@ -80,7 +80,7 @@ void ApplySoldierClass(C_Human *human, int soldierClass)
     g_gameProfile.m_humanStore->GetStats(skills, human->GetProfileIndex(), playerStats[5]);
     human->SetSkills(skills);
     // (The class is stored already: the message tells of a rise even when it went down.)
-    g_netGame.SetPlayerClass(soldierClass, human->GetNetId());
+    g_netGame.SetPlayerRank(soldierClass, human->GetNetId());
 }
 
 // ------------------------------------------------------------------------- the net object

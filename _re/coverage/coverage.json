@@ -59,8 +59,8 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "App & core",
   "state": "ported",
-  "functions": 616,
-  "bytes": 147148,
+  "functions": 617,
+  "bytes": 147171,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
@@ -115,16 +115,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "ported",
-  "functions": 1309,
-  "bytes": 400864,
+  "functions": 1310,
+  "bytes": 400967,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Menus & front end",
   "state": "pending",
-  "functions": 102,
-  "bytes": 19345,
+  "functions": 101,
+  "bytes": 19242,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -155,16 +155,16 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Network",
   "state": "ported",
-  "functions": 340,
-  "bytes": 37045,
+  "functions": 457,
+  "bytes": 56733,
   "evidence": "Hand-ported; compile-checked file by file and read against the assembly; no linked build yet"
  },
  {
   "binary": "HD2_SabreSquadron.exe",
   "group": "Network",
   "state": "pending",
-  "functions": 598,
-  "bytes": 82771,
+  "functions": 484,
+  "bytes": 63239,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -187,8 +187,8 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "Physics & collision",
   "state": "pending",
-  "functions": 105,
-  "bytes": 100042,
+  "functions": 104,
+  "bytes": 99872,
   "evidence": "Not hand-ported; the generated tier-1 translation stands in"
  },
  {
@@ -211,8 +211,8 @@
   "binary": "HD2_SabreSquadron.exe",
   "group": "STL & compiler idioms",
   "state": "excluded",
-  "functions": 371,
-  "bytes": 7457,
+  "functions": 368,
+  "bytes": 7448,
   "evidence": "MSVC 6 STL instantiations and empty functions (stl_idioms.py); the port uses the standard library"
  },
  {

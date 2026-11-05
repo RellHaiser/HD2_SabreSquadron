@@ -8,11 +8,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <map>
 #include <string>
 #include <vector>
 
 #define protected public
 #define private public
+#include "game/actors_module.h"
 #include "game/console.h"
 #include "game/controls.h"
 #include "game/game.h"
@@ -20,6 +22,8 @@
 #include "game/game_texts.h"
 #include "game/human.h"
 #include "game/human_controller.h"
+#include "game/item_defs.h"
+#include "game/items.h"
 #include "game/module.h"
 #include "game/pending.h"
 #include "game/perf_timer.h"
@@ -180,14 +184,54 @@ extern "C" IGraph *GetIGraph() { return reinterpret_cast<IGraph *>(&g_graphObjec
 
 void S_ServerEntry::Reset() { Log("server entry reset"); }
 
-// The other sub-parts' C_NetGame members.
-int C_NetGame::CountPlayers() { return 4; }
-void C_NetGame::SendPlayerScore(int slot, bool all) { Log("send score %d %d", slot, all); }
-void C_NetGame::KickPlayer(int slot, int reason) { Log("kick %d %d", slot, reason); }
-void C_NetGame::SetLevelBounds(const float *min, const float *size)
+// The game around the players (part 10d-ii): the humans' controller types and teams by human (the player's and
+// team 0 unless set), the actors by index, the ranks sent, the round time, the prints.
+std::map<const C_Human *, int> g_controllerTypes, g_humanTeams;
+int C_Human::GetControllerType() const
 {
-    Log("level bounds %.2f %.2f %.2f %.2f %.2f %.2f", min[0], min[1], min[2], size[0], size[1], size[2]);
+    auto it = g_controllerTypes.find(this);
+    return it == g_controllerTypes.end() ? HUMAN_CONTROLLER_PLAYER : it->second;
 }
+int C_Human::GetTeam(bool) const
+{
+    auto it = g_humanTeams.find(this);
+    return it == g_humanTeams.end() ? 0 : it->second;
+}
+void C_PlayerController::SendSoldierClass(int soldierClass) { Log("rank %d", soldierClass); }
+std::map<int, C_Actor *> g_actors;
+C_Actor *C_ActorsModule::GetActor(int index) const
+{
+    auto it = g_actors.find(index);
+    return it == g_actors.end() ? nullptr : it->second;
+}
+bool g_cooperative;
+bool C_GameProfile::IsCooperativeGame() const { return g_cooperative; }
+int C_game::SetRoundTime(int ms)
+{
+    Log("round time %d", ms);
+    return ms / 1000;
+}
+void C_game::Print(const char *format, ...)
+{
+    char line[256];
+    va_list args;
+    va_start(args, format);
+    std::vsnprintf(line, sizeof line, format, args);
+    va_end(args);
+    Log("game print %s", line);
+}
+void C_game::PrintColored(const S_vector &color, const char *format, ...)
+{
+    char line[256];
+    va_list args;
+    va_start(args, format);
+    std::vsnprintf(line, sizeof line, format, args);
+    va_end(args);
+    Log("colored %.0f %s", color.x, line);
+}
+void C_GameApp::PrintMessage(const char *text) { Log("app print %s", text); }
+
+// The other sub-parts' C_NetGame members.
 void C_NetGame::StopReporting(int *, bool) { Log("stop reporting"); }
 void C_NetGame::AnswerQueries() { Log("answer queries"); }
 void C_NetGame::StopVoiceClient() { Log("stop voice client"); }
@@ -264,7 +308,12 @@ struct T_Server : IDirectPlay8Server {
     HRESULT STDMETHODCALLTYPE SetCaps(const void *, DWORD) override { return 0; }
     HRESULT STDMETHODCALLTYPE SetSPCaps(const GUID *, const void *, DWORD) override { return 0; }
     HRESULT STDMETHODCALLTYPE GetSPCaps(const GUID *, void *, DWORD) override { return 0; }
-    HRESULT STDMETHODCALLTYPE GetConnectionInfo(DPNID, void *, DWORD) override { return 0; }
+    HRESULT STDMETHODCALLTYPE GetConnectionInfo(DPNID id, void *info, DWORD) override
+    {
+        if (static_cast<DWORD *>(info)[0] == 0x5C)   // (its size set)
+            static_cast<DWORD *>(info)[1] = id * 10;   // the round trip
+        return 0;
+    }
     HRESULT STDMETHODCALLTYPE RegisterLobby(void *, void *, DWORD) override { return 0; }
     HRESULT destroyResult = 0;
     const void *lastData = reinterpret_cast<void *>(1);
@@ -319,11 +368,13 @@ struct T_Client : IDirectPlay8Client {
 };
 
 #include "netgame_tests.inc"
+#include "netplayers_tests.inc"
 
 int main()
 {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
     RunNetGameTests();
+    RunNetPlayersTests();
     std::printf("netgame: %d checks, %d failures\n", checks, failures);
     return failures != 0;
 }

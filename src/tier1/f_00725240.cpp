@@ -34,67 +34,6 @@ int FUN_007252b0(int param_1, ...)
 }
 
 
-// 0x00725e90
-bool S_NetPlayerState__IsSpectating(S_NetPlayerState *_this, ...)
-{
-  bool bVar1;
-  int iVar2;
-  if (_this->human == 0) {
-    return true;
-  }
-  iVar2 = C_Human__GetControllerType(_this->human);
-  if (iVar2 != 1) {
-    if (iVar2 != 7) {
-      return false;
-    }
-    bVar1 = (*_this->human->m_controller->vtable->IsSpectating)();
-    return bVar1;
-  }
-  bVar1 = (*_this->human->m_controller->vtable->IsSpectating)();
-  return bVar1;
-}
-
-
-// 0x00725ed0
-uint8_t * FUN_00725ed0(int *param_1, ...)
-{
-  int iVar1;
-  C_str *pCVar2;
-  int *piVar3;
-  char *pcVar4;
-  C_str local_4;
-  iVar1 = param_1[0x19];
-  local_4.rep = (C_str_rep *)param_1;
-  if (((g_gameProfile.m_mpSettings)->gameType == 0) && (param_1[0xf] != 0)) {
-    iVar1 = *(int *)(param_1[0xf] + 0x74);
-    if (iVar1 == 0) {
-      piVar3 = 0;
-    }
-    else {
-      piVar3 = *(int **)(iVar1 + 0x10);
-    }
-    iVar1 = (**(code **)(*piVar3 + 0x40))();
-    if ((iVar1 == 0) || (*(int *)(*(int *)(iVar1 + 4) + 0x44) != 0)) {
-      iVar1 = 0;
-    }
-    else {
-      iVar1 = 1;
-    }
-  }
-  pCVar2 = C_GameTexts__Get(&DAT_008c1368,&local_4,
-                            (-(uint32_t)(iVar1 != 1) & 10) + 0x2792 + param_1[0x15]);
-  pcVar4 = pCVar2->rep->chars;
-  if (pCVar2->rep == 0) {
-    pcVar4 = (char *)&DAT_00867a90;
-  }
-  if ((local_4.rep != 0) &&
-     ((local_4.rep)->refCount = (local_4.rep)->refCount - 1, (local_4.rep)->refCount == 0)) {
-    tier1_operator_delete(local_4.rep);
-  }
-  return pcVar4;
-}
-
-
 // 0x00726010
 uint32_t FUN_00726010(void *_this,void *param_1, ...)
 {
@@ -171,7 +110,7 @@ uint32_t FUN_00726120(void *_this,void *param_1, ...)
 uint32_t FUN_00726230(void *_this,void *param_1, ...)
 {
   uint32_t uVar1;
-  FUN_00749f40(_this,param_1);
+  ReadNetStats(_this,param_1);
   uVar1 = C_BitStream__ReadBits(param_1,0x20);
   *(uint32_t *)((int)_this + 0x24) = uVar1;
   C_BitStream__ReadString(param_1,(char *)((int)_this + 0x28),0x32);
@@ -182,7 +121,7 @@ uint32_t FUN_00726230(void *_this,void *param_1, ...)
 // 0x00726260
 uint32_t FUN_00726260(void *_this,void *param_1, ...)
 {
-  FUN_00749ed0(_this,param_1);
+  WriteNetStats(_this,param_1);
   C_BitStream__WriteBits(param_1,*(uint32_t *)((int)_this + 0x24),0x20);
   C_BitStream__WriteString(param_1,(char *)((int)_this + 0x28));
   return 0;

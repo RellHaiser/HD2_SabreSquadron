@@ -50,13 +50,13 @@ bool C_CommandProcessor__Execute(C_CommandProcessor *_this,char *command, ...)
 }
 #if 0
 {
-  uint8_t bVar1;
+  char cVar1;
   void **ppvVar2;
   C_str_rep *ptr;
   C_MissionDef *pCVar3;
   S_MissionObjective **ppSVar4;
   S_MultiplayerSettings *pSVar5;
-  char cVar6;
+  bool bVar6;
   int iVar7;
   char *pcVar8;
   C_str ptr_00;
@@ -73,20 +73,18 @@ bool C_CommandProcessor__Execute(C_CommandProcessor *_this,char *command, ...)
   char *pcVar19;
   C_GameApp *pCVar20;
   uint32_t uVar21;
-  uint8_t *pbVar22;
-  uint32_t uVar23;
-  uint16_t *puVar24;
-  char *pcVar25;
-  int *piVar26;
-  C_Console *pCVar27;
-  bool bVar28;
-  int iVar29;
+  uint32_t uVar22;
+  uint16_t *puVar23;
+  char *pcVar24;
+  int *piVar25;
+  C_Console *pCVar26;
+  int iVar27;
   int b;
-  int iVar30;
+  int iVar28;
   char local_db0;
   uint32_t uStack_daf;
   char local_3b0 [288];
-  uint8_t local_290 [512];
+  char local_290 [512];
   C_str local_90;
   C_str local_8c;
   C_str local_88;
@@ -135,7 +133,7 @@ bool C_CommandProcessor__Execute(C_CommandProcessor *_this,char *command, ...)
     (**(code **)*DAT_0098c0fc)();
   }
   do {
-    iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_28,"maxclients");
+    iVar7 = ReadConsoleToken(&command,local_290,&local_28,"maxclients");
     if (iVar7 != 2) {
       pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_20,0x582);
       local_8 = 1;
@@ -177,7 +175,7 @@ bool C_CommandProcessor__Execute(C_CommandProcessor *_this,char *command, ...)
     case 0x13:
     case 0x14:
     case 0x15:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,0);
       if (iVar7 != 1) {
         local_14 = *(int *)((g_gameProfile.m_mpSettings)->_pad_021c + local_28 * 4 + 0xc);
         pCVar18 = C_fstr_Construct(&local_78,"%s  %d",
@@ -246,26 +244,26 @@ LAB_00742ab3:
           if ((g_gameProfile.m_mpSettings)->gameType == 3) goto LAB_00742ab3;
         }
 LAB_0074298e:
-        bVar28 = false;
+        bVar6 = false;
         b = 0;
-        iVar30 = 0;
-        iVar29 = 0;
+        iVar28 = 0;
+        iVar27 = 0;
         iVar7 = 0x12;
         *(int *)((g_gameProfile.m_mpSettings)->_pad_021c + local_28 * 4 + 0xc) = local_14;
         pCVar20 = GetGameApp();
-        C_GameApp__SendGameMessage(pCVar20,iVar7,iVar29,iVar30,b,bVar28);
+        C_GameApp__SendGameMessage(pCVar20,iVar7,iVar27,iVar28,b,bVar6);
         break;
       }
       if (((uint8_t)g_gameRole & 7) == 7) goto LAB_0074298e;
       goto LAB_00743c67;
     case 0x16:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,0);
       if (iVar7 == 0) {
         if ((g_gameRole & 1) != 0) {
-          pCVar18 = C_fstr_Construct(&local_38,(char *)local_290);
+          pCVar18 = C_fstr_Construct(&local_38,local_290);
           local_8 = 6;
-          bVar28 = S_MultiplayerSettings__AddMap(g_gameProfile.m_mpSettings,(char *)pCVar18);
-          local_21 = !bVar28;
+          bVar6 = S_MultiplayerSettings__AddMap(g_gameProfile.m_mpSettings,(char *)pCVar18);
+          local_21 = !bVar6;
           local_8 = 0xffffffff;
           if ((local_38.rep != 0) &&
              ((local_38.rep)->refCount = (local_38.rep)->refCount - 1,
@@ -313,13 +311,13 @@ LAB_0074298e:
       break;
     case 0x17:
       if ((((g_gameRole & 1) != 0) &&
-          (iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0), iVar7 == 0))
-         && (pCVar16 = GetGame(), pCVar16 != 0)) {
-        S_MultiplayerSettings__RemoveMap(g_gameProfile.m_mpSettings,(char *)local_290);
+          (iVar7 = ReadConsoleToken(&command,local_290,&local_14,0), iVar7 == 0)) &&
+         (pCVar16 = GetGame(), pCVar16 != 0)) {
+        S_MultiplayerSettings__RemoveMap(g_gameProfile.m_mpSettings,local_290);
       }
       break;
     case 0x18:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,"maxclients");
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,"maxclients");
       if ((iVar7 == 2) && (((uint8_t)g_gameRole & 7) == 7)) {
         if ((0x18 < local_14) && (local_14 < 0x1d)) {
           if ((g_gameRole & 1) != 0) {
@@ -357,7 +355,7 @@ LAB_0074298e:
       }
       goto LAB_00742c7d;
     case 0x1d:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,"maxclients");
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,"maxclients");
       if (iVar7 == 2) {
         if ((local_14 == 0x1e) || (local_14 == 0x1f)) {
           if ((g_gameRole & 1) != 0) {
@@ -400,7 +398,7 @@ LAB_00742c7d:
       }
       break;
     case 0x20:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,0);
       if (iVar7 != 0) {
         pCVar18 = C_fstr_Construct(&local_50,"sessionname: %s",
                                    (g_gameProfile.m_mpSettings)->sessionName);
@@ -417,14 +415,14 @@ LAB_00742c7d:
         goto LAB_00742c7d;
       }
       if (((g_gameRole & 1) != 0) && (((uint8_t)g_gameRole & 7) == 7)) {
-        pbVar22 = local_290;
-        pcVar19 = (g_gameProfile.m_mpSettings)->sessionName;
+        pcVar19 = local_290;
+        pcVar24 = (g_gameProfile.m_mpSettings)->sessionName;
         do {
-          bVar1 = *pbVar22;
-          pbVar22++;
-          *pcVar19 = bVar1;
+          cVar1 = *pcVar19;
           pcVar19++;
-        } while (bVar1 != 0);
+          *pcVar24 = cVar1;
+          pcVar24++;
+        } while (cVar1 != '\0');
       }
       break;
     case 0x21:
@@ -445,48 +443,48 @@ LAB_00742c7d:
           uVar21 = 0xffffffff;
           piVar9 = local_1c - 0x80;
           do {
-            piVar26 = piVar9;
+            piVar25 = piVar9;
             if (uVar21 == 0) break;
             uVar21--;
-            piVar26 = (int *)((int)piVar9 + 1);
+            piVar25 = (int *)((int)piVar9 + 1);
             iVar7 = *piVar9;
-            piVar9 = piVar26;
+            piVar9 = piVar25;
           } while ((char)iVar7 != '\0');
           uVar21 = ~uVar21;
           iVar7 = -1;
           pcVar19 = &local_db0;
           do {
-            pcVar25 = pcVar19;
+            pcVar24 = pcVar19;
             if (iVar7 == 0) break;
             iVar7--;
-            pcVar25 = pcVar19 + 1;
-            cVar6 = *pcVar19;
-            pcVar19 = pcVar25;
-          } while (cVar6 != '\0');
-          pcVar19 = (char *)((int)piVar26 - uVar21);
-          pcVar25--;
-          memcpy(pcVar25, pcVar19, uVar21);
+            pcVar24 = pcVar19 + 1;
+            cVar1 = *pcVar19;
+            pcVar19 = pcVar24;
+          } while (cVar1 != '\0');
+          pcVar19 = (char *)((int)piVar25 - uVar21);
+          pcVar24--;
+          memcpy(pcVar24, pcVar19, uVar21);
           pcVar19 += uVar21;
-          pcVar25 += uVar21;
-          uVar23 = 0;
+          pcVar24 += uVar21;
+          uVar22 = 0;
           uVar21 = 0;
           iVar7 = -1;
           pcVar19 = &local_db0;
           do {
-            pcVar25 = pcVar19;
+            pcVar24 = pcVar19;
             if (iVar7 == 0) break;
             iVar7--;
-            pcVar25 = pcVar19 + 1;
-            cVar6 = *pcVar19;
-            pcVar19 = pcVar25;
-          } while (cVar6 != '\0');
+            pcVar24 = pcVar19 + 1;
+            cVar1 = *pcVar19;
+            pcVar19 = pcVar24;
+          } while (cVar1 != '\0');
           uVar21 = (uint32_t)local_18 & 0x80000003;
-          bVar28 = uVar21 == 0;
-          *(uint16_t *)(pcVar25 - 1) = DAT_008399d4;
+          bVar6 = uVar21 == 0;
+          *(uint16_t *)(pcVar24 - 1) = DAT_008399d4;
           if ((int)uVar21 < 0) {
-            bVar28 = (uVar21 - 1 | 0xfffffffc) == 0xffffffff;
+            bVar6 = (uVar21 - 1 | 0xfffffffc) == 0xffffffff;
           }
-          if ((bVar28) && (0x846894 < (int)local_1c)) {
+          if ((bVar6) && (0x846894 < (int)local_1c)) {
             pcVar19 = &local_db0;
             pCVar20 = GetGameApp();
             C_GameApp__PrintMessage(pCVar20,pcVar19);
@@ -532,7 +530,7 @@ LAB_00742c7d:
       (*pCVar20->m_state->vtable->SetPendingState)(7);
       break;
     case 0x24:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,0);
       if (iVar7 != 1) {
         pCVar18 = C_fstr_Construct(&local_68,"dedicated  %d",
                                    (uint32_t)((g_gameProfile.m_mpSettings)->dedicated != false));
@@ -561,9 +559,9 @@ LAB_00742c7d:
       pIVar11 = GetIGraph();
       pHVar12 = (*pIVar11->vtable->GetHWND)(pIVar11);
       ShowWindow(pHVar12,(int)pIVar11);
-      ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+      ReadConsoleToken(&command,local_290,&local_14,0);
       pSVar5 = g_gameProfile.m_mpSettings;
-      uVar13 = inet_addr((char *)local_290);
+      uVar13 = inet_addr(local_290);
       *(ulong *)(pSVar5->_pad_017c + 0x68) = uVar13;
       (g_gameProfile.m_mpSettings)->sessionType = 1;
       pCVar20 = GetGameApp();
@@ -571,11 +569,11 @@ LAB_00742c7d:
       break;
     case 0x26:
       if (((uint8_t)g_gameRole & 7) != 7) {
-        iVar29 = ReadConsoleToken(&command,(char *)local_290,&local_14,"maxclients");
+        iVar27 = ReadConsoleToken(&command,local_290,&local_14,"maxclients");
         iVar7 = local_14;
-        if (((iVar29 == 2) && (0x28 < local_14)) && (local_14 < 0x2c)) {
-          iVar29 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
-          if ((iVar7 < 0x16) && (iVar29 != 1)) {
+        if (((iVar27 == 2) && (0x28 < local_14)) && (local_14 < 0x2c)) {
+          iVar27 = ReadConsoleToken(&command,local_290,&local_14,0);
+          if ((iVar7 < 0x16) && (iVar27 != 1)) {
             pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_8c,0x583);
             local_8 = 4;
             if (pCVar18->rep == 0) {
@@ -589,8 +587,8 @@ LAB_00742c7d:
             ptr_00.rep = local_8c.rep;
             goto LAB_00742c7d;
           }
-          if (((iVar7 != 0x29) || (iVar29 == 1)) ||
-             (local_14 = C_NetGame__FindPlayerByName((C_NetGame *)&g_netGame,(char *)local_290),
+          if (((iVar7 != 0x29) || (iVar27 == 1)) ||
+             (local_14 = C_NetGame__FindPlayerByName((C_NetGame *)&g_netGame,local_290),
              local_14 != -1)) {
             if ((g_gameRole & 1) == 0) {
               PostVote(iVar7,local_14);
@@ -646,22 +644,22 @@ LAB_00742c7d:
       break;
     case 0x29:
       if ((g_gameRole & 1) != 0) {
-        iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+        iVar7 = ReadConsoleToken(&command,local_290,&local_14,0);
         if (iVar7 == 1) {
-          FUN_0072f6c0(&g_netGame,local_14,0);
+          C_NetGame__KickPlayer((C_NetGame *)&g_netGame,local_14,0);
         }
         else if (iVar7 == 0) {
-          FUN_0072f5e0(&g_netGame,local_290,0);
+          C_NetGame__KickPlayerByName((C_NetGame *)&g_netGame,local_290,0);
         }
       }
       break;
     case 0x2a:
       if (((g_gameRole & 1) != 0) && (((uint8_t)g_gameRole & 7) != 7)) {
-        iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+        iVar7 = ReadConsoleToken(&command,local_290,&local_14,0);
         if ((iVar7 == 0) && (pCVar16 = GetGame(), pCVar16 != 0)) {
-          pbVar22 = local_290;
+          pcVar19 = local_290;
           GetGame();
-          ChangeMap((char *)pbVar22);
+          ChangeMap(pcVar19);
         }
         else {
           pCVar16 = GetGame();
@@ -680,7 +678,7 @@ LAB_00742c7d:
       }
       break;
     case 0x2c:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,0);
       if ((iVar7 != 1) || (0xffff < local_14)) {
         pCVar18 = C_fstr_Construct(&local_34,"port  %d",
                                    *(uint32_t *)((g_gameProfile.m_mpSettings)->_pad_017c + 0x6c));
@@ -701,7 +699,7 @@ LAB_00742c7d:
       (g_gameProfile.m_mpSettings)->unknown174 = 1;
       break;
     case 0x2d:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,0);
       pSVar5 = g_gameProfile.m_mpSettings;
       if (iVar7 != 0) {
         pCVar18 = C_fstr_Construct(&local_80,"password: ");
@@ -726,16 +724,16 @@ LAB_00742c7d:
       uVar21 = 0xffffffff;
       (g_gameProfile.m_mpSettings)->_pad_017c[0x82] = '\x01';
       pCVar18 = &(g_gameProfile.m_mpSettings)->password;
-      pbVar22 = local_290;
+      pcVar19 = local_290;
       do {
         if (uVar21 == 0) break;
         uVar21--;
-        bVar1 = *pbVar22;
-        pbVar22++;
-      } while (bVar1 != 0);
+        cVar1 = *pcVar19;
+        pcVar19++;
+      } while (cVar1 != '\0');
 LAB_00743663:
-      pCVar27 = (C_Console *)(~uVar21 - 1);
-      local_20.rep = (C_str_rep *)pCVar27;
+      pCVar26 = (C_Console *)(~uVar21 - 1);
+      local_20.rep = (C_str_rep *)pCVar26;
       local_18 = pCVar18;
       pCVar10 = tier1_operator_new(~uVar21 + 8);
       if (pCVar10 == 0) {
@@ -743,20 +741,20 @@ LAB_00743663:
       }
       else {
         pCVar10->refCount = 1;
-        pCVar10->length = (uint32_t)pCVar27;
-        pbVar22 = local_290;
-        pcVar19 = pCVar10->chars;
-        for (uVar21 = (uint32_t)pCVar27 >> 2; uVar21 != 0; uVar21 = uVar21 - 1) {
-          *(uint32_t *)pcVar19 = *(uint32_t *)pbVar22;
-          pbVar22 += 4;
+        pCVar10->length = (uint32_t)pCVar26;
+        pcVar19 = local_290;
+        pcVar24 = pCVar10->chars;
+        for (uVar21 = (uint32_t)pCVar26 >> 2; uVar21 != 0; uVar21 = uVar21 - 1) {
+          *(uint32_t *)pcVar24 = *(uint32_t *)pcVar19;
           pcVar19 += 4;
+          pcVar24 += 4;
         }
-        for (uVar21 = (uint32_t)pCVar27 & 3; uVar21 != 0; uVar21 = uVar21 - 1) {
-          *pcVar19 = *pbVar22;
-          pbVar22++;
+        for (uVar21 = (uint32_t)pCVar26 & 3; uVar21 != 0; uVar21 = uVar21 - 1) {
+          *pcVar24 = *pcVar19;
           pcVar19++;
+          pcVar24++;
         }
-        pCVar10->chars[(int)pCVar27] = '\0';
+        pCVar10->chars[(int)pCVar26] = '\0';
         pCVar18 = local_18;
       }
       ptr = pCVar18->rep;
@@ -776,7 +774,7 @@ LAB_00743663:
       }
       break;
     case 0x2f:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,"maxclients");
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,"maxclients");
       if (iVar7 != 2) {
         iVar7 = GetVoiceCodecTextId((g_gameProfile.m_mpSettings)->unknown178);
         pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_30,iVar7);
@@ -853,12 +851,12 @@ LAB_00743663:
         iVar7 = *(int *)((int)pvVar14 + 8) - *(int *)((int)pvVar14 + 4) >> 2;
         while (iVar7 != 0) {
           iVar7--;
-          iVar29 = *(int *)(*(int *)(*(int *)((int)pvVar14 + 4) + iVar7 * 4) + 1);
-          if (iVar29 == 0) {
+          iVar27 = *(int *)(*(int *)(*(int *)((int)pvVar14 + 4) + iVar7 * 4) + 1);
+          if (iVar27 == 0) {
             puVar15 = (uint32_t*)(&DAT_00867a90);
           }
           else {
-            puVar15 = (uint32_t *)(iVar29 + 8);
+            puVar15 = (uint32_t *)(iVar27 + 8);
           }
           pCVar18 = C_fstr_Construct(&local_3c,&DAT_00832cfc,puVar15);
           local_8 = 0x13;
@@ -891,12 +889,12 @@ LAB_00743663:
         iVar7 = *(int *)((int)pvVar14 + 8) - *(int *)((int)pvVar14 + 4) >> 2;
         while (iVar7 != 0) {
           iVar7--;
-          iVar29 = *(int *)(*(int *)(*(int *)((int)pvVar14 + 4) + iVar7 * 4) + 1);
-          if (iVar29 == 0) {
+          iVar27 = *(int *)(*(int *)(*(int *)((int)pvVar14 + 4) + iVar7 * 4) + 1);
+          if (iVar27 == 0) {
             puVar15 = (uint32_t*)(&DAT_00867a90);
           }
           else {
-            puVar15 = (uint32_t *)(iVar29 + 8);
+            puVar15 = (uint32_t *)(iVar27 + 8);
           }
           pCVar18 = C_fstr_Construct(&local_44,&DAT_00832cfc,puVar15);
           local_8 = 0x14;
@@ -929,12 +927,12 @@ LAB_00743663:
         iVar7 = *(int *)((int)pvVar14 + 8) - *(int *)((int)pvVar14 + 4) >> 2;
         while (iVar7 != 0) {
           iVar7--;
-          iVar29 = *(int *)(*(int *)(*(int *)((int)pvVar14 + 4) + iVar7 * 4) + 1);
-          if (iVar29 == 0) {
+          iVar27 = *(int *)(*(int *)(*(int *)((int)pvVar14 + 4) + iVar7 * 4) + 1);
+          if (iVar27 == 0) {
             puVar15 = (uint32_t*)(&DAT_00867a90);
           }
           else {
-            puVar15 = (uint32_t *)(iVar29 + 8);
+            puVar15 = (uint32_t *)(iVar27 + 8);
           }
           pCVar18 = C_fstr_Construct(&local_4c,&DAT_00832cfc,puVar15);
           local_8 = 0x15;
@@ -967,12 +965,12 @@ LAB_00743663:
         iVar7 = *(int *)((int)pvVar14 + 8) - *(int *)((int)pvVar14 + 4) >> 2;
         while (iVar7 != 0) {
           iVar7--;
-          iVar29 = *(int *)(*(int *)(*(int *)((int)pvVar14 + 4) + iVar7 * 4) + 1);
-          if (iVar29 == 0) {
+          iVar27 = *(int *)(*(int *)(*(int *)((int)pvVar14 + 4) + iVar7 * 4) + 1);
+          if (iVar27 == 0) {
             puVar15 = (uint32_t*)(&DAT_00867a90);
           }
           else {
-            puVar15 = (uint32_t *)(iVar29 + 8);
+            puVar15 = (uint32_t *)(iVar27 + 8);
           }
           pCVar18 = C_fstr_Construct(&local_54,&DAT_00832cfc,puVar15);
           local_8 = 0x16;
@@ -994,36 +992,36 @@ LAB_00743663:
       }
       break;
     case 0x31:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,0);
       if (iVar7 == 0) {
         pCVar18 = (C_str *)(g_gameProfile.m_mpSettings)->_pad_021c;
         uVar21 = 0xffffffff;
-        pbVar22 = local_290;
+        pcVar19 = local_290;
         do {
           if (uVar21 == 0) break;
           uVar21--;
-          bVar1 = *pbVar22;
-          pbVar22++;
-        } while (bVar1 != 0);
+          cVar1 = *pcVar19;
+          pcVar19++;
+        } while (cVar1 != '\0');
         goto LAB_00743663;
       }
       break;
     case 0x32:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,0);
       if (iVar7 == 0) {
         pcVar19 = tier1_operator_new(0x80);
-        strncpy(pcVar19,(char *)local_290,0x80);
+        strncpy(pcVar19,local_290,0x80);
         iVar7 = 7;
 LAB_00743c53:
-        bVar28 = false;
-        iVar29 = 0;
+        bVar6 = false;
+        iVar27 = 0;
         pCVar20 = GetGameApp();
-        C_GameApp__PostCommand(pCVar20,iVar7,(int)pcVar19,iVar29,bVar28);
+        C_GameApp__PostCommand(pCVar20,iVar7,(int)pcVar19,iVar27,bVar6);
       }
       break;
     case 0x33:
-      cVar6 = FUN_007307e0(DAT_00982104);
-      if (cVar6 != '\0') {
+      bVar6 = IsPlayerAdmin(DAT_00982104);
+      if (bVar6) {
         pcVar19 = tier1_operator_new(0x80);
         strncpy(pcVar19,command,0x80);
         iVar7 = 8;
@@ -1034,7 +1032,7 @@ LAB_00743c53:
       C_GameApp__PrintMessage(pCVar20,pcVar19);
       break;
     case 0x34:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,0);
       if (iVar7 != 1) {
         pCVar18 = C_fstr_Construct(&local_5c,"maxping:  %d",g_netMaxPing);
         local_8 = 0x17;
@@ -1052,7 +1050,7 @@ LAB_00743c53:
       g_netMaxPing = local_14;
       break;
     case 0x35:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,0);
       if (iVar7 != 1) {
         pCVar18 = C_fstr_Construct(&local_64,"maxfreq:  %d",g_netMaxFreq);
         local_8 = 0x18;
@@ -1084,29 +1082,29 @@ LAB_00743c53:
         pcVar8[0x10b] = '\0';
         pcVar8[0x10c] = '\0';
         pcVar19 = command;
-        pcVar25 = pcVar8;
+        pcVar24 = pcVar8;
         do {
-          cVar6 = *pcVar19;
+          cVar1 = *pcVar19;
           pcVar19++;
-          *pcVar25 = cVar6;
-          pcVar25++;
-        } while (cVar6 != '\0');
+          *pcVar24 = cVar1;
+          pcVar24++;
+        } while (cVar1 != '\0');
         uVar21 = 0xffffffff;
         pcVar19 = command;
         do {
           if (uVar21 == 0) break;
           uVar21--;
-          cVar6 = *pcVar19;
+          cVar1 = *pcVar19;
           pcVar19++;
-        } while (cVar6 != '\0');
-        bVar28 = false;
-        iVar30 = 0;
+        } while (cVar1 != '\0');
+        bVar6 = false;
+        iVar28 = 0;
         command = command + (~uVar21 - 1);
-        iVar29 = 0;
+        iVar27 = 0;
         iVar7 = 4;
         pcVar19 = pcVar8;
         pCVar20 = GetGameApp();
-        C_GameApp__SendGameMessage(pCVar20,iVar7,iVar29,(int)pcVar19,iVar30,bVar28);
+        C_GameApp__SendGameMessage(pCVar20,iVar7,iVar27,(int)pcVar19,iVar28,bVar6);
         if ((g_gameRole & 2) == 0) {
           sprintf(local_3b0,"ADMIN: %s",pcVar8);
           if (DAT_0098c100 == 0) {
@@ -1126,7 +1124,7 @@ LAB_00743c53:
       }
       break;
     case 0x37:
-      iVar7 = ReadConsoleToken(&command,(char *)local_290,&local_14,0);
+      iVar7 = ReadConsoleToken(&command,local_290,&local_14,0);
       if (iVar7 != 1) {
         pCVar18 = C_fstr_Construct(&local_6c,"maxinactivity:  %d",g_netMaxInactivity / 1000)
         ;
@@ -1165,9 +1163,9 @@ LAB_00743c53:
         else {
           pSVar17 = ppSVar4[(int)local_18];
         }
-        puVar24 = (uint16_t *)&DAT_00845ebc;
+        puVar23 = (uint16_t *)&DAT_00845ebc;
         if (pSVar17->status != 1) {
-          puVar24 = (uint16_t*)(&DAT_0083cde4);
+          puVar23 = (uint16_t*)(&DAT_0083cde4);
         }
         pCVar18 = C_GameTexts__Get(&DAT_008c1368,&local_2c,pSVar17[1].m_type);
         local_8 = 0x1a;
@@ -1177,7 +1175,7 @@ LAB_00743c53:
         else {
           pcVar19 = pCVar18->rep->chars;
         }
-        pCVar18 = C_fstr_Construct(&local_74,"%s - %s",puVar24,pcVar19);
+        pCVar18 = C_fstr_Construct(&local_74,"%s - %s",puVar23,pcVar19);
         local_8 = CONCAT31(GH_PIECE(local_8,1,3),0x1b);
         if (pCVar18->rep == 0) {
           pcVar19 = (char *)&DAT_00867a90;

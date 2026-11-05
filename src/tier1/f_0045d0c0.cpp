@@ -65,10 +65,20 @@ uint32_t C_Team__SetCollisions(C_Team *_this,bool on, ...)
 // 0x0045e8a0
 uint32_t PrintEnemyKilled(C_Human *killer, ...)
 {
-  C_game *format;
+  C_game *game;
+  uint32_t *color;
+  char *format;
+  uint32_t local_20;
+  uint32_t local_1c;
+  uint32_t local_18;
+  color = &local_20;
+  local_20 = 0x3f800000;
+  local_1c = 0;
+  local_18 = 0;
   C_Human__GetFullName(killer);
-  format = GetGame();
-  GameDebugPrint((char *)format);
+  format = "%s killed an enemy soldier!!!";
+  game = GetGame();
+  C_game__PrintColored(game,color,format);
   return 0;
 }
 

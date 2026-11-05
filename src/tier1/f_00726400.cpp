@@ -68,7 +68,7 @@ int FUN_00726470(uint32_t *param_1,uint32_t param_2,uint32_t param_3,int param_4
   uint32_t local_114;
   uint32_t local_110;
   uint32_t local_d8;
-  uint32_t local_d4 [7];
+  uint8_t local_d4 [28];
   uint8_t local_b8 [8];
   uint32_t local_b0;
   uint32_t local_ac;
@@ -311,7 +311,7 @@ LAB_00727179:
                 ((C_BitStream *)&local_40,(uint32_t)(g_gameProfile.m_mpSettings)->dedicated,1);
       C_BitStream__WriteBits((C_BitStream *)&local_40,(g_gameProfile.m_mpSettings)->maxClients,6);
       puVar9 = param_1;
-      iVar16 = FUN_00730410((int)param_1);
+      iVar16 = C_NetGame__CountPlayers(param_1);
       C_BitStream__WriteBits((C_BitStream *)&local_40,iVar16,6);
       pCVar3 = ((g_gameProfile.m_mpSettings)->password).rep;
       if (pCVar3 == 0) {
@@ -334,7 +334,7 @@ LAB_00727179:
       if (**(int **)(iVar17 + 0xc) == 1) {
         FUN_007272c0(local_b8,(uint8_t *)((int)&param_1 + 3));
         GH_PIECE(local_8,0,1) = 1;
-        FUN_00730be0(puVar9,local_b8);
+        C_NetGame__FillServerStatus((C_NetGame *)puVar9,local_b8);
         FUN_007263c0(local_b8,&local_40);
         local_8 = (uint32_t)GH_PIECE(local_8,1,3) << 8;
         vector_tidy_7272e0((int)local_b8);
@@ -365,7 +365,7 @@ LAB_00727179:
       *local_24 = 7;
       return -1;
     }
-    iVar17 = FUN_00730410((int)param_1);
+    iVar17 = C_NetGame__CountPlayers(param_1);
     if (pSVar5->maxClients <= iVar17) {
       *local_24 = 3;
       return -1;
@@ -426,7 +426,7 @@ LAB_0072686b:
       puVar9 = (uint32_t *)((int)puVar9 + 1);
     } while ((uint32_t)((-8 - (int)puVar21) + (int)puVar9) < 0x33);
     puVar21[0xf] = local_d8;
-    FUN_00749fa0(puVar21 + 0x10,local_d4);
+    CopyNetStats(puVar21 + 0x10,local_d4);
     puVar21[0x19] = local_b0;
     puVar21[0x1a] = local_ac;
     puVar21[0x1b] = local_a8;
@@ -820,7 +820,7 @@ uint32_t * FUN_00727630(void *_this,uint32_t *param_1, ...)
     puVar1++;
   } while (puVar1 + (-8 - (int)_this) < (uint8_t *)0x33);
   *(uint32_t *)((int)_this + 0x3c) = param_1[0xf];
-  FUN_00749fa0((void *)((int)_this + 0x40),param_1 + 0x10);
+  CopyNetStats((void *)((int)_this + 0x40),param_1 + 0x10);
   *(uint32_t *)((int)_this + 100) = param_1[0x19];
   *(uint32_t *)((int)_this + 0x68) = param_1[0x1a];
   *(uint32_t *)((int)_this + 0x6c) = param_1[0x1b];

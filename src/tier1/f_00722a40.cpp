@@ -747,7 +747,7 @@ uint32_t FUN_007237d0(uint32_t param_1,int param_2, ...)
     FUN_00738830(param_2,"Objectives");
     return 0;
   case 8:
-    FUN_00730410(0x97d070);
+    C_NetGame__CountPlayers(&g_netGame);
     FUN_00738800(param_2);
     return 0;
   case 10:
@@ -773,7 +773,7 @@ uint32_t FUN_007237d0(uint32_t param_1,int param_2, ...)
     FUN_00738800(param_2);
     return 0;
   }
-  pcVar5 = &DAT_00867a90;
+  pcVar5 = (char *)&DAT_00867a90;
 LAB_0072387f:
   FUN_00738830(param_2,pcVar5);
   return 0;
@@ -891,7 +891,7 @@ int FUN_00723cc0(int param_1, ...)
 {
   int iVar1;
   if (param_1 == 1) {
-    iVar1 = FUN_00730410(0x97d070);
+    iVar1 = C_NetGame__CountPlayers(&g_netGame);
     return iVar1;
   }
   iVar1 = 0;

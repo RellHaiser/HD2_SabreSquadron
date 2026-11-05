@@ -722,7 +722,7 @@ void C_NetGame::ResetScores()
     m_playersLock.Enter();
     for (S_NetPlayerState &player : m_players) {
         std::memset(player.stats, 0, sizeof player.stats);
-        player.unknown78[4] = player.unknown78[5] = player.unknown78[6] = player.unknown78[7] = 0;   // (+0x7C)
+        player.teamKills = 0;
     }
     m_playersLock.Leave();
     for (int team = 0; team < 3; ++team) {

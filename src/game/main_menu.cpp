@@ -1791,9 +1791,8 @@ void C_MainMenu::ShowGameInfo(const S_ServerStatus *status)
         return;
     // The players (the last first): the team's mark, the name, the kills, the points.
     PostTo(GAME_INFO_PLAYERS, CONTROL_MSG_CLEAR, 0);
-    if (status->playersBegin) {
-        for (const S_StatusPlayer *player = status->playersEnd; player != status->playersBegin;) {
-            --player;
+    {
+        for (auto player = status->players.rbegin(); player != status->players.rend(); ++player) {
             if (!player->name[0])
                 continue;
             if (player->team == 0)

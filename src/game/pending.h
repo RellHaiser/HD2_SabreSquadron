@@ -119,7 +119,7 @@ struct S_ServerEntry;
 // part 9h-xii): its players, its rules, the teams' scores.
 struct S_StatusPlayer {                                 // 0x5C bytes
     int unknown00;
-    int kills;                                          // +0x04
+    int kills;                                          // +0x04 (the player's stats, NET_STAT_*)
     int unknown08;
     int points;                                         // +0x0C
     uint8_t unknown10[0x14];
@@ -128,11 +128,8 @@ struct S_StatusPlayer {                                 // 0x5C bytes
 };
 struct S_ServerStatus {
     int unknown00;
-    // (An MSVC 6 std::vector<S_StatusPlayer>: its first, last and end.)
-    S_StatusPlayer *playersBegin;                       // +0x04
-    S_StatusPlayer *playersEnd;                         // +0x08
-    S_StatusPlayer *playersCapacity;                    // +0x0C
-    int unknown10;
+    std::vector<S_StatusPlayer> players;                // +0x04 (C_NetGame::FillServerStatus)
+    int maxClients;                                     // +0x10
     int fragLimit;                                      // +0x14
     int roundLimit;                                     // +0x18
     int roundCount;                                     // +0x1C
@@ -143,13 +140,13 @@ struct S_ServerStatus {
     int autoTeamBalance;                                // +0x30
     int thirdPersonView;                                // +0x34
     int spawnProtectionTime;                            // +0x38
-    int unknown3C;
-    int unknown40;
+    int fallingDamage;                                  // +0x3C
+    int unknown40;                                      // +0x40 (S_MultiplayerSettings +0x25C)
     int allowVehicles;                                  // +0x44
     int difficulty;                                     // +0x48 (1 .. 4)
     int lives;                                          // +0x4C
     int allowCrosshair;                                 // +0x50
-    int unknown54;
+    int spawnOnStart;                                   // +0x54
     int teamLives;                                      // +0x58
     int inverseDamage;                                  // +0x5C
     int axisScore;                                      // +0x60

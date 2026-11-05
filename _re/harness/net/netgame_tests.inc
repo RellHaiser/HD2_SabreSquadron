@@ -25,6 +25,52 @@ S_NetPlayerState Player(int connection, const char *name)
     return p;
 }
 
+extern int64_t g_perfOffset;
+
+// A human whose controller answers IsSpectating (vtable +0x64, thiscall) from its flag.
+struct T_Controller {
+    void **vtable;
+    bool spectating;
+};
+bool __attribute__((thiscall)) FakeIsSpectating(T_Controller *self)
+{
+    return self->spectating;
+}
+C_Human *MakeHuman(bool spectating)
+{
+    static void *vtable[64];
+    static T_Controller controllers[64];
+    alignas(16) static unsigned char storage[64][sizeof(C_Human)];
+    static int used;
+    for (void *&slot : vtable)
+        slot = reinterpret_cast<void *>(&FakeIsSpectating);
+    T_Controller &controller = controllers[used];
+    controller.vtable = vtable;
+    controller.spectating = spectating;
+    auto *human = reinterpret_cast<C_Human *>(storage[used++]);
+    human->m_controller = reinterpret_cast<C_HumanController *>(&controller);
+    return human;
+}
+
+int ResendTime(C_NetConnection *link)
+{
+    return static_cast<C_NetReliableChannel *>(link->m_channels[1])->m_resendTime;
+}
+float Lag(C_NetObject *object)
+{
+    return object->GetProperty(0)->GetTrack().GetLag();
+}
+bool Near(float a, float b)
+{
+    return std::fabs(a - b) < 1e-6f;
+}
+C_NetObject *LagObject(C_NetReplication &replication, int slot)
+{
+    C_NetObject *object = replication.FindObject(slot, true);
+    object->AddProperty(0);
+    return object;
+}
+
 void TestNetGameConstruction()
 {
     g_gameRole = 0;
@@ -419,6 +465,10 @@ void TestVotes()
     C_NetGame &net = Fresh();
     S_NetVote &vote = net.m_vote;
     vote = S_NetVote();
+    // (The count of players is g_netGame's: four connected, one not.)
+    g_netGame.m_players.clear();
+    for (int i = 0; i < 5; ++i)
+        g_netGame.m_players.push_back(Player(i == 2 ? 0 : 10 + i, "p"));
     // Asked by a player: told to everyone; not while one runs.
     vote.Start(2, 7);
     CHECK(vote.kind == 2 && vote.arg == 7 && vote.time == 0 && !vote.voted && vote.yes == 0 &&
@@ -462,6 +512,7 @@ void TestVotes()
     CHECK(Logged("print 50 150 50 T22E3") && Logged("print 50 150 50 T22E4"));
     PostVote(3, 4);
     CHECK(Logged("post 10 3 4 0"));
+    g_netGame.m_players.clear();
 }
 
 void TestClose()
@@ -518,7 +569,7 @@ void TestPlayers()
     CHECK(net.FindPlayerByName("pat") == 1 && net.FindPlayerByName("nobody") == -1 && net.FindPlayerByName("") == 2);
     CHECK(net.FindPlayer(20) == 1 && net.FindPlayer(0) == -1 && net.FindPlayer(30) == -1);
     CHECK(std::strcmp(net.GetPlayerName(1), "pat") == 0 && net.GetPlayerName(3) == nullptr && net.GetPlayerName(-1) == nullptr);
-    auto *human = reinterpret_cast<C_Human *>(0x1234);
+    C_Human *human = MakeHuman(false);
     net.m_players[1].human = human;
     CHECK(net.GetPlayerHuman(1) == human && net.GetPlayerHuman(3) == nullptr && net.GetPlayerHuman(-1) == nullptr);
     CHECK(net.LockPlayers() == net.m_players.data());
@@ -533,19 +584,20 @@ void TestPlayers()
     CHECK(net.GetBestScore() == 9);
     g_gameRole = GAME_ROLE_SERVER;
     net.AddScore(1, 3);
-    CHECK(net.m_players[1].stats[3] == 12 && net.m_players[1].stats[8] == 3 && Logged("send score 1 0"));
+    CHECK(net.m_players[1].stats[3] == 12 && net.m_players[1].stats[8] == 3 && Logged("rank 1") &&
+          net.m_players[1].stats[5] == 1);
     g_gameRole = GAME_ROLE_CLIENT;
     g_log.clear();
     net.AddScore(0, -2);
     CHECK(net.m_players[0].stats[3] == 3 && g_log.empty());
     net.AddScore(7, 1);
     // Reset: the stats (and +0x7C) and the teams'.
-    net.m_players[1].unknown78[4] = 1;
+    net.m_players[1].teamKills = 1;
     net.m_teamScores[1] = 3.0f;
     net.m_teamStats[2][8] = 4;
     net.m_players[1].team = 1;
     net.ResetScores();
-    CHECK(net.m_players[1].stats[3] == 0 && net.m_players[1].stats[8] == 0 && net.m_players[1].unknown78[4] == 0 &&
+    CHECK(net.m_players[1].stats[3] == 0 && net.m_players[1].stats[8] == 0 && net.m_players[1].teamKills == 0 &&
           net.m_teamScores[1] == 0.0f && net.m_teamStats[2][8] == 0 && net.m_players[1].human == human &&
           net.m_players[1].team == 1);
     // The player stats: the humans too, and the replication's objects.
@@ -595,52 +647,6 @@ void TestFrameBounds()
 }
 
 // ---- (added after the first mutation run) ----------------------------------------------------------------------------
-
-extern int64_t g_perfOffset;
-
-// A human whose controller answers IsSpectating (vtable +0x64, thiscall) from its flag.
-struct T_Controller {
-    void **vtable;
-    bool spectating;
-};
-bool __attribute__((thiscall)) FakeIsSpectating(T_Controller *self)
-{
-    return self->spectating;
-}
-C_Human *MakeHuman(bool spectating)
-{
-    static void *vtable[64];
-    static T_Controller controllers[16];
-    alignas(16) static unsigned char storage[16][sizeof(C_Human)];
-    static int used;
-    for (void *&slot : vtable)
-        slot = reinterpret_cast<void *>(&FakeIsSpectating);
-    T_Controller &controller = controllers[used];
-    controller.vtable = vtable;
-    controller.spectating = spectating;
-    auto *human = reinterpret_cast<C_Human *>(storage[used++]);
-    human->m_controller = reinterpret_cast<C_HumanController *>(&controller);
-    return human;
-}
-
-int ResendTime(C_NetConnection *link)
-{
-    return static_cast<C_NetReliableChannel *>(link->m_channels[1])->m_resendTime;
-}
-float Lag(C_NetObject *object)
-{
-    return object->GetProperty(0)->GetTrack().GetLag();
-}
-bool Near(float a, float b)
-{
-    return std::fabs(a - b) < 1e-6f;
-}
-C_NetObject *LagObject(C_NetReplication &replication, int slot)
-{
-    C_NetObject *object = replication.FindObject(slot, true);
-    object->AddProperty(0);
-    return object;
-}
 
 void TestUpdateLags()
 {
@@ -703,8 +709,8 @@ void TestUpdateLags()
           Near(Lag(objects[5]), 0.035f));
     // High pings counted (over the most) and kicked after three; the inactive kicked (not spectators).
     CHECK(net.m_players[1].highPings == 3 && net.m_players[2].highPings == 0 && net.m_players[6].highPings == 2);
-    CHECK(Logged("kick 1 2") && !Logged("kick 3 2") && !Logged("kick 4 2") && !Logged("kick 6 2") && !Logged("kick 2 2"));
-    CHECK(Logged("kick 1 3") && !Logged("kick 2 3") && !Logged("kick 6 3") && net.m_players[1].activityTime >= ticks &&
+    CHECK(Logged("game 17 to 0 a 2 b 1 0") && !Logged("game 17 to 0 a 2 b 3 0") && !Logged("game 17 to 0 a 2 b 4 0") && !Logged("game 17 to 0 a 2 b 6 0") && !Logged("game 17 to 0 a 2 b 2 0"));
+    CHECK(Logged("game 17 to 0 a 3 b 1 0") && !Logged("game 17 to 0 a 3 b 2 0") && !Logged("game 17 to 0 a 3 b 6 0") && net.m_players[1].activityTime >= ticks &&
           net.m_players[2].activityTime == ticks - 5000);
     // No most ping, no most inactivity: not counted, not kicked (through the frame).
     net.m_maxPing = 0;
@@ -715,7 +721,7 @@ void TestUpdateLags()
     g_perfOffset += 4000;
     net.m_sendTime = 0;
     net.Process(50, false);
-    CHECK(net.m_players[6].highPings == 0 && !Logged("kick 1 3") && Logged("kick 1 2"));
+    CHECK(net.m_players[6].highPings == 0 && !Logged("game 17 to 0 a 3 b 1 0") && Logged("game 17 to 0 a 2 b 1 0"));
     // Not before the 3 s; not local, the dedicated (0x12), nor without the server's or the client's object.
     net.m_players[6].highPings = 0;
     net.m_maxPing = 1;
@@ -819,7 +825,7 @@ void TestLevelScan()
     g_localPlayerSlot = 5;
     g_gameRole = GAME_ROLE_SERVER;
     CHECK(!net.Command(NET_COMMAND_SCAN_LEVEL, nullptr, 0));
-    CHECK(Logged("enum 1") && Logged("level bounds -1.05 -2.05 -7.05 10.10 8.10 10.10"));
+    CHECK(Logged("enum 1") && g_netGame.m_replication == nullptr);
     CHECK(Near(net.m_levelMin[0], -1.05f) && Near(net.m_levelMin[2], -7.05f) && Near(net.m_levelSize[1], 8.1f) &&
           Near(net.m_levelSize[2], 10.1f));
     bool zeroed = true;
@@ -834,7 +840,8 @@ void TestLevelScan()
     g_gameRole = GAME_ROLE_LOCAL;
     g_log.clear();
     net.Command(NET_COMMAND_SCAN_LEVEL, nullptr, 0);
-    CHECK(Logged("level bounds -0.05 -0.05 -0.05 2.10 6.10 8.10") && g_localPlayerSlot == 0);
+    CHECK(Near(net.m_levelMin[1], -0.05f) && Near(net.m_levelSize[0], 2.1f) && Near(net.m_levelSize[1], 6.1f) &&
+          Near(net.m_levelSize[2], 8.1f) && g_localPlayerSlot == 0);
     game->m_scene = nullptr;
 }
 
@@ -1087,6 +1094,8 @@ void TestBoundaries()
 
 void RunNetGameTests()
 {
+    g_netGame.m_playersLock.Init();
+    g_netGame.m_queueLock.Init();
     std::printf("> NetGameConstruction\n");
     TestNetGameConstruction();
     std::printf("> Streams\n");

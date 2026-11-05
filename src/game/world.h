@@ -149,8 +149,6 @@ class C_Interface;
 // The player's profile, diary and debriefing: see game/profile.h.
 
 void SetObjectiveStatus(int objective, int status);    // 0x006b6830
-// True while the network player with this id is connected.
-bool IsNetPlayerConnected(int netId);                   // 0x00730970
 // Enables a multiplayer spawn zone for a side (0 axis, 1 allied, 2 neutral).
 bool EnableSpawnZone(const char *zoneName, int side);   // 0x0069f320
 

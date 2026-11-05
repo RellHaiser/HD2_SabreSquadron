@@ -391,7 +391,7 @@ void C_RemoteController::OnMessage(C_BitStream *stream)
             g_gameProfile.m_humanStore->GetStats(skills, m_human->GetProfileIndex(),
                                                  g_netGame.GetPlayerStats(m_human->GetNetId())[5]);
             m_human->SetSkills(skills);
-            g_netGame.SetPlayerClass(message.soldierClass, m_human->GetNetId());
+            g_netGame.SetPlayerRank(message.soldierClass, m_human->GetNetId());
             break;
         }
         case CTRL_MSG_ANIMATION: {

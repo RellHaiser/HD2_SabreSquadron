@@ -217,6 +217,9 @@ public:
 
     C_NetObject &GetLocalObject() { return m_local; }
     bool HasObjects() const { return !m_objects.empty(); }
+    const std::vector<C_NetObject *> &GetObjects() const { return m_objects; }
+    // The data read from now on (SetLevelBounds: the level's quantisation set).
+    void Enable() { m_enabled = true; }
     int GetLocalId() const;
     void SetWriteEpoch(int value);
     void SetReadEpoch(int value);

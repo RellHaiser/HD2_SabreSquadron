@@ -8843,6 +8843,33 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 278 errors in 51 of 376 files. ret_audit --src: 52.
   - Stats: 9,961 of 12,306 functions by hand or absorbed (87.1 % by size).
 
+  PART 10d-ii DONE (2026-11-05): C_NetGame's players, teams and scores (net/net_players.cpp, new). The plan's band
+  0x00730f00..0x007319e0 (the LAN query server: the +0x55C table of 100 0xB8-byte entries, the port + 2 socket, the
+  0xA0-XORed checksummed packets, the random names) moves to 10d-iii with the LAN search.
+  - The kills (OnPlayerKilled: deaths, kills, the scores, the teams' sums; objectives: a team point; a team kill 10
+    off, the third kicks; co-op: a non-player's killer scores, 10 off for allies and neutrals by the actor's role;
+    Fix: the co-op killer's slot checked with <, the original's <= let one past the end through), the ranks
+    (SendPlayerScore: 0..7 by the score thresholds 10..80 at 0x0084507c, sent by the player's controller;
+    SetPlayerRank, was SetPlayerClass: the change printed, texts 0x22C4..0x22C7; S_NetPlayerState::GetRankName
+    0x00725ed0, a deathmatch by the uniform's side; Fix: it returns a C_str), the kicks (KickPlayer: game message 0x11
+    and the reason's text; KickPlayerByName), IsPlayerAdmin (+0xA1), CanPlayerRespawn (was IsNetPlayerConnected: the
+    co-op lives or the respawn rule).
+  - The scores' message: WriteScores / ReadScores (the players' stats, S_NetStats::Write / Read 0x00749ed0 /
+    0x00749f40 in 46 bits; the pings from DirectPlay's GetConnectionInfo; the round's times; the co-op lives, -1 sent
+    as 0x7E as the original; the teams' stats, scores and wins). The stats are S_NetStats (9 ints, converting to
+    int *).
+  - The teams: CountTeams / CountTeamPlayers / CountPlayers, ApplyPendingTeams, Get / SetPlayerTeam, GetLocalTeam,
+    TeamsBalanced (within 1.5 of the share), BalanceTeams (its first argument unused; team 0 against the second's
+    percentage), IsTeamAlive, AddTeamScore, PrintTeams (C_game::PrintColored 0x0069c2a0: empty), GetLocalHuman,
+    IsPlayerSpectating, S_NetPlayerState::IsSpectating.
+  - FillServerStatus (S_ServerStatus's players now a std::vector; its +0x3C / +0x54 named), FlipSessionParity
+    (S_NetPlayerState +0xAC: session), ResetReplication, GetConnectionState, SetLevelBounds (the replication's first
+    quantisation; the net library's table g_netQuantizations 0x00982de8, C_NetQuantizationTable).
+  - Harness: net/netplayers_tests.inc (with build_game.bat; 257 checks with 10d-i's). Mutations:
+    mutations/mutate_10d2.py: 480: 359 killed, 50 not building, 71 equivalent or unobserved (locks, array sizes, one-past-the-end bounds, arguments the fakes ignore). Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 278 errors in 51 of 375 files. ret_audit --src: 52.
+  - Stats: 10,008 of 12,306 functions by hand or absorbed (87.3 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

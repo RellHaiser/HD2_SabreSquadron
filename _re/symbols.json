@@ -34156,9 +34156,9 @@
   "proto": "void __cdecl PrintMessage(C_game * game, S_vector * color, char * format)"
  },
  "0069c2a0": {
-  "module": "game",
-  "name": "GameDebugPrint",
-  "proto": "void __cdecl GameDebugPrint(char * format)"
+  "module": "net_players",
+  "name": "C_game::PrintColored",
+  "proto": "void __cdecl PrintColored(void * game, void * color, char * format)"
  },
  "0069c2b0": {
   "module": "game",
@@ -38383,9 +38383,14 @@
   "proto": "void * __fastcall S_NetPlayerState(void * state)"
  },
  "00725e90": {
-  "module": "hud",
+  "module": "net_players",
   "name": "S_NetPlayerState::IsSpectating",
-  "proto": "bool __thiscall IsSpectating(S_NetPlayerState *this)"
+  "proto": "bool __thiscall IsSpectating(void *this)"
+ },
+ "00725ed0": {
+  "module": "net_players",
+  "name": "S_NetPlayerState::GetRankName",
+  "proto": "char * __fastcall GetRankName(void * state)"
  },
  "007272a0": {
   "module": "zz_idioms",
@@ -38628,19 +38633,55 @@
   "name": "C_NetGame::AddScore",
   "proto": "void __thiscall AddScore(C_NetGame *this, int slot, int points)"
  },
+ "0072f230": {
+  "module": "net_players",
+  "name": "C_NetGame::OnPlayerKilled",
+  "proto": "void __thiscall OnPlayerKilled(void *this, int victim, int killer)"
+ },
+ "0072f5e0": {
+  "module": "net_players",
+  "name": "C_NetGame::KickPlayerByName",
+  "proto": "void __thiscall KickPlayerByName(void *this, char * name, int reason)"
+ },
+ "0072f6c0": {
+  "module": "net_players",
+  "name": "C_NetGame::KickPlayer",
+  "proto": "void __thiscall KickPlayer(void *this, int slot, int reason)"
+ },
  "0072f890": {
-  "module": "player",
+  "module": "net_players",
   "name": "C_NetGame::GetPlayerStats",
   "proto": "int * __thiscall GetPlayerStats(void *this, int slot)"
  },
  "0072f8b0": {
-  "module": "game_menu",
-  "name": "C_NetGame::GetLocalPlayerStats"
+  "module": "net_players",
+  "name": "C_NetGame::GetLocalPlayerStats",
+  "proto": "int * __fastcall GetLocalPlayerStats(void * net)"
+ },
+ "0072f8d0": {
+  "module": "net_players",
+  "name": "C_NetGame::SetLevelBounds",
+  "proto": "void __thiscall SetLevelBounds(void *this, float * min, float * size)"
+ },
+ "0072fa50": {
+  "module": "net_players",
+  "name": "C_NetGame::ReadScores",
+  "proto": "void __thiscall ReadScores(void *this, void * stream)"
+ },
+ "0072fc50": {
+  "module": "net_players",
+  "name": "C_NetGame::WriteScores",
+  "proto": "void __thiscall WriteScores(void *this, void * stream)"
  },
  "0072fe90": {
-  "module": "player",
-  "name": "C_NetGame::SetPlayerClass",
-  "proto": "void __thiscall SetPlayerClass(void *this, int soldierClass, int slot)"
+  "module": "net_players",
+  "name": "C_NetGame::SetPlayerRank",
+  "proto": "void __thiscall SetPlayerRank(void *this, int rank, int slot)"
+ },
+ "00730130": {
+  "module": "net_players",
+  "name": "C_NetGame::SendPlayerScore",
+  "proto": "void __thiscall SendPlayerScore(void *this, int slot, bool lock)"
  },
  "007301d0": {
   "module": "game",
@@ -38657,10 +38698,25 @@
   "name": "C_NetGame::CountTeams",
   "proto": "void __thiscall CountTeams(C_NetGame *this, int * axis, int * allies, bool pending, bool inGame)"
  },
+ "00730410": {
+  "module": "net_players",
+  "name": "C_NetGame::CountPlayers",
+  "proto": "int __fastcall CountPlayers(void * net)"
+ },
  "007304a0": {
   "module": "game",
   "name": "C_NetGame::ApplyPendingTeams",
   "proto": "void __fastcall ApplyPendingTeams(C_NetGame * net)"
+ },
+ "00730510": {
+  "module": "net_players",
+  "name": "C_NetGame::SetPlayerTeam",
+  "proto": "void __thiscall SetPlayerTeam(void *this, int slot, int team, bool pending)"
+ },
+ "00730590": {
+  "module": "net_players",
+  "name": "C_NetGame::TeamsBalanced",
+  "proto": "bool __thiscall TeamsBalanced(void *this, int axis, int allied, bool pending)"
  },
  "007305e0": {
   "module": "game",
@@ -38668,28 +38724,54 @@
   "proto": "bool __thiscall IsTeamAlive(C_NetGame *this, int team)"
  },
  "007306a0": {
-  "module": "game",
+  "module": "net_players",
   "name": "C_NetGame::BalanceTeams",
-  "proto": "void __thiscall BalanceTeams(C_NetGame *this, int a, int b)"
+  "proto": "void __thiscall BalanceTeams(void *this, int unused, int percent)"
+ },
+ "007307e0": {
+  "module": "net_players",
+  "name": "IsPlayerAdmin",
+  "proto": "bool __cdecl IsPlayerAdmin(int slot)"
  },
  "00730830": {
   "module": "game",
   "name": "C_NetGame::GetLocalHuman",
   "proto": "C_Human * __fastcall GetLocalHuman(C_NetGame * net)"
  },
+ "00730880": {
+  "module": "net_players",
+  "name": "C_NetGame::GetLocalTeam",
+  "proto": "int __fastcall GetLocalTeam(void * net)"
+ },
  "007308a0": {
   "module": "game",
   "name": "C_NetGame::IsPlayerSpectating",
   "proto": "bool __thiscall IsPlayerSpectating(C_NetGame *this, int slot)"
  },
+ "00730900": {
+  "module": "net_players",
+  "name": "C_NetGame::GetPlayerTeam",
+  "proto": "int __thiscall GetPlayerTeam(void *this, int slot, bool pending)"
+ },
  "00730970": {
-  "module": "script",
-  "name": "IsNetPlayerConnected"
+  "module": "net_players",
+  "name": "CanPlayerRespawn",
+  "proto": "bool __cdecl CanPlayerRespawn(int slot)"
  },
  "00730a20": {
   "module": "game",
   "name": "C_NetGame::AddTeamScore",
   "proto": "void __thiscall AddTeamScore(C_NetGame *this, int team, float points)"
+ },
+ "00730a50": {
+  "module": "net_players",
+  "name": "C_NetGame::PrintTeams",
+  "proto": "void __fastcall PrintTeams(void * net)"
+ },
+ "00730be0": {
+  "module": "net_players",
+  "name": "C_NetGame::FillServerStatus",
+  "proto": "void __thiscall FillServerStatus(void *this, void * status)"
  },
  "00730e10": {
   "module": "game",
@@ -38767,6 +38849,40 @@
  "0073ab40": {
   "module": "zz_idioms",
   "name": "get_field_14_73ab40"
+ },
+ "0073cf60": {
+  "module": "net_players",
+  "name": "InitNetQuantizations"
+ },
+ "0073cfa0": {
+  "module": "net_players",
+  "name": "C_NetQuantizationTable::C_NetQuantizationTable",
+  "proto": "void * __fastcall C_NetQuantizationTable(void * table)"
+ },
+ "0073cfd0": {
+  "module": "net_players",
+  "name": "C_NetQuantizationTable::DeletingDestructor",
+  "proto": "void * __thiscall DeletingDestructor(void *this, uint flags)"
+ },
+ "0073cff0": {
+  "module": "net_players",
+  "name": "C_NetQuantizationTable::~C_NetQuantizationTable",
+  "proto": "void __fastcall ~C_NetQuantizationTable(void * table)"
+ },
+ "0073d010": {
+  "module": "net_players",
+  "name": "C_NetQuantizationTable::SetEntry",
+  "proto": "void __thiscall SetEntry(void *this, int index, void * quantization)"
+ },
+ "0073d080": {
+  "module": "net_players",
+  "name": "C_NetQuantizationTable::Set",
+  "proto": "void __thiscall Set(void *this, int index, float * span, float * from, float * step)"
+ },
+ "0073d0c0": {
+  "module": "net_players",
+  "name": "C_NetQuantizationTable::SetDefaults",
+  "proto": "void __fastcall SetDefaults(void * table)"
  },
  "0073d290": {
   "module": "net_bitstream",
@@ -40189,6 +40305,21 @@
   "module": "net_replication",
   "name": "C_NetPool::GrowPackets",
   "proto": "void __fastcall GrowPackets(void * list)"
+ },
+ "00749ed0": {
+  "module": "net_players",
+  "name": "S_NetStats::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "00749f40": {
+  "module": "net_players",
+  "name": "S_NetStats::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "00749fa0": {
+  "module": "net_players",
+  "name": "S_NetStats::Copy",
+  "proto": "void __thiscall Copy(void *this, void * from)"
  },
  "0074a1c0": {
   "module": "movement",

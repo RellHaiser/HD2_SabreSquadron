@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include "common/c_str.h"
 #include "net/bitstream.h"
 
 class C_Human;
@@ -53,6 +54,18 @@ public:
     virtual void Destroy(bool free) = 0;            // +0x0C
 };
 
+// A player's or a team's stats (9 ints, NET_STAT_*; read as an int array).
+struct S_NetStats {
+    int values[9] = {};
+
+    operator int *() { return values; }
+    operator const int *() const { return values; }
+    // In a message: the score, kills, deaths, ping and rank in 11, 10, 10, 10, 5 bits (the ping clamped to 0..1023
+    // in place first).
+    void Write(C_BitStream *stream);                // 0x00749ed0
+    void Read(C_BitStream *stream);                 // 0x00749f40
+};
+
 // Server-side state per player (0xC4 bytes; C_NetGame::LockPlayers()).
 struct S_NetPlayerState {
     S_NetPlayerState();                             // 0x00725e10
@@ -60,16 +73,17 @@ struct S_NetPlayerState {
     int unknown04 = 0;
     char name[0x34] = {};                           // +0x08 (size inferred) empty: a free slot
     class C_Human *human = nullptr;                 // +0x3C cleared when the human is destroyed
-    // (+0x0C the round's score, +0x10 the ping's share of the lag, +0x14 the soldier class (SetPlayerClass),
-    // +0x20 the total.)
-    int stats[9] = {};                              // +0x40
+    S_NetStats stats;                               // +0x40 NET_STAT_*
     int team = 0;                                   // +0x64 E_HumanTeam
     int pendingTeam = 0;                            // +0x68 the team the player switches to
     C_NetConnection *link = nullptr;                // +0x6C its transport connection (the server's)
     int unknown70 = 0;
     // The server's handshake with it (0 none, 2 sending the game to it, 1 done).
     int joinStage = 0;                              // +0x74
-    uint8_t unknown78[0x2A] = {};
+    int unknown78 = 0;
+    int teamKills = 0;                              // +0x7C (three: kicked; ResetScores clears them)
+    uint8_t unknown80[0x21] = {};
+    bool admin = false;                             // +0xA1 may use the admin commands (IsPlayerAdmin)
     bool left = false;                              // +0xA2 the player left (C_game::OnPlayerLeft);
                                                     //       cleared when the actor is removed
     uint8_t unknownA3 = 0;
@@ -78,13 +92,29 @@ struct S_NetPlayerState {
     // The server: timeGetTime() of the player's last controls or request (the player
     // controller stamps it).
     uint32_t activityTime = 0;                      // +0xA8
-    uint8_t unknownAC[4] = {};
+    // The session bit of its packets (flipped each round, FlipSessionParity; the connection's +0x08 follows).
+    uint32_t session = 0;                           // +0xAC
     int livesUsed = 0;                              // +0xB0 co-op respawns (-1 before the first spawn)
     uint8_t unknownB4[0x10] = {};
 
     bool IsConnected() const { return name[0] != 0; }
     // No human, or its (player / remote) controller watches.
     bool IsSpectating() const;                      // 0x00725e90
+    // The name of its rank (stats[NET_STAT_RANK]): texts 0x2792 + rank (the allies'; a deathmatch: the uniform's
+    // side) or 0x279C + rank.
+    // (Fix: a C_str; the original hands back the text's characters, freed for an undefined text.)
+    C_str GetRankName() const;                      // 0x00725ed0 (__fastcall)
+};
+// S_NetPlayerState::stats (and the teams' sums, C_NetGame +0x464).
+enum : int {
+    NET_STAT_KILLS = 1,
+    NET_STAT_DEATHS = 2,
+    NET_STAT_SCORE = 3,                             // the round's
+    NET_STAT_PING = 4,                              // the server's: half the round trip (ms)
+    NET_STAT_RANK = 5,                              // 0..7 by the score (10, 20, .. 80)
+    NET_STAT_TOTAL_KILLS = 6,
+    NET_STAT_TOTAL_DEATHS = 7,
+    NET_STAT_TOTAL_SCORE = 8,
 };
 
 // A vote of the players (C_NetGame +0x4D0, 0x14 bytes): a server command (its kind indexes the votable commands'
@@ -173,8 +203,9 @@ public:
     void CountTeams(int *axis, int *allies, bool pending, bool inGame);   // 0x00730320
     // The players' pending teams become their teams.
     void ApplyPendingTeams();                       // 0x007304a0
-    // Moves players between the teams towards the sizes the mission asks for.
-    void BalanceTeams(int axis, int allied);        // 0x007306a0
+    // Moves players (from the last slot) between the teams while team 0's are more than one off `percent` of the
+    // players (the first argument is not used: the mission's axis share; `percent` its allied one).
+    void BalanceTeams(int unused, int percent);     // 0x007306a0
     // The connected players (their count).
     int CountPlayers();                             // 0x00730410
     // Highest round score of the players in the game.
@@ -184,10 +215,9 @@ public:
     int *GetPlayerStats(int slot);                  // 0x0072f890
     // The local player's stats (the slot g_netLocalSlot 0x00982104's).
     int *GetLocalPlayerStats();                     // 0x0072f8b0
-    // Sets the soldier class of the player in `slot` (stats[5]) and prints its change (texts
-    // 0x22C4 / 0x22C5 about the local player, 0x22C6 / 0x22C7 about the others, by whether it
-    // went down).
-    void SetPlayerClass(int soldierClass, int slot);   // 0x0072fe90
+    // Sets the rank of the player in `slot` (stats[NET_STAT_RANK]) and prints its change (texts 0x22C4 / 0x22C5
+    // about the local player, 0x22C6 / 0x22C7 about the others, by whether it went down).
+    void SetPlayerRank(int rank, int slot);         // 0x0072fe90
     // Server: the team's score (+0x44C, float per team).
     void AddTeamScore(int team, float points);      // 0x00730a20
     float GetTeamScore(int team) const { return m_teamScores[team]; }
@@ -196,8 +226,21 @@ public:
     // Every player's round stats and the teams' scores cleared.
     void ResetScores();                             // 0x0072ebb0
     void SendScores();                              // 0x007301d0
-    // A player's score sent to everyone (`all`: every field).
-    void SendPlayerScore(int slot, bool all);       // 0x00730130
+    // Server: the rank of the player in `slot` from its score; a new one sent by its controller (`lock`: the
+    // players locked here).
+    void SendPlayerScore(int slot, bool lock);      // 0x00730130
+    // Server: the players' and teams' scores, the round's times and the co-op lives written (game message 2, part
+    // 10d-iv); a client reads them (the server's stream read into a scratch block).
+    void WriteScores(C_BitStream *stream);          // 0x0072fc50
+    void ReadScores(C_BitStream *stream);           // 0x0072fa50
+    // The player named `name` kicked (`reason` as KickPlayer).
+    void KickPlayerByName(const char *name, int reason);   // 0x0072f5e0
+    // The teams' sizes are within 1.5 of `axis` : `allied` (`pending`: the players' next teams).
+    bool TeamsBalanced(int axis, int allied, bool pending);   // 0x00730590
+    // The players and the teams' kills and scores printed (C_game::Print: nothing in the release build).
+    void PrintTeams();                              // 0x00730a50 (__fastcall; not called)
+    // A server's status for a query: its players, its rules, the teams' scores.
+    void FillServerStatus(S_ServerStatus *status);  // 0x00730be0
     // Flips bit 0 of the players' +0xAC (and of the copy their connection holds) each round
     // (meaning not identified).
     void FlipSessionParity();                       // 0x00730e10
@@ -266,7 +309,8 @@ public:
     void DeleteReplication();                       // 0x007235f0 (__fastcall)
     // The session's GameSpy reporting stopped (`unknown` 0, false).
     void StopReporting(int *unknown, bool flag);    // 0x00732730
-    // A player kicked (`reason`: 2 its ping, 3 idle).
+    // A player kicked: told to everyone (the server; game message 0x11) and printed (`reason`: 0 by the server,
+    // 1 team kills, 2 its ping, 3 idle; texts 0x22AB, 0x22AA, 0x22AD, 0x22AC).
     void KickPlayer(int slot, int reason);          // 0x0072f6c0
     // The LAN listing's answering of a server (the session menu's listing kind 1).
     void AnswerQueries();                           // 0x00723dc0 (__fastcall)
@@ -279,7 +323,7 @@ public:
     class C_NetVoice *m_voiceClient = nullptr;      // +0x00C
     class C_NetVoice *m_voiceServer = nullptr;      // +0x010
     C_NetReplication *m_replication = nullptr;      // +0x014
-    uint8_t m_quantizations[3 * 0x80];              // +0x020 position, rate, delta (S_NetQuantization)
+    S_NetQuantization m_quantizations[3];           // +0x020 position, rate, delta (SetLevelBounds: the first)
     C_NetMessage m_replicationMessage;              // +0x1A0
     std::vector<S_NetPlayerState> m_players;        // +0x1E0
     std::list<S_NetQueued> m_received;              // +0x1F0
@@ -296,7 +340,7 @@ public:
     int m_unknown448 = 0;
     float m_teamScores[3] = {};                     // +0x44C
     int m_teamWins[3] = {};                         // +0x458
-    int m_teamStats[3][9] = {};                     // +0x464
+    S_NetStats m_teamStats[3];                      // +0x464
     S_NetVote m_vote;                               // +0x4D0
     int m_unknown4E4 = 0;
     uint8_t m_unknown4E8[0x4D3C - 0x4E8] = {};       // (+0x4F4 a vector freed by the destructor, +0x4E00 ...)
@@ -362,6 +406,22 @@ extern char g_votableCommands[][0x204];             // 0x00846088
 extern void *g_netQueryThread;                      // 0x009820f8
 // The text a closed session's +0x502C string becomes.
 extern char g_netDefaultSessionText[];              // 0x00867a90
+// The player in `slot` may use the admin commands (+0xA1; false for a free slot).
+bool IsPlayerAdmin(int slot);                       // 0x007307e0
+// The player in `slot` has lives left (co-op: its own or the team's against the lives; otherwise the respawn
+// rule).
+bool CanPlayerRespawn(int slot);                    // 0x00730970
+// The quantisations the net library keeps by index (0x00982de8, vtable 0x00816380; 0 the level, set by
+// SetLevelBounds; nothing reads them).
+class C_NetQuantizationTable {
+public:
+    C_NetQuantizationTable();                       // 0x0073cfa0 (the defaults, 0x0073d0c0)
+    virtual ~C_NetQuantizationTable();              // 0x0073cff0 (deleting: 0x0073cfd0)
+    // Entry `index` (the table doubled while too small) set up from `span`, `from`, `step` (100).
+    void Set(int index, const float *span, const float *from, const float *step);   // 0x0073d080
+    std::vector<S_NetQuantization> m_entries;       // +0x04 (10 at first; aligned blocks of 0x80 bytes)
+};
+extern C_NetQuantizationTable g_netQuantizations;   // 0x00982de8
 // The GameSpy queries stopped (the SDK; `socket` null).
 void StopGameSpyQueries(uintptr_t *socket);         // 0x00738760
 // The transport's packet callback: the server queues what it gets as received, a client as outgoing.
