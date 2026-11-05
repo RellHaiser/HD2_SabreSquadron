@@ -165,3 +165,10 @@
 007252c0 S_ServerEntry::Reset | void __fastcall Reset(void *this)
 00723610 C_NetGame::PollSearch | void __fastcall PollSearch(void *this)
 0083fe08 g_netPollTime @ int
+# Part 9h-xxi: the network handler and the join's password.
+00637a60 C_MainMenu::AskJoinPassword | void __fastcall AskJoinPassword(C_MainMenu *this)
+00724040 C_NetGame::SearchServers | void __thiscall SearchServers(void *this, void * callback)
+00724090 C_NetGame::PingServers | void __thiscall PingServers(void *this, void * callback, void * servers)
+007328d0 C_NetGame::FirewallBlocks | bool __thiscall FirewallBlocks(void *this, ushort port)
+0061a0f0 C_MpMenuSettings::LoadServerList | void __fastcall LoadServerList(void *this)
+00619d00 C_MpMenuSettings::SaveServerList | void __fastcall SaveServerList(void *this)

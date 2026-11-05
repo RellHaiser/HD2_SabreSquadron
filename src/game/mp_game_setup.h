@@ -232,6 +232,10 @@ public:
     void ClearServers();                            // 0x0061b0b0 (__fastcall)
     // The servers of the list shown not answered yet (S_ServerEntry::Reset; part 9h-xx).
     void ResetServers();                            // 0x00619ca0 (__fastcall)
+    // PlayersProfiles\ServerList.bin: the two lists (the Internet's servers and the favourites) read (the old
+    // ones deleted) / written (part 9h-xxii).
+    void LoadServerList();                          // 0x0061a0f0 (__fastcall)
+    void SaveServerList();                          // 0x00619d00 (__fastcall)
     // The first list's count and the players on its servers.
     void CountServers();                            // 0x0061b040 (__fastcall)
     // `server` in the first list / the second.

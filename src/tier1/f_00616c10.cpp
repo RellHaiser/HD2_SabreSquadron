@@ -89,7 +89,7 @@ uint32_t C_XmlNode__dtor_C_XmlNode(uint32_t *param_1, ...)
 
 #endif
 // 0x00619d00
-uint32_t FUN_00619d00(int param_1, ...)
+uint32_t C_MpMenuSettings__SaveServerList(void *_this, ...)
 {
   bool bVar1;
   char *fileName;
@@ -112,7 +112,7 @@ uint32_t FUN_00619d00(int param_1, ...)
   C_fstr_Construct(&local_424,"%s\\ServerList.bin","PlayersProfiles");
   GH_PIECE(local_4,0,1) = 1;
   if (local_424.rep == 0) {
-    fileName = &DAT_00867a90;
+    fileName = (char *)&DAT_00867a90;
   }
   else {
     fileName = (local_424.rep)->chars;
@@ -137,19 +137,19 @@ uint32_t FUN_00619d00(int param_1, ...)
         dtaWrite(local_420.m_handle,&local_434,6);
       }
     }
-    if (*(int *)(param_1 + 0xc) == 0) {
+    if (*(int *)((int)_this + 0xc) == 0) {
       GH_PIECE(local_434,0,2) = 0;
       GH_PIECE(local_434,2,2) = 0;
     }
     else {
-      iVar2 = *(int *)(param_1 + 0x10) - *(int *)(param_1 + 0xc);
+      iVar2 = *(int *)((int)_this + 0x10) - *(int *)((int)_this + 0xc);
       GH_PIECE(local_434,0,2) = (uint16_t)(iVar2 >> 2);
       GH_PIECE(local_434,2,2) = (short)(iVar2 >> 0x12);
     }
     C_chunk__WriteChunk(&local_420,0x28d,&local_434,4);
     for (uVar5 = 0;
-        (*(int *)(param_1 + 0xc) != 0 &&
-        (uVar5 < (uint32_t)(*(int *)(param_1 + 0x10) - *(int *)(param_1 + 0xc) >> 2)));
+        (*(int *)((int)_this + 0xc) != 0 &&
+        (uVar5 < (uint32_t)(*(int *)((int)_this + 0x10) - *(int *)((int)_this + 0xc) >> 2)));
         uVar5 = uVar5 + 1) {
       if (local_420.m_open != false) {
         uStack_42c = 0x296;
@@ -159,7 +159,7 @@ uint32_t FUN_00619d00(int param_1, ...)
         local_420.m_depth = local_420.m_depth + 1;
         dtaWrite(local_420.m_handle,&uStack_42c,6);
       }
-      FUN_007253f0(*(void **)(*(int *)(param_1 + 0xc) + uVar5 * 4),(char*)(&local_420.m_open));
+      FUN_007253f0(*(void **)(*(int *)((int)_this + 0xc) + uVar5 * 4),(char*)(&local_420.m_open));
       if (local_420.m_open != false) {
         if (local_420.m_writing == false) {
           iVar2 = local_420.m_stack[local_420.m_depth - 1];
@@ -199,7 +199,7 @@ uint32_t FUN_00619d00(int param_1, ...)
         dtaWrite(local_420.m_handle,&uStack_42c,6);
       }
     }
-    iVar2 = param_1 + 0x18;
+    iVar2 = (int)_this + 0x18;
     iVar3 = vector_size_e4_61b3f0(iVar2);
     GH_PIECE(local_434,0,2) = (uint16_t)iVar3;
     GH_PIECE(local_434,2,2) = (short)((uint32_t)iVar3 >> 0x10);
@@ -209,7 +209,7 @@ uint32_t FUN_00619d00(int param_1, ...)
     if (iVar3 != 0) {
       do {
         C_chunk__Begin(&local_420,0x296);
-        FUN_007253f0(*(void **)(*(int *)(param_1 + 0x1c) + uVar5 * 4),(char*)(&local_420.m_open));
+        FUN_007253f0(*(void **)(*(int *)((int)_this + 0x1c) + uVar5 * 4),(char*)(&local_420.m_open));
         C_chunk__Ascend(&local_420,0);
         uVar5++;
         uVar4 = vector_size_e4_61b3f0(iVar2);
@@ -236,10 +236,10 @@ uint32_t FUN_00619d00(int param_1, ...)
 
 
 // 0x0061a0f0
-uint32_t FUN_0061a0f0(int param_1, ...)
+uint32_t C_MpMenuSettings__LoadServerList(void *_this, ...)
 {
   void *pvStack_c;
-  void *_this;
+  void *this_00;
   void **ppvVar1;
   bool bVar2;
   short sVar3;
@@ -272,24 +272,24 @@ uint32_t FUN_0061a0f0(int param_1, ...)
   local_420.m_handle = -1;
   local_420.m_writing = false;
   local_420.m_depth = 0;
-  _this = (void *)(param_1 + 8);
+  this_00 = (void *)((int)_this + 8);
   local_4 = 0;
   ppvVar1 = &pvStack_c;
-  if (*(int *)(param_1 + 0xc) != 0) {
-    iVar9 = *(int *)(param_1 + 0x10) - *(int *)(param_1 + 0xc) >> 2;
+  if (*(int *)((int)_this + 0xc) != 0) {
+    iVar9 = *(int *)((int)_this + 0x10) - *(int *)((int)_this + 0xc) >> 2;
     ppvVar1 = &pvStack_c;
     while (ExceptionList = ppvVar1, ppvVar1 = ExceptionList, iVar9 != 0) {
       iVar9--;
-      tier1_operator_delete(*(void **)(*(int *)(param_1 + 0xc) + iVar9 * 4));
+      tier1_operator_delete(*(void **)(*(int *)((int)_this + 0xc) + iVar9 * 4));
     }
   }
-  FUN_0061b910(_this,*(uint32_t **)(param_1 + 0xc),*(uint32_t **)(param_1 + 0x10));
-  local_448 = (void *)(param_1 + 0x18);
-  if (*(int *)(param_1 + 0x1c) != 0) {
-    iVar9 = *(int *)(param_1 + 0x20) - *(int *)(param_1 + 0x1c) >> 2;
+  FUN_0061b910(this_00,*(uint32_t **)((int)_this + 0xc),*(uint32_t **)((int)_this + 0x10));
+  local_448 = (void *)((int)_this + 0x18);
+  if (*(int *)((int)_this + 0x1c) != 0) {
+    iVar9 = *(int *)((int)_this + 0x20) - *(int *)((int)_this + 0x1c) >> 2;
     while (iVar9 != 0) {
       iVar9--;
-      tier1_operator_delete(*(void **)(*(int *)(param_1 + 0x1c) + iVar9 * 4));
+      tier1_operator_delete(*(void **)(*(int *)((int)_this + 0x1c) + iVar9 * 4));
     }
   }
   pvVar8 = local_448;
@@ -297,7 +297,7 @@ uint32_t FUN_0061a0f0(int param_1, ...)
   C_fstr_Construct(&local_450,"%s\\ServerList.bin","PlayersProfiles");
   local_4 = CONCAT31(GH_PIECE(local_4,1,3),1);
   if (local_450.rep == 0) {
-    fileName = &DAT_00867a90;
+    fileName = (char *)&DAT_00867a90;
   }
   else {
     fileName = (local_450.rep)->chars;
@@ -345,7 +345,7 @@ LAB_0061a270:
               C_chunk__Read(&local_420,&uStack_424,4);
               C_chunk__Ascend(&local_420,0);
               uVar4 = uStack_424;
-              uVar6 = FUN_0061b750((int)_this);
+              uVar6 = FUN_0061b750((int)this_00);
               if (uVar6 < uVar4) {
                 uVar6 = uVar4;
                 if ((int)uVar4 < 0) {
@@ -353,13 +353,14 @@ LAB_0061a270:
                 }
                 puVar7 = tier1_operator_new(uVar6 * 4);
                 uninitialized_copy4_61b950
-                          (*(uint32_t **)(param_1 + 0xc),*(uint32_t **)(param_1 + 0x10),puVar7);
+                          (*(uint32_t **)((int)_this + 0xc),*(uint32_t **)((int)_this + 0x10),
+                           puVar7);
                 empty_function_61b940();
-                tier1_operator_delete(*(void **)(param_1 + 0xc));
-                *(uint32_t **)(param_1 + 0x14) = puVar7 + uVar4;
-                iVar9 = vector_size_e4_61b3f0((int)_this);
-                *(uint32_t **)(param_1 + 0xc) = puVar7;
-                *(uint32_t **)(param_1 + 0x10) = puVar7 + iVar9;
+                tier1_operator_delete(*(void **)((int)_this + 0xc));
+                *(uint32_t **)((int)_this + 0x14) = puVar7 + uVar4;
+                iVar9 = vector_size_e4_61b3f0((int)this_00);
+                *(uint32_t **)((int)_this + 0xc) = puVar7;
+                *(uint32_t **)((int)_this + 0x10) = puVar7 + iVar9;
               }
             }
             if (sVar3 == 0x296) {
@@ -375,7 +376,7 @@ LAB_0061a270:
               }
               local_4 = CONCAT31(GH_PIECE(local_4,1,3),1);
               FUN_00725660(pvStack_44c,(char*)(&local_420.m_open));
-              FUN_0061b770(_this,*(uint32_t **)(param_1 + 0x10),(uint32_t*)(&pvStack_44c));
+              FUN_0061b770(this_00,*(uint32_t **)((int)_this + 0x10),(uint32_t*)(&pvStack_44c));
             }
             else if ((sVar3 != 0x294) && (sVar3 != 0x28f)) {
               if (local_420.m_open != false) {

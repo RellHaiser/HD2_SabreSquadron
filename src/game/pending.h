@@ -260,6 +260,11 @@ public:
     void PingServer(void(__fastcall *callback)(S_ServerEntry *server), S_ServerEntry *server);   // 0x00724070
     // The search's answers read (its socket polled; the browser's tick, every 10 ms; part 9h-xx).
     void PollSearch();                              // 0x00723610 (__fastcall)
+    // The LAN searched / the servers listed pinged (`callback` gets each answering; part 9h-xxi).
+    void SearchServers(void(__fastcall *callback)(S_ServerEntry *server));   // 0x00724040
+    void PingServers(void(__fastcall *callback)(S_ServerEntry *server), std::vector<S_ServerEntry *> &servers);   // 0x00724090
+    // Windows XP's firewall keeps `port` closed (the main menu asks to open it; part 9h-xxi).
+    bool FirewallBlocks(uint16_t port);             // 0x007328d0
     // Administration commands (NET_COMMAND_*; `unknown` is passed as 0).
     bool Command(int command, const char *arg, int unknown);   // 0x0072d680
     // State of the connection to the server (NET_CONNECTION_LOST: nothing heard for 600 ms).

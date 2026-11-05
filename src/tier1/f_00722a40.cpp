@@ -1066,10 +1066,10 @@ uint32_t FUN_00724010(void *param_1, ...)
 
 
 // 0x00724040
-uint32_t FUN_00724040(void *_this,uint32_t param_1, ...)
+uint32_t C_NetGame__SearchServers(C_NetGame *_this,void *callback, ...)
 {
   C_NetGame__Close(_this,true);
-  *(uint32_t *)((int)_this + 0x4ec) = param_1;
+  *(void **)(_this->_pad_0000 + 0x4ec) = callback;
   FUN_00724010(&g_netGame);
   return 0;
 }
@@ -1085,14 +1085,14 @@ uint32_t C_NetGame__PingServer(C_NetGame *_this,void *callback,void *server, ...
 
 
 // 0x00724090
-uint32_t FUN_00724090(void *_this,uint32_t param_1,int param_2, ...)
+uint32_t C_NetGame__PingServers(C_NetGame *_this,void *callback,void *servers, ...)
 {
   int iVar1;
   uint32_t uVar2;
-  *(uint32_t *)((int)_this + 0x4ec) = param_1;
+  *(void **)(_this->_pad_0000 + 0x4ec) = callback;
   for (uVar2 = 0;
-      (iVar1 = *(int *)(param_2 + 4), iVar1 != 0 &&
-      (uVar2 < (uint32_t)(*(int *)(param_2 + 8) - iVar1 >> 2))); uVar2 = uVar2 + 1) {
+      (iVar1 = *(int *)((int)servers + 4), iVar1 != 0 &&
+      (uVar2 < (uint32_t)(*(int *)((int)servers + 8) - iVar1 >> 2))); uVar2 = uVar2 + 1) {
     FUN_00723e80(_this,*(LPVOID **)(iVar1 + uVar2 * 4));
   }
   return 0;

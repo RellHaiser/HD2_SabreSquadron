@@ -8551,6 +8551,22 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 295 errors in 55 files. ret_audit --src: 52.
   - Stats: 9,257 of 12,306 functions by hand (85.3 % by size).
 
+  PART 9h-xxi DONE (2026-11-04): the main menu's network handler and the join's password (game/main_menu.cpp).
+  - OnNetworkMessage 0x00633490 (its jump table read from the binary): LAN games (settings read, the LAN searched, the
+    browser's title / buttons, opened), Internet games (C_MpMenuSettings::LoadServerList 0x0061a0f0, declared; the
+    list shown again), the server started (GAME_STATE_NEXT_MAP), 0x200009B (Internet: SaveServerList 0x00619d00,
+    declared), the create server screen's start (startable: saved, SetUpHostedSession, C_NetGame::FirewallBlocks
+    0x007328d0 declared: the XP firewall question 0x22EA, its answers set m_openFirewall +0x1F0, renamed), the
+    connection started (0x20000C9: the connect popup), joining (the server copied into the session; a password:
+    AskJoinPassword 0x00637a60; else g_sessionPasswordSet), the LAN searched / the list pinged
+    (C_NetGame::SearchServers 0x00724040, PingServers 0x00724090 declared), the searches stopped (none: the network
+    closed), Escape on the browser.
+  - Harness: nmLan, nmInternet, nmLeave, nmStart, nmJoin, nmSearch, nmEscape; the fake handler dropped (the chain and
+    Escape tests adjusted: Escape on the browser now goes back). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h21.py: 108: 105 killed, 3 not building.
+  - Build: MSVC clean. Tier 1: 292 errors in 55 files. ret_audit --src: 52.
+  - Stats: 9,259 of 12,306 functions by hand (85.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

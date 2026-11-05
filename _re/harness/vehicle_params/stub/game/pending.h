@@ -226,6 +226,9 @@ public:
     int QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *status), S_ServerEntry *server);
     void PingServer(void(__fastcall *callback)(S_ServerEntry *server), S_ServerEntry *server);
     void PollSearch();
+    void SearchServers(void(__fastcall *callback)(S_ServerEntry *server));
+    void PingServers(void(__fastcall *callback)(S_ServerEntry *server), std::vector<S_ServerEntry *> &servers);
+    bool FirewallBlocks(uint16_t port);
     C_Human *GetLocalHuman();
     void Close(bool now);                           // (the main menu, part 9h-iv)
     S_NetPlayerState *LockPlayers();

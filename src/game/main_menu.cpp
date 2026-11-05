@@ -2675,7 +2675,7 @@ bool C_MainMenu::OnConnectTick(void *menu, void *, C_Control *control, uint32_t,
         std::memcpy(desc.application, CONNECT_APPLICATION_GUID, sizeof desc.application);
         desc.unknown15C = CONNECT_SESSION_15C;
         desc.unknown15E = CONNECT_SESSION_15E;
-        if (g_netGame.Host(desc, self->unknown1F0) < 0)
+        if (g_netGame.Host(desc, self->m_openFirewall) < 0)
             return fail(TEXT_HOST_FAILED, TEXT_CONNECT_ESCAPE);
         AddConnectLine(TEXT_SERVER_CREATED);
         self->m_connectWait = CONNECT_WAIT_STEP;
@@ -2683,7 +2683,7 @@ bool C_MainMenu::OnConnectTick(void *menu, void *, C_Control *control, uint32_t,
         return true;
     }
     case CONNECT_STATE_HOST_DEDICATED:
-        if (!g_netGame.HostDedicated(self->unknown1F0))
+        if (!g_netGame.HostDedicated(self->m_openFirewall))
             return fail(TEXT_HOST_FAILED, TEXT_CONNECT_ESCAPE);
         AddConnectLine(TEXT_SERVER_CREATED);
         self->m_connectState = CONNECT_STATE_DEDICATED_HOSTED;
@@ -3185,4 +3185,147 @@ bool C_MainMenu::OnFavorites(void *menu, void *, C_Control *, uint32_t, uint32_t
     PostTo(BROWSER_FAVORITE, CONTROL_MSG_SET_TEXT_ID, STYLE_BUTTON, favorites ? TEXT_REMOVE_FAVORITE : TEXT_ADD_FAVORITE);
     self->m_step = BROWSER_RELIST;
     return true;
+}
+
+// ---- the network handler and the join's password (part 9h-xxi) --------------------------------------------
+
+namespace {
+
+// The firewall's question's answers, then the connection started (the connect screen opened).
+constexpr uint32_t MAIN_MSG_CONNECT = 0x20000C9, MAIN_MSG_OPEN_FIREWALL = 0x20000CA, MAIN_MSG_KEEP_FIREWALL = 0x20000CB;
+// The firewall's question ("ports not open on your Windows XP Firewall"), its kind.
+constexpr uint32_t TEXT_FIREWALL_QUESTION = 0x22EA;
+constexpr int QUESTION_YES_NO = 3;
+// The browser's title: "MULTIPLAYER GAME - LAN" / "- INTERNET"; its logo.
+constexpr uint32_t TEXT_LAN_TITLE = 0x910, TEXT_INTERNET_TITLE = 0x911;
+constexpr uint32_t BROWSER_TITLE = BROWSER_SCREEN | 0x100000, BROWSER_ADDRESS = BROWSER_SCREEN | 0xC00000,
+                   BROWSER_LOGO = BROWSER_SCREEN | 0x1300000;
+
+// The browser opened for LAN or Internet games: its title, the buttons (the Internet's: the ping, the logo, an
+// address, the favourites), the favourite button off.
+void OpenBrowser(bool internet)
+{
+    const uint32_t on = internet ? CONTROL_MSG_ACTIVATE : CONTROL_MSG_DEACTIVATE;
+    PostTo(BROWSER_TITLE, CONTROL_MSG_SET_TEXT_ID, STYLE_TITLE, internet ? TEXT_INTERNET_TITLE : TEXT_LAN_TITLE);
+    PostTo(BROWSER_RESTORE, on, 0);
+    PostTo(BROWSER_LOGO, internet ? CONTROL_MSG_SHOW : CONTROL_MSG_HIDE, 0);
+    PostTo(BROWSER_ADDRESS, on, 0);
+    PostTo(BROWSER_FAVORITES, on, 0);
+    PostTo(BROWSER_FAVORITE, CONTROL_MSG_DEACTIVATE, 0);
+    Post(MENU_MSG_OPEN_SCREEN, MAIN_SCREEN_BROWSER);
+}
+
+} // namespace
+
+bool C_MainMenu::OnNetworkMessage(S_ControlMessage *message)
+{
+    switch (message->id & CONTROL_MSG_MASK) {
+    case MAIN_MSG_LAN_GAME:
+        // LAN games: the settings read, the LAN searched, the browser opened.
+        m_mpSettings->Load();
+        g_mpSettings->unknown174 = LISTING_LAN;
+        m_step = BROWSER_IDLE;
+        OnRefreshList(this, nullptr, nullptr, 0, 0);
+        OpenBrowser(false);
+        return true;
+    case MAIN_MSG_INTERNET_GAME:
+        // Internet games: the servers listed before and the settings read, the list shown again.
+        m_mpSettings->LoadServerList();
+        m_mpSettings->Load();
+        g_mpSettings->unknown174 = LISTING_INTERNET;
+        m_step = BROWSER_RELIST;
+        OpenBrowser(true);
+        return true;
+    case MAIN_MSG_SERVER_STARTED:
+        m_state = GAME_STATE_NEXT_MAP;
+        return true;
+    case MAIN_MSG_9B:
+        // Leaving the browser: the Internet's servers kept.
+        if (g_mpSettings->unknown174 == LISTING_INTERNET)
+            m_mpSettings->SaveServerList();
+        return true;
+    case MAIN_MSG_START_SERVER:
+        // The create server screen's start: the settings saved, the session set up; the firewall asked about
+        // when its ports are closed, else the connection started.
+        if (!m_startable)
+            return true;
+        m_startable = false;
+        m_openFirewall = false;
+        m_mpSettings->Save();
+        SetUpHostedSession();
+        if (g_netGame.FirewallBlocks(static_cast<uint16_t>(g_mpSettings->port))) {
+            ShowMessageId(QUESTION_YES_NO, TEXT_FIREWALL_QUESTION, MAIN_MSG_OPEN_FIREWALL, MAIN_MSG_KEEP_FIREWALL);
+            return true;
+        }
+        Post(MAIN_MSG_CONNECT, 0);
+        return true;
+    case MAIN_MSG_OPEN_FIREWALL:
+        m_openFirewall = true;
+        Post(MAIN_MSG_CONNECT, 0);
+        return true;
+    case MAIN_MSG_KEEP_FIREWALL:
+        m_openFirewall = false;
+        Post(MAIN_MSG_CONNECT, 0);
+        return true;
+    case MAIN_MSG_CONNECT:
+        m_connectState = 0;
+        Post(MENU_MSG_OPEN_POPUP, MAIN_SCREEN_CONNECT);
+        return true;
+    case MAIN_MSG_JOIN_SERVER: {
+        // Joining the server picked (none: nothing): kept as the session's; a password asked for first.
+        if (!m_server)
+            return true;
+        S_MultiplayerSettings *settings = g_mpSettings;
+        settings->sessionType = SESSION_JOINING;
+        static_assert(sizeof settings->unknown17C == sizeof(S_ServerEntry), "the session's server");
+        std::memcpy(settings->unknown17C, m_server, sizeof(S_ServerEntry));
+        if (m_server->password) {
+            AskJoinPassword();
+            return true;
+        }
+        g_sessionPasswordSet = true;
+        m_connectState = 0;
+        Post(MENU_MSG_OPEN_POPUP, MAIN_SCREEN_CONNECT);
+        return true;
+    }
+    case MAIN_MSG_SEARCH_LAN:
+        DrainFoundServers();
+        g_netGame.SearchServers(&OnServerFound);
+        return true;
+    case MAIN_MSG_PING_LIST:
+        DrainFoundServers();
+        g_netGame.PingServers(&OnServerFound, m_mpSettings->GetList(0));
+        return true;
+    case MAIN_MSG_28:
+        // The searches stopped (their buttons'); none: the network closed, no password.
+        if (m_step == BROWSER_PINGING || m_step == BROWSER_PINGING_REACHABLE) {
+            OnRestoreList(this, nullptr, nullptr, 0, 0);
+        } else if (m_step == BROWSER_SEARCHING) {
+            OnRefreshList(this, nullptr, nullptr, 0, 0);
+        } else {
+            g_netGame.Close(true);
+            g_sessionPasswordSet = false;
+        }
+        return true;
+    case MENU_MSG_ESCAPE:
+        // Escape on the browser: the searches stopped, the list emptied, back.
+        if (g_menuScreens.empty() ||
+            (g_menuScreens.back()->GetId() >> SCREEN_INDEX_SHIFT & SCREEN_INDEX_MASK) != MAIN_SCREEN_BROWSER)
+            return false;
+        Post(MAIN_MSG_28, 0);
+        Post(MAIN_MSG_9B, 0);
+        PostTo(BROWSER_LIST, CONTROL_MSG_CLEAR, 0);
+        Post(MENU_MSG_BACK, 0);
+        return true;
+    default:
+        return false;
+    }
+}
+
+void C_MainMenu::AskJoinPassword()
+{
+    m_step = STEP_SERVER_PASSWORD;
+    PostTo(PASSWORD_INPUT, CONTROL_MSG_SET_TEXT_ID, STYLE_PASSWORD_BOX, TEXT_PASSWORD_BOX);
+    Post(MENU_MSG_OPEN_POPUP, MAIN_SCREEN_PASSWORD);
+    PostTo(PASSWORD_INPUT, CONTROL_MSG_EDIT, 0);
 }

@@ -399,7 +399,15 @@ protected:
     // list (part 9h-vi's).
     static void AddProfileLine(const char *name, int context);    // 0x00621110 (__fastcall)
     static void PostProfileLine(const char *name, int context);   // 0x00620fb0 (__fastcall)
+    // The network's messages (part 9h-xxi): LAN / Internet games (the settings, the browser opened; LAN: searched;
+    // Internet: the server list read, shown again); the server started (the next map); leaving the browser (the
+    // Internet's servers saved); the create server screen's start (startable: the settings saved, the session set
+    // up, the firewall asked about); its answers; the connection started; joining the server picked (a password
+    // asked for); the LAN searched, the list pinged; the searches stopped (none: the network closed); Escape on the
+    // browser. True; others false.
     bool OnNetworkMessage(S_ControlMessage *message);   // 0x00633490
+    // The join's password asked for: the password popup, its box emptied and edited.
+    void AskJoinPassword();                             // 0x00637a60 (__fastcall)
     // The missions' messages: a mission started (none picked: nothing): a single mission set up in its
     // campaign, else the save before it loaded (not the campaigns' first missions), the campaign advanced;
     // the state ended. The single-mission flag / the play mode set (value). The campaign started: played
@@ -423,7 +431,7 @@ protected:
     C_MpMenuSettings *m_mpSettings = nullptr;           // +0x1E4
     C_str m_movie;                                      // +0x1E8
     C_str m_saveName;                                   // +0x1EC the saved game picked
-    bool unknown1F0 = false;                            // +0x1F0
+    bool m_openFirewall = false;                        // +0x1F0 the host opens the firewall's ports
     int m_connectState = 5;                             // +0x1F4 the connect screen's state (0: starting)
     bool m_singleMissions = false;                      // +0x1F8 the missions screen shows the single missions
     int m_connectWait = 0;                              // +0x1FC the connect screen's wait (ms)

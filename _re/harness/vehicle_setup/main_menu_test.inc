@@ -29,10 +29,22 @@ bool C_GameProfile::SelectPlayer(const char *name)
 bool g_mmTakes[4];
 // (Part 9h-v: the profile screen's handler is real; its own fakes are its delete and list. Part 9h-ix: the
 // missions' handler real too.)
-bool C_MainMenu::OnNetworkMessage(S_ControlMessage *m)
+// (Part 9h-xxi: the network handler real; the server list's file, the searches and the firewall logged.)
+void C_MpMenuSettings::LoadServerList() { GfLog("load server list"); }
+void C_MpMenuSettings::SaveServerList() { GfLog("save server list"); }
+void C_NetGame::SearchServers(void(__fastcall *callback)(S_ServerEntry *))
 {
-    GfLog("network message %x", m->id);
-    return g_mmTakes[1];
+    GfLog("search %d", callback == &C_MainMenu::OnServerFound);
+}
+void C_NetGame::PingServers(void(__fastcall *callback)(S_ServerEntry *), std::vector<S_ServerEntry *> &servers)
+{
+    GfLog("ping servers %d %d", callback == &C_MainMenu::OnServerFound, static_cast<int>(servers.size()));
+}
+bool g_nmFirewall = false;
+bool C_NetGame::FirewallBlocks(uint16_t port)
+{
+    GfLog("firewall %d", port);
+    return g_nmFirewall;
 }
 // (Part 9h-xviii: the connect screen's dedicated server: logged, its result.)
 bool g_cnDedicated = true;
@@ -322,7 +334,8 @@ struct S_MainMenuResults {
          hsSession = true, cnDescribe = true, cnHidden = true, cnTick = true, cnMessage = true,
          bwDescribe = true, bwList = true, bwShown = true, bwSort = true, bwPicked = true, bwJoin = true, bwCount = true,
          bxLine = true, bxFound = true, bxList = true, bxTick = true, bxRestore = true, bxRefresh = true,
-         bxFavorite = true, bxFavorites = true;
+         bxFavorite = true, bxFavorites = true,
+         nmLan = true, nmInternet = true, nmLeave = true, nmStart = true, nmJoin = true, nmSearch = true, nmEscape = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -409,18 +422,17 @@ void MainMenuTest(I3D_scene *scene)
             message.id = id;
             m.OnMessage(&message);
         };
-        send(0x2000099);
-        // (The profile screen's and the missions' handlers, real, take none of these.)
-        // (Part 9h-xviii: the connect handler real too.)
-        ok &= MsLogIs({"network message 2000099"}, g_gfLog) && CsQueue() == "";
+        // (The profile screen's, the missions', the connect and the network handlers, real, take none of these.)
+        send(0x2000050);
+        ok &= g_gfLog.empty() && CsQueue() == "";
         const int state = m.m_state;
-        g_mmTakes[1] = true;
-        send(MAIN_MSG_PLAY_MOVIE);
-        ok &= g_gfLog.size() == 1 && m.m_state == state;
-        g_mmTakes[1] = false;
+        // (Part 9h-xxi: the network handler taking one.)
+        send(0x2000069);
+        ok &= g_gfLog.empty() && m.m_state == GAME_STATE_NEXT_MAP && CsQueue() == "";
+        m.m_state = state;
         // (The missions' handler taking one: the rest not asked.)
         send(MENU_MSG_OPEN_POPUP);
-        ok &= MsLogIs({"network message 2000002"}, g_gfLog) && CsQueue() == "";
+        ok &= g_gfLog.empty() && CsQueue() == "";
         // The movie; the saved game (none: the load command alone).
         send(0x4000000 | MAIN_MSG_PLAY_MOVIE);
         ok &= m.m_state == GAME_STATE_PLAY_AVI;
@@ -428,11 +440,11 @@ void MainMenuTest(I3D_scene *scene)
         C_GameApp *app = GetGameApp();
         app->m_pendingCommand = 0;
         send(MAIN_MSG_LOAD_GAME);
-        ok &= app->m_pendingCommand == APP_COMMAND_LOAD_FROM_MENU && g_gfLog.size() == 1;
+        ok &= app->m_pendingCommand == APP_COMMAND_LOAD_FROM_MENU && g_gfLog.empty();
         app->m_pendingCommand = 0;
         m.m_saveName = "save7.sav";
         send(MAIN_MSG_LOAD_GAME);
-        ok &= app->m_pendingCommand == 0 && g_gfLog.size() == 2 && g_gfLog[1] == "request load prof\\save7.sav";
+        ok &= app->m_pendingCommand == 0 && g_gfLog.size() == 1 && g_gfLog[0] == "request load prof\\save7.sav";
         m.m_saveName = "";
         send(MAIN_MSG_LOAD_GAME);
         ok &= app->m_pendingCommand == APP_COMMAND_LOAD_FROM_MENU;
@@ -456,11 +468,13 @@ void MainMenuTest(I3D_scene *scene)
         };
         ok &= escape(-1) == "0 2000003 0 0; ";
         // (Top 0: the options handler's screen index before its screen is built: it takes Escape.)
-        ok &= escape(0).find("20000c4") != std::string::npos && g_gfLog.size() == 1;
+        ok &= escape(0).find("20000c4") != std::string::npos && g_gfLog.empty();
         // (Part 9h-xviii: Escape on the connect screen cancels it.)
         ok &= escape(13) == "0 2000005 0 0; 0 2000028 0 0; 24900000 1000001 0 0; ";
-        for (int top : {1, 3, 5, 6, 7, 8, 9, 11, 12, 15})
+        for (int top : {1, 3, 5, 6, 7, 9, 11, 12, 15})
             ok &= escape(top) == "0 2000003 0 0; ";
+        // (Part 9h-xxi: Escape on the browser: the searches stopped, its list emptied, back.)
+        ok &= escape(8) == "0 2000028 0 0; 0 200009b 0 0; 20900000 2000018 0 0; 0 2000003 0 0; ";
         ok &= escape(14) == "0 10000200 1 0; 0 2000005 0 0; " && escape(10) == "0 10000200 1 0; 0 2000005 0 0; ";
         ok &= escape(4) == "0 14001200 1 0; 0 6001005 0 0; ";
         m.m_profileName = "Tester";
@@ -3220,7 +3234,7 @@ void MainMenuTest(I3D_scene *scene)
             std::strcpy(settings->sessionName, "Srv");
             const int oldHost = g_csHost;
             g_csHost = 0;
-            m.unknown1F0 = true;
+            m.m_openFirewall = true;
             m.m_connectWait = 0;
             ok &= tick(3) && m.m_connectState == 4 && m.m_connectWait == 300 &&
                   MsLogIs({"net host 1 Srv ebfe7ba0 11d2628d 60000fae 1114b097 100 2000 0 0"}, g_gfLog) &&
@@ -3235,7 +3249,7 @@ void MainMenuTest(I3D_scene *scene)
             ok &= tick(7) && m.m_connectState == 8 && m.m_connectWait == 300 && MsLogIs({"net dedicated 1"}, g_gfLog) &&
                   Is(CsQueue(), line(0x922));
             g_cnDedicated = false;
-            m.unknown1F0 = false;
+            m.m_openFirewall = false;
             m.m_connectWait = 0;
             ok &= tick(7) && m.m_connectState == 6 && m.m_connectWait == 2500 && MsLogIs({"net dedicated 0"}, g_gfLog) &&
                   Is(CsQueue(), line(0x920) + line(0x921));
@@ -3869,7 +3883,7 @@ void MainMenuTest(I3D_scene *scene)
             m.m_server = &s;
             g_gfLog.clear();
             ok &= C_MainMenu::OnFavorites(&m, nullptr, nullptr, 0, 0) && settings.m_listKind == 2 && !m.m_server &&
-                  m.m_step == 6 && std::find(g_gfLog.begin(), g_gfLog.end(), "network message 2000028") != g_gfLog.end() &&
+                  m.m_step == 6 && std::find(g_gfLog.begin(), g_gfLog.end(), "net close 1") != g_gfLog.end() &&
                   Is(CsQueue(), "20b00000 1000001 0 0; 20d00000 1000001 0 0; 21600000 1000001 0 0; 21700000 1000015 d 4e85; "
                                 "21600000 1000015 d 4e87; ");
             m.m_server = &s;
@@ -3895,6 +3909,172 @@ void MainMenuTest(I3D_scene *scene)
         DeleteCriticalSection(&m.m_foundLock);
         g_deleteHook = nullptr;
         g_csNames = oldNames;
+        g_gfLog.clear();
+        CsQueue();
+    }
+
+    // --- (part 9h-xxi) the network handler: LAN / Internet games, the server started, leaving the browser, start, the
+    // firewall, connecting, joining, the searches, stopped; the join's password ---
+    {
+        C_MainMenu m;
+        const auto Is = [](const std::string &got, const std::string &want) {
+            if (got != want)
+                std::printf("NETWORK %s\nNETWORK expected %s\n", got.c_str(), want.c_str());
+            return got == want;
+        };
+        InitializeCriticalSection(&m.m_foundLock);
+        C_MpMenuSettings settings;
+        for (auto &group : settings.m_setup.maps) {
+            for (C_MpMap *map : group.maps)
+                delete map;
+            group.maps.clear();
+        }
+        m.m_mpSettings = &settings;
+        S_MultiplayerSettings *session = g_mpSettings;
+        const int oldListing = session->unknown174, oldType = session->sessionType;
+        const bool oldSet = g_sessionPasswordSet;
+        S_ControlMessage message;
+        const auto send = [&](uint32_t id) {
+            message.id = id;
+            g_gfLog.clear();
+            return m.OnNetworkMessage(&message);
+        };
+        CsQueue();
+        {
+            // LAN games: the settings read, the LAN searched, the browser opened; Internet games: the server list read,
+            // shown again.
+            bool ok = true;
+            session->unknown174 = 1;
+            m.m_step = 4;
+            ok &= send(0x4000000 | 0x2000099) && session->unknown174 == 0 && m.m_step == 5 &&
+                  Is(CsQueue(), "20e00000 1000001 0 0; 21000000 1000001 0 0; 21600000 1000001 0 0; 20900000 2000018 0 0; "
+                                "20a00000 1000001 0 0; 20b00000 1000015 d 918; 0 2000027 0 0; 20100000 1000015 a 910; "
+                                "20a00000 1000001 0 0; 21300000 1000004 0 0; 20c00000 1000001 0 0; 21700000 1000001 0 0; "
+                                "21600000 1000001 0 0; 0 2000001 8 0; ");
+            WM(r.nmLan, ok);
+            ok = send(0x200009A) && session->unknown174 == 1 && m.m_step == 6 &&
+                 !g_gfLog.empty() && g_gfLog[0] == "load server list" &&
+                 Is(CsQueue(), "20100000 1000015 a 911; 20a00000 1000002 0 0; 21300000 1000003 0 0; 20c00000 1000002 0 0; "
+                               "21700000 1000002 0 0; 21600000 1000001 0 0; 0 2000001 8 0; ");
+            m.m_step = 0;
+            WM(r.nmInternet, ok);
+        }
+        {
+            // The server started: the next map. Leaving the browser: the Internet's servers saved.
+            bool ok = true;
+            const int state = m.m_state;
+            ok &= send(0x2000069) && m.m_state == GAME_STATE_NEXT_MAP && CsQueue() == "";
+            m.m_state = state;
+            session->unknown174 = 1;
+            ok &= send(0x200009B) && MsLogIs({"save server list"}, g_gfLog);
+            session->unknown174 = 0;
+            ok &= send(0x200009B) && g_gfLog.empty() && CsQueue() == "";
+            WM(r.nmLeave, ok);
+        }
+        {
+            // Start: not startable: nothing; else the settings saved, the session set up, the firewall asked about
+            // (closed: the question; its answers), the connection started.
+            bool ok = true;
+            const S_MultiplayerSettings old = *session;
+            session->maps.clear();
+            m.m_screens.clear();
+            m.m_startable = false;
+            ok &= send(0x2000029) && g_gfLog.empty() && CsQueue() == "" && session->sessionType == old.sessionType;
+            m.m_startable = true;
+            m.m_openFirewall = true;
+            g_nmFirewall = false;
+            ok &= send(0x2000029) && !m.m_startable && !m.m_openFirewall && session->sessionType == 2 &&
+                  GmInOrder(Join(g_gfLog), {"session reset", "firewall 65535"}) && Is(CsQueue(), "0 20000c9 0 0; ");
+            m.m_startable = true;
+            g_nmFirewall = true;
+            ok &= send(0x2000029) && !m.m_startable && GmInOrder(Join(g_gfLog), {"firewall 65535"}) && CsQueue() == "";
+            g_nmFirewall = false;
+            ok &= send(0x20000CA) && m.m_openFirewall && Is(CsQueue(), "0 20000c9 0 0; ");
+            ok &= send(0x20000CB) && !m.m_openFirewall && Is(CsQueue(), "0 20000c9 0 0; ");
+            m.m_connectState = 5;
+            ok &= send(0x20000C9) && m.m_connectState == 0 && Is(CsQueue(), "0 2000002 d 0; ");
+            session->Reset();
+            const std::vector<C_MpMap *> none;
+            *session = old;
+            session->maps = none;
+            WM(r.nmStart, ok);
+        }
+        {
+            // Joining: none picked: nothing; the server kept as the session's (its password asked for first).
+            bool ok = true;
+            m.m_server = nullptr;
+            session->sessionType = 0;
+            ok &= send(0x200002A) && session->sessionType == 0 && CsQueue() == "";
+            S_ServerEntry server = {};
+            std::strcpy(server.name, "Joined");
+            server.address = 0x01020304;
+            server.port = 2345;
+            m.m_server = &server;
+            m.m_connectState = 5;
+            g_sessionPasswordSet = false;
+            ok &= send(0x200002A) && session->sessionType == 1 && g_sessionPasswordSet && m.m_connectState == 0 &&
+                  std::memcmp(session->unknown17C, &server, sizeof server) == 0 && Is(CsQueue(), "0 2000002 d 0; ");
+            server.password = true;
+            g_sessionPasswordSet = false;
+            m.m_connectState = 5;
+            m.m_step = 0;
+            ok &= send(0x200002A) && !g_sessionPasswordSet && m.m_connectState == 5 && m.m_step == 7 &&
+                  std::memcmp(session->unknown17C, &server, sizeof server) == 0 &&
+                  Is(CsQueue(), "28200000 1000015 e 7d2; 0 2000002 a 0; 28200000 2000016 0 0; ");
+            m.m_server = nullptr;
+            m.m_step = 0;
+            WM(r.nmJoin, ok);
+        }
+        {
+            // The LAN searched, the list pinged (the servers found dropped first); stopped: the searches' buttons, or
+            // the network closed.
+            bool ok = true;
+            auto *found = new S_ServerEntry();
+            g_mmWatch = {found};
+            g_mmDeleted.clear();
+            g_deleteHook = &MmDeleteHook;
+            m.m_foundServers = {found};
+            ok &= send(0x2000027) && m.m_foundServers.empty() && g_mmDeleted.size() == 1 && MsLogIs({"search 1"}, g_gfLog);
+            S_ServerEntry a = {}, b = {};
+            settings.m_servers = {&a, &b};
+            ok &= send(0x2000098) && MsLogIs({"ping servers 1 2"}, g_gfLog);
+            settings.m_servers.clear();
+            g_deleteHook = nullptr;
+            g_mmWatch.clear();
+            g_mmDeleted.clear();
+            CsQueue();
+            m.m_step = 4;
+            ok &= send(0x2000028) && m.m_step == 0 && CsQueue().find("20a00000 1000015 d 915") != std::string::npos;
+            m.m_step = 9;
+            ok &= send(0x2000028) && m.m_step == 0 && CsQueue().find("20a00000 1000015 d 915") != std::string::npos;
+            m.m_step = 5;
+            ok &= send(0x2000028) && m.m_step == 0 && CsQueue().find("20b00000 1000015 d 917") != std::string::npos;
+            g_sessionPasswordSet = true;
+            m.m_step = 6;
+            ok &= send(0x2000028) && m.m_step == 6 && !g_sessionPasswordSet && MsLogIs({"net close 1"}, g_gfLog) &&
+                  CsQueue() == "";
+            m.m_step = 0;
+            WM(r.nmSearch, ok);
+        }
+        {
+            // Escape: on the browser only (no screens, another: not taken); another message: not taken.
+            bool ok = true;
+            C_MsScreen browser(nullptr, "nmbrowser", 8u << 26 | 0x5), other(nullptr, "nmother", 9u << 26);
+            g_menuScreens = {&other, &browser};
+            ok &= send(MENU_MSG_ESCAPE) &&
+                  Is(CsQueue(), "0 2000028 0 0; 0 200009b 0 0; 20900000 2000018 0 0; 0 2000003 0 0; ");
+            g_menuScreens = {&browser, &other};
+            ok &= !send(MENU_MSG_ESCAPE) && CsQueue() == "";
+            g_menuScreens.clear();
+            ok &= !send(MENU_MSG_ESCAPE) && CsQueue() == "";
+            ok &= !send(0x2000050) && !send(0x2000003) && CsQueue() == "";
+            WM(r.nmEscape, ok);
+        }
+        session->unknown174 = oldListing;
+        session->sessionType = oldType;
+        g_sessionPasswordSet = oldSet;
+        m.m_mpSettings = nullptr;
+        DeleteCriticalSection(&m.m_foundLock);
         g_gfLog.clear();
         CsQueue();
     }
@@ -3997,7 +4177,8 @@ void MainMenuTest(I3D_scene *scene)
                 " csMoves %d csDouble %d csDragStart %d csDragMove %d csDrop %d"
                 " hsSession %d cnDescribe %d cnHidden %d cnTick %d cnMessage %d"
                 " bwDescribe %d bwList %d bwShown %d bwSort %d bwPicked %d bwJoin %d bwCount %d"
-                " bxLine %d bxFound %d bxList %d bxTick %d bxRestore %d bxRefresh %d bxFavorite %d bxFavorites %d\n",
+                " bxLine %d bxFound %d bxList %d bxTick %d bxRestore %d bxRefresh %d bxFavorite %d bxFavorites %d"
+                " nmLan %d nmInternet %d nmLeave %d nmStart %d nmJoin %d nmSearch %d nmEscape %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
@@ -4010,5 +4191,6 @@ void MainMenuTest(I3D_scene *scene)
                 r.csMoves, r.csDouble, r.csDragStart, r.csDragMove, r.csDrop,
                 r.hsSession, r.cnDescribe, r.cnHidden, r.cnTick, r.cnMessage,
                 r.bwDescribe, r.bwList, r.bwShown, r.bwSort, r.bwPicked, r.bwJoin, r.bwCount,
-                r.bxLine, r.bxFound, r.bxList, r.bxTick, r.bxRestore, r.bxRefresh, r.bxFavorite, r.bxFavorites);
+                r.bxLine, r.bxFound, r.bxList, r.bxTick, r.bxRestore, r.bxRefresh, r.bxFavorite, r.bxFavorites,
+                r.nmLan, r.nmInternet, r.nmLeave, r.nmStart, r.nmJoin, r.nmSearch, r.nmEscape);
 }
