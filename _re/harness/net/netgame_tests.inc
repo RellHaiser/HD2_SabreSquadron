@@ -88,14 +88,14 @@ void TestNetGameConstruction()
           net->m_maxPing == 0 && net->m_unknown5068 == 50 && net->m_maxInactivity == 300000 &&
           net->m_packetCallback == TransportCallback && net->m_replication == nullptr);
     CHECK(net->m_players.size() == 32 && net->m_players[5].team == 2 && net->m_players[5].pendingTeam == 2 &&
-          net->m_players[5].unknown70 == -1 && net->m_players[5].unknownB4[4] == 50 && !net->m_players[5].name[0] &&
+          net->m_players[5].unknown70 == -1 && net->m_players[5].unknownB8 == 50 && !net->m_players[5].name[0] &&
           net->m_players[5].human == nullptr && net->m_players[5].stats[3] == 0);
     // The default player state.
     S_NetPlayerState p;
     CHECK(p.connection == 0 && p.team == 2 && p.pendingTeam == 2 && p.unknown70 == -1 && p.joinStage == 0 &&
           p.link == nullptr && p.highPings == 0 && p.livesUsed == 0);
     // Shut down: closed, the voice objects deleted, the replication deleted, the locks gone.
-    net->m_voiceClient = new C_NetVoice;
+    net->m_voiceClient = new C_NetVoice(nullptr, nullptr);
     g_log.clear();
     g_testMp.unknown174 = 0;
     g_gameProfile.m_mpSettings = &g_testMp;
@@ -362,8 +362,8 @@ void TestProcess()
     CHECK(a.m_channels[0]->m_outgoing.empty());
     C_NetObject *object = replication.FindObject(4, false);
     (void)object;
-    replication.m_makeFactory = [] { return NetMessageFactory(nullptr); };
-    replication.m_makeStateReader = [] { return NetStateHandler(nullptr); };
+    replication.m_makeFactory = [](int) { return NetMessageFactory(nullptr); };
+    replication.m_makeStateReader = [](int) { return NetStateHandler(nullptr); };
     replication.FindObject(4, true)->SetSendMask(NET_SEND_PROPERTIES);
     net.Process(50, true);
     CHECK(a.m_channels[0]->m_outgoing.size() == 1 && a.m_channels[0]->m_outgoing.front()->m_kind == 1 &&
@@ -540,12 +540,12 @@ void TestClose()
     net.QueueReceived(data, 2, 0);
     net.QueueOutgoing(data, 2, 0);
     C_NetReplication replication;
-    replication.m_makeFactory = [] { return NetMessageFactory(nullptr); };
-    replication.m_makeStateReader = [] { return NetStateHandler(nullptr); };
+    replication.m_makeFactory = [](int) { return NetMessageFactory(nullptr); };
+    replication.m_makeStateReader = [](int) { return NetStateHandler(nullptr); };
     replication.FindObject(1, true);
     net.m_replication = &replication;
     net.Close(true);
-    CHECK(!net.m_closePending && Logged("stop reporting") && Logged("graph flags 4660") && Logged("stop voice client") &&
+    CHECK(!net.m_closePending && Logged("firewall 0 0") && Logged("graph flags 4660") && Logged("stop voice client") &&
           Logged("stop voice server") && Logged("server cancel 0 32768") && Logged("server close 0") &&
           Logged("server release") && Logged("client cancel 0 32768") && Logged("client close 0") &&
           Logged("client release") && Logged("stop gamespy"));
@@ -605,8 +605,8 @@ void TestPlayers()
     // The player stats: the humans too, and the replication's objects.
     net.m_players[1].stats[2] = 4;
     C_NetReplication replication;
-    replication.m_makeFactory = [] { return NetMessageFactory(nullptr); };
-    replication.m_makeStateReader = [] { return NetStateHandler(nullptr); };
+    replication.m_makeFactory = [](int) { return NetMessageFactory(nullptr); };
+    replication.m_makeStateReader = [](int) { return NetStateHandler(nullptr); };
     replication.FindObject(1, true);
     net.m_replication = &replication;
     net.m_teamScores[0] = 2.0f;
@@ -630,7 +630,7 @@ void TestPlayers()
     CHECK(net.SendChat(longText.c_str(), true) && Logged(("post 3 '" + std::string(99, 'x') + "' slot 3 team 1").c_str()));
     net.SetVoiceValue(5);
     CHECK(!Logged("voice config 32 40 1 5 -2 0 0 0"));
-    C_NetVoice voice;
+    C_NetVoice voice(nullptr, nullptr);
     net.m_voiceClient = &voice;
     net.SetVoiceValue(5);
     CHECK(Logged("voice config 32 40 1 5 -2 0 0 0"));
@@ -660,8 +660,8 @@ void TestUpdateLags()
     T_Server server;
     net.m_server = &server;
     C_NetReplication replication;
-    replication.m_makeFactory = [] { return NetMessageFactory(nullptr); };
-    replication.m_makeStateReader = [] { return NetStateHandler(nullptr); };
+    replication.m_makeFactory = [](int) { return NetMessageFactory(nullptr); };
+    replication.m_makeStateReader = [](int) { return NetStateHandler(nullptr); };
     net.m_replication = &replication;
     const int now = static_cast<int>(GetPerfTimeMs());
     const DWORD ticks = timeGetTime();
@@ -748,8 +748,8 @@ void TestUpdateLags()
     T_Client client;
     net.m_client = &client;
     C_NetReplication clientReplication;
-    clientReplication.m_makeFactory = [] { return NetMessageFactory(nullptr); };
-    clientReplication.m_makeStateReader = [] { return NetStateHandler(nullptr); };
+    clientReplication.m_makeFactory = [](int) { return NetMessageFactory(nullptr); };
+    clientReplication.m_makeStateReader = [](int) { return NetStateHandler(nullptr); };
     net.m_replication = &clientReplication;
     C_NetConnection serverLink(0, 0, &socket);
     serverLink.m_roundTrip = 201;
@@ -853,7 +853,7 @@ void TestResets()
     g_log.clear();
     auto *net = new C_NetGame;
     net->m_unknown4EE0 = reinterpret_cast<C_NetUnknownObject *>(1);
-    net->m_unknown503C = 5;
+    net->m_enumHandle = 5;
     net->m_sendTime = 9;
     net->m_unknown448 = 3;
     net->m_serverBrowser = reinterpret_cast<S_ServerBrowser *>(3);
@@ -867,7 +867,7 @@ void TestResets()
     net->m_voiceClient = reinterpret_cast<C_NetVoice *>(1);
     net->m_unknown8 = true;
     net->Init();
-    CHECK(net->m_unknown4EE0 == nullptr && net->m_unknown503C == 0 && net->m_sendTime == 0 && net->m_unknown448 == 0 &&
+    CHECK(net->m_unknown4EE0 == nullptr && net->m_enumHandle == 0 && net->m_sendTime == 0 && net->m_unknown448 == 0 &&
           net->m_serverBrowser == nullptr && net->m_joinStatus == 0 && !net->m_reporting &&
           net->m_keySocket == static_cast<uintptr_t>(-1) && net->m_replication == nullptr && net->m_maxPing == 0 &&
           net->m_unknown5068 == 50 && net->m_voiceServer == nullptr && net->m_voiceClient == nullptr && !net->m_unknown8);
@@ -879,11 +879,11 @@ void TestResets()
         void Destroy(bool free) override { Log("destroy unknown %d", free); }
     } unknown;
     net->m_unknown4EE0 = &unknown;
-    net->m_voiceServer = new C_NetVoice;
+    net->m_voiceServer = new C_NetVoice(nullptr, nullptr);
     g_gameProfile.m_mpSettings = &g_testMp;
     g_log.clear();
     net->Shutdown();
-    CHECK(Logged("stop reporting") && Logged("voice deleted") && net->m_voiceServer == nullptr &&
+    CHECK(Logged("firewall 0 0") && Logged("voice deleted") && net->m_voiceServer == nullptr &&
           Logged("destroy unknown 1") && net->m_unknown4EE0 == nullptr);
     // Closed: the LAN search's socket closed, the query thread's handle closed, the connections deleted, the
     // transport stopped, the streams sent, the queues' buffers given back.

@@ -577,9 +577,9 @@ void C_NetReplication::InitObject(C_NetObject *object)
     object->SetReadQuantizations(m_read[0], m_read[1], m_read[2]);
     object->SetWriteQuantizations(m_write[0], m_write[1], m_write[2]);
     object->SetPropertyField2(m_field2);
-    object->m_factory = m_makeFactory();
+    object->m_factory = m_makeFactory(object->m_id);
     object->m_factoryContext = nullptr;
-    object->m_readState = m_makeStateReader();
+    object->m_readState = m_makeStateReader(object->m_id);
     object->m_writeState = nullptr;
     object->m_stateContext = nullptr;
 }

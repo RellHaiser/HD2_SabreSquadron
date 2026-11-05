@@ -620,14 +620,14 @@ uint32_t FUN_00732550(int *param_1,int *param_2, ...)
 
 #endif
 // 0x00732730  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_00732730(int *param_1,char param_2, ...)
+uint32_t C_NetGame__ConfigureFirewall(C_NetGame *_this,int port,bool open, ...)
 {
   return {};
 }
 #if 0
 {
   BOOL BVar1;
-  C_GameApp *_this;
+  C_GameApp *this_00;
   LPVOID lpParameter;
   int iVar2;
   _OSVERSIONINFOA *p_Var3;
@@ -653,7 +653,7 @@ uint32_t FUN_00732730(int *param_1,char param_2, ...)
   }
   if ((local_9c.dwPlatformId == 2) &&
      (((local_9c.dwMajorVersion == 5 || (local_9c.dwMinorVersion == 1)) &&
-      (GH_PIECE(DAT_0097cc00,2,1) != param_2)))) {
+      ((bool)GH_PIECE(DAT_0097cc00,2,1) != open)))) {
     CoInitialize((LPVOID)0x0);
     CoInitializeSecurity
               ((PSECURITY_DESCRIPTOR)0x0,-1,0,0,4,3,
@@ -661,18 +661,11 @@ uint32_t FUN_00732730(int *param_1,char param_2, ...)
     local_a8[0] = 0;
     CoCreateInstance((IID *)&DAT_008451dc,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008451ec,local_a8);
     if (local_a8[0] != 0) {
-      if (param_2 == '\0') {
-        FUN_00732120(local_a8[0],0x11);
-        FUN_00732120(local_a8[0],0x11);
-        FUN_00732120(local_a8[0],0x11);
-        FUN_00732120(local_a8[0],0x11);
-        GH_PIECE(DAT_0097cc00,0,3) = (uint3)(uint16_t)DAT_0097cc00;
-      }
-      else {
+      if (open) {
         if (((uint8_t)g_gameRole & 2) == 0) {
           text = "Firewall settings have been modified!";
-          _this = GetGameApp();
-          C_GameApp__PrintMessage(_this,text);
+          this_00 = GetGameApp();
+          C_GameApp__PrintMessage(this_00,text);
         }
         lpThreadId = &local_a0;
         DAT_0097cc00 = CONCAT13(1,(uint3)DAT_0097cc00);
@@ -680,10 +673,17 @@ uint32_t FUN_00732730(int *param_1,char param_2, ...)
         lpParameter = (LPVOID)GetCurrentThreadId();
         CreateThread((LPSECURITY_ATTRIBUTES)0x0,0,FUN_007320c0,lpParameter,dwCreationFlags,
                      lpThreadId);
-        DAT_0097cc00 = CONCAT22(GH_PIECE(DAT_0097cc00,2,2),(short)param_1);
-        FUN_00732550(local_a8[0],param_1);
+        DAT_0097cc00 = CONCAT22(GH_PIECE(DAT_0097cc00,2,2),(short)port);
+        FUN_00732550(local_a8[0],(int *)port);
         GH_PIECE(DAT_0097cc00,0,3) = CONCAT12(1,(short)DAT_0097cc00);
         DAT_0097cc00 = (uint32_t)(uint3)DAT_0097cc00;
+      }
+      else {
+        FUN_00732120(local_a8[0],0x11);
+        FUN_00732120(local_a8[0],0x11);
+        FUN_00732120(local_a8[0],0x11);
+        FUN_00732120(local_a8[0],0x11);
+        GH_PIECE(DAT_0097cc00,0,3) = (uint3)(uint16_t)DAT_0097cc00;
       }
       (**(code **)(*local_a8[0] + 8))(local_a8[0]);
     }

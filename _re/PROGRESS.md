@@ -8896,6 +8896,37 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 268 errors in 51 of 375 files. ret_audit --src: 52.
   - Stats: 10,032 of 12,306 functions by hand or absorbed (87.4 % by size).
 
+  PART 10d-iv DONE (2026-11-05): the DirectPlay session and the voice chat (net/net_session.cpp, net/net_voice.cpp,
+  net/net_com.cpp: the GUIDs, net/net_create.cpp: NetCreateInstance, CoCreateInstance's stand-in the harness fakes;
+  net/dplay8.h: IDirectPlay8Address, DirectPlay Voice's client / server / test, the DPN structures and messages).
+  - Hosting (Host: DirectPlay's server, the service provider's first device, the address and its port, the
+    application description, the caps 2 s / for ever / 4 s, "Creating H&D2 Server v%d.%02d", the role, the firewall
+    (ConfigureFirewall 0x00732730, was "StopReporting"), the password (S_NetSessionDesc +0x12A; +0xC8 is the service
+    provider, was "application"), the host's player 0, a dedicated server hidden, the voice, the reporting, the
+    replication, the transport on the port + 1; each failure's text in m_lastError / m_lastErrorText (+0x504C /
+    +0x5050); Fix: the providers' buffer freed on failure), HostDedicated (XDServer_%5d.txt, hd2ds_sabresquadron.exe).
+  - The client: CreateClient, CreateAddresses (TCP/IP; the host's hostname and port, 31567 without GameSpy),
+    EnumHosts (its second argument the 4-byte request the servers read: 0 search / ping, 1 status, 2 a list's ping;
+    m_enumHandle +0x503C), PingServer(s), QueryServerStatus, Connect (the CD key first with GameSpy's listing, the
+    server's link, the player's name, the join request S_JoinRequest; Fix: its name within its room), OnConnected,
+    the client's DirectPlay messages (HandleClientMessage: connected / refused, a host's answer read into its
+    S_ServerEntry (two layouts: from 1.21 the version first) or into m_status +0x4F4 for a status query, data queued,
+    sends freed, the end), the handlers' stdcall wrappers (the server's HandleServerMessage 0x00726470: 10d-v).
+  - MakeReplication (the positions / deltas / rates quantised, field 2 0x3B, the local id, lag 0.035) with the
+    factories by actor (MakeObjectFactory / MakeObjectStateReader 0x0072d590 / 0x0072d5c0, made functions in Ghidra).
+    Fix (10b): the replication's factories take the object's id (the original passes it in ECX).
+  - The voice chat: C_NetVoice (DirectPlay Voice: StartServer, CheckAudio, StartClient, SetClientConfig, Stop),
+    StartVoiceServer (the codec by the settings +0x178, seven GUIDs), StartVoiceClient, MakeVoiceBuffer (a player's
+    3D buffer, S_NetPlayerState +0xB4), UpdateVoiceTeam (Fix: 16 targets at most), VisitPlayers (empty).
+  - TakeBandwidth (DirectPlay's bytes since the last time, the transport socket's, the replication's), the text
+    conversions (ANSI / UTF-8 <-> wide), GetHostAddress, S_ServerStatus (moved to net_game.h) Write / Read with
+    S_StatusPlayer's and the rules'.
+  - Harness: net/build_session.bat (netgame_test.cpp with -DNET_SESSION_TEST; netsession_tests.inc, COM faked; 128
+    checks). Mutations: mutations/mutate_10d4.py and mutate_10d4v.py (runner mutnets.py): 684 + 106: 548 + 62 killed, 55 + 27 not building, 81 + 17 equivalent or unobserved (locks, buffer sizes, COM's initialisation and releases the fakes do not watch, leaks, the dedicated server's process). Factory checkers
+    clean.
+  - Build: MSVC clean. Tier 1: 257 errors in 48 of 374 files. ret_audit --src: 52.
+  - Stats: 10,088 of 12,306 functions by hand or absorbed (87.7 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

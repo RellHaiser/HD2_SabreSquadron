@@ -188,8 +188,8 @@ uint32_t C_ConsoleState__FUN_00744490(C_ConsoleState *_this, ...)
 {
   int iVar1;
   char *pcVar2;
-  char *pcVar3;
-  char local_168 [200];
+  uint32_t *puVar3;
+  uint32_t local_168 [50];
   uint32_t local_a0;
   uint32_t local_9c;
   uint32_t local_98;
@@ -201,11 +201,11 @@ uint32_t C_ConsoleState__FUN_00744490(C_ConsoleState *_this, ...)
     return 0;
   }
   pcVar2 = (g_gameProfile.m_mpSettings)->sessionName;
-  pcVar3 = local_168;
+  puVar3 = local_168;
   for (iVar1 = 0x5a; iVar1 != 0; iVar1 = iVar1 - 1) {
-    *(uint32_t *)pcVar3 = *(uint32_t *)pcVar2;
+    *puVar3 = *(uint32_t *)pcVar2;
     pcVar2 += 4;
-    pcVar3 += 4;
+    puVar3++;
   }
   local_9c = 0x11d2628d;
   local_a0 = 0xebfe7ba0;
@@ -213,7 +213,7 @@ uint32_t C_ConsoleState__FUN_00744490(C_ConsoleState *_this, ...)
   local_98 = 0x60000fae;
   local_c = 100;
   local_a = 2000;
-  C_NetGame__Host((C_NetGame *)&g_netGame,local_168);
+  C_NetGame__Host((C_NetGame *)&g_netGame,local_168,true);
   (*_this->vtable->SetState)(9);
   return 0;
 }
@@ -226,7 +226,7 @@ uint32_t C_ConsoleState__FUN_00744540(C_ConsoleState *_this, ...)
     (*_this->vtable->SetState)(8);
     return 0;
   }
-  C_NetGame__Connect((C_NetGame *)&g_netGame,(LPVOID *)(g_gameProfile.m_mpSettings)->_pad_017c);
+  C_NetGame__Connect((C_NetGame *)&g_netGame,(g_gameProfile.m_mpSettings)->_pad_017c);
   return 0;
 }
 

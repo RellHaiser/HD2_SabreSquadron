@@ -239,12 +239,14 @@ void C_game::PrintColored(const S_vector &color, const char *format, ...)
 void C_GameApp::PrintMessage(const char *text) { Log("app print %s", text); }
 
 // The other sub-parts' C_NetGame members.
-void C_NetGame::StopReporting(int *, bool) { Log("stop reporting"); }
+void C_NetGame::ConfigureFirewall(int port, bool open) { Log("firewall %d %d", port, open); }
+#ifndef NET_SESSION_TEST
 int C_NetGame::EnumHosts(S_ServerEntry *server, int)
 {
     Log("enum hosts %d", server ? 1 : 0);
     return 0;
 }
+#endif
 
 // The GameSpy SDK (part 10f): its calls recorded; a browser's server is a key -> value map; gcd's check answers
 // g_gcdAuthenticated / g_gcdMessage at once.
@@ -341,20 +343,24 @@ void __fastcall C_MainMenu::OnServerFound(S_ServerEntry *server) { g_foundServer
 const char *GetCDKey() { return "KEY"; }
 C_MpMap *g_currentMap;
 C_MpMap *S_MultiplayerSettings::GetCurrentMap() { return g_currentMap; }
+int g_bandwidth[7];
+void StopGameSpyQueries(uintptr_t *) { Log("stop gamespy"); }
+#ifndef NET_SESSION_TEST
+// (The session build links the real ones: net_session.cpp, net_voice.cpp.)
 void C_NetGame::StopVoiceClient() { Log("stop voice client"); }
 void C_NetGame::StopVoiceServer() { Log("stop voice server"); }
 void C_NetGame::DeleteReplication() { Log("delete replication"); }
-int g_bandwidth[7];
 void C_NetGame::TakeBandwidth(int *figures) { std::memcpy(figures, g_bandwidth, sizeof g_bandwidth); }
-void StopGameSpyQueries(uintptr_t *) { Log("stop gamespy"); }
+C_NetVoice::C_NetVoice(NetVoiceHandler client, NetVoiceHandler server) : m_clientHandler(client), m_serverHandler(server) {}
 C_NetVoice::~C_NetVoice() { Log("voice deleted"); }
-int C_NetVoice::SetClientConfig(void *config)
+long C_NetVoice::SetClientConfig(void *config)
 {
     const auto *c = static_cast<const uint32_t *>(config);
     Log("voice config %u %u %u %d %d %u %u %u", c[0], c[1], c[2], static_cast<int>(c[3]), static_cast<int>(c[4]), c[5],
         c[6], c[7]);
     return 0;
 }
+#endif
 
 // DirectPlay's server and client: their calls recorded.
 struct T_Server : IDirectPlay8Server {
@@ -477,13 +483,20 @@ struct T_Client : IDirectPlay8Client {
 #include "netgame_tests.inc"
 #include "netplayers_tests.inc"
 #include "netsearch_tests.inc"
+#ifdef NET_SESSION_TEST
+#include "netsession_tests.inc"
+#endif
 
 int main()
 {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
+#ifdef NET_SESSION_TEST
+    RunNetSessionTests();
+#else
     RunNetGameTests();
     RunNetPlayersTests();
     RunNetSearchTests();
+#endif
     std::printf("netgame: %d checks, %d failures\n", checks, failures);
     return failures != 0;
 }

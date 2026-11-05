@@ -221,7 +221,7 @@ bool C_SessionMenu::OnConsoleTick(void *menu, void *, C_Control *control, uint32
         }
         return true;
     case SESSION_STEP_CONNECT:
-        g_netGame.Connect(settings->unknown17C);
+        g_netGame.Connect(reinterpret_cast<S_ServerEntry *>(settings->unknown17C));
         self->m_step = SESSION_STEP_JOINING;
         return true;
     case SESSION_STEP_JOINING:
@@ -257,7 +257,7 @@ bool C_SessionMenu::OnConsoleTick(void *menu, void *, C_Control *control, uint32
         S_NetSessionDesc desc;
         static_assert(sizeof desc == sizeof settings->sessionName, "the session's name");
         std::memcpy(&desc, settings->sessionName, sizeof desc);
-        std::memcpy(desc.application, APPLICATION_GUID, sizeof desc.application);
+        std::memcpy(desc.serviceProvider, APPLICATION_GUID, sizeof desc.serviceProvider);
         desc.unknown15C = SESSION_UNKNOWN15C;
         desc.unknown15E = SESSION_UNKNOWN15E;
         if (g_netGame.Host(desc, true) >= 0) {

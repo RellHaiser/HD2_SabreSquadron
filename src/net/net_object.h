@@ -220,6 +220,20 @@ public:
     const std::vector<C_NetObject *> &GetObjects() const { return m_objects; }
     // The data read from now on (SetLevelBounds: the level's quantisation set).
     void Enable() { m_enabled = true; }
+    // (C_NetGame's: MakeReplication's settings; TakeBandwidth takes the bytes counted.)
+    void SetField2(int value) { m_field2 = value; }
+    void SetFactories(NetStateHandler (*stateReader)(int id), NetMessageFactory (*factory)(int id))
+    {
+        m_makeStateReader = stateReader;
+        m_makeFactory = factory;
+    }
+    void TakeByteCounts(int *written, int *read)
+    {
+        *written = m_bitsWritten >> 3;
+        *read = m_bitsRead >> 3;
+        m_bitsWritten = 0;
+        m_bitsRead = 0;
+    }
     int GetLocalId() const;
     void SetWriteEpoch(int value);
     void SetReadEpoch(int value);
@@ -237,8 +251,10 @@ private:
     bool m_enabled;                                               // +0xD4
     float m_lag;                                                  // +0xD8
     int m_localId;                                                // +0xDC
-    NetStateHandler (*m_makeStateReader)();                       // +0xE0 the objects' state reader (InitObject)
-    NetMessageFactory (*m_makeFactory)();                         // +0xE4 the objects' message factory
+    // The objects' state reader and message factory by the object's id (InitObject; the original passes the id in
+    // ECX: the 10b port had dropped it).
+    NetStateHandler (*m_makeStateReader)(int id);                 // +0xE0
+    NetMessageFactory (*m_makeFactory)(int id);                   // +0xE4
 };
 extern C_NetReplication *g_netReplication;                        // 0x0097d084
 // The performance counter's frequency (the first net object takes it).

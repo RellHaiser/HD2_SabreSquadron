@@ -115,43 +115,6 @@ enum E_NetDelivery {
     NET_DELIVERY_3 = 3,
 };
 struct S_ServerEntry;
-// A server's status (the net module's answer to QueryServerStatus; read by the main menu's game info screen,
-// part 9h-xii): its players, its rules, the teams' scores.
-struct S_StatusPlayer {                                 // 0x5C bytes
-    int unknown00;
-    int kills;                                          // +0x04 (the player's stats, NET_STAT_*)
-    int unknown08;
-    int points;                                         // +0x0C
-    uint8_t unknown10[0x14];
-    int team;                                           // +0x24 (0, 1, 2: its mark)
-    char name[0x34];                                    // +0x28 (empty: no player)
-};
-struct S_ServerStatus {
-    int unknown00;
-    std::vector<S_StatusPlayer> players;                // +0x04 (C_NetGame::FillServerStatus)
-    int maxClients;                                     // +0x10
-    int fragLimit;                                      // +0x14
-    int roundLimit;                                     // +0x18
-    int roundCount;                                     // +0x1C
-    int preparationTime;                                // +0x20
-    int respawnTime;                                    // +0x24
-    int allowRespawn;                                   // +0x28
-    int friendlyFire;                                   // +0x2C
-    int autoTeamBalance;                                // +0x30
-    int thirdPersonView;                                // +0x34
-    int spawnProtectionTime;                            // +0x38
-    int fallingDamage;                                  // +0x3C
-    int unknown40;                                      // +0x40 (S_MultiplayerSettings +0x25C)
-    int allowVehicles;                                  // +0x44
-    int difficulty;                                     // +0x48 (1 .. 4)
-    int lives;                                          // +0x4C
-    int allowCrosshair;                                 // +0x50
-    int spawnOnStart;                                   // +0x54
-    int teamLives;                                      // +0x58
-    int inverseDamage;                                  // +0x5C
-    int axisScore;                                      // +0x60
-    int alliedScore;                                    // +0x64
-};
 
 // The network game (C_NetGame, g_netGame, S_NetPlayerState, NET_COMMAND_* / NET_JOIN_*): net/net_game.h.
 #include "net/net_game.h"
@@ -159,8 +122,9 @@ struct S_ServerStatus {
 // DirectPlay fields set by the caller).
 struct S_NetSessionDesc {                               // 0x168 bytes
     char name[200];                                     // +0x00
-    uint32_t application[4];                            // +0xC8 DirectPlay's application GUID
-    uint8_t unknownD8[0x84];
+    uint32_t serviceProvider[4];                        // +0xC8 DirectPlay's (TCP/IP's)
+    uint8_t unknownD8[0x52];
+    char password[0x32];                                // +0x12A the session's (C_NetGame +0x501C)
     int16_t unknown15C;                                 // +0x15C (100)
     int16_t unknown15E;                                 // +0x15E (2000)
     uint8_t unknown160[8];

@@ -139,5 +139,4 @@
 00730e10 C_NetGame::FlipSessionParity | void __fastcall FlipSessionParity(C_NetGame * net)
 007319e0 C_NetGame::ResetReplication | void __thiscall ResetReplication(C_NetGame *this, bool all)
 00731ac0 C_NetGame::GetConnectionState | int __fastcall GetConnectionState(C_NetGame * net)
-00724940 C_NetGame::UpdateVoiceTeam | void __fastcall UpdateVoiceTeam(C_NetGame * net)
 00725270 OtherTeam | int __fastcall OtherTeam(int team)

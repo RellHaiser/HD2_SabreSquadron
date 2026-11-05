@@ -38311,14 +38311,30 @@
   "module": "zz_idioms",
   "name": "empty_function_721f40"
  },
+ "00722510": {
+  "module": "net_session",
+  "name": "VoiceClientHandler",
+  "proto": "long __stdcall VoiceClientHandler(void * context, ulong type, void * message)"
+ },
+ "00722520": {
+  "module": "net_session",
+  "name": "ClientMessageHandler",
+  "proto": "long __stdcall ClientMessageHandler(void * context, ulong type, void * message)"
+ },
+ "00722550": {
+  "module": "net_session",
+  "name": "C_NetGame::HandleClientMessage",
+  "proto": "long __stdcall HandleClientMessage(void * net, void * context, uint type, void * message)"
+ },
  "00722a80": {
-  "module": "main_menu",
+  "module": "net_session",
   "name": "C_NetGame::HostDedicated",
-  "proto": "bool __thiscall HostDedicated(void *this, bool unknown)"
+  "proto": "bool __thiscall HostDedicated(void *this, bool firewall)"
  },
  "00722b60": {
-  "module": "campaign_screens",
-  "name": "C_NetGame::Host"
+  "module": "net_session",
+  "name": "C_NetGame::Host",
+  "proto": "int __thiscall Host(void *this, void * desc, bool firewall)"
  },
  "00723190": {
   "module": "net_search",
@@ -38330,6 +38346,16 @@
   "name": "AddBrowserServer",
   "proto": "void __cdecl AddBrowserServer(void * server)"
  },
+ "007233d0": {
+  "module": "net_session",
+  "name": "C_NetGame::MakeReplication",
+  "proto": "void __fastcall MakeReplication(void * net)"
+ },
+ "007235f0": {
+  "module": "net_session",
+  "name": "C_NetGame::DeleteReplication",
+  "proto": "void __fastcall DeleteReplication(void * net)"
+ },
  "00723610": {
   "module": "main_menu",
   "name": "C_NetGame::PollSearch",
@@ -38339,6 +38365,11 @@
   "module": "net_search",
   "name": "C_NetGame::StartLanSearch",
   "proto": "int __fastcall StartLanSearch(void * net)"
+ },
+ "00723700": {
+  "module": "net_session",
+  "name": "C_NetGame::CreateAddresses",
+  "proto": "void __thiscall CreateAddresses(void *this, void * server, void * device, void * host)"
  },
  "007237d0": {
   "module": "net_search",
@@ -38380,6 +38411,16 @@
   "name": "C_NetGame::AnswerQueries",
   "proto": "void __fastcall AnswerQueries(void * net)"
  },
+ "00723e00": {
+  "module": "net_session",
+  "name": "C_NetGame::CreateClient",
+  "proto": "long __fastcall CreateClient(void * net)"
+ },
+ "00723e80": {
+  "module": "net_session",
+  "name": "C_NetGame::EnumHosts",
+  "proto": "int __thiscall EnumHosts(void *this, void * server, int request)"
+ },
  "00724010": {
   "module": "net_search",
   "name": "C_NetGame::StartSearch",
@@ -38400,27 +38441,103 @@
   "name": "C_NetGame::PingServers",
   "proto": "void __thiscall PingServers(void *this, void * callback, void * servers)"
  },
+ "007240d0": {
+  "module": "net_session",
+  "name": "C_NetGame::QueryServerStatus",
+  "proto": "int __thiscall QueryServerStatus(void *this, void * callback, void * server)"
+ },
  "007240f0": {
-  "module": "campaign_screens",
-  "name": "C_NetGame::Connect"
+  "module": "net_session",
+  "name": "C_NetGame::Connect",
+  "proto": "int __thiscall Connect(void *this, void * server)"
  },
  "007244c0": {
   "module": "campaign_screens",
   "name": "C_NetGame::GetJoinStatus"
  },
+ "007244e0": {
+  "module": "net_session",
+  "name": "C_NetGame::OnConnected",
+  "proto": "void __fastcall OnConnected(void * net)"
+ },
+ "00724520": {
+  "module": "net_session",
+  "name": "C_NetGame::StartVoiceServer",
+  "proto": "void __fastcall StartVoiceServer(void * net)"
+ },
+ "00724720": {
+  "module": "net_session",
+  "name": "C_NetGame::StopVoiceServer",
+  "proto": "void __fastcall StopVoiceServer(void * net)"
+ },
+ "00724740": {
+  "module": "net_session",
+  "name": "C_NetGame::StartVoiceClient",
+  "proto": "void __thiscall StartVoiceClient(void *this, bool onServer)"
+ },
+ "00724820": {
+  "module": "net_session",
+  "name": "C_NetGame::StopVoiceClient",
+  "proto": "void __fastcall StopVoiceClient(void * net)"
+ },
+ "00724840": {
+  "module": "net_session",
+  "name": "C_NetGame::MakeVoiceBuffer",
+  "proto": "void __thiscall MakeVoiceBuffer(void *this, int slot)"
+ },
+ "007248f0": {
+  "module": "net_session",
+  "name": "C_NetGame::VisitPlayers",
+  "proto": "void __fastcall VisitPlayers(void * net)"
+ },
  "00724940": {
-  "module": "game",
+  "module": "net_session",
   "name": "C_NetGame::UpdateVoiceTeam",
-  "proto": "void __fastcall UpdateVoiceTeam(C_NetGame * net)"
+  "proto": "void __fastcall UpdateVoiceTeam(void * net)"
+ },
+ "00724ad0": {
+  "module": "net_session",
+  "name": "NetAnsiToWide",
+  "proto": "void __cdecl NetAnsiToWide(void * out, char * text, uint length)"
+ },
+ "00724b20": {
+  "module": "net_session",
+  "name": "DirectPlayMissing",
+  "proto": "bool __cdecl DirectPlayMissing(void)"
+ },
+ "00724b30": {
+  "module": "net_session",
+  "name": "NetWideToAnsi",
+  "proto": "void __cdecl NetWideToAnsi(char * out, void * text, int length)"
+ },
+ "00724b80": {
+  "module": "net_session",
+  "name": "NetUtf8ToWide",
+  "proto": "void __cdecl NetUtf8ToWide(void * out, char * text, uint length)"
+ },
+ "00724bd0": {
+  "module": "net_session",
+  "name": "NetWideToUtf8",
+  "proto": "void __cdecl NetWideToUtf8(char * out, void * text, int length)"
  },
  "00724c20": {
   "module": "net_search",
   "name": "C_NetGame::FindFreeNameNumber",
   "proto": "int __thiscall FindFreeNameNumber(void *this, char * name, int number)"
  },
+ "00724d30": {
+  "module": "net_session",
+  "name": "C_NetGame::TakeBandwidth",
+  "proto": "void __thiscall TakeBandwidth(void *this, int * figures)"
+ },
  "00725080": {
   "module": "zz_idioms",
   "name": "empty_function_725080"
+ },
+ "00725190": {
+  "module": "net_session",
+  "name": "GetHostAddress",
+  "proto": "uint __cdecl GetHostAddress(void * address)"
  },
  "00725270": {
   "module": "game",
@@ -38456,6 +38573,61 @@
   "module": "net_players",
   "name": "S_NetPlayerState::GetRankName",
   "proto": "char * __fastcall GetRankName(void * state)"
+ },
+ "00726010": {
+  "module": "net_session",
+  "name": "S_ServerStatus::ReadRules",
+  "proto": "void __thiscall ReadRules(void *this, void * stream)"
+ },
+ "00726120": {
+  "module": "net_session",
+  "name": "S_ServerStatus::WriteRules",
+  "proto": "void __thiscall WriteRules(void *this, void * stream)"
+ },
+ "00726230": {
+  "module": "net_session",
+  "name": "S_StatusPlayer::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "00726260": {
+  "module": "net_session",
+  "name": "S_StatusPlayer::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "00726290": {
+  "module": "net_session",
+  "name": "S_ServerStatus::ReadPlayers",
+  "proto": "void __thiscall ReadPlayers(void *this, void * stream)"
+ },
+ "00726300": {
+  "module": "net_session",
+  "name": "S_ServerStatus::WritePlayers",
+  "proto": "void __thiscall WritePlayers(void *this, void * stream)"
+ },
+ "00726380": {
+  "module": "net_session",
+  "name": "S_ServerStatus::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "007263c0": {
+  "module": "net_session",
+  "name": "S_ServerStatus::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "00726430": {
+  "module": "net_session",
+  "name": "VoiceServerHandler",
+  "proto": "long __stdcall VoiceServerHandler(void * context, ulong type, void * message)"
+ },
+ "00726440": {
+  "module": "net_session",
+  "name": "ServerMessageHandler",
+  "proto": "long __stdcall ServerMessageHandler(void * context, ulong type, void * message)"
+ },
+ "00726470": {
+  "module": "net_session",
+  "name": "C_NetGame::HandleServerMessage",
+  "proto": "long __stdcall HandleServerMessage(void * net, void * context, uint type, void * message)"
  },
  "007272a0": {
   "module": "zz_idioms",
@@ -38548,6 +38720,16 @@
   "module": "net_game",
   "name": "C_NetGame::SendToPlayers",
   "proto": "void __thiscall SendToPlayers(void *this, int slot, void * data, int size, uint flags)"
+ },
+ "0072d590": {
+  "module": "net_session",
+  "name": "MakeObjectFactory",
+  "proto": "void * __fastcall MakeObjectFactory(int id)"
+ },
+ "0072d5c0": {
+  "module": "net_session",
+  "name": "MakeObjectStateReader",
+  "proto": "void * __fastcall MakeObjectStateReader(int id)"
  },
  "0072d670": {
   "module": "zz_idioms",
@@ -38918,6 +39100,11 @@
  "00732000": {
   "module": "app",
   "name": "GetCDKey"
+ },
+ "00732730": {
+  "module": "net_session",
+  "name": "C_NetGame::ConfigureFirewall",
+  "proto": "void __thiscall ConfigureFirewall(void *this, int port, bool open)"
  },
  "007328d0": {
   "module": "main_menu",
@@ -39739,6 +39926,61 @@
   "module": "net_replication",
   "name": "C_NetViewCone::Contains",
   "proto": "bool __thiscall Contains(void *this, float * pos)"
+ },
+ "00742190": {
+  "module": "net_session",
+  "name": "C_NetVoice::C_NetVoice",
+  "proto": "void * __thiscall C_NetVoice(void *this, void * clientHandler, void * serverHandler)"
+ },
+ "007421c0": {
+  "module": "net_session",
+  "name": "C_NetVoice::DeletingDestructor",
+  "proto": "void * __thiscall DeletingDestructor(void *this, uint flags)"
+ },
+ "007421e0": {
+  "module": "net_session",
+  "name": "C_NetVoice::~C_NetVoice",
+  "proto": "void __fastcall ~C_NetVoice(void * voice)"
+ },
+ "007421f0": {
+  "module": "net_session",
+  "name": "C_NetVoice::Init",
+  "proto": "long __thiscall Init(void *this, void * window, bool server, bool client, void * session, int sessionType, void * codec, void * clientConfig, int unused)"
+ },
+ "00742250": {
+  "module": "net_session",
+  "name": "C_NetVoice::Stop",
+  "proto": "long __fastcall Stop(void * voice)"
+ },
+ "007422c0": {
+  "module": "net_session",
+  "name": "C_NetVoice::CheckAudio",
+  "proto": "long __stdcall CheckAudio(void * window)"
+ },
+ "007423b0": {
+  "module": "net_session",
+  "name": "C_NetVoice::StartServer",
+  "proto": "long __thiscall StartServer(void *this, void * session, int sessionType, void * codec)"
+ },
+ "00742460": {
+  "module": "net_session",
+  "name": "C_NetVoice::StartClient",
+  "proto": "long __thiscall StartClient(void *this, void * window, void * session, void * clientConfig, int unused)"
+ },
+ "007425e0": {
+  "module": "net_session",
+  "name": "C_NetVoice::SetClientConfig",
+  "proto": "long __thiscall SetClientConfig(void *this, void * config)"
+ },
+ "00742610": {
+  "module": "net_session",
+  "name": "C_NetVoice::StopClient",
+  "proto": "long __fastcall StopClient(void * voice)"
+ },
+ "00742640": {
+  "module": "net_session",
+  "name": "C_NetVoice::StopServer",
+  "proto": "long __fastcall StopServer(void * voice)"
  },
  "00742850": {
   "module": "game",

@@ -47,7 +47,7 @@ void TestBrowser()
     auto callback = [](S_ServerEntry *) {};
     void(__fastcall *fastCallback)(S_ServerEntry *) = reinterpret_cast<void(__fastcall *)(S_ServerEntry *)>(+callback);
     net.SearchServers(fastCallback);
-    CHECK(net.m_searchCallback == fastCallback && Logged("stop reporting") && Logged("enum hosts 0"));
+    CHECK(net.m_searchCallback == fastCallback && Logged("firewall 0 0") && Logged("enum hosts 0"));
     net.m_serverBrowser = nullptr;
     g_gameRole = GAME_ROLE_LOCAL;
 }

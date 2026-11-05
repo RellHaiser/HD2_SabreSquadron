@@ -807,7 +807,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
   local_5fc = _this;
   switch(gh_switch(param_1)) {
   case 0:
-    FUN_007244e0(0x97d070);
+    C_NetGame__OnConnected(&g_netGame);
     uVar16 = C_BitStream__ReadBits(param_2,0x20);
     pCVar18 = GetGameApp();
     pCVar18->m_randomId = uVar16;

@@ -38,12 +38,39 @@ struct S_ServerEntry;
 struct S_ServerStatus;
 struct S_NetSessionDesc;
 
-// The voice chat's DirectPlay Voice client / server wrapper (vtable 0x00816598, part 10d-iii): its deleting
-// destructor; the client's configuration set (the eight dwords of DVCLIENTCONFIG; `config`).
+struct IUnknown;
+struct _GUID;
+struct IDirectPlay8Address;
+struct IDirectPlayVoiceClient;
+struct IDirectPlayVoiceServer;
+// A DirectPlay Voice message handler (PDVMESSAGEHANDLER).
+using NetVoiceHandler = long(__stdcall *)(void *context, unsigned long type, void *message);
+
+// The voice chat (DirectPlay Voice; vtable 0x00816598, 0x18 bytes): a client and / or a server on the session's
+// DirectPlay object.
 class C_NetVoice {
 public:
-    virtual ~C_NetVoice();                          // 0x007421c0
-    int SetClientConfig(void *config);              // 0x007425e0
+    C_NetVoice(NetVoiceHandler clientHandler, NetVoiceHandler serverHandler);   // 0x00742190
+    virtual ~C_NetVoice();                          // 0x007421e0 (deleting: 0x007421c0)
+    // The server and / or the client started on `session` (`window` for the audio check and the client;
+    // `sessionType`, `codec` the server's session; `clientConfig` the client's DVCLIENTCONFIG). < 0 failed.
+    long Init(void *window, bool server, bool client, IUnknown *session, int sessionType, const _GUID *codec,
+              void *clientConfig, int unused);  // 0x007421f0
+    long StartServer(IUnknown *session, int sessionType, const _GUID *codec);   // 0x007423b0
+    // The audio's setup checked (DirectPlay Voice's wizard when it must run).
+    static long __stdcall CheckAudio(void *window); // 0x007422c0 (thiscall, `this` unused: RET 4)
+    long StartClient(void *window, IUnknown *session, void *clientConfig, int unused);   // 0x00742460
+    // The client's configuration set (the eight dwords of DVCLIENTCONFIG; no client: CO_E_NOTINITIALIZED).
+    long SetClientConfig(void *config);             // 0x007425e0
+    long Stop();                                    // 0x00742250 (both)
+    long StopClient();                              // 0x00742610
+    long StopServer();                              // 0x00742640
+
+    IDirectPlayVoiceClient *m_client = nullptr;     // +0x04
+    IDirectPlayVoiceServer *m_server = nullptr;     // +0x08
+    NetVoiceHandler m_clientHandler;                // +0x0C
+    NetVoiceHandler m_serverHandler;                // +0x10
+    int m_halfDuplex = 0;                           // +0x14 the sound device works half duplex
 };
 // An object C_NetGame keeps at +0x4EE0 (not identified; Shutdown destroys it through its vtable +0x0C).
 class C_NetUnknownObject {
@@ -95,7 +122,9 @@ struct S_NetPlayerState {
     // The session bit of its packets (flipped each round, FlipSessionParity; the connection's +0x08 follows).
     uint32_t session = 0;                           // +0xAC
     int livesUsed = 0;                              // +0xB0 co-op respawns (-1 before the first spawn)
-    uint8_t unknownB4[0x10] = {};
+    void *voiceBuffer = nullptr;                    // +0xB4 its voice's IDirectSound3DBuffer (MakeVoiceBuffer)
+    int unknownB8 = 50;                             // +0xB8
+    uint8_t unknownBC[8] = {};
 
     bool IsConnected() const { return name[0] != 0; }
     // No human, or its (player / remote) controller watches.
@@ -142,6 +171,65 @@ struct S_NetVote {
 void PrintVoteResult(bool passed);                  // 0x0072de90
 // A vote asked through the game app (command 10).
 void PostVote(int kind, int arg);                   // 0x0072dd50
+
+// A server's status (the net module's answer to QueryServerStatus; read by the main menu's game info screen,
+// part 9h-xii): its players, its rules, the teams' scores.
+struct S_StatusPlayer {                                 // 0x5C bytes
+    // In a message: the stats (S_NetStats'), the team (32 bits), the name.
+    void Write(C_BitStream *stream);                    // 0x00726260
+    void Read(C_BitStream *stream);                     // 0x00726230
+
+    int unknown00;
+    int kills;                                          // +0x04 (the player's stats, NET_STAT_*)
+    int unknown08;
+    int points;                                         // +0x0C
+    uint8_t unknown10[0x14];
+    int team;                                           // +0x24 (0, 1, 2: its mark)
+    char name[0x34];                                    // +0x28 (empty: no player)
+};
+struct S_ServerStatus {
+    // In a message (part 10d-v writes it for the queries; a client reads it): the players (their count in 32
+    // bits), the rules, the teams' scores (10 bits).
+    void Write(C_BitStream *stream);                    // 0x007263c0
+    void Read(C_BitStream *stream);                     // 0x00726380
+    // The rules (+0x10 .. +0x5C; +0x40 not sent; the original's `this` is +0x10).
+    void WriteRules(C_BitStream *stream);               // 0x00726120
+    void ReadRules(C_BitStream *stream);                // 0x00726010
+
+    int unknown00;
+    std::vector<S_StatusPlayer> players;                // +0x04 (C_NetGame::FillServerStatus)
+    int maxClients;                                     // +0x10
+    int fragLimit;                                      // +0x14
+    int roundLimit;                                     // +0x18
+    int roundCount;                                     // +0x1C
+    int preparationTime;                                // +0x20
+    int respawnTime;                                    // +0x24
+    int allowRespawn;                                   // +0x28
+    int friendlyFire;                                   // +0x2C
+    int autoTeamBalance;                                // +0x30
+    int thirdPersonView;                                // +0x34
+    int spawnProtectionTime;                            // +0x38
+    int fallingDamage;                                  // +0x3C
+    int unknown40;                                      // +0x40 (S_MultiplayerSettings +0x25C)
+    int allowVehicles;                                  // +0x44
+    int difficulty;                                     // +0x48 (1 .. 4)
+    int lives;                                          // +0x4C
+    int allowCrosshair;                                 // +0x50
+    int spawnOnStart;                                   // +0x54
+    int teamLives;                                      // +0x58
+    int inverseDamage;                                  // +0x5C
+    int axisScore;                                      // +0x60
+    int alliedScore;                                    // +0x64
+};
+
+// The join request a client sends with DirectPlay's Connect (0x54 bytes).
+struct S_JoinRequest {
+    char password[0x14];                            // +0x00
+    int versionMajor;                               // +0x14
+    int versionMinor;                               // +0x18
+    int unknown1C;                                  // +0x1C (2)
+    char name[0x34];                                // +0x20
+};
 
 // A CD-key check over the key socket (0xB8 bytes): the server keeps one for each player asking (C_NetGame +0x55C,
 // a hundred), the client one for itself (+0x4D40). The packets (XORed with 0xA0, a checksum after): the client's
@@ -304,9 +392,9 @@ public:
     int StartSearch();                              // 0x00724010 (__fastcall)
     // GameSpy's LAN browser made (or cleared) and asked for the servers' keys; the role 0x12. 1.
     int StartLanSearch();                           // 0x00723620 (__fastcall)
-    // DirectPlay's hosts enumerated (`server` null: the LAN's broadcast; part 10d-iv; `unused`: 0, its stack slot
-    // the original's scratch).
-    int EnumHosts(S_ServerEntry *server, int unused);   // 0x00723e80
+    // DirectPlay's hosts enumerated (`server` null: the LAN's broadcast) with `request` (4 bytes the servers read:
+    // 0 a search or a ping, 1 a status query, 2 a list's ping). < 0 failed.
+    int EnumHosts(S_ServerEntry *server, int request);   // 0x00723e80
     // The server's GameSpy reporting (qr2 on the port + 3, the CD keys' gcd) and its key socket started.
     void StartReporting();                          // 0x00723d20 (__fastcall)
     // The key socket (UDP, the port + 2) opened, the hundred checks cleared.
@@ -337,13 +425,35 @@ public:
     void SetLevelBounds(const float *min, const float *size);   // 0x0072f8d0
     // State of the connection to the server (NET_CONNECTION_LOST: nothing heard for 600 ms).
     int GetConnectionState();                       // 0x00731ac0
-    // The server made (the session closed first; the name and DirectPlay's fields of `desc`; `unknown`:
-    // the session menu passes true): < 0 failed.
-    int Host(const S_NetSessionDesc &desc, bool unknown);   // 0x00722b60
-    // A client connecting to the server at `address` (S_MultiplayerSettings +0x17C).
-    int Connect(void *address);                     // 0x007240f0
-    // A dedicated server made (the main menu's connect screen; `unknown` its +0x1F0): false failed.
-    bool HostDedicated(bool unknown);               // 0x00722a80
+    // The server made (the session closed first; the name, the service provider and the password of `desc`;
+    // `firewall`: Windows XP's firewall opened for its port): < 0 failed (m_lastError / m_lastErrorText).
+    int Host(const S_NetSessionDesc &desc, bool firewall);   // 0x00722b60
+    // A client connecting to `server` (S_MultiplayerSettings +0x17C; its port 31567 without GameSpy's listing;
+    // the CD key checked first with it): < 0 failed.
+    int Connect(S_ServerEntry *server);             // 0x007240f0
+    // A dedicated server started (its description written, hd2ds_sabresquadron.exe run; the main menu's connect
+    // screen): false failed.
+    bool HostDedicated(bool firewall);              // 0x00722a80
+    // DirectPlay's client made and initialised (once).
+    long CreateClient();                            // 0x00723e00 (__fastcall)
+    // DirectPlay addresses on TCP/IP: `device` only that, `host` the server's address and port (none: the
+    // broadcast's, port 31567).
+    void CreateAddresses(const S_ServerEntry *server, IDirectPlay8Address **device, IDirectPlay8Address **host);   // 0x00723700
+    // The server accepted the client: joined, its voice, the replication.
+    void OnConnected();                             // 0x007244e0 (__fastcall)
+    // The voice chat's server (the settings' codec) / client (on the server's DirectPlay object or the client's).
+    void StartVoiceServer();                        // 0x00724520 (__fastcall)
+    void StartVoiceClient(bool onServer);           // 0x00724740
+    // The voice of the player in `slot` given a 3D buffer (5 m to 20 m; not called).
+    void MakeVoiceBuffer(int slot);                 // 0x00724840
+    // (The players visited under the lock, nothing done; not called.)
+    void VisitPlayers();                            // 0x007248f0 (__fastcall)
+    // The client's DirectPlay messages (the session's; `net` g_netGame): the connection, a host's answer, data, the
+    // end. HandleServerMessage: the server's (part 10d-v).
+    static long __stdcall HandleClientMessage(C_NetGame *net, void *context, uint32_t type, void *message);   // 0x00722550
+    static long __stdcall HandleServerMessage(C_NetGame *net, void *context, uint32_t type, void *message);   // 0x00726470
+    // Windows XP's firewall: `port` opened (`open`; the server's or the client's) or the game's ports closed.
+    void ConfigureFirewall(int port, bool open);    // 0x00732730
     // The client's joining (+0x5044; NET_JOIN_*).
     int GetJoinStatus() const { return m_joinStatus; }   // 0x007244c0
     // Server: the vote's timeout (15 s: failed, message 0x17).
@@ -361,8 +471,6 @@ public:
     // The replication made / deleted (its quantisations, the local object's id).
     void MakeReplication();                         // 0x007233d0 (__fastcall)
     void DeleteReplication();                       // 0x007235f0 (__fastcall)
-    // The session's GameSpy reporting stopped (`unknown` 0, false).
-    void StopReporting(int *unknown, bool flag);    // 0x00732730
     // A player kicked: told to everyone (the server; game message 0x11) and printed (`reason`: 0 by the server,
     // 1 team kills, 2 its ping, 3 idle; texts 0x22AB, 0x22AA, 0x22AD, 0x22AC).
     void KickPlayer(int slot, int reason);          // 0x0072f6c0
@@ -400,13 +508,13 @@ public:
     uint8_t m_unknown4E8[4] = {};
     void(__fastcall *m_searchCallback)(S_ServerEntry *server) = nullptr;   // +0x4EC each server found
     void(__fastcall *m_statusCallback)(S_ServerStatus *status) = nullptr;  // +0x4F0 a server's status
-    uint8_t m_unknown4F4[0x55C - 0x4F4] = {};       // (+0x4F4 a vector freed by the destructor)
+    S_ServerStatus m_status = {};                   // +0x4F4 the status a query read
     S_KeyQuery m_keyQueries[100];                   // +0x55C the server's CD-key checks
     uintptr_t m_keySocket = static_cast<uintptr_t>(-1);   // +0x4D3C the CD keys' socket
     S_KeyQuery m_keyClient;                         // +0x4D40 the client's own check
     bool m_reporting = false;                       // +0x4DF8 the server reports to GameSpy (AnswerQueries)
     uint32_t m_graphFlags = 0;                      // +0x4DFC IGraph's flags, put back by Close
-    uint8_t m_unknown4E00[0xA0] = {};
+    alignas(4) uint8_t m_serverEntry[0xA0] = {};   // +0x4E00 S_ServerEntry: the server joined (or hosted)
     float m_levelMin[4] = {};                       // +0x4EA0 (Command 3; w: unset)
     float m_levelSize[4] = {};                      // +0x4EB0
     int m_levelBits[3] = {};                        // +0x4EC0 bits for each axis of the level
@@ -424,11 +532,12 @@ public:
     bool m_locksMade = false;                       // +0x5018
     std::string m_string501C;                       // +0x501C
     std::string m_string502C;                       // +0x502C (Close: the text at 0x00867a90)
-    int m_unknown503C = 0;
+    uint32_t m_enumHandle = 0;                      // +0x503C DirectPlay's EnumHosts operation
     int m_unknown5040 = 0;
     int m_joinStatus = 0;                           // +0x5044 NET_JOIN_*
     int m_joinTime = 0;                             // +0x5048 ms
-    int m_unknown504C[2] = {};
+    long m_lastError = 0;                           // +0x504C the last DirectPlay failure's
+    const char *m_lastErrorText = nullptr;          // +0x5050
     int m_sendPeriod = 50;                          // +0x5054 ms
     int m_sendTime = 0;                             // +0x5058
     int m_unknown505C = 0;
@@ -486,6 +595,23 @@ bool IsPlayerAdmin(int slot);                       // 0x007307e0
 // The player in `slot` has lives left (co-op: its own or the team's against the lives; otherwise the respawn
 // rule).
 bool CanPlayerRespawn(int slot);                    // 0x00730970
+// DirectPlay's message handlers: the client's (not in role 7) and the server's (the server only) on g_netGame; the
+// voice's (nothing).
+long __stdcall ClientMessageHandler(void *context, unsigned long type, void *message);   // 0x00722520
+long __stdcall ServerMessageHandler(void *context, unsigned long type, void *message);   // 0x00726440
+long __stdcall VoiceClientHandler(void *context, unsigned long type, void *message);     // 0x00722510
+long __stdcall VoiceServerHandler(void *context, unsigned long type, void *message);     // 0x00726430
+// Text between the ANSI / UTF-8 code pages and wide characters (`length` -1: the whole text; the last character
+// of the room the terminator).
+void NetAnsiToWide(wchar_t *out, const char *text, unsigned length);    // 0x00724ad0
+void NetWideToAnsi(char *out, const wchar_t *text, int length);         // 0x00724b30
+void NetUtf8ToWide(wchar_t *out, const char *text, unsigned length);    // 0x00724b80
+void NetWideToUtf8(char *out, const wchar_t *text, int length);         // 0x00724bd0
+// DirectPlay is missing (always false).
+bool DirectPlayMissing();                           // 0x00724b20
+// The address a DirectPlay address names ("hostname" a.b.c.d; a in the low byte).
+uint32_t GetHostAddress(IDirectPlay8Address *address);   // 0x00725190
+
 // The quantisations the net library keeps by index (0x00982de8, vtable 0x00816380; 0 the level, set by
 // SetLevelBounds; nothing reads them).
 class C_NetQuantizationTable {

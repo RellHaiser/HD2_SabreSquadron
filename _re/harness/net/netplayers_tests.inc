@@ -672,8 +672,8 @@ void TestSessionAndQueues()
     CHECK(net.m_outgoing.empty() && net.m_received.size() == 1);
     g_gameRole = GAME_ROLE_SERVER;
     C_NetReplication replication;
-    replication.m_makeFactory = [] { return NetMessageFactory(nullptr); };
-    replication.m_makeStateReader = [] { return NetStateHandler(nullptr); };
+    replication.m_makeFactory = [](int) { return NetMessageFactory(nullptr); };
+    replication.m_makeStateReader = [](int) { return NetStateHandler(nullptr); };
     C_NetObject *object = replication.FindObject(1, true);
     struct T_Msg : C_NetObjectMessage {
         T_Msg() : C_NetObjectMessage(1) {}

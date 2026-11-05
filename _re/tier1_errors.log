@@ -322,22 +322,6 @@ f_00721f30.cpp:96:11: invalid type argument of unary '*' (have 'uint32_t' {aka '
     if (*DAT_0097b9f0 < '0') break;
 f_00721f30.cpp:97:14: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     } while (*DAT_0097b9f0 < ':');
-f_00722a40.cpp:157:36: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
-    piVar5 = (int *)CoCreateInstance((IID *)&DAT_008190a8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819058,
-f_00722a40.cpp:225:36: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
-    piVar6 = (int *)CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,
-f_00722a40.cpp:488:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
-    CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,param_2);
-f_00722a40.cpp:490:20: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
-    CoCreateInstance((IID *)&DAT_008190e8,(LPUNKNOWN)0x0,0x17,(IID *)&DAT_008190d8,param_1);
-f_00722a40.cpp:494:69: 'struct tier1::_union_1226' has no member named 'S_un_b'
-    pcVar2 = inet_ntoa((in_addr)((_union_1226 *)(iStack_c + 0x68))->S_un_b);
-f_00722a40.cpp:520:30: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
-    HVar2 = CoCreateInstance((IID *)&DAT_008190b8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819068,ppv);
-f_00722a40.cpp:921:5: expected primary-expression before '}' token
-    }
-f_00724aa0.cpp:239:28: cannot convert 'const char*' to 'wchar_t*' in assignment
-    pwStack_94 = "2hostname" + 1;
 f_007277b0.cpp:620:21: base operand of '->' is not a pointer
     (*DAT_0098c0fc->vtable->empty_function_744210)();
 f_007277b0.cpp:56:59: invalid use of incomplete type 'struct tier1::PieceType<7>'
@@ -514,15 +498,9 @@ f_00733700.cpp:5882:26: cannot convert 'tier1::u_short' to 'u_short' {aka 'short
     while (uVar1 = ntohs((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)
 f_00733700.cpp:63:35: invalid 'static_cast' from type 'tier1::u_short' to type 'uint64_t' {aka 'long long unsigned int'}
     pcVar9 = pcVar8;
-f_00742160.cpp:94:28: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
-    iVar1 = CoCreateInstance((IID *)&DAT_00819198,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819168,&local_24);
-f_00742160.cpp:132:28: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
-    uVar2 = CoCreateInstance((IID *)&DAT_008191a8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819178,ppv);
-f_00742160.cpp:169:28: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
-    HVar2 = CoCreateInstance((IID *)&DAT_008191b8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819188,ppv);
-f_00742670.cpp:129:17: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_00742670.cpp:117:17: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     (**(code **)*DAT_0098c0fc)();
-f_00742670.cpp:1116:27: base operand of '->' is not a pointer
+f_00742670.cpp:1104:27: base operand of '->' is not a pointer
     (*DAT_0098c100->vtable->Create)();
 f_007442a0.cpp:100:36: void value not ignored as it ought to be
     uVar2 = (*self->vtable->SetFlags)(self,uVar1 & 0xffffffdf);

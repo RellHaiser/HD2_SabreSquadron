@@ -45,12 +45,15 @@ void __fastcall TestReadState(void *context, C_BitStream *stream)
     g_stateContext = context;
     CHECK(stream->ReadBits(8) == 0x5A);
 }
-NetMessageFactory MakeTestFactory()
+int g_factoryId = -1, g_readerId = -1;
+NetMessageFactory MakeTestFactory(int id)
 {
+    g_factoryId = id;
     return TestFactory;
 }
-NetStateHandler MakeTestReader()
+NetStateHandler MakeTestReader(int id)
 {
+    g_readerId = id;
     return TestReadState;
 }
 
@@ -570,6 +573,13 @@ void SetupReplication(C_NetReplication &r)
 void TestReplicationBasics()
 {
     MakeQuantizations();
+    {
+        // The factories get the object's id.
+        C_NetReplication made;
+        SetupReplication(made);
+        made.FindObject(7, true);
+        CHECK(g_factoryId == 7 && g_readerId == 7);
+    }
     C_NetReplication r;
     CHECK(!r.m_useViewCone && r.m_objects.empty() && r.m_readEpoch == 0 && r.m_field2 == 0 && r.m_bitsWritten == 0 &&
           r.m_bitsRead == 0 && !r.m_enabled && r.m_makeStateReader == nullptr && r.m_makeFactory == nullptr &&

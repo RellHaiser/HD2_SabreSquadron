@@ -140,7 +140,6 @@
 # Part 9h-xviii: the connect screen.
 00632270 C_MainMenu::OnConnectHidden | bool __thiscall OnConnectHidden(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
 00632560 C_MainMenu::OnConnectTick | bool __thiscall OnConnectTick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
-00722a80 C_NetGame::HostDedicated | bool __thiscall HostDedicated(void *this, bool unknown)
 0083fdd0 g_connectStyle @ int
 # Part 9h-xix: the browser's description, list and sorting.
 00634580 C_MainMenu::DescribeServerList | bool __thiscall DescribeServerList(C_MainMenu *this, void * desc, void * model)

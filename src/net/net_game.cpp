@@ -80,7 +80,7 @@ S_NetPlayerState::S_NetPlayerState()
     team = 2;
     pendingTeam = 2;
     unknown70 = -1;
-    unknownB4[4] = 50;                               // (+0xB8 = 50)
+    unknownB8 = 50;
 }
 
 S_NetVote::S_NetVote() = default;
@@ -152,7 +152,7 @@ void PostVote(int kind, int arg)
 C_NetGame::C_NetGame()
 {
     m_transport = new C_NetTransport;
-    reinterpret_cast<S_ServerEntry *>(m_unknown4E00)->Reset();
+    reinterpret_cast<S_ServerEntry *>(m_serverEntry)->Reset();
     std::memset(m_bandwidthTotal, 0, sizeof m_bandwidthTotal);
     std::memset(m_bandwidthAverage, 0, sizeof m_bandwidthAverage);
     std::memset(m_bandwidthLast, 0, sizeof m_bandwidthLast);
@@ -175,7 +175,7 @@ C_NetGame::~C_NetGame()
 void C_NetGame::Init()
 {
     m_unknown4EE0 = nullptr;
-    m_unknown503C = 0;
+    m_enumHandle = 0;
     g_gameRole = GAME_ROLE_LOCAL;
     m_sendPeriod = 50;
     m_sendTime = 0;
@@ -231,7 +231,7 @@ void C_NetGame::Close(bool now)
         m_closePending = true;
         return;
     }
-    StopReporting(nullptr, false);
+    ConfigureFirewall(0, false);
     GetIGraph()->SetFlags(m_graphFlags);
     Process(1000, false);
     m_closePending = false;

@@ -2650,7 +2650,7 @@ bool C_MainMenu::OnConnectTick(void *menu, void *, C_Control *control, uint32_t,
         }
         return true;
     case CONNECT_STATE_CONNECT:
-        g_netGame.Connect(settings->unknown17C);
+        g_netGame.Connect(reinterpret_cast<S_ServerEntry *>(settings->unknown17C));
         self->m_connectState = CONNECT_STATE_JOINING;
         return true;
     case CONNECT_STATE_JOINING:
@@ -2673,7 +2673,7 @@ bool C_MainMenu::OnConnectTick(void *menu, void *, C_Control *control, uint32_t,
         S_NetSessionDesc desc;
         static_assert(sizeof desc == sizeof settings->sessionName, "the session's name");
         std::memcpy(&desc, settings->sessionName, sizeof desc);
-        std::memcpy(desc.application, CONNECT_APPLICATION_GUID, sizeof desc.application);
+        std::memcpy(desc.serviceProvider, CONNECT_APPLICATION_GUID, sizeof desc.serviceProvider);
         desc.unknown15C = CONNECT_SESSION_15C;
         desc.unknown15E = CONNECT_SESSION_15E;
         if (g_netGame.Host(desc, self->m_openFirewall) < 0)

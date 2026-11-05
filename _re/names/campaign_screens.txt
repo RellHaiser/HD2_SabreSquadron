@@ -22,8 +22,6 @@
 0068b1b0 C_SessionMenu::OnConsoleHidden | bool __thiscall OnConsoleHidden(C_MenuState *this, void * argument, void * control, uint notification, uint value)
 0068b1c0 C_SessionMenu::OnConsoleTick | bool __thiscall OnConsoleTick(C_MenuState *this, void * argument, void * control, uint notification, uint value)
 0068bce0 C_SessionMenu::OnPasswordNotify | bool __thiscall OnPasswordNotify(C_MenuState *this, void * argument, void * control, uint notification, uint value)
-00722b60 C_NetGame::Host
-007240f0 C_NetGame::Connect
 007244c0 C_NetGame::GetJoinStatus
 008ae5c2 g_sessionPasswordSet @ bool
 # Part 9g-iii: the game's texts C_GameTexts (src/game/game_texts.cpp; g_texts) and a C_str append.
