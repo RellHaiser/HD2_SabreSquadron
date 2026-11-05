@@ -471,11 +471,11 @@ uint32_t FUN_00720710(int param_1,uint8_t *param_2, ...)
     return 0;
   case 1:
     strncpy(local_78,(char *)param_2,100);
-    C_NetGame__SendChat((C_NetGame*)(local_78),'\0');
+    C_NetGame__SendChat((C_NetGame *)&g_netGame,local_78,'\0');
     return 0;
   case 2:
     strncpy(local_78,(char *)param_2,100);
-    C_NetGame__SendChat((C_NetGame*)(local_78),'\x01');
+    C_NetGame__SendChat((C_NetGame *)&g_netGame,local_78,'\x01');
     return 0;
   case 3:
     pCVar6 = C_TeamManager__GetPlayerTeam(&g_teamManager);

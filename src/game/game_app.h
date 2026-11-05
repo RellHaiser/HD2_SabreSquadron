@@ -17,6 +17,7 @@
 #include "common/c_str.h"
 #include "game/game_state.h"
 
+class C_BitStream;
 class C_CampaignNode;
 class C_chunk;
 class C_game;
@@ -99,6 +100,10 @@ public:
     // Sends game message `type` (E_GameMessage; `to`: a player's connection, 0 all) with two
     // values (`reliable`: the session messages).
     void SendGameMessage(int type, int to, intptr_t a, int b, bool reliable);   // 0x0072a480
+    // A game command (NET_MESSAGE_GAME's id and data) of a received stream: the server's handling of a client's
+    // and a client's of the server's (part 10d).
+    void HandleServerCommand(int id, C_BitStream *stream);  // 0x00727bd0
+    void HandleClientCommand(int id, C_BitStream *stream);  // 0x00728820
 
     // The state is active (its state value is running, starting or ending).
     bool IsStateActive() const { return m_state && IsActiveState(m_state->GetState()); }

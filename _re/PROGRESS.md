@@ -8704,7 +8704,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   10x the dedicated server's console: C_CommandProcessor (0x007426a0..0x007442e0: Execute 6 KB) and C_ConsoleState
     (0x007442e0..0x00745300).
   The GameSpy SDK (0x00733000..0x0073d260, 29 KB: the master-server list, the query / report protocol) is
-  third-party code whose servers are gone: stubbed (no servers found), documented, not ported line by line.
+  ported like the rest (the user asked to keep it, 2026-11-05), though its master servers are gone.
 
   PART 10a DONE (2026-11-05): the replicated values' tracks (net/net_track.*, new).
   - C_NetQuantized (vtable 0x00816438): the base of the net values, objects and messages: the read and write
@@ -8803,6 +8803,45 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     Factory checkers clean.
   - Build: MSVC clean. Tier 1: 278 errors in 51 of 383 files. ret_audit --src: 52.
   - Stats: 9,889 of 12,306 functions by hand or absorbed (86.7 % by size).
+
+  PART 10d PLAN (2026-11-05): C_NetGame (g_netGame 0x0097d070, 0x5080 bytes; 0x00722b60..0x00733000, 59 KB left), by
+  band: 10d-i the object, its messages and pump (0x0072c280..0x0072f230: CreateMessage / SendMessage (C_NetMessage's
+  +0x18..+0x28: unreliable, pending, channel, target, type), the received / outgoing queues (+0x1F0 / +0x1FC, locked
+  by +0x430), ReceiveMessages, Process, SendMessages, Command, the watchdog +0x4D0, the constructor 0x0072e1d0 /
+  destructor, Init / Shutdown / Close, the player table's basics); 10d-ii the players, teams and scores
+  (0x0072f230..0x00731af0); 10d-iii hosting, connecting, the LAN search and pings (0x00722b60..0x00726470); 10d-iv
+  and -v the game messages (0x00726470..0x0072c280: the join handshake 0x00726470, the received commands 0x00727bd0 /
+  0x00728820, SendGameMessage, PostCommand); 10d-vi the rest (0x00731af0..0x00733000: load progress, connection state,
+  the firewall, the CD key). Then 10e the dedicated server's configuration and console (0x00720000..0x00722b60,
+  C_CommandProcessor::Execute, C_ConsoleState) and 10f the GameSpy SDK (ported, not stubbed).
+
+  PART 10d-i DONE (2026-11-05): C_NetGame's object, message streams, frame, votes, closing and player basics
+  (net/net_game.*, net/dplay8.h, new; S_NetPlayerState and C_NetGame moved out of game/pending.h).
+  - The object (g_netGame 0x0097d070): the constructor / destructor, Init (the defaults, 32 player slots), Shutdown,
+    Close (now or at the next frame: GameSpy reporting stopped, the voice objects, the LAN search's socket, the query
+    thread's handle, DirectPlay's server and client cancelled / closed / released, the transport stopped, the queues
+    given back to g_netPool). DirectPlay 8 declared by hand (net/dplay8.h: the SDK no longer has dplay8.h). The locks
+    (+0x418 players, +0x430 queues) kept as opaque CRITICAL_SECTION storage (C_NetLock) so net_game.h stays free of
+    windows.h (its SendMessage / DispatchMessage macros); C_NetGame::SendMessage is SendNetMessage in the port.
+  - The streams: BeginMessage / CreateMessage(Ex) (the three channels' streams, the server's unreliable one, the
+    direct one; the type in 5 bits), SendNetMessage, the received / outgoing queues (TransportCallback 0x0072c730),
+    DispatchNetMessage (0x14 a game command to the app's HandleServerCommand 0x00727bd0 / HandleClientCommand
+    0x00728820; the modules' DispatchMessage / CallUnknown28 only with a mission loaded), ReceiveMessages, the
+    replication's data (kind bit 0x20).
+  - The frame: Process (every m_sendPeriod ms, the join timing out after 30 s, the streams ended and sent to every
+    connected player, the replication written), UpdateLags (every 3 s: the resend times and the objects' lags from the
+    round trips; the server drops links silent for 5 s and kicks for high pings (three over m_maxPing) and
+    inactivity; its unused time argument kept: RET 4), SendJoinData, SendMessages (the dedicated server's console
+    commands; the bandwidth history every 100 ms, averaged every sixth).
+  - Command (kick by name / slot, the level scan: ScanFrameBounds, SetLevelBounds, BitsForRange), the votes
+    (S_NetVote: Start / Begin / Vote / CountYes / End, UpdateVote (was UpdateWatchdog / UpdateWatchmeleeTracker),
+    PrintVoteResult, PostVote), the player table's basics (FindPlayer(ByName), names, humans, LockPlayers, scores:
+    ResetScores, ResetPlayerStats, GetBestScore, AddScore; SetPlayer, SetVoiceValue, SendChat).
+  - Harness: net/build_game.bat (netgame_test.exe: the game app, game, modules, console, profile, IGraph, DirectPlay
+    faked; perf_fake.cpp: a clock the tests move on). Mutations: mutations/mutate_10d1.py: 634: 469 killed, 45 not building, 120 equivalent or unobserved (locks, the constructor's resets the member initialisers repeat, one-past-the-end bounds, the replication's write positions).
+    Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 278 errors in 51 of 376 files. ret_audit --src: 52.
+  - Stats: 9,961 of 12,306 functions by hand or absorbed (87.1 % by size).
 
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`

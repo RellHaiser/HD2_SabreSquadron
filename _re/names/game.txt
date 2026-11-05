@@ -124,7 +124,6 @@
 0048fdd0 C_QuickMessages::LoadGame | bool __thiscall LoadGame(C_QuickMessages *this, C_chunk * chunk)
 0072c9a0 C_NetGame::Process | void __thiscall Process(C_NetGame *this, int timeDelta, bool unknown)
 0072d680 C_NetGame::Command | bool __thiscall Command(C_NetGame *this, int command, char * arg, int unknown)
-0072e0a0 C_NetGame::UpdateWatchdog | void __thiscall UpdateWatchdog(void *this, int timeDelta)
 0072e8b0 C_NetGame::Close | void __thiscall Close(C_NetGame *this, bool now)
 0072ebb0 C_NetGame::ResetScores | void __fastcall ResetScores(C_NetGame * net)
 0072eff0 C_NetGame::GetPlayerHuman | C_Human * __thiscall GetPlayerHuman(C_NetGame *this, int slot)

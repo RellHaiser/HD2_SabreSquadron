@@ -222,7 +222,7 @@ int FUN_00726470(uint32_t *param_1,uint32_t param_2,uint32_t param_3,int param_4
       return iVar16;
     }
     if (((uint8_t)g_gameRole & 2) != 0) {
-      FUN_00725e10(local_20c);
+      S_NetPlayerState__S_NetPlayerState(local_20c);
       local_20c[0] = *(uint32_t *)(iVar17 + 4);
       EnterCriticalSection((LPCRITICAL_SECTION)(puVar9 + 0x106));
       FUN_00727300(puVar9 + 0x77,(uint32_t *)puVar9[0x79],1,local_20c);
@@ -403,7 +403,7 @@ LAB_0072686b:
         return -1;
       }
     }
-    FUN_00725e10(&local_114);
+    S_NetPlayerState__S_NetPlayerState(&local_114);
     uVar20 = 0;
     local_114 = 0xffffffff;
     param_3 = 0;
@@ -480,10 +480,10 @@ LAB_00726cf1:
       return 0;
     }
     param_3 &= 0xffffff;
-    C_NetGame__LockPlayers((int)puVar9);
+    C_NetGame__LockPlayers((C_NetGame *)puVar9);
     local_28 += 0x20;
     local_20 = (uint8_t *)FUN_00724c20(puVar9,(char *)local_28,1);
-    C_NetGame__UnlockPlayers((int)puVar9);
+    C_NetGame__UnlockPlayers((C_NetGame *)puVar9);
     if (1 < (int)local_20) {
       pCVar11 = C_fstr_Construct(&local_4c,&DAT_0084494c,local_20);
       pcVar19 = pCVar11->rep->chars;
@@ -600,9 +600,10 @@ LAB_00726ca0:
     LeaveCriticalSection(local_1c);
     return 0;
   case 0xffff0011:
-    if (*(uint32_t *)(param_4 + 0x10) != 0) {
-      FUN_0072c540(param_1,*(uint32_t **)(param_4 + 0xc),*(uint32_t *)(param_4 + 0x10),
-                   *(uint32_t *)(param_4 + 8) | 0x80);
+    if (*(int *)(param_4 + 0x10) != 0) {
+      C_NetGame__QueueReceived
+                ((C_NetGame *)param_1,*(void **)(param_4 + 0xc),*(int *)(param_4 + 0x10),
+                 *(uint32_t *)(param_4 + 8) | 0x80);
     }
     break;
   case 0xffff0013:

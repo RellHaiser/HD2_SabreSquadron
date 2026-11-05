@@ -216,6 +216,7 @@ public:
     void SetLag(float lag);                                       // 0x0073fa30 (every object's too)
 
     C_NetObject &GetLocalObject() { return m_local; }
+    bool HasObjects() const { return !m_objects.empty(); }
     int GetLocalId() const;
     void SetWriteEpoch(int value);
     void SetReadEpoch(int value);

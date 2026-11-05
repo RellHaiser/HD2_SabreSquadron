@@ -114,31 +114,6 @@ enum E_NetDelivery {
     NET_DELIVERY_UNRELIABLE = 1,
     NET_DELIVERY_3 = 3,
 };
-// Server-side state per player (0xC4 bytes; GetPlayerStates()).
-struct S_NetPlayerState {
-    int connection;                                 // +0x00 the network connection's id (0: none)
-    int unknown04;
-    char name[0x34];                                // +0x08 (size inferred) empty: a free slot
-    class C_Human *human;                           // +0x3C cleared when the human is destroyed
-    // (+0x0C the round's score, +0x14 the soldier class (SetPlayerClass), +0x20 the total.)
-    int stats[9];                                   // +0x40
-    int team;                                       // +0x64 E_HumanTeam
-    int pendingTeam;                                // +0x68 the team the player switches to
-    uint8_t unknown6C[0x36];
-    bool left;                                      // +0xA2 the player left (C_game::OnPlayerLeft);
-                                                    //       cleared when the actor is removed
-    uint8_t unknownA3[5];
-    // The server: timeGetTime() of the player's last controls or request (the player
-    // controller stamps it).
-    uint32_t activityTime;                          // +0xA8
-    uint8_t unknownAC[4];
-    int livesUsed;                                  // +0xB0 co-op respawns (-1 before the first spawn)
-    uint8_t unknownB4[0x10];
-
-    bool IsConnected() const { return name[0] != 0; }
-    // No human, or its (player / remote) controller watches.
-    bool IsSpectating() const;                      // 0x00725e90
-};
 struct S_ServerEntry;
 // A server's status (the net module's answer to QueryServerStatus; read by the main menu's game info screen,
 // part 9h-xii): its players, its rules, the teams' scores.
@@ -181,125 +156,8 @@ struct S_ServerStatus {
     int alliedScore;                                    // +0x64
 };
 
-class C_NetGame {
-public:
-    C_BitStream *CreateMessage(int channel, int delivery);      // 0x0072c280
-    C_BitStream *CreateMessageEx(int channel, int delivery);    // 0x0072c2a0 (other message kind)
-    // Player states, locked for the caller until UnlockPlayers(). (The original
-    // returns the vector that holds them.)
-    S_NetPlayerState *LockPlayers();                // 0x0072f040
-    void UnlockPlayers();                           // 0x0072f100
-    void SendMessage(C_BitStream *msg);            // 0x0072c360
-    void Init();                                    // 0x0072e570
-    void Shutdown();                                // 0x0072e830
-    // A dedicated server's loading progress (`percent` 0..100) on its console.
-    void PrintLoadProgress(int percent);            // 0x00731af0
-    void ReceiveMessages(int timeDelta, bool beforeUpdate);   // 0x0072c780
-    void SendMessages(int timeDelta);               // 0x0072d240
-    // Name of the player in `slot` (+0x08 of its state), null if there is none.
-    const char *GetPlayerName(int slot);            // 0x0072efa0
-    // A client: the state of `slot` (the table grown to it) gets the connection and the name.
-    void SetPlayer(int slot, int connection, const char *name);   // 0x0072ed10
-    // Teams of the players (E_HumanTeam; 2 for unknown slots).
-    int GetPlayerTeam(int slot, bool pending);      // 0x00730900
-    void SetPlayerTeam(int slot, int team, bool pending);   // 0x00730510
-    int GetLocalTeam();                             // 0x00730880
-    // Score keeping of a kill (`killer` -1: none).
-    void OnPlayerKilled(int victim, int killer);    // 0x0072f230
-    // Number of player slots (the states LockPlayers() returns).
-    int GetPlayerCount() const;
-    C_Human *GetPlayerHuman(int slot);              // 0x0072eff0 (null: none)
-    C_Human *GetLocalHuman();                       // 0x00730830
-    // The player in `slot` watches (no human: true).
-    bool IsPlayerSpectating(int slot);              // 0x007308a0
-    // Some player of `team` has a living human that is not spectating.
-    bool IsTeamAlive(int team);                     // 0x007305e0
-    // Connected players with a human, by team.
-    void CountTeamPlayers(int *axis, int *allies);  // 0x00730230
-    // Players by team (`pending`: their next team; `inGame`: only those with a human).
-    void CountTeams(int *axis, int *allies, bool pending, bool inGame);   // 0x00730320
-    // The players' pending teams become their teams.
-    void ApplyPendingTeams();                       // 0x007304a0
-    // Moves players between the teams towards the sizes the mission asks for.
-    void BalanceTeams(int axis, int allied);        // 0x007306a0
-    // Highest round score of the players in the game.
-    int GetBestScore();                             // 0x0072f110
-    void AddScore(int slot, int points);            // 0x0072f1a0
-    // The stats of the player in `slot` (S_NetPlayerState::stats; not locked).
-    int *GetPlayerStats(int slot);                  // 0x0072f890
-    // The local player's stats (the slot g_netLocalSlot 0x00982104's).
-    int *GetLocalPlayerStats();                     // 0x0072f8b0
-    // Sets the soldier class of the player in `slot` (stats[5]) and prints its change (texts
-    // 0x22C4 / 0x22C5 about the local player, 0x22C6 / 0x22C7 about the others, by whether it
-    // went down).
-    void SetPlayerClass(int soldierClass, int slot);   // 0x0072fe90
-    // Server: the team's score (+0x44C, float per team).
-    void AddTeamScore(int team, float points);      // 0x00730a20
-    float GetTeamScore(int team) const;
-    // Rounds won per team (+0x458, three ints; 0x0097d4c8).
-    int *GetTeamWins();
-    void ResetScores();                             // 0x0072ebb0
-    void SendScores();                              // 0x007301d0
-    // Flips bit 0 of the players' +0xAC (and of the copy their connection holds) each round
-    // (meaning not identified).
-    void FlipSessionParity();                       // 0x00730e10
-    // Every player's human and statistics, the teams' scores and wins.
-    void ResetPlayerStats();                        // 0x0072ec60
-    void ResetReplication(bool all);                // 0x007319e0
-    // Sends and receives for `timeDelta` ms now (1000: everything pending).
-    void Process(int timeDelta, bool unknown);      // 0x0072c9a0
-    // Ends the session (`now` false: at the next frame).
-    void Close(bool now);                           // 0x0072e8b0
-    // A server's status asked for on a thread of its own; `callback` gets it there (part 9h-xii).
-    int QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *status), S_ServerEntry *server);   // 0x007240d0
-    // A server pinged (`callback`, the net thread's, gets it when it answers; part 9h-xix).
-    void PingServer(void(__fastcall *callback)(S_ServerEntry *server), S_ServerEntry *server);   // 0x00724070
-    // The search's answers read (its socket polled; the browser's tick, every 10 ms; part 9h-xx).
-    void PollSearch();                              // 0x00723610 (__fastcall)
-    // The LAN searched / the servers listed pinged (`callback` gets each answering; part 9h-xxi).
-    void SearchServers(void(__fastcall *callback)(S_ServerEntry *server));   // 0x00724040
-    void PingServers(void(__fastcall *callback)(S_ServerEntry *server), std::vector<S_ServerEntry *> &servers);   // 0x00724090
-    // Windows XP's firewall keeps `port` closed (the main menu asks to open it; part 9h-xxi).
-    bool FirewallBlocks(uint16_t port);             // 0x007328d0
-    // Administration commands (NET_COMMAND_*; `unknown` is passed as 0).
-    bool Command(int command, const char *arg, int unknown);   // 0x0072d680
-    // State of the connection to the server (NET_CONNECTION_LOST: nothing heard for 600 ms).
-    int GetConnectionState();                       // 0x00731ac0
-    // The server made (the session closed first; the name and DirectPlay's fields of `desc`; `unknown`:
-    // the session menu passes true): < 0 failed.
-    int Host(const struct S_NetSessionDesc &desc, bool unknown);   // 0x00722b60
-    // A client connecting to the server at `address` (S_MultiplayerSettings +0x17C).
-    int Connect(void *address);                     // 0x007240f0
-    // A dedicated server made (the main menu's connect screen; `unknown` its +0x1F0): false failed.
-    bool HostDedicated(bool unknown);               // 0x00722a80
-    // The client's joining (+0x5044; NET_JOIN_*).
-    int GetJoinStatus() const;                      // 0x007244c0
-    // Server: the keep-alive check of the member at +0x4D0 (message 0x17 after 15 s).
-    void UpdateWatchmeleeTracker(int timeDelta);             // 0x0072e0a0
-    // The voice chat value the player options give ((int)(option * 0.01)) to the voice
-    // object at +0x0C (meaning not identified).
-    void SetVoiceValue(int value);                  // 0x0072edf0
-    // The voice chat transmits to the local player's team ("Set Transmition team").
-    void UpdateVoiceTeam();                         // 0x00724940
-    // A chat line (its first 99 characters; `team`: to the local player's team) posted to the app
-    // (command 3) to send. True.
-    bool SendChat(const char *text, bool team);     // 0x0072ee60
-};
-// C_NetGame::Command() commands.
-enum : int {
-    NET_COMMAND_KICK_NAME = 0,
-    NET_COMMAND_KICK_SLOT = 1,
-    NET_COMMAND_SCAN_LEVEL = 3,                     // the level's bounds (g_levelMinY)
-};
-enum : int {
-    NET_CONNECTION_LOST = 9,
-};
-extern C_NetGame g_netGame;                         // 0x0097d070
-// C_NetGame::GetJoinStatus(): the client's joining (0 and 2, 6: still on its way).
-enum : int {
-    NET_JOIN_CONNECTED = 1, NET_JOIN_FULL = 3, NET_JOIN_BAD_PASSWORD = 4, NET_JOIN_BAD_CD_KEY = 5,
-    NET_JOIN_BAD_VERSION = 7,
-};
+// The network game (C_NetGame, g_netGame, S_NetPlayerState, NET_COMMAND_* / NET_JOIN_*): net/net_game.h.
+#include "net/net_game.h"
 // The session a server makes (C_NetGame::Host; S_MultiplayerSettings::sessionName's 0x168 bytes, the
 // DirectPlay fields set by the caller).
 struct S_NetSessionDesc {                               // 0x168 bytes

@@ -372,7 +372,7 @@ void C_game::Update(int timeDelta)                  // 0x0069b500
                 m_interface->ShowMessage(-1);
             }
         }
-        g_netGame.UpdateWatchmeleeTracker(timeDelta);
+        g_netGame.UpdateVote(timeDelta);
         if (m_respawnRequest != 0) {
             // The command goes out once the respawn screen picked a zone.
             const std::vector<S_SquadSoldier *> &squad = g_missionSquad->states;

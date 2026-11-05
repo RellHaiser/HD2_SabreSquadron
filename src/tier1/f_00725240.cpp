@@ -26,72 +26,11 @@ int OtherTeam(int team, ...)
 }
 
 
-// 0x00725290
-uint32_t FUN_00725290(uint32_t *param_1, ...)
-{
-  param_1[6] = 0;
-  param_1[5] = 0;
-  param_1[4] = 0;
-  param_1[3] = 0;
-  param_1[2] = 0;
-  param_1[1] = 0;
-  *param_1 = 0;
-  return 0;
-}
-
-
 // 0x007252b0
 int FUN_007252b0(int param_1, ...)
 {
   S_ServerEntry__Reset((void *)param_1);
   return param_1;
-}
-
-
-// 0x00725e00
-uint32_t FUN_00725e00(uint32_t *param_1, ...)
-{
-  uint32_t extraout_ECX;
-  FUN_00725290(param_1);
-  return extraout_ECX;
-}
-
-
-// 0x00725e10
-uint32_t * FUN_00725e10(uint32_t *param_1, ...)
-{
-  FUN_00725e20(param_1);
-  return param_1;
-}
-
-
-// 0x00725e20
-uint32_t FUN_00725e20(uint32_t *param_1, ...)
-{
-  int iVar1;
-  uint32_t *puVar2;
-  *(uint8_t *)(param_1 + 2) = 0;
-  puVar2 = param_1 + 0x10;
-  memset(puVar2, 0, 9 * sizeof(*puVar2));
-  puVar2 += 9;
-  iVar1 = 0;
-  param_1[0x2d] = 0;
-  param_1[0x1b] = 0;
-  param_1[0x1d] = 0;
-  *param_1 = 0;
-  param_1[0xf] = 0;
-  param_1[0x1f] = 0;
-  *(uint8_t *)((int)param_1 + 0xa1) = 0;
-  *(uint8_t *)((int)param_1 + 0xa2) = 0;
-  param_1[0x29] = 0;
-  param_1[0x2b] = 0;
-  param_1[0x2c] = 0;
-  param_1[0x2f] = 0;
-  param_1[0x1a] = 2;
-  param_1[0x19] = 2;
-  param_1[0x1c] = 0xffffffff;
-  param_1[0x2e] = 0x32;
-  return 0;
 }
 
 

@@ -106,6 +106,7 @@ public:
         return m_state == GAME_STATE_RUNNING || m_state == GAME_STATE_STARTING || m_state == GAME_STATE_ENDING;
     }
     I3D_scene *GetScene() const { return m_scene; }
+    bool IsMissionLoaded() const { return m_missionLoaded; }
     // The far clipping distance (m; the birds fly off beyond it).
     float GetFarClip() const { return m_farClip; }
     float GetNearClip() const { return m_nearClip; }

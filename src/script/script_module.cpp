@@ -85,7 +85,7 @@ C_BitStream *BeginScriptNetMessage(int type, bool reliable)
 
 void SendScriptNetMessage(C_BitStream *msg)
 {
-    g_netGame.SendMessage(msg);
+    g_netGame.SendNetMessage(msg);
 }
 
 // ---------------------------------------------------------------------------

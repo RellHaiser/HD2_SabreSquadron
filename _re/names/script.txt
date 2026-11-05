@@ -186,7 +186,6 @@
 007764d0 AttachModelUpdateHook
 00776520 DetachModelUpdateHook
 0072c280 C_NetGame::CreateMessage
-0072c360 C_NetGame::SendMessage
 00867b18 g_scriptPath @
 008693d0 g_pendingSounds @
 00867b08 g_relinks @

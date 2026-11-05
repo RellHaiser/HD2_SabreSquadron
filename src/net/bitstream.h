@@ -28,6 +28,15 @@ public:
     uint32_t BitPosition() const { return m_wordIndex * 32 + m_bitIndex; }
     // (Part 10c-iii.) Back to the start (the transport's send stream, reused for each datagram).
     void ResetPosition() { m_wordIndex = 0; m_bitIndex = 0; }
+    // (Part 10d.) Over `data` of `capacityBits` (not owned; C_NetGame reads its queued datagrams so).
+    void Attach(void *data, uint32_t capacityBits)
+    {
+        m_data = static_cast<uint32_t *>(data);
+        m_capacityBits = capacityBits;
+    }
+    uint32_t CapacityBits() const { return m_capacityBits; }
+    // The bytes written so far (the bits rounded up).
+    int ByteSize() const { return static_cast<int>((BitPosition() + 7) >> 3); }
     const uint32_t *Data() const { return m_data; }
 
 protected:
@@ -114,8 +123,14 @@ public:
     void WriteAxisAngle(const struct S_vector &axis, float angle, int playerIndex);   // 0x0073d9e0
     void ReadAxisAngle(struct S_vector &axis, float &angle, int playerIndex);         // 0x0073da30
 
+    // (Part 10d: C_NetGame's message streams.)
+    bool m_unreliable = false;                               // +0x18
+    int m_pending = 0;                                       // +0x1C begun, not sent
+    int m_channel = 0;                                       // +0x20
+    int m_target = 0;                                        // +0x24 a player's DirectPlay id (0: all)
+    uint32_t m_type = 0;                                     // +0x28 the message's type
+
 private:
-    uint8_t m_unknown18[0x14];
     S_NetPlayer *m_sender = nullptr;                         // +0x2C
     S_NetPlayer *m_recipient = nullptr;                      // +0x30
     int m_senderIndex = 0;                                   // +0x34

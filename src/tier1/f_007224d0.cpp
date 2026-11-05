@@ -193,8 +193,8 @@ uint32_t FUN_00722550(void *param_1,uint32_t param_2,uint32_t param_3,int param_
     }
     break;
   case 0xffff0011:
-    if (*(uint32_t *)(param_4 + 0x10) != 0) {
-      FUN_0072c600(param_1,*(uint32_t **)(param_4 + 0xc),*(uint32_t *)(param_4 + 0x10),0x80);
+    if (*(int *)(param_4 + 0x10) != 0) {
+      C_NetGame__QueueOutgoing(param_1,*(void **)(param_4 + 0xc),*(int *)(param_4 + 0x10),0x80);
     }
     break;
   case 0xffff0013:

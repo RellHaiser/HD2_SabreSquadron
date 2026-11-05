@@ -487,18 +487,17 @@ uint32_t FUN_00727bd0(void *_this,uint32_t param_1,void *param_2, ...)
       lVar19 = tier1_ftol();
       piVar13[8] = (int)lVar19;
     }
-    iVar16 = C_NetGame__GetPlayerStats((C_NetGame*)(&g_netGame),(int)local_1ac);
-    C_HumanStore__GetStats
-              (g_gameProfile.m_humanStore,piVar13,pSVar10->profileIndex,*(int *)(iVar16 + 0x14));
+    piVar11 = C_NetGame__GetPlayerStats((C_NetGame *)&g_netGame,(int)local_1ac);
+    C_HumanStore__GetStats(g_gameProfile.m_humanStore,piVar13,pSVar10->profileIndex,piVar11[5]);
     pCVar7 = local_1ac;
     pCVar8 = GetGame();
     C_game__OnRespawnRequest(pCVar8,(int)pCVar7,(S_SoldierState *)pSVar10,piVar13);
     return 0;
   case 2:
     uVar5 = C_BitStream__ReadBits(param_2,0x20);
-    iVar16 = C_NetGame__LockPlayers(0x97d070);
+    iVar16 = C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
     iVar16 = *(int *)(*(int *)(iVar16 + 4) + uVar5 * 0xc4);
-    C_NetGame__UnlockPlayers(0x97d070);
+    C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
     pCVar7 = 0;
     a = 0;
     iVar2 = 5;
@@ -512,12 +511,12 @@ uint32_t FUN_00727bd0(void *_this,uint32_t param_1,void *param_2, ...)
     uVar5 = C_BitStream__ReadBits(param_2,1);
     a[0x10c] = uVar5 != 0;
     if (-1 < *(int *)(a + 0x104)) {
-      iVar2 = C_NetGame__LockPlayers(0x97d070);
+      iVar2 = C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
       iVar16 = *(int *)(a + 0x104);
       iVar2 = *(int *)(iVar2 + 4);
       DVar14 = timeGetTime();
       *(DWORD *)(iVar2 + iVar16 * 0xc4 + 0xa8) = DVar14;
-      C_NetGame__UnlockPlayers(0x97d070);
+      C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
     }
     C_BitStream__ReadString(param_2,a,0x103);
     pCVar7 = 0;
@@ -542,8 +541,8 @@ uint32_t FUN_00727bd0(void *_this,uint32_t param_1,void *param_2, ...)
     a = (char *)C_BitStream__ReadBits(param_2,0x20);
     pCVar7 = (C_str_rep *)C_BitStream__ReadBits(param_2,0x20);
     local_1ac = pCVar7;
-    C_NetGame__LockPlayers(0x97d070);
-    C_NetGame__UnlockPlayers(0x97d070);
+    C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
+    C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
     if (pCVar7 == (C_str_rep *)0x2) {
       C_NetGame__CountTeams((C_NetGame *)&g_netGame,(int *)&local_1a4,(int *)&local_1b0,true,false);
       pCVar7 = (C_str_rep *)(uint32_t)((int)local_1b0 <= (int)local_1a4);
@@ -575,18 +574,18 @@ uint32_t FUN_00727bd0(void *_this,uint32_t param_1,void *param_2, ...)
     break;
   case 6:
     uVar5 = C_BitStream__ReadBits(param_2,5);
-    iVar16 = C_NetGame__LockPlayers(0x97d070);
+    iVar16 = C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
     C_BitStream__ReadString(param_2,(char *)(*(int *)(iVar16 + 4) + 0x80 + uVar5 * 0xc4),0x21);
-    C_NetGame__UnlockPlayers(0x97d070);
+    C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
     return 0;
   case 7:
     uVar5 = C_BitStream__ReadBits(param_2,5);
-    local_1b0 = (C_str_rep *)C_NetGame__LockPlayers(0x97d070);
+    local_1b0 = (C_str_rep *)C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
     C_BitStream__ReadString(param_2,(char *)local_a0,0x80);
     local_1a4 = (int *)(local_1b0->length + uVar5 * 0xc4);
     if ((char)local_1a4[2] != '\0') {
       if (*(int *)(g_gameProfile.m_mpSettings)->_pad_021c == 0) {
-        pbVar4 = &DAT_00867a90;
+        pbVar4 = (uint8_t *)&DAT_00867a90;
       }
       else {
         pbVar4 = (uint8_t *)(*(int *)(g_gameProfile.m_mpSettings)->_pad_021c + 8);
@@ -618,7 +617,7 @@ LAB_00727de3:
       }
       C_GameApp__SendGameMessage(_this,0x13,iVar2,(uint32_t)(iVar16 == 0),0,false);
     }
-    C_NetGame__UnlockPlayers(0x97d070);
+    C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
     return 0;
   case 8:
     C_BitStream__ReadString(param_2,(char *)local_a0,0x80);
@@ -656,11 +655,11 @@ LAB_00727de3:
       }
       iVar16++;
     }
-    iVar16 = C_NetGame__LockPlayers(0x97d070);
+    iVar16 = C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
     C_GameApp__SendGameMessage
               (_this,0x15,*(int *)(*(int *)(iVar16 + 4) + uVar5 * 0xc4),
                (uint32_t)(local_1ac == local_1b0),0,false);
-    C_NetGame__UnlockPlayers(0x97d070);
+    C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
     return 0;
   case 10:
     log2((long double)67.0);
@@ -668,10 +667,10 @@ LAB_00727de3:
     lVar19 = tier1_ftol();
     uVar5 = C_BitStream__ReadBits(param_2,(int)lVar19);
     uVar6 = C_BitStream__ReadBits(param_2,10);
-    FUN_0072dd70(&DAT_0097d540,uVar5,uVar6);
+    S_NetVote__Start(&DAT_0097d540,uVar5,uVar6);
     return 0;
   case 0xb:
-    FUN_0072dfe0((int *)&DAT_0097d540);
+    S_NetVote__CountYes(&DAT_0097d540);
     return 0;
   default:
     goto switchD_00727c05_default;
@@ -694,50 +693,53 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
   S_SquadSoldier **ppSVar2;
   int iVar3;
   long double fVar4;
-  C_Team *pCVar5;
-  C_game *pCVar6;
-  C_GameState *pCVar7;
-  void *pvVar8;
+  int *piVar5;
+  C_Team *pCVar6;
+  C_game *pCVar7;
+  C_GameState *pCVar8;
   void *pvVar9;
-  uint32_t *puVar10;
-  char *pcVar11;
+  void *pvVar10;
+  uint32_t *puVar11;
+  char *pcVar12;
   int *extraout_EAX;
-  C_game *pCVar12;
+  C_game *pCVar13;
   C_game *extraout_EAX_00;
-  C_Human *pCVar13;
+  C_Human *pCVar14;
   int *extraout_EAX_01;
-  uint32_t uVar14;
   uint32_t uVar15;
-  int *piVar16;
   int *extraout_EAX_02;
+  uint32_t uVar16;
   int *extraout_EAX_03;
   int *extraout_EAX_04;
-  C_str *pCVar17;
   int *extraout_EAX_05;
   int *extraout_EAX_06;
+  C_str *pCVar17;
   int *extraout_EAX_07;
-  C_GameApp *pCVar18;
   int *extraout_EAX_08;
   int *extraout_EAX_09;
+  C_GameApp *pCVar18;
   int *extraout_EAX_10;
   int *extraout_EAX_11;
   int *extraout_EAX_12;
   int *extraout_EAX_13;
-  C_MissionDef *arg;
-  C_MenuState *this_00;
+  char *pcVar19;
   int *extraout_EAX_14;
   int *extraout_EAX_15;
+  C_MissionDef *arg;
+  C_MenuState *this_00;
   int *extraout_EAX_16;
   int *extraout_EAX_17;
-  int iVar19;
-  float fVar20;
-  int iVar21;
-  S_SquadSoldier *pSVar22;
-  int iVar23;
-  S_SoldierProgress *pSVar24;
-  uint32_t *puVar25;
-  bool bVar26;
-  int64_t lVar27;
+  int *extraout_EAX_18;
+  int *extraout_EAX_19;
+  int iVar20;
+  float fVar21;
+  int iVar22;
+  S_SquadSoldier *pSVar23;
+  int iVar24;
+  S_SoldierProgress *pSVar25;
+  uint32_t *puVar26;
+  bool bVar27;
+  int64_t lVar28;
   S_vector4 *pos;
   S_vector4 *dir;
   uchar local_611;
@@ -802,68 +804,68 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
   switch(gh_switch(param_1)) {
   case 0:
     FUN_007244e0(0x97d070);
-    uVar15 = C_BitStream__ReadBits(param_2,0x20);
+    uVar16 = C_BitStream__ReadBits(param_2,0x20);
     pCVar18 = GetGameApp();
-    pCVar18->m_randomId = uVar15;
+    pCVar18->m_randomId = uVar16;
     DAT_0097d4b8 = C_BitStream__ReadBits(param_2,0x20);
     S_MultiplayerSettings__ReadRules(g_gameProfile.m_mpSettings,param_2);
     S_MultiplayerSettings__ReadCurrentMap(g_gameProfile.m_mpSettings,param_2);
     pCVar18 = local_5fc;
     if (local_5fc->m_state != 0) {
       (*local_5fc->m_state->vtable->Stop)();
-      pCVar7 = pCVar18->m_state;
-      if (pCVar7 != 0) {
-        (*pCVar7->vtable->ScalarDeletingDestructor)('\x01');
+      pCVar8 = pCVar18->m_state;
+      if (pCVar8 != 0) {
+        (*pCVar8->vtable->ScalarDeletingDestructor)('\x01');
       }
     }
-    pCVar6 = _aligned_malloc(0xec,0x10);
-    local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),pCVar6);
+    pCVar7 = _aligned_malloc(0xec,0x10);
+    local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),pCVar7);
     local_14 = 0x11;
-    if (pCVar6 == 0) {
-      pCVar6 = 0;
+    if (pCVar7 == 0) {
+      pCVar7 = 0;
     }
     else {
-      pCVar6 = C_game__C_game(pCVar6);
+      pCVar7 = C_game__C_game(pCVar7);
     }
-    pCVar18->m_state = (C_GameState *)pCVar6;
+    pCVar18->m_state = (C_GameState *)pCVar7;
     local_14 = 0xffffffff;
     C_Campaign__SetupMultiplayerMission(g_gameProfile.m_campaign);
-    pCVar13 = (C_Human *)C_BitStream__ReadBits(param_2,8);
-    if (0 < (int)pCVar13) {
+    pCVar14 = (C_Human *)C_BitStream__ReadBits(param_2,8);
+    if (0 < (int)pCVar14) {
       do {
-        local_610 = pCVar13;
+        local_610 = pCVar14;
         C_BitStream__ReadString(param_2,(char *)&local_5a8,0x32);
-        uVar15 = C_BitStream__ReadBits(param_2,2);
-        uVar14 = C_BitStream__ReadBits(param_2,5);
+        uVar16 = C_BitStream__ReadBits(param_2,2);
+        uVar15 = C_BitStream__ReadBits(param_2,5);
         pCVar17 = C_GameTexts__Get(&DAT_008c1368,&CStack_56c,
-                                   (-(uint32_t)(uVar15 != 1) & 10) + 0x27a6 + uVar14);
+                                   (-(uint32_t)(uVar16 != 1) & 10) + 0x27a6 + uVar15);
         if (pCVar17->rep == 0) {
-          pcVar11 = (char *)&DAT_00867a90;
+          pcVar12 = (char *)&DAT_00867a90;
         }
         else {
-          pcVar11 = pCVar17->rep->chars;
+          pcVar12 = pCVar17->rep->chars;
         }
-        sprintf((char *)&local_560,"%s %s",pcVar11,&local_5a8);
+        sprintf((char *)&local_560,"%s %s",pcVar12,&local_5a8);
         if ((CStack_56c.rep != 0) &&
            ((CStack_56c.rep)->refCount = (CStack_56c.rep)->refCount - 1,
            (CStack_56c.rep)->refCount == 0)) {
           tier1_operator_delete(CStack_56c.rep);
         }
-        C_LoaderScreen__AddPlayer((C_LoaderScreen *)&DAT_008aea80,(char *)&local_560,uVar15);
+        C_LoaderScreen__AddPlayer((C_LoaderScreen *)&DAT_008aea80,(char *)&local_560,uVar16);
         local_610 = (C_Human *)((int)local_610 - 1);
-        pCVar13 = local_610;
+        pCVar14 = local_610;
       } while (local_610 != 0);
     }
     arg = C_Campaign__GetCurrentMission(g_gameProfile.m_campaign);
     pCVar18 = local_5fc;
-    bVar26 = (*local_5fc->m_state->vtable->Start)(arg);
-    if (bVar26) {
-      FUN_00725e10(&local_3d8);
-      pvVar8 = (void *)C_NetGame__LockPlayers(0x97d070);
-      FUN_00727300(pvVar8,*(uint32_t **)((int)pvVar8 + 8),1,&local_3d8);
-      C_NetGame__UnlockPlayers(0x97d070);
+    bVar27 = (*local_5fc->m_state->vtable->Start)(arg);
+    if (bVar27) {
+      S_NetPlayerState__S_NetPlayerState(&local_3d8);
+      pvVar9 = (void *)C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
+      FUN_00727300(pvVar9,*(uint32_t **)((int)pvVar9 + 8),1,&local_3d8);
+      C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
       C_GameApp__PostCommand(pCVar18,9,0,0,false);
-      return extraout_EAX_14;
+      return extraout_EAX_16;
     }
     if (pCVar18->m_state != 0) {
       (*pCVar18->m_state->vtable->ScalarDeletingDestructor)('\x01');
@@ -953,46 +955,46 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
     }
     pCVar18->m_state = (C_GameState *)this_00;
     local_14 = 0xffffffff;
-    piVar16 = (int *)(*this_00->vtable->vf01)(0);
-    return piVar16;
+    piVar5 = (int *)(*this_00->vtable->vf01)(0);
+    return piVar5;
   case 0x1:
     if ((g_gameRole & 1) == 0) {
-      iVar21 = 100;
-      pCVar6 = GetGame();
-      C_game__EndMission(pCVar6,iVar21);
-      return extraout_EAX_15;
+      iVar22 = 100;
+      pCVar7 = GetGame();
+      C_game__EndMission(pCVar7,iVar22);
+      return extraout_EAX_17;
     }
     break;
   case 0x2:
-    uVar15 = C_BitStream__ReadBits(param_2,0x20);
-    param_1 = (int *)CONCAT31((int3)(uVar15 >> 8),(uint8_t)g_gameRole);
+    uVar16 = C_BitStream__ReadBits(param_2,0x20);
+    param_1 = (int *)CONCAT31((int3)(uVar16 >> 8),(uint8_t)g_gameRole);
     if ((g_gameRole & 1) == 0) {
-      pCVar6 = GetGame();
+      pCVar7 = GetGame();
       param_1 = 0;
-      if (pCVar6 != 0) {
-        uVar14 = FUN_0072f060(&g_netGame,uVar15);
-        iVar21 = FUN_0072efa0(&g_netGame,uVar14);
-        if (iVar21 != 0) {
+      if (pCVar7 != 0) {
+        iVar22 = C_NetGame__FindPlayer((C_NetGame *)&g_netGame,uVar16);
+        pcVar12 = C_NetGame__GetPlayerName((C_NetGame *)&g_netGame,iVar22);
+        if (pcVar12 != 0) {
           pCVar17 = C_GameTexts__Get(&DAT_008c1368,&local_568,0x22cb);
           local_14 = 8;
           if (pCVar17->rep == 0) {
-            pcVar11 = (char *)&DAT_00867a90;
+            pcVar12 = (char *)&DAT_00867a90;
           }
           else {
-            pcVar11 = pCVar17->rep->chars;
+            pcVar12 = pCVar17->rep->chars;
           }
-          uVar14 = FUN_0072f060(&g_netGame,uVar15);
-          iVar21 = FUN_0072efa0(&g_netGame,uVar14);
-          pCVar17 = C_fstr_Construct(&local_564,"%s %s",iVar21,pcVar11);
+          iVar22 = C_NetGame__FindPlayer((C_NetGame *)&g_netGame,uVar16);
+          pcVar19 = C_NetGame__GetPlayerName((C_NetGame *)&g_netGame,iVar22);
+          pCVar17 = C_fstr_Construct(&local_564,"%s %s",pcVar19,pcVar12);
           local_14 = CONCAT31(GH_PIECE(local_14,1,3),9);
           if (pCVar17->rep == 0) {
-            pcVar11 = (char *)&DAT_00867a90;
+            pcVar12 = (char *)&DAT_00867a90;
           }
           else {
-            pcVar11 = pCVar17->rep->chars;
+            pcVar12 = pCVar17->rep->chars;
           }
           pCVar18 = GetGameApp();
-          C_GameApp__PrintMessage(pCVar18,pcVar11);
+          C_GameApp__PrintMessage(pCVar18,pcVar12);
           if ((local_564.rep != 0) &&
              ((local_564.rep)->refCount = (local_564.rep)->refCount - 1,
              (local_564.rep)->refCount == 0)) {
@@ -1005,18 +1007,18 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
             tier1_operator_delete(local_568.rep);
           }
         }
-        pCVar6 = GetGame();
-        C_game__OnPlayerLeft(pCVar6,uVar15);
-        return extraout_EAX_12;
+        pCVar7 = GetGame();
+        C_game__OnPlayerLeft(pCVar7,uVar16);
+        return extraout_EAX_14;
       }
     }
     break;
   case 0x3:
-    uVar15 = C_BitStream__ReadBits(param_2,0x20);
-    uVar14 = 7;
-    local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),uVar15);
-    pvVar8 = (void *)C_NetMessage__GetSender(param_2,-1);
-    C_NetMessage__ReadQuantized(param_2,&local_5f0.x,pvVar8,uVar14);
+    uVar16 = C_BitStream__ReadBits(param_2,0x20);
+    uVar15 = 7;
+    local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),uVar16);
+    pvVar9 = (void *)C_NetMessage__GetSender(param_2,-1);
+    C_NetMessage__ReadQuantized(param_2,&local_5f0.x,pvVar9,uVar15);
     local_5c0.x = local_5f0.x;
     local_5c0.y = local_5f0.y;
     local_5c0.w = local_5e4;
@@ -1040,10 +1042,10 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
     local_580 = 0;
     local_560.name.rep = 0;
     local_14 = 5;
-    pSVar24 = &local_560.progress;
-    for (iVar21 = 9; iVar21 != 0; iVar21 = iVar21 - 1) {
-      pSVar24->unknown00 = 0.0;
-      pSVar24 = (S_SoldierProgress *)&pSVar24->unknown04;
+    pSVar25 = &local_560.progress;
+    for (iVar22 = 9; iVar22 != 0; iVar22 = iVar22 - 1) {
+      pSVar25->unknown00 = 0.0;
+      pSVar25 = (S_SoldierProgress *)&pSVar25->unknown04;
     }
     local_560.head.typeId = -1;
     local_560.head.present = 0;
@@ -1090,13 +1092,13 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
     local_580 = C_BitStream__ReadBits(param_2,7);
     if ((g_gameRole & 1) == 0) {
       S_SquadSoldier__SplitStacks(&local_560);
-      puVar25 = &local_5a8;
-      pSVar22 = &local_560;
+      puVar26 = &local_5a8;
+      pSVar23 = &local_560;
       dir = &local_5e0;
       pos = &local_5c0;
-      iVar21 = (int)GH_PIECE(local_608,0,4);
-      pCVar6 = GetGame();
-      C_game__RespawnPlayer(pCVar6,iVar21,pos,dir,(S_SoldierState *)pSVar22,(int *)puVar25);
+      iVar22 = (int)GH_PIECE(local_608,0,4);
+      pCVar7 = GetGame();
+      C_game__RespawnPlayer(pCVar7,iVar22,pos,dir,(S_SoldierState *)pSVar23,(int *)puVar26);
     }
     local_14 = 0xffffffff;
     FUN_005aaa00(&local_560.belt,(uint32_t *)local_560.belt.first,
@@ -1106,88 +1108,88 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
     vector_tidy_5aa980((int)&local_560.backpackContents);
     param_1 = (int *)vector_tidy_5aa980((int)&local_560.belt);
     if (local_560.name.rep != 0) {
-      piVar16 = (int *)C_str__ReleaseRep((C_str *)local_560.name.rep);
-      return piVar16;
+      piVar5 = (int *)C_str__ReleaseRep((C_str *)local_560.name.rep);
+      return piVar5;
     }
     break;
   case 0x4:
-    uVar15 = C_BitStream__ReadBits(param_2,0x20);
+    uVar16 = C_BitStream__ReadBits(param_2,0x20);
     C_BitStream__ReadBits(param_2,0x20);
-    uVar14 = C_BitStream__ReadBits(param_2,1);
-    local_609 = uVar14 != 0;
-    if (uVar15 != 0xffffffff) {
+    uVar15 = C_BitStream__ReadBits(param_2,1);
+    local_609 = uVar15 != 0;
+    if (uVar16 != 0xffffffff) {
       if ((bool)local_609) {
-        iVar21 = 0;
+        iVar22 = 0;
         do {
-          cVar1 = (&DAT_0084500c)[iVar21];
-          *(char *)((int)&local_3d8 + iVar21) = cVar1;
-          iVar21++;
+          cVar1 = (&DAT_0084500c)[iVar22];
+          *(char *)((int)&local_3d8 + iVar22) = cVar1;
+          iVar22++;
         } while (cVar1 != '\0');
-        puVar25 = &local_3d1;
+        puVar26 = &local_3d1;
       }
       else {
-        puVar25 = &local_3d8;
+        puVar26 = &local_3d8;
       }
-      C_BitStream__ReadString(param_2,(char *)puVar25,0x104);
-      iVar19 = C_NetGame__LockPlayers(0x97d070);
-      iVar21 = *(int *)(iVar19 + 4);
-      iVar23 = uVar15 * 0xc4;
-      iVar3 = *(int *)(iVar21 + 0x3c + (int)DAT_00982104 * 0xc4);
-      local_610 = *(C_Human **)(iVar23 + 0x3c + iVar21);
+      C_BitStream__ReadString(param_2,(char *)puVar26,0x104);
+      iVar20 = C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
+      iVar22 = *(int *)(iVar20 + 4);
+      iVar24 = uVar16 * 0xc4;
+      iVar3 = *(int *)(iVar22 + 0x3c + (int)DAT_00982104 * 0xc4);
+      local_610 = *(C_Human **)(iVar24 + 0x3c + iVar22);
       if (((local_610 == 0) || (iVar3 == 0)) ||
          (0 < *(int *)(iVar3 + 0xec) == 0 < local_610->m_stats[0])) {
-        bVar26 = true;
+        bVar27 = true;
       }
       else {
-        bVar26 = false;
+        bVar27 = false;
       }
       if (((local_609 == '\0') ||
-          (*(int *)(iVar23 + 100 + iVar21) == *(int *)(iVar21 + (int)DAT_00982104 * 0xc4 + 100))) &&
-         ((bVar26 && (*(int *)((int)local_5fc + 0x14) != 0)))) {
-        local_5f8 = (C_game *)(iVar23 + 8 + iVar21);
+          (*(int *)(iVar24 + 100 + iVar22) == *(int *)(iVar22 + (int)DAT_00982104 * 0xc4 + 100))) &&
+         ((bVar27 && (*(int *)((int)local_5fc + 0x14) != 0)))) {
+        local_5f8 = (C_game *)(iVar24 + 8 + iVar22);
         local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),&local_3d8);
-        puVar25 = &local_3d8;
+        puVar26 = &local_3d8;
         if (g_gameProfile.m_unicodeFont == false) {
-          bVar26 = HasUtf8Sequences((char *)local_5f8);
-          if (bVar26) {
+          bVar27 = HasUtf8Sequences((char *)local_5f8);
+          if (bVar27) {
             local_5f8 = (C_game *)&DAT_00845008;
           }
-          bVar26 = HasUtf8Sequences((char *)&local_3d8);
-          puVar25 = (uint32_t *)"????????";
-          if (!bVar26) {
-            puVar25 = GH_PIECE(local_608,0,4);
+          bVar27 = HasUtf8Sequences((char *)&local_3d8);
+          puVar26 = (uint32_t *)"????????";
+          if (!bVar27) {
+            puVar26 = GH_PIECE(local_608,0,4);
           }
         }
-        iVar21 = (**(code **)(**(int **)((int)local_5fc + 0x14) + 0x1c))();
+        iVar22 = (**(code **)(**(int **)((int)local_5fc + 0x14) + 0x1c))();
         pCVar18 = local_5fc;
-        if (iVar21 == 0xb) {
+        if (iVar22 == 0xb) {
           C_GameMenu__AddChatLine
-                    (*(int *)(iVar23 + 100 + *(int *)(iVar19 + 4)),(char *)local_5f8,(char *)puVar25
+                    (*(int *)(iVar24 + 100 + *(int *)(iVar20 + 4)),(char *)local_5f8,(char *)puVar26
                     );
-          piVar16 = (int *)C_NetGame__UnlockPlayers(0x97d070);
-          return piVar16;
+          piVar5 = (int *)C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
+          return piVar5;
         }
-        iVar21 = (**(code **)(**(int **)((int)local_5fc + 0x14) + 0x1c))();
-        if (iVar21 == 1) {
+        iVar22 = (**(code **)(**(int **)((int)local_5fc + 0x14) + 0x1c))();
+        if (iVar22 == 1) {
           SStack_440.x = 255.0;
           SStack_440.y = 255.0;
           SStack_440.z = 255.0;
           C_game__PrintMessage(*(C_game **)((int)pCVar18 + 0x14),&SStack_440,"%s: %s");
           if (local_610 != 0) {
-            C_Human__SetChatText(local_610,(char *)puVar25);
+            C_Human__SetChatText(local_610,(char *)puVar26);
           }
         }
       }
-      piVar16 = (int *)C_NetGame__UnlockPlayers(0x97d070);
-      return piVar16;
+      piVar5 = (int *)C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
+      return piVar5;
     }
     param_1 = (int *)C_BitStream__ReadString(param_2,(char *)&local_3d8,0x104);
     pCVar18 = local_5fc;
     if (*(int **)((int)local_5fc + 0x14) != 0) {
-      iVar21 = (**(code **)(**(int **)((int)local_5fc + 0x14) + 0x1c))();
-      if (iVar21 == 0xb) {
+      iVar22 = (**(code **)(**(int **)((int)local_5fc + 0x14) + 0x1c))();
+      if (iVar22 == 0xb) {
         C_GameMenu__AddChatLine(0,"ADMIN",(char *)&local_3d8);
-        return extraout_EAX_16;
+        return extraout_EAX_18;
       }
       param_1 = (int *)(**(code **)(**(int **)((int)pCVar18 + 0x14) + 0x1c))();
       if ((C_game *)param_1 == (C_game *)0x1) {
@@ -1195,14 +1197,14 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
         SStack_460.y = 160.0;
         SStack_460.z = 160.0;
         C_game__PrintMessage(*(C_game **)((int)pCVar18 + 0x14),&SStack_460,"ADMIN: %s");
-        return extraout_EAX_17;
+        return extraout_EAX_19;
       }
     }
     break;
   case 0x5:
-    uVar15 = C_BitStream__ReadBits(param_2,0x20);
+    uVar16 = C_BitStream__ReadBits(param_2,0x20);
     param_1 = 0;
-    for (; uVar15 != 0; uVar15 = uVar15 - 1) {
+    for (; uVar16 != 0; uVar16 = uVar16 - 1) {
       local_5f0.x = (float)C_BitStream__ReadBits(param_2,0x20);
       GH_PIECE(local_608,0,4) = gh_bitcast<uint32_t*>(local_5f0.x);
       local_5f0.y = (float)C_BitStream__ReadBits(param_2,0x20);
@@ -1213,9 +1215,9 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
       local_5cc = local_5f0.y;
       local_5c8 = local_5f0.z;
       GH_PIECE(local_608,0,4) = gh_bitcast<uint32_t*>(local_5f0.z);
-      uVar14 = C_BitStream__ReadBits(param_2,0x20);
-      local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),uVar14);
-      fVar20 = (float)C_BitStream__ReadBits(param_2,0x20);
+      uVar15 = C_BitStream__ReadBits(param_2,0x20);
+      local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),uVar15);
+      fVar21 = (float)C_BitStream__ReadBits(param_2,0x20);
       local_610 = (C_Human *)C_BitStream__ReadBits(param_2,0x20);
       local_400 = 0x3f800000;
       local_3fc = 0x3f800000;
@@ -1229,7 +1231,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
       local_5f4 = gh_bitcast<void*>(local_5c8);
       local_3f0 = local_5d0 + (float)GH_PIECE(local_608,0,4);
       local_448 = local_5c8;
-      local_3ec = fVar20 + local_44c;
+      local_3ec = fVar21 + local_44c;
       local_3e8 = gh_bitcast<float>(local_610) + local_5c8;
       local_450 = local_5d0;
       param_1 = (int *)empty_function_4d0440();
@@ -1237,47 +1239,47 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
     break;
   case 0x6:
     S_MultiplayerSettings__ReadCurrentMap(g_gameProfile.m_mpSettings,param_2);
-    pCVar6 = GetGame();
+    pCVar7 = GetGame();
     param_1 = 0;
-    if (pCVar6 != 0) {
+    if (pCVar7 != 0) {
       GetGame();
       LoadNextMap();
-      return extraout_EAX_10;
+      return extraout_EAX_12;
     }
     break;
   case 0x7:
-    pCVar6 = GetGame();
-    if (pCVar6 != 0) {
-      bVar26 = true;
-      pCVar6 = GetGame();
-      C_game__RestartMission(pCVar6,bVar26);
+    pCVar7 = GetGame();
+    if (pCVar7 != 0) {
+      bVar27 = true;
+      pCVar7 = GetGame();
+      C_game__RestartMission(pCVar7,bVar27);
     }
     C_TemporaryActorsList__ReadState((C_TemporaryActorsList *)&g_temporaryActors,param_2);
-    return extraout_EAX_09;
+    return extraout_EAX_11;
   case 0x8:
-    piVar16 = (int *)FUN_0072fa50(&g_netGame,param_2);
-    return piVar16;
+    piVar5 = (int *)FUN_0072fa50(&g_netGame,param_2);
+    return piVar5;
   case 0x9:
     param_1 = (int *)C_BitStream__ReadString(param_2,(char *)&local_5a8,0x32);
     if ((g_gameRole & 1) == 0) {
       pCVar17 = C_GameTexts__Get(&DAT_008c1368,&local_570,0x22ca);
       local_14 = 3;
       if (pCVar17->rep == 0) {
-        pcVar11 = (char *)&DAT_00867a90;
+        pcVar12 = (char *)&DAT_00867a90;
       }
       else {
-        pcVar11 = pCVar17->rep->chars;
+        pcVar12 = pCVar17->rep->chars;
       }
-      pCVar17 = C_fstr_Construct(&local_574,"%s %s",&local_5a8,pcVar11);
+      pCVar17 = C_fstr_Construct(&local_574,"%s %s",&local_5a8,pcVar12);
       local_14 = CONCAT31(GH_PIECE(local_14,1,3),4);
       if (pCVar17->rep == 0) {
-        pcVar11 = (char *)&DAT_00867a90;
+        pcVar12 = (char *)&DAT_00867a90;
       }
       else {
-        pcVar11 = pCVar17->rep->chars;
+        pcVar12 = pCVar17->rep->chars;
       }
       pCVar18 = GetGameApp();
-      C_GameApp__PrintMessage(pCVar18,pcVar11);
+      C_GameApp__PrintMessage(pCVar18,pcVar12);
       if ((local_574.rep != 0) &&
          ((local_574.rep)->refCount = (local_574.rep)->refCount - 1, (local_574.rep)->refCount == 0
          )) {
@@ -1289,167 +1291,167 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
                (C_str_rep *)((C_str *)&(local_570.rep)->refCount)->rep[-1].chars,
          ((C_str *)&(local_570.rep)->refCount)->rep == 0)) {
         tier1_operator_delete(local_570.rep);
-        return extraout_EAX_05;
+        return extraout_EAX_07;
       }
     }
     break;
   case 0xa:
-    uVar15 = C_BitStream__ReadBits(param_2,5);
-    uVar14 = C_BitStream__ReadBits(param_2,4);
-    param_1 = (int *)CONCAT31((int3)(uVar14 >> 8),(uint8_t)g_gameRole);
+    uVar16 = C_BitStream__ReadBits(param_2,5);
+    uVar15 = C_BitStream__ReadBits(param_2,4);
+    param_1 = (int *)CONCAT31((int3)(uVar15 >> 8),(uint8_t)g_gameRole);
     if ((g_gameRole & 1) == 0) {
-      pCVar6 = GetGame();
+      pCVar7 = GetGame();
       param_1 = 0;
-      if (pCVar6 != 0) {
-        pCVar6 = GetGame();
-        C_game__ApplyObjectiveStatus(pCVar6,uVar15,uVar14);
-        return extraout_EAX_04;
+      if (pCVar7 != 0) {
+        pCVar7 = GetGame();
+        C_game__ApplyObjectiveStatus(pCVar7,uVar16,uVar15);
+        return extraout_EAX_06;
       }
     }
     break;
   case 0xb:
-    pCVar6 = GetGame();
+    pCVar7 = GetGame();
     param_1 = 0;
-    if (pCVar6 != 0) {
-      pCVar6 = GetGame();
-      C_game__OnWarmupFinished(pCVar6);
-      return extraout_EAX_06;
+    if (pCVar7 != 0) {
+      pCVar7 = GetGame();
+      C_game__OnWarmupFinished(pCVar7);
+      return extraout_EAX_08;
     }
     break;
   case 0xc:
     fVar4 = (long double)log2((long double)2.0);
     local_608 = (double)((long double)0.6931471805599453 * fVar4);
     log2((long double)34.0);
-    lVar27 = tier1_ftol();
-    local_610 = (C_Human *)lVar27;
-    pCVar6 = (C_game *)C_BitStream__ReadBits(param_2,(int)local_610);
-    if (pCVar6 != (C_game *)0x21) {
+    lVar28 = tier1_ftol();
+    local_610 = (C_Human *)lVar28;
+    pCVar7 = (C_game *)C_BitStream__ReadBits(param_2,(int)local_610);
+    if (pCVar7 != (C_game *)0x21) {
       log2((long double)3.0);
-      lVar27 = tier1_ftol();
-      local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),(int)lVar27);
+      lVar28 = tier1_ftol();
+      local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),(int)lVar28);
       do {
-        uVar15 = C_BitStream__ReadBits(param_2,(int)GH_PIECE(local_608,0,4));
-        if (pCVar6 == DAT_00982104) {
+        uVar16 = C_BitStream__ReadBits(param_2,(int)GH_PIECE(local_608,0,4));
+        if (pCVar7 == DAT_00982104) {
           ppSVar2 = ((g_gameProfile.m_missionSquad)->states).first;
           if ((ppSVar2 == (S_SquadSoldier **)0x0) ||
              ((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar2 >> 2 == 0)) {
-            pSVar22 = 0;
+            pSVar23 = 0;
           }
           else {
-            pSVar22 = *ppSVar2;
+            pSVar23 = *ppSVar2;
           }
-          if (uVar15 != pSVar22->team) {
+          if (uVar16 != pSVar23->team) {
             pCVar18 = GetGameApp();
-            iVar21 = (*pCVar18->m_state->vtable->GetTypeId)();
-            if (iVar21 == 1) {
+            iVar22 = (*pCVar18->m_state->vtable->GetTypeId)();
+            if (iVar22 == 1) {
               ppSVar2 = ((g_gameProfile.m_missionSquad)->states).first;
               if ((ppSVar2 == (S_SquadSoldier **)0x0) ||
                  ((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar2 >> 2 == 0)) {
-                pSVar22 = 0;
+                pSVar23 = 0;
               }
               else {
-                pSVar22 = *ppSVar2;
+                pSVar23 = *ppSVar2;
               }
-              pSVar22->team = uVar15;
+              pSVar23->team = uVar16;
               ppSVar2 = ((g_gameProfile.m_missionSquad)->states).first;
               if ((ppSVar2 == (S_SquadSoldier **)0x0) ||
                  ((int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar2 >> 2 == 0)) {
-                pSVar22 = 0;
+                pSVar23 = 0;
               }
               else {
-                pSVar22 = *ppSVar2;
+                pSVar23 = *ppSVar2;
               }
-              S_SquadSoldier__ClearItems(pSVar22);
+              S_SquadSoldier__ClearItems(pSVar23);
               pCVar18 = GetGameApp();
-              pCVar7 = C_game__OpenGameMenu((C_game *)pCVar18->m_state,-2);
+              pCVar8 = C_game__OpenGameMenu((C_game *)pCVar18->m_state,-2);
               pCVar18 = GetGameApp();
-              pCVar18->m_state = pCVar7;
+              pCVar18->m_state = pCVar8;
             }
-            else if (iVar21 == 0xb) {
+            else if (iVar22 == 0xb) {
               pCVar18 = GetGameApp();
-              C_GameMenu__SetTeam((C_GameMenu *)pCVar18->m_state,uVar15);
+              C_GameMenu__SetTeam((C_GameMenu *)pCVar18->m_state,uVar16);
             }
           }
         }
-        FUN_00730510(&g_netGame,(uint32_t)pCVar6,uVar15,'\0');
-        FUN_00730510(&g_netGame,(uint32_t)pCVar6,uVar15,'\x01');
-        pCVar6 = (C_game *)C_BitStream__ReadBits(param_2,(int)local_610);
-      } while (pCVar6 != (C_game *)0x21);
+        FUN_00730510(&g_netGame,(uint32_t)pCVar7,uVar16,'\0');
+        FUN_00730510(&g_netGame,(uint32_t)pCVar7,uVar16,'\x01');
+        pCVar7 = (C_game *)C_BitStream__ReadBits(param_2,(int)local_610);
+      } while (pCVar7 != (C_game *)0x21);
     }
-    pCVar6 = GetGame();
+    pCVar7 = GetGame();
     param_1 = 0;
-    if (pCVar6 != 0) {
-      pCVar6 = GetGame();
-      C_game__OnWarmupStarted(pCVar6);
-      return extraout_EAX_08;
+    if (pCVar7 != 0) {
+      pCVar7 = GetGame();
+      C_game__OnWarmupStarted(pCVar7);
+      return extraout_EAX_10;
     }
     break;
   case 0xd:
-    uVar15 = C_BitStream__ReadBits(param_2,2);
-    pCVar6 = GetGame();
+    uVar16 = C_BitStream__ReadBits(param_2,2);
+    pCVar7 = GetGame();
     param_1 = 0;
-    if (pCVar6 != 0) {
-      pCVar6 = GetGame();
-      C_game__OnRoundOver(pCVar6,uVar15);
-      return extraout_EAX_07;
+    if (pCVar7 != 0) {
+      pCVar7 = GetGame();
+      C_game__OnRoundOver(pCVar7,uVar16);
+      return extraout_EAX_09;
     }
     break;
   case 0xe:
-    pCVar6 = (C_game *)C_BitStream__ReadBits(param_2,5);
-    uVar15 = C_BitStream__ReadBits(param_2,2);
-    piVar16 = (int *)FUN_00730900(&g_netGame,(uint32_t)pCVar6,'\0');
-    if (piVar16 == (int *)0x2) {
-      if (pCVar6 != DAT_00982104) {
-        piVar16 = (int *)FUN_00730510(&g_netGame,(uint32_t)pCVar6,uVar15,'\0');
+    pCVar7 = (C_game *)C_BitStream__ReadBits(param_2,5);
+    uVar16 = C_BitStream__ReadBits(param_2,2);
+    piVar5 = (int *)FUN_00730900(&g_netGame,(uint32_t)pCVar7,'\0');
+    if (piVar5 == (int *)0x2) {
+      if (pCVar7 != DAT_00982104) {
+        piVar5 = (int *)FUN_00730510(&g_netGame,(uint32_t)pCVar7,uVar16,'\0');
         goto LAB_007291be;
       }
     }
     else {
 LAB_007291be:
-      if (pCVar6 != DAT_00982104) {
-        return piVar16;
+      if (pCVar7 != DAT_00982104) {
+        return piVar5;
       }
     }
-    param_1 = (int *)FUN_00730510(&g_netGame,(uint32_t)pCVar6,uVar15,'\x01');
+    param_1 = (int *)FUN_00730510(&g_netGame,(uint32_t)pCVar7,uVar16,'\x01');
     if ((*(int **)((int)local_5fc + 0x14) != 0) &&
        (param_1 = (int *)(**(code **)(**(int **)((int)local_5fc + 0x14) + 0x1c))(),
        (C_game *)param_1 == (C_game *)0xb)) {
       if ((((uint8_t)g_gameRole & 7) != 7) &&
-         (((g_gameRole & 1) == 0 && (pCVar6 = GetGame(), pCVar6 != 0)))) {
-        iVar21 = -1;
+         (((g_gameRole & 1) == 0 && (pCVar7 = GetGame(), pCVar7 != 0)))) {
+        iVar22 = -1;
         GetGame();
-        ShowGameMenuMessage(iVar21);
+        ShowGameMenuMessage(iVar22);
       }
-      C_GameMenu__SetTeam(*(C_GameMenu **)((int)local_5fc + 0x14),uVar15);
-      return extraout_EAX_03;
+      C_GameMenu__SetTeam(*(C_GameMenu **)((int)local_5fc + 0x14),uVar16);
+      return extraout_EAX_05;
     }
     break;
   case 0xf:
-    pCVar6 = (C_game *)C_BitStream__ReadBits(param_2,5);
-    uVar15 = C_BitStream__ReadBits(param_2,1);
-    bVar26 = uVar15 != 0;
-    local_608 = (double)CONCAT71(GH_PIECE(local_608,1,7),bVar26);
+    pCVar7 = (C_game *)C_BitStream__ReadBits(param_2,5);
+    uVar16 = C_BitStream__ReadBits(param_2,1);
+    bVar27 = uVar16 != 0;
+    local_608 = (double)CONCAT71(GH_PIECE(local_608,1,7),bVar27);
     param_1 = (int *)DAT_00982104;
-    if (pCVar6 == DAT_00982104) {
-      pCVar6 = GetGame();
-      C_game__OnRespawnScreen(pCVar6,bVar26);
-      return extraout_EAX_02;
+    if (pCVar7 == DAT_00982104) {
+      pCVar7 = GetGame();
+      C_game__OnRespawnScreen(pCVar7,bVar27);
+      return extraout_EAX_04;
     }
     break;
   case 0x10:
-    pCVar13 = C_NetGame__GetLocalHuman((C_NetGame *)&g_netGame);
-    pCVar6 = GetGame();
-    if ((pCVar6 != 0) && ((g_gameRole & 1) == 0)) {
-      pCVar12 = GetGame();
-      pCVar6 = (C_game *)(pCVar12->m_roundTime / 1000);
-      pCVar12->m_respawnWaveTime = pCVar12->m_roundTime % 1000;
+    pCVar14 = C_NetGame__GetLocalHuman((C_NetGame *)&g_netGame);
+    pCVar7 = GetGame();
+    if ((pCVar7 != 0) && ((g_gameRole & 1) == 0)) {
+      pCVar13 = GetGame();
+      pCVar7 = (C_game *)(pCVar13->m_roundTime / 1000);
+      pCVar13->m_respawnWaveTime = pCVar13->m_roundTime % 1000;
       _this = local_5fc;
     }
-    if (pCVar13 == 0) {
-      return (int *)pCVar6;
+    if (pCVar14 == 0) {
+      return (int *)pCVar7;
     }
-    if (0 < pCVar13->m_stats[0]) {
-      return (int *)pCVar13->m_stats[0];
+    if (0 < pCVar14->m_stats[0]) {
+      return (int *)pCVar14->m_stats[0];
     }
     ppSVar2 = ((g_gameProfile.m_missionSquad)->states).first;
     if (ppSVar2 == (S_SquadSoldier **)0x0) {
@@ -1457,43 +1459,43 @@ LAB_0072903a:
       param_1 = 0;
     }
     else {
-      iVar21 = (int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar2 >> 2;
-      local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),iVar21);
-      if (iVar21 == 0) goto LAB_0072903a;
+      iVar22 = (int)((g_gameProfile.m_missionSquad)->states).last - (int)ppSVar2 >> 2;
+      local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),iVar22);
+      if (iVar22 == 0) goto LAB_0072903a;
       param_1 = (int *)*ppSVar2;
     }
     if ((*(short *)&((C_game *)param_1)->m_checkpoints != -1) &&
        (*(short *)((int)&((C_game *)param_1)->m_checkpoints + 2) == 1)) {
-      C_Human__RequestRespawn(pCVar13);
+      C_Human__RequestRespawn(pCVar14);
       return extraout_EAX_01;
     }
     if ((*(int **)((int)_this + 0x14) != 0) &&
        (param_1 = (int *)(**(code **)(**(int **)((int)_this + 0x14) + 0x1c))(),
        (C_game *)param_1 == (C_game *)0xb)) {
-      piVar16 = *(int **)((int)_this + 0x14);
-      *(uint8_t *)((int)piVar16 + 0x1d1) = 1;
-      return piVar16;
+      piVar5 = *(int **)((int)_this + 0x14);
+      *(uint8_t *)((int)piVar5 + 0x1d1) = 1;
+      return piVar5;
     }
     break;
   case 0x11:
-    uVar15 = C_BitStream__ReadBits(param_2,0x20);
-    pCVar6 = (C_game *)C_BitStream__ReadBits(param_2,0x20);
+    uVar16 = C_BitStream__ReadBits(param_2,0x20);
+    pCVar7 = (C_game *)C_BitStream__ReadBits(param_2,0x20);
     param_1 = (int *)GetGame();
-    if (((C_game *)param_1 != 0) && (pCVar6 == DAT_00982104)) {
-      uVar14 = uVar15;
-      pCVar12 = GetGame();
-      C_game__OnSessionClosing(pCVar12,uVar14);
+    if (((C_game *)param_1 != 0) && (pCVar7 == DAT_00982104)) {
+      uVar15 = uVar16;
+      pCVar13 = GetGame();
+      C_game__OnSessionClosing(pCVar13,uVar15);
       param_1 = (int *)extraout_EAX_00;
     }
     if ((g_gameRole & 1) == 0) {
-      piVar16 = (int *)FUN_0072f6c0(&g_netGame,(int)pCVar6,uVar15);
-      return piVar16;
+      piVar5 = (int *)FUN_0072f6c0(&g_netGame,(int)pCVar7,uVar16);
+      return piVar5;
     }
     break;
   case 0x12:
     if ((g_gameRole & 1) == 0) {
       S_MultiplayerSettings__ReadRules(g_gameProfile.m_mpSettings,param_2);
-      return extraout_EAX_13;
+      return extraout_EAX_15;
     }
     FUN_007252b0((int)local_2b8._pad_017c);
     local_2b8.password.rep = 0;
@@ -1526,51 +1528,51 @@ LAB_0072903a:
     }
     param_1 = 0;
     if (local_2b8.password.rep != 0) {
-      piVar16 = (int *)C_str__ReleaseRep((C_str *)local_2b8.password.rep);
-      return piVar16;
+      piVar5 = (int *)C_str__ReleaseRep((C_str *)local_2b8.password.rep);
+      return piVar5;
     }
     break;
   case 0x13:
-    uVar15 = C_BitStream__ReadBits(param_2,0x20);
-    iVar21 = C_NetGame__LockPlayers(0x97d070);
-    *(bool *)(*(int *)(iVar21 + 4) + 0xa1 + (int)DAT_00982104 * 0xc4) = uVar15 != 0;
-    C_NetGame__UnlockPlayers(0x97d070);
-    pcVar11 = "Admin rights granted!";
-    if (uVar15 == 0) {
-      pcVar11 = "Incorrect admin password!";
+    uVar16 = C_BitStream__ReadBits(param_2,0x20);
+    iVar22 = C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
+    *(bool *)(*(int *)(iVar22 + 4) + 0xa1 + (int)DAT_00982104 * 0xc4) = uVar16 != 0;
+    C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
+    pcVar12 = "Admin rights granted!";
+    if (uVar16 == 0) {
+      pcVar12 = "Incorrect admin password!";
     }
-    C_GameApp__PrintMessage(local_5fc,pcVar11);
+    C_GameApp__PrintMessage(local_5fc,pcVar12);
     return extraout_EAX;
   case 0x14:
     C_TemporaryActorsList__ReadState((C_TemporaryActorsList *)&g_temporaryActors,param_2);
-    return extraout_EAX_11;
+    return extraout_EAX_13;
   case 0x15:
-    uVar15 = C_BitStream__ReadBits(param_2,1);
-    if (uVar15 == 0) {
-      piVar16 = (int *)(**(code **)(**(int **)((int)_this + 0x14) + 0x2c))(0xb);
-      return piVar16;
+    uVar16 = C_BitStream__ReadBits(param_2,1);
+    if (uVar16 == 0) {
+      piVar5 = (int *)(**(code **)(**(int **)((int)_this + 0x14) + 0x2c))(0xb);
+      return piVar5;
     }
-    uVar15 = C_BitStream__ReadBits(param_2,8);
-    local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),uVar15);
-    local_610 = (C_Human *)C_NetGame__LockPlayers(0x97d070);
+    uVar16 = C_BitStream__ReadBits(param_2,8);
+    local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),uVar16);
+    local_610 = (C_Human *)C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
     if ((g_gameRole & 1) == 0) {
       FUN_0072bba0((int)local_610,*(void **)((int)local_610 + 4),
                    *(uint32_t **)((int)local_610 + 8));
     }
     local_5f8 = 0;
-    if (0 < (int)uVar15) {
+    if (0 < (int)uVar16) {
       do {
-        FUN_00725e10(&local_3d8);
+        S_NetPlayerState__S_NetPlayerState(&local_3d8);
         local_3d8 = C_BitStream__ReadBits(param_2,0x20);
         C_BitStream__ReadString(param_2,(char *)((int)&local_3d1 + 1),0x32);
         local_5f4 = (void *)C_BitStream__ReadBits(param_2,0x20);
         FUN_00749f40(local_398,param_2);
         local_560.name.rep = 0;
         local_14 = 0;
-        pSVar24 = &local_560.progress;
-        for (iVar21 = 9; iVar21 != 0; iVar21 = iVar21 - 1) {
-          pSVar24->unknown00 = 0.0;
-          pSVar24 = (S_SoldierProgress *)&pSVar24->unknown04;
+        pSVar25 = &local_560.progress;
+        for (iVar22 = 9; iVar22 != 0; iVar22 = iVar22 - 1) {
+          pSVar25->unknown00 = 0.0;
+          pSVar25 = (S_SoldierProgress *)&pSVar25->unknown04;
         }
         local_560.head.typeId = -1;
         local_560.head.present = 0;
@@ -1625,7 +1627,7 @@ LAB_0072903a:
         }
         if ((((g_gameRole & 1) == 0) &&
             (FUN_0072b9a0(local_610,*(uint32_t **)((int)local_610 + 8),&local_3d8),
-            pCVar6 = local_5f8, local_5f4 != (void *)0xffffffff)) &&
+            pCVar7 = local_5f8, local_5f4 != (void *)0xffffffff)) &&
            (local_39c = C_SpawnPoint__CreateSoldier
                                   ((int)local_5f8,(int)local_5f4,&local_5e0,&local_5c0,
                                    (S_SoldierState *)&local_560,0,-1,false),
@@ -1638,14 +1640,14 @@ LAB_0072903a:
           SStack_430.y = 0.0;
           SStack_430.z = 0.0;
           C_Human__ApplyRemoteHit(local_39c,0xe,0,local_560.health,-1,&SStack_430,&SStack_410);
-          if (pCVar6 == DAT_00982104) {
-            pCVar5 = C_TeamManager__GetPlayerTeam(&g_teamManager);
-            (*pCVar5->vtable->AddMember)(local_39c);
+          if (pCVar7 == DAT_00982104) {
+            pCVar6 = C_TeamManager__GetPlayerTeam(&g_teamManager);
+            (*pCVar6->vtable->AddMember)(local_39c);
           }
           iStack_374 = local_560.team;
           (*local_39c->m_controller->vtable->SetSpectating)(local_560.spectating);
-          iVar21 = C_Human__GetControllerType(local_39c);
-          if (iVar21 == 7) {
+          iVar22 = C_Human__GetControllerType(local_39c);
+          if (iVar22 == 7) {
             local_39c->m_controller[3].m_toServer.alloc = local_560.vip;
           }
         }
@@ -1661,97 +1663,97 @@ LAB_0072903a:
         local_5f8 = (C_game *)((int)&local_5f8->vtable + 1);
       } while ((int)local_5f8 < (int)GH_PIECE(local_608,0,4));
     }
-    C_NetGame__UnlockPlayers(0x97d070);
+    C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
     DAT_0097d078 = 1;
     ModuleManager__BroadcastReadState(param_2);
-    pCVar6 = GetGame();
-    C_game__ReadObjectiveStates(pCVar6,param_2);
-    iVar21 = 2;
-    pCVar6 = GetGame();
-    C_game__SetCameraMode(pCVar6,iVar21);
+    pCVar7 = GetGame();
+    C_game__ReadObjectiveStates(pCVar7,param_2);
+    iVar22 = 2;
+    pCVar7 = GetGame();
+    C_game__SetCameraMode(pCVar7,iVar22);
     pCVar18 = local_5fc;
-    pCVar7 = C_game__OpenGameMenu(*(C_game **)((int)local_5fc + 0x14),-2);
-    *(C_GameState **)((int)pCVar18 + 0x14) = pCVar7;
-    pCVar6 = GetGame();
-    iVar21 = (*pCVar6->vtable->GetState)();
-    if (iVar21 != 0xb) {
-      pCVar6 = GetGame();
-      iVar21 = (*pCVar6->vtable->GetPendingState)();
-      if (iVar21 != 0xb) goto LAB_00728d4e;
+    pCVar8 = C_game__OpenGameMenu(*(C_game **)((int)local_5fc + 0x14),-2);
+    *(C_GameState **)((int)pCVar18 + 0x14) = pCVar8;
+    pCVar7 = GetGame();
+    iVar22 = (*pCVar7->vtable->GetState)();
+    if (iVar22 != 0xb) {
+      pCVar7 = GetGame();
+      iVar22 = (*pCVar7->vtable->GetPendingState)();
+      if (iVar22 != 0xb) goto LAB_00728d4e;
     }
     (**(code **)(**(int **)((int)pCVar18 + 0x14) + 0x2c))(0xb);
 LAB_00728d4e:
-    if (((g_gameRole & 1) == 0) && (pCVar6 = GetGame(), pCVar6 != 0)) {
-      iVar21 = 0x92c;
+    if (((g_gameRole & 1) == 0) && (pCVar7 = GetGame(), pCVar7 != 0)) {
+      iVar22 = 0x92c;
       GetGame();
-      ShowGameMenuMessage(iVar21);
+      ShowGameMenuMessage(iVar22);
     }
-    pvVar8 = (void *)C_NetGame__LockPlayers(0x97d070);
-    pCVar13 = local_610;
-    local_5f4 = pvVar8;
-    if (local_610 != pvVar8) {
-      if (*(int *)((int)pvVar8 + 4) == 0) {
+    pvVar9 = (void *)C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
+    pCVar14 = local_610;
+    local_5f4 = pvVar9;
+    if (local_610 != pvVar9) {
+      if (*(int *)((int)pvVar9 + 4) == 0) {
         local_610 = 0;
       }
       else {
-        local_610 = (C_Human *)((*(int *)((int)pvVar8 + 8) - *(int *)((int)pvVar8 + 4)) / 0xc4);
+        local_610 = (C_Human *)((*(int *)((int)pvVar9 + 8) - *(int *)((int)pvVar9 + 4)) / 0xc4);
       }
-      pvVar9 = (void *)FUN_0072b900((int)pCVar13);
-      if (pvVar9 < local_610) {
-        uVar15 = FUN_0072b900((int)pvVar8);
-        uVar14 = FUN_0072b970((int)pCVar13);
-        pvVar8 = local_5f4;
-        if (uVar14 < uVar15) {
+      pvVar10 = (void *)FUN_0072b900((int)pCVar14);
+      if (pvVar10 < local_610) {
+        uVar16 = FUN_0072b900((int)pvVar9);
+        uVar15 = FUN_0072b970((int)pCVar14);
+        pvVar9 = local_5f4;
+        if (uVar15 < uVar16) {
           empty_function_72bbe0();
-          tier1_operator_delete(*(void **)((int)pCVar13 + 4));
-          pvVar8 = local_5f4;
-          iVar21 = FUN_0072b900((int)local_5f4);
-          if (iVar21 < 0) {
-            iVar21 = 0;
+          tier1_operator_delete(*(void **)((int)pCVar14 + 4));
+          pvVar9 = local_5f4;
+          iVar22 = FUN_0072b900((int)local_5f4);
+          if (iVar22 < 0) {
+            iVar22 = 0;
           }
-          puVar10 = tier1_operator_new(iVar21 * 0xc4);
-          *(uint32_t **)((int)pCVar13 + 4) = puVar10;
-          iVar21 = FUN_0072bbf0(*(uint32_t **)((int)pvVar8 + 4),*(uint32_t **)((int)pvVar8 + 8),
-                                puVar10);
-          *(int *)((int)pCVar13 + 0xc) = iVar21;
+          puVar11 = tier1_operator_new(iVar22 * 0xc4);
+          *(uint32_t **)((int)pCVar14 + 4) = puVar11;
+          iVar22 = FUN_0072bbf0(*(uint32_t **)((int)pvVar9 + 4),*(uint32_t **)((int)pvVar9 + 8),
+                                puVar11);
+          *(int *)((int)pCVar14 + 0xc) = iVar22;
         }
         else {
           GH_PIECE(local_608,0,4) = (uint32_t *)*(int *)((int)local_5f4 + 4);
-          iVar21 = FUN_0072b900((int)pCVar13);
-          puVar10 = (uint32_t *)((int)GH_PIECE(local_608,0,4) + iVar21 * 0xc4);
-          local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),puVar10);
-          FUN_0072bd90(*(uint32_t **)((int)pvVar8 + 4),puVar10,*(uint32_t **)((int)pCVar13 + 4))
+          iVar22 = FUN_0072b900((int)pCVar14);
+          puVar11 = (uint32_t *)((int)GH_PIECE(local_608,0,4) + iVar22 * 0xc4);
+          local_608 = (double)CONCAT44(GH_PIECE(local_608,4,4),puVar11);
+          FUN_0072bd90(*(uint32_t **)((int)pvVar9 + 4),puVar11,*(uint32_t **)((int)pCVar14 + 4))
           ;
-          FUN_0072bbf0(GH_PIECE(local_608,0,4),*(uint32_t **)((int)pvVar8 + 8),
-                       *(uint32_t **)((int)pCVar13 + 8));
-          iVar21 = FUN_0072b900((int)pvVar8);
-          iVar21 = *(int *)((int)pCVar13 + 4) + iVar21 * 0xc4;
+          FUN_0072bbf0(GH_PIECE(local_608,0,4),*(uint32_t **)((int)pvVar9 + 8),
+                       *(uint32_t **)((int)pCVar14 + 8));
+          iVar22 = FUN_0072b900((int)pvVar9);
+          iVar22 = *(int *)((int)pCVar14 + 4) + iVar22 * 0xc4;
         }
-        *(int *)((int)pCVar13 + 8) = iVar21;
+        *(int *)((int)pCVar14 + 8) = iVar22;
       }
       else {
-        FUN_0072bd90(*(uint32_t **)((int)pvVar8 + 4),*(uint32_t **)((int)pvVar8 + 8),
-                     *(uint32_t **)((int)pCVar13 + 4));
+        FUN_0072bd90(*(uint32_t **)((int)pvVar9 + 4),*(uint32_t **)((int)pvVar9 + 8),
+                     *(uint32_t **)((int)pCVar14 + 4));
         empty_function_72bbe0();
-        iVar21 = FUN_0072b900((int)pvVar8);
-        *(int *)((int)pCVar13 + 8) = *(int *)((int)pCVar13 + 4) + iVar21 * 0xc4;
+        iVar22 = FUN_0072b900((int)pvVar9);
+        *(int *)((int)pCVar14 + 8) = *(int *)((int)pCVar14 + 4) + iVar22 * 0xc4;
       }
     }
-    *(uint32_t *)(*(int *)((int)pCVar13 + 4) + 0x74 + (int)DAT_00982104 * 0xc4) = 2;
-    piVar16 = (int *)C_NetGame__UnlockPlayers(0x97d070);
-    return piVar16;
+    *(uint32_t *)(*(int *)((int)pCVar14 + 4) + 0x74 + (int)DAT_00982104 * 0xc4) = 2;
+    piVar5 = (int *)C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
+    return piVar5;
   case 0x16:
     log2((long double)67.0);
     log2((long double)2.0);
-    lVar27 = tier1_ftol();
-    uVar15 = C_BitStream__ReadBits(param_2,(int)lVar27);
-    uVar14 = C_BitStream__ReadBits(param_2,10);
-    piVar16 = (int *)FUN_0072ddb0(&DAT_0097d540,uVar15,uVar14);
-    return piVar16;
+    lVar28 = tier1_ftol();
+    uVar16 = C_BitStream__ReadBits(param_2,(int)lVar28);
+    uVar15 = C_BitStream__ReadBits(param_2,10);
+    S_NetVote__Begin(&DAT_0097d540,uVar16,uVar15);
+    return extraout_EAX_02;
   case 0x17:
-    uVar15 = C_BitStream__ReadBits(param_2,1);
-    piVar16 = (int *)FUN_0072de90(uVar15 != 0);
-    return piVar16;
+    uVar16 = C_BitStream__ReadBits(param_2,1);
+    PrintVoteResult(uVar16 != 0);
+    return extraout_EAX_03;
   }
   return param_1;
 }
@@ -1773,11 +1775,11 @@ uint32_t C_GameApp__SendGameMessage(C_GameApp *_this,int type,int to,int a,int b
   C_NetMessage *this_00;
   int iVar5;
   C_game *pCVar6;
-  uint32_t uVar7;
-  C_str *pCVar8;
-  char *pcVar9;
-  C_GameApp *pCVar10;
+  C_str *pCVar7;
+  char *pcVar8;
+  C_GameApp *pCVar9;
   void *quantization;
+  char *pcVar10;
   uint32_t uVar11;
   int iVar12;
   int *piVar13;
@@ -1848,22 +1850,22 @@ uint32_t C_GameApp__SendGameMessage(C_GameApp *_this,int type,int to,int a,int b
       this_00 = (C_NetMessage *)FUN_0072c1b0(&g_netGame,local_110,iVar14);
       switch(local_11c) {
       case 0:
-        pCVar10 = GetGameApp();
-        C_BitStream__WriteBits((C_BitStream *)this_00,pCVar10->m_randomId,0x20);
+        pCVar9 = GetGameApp();
+        C_BitStream__WriteBits((C_BitStream *)this_00,pCVar9->m_randomId,0x20);
         C_BitStream__WriteBits((C_BitStream *)this_00,DAT_0097d4b8,0x20);
         S_MultiplayerSettings__WriteRules(g_gameProfile.m_mpSettings,this_00);
         S_MultiplayerSettings__WriteCurrentMap(g_gameProfile.m_mpSettings,this_00);
-        iVar14 = C_NetGame__LockPlayers(0x97d070);
+        iVar14 = C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
         iVar5 = 0;
         local_15c = 0;
-        pcVar9 = (char *)(*(int *)(iVar14 + 4) + 8);
+        pcVar8 = (char *)(*(int *)(iVar14 + 4) + 8);
         for (; (*(int *)(iVar14 + 4) != 0 &&
                (local_15c < (uint32_t)((*(int *)(iVar14 + 8) - *(int *)(iVar14 + 4)) / 0xc4)));
             local_15c = local_15c + 1) {
-          if (*pcVar9 != '\0') {
+          if (*pcVar8 != '\0') {
             iVar5++;
           }
-          pcVar9 += 0xc4;
+          pcVar8 += 0xc4;
         }
         C_BitStream__WriteBits((C_BitStream *)this_00,iVar5,8);
         iVar5 = 0;
@@ -1871,9 +1873,9 @@ uint32_t C_GameApp__SendGameMessage(C_GameApp *_this,int type,int to,int a,int b
             (*(int *)(iVar14 + 4) != 0 &&
             (local_15c < (uint32_t)((*(int *)(iVar14 + 8) - *(int *)(iVar14 + 4)) / 0xc4)));
             local_15c = local_15c + 1) {
-          pcVar9 = (char *)(*(int *)(iVar14 + 4) + 8 + iVar5);
-          if (*pcVar9 != '\0') {
-            C_BitStream__WriteString((C_BitStream *)this_00,pcVar9);
+          pcVar8 = (char *)(*(int *)(iVar14 + 4) + 8 + iVar5);
+          if (*pcVar8 != '\0') {
+            C_BitStream__WriteString((C_BitStream *)this_00,pcVar8);
             if (((g_gameProfile.m_mpSettings)->gameType == 0) &&
                (iVar12 = *(int *)(iVar5 + 0x3c + *(int *)(iVar14 + 4)), iVar12 != 0)) {
               iVar12 = *(int *)(iVar12 + 0x74);
@@ -1903,29 +1905,29 @@ uint32_t C_GameApp__SendGameMessage(C_GameApp *_this,int type,int to,int a,int b
         }
         goto LAB_0072b46f;
       case 2:
-        uVar7 = FUN_0072f060(&g_netGame,(int)values);
-        iVar5 = FUN_0072efa0(&g_netGame,uVar7);
-        if (iVar5 != 0) {
-          pCVar8 = C_GameTexts__Get(&DAT_008c1368,&local_d4,0x22cb);
+        iVar5 = C_NetGame__FindPlayer((C_NetGame *)&g_netGame,(int)values);
+        pcVar8 = C_NetGame__GetPlayerName((C_NetGame *)&g_netGame,iVar5);
+        if (pcVar8 != 0) {
+          pCVar7 = C_GameTexts__Get(&DAT_008c1368,&local_d4,0x22cb);
           local_14 = 5;
-          if (pCVar8->rep == 0) {
-            pcVar9 = (char *)&DAT_00867a90;
+          if (pCVar7->rep == 0) {
+            pcVar8 = (char *)&DAT_00867a90;
           }
           else {
-            pcVar9 = pCVar8->rep->chars;
+            pcVar8 = pCVar7->rep->chars;
           }
-          uVar7 = FUN_0072f060(&g_netGame,(int)values);
-          iVar5 = FUN_0072efa0(&g_netGame,uVar7);
-          pCVar8 = C_fstr_Construct(&local_f4,"%s %s",iVar5,pcVar9);
+          iVar5 = C_NetGame__FindPlayer((C_NetGame *)&g_netGame,(int)values);
+          pcVar10 = C_NetGame__GetPlayerName((C_NetGame *)&g_netGame,iVar5);
+          pCVar7 = C_fstr_Construct(&local_f4,"%s %s",pcVar10,pcVar8);
           local_14 = CONCAT31(GH_PIECE(local_14,1,3),6);
-          if (pCVar8->rep == 0) {
-            pcVar9 = (char *)&DAT_00867a90;
+          if (pCVar7->rep == 0) {
+            pcVar8 = (char *)&DAT_00867a90;
           }
           else {
-            pcVar9 = pCVar8->rep->chars;
+            pcVar8 = pCVar7->rep->chars;
           }
-          pCVar10 = GetGameApp();
-          C_GameApp__PrintMessage(pCVar10,pcVar9);
+          pCVar9 = GetGameApp();
+          C_GameApp__PrintMessage(pCVar9,pcVar8);
           if ((local_f4.rep != 0) &&
              ((local_f4.rep)->refCount = (local_f4.rep)->refCount - 1,
              (local_f4.rep)->refCount == 0)) {
@@ -1978,7 +1980,7 @@ uint32_t C_GameApp__SendGameMessage(C_GameApp *_this,int type,int to,int a,int b
         tier1_operator_delete(values);
         break;
       case 5:
-        iVar5 = C_NetGame__LockPlayers(0x97d070);
+        iVar5 = C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
         if ((*(int *)(iVar5 + 4) != 0) &&
            (iVar14 = (*(int *)(iVar5 + 8) - *(int *)(iVar5 + 4)) / 0xc4, iVar14 != 0)) {
           C_BitStream__WriteBits((C_BitStream *)this_00,iVar14,0x20);
@@ -2060,24 +2062,24 @@ uint32_t C_GameApp__SendGameMessage(C_GameApp *_this,int type,int to,int a,int b
         break;
       case 9:
         C_BitStream__WriteString((C_BitStream *)this_00,(char *)values);
-        pCVar8 = C_GameTexts__Get(&DAT_008c1368,&local_e4,0x22ca);
+        pCVar7 = C_GameTexts__Get(&DAT_008c1368,&local_e4,0x22ca);
         local_14 = 3;
-        if (pCVar8->rep == 0) {
-          pcVar9 = (char *)&DAT_00867a90;
+        if (pCVar7->rep == 0) {
+          pcVar8 = (char *)&DAT_00867a90;
         }
         else {
-          pcVar9 = pCVar8->rep->chars;
+          pcVar8 = pCVar7->rep->chars;
         }
-        pCVar8 = C_fstr_Construct(&local_104,"%s %s",values,pcVar9);
+        pCVar7 = C_fstr_Construct(&local_104,"%s %s",values,pcVar8);
         local_14 = CONCAT31(GH_PIECE(local_14,1,3),4);
-        if (pCVar8->rep == 0) {
-          pcVar9 = (char *)&DAT_00867a90;
+        if (pCVar7->rep == 0) {
+          pcVar8 = (char *)&DAT_00867a90;
         }
         else {
-          pcVar9 = pCVar8->rep->chars;
+          pcVar8 = pCVar7->rep->chars;
         }
-        pCVar10 = GetGameApp();
-        C_GameApp__PrintMessage(pCVar10,pcVar9);
+        pCVar9 = GetGameApp();
+        C_GameApp__PrintMessage(pCVar9,pcVar8);
         if ((local_104.rep != 0) &&
            ((local_104.rep)->refCount = (local_104.rep)->refCount - 1,
            (local_104.rep)->refCount == 0)) {
@@ -2095,7 +2097,7 @@ uint32_t C_GameApp__SendGameMessage(C_GameApp *_this,int type,int to,int a,int b
         C_BitStream__WriteBits((C_BitStream *)this_00,local_114,4);
         break;
       case 0xc:
-        iVar5 = C_NetGame__LockPlayers(0x97d070);
+        iVar5 = C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
         iVar14 = 0;
         for (local_158 = 0;
             (iVar12 = *(int *)(iVar5 + 4), iVar12 != 0 &&
@@ -2119,7 +2121,7 @@ uint32_t C_GameApp__SendGameMessage(C_GameApp *_this,int type,int to,int a,int b
         lVar16 = tier1_ftol();
         C_BitStream__WriteBits((C_BitStream *)this_00,0x21,(int)lVar16);
 LAB_0072b46f:
-        C_NetGame__UnlockPlayers(0x97d070);
+        C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
         break;
       case 0xd:
         C_BitStream__WriteBits((C_BitStream *)this_00,values,2);
@@ -2145,7 +2147,7 @@ LAB_0072b46f:
         }
         else {
           C_BitStream__WriteBits((C_BitStream *)this_00,1,1);
-          iVar5 = C_NetGame__LockPlayers(0x97d070);
+          iVar5 = C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
           if (*(int *)(iVar5 + 4) == 0) {
             iVar14 = 0;
           }
@@ -2277,16 +2279,16 @@ LAB_0072b46f:
             }
             iVar14 += 0xc4;
           }
-          C_NetGame__UnlockPlayers(0x97d070);
+          C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
           ModuleManager__BroadcastWriteState(this_00);
           msg = this_00;
           pCVar6 = GetGame();
           C_game__WriteObjectiveStates(pCVar6,(C_BitStream *)msg);
-          uVar7 = FUN_0072f060(&g_netGame,local_110);
-          if (uVar7 != 0xffffffff) {
-            iVar5 = C_NetGame__LockPlayers(0x97d070);
-            *(uint32_t *)(*(int *)(iVar5 + 4) + 0x74 + uVar7 * 0xc4) = 2;
-            C_NetGame__UnlockPlayers(0x97d070);
+          iVar5 = C_NetGame__FindPlayer((C_NetGame *)&g_netGame,local_110);
+          if (iVar5 != -1) {
+            iVar14 = C_NetGame__LockPlayers((C_NetGame *)&g_netGame);
+            *(uint32_t *)(*(int *)(iVar14 + 4) + 0x74 + iVar5 * 0xc4) = 2;
+            C_NetGame__UnlockPlayers((C_NetGame *)&g_netGame);
           }
           DAT_0097d078 = 1;
         }
@@ -2301,7 +2303,7 @@ LAB_0072b46f:
       case 0x17:
         C_BitStream__WriteBits((C_BitStream *)this_00,values,1);
       }
-      C_NetGame__SendMessage(&g_netGame,this_00);
+      C_NetGame__SendNetMessage((C_NetGame *)&g_netGame,this_00);
       piVar13 = (int *)*DAT_0097ca00;
       *(int *)piVar13[1] = *piVar13;
       *(int *)(*piVar13 + 4) = piVar13[1];
@@ -2486,7 +2488,7 @@ switchD_0072b68a_caseD_8:
 LAB_0072b81c:
         C_BitStream__WriteBits(this_00,pcVar6,iVar7);
       }
-      C_NetGame__SendMessage(&g_netGame,this_00);
+      C_NetGame__SendNetMessage((C_NetGame *)&g_netGame,this_00);
       ptr = (int *)*DAT_0097c9f0;
       *(int *)ptr[1] = *ptr;
       *(int *)(*ptr + 4) = ptr[1];

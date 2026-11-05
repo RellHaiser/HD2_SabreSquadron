@@ -38377,6 +38377,11 @@
   "name": "S_ServerEntry::Load",
   "proto": "bool __thiscall Load(void *this, void * chunk)"
  },
+ "00725e10": {
+  "module": "net_game",
+  "name": "S_NetPlayerState::S_NetPlayerState",
+  "proto": "void * __fastcall S_NetPlayerState(void * state)"
+ },
  "00725e90": {
   "module": "hud",
   "name": "S_NetPlayerState::IsSpectating",
@@ -38416,9 +38421,35 @@
   "module": "actors",
   "name": "C_NetGame::CreateMessageEx"
  },
+ "0072c2c0": {
+  "module": "net_game",
+  "name": "C_NetGame::BeginMessage",
+  "proto": "void * __thiscall BeginMessage(void *this, int target, int type, bool reliable, int channel)"
+ },
  "0072c360": {
-  "module": "script",
-  "name": "C_NetGame::SendMessage"
+  "module": "net_game",
+  "name": "C_NetGame::SendNetMessage",
+  "proto": "void __thiscall SendNetMessage(void *this, void * msg)"
+ },
+ "0072c480": {
+  "module": "net_game",
+  "name": "C_NetGame::DispatchNetMessage",
+  "proto": "bool __cdecl DispatchNetMessage(void * stream, bool toClient)"
+ },
+ "0072c540": {
+  "module": "net_game",
+  "name": "C_NetGame::QueueReceived",
+  "proto": "void __thiscall QueueReceived(void *this, void * data, int size, uint flags)"
+ },
+ "0072c600": {
+  "module": "net_game",
+  "name": "C_NetGame::QueueOutgoing",
+  "proto": "void __thiscall QueueOutgoing(void *this, void * data, int size, uint flags)"
+ },
+ "0072c730": {
+  "module": "net_game",
+  "name": "TransportCallback",
+  "proto": "void __fastcall TransportCallback(int connection, void * data, int size, int kind, uint flags)"
  },
  "0072c780": {
   "module": "app",
@@ -38429,9 +38460,24 @@
   "name": "C_NetGame::Process",
   "proto": "void __thiscall Process(C_NetGame *this, int timeDelta, bool unknown)"
  },
+ "0072cde0": {
+  "module": "net_game",
+  "name": "C_NetGame::UpdateLags",
+  "proto": "void __thiscall UpdateLags(void *this, int timeDelta)"
+ },
+ "0072d120": {
+  "module": "net_game",
+  "name": "C_NetGame::SendJoinData",
+  "proto": "void __fastcall SendJoinData(void * net)"
+ },
  "0072d240": {
   "module": "app",
   "name": "C_NetGame::SendMessages"
+ },
+ "0072d4b0": {
+  "module": "net_game",
+  "name": "C_NetGame::SendToPlayers",
+  "proto": "void __thiscall SendToPlayers(void *this, int slot, void * data, int size, uint flags)"
  },
  "0072d670": {
   "module": "zz_idioms",
@@ -38442,10 +38488,70 @@
   "name": "C_NetGame::Command",
   "proto": "bool __thiscall Command(C_NetGame *this, int command, char * arg, int unknown)"
  },
+ "0072d9c0": {
+  "module": "net_game",
+  "name": "ScanFrameBounds",
+  "proto": "uint __stdcall ScanFrameBounds(void * frame, void * context)"
+ },
+ "0072dcd0": {
+  "module": "net_game",
+  "name": "BitsForRange",
+  "proto": "int __fastcall BitsForRange(uint * steps)"
+ },
+ "0072dd30": {
+  "module": "net_game",
+  "name": "S_NetVote::S_NetVote",
+  "proto": "void * __fastcall S_NetVote(void * vote)"
+ },
+ "0072dd50": {
+  "module": "net_game",
+  "name": "PostVote",
+  "proto": "void __cdecl PostVote(int kind, int arg)"
+ },
+ "0072dd70": {
+  "module": "net_game",
+  "name": "S_NetVote::Start",
+  "proto": "void __thiscall Start(void *this, int kind, int arg)"
+ },
+ "0072ddb0": {
+  "module": "net_game",
+  "name": "S_NetVote::Begin",
+  "proto": "void __thiscall Begin(void *this, int kind, int arg)"
+ },
+ "0072de90": {
+  "module": "net_game",
+  "name": "PrintVoteResult",
+  "proto": "void __cdecl PrintVoteResult(bool passed)"
+ },
+ "0072dfb0": {
+  "module": "net_game",
+  "name": "S_NetVote::Vote",
+  "proto": "bool __fastcall Vote(void * vote)"
+ },
+ "0072dfe0": {
+  "module": "net_game",
+  "name": "S_NetVote::CountYes",
+  "proto": "void __fastcall CountYes(void * vote)"
+ },
+ "0072e070": {
+  "module": "net_game",
+  "name": "S_NetVote::End",
+  "proto": "void __thiscall End(void *this, uint passed)"
+ },
  "0072e0a0": {
-  "module": "game",
-  "name": "C_NetGame::UpdateWatchdog",
-  "proto": "void __thiscall UpdateWatchdog(void *this, int timeDelta)"
+  "module": "net_game",
+  "name": "C_NetGame::UpdateVote",
+  "proto": "void __thiscall UpdateVote(void *this, int timeDelta)"
+ },
+ "0072e1d0": {
+  "module": "net_game",
+  "name": "C_NetGame::C_NetGame",
+  "proto": "void * __fastcall C_NetGame(void * net)"
+ },
+ "0072e3a0": {
+  "module": "net_game",
+  "name": "C_NetGame::~C_NetGame",
+  "proto": "void __fastcall ~C_NetGame(void * net)"
  },
  "0072e570": {
   "module": "app",
@@ -38475,9 +38581,24 @@
   "name": "C_NetGame::SetPlayer",
   "proto": "void __thiscall SetPlayer(C_NetGame * this, int slot, int connection, char * name)"
  },
+ "0072edf0": {
+  "module": "net_game",
+  "name": "C_NetGame::SetVoiceValue",
+  "proto": "void __thiscall SetVoiceValue(void *this, int value)"
+ },
  "0072ee60": {
   "module": "game_menu",
   "name": "C_NetGame::SendChat"
+ },
+ "0072eeb0": {
+  "module": "net_game",
+  "name": "C_NetGame::FindPlayerByName",
+  "proto": "int __thiscall FindPlayerByName(void *this, char * name)"
+ },
+ "0072efa0": {
+  "module": "net_game",
+  "name": "C_NetGame::GetPlayerName",
+  "proto": "char * __thiscall GetPlayerName(void *this, int slot)"
  },
  "0072eff0": {
   "module": "game",
@@ -38487,6 +38608,11 @@
  "0072f040": {
   "module": "actors",
   "name": "C_NetGame::LockPlayers"
+ },
+ "0072f060": {
+  "module": "net_game",
+  "name": "C_NetGame::FindPlayer",
+  "proto": "int __thiscall FindPlayer(void *this, int connection)"
  },
  "0072f100": {
   "module": "actors",
@@ -45788,8 +45914,9 @@
  },
  "0097d070": {
   "data": true,
-  "module": "app",
-  "name": "g_netGame"
+  "module": "net_game",
+  "name": "g_netGame",
+  "type": "int"
  },
  "0097d084": {
   "data": true,
