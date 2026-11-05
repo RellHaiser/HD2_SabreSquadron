@@ -21,4 +21,5 @@ del /q profile1.sav options1.bin 2>nul
 "%HERE%harness.exe" squad H:\HD2_Unpacked\Tables\HumanStore.def
 "%HERE%harness.exe" misc
 "%HERE%harness.exe" player
+"%HERE%harness.exe" delete
 popd

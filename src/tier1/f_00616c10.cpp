@@ -2,39 +2,6 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
-// 0x00616c10
-uint32_t FUN_00616c10(...)
-{
-  FUN_00616c20();
-  FUN_00616c30();
-  return 0;
-}
-
-
-// 0x00616c20
-uint32_t FUN_00616c20(...)
-{
-  FUN_007e35d3();
-  return 0;
-}
-
-
-// 0x00616c30
-uint32_t FUN_00616c30(...)
-{
-  atexit(FUN_00616c40);
-  return 0;
-}
-
-
-// 0x00616c40
-uint32_t FUN_00616c40(...)
-{
-  FUN_007e3754();
-  return 0;
-}
-
-
 // 0x00619710  (tier1 fallback: translated text kept below, needs hand porting)
 uint32_t C_XmlNode__dtor_C_XmlNode(uint32_t *param_1, ...)
 {

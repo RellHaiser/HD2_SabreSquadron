@@ -2,39 +2,6 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
-// 0x0067eb00
-uint32_t FUN_0067eb00(...)
-{
-  FUN_0067eb10();
-  FUN_0067eb20();
-  return 0;
-}
-
-
-// 0x0067eb10
-uint32_t FUN_0067eb10(...)
-{
-  FUN_007e35d3();
-  return 0;
-}
-
-
-// 0x0067eb20
-uint32_t FUN_0067eb20(...)
-{
-  atexit(FUN_0067eb30);
-  return 0;
-}
-
-
-// 0x0067eb30
-uint32_t FUN_0067eb30(...)
-{
-  FUN_007e3754();
-  return 0;
-}
-
-
 // 0x0067ed60
 uint32_t C_EquipmentMenuBase__empty_function_67ed60(C_EquipmentMenuBase *_this, ...)
 {

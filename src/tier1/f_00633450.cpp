@@ -2,45 +2,8 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
-// 0x00633450
-uint32_t FUN_00633450(...)
-{
-  FUN_00633460();
-  FUN_00633470();
-  return 0;
-}
-
-
-// 0x00633460
-uint32_t FUN_00633460(...)
-{
-  FUN_007e35d3();
-  return 0;
-}
-
-
-// 0x00633470
-uint32_t FUN_00633470(...)
-{
-  atexit(FUN_00633480);
-  return 0;
-}
-
-
-// 0x00633480
-uint32_t FUN_00633480(...)
-{
-  FUN_007e3754();
-  return 0;
-}
-
-
-// 0x00636b80  (tier1 fallback: translated text kept below, needs hand porting)
+// 0x00636b80
 uint64_t FUN_00636b80(int param_1,int param_2, ...)
-{
-  return {};
-}
-#if 0
 {
   int iVar1;
   int iVar2;
@@ -66,9 +29,12 @@ uint64_t FUN_00636b80(int param_1,int param_2, ...)
 }
 
 
-#endif
-// 0x00636c10
+// 0x00636c10  (tier1 fallback: translated text kept below, needs hand porting)
 char * FUN_00636c10(...)
+{
+  return {};
+}
+#if 0
 {
   char cVar1;
   void *pvVar2;
@@ -160,6 +126,7 @@ char * FUN_00636c10(...)
 }
 
 
+#endif
 // 0x00636e00
 uint32_t FUN_00636e00(void *_this,uint32_t *param_1,uint32_t param_2,uint32_t *param_3, ...)
 {

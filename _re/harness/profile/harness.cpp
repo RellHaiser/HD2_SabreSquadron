@@ -19,6 +19,8 @@
 #undef protected
 #include "common/chunk.h"
 #include "common/config_file.h"
+#include "common/os_files.h"
+#include <windows.h>
 #include "game/campaign.h"
 #include "game/game_app.h"
 #include "game/item_defs.h"
@@ -379,6 +381,95 @@ static void TestMisc()
     CHECK(hud2.shown);
 }
 
+// (Part 9i-v.) A profile deleted: its directory's tree (read-only files and empty directories too), its name
+// forgotten; the others and the working directory kept.
+static void MakeFile(const char *name, bool readOnly = false)
+{
+    if (FILE *f = std::fopen(name, "wb")) {
+        std::fputs("x", f);
+        std::fclose(f);
+    }
+    if (readOnly)
+        SetFileAttributesA(name, FILE_ATTRIBUTE_READONLY);
+}
+
+static bool Exists(const char *name)
+{
+    return GetFileAttributesA(name) != INVALID_FILE_ATTRIBUTES;
+}
+
+static void TestDelete()
+{
+    // (In the game's directory, as SetWorkingDirectory goes there; cleaned up after.)
+    char runDir[512];
+    _getcwd(runDir, sizeof runDir);
+    _chdir(GetGameDirectory());
+    _mkdir("PlayersProfiles");
+    _mkdir("PlayersProfiles\\Doomed");
+    _mkdir("PlayersProfiles\\Doomed\\sub");
+    _mkdir("PlayersProfiles\\Doomed\\sub\\deeper");
+    _mkdir("PlayersProfiles\\Doomed\\empty");
+    MakeFile("PlayersProfiles\\Doomed\\a.txt");
+    MakeFile("PlayersProfiles\\Doomed\\sub\\b.txt", true);
+    MakeFile("PlayersProfiles\\Doomed\\sub\\deeper\\c.txt");
+    // (Read-only directories: the profile's own and one inside.)
+    _mkdir("PlayersProfiles\\Doomed\\locked");
+    SetFileAttributesA("PlayersProfiles\\Doomed\\locked", FILE_ATTRIBUTE_READONLY);
+    _mkdir("PlayersProfiles\\Keep");
+    MakeFile("PlayersProfiles\\Keep\\k.txt");
+    char before[512], after[512];
+    _getcwd(before, sizeof before);
+    SetFileAttributesA("PlayersProfiles\\Doomed", FILE_ATTRIBUTE_READONLY);
+    g_gameProfile.m_unicodeFont = false;
+    CHECK(DeleteProfile("Doomed"));
+    _getcwd(after, sizeof after);
+    CHECK(std::strcmp(before, after) == 0);
+    CHECK(!Exists("PlayersProfiles\\Doomed") && Exists("PlayersProfiles\\Keep\\k.txt"));
+    // Not there: false, nothing else touched (the fix: the original deleted the working directory's files).
+    CHECK(!DeleteProfile("Nobody") && Exists("PlayersProfiles\\Keep\\k.txt"));
+    CHECK(!DeleteDirectoryTree("NoSuchDirectory") && Exists("PlayersProfiles\\Keep\\k.txt"));
+    // An empty directory: nothing found besides . and ..: true (only . and .. listed).
+    _mkdir("Hollow");
+    CHECK(DeleteDirectoryTree("Hollow"));
+    CHECK(RemoveDir("Hollow") && !Exists("Hollow"));
+    // A directory that cannot be removed (a file in it held open): false, the profile kept, its name remembered.
+    _mkdir("PlayersProfiles\\Busy");
+    _mkdir("PlayersProfiles\\Busy\\held");
+    MakeFile("PlayersProfiles\\Busy\\held\\open.txt");
+    g_profileDirectories.clear();
+    g_profileDirectories.insert({"Busy", "Busy"});
+    HANDLE held = CreateFileA("PlayersProfiles\\Busy\\held\\open.txt", GENERIC_READ, 0, nullptr, OPEN_EXISTING, 0, nullptr);
+    CHECK(held != INVALID_HANDLE_VALUE);
+    CHECK(!DeleteProfile("Busy") && Exists("PlayersProfiles\\Busy\\held") && g_profileDirectories.count("Busy") == 1);
+    CloseHandle(held);
+    _chdir(before);
+    CHECK(DeleteProfile("Busy") && !Exists("PlayersProfiles\\Busy") && g_profileDirectories.empty());
+    // The unicode font: the name's own directory; the name forgotten; an unknown name: false.
+    g_gameProfile.m_unicodeFont = true;
+    _mkdir("PlayersProfiles\\Profile_7");
+    MakeFile("PlayersProfiles\\Profile_7\\profile.sav");
+    g_profileDirectories.clear();
+    g_profileDirectories.insert({"Ünicode", "Profile_7"});
+    g_profileDirectories.insert({"Other", "Keep"});
+    CHECK(!DeleteProfile("Missing"));
+    _chdir(before);
+    CHECK(DeleteProfile("Ünicode") && !Exists("PlayersProfiles\\Profile_7") && g_profileDirectories.size() == 1 &&
+          g_profileDirectories.count("Other") == 1 && Exists("PlayersProfiles\\Keep\\k.txt"));
+    CHECK(!ForgetProfileName("Ünicode") && ForgetProfileName("Other") && g_profileDirectories.empty());
+    g_gameProfile.m_unicodeFont = false;
+    // The file helpers.
+    MakeFile("ro.txt", true);
+    CHECK(!DeleteFileAt("ro.txt") && SetAttributes("ro.txt", FILE_ATTRIBUTE_NORMAL) && DeleteFileAt("ro.txt") &&
+          !Exists("ro.txt") && !SetAttributes("ro.txt", FILE_ATTRIBUTE_NORMAL) && !RemoveDir("ro.txt"));
+    char cwd[8];
+    CHECK(GetCurrentDir(cwd, sizeof cwd) == nullptr);
+    DeleteFileAt("PlayersProfiles\\Keep\\k.txt");
+    RemoveDir("PlayersProfiles\\Keep");
+    RemoveDir("PlayersProfiles");
+    _chdir(runDir);
+    std::printf("delete: done\n");
+}
+
 static void TestPlayer()
 {
     _mkdir("PlayersProfiles");
@@ -448,8 +539,10 @@ int main(int argc, char **argv)
         TestMisc();
     else if (!std::strcmp(mode, "player"))
         TestPlayer();
+    else if (!std::strcmp(mode, "delete"))
+        TestDelete();
     else
-        std::printf("modes: roster FILE, names, squad, misc, player\n");
+        std::printf("modes: roster FILE, names, squad, misc, player, delete\n");
     std::printf("%d failures\n", s_failures);
     return s_failures != 0;
 }

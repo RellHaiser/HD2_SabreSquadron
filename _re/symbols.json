@@ -37601,6 +37601,11 @@
   "module": "zz_idioms",
   "name": "vector_tidy_6e8dd0"
  },
+ "006e9170": {
+  "module": "mp_settings",
+  "name": "DeleteDirectoryTree",
+  "proto": "bool __fastcall DeleteDirectoryTree(char * path)"
+ },
  "006e92a0": {
   "module": "config_file",
   "name": "GetGameDirectory",
@@ -37714,10 +37719,30 @@
   "name": "ChangeDirectory",
   "proto": "int __fastcall ChangeDirectory(char * path)"
  },
+ "006edc80": {
+  "module": "mp_settings",
+  "name": "GetCurrentDir",
+  "proto": "char * __fastcall GetCurrentDir(char * buffer, int size)"
+ },
  "006edc90": {
   "module": "config_file",
   "name": "RenameFile",
   "proto": "bool __fastcall RenameFile(char * from, char * to)"
+ },
+ "006edca0": {
+  "module": "mp_settings",
+  "name": "RemoveDir",
+  "proto": "bool __fastcall RemoveDir(char * path)"
+ },
+ "006edcb0": {
+  "module": "mp_settings",
+  "name": "DeleteFileAt",
+  "proto": "bool __fastcall DeleteFileAt(char * path)"
+ },
+ "006edcc0": {
+  "module": "mp_settings",
+  "name": "SetAttributes",
+  "proto": "bool __fastcall SetAttributes(char * path, uint attributes)"
  },
  "006edcd0": {
   "module": "config_file",

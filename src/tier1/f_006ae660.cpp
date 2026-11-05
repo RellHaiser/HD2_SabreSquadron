@@ -2,65 +2,6 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
-// 0x006af0f0
-bool ForgetProfileName(char *name, ...)
-{
-  char cVar1;
-  int *piVar2;
-  uint32_t *puVar3;
-  uint32_t uVar4;
-  char *pcVar5;
-  uint32_t local_24;
-  uint32_t local_20;
-  uint8_t local_1c [4];
-  int local_18;
-  uint32_t local_14;
-  uint32_t local_10;
-  uint32_t local_4;
-  local_4 = 0xffffffff;
-  uVar4 = 0xffffffff;
-  pcVar5 = name;
-  do {
-    if (uVar4 == 0) break;
-    uVar4--;
-    cVar1 = *pcVar5;
-    pcVar5++;
-  } while (cVar1 != '\0');
-  local_18 = 0;
-  local_14 = 0;
-  local_10 = 0;
-  std_string__AssignChars((std_string*)(local_1c),(uint32_t *)name,~uVar4 - 1);
-  local_4 = 0;
-  FUN_006b2580(g_profileDirectories,(int *)&local_24,(int)local_1c);
-  if (local_24 != g_profileDirectories[1]) {
-    uVar4 = FUN_0040aa90(local_1c,local_24 + 0xc);
-    if (-1 < (int)uVar4) {
-      puVar3 = &local_24;
-      goto LAB_006af184;
-    }
-  }
-  local_20 = g_profileDirectories[1];
-  puVar3 = &local_20;
-LAB_006af184:
-  piVar2 = (int *)*puVar3;
-  local_4 = 0xffffffff;
-  if (local_18 != 0) {
-    cVar1 = *(char *)(local_18 - 1);
-    if ((cVar1 == '\0') || (cVar1 == -1)) {
-      tier1_operator_delete((char *)(local_18 - 1));
-    }
-    else {
-      *(char *)(local_18 - 1) = cVar1 - 1;
-    }
-  }
-  if (piVar2 != (int *)g_profileDirectories[1]) {
-    FUN_006b1e50(g_profileDirectories,&local_20,piVar2);
-    return true;
-  }
-  return false;
-}
-
-
 // 0x006b1750
 uint8_t * FUN_006b1750(void *_this,uint8_t *param_1, ...)
 {

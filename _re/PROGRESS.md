@@ -8665,6 +8665,26 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 291 errors in 54 files. ret_audit --src: 52.
   - Stats: 9,298 of 12,306 functions by hand (85.8 % by size).
 
+  PART 9i-v DONE (2026-11-05): the profile deletion, part 9's static initialisers; part 9i complete.
+  - DeleteProfile 0x006aef40 (game/player_profile.cpp; no name: every profile's contents), ForgetProfileName
+    0x006af0f0; DeleteDirectoryTree 0x006e9170 and the wrappers GetCurrentDir 0x006edc80, RemoveDir 0x006edca0,
+    DeleteFileAt 0x006edcb0, SetAttributes 0x006edcc0 (common/os_files.cpp; read-only files and directories made
+    normal and tried again). Fix: a directory not entered deletes nothing (the original went on in the working
+    directory, which for an unknown profile name was PlayersProfiles). These five were not in Ghidra's index.
+  - Profile harness: mode "delete" (real directories in the game directory, cleaned up after; read-only ones, a file
+    held open). Mutations: mutations/mutate_9i5.py (run by a scratchpad script against the profile harness; the
+    "." / ".." skip not mutated: a mutant recursing into ".." deletes outside the scratch tree): 42: 35 killed,
+    3 not building, 4 equivalent.
+  - Part 9's compiler-generated static initialisers (each file's guarded header static's atexit and its iostream
+    Init / _Winit objects, 281 of them in 0x00611200 .. 0x006b0000) and the map vectors' std::vector internals
+    (0x006adf60 .. 0x006ae590) recorded in ported.txt's absorbed sections (82 tier 1 files of nothing else gone).
+  - Left in tier 1: GetCommandProcessor 0x0069f520 (its class C_CommandProcessor, vtable 0x0081659c, is the dedicated
+    server's console module 0x007426a0 ..; ported with it); unreferenced: 0x0069f620 / 0x0069f840 / 0x0069f8a0 /
+    0x0069f900 (an orphan state's start, stop, input and render: no vtable holds them), S_SquadSoldier's SaveToFile
+    0x006a4350 / LoadFromFile 0x006a4650, 0x006acff0 (AddMap's twin).
+  - Build: MSVC clean. Tier 1: 291 errors in 54 of 405 files. ret_audit --src: 52.
+  - Stats: 9,586 of 12,306 functions by hand or absorbed (86.0 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

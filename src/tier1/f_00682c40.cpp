@@ -2,39 +2,6 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
-// 0x00682c40
-uint32_t FUN_00682c40(...)
-{
-  FUN_00682c50();
-  FUN_00682c60();
-  return 0;
-}
-
-
-// 0x00682c50
-uint32_t FUN_00682c50(...)
-{
-  FUN_007e35d3();
-  return 0;
-}
-
-
-// 0x00682c60
-uint32_t FUN_00682c60(...)
-{
-  atexit(FUN_00682c70);
-  return 0;
-}
-
-
-// 0x00682c70
-uint32_t FUN_00682c70(...)
-{
-  FUN_007e3754();
-  return 0;
-}
-
-
 // 0x00686bb0
 uint32_t vector_tidy_686bb0(int param_1, ...)
 {

@@ -461,7 +461,11 @@ int CreateProfile(const char *name);                    // 0x006ae8e0
 const char *FindProfileDirectory(const char *name);     // 0x006aefe0
 // The profile `name` deleted (its directory, read-only files too; its name forgotten). True when the directory
 // was removed (an empty name: whether PlayersProfiles itself was). (Not ported yet.)
+// A profile's directory deleted with what it holds, its name forgotten (no name: every profile's contents deleted;
+// part 9i-v). False when it was not emptied or (unicode font) is not known.
 bool DeleteProfile(const char *name);                   // 0x006aef40 (__stdcall)
+// A profile name's directory forgotten (none: false).
+bool ForgetProfileName(const char *name);               // 0x006af0f0 (__fastcall)
 // Finds the profiles in PlayersProfiles (the name map anew) and calls `callback` with each
 // directory name (__fastcall in the original).
 void ScanProfiles(void (*callback)(const char *name, int context), int context);   // 0x006af200

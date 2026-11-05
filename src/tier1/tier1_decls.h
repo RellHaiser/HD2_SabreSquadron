@@ -1063,7 +1063,6 @@ extern uint32_t g_netMaxPing;
 extern S_PhysicsHandle * g_noPhysicsObject;
 extern C_ParticlesModule g_particlesModule;
 extern uint8_t g_pendingSounds;
-extern uint32_t g_profileDirectories[4];
 extern uint8_t g_relinks;
 extern uint8_t g_rigidBodies;
 extern uint32_t g_scriptCompiler;

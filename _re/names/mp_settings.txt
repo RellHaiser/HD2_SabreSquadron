@@ -20,3 +20,10 @@
 009820d4 g_netMaxPing @ int
 009820dc g_netMaxInactivity @ int
 006ad200 S_MultiplayerSettings::WriteDescription | void __thiscall WriteDescription(void *this, char * fileName)
+# Part 9i-v: the profile deletion (common/os_files.cpp, game/player_profile.cpp).
+006e9170 DeleteDirectoryTree | bool __fastcall DeleteDirectoryTree(char * path)
+006edc80 GetCurrentDir | char * __fastcall GetCurrentDir(char * buffer, int size)
+006edca0 RemoveDir | bool __fastcall RemoveDir(char * path)
+006edcb0 DeleteFileAt | bool __fastcall DeleteFileAt(char * path)
+006edcc0 SetAttributes | bool __fastcall SetAttributes(char * path, uint attributes)
+006af0f0 ForgetProfileName | bool __fastcall ForgetProfileName(char * name)

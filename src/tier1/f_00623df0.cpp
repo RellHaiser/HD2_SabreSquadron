@@ -2,39 +2,6 @@
 #include "tier1/tier1_decls.h"
 namespace tier1 {
 
-// 0x00623df0
-uint32_t FUN_00623df0(...)
-{
-  FUN_00623e00();
-  FUN_00623e10();
-  return 0;
-}
-
-
-// 0x00623e00
-uint32_t FUN_00623e00(...)
-{
-  FUN_007e35d3();
-  return 0;
-}
-
-
-// 0x00623e10
-uint32_t FUN_00623e10(...)
-{
-  atexit(FUN_00623e20);
-  return 0;
-}
-
-
-// 0x00623e20
-uint32_t FUN_00623e20(...)
-{
-  FUN_007e3754();
-  return 0;
-}
-
-
 // 0x00625ea0
 uint32_t FUN_00625ea0(void *_this,uint32_t param_1,uint32_t param_2,uint32_t param_3,uint32_t param_4, ...)
 {
