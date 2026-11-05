@@ -8599,6 +8599,24 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 292 errors in 55 files. ret_audit --src: 52.
   - Stats: 9,265 of 12,306 functions by hand (85.6 % by size).
 
+  PART 9i-i DONE (2026-11-05): the hero stats menu (game/hero_stats_menu.*, new).
+  - Campaign screen kind 0 (none in the shipped campaigns; type 9): C_Kind0Menu renamed C_HeroStatsMenu (vtable
+    0x00815c30, a C_MenuState of no fields of its own; GAME_STATE_TYPE_HERO_STATS_MENU).
+  - BuildScreens 0x00697480: "HERO STATS" (heros_screen) and three "CONFIRM" screens; OnMessage 0x00697090: Escape (on
+    the quit question: no; else the question, MENU_MSG_PREVIOUS kept back), accept 0x200006A (the roster loaded when
+    empty; the 18 skill rows' numbers, GetSkillValue 0x00696fb0, into the first soldier's stats: rows 1, 2, 5, 6, 7,
+    10, 11, 14, 15; MENU_MSG_NEXT).
+  - DescribeHeroScreen 0x006978d0, DescribeSpecialization 0x006979e0 and DescribeSkills 0x00697d20 (aligned frames, from
+    the asm): the groups GRSkillSpec / GRSkills made under the model (AddModelFrame), "skill01" copied per skill
+    (AddSkillRow 0x00698230: Health .. German, 0.02 apart; their bases 80, 75, ...); DescribeQuitQuestion 0x006977e0.
+    GetSkillValue's null top screen fixed (-1).
+  - Harness: hero_stats_test.inc / check_herostats.py (new; the factory build links hero_stats_menu.cpp): hsType,
+    hsValue, hsEscape, hsAccept, hsQuit, hsHero, hsSpec, hsSkills, hsRow, hsBuild. All 16 factory checkers in both
+    orders.
+  - Mutations: mutations/mutate_9i1.py: 161: 146 killed, 12 not building, 3 equivalent.
+  - Build: MSVC clean. Tier 1: 288 errors in 54 files. ret_audit --src: 52.
+  - Stats: 9,276 of 12,306 functions by hand (85.7 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

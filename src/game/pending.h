@@ -28,12 +28,8 @@
 // The equipment screen (kinds 3 and 4): game/equipment_screen.h. The debriefing (kind 5):
 // game/debriefing.h.
 // The squad screen (kinds 1 and 2): game/squad_menu.h.
-// Campaign screen kind 0 (none in the shipped campaigns; type 9, vtable 0x00815c30, 0x1B0
-// bytes).
-class C_Kind0Menu : public C_GameState {
-public:
-    C_Kind0Menu();                                  // (inline)
-};
+// Campaign screen kind 0 (none in the shipped campaigns; type 9): game/hero_stats_menu.h.
+#include "game/hero_stats_menu.h"
 // The console (type 12, vtable 0x008165a8, 0x214 bytes): the command line's "-cmd" / "-c".
 class C_ConsoleState : public C_GameState {
 public:

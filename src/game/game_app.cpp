@@ -227,7 +227,7 @@ bool C_GameApp::StartStep(C_CampaignNode *step, int /*unused*/)   // 0x006c1210
         delete m_state;
         switch (static_cast<C_CampaignScreen *>(step)->GetKind()) {
         case 0:
-            next = new C_Kind0Menu();
+            next = new C_HeroStatsMenu();
             break;
         case 1:
         case 2:

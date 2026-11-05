@@ -252,63 +252,6 @@ uint32_t * C_auto_00815e8c__FUN_006c1d60(C_auto_00815e8c *_this,uint8_t param_1,
 }
 
 
-// 0x006c22a0
-uint32_t C_auto_00815bfc__C_Kind0Menu__GetTypeId(C_auto_00815bfc *_this, ...)
-{
-  return 9;
-}
-
-
-// 0x006c22b0
-uint32_t * C_auto_00815bfc__C_Kind0Menu__DeletingDestructor(C_auto_00815bfc *_this,uint8_t param_1, ...)
-{
-  C_Class_815850__C_Kind0Menu___C_Kind0Menu((C_Class_815850 *)_this);
-  if ((param_1 & 1) != 0) {
-    _aligned_free(_this);
-  }
-  return (uint32_t *)_this;
-}
-
-
-// 0x006c22d0
-uint32_t C_Class_815850__C_Kind0Menu___C_Kind0Menu(C_Class_815850 *_this, ...)
-{
-  int local_4;
-  *(uint8_t ***)_this = &PTR_00815850;
-  g_menuState = 0;
-  *(uint32_t *)(_this + 0x10) = 0;
-  local_4 = 0;
-  tier1_operator_delete(*(void **)(_this + 0x144));
-  *(uint32_t *)(_this + 0x144) = 0;
-  *(uint32_t *)(_this + 0x148) = 0;
-  *(uint32_t *)(_this + 0x14c) = 0;
-  tier1_operator_delete(*(void **)(_this + 0x130));
-  *(uint32_t *)(_this + 0x130) = 0;
-  *(uint32_t *)(_this + 0x134) = 0;
-  *(uint32_t *)(_this + 0x138) = 0;
-  tier1_operator_delete(*(void **)(_this + 0x11c));
-  *(uint32_t *)(_this + 0x11c) = 0;
-  *(uint32_t *)(_this + 0x120) = 0;
-  *(uint32_t *)(_this + 0x124) = 0;
-  tier1_operator_delete(*(void **)(_this + 0x108));
-  *(uint32_t *)(_this + 0x108) = 0;
-  *(uint32_t *)(_this + 0x10c) = 0;
-  *(uint32_t *)(_this + 0x110) = 0;
-  ((C_TextBox *)(_this + 0x50))->vtable = (C_TextBox_vtbl *)&PTR_00810458;
-  GH_PIECE(local_4,0,1) = 3;
-  C_FontManager__Release(*(void **)(_this + 0x78));
-  C_TextBox__FreeLayout((C_TextBox *)(_this + 0x50));
-  GH_PIECE(local_4,0,1) = 2;
-  vector_tidy_49fcf0((int)(_this + 0xa8));
-  GH_PIECE(local_4,0,1) = 1;
-  vector_tidy_49fcd0((int)(_this + 0x94));
-  local_4 = (uint32_t)GH_PIECE(local_4,1,3) << 8;
-  FUN_004a4a20((int)(_this + 0x80));
-  *(uint8_t ***)_this = &PTR_008158ac;
-  return 0;
-}
-
-
 // 0x006c3070
 uint32_t C_GameState__FUN_006c3070(C_GameState *_this, ...)
 {

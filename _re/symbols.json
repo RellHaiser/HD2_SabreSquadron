@@ -33829,6 +33829,46 @@
   "name": "C_SquadMenu::OnScreenHidden",
   "proto": "bool __thiscall OnScreenHidden(C_MenuState *this, void * argument, void * control, uint notification, uint value)"
  },
+ "00696fb0": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::GetSkillValue",
+  "proto": "int __stdcall GetSkillValue(uint id)"
+ },
+ "00697090": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::OnMessage",
+  "proto": "void __thiscall OnMessage(void *this, void * message)"
+ },
+ "00697480": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::BuildScreens",
+  "proto": "bool __thiscall BuildScreens(void *this)"
+ },
+ "006977e0": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::DescribeQuitQuestion",
+  "proto": "bool __stdcall DescribeQuitQuestion(void * desc, void * model)"
+ },
+ "006978d0": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::DescribeHeroScreen",
+  "proto": "bool __thiscall DescribeHeroScreen(void *this, void * desc, void * model)"
+ },
+ "006979e0": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::DescribeSpecialization",
+  "proto": "bool __thiscall DescribeSpecialization(void *this, void * desc, void * model)"
+ },
+ "00697d20": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::DescribeSkills",
+  "proto": "bool __thiscall DescribeSkills(void *this, void * desc, void * model)"
+ },
+ "00698230": {
+  "module": "hero_stats_menu",
+  "name": "C_HeroStatsMenu::AddSkillRow",
+  "proto": "void __thiscall AddSkillRow(void *this, void * list, void * model, void * name, int index, float step)"
+ },
  "006987d0": {
   "module": "game",
   "name": "GetGame",
@@ -36173,15 +36213,15 @@
  },
  "006c22a0": {
   "module": "game_app",
-  "name": "C_Kind0Menu::GetTypeId"
+  "name": "C_HeroStatsMenu::GetTypeId"
  },
  "006c22b0": {
   "module": "game_app",
-  "name": "C_Kind0Menu::DeletingDestructor"
+  "name": "C_HeroStatsMenu::DeletingDestructor"
  },
  "006c22d0": {
   "module": "game_app",
-  "name": "C_Kind0Menu::~C_Kind0Menu"
+  "name": "C_HeroStatsMenu::~C_HeroStatsMenu"
  },
  "006c23e0": {
   "module": "game_app",

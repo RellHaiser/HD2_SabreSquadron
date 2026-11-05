@@ -146,14 +146,6 @@ f_00633450.cpp:63:76: invalid 'static_cast' from type 'unsigned char*' to type '
     
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
-f_00696f70.cpp:565:105: cannot convert 'char**' to 'uint32_t*' {aka 'unsigned int*'}
-    uninitialized_copy4_42a730((uint32_t*)(ppcVar4),gh_bitcast<uint32_t*>(_this[2].m_014),ppcStack_a4 + 1);
-f_00696f70.cpp:575:84: cannot convert 'char**' to 'uint32_t*' {aka 'unsigned int*'}
-    uninitialized_copy4_42a730((uint32_t*)(ppcVar4),(uint32_t*)(ppcVar4),ppcVar4 + 1);
-f_00696f70.cpp:591:32: request for member '_0_4_' in '"GRSkillSpec"', which is of non-class type 'const char [12]'
-    (**(code **)("GRSkillSpec"._0_4_ + 0x38))("GRSkillSpec",uVar7,1);
-f_00696f70.cpp:827:34: too few arguments to function
-    (*pIStack_60->vtable->LinkTo)(pIStack_60,(I3D_frame*)(piStack_5c));
 f_00698790.cpp:21:19: base operand of '->' is not a pointer
     (*DAT_0098c0fc->vtable->empty_function_744210)(_this);
 f_006c6d40.cpp:646:32: wrong type argument to unary minus
