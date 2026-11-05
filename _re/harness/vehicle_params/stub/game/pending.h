@@ -128,7 +128,21 @@ struct S_MultiplayerSettings {
     int unknown178, port, maxClients, pointLimit, roundLimit, roundCount, respawnTime, friendlyFire, autoTeamBalance,
         thirdPersonView, spawnProtection, inverseDamage, coopDifficulty, coopLives, allowCrosshair, teamLives;
     std::vector<C_MpMap *> maps;
+    // (The session's settings, part 9i-ii.)
+    C_str unknown21C;
+    int fallingDamage, unknown25C, unknown260, autoRestart, spawnOnStart, currentMap;
+    class C_MpGameSetup *setup;
     void Reset();
+    void SetRules(const struct S_MpGameRules &rules);
+    void GetRules(struct S_MpGameRules &rules);
+    void ApplySetupRules();
+    void MakeSetup();
+    void DeleteSetup();
+    bool RemoveMap(const char *name);
+    bool AddMap(const char *name);
+    void Clear();
+    bool SelectMap(const char *name);
+    C_MpMap *GetCurrentMap();
 };
 enum : int { SESSION_NONE = 0, SESSION_JOINING = 1, SESSION_HOSTING = 2 };
 

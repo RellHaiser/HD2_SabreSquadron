@@ -244,14 +244,7 @@ struct C_CsLine : C_Control {
     I3D_frame *GetHighlightFrame() const override { return highlight; }
 };
 int GetVoiceCodecTextId(int codec) { return 0xB40 + codec; }
-// (Part 9h-xvii: the session's reset: logged, its maps deleted.)
-void S_MultiplayerSettings::Reset()
-{
-    GfLog("session reset");
-    for (C_MpMap *map : maps)
-        delete map;
-    maps.clear();
-}
+// (Part 9i-ii: the session's reset real.)
 bool C_PlayerProfile::Save()
 {
     GfLog("save profile");
@@ -3084,7 +3077,7 @@ void MainMenuTest(I3D_scene *scene)
         session->sessionType = 0;
         g_gfLog.clear();
         m.SetUpHostedSession();
-        ok &= GmInOrder(Join(g_gfLog), {"session reset"}) && session->sessionType == 2 &&
+        ok &= session->unknown21C.c_str()[0] == 1 && session->sessionType == 2 &&
               std::string(session->sessionName) == "Server" && std::string(session->sessionName + 100) == "Player" &&
               session->gameType == 3 && session->unknown174 == 1 && session->dedicated && session->coopDifficulty == 101 &&
               session->coopLives == 103 && session->teamLives == 102 && session->maxClients == 101 &&
@@ -4053,7 +4046,7 @@ void MainMenuTest(I3D_scene *scene)
             g_nmFirewall = false;
             g_files.clear();
             ok &= send(0x2000029) && !m.m_startable && !m.m_openFirewall && session->sessionType == 2 &&
-                  GmInOrder(Join(g_gfLog), {"session reset", "firewall 65535"}) && Is(CsQueue(), "0 20000c9 0 0; ") &&
+                  GmInOrder(Join(g_gfLog), {"firewall 65535"}) && Is(CsQueue(), "0 20000c9 0 0; ") &&
                   g_files.size() == 1 && g_files.begin()->first.find("MPSetings.sav") != std::string::npos;
             g_files.clear();
             m.m_startable = true;

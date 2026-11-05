@@ -346,7 +346,7 @@ struct S_MultiplayerSettings {
     int unknown178;                                 // +0x178
     uint8_t unknown17C[0x9C];
     C_str password;                                 // +0x218
-    uint8_t unknown21C[4];
+    C_str unknown21C;                               // +0x21C ("\1\2\3" after Reset)
     int port;                                       // +0x220
     int gameType;                                   // +0x224 E_MpGameType
     int maxClients;                                 // +0x228
@@ -362,7 +362,8 @@ struct S_MultiplayerSettings {
     int spawnProtection;                            // +0x250 s
     int inverseDamage;                              // +0x254 share of a team hit the shooter takes
     int fallingDamage;                              // +0x258 falls hurt (C_HumanLocomotion::ApplyFallDamage)
-    uint8_t unknown25C[8];
+    int unknown25C;                                 // +0x25C (S_MpGameRules' +0x34)
+    int unknown260;                                 // +0x260
     int allowVehicles;                              // +0x264
     int autoRestart;                                // +0x268
     int coopDifficulty;                             // +0x26C
@@ -372,9 +373,26 @@ struct S_MultiplayerSettings {
     int teamLives;                                  // +0x27C the co-op lives are shared
     std::vector<C_MpMap *> maps;                    // +0x280 the session's maps (owned; the main menu's copies)
     int currentMap;                                 // +0x290
+    C_MpGameSetup *setup;                           // +0x294 the maps and rules the session takes (MakeSetup)
 
-    // The defaults (no session, no password, port 11001, the rules' defaults), the maps deleted.
+    // The defaults (no session, no password, +0x21C "\1\2\3", no listing, not dedicated, the server entry reset,
+    // no name, game type 0, port 11001, the rules' defaults, the first map current), the maps deleted (part 9i-ii).
     void Reset();                                   // 0x006ad600 (__fastcall)
+    // The rules (+0x228 .. +0x27F) from / to S_MpGameRules (its 22 values in order; the original copies them).
+    void SetRules(const S_MpGameRules &rules);
+    void GetRules(S_MpGameRules &rules);
+    // The set-up's rules of the session's game type taken.
+    void ApplySetupRules();                         // 0x006acc10 (__fastcall)
+    // A set-up made (its map list read) / deleted.
+    void MakeSetup();                               // 0x006acc50 (__fastcall)
+    void DeleteSetup();                             // 0x006acd30 (__fastcall)
+    // Map `name` (any case) removed and deleted; not the current one; none: false.
+    bool RemoveMap(const char *name);               // 0x006acd60
+    // The set-up's map `name` (any case; the last of it) of the session's game type copied to the maps; the set-up
+    // not read, another game type, none of the name: false.
+    bool AddMap(const char *name);                  // 0x006ace20
+    // The maps deleted (the last first), none current, the set-up deleted.
+    void Clear();                                   // 0x006ad560 (__fastcall)
 
     // The selected map (+0x290 into the vector at +0x280).
     C_MpMap *GetCurrentMap();                       // 0x006ad830

@@ -34955,12 +34955,42 @@
  "006acb80": {
   "module": "loader_screen",
   "name": "GetGameTypeTextId",
-  "proto": "int __cdecl GetGameTypeTextId(int gameType)"
+  "proto": "int __stdcall GetGameTypeTextId(int gameType)"
  },
  "006acbd0": {
   "module": "main_menu",
   "name": "C_MpMap::AddObjective",
   "proto": "int __thiscall AddObjective(void *this, void * objective)"
+ },
+ "006acc10": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::ApplySetupRules",
+  "proto": "void __fastcall ApplySetupRules(void *this)"
+ },
+ "006acc50": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::MakeSetup",
+  "proto": "void __fastcall MakeSetup(void *this)"
+ },
+ "006acd30": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::DeleteSetup",
+  "proto": "void __fastcall DeleteSetup(void *this)"
+ },
+ "006acd60": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::RemoveMap",
+  "proto": "bool __thiscall RemoveMap(void *this, char * name)"
+ },
+ "006ace20": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::AddMap",
+  "proto": "bool __thiscall AddMap(void *this, char * name)"
+ },
+ "006ad560": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::Clear",
+  "proto": "void __fastcall Clear(void *this)"
  },
  "006ad600": {
   "module": "main_menu",

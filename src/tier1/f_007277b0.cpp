@@ -1513,7 +1513,7 @@ LAB_0072903a:
     FUN_006ada30(local_2b8,param_2);
     local_2b8[0] = &PTR_008159f8;
     local_14 = 0x10;
-    FUN_006ad560((int)local_2b8);
+    S_MultiplayerSettings__Clear();
     local_24 = 0;
     local_14 = CONCAT31(GH_PIECE(local_14,1,3),0xf);
     empty_function_61b740();

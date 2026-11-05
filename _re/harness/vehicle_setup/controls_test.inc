@@ -78,6 +78,7 @@ void EquipmentScreenTest(I3D_scene *scene);
 void CampaignScreensTest(I3D_scene *scene);
 void MainMenuTest(I3D_scene *scene);
 void HeroStatsTest(I3D_scene *scene);
+void MpSettingsTest(I3D_scene *scene);
 
 namespace {
 
@@ -1052,6 +1053,7 @@ void ControlsTest()
     CampaignScreensTest(scene);
     MainMenuTest(scene);
     HeroStatsTest(scene);
+    MpSettingsTest(scene);
 #endif
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());
@@ -1094,4 +1096,5 @@ void ControlsTest()
 #include "campaign_screens_test.inc"
 #include "main_menu_test.inc"
 #include "hero_stats_test.inc"
+#include "mp_settings_test.inc"
 #endif

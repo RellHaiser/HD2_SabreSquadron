@@ -8617,6 +8617,22 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 288 errors in 54 files. ret_audit --src: 52.
   - Stats: 9,276 of 12,306 functions by hand (85.7 % by size).
 
+  PART 9i-ii DONE (2026-11-05): the multiplayer session's settings (game/mp_settings.cpp, game/mp_text_ids.cpp, new).
+  - S_MultiplayerSettings (g_mpSettings): Reset 0x006ad600 (the defaults: port 11001, the rules' defaults, +0x21C a
+    C_str "", the server entry reset), SetRules / GetRules (the 22 rules by name in S_MpGameRules' order; the
+    harness's stub struct orders them differently), ApplySetupRules 0x006acc10, MakeSetup 0x006acc50 / DeleteSetup
+    0x006acd30 (+0x294 C_MpGameSetup *setup, new), RemoveMap 0x006acd60, AddMap 0x006ace20, Clear 0x006ad560,
+    SelectMap 0x006ad780 (no maps: fixed, the original divided by zero), GetCurrentMap 0x006ad830.
+  - GetVoiceCodecTextId 0x006acb60 / GetGameTypeTextId 0x006acb80 (stdcall; their tables 0x008429d4: 0xB40 ..,
+    0xB4A ..): mp_text_ids.cpp, not linked in the harness (its builds fake both); checked by a scratch program
+    against the binary's tables.
+  - Harness: mp_settings_test.inc / check_mpsettings.py (new; the factory build links mp_settings.cpp; the main
+    menu's Reset fake dropped): msReset, msRules, msSetup, msApply, msRemove, msAdd, msClear, msSelect. All 17
+    factory checkers in both orders; mp_setup 54 of 54.
+  - Mutations: mutations/mutate_9i2.py: 140: 122 killed, 9 not building, 9 equivalent.
+  - Build: MSVC clean. Tier 1: 288 errors in 54 files. ret_audit --src: 52.
+  - Stats: 9,287 of 12,306 functions by hand (85.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

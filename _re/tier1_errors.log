@@ -540,9 +540,9 @@ f_00742160.cpp:132:28: invalid initialization of reference of type 'const IID&' 
     uVar2 = CoCreateInstance((IID *)&DAT_008191a8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819178,ppv);
 f_00742160.cpp:169:28: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     HVar2 = CoCreateInstance((IID *)&DAT_008191b8,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819188,ppv);
-f_00742670.cpp:132:17: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_00742670.cpp:131:17: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     (**(code **)*DAT_0098c0fc)();
-f_00742670.cpp:1118:27: base operand of '->' is not a pointer
+f_00742670.cpp:1117:27: base operand of '->' is not a pointer
     (*DAT_0098c100->vtable->Create)();
 f_007442a0.cpp:100:36: void value not ignored as it ought to be
     uVar2 = (*self->vtable->SetFlags)(self,uVar1 & 0xffffffdf);

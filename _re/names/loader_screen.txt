@@ -20,4 +20,4 @@
 006caaa0 StaticInit_6caaa0
 # (Declared: the dedicated server's console progress, the game type's text.)
 00731af0 C_NetGame::PrintLoadProgress | void __thiscall PrintLoadProgress(C_NetGame *this, int percent)
-006acb80 GetGameTypeTextId | int __cdecl GetGameTypeTextId(int gameType)
+006acb80 GetGameTypeTextId | int __stdcall GetGameTypeTextId(int gameType)

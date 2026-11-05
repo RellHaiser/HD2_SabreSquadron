@@ -21,7 +21,7 @@ uint32_t C_auto_008159f8__FUN_006b50c0(C_auto_008159f8 *_this, ...)
   uint32_t local_4;
   _this->vtable = (C_auto_008159f8_vtbl *)&PTR_008159f8;
   local_4 = 2;
-  FUN_006ad560((int)_this);
+  S_MultiplayerSettings__Clear();
   _this[0xa5].vtable = 0;
   tier1_operator_delete(_this[0xa1].vtable);
   _this[0xa1].vtable = 0;
