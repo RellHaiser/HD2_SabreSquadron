@@ -4,6 +4,8 @@
 #include "game/main_menu.h"
 
 #include <cctype>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 #include "common/os_files.h"
@@ -3328,4 +3330,89 @@ void C_MainMenu::AskJoinPassword()
     PostTo(PASSWORD_INPUT, CONTROL_MSG_SET_TEXT_ID, STYLE_PASSWORD_BOX, TEXT_PASSWORD_BOX);
     Post(MENU_MSG_OPEN_POPUP, MAIN_SCREEN_PASSWORD);
     PostTo(PASSWORD_INPUT, CONTROL_MSG_EDIT, 0);
+}
+
+// ---- the add server popup (part 9h-xxiii) -----------------------------------------------------------------
+
+namespace {
+
+// The popup's controls (screen 14's): the address, the port, yes, no.
+constexpr uint32_t ADD_SERVER_SCREEN = static_cast<uint32_t>(MAIN_SCREEN_ADD_SERVER) << SCREEN_INDEX_SHIFT;
+constexpr uint32_t ADD_SERVER_ADDRESS = ADD_SERVER_SCREEN | 0x200000, ADD_SERVER_PORT = ADD_SERVER_SCREEN | 0x300000,
+                   ADD_SERVER_YES = ADD_SERVER_SCREEN | 0x400000, ADD_SERVER_NO = ADD_SERVER_SCREEN | 0x500000;
+// "ENTER THE IP ADDRESS"; the address box's longest; the boxes' first texts.
+constexpr uint32_t TEXT_ENTER_ADDRESS = 0x7E6, ADDRESS_MAX_LENGTH = 0xF;
+const char *const DEFAULT_ADDRESS = "255.255.255.255";
+const char *const DEFAULT_PORT = "11001";
+// A server added by hand: its game type (none), its name and map.
+constexpr int GAME_TYPE_UNKNOWN = 4;
+const char *const UNKNOWN_SERVER = " ??? ";
+
+// A box's text (its GET_TEXT through the menu).
+C_str AskText(C_MainMenu *menu, uint32_t id)
+{
+    S_ControlMessage ask;
+    ask.target = id;
+    ask.id = CONTROL_MSG_GET_TEXT;
+    menu->HandleMessage(&ask);
+    return ask.text;
+}
+
+} // namespace
+
+bool C_MainMenu::DescribeAddServerScreen(S_ScreenDesc *desc, I3D_frame *model)
+{
+    model->SetPos(QUIT_MODEL_POS);
+    AddDescMessage(desc->AddControl(CONTROL_TEXT, "text"), 0, CONTROL_MSG_SET_TEXT_ID, STYLE_VALUE, TEXT_ENTER_ADDRESS);
+    S_ControlDesc *address = desc->AddControl(CONTROL_EDIT_BOX, "binput01");
+    AddDescMessage(address, 0, CONTROL_MSG_SET_TEXT, STYLE_BUTTON, C_str(DEFAULT_ADDRESS));
+    AddDescMessage(address, 0, CONTROL_MSG_SET_MAX_LENGTH, ADDRESS_MAX_LENGTH);
+    S_ControlDesc *port = desc->AddControl(CONTROL_EDIT_BOX, "binput02");
+    AddDescMessage(port, 0, CONTROL_MSG_SET_TEXT, STYLE_BUTTON, C_str(DEFAULT_PORT));
+    AddDescMessage(port, 0, CONTROL_MSG_SET_DIGITS_ONLY, 1);
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    AddDescMessage(AddButton(desc, "byes*", TEXT_YES), 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self,
+                   Callback(&OnAddServerButton));
+    AddDescMessage(AddButton(desc, "bno*", TEXT_NO), 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self,
+                   Callback(&OnAddServerButton));
+    AddDescMessage(desc->AddControl(CONTROL_EDIT_BOX, "binput"), 0, CONTROL_MSG_HIDE, 0);
+    return true;
+}
+
+bool C_MainMenu::OnAddServerButton(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    if (!control)
+        return false;
+    auto *self = static_cast<C_MainMenu *>(menu);
+    const uint32_t id = control->GetId();
+    if (id == ADD_SERVER_YES) {
+        // Both boxes filled: a server at the address and port added to the list shown (its line too).
+        const C_str address = AskText(self, ADD_SERVER_ADDRESS);
+        const C_str port = AskText(self, ADD_SERVER_PORT);
+        if (!address.IsEmpty() && !port.IsEmpty()) {
+            auto *server = new S_ServerEntry();
+            server->Reset();
+            server->Reset();
+            int a = 0, b = 0, c = 0, d = 0;
+            std::sscanf(address.c_str(), "%d.%d.%d.%d", &a, &b, &c, &d);
+            // (The first number the lowest byte; the last unmasked, as the original.)
+            server->address = ((static_cast<uint32_t>(c) & 0xFF | static_cast<uint32_t>(d) << 8) << 8 |
+                               static_cast<uint32_t>(b) & 0xFF) << 8 |
+                              static_cast<uint32_t>(a) & 0xFF;
+            server->port = std::atoi(port.c_str());
+            server->gameType = GAME_TYPE_UNKNOWN;
+            server->internet = true;
+            std::strcpy(server->name, UNKNOWN_SERVER);
+            std::strcpy(server->map, UNKNOWN_SERVER);
+            server->versionMinor = g_versionMinor;
+            server->versionMajor = g_versionMajor;
+            self->m_mpSettings->GetList(0).push_back(server);
+            self->AddServerLine(server, 1);
+        }
+    } else if (id != ADD_SERVER_NO) {
+        return false;
+    }
+    Post(MENU_MSG_CLOSE_POPUP, 0);
+    self->m_step = BROWSER_IDLE;
+    return true;
 }

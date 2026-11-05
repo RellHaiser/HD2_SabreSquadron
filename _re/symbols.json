@@ -28166,6 +28166,11 @@
   "name": "C_MainMenu::DescribeAddServerScreen",
   "proto": "bool __thiscall DescribeAddServerScreen(C_MainMenu *this, void * desc, void * model)"
  },
+ "00637510": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnAddServerButton",
+  "proto": "bool __thiscall OnAddServerButton(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00637890": {
   "module": "main_menu",
   "name": "C_MainMenu::DescribePasswordScreen",

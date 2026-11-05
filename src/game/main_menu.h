@@ -385,7 +385,14 @@ protected:
     // dedicated server (failed: its lines), hosted (the network handler's start / the menu quits). True.
     static bool OnConnectTick(void *menu, void *argument, C_Control *control, uint32_t notification,
                               uint32_t value);          // 0x00632560
+    // The add server popup (part 9h-xxiii): the model placed as the quit question's; "ENTER THE IP ADDRESS", the
+    // address (255.255.255.255, 15 characters at most) and port (11001, digits) boxes, yes / no
+    // (OnAddServerButton), the third box hidden. True.
     bool DescribeAddServerScreen(S_ScreenDesc *desc, I3D_frame *model);     // 0x006370c0
+    // Yes: both boxes filled, a server at the address (its first number the lowest byte) and port added to the
+    // list shown, its line; yes / no: closed, idle. True; another control (none): false.
+    static bool OnAddServerButton(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                  uint32_t value);      // 0x00637510
 
     // ---- the screens' message handlers (true: taken; later sub-parts) ----
     // The profile screen's messages: Escape while a difficulty is picked: taken. CONTROL_MSG_REMOVE_SELECTED (the

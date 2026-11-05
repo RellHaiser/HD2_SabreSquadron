@@ -8583,6 +8583,22 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. mp_setup 54 of 54. Tier 1: 292 errors in 55 files. ret_audit --src: 52.
   - Stats: 9,263 of 12,306 functions by hand (85.5 % by size).
 
+  PART 9h-xxiii DONE (2026-11-04): the main menu's add server popup (game/main_menu.cpp); part 9h complete.
+  - DescribeAddServerScreen 0x006370c0 (aligned frame, from the asm): the model placed as the quit question's;
+    "ENTER THE IP ADDRESS", the address box (255.255.255.255, 15 characters), the port box (11001, digits only),
+    yes / no (OnAddServerButton), "binput" hidden.
+  - OnAddServerButton 0x00637510: yes with both boxes filled: a server (sscanf "%d.%d.%d.%d", the first number the
+    lowest byte, the last unmasked; atoi port; game type 4, Internet, " ??? ", this version) added to the list shown
+    and its line; yes / no close the popup, idle; another control: false.
+  - The build test's descriptions are all real now (no MM_DESCRIBE fakes left).
+  - 9h's leftovers, left to tier 1: 0x00620670 (a CD key comparison callback: no references in code or data, dead);
+    0x00631cb0 / 0x00631ce0 / 0x00631ff0 / 0x00632060 (std::vector<S_StatusPlayer> size / insert / erase and
+    S_StatusPlayer's copy: called only by the net module, 0x0072xxxx .. 0x0074xxxx).
+  - Harness: asDescribe, asButton. All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h23.py: 58: 47 killed, 6 not building, 5 equivalent.
+  - Build: MSVC clean. Tier 1: 292 errors in 55 files. ret_audit --src: 52.
+  - Stats: 9,265 of 12,306 functions by hand (85.6 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

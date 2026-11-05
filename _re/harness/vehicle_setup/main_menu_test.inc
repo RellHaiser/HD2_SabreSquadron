@@ -273,7 +273,6 @@ bool C_PlayerProfile::GetLastSaveText(C_str *mode, C_str *mission, C_str *date) 
         GfLog("describe %s %x", N, desc->id);                                                                     \
         return true;                                                                                              \
     }
-MM_DESCRIBE(DescribeAddServerScreen, "addserver")
 
 // The found servers' deletes: a global operator delete that notes the watched addresses.
 std::vector<void *> g_mmWatch, g_mmDeleted;
@@ -334,7 +333,7 @@ struct S_MainMenuResults {
          bxLine = true, bxFound = true, bxList = true, bxTick = true, bxRestore = true, bxRefresh = true,
          bxFavorite = true, bxFavorites = true,
          nmLan = true, nmInternet = true, nmLeave = true, nmStart = true, nmJoin = true, nmSearch = true, nmEscape = true,
-         slFile = true, slOdd = true;
+         slFile = true, slOdd = true, asDescribe = true, asButton = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -4375,6 +4374,121 @@ void MainMenuTest(I3D_scene *scene)
         }
     }
 
+    // --- (part 9h-xxiii) the add server popup: its description; yes (a server added), no, others ---
+    {
+        C_MainMenu m;
+        const auto Is = [](const std::string &got, const std::string &want) {
+            if (got != want)
+                std::printf("ADDSERVER %s\nADDSERVER expected %s\n", got.c_str(), want.c_str());
+            return got == want;
+        };
+        g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnAddServerButton)] = "add";
+        {
+            // The model placed as the quit question's; the controls.
+            bool ok = true;
+            S_MrObj *model = MsFrame("asmodel");
+            void *const oldSetPos = g_msFrameVt[0x08 / 4];
+            g_msFrameVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+            S_ScreenDesc d("ADD SERVER", "password", 14u << 26);
+            g_gfLog.clear();
+            ok &= m.DescribeAddServerScreen(&d, As<I3D_frame>(model)) && MsLogIs({"asmodel 8 (0.5 -0.375 -0.5)"}, g_gfLog);
+            g_msFrameVt[0x08 / 4] = oldSetPos;
+            ok &= d.messages.empty() && d.controls.size() == 6;
+            if (d.controls.size() == 6) {
+                ok &= Is(CsTree(d.controls[0]), "13 text 38100000: 0 1000015 c 7e6;") &&
+                      Is(CsTree(d.controls[1]), "3 binput01 38200000: 0 1000014 d 0 '255.255.255.255' 0 100006e f 0;") &&
+                      Is(CsTree(d.controls[2]), "3 binput02 38300000: 0 1000014 d 0 '11001' 0 100006f 1 0;") &&
+                      Is(CsTree(d.controls[3]), "14 byes* 38400000: 0 1000015 d 7d1 0 1000007 4001000 self add;") &&
+                      Is(CsTree(d.controls[4]), "14 bno* 38500000: 0 1000015 d 7d0 0 1000007 4001000 self add;") &&
+                      Is(CsTree(d.controls[5]), "3 binput 38600000: 0 1000004 0 0;");
+            }
+            WM(r.asDescribe, ok);
+        }
+        {
+            // Yes: both boxes filled: a server (the address's first number its lowest byte) added to the list shown,
+            // its line; closed, idle. A box empty: closed only. No: closed. Others: false.
+            bool ok = true;
+            C_MpMenuSettings settings;
+            for (auto &group : settings.m_setup.maps) {
+                for (C_MpMap *map : group.maps)
+                    delete map;
+                group.maps.clear();
+            }
+            m.m_mpSettings = &settings;
+            struct C_AsScreen : C_MsScreen {
+                C_AsScreen() : C_MsScreen(nullptr, "asscreen", 14u << 26) {}
+                bool HandleMessage(S_ControlMessage *message) override
+                {
+                    if (C_Control *control = FindControl(message->target, false))
+                        return control->HandleMessage(message);
+                    return C_MsScreen::HandleMessage(message);
+                }
+            } screen;
+            C_PfLine address(0x38200000, "1.2.3.4"), port(0x38300000, "2345");
+            C_BwControl yes(0x38400000, &screen, 0), no(0x38500000, &screen, 0), other(0x38600000, &screen, 0);
+            address.m_parent = &screen;
+            port.m_parent = &screen;
+            screen.m_children = {&address, &port, &yes, &no, &other};
+            m.m_screens.assign(15, nullptr);
+            m.m_screens[14] = &screen;
+            CsQueue();
+            m.m_step = 4;
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnAddServerButton(&m, nullptr, &yes, 0, 0) && m.m_step == 0 && settings.m_servers.size() == 1 &&
+                  MsLogIs({"line 38200000 200002f 0", "line 38300000 200002f 0"}, g_gfLog);
+            if (settings.m_servers.size() == 1) {
+                const S_ServerEntry *s = settings.m_servers[0];
+                ok &= s->address == 0x04030201 && s->port == 2345 && s->gameType == 4 && s->internet && !s->dedicated &&
+                      s->ping == 9999 && std::string(s->name) == " ??? " && std::string(s->map) == " ??? " &&
+                      s->versionMinor == g_versionMinor && s->versionMajor == g_versionMajor && !s->listed &&
+                      Is(CsQueue(), CmText("20900000 1000067 0 %x; 0 2000005 0 0; ",
+                                           static_cast<uint32_t>(reinterpret_cast<uintptr_t>(s))));
+            }
+            // (The last number unmasked, as the original: 1.2.3.260 is 0x04030201 again.)
+            address.text = "1.2.3.260";
+            settings.m_listKind = 2;
+            ok &= C_MainMenu::OnAddServerButton(&m, nullptr, &yes, 0, 0) && settings.m_servers2.size() == 1 &&
+                  settings.m_servers2[0]->address == 0x04030201 && CsQueue().find("0 2000005 0 0; ") != std::string::npos;
+            settings.m_listKind = 1;
+            address.text = "300.2.3.4";
+            ok &= C_MainMenu::OnAddServerButton(&m, nullptr, &yes, 0, 0) && settings.m_servers.size() == 2 &&
+                  settings.m_servers[1]->address == 0x0403022C;
+            // (Not an address: its numbers 0.)
+            address.text = "none";
+            ok &= C_MainMenu::OnAddServerButton(&m, nullptr, &yes, 0, 0) && settings.m_servers.size() == 3 &&
+                  settings.m_servers[2]->address == 0;
+            address.text = "1.2.3.4";
+            delete settings.m_servers.back();
+            settings.m_servers.pop_back();
+            CsQueue();
+            port.text = "";
+            m.m_step = 4;
+            ok &= C_MainMenu::OnAddServerButton(&m, nullptr, &yes, 0, 0) && settings.m_servers.size() == 2 && m.m_step == 0 &&
+                  Is(CsQueue(), "0 2000005 0 0; ");
+            port.text = "1";
+            address.text = "";
+            ok &= C_MainMenu::OnAddServerButton(&m, nullptr, &yes, 0, 0) && settings.m_servers.size() == 2 &&
+                  Is(CsQueue(), "0 2000005 0 0; ");
+            m.m_step = 4;
+            ok &= C_MainMenu::OnAddServerButton(&m, nullptr, &no, 0, 0) && m.m_step == 0 && Is(CsQueue(), "0 2000005 0 0; ");
+            m.m_step = 4;
+            ok &= !C_MainMenu::OnAddServerButton(&m, nullptr, &other, 0, 0) && m.m_step == 4 && CsQueue() == "";
+            ok &= !C_MainMenu::OnAddServerButton(&m, nullptr, nullptr, 0, 0) && m.m_step == 4 && CsQueue() == "";
+            for (auto *list : {&settings.m_servers, &settings.m_servers2}) {
+                for (S_ServerEntry *server : *list)
+                    delete server;
+                list->clear();
+            }
+            screen.m_children.clear();
+            m.m_screens.clear();
+            m.m_mpSettings = nullptr;
+            m.m_step = 0;
+            WM(r.asButton, ok);
+        }
+        g_gfLog.clear();
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -4409,17 +4523,18 @@ void MainMenuTest(I3D_scene *scene)
                                                         "multiplayer menu", "create server", "password", "server filters",
                                                         "gameinfo", "confirm", "password"});
         const std::string log = Join(g_gfLog);
-        ok &= GmInOrder(log, {"scan", "describe addserver 38000000"}) &&
-              log.find("describe ", log.find("describe addserver") + 1) == std::string::npos;
+        // (Part 9h-xxiii: every screen's description real.)
+        ok &= GmInOrder(log, {"scan"}) && log.find("describe ") == std::string::npos;
         ok &= m.m_screens.size() == 15 && S_CsPeek::Callbacks(m.m_screens[1]) == 1 && S_CsPeek::Callbacks(m.m_screens[2]) == 1 &&
               S_CsPeek::Callbacks(m.m_screens[3]) == 1 && S_CsPeek::Callbacks(m.m_screens[4]) == 0 &&
               m.m_screens[4]->GetScreenFrame() == As<I3D_frame>(models[3]) &&
               !g_menuScreens.empty() && g_menuScreens.back() == m.m_screens[1];
         // The quit question's model moved.
-        // (And the password screen's, part 9h-x, and the connect screen's, part 9h-xviii.)
+        // (And the password screen's, part 9h-x, the connect screen's, part 9h-xviii, the add server popup's, 9h-xxiii.)
         ok &= log.find("mmm04 8 (0.5 -0.375 -0.5)") != std::string::npos && log.find("mmm10 8 (0.5 -0.375 -0.5)") != std::string::npos &&
-              log.find("mmm13 8 (0.5 -0.375 -0.5)") != std::string::npos &&
-              log.find(" 8 (0.5", log.find(" 8 (0.5", log.find(" 8 (0.5", log.find(" 8 (0.5") + 1) + 1) + 1) == std::string::npos &&
+              log.find("mmm13 8 (0.5 -0.375 -0.5)") != std::string::npos && log.find("mmm14 8 (0.5 -0.375 -0.5)") != std::string::npos &&
+              log.find(" 8 (0.5", log.find(" 8 (0.5", log.find(" 8 (0.5", log.find(" 8 (0.5", log.find(" 8 (0.5") + 1) + 1) + 1) + 1) ==
+                  std::string::npos &&
               log.find("mmgro 34 GROptions") != std::string::npos && log.find("mmgci 34 GB_Cinematics") != std::string::npos;
         // (The game info screen's styles and the connect screen's of this build given back: the next build makes its own.)
         ReleaseTextStyle(g_connectStyle);
@@ -4474,7 +4589,7 @@ void MainMenuTest(I3D_scene *scene)
                 " hsSession %d cnDescribe %d cnHidden %d cnTick %d cnMessage %d"
                 " bwDescribe %d bwList %d bwShown %d bwSort %d bwPicked %d bwJoin %d bwCount %d"
                 " bxLine %d bxFound %d bxList %d bxTick %d bxRestore %d bxRefresh %d bxFavorite %d bxFavorites %d"
-                " nmLan %d nmInternet %d nmLeave %d nmStart %d nmJoin %d nmSearch %d nmEscape %d slFile %d slOdd %d\n",
+                " nmLan %d nmInternet %d nmLeave %d nmStart %d nmJoin %d nmSearch %d nmEscape %d slFile %d slOdd %d asDescribe %d asButton %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
@@ -4488,5 +4603,5 @@ void MainMenuTest(I3D_scene *scene)
                 r.hsSession, r.cnDescribe, r.cnHidden, r.cnTick, r.cnMessage,
                 r.bwDescribe, r.bwList, r.bwShown, r.bwSort, r.bwPicked, r.bwJoin, r.bwCount,
                 r.bxLine, r.bxFound, r.bxList, r.bxTick, r.bxRestore, r.bxRefresh, r.bxFavorite, r.bxFavorites,
-                r.nmLan, r.nmInternet, r.nmLeave, r.nmStart, r.nmJoin, r.nmSearch, r.nmEscape, r.slFile, r.slOdd);
+                r.nmLan, r.nmInternet, r.nmLeave, r.nmStart, r.nmJoin, r.nmSearch, r.nmEscape, r.slFile, r.slOdd, r.asDescribe, r.asButton);
 }
