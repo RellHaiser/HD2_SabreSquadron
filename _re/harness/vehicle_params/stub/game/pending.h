@@ -38,57 +38,7 @@ extern int g_localPlayerSlot;
 void PeriodicLinks_SetRate(int id, int rate);
 int PeriodicLinks_Add(C_Actor *actor, int arg);
 void PeriodicLinks_Remove(int id);
-class C_NetObjectMessage {
-public:
-    explicit C_NetObjectMessage(int type);
-    virtual ~C_NetObjectMessage();
-    virtual void Write(C_BitStream *stream) = 0;
-    virtual void Read(C_BitStream *stream) = 0;
-    int GetType() const { return type; }
-    int type;
-    int sender;
-    int unknown24;
-    bool fromClient = false;
-};
-struct S_vector4;
-struct S_vector;
-struct S_NetQuantization;
-#include "net/net_track.h"
-class C_NetProperty {
-public:
-    C_NetPositionTrack &GetTrack();
-    C_NetDirTrack &GetDirTrack();
-    void SetField(int field, int value);
-    uint32_t GetFlags() const;
-    void SetFlags(uint32_t flags);
-};
-using NetStateHandler = void (__fastcall *)(void *context, C_BitStream *stream);
-using NetMessageFactory = C_NetObjectMessage *(__fastcall *)(void *context, C_BitStream *stream, bool write);
-class C_NetObject {
-public:
-    void SetQuantizations0(S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c);
-    void SetQuantizations1(S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c);
-    C_NetProperty *GetProperty(int index);
-    void Update(float seconds);
-    C_NetObjectMessage *PopMessage(int unknown);
-    void QueueMessage(C_NetObjectMessage *msg, int sender, bool reliable);
-    void Tick(float seconds);
-    void SetSendMask(int mask);
-    void SetUnknown3C(int value);
-    int GetUnknown3C() const;
-    void SetStateHandlers(NetStateHandler read, NetStateHandler write, void *context);
-    void SetMessageFactory(NetMessageFactory factory, void *context);
-    void SetUnknown40(bool value);
-};
-class C_NetReplication {
-public:
-    C_NetObject *FindObject(int id, bool create);
-    void RemoveObject(C_NetObject *object);
-    int GetLocalId() const;
-    void SetUnknownC4(int value);
-    void SetUnknownC8(int value);
-};
-extern C_NetReplication *g_netReplication;
+#include "net/net_object.h"
 // (C_CameraFrameKeeper: the real header, part 8e-i.)
 
 // --- the car's updates (game/car_update.cpp; as the real header declares them) -------------------

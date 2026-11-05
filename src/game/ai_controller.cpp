@@ -135,9 +135,9 @@ void C_AIController::Attach(C_Human *human, C_HumanController *previous)
     m_netObject->SetMessageFactory(NetCreateMessage, this);
     m_netObject->SetStateHandlers(NetReadControlBits, NetWriteControlBits, this);
     m_netObject->SetSendMask(7);
-    m_netObject->SetUnknown40(false);
+    m_netObject->SetForwarding(false);
     if (!IsServer())
-        m_netObject->SetUnknown3C(0);
+        m_netObject->SetLive(0);
     m_netObject->GetProperty(1)->GetTrack().SetValue(human->GetPosition4());
     // A new AI human: the clients are told its equipment.
     if (!previous && IsServer()) {

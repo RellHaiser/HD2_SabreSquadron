@@ -6995,8 +6995,15 @@ bool C_CameraFrameKeeper::Restore()
     return true;
 }
 #endif
-C_NetObjectMessage::C_NetObjectMessage(int t) : type(t), sender(0), unknown24(0) {}
-C_NetObjectMessage::~C_NetObjectMessage() = default;
+C_NetObjectMessage::C_NetObjectMessage(int t) : type(t) {}
+bool C_NetObjectMessage::MarkSent(int player)
+{
+    const int bit = 1 << player;
+    if (sentTo & bit)
+        return false;
+    sentTo |= bit;
+    return true;
+}
 #ifndef REAL_SEAT_WEAPON
 void C_SeatWeaponRoundsMessage::Write(C_BitStream *) {}
 void C_SeatWeaponRoundsMessage::Read(C_BitStream *) {}
@@ -7022,7 +7029,7 @@ void C_NetObject::QueueMessage(C_NetObjectMessage *msg, int sender, bool reliabl
     } else {
         g_queued.push_back({msg->type, -1, static_cast<C_SeatWeaponReloadMessage *>(msg)->seat, sender, reliable, msg->fromClient});
     }
-    ++msg->unknown24;
+    ++msg->refCount;
     g_heldMessages.push_back(msg);
 }
 int C_NetReplication::GetLocalId() const
@@ -7337,7 +7344,8 @@ struct S_FakeProperty {
     uint32_t flags = 0;
     std::vector<uint32_t> flagSets;
 };
-struct S_FakeNet {
+// (Part 10b: a real object (its virtual Update), logging what the fakes below are given.)
+struct S_FakeNet : C_NetObject {
     NetStateHandler read = nullptr, write = nullptr;
     void *stateContext = nullptr;
     NetMessageFactory factory = nullptr;
@@ -7372,15 +7380,15 @@ void C_NetObject::SetSendMask(int mask)
 {
     Net(this).sendMask = mask;
 }
-void C_NetObject::SetUnknown3C(int value)
+void C_NetObject::SetLive(int value)
 {
     Net(this).unknown3C = value;
 }
-int C_NetObject::GetUnknown3C() const
+int C_NetObject::GetLive() const
 {
     return reinterpret_cast<const S_FakeNet *>(this)->unknown3C;
 }
-C_NetObjectMessage *C_NetObject::PopMessage(int)
+C_NetObjectMessage *C_NetObject::PopMessage(bool)
 {
     std::vector<C_NetObjectMessage *> &in = Net(this).incoming;
     if (in.empty()) {
@@ -7389,7 +7397,7 @@ C_NetObjectMessage *C_NetObject::PopMessage(int)
     }
     C_NetObjectMessage *msg = in.front();
     in.erase(in.begin());
-    --msg->unknown24;
+    --msg->refCount;
     return msg;
 }
 uint32_t C_NetProperty::GetFlags() const
@@ -7403,9 +7411,19 @@ void C_NetProperty::SetFlags(uint32_t flags)
 }
 S_FakeNet &Net(C_NetObject *o)
 {
-    return *reinterpret_cast<S_FakeNet *>(o);
+    return *static_cast<S_FakeNet *>(o);
 }
-void C_NetObject::SetQuantizations0(S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c)
+C_NetObject::C_NetObject() {}
+C_NetObject::~C_NetObject() {}
+void C_NetObject::Refresh() {}
+void C_NetObject::GetReadQuantizations(S_NetQuantization **, S_NetQuantization **, S_NetQuantization **) {}
+void C_NetObject::GetWriteQuantizations(S_NetQuantization **, S_NetQuantization **, S_NetQuantization **) {}
+bool C_NetObject::Write(C_NetMessage *, int, bool)
+{
+    return false;
+}
+void C_NetObject::Read(C_NetMessage *, int, bool) {}
+void C_NetObject::SetReadQuantizations(S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c)
 {
     S_FakeNet &n = Net(this);
     n.q0[0] = a;
@@ -7413,7 +7431,7 @@ void C_NetObject::SetQuantizations0(S_NetQuantization *a, S_NetQuantization *b, 
     n.q0[2] = c;
     ++n.sets0;
 }
-void C_NetObject::SetQuantizations1(S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c)
+void C_NetObject::SetWriteQuantizations(S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c)
 {
     S_FakeNet &n = Net(this);
     n.q1[0] = a;
@@ -7437,7 +7455,7 @@ void C_NetObject::SetMessageFactory(NetMessageFactory factory, void *context)
     Net(this).factory = factory;
     Net(this).factoryContext = context;
 }
-void C_NetObject::SetUnknown40(bool value)
+void C_NetObject::SetForwarding(bool value)
 {
     Net(this).unknown40 = value;
 }
@@ -7466,11 +7484,11 @@ void C_NetReplication::RemoveObject(C_NetObject *object)
 {
     g_netRemoved.push_back(object);
 }
-void C_NetReplication::SetUnknownC4(int value)
+void C_NetReplication::SetWriteEpoch(int value)
 {
     g_netC4.push_back(value);
 }
-void C_NetReplication::SetUnknownC8(int value)
+void C_NetReplication::SetReadEpoch(int value)
 {
     g_netC8.push_back(value);
 }
@@ -12865,7 +12883,7 @@ void NetTest(const char *path)
             m->dir = dir;
             m->barrel = 1;
             m->fromClient = true;
-            m->unknown24 = 1;                           // (held by the queue it came from)
+            m->refCount = 1;                           // (held by the queue it came from)
             netObject.incoming.push_back(m);
         };
         const auto reload = [&](bool *deleted) {
@@ -12873,7 +12891,7 @@ void NetTest(const char *path)
             m->deleted = deleted;
             m->seat = seat;
             m->fromClient = true;
-            m->unknown24 = 1;
+            m->refCount = 1;
             netObject.incoming.push_back(m);
         };
         if (n > 0) {
@@ -12935,12 +12953,12 @@ void NetTest(const char *path)
             auto *rounds = new C_SeatWeaponRoundsMessage();
             rounds->seat = seat;
             rounds->rounds = 44;
-            rounds->unknown24 = 1;
+            rounds->refCount = 1;
             netObject.incoming.push_back(rounds);
             auto *ammo = new C_SeatWeaponAmmoMessage();
             ammo->typeId = 61;
             ammo->uid = 500;
-            ammo->unknown24 = 1;
+            ammo->refCount = 1;
             netObject.incoming.push_back(ammo);
             g_created.clear();
             store.added.clear();

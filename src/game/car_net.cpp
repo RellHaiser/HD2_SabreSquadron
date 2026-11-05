@@ -345,7 +345,7 @@ void C_Car::ReadMessages()                              // 0x004d2ec0
             break;
         }
         // (Queued again it is not deleted: the queue holds it.)
-        if (msg->unknown24 < 1)
+        if (msg->refCount < 1)
             delete msg;
     }
 }
@@ -440,7 +440,7 @@ void C_Car::ReadState(C_BitStream *msg)                 // 0x004de270
 
 void C_Car::UpdateNetwork(int time)                     // 0x004d3380
 {
-    m_netObject->SetUnknown3C(7);
+    m_netObject->SetLive(7);
     const bool server = (g_gameRole & GAME_ROLE_SERVER) != 0;
     if ((m_driver && m_driver->GetNetId() == g_localPlayerSlot) ||
         (server && (!m_driver || m_driver->GetRole() != HUMAN_ROLE_PLAYER))) {
@@ -475,7 +475,7 @@ void C_Car::UpdateNetwork(int time)                     // 0x004d3380
 
     // Driven elsewhere: the replicated place, rotation and velocity.
     m_netObject->SetSendMask(server ? 7 : 2);
-    m_netObject->SetUnknown3C(7);
+    m_netObject->SetLive(7);
     C_NetProperty *property = m_netObject->GetProperty(1);
     property->SetFlags(property->GetFlags() & ~0x20000u);
     const float ms = static_cast<float>(time);
@@ -528,7 +528,7 @@ void __fastcall CarNetReadState(void *context, C_BitStream *stream)   // 0x004d0
     C_Vehicle &vehicle = *car->GetVehicle();
     if (!stream->ReadBits(1))
         return;
-    const bool apply = car->m_netObject->GetUnknown3C() != 0;
+    const bool apply = car->m_netObject->GetLive() != 0;
     // (Quirk kept: the flags cleared also when nothing is applied.)
     for (int i = 0; i < vehicle.m_wheelCount; ++i) {
         if (S_VehicleWheel *wheel = vehicle.m_wheels[i])   // Fix: a missing wheel is passed over

@@ -16,6 +16,11 @@
 #include "game/profile.h"
 #include "ls3d/rw_data.h"
 
+// The net player table net/bitstream.cpp links against (none here; part 9i-iii linked it).
+struct S_NetPlayer;
+S_NetPlayer *g_netPlayerTable;
+int g_netPlayerCount;
+
 // --- the player: only the name ----------------------------------------------------------------------
 C_GameProfile g_gameProfile;
 static C_str s_playerName;

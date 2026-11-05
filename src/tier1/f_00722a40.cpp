@@ -528,7 +528,7 @@ uint32_t FUN_007233d0(int param_1, ...)
   S_NetQuantization *q_00;
   int iVar1;
   C_auto_0081646c *_this;
-  uint32_t *puVar2;
+  void *pvVar2;
   S_vector4 local_80;
   S_vector4 local_70;
   S_vector4 local_60;
@@ -541,13 +541,13 @@ uint32_t FUN_007233d0(int param_1, ...)
   _this = _aligned_malloc(0xe8,0x10);
   local_14 = 0;
   if (_this == 0) {
-    puVar2 = 0;
+    pvVar2 = 0;
   }
   else {
-    puVar2 = C_auto_0081646c__FUN_0073f020(_this);
+    pvVar2 = C_auto_0081646c__C_NetReplication__C_NetReplication(_this);
   }
-  *(uint32_t **)(param_1 + 0x14) = puVar2;
-  puVar2[0x39] = &LAB_0072d590;
+  *(void **)(param_1 + 0x14) = pvVar2;
+  *(uint8_t **)((int)pvVar2 + 0xe4) = &LAB_0072d590;
   q = (S_NetQuantization *)(param_1 + 0x20);
   local_14 = 0xffffffff;
   *(uint8_t **)(*(int *)(param_1 + 0x14) + 0xe0) = &LAB_0072d5c0;
@@ -586,10 +586,10 @@ uint32_t FUN_007233d0(int param_1, ...)
   (**(code **)(**(int **)(param_1 + 0x14) + 4))(q,q_00,param_1 + 0xa0);
   iVar1 = *(int *)(param_1 + 0x14);
   *(uint32_t *)(iVar1 + 0xc0) = 0x3b;
-  FUN_0073ed40((void *)(iVar1 + 0x30),0x3b);
+  C_NetObject__SetPropertyField2((void *)(iVar1 + 0x30),0x3b);
   *(uint32_t *)(*(int *)(param_1 + 0x14) + 0x4c) = DAT_00982104;
-  FUN_0073fa30(*(void **)(param_1 + 0x14),0x3d0f5c29);
-  g_netServerSide = (uint8_t)g_gameRole & 1;
+  C_NetReplication__SetLag(*(void **)(param_1 + 0x14),0.035);
+  g_netServerSide = (bool)((uint8_t)g_gameRole & 1);
   ExceptionList = gh_bitcast<void*>(local_40.w);
   return 0;
 }

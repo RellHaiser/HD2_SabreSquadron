@@ -303,7 +303,7 @@ void C_PlayerController::TickLocal(int timeDelta)
             m_controlBits = EncodeControlBits(m_axes, m_moveFlags);
         const float seconds = static_cast<float>(static_cast<uint32_t>(timeDelta)) * 0.001f;
         m_netObject->Tick(seconds);
-        g_netReplication->Tick30(seconds);
+        g_netReplication->GetLocalObject().Update(seconds);
         // A dive.
         if (m_controlButtons[BUTTON_DIVE] != 0.0f && m_human->m_stamina > DIVE_STAMINA_NEEDED &&
             (m_moveFlags & MOVE_MOVING_MASK)) {

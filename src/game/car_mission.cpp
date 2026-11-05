@@ -74,7 +74,7 @@ void C_Car::StartMission(bool server)                   // 0x004d16a0
     if (!IsLocalGame()) {
         m_netObject = g_netReplication->FindObject(GetNetId(), true);
         m_netObject->SetStateHandlers(&CarNetReadState, &CarNetWriteState, this);
-        m_netObject->SetUnknown40(false);
+        m_netObject->SetForwarding(false);
         m_netObject->SetMessageFactory(&MakeSeatWeaponMessage, this);
         const float top = m_vehicle.m_topSpeed;
         m_quantizations[0].Setup({top + top, 20.0f, top + top, 0.0f}, {-top, -10.0f, -top, 0.0f},
@@ -82,15 +82,15 @@ void C_Car::StartMission(bool server)                   // 0x004d16a0
         m_quantizations[1].Setup({top * 0.1f, top * 0.05f, top * 0.1f, 0.0f},
                                  {top * -0.05f, top * -0.025f, top * -0.05f, 0.0f}, {0.01f, 0.013f, 0.01f, 0.0f},
                                  100);
-        m_netObject->SetQuantizations0(nullptr, &m_quantizations[1], &m_quantizations[0]);
-        m_netObject->SetQuantizations1(nullptr, &m_quantizations[1], &m_quantizations[0]);
+        m_netObject->SetReadQuantizations(nullptr, &m_quantizations[1], &m_quantizations[0]);
+        m_netObject->SetWriteQuantizations(nullptr, &m_quantizations[1], &m_quantizations[0]);
         C_NetProperty *property = m_netObject->GetProperty(1);
         property->SetField(2, 0x3b);
         property->GetTrack().SetValue(m_position);
         property->GetDirTrack().SetDirection(m_direction, 0.0f);
         if (IsNetServer()) {
-            g_netReplication->SetUnknownC4(0);
-            g_netReplication->SetUnknownC8(1);
+            g_netReplication->SetWriteEpoch(0);
+            g_netReplication->SetReadEpoch(1);
         }
     }
     m_respawnTimer.period = 38000;

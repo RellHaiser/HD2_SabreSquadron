@@ -11197,9 +11197,25 @@
   "name": "C_NetQuantized::SetWriteQuantizations",
   "proto": "void __thiscall SetWriteQuantizations(void *this, void * value, void * delta, void * rate)"
  },
+ "004c13c0": {
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::MarkSent",
+  "proto": "bool __thiscall MarkSent(void *this, int player)"
+ },
+ "004c13f0": {
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::Update",
+  "proto": "void __thiscall Update(void *this, float seconds)"
+ },
  "004c1400": {
-  "module": "zz_idioms",
-  "name": "empty_function_4c1400"
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::Refresh",
+  "proto": "void __thiscall Refresh(void *this)"
+ },
+ "004c1450": {
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
  },
  "004c14b0": {
   "module": "seat_weapon",
@@ -38740,6 +38756,56 @@
   "name": "S_NetQuantization::WithinSteps",
   "proto": "bool __thiscall WithinSteps(void *this, float * v)"
  },
+ "0073de20": {
+  "module": "net_replication",
+  "name": "C_NetProperty::C_NetProperty",
+  "proto": "void * __thiscall C_NetProperty(void *this, int index)"
+ },
+ "0073dee0": {
+  "module": "net_replication",
+  "name": "C_NetProperty::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0073df00": {
+  "module": "net_replication",
+  "name": "C_NetProperty::~C_NetProperty",
+  "proto": "void __thiscall ~C_NetProperty(void *this)"
+ },
+ "0073df60": {
+  "module": "net_replication",
+  "name": "C_NetProperty::Write",
+  "proto": "void __thiscall Write(void *this, void * stream, int player, bool delta)"
+ },
+ "0073dfb0": {
+  "module": "net_replication",
+  "name": "C_NetProperty::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "0073dfe0": {
+  "module": "net_replication",
+  "name": "C_NetProperty::Update",
+  "proto": "void __thiscall Update(void *this, float seconds)"
+ },
+ "0073e010": {
+  "module": "net_replication",
+  "name": "C_NetProperty::Refresh",
+  "proto": "void __thiscall Refresh(void *this)"
+ },
+ "0073e030": {
+  "module": "net_replication",
+  "name": "C_NetProperty::SetReadQuantizations",
+  "proto": "void __thiscall SetReadQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "0073e070": {
+  "module": "net_replication",
+  "name": "C_NetProperty::SetWriteQuantizations",
+  "proto": "void __thiscall SetWriteQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "0073e0b0": {
+  "module": "net_replication",
+  "name": "C_NetProperty::SetLag",
+  "proto": "void __thiscall SetLag(void *this, float lag)"
+ },
  "0073e0e0": {
   "module": "car",
   "name": "C_NetProperty::SetFlags",
@@ -38750,25 +38816,115 @@
   "name": "C_NetProperty::SetField",
   "proto": "void __thiscall SetField(void *this, int field, int value)"
  },
+ "0073e190": {
+  "module": "net_replication",
+  "name": "C_NetObject::C_NetObject",
+  "proto": "void * __thiscall C_NetObject(void *this)"
+ },
+ "0073e320": {
+  "module": "net_replication",
+  "name": "C_NetObject::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0073e340": {
+  "module": "net_replication",
+  "name": "C_NetObject::~C_NetObject",
+  "proto": "void __thiscall ~C_NetObject(void *this)"
+ },
+ "0073e460": {
+  "module": "net_replication",
+  "name": "C_NetObject::AddProperty",
+  "proto": "void * __thiscall AddProperty(void *this, int index)"
+ },
  "0073e690": {
   "module": "controller",
   "name": "C_NetObject::GetProperty",
   "proto": "void * __thiscall GetProperty(void *this, int index)"
  },
+ "0073e6d0": {
+  "module": "net_replication",
+  "name": "C_NetObject::Write",
+  "proto": "bool __thiscall Write(void *this, void * stream, int player, bool fromClient)"
+ },
+ "0073e890": {
+  "module": "net_replication",
+  "name": "C_NetObject::Read",
+  "proto": "void __thiscall Read(void *this, void * stream, int sender, bool fromClient)"
+ },
+ "0073e970": {
+  "module": "net_replication",
+  "name": "C_NetObject::QueueMessage",
+  "proto": "void __thiscall QueueMessage(void *this, void * msg, int sentTo, bool outgoing)"
+ },
  "0073e9d0": {
-  "module": "car",
+  "module": "net_replication",
   "name": "C_NetObject::PopMessage",
-  "proto": "void * __thiscall PopMessage(void *this, int unknown)"
+  "proto": "void * __thiscall PopMessage(void *this, bool outgoing)"
+ },
+ "0073ea30": {
+  "module": "net_replication",
+  "name": "C_NetObject::ClearMessages",
+  "proto": "void __thiscall ClearMessages(void *this, bool release, bool outgoing, bool force)"
+ },
+ "0073eab0": {
+  "module": "net_replication",
+  "name": "C_NetObject::EraseMessageNode",
+  "proto": "void __stdcall EraseMessageNode(void * iterator, void * list)"
+ },
+ "0073eaf0": {
+  "module": "net_replication",
+  "name": "C_NetObject::Tick",
+  "proto": "void __thiscall Tick(void *this, float seconds)"
+ },
+ "0073eb20": {
+  "module": "net_replication",
+  "name": "C_NetObject::Update",
+  "proto": "void __thiscall Update(void *this, float seconds)"
+ },
+ "0073ec30": {
+  "module": "net_replication",
+  "name": "C_NetObject::Refresh",
+  "proto": "void __thiscall Refresh(void *this)"
+ },
+ "0073ec60": {
+  "module": "net_replication",
+  "name": "C_NetObject::GetReadQuantizations",
+  "proto": "void __thiscall GetReadQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "0073ec80": {
+  "module": "net_replication",
+  "name": "C_NetObject::GetWriteQuantizations",
+  "proto": "void __thiscall GetWriteQuantizations(void *this, void * value, void * delta, void * rate)"
  },
  "0073eca0": {
-  "module": "car",
-  "name": "C_NetObject::SetQuantizations1",
-  "proto": "void __thiscall SetQuantizations1(void *this, S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c)"
+  "module": "net_replication",
+  "name": "C_NetObject::SetWriteQuantizations",
+  "proto": "void __thiscall SetWriteQuantizations(void *this, void * value, void * delta, void * rate)"
  },
  "0073ecf0": {
-  "module": "car",
-  "name": "C_NetObject::SetQuantizations0",
-  "proto": "void __thiscall SetQuantizations0(void *this, S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c)"
+  "module": "net_replication",
+  "name": "C_NetObject::SetReadQuantizations",
+  "proto": "void __thiscall SetReadQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "0073ed40": {
+  "module": "net_replication",
+  "name": "C_NetObject::SetPropertyField2",
+  "proto": "void __thiscall SetPropertyField2(void *this, int value)"
+ },
+ "0073ed80": {
+  "module": "net_replication",
+  "name": "C_NetObject::SetLag",
+  "proto": "void __thiscall SetLag(void *this, float lag)"
+ },
+ "0073edc0": {
+  "module": "net_replication",
+  "name": "C_NetObject::HasDataToSend",
+  "proto": "bool __fastcall HasDataToSend(void * object)"
+ },
+ "0073ede0": {
+  "module": "net_replication",
+  "name": "C_NetObject::SecondsSinceRead",
+  "proto": "float __fastcall SecondsSinceRead(void * object)"
  },
  "0073ee20": {
   "module": "car",
@@ -38806,15 +38962,90 @@
   "module": "zz_idioms",
   "name": "construct_copy4_73efe0"
  },
+ "0073f020": {
+  "module": "net_replication",
+  "name": "C_NetReplication::C_NetReplication",
+  "proto": "void * __thiscall C_NetReplication(void *this)"
+ },
+ "0073f0b0": {
+  "module": "net_replication",
+  "name": "C_NetReplication::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "0073f0d0": {
+  "module": "net_replication",
+  "name": "C_NetReplication::~C_NetReplication",
+  "proto": "void __thiscall ~C_NetReplication(void *this)"
+ },
+ "0073f150": {
+  "module": "net_replication",
+  "name": "C_NetReplication::Reset",
+  "proto": "void __fastcall Reset(void * replication)"
+ },
+ "0073f1e0": {
+  "module": "net_replication",
+  "name": "C_NetReplication::Write",
+  "proto": "bool __thiscall Write(void *this, void * stream, int player, bool fromClient)"
+ },
+ "0073f320": {
+  "module": "net_replication",
+  "name": "C_NetReplication::Read",
+  "proto": "void __thiscall Read(void *this, void * stream, uint forwardTo, bool fromClient)"
+ },
+ "0073f550": {
+  "module": "net_replication",
+  "name": "C_NetReplication::Update",
+  "proto": "void __thiscall Update(void *this, float seconds)"
+ },
+ "0073f590": {
+  "module": "net_replication",
+  "name": "C_NetReplication::Refresh",
+  "proto": "void __thiscall Refresh(void *this)"
+ },
+ "0073f5c0": {
+  "module": "net_replication",
+  "name": "C_NetReplication::SetWriteQuantizations",
+  "proto": "void __thiscall SetWriteQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "0073f620": {
+  "module": "net_replication",
+  "name": "C_NetReplication::SetReadQuantizations",
+  "proto": "void __thiscall SetReadQuantizations(void *this, void * value, void * delta, void * rate)"
+ },
+ "0073f680": {
+  "module": "net_replication",
+  "name": "C_NetReplication::CreateObject",
+  "proto": "void * __thiscall CreateObject(void *this, int id)"
+ },
+ "0073f880": {
+  "module": "net_replication",
+  "name": "C_NetReplication::InitObject",
+  "proto": "void __thiscall InitObject(void *this, void * object)"
+ },
  "0073f900": {
   "module": "controller",
   "name": "C_NetReplication::RemoveObject",
   "proto": "void __thiscall RemoveObject(void *this, void *object)"
  },
+ "0073f970": {
+  "module": "net_replication",
+  "name": "C_NetReplication::DeleteObjects",
+  "proto": "void __fastcall DeleteObjects(void * replication)"
+ },
  "0073f9c0": {
   "module": "controller",
   "name": "C_NetReplication::FindObject",
   "proto": "void * __thiscall FindObject(void *this, int id, bool create)"
+ },
+ "0073fa10": {
+  "module": "net_replication",
+  "name": "C_NetReplication::ScanObjects",
+  "proto": "void __fastcall ScanObjects(void * replication)"
+ },
+ "0073fa30": {
+  "module": "net_replication",
+  "name": "C_NetReplication::SetLag",
+  "proto": "void __thiscall SetLag(void *this, float lag)"
  },
  "0073fa70": {
   "module": "zz_idioms",
@@ -38835,6 +39066,21 @@
  "0073fb00": {
   "module": "zz_idioms",
   "name": "construct_copy4_73fb00"
+ },
+ "0073fb40": {
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::C_NetObjectMessage",
+  "proto": "void * __thiscall C_NetObjectMessage(void *this, int type)"
+ },
+ "0073fb80": {
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::SentToAll",
+  "proto": "bool __fastcall SentToAll(void * msg)"
+ },
+ "0073fb90": {
+  "module": "net_replication",
+  "name": "C_NetObjectMessage::Expired",
+  "proto": "bool __thiscall Expired(void *this)"
  },
  "0073fbe0": {
   "module": "net_replication",
@@ -39034,6 +39280,26 @@
   "module": "net_replication",
   "name": "C_NetDirTrack::SetFlags",
   "proto": "void __thiscall SetFlags(void *this, uint flags)"
+ },
+ "00741510": {
+  "module": "net_replication",
+  "name": "C_NetViewCone::C_NetViewCone",
+  "proto": "void * __thiscall C_NetViewCone(void *this)"
+ },
+ "00741530": {
+  "module": "net_replication",
+  "name": "C_NetViewCone::ScalarDeletingDestructor",
+  "proto": "void * __thiscall ScalarDeletingDestructor(void *this, uchar flags)"
+ },
+ "00741550": {
+  "module": "net_replication",
+  "name": "C_NetViewCone::~C_NetViewCone",
+  "proto": "void __thiscall ~C_NetViewCone(void *this)"
+ },
+ "00741560": {
+  "module": "net_replication",
+  "name": "C_NetViewCone::Contains",
+  "proto": "bool __thiscall Contains(void *this, float * pos)"
  },
  "00742850": {
   "module": "game",
@@ -44942,6 +45208,12 @@
   "module": "app",
   "name": "g_netGame"
  },
+ "0097d084": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netReplication",
+  "type": "void *"
+ },
  "00981e6c": {
   "data": true,
   "module": "app",
@@ -44984,6 +45256,12 @@
   "data": true,
   "module": "net_bitstream",
   "name": "g_netPlayerCount"
+ },
+ "00982df8": {
+  "data": true,
+  "module": "net_replication",
+  "name": "g_netPerfFrequency",
+  "type": "longlong"
  },
  "00982e10": {
   "data": true,

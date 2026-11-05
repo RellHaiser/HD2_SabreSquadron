@@ -8729,6 +8729,39 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 291 errors in 54 of 405 files. ret_audit --src: 52.
   - Stats: 9,629 of 12,306 functions by hand or absorbed (86.2 % by size).
 
+  PART 10b DONE (2026-11-05): the replicated objects (net/net_object.*, new).
+  - C_NetObjectMessage (vtable 0x00810630): the sent mask (+0x20, set by QueueMessage; MarkSent 0x004c13c0,
+    SentToAll 0x0073fb80), the reference count (+0x24, was unknown24), the age (Update 0x004c13f0, Expired 0x0073fb90).
+  - C_NetProperty (0x0081641c, 0x580 bytes): a position and a direction track sharing the flags word (6-bit fields;
+    field 0 the components 7, field 1 3), the last values written to each of 32 players; Write / Read / Update,
+    SetFlags / SetField / SetLag, the quantisations (all stored, the direction track keeps its own).
+  - C_NetObject (0x00816448, 0x80 bytes): its properties (property 1 made with it; AddProperty 0x0073e460), the
+    received and outgoing message lists (QueueMessage 0x0073e970, PopMessage 0x0073e9d0, ClearMessages 0x0073ea30),
+    the send mask (NET_SEND_PROPERTIES / MESSAGES / STATE), the live flag (+0x3C, was unknown3C: SetLive), forwarding
+    (+0x40, was unknown40: SetForwarding), the players written to this second, the state handlers and the message
+    factory; Write 0x0073e6d0 (properties as deltas after the first write each second; each message once per player
+    of its side, off the queue and deleted when sent to all and held by no queue), Read 0x0073e890 (the server
+    forwards the messages, marked as sent to the players given), Update 0x0073eb20 (a property's target stops after
+    0.4 s without data). Fix: ClearMessages does not loop for ever on a message still held (the original does not
+    move on unless it deletes).
+  - C_NetReplication (0x0081646c, 0xE8 bytes; g_netReplication): the objects (9-bit ids, 0x1FF ends), the local
+    player's object (+0x30), the view cone filter (C_NetViewCone 0x00816594: within cos 0.737 of the viewer's
+    direction), the 1-bit write / read epochs (were SetUnknownC4 / C8), the bits counters, the factory makers
+    (+0xE0 / +0xE4) InitObject 0x0073f880 gives each object; Read 0x0073f320 drops the data of objects not live or of
+    the other epoch into a scratch object (its messages leak, as in the original); the local object's messages are
+    dropped. Tick30 is GetLocalObject().Update.
+  - S_PerfTimer 0x0073ee20..0x0073ee90 (game/perf_timer.cpp, ported in 2c) recorded as ported; the objects' static
+    initialisers and std::list / vector internals absorbed. A few accessors stay out of line (the vehicle harness
+    fakes them: GetTrack, GetFlags, SetSendMask, SetLive, GetLocalId, ...).
+  - Harnesses: net (net_object_test.inc: messages, properties, objects, queues, writes / reads / forwarding,
+    silence, the view cone, the replication's epochs, scratch and local objects, ownership with delete tracking);
+    the vehicle harness's fakes derive from the real C_NetObject now; mp_setup builds again (its stub's
+    S_ServerEntry and the net player table; its test data is not on this machine). All factory checkers and the
+    11 other vehicle builds' baselines clean.
+  - Mutations: mutations/mutate_10b.py: 342: 292 killed, 27 not building, 23 equivalent.
+  - Build: MSVC clean. Tier 1: 288 errors in 53 of 398 files. ret_audit --src: 52.
+  - Stats: 9,717 of 12,306 functions by hand or absorbed (86.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

@@ -262,13 +262,13 @@ void C_StaticWeapon::StartMission(bool server)          // 0x006036d0
     m_storeChanged = IsServer();
     if (!IsLocalGame()) {
         m_netObject = g_netReplication->FindObject(GetNetId(), true);
-        m_netObject->SetUnknown3C(1);
+        m_netObject->SetLive(1);
         m_netObject->SetSendMask(2);
-        m_netObject->SetUnknown40(false);
+        m_netObject->SetForwarding(false);
         m_netObject->SetMessageFactory(&MakeSeatWeaponMessage, this);
         if (IsServer()) {
-            g_netReplication->SetUnknownC4(0);
-            g_netReplication->SetUnknownC8(1);
+            g_netReplication->SetWriteEpoch(0);
+            g_netReplication->SetReadEpoch(1);
         }
     }
     for (int seat = 0;; ++seat) {
@@ -481,7 +481,7 @@ void C_StaticWeapon::ReadMessages()                     // 0x00603290
             break;
         }
         // (Queued again it is not deleted: the queue holds it.)
-        if (msg->unknown24 < 1)
+        if (msg->refCount < 1)
             delete msg;
     }
 }

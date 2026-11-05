@@ -534,12 +534,6 @@ f_00733700.cpp:5874:26: cannot convert 'tier1::u_short' to 'u_short' {aka 'short
     while (uVar1 = ntohs((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)((u_short)
 f_00733700.cpp:63:35: invalid 'static_cast' from type 'tier1::u_short' to type 'uint64_t' {aka 'long long unsigned int'}
     pcVar9 = pcVar8;
-f_0073eff0.cpp:211:20: incompatible types in assignment of 'tier1::uchar' {aka 'unsigned char'} to 'tier1::uchar [4]' {aka 'unsigned char [4]'}
-    local_30 = *(uchar *)(piVar3 + 0x17);
-f_0073eff0.cpp:398:12: 'void*' is not a pointer-to-object type
-    iVar1 = (*_this->m_0e4)();
-f_0073eff0.cpp:401:12: 'void*' is not a pointer-to-object type
-    iVar1 = (*_this->m_0e0)();
 f_00742160.cpp:94:28: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}
     iVar1 = CoCreateInstance((IID *)&DAT_00819198,(LPUNKNOWN)0x0,1,(IID *)&DAT_00819168,&local_24);
 f_00742160.cpp:132:28: invalid initialization of reference of type 'const IID&' {aka 'const GUID&'} from expression of type 'IID*' {aka 'GUID*'}

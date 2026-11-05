@@ -416,81 +416,9 @@ struct S_MultiplayerSettings {
 extern int g_netMaxFreq;                            // 0x009820d8
 extern int g_netMaxPing;                            // 0x009820d4
 extern int g_netMaxInactivity;                      // 0x009820dc
-// Replication of actors to the clients (the object 0x0097d084 points to).
-// The replicated values (C_NetTrack, C_NetDirTrack): net/net_track.h.
-#include "net/net_track.h"
-class C_NetProperty {
-public:
-    C_NetPositionTrack &GetTrack();                 // this + 0x30
-    C_NetDirTrack &GetDirTrack();                   // this + 0xC0
-    // Sets 6-bit field `field` of the word at +0x20 to `value` and hands the word to both tracks
-    // (their vtable +0x14; the car's StartMission sets field 2 to 0x3B; not identified).
-    void SetField(int field, int value);            // 0x0073e110
-    // The whole word (+0x20), likewise handed to both tracks.
-    uint32_t GetFlags() const;
-    void SetFlags(uint32_t flags);                  // 0x0073e0e0
-};
-// A message of a replicated object (vtable 0x00810630, 0x30 bytes), queued on the object for
-// the other machines (C_NetObject::QueueMessage; its slots are not identified).
-class C_NetObjectMessage {
-public:
-    explicit C_NetObjectMessage(int type);          // 0x0073fb40
-    virtual ~C_NetObjectMessage();                  // vtable +0x10 (scalar deleting)
-    // The message's data after its type (vtable +0x20 / +0x24; pure in the base).
-    virtual void Write(C_BitStream *stream) = 0;
-    virtual void Read(C_BitStream *stream) = 0;
-    int GetType() const { return type; }
-    int type;                                       // +0x1C
-    int sender;                                     // +0x20 C_NetObject::QueueMessage's
-    int unknown24;                                  // +0x24 the receiver deletes it below 1 (not identified)
-    bool fromClient = false;                        // +0x2C (the AI sets it on clients)
-};
-// The owner's state handlers of a net object (the controllers').
-using NetStateHandler = void (__fastcall *)(void *context, C_BitStream *stream);
-// Makes the object's message whose type `stream` holds (`write`: writes the number of types
-// instead; returns null).
-using NetMessageFactory = C_NetObjectMessage *(__fastcall *)(void *context, C_BitStream *stream, bool write);
-struct S_NetQuantization;                           // net/bitstream.h
-class C_NetObject {
-public:
-    // Two sets of three quantisations (vtable +0x00: +0x04..+0x0C; +0x04: +0x10..+0x18), each
-    // also handed to every property (their vtable +0x00 / +0x04; the car's StartMission passes
-    // null and its two quantisations, the smaller first, to both; not identified further).
-    void SetQuantizations0(S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c);   // 0x0073ecf0
-    void SetQuantizations1(S_NetQuantization *a, S_NetQuantization *b, S_NetQuantization *c);   // 0x0073eca0
-    C_NetProperty *GetProperty(int index);          // 0x0073e690
-    // The replication of `seconds` (vtable +0x08).
-    void Update(float seconds);
-    // The next message received for the object (null: none; `unknown` 0).
-    C_NetObjectMessage *PopMessage(int unknown);    // 0x0073e9d0
-    // Queues `msg` for sending (reliable: the queue at +0x70, else +0x68); `sender` goes to
-    // the message's +0x20.
-    void QueueMessage(C_NetObjectMessage *msg, int sender, bool reliable);   // 0x0073e970
-    // Counts `seconds` up to a second, then clears +0x50 (not identified).
-    void Tick(float seconds);                       // 0x0073eaf0
-    // The handlers that read / write the owner's state (+0x54 / +0x58, context +0x5C) and the
-    // one at +0x64 (context +0x60).
-    void SetStateHandlers(NetStateHandler read, NetStateHandler write, void *context);
-    // The factory of the object's messages (+0x64, context +0x60).
-    void SetMessageFactory(NetMessageFactory factory, void *context);
-    // +0x38: 7 normally, 0 while frozen (inferred: what is sent).
-    void SetSendMask(int mask);
-    void SetUnknown3C(int value);                   // +0x3C
-    int GetUnknown3C() const;                       // (the car's state handler applies a state while it is set)
-    void SetUnknown40(bool value);                  // +0x40
-};
-class C_NetReplication {
-public:
-    C_NetObject *FindObject(int id, bool create);   // 0x0073f9c0
-    void RemoveObject(C_NetObject *object);         // 0x0073f900
-    int GetLocalId() const;                         // +0xDC (the sender of the messages)
-    // The server's player controller sets them at Attach (+0xC4 = 0, +0xC8 = 1; not identified).
-    void SetUnknownC4(int value);
-    void SetUnknownC8(int value);
-    // The object at +0x30, its vtable +0x08 (the local player's tick in network games).
-    void Tick30(float seconds);
-};
-extern C_NetReplication *g_netReplication;          // 0x0097d084
+// The replication of actors to the clients (C_NetProperty, C_NetObject, C_NetObjectMessage, C_NetReplication,
+// g_netReplication): net/net_object.h.
+#include "net/net_object.h"
 
 // Soldier states in network messages (S_SoldierState, game/human.h).
 class C_NetMessage;

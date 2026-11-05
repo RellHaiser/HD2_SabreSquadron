@@ -1,20 +1,76 @@
-// The net module's replication (part 10): the tracks (net/net_track.cpp, part 10a). MinGW, float math as the
-// game's (SSE); run net_test.exe ("net: N checks, 0 failures"). Mutations: mutations/mutate_10a.py with the
-// scratchpad's mutnet.py (it builds this harness).
+// The net module's replication (part 10): the tracks (net/net_track.cpp, part 10a), the objects
+// (net/net_object.cpp, part 10b: net_object_test.inc). MinGW, float math as the game's (SSE); run net_test.exe
+// ("net: N checks, 0 failures"). Mutations: mutations/mutate_10a.py, mutate_10b.py with the scratchpad's mutnet.py
+// (it builds this harness).
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <cstdlib>
+#include <malloc.h>
+#include <new>
 
 #define protected public
 #define private public
 #include "net/bitstream.h"
 #include "net/net_track.h"
+#include "net/net_object.h"
 #undef private
+#include <windows.h>
 #undef protected
 
 S_NetPlayer *g_netPlayerTable;
 int g_netPlayerCount;
+
+// (Part 10b.) The deletes, recorded while tracking (a fixed array: recording must not allocate).
+bool g_trackDeletes;
+void *g_deleted[512];
+int g_deletedCount;
+void RecordDelete(void *p)
+{
+    if (g_trackDeletes && p && g_deletedCount < 512)
+        g_deleted[g_deletedCount++] = p;
+}
+bool WasDeleted(const void *p)
+{
+    for (int i = 0; i < g_deletedCount; ++i) {
+        if (g_deleted[i] == p)
+            return true;
+    }
+    return false;
+}
+void *operator new(std::size_t n)
+{
+    if (void *p = std::malloc(n ? n : 1))
+        return p;
+    throw std::bad_alloc();
+}
+void operator delete(void *p) noexcept
+{
+    RecordDelete(p);
+    std::free(p);
+}
+void operator delete(void *p, std::size_t) noexcept
+{
+    RecordDelete(p);
+    std::free(p);
+}
+void *operator new(std::size_t n, std::align_val_t a)
+{
+    if (void *p = _aligned_malloc(n ? n : 1, static_cast<std::size_t>(a)))
+        return p;
+    throw std::bad_alloc();
+}
+void operator delete(void *p, std::align_val_t) noexcept
+{
+    RecordDelete(p);
+    _aligned_free(p);
+}
+void operator delete(void *p, std::size_t, std::align_val_t) noexcept
+{
+    RecordDelete(p);
+    _aligned_free(p);
+}
 
 namespace {
 
@@ -593,6 +649,8 @@ void TestQuantizationTests()
     CHECK(!msg.WriteQuantized(w4, &q, 7) && msg.WriteQuantized(w5, &q, 7) && msg.WriteQuantized(w6, &q, 1));
 }
 
+#include "net_object_test.inc"
+
 // ---- the direction track -------------------------------------------------------------------------------------------
 
 void TestDirDefaults()
@@ -942,6 +1000,7 @@ void TestDirRoundTrip()
 
 int main()
 {
+    std::setvbuf(stdout, nullptr, _IONBF, 0);
     TestDefaults();
     TestQuantizationSetters();
     TestSetValue();
@@ -956,6 +1015,19 @@ int main()
     TestDirRead();
     TestDirUpdate();
     TestDirRoundTrip();
+    TestMessage();
+    TestProperty();
+    TestPropertyWrite();
+    TestObjectBasics();
+    TestObjectQueues();
+    TestObjectWrite();
+    TestObjectRead();
+    TestObjectUpdate();
+    TestViewCone();
+    TestReplicationBasics();
+    TestReplicationWrite();
+    TestReplicationRead();
+    TestOwnership();
     std::printf("net: %d checks, %d failures\n", checks, failures);
     return failures != 0;
 }

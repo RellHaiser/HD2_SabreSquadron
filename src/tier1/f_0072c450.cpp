@@ -490,8 +490,8 @@ uint32_t FUN_0072cde0(int *param_1, ...)
                                  ((C_auto_0081646c *)param_1[5],uVar7,false);
             }
             if (pvVar3 != 0) {
-              FUN_0073ed80(pvVar3,(float)((*(int *)(param_1[0xcd] + 0x4c) >> 1) + 5 +
-                                         *(int *)(iVar6 + 0x50 + param_1[0x78])) * 0.001);
+              C_NetObject__SetLag(pvVar3,(float)((*(int *)(param_1[0xcd] + 0x4c) >> 1) + 5 +
+                                                *(int *)(iVar6 + 0x50 + param_1[0x78])) * 0.001);
             }
           }
           iVar6 += 0xc4;
@@ -524,7 +524,7 @@ uint32_t FUN_0072cde0(int *param_1, ...)
             pvVar3 = C_auto_0081646c__C_NetReplication__FindObject
                                ((C_auto_0081646c *)param_1[5],uVar7,false);
             if (pvVar3 != 0) {
-              FUN_0073ed80(pvVar3,(float)((*(int *)(iVar5 + 0x4c) >> 1) + 5) * 0.001);
+              C_NetObject__SetLag(pvVar3,(float)((*(int *)(iVar5 + 0x4c) >> 1) + 5) * 0.001);
               if ((param_1[0x1419] != 0) && (param_1[0x1419] < *(int *)(iVar5 + 0x4c))) {
                 *(int *)(iVar6 + 0xa4 + param_1[0x78]) = *(int *)(iVar6 + 0xa4 + param_1[0x78]) + 1;
               }
