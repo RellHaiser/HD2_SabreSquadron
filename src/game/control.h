@@ -180,6 +180,7 @@ public:
     I3D_frame *GetFrame() const { return m_frame; }
     int GetIndex() const { return m_index; }
     int GetType() const { return m_type; }
+    C_Control *GetParent() const { return m_parent; }
     bool IsInactive() const { return m_inactive; }
     bool IsShown() const { return m_shown; }
     // The control with `id` among this one's descendants (`up`: first up the parents to the top,

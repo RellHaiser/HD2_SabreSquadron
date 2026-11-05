@@ -27374,6 +27374,11 @@
   "name": "C_MpGameSetup::GetCurrentGroup",
   "proto": "void * __fastcall GetCurrentGroup(void *this)"
  },
+ "00617da0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::GetCurrentMaps",
+  "proto": "void * __fastcall GetCurrentMaps(void *this)"
+ },
  "00617dc0": {
   "module": "main_menu",
   "name": "C_MpGameSetup::GetCurrentRules",
@@ -27403,6 +27408,21 @@
   "module": "main_menu",
   "name": "C_MpGameSetup::SetGameType",
   "proto": "void __thiscall SetGameType(void *this, int type)"
+ },
+ "00619730": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::RemoveMap",
+  "proto": "void __thiscall RemoveMap(void *this, int index, int unused)"
+ },
+ "00619780": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::MoveMap",
+  "proto": "void __thiscall MoveMap(void *this, int from, int to)"
+ },
+ "00619930": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::AddMap",
+  "proto": "void __thiscall AddMap(void *this, int index, int unused)"
  },
  "00619af0": {
   "module": "main_menu",
@@ -27917,6 +27937,11 @@
   "name": "C_MainMenu::OnMapPresetPicked",
   "proto": "bool __thiscall OnMapPresetPicked(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
  },
+ "0062ca10": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMapLineDoubleClick",
+  "proto": "bool __thiscall OnMapLineDoubleClick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "0062ca80": {
   "module": "main_menu",
   "name": "C_MainMenu::OnHostNameChanged",
@@ -27946,6 +27971,21 @@
   "module": "main_menu",
   "name": "C_MainMenu::ShowServerOptions",
   "proto": "void __thiscall ShowServerOptions(C_MainMenu *this, int type)"
+ },
+ "0062e870": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMapLineDragStart",
+  "proto": "bool __thiscall OnMapLineDragStart(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062e9f0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMapLineDragMove",
+  "proto": "bool __thiscall OnMapLineDragMove(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062eb60": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnMapLineDrop",
+  "proto": "bool __thiscall OnMapLineDrop(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "0062f4b0": {
   "module": "main_menu",

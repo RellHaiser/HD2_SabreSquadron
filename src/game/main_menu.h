@@ -237,12 +237,19 @@ protected:
     // A preset picked (none: nothing): that rotation set up, the picked maps shown, start refreshed. True.
     static bool OnMapPresetPicked(void *menu, void *argument, C_Control *control, uint32_t notification,
                                   uint32_t value);      // 0x0062c970
+    // A map line double-clicked (notification 0x13; part 9h-xvi): a picked one taken off the rotation, a list's
+    // added to it; the picked maps, start. True.
     static bool OnMapLineDoubleClick(void *menu, void *argument, C_Control *control, uint32_t notification,
                                      uint32_t value);   // 0x0062ca10
+    // A drag started (no highlight frame / no copy made: false): a copy of the line's frame in the scene; the
+    // menu's hint the drag (its index, from a list or the picked one, the copy, the map's name). True.
     static bool OnMapLineDragStart(void *menu, void *argument, C_Control *control, uint32_t notification,
                                    uint32_t value);     // 0x0062e870
+    // Moved (no copy: false): the copy with the cursor; a picked map over another picked line moved there.
     static bool OnMapLineDragMove(void *menu, void *argument, C_Control *control, uint32_t notification,
                                   uint32_t value);      // 0x0062e9f0
+    // Dropped: the copy released; a picked map over the lists taken off, a list's over the picked ones added
+    // (moved to the line under the cursor); the drag ended, the picked maps, start. True.
     static bool OnMapLineDrop(void *menu, void *argument, C_Control *control, uint32_t notification,
                               uint32_t value);          // 0x0062eb60
     // The password screen (over the browser: a server's password; over the options: the parental lock's code):

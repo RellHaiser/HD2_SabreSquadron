@@ -142,6 +142,14 @@ public:
     S_MpMapGroup &GetCurrentGroup();                // 0x00617d50 (__fastcall)
     const S_MpMapGroup &GetCurrentGroup() const { return const_cast<C_MpGameSetup *>(this)->GetCurrentGroup(); }
     void SetGameType(int type) { gameType = type; } // 0x00619720
+    // The list's maps of the game type set up (0 .. 2; another: 3). (Part 9h-xvi.)
+    S_MpMapGroup &GetCurrentMaps();                 // 0x00617da0 (__fastcall)
+    // The current group's map `index` taken off (out of range: nothing). (`unused`: the callers push 0.)
+    void RemoveMap(int index, int unused = 0);      // 0x00619730
+    // The list's map `index` (of the game type set up) added last to the current group (out of range: nothing).
+    void AddMap(int index, int unused = 0);         // 0x00619930
+    // The current group's map `from` moved to the place `to` (unchecked).
+    void MoveMap(int from, int to);                 // 0x00619780
     // The rules of the game type set up (0 .. 2; another: 3). (Part 9h-xv.)
     S_MpGameRules &GetCurrentRules();               // 0x00617dc0 (__fastcall)
     const S_MpGameRules &GetCurrentRules() const { return const_cast<C_MpGameSetup *>(this)->GetCurrentRules(); }

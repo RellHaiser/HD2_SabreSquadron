@@ -125,3 +125,12 @@
 0062d950 C_MainMenu::ShowServerOptions | void __thiscall ShowServerOptions(C_MainMenu *this, int type)
 0062c6d0 C_MainMenu::GetEditText | void * __thiscall GetEditText(C_MainMenu *this, void * result, uint id)
 00617dc0 C_MpGameSetup::GetCurrentRules | void * __fastcall GetCurrentRules(void *this)
+# Part 9h-xvi: the create server screen's map lines (double click, drag and drop); the setup's map moves.
+0062ca10 C_MainMenu::OnMapLineDoubleClick | bool __thiscall OnMapLineDoubleClick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+0062e870 C_MainMenu::OnMapLineDragStart | bool __thiscall OnMapLineDragStart(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+0062e9f0 C_MainMenu::OnMapLineDragMove | bool __thiscall OnMapLineDragMove(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+0062eb60 C_MainMenu::OnMapLineDrop | bool __thiscall OnMapLineDrop(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00617da0 C_MpGameSetup::GetCurrentMaps | void * __fastcall GetCurrentMaps(void *this)
+00619730 C_MpGameSetup::RemoveMap | void __thiscall RemoveMap(void *this, int index, int unused)
+00619930 C_MpGameSetup::AddMap | void __thiscall AddMap(void *this, int index, int unused)
+00619780 C_MpGameSetup::MoveMap | void __thiscall MoveMap(void *this, int from, int to)

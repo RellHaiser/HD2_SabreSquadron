@@ -9,7 +9,7 @@ import re
 import sys
 
 CHECKS = ("mmStart mmStop mmUpdate mmDrain mmMessage mmEscape mmSelect mmBuild mmDescribe mmMainShown "
-          "pfDescribe pfRefresh pfShown pfList pfDifficulty pfMessage pfButtons pfEscape pfCreate pfRename spShown spHover spClick mpLists mpDescribe mpSaveSlot mpPick mxCampaign mxSingle mxMessages mxSecret mxStart mxOperation ciDescribe ciShown ciPick pwDescribe pwServer pwLock flDescribe flShown flAccept flHelpers giDescribe giRefresh giShow giStatus csDescribe csSetup csShown csStart csPicked csHost csRules csMapList csOptions csStyle csOption").split()
+          "pfDescribe pfRefresh pfShown pfList pfDifficulty pfMessage pfButtons pfEscape pfCreate pfRename spShown spHover spClick mpLists mpDescribe mpSaveSlot mpPick mxCampaign mxSingle mxMessages mxSecret mxStart mxOperation ciDescribe ciShown ciPick pwDescribe pwServer pwLock flDescribe flShown flAccept flHelpers giDescribe giRefresh giShow giStatus csDescribe csSetup csShown csStart csPicked csHost csRules csMapList csOptions csStyle csOption csMoves csDouble csDragStart csDragMove csDrop").split()
 
 
 def main():

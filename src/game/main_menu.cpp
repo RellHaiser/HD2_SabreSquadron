@@ -10,6 +10,7 @@
 #include "game/campaign.h"
 #include "game/control.h"
 #include "game/controls.h"
+#include "game/cursor.h"
 #include "game/game_app.h"
 #include "game/game_texts.h"
 #include "game/mp_game_setup.h"
@@ -2362,5 +2363,135 @@ bool C_MainMenu::OnServerOptionChanged(void *menu, void *, C_Control *control, u
     }
     EnableRow(ROW_INVERSE_DAMAGE, rules.friendlyFire != 0);
     EnableRow(ROW_RESPAWN_TIME, rules.allowRespawn != 0);
+    return true;
+}
+
+// ---- the create server screen's map lines: double click, drag and drop (part 9h-xvi) ---------------------
+
+namespace {
+
+// The picked list's lines (their parent's place in the maps panel).
+constexpr uint32_t PICKED_LIST_PART = 0x7000;
+// The screen's areas the cursor drops in: the maps' lists, the picked list (x between, y between; compared as
+// doubles, as the original does).
+constexpr double MAPS_AREA_LEFT = 0.08, MAPS_AREA_RIGHT = 0.26, PICKED_AREA_LEFT = 0.28, PICKED_AREA_RIGHT = 0.46,
+                 AREA_TOP = -0.3, AREA_BOTTOM = -0.68;
+// The dragged copy: a little in front of its line, facing up.
+constexpr float DRAG_LIFT = 0.1f;
+// The dragged map's name's style.
+constexpr uint8_t STYLE_DRAGGED = 0xD;
+
+bool InPickedArea(const S_vector &cursor)
+{
+    return cursor.x > PICKED_AREA_LEFT && cursor.x < PICKED_AREA_RIGHT && cursor.y < AREA_TOP && cursor.y > AREA_BOTTOM;
+}
+
+} // namespace
+
+bool C_MainMenu::OnMapLineDoubleClick(void *menu, void *, C_Control *control, uint32_t notification, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if (notification == CONTROL_NOTIFY_13 && control->GetParent()) {
+        C_MpGameSetup &setup = self->m_mpSettings->m_setup;
+        // A picked map's: taken off the rotation; another: added to it.
+        if ((control->GetParent()->GetId() & CHILD_INDEX_MASK) == PICKED_LIST_PART)
+            setup.RemoveMap(control->GetIndex());
+        else
+            setup.AddMap(control->GetIndex());
+        self->ShowPickedMaps();
+        self->RefreshStartButton();
+    }
+    return true;
+}
+
+bool C_MainMenu::OnMapLineDragStart(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if (!control->GetHighlightFrame())
+        return false;
+    // A copy of the line's frame, facing up, a little in front of it, in the scene.
+    I3D_frame *frame = control->GetHighlightFrame();
+    I3D_frame *copy = I3DGetDriver()->CreateVisual(frame->GetVisualType());
+    if (!copy)
+        return false;
+    copy->Duplicate(control->GetHighlightFrame());
+    copy->LinkTo(nullptr, 0);
+    copy->SetDir(S_vector(0.0f, 1.0f, 0.0f), 0.0f);
+    const S_vector &at = control->GetHighlightFrame()->GetWorldPos();
+    copy->SetPos(S_vector(at.x, at.y, at.z - DRAG_LIFT));
+    copy->LinkTo(self->m_scene->GetPrimarySector(), 1);
+    copy->SetOn(true);
+    copy->Update();
+    // From a game type's list (not the picked one): its maps; else the rotation's.
+    S_MenuHint &drag = self->m_hint;
+    drag.m_unknown04 = (control->GetId() & CHILD_INDEX_MASK) != PICKED_LIST_PART;
+    C_MpGameSetup &setup = self->m_mpSettings->m_setup;
+    const std::vector<C_MpMap *> &maps = drag.m_unknown04 ? setup.GetCurrentMaps().maps : setup.GetCurrentGroup().maps;
+    const auto index = static_cast<uint32_t>(control->GetIndex());
+    if (!maps.empty() && index < maps.size()) {
+        drag.m_unknown00 = static_cast<int>(index);
+        drag.m_frame = copy;
+        drag.SetText(maps[index]->name, STYLE_DRAGGED);
+        drag.m_on = true;
+    }
+    return true;
+}
+
+bool C_MainMenu::OnMapLineDragMove(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    S_MenuHint &drag = self->m_hint;
+    if (!drag.m_frame)
+        return false;
+    // The copy moved with the cursor (its depth the move's).
+    const S_vector &at = drag.m_frame->GetWorldPos();
+    S_vector move;
+    self->m_cursor->GetMove(&move);
+    drag.m_frame->SetPos(S_vector(at.x + move.x, at.y + move.y, 0.0f + move.z));
+    drag.m_frame->Update();
+    const bool fromList = drag.m_unknown04 != 0;
+    S_vector cursor;
+    self->m_cursor->GetPosition(&cursor);
+    // A picked map over another picked line: moved to its place.
+    if (InPickedArea(cursor) && !fromList) {
+        C_Control *over = self->FindControl(self->m_cursor->GetHoveredId());
+        if (over && (over->GetId() & CHILD_INDEX_MASK) == PICKED_LIST_PART && drag.m_unknown00 != over->GetIndex()) {
+            self->m_mpSettings->m_setup.MoveMap(drag.m_unknown00, over->GetIndex());
+            drag.m_unknown00 = over->GetIndex();
+            self->ShowPickedMaps();
+        }
+    }
+    return true;
+}
+
+bool C_MainMenu::OnMapLineDrop(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    S_MenuHint &drag = self->m_hint;
+    if (drag.m_frame)
+        drag.m_frame->Release();
+    const bool fromList = drag.m_unknown04 != 0;
+    drag.m_frame = nullptr;
+    S_vector cursor;
+    self->m_cursor->GetPosition(&cursor);
+    const bool inMaps = cursor.x > MAPS_AREA_LEFT && cursor.x < MAPS_AREA_RIGHT && cursor.y < AREA_TOP && cursor.y > AREA_BOTTOM;
+    C_MpGameSetup &setup = self->m_mpSettings->m_setup;
+    if (inMaps && !fromList) {
+        // A picked map dropped over the lists: taken off.
+        setup.RemoveMap(drag.m_unknown00);
+    } else if (InPickedArea(cursor) && fromList) {
+        // A list's map dropped over the picked ones: added last, then moved to the line under the cursor.
+        setup.AddMap(drag.m_unknown00);
+        drag.m_unknown00 = static_cast<int>(setup.GetCurrentGroup().maps.size()) - 1;
+        C_Control *over = self->FindControl(self->m_cursor->GetHoveredId());
+        if (over && (over->GetId() & CHILD_INDEX_MASK) == PICKED_LIST_PART && drag.m_unknown00 != over->GetIndex()) {
+            setup.MoveMap(drag.m_unknown00, over->GetIndex());
+            drag.m_unknown00 = over->GetIndex();
+            self->ShowPickedMaps();
+        }
+    }
+    drag.Reset();
+    self->ShowPickedMaps();
+    self->RefreshStartButton();
     return true;
 }

@@ -8455,6 +8455,26 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 301 errors in 55 files, 126 stubs. ret_audit --src: 52.
   - Stats: 9,224 of 12,306 functions by hand (84.9 % by size).
 
+  PART 9h-xvi DONE (2026-11-04): the create server screen's map lines: double click, drag and drop
+  (game/main_menu.cpp, game/mp_game_setup.cpp).
+  - OnMapLineDoubleClick 0x0062ca10 (notification 0x13, a parent: a picked line's map taken off the rotation, a
+    list's added). OnMapLineDragStart 0x0062e870 (AND ESP,-16; from the asm): a copy of the line's highlight frame
+    (CreateVisual of its visual type, Duplicate, facing (0, 1, 0), 0.1 in front, under the scene's primary
+    sector); the menu's hint holds the drag (m_unknown00 the index, m_unknown04 from a game type's list,
+    m_frame the copy, the map's name in style 0xD, m_on). OnMapLineDragMove 0x0062e9f0 (the copy with the cursor;
+    its depth is the move's: the asm stores 0 over z; a picked map over another picked line moved there).
+    OnMapLineDrop 0x0062eb60 (the copy released; a picked map over the lists' area taken off; a list's over the
+    picked area added last, then moved to the line under the cursor; the hint reset). The areas (x 0.08 .. 0.26
+    / 0.28 .. 0.46, y -0.68 .. -0.3) compare as doubles (FCOMP double): 0.28f and -0.3f are inside, 0.08f not.
+  - C_MpGameSetup: GetCurrentMaps 0x00617da0, RemoveMap 0x00619730, AddMap 0x00619930 (both RET 8: a second
+    argument the callers push as 0, unused), MoveMap 0x00619780. C_Control::GetParent() added.
+  - Harness: csMoves, csDouble, csDragStart, csDragMove, csDrop (the fake cursor's position, move and hovered
+    id; GmCreateVisual for the copy). All 15 factory checkers in both orders; mp_setup 54 of 54.
+  - Mutations: mutations/mutate_9h16.py (both files): 97: 77 killed, 17 not building, 3 equivalent (two bounds
+    no float reaches exactly; a null store Reset repeats).
+  - Build: MSVC clean. Tier 1: 301 errors in 55 files, 126 stubs. ret_audit --src: 52.
+  - Stats: 9,232 of 12,306 functions by hand (84.9 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

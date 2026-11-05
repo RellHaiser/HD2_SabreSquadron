@@ -167,7 +167,7 @@ uint32_t FUN_006ace20(void *_this,int *param_1, ...)
   int iVar2;
   uint8_t *puVar3;
   int *piVar4;
-  int iVar5;
+  void *pvVar5;
   char *a;
   uint32_t type;
   int *piVar6;
@@ -181,18 +181,18 @@ uint32_t FUN_006ace20(void *_this,int *param_1, ...)
   if (((cVar1 != '\0') && (type = *(uint32_t *)((int)_this + 0x224), -1 < (int)type)) && ((int)type < 4))
   {
     C_MpGameSetup__SetGameType(*(char **)((int)_this + 0x294),type);
-    iVar5 = FUN_00617da0(*(int *)((int)_this + 0x294));
+    pvVar5 = C_MpGameSetup__GetCurrentMaps(*(void **)((int)_this + 0x294));
     piVar6 = param_1;
-    type = *(uint32_t *)(iVar5 + 4);
+    type = *(uint32_t *)((int)pvVar5 + 4);
     if (type != 0) {
-      iVar8 = (int)(*(int *)(iVar5 + 8) - type) >> 2;
+      iVar8 = (int)(*(int *)((int)pvVar5 + 8) - type) >> 2;
       while (iVar8 != 0) {
         iVar8--;
         b = (char *)(*piVar6 + 8);
         if (*piVar6 == 0) {
           b = (char *)&DAT_00867a90;
         }
-        iVar2 = *(int *)(*(int *)(*(int *)(iVar5 + 4) + iVar8 * 4) + 1);
+        iVar2 = *(int *)(*(int *)(*(int *)((int)pvVar5 + 4) + iVar8 * 4) + 1);
         if (iVar2 == 0) {
           a = (char *)&DAT_00867a90;
         }
@@ -206,7 +206,7 @@ uint32_t FUN_006ace20(void *_this,int *param_1, ...)
             piVar6 = 0;
           }
           else {
-            puVar3 = *(uint8_t **)(*(int *)(iVar5 + 4) + iVar8 * 4);
+            puVar3 = *(uint8_t **)(*(int *)((int)pvVar5 + 4) + iVar8 * 4);
             *(uint32_t *)((int)piVar6 + 1) = 0;
             *(uint32_t *)((int)piVar6 + 5) = 0;
             *(uint8_t *)(piVar6 + 9) = GH_PIECE(param_1,0,1);
@@ -268,7 +268,7 @@ uint32_t FUN_006acff0(void *_this,int *param_1, ...)
   int iVar2;
   uint8_t *puVar3;
   int *piVar4;
-  int iVar5;
+  void *pvVar5;
   char *a;
   uint32_t type;
   int *piVar6;
@@ -282,18 +282,18 @@ uint32_t FUN_006acff0(void *_this,int *param_1, ...)
   if (((cVar1 != '\0') && (type = *(uint32_t *)((int)_this + 0x224), -1 < (int)type)) && ((int)type < 4))
   {
     C_MpGameSetup__SetGameType(*(char **)((int)_this + 0x294),type);
-    iVar5 = FUN_00617da0(*(int *)((int)_this + 0x294));
+    pvVar5 = C_MpGameSetup__GetCurrentMaps(*(void **)((int)_this + 0x294));
     piVar6 = param_1;
-    type = *(uint32_t *)(iVar5 + 4);
+    type = *(uint32_t *)((int)pvVar5 + 4);
     if (type != 0) {
-      iVar8 = (int)(*(int *)(iVar5 + 8) - type) >> 2;
+      iVar8 = (int)(*(int *)((int)pvVar5 + 8) - type) >> 2;
       while (iVar8 != 0) {
         iVar8--;
         b = (char *)(*piVar6 + 8);
         if (*piVar6 == 0) {
           b = (char *)&DAT_00867a90;
         }
-        iVar2 = *(int *)(*(int *)(*(int *)(iVar5 + 4) + iVar8 * 4) + 5);
+        iVar2 = *(int *)(*(int *)(*(int *)((int)pvVar5 + 4) + iVar8 * 4) + 5);
         if (iVar2 == 0) {
           a = (char *)&DAT_00867a90;
         }
@@ -307,7 +307,7 @@ uint32_t FUN_006acff0(void *_this,int *param_1, ...)
             piVar6 = 0;
           }
           else {
-            puVar3 = *(uint8_t **)(*(int *)(iVar5 + 4) + iVar8 * 4);
+            puVar3 = *(uint8_t **)(*(int *)((int)pvVar5 + 4) + iVar8 * 4);
             *(uint32_t *)((int)piVar6 + 1) = 0;
             *(uint32_t *)((int)piVar6 + 5) = 0;
             *(uint8_t *)(piVar6 + 9) = GH_PIECE(param_1,0,1);

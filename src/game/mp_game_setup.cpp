@@ -655,3 +655,36 @@ S_MpGameRules &C_MpGameSetup::GetCurrentRules()
     default: return rules[3];
     }
 }
+
+S_MpMapGroup &C_MpGameSetup::GetCurrentMaps()
+{
+    switch (gameType) {
+    case 0: return maps[0];
+    case 1: return maps[1];
+    case 2: return maps[2];
+    default: return maps[3];
+    }
+}
+
+void C_MpGameSetup::RemoveMap(int index, int)
+{
+    std::vector<C_MpMap *> &group = GetCurrentGroup().maps;
+    if (index >= 0 && static_cast<size_t>(index) < group.size())
+        group.erase(group.begin() + index);
+}
+
+void C_MpGameSetup::AddMap(int index, int)
+{
+    const std::vector<C_MpMap *> &list = GetCurrentMaps().maps;
+    std::vector<C_MpMap *> &group = GetCurrentGroup().maps;
+    if (index >= 0 && static_cast<size_t>(index) < list.size())
+        group.push_back(list[static_cast<size_t>(index)]);
+}
+
+void C_MpGameSetup::MoveMap(int from, int to)
+{
+    std::vector<C_MpMap *> &group = GetCurrentGroup().maps;
+    C_MpMap *map = group[static_cast<size_t>(from)];
+    group.erase(group.begin() + from);
+    group.insert(group.begin() + to, map);
+}

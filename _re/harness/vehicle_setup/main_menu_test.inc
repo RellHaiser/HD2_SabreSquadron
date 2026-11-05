@@ -200,10 +200,16 @@ int C_NetGame::QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *), S
     return 1;
 }
 // (Part 9h-xiii: the create server screen's callbacks (a later sub-part's); the codecs' texts.)
-MM_CALLBACK(OnMapLineDoubleClick)
-MM_CALLBACK(OnMapLineDragStart)
-MM_CALLBACK(OnMapLineDragMove)
-MM_CALLBACK(OnMapLineDrop)
+// (Part 9h-xvi: a map line: its id, index, parent, highlight frame.)
+struct C_CsLine : C_Control {
+    C_CsLine(uint32_t id, int index, C_Control *parent, I3D_frame *highlight)
+        : C_Control(nullptr, id, parent), highlight(highlight)
+    {
+        m_index = index;
+    }
+    I3D_frame *highlight;
+    I3D_frame *GetHighlightFrame() const override { return highlight; }
+};
 int GetVoiceCodecTextId(int codec) { return 0xB40 + codec; }
 bool C_PlayerProfile::Save()
 {
@@ -282,7 +288,8 @@ struct S_MainMenuResults {
          flDescribe = true, flShown = true, flAccept = true, flHelpers = true,
          giDescribe = true, giRefresh = true, giShow = true, giStatus = true,
          csDescribe = true, csSetup = true, csShown = true, csStart = true, csPicked = true, csHost = true,
-         csRules = true, csMapList = true, csOptions = true, csStyle = true, csOption = true;
+         csRules = true, csMapList = true, csOptions = true, csStyle = true, csOption = true,
+         csMoves = true, csDouble = true, csDragStart = true, csDragMove = true, csDrop = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -2707,6 +2714,276 @@ void MainMenuTest(I3D_scene *scene)
         m.m_mpSettings = nullptr;
     }
 
+    // --- (part 9h-xvi) the create server screen's map lines: double click, drag and drop; the setup's moves ---
+    {
+        C_MainMenu m;
+        const auto Is = [](const std::string &got, const std::string &want) {
+            if (got != want)
+                std::printf("CSDRAG %s\nCSDRAG expected %s\n", got.c_str(), want.c_str());
+            return got == want;
+        };
+        C_MpMenuSettings settings;
+        m.m_mpSettings = &settings;
+        C_MpGameSetup &setup = settings.m_setup;
+        for (auto &group : setup.maps) {
+            for (C_MpMap *map : group.maps)
+                delete map;
+            group.maps.clear();
+        }
+        for (S_MpRotation &rotation : setup.rotations)
+            rotation.Clear();
+        C_MpMap a(C_str("ma"), C_str("da")), b(C_str("mb"), C_str("db")), c(C_str("mc"), C_str("dc")), d(C_str("md"), C_str("dd"));
+        setup.maps[1].maps = {&a, &b, &c};
+        setup.maps[3].maps = {&d};
+        setup.gameType = 1;
+        setup.rotation = 2;
+        setup.serverName = "Srv";
+        std::vector<C_MpMap *> &group = setup.rotations[2].types[1].maps;
+        const auto names = [&] {
+            std::string s;
+            for (C_MpMap *map : group)
+                s += map->GetName();
+            return s;
+        };
+        {
+            // The setup: the type's list (another type: the last); a map added (from the list), taken off, moved.
+            bool ok = true;
+            for (int type : {0, 1, 2, 3, 8}) {
+                setup.gameType = type;
+                ok &= &setup.GetCurrentMaps() == &setup.maps[type > 3 ? 3 : type];
+            }
+            setup.gameType = 1;
+            setup.AddMap(2);
+            setup.AddMap(0);
+            setup.AddMap(-1);
+            setup.AddMap(3);
+            ok &= names() == "mcma";
+            setup.AddMap(1);
+            setup.MoveMap(2, 0);
+            ok &= names() == "mbmcma";
+            setup.MoveMap(0, 2);
+            ok &= names() == "mcmamb";
+            setup.RemoveMap(-1);
+            setup.RemoveMap(3);
+            setup.RemoveMap(1);
+            ok &= names() == "mcmb";
+            group.clear();
+            setup.RemoveMap(0);
+            setup.AddMap(0);
+            ok &= names() == "ma";
+            setup.gameType = 3;
+            setup.AddMap(0);
+            ok &= setup.rotations[2].types[3].maps == std::vector<C_MpMap *>({&d});
+            setup.gameType = 1;
+            WM(r.csMoves, ok);
+        }
+        C_Control pickedList(nullptr, 0x24307000, nullptr), mapsList(nullptr, 0x24303000, nullptr);
+        const std::string start = "24900000 1000002 0 0; ", noStart = "24900000 1000001 0 0; ";
+        const auto picked = [&] {
+            std::string q = "0 10000a1 4004000 0; 24307000 2000085 0 0; ";
+            for (size_t i = 0; i < group.size(); ++i)
+                q += CmText("24307000 1000067 %x %x; ", static_cast<uint32_t>(i),
+                            static_cast<uint32_t>(reinterpret_cast<uintptr_t>(group[i])));
+            return q + "0 10000a1 4005000 0; ";
+        };
+        {
+            // Double click: a picked map taken off; a list's added; another notification / no parent: nothing.
+            bool ok = true;
+            group = {&a, &b};
+            CsQueue();
+            C_CsLine pickedLine(0x24307020, 1, &pickedList, nullptr), listLine(0x24303030, 2, &mapsList, nullptr),
+                orphan(0x24303030, 2, nullptr, nullptr);
+            ok &= C_MainMenu::OnMapLineDoubleClick(&m, nullptr, &pickedLine, CONTROL_NOTIFY_13, 0) && names() == "ma" &&
+                  Is(CsQueue(), picked() + start);
+            ok &= C_MainMenu::OnMapLineDoubleClick(&m, nullptr, &listLine, CONTROL_NOTIFY_13, 0) && names() == "mamc" &&
+                  Is(CsQueue(), picked() + start);
+            ok &= C_MainMenu::OnMapLineDoubleClick(&m, nullptr, &listLine, CONTROL_NOTIFY_CLICK, 0) && names() == "mamc" &&
+                  C_MainMenu::OnMapLineDoubleClick(&m, nullptr, &orphan, CONTROL_NOTIFY_13, 0) && names() == "mamc" &&
+                  CsQueue() == "";
+            group.clear();
+            ok &= C_MainMenu::OnMapLineDoubleClick(&m, nullptr, &pickedLine, CONTROL_NOTIFY_13, 0) &&
+                  Is(CsQueue(), picked() + noStart);
+            WM(r.csDouble, ok);
+        }
+        // The drag's frames: the line's (its world place), the copy made.
+        m.m_cursor = C_Cursor::Acquire(nullptr);
+        const auto cursor = [&](float x, float y, uint32_t hovered) {
+            g_csCursor.position = S_vector(x, y, 0.0f);
+            std::memcpy(g_csCursor.room + 8, &hovered, sizeof hovered);
+        };
+        void **const copyVt = new void *[MR_SLOTS];
+        std::copy(g_msFrameVt, g_msFrameVt + MR_SLOTS, copyVt);
+        copyVt[0x00 / 4] = reinterpret_cast<void *>(&MrFake<0x00>);
+        copyVt[0x4C / 4] = reinterpret_cast<void *>(&MrFake<0x4C, void *>);
+        copyVt[0x04 / 4] = reinterpret_cast<void *>(&MrFake<0x04>);
+        copyVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+        copyVt[0x0C / 4] = reinterpret_cast<void *>(&MrFake<0x0C, const S_vector *, float>);
+        S_MrObj *source = MsFrame("csds"), *copy = MsFrame("csdc");
+        source->vtable = copyVt;
+        copy->vtable = copyVt;
+        As<I3D_frame>(source)->m_worldMatrix.m[3][0] = 0.25f;
+        As<I3D_frame>(source)->m_worldMatrix.m[3][1] = -0.5f;
+        As<I3D_frame>(source)->m_worldMatrix.m[3][2] = 0.75f;
+        As<I3D_frame>(source)->m_frameFlags |= 0x20;
+        As<I3D_frame>(copy)->m_worldMatrix.m[3][0] = 0.5f;
+        As<I3D_frame>(copy)->m_worldMatrix.m[3][1] = 0.25f;
+        As<I3D_frame>(copy)->m_worldMatrix.m[3][2] = 2.0f;
+        As<I3D_frame>(copy)->m_frameFlags |= 0x20;
+        S_MrWorld world = MrWorld("csd");
+        m.m_scene = As<I3D_scene>(world.scene);
+        void *const oldVisual = g_driverVtable[0x50 / 4];
+        g_driverVtable[0x50 / 4] = reinterpret_cast<void *>(&GmCreateVisual);
+        g_gmVisual = As<I3D_frame>(copy);
+        // (The screen: the picked list's lines found under the cursor.)
+        C_MsScreen screen(nullptr, "csdscreen", 9u << 26);
+        C_FlControl *pool = new C_FlControl(0x24307000, &screen, 0x26, 0);
+        screen.m_children.push_back(pool);
+        for (int i = 0; i < 3; ++i)
+            pool->m_children.push_back(new C_CsLine(0x24307010 + 0x10 * static_cast<uint32_t>(i), i, pool, nullptr));
+        C_FlControl *listControl = new C_FlControl(0x24303000, &screen, 0x23, 0);
+        screen.m_children.push_back(listControl);
+        listControl->m_children.push_back(new C_CsLine(0x24303010, 0, listControl, nullptr));
+        m.m_screens.assign(10, nullptr);
+        m.m_screens[9] = &screen;
+        {
+            // A drag started: a copy of the line's frame (facing up, a little in front, in the scene); the hint the
+            // drag (its map's name). None without a highlight frame or a copy; out of range: copied, not dragged.
+            bool ok = true;
+            C_CsLine listLine(0x24303020, 1, &mapsList, As<I3D_frame>(source)), none(0x24303020, 1, &mapsList, nullptr),
+                pickedLine(0x24307020, 0, &pickedList, As<I3D_frame>(source)), outOfRange(0x24303020, 3, &mapsList, As<I3D_frame>(source));
+            m.m_hint.Reset();
+            g_gfLog.clear();
+            ok &= !C_MainMenu::OnMapLineDragStart(&m, nullptr, &none, CONTROL_NOTIFY_0A, 0) && g_gfLog.empty();
+            ok &= C_MainMenu::OnMapLineDragStart(&m, nullptr, &listLine, CONTROL_NOTIFY_0A, 0) && m.m_hint.m_on &&
+                  m.m_hint.m_unknown00 == 1 && m.m_hint.m_unknown04 == 1 && m.m_hint.m_frame == As<I3D_frame>(copy) &&
+                  m.m_hint.m_hasText && m.m_hint.m_box.m_runs.size() == 1 && m.m_hint.m_box.m_runs[0].style == 0xD &&
+                  std::string(m.m_hint.m_box.m_runs[0].text.c_str()) == "mb" &&
+                  Is(Join(g_gfLog), "csds 4; create visual 0; csdc 4c csds; csdc 38 null 0; csdc c (0 1 0) 0;"
+                                    " csdc 8 (0.25 -0.5 0.65); csdc 38 sector 1; csdc on 1; csdc 24; ");
+            m.m_hint.Reset();
+            group = {&c, &a};
+            ok &= C_MainMenu::OnMapLineDragStart(&m, nullptr, &pickedLine, CONTROL_NOTIFY_0A, 0) && m.m_hint.m_on &&
+                  m.m_hint.m_unknown00 == 0 && m.m_hint.m_unknown04 == 0;
+            m.m_hint.Reset();
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnMapLineDragStart(&m, nullptr, &outOfRange, CONTROL_NOTIFY_0A, 0) && !m.m_hint.m_on &&
+                  !m.m_hint.m_frame && GmInOrder(Join(g_gfLog), {"create visual 0", "csdc 24"});
+            group.clear();
+            ok &= C_MainMenu::OnMapLineDragStart(&m, nullptr, &pickedLine, CONTROL_NOTIFY_0A, 0) && !m.m_hint.m_on;
+            g_gmVisual = nullptr;
+            ok &= !C_MainMenu::OnMapLineDragStart(&m, nullptr, &listLine, CONTROL_NOTIFY_0A, 0) && !m.m_hint.m_on;
+            g_gmVisual = As<I3D_frame>(copy);
+            WM(r.csDragStart, ok);
+        }
+        {
+            // Moved: the copy with the cursor (its depth the move's); a picked map over another picked line moved
+            // there (only from the picked list, only in its area; x / y compared as doubles).
+            bool ok = true;
+            m.m_hint.Reset();
+            ok &= !C_MainMenu::OnMapLineDragMove(&m, nullptr, nullptr, 0, 0);
+            group = {&a, &b, &c};
+            m.m_hint.m_frame = As<I3D_frame>(copy);
+            m.m_hint.m_unknown00 = 0;
+            m.m_hint.m_unknown04 = 0;
+            m.m_hint.m_on = true;
+            g_csCursor.move = S_vector(0.125f, -0.25f, 0.5f);
+            cursor(0.3f, -0.5f, 0x24307030);
+            g_gfLog.clear();
+            CsQueue();
+            ok &= C_MainMenu::OnMapLineDragMove(&m, nullptr, nullptr, 0, 0) && names() == "mbmcma" &&
+                  m.m_hint.m_unknown00 == 2 && GmInOrder(Join(g_gfLog), {"csdc 8 (0.625 0 0.5)", "csdc 24"});
+            const std::string q = CsQueue();
+            ok &= q.find("24307000 2000085") != std::string::npos && q.find("10000a1") == std::string::npos;
+            // The same line: nothing; outside the area (each side); from a list; over another control: nothing.
+            const auto still = [&](float x, float y, uint32_t hovered, int from) {
+                group = {&a, &b, &c};
+                m.m_hint.m_unknown00 = 0;
+                m.m_hint.m_unknown04 = from;
+                cursor(x, y, hovered);
+                return C_MainMenu::OnMapLineDragMove(&m, nullptr, nullptr, 0, 0) && names() == "mambmc" &&
+                       m.m_hint.m_unknown00 == 0 && CsQueue() == "";
+            };
+            ok &= still(0.3f, -0.5f, 0x24307010, 0) && still(0.28f - 0.0001f, -0.5f, 0x24307030, 0) &&
+                  still(0.46f, -0.5f, 0x24307030, 0) && still(0.3f, -0.29f, 0x24307030, 0) &&
+                  still(0.3f, -0.68f, 0x24307030, 0) && still(0.3f, -0.5f, 0x24307030, 1) &&
+                  still(0.3f, -0.5f, 0x24303010, 0) && still(0.3f, -0.5f, 0x24399000, 0);
+            // (0.28f is above 0.28 as a double: inside.)
+            group = {&a, &b, &c};
+            m.m_hint.m_unknown00 = 0;
+            m.m_hint.m_unknown04 = 0;
+            cursor(0.28f, -0.6799999f, 0x24307020);
+            ok &= C_MainMenu::OnMapLineDragMove(&m, nullptr, nullptr, 0, 0) && names() == "mbmamc";
+            // (-0.3f is below -0.3 as a double: inside.)
+            group = {&a, &b, &c};
+            m.m_hint.m_unknown00 = 0;
+            cursor(0.3f, -0.3f, 0x24307020);
+            ok &= C_MainMenu::OnMapLineDragMove(&m, nullptr, nullptr, 0, 0) && names() == "mbmamc";
+            CsQueue();
+            WM(r.csDragMove, ok);
+        }
+        {
+            // Dropped: the copy released; a picked map over the lists taken off; a list's over the picked ones
+            // added (moved to the line under the cursor); else nothing. The drag ended; the picked maps, start.
+            bool ok = true;
+            const auto drop = [&](float x, float y, uint32_t hovered, int index, int from) {
+                m.m_hint.Reset();
+                m.m_hint.m_frame = As<I3D_frame>(copy);
+                m.m_hint.m_unknown00 = index;
+                m.m_hint.m_unknown04 = from;
+                m.m_hint.m_on = true;
+                cursor(x, y, hovered);
+                g_gfLog.clear();
+                const bool result = C_MainMenu::OnMapLineDrop(&m, nullptr, nullptr, 0, 0);
+                return result && !m.m_hint.m_on && !m.m_hint.m_frame && MrHas("csdc 0");
+            };
+            group = {&a, &b, &c};
+            ok &= drop(0.1f, -0.5f, 0, 1, 0) && names() == "mamc" && Is(CsQueue(), picked() + start);
+            group = {&a, &b, &c};
+            ok &= drop(0.1f, -0.5f, 0, 1, 1) && names() == "mambmc" && Is(CsQueue(), picked() + start);
+            group = {&a};
+            ok &= drop(0.3f, -0.5f, 0x24307010, 2, 1) && names() == "mcma" &&
+                  Is(CsQueue(), CmText("24307000 2000085 0 0; 24307000 1000064 0 %x; 24307000 1000067 1 %x; ",
+                                       static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&c)),
+                                       static_cast<uint32_t>(reinterpret_cast<uintptr_t>(&a))) +
+                                    picked() + start);
+            group = {&a};
+            ok &= drop(0.3f, -0.5f, 0x24307020, 2, 1) && names() == "mamc" && Is(CsQueue(), picked() + start);
+            group = {&a};
+            ok &= drop(0.3f, -0.5f, 0x24303010, 1, 1) && names() == "mamb" && Is(CsQueue(), picked() + start);
+            group = {&a, &b};
+            ok &= drop(0.3f, -0.5f, 0x24307010, 0, 0) && names() == "mamb" && Is(CsQueue(), picked() + start);
+            // (Each side of the lists' area, compared as doubles: 0.08f and -0.68f outside, 0.26f and -0.3f inside.)
+            for (const auto &at : {std::make_pair(0.08f, -0.5f), std::make_pair(0.2601f, -0.5f),
+                                   std::make_pair(0.1f, -0.29f), std::make_pair(0.1f, -0.68f)}) {
+                group = {&a, &b};
+                ok &= drop(at.first, at.second, 0, 0, 0) && names() == "mamb";
+            }
+            for (const auto &at : {std::make_pair(0.26f, -0.5f), std::make_pair(0.1f, -0.3f), std::make_pair(0.0801f, -0.6799f)}) {
+                group = {&a, &b};
+                ok &= drop(at.first, at.second, 0, 0, 0) && names() == "mb";
+            }
+            CsQueue();
+            // No copy: nothing released.
+            m.m_hint.Reset();
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnMapLineDrop(&m, nullptr, nullptr, 0, 0) && !MrHas("csdc 0");
+            CsQueue();
+            WM(r.csDrop, ok);
+        }
+        g_driverVtable[0x50 / 4] = oldVisual;
+        g_gmVisual = nullptr;
+        m.m_screens.clear();
+        m.m_hint.Reset();
+        m.m_cursor->Release();
+        m.m_cursor = nullptr;
+        m.m_scene = nullptr;
+        for (S_MpRotation &rotation : setup.rotations)
+            rotation.Clear();
+        for (auto &g : setup.maps)
+            g.maps.clear();
+        m.m_mpSettings = nullptr;
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -2799,7 +3076,8 @@ void MainMenuTest(I3D_scene *scene)
                 " pwDescribe %d pwServer %d pwLock %d flDescribe %d flShown %d"
                 " flAccept %d flHelpers %d giDescribe %d giRefresh %d giShow %d giStatus %d"
                 " csDescribe %d csSetup %d csShown %d csStart %d csPicked %d csHost %d"
-                " csRules %d csMapList %d csOptions %d csStyle %d csOption %d\n",
+                " csRules %d csMapList %d csOptions %d csStyle %d csOption %d"
+                " csMoves %d csDouble %d csDragStart %d csDragMove %d csDrop %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
@@ -2808,5 +3086,6 @@ void MainMenuTest(I3D_scene *scene)
                 r.flDescribe, r.flShown, r.flAccept, r.flHelpers,
                 r.giDescribe, r.giRefresh, r.giShow, r.giStatus,
                 r.csDescribe, r.csSetup, r.csShown, r.csStart, r.csPicked, r.csHost,
-                r.csRules, r.csMapList, r.csOptions, r.csStyle, r.csOption);
+                r.csRules, r.csMapList, r.csOptions, r.csStyle, r.csOption,
+                r.csMoves, r.csDouble, r.csDragStart, r.csDragMove, r.csDrop);
 }
