@@ -10,6 +10,7 @@
 
 #include "common/c_str.h"
 
+class C_BitStream;
 class C_chunk;
 class C_MpGameSetup;
 class C_XmlNode;
@@ -22,12 +23,21 @@ struct S_MpMapObjective {
     int type;                                       // +0x0C type="VIP": 1, else -1
     int team;                                       // +0x10 side: AXIS 0, ALLIED (or none) 1, else -1
     int vipUniform;                                 // +0x14 vip_uniform_id (VIP only; else -1)
+
+    // Sent to the clients (part 9i-iii): the allied text, the axis text, the points (16 bits each), the type (8),
+    // the team (2), the VIP's uniform (16); read back so (the type and team unsigned, the others signed).
+    void Write(C_BitStream *stream) const;          // 0x006ade20
+    void Read(C_BitStream *stream);                 // 0x006ade80
 };
 // A map's allowed ITEM (0x0C bytes; the old list's: the id only, the others -1).
 struct S_MpMapItem {
     int itemId;                                     // item_id
     int count;                                      // item_num
     int ammo;                                       // ammo_num
+
+    // Sent to the clients: the id (16 bits, read signed), the count and the ammo (8, unsigned).
+    void Write(C_BitStream *stream) const;          // 0x006adee0
+    void Read(C_BitStream *stream);                 // 0x006adf20
 };
 
 // A map of the map list (0x48 bytes; the original's strings sit unaligned at +0x01 / +0x05).
@@ -51,6 +61,11 @@ public:
     const std::vector<S_MpMapItem> &GetItems() const { return items; }
     // The allowed presets (ALLOWEDPRESETS' text; the equipment screen looks the presets' names up in it).
     const char *GetPresets() const { return presets.c_str(); }
+    // Sent to the clients (part 9i-iii): the name, the directory, the five bytes, the description (16 bits), the
+    // presets, the objectives and the items (an 8-bit count each); read back so (the bytes unsigned: -1 comes
+    // back 255; the strings 0x1000 at most).
+    void Write(C_BitStream *stream) const;          // 0x006adad0
+    void Read(C_BitStream *stream);                 // 0x006adc40
 
     uint8_t unknown00 = 0;                          // +0x00
     C_str name;                                     // +0x01 name

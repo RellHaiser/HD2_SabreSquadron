@@ -215,3 +215,184 @@ void MpSettingsTest(I3D_scene *)
     std::printf("mpsettings: msReset %d msRules %d msSetup %d msApply %d msRemove %d msAdd %d msClear %d msSelect %d\n",
                 r.msReset, r.msRules, r.msSetup, r.msApply, r.msRemove, r.msAdd, r.msClear, r.msSelect);
 }
+
+// (Part 9i-iii: the replication's tests, in the factory build: the strings of the fake streams, as item_test.inc's,
+// which the factory build does not have.)
+#ifndef ITEM_TEST
+std::vector<std::string> g_itStrings;
+void C_BitStream::WriteString(const char *text)
+{
+    g_itStrings.push_back(text);
+    reinterpret_cast<S_FakeStream *>(this)->bits.emplace_back(static_cast<uint32_t>(g_itStrings.size() - 1), -6);
+}
+void C_BitStream::ReadString(char *buffer, int bufferSize)
+{
+    buffer[0] = 0;
+    if (g_readPos >= g_readBits.size() || g_readBits[g_readPos].second != -6) {
+        g_readMismatch = true;
+        return;
+    }
+    const std::string &text = g_itStrings.at(g_readBits[g_readPos++].first);
+    std::snprintf(buffer, static_cast<size_t>(bufferSize), "%s", text.c_str());
+}
+#endif
+
+struct S_ReplResults {
+    bool rpWriteRules = true, rpReadRules = true, rpWriteMap = true, rpReadMap = true, rpCurrentMap = true;
+};
+
+void ReplicationTest()
+{
+    S_ReplResults r;
+    S_MultiplayerSettings *const s = g_mpSettings;
+    const S_MultiplayerSettings old = *s;
+    s->maps.clear();
+    const auto bits = [](const S_FakeStream &stream) {
+        std::string out;
+        for (const auto &b : stream.bits)
+            out += CmText("%x/%d ", b.first, b.second);
+        return out;
+    };
+    const int oldFreq = g_netMaxFreq, oldPing = g_netMaxPing, oldInactivity = g_netMaxInactivity;
+    {
+        // The rules: the listing and the game type (8 bits), the 22 rules (16), the net limits (16; the inactivity in s).
+        // (The limits start at 0.)
+        bool ok = g_netMaxFreq == 0 && g_netMaxPing == 0 && g_netMaxInactivity == 0;
+        s->unknown174 = 1;
+        s->gameType = 3;
+        int values[22];
+        for (int i = 0; i < 22; ++i)
+            values[i] = 200 + i;
+        values[18] = -1;
+        S_MpGameRules rules;
+        std::memcpy(&rules, values, sizeof values);
+        s->SetRules(rules);
+        g_netMaxFreq = 25;
+        g_netMaxPing = 600;
+        g_netMaxInactivity = 30500;
+        S_FakeStream stream{0, false, {}, false};
+        s->WriteRules(reinterpret_cast<C_BitStream *>(&stream));
+        std::string want = "1/8 3/8 ";
+        for (int i = 0; i < 22; ++i)
+            want += CmText("%x/16 ", static_cast<uint32_t>(values[i]));
+        want += "19/16 258/16 1e/16 ";
+        ok &= bits(stream) == want;
+        if (!ok)
+            std::printf("REPL rules %s\n", bits(stream).c_str());
+        WM(r.rpWriteRules, ok);
+    }
+    {
+        // Read back: 8 bits unsigned, the rules and limits sign-extended, the inactivity in ms.
+        bool ok = true;
+        g_readBits = {{0xFF, 8}, {2, 8}};
+        for (int i = 0; i < 22; ++i)
+            g_readBits.emplace_back(i == 3 ? 0xFFFE : 300 + i, 16);
+        g_readBits.emplace_back(0xFFFF, 16);
+        g_readBits.emplace_back(700, 16);
+        g_readBits.emplace_back(45, 16);
+        g_readPos = 0;
+        g_readMismatch = false;
+        s->ReadRules(nullptr);
+        S_MpGameRules got;
+        s->GetRules(got);
+        int values[22];
+        std::memcpy(values, &got, sizeof values);
+        ok &= !g_readMismatch && g_readPos == g_readBits.size() && s->unknown174 == 255 && s->gameType == 2 &&
+              values[0] == 300 && values[3] == -2 && values[21] == 321 && g_netMaxFreq == -1 && g_netMaxPing == 700 &&
+              g_netMaxInactivity == 45000;
+        WM(r.rpReadRules, ok);
+    }
+    // A map with objectives and items.
+    C_MpMap map(C_str("Oasis"), C_str("oasis_mp"));
+    map.aircraftAxis = 1;
+    map.aircraftAllied = -1;
+    map.balancedAxis = 3;
+    map.balancedAllied = 4;
+    map.frontline = 1;
+    map.description = -5;
+    map.presets = "p1;p2";
+    map.objectives = {{11, 12, 13, 1, 1, 14}, {21, 22, -23, -1, 2, -1}};
+    map.items = {{101, 2, 30}, {-2, 255, 1}};
+    S_FakeStream written{0, false, {}, false};
+    {
+        // Written: the name, the directory (strings), five bytes, the description (16), the presets; the objectives
+        // (8: their count; each: allied, axis, points 16, type 8, team 2, the VIP's uniform 16); the items (8; each: id
+        // 16, count and ammo 8).
+        bool ok = true;
+        g_itStrings.clear();
+        map.Write(reinterpret_cast<C_BitStream *>(&written));
+        ok &= bits(written) == "0/-6 1/-6 1/8 ffffffff/8 3/8 4/8 1/8 fffffffb/16 2/-6 2/8 c/16 b/16 d/16 1/8 1/2 e/16 "
+                               "16/16 15/16 ffffffe9/16 ffffffff/8 2/2 ffffffff/16 2/8 65/16 2/8 1e/8 fffffffe/16 ff/8 1/8 " &&
+              g_itStrings == std::vector<std::string>({"Oasis", "oasis_mp", "p1;p2"});
+        if (!ok)
+            std::printf("REPL map %s\n", bits(written).c_str());
+        WM(r.rpWriteMap, ok);
+    }
+    {
+        // Read back (the stream's values as the real stream masks them): the bytes unsigned, the shorts signed.
+        bool ok = true;
+        g_readBits.clear();
+        for (const auto &b : written.bits)
+            g_readBits.emplace_back(b.second > 0 && b.second < 32 ? b.first & ((1u << b.second) - 1u) : b.first, b.second);
+        g_readPos = 0;
+        g_readMismatch = false;
+        C_MpMap got(C_str("x"), C_str("y"));
+        got.objectives = {{1, 1, 1, 1, 1, 1}};
+        got.items = {{9, 9, 9}};
+        got.Read(nullptr);
+        ok &= !g_readMismatch && g_readPos == g_readBits.size() && std::string(got.GetName()) == "Oasis" &&
+              std::string(got.GetDirectory()) == "oasis_mp" && got.aircraftAxis == 1 && got.aircraftAllied == 255 &&
+              got.balancedAxis == 3 && got.balancedAllied == 4 && got.frontline == 1 && got.description == -5 &&
+              std::string(got.GetPresets()) == "p1;p2" && got.objectives.size() == 2 && got.items.size() == 2;
+        if (got.objectives.size() == 2 && got.items.size() == 2) {
+            const S_MpMapObjective &o = got.objectives[1];
+            ok &= got.objectives[0].axisText == 11 && got.objectives[0].alliedText == 12 && got.objectives[0].points == 13 &&
+                  got.objectives[0].type == 1 && got.objectives[0].team == 1 && got.objectives[0].vipUniform == 14 &&
+                  o.axisText == 21 && o.alliedText == 22 && o.points == -23 && o.type == 255 && o.team == 2 &&
+                  o.vipUniform == -1 && got.items[0].itemId == 101 && got.items[0].count == 2 && got.items[0].ammo == 30 &&
+                  got.items[1].itemId == -2 && got.items[1].count == 255 && got.items[1].ammo == 1;
+        }
+        WM(r.rpReadMap, ok);
+    }
+    {
+        // The current map written; read: the old maps deleted, the one read the current.
+        bool ok = true;
+        C_MpMap other(C_str("Other"), C_str("o"));
+        s->maps = {&other, &map};
+        s->currentMap = 1;
+        S_FakeStream stream{0, false, {}, false};
+        g_itStrings.clear();
+        s->WriteCurrentMap(reinterpret_cast<C_BitStream *>(&stream));
+        ok &= bits(stream) == bits(written);
+        auto *a = new C_MpMap(C_str("a"), C_str("a")), *b = new C_MpMap(C_str("b"), C_str("b"));
+        s->maps = {a, b};
+        s->currentMap = 1;
+        g_mmWatch = {a, b};
+        g_mmDeleted.clear();
+        g_deleteHook = &MmDeleteHook;
+        g_readBits.clear();
+        for (const auto &x : written.bits)
+            g_readBits.emplace_back(x.second > 0 && x.second < 32 ? x.first & ((1u << x.second) - 1u) : x.first, x.second);
+        g_readPos = 0;
+        g_readMismatch = false;
+        s->ReadCurrentMap(nullptr);
+        g_deleteHook = nullptr;
+        ok &= g_mmDeleted == std::vector<void *>({a, b}) && s->maps.size() == 1 && s->currentMap == 0 &&
+              std::string(s->maps[0]->GetName()) == "Oasis" && s->maps[0]->objectives.size() == 2 && !g_readMismatch;
+        for (C_MpMap *m : s->maps)
+            delete m;
+        s->maps.clear();
+        g_mmWatch.clear();
+        g_mmDeleted.clear();
+        WM(r.rpCurrentMap, ok);
+    }
+    g_readBits.clear();
+    g_readPos = 0;
+    g_itStrings.clear();
+    g_netMaxFreq = oldFreq;
+    g_netMaxPing = oldPing;
+    g_netMaxInactivity = oldInactivity;
+    *s = old;
+    std::printf("replication: rpWriteRules %d rpReadRules %d rpWriteMap %d rpReadMap %d rpCurrentMap %d\n", r.rpWriteRules,
+                r.rpReadRules, r.rpWriteMap, r.rpReadMap, r.rpCurrentMap);
+}

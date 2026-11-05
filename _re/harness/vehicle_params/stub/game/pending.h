@@ -143,7 +143,13 @@ struct S_MultiplayerSettings {
     void Clear();
     bool SelectMap(const char *name);
     C_MpMap *GetCurrentMap();
+    // (The replication, part 9i-iii.)
+    void WriteRules(class C_BitStream *stream);
+    void ReadRules(class C_BitStream *stream);
+    void WriteCurrentMap(class C_BitStream *stream);
+    void ReadCurrentMap(class C_BitStream *stream);
 };
+extern int g_netMaxFreq, g_netMaxPing, g_netMaxInactivity;
 enum : int { SESSION_NONE = 0, SESSION_JOINING = 1, SESSION_HOSTING = 2 };
 
 // --- the car's callbacks (game/car_callbacks.cpp; as the real header declares them) --------------

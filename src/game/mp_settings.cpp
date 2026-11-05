@@ -8,6 +8,7 @@
 
 #include "game/controls.h"
 #include "game/mp_game_setup.h"
+#include "net/bitstream.h"
 
 namespace {
 
@@ -177,4 +178,70 @@ bool S_MultiplayerSettings::SelectMap(const char *name)
 C_MpMap *S_MultiplayerSettings::GetCurrentMap()
 {
     return maps[static_cast<size_t>(currentMap)];
+}
+
+// ---- the session sent to the clients (part 9i-iii) --------------------------------------------------------
+
+int g_netMaxFreq = 0;
+int g_netMaxPing = 0;
+int g_netMaxInactivity = 0;
+
+namespace {
+
+// Each value's bits: the listing and the game type, a rule, the net limits.
+constexpr int BYTE_BITS = 8, RULE_BITS = 16;
+// The inactivity limit is sent in seconds.
+constexpr int MS_PER_SECOND = 1000;
+
+int ReadShort(C_BitStream *stream)
+{
+    return static_cast<int16_t>(stream->ReadBits(RULE_BITS));
+}
+
+} // namespace
+
+void S_MultiplayerSettings::WriteRules(C_BitStream *stream)
+{
+    stream->WriteBits(static_cast<uint32_t>(unknown174), BYTE_BITS);
+    stream->WriteBits(static_cast<uint32_t>(gameType), BYTE_BITS);
+    S_MpGameRules rules;
+    GetRules(rules);
+    int values[22];
+    std::memcpy(values, &rules, sizeof values);
+    for (int value : values)
+        stream->WriteBits(static_cast<uint32_t>(value), RULE_BITS);
+    stream->WriteBits(static_cast<uint32_t>(g_netMaxFreq), RULE_BITS);
+    stream->WriteBits(static_cast<uint32_t>(g_netMaxPing), RULE_BITS);
+    stream->WriteBits(static_cast<uint32_t>(g_netMaxInactivity / MS_PER_SECOND), RULE_BITS);
+}
+
+void S_MultiplayerSettings::ReadRules(C_BitStream *stream)
+{
+    unknown174 = static_cast<int>(stream->ReadBits(BYTE_BITS));
+    gameType = static_cast<int>(stream->ReadBits(BYTE_BITS));
+    int values[22];
+    for (int &value : values)
+        value = ReadShort(stream);
+    S_MpGameRules rules;
+    std::memcpy(&rules, values, sizeof values);
+    SetRules(rules);
+    g_netMaxFreq = ReadShort(stream);
+    g_netMaxPing = ReadShort(stream);
+    g_netMaxInactivity = ReadShort(stream) * MS_PER_SECOND;
+}
+
+void S_MultiplayerSettings::WriteCurrentMap(C_BitStream *stream)
+{
+    maps[static_cast<size_t>(currentMap)]->Write(stream);
+}
+
+void S_MultiplayerSettings::ReadCurrentMap(C_BitStream *stream)
+{
+    for (C_MpMap *map : maps)
+        delete map;
+    maps.clear();
+    auto *map = new C_MpMap(C_str(), C_str());
+    map->Read(stream);
+    maps.push_back(map);
+    currentMap = 0;
 }

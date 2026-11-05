@@ -348,19 +348,25 @@ f_007277b0.cpp:56:64: expected '(' before '*' token
     C_BitStream__WriteBits(param_1,(int)param_2[1],0x10);
 f_007277b0.cpp:56:65: expected primary-expression before '>' token
     C_BitStream__WriteBits(param_1,(int)param_2[1],0x10);
-f_007277b0.cpp:1821:15: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_007277b0.cpp:1490:25: incompatible types in assignment of 'tier1::uchar*' {aka 'unsigned char*'} to 'unsigned char [4]'
+    local_2b8._pad_0000 = (uchar  [4])&PTR_008159f8;
+f_007277b0.cpp:1495:25: incompatible types in assignment of 'tier1::uchar*' {aka 'unsigned char*'} to 'unsigned char [4]'
+    local_2b8._pad_0000 = (uchar  [4])&PTR_008159f8;
+f_007277b0.cpp:1505:32: ISO C++ forbids casting to an array type 'tier1::uchar [4]' {aka 'unsigned char [4]'}
+    if (local_2b8._pad_021c != (uchar  [4])0x0) {
+f_007277b0.cpp:1817:15: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     iVar5 = *DAT_0097ca00;
-f_007277b0.cpp:2285:24: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_007277b0.cpp:2281:24: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     piVar13 = (int *)*DAT_0097ca00;
-f_007277b0.cpp:2316:16: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_007277b0.cpp:2312:16: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     ptr = (int *)*DAT_0097ca00;
-f_007277b0.cpp:2348:12: '_flush' was not declared in this scope; did you mean 'flush'?
+f_007277b0.cpp:2344:12: '_flush' was not declared in this scope; did you mean 'flush'?
     pcVar6 = _flush;
-f_007277b0.cpp:2372:15: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_007277b0.cpp:2368:15: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     iVar7 = *DAT_0097c9f0;
-f_007277b0.cpp:2460:20: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_007277b0.cpp:2456:20: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     ptr = (int *)*DAT_0097c9f0;
-f_007277b0.cpp:2483:16: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
+f_007277b0.cpp:2479:16: invalid type argument of unary '*' (have 'uint32_t' {aka 'unsigned int'})
     ptr = (int *)*DAT_0097c9f0;
 f_007277b0.cpp:63:76: invalid 'static_cast' from type 'tier1::C_game*' to type 'uint64_t' {aka 'long long unsigned int'}
     uint32_t FUN_00727850(void *param_1,int *param_2,char param_3, ...)

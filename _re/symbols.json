@@ -35007,6 +35007,56 @@
   "name": "S_MultiplayerSettings::GetCurrentMap",
   "proto": "C_MpMap * __fastcall GetCurrentMap(S_MultiplayerSettings * settings)"
  },
+ "006ad840": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::WriteCurrentMap",
+  "proto": "void __thiscall WriteCurrentMap(void *this, void * stream)"
+ },
+ "006ad860": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::ReadCurrentMap",
+  "proto": "void __thiscall ReadCurrentMap(void *this, void * stream)"
+ },
+ "006ad990": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::WriteRules",
+  "proto": "void __thiscall WriteRules(void *this, void * stream)"
+ },
+ "006ada30": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::ReadRules",
+  "proto": "void __thiscall ReadRules(void *this, void * stream)"
+ },
+ "006adad0": {
+  "module": "mp_settings",
+  "name": "C_MpMap::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "006adc40": {
+  "module": "mp_settings",
+  "name": "C_MpMap::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "006ade20": {
+  "module": "mp_settings",
+  "name": "S_MpMapObjective::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "006ade80": {
+  "module": "mp_settings",
+  "name": "S_MpMapObjective::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
+ "006adee0": {
+  "module": "mp_settings",
+  "name": "S_MpMapItem::Write",
+  "proto": "void __thiscall Write(void *this, void * stream)"
+ },
+ "006adf20": {
+  "module": "mp_settings",
+  "name": "S_MpMapItem::Read",
+  "proto": "void __thiscall Read(void *this, void * stream)"
+ },
  "006ae210": {
   "module": "zz_idioms",
   "name": "empty_function_6ae210"
@@ -44688,6 +44738,24 @@
   "data": true,
   "module": "hud",
   "name": "g_serverName"
+ },
+ "009820d4": {
+  "data": true,
+  "module": "mp_settings",
+  "name": "g_netMaxPing",
+  "type": "int"
+ },
+ "009820d8": {
+  "data": true,
+  "module": "mp_settings",
+  "name": "g_netMaxFreq",
+  "type": "int"
+ },
+ "009820dc": {
+  "data": true,
+  "module": "mp_settings",
+  "name": "g_netMaxInactivity",
+  "type": "int"
  },
  "00982100": {
   "data": true,

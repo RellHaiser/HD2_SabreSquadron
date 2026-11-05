@@ -1035,7 +1035,7 @@ LAB_00743c53:
     case 0x34:
       iVar7 = ReadConsoleToken(&command,(char *)local_290,(int *)&local_14,0);
       if (iVar7 != 1) {
-        pCVar18 = C_fstr_Construct(&local_5c,"maxping:  %d",DAT_009820d4);
+        pCVar18 = C_fstr_Construct(&local_5c,"maxping:  %d",g_netMaxPing);
         local_8 = 0x17;
         if (pCVar18->rep == 0) {
           pcVar19 = (char *)&DAT_00867a90;
@@ -1048,12 +1048,12 @@ LAB_00743c53:
         ptr_00.rep = local_5c.rep;
         goto LAB_00742c7d;
       }
-      DAT_009820d4 = local_14;
+      g_netMaxPing = local_14;
       break;
     case 0x35:
       iVar7 = ReadConsoleToken(&command,(char *)local_290,(int *)&local_14,0);
       if (iVar7 != 1) {
-        pCVar18 = C_fstr_Construct(&local_64,"maxfreq:  %d",DAT_009820d8);
+        pCVar18 = C_fstr_Construct(&local_64,"maxfreq:  %d",g_netMaxFreq);
         local_8 = 0x18;
         if (pCVar18->rep == 0) {
           pcVar19 = (char *)&DAT_00867a90;
@@ -1067,7 +1067,7 @@ LAB_00743c53:
         goto LAB_00742c7d;
       }
       if (local_14 != 0) {
-        DAT_009820d8 = local_14;
+        g_netMaxFreq = local_14;
       }
       break;
     case 0x36:
@@ -1127,7 +1127,8 @@ LAB_00743c53:
     case 0x37:
       iVar7 = ReadConsoleToken(&command,(char *)local_290,(int *)&local_14,0);
       if (iVar7 != 1) {
-        pCVar18 = C_fstr_Construct(&local_6c,"maxinactivity:  %d",DAT_009820dc / 1000);
+        pCVar18 = C_fstr_Construct(&local_6c,"maxinactivity:  %d",g_netMaxInactivity / 1000)
+        ;
         local_8 = 0x19;
         if (pCVar18->rep == 0) {
           pcVar19 = (char *)&DAT_00867a90;
@@ -1140,7 +1141,7 @@ LAB_00743c53:
         ptr_00.rep = local_6c.rep;
         goto LAB_00742c7d;
       }
-      DAT_009820dc = local_14 * 1000;
+      g_netMaxInactivity = local_14 * 1000;
       break;
     case 0x38:
       pCVar16 = GetGame();

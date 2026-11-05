@@ -13,6 +13,7 @@
 #include "game/game_texts.h"
 #include "game/profile.h"
 #include "game/xml_node.h"
+#include "net/bitstream.h"
 
 namespace {
 
@@ -864,4 +865,104 @@ bool S_ServerEntry::Load(C_chunk &chunk)
         chunk.Ascend();
     }
     return true;
+}
+
+// ---- a map sent to the clients (part 9i-iii) --------------------------------------------------------------
+
+namespace {
+
+// The strings' longest read; each value's bits.
+constexpr int MAP_STRING_SIZE = 0x1000;
+constexpr int BYTE_BITS = 8, SHORT_BITS = 16, TEAM_BITS = 2;
+
+int ReadShort(C_BitStream *stream)
+{
+    return static_cast<int16_t>(stream->ReadBits(SHORT_BITS));
+}
+
+} // namespace
+
+void S_MpMapObjective::Write(C_BitStream *stream) const
+{
+    stream->WriteBits(static_cast<uint32_t>(alliedText), SHORT_BITS);
+    stream->WriteBits(static_cast<uint32_t>(axisText), SHORT_BITS);
+    stream->WriteBits(static_cast<uint32_t>(points), SHORT_BITS);
+    stream->WriteBits(static_cast<uint32_t>(type), BYTE_BITS);
+    stream->WriteBits(static_cast<uint32_t>(team), TEAM_BITS);
+    stream->WriteBits(static_cast<uint32_t>(vipUniform), SHORT_BITS);
+}
+
+void S_MpMapObjective::Read(C_BitStream *stream)
+{
+    alliedText = ReadShort(stream);
+    axisText = ReadShort(stream);
+    points = ReadShort(stream);
+    type = static_cast<int>(stream->ReadBits(BYTE_BITS));
+    team = static_cast<int>(stream->ReadBits(TEAM_BITS));
+    vipUniform = ReadShort(stream);
+}
+
+void S_MpMapItem::Write(C_BitStream *stream) const
+{
+    stream->WriteBits(static_cast<uint32_t>(itemId), SHORT_BITS);
+    stream->WriteBits(static_cast<uint32_t>(count), BYTE_BITS);
+    stream->WriteBits(static_cast<uint32_t>(ammo), BYTE_BITS);
+}
+
+void S_MpMapItem::Read(C_BitStream *stream)
+{
+    itemId = ReadShort(stream);
+    count = static_cast<int>(stream->ReadBits(BYTE_BITS));
+    ammo = static_cast<int>(stream->ReadBits(BYTE_BITS));
+}
+
+void C_MpMap::Write(C_BitStream *stream) const
+{
+    stream->WriteString(name.c_str());
+    stream->WriteString(directory.c_str());
+    stream->WriteBits(static_cast<uint32_t>(aircraftAxis), BYTE_BITS);
+    stream->WriteBits(static_cast<uint32_t>(aircraftAllied), BYTE_BITS);
+    stream->WriteBits(static_cast<uint32_t>(balancedAxis), BYTE_BITS);
+    stream->WriteBits(static_cast<uint32_t>(balancedAllied), BYTE_BITS);
+    stream->WriteBits(static_cast<uint32_t>(frontline), BYTE_BITS);
+    stream->WriteBits(static_cast<uint32_t>(description), SHORT_BITS);
+    stream->WriteString(presets.c_str());
+    stream->WriteBits(static_cast<uint32_t>(objectives.size()), BYTE_BITS);
+    for (const S_MpMapObjective &objective : objectives)
+        objective.Write(stream);
+    stream->WriteBits(static_cast<uint32_t>(items.size()), BYTE_BITS);
+    for (const S_MpMapItem &item : items)
+        item.Write(stream);
+}
+
+void C_MpMap::Read(C_BitStream *stream)
+{
+    // (The bytes read unsigned: -1 comes back 255, as the original.)
+    std::vector<char> text(MAP_STRING_SIZE);
+    stream->ReadString(text.data(), MAP_STRING_SIZE);
+    name = text.data();
+    stream->ReadString(text.data(), MAP_STRING_SIZE);
+    directory = text.data();
+    aircraftAxis = static_cast<int>(stream->ReadBits(BYTE_BITS));
+    aircraftAllied = static_cast<int>(stream->ReadBits(BYTE_BITS));
+    balancedAxis = static_cast<int>(stream->ReadBits(BYTE_BITS));
+    balancedAllied = static_cast<int>(stream->ReadBits(BYTE_BITS));
+    frontline = static_cast<int>(stream->ReadBits(BYTE_BITS));
+    description = ReadShort(stream);
+    stream->ReadString(text.data(), MAP_STRING_SIZE);
+    presets = text.data();
+    const uint32_t objectiveCount = stream->ReadBits(BYTE_BITS);
+    objectives.clear();
+    for (uint32_t i = 0; i < objectiveCount; ++i) {
+        S_MpMapObjective objective;
+        objective.Read(stream);
+        objectives.push_back(objective);
+    }
+    const uint32_t itemCount = stream->ReadBits(BYTE_BITS);
+    items.clear();
+    for (uint32_t i = 0; i < itemCount; ++i) {
+        S_MpMapItem item;
+        item.Read(stream);
+        items.push_back(item);
+    }
 }

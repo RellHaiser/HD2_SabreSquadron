@@ -8619,7 +8619,7 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
 
   PART 9i-ii DONE (2026-11-05): the multiplayer session's settings (game/mp_settings.cpp, game/mp_text_ids.cpp, new).
   - S_MultiplayerSettings (g_mpSettings): Reset 0x006ad600 (the defaults: port 11001, the rules' defaults, +0x21C a
-    C_str "", the server entry reset), SetRules / GetRules (the 22 rules by name in S_MpGameRules' order; the
+    C_str "\1\2\3", the server entry reset), SetRules / GetRules (the 22 rules by name in S_MpGameRules' order; the
     harness's stub struct orders them differently), ApplySetupRules 0x006acc10, MakeSetup 0x006acc50 / DeleteSetup
     0x006acd30 (+0x294 C_MpGameSetup *setup, new), RemoveMap 0x006acd60, AddMap 0x006ace20, Clear 0x006ad560,
     SelectMap 0x006ad780 (no maps: fixed, the original divided by zero), GetCurrentMap 0x006ad830.
@@ -8632,6 +8632,24 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Mutations: mutations/mutate_9i2.py: 140: 122 killed, 9 not building, 9 equivalent.
   - Build: MSVC clean. Tier 1: 288 errors in 54 files. ret_audit --src: 52.
   - Stats: 9,287 of 12,306 functions by hand (85.8 % by size).
+
+  PART 9i-iii DONE (2026-11-05): the session and its map sent to the clients (game/mp_settings.cpp,
+  game/mp_game_setup.cpp).
+  - S_MultiplayerSettings: WriteRules 0x006ad990 / ReadRules 0x006ada30 (the listing and the game type 8 bits, the 22
+    rules 16 bits each, then the net module's limits g_netMaxFreq 0x009820d8, g_netMaxPing 0x009820d4,
+    g_netMaxInactivity 0x009820dc (ms; sent in s): new globals, named in Ghidra), WriteCurrentMap 0x006ad840,
+    ReadCurrentMap 0x006ad860 (the maps replaced by the one read, current).
+  - C_MpMap::Write 0x006adad0 / Read 0x006adc40 (the strings, five bytes read back unsigned, the description, the
+    presets, the objectives and items with 8-bit counts), S_MpMapObjective::Write / Read 0x006ade20 / 0x006ade80,
+    S_MpMapItem::Write / Read 0x006adee0 / 0x006adf20. Their vectors' helpers 0x006adf60 .. 0x006ae590 are
+    std::vector's.
+  - Harness: ReplicationTest in mp_settings_test.inc / check_replication.py (new; the fake streams' strings defined
+    for the factory build): rpWriteRules, rpReadRules, rpWriteMap, rpReadMap, rpCurrentMap. All 18 factory checkers in
+    both orders; the mp_setup build links src/net/bitstream.cpp now (54 of 54).
+  - Mutations: mutations/mutate_9i3.py: 89: 82 killed, 7 not building.
+  - Build: MSVC clean. Tier 1: 291 errors in 54 files (+3 in the net module's f_007277b0, a local of Ghidra's
+    S_MultiplayerSettings layout). ret_audit --src: 52.
+  - Stats: 9,297 of 12,306 functions by hand (85.8 % by size).
 
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`

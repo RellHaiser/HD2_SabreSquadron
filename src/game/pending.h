@@ -393,6 +393,13 @@ struct S_MultiplayerSettings {
     bool AddMap(const char *name);                  // 0x006ace20
     // The maps deleted (the last first), none current, the set-up deleted.
     void Clear();                                   // 0x006ad560 (__fastcall)
+    // Sent to the clients (part 9i-iii): the listing and the game type (8 bits), the rules (16 each), the net
+    // limits (16; the inactivity in seconds); read back so (the rules and limits signed).
+    void WriteRules(class C_BitStream *stream);     // 0x006ad990
+    void ReadRules(class C_BitStream *stream);      // 0x006ada30
+    // The current map sent; read: the maps replaced by the one read, current.
+    void WriteCurrentMap(class C_BitStream *stream);   // 0x006ad840
+    void ReadCurrentMap(class C_BitStream *stream); // 0x006ad860
 
     // The selected map (+0x290 into the vector at +0x280).
     C_MpMap *GetCurrentMap();                       // 0x006ad830
@@ -400,6 +407,11 @@ struct S_MultiplayerSettings {
     bool SelectMap(const char *name);               // 0x006ad780
 };
 
+// The net module's limits the session sends: the update rate, the ping, the inactivity (ms; mpdesc.txt's
+// maxfreq / maxping / maxinactivity).
+extern int g_netMaxFreq;                            // 0x009820d8
+extern int g_netMaxPing;                            // 0x009820d4
+extern int g_netMaxInactivity;                      // 0x009820dc
 // Replication of actors to the clients (the object 0x0097d084 points to).
 class C_NetTrack {                                  // value interpolated on the clients
 public:

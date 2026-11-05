@@ -5,3 +5,17 @@
 006acd60 S_MultiplayerSettings::RemoveMap | bool __thiscall RemoveMap(void *this, char * name)
 006ace20 S_MultiplayerSettings::AddMap | bool __thiscall AddMap(void *this, char * name)
 006ad560 S_MultiplayerSettings::Clear | void __fastcall Clear(void *this)
+# Part 9i-iii: the session and its map sent to the clients.
+006ad990 S_MultiplayerSettings::WriteRules | void __thiscall WriteRules(void *this, void * stream)
+006ada30 S_MultiplayerSettings::ReadRules | void __thiscall ReadRules(void *this, void * stream)
+006ad840 S_MultiplayerSettings::WriteCurrentMap | void __thiscall WriteCurrentMap(void *this, void * stream)
+006ad860 S_MultiplayerSettings::ReadCurrentMap | void __thiscall ReadCurrentMap(void *this, void * stream)
+006adad0 C_MpMap::Write | void __thiscall Write(void *this, void * stream)
+006adc40 C_MpMap::Read | void __thiscall Read(void *this, void * stream)
+006ade20 S_MpMapObjective::Write | void __thiscall Write(void *this, void * stream)
+006ade80 S_MpMapObjective::Read | void __thiscall Read(void *this, void * stream)
+006adee0 S_MpMapItem::Write | void __thiscall Write(void *this, void * stream)
+006adf20 S_MpMapItem::Read | void __thiscall Read(void *this, void * stream)
+009820d8 g_netMaxFreq @ int
+009820d4 g_netMaxPing @ int
+009820dc g_netMaxInactivity @ int

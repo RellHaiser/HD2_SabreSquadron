@@ -683,8 +683,12 @@ switchD_00727c05_default: ;
 
 
 #endif
-// 0x00728820
+// 0x00728820  (tier1 fallback: translated text kept below, needs hand porting)
 int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
+{
+  return {};
+}
+#if 0
 {
   char cVar1;
   S_SquadSoldier **ppSVar2;
@@ -718,12 +722,13 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
   int *extraout_EAX_10;
   int *extraout_EAX_11;
   int *extraout_EAX_12;
+  int *extraout_EAX_13;
   C_MissionDef *arg;
   C_MenuState *this_00;
-  int *extraout_EAX_13;
   int *extraout_EAX_14;
   int *extraout_EAX_15;
   int *extraout_EAX_16;
+  int *extraout_EAX_17;
   int iVar19;
   float fVar20;
   int iVar21;
@@ -789,15 +794,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
   C_Human *local_39c;
   uint8_t local_398 [36];
   int iStack_374;
-  uint8_t **local_2b8 [95];
-  uint8_t local_13c [156];
-  C_str *local_a0;
-  C_str *local_9c;
-  uchar local_38;
-  void *local_34;
-  uint32_t local_30;
-  uint32_t local_2c;
-  uint32_t local_24;
+  S_MultiplayerSettings local_2b8;
   void *pvStack_20;
   uint32_t local_14;
   local_14 = 0xffffffff;
@@ -809,8 +806,8 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
     pCVar18 = GetGameApp();
     pCVar18->m_randomId = uVar15;
     DAT_0097d4b8 = C_BitStream__ReadBits(param_2,0x20);
-    FUN_006ada30(g_gameProfile.m_mpSettings,param_2);
-    FUN_006ad860(g_gameProfile.m_mpSettings,param_2);
+    S_MultiplayerSettings__ReadRules(g_gameProfile.m_mpSettings,param_2);
+    S_MultiplayerSettings__ReadCurrentMap(g_gameProfile.m_mpSettings,param_2);
     pCVar18 = local_5fc;
     if (local_5fc->m_state != 0) {
       (*local_5fc->m_state->vtable->Stop)();
@@ -866,7 +863,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
       FUN_00727300(pvVar8,*(uint32_t **)((int)pvVar8 + 8),1,&local_3d8);
       C_NetGame__UnlockPlayers(0x97d070);
       C_GameApp__PostCommand(pCVar18,9,0,0,false);
-      return extraout_EAX_13;
+      return extraout_EAX_14;
     }
     if (pCVar18->m_state != 0) {
       (*pCVar18->m_state->vtable->ScalarDeletingDestructor)('\x01');
@@ -963,7 +960,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
       iVar21 = 100;
       pCVar6 = GetGame();
       C_game__EndMission(pCVar6,iVar21);
-      return extraout_EAX_14;
+      return extraout_EAX_15;
     }
     break;
   case 0x2:
@@ -1190,7 +1187,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
       iVar21 = (**(code **)(**(int **)((int)local_5fc + 0x14) + 0x1c))();
       if (iVar21 == 0xb) {
         C_GameMenu__AddChatLine(0,"ADMIN",(char *)&local_3d8);
-        return extraout_EAX_15;
+        return extraout_EAX_16;
       }
       param_1 = (int *)(**(code **)(**(int **)((int)pCVar18 + 0x14) + 0x1c))();
       if ((C_game *)param_1 == (C_game *)0x1) {
@@ -1198,7 +1195,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
         SStack_460.y = 160.0;
         SStack_460.z = 160.0;
         C_game__PrintMessage(*(C_game **)((int)pCVar18 + 0x14),&SStack_460,"ADMIN: %s");
-        return extraout_EAX_16;
+        return extraout_EAX_17;
       }
     }
     break;
@@ -1239,7 +1236,7 @@ int * FUN_00728820(void *_this,int *param_1,void *param_2, ...)
     }
     break;
   case 0x6:
-    FUN_006ad860(g_gameProfile.m_mpSettings,param_2);
+    S_MultiplayerSettings__ReadCurrentMap(g_gameProfile.m_mpSettings,param_2);
     pCVar6 = GetGame();
     param_1 = 0;
     if (pCVar6 != 0) {
@@ -1495,38 +1492,41 @@ LAB_0072903a:
     break;
   case 0x12:
     if ((g_gameRole & 1) == 0) {
-      piVar16 = (int *)FUN_006ada30(g_gameProfile.m_mpSettings,param_2);
-      return piVar16;
+      S_MultiplayerSettings__ReadRules(g_gameProfile.m_mpSettings,param_2);
+      return extraout_EAX_13;
     }
-    FUN_007252b0((int)local_13c);
-    local_a0 = 0;
-    local_9c = 0;
-    local_34 = 0;
-    local_38 = local_611;
-    local_30 = 0;
-    local_2c = 0;
+    FUN_007252b0((int)local_2b8._pad_017c);
+    local_2b8.password.rep = 0;
+    local_2b8._pad_021c[0] = '\0';
+    local_2b8._pad_021c[1] = '\0';
+    local_2b8._pad_021c[2] = '\0';
+    local_2b8._pad_021c[3] = '\0';
+    local_2b8.maps.first = (void **)0x0;
+    local_2b8.maps.alloc = local_611;
+    local_2b8.maps.last = (void **)0x0;
+    local_2b8.maps.end = (void **)0x0;
     local_14 = 0xc;
-    local_2b8[0] = &PTR_008159f8;
-    local_24 = 0;
+    local_2b8._pad_0000 = (uchar  [4])&PTR_008159f8;
+    local_2b8.unknown294 = 0;
     S_MultiplayerSettings__Reset();
     local_14 = 0xd;
-    FUN_006ada30(local_2b8,param_2);
-    local_2b8[0] = &PTR_008159f8;
+    S_MultiplayerSettings__ReadRules(&local_2b8,param_2);
+    local_2b8._pad_0000 = (uchar  [4])&PTR_008159f8;
     local_14 = 0x10;
     S_MultiplayerSettings__Clear();
-    local_24 = 0;
+    local_2b8.unknown294 = 0;
     local_14 = CONCAT31(GH_PIECE(local_14,1,3),0xf);
     empty_function_61b740();
-    tier1_operator_delete(local_34);
-    local_34 = 0;
-    local_30 = 0;
-    local_2c = 0;
-    if (local_9c != 0) {
-      C_str__ReleaseRep(local_9c);
+    tier1_operator_delete(local_2b8.maps.first);
+    local_2b8.maps.first = (void **)0x0;
+    local_2b8.maps.last = (void **)0x0;
+    local_2b8.maps.end = (void **)0x0;
+    if (local_2b8._pad_021c != (uchar  [4])0x0) {
+      C_str__ReleaseRep((C_str *)local_2b8._pad_021c);
     }
     param_1 = 0;
-    if (local_a0 != 0) {
-      piVar16 = (int *)C_str__ReleaseRep(local_a0);
+    if (local_2b8.password.rep != 0) {
+      piVar16 = (int *)C_str__ReleaseRep((C_str *)local_2b8.password.rep);
       return piVar16;
     }
     break;
@@ -1757,6 +1757,7 @@ LAB_00728d4e:
 }
 
 
+#endif
 // 0x0072a480  (tier1 fallback: translated text kept below, needs hand porting)
 uint32_t C_GameApp__SendGameMessage(C_GameApp *_this,int type,int to,int a,int b,bool reliable, ...)
 {
@@ -1850,8 +1851,8 @@ uint32_t C_GameApp__SendGameMessage(C_GameApp *_this,int type,int to,int a,int b
         pCVar10 = GetGameApp();
         C_BitStream__WriteBits((C_BitStream *)this_00,pCVar10->m_randomId,0x20);
         C_BitStream__WriteBits((C_BitStream *)this_00,DAT_0097d4b8,0x20);
-        FUN_006ad990(g_gameProfile.m_mpSettings,this_00);
-        FUN_006ad840(g_gameProfile.m_mpSettings,this_00);
+        S_MultiplayerSettings__WriteRules(g_gameProfile.m_mpSettings,this_00);
+        S_MultiplayerSettings__WriteCurrentMap(g_gameProfile.m_mpSettings,this_00);
         iVar14 = C_NetGame__LockPlayers(0x97d070);
         iVar5 = 0;
         local_15c = 0;
@@ -2047,7 +2048,7 @@ uint32_t C_GameApp__SendGameMessage(C_GameApp *_this,int type,int to,int a,int b
         }
         goto LAB_0072b46f;
       case 6:
-        FUN_006ad840(g_gameProfile.m_mpSettings,this_00);
+        S_MultiplayerSettings__WriteCurrentMap(g_gameProfile.m_mpSettings,this_00);
         break;
       case 7:
       case 0x14:
@@ -2136,7 +2137,7 @@ LAB_0072b46f:
         C_BitStream__WriteBits((C_BitStream *)this_00,local_114,0x20);
         break;
       case 0x12:
-        FUN_006ad990(g_gameProfile.m_mpSettings,this_00);
+        S_MultiplayerSettings__WriteRules(g_gameProfile.m_mpSettings,this_00);
         break;
       case 0x15:
         if (values == 0) {
