@@ -178,7 +178,48 @@ protected:
     // played in the screen's movie control. True.
     static bool OnMoviePick(void *menu, void *argument, C_Control *control, uint32_t notification,
                             uint32_t value);            // 0x00615470
+    // The browser (part 9h-xix): its tick (OnBrowserTick), shown (OnBrowserShown); the title; the sort arrows and
+    // the list's headers (OnServerSort); the server list (DescribeServerList); restore / refresh the list
+    // (OnRestoreList, OnRefreshList); the address popup (off), the filters, join (off), create a server, the game
+    // info (off), back (the list emptied); the version, the logos, the online line; the favourites
+    // (OnFavoriteToggle, OnFavorites). True.
     bool DescribeBrowserScreen(S_ScreenDesc *desc, I3D_frame *model);       // 0x00634050
+    // The list's frames: the group GB_ServerList made under the model, the row "sever00" moved into it (none:
+    // false), off, and copied ("Server1" .. "Server11", off); the scroll bar and the list (picked:
+    // OnServerPicked, 13: OnServerJoin, changed: OnServerCountChanged). True.
+    bool DescribeServerList(S_ScreenDesc *desc, I3D_frame *model);          // 0x00634580
+    // Shown: no single mission. True.
+    static bool OnBrowserShown(void *menu, void *argument, C_Control *control, uint32_t notification,
+                               uint32_t value);         // 0x006356d0
+    // The screen's tick (part 9h-xx).
+    static bool OnBrowserTick(void *menu, void *argument, C_Control *control, uint32_t notification,
+                              uint32_t value);          // 0x00635ba0
+    // The arrows (the direction toggled) or a header (its key; already the key: the arrows flipped). No
+    // control, another: false.
+    static bool OnServerSort(void *menu, void *argument, C_Control *control, uint32_t notification,
+                             uint32_t value);           // 0x00636640
+    // The pinged server's answer: nothing.
+    static void __fastcall IgnoreServer(S_ServerEntry *server);   // 0x00635980
+    // A server picked (m_server; none: nothing more): pinged, join and the game info on; listing the
+    // Internet's: the favourite button on. True.
+    static bool OnServerPicked(void *menu, void *argument, C_Control *control, uint32_t notification,
+                               uint32_t value);         // 0x006360c0
+    // A server picked: the join messages posted (as the join button's). True.
+    static bool OnServerJoin(void *menu, void *argument, C_Control *control, uint32_t notification,
+                             uint32_t value);           // 0x00636280
+    // The online line: the list's entries / the first list's servers, their players. True.
+    static bool OnServerCountChanged(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                     uint32_t value);   // 0x006364b0
+    // The browser's buttons (part 9h-xx): restore the list, refresh it, a favourite added / removed, the
+    // favourites.
+    static bool OnRestoreList(void *menu, void *argument, C_Control *control, uint32_t notification,
+                              uint32_t value);          // 0x00634f90
+    static bool OnRefreshList(void *menu, void *argument, C_Control *control, uint32_t notification,
+                              uint32_t value);          // 0x00635360
+    static bool OnFavoriteToggle(void *menu, void *argument, C_Control *control, uint32_t notification,
+                                 uint32_t value);       // 0x00634950
+    static bool OnFavorites(void *menu, void *argument, C_Control *control, uint32_t notification,
+                            uint32_t value);            // 0x00634b30
     // The create server screen: shown / hidden: OnCreateServerShown / OnCreateServerHidden; the host's name
     // (OnHostNameChanged), the game type (OnServerStyleChanged), the maps panel, the options panel, the voice
     // chat's codec, start (off; MAIN_MSG_START_SERVER), back, the texts, the map list presets

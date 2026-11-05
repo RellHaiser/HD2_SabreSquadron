@@ -244,10 +244,10 @@ bool C_MainMenu__OnNetworkMessage(C_MainMenu *_this,void *message, ...)
         g_sessionPasswordSet = false;
         return true;
       }
-      FUN_00635360((int)_this);
+      C_MainMenu__OnRefreshList(_this,0,0,0,0);
       return true;
     }
-    FUN_00634f90((int)_this);
+    C_MainMenu__OnRestoreList(_this,0,0,0,0);
     return true;
   case 0x2000029:
     if (_this->_pad_01e8[0x2a] == '\0') {
@@ -326,7 +326,7 @@ bool C_MainMenu__OnNetworkMessage(C_MainMenu *_this,void *message, ...)
     _this->_pad_0104[0xc5] = '\0';
     _this->_pad_0104[0xc6] = '\0';
     _this->_pad_0104[199] = '\0';
-    FUN_00635360((int)_this);
+    C_MainMenu__OnRefreshList(_this,0,0,0,0);
     local_54 = 0x20100000;
     local_40 = 0;
     local_50 = 0x1000015;
@@ -534,228 +534,16 @@ bool C_MainMenu__OnNetworkMessage(C_MainMenu *_this,void *message, ...)
 
 
 #endif
-// 0x00634050
-uint32_t C_MainMenu__C_MainMenu__DescribeBrowserScreen(C_MainMenu *_this,void *param_1,int *param_2, ...)
-{
-  void *pvVar1;
-  AddScreenMessage((int)param_1,0,0x1000007,0x4014000,_this,FUN_00635ba0);
-  AddScreenMessage((int)param_1,0,0x1000007,0x400d000,_this,FUN_006356d0);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_screen");
-  AddDescMessage2(pvVar1,0,0x1000015,10,0x8fd);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,10,"barrows");
-  AddDescMessage3(pvVar1,0,0x1000007,0x4010000,(uint32_t)_this,0x636640);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bhost name");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x8fe);
-  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x636640);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,&DAT_0083fec8);
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x8ff);
-  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x636640);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bstyle");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x900);
-  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x636640);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bping");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x901);
-  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x636640);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bplayers/max");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x902);
-  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x636640);
-  C_MainMenu__FUN_00634580(_this,(int)param_1,param_2);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"brestore list");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x915);
-  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x634f90);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"brefresh list");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x917);
-  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x635360);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"benter server ip");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x904);
-  AddDescMessage1(pvVar1,0,0x6001002,0xe);
-  AddDescMessage1(pvVar1,0,0x1000001,0);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bserver filters");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x905);
-  AddDescMessage1(pvVar1,0,0x6001001,0xb);
-  AddDescMessage1(pvVar1,0,0x6001028,0);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bjoin game");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x906);
-  AddDescMessage1(pvVar1,0,0x6001028,0);
-  AddDescMessage1(pvVar1,0,0x600109b,0);
-  AddDescMessage1(pvVar1,0,0x600102a,0);
-  AddDescMessage1(pvVar1,0,0x1000001,0);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bcreate server");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x907);
-  AddDescMessage1(pvVar1,0,0x6001001,9);
-  AddDescMessage1(pvVar1,0,0x6001028,0);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bview game info");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x908);
-  AddDescMessage1(pvVar1,0,0x6001001,0xc);
-  AddDescMessage1(pvVar1,0,0x1000001,0);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bback");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x909);
-  AddDescMessage1(pvVar1,0,0x6001028,0);
-  AddDescMessage1(pvVar1,0,0x600109b,0);
-  AddDescMessage1(pvVar1,0x20900000,0x6001018,0);
-  AddDescMessage1(pvVar1,0,0x6001003,0);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_h&dversion");
-  AddDescMessage2(pvVar1,0,0x1000015,0x28,0x7d6);
-  S_ScreenDesc__AddControl(param_1,4,"gamespylogo");
-  S_ScreenDesc__AddControl(param_1,4,"esrb-US");
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x13,"text_online");
-  AddDescMessage2(pvVar1,0,0x1000015,0x28,0x7d6);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"badd/remove");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x4e86);
-  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x634950);
-  pvVar1 = (void *)S_ScreenDesc__AddControl(param_1,0x14,"bfavorites");
-  AddDescMessage2(pvVar1,0,0x1000015,0xd,0x4e84);
-  AddDescMessage3(pvVar1,0,0x1000007,0x4001000,(uint32_t)_this,0x634b30);
-  return 1;
-}
-
-
-// 0x00634580
-uint32_t C_MainMenu__FUN_00634580(C_MainMenu *_this,int param_1,int *param_2, ...)
-{
-  uint8_t stack0xffffff70[64];
-  void *this_00;
-  void *desc;
-  C_str *pCVar1;
-  C_MenuState *parent;
-  C_MenuState *source;
-  int *piVar2;
-  S_ControlDesc *pSVar3;
-  uint32_t *puVar4;
-  C_MenuState *this_01;
-  int iVar5;
-  C_str CStack_94;
-  C_str local_6c;
-  C_MenuState *local_68 [2];
-  uint32_t local_60;
-  uint32_t local_5c;
-  uint32_t local_58;
-  int *piStack_54;
-  void *pvStack_4c;
-  uint32_t uStack_44;
-  void *pvStack_28;
-  uint32_t local_14;
-  local_14 = 0xffffffff;
-  local_60 = 0;
-  local_5c = 0;
-  local_58 = 0;
-  pCVar1 = C_fstr_Construct(&local_6c,"GB_ServerList");
-  local_14 = 0;
-  CStack_94.rep = (C_str_rep *)0x6345eb;
-  parent = C_MenuState__AddFrame((C_MenuState *)_this,pCVar1,6,param_2,&local_60);
-  local_14 = 0xffffffff;
-  local_68[0] = parent;
-  if ((local_6c.rep != 0) &&
-     ((local_6c.rep)->refCount = (local_6c.rep)->refCount - 1, (local_6c.rep)->refCount == 0)) {
-    tier1_operator_delete(local_6c.rep);
-  }
-  source = (C_MenuState *)(**(code **)(*param_2 + 0x48))();
-  if ((source != 0) && (parent != 0)) {
-    CStack_94.rep = (C_str_rep *)parent;
-    (*source->vtable->_purecall_0e)();
-    this_01 = source;
-    (*source->vtable->CommitPendingState)(source,0);
-    (*source->vtable->SetState)(source);
-    (*parent->vtable->CommitPendingState)(parent,1);
-    (*parent->vtable->SetState)(parent);
-    iVar5 = 1;
-    do {
-      pCVar1 = C_fstr_Construct(&CStack_94,"Server%d",iVar5);
-      uStack_44 = 1;
-      piVar2 = C_MenuState__CloneFrame(this_01,pCVar1,parent,source);
-      uStack_44 = 0xffffffff;
-      if (((C_MenuState *)CStack_94.rep != 0) &&
-         ((CStack_94.rep)->refCount =
-               (int)((int)&((C_MenuState_vtbl *)(CStack_94.rep)->refCount)[-1].vf16 + 3),
-         (C_MenuState_vtbl *)(CStack_94.rep)->refCount == 0)) {
-        tier1_operator_delete(CStack_94.rep);
-      }
-      (**(code **)(*piVar2 + 0x30))(piVar2,0);
-      (**(code **)(*piVar2 + 0x24))(piVar2);
-      iVar5++;
-      parent = source;
-    } while (iVar5 < 0xc);
-    if (*(int *)(param_1 + 0x28) == 0) {
-      iVar5 = 0;
-    }
-    else {
-      iVar5 = *(int *)(param_1 + 0x2c) - *(int *)(param_1 + 0x28) >> 2;
-    }
-    pSVar3 = tier1_operator_new(0x40);
-    uStack_44 = 2;
-    if (pSVar3 == 0) {
-      CStack_94.rep = 0;
-    }
-    else {
-      CStack_94.rep =
-           S_ControlDesc__S_ControlDesc
-                     (pSVar3,8,"scroll00",
-                      (iVar5 + 1U & 0x3f) << 0x14 | *(uint32_t *)(param_1 + 0x40));
-    }
-    uStack_44 = 0xffffffff;
-    FUN_00615f50((void *)(param_1 + 0x24),*(uint32_t **)(param_1 + 0x2c),(uint32_t*)(&CStack_94));
-    iVar5 = *(int *)(*(int *)(param_1 + 0x2c) - 4);
-    uStack_44 = 3;
-    FUN_00615d50((void *)(iVar5 + 0x10),*(uint32_t **)(iVar5 + 0x18),
-                 (uint32_t *)&stack0xffffff70);
-    uStack_44 = 0xffffffff;
-    if (*(int *)(param_1 + 0x28) == 0) {
-      iVar5 = 0;
-    }
-    else {
-      iVar5 = *(int *)(param_1 + 0x2c) - *(int *)(param_1 + 0x28) >> 2;
-    }
-    pSVar3 = tier1_operator_new(0x40);
-    uStack_44 = 4;
-    if (pSVar3 == 0) {
-      CStack_94.rep = 0;
-    }
-    else {
-      CStack_94.rep =
-           S_ControlDesc__S_ControlDesc
-                     (pSVar3,0x18,"GB_ServerList",
-                      (iVar5 + 1U & 0x3f) << 0x14 | *(uint32_t *)(param_1 + 0x40));
-    }
-    uStack_44 = 0xffffffff;
-    FUN_00615f50((void *)(param_1 + 0x24),*(uint32_t **)(param_1 + 0x2c),(uint32_t*)(&CStack_94));
-    desc = *(void **)(*(int *)(param_1 + 0x2c) - 4);
-    this_00 = (void *)((int)desc + 0x10);
-    uStack_44 = 5;
-    FUN_00615d50(this_00,*(uint32_t **)((int)desc + 0x18),(uint32_t *)&stack0xffffff70);
-    uStack_44 = 0xffffffff;
-    puVar4 = (uint32_t *)FUN_00614da0(&stack0xffffff70,0,0x1000007,0x400e000,this_01,FUN_006360c0)
-    ;
-    uStack_44 = 6;
-    FUN_00615d50(this_00,*(uint32_t **)((int)desc + 0x18),puVar4);
-    uStack_44 = 0xffffffff;
-    puVar4 = (uint32_t *)FUN_00614da0(local_68,0,0x1000007,0x4013000,this_01,FUN_00636280);
-    uStack_44 = 7;
-    FUN_00615d50(this_00,*(uint32_t **)((int)desc + 0x18),puVar4);
-    uStack_44 = 0xffffffff;
-    if ((piStack_54 != 0) && (*piStack_54 = *piStack_54 - 1, *piStack_54 == 0)) {
-      tier1_operator_delete(piStack_54);
-    }
-    AddDescMessage3(desc,0,0x1000007,0x4010000,(uint32_t)this_01,0x6364b0);
-    return 1;
-  }
-  return 0;
-}
-
-
 // 0x00634950
-uint32_t FUN_00634950(int param_1, ...)
+bool C_MainMenu__OnFavoriteToggle(C_MainMenu *_this,void *argument,void *control,uint32_t notification,uint32_t value, ...)
 {
   int iVar1;
-  int *_this;
-  int *piVar2;
-  int iVar3;
-  uint32_t *puVar4;
-  int *extraout_EAX;
-  void *this_00;
+  void *pvVar2;
+  uint32_t *puVar3;
+  int iVar4;
   int iVar5;
-  int iVar6;
-  uint32_t *puVar7;
-  bool bVar8;
+  uint32_t *puVar6;
+  bool bVar7;
   uint32_t *local_28;
   uint32_t local_24;
   uint32_t local_20;
@@ -763,101 +551,100 @@ uint32_t FUN_00634950(int param_1, ...)
   int *local_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
-  if (*(int *)(param_1 + 0x21c) == 0) {
-    return (uint32_t)ExceptionList & 0xffffff00;
+  if (*(int *)(_this[1]._pad_0004 + 1) == 0) {
+    return false;
   }
-  iVar5 = *(int *)((int)*(void **)(param_1 + 0x1e4) + 4);
-  if (iVar5 == 1) {
+  iVar4 = *(int *)((int)_this->m_1e4 + 4);
+  if (iVar4 == 1) {
     local_28 = tier1_operator_new(0x9c);
     if (local_28 == 0) {
       local_28 = 0;
     }
     else {
-      puVar4 = *(uint32_t **)(param_1 + 0x21c);
-      puVar7 = local_28;
-      for (iVar5 = 0x27; iVar5 != 0; iVar5 = iVar5 - 1) {
-        *puVar7 = *puVar4;
-        puVar4++;
-        puVar7++;
+      puVar3 = *(uint32_t **)(_this[1]._pad_0004 + 1);
+      puVar6 = local_28;
+      for (iVar4 = 0x27; iVar4 != 0; iVar4 = iVar4 - 1) {
+        *puVar6 = *puVar3;
+        puVar3++;
+        puVar6++;
       }
     }
-    this_00 = (void *)C_MpMenuSettings__GetList(*(void **)(param_1 + 0x1e4),2);
-    piVar2 = (int *)FUN_00636e00(this_00,*(uint32_t **)((int)this_00 + 8),1,(uint32_t*)(&local_28));
+    pvVar2 = C_MpMenuSettings__GetList(_this->m_1e4,2);
+    FUN_00636e00(pvVar2,*(uint32_t **)((int)pvVar2 + 8),1,(uint32_t*)(&local_28));
   }
-  else {
-    piVar2 = (int *)(iVar5 - 2);
-    if (piVar2 == 0) {
-      iVar3 = C_MpMenuSettings__GetList(*(void **)(param_1 + 0x1e4),0);
-      iVar5 = *(int *)(iVar3 + 4);
-      if ((iVar5 != 0) && (iVar6 = *(int *)(iVar3 + 8) - iVar5 >> 2, iVar6 != 0)) {
+  else if (iVar4 == 2) {
+    pvVar2 = C_MpMenuSettings__GetList(_this->m_1e4,0);
+    iVar4 = *(int *)((int)pvVar2 + 4);
+    if ((iVar4 != 0) && (iVar5 = *(int *)((int)pvVar2 + 8) - iVar4 >> 2, iVar5 != 0)) {
 LAB_006349c3:
-        iVar1 = iVar6 * 4;
-        iVar6--;
-        if (*(int *)(iVar5 - 4 + iVar1) != *(int *)(param_1 + 0x21c)) goto code_r0x006349cc;
-        *(uint32_t *)(param_1 + 0x21c) = 0;
-        tier1_operator_delete(*(void **)(*(int *)(iVar3 + 4) + iVar6 * 4));
-        puVar7 = *(uint32_t **)(iVar3 + 8);
-        iVar5 = *(int *)(iVar3 + 4) + iVar6 * 4;
-        puVar4 = (uint32_t *)(iVar5 + 4);
-        if (puVar4 != puVar7) {
-          iVar5 = iVar5 - (int)puVar4;
-          do {
-            *(uint32_t *)(iVar5 + (int)puVar4) = *puVar4;
-            puVar4++;
-          } while (puVar4 != puVar7);
-        }
-        *(int *)(iVar3 + 8) = *(int *)(iVar3 + 8) - 4;
+      iVar1 = iVar5 * 4;
+      iVar5--;
+      if (*(int *)(iVar4 - 4 + iVar1) != *(int *)(_this[1]._pad_0004 + 1)) goto code_r0x006349cc;
+      _this[1]._pad_0004[1] = '\0';
+      _this[1]._pad_0004[2] = '\0';
+      _this[1]._pad_0004[3] = '\0';
+      _this[1]._pad_0004[4] = '\0';
+      tier1_operator_delete(*(void **)(*(int *)((int)pvVar2 + 4) + iVar5 * 4));
+      puVar6 = *(uint32_t **)((int)pvVar2 + 8);
+      iVar4 = *(int *)((int)pvVar2 + 4) + iVar5 * 4;
+      puVar3 = (uint32_t *)(iVar4 + 4);
+      if (puVar3 != puVar6) {
+        iVar4 = iVar4 - (int)puVar3;
+        do {
+          *(uint32_t *)(iVar4 + (int)puVar3) = *puVar3;
+          puVar3++;
+        } while (puVar3 != puVar6);
       }
+      *(int *)((int)pvVar2 + 8) = *(int *)((int)pvVar2 + 8) - 4;
+    }
 LAB_00634a09:
-      _this = DAT_008ae5ac;
-      local_24 = 0x21600000;
-      local_10 = 0;
-      local_20 = 0x1000001;
-      local_1c = 0;
-      local_4 = 0;
-      if ((DAT_008ae5bc == 0) || (DAT_008ae5ac == DAT_008ae5a8)) {
+    puVar3 = DAT_008ae5ac;
+    local_24 = 0x21600000;
+    local_10 = 0;
+    local_20 = 0x1000001;
+    local_1c = 0;
+    local_4 = 0;
+    if ((DAT_008ae5bc == 0) || (DAT_008ae5ac == DAT_008ae5a8)) {
+      FUN_00616100(0x8ae590);
+      puVar3 = DAT_008ae5ac;
+      DAT_008ae5ac += 6;
+      FUN_006169d0(puVar3,&local_24);
+    }
+    else {
+      puVar6 = DAT_008ae5ac + 6;
+      if (puVar6 == DAT_008ae5a8) {
+        DAT_008ae5ac = puVar6;
+        FUN_006169d0(puVar3,&local_24);
         FUN_00616100(0x8ae590);
-        piVar2 = DAT_008ae5ac;
-        DAT_008ae5ac += 6;
-        piVar2 = (int *)FUN_006169d0(piVar2,&local_24);
       }
       else {
-        piVar2 = DAT_008ae5ac + 6;
-        if (piVar2 == DAT_008ae5a8) {
-          DAT_008ae5ac = piVar2;
-          FUN_006169d0(_this,&local_24);
-          piVar2 = (int *)FUN_00616100(0x8ae590);
-        }
-        else {
-          bVar8 = DAT_008ae5ac != 0;
-          DAT_008ae5ac = piVar2;
-          if (bVar8) {
-            piVar2 = (int *)FUN_006157d0(_this,&local_24);
-          }
+        bVar7 = DAT_008ae5ac != 0;
+        DAT_008ae5ac = puVar6;
+        if (bVar7) {
+          FUN_006157d0(puVar3,&local_24);
         }
       }
-      DAT_008ae5bc++;
-      if ((local_10 != 0) &&
-         (*local_10 = *local_10 - 1, piVar2 = local_10, *local_10 == 0)) {
-        tier1_operator_delete(local_10);
-        piVar2 = extraout_EAX;
-      }
-      *(uint32_t *)(param_1 + 0x1c8) = 6;
     }
+    DAT_008ae5bc++;
+    if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
+      tier1_operator_delete(local_10);
+    }
+    _this->_pad_0104[0xc4] = '\x06';
+    _this->_pad_0104[0xc5] = '\0';
+    _this->_pad_0104[0xc6] = '\0';
+    _this->_pad_0104[199] = '\0';
   }
-  return CONCAT31((int3)((uint32_t)piVar2 >> 8),1);
+  return true;
 code_r0x006349cc:
-  if (iVar6 == 0) goto LAB_00634a09;
+  if (iVar5 == 0) goto LAB_00634a09;
   goto LAB_006349c3;
 }
 
 
 // 0x00634b30
-uint32_t FUN_00634b30(void *param_1, ...)
+bool C_MainMenu__OnFavorites(C_MainMenu *_this,void *argument,void *control,uint32_t notification,uint32_t value, ...)
 {
-  void *_this;
-  void *pvVar1;
-  void *extraout_EAX;
+  void *this_00;
   uint32_t local_12c;
   uint32_t local_128;
   uint32_t local_124;
@@ -912,16 +699,19 @@ uint32_t FUN_00634b30(void *param_1, ...)
   C_str *local_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
-  _this = *(void **)((int)param_1 + 0x1e4);
-  if (*(int *)((int)_this + 4) == 1) {
-    *(uint32_t *)((int)param_1 + 0x21c) = 0;
-    C_MpMenuSettings__SetListKind(_this,2);
+  this_00 = _this->m_1e4;
+  if (*(int *)((int)this_00 + 4) == 1) {
+    _this[1]._pad_0004[1] = '\0';
+    _this[1]._pad_0004[2] = '\0';
+    _this[1]._pad_0004[3] = '\0';
+    _this[1]._pad_0004[4] = '\0';
+    C_MpMenuSettings__SetListKind(this_00,2);
     local_a0 = 0;
     local_b4 = 0;
     local_b0 = 0x2000028;
     local_ac = 0;
     local_4 = 0;
-    C_MenuState__HandleMessage(param_1,&local_b4);
+    C_MenuState__HandleMessage((C_MenuState *)_this,&local_b4);
     if (local_a0 != 0) {
       C_str__ReleaseRep(local_a0);
     }
@@ -969,90 +759,94 @@ uint32_t FUN_00634b30(void *param_1, ...)
     local_d8 = 0x4e87;
     local_4 = 5;
     PostControlMessage(&DAT_008ae590,&local_e4);
-    pvVar1 = extraout_EAX;
     if (local_d0 != 0) {
-      pvVar1 = (void *)C_str__ReleaseRep(local_d0);
+      C_str__ReleaseRep(local_d0);
     }
-    *(uint32_t *)((int)param_1 + 0x1c8) = 6;
+    _this->_pad_0104[0xc4] = '\x06';
+    _this->_pad_0104[0xc5] = '\0';
+    _this->_pad_0104[0xc6] = '\0';
+    _this->_pad_0104[199] = '\0';
   }
-  else {
-    pvVar1 = (void *)(*(int *)((int)_this + 4) - 2);
-    if (pvVar1 == 0) {
-      *(uint32_t *)((int)param_1 + 0x21c) = 0;
-      C_MpMenuSettings__SetListKind(_this,1);
-      local_88 = 0;
-      local_9c = 0;
-      local_98 = 0x2000028;
-      local_94 = 0;
-      local_4 = 6;
-      C_MenuState__HandleMessage(param_1,&local_9c);
-      if (local_88 != 0) {
-        C_str__ReleaseRep(local_88);
-      }
-      local_b8 = 0;
-      local_cc = 0x20b00000;
-      local_c8 = 0x1000002;
-      local_c4 = 0;
-      local_4 = 7;
-      PostControlMessage(&DAT_008ae590,&local_cc);
-      if (local_b8 != 0) {
-        C_str__ReleaseRep(local_b8);
-      }
-      local_28 = 0;
-      local_3c = 0x20d00000;
-      local_38 = 0x1000002;
-      local_34 = 0;
-      local_4 = 8;
-      PostControlMessage(&DAT_008ae590,&local_3c);
-      if ((local_28 != 0) && (*local_28 = *local_28 - 1, *local_28 == 0)) {
-        tier1_operator_delete(local_28);
-      }
-      local_58 = 0;
-      local_6c = 0x21600000;
-      local_68 = 0x1000001;
-      local_64 = 0;
-      local_4 = 9;
-      PostControlMessage(&DAT_008ae590,&local_6c);
-      if ((local_58 != 0) && (*local_58 = *local_58 - 1, *local_58 == 0)) {
-        tier1_operator_delete(local_58);
-      }
-      local_e8 = 0;
-      local_fc = 0x21700000;
-      local_f8 = 0x1000015;
-      local_f4 = 0xd;
-      local_f0 = 0x4e84;
-      local_4 = 10;
-      PostControlMessage(&DAT_008ae590,&local_fc);
-      if ((local_e8 != 0) && (*local_e8 = *local_e8 - 1, *local_e8 == 0)) {
-        tier1_operator_delete(local_e8);
-      }
-      local_118 = 0;
-      local_12c = 0x21600000;
-      local_128 = 0x1000015;
-      local_124 = 0xd;
-      local_120 = 0x4e86;
-      local_4 = 0xb;
-      PostControlMessage(&DAT_008ae590,&local_12c);
-      if ((local_118 != 0) && (*local_118 = *local_118 - 1, *local_118 == 0)) {
-        tier1_operator_delete(local_118);
-      }
-      *(uint32_t *)((int)param_1 + 0x1c8) = 6;
-      pvVar1 = param_1;
+  else if (*(int *)((int)this_00 + 4) == 2) {
+    _this[1]._pad_0004[1] = '\0';
+    _this[1]._pad_0004[2] = '\0';
+    _this[1]._pad_0004[3] = '\0';
+    _this[1]._pad_0004[4] = '\0';
+    C_MpMenuSettings__SetListKind(this_00,1);
+    local_88 = 0;
+    local_9c = 0;
+    local_98 = 0x2000028;
+    local_94 = 0;
+    local_4 = 6;
+    C_MenuState__HandleMessage((C_MenuState *)_this,&local_9c);
+    if (local_88 != 0) {
+      C_str__ReleaseRep(local_88);
     }
+    local_b8 = 0;
+    local_cc = 0x20b00000;
+    local_c8 = 0x1000002;
+    local_c4 = 0;
+    local_4 = 7;
+    PostControlMessage(&DAT_008ae590,&local_cc);
+    if (local_b8 != 0) {
+      C_str__ReleaseRep(local_b8);
+    }
+    local_28 = 0;
+    local_3c = 0x20d00000;
+    local_38 = 0x1000002;
+    local_34 = 0;
+    local_4 = 8;
+    PostControlMessage(&DAT_008ae590,&local_3c);
+    if ((local_28 != 0) && (*local_28 = *local_28 - 1, *local_28 == 0)) {
+      tier1_operator_delete(local_28);
+    }
+    local_58 = 0;
+    local_6c = 0x21600000;
+    local_68 = 0x1000001;
+    local_64 = 0;
+    local_4 = 9;
+    PostControlMessage(&DAT_008ae590,&local_6c);
+    if ((local_58 != 0) && (*local_58 = *local_58 - 1, *local_58 == 0)) {
+      tier1_operator_delete(local_58);
+    }
+    local_e8 = 0;
+    local_fc = 0x21700000;
+    local_f8 = 0x1000015;
+    local_f4 = 0xd;
+    local_f0 = 0x4e84;
+    local_4 = 10;
+    PostControlMessage(&DAT_008ae590,&local_fc);
+    if ((local_e8 != 0) && (*local_e8 = *local_e8 - 1, *local_e8 == 0)) {
+      tier1_operator_delete(local_e8);
+    }
+    local_118 = 0;
+    local_12c = 0x21600000;
+    local_128 = 0x1000015;
+    local_124 = 0xd;
+    local_120 = 0x4e86;
+    local_4 = 0xb;
+    PostControlMessage(&DAT_008ae590,&local_12c);
+    if ((local_118 != 0) && (*local_118 = *local_118 - 1, *local_118 == 0)) {
+      tier1_operator_delete(local_118);
+    }
+    _this->_pad_0104[0xc4] = '\x06';
+    _this->_pad_0104[0xc5] = '\0';
+    _this->_pad_0104[0xc6] = '\0';
+    _this->_pad_0104[199] = '\0';
   }
-  return CONCAT31((int3)((uint32_t)pvVar1 >> 8),1);
+  return true;
 }
 
 
 // 0x00634f90  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_00634f90(int param_1, ...)
+bool C_MainMenu__OnRestoreList(C_MainMenu *_this,void *argument,void *control,uint32_t notification,uint32_t value, ...)
 {
   return {};
 }
 #if 0
 {
-  int *extraout_EAX;
-  int *extraout_EAX_00;
+  int iVar1;
+  void *pvVar2;
   uint32_t local_24;
   uint32_t local_20;
   uint32_t local_1c;
@@ -1060,13 +854,24 @@ uint32_t FUN_00634f90(int param_1, ...)
   C_str *local_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
-  local_10 = *(C_str **)(param_1 + 0x1c8);
-  if (local_10 == 0) {
-    *(uint32_t *)(param_1 + 0x200) = 0;
-    FUN_00619ca0(*(int *)(param_1 + 0x1e4));
-    *(uint32_t *)(param_1 + 0x21c) = 0;
-    if (*(char *)(*(int *)(param_1 + 0x1e4) + 0x39c) == '\0') {
-      *(uint32_t *)(param_1 + 0x1c8) = 4;
+  iVar1 = *(int *)(_this->_pad_0104 + 0xc4);
+  if (iVar1 == 0) {
+    pvVar2 = _this->m_1e4;
+    _this->_pad_01e8[0x18] = '\0';
+    _this->_pad_01e8[0x19] = '\0';
+    _this->_pad_01e8[0x1a] = '\0';
+    _this->_pad_01e8[0x1b] = '\0';
+    FUN_00619ca0((int)pvVar2);
+    pvVar2 = _this->m_1e4;
+    _this[1]._pad_0004[1] = '\0';
+    _this[1]._pad_0004[2] = '\0';
+    _this[1]._pad_0004[3] = '\0';
+    _this[1]._pad_0004[4] = '\0';
+    if (*(char *)((int)pvVar2 + 0x39c) == '\0') {
+      _this->_pad_0104[0xc4] = '\x04';
+      _this->_pad_0104[0xc5] = '\0';
+      _this->_pad_0104[0xc6] = '\0';
+      _this->_pad_0104[199] = '\0';
     }
     else {
       local_10 = 0;
@@ -1078,7 +883,10 @@ uint32_t FUN_00634f90(int param_1, ...)
       if (local_10 != 0) {
         C_str__ReleaseRep(local_10);
       }
-      *(uint32_t *)(param_1 + 0x1c8) = 9;
+      _this->_pad_0104[0xc4] = '\t';
+      _this->_pad_0104[0xc5] = '\0';
+      _this->_pad_0104[0xc6] = '\0';
+      _this->_pad_0104[199] = '\0';
     }
     local_10 = 0;
     local_24 = 0x20e00000;
@@ -1144,10 +952,9 @@ uint32_t FUN_00634f90(int param_1, ...)
     if ((local_10 != 0) &&
        (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
       tier1_operator_delete(local_10);
-      local_10 = (C_str *)extraout_EAX;
     }
   }
-  else if ((local_10 == (C_str *)0x4) || (local_10 == (C_str *)&DAT_00000009)) {
+  else if ((iVar1 == 4) || (iVar1 == 9)) {
     local_10 = 0;
     local_24 = 0;
     local_20 = 0x2000028;
@@ -1180,8 +987,7 @@ uint32_t FUN_00634f90(int param_1, ...)
        (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
       tier1_operator_delete(local_10);
     }
-    local_10 = *(C_str **)(*(int *)(param_1 + 0x1e4) + 4);
-    if (local_10 == (C_str *)0x1) {
+    if (*(int *)((int)_this->m_1e4 + 4) == 1) {
       local_10 = 0;
       local_24 = 0x20b00000;
       local_20 = 0x1000002;
@@ -1191,39 +997,43 @@ uint32_t FUN_00634f90(int param_1, ...)
       if ((local_10 != 0) &&
          (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
         tier1_operator_delete(local_10);
-        local_10 = (C_str *)extraout_EAX_00;
       }
     }
-    *(uint32_t *)(param_1 + 0x1c8) = 0;
+    _this->_pad_0104[0xc4] = '\0';
+    _this->_pad_0104[0xc5] = '\0';
+    _this->_pad_0104[0xc6] = '\0';
+    _this->_pad_0104[199] = '\0';
   }
-  return CONCAT31((int3)((uint32_t)local_10 >> 8),1);
+  return true;
 }
 
 
 #endif
 // 0x00635360  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_00635360(int param_1, ...)
+bool C_MainMenu__OnRefreshList(C_MainMenu *_this,void *argument,void *control,uint32_t notification,uint32_t value, ...)
 {
   return {};
 }
 #if 0
 {
-  S_MultiplayerSettings *extraout_EAX;
-  S_MultiplayerSettings *pSVar1;
-  S_MultiplayerSettings *extraout_EAX_00;
   uint32_t local_24;
   uint32_t local_20;
   uint32_t local_1c;
   uint32_t local_18;
-  S_MultiplayerSettings *local_10;
+  C_str *local_10;
   uint32_t local_4;
   local_4 = 0xffffffff;
-  pSVar1 = *(S_MultiplayerSettings **)(param_1 + 0x1c8);
-  if (pSVar1 == 0) {
-    *(uint32_t *)(param_1 + 0x200) = 0;
-    *(uint32_t *)(param_1 + 0x21c) = 0;
-    C_MainMenu__C_MainMenu::DrainFoundServers((C_MainMenu *)param_1);
-    C_MpMenuSettings__ClearServers(*(int *)(param_1 + 0x1e4));
+  if (*(int *)(_this->_pad_0104 + 0xc4) == 0) {
+    _this->_pad_01e8[0x18] = '\0';
+    _this->_pad_01e8[0x19] = '\0';
+    _this->_pad_01e8[0x1a] = '\0';
+    _this->_pad_01e8[0x1b] = '\0';
+    _this[1]._pad_0004[1] = '\0';
+    _this[1]._pad_0004[2] = '\0';
+    _this[1]._pad_0004[3] = '\0';
+    _this[1]._pad_0004[4] = '\0';
+    C_MainMenu__DrainFoundServers();
+    C_MpMenuSettings__ClearServers(_this->m_1e4);
     local_10 = 0;
     local_24 = 0x20e00000;
     local_20 = 0x1000001;
@@ -1231,7 +1041,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_4 = 0;
     PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
-      C_str__ReleaseRep((C_str *)local_10);
+      C_str__ReleaseRep(local_10);
     }
     local_10 = 0;
     local_24 = 0x21000000;
@@ -1240,7 +1050,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_4 = 1;
     PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
-      C_str__ReleaseRep((C_str *)local_10);
+      C_str__ReleaseRep(local_10);
     }
     local_10 = 0;
     local_24 = 0x21600000;
@@ -1249,7 +1059,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_4 = 2;
     PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
-      C_str__ReleaseRep((C_str *)local_10);
+      C_str__ReleaseRep(local_10);
     }
     local_10 = 0;
     local_24 = 0x20900000;
@@ -1258,7 +1068,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_4 = 3;
     PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
-      C_str__ReleaseRep((C_str *)local_10);
+      C_str__ReleaseRep(local_10);
     }
     local_10 = 0;
     local_24 = 0x20a00000;
@@ -1267,7 +1077,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_4 = 4;
     PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
-      C_str__ReleaseRep((C_str *)local_10);
+      C_str__ReleaseRep(local_10);
     }
     local_10 = 0;
     local_24 = 0x20b00000;
@@ -1277,7 +1087,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_4 = 5;
     PostControlMessage(&DAT_008ae590,&local_24);
     if (local_10 != 0) {
-      C_str__ReleaseRep((C_str *)local_10);
+      C_str__ReleaseRep(local_10);
     }
     local_10 = 0;
     local_24 = 0;
@@ -1285,13 +1095,15 @@ uint32_t FUN_00635360(int param_1, ...)
     local_1c = 0;
     local_4 = 6;
     PostControlMessage(&DAT_008ae590,&local_24);
-    pSVar1 = extraout_EAX;
     if (local_10 != 0) {
-      pSVar1 = (S_MultiplayerSettings *)C_str__ReleaseRep((C_str *)local_10);
+      C_str__ReleaseRep(local_10);
     }
-    *(uint32_t *)(param_1 + 0x1c8) = 5;
+    _this->_pad_0104[0xc4] = '\x05';
+    _this->_pad_0104[0xc5] = '\0';
+    _this->_pad_0104[0xc6] = '\0';
+    _this->_pad_0104[199] = '\0';
   }
-  else if (pSVar1 == (S_MultiplayerSettings *)0x5) {
+  else if (*(int *)(_this->_pad_0104 + 0xc4) == 5) {
     local_10 = 0;
     local_24 = 0;
     local_20 = 0x2000028;
@@ -1299,7 +1111,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_4 = 7;
     PostControlMessage(&DAT_008ae590,&local_24);
     if ((local_10 != 0) &&
-       (*(int *)local_10 = *(int *)local_10 - 1, *(int *)local_10 == 0)) {
+       (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
       tier1_operator_delete(local_10);
     }
     local_10 = 0;
@@ -1309,7 +1121,7 @@ uint32_t FUN_00635360(int param_1, ...)
     local_4 = 8;
     PostControlMessage(&DAT_008ae590,&local_24);
     if ((local_10 != 0) &&
-       (*(int *)local_10 = *(int *)local_10 - 1, *(int *)local_10 == 0)) {
+       (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
       tier1_operator_delete(local_10);
     }
     local_10 = 0;
@@ -1321,10 +1133,9 @@ uint32_t FUN_00635360(int param_1, ...)
     PostControlMessage(&DAT_008ae590,&local_24);
     local_4 = 0xffffffff;
     if ((local_10 != 0) &&
-       (*(int *)local_10 = *(int *)local_10 - 1, *(int *)local_10 == 0)) {
+       (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
       tier1_operator_delete(local_10);
     }
-    pSVar1 = g_gameProfile.m_mpSettings;
     if ((g_gameProfile.m_mpSettings)->unknown174 == 1) {
       local_10 = 0;
       local_24 = 0x20a00000;
@@ -1332,31 +1143,21 @@ uint32_t FUN_00635360(int param_1, ...)
       local_1c = 0;
       local_4 = 10;
       PostControlMessage(&DAT_008ae590,&local_24);
-      pSVar1 = local_10;
       if ((local_10 != 0) &&
-         (*(int *)local_10->_pad_0000 = *(int *)local_10->_pad_0000 - 1,
-         *(int *)local_10->_pad_0000 == 0)) {
+         (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
         tier1_operator_delete(local_10);
-        pSVar1 = extraout_EAX_00;
       }
     }
-    *(uint32_t *)(param_1 + 0x1c8) = 0;
+    _this->_pad_0104[0xc4] = '\0';
+    _this->_pad_0104[0xc5] = '\0';
+    _this->_pad_0104[0xc6] = '\0';
+    _this->_pad_0104[199] = '\0';
   }
-  return CONCAT31((int3)((uint32_t)pSVar1 >> 8),1);
+  return true;
 }
 
 
 #endif
-// 0x006356d0
-uint32_t FUN_006356d0(...)
-{
-  S_PlayMode *pSVar1;
-  pSVar1 = g_gameProfile.m_playMode;
-  (g_gameProfile.m_playMode)->singleMission = -1;
-  return CONCAT31((int3)((uint32_t)pSVar1 >> 8),1);
-}
-
-
 // 0x00635710
 uint32_t FUN_00635710(void *param_1, ...)
 {
@@ -1542,24 +1343,22 @@ uint32_t FUN_00635b70(uint32_t param_1, ...)
 
 
 // 0x00635ba0
-uint32_t FUN_00635ba0(void *_this, ...)
+bool C_MainMenu__OnBrowserTick(C_MainMenu *_this,void *argument,void *control,uint32_t notification,uint32_t value, ...)
 {
   uint32_t *puVar1;
-  int iVar2;
-  uint32_t *puVar3;
+  uint32_t *puVar2;
+  void *pvVar3;
   int iVar4;
-  int *extraout_EAX;
   uint32_t uVar5;
   bool bVar6;
-  int in_stack_00000010;
   uint32_t local_2c;
   uint32_t local_28;
   uint32_t local_24;
   int *local_18;
-  int local_14;
+  void *local_14;
   uint32_t local_8;
   local_8 = 0xffffffff;
-  iVar4 = *(int *)((int)_this + 0x1c8);
+  iVar4 = *(int *)(_this->_pad_0104 + 0xc4);
   if ((((iVar4 == 4) || (iVar4 == 9)) || (iVar4 == 5)) || (iVar4 == 6)) {
     if (iVar4 == 6) {
       local_2c = 0x20900000;
@@ -1567,51 +1366,56 @@ uint32_t FUN_00635ba0(void *_this, ...)
       local_28 = 0x2000018;
       local_24 = 0;
       local_8 = 0;
-      C_MenuState__HandleMessage(_this,&local_2c);
+      C_MenuState__HandleMessage((C_MenuState *)_this,&local_2c);
       local_8 = 0xffffffff;
       if ((local_18 != 0) && (*local_18 = *local_18 - 1, *local_18 == 0)) {
         tier1_operator_delete(local_18);
       }
-      iVar4 = C_MpMenuSettings__GetList(*(void **)((int)_this + 0x1e4),0);
+      pvVar3 = C_MpMenuSettings__GetList(_this->m_1e4,0);
       for (uVar5 = 0;
-          (iVar2 = *(int *)(iVar4 + 4), iVar2 != 0 &&
-          (uVar5 < (uint32_t)(*(int *)(iVar4 + 8) - iVar2 >> 2))); uVar5 = uVar5 + 1) {
-        FUN_00635f10(_this,*(int *)(iVar2 + uVar5 * 4));
+          (iVar4 = *(int *)((int)pvVar3 + 4), iVar4 != 0 &&
+          (uVar5 < (uint32_t)(*(int *)((int)pvVar3 + 8) - iVar4 >> 2))); uVar5 = uVar5 + 1) {
+        FUN_00635f10(_this,*(int *)(iVar4 + uVar5 * 4));
       }
       local_18 = 0;
       local_2c = 0x20900000;
       local_28 = 0x200002c;
       local_24 = 0;
       local_8 = 1;
-      C_MenuState__HandleMessage(_this,&local_2c);
+      C_MenuState__HandleMessage((C_MenuState *)_this,&local_2c);
       if ((local_18 != 0) && (*local_18 = *local_18 - 1, *local_18 == 0)) {
         tier1_operator_delete(local_18);
-        local_18 = extraout_EAX;
       }
-      *(uint32_t *)((int)_this + 0x1c8) = 0;
-      return CONCAT31((int3)((uint32_t)local_18 >> 8),1);
+      _this->_pad_0104[0xc4] = '\0';
+      _this->_pad_0104[0xc5] = '\0';
+      _this->_pad_0104[0xc6] = '\0';
+      _this->_pad_0104[199] = '\0';
+      return true;
     }
     if (iVar4 == 9) {
-      iVar4 = C_MpMenuSettings__GetList(*(void **)((int)_this + 0x1e4),0);
-      local_14 = iVar4;
+      pvVar3 = C_MpMenuSettings__GetList(_this->m_1e4,0);
+      local_14 = pvVar3;
       for (uVar5 = 0;
-          (iVar2 = *(int *)(iVar4 + 4), iVar2 != 0 &&
-          (uVar5 < (uint32_t)(*(int *)(iVar4 + 8) - iVar2 >> 2))); uVar5 = uVar5 + 1) {
-        iVar2 = *(int *)(iVar2 + uVar5 * 4);
-        if ((*(uint32_t *)(iVar2 + 0x74) < 9999) && (*(char *)(iVar2 + 0x98) == '\0')) {
-          *(uint32_t *)((int)_this + 0x200) = 0;
-          *(uint8_t *)(*(int *)(*(int *)(iVar4 + 4) + uVar5 * 4) + 0x98) = 1;
-          FUN_00635f10(_this,*(int *)(*(int *)(iVar4 + 4) + uVar5 * 4));
-          iVar4 = local_14;
+          (iVar4 = *(int *)((int)pvVar3 + 4), iVar4 != 0 &&
+          (uVar5 < (uint32_t)(*(int *)((int)pvVar3 + 8) - iVar4 >> 2))); uVar5 = uVar5 + 1) {
+        iVar4 = *(int *)(iVar4 + uVar5 * 4);
+        if ((*(uint32_t *)(iVar4 + 0x74) < 9999) && (*(char *)(iVar4 + 0x98) == '\0')) {
+          _this->_pad_01e8[0x18] = '\0';
+          _this->_pad_01e8[0x19] = '\0';
+          _this->_pad_01e8[0x1a] = '\0';
+          _this->_pad_01e8[0x1b] = '\0';
+          *(uint8_t *)(*(int *)(*(int *)((int)pvVar3 + 4) + uVar5 * 4) + 0x98) = 1;
+          FUN_00635f10(_this,*(int *)(*(int *)((int)pvVar3 + 4) + uVar5 * 4));
+          pvVar3 = local_14;
         }
       }
-      if (*(int *)((int)_this + 0x200) == 0) {
+      if (*(int *)(_this->_pad_01e8 + 0x18) == 0) {
         local_18 = 0;
         local_2c = 0x20900000;
         local_28 = 0x200002c;
         local_24 = 0;
         local_8 = 2;
-        C_MenuState__HandleMessage(_this,&local_2c);
+        C_MenuState__HandleMessage((C_MenuState *)_this,&local_2c);
         local_8 = 0xffffffff;
         if ((local_18 != 0) && (*local_18 = *local_18 - 1, *local_18 == 0)) {
           tier1_operator_delete(local_18);
@@ -1621,20 +1425,20 @@ uint32_t FUN_00635ba0(void *_this, ...)
     else {
       FUN_00635710(_this);
     }
-    iVar4 = *(int *)((int)_this + 0x200) + in_stack_00000010;
-    *(int *)((int)_this + 0x200) = iVar4;
-    *(int *)((int)_this + 0x204) = *(int *)((int)_this + 0x204) + in_stack_00000010;
+    iVar4 = *(int *)(_this->_pad_01e8 + 0x18) + value;
+    *(int *)(_this->_pad_01e8 + 0x18) = iVar4;
+    *(uint32_t *)(_this->_pad_01e8 + 0x1c) = *(int *)(_this->_pad_01e8 + 0x1c) + value;
     if (15000 < iVar4) {
-      iVar4 = *(int *)((int)_this + 0x1c8);
+      iVar4 = *(int *)(_this->_pad_0104 + 0xc4);
       if ((iVar4 == 4) || (iVar4 == 9)) {
-        FUN_00634f90((int)_this);
+        C_MainMenu__OnRestoreList(_this,0,0,0,0);
       }
       else if (iVar4 == 5) {
-        FUN_00635360((int)_this);
+        C_MainMenu__OnRefreshList(_this,0,0,0,0);
       }
     }
-    puVar3 = DAT_008ae5ac;
-    if (1000 < *(int *)((int)_this + 0x204)) {
+    puVar2 = DAT_008ae5ac;
+    if (1000 < *(int *)(_this->_pad_01e8 + 0x1c)) {
       local_2c = 0x20900000;
       local_18 = 0;
       local_28 = 0x2000079;
@@ -1642,9 +1446,9 @@ uint32_t FUN_00635ba0(void *_this, ...)
       local_8 = 3;
       if ((DAT_008ae5bc == 0) || (DAT_008ae5ac == DAT_008ae5a8)) {
         FUN_00616100(0x8ae590);
-        puVar3 = DAT_008ae5ac;
+        puVar2 = DAT_008ae5ac;
         DAT_008ae5ac += 6;
-        FUN_006169d0(puVar3,&local_2c);
+        FUN_006169d0(puVar2,&local_2c);
       }
       else {
         puVar1 = DAT_008ae5ac + 6;
@@ -1652,7 +1456,7 @@ uint32_t FUN_00635ba0(void *_this, ...)
           bVar6 = DAT_008ae5ac != 0;
           DAT_008ae5ac = puVar1;
           if (bVar6) {
-            FUN_006157d0(puVar3,&local_2c);
+            FUN_006157d0(puVar2,&local_2c);
           }
           FUN_00616100(0x8ae590);
         }
@@ -1660,7 +1464,7 @@ uint32_t FUN_00635ba0(void *_this, ...)
           bVar6 = DAT_008ae5ac != 0;
           DAT_008ae5ac = puVar1;
           if (bVar6) {
-            FUN_006157d0(puVar3,&local_2c);
+            FUN_006157d0(puVar2,&local_2c);
           }
         }
       }
@@ -1669,16 +1473,18 @@ uint32_t FUN_00635ba0(void *_this, ...)
       if ((local_18 != 0) && (*local_18 = *local_18 - 1, *local_18 == 0)) {
         tier1_operator_delete(local_18);
       }
-      *(uint32_t *)((int)_this + 0x204) = 0;
+      _this->_pad_01e8[0x1c] = '\0';
+      _this->_pad_01e8[0x1d] = '\0';
+      _this->_pad_01e8[0x1e] = '\0';
+      _this->_pad_01e8[0x1f] = '\0';
     }
-    iVar4 = DAT_0083fe08 + in_stack_00000010;
-    DAT_0083fe08 = iVar4;
-    if (10 < iVar4) {
-      iVar4 = FUN_00723610(0x97d070);
+    DAT_0083fe08 += value;
+    if (10 < DAT_0083fe08) {
+      FUN_00723610(0x97d070);
       DAT_0083fe08 = 0;
     }
   }
-  return CONCAT31((int3)((uint32_t)iVar4 >> 8),1);
+  return true;
 }
 
 
@@ -1763,474 +1569,6 @@ uint32_t FUN_00635f10(void *_this,int param_1, ...)
 LAB_006360a8:
   DAT_008ae5bc++;
   return 0;
-}
-
-
-// 0x006360c0  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t FUN_006360c0(void *_this,uint32_t param_1,int *param_2, ...)
-{
-  return {};
-}
-#if 0
-{
-  uint32_t *puVar1;
-  int *extraout_EAX;
-  uint32_t *puVar2;
-  uint32_t local_40;
-  uint32_t local_3c;
-  uint32_t local_38;
-  LPVOID *local_34;
-  int *local_2c;
-  uint32_t local_28;
-  uint32_t local_24;
-  uint32_t local_20;
-  int *local_14;
-  uint8_t local_8;
-  undefined3 uStack_7;
-  local_2c = 0;
-  local_40 = 0;
-  local_3c = 0x1000069;
-  local_38 = 0;
-  local_8 = 0;
-  uStack_7 = 0;
-  (**(code **)(*param_2 + 0x6c))(&local_40);
-  *(LPVOID **)((int)_this + 0x21c) = local_34;
-  if (local_34 == 0) goto LAB_00636252;
-  FUN_00724070(&g_netGame,&DAT_00635980,local_34);
-  local_14 = 0;
-  local_28 = 0x20e00000;
-  local_24 = 0x1000002;
-  local_20 = 0;
-  _local_8 = CONCAT31(uStack_7,1);
-  PostControlMessage(&DAT_008ae590,&local_28);
-  if ((local_14 != 0) && (*local_14 = *local_14 - 1, *local_14 == 0)) {
-    tier1_operator_delete(local_14);
-  }
-  local_28 = 0x21000000;
-  local_14 = 0;
-  local_24 = 0x1000002;
-  local_20 = 0;
-  local_8 = 2;
-  PostControlMessage(&DAT_008ae590,&local_28);
-  local_8 = 0;
-  if ((local_14 != 0) && (*local_14 = *local_14 - 1, *local_14 == 0)) {
-    tier1_operator_delete(local_14);
-  }
-  puVar2 = DAT_008ae5ac;
-  if ((g_gameProfile.m_mpSettings)->unknown174 != 1) goto LAB_00636252;
-  local_28 = 0x21600000;
-  local_14 = 0;
-  local_24 = 0x1000002;
-  local_20 = 0;
-  local_8 = 3;
-  if (DAT_008ae5bc == 0) {
-LAB_00636209:
-    FUN_00616100(0x8ae590);
-    puVar2 = DAT_008ae5ac;
-    DAT_008ae5ac += 6;
-LAB_00636225:
-    FUN_006169d0(puVar2,&local_28);
-  }
-  else {
-    if (DAT_008ae5ac == DAT_008ae5a8) goto LAB_00636209;
-    puVar1 = DAT_008ae5ac + 6;
-    DAT_008ae5ac = puVar1;
-    if (puVar1 != DAT_008ae5a8) goto LAB_00636225;
-    FUN_006169d0(puVar2,&local_28);
-    FUN_00616100(0x8ae590);
-  }
-  DAT_008ae5bc++;
-  if ((local_14 != 0) && (*local_14 = *local_14 - 1, *local_14 == 0)) {
-    tier1_operator_delete(local_14);
-  }
-LAB_00636252:
-  if ((local_2c != 0) && (*local_2c = *local_2c - 1, *local_2c == 0)) {
-    tier1_operator_delete(local_2c);
-    local_2c = extraout_EAX;
-  }
-  return CONCAT31((int3)((uint32_t)local_2c >> 8),1);
-}
-
-
-#endif
-// 0x00636280
-uint32_t FUN_00636280(int param_1, ...)
-{
-  int *_this;
-  int *piVar1;
-  int *extraout_EAX;
-  bool bVar2;
-  uint32_t local_24;
-  uint32_t local_20;
-  uint32_t local_1c;
-  int *local_10;
-  uint32_t local_4;
-  piVar1 = 0;
-  if (*(int *)(param_1 + 0x21c) != 0) {
-    local_10 = 0;
-    local_24 = 0;
-    local_20 = 0x2000028;
-    local_1c = 0;
-    local_4 = 0;
-    PostControlMessage(&DAT_008ae590,&local_24);
-    if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
-      tier1_operator_delete(local_10);
-    }
-    local_10 = 0;
-    local_24 = 0;
-    local_20 = 0x200009b;
-    local_1c = 0;
-    local_4 = 1;
-    PostControlMessage(&DAT_008ae590,&local_24);
-    if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
-      tier1_operator_delete(local_10);
-    }
-    _this = DAT_008ae5ac;
-    local_24 = 0;
-    local_10 = 0;
-    local_20 = 0x200002a;
-    local_1c = 0;
-    local_4 = 2;
-    if ((DAT_008ae5bc == 0) || (DAT_008ae5ac == DAT_008ae5a8)) {
-      FUN_00616100(0x8ae590);
-      piVar1 = DAT_008ae5ac;
-      DAT_008ae5ac += 6;
-      piVar1 = (int *)FUN_006169d0(piVar1,&local_24);
-    }
-    else {
-      piVar1 = DAT_008ae5ac + 6;
-      if (piVar1 == DAT_008ae5a8) {
-        DAT_008ae5ac = piVar1;
-        FUN_006169d0(_this,&local_24);
-        piVar1 = (int *)FUN_00616100(0x8ae590);
-      }
-      else {
-        bVar2 = DAT_008ae5ac != 0;
-        DAT_008ae5ac = piVar1;
-        if (bVar2) {
-          piVar1 = (int *)FUN_006157d0(_this,&local_24);
-        }
-      }
-    }
-    DAT_008ae5bc++;
-    if ((local_10 != 0) && (*local_10 = *local_10 - 1, piVar1 = local_10, *local_10 == 0))
-    {
-      tier1_operator_delete(local_10);
-      piVar1 = extraout_EAX;
-    }
-  }
-  return CONCAT31((int3)((uint32_t)piVar1 >> 8),1);
-}
-
-
-// 0x006364b0
-uint32_t FUN_006364b0(void *param_1, ...)
-{
-  uint32_t uVar1;
-  C_str *pCVar2;
-  char *pcVar3;
-  int iVar4;
-  int *extraout_EAX;
-  C_str local_44;
-  C_str local_40;
-  uint32_t local_3c;
-  uint32_t local_38;
-  uint32_t local_34;
-  C_str_rep *local_28;
-  uint32_t local_24;
-  uint32_t local_20;
-  uint32_t local_1c;
-  int *local_10;
-  uint32_t local_4;
-  local_10 = 0;
-  local_24 = 0x20900000;
-  local_20 = 0x10000a2;
-  local_1c = 0;
-  local_4 = 0;
-  C_MenuState__HandleMessage(param_1,&local_24);
-  uVar1 = local_1c;
-  C_MpMenuSettings__CountServers(*(void **)((int)param_1 + 0x1e4));
-  pCVar2 = C_GameTexts__Get(&DAT_008c1368,&local_40,0x22ae);
-  local_4 = CONCAT31(GH_PIECE(local_4,1,3),1);
-  if (pCVar2->rep == 0) {
-    pcVar3 = (char *)&DAT_00867a90;
-  }
-  else {
-    pcVar3 = pCVar2->rep->chars;
-  }
-  C_fstr_Construct(&local_44,"%d/%d ----- %d %s",uVar1,
-                   *(uint32_t *)(*(int *)((int)param_1 + 0x1e4) + 0x28),
-                   *(uint32_t *)(*(int *)((int)param_1 + 0x1e4) + 0x2c),pcVar3);
-  if ((local_40.rep != 0) &&
-     ((local_40.rep)->refCount = (local_40.rep)->refCount - 1, (local_40.rep)->refCount == 0)) {
-    tier1_operator_delete(local_40.rep);
-  }
-  if (local_44.rep != 0) {
-    (local_44.rep)->refCount = (local_44.rep)->refCount + 1;
-  }
-  local_3c = 0x21500000;
-  local_38 = 0x1000014;
-  local_34 = 9;
-  if (local_44.rep != 0) {
-    (local_44.rep)->refCount = (local_44.rep)->refCount + 1;
-  }
-  local_28 = local_44.rep;
-  if ((local_44.rep != 0) &&
-     (iVar4 = (local_44.rep)->refCount - 1, (local_44.rep)->refCount = iVar4, iVar4 == 0)) {
-    tier1_operator_delete(local_44.rep);
-  }
-  local_4 = CONCAT31(GH_PIECE(local_4,1,3),4);
-  PostControlMessage(&DAT_008ae590,&local_3c);
-  if ((local_28 != 0) &&
-     (local_28->refCount = local_28->refCount - 1, local_28->refCount == 0)) {
-    tier1_operator_delete(local_28);
-  }
-  if ((local_44.rep != 0) &&
-     ((local_44.rep)->refCount = (local_44.rep)->refCount - 1, (local_44.rep)->refCount == 0)) {
-    tier1_operator_delete(local_44.rep);
-  }
-  if ((local_10 != 0) && (*local_10 = *local_10 - 1, *local_10 == 0)) {
-    tier1_operator_delete(local_10);
-    local_10 = extraout_EAX;
-  }
-  return CONCAT31((int3)((uint32_t)local_10 >> 8),1);
-}
-
-
-// 0x00636640
-uint32_t FUN_00636640(void *_this,uint32_t param_1,int param_2, ...)
-{
-  int iVar1;
-  uint8_t bVar2;
-  int iVar3;
-  C_str_rep *extraout_EAX;
-  int *ptr;
-  C_str_rep *extraout_EAX_00;
-  uint32_t local_12c;
-  uint32_t local_128;
-  int local_124;
-  uint32_t local_120;
-  uint32_t local_11c;
-  C_str local_118;
-  uint32_t local_114;
-  uint32_t local_110;
-  uint32_t local_10c;
-  uint32_t local_108;
-  uint32_t local_104;
-  C_str *local_100;
-  uint32_t local_fc;
-  uint32_t local_f8;
-  uint32_t local_f4;
-  C_str *local_e8;
-  uint32_t local_e4;
-  uint32_t local_e0;
-  uint32_t local_dc;
-  int *local_d0;
-  uint32_t local_cc;
-  uint32_t local_c8;
-  uint32_t local_c4;
-  C_str *local_b8;
-  uint32_t local_b4;
-  uint32_t local_b0;
-  uint32_t local_ac;
-  int *local_a0;
-  uint32_t local_9c;
-  uint32_t local_98;
-  uint32_t local_94;
-  C_str *local_88;
-  uint32_t local_84;
-  uint32_t local_80;
-  uint32_t local_7c;
-  int *local_70;
-  uint32_t local_6c;
-  uint32_t local_68;
-  uint32_t local_64;
-  C_str *local_58;
-  uint32_t local_54;
-  uint32_t local_50;
-  uint32_t local_4c;
-  int *local_40;
-  uint32_t local_3c;
-  uint32_t local_38;
-  uint32_t local_34;
-  C_str *local_28;
-  uint32_t local_24;
-  uint32_t local_20;
-  uint32_t local_1c;
-  int *local_10;
-  uint32_t local_4;
-  if (param_2 == 0) {
-    return 0;
-  }
-  iVar1 = *(int *)(param_2 + 0x60);
-  local_118.rep = 0;
-  local_12c = 0x20900000;
-  local_128 = 0x20000ad;
-  local_124 = 0;
-  local_4 = 0;
-  C_MenuState__HandleMessage(_this,&local_12c);
-  iVar3 = local_124;
-  local_100 = 0;
-  local_114 = 0x20200000;
-  local_110 = 0x100006c;
-  local_10c = 0;
-  local_12c = 0x20200000;
-  local_128 = 0x100006c;
-  local_120 = local_108;
-  GH_PIECE(local_4,0,1) = 1;
-  local_124 = 0;
-  local_11c = local_104;
-  C_str__Assign(&local_118,(uint32_t*)(&local_100));
-  GH_PIECE(local_4,0,1) = 0;
-  if (local_100 != 0) {
-    C_str__ReleaseRep(local_100);
-  }
-  C_MenuState__HandleMessage(_this,&local_12c);
-  bVar2 = (uint8_t)iVar3;
-  if (iVar1 < 0x20500001) {
-    if (iVar1 != 0x20500000) {
-      if (iVar1 == 0x20200000) {
-        local_e8 = 0;
-        local_fc = 0x20900000;
-        local_f8 = 0x2000079;
-        local_f4 = 0xc0;
-        local_4 = CONCAT31(GH_PIECE(local_4,1,3),2);
-        PostControlMessage(&DAT_008ae590,&local_fc);
-        if (local_e8 != 0) {
-          C_str__ReleaseRep(local_e8);
-        }
-      }
-      else if (iVar1 == 0x20300000) {
-        if ((bVar2 & 7) == 1) {
-          local_b8 = 0;
-          local_c4 = (uint32_t)(local_124 == 0);
-          local_cc = 0x20200000;
-          local_c8 = 0x100006d;
-          local_4 = CONCAT31(GH_PIECE(local_4,1,3),3);
-          PostControlMessage(&DAT_008ae590,&local_cc);
-          if (local_b8 != 0) {
-            C_str__ReleaseRep(local_b8);
-          }
-        }
-        else {
-          local_58 = 0;
-          local_6c = 0x20900000;
-          local_68 = 0x2000079;
-          local_64 = 1;
-          local_4 = CONCAT31(GH_PIECE(local_4,1,3),4);
-          PostControlMessage(&DAT_008ae590,&local_6c);
-          if (local_58 != 0) {
-            C_str__ReleaseRep(local_58);
-          }
-        }
-      }
-      else {
-        if (iVar1 != 0x20400000) goto LAB_006369b3;
-        if ((bVar2 & 7) == 2) {
-          local_114 = 0x20200000;
-          local_10c = (uint32_t)(local_124 == 0);
-          local_100 = 0;
-          local_110 = 0x100006d;
-          local_4 = CONCAT31(GH_PIECE(local_4,1,3),5);
-          PostControlMessage(&DAT_008ae590,&local_114);
-          if (local_100 != 0) {
-            C_str__ReleaseRep(local_100);
-          }
-        }
-        else {
-          local_88 = 0;
-          local_9c = 0x20900000;
-          local_98 = 0x2000079;
-          local_94 = 2;
-          local_4 = CONCAT31(GH_PIECE(local_4,1,3),6);
-          PostControlMessage(&DAT_008ae590,&local_9c);
-          if (local_88 != 0) {
-            C_str__ReleaseRep(local_88);
-          }
-        }
-      }
-      goto LAB_00636b40;
-    }
-    if ((bVar2 & 7) == 3) {
-      local_28 = 0;
-      local_34 = (uint32_t)(local_124 == 0);
-      local_3c = 0x20200000;
-      local_38 = 0x100006d;
-      local_4 = CONCAT31(GH_PIECE(local_4,1,3),7);
-      PostControlMessage(&DAT_008ae590,&local_3c);
-      if (local_28 != 0) {
-        C_str__ReleaseRep(local_28);
-      }
-      goto LAB_00636b40;
-    }
-    local_d0 = 0;
-    local_e4 = 0x20900000;
-    local_e0 = 0x2000079;
-    local_dc = 3;
-    local_4 = CONCAT31(GH_PIECE(local_4,1,3),8);
-    PostControlMessage(&DAT_008ae590,&local_e4);
-    ptr = local_d0;
-  }
-  else if (iVar1 == 0x20600000) {
-    if ((bVar2 & 7) == 4) {
-      local_40 = 0;
-      local_4c = (uint32_t)(local_124 == 0);
-      local_54 = 0x20200000;
-      local_50 = 0x100006d;
-      local_4 = CONCAT31(GH_PIECE(local_4,1,3),9);
-      PostControlMessage(&DAT_008ae590,&local_54);
-      ptr = local_40;
-    }
-    else {
-      local_10 = 0;
-      local_24 = 0x20900000;
-      local_20 = 0x2000079;
-      local_1c = 4;
-      local_4 = CONCAT31(GH_PIECE(local_4,1,3),10);
-      PostControlMessage(&DAT_008ae590,&local_24);
-      ptr = local_10;
-    }
-  }
-  else {
-    if (iVar1 != 0x20700000) {
-LAB_006369b3:
-      if ((local_118.rep != 0) &&
-         ((local_118.rep)->refCount = (local_118.rep)->refCount - 1, (local_118.rep)->refCount == 0
-         )) {
-        tier1_operator_delete(local_118.rep);
-        local_118.rep = extraout_EAX;
-      }
-      return (uint32_t)local_118.rep & 0xffffff00;
-    }
-    if ((bVar2 & 7) == 5) {
-      local_a0 = 0;
-      local_ac = (uint32_t)(local_124 == 0);
-      local_b4 = 0x20200000;
-      local_b0 = 0x100006d;
-      local_4 = CONCAT31(GH_PIECE(local_4,1,3),0xb);
-      PostControlMessage(&DAT_008ae590,&local_b4);
-      ptr = local_a0;
-    }
-    else {
-      local_70 = 0;
-      local_84 = 0x20900000;
-      local_80 = 0x2000079;
-      local_7c = 5;
-      local_4 = CONCAT31(GH_PIECE(local_4,1,3),0xc);
-      PostControlMessage(&DAT_008ae590,&local_84);
-      ptr = local_70;
-    }
-  }
-  if ((ptr != 0) && (*ptr = *ptr - 1, *ptr == 0)) {
-    tier1_operator_delete(ptr);
-  }
-LAB_00636b40:
-  if ((local_118.rep != 0) &&
-     ((local_118.rep)->refCount = (local_118.rep)->refCount - 1, (local_118.rep)->refCount == 0)) {
-    tier1_operator_delete(local_118.rep);
-    local_118.rep = extraout_EAX_00;
-  }
-  return CONCAT31((int3)((uint32_t)local_118.rep >> 8),1);
 }
 
 

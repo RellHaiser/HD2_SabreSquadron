@@ -201,6 +201,31 @@ int C_NetGame::QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *), S
     g_giCallback = callback;
     return 1;
 }
+// (Part 9h-xix: the browser's later callbacks: logged; a ping: logged, its callback kept; a control answering every
+// message with its values, logged.)
+MM_CALLBACK(OnBrowserTick)
+MM_CALLBACK(OnRestoreList)
+MM_CALLBACK(OnRefreshList)
+MM_CALLBACK(OnFavoriteToggle)
+MM_CALLBACK(OnFavorites)
+void(__fastcall *g_bwPing)(S_ServerEntry *);
+void C_NetGame::PingServer(void(__fastcall *callback)(S_ServerEntry *), S_ServerEntry *server)
+{
+    GfLog("ping %s", server->name);
+    g_bwPing = callback;
+}
+struct C_BwControl : C_Control {
+    C_BwControl(uint32_t id, C_Control *parent, uint32_t v) : C_Control(nullptr, id, parent), value(v) {}
+    uint32_t value;
+    uintptr_t value2 = 0;
+    bool HandleMessage(S_ControlMessage *m) override
+    {
+        GfLog("bw %x %x", m_id, m->id);
+        m->value = value;
+        m->value2 = value2;
+        return true;
+    }
+};
 // (Part 9h-xiii: the create server screen's callbacks (a later sub-part's); the codecs' texts.)
 // (Part 9h-xvi: a map line: its id, index, parent, highlight frame.)
 struct C_CsLine : C_Control {
@@ -242,7 +267,6 @@ bool C_PlayerProfile::GetLastSaveText(C_str *mode, C_str *mission, C_str *date) 
         GfLog("describe %s %x", N, desc->id);                                                                     \
         return true;                                                                                              \
     }
-MM_DESCRIBE(DescribeBrowserScreen, "browser")
 MM_DESCRIBE(DescribeAddServerScreen, "addserver")
 
 // The found servers' deletes: a global operator delete that notes the watched addresses.
@@ -299,7 +323,8 @@ struct S_MainMenuResults {
          csDescribe = true, csSetup = true, csShown = true, csStart = true, csPicked = true, csHost = true,
          csRules = true, csMapList = true, csOptions = true, csStyle = true, csOption = true,
          csMoves = true, csDouble = true, csDragStart = true, csDragMove = true, csDrop = true,
-         hsSession = true, cnDescribe = true, cnHidden = true, cnTick = true, cnMessage = true;
+         hsSession = true, cnDescribe = true, cnHidden = true, cnTick = true, cnMessage = true,
+         bwDescribe = true, bwList = true, bwShown = true, bwSort = true, bwPicked = true, bwJoin = true, bwCount = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -3256,6 +3281,232 @@ void MainMenuTest(I3D_scene *scene)
         g_connectStyle = -1;
     }
 
+    // --- (part 9h-xix) the browser: its description and list, shown, sorting, a server picked / joined, the count ---
+    {
+        C_MainMenu m;
+        const auto Is = [](const std::string &got, const std::string &want) {
+            if (got != want)
+                std::printf("BROWSER %s\nBROWSER expected %s\n", got.c_str(), want.c_str());
+            return got == want;
+        };
+        g_csNames[reinterpret_cast<uintptr_t>(&m)] = "self";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnBrowserTick)] = "tick";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnBrowserShown)] = "shown";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnServerSort)] = "sort";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnRestoreList)] = "restore";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnRefreshList)] = "refresh";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnFavoriteToggle)] = "favorite";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnFavorites)] = "favorites";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnServerPicked)] = "picked";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnServerJoin)] = "join";
+        g_csNames[reinterpret_cast<uintptr_t>(&C_MainMenu::OnServerCountChanged)] = "count";
+        S_MrObj *model = MsFrame("bwmodel"), *row = MsFrame("bwrow");
+        void *const oldSetPos = g_msFrameVt[0x08 / 4];
+        g_msFrameVt[0x08 / 4] = reinterpret_cast<void *>(&MrFake<0x08, const S_vector *>);
+        {
+            // The callbacks; the controls (their messages); the list's frames.
+            bool ok = true;
+            g_msChildren[{model, "sever00"}] = row;
+            g_mrMade[FRAME_DUMMY] = {MsFrame("bwgroup")};
+            g_mrClones.clear();
+            for (int i = 1; i < 12; ++i)
+                g_mrClones.push_back(As<I3D_frame>(MsFrame(strdup(CmText("bwc%d", i).c_str()))));
+            S_ScreenDesc d("multiplayer menu", "multiplayer menu", 8u << 26);
+            g_gfLog.clear();
+            ok &= m.DescribeBrowserScreen(&d, As<I3D_frame>(model));
+            ok &= d.messages.size() == 2 && Is(CsMessage(d.messages[0]), "0 1000007 4014000 self tick") &&
+                  Is(CsMessage(d.messages[1]), "0 1000007 400d000 self shown");
+            std::string names;
+            for (const S_ControlDesc *c : d.controls)
+                names += CmText("%x %s %x|", c->type, c->name.c_str(), c->id);
+            ok &= Is(names, "13 text_screen 20100000|a barrows 20200000|14 bhost name 20300000|14 bmap 20400000|"
+                            "14 bstyle 20500000|14 bping 20600000|14 bplayers/max 20700000|8 scroll00 20800000|"
+                            "18 GB_ServerList 20900000|14 brestore list 20a00000|14 brefresh list 20b00000|"
+                            "14 benter server ip 20c00000|14 bserver filters 20d00000|14 bjoin game 20e00000|"
+                            "14 bcreate server 20f00000|14 bview game info 21000000|14 bback 21100000|"
+                            "13 text_h&dversion 21200000|4 gamespylogo 21300000|4 esrb-US 21400000|13 text_online 21500000|"
+                            "14 badd/remove 21600000|14 bfavorites 21700000|");
+            if (d.controls.size() == 23) {
+                const char *const want[23] = {
+                    "13 text_screen 20100000: 0 1000015 a 8fd;",
+                    "a barrows 20200000: 0 1000007 4010000 self sort;",
+                    "14 bhost name 20300000: 0 1000015 d 8fe 0 1000007 4001000 self sort;",
+                    "14 bmap 20400000: 0 1000015 d 8ff 0 1000007 4001000 self sort;",
+                    "14 bstyle 20500000: 0 1000015 d 900 0 1000007 4001000 self sort;",
+                    "14 bping 20600000: 0 1000015 d 901 0 1000007 4001000 self sort;",
+                    "14 bplayers/max 20700000: 0 1000015 d 902 0 1000007 4001000 self sort;",
+                    "8 scroll00 20800000: 0 100000b 20900000 0;",
+                    "18 GB_ServerList 20900000: 0 100000b 20800000 0 0 1000007 400e000 self picked"
+                    " 0 1000007 4013000 self join 0 1000007 4010000 self count;",
+                    "14 brestore list 20a00000: 0 1000015 d 915 0 1000007 4001000 self restore;",
+                    "14 brefresh list 20b00000: 0 1000015 d 917 0 1000007 4001000 self refresh;",
+                    "14 benter server ip 20c00000: 0 1000015 d 904 0 6001002 e 0 0 1000001 0 0;",
+                    "14 bserver filters 20d00000: 0 1000015 d 905 0 6001001 b 0 0 6001028 0 0;",
+                    "14 bjoin game 20e00000: 0 1000015 d 906 0 6001028 0 0 0 600109b 0 0 0 600102a 0 0 0 1000001 0 0;",
+                    "14 bcreate server 20f00000: 0 1000015 d 907 0 6001001 9 0 0 6001028 0 0;",
+                    "14 bview game info 21000000: 0 1000015 d 908 0 6001001 c 0 0 1000001 0 0;",
+                    "14 bback 21100000: 0 1000015 d 909 0 6001028 0 0 0 600109b 0 0 20900000 6001018 0 0 0 6001003 0 0;",
+                    "13 text_h&dversion 21200000: 0 1000015 28 7d6;",
+                    "4 gamespylogo 21300000:;",
+                    "4 esrb-US 21400000:;",
+                    "13 text_online 21500000: 0 1000015 28 7d6;",
+                    "14 badd/remove 21600000: 0 1000015 d 4e86 0 1000007 4001000 self favorite;",
+                    "14 bfavorites 21700000: 0 1000015 d 4e84 0 1000007 4001000 self favorites;"};
+                for (int i = 0; i < 23; ++i)
+                    ok &= Is(CsTree(d.controls[i]), want[i]);
+            } else {
+                ok = false;
+            }
+            std::vector<std::string> order = {"bwgroup 34 GB_ServerList", "bwrow 38 bwgroup 1", "bwrow on 0", "bwrow 24",
+                                              "bwgroup on 1", "bwgroup 24"};
+            for (int i = 1; i < 12; ++i) {
+                order.push_back("clone tree bwrow 0");
+                order.push_back(CmText("bwc%d 34 Server%d", i, i));
+                order.push_back(CmText("bwc%d on 0", i));
+                order.push_back(CmText("bwc%d 24", i));
+            }
+            const std::string log = Join(g_gfLog);
+            ok &= GmInOrder(log, order) && GmInOrder(log, {"bwgroup 8 (0 0 0)"}) && log.find("bwc12") == std::string::npos;
+            if (!ok)
+                std::printf("BROWSER log %s\n", log.c_str());
+            m.m_frames.clear();
+            m.m_models.clear();
+            WM(r.bwDescribe, ok);
+        }
+        {
+            // No row: the list not described (the controls after it moved up).
+            bool ok = true;
+            g_msChildren.erase({model, "sever00"});
+            g_mrMade[FRAME_DUMMY] = {MsFrame("bwgroup2"), MsFrame("bwgroup2b")};
+            S_ScreenDesc d("multiplayer menu", "multiplayer menu", 8u << 26);
+            ok &= !m.DescribeServerList(&d, As<I3D_frame>(model)) && d.controls.empty();
+            ok &= m.DescribeBrowserScreen(&d, As<I3D_frame>(model)) && d.controls.size() == 21 &&
+                  d.controls[7]->name == "brestore list" && d.controls[7]->id == 0x20800000;
+            g_mrMade.erase(FRAME_DUMMY);
+            m.m_frames.clear();
+            m.m_models.clear();
+            WM(r.bwList, ok);
+        }
+        g_msFrameVt[0x08 / 4] = oldSetPos;
+        {
+            // Shown: no single mission.
+            S_PlayMode playMode;
+            S_PlayMode *const oldPlayMode = g_gameProfile.m_playMode;
+            g_gameProfile.m_playMode = &playMode;
+            playMode.singleMission = 1;
+            const bool ok = C_MainMenu::OnBrowserShown(&m, nullptr, nullptr, 0, 0) && playMode.singleMission == -1 &&
+                            CsQueue() == "";
+            g_gameProfile.m_playMode = oldPlayMode;
+            WM(r.bwShown, ok);
+        }
+        // The browser (8) with the arrows, the headers, the list.
+        struct C_BwScreen : C_MsScreen {
+            C_BwScreen() : C_MsScreen(nullptr, "bwscreen", 8u << 26) {}
+            bool HandleMessage(S_ControlMessage *message) override
+            {
+                if (C_Control *control = FindControl(message->target, false))
+                    return control->HandleMessage(message);
+                return C_MsScreen::HandleMessage(message);
+            }
+        } browser;
+        C_BwControl arrows(0x20200000, &browser, 1), list(0x20900000, &browser, 0x42), other(0x20800000, &browser, 0);
+        std::vector<C_BwControl *> headers;
+        for (uint32_t i = 0; i < 5; ++i)
+            headers.push_back(new C_BwControl(0x20300000 + 0x100000 * i, &browser, 0));
+        browser.m_children = {&arrows, &list, &other};
+        for (C_BwControl *header : headers)
+            browser.m_children.push_back(header);
+        m.m_screens.assign(9, nullptr);
+        m.m_screens[8] = &browser;
+        {
+            // The arrows: the direction toggled; a header: its key; the key's own: the arrows flipped; none, another:
+            // false.
+            bool ok = true;
+            g_gfLog.clear();
+            CsQueue();
+            ok &= C_MainMenu::OnServerSort(&m, nullptr, &arrows, 0, 0) && Is(CsQueue(), "20900000 2000079 c0 0; ") &&
+                  MsLogIs({"bw 20900000 20000ad", "bw 20200000 100006c"}, g_gfLog);
+            const char *const sorts[5] = {"20900000 2000079 1 0; ", "20200000 100006d 0 0; ", "20900000 2000079 3 0; ",
+                                          "20900000 2000079 4 0; ", "20900000 2000079 5 0; "};
+            for (int i = 0; i < 5; ++i)
+                ok &= C_MainMenu::OnServerSort(&m, nullptr, headers[i], 0, 0) && Is(CsQueue(), sorts[i]);
+            arrows.value = 0;
+            ok &= C_MainMenu::OnServerSort(&m, nullptr, headers[1], 0, 0) && Is(CsQueue(), "20200000 100006d 1 0; ");
+            list.value = 0x85;
+            ok &= C_MainMenu::OnServerSort(&m, nullptr, headers[4], 0, 0) && Is(CsQueue(), "20200000 100006d 1 0; ");
+            ok &= C_MainMenu::OnServerSort(&m, nullptr, headers[1], 0, 0) && Is(CsQueue(), "20900000 2000079 2 0; ");
+            list.value = 0;
+            ok &= C_MainMenu::OnServerSort(&m, nullptr, headers[0], 0, 0) && Is(CsQueue(), "20900000 2000079 1 0; ");
+            g_gfLog.clear();
+            ok &= !C_MainMenu::OnServerSort(&m, nullptr, &other, 0, 0) && CsQueue() == "" && g_gfLog.size() == 2;
+            g_gfLog.clear();
+            ok &= !C_MainMenu::OnServerSort(&m, nullptr, nullptr, 0, 0) && CsQueue() == "" && g_gfLog.empty();
+            WM(r.bwSort, ok);
+        }
+        {
+            // A server picked: kept, pinged, join and the game info on (listing the Internet's: the favourite too); none:
+            // nothing.
+            bool ok = true;
+            S_ServerEntry server = {};
+            std::strcpy(server.name, "Srv");
+            list.value2 = reinterpret_cast<uintptr_t>(&server);
+            const int oldListing = g_mpSettings->unknown174;
+            g_mpSettings->unknown174 = 0;
+            g_gfLog.clear();
+            g_bwPing = nullptr;
+            ok &= C_MainMenu::OnServerPicked(&m, nullptr, &list, 0, 0) && m.m_server == &server &&
+                  Is(CsQueue(), "20e00000 1000002 0 0; 21000000 1000002 0 0; ") &&
+                  MsLogIs({"bw 20900000 1000069", "ping Srv"}, g_gfLog) && g_bwPing == &C_MainMenu::IgnoreServer;
+            g_mpSettings->unknown174 = 1;
+            ok &= C_MainMenu::OnServerPicked(&m, nullptr, &list, 0, 0) &&
+                  Is(CsQueue(), "20e00000 1000002 0 0; 21000000 1000002 0 0; 21600000 1000002 0 0; ");
+            g_mpSettings->unknown174 = 2;
+            ok &= C_MainMenu::OnServerPicked(&m, nullptr, &list, 0, 0) &&
+                  Is(CsQueue(), "20e00000 1000002 0 0; 21000000 1000002 0 0; ");
+            list.value2 = 0;
+            g_gfLog.clear();
+            ok &= C_MainMenu::OnServerPicked(&m, nullptr, &list, 0, 0) && !m.m_server && CsQueue() == "" &&
+                  MsLogIs({"bw 20900000 1000069"}, g_gfLog);
+            g_mpSettings->unknown174 = oldListing;
+            C_MainMenu::IgnoreServer(&server);
+            WM(r.bwPicked, ok);
+            // Joined: the join button's messages; no server: nothing.
+            ok = C_MainMenu::OnServerJoin(&m, nullptr, &list, 0, 0) && CsQueue() == "";
+            m.m_server = &server;
+            ok &= C_MainMenu::OnServerJoin(&m, nullptr, &list, 0, 0) &&
+                  Is(CsQueue(), "0 2000028 0 0; 0 200009b 0 0; 0 200002a 0 0; ");
+            m.m_server = nullptr;
+            WM(r.bwJoin, ok);
+        }
+        {
+            // The count: the list's entries, the first list's servers and their players, the text.
+            bool ok = true;
+            C_MpMenuSettings settings;
+            m.m_mpSettings = &settings;
+            S_ServerEntry a = {}, b = {};
+            a.players = 3;
+            b.players = 4;
+            settings.m_servers = {&a, &b};
+            list.value = 7;
+            g_gfLog.clear();
+            const std::string online = g_texts.Get(0x22AE).c_str();
+            ok &= C_MainMenu::OnServerCountChanged(&m, nullptr, &list, 0, 0) &&
+                  Is(CsQueue(), "21500000 1000014 9 0 '7/2 ----- 7 " + online + "'; ") &&
+                  MsLogIs({"bw 20900000 10000a2"}, g_gfLog) && settings.m_serverCount == 2 && settings.m_playerCount == 7;
+            settings.m_servers.clear();
+            list.value = 0;
+            ok &= C_MainMenu::OnServerCountChanged(&m, nullptr, &list, 0, 0) &&
+                  Is(CsQueue(), "21500000 1000014 9 0 '0/0 ----- 0 " + online + "'; ");
+            m.m_mpSettings = nullptr;
+            WM(r.bwCount, ok);
+        }
+        for (C_BwControl *header : headers)
+            delete header;
+        browser.m_children.clear();
+        m.m_screens.clear();
+        g_gfLog.clear();
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -3278,7 +3529,7 @@ void MainMenuTest(I3D_scene *scene)
         // (The missions screen's two groups (no templates: not described further); the options screen's group frame:
         // the real handler finds no buttons.)
         // (And the create server screen's seven: its panels' groups (no templates: not described further).)
-        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc"), MsFrame("mmgs"), MsFrame("mmgro"), MsFrame("mmgci"),  MsFrame("mmcs1"),
+        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc"), MsFrame("mmgs"), MsFrame("mmgro"), MsFrame("mmgci"),  MsFrame("mmbw"), MsFrame("mmcs1"),
                                  MsFrame("mmcs2"), MsFrame("mmcs3"), MsFrame("mmcs4"), MsFrame("mmcs5"),   MsFrame("mmcs6"),
                                  MsFrame("mmcs7")};
         g_cacheLoads.clear();
@@ -3290,8 +3541,7 @@ void MainMenuTest(I3D_scene *scene)
                                                         "multiplayer menu", "create server", "password", "server filters",
                                                         "gameinfo", "confirm", "password"});
         const std::string log = Join(g_gfLog);
-        ok &= GmInOrder(log, {"scan", "describe browser 20000000",
-                              "describe addserver 38000000"}) &&
+        ok &= GmInOrder(log, {"scan", "describe addserver 38000000"}) &&
               log.find("describe ", log.find("describe addserver") + 1) == std::string::npos;
         ok &= m.m_screens.size() == 15 && S_CsPeek::Callbacks(m.m_screens[1]) == 1 && S_CsPeek::Callbacks(m.m_screens[2]) == 1 &&
               S_CsPeek::Callbacks(m.m_screens[3]) == 1 && S_CsPeek::Callbacks(m.m_screens[4]) == 0 &&
@@ -3315,7 +3565,7 @@ void MainMenuTest(I3D_scene *scene)
         m.m_screens = {&box};
         m.m_models.clear();
         g_mrMade[FRAME_MODEL] = std::deque<S_MrObj *>(models.begin(), models.end());
-        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc2"), MsFrame("mmgs2"), MsFrame("mmgro2"), MsFrame("mmgci2"), MsFrame("mmcs8"),
+        g_mrMade[FRAME_DUMMY] = {MsFrame("mmgc2"), MsFrame("mmgs2"), MsFrame("mmgro2"), MsFrame("mmgci2"), MsFrame("mmbw2"), MsFrame("mmcs8"),
                                  MsFrame("mmcs9"), MsFrame("mmcs10"), MsFrame("mmcs11"), MsFrame("mmcs12"), MsFrame("mmcs13"),
                                  MsFrame("mmcs14")};
         g_cacheFailName = "change_profile";
@@ -3353,7 +3603,8 @@ void MainMenuTest(I3D_scene *scene)
                 " csDescribe %d csSetup %d csShown %d csStart %d csPicked %d csHost %d"
                 " csRules %d csMapList %d csOptions %d csStyle %d csOption %d"
                 " csMoves %d csDouble %d csDragStart %d csDragMove %d csDrop %d"
-                " hsSession %d cnDescribe %d cnHidden %d cnTick %d cnMessage %d\n",
+                " hsSession %d cnDescribe %d cnHidden %d cnTick %d cnMessage %d"
+                " bwDescribe %d bwList %d bwShown %d bwSort %d bwPicked %d bwJoin %d bwCount %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
@@ -3364,5 +3615,6 @@ void MainMenuTest(I3D_scene *scene)
                 r.csDescribe, r.csSetup, r.csShown, r.csStart, r.csPicked, r.csHost,
                 r.csRules, r.csMapList, r.csOptions, r.csStyle, r.csOption,
                 r.csMoves, r.csDouble, r.csDragStart, r.csDragMove, r.csDrop,
-                r.hsSession, r.cnDescribe, r.cnHidden, r.cnTick, r.cnMessage);
+                r.hsSession, r.cnDescribe, r.cnHidden, r.cnTick, r.cnMessage,
+                r.bwDescribe, r.bwList, r.bwShown, r.bwSort, r.bwPicked, r.bwJoin, r.bwCount);
 }

@@ -224,6 +224,7 @@ struct S_ServerStatus {
 class C_NetGame {
 public:
     int QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *status), S_ServerEntry *server);
+    void PingServer(void(__fastcall *callback)(S_ServerEntry *server), S_ServerEntry *server);
     C_Human *GetLocalHuman();
     void Close(bool now);                           // (the main menu, part 9h-iv)
     S_NetPlayerState *LockPlayers();

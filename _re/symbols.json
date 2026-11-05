@@ -28061,10 +28061,70 @@
   "name": "C_MainMenu::DescribeBrowserScreen",
   "proto": "bool __thiscall DescribeBrowserScreen(C_MainMenu *this, void * desc, void * model)"
  },
+ "00634580": {
+  "module": "main_menu",
+  "name": "C_MainMenu::DescribeServerList",
+  "proto": "bool __thiscall DescribeServerList(C_MainMenu *this, void * desc, void * model)"
+ },
+ "00634950": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnFavoriteToggle",
+  "proto": "bool __thiscall OnFavoriteToggle(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00634b30": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnFavorites",
+  "proto": "bool __thiscall OnFavorites(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00634f90": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnRestoreList",
+  "proto": "bool __thiscall OnRestoreList(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00635360": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnRefreshList",
+  "proto": "bool __thiscall OnRefreshList(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006356d0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnBrowserShown",
+  "proto": "bool __thiscall OnBrowserShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00635980": {
+  "module": "main_menu",
+  "name": "C_MainMenu::IgnoreServer",
+  "proto": "void __fastcall IgnoreServer(void * server)"
+ },
+ "00635ba0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnBrowserTick",
+  "proto": "bool __thiscall OnBrowserTick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "006360c0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerPicked",
+  "proto": "bool __thiscall OnServerPicked(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00636280": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerJoin",
+  "proto": "bool __thiscall OnServerJoin(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
  "00636400": {
   "module": "main_menu",
   "name": "C_MainMenu::DrainFoundServers",
   "proto": "void __fastcall DrainFoundServers(C_MainMenu *this)"
+ },
+ "006364b0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerCountChanged",
+  "proto": "bool __thiscall OnServerCountChanged(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "00636640": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerSort",
+  "proto": "bool __thiscall OnServerSort(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
  },
  "006370c0": {
   "module": "main_menu",
@@ -38038,6 +38098,11 @@
  "00722b60": {
   "module": "campaign_screens",
   "name": "C_NetGame::Host"
+ },
+ "00724070": {
+  "module": "main_menu",
+  "name": "C_NetGame::PingServer",
+  "proto": "void __thiscall PingServer(void *this, void * callback, void * server)"
  },
  "007240f0": {
   "module": "campaign_screens",

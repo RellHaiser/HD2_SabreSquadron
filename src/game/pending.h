@@ -256,6 +256,8 @@ public:
     void Close(bool now);                           // 0x0072e8b0
     // A server's status asked for on a thread of its own; `callback` gets it there (part 9h-xii).
     int QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *status), S_ServerEntry *server);   // 0x007240d0
+    // A server pinged (`callback`, the net thread's, gets it when it answers; part 9h-xix).
+    void PingServer(void(__fastcall *callback)(S_ServerEntry *server), S_ServerEntry *server);   // 0x00724070
     // Administration commands (NET_COMMAND_*; `unknown` is passed as 0).
     bool Command(int command, const char *arg, int unknown);   // 0x0072d680
     // State of the connection to the server (NET_CONNECTION_LOST: nothing heard for 600 ms).

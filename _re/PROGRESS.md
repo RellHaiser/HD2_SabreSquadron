@@ -8513,6 +8513,25 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 301 errors in 55 files. ret_audit --src: 52.
   - Stats: 9,239 of 12,306 functions by hand (85.1 % by size).
 
+  PART 9h-xix DONE (2026-11-04): the main menu's browser: its description, list and sorting (game/main_menu.cpp).
+  - DescribeBrowserScreen 0x00634050: tick OnBrowserTick, shown OnBrowserShown 0x006356d0 (no single mission); the title,
+    the sort arrows ("barrows", a toggle button) and the five headers (OnServerSort), DescribeServerList, "REFRESH LIST"
+    (OnRestoreList), "UPDATE LIST" (OnRefreshList), the address popup (off), filters, join (off), create a server, the
+    game info (off), back (the list emptied), the version, the logos, the online line, the favourites' two buttons.
+  - DescribeServerList 0x00634580 (aligned frame, from the asm): GB_ServerList made, "sever00" moved in and copied
+    ("Server1" .. "Server11"); the scroll bar and the list (type 0x18): picked OnServerPicked 0x006360c0 (m_server,
+    pinged with C_NetGame::PingServer 0x00724070 (declared) and the empty IgnoreServer 0x00635980 (made a function in
+    Ghidra), join / game info on, the favourite button with Internet games), 13 OnServerJoin 0x00636280, changed
+    OnServerCountChanged 0x006364b0 ("%d/%d ----- %d %s", text 0x22AE).
+  - OnServerSort 0x00636640: the arrows: the direction toggled (0xC0); a header: its key, its own key: the arrows
+    flipped (which sorts).
+  - Harness: bwDescribe, bwList, bwShown, bwSort, bwPicked, bwJoin, bwCount (a screen forwarding to its controls);
+    the build test's browser real (its group frame). All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h19.py: 151: 139 killed, 12 not building.
+  - Build: MSVC clean. Tier 1: 303 errors in 55 files (+2: OnNetworkMessage's copy calls the ported callbacks; part
+    9h-xxi ports it). ret_audit --src: 52.
+  - Stats: 9,246 of 12,306 functions by hand (85.2 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

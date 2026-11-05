@@ -142,3 +142,17 @@
 00632560 C_MainMenu::OnConnectTick | bool __thiscall OnConnectTick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
 00722a80 C_NetGame::HostDedicated | bool __thiscall HostDedicated(void *this, bool unknown)
 0083fdd0 g_connectStyle @ int
+# Part 9h-xix: the browser's description, list and sorting.
+00634580 C_MainMenu::DescribeServerList | bool __thiscall DescribeServerList(C_MainMenu *this, void * desc, void * model)
+006356d0 C_MainMenu::OnBrowserShown | bool __thiscall OnBrowserShown(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00635ba0 C_MainMenu::OnBrowserTick | bool __thiscall OnBrowserTick(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00636640 C_MainMenu::OnServerSort | bool __thiscall OnServerSort(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00635980 C_MainMenu::IgnoreServer | void __fastcall IgnoreServer(void * server)
+006360c0 C_MainMenu::OnServerPicked | bool __thiscall OnServerPicked(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00636280 C_MainMenu::OnServerJoin | bool __thiscall OnServerJoin(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+006364b0 C_MainMenu::OnServerCountChanged | bool __thiscall OnServerCountChanged(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00634f90 C_MainMenu::OnRestoreList | bool __thiscall OnRestoreList(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00635360 C_MainMenu::OnRefreshList | bool __thiscall OnRefreshList(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00634950 C_MainMenu::OnFavoriteToggle | bool __thiscall OnFavoriteToggle(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00634b30 C_MainMenu::OnFavorites | bool __thiscall OnFavorites(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+00724070 C_NetGame::PingServer | void __thiscall PingServer(void *this, void * callback, void * server)

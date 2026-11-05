@@ -2714,3 +2714,186 @@ bool C_MainMenu::OnConnectMessage(S_ControlMessage *message)
     RefreshStartButton();
     return true;
 }
+
+// ---- the browser's description, list and sorting (part 9h-xix) --------------------------------------------
+
+namespace {
+
+constexpr int CONTROL_TOGGLE_BUTTON = 0xA, CONTROL_SERVER_LIST = 0x18;
+// The browser's controls (screen 8's; their order in its description).
+constexpr uint32_t BROWSER_SCREEN = static_cast<uint32_t>(MAIN_SCREEN_BROWSER) << SCREEN_INDEX_SHIFT;
+constexpr uint32_t BROWSER_ARROWS = BROWSER_SCREEN | 0x200000, BROWSER_FIRST_HEADER = BROWSER_SCREEN | 0x300000,
+                   BROWSER_SCROLL = BROWSER_SCREEN | 0x800000, BROWSER_LIST = BROWSER_SCREEN | 0x900000,
+                   BROWSER_JOIN = BROWSER_SCREEN | 0xE00000, BROWSER_GAME_INFO = BROWSER_SCREEN | 0x1000000,
+                   BROWSER_ONLINE = BROWSER_SCREEN | 0x1500000, BROWSER_FAVORITE = BROWSER_SCREEN | 0x1600000;
+// The list's header buttons (the sort keys 1 .. 5 in order) and their texts.
+const struct {
+    const char *name;
+    uint32_t text;
+} BROWSER_HEADERS[] = {{"bhost name", 0x8FE}, {"bmap", 0x8FF}, {"bstyle", 0x900}, {"bping", 0x901}, {"bplayers/max", 0x902}};
+constexpr uint32_t SORT_KEY_MASK = 7, SORT_TOGGLE = 0xC0;
+// The list's rows: the template "sever00" and its copies "Server1" .. "Server11".
+constexpr int SERVER_ROWS = 12;
+// The online line's style, its text (" players online").
+constexpr uint32_t STYLE_ONLINE = 9, TEXT_PLAYERS_ONLINE = 0x22AE;
+
+} // namespace
+
+bool C_MainMenu::DescribeBrowserScreen(S_ScreenDesc *desc, I3D_frame *model)
+{
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    AddScreenMessage(desc, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_SCREEN_TICK, self, Callback(&OnBrowserTick));
+    AddScreenMessage(desc, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_SHOWN, self, Callback(&OnBrowserShown));
+    AddText(desc, "text_screen", STYLE_TITLE, 0x8FD);
+    AddDescMessage(desc->AddControl(CONTROL_TOGGLE_BUTTON, "barrows"), 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CHANGED,
+                   self, Callback(&OnServerSort));
+    for (const auto &header : BROWSER_HEADERS)
+        AddDescMessage(AddButton(desc, header.name, header.text), 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self,
+                       Callback(&OnServerSort));
+    // (Its result unchecked: no list leaves the controls after it their places.)
+    DescribeServerList(desc, model);
+    AddDescMessage(AddButton(desc, "brestore list", 0x915), 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self,
+                   Callback(&OnRestoreList));
+    AddDescMessage(AddButton(desc, "brefresh list", 0x917), 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self,
+                   Callback(&OnRefreshList));
+    S_ControlDesc *address = AddButton(desc, "benter server ip", 0x904);
+    AddDescMessage(address, 0, FROM_SCREEN | MENU_MSG_OPEN_POPUP, MAIN_SCREEN_ADD_SERVER);
+    AddDescMessage(address, 0, CONTROL_MSG_DEACTIVATE, 0);
+    S_ControlDesc *filters = AddButton(desc, "bserver filters", 0x905);
+    AddDescMessage(filters, 0, FROM_SCREEN | MENU_MSG_OPEN_SCREEN, MAIN_SCREEN_FILTERS);
+    AddDescMessage(filters, 0, FROM_SCREEN | MAIN_MSG_28, 0);
+    S_ControlDesc *join = AddButton(desc, "bjoin game", 0x906);
+    AddDescMessage(join, 0, FROM_SCREEN | MAIN_MSG_28, 0);
+    AddDescMessage(join, 0, FROM_SCREEN | MAIN_MSG_9B, 0);
+    AddDescMessage(join, 0, FROM_SCREEN | MAIN_MSG_JOIN_SERVER, 0);
+    AddDescMessage(join, 0, CONTROL_MSG_DEACTIVATE, 0);
+    S_ControlDesc *create = AddButton(desc, "bcreate server", 0x907);
+    AddDescMessage(create, 0, FROM_SCREEN | MENU_MSG_OPEN_SCREEN, MAIN_SCREEN_CREATE_SERVER);
+    AddDescMessage(create, 0, FROM_SCREEN | MAIN_MSG_28, 0);
+    S_ControlDesc *info = AddButton(desc, "bview game info", 0x908);
+    AddDescMessage(info, 0, FROM_SCREEN | MENU_MSG_OPEN_SCREEN, MAIN_SCREEN_GAME_INFO);
+    AddDescMessage(info, 0, CONTROL_MSG_DEACTIVATE, 0);
+    S_ControlDesc *back = AddButton(desc, "bback", 0x909);
+    AddDescMessage(back, 0, FROM_SCREEN | MAIN_MSG_28, 0);
+    AddDescMessage(back, 0, FROM_SCREEN | MAIN_MSG_9B, 0);
+    AddDescMessage(back, BROWSER_LIST, FROM_SCREEN | CONTROL_MSG_CLEAR, 0);
+    AddDescMessage(back, 0, FROM_SCREEN | MENU_MSG_BACK, 0);
+    AddText(desc, "text_h&dversion", STYLE_VERSION, TEXT_VERSION);
+    desc->AddControl(CONTROL_PICTURE, "gamespylogo");
+    desc->AddControl(CONTROL_PICTURE, "esrb-US");
+    AddText(desc, "text_online", STYLE_VERSION, TEXT_VERSION);
+    AddDescMessage(AddButton(desc, "badd/remove", 0x4E86), 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self,
+                   Callback(&OnFavoriteToggle));
+    AddDescMessage(AddButton(desc, "bfavorites", 0x4E84), 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CLICK, self,
+                   Callback(&OnFavorites));
+    return true;
+}
+
+bool C_MainMenu::DescribeServerList(S_ScreenDesc *desc, I3D_frame *model)
+{
+    I3D_frame *group = AddFrame(C_str("GB_ServerList"), FRAME_DUMMY, model, S_vector(0.0f, 0.0f, 0.0f));
+    I3D_frame *row = model->FindChildFrame("sever00", FRAME_MASK_DUMMY);
+    if (!row || !group)
+        return false;
+    row->LinkTo(group, 1);
+    row->SetOn(false);
+    row->Update();
+    group->SetOn(true);
+    group->Update();
+    for (int i = 1; i < SERVER_ROWS; ++i) {
+        I3D_frame *copy = CloneFrame(C_fstr("Server%d", i), group, row);
+        copy->SetOn(false);
+        copy->Update();
+    }
+    AddDescMessage(desc->AddControl(CONTROL_SCROLL_BAR, "scroll00"), 0, CONTROL_MSG_SET_VALUE, BROWSER_LIST);
+    S_ControlDesc *list = desc->AddControl(CONTROL_SERVER_LIST, "GB_ServerList");
+    AddDescMessage(list, 0, CONTROL_MSG_SET_VALUE, BROWSER_SCROLL);
+    const auto self = reinterpret_cast<uintptr_t>(this);
+    AddDescMessage(list, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_PICKED, self, Callback(&OnServerPicked));
+    AddDescMessage(list, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_13, self, Callback(&OnServerJoin));
+    AddDescMessage(list, 0, CONTROL_MSG_ADD_CALLBACK, CONTROL_NOTIFY_CHANGED, self, Callback(&OnServerCountChanged));
+    return true;
+}
+
+bool C_MainMenu::OnBrowserShown(void *, void *, C_Control *, uint32_t, uint32_t)
+{
+    g_gameProfile.m_playMode->singleMission = -1;
+    return true;
+}
+
+bool C_MainMenu::OnServerSort(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    if (!control)
+        return false;
+    auto *self = static_cast<C_MainMenu *>(menu);
+    const uint32_t id = control->GetId();
+    S_ControlMessage sort;
+    sort.target = BROWSER_LIST;
+    sort.id = CONTROL_MSG_GET_SORT;
+    self->HandleMessage(&sort);
+    const uint32_t key = sort.value & SORT_KEY_MASK;
+    S_ControlMessage arrows;
+    arrows.target = BROWSER_ARROWS;
+    arrows.id = CONTROL_MSG_GET_CHECKED;
+    self->HandleMessage(&arrows);
+    // The arrows: the direction toggled; a header: its key (already the key: the arrows flipped, which sorts).
+    if (id == BROWSER_ARROWS) {
+        PostTo(BROWSER_LIST, CONTROL_MSG_SORT, SORT_TOGGLE);
+        return true;
+    }
+    for (uint32_t i = 0; i < sizeof BROWSER_HEADERS / sizeof *BROWSER_HEADERS; ++i) {
+        if (id != BROWSER_FIRST_HEADER + i * CONTROL_INDEX_STEP)
+            continue;
+        if (key == i + 1)
+            PostTo(BROWSER_ARROWS, CONTROL_MSG_SET_CHECKED, arrows.value == 0);
+        else
+            PostTo(BROWSER_LIST, CONTROL_MSG_SORT, i + 1);
+        return true;
+    }
+    return false;
+}
+
+void __fastcall C_MainMenu::IgnoreServer(S_ServerEntry *) {}
+
+bool C_MainMenu::OnServerPicked(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    S_ControlMessage ask;
+    ask.id = CONTROL_MSG_GET_SELECTED;
+    control->HandleMessage(&ask);
+    self->m_server = reinterpret_cast<S_ServerEntry *>(ask.value2);
+    if (!self->m_server)
+        return true;
+    g_netGame.PingServer(&IgnoreServer, self->m_server);
+    PostTo(BROWSER_JOIN, CONTROL_MSG_ACTIVATE, 0);
+    PostTo(BROWSER_GAME_INFO, CONTROL_MSG_ACTIVATE, 0);
+    if (g_mpSettings->unknown174 == LISTING_INTERNET)
+        PostTo(BROWSER_FAVORITE, CONTROL_MSG_ACTIVATE, 0);
+    return true;
+}
+
+bool C_MainMenu::OnServerJoin(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    if (static_cast<C_MainMenu *>(menu)->m_server) {
+        Post(MAIN_MSG_28, 0);
+        Post(MAIN_MSG_9B, 0);
+        Post(MAIN_MSG_JOIN_SERVER, 0);
+    }
+    return true;
+}
+
+bool C_MainMenu::OnServerCountChanged(void *menu, void *, C_Control *, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    S_ControlMessage ask;
+    ask.target = BROWSER_LIST;
+    ask.id = CONTROL_MSG_GET_ENTRY_COUNT;
+    self->HandleMessage(&ask);
+    C_MpMenuSettings *settings = self->m_mpSettings;
+    settings->CountServers();
+    const C_str online = g_texts.Get(TEXT_PLAYERS_ONLINE);
+    PostText(BROWSER_ONLINE, CONTROL_MSG_SET_TEXT, STYLE_ONLINE,
+             C_fstr("%d/%d ----- %d %s", static_cast<int>(ask.value), settings->m_serverCount, settings->m_playerCount,
+                    online.c_str()));
+    return true;
+}
