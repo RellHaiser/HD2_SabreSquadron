@@ -595,8 +595,8 @@ long __stdcall C_NetGame::HandleClientMessage(C_NetGame *net, void *, uint32_t t
             net->QueueOutgoing(receive->data, static_cast<int>(receive->dataSize), 0x80);
         break;
     }
-    case DPN_MSGID_SEND_COMPLETE:
-        operator delete(static_cast<const DPNMSG_SEND_COMPLETE *>(message)->context);
+    case DPN_MSGID_RETURN_BUFFER:
+        operator delete(static_cast<const DPNMSG_RETURN_BUFFER *>(message)->buffer);
         break;
     case DPN_MSGID_TERMINATE_SESSION:
         // The session ended: the server's link gone, back to the menus.

@@ -379,11 +379,14 @@ C_NetObjectMessage *__fastcall NetCreateMessage(void *, C_BitStream *, bool) { r
 void __fastcall NetReadControlBits(void *, C_BitStream *) {}
 C_NetObjectMessage *__fastcall MakeSeatWeaponMessage(void *, C_BitStream *, bool) { return nullptr; }
 void __fastcall CarNetReadState(void *, C_BitStream *) {}
+#ifndef NET_MESSAGES_TEST
+// (The messages' build links the real one: net_messages.cpp.)
 long __stdcall C_NetGame::HandleServerMessage(C_NetGame *net, void *, uint32_t type, void *)
 {
     Log("server message %08x %d", type, net == &g_netGame);
     return 7;
 }
+#endif
 
 // ---- the tests ---------------------------------------------------------------------------------------------------------
 
@@ -935,8 +938,8 @@ void TestClientMessages()
     CHECK(net.m_outgoing.size() == 1 && net.m_outgoing.front().flags == 0x80 && net.m_outgoing.front().size == 3);
     net.m_outgoing.clear();
     // A send done: its data freed.
-    DPNMSG_SEND_COMPLETE done = {sizeof done, 0, operator new(16)};
-    C_NetGame::HandleClientMessage(&net, nullptr, DPN_MSGID_SEND_COMPLETE, &done);
+    DPNMSG_RETURN_BUFFER done = {sizeof done, 0, operator new(16)};
+    C_NetGame::HandleClientMessage(&net, nullptr, DPN_MSGID_RETURN_BUFFER, &done);
     // The end: the link gone; back to the menus (0xB).
     auto *own = new C_NetConnection(1, 0, &socket);
     net.m_serverLink = own;

@@ -75,25 +75,6 @@ private:
 // ---------------------------------------------------------------------------
 // The mission squad (profile_squad.cpp, 0x006a1f80..0x006a5a50)
 
-// What a squad soldier carries (S_SquadSoldier +0x8C; 0x20 bytes, saved as they are).
-struct S_SoldierLoad {
-    int capacity = 0;                                   // +0x00 (+0x8C) the weight the soldier can carry (strength)
-    float weight = 0.0f;                                // +0x04 (+0x90) everything carried
-    float backpackMaxWeight = 0.0f;                     // +0x08 (+0x94) the backpack's container
-    int backpackMaxVolume = 0;                          // +0x0C (+0x98)
-    float backpackWeight = 0.0f;                        // +0x10 (+0x9C) its contents
-    int backpackVolume = 0;                             // +0x14 (+0xA0)
-    float beltWeight = 0.0f;                            // +0x18 (+0xA4)
-    int beltVolume = 0;                                 // +0x1C (+0xA8) at most 12
-
-    // Fractions of the limits (absolute values): the belt's volume of 12, the backpack's volume,
-    // the weight carried.
-    float GetBeltFill() const;                          // 0x006a25e0
-    float GetBackpackFill() const;                      // 0x006a25f0
-    float GetWeightFill() const;                        // 0x006a2600
-};
-static_assert(sizeof(S_SoldierLoad) == 0x20, "saved as is");
-
 // The slots S_SquadSoldier::PutItem / RemoveItem / CountItems take (bits).
 enum : uint8_t {
     SQUAD_SLOT_HEAD = 0x01,
@@ -143,7 +124,7 @@ struct S_SquadSoldier : S_SoldierState {
     bool SaveGame(C_chunk &chunk);                      // 0x006a49a0
     bool LoadGame(C_chunk &chunk);                      // 0x006a4c10
 
-    S_SoldierLoad load;                                 // +0x8C
+    // (+0x8C: the load, S_SoldierState's.)
 };
 
 // A soldier's records outside the soldier structures (__fastcall helpers of the original).

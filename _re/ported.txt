@@ -10354,3 +10354,23 @@
 00742160
 00742670
 # hand-ported (continued)
+00726470
+007277f0
+00727820
+00727850
+00727a30
+0072a480
+0072b590
+0072c190
+0072c1b0
+0072c1d0
+# absorbed helpers 007272c0-0072bd20: the status's vector made / freed inline, the game messages' and commands' std::lists (made, inserted, freed at exit) (part 10d-v)
+007272c0
+007272e0
+0072b530
+0072b8a0
+0072bc30
+0072bc90
+0072bcc0
+0072bd20
+# hand-ported (continued)

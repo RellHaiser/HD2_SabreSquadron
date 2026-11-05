@@ -96,7 +96,7 @@ void C_NetGame::UpdateVoiceTeam()
     ItLog("voiceteam");
 }
 // A soldier state in the fake streams: its profile index and uniform (bit count -12).
-void NetWriteSoldierState(C_NetMessage *msg, const S_SoldierState &state, bool unknown)
+void NetWriteSoldierState(C_NetMessage *msg, S_SoldierState &state, bool unknown)
 {
     ItLog("writestate %d", unknown);
     auto *s = reinterpret_cast<S_FakeStream *>(msg);

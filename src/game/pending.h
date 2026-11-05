@@ -239,11 +239,14 @@ extern int g_netMaxInactivity;                      // 0x009820dc
 // g_netReplication): net/net_object.h.
 #include "net/net_object.h"
 
-// Soldier states in network messages (S_SoldierState, game/human.h).
+// Soldier states in network messages (S_SoldierState, game/soldier.h; net/net_messages.cpp): the name, team (1 bit),
+// profile (8; -1 sent as 0xFF and stored so), spawn zone (10; -1: 0x3FF, stored so), spectating, vip, health (10),
+// the items (uid 16, type 16, present 8; the belt's and backpack's counted in 8 bits), the load (256 bits);
+// `itemsOnly`: the items. Reading appends to the lists.
 class C_NetMessage;
 struct S_SoldierState;
-void NetWriteSoldierState(C_NetMessage *msg, const S_SoldierState &state, bool unknown);   // 0x00727850
-void NetReadSoldierState(C_NetMessage *msg, S_SoldierState &state, bool unknown);          // 0x00727a30
+void NetWriteSoldierState(C_NetMessage *msg, S_SoldierState &state, bool itemsOnly);   // 0x00727850 (__fastcall)
+void NetReadSoldierState(C_NetMessage *msg, S_SoldierState &state, bool itemsOnly);    // 0x00727a30 (__fastcall)
 
 // ---- text / localisation -----------------------------------------------------------
 // The game profile (g_gameProfile): see game/profile.h.

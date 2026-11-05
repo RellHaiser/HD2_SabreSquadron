@@ -3,6 +3,8 @@
 alignas(16) unsigned char g_gameProfile[0x4000];
 // The actors module (GetActor faked by index).
 alignas(16) unsigned char g_actorsModule[0x400];
+// The temporary actors (WriteState faked; the messages' build).
+alignas(16) unsigned char g_temporaryActors[0x400];
 // The game's version (1.2).
 int g_versionMajor = 1;
 int g_versionMinor = 2;

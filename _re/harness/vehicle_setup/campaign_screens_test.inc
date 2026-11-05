@@ -25,8 +25,8 @@ int C_Campaign::GetOperationIndex(int campaign)
 int g_csHost, g_csJoin;
 int C_NetGame::Host(const S_NetSessionDesc &desc, bool unknown)
 {
-    GfLog("net host %d %s %x %x %x %x %d %d %x %x", unknown, desc.name, desc.application[0], desc.application[1],
-          desc.application[2], desc.application[3], desc.unknown15C, desc.unknown15E, desc.unknownD8[0],
+    GfLog("net host %d %s %x %x %x %x %d %d %x %x", unknown, desc.name, desc.serviceProvider[0], desc.serviceProvider[1],
+          desc.serviceProvider[2], desc.serviceProvider[3], desc.unknown15C, desc.unknown15E, desc.unknownD8[0],
           desc.unknown160[7]);
     return g_csHost;
 }

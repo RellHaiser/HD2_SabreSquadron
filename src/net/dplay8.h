@@ -206,7 +206,7 @@ enum : DWORD {
     DPN_MSGID_CONNECT_COMPLETE = 0xFFFF0005,
     DPN_MSGID_ENUM_HOSTS_RESPONSE = 0xFFFF000B,
     DPN_MSGID_RECEIVE = 0xFFFF0011,
-    DPN_MSGID_SEND_COMPLETE = 0xFFFF0013,
+    DPN_MSGID_RETURN_BUFFER = 0xFFFF0013,             // (a buffer the game handed DirectPlay: freed)
     DPN_MSGID_TERMINATE_SESSION = 0xFFFF0016,
 };
 struct DPNMSG_CONNECT_COMPLETE {
@@ -235,10 +235,11 @@ struct DPNMSG_RECEIVE {
     DWORD dataSize;                                     // +0x10
     DPNHANDLE buffer;
 };
-struct DPNMSG_SEND_COMPLETE {
+struct DPNMSG_RETURN_BUFFER {
     DWORD size;
-    DPNHANDLE asyncOp;
-    void *context;                                      // +0x08 (the game's: the data sent, freed)
+    HRESULT result;
+    void *buffer;                                       // +0x08 the game's (an enum answer's data): freed
+    void *context;
 };
 
 // The GUIDs (DirectPlay 8, DirectPlay Voice, the game's application, the voice codecs, the default voice devices).

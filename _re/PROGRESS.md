@@ -8927,6 +8927,38 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 257 errors in 48 of 374 files. ret_audit --src: 52.
   - Stats: 10,088 of 12,306 functions by hand or absorbed (87.7 % by size).
 
+  PART 10d-v DONE (2026-11-05): the network game's messages (net/net_messages.cpp).
+  - The server's DirectPlay messages (HandleServerMessage 0x00726470): a player created (its slot, from the
+    connection's context: the id, the name from GetClientInfo (UTF-8 with the unicode font or CJK characters, else
+    ANSI; made unique, the slot's own old name counting), the activity time, not admin, the stats cleared, its link
+    added to the transport; the errors "DPserver->GetClientInfo failed (1)" / "(2)"; the server's own player
+    appended on a playing server), destroyed (its link removed from g_netGame's transport, its key check dropped;
+    told: game message 2), the hosts' queries (a mission past 99 ms: the request, map, version, rules, players,
+    password, port, voice; a status query: the status), a connection asked for (the version, the room, the
+    password; the first free slot reset or one appended (32 at most); the address; GameSpy's listing: a good CD-key
+    check of that address and name kept (KEY_KEPT), in use: refused 6, none: 5; the reply's byte the slot with the
+    transport's session bit at 0x80), aborted, data (queued as the slot's | 0x80), a returned buffer
+    (DPN_MSGID_RETURN_BUFFER 0xFFFF0013, was SEND_COMPLETE; DPNMSG_RETURN_BUFFER), the server's info.
+  - The game messages: BeginGameMessage 0x0072c1d0 (type 0x14, the id in 32 bits; BeginCommand / BeginReply
+    0x0072c190 / 0x0072c1b0), C_GameApp::SendGameMessage 0x0072a480 (unreliable: queued under the command lock;
+    reliable: the queue sent, each after a 1000 ms Process: 0 the join data (a deathmatch's teams by the uniform's
+    side), 2 a player left, 3 a spawn (the block freed; Fix: the soldier state's destructor run), 4 a chat line, 5
+    the players' places (the last first), 6 / 0x12 the map / rules, 7 / 0x14 the temporary actors, 8 the scores,
+    9 a player joined, 0xC the teams, 0x15 the whole game for a joining player (its join stage 2), the small
+    ones), C_GameApp::PostCommand 0x0072b590 (the commands: the player's soldier (Fix: an empty squad sends an
+    empty state; the original reads null), chat, texts, the actors from 32 counted, ...).
+  - A soldier's state in a message (NetWriteSoldierState / NetReadSoldierState 0x00727850 / 0x00727a30, the items
+    0x00727820 / 0x007277f0): the state is not const (-1 profile / spawn zone stored as 0xFF / 0x3FF).
+    S_SoldierState is 0xAC bytes: the load (S_SoldierLoad, moved to game/soldier.h) at +0x8C, was
+    S_SquadSoldier's. S_NetPlayerState +0x04 address, +0x70 keyQuery.
+  - The vehicle harness's stubs caught up with 10d-iv (S_NetSessionDesc serviceProvider / password, S_ServerStatus
+    players as a vector; the factory checker had run a stale exe) and with the load's move.
+  - Harness: net/build_messages.bat (netgame_test.cpp with -DNET_SESSION_TEST -DNET_MESSAGES_TEST; the real
+    SendGameMessage / PostCommand linked; netmessages_tests.inc, 212 checks). Mutations: mutations/mutate_10d5.py
+    (runner mutnetm.py): 586: 477 killed, 49 not building, 60 survived. Factory checkers clean.
+  - Build: MSVC clean. Tier 1: 250 errors in 48/374 (was 257). ret_audit --src: 52.
+  - Stats: 10,106 of 12,306 functions by hand or absorbed (87.9 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

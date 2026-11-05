@@ -152,9 +152,7 @@ struct S_StatusPlayer {
 };
 struct S_ServerStatus {
     int unknown00;
-    S_StatusPlayer *playersBegin;
-    S_StatusPlayer *playersEnd;
-    S_StatusPlayer *playersCapacity;
+    std::vector<S_StatusPlayer> players;                // (the real one's: +0x04)
     int unknown10;
     int fragLimit;
     int roundLimit;
@@ -215,16 +213,17 @@ enum : int {
 };
 struct S_NetSessionDesc {                               // (as the real header)
     char name[200];
-    uint32_t application[4];
-    uint8_t unknownD8[0x84];
+    uint32_t serviceProvider[4];                        // +0xC8
+    uint8_t unknownD8[0x52];
+    char password[0x32];                                // +0x12A
     int16_t unknown15C;
     int16_t unknown15E;
     uint8_t unknown160[8];
 };
 class C_NetMessage;
 struct S_SoldierState;
-void NetWriteSoldierState(C_NetMessage *msg, const S_SoldierState &state, bool unknown);
-void NetReadSoldierState(C_NetMessage *msg, S_SoldierState &state, bool unknown);
+void NetWriteSoldierState(C_NetMessage *msg, S_SoldierState &state, bool itemsOnly);
+void NetReadSoldierState(C_NetMessage *msg, S_SoldierState &state, bool itemsOnly);
 
 // (The seat weapon, game/seat_weapon.cpp: its barrels' frame data.)
 struct S_FrameData;

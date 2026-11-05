@@ -14,49 +14,4 @@ uint32_t FUN_0072c140(...)
 }
 
 
-// 0x0072c190
-uint32_t FUN_0072c190(void *_this,uint32_t param_1, ...)
-{
-  FUN_0072c1d0(_this,0,param_1,'\0');
-  return 0;
-}
-
-
-// 0x0072c1b0
-uint32_t FUN_0072c1b0(void *_this,int param_1,uint32_t param_2, ...)
-{
-  FUN_0072c1d0(_this,param_1,param_2,'\x01');
-  return 0;
-}
-
-
-// 0x0072c1d0
-void * FUN_0072c1d0(void *_this,int param_1,uint32_t param_2,char param_3, ...)
-{
-  C_BitStream *this_00;
-  int64_t lVar1;
-  if ((param_3 == '\0') && (((uint8_t)g_gameRole & 1) != 0)) {
-    this_00 = (C_BitStream *)((int)_this + 700);
-  }
-  else {
-    this_00 = (C_BitStream *)((int)_this + 0x208);
-    if (param_1 != 0) {
-      this_00 = (C_BitStream *)((int)_this + 0x2f8);
-    }
-  }
-  this_00[1].m_00c = 0;
-  this_00[1].m_008 = 1;
-  log2((long double)20.0);
-  this_00[1].m_010 = param_1;
-  *(bool *)&this_00[1].m_004 = param_3 == '\0';
-  log2((long double)2.0);
-  lVar1 = tier1_ftol();
-  C_BitStream__WriteBits(this_00,0x14,(int)lVar1);
-  this_00[2].vtable = (C_BitStream_vtbl *)0x14;
-  C_BitStream__WriteBits(this_00,param_2,0x20);
-  return this_00;
-  return 0;
-}
-
-
 } // namespace tier1

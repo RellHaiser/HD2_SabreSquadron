@@ -88,11 +88,11 @@ void TestNetGameConstruction()
           net->m_maxPing == 0 && net->m_unknown5068 == 50 && net->m_maxInactivity == 300000 &&
           net->m_packetCallback == TransportCallback && net->m_replication == nullptr);
     CHECK(net->m_players.size() == 32 && net->m_players[5].team == 2 && net->m_players[5].pendingTeam == 2 &&
-          net->m_players[5].unknown70 == -1 && net->m_players[5].unknownB8 == 50 && !net->m_players[5].name[0] &&
+          net->m_players[5].keyQuery == -1 && net->m_players[5].unknownB8 == 50 && !net->m_players[5].name[0] &&
           net->m_players[5].human == nullptr && net->m_players[5].stats[3] == 0);
     // The default player state.
     S_NetPlayerState p;
-    CHECK(p.connection == 0 && p.team == 2 && p.pendingTeam == 2 && p.unknown70 == -1 && p.joinStage == 0 &&
+    CHECK(p.connection == 0 && p.team == 2 && p.pendingTeam == 2 && p.keyQuery == -1 && p.joinStage == 0 &&
           p.link == nullptr && p.highPings == 0 && p.livesUsed == 0);
     // Shut down: closed, the voice objects deleted, the replication deleted, the locks gone.
     net->m_voiceClient = new C_NetVoice(nullptr, nullptr);

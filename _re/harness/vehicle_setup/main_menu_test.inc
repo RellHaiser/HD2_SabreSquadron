@@ -1971,8 +1971,7 @@ void MainMenuTest(I3D_scene *scene)
             players[i].points = given[i].points;
         }
         S_ServerStatus status = {};
-        status.playersBegin = players;
-        status.playersEnd = players + 5;
+        status.players.assign(players, players + 5);
         const int numbers[] = {10, 11, 12, 13, 14, 15};
         status.fragLimit = numbers[0];
         status.roundLimit = numbers[1];
@@ -2063,11 +2062,10 @@ void MainMenuTest(I3D_scene *scene)
             ok &= Is(CsQueue(), "");
             // No players: their box only emptied.
             g_menuState = &m;
-            status.playersBegin = status.playersEnd = nullptr;
+            status.players.clear();
             C_MainMenu::ShowGameInfo(&status);
             ok &= CsQueue().rfind("30100000 2000018 0 0; 30200000 1000077 0 0; ", 0) == 0;
-            status.playersBegin = players;
-            status.playersEnd = players + 5;
+            status.players.assign(players, players + 5);
             WM(r.giShow, ok);
         }
         {

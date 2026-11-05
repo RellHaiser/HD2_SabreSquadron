@@ -91,6 +91,8 @@ int g_netPlayerCount;
 alignas(16) static unsigned char g_appStorage[sizeof(C_GameApp)];
 C_GameApp *GetGameApp() { return reinterpret_cast<C_GameApp *>(g_appStorage); }
 S_NetPlayerState *g_watchedPlayer;   // its join stage logged with each game message
+#ifndef NET_MESSAGES_TEST
+// (The messages' build links the real ones: net_messages.cpp.)
 void C_GameApp::SendGameMessage(int type, int to, intptr_t a, int b, bool reliable)
 {
     Log("game %d to %d a %d b %d %d", type, to, static_cast<int>(a), b, reliable);
@@ -107,6 +109,7 @@ void C_GameApp::PostCommand(int command, intptr_t a, intptr_t b, bool flush)
     }
     Log("post %d %d %d %d", command, static_cast<int>(a), static_cast<int>(b), flush);
 }
+#endif
 void C_GameApp::HandleServerCommand(int id, C_BitStream *stream)
 {
     Log("server command %d %u", id, stream->ReadBits(8));
@@ -486,11 +489,16 @@ struct T_Client : IDirectPlay8Client {
 #ifdef NET_SESSION_TEST
 #include "netsession_tests.inc"
 #endif
+#ifdef NET_MESSAGES_TEST
+#include "netmessages_tests.inc"
+#endif
 
 int main()
 {
     std::setvbuf(stdout, nullptr, _IONBF, 0);
-#ifdef NET_SESSION_TEST
+#if defined(NET_MESSAGES_TEST)
+    RunNetMessagesTests();
+#elif defined(NET_SESSION_TEST)
     RunNetSessionTests();
 #else
     RunNetGameTests();

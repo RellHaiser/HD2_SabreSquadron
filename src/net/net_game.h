@@ -97,14 +97,14 @@ struct S_NetStats {
 struct S_NetPlayerState {
     S_NetPlayerState();                             // 0x00725e10
     int connection = 0;                             // +0x00 the DirectPlay player id (0: none)
-    int unknown04 = 0;
+    uint32_t address = 0;                           // +0x04 the player's (INDICATE_CONNECT)
     char name[0x34] = {};                           // +0x08 (size inferred) empty: a free slot
     class C_Human *human = nullptr;                 // +0x3C cleared when the human is destroyed
     S_NetStats stats;                               // +0x40 NET_STAT_*
     int team = 0;                                   // +0x64 E_HumanTeam
     int pendingTeam = 0;                            // +0x68 the team the player switches to
     C_NetConnection *link = nullptr;                // +0x6C its transport connection (the server's)
-    int unknown70 = 0;
+    int keyQuery = 0;                               // +0x70 its CD-key check (-1: none)
     // The server's handshake with it (0 none, 2 sending the game to it, 1 done).
     int joinStage = 0;                              // +0x74
     int unknown78 = 0;
@@ -254,7 +254,7 @@ enum : int {
     KEY_GOOD = 4,
     KEY_BAD = 5,
     KEY_IN_USE = 6,
-    KEY_KEPT = 7,                                   // (never set by the game: kept past the expiry)
+    KEY_KEPT = 7,                                   // a good one taken by its player's connection (kept past the expiry)
 };
 
 // A received or queued datagram (the queues' nodes, 0x18 bytes).
@@ -275,6 +275,11 @@ public:
     C_BitStream *CreateMessage(int type, int channel);      // 0x0072c280
     C_BitStream *CreateMessageEx(int type, int channel);    // 0x0072c2a0 (other message kind)
     C_BitStream *BeginMessage(int target, int type, bool reliable, int channel);   // 0x0072c2c0
+    // A game message (type 0x14, channel 0) of `id` (32 bits) to `to` (0: everyone); BeginCommand: an unreliable
+    // one to everyone (PostCommand's), BeginReply: a reliable one (SendGameMessage's).
+    C_BitStream *BeginGameMessage(int to, int id, bool reliable);   // 0x0072c1d0
+    C_BitStream *BeginCommand(int id);              // 0x0072c190
+    C_BitStream *BeginReply(int to, int id);        // 0x0072c1b0
     // A message to one player (its target), ended and sent (to itself: queued as received).
     // (SendNetMessage: windows.h's SendMessage macro would rename it where windows.h comes first.)
     void SendNetMessage(C_BitStream *msg);          // 0x0072c360

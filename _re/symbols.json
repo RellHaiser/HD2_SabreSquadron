@@ -38637,6 +38637,26 @@
   "module": "zz_idioms",
   "name": "vector_tidy_7272e0"
  },
+ "007277f0": {
+  "module": "net_messages",
+  "name": "NetReadSoldierItem",
+  "proto": "void __fastcall NetReadSoldierItem(void * stream, void * item)"
+ },
+ "00727820": {
+  "module": "net_messages",
+  "name": "NetWriteSoldierItem",
+  "proto": "void __fastcall NetWriteSoldierItem(void * stream, void * item)"
+ },
+ "00727850": {
+  "module": "net_messages",
+  "name": "NetWriteSoldierState",
+  "proto": "void __fastcall NetWriteSoldierState(void * msg, void * state, bool itemsOnly)"
+ },
+ "00727a30": {
+  "module": "net_messages",
+  "name": "NetReadSoldierState",
+  "proto": "void __fastcall NetReadSoldierState(void * msg, void * state, bool itemsOnly)"
+ },
  "0072a480": {
   "module": "game_app",
   "name": "C_GameApp::SendGameMessage",
@@ -38654,6 +38674,21 @@
  "0072bbe0": {
   "module": "zz_idioms",
   "name": "empty_function_72bbe0"
+ },
+ "0072c190": {
+  "module": "net_messages",
+  "name": "C_NetGame::BeginCommand",
+  "proto": "void * __thiscall BeginCommand(void *this, int id)"
+ },
+ "0072c1b0": {
+  "module": "net_messages",
+  "name": "C_NetGame::BeginReply",
+  "proto": "void * __thiscall BeginReply(void *this, int to, int id)"
+ },
+ "0072c1d0": {
+  "module": "net_messages",
+  "name": "C_NetGame::BeginGameMessage",
+  "proto": "void * __thiscall BeginGameMessage(void *this, int to, int id, bool reliable)"
  },
  "0072c280": {
   "module": "script",

@@ -79,7 +79,7 @@ S_NetPlayerState::S_NetPlayerState()
 {
     team = 2;
     pendingTeam = 2;
-    unknown70 = -1;
+    keyQuery = -1;
     unknownB8 = 50;
 }
 

@@ -181,20 +181,7 @@ enum : uint8_t {
     SQUAD_SLOT_BACKPACK = 0x08,
     SQUAD_SLOT_LONG_GUN = 0x10,
 };
-// (The equipment panel, part 9e-ii-a: equipment_panel_test.inc fakes the methods.)
-struct S_SoldierLoad {
-    int capacity = 0;                                   // +0x00 (+0x8C)
-    float weight = 0.0f;                                // +0x04 (+0x90)
-    float backpackMaxWeight = 0.0f;                     // +0x08 (+0x94)
-    int backpackMaxVolume = 0;                          // +0x0C (+0x98)
-    float backpackWeight = 0.0f;                        // +0x10 (+0x9C)
-    int backpackVolume = 0;                             // +0x14 (+0xA0)
-    float beltWeight = 0.0f;                            // +0x18 (+0xA4)
-    int beltVolume = 0;                                 // +0x1C (+0xA8)
-    float GetBeltFill() const;
-    float GetBackpackFill() const;
-    float GetWeightFill() const;
-};
+// (S_SoldierLoad: game/soldier.h, S_SoldierState's +0x8C.)
 class C_ItemStock;
 struct S_SquadSoldier : S_SoldierState {
     void SplitStacks();
@@ -211,7 +198,6 @@ struct S_SquadSoldier : S_SoldierState {
     // (The player screen and the squad's team, part 9e-xviii: game_menu_test.inc.)
     void CopyFrom(const S_SquadSoldier &other);
     void UpdateLoad();
-    S_SoldierLoad load;                                 // +0x8C
 };
 struct S_MissionSquad {
     // (The in-game menu's player screen, part 9e-xviii: game_menu_test.inc.)
