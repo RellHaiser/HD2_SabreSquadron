@@ -211,6 +211,14 @@ struct C_CsLine : C_Control {
     I3D_frame *GetHighlightFrame() const override { return highlight; }
 };
 int GetVoiceCodecTextId(int codec) { return 0xB40 + codec; }
+// (Part 9h-xvii: the session's reset: logged, its maps deleted.)
+void S_MultiplayerSettings::Reset()
+{
+    GfLog("session reset");
+    for (C_MpMap *map : maps)
+        delete map;
+    maps.clear();
+}
 bool C_PlayerProfile::Save()
 {
     GfLog("save profile");
@@ -289,7 +297,8 @@ struct S_MainMenuResults {
          giDescribe = true, giRefresh = true, giShow = true, giStatus = true,
          csDescribe = true, csSetup = true, csShown = true, csStart = true, csPicked = true, csHost = true,
          csRules = true, csMapList = true, csOptions = true, csStyle = true, csOption = true,
-         csMoves = true, csDouble = true, csDragStart = true, csDragMove = true, csDrop = true;
+         csMoves = true, csDouble = true, csDragStart = true, csDragMove = true, csDrop = true,
+         hsSession = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -2984,6 +2993,97 @@ void MainMenuTest(I3D_scene *scene)
         m.m_mpSettings = nullptr;
     }
 
+    // --- (part 9h-xvii) the hosted session set up from the create server screen ---
+    {
+        bool ok = true;
+        C_MainMenu m;
+        C_MpMenuSettings settings;
+        m.m_mpSettings = &settings;
+        C_MpGameSetup &setup = settings.m_setup;
+        for (auto &group : setup.maps) {
+            for (C_MpMap *map : group.maps)
+                delete map;
+            group.maps.clear();
+        }
+        for (S_MpRotation &rotation : setup.rotations)
+            rotation.Clear();
+        C_MpMap a(C_str("ma"), C_str("da")), b(C_str("mb"), C_str("db"));
+        a.frontline = 1;
+        a.presets = "p1";
+        b.description = 77;
+        setup.gameType = 3;
+        setup.rotation = 1;
+        setup.rotations[1].types[3].maps = {&a, &b};
+        setup.serverName = "Server";
+        m.m_profileName = "Player";
+        struct C_HsEdit : C_Control {
+            C_HsEdit(uint32_t id, C_Control *parent) : C_Control(nullptr, id, parent) { m_type = 0xE; }
+            bool HandleMessage(S_ControlMessage *message) override
+            {
+                if (message->id == CONTROL_MSG_GET_TEXT)
+                    message->text = C_str("pw");
+                return true;
+            }
+        };
+        C_MsScreen screen(nullptr, "hsscreen", 9u << 26);
+        C_FlControl *list = new C_FlControl(0x24700000, &screen, 0x23, 0);
+        screen.m_children.push_back(list);
+        C_FlControl *style = new C_FlControl(0x24200000, &screen, 0x10, 3);
+        for (C_Control *c : std::initializer_list<C_Control *>{style, new C_FlControl(0x24400000, &screen, 0x24, 1),
+                                                                new C_FlControl(0x24500000, &screen, 0x24, 1),
+                                                                new C_FlControl(0x24800000, &screen, 0x10, 6)})
+            screen.m_children.push_back(c);
+        const uint32_t rowIds[] = {0x24701000, 0x24702000, 0x24703000, 0x24704000, 0x24705000, 0x24706000, 0x24707000, 0x24708000,
+                                   0x24709000, 0x2470a000, 0x2470b000, 0x2470c000, 0x2470d000, 0x2470e000, 0x2470f000, 0x24710000};
+        for (int i = 0; i < 16; ++i)
+            list->m_children.push_back(new C_FlControl(rowIds[i], list, i == 0 ? 0x28 : 0xE, 100 + i));
+        list->m_children.push_back(new C_HsEdit(0x24711000, list));
+        list->m_children.push_back(new C_FlControl(0x24712000, list, 0xE, 4321));
+        m.m_screens.assign(10, nullptr);
+        m.m_screens[9] = &screen;
+        S_MultiplayerSettings *session = g_mpSettings;
+        const S_MultiplayerSettings old = *session;
+        session->maps.clear();
+        session->sessionType = 0;
+        g_gfLog.clear();
+        m.SetUpHostedSession();
+        ok &= GmInOrder(Join(g_gfLog), {"session reset"}) && session->sessionType == 2 &&
+              std::string(session->sessionName) == "Server" && std::string(session->sessionName + 100) == "Player" &&
+              session->gameType == 3 && session->unknown174 == 1 && session->dedicated && session->coopDifficulty == 101 &&
+              session->coopLives == 103 && session->teamLives == 102 && session->maxClients == 101 &&
+              session->pointLimit == 104 && session->roundLimit == 105 && session->roundCount == 106 && session->warmup == 107 &&
+              session->allowRespawn == 108 && session->respawnTime == 109 && session->spawnProtection == 110 &&
+              session->inverseDamage == 111 && session->friendlyFire == 112 && session->autoTeamBalance == 113 &&
+              session->thirdPersonView == 114 && session->allowCrosshair == 115 &&
+              std::string(session->password.c_str()) == "pw" && session->port == 4321 && session->unknown178 == 6;
+        // The rotation's maps copied (every field).
+        ok &= session->maps.size() == 2 && session->maps[0] != &a && session->maps[1] != &b &&
+              std::string(session->maps[0]->GetName()) == "ma" && std::string(session->maps[0]->GetDirectory()) == "da" &&
+              session->maps[0]->frontline == 1 && std::string(session->maps[0]->GetPresets()) == "p1" &&
+              std::string(session->maps[1]->GetName()) == "mb" && session->maps[1]->description == 77;
+        // Another game type: the cooperative rules' defaults.
+        style->value = 1;
+        m.SetUpHostedSession();
+        ok &= session->gameType == 1 && session->coopDifficulty == 3 && session->coopLives == -1 && session->teamLives == 0 &&
+              session->maps.size() == 2;
+        // (A name longer than its field cut.)
+        setup.serverName = C_str(std::string(150, 'x').c_str());
+        m.SetUpHostedSession();
+        ok &= std::strlen(session->sessionName) == 99 && std::string(session->sessionName + 100) == "Player";
+        m.m_profileName = C_str(std::string(300, 'y').c_str());
+        m.SetUpHostedSession();
+        ok &= std::strlen(session->sessionName + 100) == 259;
+        session->Reset();
+        const std::vector<C_MpMap *> none;
+        *session = old;
+        session->maps = none;
+        m.m_screens.clear();
+        for (S_MpRotation &rotation : setup.rotations)
+            rotation.Clear();
+        m.m_mpSettings = nullptr;
+        WM(r.hsSession, ok);
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -3077,7 +3177,8 @@ void MainMenuTest(I3D_scene *scene)
                 " flAccept %d flHelpers %d giDescribe %d giRefresh %d giShow %d giStatus %d"
                 " csDescribe %d csSetup %d csShown %d csStart %d csPicked %d csHost %d"
                 " csRules %d csMapList %d csOptions %d csStyle %d csOption %d"
-                " csMoves %d csDouble %d csDragStart %d csDragMove %d csDrop %d\n",
+                " csMoves %d csDouble %d csDragStart %d csDragMove %d csDrop %d"
+                " hsSession %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
@@ -3087,5 +3188,6 @@ void MainMenuTest(I3D_scene *scene)
                 r.giDescribe, r.giRefresh, r.giShow, r.giStatus,
                 r.csDescribe, r.csSetup, r.csShown, r.csStart, r.csPicked, r.csHost,
                 r.csRules, r.csMapList, r.csOptions, r.csStyle, r.csOption,
-                r.csMoves, r.csDouble, r.csDragStart, r.csDragMove, r.csDrop);
+                r.csMoves, r.csDouble, r.csDragStart, r.csDragMove, r.csDrop,
+                r.hsSession);
 }

@@ -134,3 +134,6 @@
 00619730 C_MpGameSetup::RemoveMap | void __thiscall RemoveMap(void *this, int index, int unused)
 00619930 C_MpGameSetup::AddMap | void __thiscall AddMap(void *this, int index, int unused)
 00619780 C_MpGameSetup::MoveMap | void __thiscall MoveMap(void *this, int from, int to)
+# Part 9h-xvii: the hosted session set up from the create server screen.
+0062d030 C_MainMenu::SetUpHostedSession | void __thiscall SetUpHostedSession(C_MainMenu *this)
+006ad600 S_MultiplayerSettings::Reset | void __fastcall Reset(void *this)

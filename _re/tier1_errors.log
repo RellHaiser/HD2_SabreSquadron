@@ -142,26 +142,26 @@ f_005ac500.cpp:112:57: request for member '_12_2_' in '"\012ControlsEx - "', whi
     *(uint16_t *)(pcVar9 + 0xb) = "\nControlsEx - "._12_2_;
 f_00616c10.cpp:57:5: 'empty_function_6e6ba0' was not declared in this scope; did you mean 'empty_function_6e4a10'?
     empty_function_6e6ba0();
-f_00633450.cpp:209:49: base operand of '->' is not a pointer
+f_00633450.cpp:202:49: base operand of '->' is not a pointer
     DAT_008ae5ac = (C_MainMenu *)(DAT_008ae5ac->_pad_0004 + 0x14);
-f_00633450.cpp:213:43: base operand of '->' is not a pointer
-    pCVar5 = (C_MainMenu *)(DAT_008ae5ac->_pad_0004 + 0x14);
-f_00633450.cpp:1128:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00633450.cpp:206:43: base operand of '->' is not a pointer
+    pCVar1 = (C_MainMenu *)(DAT_008ae5ac->_pad_0004 + 0x14);
+f_00633450.cpp:1136:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:1141:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00633450.cpp:1149:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:1151:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00633450.cpp:1159:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:1163:49: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00633450.cpp:1171:49: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:1175:51: no matching function for call to 'tier1::C_str::C_str(int)'
+f_00633450.cpp:1183:51: no matching function for call to 'tier1::C_str::C_str(int)'
     (*local_10 = (C_str)(*(int *)local_10 - 1), *(int *)local_10 == 0)) {
-f_00633450.cpp:1203:5: 'C_MainMenu__C_MainMenu' has not been declared
+f_00633450.cpp:1211:5: 'C_MainMenu__C_MainMenu' has not been declared
     C_MainMenu__C_MainMenu::DrainFoundServers((C_MainMenu *)param_1);
-f_00633450.cpp:1777:3: '_local_8' was not declared in this scope; did you mean 'local_8'?
+f_00633450.cpp:1785:3: '_local_8' was not declared in this scope; did you mean 'local_8'?
     _local_8 = CONCAT31(uStack_7,1);
 f_00633450.cpp:63:76: invalid 'static_cast' from type 'unsigned char*' to type 'uint64_t' {aka 'long long unsigned int'}
-    int *local_220;
+    uint32_t local_204;
 f_0063de40.cpp:47:19: invalid types 'uint32_t {aka unsigned int}[int]' for array subscript
     DAT_008acbe8[2] = 0;
 f_00696f70.cpp:565:105: cannot convert 'char**' to 'uint32_t*' {aka 'unsigned int*'}

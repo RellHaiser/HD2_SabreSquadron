@@ -206,6 +206,11 @@ protected:
     void ShowServerOptions(int type);                   // 0x0062d950
     // A titled edit box's text (none, another kind: empty).
     C_str GetEditText(uint32_t id);                     // 0x0062c6d0
+    // The hosted session from the create server screen (OnNetworkMessage's start): the settings reset, hosting;
+    // the server's and the player's names; the game type, internet, dedicated, the cooperative rules (another
+    // type: difficulty 3, unlimited lives, no team lives), the rules, the password, the port, the voice codec;
+    // copies of the rotation's maps.
+    void SetUpHostedSession();                          // 0x0062d030
     // (The two lists' helper: a map line's callbacks: double click, drag started, moved, dropped.)
     static void AddMapLineCallbacks(S_ControlDesc *line, uintptr_t self);
     // The options panel: the internet / dedicated check boxes, its scroll bar, its list of rows (copies of the

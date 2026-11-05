@@ -36,7 +36,9 @@ public:
     // (Inline in the list's parser: the ints -1 but `frontline` 0.)
     C_MpMap(const C_str &name, const C_str &directory) : name(name), directory(directory) {}
     ~C_MpMap() = default;                           // 0x0061b470 (__fastcall)
-    C_MpMap(const C_MpMap &) = delete;
+    // (A hosted session's copy: SetUpHostedSession's, 0x0062d030 inline, its vectors' 0x0062f020 / 0x0062f360 /
+    // 0x0062ed20.)
+    C_MpMap(const C_MpMap &) = default;
     C_MpMap &operator=(const C_MpMap &) = delete;
 
     // An objective added (last); the count of them.

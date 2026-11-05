@@ -363,6 +363,11 @@ struct S_MultiplayerSettings {
     int allowCrosshair;                             // +0x274
     int spawnOnStart;                               // +0x278 co-op: everyone spawns at zone 0
     int teamLives;                                  // +0x27C the co-op lives are shared
+    std::vector<C_MpMap *> maps;                    // +0x280 the session's maps (owned; the main menu's copies)
+    int currentMap;                                 // +0x290
+
+    // The defaults (no session, no password, port 11001, the rules' defaults), the maps deleted.
+    void Reset();                                   // 0x006ad600 (__fastcall)
 
     // The selected map (+0x290 into the vector at +0x280).
     C_MpMap *GetCurrentMap();                       // 0x006ad830

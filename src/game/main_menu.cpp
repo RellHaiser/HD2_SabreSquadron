@@ -2495,3 +2495,57 @@ bool C_MainMenu::OnMapLineDrop(void *menu, void *, C_Control *, uint32_t, uint32
     self->RefreshStartButton();
     return true;
 }
+
+// ---- the hosted session set up from the create server screen (part 9h-xvii) -------------------------------
+
+namespace {
+
+// The session's names: the server's (first 100 bytes) and the host player's (the next 260).
+constexpr size_t SESSION_NAME_SIZE = 100, SESSION_PLAYER_SIZE = 260;
+// A non-cooperative game's cooperative rules.
+constexpr int DEFAULT_COOP_DIFFICULTY = 3, DEFAULT_COOP_LIVES = -1;
+
+} // namespace
+
+void C_MainMenu::SetUpHostedSession()
+{
+    S_MultiplayerSettings *session = g_mpSettings;
+    session->Reset();
+    session->sessionType = SESSION_HOSTING;
+    // (Fix: the names cut to their fields; the original copies them unbounded.)
+    char names[SESSION_NAME_SIZE + SESSION_PLAYER_SIZE] = {};
+    std::strncpy(names, m_mpSettings->m_setup.serverName.c_str(), SESSION_NAME_SIZE - 1);
+    std::strncpy(names + SESSION_NAME_SIZE, m_profileName.c_str(), SESSION_PLAYER_SIZE - 1);
+    std::memcpy(session->sessionName, names, sizeof names);
+    session->gameType = GetControlValue(CREATE_STYLE);
+    session->unknown174 = GetControlValue(CREATE_INTERNET) != 0;
+    session->dedicated = GetControlValue(CREATE_DEDICATED) != 0;
+    if (session->gameType == GAME_TYPE_COOPERATIVE) {
+        session->coopDifficulty = GetControlValue(ROW_DIFFICULTY) + 1;
+        session->coopLives = GetControlValue(ROW_LIVES);
+        session->teamLives = GetControlValue(ROW_TEAM_LIVES);
+    } else {
+        session->coopDifficulty = DEFAULT_COOP_DIFFICULTY;
+        session->coopLives = DEFAULT_COOP_LIVES;
+        session->teamLives = 0;
+    }
+    session->maxClients = GetControlValue(ROW_PLAYERS);
+    session->pointLimit = GetControlValue(ROW_POINT_LIMIT);
+    session->roundLimit = GetControlValue(ROW_ROUND_LIMIT);
+    session->roundCount = GetControlValue(ROW_ROUND_COUNT);
+    session->warmup = GetControlValue(ROW_WARMUP);
+    session->respawnTime = GetControlValue(ROW_RESPAWN_TIME);
+    session->spawnProtection = GetControlValue(ROW_SPAWN_PROTECTION);
+    session->inverseDamage = GetControlValue(ROW_INVERSE_DAMAGE);
+    session->allowRespawn = GetControlValue(ROW_ALLOW_RESPAWN);
+    session->friendlyFire = GetControlValue(ROW_FRIENDLY_FIRE);
+    session->autoTeamBalance = GetControlValue(ROW_TEAM_BALANCE);
+    session->thirdPersonView = GetControlValue(ROW_THIRD_PERSON);
+    session->allowCrosshair = GetControlValue(ROW_CROSSHAIR);
+    session->password = GetEditText(CREATE_PASSWORD);
+    session->port = GetControlValue(CREATE_PORT);
+    session->unknown178 = GetControlValue(CREATE_VOICE);
+    // The rotation's maps, copied.
+    for (const C_MpMap *map : m_mpSettings->m_setup.GetCurrentGroup().maps)
+        session->maps.push_back(new C_MpMap(*map));
+}

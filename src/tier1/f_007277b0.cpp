@@ -1508,7 +1508,7 @@ LAB_0072903a:
     local_14 = 0xc;
     local_2b8[0] = &PTR_008159f8;
     local_24 = 0;
-    FUN_006ad600((int)local_2b8);
+    S_MultiplayerSettings__Reset();
     local_14 = 0xd;
     FUN_006ada30(local_2b8,param_2);
     local_2b8[0] = &PTR_008159f8;

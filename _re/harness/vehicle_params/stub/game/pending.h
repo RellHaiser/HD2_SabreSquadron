@@ -111,6 +111,7 @@ enum : int {
     MP_GAME_OBJECTIVES = 2,
     MP_GAME_COOPERATIVE = 3,
 };
+class C_MpMap;
 struct S_MultiplayerSettings {
     int gameType;
     int allowVehicles;                                  // (the car's StartMission, RestartMission)
@@ -123,6 +124,11 @@ struct S_MultiplayerSettings {
     char sessionName[0x168];
     uint8_t unknown17C[0x9C];
     C_str password;
+    // (The main menu's hosted session, part 9h-xvii.)
+    int unknown178, port, maxClients, pointLimit, roundLimit, roundCount, respawnTime, friendlyFire, autoTeamBalance,
+        thirdPersonView, spawnProtection, inverseDamage, coopDifficulty, coopLives, allowCrosshair, teamLives;
+    std::vector<C_MpMap *> maps;
+    void Reset();
 };
 enum : int { SESSION_NONE = 0, SESSION_JOINING = 1, SESSION_HOSTING = 2 };
 

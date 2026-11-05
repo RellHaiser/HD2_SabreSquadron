@@ -8475,6 +8475,21 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 301 errors in 55 files, 126 stubs. ret_audit --src: 52.
   - Stats: 9,232 of 12,306 functions by hand (84.9 % by size).
 
+  PART 9h-xvii DONE (2026-11-04): the hosted session set up from the create server screen (game/main_menu.cpp).
+  - SetUpHostedSession 0x0062d030 (OnNetworkMessage's start server, a later sub-part): g_mpSettings Reset
+    (S_MultiplayerSettings::Reset 0x006ad600, declared: the defaults, its maps deleted), hosting; the session's
+    name block (0x168 bytes: the server's name in the first 100, the player's in the next 260; fix: cut to their
+    fields, the original copies them unbounded); the game type, internet (unknown174), dedicated, the cooperative
+    rules (another type: difficulty 3, unlimited lives, no team lives), the rules, the password, the port, the
+    voice codec (unknown178) from the screen's controls; copies of the rotation's maps (C_MpMap's copy
+    constructor now defaulted: 0x0062d030 inline and its vectors' 0x0062f020 / 0x0062f360 / 0x0062ed20).
+    S_MultiplayerSettings gains maps (+0x280) and currentMap (+0x290).
+  - Harness: hsSession (every field from the controls, the maps copied, another type's defaults, long names cut).
+    All 15 factory checkers in both orders.
+  - Mutations: mutations/mutate_9h17.py: 45: 43 killed, 2 not building.
+  - Build: MSVC clean. Tier 1: 301 errors in 55 files. ret_audit --src: 52.
+  - Stats: 9,235 of 12,306 functions by hand (85.0 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

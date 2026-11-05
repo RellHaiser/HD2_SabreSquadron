@@ -486,21 +486,22 @@ uint32_t FUN_006ad560(int param_1, ...)
 
 
 // 0x006ad600
-uint32_t FUN_006ad600(int param_1, ...)
+uint32_t S_MultiplayerSettings__Reset(...)
 {
-  void *ptr;
+  void *map;
+  int in_ECX;
   int iVar1;
   uint32_t *puVar2;
   uint32_t *puVar3;
   uint32_t local_58 [22];
-  *(uint32_t *)(param_1 + 4) = 0;
-  C_str__operator_assign((C_str *)(param_1 + 0x218),&DAT_00867a90);
-  C_str__operator_assign((C_str *)(param_1 + 0x21c),&DAT_00842b5c);
-  *(uint32_t *)(param_1 + 0x178) = 0;
-  *(uint32_t *)(param_1 + 0x174) = 0;
-  *(uint8_t *)(param_1 + 0x170) = 0;
-  FUN_007252c0(param_1 + 0x17c);
-  puVar2 = (uint32_t *)(param_1 + 8);
+  *(uint32_t *)(in_ECX + 4) = 0;
+  C_str__operator_assign((C_str *)(in_ECX + 0x218),(char *)&DAT_00867a90);
+  C_str__operator_assign((C_str *)(in_ECX + 0x21c),&DAT_00842b5c);
+  *(uint32_t *)(in_ECX + 0x178) = 0;
+  *(uint32_t *)(in_ECX + 0x174) = 0;
+  *(uint8_t *)(in_ECX + 0x170) = 0;
+  FUN_007252c0(in_ECX + 0x17c);
+  puVar2 = (uint32_t *)(in_ECX + 8);
   memset(puVar2, 0, 0x5a * sizeof(*puVar2));
   puVar2 += 0x5a;
   iVar1 = 0;
@@ -526,28 +527,28 @@ uint32_t FUN_006ad600(int param_1, ...)
   local_58[0x13] = 1;
   local_58[0x14] = 0;
   local_58[0x15] = 1;
-  *(uint32_t *)(param_1 + 0x224) = 0;
-  *(uint32_t *)(param_1 + 0x220) = 0x2af9;
+  *(uint32_t *)(in_ECX + 0x224) = 0;
+  *(uint32_t *)(in_ECX + 0x220) = 0x2af9;
   puVar2 = local_58;
-  puVar3 = (uint32_t *)(param_1 + 0x228);
+  puVar3 = (uint32_t *)(in_ECX + 0x228);
   for (iVar1 = 0x16; iVar1 != 0; iVar1 = iVar1 - 1) {
     *puVar3 = *puVar2;
     puVar2++;
     puVar3++;
   }
-  *(uint32_t *)(param_1 + 0x290) = 0;
-  if (*(int *)(param_1 + 0x284) != 0) {
-    iVar1 = *(int *)(param_1 + 0x288) - *(int *)(param_1 + 0x284) >> 2;
+  *(uint32_t *)(in_ECX + 0x290) = 0;
+  if (*(int *)(in_ECX + 0x284) != 0) {
+    iVar1 = *(int *)(in_ECX + 0x288) - *(int *)(in_ECX + 0x284) >> 2;
     while (iVar1 != 0) {
       iVar1--;
-      ptr = *(void **)(*(int *)(param_1 + 0x284) + iVar1 * 4);
-      if (ptr != 0) {
-        C_MpMap__dtor_C_MpMap((int)ptr);
-        tier1_operator_delete(ptr);
+      map = *(void **)(*(int *)(in_ECX + 0x284) + iVar1 * 4);
+      if (map != 0) {
+        C_MpMap__dtor_C_MpMap(map);
+        tier1_operator_delete(map);
       }
     }
   }
-  *(uint32_t *)(param_1 + 0x288) = *(uint32_t *)(param_1 + 0x284);
+  *(uint32_t *)(in_ECX + 0x288) = *(uint32_t *)(in_ECX + 0x284);
   return 0;
 }
 

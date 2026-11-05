@@ -27962,6 +27962,11 @@
   "name": "C_MainMenu::ShowMapList",
   "proto": "void __thiscall ShowMapList(C_MainMenu *this, int type)"
  },
+ "0062d030": {
+  "module": "main_menu",
+  "name": "C_MainMenu::SetUpHostedSession",
+  "proto": "void __thiscall SetUpHostedSession(C_MainMenu *this)"
+ },
  "0062d490": {
   "module": "main_menu",
   "name": "C_MainMenu::OnServerOptionChanged",
@@ -34801,6 +34806,11 @@
   "module": "main_menu",
   "name": "C_MpMap::AddObjective",
   "proto": "int __thiscall AddObjective(void *this, void * objective)"
+ },
+ "006ad600": {
+  "module": "main_menu",
+  "name": "S_MultiplayerSettings::Reset",
+  "proto": "void __fastcall Reset(void *this)"
  },
  "006ad780": {
   "module": "game",

@@ -36,26 +36,21 @@ uint32_t FUN_00633480(...)
 
 
 // 0x00633490  (tier1 fallback: translated text kept below, needs hand porting)
-uint32_t C_MainMenu__C_MainMenu__OnNetworkMessage(C_MainMenu *_this,int param_1, ...)
+bool C_MainMenu__OnNetworkMessage(C_MainMenu *_this,void *message, ...)
 {
   return {};
 }
 #if 0
 {
-  int *piVar1;
-  C_MainMenu *this_00;
-  char cVar2;
-  uint3 uVar6;
-  uint32_t uVar3;
-  uint32_t extraout_EAX;
-  int iVar4;
-  uint32_t extraout_EAX_00;
-  C_MainMenu *pCVar5;
-  C_MainMenu *extraout_EAX_01;
-  uint32_t uVar7;
-  uint32_t *puVar8;
-  uchar *puVar9;
-  bool bVar10;
+  C_MainMenu *pCVar1;
+  C_MainMenu *pCVar2;
+  char cVar3;
+  void *pvVar4;
+  int *ptr;
+  int iVar5;
+  uint32_t *puVar6;
+  uchar *puVar7;
+  bool bVar8;
   int local_25c [4];
   uint32_t local_24c;
   uint32_t local_248;
@@ -80,7 +75,7 @@ uint32_t C_MainMenu__C_MainMenu__OnNetworkMessage(C_MainMenu *_this,int param_1,
   uint32_t local_1d4;
   uint32_t local_1d0;
   uint32_t local_1cc;
-  C_MainMenu *local_1c0;
+  int *local_1c0;
   uint32_t local_1bc;
   uint32_t local_1b8;
   uint32_t local_1b4;
@@ -88,7 +83,7 @@ uint32_t C_MainMenu__C_MainMenu__OnNetworkMessage(C_MainMenu *_this,int param_1,
   uint32_t local_1a4;
   uint32_t local_1a0;
   uint32_t local_19c;
-  C_MainMenu *local_190;
+  int *local_190;
   uint32_t local_18c;
   uint32_t local_188;
   uint32_t local_184;
@@ -96,7 +91,7 @@ uint32_t C_MainMenu__C_MainMenu__OnNetworkMessage(C_MainMenu *_this,int param_1,
   uint32_t local_174;
   uint32_t local_170;
   uint32_t local_16c;
-  C_MainMenu *local_160;
+  int *local_160;
   uint32_t local_15c;
   uint32_t local_158;
   uint32_t local_154;
@@ -104,15 +99,15 @@ uint32_t C_MainMenu__C_MainMenu__OnNetworkMessage(C_MainMenu *_this,int param_1,
   uint32_t local_144;
   uint32_t local_140;
   uint32_t local_13c;
-  C_MainMenu *local_130;
+  int *local_130;
   uint32_t local_12c;
   uint32_t local_128;
   uint32_t local_124;
-  C_MainMenu *local_118;
+  int *local_118;
   uint32_t local_114;
   uint32_t local_110;
   uint32_t local_10c;
-  C_MainMenu *local_100;
+  int *local_100;
   uint32_t local_fc;
   uint32_t local_f8;
   uint32_t local_f4;
@@ -120,7 +115,7 @@ uint32_t C_MainMenu__C_MainMenu__OnNetworkMessage(C_MainMenu *_this,int param_1,
   uint32_t local_e4;
   uint32_t local_e0;
   uint32_t local_dc;
-  C_MainMenu *local_d0;
+  int *local_d0;
   uint32_t local_cc;
   uint32_t local_c8;
   uint32_t local_c4;
@@ -154,26 +149,24 @@ uint32_t C_MainMenu__C_MainMenu__OnNetworkMessage(C_MainMenu *_this,int param_1,
   uint32_t local_2c;
   uint32_t local_28;
   uint32_t local_24;
-  C_MainMenu *local_18;
+  int *local_18;
   C_MainMenu *local_14;
   uint32_t local_8;
   local_8 = 0xffffffff;
-  uVar7 = *(uint32_t *)(param_1 + 4) & 0x3000fff;
-  pCVar5 = (C_MainMenu *)(uVar7 + 0xfdfffff6);
-  uVar6 = (uint3)((uint32_t)pCVar5 >> 8);
   local_14 = _this;
-  switch(uVar7) {
+  switch(*(uint32_t *)((int)message + 4) & 0x3000fff) {
   case 0x200000a:
-    pCVar5 = 0;
-    if (DAT_008ae5f0 == 0) goto switchD_006334da_caseD_200000b;
+    if (DAT_008ae5f0 == 0) {
+      return false;
+    }
     local_38 = DAT_008ae5dc;
     local_3c = DAT_008ae5d8;
     local_34 = DAT_008ae5e0;
     local_30 = DAT_008ae5e4;
-    iVar4 = FUN_00620e90(&local_3c,local_25c,1);
-    pCVar5 = *(C_MainMenu **)(iVar4 + 8);
-    if (((uint8_t)((int)pCVar5->vtable[1].vf01 >> 0x1a) & 0x3f) != 8)
-    goto switchD_006334da_caseD_200000b;
+    iVar5 = FUN_00620e90(&local_3c,local_25c,1);
+    if (((uint8_t)((int)*(uint32_t *)(**(int **)(iVar5 + 8) + 0x60) >> 0x1a) & 0x3f) != 8) {
+      return false;
+    }
     local_200 = 0x2000028;
     local_1f0 = 0;
     local_204 = 0;
@@ -201,7 +194,7 @@ uint32_t C_MainMenu__C_MainMenu__OnNetworkMessage(C_MainMenu *_this,int param_1,
     if ((local_220 != 0) && (*local_220 = *local_220 - 1, *local_220 == 0)) {
       tier1_operator_delete(local_220);
     }
-    this_00 = DAT_008ae5ac;
+    pCVar2 = DAT_008ae5ac;
     local_28 = 0x2000003;
     local_18 = 0;
     local_2c = 0;
@@ -209,64 +202,66 @@ uint32_t C_MainMenu__C_MainMenu__OnNetworkMessage(C_MainMenu *_this,int param_1,
     local_8 = 0x16;
     if ((DAT_008ae5bc == 0) || (DAT_008ae5ac == DAT_008ae5a8)) {
       FUN_00616100(0x8ae590);
-      pCVar5 = DAT_008ae5ac;
+      pCVar2 = DAT_008ae5ac;
       DAT_008ae5ac = (C_MainMenu *)(DAT_008ae5ac->_pad_0004 + 0x14);
-      pCVar5 = (C_MainMenu *)FUN_006169d0((uint32_t*)(&pCVar5->vtable),&local_2c);
+      FUN_006169d0((uint32_t*)(&pCVar2->vtable),&local_2c);
     }
     else {
-      pCVar5 = (C_MainMenu *)(DAT_008ae5ac->_pad_0004 + 0x14);
-      if (pCVar5 == DAT_008ae5a8) {
-        DAT_008ae5ac = pCVar5;
-        FUN_006169d0((uint32_t*)(&this_00->vtable),&local_2c);
-        pCVar5 = (C_MainMenu *)FUN_00616100(0x8ae590);
+      pCVar1 = (C_MainMenu *)(DAT_008ae5ac->_pad_0004 + 0x14);
+      if (pCVar1 == DAT_008ae5a8) {
+        DAT_008ae5ac = pCVar1;
+        FUN_006169d0((uint32_t*)(&pCVar2->vtable),&local_2c);
+        FUN_00616100(0x8ae590);
       }
       else {
         local_14 = DAT_008ae5ac;
-        bVar10 = DAT_008ae5ac != 0;
+        bVar8 = DAT_008ae5ac != 0;
         local_8 = 0x17;
-        DAT_008ae5ac = pCVar5;
-        if (bVar10) {
-          pCVar5 = (C_MainMenu *)FUN_006157d0(this_00,&local_2c);
+        DAT_008ae5ac = pCVar1;
+        if (bVar8) {
+          FUN_006157d0(pCVar2,&local_2c);
         }
       }
     }
     DAT_008ae5bc++;
-    if (local_18 == 0) goto LAB_00633f2b;
-    local_18->vtable = (C_MainMenu_vtbl *)((int)&local_18->vtable[-1].vf16 + 3);
-    pCVar5 = local_18;
+    if (local_18 == 0) {
+      return true;
+    }
+    *local_18 = *local_18 - 1;
+    ptr = local_18;
     break;
   default:
-switchD_006334da_caseD_200000b:
-    return (uint32_t)pCVar5 & 0xffffff00;
+    return false;
   case 0x2000027:
-    C_MainMenu__DrainFoundServers(_this);
-    uVar3 = FUN_00724040(&g_netGame,FUN_00635b70);
-    return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
+    C_MainMenu__DrainFoundServers();
+    FUN_00724040(&g_netGame,FUN_00635b70);
+    return true;
   case 0x2000028:
-    iVar4 = *(int *)(_this->_pad_0104 + 0xc4);
-    if ((iVar4 != 4) && (iVar4 != 9)) {
-      if (iVar4 == 5) {
-        uVar3 = FUN_00635360((int)_this);
-        return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
+    iVar5 = *(int *)(_this->_pad_0104 + 0xc4);
+    if ((iVar5 != 4) && (iVar5 != 9)) {
+      if (iVar5 != 5) {
+        C_NetGame__Close((C_NetGame *)&g_netGame,true);
+        g_sessionPasswordSet = false;
+        return true;
       }
-      C_NetGame__Close((C_NetGame *)&g_netGame,true);
-      g_sessionPasswordSet = 0;
-      return CONCAT31((int3)((uint32_t)extraout_EAX_00 >> 8),1);
+      FUN_00635360((int)_this);
+      return true;
     }
-    uVar3 = FUN_00634f90((int)_this);
-    return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
+    FUN_00634f90((int)_this);
+    return true;
   case 0x2000029:
-    pCVar5 = (C_MainMenu *)((uint32_t)uVar6 << 8);
-    if (_this->_pad_01e8[0x2a] == '\0') goto LAB_00633f2b;
-    piVar1 = _this->m_1e4;
+    if (_this->_pad_01e8[0x2a] == '\0') {
+      return true;
+    }
+    pvVar4 = _this->m_1e4;
     _this->_pad_01e8[0x2a] = '\0';
     _this->_pad_01e8[8] = '\0';
-    C_MpMenuSettings__Save(piVar1);
-    C_MainMenu__FUN_0062d030(_this);
-    cVar2 = FUN_007328d0();
-    if (cVar2 != '\0') {
+    C_MpMenuSettings__Save(pvVar4);
+    C_MainMenu__SetUpHostedSession(_this);
+    cVar3 = FUN_007328d0();
+    if (cVar3 != '\0') {
       C_MenuState__ShowMessageId((C_MenuState *)_this,3,0x22ea,0x20000ca,0x20000cb);
-      return CONCAT31((int3)((uint32_t)extraout_EAX >> 8),1);
+      return true;
     }
     local_110 = 0x20000c9;
     local_100 = 0;
@@ -274,26 +269,29 @@ switchD_006334da_caseD_200000b:
     local_10c = 0;
     local_8 = 0xe;
     PostControlMessage(&DAT_008ae590,&local_114);
-    pCVar5 = local_100;
-    if (local_100 == 0) goto LAB_00633f2b;
-    local_100->vtable = (C_MainMenu_vtbl *)((int)&local_100->vtable[-1].vf16 + 3);
+    if (local_100 == 0) {
+      return true;
+    }
+    *local_100 = *local_100 - 1;
+    ptr = local_100;
     break;
   case 0x200002a:
-    pCVar5 = 0;
-    if (*(int *)(_this[1]._pad_0004 + 1) == 0) goto LAB_00633f2b;
+    if (*(int *)(_this[1]._pad_0004 + 1) == 0) {
+      return true;
+    }
     (g_gameProfile.m_mpSettings)->sessionType = 1;
-    puVar8 = *(uint32_t **)(_this[1]._pad_0004 + 1);
-    puVar9 = (g_gameProfile.m_mpSettings)->_pad_017c;
-    for (iVar4 = 0x27; iVar4 != 0; iVar4 = iVar4 - 1) {
-      *(uint32_t *)puVar9 = *puVar8;
-      puVar8++;
-      puVar9 += 4;
+    puVar6 = *(uint32_t **)(_this[1]._pad_0004 + 1);
+    puVar7 = (g_gameProfile.m_mpSettings)->_pad_017c;
+    for (iVar5 = 0x27; iVar5 != 0; iVar5 = iVar5 - 1) {
+      *(uint32_t *)puVar7 = *puVar6;
+      puVar6++;
+      puVar7 += 4;
     }
     if (*(char *)(*(int *)(_this[1]._pad_0004 + 1) + 0x82) != '\0') {
-      uVar3 = FUN_00637a60((int)_this);
-      return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
+      FUN_00637a60((int)_this);
+      return true;
     }
-    g_sessionPasswordSet = 1;
+    g_sessionPasswordSet = true;
     _this->_pad_01e8[0xc] = '\0';
     _this->_pad_01e8[0xd] = '\0';
     _this->_pad_01e8[0xe] = '\0';
@@ -304,21 +302,23 @@ switchD_006334da_caseD_200000b:
     local_1cc = 0xd;
     local_8 = 0x12;
     PostControlMessage(&DAT_008ae590,&local_1d4);
-    pCVar5 = local_1c0;
-    if (local_1c0 == 0) goto LAB_00633f2b;
-    local_1c0->vtable = (C_MainMenu_vtbl *)((int)&local_1c0->vtable[-1].vf16 + 3);
+    if (local_1c0 == 0) {
+      return true;
+    }
+    *local_1c0 = *local_1c0 - 1;
+    ptr = local_1c0;
     break;
   case 0x2000069:
     _this->_pad_0004[0] = '\t';
     _this->_pad_0004[1] = '\0';
     _this->_pad_0004[2] = '\0';
     _this->_pad_0004[3] = '\0';
-    return CONCAT31(uVar6,1);
+    return true;
   case 0x2000098:
-    C_MainMenu__DrainFoundServers(_this);
-    iVar4 = C_MpMenuSettings__GetList(_this->m_1e4,0);
-    uVar3 = FUN_00724090(&g_netGame,FUN_00635b70,iVar4);
-    return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
+    C_MainMenu__DrainFoundServers();
+    pvVar4 = C_MpMenuSettings__GetList(_this->m_1e4,0);
+    FUN_00724090(&g_netGame,FUN_00635b70,(int)pvVar4);
+    return true;
   case 0x2000099:
     C_MpMenuSettings__Load(_this->m_1e4);
     (g_gameProfile.m_mpSettings)->unknown174 = 0;
@@ -394,9 +394,11 @@ switchD_006334da_caseD_200000b:
     local_124 = 8;
     local_8 = 6;
     PostControlMessage(&DAT_008ae590,&local_12c);
-    pCVar5 = local_118;
-    if (local_118 == 0) goto LAB_00633f2b;
-    local_118->vtable = (C_MainMenu_vtbl *)((int)&local_118->vtable[-1].vf16 + 3);
+    if (local_118 == 0) {
+      return true;
+    }
+    *local_118 = *local_118 - 1;
+    ptr = local_118;
     break;
   case 0x200009a:
     FUN_0061a0f0((int)_this->m_1e4);
@@ -467,16 +469,18 @@ switchD_006334da_caseD_200000b:
     local_dc = 8;
     local_8 = 0xd;
     PostControlMessage(&DAT_008ae590,&local_e4);
-    pCVar5 = local_d0;
-    if (local_d0 == 0) goto LAB_00633f2b;
-    local_d0->vtable = (C_MainMenu_vtbl *)((int)&local_d0->vtable[-1].vf16 + 3);
+    if (local_d0 == 0) {
+      return true;
+    }
+    *local_d0 = *local_d0 - 1;
+    ptr = local_d0;
     break;
   case 0x200009b:
-    if ((g_gameProfile.m_mpSettings)->unknown174 == 1) {
-      uVar3 = FUN_00619d00((int)_this->m_1e4);
-      return CONCAT31((int3)((uint32_t)uVar3 >> 8),1);
+    if ((g_gameProfile.m_mpSettings)->unknown174 != 1) {
+      return true;
     }
-    goto LAB_00633f2b;
+    FUN_00619d00((int)_this->m_1e4);
+    return true;
   case 0x20000c9:
     local_1a0 = 0x2000002;
     _this->_pad_01e8[0xc] = '\0';
@@ -488,9 +492,11 @@ switchD_006334da_caseD_200000b:
     local_19c = 0xd;
     local_8 = 0x11;
     PostControlMessage(&DAT_008ae590,&local_1a4);
-    pCVar5 = local_190;
-    if (local_190 == 0) goto LAB_00633f2b;
-    local_190->vtable = (C_MainMenu_vtbl *)((int)&local_190->vtable[-1].vf16 + 3);
+    if (local_190 == 0) {
+      return true;
+    }
+    *local_190 = *local_190 - 1;
+    ptr = local_190;
     break;
   case 0x20000ca:
     _this->_pad_01e8[8] = '\x01';
@@ -500,9 +506,11 @@ switchD_006334da_caseD_200000b:
     local_13c = 0;
     local_8 = 0xf;
     PostControlMessage(&DAT_008ae590,&local_144);
-    pCVar5 = local_130;
-    if (local_130 == 0) goto LAB_00633f2b;
-    local_130->vtable = (C_MainMenu_vtbl *)((int)&local_130->vtable[-1].vf16 + 3);
+    if (local_130 == 0) {
+      return true;
+    }
+    *local_130 = *local_130 - 1;
+    ptr = local_130;
     break;
   case 0x20000cb:
     local_170 = 0x20000c9;
@@ -512,16 +520,16 @@ switchD_006334da_caseD_200000b:
     local_16c = 0;
     local_8 = 0x10;
     PostControlMessage(&DAT_008ae590,&local_174);
-    pCVar5 = local_160;
-    if (local_160 == 0) goto LAB_00633f2b;
-    local_160->vtable = (C_MainMenu_vtbl *)((int)&local_160->vtable[-1].vf16 + 3);
+    if (local_160 == 0) {
+      return true;
+    }
+    *local_160 = *local_160 - 1;
+    ptr = local_160;
   }
-  if (pCVar5->vtable == 0) {
-    tier1_operator_delete(pCVar5);
-    pCVar5 = extraout_EAX_01;
+  if (*ptr == 0) {
+    tier1_operator_delete(ptr);
   }
-LAB_00633f2b:
-  return CONCAT31((int3)((uint32_t)pCVar5 >> 8),1);
+  return true;
 }
 
 
