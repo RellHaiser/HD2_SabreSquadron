@@ -55,26 +55,6 @@ int FUN_00617da0(int param_1, ...)
 }
 
 
-// 0x00617dc0
-int FUN_00617dc0(int param_1, ...)
-{
-  int iVar1;
-  int iVar2;
-  iVar1 = *(int *)(param_1 + 0x18);
-  if (iVar1 == 0) {
-    return param_1 + 0x200;
-  }
-  if (iVar1 == 1) {
-    return param_1 + 600;
-  }
-  iVar2 = param_1 + 0x2b0;
-  if (iVar1 != 2) {
-    iVar2 = param_1 + 0x308;
-  }
-  return iVar2;
-}
-
-
 // 0x00619710  (tier1 fallback: translated text kept below, needs hand porting)
 uint32_t C_XmlNode__dtor_C_XmlNode(uint32_t *param_1, ...)
 {

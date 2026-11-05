@@ -118,3 +118,10 @@
 00617d50 C_MpGameSetup::GetCurrentGroup | void * __fastcall GetCurrentGroup(void *this)
 00619720 C_MpGameSetup::SetGameType | void __thiscall SetGameType(void *this, int type)
 00619af0 C_MpGameSetup::SelectRotation | void __thiscall SelectRotation(void *this, int index)
+# Part 9h-xv: the create server screen's callbacks: the game type, the options.
+0062cd50 C_MainMenu::OnServerStyleChanged | bool __thiscall OnServerStyleChanged(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+0062d490 C_MainMenu::OnServerOptionChanged | bool __thiscall OnServerOptionChanged(C_MainMenu *this, void * argument, void * control, uint notification, uint value)
+0062ce10 C_MainMenu::ShowMapList | void __thiscall ShowMapList(C_MainMenu *this, int type)
+0062d950 C_MainMenu::ShowServerOptions | void __thiscall ShowServerOptions(C_MainMenu *this, int type)
+0062c6d0 C_MainMenu::GetEditText | void * __thiscall GetEditText(C_MainMenu *this, void * result, uint id)
+00617dc0 C_MpGameSetup::GetCurrentRules | void * __fastcall GetCurrentRules(void *this)

@@ -2205,3 +2205,162 @@ void C_MainMenu::RefreshStartButton()
     m_startable = !setup.GetCurrentGroup().maps.empty() && !setup.serverName.IsEmpty();
     PostTo(CREATE_START, m_startable ? CONTROL_MSG_ACTIVATE : CONTROL_MSG_DEACTIVATE, 0);
 }
+
+// ---- the create server screen's callbacks: the game type, the options (part 9h-xv) -------------------------
+
+namespace {
+
+// The options list's rows (their ids by their places in DescribeOptionsPanel).
+enum : uint32_t {
+    ROW_DIFFICULTY = 0x24701000, ROW_PLAYERS = 0x24702000, ROW_TEAM_LIVES = 0x24703000, ROW_LIVES = 0x24704000,
+    ROW_POINT_LIMIT = 0x24705000, ROW_ROUND_LIMIT = 0x24706000, ROW_ROUND_COUNT = 0x24707000, ROW_WARMUP = 0x24708000,
+    ROW_ALLOW_RESPAWN = 0x24709000, ROW_RESPAWN_TIME = 0x2470A000, ROW_SPAWN_PROTECTION = 0x2470B000,
+    ROW_INVERSE_DAMAGE = 0x2470C000, ROW_FRIENDLY_FIRE = 0x2470D000, ROW_TEAM_BALANCE = 0x2470E000,
+    ROW_THIRD_PERSON = 0x2470F000, ROW_CROSSHAIR = 0x24710000
+};
+// The screen's own controls by their places: internet, dedicated, the voice chat.
+constexpr uint32_t PLACE_INTERNET = 4, PLACE_DEDICATED = 5, PLACE_VOICE = 8;
+constexpr uint32_t CONTROL_PLACE_SHIFT = 20, CONTROL_PLACE_MASK = 0x3F, CHILD_INDEX_MASK = 0xFF000, CHILD_PART_MASK = 0xF;
+// The game types: deathmatch, team play, hidden maps, cooperative; their players' ranges.
+constexpr int GAME_TYPE_DEATHMATCH = 0, GAME_TYPE_TEAMPLAY = 1, GAME_TYPE_HIDDEN = 2;
+constexpr uint32_t MIN_PLAYERS = 2, MAX_PLAYERS = 32, MAX_COOP_PLAYERS = 6;
+
+void EnableRow(uint32_t row, bool on)
+{
+    PostTo(row, on ? CONTROL_MSG_ACTIVATE : CONTROL_MSG_DEACTIVATE, 0);
+}
+
+} // namespace
+
+bool C_MainMenu::OnServerStyleChanged(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    S_ControlMessage ask;
+    ask.id = CONTROL_MSG_GET_SELECTED;
+    control->HandleMessage(&ask);
+    const auto type = static_cast<int>(ask.value);
+    if (type > -1) {
+        self->m_mpSettings->m_setup.SetGameType(type);
+        self->ShowPickedMaps();
+        self->RefreshStartButton();
+        self->ShowMapList(type);
+        self->ShowServerOptions(type);
+    }
+    return true;
+}
+
+void C_MainMenu::ShowMapList(int type)
+{
+    for (int i = 0; i < MP_GAME_TYPES; ++i) {
+        const uint32_t list = CREATE_FIRST_MAP_LIST + 0x1000 * static_cast<uint32_t>(i);
+        if (i == type) {
+            PostTo(list, CONTROL_MSG_SHOW, 0);
+            PostTo(CREATE_SCROLL_MAPS, CONTROL_MSG_SET_VALUE, list);
+            PostTo(list, CONTROL_MSG_REFRESH, 0);
+        } else {
+            PostTo(list, CONTROL_MSG_HIDE, 0);
+        }
+    }
+}
+
+void C_MainMenu::ShowServerOptions(int type)
+{
+    const S_MpGameRules &rules = m_mpSettings->m_setup.GetCurrentRules();
+    PostTo(ROW_TEAM_LIVES, CONTROL_MSG_SET_CHECKED_QUIET, static_cast<uint32_t>(rules.teamLives));
+    PostTo(ROW_DIFFICULTY, CONTROL_MSG_PICK_INDEX, static_cast<uint32_t>(rules.coopDifficulty - 1));
+    const std::pair<uint32_t, int> numbers[] = {
+        {ROW_LIVES, rules.coopLives},         {ROW_PLAYERS, rules.maxClients},  {ROW_POINT_LIMIT, rules.pointLimit},
+        {ROW_ROUND_LIMIT, rules.roundLimit},  {ROW_ROUND_COUNT, rules.roundCount}, {ROW_WARMUP, rules.warmup},
+        {ROW_RESPAWN_TIME, rules.respawnTime}, {ROW_SPAWN_PROTECTION, rules.spawnProtection},
+        {ROW_INVERSE_DAMAGE, rules.inverseDamage}};
+    for (const auto &number : numbers)
+        PostTo(number.first, CONTROL_MSG_SET_NUMBER, STYLE_BUTTON, static_cast<uintptr_t>(number.second));
+    const std::pair<uint32_t, int> flags[] = {{ROW_ALLOW_RESPAWN, rules.allowRespawn}, {ROW_FRIENDLY_FIRE, rules.friendlyFire},
+                                              {ROW_TEAM_BALANCE, rules.autoTeamBalance}, {ROW_THIRD_PERSON, rules.thirdPersonView},
+                                              {ROW_CROSSHAIR, rules.allowCrosshair}};
+    for (const auto &flag : flags)
+        PostTo(flag.first, CONTROL_MSG_SET_CHECKED_QUIET, static_cast<uint32_t>(flag.second));
+    // Inverse damage with friendly fire only; the respawn time with respawning only.
+    EnableRow(ROW_INVERSE_DAMAGE, rules.friendlyFire != 0);
+    EnableRow(ROW_RESPAWN_TIME, rules.allowRespawn != 0);
+    // The rows the game type has.
+    if (type == GAME_TYPE_DEATHMATCH || type == GAME_TYPE_TEAMPLAY || type == GAME_TYPE_HIDDEN) {
+        const bool teams = type != GAME_TYPE_DEATHMATCH;
+        PostTo(ROW_PLAYERS, CONTROL_MSG_SET_RANGE, MIN_PLAYERS, MAX_PLAYERS);
+        EnableRow(ROW_DIFFICULTY, false);
+        EnableRow(ROW_LIVES, false);
+        EnableRow(ROW_TEAM_LIVES, false);
+        EnableRow(ROW_POINT_LIMIT, type != GAME_TYPE_HIDDEN);
+        EnableRow(ROW_ALLOW_RESPAWN, type == GAME_TYPE_HIDDEN);
+        EnableRow(ROW_FRIENDLY_FIRE, teams);
+        EnableRow(ROW_TEAM_BALANCE, teams);
+        EnableRow(ROW_ROUND_LIMIT, true);
+    } else if (type == GAME_TYPE_COOPERATIVE) {
+        PostTo(ROW_ALLOW_RESPAWN, CONTROL_MSG_SET_CHECKED_QUIET, 1);
+        EnableRow(ROW_RESPAWN_TIME, true);
+        PostTo(ROW_PLAYERS, CONTROL_MSG_SET_RANGE, MIN_PLAYERS, MAX_COOP_PLAYERS);
+        EnableRow(ROW_DIFFICULTY, true);
+        EnableRow(ROW_LIVES, true);
+        EnableRow(ROW_TEAM_LIVES, true);
+        PostTo(ROW_TEAM_BALANCE, CONTROL_MSG_SET_CHECKED_QUIET, 0);
+        EnableRow(ROW_POINT_LIMIT, false);
+        EnableRow(ROW_ALLOW_RESPAWN, false);
+        EnableRow(ROW_FRIENDLY_FIRE, true);
+        EnableRow(ROW_TEAM_BALANCE, false);
+        EnableRow(ROW_ROUND_LIMIT, false);
+    }
+}
+
+C_str C_MainMenu::GetEditText(uint32_t id)
+{
+    C_Control *control = FindControl(id);
+    if (!control || control->GetType() != CONTROL_TITLED_EDIT)
+        return C_str();
+    return ControlText(control);
+}
+
+bool C_MainMenu::OnServerOptionChanged(void *menu, void *, C_Control *control, uint32_t, uint32_t)
+{
+    auto *self = static_cast<C_MainMenu *>(menu);
+    if (!control)
+        return false;
+    C_MpGameSetup &setup = self->m_mpSettings->m_setup;
+    S_MpGameRules &rules = setup.GetCurrentRules();
+    const uint32_t id = control->GetId();
+    // The screen's own controls: internet, dedicated, the voice codec.
+    if ((id & CHILD_INDEX_MASK) == 0) {
+        switch (id >> CONTROL_PLACE_SHIFT & CONTROL_PLACE_MASK) {
+        case PLACE_INTERNET: setup.internet = self->GetControlValue(CREATE_INTERNET) != 0; break;
+        case PLACE_DEDICATED: setup.dedicated = self->GetControlValue(CREATE_DEDICATED) != 0; break;
+        case PLACE_VOICE: setup.voiceCodec = self->GetControlValue(CREATE_VOICE); break;
+        default: break;
+        }
+        return true;
+    }
+    // A row: its rule.
+    const uint32_t row = id & ~CHILD_PART_MASK;
+    switch (row) {
+    case ROW_DIFFICULTY: rules.coopDifficulty = self->GetControlValue(row) + 1; break;
+    case ROW_PLAYERS: rules.maxClients = self->GetControlValue(row); break;
+    case ROW_TEAM_LIVES: rules.teamLives = self->GetControlValue(row); break;
+    case ROW_LIVES: rules.coopLives = self->GetControlValue(row); break;
+    case ROW_POINT_LIMIT: rules.pointLimit = self->GetControlValue(row); break;
+    case ROW_ROUND_LIMIT: rules.roundLimit = self->GetControlValue(row); break;
+    case ROW_ROUND_COUNT: rules.roundCount = self->GetControlValue(row); break;
+    case ROW_WARMUP: rules.warmup = self->GetControlValue(row); break;
+    case ROW_ALLOW_RESPAWN: rules.allowRespawn = self->GetControlValue(row); break;
+    case ROW_RESPAWN_TIME: rules.respawnTime = self->GetControlValue(row); break;
+    case ROW_SPAWN_PROTECTION: rules.spawnProtection = self->GetControlValue(row); break;
+    case ROW_INVERSE_DAMAGE: rules.inverseDamage = self->GetControlValue(row); break;
+    case ROW_FRIENDLY_FIRE: rules.friendlyFire = self->GetControlValue(row); break;
+    case ROW_TEAM_BALANCE: rules.autoTeamBalance = self->GetControlValue(row); break;
+    case ROW_THIRD_PERSON: rules.thirdPersonView = self->GetControlValue(row); break;
+    case ROW_CROSSHAIR: rules.allowCrosshair = self->GetControlValue(row); break;
+    case CREATE_PASSWORD: setup.password = self->GetEditText(CREATE_PASSWORD); break;
+    case CREATE_PORT: setup.port = self->GetControlValue(CREATE_PORT); break;
+    default: break;
+    }
+    EnableRow(ROW_INVERSE_DAMAGE, rules.friendlyFire != 0);
+    EnableRow(ROW_RESPAWN_TIME, rules.allowRespawn != 0);
+    return true;
+}

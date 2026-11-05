@@ -27374,6 +27374,11 @@
   "name": "C_MpGameSetup::GetCurrentGroup",
   "proto": "void * __fastcall GetCurrentGroup(void *this)"
  },
+ "00617dc0": {
+  "module": "main_menu",
+  "name": "C_MpGameSetup::GetCurrentRules",
+  "proto": "void * __fastcall GetCurrentRules(void *this)"
+ },
  "00617df0": {
   "module": "main_menu",
   "name": "C_MpGameSetup::Save",
@@ -27897,6 +27902,11 @@
   "name": "C_MainMenu::GetControlValue",
   "proto": "int __thiscall GetControlValue(C_MainMenu *this, uint id)"
  },
+ "0062c6d0": {
+  "module": "main_menu",
+  "name": "C_MainMenu::GetEditText",
+  "proto": "void * __thiscall GetEditText(C_MainMenu *this, void * result, uint id)"
+ },
  "0062c780": {
   "module": "main_menu",
   "name": "C_MainMenu::ShowPickedMaps",
@@ -27916,6 +27926,26 @@
   "module": "main_menu",
   "name": "C_MainMenu::RefreshStartButton",
   "proto": "void __fastcall RefreshStartButton(C_MainMenu *this)"
+ },
+ "0062cd50": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerStyleChanged",
+  "proto": "bool __thiscall OnServerStyleChanged(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062ce10": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowMapList",
+  "proto": "void __thiscall ShowMapList(C_MainMenu *this, int type)"
+ },
+ "0062d490": {
+  "module": "main_menu",
+  "name": "C_MainMenu::OnServerOptionChanged",
+  "proto": "bool __thiscall OnServerOptionChanged(C_MainMenu *this, void * argument, void * control, uint notification, uint value)"
+ },
+ "0062d950": {
+  "module": "main_menu",
+  "name": "C_MainMenu::ShowServerOptions",
+  "proto": "void __thiscall ShowServerOptions(C_MainMenu *this, int type)"
  },
  "0062f4b0": {
   "module": "main_menu",

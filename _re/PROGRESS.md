@@ -8434,6 +8434,27 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Build: MSVC clean. Tier 1: 308 errors in 56 files, 127 stubs. ret_audit --src: 52.
   - Stats: 9,218 of 12,306 functions by hand (84.7 % by size).
 
+  PART 9h-xv DONE (2026-11-04): the create server screen's callbacks: the game type, the options
+  (game/main_menu.cpp, game/mp_game_setup.cpp).
+  - OnServerStyleChanged 0x0062cd50 (GET_SELECTED's value; -1: nothing): the game type set up, the picked maps,
+    start, ShowMapList 0x0062ce10 (its list shown, the scroll bar on it, refreshed; the others hidden),
+    ShowServerOptions 0x0062d950 (every row from the current rules: the difficulty's index is the rule - 1;
+    inverse damage on with friendly fire, the respawn time with respawning; then the game type's rows:
+    deathmatch / team play / hidden maps 2 .. 32 players, the point limit (not hidden maps), respawning
+    (hidden maps only), friendly fire and team balance (not deathmatch), the round limit; cooperative 2 .. 6,
+    respawning forced on and its box off, team balance forced off, its difficulty, lives, team lives on, the
+    point and round limits off).
+  - OnServerOptionChanged 0x0062d490 (none: false): the screen's own boxes (by their places 4 / 5 / 8): internet
+    (C_MpGameSetup::internet +0x14, named), dedicated, the voice codec, without the dependent rows; a row (its
+    id's low 4 bits off): its rule (the difficulty + 1), the password (GetEditText 0x0062c6d0: a titled edit
+    box's text, else empty) or the port; then inverse damage / the respawn time on by friendly fire /
+    respawning (also for an unknown row; checked in the asm). C_MpGameSetup::GetCurrentRules 0x00617dc0.
+  - Harness: csRules, csMapList, csOptions (every game type), csStyle, csOption (every row, the rows under the
+    options list as FindControl needs). All 15 factory checkers in both orders; the mp_setup harness 54 of 54.
+  - Mutations: mutations/mutate_9h15.py (both files): 91: 84 killed, 7 not building.
+  - Build: MSVC clean. Tier 1: 301 errors in 55 files, 126 stubs. ret_audit --src: 52.
+  - Stats: 9,224 of 12,306 functions by hand (84.9 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

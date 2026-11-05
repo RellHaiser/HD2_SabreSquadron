@@ -307,7 +307,7 @@ void C_MpGameSetup::LoadMapList()
     port = DEFAULT_PORT;
     gameType = 0;
     voiceCodec = 0;
-    unknown14 = 0;
+    internet = 0;
     dedicated = 0;
     loaded = true;
 }
@@ -334,7 +334,7 @@ void C_MpGameSetup::Load(C_chunk &chunk)
             rotation = 0;
             chunk.Read(gameType);
             chunk.Read(voiceCodec);
-            chunk.Read(unknown14);
+            chunk.Read(internet);
             chunk.Read(dedicated);
             chunk.Ascend();
             break;
@@ -374,7 +374,7 @@ void C_MpGameSetup::Load(C_chunk &chunk)
             chunk.Read(rotation);
             chunk.Read(gameType);
             chunk.Read(voiceCodec);
-            chunk.Read(unknown14);
+            chunk.Read(internet);
             chunk.Read(dedicated);
             chunk.Ascend();
             break;
@@ -402,7 +402,7 @@ void C_MpGameSetup::Save(C_chunk &chunk) const
     chunk.Write(rotation);
     chunk.Write(gameType);
     chunk.Write(voiceCodec);
-    chunk.Write(unknown14);
+    chunk.Write(internet);
     chunk.Write(dedicated);
     chunk.Ascend();
     chunk.Begin(CHUNK_RULES);
@@ -644,4 +644,14 @@ void C_MpGameSetup::SelectRotation(int index)
     first.Clear();
     for (int type = 0; type < MP_GAME_TYPES; ++type)
         first.types[type].maps = maps[type].maps;
+}
+
+S_MpGameRules &C_MpGameSetup::GetCurrentRules()
+{
+    switch (gameType) {
+    case 0: return rules[0];
+    case 1: return rules[1];
+    case 2: return rules[2];
+    default: return rules[3];
+    }
 }

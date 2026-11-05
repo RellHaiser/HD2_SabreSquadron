@@ -198,6 +198,14 @@ protected:
     void ShowPickedMaps();                              // 0x0062c780 (__fastcall)
     // Startable: the current group has maps and the server a name; start on or off.
     void RefreshStartButton();                          // 0x0062cbf0 (__fastcall)
+    // The game type's map list shown (its scroll bar on it, refreshed), the others hidden.
+    void ShowMapList(int type);                         // 0x0062ce10
+    // The options from the current rules; inverse damage / the respawn time on by friendly fire / respawning;
+    // the rows of the game type on (deathmatch, team play, hidden maps: 2 .. 32 players; cooperative: 2 .. 6,
+    // respawning forced, its difficulty, lives, team lives).
+    void ShowServerOptions(int type);                   // 0x0062d950
+    // A titled edit box's text (none, another kind: empty).
+    C_str GetEditText(uint32_t id);                     // 0x0062c6d0
     // (The two lists' helper: a map line's callbacks: double click, drag started, moved, dropped.)
     static void AddMapLineCallbacks(S_ControlDesc *line, uintptr_t self);
     // The options panel: the internet / dedicated check boxes, its scroll bar, its list of rows (copies of the
@@ -217,8 +225,13 @@ protected:
     // start refreshed. True.
     static bool OnHostNameChanged(void *menu, void *argument, C_Control *control, uint32_t notification,
                                   uint32_t value);      // 0x0062ca80
+    // The game type picked (part 9h-xv; GET_SELECTED's value; none, -1: nothing): set up; the picked maps,
+    // start, its map list, its options shown. True.
     static bool OnServerStyleChanged(void *menu, void *argument, C_Control *control, uint32_t notification,
                                      uint32_t value);   // 0x0062cd50
+    // An option changed (none: false): internet / dedicated / the voice codec into the setup; a row into the
+    // current rules (the difficulty + 1; the password: its text; the port: the setup's), inverse damage and
+    // the respawn time then on by friendly fire / respawning. True.
     static bool OnServerOptionChanged(void *menu, void *argument, C_Control *control, uint32_t notification,
                                       uint32_t value);  // 0x0062d490
     // A preset picked (none: nothing): that rotation set up, the picked maps shown, start refreshed. True.

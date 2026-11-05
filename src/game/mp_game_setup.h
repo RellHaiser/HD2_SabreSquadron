@@ -142,6 +142,9 @@ public:
     S_MpMapGroup &GetCurrentGroup();                // 0x00617d50 (__fastcall)
     const S_MpMapGroup &GetCurrentGroup() const { return const_cast<C_MpGameSetup *>(this)->GetCurrentGroup(); }
     void SetGameType(int type) { gameType = type; } // 0x00619720
+    // The rules of the game type set up (0 .. 2; another: 3). (Part 9h-xv.)
+    S_MpGameRules &GetCurrentRules();               // 0x00617dc0 (__fastcall)
+    const S_MpGameRules &GetCurrentRules() const { return const_cast<C_MpGameSetup *>(this)->GetCurrentRules(); }
     // A rotation set up (0 .. 4; another: nothing); the first ("in order") made every map of the list.
     void SelectRotation(int index);                 // 0x00619af0
 
@@ -150,7 +153,7 @@ public:
     C_str password;                                 // +0x005
     int port = 0;                                   // +0x00C
     int voiceCodec = 0;                             // +0x010 the voice chat's codec (saved in 0x1B7)
-    uint8_t unknown14 = 0;                          // +0x014
+    bool internet = false;                          // +0x014 an internet server (the create server screen's box)
     bool dedicated = false;                         // +0x015 a dedicated server
     int gameType = 0;                               // +0x018 the game type set up
     S_MpMapGroup maps[MP_GAME_TYPES];               // +0x01C the list's (owned)

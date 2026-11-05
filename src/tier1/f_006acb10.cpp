@@ -41,7 +41,7 @@ uint32_t FUN_006acc10(int param_1, ...)
   int iVar2;
   uint32_t *puVar3;
   C_MpGameSetup__SetGameType(*(void **)(param_1 + 0x294),*(int *)(param_1 + 0x224));
-  puVar1 = (uint32_t *)FUN_00617dc0(*(int *)(param_1 + 0x294));
+  puVar1 = C_MpGameSetup__GetCurrentRules(*(void **)(param_1 + 0x294));
   puVar3 = (uint32_t *)(param_1 + 0x228);
   for (iVar2 = 0x16; iVar2 != 0; iVar2 = iVar2 - 1) {
     *puVar3 = *puVar1;

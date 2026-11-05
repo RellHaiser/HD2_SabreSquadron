@@ -200,8 +200,6 @@ int C_NetGame::QueryServerStatus(void(__fastcall *callback)(S_ServerStatus *), S
     return 1;
 }
 // (Part 9h-xiii: the create server screen's callbacks (a later sub-part's); the codecs' texts.)
-MM_CALLBACK(OnServerStyleChanged)
-MM_CALLBACK(OnServerOptionChanged)
 MM_CALLBACK(OnMapLineDoubleClick)
 MM_CALLBACK(OnMapLineDragStart)
 MM_CALLBACK(OnMapLineDragMove)
@@ -283,7 +281,8 @@ struct S_MainMenuResults {
          pwDescribe = true, pwServer = true, pwLock = true,
          flDescribe = true, flShown = true, flAccept = true, flHelpers = true,
          giDescribe = true, giRefresh = true, giShow = true, giStatus = true,
-         csDescribe = true, csSetup = true, csShown = true, csStart = true, csPicked = true, csHost = true;
+         csDescribe = true, csSetup = true, csShown = true, csStart = true, csPicked = true, csHost = true,
+         csRules = true, csMapList = true, csOptions = true, csStyle = true, csOption = true;
 };
 
 void MainMenuTest(I3D_scene *scene)
@@ -2505,6 +2504,209 @@ void MainMenuTest(I3D_scene *scene)
         m.m_mpSettings = nullptr;
     }
 
+    // --- (part 9h-xv) the create server screen: the game type picked, its maps and options; an option changed ---
+    {
+        C_MainMenu m;
+        const auto Is = [](const std::string &got, const std::string &want) {
+            if (got != want)
+                std::printf("CSOPT %s\nCSOPT expected %s\n", got.c_str(), want.c_str());
+            return got == want;
+        };
+        C_MpMenuSettings settings;
+        m.m_mpSettings = &settings;
+        C_MpGameSetup &setup = settings.m_setup;
+        for (auto &group : setup.maps) {
+            for (C_MpMap *map : group.maps)
+                delete map;
+            group.maps.clear();
+        }
+        for (S_MpRotation &rotation : setup.rotations)
+            rotation.Clear();
+        {
+            // The current rules by the game type (another: the last).
+            bool ok = true;
+            for (int type : {0, 1, 2, 3, 9}) {
+                setup.gameType = type;
+                ok &= &setup.GetCurrentRules() == &setup.rules[type > 3 ? 3 : type];
+            }
+            const C_MpGameSetup &constSetup = setup;
+            ok &= &constSetup.GetCurrentRules() == &setup.rules[3];
+            WM(r.csRules, ok);
+        }
+        {
+            // The game type's map list shown, the others hidden.
+            bool ok = true;
+            CsQueue();
+            m.ShowMapList(1);
+            ok &= Is(CsQueue(), "24302000 1000004 0 0; 24303000 1000003 0 0; 24301000 100000b 24303000 0; 24303000 200002c 0 0;"
+                                " 24304000 1000004 0 0; 24305000 1000004 0 0; ");
+            m.ShowMapList(-1);
+            ok &= Is(CsQueue(), "24302000 1000004 0 0; 24303000 1000004 0 0; 24304000 1000004 0 0; 24305000 1000004 0 0; ");
+            WM(r.csMapList, ok);
+        }
+        // The rules' values (distinct), the options' posts from them.
+        S_MpGameRules &rules = setup.rules[2];
+        setup.gameType = 2;
+        const int values[] = {11, 12, 13, 14, 15, 16, 1, 0, 1, 1, 17, 18};
+        int *const fields[] = {&rules.maxClients,   &rules.pointLimit,   &rules.roundLimit,      &rules.roundCount,
+                               &rules.warmup,       &rules.respawnTime,  &rules.allowRespawn,    &rules.friendlyFire,
+                               &rules.autoTeamBalance, &rules.thirdPersonView, &rules.spawnProtection, &rules.inverseDamage};
+        for (int i = 0; i < 12; ++i)
+            *fields[i] = values[i];
+        rules.coopDifficulty = 3;
+        rules.coopLives = 19;
+        rules.allowCrosshair = 1;
+        rules.teamLives = 0;
+        const std::string base = "24703000 1000076 0 0; 24701000 1000076 2 0; 24704000 1000078 d 13; 24702000 1000078 d b;"
+                                 " 24705000 1000078 d c; 24706000 1000078 d d; 24707000 1000078 d e; 24708000 1000078 d f;"
+                                 " 2470a000 1000078 d 10; 2470b000 1000078 d 11; 2470c000 1000078 d 12; 24709000 1000076 1 0;"
+                                 " 2470d000 1000076 0 0; 2470e000 1000076 1 0; 2470f000 1000076 1 0; 24710000 1000076 1 0;"
+                                 " 2470c000 1000001 0 0; 2470a000 1000002 0 0; ";
+        const auto en = [](uint32_t row, bool on) { return CmText("%x %x 0 0; ", row, on ? 0x1000002 : 0x1000001); };
+        const auto typeRows = [&](int type) {
+            std::string q;
+            if (type == 3) {
+                q += "24709000 1000076 1 0; " + en(0x2470a000, true) + "24702000 10000a0 2 6; " + en(0x24701000, true) +
+                     en(0x24704000, true) + en(0x24703000, true) + "2470e000 1000076 0 0; " + en(0x24705000, false) +
+                     en(0x24709000, false) + en(0x2470d000, true) + en(0x2470e000, false) + en(0x24706000, false);
+            } else if (type >= 0 && type <= 2) {
+                q += "24702000 10000a0 2 20; " + en(0x24701000, false) + en(0x24704000, false) + en(0x24703000, false) +
+                     en(0x24705000, type != 2) + en(0x24709000, type == 2) + en(0x2470d000, type != 0) +
+                     en(0x2470e000, type != 0) + en(0x24706000, true);
+            }
+            return q;
+        };
+        {
+            // The options: the rules' values, the two dependent rows, the game type's rows.
+            bool ok = true;
+            for (int type : {0, 1, 2, 3, 5, -1}) {
+                m.ShowServerOptions(type);
+                ok &= Is(CsQueue(), base + typeRows(type));
+            }
+            // Friendly fire on, respawning off: inverse damage on, the respawn time off.
+            rules.friendlyFire = 1;
+            rules.allowRespawn = 0;
+            m.ShowServerOptions(7);
+            const std::string q = CsQueue();
+            ok &= q.find("2470c000 1000002 0 0; 2470a000 1000001 0 0; ") != std::string::npos;
+            rules.friendlyFire = 0;
+            rules.allowRespawn = 1;
+            WM(r.csOptions, ok);
+        }
+        {
+            // The game type picked (GET_SELECTED): set up; the picked maps, start, its list, its options. None: nothing.
+            bool ok = true;
+            struct C_CsStyle : C_Control {
+                C_CsStyle() : C_Control(nullptr, 0x24200000, nullptr) {}
+                int picked = 2;
+                bool HandleMessage(S_ControlMessage *message) override
+                {
+                    if (message->id == CONTROL_MSG_GET_SELECTED)
+                        message->value = static_cast<uint32_t>(picked);
+                    return true;
+                }
+            } style;
+            setup.gameType = 0;
+            setup.serverName = "Srv";
+            ok &= C_MainMenu::OnServerStyleChanged(&m, nullptr, &style, CONTROL_NOTIFY_CHANGED, 0) && setup.gameType == 2;
+            const std::string q = CsQueue();
+            const std::string list = "24302000 1000004 0 0; 24303000 1000004 0 0; 24304000 1000003 0 0; 24301000 100000b 24304000 0;"
+                                     " 24304000 200002c 0 0; 24305000 1000004 0 0; ";
+            ok &= Is(q, "0 10000a1 4004000 0; 24307000 2000085 0 0; 0 10000a1 4005000 0; 24900000 1000001 0 0; " + list + base +
+                            typeRows(2));
+            style.picked = -1;
+            ok &= C_MainMenu::OnServerStyleChanged(&m, nullptr, &style, CONTROL_NOTIFY_CHANGED, 0) && setup.gameType == 2 &&
+                  CsQueue() == "";
+            style.picked = 0;
+            ok &= C_MainMenu::OnServerStyleChanged(&m, nullptr, &style, CONTROL_NOTIFY_CHANGED, 0) && setup.gameType == 0;
+            CsQueue();
+            setup.gameType = 2;
+            WM(r.csStyle, ok);
+        }
+        {
+            // An option changed: into the setup or the current rules; the two dependent rows (rows only).
+            bool ok = true;
+            struct C_CsEdit : C_Control {
+                C_CsEdit(uint32_t id, C_Control *parent, int type, const char *t) : C_Control(nullptr, id, parent), text(t)
+                {
+                    m_type = type;
+                }
+                const char *text;
+                bool HandleMessage(S_ControlMessage *message) override
+                {
+                    if (message->id == CONTROL_MSG_GET_TEXT)
+                        message->text = C_str(text);
+                    return true;
+                }
+            };
+            C_MsScreen screen(nullptr, "csopt", 9u << 26);
+            m.m_screens.assign(10, nullptr);
+            m.m_screens[9] = &screen;
+            const struct {
+                uint32_t id;
+                int type, value;
+                int *field;
+            } rows[] = {{0x24701000, 0x28, 1, &rules.coopDifficulty}, {0x24702000, 0xE, 21, &rules.maxClients},
+                        {0x24703000, 0x27, 1, &rules.teamLives},      {0x24704000, 0xE, 22, &rules.coopLives},
+                        {0x24705000, 0xE, 23, &rules.pointLimit},     {0x24706000, 0xE, 24, &rules.roundLimit},
+                        {0x24707000, 0xE, 25, &rules.roundCount},     {0x24708000, 0xE, 26, &rules.warmup},
+                        {0x24709000, 0x27, 0, &rules.allowRespawn},   {0x2470a000, 0xE, 27, &rules.respawnTime},
+                        {0x2470b000, 0xE, 28, &rules.spawnProtection}, {0x2470c000, 0xE, 29, &rules.inverseDamage},
+                        {0x2470d000, 0x27, 1, &rules.friendlyFire},   {0x2470e000, 0x27, 0, &rules.autoTeamBalance},
+                        {0x2470f000, 0x27, 0, &rules.thirdPersonView}, {0x24710000, 0x27, 0, &rules.allowCrosshair}};
+            // (The rows under the options list, as the screen makes them.)
+            C_FlControl *list = new C_FlControl(0x24700000, &screen, 0x23, 0);
+            screen.m_children.push_back(list);
+            for (const auto &row : rows)
+                list->m_children.push_back(new C_FlControl(row.id, list, row.type, row.value));
+            C_FlControl *port = new C_FlControl(0x24712000, list, 0xE, 2345);
+            C_CsEdit *password = new C_CsEdit(0x24711000, list, 0xE, "secret");
+            list->m_children.push_back(port);
+            list->m_children.push_back(password);
+            C_FlControl *internet = new C_FlControl(0x24400000, &screen, 0x24, 1);
+            C_FlControl *dedicated = new C_FlControl(0x24500000, &screen, 0x24, 1);
+            C_FlControl *voice = new C_FlControl(0x24800000, &screen, 0x10, 5);
+            for (C_Control *c : std::initializer_list<C_Control *>{internet, dedicated, voice})
+                screen.m_children.push_back(c);
+            // Each row (its id's low part ignored): its rule (the difficulty + 1); then the dependent rows.
+            for (size_t i = 0; i < 16; ++i) {
+                C_FlControl part(rows[i].id | 0x7, nullptr, rows[i].type, 0);
+                *rows[i].field = -5;
+                ok &= C_MainMenu::OnServerOptionChanged(&m, nullptr, &part, CONTROL_NOTIFY_CHANGED, 0) &&
+                      *rows[i].field == rows[i].value + (i == 0 ? 1 : 0);
+                const std::string q = CsQueue();
+                ok &= Is(q, en(0x2470c000, rules.friendlyFire != 0) + en(0x2470a000, rules.allowRespawn != 0));
+            }
+            // The password (a titled edit box's text; another kind: empty), the port.
+            C_FlControl part(0x24711003, nullptr, 0xE, 0);
+            ok &= C_MainMenu::OnServerOptionChanged(&m, nullptr, &part, 0, 0) && std::string(setup.password.c_str()) == "secret";
+            ok &= std::string(m.GetEditText(0x24711000).c_str()) == "secret" && m.GetEditText(0x24712000).IsEmpty() &&
+                  m.GetEditText(0x24400000).IsEmpty() &&
+                  m.GetEditText(0x24799000).IsEmpty();
+            C_FlControl portPart(0x24712000, nullptr, 0xE, 0);
+            ok &= C_MainMenu::OnServerOptionChanged(&m, nullptr, &portPart, 0, 0) && setup.port == 2345;
+            // An unknown row: only the dependent rows.
+            C_FlControl unknownRow(0x24799000, nullptr, 0xE, 0);
+            ok &= C_MainMenu::OnServerOptionChanged(&m, nullptr, &unknownRow, 0, 0) && CsQueue().size() > 0;
+            CsQueue();
+            // The screen's own: internet, dedicated, the voice codec (no dependent rows); another place: nothing.
+            setup.internet = false;
+            setup.dedicated = false;
+            setup.voiceCodec = 0;
+            ok &= C_MainMenu::OnServerOptionChanged(&m, nullptr, internet, 0, 0) && setup.internet &&
+                  C_MainMenu::OnServerOptionChanged(&m, nullptr, dedicated, 0, 0) && setup.dedicated &&
+                  C_MainMenu::OnServerOptionChanged(&m, nullptr, voice, 0, 0) && setup.voiceCodec == 5 && CsQueue() == "";
+            internet->value = 0;
+            C_FlControl other(0x24200000, nullptr, 0x10, 0);
+            ok &= C_MainMenu::OnServerOptionChanged(&m, nullptr, &other, 0, 0) && setup.internet && CsQueue() == "";
+            ok &= C_MainMenu::OnServerOptionChanged(&m, nullptr, internet, 0, 0) && !setup.internet;
+            ok &= !C_MainMenu::OnServerOptionChanged(&m, nullptr, nullptr, 0, 0) && CsQueue() == "";
+            m.m_screens.clear();
+            WM(r.csOption, ok);
+        }
+        m.m_mpSettings = nullptr;
+    }
+
     // --- built: each screen's model loaded, described by its kind, made; the main screen opened ---
     {
         bool ok = true;
@@ -2596,7 +2798,8 @@ void MainMenuTest(I3D_scene *scene)
                 " mxMessages %d mxSecret %d mxStart %d mxOperation %d ciDescribe %d ciShown %d ciPick %d"
                 " pwDescribe %d pwServer %d pwLock %d flDescribe %d flShown %d"
                 " flAccept %d flHelpers %d giDescribe %d giRefresh %d giShow %d giStatus %d"
-                " csDescribe %d csSetup %d csShown %d csStart %d csPicked %d csHost %d\n",
+                " csDescribe %d csSetup %d csShown %d csStart %d csPicked %d csHost %d"
+                " csRules %d csMapList %d csOptions %d csStyle %d csOption %d\n",
                 r.mmStart, r.mmStop, r.mmUpdate, r.mmDrain, r.mmMessage, r.mmEscape, r.mmSelect, r.mmBuild, r.mmDescribe,
                 r.mmMainShown, r.pfDescribe, r.pfRefresh, r.pfShown, r.pfList, r.pfDifficulty, r.pfMessage,
                 r.pfButtons, r.pfEscape, r.pfCreate, r.pfRename, r.spShown, r.spHover, r.spClick, r.mpLists, r.mpDescribe,
@@ -2604,5 +2807,6 @@ void MainMenuTest(I3D_scene *scene)
                 r.ciDescribe, r.ciShown, r.ciPick, r.pwDescribe, r.pwServer, r.pwLock,
                 r.flDescribe, r.flShown, r.flAccept, r.flHelpers,
                 r.giDescribe, r.giRefresh, r.giShow, r.giStatus,
-                r.csDescribe, r.csSetup, r.csShown, r.csStart, r.csPicked, r.csHost);
+                r.csDescribe, r.csSetup, r.csShown, r.csStart, r.csPicked, r.csHost,
+                r.csRules, r.csMapList, r.csOptions, r.csStyle, r.csOption);
 }
