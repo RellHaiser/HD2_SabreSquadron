@@ -34987,6 +34987,11 @@
   "name": "S_MultiplayerSettings::AddMap",
   "proto": "bool __thiscall AddMap(void *this, char * name)"
  },
+ "006ad200": {
+  "module": "mp_settings",
+  "name": "S_MultiplayerSettings::WriteDescription",
+  "proto": "void __thiscall WriteDescription(void *this, char * fileName)"
+ },
  "006ad560": {
   "module": "mp_settings",
   "name": "S_MultiplayerSettings::Clear",

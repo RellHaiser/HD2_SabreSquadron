@@ -400,6 +400,10 @@ struct S_MultiplayerSettings {
     // The current map sent; read: the maps replaced by the one read, current.
     void WriteCurrentMap(class C_BitStream *stream);   // 0x006ad840
     void ReadCurrentMap(class C_BitStream *stream); // 0x006ad860
+    // The session described for the dedicated server (part 9i-iv; null: mpdesc.txt): its name, the game type, the
+    // maps, the domain, dedicated, the port (not a dedicated LAN server's), the password, the rules (the first 13
+    // by their config keywords, the others), the net limits, the game's voice codec (none: no line), "server".
+    void WriteDescription(const char *fileName);    // 0x006ad200
 
     // The selected map (+0x290 into the vector at +0x280).
     C_MpMap *GetCurrentMap();                       // 0x006ad830

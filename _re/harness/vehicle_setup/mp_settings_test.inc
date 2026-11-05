@@ -396,3 +396,100 @@ void ReplicationTest()
     std::printf("replication: rpWriteRules %d rpReadRules %d rpWriteMap %d rpReadMap %d rpCurrentMap %d\n", r.rpWriteRules,
                 r.rpReadRules, r.rpWriteMap, r.rpReadMap, r.rpCurrentMap);
 }
+
+// (Part 9i-iv.) The session's description file: written to a file of the test's, read back.
+std::string ReadTextFile(const char *name)
+{
+    std::string text;
+    if (FILE *f = std::fopen(name, "rt")) {
+        char buffer[512];
+        size_t n;
+        while ((n = std::fread(buffer, 1, sizeof buffer, f)) > 0)
+            text.append(buffer, n);
+        std::fclose(f);
+    }
+    return text;
+}
+
+void DescriptionTest()
+{
+    bool ok = true;
+    S_MultiplayerSettings *const s = g_mpSettings;
+    const S_MultiplayerSettings old = *s;
+    const int oldFreq = g_netMaxFreq, oldPing = g_netMaxPing, oldInactivity = g_netMaxInactivity;
+    C_MpMap a(C_str("Oasis"), C_str("o")), b(C_str("Bridge"), C_str("b"));
+    s->maps = {&a, &b};
+    std::memset(s->sessionName, 0, sizeof s->sessionName);
+    std::strcpy(s->sessionName, "My Game");
+    s->gameType = 2;
+    s->unknown174 = 1;
+    s->dedicated = true;
+    s->port = 11002;
+    s->password = "secret";
+    int values[22];
+    for (int i = 0; i < 22; ++i)
+        values[i] = i * 3 - 1;
+    S_MpGameRules rules;
+    std::memcpy(&rules, values, sizeof values);
+    s->SetRules(rules);
+    g_netMaxFreq = 20;
+    g_netMaxPing = 500;
+    g_netMaxInactivity = 61999;
+    s->unknown178 = 4;
+    const char *const file = "mpdesc_test.txt";
+    s->WriteDescription(file);
+    std::string want = "sessionname \"My Game\"\nstyle objectives\nmapname Oasis\nmapname Bridge\ndomain internet\n"
+                       "dedicated 1\nport 11002\npassword \"secret\"\n";
+    const char *const keys[13] = {"maxclients", "pointlimit", "roundlimit", "roundcount", "warmup", "respawntime",
+                                  "allowrespawn", "friendlyfire", "autoteambalance", "3rdpersonview", "spawnprotection",
+                                  "inversedamage", "fallingdmg"};
+    for (int i = 0; i < 13; ++i)
+        want += CmText("%s %d\n", keys[i], values[i]);
+    want += CmText("maxfreq 20\nmaxping 500\nmaxinactivity 61\nallowvehicles %d\nautorestart %d\ncoopdifficulty %d\n"
+                   "cooplives %d\nallowcrosshair %d\nspawnonstart %d\nteamlives %d\nvoicechat truespeech\nserver\n",
+                   values[15], values[16], values[17], values[18], values[19], values[20], values[21]);
+    const std::string got = ReadTextFile(file);
+    ok &= got == want;
+    if (!ok)
+        std::printf("DESC got\n%s\nDESC want\n%s\n", got.c_str(), want.c_str());
+    // A dedicated LAN server: no port; no codec (0) or past them: no voice line; other game types, domains: empty.
+    s->unknown174 = 0;
+    s->unknown178 = 0;
+    s->gameType = 0;
+    s->WriteDescription(file);
+    std::string lan = ReadTextFile(file);
+    ok &= lan.find("port ") == std::string::npos && lan.find("voicechat") == std::string::npos &&
+          lan.find("style deathmatch\n") != std::string::npos && lan.find("domain local\n") != std::string::npos;
+    s->dedicated = false;
+    s->unknown178 = 8;
+    s->gameType = 4;
+    s->unknown174 = 2;
+    s->WriteDescription(file);
+    lan = ReadTextFile(file);
+    ok &= lan.find("port 11002\n") != std::string::npos && lan.find("voicechat") == std::string::npos &&
+          lan.find("style \n") != std::string::npos && lan.find("domain \n") != std::string::npos &&
+          lan.find("dedicated 0\n") != std::string::npos;
+    s->unknown178 = 1;
+    s->gameType = 3;
+    s->unknown174 = 0;
+    s->WriteDescription(file);
+    lan = ReadTextFile(file);
+    ok &= lan.find("voicechat vr12\n") != std::string::npos && lan.find("style cooperative\n") != std::string::npos &&
+          lan.find("port 11002\n") != std::string::npos;
+    s->unknown178 = 7;
+    s->gameType = -1;
+    s->unknown174 = -1;
+    s->WriteDescription(file);
+    lan = ReadTextFile(file);
+    ok &= lan.find("voicechat pcm\nserver\n") != std::string::npos && lan.find("style \n") != std::string::npos &&
+          lan.find("domain \n") != std::string::npos;
+    std::remove(file);
+    // No file opened (a directory's name): nothing written.
+    s->WriteDescription(".");
+    s->maps.clear();
+    *s = old;
+    g_netMaxFreq = oldFreq;
+    g_netMaxPing = oldPing;
+    g_netMaxInactivity = oldInactivity;
+    std::printf("description: dsWrite %d\n", ok);
+}

@@ -148,6 +148,7 @@ struct S_MultiplayerSettings {
     void ReadRules(class C_BitStream *stream);
     void WriteCurrentMap(class C_BitStream *stream);
     void ReadCurrentMap(class C_BitStream *stream);
+    void WriteDescription(const char *fileName);
 };
 extern int g_netMaxFreq, g_netMaxPing, g_netMaxInactivity;
 enum : int { SESSION_NONE = 0, SESSION_JOINING = 1, SESSION_HOSTING = 2 };

@@ -3,11 +3,13 @@
 #include "game/pending.h"
 
 #include <cstddef>
+#include <cstdio>
 #include <cstring>
 #include <string.h>
 
 #include "game/controls.h"
 #include "game/mp_game_setup.h"
+#include "game/profile.h"
 #include "net/bitstream.h"
 
 namespace {
@@ -244,4 +246,67 @@ void S_MultiplayerSettings::ReadCurrentMap(C_BitStream *stream)
     map->Read(stream);
     maps.push_back(map);
     currentMap = 0;
+}
+
+// ---- the session's description file (part 9i-iv) ---------------------------------------------------------
+
+namespace {
+
+// The default file; the server config's keywords (the net module's table of 0x204-byte entries: the rules' first
+// 13 at 0x00846088, the game types at 0x008492ec, the domains at 0x00849d00, the voice codecs 1 .. 7 at 0x0084d36c).
+const char *const DESCRIPTION_FILE = "mpdesc.txt";
+const char *const RULE_KEYWORDS[13] = {"maxclients",   "pointlimit",      "roundlimit",   "roundcount", "warmup",
+                                       "respawntime",  "allowrespawn",    "friendlyfire", "autoteambalance",
+                                       "3rdpersonview", "spawnprotection", "inversedamage", "fallingdmg"};
+const char *const GAME_TYPE_KEYWORDS[4] = {"deathmatch", "occupation", "objectives", "cooperative"};
+const char *const DOMAIN_KEYWORDS[2] = {"local", "internet"};
+const char *const VOICE_CODEC_KEYWORDS[7] = {"vr12", "sc03", "sc06", "truespeech", "gsm", "adpcm", "pcm"};
+
+// A keyword of a table, or "" past it (the original read the neighbouring entries).
+const char *Keyword(const char *const *table, int count, int index)
+{
+    return index >= 0 && index < count ? table[index] : "";
+}
+
+} // namespace
+
+void S_MultiplayerSettings::WriteDescription(const char *fileName)
+{
+    FILE *file = std::fopen(fileName ? fileName : DESCRIPTION_FILE, "wt");
+    // Fix: not opened: nothing (the original wrote to a null file).
+    if (!file)
+        return;
+    std::fprintf(file, "sessionname \"%s\"\n", sessionName);
+    std::fprintf(file, "style %s\n", Keyword(GAME_TYPE_KEYWORDS, 4, gameType));
+    for (const C_MpMap *map : maps)
+        std::fprintf(file, "mapname %s\n", map->GetName());
+    std::fprintf(file, "domain %s\n", Keyword(DOMAIN_KEYWORDS, 2, unknown174));
+    std::fprintf(file, "dedicated %d\n", dedicated ? 1 : 0);
+    // (A dedicated LAN server's port not written.)
+    if (!dedicated || unknown174 != 0)
+        std::fprintf(file, "port %d\n", port);
+    std::fprintf(file, "password \"%s\"\n", password.c_str());
+    S_MpGameRules rules;
+    GetRules(rules);
+    int values[22];
+    std::memcpy(values, &rules, sizeof values);
+    for (int i = 0; i < 13; ++i)
+        std::fprintf(file, "%s %d\n", RULE_KEYWORDS[i], values[i]);
+    std::fprintf(file, "maxfreq %d\n", g_netMaxFreq);
+    std::fprintf(file, "maxping %d\n", g_netMaxPing);
+    std::fprintf(file, "maxinactivity %d\n", g_netMaxInactivity / MS_PER_SECOND);
+    std::fprintf(file, "allowvehicles %d\n", allowVehicles);
+    std::fprintf(file, "autorestart %d\n", autoRestart);
+    std::fprintf(file, "coopdifficulty %d\n", coopDifficulty);
+    std::fprintf(file, "cooplives %d\n", coopLives);
+    std::fprintf(file, "allowcrosshair %d\n", allowCrosshair);
+    std::fprintf(file, "spawnonstart %d\n", spawnOnStart);
+    std::fprintf(file, "teamlives %d\n", teamLives);
+    // The voice chat's codec (the game's session's, not this one's; 0: none written).
+    // Fix: its name written (the original passed the keyword's table entry by value to %s).
+    const int codec = g_mpSettings->unknown178;
+    if (codec >= 1 && codec <= 7)
+        std::fprintf(file, "voicechat %s\n", VOICE_CODEC_KEYWORDS[codec - 1]);
+    std::fprintf(file, "server\n");
+    std::fclose(file);
 }

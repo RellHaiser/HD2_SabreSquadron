@@ -19,3 +19,4 @@
 009820d8 g_netMaxFreq @ int
 009820d4 g_netMaxPing @ int
 009820dc g_netMaxInactivity @ int
+006ad200 S_MultiplayerSettings::WriteDescription | void __thiscall WriteDescription(void *this, char * fileName)

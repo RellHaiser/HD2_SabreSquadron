@@ -55,7 +55,7 @@ bool C_NetGame__HostDedicated(C_NetGame *_this,bool unknown, ...)
     FUN_00732730(piVar1,'\x01');
   }
   sprintf(local_178,"XDServer_%5d.txt",(g_gameProfile.m_mpSettings)->port);
-  FUN_006ad200(g_gameProfile.m_mpSettings,local_178);
+  S_MultiplayerSettings__WriteDescription(g_gameProfile.m_mpSettings,local_178);
   sprintf(local_100,"hd2ds_sabresquadron.exe -cmd -exec %s",local_178);
   GetStartupInfoA(&local_144);
   BVar2 = CreateProcessA("hd2ds_sabresquadron.exe",local_100,(LPSECURITY_ATTRIBUTES)0x0,

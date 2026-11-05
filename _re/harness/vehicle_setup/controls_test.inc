@@ -80,6 +80,7 @@ void MainMenuTest(I3D_scene *scene);
 void HeroStatsTest(I3D_scene *scene);
 void MpSettingsTest(I3D_scene *scene);
 void ReplicationTest();
+void DescriptionTest();
 
 namespace {
 
@@ -1056,6 +1057,7 @@ void ControlsTest()
     HeroStatsTest(scene);
     MpSettingsTest(scene);
     ReplicationTest();
+    DescriptionTest();
 #endif
     ReleaseTextStyle(st);
     keeper.m_fonts->m_fonts.erase(keeper.m_fonts->m_fonts.begin());

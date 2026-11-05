@@ -8651,6 +8651,20 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
     S_MultiplayerSettings layout). ret_audit --src: 52.
   - Stats: 9,297 of 12,306 functions by hand (85.8 % by size).
 
+  PART 9i-iv DONE (2026-11-05): the session's description file (game/mp_settings.cpp).
+  - S_MultiplayerSettings::WriteDescription 0x006ad200 (C_NetGame::HostDedicated's; null: mpdesc.txt): the session's
+    name, the game type, the maps, the domain, dedicated, the port (not a dedicated LAN server's), the password, the
+    first 13 rules by the server config's keywords (the net module's 0x204-byte keyword table at 0x00846088; the game
+    types at 0x008492ec, the domains at 0x00849d00, the codecs 1 .. 7 at 0x0084d36c: copied as strings), the net
+    limits, the rest of the rules, the game's voice codec, "server". Fixes: the codec's keyword entry was passed by
+    value to %s (any codec crashed the original); a file not opened, out-of-range indexes (the neighbouring
+    keywords were read): nothing / empty.
+  - Harness: DescriptionTest in mp_settings_test.inc / check_description.py (new): dsWrite (a real file in the run's
+    directory, read back). All 19 factory checkers in both orders.
+  - Mutations: mutations/mutate_9i4.py: 45: 37 killed, 3 not building, 5 equivalent.
+  - Build: MSVC clean. Tier 1: 291 errors in 54 files. ret_audit --src: 52.
+  - Stats: 9,298 of 12,306 functions by hand (85.8 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).
