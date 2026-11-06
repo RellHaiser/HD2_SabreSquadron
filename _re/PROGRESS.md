@@ -9172,6 +9172,17 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
 
   PART 13a DONE (2026-11-06): the trial link. _re/tools/link_check.py, _re/LINK_STATUS.md, _re/link_unresolved.txt. The hand port alone: 52 unresolved symbols, no duplicates, no exe yet. Tier 1 cannot link with it (other compiler, types, namespace) and is not needed for a build. Aim of the first run (owner): single player.
 
+  PART 13b DONE (2026-11-06): the executable links. 0 unresolved symbols, 4.4 MB, not run. Imports of LS3DF.dll and rw_data.dll are by ordinal, and the ports' ordinals and names were compared equal to the original DLLs' (60 and 26).
+  - game/quick_messages.cpp: C_QuickMessages, the dialogue subtitles from Text\Dialogs.bin and Dialogs_DD.bin; both must be there or no subtitles at all. Kept: loading a save clears the dialogue it just read, so a saved subtitle does not come back; an unknown chunk in the files is read into rather than skipped. Fixed: texts terminated; GetText of an unknown id returned null.
+  - game/globals.cpp: the globals nobody defined, and RandomFloat, ShowMessage, GetConsole, ReadUnicodeInput, ShowGameMenuMessage, MeleeTrackerBarkTurn, the debug font. app.cpp: GameWindowProc, RunExitSequence, FreeResourceCaches. Others: S_MultiplayerSettings ctor and dtor, C_Actor::GetSector (null for what is no human, a fix), C_ResourceCache::Forget.
+  - Linking found: a Windows macro renamed ModuleManager::DispatchMessage where windows.h was seen; g_missionVariant was in an anonymous namespace; six functions were listed as ported with no body.
+  - Protection: the two last tests are now plain true (pending.h), the tables are gone.
+  - Things to watch in the first run. g_defaultFormationScale: no code or data writes it in the original (byte scan of .text), so followers' formations have a zero scale: all places at the leader, kept 1.2 m apart. The joystick: IJoy.dll's only import has no caller in the decompile, and the list 0x008aeb4c is never added to, so the port does not import IJoy at all. The debug statistics list has no adds, so only its font is kept. The byte 0x0086933c has no writer: the low subtitle row is never used.
+  - Not done: tier 1 was not regenerated for this part (it is no longer in any build; see _re/LINK_STATUS.md), so it still holds these functions.
+  - Harness: script_module/build_quick_messages.bat (77 checks, a real C_chunk over files in memory, a fake box and IGraph). Mutations: mutate_13b.py 203: 167 killed, 16 not building, 20 survived (initial values overwritten by a read, frees, boundaries of a 999-byte text, Ascends at the end of a read).
+  - globals.cpp and the app.cpp additions have no tests: each is a few lines read from the assembly. Nothing has been run.
+  - Stats: 10,776 of 12,306 functions by hand or absorbed (93.4 % by size).
+
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`
 (patches urllib to add it; override with GHIDRA_PROGRAM).

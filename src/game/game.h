@@ -81,6 +81,7 @@ enum E_GameMessage : int {
 };
 
 class C_QuickMessages;
+class C_TextBox;
 
 class C_game : public C_GameState {                 // vtable 0x008159ac, 0xEC bytes
     friend class C_GameApp;                             // the game commands (net/net_commands.cpp)
@@ -340,6 +341,17 @@ private:
     std::vector<I3D_light *> m_staticLights;        // +0xDC switched off for the mission
 };
 
+// One dialogue (0x18 bytes): the files only ever give it one line.
+struct S_QuickDialog {
+    struct S_Line {
+        int time;                                       // ms
+        C_str text;
+    };
+    int line = -1;                                      // +0x00 the line shown
+    int id = -1;                                        // +0x04
+    std::vector<S_Line> lines;                          // +0x08
+};
+
 // Quick chat messages (C_game +0x60, 0x28 bytes).
 class C_QuickMessages {
 public:
@@ -358,6 +370,20 @@ public:
     // The subtitle of dubbing `dubbing`, shown `length` ms (-1: no sample).
     void ShowDubbing(int dubbing, int length);      // 0x0048f180
     void Render();                                  // 0x0048f390
+
+private:
+    int FindDialog(int id) const;
+    bool StartDialog(int index);
+
+    uint8_t m_layer = 0;                            // +0x00 (the byte 0x0086933c; saved)
+    bool m_ready = false;                           // +0x01 the files read
+    bool m_showing = false;                         // +0x02
+    C_TextBox *m_box = nullptr;                     // +0x04
+    uint8_t m_style = 0;                            // +0x08
+    int m_current = -1;                             // +0x0C the dialogue shown
+    int m_timeLeft = -1;                            // +0x10 ms
+    C_str m_text;                                   // +0x14
+    std::vector<S_QuickDialog *> m_dialogs;         // +0x18
 };
 
 C_game *GetGame();                                  // 0x006987d0

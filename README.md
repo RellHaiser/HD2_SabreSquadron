@@ -11,7 +11,7 @@ of the game and its data.
 
 Work in progress (2026-11-01). Of the game's 12,293 functions, 8,254 (74.6 % of the code by size)
 are ported by hand. Generated code (tier 1, below) covers the rest. The sources are
-compile-checked file by file; there is no linked build of the game yet.
+compile-checked file by file. The hand port links into an executable (2026-11-06); it has not been run yet.
 
 Ported so far, among others: the app core and module framework, the console, configuration and
 data files (`C_chunk`), the mission script language (compiler, expressions, interpreter), the

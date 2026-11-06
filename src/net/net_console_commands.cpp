@@ -272,6 +272,11 @@ C_CommandProcessor *GetCommandProcessor()
     return g_commandProcessor;
 }
 
+void ClearCommandProcessor()
+{
+    g_commandProcessor = nullptr;
+}
+
 bool C_CommandProcessor::Execute(const char *command)
 {
     GetCommandProcessor();

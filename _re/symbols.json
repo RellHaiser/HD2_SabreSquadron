@@ -8400,20 +8400,48 @@
   "module": "zz_idioms",
   "name": "vector_tidy_48ee30"
  },
+ "0048ee50": {
+  "module": "quick_messages",
+  "name": "QuickMessages_ShowSubtitles"
+ },
  "0048ef40": {
   "module": "game",
   "name": "C_QuickMessages::Done",
   "proto": "void __fastcall Done(C_QuickMessages * messages)"
+ },
+ "0048efc0": {
+  "module": "quick_messages",
+  "name": "QuickDialog_Free"
+ },
+ "0048f080": {
+  "module": "quick_messages",
+  "name": "QuickMessages_SetSubtitle"
+ },
+ "0048f180": {
+  "module": "quick_messages",
+  "name": "QuickMessages_ShowDubbing"
  },
  "0048f2d0": {
   "module": "game",
   "name": "C_QuickMessages::Update",
   "proto": "void __thiscall Update(C_QuickMessages *this, int timeDelta)"
  },
+ "0048f390": {
+  "module": "quick_messages",
+  "name": "QuickMessages_Render"
+ },
  "0048f400": {
   "module": "game",
   "name": "C_QuickMessages::Reset",
   "proto": "void __fastcall Reset(C_QuickMessages * messages)"
+ },
+ "0048f420": {
+  "module": "quick_messages",
+  "name": "QuickMessages_LoadDialog"
+ },
+ "0048f7d0": {
+  "module": "quick_messages",
+  "name": "QuickMessages_LoadDialogs"
  },
  "0048fbc0": {
   "module": "profile",
@@ -8429,6 +8457,14 @@
   "module": "game",
   "name": "C_QuickMessages::LoadGame",
   "proto": "bool __thiscall LoadGame(C_QuickMessages *this, C_chunk * chunk)"
+ },
+ "00490040": {
+  "module": "quick_messages",
+  "name": "QuickMessages_RestoreDialog"
+ },
+ "004900e0": {
+  "module": "quick_messages",
+  "name": "QuickMessages_GetText"
  },
  "00490340": {
   "module": "zz_idioms",
@@ -38008,6 +38044,14 @@
  "006e6fc0": {
   "module": "xml_node",
   "name": "XmlAttr_DeletingDtor"
+ },
+ "006e8860": {
+  "module": "quick_messages",
+  "name": "RenderDebugStats"
+ },
+ "006e8900": {
+  "module": "quick_messages",
+  "name": "LoadDebugFont"
  },
  "006e8960": {
   "module": "app",

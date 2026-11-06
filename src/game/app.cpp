@@ -589,6 +589,32 @@ int RunGame()
     return 1;
 }
 
+// (0x006dd8d0) The running instance woken by another; everything else to the window's own.
+LRESULT CALLBACK GameWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    if (msg == g_activateMessage) {
+        ShowWindow(hwnd, SW_RESTORE);
+        SetForegroundWindow(hwnd);
+    }
+    return CallWindowProcA(reinterpret_cast<WNDPROC>(g_originalWndProc), hwnd, msg, wParam, lParam);
+}
+
+// (The end of 0x006dceb0.) Made if it was not: the set-up it makes is deleted with it.
+void RunExitSequence()
+{
+    delete GetCommandProcessor();
+    ClearCommandProcessor();
+}
+
+// (The middle of 0x006dc770.) The caches, not their objects.
+void FreeResourceCaches()
+{
+    g_modelCache.Forget();
+    g_soundCache.Forget();
+    g_shadowCache.Forget();
+    g_versionModelCache.Forget();
+}
+
 int WINAPI WinMain(HINSTANCE instance, HINSTANCE /*prevInstance*/, LPSTR /*cmdLine*/, int /*showCmd*/)
 {
     // Only one instance: wake the running one instead.

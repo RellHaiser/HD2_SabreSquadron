@@ -37,7 +37,6 @@ const char *const SCENE_FRAME_Z = "z";
 int g_humansInMission = 0;                              // 0x0098a6a0
 bool g_cameraUnderWater = false;                        // 0x0098a6ac
 // Per mission a variant number (1: Brest, Norway, Sicily 1; 2: Prole, Burma, Czech, Sicily 2).
-int g_missionVariant = 0;                               // 0x0098a6b0
 bool g_unknown84f418 = false;                           // 0x0084f418
 // Lighting of the bodies on snow missions (C_HumanLighting::m_climate).
 float g_missionClimate = 0.0f;                          // 0x0084f410
@@ -86,6 +85,8 @@ bool InBurntCar(const C_HumanMovement &movement)
 const I3D_frame *LightJoint(const C_HumanMovement &movement) { return movement.m_joints[HUMAN_JOINT_A].frame; }
 
 }  // namespace
+
+int g_missionVariant = 0;                               // 0x0098a6b0
 
 // Per mission: humans breathe vapour (cold missions).
 bool g_coldMission = false;                             // 0x0098a6ad

@@ -359,22 +359,9 @@ int ExecuteConsoleCommand(int command, const char *args);   // 0x00720710 (__fas
 // a range.
 bool ConsoleValueInRange(int number, const char *range, bool *in);   // 0x00721f60 (__fastcall)
 
-// A pair of tables the game checks against each other (copy protection, inferred).
-extern const uint32_t g_protectionTableA[];         // 0x008ca840
-extern const uint32_t g_protectionTableB[];         // 0x008caf40
-extern uint16_t g_protectionIndexA;                 // 0x008cac84
-extern uint16_t g_protectionIndexB;                 // 0x008cb384
-inline bool CopyProtectionIntact()
-{
-    return g_protectionTableA[g_protectionIndexA] == g_protectionTableB[g_protectionIndexB];
-}
-// The pair the aqualung checks (C_HumanMovement::UpdateBreath).
-extern uint16_t g_protectionIndexBreathA;           // 0x008cac8e
-extern uint16_t g_protectionIndexBreathB;           // 0x008cb38e
-inline bool CopyProtectionIntactBreath()
-{
-    return g_protectionTableA[g_protectionIndexBreathA] == g_protectionTableB[g_protectionIndexBreathB];
-}
+// The original's tests of its copy protection (game/copy_protection.h): always the genuine copy's way.
+inline bool CopyProtectionIntact() { return true; }
+inline bool CopyProtectionIntactBreath() { return true; }
 
 // (C_Ladder and the accessors the human movement code uses on it: game/ladder.h.)
 
@@ -422,6 +409,7 @@ private:
     void ExecuteFile(const char *name);             // 0x007440d0
 };
 C_CommandProcessor *GetCommandProcessor();          // 0x0069f520
+void ClearCommandProcessor();                       // (the singleton forgotten)
 
 // The game's scene as the vehicles use it (0x0089c1d0; copied by the mission loader 0x006d4270).
 extern I3D_scene *g_carScene;
