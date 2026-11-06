@@ -25,7 +25,7 @@ COMMON = ["/nologo", "/c", "/std:c++17", "/EHsc", "/W3", "/permissive-", "/Zc:__
           "/arch:IA32", "/Z7", "/MP", '/I"%s"' % SRC]
 RELEASE = ["/O2", "/Oy-", "/MT", "/GS-"]
 CHECKED = ["/Od", "/Oy-", "/MTd", "/RTC1", "/D_ITERATOR_DEBUG_LEVEL=0"]        # (The checked iterators change sizes, which the layout assertions see.)
-LINK = ["/nologo", "/SUBSYSTEM:WINDOWS", "/MACHINE:X86", "/DEBUG:FULL", "/INCREMENTAL:NO", "/DYNAMICBASE:NO", "/NXCOMPAT:NO", "/LARGEADDRESSAWARE:NO", "/SAFESEH:NO"]
+LINK = ["/nologo", "/SUBSYSTEM:WINDOWS,5.01", "/MACHINE:X86", "/DEBUG:FULL", "/INCREMENTAL:NO", "/DYNAMICBASE:NO", "/NXCOMPAT:NO", "/LARGEADDRESSAWARE:NO", "/SAFESEH:NO"]
 
 
 def run_bat(path, lines):

@@ -472,10 +472,10 @@ void C_GameMenu::OnMessage(S_ControlMessage *message)
 bool C_GameMenu::BuildScreens()
 {
     S_MenuDesc *menu = new S_MenuDesc();
-    menu->AddScreen("MAIN_INGAME_MENU", "main_ingame");
+    menu->AddScreen("MAIN_INGAME_MENU", "main ingame");
     menu->AddScreen("OPTIONS", "options");
     if (!IsLocalGame())
-        menu->AddScreen("PLAYER_SCREEN", g_gameProfile.IsCooperativeGame() ? "player_screen_2" : "player_screen");
+        menu->AddScreen("PLAYER SCREEN", g_gameProfile.IsCooperativeGame() ? "player screen 2" : "player screen");
     for (S_ScreenDesc *desc : menu->screens) {
         I3D_frame *model = LoadModel(desc->name.c_str(), desc->file.c_str());
         if (!model)

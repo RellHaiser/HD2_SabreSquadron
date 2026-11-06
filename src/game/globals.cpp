@@ -28,8 +28,8 @@ I3D_scene *g_carScene;                                  // 0x0089c1d0
 float g_levelMinY;                                      // 0x0097ca34
 float g_netSceneTop;                                    // 0x0097ca44
 int g_localPlayerSlot;                                  // 0x00982104
-int g_netPlayerCount;                                   // 0x00982df0 (nothing writes it)
-S_NetPlayer *g_netPlayerTable;                          // 0x00982dec (nothing writes it)
+int g_netPlayerCount;                                   // 0x00982df0 (set by C_NetQuantizationTable::Set: its members)
+S_NetPlayer *g_netPlayerTable;                          // 0x00982dec
 S_MaterialDef *g_materials;                             // 0x0097b9b4
 uint32_t g_materialCount;                               // 0x0097b9b8
 // Quirk kept: nothing writes this in the original, so the scale followers' formations get is zero: all their places are the leader's, then kept 1.2 m apart.

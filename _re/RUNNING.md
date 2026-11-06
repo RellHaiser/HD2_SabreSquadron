@@ -1,6 +1,6 @@
-# Running the port (Part 13c, 2026-11-06)
+# Running the port (Parts 13c, 13d, 2026-11-06)
 
-The port starts, plays the logo and intro videos, and reaches a fully drawn main menu. The mouse works, the "Are you sure?" box works, and END exits cleanly. **No mission has been loaded.**
+The port starts, plays the videos, reaches the main menu, makes a profile, starts the campaign's Training mission, plays its intro cutscene with subtitles, and the soldier walks and turns. The in-game menu opens and "Exit to main menu" returns to the main menu. Windowed, on one mission: see "Not tested".
 
 ## Build
 
@@ -18,14 +18,29 @@ The original's settings copied: base 0x400000, 1 MB stack, no DEP, not relocatab
 
 ## Run
 
-The run folder is `H:\HD2_PortRun`, a copy of `H:\HD2_Unmodified` with `HD2_Port.exe` added. It uses the **original** `LS3DF.dll`, `rw_data.dll`, Bink, Vorbis. The game writes `log.txt` and `window.cfg` there. It only reads the registry (`HKLM\SOFTWARE\WOW6432Node\Illusion Softworks\Hidden & Dangerous 2`: the CD key, `LS3D_setup`), shared with the installed game.
+The run folder is `H:\HD2_PortRun`, a copy of `H:\HD2_Unmodified` with `HD2_Port.exe` added. It uses the **`devel` branch's build of the LS3DF port** (see below), and the original `rw_data.dll`, Bink, Vorbis. The game writes `log.txt` and `window.cfg` there. It only reads the registry (`HKLM\SOFTWARE\WOW6432Node\Illusion Softworks\Hidden & Dangerous 2`: the CD key, `LS3D_setup`), shared with the installed game.
 
 - `-window`: the port's own switch. A window whatever `LS3D_setup` says. **Do not use `-c`**: it is the console mode, and it hides the window.
 - Avoid ` -c` or `-cmd` anywhere in the command line and folder names: the game looks for them with `strstr`.
 
+## Which LS3DF.dll
+
+| Exe | DLL | Result |
+|---|---|---|
+| Original | Original | Clear weather, the reference |
+| Port | Original | **Crash loading a mission.** The original's `S_vector::operator*(S_matrix)` and its kin write 16 bytes through a 12-byte result: `_RTC_CheckStackVars` in `C_PhysDoor`'s constructor (checked build), stack cookie failure in `C_Vehicle::Setup` (release build). MSVC6's stack layout hid this from the original exe; a modern compiler's does not |
+| Original | `../LS3DF` as it stands | Screen-filling grey "fog": the rain |
+| Port | `../LS3DF` as it stands | The same fog |
+| Port or original | `LS3DF_Github` `devel` | Clear, rain as thin streaks |
+
+The fog is the rain: `I3D_scene::SetWeather` converted its float parameters 5 and 7 from ints, so a width of 0.06 became about 5e8 and every drop a quad across the screen. Fixed in `LS3DF_Github` commit `586f479` (2026-10-26, `devel`), not in the `../LS3DF` folder or `origin/main`. **`build_game.py` links against `../LS3DF`'s import library; at run time use `devel`'s DLL**: export it (`git -C LS3DF_Github archive devel`) to a scratch folder, `python build.py dll`, copy the DLL and PDB to the run folder. Also kept there: `LS3DF_original.dll`, `LS3DF_ported.dll` (`../LS3DF`'s).
+
+With `devel`'s DLL the sky is a flat dark green with either exe, where the original DLL shows clouds. That is the DLL's, not the game's: a difference for the LS3DF port. Not looked into.
+
 ## Tools
 
 - `_re/tools/debugrun.cpp`: a small debugger (build it with MSVC x86, see its head). Logs DLLs, exceptions with registers and a symbolized stack, the exit code. `--timeout N` logs all threads and kills the game after N seconds.
+- `_re/tools/to_menu.ps1`: Esc until the main menu shows.
 - `_re/tools/shot.ps1`, `send_keys.ps1`: a picture of the game's client area, keys by scan code (0x01 is Esc), mouse by relative moves (the game adds up DirectInput's deltas, so `click:x:y` goes to the corner first; 1:1 at 1600x1200). Both refuse to act unless the game's window has the focus.
 - `_re/tools/vtable_audit.py`: the game's engine interfaces (`src/ls3d`) against the LS3DF port's headers, slot by slot: bytes of arguments, floats, a float result. **Run it after touching `src/ls3d`.**
 
@@ -38,6 +53,12 @@ The run folder is `H:\HD2_PortRun`, a copy of `H:\HD2_Unmodified` with `HD2_Port
 | Main loop: `GetGame()` used without its null test, in the menus. Also a command pending while the player's controls were off was dropped; the original keeps it | crash, then the assembly |
 | `NetFirewallAvailable`: `OSVERSIONINFOA` on the stack, `GetVersionExA` told it had the 0x9C bytes of the larger struct: the system wrote past it | `--checked`, stack check |
 | `S_IGraphInit` was the wrong layout (flags at +0x28, not +0x2C; bit depth, refresh rate and the error callback missing; flag names guessed): the engine got flags 0, so never full screen, and a window whose viewport failed. `C_TextBox::Render` could not restore the viewport after its first clipped box, so all later menu text was clipped away. Now from the assembly of 0x006db440 and the LS3DF port's header | a menu without text, `SetViewport` failing inside d3d8 |
+| Part 13d: collision file header (`tree.klz`): frame count and block end read from the wrong offsets: +0x0C and +0x08, not +0x14 and +0x10 | crash at the first mission load, then the file and the assembly |
+| Part 13d: `g_netPlayerTable` and `g_netPlayerCount`, which part 13b said nothing writes: they are members of `g_netQuantizations` (0x00982de8), written through `this`, which an xref search cannot see | null pointer in `WriteQuantized` at the spawn |
+| Part 13d: `C_Actor::GetSector`, added in 13b, called itself for ever | stack overflow on entering the level |
+| Part 13d: `C_KeyBindings::Load` kept the file's `changed` flag, usually false; the original sets it on every record. So a saved profile's keys were never bound, `GetValues` returned -1, `HandleInput` was never called: no Esc, no control of the soldier. It worked in 13c only because no profile existed yet | Esc stopped skipping the videos after a profile was made |
+| Part 13d: the in-game menu's model names: `main_ingame`, `player_screen`, `player_screen_2`; the files are `main ingame`, `player screen`, `player screen 2`. The model not loaded, Esc in a mission opened the options | the wrong menu; all 35 model names of the menus then checked against `MODELS` |
+| Part 13d: the client area was 1590x1190 where the original has 1600x1200: the linker's newer subsystem version. `/SUBSYSTEM:WINDOWS,5.01`, as near as the linker allows to the original's | comparing pictures with the original |
 | The version text has three numbers (`%d.%02d.%d`), the port passed two: `1.12.1286592330`. The third is the original's 0x009820f4, which nothing writes: `1.12.0` | looking at the menu |
 
 The early files (`app.cpp` above all) were ported before the later rigour: expect more of this kind there. `InitSound`, `InitRenderer` and `ApplyRenderSettings` were compared with the assembly and agree. Most of the rest of `app.cpp` has not been.
@@ -45,7 +66,8 @@ The early files (`app.cpp` above all) were ported before the later rigour: expec
 ## Not tested
 
 - **Full screen.** Every run used `-window`, because full screen changes the display mode. The flags are now right, but it has not been seen.
-- **Any mission**, the menus behind the main one, saving, sound in play. Sound started (see `log.txt`) but nobody listened to it.
-- The window's client area is 1590x1190 for a 1600x1200 back buffer (windowed only; the picture is scaled slightly). Not compared with the original in a window.
+- **The rest of the game:** only the campaign's first mission, its start. No weapons were fired, no enemies met, no vehicles driven, no mission finished. Saving and loading not tried (the Training mission greys them out).
+- **Sound in play.** It starts (see `log.txt`), but nobody has listened.
+- **How it plays.** Screenshots show it moves; speed, animation and AI are not compared with the original.
 - The title bar is empty and there is no icon: the port has no resources yet. The string resource could not be read from the file on disk (the packed exe's), and the title is not worth guessing.
 - `I3D_joint::UnknownA8` (slot 0xA8, past what the LS3DF port's header declares): only behind a debug switch.

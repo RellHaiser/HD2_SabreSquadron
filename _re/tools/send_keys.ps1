@@ -1,6 +1,6 @@
 # Presses keys in the running game (DirectInput: by scan code). Usage: send_keys.ps1 <process name> <scan code in hex>[,<scan code>...] [-Hold ms]
 # Also mouse: "click:x:y" clicks at the game's cursor coordinates; "click:x:y:move" only moves there.
-param([string]$Name, [string]$Keys, [int]$Hold = 80)
+param([string]$Name, [string]$Keys, [int]$Hold = 250)
 Add-Type @"
 using System;
 using System.Runtime.InteropServices;
@@ -33,7 +33,11 @@ foreach ($key in $Keys.Split(',')) {
             $left -= $dx; $down -= $dy
             Start-Sleep -Milliseconds 15
         }
-        Start-Sleep -Milliseconds 300
+        # (The menu picks before it reads the mouse, so a hover needs a move after the arrival: a small one, there and back.)
+        Start-Sleep -Milliseconds 100
+        [K]::mouse_event(1, 1, 0, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 100
+        [K]::mouse_event(1, [uint32]4294967295, 0, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 100
+        [K]::mouse_event(1, 1, 0, 0, [UIntPtr]::Zero); Start-Sleep -Milliseconds 200
         if ($parts.Count -gt 3) { continue }           # "click:x:y:move": only moves.
         [K]::mouse_event(2, 0, 0, 0, [UIntPtr]::Zero)
         Start-Sleep -Milliseconds $Hold

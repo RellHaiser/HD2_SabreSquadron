@@ -9186,6 +9186,10 @@ Vehicles (2026-10-20, started). Map of 0x004c1200..0x0051c180 (~350 KB):
   - Tools: _re/tools/build_game.py (x87, symbols; --checked: /Od /MTd /RTC1), debugrun.cpp (debugger with a symbolized log), shot.ps1, send_keys.ps1 (both only while the game has the focus), vtable_audit.py. Run folder H:\HD2_PortRun, with the original DLLs. New switch -window.
   - Fixes: three engine slots declared with the wrong arguments (IGraph::InitInput, ISND_source::SetSound, CreateJointOverride + Add); the main loop's missing GetGame() test and a pending command it dropped; NetFirewallAvailable's stack overrun; the layout of S_IGraphInit and all of InitGraphics' flags; the version text's third number.
   - Not tested: full screen (every run used -window), any mission, the other menus. None of the fixes has a harness test: they were seen in the run or read from the assembly. The early files, app.cpp above all, deserve more comparing.
+  PART 13d DONE (2026-11-06): the first mission. Profile made, campaign started, Training loaded, cutscene and subtitles, the soldier walks and turns, the in-game menu, back to the main menu. Checked and release builds, no exception. Details: _re/RUNNING.md.
+  - Needs LS3DF_Github's devel DLL: the original DLL crashes under a modern compiler's stack (16 bytes written through a 12-byte S_vector), and ../LS3DF lacks the rain fix (586f479), which the user pointed to.
+  - Fixes: collision file header; the net tables' two globals (13b's 'nothing writes it' was wrong); C_Actor::GetSector's recursion (13b's); C_KeyBindings::Load's changed flag; the in-game menu's model names; the subsystem version.
+  - Not tested: full screen, the rest of the game, weapons, enemies, vehicles, saving, sound by ear. With the devel DLL the sky is flat dark green, also under the original exe: for the LS3DF port.
 
 Ghidra (2026-10-15): the dedicated server HD2DS_SabreSquadron.exe is open next to the client, so every
 plugin request needs `program=HD2_SabreSquadron_unpacked.exe`; the tools import `tools/ghidra_program.py`

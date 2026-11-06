@@ -372,6 +372,11 @@ static void TestMisc()
     ReadRoot("keys1.bin", [&](C_chunk &chunk) { CHECK(bindings2.Load(chunk)); });
     WriteRoot("keys2.bin", 0x25A6, [&](C_chunk &chunk) { bindings2.Save(chunk); });
     CHECK(SameFiles("keys1.bin", "keys2.bin"));
+    // (Part 13d.) Loaded bindings are bound whatever the file's flag says: the file's game bindings have it false here.
+    const int callsBeforeLoad = s_bindCalls;
+    C_KeyBindings bindings3;
+    ReadRoot("keys1.bin", [&](C_chunk &chunk) { CHECK(bindings3.Load(chunk)); });
+    CHECK(s_bindCalls > callsBeforeLoad);
 
     S_HudOption hud;
     hud.shown = true;

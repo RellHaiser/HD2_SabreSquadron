@@ -428,6 +428,9 @@ void C_NetQuantizationTable::Set(int index, const float *span, const float *from
     if (static_cast<size_t>(index) >= m_entries.size())
         m_entries.resize(m_entries.size() * 2);
     m_entries[static_cast<size_t>(index)] = quantization;
+    // (C_NetMessage finds them through these: in the original they are this table's own members, 0x00982dec and 0x00982df0.)
+    g_netPlayerTable = reinterpret_cast<S_NetPlayer *>(m_entries.data());
+    g_netPlayerCount = static_cast<int>(m_entries.size());
 }
 
 // ---- the teams ---------------------------------------------------------------------------------------------------------

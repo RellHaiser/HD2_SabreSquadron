@@ -1101,7 +1101,7 @@ void GameMenuTest(I3D_scene *scene)
         g_gmDifficulty = 1;
         C_GameMenu builder;
         const auto main = [&]() {
-            S_ScreenDesc desc("MAIN_INGAME_MENU", "main_ingame", 1 << 26);
+            S_ScreenDesc desc("MAIN_INGAME_MENU", "main ingame", 1 << 26);
             return builder.BuildMainScreen(&desc, nullptr) ? describe(desc) : std::string("false");
         };
         const std::string version = "text_h&dversion 13: 1000015 28 7d6; ";
@@ -1211,7 +1211,7 @@ void GameMenuTest(I3D_scene *scene)
             WM(r.gmBuild, okb);
         }
 
-        // A network game's: the player screen too (co-op: "player_screen_2"); the warmup's menu opens it.
+        // A network game's: the player screen too (co-op: "player screen 2"); the warmup's menu opens it.
         g_gameRole = GAME_ROLE_CLIENT;
         // (Part 9e-xviii: the player screen shown on its opening: a squad.)
         S_MissionSquad netSquad;
@@ -1238,13 +1238,13 @@ void GameMenuTest(I3D_scene *scene)
             S_MrObj *dm = MrObj("gmcd", g_mrModelVt);
             g_mrMade[FRAME_MODEL] = {a, o, p, dm};
             g_epProfiles.clear();
-            okb &= m.BuildScreens() && MrHas("gmcp 34 PLAYER_SCREEN") && MrHas("gmcp 48 equippanel 20") &&
+            okb &= m.BuildScreens() && MrHas("gmcp 34 PLAYER SCREEN") && MrHas("gmcp 48 equippanel 20") &&
                    MrHas("items loaded") && MrHas("gmcp 48 allitemspanel 20") && MrHas("gmco 48 bvideo setup 20") && m.m_screens[3]->m_inactive == false &&
                    m.m_screens.size() == 4 && m.m_screens[3]->GetId() == 3u << 26 && !g_menuScreens.empty() &&
                    g_menuScreens.back() == m.m_screens[coop ? 3 : 1];
             okb &= g_cacheLoads.size() >= 3 &&
                    g_cacheLoads[coop ? g_cacheLoads.size() - 2 : g_cacheLoads.size() - 1] ==
-                       (coop ? "player_screen_2" : "player_screen") &&
+                       (coop ? "player screen 2" : "player screen") &&
                    (!coop || (g_cacheLoads.back() == "description" && m.m_popup &&
                               m.m_popup->GetScreenFrame() == As<I3D_frame>(dm)));
             delete m.m_popup;
@@ -1341,7 +1341,7 @@ void GameMenuTest(I3D_scene *scene)
             // (Nothing to make: the soldier's Setup stops at once.)
             g_mrMade.clear();
             m.m_scene = As<I3D_scene>(world.scene);
-            S_ScreenDesc desc("PLAYER_SCREEN", "player_screen", 3u << 26);
+            S_ScreenDesc desc("PLAYER SCREEN", "player screen", 3u << 26);
             g_gfLog.clear();
             okp &= m.BuildPlayerScreen(&desc, As<I3D_frame>(model));
             std::string want = head + "text_warm_up 13 c500000: 1000015 2d 9e5 1000004 0 0; "
@@ -1374,7 +1374,7 @@ void GameMenuTest(I3D_scene *scene)
             g_msChildren.erase({model, "3Dview"});
             C_GameMenu n;
             n.m_scene = m.m_scene;
-            S_ScreenDesc desc2("PLAYER_SCREEN", "player_screen", 3u << 26);
+            S_ScreenDesc desc2("PLAYER SCREEN", "player screen", 3u << 26);
             okp &= n.BuildPlayerScreen(&desc2, As<I3D_frame>(model));
             want = playerDescribe(desc2, &n);
             okp &= want.find("text_warm_up 13 c500000: 1000015 2d 9e5; text_etimated") != std::string::npos &&
@@ -1391,7 +1391,7 @@ void GameMenuTest(I3D_scene *scene)
             g_mrMade[FRAME_MODEL] = {popupModel};
             C_GameMenu c;
             c.m_scene = m.m_scene;
-            S_ScreenDesc desc3("PLAYER_SCREEN", "player_screen_2", 3u << 26);
+            S_ScreenDesc desc3("PLAYER SCREEN", "player screen 2", 3u << 26);
             g_cacheLoads.clear();
             g_gfLog.clear();
             okp &= c.BuildPlayerScreen(&desc3, As<I3D_frame>(model));
@@ -1406,7 +1406,7 @@ void GameMenuTest(I3D_scene *scene)
             c.m_popup = nullptr;
             C_GameMenu c2;
             c2.m_scene = m.m_scene;
-            S_ScreenDesc desc4("PLAYER_SCREEN", "player_screen_2", 3u << 26);
+            S_ScreenDesc desc4("PLAYER SCREEN", "player screen 2", 3u << 26);
             g_mrMade[FRAME_MODEL] = {MrObj("gmpd2", g_mrModelVt)};
             g_cacheFailName = "description";
             okp &= c2.BuildPlayerScreen(&desc4, As<I3D_frame>(model)) && !c2.m_popup;
@@ -1495,9 +1495,9 @@ void GameMenuTest(I3D_scene *scene)
                     return menu.BuildSoldiersPanel(&d, As<I3D_frame>(sm));
                 };
                 C_GameMenu s1;
-                S_ScreenDesc d1("PLAYER_SCREEN", "player_screen", 3u << 26);
+                S_ScreenDesc d1("PLAYER SCREEN", "player screen", 3u << 26);
                 C_GameMenu s0;
-                S_ScreenDesc d0("PLAYER_SCREEN", "player_screen", 3u << 26);
+                S_ScreenDesc d0("PLAYER SCREEN", "player screen", 3u << 26);
                 oks &= build(1, s0, d0) && d0.controls.size() == 1 && d0.controls[0]->children[1]->children.size() == 1;
                 oks &= build(2, s1, d1) && d1.controls.size() == 1;
                 std::string want = "soldierspanel 5 c100000: { scroll11 8 c101000: 100000b c102000 0; GB_Soldiers_a 23 c102000:" +
@@ -1522,7 +1522,7 @@ void GameMenuTest(I3D_scene *scene)
                 WM(r.gmSoldiers, oks);
                 // 33 profiles: 30 in the first list, 3 in the second; 61: 30 in each; co-op: no marks.
                 C_GameMenu s2;
-                S_ScreenDesc d2("PLAYER_SCREEN", "player_screen", 3u << 26);
+                S_ScreenDesc d2("PLAYER SCREEN", "player screen", 3u << 26);
                 g_coop = true;
                 oks &= build(33, s2, d2) && d2.controls.size() == 1 && d2.controls[0]->children.size() == 3;
                 g_coop = false;
@@ -1535,7 +1535,7 @@ void GameMenuTest(I3D_scene *scene)
                            MrHas("gmsv32 38 gmsx 0") && MrHas("gmsv29 34 Soldier_a29");
                 }
                 C_GameMenu s3;
-                S_ScreenDesc d3("PLAYER_SCREEN", "player_screen", 3u << 26);
+                S_ScreenDesc d3("PLAYER SCREEN", "player screen", 3u << 26);
                 oks &= build(61, s3, d3) && d3.controls.size() == 1 && d3.controls[0]->children.size() == 5 &&
                        d3.controls[0]->children[1]->children.size() == 30 && d3.controls[0]->children[2]->children.size() == 30 &&
                        d3.controls[0]->children[2]->children[29]->name == C_str("Soldier_x59");
@@ -1544,13 +1544,13 @@ void GameMenuTest(I3D_scene *scene)
                 // made (no controls).
                 bool okn = true;
                 C_GameMenu s4;
-                S_ScreenDesc d4("PLAYER_SCREEN", "player_screen", 3u << 26);
+                S_ScreenDesc d4("PLAYER SCREEN", "player screen", 3u << 26);
                 okn &= !build(0, s4, d4) && d4.controls.empty() && g_gfLog.empty();
                 for (const char *missing : {"photo03", "selector"}) {
                     S_MrObj *const kept = g_msChildren[{sm, missing}];
                     g_msChildren.erase({sm, missing});
                     C_GameMenu s5;
-                    S_ScreenDesc d5("PLAYER_SCREEN", "player_screen", 3u << 26);
+                    S_ScreenDesc d5("PLAYER SCREEN", "player screen", 3u << 26);
                     okn &= !build(2, s5, d5) && d5.controls.empty() && MrHas("gmsx 34 GB_Soldiers_x") &&
                            logHas("gmsphoto") == 0 && logHas("gmssel 38") == 0;
                     g_msChildren[{sm, missing}] = kept;
@@ -1600,7 +1600,7 @@ void GameMenuTest(I3D_scene *scene)
                 e.m_scene = m.m_scene;
                 S_MrObj *holsters = MsFrame("gmeh"), *backpack = MsFrame("gmeb");
                 g_mrMade[FRAME_DUMMY] = {holsters, backpack};
-                S_ScreenDesc de("PLAYER_SCREEN", "player_screen", 3u << 26);
+                S_ScreenDesc de("PLAYER SCREEN", "player screen", 3u << 26);
                 g_gfLog.clear();
                 oke &= e.BuildEquipmentPanel(&de, As<I3D_frame>(em));
                 std::vector<std::string> want = {"gmem 48 equippanel 20", "create 6", "create 6", "gmeq 34 P_Equipment",
@@ -1643,7 +1643,7 @@ void GameMenuTest(I3D_scene *scene)
                 bool okn = true;
                 g_msChildren.erase({em, "equippanel"});
                 C_GameMenu e2;
-                S_ScreenDesc de2("PLAYER_SCREEN", "player_screen", 3u << 26);
+                S_ScreenDesc de2("PLAYER SCREEN", "player screen", 3u << 26);
                 g_mrMade[FRAME_DUMMY] = {MsFrame("gmeh2"), MsFrame("gmeb2")};
                 g_gfLog.clear();
                 okn &= !e2.BuildEquipmentPanel(&de2, As<I3D_frame>(em)) && e2.m_models.empty() && de2.controls.empty() &&
@@ -1651,7 +1651,7 @@ void GameMenuTest(I3D_scene *scene)
                 g_msChildren[{em, "equippanel"}] = panel;
                 for (int made = 0; made < 2; ++made) {
                     C_GameMenu e3;
-                    S_ScreenDesc de3("PLAYER_SCREEN", "player_screen", 3u << 26);
+                    S_ScreenDesc de3("PLAYER SCREEN", "player screen", 3u << 26);
                     g_mrMade[FRAME_DUMMY] = {MsFrame("gmeh3")};
                     if (made == 0)
                         g_mrMade[FRAME_DUMMY].clear();
@@ -1700,7 +1700,7 @@ void GameMenuTest(I3D_scene *scene)
                 want.push_back("gmim 48 selitem08 1");
                 want.push_back("gmiu_selitem08 38 null 1");
                 C_GameMenu it;
-                S_ScreenDesc di("PLAYER_SCREEN", "player_screen", 3u << 26);
+                S_ScreenDesc di("PLAYER SCREEN", "player screen", 3u << 26);
                 As<I3D_frame>(count)->m_frameFlags |= 1;
                 g_gfLog.clear();
                 oki &= it.BuildItemsPanel(&di, As<I3D_frame>(im));
@@ -1713,7 +1713,7 @@ void GameMenuTest(I3D_scene *scene)
                     S_MrObj *const kept = g_msChildren[{im, missing}];
                     g_msChildren.erase({im, missing});
                     C_GameMenu it2;
-                    S_ScreenDesc di2("PLAYER_SCREEN", "player_screen", 3u << 26);
+                    S_ScreenDesc di2("PLAYER SCREEN", "player screen", 3u << 26);
                     g_gfLog.clear();
                     okn &= !it2.BuildItemsPanel(&di2, As<I3D_frame>(im)) && !g_gfLog.empty() && g_gfLog[0] == "items loaded" &&
                            logHas("store desc") == 0 && logHas("gmic 34") == 0 && !it2.m_storeList.m_menu;
@@ -1727,7 +1727,7 @@ void GameMenuTest(I3D_scene *scene)
             // --- the skills panel (part 9e-xvi): "Panel02" taking no input; per skill its name's title
             // (no margin, text 0xA78 + the skill), its bar (along z, empty), its value's title ---
             {
-                S_ScreenDesc dk("PLAYER_SCREEN", "player_screen", 3u << 26);
+                S_ScreenDesc dk("PLAYER SCREEN", "player screen", 3u << 26);
                 std::string got;
                 bool okk = C_GameMenu::BuildSkillsPanel(&dk, nullptr) && dk.controls.size() == 1;
                 for (const S_ControlDesc *c : dk.controls) {

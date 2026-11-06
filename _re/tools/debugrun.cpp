@@ -10,6 +10,8 @@
 #include <dbghelp.h>
 #include <psapi.h>
 
+#include <share.h>
+
 #include <cstdarg>
 #include <cstdio>
 #include <map>
@@ -148,7 +150,7 @@ int main(int argc, char **argv)
         if (option == "--timeout")
             timeoutSeconds = atoi(argv[++i]);
         else if (option == "--log")
-            fopen_s(&g_log, argv[++i], "w");
+            g_log = _fsopen(argv[++i], "w", _SH_DENYNO);
         else if (option == "--first-chance")
             firstChanceReports = atoi(argv[++i]);
         else if (option == "--stay")
